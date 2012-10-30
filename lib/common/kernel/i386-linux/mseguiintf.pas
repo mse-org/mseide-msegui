@@ -753,23 +753,25 @@ const
 // needednetatom = netatomty(ord(high(netatomty))-4);
 type
  xdndatomty = (xdnd_aware,xdnd_selection,xdnd_typelist,
-  xdnd_actioncopy,xdnd_actionmove,xdnd_actionlink,xdnd_actionask,
-  xdnd_actionprivate,
   xdnd_actionlist,xdnd_actiondescription,xdnd_proxy,
   xdnd_enter,xdnd_position,xdnd_status,xdnd_leave,xdnd_drop,xdnd_finished
   );
 const
  xdndatomnames: array[xdndatomty] of string = (
   'XdndAware','XdndSelection','XdndTypeList',
-  'XdndActionCopy','XdndActionMove','XdndActionLink','XdndActionAsk',
-  'XdndActionPrivate',
   'XdndActionList','XdndActionDescription','XdndProxy',
   'XdndEnter','XdndPosition','XdndStatus','XdndLeave','XdndDrop','XdndFinished'
+ );
+ xdndactionatomnames: array[dndactionty] of string = (
+  '','XdndActionCopy','XdndActionMove','XdndActionLink','XdndActionAsk',
+  'XdndActionPrivate'
  );
  
 var
  netatoms: array[netatomty] of atom;
  xdndatoms: array[xdndatomty] of atom;
+ xdndactionatoms: array[dndactionty] of atom;
+ 
  netsupported: boolean;
  canfullscreen: boolean;
  canframeextents: boolean;
@@ -1139,7 +1141,7 @@ begin
  gdi_lock;
  clipboard:= value;
  clipboardtimestamp:= lasteventtime;
- clipboardtimestamp:= clipboardtimestamp; //no "not used" compiler message
+// clipboardtimestamp:= clipboardtimestamp; //no "not used" compiler message
  xsetselectionowner(appdisp,clipboardatom,appid,lasteventtime);
  result:= gue_ok;
  gdi_unlock;
@@ -3303,6 +3305,26 @@ begin
  gdi_unlock;
 end;
 
+function windowsatpos(const pos: pointty): winidarty;
+                //top down without root
+var
+ int1: integer;
+ id,id1: winidty;
+ int2: integer;
+begin
+ id:= mserootwindow;
+ int2:= 0;
+ while true do begin
+  id1:= id;
+  if (longint(xtranslatecoordinates(appdisp,mserootwindow,id1,
+         pos.x,pos.y,@int1,@int1,@id)) = 0) or (id = 0) then begin
+   break;
+  end;
+  additem(integerarty(result),id,int2);
+ end;
+ setlength(result,int2);
+end;
+
 function gui_setwindowgroup(id,group: winidty): guierrorty;
 var
  wmhints: pxwmhints;
@@ -4180,7 +4202,7 @@ begin
 end;
 
 type
- tsysdndhandler = class
+ tsysdndreader = class
   private
    fwinid: winidty;
    fsource: winidty;
@@ -4194,23 +4216,55 @@ type
    fshiftstate: shiftstatesty;
    fscroll: boolean;
    fdroptimestamp: longword;
+  protected
   public
    property winid: winidty read fwinid;
    constructor create(const aevent: txclientmessageevent);
+   destructor destroy; override;
    function readdata(var adata: string;
                               const typeindex: integer): guierrorty;
    function readtext(var atext: msestring;
                               const typeindex: integer): guierrorty;
  end;
 
-{ tsysdndhandler }
+ tsysdndwriter = class
+  private
+   fintf: isysdnd;
+   ftimestamp: longword;
+   ftypes: atomarty;
+   fsource: winidty;
+   fdest: winidty;
+   fdestaccepts: boolean;
+   fpos: pointty;
+   fentervalues: array[0..4] of longword;   
+   fpositionvalues: array[0..4] of longword;   
+  protected
+   procedure resetdest;
+   procedure selectioncleared(var aevent: txselectionclearevent);
+   function check(const apos: pointty): boolean;
+   function handleevent(var aevent: txclientmessageevent): tmseevent;
+   function drop: boolean;
+   function getdata(var aevent: txselectionrequestevent;
+                   var adata: string; var aproperty: atom): boolean; 
+                                        //false if no data
+  public
+   constructor create(const aintf: isysdnd; const asource: winidty);
+   destructor destroy; override;
+ end;
+ 
+var
+ sysdndreader: tsysdndreader;
+ sysdndwriter: tsysdndwriter;
 
-constructor tsysdndhandler.create(const aevent: txclientmessageevent);
+{ tsysdndreader }
+
+constructor tsysdndreader.create(const aevent: txclientmessageevent);
 var
  lwo1: longword;
  int1,int2: integer;
  ar1: atomarty;
 begin
+ freeandnil(sysdndwriter);
  with aevent do begin
   fwinid:= xwindow;
   fsource:= data.l[0];
@@ -4241,7 +4295,7 @@ begin
  end;
 end;
 
-function tsysdndhandler.readdata(var adata: string;
+function tsysdndreader.readdata(var adata: string;
                                         const typeindex: integer): guierrorty;
 var
  acttype: atom;
@@ -4263,7 +4317,7 @@ begin
  end;
 end;
 
-function tsysdndhandler.readtext(var atext: msestring;
+function tsysdndreader.readtext(var atext: msestring;
                                         const typeindex: integer): guierrorty;
 var
  acttype: atom;
@@ -4288,40 +4342,236 @@ begin
  end;
 end;
 
-var
- sysdndhandler: tsysdndhandler;
-
-function gui_sysdnd(const action: sysdndactionty): guierrorty;
+destructor tsysdndreader.destroy;
 begin
+ inherited;
+end;
+
+{ tsysdndwriter }
+
+constructor tsysdndwriter.create(const aintf: isysdnd; const asource: winidty);
+var
+ ar1: stringarty;
+ int1: integer;
+ act1,act2: dndactionty;
+begin
+ fintf:= aintf;
+ fsource:= asource;
+ ftimestamp:= lasteventtime;
+ freeandnil(sysdndreader);
+ fentervalues[0]:= fsource;
+ fpositionvalues[0]:= fsource;
+ fpositionvalues[3]:= ftimestamp;
+ fpositionvalues[4]:= xdndactionatoms[aintf.getaction];
+ ar1:= aintf.gettypes;
+ setlength(ftypes,length(ar1)); //todo: what about empty types?
+ for int1:= 0 to high(ar1) do begin
+  ftypes[int1]:= xinternatom(appdisp,pchar(ar1[int1]),
+                                    {$ifdef xboolean}false{$else}0{$endif});
+  if int1 <= high(fentervalues)-2 then begin
+   fentervalues[int1+2]:= ftypes[int1];
+  end;
+ end;
+ if high(ftypes) > 2 then begin
+  setlongproperty(fsource,xdndatoms[xdnd_typelist],ftypes,atomatom);
+ end;
+ gdi_lock;
+ xsetselectionowner(appdisp,xdndatoms[xdnd_selection],fsource,ftimestamp);
+ gdi_unlock;
+end;
+
+destructor tsysdndwriter.destroy;
+begin
+ gdi_lock;
+ resetdest;
+ xsetselectionowner(appdisp,xdndatoms[xdnd_selection],0,ftimestamp);
+                       //release selection
+ xdeleteproperty(appdisp,appid,xdndatoms[xdnd_typelist]);
+ gdi_unlock;
+ inherited;
+end;
+
+procedure tsysdndwriter.selectioncleared(var aevent: txselectionclearevent);
+begin
+ if laterorsame(aevent.time,ftimestamp) then begin
+  fintf.cancelsysdnd;
+  sysdndwriter:= nil;
+  inherited destroy;
+ end;
+end;
+
+procedure tsysdndwriter.resetdest;
+begin
+ if fdest <> 0 then begin
+  fdestaccepts:= false;
+  sendnetcardinalmessage(fdest,xdndatoms[xdnd_leave],fdest,[fsource]);
+  fdest:= 0;
+ end;
+end;
+
+function tsysdndwriter.check(const apos: pointty): boolean;
+var
+ ar1: atomarty;
+ ar2: winidarty;
+ int1: integer;
+begin
+ result:= false;
+ ar2:= windowsatpos(apos);
+ for int1:= high(ar2) downto 0 do begin
+  if readatomproperty(ar2[int1],xdndatoms[xdnd_aware],ar1) and 
+                                             (high(ar1) = 0) then begin
+   if ar2[int1] <> fdest then begin
+    if fdest <> 0 then begin
+     fdestaccepts:= false;
+     sendnetcardinalmessage(fdest,xdndatoms[xdnd_leave],fdest,[fsource]);
+    end;
+    fdest:= ar2[int1];
+    if ar1[0] < 3 then begin
+     ar1[0]:= 3;
+    end
+    else begin
+     if ar1[0] > 4 then begin
+      ar1[0]:= 4;
+     end;
+    end;
+    ar1[0]:= ar1[0] shr 24;
+    if high(ftypes) > 2 then begin
+     ar1[0]:= ar1[0] or 1;
+    end;
+    fentervalues[1]:= ar1[0];
+    sendnetcardinalmessage(fdest,xdndatoms[xdnd_enter],fdest,fentervalues);
+   end;
+   fpos:= apos;
+   fpositionvalues[2]:= (fpos.x shl 16) or (fpos.y and $ffff);
+   sendnetcardinalmessage(fdest,xdndatoms[xdnd_position],fdest,fpositionvalues);   
+   result:= true;
+   exit;
+  end;
+ end;
+ if fdest <> 0 then begin
+  application.postevent(tsysdndstatusevent.create(fintf.geteventintf,false));
+ end;
+ resetdest;
+end;
+
+function tsysdndwriter.handleevent(var aevent: txclientmessageevent): tmseevent;
+begin
+ result:= nil;
+ with aevent do begin
+  if (message_type = xdndatoms[xdnd_status]) and (fdest <> 0) and
+                                       (data.l[0] = fdest) then begin
+   fdestaccepts:= data.l[1] and 1 <> 0;
+   result:= tsysdndstatusevent.create(fintf.geteventintf,fdestaccepts);
+  end;
+ end;
+end;
+
+function tsysdndwriter.drop: boolean;
+begin
+ result:= true;
+ sendnetcardinalmessage(fdest,xdndatoms[xdnd_drop],fdest,
+                                                [fsource,0,ftimestamp]);
+end;
+
+function tsysdndwriter.getdata(var aevent: txselectionrequestevent;
+               var adata: string; var aproperty: atom): boolean;
+var
+ int1: integer;
+begin
+ result:= false;
+ with aevent do begin
+  for int1:= 0 to high(ftypes) do begin
+   if ftypes[int1] = target then begin
+    adata:= fintf.convertmimedata(int1);
+    result:= true;
+    break;
+   end;
+  end;
+ end;
+ if not result then begin
+  aproperty:= none;
+ end;
+end;
+
+function gui_sysdnd(const action: sysdndactionty;
+                         const aintf: isysdnd; const arect: rectty;
+                                         out aresult: boolean): guierrorty;
+begin
+ aresult:= false;
+ result:= gue_nodragpending;
+ if sysdndwriter <> nil then begin
+  result:= gue_ok;
+  case action of
+   sdnda_begin: begin
+    freeandnil(sysdndwriter);
+    sysdndwriter:= tsysdndwriter.create(aintf,appid);
+   end;
+   sdnda_finished: begin
+    if sysdndwriter <> nil then begin
+     if not sysdndwriter.fdestaccepts then begin    //todo: timeout
+      freeandnil(sysdndwriter);       
+     end;
+    end;
+   end;
+   sdnda_destroyed: begin
+    freeandnil(sysdndwriter);
+   end;
+   sdnda_check: begin
+    aresult:= sysdndwriter.check(arect.pos);
+   end;
+   sdnda_drop: begin
+    aresult:= sysdndwriter.drop;
+   end;
+   else begin
+    result:= gue_error;
+   end;
+  end;
+ end
+ else begin
+  if sysdndreader <> nil then begin
  //todo: use limit rectangle
- if sysdndhandler <> nil then begin
-  with sysdndhandler do begin
+   result:= gue_ok;
+   with sysdndreader do begin
+    case action of
+     sdnda_reject: begin
+      sendnetcardinalmessage(fsource,xdndatoms[xdnd_status],fsource,
+                       [fwinid,2,0,0,faction]); //always get position messages
+     end;
+     sdnda_accept: begin
+      sendnetcardinalmessage(fsource,xdndatoms[xdnd_status],fsource,
+                       [fwinid,3,0,0,faction]);  //always get position messages
+     end;
+     sdnda_finished: begin
+      sendnetcardinalmessage(fsource,xdndatoms[xdnd_status],fsource,
+                             [fwinid,1,faction]);  //always accepted
+      freeandnil(sysdndreader);
+     end;
+     else begin
+      result:= gue_error;
+     end;
+    end;
+   end;
+  end
+  else begin //writer = nil
+   result:= gue_ok;
    case action of
-    sdnda_reject: begin
-     sendnetcardinalmessage(fsource,xdndatoms[xdnd_status],fsource,
-                      [fwinid,2,0,0,faction]); //always get position messages
+    sdnda_begin: begin
+     sysdndwriter:= tsysdndwriter.create(aintf,appid);
     end;
-    sdnda_accept: begin
-     sendnetcardinalmessage(fsource,xdndatoms[xdnd_status],fsource,
-                      [fwinid,3,0,0,faction]);  //always get position messages
-    end;
-    sdnda_finished: begin
-     sendnetcardinalmessage(fsource,xdndatoms[xdnd_status],fsource,
-                            [fwinid,1,faction]);  //always accepted
-     freeandnil(sysdndhandler);
+    else begin
+     result:= gue_nodragpending;
     end;
    end;
   end;
  end;
- result:= gue_ok;
 end;
 
 function gui_sysdndreaddata(var adata: string;
                               const typeindex: integer): guierrorty;
 begin
  result:= gue_nodragpending;
- if sysdndhandler <> nil then begin
-  result:= sysdndhandler.readdata(adata,typeindex);
+ if sysdndreader <> nil then begin
+  result:= sysdndreader.readdata(adata,typeindex);
  end;
 end;
 
@@ -4329,8 +4579,8 @@ function gui_sysdndreadtext(var atext: msestring;
                               const typeindex: integer): guierrorty;
 begin
  result:= gue_nodragpending;
- if sysdndhandler <> nil then begin
-  result:= sysdndhandler.readtext(atext,typeindex);
+ if sysdndreader <> nil then begin
+  result:= sysdndreader.readtext(atext,typeindex);
  end;
 end;
  
@@ -4339,59 +4589,183 @@ function handlexdnd(var aevent: txclientmessageevent): tmseevent;
  function checkhandler(const updateposition: boolean): boolean;
  begin
   result:= false;
-  if sysdndhandler <> nil then begin
-   if (sysdndhandler.winid <> aevent.xwindow) or 
-                        (aevent.data.l[0] <> sysdndhandler.fsource) then begin
-    freeandnil(sysdndhandler); //there is something wrong
+  if sysdndreader <> nil then begin
+   if (sysdndreader.winid <> aevent.xwindow) or 
+                        (aevent.data.l[0] <> sysdndreader.fsource) then begin
+    freeandnil(sysdndreader); //there is something wrong
    end
    else begin
     result:= true;
     if updateposition then begin
-     with aevent,sysdndhandler do begin
+     with aevent,sysdndreader do begin
       fpos:= mp(longword(data.l[2]) shr 16,data.l[2] and $ffff);
       fshiftstate:= xtoshiftstate(data.l[1] and $ff,key_none,mb_none,false);
       fscroll:= data.l[1] and (1 shl 10) <> 0;
+      faction:= data.l[4];
      end;
     end;
    end;
   end;
  end; //checkhandler
 
- function createevent(const akind: drageventkindty): tsysdndevent; 
+ function createevent(const akind: drageventkindty): tsysdndevent;
+ var
+  act1,act2: dndactionty;
  begin
-  with sysdndhandler do begin
+  with sysdndreader do begin
+   act2:= dnda_none;
+   for act1:= low(dndactionty) to high(dndactionty) do begin
+    if xdndactionatoms[act1] = faction then begin
+     act2:= act1;
+     break;
+    end;
+   end;
    result:= tsysdndevent.create(akind,fwinid,fpos,fshiftstate,
-                                                   fscroll,fdatatypes);
+                                    fscroll,fdatatypes,act2);
   end;
  end; //createevent
  
 begin
  result:= nil;
  with aevent do begin
-  if message_type = xdndatoms[xdnd_enter] then begin
-   freeandnil(sysdndhandler);
-   sysdndhandler:= tsysdndhandler.create(aevent);
+  if sysdndwriter <> nil then begin
+   result:= sysdndwriter.handleevent(aevent);
   end
   else begin
-   if message_type = xdndatoms[xdnd_position] then begin
-    if checkhandler(true) then begin
-     result:= createevent(dek_check);
-    end;
+   if message_type = xdndatoms[xdnd_enter] then begin
+    freeandnil(sysdndreader);
+    sysdndreader:= tsysdndreader.create(aevent);
    end
    else begin
-    if message_type = xdndatoms[xdnd_drop] then begin
-     if checkhandler(false) then begin
-      result:= createevent(dek_drop);
-      sysdndhandler.fdroptimestamp:= data.l[2];
+    if message_type = xdndatoms[xdnd_position] then begin
+     if checkhandler(true) then begin
+      result:= createevent(dek_check);
      end;
     end
     else begin
-     if message_type = xdndatoms[xdnd_leave] then begin
-      freeandnil(sysdndhandler);
+     if message_type = xdndatoms[xdnd_drop] then begin
+      if checkhandler(false) then begin
+       result:= createevent(dek_drop);
+       sysdndreader.fdroptimestamp:= data.l[2];
+      end;
+     end
+     else begin
+      if message_type = xdndatoms[xdnd_leave] then begin
+       freeandnil(sysdndreader);
+      end;
      end;
     end;
    end;
   end;
+ end;
+end;
+
+function getclipboarddata(var aevent: txselectionrequestevent;
+                   var adata: string; var aproperty: atom): boolean; 
+                                        //false if no data
+var
+ atomar: array[0..7] of atom;
+ textprop: xtextproperty;
+begin
+ with aevent do begin
+  result:= false;
+  if target = targetsatom then begin
+   atomar[0]:= textplainatom;
+   atomar[1]:= utf8_stringatom;
+   atomar[2]:= compound_textatom;
+   atomar[3]:= stringatom;
+   atomar[4]:= textatom;
+   atomar[5]:= targetsatom;
+   atomar[6]:= timestampatom;
+//       atomar[7]:= multipleatom; //not implemented
+   xchangeproperty(appdisp,requestor,aproperty,atomatom,32,
+              propmodereplace,@atomar[0],7);
+  end
+  else begin
+   if target = timestampatom then begin
+    atomar[0]:= clipboardtimestamp;
+    xchangeproperty(appdisp,requestor,aproperty,target,32,
+               propmodereplace,@atomar[0],1);
+   end
+   else begin
+    result:= true;
+    if target = utf8_stringatom then begin
+     adata:= stringtoutf8(clipboard);
+    end
+    else begin
+     if target = stringatom then begin
+      adata:= stringtolatin1(clipboard);
+     end
+     else begin
+      if (target = textatom) or (target = textplainatom) then begin
+       adata:= clipboard; //current locale
+      end
+      else begin
+       result:= false;
+       if target = compound_textatom then begin
+        if stringtotextproperty(clipboard,xcompoundtextstyle,
+                                               textprop) then begin
+         with textprop do begin
+          xchangeproperty(appdisp,requestor,
+                {$ifdef FPC}_property{$else}xproperty{$endif},encoding,
+                                     format,propmodereplace,value,nitems);
+          xfree(value);
+         end;
+        end
+        else begin
+         aproperty:= none;
+        end;
+       end
+       else begin
+        aproperty:= none;
+       end;
+      end;
+     end;
+    end;
+   end;
+  end;
+ end;
+end;
+
+procedure handleselectionrequest(var aevent: txselectionrequestevent);
+var
+ event1: txselectionevent;
+ str1: string;
+ bo1: boolean;
+begin
+ with aevent do begin
+  event1.xtype:= selectionnotify;
+  event1.requestor:= requestor;
+  event1.selection:= selection;
+  if {$ifdef FPC}_property{$else}xproperty{$endif} = none then begin
+   {$ifdef FPC}_property{$else}xproperty{$endif}:= target;
+  end;
+  event1.target:= target;
+  event1.{$ifdef FPC}_property{$else}xproperty{$endif}:= 
+                           {$ifdef FPC}_property{$else}xproperty{$endif};
+  event1.time:= time;
+  bo1:= false;  
+  if selection = clipboardatom then begin
+   bo1:= getclipboarddata(aevent,str1,
+              event1.{$ifdef FPC}_property{$else}xproperty{$endif});
+  end
+  else begin
+   if (selection = xdndatoms[xdnd_selection]) and 
+                              (sysdndwriter <> nil) then begin
+    bo1:= sysdndwriter.getdata(aevent,str1,
+                      {$ifdef FPC}_property{$else}xproperty{$endif});
+   end
+   else begin
+    {$ifdef FPC}_property{$else}xproperty{$endif}:= none;
+   end;
+  end;
+  if bo1 then begin
+   xchangeproperty(appdisp,requestor,
+            {$ifdef FPC}_property{$else}xproperty{$endif},target,8,
+             propmodereplace,pbyte(pchar(str1)),length(str1));
+  end;
+  xsendevent(appdisp,requestor,{$ifdef xboolean}false{$else}0{$endif},0,
+                                                                   @event1);
  end;
 end;
 
@@ -4406,19 +4780,17 @@ var
  icstatus: tstatus;
  chars: msestring;
  int1: integer;
- event: xevent;
+// event: xevent;
  pollinfo: array[0..1] of pollfd;
              //0 connection, 1 sessionmanagement
  pollcount: integer;
- str1: string;
+// str1: string;
 {$ifdef with_sm}
  int2: integer;
 {$endif}
  shiftstate1: shiftstatesty;
  key1,key2: keyty;
  button1: mousebuttonty;
- atomar: array[0..7] of atom;
- textprop: xtextproperty;
  bo1: boolean;
  rect1: rectty;
  pt1: pointty;
@@ -4542,91 +4914,15 @@ eventrestart:
     clipboard:= '';
     exit;
    end;
+   if (xev.xselectionclear.selection = xdndatoms[xdnd_selection]) and
+                 (sysdndwriter <> nil) then begin
+    sysdndwriter.selectioncleared(xev.xselectionclear);
+   end;
   end
   else begin
    if xev.xtype = selectionrequest then begin
-    with xev.xselectionrequest do begin
-     if selection = clipboardatom then begin
-      event.xtype:= selectionnotify;
-      event.xselection.requestor:= requestor;
-      event.xselection.selection:= clipboardatom;
-      if {$ifdef FPC}_property{$else}xproperty{$endif} = none then begin
-       {$ifdef FPC}_property{$else}xproperty{$endif}:= target;
-      end;
-      event.xselection.target:= target;
-      event.xselection.{$ifdef FPC}_property{$else}xproperty{$endif}:= 
-                               {$ifdef FPC}_property{$else}xproperty{$endif};
-      event.xselection.time:= time;
-      bo1:= false;
-      if target = targetsatom then begin
-       atomar[0]:= textplainatom;
-       atomar[1]:= utf8_stringatom;
-       atomar[2]:= compound_textatom;
-       atomar[3]:= stringatom;
-       atomar[4]:= textatom;
-       atomar[5]:= targetsatom;
-       atomar[6]:= timestampatom;
-//       atomar[7]:= multipleatom; //not implemented
-       xchangeproperty(appdisp,requestor,
-          {$ifdef FPC}_property{$else}xproperty{$endif},atomatom,32,
-                  propmodereplace,@atomar[0],7);
-      end
-      else begin
-       if target = timestampatom then begin
-        atomar[0]:=
-        xchangeproperty(appdisp,requestor,
-           {$ifdef FPC}_property{$else}xproperty{$endif},target,32,
-                   propmodereplace,@atomar[0],1);
-       end
-       else begin
-        bo1:= true;
-        if target = utf8_stringatom then begin
-         str1:= stringtoutf8(clipboard);
-        end
-        else begin
-         if target = stringatom then begin
-          str1:= stringtolatin1(clipboard);
-         end
-         else begin
-          if (target = textatom) or (target = textplainatom) then begin
-           str1:= clipboard; //current locale
-          end
-          else begin
-           bo1:= false;
-           if target = compound_textatom then begin
-            if stringtotextproperty(clipboard,xcompoundtextstyle,
-                                                   textprop) then begin
-             with textprop do begin
-              xchangeproperty(appdisp,requestor,
-                    {$ifdef FPC}_property{$else}xproperty{$endif},encoding,
-                                         format,propmodereplace,value,nitems);
-              xfree(value);
-             end;
-            end
-            else begin
-             event.xselection.{$ifdef FPC}_property{$else}xproperty{$endif}:= 
-                                                                          none;
-            end;
-           end
-           else begin
-            event.xselection.{$ifdef FPC}_property{$else}xproperty{$endif}:= 
-                                                                          none;
-           end;
-          end;
-         end;
-        end;
-       end;
-      end;
-      if bo1 then begin
-       xchangeproperty(appdisp,requestor,
-                {$ifdef FPC}_property{$else}xproperty{$endif},target,8,
-                 propmodereplace,pbyte(pchar(str1)),length(str1));
-      end;
-      xsendevent(appdisp,requestor,{$ifdef xboolean}false{$else}0{$endif},0,
-                                                                       @event);
-      exit;
-     end;
-    end;
+    handleselectionrequest(xev.xselectionrequest);
+    exit;
    end;
   end;
  end;
@@ -4853,9 +5149,19 @@ eventrestart:
   end;
   destroynotify: begin
    with xev.xdestroywindow do begin
-    if (sysdndhandler <> nil) and 
-                (sysdndhandler.winid = xwindow) then begin
-     freeandnil(sysdndhandler);
+    if (sysdndreader <> nil) and 
+                (sysdndreader.winid = xwindow) then begin
+     freeandnil(sysdndreader);
+    end;
+    if (sysdndwriter <> nil) then begin
+     with sysdndwriter do begin
+      if fdest = xwindow then begin
+       fdest:= 0;
+      end;
+      if fsource = xwindow then begin
+       freeandnil(sysdndwriter);
+      end;
+     end;
     end;
     result:= twindowevent.create(ek_destroy,xwindow);
    end;
@@ -5288,6 +5594,10 @@ begin
   xinternatoms(appdisp,@xdndatomnames[low(xdndatomty)],
            integer(high(xdndatomty))+1,{$ifdef xboolean}false{$else}0{$endif},
            @xdndatoms[low(xdndatomty)]);
+  fillchar(xdndactionatoms,sizeof(xdndactionatoms),0);      //get or create xdnd atoms
+  xinternatoms(appdisp,@xdndactionatomnames[firstdndaction],
+           integer(high(dndactionty)),{$ifdef xboolean}false{$else}0{$endif},
+           @xdndactionatoms[firstdndaction]); //first = 0
  
   fillchar(netatoms,sizeof(netatoms),0);               //check _net_
   xinternatoms(appdisp,@netatomnames[low(netatomty)],
@@ -5363,7 +5673,8 @@ function gui_deinit: guierrorty;
 begin
  gdi_lock;
  try
-  freeandnil(sysdndhandler);
+  freeandnil(sysdndreader);
+  freeandnil(sysdndwriter);
   clipboard:= '';
   result:= gue_ok;
   settimer1(0); //kill timer
@@ -5489,5 +5800,6 @@ initialization
  noreconfigurewmwindow:= true;
  stackmodebelowworkaround:= false;
  hassm:= geticelib and getsmlib;
+
 end.
 

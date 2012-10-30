@@ -226,7 +226,7 @@ type
               const linkintf: iobjectlink = nil); overload;
    procedure setlinkedvar(const source: tlinkedobject; var dest: tlinkedobject;
               const linkintf: iobjectlink = nil); overload;
-  //iobjectlink
+    //iobjectlink
    procedure link(const source,dest: iobjectlink; valuepo: pointer = nil;
                    ainterfacetype: pointer = nil; once: boolean = false);
    procedure unlink(const source,dest: iobjectlink; valuepo: pointer = nil);
@@ -3336,7 +3336,8 @@ end;
 
 {$endif}
 
-constructor tobjectlinker.create(const owner: iobjectlink; onevent: objectlinkeventty);
+constructor tobjectlinker.create(const owner: iobjectlink;
+                                onevent: objectlinkeventty);
 begin
 {$ifdef debugobjectlink}
  writeln('create o: ' + intftext(owner));

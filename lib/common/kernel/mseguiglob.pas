@@ -13,7 +13,7 @@ unit mseguiglob;
 
 interface
 uses
- Classes,msegraphutils,msetypes,msekeyboard,mseerr,mseevent,msestrings;
+ Classes,msegraphutils,msetypes,msekeyboard,mseerr,mseevent,msestrings,mseglob;
 {$ifdef FPC}
  
 {$endif}
@@ -228,7 +228,20 @@ const
  );
 
 type
- sysdndactionty = (sdnda_reject,sdnda_accept,sdnda_finished);
+ sysdndactionty = (sdnda_reject,sdnda_accept,sdnda_finished,
+                   sdnda_begin,sdnda_check,sdnda_drop,sdnda_destroyed);
+ dndactionty = (dnda_none,dnda_copy,dnda_move,dnda_link,dnda_ask,dnda_private);
+const
+ firstdndaction = dnda_copy;
+type
+ isysdnd = interface(inullinterface)
+  procedure cancelsysdnd;
+  function gettypes: stringarty;
+  function getaction: dndactionty;
+  function geteventintf: ievent;
+  function convertmimedata(const atypeindex: integer): string;
+  function convertmimetext(const atypeindex: integer): msestring;
+ end;
  
  guierrorty = (gue_ok,gue_error,
                gue_alreadyregistered,gue_notregistered,
@@ -278,7 +291,7 @@ procedure guierror(error: guierrorty; sender: tobject; text: string = ''); overl
 implementation
 
 uses
- mseglob,mseclasses,msestreaming;
+ mseclasses,msestreaming;
 
 const
  errortexts: array[guierrorty] of string =

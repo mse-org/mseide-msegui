@@ -1201,6 +1201,9 @@ type
    class function getinstancepo(owner: tobject): pfont; override;
  end;
  widgetfontemptyclassty = class of twidgetfontempty;
+
+ dragobjstatety = (dos_sysdnd,dos_write);
+ dragobjstatesty = set of dragobjstatety;
  
  pdragobject = ^tdragobject;
  tdragobject = class
@@ -1209,14 +1212,24 @@ type
    fpickpos: pointty;
   protected
    fsender: tobject;
+   fstate: dragobjstatesty;
+   fsysdndintf: isysdnd;
+   feventintf: ievent;
+   faction: dndactionty;
+   function checksysdnd(const aaction: sysdndactionty;
+                             const arect: rectty): boolean;
+    //isysdnd
+   function geteventintf: ievent;
   public
    constructor create(const asender: tobject; var instance: tdragobject;
-                          const apickpos: pointty);
+                          const apickpos: pointty;
+                          const aaction: dndactionty = dnda_none);
    destructor destroy; override;
    function sender: tobject;
    procedure acepted(const apos: pointty); virtual; //screenorigin
    procedure refused(const apos: pointty); virtual;
    property pickpos: pointty read fpickpos;         //screenorigin
+   property state: dragobjstatesty read fstate;
  end;
 
  drageventkindty = (dek_begin,dek_check,dek_drop);
@@ -6278,18 +6291,21 @@ end;
 { tdragobject }
 
 constructor tdragobject.create(const asender: tobject; var instance: tdragobject;
-                                 const apickpos: pointty);
+                                 const apickpos: pointty;
+                                 const aaction: dndactionty = dnda_none);
 begin
  fsender:= asender;
  finstancepo:= @instance;
  instance.Free;
  instance:= self;
  fpickpos:= apickpos;
+ faction:= aaction;
  application.dragstarted;
 end;
 
 destructor tdragobject.destroy;
 begin
+ checksysdnd(sdnda_destroyed,nullrect);
  if finstancepo <> nil then begin
   finstancepo^:= nil;
  end;
@@ -6309,6 +6325,20 @@ end;
 function tdragobject.sender: tobject;
 begin
  result:= fsender;
+end;
+
+function tdragobject.checksysdnd(const aaction: sysdndactionty;
+                                 const arect: rectty): boolean;
+begin
+ result:= false;
+ if dos_sysdnd in fstate then begin
+  gui_sysdnd(aaction,fsysdndintf,arect,result);
+ end;
+end;
+
+function tdragobject.geteventintf: ievent;
+begin
+ result:= feventintf;
 end;
 
 { twidget }
@@ -14412,6 +14442,7 @@ var
  wi1: twidget;
  obj1: tsysmimedragobject;
  info: draginfoty;
+ bo1: boolean;
 begin
  if wo_sysdnd in foptions then begin
   with tsysdndevent(event) do begin
@@ -14424,7 +14455,8 @@ begin
    end;
    if wi1 <> nil then begin
     obj1:= nil;
-    tsysmimedragobject.create(nil,tdragobject(obj1),nullpoint,ftypes);
+    tsysmimedragobject.create(nil,tdragobject(obj1),nullpoint,ftypes,
+                                                              faction);
     fillchar(info,sizeof(info),0);
     with info do begin
      eventkind:= fdndkind;
@@ -14436,14 +14468,14 @@ begin
     finally
      obj1.free;
      if fdndkind = dek_drop then begin
-      gui_sysdnd(sdnda_finished);      
+      gui_sysdnd(sdnda_finished,nil,nullrect,bo1);      
      end
      else begin
       if not info.accept then begin
-       gui_sysdnd(sdnda_reject);
+       gui_sysdnd(sdnda_reject,nil,nullrect,bo1);
       end
       else begin
-       gui_sysdnd(sdnda_accept);
+       gui_sysdnd(sdnda_accept,nil,nullrect,bo1);
       end;
      end;
     end;

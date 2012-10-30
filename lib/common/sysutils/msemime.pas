@@ -11,30 +11,57 @@ unit msemime;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- msegui,msedrag,msestrings,msetypes,msegraphutils;
+ msegui,msedrag,msestrings,msetypes,msegraphutils,mseglob,mseguiglob,mseclasses;
  
 type
- tmimedragobject = class(tdragobject)
+
+ tmimedragobject = class;
+ 
+ imimedragclient = interface(iobjectlink)
+   procedure convertmimedata(const sender: tmimedragobject;
+                                      var adata: string; const atypeindex);
+   procedure convertmimetext(const sender: tmimedragobject;
+                                      var adata: msestring; const atypeindex);
+ end;
+  
+ tmimedragobject = class(tdragobject,iobjectlink)
   private
    ftypes: stringarty;
    ftypeindex: integer;
    fdata: string;
    ftext: msestring;
+   fobjectlinker: tobjectlinker;
    procedure settypeindex(const avalue: integer);
   protected
+   fintf: imimedragclient;
    function getdata: string; virtual;
    function gettext: msestring; virtual;
    procedure setdata(const avalue: string); virtual;
    procedure settext(const avalue: msestring); virtual;
+    //iobjectlink
+   procedure link(const source,dest: iobjectlink; valuepo: pointer = nil;
+                   ainterfacetype: pointer = nil; once: boolean = false);
+   procedure unlink(const source,dest: iobjectlink; valuepo: pointer = nil);
+   procedure objevent(const asender: iobjectlink; const event: objecteventty);
+   function getinstance: tobject;
   public
    constructor create(const asender: tobject; var instance: tdragobject;
-               const apickpos: pointty; const atypes: stringarty);
+               const apickpos: pointty; const atypes: array of string;
+               const aaction: dndactionty = dnda_none;
+                             const aintf: imimedragclient = nil); virtual;
+   constructor createwrite(const asender: tobject; var instance: tdragobject;
+               const apickpos: pointty; const atypes: array of string;
+               const aaction: dndactionty = dnda_none;
+               const aintf: imimedragclient = nil);
+   destructor destroy; override;
    function checktypes(const awanted: array of string): boolean;
    property types: stringarty read ftypes; //do not modify
    property typeindex: integer read ftypeindex write settypeindex default -1;
                        //-1 -> none selected
    property data: string read getdata write setdata;
    property text: msestring read gettext write settext;
+   function convertmimedata(const atypeindex: integer): string; virtual;
+   function convertmimetext(const atypeindex: integer): msestring; virtual;
  end;
 
 implementation
@@ -45,11 +72,35 @@ uses
 
 constructor tmimedragobject.create(const asender: tobject;
                var instance: tdragobject; const apickpos: pointty;
-               const atypes: stringarty);
+               const atypes: array of string;
+               const aaction: dndactionty = dnda_none;
+                             const aintf: imimedragclient = nil);
 begin
- ftypes:= atypes;
+ fobjectlinker:= tobjectlinker.create(iobjectlink(self),nil);
+ ftypes:= opentodynarrays(atypes);
+ faction:= aaction;
  ftypeindex:= -1;
- inherited create(asender,instance,apickpos);
+ fintf:= aintf;
+ if fintf <> nil then begin
+  fobjectlinker.link(iobjectlink(self),fintf);
+ end;
+ inherited create(asender,instance,apickpos,aaction);
+end;
+
+constructor tmimedragobject.createwrite(const asender: tobject;
+               var instance: tdragobject; const apickpos: pointty;
+               const atypes: array of string;
+               const aaction: dndactionty = dnda_none;
+               const aintf: imimedragclient = nil);
+begin
+ include(fstate,dos_write);
+ create(asender,instance,apickpos,atypes,aaction,aintf);
+end;
+
+destructor tmimedragobject.destroy;
+begin
+ fobjectlinker.free;
+ inherited;
 end;
 
 procedure tmimedragobject.settypeindex(const avalue: integer);
@@ -99,6 +150,58 @@ procedure tmimedragobject.settext(const avalue: msestring);
 begin
  fdata:= '';
  ftext:= avalue;
+end;
+
+function tmimedragobject.convertmimedata(const atypeindex: integer): string;
+begin
+ if fdata = '' then begin
+  result:= ftext;
+ end
+ else begin
+  result:= fdata;
+ end;
+ if fintf <> nil then begin
+  fintf.convertmimedata(self,result,atypeindex);
+ end;
+end;
+
+function tmimedragobject.convertmimetext(const atypeindex: integer): msestring;
+begin
+ if ftext = '' then begin
+  result:= fdata;
+ end
+ else begin
+  result:= ftext;
+ end;
+ if fintf <> nil then begin
+  fintf.convertmimetext(self,result,atypeindex);
+ end;
+end;
+
+procedure tmimedragobject.link(const source: iobjectlink;
+               const dest: iobjectlink; valuepo: pointer = nil;
+               ainterfacetype: pointer = nil; once: boolean = false);
+begin
+ fobjectlinker.link(source,dest,valuepo,ainterfacetype,once);
+end;
+
+procedure tmimedragobject.unlink(const source: iobjectlink;
+               const dest: iobjectlink; valuepo: pointer = nil);
+begin
+ fobjectlinker.unlink(source,dest,valuepo);
+end;
+
+procedure tmimedragobject.objevent(const asender: iobjectlink;
+               const event: objecteventty);
+begin
+ if (asender = fintf) and (event = oe_destroyed) then begin
+  destroy;
+ end;
+end;
+
+function tmimedragobject.getinstance: tobject;
+begin
+ result:= self;
 end;
 
 end.

@@ -149,7 +149,10 @@ function gui_copytoclipboard(const value: msestring): guierrorty;
 function gui_pastefromclipboard(out value: msestring): guierrorty;
 function gui_canpastefromclipboard: boolean;
 
-function gui_sysdnd(const action: sysdndactionty): guierrorty;
+function gui_sysdnd(const action: sysdndactionty;
+                     const aintf: isysdnd; const arect: rectty;
+                               out aresult: boolean): guierrorty;
+                               //aintf = nil for read actions 
 function gui_sysdndreaddata(var adata: string;
                               const typeindex: integer): guierrorty;
 function gui_sysdndreadtext(var atext: msestring;

@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -73,11 +73,13 @@ type
   dragdrop: drageventty;
  end;
 
- tcustomdragcontroller = class(tlinkedpersistent)
+ tcustomdragcontroller = class(tlinkedpersistent,ievent)
   private
    procedure dokeypress(const sender: twidget; var info: keyeventinfoty);
-   procedure initdraginfo(var info: draginfoty; const eventkind: drageventkindty; const pos: pointty);
-   function checkcandragdrop(const pos: pointty): twidget;
+   procedure initdraginfo(var info: draginfoty;
+                         const eventkind: drageventkindty; const pos: pointty);
+   function checkcandragdrop(const pos: pointty;
+                                out sysdndpending: boolean): twidget;
   protected
    fpickpos: pointty;
    fpickrect: rectty;
@@ -85,6 +87,10 @@ type
    fstate: dragstatesty;
    fintf: idragcontroller;
    function checkclickstate(const info: mouseeventinfoty): boolean; virtual;
+   function checksysdnd(const aaction: sysdndactionty;
+                                   const arect: rectty): boolean; virtual;
+    //ievent
+   procedure receiveevent(const aevent: tobjectevent); virtual;
   public
    constructor create(const aintf: idragcontroller); reintroduce;
    destructor destroy; override;
@@ -102,7 +108,8 @@ type
  tdragcontroller = class(tcustomdragcontroller)
   private
    fonbefore,fonafter: drageventsty;
-   function dodragevent(const events: drageventsty; var info: draginfoty): boolean;
+   function dodragevent(const events: drageventsty;
+                                               var info: draginfoty): boolean;
   public
    function beforedragevent(var info: draginfoty): boolean; override;
     //true if processed
@@ -123,13 +130,18 @@ type
                                   write fonafter.dragdrop;
  end;
  
-function isobjectdrag(const dragobject: tdragobject; objectclass: tclass): boolean;
+function isobjectdrag(const dragobject: tdragobject;
+                                                objectclass: tclass): boolean;
 
 implementation
 uses
- msebits,msepointer,msekeyboard;
+ msebits,msepointer,msekeyboard,msesysdnd;
 
-function isobjectdrag(const dragobject: tdragobject; objectclass: tclass): boolean;
+type
+ tdragobject1 = class(tdragobject);
+ 
+function isobjectdrag(const dragobject: tdragobject; 
+                                                objectclass: tclass): boolean;
 begin
  result:= (dragobject is tobjectdragobject) and
          (tobjectdragobject(dragobject).fdata is objectclass);
@@ -155,8 +167,11 @@ end;
 
 procedure tcustomdragcontroller.enddrag;
 begin
+ checksysdnd(sdnda_finished,nullrect);
  if fdragobject <> nil then begin
-  fdragobject.free;
+  if not (dos_sysdnd in fdragobject.state) then begin
+   fdragobject.free;
+  end;
   application.cursorshape:= cr_default;
  end;
  application.unregisteronkeypress({$ifdef FPC}@{$endif}dokeypress);
@@ -171,25 +186,30 @@ begin
  end;
 end;
 
-function tcustomdragcontroller.checkcandragdrop(const pos: pointty): twidget;
+function tcustomdragcontroller.checkcandragdrop(const pos: pointty;
+                                        out sysdndpending: boolean): twidget;
 var
  window: twindow;
- po1: pointty;
+ pt1: pointty;
  info: draginfoty;
 begin
  result:= nil;
- po1:= translateclientpoint(pos,fintf.getwidget,nil);
- window:= application.windowatpos(po1);
+ pt1:= translateclientpoint(pos,fintf.getwidget,nil);
+ window:= application.windowatpos(pt1);
  if window <> nil then begin
-  result:= window.owner.widgetatpos(translatewidgetpoint(po1,nil,window.owner),
+  sysdndpending:= false;
+  result:= window.owner.widgetatpos(translatewidgetpoint(pt1,nil,window.owner),
           [ws_visible,ws_enabled]);
   if result <> nil then begin
-   initdraginfo(info,dek_check,translateclientpoint(po1,nil,result));
+   initdraginfo(info,dek_check,translateclientpoint(pt1,nil,result));
    result.dragevent(info);
    if not info.accept then begin
     result:= nil;
    end;
-  end;
+  end
+ end
+ else begin
+  sysdndpending:= checksysdnd(sdnda_check,mr(pt1,nullsize));
  end;
 end;
 
@@ -215,6 +235,7 @@ var
  owner: twidget;
  widget1: twidget;
  draginfo: draginfoty;
+ bo1: boolean;
 begin
  owner:= fintf.getwidget;
  case info.eventkind of
@@ -226,15 +247,22 @@ begin
    end;
   end;
   ek_buttonrelease: begin
-   if fdragobject <> nil then begin
-    include(info.eventstate,es_processed);
-    widget1:= checkcandragdrop(info.pos);
-    if widget1 <> nil then begin
-     initdraginfo(draginfo,dek_drop,translateclientpoint(info.pos,owner,widget1));
-     widget1.dragevent(draginfo);
+   try
+    if fdragobject <> nil then begin
+     include(info.eventstate,es_processed);
+     widget1:= checkcandragdrop(info.pos,bo1);
+     if widget1 <> nil then begin
+      initdraginfo(draginfo,dek_drop,
+                                 translateclientpoint(info.pos,owner,widget1));
+      widget1.dragevent(draginfo);
+     end
+     else begin
+      checksysdnd(sdnda_drop,nullrect);
+     end;
     end;
+   finally
+    enddrag;
    end;
-   enddrag;
   end;
   ek_mousemove,ek_mousepark: begin
    if checkclickstate(info) then begin
@@ -245,16 +273,20 @@ begin
      application.registeronkeypress({$ifdef FPC}@{$endif}dokeypress);
      initdraginfo(draginfo,dek_begin,fpickpos);
      owner.dragevent(draginfo);
+     checksysdnd(sdnda_begin,nullrect);
     end;
     if (fdragobject <> nil) then begin
+     tdragobject1(fdragobject).feventintf:= ievent(self);
      include(info.eventstate,es_processed);
-     if checkcandragdrop(info.pos) <> nil then begin
+     if checkcandragdrop(info.pos,bo1) <> nil then begin
       application.cursorshape:= cr_drag;
       fdragobject.acepted(translateclientpoint(info.pos,owner,nil));
      end
      else begin
-      application.cursorshape:= cr_forbidden;
-      fdragobject.refused(translateclientpoint(info.pos,owner,nil));
+      if not bo1 then begin
+       application.cursorshape:= cr_forbidden;
+       fdragobject.refused(translateclientpoint(info.pos,owner,nil));
+      end;
      end;
     end;
    end
@@ -279,6 +311,30 @@ begin
  subpoint1(info.pos,po1);
  clientmouseevent(info);
  addpoint1(info.pos,po1);
+end;
+
+function tcustomdragcontroller.checksysdnd(const aaction: sysdndactionty;
+                                               const arect: rectty): boolean;
+begin
+ if fdragobject <> nil then begin
+  result:= tdragobject1(fdragobject).checksysdnd(aaction,arect);
+ end;
+end;
+
+procedure tcustomdragcontroller.receiveevent(const aevent: tobjectevent);
+begin
+ if (fdragobject <> nil) and (aevent is tsysdndstatusevent) then begin
+  with tsysdndstatusevent(aevent) do begin
+   if ds_beginchecked in fstate then begin
+    if accept then begin
+     application.cursorshape:= cr_drag;
+    end
+    else begin
+     application.cursorshape:= cr_forbidden;
+    end;
+   end;
+  end;
+ end;
 end;
 
 { tdragcontroller }

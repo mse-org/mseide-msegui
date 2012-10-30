@@ -506,8 +506,11 @@ begin
  result:= isclipboardformatavailable(cf_text);
 end;
 
-function gui_sysdnd(const action: sysdndactionty): guierrorty;
+function gui_sysdnd(const action: sysdndactionty;
+               const aintf: isysdnd;  const arect: rectty;
+                            out aresult: boolean): guierrorty;
 begin
+ aresult:= false;
  result:= gue_notimplemented;
 end;
 
