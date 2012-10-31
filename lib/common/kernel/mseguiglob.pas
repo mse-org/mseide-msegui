@@ -228,9 +228,9 @@ const
  );
 
 type
+ dndactionty = (dnda_none,dnda_copy,dnda_move,dnda_link,dnda_ask,dnda_private);
  sysdndactionty = (sdnda_reject,sdnda_accept,sdnda_finished,
                    sdnda_begin,sdnda_check,sdnda_drop,sdnda_destroyed);
- dndactionty = (dnda_none,dnda_copy,dnda_move,dnda_link,dnda_ask,dnda_private);
 const
  firstdndaction = dnda_copy;
 type
@@ -243,6 +243,49 @@ type
   function convertmimetext(const atypeindex: integer): msestring;
  end;
  
+ dragobjstatety = (dos_sysdnd,dos_write,dos_sysdroppending);
+ dragobjstatesty = set of dragobjstatety;
+ 
+ pdragobject = ^tdragobject;
+ tdragobject = class
+  private
+   fpickpos: pointty;
+  protected
+   finstancepo: pdragobject;
+   fsender: tobject;
+   fstate: dragobjstatesty;
+   fsysdndintf: isysdnd;
+   feventintf: ievent;
+   faction: dndactionty;
+   function checksysdnd(const aaction: sysdndactionty;
+                             const arect: rectty): boolean;
+    //isysdnd
+   function geteventintf: ievent;
+  public
+   constructor create(const asender: tobject; var instance: tdragobject;
+                          const apickpos: pointty;
+                          const aaction: dndactionty = dnda_none);
+   destructor destroy; override;
+   function sender: tobject;
+   procedure acepted(const apos: pointty); virtual; //screenorigin
+   procedure refused(const apos: pointty); virtual;
+   property pickpos: pointty read fpickpos;         //screenorigin
+   property state: dragobjstatesty read fstate;
+   property action: dndactionty read faction write faction;
+ end;
+
+ drageventkindty = (dek_begin,dek_check,dek_drop,dek_leave);
+
+ draginfoty = record
+  eventkind: drageventkindty;
+  pos: pointty;           //origin = clientrect.pos
+  pickpos: pointty;       //origin = screenorigin
+  clientpickpos: pointty; //origin = clientrect.pos
+  dragobjectpo: pdragobject;
+  accept: boolean;
+ end;
+
+type
  guierrorty = (gue_ok,gue_error,
                gue_alreadyregistered,gue_notregistered,
                gue_postevent,gue_timer,
@@ -286,13 +329,16 @@ var
  toplevelraise: boolean;
 
 procedure guierror(error: guierrorty; text: string = ''); overload;
-procedure guierror(error: guierrorty; sender: tobject; text: string = ''); overload;
+procedure guierror(error: guierrorty; sender: tobject;
+                                                  text: string = ''); overload;
 
 implementation
 
 uses
- mseclasses,msestreaming;
-
+ mseclasses,msestreaming,mseapplication,msegui,mseguiintf;
+type
+ tguiapplication1 = class(tguiapplication);
+ 
 const
  errortexts: array[guierrorty] of string =
   ('','Error',
@@ -386,6 +432,59 @@ end;
 function egui.geterror: guierrorty;
 begin
  result:= guierrorty(ferror);
+end;
+
+{ tdragobject }
+
+constructor tdragobject.create(const asender: tobject; var instance: tdragobject;
+                                 const apickpos: pointty;
+                                 const aaction: dndactionty = dnda_none);
+begin
+ fsender:= asender;
+ finstancepo:= @instance;
+ instance.Free;
+ instance:= self;
+ fpickpos:= apickpos;
+ faction:= aaction;
+ tguiapplication1(application).dragstarted;
+end;
+
+destructor tdragobject.destroy;
+begin
+ checksysdnd(sdnda_destroyed,nullrect);
+ if finstancepo <> nil then begin
+  finstancepo^:= nil;
+ end;
+ inherited;
+end;
+
+procedure tdragobject.acepted(const apos: pointty);
+begin
+ //dummy
+end;
+
+procedure tdragobject.refused(const apos: pointty);
+begin
+ //dummy
+end;
+
+function tdragobject.sender: tobject;
+begin
+ result:= fsender;
+end;
+
+function tdragobject.checksysdnd(const aaction: sysdndactionty;
+                                 const arect: rectty): boolean;
+begin
+ result:= false;
+ if dos_sysdnd in fstate then begin
+  gui_sysdnd(aaction,fsysdndintf,arect,result);
+ end;
+end;
+
+function tdragobject.geteventintf: ievent;
+begin
+ result:= feventintf;
 end;
 
 end.

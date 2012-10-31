@@ -4406,6 +4406,7 @@ begin
    end
    else begin
     if message_type = xdndatoms[xdnd_leave] then begin
+     result:= createevent(dek_leave);
      freeandnil(sysdndreader);
     end;
    end;

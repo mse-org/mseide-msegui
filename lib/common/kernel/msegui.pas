@@ -21,7 +21,7 @@ uses
  {$ifdef FPC}classes{$else}Classes{$endif},sysutils,msegraphics,msetypes,
  msestrings,mseerr,msegraphutils,mseapplication,
  msepointer,mseevent,msekeyboard,mseclasses,mseglob,mseguiglob,mselist,
- msesystypes,msethread,mseguiintf,
+ msesystypes,msethread,mseguiintf,{msesysdnd,}
  msebitmap,msearrayprops,msethreadcomp,mserichstring,msearrayutils
                                {$ifdef mse_with_ifi},mseifiglob{$endif};
 
@@ -1202,48 +1202,6 @@ type
  end;
  widgetfontemptyclassty = class of twidgetfontempty;
 
- dragobjstatety = (dos_sysdnd,dos_write,dos_sysdroppending);
- dragobjstatesty = set of dragobjstatety;
- 
- pdragobject = ^tdragobject;
- tdragobject = class
-  private
-   fpickpos: pointty;
-  protected
-   finstancepo: pdragobject;
-   fsender: tobject;
-   fstate: dragobjstatesty;
-   fsysdndintf: isysdnd;
-   feventintf: ievent;
-   faction: dndactionty;
-   function checksysdnd(const aaction: sysdndactionty;
-                             const arect: rectty): boolean;
-    //isysdnd
-   function geteventintf: ievent;
-  public
-   constructor create(const asender: tobject; var instance: tdragobject;
-                          const apickpos: pointty;
-                          const aaction: dndactionty = dnda_none);
-   destructor destroy; override;
-   function sender: tobject;
-   procedure acepted(const apos: pointty); virtual; //screenorigin
-   procedure refused(const apos: pointty); virtual;
-   property pickpos: pointty read fpickpos;         //screenorigin
-   property state: dragobjstatesty read fstate;
-   property action: dndactionty read faction write faction;
- end;
-
- drageventkindty = (dek_begin,dek_check,dek_drop);
-
- draginfoty = record
-  eventkind: drageventkindty;
-  pos: pointty;           //origin = clientrect.pos
-  pickpos: pointty;       //origin = screenorigin
-  clientpickpos: pointty; //origin = clientrect.pos
-  dragobjectpo: pdragobject;
-  accept: boolean;
- end;
-
  twidgetevent = class(tcomponentevent)
  end;
 
@@ -1972,6 +1930,7 @@ type
    fsyscontainer: syswindowty;
    fmodalwidget: twidget;
    fmodallevel: integer;
+   fsysdragobject: tobject; //tsysmimedragobject;
    
    procedure setcaption(const avalue: msestring);
    procedure widgetdestroyed(widget: twidget);
@@ -2330,6 +2289,7 @@ type
    procedure internalinitialize; override;
    procedure internaldeinitialize;  override;
    procedure objecteventdestroyed(const sender: tobjectevent); override;
+   procedure dragstarted; //calls dragstarted of all known widgets
   public
    constructor create(aowner: tcomponent); override;
    procedure destroyforms;
@@ -2453,7 +2413,6 @@ type
    function shortcutting: boolean; //widget is in doshortcut procedure
    property caret: tcaret read fcaret;
    property mouse: tmouse read fmouse;
-   procedure dragstarted; //calls dragstarted of all known widgets
    procedure mouseparkevent; //simulates mouseparkevent
    procedure delayedmouseshift(const ashift: pointty);
    procedure calcmousewheeldelta(var info: mousewheeleventinfoty;
@@ -2684,6 +2643,7 @@ type
  trealarrayprop1 = class(trealarrayprop);
  tcaret1 = class(tcaret);
  tobjectevent1 = class(tobjectevent);
+ tsysmimedragobject1 = class(tsysmimedragobject);
 
 const
  cancelwaittag = 823757;
@@ -6287,59 +6247,6 @@ begin
    end;
   end;
  end;
-end;
-
-{ tdragobject }
-
-constructor tdragobject.create(const asender: tobject; var instance: tdragobject;
-                                 const apickpos: pointty;
-                                 const aaction: dndactionty = dnda_none);
-begin
- fsender:= asender;
- finstancepo:= @instance;
- instance.Free;
- instance:= self;
- fpickpos:= apickpos;
- faction:= aaction;
- application.dragstarted;
-end;
-
-destructor tdragobject.destroy;
-begin
- checksysdnd(sdnda_destroyed,nullrect);
- if finstancepo <> nil then begin
-  finstancepo^:= nil;
- end;
- inherited;
-end;
-
-procedure tdragobject.acepted(const apos: pointty);
-begin
- //dummy
-end;
-
-procedure tdragobject.refused(const apos: pointty);
-begin
- //dummy
-end;
-
-function tdragobject.sender: tobject;
-begin
- result:= fsender;
-end;
-
-function tdragobject.checksysdnd(const aaction: sysdndactionty;
-                                 const arect: rectty): boolean;
-begin
- result:= false;
- if dos_sysdnd in fstate then begin
-  gui_sysdnd(aaction,fsysdndintf,arect,result);
- end;
-end;
-
-function tdragobject.geteventintf: ievent;
-begin
- result:= feventintf;
 end;
 
 { twidget }
@@ -12336,6 +12243,7 @@ end;
 destructor twindow.destroy;
 begin
  include(fstate,tws_destroying);
+ freeandnil(fsysdragobject);
  container:= 0;
  appinst.twindowdestroyed(self);
  if ftransientfor <> nil then begin
@@ -14441,44 +14349,62 @@ end;
 procedure twindow.processsysdnd(const event: twindowevent);
 var
  wi1: twidget;
- obj1: tsysmimedragobject;
+// obj1: tsysmimedragobject;
  info: draginfoty;
  bo1: boolean;
 begin
  if wo_sysdnd in foptions then begin
   with tsysdndevent(event) do begin
-   subpoint1(fpos,owner.pos);
-   wi1:= fowner.widgetatpos(fpos,[ws_visible,ws_enabled]);
-   if (wi1 = nil) and 
-        (fowner.fwidgetstate*[ws_visible,ws_enabled] = 
-                                       [ws_visible,ws_enabled]) then begin
-    wi1:= fowner;
-   end;
-   if wi1 <> nil then begin
-    obj1:= nil;
-    tsysmimedragobject.create(nil,tdragobject(obj1),nullpoint,ftypes,
-                                                              faction);
-    fillchar(info,sizeof(info),0);
-    with info do begin
-     eventkind:= fdndkind;
-     pos:= translateclientpoint(fpos,owner,wi1);
-     dragobjectpo:= @obj1;
+   if fdndkind = dek_leave then begin
+    freeandnil(fsysdragobject);
+   end
+   else begin
+    subpoint1(fpos,owner.pos);
+    wi1:= fowner.widgetatpos(fpos,[ws_visible,ws_enabled]);
+    if (wi1 = nil) and 
+         (fowner.fwidgetstate*[ws_visible,ws_enabled] = 
+                                        [ws_visible,ws_enabled]) then begin
+     wi1:= fowner;
     end;
-    try
-     wi1.dragevent(info);
-    finally
-     if fdndkind = dek_drop then begin
-      gui_sysdnd(sdnda_finished,isysdnd(obj1),nullrect,bo1);      
-     end
-     else begin
-      if not info.accept then begin
-       gui_sysdnd(sdnda_reject,isysdnd(obj1),nullrect,bo1);
+    if wi1 <> nil then begin
+     if fsysdragobject = nil then begin
+      tsysmimedragobject.create(nil,tdragobject(fsysdragobject),nullpoint,ftypes,
+                                                               faction);
+     end;
+     with tsysmimedragobject1(fsysdragobject) do begin
+      if (ftypes <> tsysdndevent(event).ftypes) or 
+                                (ftypeindex > high(ftypes)) then begin
+                                //missed dek_leave
+       ftypes:= tsysdndevent(event).ftypes;
+       ftypeindex:= -1;
+      end;
+      faction:= tsysdndevent(event).faction;
+     end;
+     fillchar(info,sizeof(info),0);
+     with info do begin
+      eventkind:= fdndkind;
+      pos:= translateclientpoint(fpos,owner,wi1);
+      dragobjectpo:= @fsysdragobject;
+     end;
+     try
+      wi1.dragevent(info);
+     finally
+      if fdndkind = dek_drop then begin
+       gui_sysdnd(sdnda_finished,isysdnd(tsysmimedragobject(fsysdragobject)),
+                                                                   nullrect,bo1);      
       end
       else begin
-       gui_sysdnd(sdnda_accept,isysdnd(obj1),nullrect,bo1);
+       if not info.accept then begin
+        gui_sysdnd(sdnda_reject,isysdnd(tsysmimedragobject(fsysdragobject)),
+                                                                   nullrect,bo1);
+       end
+       else begin
+        gui_sysdnd(sdnda_accept,isysdnd(tsysmimedragobject(fsysdragobject))
+                                                                 ,nullrect,bo1);
+       end;
       end;
+ //     obj1.free;
      end;
-     obj1.free;
     end;
    end;
   end;

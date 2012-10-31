@@ -26,13 +26,13 @@ type
   
  tmimedragobject = class(tdragobject,iobjectlink)
   private
-   ftypes: stringarty;
-   ftypeindex: integer;
    fdata: string;
    ftext: msestring;
    fobjectlinker: tobjectlinker;
    procedure settypeindex(const avalue: integer);
   protected
+   ftypes: stringarty;
+   ftypeindex: integer;
    fintf: imimesource;
    function getdata: string; virtual;
    function gettext: msestring; virtual;

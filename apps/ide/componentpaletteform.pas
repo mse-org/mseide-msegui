@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2011 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2012 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@ unit componentpaletteform;
 
 interface
 uses
- msegui,mseclasses,mseforms,msetabs,msetoolbar,msegraphutils,msestat;
+ msegui,mseclasses,mseforms,msetabs,msetoolbar,msegraphutils,msestat,mseguiglob;
 
 type
  tcomponentpalettefo = class(tdockform)
@@ -30,8 +30,8 @@ type
    procedure componentpalettedragdrop(const sender: TObject;
       const apos: pointty; var dragobject: tdragobject; var processed: boolean);
    procedure componentpagesactivetabchange(const sender: TObject);
-   procedure componentpalettebuttonchanged(const sender: TObject;
-    const button: ttoolbutton);
+   procedure componentpalettebuttonchanged(const sender: tobject;
+                                             const button: tcustomtoolbutton);
    procedure foonreadstat(const sender: TObject; const reader: tstatreader);
   public
    procedure updatecomponentpalette(init: boolean);
@@ -61,7 +61,7 @@ begin
 end;
 
 procedure tcomponentpalettefo.componentpalettebuttonchanged(const sender: TObject;
-  const button: ttoolbutton);
+  const button: tcustomtoolbutton);
 begin
  if not application.terminated then begin
   with registeredcomponents do begin

@@ -2143,7 +2143,8 @@ type
    function rowvisible(const arow: integer): integer;
                  //0 -> fully visible, < 0 -> below > 0 above
    function rowsperpage: integer;
-   function cellatpos(const apos: pointty; out coord: gridcoordty): cellkindty; overload;
+   function cellatpos(const apos: pointty;
+                             out coord: gridcoordty): cellkindty; overload;
                  //origin = paintrect.pos
    function cellatpos(const apos: pointty): gridcoordty; overload;
    function cellrect(const cell: gridcoordty;
