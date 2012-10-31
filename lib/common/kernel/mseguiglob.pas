@@ -234,7 +234,7 @@ type
 const
  firstdndaction = dnda_copy;
 type
- isysdnd = interface(inullinterface)
+ isysdnd = interface(iobjectlink)
   procedure cancelsysdnd;
   function gettypes: stringarty;
   function getaction: dndactionty;

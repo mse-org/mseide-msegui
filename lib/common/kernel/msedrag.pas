@@ -86,6 +86,7 @@ type
    fdragobject: tdragobject;
    fstate: dragstatesty;
    fintf: idragcontroller;
+   fsysdndobjects: array[0..3] of tdragobject;
    function checkclickstate(const info: mouseeventinfoty): boolean; virtual;
    function checksysdnd(const aaction: sysdndactionty;
                                    const arect: rectty): boolean; virtual;
@@ -135,7 +136,7 @@ function isobjectdrag(const dragobject: tdragobject;
 
 implementation
 uses
- msebits,msepointer,msekeyboard,msesysdnd;
+ msebits,msepointer,msekeyboard,msesysdnd,sysutils;
 
 type
  tdragobject1 = class(tdragobject);
@@ -155,8 +156,13 @@ begin
 end;
 
 destructor tcustomdragcontroller.destroy;
+var
+ int1: integer;
 begin
  enddrag;
+ for int1:= 0 to high(fsysdndobjects) do begin
+  freeandnil(fsysdndobjects[int1]);
+ end;
  inherited;
 end;
 
@@ -166,10 +172,27 @@ begin
 end;
 
 procedure tcustomdragcontroller.enddrag;
+var
+ int1,int2: integer;
 begin
- checksysdnd(sdnda_finished,nullrect);
+// checksysdnd(sdnda_finished,nullrect);
  if fdragobject <> nil then begin
-  if not (dos_sysdnd in fdragobject.state) then begin
+  if dos_sysdroppending in tdragobject1(fdragobject).fstate then begin
+   int2:= 0;
+   for int1:= 0 to high(fsysdndobjects) do begin
+    if fsysdndobjects[int1] = nil then begin
+     int2:= int1;
+     break;
+    end;
+   end;
+   if fsysdndobjects[int2] <> nil then begin
+    fsysdndobjects[int2].destroy;
+   end;
+   tdragobject1(fdragobject).finstancepo:= @fsysdndobjects[int2];
+   tdragobject1(fdragobject).finstancepo^:= fdragobject;
+   fdragobject:= nil;
+  end
+  else begin  
    fdragobject.free;
   end;
   application.cursorshape:= cr_default;
@@ -257,6 +280,9 @@ begin
       widget1.dragevent(draginfo);
      end
      else begin
+      if bo1 then begin
+       include(tdragobject1(fdragobject).fstate,dos_sysdroppending);
+      end;
       checksysdnd(sdnda_drop,nullrect);
      end;
     end;

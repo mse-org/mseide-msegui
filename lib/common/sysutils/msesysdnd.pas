@@ -43,8 +43,6 @@ type
  
  tsysmimedragobject = class(tmimedragobject,isysdnd)
   private
-   fdata: string;
-   ftext: msestring;
   protected
    procedure checkwritable;
    procedure setdata(const avalue: string); override;
@@ -59,11 +57,11 @@ type
    constructor create(const asender: tobject; var instance: tdragobject;
          const apickpos: pointty; const atypes: array of string;
                   const aaction: dndactionty = dnda_none;
-                             const aintf: imimedragclient = nil); override;
+                             const aintf: imimesource = nil); override;
    constructor createwrite(const asender: tobject; var instance: tdragobject;
                const apickpos: pointty; const atypes: array of string;
                const aaction: dndactionty = dnda_none;
-               const aintf: imimedragclient = nil);
+               const aintf: imimesource = nil);
  end;
   
 implementation
@@ -92,7 +90,7 @@ constructor tsysmimedragobject.create(const asender: tobject;
                var instance: tdragobject; const apickpos: pointty;
                const atypes: array of string;
                        const aaction: dndactionty = dnda_none;
-                       const aintf: imimedragclient = nil);
+                       const aintf: imimesource = nil);
 begin
  fsysdndintf:= isysdnd(self);
  include(fstate,dos_sysdnd);
@@ -103,7 +101,7 @@ constructor tsysmimedragobject.createwrite(const asender: tobject;
                var instance: tdragobject; const apickpos: pointty;
                const atypes: array of string;
                const aaction: dndactionty = dnda_none;
-               const aintf: imimedragclient = nil);
+               const aintf: imimesource = nil);
 begin
  include(fstate,dos_sysdnd);
  inherited createwrite(asender,instance,apickpos,atypes,aaction,aintf);
@@ -112,7 +110,7 @@ end;
 function tsysmimedragobject.getdata: string;
 begin
  if dos_write in fstate then begin
-  result:= fdata;
+  result:= inherited getdata;
  end
  else begin
   result:= '';
@@ -124,7 +122,7 @@ end;
 function tsysmimedragobject.gettext: msestring;
 begin
  if dos_write in fstate then begin
-  result:= ftext;
+  result:= inherited gettext;
  end
  else begin
   result:= '';
@@ -143,15 +141,13 @@ end;
 procedure tsysmimedragobject.setdata(const avalue: string);
 begin
  checkwritable;
- ftext:= '';
- fdata:= avalue;
+ inherited;
 end;
 
 procedure tsysmimedragobject.settext(const avalue: msestring);
 begin
  checkwritable;
- fdata:= '';
- ftext:= avalue;
+ inherited;
 end;
 
 procedure tsysmimedragobject.cancelsysdnd;

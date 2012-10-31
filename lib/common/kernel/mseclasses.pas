@@ -221,7 +221,8 @@ type
   protected
    fobjectlinker: tobjectlinker;
    function getobjectlinker: tobjectlinker;
-   procedure objectevent(const sender: tobject; const event: objecteventty); virtual;
+   procedure objectevent(const sender: tobject;
+                            const event: objecteventty); virtual;
    procedure setlinkedvar(const source: tmsecomponent; var dest: tmsecomponent;
               const linkintf: iobjectlink = nil); overload;
    procedure setlinkedvar(const source: tlinkedobject; var dest: tlinkedobject;
@@ -230,7 +231,8 @@ type
    procedure link(const source,dest: iobjectlink; valuepo: pointer = nil;
                    ainterfacetype: pointer = nil; once: boolean = false);
    procedure unlink(const source,dest: iobjectlink; valuepo: pointer = nil);
-   procedure objevent(const sender: iobjectlink; const event: objecteventty);
+   procedure objevent(const sender: iobjectlink;
+                                 const event: objecteventty); virtual;
    function getinstance: tobject;
  public
    destructor destroy; override;

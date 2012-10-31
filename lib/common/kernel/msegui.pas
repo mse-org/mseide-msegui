@@ -1202,15 +1202,15 @@ type
  end;
  widgetfontemptyclassty = class of twidgetfontempty;
 
- dragobjstatety = (dos_sysdnd,dos_write);
+ dragobjstatety = (dos_sysdnd,dos_write,dos_sysdroppending);
  dragobjstatesty = set of dragobjstatety;
  
  pdragobject = ^tdragobject;
  tdragobject = class
   private
-   finstancepo: pdragobject;
    fpickpos: pointty;
   protected
+   finstancepo: pdragobject;
    fsender: tobject;
    fstate: dragobjstatesty;
    fsysdndintf: isysdnd;
@@ -1230,6 +1230,7 @@ type
    procedure refused(const apos: pointty); virtual;
    property pickpos: pointty read fpickpos;         //screenorigin
    property state: dragobjstatesty read fstate;
+   property action: dndactionty read faction write faction;
  end;
 
  drageventkindty = (dek_begin,dek_check,dek_drop);
@@ -14466,18 +14467,18 @@ begin
     try
      wi1.dragevent(info);
     finally
-     obj1.free;
      if fdndkind = dek_drop then begin
-      gui_sysdnd(sdnda_finished,nil,nullrect,bo1);      
+      gui_sysdnd(sdnda_finished,isysdnd(obj1),nullrect,bo1);      
      end
      else begin
       if not info.accept then begin
-       gui_sysdnd(sdnda_reject,nil,nullrect,bo1);
+       gui_sysdnd(sdnda_reject,isysdnd(obj1),nullrect,bo1);
       end
       else begin
-       gui_sysdnd(sdnda_accept,nil,nullrect,bo1);
+       gui_sysdnd(sdnda_accept,isysdnd(obj1),nullrect,bo1);
       end;
      end;
+     obj1.free;
     end;
    end;
   end;

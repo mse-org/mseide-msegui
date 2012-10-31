@@ -242,7 +242,8 @@ begin
  end;
 end;
 
-procedure tobjectevent.objevent(const sender: iobjectlink; const event: objecteventty);
+procedure tobjectevent.objevent(const sender: iobjectlink;
+                                         const event: objecteventty);
 begin
  if event = oe_destroyed then begin
   finterface:= nil;

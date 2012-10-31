@@ -490,7 +490,7 @@ implementation
 uses
  msebits,msekeyboard,sysutils,msesysutils,msefileutils,msedatalist
  {$ifdef with_sm},sm,ice{$endif},msesonames,msegui,mseactions,msex11gdi,
- msearrayutils,msesys,msesysintf1,msesysdnd
+ msearrayutils,msesys,msesysintf1,msesysdnd,mseclasses,mseglob
  {$ifdef mse_debug},mseformatstr{$endif};
 
 const
@@ -4202,7 +4202,7 @@ begin
 end;
 
 type
- tsysdndreader = class
+ tsysdndreader = class           //todo: scrolling
   private
    fwinid: winidty;
    fsource: winidty;
@@ -4217,18 +4217,22 @@ type
    fscroll: boolean;
    fdroptimestamp: longword;
   protected
+   function handleevent(var aevent: txclientmessageevent): tmseevent;
   public
-   property winid: winidty read fwinid;
    constructor create(const aevent: txclientmessageevent);
-   destructor destroy; override;
+   property winid: winidty read fwinid;
    function readdata(var adata: string;
                               const typeindex: integer): guierrorty;
    function readtext(var atext: msestring;
                               const typeindex: integer): guierrorty;
  end;
 
- tsysdndwriter = class
+ sysdndwriterstatety = (sdws_destroying);
+ sysdndwriterstatesty = set of sysdndwriterstatety;
+ 
+ tsysdndwriter = class(tlinkedobject)
   private
+   fstate: sysdndwriterstatesty;
    fintf: isysdnd;
    ftimestamp: longword;
    ftypes: atomarty;
@@ -4247,6 +4251,8 @@ type
    function getdata(var aevent: txselectionrequestevent;
                    var adata: string; var aproperty: atom): boolean; 
                                         //false if no data
+   procedure objevent(const sender: iobjectlink;
+                                 const event: objecteventty); override;
   public
    constructor create(const aintf: isysdnd; const asource: winidty);
    destructor destroy; override;
@@ -4342,9 +4348,69 @@ begin
  end;
 end;
 
-destructor tsysdndreader.destroy;
+function tsysdndreader.handleevent(var aevent: txclientmessageevent): tmseevent;
+
+ function checkhandler(const updateposition: boolean): boolean;
+ begin
+  result:= false;
+  if sysdndreader <> nil then begin
+   if (sysdndreader.winid <> aevent.xwindow) or 
+                        (aevent.data.l[0] <> sysdndreader.fsource) then begin
+    freeandnil(sysdndreader); //there is something wrong
+   end
+   else begin
+    result:= true;
+    if updateposition then begin
+     with aevent,sysdndreader do begin
+      fpos:= mp(longword(data.l[2]) shr 16,data.l[2] and $ffff);
+      fshiftstate:= xtoshiftstate(data.l[1] and $ff,key_none,mb_none,false);
+      fscroll:= data.l[1] and (1 shl 10) <> 0;
+      faction:= data.l[4];
+     end;
+    end;
+   end;
+  end;
+ end; //checkhandler
+
+ function createevent(const akind: drageventkindty): tsysdndevent;
+ var
+  act1,act2: dndactionty;
+ begin
+  with sysdndreader do begin
+   act2:= dnda_none;
+   for act1:= low(dndactionty) to high(dndactionty) do begin
+    if xdndactionatoms[act1] = faction then begin
+     act2:= act1;
+     break;
+    end;
+   end;
+   result:= tsysdndevent.create(akind,fwinid,fpos,fshiftstate,
+                                    fscroll,fdatatypes,act2);
+  end;
+ end; //createevent
+ 
 begin
- inherited;
+ result:= nil;
+ with aevent do begin
+  if message_type = xdndatoms[xdnd_position] then begin
+   if checkhandler(true) then begin
+    result:= createevent(dek_check);
+   end;
+  end
+  else begin
+   if message_type = xdndatoms[xdnd_drop] then begin
+    if checkhandler(false) then begin
+     result:= createevent(dek_drop);
+     sysdndreader.fdroptimestamp:= data.l[2];
+    end;
+   end
+   else begin
+    if message_type = xdndatoms[xdnd_leave] then begin
+     freeandnil(sysdndreader);
+    end;
+   end;
+  end;
+ end;
 end;
 
 { tsysdndwriter }
@@ -4353,9 +4419,10 @@ constructor tsysdndwriter.create(const aintf: isysdnd; const asource: winidty);
 var
  ar1: stringarty;
  int1: integer;
- act1,act2: dndactionty;
+// act1,act2: dndactionty;
 begin
  fintf:= aintf;
+ getobjectlinker.link(iobjectlink(self),aintf);
  fsource:= asource;
  ftimestamp:= lasteventtime;
  freeandnil(sysdndreader);
@@ -4382,13 +4449,29 @@ end;
 
 destructor tsysdndwriter.destroy;
 begin
+ include(fstate,sdws_destroying);
  gdi_lock;
  resetdest;
  xsetselectionowner(appdisp,xdndatoms[xdnd_selection],0,ftimestamp);
                        //release selection
  xdeleteproperty(appdisp,appid,xdndatoms[xdnd_typelist]);
  gdi_unlock;
+ if fintf <> nil then begin
+  fintf.cancelsysdnd;
+ end;
  inherited;
+end;
+
+procedure tsysdndwriter.objevent(const sender: iobjectlink;
+               const event: objecteventty);
+begin
+ inherited;
+ if (sender = fintf) and (event = oe_destroyed) then begin
+  fintf:= nil;
+  if not (sdws_destroying in fstate) then begin
+   freeandnil(sysdndwriter);
+  end;
+ end;
 end;
 
 procedure tsysdndwriter.selectioncleared(var aevent: txselectionclearevent);
@@ -4443,6 +4526,7 @@ begin
    end;
    fpos:= apos;
    fpositionvalues[2]:= (fpos.x shl 16) or (fpos.y and $ffff);
+   fpositionvalues[4]:= xdndactionatoms[fintf.getaction];
    sendnetcardinalmessage(fdest,xdndatoms[xdnd_position],fdest,fpositionvalues);   
    result:= true;
    exit;
@@ -4458,10 +4542,16 @@ function tsysdndwriter.handleevent(var aevent: txclientmessageevent): tmseevent;
 begin
  result:= nil;
  with aevent do begin
-  if (message_type = xdndatoms[xdnd_status]) and (fdest <> 0) and
-                                       (data.l[0] = fdest) then begin
-   fdestaccepts:= data.l[1] and 1 <> 0;
-   result:= tsysdndstatusevent.create(fintf.geteventintf,fdestaccepts);
+  if (message_type = xdndatoms[xdnd_status]) then begin
+   if (fdest <> 0) and (data.l[0] = fdest) then begin
+    fdestaccepts:= data.l[1] and 1 <> 0;
+    result:= tsysdndstatusevent.create(fintf.geteventintf,fdestaccepts);
+   end;
+  end
+  else begin
+   if (message_type = xdndatoms[xdnd_finished]) then begin
+    freeandnil(sysdndwriter);
+   end;
   end;
  end;
 end;
@@ -4496,6 +4586,8 @@ end;
 function gui_sysdnd(const action: sysdndactionty;
                          const aintf: isysdnd; const arect: rectty;
                                          out aresult: boolean): guierrorty;
+var
+ act1: atom;
 begin
  aresult:= false;
  result:= gue_nodragpending;
@@ -4532,18 +4624,24 @@ begin
  //todo: use limit rectangle
    result:= gue_ok;
    with sysdndreader do begin
+    if aintf <> nil then begin
+     act1:= xdndactionatoms[aintf.getaction];
+    end
+    else begin
+     act1:= faction;
+    end;
     case action of
      sdnda_reject: begin
       sendnetcardinalmessage(fsource,xdndatoms[xdnd_status],fsource,
-                       [fwinid,2,0,0,faction]); //always get position messages
+                       [fwinid,2,0,0,act1]); //always get position messages
      end;
      sdnda_accept: begin
       sendnetcardinalmessage(fsource,xdndatoms[xdnd_status],fsource,
-                       [fwinid,3,0,0,faction]);  //always get position messages
+                       [fwinid,3,0,0,act1]);  //always get position messages
      end;
      sdnda_finished: begin
       sendnetcardinalmessage(fsource,xdndatoms[xdnd_status],fsource,
-                             [fwinid,1,faction]);  //always accepted
+                             [fwinid,1,act1]);  //always accepted
       freeandnil(sysdndreader);
      end;
      else begin
@@ -4586,45 +4684,6 @@ end;
  
 function handlexdnd(var aevent: txclientmessageevent): tmseevent;
 
- function checkhandler(const updateposition: boolean): boolean;
- begin
-  result:= false;
-  if sysdndreader <> nil then begin
-   if (sysdndreader.winid <> aevent.xwindow) or 
-                        (aevent.data.l[0] <> sysdndreader.fsource) then begin
-    freeandnil(sysdndreader); //there is something wrong
-   end
-   else begin
-    result:= true;
-    if updateposition then begin
-     with aevent,sysdndreader do begin
-      fpos:= mp(longword(data.l[2]) shr 16,data.l[2] and $ffff);
-      fshiftstate:= xtoshiftstate(data.l[1] and $ff,key_none,mb_none,false);
-      fscroll:= data.l[1] and (1 shl 10) <> 0;
-      faction:= data.l[4];
-     end;
-    end;
-   end;
-  end;
- end; //checkhandler
-
- function createevent(const akind: drageventkindty): tsysdndevent;
- var
-  act1,act2: dndactionty;
- begin
-  with sysdndreader do begin
-   act2:= dnda_none;
-   for act1:= low(dndactionty) to high(dndactionty) do begin
-    if xdndactionatoms[act1] = faction then begin
-     act2:= act1;
-     break;
-    end;
-   end;
-   result:= tsysdndevent.create(akind,fwinid,fpos,fshiftstate,
-                                    fscroll,fdatatypes,act2);
-  end;
- end; //createevent
- 
 begin
  result:= nil;
  with aevent do begin
@@ -4637,23 +4696,8 @@ begin
     sysdndreader:= tsysdndreader.create(aevent);
    end
    else begin
-    if message_type = xdndatoms[xdnd_position] then begin
-     if checkhandler(true) then begin
-      result:= createevent(dek_check);
-     end;
-    end
-    else begin
-     if message_type = xdndatoms[xdnd_drop] then begin
-      if checkhandler(false) then begin
-       result:= createevent(dek_drop);
-       sysdndreader.fdroptimestamp:= data.l[2];
-      end;
-     end
-     else begin
-      if message_type = xdndatoms[xdnd_leave] then begin
-       freeandnil(sysdndreader);
-      end;
-     end;
+    if sysdndreader <> nil then begin
+     result:= sysdndreader.handleevent(aevent);
     end;
    end;
   end;
