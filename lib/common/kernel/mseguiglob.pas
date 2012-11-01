@@ -228,10 +228,10 @@ const
  );
 
 type
- dndactionty = (dnda_copy,dnda_move,dnda_link,dnda_ask,dnda_private);
- dndactionsty = set of dndactionty;
  sysdndactionty = (sdnda_reject,sdnda_accept,sdnda_finished,
                    sdnda_begin,sdnda_check,sdnda_drop,sdnda_destroyed);
+ dndactionty = (dnda_copy,dnda_move,dnda_link,dnda_ask,dnda_private);
+ dndactionsty = set of dndactionty;
 const
  firstdndaction = dnda_copy;
 type

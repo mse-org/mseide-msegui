@@ -763,7 +763,7 @@ const
   'XdndEnter','XdndPosition','XdndStatus','XdndLeave','XdndDrop','XdndFinished'
  );
  xdndactionatomnames: array[dndactionty] of string = (
-  '','XdndActionCopy','XdndActionMove','XdndActionLink','XdndActionAsk',
+  'XdndActionCopy','XdndActionMove','XdndActionLink','XdndActionAsk',
   'XdndActionPrivate'
  );
  
@@ -4208,7 +4208,7 @@ type
    fsource: winidty;
    fprotocolversion: byte;
    faction: atom;
-   fdatatypes: stringarty;
+   fdataformats: msestringarty;
    fdatatypeatoms: atomarty;
    fdata: stringarty;
    ftext: msestringarty;
@@ -4235,7 +4235,7 @@ type
    fstate: sysdndwriterstatesty;
    fintf: isysdnd;
    ftimestamp: longword;
-   ftypes: atomarty;
+   fformats: atomarty;
    fsource: winidty;
    fdest: winidty;
    fdestaccepts: boolean;
@@ -4285,17 +4285,17 @@ begin
    setlength(ar1,3);
    move(data.l[2],ar1[0],3*sizeof(ar1[0]));
   end;
-  setlength(fdatatypes,length(ar1));
+  setlength(fdataformats,length(ar1));
   setlength(fdatatypeatoms,length(ar1));
   int2:= 0;
   for int1:= 0 to high(ar1) do begin
    if ar1[int1] <> 0 then begin
     fdatatypeatoms[int2]:= ar1[int1];
-    fdatatypes[int2]:= xgetatomname(appdisp,ar1[int1]);
+    fdataformats[int2]:= xgetatomname(appdisp,ar1[int1]);
     inc(int2);
    end;
   end;
-  setlength(fdatatypes,int2);
+  setlength(fdataformats,int2);
   setlength(fdata,int2);
   setlength(ftext,int2);
  end;
@@ -4374,18 +4374,19 @@ function tsysdndreader.handleevent(var aevent: txclientmessageevent): tmseevent;
 
  function createevent(const akind: drageventkindty): tsysdndevent;
  var
-  act1,act2: dndactionty;
+  act1: dndactionty;
+  act2: dndactionsty;
  begin
   with sysdndreader do begin
-   act2:= dnda_none;
+   act2:= [];
    for act1:= low(dndactionty) to high(dndactionty) do begin
     if xdndactionatoms[act1] = faction then begin
-     act2:= act1;
+     include(act2,act1);
      break;
     end;
    end;
    result:= tsysdndevent.create(akind,fwinid,fpos,fshiftstate,
-                                    fscroll,fdatatypes,act2);
+                                    fscroll,fdataformats,act2);
   end;
  end; //createevent
  
@@ -4414,13 +4415,27 @@ begin
  end;
 end;
 
+function getactionatom(const aactions: dndactionsty): atom;
+var
+ act1: dndactionty;
+begin
+ result:= 0;
+ for act1:= low(dndactionty) to high(dndactionty) do begin
+  if act1 in aactions then begin
+   result:= xdndactionatoms[act1];
+   break;
+  end;
+ end;
+end;
+
 { tsysdndwriter }
 
 constructor tsysdndwriter.create(const aintf: isysdnd; const asource: winidty);
 var
- ar1: stringarty;
+ ar1: msestringarty;
  int1: integer;
-// act1,act2: dndactionty;
+// act1: dndactionty;
+// act2: dndactionsty;
 begin
  fintf:= aintf;
  getobjectlinker.link(iobjectlink(self),aintf);
@@ -4430,18 +4445,18 @@ begin
  fentervalues[0]:= fsource;
  fpositionvalues[0]:= fsource;
  fpositionvalues[3]:= ftimestamp;
- fpositionvalues[4]:= xdndactionatoms[aintf.getaction];
- ar1:= aintf.gettypes;
- setlength(ftypes,length(ar1)); //todo: what about empty types?
+ fpositionvalues[4]:= getactionatom(aintf.getactions);
+ ar1:= aintf.getformats;
+ setlength(fformats,length(ar1)); //todo: what about empty types?
  for int1:= 0 to high(ar1) do begin
-  ftypes[int1]:= xinternatom(appdisp,pchar(ar1[int1]),
+  fformats[int1]:= xinternatom(appdisp,pchar(ar1[int1]),
                                     {$ifdef xboolean}false{$else}0{$endif});
   if int1 <= high(fentervalues)-2 then begin
-   fentervalues[int1+2]:= ftypes[int1];
+   fentervalues[int1+2]:= fformats[int1];
   end;
  end;
- if high(ftypes) > 2 then begin
-  setlongproperty(fsource,xdndatoms[xdnd_typelist],ftypes,atomatom);
+ if high(fformats) > 2 then begin
+  setlongproperty(fsource,xdndatoms[xdnd_typelist],fformats,atomatom);
  end;
  gdi_lock;
  xsetselectionowner(appdisp,xdndatoms[xdnd_selection],fsource,ftimestamp);
@@ -4519,7 +4534,7 @@ begin
      end;
     end;
     ar1[0]:= ar1[0] shr 24;
-    if high(ftypes) > 2 then begin
+    if high(fformats) > 2 then begin
      ar1[0]:= ar1[0] or 1;
     end;
     fentervalues[1]:= ar1[0];
@@ -4527,7 +4542,7 @@ begin
    end;
    fpos:= apos;
    fpositionvalues[2]:= (fpos.x shl 16) or (fpos.y and $ffff);
-   fpositionvalues[4]:= xdndactionatoms[fintf.getaction];
+   fpositionvalues[4]:= getactionatom(fintf.getactions);
    sendnetcardinalmessage(fdest,xdndatoms[xdnd_position],fdest,fpositionvalues);   
    result:= true;
    exit;
@@ -4571,8 +4586,8 @@ var
 begin
  result:= false;
  with aevent do begin
-  for int1:= 0 to high(ftypes) do begin
-   if ftypes[int1] = target then begin
+  for int1:= 0 to high(fformats) do begin
+   if fformats[int1] = target then begin
     adata:= fintf.convertmimedata(int1);
     result:= true;
     break;
@@ -4626,7 +4641,7 @@ begin
    result:= gue_ok;
    with sysdndreader do begin
     if aintf <> nil then begin
-     act1:= xdndactionatoms[aintf.getaction];
+     act1:= getactionatom(aintf.getactions);
     end
     else begin
      act1:= faction;
