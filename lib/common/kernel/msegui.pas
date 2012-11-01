@@ -14368,17 +14368,17 @@ begin
     end;
     if wi1 <> nil then begin
      if fsysdragobject = nil then begin
-      tsysmimedragobject.create(nil,tdragobject(fsysdragobject),nullpoint,ftypes,
-                                                               faction);
+      tsysmimedragobject.create(nil,tdragobject(fsysdragobject),nullpoint,
+                                                           fformats,factions);
      end;
      with tsysmimedragobject1(fsysdragobject) do begin
-      if (ftypes <> tsysdndevent(event).ftypes) or 
-                                (ftypeindex > high(ftypes)) then begin
+      if (fformats <> tsysdndevent(event).fformats) or 
+                                (fformatindex > high(fformats)) then begin
                                 //missed dek_leave
-       ftypes:= tsysdndevent(event).ftypes;
-       ftypeindex:= -1;
+       fformats:= tsysdndevent(event).fformats;
+       fformatindex:= -1;
       end;
-      faction:= tsysdndevent(event).faction;
+      factions:= tsysdndevent(event).factions;
      end;
      fillchar(info,sizeof(info),0);
      with info do begin
@@ -14394,13 +14394,13 @@ begin
                                                                    nullrect,bo1);      
       end
       else begin
-       if not info.accept then begin
-        gui_sysdnd(sdnda_reject,isysdnd(tsysmimedragobject(fsysdragobject)),
-                                                                   nullrect,bo1);
-       end
-       else begin
+       if info.accept then begin
         gui_sysdnd(sdnda_accept,isysdnd(tsysmimedragobject(fsysdragobject))
                                                                  ,nullrect,bo1);
+       end
+       else begin
+        gui_sysdnd(sdnda_reject,isysdnd(tsysmimedragobject(fsysdragobject)),
+                                                                   nullrect,bo1);
        end;
       end;
  //     obj1.free;

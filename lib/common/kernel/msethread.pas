@@ -99,6 +99,7 @@ type
    destructor destroy; override;
    procedure terminate; override;
    procedure postevent(event: tmseevent);
+   procedure clearevents;
    function waitevent(const timeoutus: integer = -1): tmseevent;
                  // -1 infinite, 0 no block
    function eventcount: integer;
@@ -414,6 +415,11 @@ begin
  if (result <> nil) and (result.kind = ek_terminate) then begin
   freeandnil(result);
  end;
+end;
+
+procedure teventthread.clearevents;
+begin
+ feventlist.clear;
 end;
 
 { tsemthread }

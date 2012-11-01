@@ -228,7 +228,8 @@ const
  );
 
 type
- dndactionty = (dnda_none,dnda_copy,dnda_move,dnda_link,dnda_ask,dnda_private);
+ dndactionty = (dnda_copy,dnda_move,dnda_link,dnda_ask,dnda_private);
+ dndactionsty = set of dndactionty;
  sysdndactionty = (sdnda_reject,sdnda_accept,sdnda_finished,
                    sdnda_begin,sdnda_check,sdnda_drop,sdnda_destroyed);
 const
@@ -236,8 +237,8 @@ const
 type
  isysdnd = interface(iobjectlink)
   procedure cancelsysdnd;
-  function gettypes: stringarty;
-  function getaction: dndactionty;
+  function getformats: msestringarty;
+  function getactions: dndactionsty;
   function geteventintf: ievent;
   function convertmimedata(const atypeindex: integer): string;
   function convertmimetext(const atypeindex: integer): msestring;
@@ -256,7 +257,7 @@ type
    fstate: dragobjstatesty;
    fsysdndintf: isysdnd;
    feventintf: ievent;
-   faction: dndactionty;
+   factions: dndactionsty;
    function checksysdnd(const aaction: sysdndactionty;
                              const arect: rectty): boolean;
     //isysdnd
@@ -264,14 +265,14 @@ type
   public
    constructor create(const asender: tobject; var instance: tdragobject;
                           const apickpos: pointty;
-                          const aaction: dndactionty = dnda_none);
+                          const aactions: dndactionsty = []);
    destructor destroy; override;
    function sender: tobject;
    procedure acepted(const apos: pointty); virtual; //screenorigin
    procedure refused(const apos: pointty); virtual;
    property pickpos: pointty read fpickpos;         //screenorigin
    property state: dragobjstatesty read fstate;
-   property action: dndactionty read faction write faction;
+   property actions: dndactionsty read factions write factions;
  end;
 
  drageventkindty = (dek_begin,dek_check,dek_drop,dek_leave);
@@ -438,14 +439,14 @@ end;
 
 constructor tdragobject.create(const asender: tobject; var instance: tdragobject;
                                  const apickpos: pointty;
-                                 const aaction: dndactionty = dnda_none);
+                                 const aactions: dndactionsty);
 begin
  fsender:= asender;
  finstancepo:= @instance;
  instance.Free;
  instance:= self;
  fpickpos:= apickpos;
- faction:= aaction;
+ factions:= aactions;
  tguiapplication1(application).dragstarted;
 end;
 

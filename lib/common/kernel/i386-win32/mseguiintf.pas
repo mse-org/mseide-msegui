@@ -58,7 +58,7 @@ implementation
 //todo: 19.10.03 rasterops for textout
 uses
  sysutils,mselist,msekeyboard,msebits,msearrayutils,msesysutils,msegui,
- msesystimer,msegdi32gdi,msesysintf1,msedynload;
+ msesystimer,msegdi32gdi,msesysintf1,msedynload,msewindnd;
 
 type
 
@@ -510,20 +510,19 @@ function gui_sysdnd(const action: sysdndactionty;
                const aintf: isysdnd;  const arect: rectty;
                             out aresult: boolean): guierrorty;
 begin
- aresult:= false;
- result:= gue_notimplemented;
+ result:= sysdnd(action,aintf,arect,aresult);
 end;
 
 function gui_sysdndreaddata(var adata: string;
                               const typeindex: integer): guierrorty;
 begin
- result:= gue_notimplemented;
+ result:= sysdndreaddata(adata,typeindex);
 end;
 
 function gui_sysdndreadtext(var atext: msestring;
                               const typeindex: integer): guierrorty;
 begin
- result:= gue_notimplemented;
+ result:= sysdndreadtext(atext,typeindex);
 end;
 
 function gui_pastefromclipboard(out value: msestring): guierrorty;
@@ -2685,6 +2684,9 @@ begin
     gui_setwindowicon(applicationwindow,icon,iconmask);
    end;
   end;
+  if wo_sysdnd in options then begin
+   regsysdndwindow(id);
+  end;
  end;
 end;
 
@@ -3012,8 +3014,9 @@ const
 var
  classinfow: twndclassw;
  classinfoa: twndclassa;
+ hres1: hresult;
 
-begin
+begin  
  mousewindow:= 0;
  mousecursor:= 0;
  applicationwindow:= 0;
@@ -3084,6 +3087,7 @@ var
  acursor: cursorshapety;
 
 begin
+ windnddeinit;
  systimerdeinit;
 // killtimer;
  killmouseidletimer;

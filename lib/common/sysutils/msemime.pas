@@ -29,10 +29,10 @@ type
    fdata: string;
    ftext: msestring;
    fobjectlinker: tobjectlinker;
-   procedure settypeindex(const avalue: integer);
+   procedure setformatindex(const avalue: integer);
   protected
-   ftypes: stringarty;
-   ftypeindex: integer;
+   fformats: msestringarty;
+   fformatindex: integer;
    fintf: imimesource;
    function getdata: string; virtual;
    function gettext: msestring; virtual;
@@ -46,17 +46,18 @@ type
    function getinstance: tobject;
   public
    constructor create(const asender: tobject; var instance: tdragobject;
-               const apickpos: pointty; const atypes: array of string;
-               const aaction: dndactionty = dnda_none;
+               const apickpos: pointty; const aformats: array of msestring;
+               const aactions: dndactionsty = [];
                              const aintf: imimesource = nil); virtual;
    constructor createwrite(const asender: tobject; var instance: tdragobject;
-               const apickpos: pointty; const atypes: array of string;
-               const aaction: dndactionty = dnda_none;
+               const apickpos: pointty; const aformats: array of msestring;
+               const aactions: dndactionsty = [];
                const aintf: imimesource = nil);
    destructor destroy; override;
-   function checktypes(const awanted: array of string): boolean;
-   property types: stringarty read ftypes; //do not modify
-   property typeindex: integer read ftypeindex write settypeindex default -1;
+   function checkformat(const awanted: array of msestring): boolean;
+   property formats: msestringarty read fformats; //do not modify
+   property formatindex: integer read fformatindex 
+                               write setformatindex default -1;
                        //-1 -> none selected
    property data: string read getdata write setdata;
    property text: msestring read gettext write settext;
@@ -72,29 +73,29 @@ uses
 
 constructor tmimedragobject.create(const asender: tobject;
                var instance: tdragobject; const apickpos: pointty;
-               const atypes: array of string;
-               const aaction: dndactionty = dnda_none;
+               const aformats: array of msestring;
+               const aactions: dndactionsty = [];
                              const aintf: imimesource = nil);
 begin
  fobjectlinker:= tobjectlinker.create(iobjectlink(self),nil);
- ftypes:= opentodynarrays(atypes);
- faction:= aaction;
- ftypeindex:= -1;
+ fformats:= opentodynarraym(aformats);
+ factions:= aactions;
+ fformatindex:= -1;
  fintf:= aintf;
  if fintf <> nil then begin
   fobjectlinker.link(iobjectlink(self),fintf);
  end;
- inherited create(asender,instance,apickpos,aaction);
+ inherited create(asender,instance,apickpos,aactions);
 end;
 
 constructor tmimedragobject.createwrite(const asender: tobject;
                var instance: tdragobject; const apickpos: pointty;
-               const atypes: array of string;
-               const aaction: dndactionty = dnda_none;
+               const aformats: array of msestring;
+               const aactions: dndactionsty = [];
                const aintf: imimesource = nil);
 begin
  include(fstate,dos_write);
- create(asender,instance,apickpos,atypes,aaction,aintf);
+ create(asender,instance,apickpos,aformats,aactions,aintf);
 end;
 
 destructor tmimedragobject.destroy;
@@ -103,27 +104,28 @@ begin
  inherited;
 end;
 
-procedure tmimedragobject.settypeindex(const avalue: integer);
+procedure tmimedragobject.setformatindex(const avalue: integer);
 begin
  if avalue < 0 then begin
-  ftypeindex:= -1;
+  fformatindex:= -1;
  end
  else begin
-  checkarrayindex(ftypes,avalue);
-  ftypeindex:= avalue;
+  checkarrayindex(fformats,avalue);
+  fformatindex:= avalue;
  end;
 end;
 
-function tmimedragobject.checktypes(const awanted: array of string): boolean;
+function tmimedragobject.checkformat(
+                              const awanted: array of msestring): boolean;
 var
  int1,int2: integer;
 begin
  result:= false;
  for int1:= 0 to high(awanted) do begin
-  for int2:= 0 to high(ftypes) do begin
-   if awanted[int1] = ftypes[int2] then begin
+  for int2:= 0 to high(fformats) do begin
+   if awanted[int1] = fformats[int2] then begin
     result:= true;
-    ftypeindex:= int2;
+    fformatindex:= int2;
     exit;
    end;
   end;
@@ -132,8 +134,8 @@ end;
 
 function tmimedragobject.getdata: string;
 begin
- if ftypeindex >= 0 then begin
-  result:= convertmimedata(ftypeindex);
+ if fformatindex >= 0 then begin
+  result:= convertmimedata(fformatindex);
  end
  else begin
   if fdata = '' then begin
@@ -147,8 +149,8 @@ end;
 
 function tmimedragobject.gettext: msestring;
 begin
- if ftypeindex >= 0 then begin
-  result:= convertmimetext(ftypeindex);
+ if fformatindex >= 0 then begin
+  result:= convertmimetext(fformatindex);
  end
  else begin
   if ftext = '' then begin

@@ -148,6 +148,7 @@ type
   public
    constructor create(aownsobjects: boolean);
    destructor destroy; override;
+   procedure clear; override;
    procedure post(event: tmseevent);
    function wait(const timeoutus: integer = 0): tmseevent;
                  // -1 infinite, 0 no block
@@ -355,6 +356,18 @@ begin
   if sys_semwait(fsem,0) = sye_ok then begin
    get;
   end;
+ end;
+end;
+
+procedure teventqueue.clear;
+begin
+ if not fdestroying then begin
+  sys_mutexlock(fmutex);
+  inherited;
+  sys_mutexunlock(fmutex);
+ end
+ else begin
+  inherited;
  end;
 end;
 

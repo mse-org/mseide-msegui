@@ -21,16 +21,16 @@ type
  tsysdndevent = class(twindowevent)
   private
   public
-   ftypes: stringarty;   
+   fformats: msestringarty;   
    fpos: pointty;
    fshiftstate: shiftstatesty;
    fscroll: boolean;
    fdndkind: drageventkindty;
-   faction: dndactionty;
+   factions: dndactionsty;
    constructor create(const adndkind: drageventkindty;
             const awinid: winidty; const apos: pointty;
             const ashiftstate: shiftstatesty; const ascroll: boolean;
-            const atypes: stringarty; const aaction: dndactionty);
+            const aformats: msestringarty; const aactions: dndactionsty);
  end;
 
  tsysdndstatusevent = class(tobjectevent)
@@ -51,36 +51,36 @@ type
    function gettext: msestring; override;
    procedure cancelsysdnd; virtual;
     //isysdnd
-   function gettypes: stringarty;
-   function getaction: dndactionty;
+   function getformats: msestringarty;
+   function getactions: dndactionsty;
   public
    constructor create(const asender: tobject; var instance: tdragobject;
-         const apickpos: pointty; const atypes: array of string;
-                  const aaction: dndactionty = dnda_none;
+         const apickpos: pointty; const atypes: array of msestring;
+                  const aactions: dndactionsty = [];
                              const aintf: imimesource = nil); override;
    constructor createwrite(const asender: tobject; var instance: tdragobject;
-               const apickpos: pointty; const atypes: array of string;
-               const aaction: dndactionty = dnda_none;
+               const apickpos: pointty; const atypes: array of msestring;
+               const aactions: dndactionsty = [];
                const aintf: imimesource = nil);
  end;
-  
+
 implementation
 uses
  msearrayutils,mseguiintf,sysutils;
- 
+
 { tsysdndevent }
 
 constructor tsysdndevent.create(const adndkind: drageventkindty;
                  const awinid: winidty; const apos: pointty;
                  const ashiftstate: shiftstatesty; const ascroll: boolean;
-                 const atypes: stringarty; const aaction: dndactionty);
+                 const aformats: msestringarty; const aactions: dndactionsty);
 begin
  fdndkind:= adndkind;
  fpos:= apos;
  fshiftstate:= ashiftstate;
  fscroll:= ascroll;
- ftypes:= atypes;
- faction:= aaction;
+ fformats:= aformats;
+ factions:= aactions;
  inherited create(ek_sysdnd,awinid);
 end;
 
@@ -88,23 +88,23 @@ end;
 
 constructor tsysmimedragobject.create(const asender: tobject;
                var instance: tdragobject; const apickpos: pointty;
-               const atypes: array of string;
-                       const aaction: dndactionty = dnda_none;
+               const atypes: array of msestring;
+                       const aactions: dndactionsty = [];
                        const aintf: imimesource = nil);
 begin
  fsysdndintf:= isysdnd(self);
  include(fstate,dos_sysdnd);
- inherited create(asender,instance,apickpos,atypes,aaction,aintf);
+ inherited create(asender,instance,apickpos,atypes,aactions,aintf);
 end;
 
 constructor tsysmimedragobject.createwrite(const asender: tobject;
                var instance: tdragobject; const apickpos: pointty;
-               const atypes: array of string;
-               const aaction: dndactionty = dnda_none;
+               const atypes: array of msestring;
+               const aactions: dndactionsty = [];
                const aintf: imimesource = nil);
 begin
  include(fstate,dos_sysdnd);
- inherited createwrite(asender,instance,apickpos,atypes,aaction,aintf);
+ inherited createwrite(asender,instance,apickpos,atypes,aactions,aintf);
 end;
 
 function tsysmimedragobject.getdata: string;
@@ -114,7 +114,7 @@ begin
  end
  else begin
   result:= '';
-  gui_sysdndreaddata(result,typeindex);
+  gui_sysdndreaddata(result,formatindex);
 //  guierror(gui_sysdndreaddata(result,typeindex),'Can not read sysdnd data.');
  end;
 end;
@@ -126,7 +126,7 @@ begin
  end
  else begin
   result:= '';
-  gui_sysdndreadtext(result,typeindex);
+  gui_sysdndreadtext(result,formatindex);
 //  guierror(gui_sysdndreadtext(result,typeindex),'Can not read sysdnd text.');
  end;
 end;
@@ -155,14 +155,14 @@ begin
  destroy;
 end;
 
-function tsysmimedragobject.gettypes: stringarty;
+function tsysmimedragobject.getformats: msestringarty;
 begin
- result:= types;
+ result:= formats;
 end;
 
-function tsysmimedragobject.getaction: dndactionty;
+function tsysmimedragobject.getactions: dndactionsty;
 begin
- result:= faction;
+ result:= factions;
 end;
 
 { tsysdndstatusevent }

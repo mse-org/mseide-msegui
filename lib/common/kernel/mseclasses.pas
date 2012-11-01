@@ -243,14 +243,16 @@ type
   protected
    function _addref: integer; stdcall;
    function _release: integer; stdcall;
-   function QueryInterface(const IID: TGUID; out Obj): HResult; stdcall;
+   function queryinterface({$ifdef fpc_has_constref}constref{$else}const{$endif}
+                    iid: tguid; out obj): hresult; stdcall;
  end;
 
  tnullinterfacedpersistent = class(tvirtualpersistent)
   protected
    function _addref: integer; stdcall;
    function _release: integer; stdcall;
-   function QueryInterface(const IID: TGUID; out Obj): HResult; stdcall;
+   function QueryInterface({$ifdef fpc_has_constref}constref{$else}const{$endif}
+                 IID: TGUID; out Obj): HResult; stdcall;
  end;
 
  toptionalpersistent = class(tnullinterfacedpersistent)
@@ -3823,11 +3825,12 @@ begin
  result:= -1;
 end;
 
-function tnullinterfacedobject.QueryInterface(const IID: TGUID;
-  out Obj): HResult; stdcall;
+function tnullinterfacedobject.queryinterface(
+ {$ifdef fpc_has_constref}constref{$else}const{$endif}iid: tguid;
+  out obj): hresult; stdcall;
 begin
- if GetInterface(IID, Obj) then begin
-   Result:=0
+ if getinterface(iid, obj) then begin
+   result:=0
  end
  else begin
   result:= integer(e_nointerface);
@@ -3846,7 +3849,8 @@ begin
  result:= -1;
 end;
 
-function tnullinterfacedpersistent.QueryInterface(const IID: TGUID;
+function tnullinterfacedpersistent.QueryInterface(
+  {$ifdef fpc_has_constref}constref{$else}const{$endif} IID: TGUID;
   out Obj): HResult; stdcall;
 begin
  if GetInterface(IID, Obj) then begin
