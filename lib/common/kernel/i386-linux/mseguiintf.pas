@@ -4684,7 +4684,7 @@ begin
                        [fwinid,3,0,0,act1]);  //always get position messages
      end;
      sdnda_finished: begin
-      sendnetcardinalmessage(fsource,xdndatoms[xdnd_status],fsource,
+      sendnetcardinalmessage(fsource,xdndatoms[xdnd_finished],fsource,
                              [fwinid,1,act1]);  //always accepted
       freeandnil(sysdndreader);
      end;
