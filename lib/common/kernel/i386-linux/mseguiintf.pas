@@ -490,7 +490,7 @@ implementation
 uses
  msebits,msekeyboard,sysutils,msesysutils,msefileutils,msedatalist
  {$ifdef with_sm},sm,ice{$endif},msesonames,msegui,mseactions,msex11gdi,
- msearrayutils,msesys,msesysintf1,msesysdnd,mseclasses,mseglob
+ msearrayutils,msesys,msesysintf1,msesysdnd,mseclasses,mseglob,msetimer
  {$ifdef mse_debug},mseformatstr{$endif};
 
 const
@@ -4232,6 +4232,7 @@ type
  
  tsysdndwriter = class(tlinkedobject)
   private
+   frepeater: tsimpletimer;
    fstate: sysdndwriterstatesty;
    fintf: isysdnd;
    ftimestamp: longword;
@@ -4243,6 +4244,8 @@ type
    fentervalues: array[0..4] of longword;   
    fpositionvalues: array[0..4] of longword;   
   protected
+   procedure startcheckrepeater;
+   procedure docheckrepeat(const sender: tobject);
    procedure resetdest;
    procedure selectioncleared(var aevent: txselectionclearevent);
    function check(const apos: pointty): boolean;
@@ -4291,7 +4294,7 @@ begin
   for int1:= 0 to high(ar1) do begin
    if ar1[int1] <> 0 then begin
     fdatatypeatoms[int2]:= ar1[int1];
-    fdataformats[int2]:= xgetatomname(appdisp,ar1[int1]);
+    fdataformats[int2]:= msestring(xgetatomname(appdisp,ar1[int1]));
     inc(int2);
    end;
   end;
@@ -4449,7 +4452,7 @@ begin
  ar1:= aintf.getformats;
  setlength(fformats,length(ar1)); //todo: what about empty types?
  for int1:= 0 to high(ar1) do begin
-  fformats[int1]:= xinternatom(appdisp,pchar(ar1[int1]),
+  fformats[int1]:= xinternatom(appdisp,pchar(string(ar1[int1])),
                                     {$ifdef xboolean}false{$else}0{$endif});
   if int1 <= high(fentervalues)-2 then begin
    fentervalues[int1+2]:= fformats[int1];
@@ -4492,19 +4495,25 @@ end;
 
 procedure tsysdndwriter.selectioncleared(var aevent: txselectionclearevent);
 begin
- if laterorsame(aevent.time,ftimestamp) then begin
-  fintf.cancelsysdnd;
-  sysdndwriter:= nil;
-  inherited destroy;
+ if laterorsame(ftimestamp,aevent.time) then begin
+  if fintf <> nil then begin
+   fintf.cancelsysdnd;
+  end;
+  if sysdndwriter <> nil then begin //???
+   sysdndwriter:= nil;
+   inherited destroy;
+  end;
  end;
 end;
 
 procedure tsysdndwriter.resetdest;
 begin
  if fdest <> 0 then begin
+  freeandnil(frepeater);
   fdestaccepts:= false;
   sendnetcardinalmessage(fdest,xdndatoms[xdnd_leave],fdest,[fsource]);
   fdest:= 0;
+  freeandnil(frepeater);
  end;
 end;
 
@@ -4545,6 +4554,7 @@ begin
    fpositionvalues[4]:= getactionatom(fintf.getactions);
    sendnetcardinalmessage(fdest,xdndatoms[xdnd_position],fdest,fpositionvalues);   
    result:= true;
+   startcheckrepeater;
    exit;
   end;
  end;
@@ -4552,6 +4562,24 @@ begin
   application.postevent(tsysdndstatusevent.create(fintf.geteventintf,false));
  end;
  resetdest;
+end;
+
+procedure tsysdndwriter.docheckrepeat(const sender: tobject);
+begin
+ sendnetcardinalmessage(fdest,xdndatoms[xdnd_position],fdest,fpositionvalues);   
+end;
+
+const
+ checkrepeatinterval = 200000;
+ 
+procedure tsysdndwriter.startcheckrepeater;
+begin
+ if frepeater = nil then begin
+  frepeater:= tsimpletimer.create(checkrepeatinterval,@docheckrepeat,true,[]);
+ end
+ else begin
+  frepeater.interval:= checkrepeatinterval;
+ end;
 end;
 
 function tsysdndwriter.handleevent(var aevent: txclientmessageevent): tmseevent;

@@ -16,10 +16,11 @@ uses
  msegui,msegraphutils,mseevent,classes,mseclasses,mseglob,mseguiglob;
 
 type
- drageventty = procedure(const sender: tobject; const apos: pointty;
-                    var dragobject: tdragobject; var processed: boolean) of object;
- dragovereventty = procedure(const sender: tobject; const apos: pointty;
-          var dragobject: tdragobject; var accept: boolean; var processed: boolean) of object;
+ drageventty = procedure(const asender: tobject; const apos: pointty;
+               var adragobject: tdragobject; var processed: boolean) of object;
+ dragovereventty = procedure(const asender: tobject; const apos: pointty;
+               var adragobject: tdragobject; var accept: boolean;
+                                            var processed: boolean) of object;
 
  ttagdragobject = class(tdragobject)
   private
@@ -61,11 +62,12 @@ type
   function getdragrect(const apos: pointty): rectty;
  end;
 
- dragstatety = (ds_clicked,ds_beginchecked,ds_cursorshapechanged);
+ dragstatety = (ds_clicked,ds_beginchecked,ds_cursorshapechanged,
+                                                       ds_haddragobject);
  dragstatesty = set of dragstatety;
 
 const
- dragstates = [ds_clicked,ds_beginchecked];
+ dragstates = [ds_clicked,ds_beginchecked,ds_haddragobject];
 type
  drageventsty = record
   dragbegin: drageventty;
@@ -195,6 +197,8 @@ begin
   else begin  
    fdragobject.free;
   end;
+ end;
+ if ds_haddragobject in fstate then begin
   application.cursorshape:= cr_default;
  end;
  application.unregisteronkeypress({$ifdef FPC}@{$endif}dokeypress);
@@ -302,6 +306,7 @@ begin
      checksysdnd(sdnda_begin,nullrect);
     end;
     if (fdragobject <> nil) then begin
+     include(fstate,ds_haddragobject);
      tdragobject1(fdragobject).feventintf:= ievent(self);
      include(info.eventstate,es_processed);
      if checkcandragdrop(info.pos,bo1) <> nil then begin
