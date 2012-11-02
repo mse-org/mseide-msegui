@@ -22,6 +22,7 @@ type
   private
   public
    fformats: msestringarty;   
+   fformatistext: booleanarty;   
    fpos: pointty;
    fshiftstate: shiftstatesty;
    fscroll: boolean;
@@ -30,7 +31,9 @@ type
    constructor create(const adndkind: drageventkindty;
             const awinid: winidty; const apos: pointty;
             const ashiftstate: shiftstatesty; const ascroll: boolean;
-            const aformats: msestringarty; const aactions: dndactionsty);
+            const aformats: msestringarty;
+            const aformatistext: booleanarty;
+            const aactions: dndactionsty);
  end;
 
  tsysdndstatusevent = class(tobjectevent)
@@ -52,14 +55,17 @@ type
    procedure cancelsysdnd; virtual;
     //isysdnd
    function getformats: msestringarty;
+   function getformatistext: booleanarty;
    function getactions: dndactionsty;
   public
    constructor create(const asender: tobject; var instance: tdragobject;
-         const apickpos: pointty; const atypes: array of msestring;
+         const apickpos: pointty; const aformats: array of msestring;
+         const aformatistext: array of boolean;
                   const aactions: dndactionsty = [];
                              const aintf: imimesource = nil); override;
    constructor createwrite(const asender: tobject; var instance: tdragobject;
-               const apickpos: pointty; const atypes: array of msestring;
+               const apickpos: pointty; const aformats: array of msestring;
+               const aformatistext: array of boolean;
                const aactions: dndactionsty = [];
                const aintf: imimesource = nil);
  end;
@@ -71,15 +77,17 @@ uses
 { tsysdndevent }
 
 constructor tsysdndevent.create(const adndkind: drageventkindty;
-                 const awinid: winidty; const apos: pointty;
-                 const ashiftstate: shiftstatesty; const ascroll: boolean;
-                 const aformats: msestringarty; const aactions: dndactionsty);
+               const awinid: winidty; const apos: pointty;
+               const ashiftstate: shiftstatesty; const ascroll: boolean;
+               const aformats: msestringarty; const aformatistext: booleanarty;
+               const aactions: dndactionsty);
 begin
  fdndkind:= adndkind;
  fpos:= apos;
  fshiftstate:= ashiftstate;
  fscroll:= ascroll;
  fformats:= aformats;
+ fformatistext:= aformatistext;
  factions:= aactions;
  inherited create(ek_sysdnd,awinid);
 end;
@@ -88,23 +96,27 @@ end;
 
 constructor tsysmimedragobject.create(const asender: tobject;
                var instance: tdragobject; const apickpos: pointty;
-               const atypes: array of msestring;
+               const aformats: array of msestring;
+               const aformatistext: array of boolean;
                        const aactions: dndactionsty = [];
                        const aintf: imimesource = nil);
 begin
  fsysdndintf:= isysdnd(self);
  include(fstate,dos_sysdnd);
- inherited create(asender,instance,apickpos,atypes,aactions,aintf);
+ inherited create(asender,instance,apickpos,aformats,aformatistext,
+                                                          aactions,aintf);
 end;
 
 constructor tsysmimedragobject.createwrite(const asender: tobject;
                var instance: tdragobject; const apickpos: pointty;
-               const atypes: array of msestring;
+          const aformats: array of msestring;
+           const aformatistext: array of boolean;
                const aactions: dndactionsty = [];
                const aintf: imimesource = nil);
 begin
  include(fstate,dos_sysdnd);
- inherited createwrite(asender,instance,apickpos,atypes,aactions,aintf);
+ inherited createwrite(asender,instance,apickpos,aformats,aformatistext,
+                       aactions,aintf);
 end;
 
 function tsysmimedragobject.getdata: string;
@@ -158,6 +170,11 @@ end;
 function tsysmimedragobject.getformats: msestringarty;
 begin
  result:= formats;
+end;
+
+function tsysmimedragobject.getformatistext: booleanarty;
+begin
+ result:= fformatistext;
 end;
 
 function tsysmimedragobject.getactions: dndactionsty;

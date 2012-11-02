@@ -238,6 +238,7 @@ type
  isysdnd = interface(iobjectlink)
   procedure cancelsysdnd;
   function getformats: msestringarty;
+  function getformatistext: booleanarty;
   function getactions: dndactionsty;
   function geteventintf: ievent;
   function convertmimedata(const atypeindex: integer): string;

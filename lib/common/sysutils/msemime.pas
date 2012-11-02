@@ -32,6 +32,7 @@ type
    procedure setformatindex(const avalue: integer);
   protected
    fformats: msestringarty;
+   fformatistext: booleanarty;
    fformatindex: integer;
    fintf: imimesource;
    function getdata: string; virtual;
@@ -47,15 +48,18 @@ type
   public
    constructor create(const asender: tobject; var instance: tdragobject;
                const apickpos: pointty; const aformats: array of msestring;
+               const aformatistext: array of boolean;
                const aactions: dndactionsty = [];
                              const aintf: imimesource = nil); virtual;
    constructor createwrite(const asender: tobject; var instance: tdragobject;
                const apickpos: pointty; const aformats: array of msestring;
+               const aformatistext: array of boolean;
                const aactions: dndactionsty = [];
                const aintf: imimesource = nil);
    destructor destroy; override;
    function checkformat(const awanted: array of msestring): boolean;
-   property formats: msestringarty read fformats; //do not modify
+   property formats: msestringarty read fformats;         //do not modify
+   property formatistext: booleanarty read fformatistext; //do not modify
    property formatindex: integer read fformatindex 
                                write setformatindex default -1;
                        //-1 -> none selected
@@ -74,11 +78,14 @@ uses
 constructor tmimedragobject.create(const asender: tobject;
                var instance: tdragobject; const apickpos: pointty;
                const aformats: array of msestring;
+               const aformatistext: array of boolean;
                const aactions: dndactionsty = [];
                              const aintf: imimesource = nil);
 begin
  fobjectlinker:= tobjectlinker.create(iobjectlink(self),nil);
  fformats:= opentodynarraym(aformats);
+ fformatistext:= opentodynarraybo(aformatistext);
+ setlength(fformatistext,length(fformats));
  factions:= aactions;
  fformatindex:= -1;
  fintf:= aintf;
@@ -91,11 +98,12 @@ end;
 constructor tmimedragobject.createwrite(const asender: tobject;
                var instance: tdragobject; const apickpos: pointty;
                const aformats: array of msestring;
+               const aformatistext: array of boolean;
                const aactions: dndactionsty = [];
                const aintf: imimesource = nil);
 begin
  include(fstate,dos_write);
- create(asender,instance,apickpos,aformats,aactions,aintf);
+ create(asender,instance,apickpos,aformats,aformatistext,aactions,aintf);
 end;
 
 destructor tmimedragobject.destroy;

@@ -3014,7 +3014,7 @@ const
 var
  classinfow: twndclassw;
  classinfoa: twndclassa;
- hres1: hresult;
+// hres1: hresult;
 
 begin  
  mousewindow:= 0;

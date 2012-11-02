@@ -14369,13 +14369,15 @@ begin
     if wi1 <> nil then begin
      if fsysdragobject = nil then begin
       tsysmimedragobject.create(nil,tdragobject(fsysdragobject),nullpoint,
-                                                           fformats,factions);
+                                      fformats,fformatistext,factions);
      end;
      with tsysmimedragobject1(fsysdragobject) do begin
-      if (fformats <> tsysdndevent(event).fformats) or 
+      if (fformats <> tsysdndevent(event).fformats) or
+         (fformatistext <> tsysdndevent(event).fformatistext) or
                                 (fformatindex > high(fformats)) then begin
                                 //missed dek_leave
        fformats:= tsysdndevent(event).fformats;
+       fformatistext:= tsysdndevent(event).fformatistext;
        fformatindex:= -1;
       end;
       factions:= tsysdndevent(event).factions;
