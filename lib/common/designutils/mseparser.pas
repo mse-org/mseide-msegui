@@ -930,9 +930,12 @@ function tparser.getsourcepos(const atoken: tokenidty): sourceposty;
 var
  int1: integer;
 begin
- result.filenum:= fscannernum + 1;
- result.filename:= fscanners[fscannernum].ffileid;
- with result.pos,fscanner do begin
+// result.filenum:= fscannernum + 1;
+// result.filename:= fscanners[fscannernum].ffileid;
+ result.filenum:= atoken.scanner + 1;
+// with result.pos,fscanner do begin
+ with result.pos,fscanners[atoken.scanner] do begin
+  result.filename:= ffileid;
   row:= 0;
   col:= ftokens[atoken.token].value.po -
           pchar(fsource);
