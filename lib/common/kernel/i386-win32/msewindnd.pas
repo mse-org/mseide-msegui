@@ -107,8 +107,8 @@ type
   private
    fcheckpending: integer;
   protected
-   fdata: string;
-   ftext: msestring;
+   fdata: stringarty;
+   ftext: msestringarty;
    findex: integer;
    fintf: isysdnd;
    factions: dndactionsty;
@@ -494,22 +494,22 @@ function tdataobject.getdatasize(out apo: pointer): integer;
 begin
  application.lock;
  if fformatistext[findex] then begin
-  if ftext = '' then begin
+  if ftext[findex] = '' then begin
    if fintf <> nil then begin
-    ftext:= fintf.convertmimetext(findex);
+    ftext[findex]:= fintf.convertmimetext(findex);
    end;
   end;
-  result:= length(ftext) * sizeof(msechar);
-  apo:= pointer(ftext);
+  result:= length(ftext[findex]) * sizeof(msechar);
+  apo:= pointer(ftext[findex]);
  end
  else begin
-  if fdata = '' then begin
+  if fdata[findex] = '' then begin
    if fintf <> nil then begin
-    fdata:= fintf.convertmimedata(findex);
+    fdata[findex]:= fintf.convertmimedata(findex);
    end;
   end;
-  result:= length(fdata);
-  apo:= pointer(fdata);
+  result:= length(fdata[findex]);
+  apo:= pointer(fdata[findex]);
  end;
  application.unlock;
 end;
@@ -642,8 +642,8 @@ var
 begin
  getobjectlinker.setlinkedvar(iobjectlink(self),aevent.fintf,
                                                  iobjectlink(fintf));
- ftext:= '';
- fdata:= '';
+ ftext:= nil;
+ fdata:= nil;
  fcheckpending:= 0;
  fdrop:= false;
  fcancel:= false;
@@ -652,6 +652,8 @@ begin
  fformats:= fintf.getformats;
  fformatistext:= fintf.getformatistext;
  setlength(fformatistext,length(fformats));
+ setlength(ftext,length(fformats));
+ setlength(fdata,length(fformats));
  fcformats:= nil;
  setlength(fcformats,length(fformats));
  for int1:= 0 to high(fformats) do begin

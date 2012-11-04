@@ -13,7 +13,8 @@ unit msedrag;
 
 interface
 uses
- msegui,msegraphutils,mseevent,classes,mseclasses,mseglob,mseguiglob;
+ msegui,msegraphutils,mseevent,classes,mseclasses,mseglob,mseguiglob,
+ msetimer;
 
 type
  drageventty = procedure(const asender: tobject; const apos: pointty;
@@ -68,6 +69,7 @@ type
 
 const
  dragstates = [ds_clicked,ds_beginchecked,ds_haddragobject];
+ sdndexpiretime = 5000000; //5s
 type
  drageventsty = record
   dragbegin: drageventty;
@@ -75,8 +77,14 @@ type
   dragdrop: drageventty;
  end;
 
+ sysdndinfoty = record
+  dragobj: tdragobject;
+//  expiretime: longword;
+ end;
+ 
  tcustomdragcontroller = class(tlinkedpersistent,ievent)
   private
+   ftimer: tsimpletimer;
    procedure dokeypress(const sender: twidget; var info: keyeventinfoty);
    procedure initdraginfo(var info: draginfoty;
                          const eventkind: drageventkindty; const pos: pointty);
@@ -88,7 +96,8 @@ type
    fdragobject: tdragobject;
    fstate: dragstatesty;
    fintf: idragcontroller;
-   fsysdndobjects: array[0..3] of tdragobject;
+   fsysdndobjects: array[0..3] of sysdndinfoty;
+   procedure doexpiresdnd(const sender: tobject);
    function checkclickstate(const info: mouseeventinfoty): boolean; virtual;
    function checksysdnd(const aaction: sysdndactionty;
                                    const arect: rectty): boolean; virtual;
@@ -138,7 +147,7 @@ function isobjectdrag(const dragobject: tdragobject;
 
 implementation
 uses
- msebits,msepointer,msekeyboard,msesysdnd,sysutils;
+ msebits,msepointer,msekeyboard,msesysdnd,sysutils,msesysutils;
 
 type
  tdragobject1 = class(tdragobject);
@@ -162,6 +171,7 @@ var
  int1: integer;
 begin
  enddrag;
+ ftimer.free;
  for int1:= 0 to high(fsysdndobjects) do begin
   freeandnil(fsysdndobjects[int1]);
  end;
@@ -173,6 +183,16 @@ begin
  result:= ds_clicked in fstate;
 end;
 
+procedure tcustomdragcontroller.doexpiresdnd(const sender: tobject);
+var
+ int1: integer;
+begin
+ for int1:= low(fsysdndobjects) to high(fsysdndobjects) do begin
+  freeandnil(fsysdndobjects[int1].dragobj);
+ end;
+ freeandnil(ftimer);
+end;
+
 procedure tcustomdragcontroller.enddrag;
 var
  int1,int2: integer;
@@ -182,16 +202,25 @@ begin
   if dos_sysdroppending in tdragobject1(fdragobject).fstate then begin
    int2:= 0;
    for int1:= 0 to high(fsysdndobjects) do begin
-    if fsysdndobjects[int1] = nil then begin
+    if fsysdndobjects[int1].dragobj = nil then begin
      int2:= int1;
      break;
     end;
    end;
-   if fsysdndobjects[int2] <> nil then begin
-    fsysdndobjects[int2].destroy;
-   end;
-   tdragobject1(fdragobject).finstancepo:= @fsysdndobjects[int2];
-   tdragobject1(fdragobject).finstancepo^:= fdragobject;
+   with fsysdndobjects[int2] do begin
+    if dragobj <> nil then begin
+     dragobj.destroy;
+    end;
+    tdragobject1(fdragobject).finstancepo:= @dragobj;
+    dragobj:= fdragobject;
+    if ftimer = nil then begin
+     ftimer:= tsimpletimer.create(sdndexpiretime,@doexpiresdnd,
+                                                    true,[to_single]);
+    end
+    else begin
+     ftimer.interval:= sdndexpiretime;
+    end;
+   end;   
    fdragobject:= nil;
   end
   else begin  
