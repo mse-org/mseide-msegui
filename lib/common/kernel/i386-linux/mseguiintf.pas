@@ -4209,6 +4209,7 @@ type
    fprotocolversion: byte;
    faction: atom;
    fdataformats: msestringarty;
+   fformatistext: booleanarty;
    fdatatypeatoms: atomarty;
    fdata: stringarty;
    ftext: msestringarty;
@@ -4301,6 +4302,8 @@ begin
   setlength(fdataformats,int2);
   setlength(fdata,int2);
   setlength(ftext,int2);
+  fformatistext:= nil;
+  setlength(fformatistext,int2);
  end;
 end;
 
@@ -4389,7 +4392,7 @@ function tsysdndreader.handleevent(var aevent: txclientmessageevent): tmseevent;
     end;
    end;
    result:= tsysdndevent.create(akind,fwinid,fpos,fshiftstate,
-                                    fscroll,fdataformats,act2);
+                           fscroll,fdataformats,fformatistext,act2);
   end;
  end; //createevent
  

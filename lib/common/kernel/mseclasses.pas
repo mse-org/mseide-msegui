@@ -238,21 +238,27 @@ type
    destructor destroy; override;
 //   property objectlinker: tobjectlinker read getobjectlinker;
  end;
-
+(*
  tnullinterfacedobject = class(tobject,iunknown)
   protected
-   function _addref: integer; stdcall;
-   function _release: integer; stdcall;
+   function _addref: integer; 
+                      {$ifdef mswindows}stdcall{$else} cdecl{$endif};
+   function _release: integer;
+                      {$ifdef mswindows}stdcall{$else} cdecl{$endif};
    function queryinterface({$ifdef fpc_has_constref}constref{$else}const{$endif}
-                    iid: tguid; out obj): hresult; stdcall;
+                    iid: tguid; out obj): hresult;
+                       {$ifdef mswindows}stdcall{$else} cdecl{$endif};
  end;
-
+*)
  tnullinterfacedpersistent = class(tvirtualpersistent,iunknown)
   protected
-   function _addref: integer; stdcall;
-   function _release: integer; stdcall;
+   function _addref: integer; 
+                      {$ifdef mswindows}stdcall{$else} cdecl{$endif};
+   function _release: integer;
+                      {$ifdef mswindows}stdcall{$else} cdecl{$endif};
    function QueryInterface({$ifdef fpc_has_constref}constref{$else}const{$endif}
-                 IID: TGUID; out Obj): HResult; stdcall;
+                 IID: TGUID; out Obj): HResult; 
+                      {$ifdef mswindows}stdcall{$else} cdecl{$endif};
  end;
 
  toptionalpersistent = class(tnullinterfacedpersistent)
@@ -3812,7 +3818,7 @@ function tlinkedobject.getinstance: tobject;
 begin
  result:= self;
 end;
-
+(*
 { tnullinterfacedobject }
 
 function tnullinterfacedobject._addref: integer; stdcall;
@@ -3836,22 +3842,25 @@ begin
   result:= integer(e_nointerface);
  end;
 end;
-
+*)
 { tnullinterfacedpersistent }
 
-function tnullinterfacedpersistent._addref: integer; stdcall;
+function tnullinterfacedpersistent._addref: integer;
+                   {$ifdef mswindows}stdcall{$else} cdecl{$endif};
 begin
  result:= -1;
 end;
 
-function tnullinterfacedpersistent._release: integer; stdcall;
+function tnullinterfacedpersistent._release: integer;
+                   {$ifdef mswindows}stdcall{$else} cdecl{$endif};
 begin
  result:= -1;
 end;
 
 function tnullinterfacedpersistent.QueryInterface(
   {$ifdef fpc_has_constref}constref{$else}const{$endif} IID: TGUID;
-  out Obj): HResult; stdcall;
+  out Obj): HResult;
+                     {$ifdef mswindows}stdcall{$else} cdecl{$endif};
 begin
  if GetInterface(IID, Obj) then begin
    Result:=0

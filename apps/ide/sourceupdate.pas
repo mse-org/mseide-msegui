@@ -21,7 +21,7 @@ unit sourceupdate;
 interface
 uses
  msedesigner,mseclasses,msedesignintf,classes,typinfo,
- msetypes,msestrings,pascaldesignparser,cdesignparser,
+ msetypes,msestrings,pascaldesignparser,cdesignparser,mseglob,
  msestream,mseparser,msesyntaxedit,mselist,msehash,msedesignparser;
 
 type 
