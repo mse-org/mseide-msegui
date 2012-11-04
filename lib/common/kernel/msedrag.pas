@@ -347,6 +347,7 @@ end;
 function tcustomdragcontroller.checksysdnd(const aaction: sysdndactionty;
                                                const arect: rectty): boolean;
 begin
+ result:= false;
  if fdragobject <> nil then begin
   result:= tdragobject1(fdragobject).checksysdnd(aaction,arect);
  end;

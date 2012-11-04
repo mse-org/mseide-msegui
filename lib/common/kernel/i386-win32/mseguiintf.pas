@@ -45,6 +45,9 @@ procedure winrecttorect(const rect: rectty); overload;
 procedure winrecttorect(po: prectty; count: integer); overload;
 function mrect(aleft,atop,aright,abottom: integer): trect;
 
+procedure beginsdndwrite(const athread: threadty);
+procedure endsdndwrite;
+
 {$ifdef mse_debuggdi}
 var
  pixmapcount: integer;
@@ -2443,6 +2446,23 @@ begin
  end;
 end;
 
+var
+ sdndthread: threadty;
+ 
+procedure beginsdndwrite(const athread: threadty);
+begin
+ application.lock;
+ sdndthread:= athread;
+ application.unlock;
+end;
+
+procedure endsdndwrite;
+begin
+ application.lock;
+ sdndthread:= 0;
+ application.unlock;
+end;
+
 procedure dispatchevents;
 var
  msg,msg1: tmsg;
@@ -2453,6 +2473,9 @@ begin
  end;
  if iswin95 then begin
   while peekmessagea(msg,0,0,0,pm_remove) do begin
+   if sdndthread <> 0 then begin
+    postthreadmessagea(sdndthread,msg.message,msg.wparam,msg.lparam);
+   end;
    with msg do begin
     case message of
      destroymessage: begin
@@ -2479,6 +2502,9 @@ begin
  end
  else begin
   while peekmessagew(msg,0,0,0,pm_remove) do begin
+   if sdndthread <> 0 then begin
+    postthreadmessagew(sdndthread,msg.message,msg.wparam,msg.lparam);
+   end;
    with msg do begin
     case message of
      destroymessage: begin

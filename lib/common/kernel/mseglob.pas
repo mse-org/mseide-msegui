@@ -31,11 +31,13 @@ type
   //no referencecount, only for fpc, not available in delphi
  end;
 
- tnullinterfacedobject = class(tobject)
+ tnullinterfacedobject = class(tobject,iunknown)
   protected
    function _addref: integer; stdcall;
    function _release: integer; stdcall;
-   function QueryInterface(const IID: TGUID; out Obj): HResult; stdcall;
+   function queryinterface(
+                {$ifdef fpc_has_constref}constref{$else}const{$endif}
+                                        iid: tguid; out obj): hresult; stdcall;
  end;
 
  objecteventty = (oe_destroyed,oe_connect,oe_disconnect,
@@ -121,9 +123,16 @@ begin
  result:= -1;
 end;
 
-function tnullinterfacedobject.QueryInterface(const IID: TGUID; out Obj): HResult; stdcall;
+function tnullinterfacedobject.QueryInterface(
+             {$ifdef fpc_has_constref}constref{$else}const{$endif}
+                                        IID: TGUID; out Obj): HResult; stdcall;
 begin
- result:= hresult(e_nointerface);
+ if getinterface(iid, obj) then begin
+   result:=0
+ end
+ else begin
+  result:= integer(e_nointerface);
+ end;
 end;
 
 { emse }

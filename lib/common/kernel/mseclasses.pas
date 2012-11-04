@@ -239,7 +239,7 @@ type
 //   property objectlinker: tobjectlinker read getobjectlinker;
  end;
 
- tnullinterfacedobject = class(tobject)
+ tnullinterfacedobject = class(tobject,iunknown)
   protected
    function _addref: integer; stdcall;
    function _release: integer; stdcall;
@@ -247,7 +247,7 @@ type
                     iid: tguid; out obj): hresult; stdcall;
  end;
 
- tnullinterfacedpersistent = class(tvirtualpersistent)
+ tnullinterfacedpersistent = class(tvirtualpersistent,iunknown)
   protected
    function _addref: integer; stdcall;
    function _release: integer; stdcall;
