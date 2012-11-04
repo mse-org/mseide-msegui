@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2010 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2012 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -33,10 +33,12 @@ type
   private
    fids: integerarty;
    frefreshedrow: integer;
+   fstopinfo: stopinfoty;
   public
    gdb: tgdbmi;
    procedure refresh;
    procedure clear;
+   property stopinfo: stopinfoty read fstopinfo write fstopinfo;
  end;
 
 var
@@ -44,7 +46,8 @@ var
 
 implementation
 uses
- threadsform_mfm,sysutils,sourceform,msefileutils,main,stackform,mseguiintf;
+ threadsform_mfm,sysutils,sourceform,msefileutils,main,stackform,mseguiintf,
+ sourcepage;
 
 { tthreadsfo }
 
@@ -94,38 +97,32 @@ begin
  refresh;
 end;
 
-procedure tthreadsfo.gridoncellevent(const sender: TObject; var info: celleventinfoty);
+procedure tthreadsfo.gridoncellevent(const sender: TObject;
+                                           var info: celleventinfoty);
 var
- stopinfo: stopinfoty;
+ page1: tsourcepage;
 begin
  case info.eventkind of
   cek_enter: begin
    if (frefreshedrow <> info.cell.row) and
          (gdb.threadselect(fids[info.cell.row],
-                  stopinfo.filename,stopinfo.line) = gdb_ok) then begin
+                  fstopinfo.filename,fstopinfo.line) = gdb_ok) then begin
     refresh;
     stackfo.refresh;
     mainfo.refreshframe;
-    if stopinfo.filename <> '' then begin
-     stopinfo.filedir:= '';
-     sourcefo.locate(stopinfo);
+    if fstopinfo.filename <> '' then begin
+     fstopinfo.filedir:= '';
+     sourcefo.locate(fstopinfo);
     end;
-{
-    if gdb.getsourcename(wstr1) = gdb_ok then begin
-     with stopinfo do begin
-      splitfilepath(wstr1,filedir,filename);
-      if gdb.stacklistframes(ar1,0,0) = gdb_ok then begin
-       line:= ar1[0].line;
-       sourcefo.locate(stopinfo);
-      end;
-     end;
-    end;
-}
    end;
   end;
  end;
  if iscellclick(info,[ccr_dblclick]) then begin
-  sourcefo.activate;
+  page1:= sourcefo.locate(fstopinfo);
+  if page1 <> nil then begin
+   page1.activate;
+  end;
+//  sourcefo.activate;
  end;
 end;
 

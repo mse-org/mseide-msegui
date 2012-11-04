@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2010 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2012 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -102,13 +102,8 @@ end;
 procedure tstackfo.gridoncellevent(const sender: tobject;
   var info: celleventinfoty);
 var
-// str1: msestring;
  rect1: rectty;
 begin
-// if isrowexit(info,true) then begin
-//  filedisp.value:= '';
-//  address.value:= '';
-// end;
  with info do begin
   case eventkind of
    cek_focusedcellchanged: begin
@@ -119,12 +114,6 @@ begin
      mainfo.stackframechanged(newcell.row);
     end;
    end;
-{
-   cek_exit: begin
-    filedisp.value:= '';
-    address.value:= '';
-   end;
-  }
    cek_firstmousepark: begin
     if cell.col = 1 then begin
      with tstringgrid(sender) do begin

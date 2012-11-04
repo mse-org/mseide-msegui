@@ -174,6 +174,7 @@ type
    ftargetfilemodified: boolean;
    frunningprocess: prochandlety;
    flayoutloading: boolean;
+   fstopinfo: stopinfoty;
    procedure dorun;
    function runtarget: boolean; //true if run possible
    procedure newproject(const fromprogram,empty: boolean);
@@ -253,7 +254,7 @@ type
    function loadexec(isattach: boolean;
                        const forcedownload: boolean): boolean; //true if ok
    procedure setstattext(const atext: msestring; const akind: messagetextkindty = mtk_info);
-   procedure refreshstopinfo(const stopinfo: stopinfoty);
+   procedure refreshstopinfo(const astopinfo: stopinfoty);
    procedure updatemodifiedforms;
    function checkremake(startcommand: startcommandty): boolean;
                          //true if running possible
@@ -295,6 +296,7 @@ type
    procedure toggleformunit;
    property lastform: tcustommseform read flastform;
    property execstamp: integer read fexecstamp;
+   property stopinfo: stopinfoty read fstopinfo;
  end;
 
 var
@@ -848,9 +850,10 @@ begin
  threadsfo.clear;
 end;
 
-procedure tmainfo.refreshstopinfo(const stopinfo: stopinfoty);
+procedure tmainfo.refreshstopinfo(const astopinfo: stopinfoty);
 begin
- with stopinfo do begin
+ fstopinfo:= astopinfo;
+ with astopinfo do begin
   case reason of
    sr_signal_received: begin
     setstattext(messagetext,mtk_signal);
@@ -868,6 +871,7 @@ begin
   breakpointsfo.refresh;
   stackfo.refresh;
   threadsfo.refresh;
+  threadsfo.stopinfo:= astopinfo;
   cpufo.refresh;
   disassfo.refresh(addr);
   if (reason = sr_exception) then begin

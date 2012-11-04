@@ -3300,15 +3300,19 @@ function tgdbmi.threadselect(const aid: integer; out filename: filenamety;
                                              out line: integer): gdbresultty;
 var
  str1: string;
+ ar1: resultinfoarty;
 begin
  filename:= '';
  line:= 0;
  result:= synccommand('-thread-select ' + inttostr(aid));
  if result = gdb_ok then begin
-  if getstringvalue(fsyncvalues,'file',str1) then begin
+  if not gettuplevalue(fsyncvalues,'frame',ar1) then begin
+   ar1:= fsyncvalues;
+  end;
+  if getstringvalue(ar1,'file',str1) then begin
    filename:= str1;
   end;  
-  getintegervalue(fsyncvalues,'line',line);
+  getintegervalue(ar1,'line',line);
  end;
 end;
 
