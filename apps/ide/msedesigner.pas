@@ -576,7 +576,8 @@ procedure createbackupfile(const newname,origname: filenamety;
            
 function designer: tdesigner;
 function isdatasubmodule(const acomponent: tobject;
-                               const iconified: boolean = false): boolean;
+                         const iconified: boolean = false;
+                         const both: boolean = false): boolean;
 
 implementation
 
@@ -621,11 +622,13 @@ begin
 end;
 
 function isdatasubmodule(const acomponent: tobject;
-                            const iconified: boolean = false): boolean;
+                         const iconified: boolean = false;
+                         const both: boolean = false): boolean;
 begin
  result:= (acomponent <> nil) and (acomponent is tmsedatamodule) and 
             (csinline in tmsedatamodule(acomponent).componentstate) and
-            (iconified = (dmo_iconic in tmsedatamodule(acomponent).options));
+            (both or
+            (iconified = (dmo_iconic in tmsedatamodule(acomponent).options)));
 end;
 
 function issubprop(const obj1: tobject): boolean;

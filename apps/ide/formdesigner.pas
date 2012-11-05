@@ -226,8 +226,11 @@ type
    procedure adjustchildcomponentpos(var apos: pointty);
    procedure readjustchildcomponentpos(var apos: pointty);
   protected
-   function getcomponentrect(const component: tcomponent): rectty;
+   function getcomponentrect(const component: tcomponent; 
+                            const shiftoffset: boolean): rectty;
+                                         //embedded
    function getcomponentrect1(const component: tcomponent): rectty;
+                                         //top level
    function componentatpos(const pos: pointty): tcomponent;
    function iswidgetcomp(const acomp: tcomponent): boolean;
  
@@ -466,12 +469,15 @@ begin
 end;
 }
 
-function tdesignwindow.getcomponentrect(const component: tcomponent): rectty;
+function tdesignwindow.getcomponentrect(const component: tcomponent;
+                                         const shiftoffset: boolean): rectty;
 var
  bo1: boolean;
 begin
  result.pos:= getcomponentpos(component);
- addpoint1(result.pos,componentoffset);
+ if shiftoffset then begin
+  addpoint1(result.pos,componentoffset);
+ end;
  bo1:= (component is tmsedatamodule) and 
                  (csinline in tmsedatamodule(component).componentstate);
  if bo1 and not (dmo_iconic in tmsedatamodule(component).options) then begin
@@ -493,7 +499,7 @@ var
  comp1: tcomponent;
  bo1: boolean;
 begin
- result:= getcomponentrect(component);
+ result:= getcomponentrect(component,true);
  comp1:= component.owner;
  while comp1 <> nil do begin
   if isdatasubmodule(comp1) then begin        //adjust submodulepos
@@ -523,11 +529,13 @@ var
  isdatamodule: boolean;
  toplevel: boolean;
                                        
- function checkcomponent(const component: tcomponent; const pos: pointty): tcomponent;
+ function checkcomponent(const component: tcomponent;
+                const pos: pointty; const shiftoffset: boolean): tcomponent;
  var
   int1: integer;
   pt1: pointty;
   bo1,bo2: boolean;
+  shift1: boolean;
   rect1: rectty;
   comp1: tcomponent;
  begin
@@ -535,8 +543,9 @@ var
   bo2:= false;
   bo1:=  not isdatamodule and iswidgetcomp(component) and 
                                (twidget(component).parentwidget <> nil);
+  shift1:= shiftoffset; //for chidren
   pt1:= pos;
-  rect1:= getcomponentrect(component);
+  rect1:= getcomponentrect(component,shiftoffset);
   if bo1 and not toplevel then begin
    subpoint1(pt1,twidget(component).pos);
    if (component.owner = module) and (module is twidget) then begin
@@ -547,6 +556,7 @@ var
    if isdatasubmodule(component) then begin
     bo2:= pointinrect(pt1,rect1);
     subpoint1(pt1,rect1.pos);
+    shift1:= false;
    end;
   end;
   if toplevel or 
@@ -557,7 +567,7 @@ var
    for int1:= component.componentcount - 1 downto 0 do begin
     comp1:= component.components[int1];
     if isdatasubmodule(comp1) then begin
-     result:= checkcomponent(comp1,pt1);
+     result:= checkcomponent(comp1,pt1,shift1);
      if result <> nil then begin
       exit;
      end;
@@ -566,7 +576,7 @@ var
    for int1:= component.componentcount - 1 downto 0 do begin
     comp1:= component.components[int1];
     if not isdatasubmodule(comp1) then begin
-     result:= checkcomponent(comp1,pt1);
+     result:= checkcomponent(comp1,pt1,shift1);
      if result <> nil then begin
       exit;
      end;
@@ -583,7 +593,7 @@ var
 begin
  isdatamodule:= tformdesignerfo(fowner).fform = nil;
  toplevel:= true;
- result:= checkcomponent(tformdesignerfo(fowner).fmodule,pos);
+ result:= checkcomponent(tformdesignerfo(fowner).fmodule,pos,true);
  if result = tformdesignerfo(fowner).fmodule then begin
   result:= nil;
  end;
@@ -1148,7 +1158,7 @@ procedure tdesignwindow.doafterpaint(const canvas: tcanvas);
   end;
  end;
  
- procedure drawcomponent(const component: tcomponent);
+ procedure drawcomponent(const component: tcomponent; const toplevel: boolean);
  var
   rect1: rectty;
   int1: integer;
@@ -1178,7 +1188,7 @@ procedure tdesignwindow.doafterpaint(const canvas: tcanvas);
     end
    end
    else begin
-    rect1:= getcomponentrect(component);
+    rect1:= getcomponentrect(component,toplevel);
    end;
    if not (iswidget or issub) then begin
     if isdatasubmodule(component,true) then begin
@@ -1197,7 +1207,9 @@ procedure tdesignwindow.doafterpaint(const canvas: tcanvas);
    else begin
     if component.componentcount > 0 then begin
      canvas.save;
-     canvas.intersectcliprect(rect1);
+     if not issub then begin
+      canvas.intersectcliprect(rect1);
+     end;
      if not isroot then begin
       canvas.move(rect1.pos);
      end;
@@ -1209,7 +1221,7 @@ procedure tdesignwindow.doafterpaint(const canvas: tcanvas);
      for int1:= 0 to component.componentcount - 1 do begin
       comp1:= component.components[int1];
       if not isdatasubmodule(comp1) then begin
-       drawcomponent(comp1);
+       drawcomponent(comp1,isroot);
       end;
      end;
      canvas.restore;
@@ -1221,7 +1233,7 @@ procedure tdesignwindow.doafterpaint(const canvas: tcanvas);
       if isdatasubmodule(comp1) then begin
        canvas.save;
        clipchildren(component,int1+1);
-       drawcomponent(comp1);
+       drawcomponent(comp1,isroot);
        canvas.restore;
       end;
      end;
@@ -1246,7 +1258,7 @@ procedure tdesignwindow.doafterpaint(const canvas: tcanvas);
 begin
  if tformdesignerfo(fowner).fmodule <> nil then begin
   canvas.intersectcliprect(tformdesignerfo(fowner).gridrect);
-  drawcomponent(tformdesignerfo(fowner).fmodule);
+  drawcomponent(tformdesignerfo(fowner).fmodule,true);
   if form <> nil then begin
    drawgrid(canvas);
   end;
@@ -1256,32 +1268,40 @@ begin
 end;
 
 function tdesignwindow.componentscrollsize: sizety;
-var
- int1,int2: integer;
- component: tcomponent;
- rect1: rectty;
-begin
- result:= nullsize;
- if tformdesignerfo(fowner).fmodule <> nil then begin
-  with tformdesignerfo(fowner).fmodule do begin
-   for int1:= 0 to componentcount - 1 do begin
-    component:= components[int1];
-    if not iswidgetcomp(component) then begin
-     rect1:= getcomponentrect(component);
-     subpoint1(rect1.pos,componentoffset);
-     int2:= rect1.x + rect1.cx;
-     if int2 > result.cx then begin
-      result.cx:= int2;
-     end;
-     int2:= rect1.y + rect1.cy;
-     if int2 > result.cy then begin
-      result.cy:= int2;
+
+ procedure check(const acomponent: tcomponent; const shift: pointty);
+ var
+  int1,int2: integer;
+  component: tcomponent;
+  rect1: rectty;
+ begin  
+  if acomponent <> nil then begin
+   with acomponent do begin
+    for int1:= 0 to componentcount - 1 do begin
+     component:= components[int1];
+     if not iswidgetcomp(component) then begin
+      rect1:= getcomponentrect(component,false);
+      addpoint1(rect1.pos,shift);
+      int2:= rect1.x + rect1.cx;
+      if int2 > result.cx then begin
+       result.cx:= int2;
+      end;
+      int2:= rect1.y + rect1.cy;
+      if int2 > result.cy then begin
+       result.cy:= int2;
+      end;
+      if isdatasubmodule(component) then begin
+       check(component,rect1.pos);
+      end;
      end;
     end;
    end;
   end;
-  subsize1(result,sizety(tformdesignerfo(fowner).gridrect.pos));
- end;
+ end; //check
+ 
+begin
+ result:= nullsize;
+ check(tformdesignerfo(fowner).fmodule,nullpoint);
  inc(result.cx,handlesize);
  inc(result.cy,handlesize);
 end;
@@ -1934,7 +1954,8 @@ begin
        end;
       end;
       if component <> nil then begin
-       if (factcompindex < 0) or (component <> fselections[factcompindex]) then begin
+       if (factcompindex < 0) or 
+                       (component <> fselections[factcompindex]) then begin
         factarea:= ar_none;
        end;
        bo1:= true;
@@ -2046,9 +2067,12 @@ begin
         end
         else begin
          if component is tmsedatamodule then begin
+          rect1:= getcomponentrect1(component);          
           with tmsedatamodule(component) do begin
+           subpoint1(factsizerect.pos,rect1.pos);
 //////           subpoint1(factsizerect.pos,parentwidget.rootpos);
-           setcomponentpos(component,factsizerect.pos);
+           setcomponentpos(component,
+                addpoint(getcomponentpos(component),factsizerect.pos));
            size:= factsizerect.size;
           end;
           fselections.componentschanged;
@@ -2523,7 +2547,7 @@ procedure tdesignwindow.ItemsModified(const ADesigner: IDesigner;
            const AItem: tobject);
 begin
  fselections.externalcomponentchanged(aitem);
- if isdatasubmodule(aitem) then begin
+ if isdatasubmodule(aitem,false,true) then begin //iconic state could be changed
   clientsizechanged;
  end;
 end;
