@@ -1258,7 +1258,7 @@ var
      if not isroot or iswidget then begin
       canvas.move(rect1.pos);
      end;
-     clipchildren(component,0,toplevel);
+     clipchildren(component,0,isroot{toplevel} and not iswidget);
 //     pt1:= rect1.pos;
 //     if component.owner = tformdesignerfo(fowner).fmodule then begin
 //      adjustchildcomponentpos(pt1);
@@ -1277,7 +1277,7 @@ var
       comp1:= component.components[int1];
       if isdatasubmodule(comp1) then begin
        canvas.save;
-       clipchildren(component,int1+1,not isroot);
+       clipchildren(component,int1+1,{not} isroot);
        drawcomponent(comp1,isroot);
        canvas.restore;
       end;

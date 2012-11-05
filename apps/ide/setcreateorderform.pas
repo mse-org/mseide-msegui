@@ -41,7 +41,7 @@ begin
  with amodule do begin
   for int1:= 0 to componentcount - 1 do begin
    with components[int1] do begin
-    if not hasparent then begin
+    if not hasparent or (csinline in componentstate) then begin
      grid.appendrow([msestring(name),msestring(classname)]);
      if acurrentcompname = name then begin
       grid.row:=int1;
