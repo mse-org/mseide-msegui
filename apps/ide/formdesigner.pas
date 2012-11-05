@@ -1126,6 +1126,7 @@ begin
  if not fclientsizevalid then begin
   tformdesignerfo(fowner).recalcclientsize;
   fclientsizevalid:= true;
+  fselections.finfovalid:= false;
  end;
  inherited;
 end;
