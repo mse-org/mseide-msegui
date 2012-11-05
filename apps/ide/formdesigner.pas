@@ -638,6 +638,10 @@ var
   end;
  end;
 
+var
+ int1: integer;
+ po1: pformselectedinfoty;
+ comp1: tcomponent;
 begin
  result:= false;
  amodule:= tformdesignerfo(fowner.fowner).fmodule;
@@ -645,6 +649,21 @@ begin
  inherited assign(source);
  if not result then begin
   checkowned;
+ end;
+ if result then begin
+  po1:= datapo;
+  for int1:= 0 to count - 1 do begin   
+   comp1:= po1^.selectedinfo.instance.owner;
+   while (comp1 <> nil) and (comp1 <> amodule) do begin
+    if comp1 is tmsedatamodule then begin
+     with tmsedatamodule(comp1) do begin
+      options:= options - [dmo_iconic];
+     end;
+    end;
+    comp1:= comp1.owner;
+   end;
+   inc(po1);
+  end;
  end;
 end;
 
