@@ -1,12 +1,12 @@
 object formdesignerfo: tformdesignerfo
-  optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
+  optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_hinton]
   optionsskin = [osk_noskin]
   visible = False
   bounds_x = 196
   bounds_y = 202
   bounds_cx = 287
   bounds_cy = 300
-  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent]
   container.frame.zoomwidthstep = 1
   container.frame.zoomheightstep = 1
   container.oncalcminscrollsize = calcscrollsize
@@ -88,7 +88,7 @@ object formdesignerfo: tformdesignerfo
   top = 180
   moduleclassname = 'tmseform'
   object popupme: tpopupmenu
-    menu.submenu.count = 24
+    menu.submenu.count = 26
     menu.submenu.items = <    
       item
         caption = 'Show objectinspector'
@@ -105,6 +105,14 @@ object formdesignerfo: tformdesignerfo
         state = [as_localcaption, as_localonexecute]
         options = [mao_shortcutcaption, mao_asyncexecute]
         onexecute = doshowastext
+      end    
+      item
+        action = hidecompact
+        options = [mao_checkbox, mao_shortcutcaption]
+      end    
+      item
+        action = hidewidgetact
+        options = [mao_checkbox, mao_shortcutcaption]
       end    
       item
         options = [mao_separator, mao_shortcutcaption]
@@ -241,5 +249,18 @@ object formdesignerfo: tformdesignerfo
       end>
     left = 48
     top = 40
+  end
+  object hidecompact: taction
+    caption = 'Hide &Components'
+    onexecute = hidecompexe
+    left = 144
+    top = 40
+  end
+  object hidewidgetact: taction
+    caption = 'Hide &Widgets'
+    onexecute = hidewidgetexe
+    onupdate = updatewidgethideexe
+    left = 144
+    top = 56
   end
 end
