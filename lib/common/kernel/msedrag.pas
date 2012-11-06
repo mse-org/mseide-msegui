@@ -305,6 +305,7 @@ begin
   ek_buttonrelease: begin
    try
     if fdragobject <> nil then begin
+     fdragobject.droppos:= translateclientpoint(info.pos,owner,nil);
      include(info.eventstate,es_processed);
      widget1:= checkcandragdrop(info.pos,bo1);
      if widget1 <> nil then begin

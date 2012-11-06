@@ -252,6 +252,7 @@ type
  tdragobject = class
   private
    fpickpos: pointty;
+   fdroppos: pointty;
   protected
    finstancepo: pdragobject;
    fsender: tobject;
@@ -269,9 +270,10 @@ type
                           const aactions: dndactionsty = []);
    destructor destroy; override;
    function sender: tobject;
-   procedure acepted(const apos: pointty); virtual; //screenorigin
-   procedure refused(const apos: pointty); virtual;
-   property pickpos: pointty read fpickpos;         //screenorigin
+   procedure acepted(const apos: pointty); virtual;        //screenorigin
+   procedure refused(const apos: pointty); virtual;        //screenorigin
+   property pickpos: pointty read fpickpos write fpickpos; //screenorigin
+   property droppos: pointty read fdroppos write fdroppos; //screenorigin
    property state: dragobjstatesty read fstate;
    property actions: dndactionsty read factions write factions;
  end;

@@ -19,9 +19,9 @@ type
  
  imimesource = interface(iobjectlink)
    procedure convertmimedata(const sender: tmimedragobject;
-                                      var adata: string; const atypeindex);
+                        var adata: string; const atypeindex: integer);
    procedure convertmimetext(const sender: tmimedragobject;
-                                      var adata: msestring; const atypeindex);
+                        var adata: msestring; const atypeindex: integer);
  end;
   
  tmimedragobject = class(tdragobject,iobjectlink)
@@ -34,6 +34,7 @@ type
    fformats: msestringarty;
    fformatistext: booleanarty;
    fformatindex: integer;
+   fwantedformatindex: integer;
    fintf: imimesource;
    function getdata: string; virtual;
    function gettext: msestring; virtual;
@@ -63,6 +64,9 @@ type
    property formatindex: integer read fformatindex 
                                write setformatindex default -1;
                        //-1 -> none selected
+   property wantedformatindex: integer read fwantedformatindex 
+                               write fwantedformatindex default -1;
+                       //-1 -> none selected
    property data: string read getdata write setdata;
    property text: msestring read gettext write settext;
    function convertmimedata(const atypeindex: integer): string; virtual;
@@ -88,6 +92,7 @@ begin
  setlength(fformatistext,length(fformats));
  factions:= aactions;
  fformatindex:= -1;
+ fwantedformatindex:= -1;
  fintf:= aintf;
  if fintf <> nil then begin
   fobjectlinker.link(iobjectlink(self),fintf);
@@ -129,11 +134,14 @@ var
  int1,int2: integer;
 begin
  result:= false;
+ fformatindex:= -1;
+ fwantedformatindex:= -1;
  for int1:= 0 to high(awanted) do begin
   for int2:= 0 to high(fformats) do begin
    if awanted[int1] = fformats[int2] then begin
     result:= true;
     fformatindex:= int2;
+    fwantedformatindex:= int1;
     exit;
    end;
   end;

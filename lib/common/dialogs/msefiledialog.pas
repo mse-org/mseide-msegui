@@ -281,6 +281,8 @@ type
    fcontroller: tfiledialogcontroller;
 //   fdialogkind: filedialogkindty;
    procedure setcontroller(const avalue: tfiledialogcontroller);
+   function getsysvalue: filenamety;
+   procedure setsysvalue(const avalue: filenamety);
   protected
    function createdialogcontroller: tstringdialogcontroller; override;
    procedure texttovalue(var accept: boolean; const quiet: boolean); override;
@@ -301,6 +303,7 @@ type
    destructor destroy; override;
    procedure componentevent(const event: tcomponentevent); override;
    property controller: tfiledialogcontroller read fcontroller write setcontroller;
+   property sysvalue: filenamety read getsysvalue write setsysvalue;
   published
 //   property dialogkind: filedialogkindty read fdialogkind write fdialogkind default fdk_open;
  end;
@@ -2101,6 +2104,16 @@ end;
 function tcustomfilenameedit.createdialogcontroller: tstringdialogcontroller;
 begin
  result:= tfilenameeditcontroller.create(self);
+end;
+
+function tcustomfilenameedit.getsysvalue: filenamety;
+begin
+ result:= tosysfilepath(value);
+end;
+
+procedure tcustomfilenameedit.setsysvalue(const avalue: filenamety);
+begin
+ value:= tomsefilepath(avalue);
 end;
 
 { tdirdropdownedit }
