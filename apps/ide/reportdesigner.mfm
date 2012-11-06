@@ -23,8 +23,8 @@ inherited reportdesignerfo: treportdesignerfo
     frame.dummy = 0
     taborder = 4
     bounds_x = 7
-    bounds_y = 18
-    bounds_cx = 200
+    bounds_y = 17
+    bounds_cx = 199
     bounds_cy = 7
     anchors = [an_left, an_top, an_right]
     dial.options = []
@@ -63,18 +63,19 @@ inherited reportdesignerfo: treportdesignerfo
     dial.angle = 0
   end
   object tabbar: ttabbar[1]
-    optionswidget = [ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    optionswidget1 = [ow1_fontglyphheight, ow1_autoscale, ow1_autoheight]
+    optionswidget = [ow_mousewheel, ow_destroywidgets]
     color = -1879048187
     bounds_x = 120
     bounds_y = 0
-    bounds_cx = 1
-    bounds_cy = 18
+    bounds_cx = 0
+    bounds_cy = 17
     anchors = [an_left, an_top, an_right]
     onactivetabchange = tabcha
     ontabmoving = tabmo
     onclientmouseevent = tabmouse
     options = [tabo_dragsource, tabo_dragdest]
-    reffontheight = 14
+    reffontheight = 13
   end
   object reportcontainer: tscrollbox[2]
     color = -1879048187
@@ -85,9 +86,9 @@ inherited reportdesignerfo: treportdesignerfo
     frame.localprops = [frl_colorclient]
     taborder = 1
     bounds_x = 7
-    bounds_y = 25
-    bounds_cx = 198
-    bounds_cy = 434
+    bounds_y = 24
+    bounds_cx = 197
+    bounds_cy = 435
     anchors = [an_left, an_top, an_right, an_bottom]
     onlayout = repcomtainerchildscaled
     onscroll = reportcontainerscroll
@@ -95,7 +96,7 @@ inherited reportdesignerfo: treportdesignerfo
   object tspacer1: tspacer[3]
     taborder = 2
     bounds_x = 144
-    bounds_y = 18
+    bounds_y = 17
     bounds_cx = 50
     bounds_cy = 5
     linktop = tabbar
@@ -106,9 +107,9 @@ inherited reportdesignerfo: treportdesignerfo
     color = -1879048185
     taborder = 3
     bounds_x = 0
-    bounds_y = 25
+    bounds_y = 24
     bounds_cx = 7
-    bounds_cy = 590
+    bounds_cy = 591
     anchors = [an_left, an_top, an_bottom]
     dial.widthmm = 0.3
     dial.direction = gd_down
@@ -148,7 +149,7 @@ inherited reportdesignerfo: treportdesignerfo
   object tspacer2: tspacer[5]
     taborder = 5
     bounds_x = 144
-    bounds_y = 25
+    bounds_y = 24
     bounds_cx = 50
     bounds_cy = 5
     linktop = dialh
@@ -172,12 +173,13 @@ inherited reportdesignerfo: treportdesignerfo
     bounds_x = 52
     bounds_y = 0
     bounds_cx = 68
-    bounds_cy = 18
+    bounds_cy = 17
     textflags = [tf_ycentered]
     valuerange = 1
+    valuestart = 0
     format = '0.0mm'
     value = -Inf
-    reffontheight = 14
+    reffontheight = 13
   end
   object ydisp: trealdisp[8]
     color = -1879048187
@@ -186,16 +188,17 @@ inherited reportdesignerfo: treportdesignerfo
     bounds_x = 0
     bounds_y = 0
     bounds_cx = 52
-    bounds_cy = 18
+    bounds_cy = 17
     valuerange = 1
+    valuestart = 0
     format = '0.0'
     value = -Inf
-    reffontheight = 14
+    reffontheight = 13
   end
   object tspacer4: tspacer[9]
     taborder = 9
     bounds_x = 16
-    bounds_y = 25
+    bounds_y = 24
     bounds_cx = 50
     bounds_cy = 5
     linktop = dialh
@@ -203,9 +206,18 @@ inherited reportdesignerfo: treportdesignerfo
     dist_bottom = -5
   end
   inherited popupme: tpopupmenu[10]
-    onupdate = popupupda
-    menu.submenu.count = 27
+    menu.submenu.count = 32
     menu.submenu.items = <    
+      item
+      end    
+      item
+      end    
+      item
+      end    
+      item
+      end    
+      item
+      end    
       item
       end    
       item
@@ -258,6 +270,168 @@ inherited reportdesignerfo: treportdesignerfo
         options = [mao_separator, mao_shortcutcaption]
       end    
       item
+        caption = 'Add Report Page'
+        name = 'addpage'
+        state = [as_localcaption]
+      end    
+      item
+        caption = 'Delete Report Page'
+        name = 'delpage'
+        state = [as_localcaption]
+      end>
+  end
+  inherited hidecompact: taction[11]
+  end
+  inherited hidewidgetact: taction[12]
+    state = [as_disabled, as_invisible]
+  end
+  inherited togglehideact: taction[13]
+  end
+  inherited showallact: taction[14]
+  end
+  object tpopupmenu2: tpopupmenu[15]
+    menu.submenu.count = 29
+    menu.submenu.items = <    
+      item
+        caption = 'Show objectinspector'
+        state = [as_localcaption, as_localonexecute]
+      end    
+      item
+        caption = 'Show componentpalette'
+        state = [as_localcaption, as_localonexecute]
+      end    
+      item
+        caption = 'Show as Text'
+        state = [as_localcaption, as_localonexecute]
+        options = [mao_shortcutcaption, mao_asyncexecute]
+      end    
+      item
+        action = formdesignerfo.hidecompact
+        options = [mao_separator, mao_shortcutcaption]
+      end    
+      item
+        action = formdesignerfo.hidewidgetact
+        options = [mao_checkbox, mao_shortcutcaption]
+      end    
+      item
+        action = hidewidgetact
+        state = [as_disabled, as_invisible]
+        options = [mao_checkbox, mao_shortcutcaption]
+      end    
+      item
+        action = togglehideact
+      end    
+      item
+        action = showallact
+      end    
+      item
+        options = [mao_separator, mao_shortcutcaption]
+      end    
+      item
+        caption = 'Copy Component(s)'
+        name = 'copy'
+        state = [as_localcaption, as_localshortcut, as_localonexecute]
+        sc = (
+          1
+          16451
+        )
+      end    
+      item
+        caption = 'Cut Component(s)'
+        name = 'cut'
+        state = [as_localcaption, as_localshortcut, as_localonexecute]
+        options = [mao_shortcutcaption, mao_asyncexecute]
+        sc = (
+          1
+          16472
+        )
+      end    
+      item
+        caption = 'Paste Component(s)'
+        name = 'paste'
+        state = [as_localcaption, as_localshortcut, as_localonexecute]
+        sc = (
+          1
+          16470
+        )
+      end    
+      item
+        caption = 'Delete Component(s)'
+        name = 'delete'
+        state = [as_localcaption, as_localshortcut, as_localonexecute]
+        options = [mao_shortcutcaption, mao_asyncexecute]
+        sc = (
+          1
+          263
+        )
+      end    
+      item
+        caption = 'Undelete Component(s)'
+        name = 'undelete'
+        state = [as_localcaption, as_localonexecute]
+      end    
+      item
+        options = [mao_separator, mao_shortcutcaption]
+      end    
+      item
+        caption = 'Select Childwidget'
+        name = 'selectchild'
+        state = [as_localcaption]
+      end    
+      item
+        caption = 'Edit Component'
+        name = 'editcomp'
+        state = [as_localcaption, as_localonexecute]
+      end    
+      item
+        caption = 'Bring to Front'
+        name = 'bringtofro'
+        state = [as_localcaption, as_localonexecute]
+      end    
+      item
+        caption = 'Send to Back'
+        name = 'sendtoba'
+        state = [as_localcaption, as_localonexecute]
+      end    
+      item
+        caption = 'Iconify'
+        name = 'iconify'
+        state = [as_localcaption, as_localonexecute]
+      end    
+      item
+        caption = 'Deiconify'
+        name = 'deiconify'
+        state = [as_localcaption, as_localonexecute]
+      end    
+      item
+        caption = 'Set Tab Order'
+        name = 'settabord'
+        state = [as_localcaption, as_localonexecute]
+      end    
+      item
+        caption = 'Set Creation Order'
+        state = [as_localcaption, as_localonexecute]
+      end    
+      item
+        caption = 'Sync. to Font Height'
+        name = 'synctofo'
+        state = [as_localcaption, as_localonexecute]
+      end    
+      item
+        caption = 'Revert to inherited'
+        name = 'revert'
+        state = [as_localcaption, as_localonexecute]
+        options = [mao_shortcutcaption, mao_asyncexecute]
+      end    
+      item
+        options = [mao_separator, mao_shortcutcaption]
+      end    
+      item
+        caption = 'Touch Form'
+        state = [as_localcaption, as_localonexecute]
+        options = [mao_separator, mao_shortcutcaption]
+      end    
+      item
         caption = 'Add report page'
         name = 'addpage'
         state = [as_localcaption, as_localonexecute]
@@ -267,8 +441,9 @@ inherited reportdesignerfo: treportdesignerfo
         caption = 'Delete report page'
         name = 'delpage'
         state = [as_localcaption, as_localonexecute]
-        options = [mao_shortcutcaption, mao_asyncexecute]
         onexecute = deletepage
       end>
+    left = 16
+    top = 160
   end
 end

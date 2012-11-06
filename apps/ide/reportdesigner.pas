@@ -4,7 +4,7 @@ interface
 uses
  classes,msegui,mseclasses,mseforms,formdesigner,msesimplewidgets,msetabs,
  msesplitter,msegraphutils,msedesigner,msedesignintf,msereport,msetypes,
- mseevent,mseglob,mseguiglob,msemenus,msedial,msedispwidgets;
+ mseevent,mseglob,mseguiglob,msemenus,msedial,msedispwidgets,mseact;
 
 const
  updatetabtag = 83684;
@@ -29,6 +29,7 @@ type
    tspacer1: tspacer;
    tspacer2: tspacer;
    tspacer3: tspacer;
+   tpopupmenu2: tpopupmenu;
    procedure repchildscaled(const sender: TObject);
    procedure tabcha(const sender: TObject);
    procedure tabmo(const sender: TObject; var curindex: Integer;
@@ -47,6 +48,8 @@ type
    fstate: reportdesignerstatesty;
    function ppmm: real;
   protected
+   procedure setmoduleoptions(const aoptions: moduleoptionsty); override;
+   procedure updatewidgethideexe(const sender: tcustomaction); override;
    function report: tcustomreport;
    function getmoduleparent: twidget; override;
    function getdesignrect: rectty; override;
@@ -415,6 +418,16 @@ end;
 procedure treportdesignerfo.componentmoving(const apos: pointty);
 begin
  setmousemarkers(apos,self);
+end;
+
+procedure treportdesignerfo.setmoduleoptions(const aoptions: moduleoptionsty);
+begin
+ inherited setmoduleoptions(aoptions-[mo_hidewidgets]);
+end;
+
+procedure treportdesignerfo.updatewidgethideexe(const sender: tcustomaction);
+begin
+ //dummy
 end;
 
 end.

@@ -392,13 +392,14 @@ procedure tsourcefo.updatestat(const statfiler: tstatfiler);
 var
  int1: integer;
  filenames,relpaths,modulenames: filenamearty;
+ moduleoptions: integerarty;
  ismod: longboolarty;
  ar1,ar2: longboolarty;
  page1: tsourcepage1;
  intar1,intar2: integerarty;
  mstr1: filenamety;
  bo1: boolean;
-// po1: pmoduleinfoty;
+ po1: pmoduleinfoty;
  
 begin
  with statfiler do begin
@@ -432,11 +433,13 @@ begin
     end;
    end;
    setlength(modulenames,designer.modules.count);
+   setlength(moduleoptions,length(modulenames));
    setlength(ar1,length(modulenames));
    setlength(ar2,length(modulenames));
    for int1:= 0 to designer.modules.count - 1 do begin
     with designer.modules[int1]^ do begin
      modulenames[int1]:= filename;
+     moduleoptions[int1]:= longword(designformintf.moduleoptions);
      ar1[int1]:= designform.visible;
      ar2[int1]:= not hasmenuitem;
     end;
@@ -466,6 +469,7 @@ begin
   updatevalue('relpaths',relpaths);
   updatevalue('ismoduletexts',ismod);
   updatevalue('modules',modulenames);
+  updatevalue('moduleoptions',moduleoptions);
   updatevalue('visiblemodules',ar1);
   updatevalue('nomenumodules',ar2);
   if not iswriter then begin
@@ -500,6 +504,7 @@ begin
     end;
     mainfo.errorformfilename:= '';
     setlength(ar2,length(modulenames));
+    setlength(moduleoptions,length(modulenames));
     for int1:= 0 to high(modulenames) do begin
      try
       if int1 > high(ar1) then begin
@@ -510,12 +515,17 @@ begin
       end;
       mstr1:= relativepath(modulenames[int1],projectoptions.projectdir);
       if findfile(mstr1) then begin
-       mainfo.openformfile(filepath(mstr1),bo1,false,false,
+       po1:= mainfo.openformfile(filepath(mstr1),bo1,false,false,
                                                          not ar2[int1],true);
       end
       else begin
-       mainfo.openformfile(modulenames[int1],bo1,false,false,
+       po1:= mainfo.openformfile(modulenames[int1],bo1,false,false,
                                                          not ar2[int1],true);
+      end;
+      if (po1 <> nil) then begin
+       po1^.designformintf.moduleoptions:= 
+            moduleoptionsty(longword(moduleoptions[int1])) *
+                                                 [mo_hidewidgets,mo_hidecomp];
       end;
      except
       if checkprojectloadabort then begin

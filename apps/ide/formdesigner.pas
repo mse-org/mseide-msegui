@@ -104,6 +104,8 @@ type
    popupme: tpopupmenu;
    hidecompact: taction;
    hidewidgetact: taction;
+   togglehideact: taction;
+   showallact: taction;
    procedure doshowobjectinspector(const sender: tobject);
    procedure doshowcomponentpalette(const sender: tobject);
    procedure doshowastext(const sender: tobject);
@@ -127,8 +129,10 @@ type
    procedure doiconify(const sender: TObject);
    procedure dodeiconify(const sender: TObject);
    procedure hidecompexe(const sender: TObject);
-   procedure updatewidgethideexe(const sender: tcustomaction);
+   procedure updatewidgethideexe(const sender: tcustomaction); virtual;
    procedure hidewidgetexe(const sender: TObject);
+   procedure togglehideexe(const sender: TObject);
+   procedure showallexe(const sender: TObject);
   private
    fdesigner: tdesigner;
    fform: twidget;
@@ -136,6 +140,7 @@ type
    fmoduleintf: pdesignmoduleintfty;
    fmodulesetting: integer;
    fformcont: tformcontainer;
+   fmoduleoptions: moduleoptionsty;
    procedure setmodule(const value: tmsecomponent);
    function getselections: tformdesignerselections;
   protected
@@ -175,12 +180,17 @@ type
    procedure componentmoving(const apos: pointty); virtual;
    procedure placecomponent(const component: tcomponent; const apos: pointty;
                                  aparent: tcomponent = nil);
+   function getmoduleoptions: moduleoptionsty;
+   procedure setmoduleoptions(const aoptions: moduleoptionsty); virtual;
   public
    constructor create(const aowner: tcomponent; const adesigner: tdesigner;
                       const aintf: pdesignmoduleintfty); reintroduce; virtual;
                         
    destructor destroy; override;
    function designnotification: idesignnotification;
+    //idesignform
+   property moduleoptions: moduleoptionsty read getmoduleoptions 
+                                                   write setmoduleoptions;
    function clickedcomponent: tcomponent;
    property modulerect: rectty read fwidgetrect;
    procedure updatecaption;
@@ -189,6 +199,7 @@ type
    procedure endplacement;
    procedure beginstreaming; virtual;
    procedure endstreaming; virtual;
+
    property module: tmsecomponent read fmodule write setmodule;
    property form: twidget read fform;
  end;
@@ -248,7 +259,7 @@ type
                                          //embedded
    function getcomponentrect1(const component: tcomponent): rectty;
                                          //top level
-   function componentatpos(const pos: pointty): tcomponent;
+   function componentatpos(const apos: pointty): tcomponent;
    function iswidgetcomp(const acomp: tcomponent): boolean;
  
    procedure poschanged; override;
@@ -273,8 +284,8 @@ type
    procedure updateclickedcomponent;
    procedure deletecomponent(const component: tcomponent);
    procedure selectcomponent(const component: tcomponent;
-//                                 const bymouse: boolean;
                                              mode: selectmodety = sm_select);
+                                  //component can be nil
    procedure selectparentwidget(const awidget: twidget);
    procedure clearselection;
    procedure domodified;
@@ -540,11 +551,12 @@ begin
  end;
 end;
 
-function tdesignwindow.componentatpos(const pos: pointty): tcomponent;
+function tdesignwindow.componentatpos(const apos: pointty): tcomponent;
 
 var
  isdatamodule: boolean;
  toplevel: boolean;
+ compoff,widoff: boolean;
                                        
  function checkcomponent(const component: tcomponent;
                 const pos: pointty; const shiftoffset: boolean): tcomponent;
@@ -557,9 +569,14 @@ var
   comp1: tcomponent;
  begin
   result:= nil;
-  bo2:= false;
-  bo1:=  not isdatamodule and iswidgetcomp(component) and 
+  bo2:= iswidgetcomp(component);
+  if ((bo2 and widoff) or (not bo2 and compoff)) and 
+                                          (component.owner <> nil) then begin
+   exit;
+  end;
+  bo1:=  not isdatamodule and bo2 and 
                                (twidget(component).parentwidget <> nil);
+  bo2:= false;
   shift1:= shiftoffset; //for chidren
   pt1:= pos;
   rect1:= getcomponentrect(component,shiftoffset);
@@ -608,11 +625,15 @@ var
  end;
  
 begin
- isdatamodule:= tformdesignerfo(fowner).fform = nil;
- toplevel:= true;
- result:= checkcomponent(tformdesignerfo(fowner).fmodule,pos,true);
- if result = tformdesignerfo(fowner).fmodule then begin
-  result:= nil;
+ with tformdesignerfo(fowner) do begin
+  isdatamodule:= fform = nil;
+  widoff:= hidewidgetact.checked;
+  compoff:= hidecompact.checked;
+  toplevel:= true;
+  result:= checkcomponent(tformdesignerfo(fowner).fmodule,apos,true);
+  if result = tformdesignerfo(fowner).fmodule then begin
+   result:= nil;
+  end;
  end;
 end;
 
@@ -629,7 +650,8 @@ function tformdesignerselections.assign(
               //true if owned components involved
 var
  amodule: tmsecomponent;
-
+ ar1: booleanarty;
+ 
  procedure checkowned;
  var
   int1: integer;
@@ -637,6 +659,7 @@ var
   po1: pformselectedinfoty;
  begin
   result:= false;
+  setlength(ar1,count);
   po1:= datapo;
   for int1:= 0 to count - 1 do begin
    result:= po1^.selectedinfo.instance = amodule;
@@ -644,12 +667,10 @@ var
    while comp1 <> nil do begin
     if comp1 = amodule then begin
      result:= true;
+     ar1[int1]:= true;
      break;
     end;
     comp1:= comp1.owner;
-   end;
-   if result then begin
-    break;
    end;
    inc(po1);
   end;
@@ -659,6 +680,7 @@ var
  int1: integer;
  po1: pformselectedinfoty;
  comp1: tcomponent;
+ bo1,bo2: boolean;
 begin
  result:= false;
  amodule:= tformdesignerfo(fowner.fowner).fmodule;
@@ -668,18 +690,38 @@ begin
   checkowned;
  end;
  if result then begin
+  bo1:= false;
+  bo2:= false;
   po1:= datapo;
   for int1:= 0 to count - 1 do begin   
-   comp1:= po1^.selectedinfo.instance.owner;
+   comp1:= po1^.selectedinfo.instance;
    while (comp1 <> nil) and (comp1 <> amodule) do begin
-    if comp1 is tmsedatamodule then begin
-     with tmsedatamodule(comp1) do begin
-      options:= options - [dmo_iconic];
+    if ar1[int1] then begin
+     if (comp1 is tmsedatamodule) and (comp1 <> 
+                                   po1^.selectedinfo.instance) then begin
+      with tmsedatamodule(comp1) do begin
+       options:= options - [dmo_iconic];
+      end;
+     end;
+    
+     if fowner.iswidgetcomp(comp1) then begin
+      bo1:= true;
+     end
+     else begin
+      bo2:= true;
      end;
     end;
     comp1:= comp1.owner;
    end;
    inc(po1);
+  end;
+  with tformdesignerfo(fowner.fowner) do begin
+   if bo1 then begin
+    hidewidgetact.checked:= false;
+   end;
+   if bo2 then begin
+    hidecompact.checked:= false;
+   end;
   end;
  end;
 end;
@@ -1183,6 +1225,7 @@ procedure tdesignwindow.doafterpaint(const canvas: tcanvas);
 
 var
  offs: pointty;
+ gridrect: rectty;
  
  procedure clipchildren(const acomp: tcomponent; const aindex: integer;
                         const shiftoffset: boolean);
@@ -1202,19 +1245,25 @@ var
    end;
   end;
  end;
- 
- procedure drawcomponent(const component: tcomponent; const toplevel: boolean);
+
+var
+ level: integer;
+  
+ procedure drawcomponent(const component: tcomponent);
  var
   rect1: rectty;
   int1: integer;
-//  pt1: pointty;
   isroot,iswidget,issub: boolean;
   comp1: tcomponent;
+//  bo1: boolean;
+ label
+  endlab;
  begin
+  isroot:= level = 0;
+  inc(level);
   if not (cssubcomponent in component.componentstyle) then begin
    iswidget:= false;
    issub:= false;
-   isroot:= component = tformdesignerfo(fowner).fmodule;
    if isroot then begin
     iswidget:= true;
    end
@@ -1226,14 +1275,20 @@ var
    end;
    if iswidget then begin
     if isroot then begin
-     rect1:= tformdesignerfo(fowner).gridrect;
+     rect1:= gridrect;
     end
     else begin
+     if tformdesignerfo(fowner).hidewidgetact.checked then begin
+      goto endlab;
+     end;
      rect1:= twidget(component).widgetrect;
+     if level = 2 then begin
+      addpoint1(rect1.pos,gridrect.pos);
+     end;
     end
    end
    else begin
-    rect1:= getcomponentrect(component,toplevel);
+    rect1:= getcomponentrect(component,level <= 2);
    end;
    if not (iswidget or issub) then begin
     if isdatasubmodule(component,true) then begin
@@ -1255,18 +1310,15 @@ var
      if not issub then begin
       canvas.intersectcliprect(rect1);
      end;
-     if not isroot or iswidget then begin
+     if not isroot then begin
       canvas.move(rect1.pos);
      end;
-     clipchildren(component,0,isroot{toplevel} and not iswidget);
-//     pt1:= rect1.pos;
-//     if component.owner = tformdesignerfo(fowner).fmodule then begin
-//      adjustchildcomponentpos(pt1);
-//     end;
+     clipchildren(component,0,isroot);
+
      for int1:= 0 to component.componentcount - 1 do begin
       comp1:= component.components[int1];
       if not isdatasubmodule(comp1) then begin
-       drawcomponent(comp1,isroot);
+       drawcomponent(comp1);
       end;
      end;
      canvas.restore;
@@ -1277,8 +1329,8 @@ var
       comp1:= component.components[int1];
       if isdatasubmodule(comp1) then begin
        canvas.save;
-       clipchildren(component,int1+1,{not} isroot);
-       drawcomponent(comp1,isroot);
+       clipchildren(component,int1+1,isroot);
+       drawcomponent(comp1);
        canvas.restore;
       end;
      end;
@@ -1295,6 +1347,8 @@ var
     end;
    end;
   end;
+ endlab:
+  dec(level);
  end;
  
 //var
@@ -1302,11 +1356,13 @@ var
 // rect1: rectty;
 begin
  offs:= componentoffset;
+ gridrect:= tformdesignerfo(fowner).gridrect;
  with tformdesignerfo(fowner) do begin
   if fmodule <> nil then begin
    canvas.intersectcliprect(tformdesignerfo(fowner).gridrect);
    if not hidecompact.checked then begin
-    drawcomponent(tformdesignerfo(fowner).fmodule,true);
+    level:= 0;
+    drawcomponent(tformdesignerfo(fowner).fmodule);
    end;
    if form <> nil then begin
     drawgrid(canvas);
@@ -1642,12 +1698,12 @@ begin
           factarea:= actareabefore;
          end
          else begin
-          if isdatasubmodule(comp1.owner) then begin
+//          if isdatasubmodule(comp1.owner) then begin
            selectcomponent(comp1.owner);
-          end
-          else begin
-           selectcomponent(module);
-          end;
+//          end
+//          else begin
+//           selectcomponent(module);
+//          end;
          end;
         end;
        end;
@@ -1995,7 +2051,8 @@ begin
       if isinpaintrect then begin
        component:= componentatpos(pos);
        if (component = nil) then begin
-        if form <> nil then begin
+        if (form <> nil) and 
+                 not tformdesignerfo(fowner).hidewidgetact.checked then begin
          component:= widgetatpos(pos,true);
         end
         else begin
@@ -2413,39 +2470,31 @@ procedure tdesignwindow.selectcomponent(const component: tcomponent;
 //                       const bymouse: boolean;
                        mode: selectmodety = sm_select);
 begin
- if mode = sm_remove then begin
-  fselections.remove(component);
-  factcompindex:= -1;
- end
- else begin
-  if mode = sm_select then begin
-   fselections.clear;
-  end;
-  factcompindex:= fselections.indexof(component);
-  if factcompindex < 0 then begin
-   factcompindex:= fselections.add(component);
+ if component <> nil then begin
+  if mode = sm_remove then begin
+   fselections.remove(component);
+   factcompindex:= -1;
   end
   else begin
-   if mode = sm_flip then begin
-    fselections.remove(component);
-    factcompindex:= -1;
+   if mode = sm_select then begin
+    fselections.clear;
+   end;
+   factcompindex:= fselections.indexof(component);
+   if factcompindex < 0 then begin
+    factcompindex:= fselections.add(component);
+   end
+   else begin
+    if mode = sm_flip then begin
+     fselections.remove(component);
+     factcompindex:= -1;
+    end;
    end;
   end;
- end;
- if factcompindex < 0 then begin
-  factarea:= ar_none;
- end;
- {
- if bymouse then begin
-  if factcompindex >= 0 then begin
-   factarea:= ar_component;
-  end
-  else begin
+  if factcompindex < 0 then begin
    factarea:= ar_none;
   end;
+  updateselections;
  end;
- }
- updateselections;
 end;
 
 procedure tdesignwindow.selectparentwidget(const awidget: twidget);
@@ -2780,16 +2829,20 @@ begin
 end;
 
 procedure tformdesignerfo.doasyncevent(var atag: integer);
+var
+ mstr1: msestring;
 begin
  case designerfoeventty(atag) of
   fde_updatecaption: begin
    if fmodule <> nil then begin
-    if fdesigner.modules.findmodule(fmodule)^.modified then begin
-     caption:= '*'+fmodule.name;
-    end
-    else begin
-     caption:= fmodule.name;
+    mstr1:= fmodule.name;
+    if fmoduleoptions <> [] then begin
+     mstr1:= '-'+mstr1;
     end;
+    if fdesigner.modules.findmodule(fmodule)^.modified then begin
+     mstr1:= '*'+mstr1;
+    end;
+    caption:= mstr1;
    end;
   end;
   fde_syncsize: begin
@@ -3297,7 +3350,7 @@ end;
 
 function tformdesignerfo.gridrect: rectty;
 begin
- if form = nil then begin
+ if (form = nil) or hidewidgetact.checked then begin
   result:= container.paintrect;
  end
  else begin
@@ -3416,16 +3469,55 @@ begin
  end;
 end;
 
+procedure tformdesignerfo.setmoduleoptions(const aoptions: moduleoptionsty);
+var
+ changes: moduleoptionsty;
+begin
+ if fform <> nil then begin
+  changes:= aoptions><fmoduleoptions;
+  if changes <> [] then begin
+   fmoduleoptions:= aoptions;
+   hidewidgetact.checked:= mo_hidewidgets in aoptions;
+   hidecompact.checked:= mo_hidecomp in aoptions;
+   updatecaption;
+   if mo_hidecomp in changes then begin
+    clientrectchanged;
+    if mo_hidecomp in fmoduleoptions then begin
+     designer.noselection;
+    end;
+   end;
+   if mo_hidewidgets in changes then begin
+    if mo_hidewidgets in fmoduleoptions then begin
+     designer.noselection;
+     fscrollbox.visible:= true;
+    end
+    else begin
+     fscrollbox.visible:= false;
+    end;
+    fformcont.visible:= not fscrollbox.visible;
+   end;  
+  end;
+ end;
+end;
+
 procedure tformdesignerfo.hidecompexe(const sender: TObject);
 begin
  clientrectchanged;
+ if hidecompact.checked then begin
+  moduleoptions:= moduleoptions + [mo_hidecomp];
+ end
+ else begin
+  moduleoptions:= moduleoptions - [mo_hidecomp];
+ end;
 end;
 
 procedure tformdesignerfo.hidewidgetexe(const sender: TObject);
 begin
- if fformcont.visible = hidewidgetact.checked then begin
-  fscrollbox.visible:= hidewidgetact.checked;
-  fformcont.visible:= not fscrollbox.visible;
+ if hidewidgetact.checked then begin
+  moduleoptions:= moduleoptions + [mo_hidewidgets];
+ end
+ else begin
+  moduleoptions:= moduleoptions - [mo_hidewidgets];
  end;
 end;
 
@@ -3433,6 +3525,41 @@ procedure tformdesignerfo.updatewidgethideexe(const sender: tcustomaction);
 begin
  hidecompact.enabled:= fform <> nil;
  hidewidgetact.enabled:= fform <> nil;
+ togglehideact.enabled:= fform <> nil;
+ showallact.enabled:= fform <> nil;
+end;
+
+function tformdesignerfo.getmoduleoptions: moduleoptionsty;
+begin
+ result:= fmoduleoptions;
+end;
+
+procedure tformdesignerfo.togglehideexe(const sender: TObject);
+begin
+ if hidewidgetact.checked then begin
+  if hidecompact.enabled then begin
+   hidecompact.checked:= true;
+  end;
+  hidewidgetact.checked:= false;
+ end
+ else begin
+  if hidecompact.checked then begin
+   if hidewidgetact.enabled then begin
+    hidewidgetact.checked:= true;
+   end;
+   hidecompact.checked:= false;
+  end
+  else begin
+   if hidecompact.enabled then begin
+    hidecompact.checked:= true;
+   end;
+  end;
+ end;
+end;
+
+procedure tformdesignerfo.showallexe(const sender: TObject);
+begin
+ moduleoptions:= moduleoptions - [mo_hidewidgets,mo_hidecomp];
 end;
 
 initialization

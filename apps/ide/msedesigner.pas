@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2011 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2012 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -38,9 +38,16 @@ const
 type
  tdesigner = class;
 
+ moduleoptionty = (mo_hidewidgets,mo_hidecomp);
+ moduleoptionsty = set of moduleoptionty;
+
  iformdesigner = interface(inullinterface)
                            ['{0207E291-638A-4A1B-BA9F-4FB0F6A0EA29}']
   function clickedcomponent: tcomponent;
+  function getmoduleoptions: moduleoptionsty;
+  procedure setmoduleoptions(const aoptions: moduleoptionsty);
+  property moduleoptions: moduleoptionsty read getmoduleoptions
+                                                 write setmoduleoptions;
  end;
  
  methodinfoty = record
@@ -67,7 +74,6 @@ type
 {$endif}
   protected
    procedure finalizeitem(var aitemdata); override;
-//   procedure freedata(var data); override;
    procedure deletemethod(const aadress: pointer);
    procedure addmethod(const aname: string; const aaddress: pointer;
                        const atypeinfo: ptypeinfo);
@@ -105,7 +111,6 @@ type
 
  moduleinfoty = record
   filename: msestring;
-  backupcreated: boolean;
   moduleclassname: string[80]; //can not be ansistring!
   instancevarname: string;
   instance: tmsecomponent;
@@ -116,13 +121,15 @@ type
   methodtableswapped: integer;
   methodtablebefore: pointer;
  {$endif}
+  backupcreated: boolean;
+  modified: boolean;
+  resolved: boolean;
+  hasmenuitem: boolean;
+//  options: moduleoptionsty;
   components: tcomponents;
   designform: tmseform;
   designformintf: iformdesigner;
-  modified: boolean;
-  hasmenuitem: boolean;
   referencedmodules: stringarty;
-  resolved: boolean;
   loadingstream: tstream;
  end;
  pmoduleinfoty = ^moduleinfoty;
@@ -138,11 +145,8 @@ type
   private
    fdesigner: tdesigner;
    fcomponent: tcomponentslink; // to receive componentnotifications
-//   famodule: tcomponent;
    fowner: pmoduleinfoty;
-//   procedure doadd(component: tcomponent);
   protected
-//   procedure freedata(var data); override;
    procedure finalizeitem(var aitemdata); override;
    function find(const value: tobject): pcomponentinfoty;
    procedure destroynotification(const acomponent: tcomponent);
@@ -295,7 +299,6 @@ type
  
  tdescendentinstancelist = class(tdesignerancestorlist)
   private
-//   ferrorhandler: treaderrorhandler;
    fdelcomps:componentarty;
    froot: tcomponent;
    fmodule: pmoduleinfoty;

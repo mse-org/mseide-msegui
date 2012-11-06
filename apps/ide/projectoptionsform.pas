@@ -387,6 +387,7 @@ type
    fmodulenames: msestringarty;
    fmoduletypes: msestringarty;
    fmodulefiles: filenamearty;
+//   fmoduleoptions: integerarty;
    fbefcommandon: integerarty;
    fmakeoptionson: integerarty;
    faftcommandon: integerarty;
@@ -446,6 +447,7 @@ type
    property modulenames: msestringarty read fmodulenames write fmodulenames;
    property moduletypes: msestringarty read fmoduletypes write fmoduletypes;
    property modulefiles: filenamearty read fmodulefiles write fmodulefiles;
+//   property moduleoptions: integerarty read fmoduleoptions write fmoduleoptions;
 
    property befcommandon: integerarty read fbefcommandon write fbefcommandon;
    property makeoptionson: integerarty read fmakeoptionson write fmakeoptionson;

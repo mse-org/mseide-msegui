@@ -1,9 +1,10 @@
 object formdesignerfo: tformdesignerfo
   optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_hinton]
   optionsskin = [osk_noskin]
+  popupmenu = popupme
   visible = False
-  bounds_x = 196
-  bounds_y = 202
+  bounds_x = 111
+  bounds_y = 256
   bounds_cx = 287
   bounds_cy = 300
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent]
@@ -88,7 +89,7 @@ object formdesignerfo: tformdesignerfo
   top = 180
   moduleclassname = 'tmseform'
   object popupme: tpopupmenu
-    menu.submenu.count = 26
+    menu.submenu.count = 29
     menu.submenu.items = <    
       item
         caption = 'Show objectinspector'
@@ -107,12 +108,21 @@ object formdesignerfo: tformdesignerfo
         onexecute = doshowastext
       end    
       item
+        options = [mao_separator, mao_shortcutcaption]
+      end    
+      item
         action = hidecompact
         options = [mao_checkbox, mao_shortcutcaption]
       end    
       item
         action = hidewidgetact
         options = [mao_checkbox, mao_shortcutcaption]
+      end    
+      item
+        action = togglehideact
+      end    
+      item
+        action = showallact
       end    
       item
         options = [mao_separator, mao_shortcutcaption]
@@ -252,15 +262,27 @@ object formdesignerfo: tformdesignerfo
   end
   object hidecompact: taction
     caption = 'Hide &Components'
-    onexecute = hidecompexe
+    onchange = hidecompexe
     left = 144
     top = 40
   end
   object hidewidgetact: taction
     caption = 'Hide &Widgets'
-    onexecute = hidewidgetexe
     onupdate = updatewidgethideexe
+    onchange = hidewidgetexe
     left = 144
     top = 56
+  end
+  object togglehideact: taction
+    caption = '&Hide Widgets<>Components'
+    onexecute = togglehideexe
+    left = 144
+    top = 72
+  end
+  object showallact: taction
+    caption = '&Show all'
+    onexecute = showallexe
+    left = 144
+    top = 88
   end
 end
