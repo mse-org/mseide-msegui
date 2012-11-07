@@ -8793,7 +8793,8 @@ end;
 function twidget.isclientmouseevent(var info: mouseeventinfoty): boolean;
 begin
  with info do begin
-  if not (es_processed in eventstate) or (info.eventkind = ek_mousemove) then begin
+  if not (es_processed in eventstate) or 
+                                 (info.eventkind = ek_mousemove) then begin
    updatemousestate(info);
    if [ws_mouseinclient,ws_clientmousecaptured] * fwidgetstate <> [] then begin
     if (appinst.fclientmousewidget <> self) and not (es_child in eventstate) then begin

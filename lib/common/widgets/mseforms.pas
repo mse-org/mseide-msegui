@@ -2026,9 +2026,6 @@ begin
  if not (es_processed in info.eventstate) then begin
   fdragdock.mouseevent(info);
  end;
-// else begin
-//  fdragdock.checkmouseactivate(self,info);
-// end;
 end;
 
 procedure tcustomdockform.childmouseevent(const sender: twidget;

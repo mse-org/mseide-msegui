@@ -2803,7 +2803,8 @@ procedure tcustomcaptionframe.updatemousestate(const sender: twidget;
         const info: mouseeventinfoty);
 begin
  inherited;
- if pointincaption(info.pos) then begin
+ if pointincaption(info.pos) and 
+                   not (ow_mousetransparent in sender.optionswidget) then begin
   with twidget1(sender) do begin
    include(fwidgetstate,ws_wantmousebutton);    //for twidget.iswidgetclick
    if fs_captionfocus in fstate then begin

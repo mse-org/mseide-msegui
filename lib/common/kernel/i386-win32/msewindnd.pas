@@ -678,7 +678,7 @@ begin
  end;
  application.unlock;
 end;
-var testvar: dndactionsty; testvar1: dword;
+
 function tdataobject.givefeedback(dweffect: longint): hresult; stdcall;
 begin
  if interlockeddecrement(fcheckpending) >= 0 then begin
@@ -693,8 +693,6 @@ begin
  else begin
   interlockedincrement(fcheckpending);
  end;
- testvar:= ftargetactions;
- testvar1:= dweffect;
  result:= s_ok;
 end;
 
