@@ -249,7 +249,8 @@ type
    fr: prectaccessty;
    fw: pwidgetaccessty;
    procedure checkdirection;
-   procedure objectevent(const sender: tobject; const event: objecteventty); override;
+   procedure objectevent(const sender: tobject;
+                                      const event: objecteventty); override;
    function checkclickstate(const info: mouseeventinfoty): boolean; override;
    
    function doclose(const awidget: twidget): boolean;
@@ -262,7 +263,8 @@ type
    function docheckdock(const info: draginfoty): boolean; virtual;
    function dockdrag(const dragobj: tdockdragobject): boolean;
 
-   function getparentcontroller(out acontroller: tdockcontroller): boolean; overload;
+   function getparentcontroller(
+                     out acontroller: tdockcontroller): boolean; overload;
    function getparentcontroller: tdockcontroller; overload;
    property useroptions: optionsdockty read fuseroptions write setuseroptions
                      default defaultoptionsdock;
@@ -305,13 +307,15 @@ type
    function beforedragevent(var info: draginfoty): boolean; override;
    procedure enddrag; override;
    procedure clientmouseevent(var info: mouseeventinfoty); override;
-   procedure childmouseevent(const sender: twidget; var info: mouseeventinfoty);
+   procedure childmouseevent(const sender: twidget;
+                                     var info: mouseeventinfoty); override;
    procedure checkmouseactivate(const sender: twidget; 
                                       var info: mouseeventinfoty);
-   procedure dopaint(const acanvas: tcanvas); //canvasorigin = container.clientpos;
+   procedure dopaint(const acanvas: tcanvas);
+                                       //canvasorigin = container.clientpos;
    procedure doactivate;
-   procedure sizechanged(force: boolean = false; scalefixedalso: boolean = false;
-                           const awidgets: widgetarty = nil);
+   procedure sizechanged(force: boolean = false;
+            scalefixedalso: boolean = false; const awidgets: widgetarty = nil);
    procedure parentchanged(const sender: twidget);
    procedure poschanged;
    procedure statechanged(const astate: widgetstatesty);
@@ -321,7 +325,8 @@ type
    procedure layoutchanged; //force layout calcualation
       //istatfile
    procedure dostatread(const reader: tstatreader);
-   procedure dostatwrite(const writer: tstatwriter; const bounds: prectty = nil);
+   procedure dostatwrite(const writer: tstatwriter;
+                                  const bounds: prectty = nil);
    procedure statreading;
    procedure statread;
    function getdockcaption: msestring;
@@ -3244,6 +3249,7 @@ procedure tdockcontroller.childmouseevent(const sender: twidget;
                var info: mouseeventinfoty);
 begin
  checkmouseactivate(sender,info);
+ inherited;
 end;
 
 procedure tdockcontroller.widgetregionchanged(const sender: twidget);

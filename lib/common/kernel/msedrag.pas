@@ -42,17 +42,7 @@ type
                     const apickpos: pointty; const dataobject: tobject);
   property data: tobject read fdata;
  end;
-{
- tlinkedobjectdragobject = class(tdragobject,iobjectlink)
-  private
-  protected
-   fdata: tobject;
-  public
-   constructor create(const asender: tobject; var instance: tdragobject;
-              const dataobject: iobjectlink);
-   function data: tobject;
- end;
-}
+
  tstringdragobject = class(tdragobject)
   public
    data: string;
@@ -81,10 +71,14 @@ type
   dragobj: tdragobject;
 //  expiretime: longword;
  end;
+
+ dragoptionty = (do_child);
+ dragoptionsty = set of dragoptionty;
  
  tcustomdragcontroller = class(tlinkedpersistent,ievent)
   private
    ftimer: tsimpletimer;
+   foptions: dragoptionsty;
    procedure dokeypress(const sender: twidget; var info: keyeventinfoty);
    procedure initdraginfo(var info: draginfoty;
                          const eventkind: drageventkindty; const pos: pointty);
@@ -110,11 +104,15 @@ type
    procedure enddrag; virtual;
    procedure mouseevent(var info: mouseeventinfoty);
    procedure clientmouseevent(var info: mouseeventinfoty); virtual;
+   procedure childmouseevent(const sender: twidget;
+                                  var info: mouseeventinfoty); virtual;
    function beforedragevent(var info: draginfoty): boolean; virtual; abstract;
     //true if processed
    function afterdragevent(var info: draginfoty): boolean; virtual; abstract;
     //true if processed
    property pickpos: pointty read fpickpos; //clientorigin
+   property options: dragoptionsty read foptions
+                                    write foptions default [];
  end;
 
  tdragcontroller = class(tcustomdragcontroller)
@@ -140,6 +138,7 @@ type
                                   write fonafter.dragover;
    property onafterdragdrop: drageventty read fonafter.dragdrop 
                                   write fonafter.dragdrop;
+   property options;
  end;
  
 function isobjectdrag(const dragobject: tdragobject;
@@ -394,6 +393,26 @@ begin
     else begin
      application.cursorshape:= cr_forbidden;
     end;
+   end;
+  end;
+ end;
+end;
+
+procedure tcustomdragcontroller.childmouseevent(const sender: twidget;
+               var info: mouseeventinfoty);
+var
+ widget1: twidget;
+ pt1: pointty;
+begin
+ if do_child in foptions then begin
+  widget1:= fintf.getwidget;
+  if sender <> widget1 then begin
+   pt1:= info.pos;
+   translatewidgetpoint1(info.pos,sender,widget1);
+   try
+    mouseevent(info);
+   finally
+    info.pos:= pt1;
    end;
   end;
  end;

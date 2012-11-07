@@ -2045,7 +2045,9 @@ begin
  end;
  if not (es_processed in info.eventstate) then begin  
   fdragdock.childmouseevent(sender,info);
-  inherited;
+  if not (es_processed in info.eventstate) then begin
+   inherited;
+  end;
  end;
 end;
 
