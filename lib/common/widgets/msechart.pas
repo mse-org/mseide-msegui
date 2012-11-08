@@ -551,7 +551,7 @@ type
    procedure createframechart;
    function fit(const asides: rectsidesty = allrectsides): boolean; 
            //adjust fitframe for extents of dials
-           //returns tru if changes made
+           //returns true if changes made
 
    property optionschart: optionschartty read foptionschart
                             write setoptionschart default defaultoptionschart;
@@ -664,16 +664,11 @@ type
    fchartwindowrect: rectty;
    fxref: integer;
    ftraces: trecordertraces;
-//   fstarted: boolean;
-//   fchartvalid: boolean;
    foptions: chartrecorderoptionsty;
    procedure setsamplecount(const avalue: integer);
    procedure settraces(const avalue: trecordertraces);
   protected
    procedure checkinit;
-//   procedure changed; override;
-//   procedure chartchange;
-//   procedure clientrectchanged; override;
    procedure dopaintcontent(const acanvas: tcanvas); override;
   public
    constructor create(aowner: tcomponent); override;

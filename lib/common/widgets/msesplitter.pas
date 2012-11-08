@@ -115,7 +115,6 @@ type
    destructor destroy; override;
    procedure move(const dist: pointty);
 
-   property optionswidget default defaultoptionswidgetnofocus;
    property options: splitteroptionsty read foptions write setoptions 
                  default defaultsplitteroptions;
    property shrinkpriority: integer read getshrinkpriority 
@@ -126,11 +125,16 @@ type
    property linkbottom: twidget read flinkbottom write setlinkbottom;
 
    property color default defaultsplittercolor;
-   property grip: stockbitmapty read fgrip write setgrip default defaultsplittergrip;
-   property colorgrip: colorty read fcolorgrip write setcolorgrip default defaultsplittercolorgrip;
+   property grip: stockbitmapty read fgrip write setgrip 
+                                               default defaultsplittergrip;
+   property colorgrip: colorty read fcolorgrip write setcolorgrip 
+                                               default defaultsplittercolorgrip;
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read getstatvarname write fstatvarname;
-   property onupdatelayout: notifyeventty read fonupdatelayout write fonupdatelayout;
+   property onupdatelayout: notifyeventty read fonupdatelayout
+                                               write fonupdatelayout;
+  published
+   property optionswidget default defaultoptionswidgetnofocus;
  end;
 
  tsplitter = class(tcustomsplitter)
