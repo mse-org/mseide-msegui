@@ -128,7 +128,7 @@ type
                     dos_fixsizebuttonclicked,dos_floatbuttonclicked,
                     dos_topbuttonclicked,dos_backgroundbuttonclicked,
                     dos_lockbuttonclicked,
-                    dos_moving,
+                    dos_moving,dos_hasfloatbutton,
                     {dos_proprefvalid,}dos_showed,dos_xorpic);
  dockstatesty = set of dockstatety;
 
@@ -154,6 +154,7 @@ type
   private
    foncalclayout: docklayouteventty;
    fonlayoutchanged: dockcontrollereventty;
+   fonboundschanged: dockcontrollereventty;
    fonfloat: notifyeventty;
    fondock: notifyeventty;
    fonchilddock: widgeteventty;
@@ -287,6 +288,7 @@ type
    function isfloating: boolean;
    function canmdisize: boolean;
    procedure dolayoutchanged;
+   procedure doboundschanged;
    procedure docaptionchanged;
    function findbandpos(const apos: integer; out aindex: integer;
                                      out arect: rectty): boolean;
@@ -385,6 +387,8 @@ type
    property oncalclayout: docklayouteventty read foncalclayout write foncalclayout;
    property onlayoutchanged: dockcontrollereventty read fonlayoutchanged 
                                                        write fonlayoutchanged;
+   property onboundschanged: dockcontrollereventty read fonboundschanged 
+                                                       write fonboundschanged;
    property onfloat: notifyeventty read fonfloat write fonfloat;
    property ondock: notifyeventty read fondock write fondock;
    property onchilddock: widgeteventty read fonchilddock write fonchilddock;
@@ -457,7 +461,7 @@ type
    procedure getpaintframe(var frame: framety); override;
    function calcsizingrect(const akind: sizingkindty;
                                 const offset: pointty): rectty;
-   //iface
+    //iface
    function getclientrect: rectty;
    procedure invalidate;
    function translatecolor(const acolor: colorty): colorty;
@@ -465,10 +469,10 @@ type
               const linkintf: iobjectlink = nil);
    function getcomponentstate: tcomponentstate;
    procedure widgetregioninvalid;
-   procedure drawgripbutton(const acanvas: tcanvas; const kind: dockbuttonrectty;
-                    const arect: rectty; 
-                    const acolorglyph,acolorbutton: colorty); virtual;
-   //iobjectpicker
+   procedure drawgripbutton(const acanvas: tcanvas;
+                    const kind: dockbuttonrectty; const arect: rectty; 
+                             const acolorglyph,acolorbutton: colorty); virtual;
+    //iobjectpicker
    function getwidget: twidget;
    function getcursorshape(const sender: tobjectpicker;
                               var shape: cursorshapety): boolean;
@@ -562,7 +566,8 @@ type
   published
    property dragdock: tdockcontroller read fdragdock write setdragdock;
    property optionswidget default defaultdockpaneloptionswidget;
-   property optionswindow: windowoptionsty read foptionswindow write foptionswindow default [];
+   property optionswindow: windowoptionsty read foptionswindow 
+                                               write foptionswindow default [];
    property frame: tgripframe read getframe write setframe;
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: string read fstatvarname write fstatvarname;
@@ -592,8 +597,8 @@ type
    procedure dopageremoved(const apage: twidget);  override;
    procedure updateoptions;
   public
-   constructor create(const acontroller: tdockcontroller; const aparent: twidget);
-                    reintroduce;
+   constructor create(const acontroller: tdockcontroller;
+                                         const aparent: twidget); reintroduce;
    destructor destroy; override;
  end;
 
@@ -614,8 +619,8 @@ type
 
 { twidgetdragobject }
 
-constructor twidgetdragobject.create(const asender: twidget; var instance: tdragobject;
-                     const apickpos: pointty);
+constructor twidgetdragobject.create(const asender: twidget;
+                           var instance: tdragobject; const apickpos: pointty);
 begin
  inherited create(asender,instance,apickpos);
 end;
@@ -660,7 +665,8 @@ begin
  fdock.refused(apos);
 end;
 
-procedure tdockdragobject.setxorwidget(const awidget: twidget; const screenrect: rectty);
+procedure tdockdragobject.setxorwidget(const awidget: twidget;
+                                                    const screenrect: rectty);
 begin
  if (awidget <> fxorwidget) or not rectisequal(fxorrect,screenrect) then begin
   drawxorpic;
@@ -1351,6 +1357,7 @@ begin
    end;  
   end;
  end;
+ doboundschanged;
 end;
 
 procedure tdockcontroller.dopaint(const acanvas: tcanvas); //canvasorigin = container.clientpos;
@@ -1952,7 +1959,8 @@ begin
  updatesplitterrects(ar1);
 endlab:
  widget1:= fintf.getwidget;
- if widget1.canevent(tmethod(foncalclayout)) then begin
+ if widget1.canevent(tmethod(foncalclayout)) and 
+                             not application.terminated then begin
   foncalclayout(widget1,ar1);
  end;
  dolayoutchanged;
@@ -2200,7 +2208,8 @@ begin
         result:= true;
        end
        else begin
-        if canfloat then begin
+        if canfloat and not (dos_hasfloatbutton in fdockstate) and 
+                        not(csdesigning in widget1.componentstate) then begin
          dofloat(nullpoint);
          result:= true;
         end;
@@ -2345,7 +2354,7 @@ var
  intf1: idocktarget;
  dir1: splitdirty;
 begin
- if canfloat then begin
+ if canfloat and not (dos_hasfloatbutton in fdockstate) then begin
   widget1:= fintf.getwidget.parentwidget;
   dir1:= sd_none; //compiler warning
   if widget1 <> nil then begin
@@ -3199,7 +3208,9 @@ begin
        end;
        dbr_float: begin
         if (dos_floatbuttonclicked in fdockstate) then begin
-         float;
+         if not (csdesigning in widget1.componentstate) then begin
+          dofloat(nullpoint);
+         end;
         end;
        end;
        dbr_top: begin
@@ -3695,7 +3706,19 @@ begin
    break;
   end;
   widget1:= widget1.parentwidget;
- end;   
+ end;
+ doboundschanged;
+end;
+
+procedure tdockcontroller.doboundschanged;
+var
+ widget1: twidget;
+begin
+ widget1:= fintf.getwidget;
+ if widget1.canevent(tmethod(fonboundschanged)) and
+                                      not application.terminated then begin
+  fonlayoutchanged(self);
+ end;
 end;
 
 procedure tdockcontroller.docaptionchanged;
@@ -3850,24 +3873,26 @@ begin
    end;
    dbr_minimize: begin
     draw3dframe(acanvas,arect,1,defaultframecolors,[]);
+    acanvas.move(pos);
     case fgrip_pos of
      cp_left: begin
-      drawvect(makepoint(x+2,y+2),gd_down,cy-5,acolorglyph);
-      drawvect(makepoint(x+3,y+2),gd_down,cy-5,acolorglyph);
+      drawvect(makepoint(2,2),gd_down,cy-5,acolorglyph);
+      drawvect(makepoint(3,2),gd_down,cy-5,acolorglyph);
      end;
      cp_right: begin
-      drawvect(makepoint(x+cx-3,y+2),gd_down,cy-5,acolorglyph);
-      drawvect(makepoint(x+cx-4,y+2),gd_down,cy-5,acolorglyph);
+      drawvect(makepoint(cx-3,2),gd_down,cy-5,acolorglyph);
+      drawvect(makepoint(cx-4,2),gd_down,cy-5,acolorglyph);
      end;
      cp_bottom: begin
-      drawvect(makepoint(x+2,y+cy-3),gd_right,cx-5,acolorglyph);
-      drawvect(makepoint(x+2,y+cy-4),gd_right,cx-5,acolorglyph);
+      drawvect(makepoint(2,cy-3),gd_right,cx-5,acolorglyph);
+      drawvect(makepoint(2,cy-4),gd_right,cx-5,acolorglyph);
      end;
      else begin //cp_top
-      drawvect(makepoint(x+2,y+2),gd_right,cx-5,acolorglyph);
-      drawvect(makepoint(x+2,y+3),gd_right,cx-5,acolorglyph);
+      drawvect(makepoint(2,2),gd_right,cx-5,acolorglyph);
+      drawvect(makepoint(2,3),gd_right,cx-5,acolorglyph);
      end;
     end;
+    acanvas.remove(pos);
    end;
    dbr_fixsize: begin
     draw3dframe(acanvas,arect,calclevel(od_fixsize),
@@ -3875,10 +3900,12 @@ begin
     drawframe(inflaterect(arect,-2),-1,acolorglyph);
    end;
    dbr_float: begin
-    int1:= x + cx div 2;
     draw3dframe(acanvas,arect,1,defaultframecolors,[]);
-    drawlines([mp(2,cy-3),mp(2,2),mp(cx-3,2)],false,acolorglyph);
+    int1:= cx div 2;
+    acanvas.move(pos);
+    drawlines([mp(2,int1),mp(2,2),mp(int1,2)],false,acolorglyph);
     drawline(mp(cx-3,cy-3),mp(2,2),acolorglyph);
+    acanvas.remove(pos);
    end;
    dbr_top: begin
     int1:= x + cx div 2;
@@ -4172,6 +4199,12 @@ begin
               {$ifdef FPC}longword{$else}word{$endif}(fgrip_options),
               {$ifdef FPC}longword{$else}word{$endif}(amask)));
  if fgrip_options <> avalue then begin
+  if go_floatbutton in avalue then begin
+   include(fcontroller.fdockstate,dos_hasfloatbutton);
+  end
+  else begin
+   exclude(fcontroller.fdockstate,dos_hasfloatbutton);
+  end;
   fgrip_options:= avalue;
   internalupdatestate;
  end;

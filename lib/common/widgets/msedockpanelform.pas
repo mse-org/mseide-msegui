@@ -523,7 +523,7 @@ procedure tdockpanelform.doonclose;
  end;
 begin
  inherited;
- if containerempty then begin
+ if containerempty and not (csdesigning in componentstate) then begin
   release;
  end;
 end;
