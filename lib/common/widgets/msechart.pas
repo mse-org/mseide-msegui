@@ -202,6 +202,10 @@ type
    procedure minmaxx1(var amin,amax: real); //extend
    procedure minmaxy(out amin,amax: real);
    procedure minmaxy1(var amin,amax: real); //extend
+   procedure autoscalex(const astartmargin: real = 0;
+                                             const aendmargin: real = 0);
+   procedure autoscaley(const astartmargin: real = 0;
+                                             const aendmargin: real = 0);
 
    property xdata: realarty read finfo.ydata write setxdata;
    property ydata: realarty read finfo.ydata write setydata;
@@ -596,8 +600,10 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    procedure clear; virtual;
-   procedure autoscalex(const astart: real = 0; const arange: real = 1);
-   procedure autoscaley(const astart: real = 0; const arange: real = 1);
+   procedure autoscalex(const astartmargin: real = 0;
+                                             const aendmargin: real = 0);
+   procedure autoscaley(const astartmargin: real = 0;
+                                             const aendmargin: real = 0);
    procedure addsample(const asamples: array of real); virtual;
    property traces: ttraces read ftraces write settraces;
  end;
@@ -704,7 +710,8 @@ type
 
 function autointerval(const arange: real; const aintervalcount: real): real;
                    //returns apropropriate 1/2/5 value
-function calctracerange(var min: real; const max: real): real;
+function calctracerange(var min: real; const max: real; const log: boolean;
+          const startmargin: real = 0; const endmargin: real = 0): real;
 function makexseriesdata(const value: real; const index: integer): xseriesdataty;
 
 implementation
@@ -2082,6 +2089,26 @@ begin
  end;
 end;
 
+procedure ttrace.autoscalex(const astartmargin: real = 0;
+                                             const aendmargin: real = 0);
+var
+ min,max: real; 
+begin
+ minmaxx(min,max);
+ xrange:= calctracerange(min,max,cto_logx in options,astartmargin,aendmargin);
+ xstart:= min;
+end;
+
+procedure ttrace.autoscaley(const astartmargin: real = 0;
+                                             const aendmargin: real = 0);
+var
+ min,max: real; 
+begin
+ minmaxy(min,max);
+ yrange:= calctracerange(min,max,cto_logy in options,astartmargin,aendmargin);
+ ystart:= min;
+end;
+
 { ttraces }
 
 constructor ttraces.create(const aowner: tcustomchart);
@@ -3142,7 +3169,8 @@ begin
  ftraces.dostatwrite(writer);
 end;
 
-function calctracerange(var min: real; const max: real): real;
+function calctracerange(var min: real; const max: real; const log: boolean;
+           const startmargin: real = 0; const endmargin: real = 0): real;
 begin
  result:= max-min;
  if result = 0 then begin
@@ -3152,10 +3180,16 @@ begin
   end;
   min:= min - result / 2;
  end;
+ if log then begin
+ end
+ else begin
+  min:= min - startmargin*result;
+  result:= result*(1+startmargin+endmargin);
+ end;
 end;
 
-procedure tcustomchart.autoscalex(const astart: real = 0;
-                                                      const arange: real = 1);
+procedure tcustomchart.autoscalex(const astartmargin: real = 0;
+                                             const aendmargin: real = 0);
 var
  rea1,rea2: real;
  min,max,ra: real; 
@@ -3174,13 +3208,14 @@ begin
    end;
   end;
  end;
- ra:= calctracerange(min,max);
+ ra:= calctracerange(min,max,cto_logx in traces.options,
+                                                   astartmargin,aendmargin);
  xstart:= min;
  xrange:= ra;
 end;
 
-procedure tcustomchart.autoscaley(const astart: real = 0;
-                                                      const arange: real = 1);
+procedure tcustomchart.autoscaley(const astartmargin: real = 0;
+                                             const aendmargin: real = 0);
 var
  rea1,rea2: real;
  min,max,ra: real; 
@@ -3199,7 +3234,8 @@ begin
    end;
   end;
  end;
- ra:= calctracerange(min,max);
+ ra:= calctracerange(min,max,cto_logy in traces.options,
+                                                  astartmargin,aendmargin);
  ystart:= min;
  yrange:= ra;
 end;

@@ -93,14 +93,14 @@ type
    procedure updatedock;
    procedure updatelinkedwidgets(const delta: pointty);
 
-   //istatfile
+    //istatfile
    procedure dostatread(const reader: tstatreader);
    procedure dostatwrite(const writer: tstatwriter);
    procedure statreading;
    procedure statread;
    function getstatvarname: msestring;
 
-   //iobjectpicker
+    //iobjectpicker
    function getcursorshape(const sender: tobjectpicker;
                                         var shape: cursorshapety): boolean;
    procedure getpickobjects(const sender: tobjectpicker; 
