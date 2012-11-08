@@ -2924,7 +2924,7 @@ begin
  beginplacement;
  try
   if fmodule is twidget then begin
-   fform:= twidget(fmodule);
+   setlinkedvar(fmodule,tmsecomponent(fform));
    widgetrect:= getdesignrect;
    twidget(fmodule).parentwidget:= getmoduleparent;
    twidget(fmodule).pos:= nullpoint;

@@ -40,7 +40,7 @@ type
  optionsdockty = set of optiondockty;
 
  dockbuttonrectty = (dbr_none,dbr_handle,dbr_close,dbr_maximize,dbr_normalize,
-                     dbr_minimize,dbr_fixsize,
+                     dbr_minimize,dbr_fixsize,dbr_float,
                      dbr_top,dbr_background,dbr_lock);
 const
  defaultoptionsdock = [od_savepos,od_savezorder,od_savechildren];
@@ -125,7 +125,7 @@ type
                  dos_updating4,dos_updating5,dos_tabedending,
                     dos_closebuttonclicked,dos_maximizebuttonclicked,
                     dos_normalizebuttonclicked,dos_minimizebuttonclicked,
-                    dos_fixsizebuttonclicked,
+                    dos_fixsizebuttonclicked,dos_floatbuttonclicked,
                     dos_topbuttonclicked,dos_backgroundbuttonclicked,
                     dos_lockbuttonclicked,
                     dos_moving,
@@ -401,7 +401,8 @@ type
 type
  gripoptionty = (go_closebutton,go_minimizebutton,go_normalizebutton,
                  go_maximizebutton,
-                 go_fixsizebutton,go_topbutton,go_backgroundbutton,
+                 go_fixsizebutton,
+                 go_floatbutton,go_topbutton,go_backgroundbutton,
                  go_lockbutton,
                  go_horz,go_vert,go_opposite,go_showsplitcaption,
                  go_showfloatcaption);
@@ -3086,9 +3087,9 @@ var
 const
  resetmousedockstate =
         [dos_closebuttonclicked,dos_maximizebuttonclicked,
-            dos_normalizebuttonclicked,dos_minimizebuttonclicked,
-            dos_fixsizebuttonclicked,dos_topbuttonclicked,
-            dos_backgroundbuttonclicked,dos_lockbuttonclicked,dos_moving];
+          dos_normalizebuttonclicked,dos_minimizebuttonclicked,
+          dos_fixsizebuttonclicked,dos_floatbuttonclicked,dos_topbuttonclicked,
+          dos_backgroundbuttonclicked,dos_lockbuttonclicked,dos_moving];
              
 begin
  inherited;
@@ -3154,6 +3155,7 @@ begin
         dbr_normalize: include(fdockstate,dos_normalizebuttonclicked);
         dbr_minimize: include(fdockstate,dos_minimizebuttonclicked);
         dbr_fixsize: include(fdockstate,dos_fixsizebuttonclicked);
+        dbr_float: include(fdockstate,dos_floatbuttonclicked);
         dbr_top: include(fdockstate,dos_topbuttonclicked);
         dbr_background: include(fdockstate,dos_backgroundbuttonclicked);
         dbr_lock: include(fdockstate,dos_lockbuttonclicked);
@@ -3193,6 +3195,11 @@ begin
           togglebit({$ifdef FPC}longword{$else}longword{$endif}(fuseroptions),
           ord(od_fixsize)));
          widget1.invalidatewidget;
+        end;
+       end;
+       dbr_float: begin
+        if (dos_floatbuttonclicked in fdockstate) then begin
+         float;
         end;
        end;
        dbr_top: begin
@@ -3867,6 +3874,12 @@ begin
                  defaultframecolors,[]);
     drawframe(inflaterect(arect,-2),-1,acolorglyph);
    end;
+   dbr_float: begin
+    int1:= x + cx div 2;
+    draw3dframe(acanvas,arect,1,defaultframecolors,[]);
+    drawlines([mp(2,cy-3),mp(2,2),mp(cx-3,2)],false,acolorglyph);
+    drawline(mp(cx-3,cy-3),mp(2,2),acolorglyph);
+   end;
    dbr_top: begin
     int1:= x + cx div 2;
     draw3dframe(acanvas,arect,calclevel(od_top),defaultframecolors,[]);
@@ -3940,6 +3953,10 @@ begin
    if (frects[dbr_fixsize].cx > 0) and 
                            (go_fixsizebutton in fgrip_options) then begin
     drawgripbutton(canvas,dbr_fixsize,frects[dbr_fixsize],colorglyph,colorbutton);
+   end;
+   if (frects[dbr_float].cx > 0) and 
+                           (go_floatbutton in fgrip_options) then begin
+    drawgripbutton(canvas,dbr_float,frects[dbr_float],colorglyph,colorbutton);
    end;
    if (frects[dbr_top].cx > 0) and 
                            (go_topbutton in fgrip_options)  then begin
@@ -4291,11 +4308,17 @@ begin
     initrect(dbr_minimize);
    end;
   end;
-  if bo1 and (go_fixsizebutton in fgrip_options) then begin
-   if designing or bo3 and fcontroller.getparentcontroller(parentcontroller) and
-                   not parentcontroller.nofit and 
+  if bo1 or designing then begin
+   if (go_fixsizebutton in fgrip_options) then begin
+    if designing or 
+         bo3 and fcontroller.getparentcontroller(parentcontroller) and
+         not parentcontroller.nofit and 
                   (parentcontroller.fsplitdir <> sd_tabed)  then begin
-    initrect(dbr_fixsize);
+     initrect(dbr_fixsize);
+    end;
+   end;
+   if (go_floatbutton in fgrip_options) then begin
+    initrect(dbr_float);
    end;
   end;
   if bo2 then begin
