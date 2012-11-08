@@ -338,6 +338,7 @@ type
    function activewidget: twidget; //focused child or active tab
 
    property mdistate: mdistatety read fmdistate write setmdistate;
+   property currentsplitdir: splitdirty read fsplitdir;
    function close: boolean; //simulates mr_windowclosed for owner
    function closeactivewidget: boolean;
                    //simulates mr_windowclosed for active widget, true if ok
@@ -363,7 +364,8 @@ type
 
    property tab_frame: tframecomp read ftab_frame write settab_frame;
    property tab_face: tfacecomp read ftab_face write settab_face;
-   property tab_color: colorty read ftab_color write settab_color default cl_default;
+   property tab_color: colorty read ftab_color write settab_color
+                                               default cl_default;
    property tab_colortab: colorty read ftab_colortab 
                         write settab_colortab default cl_transparent;
    property tab_coloractivetab: colorty read ftab_coloractivetab 
@@ -379,12 +381,14 @@ type
    
    property caption: msestring read fcaption write setcaption;
    property splitdir: splitdirty read fdefaultsplitdir write setsplitdir 
-                      default sd_none;
+                      default sd_none; //sets default and current splitdir,
+                                       //returns default
    property optionsdock: optionsdockty read foptionsdock write setoptionsdock
                       default defaultoptionsdock;
    property bandgap: integer read fbandgap write setbandgap default 0;
    
-   property oncalclayout: docklayouteventty read foncalclayout write foncalclayout;
+   property oncalclayout: docklayouteventty read foncalclayout
+                                                          write foncalclayout;
    property onlayoutchanged: dockcontrollereventty read fonlayoutchanged 
                                                        write fonlayoutchanged;
    property onboundschanged: dockcontrollereventty read fonboundschanged 
@@ -3717,7 +3721,7 @@ begin
  widget1:= fintf.getwidget;
  if widget1.canevent(tmethod(fonboundschanged)) and
                                       not application.terminated then begin
-  fonlayoutchanged(self);
+  fonboundschanged(self);
  end;
 end;
 
