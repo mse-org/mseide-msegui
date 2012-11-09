@@ -3171,20 +3171,41 @@ end;
 
 function calctracerange(var min: real; const max: real; const log: boolean;
            const startmargin: real = 0; const endmargin: real = 0): real;
+var
+ rea1,rea2,rea3: real;
+ logmin,logmax: real;
 begin
- result:= max-min;
- if result = 0 then begin
-  result:= min;
-  if result = 0 then begin
-   result:= 1;
-  end;
-  min:= min - result / 2;
- end;
+ rea2:= 1-startmargin-endmargin;
+ rea1:= max-min;
  if log then begin
+  if (min > 0) and (max > 0) and (rea1 > 0) and (rea2 > 0.01) then begin
+   logmin:= ln(min);
+   logmax:= ln(max);
+   rea1:= logmax-logmin;
+   rea2:= 1/rea2;
+   min:= exp(logmin - startmargin*rea2*rea1);
+   rea3:= exp(logmax + endmargin*rea2*rea1);
+   result:= rea3-min;
+  end
+  else begin//invalid
+   min:= 0.1;
+   result:= 0.9;
+  end;
  end
  else begin
-  min:= min - startmargin*result;
-  result:= result*(1+startmargin+endmargin);
+  if (rea1 = 0) or (rea2 < 0.01) then begin //invalid
+   result:= min;
+   if result = 0 then begin
+    result:= 1;
+   end;
+   min:= min - result / 2;
+  end
+  else begin
+   rea2:= 1/rea2;
+   min:= min - startmargin*rea2*rea1;
+   rea3:= max + endmargin*rea2*rea1;
+   result:= rea3 - min;
+  end;
  end;
 end;
 
