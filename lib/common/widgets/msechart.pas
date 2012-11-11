@@ -99,6 +99,7 @@ type
  ttrace = class(townedeventpersistent,iimagelistinfo,iframe,iface)
   private
    finfo: traceinfoty;
+   fbreaks: integerarty;
    procedure setxydata(const avalue: complexarty);
    procedure datachange;
    procedure setcolor(const avalue: colorty);
@@ -149,6 +150,7 @@ type
    function getbar_face: tface;
    procedure setbar_face(const avalue: tface);
    procedure setbar_ref(const avalue: barrefty);
+   procedure setbreaks(const avalue: integerarty);
   protected
    ftraces: ttraces;
    procedure setkind(const avalue: tracekindty); virtual;
@@ -212,6 +214,8 @@ type
    property xydata: complexarty read finfo.xydata write setxydata;
    property xdatalist: trealdatalist read finfo.xdatalist write setxdatalist;
    property ydatalist: trealdatalist read finfo.ydatalist write setydatalist;
+   property breaks: integerarty read fbreaks write setbreaks;
+                             //for xy without cto_xordered only
 
    property xvalue[const index: integer]: real read getxvalue write setxvalue;
    property yvalue[const index: integer]: real read getyvalue write setyvalue;
@@ -804,6 +808,11 @@ begin
  datachange;
 end;
 
+procedure ttrace.setbreaks(const avalue: integerarty);
+begin
+ fbreaks:= avalue;
+ tcustomchart(fowner).traces.change;
+end;
 
 procedure ttrace.setxdata(const avalue: realarty);
 begin
@@ -1229,7 +1238,13 @@ begin
   else begin
    acanvas.capstyle:= cs_round;
    acanvas.joinstyle:= js_round;
-   acanvas.drawlines(finfo.datapoints,false,finfo.color);
+   if (fbreaks = nil) or (kind = trk_xseries) or 
+                        (cto_xordered in finfo.options) then begin
+    acanvas.drawlines(finfo.datapoints,false,finfo.color);
+   end
+   else begin
+    acanvas.drawlines(finfo.datapoints,fbreaks,false,finfo.color);
+   end;
    acanvas.capstyle:= cs_butt;
    acanvas.joinstyle:= js_miter;
   end;
@@ -1532,6 +1547,7 @@ end;
 procedure ttrace.clear;
 begin
  xydata:= nil;
+ fbreaks:= nil;
 end;
 
 procedure ttrace.addxydata(const x: real; const y: real);

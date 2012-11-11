@@ -820,6 +820,10 @@ type
                        const acolor: colorty = cl_default;
                        const first: integer = 0; const acount: integer = -1);
                                                           //-1 -> all
+   procedure drawlines(const apoints: array of pointty;
+                       const abreaks: array of integer; //ascending order
+                       const aclosed: boolean = false; 
+                       const acolor: colorty = cl_default);
    procedure drawvect(const startpoint: pointty; const direction: graphicdirectionty;
                       const length: integer; const acolor: colorty = cl_default);
                                                            overload;
@@ -3798,6 +3802,40 @@ begin
     end;
    end;
    gdi(gdf_drawlines);
+  end;
+ end;
+end;
+
+procedure tcanvas.drawlines(const apoints: array of pointty;
+                       const abreaks: array of integer; //ascending order
+                       const aclosed: boolean = false; 
+                       const acolor: colorty = cl_default);
+var
+ int1: integer;
+ s,e: integer;
+begin
+ if cs_inactive in fstate then exit;
+ if length(apoints) > 0 then begin
+  if checkforeground(acolor,true) then begin
+   s:= 0;
+   int1:= 0;
+   with fdrawinfo.points do begin
+    closed:= false;
+    repeat
+     e:= length(apoints);
+     if (int1 <= high(abreaks)) and (abreaks[int1] < e) then begin
+      e:= abreaks[int1];
+      inc(int1);
+     end;
+     points:= @apoints[s];
+     count:= e-s;
+     if e = length(apoints) then begin
+      closed:= aclosed;
+     end;
+     gdi(gdf_drawlines);
+     s:= e;
+    until e = length(apoints);
+   end;
   end;
  end;
 end;
