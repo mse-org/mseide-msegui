@@ -207,7 +207,7 @@ type
    procedure autoscaley(const astartmargin: real = 0;
                                              const aendmargin: real = 0);
 
-   property xdata: realarty read finfo.ydata write setxdata;
+   property xdata: realarty read finfo.xdata write setxdata;
    property ydata: realarty read finfo.ydata write setydata;
    property xydata: complexarty read finfo.xydata write setxydata;
    property xdatalist: trealdatalist read finfo.xdatalist write setxdatalist;
