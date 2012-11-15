@@ -54,6 +54,41 @@ type
    property onsetvalue;
    property controller;
  end;
+
+ tdbremotefilenameedit = class(tcustomremotefilenameedit,idbeditfieldlink,
+                                                                    ireccontrol)
+  private
+   fdatalink: tstringeditwidgetdatalink;
+   procedure setdatalink(const avalue: tstringeditwidgetdatalink);
+  protected   
+   procedure defineproperties(filer: tfiler); override;
+   procedure editnotification(var info: editnotificationinfoty); override;
+   function nullcheckneeded(const newfocus: twidget): boolean; override;
+   procedure griddatasourcechanged; override;
+   function getgriddatasource: tdatasource;
+   function createdatalist(const sender: twidgetcol): tdatalist; override;
+   procedure modified; override;
+   function getoptionsedit: optionseditty; override;
+   procedure dochange; override;
+   function getrowdatapo(const arow: integer): pointer; override;
+   function getfieldlink: tcustomeditwidgetdatalink;
+    //idbeditfieldlink
+   procedure valuetofield;
+   procedure fieldtovalue;
+   procedure getfieldtypes(var afieldtypes: fieldtypesty);
+    //ireccontrol
+   procedure recchanged;
+  public
+   constructor create(aowner: tcomponent); override;
+   destructor destroy; override;
+  published
+   property datalink: tstringeditwidgetdatalink read fdatalink write setdatalink;
+   property frame;
+   property passwordchar;
+   property maxlength;
+   property onsetvalue;
+   property dialog;
+ end;
  
  tdbcoloredit = class(tcustomcoloredit,idbeditfieldlink,ireccontrol)
   private
@@ -287,6 +322,126 @@ begin
 end;
 
 function tdbfilenameedit.getfieldlink: tcustomeditwidgetdatalink;
+begin
+ result:= fdatalink;
+end;
+
+{ tdbremotefilenameedit }
+
+constructor tdbremotefilenameedit.create(aowner: tcomponent);
+begin
+ fdatalink:= tstringeditwidgetdatalink.Create(idbeditfieldlink(self));
+ inherited;
+end;
+
+destructor tdbremotefilenameedit.destroy;
+begin
+ inherited;
+ fdatalink.free;
+end;
+
+procedure tdbremotefilenameedit.dochange;
+begin
+ fdatalink.dataentered;
+ inherited;
+end;
+
+procedure tdbremotefilenameedit.modified;
+begin
+ fdatalink.modified;
+ inherited;
+end;
+
+function tdbremotefilenameedit.getoptionsedit: optionseditty;
+begin
+ result:= inherited getoptionsedit;
+ fdatalink.updateoptionsedit(result);
+end;
+
+procedure tdbremotefilenameedit.valuetofield;
+begin
+ if value = '' then begin
+  fdatalink.field.clear;
+ end
+ else begin
+  fdatalink.asmsestring:= value;
+ end;
+end;
+
+procedure tdbremotefilenameedit.fieldtovalue;
+begin
+ value:= fdatalink.asmsestring;
+end;
+
+function tdbremotefilenameedit.getrowdatapo(const arow: integer): pointer;
+begin
+ if fgriddatalink <> nil then begin
+  result:= tgriddatalink(fgriddatalink).getstringbuffer(fdatalink.field,arow);
+ end
+ else begin
+  result:= nil;
+ end;
+end;
+
+function tdbremotefilenameedit.createdatalist(const sender: twidgetcol): tdatalist;
+begin
+ result:= nil;
+end;
+
+procedure tdbremotefilenameedit.griddatasourcechanged;
+begin
+ fdatalink.griddatasourcechanged;
+end;
+
+function tdbremotefilenameedit.getgriddatasource: tdatasource;
+begin
+ result:= tcustomdbwidgetgrid(fgridintf.getcol.grid).datalink.datasource;
+end;
+
+procedure tdbremotefilenameedit.getfieldtypes(var afieldtypes: fieldtypesty);
+begin
+ afieldtypes:= textfields;
+end;
+
+function tdbremotefilenameedit.nullcheckneeded(const newfocus: twidget): boolean;
+begin
+ result:= inherited nullcheckneeded(newfocus);
+{$warnings off}
+ teditwidgetdatalink1(fdatalink).nullcheckneeded(result);
+{$warnings on}
+end;
+
+procedure tdbremotefilenameedit.setdatalink(const avalue: tstringeditwidgetdatalink);
+begin
+ fdatalink.assign(avalue);
+end;
+
+procedure tdbremotefilenameedit.defineproperties(filer: tfiler);
+begin
+ inherited;
+ fdatalink.fixupproperties(filer);  //move values to datalink
+end;
+
+procedure tdbremotefilenameedit.editnotification(var info: editnotificationinfoty);
+var
+ int1: integer;
+begin
+ inherited;
+ if info.action = ea_textedited then begin
+  if fdatalink.cuttext(text,int1) then begin
+   text:= copy(text,1,int1);
+  end;
+ end;
+end;
+
+procedure tdbremotefilenameedit.recchanged;
+begin
+{$warnings off}
+ teditwidgetdatalink1(fdatalink).recordchanged(nil);
+{$warnings on}
+end;
+
+function tdbremotefilenameedit.getfieldlink: tcustomeditwidgetdatalink;
 begin
  result:= fdatalink;
 end;

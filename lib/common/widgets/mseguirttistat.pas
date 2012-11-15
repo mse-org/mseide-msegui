@@ -11,7 +11,7 @@ unit mseguirttistat;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- msegui,mserttistat,mseglob;
+ msegui,mserttistat,mseglob,mseclasses;
  
 type
  rttistatoption = (rso_autowritestat);
@@ -24,22 +24,30 @@ type
    fongetdialogclass: getwidgetclassprocty;
    fdialogclass: widgetclassty;
    foptions: rttistatoptionsty;
+   fdialog: twidget;
+   fonbeforeedit: notifyeventty;
+   fonafteredit: notifyeventty;
   public
    function edit: modalresultty;
    property dialogclass: widgetclassty read fdialogclass write fdialogclass;
+   property dialog: twidget read fdialog;
   published
    property options: rttistatoptionsty read foptions write foptions default [];
    property ongetdialogclass: getwidgetclassprocty read fongetdialogclass 
                                                        write fongetdialogclass;
+   property onbeforeedit: notifyeventty read fonbeforeedit write fonbeforeedit;
+   property onafteredit: notifyeventty read fonafteredit write fonafteredit;
  end;
  
 implementation
-
+uses
+ sysutils;
+ 
 { tguirttistat }
 
 function tguirttistat.edit: modalresultty;
 var
- dia1: twidget;
+// dia1: twidget;
  cla1: widgetclassty;
 begin
  result:= mr_none;
@@ -48,18 +56,24 @@ begin
   fongetdialogclass(self,cla1);
  end;
  if cla1 <> nil then begin
-  dia1:= cla1.create(nil);
+  fdialog:= cla1.create(nil);
   try
-   objtovalues(dia1);
-   result:= dia1.show(ml_application);
+   objtovalues(fdialog);
+   if canevent(tmethod(fonbeforeedit)) then begin
+    fonbeforeedit(self);
+   end;
+   result:= fdialog.show(ml_application);
    if result = mr_ok then begin
-    valuestoobj(dia1);
+    valuestoobj(fdialog);
+    if canevent(tmethod(fonafteredit)) then begin
+     fonafteredit(self);
+    end;
     if (rso_autowritestat in foptions) and (statfile <> nil) then begin
      statfile.writestat;
     end;
    end;
   finally
-   dia1.free;
+   freeandnil(fdialog);
   end;
  end;
 end;

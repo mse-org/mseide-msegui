@@ -268,15 +268,15 @@ type
                                   default defaultfiledialogoptionsedit;
  end;
 
- tcustomfilenameedit = class;
+ tcustomfilenameedit1 = class;
  tfilenameeditcontroller = class(tstringdialogcontroller)
   protected
    function execute(var avalue: msestring): boolean; override;
   public
-   constructor create(const aowner: tcustomfilenameedit);
+   constructor create(const aowner: tcustomfilenameedit1);
  end;
  
- tcustomfilenameedit = class(tcustomdialogstringed)
+ tcustomfilenameedit1 = class(tcustomdialogstringed)
   private
    fcontroller: tfiledialogcontroller;
 //   fdialogkind: filedialogkindty;
@@ -308,6 +308,23 @@ type
 //   property dialogkind: filedialogkindty read fdialogkind write fdialogkind default fdk_open;
  end;
 
+ tcustomfilenameedit = class(tcustomfilenameedit1)
+  public
+   constructor create(aowner: tcomponent); override;
+   destructor destroy; override;
+ end;
+
+ tcustomremotefilenameedit = class(tcustomfilenameedit1)
+  private
+   fdialog: tfiledialog;
+   procedure setfiledialog(const avalue: tfiledialog);
+  protected
+   procedure objectevent(const sender: tobject;
+                                 const event: objecteventty); override;
+  public
+   property dialog: tfiledialog read fdialog write setfiledialog;
+ end;
+ 
  tfilenameedit = class(tcustomfilenameedit)
   published
    property frame;
@@ -316,6 +333,16 @@ type
    property value;
    property onsetvalue;
    property controller;
+ end; 
+
+ tremotefilenameedit = class(tcustomremotefilenameedit)
+  published
+   property frame;
+   property passwordchar;
+   property maxlength;
+   property value;
+   property onsetvalue;
+   property dialog;
  end; 
 
  dirdropdowneditoptionty = (ddeo_showhiddenfiles,ddeo_checksubdir);
@@ -1959,30 +1986,35 @@ end;
 
 { tfilenameeditcontroller }
 
-constructor tfilenameeditcontroller.create(const aowner: tcustomfilenameedit);
+constructor tfilenameeditcontroller.create(const aowner: tcustomfilenameedit1);
 begin
  inherited create(aowner);
 end;
 
 function tfilenameeditcontroller.execute(var avalue: msestring): boolean;
 begin
- with tcustomfilenameedit(fowner) do begin
-  result:= fcontroller.execute(avalue);
+ with tcustomfilenameedit1(fowner) do begin
+  if fcontroller <> nil then begin
+   result:= fcontroller.execute(avalue);
+  end
+  else begin
+   result:= false;
+  end;
  end;
 end;
 
-{ tcustomfilenameedit }
+{ tcustomfilenameedit1 }
 
-constructor tcustomfilenameedit.create(aowner: tcomponent);
+constructor tcustomfilenameedit1.create(aowner: tcomponent);
 begin
- fcontroller:= tfiledialogcontroller.create(self,{$ifdef FPC}@{$endif}formatchanged);
+// fcontroller:= tfiledialogcontroller.create(self,{$ifdef FPC}@{$endif}formatchanged);
  inherited;
 end;
 
-destructor tcustomfilenameedit.destroy;
+destructor tcustomfilenameedit1.destroy;
 begin
  inherited;
- fcontroller.Free;
+// fcontroller.Free;
 end;
 {
 function tcustomfilenameedit.execute(var avalue: msestring): boolean;
@@ -1990,130 +2022,172 @@ begin
  result:= fcontroller.execute(avalue);
 end;
 }
-procedure tcustomfilenameedit.setcontroller(const avalue: tfiledialogcontroller);
+procedure tcustomfilenameedit1.setcontroller(const avalue: tfiledialogcontroller);
 begin
- fcontroller.assign(avalue);
+ if fcontroller <> nil then begin
+  fcontroller.assign(avalue);
+ end;
 end;
 
-procedure tcustomfilenameedit.readstatvalue(const reader: tstatreader);
+procedure tcustomfilenameedit1.readstatvalue(const reader: tstatreader);
 begin
  if fgridintf <> nil then begin
   inherited;
  end
  else begin
-  fcontroller.readstatvalue(reader);
-  value:= fcontroller.filename;
+  if fcontroller <> nil then begin
+   fcontroller.readstatvalue(reader);
+   value:= fcontroller.filename;
+  end;
  end;
 end;
 
-procedure tcustomfilenameedit.readstatstate(const reader: tstatreader);
+procedure tcustomfilenameedit1.readstatstate(const reader: tstatreader);
 begin
- fcontroller.readstatstate(reader);
+ if fcontroller <> nil then begin
+  fcontroller.readstatstate(reader);
+ end;
 end;
 
-procedure tcustomfilenameedit.readstatoptions(const reader: tstatreader);
+procedure tcustomfilenameedit1.readstatoptions(const reader: tstatreader);
 begin
- fcontroller.readstatoptions(reader);
+ if fcontroller <> nil then begin
+  fcontroller.readstatoptions(reader);
+ end;
 end;
 
-procedure tcustomfilenameedit.writestatvalue(const writer: tstatwriter);
+procedure tcustomfilenameedit1.writestatvalue(const writer: tstatwriter);
 begin
  if fgridintf <> nil then begin
   inherited;
  end
  else begin
-  fcontroller.writestatvalue(writer);
+  if fcontroller <> nil then begin
+   fcontroller.writestatvalue(writer);
+  end;
  end;
 end;
 
-procedure tcustomfilenameedit.writestatstate(const writer: tstatwriter);
+procedure tcustomfilenameedit1.writestatstate(const writer: tstatwriter);
 begin
- fcontroller.writestatstate(writer);
+ if fcontroller <> nil then begin
+  fcontroller.writestatstate(writer);
+ end;
 end;
 
-procedure tcustomfilenameedit.writestatoptions(const writer: tstatwriter);
+procedure tcustomfilenameedit1.writestatoptions(const writer: tstatwriter);
 begin
- fcontroller.writestatoptions(writer);
+ if fcontroller <> nil then begin
+  fcontroller.writestatoptions(writer);
+ end;
 end;
 
-function tcustomfilenameedit.getvaluetext: msestring;
+function tcustomfilenameedit1.getvaluetext: msestring;
 begin
 // result:= filepath(fcontroller.filename);
- result:= fcontroller.filename;
+ if fcontroller <> nil then begin
+  result:= fcontroller.filename;
+ end
+ else begin
+  result:= '';
+ end;
 end;
 
-procedure tcustomfilenameedit.texttovalue(var accept: boolean;
+procedure tcustomfilenameedit1.texttovalue(var accept: boolean;
                                                     const quiet: boolean);
 var
  ar1: filenamearty;
  mstr1: filenamety;
  int1: integer;
 begin
- if (fcontroller.defaultext <> '') then begin
-  unquotefilename(text,ar1);
-  for int1:= 0 to high(ar1) do begin
-   if not hasfileext(ar1[int1]) then begin
-    ar1[int1]:= ar1[int1] + '.'+controller.defaultext;
+ if fcontroller <> nil then begin
+  if (fcontroller.defaultext <> '') then begin
+   unquotefilename(text,ar1);
+   for int1:= 0 to high(ar1) do begin
+    if not hasfileext(ar1[int1]) then begin
+     ar1[int1]:= ar1[int1] + '.'+controller.defaultext;
+    end;
+   end;
+   mstr1:= quotefilename(ar1);
+  end
+  else begin
+   mstr1:= text;
+  end;
+  fcontroller.filename:= mstr1;
+ end;
+ inherited;
+end;
+
+procedure tcustomfilenameedit1.updatedisptext(var avalue: msestring);
+begin
+ if fcontroller <> nil then begin
+  with fcontroller do begin
+   if fdo_dispname in foptions then begin
+    avalue:= msefileutils.filename(avalue);
+   end;
+   if fdo_dispnoext in foptions then begin
+    avalue:= removefileext(avalue);
    end;
   end;
-  mstr1:= quotefilename(ar1);
- end
- else begin
-  mstr1:= text;
- end;
- fcontroller.filename:= mstr1;
- inherited;
-end;
-
-procedure tcustomfilenameedit.updatedisptext(var avalue: msestring);
-begin
- with fcontroller do begin
-  if fdo_dispname in foptions then begin
-   avalue:= msefileutils.filename(avalue);
-  end;
-  if fdo_dispnoext in foptions then begin
-   avalue:= removefileext(avalue);
-  end;
  end;
 end;
 
-procedure tcustomfilenameedit.valuechanged;
+procedure tcustomfilenameedit1.valuechanged;
 begin
- fcontroller.filename:= value;
+ if fcontroller <> nil then begin
+  fcontroller.filename:= value;
+ end;
  inherited;
 end;
 
-procedure tcustomfilenameedit.componentevent(const event: tcomponentevent);
+procedure tcustomfilenameedit1.componentevent(const event: tcomponentevent);
 begin
- fcontroller.componentevent(event);
+ if fcontroller <> nil then begin
+  fcontroller.componentevent(event);
+ end;
  inherited;
 end;
 
-procedure tcustomfilenameedit.updatecopytoclipboard(var atext: msestring);
+procedure tcustomfilenameedit1.updatecopytoclipboard(var atext: msestring);
 begin
  tosysfilepath1(atext);
  inherited;
 end;
 
-procedure tcustomfilenameedit.updatepastefromclipboard(var atext: msestring);
+procedure tcustomfilenameedit1.updatepastefromclipboard(var atext: msestring);
 begin
  tomsefilepath1(atext);
  inherited;
 end;
 
-function tcustomfilenameedit.createdialogcontroller: tstringdialogcontroller;
+function tcustomfilenameedit1.createdialogcontroller: tstringdialogcontroller;
 begin
  result:= tfilenameeditcontroller.create(self);
 end;
 
-function tcustomfilenameedit.getsysvalue: filenamety;
+function tcustomfilenameedit1.getsysvalue: filenamety;
 begin
  result:= tosysfilepath(value);
 end;
 
-procedure tcustomfilenameedit.setsysvalue(const avalue: filenamety);
+procedure tcustomfilenameedit1.setsysvalue(const avalue: filenamety);
 begin
  value:= tomsefilepath(avalue);
+end;
+
+{ tcustomfilenameedit }
+
+constructor tcustomfilenameedit.create(aowner: tcomponent);
+begin
+ fcontroller:= tfiledialogcontroller.create(self,
+                                {$ifdef FPC}@{$endif}formatchanged);
+ inherited;
+end;
+
+destructor tcustomfilenameedit.destroy;
+begin
+ inherited;
+ fcontroller.Free;
 end;
 
 { tdirdropdownedit }
@@ -2188,6 +2262,28 @@ end;
 procedure tdirdropdownedit.updatepastefromclipboard(var atext: msestring);
 begin
  tomsefilepath1(atext);
+ inherited;
+end;
+
+{ tcustomremotefilenameedit }
+
+procedure tcustomremotefilenameedit.setfiledialog(const avalue: tfiledialog);
+begin
+ setlinkedvar(avalue,tmsecomponent(fdialog));
+ if avalue = nil then begin
+  fcontroller:= nil;
+ end
+ else begin
+  fcontroller:= avalue.fcontroller;
+ end;
+end;
+
+procedure tcustomremotefilenameedit.objectevent(const sender: tobject;
+               const event: objecteventty);
+begin
+ if (event = oe_destroyed) and (sender = fdialog) then begin
+  fcontroller:= nil;
+ end;
  inherited;
 end;
 

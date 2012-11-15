@@ -346,7 +346,7 @@ begin
       tdbdialogstringedit,tdbmemodialogedit,
       tdbdialogintegeredit,tdbdialogrealedit,
       tdbdialogdatetimeedit,
-      tdbfilenameedit,tdbcoloredit,
+      tdbfilenameedit,tdbremotefilenameedit,tdbcoloredit,
 
       tdropdownlisteditdb,tdropdownlisteditlb,
       tenumeditdb,tenumeditlb,

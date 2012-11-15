@@ -202,9 +202,10 @@ type
                                   restorestate: boolean = false);
    procedure loadfromfile(const afilename: filenamety;
                                   restorestate: boolean = false); virtual;
-   procedure savetostream(const stream: ttextstream; const resetmodified: boolean);
+   procedure savetostream(const stream: ttextstream;
+                                        const resetmodified: boolean);
    procedure savetofile(const afilename: filenamety = '');
-                       //afilename = '' -> actual filename
+                       //afilename = '' -> current filename
    procedure beginupdate; virtual;
    procedure endupdate;  virtual;
    procedure clear; virtual;
@@ -909,7 +910,8 @@ begin
  end;
 end;
 
-procedure tcustomtextedit.savetofile(const afilename: filenamety = ''); //afilename = '' -> actual filename
+procedure tcustomtextedit.savetofile(const afilename: filenamety = ''); 
+                                        //afilename = '' -> current filename
 var
  stream: ttextstream;
  str1: filenamety;
