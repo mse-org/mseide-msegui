@@ -1618,6 +1618,8 @@ type
    procedure bringtofront;
    procedure sendtoback;
    procedure stackunder(const predecessor: twidget);
+   procedure setchildorder(const achildren: widgetarty);
+                //last is top, nil items ignored
 
    procedure paint(const canvas: tcanvas); virtual;
    procedure update; virtual;
@@ -1656,13 +1658,15 @@ type
    property parentwidget: twidget read fparentwidget write setparentwidget;
    function getrootwidgetpath: widgetarty; //root widget is last
    function widgetcount: integer;
-   function parentwidgetindex: integer; //index in parentwidget.widgets, -1 if none
+   function parentwidgetindex: integer; 
+                            //index in parentwidget.widgets, -1 if none
    property widgets[const index: integer]: twidget read getwidgets;
    function widgetatpos(var info: widgetatposinfoty): twidget; overload;
    function widgetatpos(const pos: pointty): twidget; overload;
    function widgetatpos(const pos: pointty; 
                    const state: widgetstatesty): twidget; overload;
-   function findtagwidget(const atag: integer; const aclass: widgetclassty): twidget;
+   function findtagwidget(const atag: integer;
+                                const aclass: widgetclassty): twidget;
               //returns first matching descendent
    function findwidget(const aname: ansistring): twidget;
               //searches in container.widgets, case insensitive
@@ -1670,7 +1674,8 @@ type
    property container: twidget read getcontainer;
    function containeroffset: pointty;
    function childrencount: integer; virtual;
-   property children[const index: integer]: twidget read getchildwidgets; default;
+   property children[const index: integer]: twidget read getchildwidgets;
+                                                                      default;
    function childatpos(const pos: pointty; 
                    const clientorigin: boolean = true): twidget; virtual;
    function gettaborderedwidgets: widgetarty;
@@ -11903,6 +11908,25 @@ begin
  else begin
   window.stackunder(predecessor.window);
  end;
+end;
+
+procedure twidget.setchildorder(const achildren: widgetarty); //last is top
+var
+ int1,int2,int3: integer;
+begin
+ int2:= high(fwidgets);
+ for int1:= high(achildren) downto 0 do begin
+  if achildren[int1] <> nil then begin
+   for int3:= int2 downto 0 do begin
+    if fwidgets[int3] = achildren[int1] then begin
+     moveitem(pointerarty(fwidgets),int3,int2);
+     dec(int2);
+     break;
+    end;
+   end;    
+  end;
+ end;
+ sortzorder;
 end;
 
 function twidget.gethint: msestring;

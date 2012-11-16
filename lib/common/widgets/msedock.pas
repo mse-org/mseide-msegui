@@ -208,6 +208,8 @@ type
    ftab_widthmin: integer;
    ftab_widthmax: integer;
    fdefaultsplitdir: splitdirty;
+   fchildren: stringarty;
+   ffocusedchild: integer;
    procedure updaterefsize;
    procedure setdockhandle(const avalue: tdockhandle);
    function checksplit(const awidgets: widgetarty;
@@ -302,6 +304,7 @@ type
    function writechild(const index: integer): msestring;
    procedure readchildrencount(const acount: integer);
    procedure readchild(const index: integer; const avalue: msestring);
+   procedure receiveevent(const aevent: tobjectevent); override;
 
   public
    constructor create(aintf: idockcontroller);
@@ -593,6 +596,14 @@ const
  useroptionsmask: optionsdockty = [od_fixsize,od_top,od_background,od_lock];
 
 type
+ tchildorderevent = class(tobjectevent)
+  protected
+   fchildren: stringarty;
+   ffocusedchild: integer;
+  public
+   constructor create(const sender: tdockcontroller);
+ end;
+ 
  tdocktabwidget = class(ttabwidget)
   private
    fcontroller: tdockcontroller;
@@ -2490,7 +2501,7 @@ end;
 
 procedure tdockcontroller.readchildrencount(const acount: integer);
 begin
- //dummy;
+ setlength(fchildren,acount);
 end;
 
 procedure tdockcontroller.readchild(const index: integer;
@@ -2503,9 +2514,8 @@ begin
  decoderecord(avalue,[@na,@rect1.x,@rect1.y,@rect1.cx,@rect1.cy],'siiii');
  with fintf.getwidget do begin
   w1:= findwidget(na);
+  fchildren[index]:= na;
   if w1 <> nil then begin
-//   rect2.pos:= nullpoint;
-//   rect2.size:= application.screensize;
    rect2:= application.screenrect(window);
    shiftinrect(rect1,rect2);
    clipinrect(rect1,rect2);
@@ -2583,13 +2593,17 @@ begin
     widgetrect:= rect1;
     application.postevent(tobjectevent.create(ek_checkscreenrange,
                                                              ievent(widget0)));
-//    setclippedwidgetrect(rect1); //shift into screen
    end;
    visible:= bo1;
   end;
   if od_savechildren in foptionsdock then begin
+   ffocusedchild:= reader.readinteger('focusedchild',-1);
    reader.readrecordarray('children',{$ifdef FPC}@{$endif}readchildrencount,
              {$ifdef FPC}@{$endif}readchild);
+   if fchildren <> nil then begin
+    application.postevent(tchildorderevent.create(self));
+    fchildren:= nil;
+   end;
   end;
   if (parentwidget = nil) and (od_savezorder in foptionsdock) then  begin
    str1:= '~';
@@ -2613,6 +2627,9 @@ function tdockcontroller.writechild(const index: integer): msestring;
 begin
  with twidget1(fintf.getwidget).widgets[index] do begin
   result:= encoderecord([name,bounds_x,bounds_y,bounds_cx,bounds_cy]);
+  if entered then begin
+   ffocusedchild:= index;
+  end;
  end;
 end;
 
@@ -2682,6 +2699,7 @@ begin
   if od_savechildren in foptionsdock then begin
    writer.writerecordarray('children',widgetcount,
              {$ifdef FPC}@{$endif}writechild);
+   writer.writeinteger('focusedchild',ffocusedchild);
   end;
  end;
 end;
@@ -3804,6 +3822,31 @@ begin
  end;
 end;
 
+procedure tdockcontroller.receiveevent(const aevent: tobjectevent);
+var
+ int1: integer;
+ ar1: widgetarty;
+ widget1: twidget;
+begin
+ if aevent is tchildorderevent then begin
+  with tchildorderevent(aevent) do begin
+   setlength(ar1,length(fchildren));
+   widget1:= fintf.getwidget;
+   for int1:= 0 to high(fchildren) do begin
+    ar1[int1]:= widget1.findwidget(fchildren[int1]);
+   end;
+   if (ffocusedchild >= 0) and (ffocusedchild <= high(ar1)) and 
+       (ar1[ffocusedchild] <> nil) and ar1[ffocusedchild].canfocus then begin
+    ar1[ffocusedchild].setfocus(false);
+   end;
+   widget1.setchildorder(ar1);
+  end;
+ end
+ else begin
+  inherited;
+ end;
+end;
+
 { tgripframe }
 
 constructor tgripframe.create(const intf: icaptionframe;
@@ -4922,6 +4965,15 @@ end;
 procedure tdockpanel.dodockcaptionchanged(const sender: tdockcontroller);
 begin
  //dummy
+end;
+
+{ tchildorderevent }
+
+constructor tchildorderevent.create(const sender: tdockcontroller);
+begin
+ fchildren:= sender.fchildren;
+ ffocusedchild:= sender.ffocusedchild;
+ inherited create(ek_object,ievent(sender));
 end;
 
 end.
