@@ -246,6 +246,7 @@ type
    property edited: boolean read getedited write setedited;
    function emptytext: boolean;
    function seteditfocus: boolean;
+   function isnull: boolean; virtual;
 
    property dataeditstate: dataeditstatesty read fstate;   
    property statfile: tstatfile read fstatfile write setstatfile;
@@ -340,6 +341,7 @@ type
 
   public
    function checkvalue(const quiet: boolean = false): boolean; override;
+   function isnull: boolean; override;
    procedure dragevent(var info: draginfoty); override;
    procedure fillcol(const value: msestring);
    procedure assigncol(const value: tmsestringdatalist);
@@ -1048,6 +1050,8 @@ type
    function getifilink: tifireallinkcomp;
    procedure setifilink(const avalue: tifireallinkcomp);
   {$endif}
+   function getasstring: msestring;
+   procedure setasstring(const avalue: msestring);
   protected
    fvalue: realty;
    fvaluedefault: realty;
@@ -1073,7 +1077,8 @@ type
    function griddata: trealdatalist;
    procedure fillcol(const value: realty);
    procedure assigncol(const value: trealdatalist);
-   function isnull: boolean;
+   function isnull: boolean; override;
+   property asstring: msestring read getasstring write setasstring;
    property asinteger: integer read getasinteger write setasinteger;
                     //returns minint for empty value
    property ascurrency: currency read getascurrency write setascurrency;
@@ -1300,7 +1305,7 @@ type
    function griddata: trealdatalist;
    procedure fillcol(const value: tdatetime);
    procedure assigncol(const value: trealdatalist);
-   function isnull: boolean;
+   function isnull: boolean; override;
    property onsetvalue: setdatetimeeventty read fonsetvalue write fonsetvalue;
    property value: tdatetime read fvalue write setvalue {stored false};
    property valuedefault: tdatetime read fvaluedefault 
@@ -1341,7 +1346,7 @@ function inttorealty(const avalue: integer): realty;
 
 implementation
 uses
- sysutils,msereal,msebits,msestreaming,msestockobjects;
+ sysutils,msereal,msebits,msestreaming,msestockobjects,msefloattostr;
 
 type
  tdatalist1 = class(tdatalist);
@@ -2772,6 +2777,11 @@ begin
  //dummy
 end;
 
+function tcustomdataedit.isnull: boolean;
+begin
+ result:= false; //dummy
+end;
+
 { tcustomstringedit }
 
 function tcustomstringedit.internaldatatotext(const data): msestring;
@@ -2990,6 +3000,11 @@ end;
 procedure tcustomstringedit.setifilink(const avalue: tifistringlinkcomp);
 begin
  inherited setifilink(avalue);
+end;
+
+function tcustomstringedit.isnull: boolean;
+begin
+ result:= value = '';
 end;
 
 {$endif}
@@ -5304,6 +5319,16 @@ end;
 function tcustomrealedit.isnull: boolean;
 begin
  result:= value = emptyreal;
+end;
+
+function tcustomrealedit.getasstring: msestring;
+begin
+ result:= doubletostring(value);
+end;
+
+procedure tcustomrealedit.setasstring(const avalue: msestring);
+begin
+ value:= strtorealtydot(avalue);
 end;
 
 {$ifdef mse_with_ifi}
