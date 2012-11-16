@@ -72,8 +72,6 @@ type
    procedure emptychanged;
    
    procedure setstatfile(const Value: tstatfile);
-   function getreadonly: boolean;
-   procedure setreadonly(const avalue: boolean);
    procedure setempty_text(const avalue: msestring);
    procedure setempty_textflags(const avalue: textflagsty);
    procedure setempty_textcolor(const avalue: colorty);
@@ -250,7 +248,6 @@ type
    function seteditfocus: boolean;
 
    property dataeditstate: dataeditstatesty read fstate;   
-   property readonly: boolean read getreadonly write setreadonly;
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read getstatvarname write fstatvarname;
    property empty_options: emptyoptionsty read fempty_options 
@@ -2366,24 +2363,6 @@ begin
  inherited;
  if (fgridintf <> nil) and not (csloading in componentstate) then begin
   fgridintf.getcol.enabled:= avalue;
- end;
-end;
-
-function tcustomdataedit.getreadonly: boolean;
-begin
- result:= oe_readonly in foptionsedit;
-end;
-
-procedure tcustomdataedit.setreadonly(const avalue: boolean);
-begin
- if avalue <> (oe_readonly in foptionsedit) then begin
-  if avalue then begin
-   optionsedit:= optionsedit + [oe_readonly];
-  end
-  else begin
-   optionsedit:= optionsedit - [oe_readonly];
-  end;  
-  setupeditor;
  end;
 end;
 

@@ -101,7 +101,7 @@ type
    procedure colchanged;
    function gettabulators: ttabulators;
    procedure settabulators(const Value: ttabulators);
-   procedure setreadonly(const avalue: boolean);
+//   procedure setreadonly(const avalue: boolean);
    function getrow: integer;
    procedure setrow(const avalue: integer);
    function getcol: integer;
@@ -2229,7 +2229,7 @@ procedure tcustomtextedit.aftercelldragevent(var ainfo: draginfoty;
 begin
  //dummy
 end;
-
+{
 procedure tcustomtextedit.setreadonly(const avalue: boolean);
 begin
  if avalue then begin
@@ -2239,7 +2239,7 @@ begin
   optionsedit:= optionsedit - [oe_readonly];
  end;  
 end;
-
+}
 function tcustomtextedit.getinnerframe: framety;
 begin
  result:= minimaltextframe;

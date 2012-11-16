@@ -3260,7 +3260,8 @@ begin
    widget1:= fintf.getwidget;
    widget1.bringtofront;
    if ((sender = widget1) or (sender = widget1.container)) and 
-                  widget1.canfocus then begin
+                  widget1.canfocus and 
+          not widget1.checkdescendent(widget1.window.focusedwidget)then begin
     widget1.setfocus;
    end;
   end;

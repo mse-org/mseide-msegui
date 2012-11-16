@@ -334,6 +334,8 @@ type
   protected
    feditor: tinplaceedit;
    foptionsedit: optionseditty;
+   function getreadonly: boolean; virtual;
+   procedure setreadonly(const avalue: boolean); virtual;
    procedure setmaxlength(const avalue: integer);
    procedure updatetextflags; virtual;
    procedure updateflagtext(var avalue: msestring);
@@ -394,6 +396,7 @@ type
    function actualcursor(const apos: pointty): cursorshapety; override;
 
    property editor: tinplaceedit read feditor;
+   property readonly: boolean read getreadonly write setreadonly;
    property optionsedit: optionseditty read getoptionsedit write setoptionsedit
                    default defaultoptionsedit;
    property optionsedit1: optionsedit1ty read getoptionsedit1 
@@ -1228,6 +1231,25 @@ function tcustomedit.getoptionsedit: optionseditty;
 begin
  result:= foptionsedit;
 end;
+
+function tcustomedit.getreadonly: boolean;
+begin
+ result:= oe_readonly in foptionsedit;
+end;
+
+procedure tcustomedit.setreadonly(const avalue: boolean);
+begin
+ if avalue <> (oe_readonly in foptionsedit) then begin
+  if avalue then begin
+   optionsedit:= optionsedit + [oe_readonly];
+  end
+  else begin
+   optionsedit:= optionsedit - [oe_readonly];
+  end;  
+  setupeditor;
+ end;
+end;
+
 {
 function tcustomedit.getoptionsdb: optionseditdbty;
 begin

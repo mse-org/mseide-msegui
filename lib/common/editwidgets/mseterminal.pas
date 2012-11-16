@@ -66,6 +66,7 @@ type
    procedure setprompt(const avalue: msestring);
   protected
    fprocess: tmseprocess;
+   procedure setreadonly(const avalue: boolean); override;
    procedure doinputavailable(const sender: tpipereader);
    procedure dopipebroken(const sender: tpipereader);
    procedure doprocfinished(const sender: tobject);
@@ -790,6 +791,17 @@ lab1:
  else begin
   result:= '';
  end;
+end;
+
+procedure tterminal.setreadonly(const avalue: boolean);
+begin
+ if avalue then begin
+  options:= options + [teo_readonly];
+ end
+ else begin
+  options:= options - [teo_readonly];
+ end;
+ inherited;
 end;
 
 end.
