@@ -43,7 +43,8 @@ type
 
  ifivaluelinkstatety = (ivs_linking,ivs_valuesetting,ivs_loadedproc);
  ifivaluelinkstatesty = set of ifivaluelinkstatety;
- valueclientoptionty = (vco_datalist,vco_nosync,vco_readonly,vco_notnull);
+ valueclientoptionty = (vco_datalist,vco_nosync,vco_novaluetoclient,
+                                                  vco_readonly,vco_notnull);
  valueclientoptionsty = set of valueclientoptionty;
    
  tcustomificlientcontroller = class(tlinkedpersistent,iifiserver,istatfile)
@@ -1153,7 +1154,9 @@ begin
  if dest <> nil then begin
   alink.setifiserverintf(iifiserver(dest.fcontroller));
   if (alinkcomp is tifivaluelinkcomp) and 
-                        not (csloading in alinkcomp.componentstate) then begin
+                        not (csloading in alinkcomp.componentstate) and
+    (vco_datalist in 
+             tifivaluelinkcomp(alinkcomp).controller.optionsvalue) then begin
    iifidatalink(alink).updateifigriddata(alinkcomp,
         tifivaluelinkcomp(alinkcomp).controller.fdatalist);
   end;
@@ -1360,7 +1363,8 @@ end;
 procedure tcustomificlientcontroller.change(const alink: iificlient);
 begin
  if {(fvalueproperty <> nil) and} not (ivs_valuesetting in fstate) and 
-            not (csloading in fowner.componentstate) then begin
+            not (csloading in fowner.componentstate) and 
+            not  (vco_novaluetoclient in foptionsvalue) then begin
   include(fstate,ivs_valuesetting);
   try
    if alink <> nil then begin
@@ -2319,7 +2323,6 @@ begin
  if result = nil then begin
   raise exception.create('No datalist, activate optionsvalue vco_datalist.');
  end;
-// result:= getfirstdatalist1;
 end;
 
 function tvalueclientcontroller.ififieldname: string;

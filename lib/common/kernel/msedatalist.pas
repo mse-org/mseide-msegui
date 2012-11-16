@@ -1078,8 +1078,6 @@ begin
                                                typeinfo(idatalistclient));
  if dest <> nil then begin
   include(dest.fstate,dls_remote);
- end;
- if dest <> nil then begin
   aintf.itemchanged(dest,-1);
  end;
 end;

@@ -1428,7 +1428,8 @@ begin
   {$ifdef mse_with_ifi}
    ifilink1:= fintf.getifilink;
    if (ifilink1 <> nil) and not(csloading in ifilink1.componentstate) and
-                                     (ifilink1 is tifivaluelinkcomp) then begin
+           (ifilink1 is tifivaluelinkcomp) and (vco_datalist in 
+                 tifivaluelinkcomp(ifilink1).controller.optionsvalue) then begin
     if fdata = dl1 then begin
      dl1:= nil; //no double free
     end;

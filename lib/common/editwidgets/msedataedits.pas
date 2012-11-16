@@ -95,7 +95,8 @@ type
    procedure ifisetvalue(var avalue; var accept: boolean);
    function getifilinkkind: ptypeinfo; virtual;
    procedure setifilink(const avalue: tifilinkcomp);
-   procedure updateifigriddata(const sender: tobject; const alist: tdatalist);
+   procedure updateifigriddata(const sender: tobject;
+                                           const alist: tdatalist); virtual;
    function getgriddata: tdatalist;
    function getvalueprop: ppropinfo;
 {$endif}
@@ -3002,12 +3003,12 @@ begin
  inherited setifilink(avalue);
 end;
 
+{$endif}
+
 function tcustomstringedit.isnull: boolean;
 begin
  result:= value = '';
 end;
-
-{$endif}
 
 { tstringedit }
 

@@ -10,6 +10,9 @@
 unit mselistbrowser;
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+{$ifndef mse_no_ifi}
+ {$define mse_with_ifi}
+{$endif}
 
 interface
 uses
@@ -18,7 +21,11 @@ uses
  msebitmap,mseclasses,mseguiglob,msedrawtext,msefileutils,msedataedits,
  mseeditglob,msewidgetgrid,msewidgets,mseedit,mseevent,msegui,msedropdownlist,
  msesys,msedrag,msestat,mseinplaceedit,msepointer,msegridsglob,
- mserichstring;
+ mserichstring
+ {$ifdef mse_with_ifi}
+ ,mseificomp,mseifiglob,mseificompglob
+ {$endif}
+ ;
 
 const
  defaultcellwidth = 50;
@@ -490,6 +497,10 @@ type
    procedure setitems(const index: integer; const Value: tlistitem);
    function getediting: boolean;
    procedure setediting(const avalue: boolean);
+  {$ifdef mse_with_ifi}
+   function getifilink: tifistringlinkcomp;
+   procedure setifilink(const avalue: tifistringlinkcomp);
+  {$endif}
   protected
    flayoutinfofocused: listitemlayoutinfoty;
    flayoutinfocell: listitemlayoutinfoty;
@@ -501,7 +512,9 @@ type
                                       var asize: sizety); override;
    procedure calclayout(const asize: sizety; 
                                        out alayout: listitemlayoutinfoty);
-
+    //iifidatalink
+   procedure updateifigriddata(const sender: tobject;
+                                           const alist: tdatalist); override;
     //iedit
    function locatecount: integer; override;        //number of locate values
    function getkeystring(const index: integer): msestring; override;
@@ -564,6 +577,7 @@ type
                        out acellrect: rectty): boolean; overload; override;
    function getvaluetext: msestring;
    procedure setvaluetext(var avalue: msestring);
+   function isnull: boolean; override;
    function item: tlistitem;
    property items[const index: integer]: tlistitem read getitems 
                                                     write setitems; default;
@@ -575,6 +589,9 @@ type
   published
    property itemlist: titemeditlist read getitemlist 
                                        write setitemlist stored false;
+{$ifdef mse_with_ifi}
+   property ifilink: tifistringlinkcomp read getifilink write setifilink;
+{$endif}
    property onsetvalue: setstringeventty read fonsetvalue write fonsetvalue;
    property onclientmouseevent: mouseeventty read fonclientmouseevent 
                            write fonclientmouseevent;
@@ -2966,6 +2983,30 @@ begin
  tcustombuttonframe.create(iscrollframe(self),ibutton(self));
 end;
 
+{$ifdef mse_with_ifi}
+function titemedit.getifilink: tifistringlinkcomp;
+begin
+ result:= tifistringlinkcomp(fifilink);
+end;
+
+procedure titemedit.setifilink(const avalue: tifistringlinkcomp);
+begin
+ inherited setifilink(avalue);
+end;
+
+procedure titemedit.updateifigriddata(const sender: tobject;
+               const alist: tdatalist);
+begin
+ //dummy, common datalist not possible
+end;
+
+{$endif}
+
+function titemedit.isnull: boolean;
+begin
+ result:= (item = nil) or (item.caption = '');
+end;
+
 procedure titemedit.buttonaction(var action: buttonactionty;
   const buttonindex: integer);
 begin
@@ -3307,6 +3348,7 @@ begin
   end;
  end;
 end;
+
 {
 function titemedit.actualcursor(const apos: pointty): cursorshapety;
 var
