@@ -2433,7 +2433,7 @@ begin
    po1.y:= ((y - offset.y) div gridcy) * gridcy + offset.y;
    endy:= y + cy;
   end;
-  setlength(points1, rect1.cx div gridcx + 1);
+  setlength(points1, rect1.cx div gridcx + 2);
   for int1:= 0 to high(points1) do begin
    points1[int1].x:= po1.x;
    inc(po1.x,gridcx);
