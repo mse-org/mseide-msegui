@@ -233,6 +233,7 @@ type
    fselectwidget: twidget;
    fselectcomp: tcomponent;
    fclientsizevalid: boolean;
+   fcompoffsbefore: pointty;
    procedure drawgrid(const canvas: tcanvas);
    procedure hidexorpic(const canvas: tcanvas);
    procedure showxorpic(const canvas: tcanvas);
@@ -1356,6 +1357,10 @@ var
 // rect1: rectty;
 begin
  offs:= componentoffset;
+ if not pointisequal(offs,fcompoffsbefore) then begin
+  fcompoffsbefore:= offs;
+  fselections.finfovalid:= false;
+ end;
  gridrect:= tformdesignerfo(fowner).gridrect;
  with tformdesignerfo(fowner) do begin
   if fmodule <> nil then begin

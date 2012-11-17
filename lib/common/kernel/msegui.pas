@@ -1624,8 +1624,8 @@ type
    procedure paint(const canvas: tcanvas); virtual;
    procedure update; virtual;
    procedure scrollwidgets(const dist: pointty);
-   procedure scrollrect(const dist: pointty; const rect: rectty; scrollcaret: boolean);
-                             //origin = paintrect.pos
+   procedure scrollrect(const dist: pointty; const rect: rectty;
+                                scrollcaret: boolean); //origin = paintrect.pos
    procedure scroll(const dist: pointty);
                             //scrolls paintrect and widgets
    procedure getcaret;
