@@ -2890,17 +2890,8 @@ procedure titemedit.setitemlist(const Value: titemeditlist);
 begin
  fitemlist.Assign(Value);
 end;
-{
-procedure titemedit.updatecellzone(const pos: pointty; var result: cellzonety);
-begin
- if fvalue <> nil then begin
-  fvalue.updatecellzone(pos,result);
- end;
-end;
-}
+
 procedure titemedit.dokeydown(var info: keyeventinfoty);
-//var
-// str1: msestring;
 begin
  doonkeydown(info);
  with info do begin
@@ -2908,7 +2899,7 @@ begin
    if (oe_locate in foptionsedit) and isenterkey(nil,key) and 
                        (shiftstate = []) then begin
     if not editing then begin
-     editing:= (item <> nil) and not (ns_readonly in item.state) and 
+     editing:= fieldcanedit{(item <> nil) and not (ns_readonly in item.state)} and 
                   not (oe_readonly in foptionsedit);
      if editing then begin
       include(eventstate,es_processed);
@@ -2920,42 +2911,13 @@ begin
      include(eventstate,es_processed);
     end;
    end;
-{   
-   if not(es_processed in eventstate) and islocating then begin
-    if (key = key_backspace) and (shiftstate = []) then begin
-     filtertext:= copy(ffiltertext,1,length(ffiltertext)-1);
-    end
-    else begin
-     if (key = key_home) and (shiftstate = []) then begin
-      filtertext:= '';
-     end
-     else begin
-      str1:= mseextractprintchars(info.chars);
-      if (str1 <> '') and (shiftstate - [ss_shift] = []) then begin
-       filtertext:= ffiltertext + str1;
-       include(eventstate,es_processed);
-      end;
-     end;
-    end;
-   end;
-}
   end;
  end;
  if not (es_processed in info.eventstate) then begin
   inherited;
  end;
 end;
-{
-procedure titemedit.dokeyup(var info: keyeventinfoty);
-begin
- if canevent(tmethod(fonkeyup)) then begin
-  fonkeyup(self,info);
- end;
- if not (es_processed in info.eventstate) then begin
-  inherited;
- end;
-end;
-}
+
 function titemedit.getvaluetext: msestring;
 begin
  if (fvalue <> nil) then begin
