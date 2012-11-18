@@ -1109,12 +1109,20 @@ procedure tcustomedit.doactivate;
 begin
  inherited;
  feditor.doactivate;
+ if (oe_focusrectonreadonly in foptionsedit) and 
+                         (oe_readonly in optionsedit) then begin
+  invalidate;
+ end;
 end;
 
 procedure tcustomedit.dodeactivate;
 begin
  inherited;
  feditor.dodeactivate;
+ if (oe_focusrectonreadonly in foptionsedit) and 
+                         (oe_readonly in optionsedit) then begin
+  invalidate;
+ end;
 end;
 
 procedure tcustomedit.dofocus;
