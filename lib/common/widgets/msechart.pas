@@ -396,6 +396,7 @@ type
    property direction default gd_up;
    property indent1;
    property indent2;
+   property fitdist;
    property start;
    property range;
    property kind;
@@ -415,6 +416,7 @@ type
    property direction default gd_right;
    property indent1;
    property indent2;
+   property fitdist;
    property start;
    property range;
    property kind;
@@ -476,7 +478,7 @@ type
  rectsidety = (rs_left,rs_top,rs_right,rs_bottom);
  rectsidesty = set of rectsidety;
  optionchartty = (oca_autofitleft,oca_autofittop,oca_autofitright,
-                    oca_autofitbottom);
+                    oca_autofitbottom); //same layout as rectsidesty
  optionschartty = set of optionchartty;
 const
  allrectsides = [rs_left,rs_top,rs_right,rs_bottom];
@@ -2887,25 +2889,61 @@ var
  fra1: framety;
  rect1: rectty;
  si1: sizety;
+ shift1,shift2: integer;
+
+ procedure handle(const adial: tcustomdialcontroller1;
+                               const active1,active2,isx: boolean);
+ var
+  int1: integer;
+ begin
+  with adial do begin
+   if do_opposite in options then begin
+    if active2 then begin
+     indent1:= -shift2-fitdist;
+    end;
+   end
+   else begin
+    if active2 then begin
+     indent1:= -shift1-fitdist;
+    end;
+   end;
+   checklayout;
+   expandrectext1(ext1,tdialticks1(ticks).fdim);
+   with tdialticks1(ticks).fdim do begin
+    if isx then begin
+     int1:= fitdist + bottom - top;
+    end
+    else begin
+     int1:= fitdist + right - left;
+    end;
+   end;
+   if do_opposite in options then begin
+    shift2:= shift2 + int1;
+   end
+   else begin
+    shift1:= shift1 + int1;
+   end;
+  end;
+ end;
+
 begin
  result:= false;
  si1:= clientsize;
  rect1:= getdialrect;
  ext1.topleft:= rect1.pos;
  ext1.bottomright:= addpoint(rect1.pos,pointty(rect1.size));
+ shift1:= 0;
+ shift2:= 0;
  for int1:= 0 to fxdials.count-1 do begin
-  with fxdials[int1] do begin
-   checklayout;
-   expandrectext1(ext1,tdialticks1(ticks).fdim)
-  end;
+  handle(tcustomdialcontroller1(fxdials[int1]),
+                             rs_right in asides,rs_left in asides,true);
  end;
+ shift1:= 0;
+ shift2:= 0;
  for int1:= 0 to fydials.count-1 do begin
-  with fydials[int1] do begin
-   checklayout;
-   expandrectext1(ext1,tdialticks1(ticks).fdim)
-  end;
+  handle(tcustomdialcontroller1(fydials[int1]),
+                             rs_bottom in asides,rs_top in asides,false);
  end;
-
  inflaterectext1(ext1,tcustomframe1(fframe).fi.innerframe);
  if fframechart <> nil then begin
   inflaterectext1(ext1,fframechart.innerframe);

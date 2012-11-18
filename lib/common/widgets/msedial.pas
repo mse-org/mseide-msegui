@@ -257,6 +257,7 @@ type
    farcscale: real; //factor diallenght arc / diallenght linear
    findent1: integer;
    findent2: integer;
+   ffitdist: integer;
    procedure setstart(const avalue: real);
    procedure setshift(const avalue: real);
    procedure setrange(const avalue: real);
@@ -285,6 +286,7 @@ type
    procedure setboxline(const avalue: boolean);
    function getfront: boolean;
    procedure setfront(const avalue: boolean);
+   procedure setfitdist(const avalue: integer);
   protected
    procedure setdirection(const avalue: graphicdirectionty); virtual;
    procedure changed;
@@ -322,6 +324,7 @@ type
                                        default gd_right;
    property indent1: integer read findent1 write setindent1 default 0;
    property indent2: integer read findent2 write setindent2 default 0;
+   property fitdist: integer read ffitdist write setfitdist default 0;
    property start: real read fstart write setstart;
    property shift: real read fshift write setshift; //added to start
    property range: real read frange write setrange; //default 1.0
@@ -2032,6 +2035,14 @@ procedure tcustomdialcontroller.setindent2(const avalue: integer);
 begin
  if findent2 <> avalue then begin
   findent2:= avalue;
+  changed;
+ end;
+end;
+
+procedure tcustomdialcontroller.setfitdist(const avalue: integer);
+begin
+ if ffitdist <> avalue then begin
+  ffitdist:= avalue;
   changed;
  end;
 end;
