@@ -1985,6 +1985,7 @@ end;
 
 procedure tcustomlistview.editnotification(var info: editnotificationinfoty);
 begin
+ //dummy
 end;
 
 procedure tcustomlistview.synctofontheight;
@@ -2777,21 +2778,12 @@ end;
 procedure titemedit.clientmouseevent(var info: mouseeventinfoty);
 var
  po1: pointty;
-// cursor1: cursorshapety;
  zone1: cellzonety;
 begin
  if (fvalue <> nil) and (info.eventkind in mouseposevents) then begin
   zone1:= cz_default;
   fvalue.updatecellzone(info.pos,zone1);
   application.widgetcursorshape:= getcellcursor(-1,zone1);
- {
-  if not editing then begin
-   application.widgetcursorshape:= cursorreadonly;
-  end
-  else begin
-   application.widgetcursorshape:= getcellcursor(-1,zone1);
-  end;
- }
  end;
  if canevent(tmethod(fonclientmouseevent)) then begin
   fonclientmouseevent(self,info);
@@ -2805,7 +2797,6 @@ begin
      if not (es_processed in info.eventstate) then begin
       doitembuttonpress(info);
      end;
-//     po2:= subpoint(cellrect(focusedcell).pos,fwidgetrect.pos);
      po1:= subpoint(scrollpos,po1);
      if (po1.x <> 0) or (po1.y <> 0) then begin
       self.releasemouse;
@@ -3124,35 +3115,22 @@ begin
    else begin
     exclude(fstate,des_editing);
    end;
-//   fediting:= avalue;
    setupeditor;
    if editing then begin
-//    ffiltertext:= '';
     feditor.selectall;
    end
    else begin
     if foptionsedit * [oe_autoselect,oe_locate] = [oe_autoselect] then begin
      feditor.selectall;
     end;
-//    updatefilterselect;
    end;
   end
   else begin
    exclude(fstate,des_editing);
-//   fediting:= false;
   end;
-  cursorchanged;
+//  cursorchanged;
+  updatereadonlystate;
  end;
-{
- if application.clientmousewidget = self then begin
-  if not fediting then begin
-   application.widgetcursorshape:= cursorreadonly;
-  end
-  else begin
-   application.widgetcursorshape:= cursor;
-  end;
- end;
-}
 end;
 
 function titemedit.getoptionsedit: optionseditty;

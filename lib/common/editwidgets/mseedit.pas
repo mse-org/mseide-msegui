@@ -351,7 +351,7 @@ type
    procedure dragstarted; override;
 
    class function classskininfo: skininfoty; override;
-  //iedit
+     //iedit
    function getoptionsedit: optionseditty; virtual;
    function hasselection: boolean; virtual;
    function cangridcopy: boolean; virtual;
@@ -366,7 +366,7 @@ type
    function getkeystring(const aindex: integer): msestring; virtual; //locate text
    function getedited: boolean; virtual;
 
-               //interface to inplaceedit
+    //interface to inplaceedit
    procedure dokeydown(var info: keyeventinfoty); override;
    procedure clientmouseevent(var info: mouseeventinfoty); override;
    procedure updatepopupmenu(var amenu: tpopupmenu;
@@ -1110,7 +1110,7 @@ begin
  inherited;
  feditor.doactivate;
  if (oe_focusrectonreadonly in foptionsedit) and 
-                         (oe_readonly in optionsedit) then begin
+                         (oe_readonly in optionsedit) and focused then begin
   invalidate;
  end;
 end;
@@ -1120,7 +1120,7 @@ begin
  inherited;
  feditor.dodeactivate;
  if (oe_focusrectonreadonly in foptionsedit) and 
-                         (oe_readonly in optionsedit) then begin
+                         (oe_readonly in optionsedit) and focused then begin
   invalidate;
  end;
 end;
@@ -1583,7 +1583,7 @@ begin
   feditor.updatecaret;
  end;
  cursorchanged;
- if (oe_focusrectonreadonly in foptionsedit) and focused then begin
+ if (oe_focusrectonreadonly in foptionsedit) and focused and active then begin
   invalidate;
  end;
 end;
