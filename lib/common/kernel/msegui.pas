@@ -1384,7 +1384,7 @@ type
 
    procedure initparentclientsize;
    function getcaretcliprect: rectty; virtual;  //origin = clientrect.pos
-   procedure beginread; override;
+   procedure dobeginread; override;
    procedure doendread; override;
    procedure loaded; override;
 
@@ -7243,7 +7243,7 @@ begin
  updatesizerange(avalue,fmaxsize);
 end;
 
-procedure twidget.beginread;
+procedure twidget.dobeginread;
 begin
  if fframe <> nil then begin
   exclude(fframe.fstate,fs_paintposinited);

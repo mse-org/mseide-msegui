@@ -332,7 +332,8 @@ type
    property sender: tobject read fsender;
  end;
 
- msecomponentstatety = (cs_ismodule,cs_endreadproc,cs_loadedproc,
+ msecomponentstatety = (cs_ismodule,cs_beginreadproc,cs_endreadproc,
+                       cs_loadedproc,
                         cs_inheritedloading,cs_noload,cs_tmpmodule,
                         cs_subcompref, //subcomponent can be referenced 
                                        //by component properties
@@ -370,6 +371,7 @@ type
    ftagpo: pointer;
    procedure readmoduleclassname(reader: treader);
    procedure writemoduleclassname(writer: twriter);
+   procedure beginread;// virtual;
    procedure endread;
   protected
    fmsecomponentstate: msecomponentstatesty;
@@ -391,7 +393,7 @@ type
    function getobjectlinker: tobjectlinker;
    procedure objectevent(const sender: tobject;
                                  const event: objecteventty); virtual;
-   procedure beginread; virtual;
+   procedure dobeginread; virtual;
    procedure doendread; virtual;
    procedure readstate(reader: treader); override;
    procedure loaded; override;
@@ -4481,13 +4483,19 @@ var
  int1: integer;
  comp1: tcomponent;
 begin
- for int1:= 0 to componentcount - 1 do begin
-  comp1:= components[int1];
-  if (cssubcomponent in comp1.componentstyle) and 
-            (comp1 is tmsecomponent) then begin
-   tmsecomponent(comp1).beginread;
+ include(fmsecomponentstate,cs_beginreadproc);
+ try
+  dobeginread;
+  for int1:= 0 to componentcount - 1 do begin
+   comp1:= components[int1];
+   if (cssubcomponent in comp1.componentstyle) and 
+             (comp1 is tmsecomponent) then begin
+    tmsecomponent(comp1).beginread;
+   end;
   end;
- end;
+ finally
+  exclude(fmsecomponentstate,cs_beginreadproc);
+ end;  
 end;
 
 procedure tmsecomponent.endread;
@@ -4657,6 +4665,11 @@ end;
 function tmsecomponent.loading: boolean;
 begin
  result:= csloading in componentstate;
+end;
+
+procedure tmsecomponent.dobeginread;
+begin
+ //dummy
 end;
 
 procedure tmsecomponent.doendread;

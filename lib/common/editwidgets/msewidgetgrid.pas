@@ -205,10 +205,15 @@ type
  
  twidgetcols = class(tdatacols)
   private
+   fcolorder: stringarty;
    function getcols(const index: integer): twidgetcol;
    procedure unregisterchildwidget(const child: twidget);
+   procedure updatecolorder;
+   procedure writeorder(writer: twriter);
+   procedure readorder(reader: treader);
   protected
    procedure updatedatastate(var accepted: boolean); override;
+   procedure defineproperties(filer: tfiler); override;
   public
    constructor create(const aowner: tcustomwidgetgrid);
    class function getitemclasstype: persistentclassty; override;
@@ -247,7 +252,7 @@ type
    function setfocus(aactivate: boolean = true): boolean; override;
               //unsetsfocus if not focusable
  end;
-  
+
  tcustomwidgetgrid = class(tcustomgrid)
   private
    fcontainer0: twidget; //for nohascroll widgets
@@ -287,6 +292,7 @@ type
    procedure updatecontainerrect;
    procedure updatelayout; override;
    procedure getchildren(proc: tgetchildproc; root: tcomponent); override;
+//   procedure dobeginread; override;
    procedure doendread; override;
    function scrollcaret(const vertical: boolean): boolean; override;
    procedure docellevent(var info: celleventinfoty); override;
@@ -1331,7 +1337,7 @@ end;
 
 procedure twidgetcol.defineproperties(filer: tfiler);
 var
- bo1: boolean;
+ bo1,bo2: boolean;
  col1: twidgetcol;
  str1,str2: string;
 begin
@@ -1358,11 +1364,18 @@ begin
   bo1:= bo1 or fdata.checkwritedata(filer);
   filer.ancestor:= col1;
  end;
- filer.defineproperty('dataclass',{$ifdef FPC}@{$endif}readdataclass,
-                       {$ifdef FPC}@{$endif}writedataclass,
-       (fdata <> nil) and not (dls_remote in fdata.state) and
+ bo2:= (fdata <> nil) and not (dls_remote in fdata.state) and
       (not(dls_nogridstreaming in fdata.state) or
-          (dls_propertystreaming in fdata.state)));
+          (dls_propertystreaming in fdata.state));
+ if (filer is twriter) and (twriter(filer).ancestor <> nil) then begin
+  with twidgetcol(twriter(filer).ancestor) do begin
+   if (fdata <> nil) and (fdata is self.fdata.classtype) then begin
+    bo2:= false;
+   end;
+  end;
+ end;
+ filer.defineproperty('dataclass',{$ifdef FPC}@{$endif}readdataclass,
+                       {$ifdef FPC}@{$endif}writedataclass,bo2);
  filer.defineproperty('data',{$ifdef FPC}@{$endif}readdata,
                        {$ifdef FPC}@{$endif}writedata,bo1);
  if (fdata <> nil) and (dls_propertystreaming in 
@@ -2015,6 +2028,84 @@ begin
    cols[int1].checkcanclose(accepted);
   end;
  end;
+ inherited;
+end;
+
+procedure twidgetcols.writeorder(writer: twriter);
+var
+ ar1: stringarty;
+ int1: integer;
+begin
+ setlength(ar1,count);
+ for int1:= 0 to high(ar1) do begin
+  ar1[int1]:= twidgetcol(fitems[int1]).fwidgetname;
+ end;
+ writestringar(writer,ar1);
+end;
+
+procedure twidgetcols.updatecolorder;
+var
+ ar2: pointerarty;
+ int1,int2: integer;
+begin
+ if (count > 0) and (fcolorder <> nil) then begin //inherited
+  if length(fcolorder) > count then begin
+   count:= length(fcolorder);
+  end;
+  setlength(ar2,count);
+  for int1:= 0 to high(fcolorder) do begin
+   if fcolorder[int1] <> '' then begin
+    for int2:= 0 to high(ar2) do begin
+     if (fitems[int2] <> nil) and
+         (twidgetcol(fitems[int2]).fwidgetname = fcolorder[int1]) then begin
+      ar2[int1]:= fitems[int2];
+      fitems[int2]:= nil;
+      break;
+     end;
+    end;
+   end;
+  end;
+  int2:= 0;
+  for int1:= 0 to high(ar2) do begin
+   if ar2[int1] = nil then begin
+    while fitems[int2] = nil do begin
+     inc(int2);
+    end;
+    ar2[int1]:= fitems[int2]; //we hope the best
+   end;
+  end;
+  fitems:= persistentarty(ar2);
+  fcolorder:= nil;
+ end;
+end;
+
+procedure twidgetcols.readorder(reader: treader);
+begin
+ readstringar(reader,fcolorder);
+ updatecolorder;
+end;
+
+procedure twidgetcols.defineproperties(filer: tfiler);
+var
+ bo1: boolean;
+ int1: integer;
+begin
+ bo1:= (filer is twriter) and (twriter(filer).ancestor <> nil);
+ if bo1  then begin
+  with twidgetcols(twriter(filer).ancestor) do begin
+   if count = self.count then begin
+    bo1:= false;
+    for int1:= 0 to count-1 do begin
+     if twidgetcol(fitems[int1]).fwidgetname <> 
+                            twidgetcol(self.fitems[int1]).fwidgetname then begin
+      bo1:= true;
+      break;
+     end;
+    end;
+   end;
+  end;
+ end;
+ filer.defineproperty('colorder',@readorder,@writeorder,bo1);
  inherited;
 end;
 
@@ -2903,7 +2994,22 @@ begin
  twidget1(fcontainer1).getchildren(proc,root);
  twidget1(fcontainer3).getchildren(proc,root);
 end;
-
+{
+procedure tcustomwidgetgrid.dobeginread;
+var
+ int1: integer;
+begin
+ setlength(fwidgetcolorder,fdatacols.count);
+ for int1:= 0 to high(fwidgetcolorder) do begin
+  with fwidgetcolorder[int1],
+                twidgetcol(twidgetcols(fdatacols).fitems[int1]) do begin
+   colwidgetname:= fwidgetname;
+   coldatalist:= fdata;
+  end;
+ end;
+ inherited;
+end;
+}
 procedure tcustomwidgetgrid.doendread;
 var
  int1,int2,int3: integer;
@@ -2949,6 +3055,15 @@ begin
         end;
         fintf:= nil;    
             //do not remove existing link, inherited order could be changed
+{        for int3:= 0 to high(fwidgetcolorder) do begin
+         with fwidgetcolorder[int3] do begin
+          if colwidgetname = str1 then begin
+           fdata:= coldatalist;     //repair inherited col order
+           break;
+          end;
+         end;
+        end;
+        }
         setwidget(ar1[int2]);
         ar1[int2]:= nil;
        end;
@@ -3000,6 +3115,7 @@ begin
  finally
   exclude(fstate,gs_layoutupdating);
   dec(tgridcontainer(fcontainer2).flayoutupdating);
+//  fwidgetcolorder:= nil;
  end;
  inherited;
 end;
