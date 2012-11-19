@@ -1404,7 +1404,6 @@ begin
 end;
 
 procedure twidgetcol.setwidget(const awidget: twidget);
-//todo: use widget datalist if inherited column position has changed !!!!!!!!!
 var
  po1: pointer;
  dl1: tdatalist;
@@ -3014,9 +3013,9 @@ procedure tcustomwidgetgrid.doendread;
 var
  int1,int2,int3: integer;
  ar1: widgetarty;
- ar2: array of igridwidget;
+// ar2: array of igridwidget;
  str1: string;
- intf1: igridwidget;
+// intf1: igridwidget;
 begin
  inc(tgridcontainer(fcontainer2).flayoutupdating);
  include(fstate,gs_layoutupdating);
@@ -3030,6 +3029,7 @@ begin
     end;
    end;
   end;
+{
   if (csdesigning in componentstate) then begin
    setlength(ar2,length(ar1)); //init check deleted widgets
    for int1:= 0 to high(ar2) do begin
@@ -3039,6 +3039,7 @@ begin
     end;
    end;
   end;
+}
   for int1:= 0 to fdatacols.count - 1 do begin
    with twidgetcols(fdatacols)[int1] do begin
     for int2:= 0 to high(ar1) do begin
@@ -3050,9 +3051,9 @@ begin
       if str1 <> '' then begin
        if (str1 = fwidgetname) then begin
         ar1[int2].parentwidget:= fcontainer2;
-        if (csdesigning in componentstate) then begin
-         ar2[int2]:= nil; //linked
-        end;
+//        if (csdesigning in componentstate) then begin
+//         ar2[int2]:= nil; //linked
+//        end;
         fintf:= nil;    
             //do not remove existing link, inherited order could be changed
 {        for int3:= 0 to high(fwidgetcolorder) do begin
@@ -3083,6 +3084,7 @@ begin
     ffixrowwidgetnames:= nil;
    end;
   end;
+{
   if csdesigning in componentstate then begin //check deleted inherited widgets
    for int1:= 0 to high(ar2) do begin
     if ar2[int1] <> nil then begin
@@ -3090,6 +3092,7 @@ begin
     end;
    end;
   end;
+}
   for int1:= 0 to fdatacols.count - 1 do begin
    twidgetcols(fdatacols)[int1].sourcenamechanged(-1);
   end;
