@@ -164,7 +164,7 @@ type
    procedure setfirstclick;
    function createdatalist(const sender: twidgetcol): tdatalist; virtual; abstract;
    procedure datalistdestroyed; virtual;
-   function getdatatype: listdatatypety; virtual; abstract;
+   function getdatatype: datalistclassty; virtual; abstract;
    function getdefaultvalue: pointer; virtual;
    function getrowdatapo(const arow: integer): pointer; virtual;
    procedure setgridintf(const intf: iwidgetgrid); virtual;
@@ -332,7 +332,7 @@ type
    function internaldatatotext(const data): msestring; override;
    procedure texttodata(const atext: msestring; var data); override;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
-   function getdatatype: listdatatypety; override;
+   function getdatatype: datalistclassty; override;
    procedure valuetogrid(arow: integer); override;
    procedure gridtovalue(arow: integer); override;
    procedure readstatvalue(const reader: tstatreader); override;
@@ -440,7 +440,7 @@ type
    procedure texttovalue(var accept: boolean; const quiet: boolean); override;
    function internaldatatotext(const data): msestring; override;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
-   function getdatatype: listdatatypety; override;
+   function getdatatype: datalistclassty; override;
    procedure valuetogrid(arow: integer); override;
    procedure gridtovalue(arow: integer); override;
    procedure readstatvalue(const reader: tstatreader); override;
@@ -669,7 +669,7 @@ type
    function internaldatatotext(const data): msestring; override;
    procedure texttodata(const atext: msestring; var data); override;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
-   function getdatatype: listdatatypety; override;
+   function getdatatype: datalistclassty; override;
    procedure valuetogrid(arow: integer); override;
    procedure gridtovalue(arow: integer); override;
    procedure readstatvalue(const reader: tstatreader); override;
@@ -735,7 +735,7 @@ type
    function internaldatatotext(const data): msestring; override;
    procedure texttodata(const atext: msestring; var data); override;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
-   function getdatatype: listdatatypety; override;
+   function getdatatype: datalistclassty; override;
    procedure valuetogrid(arow: integer); override;
    procedure gridtovalue(arow: integer); override;
    procedure readstatvalue(const reader: tstatreader); override;
@@ -867,7 +867,7 @@ type
    fvalueempty: integer;
    procedure setvalue(const avalue: integer);
    function createdatalist(const sender: twidgetcol): tdatalist; override;
-   function getdatatype: listdatatypety; override;
+   function getdatatype: datalistclassty; override;
    function getdefaultvalue: pointer; override;
    procedure texttovalue(var accept: boolean; const quiet: boolean); override;
    procedure texttodata(const atext: msestring; var data); override;
@@ -1066,7 +1066,7 @@ type
    function internaldatatotext(const data): msestring; override;
    procedure texttodata(const atext: msestring; var data); override;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
-   function getdatatype: listdatatypety; override;
+   function getdatatype: datalistclassty; override;
    procedure valuetogrid(arow: integer); override;
    procedure gridtovalue(arow: integer); override;
    procedure defineproperties(filer: tfiler); override;
@@ -1292,7 +1292,7 @@ type
    function internaldatatotext(const data): msestring; override;
    procedure texttodata(const atext: msestring; var data); override;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
-   function getdatatype: listdatatypety; override;
+   function getdatatype: datalistclassty; override;
    procedure valuetogrid(arow: integer); override;
    procedure gridtovalue(arow: integer); override;
    procedure defineproperties(filer: tfiler); override;
@@ -2806,9 +2806,9 @@ begin
  result:= tgridmsestringdatalist.create(sender);
 end;
 
-function tcustomstringedit.getdatatype: listdatatypety;
+function tcustomstringedit.getdatatype: datalistclassty;
 begin
- result:= dl_msestring;
+ result:= tgridmsestringdatalist;
 end;
 
 procedure tcustomstringedit.setvalue(const Value: msestring);
@@ -3288,9 +3288,9 @@ begin
  result:= tgridansistringdatalist.create(sender);
 end;
 
-function thexstringedit.getdatatype: listdatatypety;
+function thexstringedit.getdatatype: datalistclassty;
 begin
- result:= dl_ansistring;
+ result:= tgridansistringdatalist;
 end;
 
 function thexstringedit.getgridvalue(const index: integer): ansistring;
@@ -3822,9 +3822,9 @@ begin
  result:= tgridintegerdatalist.create(sender);
 end;
 
-function tcustomintegeredit.getdatatype: listdatatypety;
+function tcustomintegeredit.getdatatype: datalistclassty;
 begin
- result:= dl_integer;
+ result:= tgridintegerdatalist;
 end;
 
 procedure tcustomintegeredit.valuetogrid(arow: integer);
@@ -4092,9 +4092,9 @@ begin
  result:= tgridint64datalist.create(sender);
 end;
 
-function tcustomint64edit.getdatatype: listdatatypety;
+function tcustomint64edit.getdatatype: datalistclassty;
 begin
- result:= dl_int64;
+ result:= tgridint64datalist;
 end;
 
 procedure tcustomint64edit.valuetogrid(arow: integer);
@@ -4585,9 +4585,9 @@ begin
  result:= tgridenumdatalist.create(sender);
 end;
 
-function tcustomenuedit.getdatatype: listdatatypety;
+function tcustomenuedit.getdatatype: datalistclassty;
 begin
- result:= dl_integer;
+ result:= tgridenumdatalist;
 end;
 
 procedure tcustomenuedit.setvalue(const avalue: integer);
@@ -5027,9 +5027,9 @@ begin
  result:= tgridrealdatalist.create(sender);
 end;
 
-function tcustomrealedit.getdatatype: listdatatypety;
+function tcustomrealedit.getdatatype: datalistclassty;
 begin
- result:= dl_real;
+ result:= tgridrealdatalist;
 end;
 
 procedure tcustomrealedit.gridtovalue(arow: integer);
@@ -5370,9 +5370,10 @@ begin
   end;
  end;
 end;
-
+var testvar5: string;
 procedure tcustomrealedit.updatedatalist;
 begin
+testvar5:= fdatalist.classname;
  with tgridrealdatalist(fdatalist) do begin
   min:= self.min;
   max:= self.max;
@@ -5743,9 +5744,9 @@ begin
  result:= tgridrealdatalist.create(sender);
 end;
 
-function tcustomdatetimeedit.getdatatype: listdatatypety;
+function tcustomdatetimeedit.getdatatype: datalistclassty;
 begin
- result:= dl_datetime;
+ result:= tgridrealdatalist;
 end;
 
 procedure tcustomdatetimeedit.valuetogrid(arow: integer);

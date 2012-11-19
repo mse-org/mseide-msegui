@@ -52,7 +52,7 @@ type
    procedure setreadonly(const avalue: boolean);
    function createdatalist(const sender: twidgetcol): tdatalist; virtual;
    procedure datalistdestroyed;
-   function getdatatype: listdatatypety;
+   function getdatatype: datalistclassty;
    function getdefaultvalue: pointer;
    function getrowdatapo(const arow: integer): pointer; virtual;
    procedure setgridintf(const intf: iwidgetgrid);
@@ -183,9 +183,9 @@ begin
  result:= tgridansistringdatalist.create(sender);
 end;
 
-function tcustomdataimage.getdatatype: listdatatypety;
+function tcustomdataimage.getdatatype: datalistclassty;
 begin
- result:= dl_ansistring;
+ result:= tgridansistringdatalist;
 end;
 
 function tcustomdataimage.getdefaultvalue: pointer;

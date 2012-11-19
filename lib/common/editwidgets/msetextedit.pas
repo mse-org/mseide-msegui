@@ -143,7 +143,7 @@ type
    procedure setfirstclick;
    function createdatalist(const sender: twidgetcol): tdatalist; virtual;
    procedure datalistdestroyed;
-   function getdatatype: listdatatypety; virtual;
+   function getdatatype: datalistclassty; virtual;
    function getinitvalue: pointer;
    function getdefaultvalue: pointer;
    function getrowdatapo(const arow: integer): pointer; virtual;
@@ -536,9 +536,9 @@ begin
  result:= flines;
 end;
 
-function tcustomtextedit.getdatatype: listdatatypety;
+function tcustomtextedit.getdatatype: datalistclassty;
 begin
- result:= dl_none;
+ result:= tgridrichstringdatalist;
 end;
 
 procedure tcustomtextedit.dobeforepaintforeground(const canvas: tcanvas);

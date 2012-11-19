@@ -246,7 +246,7 @@ type
              //returns size of datablock
    procedure change(const index: integer); virtual;
                    //index -1 -> undefined
-   function datatype: listdatatypety; virtual;
+   class function datatype: listdatatypety; virtual;
    procedure checkindexrange(const aindex: integer; const acount: integer = 1);
    procedure checkindex(var index: integer); 
                         //bringt absolute zeilennummer in ringpuffer
@@ -301,6 +301,11 @@ type
  
  pdatalist = ^tdatalist;
  
+ tnonedatalist = class(tdatalist)
+  public
+   class function datatype: listdatatypety; override;
+ end;
+    
  subdatainfoty = record
   list: tdatalist;
   subindex: integer; //0 = main
@@ -329,7 +334,7 @@ type
    min: integer;
    max: integer;
    constructor create; override;
-   function datatype: listdatatypety; override;
+   class function datatype: listdatatypety; override;
    function empty(const index: integer): boolean; override;   //true wenn leer
    function add(const value: integer): integer;
    procedure insert(const index: integer; const item: integer);
@@ -375,7 +380,7 @@ type
    function getstatdata(const index: integer): msestring; override;
   public
    constructor create; override;
-   function datatype: listdatatypety; override;
+   class function datatype: listdatatypety; override;
 //   procedure assign(source: tpersistent); override;
    function empty(const index: integer): boolean; override;   //true wenn leer
    function add(const avalue: int64): integer;
@@ -406,7 +411,7 @@ type
    function getstatdata(const index: integer): msestring; override;
   public
    constructor create; override;
-   function datatype: listdatatypety; override;
+   class function datatype: listdatatypety; override;
 //   procedure assign(source: tpersistent); override;
    function empty(const index: integer): boolean; override;   //true wenn leer
    function add(const avalue: currency): integer;
@@ -466,7 +471,7 @@ type
    min: realty;
    max: realty;
    constructor create; override;
-   function datatype: listdatatypety; override;
+   class function datatype: listdatatypety; override;
    procedure assignre(source: tcomplexdatalist);
    procedure assignim(source: tcomplexdatalist);
    function empty(const index: integer): boolean; override;
@@ -488,7 +493,7 @@ type
   protected
    function getdefault: pointer; override;
   public
-   function datatype: listdatatypety; override;
+   class function datatype: listdatatypety; override;
    function empty(const index: integer): boolean; override;   //true wenn leer
    procedure fill(acount: integer; const defaultvalue: tdatetime); overload;
    procedure fill(const defaultvalue: tdatetime); overload;
@@ -514,7 +519,7 @@ type
    max: realty;
    
    constructor create; override;
-   function datatype: listdatatypety; override;
+   class function datatype: listdatatypety; override;
    procedure assign(source: tpersistent); override;
    procedure assignb(const source: tdatalist); override;
    procedure assignre(const source: trealdatalist);
@@ -566,7 +571,7 @@ type
    procedure assignb(const source: tdatalist); override;
    procedure assigntob(const dest: tdatalist); override;
 
-   function datatype: listdatatypety; override;
+   class function datatype: listdatatypety; override;
    function add(const valuea: realty; const valueb: integer = 0): integer; overload;
    function add(const value: realintty): integer; overload;
    procedure insert(const index: integer; const item: realty;
@@ -633,7 +638,7 @@ type
    function getstatdata(const index: integer): msestring; override;
    function textlength: integer;
   public
-   function datatype: listdatatypety; override;
+   class function datatype: listdatatypety; override;
    procedure assign(source: tpersistent); override;
    procedure assignopenarray(const data: array of ansistring);
 //   procedure assignarray(const data: stringarty); overload;
@@ -726,7 +731,7 @@ type
   protected
    function compare(const l,r): integer; override;
   public
-   function datatype: listdatatypety; override;
+   class function datatype: listdatatypety; override;
    function add(const value: msestring): integer; override;
    procedure insert(const index: integer; const item: msestring); override;
    procedure fill(acount: integer; const defaultvalue: msestring);
@@ -756,7 +761,7 @@ type
    procedure assignb(const source: tdatalist); override;
    procedure assigntob(const dest: tdatalist); override;
 
-   function datatype: listdatatypety; override;
+   class function datatype: listdatatypety; override;
    function add(const value: msestring): integer; overload; override;
    function add(const valuea: msestring; const valueb: msestring = ''): integer; overload;
    function add(const value: doublemsestringty): integer; overload;
@@ -805,7 +810,7 @@ type
    procedure assignb(const source: tdatalist); override;
    procedure assigntob(const dest: tdatalist); override;
 
-   function datatype: listdatatypety; override;
+   class function datatype: listdatatypety; override;
    function add(const value: msestring): integer; override;
    function add(const valuea: msestring; const valueb: integer): integer; overload;
    function add(const value: msestringintty): integer; overload;
@@ -958,7 +963,7 @@ type
    procedure change(const aindex: integer); override;
    procedure assign(source: tpersistent); override;
    property infolevel: rowinfolevelty read finfolevel;
-   function datatype: listdatatypety; override;
+   class function datatype: listdatatypety; override;
    function datapocolmerge: pointer;
    function dataporowheight: pointer;
    function getitempo(const index: integer): prowstatety;
@@ -2627,7 +2632,7 @@ begin
  result:= true;
 end;
 
-function tdatalist.datatype: listdatatypety;
+class function tdatalist.datatype: listdatatypety;
 begin
  result:= dl_custom;
 end;
@@ -2991,7 +2996,7 @@ begin
  internalsetdata(index,value);
 end;
 
-function tintegerdatalist.datatype: listdatatypety;
+class function tintegerdatalist.datatype: listdatatypety;
 begin
  result:= dl_integer;
 end;
@@ -3195,7 +3200,7 @@ begin
 // max:= maxint;
 end;
 
-function tint64datalist.datatype: listdatatypety;
+class function tint64datalist.datatype: listdatatypety;
 begin
  result:= dl_int64;
 end;
@@ -3333,7 +3338,7 @@ begin
 // max:= maxint;
 end;
 
-function tcurrencydatalist.datatype: listdatatypety;
+class function tcurrencydatalist.datatype: listdatatypety;
 begin
  result:= dl_currency;
 end;
@@ -3603,7 +3608,7 @@ begin
  internalsetasarray(pointer(data),sizeof(realty),length(data));
 end;
 
-function trealdatalist.datatype: listdatatypety;
+class function trealdatalist.datatype: listdatatypety;
 begin
  result:= dl_real;
 end;
@@ -3727,7 +3732,7 @@ end;
 
 { tdatetimedatalist }
 
-function tdatetimedatalist.datatype: listdatatypety;
+class function tdatetimedatalist.datatype: listdatatypety;
 begin
  result:= dl_datetime;
 end;
@@ -3898,7 +3903,7 @@ begin
  internalsetdata(index,value);
 end;
 
-function tcomplexdatalist.datatype: listdatatypety;
+class function tcomplexdatalist.datatype: listdatatypety;
 begin
  result:= dl_complex;
 end;
@@ -4176,7 +4181,7 @@ begin
  change(index);
 end;
 
-function tansistringdatalist.datatype: listdatatypety;
+class function tansistringdatalist.datatype: listdatatypety;
 begin
  result:= dl_ansistring;
 end;
@@ -5132,7 +5137,7 @@ end;
 
 { tmsestringdatalist }
 
-function tmsestringdatalist.datatype: listdatatypety;
+class function tmsestringdatalist.datatype: listdatatypety;
 begin
  result:= dl_msestring;
 end;
@@ -5191,7 +5196,7 @@ begin
  fsize:= sizeof(doublemsestringty);
 end;
 
-function tdoublemsestringdatalist.datatype: listdatatypety;
+class function tdoublemsestringdatalist.datatype: listdatatypety;
 begin
  result:= dl_doublemsestring;
 end;
@@ -5482,7 +5487,7 @@ begin
  fsize:= sizeof(msestringintty);
 end;
 
-function tmsestringintdatalist.datatype: listdatatypety;
+class function tmsestringintdatalist.datatype: listdatatypety;
 begin
  result:= dl_msestringint;
 end;
@@ -5786,7 +5791,7 @@ begin
  fsize:= sizeof(realintty);
 end;
 
-function trealintdatalist.datatype: listdatatypety;
+class function trealintdatalist.datatype: listdatatypety;
 begin
  result:= dl_realint;
 end;
@@ -6101,7 +6106,7 @@ begin
  end;
 end;
 
-function tcustomrowstatelist.datatype: listdatatypety;
+class function tcustomrowstatelist.datatype: listdatatypety;
 begin
  result:= dl_rowstate;
 end;
@@ -6813,6 +6818,13 @@ end;
 function tobjectdatalist.checkassigncompatibility(const source: tpersistent): boolean;
 begin
  result:= source.inheritsfrom(tobjectdatalist);
+end;
+
+{ tnonedatalist }
+
+class function tnonedatalist.datatype: listdatatypety;
+begin
+ result:= dl_none;
 end;
 
 end.

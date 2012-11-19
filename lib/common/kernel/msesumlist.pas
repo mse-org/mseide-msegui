@@ -82,7 +82,7 @@ type
    procedure listdestroyed(const sender: tdatalist); override;
    procedure clean(const start,stop: integer); override;
    procedure change(const index: integer); override;
-   function datatype: listdatatypety; override;
+   class function datatype: listdatatypety; override;
    procedure sourcechange(const sender: tdatalist; 
                                          const index: integer); override;
    function getsourcecount: integer; override;
@@ -154,7 +154,7 @@ begin
  checklistdestroyed(flinkissum,sender);
 end;
 
-function trealsumlist.datatype: listdatatypety;
+class function trealsumlist.datatype: listdatatypety;
 begin
  result:= dl_realsum;
 end;

@@ -5634,7 +5634,8 @@ end;
 
 { tdatacol }
 
-constructor tdatacol.create(const agrid: tcustomgrid; const aowner: tgridarrayprop);
+constructor tdatacol.create(const agrid: tcustomgrid;
+                                    const aowner: tgridarrayprop);
 begin
  fwidthmin:= 1;
  fselectedrow:= -1;

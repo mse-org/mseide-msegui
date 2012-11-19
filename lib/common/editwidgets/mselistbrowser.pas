@@ -540,7 +540,7 @@ type
    procedure setgridintf(const intf: iwidgetgrid); override;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    procedure datalistdestroyed; override;
-   function getdatatype: listdatatypety; override;
+   function getdatatype: datalistclassty; override;
    procedure drawcell(const canvas: tcanvas); override;
    procedure valuetogrid(arow: integer); override;
    procedure gridtovalue(arow: integer); override;
@@ -844,6 +844,7 @@ type
                                var processed: boolean); override;
    procedure aftercelldragevent(var ainfo: draginfoty; const arow: integer;
                                var processed: boolean); override;
+   function getdatatype: datalistclassty; override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -2494,9 +2495,9 @@ begin
  result:= fitemlist;
 end;
 
-function titemedit.getdatatype: listdatatypety;
+function titemedit.getdatatype: datalistclassty;
 begin
- result:= dl_none;
+ result:= titemeditlist;
 end;
 
 procedure titemedit.setgridintf(const intf: iwidgetgrid);
@@ -4686,6 +4687,11 @@ begin
  inherited;
 end;
 
+function ttreeitemedit.getdatatype: datalistclassty;
+begin
+ result:= ttreeitemeditlist;
+end;
+
 function ttreeitemedit.candragsource(const apos: pointty): boolean;
 var
  zone1: cellzonety;
@@ -5258,6 +5264,7 @@ begin
   end;
  end;
 end;
+
 {
 procedure ttreeitemedit.drawcell(const canvas: tcanvas);
 begin

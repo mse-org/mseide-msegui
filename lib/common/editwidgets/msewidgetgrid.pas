@@ -71,8 +71,8 @@ type
                          const apos: pointty;
                            var result: cellzonety);
   function createdatalist(const sender: twidgetcol): tdatalist;
+  function getdatatype: datalistclassty;
   procedure datalistdestroyed;
-  function getdatatype: listdatatypety;
   function getdefaultvalue: pointer;
 //  function getrowdatapo(const info: cellinfoty): pointer;
   function getrowdatapo(const arow: integer): pointer;
@@ -1421,6 +1421,9 @@ begin
     fdata:= fintf.createdatalist(self);
    end
    else begin
+    if (dl1 <> nil) and not (dl1 is fintf.getdatatype) then begin
+     componentexception(awidget,'Wrong datalist type.');
+    end;
     fdata:= dl1;
    end;
    fintf.setgridintf(iwidgetgrid(self));
@@ -1497,10 +1500,9 @@ begin
  end
  else begin
   if fintf <> nil then begin
-   datatype:= fintf.getdatatype;
+   datatype:= fintf.getdatatype.datatype;
    if arow >= 0 then begin
     info.cell.row:= arow;
-//    info.griddatalink:= tcustomwidgetgrid(fgrid).getgriddatalink;
     po1:= fintf.getrowdatapo(info.cell.row);
    end
    else begin
