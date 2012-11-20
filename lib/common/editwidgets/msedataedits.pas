@@ -5370,10 +5370,9 @@ begin
   end;
  end;
 end;
-var testvar5: string;
+
 procedure tcustomrealedit.updatedatalist;
 begin
-testvar5:= fdatalist.classname;
  with tgridrealdatalist(fdatalist) do begin
   min:= self.min;
   max:= self.max;

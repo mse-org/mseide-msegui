@@ -429,6 +429,24 @@ procedure ObjectBinaryToText1(Input, Output: TStream;
     end;
   end;
 
+  procedure processstring(const valuetype: tvaluetype);
+  begin
+   case valuetype of
+    vastring: begin
+     outstring(readsstr);
+    end;
+    valstring: begin
+     outstring(readlstr);
+    end;
+    vautf8string: begin
+     oututf8str(readlstr);
+    end;
+    vawstring,vaustring: begin
+     outwstring(readwstr);
+    end;
+   end;
+  end; //processstring
+  
   procedure ReadPropList(indent: String);
 
     procedure ProcessValue(ValueType: TValueType; Indent: String);
@@ -543,9 +561,22 @@ procedure ObjectBinaryToText1(Input, Output: TStream;
               OutLn(Indent);
               Input.Seek(-1, soFromCurrent);
               OutStr(indent + '  item');
-              ValueType := TValueType({$ifdef FPC}Input.{$endif}ReadByte);
-              if ValueType <> vaList then
+              ValueType:= TValueType({$ifdef FPC}Input.{$endif}ReadByte);
+              case valuetype of               
+               vaInt8,vaInt16,vaInt32: begin
                 OutStr('[' + IntToStr(ReadInt(ValueType)) + ']');
+                valuetype:= tvaluetype({$ifdef fpc}input.{$endif}readbyte);
+               end;
+               vastring,vautf8string,valstring: begin
+                outstr(' ');
+                processstring(valuetype);
+                valuetype:= tvaluetype({$ifdef fpc}input.{$endif}readbyte);
+               end;
+              end;
+              if valuetype <> valist then begin
+               raise ereaderror.createfmt(serrinvalidpropertytype,
+                                                       [ord(valuetype)]);
+              end;
               OutLn('');
               ReadPropList(indent + '    ');
               OutStr(indent + '  end');
@@ -784,6 +815,7 @@ var
     end;
   end;
 
+
   procedure ProcessWideString(const left : widestring);
   var ws : widestring;
   begin
@@ -797,6 +829,36 @@ var
     end;
     {$ifdef FPC}Output.{$endif}WriteByte(Ord(vaWstring));
     WriteWString(ws);
+  end;
+
+  procedure processstring;
+  var
+   s: string;
+  begin
+   s:= parser.TokenString;
+   while parser.NextToken = '+' do begin
+    parser.NextToken;   // Get next string fragment
+    case parser.Token of
+     toString: begin
+      s:= s + parser.TokenString;
+     end;
+     toWString: begin
+      ProcessWideString(s);
+      exit;
+     end
+     else begin
+      parser.CheckToken(toString);
+     end;
+    end;
+   end;
+   if (length(S)>255) then begin
+     {$ifdef FPC}Output.{$endif}WriteByte(Ord(vaLString));
+     WriteLString(S);
+   end
+   else begin
+    {$ifdef FPC}Output.{$endif}WriteByte(Ord(vaString));
+    WriteString(s);
+   end;
   end;
   
   procedure ProcessProperty; forward;
@@ -832,29 +894,7 @@ var
 {$endif}
       toString:
         begin
-          s := parser.TokenString;
-          while parser.NextToken = '+' do
-          begin
-            parser.NextToken;   // Get next string fragment
-            case parser.Token of
-              toString  : s:=s+parser.TokenString;
-              toWString : begin
-                            ProcessWideString(s);
-                            exit;
-                          end
-              else parser.CheckToken(toString);
-            end;
-          end;
-          if (length(S)>255) then
-          begin
-            {$ifdef FPC}Output.{$endif}WriteByte(Ord(vaLString));
-            WriteLString(S);
-          end
-          else
-          begin
-            {$ifdef FPC}Output.{$endif}WriteByte(Ord(vaString));
-            WriteString(s);
-          end;
+         processstring;
         end;
       toWString:
         ProcessWideString('');
@@ -932,6 +972,10 @@ var
           begin
             parser.CheckTokenSymbol('item');
             parser.NextToken;
+            if parser.token = tostring then begin //item name
+             processstring;
+//             parser.nexttoken;
+            end;
             // ConvertOrder
             {$ifdef FPC}Output.{$endif}WriteByte(Ord(vaList));
             while not parser.TokenSymbolIs('end') do

@@ -281,6 +281,7 @@ type
    procedure defineproperties(filer: tfiler); override;
    procedure readcollection(reader: treader);
    procedure writecollection(writer: twriter);
+   function getcollectionname(const index: integer): string; virtual;
    function ispropertystored(index: integer): boolean; virtual;
    procedure setlinkedvar(const source: tmsecomponent; var dest: tmsecomponent;
               const linkintf: iobjectlink = nil); overload;
@@ -1551,24 +1552,30 @@ end;
 
 procedure tpersistentarrayprop.readcollection(reader: treader);
 var
- int1: integer;
-
+ int1,int2,int3: integer;
+ str1: string;
 begin
  with treader1(reader) do begin
   readvalue;
   int1:= 0;
   while not EndOfList do begin
-  {
-   if int1 >= count then begin
-    raise earraystreamerror.create('Arrayproperty length mismatch: '+
-          inttostr(count) + '.');
-   end;
-  }
    if NextValue in [vaInt8, vaInt16, vaInt32] then ReadInteger;
+   int2:= int1;
+   if nextvalue in [vastring,vautf8string,valstring] then begin
+    str1:= readstring;
+    if str1 <> '' then begin
+     for int3:= 0 to count-1 do begin 
+      if getcollectionname(int3) = str1 then begin
+       int2:= int3;
+       break;
+      end;
+     end;
+    end;
+   end;
    ReadListBegin;
    while not EndOfList do  begin
-    if int1 <= high(fitems) then begin
-     treader1(reader).ReadProperty(getitems(int1));
+    if int2 <= high(fitems) then begin
+     treader1(reader).ReadProperty(getitems(int2));
     end
     else begin
      {$ifdef FPC}
@@ -1588,9 +1595,10 @@ end;
 
 procedure tpersistentarrayprop.writecollection(writer: twriter);
 var
- int1: integer;
+ int1,int2,int3: integer;
  proppathvorher: string;
  ancestorbefore: tpersistentarrayprop;
+ str1: string;
 
 begin
  proppathvorher:= getfproppath(writer);
@@ -1604,12 +1612,25 @@ begin
    WriteValue(vaCollection);
    {$endif}
    for int1 := 0 to Count - 1 do begin
+    str1:= getcollectionname(int1);
+    if str1 <> '' then begin
+     writestring(str1);
+    end;
     WriteListBegin;
-    if (ancestorbefore <> nil) and (int1 < ancestorbefore.count) then begin
-     ancestor:= ancestorbefore.fitems[int1];
-    end
-    else begin
-     ancestor:= nil;
+    ancestor:= nil;
+    if ancestorbefore <> nil then begin 
+     int2:= int1;
+     if (str1 <> '') then begin
+      for int3:= 0 to ancestorbefore.count-1 do begin
+       if ancestorbefore.getcollectionname(int3) = str1 then begin
+        int2:= int3;
+        break;
+       end;
+      end;
+     end;
+     if (int2 < ancestorbefore.count) then begin
+      ancestor:= ancestorbefore.fitems[int2];
+     end;
     end;
     if ispropertystored(int1) then begin
      twriter1(writer).WriteProperties(getitems(int1));
@@ -1774,6 +1795,11 @@ end;
 class function tpersistentarrayprop.getitemclasstype: persistentclassty;
 begin
  result:= nil; //dummy
+end;
+
+function tpersistentarrayprop.getcollectionname(const index: integer): string;
+begin
+ result:= '';
 end;
 
 { townedpersistentarrayprop }

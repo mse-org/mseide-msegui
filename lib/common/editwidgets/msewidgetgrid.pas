@@ -214,6 +214,7 @@ type
   protected
    procedure updatedatastate(var accepted: boolean); override;
    procedure defineproperties(filer: tfiler); override;
+   function getcollectionname(const aindex: integer): string; override;
   public
    constructor create(const aowner: tcustomwidgetgrid);
    class function getitemclasstype: persistentclassty; override;
@@ -2106,6 +2107,11 @@ begin
  end;
  filer.defineproperty('colorder',@readorder,@writeorder,bo1);
  inherited;
+end;
+
+function twidgetcols.getcollectionname(const aindex: integer): string;
+begin
+ result:= twidgetcol(fitems[aindex]).fwidgetname;
 end;
 
 { twidgetfixcol }
