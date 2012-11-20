@@ -567,9 +567,8 @@ procedure ObjectBinaryToText1(Input, Output: TStream;
                 OutStr('[' + IntToStr(ReadInt(ValueType)) + ']');
                 valuetype:= tvaluetype({$ifdef fpc}input.{$endif}readbyte);
                end;
-               vastring,vautf8string,valstring: begin
-                outstr(' ');
-                processstring(valuetype);
+               vaident: begin
+                outstr('['+readsstr+']');
                 valuetype:= tvaluetype({$ifdef fpc}input.{$endif}readbyte);
                end;
               end;
@@ -972,9 +971,15 @@ var
           begin
             parser.CheckTokenSymbol('item');
             parser.NextToken;
-            if parser.token = tostring then begin //item name
-             processstring;
-//             parser.nexttoken;
+            if parser.token = '[' then begin
+             parser.nexttoken;
+             if parser.token = tosymbol then begin //item name
+              {$ifdef fpc}output.{$endif}writebyte(ord(vaident));
+              writestring(parser.tokencomponentident);
+             end;
+             parser.nexttoken;
+             parser.checktoken(']');
+             parser.nexttoken;
             end;
             // ConvertOrder
             {$ifdef FPC}Output.{$endif}WriteByte(Ord(vaList));

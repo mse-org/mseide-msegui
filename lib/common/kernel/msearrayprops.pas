@@ -1561,8 +1561,8 @@ begin
   while not EndOfList do begin
    if NextValue in [vaInt8, vaInt16, vaInt32] then ReadInteger;
    int2:= int1;
-   if nextvalue in [vastring,vautf8string,valstring] then begin
-    str1:= readstring;
+   if nextvalue = vaident then begin
+    str1:= readident;
     if str1 <> '' then begin
      for int3:= 0 to count-1 do begin 
       if getcollectionname(int3) = str1 then begin
@@ -1614,7 +1614,7 @@ begin
    for int1 := 0 to Count - 1 do begin
     str1:= getcollectionname(int1);
     if str1 <> '' then begin
-     writestring(str1);
+     writeident(str1);
     end;
     WriteListBegin;
     ancestor:= nil;
