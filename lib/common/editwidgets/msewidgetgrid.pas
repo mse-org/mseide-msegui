@@ -1428,6 +1428,7 @@ begin
   {$endif}
   end;
   if awidget <> nil then begin
+   fwidgetname:= awidget.name;
    awidget.visible:= false;
    awidget.getcorbainterface(typeinfo(igridwidget),fintf);
    if not (gps_datalistvalid in fstate) then begin
@@ -1484,6 +1485,7 @@ begin
    tcustomgrid1(fcellinfo.grid).layoutchanged;
   end
   else begin
+   fwidgetname:= '';
    fintf:= nil;
    if (dl1 <> nil) and (dls_remote in dl1.state) then begin
     dl1:= nil; //no free
@@ -2076,6 +2078,7 @@ begin
   end;
   fitems:= persistentarty(ar2);
   fcolorder:= nil;
+  clearorder; //new order is default  
  end;
 end;
 
