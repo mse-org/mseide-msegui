@@ -567,6 +567,8 @@ implementation
 uses
  msestockobjects,{$ifdef FPCc}rtlconst{$else}rtlconsts{$endif},
            sysutils,msebits,msesysintf;
+const
+ imageextendcaptionpos = [cp_right,cp_righttop,cp_rightcenter,cp_rightbottom];
 
 function copylistitems(const asource: listitemarty): listitemarty;
 var
@@ -735,7 +737,9 @@ begin
    end;
   end;
   if aimagelist <> nil then begin
-   imageextend.cx:= aimagelist.size.cx+imageextra.cx-imagerect.cx;
+   if fowner.captionpos in imageextendcaptionpos then begin 
+    imageextend.cx:= aimagelist.size.cx+imageextra.cx-imagerect.cx;
+   end;
    if acanvas <> nil then begin
     int1:= getactimagenr;
     if (int1 >= 0) and (int1 < aimagelist.count) then begin
@@ -760,14 +764,16 @@ begin
   ainfo.dest.cx:= ainfo.dest.cx - treelevelshift;
   ainfo.clip.cx:= ainfo.clip.cx - treelevelshift;
   if fimagelist <> nil then begin
-   int1:= imageextend.cx;
-   with ainfo.dest do begin
-    x:= x+int1;
-    cx:= cx-int1;
-   end;
-   with ainfo.clip do begin
-    x:= x+int1;
-    cx:= cx-int1;
+   if fowner.captionpos in imageextendcaptionpos then begin
+    int1:= imageextend.cx;
+    with ainfo.dest do begin
+     x:= x+int1;
+     cx:= cx-int1;
+    end;
+    with ainfo.clip do begin
+     x:= x+int1;
+     cx:= cx-int1;
+    end;
    end;
   end;
  end;
