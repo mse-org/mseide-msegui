@@ -318,6 +318,7 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   procedure writestate(writer: twriter); override;
    procedure insertwidget(const awidget: twidget; const apos: pointty); override;
    function childrencount: integer; override;
    function getlogicalchildren: widgetarty; override;
@@ -3653,6 +3654,23 @@ end;
 function tcustomwidgetgrid.cellhasfocus: boolean;
 begin
  result:= fcontainer2.entered or fcontainer0.entered or focused;
+end;
+
+procedure tcustomwidgetgrid.writestate(writer: twriter);
+var
+ int1: integer;
+begin
+ for int1:= 0 to fdatacols.count-1 do begin
+  with twidgetcol(twidgetcols(fdatacols).fitems[int1]) do begin
+   if fintf = nil then begin
+    fwidgetname:= '';
+   end
+   else begin
+    fwidgetname:= fintf.getwidget.name;
+   end;
+  end;
+ end;
+ inherited;
 end;
 
 procedure registergriddatalistclass(const tag: ansistring;
