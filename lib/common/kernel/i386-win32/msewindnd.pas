@@ -15,6 +15,13 @@ uses
  mseclasses,activex,mseglob;
 
 type
+  IDropSource = interface(IUnknown)
+    ['{00000121-0000-0000-C000-000000000046}']
+    function QueryContinueDrag(fEscapePressed: BOOL;
+      grfKeyState: DWORD):HResult;StdCall;
+    function GiveFeedback(dwEffect: DWORD): HResult;StdCall;
+  end;
+
  ienumformatetc = interface(iunknown)['{00000103-0000-0000-c000-000000000046}']
   function next(celt: ulong; out rgelt: formatetc;
                       pceltfetched:pulong = nil): hresult; stdcall;
@@ -142,8 +149,8 @@ type
    function enumdadvise(out enumadvise: ienumstatdata): hresult; stdcall;
     //idropsource
    function querycontinuedrag(fescapepressed: bool;
-               grfkeystate: longint):hresult; stdcall;
-   function givefeedback(dweffect: longint): hresult; stdcall;
+               grfkeystate: dword):hresult; stdcall;
+   function givefeedback(dweffect: dword): hresult; stdcall;
  end;
 
  writestatety = (ws_active,{ws_cancel,ws_drop,}ws_checking);
@@ -662,7 +669,7 @@ begin
 end;
 
 function tdataobject.querycontinuedrag(fescapepressed: bool;
-               grfkeystate: longint): hresult; stdcall;
+               grfkeystate: dword): hresult; stdcall;
 begin
  application.lock;
  result:= s_ok;
@@ -679,7 +686,7 @@ begin
  application.unlock;
 end;
 
-function tdataobject.givefeedback(dweffect: longint): hresult; stdcall;
+function tdataobject.givefeedback(dweffect: dword): hresult; stdcall;
 begin
  if interlockeddecrement(fcheckpending) >= 0 then begin
   application.lock;

@@ -541,7 +541,6 @@ type
    procedure dopaintcontent(const acanvas: tcanvas); virtual;
    procedure dopaintbackground(const canvas: tcanvas); override;
    procedure dopaint(const acanvas: tcanvas); override;
-   procedure paint(const acanvas: tcanvas); override;
     //idialcontroller
    procedure directionchanged(const dir,dirbefore: graphicdirectionty);
    function getdialrect: rectty;
@@ -558,6 +557,7 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   procedure paint(const acanvas: tcanvas); override;
    procedure createfacechart;
    procedure createframechart;
    function fit(const asides: rectsidesty = allrectsides): boolean; 

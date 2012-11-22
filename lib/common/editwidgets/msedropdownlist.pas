@@ -375,8 +375,6 @@ type
    procedure setcols(const Value: tdropdowncols);
    function getitemindex: integer;
    procedure setitemindex(const Value: integer);
-   procedure objectevent(const sender: tobject;
-                               const event: objecteventty); override;
    procedure setvaluecol(const avalue: integer);
    procedure setimagelist(const avalue: timagelist);
    procedure imagelistchanged;
@@ -399,6 +397,8 @@ type
    fdropdownitems: tdropdowncols;
    fdropdownlist: tdropdownlist;
    fcols: tdropdowncols;
+   procedure objectevent(const sender: tobject;
+                               const event: objecteventty); override;
    procedure valuecolchanged; virtual;
    function getdropdownwidget: twidget; override;
    procedure itemchanged(const sender: tdatalist; const index: integer);
@@ -498,7 +498,7 @@ type
    procedure drawcell(const canvas: tcanvas); override;
   public
    constructor create(const agrid: tcustomgrid; const aowner: tgridarrayprop;
-                               const acontroller: tcustomdropdownlistcontroller);
+             const acontroller: tcustomdropdownlistcontroller); reintroduce;
  end;
 
  twidget1 = class(twidget);
