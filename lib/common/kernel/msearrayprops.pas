@@ -1752,8 +1752,10 @@ end;
 procedure tpersistentarrayprop.add(const item: tpersistent);
 begin
  beginupdate;
- insertempty(length(fitems));
+ setlength(fitems,high(fitems)+2);
+// insertempty(length(fitems));
  fitems[high(fitems)]:= item;
+ setcount1(length(fitems),false);
  endupdate;
 end;
 

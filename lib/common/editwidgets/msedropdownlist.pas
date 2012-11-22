@@ -19,7 +19,8 @@ uses
  msekeyboard,msegridsglob,mseeditglob,msestat,msebitmap;
 
 const
- defaultdropdowncoloptions = [co_fill,co_readonly,co_focusselect,co_mousemovefocus,co_rowselect];
+ defaultdropdowncoloptions = [co_fill,co_readonly,co_focusselect,
+                                        co_mousemovefocus,co_rowselect];
  defaultdropdowncoltextflags = defaultcoltextflags + [tf_noselect];
  mouseautoscrollheight = 4;
  dropdownitemselectedevent = 345;
@@ -29,7 +30,7 @@ type
  dropdownlistoptionty = (dlo_casesensitive,dlo_posinsensitive);
  dropdownlistoptionsty = set of dropdownlistoptionty;
 
- dropdownliststatety = (dls_firstmousemoved,dls_mousemoved,dls_scrollup{,dls_closing});
+ dropdownliststatety = (dls_firstmousemoved,dls_mousemoved,dls_scrollup);
  dropdownliststatesty = set of dropdownliststatety;
 
  dropdowneditoptionty = (deo_selectonly,deo_forceselect,
@@ -488,12 +489,24 @@ implementation
 uses
  sysutils,msewidgets,mseguiintf,rtlconsts,msebits;
 
-type
+type 
+ timagefixcol = class(tfixcol)
+  private
+   fimagelist: timagelist;
+   fimageframe: framety;
+  protected
+   procedure drawcell(const canvas: tcanvas); override;
+  public
+   constructor create(const agrid: tcustomgrid; const aowner: tgridarrayprop;
+                               const acontroller: tcustomdropdownlistcontroller);
+ end;
+
  twidget1 = class(twidget);
  tcustombuttonframe1 = class(tcustombuttonframe);
  tstringcol1 = class(tstringcol);
  tframebutton1 = class(tframebutton);
  tdatacols1 = class(tdatacols);
+ 
 const
  defaultdropdowncellinnerframe: framety = 
                       (left: 1; top: 0; right: 1; bottom: 0);
@@ -1792,6 +1805,7 @@ var
  aparent: twidget;
  widget1: twidget;
  col1: colorty;
+ int1: integer;
 begin
  fcontroller:= acontroller;
  aparent:= fcontroller.getwidget;
@@ -1827,6 +1841,14 @@ begin
   fframe.framewidth:= 1;
   fframe.colorframe:= cl_black;
   initcols(acols);
+  if acontroller.imagelist <> nil then begin
+   ffixcols.add(timagefixcol.create(self,ffixcols,fcontroller));
+   int1:= fcontroller.imagelist.height + fcontroller.fimageframe.top + 
+                fcontroller.fimageframe.bottom;
+   if datarowheight < int1 then begin
+    datarowheight:= int1;
+   end;
+  end;
  finally
   endupdate;
  end;
@@ -1980,7 +2002,7 @@ begin
  if arowcount > frowcount then begin
   arowcount:= frowcount;
  end;
- datarowheight:= font.lineheight;
+// datarowheight:= font.lineheight;
  if arowcount = 0 then begin
   rect1.cy:= ystep div 2;
  end
@@ -2193,6 +2215,29 @@ constructor tdropdownbutton.create(aowner: tobject);
 begin
  inherited;
  finfo.ca.imagenr:= ord(stg_arrowdownsmall);
+end;
+
+{ timagefixcol }
+
+constructor timagefixcol.create(const agrid: tcustomgrid;
+                                   const aowner: tgridarrayprop;
+                            const acontroller: tcustomdropdownlistcontroller);
+begin
+ inherited create(agrid,aowner);
+ fimagelist:= acontroller.imagelist;
+ fimageframe:= acontroller.imageframe;
+ width:= fimagelist.width + acontroller.fimageframe.left +
+                                      acontroller.fimageframe.right;
+ linewidth:= 0;
+end;
+
+procedure timagefixcol.drawcell(const canvas: tcanvas);
+begin
+ inherited;
+ with cellinfoty(canvas.drawinfopo^) do begin
+  fimagelist.paint(canvas,cell.row,deflaterect(rect,fimageframe),
+                                                        [al_ycentered]);
+ end; 
 end;
 
 end.
