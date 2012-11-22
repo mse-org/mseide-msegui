@@ -43,13 +43,13 @@ type
                    var info: mouseeventinfoty);
    procedure reportcontainerscroll(const sender: twidget; const point: pointty);
    procedure repcomtainerchildscaled(const sender: TObject);
+   procedure updatewidgethideexe(const sender: tcustomaction); override;
   private
 //   freportcontainer: treportcontainer;
    fstate: reportdesignerstatesty;
    function ppmm: real;
   protected
    procedure setmoduleoptions(const aoptions: moduleoptionsty); override;
-   procedure updatewidgethideexe(const sender: tcustomaction); override;
    function report: tcustomreport;
    function getmoduleparent: twidget; override;
    function getdesignrect: rectty; override;

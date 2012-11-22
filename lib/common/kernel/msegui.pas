@@ -1224,6 +1224,7 @@ type
    ffocusedchild,ffocusedchildbefore: twidget;
    ffontheight: integer;
    fsetwidgetrectcount: integer; //for recursive setpos
+   fautosizelevel: byte;
 
    foptionsskin: optionsskinty;
    fskingroup: integer;
@@ -4636,10 +4637,6 @@ begin
  checkstate;
  result.cx:= fpaintframe.left + fpaintframe.right;
  result.cy:= fpaintframe.top + fpaintframe.bottom;
-// result.cx:= fouterframe.left + fpaintframe.left +
-//       fpaintframe.right + fouterframe.right;
-// result.cy:= fouterframe.top + fpaintframe.top +
-//       fpaintframe.bottom + fouterframe.bottom;
 end;
 
 function tcustomframe.innerframewidth: sizety;
@@ -6924,7 +6921,7 @@ begin
  result:= fminsize;
 end;
 
-procedure twidget.internalsetwidgetrect(Value: rectty; 
+procedure twidget.internalsetwidgetrect(value: rectty; 
                                                   const windowevent: boolean);
 
  procedure checkwidgetregionchanged(var achanged: boolean);
@@ -6944,7 +6941,10 @@ var
  size1,size2: sizety;
  ar1: widgetarty;
  ar2,ar3: integerarty;
+ autosizecha: boolean;
+ autosi: sizety;
 begin
+ autosizecha:= false;
  if ([ow1_autowidth,ow1_autoheight]*foptionswidget1 <> []) and 
                                  not (csloading in componentstate) then begin
   if not windowevent then begin
@@ -6966,6 +6966,7 @@ begin
   if not (ow1_autoheight in foptionswidget1) then begin
    size1.cy:= 0;
   end;
+  autosizecha:= (size1.cx <> 0) or (size1.cy <> 0);
   inc(value.cx,size1.cx);
   if (ow1_autosizeanright in foptionswidget1) and 
                                         not (an_right in fanchors) then begin
@@ -6976,6 +6977,7 @@ begin
                                         not (an_bottom in fanchors) then begin
    dec(value.y,size1.cy);
   end;
+  autosi:= value.size;
   if not windowevent then begin
    checkwidgetsize(value.size);
   end;
@@ -7085,6 +7087,16 @@ begin
   end;
   if bo2 and (tws_windowvisible in fwindow.fstate) then begin
    fwindow.checkwindow(windowevent);
+  end;
+ end;
+ if autosizecha and (fwidgetrect.cx = autosi.cx) and 
+           (fwidgetrect.cy = autosi.cy) and (fautosizelevel < 6) then begin
+                                //emergency break
+  inc(fautosizelevel);
+  try
+   internalsetwidgetrect(fwidgetrect,windowevent);
+  finally
+   dec(fautosizelevel);
   end;
  end;
 end;
@@ -7893,6 +7905,7 @@ begin
    {$endif}
    canvas.font:= getfont;
    canvas.color:= actcolor;
+   canvas.drawinfopo:= nil;
    dopaint(canvas);
    doonpaint(canvas);
   end;

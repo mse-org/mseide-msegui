@@ -628,6 +628,7 @@ type
    procedure doafterclosedropdown; virtual;
    function getdropdownitems: tdropdowncols;
    function getvalueempty: integer; virtual;
+   procedure imagelistchanged; virtual;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -3422,6 +3423,11 @@ begin
    inflaterect1(flayoutinfocell.captioninnerrect,fpaintframe); //remove buttons
   end;
  end;
+end;
+
+procedure tdropdownitemedit.imagelistchanged;
+begin
+ //dummy
 end;
 {
 function tdropdownitemedit.setdropdowntext(const value: msestring;

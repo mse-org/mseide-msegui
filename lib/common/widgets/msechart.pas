@@ -2935,14 +2935,18 @@ begin
  shift1:= 0;
  shift2:= 0;
  for int1:= 0 to fxdials.count-1 do begin
+ {$warnings off}
   handle(tcustomdialcontroller1(fxdials[int1]),
                              rs_right in asides,rs_left in asides,true);
+ {$warnings on}
  end;
  shift1:= 0;
  shift2:= 0;
  for int1:= 0 to fydials.count-1 do begin
+ {$warnings off}
   handle(tcustomdialcontroller1(fydials[int1]),
                              rs_bottom in asides,rs_top in asides,false);
+ {$warnings on}
  end;
  inflaterectext1(ext1,tcustomframe1(fframe).fi.innerframe);
  if fframechart <> nil then begin

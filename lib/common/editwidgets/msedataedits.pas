@@ -22,7 +22,7 @@ uses
  msetypes,msestrings,msedatalist,mseglob,mseguiglob,
  mseevent,msegraphutils,msedrawtext,msestat,msestatfile,mseclasses,
  msearrayprops,msegrids,msewidgetgrid,msedropdownlist,msedrag,mseforms,
- mseformatstr,typinfo,msemenus,
+ mseformatstr,typinfo,msemenus,msebitmap,
  msescrollbar,msewidgets,msepopupcalendar,msekeyboard,msepointer,msegridsglob
  {$ifdef mse_with_ifi}
  ,mseificomp,mseifiglob,mseificompglob
@@ -532,7 +532,11 @@ type
    procedure setifilink1(const avalue: tifidropdownlistlinkcomp);
    procedure ifidropdownlistchanged(const acols: tifidropdowncols);
   {$endif}
+    //idropdownlist
+   procedure imagelistchanged;
   protected
+   procedure paintimage(const canvas: tcanvas); override;
+   procedure dochange; override;
   {$ifdef mse_with_ifi}
    function getifidatalinkintf: iifidatalink; override;
     //iifidatalink
@@ -545,6 +549,8 @@ type
    function createdropdowncontroller: tcustomdropdowncontroller; override;
    procedure internalsort(const acol: integer; 
                           out sortlist: integerarty); virtual;
+   function geteditframe: framety; override;
+   procedure getautopaintsize(var asize: sizety); override;
   public
    procedure sort(const acol: integer = 0);
    property dropdown: tdropdownlistcontroller read getdropdown write setdropdown;
@@ -883,6 +889,7 @@ type
    function getvalueempty: integer; override;
    function textcellcopy: boolean; override;
    procedure updatedatalist; override;
+   procedure paintimage(const canvas: tcanvas); override;
   public
    enums: integerarty; //nil -> enum = item rowindex + valueoffset
    constructor create(aowner: tcomponent); override;
@@ -1359,6 +1366,7 @@ type
  tcustomgrid1 = class(tcustomgrid);
  tcustomwidgetgrid1 = class(tcustomwidgetgrid);
  tdropdowncontroller1 = class(tdropdowncontroller);
+ tcustomdropdownlistcontroller1 = class(tcustomdropdownlistcontroller);
 // tdatacol1 = class(tdatacol);
 
 function realtytoint(const avalue: realty): integer;
@@ -2100,6 +2108,7 @@ var
  bo1: boolean;
  int1: integer;
  rect1: rectty;
+ fra1: framety;
 begin
  atextflags:= textflags;
  with cellinfoty(canvas.drawinfopo^) do begin
@@ -2109,8 +2118,9 @@ begin
     canvas.font.style:= fempty_fontstyle;
    end;
   end;
+  fra1:= geteditframe;
   if calcautocellsize then begin
-   rect1:= textrect(canvas,mstr1,innerrect,atextflags);
+   rect1:= textrect(canvas,mstr1,deflaterect(innerrect,fra1),atextflags);
    int1:= rect1.cx - innerrect.cx + rect.cx;
    if int1 > autocellsize.cx then begin
     autocellsize.cx:= int1;
@@ -2124,6 +2134,7 @@ begin
    if bo1 and (fempty_color <> cl_none) and not (des_grayed in fstate) then begin
     canvas.fillrect(rect,fempty_color);
    end;
+   paintimage(canvas);
    if mstr1 <> '' then begin
     if bo1 then begin    
      canvas.font:= getfontempty1{fempty_font};
@@ -2138,7 +2149,8 @@ begin
     if des_grayed in fstate then begin
      include(atextflags,tf_grayed);
     end;
-    drawtext(canvas,mstr1,innerrect,rect,atextflags);
+    drawtext(canvas,mstr1,deflaterect(innerrect,fra1),deflaterect(rect,fra1),
+                                                                  atextflags);
    end;
   end;
  end;
@@ -3674,6 +3686,60 @@ begin
  tdropdownlistcontroller(fdropdown).dostatwrite(writer);
 end;
 
+function tcustomdropdownlistedit.geteditframe: framety;
+begin
+ result:= nullframe;
+ if (fdropdown <> nil) and not(csdestroying in componentstate) and
+     (tcustomdropdownlistcontroller(fdropdown).imagelist <> nil) then begin
+  with tcustomdropdownlistcontroller1(fdropdown)do begin
+   result.left:= tcustomdropdownlistcontroller(fdropdown).imagelist.width + 
+                fimageframe.left + fimageframe.right;
+  end;
+ end;
+end;
+
+procedure tcustomdropdownlistedit.getautopaintsize(var asize: sizety);
+var
+ int1: integer;
+begin
+ inherited;
+ with tcustomdropdownlistcontroller1(fdropdown)do begin
+  if fimagelist <> nil then begin
+   int1:= fimagelist.height + fimageframe.top + fimageframe.bottom;
+   if int1 > asize.cy then begin
+    asize.cy:= int1;
+   end;
+  end;
+ end; 
+end;
+
+procedure tcustomdropdownlistedit.imagelistchanged;
+begin
+ if componentstate*[csloading,csdestroying] = [] then begin
+  setupeditor;
+  formatchanged;
+  checkautosize;
+ end;
+end;
+
+procedure tcustomdropdownlistedit.paintimage(const canvas: tcanvas);
+begin
+ with tcustomdropdownlistcontroller1(fdropdown) do begin
+  if imagelist <> nil then begin
+   imagelist.paint(canvas,itemindex,
+              deflaterect(clientrect,fimageframe),[al_ycentered]);
+  end;
+ end;
+end;
+
+procedure tcustomdropdownlistedit.dochange;
+begin
+ if tcustomdropdownlistcontroller(fdropdown).imagelist <> nil then begin
+  invalidate;
+ end;
+ inherited;
+end;
+
 { thistorycontroller }
 
 constructor thistorycontroller.create(const intf: idropdownlist);
@@ -4806,6 +4872,7 @@ procedure tcustomenuedit.setifilink1(const avalue: tifienumlinkcomp);
 begin
  setifilink0(avalue);
 end;
+{$endif}
 
 procedure tcustomenuedit.setmin(const avalue: integer);
 begin
@@ -4834,7 +4901,24 @@ begin
   max:= self.max;
  end;
 end;
-{$endif}
+
+procedure tcustomenuedit.paintimage(const canvas: tcanvas);
+var
+ int1: integer;
+begin
+ with tcustomdropdownlistcontroller1(fdropdown) do begin
+  if imagelist <> nil then begin
+   int1:= value;
+   if canvas.drawinfopo <> nil then begin   
+    with cellinfoty(canvas.drawinfopo^) do begin
+     int1:= pinteger(datapo)^;
+    end;
+   end;
+   imagelist.paint(canvas,int1,
+                      deflaterect(clientrect,fimageframe),[al_ycentered]);
+  end;
+ end;
+end;
 
 { tenumdropdowncontroller }
 

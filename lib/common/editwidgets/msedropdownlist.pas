@@ -16,7 +16,7 @@ uses
  mseclasses,mseedit,mseevent,mseglob,mseguiglob,msegrids,msedatalist,msegui,
  mseinplaceedit,msearrayprops,classes,msegraphics,msedrawtext,msegraphutils,
  msetimer,mseforms,msetypes,msestrings,msestockobjects,msescrollbar,
- msekeyboard,msegridsglob,mseeditglob,msestat;
+ msekeyboard,msegridsglob,mseeditglob,msestat,msebitmap;
 
 const
  defaultdropdowncoloptions = [co_fill,co_readonly,co_focusselect,co_mousemovefocus,co_rowselect];
@@ -169,6 +169,7 @@ type
  idropdownlist = interface(idropdown)
   function getdropdownitems: tdropdowncols;
               //nil -> dropdowncontroller.fdropdownitems
+  procedure imagelistchanged;
  end;
 
  idropdownwidget = interface(idropdown)
@@ -299,7 +300,8 @@ type
    function getbuttonframeclass: dropdownbuttonframeclassty; virtual;
    procedure updatedropdownbounds(var arect: rectty); virtual;
    procedure updatedropdownpos(const arect: rectty);
-   procedure objectevent(const sender: tobject; const event: objecteventty); override;
+   procedure objectevent(const sender: tobject;
+                               const event: objecteventty); override;
    procedure setoptions(const Value: dropdowneditoptionsty); virtual;
    function getdropdownwidget: twidget; virtual;
    function getwidget: twidget;
@@ -372,8 +374,19 @@ type
    procedure setcols(const Value: tdropdowncols);
    function getitemindex: integer;
    procedure setitemindex(const Value: integer);
+   procedure objectevent(const sender: tobject;
+                               const event: objecteventty); override;
    procedure setvaluecol(const avalue: integer);
+   procedure setimagelist(const avalue: timagelist);
+   procedure imagelistchanged;
+   procedure setimageframe(const avalue: framety);
+   procedure setimageframe_left(const avalue: integer);
+   procedure setimageframe_top(const avalue: integer);
+   procedure setimageframe_right(const avalue: integer);
+   procedure setimageframe_bottom(const avalue: integer);
   protected
+   fimagelist: timagelist;
+   fimageframe: framety;
    fdropdownrowcount: integer;
    fwidth: integer;
    fvaluecol: integer;
@@ -425,6 +438,16 @@ type
                                       write fbuttonendlength default 0;
    property buttonminlength: integer read fbuttonminlength 
                     write fbuttonminlength default defaultbuttonminlength;
+   property imagelist: timagelist read fimagelist write setimagelist;
+   property imageframe: framety read fimageframe write setimageframe;
+   property imageframe_left: integer read fimageframe.left 
+                                         write setimageframe_left default 0;
+   property imageframe_top: integer read fimageframe.top
+                                         write setimageframe_top default 0;
+   property imageframe_right: integer read fimageframe.right 
+                                         write setimageframe_right default 0;
+   property imageframe_bottom: integer read fimageframe.bottom 
+                                         write setimageframe_bottom default 0;
  end;
 
  tnocolsdropdownlistcontroller = class(tcustomdropdownlistcontroller)
@@ -432,6 +455,11 @@ type
    function getbuttonframeclass: dropdownbuttonframeclassty; override;
   published
    property options;
+   property imagelist;
+   property imageframe_left;
+   property imageframe_top;
+   property imageframe_right;
+   property imageframe_bottom;
    property dropdownrowcount;
    property width;
    property datarowlinewidth;
@@ -1604,6 +1632,31 @@ begin
  end;
 end;
 
+procedure tcustomdropdownlistcontroller.objectevent(const sender: tobject;
+               const event: objecteventty);
+begin
+ inherited;
+ if (sender = fimagelist) then begin
+  case event of
+   oe_destroyed: begin
+    fimagelist:= nil;
+    imagelistchanged;
+   end;
+   oe_changed: begin
+    imagelistchanged;
+   end;
+  end;
+ end;
+end;
+
+procedure tcustomdropdownlistcontroller.setimagelist(const avalue: timagelist);
+begin
+ if fimagelist <> avalue then begin
+  setlinkedvar(avalue,tmsecomponent(fimagelist));
+  imagelistchanged;
+ end;
+end;
+
 procedure tcustomdropdownlistcontroller.valuecolchanged;
 begin
  //dummy
@@ -1652,6 +1705,41 @@ begin
   end;
   writer.writearray('dropdowncolwidths',ar1);
  end;
+end;
+
+procedure tcustomdropdownlistcontroller.imagelistchanged;
+begin
+ idropdownlist(fintf).imagelistchanged;
+end;
+
+procedure tcustomdropdownlistcontroller.setimageframe(const avalue: framety);
+begin
+ fimageframe:= avalue;
+ imagelistchanged; 
+end;
+
+procedure tcustomdropdownlistcontroller.setimageframe_left(const avalue: integer);
+begin
+ fimageframe.left:= avalue;
+ imagelistchanged;
+end;
+
+procedure tcustomdropdownlistcontroller.setimageframe_top(const avalue: integer);
+begin
+ fimageframe.top:= avalue;
+ imagelistchanged;
+end;
+
+procedure tcustomdropdownlistcontroller.setimageframe_right(const avalue: integer);
+begin
+ fimageframe.right:= avalue;
+ imagelistchanged;
+end;
+
+procedure tcustomdropdownlistcontroller.setimageframe_bottom(const avalue: integer);
+begin
+ fimageframe.bottom:= avalue;
+ imagelistchanged;
 end;
 
 { tnocolsdropdownlistcontroller }

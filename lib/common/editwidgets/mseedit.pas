@@ -342,6 +342,7 @@ type
    function geteditor: tinplaceedit;
    function geteditfont: tfont; virtual;
    function getinnerframe: framety; virtual;
+   function geteditframe: framety; virtual;
    procedure setupeditor; virtual;
    procedure internalcreateframe; override;
    procedure clientrectchanged; override;
@@ -376,6 +377,7 @@ type
    procedure dofocus; override;
    procedure dodefocus; override;
    procedure dopaint(const canvas: tcanvas); override;
+   procedure paintimage(const canvas: tcanvas); virtual;
    procedure doafterpaint(const canvas: tcanvas); override;
    procedure rootchanged; override;
    procedure showhint(var info: hintinfoty); override;
@@ -1171,6 +1173,7 @@ end;
 procedure tcustomedit.dopaint(const canvas: tcanvas);
 begin
  inherited;
+ paintimage(canvas);
  feditor.dopaint(canvas);
 end;
 
@@ -1311,17 +1314,26 @@ begin
  result:= minimalframe;
 end;
 
+function tcustomedit.geteditframe: framety;
+begin
+ result:= nullframe;
+end;
+
 procedure tcustomedit.setupeditor;
+var
+ fra1: framety;
 begin
  if not (csloading in componentstate) then begin
+  fra1:= geteditframe;
   with feditor do begin
    if fframe = nil then begin
-    setup(text,curindex,true,deflaterect(clientrect,getinnerframe),
-             clientrect,nil,nil,geteditfont);
+    setup(text,curindex,true,
+         deflaterect(clientrect,addframe(fra1,getinnerframe)),
+             deflaterect(clientrect,fra1),nil,nil,geteditfont);
    end
    else begin
-    setup(text,curindex,true,innerclientrect,
-                  makerect(nullpoint,clientsize),nil,nil,geteditfont);
+    setup(text,curindex,true,deflaterect(innerclientrect,fra1),
+           deflaterect(makerect(nullpoint,clientsize),fra1),nil,nil,geteditfont);
    end;
   end;
  end;
@@ -1361,11 +1373,15 @@ begin
   fram1:= getinnerframe;
  end
  else begin
-  fram1:= fframe.innerframe;
+//  fram1:= fframe.innerframe;
+  fram1:= fframe.framei;
  end;
  asize:= feditor.textrect.size;
  asize.cx:= asize.cx + fram1.left + fram1.right;
  asize.cy:= asize.cy + fram1.top + fram1.bottom;
+ fram1:= geteditframe;
+ asize.cx:= asize.cx + fram1.left+fram1.right;
+ asize.cy:= asize.cy + fram1.top+fram1.bottom;
 end;
 
 procedure tcustomedit.fontchanged;
@@ -1632,6 +1648,11 @@ begin
    result:= cr_ibeam;
   end;
  end;
+end;
+
+procedure tcustomedit.paintimage(const canvas: tcanvas);
+begin
+ //dummy
 end;
 
 end.

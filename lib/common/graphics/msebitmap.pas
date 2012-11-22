@@ -2296,7 +2296,7 @@ procedure timagelist.paint(const acanvas: tcanvas; const index: integer;
          const dest: rectty; source: rectty;
          const alignment: alignmentsty = [];
          const acolor: colorty = cl_default;
-        const acolorbackground: colorty = cl_default;
+         const acolorbackground: colorty = cl_default;
                          const atransparency: colorty = cl_default
                                                                );
 

@@ -867,7 +867,7 @@ var
 {$ifndef FPUNONE}
     flt: Extended;
 {$endif}
-    s: String;
+//    s: String;
     stream: TMemoryStream;
   begin
     case parser.Token of
