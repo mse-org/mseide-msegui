@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -87,6 +87,11 @@ type
   stg_doublesquare
                  );
 
+const
+ firsttracesymbol = stg_circlesmall;
+ lasttracesymbol = stg_triatopbig;
+ 
+type
  stockcaptionty = (sc_none,sc_is_invalid,sc_Format_error,sc_Value_is_required,
                     sc_Error,sc_Min,sc_Max,sc_Range_error,
                     sc_Undohk,sc_Redohk,sc_copyhk,sc_cuthk,sc_pastehk,
