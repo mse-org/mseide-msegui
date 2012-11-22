@@ -541,6 +541,7 @@ type
    procedure dopaintcontent(const acanvas: tcanvas); virtual;
    procedure dopaintbackground(const canvas: tcanvas); override;
    procedure dopaint(const acanvas: tcanvas); override;
+   procedure paint(const acanvas: tcanvas); override;
     //idialcontroller
    procedure directionchanged(const dir,dirbefore: graphicdirectionty);
    function getdialrect: rectty;
@@ -2705,17 +2706,21 @@ end;
 }
 procedure tcuchart.dopaint(const acanvas: tcanvas);
 begin
- if not checklayout then begin
-  inherited;
-  fxdials.paint(acanvas);
-  fydials.paint(acanvas);
-  dopaintcontent(acanvas);
-  fxdials.afterpaint(acanvas);
-  fydials.afterpaint(acanvas);
-  if fframechart <> nil then begin
-   fframechart.paintoverlay(acanvas,fchartframerect);
-  end;
+ inherited;
+ fxdials.paint(acanvas);
+ fydials.paint(acanvas);
+ dopaintcontent(acanvas);
+ fxdials.afterpaint(acanvas);
+ fydials.afterpaint(acanvas);
+ if fframechart <> nil then begin
+  fframechart.paintoverlay(acanvas,fchartframerect);
  end;
+end;
+
+procedure tcuchart.paint(const acanvas: tcanvas);
+begin
+ checklayout;
+ inherited;
 end;
 
 procedure tcuchart.setcolorchart(const avalue: colorty);
