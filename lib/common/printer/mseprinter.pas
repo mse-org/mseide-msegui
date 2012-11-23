@@ -357,6 +357,10 @@ type
    property clientrect: rectty read fclientrect;
    property clientpos: pointty read fclientrect.pos;
    property clientsize: sizety read fclientrect.size;
+   property clientleft: integer read fclientrect.x;
+   property clienttop: integer read fclientrect.y;
+   property clientwidth: integer read fclientrect.cx;
+   property clientheight: integer read fclientrect.cy;
    property colorspace: colorspacety read fcolorspace 
                          write setcolorspace default cos_gray;
    property pagenumber: integer read fpagenumber;

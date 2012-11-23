@@ -283,6 +283,7 @@ type
    procedure setcontroller(const avalue: tfiledialogcontroller);
    function getsysvalue: filenamety;
    procedure setsysvalue(const avalue: filenamety);
+   function getsysvaluequoted: filenamety;
   protected
    function createdialogcontroller: tstringdialogcontroller; override;
    procedure texttovalue(var accept: boolean; const quiet: boolean); override;
@@ -304,6 +305,7 @@ type
    procedure componentevent(const event: tcomponentevent); override;
    property controller: tfiledialogcontroller read fcontroller write setcontroller;
    property sysvalue: filenamety read getsysvalue write setsysvalue;
+   property sysvaluequoted: filenamety read getsysvaluequoted write setsysvalue;
   published
 //   property dialogkind: filedialogkindty read fdialogkind write fdialogkind default fdk_open;
  end;
@@ -2173,6 +2175,11 @@ end;
 procedure tcustomfilenameedit1.setsysvalue(const avalue: filenamety);
 begin
  value:= tomsefilepath(avalue);
+end;
+
+function tcustomfilenameedit1.getsysvaluequoted: filenamety;
+begin
+ result:= tosysfilepath(value,true);
 end;
 
 { tcustomfilenameedit }

@@ -33,7 +33,7 @@ type
 
 const
  sortflags: filelistoptionsty = [flo_sortname,flo_sorttime,flo_sortsize];
- intermediatefileextension = '.$$$';
+ intermediatefileextension = '.tmp';
 type
  filesortfuncty = function(const l,r: fileinfoty): integer of object;
 
