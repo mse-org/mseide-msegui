@@ -841,6 +841,11 @@ type
    constructor create(const intf: idropdownlist);
   published
    property options default defaultenumdropdownoptions;
+   property imagelist;
+   property imageframe_left;
+   property imageframe_top;
+   property imageframe_right;
+   property imageframe_bottom;
    property cols;
    property valuecol;
 //   property itemindex;
@@ -866,6 +871,8 @@ type
   {$endif}
    procedure setmin(const avalue: integer);
    procedure setmax(const avalue: integer);
+   function getdropdown: tenumdropdowncontroller;
+   procedure setdropdown(const avalue: tenumdropdowncontroller);
   protected
    fonsetvalue1: setintegereventty;
    fvalue1: integer;
@@ -903,7 +910,8 @@ type
    property valueoffset: integer read fvalueoffset write setvalueoffset default 0;
                                    //before value
    property value: integer read fvalue1 write setvalue default -1;
-   property valuedefault: integer read fvaluedefault1 write fvaluedefault1 default -1;
+   property valuedefault: integer read fvaluedefault1
+                                        write fvaluedefault1 default -1;
    property valueempty: integer read fvalueempty write fvalueempty default -1;
    property base: numbasety read fbase write setbase default nb_dec;
    property bitcount: integer read fbitcount write setbitcount default 32;
@@ -912,6 +920,8 @@ type
    property gridvalue[const index: integer]: integer
         read getgridvalue write setgridvalue; default;
    property gridvalues: integerarty read getgridvalues write setgridvalues;
+   property dropdown: tenumdropdowncontroller read getdropdown
+                                                        write setdropdown;
    property onsetvalue: setintegereventty read fonsetvalue1 write fonsetvalue1;
 {$ifdef mse_with_ifi}
    property ifilink: tifienumlinkcomp read getifilink write setifilink1;
@@ -4918,6 +4928,16 @@ begin
                       deflaterect(clientrect,fimageframe),[al_ycentered]);
   end;
  end;
+end;
+
+function tcustomenuedit.getdropdown: tenumdropdowncontroller;
+begin
+ result:= tenumdropdowncontroller(fdropdown);
+end;
+
+procedure tcustomenuedit.setdropdown(const avalue: tenumdropdowncontroller);
+begin
+ fdropdown.assign(avalue);
 end;
 
 { tenumdropdowncontroller }

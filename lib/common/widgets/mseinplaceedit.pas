@@ -177,7 +177,7 @@ type
    procedure clear; virtual;
    procedure initfocus;
    procedure moveindex(newindex: integer; shift: boolean = false;
-            donotify: boolean = true); virtual;
+                                   donotify: boolean = true); virtual;
    procedure inserttext(const text: msestring; nooverwrite: boolean = true);
    function copytoclipboard: boolean;           //true if copied
    function cuttoclipboard: boolean; virtual;   //true if cut
@@ -1851,7 +1851,7 @@ end;
 procedure tinplaceedit.settextflags(const Value: textflagsty);
 begin
  if ftextflags <> value then begin
-  ftextflags := Value;
+  ftextflags := Value+[tf_clipo];
   updatetextflags(fowner.focused);
  end;
 end;
@@ -1859,7 +1859,7 @@ end;
 procedure tinplaceedit.settextflagsactive(const Value: textflagsty);
 begin
  if ftextflagsactive <> value then begin
-  ftextflagsactive := Value;
+  ftextflagsactive:= Value+[tf_clipo];
   updatetextflags(fowner.active);
  end;
 end;

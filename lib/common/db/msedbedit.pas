@@ -6061,7 +6061,7 @@ var
 begin
  fdatalink:= tdropdownlistdatalink.create(self,igriddatalink(self),
                                                     acontroller.fdatalink);
- inherited create(acontroller,acols);
+ inherited create(acontroller,acols,nil);
  include(fstate,gs_isdb);
  fzebra_step:= 0;
  fdatalink.datasource:= acontroller.datasource;
@@ -6338,7 +6338,7 @@ begin
     datas.enablecontrols;
    end;
   end;
-  result:= tdropdownlist.create(self,fcols);
+  result:= tdropdownlist.create(self,fcols,nil);
  end
  else begin
   result:= tdbdropdownlist.create(self,fcols);
@@ -10514,7 +10514,7 @@ constructor texterndatadropdownlist.create(
 var
  int1,int2,int3: integer;
 begin
- inherited create(acontroller,acols);
+ inherited create(acontroller,acols,nil);
  include(fstate,gs_isdb);
  int1:= acontroller.dropdownrowcount;
  if (edds_filtered in feddstate) then begin
@@ -11119,7 +11119,7 @@ begin
     end;
    end;
   end;
-  result:= tcopydropdownlist.create(self,fcols);
+  result:= tcopydropdownlist.create(self,fcols,nil);
  end
  else begin
   result:= tlbdropdownlist.create(self,fcols);

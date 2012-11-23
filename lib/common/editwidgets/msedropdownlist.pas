@@ -206,6 +206,16 @@ type
    constructor create(const dest: tmsecomponent; const arow: integer);
  end;
  
+ tdropdownfixcol = class(tfixcol)
+  protected
+   fcontroller: tcustomdropdownlistcontroller;
+  public
+   constructor create(const agrid: tcustomgrid;
+              const aowner: tgridarrayprop;
+      const acontroller: tcustomdropdownlistcontroller); virtual; reintroduce;
+ end;
+ dropdownfixcolclassty = class of tdropdownfixcol;
+
  tdropdownlist = class(tcustomstringgrid)
   private
    foptions1: dropdownlistoptionsty;
@@ -237,7 +247,8 @@ type
    procedure setactiveitem(const aitemindex: integer); virtual;
   public
    constructor create(const acontroller: tcustomdropdownlistcontroller;
-                             acols: tdropdowncols); reintroduce;
+              const acols: tdropdowncols;
+                   const afixcolclass: dropdownfixcolclassty); reintroduce;
    destructor destroy; override;
    procedure show(awidth: integer; arowcount: integer;
                 var aitemindex: integer; afiltertext: msestring); reintroduce;
@@ -415,6 +426,7 @@ type
    procedure updatedropdownbounds(var arect: rectty); override;
    procedure receiveevent(const event: tobjectevent); override;
    function createdropdownlist: tdropdownlist; virtual;
+   function getfixcolclass: dropdownfixcolclassty; virtual;
    procedure internaldropdown; override;
    procedure editnotification(var info: editnotificationinfoty); override;
   public
@@ -456,11 +468,6 @@ type
    function getbuttonframeclass: dropdownbuttonframeclassty; override;
   published
    property options;
-   property imagelist;
-   property imageframe_left;
-   property imageframe_top;
-   property imageframe_right;
-   property imageframe_bottom;
    property dropdownrowcount;
    property width;
    property datarowlinewidth;
@@ -472,6 +479,11 @@ type
 
  tdropdownlistcontroller = class(tnocolsdropdownlistcontroller)
   published
+   property imagelist;
+   property imageframe_left;
+   property imageframe_top;
+   property imageframe_right;
+   property imageframe_bottom;
    property cols;
    property valuecol;
    property itemindex;
@@ -490,7 +502,7 @@ uses
  sysutils,msewidgets,mseguiintf,rtlconsts,msebits;
 
 type 
- timagefixcol = class(tfixcol)
+ timagefixcol = class(tdropdownfixcol)
   private
    fimagelist: timagelist;
    fimageframe: framety;
@@ -498,7 +510,7 @@ type
    procedure drawcell(const canvas: tcanvas); override;
   public
    constructor create(const agrid: tcustomgrid; const aowner: tgridarrayprop;
-             const acontroller: tcustomdropdownlistcontroller); reintroduce;
+             const acontroller: tcustomdropdownlistcontroller); override;
  end;
 
  twidget1 = class(twidget);
@@ -1410,7 +1422,7 @@ end;
 
 function tcustomdropdownlistcontroller.createdropdownlist: tdropdownlist;
 begin
- result:= tdropdownlist.create(self,fdropdownitems);
+ result:= tdropdownlist.create(self,fdropdownitems,getfixcolclass);
  result.name:= '_dropdownlist'; //debug purposes
 end;
 
@@ -1755,6 +1767,11 @@ begin
  imagelistchanged;
 end;
 
+function tcustomdropdownlistcontroller.getfixcolclass: dropdownfixcolclassty;
+begin
+ result:= nil; //dummy
+end;
+
 { tnocolsdropdownlistcontroller }
 
 function tnocolsdropdownlistcontroller.getbuttonframeclass: dropdownbuttonframeclassty;
@@ -1799,8 +1816,10 @@ end;
 
 { tdropdownlist }
 
-constructor tdropdownlist.create(const acontroller: tcustomdropdownlistcontroller;
-                       acols : tdropdowncols);
+constructor tdropdownlist.create(
+              const acontroller: tcustomdropdownlistcontroller;
+              const acols : tdropdowncols;
+              const afixcolclass: dropdownfixcolclassty);
 var
  aparent: twidget;
  widget1: twidget;
@@ -1841,6 +1860,9 @@ begin
   fframe.framewidth:= 1;
   fframe.colorframe:= cl_black;
   initcols(acols);
+  if afixcolclass <> nil then begin
+   ffixcols.add(afixcolclass.create(self,ffixcols,fcontroller));
+  end;
   if acontroller.imagelist <> nil then begin
    ffixcols.add(timagefixcol.create(self,ffixcols,fcontroller));
    int1:= fcontroller.imagelist.height + fcontroller.fimageframe.top + 
@@ -2217,19 +2239,29 @@ begin
  finfo.ca.imagenr:= ord(stg_arrowdownsmall);
 end;
 
+{ tdropdownfixcol }
+
+constructor tdropdownfixcol.create(const agrid: tcustomgrid;
+               const aowner: tgridarrayprop;
+               const acontroller: tcustomdropdownlistcontroller);
+begin
+ fcontroller:= acontroller;
+ inherited create(agrid,aowner);
+ linewidth:= 0;
+ color:= acontroller.color;
+end;
+
 { timagefixcol }
 
 constructor timagefixcol.create(const agrid: tcustomgrid;
                                    const aowner: tgridarrayprop;
                             const acontroller: tcustomdropdownlistcontroller);
 begin
- inherited create(agrid,aowner);
+ inherited create(agrid,aowner,acontroller);
  fimagelist:= acontroller.imagelist;
  fimageframe:= acontroller.imageframe;
  width:= fimagelist.width + acontroller.fimageframe.left +
                                       acontroller.fimageframe.right;
- linewidth:= 0;
- color:= acontroller.color;
 end;
 
 procedure timagefixcol.drawcell(const canvas: tcanvas);

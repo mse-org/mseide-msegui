@@ -895,7 +895,8 @@ type
                        default defaultfixcoloptions;
    property font;
  end;
-
+ fixcolclassty = class of tfixcol;
+ 
  tcolheaderfont = class(tparentfont)
   public
    class function getinstancepo(owner: tobject): pfont; override;

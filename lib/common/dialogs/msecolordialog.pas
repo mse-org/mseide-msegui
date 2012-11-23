@@ -15,7 +15,7 @@ interface
 uses
  msegui,mseclasses,mseforms,msegraphedits,msewidgets,msesimplewidgets,
  msedataedits,msegraphics,mseglob,mseguiglob,msedialog,
- classes,msetypes,msedropdownlist,
+ classes,msetypes,msedropdownlist,msegrids,
  msestrings,mseedit,msestat,msestatfile,msegraphutils,msemenus,mseevent;
 
 const
@@ -72,8 +72,6 @@ type
    procedure setvalue(avalue: colorty);
    function getvaluedefault: colorty;
    procedure setvaluedefault(avalue: colorty);
-//   function getbuttonellipse: tdropdownbutton;
-//   procedure setbuttonellipse(const avalue: tdropdownbutton);
    
    function getonsetvalue: setcoloreventty;
    procedure setonsetvalue(const avalue: setcoloreventty);
@@ -89,8 +87,11 @@ type
    function internaldatatotext(const data): msestring; override;
    function createdropdowncontroller: tcustomdropdowncontroller; override;
    procedure texttovalue(var accept: boolean; const quiet: boolean); override;
+   procedure paintimage(const canvas: tcanvas); override;
+   function geteditframe: framety; override;
    procedure buttonaction(var action: buttonactionty;
                     const buttonindex: integer); override;
+   procedure dochange; override;
   public
    constructor create(aowner: tcomponent); override;
    property value: colorty read getvalue write setvalue default cl_none;
@@ -117,10 +118,11 @@ type
   
  tcolordropdowncontroller = class(tnocolsdropdownlistcontroller)
   protected
+   fcolorvalues: colorarty;
    function getbuttonframeclass: dropdownbuttonframeclassty; override;
+   function getfixcolclass: dropdownfixcolclassty; override;
   public
    constructor create(const intf: idropdownlist);
-//   procedure createframe; override;
  end;
  
 function colordialog(var acolor: colorty): modalresultty;
@@ -131,6 +133,16 @@ uses
  msecolordialog_mfm,msestockobjects,mseformatstr,sysutils;
 type
  twidget1 = class(twidget);
+ 
+ tcolorfixcol = class(tdropdownfixcol)
+  protected
+   ficonrect: rectty;
+   procedure drawcell(const canvas: tcanvas); override;
+  public
+   constructor create(const agrid: tcustomgrid;
+              const aowner: tgridarrayprop;
+                const acontroller: tcustomdropdownlistcontroller); override;
+ end;
  
 function colordialog(var acolor: colorty): modalresultty;
 var
@@ -185,30 +197,48 @@ begin
  buttons[1].assign(avalue);
 end;
 
+{ tcolorfixcol }
+
+constructor tcolorfixcol.create(const agrid: tcustomgrid;
+               const aowner: tgridarrayprop;
+               const acontroller: tcustomdropdownlistcontroller);
+begin
+ inherited;
+ width:= agrid.datarowheight;
+ ficonrect.x:= 1;
+ ficonrect.y:= 1;
+ ficonrect.cy:= width - 2;
+ ficonrect.cx:= ficonrect.cy;
+end;
+
+procedure tcolorfixcol.drawcell(const canvas: tcanvas);
+begin
+ inherited;
+ with cellinfoty(canvas.drawinfopo^) do begin
+  canvas.fillrect(ficonrect,
+           tcolordropdowncontroller(fcontroller).fcolorvalues[cell.row]);
+ end;
+ canvas.drawrect(ficonrect,cl_black);
+end;
+
 { tcolordropdowncontroller }
 
 constructor tcolordropdowncontroller.create(const intf: idropdownlist);
 begin
  inherited;
  valuelist.asarray:= getcolornames;
+ fcolorvalues:= getcolorvalues;
  options:= [deo_autodropdown,deo_keydropdown];
 end;
-{
-procedure tcolordropdowncontroller.createframe;
-begin
- inherited;
- with tcustomdropdownbuttonframe(twidget1(fintf.getwidget).fframe) do begin
-  buttons.count:= 2;
-  buttons[1].assign(buttons[0]);
-  buttons[1].imagenr:= ord(stg_ellipsesmall);
-  buttons[0].imagenr:= ord(stg_arrowdownsmall);
-  activebutton:= 0;
- end;
-end;
-}
+
 function tcolordropdowncontroller.getbuttonframeclass: dropdownbuttonframeclassty;
 begin
  result:= tellipsedropdownbuttonframe;
+end;
+
+function tcolordropdowncontroller.getfixcolclass: dropdownfixcolclassty;
+begin
+ result:= tcolorfixcol;
 end;
 
 { tcustomcoloredit }
@@ -389,6 +419,42 @@ end;
 procedure tcustomcoloredit.setgridvalues(const avalue: colorarty);
 begin
  inherited gridvalues:= integerarty(avalue);
+end;
+
+function tcustomcoloredit.geteditframe: framety;
+begin
+ result.left:= innerclientsize.cy + 1;
+ result.right:= 0;
+ result.top:= 0;
+ result.bottom:= 0;
+end;
+
+procedure tcustomcoloredit.paintimage(const canvas: tcanvas);
+var
+ rect1: rectty;
+ co1: colorty;
+begin
+ if canvas.drawinfopo <> nil then begin
+  with cellinfoty(canvas.drawinfopo^) do begin
+   rect1:= innerrect;
+   co1:= pcolorty(datapo)^;
+  end;
+ end
+ else begin
+  rect1:= innerclientrect;
+  co1:= value;
+ end;
+ rect1.x:= 1;
+ dec(rect1.cy);
+ rect1.cx:= rect1.cy;
+ canvas.fillrect(rect1,co1);
+ canvas.drawrect(rect1,cl_black);
+end;
+
+procedure tcustomcoloredit.dochange;
+begin
+ inherited;
+ invalidate;
 end;
 
 { tcolordialogfo }

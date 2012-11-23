@@ -1329,11 +1329,11 @@ begin
    if fframe = nil then begin
     setup(text,curindex,true,
          deflaterect(clientrect,addframe(fra1,getinnerframe)),
-             deflaterect(clientrect,fra1),nil,nil,geteditfont);
+                             deflaterect(clientrect,fra1),nil,nil,geteditfont);
    end
    else begin
     setup(text,curindex,true,deflaterect(innerclientrect,fra1),
-           deflaterect(makerect(nullpoint,clientsize),fra1),nil,nil,geteditfont);
+         deflaterect(makerect(nullpoint,clientsize),fra1),nil,nil,geteditfont);
    end;
   end;
  end;
