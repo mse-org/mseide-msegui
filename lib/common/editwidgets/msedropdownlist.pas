@@ -2229,6 +2229,7 @@ begin
  width:= fimagelist.width + acontroller.fimageframe.left +
                                       acontroller.fimageframe.right;
  linewidth:= 0;
+ color:= acontroller.color;
 end;
 
 procedure timagefixcol.drawcell(const canvas: tcanvas);
