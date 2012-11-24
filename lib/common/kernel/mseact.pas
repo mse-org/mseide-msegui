@@ -166,6 +166,8 @@ type
    procedure setchecked(const Value: boolean);
    procedure setoptions(const Value: actionoptionsty);
    procedure setstatfile(const Value: tstatfile);
+   function getvisible: boolean;
+   procedure setvisible(const avalue: boolean);
   protected
    finfo: actioninfoty;
    foptions: actionoptionsty;
@@ -195,6 +197,7 @@ type
    procedure updateinfo(const sender: iactionlink);
    property caption: captionty read getcaption write setcaption;
    property state: actionstatesty read getstate write setstate default [];
+   property visible: boolean read getvisible write setvisible;
    property enabled: boolean read getenabled write setenabled;
    property checked: boolean read getchecked write setchecked;
    property group: integer read getgroup write setgroup default 0;
@@ -1289,6 +1292,21 @@ begin
  mseificomp.setifilinkcomp(iifiexeclink(self),avalue,tifilinkcomp(fifilink));
 end;
 {$endif}
+
+function tcustomaction.getvisible: boolean;
+begin
+ result:= not(as_invisible in finfo.state);
+end;
+
+procedure tcustomaction.setvisible(const avalue: boolean);
+begin
+ if avalue then begin
+  state:= state - [as_invisible];
+ end
+ else begin
+  state:= state + [as_invisible];
+ end;
+end;
 
 end.
 

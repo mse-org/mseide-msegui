@@ -426,6 +426,7 @@ type
    procedure dochange; override;
   public
    constructor create(aowner: tcomponent); override;
+   function pagesizename: msestring;
   published
    property value: stdpagesizety read getvalue write setvalue default sps_a4;
  end;
@@ -1524,6 +1525,11 @@ begin
  if fprinter <> nil then begin
   value:= fprinter.pa_size;
  end;
+end;
+
+function tpagesizeselector.pagesizename: msestring;
+begin
+ result:= stdpagesizes[value].name;
 end;
 
 { tpageorientationselector }
