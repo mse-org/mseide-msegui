@@ -18,7 +18,7 @@ uses
  msetypes,msestrings,classes,msekeyboard,msebitmap;
 
 type
- menuoptionty = (mo_insertfirst,mo_singleregion,mo_shortcutright,mo_commonwidth,
+ menuoptionty = (mo_insertfirst,mo_noseparator,mo_singleregion,mo_shortcutright,mo_commonwidth,
                  mo_activate,{mo_noanim,}mo_mainarrow,mo_updateonidle);
  menuoptionsty = set of menuoptionty;
 const
@@ -373,8 +373,8 @@ type
                  const first: boolean = false): integer; overload;
                             //returs index of first added item
    class function additems(var amenu: tpopupmenu; const atransientfor: twidget;
-                 var mouseinfo: mouseeventinfoty; const items: tcustommenu;
-                 const aseparator: boolean = true): integer; overload;
+                 var mouseinfo: mouseeventinfoty; const items: tcustommenu{;
+                 const aseparator: boolean = true}): integer; overload;
                             //returs index of first added item
  end;
 
@@ -1903,9 +1903,9 @@ begin
  end;
 end;
 
-class function tpopupmenu.additems(var amenu: tpopupmenu; const atransientfor: twidget;
-                 var mouseinfo: mouseeventinfoty; const items: tcustommenu;
-                 const aseparator: boolean = true): integer;
+class function tpopupmenu.additems(var amenu: tpopupmenu;
+         const atransientfor: twidget; var mouseinfo: mouseeventinfoty;
+                                            const items: tcustommenu): integer;
 var
  bo1: boolean;
  widget1: twidget;
@@ -1919,8 +1919,8 @@ begin
   items.ftransientfor:= widget1;
  end;
  bo1:= (amenu = nil) or amenu.ftransient;
- result:= additems(amenu,atransientfor,mouseinfo,items.fmenu.fsubmenu,aseparator,
-            mo_insertfirst in items.foptions);
+ result:= additems(amenu,atransientfor,mouseinfo,items.fmenu.fsubmenu,
+    not (mo_noseparator in items.foptions),mo_insertfirst in items.foptions);
  if bo1 then begin
   amenu.fmenu.enabled:= items.fmenu.enabled;
   amenu.foptions:= items.foptions;
