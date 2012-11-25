@@ -2,7 +2,7 @@ MSEide+MSEgui breaking changes version history
 
 2012-11-25
  tpopupmenu.additems() aseparator parameter removed, use tcustommenu.options
-  oe_noseparator.
+ oe_noseparator.
 2012-10-26
  optionsscrollty oscr_zoom -> oscr_zoomwidth,oscr_zoomheight.
 2012-10-11

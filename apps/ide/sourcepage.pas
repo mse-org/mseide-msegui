@@ -30,7 +30,7 @@ uses
 
 
 type
- sourcepageasynctagty = (spat_showasform,spat_checkbracket,spat_showsource);
+ sourcepageasynctagty = (spat_showasform,{spat_checkbracket,}spat_showsource);
  
  bookmarkty = record
   row: integer;
@@ -98,9 +98,9 @@ type
    fbracket1,fbracket2: gridcoordty;
    procedure doasyncevent(var atag: integer); override;
    procedure removebookmark(const bookmarknum: integer);
-   procedure callcheckbrackets;
-   procedure checkbrackets;
-   procedure clearbrackets;
+//   procedure callcheckbrackets;
+//   procedure checkbrackets;
+//   procedure clearbrackets;
    procedure beginupdate;
    procedure endupdate;
    function checkfilechanged: boolean;
@@ -240,10 +240,12 @@ begin
     end;
    end;
   end;
+{
   spat_checkbracket: begin
    dec(fbracketchecking);
    checkbrackets;
   end;
+}
   spat_showsource: begin
    sourcefo.naviglist.showsource(fshowsourcepos,true);
   end;
@@ -1172,20 +1174,20 @@ begin
 end;
 
 procedure tsourcepage.editoneditnotification(const sender: tobject;
-  var info: editnotificationinfoty);
+                                          var info: editnotificationinfoty);
 begin
- if (info.action = ea_beforechange) and not edit.syntaxchanging then begin
-  clearbrackets;
- end
- else begin
+// if (info.action = ea_beforechange) and not edit.syntaxchanging then begin
+//  clearbrackets;
+// end
+// else begin
   if (info.action = ea_indexmoved) and not grid.updating then begin
    updatelinedisp;
   end;
-  if info.action in [ea_indexmoved,ea_delchar,ea_deleteselection,ea_pasteselection,
-                     ea_textentered] then begin
-   callcheckbrackets;
-  end;
- end;
+//  if info.action in [ea_indexmoved,ea_delchar,ea_deleteselection,ea_pasteselection,
+//                     ea_textentered] then begin
+//   callcheckbrackets;
+//  end;
+// end;
 end;
 
 procedure tsourcepage.gridonrowsdeleted(const sender: tcustomgrid;
@@ -1252,6 +1254,7 @@ begin
    edit.tabulators.defaultdist:= int1 * e.tabstops / edit.tabulators.ppmm;
 //   edit.tabulators.setdefaulttabs(int1 * tabstops / edit.tabulators.ppmm);
    edit.autoindent:= e.autoindent;
+   edit.markbrackets:= e.editmarkbrackets;
    case e.encoding of
     1: begin
      edit.encoding:= ce_utf8n;
@@ -1428,7 +1431,7 @@ begin
   end;
  end;
 end;
-
+{
 procedure tsourcepage.clearbrackets;
 begin
  if (fbracket1.col >= 0) and (fbracketsetting = 0) then begin
@@ -1517,7 +1520,7 @@ begin
   asyncevent(ord(spat_checkbracket));
  end;
 end;
-
+}
 function tsourcepage.source: trichstringdatalist;
 begin
  result:= edit.datalist;

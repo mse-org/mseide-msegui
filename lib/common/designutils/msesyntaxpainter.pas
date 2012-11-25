@@ -14,7 +14,7 @@ unit msesyntaxpainter;
 sdef file =
 {globaldefinition}
 {scope}
-
+//last scope is default scope
 globaldefinition = CASEINSENSITIVE | keywordchars | addkeywordchars |
      keyworddefs | editorcolors | styles
 
@@ -68,14 +68,15 @@ KEYWORDS [style] newline //style used as default
 
 calltokens =
 CALLTOKENS newline
-{{[.]string}[.]} scopename newline} 
+{{[.|,]string}[.]} scopename newline} 
 
  //. -> whitespace, example:
  //'begin' finds 'abeginz ...
  //.'begin' finds newline'beginz', ' beginz' ...
  //'begin'. finds 'abegin ', 'abegin'newline ...
  //.'begin'. finds newline'begin ',' begin ', ' begin'newline ...
-
+ //, -> begin of line
+ 
 jumptokens =
 JUMPTOKENS newline
 {{[.]string}[.]} scopename newline}
@@ -101,7 +102,7 @@ const
 
 type
  tokencharsty = set of char;
- tokenflagty = (tf_startwhitespace,tf_endwhitespace);
+ tokenflagty = (tf_firstofline,tf_startwhitespace,tf_endwhitespace);
  tokenflagsty = set of tokenflagty;
  tokeninfoty = record
                 name: msestring;
@@ -180,7 +181,8 @@ type
    procedure push(const value: refreshinfoty);
    function pop: boolean; overload;
    function pop(out value: refreshinfoty): boolean; overload;
-   property items[index: integer]: refreshinfoty read Getitems write Setitems; default;
+   property items[index: integer]: refreshinfoty read Getitems
+                                                   write Setitems; default;
  end;
 
  scopestackcachety = record
@@ -582,18 +584,22 @@ var
  
 var
  startpo: pmsechar;
+ linestart: boolean;
 
  function checktokenwhitespace(const atoken: tokeninfoty;
                                     const apo: pmsechar): boolean;
  var
   po1: pmsechar;
  begin
-  result:= (not (tf_startwhitespace in atoken.flags) or
-              (apo = startpo) or ((apo-1)^ = ' ') or ((apo-1)^ = c_tab));
-  if result and (tf_endwhitespace in atoken.flags) then begin
-   po1:= apo+length(atoken.name);
-   result:= (po1^ = ' ') or (po1^ = c_tab) or (po1^ = #0) or
-                                     (po1^ = c_return) or (po1^ = c_linefeed);
+  result:= not (tf_firstofline in atoken.flags) or linestart;
+  if result then begin
+   result:= (not (tf_startwhitespace in atoken.flags) or
+               (apo = startpo) or ((apo-1)^ = ' ') or ((apo-1)^ = c_tab));
+   if result and (tf_endwhitespace in atoken.flags) then begin
+    po1:= apo+length(atoken.name);
+    result:= (po1^ = ' ') or (po1^ = c_tab) or (po1^ = #0) or
+                                      (po1^ = c_return) or (po1^ = c_linefeed);
+   end;
   end;
  end;
 
@@ -654,6 +660,7 @@ begin
      ristr:= list.richitemspo[start];
      format:= ristr^.format;
      startpo:= pointer(ristr^.text);
+     linestart:= true;
      wpo1:= startpo;
      alen:= length(ristr^.text);
      keywordlen:= 0;
@@ -662,6 +669,9 @@ begin
                                                                         changed;
      if alen > 0 then begin
       repeat
+       if (wpo1^ = c_return) or (wpo1^ = c_linefeed) then begin
+        linestart:= true;
+       end;
        if (keywordlen <= 0) and not scopeinfopo^.return then begin
         lstr1.po:= wpo1;
         while char(byte(wpo1^)) in keywordchars do begin
@@ -694,6 +704,7 @@ begin
                                 charstyles[ptruint(po1)-1]) or changed;
           dec(alen,lstr1.len);
           keywordlen:= 0;
+          linestart:= false;
          end
          else begin
           keywordlen:= lstr1.len;
@@ -806,9 +817,15 @@ begin
        end;
        
        if bo1 then begin
+        if (wpo1^ <> ' ') and (wpo1^ <> c_tab) then begin
+         linestart:= false;
+        end;
         inc(wpo1);
         dec(alen);
         dec(keywordlen);
+       end
+       else begin
+        linestart:= false;
        end;
       until alen < 0;
       if scopeinfopo^.return then begin
@@ -1017,6 +1034,12 @@ begin
   if po1^ = '.' then begin
    include(tokenflags,tf_startwhitespace);
    inc(po1);
+  end
+  else begin
+   if po1^ = ',' then begin
+    include(tokenflags,tf_firstofline);
+    inc(po1);
+   end;
   end;
   if po1^ = '''' then begin
    result:= true;

@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -26,27 +26,44 @@ const
  closebrackets: array[bracketkindty] of msechar = (#0,')',']','}');
 
 type
+ syntaxeditoptionty = (seo_autoindent,seo_markbrackets);
+ syntaxeditoptionsty = set of syntaxeditoptionty;
+ 
  tsyntaxedit = class(tundotextedit)
   private
    fsyntaxpainter: tsyntaxpainter;
    fsyntaxpainterhandle: integer;
-   fautoindent: boolean;
+//   fautoindent: boolean;
    flinkpos: gridcoordty;
    flinklength: integer;
    fdefaultsyntax: boolean;
    fsyntaxchanging: integer;
+   fbracketsetting: integer;
+   fbracketchecking: integer;
    procedure setsyntaxpainter(const Value: tsyntaxpainter);
    procedure unregistersyntaxpainter;
    procedure syntaxchanged(const sender: tobject; const index: integer);
    procedure setdefaultsyntax(const avalue: boolean);
    procedure checkdefaultsyntax;
+   procedure readautoindent(reader: treader);
+   function getautoindent: boolean;
+   procedure setautoindent(const avalue: boolean);
+   function getmarkbrackets: boolean;
+   procedure setmarkbrackets(const avalue: boolean);
   protected
+   foptions: syntaxeditoptionsty;
+   fbracket1,fbracket2: gridcoordty;
    procedure objectevent(const sender: tobject; const event: objecteventty); override;
    procedure gridvaluechanged(const index: integer); override;
    procedure insertlinebreak; override;
    procedure dokeydown(var info: keyeventinfoty); override;
    procedure loaded; override;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
+   procedure defineproperties(filer: tfiler); override;
+   procedure clearbrackets;
+   procedure checkbrackets;
+   procedure editnotification(var info: editnotificationinfoty); override;
+   procedure doasyncevent(var atag: integer); override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -75,11 +92,14 @@ type
                 const open: boolean; maxrows: integer = 100): gridcoordty;
    property syntaxpainterhandle: integer read fsyntaxpainterhandle;
    function syntaxchanging: boolean;
+   property autoindent: boolean read getautoindent write setautoindent;
+   property markbrackets: boolean read getmarkbrackets write setmarkbrackets;
   published
    property syntaxpainter: tsyntaxpainter read fsyntaxpainter write setsyntaxpainter;
    property defaultsyntax: boolean read fdefaultsyntax 
                              write setdefaultsyntax default false;
-   property autoindent: boolean read fautoindent write fautoindent default false;
+   property options: syntaxeditoptionsty read foptions write foptions;
+//   property autoindent: boolean read fautoindent write fautoindent default false;
  end;
 
 function checkbracketkind(const achar: msechar; out open: boolean): bracketkindty;
@@ -87,7 +107,9 @@ function checkbracketkind(const achar: msechar; out open: boolean): bracketkindt
 implementation
 uses
  mserichstring,msegraphics,msekeyboard,msegraphutils,msepointer;
-
+const
+ checkbrackettag = 84621847;
+ 
 type
  tundoinplaceedit1 = class(tundoinplaceedit);
  ttextundolist1 = class(ttextundolist);
@@ -119,6 +141,8 @@ constructor tsyntaxedit.create(aowner: tcomponent);
 begin
  fsyntaxpainterhandle:= -1;
  flinkpos:= invalidcell;
+ fbracket1:= invalidcell;
+ fbracket2:= invalidcell;
  inherited;
 end;
 
@@ -561,6 +585,83 @@ begin
   end; 
  end;
 end;
+
+procedure tsyntaxedit.clearbrackets;
+begin
+ if (fbracket1.col >= 0) and (fbracketsetting = 0) then begin
+  inc(fbracketsetting);
+  try
+   setfontstyle(fbracket1,makegridcoord(fbracket1.col+1,fbracket1.row),
+                                  fs_bold,false);
+   setfontstyle(fbracket2,makegridcoord(fbracket2.col+1,fbracket2.row),
+                                  fs_bold,false);
+   refreshsyntax(fbracket1.row,1);
+   refreshsyntax(fbracket2.row,1);
+   fbracket1:= invalidcell;
+   fbracket2:= invalidcell;
+   if syntaxpainterhandle >= 0 then begin
+    syntaxpainter.boldchars[syntaxpainterhandle]:= nil;
+   end;
+  finally
+   dec(fbracketsetting);
+  end;
+ end;  
+end;
+
+procedure tsyntaxedit.checkbrackets;
+var
+ mch1: msechar;
+ br1,br2: bracketkindty;
+ open,open2: boolean;
+ pt1,pt2: gridcoordty;
+ ar1: gridcoordarty;
+begin
+ clearbrackets;
+ pt2:= invalidcell;
+ pt1:= editpos;
+ mch1:= charatpos(pt1);
+ br1:= checkbracketkind(mch1,open);
+ if (br1 <> bki_none) and (pt1.col > 0) then begin
+  dec(pt1.col);
+  br2:= checkbracketkind(charatpos(pt1),open2);
+  if (br2 = bki_none) or (open <> open2) then begin
+   inc(pt1.col);
+  end
+  else begin
+   br1:= br2;
+  end;
+  pt2:= matchbracket(pt1,br1,open);
+ end
+ else begin
+  dec(pt1.col);
+  if pt1.col >= 0 then begin
+   mch1:= charatpos(pt1);
+   br1:= checkbracketkind(mch1,open);
+   if br1 <> bki_none then begin
+    pt2:= matchbracket(pt1,br1,open);
+   end;
+  end;
+ end;
+ if pt2.col >= 0 then begin
+  fbracket1:= pt1;
+  fbracket2:= pt2;
+  inc(fbracketsetting);
+  try
+   setfontstyle(pt1,makegridcoord(pt1.col+1,pt1.row),fs_bold,true);
+   setfontstyle(pt2,makegridcoord(pt2.col+1,pt2.row),fs_bold,true);
+  finally
+   dec(fbracketsetting);
+  end;
+  if syntaxpainterhandle >= 0 then begin
+   setlength(ar1,2);
+   ar1[0]:= fbracket1;
+   ar1[1]:= fbracket2;
+   syntaxpainter.boldchars[syntaxpainterhandle]:= ar1;
+   refreshsyntax(fbracket1.row,1);
+   refreshsyntax(fbracket2.row,1);
+  end;
+ end;
+end;
  
 procedure tsyntaxedit.insertlinebreak;
 var
@@ -573,7 +674,7 @@ begin
  feditor.begingroup;
  try
   inherited;
-  if fautoindent then begin
+  if seo_autoindent in foptions then begin
    po1:= editpos;
    if po1.row > 0 then begin
     mstr1:= gridvalue[po1.row-1];
@@ -805,6 +906,76 @@ end;
 function tsyntaxedit.syntaxchanging: boolean;
 begin
  result:= fsyntaxchanging <> 0;
+end;
+
+procedure tsyntaxedit.readautoindent(reader: treader);
+begin
+ if reader.readboolean then begin
+  include(foptions,seo_autoindent);
+ end;
+end;
+
+procedure tsyntaxedit.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('autoindent',@readautoindent,nil,false);
+end;
+
+procedure tsyntaxedit.editnotification(var info: editnotificationinfoty);
+begin
+ inherited;
+ if (info.action = ea_beforechange) and not syntaxchanging then begin
+  clearbrackets;
+ end
+ else begin
+  if (seo_markbrackets in options) and
+      (info.action in [ea_indexmoved,ea_delchar,ea_deleteselection,
+                              ea_pasteselection,ea_textentered]) then begin
+   if (fbracketchecking = 0) then begin
+    inc(fbracketchecking);
+    asyncevent(checkbrackettag);
+   end;
+  end;
+ end; 
+end;
+
+procedure tsyntaxedit.doasyncevent(var atag: integer);
+begin
+ inherited;
+ if atag = checkbrackettag then begin
+  fbracketchecking:= 0;
+  checkbrackets;
+ end;
+end;
+
+function tsyntaxedit.getautoindent: boolean;
+begin
+ result:= seo_autoindent in options;
+end;
+
+procedure tsyntaxedit.setautoindent(const avalue: boolean);
+begin
+ if avalue then begin
+  options:= options + [seo_autoindent];
+ end
+ else begin
+  options:= options - [seo_autoindent];
+ end;
+end;
+
+function tsyntaxedit.getmarkbrackets: boolean;
+begin
+ result:= seo_markbrackets in options;
+end;
+
+procedure tsyntaxedit.setmarkbrackets(const avalue: boolean);
+begin
+ if avalue then begin
+  options:= options + [seo_markbrackets];
+ end
+ else begin
+  options:= options - [seo_markbrackets];
+ end;
 end;
 
 end.

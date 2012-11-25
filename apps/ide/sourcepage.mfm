@@ -43,7 +43,7 @@ object sourcepage: tsourcepage
     )
     datacols.count = 2
     datacols.items = <    
-      item
+      item[dataicon]
         linecolor = -1610612732
         width = 15
         options = [co_nofocus, co_nohscroll]
@@ -51,7 +51,7 @@ object sourcepage: tsourcepage
         widgetname = 'dataicon'
         dataclass = tgridintegerdatalist
       end    
-      item
+      item[edit]
         width = 2000
         options = [co_leftbuttonfocusonly, co_savestate, co_mousescrollrow]
         onchange = textchanged
