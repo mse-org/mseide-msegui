@@ -19,8 +19,13 @@ globaldefinition = CASEINSENSITIVE | keywordchars | addkeywordchars |
      keyworddefs | editorcolors | styles
 
 keywordchars =
-KEYWORDCHARS {string} newline
-//default = A..Z, a..z, 0..9,_
+KEYWORDCHARS newline
+{{string} newline}
+//default = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxy0123456789_'
+
+addkeywordchars =
+ADDKEYWORDCHARS newline
+{{string} newline}
 
 string = 
 '{character}'
@@ -37,7 +42,7 @@ styledef =
 
 stylestring =
 '[b][i][u][s]'
-//b = bold i = italic u = underscore s = strikeout
+//b = bold i = italic u = underline s = strikeout
 
 keyworddefs =
 KEYWORDDEFS keyworddefsname [stylename] newline
