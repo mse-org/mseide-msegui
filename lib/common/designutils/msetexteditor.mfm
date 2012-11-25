@@ -1,11 +1,13 @@
 object msetexteditorfo: tmsetexteditorfo
-  optionswidget = [ow_arrowfocus, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
+  optionswidget = [ow_arrowfocus, ow_subfocus, ow_destroywidgets, ow_hinton]
   visible = False
   bounds_x = 74
   bounds_y = 214
   bounds_cx = 369
   bounds_cy = 268
-  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets]
+  container.frame.zoomwidthstep = 1
+  container.frame.zoomheightstep = 1
   container.bounds = (
     0
     0
@@ -56,9 +58,9 @@ object msetexteditorfo: tmsetexteditorfo
       end>
     datacols.count = 1
     datacols.items = <    
-      item
+      item[textedit]
         width = 2000
-        options = [co_leftbuttonfocusonly, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+        options = [co_leftbuttonfocusonly, co_savevalue, co_savestate, co_mousescrollrow]
         widgetname = 'textedit'
         dataclass = tgridrichstringdatalist
       end>
@@ -66,7 +68,6 @@ object msetexteditorfo: tmsetexteditorfo
     datarowheight = 14
     reffontheight = 14
     object textedit: tsyntaxedit
-      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontlineheight, ow_autoscale]
       frame.levelo = 0
       frame.framei_top = 0
       frame.framei_bottom = 0
@@ -78,11 +79,12 @@ object msetexteditorfo: tmsetexteditorfo
       bounds_y = 0
       bounds_cx = 2000
       bounds_cy = 14
-      font.xscale =  1.0000000000000000E+0000
+      font.xscale = 1
       font.dummy = 0
-      optionsedit = [oe_closequery, oe_checkmrcancel, oe_linebreak, oe_eatreturn, oe_exitoncursor, oe_nofirstarrownavig, oe_keyexecute, oe_savevalue, oe_savestate]
-      encoding = ce_locale
+      optionsedit1 = [oe1_keyexecute]
+      optionsedit = [oe_closequery, oe_checkmrcancel, oe_linebreak, oe_eatreturn, oe_exitoncursor, oe_nofirstarrownavig, oe_savevalue, oe_savestate]
       oneditnotifcation = editnotify
+      options = [seo_autoindent, seo_markbrackets]
       reffontheight = 14
     end
   end
@@ -169,7 +171,6 @@ object msetexteditorfo: tmsetexteditorfo
     statfile = tstatfile1
     controller.captionopen = 'Load file'
     controller.captionsave = 'Save file'
-    dialogkind = fdk_none
     left = 80
     top = 104
   end
