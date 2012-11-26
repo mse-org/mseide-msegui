@@ -330,10 +330,8 @@ type
  tcustomscrollboxframe = class(tcustomscrollframe,iscrollbox)
   private
    fscrolling: integer;
-   fclientheight: integer;
-   fclientwidth: integer;
-   fclientheightmin: integer;
-   fclientwidthmin: integer;
+   fclientsize: sizety;
+   fclientsizemin: sizety;
    fdragging: boolean;
    fpickpos: pointty;
    fpickref: pointty;
@@ -341,16 +339,19 @@ type
    fzoomwidthstep: real;
    fzoomheightstep: real;
    procedure clientrecttoscrollbar(const rect: rectty);
-   procedure setclientheigth(const Value: integer);
-   procedure setclientwidth(const Value: integer);
-   procedure setclientheigthmin(const Value: integer);
-   procedure setclientwidthmin(const Value: integer);
+   procedure setclientsize(const avalue: sizety);
+   procedure setclientheight(const avalue: integer);
+   procedure setclientwidth(const avalue: integer);
+   procedure setclientsizemin(const avalue: sizety);
+   procedure setclientheightmin(const avalue: integer);
+   procedure setclientwidthmin(const avalue: integer);
    procedure calcclientrect(var aclientrect: rectty);
    function getwidget: twidget;
    procedure setsbhorz(const avalue: tscrollboxscrollbar);
    function getsbhorz: tscrollboxscrollbar;
    procedure setsbvert(const avalue: tscrollboxscrollbar);
    function getsbvert: tscrollboxscrollbar;
+   procedure setzoom1(const avalue: complexty);
    procedure setzoom(const avalue: complexty);
    procedure setzoomwidth(const avalue: double);
    procedure setzoomheight(const avalue: double);
@@ -400,10 +401,16 @@ type
                                  //default 1
    property zoomheightstep: real read fzoomheightstep write fzoomheightstep;
                                  //default 1
-   property clientwidth: integer read fclientwidth write setclientwidth default 0;
-   property clientheight: integer read fclientheight write setclientheigth default 0;
-   property clientwidthmin: integer read fclientwidthmin write setclientwidthmin default 0;
-   property clientheightmin: integer read fclientheightmin write setclientheigthmin default 0;
+   property clientsize: sizety read fclientsize write setclientsize;
+   property clientwidth: integer read fclientsize.cx 
+                                     write setclientwidth default 0;
+   property clientheight: integer read fclientsize.cy 
+                                     write setclientheight default 0;
+   property clientsizemin: sizety read fclientsizemin write setclientsizemin;
+   property clientwidthmin: integer read fclientsizemin.cx 
+                                     write setclientwidthmin default 0;
+   property clientheightmin: integer read fclientsizemin.cy
+                                     write setclientheightmin default 0;
    property framei_left default 2;
    property framei_top default 2;
    property framei_right default 2;
@@ -3932,11 +3939,11 @@ begin
   statebefore:= fstate;
   asize:= twidget1(fowner).calcminscrollsize;
   with asize do begin
-   if fclientwidth <> 0 then begin
-    cx:= fclientwidth;
+   if fclientsize.cx <> 0 then begin
+    cx:= fclientsize.cx;
    end;
-   if fclientheight <> 0 then begin
-    cy:= fclientheight;
+   if fclientsize.cy <> 0 then begin
+    cy:= fclientsize.cy;
    end;
    if sbo_showauto in fhorz.options then begin
     if cx > fpaintrect.cx then begin
@@ -4121,58 +4128,53 @@ begin
  result:= fclientrect.size;
 end;
 
-procedure tcustomscrollboxframe.setclientheigth(const value: integer);
+procedure tcustomscrollboxframe.setclientsize(const avalue: sizety);
 begin
- if fclientheight <> value then begin
-  if value < 0 then begin
-   fclientheight:= 0;
-  end
-  else begin
-   fclientheight:= value;
+ if (fclientsize.cx <> avalue.cx) or (fclientsize.cy <> avalue.cy) then begin
+  fclientsize:= avalue;
+  if fclientsize.cx < 0 then begin
+   fclientsize.cx:= 0;
+  end;
+  if fclientsize.cy < 0 then begin
+   fclientsize.cy:= 0;
   end;
   internalupdatestate;
  end;
 end;
 
-procedure tcustomscrollboxframe.setclientwidth(const value: integer);
+procedure tcustomscrollboxframe.setclientwidth(const avalue: integer);
 begin
- if fclientwidth <> value then begin
-  if value < 0 then begin
-   fclientwidth:= 0;
-  end
-  else begin
-   fclientwidth:= value;
+ setclientsize(ms(avalue,fclientsize.cy));
+end;
+
+procedure tcustomscrollboxframe.setclientheight(const avalue: integer);
+begin
+ setclientsize(ms(fclientsize.cx,avalue));
+end;
+
+procedure tcustomscrollboxframe.setclientsizemin(const avalue: sizety);
+begin
+ if (fclientsizemin.cx <> avalue.cx) or 
+                             (fclientsizemin.cy <> avalue.cy) then begin
+  fclientsizemin:= avalue;
+  if fclientsizemin.cx < 0 then begin
+   fclientsizemin.cx:= 0;
+  end;
+  if fclientsizemin.cy < 0 then begin
+   fclientsizemin.cy:= 0;
   end;
   internalupdatestate;
  end;
 end;
 
-procedure tcustomscrollboxframe.setclientheigthmin(const value: integer);
+procedure tcustomscrollboxframe.setclientwidthmin(const avalue: integer);
 begin
- if fclientheightmin <> value then begin
-  if value < 0 then begin
-   fclientheightmin:= 0;
-  end
-  else begin
-   fclientheightmin:= value;
-  end;
-  internalupdatestate;
-//  fintf.clientrectchanged;
- end;
+ setclientsizemin(ms(avalue,fclientsizemin.cy));
 end;
 
-procedure tcustomscrollboxframe.setclientwidthmin(const value: integer);
+procedure tcustomscrollboxframe.setclientheightmin(const avalue: integer);
 begin
- if fclientwidthmin <> value then begin
-  if value < 0 then begin
-   fclientwidthmin:= 0;
-  end
-  else begin
-   fclientwidthmin:= value;
-  end;
-  internalupdatestate;
-//  fintf.clientrectchanged;
- end;
+ setclientsizemin(ms(fclientsizemin.cx,avalue));
 end;
 
 procedure tcustomscrollboxframe.showrect(const arect: rectty; 
@@ -4344,7 +4346,9 @@ begin
  end;
 end;
 
-procedure tcustomscrollboxframe.setzoom(const avalue: complexty);
+procedure tcustomscrollboxframe.setzoom1(const avalue: complexty);
+var
+ size1: sizety;
 begin
  fzoom:= avalue;
  if fzoom.re < 1 then begin
@@ -4354,22 +4358,24 @@ begin
   fzoom.im:= 1;
  end;
  checkstate;
+ size1:= nullsize;
  with fpaintframedelta do begin
   if avalue.re > 1 then begin
-   clientwidth:= round((fpaintrect.cx+left+right)*avalue.re); 
+   size1.cx:= round((fpaintrect.cx+left+right)*avalue.re); 
                                         //do not use scrollbarwidth
-  end
-  else begin
-   clientwidth:= 0;
   end;
   if avalue.im > 1 then begin
-   clientheight:= round((fpaintrect.cy+top+bottom)*avalue.im);
+   size1.cy:= round((fpaintrect.cy+top+bottom)*avalue.im);
                                         //do not use scrollbarwidth
-  end
-  else begin
-   clientheight:= 0;
   end;
  end;
+ fclientsize:= size1;
+end;
+
+procedure tcustomscrollboxframe.setzoom(const avalue: complexty);
+begin
+ setzoom1(avalue);
+ internalupdatestate;
 end;
 
 procedure tcustomscrollboxframe.setzoomwidth(const avalue: double);
@@ -4406,7 +4412,7 @@ procedure tcustomscrollboxframe.domousewheelevent(var info: mousewheeleventinfot
                const pagingreversed: boolean);
 var
  size1: sizety;
- pt1: pointty;
+ pt1,pt2: pointty;
  co1: complexty;
  bo1: boolean;
  ma1: shiftstatesty;
@@ -4448,19 +4454,40 @@ begin
       end;
      end;
      if bo1 then begin
-      zoom:= co1;
+      setzoom1(co1);
       pt1:= nullpoint;
-      if size1.cx > 0 then begin
-       pt1.x:= -((info.pos.x-fclientrect.x+fpaintrect.x) * 
-                              (fclientrect.cx-size1.cx)) div size1.cx;
+      with pt2 do begin
+       x:= info.pos.x-fpaintrect.x;
+       if x < 0 then begin
+        x:= 0;
+       end;
+       if x > fpaintrect.cx then begin
+        x:= fpaintrect.cx;
+       end;
+       x:= x - fclientrect.x;
+       y:= info.pos.y-fpaintrect.y;
+       if y < 0 then begin
+        y:= 0;
+       end;
+       if y > fpaintrect.cy then begin
+        y:= fpaintrect.cy;
+       end;
+       y:= y - fclientrect.y;
       end;
-      if size1.cy > 0 then begin
-       pt1.y:= -((info.pos.y-fclientrect.y+fpaintrect.y) * 
-                              (fclientrect.cy-size1.cy) div size1.cy);
+      if (size1.cx > 0) and (fclientsize.cx > 0) then begin
+       pt1.x:= -round(pt2.x*((fclientsize.cx/size1.cx)-1.0));
       end;
-      if (pt1.x <> 0) or (pt1.y <> 0) then begin
-       setclientpos(addpoint(fclientrect.pos,pt1));
+      if (size1.cy > 0) and (fclientsize.cy > 0) then begin
+       pt1.y:= -round(pt2.y*((fclientsize.cy/size1.cy)-1.0));
       end;
+      addpoint1(fclientrect.pos,pt1);
+      if fclientrect.x > 0 then begin
+       fclientrect.x:= 0;
+      end;
+      if fclientrect.y > 0 then begin
+       fclientrect.y:= 0;
+      end;
+      internalupdatestate;
      end;
     end;
    end

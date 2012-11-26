@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -250,7 +250,8 @@ function isemptydatetime(const avalue: tdatetime): boolean;
                          {$ifdef FPC}inline;{$endif} deprecated;
             //use x = emptydatetime instead
 //function emptydatetime: tdatetime;
-function makecomplex(const are: real; aim: real): complexty;
+function makecomplex(const are: real; aim: real): complexty; inline;
+function mc(const are: real; aim: real): complexty; inline;
 procedure splitcomplexar(const acomplex: complexarty; out re,im: realarty);
 
 implementation
@@ -294,6 +295,12 @@ begin
 end;
 
 function makecomplex(const are: real; aim: real): complexty;
+begin
+ result.re:= are;
+ result.im:= aim;
+end;
+
+function mc(const are: real; aim: real): complexty;
 begin
  result.re:= are;
  result.im:= aim;
