@@ -3996,9 +3996,9 @@ label
  endlab;
 begin
  inherited;
+ checkstate;
+ checkgripsize;
  with canvas do begin
-  checkstate;
-  checkgripsize;
   rect1:= clipbox;
   if testintersectrect(rect1,fgriprect) then begin
    colorbefore:= color;

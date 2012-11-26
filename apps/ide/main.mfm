@@ -1,8 +1,11 @@
 object mainfo: tmainfo
   optionswidget = [ow_arrowfocus, ow_subfocus, ow_destroywidgets, ow_hinton]
+  frame.grip_size = 10
+  frame.grip_options = [go_fixsizebutton, go_topbutton, go_backgroundbutton, go_lockbutton]
+  frame.dummy = 0
   visible = False
-  bounds_x = 125
-  bounds_y = 178
+  bounds_x = 45
+  bounds_y = 165
   bounds_cx = 437
   bounds_cy = 138
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets]
@@ -19,7 +22,7 @@ object mainfo: tmainfo
   container.bounds = (
     0
     16
-    437
+    427
     122
   )
   dragdock.optionsdock = [od_savepos, od_savezorder, od_savechildren, od_canmove, od_cansize, od_canfloat, od_candock]
@@ -42,10 +45,10 @@ object mainfo: tmainfo
     optionswidget = [ow_background, ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_destroywidgets]
     bounds_x = 0
     bounds_y = 21
-    bounds_cx = 437
+    bounds_cx = 427
     bounds_cy = 164
-    anchors = [an_left, an_top, an_right, an_bottom]
-    dragdock.optionsdock = [od_acceptsdock, od_splitvert, od_splithorz, od_tabed, od_proportional, od_fixsize, od_background]
+    anchors = [an_top, an_bottom]
+    dragdock.optionsdock = [od_acceptsdock, od_splitvert, od_splithorz, od_tabed, od_proportional, od_background]
     statfile = projectstatfile
   end
   object statdisp: tstringdisp
@@ -55,7 +58,7 @@ object mainfo: tmainfo
     taborder = 1
     bounds_x = 0
     bounds_y = 1
-    bounds_cx = 437
+    bounds_cx = 427
     bounds_cy = 18
     anchors = [an_top]
     font.name = 'stf_default'
