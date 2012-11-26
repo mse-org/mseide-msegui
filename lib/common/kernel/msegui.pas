@@ -1428,7 +1428,6 @@ type
    procedure getautopaintsize(var asize: sizety); virtual;
    procedure getautocellsize(const acanvas: tcanvas;
                                       var asize: sizety); virtual;
-   procedure checkautosize;
    procedure childclientrectchanged(const sender: twidget); virtual;
    procedure childautosizechanged(const sender: twidget); virtual;
    procedure poschanged; virtual;
@@ -1557,6 +1556,7 @@ type
    procedure createface;
    procedure createfont;
    procedure createfontempty;
+   procedure checkautosize;
 
    function isloading: boolean;      //checks ws_loadlock and csdestroing too
    function canmouseinteract: boolean; //checks csdesigning and cssubcomponent

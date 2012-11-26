@@ -457,16 +457,14 @@ begin
   fram1:= nullframe;
  end
  else begin
-  fram1:= fframe.innerframe;
+  fram1:= fframe.framei;
  end;
  if not ftextrectvalid then begin
   msedrawtext.textrect(getcanvas,finfo);
   ftextrectvalid:= true;
  end;
- asize:= finfo.res.size;
-
- asize.cx:= asize.cx + fram1.left + fram1.right;
- asize.cy:= asize.cy + fram1.top + fram1.bottom;
+ asize.cx:= finfo.res.size.cx + fram1.left + fram1.right;
+ asize.cy:= finfo.res.size.cy + fram1.top + fram1.bottom;
 end;
 
 procedure tdispwidget.dopaint(const canvas: tcanvas);
@@ -478,9 +476,9 @@ end;
 
 procedure tdispwidget.fontchanged;
 begin
- inherited;
  finfo.font:= getfont;
  invalidatetext;
+ inherited;
 end;
 
 procedure tdispwidget.internalcreateframe;
