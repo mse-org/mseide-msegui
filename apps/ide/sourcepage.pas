@@ -73,8 +73,8 @@ type
    ffileloading: integer;
    ffileloaderror: boolean;
    frelpath: filenamety;
-   fbracketsetting: integer;
-   fbracketchecking: integer;
+//   fbracketsetting: integer;
+//   fbracketchecking: integer;
    fshowsourcepos: sourceposty;
    procedure setactiverow(const Value: integer);
    procedure setgdb(agdb: tgdbmi);

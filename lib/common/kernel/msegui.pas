@@ -152,7 +152,8 @@ type
                  );
  widgetstatesty = set of widgetstatety;
  widgetstate1ty = (ws1_childscaled,ws1_childrectchanged,
-                   ws1_scaling,ws1_autoscaling,ws1_painting,ws1_updateopaque,
+                   ws1_scaling,ws1_autoscaling,ws1_autosizing,
+                   ws1_painting,ws1_updateopaque,
                    ws1_widgetregionvalid,ws1_rootvalid,
                    ws1_anchorsizing,ws1_anchorsetting,ws1_parentclientsizeinited,
                    ws1_parentupdating, //set while setparentwidget
@@ -7695,6 +7696,7 @@ begin
   parentclientrectchanged;
  end
  else begin
+  checkautosize;
   for int1:= 0 to high(fwidgets) do begin
    fwidgets[int1].parentclientrectchanged;
   end;
@@ -12039,14 +12041,20 @@ end;
 
 procedure twidget.checkautosize;
 begin
- if [csloading,csdestroying] * componentstate = [] then begin
-  if ([ow1_autowidth,ow1_autoheight]*foptionswidget1 <> []) then begin
-   internalsetwidgetrect(fwidgetrect,false);
-  end
-  else begin
-   if fparentwidget <> nil then begin
-    fparentwidget.childautosizechanged(self);
+ if ([csloading,csdestroying] * componentstate = []) and 
+                       not (ws1_autosizing in fwidgetstate1)then begin
+  include(fwidgetstate1,ws1_autosizing);
+  try
+   if ([ow1_autowidth,ow1_autoheight]*foptionswidget1 <> []) then begin
+    internalsetwidgetrect(fwidgetrect,false);
+   end
+   else begin
+    if fparentwidget <> nil then begin
+     fparentwidget.childautosizechanged(self);
+    end;
    end;
+  finally
+   exclude(fwidgetstate1,ws1_autosizing);
   end;
  end;
 end;
