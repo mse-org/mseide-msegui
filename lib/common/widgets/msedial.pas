@@ -141,7 +141,6 @@ type
    finfo: markerinfoty;
    procedure checklayout;
    procedure readvalue(reader: treader);
-//   procedure writevalue(writer: twriter);
    procedure setvalue(const avalue: realty);
    procedure setoptions(const avalue: dialmarkeroptionsty);
    function getvisible: boolean;
@@ -186,7 +185,6 @@ type
    function getvisible: boolean;
    procedure setvisible(const avalue: boolean);
   protected
-//   procedure paint(const acanvas: tcanvas);
   public
    property visible: boolean read getvisible write setvisible;
   published
@@ -1281,8 +1279,6 @@ const
  tolerance = 0.000001;
  
  function getico(const interval: real; const intervalcount: integer): integer;
-// var
-//  int1: integer;
  begin
   result:= intervalcount - 
          floor((1/interval) * intervalcount * (1 + tolerance)); 
@@ -1792,6 +1788,7 @@ begin
          end;
         end;
        end;
+       //todo: variable unitcaption pos.
       end;
      end;  
     end;

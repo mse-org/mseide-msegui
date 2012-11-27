@@ -706,7 +706,6 @@ type
   protected
    fuser: tobject;
    fintf: pointer; //icanvas;
-//   fgdinum: integer;
    fstate: canvasstatesty;
    fvaluepo: canvasvaluespoty;
    fdrawinfo: drawinfoty;
@@ -1018,7 +1017,8 @@ type
    procedure sethandle(const Value: pixmapty);
    function getcanvas: tcanvas;
    procedure switchtomonochrome;
-
+   procedure setwidth(const avalue: integer);
+   procedure setheight(const avalue: integer);
   protected
    fgdifuncs: pgdifunctionaty;
    fcanvasclass: canvasclassty;
@@ -1095,6 +1095,8 @@ type
    property canvas: tcanvas read getcanvas;
    property size: sizety read fsize write setsize;
          //pixels are not inited
+   property width: integer read fsize.cx write setwidth;
+   property height: integer read fsize.cy write setheight;
    function isempty: boolean;
    property monochrome: boolean read getmonochrome write setmonochrome;
  end;
@@ -2218,6 +2220,16 @@ begin
  if result = nil then begin
   result:= fcanvasclass.getclassgdifuncs;
  end;
+end;
+
+procedure tsimplebitmap.setwidth(const avalue: integer);
+begin
+ size:= ms(avalue,height);
+end;
+
+procedure tsimplebitmap.setheight(const avalue: integer);
+begin
+ size:= ms(width,avalue);
 end;
 
 { tfont }

@@ -55,6 +55,11 @@ type
 
  barrefty = (br_zero,br_top,br_bottom);
   
+ ttracefont = class(tparentfont)
+  public
+   class function getinstancepo(owner: tobject): pfont; override;
+ end;
+
  traceinfoty = record
   xdata: realarty;
   ydata: realarty;
@@ -77,6 +82,9 @@ type
   maxcount: integer;
   widthmm: real;
   dashes: string;
+  legend: msestring;
+  legendrect: rectty;
+  font: ttracefont;
   options: charttraceoptionsty;
   chartkind: tracechartkindty;
   bar_offset: integer;
@@ -100,8 +108,14 @@ type
   private
    finfo: traceinfoty;
    fbreaks: integerarty;
+   fbmp2: tmaskedbitmap;
+   fco1: colorty;
+   fimli1: timagelist;
+   frect1: rectty;
+   fimagealignment: alignmentsty;
    procedure setxydata(const avalue: complexarty);
    procedure datachange;
+//   procedure layoutchange;
    procedure setcolor(const avalue: colorty);
    procedure setcolorimage(const avalue: colorty);
    procedure setxserrange(const avalue: real);
@@ -151,8 +165,19 @@ type
    procedure setbar_face(const avalue: tface);
    procedure setbar_ref(const avalue: barrefty);
    procedure setbreaks(const avalue: integerarty);
+   function getlegend_font: ttracefont;
+   procedure setlegend_font(const avalue: ttracefont);
+   procedure setlegend_caption(const avalue: msestring);
+{
+   procedure setlegend_x(const avalue: integer);
+   procedure setlegend_y(const avalue: integer);
+   procedure setlegend_pos(const avalue: pointty);
+}
+   function isfontstored: boolean;
+   procedure fontchanged(const sender: tobject);
   protected
    ftraces: ttraces;
+   fcurfont: tfont;
    procedure setkind(const avalue: tracekindty); virtual;
    procedure setoptions(const avalue: charttraceoptionsty); virtual;
    function getxitempo(const aindex: integer): preal;
@@ -161,9 +186,11 @@ type
                    out xcount,ycount,xstep,ystep: integer);
                 
    procedure checkgraphic;
+   procedure clip2(const acanvas: tcanvas);
    procedure paint(const acanvas: tcanvas);
    procedure paint1(const acanvas: tcanvas; const imagesize: sizety;
                         const imagealignment: alignmentsty);
+   procedure paint2(const acanvas: tcanvas);
    procedure defineproperties(filer: tfiler); override;
     //iframe
    procedure setframeinstance(instance: tcustomframe);
@@ -191,6 +218,7 @@ type
    destructor destroy; override;
    procedure createbar_frame;
    procedure createbar_face;
+   procedure createfont;
    
    procedure clear;
    procedure deletedata(const aindex: integer); overload;
@@ -229,6 +257,7 @@ type
    property logx: boolean read getlogx write setlogx;
    property logy: boolean read getlogy write setlogy;
    property visible: boolean read getvisible write setvisible;
+//   property legend_pos: pointty read finfo.legendpos write setlegend_pos;
    
   published
    property color: colorty read finfo.color write setcolor default cl_black;
@@ -261,6 +290,11 @@ type
    
    property imagenr: imagenrty read finfo.imagenr write setimagenr default -1;
    property name: string read finfo.name write finfo.name;
+   property legend_caption: msestring read finfo.legend write setlegend_caption;
+//   property legend_x: integer read finfo.legendpos.x write setlegend_x;
+//   property legend_y: integer read finfo.legendpos.y write setlegend_y;
+   property legend_font: ttracefont read getlegend_font 
+                                write setlegend_font stored isfontstored;
  end;
 
  traceaty = array[0..0] of ttrace;
@@ -268,6 +302,11 @@ type
  
  tracesstatety = (trss_graphicvalid);
  tracesstatesty = set of tracesstatety;
+
+ ttracesfont = class(tparentfont)
+  public
+   class function getinstancepo(owner: tobject): pfont; override;
+ end;
    
  ttraces = class(townedeventpersistentarrayprop)
   private
@@ -287,6 +326,8 @@ type
    fchartkind: tracechartkindty;
    fbar_width: integer;
    fbar_ref: barrefty;
+   ffont: ttracesfont;
+   flegend_pos: complexty;
    procedure setitems(const index: integer; const avalue: ttrace);
    function getitems(const index: integer): ttrace;
    procedure setxserstart(const avalue: real);
@@ -306,6 +347,13 @@ type
    procedure setchartkind(const avalue: tracechartkindty);
    procedure setbar_width(const avalue: integer);
    procedure setbar_ref(const avalue: barrefty);
+   function getfont: ttracesfont;
+   procedure setfont(const avalue: ttracesfont);
+   function isfontstored: boolean;
+   procedure fontchanged(const sender: tobject);
+   procedure setlegend_pos(const avalue: complexty);
+   procedure setlegend_x(const avalue: real);
+   procedure setlegend_y(const avalue: real);
   protected
    fsize: sizety;
    fscalex: real;
@@ -314,12 +362,17 @@ type
    procedure setoptions(const avalue: charttraceoptionsty); virtual;
    procedure change; reintroduce;
    procedure clientrectchanged;
+// checkgraphic;
+   procedure clipoverlay(const acanvas: tcanvas);
    procedure paint(const acanvas: tcanvas);
+   procedure paintoverlay(const acanvas: tcanvas);
    procedure checkgraphic;
    procedure createitem(const index: integer; var item: tpersistent); override;
   public
    constructor create(const aowner: tcustomchart); reintroduce;
+   destructor destroy; override;
    class function getitemclasstype: persistentclassty; override;
+   procedure createfont;
    function itembyname(const aname: string): ttrace;
    function actualimagelist: timagelist;
    procedure assign(source: tpersistent); override;
@@ -331,6 +384,7 @@ type
    property logy: boolean read getlogy write setlogy;
    property items[const index: integer]: ttrace read getitems 
                                                    write setitems; default;
+   property legend_pos: complexty read flegend_pos write setlegend_pos;
   published
    property kind: tracekindty read fkind write setkind default trk_xseries;
    property chartkind: tracechartkindty read fchartkind 
@@ -351,6 +405,9 @@ type
    property bar_width: integer read fbar_width 
                                   write setbar_width default 0; //0 -> bar line
    property bar_ref: barrefty read fbar_ref write setbar_ref default br_zero;
+   property font: ttracesfont read getfont write setfont stored isfontstored;
+   property legend_x: real read flegend_pos.re write setlegend_x;
+   property legend_y: real read flegend_pos.im write setlegend_y;
  end;
 
  txytrace = class(ttrace)
@@ -538,8 +595,10 @@ type
    procedure chartchange;
    procedure invalidatelayout;
    procedure clientrectchanged; override;
-   procedure dopaintcontent(const acanvas: tcanvas); virtual;
    procedure dopaintbackground(const canvas: tcanvas); override;
+   procedure doclipcontent1(const acanvas: tcanvas); virtual;
+   procedure dopaintcontent(const acanvas: tcanvas); virtual;
+   procedure dopaintcontent1(const acanvas: tcanvas); virtual;
    procedure dopaint(const acanvas: tcanvas); override;
     //idialcontroller
    procedure directionchanged(const dir,dirbefore: graphicdirectionty);
@@ -600,7 +659,9 @@ type
   protected
    ftraces: ttraces;
    procedure clientrectchanged; override;
+   procedure doclipcontent1(const acanvas: tcanvas); override;
    procedure dopaintcontent(const acanvas: tcanvas); override;
+   procedure dopaintcontent1(const acanvas: tcanvas); override;
    procedure dostatread(const reader: tstatreader); override;
    procedure dostatwrite(const writer: tstatwriter); override;
   public
@@ -773,6 +834,13 @@ begin
  end;
 end;
   
+{ ttracefont }
+
+class function ttracefont.getinstancepo(owner: tobject): pfont;
+begin
+ result:= @ttrace(owner).finfo.font;
+end;
+
 { ttrace }
 
 constructor ttrace.create(aowner: tobject);
@@ -793,6 +861,8 @@ begin
  inherited;
  finfo.bar_frame.free;
  finfo.bar_face.free;
+ finfo.font.free;
+ fbmp2.free;
 end;
 
 procedure ttrace.datachange;
@@ -1262,59 +1332,127 @@ procedure ttrace.paint1(const acanvas: tcanvas; const imagesize: sizety;
 var
  int1: integer;
  pt1: pointty;
- rect1: rectty;
- co1: colorty;
- bmp1,bmp2: tmaskedbitmap;
+// rect1: rectty;
+// co1: colorty;
+ bmp1{,bmp2}: tmaskedbitmap;
 // margin: integer;
- imli1: timagelist;
+// imli1: timagelist;
 begin
  if not visible then begin
   exit;
  end;
+ fimagealignment:= imagealignment;
  with ftraces do begin
-  imli1:= actualimagelist;
-  if (imli1 <> nil) and (finfo.imagenr >= 0) and 
-                                    (finfo.imagenr < imli1.count) then begin
+  fimli1:= actualimagelist;
+  if (fimli1 <> nil) and (finfo.imagenr >= 0) and 
+                                    (finfo.imagenr < fimli1.count) then begin
    pt1:= pointty(imagesize);
    pt1.x:= pt1.x div 2;
    pt1.y:= pt1.y div 2;
    acanvas.remove(pt1);
-   rect1.size:= imagesize;
-   co1:= finfo.colorimage;
-   if co1 = cl_default then begin
-    co1:= finfo.color;
+   frect1.size:= imagesize;
+   fco1:= finfo.colorimage;
+   if fco1 = cl_default then begin
+    fco1:= finfo.color;
    end;
    if not acanvas.highresdevice and 
                (imagealignment * [al_stretchx,al_stretchy] <> []) then begin
-    bmp1:= tmaskedbitmap.create(imli1.monochrome);
-    bmp2:= tmaskedbitmap.create(false);
+    bmp1:= tmaskedbitmap.create(fimli1.monochrome);
+    fbmp2.free; //in case of previous exception
+    fbmp2:= tmaskedbitmap.create(false);
     try
-     bmp1.masked:= imli1.masked;
-     imli1.getimage(finfo.imagenr,bmp1);
-     bmp1.colorforeground:= co1;
+     bmp1.masked:= fimli1.masked;
+     fimli1.getimage(finfo.imagenr,bmp1);
+     bmp1.colorforeground:= fco1;
      bmp1.colorbackground:= tcuchart(fowner).colorchart;
      bmp1.monochrome:= false;
      bmp1.colormask:= true;
-     bmp2.size:= imagesize;
-     bmp1.stretch(bmp2);
+     fbmp2.size:= imagesize;
+     bmp1.stretch(fbmp2);
      for int1:= finfo.bottommargin to high(finfo.datapoints) - 
                                                 finfo.topmargin do begin
-      bmp2.paint(acanvas,finfo.datapoints[int1],[],co1);
+      fbmp2.paint(acanvas,finfo.datapoints[int1],[],fco1);
      end;
     finally
      bmp1.free;
-     bmp2.free;
+//     bmp2.free;
     end;
    end
    else begin
     for int1:= finfo.bottommargin to high(finfo.datapoints) - 
                                                  finfo.topmargin do begin
-     rect1.pos:= finfo.datapoints[int1];
-     imli1.paint(acanvas,finfo.imagenr,rect1,imagealignment,co1);
+     frect1.pos:= finfo.datapoints[int1];
+     fimli1.paint(acanvas,finfo.imagenr,frect1,imagealignment,fco1);
     end;
    end;
    acanvas.move(pt1);
+  end
+  else begin
+   fimli1:= nil;
   end;
+ end;
+end;
+
+procedure ttrace.paint2(const acanvas: tcanvas);
+var
+ int1: integer;
+ pt1: pointty;
+begin
+ if not visible then begin
+  exit;
+ end;
+ if finfo.legend <> '' then begin
+  int1:= finfo.legendrect.x + 2*fcurfont.glyphheight;
+  acanvas.drawstring(finfo.legend,mp(int1,finfo.legendrect.y+fcurfont.ascent),
+                                                                      fcurfont);
+  pt1.y:= finfo.legendrect.y + finfo.legendrect.cy div 2;
+  if finfo.widthmm > 0 then begin
+   acanvas.dashes:= finfo.dashes;
+   acanvas.linewidthmm:= finfo.widthmm;
+   acanvas.drawvect(mp(finfo.legendrect.x+1,pt1.y),
+                             gd_right,2*fcurfont.glyphheight-3,finfo.color);
+   acanvas.dashes:= '';
+   acanvas.linewidthmm:= 0;
+  end;
+  pt1.x:= int1 - fcurfont.glyphheight; //image center
+  if fimli1 <> nil then begin
+   if fbmp2 <> nil then begin
+    pt1.x:= pt1.x - fbmp2.width div 2;
+    pt1.y:= pt1.x - fbmp2.height div 2;
+    fbmp2.paint(acanvas,pt1,[],fco1);
+   end
+   else begin
+    frect1.x:= pt1.x - frect1.cx div 2;
+    frect1.y:= pt1.y - frect1.cy div 2;
+    fimli1.paint(acanvas,finfo.imagenr,frect1,fimagealignment,fco1);
+   end;
+  end;
+ end;
+ fbmp2.free;
+ fbmp2:= nil;
+end;
+
+procedure ttrace.clip2(const acanvas: tcanvas);
+//const
+// padding = 1;
+//var
+// rect1: rectty;
+begin
+ if not visible then begin
+  exit;
+ end;
+ if finfo.legend <> '' then begin
+  fcurfont:= legend_font;
+{
+  rect1.pos:= finfo.legendpos;
+  rect1.cx:= acanvas.getstringwidth(finfo.legend,fcurfont)+
+                                 2*fcurfont.glyphheight + 2*padding;
+  rect1.cy:= fcurfont.glyphheight + 2*padding;
+  rect1.y:= rect1.y - fcurfont.ascent - padding;
+  rect1.x:= rect1.x - padding;
+  acanvas.subcliprect(rect1);
+}
+  acanvas.subcliprect(finfo.legendrect);
  end;
 end;
 
@@ -2128,6 +2266,82 @@ begin
  ystart:= min;
 end;
 
+procedure ttrace.fontchanged(const sender: tobject);
+begin
+ datachange;
+end;
+
+function ttrace.isfontstored: boolean;
+begin
+ result:= finfo.font <> nil;
+end;
+
+procedure ttrace.createfont;
+begin
+ if finfo.font = nil then begin
+  finfo.font:= ttracefont.create;
+  finfo.font.onchange:= {$ifdef FPC}@{$endif}fontchanged;
+ end;
+end;
+
+function ttrace.getlegend_font: ttracefont;
+begin
+ getoptionalobject(tcustomchart(fowner).componentstate,
+                               finfo.font,{$ifdef FPC}@{$endif}createfont);
+ if finfo.font <> nil then begin
+  result:= finfo.font;
+ end
+ else begin
+{$warnings off}
+  result:= ttracefont(ftraces.getfont);
+{$warnings on}
+ end;
+end;
+
+procedure ttrace.setlegend_font(const avalue: ttracefont);
+begin
+ if avalue <> finfo.font then begin
+  setoptionalobject(tcustomchart(fowner).componentstate,
+                   avalue,finfo.font,{$ifdef FPC}@{$endif}createfont);
+  datachange;
+ end;
+end;
+
+procedure ttrace.setlegend_caption(const avalue: msestring);
+begin
+ finfo.legend:= avalue;
+ datachange;
+end;
+{
+procedure ttrace.setlegend_x(const avalue: integer);
+begin
+ if finfo.legendpos.x <> avalue then begin
+  finfo.legendpos.x:= avalue;
+  datachange;
+ end;
+end;
+
+procedure ttrace.setlegend_y(const avalue: integer);
+begin
+ if finfo.legendpos.y <> avalue then begin
+  finfo.legendpos.y:= avalue;
+  datachange;
+ end;
+end;
+
+procedure ttrace.setlegend_pos(const avalue: pointty);
+begin
+ finfo.legendpos:= avalue;
+ datachange;
+end;
+}
+{ ttracesfont }
+
+class function ttracesfont.getinstancepo(owner: tobject): pfont;
+begin
+ result:= @ttraces(owner).ffont;
+end;
+
 { ttraces }
 
 constructor ttraces.create(const aowner: tcustomchart);
@@ -2137,6 +2351,12 @@ begin
  fxrange:= 1;
  fyrange:= 1;
  inherited create(aowner,ownedeventpersistentclassty(getitemclasstype));
+end;
+
+destructor ttraces.destroy;
+begin
+ inherited;
+ ffont.free;
 end;
 
 class function ttraces.getitemclasstype: persistentclassty;
@@ -2167,7 +2387,7 @@ var
  align1: alignmentsty;
  imli1: timagelist;
 begin
- checkgraphic;
+// checkgraphic;
  for int1:= 0 to high(fitems) do begin
   ptraceaty(fitems)^[int1].paint(acanvas);
  end;
@@ -2192,12 +2412,36 @@ begin
  acanvas.linewidth:= 0;
 end;
 
-procedure ttraces.checkgraphic;
+procedure ttraces.clipoverlay(const acanvas: tcanvas);
 var
  int1: integer;
 begin
+ checkgraphic;
+ for int1:= 0 to high(fitems) do begin
+  ptraceaty(fitems)^[int1].clip2(acanvas);
+ end;
+end;
+
+procedure ttraces.paintoverlay(const acanvas: tcanvas);
+var
+ int1: integer;
+begin
+ for int1:= 0 to high(fitems) do begin
+  ptraceaty(fitems)^[int1].paint2(acanvas);
+ end;
+end;
+
+procedure ttraces.checkgraphic;
+var
+ int1: integer;
+ x1,y1,x2,y2: integer;
+ canvas1: tcanvas;
+ rect1: rectty;
+begin
  if not (trss_graphicvalid in ftracestate) then begin
-  fsize:= tcustomchart(fowner).getdialrect.size;
+  canvas1:= tcustomchart(fowner).getcanvas;
+  rect1:= tcustomchart(fowner).getdialrect;
+  fsize:= rect1.size;
   if fsize.cx < 0 then begin
    fsize.cx:= 0;
   end;
@@ -2206,8 +2450,49 @@ begin
   end;
   fscalex:= fsize.cx;
   fscaley:= fsize.cy;
+  x1:= 0;
+  y1:= 0;
   for int1:= 0 to high(fitems) do begin
-   ptraceaty(fitems)^[int1].checkgraphic;
+   with ptraceaty(fitems)^[int1] do begin
+    checkgraphic;
+    if finfo.legend <> '' then begin
+     with finfo.legendrect do begin
+      fcurfont:= getlegend_font;
+      cy:= fcurfont.glyphheight;
+      cx:= 2*cy + canvas1.getstringwidth(finfo.legend,fcurfont);
+      if cx > x1 then begin
+       x1:= cx;
+      end;
+      y1:= y1 + cy;
+     end;
+    end
+    else begin
+     finfo.legendrect:= nullrect;
+    end;
+   end;    
+  end;
+  x2:= round(flegend_pos.re*fsize.cx) - x1 div 2;
+  if x2 + x1 > fsize.cx then begin
+   x2:= fsize.cx - x1;
+  end;
+  if x2 < 0 then begin
+   x2:= 0;
+  end;
+  y2:= fsize.cy - round(flegend_pos.im*fsize.cy) - y1 div 2;
+  if y2 + y1 > fsize.cy then begin
+   y2:= fsize.cy - y1;
+  end;
+  if y2 < 0 then begin
+   y2:= 0;
+  end;
+  x2:= x2 + rect1.x;
+  y2:= y2 + rect1.y;
+  for int1:= 0 to high(fitems) do begin
+   with ptraceaty(fitems)^[int1].finfo.legendrect do begin
+    x:= x2;
+    y:= y2;
+    y2:= y2 + cy;
+   end;
   end;
   include(ftracestate,trss_graphicvalid);
  end;
@@ -2449,6 +2734,29 @@ begin
  change;
 end;
 
+function ttraces.getfont: ttracesfont;
+begin
+  getoptionalobject(tcustomchart(fowner).componentstate,
+                               ffont,{$ifdef FPC}@{$endif}createfont);
+ if ffont <> nil then begin
+  result:= ffont;
+ end
+ else begin
+{$warnings off}
+  result:= ttracesfont(tcustomchart(fowner).getfont);
+{$warnings on}
+ end;
+end;
+
+procedure ttraces.setfont(const avalue: ttracesfont);
+begin
+ if avalue <> ffont then begin
+  setoptionalobject(tcustomchart(fowner).componentstate,
+                   avalue,ffont,{$ifdef FPC}@{$endif}createfont);
+  change;
+ end;
+end;
+
 procedure ttraces.dostatread(const reader: tstatreader);
 var
  int1: integer;
@@ -2549,6 +2857,40 @@ begin
   end;
   ttrace(fitems[int1]).xydata:= adata[int1];
  end;
+end;
+
+function ttraces.isfontstored: boolean;
+begin
+ result:= ffont <> nil;
+end;
+
+procedure ttraces.createfont;
+begin
+ if font = nil then begin
+  ffont:= ttracesfont.create;
+  ffont.onchange:= {$ifdef FPC}@{$endif}fontchanged;
+ end;
+end;
+
+procedure ttraces.fontchanged(const sender: tobject);
+begin
+ change;
+end;
+
+procedure ttraces.setlegend_pos(const avalue: complexty);
+begin
+ flegend_pos:= avalue;
+ change;
+end;
+
+procedure ttraces.setlegend_x(const avalue: real);
+begin
+ legend_pos:= mc(avalue,flegend_pos.im);
+end;
+
+procedure ttraces.setlegend_y(const avalue: real);
+begin
+ legend_pos:= mc(flegend_pos.re,avalue);
 end;
 
 { tchartdialvert }
@@ -2662,7 +3004,17 @@ begin
 end;
 }
 
+procedure tcuchart.doclipcontent1(const acanvas: tcanvas);
+begin
+ //dummy
+end;
+
 procedure tcuchart.dopaintcontent(const acanvas: tcanvas);
+begin
+ //dummy
+end;
+
+procedure tcuchart.dopaintcontent1(const acanvas: tcanvas);
 begin
  //dummy
 end;
@@ -2707,11 +3059,15 @@ end;
 procedure tcuchart.dopaint(const acanvas: tcanvas);
 begin
  inherited;
+ acanvas.save;
+ doclipcontent1(acanvas);
  fxdials.paint(acanvas);
  fydials.paint(acanvas);
  dopaintcontent(acanvas);
  fxdials.afterpaint(acanvas);
  fydials.afterpaint(acanvas);
+ acanvas.restore;
+ dopaintcontent1(acanvas);
  if fframechart <> nil then begin
   fframechart.paintoverlay(acanvas,fchartframerect);
  end;
@@ -3176,6 +3532,12 @@ begin
  inherited;
 end;
 
+procedure tcustomchart.doclipcontent1(const acanvas: tcanvas);
+begin
+ inherited;
+ ftraces.clipoverlay(acanvas);
+end;
+
 procedure tcustomchart.dopaintcontent(const acanvas: tcanvas);
 var
  rect1: rectty;
@@ -3190,6 +3552,12 @@ begin
  ftraces.paint(acanvas);
  acanvas.restore;
 // acanvas.remove(innerclientpos);
+end;
+
+procedure tcustomchart.dopaintcontent1(const acanvas: tcanvas);
+begin
+ inherited;
+ ftraces.paintoverlay(acanvas);
 end;
 
 procedure tcustomchart.setxstart(const avalue: real);
