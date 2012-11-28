@@ -45,6 +45,7 @@ type
   public
    constructor create(const aowner: tmenuitem);
    class function getitemclasstype: persistentclassty; override;
+   function hasvisibleitem: boolean;
    procedure sort;
    procedure assign(source: tpersistent); override;
    function insert(const index: integer; const aitem: tmenuitem): integer; overload;
@@ -188,6 +189,7 @@ type
    procedure doupdate;
    procedure doshortcut(var info: keyeventinfoty);
    function count: integer;
+   function hasvisibleitem: boolean;
    function parentmenu: tmenuitem;
    function actualcolor: colorty;
    function actualcoloractive: colorty;
@@ -369,7 +371,7 @@ type
                             //returs index of first added item
    class function additems(var amenu: tpopupmenu; const atransientfor: twidget;
                  var mouseinfo: mouseeventinfoty; const items: tmenuitems;
-                 const aseparator: boolean = true;
+                 aseparator: boolean = true;
                  const first: boolean = false): integer; overload;
                             //returs index of first added item
    class function additems(var amenu: tpopupmenu; const atransientfor: twidget;
@@ -797,6 +799,11 @@ begin
  else begin
   result:= fsubmenu.count;
  end;
+end;
+
+function tmenuitem.hasvisibleitem: boolean;
+begin
+ result:= (fsubmenu <> nil) and fsubmenu.hasvisibleitem;
 end;
 
 function tmenuitem.getsubmenu: tmenuitems;
@@ -1822,6 +1829,19 @@ begin
  dochange(-1);
 end;
 
+function tmenuitems.hasvisibleitem: boolean;
+var
+ int1: integer;
+begin
+ result:= false;
+ for int1:= 0 to count - 1 do begin
+  if not (as_invisible in tmenuitem(fitems[int1]).finfo.state) then begin
+   result:= true;
+   break;
+  end;
+ end;
+end;
+
 { tpopupmenu }
 
 class function tpopupmenu.classskininfo: skininfoty;
@@ -1872,7 +1892,7 @@ begin
  if amenu = nil then begin
   amenu:= tpopupmenu.createtransient(atransientfor,@mouseinfo);
  end;
- if aseparator and (amenu.menu.submenu.count > 0) then begin
+ if aseparator and amenu.menu.hasvisibleitem then begin
   amenu.menu.submenu.insertseparator(bigint);
  end;
  result:= amenu.menu.submenu.insert(bigint,captions,aoptions,states,onexecutes);
@@ -1880,7 +1900,7 @@ end;
 
 class function tpopupmenu.additems(var amenu: tpopupmenu; const atransientfor: twidget;
                  var mouseinfo: mouseeventinfoty; const items: tmenuitems;
-                 const aseparator: boolean = true;
+                 aseparator: boolean = true;
                  const first: boolean = false): integer;
 begin
  if amenu = nil then begin
@@ -1888,14 +1908,16 @@ begin
  end;
  result:= -1; //compiler warning
  if items <> nil then begin
+  aseparator:= aseparator and items.hasvisibleitem and
+                                                amenu.menu.hasvisibleitem;
   if first then begin
    result:= amenu.menu.submenu.insert(0,items);
-   if aseparator and (items.count > 0) then begin
+   if aseparator then begin
     amenu.menu.submenu.insertseparator(items.count);
    end;
   end
   else begin
-   if aseparator and (amenu.menu.count > 0) then begin
+   if aseparator then begin
     amenu.menu.submenu.insertseparator(bigint);
    end;
    result:= amenu.menu.submenu.insert(bigint,items);
