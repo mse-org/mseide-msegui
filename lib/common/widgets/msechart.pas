@@ -371,6 +371,7 @@ type
    procedure setkind(const avalue: tracekindty); virtual;
    procedure setoptions(const avalue: charttraceoptionsty); virtual;
    procedure change; reintroduce;
+   procedure layoutchanged;
    procedure clientrectchanged;
    procedure clipoverlay(const acanvas: tcanvas);
    procedure paint(const acanvas: tcanvas);
@@ -2865,7 +2866,7 @@ begin
  if avalue <> ffont then begin
   setoptionalobject(tcustomchart(fowner).componentstate,
                    avalue,ffont,{$ifdef FPC}@{$endif}createfont);
-  change;
+  layoutchanged;
  end;
 end;
 
@@ -2986,7 +2987,7 @@ end;
 
 procedure ttraces.fontchanged(const sender: tobject);
 begin
- change;
+ layoutchanged;
 end;
 
 procedure ttraces.setlegend_pos(const avalue: complexty);
@@ -3011,7 +3012,7 @@ procedure ttraces.setlegend_dist(const avalue: integer);
 begin
  if flegend_dist <> avalue then begin
   flegend_dist:= avalue;
-  change;
+  layoutchanged;
  end;
 end;
 
@@ -3019,7 +3020,7 @@ procedure ttraces.setlegend_placement(const avalue: tracelegendplacementty);
 begin
  if flegend_placement <> avalue then begin
   flegend_placement:= avalue;
-  change;
+  layoutchanged;
  end;
 end;
 
@@ -3027,8 +3028,15 @@ procedure ttraces.setlegend_fitdist(const avalue: integer);
 begin
  if flegend_fitdist <> avalue then begin
   flegend_fitdist:= avalue;
-  change;
+  layoutchanged;
  end;
+end;
+
+procedure ttraces.layoutchanged;
+begin
+ exclude(ftracestate,trss_graphicvalid);
+ change;
+ tcustomchart(fowner).layoutchanged;
 end;
 
 { tchartdialvert }
