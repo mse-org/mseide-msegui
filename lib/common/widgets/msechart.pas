@@ -28,11 +28,14 @@ type
                        cto_savexscale,cto_saveyscale
                        );
  charttraceoptionsty = set of charttraceoptionty;
+ tracelegendplacementty = (tlp_none,tlp_xy,tlp_above,tlp_below);
 
 const
  chartrecorderstatesmask  = [chs_hasdialscroll,chs_hasdialshift,chs_started,
                              chs_full,chs_chartvalid];
  defaultxytraceoptions = [cto_xordered];
+ defaultlegenddist = 1;
+ defaultlegendplacement = tlp_xy;
 
 type
  tcustomchart = class;
@@ -328,6 +331,9 @@ type
    fbar_ref: barrefty;
    ffont: ttracesfont;
    flegend_pos: complexty;
+   flegend_dist: integer;
+   flegend_placement: tracelegendplacementty;
+   flegend_fitdist: integer;
    procedure setitems(const index: integer; const avalue: ttrace);
    function getitems(const index: integer): ttrace;
    procedure setxserstart(const avalue: real);
@@ -354,15 +360,18 @@ type
    procedure setlegend_pos(const avalue: complexty);
    procedure setlegend_x(const avalue: real);
    procedure setlegend_y(const avalue: real);
+   procedure setlegend_dist(const avalue: integer);
+   procedure setlegend_placement(const avalue: tracelegendplacementty);
+   procedure setlegend_fitdist(const avalue: integer);
   protected
    fsize: sizety;
    fscalex: real;
    fscaley: real;
+   flegendsize: sizety;
    procedure setkind(const avalue: tracekindty); virtual;
    procedure setoptions(const avalue: charttraceoptionsty); virtual;
    procedure change; reintroduce;
    procedure clientrectchanged;
-// checkgraphic;
    procedure clipoverlay(const acanvas: tcanvas);
    procedure paint(const acanvas: tcanvas);
    procedure paintoverlay(const acanvas: tcanvas);
@@ -408,6 +417,12 @@ type
    property font: ttracesfont read getfont write setfont stored isfontstored;
    property legend_x: real read flegend_pos.re write setlegend_x;
    property legend_y: real read flegend_pos.im write setlegend_y;
+   property legend_dist: integer read flegend_dist write setlegend_dist default
+                                         defaultlegenddist;
+   property legend_fitdist: integer read flegend_fitdist 
+                  write setlegend_fitdist default defaultlegenddist;
+   property legend_placement: tracelegendplacementty read flegend_placement
+                                write setlegend_placement default tlp_xy;
  end;
 
  txytrace = class(ttrace)
@@ -591,7 +606,7 @@ type
    procedure fontchanged; override;
    function checklayout: boolean; virtual; //true if changes made
    procedure changed; virtual;
-   procedure layoutchanged;
+   procedure layoutchanged; virtual;
    procedure chartchange;
    procedure invalidatelayout;
    procedure clientrectchanged; override;
@@ -613,6 +628,7 @@ type
    procedure statread; virtual;
    function getstatvarname: msestring;
    procedure initscrollstate;
+   procedure extendfit(const asides: rectsidesty; var aext: rectextty); virtual;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -664,6 +680,8 @@ type
    procedure dopaintcontent1(const acanvas: tcanvas); override;
    procedure dostatread(const reader: tstatreader); override;
    procedure dostatwrite(const writer: tstatwriter); override;
+   procedure layoutchanged; override;
+   procedure extendfit(const asides: rectsidesty; var aext: rectextty); override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -2350,6 +2368,9 @@ begin
  fxserrange:= 1;
  fxrange:= 1;
  fyrange:= 1;
+ flegend_dist:= defaultlegenddist;
+ flegend_fitdist:= defaultlegenddist;
+ flegend_placement:= defaultlegendplacement;
  inherited create(aowner,ownedeventpersistentclassty(getitemclasstype));
 end;
 
@@ -2417,8 +2438,10 @@ var
  int1: integer;
 begin
  checkgraphic;
- for int1:= 0 to high(fitems) do begin
-  ptraceaty(fitems)^[int1].clip2(acanvas);
+ if flegend_placement <> tlp_none then begin
+  for int1:= 0 to high(fitems) do begin
+   ptraceaty(fitems)^[int1].clip2(acanvas);
+  end;
  end;
 end;
 
@@ -2426,17 +2449,40 @@ procedure ttraces.paintoverlay(const acanvas: tcanvas);
 var
  int1: integer;
 begin
- for int1:= 0 to high(fitems) do begin
-  ptraceaty(fitems)^[int1].paint2(acanvas);
+ if flegend_placement <> tlp_none then begin
+  for int1:= 0 to high(fitems) do begin
+   ptraceaty(fitems)^[int1].paint2(acanvas);
+  end;
  end;
 end;
 
 procedure ttraces.checkgraphic;
+type
+ rowinfoty = record
+  last: integer;
+  width: integer;
+  height: integer;
+ end;
 var
- int1: integer;
+ int1,int2,int3: integer;
  x1,y1,x2,y2: integer;
  canvas1: tcanvas;
  rect1: rectty;
+ ar1: array of rowinfoty;
+
+ procedure pushrow(const aindex: integer);
+ begin
+  with ar1[int2] do begin
+   last:= aindex;
+   width:= x1;
+   height:= y1;
+  end;
+  y2:= y2 + y1;
+  inc(int2);
+  x1:= -1;
+  y1:= 0;
+ end; //pushrow
+       
 begin
  if not (trss_graphicvalid in ftracestate) then begin
   canvas1:= tcustomchart(fowner).getcanvas;
@@ -2455,7 +2501,7 @@ begin
   for int1:= 0 to high(fitems) do begin
    with ptraceaty(fitems)^[int1] do begin
     checkgraphic;
-    if finfo.legend <> '' then begin
+    if (finfo.legend <> '') and not (cto_invisible in finfo.options) then begin
      with finfo.legendrect do begin
       fcurfont:= getlegend_font;
       cy:= fcurfont.glyphheight;
@@ -2471,27 +2517,93 @@ begin
     end;
    end;    
   end;
-  x2:= round(flegend_pos.re*fsize.cx) - x1 div 2;
-  if x2 + x1 > fsize.cx then begin
-   x2:= fsize.cx - x1;
-  end;
-  if x2 < 0 then begin
-   x2:= 0;
-  end;
-  y2:= fsize.cy - round(flegend_pos.im*fsize.cy) - y1 div 2;
-  if y2 + y1 > fsize.cy then begin
-   y2:= fsize.cy - y1;
-  end;
-  if y2 < 0 then begin
-   y2:= 0;
-  end;
-  x2:= x2 + rect1.x;
-  y2:= y2 + rect1.y;
-  for int1:= 0 to high(fitems) do begin
-   with ptraceaty(fitems)^[int1].finfo.legendrect do begin
-    x:= x2;
-    y:= y2;
-    y2:= y2 + cy;
+  case flegend_placement of
+   tlp_xy: begin
+    x2:= round(flegend_pos.re*fsize.cx) - x1 div 2;
+    int1:= fsize.cx - x1 - flegend_dist;
+    if x2 > int1 then begin
+     x2:= int1;
+    end;
+    if x2 < flegend_dist then begin
+     x2:= flegend_dist;
+    end;
+    y2:= fsize.cy - round(flegend_pos.im*fsize.cy) - y1 div 2;
+    int1:= fsize.cy - y1 - flegend_dist;
+    if y2 > int1 then begin
+     y2:= int1;
+    end;
+    if y2 < flegend_dist then begin
+     y2:= flegend_dist;
+    end;
+  
+    x2:= x2 + rect1.x;
+    y2:= y2 + rect1.y;
+    for int1:= 0 to high(fitems) do begin
+     with ptraceaty(fitems)^[int1].finfo.legendrect do begin
+      x:= x2;
+      y:= y2;
+      y2:= y2 + cy;
+     end;
+    end;
+   end;
+   tlp_above,tlp_below: begin
+    setlength(ar1,length(fitems)); //max
+    if ar1 <> nil then begin
+     x2:= rect1.cx;       //max width
+     y2:= 0;              //tot height
+     with ptraceaty(fitems)^[0].finfo.legendrect do begin
+      x1:= cx;
+      y1:= cy;
+     end;
+     int2:= 0;
+     for int1:= 1 to high(fitems) do begin
+      with ptraceaty(fitems)^[int1].finfo.legendrect do begin
+       if x1+cx+1 > x2 then begin
+        pushrow(int1-1);
+       end;
+       x1:= x1 + cx + 1;
+       if cy > y1 then begin
+        y1:= cy;
+       end;
+      end;
+     end;
+     if (int2 = 0) or (high(fitems) > 0) then begin
+      pushrow(high(fitems)); //last or single
+     end;
+     setlength(ar1,int2);
+     if flegend_placement = tlp_above then begin
+      y1:= rect1.y - y2 - flegend_dist;
+     end
+     else begin
+      y1:= rect1.y + rect1.cy + flegend_dist;
+     end;
+     int2:= 0;
+     x2:= 0;
+     for int1:= 0 to high(ar1) do begin
+      with ar1[int1] do begin
+       if x2 < width then begin
+        x2:= width;
+       end;
+      end;
+     end;
+     flegendsize.cx:= x2;
+     flegendsize.cy:= y2;
+     x2:= rect1.x + (rect1.cx - x2) div 2; //center block
+     for int1:= 0 to high(ar1) do begin
+      with ar1[int1] do begin
+       x1:= x2;
+       for int3:= int2 to last do begin
+        with ptraceaty(fitems)^[int3].finfo.legendrect do begin
+         x:= x1;
+         y:= y1 + (height - cy) div 2;
+         x1:= x1 + cx + 1;
+        end;
+       end;
+       int2:= last + 1;
+       y1:= y1 + height;
+      end;
+     end;
+    end;
    end;
   end;
   include(ftracestate,trss_graphicvalid);
@@ -2879,8 +2991,10 @@ end;
 
 procedure ttraces.setlegend_pos(const avalue: complexty);
 begin
- flegend_pos:= avalue;
- change;
+ if (flegend_pos.re <> avalue.re) or (flegend_pos.im <> avalue.im) then begin
+  flegend_pos:= avalue;  
+  change;
+ end;
 end;
 
 procedure ttraces.setlegend_x(const avalue: real);
@@ -2891,6 +3005,30 @@ end;
 procedure ttraces.setlegend_y(const avalue: real);
 begin
  legend_pos:= mc(flegend_pos.re,avalue);
+end;
+
+procedure ttraces.setlegend_dist(const avalue: integer);
+begin
+ if flegend_dist <> avalue then begin
+  flegend_dist:= avalue;
+  change;
+ end;
+end;
+
+procedure ttraces.setlegend_placement(const avalue: tracelegendplacementty);
+begin
+ if flegend_placement <> avalue then begin
+  flegend_placement:= avalue;
+  change;
+ end;
+end;
+
+procedure ttraces.setlegend_fitdist(const avalue: integer);
+begin
+ if flegend_fitdist <> avalue then begin
+  flegend_fitdist:= avalue;
+  change;
+ end;
 end;
 
 { tchartdialvert }
@@ -2978,6 +3116,7 @@ end;
 procedure tcuchart.invalidatelayout;
 begin
  if componentstate * [csloading,csdestroying] = [] then begin
+  exclude(fstate,chs_layoutvalid);
   fxdials.changed;
   fydials.changed;
   chartchange;
@@ -3298,7 +3437,7 @@ begin
  for int1:= 0 to fxdials.count-1 do begin
  {$warnings off}
   handle(tcustomdialcontroller1(fxdials[int1]),
-                             rs_right in asides,rs_left in asides,true);
+                             rs_bottom in asides,rs_top in asides,true);
  {$warnings on}
  end;
  shift1:= 0;
@@ -3306,9 +3445,10 @@ begin
  for int1:= 0 to fydials.count-1 do begin
  {$warnings off}
   handle(tcustomdialcontroller1(fydials[int1]),
-                             rs_bottom in asides,rs_top in asides,false);
+                             rs_right in asides,rs_left in asides,false);
  {$warnings on}
  end;
+ extendfit(asides,ext1);
  inflaterectext1(ext1,tcustomframe1(fframe).fi.innerframe);
  if fframechart <> nil then begin
   inflaterectext1(ext1,fframechart.innerframe);
@@ -3442,6 +3582,11 @@ procedure tcuchart.setframechart(const avalue: tframe);
 begin
  setoptionalobject(avalue,fframechart,{$ifdef FPC}@{$endif}createframechart);
  invalidate;
+end;
+
+procedure tcuchart.extendfit(const asides: rectsidesty; var aext: rectextty);
+begin
+ //dummy
 end;
 
 { tcustomchart }
@@ -3690,6 +3835,34 @@ begin
                                                   astartmargin,aendmargin);
  ystart:= min;
  yrange:= ra;
+end;
+
+procedure tcustomchart.layoutchanged;
+begin
+ inherited;
+ ftraces.change;
+end;
+
+procedure tcustomchart.extendfit(const asides: rectsidesty; var aext: rectextty);
+var
+ rect1: rectty;
+ int1: integer;
+begin
+ with ftraces do begin
+  if legend_placement in [tlp_above,tlp_below] then begin
+   checkgraphic;
+   rect1:= self.getdialrect;
+   int1:= flegendsize.cy + legend_fitdist;
+   if legend_placement = tlp_above then begin
+    legend_dist:= rect1.y  - aext.top + legend_fitdist;
+    aext.top:= aext.top - int1;
+   end
+   else begin
+    legend_dist:= aext.bottom - rect1.y - rect1.cy + legend_fitdist;
+    aext.bottom:= aext.bottom + int1;
+   end;
+  end;
+ end; 
 end;
 
 { trecordertraces }
