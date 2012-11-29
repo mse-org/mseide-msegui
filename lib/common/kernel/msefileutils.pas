@@ -234,6 +234,9 @@ function getcurrentdir: filenamety; deprecated;
 function getcurrentdirmse: filenamety;
 function setcurrentdir(const path: filenamety): filenamety; deprecated;
 function setcurrentdirmse(const path: filenamety): filenamety;
+function trysetcurrentdirmse(const path: filenamety): boolean; overload;
+function trysetcurrentdirmse(const path: filenamety;
+                            out pathbefore: msestring): boolean; overload;
 
 procedure clearfileinfo(var info: fileinfoty);
 procedure initdirfileinfo(var info: fileinfoty; const aname: filenamety;
@@ -472,6 +475,18 @@ begin
  if error <> sye_ok then begin
   syserror(error,'Setcurrentdir "'+ path + quotechar+':'+lineend);
  end;
+end;
+
+function trysetcurrentdirmse(const path: filenamety;
+                            out pathbefore: filenamety): boolean;
+begin
+ pathbefore:= sys_getcurrentdir;
+ result:= sys_setcurrentdir(path) = sye_ok;
+end;
+
+function trysetcurrentdirmse(const path: filenamety): boolean;
+begin
+ result:= sys_setcurrentdir(path) = sye_ok;
 end;
 
 function setcurrentdir(const path: filenamety): filenamety;

@@ -40,6 +40,32 @@ const
 {$endif}
 
 const
+{$ifdef linux}
+ {$ifdef CPU64}
+  platformtext = 'x86_64-linux';
+ {$else}
+  platformtext = 'i386-linux';
+ {$endif}
+{$else}
+ {$ifdef openbsd}
+  {$ifdef CPU64}
+  platformtext = 'x86_64-openbsd';
+  {$else}
+  platformtext = 'i386-openbsd';
+  {$endif}
+ {$else}
+  {$ifdef bsd}
+   {$ifdef CPU64}
+  platformtext = 'x86_64-bsd';
+   {$else}
+  platformtext = 'i386-bsd';
+   {$endif}
+  {$else}
+   platformtext = 'i386-win32';
+  {$endif}
+ {$endif}
+{$endif}
+
  moduleclassnamename = 'moduleclassname';
 // inheritedmoduleclassnamename = 'inheritedmoduleclassname';
  compilerdefaults =

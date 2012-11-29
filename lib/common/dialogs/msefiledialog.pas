@@ -1504,10 +1504,10 @@ begin
  fwindowrect.cy:= reader.readinteger('cy',fwindowrect.cy);
  fcolwidth:= reader.readinteger('filecolwidth',fcolwidth);
  if fdo_chdir in foptions then begin
-  try
-   setcurrentdirmse(flastdir);
-  except
-  end;
+//  try
+   trysetcurrentdirmse(flastdir);
+//  except
+//  end;
  end;
 end;
 

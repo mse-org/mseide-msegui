@@ -118,6 +118,7 @@ type
    fimagealignment: alignmentsty;
    procedure setxydata(const avalue: complexarty);
    procedure datachange;
+   procedure legendchange;
 //   procedure layoutchange;
    procedure setcolor(const avalue: colorty);
    procedure setcolorimage(const avalue: colorty);
@@ -376,6 +377,7 @@ type
    procedure clipoverlay(const acanvas: tcanvas);
    procedure paint(const acanvas: tcanvas);
    procedure paintoverlay(const acanvas: tcanvas);
+   procedure calclegendrect;
    procedure checkgraphic;
    procedure createitem(const index: integer; var item: tpersistent); override;
   public
@@ -888,6 +890,18 @@ procedure ttrace.datachange;
 begin
  exclude(finfo.state,trs_datapointsvalid);
  tcustomchart(fowner).traces.change;
+end;
+
+procedure ttrace.legendchange;
+begin
+ with tcustomchart(fowner).traces do begin
+  if legend_placement in [tlp_above,tlp_below] then begin
+   layoutchanged;
+  end
+  else begin
+   change;
+  end;
+ end;
 end;
 
 procedure ttrace.setxydata(const avalue: complexarty);
@@ -2287,7 +2301,7 @@ end;
 
 procedure ttrace.fontchanged(const sender: tobject);
 begin
- datachange;
+ legendchange;
 end;
 
 function ttrace.isfontstored: boolean;
@@ -2322,14 +2336,14 @@ begin
  if avalue <> finfo.font then begin
   setoptionalobject(tcustomchart(fowner).componentstate,
                    avalue,finfo.font,{$ifdef FPC}@{$endif}createfont);
-  datachange;
+  legendchange;
  end;
 end;
 
 procedure ttrace.setlegend_caption(const avalue: msestring);
 begin
  finfo.legend:= avalue;
- datachange;
+ legendchange;
 end;
 {
 procedure ttrace.setlegend_x(const avalue: integer);
@@ -2457,7 +2471,7 @@ begin
  end;
 end;
 
-procedure ttraces.checkgraphic;
+procedure ttraces.calclegendrect;
 type
  rowinfoty = record
   last: integer;
@@ -2483,7 +2497,7 @@ var
   x1:= -1;
   y1:= 0;
  end; //pushrow
-       
+
 begin
  if not (trss_graphicvalid in ftracestate) then begin
   canvas1:= tcustomchart(fowner).getcanvas;
@@ -2497,11 +2511,11 @@ begin
   end;
   fscalex:= fsize.cx;
   fscaley:= fsize.cy;
+ 
   x1:= 0;
   y1:= 0;
   for int1:= 0 to high(fitems) do begin
    with ptraceaty(fitems)^[int1] do begin
-    checkgraphic;
     if (finfo.legend <> '') and not (cto_invisible in finfo.options) then begin
      with finfo.legendrect do begin
       fcurfont:= getlegend_font;
@@ -2605,6 +2619,20 @@ begin
       end;
      end;
     end;
+   end;
+  end;
+ end;
+end;
+
+procedure ttraces.checkgraphic;
+var
+ int1: integer;       
+begin
+ if not (trss_graphicvalid in ftracestate) then begin
+  calclegendrect;
+  for int1:= 0 to high(fitems) do begin
+   with ptraceaty(fitems)^[int1] do begin
+    checkgraphic;
    end;
   end;
   include(ftracestate,trss_graphicvalid);
@@ -3571,7 +3599,7 @@ end;
 
 procedure tcuchart.createframechart;
 begin
- if fframechart <> nil then begin
+ if fframechart = nil then begin
   fframechart:= tframe(tframe.newinstance);
  {$warnings off}
   include(tcustomframe1(fframechart).fstate,fs_nosetinstance);
@@ -3854,9 +3882,24 @@ end;
 procedure tcustomchart.extendfit(const asides: rectsidesty; var aext: rectextty);
 var
  rect1: rectty;
- int1: integer;
+// int1: integer;
 begin
+ inherited;
  with ftraces do begin
+  if legend_placement in [tlp_above,tlp_below] then begin
+//   checkgraphic;
+   rect1:= self.getdialrect;
+   calclegendrect;
+   if legend_placement = tlp_above then begin
+    legend_dist:= rect1.y - aext.top + legend_fitdist;
+    aext.top:= aext.top - flegendsize.cy - legend_fitdist;
+   end
+   else begin
+    legend_dist:= aext.bottom - rect1.y - rect1.cy + legend_fitdist;
+    aext.bottom:= aext.bottom + flegendsize.cy + legend_fitdist;
+   end;
+  end;
+ {
   if legend_placement in [tlp_above,tlp_below] then begin
    checkgraphic;
    rect1:= self.getdialrect;
@@ -3870,6 +3913,7 @@ begin
     aext.bottom:= aext.bottom + int1;
    end;
   end;
+ }
  end; 
 end;
 

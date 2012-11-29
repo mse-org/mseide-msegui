@@ -36,31 +36,6 @@ uses
  msepipestream;
 const
  versiontext = '2.9 unstable';
-{$ifdef linux}
- {$ifdef CPU64}
-  hosttext = 'x86_64-linux';
- {$else}
-  hosttext = 'i386-linux';
- {$endif}
-{$else}
- {$ifdef openbsd}
-  {$ifdef CPU64}
-  hosttext = 'x86_64-openbsd';
-  {$else}
-  hosttext = 'i386-openbsd';
-  {$endif}
- {$else}
-  {$ifdef bsd}
-   {$ifdef CPU64}
-  hosttext = 'x86_64-bsd';
-   {$else}
-  hosttext = 'i386-bsd';
-   {$endif}
-  {$else}
-   hosttext = 'i386-win32';
-  {$endif}
- {$endif}
-{$endif}
  idecaption = 'MSEide';
 
 type
@@ -2666,7 +2641,7 @@ procedure tmainfo.aboutonexecute(const sender: TObject);
 begin
  showmessage('MSEgui version: '+mseguiversiontext+c_linefeed+
              'MSEide version: '+versiontext+c_linefeed+
-             'Host: '+ hosttext+ c_linefeed+
+             'Host: '+ platformtext+ c_linefeed+
              c_linefeed+
              'Copyright 1999-2012'+c_linefeed+
              'by Martin Schreiber'
