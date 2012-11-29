@@ -137,13 +137,13 @@ var
   with parser do begin
    while checkoperator('*') do begin
    end;
-   scope.addidents(parser);
+   scope.addidentpath(parser,'.');
    if checkoperator('[') then begin
     findoperator(']');
    end;
    while checkoperator('*') do begin
    end;
-   scope.addidents(parser);
+   scope.addidentpath(parser,'.');
   end;
  end;
  

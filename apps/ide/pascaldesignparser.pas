@@ -93,7 +93,7 @@ var
     while checkoperator('^') do begin
     end;
    end;
-   scope.addidents(parser);
+   scope.addidentpath(parser,'.');
   end;
  end;
 
@@ -241,7 +241,14 @@ begin
        end;
        syk_classdef: begin
         if checkoperator('=') and checkident(ord(pid_class)) and checkoperator('(') then begin
-         doaddidents;
+         scope.addidents(parser,',');
+//         doaddidents;
+        end;
+       end;
+       syk_interfacedef: begin
+        if checkoperator('=') and checkident(ord(pid_interface))
+                                   and checkoperator('(') then begin
+         scope.addidents(parser,#0);
         end;
        end;
       end;

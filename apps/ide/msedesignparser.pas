@@ -343,7 +343,10 @@ type
     procedure addemptyident(const aparser: tparser);
     procedure endident(const aparser: tparser); overload;
     procedure endident(const aparser: tparser; const endpos: sourceposty); overload;
-    function addidents(const aparser: tparser): boolean;
+    function addidentpath(const aparser: tparser;
+                                    const aseparator: char): boolean;
+    function addidents(const aparser: tparser;
+                                    const aseparator: char): boolean;
 
     function find(const aname: string;
                      const akind: symbolkindty = syk_none): pdefinfoty;
@@ -1302,7 +1305,8 @@ begin
  end;
 end;
 
-function tdeflist.addidents(const aparser: tparser): boolean;
+function tdeflist.addidentpath(const aparser: tparser;
+                                    const aseparator: char): boolean;
 var
  ident1: integer;
 begin
@@ -1310,7 +1314,7 @@ begin
   ident1:= getident;
   if (token^.kind = tk_name) and (ident1 < 0) then begin
    startident(aparser);
-   while checkoperator('.') do begin
+   while checkoperator(aseparator) do begin
     ident1:= getident;
     if (token^.kind = tk_name) and (ident1 < 0) then begin
      addident(aparser);
@@ -1325,6 +1329,27 @@ begin
   else begin
    result:= false;
   end;
+ end;
+end;
+
+function tdeflist.addidents(const aparser: tparser;
+                                    const aseparator: char): boolean;
+var
+ ident1: integer;
+begin
+ result:= true;
+ with aparser do begin
+  repeat
+   ident1:= getident;
+   if (token^.kind = tk_name) and (ident1 < 0) then begin
+    startident(aparser);
+    endident(aparser);
+   end
+   else begin
+    result:= false;
+    break;
+   end;
+  until not checkoperator(aseparator);
  end;
 end;
 

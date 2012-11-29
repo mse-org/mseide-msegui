@@ -793,7 +793,7 @@ var
  item1: sourceitemty;
 begin
  if adef^.kind in [syk_typedef,syk_vardef,syk_classdef,syk_procdef,syk_procimp,
-                         syk_classprocimp] then begin
+                         syk_classprocimp,syk_interfacedef] then begin
   item1.filename:= adef^.pos.filename;
   item1.startoffset:= adef^.pos.offset;
   item1.endoffset:= adef^.stop1.offset;
@@ -856,7 +856,7 @@ begin
                               po1^.pos.filename),false));
    end;
    syk_typedef,syk_vardef,syk_classdef,syk_procdef,syk_classprocimp,
-                         syk_procimp: begin
+                         syk_procimp,syk_interfacedef: begin
     case infopo^.proglang of
      pl_c: begin
       parsecdef(po1,str1,list1);
