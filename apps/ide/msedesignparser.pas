@@ -346,7 +346,7 @@ type
     function addidentpath(const aparser: tparser;
                                     const aseparator: char): boolean;
     function addidents(const aparser: tparser;
-                                    const aseparator: char): boolean;
+                const aseparator: char; const apathseparator: char): boolean;
 
     function find(const aname: string;
                      const akind: symbolkindty = syk_none): pdefinfoty;
@@ -1333,10 +1333,14 @@ begin
 end;
 
 function tdeflist.addidents(const aparser: tparser;
-                                    const aseparator: char): boolean;
+                  const aseparator: char; const apathseparator: char): boolean;
 var
  ident1: integer;
 begin
+ repeat
+  result:= addidentpath(aparser,apathseparator);
+ until not result or not aparser.checkoperator(aseparator);
+{
  result:= true;
  with aparser do begin
   repeat
@@ -1351,6 +1355,7 @@ begin
    end;
   until not checkoperator(aseparator);
  end;
+}
 end;
 
 function tdeflist.finddef(const anamepath: stringarty; var scopes: deflistarty;

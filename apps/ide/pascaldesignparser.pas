@@ -241,14 +241,14 @@ begin
        end;
        syk_classdef: begin
         if checkoperator('=') and checkident(ord(pid_class)) and checkoperator('(') then begin
-         scope.addidents(parser,',');
+         scope.addidents(parser,',','.');
 //         doaddidents;
         end;
        end;
        syk_interfacedef: begin
         if checkoperator('=') and checkident(ord(pid_interface))
                                    and checkoperator('(') then begin
-         scope.addidents(parser,#0);
+         scope.addidents(parser,#0,'.');
         end;
        end;
       end;
