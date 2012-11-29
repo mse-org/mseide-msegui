@@ -485,7 +485,8 @@ const
  );
 
 procedure gdierror(error: gdierrorty; const text: string = ''); overload;
-procedure gdierror(error: gdierrorty; sender: tobject; text: string = ''); overload;
+procedure gdierror(error: gdierrorty; sender: tobject;
+                                            text: string = ''); overload;
  
 function stringtocolor(value: string): colorty;
 function colortostring(value: colorty): string;
@@ -500,6 +501,8 @@ function makerect(const pos: pointty; const size: sizety): rectty; overload;
                                {$ifdef FPC}inline;{$endif}
 function makesegment(const a,b: pointty): segmentty;
                                {$ifdef FPC}inline;{$endif}
+function makeframe(const left,top,right,bottom: integer): framety;
+                               {$ifdef FPC}inline;{$endif}
 
 function mp(const x,y: integer): pointty; {$ifdef FPC}inline;{$endif}
 function ms(const cx,cy: integer): sizety; {$ifdef FPC}inline;{$endif}
@@ -508,6 +511,8 @@ function mr(const x,y,cx,cy: integer): rectty; overload;
 function mr(const pos: pointty; const size: sizety): rectty; overload;
                                {$ifdef FPC}inline;{$endif}
 function mg(const a,b: pointty): segmentty;
+                               {$ifdef FPC}inline;{$endif}
+function mf(const left,top,right,bottom: integer): framety;
                                {$ifdef FPC}inline;{$endif}
 
 function bottomright(const rect: rectty): pointty; {$ifdef FPC}inline;{$endif}
@@ -921,6 +926,24 @@ function makerect(const pos: pointty; const size: sizety): rectty; overload;
 begin
  result.pos:= pos;
  result.size:= size;
+end;
+
+function makeframe(const left,top,right,bottom: integer): framety;
+                               {$ifdef FPC}inline;{$endif}
+begin
+ result.left:= left;
+ result.top:= top;
+ result.right:= right;
+ result.bottom:= bottom;
+end;
+
+function mf(const left,top,right,bottom: integer): framety;
+                               {$ifdef FPC}inline;{$endif}
+begin
+ result.left:= left;
+ result.top:= top;
+ result.right:= right;
+ result.bottom:= bottom;
 end;
 
 function makesegment(const a,b: pointty): segmentty;
