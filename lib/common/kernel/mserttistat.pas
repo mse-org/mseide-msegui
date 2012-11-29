@@ -897,6 +897,7 @@ end;
 function tcustomrttistat.getobj(out aobj: objectinfoarty): boolean;
 var
  obj1: tobject;
+ int1: integer;
 begin
  obj1:= nil;
  aobj:= nil;
@@ -906,11 +907,16 @@ begin
  if assigned(fongetobjects) then begin
   fongetobjects(self,aobj);
  end;
+ result:= (obj1 <> nil) or (aobj <> nil); 
  if obj1 <> nil then begin
+  for int1:= 0 to high(aobj) do begin
+   if aobj[int1].obj = obj1 then begin
+    exit;
+   end;
+  end;
   setlength(aobj,high(aobj)+2);
   aobj[high(aobj)].obj:= obj1;
  end;
- result:= aobj <> nil; 
 end;
 
 procedure tcustomrttistat.setstatfile(const avalue: tstatfile);

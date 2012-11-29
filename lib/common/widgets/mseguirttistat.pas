@@ -27,10 +27,12 @@ type
    fdialog: twidget;
    fonbeforeedit: notifyeventty;
    fonafteredit: notifyeventty;
+   fediting: boolean;
   public
    function edit: modalresultty;
    property dialogclass: widgetclassty read fdialogclass write fdialogclass;
    property dialog: twidget read fdialog;
+   property editing: boolean read fediting;
   published
    property options: rttistatoptionsty read foptions write foptions default [];
    property ongetdialogclass: getwidgetclassprocty read fongetdialogclass 
@@ -57,6 +59,7 @@ begin
  end;
  if cla1 <> nil then begin
   fdialog:= cla1.create(nil);
+  fediting:= true;
   try
    objtovalues(fdialog);
    if canevent(tmethod(fonbeforeedit)) then begin
@@ -73,6 +76,7 @@ begin
     end;
    end;
   finally
+   fediting:= false;
    freeandnil(fdialog);
   end;
  end;
