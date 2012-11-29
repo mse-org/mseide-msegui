@@ -465,10 +465,13 @@ begin
    else params.kind:= mkprocedure;
   end;
   name:= getorigname;
-  uppername:= uppercase(name);
-  result:= parseprocparams(params.kind,params.params);
+  result:= not checkoperator('.'); //interface proc definition?
   if result then begin
-   intendpos:= sourcepos;
+   uppername:= uppercase(name);
+   result:= parseprocparams(params.kind,params.params);
+   if result then begin
+    intendpos:= sourcepos;
+   end;
   end;
  end;
 end;
