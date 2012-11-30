@@ -35,6 +35,9 @@ type
 
 {$M+} //toptionsclass needs RTTI
  toptionsclass = class(tobject)
+  protected
+   procedure dostatread(const reader: tstatreader); virtual;
+   procedure dostatwrite(const writer: tstatwriter); virtual;
  end;
 
  tcustomrttistat = class(tmsecomponent,istatfile)
@@ -53,17 +56,17 @@ type
   {$endif}
    procedure setstatfile(const avalue: tstatfile);
   protected
+   function getobj(out aobj: objectinfoarty): boolean;
+  {$ifdef mse_with_ifi}
+   function findtarget(const aname: string): tobject;
+   procedure scantargets(const aroot: tcomponent);
+  {$endif}
     //istatfile
    procedure dostatread(const reader: tstatreader); virtual;
    procedure dostatwrite(const writer: tstatwriter); virtual;
    procedure statreading;
    procedure statread;
    function getstatvarname: msestring;
-   function getobj(out aobj: objectinfoarty): boolean;
-  {$ifdef mse_with_ifi}
-   function findtarget(const aname: string): tobject;
-   procedure scantargets(const aroot: tcomponent);
-  {$endif}
   public
    procedure readstat(const areader: tstatreader);
    procedure writestat(const awriter: tstatwriter);
@@ -933,9 +936,13 @@ begin
  if getobj(obj1) then begin
   for int1:= 0 to high(obj1) do begin
    readobjectstat(reader,obj1[int1]);
-   if mseclasses.getcorbainterface(obj1[int1].obj,typeinfo(istatfile),
-                                                           intf1) then begin
-    intf1.dostatread(reader);
+   with obj1[int1] do begin
+    if mseclasses.getcorbainterface(obj,typeinfo(istatfile),intf1) then begin
+     intf1.dostatread(reader);
+    end;
+    if obj is toptionsclass then begin
+     toptionsclass(obj).dostatread(reader);
+    end;
    end;
   end;
  end;
@@ -955,11 +962,16 @@ var
 begin
  if getobj(obj1) then begin
   for int1:= 0 to high(obj1) do begin
-   writeobjectstat(writer,obj1[int1]);
-   if mseclasses.getcorbainterface(obj1[int1].obj,typeinfo(istatfile),
-                                                             intf1) then begin
-    intf1.dostatwrite(writer);
+   with obj1[int1] do begin
+    if obj is toptionsclass then begin
+     toptionsclass(obj).dostatwrite(writer);
+    end;
+    if mseclasses.getcorbainterface(obj1[int1].obj,typeinfo(istatfile),
+                                                              intf1) then begin
+     intf1.dostatwrite(writer);
+    end;
    end;
+   writeobjectstat(writer,obj1[int1]);
   end;
  end;
  if assigned(fonstatupdate) then begin
@@ -1055,5 +1067,17 @@ end;
 {$endif}
 
 { trttistat }
+
+{ toptionsclass }
+
+procedure toptionsclass.dostatread(const reader: tstatreader);
+begin
+ //dummy
+end;
+
+procedure toptionsclass.dostatwrite(const writer: tstatwriter);
+begin
+ //dummy
+end;
 
 end.
