@@ -194,6 +194,7 @@ begin
      input.write(todata);
     except
     end;
+    input.close;
    end;
    if atimeout < 0 then begin
     result:= waitforprocess;
