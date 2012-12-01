@@ -15,7 +15,7 @@ interface
 uses
  msegrids,Classes,msestream,mseclasses,msepipestream,mseevent,mseinplaceedit,
  msetextedit,msestrings,msesys,mseeditglob,msemenus,msegui,mseguiglob,
- mseprocess,msegridsglob,mseedit,mseglob;
+ mseprocess,msegridsglob,mseedit,mseglob,msewidgetgrid;
 type
  sendtexteventty = procedure(const sender: tobject; 
                        var atext: msestring; var donotsend: boolean) of object;
@@ -34,7 +34,7 @@ type
 // terminalstatesty = set of terminalstatety;
  
  
- tterminal = class(tcustomtextedit)
+ tterminal = class(tcustomtextedit,igridwidget)
   private
    foninputpipebroken: notifyeventty;
    fonerrorpipebroken: notifyeventty;
@@ -66,6 +66,8 @@ type
    procedure setprompt(const avalue: msestring);
   protected
    fprocess: tmseprocess;
+   procedure setreadonly1(const avalue: boolean);
+   procedure igridwidget.setreadonly = setreadonly1;
    procedure setreadonly(const avalue: boolean); override;
    procedure doinputavailable(const sender: tpipereader);
    procedure dopipebroken(const sender: tpipereader);
@@ -802,6 +804,11 @@ begin
   options:= options - [teo_readonly];
  end;
  inherited;
+end;
+
+procedure tterminal.setreadonly1(const avalue: boolean);
+begin
+ //dummy for igridwidget
 end;
 
 end.
