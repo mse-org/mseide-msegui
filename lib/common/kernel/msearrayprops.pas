@@ -252,9 +252,9 @@ type
   private                     //same layout as tpointerarrayprop!
   protected
    fitems: persistentarty;    //same layout as tintegerarrayprop!
+   fdestroyingitem: tpersistent;
    fitemclasstype: virtualpersistentclassty;
    fobjectlinker: tobjectlinker;
-
    function _addref: integer; stdcall;
    function _release: integer; stdcall;
    function QueryInterface(const IID: TGUID; out Obj): HResult; stdcall;
@@ -290,6 +290,7 @@ type
   public
    constructor create(aitemclasstype: virtualpersistentclassty); reintroduce;
    destructor destroy; override;
+   procedure itemdestroyed(const aitem: tpersistent);
    procedure assign(source: tpersistent); override;
    function propkind: arraypropkindty; override;
    function displayname(const index: integer): msestring; virtual;
@@ -1493,15 +1494,19 @@ procedure tpersistentarrayprop.setcount1(acount: integer; doinit: boolean);
 var
  {lengthvorher,}int1: integer;
  ar1: persistentarty;
+ pers1: tpersistent;
 begin
  checkcount(acount);
  int1:= length(fitems) - acount;
  if int1 > 0 then begin
+  pers1:= fdestroyingitem;
   ar1:= copy(fitems,acount,int1);
   setlength(fitems,acount); //return new count
   for int1:= high(ar1) downto 0 do begin
+   fdestroyingitem:= ar1[int1];
    ar1[int1].free;
   end;
+  fdestroyingitem:= pers1;
  end
  else begin
   setlength(fitems,acount);
@@ -1802,6 +1807,16 @@ end;
 function tpersistentarrayprop.getcollectionname(const index: integer): string;
 begin
  result:= '';
+end;
+
+procedure tpersistentarrayprop.itemdestroyed(const aitem: tpersistent);
+begin
+ if not (aps_destroying in fstate) and (aitem <> fdestroyingitem) then begin
+  if removeitem(pointerarty(fitems),aitem) >= 0 then begin
+   change(-1);
+   dosizechanged;
+  end;
+ end;
 end;
 
 { townedpersistentarrayprop }

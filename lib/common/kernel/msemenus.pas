@@ -783,6 +783,9 @@ begin
 // if fsubmenu <> nil then begin
 //  fsubmenu.count:= 0;
 // end;
+ if (fparentmenu <> nil) then begin
+  fparentmenu.fsubmenu.itemdestroyed(self);
+ end;
  fsubmenu.free;
  if (fowner = nil) or not fowner.ftransient then begin
   ffont.free;
