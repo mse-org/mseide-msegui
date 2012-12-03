@@ -3790,6 +3790,9 @@ begin
  rea2:= 1-startmargin-endmargin;
  rea1:= max-min;
  if log then begin
+  if min <= 0 then begin
+   min:= max/100;
+  end;
   if (min > 0) and (max > 0) and (rea1 > 0) and (rea2 > 0.01) then begin
    logmin:= ln(min);
    logmax:= ln(max);
