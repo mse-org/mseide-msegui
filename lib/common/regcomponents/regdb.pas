@@ -150,16 +150,12 @@ implementation
 uses
  dbconst,db,mseibconnection,
  msepqconnection,mseodbcconn,{sqldb,}
- mselookupbuffer,msedbf,msesdfdata,msememds,mselocaldataset,
+ mselookupbuffer,mselocaldataset,
  msearrayutils,msedbfieldeditor,sysutils,msetexteditor,
  msedbdispwidgets,msedbgraphics,regdb_bmp,msedbdialog,msegrids,
  msedbcalendardatetimeedit,
  regwidgets,msebufdataset,msedbevents,msesqlite3conn,msqldb,msemysqlconn,
- msedblookup
- {$ifdef mse_with_sqlite}
- ,msesqlite3ds
- {$endif}
- ;
+ msedblookup;
 
 type
  tpropertyeditor1 = class(tpropertyeditor);
@@ -314,10 +310,6 @@ begin
       tmsesqltransaction,tmsesqlquery,
       tlocaldataset,
       
-      tmsedbf,tmsefixedformatdataset,tmsesdfdataset,tmsememdataset,
-     {$ifdef mse_with_sqlite}
-      tmsesqlite3dataset,
-     {$endif}
       tmsedatasource,
 
       tsqlstatement,tmsesqlscript,tsqlresult,

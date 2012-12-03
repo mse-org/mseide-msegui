@@ -23,14 +23,25 @@ implementation
 uses
  regdeprecated_bmp,msedesignintf
     {$ifdef hasdb}
-     ,msemysql40conn,msemysql41conn,msemysql50conn
+     ,msemysql40conn,msemysql41conn,msemysql50conn,
+     msedbf,msesdfdata,msememds
+     {$ifdef mse_with_sqlite}
+     ,msesqlite3ds
+     {$endif}
     {$endif};
 
 procedure Register;
 begin
- registercomponents('Depr',[{$ifdef hasdb}
-    tmsemysql40connection,tmsemysql41connection,tmsemysql50connection
-                            {$endif}]);
+ registercomponents('Depr',[
+   {$ifdef hasdb}
+    tmsemysql40connection,tmsemysql41connection,tmsemysql50connection,
+      tmsedbf,tmsefixedformatdataset,tmsesdfdataset,tmsememdataset,
+     {$ifdef mse_with_sqlite}
+      tmsesqlite3dataset
+     {$endif}
+    
+   {$endif}
+                         ]);
  registercomponenttabhints(['Depr'],['Deprecated components']);
 end;
 

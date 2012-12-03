@@ -1334,8 +1334,8 @@ end;
 
 function tdeflist.addidents(const aparser: tparser;
                   const aseparator: char; const apathseparator: char): boolean;
-var
- ident1: integer;
+//var
+// ident1: integer;
 begin
  repeat
   result:= addidentpath(aparser,apathseparator);
