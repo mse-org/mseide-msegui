@@ -35,9 +35,9 @@ begin
  registercomponents('Depr',[
    {$ifdef hasdb}
     tmsemysql40connection,tmsemysql41connection,tmsemysql50connection,
-      tmsedbf,tmsefixedformatdataset,tmsesdfdataset,tmsememdataset,
+      tmsedbf,tmsefixedformatdataset,tmsesdfdataset,tmsememdataset
      {$ifdef mse_with_sqlite}
-      tmsesqlite3dataset
+      ,tmsesqlite3dataset
      {$endif}
     
    {$endif}
