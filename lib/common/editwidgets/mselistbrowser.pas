@@ -3576,8 +3576,11 @@ var
 begin
  wi1:= editwidget;
  if wi1 <> nil then begin
-  wi1.gridrow:= findex;
-  wi1.activate;
+  with wi1.widgetcol do begin;
+   grid.focuscell(mgc(index,self.findex));
+   grid.activate;
+  end;
+//  wi1.activate;
  end;
 end;
 
