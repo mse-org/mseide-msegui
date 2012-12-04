@@ -359,6 +359,8 @@ type
          const pos: graphicdirectionty): tmenuitem; overload;
    function show(const atransientfor: twidget;
            var mouseinfo: mouseeventinfoty): tmenuitem; overload;
+   function show(const atransientfor: twidget;
+           const pos: pointty): tmenuitem; overload;
                             //returns selected item, nil if none
    class function additems(var amenu: tpopupmenu; const atransientfor: twidget;
                  var mouseinfo: mouseeventinfoty;
@@ -1879,6 +1881,19 @@ begin
  finally
   ftransientfor:= nil;
   fmouseinfopo:= nil;
+ end;
+end;
+
+function tpopupmenu.show(const atransientfor: twidget;
+           const pos: pointty): tmenuitem; overload;
+begin
+ ftransientfor:= atransientfor;
+ try
+  doupdate;
+  result:= showpopupmenu(fmenu,ftransientfor,pos,self);
+  checkexec;
+ finally
+  ftransientfor:= nil;
  end;
 end;
 

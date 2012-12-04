@@ -1805,6 +1805,7 @@ type
    fonrowsmoving: gridblockmovingeventty;
 {$ifdef mse_with_ifi}
    fifilink: tifigridlinkcomp;
+   fonrowsmodified: notifyeventty;
    procedure ifirowchange;
    function getifilinkkind: ptypeinfo;
    procedure setifilink(const avalue: tifigridlinkcomp);
@@ -1995,6 +1996,7 @@ type
    procedure dorowsinserted(const index,count: integer); virtual;
    procedure dorowsdeleting(var index,count: integer); virtual;
    procedure dorowsdeleted(index,count: integer); virtual;
+   procedure dorowsmodified;
    procedure dorowsdatachanged(const acell: gridcoordty; 
                                            const acount: integer); virtual;
    procedure dorowcountchanged(const countbefore,newcount: integer); virtual;
@@ -2367,6 +2369,9 @@ type
               write fonrowsdeleting;
    property onrowsdeleted: gridblockeventty read fonrowsdeleted
               write fonrowsdeleted;
+   property onrowsmodified: notifyeventty read fonrowsmodified 
+                                              write fonrowsmodified;
+             //called if user deletes, inserts or moves rows
 
    property onsort: gridsorteventty read fonsort write fonsort;
    property onsortchanged: gridnotifyeventty read fonsortchanged 
@@ -2452,6 +2457,7 @@ type
    property onrowsinserted;
    property onrowsdeleting;
    property onrowsdeleted;
+   property onrowsmodified;
    property onscrollrows;
    property ongetmorerows;
    property oncellevent;
@@ -2585,6 +2591,7 @@ type
    property onrowsinserted;
    property onrowsdeleting;
    property onrowsdeleted;
+   property onrowsmodified;
    property onscrollrows;
    property ongetmorerows;
    property oncellevent;
@@ -13378,7 +13385,7 @@ begin
  //   cellkind:= 
     cellatpos(makepoint(fdatarect.x,apos.y),cell1);
     if (cell1.row >= 0) and (cell.row <> cell1.row) then begin
-     moverow(cell.row,cell1.row);
+     moverow(cell.row,cell1.row,1,true);
     end
     else begin
     end;
@@ -14136,6 +14143,7 @@ begin
  if canevent(tmethod(fonrowsmoved)) then begin
   fonrowsmoved(self,fromindex,toindex,count);
  end;
+ dorowsmodified;
 end;
 
 procedure tcustomgrid.dorowsinserting(var index, count: integer);
@@ -14151,6 +14159,7 @@ begin
   fonrowsinserted(self,index,count);
  end;
  dorowsdatachanged(makegridcoord(invalidaxis,index),count);
+ dorowsmodified;
 end;
 
 procedure tcustomgrid.dorowsdeleting(var index, count: integer);
@@ -14165,6 +14174,7 @@ begin
  if canevent(tmethod(fonrowsdeleted)) then begin
   fonrowsdeleted(self,index,count);
  end;
+ dorowsmodified;
 end;
 
 class function tcustomgrid.classskininfo: skininfoty;
@@ -15572,6 +15582,13 @@ end;
 function tcustomgrid.userinput: boolean;
 begin
  result:= gs1_userinput in fstate1;
+end;
+
+procedure tcustomgrid.dorowsmodified;
+begin
+ if userinput and canevent(tmethod(fonrowsmodified)) then begin
+  fonrowsmodified(self);
+ end;
 end;
 
 { tdrawgrid }

@@ -388,6 +388,7 @@ type
    property onrowsinserted;
    property onrowsdeleting;
    property onrowsdeleted;
+   property onrowsmodified;
    property onscrollrows;
    property ongetmorerows;
    property oncellevent;
