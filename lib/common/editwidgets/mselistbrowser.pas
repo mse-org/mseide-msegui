@@ -2899,7 +2899,7 @@ begin
      end;
     end
     else begin
-     inherited;
+//     inherited;
      editing:= false;
      include(eventstate,es_processed);
     end;
