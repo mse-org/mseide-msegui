@@ -4328,7 +4328,8 @@ function tcustomscrollboxframe.isdragstart(const sender: twidget;
 begin
  with info do begin
   result:= (oscr_drag in foptionsscroll) and 
-            (eventkind = ek_buttonpress) and (shiftstate = [ss_middle]) and
+            (eventkind = ek_buttonpress) and 
+            (shiftstate*buttonshiftstatesmask = [ss_middle]) and
              pointinrect(translatewidgetpoint(pos,sender,fowner),fpaintrect) and 
                ((fclientrect.cx <> fpaintrect.cx) or 
                      (fclientrect.cx <> fpaintrect.cx));
