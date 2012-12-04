@@ -10416,7 +10416,8 @@ var
       if rowfocus then begin
        cell1.col:= mergestart(ffocusedcell.col,cell1.row); 
                                            //try to focus mouse row
-       if (cell1.col < 0) or (co_nofocus in fdatacols[cell1.col].options) then begin
+       if (cell1.col < 0) or 
+                       (co_nofocus in fdatacols[cell1.col].options) then begin
         cell1.col:= nextfocusablecol(0,false,cell1.row,false);
        end;
       end

@@ -3563,11 +3563,18 @@ begin
 end;
 
 function ttreelistedititem.editwidget: ttreeitemedit;
+var
+ node1: ttreelistedititem;
 begin
  result:= nil;
- if fowner <> nil then begin
-  result:= ttreeitemedit(ttreeitemeditlist(fowner).fowner);
- end;
+ node1:= self;
+ repeat 
+  if node1.fowner <> nil then begin
+   result:= ttreeitemedit(ttreeitemeditlist(node1.fowner).fowner);
+   break;
+  end;
+  node1:= ttreelistedititem(node1.parent);
+ until not (node1 is ttreelistedititem);
 end;
 
 procedure ttreelistedititem.activate;
@@ -3576,6 +3583,7 @@ var
 begin
  wi1:= editwidget;
  if wi1 <> nil then begin
+  rootexpanded:= true;
   with wi1.widgetcol do begin;
    grid.focuscell(mgc(index,self.findex));
    grid.activate;
