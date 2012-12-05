@@ -95,6 +95,7 @@ type
    function checkclickstate(const info: mouseeventinfoty): boolean; virtual;
    function checksysdnd(const aaction: sysdndactionty;
                                    const arect: rectty): boolean; virtual;
+   function canbegindrag: boolean; virtual;
     //ievent
    procedure receiveevent(const aevent: tobjectevent); virtual;
   public
@@ -329,10 +330,12 @@ begin
       (fdragobject = nil) and not pointinrect(info.pos,fpickrect)
       {(distance(info.pos,fpickpos) > mindragdist)} then begin
      include(fstate,ds_beginchecked);
-     application.registeronkeypress({$ifdef FPC}@{$endif}dokeypress);
-     initdraginfo(draginfo,dek_begin,fpickpos);
-     owner.dragevent(draginfo);
-     checksysdnd(sdnda_begin,nullrect);
+     if canbegindrag then begin
+      application.registeronkeypress({$ifdef FPC}@{$endif}dokeypress);
+      initdraginfo(draginfo,dek_begin,fpickpos);
+      owner.dragevent(draginfo);
+      checksysdnd(sdnda_begin,nullrect);
+     end;
     end;
     if (fdragobject <> nil) then begin
      include(fstate,ds_haddragobject);
@@ -416,6 +419,11 @@ begin
    end;
   end;
  end;
+end;
+
+function tcustomdragcontroller.canbegindrag: boolean;
+begin
+ result:= true;
 end;
 
 { tdragcontroller }

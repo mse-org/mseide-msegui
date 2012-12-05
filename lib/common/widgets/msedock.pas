@@ -305,6 +305,7 @@ type
    procedure readchildrencount(const acount: integer);
    procedure readchild(const index: integer; const avalue: msestring);
    procedure receiveevent(const aevent: tobjectevent); override;
+   function canbegindrag: boolean; override;
 
   public
    constructor create(aintf: idockcontroller);
@@ -2863,6 +2864,11 @@ end;
 function tdockcontroller.doclose(const awidget: twidget): boolean;
 begin
  result:= simulatemodalresult(awidget,mr_windowclosed);
+end;
+
+function tdockcontroller.canbegindrag: boolean;
+begin
+ result:= fdockstate * [dos_moving,dos_sizing,dos_xorpic] = [];
 end;
 
 procedure tdockcontroller.clientmouseevent(var info: mouseeventinfoty);
