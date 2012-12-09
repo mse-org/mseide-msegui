@@ -1638,7 +1638,7 @@ function tcustombufstream.getbufpo: pchar;
 var
  int1: integer;
 begin
- if bufoffset = nil then begin
+ if (bufoffset = nil) or (bufoffset = bufend) then begin
   int1:= readbytes(fbuffer^);
   if int1 > 0 then begin
    bufend:= fbuffer + int1;
