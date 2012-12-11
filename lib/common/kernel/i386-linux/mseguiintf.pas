@@ -313,7 +313,7 @@ const
  pixel0 = $000000;
  pixel1 = $ffffff;
 type
-  Bool = integer;
+  Bool = cint;
   XID = type culong;
   TXICCEncodingStyle = (XStringStyle,XCompoundTextStyle,XTextStyle,
      XStdICCTextStyle,XUTF8StringStyle);
@@ -336,6 +336,8 @@ function msevisual: pvisual;
 function mserootwindow(id: winidty = 0): winidty;
 function msedefaultscreen: pscreen;
 function msedefaultscreenno: integer;
+
+{$PACKRECORDS C}
 
 type
  _XIM = record end;
@@ -374,13 +376,13 @@ type
 *)  
   PXWMHints = ^XWMHints;
   XWMHints = record
-    flags: Longint;  { marks which fields in this structure are defined  }
+    flags: clong;  { marks which fields in this structure are defined  }
     input: Bool;     { does this application rely on the window manager to get keyboard input?  }
     initial_state: Longint;  { see below  }
     icon_pixmap: xid;     { pixmap to be used as icon  }
     icon_window: xid;     { window to be used as icon  }
-    icon_x: Longint;         { initial position of icon  }
-    icon_y: Longint;
+    icon_x: cint;         { initial position of icon  }
+    icon_y: cint;
     icon_mask: xid;       { icon mask bitmap  }
     window_group: XID;       { id of related window group }
     { this structure may be extended in the future  }
@@ -1679,8 +1681,20 @@ begin
  with hints^ do begin
   icon_pixmap:= icon;
   icon_mask:= mask;
-  updatebit(longword(flags),2,icon <> 0); //iconpixmaphint
-  updatebit(longword(flags),5,mask <> 0); //iconmaskhint
+  if icon <> 0 then begin
+   flags:= flags or (1 shl 2);           //iconpixmaphint
+  end
+  else begin
+   flags:= flags and not(1 shl 2);
+  end;
+  if mask <> 0 then begin
+   flags:= flags or (1 shl 5);           //iconmaskhint
+  end
+  else begin
+   flags:= flags and not(1 shl 5);
+  end;
+//  updatebit(culong(flags),2,icon <> 0); //iconpixmaphint
+//  updatebit(culong(flags),5,mask <> 0); //iconmaskhint
  end;
  xsetwmhints(appdisp,id,hints);
  xfree(hints);
