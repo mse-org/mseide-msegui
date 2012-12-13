@@ -20,20 +20,36 @@ unit messageform;
 
 interface
 uses
- msegui,mseclasses,mseforms,msegrids,msemenus,msedataedits,msesimplewidgets;
+ msegui,mseclasses,mseforms,msegrids,msemenus,msedataedits,msesimplewidgets,
+ classes,projectoptionsform;
 
 type
  tmessagefo = class(tdockform)
    messages: tstringgrid;
    tpopupmenu1: tpopupmenu;
-   procedure messagesoncellevent(const sender: tobject; var info: celleventinfoty);
+   procedure messagesoncellevent(const sender: tobject;
+                                                   var info: celleventinfoty);
    procedure copyexe(const sender: TObject);
+  private
+   fcolorrow: integer;
+  public
+   constructor create(aowner: tcomponent); override;
+   procedure addtext(const atext: string);
+   procedure updateprojectoptions;
  end;
+ 
 var
  messagefo: tmessagefo;
+
 implementation
 uses
  messageform_mfm,sourcepage,sourceform,msewidgets,msestrings;
+
+constructor tmessagefo.create(aowner: tcomponent);
+begin
+ fcolorrow:= -1;
+ inherited;
+end;
  
 procedure tmessagefo.messagesoncellevent(const sender: tobject;
   var info: celleventinfoty);
@@ -49,6 +65,50 @@ end;
 procedure tmessagefo.copyexe(const sender: TObject);
 begin
  copytoclipboard(messages.datacols[0].datalist.concatstring('',lineend));
+end;
+
+procedure tmessagefo.addtext(const atext: string);
+var
+ int1,int2: integer;
+ lev1: errorlevelty;
+ col1,row1: integer;
+ fn1: filenamety;
+begin
+ with messages do begin
+  int1:= datacols[0].readpipe(atext,true,120);
+  int2:= rowhigh-int1;
+  if int2 < 0 then begin
+   int2:= 0;
+  end;
+  with messages[0] do begin
+   for int1:= rowhigh downto int2 do begin
+    if checkerrormessage(items[int1],lev1,fn1,col1,row1) then begin
+     case lev1 of
+      el_error: begin
+       rowcolorstate[int1]:= 0;
+      end;
+      el_warning: begin
+       rowcolorstate[int1]:= 1;
+      end;
+      el_note: begin
+       rowcolorstate[int1]:= 2;
+      end;
+     end;
+    end;
+   end;
+  end;
+  showlastrow;
+ end;  
+end;
+
+procedure tmessagefo.updateprojectoptions;
+begin
+ with messages,projectoptions.o do begin
+  rowcolors[0]:= colorerror;
+  rowcolors[1]:= colorwarning;
+  rowcolors[2]:= colornote;
+  invalidate;
+ end;
 end;
 
 end.

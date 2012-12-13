@@ -1,5 +1,7 @@
 MSEide+MSEgui breaking changes version history
 
+2012-12-13
+ tpoorstringdatalist.addchars() returns added rowcount instead of rowindex.
 2012-11-25
  tpopupmenu.additems() aseparator parameter removed, use tcustommenu.options
  oe_noseparator.

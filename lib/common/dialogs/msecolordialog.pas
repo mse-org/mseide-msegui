@@ -224,10 +224,15 @@ end;
 { tcolordropdowncontroller }
 
 constructor tcolordropdowncontroller.create(const intf: idropdownlist);
+var
+ int1: integer;
 begin
  inherited;
  valuelist.asarray:= getcolornames;
  fcolorvalues:= getcolorvalues;
+ for int1:= 0 to high(fcolorvalues) do begin
+  fcolorvalues[int1]:= colorty(colortorgb(fcolorvalues[int1]));
+ end;
  options:= [deo_autodropdown,deo_keydropdown];
 end;
 

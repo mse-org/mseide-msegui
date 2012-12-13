@@ -173,15 +173,15 @@ const
  defaultfunctional: array[0..functionalcolorcount-1]
                      of colorinfoty =
    (
-    (name: 'cl_invalid';  rgb:               (blue: $00; green: $00; red: $00; res: $00)), //0
-    (name: 'cl_default'; rgb:                (blue: $00; green: $00; red: $00; res: $00)), //1
-    (name: 'cl_parent';  rgb:                (blue: $00; green: $00; red: $00; res: $00)), //2
-    (name: 'cl_transparent'; rgb:            (blue: $00; green: $00; red: $00; res: $00)), //3
-    (name: 'cl_brush';  rgb:                 (blue: $00; green: $00; red: $00; res: $00)), //4
-    (name: 'cl_brushcanvas'; rgb:            (blue: $00; green: $00; red: $00; res: $00)), //5
-    (name: 'cl_none';  rgb:                  (blue: $00; green: $00; red: $00; res: $00)), //6
-    (name: 'cl_font';  rgb:                  (blue: $00; green: $00; red: $00; res: $00)), //7
-    (name: 'cl_normal';  rgb:                (blue: $00; green: $00; red: $00; res: $00))  //8
+    (name: 'cl_invalid';  rgb:               (blue: $ff; green: $ff; red: $ff; res: $00)), //0
+    (name: 'cl_default'; rgb:                (blue: $ff; green: $ff; red: $ff; res: $00)), //1
+    (name: 'cl_parent';  rgb:                (blue: $ff; green: $ff; red: $ff; res: $00)), //2
+    (name: 'cl_transparent'; rgb:            (blue: $ff; green: $ff; red: $ff; res: $00)), //3
+    (name: 'cl_brush';  rgb:                 (blue: $ff; green: $ff; red: $ff; res: $00)), //4
+    (name: 'cl_brushcanvas'; rgb:            (blue: $ff; green: $ff; red: $ff; res: $00)), //5
+    (name: 'cl_none';  rgb:                  (blue: $ff; green: $ff; red: $ff; res: $00)), //6
+    (name: 'cl_font';  rgb:                  (blue: $ff; green: $ff; red: $ff; res: $00)), //7
+    (name: 'cl_normal';  rgb:                (blue: $ff; green: $ff; red: $ff; res: $00))  //8
 //    (name: 'cl_mask'; rgb:                   (blue: $00; green: $00; red: $00; res: $00))
 //    (name: 'cl_grayed'; rgb:                 (blue: $80; green: $80; red: $80; res: $00))
    );
@@ -800,11 +800,6 @@ begin
  for int1:= cl_nonenum+1 to functionalcolorcount-1 do begin
   result[int1+int2]:= cl_functional + longword(int1);
  end;
- {
- for int1:= cl_nonenum + 1 to high(defaultfunctional) do begin
-  result[int1+int2-1]:= cl_functional + longword(int1);
- end;
- }
  inc(int2,functionalcolorcount-1);
  for int1:= 0 to high(defaultuser) do begin
   result[int1+int2]:= cl_user + longword(int1);

@@ -4494,11 +4494,13 @@ var
  first: pmsestring;
  mstr1: msestring; 
 begin
+ result:= 0;
  ar1:= nil; //compilerwarning
  if value <> '' then begin
   ar1:= breaklines(value);
   if fcount = 0 then begin
    count:= 1;
+   inc(result);
   end;
   int1:= fcount - 1;
   int2:= int1;
@@ -4517,9 +4519,10 @@ begin
   end
   else begin
    ar1[0]:= first^ + ar1[0];
-   for int1:= 1 to high(ar1) do begin
-    add(ar1[int1]);
-   end;
+//   for int1:= 1 to high(ar1) do begin
+//    add(ar1[int1]);
+//    inc(result);
+//   end;
   end;
   if maxchars <> 0 then begin
    int2:= 0;
@@ -4558,21 +4561,19 @@ begin
   end;
   setlength(ar3,length(ar1));
   setlength(ar4,length(ar1));
+  first^:= ar1[0];
   if high(ar1) > 0 then begin
    beginupdate;
-  end;
-  first^:= ar1[0];
-  for int1:= 1 to high(ar1) do begin
-   add(ar1[int1],ar3[int1] and not ar4[int1]);
-  end;
-  if high(ar1) > 0 then begin
+   result:= result + high(ar1);
+   for int1:= 1 to high(ar1) do begin
+    add(ar1[int1],ar3[int1] and not ar4[int1]);
+   end;
    endupdate;
   end
   else begin
    change(fcount-1);
   end;
  end;
- result:= fcount-1;
 end;
 
 {

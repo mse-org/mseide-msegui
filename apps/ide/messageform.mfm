@@ -67,14 +67,19 @@ object messagefo: tmessagefo
     datacols.items = <    
       item
         linecolorfix = -1610612733
-        colorfocused = 16777088
         width = 3000
-        options = [co_readonly, co_leftbuttonfocusonly, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_cancopy, co_mousescrollrow]
+        options = [co_readonly, co_drawfocus, co_leftbuttonfocusonly, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_cancopy, co_mousescrollrow]
         optionsedit = []
         valuefalse = '0'
         valuetrue = '1'
       end>
     rowcountmax = 5000
+    rowcolors.count = 3
+    rowcolors.items = (
+      -1610612712
+      -1610612717
+      -1610612716
+    )
     datarowlinewidth = 0
     datarowheight = 16
     oncellevent = messagesoncellevent

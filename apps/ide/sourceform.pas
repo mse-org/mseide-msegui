@@ -156,11 +156,13 @@ type
    property sourcehintwidget: twidget read fsourcehintwidget write setsourcehintwidget;
  end;
 
-  errorlevelty = (el_none,el_all,el_note,el_hint,el_warning,el_error);
+  errorlevelty = (el_none,el_all,el_hint,el_note,el_warning,el_error);
 
 var
  sourcefo: tsourcefo;
 
+function checkerrormessage(const text: msestring; out alevel: errorlevelty;
+           out afilename: filenamety; out col,row: integer): boolean;
 function locateerrormessage(const text: msestring; var apage: tsourcepage;
                    minlevel: errorlevelty = el_all): boolean;
          //true if valid errormessage
@@ -175,6 +177,116 @@ uses
 type
  tsourcepage1 = class(tsourcepage);
 
+function checkerrormessage(const text: msestring; out alevel: errorlevelty;
+           out afilename: filenamety; out col,row: integer): boolean;
+var
+ ar1,ar2,ar3: msestringarty;
+ int1: integer;
+begin
+ result:= false;
+ col:= 0;
+ row:= 0;
+ alevel:= el_none;
+ splitstring(text,ar1,msechar('('));
+ if length(ar1) > 1 then begin         //try FPC
+  splitstring(ar1[1],ar2,msechar(')'));
+  if length(ar2) > 1 then begin
+   splitstring(ar2[0],ar3,msechar(','));
+   if (high(ar3) >= 0) then begin
+    if startsstr(' Error:',ar2[1]) or startsstr(' Fatal:',ar2[1]) then begin
+     alevel:= el_error;
+    end
+    else begin
+     if startsstr(' Warning:',ar2[1]) then begin
+      alevel:= el_warning;
+     end
+     else begin
+      if startsstr(' Note:',ar2[1]) then begin
+       alevel:= el_note;
+      end
+      else begin
+       if startsstr(' Hint:',ar2[1]) then begin
+        alevel:= el_hint;
+       end;
+      end;
+     end;
+    end;
+    if alevel <> el_none then begin
+     if trystrtointmse(ar3[0],row) then begin
+      dec(row);
+      if high(ar3) >= 1 then begin
+       if trystrtointmse(ar3[1],col) then begin
+        dec(col);
+        result:= true;
+       end;
+      end
+      else begin
+       result:= true;
+      end;
+      if result then begin
+       afilename:= ar1[0];
+      end;
+     end;
+    end;
+   end;
+  end;
+ end;
+ if (alevel = el_none) and not result then begin
+  ar1:= nil;
+  ar2:= nil;
+  splitstring(text,ar1,msechar(':'));
+  if high(ar1) > 2 then begin
+   for int1:= 2 to 3 do begin
+    ar1[int1]:= struppercase(ar1[int1]);
+   end;
+   if (ar1[2] = ' ERROR') or (ar1[3] = ' ERROR') then begin
+    alevel:= el_error;
+   end
+   else begin
+    if (ar1[2] = ' WARNING') or (ar1[3] = ' WARNING') then begin
+     alevel:= el_warning;
+    end
+    else begin
+     if (ar1[2] = ' HINT') or (ar1[3] = ' HINT') then begin
+      alevel:= el_hint;
+     end
+     else begin
+      alevel:= el_all;
+     end;
+    end;
+   end;
+   if alevel <> el_none then begin
+    if trystrtointmse(ar1[1],row) then begin
+     dec(row);
+     if trystrtointmse(ar1[2],col) then begin
+      dec(col);
+     end
+     else begin
+      col:= 0;
+     end;
+     afilename:= ar1[0];
+     result:= true;
+    end;
+   end;
+  end; 
+ end;
+end;
+
+function locateerrormessage(const text: msestring; var apage: tsourcepage;
+              minlevel: errorlevelty = el_all): boolean;
+var
+ lev1: errorlevelty;
+ col1,row1: integer;
+ fna1: filenamety;
+begin
+ apage:= nil;
+ result:= checkerrormessage(text,lev1,fna1,col1,row1);
+ if result and (fna1 <> '') and (lev1 >= minlevel) then begin
+  apage:= sourcefo.showsourceline(objpath(fna1),row1,col1,true);
+ end;
+end;
+
+(*
 function locateerrormessage(const text: msestring; var apage: tsourcepage;
               minlevel: errorlevelty = el_all): boolean;
 var
@@ -228,23 +340,11 @@ begin
        apage:= sourcefo.showsourceline(objpath(ar1[0]),row,col,true);
       end;
      end;
-    {
-     try
-      row:= strtoint(ar3[0]) - 1;
-      if high(ar3) >= 1 then begin
-       col:= strtoint(ar3[1]) - 1;
-      end;
-      apage:= sourcefo.showsourceline(objpath(ar1[0]),row,col,true);
-      result:= true;
-     except
-     end;
-    }
     end;
    end;
   end;
  end;
  if (alevel = el_all) and not result then begin
-  // try gcc
   ar1:= nil;
   ar2:= nil;
   splitstring(text,ar1,msechar(':'));
@@ -280,23 +380,11 @@ begin
      apage:= sourcefo.showsourceline(objpath(ar1[0]),row,col,true);
      result:= true;
     end;
-{
-    try
-     result:= true;
-     row:= strtoint(ar1[1]) - 1;
-     try
-      col:= strtoint(ar1[2]) - 1;
-     except
-      col:= 0;
-     end;
-     apage:= sourcefo.showsourceline(objpath(ar1[0]),row,col,true);
-    except
-    end; 
-}
    end;
   end; 
  end;
 end;
+*)
 
 { tnaviglist }
 

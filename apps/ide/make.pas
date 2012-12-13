@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2011 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2012 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -52,17 +52,14 @@ type
    fmessagefile: ttextstream;
    fnofilecopy: boolean;
    ffinished: boolean;
-//   ferrorfinished: boolean;
    fmessagefinished: boolean;
    fsetmakedir: boolean;
    messagepipe: tpipereader;
-//   errorpipe: tpipereader;
   protected
    fcanceled: boolean;
    procid: integer;
    procedure doasyncevent(var atag: integer); override;
    procedure inputavailable(const sender: tpipereader);
-//   procedure errorfinished(const sender: tpipereader);
    procedure messagefinished(const sender: tpipereader);
    procedure dofinished; virtual;
    function getcommandline: ansistring; virtual;
@@ -78,8 +75,6 @@ type
    fscriptpath: filenamety;
   protected
    function getcommandline: ansistring; override;
-//   procedure scriptexe(const sender: tguiapplication; var again: boolean);
-//   procedure scriptcancel(const sender: tobject);
    procedure dofinished; override;
   public
    constructor create(const aowner: tcomponent; const ascriptpath: filenamety;
@@ -186,11 +181,6 @@ begin
   str1:= str3;
   if targetfile <> '' then begin
    str1:= str1 + ' '+quotefilename(targpref+tosysfilepath(targetfile));
-//   str1:= str1 + ' '+quotefilename('-o'+filename(targetfile));
-//   wstr1:= removelastpathsection(targetfile);
-//   if wstr1 <> '' then begin
-//    str1:= str1 + ' '+quotefilename('-FE'+tosysfilepath(wstr1));
-//   end;
   end;
   int2:= high(unitdirs);
   int1:= high(unitdirson);
@@ -264,9 +254,6 @@ begin
   messagepipe:= tpipereader.create;
   messagepipe.oninputavailable:= {$ifdef FPC}@{$endif}inputavailable;
   messagepipe.onpipebroken:= {$ifdef FPC}@{$endif}messagefinished;
-//  errorpipe:= tpipereader.create;
-//  errorpipe.oninputavailable:= {$ifdef FPC}@{$endif}inputavailable;
-//  errorpipe.onpipebroken:= {$ifdef FPC}@{$endif}errorfinished;
   if clearscreen then begin
    messagefo.messages.rowcount:= 0;
   end;
@@ -278,7 +265,6 @@ end;
 
 destructor tprogrunner.destroy;
 begin
-// messagepipe.handle:= invalidfilehandle;
  if (procid <> invalidprochandle) then begin
   try
    killprocess(procid);
@@ -287,7 +273,6 @@ begin
   procid:= invalidprochandle;
  end;
  messagepipe.Free;
-// errorpipe.Free;
  fmessagefile.free;
  inherited;
 end;
@@ -297,20 +282,17 @@ var
  wdbefore: filenamety;
 begin
  fexitcode:= 1; //defaulterror
-// ferrorfinished:= false;
  fmessagefinished:= false;
  ffinished:= false;
  
  procid:= invalidprochandle;
  with projectoptions,o.texp do begin
   if fsetmakedir and (makedir <> '') then begin
-//   wdbefore:= getcurrentdirmse;
    wdbefore:= setcurrentdirmse(makedir);
   end;
   try
-   procid:= execmse2(acommandline,nil,messagepipe,messagepipe{errorpipe},{false,}-1,
-                               [exo_inactive,exo_tty]
-                               {true,false,true});
+   procid:= execmse2(acommandline,nil,messagepipe,messagepipe,-1,
+                                                   [exo_inactive,exo_tty]);
   except
    on e1: exception do begin
     fcanceled:= true;
@@ -343,21 +325,11 @@ begin
  ffinished:= true;
  asyncevent(0);
 end;
-{
-procedure tprogrunner.errorfinished(const sender: tpipereader);
-begin
- ferrorfinished:= true;
- if fmessagefinished then begin
-  dofinished;
- end;
-end;
-}
+
 procedure tprogrunner.messagefinished(const sender: tpipereader);
 begin
  fmessagefinished:= true;
-// if ferrorfinished then begin
-  dofinished;
-// end;
+ dofinished;
 end;
 
 function addmessagetext(const sender: tpipereader;
@@ -374,10 +346,7 @@ begin
   sleepus(100000);
   application.lock;
  end;
- with messagefo.messages do begin
-  datacols[0].readpipe(str1,true,120);
-  showlastrow;
- end;
+ messagefo.addtext(str1);
  result:= str1;
 end;
 
@@ -407,8 +376,8 @@ begin
  inherited create(nil,true,true);
  if procid <> invalidprochandle then begin
   mainfo.setstattext('Making.',mtk_running);
-  messagefo.messages.font.options:= messagefo.messages.font.options {-
-               [foo_antialiased]} + [foo_nonantialiased];
+  messagefo.messages.font.options:= messagefo.messages.font.options +
+                                                      [foo_nonantialiased];
  end
  else begin
   mainfo.setstattext('Make not running.',mtk_error);
@@ -477,7 +446,7 @@ procedure tmaker.doasyncevent(var atag: integer);
   setcurrentdirmse(fcurrentdir);
   designnotifications.aftermake(idesigner(designer),fexitcode);
   messagefo.messages.font.options:= messagefo.messages.font.options +
-              [foo_antialiased2]{ - [foo_nonantialiased]};
+              [foo_antialiased2];
  end;
 var
  str1: string;
@@ -502,12 +471,9 @@ begin
  inherited create(aowner,false,true);
  if procid <> invalidprochandle then begin
   mainfo.setstattext('Downloading.',mtk_running);
-//  messagefo.messages.font.options:= messagefo.messages.font.options -
-//               [foo_antialiased] + [foo_nonantialiased];
  end
  else begin
   mainfo.setstattext('Download not running.',mtk_error);
-//  designnotifications.aftermake(idesigner(designer),int1);
  end;
 end;
 
@@ -552,22 +518,4 @@ begin
  application.terminatewait;
 end;
 
-{
-procedure tscriptrunner.scriptexe(const sender: tguiapplication;
-               var again: boolean);
-begin
- if not ffinished then begin
-  sender.idlesleep(100000);
-  again:= true;
- end
- else begin
-  
- end;
-end;
-
-procedure tscriptrunner.scriptcancel(const sender: tobject);
-begin
- killprocess(procid);
-end;
-}
 end.

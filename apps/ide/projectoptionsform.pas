@@ -411,6 +411,9 @@ type
    fexpandprojectfilemacros: longboolarty;
    floadprojectfile: longboolarty;
    fnewinheritedforms: longboolarty;
+   fcolorerror: colorty;
+   fcolorwarning: colorty;
+   fcolornote: colorty;
   protected
    function gett: tobject; override;
    function gettexp: tobject; override;
@@ -423,6 +426,9 @@ type
    property copymessages: boolean read fcopymessages write fcopymessages;
    property closemessages: boolean read fclosemessages write fclosemessages;
    property checkmethods: boolean read fcheckmethods write fcheckmethods;
+   property colorerror: colorty read fcolorerror write fcolorerror;
+   property colorwarning: colorty read fcolorwarning write fcolorwarning;
+   property colornote: colorty read fcolornote write fcolornote;
 
    property usercolors: colorarty read fusercolors write fusercolors;
    property usercolorcomment: msestringarty read fusercolorcomment 
@@ -753,6 +759,12 @@ type
    formatmacrogrid: twidgetgrid;
    formatmacronames: tstringedit;
    formatmacrovalues: tstringedit;
+   tspacer4: tspacer;
+   colorerror: tcoloredit;
+   tspacer5: tspacer;
+   colorwarning: tcoloredit;
+   tspacer6: tspacer;
+   colornote: tcoloredit;
    procedure acttiveselectondataentered(const sender: TObject);
    procedure colonshowhint(const sender: tdatacol; const arow: Integer; 
                       var info: hintinfoty);
@@ -829,7 +841,7 @@ uses
  objectinspector,msebits,msefileutils,msedesignintf,guitemplates,
  watchform,stackform,main,projecttreeform,findinfileform,
  selecteditpageform,programparametersform,sourceupdate,
- msedesigner,panelform,watchpointsform,commandlineform,
+ msedesigner,panelform,watchpointsform,commandlineform,messageform,
  componentpaletteform,mserichstring,msesettings,formdesigner,
  msestringlisteditor,msetexteditor,msepropertyeditors,mseshapes,mseactions,
  componentstore,cpuform,msesysutils,msecomptree,msefont,typinfo,mserttistat
@@ -1016,19 +1028,6 @@ begin
   aname:= filename;
   projecthistory:= history;
  end;
- {
- aname:= projectoptions.projectfilename;
- if save then begin
-  result:= filedialog(aname,[fdo_save,fdo_checkexist],'Save Project',
-          ['Project files','All files'],['*.prj','*'],'prj',
-          nil,nil,nil,[fa_all],[fa_hidden],@projecthistory);
- end
- else begin
-  result:= filedialog(aname,[fdo_checkexist],'Open Project',
-          ['Project files','All files'],['*.prj','*'],'prj',
-          nil,nil,nil,[fa_all],[fa_hidden],@projecthistory);
- end;
- }
 end;
 
 function getmacros: tmacrolist;
@@ -1757,7 +1756,6 @@ begin
    fo.aftmake4on.gridupdatetagvalue(int1,o.aftcommandon[int1]);
   end;
 
-//  fo.unitdirs.gridvalues:= reversearray(unitdirs);
   fo.unitdirs.gridvalues:= reversearray(fo.unitdirs.gridvalues);
   int2:= high(o.t.unitdirs);
   for int1:= 0 to int2 do begin
@@ -1776,15 +1774,8 @@ begin
    fo.dobjon.gridupdatetagvalue(int2,o.unitdirson[int1]);
    dec(int2);
   end;
-//  fo.unitpref.value:= unitpref;
-//  fo.incpref.value:= incpref;
-//  fo.libpref.value:= libpref;
-//  fo.objpref.value:= objpref;
-//  fo.targpref.value:= targpref;
   fo.activemacroselect[o.macrogroup]:= true;
   fo.activegroupchanged;
-//  fo.macronames.gridvalues:= macronames;
-//  fo.macrovalues.gridvalues:= macrovalues;
   setlength(o.fgroupcomments,6);
   fo.groupcomment.gridvalues:= o.groupcomments;
 
@@ -1805,14 +1796,6 @@ begin
   fo.grid[1].datalist.asarray:= e.t.sourcefilemasks;
   fo.filefiltergrid[0].datalist.asarray:= e.t.filemasknames;
   fo.filefiltergrid[1].datalist.asarray:= e.t.filemasks;
-//  fo.toolsave.gridvalues:= toolsave;
-//  fo.toolhide.gridvalues:= toolhide;
-//  fo.toolparse.gridvalues:= toolparse;
-//  fo.toolmenu.gridvalues:= toolmenus;
-//  fo.toolfile.gridvalues:= toolfiles;
-//  fo.toolparam.gridvalues:= toolparams;
-//  fo.def.gridvalues:= defines;
-//  fo.defon.gridvalues:= defineson;
   fo.settingsdataent(nil);
  end;
 end;
@@ -1894,25 +1877,12 @@ begin
       fo.duniton.gridvaluetag(int1,0) or fo.dincludeon.gridvaluetag(int1,0) or
       fo.dlibon.gridvaluetag(int1,0) or fo.dobjon.gridvaluetag(int1,0);
   end;
-//  unitpref:= fo.unitpref.value;
-//  incpref:= fo.incpref.value;
-//  libpref:= fo.libpref.value;
-//  objpref:= fo.objpref.value;
-//  targpref:= fo.targpref.value;
   storemacros(fo);
   d.t.sourcedirs:= reversearray(fo.sourcedirs.gridvalues);
-//  defines:= fo.def.gridvalues;
-//  defineson:= fo.defon.gridvalues;
   e.t.syntaxdeffiles:= fo.grid[0].datalist.asarray;
   e.t.sourcefilemasks:= fo.grid[1].datalist.asarray;
   e.t.filemasknames:= fo.filefiltergrid[0].datalist.asarray;
   e.t.filemasks:= fo.filefiltergrid[1].datalist.asarray;
-//  toolsave:= fo.toolsave.gridvalues;
-//  toolhide:= fo.toolhide.gridvalues;
-//  toolparse:= fo.toolparse.gridvalues;
-//  toolmenus:= fo.toolmenu.gridvalues;
-//  toolfiles:= fo.toolfile.gridvalues;
-//  toolparams:= fo.toolparam.gridvalues;  
  end;
  expandprojectmacros;
 end;
@@ -1927,6 +1897,7 @@ begin
  for int1:= 0 to designer.modules.count - 1 do begin
   tdesignwindow(designer.modules[int1]^.designform.window).updateprojectoptions;
  end;
+ messagefo.updateprojectoptions;
 end;
 
 function readprojectoptions(const filename: filenamety): boolean;
@@ -2151,7 +2122,8 @@ begin
                     defaultmake,makegroupbox],0);
  aligny(wam_center,[mainfile,targetfile,targpref]);
  aligny(wam_center,[makecommand,makedir]);
- aligny(wam_center,[messageoutputfile,copymessages]);
+ aligny(wam_center,[messageoutputfile,copymessages,
+                                         colorerror,colorwarning,colornote]);
  placexorder(defaultmake.bounds_x,[10-defaultmake.frame.outerframe.right,10],
              [defaultmake,showcommandline,checkmethods]);
  int1:= aligny(wam_center,[defaultmake,showcommandline]);
@@ -2594,39 +2566,9 @@ begin
  
  closemessages:= true;
  checkmethods:= true;
-{
- valuehints:= true;
- activateonbreak:= true;
- additem(fexceptclassnames,'EconvertError');
- additem(fexceptignore,false);
-}
-(*
- showgrid:= true;
- snaptogrid:= true;
- moveonfirstclick:= true;
- gridsizex:= defaultgridsizex;
- gridsizey:= defaultgridsizey;
- encoding:= 1; //utf8n
- autoindent:= true;
- blockindent:= 1;
- rightmarginon:= true;
- rightmarginchars:= 80;
- tabstops:= 4;
- editfontname:= 'mseide_source';
- editfontcolor:= integer(cl_text);
- editbkcolor:= integer(cl_foreground);
- statementcolor:= $E0FFFF;
- editfontantialiased:= true;
- editmarkbrackets:= true;
- backupfilecount:= 2;
- valuehints:= true;
- activateonbreak:= true;
- additem(fexceptclassnames,'EconvertError');
- additem(fexceptignore,false);
- setlength(ar1,1);
- ar1[0]:= '${TEMPLATEDIR}';
- codetemplatedirs:= ar1;
-*)
+ fcolorerror:= cl_yellow;
+ fcolorwarning:= cl_ltred;
+ fcolornote:= cl_ltgreen;
  inherited;
 end;
 {

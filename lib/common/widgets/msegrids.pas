@@ -793,12 +793,14 @@ type
                          const aowner: tgridarrayprop); override;
    destructor destroy; override;
    function edited: boolean;
-   procedure readpipe(const pipe: tpipereader; 
+   function readpipe(const pipe: tpipereader; 
                       const processeditchars: boolean = false;
-                      const maxchars: integer = 0); overload;
-   procedure readpipe(const text: string; 
+                      const maxchars: integer = 0): integer; overload;
+      //returns added rowcount
+   function readpipe(const text: string; 
                       const processeditchars: boolean = false;
-                      const maxchars: integer = 0); overload;
+                      const maxchars: integer = 0): integer; overload;
+      //returns added rowcount
    procedure fillcol(const value: msestring);
    property items[aindex: integer]: msestring read getitems write setitems; default;
    property checked[aindex: integer]: boolean read getchecked write setchecked;
@@ -3618,11 +3620,6 @@ begin
       fcellinfo.selected:= getselected(row1);
       fcellinfo.readonly:= fcellinfo.grid.getrowreadonlystate(row1);
       fcellinfo.notext:= false;
-//      fcellinfo.needslayout:= hasrowheight and 
-//             (frowheightbefore <> fcellrect.cy) or 
-//             (fdrawfocusedcellbefore <> isfocusedcell); //used in listedititems
-//      frowheightbefore:= fcellrect.cy;
-//      fdrawfocusedcellbefore:= isfocusedcell;
       fcellinfo.ismousecell:= 
                (fcellinfo.grid.fmousecell.col = fcellinfo.cell.col) and 
                                 (fcellinfo.grid.fmousecell.row = row1);
@@ -6825,27 +6822,27 @@ begin
  fdata.Assign(value);
 end;
 
-procedure tcustomstringcol.readpipe(const pipe: tpipereader;
-                            const processeditchars: boolean = false;
-                            const maxchars: integer = 0);
-var
- mstr1: msestring;
-begin
- try
-  mstr1:= pipe.readdatastring;
- except
- end;
- datalist.addchars(mstr1,processeditchars,maxchars);
-end;
-
-procedure tcustomstringcol.readpipe(const text: string;
+function tcustomstringcol.readpipe(const text: string;
               const processeditchars: boolean = false;
-              const maxchars: integer = 0);
+              const maxchars: integer = 0): integer;
 var
  mstr1: msestring;
 begin
  mstr1:= text;
- datalist.addchars(mstr1,processeditchars,maxchars);
+ result:= datalist.addchars(mstr1,processeditchars,maxchars);
+end;
+
+function tcustomstringcol.readpipe(const pipe: tpipereader;
+                            const processeditchars: boolean = false;
+                            const maxchars: integer = 0): integer;
+var
+ str1: string;
+begin
+ try
+  str1:= pipe.readdatastring;
+ except
+ end;
+ result:= readpipe(str1,processeditchars,maxchars);
 end;
 
 function tcustomstringcol.geteditstate: dataeditstatesty;

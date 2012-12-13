@@ -114,7 +114,8 @@ type
   public
    constructor create;
    function propkind: arraypropkindty; override;
-   property items[const index: integer]: colorty read getitems write setitems; default;
+   property items[const index: integer]: colorty read getitems 
+                                                write setitems; default;
  end;
 
  tint64arrayprop = class(tarrayprop)
@@ -856,7 +857,7 @@ end;
 
 constructor tcolorarrayprop.create;
 begin
- fvaluedefault:= cl_transparent;
+ fvaluedefault:= cl_none;
  inherited;
 end;
 

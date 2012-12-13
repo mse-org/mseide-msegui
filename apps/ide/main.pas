@@ -2528,9 +2528,6 @@ begin
   end;
   if fstartcommand <> sc_none then begin
    runtarget;
-//   if loadexec(false,false) then begin
-//    dorun;
-//   end;
   end;
  end;
 end;
