@@ -11,7 +11,7 @@ unit mseguirttistat;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- msegui,mserttistat,mseglob,mseclasses;
+ msegui,mserttistat,mseglob,mseclasses,msestat,msestatfile;
  
 type
  rttistatoption = (rso_autowritestat);
