@@ -2566,7 +2566,7 @@ begin
  
  closemessages:= true;
  checkmethods:= true;
- fcolorerror:= cl_yellow;
+ fcolorerror:= cl_ltyellow;
  fcolorwarning:= cl_ltred;
  fcolornote:= cl_ltgreen;
  inherited;

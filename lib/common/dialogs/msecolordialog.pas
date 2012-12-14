@@ -452,7 +452,7 @@ begin
  rect1.x:= 1;
  dec(rect1.cy);
  rect1.cx:= rect1.cy;
- canvas.fillrect(rect1,co1);
+ canvas.fillrect(rect1,colorty(colortorgb(co1)));
  canvas.drawrect(rect1,cl_black);
 end;
 
