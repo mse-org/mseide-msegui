@@ -425,10 +425,10 @@ type
    TXICCEncodingStyle = (XStringStyle,XCompoundTextStyle,XTextStyle,
      XStdICCTextStyle,XUTF8StringStyle);
   }
-function XSetWMHints(Display: PDisplay; W: xid; WMHints: PXWMHints): Longint; cdecl;
+function XSetWMHints(Display: PDisplay; W: xid; WMHints: PXWMHints): cint; cdecl;
                               external sXLib name 'XSetWMHints';
-function XSetForeground(Display: PDisplay; GC: TGC; Foreground: longword): longint; cdecl;
-                              external sXLib name 'XSetForeground';
+function XSetForeground(Display: PDisplay; GC: TGC;
+       Foreground: culong): cint; cdecl; external sXLib name 'XSetForeground';
       //bug in borland Xlib.pas
 procedure XDrawImageString(Display: PDisplay; D: TDrawable; GC: TGC;
   X, Y: Integer; S: PChar; Len: Integer); cdecl;
@@ -1693,8 +1693,6 @@ begin
   else begin
    flags:= flags and not(1 shl 5);
   end;
-//  updatebit(culong(flags),2,icon <> 0); //iconpixmaphint
-//  updatebit(culong(flags),5,mask <> 0); //iconmaskhint
  end;
  xsetwmhints(appdisp,id,hints);
  xfree(hints);
