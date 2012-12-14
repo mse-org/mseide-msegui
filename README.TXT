@@ -1,10 +1,10 @@
 MSEide+MSEgui Pascal Cross Platform GUI Development System.
 
-2012-04-01 Version 2.8.2
+2012-12-14 Version 2.8.4
 Copyright (c) 1999-2012 by Martin Schreiber
 
-- Compiles with FPC 2.4.4 or FPC 2.6
-- Tested on i386-linux SuSE 12.1, x84_64-linux SuSE 11.1 and
+- Compiles with FPC 2.6.0 or 2.6.2
+- Tested on i386-linux SuSE 12.2, x84_64-linux SuSE 12.2 and
   i386-win32 98, 2000, XP and Vista.
 - Links to xlib and gdi32, no external widget library needed.
 - Internal character encoding is UCS2.
@@ -32,11 +32,11 @@ IDE is under GPL, library under modified LGPL like FPC-RTL.
 
 Installation:
 *************
-1. Download and install FPC 2.6, you can get it from 
+1. Download and install FPC 2.6.2, you can get it from 
    http://www.freepascal.org/download.var
-2. Download mseide_msegui_src_2_8_2.zip and mseide_i386_win32_2_8_2.zip or
-   mseide_i386_linux_2_8_2.tar.gz or mseide_x84_64_linux_2_8_2.tar.gz
-   http://sourceforge.net/projects/mseide-msegui/files/mseide-msegui/2.8.2/
+2. Download mseide_msegui_src_2_8_4.zip and mseide_i386_win32_2_8_4.zip or
+   mseide_i386_linux_2_8_4.tar.gz or mseide_x84_64_linux_2_8_4.tar.gz
+   http://sourceforge.net/projects/mseide-msegui/files/mseide-msegui/2.8.4/
 3. Extract them to a directory of your choice ('yourdirectory') .
 4. Run 'yourdirectory/bin/mseide' on linux or 
    'yourdirectory\bin\mseide.exe' on windows.
@@ -50,7 +50,7 @@ If you wish to to compile the IDE:
 2. 'Target'-'Continue'.
 
 Compiling MSEide from commandline on Linux:
-ppc386 -Fulib/common/* -Fulib/common/kernel/i386-linux -Filib/common/kernel apps/ide/mseide.pas
+fpc -Fulib/common/* -Fulib/common/kernel/i386-linux -Filib/common/kernel apps/ide/mseide.pas
 On windows:
 ppc386.exe -Fulib\common\* -Fulib\common\kernel\i386-win32 -Filib\common\kernel apps\ide\mseide.pas
 
