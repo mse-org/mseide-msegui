@@ -3307,6 +3307,11 @@ end;
 // painting
 //
 
+function ispaintcolor(acolor: colorty): boolean; inline;
+begin
+ result:= (acolor <> cl_transparent) and (acolor <> cl_none);
+end;
+
 procedure tcanvas.checkgcstate(state: canvasstatesty);
 var
  values: gcvaluesty;
@@ -3404,11 +3409,11 @@ begin
    values.colorbackground:= colortopixel(acolorbackground);
    gccolorbackground:= acolorbackground;
   end;
-  if gccolorbackground = cl_transparent then begin
-   exclude(drawingflags,df_opaque);
+  if ispaintcolor(gccolorbackground) then begin
+   include(drawingflags,df_opaque);
   end
   else begin
-   include(drawingflags,df_opaque);
+   exclude(drawingflags,df_opaque);
   end;
   if cs_font in state then begin
    if (afonthandle1 <> gcfonthandle1) then begin
@@ -3466,7 +3471,7 @@ begin
   else begin
    acolorforeground:= acolor;
   end;
-  if acolorforeground <> cl_transparent then begin
+  if ispaintcolor(acolorforeground) then begin
    if lineinfo then begin
     if length(dashes) > 0 then begin
      acolorbackground:= fvaluepo^.colorbackground;
@@ -4396,7 +4401,8 @@ var
  rect1,rect2: rectty;
 begin
  if cs_inactive in fstate then exit;
- if acolor <> cl_transparent then begin
+ 
+ if ispaintcolor(acolor) then begin
   if awidth <> 0 then begin
    if awidth < 0 then begin
     rect2:= arect;
@@ -4453,7 +4459,7 @@ var
  rect1,rect2: rectty;
 begin
  if cs_inactive in fstate then exit;
- if acolor <> cl_transparent then begin
+ if ispaintcolor(acolor) then begin
   rect2:= arect;
   if checkforeground(acolor,false) then begin
    with fdrawinfo.rect do begin
