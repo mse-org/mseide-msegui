@@ -745,6 +745,8 @@ begin
  initpointers(aclient);
 end;
 
+{$optimization off} //internal compiler error 200409241
+
 function tbase64handler.readdata(var aclient: cryptoclientinfoty; var buffer;
                const acount: integer): integer;
 var
