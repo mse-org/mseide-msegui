@@ -1,5 +1,7 @@
 MSEide+MSEgui breaking changes version history
 
+Version 2.8.4
+2012-12-14
 2012-12-13
  tpoorstringdatalist.addchars() returns added rowcount instead of rowindex.
 2012-11-25
