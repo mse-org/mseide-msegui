@@ -1,4 +1,4 @@
-{ MSEtools Copyright (c) 1999-2008 by Martin Schreiber
+{ MSEtools Copyright (c) 1999-2012 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -518,6 +518,7 @@ procedure tmainfo.donottranslateonsetvalue(const sender: tobject;
 begin
  tpropinfoitem(tree.item).node.info.donottranslate:= avalue;
  datachanged;
+ grid.invalidaterow(grid.row);
 end;
 
 procedure tmainfo.commentonsetvalue(const sender: tobject;
@@ -1147,10 +1148,13 @@ end;
 
 procedure tmainfo.beforelangdrawcell(const sender: tcol; const canvas: tcanvas;
                var cellinfo: cellinfoty; var processed: Boolean);
+var
+ int1: integer;
 begin
  if coloron.value then begin
   with cellinfo.cell do begin
-   if (typedisp[row] = ord(vastring)) and 
+   int1:= typedisp[row];
+   if ((int1 = ord(vastring)) or (int1 = ord(vawstring))) and 
           not donottranslate[row] and 
           (tstringedit(grid.datacols[col].editwidget)[row] =
                  value[row]) and (value[row] <> '') then begin

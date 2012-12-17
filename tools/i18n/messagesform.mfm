@@ -14,7 +14,7 @@ object messagesfo: tmessagesfo
     421
     234
   )
-  options = [fo_closeonesc, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
+  options = [fo_closeonesc, fo_closeonenter, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
   caption = 'Make Language Units'
   onclosequery = formclosquery
   moduleclassname = 'tmseform'
@@ -28,7 +28,7 @@ object messagesfo: tmessagesfo
     datacols.count = 1
     datacols.options = [co_fill, co_savestate]
     datacols.items = <    
-      item
+      item[messages]
         width = 1024
         options = [co_fill, co_savestate]
         widthmin = 1024
