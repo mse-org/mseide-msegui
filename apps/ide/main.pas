@@ -35,7 +35,7 @@ uses
  mserttistat,msedatanodes,mseedit,mseifiglob,mselistbrowser,projecttreeform,
  msepipestream;
 const
- versiontext = '2.8.4';
+ versiontext = '2.9 unstable';
  idecaption = 'MSEide';
 
 type

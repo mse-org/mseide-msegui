@@ -211,22 +211,23 @@ begin
       end;
      end;
     end;
-    if alevel <> el_none then begin
-     if trystrtointmse(ar3[0],row) then begin
-      dec(row);
-      if high(ar3) >= 1 then begin
-       if trystrtointmse(ar3[1],col) then begin
-        dec(col);
-        result:= true;
-       end;
-      end
-      else begin
+    if trystrtointmse(ar3[0],row) then begin
+     dec(row);
+     if high(ar3) >= 1 then begin
+      if trystrtointmse(ar3[1],col) then begin
+       dec(col);
        result:= true;
       end;
-      if result then begin
-       afilename:= ar1[0];
-      end;
+     end
+     else begin
+      result:= true;
      end;
+     if result then begin
+      afilename:= ar1[0];
+     end;
+    end;
+    if result and (alevel = el_none) then begin
+     alevel:= el_all;
     end;
    end;
   end;
@@ -280,9 +281,11 @@ var
  fna1: filenamety;
 begin
  apage:= nil;
- result:= checkerrormessage(text,lev1,fna1,col1,row1);
- if result and (fna1 <> '') and (lev1 >= minlevel) then begin
+ result:= false;
+ if checkerrormessage(text,lev1,fna1,col1,row1) and (fna1 <> '') and 
+                                                (lev1 >= minlevel) then begin
   apage:= sourcefo.showsourceline(objpath(fna1),row1,col1,true);
+  result:= true;
  end;
 end;
 

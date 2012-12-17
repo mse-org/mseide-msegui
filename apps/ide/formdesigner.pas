@@ -241,7 +241,8 @@ type
    procedure checkdelobjs(const aitem: tcomponent);
 
    procedure doaddcomponent(acomponent: tcomponent);
-   procedure doinitcomponent(acomponent: tcomponent; parent: tcomponent);
+   procedure doinitcomponent(const acomponent: tcomponent;
+                                            const parent: tcomponent);
 
    procedure setshowgrid(const avalue: boolean);
    procedure setgridsizex(const avalue: integer);
@@ -1459,8 +1460,8 @@ begin
  end;
 end;
 
-procedure tdesignwindow.doinitcomponent(
-                         acomponent: tcomponent; parent: tcomponent);
+procedure tdesignwindow.doinitcomponent(const acomponent: tcomponent;
+                      const parent: tcomponent);
 var
  rect1: rectty;
  pt1,pt2: pointty;
@@ -1575,7 +1576,8 @@ begin
    if bo1 then begin
     clear;
     if adata <> '' then begin
-     pastefromobjecttext(adata,module,comp1,{$ifdef FPC}@{$endif}doinitcomponent);
+     pastefromobjecttext(adata,module,comp1,
+                  {$ifdef FPC}@{$endif}doinitcomponent);
     end
     else begin
      pastefromclipboard(module,comp1,{$ifdef FPC}@{$endif}doinitcomponent);
@@ -1593,15 +1595,27 @@ end;
 procedure tdesignwindow.doundelete;
 var
  int1: integer;
+ ar1: componentarty;
 begin
  if fdelobjs <> nil then begin
   with fselections do begin
    clear;
    for int1:= 0 to high(fdelobjs) do begin
     with fdelobjs[int1] do begin
-     pastefromobjecttext(objtext,owner,parent,
+     ar1:= pastefromobjecttext(objtext,owner,parent,
                     {$ifdef FPC}@{$endif}doinitcomponent);
+     if ar1 <> nil then begin
+      if (owner <> nil) and (ownerindex >= 0) then begin
+       ar1[0].componentindex:= ownerindex;
+      end;
+      if (parent <> nil) and (parentindex >= 0) then begin
+      {$warnings off}
+       tcomponent1(parent).setchildorder(ar1[0],parentindex);
+      {$warnings on}
+      end;
+     end;
      if parent <> nil then begin
+      
       designer.componentmodified(parent);
      end
      else begin

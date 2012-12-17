@@ -22,7 +22,8 @@ uses
 const
  defaultmoduleclassname = 'tmseform';
 type
- initcomponentprocty = procedure(acomponent: tcomponent; aparent: tcomponent) of object;
+ initcomponentprocty = 
+  procedure(const acomponent: tcomponent; const aparent: tcomponent) of object;
 
  componentclassinfoty = record
   classtyp: tcomponentclass;
@@ -206,6 +207,8 @@ type
  objinfoty = record
   owner: tcomponent;
   parent: twidget;
+  ownerindex: integer;
+  parentindex: integer;
   objtext: string;
  end;
  objinfoarty = array of objinfoty;
@@ -250,12 +253,11 @@ type
    function getobjinfoar: objinfoarty;   
    function getobjecttext: string;
    function pastefromobjecttext(const aobjecttext: string; 
-           aowner,aparent: tcomponent; initproc: initcomponentprocty): integer;
-                  //returns count of added components
+                                       aowner,aparent: tcomponent;
+                               initproc: initcomponentprocty): componentarty;
    procedure copytoclipboard;
    function pastefromclipboard(aowner,aparent: tcomponent;
-                             initproc: initcomponentprocty): integer;
-                  //returns count of added components
+                             initproc: initcomponentprocty): componentarty;
 
    function itempo(const index: integer): pselectedinfoty;
    function indexof(const ainstance: tcomponent): integer;
@@ -981,11 +983,24 @@ begin
    setlength(result,high(result)+2);
    with result[high(result)] do begin
     owner:= co1.owner;
+    if owner <> nil then begin
+     ownerindex:= co1.componentindex;
+    end
+    else begin
+     ownerindex:= -1;
+    end;
     if co1 is twidget then begin
      parent:= twidget(co1).parentwidget;
+     if parent <> nil then begin
+      parentindex:= twidget(parent).indexofwidget(twidget(co1));
+     end
+     else begin
+      parentindex:= -1;
+     end;
     end
     else begin
      parent:= nil;
+     parentindex:= -1;
     end;
     binstream:= tmemorystream.create;
     writer:= twritermse.create(binstream,4096,true);
@@ -1090,7 +1105,7 @@ begin
 end;
 
 function tdesignerselections.pastefromobjecttext(const aobjecttext: string; 
-         aowner,aparent: tcomponent; initproc: initcomponentprocty): integer;
+   aowner,aparent: tcomponent; initproc: initcomponentprocty): componentarty;
                   //returns count of added components
 var
  binstream: tmemorystream;
@@ -1103,8 +1118,8 @@ var
  validaterenamebefore: validaterenameeventty;
  
 begin
+ result:= nil;
  if aobjecttext = '' then begin
-  result:= 0;
   exit;
  end; 
  if aowner is tmsecomponent then begin
@@ -1181,6 +1196,7 @@ begin
        if (comp2.getparentcomponent = nil) or (comp2 is tmsedatamodule) then begin
 //        add(comp2);
         addchildren(comp2);
+        additem(pointerarty(result),pointer(comp2));
        end;
       end;
       removefixupreferences(comp1,'');
@@ -1221,16 +1237,15 @@ begin
   count:= countbefore;
   application.handleexception;
  end;
- result:= count - countbefore;
+// result:= count - countbefore;
 end;
 
 function tdesignerselections.pastefromclipboard(aowner,aparent: tcomponent;
-                initproc: initcomponentprocty): integer;
-                  //returns count of added components
+                initproc: initcomponentprocty): componentarty;
 var
  str1: msestring;
 begin
- result:= 0;
+ result:= nil;
  if msewidgets.pastefromclipboard(str1) then begin
   result:= pastefromobjecttext(str1,aowner,aparent,initproc);
  end;
