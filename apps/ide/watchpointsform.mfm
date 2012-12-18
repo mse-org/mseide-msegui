@@ -90,7 +90,7 @@ object watchpointsfo: twatchpointsfo
   onshow = watchpointsonshow
   moduleclassname = 'tdockform'
   object grid: twidgetgrid
-    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets]
     frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
     taborder = 1
     popupmenu = gripopup
@@ -129,44 +129,44 @@ object watchpointsfo: twatchpointsfo
       end>
     datacols.count = 7
     datacols.items = <    
-      item
+      item[wpton]
         width = 16
         options = [co_drawfocus, co_savestate]
         widgetname = 'wpton'
         dataclass = tgridintegerdatalist
       end    
-      item
+      item[wptkind]
         width = 33
         options = [co_savevalue, co_savestate]
         widgetname = 'wptkind'
         dataclass = tgridenumdatalist
       end    
-      item
+      item[wptexpression]
         width = 158
         options = [co_proportional, co_savevalue, co_savestate]
         widgetname = 'wptexpression'
         dataclass = tgridmsestringdatalist
       end    
-      item
+      item[wptno]
         width = 9
         options = [co_invisible]
         widgetname = 'wptno'
         dataclass = tgridintegerdatalist
       end    
-      item
+      item[wptcount]
         color = -1879048185
         width = 34
         options = [co_readonly, co_nofocus, co_savestate]
         widgetname = 'wptcount'
         dataclass = tgridintegerdatalist
       end    
-      item
+      item[wptignore]
         width = 38
         options = [co_savevalue, co_savestate]
         widgetname = 'wptignore'
         dataclass = tgridintegerdatalist
       end    
-      item
+      item[wptcondition]
         width = 174
         options = [co_fill, co_savevalue, co_savestate]
         widgetname = 'wptcondition'
@@ -187,12 +187,12 @@ object watchpointsfo: twatchpointsfo
       bounds_y = 0
       bounds_cx = 16
       bounds_cy = 16
-      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savestate]
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_savestate, oe_autopopupmenu]
       visible = False
       onsetvalue = wptononsetvalue
     end
     object wptkind: tenumedit
-      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
       optionsskin = [osk_framebuttononly]
       frame.levelo = 0
       frame.colorclient = -2147483645
@@ -219,11 +219,11 @@ object watchpointsfo: twatchpointsfo
             'R'
           )
         end>
-      dropdown.itemindex = 0
       reffontheight = 14
     end
     object wptexpression: tstringedit
-      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight]
+      optionswidget1 = [ow1_fontglyphheight]
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
       optionsskin = [osk_framebuttononly]
       frame.levelo = 0
       frame.colorclient = -2147483645
@@ -239,7 +239,8 @@ object watchpointsfo: twatchpointsfo
       reffontheight = 14
     end
     object wptno: tintegeredit
-      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight]
+      optionswidget1 = [ow1_fontglyphheight]
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
       optionsskin = [osk_framebuttononly]
       frame.levelo = 0
       frame.colorclient = -2147483645
@@ -251,11 +252,13 @@ object watchpointsfo: twatchpointsfo
       bounds_y = 0
       bounds_cx = 9
       bounds_cy = 16
-      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savestate]
+      optionsedit1 = [oe1_autopopupmenu]
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_savestate]
       reffontheight = 14
     end
     object wptcount: tintegeredit
-      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight]
+      optionswidget1 = [ow1_fontglyphheight]
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
       optionsskin = [osk_framebuttononly]
       frame.levelo = 0
       frame.colorclient = -2147483645
@@ -267,11 +270,13 @@ object watchpointsfo: twatchpointsfo
       bounds_y = 0
       bounds_cx = 34
       bounds_cy = 16
-      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savestate]
+      optionsedit1 = [oe1_autopopupmenu]
+      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_savestate]
       reffontheight = 14
     end
     object wptignore: tintegeredit
-      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight]
+      optionswidget1 = [ow1_fontglyphheight]
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
       optionsskin = [osk_framebuttononly]
       frame.levelo = 0
       frame.colorclient = -2147483645
@@ -283,12 +288,13 @@ object watchpointsfo: twatchpointsfo
       bounds_y = 0
       bounds_cx = 38
       bounds_cy = 16
-      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_forcereturncheckvalue, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_forcereturncheckvalue, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_savevalue, oe_savestate]
       ondataentered = wptondataentered
       reffontheight = 14
     end
     object wptcondition: tstringedit
-      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight]
+      optionswidget1 = [ow1_fontglyphheight]
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
       optionsskin = [osk_framebuttononly]
       frame.levelo = 0
       frame.colorclient = -2147483645
@@ -305,7 +311,7 @@ object watchpointsfo: twatchpointsfo
     end
   end
   object tlabel1: tlabel
-    optionswidget = [ow_destroywidgets, ow_autoscale]
+    optionswidget1 = [ow1_autoscale, ow1_autowidth, ow1_autoheight]
     bounds_x = 0
     bounds_y = 0
     bounds_cx = 345
@@ -323,6 +329,17 @@ object watchpointsfo: twatchpointsfo
       end>
     menu.name = 'gridpopup'
     left = 112
+    top = 88
+  end
+  object c: tstringcontainer
+    strings.data = (
+      'Watchpoint error.'
+      'WATCHPOINT ERROR'
+      'Program not loaded.'
+      'Do you wish to delete all watchpoints?'
+      'Confirmation'
+    )
+    left = 216
     top = 88
   end
 end

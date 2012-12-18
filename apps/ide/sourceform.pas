@@ -22,13 +22,33 @@ interface
 
 uses
  msetextedit,msewidgetgrid,mseforms,Classes,msegdbutils,msegraphedits,mseevent,
- msehash,msebitmap,msetabs,sourcepage,mseglob,
- msetypes,msestrings,mseguiglob,msegui,msesyntaxpainter,msemenus,
- mseactions,msesyntaxedit,msestat,finddialogform,msestream,msefilechange,
- breakpointsform,mseparser,msesimplewidgets,msegrids,msegraphutils,
- mseact,msegridsglob;
+ msehash,msebitmap,msetabs,sourcepage,mseglob,msetypes,msestrings,mseguiglob,
+ msegui,msesyntaxpainter,msemenus,mseactions,msesyntaxedit,msestat,
+ finddialogform,msestream,msefilechange,breakpointsform,mseparser,
+ msesimplewidgets,msegrids,msegraphutils,mseact,msegridsglob,msestringcontainer;
 
 type
+ stringconsts = (
+  str_file,          //0 File "
+  haschanged,        //1 " has changed.
+  therearemody,      //2 There are modifications in edit buffer also.
+  wishreload,        //3 Do you wish to reload from disk?
+  confirmation,      //4 Confirmation
+  none,              //5 <none>
+  wishreplace,       //6 Do you wish to replace:
+  str_with,          //7 with:
+  str_new,           //8 <new>
+  syntaxdeffile,     //9 Syntaxdeffile:
+  str_text,          //10 Text
+  notfound,          //11 not found.
+  restartbegin,      //12 Restart from begin of file?
+  cancel,            //13 Cancel?
+  replaceoccu,       //14 Do you wish to to replace this occurence?
+  gotoline,          //15 Go to line number:
+  findline,          //16 Find line
+  modieditalso       //17 There are modifications in edit buffer also.
+ );
+
  tsourcefo = class;
 
  tnaviglist = class(tsourceposlist)
@@ -54,6 +74,7 @@ type
    navigbackact: taction;
    tstockglyphbutton1: tstockglyphbutton;
    tstockglyphbutton2: tstockglyphbutton;
+   c: tstringcontainer;
    procedure formonidle(var again: boolean);
    procedure doselectpage(const sender: TObject);
 
@@ -672,12 +693,12 @@ begin
     with items[int1] do begin
      if filechanged then begin
       filechanged:= false;
-      wstr1:= 'File "'+filepath+'" has changed.';
+      wstr1:= c[ord(str_file)]+filepath+c[ord(haschanged)];
       if modified then begin
-       wstr1:= wstr1 + ' There are modifications in edit buffer also.'
+       wstr1:= wstr1 + ' '+ c[ord(modieditalso)];
       end;
-      wstr1:= wstr1 + ' Do you wish to reload from disk?';
-      if askok(wstr1,'Confirmation') then begin
+      wstr1:= wstr1 + ' '+c[ord(wishreload)];
+      if askok(wstr1,c[ord(confirmation)]) then begin
        filechanged:= false;
        reload;
        mainfo.sourcechanged(items[int1]);
@@ -964,7 +985,7 @@ begin
   caption:= page.caption;
  end
  else begin
-  caption:= '<none>';
+  caption:= c[ord(none)];
  end;
 end;
 
@@ -1341,12 +1362,12 @@ begin
   ar1:= breaklines(mstr1);
   mstr3:= messagestr(mstr1);
   for int1:= 0 to high(ar1)-1 do begin
-   ar1[int1]:= stringtopascalstring(ar1[int1])+'+linend+';
+   ar1[int1]:= stringtopascalstring(ar1[int1])+'+lineend+';
   end;
   ar1[high(ar1)]:= stringtopascalstring(ar1[high(ar1)]);  
   mstr2:= concatstrings(ar1,lineend);
   mstr4:= messagestr(mstr2);
-  if askyesno('Do you wish to replace:'+lineend+mstr3+lineend+'with:'+lineend+
+  if askyesno(c[ord(wishreplace)]+lineend+mstr3+lineend+c[ord(str_with)]+lineend+
         mstr4+lineend+'?') then begin
    editor.begingroup;
    deleteselection;

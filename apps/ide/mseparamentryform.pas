@@ -21,8 +21,12 @@ uses
  mseglob,mseguiglob,mseguiintf,mseapplication,msestat,msemenus,msegui,
  msegraphics,msegraphutils,mseevent,mseclasses,mseforms,msesimplewidgets,
  msewidgets,msedataedits,mseedit,msegrids,msestrings,msetypes,msewidgetgrid,
- msememodialog,msesplitter,msestatfile;
+ msememodialog,msesplitter,msestatfile,msestringcontainer;
 type
+ strinconsts = (
+  codetemplate   //0 Code Template "
+ );
+ 
  tmseparamentryfo = class(tmseform)
    grid: twidgetgrid;
    macroname: tstringedit;
@@ -32,6 +36,7 @@ type
    tbutton1: tbutton;
    comment: tlabel;
    tstatfile1: tstatfile;
+   c: tstringcontainer;
  end;
 var
  mseparamentryfo: tmseparamentryfo;

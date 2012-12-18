@@ -25,7 +25,7 @@ uses
  mseforms,msewidgetgrid,mselistbrowser,msedatanodes,msetypes,msemenus,mseevent,
  mseactions,msefiledialog,msestat,msegrids,msedesigner,msedataedits,
  msegraphutils,msegui,msestrings,mseact,mseguiglob,mseclasses,msebitmap,mseedit,
- mseglob,msegraphics,msescrollbar,msesys,msehash,mseifiglob;
+ mseglob,msegraphics,msescrollbar,msesys,msehash,mseifiglob,msestringcontainer;
 
 type
  projectnodety = (pnk_none,pnk_source,pnk_form,pnk_files,pnk_dir);
@@ -53,6 +53,7 @@ type
    nodeicons: timagelist;
    dummyimage: timagelist;
    editdiract: taction;
+   c: tstringcontainer;
    procedure projecteditonchange(const sender: TObject);
    procedure projecteditonstatreaditem(const sender: TObject; 
                 const reader: tstatreader; var aitem: ttreelistitem);
@@ -289,10 +290,20 @@ implementation
 uses
  sysutils,projecttreeform_mfm,msefileutils,main,sourceform,msewidgets,
  msedatalist,msedrag,sourceupdate,msemacros,projectoptionsform;
+type
+ stringconsts = (
+  pascalunits,       //0 Pascal Units
+  str_cmodules,      //1 C Modules
+  textfiles,         //2 Text Files
+  wishremove,        //3 Do you wish to remove "
+  selectdirectory,   //4 Select Directory
+  wantremove,        //5 Do you want to remove
+  withsubitems       //6 with the sub-items from project?
+ );
 const
- unitscaption = 'Pascal Units';
- cmodulescaption = 'C Modules';
- filescaption = 'Text Files';
+// unitscaption = 'Pascal Units';
+// cmodulescaption = 'C Modules';
+// filescaption = 'Text Files';
  mainico = -1;
  fileico = 0;
  unitico = 2;
@@ -580,7 +591,7 @@ begin
  fhashlist:= tfilenodehashlist.create;
  inherited create(pnk_files);
  fstate:= fstate + [ns_readonly,ns_drawemptybox];
- caption:= filescaption;
+ caption:= projecttreefo.c[ord(textfiles)];
 end;
 
 destructor tfilesnode.destroy;
@@ -773,7 +784,7 @@ end;
 constructor tunitsnode.create;
 begin
  inherited create;
- caption:= unitscaption;
+ caption:= projecttreefo.c[ord(pascalunits)];
  fnamelist:= tnamehashlist.create;
  fclasstypelist:= tnamehashlist.create;
 end;
@@ -938,7 +949,7 @@ end;
 constructor tcmodulesnode.create;
 begin
  inherited;
- caption:= cmodulescaption;
+ caption:= projecttreefo.c[ord(str_cmodules)];
 end;
 
 procedure tcmodulesnode.parse(const astopcheckproc: stopcheckprocty);
@@ -1072,9 +1083,9 @@ begin
   projecttreefo.funitloading:= false;
   projecttreefo.projectedit.itemlist.updatenode('cmodules',filer,fcmodules);
   projecttreefo.projectedit.itemlist.updatenode('files',filer,ffiles);
-  funits.caption:= unitscaption;
-  fcmodules.caption:= cmodulescaption;
-  ffiles.caption:= filescaption;
+  funits.caption:= projecttreefo.c[ord(pascalunits)];
+  fcmodules.caption:= projecttreefo.c[ord(str_cmodules)];
+  ffiles.caption:= projecttreefo.c[ord(textfiles)];
  finally
   projecttreefo.projectedit.itemlist.endupdate;
  end;
@@ -1186,9 +1197,9 @@ end;
 
 procedure tprojecttreefo.projecttreefoonloaded(const sender: tobject);
 begin
- projecttree.units.caption:= unitscaption;
- projecttree.files.caption:= filescaption;
- projecttree.cmodules.caption:= cmodulescaption;
+ projecttree.units.caption:= projecttreefo.c[ord(pascalunits)];
+ projecttree.files.caption:= projecttreefo.c[ord(textfiles)];
+ projecttree.cmodules.caption:= projecttreefo.c[ord(str_cmodules)];
  projectedit.itemlist.add(ttreelistedititem(projecttree.units));
  projectedit.itemlist.add(ttreelistedititem(projecttree.cmodules));
  projectedit.itemlist.add(ttreelistedititem(projecttree.files));
@@ -1240,7 +1251,7 @@ var
  rnode: ttreelistitem;
 begin
  with tfilenode(projectedit.item) do begin
-  if askok('Do you wish to remove "'+ ffilename +
+  if askok(c[ord(wishremove)]+ ffilename +
             '"?','') then begin
    if sourcefo.closepage(fpath) then begin
     rowbefore:= grid.row;
@@ -1286,7 +1297,8 @@ var
 begin
  with mainfo.openfile.controller do begin
   filename:= gettreedir;
-  if execute(fdk_open,'Select Directory',[fdo_directory]) = mr_ok then begin
+  if execute(fdk_open,c[ord(selectdirectory)],
+                                [fdo_directory]) = mr_ok then begin
    int1:= addirectory(filename).index;
    if int1 >= 0 then begin
     grid.row:= int1;
@@ -1298,9 +1310,9 @@ end;
 procedure tprojecttreefo.remdirexe(const sender: TObject);
  
 begin
- if askyesno('Do you want to remove '+lineend+
+ if askyesno(c[ord(wantremove)]+' '+lineend+
     tfilenode(projectedit.item).fpath+lineend+
-    'with the sub-items from project?') then begin
+    c[ord(withsubitems)]) then begin
   tfilesnode(projectedit.item.rootnode).removefile(tdirnode(projectedit.item));
   projectedit.item.free;
  end;
@@ -1377,7 +1389,7 @@ begin
  no1:= tfilenode(projectedit.item);
  fn1:= no1.path;
  with mainfo.openfile.controller do begin
-  if execute(fn1,fdk_open,'Select Directory',[fdo_directory]) then begin
+  if execute(fn1,fdk_open,c[ord(selectdirectory)],[fdo_directory]) then begin
    no1.filename:= relativepath(fn1,no1.parentpath);
   end;
  end;

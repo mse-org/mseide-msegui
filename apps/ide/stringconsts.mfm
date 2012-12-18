@@ -1,0 +1,11 @@
+object s: tstringconstsmo
+  bounds_cx = 287
+  bounds_cy = 100
+  left = 100
+  top = 100
+  moduleclassname = 'tmsedatamodule'
+  object c: tstringcontainer
+    left = 16
+    top = 16
+  end
+end

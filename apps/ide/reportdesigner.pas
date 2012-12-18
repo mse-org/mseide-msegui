@@ -4,7 +4,8 @@ interface
 uses
  classes,msegui,mseclasses,mseforms,formdesigner,msesimplewidgets,msetabs,
  msesplitter,msegraphutils,msedesigner,msedesignintf,msereport,msetypes,
- mseevent,mseglob,mseguiglob,msemenus,msedial,msedispwidgets,mseact;
+ mseevent,mseglob,mseguiglob,msemenus,msedial,msedispwidgets,mseact,
+ msestringcontainer,msestrings;
 
 const
  updatetabtag = 83684;
@@ -30,6 +31,7 @@ type
    tspacer2: tspacer;
    tspacer3: tspacer;
    tpopupmenu2: tpopupmenu;
+   sc: tstringcontainer;
    procedure repchildscaled(const sender: TObject);
    procedure tabcha(const sender: TObject);
    procedure tabmo(const sender: TObject; var curindex: Integer;
@@ -86,6 +88,11 @@ implementation
 uses
  reportdesigner_mfm,msearrayutils,msegraphics,msewidgets,msereal;
 type
+ stringconsts = (
+  sc_wishdelete,     //0 Do you wish to delete
+  sc_warning         //1 WARNING
+ );
+ 
  tcustomreport1 = class(tcustomreport);
  
 { treportcontainer }
@@ -290,8 +297,8 @@ var
  comp1: tcomponent;
 begin
  comp1:= report[tabbar.activetab];
- if askok('Do you wish to delete '''+
-                          comp1.name+'''?','WARNING',mr_cancel) then begin
+ if askok(sc[ord(sc_wishdelete)]+' '''+
+               comp1.name+'''?',sc[ord(sc_warning)],mr_cancel) then begin
 //  designer.deletecomponent(comp1);
   deletecomponent(comp1);
   updatetabs;

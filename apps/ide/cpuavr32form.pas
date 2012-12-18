@@ -4,7 +4,8 @@ interface
 uses
  classes,mseglob,mseguiglob,mseapplication,msestat,msemenus,msegui,msegraphics,
  msegraphutils,mseevent,mseclasses,mseforms,cpuform,msesplitter,msedataedits,
- mseedit,msestrings,msetypes,msegraphedits,msesimplewidgets,msewidgets;
+ mseedit,msestrings,msetypes,msegraphedits,msesimplewidgets,msewidgets,
+ msestringcontainer;
 
 type
  tcpuavr32fo = class(tcpufo)
@@ -52,6 +53,7 @@ type
    sp: tintegeredit;
    lr: tintegeredit;
    pc: tintegeredit;
+   cs: tstringcontainer;
    procedure regsetvalue(const sender: TObject; var avalue: Integer;
                    var accept: Boolean);
    procedure flagssetvalue(const sender: TObject; var avalue: Boolean;
@@ -80,6 +82,11 @@ implementation
 uses
  cpuavr32form_mfm,main,msegdbutils,sourceform,mseformatstr,sysutils,
  disassform;
+type
+ stringconsts = (
+  retad,          //0 Return address:
+  exceptreturn    //1 Exception return
+ );
  
 const
  modebits =   $01c00000;
@@ -173,10 +180,10 @@ procedure tcpuavr32fo.checkexcept(const sender: TObject);
     mstr1:= mstr1+lineend+mstr1;
    end
    else begin
-    mstr1:= mstr1+lineend+'Return address: '+str1;
+    mstr1:= mstr1+lineend+cs[ord(retad)]+' '+str1;
    end;
   end;
-  showmessage(mstr1,'Exception return');
+  showmessage(mstr1,cs[ord(exceptreturn)]);
  end;
 
 var

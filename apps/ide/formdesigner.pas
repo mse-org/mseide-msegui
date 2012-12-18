@@ -24,7 +24,7 @@ uses
  msedesignintf,mseclasses,msemenuwidgets,msemenus,msefiledialog,msedesigner,
  typinfo,componentpaletteform,msestrings,msewidgets,
  mseglob{$ifndef mse_no_db}{$ifdef FPC},msereport{$endif}{$endif},msetimer,
- mseact,mseactions,mseifiglob;
+ mseact,mseactions,mseifiglob,msestringcontainer;
 
 type
  areaty = (ar_none,ar_component,ar_componentmove,ar_selectrect,ht_topleft,
@@ -106,6 +106,7 @@ type
    hidewidgetact: taction;
    togglehideact: taction;
    showallact: taction;
+   c: tstringcontainer;
    procedure doshowobjectinspector(const sender: tobject);
    procedure doshowcomponentpalette(const sender: tobject);
    procedure doshowastext(const sender: tobject);
@@ -363,9 +364,14 @@ uses
  formdesigner_mfm,mselist,msekeyboard,msepointer,msebits,sysutils,
  msestockobjects,msedrawtext,selectsubmoduledialogform,mseshapes,settaborderform,
  msedatalist,objectinspector,projectoptionsform,main,msedatamodules,msetypes,
-setcreateorderform,componentstore,msearrayutils;
+ setcreateorderform,componentstore,msearrayutils,actionsmodule;
 
 type
+ stringconsts = (
+  wishrevert,        //0 Do you wish to revert to inherited
+  selectedcomp       //1 the selected component?
+ );
+ 
  tcomponent1 = class(tcomponent);
  tmsecomponent1 = class(tmsecomponent);
  twidget1 = class(twidget);
@@ -448,7 +454,7 @@ begin
    end;
   end;
  end;
- raise exception.Create('Unknown moduleclass for "'+ aclassname^ +'": "'+
+ raise exception.Create(actionsmo.c[ord(ac_unknownmodclass)]+ aclassname^ +'": "'+
               designmoduleclassname+'".');
 end;
 
@@ -1643,8 +1649,8 @@ begin
   for int1:= 0 to count - 1 do begin
    with items[int1] do begin
     if componentstate * [csancestor,csinline] = [csancestor] then begin
-     showmessage('Inherited component "'+name+
-                     '" can not be deleted.','ERROR');
+     showmessage(actionsmo.c[ord(ac_inheritedcomp)]+name+
+                     actionsmo.c[ord(ac_cannotdel)],actionsmo.c[ord(ac_error)]);
      exit;
     end;             
    end;
@@ -3344,8 +3350,7 @@ end;
 
 procedure tformdesignerfo.revertexe(const sender: TObject);
 begin
- if askok('Do you wish to revert to inherited'+lineend+
-          'the selected component?') then begin
+ if askok(c[ord(wishrevert)]+lineend+c[ord(selectedcomp)]) then begin
   fdesigner.revert(tdesignwindow(window).fselections[0]);
   objectinspectorfo.refresh;
  end;

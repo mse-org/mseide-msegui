@@ -43,7 +43,7 @@ uses
  msesysutils,msegraphics,messageform,msedesignintf,msedesigner,
  mseprocmonitor,mseevent,
  msetypes,classes,mseclasses,mseapplication,msestream,
- msegui;
+ msegui,actionsmodule;
  
 type
  tprogrunner = class(tactcomponent)
@@ -158,7 +158,7 @@ procedure abortmake;
 begin
  if maker <> nil then begin
   killmake;
-  mainfo.setstattext('Make aborted.',mtk_error);
+  mainfo.setstattext(actionsmo.c[ord(ac_makeaborted)],mtk_error);
  end;
 end;
 
@@ -166,7 +166,7 @@ procedure abortdownload;
 begin
  if loader <> nil then begin
   killload;
-  mainfo.setstattext('Download aborted.',mtk_error);
+  mainfo.setstattext(actionsmo.c[ord(ac_downloadaborted)],mtk_error);
  end;
 end;
 
@@ -301,7 +301,8 @@ begin
      fexitcode:= eoserror(e).error;
 {$warnings on}
     end;
-    application.handleexception(nil,'Runerror with "'+acommandline+'": ');
+    application.handleexception(nil,actionsmo.c[ord(ac_runerrorwith)]+
+                                                          acommandline+'": ');
    end;
   end;
   if fsetmakedir and (makedir <> '') then begin
@@ -313,7 +314,7 @@ end;
 procedure tprogrunner.doasyncevent(var atag: integer);
 begin
  if not getprocessexitcode(procid,fexitcode,5000000) then begin
-  messagefo.messages.appendrow(['Error: Timeout.']);
+  messagefo.messages.appendrow([actionsmo.c[ord(ac_errortimeout)]]);
   messagefo.messages.appendrow(['']);
   killprocess(procid);
  end;
@@ -375,12 +376,12 @@ begin
  fcurrentdir:= getcurrentdirmse;
  inherited create(nil,true,true);
  if procid <> invalidprochandle then begin
-  mainfo.setstattext('Making.',mtk_running);
+  mainfo.setstattext(actionsmo.c[ord(ac_making)],mtk_running);
   messagefo.messages.font.options:= messagefo.messages.font.options +
                                                       [foo_nonantialiased];
  end
  else begin
-  mainfo.setstattext('Make not running.',mtk_error);
+  mainfo.setstattext(actionsmo.c[ord(ac_makenotrunning)],mtk_error);
   designnotifications.aftermake(idesigner(designer),fexitcode);
  end;
 end;
@@ -470,10 +471,10 @@ constructor tloader.create(aowner: tcomponent);
 begin
  inherited create(aowner,false,true);
  if procid <> invalidprochandle then begin
-  mainfo.setstattext('Downloading.',mtk_running);
+  mainfo.setstattext(actionsmo.c[ord(ac_downloading)],mtk_running);
  end
  else begin
-  mainfo.setstattext('Download not running.',mtk_error);
+  mainfo.setstattext(actionsmo.c[ord(ac_downloadnotrunning)],mtk_error);
  end;
 end;
 
@@ -502,8 +503,9 @@ begin
  messagefo.messages.appendrow('');
  inherited create(aowner,false,setmakedir);
  if not fcanceled then begin
-  fcanceled:= not application.waitdialog(nil,'"'+ascriptpath+'" running.',
-     'Script',nil,nil,nil);
+  fcanceled:= not application.waitdialog(nil,'"'+ascriptpath+
+               actionsmo.c[ord(ac_running)],
+     actionsmo.c[ord(ac_script)],nil,nil,nil);
  end;
 end;
 

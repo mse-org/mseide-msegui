@@ -22,9 +22,73 @@ interface
 uses
  mseclasses,mseact,mseactions,msebitmap,msestrings,msegui,msedatamodules,
  mseglob,msestat,mseifiglob,msegraphics,msegraphutils,mseguiglob,msemenus,
- msesimplewidgets,msewidgets,projecttreeform;
+ msesimplewidgets,msewidgets,projecttreeform,msestringcontainer;
  
 type
+ stringconsts = (
+  ac_configuremseide, //0 Configure MSEide
+  ac_processid,       //1 Process ID
+  ac_attachtoprocess, //2 Attach to process
+  ac_unknownmodclass, //3 Unknown moduleclass for "
+  ac_inheritedcomp,   //4 Inherited component "
+  ac_cannotdel,       //5 " can not be deleted.
+  ac_error,           //6 ERROR
+  ac_makeaborted,     //7 Make aborted.
+  ac_downloadaborted, //8 Download aborted.
+  ac_runerrorwith,    //9 Runerror with "
+  ac_errortimeout,    //10 Error: Timeout.
+  ac_making,          //11 Making.
+  ac_makenotrunning,  //12 Make not running.
+  ac_downloading,     //13 Downloading.
+  ac_downloadnotrunning, //14 Download not running.
+  ac_running,         //15 " running.
+  ac_script,         //16 Script
+  ac_recursiveforminheritance, //17 Recursive form inheritance of "
+  ac_component,      //18 Component "
+  ac_exists,         //19 " exists.
+  ac_ancestorfor,    //20 Ancestor for "
+  ac_notfound,       //21 " not found.
+  ac_module,         //22 Module "
+  ac_invalidname,    //23 Invalid name "
+  ac_invalidmethodname, //24 Invalid methodname
+  ac_modulenotfound, //25 Module not found
+  ac_methodnotfound, //26 Method not found
+  ac_publishedmeth,  //27 Published (managed) method
+  ac_doesnotexist,   //28 does not exist.
+  ac_wishdelete,     //29 Do you wish to delete the event?
+  ac_warning,        //30 WARNING
+  ac_method,         //31 Method
+  ac_differentparams,   //32 has different parameters.
+  ac_amodule,        //33 A module "
+  ac_isopen,         //34 " is already open.
+  ac_unresolvedref,   //35 Unresolved reference(s) to
+  ac_modules,        //36 Module(s):
+  ac_cannotreadform, //37 Can not read formfile "
+  ac_invalidcompname,//38 Invalid component name.
+  ac_invalidexception, //39 Invalid exception
+  ac_tools,           //40 T&ools
+  ac_forms,           //41 Forms
+  ac_source,          //42 Source
+  ac_allfiles,        //43 All Files
+  ac_program,         //44 Program
+  ac_unit,            //45 Unit
+  ac_textfile,        //46 Textfile
+  ac_mainform,        //47 Mainform
+  ac_simpleform,      //48 Simple Form
+  ac_dockingform,     //49 Docking Form
+  ac_datamodule,      //50 Datamodule
+  ac_subform,         //51 Subform
+  ac_scrollboxform,   //52 Scrollboxform
+  ac_tabform,         //53 Tabform
+  ac_dockpanel,       //54 Dockpanel
+  ac_report,          //55 Report
+  ac_scriptform,      //56 Scriptform
+  ac_inheritedform,   //57 Inherited Form
+  ac_replacesettings, //58 Do you want to replace the settings by
+  ac_file,            //59 File "
+  ac_wantoverwrite    //60 Do you want to overwrite?
+ );
+
  tactionsmo = class(tmsedatamodule)
    buttonicons: timagelist;
 
@@ -116,6 +180,7 @@ type
    projectsourceact: taction;
    projectsaveact: taction;
    projectcloseact: taction;
+   c: tstringcontainer;
    procedure findinfileonexecute(const sender: tobject);
 
    //file
@@ -195,10 +260,11 @@ uses
  projectoptionsform,findinfileform,breakpointsform,watchform,selecteditpageform,
  disassform,printform,msegdbutils,mseintegerenter,msesettings,
  componentstore,cpuform;
-
+ 
 procedure configureide;
 begin
- if editsettings('Configure MSEide',actionsmo.shortcuts) then begin
+ if editsettings(actionsmo.c[ord(ac_configuremseide)],
+                                      actionsmo.shortcuts) then begin
   expandprojectmacros;
  end;
 end;
@@ -542,8 +608,8 @@ var
 begin
  with mainfo do begin
   int1:= 0;
-  if integerenter(int1,minint,maxint,
-          'Process ID','Attach to process') = mr_ok then begin
+  if integerenter(int1,minint,maxint,c[ord(ac_processid)],
+                                  c[ord(ac_attachtoprocess)]) = mr_ok then begin
    startgdb(false);
    gdb.attach(int1,info);
    loadexec(true,false);

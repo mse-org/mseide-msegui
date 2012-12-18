@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-20012 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -36,7 +36,7 @@ type
 
 implementation
 uses
- msestringlisteditor_mfm;
+ msestringlisteditor_mfm,mseeditglob,msetypes;
  
 { tstringlisteditor }
 

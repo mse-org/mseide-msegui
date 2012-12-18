@@ -21,7 +21,7 @@ unit watchpointsform;
 interface
 uses
  msegui,mseclasses,mseforms,msedataedits,msegraphedits,msewidgetgrid,msestat,
- msegdbutils,msesimplewidgets,msemenus,msestrings,msegrids;
+ msegdbutils,msesimplewidgets,msemenus,msestrings,msegrids,msestringcontainer;
 
 type
  twatchpointsfo = class(tdockform)
@@ -35,6 +35,7 @@ type
    wptexpression: tstringedit;
    wpton: tbooleanedit;
    grid: twidgetgrid;
+   c: tstringcontainer;
    procedure wptondataentered(const sender: TObject);
    procedure wptononsetvalue(const sender: TObject; var avalue: Boolean;
                         var accept: Boolean);
@@ -59,7 +60,15 @@ implementation
 
 uses
  watchpointsform_mfm,projectoptionsform,msewidgets,breakpointsform;
-
+type
+ stringconstants = (
+  watcherror,        //0 Watchpoint error.
+  watcherror2,       //1 WATCHPOINT ERROR
+  programnotloaded,  //2 Program not loaded.
+  deleteall,         //3 Do you wish to delete all watchpoints?
+  confirmation       //4 Confirmation
+ );
+ 
 { twatchpointsfo }
 
 procedure twatchpointsfo.refresh(const breakpoints: breakpointinfoarty);
@@ -108,9 +117,9 @@ begin
    str1:= gdb.errormessage;
   end
   else begin
-   str1:= 'Watchpoint error.';
+   str1:= c[ord(watcherror)];
   end;
-  showmessage(str1,'WATCHPOINT ERROR');
+  showmessage(str1,c[ord(watcherror2)]);
  end;
 end;
 
@@ -157,7 +166,7 @@ begin
   end;
  end
  else begin
-  showerror('Program not loaded.');
+  showerror(c[ord(programnotloaded)]);
  end;
 end;
 
@@ -165,7 +174,7 @@ procedure twatchpointsfo.deleteallonexecute(const sender: TObject);
 var
  int1,int2: integer;
 begin
- if askok('Do you wish to delete all watchpoints?','Confirmation') then begin
+ if askok(c[ord(deleteall)],c[ord(confirmation)]) then begin
   int1:= 0;
   int2:= grid.rowcount;
   deleterow(nil,int1,int2);

@@ -590,7 +590,8 @@ uses
  designer_bmp,msesys,msewidgets,formdesigner,objectinspector,
  msefiledialog,projectoptionsform,sourceupdate,sourceform,sourcepage,
  pascaldesignparser,msearrayprops,rtlconsts,msedatamodules,
- msesimplewidgets,msesysutils,mseobjecttext,msestreaming,msedatanodes,main;
+ msesimplewidgets,msesysutils,mseobjecttext,msestreaming,msedatanodes,main,
+ actionsmodule;
 
 const
  renewbackuptag = 0;
@@ -1419,8 +1420,8 @@ var
 
 begin
  if modifylevel >= 16 then begin
-  showmessage('Recursive form inheritance of "'+
-                              amodule^.filename+'".','ERROR');
+  showmessage(actionsmo.c[ord(ac_recursiveforminheritance)]+
+                  amodule^.filename+'".',actionsmo.c[ord(ac_error)]);
   sysutils.abort;
  end;
  if modifylevel = 0 then begin
@@ -1715,8 +1716,8 @@ var
  begin
   if aancestor <> nil then begin
    if reclevel >= 16 then begin
-    showmessage('Recursive form inheritance of "'+
-                                amodule^.filename+'".','ERROR');
+    showmessage(actionsmo.c[ord(ac_recursiveforminheritance)]+
+                       amodule^.filename+'".',actionsmo.c[ord(ac_error)]);
     sysutils.abort;
    end;
    inc(reclevel);
@@ -1743,8 +1744,8 @@ var
  begin
   if aancestor <> nil then begin
    if reclevel >= 16 then begin
-    showmessage('Recursive form inheritance of "'+
-                                amodule^.filename+'".','ERROR');
+    showmessage(actionsmo.c[ord(ac_recursiveforminheritance)]+
+                 amodule^.filename+'".',actionsmo.c[ord(ac_error)]);
     sysutils.abort;
    end;
    inc(reclevel);
@@ -1753,8 +1754,9 @@ var
     if po1^.ancestor = aancestor^.instance then begin
      comp1:= findnestedcomponent(po1^.descendent,newpath);
      if comp1 <> nil then begin
-      raise exception.create(po1^.descendent.name+': Component "'+
-             newpath+'" exists.');
+      raise exception.create(po1^.descendent.name+': '+
+             actionsmo.c[ord(ac_component)]+
+             newpath+actionsmo.c[ord(ac_exists)]);
      end;
      donamechange(fdesigner.modules.findmodule(po1^.descendent));
     end;
@@ -2483,7 +2485,8 @@ begin
    if ainherited then begin
     po1:= fdesigner.getinheritedmodule(designmoduleclassname);
     if po1 = nil then begin
-     raise exception.create('Ancestor for "'+designmoduleclassname+'" not found.');
+     raise exception.create(actionsmo.c[ord(ac_ancestorfor)]+
+           designmoduleclassname+actionsmo.c[ord(ac_notfound)]);
     end;
     fdesigner.beginstreaming(po1);
     try
@@ -3417,7 +3420,8 @@ function tdesigner.checkmodule(const filename: msestring): pmoduleinfoty;
 begin
  result:= fmodules.findmodule(filename);
  if result = nil then begin
-  raise exception.Create('Module "'+filename+'" not found');
+  raise exception.Create(actionsmo.c[ord(ac_module)]+
+                          filename+actionsmo.c[ord(ac_notfound)]);
  end;
 end;
 
@@ -3467,7 +3471,7 @@ end;
 procedure tdesigner.checkident(const aname: string);
 begin
  if not isvalidident(aname) or (aname = '') then begin
-  raise exception.Create('Invalid name "'+aname+'".');
+  raise exception.Create(actionsmo.c[ord(ac_invalidname)]+aname+'".');
  end;
 end;
 
@@ -3910,14 +3914,15 @@ var
  oldname: string;
 begin
  if not isvalidident(newname) then begin
-  raise exception.Create('Invalid methodname '''+newname+'''.');
+  raise exception.Create(actionsmo.c[ord(ac_invalidmethodname)]+' '''+
+                                                            newname+'''.');
  end;
  getmethodinfo(method,po2,po1);
  if po2 = nil then begin
-  raise exception.Create('Module not found');
+  raise exception.Create(actionsmo.c[ord(ac_modulenotfound)]);
  end;
  if po1 = nil then begin
-  raise exception.Create('Method not found');
+  raise exception.Create(actionsmo.c[ord(ac_methodnotfound)]);
  end;
  oldname:= po1^.name;
  po1^.name:= newname;
@@ -4260,16 +4265,19 @@ var
         end;
         mr1:= mr_none;
         if (po2 = nil) or not po2^.managed then begin
-         mr1:= askyesnocancel('Published (managed) method '+
+         mr1:= askyesnocancel(actionsmo.c[ord(ac_publishedmeth)]+ ' '+
                  amodule^.instance.name+'.'+po1^.name+' ('+
-                 comp1.name+'.'+ar1[int1]^.name+') does not exist.'+lineend+
-                 'Do you wish to delete the event?','WARNING');
+                 comp1.name+'.'+ar1[int1]^.name+') '+
+                 actionsmo.c[ord(ac_doesnotexist)]+lineend+
+                 actionsmo.c[ord(ac_wishdelete)],actionsmo.c[ord(ac_warning)]);
         end
         else begin
          if not parametersmatch(po1^.typeinfo,po2^.params) then begin
-           mr1:= askyesnocancel('Method '+amodule^.instance.name+'.'+po1^.name+' ('+
-                 comp1.name+'.'+ar1[int1]^.name+') has different parameters.'+lineend+
-                 'Do you wish to delete the event?','WARNING');
+           mr1:= askyesnocancel(actionsmo.c[ord(ac_method)]+
+                ' '+amodule^.instance.name+'.'+po1^.name+' ('+
+                 comp1.name+'.'+ar1[int1]^.name+') '+
+                 actionsmo.c[ord(ac_differentparams)]+lineend+
+                 actionsmo.c[ord(ac_wishdelete)],actionsmo.c[ord(ac_warning)]);
          end;
         end;
         if mr1 = mr_yes then begin
@@ -4463,7 +4471,8 @@ begin //loadformfile
       if skipexisting and issamefilepath(result^.filename,filename) then begin
        exit;
       end;
-      raise exception.create('A module "'+modulename+'" is already open.');
+      raise exception.create(actionsmo.c[ord(ac_amodule)]+modulename+
+                            actionsmo.c[ord(ac_isopen)]);
      end;
      stream2.Position:= 0;
      loadingdesignerbefore:= loadingdesigner;
@@ -4574,8 +4583,9 @@ begin //loadformfile
           for int1:= 1 to rootnames.Count - 1 do begin
            wstr1:= wstr1 + ','+rootnames[int1];
           end;
-          raise exception.Create('Unresolved reference(s) to '+lastmissed+lineend+
-          'Module(s): '+wstr1+'.');
+          raise exception.Create(actionsmo.c[ord(ac_unresolvedref)]+' '+
+                                                       lastmissed+lineend+
+                          actionsmo.c[ord(ac_modules)]+' '+wstr1+'.');
          end;
          result^.resolved:= true;
         except
@@ -4609,7 +4619,8 @@ begin //loadformfile
      end;
     except
      on e: exception do begin
-      e.Message:= 'Can not read formfile "'+filename+'".'+lineend+e.Message;
+      e.Message:= actionsmo.c[ord(ac_cannotreadform)]+filename+'".'+
+                                                       lineend+e.Message;
       raise;
      end;
     end;
@@ -4633,8 +4644,8 @@ begin //loadformfile
           str1:= '';
          end;
          exp1:= exception.create(
-             'Can not read formfile "'+filename+'".'+lineend+
-             'Unresolved reference(s) to '+rootnames[0]+str1+'.');
+             actionsmo.c[ord(ac_cannotreadform)]+filename+'".'+lineend+
+             actionsmo.c[ord(ac_unresolvedref)]+rootnames[0]+str1+'.');
         end;
         instance.free;
         fmodules.removemoduleinfo(fcheckfixups[high(fcheckfixups)]);
@@ -5459,7 +5470,7 @@ begin
   po1:= findcomponentmodule(acomponent);
   if po1 <> nil then begin
    if newname = '' then begin
-    raise exception.Create('Invalid component name,');
+    raise exception.Create(actionsmo.c[ord(ac_invalidcompname)]);
    end;
    if acomponent.name <> newname then begin
     if stringicomp(acomponent.name,newname) <> 0 then begin
@@ -5554,7 +5565,8 @@ begin
   comp1:= reader.root;
  end;
  with exception(ExceptObject) do begin
-  message:= 'Component "'+ownernamepath(comp1)+'":'+lineend+message;
+  message:= actionsmo.c[ord(ac_component)]+
+                            ownernamepath(comp1)+'":'+lineend+message;
  end;
 end;
 

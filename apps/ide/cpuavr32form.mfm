@@ -26,7 +26,7 @@ inherited cpuavr32fo: tcpuavr32fo
     bounds_x = 0
     bounds_y = 18
     bounds_cx = 243
-    bounds_cy = 254
+    bounds_cy = 252
     optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
     linktop = stoptime
     object tbooleanedit16: tbooleanedit
@@ -510,7 +510,7 @@ inherited cpuavr32fo: tcpuavr32fo
       optionswidget1 = [ow1_autowidth, ow1_autoheight]
       taborder = 22
       bounds_x = 112
-      bounds_y = 234
+      bounds_y = 225
       bounds_cx = 113
       bounds_cy = 20
       state = [as_disabled, as_localdisabled, as_localcaption, as_localonexecute]
@@ -523,7 +523,7 @@ inherited cpuavr32fo: tcpuavr32fo
       bounds_x = 113
       bounds_y = 40
       bounds_cx = 114
-      bounds_cy = 168
+      bounds_cy = 160
       optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
       font.name = 'stf_default'
       font.xscale = 1
@@ -549,7 +549,6 @@ inherited cpuavr32fo: tcpuavr32fo
         bounds_x = 0
         bounds_y = 0
         bounds_cx = 107
-        bounds_cy = 21
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
@@ -557,7 +556,7 @@ inherited cpuavr32fo: tcpuavr32fo
         onsetvalue = regsetvalue
         base = nb_hex
         max = -1
-        reffontheight = 17
+        reffontheight = 16
       end
       object r7: tintegeredit
         optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -575,9 +574,8 @@ inherited cpuavr32fo: tcpuavr32fo
         )
         taborder = 1
         bounds_x = 0
-        bounds_y = 21
+        bounds_y = 20
         bounds_cx = 107
-        bounds_cy = 21
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
@@ -585,7 +583,7 @@ inherited cpuavr32fo: tcpuavr32fo
         onsetvalue = regsetvalue
         base = nb_hex
         max = -1
-        reffontheight = 17
+        reffontheight = 16
       end
       object r8: tintegeredit
         optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -603,9 +601,8 @@ inherited cpuavr32fo: tcpuavr32fo
         )
         taborder = 2
         bounds_x = 0
-        bounds_y = 42
+        bounds_y = 40
         bounds_cx = 107
-        bounds_cy = 21
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
@@ -613,7 +610,7 @@ inherited cpuavr32fo: tcpuavr32fo
         onsetvalue = regsetvalue
         base = nb_hex
         max = -1
-        reffontheight = 17
+        reffontheight = 16
       end
       object r11: tintegeredit
         optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -631,9 +628,8 @@ inherited cpuavr32fo: tcpuavr32fo
         )
         taborder = 5
         bounds_x = 0
-        bounds_y = 105
+        bounds_y = 100
         bounds_cx = 114
-        bounds_cy = 21
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
@@ -641,7 +637,7 @@ inherited cpuavr32fo: tcpuavr32fo
         onsetvalue = regsetvalue
         base = nb_hex
         max = -1
-        reffontheight = 17
+        reffontheight = 16
       end
       object r10: tintegeredit
         optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -659,9 +655,8 @@ inherited cpuavr32fo: tcpuavr32fo
         )
         taborder = 4
         bounds_x = 0
-        bounds_y = 84
+        bounds_y = 80
         bounds_cx = 114
-        bounds_cy = 21
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
@@ -669,7 +664,7 @@ inherited cpuavr32fo: tcpuavr32fo
         onsetvalue = regsetvalue
         base = nb_hex
         max = -1
-        reffontheight = 17
+        reffontheight = 16
       end
       object r9: tintegeredit
         optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -687,9 +682,8 @@ inherited cpuavr32fo: tcpuavr32fo
         )
         taborder = 3
         bounds_x = 0
-        bounds_y = 63
+        bounds_y = 60
         bounds_cx = 107
-        bounds_cy = 21
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
@@ -697,7 +691,7 @@ inherited cpuavr32fo: tcpuavr32fo
         onsetvalue = regsetvalue
         base = nb_hex
         max = -1
-        reffontheight = 17
+        reffontheight = 16
       end
       object r12: tintegeredit
         optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -715,9 +709,8 @@ inherited cpuavr32fo: tcpuavr32fo
         )
         taborder = 6
         bounds_x = 0
-        bounds_y = 126
+        bounds_y = 120
         bounds_cx = 114
-        bounds_cy = 21
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
@@ -725,7 +718,7 @@ inherited cpuavr32fo: tcpuavr32fo
         onsetvalue = regsetvalue
         base = nb_hex
         max = -1
-        reffontheight = 17
+        reffontheight = 16
       end
       object sr: tintegeredit
         optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -743,9 +736,8 @@ inherited cpuavr32fo: tcpuavr32fo
         )
         taborder = 7
         bounds_x = 0
-        bounds_y = 147
+        bounds_y = 140
         bounds_cx = 107
-        bounds_cy = 21
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
@@ -754,7 +746,7 @@ inherited cpuavr32fo: tcpuavr32fo
         onsetvalue = regsetvalue
         base = nb_hex
         max = -1
-        reffontheight = 17
+        reffontheight = 16
       end
     end
     object tlayouter1: tlayouter
@@ -763,7 +755,7 @@ inherited cpuavr32fo: tcpuavr32fo
       bounds_x = 0
       bounds_y = 40
       bounds_cx = 110
-      bounds_cy = 189
+      bounds_cy = 180
       optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
       font.name = 'stf_default'
       font.xscale = 1
@@ -790,9 +782,8 @@ inherited cpuavr32fo: tcpuavr32fo
         )
         taborder = 1
         bounds_x = 0
-        bounds_y = 21
+        bounds_y = 20
         bounds_cx = 107
-        bounds_cy = 21
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
@@ -800,7 +791,7 @@ inherited cpuavr32fo: tcpuavr32fo
         onsetvalue = regsetvalue
         base = nb_hex
         max = -1
-        reffontheight = 17
+        reffontheight = 16
       end
       object r0: tintegeredit
         optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -819,7 +810,6 @@ inherited cpuavr32fo: tcpuavr32fo
         bounds_x = 0
         bounds_y = 0
         bounds_cx = 107
-        bounds_cy = 21
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
@@ -827,7 +817,7 @@ inherited cpuavr32fo: tcpuavr32fo
         onsetvalue = regsetvalue
         base = nb_hex
         max = -1
-        reffontheight = 17
+        reffontheight = 16
       end
       object r4: tintegeredit
         optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -845,9 +835,8 @@ inherited cpuavr32fo: tcpuavr32fo
         )
         taborder = 4
         bounds_x = 0
-        bounds_y = 84
+        bounds_y = 80
         bounds_cx = 107
-        bounds_cy = 21
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
@@ -855,7 +844,7 @@ inherited cpuavr32fo: tcpuavr32fo
         onsetvalue = regsetvalue
         base = nb_hex
         max = -1
-        reffontheight = 17
+        reffontheight = 16
       end
       object r3: tintegeredit
         optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -873,9 +862,8 @@ inherited cpuavr32fo: tcpuavr32fo
         )
         taborder = 3
         bounds_x = 0
-        bounds_y = 63
+        bounds_y = 60
         bounds_cx = 107
-        bounds_cy = 21
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
@@ -883,7 +871,7 @@ inherited cpuavr32fo: tcpuavr32fo
         onsetvalue = regsetvalue
         base = nb_hex
         max = -1
-        reffontheight = 17
+        reffontheight = 16
       end
       object r2: tintegeredit
         optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -901,9 +889,8 @@ inherited cpuavr32fo: tcpuavr32fo
         )
         taborder = 2
         bounds_x = 0
-        bounds_y = 42
+        bounds_y = 40
         bounds_cx = 107
-        bounds_cy = 21
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
@@ -911,7 +898,7 @@ inherited cpuavr32fo: tcpuavr32fo
         onsetvalue = regsetvalue
         base = nb_hex
         max = -1
-        reffontheight = 17
+        reffontheight = 16
       end
       object r5: tintegeredit
         optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -929,9 +916,8 @@ inherited cpuavr32fo: tcpuavr32fo
         )
         taborder = 5
         bounds_x = 0
-        bounds_y = 105
+        bounds_y = 100
         bounds_cx = 107
-        bounds_cy = 21
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
@@ -939,7 +925,7 @@ inherited cpuavr32fo: tcpuavr32fo
         onsetvalue = regsetvalue
         base = nb_hex
         max = -1
-        reffontheight = 17
+        reffontheight = 16
       end
       object sp: tintegeredit
         optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -957,9 +943,8 @@ inherited cpuavr32fo: tcpuavr32fo
         )
         taborder = 6
         bounds_x = 0
-        bounds_y = 126
+        bounds_y = 120
         bounds_cx = 110
-        bounds_cy = 21
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
@@ -967,7 +952,7 @@ inherited cpuavr32fo: tcpuavr32fo
         onsetvalue = regsetvalue
         base = nb_hex
         max = -1
-        reffontheight = 17
+        reffontheight = 16
       end
       object lr: tintegeredit
         optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -985,9 +970,8 @@ inherited cpuavr32fo: tcpuavr32fo
         )
         taborder = 7
         bounds_x = 0
-        bounds_y = 147
+        bounds_y = 140
         bounds_cx = 103
-        bounds_cy = 21
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
@@ -995,7 +979,7 @@ inherited cpuavr32fo: tcpuavr32fo
         onsetvalue = regsetvalue
         base = nb_hex
         max = -1
-        reffontheight = 17
+        reffontheight = 16
       end
       object pc: tintegeredit
         optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -1013,9 +997,8 @@ inherited cpuavr32fo: tcpuavr32fo
         )
         taborder = 8
         bounds_x = 0
-        bounds_y = 168
+        bounds_y = 160
         bounds_cx = 109
-        bounds_cy = 21
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
@@ -1023,8 +1006,16 @@ inherited cpuavr32fo: tcpuavr32fo
         onsetvalue = regsetvalue
         base = nb_hex
         max = -1
-        reffontheight = 17
+        reffontheight = 16
       end
     end
+  end
+  object cs: tstringcontainer[3]
+    strings.data = (
+      'Return address:'
+      'Exception return'
+    )
+    left = 128
+    top = 224
   end
 end

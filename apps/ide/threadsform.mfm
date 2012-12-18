@@ -175,4 +175,12 @@ object threadsfo: tthreadsfo
     left = 88
     top = 144
   end
+  object c: tstringcontainer
+    strings.data = (
+      '*active*'
+      'unknown'
+    )
+    left = 72
+    top = 72
+  end
 end

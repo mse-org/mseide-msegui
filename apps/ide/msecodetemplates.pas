@@ -269,7 +269,7 @@ begin
   with finfos[puint1] do begin
    fo:= tmseparamentryfo.create(nil);
    try
-    fo.caption:= 'Code Template "'+name+'"';
+    fo.caption:= fo.c[ord(codetemplate)]+name+'"';
     fo.comment.caption:= comment;
     fo.macroname.gridvalues:= params;
     fo.macrovalue.gridvalues:= paramdefaults;

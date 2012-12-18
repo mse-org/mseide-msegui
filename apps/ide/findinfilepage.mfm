@@ -1,11 +1,11 @@
 object findinfilepagefo: tfindinfilepagefo
-  optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
+  optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_hinton]
   visible = False
   bounds_x = 382
   bounds_y = 163
   bounds_cx = 573
   bounds_cy = 310
-  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets]
   container.frame.zoomwidthstep = 1
   container.frame.zoomheightstep = 1
   container.onlayout = childscaled
@@ -20,7 +20,7 @@ object findinfilepagefo: tfindinfilepagefo
   onlayout = childscaled
   moduleclassname = 'tmseform'
   object grid: twidgetgrid
-    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets]
     color = -1879048187
     taborder = 1
     bounds_x = 0
@@ -39,7 +39,7 @@ object findinfilepagefo: tfindinfilepagefo
     rowcount = 1
     datacols.count = 1
     datacols.items = <    
-      item
+      item[foundlist]
         width = 1500
         options = [co_readonly, co_fill]
         widthmin = 1500
@@ -55,7 +55,8 @@ object findinfilepagefo: tfindinfilepagefo
     oncellevent = foundlistoncellevent
     reffontheight = 14
     object foundlist: ttextedit
-      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+      optionswidget1 = [ow1_fontglyphheight, ow1_autoscale]
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
       color = -1879048185
       taborder = 1
       visible = False
@@ -63,7 +64,8 @@ object findinfilepagefo: tfindinfilepagefo
       bounds_y = 0
       bounds_cx = 1500
       bounds_cy = 16
-      optionsedit = [oe_readonly, oe_closequery, oe_checkmrcancel, oe_linebreak, oe_eatreturn, oe_exitoncursor, oe_keyexecute, oe_savestate]
+      optionsedit1 = [oe1_keyexecute]
+      optionsedit = [oe_readonly, oe_closequery, oe_checkmrcancel, oe_linebreak, oe_eatreturn, oe_exitoncursor, oe_savestate]
       oncellevent = foundlistoncellevent
       reffontheight = 14
     end
@@ -91,7 +93,8 @@ object findinfilepagefo: tfindinfilepagefo
     reffontheight = 14
   end
   object cancel: tbutton
-    optionswidget = [ow_tabfocus, ow_arrowfocus, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    optionswidget1 = [ow1_fontglyphheight, ow1_autoscale]
+    optionswidget = [ow_tabfocus, ow_arrowfocus, ow_mousewheel, ow_destroywidgets]
     color = -2147483645
     taborder = 5
     bounds_x = 453
@@ -105,7 +108,8 @@ object findinfilepagefo: tfindinfilepagefo
     reffontheight = 14
   end
   object again: tbutton
-    optionswidget = [ow_tabfocus, ow_arrowfocus, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    optionswidget1 = [ow1_fontglyphheight, ow1_autoscale]
+    optionswidget = [ow_tabfocus, ow_arrowfocus, ow_mousewheel, ow_destroywidgets]
     color = -2147483645
     taborder = 4
     bounds_x = 503
@@ -119,7 +123,8 @@ object findinfilepagefo: tfindinfilepagefo
     reffontheight = 14
   end
   object closepage: tstockglyphbutton
-    optionswidget = [ow_tabfocus, ow_arrowfocus, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    optionswidget1 = [ow1_fontglyphheight, ow1_autoscale]
+    optionswidget = [ow_tabfocus, ow_arrowfocus, ow_mousewheel, ow_destroywidgets]
     color = -2147483645
     bounds_x = 553
     bounds_y = 1
@@ -137,5 +142,13 @@ object findinfilepagefo: tfindinfilepagefo
     onterminate = threadonterminate
     left = 16
     top = 72
+  end
+  object c: tstringcontainer
+    strings.data = (
+      '*** CANCELED ***'
+      'FINISHED'
+    )
+    left = 136
+    top = 64
   end
 end

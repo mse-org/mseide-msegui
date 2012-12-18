@@ -1754,12 +1754,10 @@ var
  comp1: tcomponent;
 begin
  with tpropertyitem(props.item).feditor do begin
-//  if askyesno('Do you want to revert to inherited '+name+'?','WARNING') then begin
-   comp1:= designer.findancestorcomponent(component);
-   if comp1 <> nil then begin
-    copyproperty(comp1);
-   end;
-//  end;
+  comp1:= designer.findancestorcomponent(component);
+  if comp1 <> nil then begin
+   copyproperty(comp1);
+  end;
  end;
 end;
 

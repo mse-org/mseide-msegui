@@ -22,7 +22,8 @@ interface
 
 uses
  mseforms,msedataedits,msewidgetgrid,msegdbutils,msegraphedits,msedock,msegrids,
- msegui,msestrings,msemenus,mseedit,mseevent,msetypes,msegraphics,msebitmap;
+ msegui,msestrings,msemenus,mseedit,mseevent,msetypes,msegraphics,msebitmap,
+ msestringcontainer;
 
 type
  twatchfo = class(tdockform)
@@ -35,6 +36,7 @@ type
    sizecode: tintegeredit;
    formatcode: tdatabutton;
    timagelist1: timagelist;
+   c: tstringcontainer;
    procedure expressionondataentered(const sender: tobject);
    procedure expresultonsetvalue(const sender: tobject; var avalue: msestring; var accept: boolean);
    procedure resultcellevent(const sender: TObject; var info: celleventinfoty);
@@ -66,6 +68,12 @@ uses
  watchform_mfm,main,msewidgets,projectoptionsform,actionsmodule,msegraphutils,
  mseguiglob,mseformatstr,msebits,sysutils,watchpointsform,memoryform;
 type
+ stringconstants = (
+  deleteall,        //0 Do you wish to delete all watches?
+  confirmation,     //1 Confirmation
+  disabled          //2 <disabled>
+ );
+ 
  numformatty = (nf_default,nf_bin,nf_decs,nf_decu,nf_hex);
  numsizety = (ns_default,ns_8,ns_16,ns_32,ns_64);
  
@@ -176,7 +184,7 @@ begin
   end
   else begin
    grid.rowfontstate[index]:= -1;
-   expresult[index]:= '<disabled>';
+   expresult[index]:= c[ord(disabled)];
   end;
  end
  else begin
@@ -225,7 +233,7 @@ end;
 
 procedure twatchfo.deletallexecute(const sender: TObject);
 begin
- if askok('Do you wish to delete all watches?','Confirmation') then begin
+ if askok(c[ord(deleteall)],c[ord(confirmation)]) then begin
   grid.clear;
  end;
 end;

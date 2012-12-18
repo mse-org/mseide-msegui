@@ -20,12 +20,16 @@ unit commandlineform;
 
 interface
 uses
- msegui,mseclasses,mseforms,msedataedits;
+ msegui,mseclasses,mseforms,msedataedits,msestringcontainer,msestrings;
  
 type
-
+ stringconsts = (
+ makedisabled //0 Make disabled by Default make col!
+ );
+ 
  tcommandlinefo = class(tmseform)
    disp: tmemoedit;
+   c: tstringcontainer;
  end;
 
 procedure showcommandline;
@@ -41,7 +45,7 @@ begin
  fo:= tcommandlinefo.create(nil);
  try
   if projectoptions.defaultmake >= maxdefaultmake then begin
-   fo.disp.value:= 'Make disabled by Default make col!';
+   fo.disp.value:= fo.c[ord(makedisabled)];
   end
   else begin
    fo.disp.value:= buildmakecommandline(projectoptions.defaultmake);

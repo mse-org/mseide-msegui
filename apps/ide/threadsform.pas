@@ -21,12 +21,13 @@ unit threadsform;
 interface
 uses
  msegui,mseclasses,mseforms,msegrids,msegdbutils,msetypes,msestrings,
- msegridsglob,msemenus;
+ msegridsglob,msemenus,msestringcontainer;
 
 type
  tthreadsfo = class(tdockform)
    grid: tstringgrid;
    tpopupmenu1: tpopupmenu;
+   c: tstringcontainer;
    procedure threadsfoonshow(const sender: TObject);
    procedure gridoncellevent(const sender: TObject; var info: celleventinfoty);
    procedure copytoclipboardexe(const sender: TObject);
@@ -48,7 +49,12 @@ implementation
 uses
  threadsform_mfm,sysutils,sourceform,msefileutils,main,stackform,mseguiintf,
  sourcepage;
-
+type
+ stringconsts = (
+  active,     //0 *active*
+  unknown    //1 unknown
+ );
+ 
 { tthreadsfo }
 
 procedure tthreadsfo.clear;
@@ -73,12 +79,12 @@ begin
      grid[0][int1]:= inttostr(threadid);
      case state of
       ts_active: begin
-       wstr1:= '*active*';
+       wstr1:= c[ord(active)];
        frefreshedrow:= int1;
        grid.row:= int1;
       end
       else begin
-       wstr1:= 'unknown';
+       wstr1:= c[ord(unknown)];
       end;
      end;
      grid[1][int1]:= wstr1;

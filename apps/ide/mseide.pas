@@ -34,10 +34,11 @@ uses
   stackform,projecttreeform,findinfileform,cpuform,disassform,memoryform,
   threadsform,mseguiglob,symbolform,
   targetconsole,main,mseguiintf,msestockobjects,regunitgroups,guitemplates,
-  msegraphutils,msefont;
+  msegraphutils,msefont,stringconsts;
 begin
  registerfontalias('mseide_source',gui_getdefaultfontnames[stf_courier],
                     fam_fixnooverwrite,16);
+ application.createdatamodule(tstringconstsmo,s);
  application.createdatamodule(tguitemplatesmo,guitemplatesmo);
  application.createdatamodule(tactionsmo,actionsmo);
  application.createform(tsourcefo, sourcefo);

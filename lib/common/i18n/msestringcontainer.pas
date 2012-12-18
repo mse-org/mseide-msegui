@@ -28,6 +28,7 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    function i(const aindex: integer): msestring;  //by index
+   property byindex[const aindex: integer]: msestring read i; default;
   published
    property strings: tmsestringdatalist read fstrings write setstrings;
    property ongetstring: getstringeventty read fongetstring write fongetstring;
@@ -47,6 +48,7 @@ type
    destructor destroy; override;
    function k(const akey: msestring): msestring; //by key
    function i(const aindex: integer): msestring;  //by index
+   property byindex[const aindex: integer]: msestring read i; default;
   published
    property strings: tkeystringdatalist read fstrings write setstrings;
                    //a = strings, b = keys

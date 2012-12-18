@@ -139,7 +139,6 @@ object templateeditorfo: ttemplateeditorfo
     linkbottom = paramgrid
   end
   object tsplitter1: tsplitter
-    optionswidget = [ow_destroywidgets]
     color = -1879048189
     taborder = 14
     bounds_x = 0
@@ -172,7 +171,7 @@ object templateeditorfo: ttemplateeditorfo
     datacols.count = 1
     datacols.options = [co_leftbuttonfocusonly, co_savevalue, co_savestate, co_mousescrollrow]
     datacols.items = <    
-      item
+      item[templed]
         width = 1016
         options = [co_leftbuttonfocusonly, co_savevalue, co_savestate, co_mousescrollrow]
         widgetname = 'templed'
@@ -222,7 +221,6 @@ object templateeditorfo: ttemplateeditorfo
     reffontheight = 14
   end
   object tsplitter2: tsplitter
-    optionswidget = [ow_destroywidgets]
     color = -1879048189
     taborder = 16
     visible = False
@@ -363,5 +361,13 @@ object templateeditorfo: ttemplateeditorfo
     controller.options = [fdo_save, fdo_checkexist, fdo_savelastdir]
     left = 200
     top = 192
+  end
+  object c: tstringcontainer
+    strings.data = (
+      'Do you want to delete "'
+      'Code Template Editor'
+    )
+    left = 104
+    top = 232
   end
 end

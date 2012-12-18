@@ -32,7 +32,7 @@ uses
  mseformatstr,mseinplaceedit,msedatanodes,mselistbrowser,msebitmap,
  msecolordialog,msedrawtext,msewidgets,msepointer,mseguiglob,msepipestream,
  msemenus,sysutils,mseglob,mseedit,db,msedialog,msescrollbar,msememodialog,
- msecodetemplates,mseifiglob,mseapplication,msestream;
+ msecodetemplates,mseifiglob,mseapplication,msestream,msestringcontainer;
 
 const
  defaultsourceprintfont = 'Courier';
@@ -765,6 +765,7 @@ type
    colorwarning: tcoloredit;
    tspacer6: tspacer;
    colornote: tcoloredit;
+   c: tstringcontainer;
    procedure acttiveselectondataentered(const sender: TObject);
    procedure colonshowhint(const sender: tdatacol; const arow: Integer; 
                       var info: hintinfoty);
@@ -842,7 +843,7 @@ uses
  watchform,stackform,main,projecttreeform,findinfileform,
  selecteditpageform,programparametersform,sourceupdate,
  msedesigner,panelform,watchpointsform,commandlineform,messageform,
- componentpaletteform,mserichstring,msesettings,formdesigner,
+ componentpaletteform,mserichstring,msesettings,formdesigner,actionsmodule,
  msestringlisteditor,msetexteditor,msepropertyeditors,mseshapes,mseactions,
  componentstore,cpuform,msesysutils,msecomptree,msefont,typinfo,mserttistat
  {$ifndef mse_no_db}{$ifdef FPC},msedbfieldeditor{$endif}{$endif};
@@ -851,6 +852,12 @@ var
  projectoptionsfo: tprojectoptionsfo;
 type
 
+ stringconsts = (
+  wrongencoding,    //0 Wrong encoding can damage your source files.
+  wishsetencoding,  //1 Do you wish to set encoding to
+  warning           //2 *** WARNING ***
+ );
+ 
  signalinfoty = record
   num: integer;
   flags: sigflagsty;
@@ -1004,13 +1011,13 @@ function checkprojectloadabort: boolean;
 begin
  result:= false;
  if exceptobject is exception then begin
-  if showmessage(exception(exceptobject).Message,'ERROR',[mr_ok,mr_cancel]) <> 
-                               mr_ok then begin
+  if showmessage(exception(exceptobject).Message,
+            actionsmo.c[ord(ac_error)],[mr_ok,mr_cancel]) <> mr_ok then begin
    result:= true;
   end;
  end
  else begin
-  raise exception.create('Invalid exception');
+  raise exception.create(actionsmo.c[ord(ac_invalidexception)]);
  end;
 end;
 
@@ -1199,7 +1206,7 @@ begin
      if item1 = nil then begin
       item1:= tmenuitem.create;
       item1.name:= 'tools';
-      item1.caption:= 'T&ools';
+      item1.caption:= actionsmo.c[ord(ac_tools)];
       insert(itemindexbyname('settings'),item1);
      end;
      with item1.submenu do begin
@@ -1349,17 +1356,17 @@ begin
   setlength(fnewfiexts,3);
   setlength(fnewfisources,3);
   
-  newfinames[0]:= 'Program';
+  newfinames[0]:= actionsmo.c[ord(ac_program)];
   newfifilters[0]:= '"*.pas" "*.pp"';
   newfiexts[0]:= 'pas';
   newfisources[0]:= '${TEMPLATEDIR}default/program.pas';
 
-  newfinames[1]:= 'Unit';
+  newfinames[1]:= actionsmo.c[ord(ac_unit)];
   newfifilters[1]:= '"*.pas" "*.pp"';
   newfiexts[1]:= 'pas';
   newfisources[1]:= '${TEMPLATEDIR}default/unit.pas';
 
-  newfinames[2]:= 'Textfile';
+  newfinames[2]:= actionsmo.c[ord(ac_textfile)];
   newfifilters[2]:= '';
   newfiexts[2]:= '';
   newfisources[2]:= '';
@@ -1370,67 +1377,67 @@ begin
   setlength(fnewfosources,11);
   setlength(fnewfoforms,11);
 
-  newfonames[0]:= 'Mainform';
+  newfonames[0]:= actionsmo.c[ord(ac_mainform)];
   newfonamebases[0]:= 'form';
   newinheritedforms[0]:= false;
   newfosources[0]:= '${TEMPLATEDIR}default/mainform.pas';
   newfoforms[0]:= '${TEMPLATEDIR}default/mainform.mfm';
  
-  newfonames[1]:= 'Simple Form';
+  newfonames[1]:= actionsmo.c[ord(ac_simpleform)];
   newfonamebases[1]:= 'form';
   newinheritedforms[1]:= false;
   newfosources[1]:= '${TEMPLATEDIR}default/simpleform.pas';
   newfoforms[1]:= '${TEMPLATEDIR}default/simpleform.mfm';
  
-  newfonames[2]:= 'Docking Form';
+  newfonames[2]:= actionsmo.c[ord(ac_dockingform)];
   newfonamebases[2]:= 'form';
   newinheritedforms[2]:= false;
   newfosources[2]:= '${TEMPLATEDIR}default/dockingform.pas';
   newfoforms[2]:= '${TEMPLATEDIR}default/dockingform.mfm';
  
-  newfonames[3]:= 'Datamodule';
+  newfonames[3]:= actionsmo.c[ord(ac_datamodule)];
   newfonamebases[3]:= 'module';
   newinheritedforms[3]:= false;
   newfosources[3]:= '${TEMPLATEDIR}default/datamodule.pas';
   newfoforms[3]:= '${TEMPLATEDIR}default/datamodule.mfm';
  
-  newfonames[4]:= 'Subform';
+  newfonames[4]:= actionsmo.c[ord(ac_subform)];
   newfonamebases[4]:= 'form';
   newinheritedforms[4]:= false;
   newfosources[4]:= '${TEMPLATEDIR}default/subform.pas';
   newfoforms[4]:= '${TEMPLATEDIR}default/subform.mfm';
 
-  newfonames[5]:= 'Scrollboxform';
+  newfonames[5]:= actionsmo.c[ord(ac_scrollboxform)];
   newfonamebases[5]:= 'form';
   newinheritedforms[5]:= false;
   newfosources[5]:= '${TEMPLATEDIR}default/scrollboxform.pas';
   newfoforms[5]:= '${TEMPLATEDIR}default/scrollboxform.mfm';
 
-  newfonames[6]:= 'Tabform';
+  newfonames[6]:= actionsmo.c[ord(ac_tabform)];
   newfonamebases[6]:= 'form';
   newinheritedforms[6]:= false;
   newfosources[6]:= '${TEMPLATEDIR}default/tabform.pas';
   newfoforms[6]:= '${TEMPLATEDIR}default/tabform.mfm';
  
-  newfonames[7]:= 'Dockpanel';
+  newfonames[7]:= actionsmo.c[ord(ac_dockpanel)];
   newfonamebases[7]:= 'form';
   newinheritedforms[7]:= false;
   newfosources[7]:= '${TEMPLATEDIR}default/dockpanelform.pas';
   newfoforms[7]:= '${TEMPLATEDIR}default/dockpanelform.mfm';
 
-  newfonames[8]:= 'Report';
+  newfonames[8]:= actionsmo.c[ord(ac_report)];
   newfonamebases[8]:= 'report';
   newinheritedforms[8]:= false;
   newfosources[8]:= '${TEMPLATEDIR}default/report.pas';
   newfoforms[8]:= '${TEMPLATEDIR}default/report.mfm';
  
-  newfonames[9]:= 'Scriptform';
+  newfonames[9]:= actionsmo.c[ord(ac_scriptform)];
   newfonamebases[9]:= 'script';
   newinheritedforms[9]:= false;
   newfosources[9]:= '${TEMPLATEDIR}default/pascform.pas';
   newfoforms[9]:= '${TEMPLATEDIR}default/pascform.mfm';
 
-  newfonames[10]:= 'Inherited Form';
+  newfonames[10]:= actionsmo.c[ord(ac_inheritedform)];
   newfonamebases[10]:= 'form';
   newinheritedforms[10]:= true;
   newfosources[10]:= '${TEMPLATEDIR}default/inheritedform.pas';
@@ -1446,11 +1453,11 @@ begin
   additem(fsourcefilemasks,'"*.mfm"');
   additem(fsyntaxdeffiles,'${SYNTAXDEFDIR}objecttext.sdef');
 
-  additem(ffilemasknames,'Source');
+  additem(ffilemasknames,actionsmo.c[ord(ac_source)]);
   additem(ffilemasks,'"*.pp" "*.pas" "*.inc" "*.dpr" "*.lpr"');
-  additem(ffilemasknames,'Forms');
+  additem(ffilemasknames,actionsmo.c[ord(ac_forms)]);
   additem(ffilemasks,'*.mfm');
-  additem(ffilemasknames,'All Files');
+  additem(ffilemasknames,actionsmo.c[ord(ac_allfiles)]);
   additem(ffilemasks,'*');
 
  end;
@@ -2167,8 +2174,8 @@ var
  mstr1: msestring;
 begin
  mstr1:= encoding.dropdown.valuelist[avalue];
- accept:= askyesno('Wrong encoding can damage your source files.'+lineend+
-             'Do you wish to set encoding to '+mstr1+'?','*** WARNING ***');
+ accept:= askyesno(c[ord(wrongencoding)]+lineend+
+             c[ord(wishsetencoding)]+' '+mstr1+'?',c[ord(warning)]);
 end;
 
 procedure tprojectoptionsfo.createexe(const sender: TObject);
@@ -2379,8 +2386,8 @@ var
 begin
  if (sender <> nil) then begin
   fname1:= sender.settingsfile.value;
-  if not askyesno('Do you want to replace the settings by'+lineend+
-              '"'+fname1+'"?','WARNING') then begin
+  if not askyesno(actionsmo.c[ord(ac_replacesettings)]+lineend+
+              '"'+fname1+'"?',actionsmo.c[ord(ac_warning)]) then begin
    exit;
   end;
  end
@@ -2437,8 +2444,9 @@ var
 begin
  if sender <> nil then begin
   fname1:= sender.settingsfile.value;
-  if findfile(fname1) and not askyesno('File "'+fname1+'" exists.'+lineend+
-    'Do you want to overwrite?','WARNING') then begin
+  if findfile(fname1) and not askyesno(actionsmo.c[ord(ac_file)]+fname1+
+                    actionsmo.c[ord(ac_exists)]+lineend+
+    actionsmo.c[ord(ac_wantoverwrite)],actionsmo.c[ord(ac_warning)]) then begin
    exit;
   end;
  end

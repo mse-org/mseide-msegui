@@ -9,7 +9,7 @@ object watchfo: twatchfo
   bounds_y = 247
   bounds_cx = 310
   bounds_cy = 245
-  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets]
   container.color = -2147483645
   container.frame.zoomwidthstep = 1
   container.frame.zoomheightstep = 1
@@ -59,7 +59,7 @@ object watchfo: twatchfo
   }
   moduleclassname = 'tdockform'
   object grid: twidgetgrid
-    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_hinton, ow_fontglyphheight, ow_autoscale]
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_hinton]
     frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
     taborder = 1
     popupmenu = gripopup
@@ -111,20 +111,20 @@ object watchfo: twatchfo
       end>
     datacols.count = 5
     datacols.items = <    
-      item
+      item[watchon]
         width = 13
         options = [co_drawfocus, co_savevalue, co_savestate]
         widgetname = 'watchon'
         dataclass = tgridintegerdatalist
       end    
-      item
+      item[expression]
         width = 152
         options = [co_savevalue, co_savestate]
         options1 = [co1_rowcolor, co1_zebracolor]
         widgetname = 'expression'
         dataclass = tgridmsestringdatalist
       end    
-      item
+      item[expresult]
         width = 82
         options = [co_fill]
         widthmin = 50
@@ -132,14 +132,14 @@ object watchfo: twatchfo
         widgetname = 'expresult'
         dataclass = tgridmsestringdatalist
       end    
-      item
+      item[formatcode]
         color = -2147483646
         coloractive = -1879048185
         width = 12
         widgetname = 'formatcode'
         dataclass = tgridintegerdatalist
       end    
-      item
+      item[sizecode]
         width = 13
         options = [co_invisible, co_savevalue, co_savestate, co_mousescrollrow]
         widgetname = 'sizecode'
@@ -155,14 +155,14 @@ object watchfo: twatchfo
       bounds_y = 0
       bounds_cy = 16
       statfile = mainfo.projectstatfile
-      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savevalue, oe_savestate]
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_savevalue, oe_savestate, oe_autopopupmenu]
       ondataentered = expressionondataentered
       visible = False
       value = True
       valuedefault = True
     end
     object expression: tstringedit
-      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
       optionsskin = [osk_framebuttononly]
       taborder = 2
       visible = False
@@ -171,12 +171,13 @@ object watchfo: twatchfo
       bounds_cx = 152
       bounds_cy = 16
       statfile = mainfo.projectstatfile
-      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_forcereturncheckvalue, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_forcereturncheckvalue, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_savevalue, oe_savestate]
       ondataentered = expressionondataentered
       reffontheight = 14
     end
     object expresult: tstringedit
-      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_autoscale]
+      optionswidget1 = [ow1_autoscale]
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
       optionsskin = [osk_framebuttononly]
       taborder = 3
       visible = False
@@ -184,11 +185,10 @@ object watchfo: twatchfo
       bounds_y = 0
       bounds_cx = 82
       bounds_cy = 16
-      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_autopopupmenu, oe_keyexecute, oe_savestate]
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_savestate]
       onsetvalue = expresultonsetvalue
     end
     object formatcode: tdatabutton
-      optionswidget = [ow_tabfocus, ow_arrowfocus, ow_destroywidgets]
       frame.optionsskin = [fso_nofocusrect, fso_nodefaultrect]
       frame.localprops = [frl_optionsskin]
       frame.dummy = 0
@@ -214,7 +214,7 @@ object watchfo: twatchfo
       max = 4
     end
     object sizecode: tintegeredit
-      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
+      optionswidget1 = [ow1_fontglyphheight]
       optionsskin = [osk_framebuttononly]
       frame.levelo = 0
       frame.colorclient = -2147483645
@@ -244,7 +244,7 @@ object watchfo: twatchfo
     bounds_cx = 81
     bounds_cy = 16
     statfile = mainfo.projectstatfile
-    optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_checkvaluepaststatread, oe_savevalue, oe_savestate]
+    optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_savevalue, oe_savestate, oe_checkvaluepaststatread, oe_autopopupmenu]
     onchange = watchesononchange
     onsetvalue = watchesononsetvalue
     value = True
@@ -416,5 +416,14 @@ object watchfo: twatchfo
       48209108482091084820D1BF48E0010848200100482081053020014000000000
       00000000000000000000000000000000
     }
+  end
+  object c: tstringcontainer
+    strings.data = (
+      'Do you wish to delete all watches?'
+      'Confirmation'
+      '<disabled>'
+    )
+    left = 96
+    top = 80
   end
 end

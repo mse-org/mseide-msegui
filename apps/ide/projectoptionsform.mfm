@@ -5501,4 +5501,13 @@ object projectoptionsfo: tprojectoptionsfo
     left = 336
     top = 104
   end
+  object c: tstringcontainer
+    strings.data = (
+      'Wrong encoding can damage your source files.'
+      'Do you wish to set encoding to'
+      '*** WARNING ***'
+    )
+    left = 512
+    top = 160
+  end
 end

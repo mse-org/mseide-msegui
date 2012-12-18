@@ -118,7 +118,7 @@ object componentstorefo: tcomponentstorefo
     datacols.count = 4
     datacols.options = [co_proportional, co_savestate, co_mousescrollrow]
     datacols.items = <    
-      item
+      item[node]
         width = 111
         options = [co_drawfocus, co_proportional, co_savestate, co_mousescrollrow]
         widgetname = 'node'
@@ -131,7 +131,7 @@ object componentstorefo: tcomponentstorefo
         datalist.ondragover = drago
         datalist.ondragdrop = dragdro
       end    
-      item
+      item[sel]
         color = -2147483646
         width = 19
         options = [co_fixwidth, co_proportional, co_savestate, co_mousescrollrow]
@@ -140,13 +140,13 @@ object componentstorefo: tcomponentstorefo
         widgetname = 'sel'
         dataclass = tgridintegerdatalist
       end    
-      item
+      item[compdesc]
         width = 112
         options = [co_fill, co_savestate, co_mousescrollrow]
         widgetname = 'compdesc'
         dataclass = tgridmsestringdatalist
       end    
-      item
+      item[filepath]
         width = 185
         options = [co_proportional, co_savestate, co_mousescrollrow]
         widgetname = 'filepath'
@@ -425,5 +425,25 @@ object componentstorefo: tcomponentstorefo
     controller.captionopen = 'Select Component File'
     left = 40
     top = 200
+  end
+  object c: tstringcontainer
+    strings.data = (
+      'Component Store'
+      'Component read error.'
+      'Do you want to overwrite "'
+      '" with current clipboard content?'
+      'WARNING'
+      'No component(s) in clipboard.'
+      'Error while writing the storegroup.'
+      'ERROR'
+      'Do you want to remove "'
+      '"?'
+      '" branch?'
+      'File "'
+      '" does not exist, do you want to create it?'
+      'Save Component Store Group'
+    )
+    left = 296
+    top = 144
   end
 end

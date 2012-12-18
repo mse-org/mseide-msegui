@@ -4,6 +4,8 @@ object mseparamentryfo: tmseparamentryfo
   bounds_y = 262
   bounds_cx = 371
   bounds_cy = 260
+  container.frame.zoomwidthstep = 1
+  container.frame.zoomheightstep = 1
   container.bounds = (
     0
     0
@@ -36,13 +38,13 @@ object mseparamentryfo: tmseparamentryfo
     datacols.count = 2
     datacols.options = [co_proportional, co_savestate, co_mousescrollrow]
     datacols.items = <    
-      item
+      item[macroname]
         width = 89
         options = [co_readonly, co_nofocus, co_proportional, co_savestate, co_mousescrollrow]
         widgetname = 'macroname'
         dataclass = tgridmsestringdatalist
       end    
-      item
+      item[macrovalue]
         width = 276
         options = [co_fill, co_savestate, co_mousescrollrow]
         widgetname = 'macrovalue'
@@ -58,11 +60,11 @@ object mseparamentryfo: tmseparamentryfo
       bounds_y = 0
       bounds_cx = 89
       bounds_cy = 16
-      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_checkvaluepaststatread, oe_savestate]
+      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_savestate, oe_checkvaluepaststatread]
       reffontheight = 14
     end
     object macrovalue: tmemodialogedit
-      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
+      optionswidget1 = [ow1_fontglyphheight]
       optionsskin = [osk_framebuttononly]
       frame.levelo = 0
       frame.localprops = [frl_levelo]
@@ -74,12 +76,11 @@ object mseparamentryfo: tmseparamentryfo
       bounds_y = 0
       bounds_cx = 276
       bounds_cy = 16
-      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_checkvaluepaststatread, oe_savestate]
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_savestate, oe_checkvaluepaststatread]
       reffontheight = 14
     end
   end
   object tsplitter1: tsplitter
-    color = -2147483647
     taborder = 1
     bounds_x = 0
     bounds_y = 231
@@ -120,7 +121,6 @@ object mseparamentryfo: tmseparamentryfo
       anchors = [an_left, an_top, an_right]
       caption = 'comment'
       textflags = [tf_ycentered, tf_wordbreak]
-      reffontheight = 14
     end
   end
   object tstatfile1: tstatfile
@@ -128,5 +128,12 @@ object mseparamentryfo: tmseparamentryfo
     options = [sfo_memory, sfo_transaction, sfo_activatorread, sfo_activatorwrite]
     left = 40
     top = 80
+  end
+  object c: tstringcontainer
+    strings.data = (
+      'Code Template "'
+    )
+    left = 40
+    top = 120
   end
 end

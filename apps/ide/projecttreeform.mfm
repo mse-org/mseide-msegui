@@ -1,5 +1,5 @@
 object projecttreefo: tprojecttreefo
-  optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
+  optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_hinton]
   frame.grip_size = 10
   frame.grip_options = [go_closebutton, go_fixsizebutton, go_topbutton, go_backgroundbutton]
   frame.dummy = 0
@@ -8,7 +8,7 @@ object projecttreefo: tprojecttreefo
   bounds_y = 431
   bounds_cx = 286
   bounds_cy = 201
-  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets]
   container.frame.zoomwidthstep = 1
   container.frame.zoomheightstep = 1
   container.bounds = (
@@ -28,7 +28,7 @@ object projecttreefo: tprojecttreefo
   onstatupdate = projecttreeonupdatestat
   moduleclassname = 'tdockform'
   object grid: twidgetgrid
-    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets]
     bounds_x = 0
     bounds_y = 0
     bounds_cx = 276
@@ -38,7 +38,7 @@ object projecttreefo: tprojecttreefo
     datacols.count = 2
     datacols.options = [co_savestate, co_mousescrollrow]
     datacols.items = <    
-      item
+      item[projectedit]
         linecolorfix = -1610612733
         width = 141
         options = [co_readonly, co_savestate, co_mousescrollrow]
@@ -54,7 +54,7 @@ object projecttreefo: tprojecttreefo
         datalist.ondragover = editdragover
         datalist.ondragdrop = editdragrop
       end    
-      item
+      item[edit]
         linecolorfix = -1610612733
         width = 129
         options = [co_fill, co_savestate, co_mousescrollrow]
@@ -65,10 +65,10 @@ object projecttreefo: tprojecttreefo
     datarowheight = 15
     statfile = mainfo.projectstatfile
     oncellevent = gridcellevent
-    reffontheight = 13
+    reffontheight = 14
     object projectedit: ttreeitemedit
-      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
       optionswidget1 = [ow1_autoheight]
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
       color = -1879048185
       frame.levelo = 0
       frame.colorclient = -2147483646
@@ -79,7 +79,7 @@ object projecttreefo: tprojecttreefo
       bounds_x = 0
       bounds_y = 0
       bounds_cx = 141
-      bounds_cy = 15
+      bounds_cy = 16
       optionsedit = [oe_readonly, oe_undoonesc, oe_checkmrcancel, oe_exitoncursor, oe_hintclippedtext, oe_locate, oe_savestate]
       onchange = projecteditonchange
       onsetvalue = captionset
@@ -114,13 +114,14 @@ object projecttreefo: tprojecttreefo
       bounds_y = 0
       bounds_cx = 129
       bounds_cy = 15
-      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_autopopupmenu, oe_keyexecute, oe_savestate]
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_savestate]
       textflags = [tf_ycentered, tf_clipo, tf_noselect, tf_ellipseleft]
       oncellevent = editoncellevent
       dropdown.cols.count = 1
       dropdown.cols.items = <      
         item
         end>
+      reffontheight = 14
     end
   end
   object unitpopup: tpopupmenu
@@ -381,5 +382,18 @@ object projecttreefo: tprojecttreefo
     onexecute = editdirexe
     onupdate = udateeditdirexe
     top = 136
+  end
+  object c: tstringcontainer
+    strings.data = (
+      'Pascal Units'
+      'C Modules'
+      'Text Files'
+      'Do you wish to remove "'
+      'Select Directory'
+      'Do you want to remove'
+      'with the sub-items from project?'
+    )
+    left = 208
+    top = 168
   end
 end

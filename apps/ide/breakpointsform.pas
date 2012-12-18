@@ -22,7 +22,7 @@ interface
 uses
  mseforms,msewidgetgrid,msedataedits,msegdbutils,msetypes,msegrids,
  msegraphedits,msestat,msemenuwidgets,msemenus,msestrings,mseedit,mseevent,
- msegui,msegraphics,mseguiglob;
+ msegui,msegraphics,mseguiglob,msestringcontainer;
 
 type
  bkptstatety = (bkpts_none,bkpts_normal,bkpts_disabled,bkpts_error);
@@ -50,6 +50,7 @@ type
    address: tint64edit;
    addressbkpt: tbooleanedit;
    errormessage: tstringedit;
+   c: tstringcontainer;
    procedure bkptsononchange(const sender: TObject);
    procedure bkptsononsetvalue(const sender: TObject; var avalue: boolean;
                                             var accept: Boolean);
@@ -132,6 +133,14 @@ uses
  main,msewidgets,actionsmodule,watchpointsform,mseformatstr,msegraphutils,
  disassform;
 
+type
+ stringconsts = (
+  breakpointerror,       //0 Breakpoint error.
+  breakpointerror1,      //1 BREAKPOINT ERROR
+  delbr,                 //2 Do you wish to delete all breakpoints?
+  confirmation           //3 Confirmation
+ );
+  
 { tbreakpointsfo }
 
 procedure tbreakpointsfo.updatestat(const statfiler: tstatfiler);
@@ -347,10 +356,10 @@ begin
    str1:= gdb.errormessage;
   end
   else begin
-   str1:= 'Breakpoint error.';
+   str1:= c[ord(breakpointerror)];
   end;
   errme:= str1;
-  showmessage(str1,'BREAKPOINT ERROR');
+  showmessage(str1,c[ord(breakpointerror1)]);
  end;
 end;
 
@@ -721,7 +730,7 @@ end;
 
 procedure tbreakpointsfo.deleteallexecute(const sender: TObject);
 begin
- if askok('Do you wish to delete all breakpoints?','Confirmation') then begin
+ if askok(c[ord(delbr)],c[ord(confirmation)]) then begin
   grid.deleterow(0,grid.rowcount);
  end;
 end;

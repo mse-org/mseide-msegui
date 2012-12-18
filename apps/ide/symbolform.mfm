@@ -7,6 +7,8 @@ object symbolfo: tsymbolfo
   bounds_y = 257
   bounds_cx = 361
   bounds_cy = 137
+  container.frame.zoomwidthstep = 1
+  container.frame.zoomheightstep = 1
   container.bounds = (
     0
     0
@@ -58,7 +60,7 @@ object symbolfo: tsymbolfo
   onshow = showex
   moduleclassname = 'tdockform'
   object grid: twidgetgrid
-    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_hinton, ow_fontglyphheight, ow_autoscale]
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_hinton]
     frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
     popupmenu = tpopupmenu1
     bounds_x = 0
@@ -95,13 +97,13 @@ object symbolfo: tsymbolfo
       item
         color = -1610612729
         name = 'stf_default'
-        xscale =  1.0000000000000000E+0000
+        xscale = 1
         dummy = 0
       end>
     datacols.count = 5
     datacols.options = [co_savevalue, co_savestate, co_cancopy, co_mousescrollrow]
     datacols.items = <    
-      item
+      item[symbol]
         width = 111
         options = [co_savevalue, co_savestate, co_cancopy, co_canpaste]
         options1 = [co1_rowfont, co1_zebracolor]
@@ -109,26 +111,26 @@ object symbolfo: tsymbolfo
         widgetname = 'symbol'
         dataclass = tgridmsestringdatalist
       end    
-      item
+      item[symaddr]
         width = 107
         options = [co_readonly, co_drawfocus, co_fill, co_savestate, co_cancopy, co_mousescrollrow]
         widgetname = 'symaddr'
         dataclass = tgridmsestringdatalist
       end    
-      item
+      item[syminfo]
         width = 79
         options = [co_readonly, co_drawfocus, co_proportional, co_cancopy]
         widthmin = 0
         widgetname = 'syminfo'
         dataclass = tgridmsestringdatalist
       end    
-      item
+      item[path]
         width = 15
         options = [co_invisible, co_cancopy, co_mousescrollrow]
         widgetname = 'path'
         dataclass = tgridmsestringdatalist
       end    
-      item
+      item[line]
         width = 11
         options = [co_invisible, co_cancopy, co_mousescrollrow]
         widgetname = 'line'
@@ -139,7 +141,7 @@ object symbolfo: tsymbolfo
     oncellevent = cellev
     reffontheight = 14
     object symbol: tstringedit
-      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
       optionsskin = [osk_framebuttononly]
       taborder = 1
       visible = False
@@ -148,7 +150,7 @@ object symbolfo: tsymbolfo
       bounds_cx = 111
       bounds_cy = 16
       statfile = mainfo.projectstatfile
-      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_forcereturncheckvalue, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_forcereturncheckvalue, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_savevalue, oe_savestate]
       ondataentered = symboldataent
       reffontheight = 14
     end
@@ -161,11 +163,13 @@ object symbolfo: tsymbolfo
       bounds_y = 0
       bounds_cx = 107
       bounds_cy = 16
-      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_hintclippedtext, oe_autopopupmenu, oe_keyexecute, oe_savestate]
+      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_hintclippedtext, oe_savestate]
       textflags = [tf_ycentered, tf_noselect, tf_ellipseleft]
+      reffontheight = 14
     end
     object syminfo: tstringedit
-      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_autoscale]
+      optionswidget1 = [ow1_autoscale]
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
       optionsskin = [osk_framebuttononly]
       taborder = 3
       visible = False
@@ -173,10 +177,10 @@ object symbolfo: tsymbolfo
       bounds_y = 0
       bounds_cx = 79
       bounds_cy = 16
-      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_hintclippedtext, oe_autopopupmenu, oe_keyexecute, oe_savestate]
+      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_hintclippedtext, oe_savestate]
     end
     object path: tstringedit
-      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
+      optionswidget1 = [ow1_fontglyphheight]
       optionsskin = [osk_framebuttononly]
       taborder = 4
       visible = False
@@ -184,11 +188,11 @@ object symbolfo: tsymbolfo
       bounds_y = 0
       bounds_cx = 15
       bounds_cy = 16
-      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_checkvaluepaststatread, oe_savestate]
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_savestate, oe_checkvaluepaststatread]
       reffontheight = 14
     end
     object line: tintegeredit
-      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
+      optionswidget1 = [ow1_fontglyphheight]
       optionsskin = [osk_framebuttononly]
       taborder = 5
       visible = False
@@ -196,7 +200,7 @@ object symbolfo: tsymbolfo
       bounds_y = 0
       bounds_cx = 11
       bounds_cy = 16
-      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_checkvaluepaststatread, oe_savestate]
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_savestate, oe_checkvaluepaststatread]
       reffontheight = 14
     end
   end
@@ -210,5 +214,13 @@ object symbolfo: tsymbolfo
       end>
     left = 80
     top = 72
+  end
+  object c: tstringcontainer
+    strings.data = (
+      'GDB not active.'
+      'Do you wish to delete all symbols?'
+    )
+    left = 192
+    top = 56
   end
 end

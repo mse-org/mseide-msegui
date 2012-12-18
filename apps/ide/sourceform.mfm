@@ -10,7 +10,7 @@ object sourcefo: tsourcefo
   bounds_y = 116
   bounds_cx = 433
   bounds_cy = 327
-  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets]
   container.frame.zoomwidthstep = 1
   container.frame.zoomheightstep = 1
   container.frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
@@ -505,5 +505,29 @@ object sourcefo: tsourcefo
       1
       24641
     )
+  end
+  object c: tstringcontainer
+    strings.data = (
+      'File "'
+      '" has changed.'
+      'There are modifications in edit buffer also.'
+      'Do you wish to reload from disk?'
+      'Confirmation'
+      '<none>'
+      'Do you wish to replace:'
+      'with:'
+      '<new>'
+      'Syntaxdeffile:'
+      'Text'
+      'not found.'
+      'Restart from begin of file?'
+      'Cancel?'
+      'Do you wish to to replace this occurence?'
+      'Go to line number:'
+      'Find line'
+      'There are modifications in edit buffer also.'
+    )
+    left = 176
+    top = 104
   end
 end

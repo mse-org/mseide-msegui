@@ -274,7 +274,7 @@ begin
  pathdisp.value:= finitialfilepath;
  str1:= filename;
  if str1 = '' then begin
-  str1:= '<new>';
+  str1:= sourcefo.c[ord(str_new)];
  end;
  if modified then begin
   caption:= '*'+str1;
@@ -318,7 +318,7 @@ begin
   updatestatvalues;
  except
   on e: exception do begin
-   handleerror(e,'Syntaxdeffile:');
+   handleerror(e,sourcefo.c[ord(syntaxdeffile)]);
   end;
  end;
 end;
@@ -901,7 +901,9 @@ end;
 
 procedure tsourcepage.textnotfound;
 begin
- showmessage('Text '''+projectoptions.findreplaceinfo.find.text+''' not found.');
+ showmessage(sourcefo.c[ord(str_text)]+' '''+
+           projectoptions.findreplaceinfo.find.text+''' '+
+           sourcefo.c[ord(notfound)]);
 end;
  
 procedure tsourcepage.find;
@@ -928,8 +930,9 @@ begin
      textnotfound;
     end
     else begin
-     if askok('Text '''+text+
-              ''' not found. Restart from begin of file?') then begin
+     if askok(sourcefo.c[ord(str_text)]+' '''+text+
+              ''' '+sourcefo.c[ord(notfound)]+' '+
+              sourcefo.c[ord(restartbegin)]) then begin
       ffindpos:= nullcoord;
       if not edit.find(text,options,ffindpos,edit.editpos,true,findshowpos) then begin
        textnotfound;
@@ -963,7 +966,7 @@ procedure tsourcepage.replace(all: boolean);
   result:= application.waitescaped;
   if result then begin
    endupdate;
-   result:= askyesno('Cancel?');
+   result:= askyesno(sourcefo.c[ord(cancel)]);
    application.processmessages;
    beginupdate;
   end;
@@ -1000,7 +1003,7 @@ begin
     repeat
      if prompt then begin
       rect1:= edit.textpostomouserect(ffindpos);
-      res1:= showmessage('Do you wish to to replace this occurence?','',
+      res1:= showmessage(sourcefo.c[ord(replaceoccu)],'',
        [mr_yes,mr_all,mr_no,mr_cancel],rect1,grid,cp_bottomleft,res1);
      end
      else begin
@@ -1043,7 +1046,8 @@ end;
 
 procedure tsourcepage.doline;
 begin
- if integerenter(fgotoline,1,grid.rowcount,'Go to line number:','Find line') = mr_ok then begin
+ if integerenter(fgotoline,1,grid.rowcount,
+      sourcefo.c[ord(gotoline)],sourcefo.c[ord(findline)]) = mr_ok then begin
   grid.row:= fgotoline-1;
  end;
 end;

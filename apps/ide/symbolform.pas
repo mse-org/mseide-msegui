@@ -20,7 +20,8 @@ interface
 uses
  mseglob,mseguiglob,mseguiintf,mseapplication,msestat,msemenus,msegui,
  msegraphics,msegraphutils,mseevent,mseclasses,mseforms,msedock,msedataedits,
- mseedit,msegrids,msestrings,msetypes,msewidgetgrid,msegraphedits;
+ mseedit,msegrids,msestrings,msetypes,msewidgetgrid,msegraphedits,
+ msestringcontainer;
 
 type
  tsymbolfo = class(tdockform)
@@ -31,6 +32,7 @@ type
    tpopupmenu1: tpopupmenu;
    path: tstringedit;
    line: tintegeredit;
+   c: tstringcontainer;
    procedure symboldataent(const sender: TObject);
    procedure symbolcha(const sender: tdatacol; const aindex: Integer);
    procedure deleteallex(const sender: TObject);
@@ -47,7 +49,12 @@ var
 implementation
 uses
  symbolform_mfm,msegdbutils,main,sysutils,msewidgets,mseformatstr,sourceform;
-
+type
+ stringconsts = (
+  gdbnotactive,      //0 GDB not active.
+  deleteall          //1 Do you wish to delete all symbols?
+ );
+ 
 procedure tsymbolfo.checksymbol(const aindex: integer);
 var
  str1,str2: msestring;
@@ -67,7 +74,7 @@ begin
   end;
   err:= mainfo.gdb.infosymbol(str2,str1);
   if err = gdb_notactive then begin
-   mstr1:= 'GDB not active.';
+   mstr1:= c[ord(gdbnotactive)];
    syminfo[aindex]:= mstr1;
    symaddr[aindex]:= mstr1;
    exit;
@@ -122,7 +129,7 @@ end;
 
 procedure tsymbolfo.deleteallex(const sender: TObject);
 begin
- if askyesno('Do you wish to delete all symbols?') then begin
+ if askyesno(c[ord(deleteall)]) then begin
   grid.clear;
  end;
 end;

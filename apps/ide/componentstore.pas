@@ -22,7 +22,7 @@ uses
  msegraphutils,mseevent,mseclasses,mseforms,msedock,mseact,mseactions,
  msestrings,msedataedits,mseedit,msegrids,msetypes,msewidgetgrid,msedatanodes,
  mselistbrowser,msewidgets,msestatfile,msebitmap,msefiledialog,msesys,msedialog,
- msememodialog,msesimplewidgets,msegridsglob,msegraphedits;
+ msememodialog,msesimplewidgets,msegridsglob,msegraphedits,msestringcontainer;
 
 type
  storedcomponentinfoty = record
@@ -83,6 +83,7 @@ type
    addfileact: taction;
    compfiledialog: tfiledialog;
    sel: tdatabutton;
+   c: tstringcontainer;
    procedure createexe(const sender: TObject);
    procedure dopastecomponent(const sender: TObject);
    procedure statreadexe(const sender: TObject; const reader: tstatreader);
@@ -164,11 +165,25 @@ implementation
 uses
  componentstore_mfm,msestream,storedcomponentinfodialog,msedatalist,msefileutils,
  sysutils,projectoptionsform,componentpaletteform,mseobjecttext,msearrayutils;
-const
- storecaption = 'Component Store';
 type
  treader1 = class(treader);
- 
+ strconsts = (
+  storecaption,       //0 Component Store
+  compreaderror,      //1 Component read error.
+  wantoverwrite,      //2 Do you want to overwrite "
+  withcurrent,        //3 " with current clipboard content?
+  warning,            //4 WARNING
+  nocomps,            //5 No component(s) in clipboard.
+  errorwriting,       //6 Error while writing the storegroup.
+  error,              //7 ERROR
+  wantremove,         //8 Do you want to remove "
+  qm,                 //9 "?
+  branch,             //10 " branch?
+  str_file,           //11 File "
+  doesnotexist,       //12 " does not exist, do you want to create it?
+  savecompstore       //13 Save Component Store Group
+ );
+  
 function getstoredir: filenamety;
 begin
  result:= filepath(expandprmacros('${COMPSTOREDIR}'),fk_dir);
@@ -356,7 +371,7 @@ begin
    end;    
   except
    if not apaste then begin
-    showerror('Component read error.');
+    showerror(c[ord(compreaderror)]);
    end;
    exit;        //invalid
   end;
@@ -404,8 +419,8 @@ var
  stream1,stream2: tstream;
  stream3: ttextstream;
 begin
- if askyesno('Do you want to overwrite "'+filepath.value+
-            '" with current clipboard content?','WARNING') then begin
+ if askyesno(c[ord(wantoverwrite)]+filepath.value+c[ord(withcurrent)],
+                                                  c[ord(warning)]) then begin
   bo1:= false;
   if pastefromclipboard(mstr1) then begin
    stream1:= tstringcopystream.create(mstr1);
@@ -428,7 +443,7 @@ begin
    end;
   end;
   if not bo1 then begin
-   showerror('No component(s) in clipboard.');
+   showerror(c[ord(nocomps)]);
   end;
  end;
 end;
@@ -562,8 +577,8 @@ begin
  except
   on e: exception do begin
    fchanged:= true;
-   result:= showmessage('Error while writing the storegroup.'+lineend+
-               e.message,'ERROR',[mr_cancel,mr_ignore]);
+   result:= showmessage(c[ord(errorwriting)]+lineend+
+               e.message,c[ord(error)],[mr_cancel,mr_ignore]);
    if result = mr_ignore then begin
     result:= mr_ok;
    end;
@@ -793,7 +808,7 @@ end;
 procedure tcomponentstorefo.removestoreex(const sender: TObject);
 begin
  with tstoredcomponent(node.item).finfo do begin
-  if askyesno('Do you want to remove "'+compname+'"?') then begin
+  if askyesno(c[ord(wantremove)]+compname+c[ord(qm)]) then begin
    tstoredcomponent(node.item).free;
    storechanged;
   end;
@@ -803,7 +818,7 @@ end;
 procedure tcomponentstorefo.delnode(const sender: TObject);
 begin
  with tstoredcomponent(node.item).finfo do begin
-  if askyesno('Do you want to remove "'+compname+'" branch?') then begin
+  if askyesno(c[ord(wantremove)]+compname+c[ord(branch)]) then begin
    tstoredcomponent(node.item).free;
    storechanged;
   end; 
@@ -813,7 +828,7 @@ end;
 procedure tcomponentstorefo.removecomp(const sender: TObject);
 begin
  with tstoredcomponent(node.item).finfo do begin
-  if askyesno('Do you want to remove "'+compname+'"?') then begin
+  if askyesno(c[ord(wantremove)]+compname+c[ord(qm)]) then begin
    tstoredcomponent(node.item).free;
    storechanged;
   end; 
@@ -930,7 +945,7 @@ begin
  else begin
   mstr2:= filename(fgroupfilename);
  end;
- dragdock.caption:= mstr1+storecaption+' ('+mstr2+')';
+ dragdock.caption:= mstr1+c[ord(storecaption)]+' ('+mstr2+')';
 end;
 
 procedure tcomponentstorefo.storechanged;
@@ -960,8 +975,7 @@ begin
    filename:= fgroupfilename;
    if execute(fdk_open) = mr_ok then begin
     if not findfile(filename) then begin
-     if askyesno('File '+filename+
-                 ' does not exist, do you want to create it?') then begin
+     if askyesno(c[ord(str_file)]+filename+c[ord(doesnotexist)]) then begin
       writestoregroup(filename);
      end;
     end
@@ -989,7 +1003,7 @@ function tcomponentstorefo.dosavegroupas: modalresultty;
 begin
  with groupfiledialog,controller do begin
   filename:= fgroupfilename;
-  result:= execute(fdk_save,'Save Component Store Group',[fdo_checkexist]);
+  result:= execute(fdk_save,c[ord(savecompstore)],[fdo_checkexist]);
   if result = mr_ok then begin
    result:= writestoregroup(filename);
   end;

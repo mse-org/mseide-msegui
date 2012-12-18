@@ -7,7 +7,7 @@ uses
  msesimplewidgets,msewidgets,msedataedits,mseedit,msegrids,msestrings,msetypes,
  msewidgetgrid,msegraphedits,msesplitter,mseeditglob,msetextedit,msedispwidgets,
  msebitmap,msedatanodes,msefiledialog,mselistbrowser,msescrollbar,msesystypes,
- msesys;
+ msesys,msestringcontainer;
 type
  ttemplateeditorfo = class(tmseform)
    tstatfile1: tstatfile;
@@ -30,6 +30,7 @@ type
    savefiledialog: tfiledialog;
    deletebu: tbutton;
    saveasbu: tbutton;
+   c: tstringcontainer;
    procedure afterstatreadexe(const sender: TObject);
    procedure editnotify(const sender: TObject;
                    var info: editnotificationinfoty);
@@ -54,7 +55,12 @@ implementation
 uses
  templateeditor_mfm,msecodetemplates,projectoptionsform,sysutils,msefileutils,
  msedatalist,msesysintf,msearrayutils;
- 
+type
+ stringconsts = (
+  wantdelete,   //0 Do you want to delete "
+  codetemped    //1 Code Template Editor
+ );
+  
 constructor ttemplateeditorfo.create(const aindex: integer);
 begin
  findex:= aindex;
@@ -192,7 +198,7 @@ end;
 
 procedure ttemplateeditorfo.deleteexe(const sender: TObject);
 begin
- if askyesno('Do you want to delete "'+fpath+'"?') then begin
+ if askyesno(c[ord(wantdelete)]+fpath+'"?') then begin
   deletefile(fpath);
   fdeleted:= true;
   window.modalresult:= mr_cancel;
@@ -203,7 +209,7 @@ procedure ttemplateeditorfo.setpath(const avalue: filenamety);
 begin
  fpath:= avalue;
  if fpath = '' then begin
-  caption:= 'Code Template Editor';
+  caption:= c[ord(codetemped)];
   deletebu.enabled:= false;
  end
  else begin

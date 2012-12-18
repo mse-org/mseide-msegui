@@ -285,4 +285,12 @@ object formdesignerfo: tformdesignerfo
     left = 144
     top = 88
   end
+  object c: tstringcontainer
+    strings.data = (
+      'Do you wish to revert to inherited'
+      'the selected component?'
+    )
+    left = 64
+    top = 136
+  end
 end

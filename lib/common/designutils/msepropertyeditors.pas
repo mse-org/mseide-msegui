@@ -911,7 +911,7 @@ uses
  mseformatbmpicoread{$ifdef FPC},mseformatjpgread,mseformatpngread,
  mseformatpnmread,mseformattgaread,mseformatxpmread{$endif},
  msestat,msestatfile,msefileutils,
- msedesigner,variants;
+ msedesigner,variants,mseeditglob;
 
 const
  methodsortlevel = 100;
@@ -5233,6 +5233,7 @@ begin
  try
   with editform do begin
    valueedit.datalist.assign(tmsestringdatalist(getpointervalue));
+   valueedit.editpos:= mgc(bigint,bigint);
    show(true,nil);
   end;
  finally

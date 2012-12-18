@@ -20,8 +20,9 @@ unit findinfilepage;
 
 interface
 uses
- msegui,mseclasses,mseforms,msetabs,msetextedit,msewidgetgrid,msegrids,msethreadcomp,
- findinfileform,msesimplewidgets,msedispwidgets,msestrings,classes;
+ msegui,mseclasses,mseforms,msetabs,msetextedit,msewidgetgrid,msegrids,
+ msethreadcomp,findinfileform,msesimplewidgets,msedispwidgets,msestrings,
+ classes,msestringcontainer;
 
 type 
 
@@ -34,6 +35,7 @@ type
    again: tbutton;
    thread: tthreadcomp;
    closepage: tstockglyphbutton;
+   c: tstringcontainer;
    procedure foundlistoncellevent(const sender: tobject; var info: celleventinfoty);
    procedure threadonexecute(const sender: tthreadcomp);
    procedure threadonstart(const sender: tthreadcomp);
@@ -60,6 +62,12 @@ uses
  findinfilepage_mfm,sourcepage,sourceform,mseeditglob,sysutils,mserichstring,
  msegraphics,msestream,msefileutils,msesys,findinfiledialogform,msegraphutils,
  projectoptionsform;
+
+type
+ stringconsts = (
+  canceled,           //0 *** CANCELED ***
+  finished            //1 FINISHED
+ );
  
 { tfindinfilepagefo}
  
@@ -92,7 +100,7 @@ procedure tfindinfilepagefo.cancelsearch;
 begin
  thread.terminate;
  thread.waitfor;
- filename.value:= '*** CANCELED ***';
+ filename.value:= c[ord(canceled)];
 end;
 
 procedure tfindinfilepagefo.startfile(const afilename: filenamety);
@@ -286,7 +294,7 @@ begin
  if not application.terminated then begin
   cancel.enabled:= false;
   again.enabled:= true;
-  filename.value:= 'FINISHED';
+  filename.value:= c[ord(finished)];
  end;
 end;
 

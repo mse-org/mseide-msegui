@@ -4,7 +4,7 @@ interface
 uses
  msegui,mseclasses,mseforms,msesimplewidgets,msepostscriptprinter,mseprinter,
  msedataedits,msethreadcomp,msegraphedits,msestrings,msegraphics,msestat,
- msestatfile,msetypes,mseglob;
+ msestatfile,msetypes,mseglob,msestringcontainer;
 
 type
  tprintfo = class(tmseform)
@@ -21,6 +21,7 @@ type
    tpagesizeselector1: tpagesizeselector;
    tstatfile1: tstatfile;
    pages: tstringedit;
+   c: tstringcontainer;
    procedure pronpagestart(const sender: tcustomprinter);
    procedure printidle(var again: Boolean);
    procedure runonexecute(const sender: TObject);
@@ -44,7 +45,12 @@ uses
  printform_mfm,main,sourceform,msestream,msesys,msegraphutils,msedrawtext,
  msesettings,msereal,msewidgets,sysutils,projectoptionsform,mserichstring,
  mseguiglob;
-
+type
+ stringconsts = (
+  page,           //0 Page
+  wishcancel      //1 Do you wish to cancel printing?
+ );
+ 
 procedure tprintfo.printidle(var again: Boolean);
 begin
  try
@@ -120,8 +126,8 @@ begin
   font.name:= titlefont.value;
   drawtext(sourcefo.activepage.filepath,makerect(0,0,clientsize.cx-
                           round(10*fontsize.value),0),[tf_ellipseleft]);
-  drawtext('Page '+inttostr(pagenumber+1),makerect(clientsize.cx,0,0,0),
-                  [tf_right]);
+  drawtext(c[ord(page)]+' '+inttostr(pagenumber+1),
+                 makerect(clientsize.cx,0,0,0),[tf_right]);
   restore;
  end;
 end;
@@ -137,7 +143,7 @@ end;
 procedure tprintfo.cancelexec(const sender: TObject);
 begin
  if run then begin
-  if askyesno('Do you wish to cancel printing?') then begin
+  if askyesno(c[ord(wishcancel)]) then begin
    run:= false;
    window.modalresult:= mr_cancel;
   end;
