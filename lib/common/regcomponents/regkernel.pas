@@ -146,7 +146,7 @@ begin
 
  registercomponents('NoGui',[tstatfile,trttistat,tnoguiaction,tactivator,
                     ttimer,tthreadcomp,tpipereadercomp,tprocessmonitor,
-                    tstringcontainer]);
+                    tstringcontainer,tkeystringcontainer]);
  registercomponenttabhints(['NoGui'],['Components without GUI dependence']);
 
  registerpropertyeditor(typeinfo(tstatfile),tstatfile,'',

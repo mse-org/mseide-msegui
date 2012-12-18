@@ -14,28 +14,42 @@ uses
  mseclasses,msedatalist,classes,msehash,msestrings;
  
 type
- tcontainerstringdatalist = class(tdoublemsestringdatalist)
- end;
- 
  tstringcontainer = class;
 
- getstringeventty = procedure(const sender: tstringcontainer;
+ getstringeventty = procedure(const sender: tobject;
                       const aindex: integer; var avalue: msestring) of object;
 
  tstringcontainer = class(tmsecomponent)
   private
-   fstrings: tcontainerstringdatalist;
-   fhash: tintegermsestringhashdatalist;
+   fstrings: tmsestringdatalist;
    fongetstring: getstringeventty;
-   procedure setstrings(const avalue: tcontainerstringdatalist);
+   procedure setstrings(const avalue: tmsestringdatalist);
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   function n(const aname: msestring): msestring; //by name
    function i(const aindex: integer): msestring;  //by index
   published
-   property strings: tcontainerstringdatalist read fstrings write setstrings;
-                   //a = strings, b = names
+   property strings: tmsestringdatalist read fstrings write setstrings;
+   property ongetstring: getstringeventty read fongetstring write fongetstring;
+ end;
+
+ tkeystringdatalist = class(tdoublemsestringdatalist)
+ end;
+ 
+ tkeystringcontainer = class(tmsecomponent)
+  private
+   fstrings: tkeystringdatalist;
+   fhash: tintegermsestringhashdatalist;
+   fongetstring: getstringeventty;
+   procedure setstrings(const avalue: tkeystringdatalist);
+  public
+   constructor create(aowner: tcomponent); override;
+   destructor destroy; override;
+   function k(const akey: msestring): msestring; //by key
+   function i(const aindex: integer): msestring;  //by index
+  published
+   property strings: tkeystringdatalist read fstrings write setstrings;
+                   //a = strings, b = keys
    property ongetstring: getstringeventty read fongetstring write fongetstring;
  end;
  
@@ -45,8 +59,7 @@ implementation
 
 constructor tstringcontainer.create(aowner: tcomponent);
 begin
- fstrings:= tcontainerstringdatalist.create;
- fhash:= tintegermsestringhashdatalist.create;
+ fstrings:= tmsestringdatalist.create;
  inherited;
 end;
 
@@ -54,10 +67,43 @@ destructor tstringcontainer.destroy;
 begin
  inherited;
  fstrings.free;
+end;
+
+function tstringcontainer.i(const aindex: integer): msestring;
+begin
+ if (aindex < 0) or (aindex >= fstrings.count) then begin
+  result:= '';
+ end
+ else begin
+  result:= pmsestringaty(fstrings.datapo)^[aindex];
+  if assigned(fongetstring) then begin
+   fongetstring(self,aindex,result);
+  end;
+ end;
+end;
+
+procedure tstringcontainer.setstrings(const avalue: tmsestringdatalist);
+begin
+ fstrings.assign(avalue);
+end;
+
+{ tkeystringcontainer }
+
+constructor tkeystringcontainer.create(aowner: tcomponent);
+begin
+ fstrings:= tkeystringdatalist.create;
+ fhash:= tintegermsestringhashdatalist.create;
+ inherited;
+end;
+
+destructor tkeystringcontainer.destroy;
+begin
+ inherited;
+ fstrings.free;
  fhash.free;
 end;
 
-function tstringcontainer.n(const aname: msestring): msestring;
+function tkeystringcontainer.k(const akey: msestring): msestring;
 var
  po1: pdoublemsestringaty;
  int1: integer;
@@ -73,10 +119,10 @@ begin
    end;
   end;
  end;
- result:= i(fhash.find(aname));
+ result:= i(fhash.find(akey));
 end;
 
-function tstringcontainer.i(const aindex: integer): msestring;
+function tkeystringcontainer.i(const aindex: integer): msestring;
 begin
  if (aindex < 0) or (aindex >= fstrings.count) then begin
   result:= '';
@@ -89,7 +135,7 @@ begin
  end;
 end;
 
-procedure tstringcontainer.setstrings(const avalue: tcontainerstringdatalist);
+procedure tkeystringcontainer.setstrings(const avalue: tkeystringdatalist);
 begin
  fstrings.assign(avalue);
 end;
