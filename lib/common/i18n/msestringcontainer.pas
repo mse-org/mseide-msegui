@@ -122,6 +122,9 @@ begin
   end;
  end;
  result:= i(fhash.find(akey));
+ if result = '' then begin
+  result:= akey;
+ end;
 end;
 
 function tkeystringcontainer.i(const aindex: integer): msestring;
