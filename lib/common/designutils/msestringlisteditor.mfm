@@ -45,7 +45,7 @@ object stringlisteditor: tstringlisteditor
   end
   object grid: twidgetgrid
     optionswidget1 = [ow1_fontlineheight]
-    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusout, ow_focusbackonesc, ow_destroywidgets]
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusout, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets]
     taborder = 1
     bounds_x = 0
     bounds_y = 0

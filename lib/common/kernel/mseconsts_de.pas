@@ -85,7 +85,7 @@ const
   'Verzeichnis erstellen',//sc_create_new_directory
   'Datei',                                     //sc_file
   'existiert, wollen Sie '#252'berschreiben?', //sc_exists_overwrite
-  'wurde geändert, wollen Sie speichern?'   ,  //sc_is_modified_save
+  'wurde geändert, wollen Sie speichern?,      //sc_is_modified_save
   'WARNUNG',                                   //sc_warningupper
   'FEHLER',                                    //sc_errorupper
   'existiert nicht',                           //sc_does_not_exist
