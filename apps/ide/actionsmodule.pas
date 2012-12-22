@@ -86,9 +86,25 @@ type
   ac_inheritedform,   //57 Inherited Form
   ac_replacesettings, //58 Do you want to replace the settings by
   ac_file,            //59 File "
-  ac_wantoverwrite    //60 Do you want to overwrite?
+  ac_wantoverwrite,   //60 Do you want to overwrite?
+  ac_sr_unknown,      //61 Unknown
+  ac_sr_error,        //62 Error
+  ac_sr_startup,      //63 Startup
+  ac_sr_exception,    //64 Exception
+  ac_sr_gdbdied,      //65 GDB died
+  ac_sr_breakpoint_hit,           //66 Breakpoint hit
+  ac_sr_watchpointtrigger,        //67 Watchpoint triggered
+  ac_sr_readwatchpointtrigger,    //68 Read Watchpoint triggered
+  ac_sr_accesswatchpointtrigger,  //69 Access Watchpoint triggered
+  ac_sr_end_stepping_range,       //70 End stepping range
+  ac_sr_function_finished,        //71 Function finished
+  ac_sr_exited_normally,          //72 Exited normally
+  ac_sr_exited,                   //73 Exited
+  ac_sr_detached,                 //74 Detached
+  ac_sr_signal_received           //75 Signal received
  );
 
+type
  tactionsmo = class(tmsedatamodule)
    buttonicons: timagelist;
 
@@ -247,6 +263,7 @@ type
    procedure projectsourceexe(const sender: TObject);
    procedure projectsaveexe(const sender: TObject);
    procedure projectcloeseexe(const sender: TObject);
+   procedure creadstateexe(const sender: TObject);
  end;
 
 var
@@ -690,6 +707,11 @@ end;
 procedure tactionsmo.projectcloeseexe(const sender: TObject);
 begin
  mainfo.closeprojectactonexecute (sender);
+end;
+
+procedure tactionsmo.creadstateexe(const sender: TObject);
+begin
+ msegdbutils.localizetext;
 end;
 
 end.

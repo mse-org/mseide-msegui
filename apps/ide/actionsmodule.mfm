@@ -2238,6 +2238,7 @@ object actionsmo: tactionsmo
     top = 376
   end
   object c: tstringcontainer
+    onreadstate = creadstateexe
     strings.data = (
       'Configure MSEide'
       'Process ID'
@@ -2300,6 +2301,21 @@ object actionsmo: tactionsmo
       'Do you want to replace the settings by'
       'File "'
       'Do you want to overwrite?'
+      'Unknown'
+      'Error'
+      'Startup'
+      'Exception'
+      'GDB died'
+      'Breakpoint hit'
+      'Watchpoint triggered'
+      'Read Watchpoint triggered'
+      'Access Watchpoint triggered'
+      'End stepping range'
+      'Function finished'
+      'Exited normally'
+      'Exited'
+      'Detached'
+      'Signal received'
     )
     left = 288
     top = 392

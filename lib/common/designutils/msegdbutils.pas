@@ -95,7 +95,7 @@ type
                  sr_end_stepping_range,sr_function_finished,
                  sr_exited_normally,sr_exited,sr_detached,sr_signal_received);
 const
- stopreasontext: array[stopreasonty] of string = (
+ defaultstopreasontext: array[stopreasonty] of string = (
           '',
           'Unknown',
           'Error',
@@ -113,6 +113,9 @@ const
           'Detached',
           'Signal received'
           );
+var
+ stopreasontext: array[stopreasonty] of string;
+
 type
  stopinfoty = record
   reason: stopreasonty;
@@ -614,11 +617,13 @@ type
                                  write setoverloadsleepus default -1;
  end;
 
+procedure localizetext;
+
 implementation
 
 uses
  sysutils,mseformatstr,mseprocutils,msesysutils,msefileutils,
- msebits,msesysintf,mseguiintf,msearrayutils,msesys,msedate
+ msebits,msesysintf,mseguiintf,msearrayutils,msesys,msedate,actionsmodule
         {$ifdef UNIX},mselibc{$else},windows{$endif};
 
 const                                      
@@ -4556,5 +4561,16 @@ begin
 end;
 
 {$endif unix}
- 
+
+procedure localizetext;
+var
+ sr1: stopreasonty;
+begin
+ for sr1:= sr_unknown to high(stopreasonty) do begin
+  stopreasontext[sr1]:= actionsmo.c[ord(ac_sr_unknown)-1+ord(sr1)];
+ end;
+end;
+
+initialization
+ stopreasontext:= defaultstopreasontext; 
 end.

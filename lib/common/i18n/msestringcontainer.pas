@@ -19,11 +19,25 @@ type
  getstringeventty = procedure(const sender: tobject;
                       const aindex: integer; var avalue: msestring) of object;
 
- tstringcontainer = class(tmsecomponent)
+ tcustomstringcontainer = class(tmsecomponent)
+  private
+   fonreadstate: notifyeventty;
+   foneventloopstart: notifyeventty;
+  protected
+   procedure readstate(reader: treader); override;
+   procedure doasyncevent(var atag: integer); override;
+  published
+   property onreadstate: notifyeventty read fonreadstate write fonreadstate;
+   property oneventloopstart: notifyeventty read foneventloopstart 
+                                                    write foneventloopstart;
+ end;
+ 
+ tstringcontainer = class(tcustomstringcontainer)
   private
    fstrings: tmsestringdatalist;
    fongetstring: getstringeventty;
    procedure setstrings(const avalue: tmsestringdatalist);
+  protected
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -37,12 +51,13 @@ type
  tkeystringdatalist = class(tdoublemsestringdatalist)
  end;
  
- tkeystringcontainer = class(tmsecomponent)
+ tkeystringcontainer = class(tcustomstringcontainer)
   private
    fstrings: tkeystringdatalist;
    fhash: tintegermsestringhashdatalist;
    fongetstring: getstringeventty;
    procedure setstrings(const avalue: tkeystringdatalist);
+  protected
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -56,6 +71,27 @@ type
  end;
  
 implementation
+
+{ tcustomstringcontainer } 
+
+procedure tcustomstringcontainer.readstate(reader: treader);
+begin
+ inherited;
+ if assigned(fonreadstate) then begin
+  fonreadstate(self);
+ end;
+ if assigned(foneventloopstart) then begin
+  asyncevent;
+ end;
+end;
+
+procedure tcustomstringcontainer.doasyncevent(var atag: integer);
+begin
+ inherited;
+ if canevent(tmethod(foneventloopstart)) then begin
+  foneventloopstart(self);
+ end;
+end;
 
 { tstringcontainer }
 
