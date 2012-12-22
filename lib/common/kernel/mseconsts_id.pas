@@ -84,6 +84,7 @@ const
   'Buat Direktori Baru',   //sc_create_new_directory
   'File',                  //sc_file
   'sudah ada, akan ditimpa?', //sc_exists_overwrite
+  'is modified. Save?',  //sc_is_modified_save
   'PERINGATAN',            //sc_warningupper
   'SALAH',                 //sc_errorupper
   'tidak ada',             //sc_does_not_exist

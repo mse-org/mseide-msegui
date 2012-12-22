@@ -88,6 +88,8 @@ const
   #26032#24314#25991#20214#22841,            //sc_create_new_directory
   #25991#20214,                              //sc_filehk
   #25991#20214#24050#32463#23384#22312#65292#26159#21542#35206#30422#65311, //sc_exists_overwrite
+    'is modified. Save?',  //sc_is_modified_save
+
   #35686#21578,                              //sc_warningupper
   #38169#35823,                              //sc_errorupper
   #19981#23384#22312,                        //sc_does_not_exist

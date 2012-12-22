@@ -1422,6 +1422,19 @@ end;
 function confirmsavechangedfile(const filename: filenamety;
          out modalresult: modalresultty; multiple: boolean = false): boolean;
 begin
+ with stockobjects do begin
+  if multiple then begin
+   modalresult:= showmessage(captions[sc_file]+' '+filename+' '+
+                  captions[sc_is_modified_save],captions[sc_confirmation],
+                   [mr_yes,mr_all,mr_no,mr_noall,mr_cancel],mr_yes);
+  end
+  else begin
+   modalresult:= showmessage(captions[sc_file]+' '+filename+' '+
+                  captions[sc_is_modified_save],captions[sc_confirmation],
+                   [mr_yes,mr_no,mr_cancel],mr_yes);
+  end;
+ end;
+{
  if multiple then begin
   modalresult:= showmessage('File '+filename+' is modified. Save?','Confirmation',
                   [mr_yes,mr_all,mr_no,mr_noall,mr_cancel],mr_yes);
@@ -1430,6 +1443,7 @@ begin
   modalresult:= showmessage('File '+filename+' is modified. Save?','Confirmation',
                   [mr_yes,mr_no,mr_cancel],mr_yes);
  end;
+}
  if modalresult = mr_windowclosed then begin
   modalresult:= mr_cancel;
  end;

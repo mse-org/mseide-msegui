@@ -145,6 +145,7 @@ const
   'Create new directory',//sc_create_new_directory
   'File',               //sc_file
   'exists, do you want to overwrite?', //sc_exists_overwrite
+  'is modified. Save?',  //sc_is_modified_save
   'WARNING',               //sc_warningupper
   'ERROR',                 //sc_errorupper
   'does not exist',        //sc_does_not_exist
