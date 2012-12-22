@@ -301,16 +301,8 @@ var
         readvalue;
         stringvalue:= {$ifdef FPC}driver.{$endif}readstr;
        end;
-//       vaString,vaLString:  begin
-//        stringvalue:= readstring;
-//       end;
        vastring,valstring,vaWString,vautf8string: begin
         msestringvalue:= treader_readmsestring(reader);
-//        {$ifdef mse_unicodestring}
-//        msestringvalue:= readunicodestring;
-//        {$else}
-//        msestringvalue:= readwidestring;
-//        {$endif}
        end;
        vaSet: begin
         readvalue;
@@ -335,7 +327,12 @@ var
           aitem.info.name:= inttostr(int1);
          end
          else begin
-          aitem.info.name:= inttostr(int2)+':';
+          if NextValue in [vaident] then begin
+           aitem.info.name:= readident;
+          end
+          else begin
+           aitem.info.name:= inttostr(int2)+':';
+          end;
          end;
          readlistbegin;
          while not endoflist do begin
@@ -491,20 +488,7 @@ var
        end;
        vaString,vaLString,vaWString,vautf8string: begin
         twriter_writemsestring(writer,msestringvalue);
-//       {$ifdef mse_unicodestring}
-//        writeunicodestring(msestringvalue);
-//        {$else}
-//        writewidestring(msestringvalue);
-//        {$endif}
        end;
-       (*
-       vaString,vaLString:  begin
-        writestring(stringvalue);
-       end;
-       vaWString{$ifndef FPC},vautf8string{$endif}: begin
-        writewidestring(msestringvalue);
-       end;
-       *)
        vaSet: begin
         ar1:= nil;
         str1:= trim(stringvalue);
@@ -518,27 +502,6 @@ var
          end;
          writestr('');
         end;
-        {
-        int2:= length(ar1) + 32 + sizeof(setinfo);
-        for int1:= 0 to high(ar1) do begin
-         inc(int2,length(ar1[int1]));
-        end;
-        po1:= getmem(int2);
-        po2:= @po1^.data.namelist;
-        for int1:= 0 to high(ar1) do begin
-         po2^:= ar1[int1];
-         inc(pchar(po2),length(po2^)+1);
-        end;
-        for int1:= length(ar1) to 31 do begin
-         po2^:= '';
-         inc(pchar(po2),1);
-        end;
-        lwo1:= bitmask[length(ar1)];
-        setinfo.kind:= tkset;
-        setinfo.namelen:= 0;
-        driver.writeset(lwo1,@setinfo);
-        freemem(po2);
-        }
         {$else}
         writevalue(vaset);
         for int1:= 0 to high(ar1) do begin
@@ -555,8 +518,15 @@ var
         {$endif}
         for int1:= 0 to node.fcount - 1 do begin
          with node[int1] do begin
-          if (info.name <> '') and (info.name[length(info.name)] <> ':') then begin
-           writeinteger(strtoint(info.name));
+          if (info.name <> '') then begin
+           if info.name[1] in ['0'..'9'] then begin
+            if (info.name[length(info.name)] <> ':') then begin
+             writeinteger(strtoint(info.name));
+            end;
+           end
+           else begin
+            writeident(info.name);
+           end;
           end;
          end;
          writelistbegin;

@@ -902,6 +902,7 @@ function findpastedcomponent(const origname: string): tcomponent;
 function findpastedcomponentname(const comp: tcomponent): string;
 
 {$ifdef mse_debug}
+procedure dumptextstream(const stream: tstream; const atext: string);
 procedure dumpcomponent(const acomp: tcomponent; const atext: string = '');
 procedure dumpstreamcomponent(const acomp: tcomponent; const atext: string = '');
 procedure debugstreamout(const stream: tstream; const atext: string);
@@ -1209,6 +1210,20 @@ begin
  teststream.writetotext(output);
  teststream.free;
  flush(output);
+end;
+
+procedure dumptextstream(const stream: tstream; const atext: string);
+var
+ int1: integer;
+ str1: string;
+begin
+ debugwriteln(atext);
+ int1:= stream.position;
+ stream.position:= 0;
+ setlength(str1,stream.size);
+ stream.readbuffer(pointer(str1)^,length(str1));
+ debugwriteln(str1);
+ stream.position:= int1;
 end;
 
 procedure debugbinstreamout(const acomp,aancestor: tcomponent;
