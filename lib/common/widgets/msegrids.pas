@@ -3258,13 +3258,14 @@ end;
 
 constructor tcol.create(const agrid: tcustomgrid; const aowner: tgridarrayprop);
 begin
-// fmaxwidthrow:= -1;
  inherited create(agrid,aowner);
  ffocusrectdist:= tcols(aowner).ffocusrectdist;
  fwidth:= tcols(aowner).fwidth;
  foptions:= tcols(aowner).foptions;
  foptions1:= tcols(aowner).foptions1;
-// foptionscell:= tcols(aowner).foptionscell;
+ if co1_autorowheight in foptions1 then begin
+  include(fstate,gps_needsrowheight);
+ end;
  flinewidth:= tcols(aowner).flinewidth;
  flinecolor:= tcols(aowner).flinecolor;
  ffontactivenum:= tcols(aowner).ffontactivenum;
@@ -3788,6 +3789,7 @@ begin
    fwidth:= Value;
   end;
   updatewidth(fwidth);
+  updatepropwidth;
   fcellinfo.grid.layoutchanged;
   if (gps_needsrowheight in fstate) and 
         not (csloading in fcellinfo.grid.componentstate) then begin
@@ -3795,7 +3797,7 @@ begin
    fcellinfo.grid.updatelayout;
    fcellinfo.grid.datacols.rowstate.change(-1);
   end;
-  updatepropwidth;
+//  updatepropwidth;
  end;
 end;
 
