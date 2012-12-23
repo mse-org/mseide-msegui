@@ -102,7 +102,7 @@ type
   ac_sr_exited,                   //73 Exited
   ac_sr_detached,                 //74 Detached
   ac_sr_signal_received,          //75 Signal received
-  ac_stoperror                    //76 
+  ac_stoperror                    //76 Stop error
  );
 
 type

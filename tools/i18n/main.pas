@@ -100,6 +100,7 @@ type
    procedure exitexe(const sender: TObject);
    procedure beforelangdrawcell(const sender: tcol; const canvas: tcanvas;
                    var cellinfo: cellinfoty; var processed: Boolean);
+   procedure showcolordataentered(const sender: TObject);
   private
    datastream: ttextdatastream;
 //   alang: integer;
@@ -325,6 +326,7 @@ begin
    if editwidget = nil then begin
     edit1:= tmemodialogedit.create(self);
     edit1.initgridwidget;
+    edit1.frame.button.width:= 13;
     edit1.onsetvalue:= {$ifdef FPC}@{$endif}variantonsetvalue;
     edit1.Tag:= int1 - variantshift;
     edit1.optionsedit:= (edit1.optionsedit - [oe_savevalue]) + 
@@ -1162,6 +1164,11 @@ begin
    end;
   end;
  end;
+end;
+
+procedure tmainfo.showcolordataentered(const sender: TObject);
+begin
+ grid.invalidate;
 end;
 
 end.
