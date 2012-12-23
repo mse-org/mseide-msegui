@@ -79,18 +79,18 @@ const
 
                                        // hotkeys///
   #1042#1077#1088#1085#1091#1090#1100 ,           //sc_Undohk     => Vernut`
-  '&Redo',                             //sc_Redohk  //               //
+  '&#1055#1086#1074#1090#1086#1088',                             //sc_Redohk  => Povtor//               //
   #1057#1082#1086#1087#1080#1088#1086#1074#1072#1090#1100 , 
                                                   //sc_Copyhk    => Skopirovat`
   #1042#1099#1088#1077#1079#1072#1090#1100 ,      //sc_Cuthk      => Vyrezat`
   #1042#1089#1090#1072#1074#1080#1090#1100 ,     ///sc_Pastehk    => Vstavit`
-  '&Insert Row',        //sc_insert_rowhk ///          //
-  '&Append Row',        //sc_append_rowhk  // hotkeys  //
-  '&Delete Row',        //sc_delete_rowhk ///         ///
+  '&'#1042#1089#1090#1072#1074#1080#1090#1100' '#1089#1090#1088#1086#1082#1091,        //sc_insert_rowhk => Vstavit' stroku ///          //
+  '&'#1044#1086#1073#1072#1074#1080#1090#1100' '#1089#1090#1088#1086#1082#1091,        //sc_append_rowhk  => Dobavit' stroku // hotkeys  //
+  '&'#1059#1076#1072#1083#1080#1090#1100' '#1089#1090#1088#1086#1082#1091,        //sc_delete_rowhk => Udalit' stroku///         ///
   
                                        // hotkeys///
   '&'#1050#1072#1090#1072#1083#1086#1075 ,        //sc_Dirhk      => Katalog
-  '&Home',                //sc_homehk               //
+  '&'#1044#1086#1084'.',                //sc_homehk => Dom.              //
   '&'#1042#1074#1077#1088#1093 ,                  //sc_Uphk       => Vverh
   '&'#1053#1086#1074'. '#1082#1072#1090'-'#1075 , //sc_New_dirhk  => Nov. kat-g
   #1053#1072'&'#1079#1074#1072#1085#1080#1077 ,   //sc_Namehk     => Nazvanie
@@ -109,7 +109,7 @@ const
   #1091#1078#1077' '#1077#1089#1090#1100', '+
   #1087#1077#1088#1077#1079#1072#1087#1080#1089#1072#1090#1100'?' , 
                                                   //sc_exists_overwrite
-  'is modified. Save?',  //sc_is_modified_save
+  #1084#1086#1076#1080#1092#1080#1094#1080#1088#1086#1074#1072#1085'. '#1057#1086#1093#1088#1072#1085#1080#1090#1100'?',  //sc_is_modified_save
   #1055#1056#1045#1044#1059#1055#1056#1045#1046#1044#1045#1053#1048#1045 , 
                                                   //sc_warningupper
   #1054#1064#1048#1041#1050#1040 ,                //sc_errorupper
@@ -148,36 +148,36 @@ const
                                                 //sc_Confirmation
   #1059#1076#1072#1083#1080#1090#1100' '#1079#1072#1087#1080#1089#1100'?',
                                                 //sc_Delete_record_question
-  'Close page',         //sc_close_page
-  'First',              //sc_first
-  'Prior',              //sc_prior
-  'Next',               //sc_next
-  'Last',               //sc_last
-  'Append',             //sc_append
-  'Delete',             //sc_delete
-  'Edit',               //sc_edit
-  'Post',               //sc_post
-  'Cancel',             //sc_cancel
-  'Refresh',            //sc_refresh
-  'Edit filter',        //sc_filter_filter
-  'Edit filter minimum',//sc_edit_filter_min
-  'Edit filter maximum',//sc_filter_edit_max
-  'Filter on',          //sc_filter_on
-  'Search',             //sc_search
-  'Auto edit',          //sc_autoedit
-  'Copy record',        //sc_copy_record
-  'Copy record?',       //sc_Copy_record_question
-  'Dialog',             //sc_dialog
-  'Insert',             //sc_insert
-  'Copy',               //sc_copy
-  'Filter off',         //sc_filter_off
-  'Portrait',           //sc_portrait print orientation
-  'Landscape',          //sc_landscape print orientation
-  'Delete row?',        //sc_Delete_row_question
-  'selected rows?',     //sc_selected_rows
-  'Single item only',    //sc_Single_item_only 
-  'Copy Cells',          //sc_Copy_Cells
-  'Paste Cells'          //sc_Paste_Cells
+  #1047#1072#1082#1088#1099#1090#1100#32#1089#1090#1088#1072#1085#1080#1094#1091,         //sc_close_page
+  #1057#1085#1072#1095#1072#1083#1072,              //sc_first
+  #1055#1088#1080#1086#1088,              //sc_prior
+  #1044#1072#1083#1077#1077,               //sc_next
+  #1053#1072#1079#1072#1076,               //sc_last
+  #1044#1086#1073#1072#1074#1080#1090#1100,             //sc_append
+  #1059#1076#1072#1083#1080#1090#1100,             //sc_delete
+  #1055#1088#1072#1074#1080#1090#1100,               //sc_edit
+  #1055#1086#1089#1083#1077,               //sc_post
+  #1054#1090#1084#1077#1085#1072,             //sc_cancel
+  #1054#1073#1085#1086#1074#1080#1090#1100,            //sc_refresh
+  #1048#1079#1084#1077#1085#1080#1090#1100' '#1092#1080#1083#1100#1090#1088,        //sc_filter_filter
+  #1048#1079#1084#1077#1085#1080#1090#1100' '#1084#1080#1085'. '#1092#1080#1083#1100#1090#1088  ,//sc_edit_filter_min
+  #1048#1079#1084#1077#1085#1080#1090#1100' '#1084#1072#1082#1089'. '#1092#1080#1083#1100#1090#1088, //sc_filter_edit_max
+  #1042#1082#1083'. '#1092#1080#1083#1100#1090#1088,          //sc_filter_on
+  #1055#1086#1080#1089#1082,             //sc_search
+  #1040#1074#1090#1086#1084#1072#1090'. '#1087#1088#1072#1074#1082#1072,          //sc_autoedit
+  #1050#1086#1087#1080#1088#1086#1074#1072#1090#1100' '#1079#1072#1087#1080#1089#1100,        //sc_copy_record
+  #1050#1086#1087#1080#1088#1086#1074#1072#1090#1100' '#1079#1072#1087#1080#1089#1100'?',       //sc_Copy_record_question
+  #1044#1080#1072#1083#1086#1075,             //sc_dialog
+  #1042#1089#1090#1072#1074#1080#1090#1100,             //sc_insert
+  #1050#1086#1087#1080#1088#1086#1074#1072#1090#1100,               //sc_copy
+  #1054#1090#1082#1083'. '#1092#1080#1083#1100#1090#1088,         //sc_filter_off
+  #1040#1083#1100#1073#1086#1084#1085#1072#1103,           //sc_portrait print orientation
+  #1050#1085#1080#1078#1085#1072#1103,          //sc_landscape print orientation
+  #1059#1076#1072#1083#1080#1090#1100' '#1089#1090#1088#1086#1082#1091'?',        //sc_Delete_row_question
+  #1074#1099#1073#1088#1072#1085#1085#1099#1077' '#1089#1090#1088#1086#1082#1080'?',     //sc_selected_rows
+  #1058#1086#1083#1100#1082#1086' '#1087#1088#1086#1089#1090#1086#1081' '#1087#1091#1085#1082#1090,    //sc_Single_item_only 
+  #1050#1086#1087#1080#1088#1086#1074#1072#1090#1100' '#1103#1095#1077#1081#1082#1080,          //sc_Copy_Cells
+  #1042#1089#1090#1072#1074#1080#1090#1100' '#1103#1095#1077#1081#1082#1080          //sc_Paste_Cells
 );
     
 function delete_n_selected_rows(const params: array of const): msestring;
