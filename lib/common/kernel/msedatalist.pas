@@ -847,6 +847,9 @@ const
 type
  rowstatenumty = -1..126; //msb = row readonly flag for rowfontstate,
             //reserved for rowcolorstate (used in tcustomstringgrid)
+const
+ rowstatenummask = $7f;
+type
 
  rowinfolevelty = (ril_normal,ril_colmerge,ril_rowheight);
  rowstatety = packed record

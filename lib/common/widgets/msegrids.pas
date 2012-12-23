@@ -739,6 +739,7 @@ type
    function empty(const index: integer): boolean; override;   //true wenn leer
    function getparagraph(const index: integer;
                                const aseparator: msestring = ''): msestring;   
+   property noparagraph[index: integer]: boolean read getnoparagraphs;
  end;
  
  tcustomstringcol = class(tdatacol)
@@ -764,6 +765,7 @@ type
    function getvaluedefault: msestring;
    procedure setvaluedefault(const avalue: msestring);
    procedure setcolorglyph(const avalue: colorty);
+   function getnoparagraph(const aindex: integer): boolean;
   protected
    ftextinfo: drawtextinfoty;
    foptionsedit: stringcoleditoptionsty;
@@ -802,7 +804,9 @@ type
                       const maxchars: integer = 0): integer; overload;
       //returns added rowcount
    procedure fillcol(const value: msestring);
-   property items[aindex: integer]: msestring read getitems write setitems; default;
+   property items[aindex: integer]: msestring read getitems
+                                          write setitems; default;
+   property noparagraph[const aindex: integer]: boolean read getnoparagraph;
    property checked[aindex: integer]: boolean read getchecked write setchecked;
 
    property textflags: textflagsty read ftextinfo.flags write settextflags
@@ -3372,7 +3376,7 @@ begin
   bo1:= getselected(aindex);
   if co1_rowcolor in foptions1 then begin
    po1:= fcellinfo.grid.fdatacols.frowstate.getitempo(aindex);
-   by1:= po1^.color;
+   by1:= po1^.color and rowstatenummask;
 //   if by1 <> 0 then begin
     int1:= by1 + frowcoloroffset - 1;
     if bo1 then begin
@@ -3444,7 +3448,7 @@ begin
   bo1:= getselected(aindex);
   if co1_rowfont in foptions1 then begin
    po1:= fcellinfo.grid.fdatacols.frowstate.getitempo(aindex);
-   by1:= po1^.font;
+   by1:= po1^.font and rowstatenummask;
    if by1 <> 0 then begin
     int1:= by1 + frowfontoffset - 1;
     if bo1 then begin
@@ -6929,6 +6933,11 @@ end;
 procedure tcustomstringcol.fillcol(const value: msestring);
 begin
  datalist.fill(datalist.count,value);
+end;
+
+function tcustomstringcol.getnoparagraph(const aindex: integer): boolean;
+begin
+ result:= tcustomgrid(fowner).fdatacols.frowstate.flag1[aindex];
 end;
 
 { tfixcol }
