@@ -175,7 +175,6 @@ object mainfo: tmainfo
     datacols.items = <    
       item[tree]
         width = 195
-        onbeforedrawcell = beforelangdrawcell
         options = [co_readonly, co_proportional, co_savestate]
         options1 = [co1_rowfont, co1_rowcolor, co1_zebracolor, co1_rowcoloractive, co1_rowcolorfocused, co1_rowreadonly, co1_autorowheight]
         widgetname = 'tree'
