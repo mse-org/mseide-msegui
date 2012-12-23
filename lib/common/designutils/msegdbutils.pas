@@ -1290,7 +1290,7 @@ begin
       end;
       bo1:= getstopinfo(values,flastconsoleoutput,stopinfo);
       if not bo1 then begin
-       stopinfo.messagetext:= 'Stop error: ' + stopinfo.messagetext;
+       stopinfo.messagetext:= actionsmo.c[ord(ac_stoperror)]+': ' + stopinfo.messagetext;
       end
       else begin
        if (stopinfo.reason = sr_breakpoint_hit) and 

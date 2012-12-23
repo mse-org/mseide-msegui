@@ -2316,6 +2316,7 @@ object actionsmo: tactionsmo
       'Exited'
       'Detached'
       'Signal received'
+      'Stop error'
     )
     left = 288
     top = 392
