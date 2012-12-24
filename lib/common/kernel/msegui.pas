@@ -10520,7 +10520,8 @@ end;
 
 procedure twidget.setvisible(const avalue: boolean);
 begin
- if not (csloading in componentstate) and (avalue <> getvisible) then begin
+ if (not (csloading in componentstate) or not avalue) and 
+                                        (avalue <> getvisible) then begin
   if avalue then begin
    if parentisvisible then begin
     show(false,window.ftransientfor);
