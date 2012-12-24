@@ -107,6 +107,7 @@ type
                    var accept: Boolean);
   private
    funitloading: boolean;
+   finited: boolean;
   protected
    function addirectory(const aname: filenamety): tdirnode;
    function gettreedir: filenamety;
@@ -1197,12 +1198,15 @@ end;
 
 procedure tprojecttreefo.projecttreefoonloaded(const sender: tobject);
 begin
- projecttree.units.caption:= projecttreefo.c[ord(pascalunits)];
- projecttree.files.caption:= projecttreefo.c[ord(textfiles)];
- projecttree.cmodules.caption:= projecttreefo.c[ord(str_cmodules)];
- projectedit.itemlist.add(ttreelistedititem(projecttree.units));
- projectedit.itemlist.add(ttreelistedititem(projecttree.cmodules));
- projectedit.itemlist.add(ttreelistedititem(projecttree.files));
+ if not finited then begin
+  finited:= true;
+  projecttree.units.caption:= projecttreefo.c[ord(pascalunits)];
+  projecttree.files.caption:= projecttreefo.c[ord(textfiles)];
+  projecttree.cmodules.caption:= projecttreefo.c[ord(str_cmodules)];
+  projectedit.itemlist.add(ttreelistedititem(projecttree.units));
+  projectedit.itemlist.add(ttreelistedititem(projecttree.cmodules));
+  projectedit.itemlist.add(ttreelistedititem(projecttree.files));
+ end;
 end;
 
 procedure tprojecttreefo.clear;
