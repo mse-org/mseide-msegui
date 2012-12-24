@@ -32,7 +32,7 @@ uses
  classes,mseclasses,msegraphutils,typinfo,msedock,sysutils,msesysenv,msemacros,
  msestrings,msepostscriptprinter,msegraphics,mseglob,mseprocmonitorcomp,
  msesystypes,mserttistat,msedatanodes,mseedit,mseifiglob,mselistbrowser,
- projecttreeform,msepipestream,msestringcontainer;
+ projecttreeform,msepipestream,msestringcontainer,msesys;
 const
  versiontext = '2.9 unstable';
  idecaption = 'MSEide';
@@ -72,6 +72,7 @@ type
    projectfiledia: tfiledialog;
    targetpipe: tpipereadercomp;
    c: tstringcontainer;
+   openform: tfiledialog;
    procedure newfileonexecute(const sender: tobject);
    procedure newformonexecute(const sender: TObject);
 
@@ -281,7 +282,7 @@ procedure handleerror(const e: exception; const text: string);
 
 implementation
 uses
- regwidgets,regeditwidgets,regdialogs,regkernel,regprinter,msesys,
+ regwidgets,regeditwidgets,regdialogs,regkernel,regprinter,
  toolhandlermodule,
  {$ifndef mse_no_math}
   {$ifdef FPC}regmath,{$endif}
@@ -474,11 +475,6 @@ begin
  end;
  if not bo1 and projecttree.units.findformbyname(wstr2,mstr1) then begin
   bo1:= dofind([wstr2],[mstr1]);
- {
-  with projecttree.units do begin
-   bo1:= dofind(modulenames,modulefilenames);
-  end;
- }
  end;
  if bo1 then begin
   action:= mr_ok;
@@ -492,10 +488,15 @@ begin
   case action of
    mr_ok: begin
     wstr2:= '';
-    action:= filedialog(wstr2,[fdo_checkexist],c[ord(formfile)]+' '+ aname,
-                 [c[ord(formfiles)]],['*.mfm'],'',nil,nil,nil,[fa_all],[fa_hidden]);
-                 //defaultvalues don't work on kylix
-    if action = mr_ok then begin
+//    openform.controller.filename:= '';
+//    openform.controller.captionopen:= c[ord(formfile)]+' '+ aname;
+    if openform.controller.execute(wstr2,fdk_open,
+                                     c[ord(formfile)]+' '+ aname) then begin
+//    action:= filedialog(wstr2,[fdo_checkexist],c[ord(formfile)]+' '+ aname,
+//                 [c[ord(formfiles)]],['*.mfm'],'',nil,nil,nil,[fa_all],[fa_hidden]);
+//                 //defaultvalues don't work on kylix
+//    if action = mr_ok then begin
+//     openformfile(openform.controller.filename,false,false,true,true,false);
      openformfile(wstr2,false,false,true,true,false);
     end;
    end;

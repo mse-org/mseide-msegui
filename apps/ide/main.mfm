@@ -75,7 +75,7 @@ object mainfo: tmainfo
     startupbkpton = False
     onevent = gdbonevent
     overloadsleepus = 10000
-    left = 224
+    left = 104
     top = 24
   end
   object mainstatfile: tstatfile
@@ -83,7 +83,6 @@ object mainfo: tmainfo
     filedir = '"^/.mseide"'
     options = [sfo_createpath, sfo_transaction, sfo_activatorread, sfo_activatorwrite]
     onstatupdate = mainstatfileonupdatestat
-    left = 16
     top = 24
   end
   object mainmenu1: tmainmenu
@@ -677,7 +676,7 @@ object mainfo: tmainfo
         onexecute = aboutonexecute
       end>
     menu.coloractive = -1879048187
-    left = 127
+    left = 103
     top = 88
   end
   object openfile: tfiledialog
@@ -685,13 +684,12 @@ object mainfo: tmainfo
     controller.options = [fdo_checkexist]
     controller.captionopen = 'Open file'
     controller.captionsave = 'Save file as'
-    left = 128
-    top = 25
+    left = 80
+    top = 1
   end
   object projectstatfile: tstatfile
     filename = 'status.sta'
     onstatbeforeread = statbefread
-    left = 16
     top = 56
   end
   object vievmenuicons: timagelist
@@ -1419,21 +1417,21 @@ object mainfo: tmainfo
   end
   object dummyimagelist: timagelist
     width = 24
-    left = 128
+    left = 104
     top = 56
   end
   object viewmenu: tframecomp
-    left = 224
+    left = 208
     top = 88
   end
   object runprocmon: tprocessmonitor
     onchilddied = runprocdied
-    left = 288
+    left = 192
     top = 24
   end
   object statoptions: trttistat
     ongetobjects = getstatobjs
-    left = 16
+    left = 8
     top = 88
   end
   object projectfiledia: tfiledialog
@@ -1452,12 +1450,12 @@ object mainfo: tmainfo
     controller.captionopen = 'Open Project'
     controller.captionsave = 'Save Project'
     left = 264
-    top = 56
+    top = 1
   end
   object targetpipe: tpipereadercomp
     oninputavailable = targetpipeinput
-    left = 288
-    top = 40
+    left = 296
+    top = 24
   end
   object c: tstringcontainer
     strings.data = (
@@ -1514,7 +1512,21 @@ object mainfo: tmainfo
       'Source has changed, do you wish to remake project?'
       'Load Window Layout'
     )
-    left = 368
-    top = 64
+    left = 232
+    top = 56
+  end
+  object openform: tfiledialog
+    statfile = projectstatfile
+    controller.filterlist.data = (
+      (
+        'Form Files'
+        '*.mfm'
+      )
+    )
+    controller.defaultext = 'mfm'
+    controller.options = [fdo_checkexist]
+    controller.captionopen = 'Open Form File'
+    left = 168
+    top = 1
   end
 end
