@@ -88,7 +88,7 @@ const
   'Crear una carpeta nueva',           //sc_create_new_directory
   'Archivo',                           //sc_file
   'existe, '#191'quiere sobreescribirlo?', //sc_exists_overwrite
-  'is modified. Save?',  //sc_is_modified_save
+  'ha sido modificado. '#191'Guardar?',  //sc_is_modified_save
   'ADVERTENCIA',                       //sc_warningupper
   'ERROR',                             //sc_errorupper
   'no existe',                         //sc_does_not_exist
