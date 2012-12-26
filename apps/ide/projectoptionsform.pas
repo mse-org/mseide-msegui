@@ -1925,7 +1925,8 @@ begin
   result:= true;
  except
   on e: exception do begin
-   showerror('Can not read project "'+filename+'".'+lineend+e.message,'ERROR');
+   showerror(actionsmo.c[ord(ac_cannotreadproject)]+' "'+filename+'".'+
+                               lineend+e.message,actionsmo.c[ord(ac_error)]);
   end;
  end;
 end;

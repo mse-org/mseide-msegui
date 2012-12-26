@@ -87,6 +87,7 @@ const
   'is modified. Save?',  //sc_is_modified_save
   'PERINGATAN',            //sc_warningupper
   'SALAH',                 //sc_errorupper
+  'Exception',             //sc_exception
   'tidak ada',             //sc_does_not_exist
   'tidak dapat membaca direktori', //sc_can_not_read_directory
   'Format grafik tidak didukung', //sc_graphic_not_supported

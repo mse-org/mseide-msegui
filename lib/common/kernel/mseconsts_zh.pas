@@ -92,6 +92,7 @@ const
 
   #35686#21578,                              //sc_warningupper
   #38169#35823,                              //sc_errorupper
+  'Exception',             //sc_exception
   #19981#23384#22312,                        //sc_does_not_exist
   #25214#19981#21040#25991#20214#22841,      //sc_can_not_read_directory
   #22270#24418#26684#24335#19981#25903#25345,//sc_graphic_not_supported

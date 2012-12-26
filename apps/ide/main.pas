@@ -2660,7 +2660,7 @@ begin
              c_linefeed+
              'Copyright 1999-2012'+c_linefeed+
              'by Martin Schreiber'
-             ,'About MSEide');
+             ,actionsmo.c[ord(ac_about)]+' MSEide');
 end;
 
 procedure tmainfo.configureexecute(const sender: TObject);

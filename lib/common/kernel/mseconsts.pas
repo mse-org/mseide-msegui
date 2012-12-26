@@ -148,6 +148,7 @@ const
   'is modified. Save?',  //sc_is_modified_save
   'WARNING',               //sc_warningupper
   'ERROR',                 //sc_errorupper
+  'Exception',             //sc_exception
   'does not exist',        //sc_does_not_exist
   'Can not read directory', //sc_can_not_read_directory
   'Graphic format not supported', //sc_graphic_not_supported

@@ -88,6 +88,7 @@ const
   'wurde geändert, wollen Sie speichern?',     //sc_is_modified_save
   'WARNUNG',                                   //sc_warningupper
   'FEHLER',                                    //sc_errorupper
+  'Exception',                                 //sc_exception
   'existiert nicht',                           //sc_does_not_exist
   'Verzeichnis kann nicht gelesen werden',     //sc_can_not_read_directory
   'Grafik Format nicht unterst'#252'tzt', //sc_graphic_not_supported

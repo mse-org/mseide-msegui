@@ -2317,6 +2317,8 @@ object actionsmo: tactionsmo
       'Detached'
       'Signal received'
       'Stop error'
+      'Can not read project'
+      'About'
     )
     left = 288
     top = 392

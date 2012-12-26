@@ -101,7 +101,7 @@ type
                     sc_Save,sc_Open,
                     sc_name,sc_create_new_directory,
                     sc_file,sc_exists_overwrite,sc_is_modified_save,
-                    sc_warningupper,sc_errorupper,
+                    sc_warningupper,sc_errorupper,sc_exception,
                     sc_does_not_exist,sc_can_not_read_directory,
                     sc_graphic_format_not_supported,sc_graphic_format_error,
                     sc_MS_Bitmap,sc_MS_Icon,sc_JPEG_Image,sc_PNG_Image,
