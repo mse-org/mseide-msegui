@@ -2319,6 +2319,7 @@ object actionsmo: tactionsmo
       'Stop error'
       'Can not read project'
       'About'
+      'Object Inspector'
     )
     left = 288
     top = 392

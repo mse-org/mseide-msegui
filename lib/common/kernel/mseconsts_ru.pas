@@ -114,6 +114,7 @@ const
                                                   //sc_warningupper
   #1054#1064#1048#1041#1050#1040 ,                //sc_errorupper
   #1048#1089#1082#1083#1102#1095#1077#1085#1080#1077,             //sc_exception
+  'System',                //sc_system
   #1085#1077' '#1089#1091#1097#1077#1089#1090#1074#1091#1077#1090 , 
                                                  //sc_does_not_exist
   #1053#1077' '#1091#1076#1072#1077#1090#1089#1103' '+
@@ -171,6 +172,14 @@ const
   #1044#1080#1072#1083#1086#1075,             //sc_dialog
   #1042#1089#1090#1072#1074#1080#1090#1100,             //sc_insert
   #1050#1086#1087#1080#1088#1086#1074#1072#1090#1100,               //sc_copy
+  'Paste',              //sc_paste
+  'Row insert',         //sc_row_insert
+  'Row append',         //sc_row_append
+  'Row delete',         //sc_row_delete
+  'Undo',               //sc_undo
+  'Redo',               //sc_redo
+  'Cut',                //sc_cut
+  'Select all',         //sc_select_all
   #1054#1090#1082#1083'. '#1092#1080#1083#1100#1090#1088,         //sc_filter_off
   #1040#1083#1100#1073#1086#1084#1085#1072#1103,           //sc_portrait print orientation
   #1050#1085#1080#1078#1085#1072#1103,          //sc_landscape print orientation

@@ -69,7 +69,7 @@ end;
 
 procedure tmessagefo.addtext(const atext: string);
 var
- int1,int2,int3: integer;
+ int1,int2: integer;
  lev1: errorlevelty;
  col1,row1: integer;
  fn1: filenamety;

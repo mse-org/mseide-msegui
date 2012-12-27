@@ -2699,7 +2699,7 @@ const
   (sc_first,sc_prior,sc_next,sc_last,sc_append,
   
 // dbnb_delete,dbnb_copyrecord,dbnb_edit,
-   sc_delete,sc_copyxx,sc_edit,
+   sc_delete,sc_copy,sc_edit,
 // dbnb_post,dbnb_cancel,dbnb_refresh,
    sc_post,sc_cancel,sc_refresh,
 // dbnb_filter,dbnb_filtermin,dbnb_filtermax,dbnb_filteronoff,dbnb_find,

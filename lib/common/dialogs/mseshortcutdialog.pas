@@ -57,7 +57,7 @@ function shortcutdialog(const acontroller: tshortcutcontroller): modalresultty;
 
 implementation
 uses
- mseshortcutdialog_mfm,msekeyboard,msedatalist,msearrayutils;
+ mseshortcutdialog_mfm,msekeyboard,msedatalist,msearrayutils,msestockobjects;
 
 const
  errorcolor = cl_ltred;
@@ -99,7 +99,7 @@ var
 begin
  fo1:= tmseshortcutdialogfo.create(nil);
  try
-  no1:= tsysshortcutitem.create('System');
+  no1:= tsysshortcutitem.create(stockobjects.captions[sc_system]);
   for ss1:= low(ss1) to high(ss1) do begin
    no1.add(tsysshortcutitem.create(acontroller,ss1));
   end;

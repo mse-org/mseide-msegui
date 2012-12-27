@@ -149,6 +149,7 @@ const
   'WARNING',               //sc_warningupper
   'ERROR',                 //sc_errorupper
   'Exception',             //sc_exception
+  'System',                //sc_system
   'does not exist',        //sc_does_not_exist
   'Can not read directory', //sc_can_not_read_directory
   'Graphic format not supported', //sc_graphic_not_supported
@@ -186,8 +187,16 @@ const
   'Dialog',             //sc_dialog
   'Insert',             //sc_insert
   'Copy',               //sc_copy
+  'Paste',              //sc_paste
+  'Row insert',         //sc_row_insert
+  'Row append',         //sc_row_append
+  'Row delete',         //sc_row_delete
+  'Undo',               //sc_undo
+  'Redo',               //sc_redo
+  'Cut',                //sc_cut
+  'Select all',         //sc_select_all
+  
   'Filter off',         //sc_filter_off
-
   'Portrait',           //sc_portrait print orientation
   'Landscape',          //sc_landscape print orientation
   'Delete row?',        //sc_Delete_row_question

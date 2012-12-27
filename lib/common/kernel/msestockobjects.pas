@@ -101,7 +101,7 @@ type
                     sc_Save,sc_Open,
                     sc_name,sc_create_new_directory,
                     sc_file,sc_exists_overwrite,sc_is_modified_save,
-                    sc_warningupper,sc_errorupper,sc_exception,
+                    sc_warningupper,sc_errorupper,sc_exception,sc_system,
                     sc_does_not_exist,sc_can_not_read_directory,
                     sc_graphic_format_not_supported,sc_graphic_format_error,
                     sc_MS_Bitmap,sc_MS_Icon,sc_JPEG_Image,sc_PNG_Image,
@@ -121,8 +121,11 @@ type
                     sc_edit_filter,sc_edit_filter_min,sc_edit_filter_max,
                     sc_filter_on,sc_search,sc_auto_edit,sc_copy_record,
                     sc_dialog,
-                    sc_insert,sc_copyxx,sc_filter_off,
-                    
+                    sc_insert,sc_copy,sc_paste,
+                    sc_row_insert,sc_row_append,sc_row_delete,
+                    sc_undo,sc_redo,sc_cut,sc_select_all,
+
+                    sc_filter_off,
                     sc_portrait,sc_landscape,
                     sc_Delete_row_question,sc_selected_rows,
                     sc_Single_item_only,sc_Copy_Cells,sc_Paste_Cells

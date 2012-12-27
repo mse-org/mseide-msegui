@@ -202,7 +202,7 @@ type
    procedure statreading; virtual;
    procedure statread; virtual;
    function getstatvarname: msestring;
-
+   function getwindowcaption: msestring; virtual;
    procedure windowcreated; override;
    procedure dofontheightdelta(var delta: integer); override;
    procedure widgetregionchanged(const sender: twidget); override;
@@ -431,6 +431,7 @@ type
    procedure activechanged; override;
    procedure doactivate; override;
    procedure parentchanged; override;
+   function getwindowcaption: msestring; override;
   public
    constructor create(aowner: tcomponent; load: boolean); override;
    destructor destroy; override;
@@ -1627,12 +1628,23 @@ begin
  end;
 end;
 
+function tcustommseform.getwindowcaption: msestring;
+begin
+ result:= fcaption;
+end;
+
 procedure tcustommseform.windowcreated;
+var
+ mstr1: msestring;
 begin
  inherited;
- if fcaption <> '' then begin
-  caption:= fcaption;                //set windowcaption
+ mstr1:= getwindowcaption;
+ if mstr1 <> '' then begin
+  window.caption:= mstr1;
  end;
+// if fcaption <> '' then begin
+//  caption:= fcaption;                //set windowcaption
+// end;
 end;
 
 procedure tcustommseform.dofontheightdelta(var delta: integer);
@@ -2098,6 +2110,11 @@ procedure tcustomdockform.poschanged;
 begin
  fdragdock.poschanged;
  inherited;
+end;
+
+function tcustomdockform.getwindowcaption: msestring;
+begin
+ result:= fdragdock.getfloatcaption;
 end;
 
 { tdockform}

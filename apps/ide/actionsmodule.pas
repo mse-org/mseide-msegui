@@ -104,7 +104,8 @@ type
   ac_sr_signal_received,          //75 Signal received
   ac_stoperror,                   //76 Stop error
   ac_cannotreadproject,           //77 Can not read project
-  ac_about                        //78 About
+  ac_about,                       //78 About
+  ac_objectinspector              //79 Object Inspector
  );
 
 type

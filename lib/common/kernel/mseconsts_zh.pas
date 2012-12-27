@@ -93,6 +93,7 @@ const
   #35686#21578,                              //sc_warningupper
   #38169#35823,                              //sc_errorupper
   'Exception',             //sc_exception
+  'System',                //sc_system
   #19981#23384#22312,                        //sc_does_not_exist
   #25214#19981#21040#25991#20214#22841,      //sc_can_not_read_directory
   #22270#24418#26684#24335#19981#25903#25345,//sc_graphic_not_supported
@@ -130,6 +131,14 @@ const
   'Dialog',             //sc_dialog
   #25554#20837,                        //sc_insert
   'Copy',                              //sc_copy
+  'Paste',              //sc_paste
+  'Row insert',         //sc_row_insert
+  'Row append',         //sc_row_append
+  'Row delete',         //sc_row_delete
+  'Undo',               //sc_undo
+  'Redo',               //sc_redo
+  'Cut',                //sc_cut
+  'Select all',         //sc_select_all
   #36807#28388#20851#38381,            //sc_filter_off
   'Portrait',                          //sc_portrait print orientation
   'Landscape',                         //sc_landscape print orientation

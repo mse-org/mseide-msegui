@@ -88,6 +88,7 @@ const
   'PERINGATAN',            //sc_warningupper
   'SALAH',                 //sc_errorupper
   'Exception',             //sc_exception
+  'System',                //sc_system
   'tidak ada',             //sc_does_not_exist
   'tidak dapat membaca direktori', //sc_can_not_read_directory
   'Format grafik tidak didukung', //sc_graphic_not_supported
@@ -125,6 +126,14 @@ const
   'Dialog',             //sc_dialog
   'Sisipkan',             //sc_insert
   'Salin',                 //sc_copy
+  'Paste',              //sc_paste
+  'Row insert',         //sc_row_insert
+  'Row append',         //sc_row_append
+  'Row delete',         //sc_row_delete
+  'Undo',               //sc_undo
+  'Redo',               //sc_redo
+  'Cut',                //sc_cut
+  'Select all',         //sc_select_all
   'Filter mati',          //sc_filter_off
   'Berdiri',              //sc_portrait print orientation
   'Rebah',                //sc_landscape print orientation

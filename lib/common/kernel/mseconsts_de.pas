@@ -89,6 +89,7 @@ const
   'WARNUNG',                                   //sc_warningupper
   'FEHLER',                                    //sc_errorupper
   'Exception',                                 //sc_exception
+  'System',                                    //sc_system
   'existiert nicht',                           //sc_does_not_exist
   'Verzeichnis kann nicht gelesen werden',     //sc_can_not_read_directory
   'Grafik Format nicht unterst'#252'tzt', //sc_graphic_not_supported
@@ -126,6 +127,14 @@ const
   'Dialog',                   //sc_dialog
   'Einf'#252'gen',            //sc_insert
   'Kopieren',                 //sc_copy
+  'Einf'#252'gen',            //sc_paste
+  'Zeile einf'#252'gen',      //sc_row_insert
+  'Zeile anf'#252'gen',       //sc_row_append
+  'Zeile l'#246'schen',       //sc_row_delete
+  'R'#252'ckg'#228'ngig',     //sc_undo
+  'Wiederherstellen',         //sc_redo
+  'Ausschneiden',             //sc_cut
+  'Alles markieren',          //sc_select_all
   'Filter aus',               //sc_filter_off
   'Hochformat',               //sc_portrait print orientation
   'Querformat',               //sc_landscape print orientation
@@ -133,7 +142,7 @@ const
   'gew'#228'hlte Zeilen',      //sc_selected_rows
   'Nur Einzeleintrag erlaubt', //sc_Single_item_only 
   'Zellen kopieren',           //sc_Copy_Cells
-  'Zellen einfügen'            //sc_Paste_Cells
+  'Zellen einf'#252'gen'       //sc_Paste_Cells
 );
     
 function delete_n_selected_rows(const params: array of const): msestring;

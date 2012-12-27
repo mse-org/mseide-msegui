@@ -329,7 +329,8 @@ var
  sysshortcuts1: sysshortcutaty;
 implementation
 uses
- sysutils,mserichstring,msestream,typinfo,mseformatstr,msestreaming;
+ sysutils,mserichstring,msestream,typinfo,mseformatstr,msestreaming,
+ msestockobjects;
  
 const   
  letterkeycount = ord('z') - ord('a') + 1;
@@ -528,12 +529,19 @@ end;
 //todo: internationalize
 function getsysshortcutdispname(const aitem: sysshortcutty): msestring;
 const
+{
  list: array[sysshortcutty] of msestring = (
         'Copy','Paste','Cut','Select all',
         'Row insert','Row append','Row delete',
         'Copy cells','Paste cells','Undo','Redo');
+}
+ list: array[sysshortcutty] of stockcaptionty = (
+        sc_Copy,sc_Paste,sc_cut,sc_select_all,
+        sc_row_insert,sc_row_append,sc_row_delete,
+        sc_copy_cells,sc_paste_cells,sc_undo,sc_redo);
+
 begin
- result:= list[aitem];
+ result:= stockobjects.captions[list[aitem]];
 end;
 
 function isnormalkey(const akey: shortcutty): boolean;

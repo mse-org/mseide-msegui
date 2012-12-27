@@ -230,7 +230,7 @@ var
 
 implementation
 uses
- objectinspector_mfm,sysutils,msearrayprops,
+ objectinspector_mfm,sysutils,msearrayprops,actionsmodule,
  msebitmap,msedrag,mseeditglob,msestockobjects,msedropdownlist,
  sourceupdate,sourceform,msekeyboard,main,msedatalist;
 
@@ -238,7 +238,7 @@ const
  ado_rereadprops = 1;  //asyncevent codes
  ado_updatecomponentname = 2;
  ado_compselection = 3;
- objectinspectorcaption = 'Object Inspector';
+// objectinspectorcaption = 'Object Inspector';
  selectcolor = cl_ltred;
 
 type
@@ -653,7 +653,7 @@ procedure tobjectinspectorfo.moduleactivated(const adesigner: idesigner;
                   const amodule: tmsecomponent);
 begin
  factmodule:= amodule;
- caption:= objectinspectorcaption + ' (' + amodule.Name+')';
+ caption:= actionsmo.c[ord(ac_objectinspector)] + ' (' + amodule.Name+')';
  updatecomponentname;
 // clear;
 end;
@@ -661,7 +661,7 @@ end;
 procedure tobjectinspectorfo.moduledeactivated(const adesigner: idesigner;
                   const amodule: tmsecomponent);
 begin
- caption:= objectinspectorcaption;
+ caption:= actionsmo.c[ord(ac_objectinspector)];
 // clear;
  factmodule:= nil;
 end;
