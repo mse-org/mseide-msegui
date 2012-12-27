@@ -22,10 +22,13 @@ type
  defaultgeneratortextty = array[textgeneratorty] of textgeneratorfuncty;
  pdefaultgeneratortextty = ^defaultgeneratortextty;
  
- langty = (la_none,la_en,la_de,la_ru,la_es,la_uzcyr,la_id,la_zh);
+ langty = (la_none,la_en,la_de,la_ru,la_es,la_uzcyr,la_id,la_zh,
+           la_fr);
  
 const
- langnames: array[langty] of string = ('','en','de','ru','es','uz_cyr','id','zh');
+ langnames: array[langty] of string = (
+            '','en','de','ru','es','uz_cyr','id','zh',
+            'fr');
 
  function modalresulttext(const index: modalresultty): msestring;
  function modalresulttextnoshortcut(const index: modalresultty): msestring;

@@ -130,14 +130,14 @@ const
   'Di'#225'logo',                      //sc_dialog
   'Insertar',                          //sc_insert
   'Copiar',                            //sc_copy
-  'Paste',              //sc_paste
-  'Row insert',         //sc_row_insert
-  'Row append',         //sc_row_append
-  'Row delete',         //sc_row_delete
-  'Undo',               //sc_undo
-  'Redo',               //sc_redo
-  'Cut',                //sc_cut
-  'Select all',         //sc_select_all
+  'Pegar',              //sc_paste
+  'Insertar fila',         //sc_row_insert
+  'A'#241'adir fila',         //sc_row_append
+  'Borrar fila',         //sc_row_delete
+  'Deshacer',               //sc_undo
+  'Rehacer',               //sc_redo
+  'Cortar',                //sc_cut
+  'Seleccioinar todo',         //sc_select_all
   'Filtro apagado',                    //sc_filter_off
   'Vertical',                          //sc_portrait print orientation
   'Apaisado',                          //sc_landscape print orientation
