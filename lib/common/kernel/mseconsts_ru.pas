@@ -113,7 +113,7 @@ const
   #1055#1056#1045#1044#1059#1055#1056#1045#1046#1044#1045#1053#1048#1045 , 
                                                   //sc_warningupper
   #1054#1064#1048#1041#1050#1040 ,                //sc_errorupper
-  'Exception',             //sc_exception
+  #1048#1089#1082#1083#1102#1095#1077#1085#1080#1077,             //sc_exception
   #1085#1077' '#1089#1091#1097#1077#1089#1090#1074#1091#1077#1090 , 
                                                  //sc_does_not_exist
   #1053#1077' '#1091#1076#1072#1077#1090#1089#1103' '+
@@ -185,10 +185,10 @@ function delete_n_selected_rows(const params: array of const): msestring;
 begin
  with params[0] do begin
   if vinteger = 1 then begin
-   result:= 'Delete selected row?'
+   result:= #1059#1076#1072#1083#1080#1090#1100' '#1074#1099#1073#1088#1072#1085#1085#1091#1102' '#1089#1090#1088#1086#1082#1091'?'
   end
   else begin
-   result:= 'Delete '+inttostr(vinteger)+' selected rows?';
+   result:= #1059#1076#1072#1083#1080#1090#1100' '+inttostr(vinteger)+' '#1074#1099#1073#1088#1072#1085#1085#1091#1102' '#1089#1090#1088#1086#1082#1091'?';
   end;
  end;
 end;
