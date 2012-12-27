@@ -91,8 +91,8 @@ const
   'ha sido modificado. '#191'Guardar?',  //sc_is_modified_save
   'ADVERTENCIA',                       //sc_warningupper
   'ERROR',                             //sc_errorupper
-  'Exception',             //sc_exception
-  'System',                //sc_system
+  'Excepci'#243'n',             //sc_exception
+  'Sistema',                //sc_system
   'no existe',                         //sc_does_not_exist
   'No puedo leer la carpeta',          //sc_can_not_read_directory
   'Formato gr'#225'fico no soportado', //sc_graphic_not_supported
