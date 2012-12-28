@@ -1368,7 +1368,7 @@ begin
   mstr2:= concatstrings(ar1,lineend);
   mstr4:= messagestr(mstr2);
   if askyesno(c[ord(wishreplace)]+lineend+mstr3+lineend+c[ord(str_with)]+lineend+
-        mstr4+lineend+'?') then begin
+        mstr4+lineend+'?',c[ord(confirmation)]) then begin
    editor.begingroup;
    deleteselection;
    inserttext(mstr2,true);
