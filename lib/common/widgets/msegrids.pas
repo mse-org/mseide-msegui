@@ -11395,11 +11395,16 @@ begin     //focuscell
    end;
 //   end;
    cellbefore:= ffocusedcell; 
-   if (selectaction = fca_exitgrid) or ((coord1.row >= 0) and
-          ((coord1.row >= frowcount-1) and (cell.row < coord1.row) or
-           not autorowappended and (
-           (cell.row <= rowcountbefore{-1}) and not (gs_restorerow in fstate) or
-           (cell.row < frowcount)))) then begin
+   if (selectaction = fca_exitgrid) or 
+      ((cell.row <> ffocusedcell.row) and
+       (coord1.row >= 0) and
+       ((coord1.row >= frowcount-1) and (cell.row < coord1.row) or
+        not autorowappended and 
+         ((cell.row <= rowcountbefore{-1}) and not (gs_restorerow in fstate) or
+          (cell.row < frowcount)
+         )
+       )
+      ) then begin
     int1:= ffocusedcell.row;
     ffocusedcell.row:= invalidaxis;
     updaterowdata; //for twidgetgrid, data invalid

@@ -397,12 +397,12 @@ type
 
    function getrowdatapo(const arow: integer): pointer; override;
    function getnulltext: msestring; override;
-  //idbeditfieldlink
+    //idbeditfieldlink
    procedure valuetofield;
    procedure fieldtovalue;
    procedure getfieldtypes(var afieldtypes: fieldtypesty);
    function getfieldlink: tcustomeditwidgetdatalink;
-  //ireccontrol
+    //ireccontrol
    procedure recchanged;
   public
    constructor create(aowner: tcomponent); override;

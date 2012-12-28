@@ -1504,10 +1504,10 @@ var
  info: cellinfoty;
  po1: pointer;
 begin
+ if arow = -1 then begin
+  arow:= twidgetgrid(fcellinfo.grid).ffocusedcell.row;
+ end;
  if fdata <> nil then begin
-  if arow = -1 then begin
-   arow:= twidgetgrid(fcellinfo.grid).ffocusedcell.row;
-  end;
   if (arow >= 0) and (arow < fdata.count) then begin
    tdatalist1(fdata).getgriddata(arow,dest);
   end
