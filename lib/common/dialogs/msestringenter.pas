@@ -13,8 +13,8 @@ unit msestringenter;
 
 interface
 uses
- mseforms,msedataedits,msesimplewidgets,msetypes,
- msegui,mseglob,mseguiglob,msedialog,msestrings;
+ mseforms,msedataedits,msesimplewidgets,msetypes,msegui,mseglob,mseguiglob,
+ msedialog,msestrings,msestringcontainer;
 
 type
  tstringenterfo = class(tdialogform)
@@ -22,6 +22,7 @@ type
    lab: tlabel;
    ok: tbutton;
    cancel: tbutton;
+   c: tstringcontainer;
  end;
 
 //functions below are threadsave
@@ -35,6 +36,13 @@ implementation
 uses
  msestringenter_mfm,msewidgets;
 
+type
+ stringconststy = (
+  str_password,       //0 PASSWORD
+  enterpassword,      //1 Enter password
+  invalidpassword     //2 Invalid password!
+ );
+ 
 function stringenter(var avalue: msestring; const text: msestring = '';
                                const acaption: msestring = ''): modalresultty;
 var
@@ -70,14 +78,14 @@ begin
   fo:= tstringenterfo.create(nil);
   try
    with fo do begin
-    caption:= 'PASSWORD';
-    lab.caption:= 'Enter password:';
+    caption:= c[ord(str_password)];
+    lab.caption:= c[ord(enterpassword)]+':';
     value.passwordchar:= '*';
     value.value:= '';
     modalresult:= fo.show(true,nil);
     result:= (modalresult = mr_ok) and (password = value.value);
     if not result and (modalresult = mr_ok) then begin
-     showerror('Invalid password!');
+     showerror(c[ord(invalidpassword)]);
     end;
    end;
   finally

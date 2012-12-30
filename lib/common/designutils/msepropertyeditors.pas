@@ -911,7 +911,7 @@ uses
  mseformatbmpicoread{$ifdef FPC},mseformatjpgread,mseformatpngread,
  mseformatpnmread,mseformattgaread,mseformatxpmread{$endif},
  msestat,msestatfile,msefileutils,
- msedesigner,variants,mseeditglob;
+ msedesigner,variants,mseeditglob,msepropertyeditorsmodule;
 
 const
  methodsortlevel = 100;
@@ -928,6 +928,7 @@ type
 var
  fpropertyeditors: tpropertyeditors;
  ftextpropertyfont: tfont;
+ mo: tmsepropertyeditorsmo;
 
 function getcomponentpropname(const acomp: tcomponent): msestring;
 begin
@@ -961,7 +962,7 @@ begin
    statfile1.filename:= bmpfiledialogstatname;
    filterlist.asarraya:= graphicfilefilternames;
    filterlist.asarrayb:= graphicfilemasks;
-   captionopen:= 'Open image file';
+   captionopen:= mo.c[ord(openimagefile)];;
    statfile:= statfile1;
    statfile.readstat;
    filename:= filedir(filename);
@@ -1050,7 +1051,7 @@ begin
  for int1:= 0 to high(value) do begin
   int2:= getenumvalue(enumtype,value[int1]);
   if (int2 < 0) then begin
-   raise exception.Create('Invalid set item: '''+value[int1]+'''');
+   raise exception.Create(mo.c[ord(invalidsetitem)]+': '''+value[int1]+'''');
   end;
   ar1[int2]:= true;
  end;
@@ -1400,7 +1401,7 @@ end;
 
 function tpropertyeditor.getvalue: msestring;
 begin
- result:= 'Unknown';
+ result:= mo.c[ord(unknown)];
 end;
 
 procedure tpropertyeditor.setvalue(const value: msestring);
@@ -2084,7 +2085,7 @@ end;
 
 procedure tpropertyeditor.properror;
 begin
- raise exception.Create('Wrong property value');
+ raise exception.Create(mo.c[ord(wrongpropertyvalue)]);
 end;
 
 function tpropertyeditor.getdefaultstate: propertystatesty;
@@ -2364,7 +2365,7 @@ begin
  end
  else begin
   if not isvalidident(value) then begin
-   raise exception.create('Invalid method name '''+value+'''.');
+   raise exception.create(mo.c[ord(invalidmethodname)]+' '''+value+'''.');
   end;
   method1:= fdesigner.getmethod(value,fmodule,
                   fprops[0].propinfo^.proptype{$ifndef FPC}^{$endif},true);
@@ -2377,7 +2378,8 @@ begin
    end
    else begin
     if method1.data <> nil then begin
-     raise exception.create('Methodname '''+value+''' exists');
+     raise exception.create(mo.c[ord(str_methodname)]+' '''+value+''' '+
+                       mo.c[ord(exists)]);
     end;
     method1:= fdesigner.createmethod(value,fmodule,
                  fprops[0].propinfo^.proptype{$ifndef FPC}^{$endif});
@@ -2582,8 +2584,8 @@ end;
 
 function tclasspropertyeditor.checkfreeoptionalclass: boolean;
 begin
- result:= askok('Do you wish to destroy ' + fname+' ('+ftypeinfo^.Name+
-          ')?','CONFIRMATION');
+ result:= askok(mo.c[ord(wishdestroy)]+' ' + fname+' ('+ftypeinfo^.Name+
+          ')?',stockobjects.captions[sc_confirmation]);
 end;
 
 function tclasspropertyeditor.getvalue: msestring;
@@ -3262,8 +3264,9 @@ begin
   end;
  end;
  int1:= tarrayprop(getpointervalue).count;
- if ( int1 > va) and not askok('Do you wish to delete items '+inttostr(va) +
-         ' to '+ inttostr(int1-1) + '?','CONFIRMATION') then begin
+ if ( int1 > va) and not askok(mo.c[ord(wishdelete)]+' '+inttostr(va) +
+         ' '+mo.c[ord(str_to)]+' '+ inttostr(int1-1) + '?',
+         stockobjects.captions[sc_confirmation]) then begin
   exit;
  end;
  if not ((ps_noadditems in fstate) and (va > int1)) then begin
@@ -4502,7 +4505,7 @@ procedure tdatetimepropertyeditor.setvalue(const value: msestring);
    end;
   end
   else begin
-   raise exception.create('Empty date.');
+   raise exception.create(mo.c[ord(emptydate)]+'.');
   end;
   result:= encodedate(year,month,day);
  end;
@@ -4527,7 +4530,7 @@ procedure tdatetimepropertyeditor.setvalue(const value: msestring);
    result:= encodetime(hour,minute,second,0);
   end
   else begin
-   raise exception.create('Empty time.');
+   raise exception.create(mo.c[ord(emptytime)]+'.');
   end;
  end;
  
@@ -4998,7 +5001,7 @@ end;
 
 procedure ttextstringspropertyeditor.setvalue(const avalue: msestring);
 begin
- if (avalue = '') and askok('Do you wish to clear "'+fname+'"?') then begin
+ if (avalue = '') and askok(mo.c[ord(wishclear)]+' "'+fname+'"?') then begin
   if ismsestring then begin
    tmsestringdatalist(getpointervalue).clear;
   end
@@ -5011,7 +5014,7 @@ end;
 
 function ttextstringspropertyeditor.getcaption: msestring;
 begin
- result:= 'Texteditor';
+ result:= mo.c[ord(texteditor)];
 end;
 
 procedure ttextstringspropertyeditor.updateline(var aline: ansistring);
@@ -5473,7 +5476,7 @@ end;
 procedure tnamepropertyeditor.setvalue(const value: msestring);
 begin
  if not isvalidident(value) then begin
-  raise exception.create('Invalid component name '''+value+'''.');
+  raise exception.create(mo.c[ord(invalidcomponentname)]+' '''+value+'''.');
  end;
  inherited;
 end;
@@ -5516,6 +5519,7 @@ end;
 
 initialization
 // apropertyeditors:= tpropertyeditors.Create;
+ application.createdatamodule(tmsepropertyeditorsmo,mo);
 finalization
  freeandnil(fpropertyeditors);
  freeandnil(ftextpropertyfont);

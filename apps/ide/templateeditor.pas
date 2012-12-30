@@ -56,9 +56,11 @@ uses
  templateeditor_mfm,msecodetemplates,projectoptionsform,sysutils,msefileutils,
  msedatalist,msesysintf,msearrayutils;
 type
- stringconsts = (
-  wantdelete,   //0 Do you want to delete "
-  codetemped    //1 Code Template Editor
+ stringconststy = (
+  wantdelete,      //0 Do you want to delete "
+  codetemped,      //1 Code Template Editor
+  hasbeenaddedto   
+          //2 has been added to 'Project'-'Options'-'Editor'-'Code Templates'.
  );
   
 constructor ttemplateeditorfo.create(const aindex: integer);
@@ -172,8 +174,7 @@ begin
       additem(projectoptions.o.t.fcodetemplatedirs,dir1);
       expandprojectmacros;
       projectoptionsmodified;
-      showmessage('"'+dir1+
-  '" has been added to ''Project''-''Options''-''Editor''-''Code Templates''.');
+      showmessage('"'+dir1+'" '+c[ord(hasbeenaddedto)]);
       exit;
      end;
     end;

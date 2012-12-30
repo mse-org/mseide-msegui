@@ -852,12 +852,46 @@ var
  projectoptionsfo: tprojectoptionsfo;
 type
 
- stringconsts = (
+ stringconststy = (
   wrongencoding,    //0 Wrong encoding can damage your source files.
   wishsetencoding,  //1 Do you wish to set encoding to
-  warning           //2 *** WARNING ***
+  warning,          //2 *** WARNING ***
+  c_SIGHUP,         //3 Hangup
+  c_SIGINT,         //4 Interrupt
+  c_SIGQUIT,        //5 Quit
+  c_SIGILL,         //6 Illegal instruction
+  c_SIGTRAP,        //7 Trace trap
+  c_SIGABRT,        //8 Abort
+  c_SIGBUS,         //9 BUS error
+  c_SIGFPE,         //10 Floating-point exception
+  c_SIGKILL,        //11 Kill
+  c_SIGUSR1,        //12 User-defined signal 1
+  c_SIGSEGV,        //13 Segmentation violation
+  c_SIGUSR2,        //14 User-defined signal 2
+  c_SIGPIPE,        //15 Broken pipe
+  c_SIGALRM,        //16 Alarm clock
+  c_SIGTERM,        //17 Termination
+  c_SIGSTKFLT,      //18 Stack fault
+  c_SIGCHLD,        //19 Child status has changed
+  c_SIGCONT,        //20 Continue
+  c_SIGSTOP,        //21 Stop, unblockable
+  c_SIGTSTP,        //22 Keyboard stop
+  c_SIGTTIN,        //23 Background read from tty
+  c_SIGTTOU,        //24 Background write to tty
+  c_SIGURG,         //25 Urgent condition on socket
+  c_SIGXCPU,        //26 CPU limit exceeded
+  c_SIGXFSZ,        //27 File size limit exceeded
+  c_SIGTALRM,       //28 Virtual alarm clock
+  c_SIGPROF,        //29 Profiling alarm clock
+  c_SIGWINCH,       //30 Window size change
+  c_SIGIO,          //31 I/O now possible
+  c_SIGPWR          //32 Power failure restart
  );
+const
+ firstsiginfocomment = c_sighup;
+ lastsiginfocomment = c_sigpwr;
  
+type 
  signalinfoty = record
   num: integer;
   flags: sigflagsty;
@@ -882,6 +916,7 @@ const
  codetemplateeditstatname =  'templedit.sta';
  
  siginfocount = 30;
+var
  siginfos: array[0..siginfocount-1] of signalinfoty = (
   (num:  1; flags: [sfl_stop]; name: 'SIGHUP'; comment: 'Hangup'),
   (num:  2; flags: [sfl_stop,sfl_internal,sfl_handle]; name: 'SIGINT'; comment: 'Interrupt'),
@@ -2180,12 +2215,17 @@ begin
 end;
 
 procedure tprojectoptionsfo.createexe(const sender: TObject);
+var
+ int1: integer;
 begin
  {$ifdef mswindows}
  externalconsole.visible:= true;
  {$else}
  settty.visible:= true;
  {$endif}
+ for int1:= ord(firstsiginfocomment) to ord(lastsiginfocomment) do begin
+  siginfos[int1-ord(firstsiginfocomment)].comment:= actionsmo.c[int1];
+ end;
 end;
 
 procedure tprojectoptionsfo.drawcol(const sender: tpointeredit;

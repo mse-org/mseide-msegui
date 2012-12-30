@@ -2,10 +2,10 @@ unit msetexteditor;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- msegui,mseglob,mseguiglob,mseclasses,mseforms,
- msesimplewidgets,msewidgetgrid,msesyntaxedit,
- msemenus,msefiledialog,msestat,msestatfile,msesyntaxpainter,msedispwidgets,
- mseinplaceedit,mseact,mseactions,mseeditglob;
+ msegui,mseglob,mseguiglob,mseclasses,mseforms,msesimplewidgets,msewidgetgrid,
+ msesyntaxedit,msemenus,msefiledialog,msestat,msestatfile,msesyntaxpainter,
+ msedispwidgets,mseinplaceedit,mseact,mseactions,mseeditglob,msestringcontainer,
+ msestrings;
 
 const
  texteditorstatname =  'texteditor.sta';
@@ -22,6 +22,7 @@ type
    tstatfile1: tstatfile;
    linedisp: tstringdisp;
    grid: twidgetgrid;
+   c: tstringcontainer;
    procedure undoexe(const sender: TObject);
    procedure redoexe(const sender: TObject);
    procedure popupuponupdate(const sender: tcustommenu);
@@ -49,7 +50,11 @@ uses
 
 const
  sqlsyntaxdef = '';
- 
+type
+ strinconststy = (
+  testok            //0 Test OK
+ );
+  
 constructor tmsetexteditorfo.create(const aonclosequery: closequeryeventty;
             const asyntaxpainter: tsyntaxpainter; const asyntaxindex: integer;
             const testbutton: boolean);
@@ -129,7 +134,7 @@ begin
  modres:= mr_canclose;
  onclosequery(self,modres);
  if modres = mr_canclose then begin
-  showmessage('Test OK');
+  showmessage(c[ord(testok)]);
  end;
 end;
 

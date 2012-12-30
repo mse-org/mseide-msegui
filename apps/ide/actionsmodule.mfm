@@ -2320,6 +2320,7 @@ object actionsmo: tactionsmo
       'Can not read project'
       'About'
       'Object Inspector'
+      'Store Component'
     )
     left = 288
     top = 392

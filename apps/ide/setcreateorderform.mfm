@@ -3,37 +3,40 @@ object setcreateorderfo: tsetcreateorderfo
   bounds_y = 264
   bounds_cx = 381
   bounds_cy = 340
-  taborder = 1
-  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_mousewheel, ow_destroywidgets, ow_autoscale]
-  container.bounds_x = 0
-  container.bounds_y = 0
-  container.bounds_cx = 381
-  container.bounds_cy = 340
-  container.frame.dummy = 0
+  container.frame.zoomwidthstep = 1
+  container.frame.zoomheightstep = 1
+  container.bounds = (
+    0
+    0
+    381
+    340
+  )
   options = [fo_closeonesc, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savezorder, fo_savestate]
   statfile = statfile1
   onclosequery = formonclosequery
   moduleclassname = 'tmseform'
   object grid: tstringgrid
-    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 0
     bounds_y = 0
     bounds_cx = 381
     bounds_cy = 306
-    frame.dummy = 0
     anchors = [an_top, an_bottom]
     optionsgrid = [og_colsizing, og_rowmoving, og_keyrowmoving, og_focuscellonenter, og_colchangeontabkey, og_wrapcol, og_autopopup, og_mousescrollcol]
     datacols.count = 2
-    datacols.options = [co_readonly, co_focusselect, co_rowselect, co_proportional, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+    datacols.options = [co_readonly, co_focusselect, co_rowselect, co_proportional, co_savestate, co_mousescrollrow]
     datacols.items = <    
       item
         width = 165
-        options = [co_readonly, co_focusselect, co_rowselect, co_proportional, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+        options = [co_readonly, co_focusselect, co_rowselect, co_proportional, co_savestate, co_mousescrollrow]
+        valuefalse = '0'
+        valuetrue = '1'
       end    
       item
         width = 159
-        options = [co_readonly, co_focusselect, co_rowselect, co_fill, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+        options = [co_readonly, co_focusselect, co_rowselect, co_fill, co_savestate, co_mousescrollrow]
         optionsedit = [scoe_undoonesc, scoe_eatreturn, scoe_autoselect, scoe_autoselectonfirstclick, scoe_hintclippedtext]
+        valuefalse = '0'
+        valuetrue = '1'
       end>
     fixcols.count = 1
     fixcols.items = <    
@@ -63,31 +66,27 @@ object setcreateorderfo: tsetcreateorderfo
     reffontheight = 14
   end
   object tbutton1: tbutton
-    optionswidget = [ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    optionswidget1 = [ow1_fontglyphheight, ow1_autoscale]
+    taborder = 1
     bounds_x = 254
     bounds_y = 312
     bounds_cx = 58
     bounds_cy = 20
     anchors = [an_right, an_bottom]
-    taborder = 1
     state = [as_localcaption]
-    autosize_cx = 0
-    autosize_cy = 0
     caption = '&OK'
     modalresult = mr_ok
     reffontheight = 14
   end
   object tbutton2: tbutton
-    optionswidget = [ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    optionswidget1 = [ow1_fontglyphheight, ow1_autoscale]
+    taborder = 2
     bounds_x = 318
     bounds_y = 312
     bounds_cx = 58
     bounds_cy = 20
     anchors = [an_right, an_bottom]
-    taborder = 2
     state = [as_default, as_localdefault, as_localcaption]
-    autosize_cx = 0
-    autosize_cy = 0
     caption = '&Cancel'
     modalresult = mr_cancel
     reffontheight = 14
@@ -97,5 +96,12 @@ object setcreateorderfo: tsetcreateorderfo
     options = [sfo_memory]
     left = 104
     top = 136
+  end
+  object c: tstringcontainer
+    strings.data = (
+      'Set Component create Order of'
+    )
+    left = 40
+    top = 40
   end
 end

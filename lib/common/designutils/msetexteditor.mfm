@@ -202,4 +202,11 @@ object msetexteditorfo: tmsetexteditorfo
       24666
     )
   end
+  object c: tstringcontainer
+    strings.data = (
+      'Test OK'
+    )
+    left = 192
+    top = 152
+  end
 end

@@ -105,7 +105,9 @@ type
   ac_stoperror,                   //76 Stop error
   ac_cannotreadproject,           //77 Can not read project
   ac_about,                       //78 About
-  ac_objectinspector              //79 Object Inspector
+  ac_objectinspector,             //79 Object Inspector
+  ac_storecomponent               //80 Store Component
+
  );
 
 type

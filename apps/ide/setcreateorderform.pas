@@ -4,7 +4,7 @@ interface
 uses
  classes,msegui,mseclasses,mseforms,msestat,msestatfile,msestrings,msedatalist,
  msedrawtext,mseevent,msegraphics,msegraphutils,msegrids,mseguiglob,mseglob,
- msepipestream,msetypes,msesimplewidgets,msewidgets;
+ msepipestream,msetypes,msesimplewidgets,msewidgets,msestringcontainer;
 
 type
  tsetcreateorderfo = class(tmseform)
@@ -12,6 +12,7 @@ type
    grid: tstringgrid;
    tbutton1: tbutton;
    tbutton2: tbutton;
+   c: tstringcontainer;
    procedure formonclosequery(const sender: tcustommseform;
                    var amodalresult: modalresultty);
   private
@@ -26,7 +27,11 @@ var
 implementation
 uses
  setcreateorderform_mfm,msedesigner;
- 
+type
+ stringconsttsty = (
+  setcomponentcreateorder          //0 Set Component create Order of
+ );
+  
 { tsetcreateorderfo }
 
 constructor tsetcreateorderfo.create(const amodule: tcomponent;
@@ -36,7 +41,7 @@ var
 // str1: string;
 begin
  inherited create(nil);
- caption:= 'Set Component create Order of '+amodule.name;
+ caption:= c[ord(setcomponentcreateorder)]+' '+amodule.name;
  fmodule:= amodule;
  with amodule do begin
   for int1:= 0 to componentcount - 1 do begin

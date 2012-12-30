@@ -43,7 +43,7 @@ var
  
 implementation
 uses
- storedcomponentinfodialog_mfm,msefileutils;
+ storedcomponentinfodialog_mfm,msefileutils,actionsmodule;
  
 { tstoredcomponentinfodialogfo }
 
@@ -52,7 +52,7 @@ begin
  infopo:= @ainfo;
  inherited create(nil);
  with ainfo do begin
-  self.caption:= 'Store Component '+componentname+': '+compclass;
+  self.caption:= actionsmo.c[ord(ac_storecomponent)]+' '+componentname+': '+compclass;
   self.compname.value:= compname;
   self.compdesc.value:= compdesc;
   self.filepath.value:= filepath;

@@ -18,9 +18,9 @@ unit msedbfieldeditor;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- db,msegui,mseclasses,mseforms,msedb,msestat,msestatfile,msesimplewidgets,msegrids,
- msewidgetgrid,msesplitter,msedataedits,msestrings,mseeditglob,msegraphedits,
- mseglob,msegridsglob;
+ db,msegui,mseclasses,mseforms,msedb,msestat,msestatfile,msesimplewidgets,
+ msegrids,msewidgetgrid,msesplitter,msedataedits,msestrings,mseeditglob,
+ msegraphedits,mseglob,msegridsglob,msestringcontainer;
 
 const
  dbfieldeditorstatname =  'dbfieldeditor.sta';
@@ -40,6 +40,7 @@ type
    fieldname: tstringedit;
    deftofield: tstockglyphbutton;
    fieldtodef: tstockglyphbutton;
+   c: tstringcontainer;
    procedure formloaded(const sender: TObject);
    procedure initcla(const sender: tenumtypeedit);
    procedure splitterupda(const sender: TObject);
@@ -75,6 +76,9 @@ uses
  
 type
  tpersistentfields1 = class(tpersistentfields);
+ stringconststy = (
+  str_dataset            //0 Dataset
+ );
  
 function editpersistentfields(const instance: tpersistentfields): boolean;
 var
@@ -182,7 +186,7 @@ var
  field1: tfield;
 begin
  with ffields.dataset do begin
-  caption:= 'Dataset: '+name;
+  caption:= c[ord(str_dataset)]+': '+name;
   fielddefli.rowcount:= fielddefs.count;
   for int1:= 0 to fielddefs.count-1 do begin
    fielddefli[0][int1]:= fielddefs[int1].name;

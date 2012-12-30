@@ -366,6 +366,7 @@ object templateeditorfo: ttemplateeditorfo
     strings.data = (
       'Do you want to delete "'
       'Code Template Editor'
+      'has been added to ''Project''-''Options''-''Editor''-''Code Templates''.'
     )
     left = 104
     top = 232

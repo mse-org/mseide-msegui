@@ -1,0 +1,28 @@
+object msepropertyeditorsmo: tmsepropertyeditorsmo
+  bounds_cx = 100
+  bounds_cy = 100
+  left = 100
+  top = 100
+  moduleclassname = 'tmsedatamodule'
+  object c: tstringcontainer
+    strings.data = (
+      'Open image file'
+      'Invalid set item'
+      'Unknown'
+      'Wrong property value'
+      'Invalid method name'
+      'Method name'
+      'exists'
+      'Do you wish to destroy'
+      'Do you wish to delete items'
+      'to'
+      'Empty date'
+      'Empty time'
+      'Do you wish to clear'
+      'Texteditor'
+      'Invalid component name'
+    )
+    left = 32
+    top = 40
+  end
+end
