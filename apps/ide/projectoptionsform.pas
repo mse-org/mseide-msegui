@@ -2224,7 +2224,7 @@ begin
  settty.visible:= true;
  {$endif}
  for int1:= ord(firstsiginfocomment) to ord(lastsiginfocomment) do begin
-  siginfos[int1-ord(firstsiginfocomment)].comment:= actionsmo.c[int1];
+  siginfos[int1-ord(firstsiginfocomment)].comment:= c[int1];
  end;
 end;
 
