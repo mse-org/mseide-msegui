@@ -91,6 +91,9 @@ const
   'Exception',                                 //sc_exception
   'System',                                    //sc_system
   'existiert nicht',                           //sc_does_not_exist
+  'PASSWORT',                 //sc_passwordupper
+  'Ppassworteingabe',         //sc_enterpassword
+  'Ung'#252'ltiges Passwort!',//sc_invalidpassword
   'Verzeichnis kann nicht gelesen werden',     //sc_can_not_read_directory
   'Grafik Format nicht unterst'#252'tzt', //sc_graphic_not_supported
   'Grafik Format Fehler', //sc_graphic_format_error

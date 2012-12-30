@@ -90,6 +90,9 @@ const
   'Exception',             //sc_exception
   'System',                //sc_system
   'tidak ada',             //sc_does_not_exist
+  'PASSWORD',              //sc_passwordupper
+  'Enter password',        //sc_enterpassword
+  'Invalid password!',     //sc_invalidpassword
   'tidak dapat membaca direktori', //sc_can_not_read_directory
   'Format grafik tidak didukung', //sc_graphic_not_supported
   'Format grafik salah',  //sc_graphic_format_error

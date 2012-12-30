@@ -117,6 +117,9 @@ const
   'System',                //sc_system
   #1085#1077' '#1089#1091#1097#1077#1089#1090#1074#1091#1077#1090 , 
                                                  //sc_does_not_exist
+  'PASSWORD',              //sc_passwordupper
+  'Enter password',        //sc_enterpassword
+  'Invalid password!',     //sc_invalidpassword
   #1053#1077' '#1091#1076#1072#1077#1090#1089#1103' '+
   #1087#1088#1086#1095#1077#1089#1090#1100' '+
   #1089#1086#1076#1077#1088#1078#1080#1084#1086#1077+

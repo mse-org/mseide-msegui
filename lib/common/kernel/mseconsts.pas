@@ -154,6 +154,9 @@ const
   'Exception',             //sc_exception
   'System',                //sc_system
   'does not exist',        //sc_does_not_exist
+  'PASSWORD',              //sc_passwordupper
+  'Enter password',        //sc_enterpassword
+  'Invalid password!',     //sc_invalidpassword
   'Can not read directory', //sc_can_not_read_directory
   'Graphic format not supported', //sc_graphic_not_supported
   'Graphic format error', //sc_graphic_format_error

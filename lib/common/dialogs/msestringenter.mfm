@@ -68,13 +68,4 @@ object stringenterfo: tstringenterfo
     modalresult = mr_cancel
     reffontheight = 14
   end
-  object c: tstringcontainer
-    strings.data = (
-      'PASSWORD'
-      'Enter password'
-      'Invalid password!'
-    )
-    left = 64
-    top = 8
-  end
 end

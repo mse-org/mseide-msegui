@@ -99,6 +99,9 @@ const
   'Exception',             //sc_exception
   'System',                //sc_system
   'does not exist',         //sc_does_not_exist
+  'PASSWORD',              //sc_passwordupper
+  'Enter password',        //sc_enterpassword
+  'Invalid password!',     //sc_invalidpassword
   'Can not read directory', //sc_can_not_read_directory
   #1043#1088#1072#1092#1080#1082' '#1092#1086#1088#1084#1072#1090' '#1090#1072#1098#1084#1080#1085#1083#1072#1085#1084#1072#1075#1072#1085 , //sc_graphic_not_supported
   #1053#1086#1090#1118#1171#1088#1080' '#1075#1088#1072#1092#1080#1082' '#1092#1086#1088#1084#1072#1090#1080 ,         //sc_graphic_format_error

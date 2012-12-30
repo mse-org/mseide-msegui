@@ -22,7 +22,6 @@ type
    lab: tlabel;
    ok: tbutton;
    cancel: tbutton;
-   c: tstringcontainer;
  end;
 
 //functions below are threadsave
@@ -34,15 +33,8 @@ function checkpassword(const password: msestring; var modalresult: modalresultty
 
 implementation
 uses
- msestringenter_mfm,msewidgets;
+ msestringenter_mfm,msewidgets,msestockobjects;
 
-type
- stringconststy = (
-  str_password,       //0 PASSWORD
-  enterpassword,      //1 Enter password
-  invalidpassword     //2 Invalid password!
- );
- 
 function stringenter(var avalue: msestring; const text: msestring = '';
                                const acaption: msestring = ''): modalresultty;
 var
@@ -78,14 +70,14 @@ begin
   fo:= tstringenterfo.create(nil);
   try
    with fo do begin
-    caption:= c[ord(str_password)];
-    lab.caption:= c[ord(enterpassword)]+':';
+    caption:= stockobjects.captions[sc_passwordupper];
+    lab.caption:= stockobjects.captions[sc_enterpassword]+':';
     value.passwordchar:= '*';
     value.value:= '';
     modalresult:= fo.show(true,nil);
     result:= (modalresult = mr_ok) and (password = value.value);
     if not result and (modalresult = mr_ok) then begin
-     showerror(c[ord(invalidpassword)]);
+     showerror(stockobjects.captions[sc_invalidpassword]);
     end;
    end;
   finally

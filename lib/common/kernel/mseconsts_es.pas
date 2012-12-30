@@ -94,6 +94,9 @@ const
   'Excepci'#243'n',             //sc_exception
   'Sistema',                //sc_system
   'no existe',                         //sc_does_not_exist
+  'PASSWORD',              //sc_passwordupper
+  'Enter password',        //sc_enterpassword
+  'Invalid password!',     //sc_invalidpassword
   'No puedo leer la carpeta',          //sc_can_not_read_directory
   'Formato gr'#225'fico no soportado', //sc_graphic_not_supported
   'Error de formato gr'#225'fico',     //sc_graphic_format_error

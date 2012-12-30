@@ -132,6 +132,9 @@ const
   'Exception',                            //sc_exception
   'Syst'#232'me',                         //sc_system
   'n'#8217'existe pas',                   //sc_does_not_exist
+  'PASSWORD',              //sc_passwordupper
+  'Enter password',        //sc_enterpassword
+  'Invalid password!',     //sc_invalidpassword
   'Impossible lire r'#233'pertoire',      //sc_can_not_read_directory
   'Format graphique non support'#233'',   //sc_graphic_not_supported
   'Erreur de format graphique',           //sc_graphic_format_error
