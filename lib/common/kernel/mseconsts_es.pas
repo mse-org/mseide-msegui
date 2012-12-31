@@ -66,9 +66,9 @@ const
   'M'#225'x.',                  //sc_Max
   'Error de rango',             //sc_Range_error  
 
-  '&Deshacer',                  //sc_Undo  ///              ///
-  '&Rehacer',                   //sc_Redo   //               //
-  '&Copiar',                    //sc_Copy   // hotkeys       //
+  '&Deshacer',                  //sc_Undo   ///              ///
+  '&Rehacer',                   //sc_Redo    //               //
+  '&Copiar',                    //sc_Copy     // hotkeys       //
   'C&ortar',                    //sc_Cut    //               //
   '&Pegar',                     //sc_Paste ///               // hotkeys
   '&Insertar fila',             //sc_insert_row ///          //
@@ -85,18 +85,18 @@ const
   'Guardar',                      //sc_save 
   'Abrir',                        //sc_open
   'Nombre',                       //sc_name1
-  'Crear una carpeta nueva',           //sc_create_new_directory
-  'Archivo',                           //sc_file
+  'Crear una carpeta nueva',               //sc_create_new_directory
+  'Archivo',                               //sc_file
   'existe, '#191'quiere sobreescribirlo?', //sc_exists_overwrite
-  'ha sido modificado. '#191'Guardar?',  //sc_is_modified_save
+  'ha sido modificado. '#191'Guardar?',    //sc_is_modified_save
   'ADVERTENCIA',                       //sc_warningupper
   'ERROR',                             //sc_errorupper
-  'Excepci'#243'n',             //sc_exception
-  'Sistema',                //sc_system
+  'Excepci'#243'n',                    //sc_exception
+  'Sistema',                           //sc_system
   'no existe',                         //sc_does_not_exist
-  'PASSWORD',              //sc_passwordupper
-  'Enter password',        //sc_enterpassword
-  'Invalid password!',     //sc_invalidpassword
+  'CONTRASE'#209'A',                   //sc_passwordupper
+  'Introduzca contrase'#241'a',        //sc_enterpassword
+  #161'contrase'#241'a incorrecta!',   //sc_invalidpassword
   'No puedo leer la carpeta',          //sc_can_not_read_directory
   'Formato gr'#225'fico no soportado', //sc_graphic_not_supported
   'Error de formato gr'#225'fico',     //sc_graphic_format_error
@@ -133,14 +133,14 @@ const
   'Di'#225'logo',                      //sc_dialog
   'Insertar',                          //sc_insert
   'Copiar',                            //sc_copy
-  'Pegar',              //sc_paste
-  'Insertar fila',         //sc_row_insert
-  'A'#241'adir fila',         //sc_row_append
-  'Borrar fila',         //sc_row_delete
-  'Deshacer',               //sc_undo
-  'Rehacer',               //sc_redo
-  'Cortar',                //sc_cut
-  'Seleccioinar todo',         //sc_select_all
+  'Pegar',                             //sc_paste
+  'Insertar fila',                     //sc_row_insert
+  'A'#241'adir fila',                  //sc_row_append
+  'Borrar fila',                       //sc_row_delete
+  'Deshacer',                          //sc_undo
+  'Rehacer',                           //sc_redo
+  'Cortar',                            //sc_cut
+  'Seleccioinar todo',                 //sc_select_all
   'Filtro apagado',                    //sc_filter_off
   'Vertical',                          //sc_portrait print orientation
   'Apaisado',                          //sc_landscape print orientation
