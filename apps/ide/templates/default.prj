@@ -184,14 +184,14 @@ groupcomments=6
  
 sourcedirs=4
  ${MSEDIR}lib/addon/*/
- ${MSELIBDIR}kernel/$TARGET/
+ ${MSELIBDIR}kernel/$TARGETOSDIR/
  ${MSELIBDIR}*/
  ./
 defines=0
 defineson=0
 unitdirs=4
  ${MSEDIR}lib/addon/*/
- ${MSELIBDIR}kernel/$TARGET/
+ ${MSELIBDIR}kernel/$TARGETOSDIR/
  ${MSELIBDIR}kernel/
  ${MSELIBDIR}*/
 unitdirson=4

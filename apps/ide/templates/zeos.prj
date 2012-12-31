@@ -189,7 +189,7 @@ sourcedirs=6
  ${MSEDIR}lib/addon/*/
  ${zeosdir}src/*/
  ${zeosdir}src/
- ${MSELIBDIR}kernel/$TARGET/
+ ${MSELIBDIR}kernel/$TARGETOSDIR/
  ${MSELIBDIR}*/
  ./
 defines=0
@@ -198,7 +198,7 @@ unitdirs=6
  ${MSEDIR}lib/addon/*/
  ${zeosdir}src/*/
  ${zeosdir}src/
- ${MSELIBDIR}kernel/$TARGET/
+ ${MSELIBDIR}kernel/$TARGETOSDIR/
  ${MSELIBDIR}kernel/
  ${MSELIBDIR}*/
 unitdirson=6
