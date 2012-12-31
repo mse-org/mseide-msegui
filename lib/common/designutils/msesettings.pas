@@ -21,33 +21,35 @@ uses
  mseglob,mseguiglob,msegui,mseclasses,mseforms,msestat,msestatfile,
  msesimplewidgets,msefiledialog,msestrings,msemacros,msedataedits,msebitmap,
  msedatanodes,mseedit,mseevent,msegraphutils,msegrids,mselistbrowser,msemenus,
- msesys,msetypes,msegraphics,msewidgets,mseactions;
+ msesys,msetypes,msegraphics,msewidgets,mseactions,mseifiglob,msesplitter;
 
 type
  settingsmacroty = (sma_fpcdir,sma_fpclibdir,sma_msedir,sma_mselibdir,
                    sma_syntaxdefdir,sma_templatedir,sma_compstoredir,
-                   sma_compiler,sma_debugger,sma_exeext,sma_target);
+                   sma_compiler,sma_debugger,
+                   sma_exeext,sma_target,sma_targetosdir);
 const
  statdirname = '^/.mseide';
  settingsmacronames: array[settingsmacroty] of msestring = (
                      'fpcdir','fpclibdir','msedir','mselibdir','syntaxdefdir',
-                     'templatedir','compstoredir','compiler','debugger','exeext','target');
+                     'templatedir','compstoredir','compiler','debugger',
+                     'exeext','target','targetosdir');
  {$ifdef mswindows}
  defaultsettingmacros: array[settingsmacroty] of msestring = (
                 '','','','${MSEDIR}lib/common/','${MSEDIR}apps/ide/syntaxdefs/',
                 '${MSEDIR}apps/ide/templates/','${MSEDIR}apps/ide/compstore/',
-                'ppc386.exe','gdb.exe','.exe','i386-win32');
+                'ppc386.exe','gdb.exe','.exe','i386-win32','windows');
  {$else}
   {$ifdef CPU64}
   defaultsettingmacros: array[settingsmacroty] of msestring = (
                  '','','','${MSEDIR}lib/common/','${MSEDIR}apps/ide/syntaxdefs/',
                  '${MSEDIR}apps/ide/templates/','${MSEDIR}apps/ide/compstore/',
-                 'ppcx64','gdb','','i386-linux');
+                 'ppcx64','gdb','','x86_64-linux','linux');
   {$else}
   defaultsettingmacros: array[settingsmacroty] of msestring = (
                  '','','','${MSEDIR}lib/common/','${MSEDIR}apps/ide/syntaxdefs/',
                  '${MSEDIR}apps/ide/templates/','${MSEDIR}apps/ide/compstore/',
-                 'ppc386','gdb','','i386-linux');
+                 'ppc386','gdb','','i386-linux','linux');
   {$endif}
  {$endif}
                 
@@ -75,6 +77,8 @@ type
    printcomm: tstringedit;
    compstoredir: tfilenameedit;
    shortcutbu: tbutton;
+   targetosdir: tstringedit;
+   tsplitter2: tsplitter;
    procedure epandfilenamemacro(const sender: TObject; var avalue: msestring;
                      var accept: Boolean);
    procedure formoncreate(const sender: TObject);
@@ -202,6 +206,7 @@ begin
   debugger.value:= macros[sma_debugger];
   exeext.value:= macros[sma_exeext];
   target.value:= macros[sma_target];
+  targetosdir.value:= macros[sma_targetosdir];
   printcomm.value:= printcommand;
  end;
 end;
@@ -219,6 +224,7 @@ begin
  result[sma_debugger]:= debugger.value;
  result[sma_exeext]:= exeext.value;
  result[sma_target]:= target.value;
+ result[sma_targetosdir]:= targetosdir.value;
 end;
 
 procedure tsettingsfo.epandfilenamemacro(const sender: TObject;

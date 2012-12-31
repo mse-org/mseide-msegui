@@ -1372,7 +1372,7 @@ begin
   defaultmake:= 1; //make
   additem(funitdirs,'${MSELIBDIR}*/');
   additem(funitdirs,'${MSELIBDIR}kernel/');
-  additem(funitdirs,'${MSELIBDIR}kernel/$TARGET/');
+  additem(funitdirs,'${MSELIBDIR}kernel/$TARGETOSDIR/');
   setlength(funitdirson,length(unitdirs));
   for int1:= 0 to high(funitdirson) do begin
    funitdirson[int1]:= unitson;
@@ -1501,7 +1501,7 @@ begin
   gdbprocessor:= 'auto';
   additem(fsourcedirs,'./');
   additem(fsourcedirs,'${MSELIBDIR}*/');
-  additem(fsourcedirs,'${MSELIBDIR}kernel/$TARGET/');
+  additem(fsourcedirs,'${MSELIBDIR}kernel/$TARGETOSDIR/');
   sourcedirs:= reversearray(sourcedirs);
  end;
  if expand then begin 

@@ -49,7 +49,7 @@ object settingsfo: tsettingsfo
     reffontheight = 14
   end
   object tbutton1: tbutton
-    taborder = 13
+    taborder = 14
     bounds_x = 240
     bounds_y = 541
     bounds_cx = 50
@@ -200,7 +200,7 @@ object settingsfo: tsettingsfo
     taborder = 10
     bounds_x = 8
     bounds_y = 439
-    bounds_cx = 78
+    bounds_cx = 80
     bounds_cy = 37
     onsetvalue = setvalue
     reffontheight = 14
@@ -216,11 +216,10 @@ object settingsfo: tsettingsfo
       0
     )
     taborder = 11
-    bounds_x = 96
+    bounds_x = 98
     bounds_y = 439
-    bounds_cx = 252
+    bounds_cx = 94
     bounds_cy = 37
-    anchors = [an_left, an_top, an_right]
     onsetvalue = setvalue
     reffontheight = 14
   end
@@ -277,7 +276,7 @@ object settingsfo: tsettingsfo
       0
       0
     )
-    taborder = 12
+    taborder = 13
     bounds_x = 8
     bounds_y = 487
     bounds_cx = 340
@@ -316,7 +315,7 @@ object settingsfo: tsettingsfo
     reffontheight = 14
   end
   object shortcutbu: tbutton
-    taborder = 14
+    taborder = 15
     bounds_x = 10
     bounds_y = 541
     bounds_cx = 78
@@ -324,6 +323,38 @@ object settingsfo: tsettingsfo
     state = [as_localcaption, as_localonexecute]
     caption = 'Shortcuts'
     onexecute = editshortcuts
+  end
+  object targetosdir: tstringedit
+    Tag = 11
+    frame.caption = '${TARGETOSDIR}'
+    frame.dummy = 0
+    frame.outerframe = (
+      0
+      17
+      0
+      0
+    )
+    taborder = 12
+    bounds_x = 202
+    bounds_y = 439
+    bounds_cx = 146
+    bounds_cy = 37
+    anchors = [an_left, an_top, an_right]
+    onsetvalue = setvalue
+    reffontheight = 14
+  end
+  object tsplitter2: tsplitter
+    taborder = 16
+    visible = False
+    bounds_x = 192
+    bounds_y = 456
+    bounds_cx = 10
+    bounds_cy = 20
+    options = [spo_hprop, spo_dockleft, spo_docktop, spo_dockright, spo_dockbottom]
+    linkleft = target
+    linkright = targetosdir
+    grip = stb_none
+    statfile = tstatfile1
   end
   object tstatfile1: tstatfile
     filename = 'settingsfo.sta'
