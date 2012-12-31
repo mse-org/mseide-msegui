@@ -121,11 +121,11 @@ groupcomments=6
  
  
 sourcedirs=3
- ${MSELIBDIR}kernel/$TARGET/
+ ${MSELIBDIR}kernel/$TARGETOSDIR/
  ${MSELIBDIR}*/
  ./
 unitdirs=3
- ${MSELIBDIR}kernel/$TARGET/
+ ${MSELIBDIR}kernel/$TARGETOSDIR/
  ${MSELIBDIR}kernel/
  ${MSELIBDIR}*/
 unitdirson=3

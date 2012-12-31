@@ -103,13 +103,13 @@ macrovalues=0
 macrogroup=0
 groupcomments=0
 sourcedirs=3
- ${MSELIBDIR}kernel/$TARGET/
+ ${MSELIBDIR}kernel/$TARGETOSDIR/
  ${MSELIBDIR}*/
  ./
 defines=0
 defineson=0
 unitdirs=3
- ${MSELIBDIR}kernel/$TARGET/
+ ${MSELIBDIR}kernel/$TARGETOSDIR/
  ${MSELIBDIR}kernel/
  ${MSELIBDIR}*/
 unitdirson=3

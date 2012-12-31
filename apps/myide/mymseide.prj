@@ -234,7 +234,7 @@ groupcomments=6
  
 sourcedirs=5
  ${MSEDIR}lib/addon/*/
- ${MSELIBDIR}kernel/$TARGET/
+ ${MSELIBDIR}kernel/$TARGETOSDIR/
  ${MSELIBDIR}*/
  ../ide/
  ./
@@ -242,7 +242,7 @@ defines=0
 defineson=0
 unitdirs=5
  ${MSEDIR}lib/addon/*/
- ${MSELIBDIR}kernel/$TARGET/
+ ${MSELIBDIR}kernel/$TARGETOSDIR/
  ${MSELIBDIR}kernel/
  ${MSELIBDIR}*/
  ../ide/
