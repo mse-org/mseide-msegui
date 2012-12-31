@@ -3,11 +3,11 @@ MSEide+MSEgui Pascal Cross Platform GUI Development System.
 2012-12-31 Version 2.8.6
 Copyright (c) 1999-2012 by Martin Schreiber
 
-*** 2.8.4 -> 2.8.6: The misleading OS directory names have been changed
- lib/common/kernel/i386-linux -> lib/common/kernel/linux
- lib/common/kernel/i386-win32 -> lib/common/kernel/windows
-There is a new settings macro ${TARGETOSDIR} which points to the new directory.
-Please replace ${TARGET} by ${TARGETOSDIR} in your existing project options.
+* 2.8.4 -> 2.8.6: The misleading OS directory names have been changed
+* lib/common/kernel/i386-linux -> lib/common/kernel/linux
+* lib/common/kernel/i386-win32 -> lib/common/kernel/windows
+* There is a new settings macro ${TARGETOSDIR} which points to the new directory.
+* Please replace ${TARGET} by ${TARGETOSDIR} in your existing project options.
 
 - Compiles with FPC 2.6.0 or 2.6.2
 - Tested on i386-linux SuSE 12.2, x84_64-linux SuSE 12.2 and
