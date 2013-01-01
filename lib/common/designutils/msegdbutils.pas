@@ -54,7 +54,7 @@ type
            rec_threadcreated,rec_threadexited,rec_threadgroupexited,
            rec_threadselected,
            rec_libraryloaded,rec_libraryunloaded,
-           rec_threadgroupadded,rec_threadgroupstarted);
+           rec_threadgroupadded,rec_threadgroupstarted,rec_breakpointmodified);
  resultclassty = rec_done..rec_exit;
  asyncclassty = rec_running..high(recordclassty);
 const
@@ -64,14 +64,14 @@ const
           'thread-created','thread-exited', 'thread-group-exited', 
           'thread-selected',
           'library-loaded','library-unloaded',
-          'thread-group-added','thread-group-started');
+          'thread-group-added','thread-group-started','breakpoint-modified');
  recordclassnoname: array[recordclassty] of boolean =
          (false,  false,      false,         false,     false,
           false,     true,
           false,           false,           false,
           false,
           false,            false,
-          false,               false);
+          false,               false,                  false);
  defaultsynctimeout = 2000000; //2 seconds
 type
  valuekindty = (vk_value,vk_tuple,vk_list);
