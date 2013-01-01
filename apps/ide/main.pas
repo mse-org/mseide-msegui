@@ -1142,10 +1142,12 @@ begin
    gdb.restarttarget;
   end;
  end;
- {$ifdef mswindows}
  gdb.newconsole:= projectoptions.d.externalconsole;
+ {$ifdef mswindows}
+// gdb.newconsole:= projectoptions.d.externalconsole;
  {$else}
  gdb.settty:= projectoptions.d.settty;
+ gdb.xtermoptions:= projectoptions.d.texp.xtermoptions;
  {$endif}
 end;
 

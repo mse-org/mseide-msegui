@@ -1155,9 +1155,9 @@ object projectoptionsfo: tprojectoptionsfo
           optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets]
           optionswidget1 = [ow1_fontglyphheight]
           bounds_x = 0
-          bounds_y = 236
+          bounds_y = 217
           bounds_cx = 803
-          bounds_cy = 282
+          bounds_cy = 301
           anchors = [an_left, an_top, an_right, an_bottom]
           taborder = 3
           activepageindex = 0
@@ -1181,7 +1181,7 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_x = 0
             bounds_y = 18
             bounds_cx = 803
-            bounds_cy = 264
+            bounds_cy = 283
             anchors = [an_left, an_top, an_right, an_bottom]
             caption = 'Source &directories'
             reffontheight = 14
@@ -1194,7 +1194,7 @@ object projectoptionsfo: tprojectoptionsfo
               bounds_x = 0
               bounds_y = 0
               bounds_cx = 803
-              bounds_cy = 264
+              bounds_cy = 283
               bounds_cymin = 40
               anchors = []
               optionsgrid = [og_rowmoving, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_selectedrowsdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_wrapcol, og_autopopup]
@@ -1250,7 +1250,7 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_x = 0
             bounds_y = 18
             bounds_cx = 803
-            bounds_cy = 264
+            bounds_cy = 283
             anchors = [an_left, an_top, an_right, an_bottom]
             caption = 'Defi&nes'
             reffontheight = 14
@@ -1261,7 +1261,7 @@ object projectoptionsfo: tprojectoptionsfo
               bounds_x = 0
               bounds_y = 0
               bounds_cx = 803
-              bounds_cy = 264
+              bounds_cy = 283
               anchors = []
               optionsgrid = [og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_colchangeontabkey, og_wrapcol, og_autopopup]
               fixrows.count = 1
@@ -1343,7 +1343,7 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_x = 0
             bounds_y = 18
             bounds_cx = 803
-            bounds_cy = 264
+            bounds_cy = 283
             anchors = [an_left, an_top, an_right, an_bottom]
             caption = '&Signals'
             reffontheight = 14
@@ -1356,7 +1356,7 @@ object projectoptionsfo: tprojectoptionsfo
               bounds_x = 0
               bounds_y = 0
               bounds_cx = 803
-              bounds_cy = 264
+              bounds_cy = 283
               bounds_cymin = 40
               anchors = []
               optionsgrid = [og_colsizing, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_sorted, og_wrapcol, og_autopopup]
@@ -1507,7 +1507,7 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_x = 0
             bounds_y = 18
             bounds_cx = 803
-            bounds_cy = 264
+            bounds_cy = 283
             anchors = [an_left, an_top, an_right, an_bottom]
             caption = '&Exceptions'
             reffontheight = 14
@@ -1518,7 +1518,7 @@ object projectoptionsfo: tprojectoptionsfo
               bounds_x = 0
               bounds_y = 0
               bounds_cx = 803
-              bounds_cy = 264
+              bounds_cy = 283
               anchors = []
               optionsgrid = [og_colsizing, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_colchangeontabkey, og_wrapcol, og_autopopup]
               fixrows.count = 1
@@ -1597,7 +1597,7 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_x = 0
             bounds_y = 18
             bounds_cx = 803
-            bounds_cy = 264
+            bounds_cy = 283
             anchors = [an_left, an_top, an_right, an_bottom]
             caption = '&Target'
             reffontheight = 14
@@ -2179,9 +2179,9 @@ object projectoptionsfo: tprojectoptionsfo
           frame.dummy = 0
           taborder = 2
           bounds_x = 7
-          bounds_y = 196
-          bounds_cx = 628
-          bounds_cy = 30
+          bounds_y = 164
+          bounds_cx = 778
+          bounds_cy = 43
           optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
           linkbottom = ttabwidget1
           dist_bottom = 10
@@ -2203,10 +2203,10 @@ object projectoptionsfo: tprojectoptionsfo
             )
             taborder = 4
             bounds_x = 508
-            bounds_y = 0
+            bounds_y = 13
             bounds_cx = 63
             bounds_cy = 30
-            visible = False
+            onchange = extconschangeexe
           end
           object showconsole: tbooleanedit
             frame.caption = 'Show &Console'#10'on Run'
@@ -2221,7 +2221,7 @@ object projectoptionsfo: tprojectoptionsfo
             )
             taborder = 2
             bounds_x = 333
-            bounds_y = 0
+            bounds_y = 13
             bounds_cx = 97
             bounds_cy = 30
           end
@@ -2238,7 +2238,7 @@ object projectoptionsfo: tprojectoptionsfo
             )
             taborder = 1
             bounds_x = 237
-            bounds_y = 0
+            bounds_y = 13
             bounds_cx = 86
             bounds_cy = 30
           end
@@ -2254,7 +2254,7 @@ object projectoptionsfo: tprojectoptionsfo
               9
             )
             bounds_x = 0
-            bounds_y = 0
+            bounds_y = 13
             bounds_cx = 65
             bounds_cy = 30
           end
@@ -2270,8 +2270,8 @@ object projectoptionsfo: tprojectoptionsfo
               9
             )
             taborder = 5
-            bounds_x = 581
-            bounds_y = 0
+            bounds_x = 731
+            bounds_y = 13
             bounds_cx = 47
             bounds_cy = 30
           end
@@ -2287,7 +2287,7 @@ object projectoptionsfo: tprojectoptionsfo
             taborder = 6
             hint = 'Release mouse grab by target stop. gdb sometimes crashes with this option.'
             bounds_x = 75
-            bounds_y = 0
+            bounds_y = 13
             bounds_cx = 152
             bounds_cy = 30
             options = [bo_executeonclick, bo_executeonkey, bo_executeonshortcut, bo_executedefaultonenterkey, bo_reversed]
@@ -2303,10 +2303,31 @@ object projectoptionsfo: tprojectoptionsfo
             )
             taborder = 3
             bounds_x = 440
-            bounds_y = 7
+            bounds_y = 20
             bounds_cx = 58
             bounds_cy = 16
             visible = False
+          end
+          object xtermoptions: tmemodialogedit
+            frame.caption = 'xterm Options'
+            frame.button.imagenr = 17
+            frame.outerframe = (
+              0
+              17
+              0
+              0
+            )
+            taborder = 7
+            onshowhint = hintexpandedmacros
+            enabled = False
+            visible = False
+            bounds_x = 581
+            bounds_y = 0
+            bounds_cx = 140
+            bounds_cy = 37
+            textflags = [tf_noselect]
+            textflagsactive = []
+            reffontheight = 14
           end
         end
         object debugtarget: tfilenameedit

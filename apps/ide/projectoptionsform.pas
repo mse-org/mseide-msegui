@@ -258,6 +258,7 @@ type
    fdebugoptions: msestring;
    fdebugtarget: filenamety;
    fruncommand: filenamety;
+   fxtermoptions: msestring;
    fremoteconnection: msestring;
    fuploadcommand: filenamety;
    fgdbprocessor: msestring;
@@ -281,6 +282,7 @@ type
    property debugoptions: msestring read fdebugoptions write fdebugoptions;
    property debugtarget: filenamety read fdebugtarget write fdebugtarget;
    property runcommand: filenamety read fruncommand write fruncommand;
+   property xtermoptions: msestring read fxtermoptions write fxtermoptions;
    property remoteconnection: msestring read fremoteconnection 
                                         write fremoteconnection;
    property uploadcommand: filenamety read fuploadcommand 
@@ -766,6 +768,7 @@ type
    tspacer6: tspacer;
    colornote: tcoloredit;
    c: tstringcontainer;
+   xtermoptions: tmemodialogedit;
    procedure acttiveselectondataentered(const sender: TObject);
    procedure colonshowhint(const sender: tdatacol; const arow: Integer; 
                       var info: hintinfoty);
@@ -803,6 +806,7 @@ type
    procedure saveexe(const sender: TObject);
    procedure settingsdataent(const sender: TObject);
    procedure loadexe(const sender: TObject);
+   procedure extconschangeexe(const sender: TObject);
   private
    procedure activegroupchanged;
  end;
@@ -2180,7 +2184,11 @@ end;
 
 procedure tprojectoptionsfo.debuggeronchildscaled(const sender: TObject);
 begin
+{$ifdef mswindows}
  placeyorder(0,[0,0,10],[debugcommand,debugoptions,debugtarget,tlayouter1]);
+{$else}
+ placeyorder(0,[0,0,2],[debugcommand,debugoptions,debugtarget,tlayouter1]);
+{$endif}
  aligny(wam_center,[debugtarget,runcommand]);
 end;
 
@@ -2219,9 +2227,10 @@ var
  int1: integer;
 begin
  {$ifdef mswindows}
- externalconsole.visible:= true;
+// externalconsole.visible:= true;
  {$else}
  settty.visible:= true;
+ xtermoptions.visible:= true;
  {$endif}
  for int1:= ord(firstsiginfocomment) to ord(lastsiginfocomment) do begin
   siginfos[int1-ord(firstsiginfocomment)].comment:= c[int1];
@@ -2538,6 +2547,11 @@ begin
  bo1:= settingsfile.value <> '';
  savebu.enabled:= bo1;
  loadbu.enabled:= bo1;
+end;
+
+procedure tprojectoptionsfo.extconschangeexe(const sender: TObject);
+begin
+ xtermoptions.enabled:= externalconsole.value;
 end;
 
 { toptions }

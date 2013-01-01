@@ -15,7 +15,7 @@ unit msegdbutils;
 interface
 uses
  msestream,mseclasses,classes,msetypes,mseevent,msehash,msepipestream,msestrings,
- mseapplication,msegui,msedatalist,msesystypes;
+ mseapplication,msegui,msedatalist,msesystypes,mseprocess;
 
 //todo: byte endianess for remote debugging
 
@@ -239,6 +239,7 @@ type
    fdevicename: string;
    finput: tpipereader;
    foutput: tpipewriter;
+   fpty: integer;
    procedure closeinp;
   public
    constructor create;
@@ -263,6 +264,7 @@ type
    fgdbfrom{,fgdberror}: tpipereader;
    {$ifdef UNIX}
    ftargetterminal: tpseudoterminal;
+   ftargetconsole: tmseprocess;
    {$endif}
    fgdb: integer; //processhandle
    fstate: gdbstatesty;
@@ -296,9 +298,9 @@ type
    flastbreakpoint: integer;
    fenvvars: envvararty;
    ftargetdebugbegin,ftargetdebugend: qword;
-   {$ifdef mswindows}
+//   {$ifdef mswindows}
    fnewconsole: boolean;
-   {$endif}
+//   {$endif}
    fremoteconnection: msestring;
    fgdbdownload: boolean;
    fsimulator: boolean;
@@ -317,6 +319,7 @@ type
    fsettty: boolean;
    fbeforeconnect: filenamety;
    fafterconnect: filenamety;
+   fxtermoptions: string;
    procedure setstoponexception(const avalue: boolean);
    procedure checkactive;
    function checkconnection(const proginfo: boolean): gdbresultty;
@@ -333,6 +336,9 @@ type
    fpointerhexdigits: integer;
    {$ifdef UNIX}
    procedure targetfrom(const sender: tpipereader);
+   procedure killtargetconsole;
+   function createtargetconsole: boolean;
+   procedure xtermfrom(const sender: tpipereader);
    {$endif}
    procedure gdbfrom(const sender: tpipereader);
    procedure gdbpipebroken(const sender: tpipereader);
@@ -590,9 +596,9 @@ type
 
    property progparameters: string read fprogparameters write fprogparameters;
    property workingdirectory: filenamety read fworkingdirectory write fworkingdirectory;
-   {$ifdef mswindows}
+//   {$ifdef mswindows}
    property newconsole: boolean read fnewconsole write fnewconsole;
-   {$endif}
+//   {$endif}
    property processorname: ansistring read getprocessorname write setprocessorname;
   published
    property guiintf: boolean read fguiintf write fguiintf default false;
@@ -615,6 +621,7 @@ type
    property onerror: gdbeventty read fonerror write fonerror;
    property overloadsleepus: integer read foverloadsleepus 
                                  write setoverloadsleepus default -1;
+   property xtermoptions: string read fxtermoptions write fxtermoptions;
  end;
 
 procedure localizetext;
@@ -783,6 +790,10 @@ begin
  {$ifdef UNIX}
  ftargetterminal:= tpseudoterminal.create;
  ftargetterminal.input.oninputavailable:= {$ifdef FPC}@{$endif}targetfrom;
+ ftargetconsole:= tmseprocess.create(nil);
+ ftargetconsole.options:= [pro_output,pro_errorouttoout];
+ ftargetconsole.filename:= 'xterm';
+ ftargetconsole.output.oninputavailable:= @xtermfrom;
  {$endif}
  foverloadsleepus:= -1;
  inherited;
@@ -794,6 +805,7 @@ begin
  inherited;
  fsourcefiles.free;
  {$ifdef UNIX}
+ ftargetconsole.free;
  ftargetterminal.free;
  {$endif}
 end;
@@ -920,7 +932,7 @@ begin
   end;
   if bo1 then begin
   }
-  if fsettty then begin
+  if fsettty or fnewconsole then begin
    clicommand('tty '+ftargetterminal.devicename);
   end;
   {$endif}
@@ -1330,7 +1342,9 @@ begin
         fprocid:= 0;
         getprocid(fprocid);
         {$ifdef UNIX}
-        ftargetterminal.restart;
+        if not fnewconsole then begin
+         ftargetterminal.restart;
+        end;
         {$endif}
         if gs_startup in self.fstate then begin
          exit; //already done
@@ -1739,6 +1753,38 @@ begin
   targetoutput(sender.readdatastring);
  end;
 end;
+
+procedure tgdbmi.killtargetconsole;
+begin
+ ftargetconsole.kill;
+end;
+
+function tgdbmi.createtargetconsole: boolean;
+var
+ ar1: stringarty;
+begin
+// ftargetconsole.parameter:= '-S'+ftargetterminal.devicename;
+       //xterm crashes with the -S/dev/pts/... format
+ ar1:= splitstring(ftargetterminal.devicename,'/'); 
+ if ar1 <> nil then begin
+  ftargetconsole.parameter:= '-S'+ar1[high(ar1)]+'/'+
+                                inttostr(ftargetterminal.fpty);
+ end
+ else begin
+  ftargetconsole.parameter:= '';
+ end;
+ if fxtermoptions <> '' then begin
+  ftargetconsole.parameter:= ftargetconsole.parameter + ' ' + fxtermoptions;
+ end;
+ ftargetconsole.active:= true;
+ result:= ftargetconsole.running;
+end;
+
+procedure tgdbmi.xtermfrom(const sender: tpipereader);
+begin
+ targetoutput(sender.readdatastring);
+end;
+
 {$endif}
 
 function tgdbmi.internalcommand(acommand: string): boolean;
@@ -2064,6 +2110,14 @@ var
  frames1: frameinfoarty;
  ev: tgdbstartupevent;
 begin
+{$ifdef unix}
+ killtargetconsole;
+ if fnewconsole then begin
+  if not createtargetconsole then begin
+   raise exception.create('Can not run '+ftargetconsole.filename);
+  end;
+ end;
+{$endif}
  fstartupbreakpoint:= -1;
  fstartupbreakpoint1:= -1;
  exclude(fstate,gs_startup);
@@ -4481,16 +4535,16 @@ begin
  ftargetterminal.input.overloadsleepus:= avalue;
 {$endif}
 end;
+
 {$ifdef UNIX}
 { tpseudoterminal }
 
 constructor tpseudoterminal.create;
-var
- pty: integer;
 
  procedure error;
  begin
-  sys_closefile(pty);
+  sys_closefile(fpty);
+  fpty:= invalidfilehandle;
   syserror(syelasterror,'Can not create pseudoterminal:');
  end;
  
@@ -4501,30 +4555,35 @@ var
  ios: termios{ty};
  
 begin
- pty:= invalidfilehandle;
- pty:= getpt;
- if pty < 0 then error;
- if (grantpt(pty) < 0) or (unlockpt(pty) < 0) then error;
+ fpty:= invalidfilehandle;
+ fpty:= getpt;
+ if fpty < 0 then error;
+ if (grantpt(fpty) < 0) or (unlockpt(fpty) < 0) then error;
  setlength(fdevicename,buflen);
- if ptsname_r(pty,@fdevicename[1],buflen) < 0 then error;
+ if ptsname_r(fpty,@fdevicename[1],buflen) < 0 then error;
  setlength(fdevicename,length(pchar(fdevicename)));
- if msetcgetattr(pty,ios) <> 0 then error;
+ fillchar(ios,sizeof(ios),0);
+ if msetcgetattr(fpty,ios) <> 0 then error;
  ios.c_lflag:= ios.c_lflag and not (icanon or echo);
  ios.c_cc[vmin]:= #1;
  ios.c_cc[vtime]:= #0;
- if msetcsetattr(pty,tcsanow,ios) <> 0 then error;
+ if msetcsetattr(fpty,tcsanow,ios) <> 0 then error;
  finput:= tpipereader.create;
  foutput:= tpipewriter.create;
 // finput.handle:= pty;
- foutput.handle:= pty;
+ foutput.handle:= fpty;
 end;
 
 destructor tpseudoterminal.destroy;
 begin
  closeinp;
  foutput.releasehandle;
+ finput.releasehandle;
  foutput.free;
  finput.free;
+ if fpty <> invalidfilehandle then begin
+  sys_closefile(fpty);
+ end;
 end;
 
 procedure tpseudoterminal.closeinp;
