@@ -240,7 +240,9 @@ begin
         end;
        end;
        syk_classdef: begin
-        if checkoperator('=') and checkident(ord(pid_class)) and checkoperator('(') then begin
+        if checkoperator('=') and 
+               (checkident([ord(pid_class),ord(pid_object)])  >= 0) and 
+                                               checkoperator('(') then begin
          scope.addidents(parser,',','.');
 //         doaddidents;
         end;
@@ -625,7 +627,7 @@ begin
  ar1:= nil; //compiler warning
  token1:= acttoken;
  result:= getorignamenoident(value) and checkoperator('=') and 
-                  checkident(integer(pid_class));
+                  (checkident([integer(pid_class),integer(pid_object)]) >= 0);
  if result then begin
   if checkoperator(';') then begin
    lasttoken;           //forward declaration
@@ -898,7 +900,7 @@ begin
         back;
        end;
       end;
-      pid_class: begin
+      pid_class,pid_object: begin
        mark;
        acttoken:= statementstart;
        if parseclasstype then begin
@@ -908,11 +910,13 @@ begin
         back;
        end;
       end;
+      {
       pid_object: begin
        parseobject;
        funitinfopo^.deflist.add(lstringtostring(lstr1),syk_typedef,
                   getsourcepos(statementstart),sourcepos);
       end;
+      }
       pid_record: begin
        parserecord;
        funitinfopo^.deflist.add(lstringtostring(lstr1),syk_typedef,

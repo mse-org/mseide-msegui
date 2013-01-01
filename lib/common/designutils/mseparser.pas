@@ -231,7 +231,9 @@ type
                       //false if none, -1 if name or none
    function getnameorident: boolean; overload;
    function getfirstident: integer; //-1 if none or not first token in line
-   function checkident(const ident: integer): boolean; //true if ok
+   function checkident(const ident: integer): boolean; overload;//true if ok
+   function checkident(const ident: array of integer): integer; overload;
+                                  //returns fond ident, -1 if none
    function testident(const ident: integer): boolean;
                        //skips whitespace, true if ident found
    function checknamenoident: boolean;
@@ -1519,6 +1521,25 @@ begin
  int1:= getident;
  result:= ident = int1;
  if not result and (int1 >= 0) then begin
+  lasttoken;
+ end;
+end;
+
+function tparser.checkident(const ident: array of integer): integer; overload;
+var
+ int1,int2: integer;
+begin
+ int1:= getident;
+ result:= -1;
+ if int1 >= 0 then begin
+  for int2:= 0 to high(ident) do begin
+   if int1 = ident[int2] then begin
+    result:= int1;
+    break;
+   end;
+  end;
+ end;
+ if (result < 0) and (int1 >= 0) then begin
   lasttoken;
  end;
 end;
