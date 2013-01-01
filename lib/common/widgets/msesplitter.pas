@@ -1656,7 +1656,7 @@ end;
 
 function tlayouter.calcminscrollsize: sizety;
 var
- int1,int2: integer;
+ int1,int2,int3,int4: integer;
 begin
  result:= inherited calcminscrollsize;
  if lao_placex in foptionslayout then begin
@@ -1673,14 +1673,29 @@ begin
  end;
  if (high(fwidgets) >= 0) and (align_glue <> wam_none) and 
                                      (align_mode <> wam_none)then begin
+  int2:= -bigint;
+  int3:= bigint;
   if lao_alignx in foptionslayout then begin
-   int2:= 0;
    for int1:= 0 to high(fwidgets) do begin
     with fwidgets[int1] do begin
-     if isvisible and (fwidgetrect.cx > int2) then begin
-      int2:= fwidgetrect.cx;
+     if isvisible then begin
+      with fwidgetrect do begin
+       if x < int3 then begin
+        int3:= x;
+       end;
+       int4:= x + cx;
+       if int4 > int2 then begin
+        int2:= int4;
+       end;
+      end;
      end;
     end;  
+   end;
+   if int2 > int3 then begin
+    int2:= int2-int3;
+   end
+   else begin
+    int2:= 0;
    end;
    int2:= int2 + innerframewidth.cx;
    if int2 < bounds_cxmin then begin
@@ -1689,13 +1704,26 @@ begin
    result.cx:= int2;
   end;   
   if lao_aligny in foptionslayout then begin
-   int2:= 0;
    for int1:= 0 to high(fwidgets) do begin
     with fwidgets[int1] do begin
-     if isvisible and (fwidgetrect.cy > int2) then begin
-      int2:= fwidgetrect.cy;
+     if isvisible then begin
+      with fwidgetrect do begin
+       if y < int3 then begin
+        int3:= y;
+       end;
+       int4:= y + cy;
+       if int4 > int2 then begin
+        int2:= int4;
+       end;
+      end;
      end;
     end;  
+   end;
+   if int2 > int3 then begin
+    int2:= int2-int3;
+   end
+   else begin
+    int2:= 0;
    end;
    int2:= int2 + innerframewidth.cy;
    if int2 < bounds_cymin then begin
