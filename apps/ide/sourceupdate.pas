@@ -825,8 +825,8 @@ function tsourceupdater.getidentpath(const infopo: punitinfoty;
      for int1:= 0 to int2 do begin
       infile.position:= apo^.pos.offset;
       int3:= apo^.identlen;
-      if not((int1 = int2) and
-        (apos.pos.col <= apo^.pos.pos.col) or (apos.pos.row < apo^.pos.pos.row)) then begin
+      if not((int1 = int2) and (apos.pos.col <= apo^.pos.pos.col) or 
+                              (apos.pos.row < apo^.pos.pos.row)) then begin
        setlength(result[int1],int3);
        infile.ReadBuffer(result[int1][1],int3);
         //else ''
@@ -857,23 +857,27 @@ begin
    end;
    syk_typedef,syk_vardef,syk_classdef,syk_procdef,syk_classprocimp,
                          syk_procimp,syk_interfacedef: begin
-    case infopo^.proglang of
-     pl_c: begin
-      parsecdef(po1,str1,list1);
+    list1:= nil;
+    try
+     case infopo^.proglang of
+      pl_c: begin
+       parsecdef(po1,str1,list1);
+      end
+      else begin
+       parsepascaldef(po1,str1,list1);
+      end;
+     end;
+     pos1.line:= apos.line - po1^.pos.line;
+     if pos1.line = 0 then begin
+      pos1.pos.col:= apos.pos.col - po1^.pos.pos.col;
      end
      else begin
-      parsepascaldef(po1,str1,list1);
+      pos1.pos.col:= apos.pos.col;
      end;
+     getidents(list1.finditem(pos1,false,list2),ttextstream.createdata(str1));
+    finally
+     list1.Free;
     end;
-    pos1.line:= apos.line - po1^.pos.line;
-    if pos1.line = 0 then begin
-     pos1.pos.col:= apos.pos.col - po1^.pos.pos.col;
-    end
-    else begin
-     pos1.pos.col:= apos.pos.col;
-    end;
-    getidents(list1.finditem(pos1,false,list2),ttextstream.createdata(str1));
-    list1.Free;
    end;
   end;
  end;

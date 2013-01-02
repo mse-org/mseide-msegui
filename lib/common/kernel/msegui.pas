@@ -17404,14 +17404,14 @@ end;
 function tguiapplication.waitescaped: boolean;
 begin
  lock;
- result:= waiting and gui_escapepressed;
- if not result then begin
-  tinternalapplication(self).getevents;
+ result:= waiting;
+ if result then begin
   result:= gui_escapepressed;
+  if not result then begin
+   tinternalapplication(self).getevents;
+   result:= gui_escapepressed;
+  end;
  end;
-// if result then begin
-//  gui_resetescapepressed;
-// end;
  unlock;
 end;
 

@@ -448,7 +448,7 @@ function emptysourcepos: sourceposty;
 implementation
 uses
  sysutils,mseformatstr,msedatalist,typinfo,msebits,msewidgets,
- msefileutils,msearrayutils;
+ msefileutils,msearrayutils,mseapplication;
 
 type
  treader1 = class(treader);
@@ -702,6 +702,9 @@ end;
 
 constructor tparser.create(const afilelist: tmseindexednamelist);
 begin
+ if application.waitescaped then begin
+  abort;
+ end;
  fdefines:= tdefineslist.create(0);
  ffilelist:= afilelist;
  flastvalidident:= bigint;
