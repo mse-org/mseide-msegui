@@ -806,6 +806,9 @@ var
  int1: integer;
 begin
  result:= -1;
+ if application.waitescaped then begin
+  abort;//exit;
+ end;
  if high(ffilestack) < maxincludelevel then begin
   if findfile(filename,fincludefiledirs,str1) then begin
    for int1:= 0 to high(ffilestack) do begin
