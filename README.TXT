@@ -1,7 +1,7 @@
 MSEide+MSEgui Pascal Cross Platform GUI Development System.
 
-2012-12-31 Version 2.8.6
-Copyright (c) 1999-2012 by Martin Schreiber
+2013-01-02 Version 2.8.6
+Copyright (c) 1999-2013 by Martin Schreiber
 
 * 2.8.4 -> 2.8.6: The misleading OS directory names have been changed
 * lib/common/kernel/i386-linux -> lib/common/kernel/linux
