@@ -246,7 +246,8 @@ type
                           stored iscolorglyphstored default cl_default;
                                 //cl_default maps to cl_glyph
    property coloractive: colorty read fcoloractive write setcoloractive 
-                          default cl_parent;
+                          default cl_default;
+           //cl_default maps to cl_parent, cl_normal maps to color property
    property font: tmenufont read getfont write setfont stored isfontstored;
    property fontactive: tmenufontactive read getfontactive write setfontactive
                             stored isfontactivestored;
@@ -776,7 +777,7 @@ begin
  initactioninfo(finfo,defaultmenuactoptions);
  finfo.color:= cl_default;
  finfo.colorglyph:= cl_default;
- fcoloractive:= cl_parent;
+ fcoloractive:= cl_default;
  inherited create;
 end;
 
