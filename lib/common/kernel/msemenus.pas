@@ -1950,6 +1950,7 @@ class function tpopupmenu.additems(var amenu: tpopupmenu;
 var
  bo1: boolean;
  widget1: twidget;
+ items1: tmenuitems;
 begin
  items.fmouseinfopo:= @mouseinfo;
  widget1:= items.ftransientfor;
@@ -1960,8 +1961,12 @@ begin
   items.ftransientfor:= widget1;
  end;
  bo1:= (amenu = nil) or amenu.ftransient;
- result:= additems(amenu,atransientfor,mouseinfo,items.fmenu.fsubmenu,
-    not (mo_noseparator in items.foptions),mo_insertfirst in items.foptions);
+ items1:= nil;
+ if items.fmenu.visible then begin
+  items1:= items.fmenu.fsubmenu;
+ end;
+ result:= additems(amenu,atransientfor,mouseinfo,items1,
+     not (mo_noseparator in items.foptions),mo_insertfirst in items.foptions);
  if bo1 then begin
   amenu.fmenu.enabled:= items.fmenu.enabled;
   amenu.foptions:= items.foptions;
