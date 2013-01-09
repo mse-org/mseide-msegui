@@ -1147,7 +1147,7 @@ begin
 // gdb.newconsole:= projectoptions.d.externalconsole;
  {$else}
  gdb.settty:= projectoptions.d.settty;
- gdb.xtermoptions:= projectoptions.d.texp.xtermoptions;
+ gdb.xtermcommand:= projectoptions.d.texp.xtermcommand;
  {$endif}
 end;
 

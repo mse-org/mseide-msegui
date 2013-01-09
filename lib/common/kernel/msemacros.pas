@@ -63,12 +63,30 @@ type
 //              const caseinsensitive: boolean = true): msestring; overload;
 function initmacros(const anames,avalues: array of msestring): macroinfoarty;
 function expandmacros(const value: msestring; const macros: macroinfoarty;
-          const options: macrooptionsty = [mao_caseinsensitive]): msestring; 
+   const options: macrooptionsty = [mao_caseinsensitive]): msestring; overload;
+function expandmacros(const value: msestring; 
+               const anames,avalues: array of msestring;
+   const options: macrooptionsty = [mao_caseinsensitive]): msestring; overload;
 
 implementation
 uses
  msestream;
  
+function initmacros(const anames,avalues: array of msestring): macroinfoarty;
+var
+ int1: integer;
+begin
+ setlength(result,length(anames));
+ for int1:= 0 to high(result) do begin
+  with result[int1] do begin
+   name:= anames[int1];
+   if int1 <= high(avalues) then begin
+    value:= avalues[int1];
+   end;
+  end;
+ end;
+end;
+
 function expandmacros(const value: msestring; const macros:macroinfoarty;
               const options: macrooptionsty = [mao_caseinsensitive]): msestring;
 var
@@ -84,19 +102,11 @@ begin
  end;
 end;
 
-function initmacros(const anames,avalues: array of msestring): macroinfoarty;
-var
- int1: integer;
+function expandmacros(const value: msestring; 
+               const anames,avalues: array of msestring;
+   const options: macrooptionsty = [mao_caseinsensitive]): msestring; overload;
 begin
- setlength(result,length(anames));
- for int1:= 0 to high(result) do begin
-  with result[int1] do begin
-   name:= anames[int1];
-   if int1 <= high(avalues) then begin
-    value:= avalues[int1];
-   end;
-  end;
- end;
+ result:= expandmacros(value,initmacros(anames,avalues),options);
 end;
 
 { 

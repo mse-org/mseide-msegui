@@ -120,6 +120,13 @@ Predefined project macros:
 PROJECTNAME, PROJECTDIR, MAINFILE, TARGETFILE, they can be overridden by 
 'Project'-'Options'-'Macros'.
 
+MSEide macros in 'Project'-'Options'-'Debugger'-'xterm Command'
+***************************************************************
+${PTS} expands to tty pts path
+${PTSN} expands to tty pts number
+${PTSH} expands to tty pts handle
+Entering an empty string restores the default.
+
 MSEide external tools parameters macros
 ***************************************
 Predefined macros in 'Project'-'Options'-'Tools'-'Parameters':

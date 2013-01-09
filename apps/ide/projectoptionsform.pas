@@ -39,6 +39,7 @@ const
  defaulttitleprintfont = 'Helvetica';
  defaultprintfontsize = 35.2778; //10 point
  maxdefaultmake = $40-1;
+ defaultxtermcommand = 'xterm -S${PTSN}/${PTSH}';
  
 type
  settinggroupty = (sg_editor,sg_debugger);
@@ -258,7 +259,6 @@ type
    fdebugoptions: msestring;
    fdebugtarget: filenamety;
    fruncommand: filenamety;
-   fxtermoptions: msestring;
    fremoteconnection: msestring;
    fuploadcommand: filenamety;
    fgdbprocessor: msestring;
@@ -276,13 +276,16 @@ type
    fenvvarvalues: msestringarty;
    fbeforeconnect: filenamety;
    fafterconnect: filenamety;
+   fxtermcommand: msestring;
   protected
+  public
+   constructor create;
   published
    property debugcommand: filenamety read fdebugcommand write fdebugcommand;
    property debugoptions: msestring read fdebugoptions write fdebugoptions;
    property debugtarget: filenamety read fdebugtarget write fdebugtarget;
    property runcommand: filenamety read fruncommand write fruncommand;
-   property xtermoptions: msestring read fxtermoptions write fxtermoptions;
+   property xtermcommand: msestring read fxtermcommand write fxtermcommand;
    property remoteconnection: msestring read fremoteconnection 
                                         write fremoteconnection;
    property uploadcommand: filenamety read fuploadcommand 
@@ -768,7 +771,8 @@ type
    tspacer6: tspacer;
    colornote: tcoloredit;
    c: tstringcontainer;
-   xtermoptions: tmemodialogedit;
+   xtermcommand: tmemodialogedit;
+   xtermsplitter: tsplitter;
    procedure acttiveselectondataentered(const sender: TObject);
    procedure colonshowhint(const sender: tdatacol; const arow: Integer; 
                       var info: hintinfoty);
@@ -807,6 +811,8 @@ type
    procedure settingsdataent(const sender: TObject);
    procedure loadexe(const sender: TObject);
    procedure extconschangeexe(const sender: TObject);
+   procedure setxtermcommandexe(const sender: TObject; var avalue: msestring;
+                   var accept: Boolean);
   private
    procedure activegroupchanged;
  end;
@@ -2189,7 +2195,7 @@ begin
 {$else}
  placeyorder(0,[0,0,2],[debugcommand,debugoptions,debugtarget,tlayouter1]);
 {$endif}
- aligny(wam_center,[debugtarget,runcommand]);
+ aligny(wam_center,[debugtarget,runcommand,xtermcommand]);
 end;
 
 procedure tprojectoptionsfo.macronchildscaled(const sender: TObject);
@@ -2230,7 +2236,7 @@ begin
 // externalconsole.visible:= true;
  {$else}
  settty.visible:= true;
- xtermoptions.visible:= true;
+// xtermoptions.visible:= true;
  {$endif}
  for int1:= ord(firstsiginfocomment) to ord(lastsiginfocomment) do begin
   siginfos[int1-ord(firstsiginfocomment)].comment:= c[int1];
@@ -2551,7 +2557,17 @@ end;
 
 procedure tprojectoptionsfo.extconschangeexe(const sender: TObject);
 begin
- xtermoptions.enabled:= externalconsole.value;
+{$ifndef mswindows}
+ xtermcommand.enabled:= externalconsole.value;
+{$endif}
+end;
+
+procedure tprojectoptionsfo.setxtermcommandexe(const sender: TObject;
+               var avalue: msestring; var accept: Boolean);
+begin
+ if avalue = '' then begin
+  avalue:= defaultxtermcommand;
+ end;
 end;
 
 { toptions }
@@ -2750,6 +2766,13 @@ end;
 function tdebugoptions.gettexp: tobject;
 begin
  result:= ftexp;
+end;
+
+{ ttextdebugoptions }
+
+constructor ttextdebugoptions.create;
+begin
+ fxtermcommand:= defaultxtermcommand;
 end;
 
 initialization
