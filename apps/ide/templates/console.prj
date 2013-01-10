@@ -213,8 +213,8 @@ groupcomments=6
  
 sourcedirs=4
  ${MSEDIR}lib/addon/*/
- ${MSELIBDIR}kernel/$TARGETOSDIR/
- ${MSELIBDIR}*/
+ ${MSEDIR}lib/common/kernel/$TARGETOSDIR/
+ ${MSEDIR}lib/common/*/
  ./
 defines=0
 defineson=0
