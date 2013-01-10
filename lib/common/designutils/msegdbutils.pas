@@ -241,6 +241,8 @@ type
    foutput: tpipewriter;
    fpty: integer;
    procedure closeinp;
+   procedure setoutecho(const avalue: boolean);
+   function getoutecho: boolean;
   public
    constructor create;
    destructor destroy; override;
@@ -248,6 +250,7 @@ type
    property devicename: string read fdevicename;
    property input: tpipereader read finput;
    property output: tpipewriter read foutput;
+   property outecho: boolean read getoutecho write setoutecho;
  end;
 {$endif} 
 
@@ -319,7 +322,7 @@ type
    fsettty: boolean;
    fbeforeconnect: filenamety;
    fafterconnect: filenamety;
-   fxtermoptions: string;
+   fxtermcommand: filenamety;
    procedure setstoponexception(const avalue: boolean);
    procedure checkactive;
    function checkconnection(const proginfo: boolean): gdbresultty;
@@ -621,7 +624,12 @@ type
    property onerror: gdbeventty read fonerror write fonerror;
    property overloadsleepus: integer read foverloadsleepus 
                                  write setoverloadsleepus default -1;
-   property xtermoptions: string read fxtermoptions write fxtermoptions;
+   {$warnings off}   
+   property xtermcommand: filenamety read fxtermcommand write fxtermcommand;
+                   //${PTS} expands to tty pts path
+                   //${PTSN} expands to tty pts number
+                   //${PTSH} expands to tty pts handle
+   {$warnings on}
  end;
 
 procedure localizetext;
@@ -629,7 +637,7 @@ procedure localizetext;
 implementation
 
 uses
- sysutils,mseformatstr,mseprocutils,msesysutils,msefileutils,
+ sysutils,mseformatstr,mseprocutils,msesysutils,msefileutils,msemacros,
  msebits,msesysintf,mseguiintf,msearrayutils,msesys,msedate,actionsmodule
         {$ifdef UNIX},mselibc{$else},windows{$endif};
 
@@ -792,7 +800,7 @@ begin
  ftargetterminal.input.oninputavailable:= {$ifdef FPC}@{$endif}targetfrom;
  ftargetconsole:= tmseprocess.create(nil);
  ftargetconsole.options:= [pro_output,pro_errorouttoout];
- ftargetconsole.filename:= 'xterm';
+// ftargetconsole.filename:= 'xterm';
  ftargetconsole.output.oninputavailable:= @xtermfrom;
  {$endif}
  foverloadsleepus:= -1;
@@ -1757,27 +1765,29 @@ end;
 procedure tgdbmi.killtargetconsole;
 begin
  ftargetconsole.kill;
+ ftargetterminal.outecho:= false;
 end;
 
 function tgdbmi.createtargetconsole: boolean;
 var
  ar1: stringarty;
+ pts,ptsn,ptsh: msestring;
 begin
-// ftargetconsole.parameter:= '-S'+ftargetterminal.devicename;
-       //xterm crashes with the -S/dev/pts/... format
- ar1:= splitstring(ftargetterminal.devicename,'/'); 
- if ar1 <> nil then begin
-  ftargetconsole.parameter:= '-S'+ar1[high(ar1)]+'/'+
-                                inttostr(ftargetterminal.fpty);
- end
- else begin
-  ftargetconsole.parameter:= '';
+ result:= false;
+ if fxtermcommand <> '' then begin
+  ftargetterminal.outecho:= true;
+  pts:= ftargetterminal.devicename;
+  ar1:= splitstring(ftargetterminal.devicename,'/'); 
+  if ar1 <> nil then begin
+   ptsn:= ar1[high(ar1)];
+  end;
+  ptsh:= inttostr(ftargetterminal.fpty);
+  ftargetconsole.commandline:=
+               expandmacros(fxtermcommand,['PTS','PTSN','PTSH'],[pts,ptsn,ptsh],
+                                                          [mao_caseinsensitive]);
+  ftargetconsole.active:= true;
+  result:= ftargetconsole.running;
  end;
- if fxtermoptions <> '' then begin
-  ftargetconsole.parameter:= ftargetconsole.parameter + ' ' + fxtermoptions;
- end;
- ftargetconsole.active:= true;
- result:= ftargetconsole.running;
 end;
 
 procedure tgdbmi.xtermfrom(const sender: tpipereader);
@@ -4616,6 +4626,31 @@ begin
     finput.handle:= foutput.handle;
    end;
   end;
+ end;
+end;
+
+procedure tpseudoterminal.setoutecho(const avalue: boolean);
+var
+ ios: termios{ty};
+begin
+ if msetcgetattr(fpty,ios) = 0 then begin
+  if avalue then begin
+   ios.c_lflag:= ios.c_lflag or echo;
+  end
+  else begin
+   ios.c_lflag:= ios.c_lflag and not echo;
+  end;
+  msetcsetattr(foutput.handle,tcsanow,ios);
+ end;
+end;
+
+function tpseudoterminal.getoutecho: boolean;
+var
+ ios: termios{ty};
+begin
+ result:= false;
+ if msetcgetattr(fpty,ios) = 0 then begin
+  result:= ios.c_lflag and echo <> 0;
  end;
 end;
 
