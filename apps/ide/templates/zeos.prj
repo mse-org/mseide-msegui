@@ -189,8 +189,8 @@ sourcedirs=6
  ${MSEDIR}lib/addon/*/
  ${zeosdir}src/*/
  ${zeosdir}src/
- ${MSELIBDIR}kernel/$TARGETOSDIR/
- ${MSELIBDIR}*/
+ ${MSEDIR}lib/common/kernel/$TARGETOSDIR/
+ ${MSEDIR}lib/common/*/
  ./
 defines=0
 defineson=0
