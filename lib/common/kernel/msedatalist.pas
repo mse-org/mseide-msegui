@@ -4508,7 +4508,7 @@ begin
   int1:= fcount - 1;
   int2:= int1;
   checkindex(int1);
-  first:= pmsestring(datapo+int1*fsize);
+  first:= pmsestring(fdatapo+int1*fsize);
   if processeditchars then begin
    mstr1:= first^;
    addeditchars(ar1[0],mstr1,feditcharindex);
