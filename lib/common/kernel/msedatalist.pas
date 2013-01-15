@@ -114,6 +114,7 @@ type
    fdatapo: pchar;
    fsize: integer;
    fcount: integer;
+   fscrolled: integer;
    flinkdest: datalistarty;
    fstate: dataliststatesty;
    fintparam: integer;
@@ -2122,9 +2123,10 @@ begin
  countvorher:= fcount;
  if value > fmaxcount then begin
   int1:= value-fmaxcount;        //last item to init
-  if int1 > fcount then begin 
+  if int1 > fcount then begin
    int1:= fcount;               
   end;
+  fscrolled:= fscrolled+int1;
   value:= fmaxcount;
   if value > fcapacity then begin
    capacity:= value;

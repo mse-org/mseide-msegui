@@ -5685,9 +5685,18 @@ begin
 end;
 
 procedure tdatacol.rowcountchanged(const newcount: integer);
+var
+ int1: integer;
 begin
  if fdata <> nil then begin
-  fdata.count:= newcount;
+  with tdatalist1(fdata) do begin
+   int1:= newcount - fscrolled;
+   if int1 < fcellinfo.grid.frowcount then begin
+    int1:= fcellinfo.grid.frowcount;
+   end;
+   count:= int1;
+   fscrolled:= 0;
+  end;
  end;
  inherited;
  maxwidthinvalid(-1);
@@ -6061,14 +6070,20 @@ end;
 procedure tdatacol.itemchanged(const sender: tdatalist; const aindex: integer);
 var
  coord1: gridcoordty;
+ int1: integer;
 begin
- if (aindex < 0) and (sender.count <> fcellinfo.grid.frowcount) then begin
-  if fcellinfo.grid.fupdating = 0 then begin
-   fcellinfo.grid.rowcount:= sender.count;
-   afterrowcountupdate;
-  end
-  else begin
-   include(fcellinfo.grid.fstate,gs_rowcountinvalid)
+ if (aindex < 0) then begin
+  with tdatalist1(sender) do begin
+   int1:= count + fscrolled;
+   if int1 <> fcellinfo.grid.frowcount then begin
+    if fcellinfo.grid.fupdating = 0 then begin
+     fcellinfo.grid.rowcount:= int1;
+     afterrowcountupdate;
+    end
+    else begin
+     include(fcellinfo.grid.fstate,gs_rowcountinvalid)
+    end;
+   end;
   end;
  end;
  if not (gps_noinvalidate in fstate) and 
