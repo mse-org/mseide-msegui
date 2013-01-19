@@ -2,7 +2,7 @@ unit msedbdispwidgets;
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
 interface
 uses
- db,classes,msesimplewidgets,msedb,msetypes,mseclasses,mseguiglob,mseglob,
+ mdb,classes,msesimplewidgets,msedb,msetypes,mseclasses,mseguiglob,mseglob,
  msedispwidgets,msestrings,mselookupbuffer,msegui,msemenus,mseevent,
  msebarcode;
  

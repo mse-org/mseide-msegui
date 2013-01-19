@@ -14,7 +14,7 @@ unit mseifidbcomp;
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
 interface
 uses
- mseificomp,msesqlresult,msqldb,mseclasses,classes,msedatalist,msestrings,db,
+ mseificomp,msesqlresult,msqldb,mseclasses,classes,msedatalist,msestrings,mdb,
  msedb,msetypes;
 type
 { 

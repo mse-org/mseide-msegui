@@ -13,7 +13,7 @@ unit msestringintlisteditor;
 
 interface
 uses
- mseforms,msedataedits,msesimplewidgets,msewidgetgrid,msegrids,db,mseclasses,
+ mseforms,msedataedits,msesimplewidgets,msewidgetgrid,msegrids,mseclasses,
  msedialog,mseedit,mseglob,msegraphics,msegraphutils,msegui,
  mseguiglob,msemenus,msestrings,msetypes;
 type

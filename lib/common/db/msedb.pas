@@ -39,7 +39,7 @@ unit msedb;
 interface
 
 uses
- classes,db,mseclasses,mseglob,msestrings,msetypes,msearrayprops,mseapplication,
+ classes,mdb,mseclasses,mseglob,msestrings,msetypes,msearrayprops,mseapplication,
  sysutils,msebintree,mseact,msetimer{$ifdef mse_fpc_2_4_3},maskutils{$endif},
  msevariants;
 

@@ -21,7 +21,7 @@ unit modbcconn;
 interface
 
 uses
-  Classes, SysUtils, msqldb, db, odbcsqldyn,msetypes,msedb,msestrings;
+  Classes, SysUtils, msqldb, mdb, odbcsqldyn,msetypes,msedb,msestrings;
 
 type
 

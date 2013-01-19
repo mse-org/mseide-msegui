@@ -225,11 +225,7 @@ In MSEi18n:
 
 SQLite
 ******
-To install tmsesqlite3dataset compile the IDE with -dmse_with_sqlite 
-(experimental, needs installed libsqlite3.so (linux) or sqlite3.dll (win32) 
-on your system).
-
-tsqlite3connection is available without -dmse_with_sqlite. Field type mapping:
+tsqlite3connection field type mapping:
 
       Type name        SQLite storage class  Field type    Data type
 +--------------------+---------------------+-------------+-------------+
@@ -255,15 +251,6 @@ tsqlite3connection is available without -dmse_with_sqlite. Field type mapping:
 
 *** Do not use Sqlite3 in multi-threaded applications. Set treport.options 
 reo_nothread to true for rendering a Sqlite3 report ***.
-
-ZeosLib
-*******
-To install the Zeos components add the path to the Zeos source to 'Project'-
-'Options'-'Make'-'Directories' and compile the IDE with -dmse_with_zeoslib.
-Dependent of the Zeos version it will be necessary to add -MDelphi to 'Project'-
-'Options'-'Make'-'Make options'.
-There is a predefined IDE project apps/ide/mseide_zeos.prj, update 'Project'-
-'Options'-'Macros' according to your installation.
 
 patch_fpc_2_4_2
 ***************

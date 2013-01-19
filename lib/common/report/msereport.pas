@@ -14,7 +14,7 @@ uses
  classes,mseapplication,msegui,msegraphics,msetypes,msewidgets,msegraphutils,
  mseclasses,
  msetabs,mseprinter,msestream,msearrayprops,mseguiglob,msesimplewidgets,
- msedrawtext,msestrings,mserichstring,msedb,db,msethread,mseobjectpicker,
+ msedrawtext,msestrings,mserichstring,msedb,mdb,msethread,mseobjectpicker,
  msepointer,mseevent,msesplitter,msestatfile,mselookupbuffer,mseformatstr,
  msegdiprint,msemenus,mseglob;
 

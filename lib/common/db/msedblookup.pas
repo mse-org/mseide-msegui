@@ -2,7 +2,7 @@ unit msedblookup;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- classes,db,msewidgetgrid,msedataedits,mseeditglob,msestrings,msedatalist,
+ classes,mdb,msewidgetgrid,msedataedits,mseeditglob,msestrings,msedatalist,
  msedbedit,msedb,msegui,msegrids,msedbdispwidgets,mselookupbuffer,mseclasses,
  mseformatstr,msetypes,mseglob,msemenus,mseguiglob,msebufdataset;
 

@@ -11,7 +11,7 @@ unit msesqldb;
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$goto on}{$endif}
 interface
 uses
- classes,db,msebufdataset,msqldb,msedb,mseclasses,msetypes,mseglob,
+ classes,mdb,msebufdataset,msqldb,msedb,mseclasses,msetypes,mseglob,
  msedatabase,sysutils,msetimer,msestrings,msearrayprops,mseapplication,
  msesqlquery;
 

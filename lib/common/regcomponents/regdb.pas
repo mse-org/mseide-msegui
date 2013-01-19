@@ -148,7 +148,7 @@ type
   
 implementation
 uses
- dbconst,db,mseibconnection,
+ dbconst,mdb,mseibconnection,
  msepqconnection,mseodbcconn,{sqldb,}
  mselookupbuffer,mselocaldataset,
  msearrayutils,msedbfieldeditor,sysutils,msetexteditor,

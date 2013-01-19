@@ -31,7 +31,7 @@ unit msebufdataset;
 interface 
 
 uses
- db,classes,variants,msetypes,msearrayprops,mseclasses,mselist,msestrings,
+ mdb,classes,variants,msetypes,msearrayprops,mseclasses,mselist,msestrings,
  msedb,msedatabase,mseglob,msearrayutils,msedatalist,msevariants,
  msestream;
   

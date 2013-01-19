@@ -37,7 +37,7 @@ unit mmysqlconn;
 interface
 
 uses
-  Classes, SysUtils,msqldb,db,dynlibs,msestrings,msedb,
+  Classes, SysUtils,msqldb,mdb,dynlibs,msestrings,msedb,
   mysqldyn,msetypes,ctypes;
 
 Type

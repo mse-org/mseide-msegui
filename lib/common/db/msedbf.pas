@@ -12,7 +12,7 @@ unit msedbf;
 interface
 uses
 {$warnings off}
- classes,db,dbf,msedb,msestrings,dbf_idxfile,mseapplication;
+ classes,mdb,mdbf,msedb,msestrings,dbf_idxfile,mseapplication;
 {$warnings on}
  
 type

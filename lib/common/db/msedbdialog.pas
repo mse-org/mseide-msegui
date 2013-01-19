@@ -14,7 +14,7 @@ unit msedbdialog;
 
 interface
 uses
- classes,mseguiglob,msefiledialog,db,mseinplaceedit,msedbedit,msegui,
+ classes,mseguiglob,msefiledialog,mdb,mseinplaceedit,msedbedit,msegui,
  msewidgetgrid,
  msedatalist,mseeditglob,msegrids,msetypes,msedb,msemenus,mseedit,
  msedataedits,mseevent,msestrings,msecolordialog,msegraphutils,msedialog,

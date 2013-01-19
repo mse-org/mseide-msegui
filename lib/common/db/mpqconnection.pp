@@ -24,7 +24,7 @@ unit mpqconnection;
 interface
 
 uses
-  Classes, SysUtils, msqldb, db, dbconst,msedbevents,msestrings,msedb,
+  Classes, SysUtils, msqldb, mdb, dbconst,msedbevents,msestrings,msedb,
 {$IfDef LinkDynamically}
   postgres3dyn;
 {$Else}

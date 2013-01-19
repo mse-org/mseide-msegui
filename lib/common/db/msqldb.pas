@@ -25,7 +25,7 @@ unit msqldb;
 interface
 
 uses 
- sysutils,classes,db,msebufdataset,msetypes,msedb,mseclasses,msedatabase,
+ sysutils,classes,mdb,msebufdataset,msetypes,msedb,mseclasses,msedatabase,
  msestrings,msearrayutils,msedatalist,
  mseapplication,mseglob,msetimer,msearrayprops,msemacros;
 

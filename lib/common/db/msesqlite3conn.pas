@@ -17,7 +17,7 @@ unit msesqlite3conn;
 
 interface
 uses
- classes,msedb,msqldb,msestrings,db,sqlite3dyn,msetypes,msedatabase;
+ classes,msedb,msqldb,msestrings,mdb,sqlite3dyn,msetypes,msedatabase;
 { 
       Type name        SQLite storage class  Field type    Data type
 +--------------------+---------------------+-------------+-------------+

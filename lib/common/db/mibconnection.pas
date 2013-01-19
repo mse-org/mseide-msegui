@@ -30,7 +30,7 @@ interface
 //todo: use execute_immediate if possible
 
 uses
- Classes,SysUtils,msqldb,db,math,dbconst,msebufdataset,msedbevents,msesystypes,
+ Classes,SysUtils,msqldb,mdb,math,dbconst,msebufdataset,msedbevents,msesystypes,
  msestrings,msedb,msetypes,
 {$IfDef LinkDynamically}
   ibase60dyn;

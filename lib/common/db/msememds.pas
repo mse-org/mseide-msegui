@@ -11,7 +11,7 @@ unit msememds;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- classes,db,memds,msedb,msestrings,mseapplication;
+ classes,mdb,memds,msedb,msestrings,mseapplication;
 type
  tmsememdataset = class(tmemdataset,imselocate,idscontroller,igetdscontroller,
                                iactivatorclient)

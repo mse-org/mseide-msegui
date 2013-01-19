@@ -11,7 +11,7 @@ unit msemysqlconn;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- db,classes,mmysqlconn,msestrings,msedb,msqldb,msedatabase;
+ mdb,classes,mmysqlconn,msestrings,msedb,msqldb,msedatabase;
 
 type
  tmsemysqlconnection = class(tmysqlconnection,idbcontroller)

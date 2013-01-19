@@ -12,7 +12,7 @@ unit msesqlquery;
 
 interface
 uses
- classes,db,msetimer,msebufdataset,msqldb,msedb,msestrings,msedatabase,
+ classes,mdb,msetimer,msebufdataset,msqldb,msedb,msestrings,msedatabase,
  mseclasses,msetypes,msesqlresult;
  
 type

@@ -11,7 +11,7 @@ unit mseodbcconn;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- db,classes,modbcconn,msestrings,msedb,msedatabase,msqldb;
+ mdb,classes,modbcconn,msestrings,msedb,msedatabase,msqldb;
 type
  tmseodbcconnection = class(todbcconnection,idbcontroller)
   private

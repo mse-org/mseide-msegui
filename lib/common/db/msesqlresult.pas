@@ -4,7 +4,7 @@ interface
 {$ifdef VER2_1_5} {$define mse_FPC_2_2} {$endif}
 {$ifdef VER2_2} {$define mse_FPC_2_2} {$endif}
 uses
- classes,db,msqldb,mseclasses,msedb,msedatabase,msearrayprops,msestrings,msereal,
+ classes,mdb,msqldb,mseclasses,msedb,msedatabase,msearrayprops,msestrings,msereal,
  msetypes,mselookupbuffer,mseglob,msedatalist,msevariants,mseevent;
  
 type

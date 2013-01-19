@@ -11,7 +11,7 @@ unit msesdfdata;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- classes,db,sdfdata,msedb,msestrings,mseapplication;
+ classes,mdb,msdfdata,msedb,msestrings,mseapplication;
 type
  tmsefixedformatdataset = class(tfixedformatdataset,imselocate,
                              idscontroller,igetdscontroller,iactivatorclient)

@@ -292,7 +292,6 @@ uses
  {$ifdef mse_with_ifi}
   regifi,{$ifdef mse_with_ifirem}regifirem,{$endif}
  {$endif}
- {$ifdef mse_with_zeoslib}regzeoslib,{$endif}
  {$ifdef mse_with_pascalscript}regpascalscript,{$endif}
  regdesignutils,regsysutils,regcrypto,regserialcomm,regexperimental,
  regdeprecated,

@@ -18,7 +18,7 @@ unit msedbfieldeditor;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- db,msegui,mseclasses,mseforms,msedb,msestat,msestatfile,msesimplewidgets,
+ mdb,msegui,mseclasses,mseforms,msedb,msestat,msestatfile,msesimplewidgets,
  msegrids,msewidgetgrid,msesplitter,msedataedits,msestrings,mseeditglob,
  msegraphedits,mseglob,msegridsglob,msestringcontainer;
 
