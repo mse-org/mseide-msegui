@@ -9,7 +9,7 @@ interface
 {$ifdef USE_CACHE}
 
 uses
-  Classes,
+  classes,mclasses
   SysUtils,
   dbf_common,
   dbf_avl,

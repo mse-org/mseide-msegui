@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2004-2012 by Martin Schreiber
+{ MSEgui Copyright (c) 2004-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -39,7 +39,8 @@ unit msedb;
 interface
 
 uses
- classes,mdb,mseclasses,mseglob,msestrings,msetypes,msearrayprops,mseapplication,
+ classes,mclasses,mdb,mseclasses,mseglob,msestrings,msetypes,msearrayprops,
+ mseapplication,
  sysutils,msebintree,mseact,msetimer{$ifdef mse_fpc_2_4_3},maskutils{$endif},
  msevariants;
 

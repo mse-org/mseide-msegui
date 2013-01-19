@@ -5,7 +5,7 @@ interface
 {$I dbf_common.inc}
 
 uses
-  Classes,
+  classes,mclasses,
   SysUtils,
   dbf_common;
 

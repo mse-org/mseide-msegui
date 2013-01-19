@@ -24,7 +24,7 @@ unit mdb;
 
 interface
 
-uses Classes,Sysutils,Variants,FmtBCD,MaskUtils;
+uses classes,mclasses,Sysutils,Variants,FmtBCD,MaskUtils;
 
 const
 

@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2010 by Martin Schreiber
+{ MSEgui Copyright (c) 2010-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -11,8 +11,8 @@ unit mseifidbgui;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- classes,mdb,mseifigui,mseifids,mseifi,msedatalist,msegui,msemenus,msegrids,
- mseguiglob,msetypes,mseapplication;
+ classes,mclasses,mdb,mseifigui,mseifids,mseifi,msedatalist,msegui,msemenus,
+ msegrids,mseguiglob,msetypes,mseapplication;
 type
  tdbrxwidgetgrid = class;
 

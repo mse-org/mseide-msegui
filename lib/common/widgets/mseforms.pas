@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -19,8 +19,8 @@ interface
 uses
  msewidgets,msemenus,msegraphics,mseapplication,msegui,msegraphutils,mseevent,
  msetypes,msestrings,mseglob,mseguiglob,mseguiintf,
- msemenuwidgets,msestat,msestatfile,mseclasses,Classes,msedock,msesimplewidgets,
- msebitmap,typinfo
+ msemenuwidgets,msestat,msestatfile,mseclasses,classes,mclasses,msedock,
+ msesimplewidgets,msebitmap,typinfo
  {$ifdef mse_with_ifi},mseifiglob,mseificompglob,mseificomp{$endif};
 
 {$if defined(FPC) and (fpc_fullversion >= 020403)}

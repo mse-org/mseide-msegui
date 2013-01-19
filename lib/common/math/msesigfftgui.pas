@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 20010-2011 by Martin Schreiber
+{ MSEgui Copyright (c) 20010-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -16,8 +16,8 @@ unit msesigfftgui;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- msesignal,msechart,classes,msesigfft,msegui,msegraphutils,msemenus,msegraphics,
- mseguiglob,mseclasses;
+ msesignal,msechart,classes,mclasses,msesigfft,msegui,msegraphutils,msemenus,
+ msegraphics,mseguiglob,mseclasses;
  
 type
  tsigscopefft = class;

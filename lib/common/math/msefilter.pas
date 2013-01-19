@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2010-2011 by Martin Schreiber
+{ MSEgui Copyright (c) 2010-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -16,7 +16,8 @@ unit msefilter;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- mseclasses,msedatalist,classes,msetypes,msesignal,msearrayprops,msereal;
+ mseclasses,msedatalist,classes,mclasses,msetypes,msesignal,msearrayprops,
+ msereal;
 type
 
  tdoublefiltercomp = class;

@@ -15,7 +15,7 @@ unit msepipestream;
 interface
 
 uses
- msestream,msethread,msesystypes,classes,msebits,mseclasses;
+ msestream,msethread,msesystypes,classes,mclasses,msebits,mseclasses;
 
 type
 

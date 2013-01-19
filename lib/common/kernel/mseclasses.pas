@@ -21,7 +21,7 @@ unit mseclasses;
 
 interface
 uses
- classes,mseglob,mseevent,msetypes,msestrings,sysutils,typinfo,mselist,
+ classes,mclasses,mseglob,mseevent,msetypes,msestrings,sysutils,typinfo,mselist,
  msegraphutils{$ifdef mse_with_ifi},mseifiglob{$endif};
 
 {$if defined(FPC) and (fpc_fullversion >= 020403)}
@@ -3183,7 +3183,7 @@ begin
  info.objectdata:= datapo;
  info.name:= uppercase(name);
  objectdatalist.add(info);
- classes.registerclass(objectclass);
+ mclasses.registerclass(objectclass);
 end;
 
 procedure registerobjectdata(datapo: pobjectdataty; 

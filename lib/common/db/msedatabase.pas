@@ -3,7 +3,6 @@
     Copyright (c) 1999-2000 by Michael Van Canneyt, member of the
     Free Pascal development team
     
-    Modified 2007-2011 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -12,13 +11,15 @@
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
+  Modified 2007-2013 by Martin Schreiber
+
  **********************************************************************}
  
 unit msedatabase;
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
 interface
 uses
- classes,mdb,sysutils,msedb,msestrings,mseclasses,mseglob,msetypes,
+ classes,mclasses,mdb,sysutils,msedb,msestrings,mseclasses,mseglob,msetypes,
  mseapplication;
 
 type

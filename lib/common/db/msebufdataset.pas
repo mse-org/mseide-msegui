@@ -3,7 +3,6 @@
     Copyright (c) 1999-2000 by Michael Van Canneyt, member of the
     Free Pascal development team
     
-    Rewritten 2006-2012 by Martin Schreiber
     
     BufDataset implementation
 
@@ -13,6 +12,8 @@
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+  Rewritten 2006-2013 by Martin Schreiber
 
  **********************************************************************}
  
@@ -31,7 +32,8 @@ unit msebufdataset;
 interface 
 
 uses
- mdb,classes,variants,msetypes,msearrayprops,mseclasses,mselist,msestrings,
+ mdb,classes,mclasses,variants,msetypes,msearrayprops,mseclasses,mselist,
+ msestrings,
  msedb,msedatabase,mseglob,msearrayutils,msedatalist,msevariants,
  msestream;
   

@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -12,7 +12,8 @@ unit msepqconnection;
 
 interface
 uses
- classes,mpqconnection,msestrings,msedb,msetypes,msqldb,mdb,msedatabase;
+ classes,mclasses,mpqconnection,msestrings,msedb,msetypes,msqldb,mdb,
+ msedatabase;
 type
  pqconnectionoptionty = (pqco_usesavepoint,pqco_closetransactiononfail);
  pqconnectionoptionsty = set of pqconnectionoptionty;

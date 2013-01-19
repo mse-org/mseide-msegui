@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -13,7 +13,7 @@ unit msecomponenteditors;
 
 interface
 uses
- Classes,msedesignintf,mseglob,mseguiglob,mseclasses,mselist,msetypes;
+ classes,mclasses,msedesignintf,mseglob,mseguiglob,mseclasses,mselist,msetypes;
 
 type
 

@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -12,7 +12,7 @@ unit msemysql41conn;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- mdb,classes,mmysql41conn,msestrings,msedb,msqldb,msedatabase;
+ mdb,classes,mclasses,mmysql41conn,msestrings,msedb,msqldb,msedatabase;
  
 type
  tmsemysql41connection = class(tmysql41connection,idbcontroller)

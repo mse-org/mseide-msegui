@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2009-2010 by Martin Schreiber
+{ MSEgui Copyright (c) 2009-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -13,9 +13,10 @@ unit msefoldedit;
 
 interface
 uses
- classes,mseclasses,msedataedits,msegraphics,mseguiglob,msegrids,mseevent,msegui,
-     msegraphutils,msebitmap,mseeditglob,msedatalist,msewidgetgrid,mseedit,
-     msedrawtext,msetypes,msestat,msepointer,msemenus,msestrings,msegridsglob;
+ classes,mclasses,mseclasses,msedataedits,msegraphics,mseguiglob,msegrids,
+ mseevent,msegui,
+ msegraphutils,msebitmap,mseeditglob,msedatalist,msewidgetgrid,mseedit,
+ msedrawtext,msetypes,msestat,msepointer,msemenus,msestrings,msegridsglob;
 
 const
  defaultfoldedittextflags = defaulttextflags + [tf_clipo];

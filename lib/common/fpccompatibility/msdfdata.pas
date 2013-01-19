@@ -131,7 +131,7 @@ How to Install
 interface
 
 uses
-  mdb, Classes, SysUtils, DBConst;
+  mdb, classes,mclasses,SysUtils, DBConst;
 
 type
 //-----------------------------------------------------------------------------
@@ -276,7 +276,7 @@ type
     property Delimiter: Char read FDelimiter write SetDelimiter;
     property FirstLineAsSchema: Boolean read FFirstLineAsSchema write SetFirstLineAsSchema;
   end;
-procedure Register;
+//procedure Register;
 
 implementation
 //{$R *.Res}
@@ -1118,7 +1118,7 @@ procedure TSdfDataSet.SetMultiLine(const Value: Boolean);
 begin
   FFMultiLine:=Value;
 end;
-
+{
 
 //-----------------------------------------------------------------------------
 // This procedure is used to register this component on the component palette
@@ -1128,5 +1128,5 @@ begin
   RegisterComponents('Data Access', [TFixedFormatDataSet]);
   RegisterComponents('Data Access', [TSdfDataSet]);
 end;
-
+}
 end.

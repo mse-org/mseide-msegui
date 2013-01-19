@@ -7,7 +7,7 @@ interface
 {$I dbf_common.inc}
 
 uses
-  SysUtils, Classes, mdb
+  SysUtils, classes,mclasses,mdb
 {$ifndef WINDOWS}
   , Types, dbf_wtil
 {$ifdef KYLIX}

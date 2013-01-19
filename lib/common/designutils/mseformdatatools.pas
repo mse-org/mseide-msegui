@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -13,7 +13,7 @@ unit mseformdatatools;
 
 interface
 uses
- msetypes,msestrings,msestream,Classes,mseclasses;
+ msetypes,msestrings,msestream,classes,mclasses,mseclasses;
 type
  objformatty = (of_default,of_delphi,of_fp);
 

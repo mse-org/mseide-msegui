@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 2008-2012 by Martin Schreiber
+{ MSEide Copyright (c) 2008-2013 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -18,7 +18,8 @@ unit componentstore;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- classes,mseglob,mseguiglob,mseapplication,msestat,msemenus,msegui,msegraphics,
+ classes,mclasses,mseglob,mseguiglob,mseapplication,msestat,msemenus,msegui,
+ msegraphics,
  msegraphutils,mseevent,mseclasses,mseforms,msedock,mseact,mseactions,
  msestrings,msedataedits,mseedit,msegrids,msetypes,msewidgetgrid,msedatanodes,
  mselistbrowser,msewidgets,msestatfile,msebitmap,msefiledialog,msesys,msedialog,

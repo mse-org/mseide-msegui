@@ -13,7 +13,7 @@ unit mseformatstr;     //stringwandelroutinen 31.5.99 mse
 
 interface
 uses
- Classes, msetypes,msestrings,SysUtils,msemacros,mseglob;
+ classes,mclasses,msetypes,msestrings,SysUtils,msemacros,mseglob;
 
 type
  dateconvertty = (dc_none,dc_tolocal,dc_toutc);

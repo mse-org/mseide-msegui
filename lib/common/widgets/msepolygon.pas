@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2008 by Martin Schreiber
+{ MSEgui Copyright (c) 2008-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -11,8 +11,8 @@ unit msepolygon;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- msegui,mseguiglob,msewidgets,msegraphutils,msegraphics,classes,msetypes,msebitmap,
- msesimplewidgets,msemenus,mseevent;
+ msegui,mseguiglob,msewidgets,msegraphutils,msegraphics,classes,mclasses,
+ msetypes,msebitmap,msesimplewidgets,msemenus,mseevent;
  
 type
  polygonstatety = (pos_geometryvalid);

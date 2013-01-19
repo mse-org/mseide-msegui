@@ -7,7 +7,7 @@
  *  Description: ODBC SQLDB unit                                              *
  *  License:     (modified) LGPL                                              *
  *                                                                            *
- *  Modified 2006-2012 by Martin Schreiber                                    *
+ *  Modified 2006-2013 by Martin Schreiber                                    *
  ******************************************************************************}
 
 unit modbcconn;
@@ -21,7 +21,7 @@ unit modbcconn;
 interface
 
 uses
-  Classes, SysUtils, msqldb, mdb, odbcsqldyn,msetypes,msedb,msestrings;
+ classes,mclasses,SysUtils, msqldb, mdb, odbcsqldyn,msetypes,msedb,msestrings;
 
 type
 

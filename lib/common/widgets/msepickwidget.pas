@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2008-2010 by Martin Schreiber
+{ MSEgui Copyright (c) 2008-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -11,8 +11,8 @@ unit msepickwidget;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- classes,mseclasses,msesimplewidgets,mseobjectpicker,msegraphutils,msegui,
- mseguiglob,msepointer,msetypes,msegraphics,mseevent,msemenus;
+ classes,mclasses,mseclasses,msesimplewidgets,mseobjectpicker,msegraphutils,
+ msegui,mseguiglob,msepointer,msetypes,msegraphics,mseevent,msemenus;
 
 // todo:
 // select rect

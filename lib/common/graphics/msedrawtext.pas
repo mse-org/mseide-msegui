@@ -15,7 +15,7 @@ unit msedrawtext;
 
 interface
 uses
- {$ifdef FPC}classes{$else}Classes{$endif},msegraphics,mserichstring,
+ classes,mclasses,msegraphics,mserichstring,
   msegraphutils,
   msearrayprops,mseclasses,msestrings,msetypes,mseguiglob;
 

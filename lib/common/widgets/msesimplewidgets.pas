@@ -16,7 +16,7 @@ interface
 uses
  msegui,mseglob,mseguiglob,msetypes,msestrings,msegraphics,mseevent,
  mseact,msewidgets,
- mserichstring,mseshapes,Classes,mseclasses,msebitmap,msedrawtext,
+ mserichstring,mseshapes,classes,mclasses,mseclasses,msebitmap,msedrawtext,
  msedrag,msestockobjects,msegraphutils,msemenus;
 
 const

@@ -15,7 +15,8 @@ const
  
 implementation
 uses
- classes,msegraphics,msebitmap,fpreadtga,msegraphicstream,msestockobjects;
+ classes,mclasses,msegraphics,msebitmap,fpreadtga,msegraphicstream,
+ msestockobjects;
  
 type
  tmsefpreadertarga = class(tfpreadertarga)

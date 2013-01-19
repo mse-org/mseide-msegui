@@ -621,7 +621,7 @@ procedure removeduplicatedpoints(var vect: pointarty);
 
 implementation
 uses
- mseglob,SysUtils,mseformatstr,classes{,msestreaming};
+ mseglob,SysUtils,mseformatstr,classes,mclasses;
 const
  errortexts: array[gdierrorty] of string = (
    '',

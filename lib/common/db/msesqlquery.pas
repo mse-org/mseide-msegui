@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -12,8 +12,8 @@ unit msesqlquery;
 
 interface
 uses
- classes,mdb,msetimer,msebufdataset,msqldb,msedb,msestrings,msedatabase,
- mseclasses,msetypes,msesqlresult;
+ classes,mclasses,mdb,msetimer,msebufdataset,msqldb,msedb,msestrings,
+ msedatabase,mseclasses,msetypes,msesqlresult;
  
 type
  tsqlquery = class;

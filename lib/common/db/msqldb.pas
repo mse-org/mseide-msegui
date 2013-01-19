@@ -1,6 +1,5 @@
 {
     Copyright (c) 2004 by Joost van der Sluis
-    Modified 2006-2011 by Martin Schreiber
 
     SQL database & dataset
 
@@ -10,6 +9,8 @@
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+  Modified 2006-2013 by Martin Schreiber
 
  **********************************************************************}
 
@@ -25,8 +26,8 @@ unit msqldb;
 interface
 
 uses 
- sysutils,classes,mdb,msebufdataset,msetypes,msedb,mseclasses,msedatabase,
- msestrings,msearrayutils,msedatalist,
+ sysutils,classes,mclasses,mdb,msebufdataset,msetypes,msedb,mseclasses,
+ msedatabase,msestrings,msearrayutils,msedatalist,
  mseapplication,mseglob,msetimer,msearrayprops,msemacros;
 
 type 

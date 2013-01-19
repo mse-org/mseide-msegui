@@ -21,7 +21,8 @@ uses
  msegui,mseeditglob,msegraphics,msegraphutils,msedatalist,
  mseevent,mseglob,mseguiglob,
  mseinplaceedit,msegrids,msetypes,mseshapes,msewidgets,
- msedrawtext,classes,msereal,mseclasses,msearrayprops,msebitmap,msemenus,
+ msedrawtext,classes,mclasses,msereal,mseclasses,msearrayprops,
+ msebitmap,msemenus,
  msesimplewidgets,msepointer,msestrings,msescrollbar
          {$ifdef mse_with_ifi},mseifiglob{$endif};
 
@@ -453,7 +454,7 @@ type
 
 implementation
 uses
- SysUtils,msekeyboard,msebits,msedataedits,msestockobjects,mseact;
+ sysutils,msekeyboard,msebits,msedataedits,msestockobjects,mseact;
 
 type
  twidget1 = class(twidget);

@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2007-2012 by Martin Schreiber
+{ MSEgui Copyright (c) 2007-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -11,7 +11,7 @@ unit msessl;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- classes,msecryptio,mseopenssl,mseopensslevp,mseopensslrand,
+ classes,mclasses,msecryptio,mseopenssl,mseopensslevp,mseopensslrand,
  msestrings,msesystypes,msecryptohandler,msetypes,msesys,
  msestream;
  

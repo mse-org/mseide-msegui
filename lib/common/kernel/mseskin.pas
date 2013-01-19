@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2008-2012 by Martin Schreiber
+{ MSEgui Copyright (c) 2008-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -11,7 +11,8 @@ unit mseskin;
 {$ifdef FPC}{$mode objfpc}{$h+}{$goto on}{$endif}
 interface
 uses
- classes,mseclasses,msegui,msescrollbar,mseedit,msegraphics,msegraphutils,
+ classes,mclasses,mseclasses,msegui,msescrollbar,mseedit,
+ msegraphics,msegraphutils,
  msetabs,msetoolbar,msedataedits,msemenus,msearrayprops,msegraphedits,
  msesimplewidgets,
  msegrids,msewidgets,msetypes,mseglob,msestrings,msedrawtext,mseguiglob;

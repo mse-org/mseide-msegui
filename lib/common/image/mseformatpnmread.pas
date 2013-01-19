@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2006-2012 by Martin Schreiber
+{ MSEgui Copyright (c) 2006-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -15,7 +15,8 @@ const
  
 implementation
 uses
- classes,msegraphics,msebitmap,fpreadpnm,msegraphicstream,msestockobjects;
+ classes,mclasses,msegraphics,msebitmap,fpreadpnm,msegraphicstream,
+ msestockobjects;
 
 type
  tmsefpreaderpnm = class(tfpreaderpnm)

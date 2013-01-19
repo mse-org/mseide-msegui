@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2012 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2013 by Martin Schreiber
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -25,8 +25,8 @@ uses
 implementation
 
 uses
- classes,msethreadcomp,msebitmap,msetimer,msestatfile,mseact,mseactions,
- mseshapes,
+ classes,mclasses,msethreadcomp,msebitmap,msetimer,msestatfile,mseact,
+ mseactions,mseshapes,
  msedesignintf,msemenus,msegui,msepipestream,sysutils,
  msegraphutils,regkernel_bmp,msegraphics,msestrings,msepostscriptprinter,
  mseprinter,msetypes,msedatalist,msedatamodules,mseclasses,formdesigner,

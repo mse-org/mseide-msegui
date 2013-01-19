@@ -13,7 +13,7 @@ unit msedatamodules;
 
 interface
 uses
- classes,mseclasses,msetypes,msegraphutils,msestatfile,mseevent,mseapplication;
+ classes,mclasses,mseclasses,msetypes,msegraphutils,msestatfile,mseevent,mseapplication;
  
 type
  datamoduleoptionty = (dmo_autoreadstat,dmo_delayedreadstat,

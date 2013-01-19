@@ -11,8 +11,8 @@ unit mseprocess;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- classes,mseclasses,msepipestream,msestrings,msestatfile,msestat,msesystypes,
- mseevent,msetypes,mseprocmonitor,mseapplication;
+ classes,mclasses,mseclasses,msepipestream,msestrings,msestatfile,msestat,
+ msesystypes,mseevent,msetypes,mseprocmonitor,mseapplication;
 const 
  defaultpipewaitus = 0;
 type

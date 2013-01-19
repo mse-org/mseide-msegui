@@ -252,11 +252,6 @@ tsqlite3connection field type mapping:
 *** Do not use Sqlite3 in multi-threaded applications. Set treport.options 
 reo_nothread to true for rendering a Sqlite3 report ***.
 
-patch_fpc_2_4_2
-***************
-Has a patched writer.inc which fixes FPC bug #18021, necessary for the signal
-processing components.
-
 Have a lot of fun!
 
 Martin

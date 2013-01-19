@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -18,7 +18,7 @@ unit msedataedits;
 
 interface
 uses
- Classes,msegui,mseinplaceedit,mseeditglob,msegraphics,mseedit,
+ classes,mclasses,msegui,mseinplaceedit,mseeditglob,msegraphics,mseedit,
  msetypes,msestrings,msedatalist,mseglob,mseguiglob,
  mseevent,msegraphutils,msedrawtext,msestat,msestatfile,mseclasses,
  msearrayprops,msegrids,msewidgetgrid,msedropdownlist,msedrag,mseforms,

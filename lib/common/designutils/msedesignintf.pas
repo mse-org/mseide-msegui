@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -16,7 +16,7 @@ unit msedesignintf;
 
 interface
 uses
- classes,msegraphutils,mselist,sysutils,typinfo,msebitmap,
+ classes,mclasses,msegraphutils,mselist,sysutils,typinfo,msebitmap,
  msetypes,msestrings,msegraphics,msegui,mseglob,msearrayutils,
  mseclasses,mseforms,msestat,mserichstring,msecomptree;
 const
@@ -540,7 +540,7 @@ begin
      end;
      class1:= class1.ClassParent;
     end;
-    classes.registerclass(info.classtyp);
+    mclasses.registerclass(info.classtyp);
     add(info);
    end;
   end;

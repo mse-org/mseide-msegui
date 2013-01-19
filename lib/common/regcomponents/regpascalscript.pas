@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2010 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2013 by Martin Schreiber
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@ unit regpascalscript;
 interface 
 implementation
 uses
- classes,msedesignintf,msepascalscript,msepascimport,
+ classes,mclasses,msedesignintf,msepascalscript,msepascimport,
  msepropertyeditors,msetypes,msestrings,
  msetexteditor,mseglob,mseguiglob,msegui,msewidgets,uPSComponent,
  uPSComponent_Default,

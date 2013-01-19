@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2011 by Martin Schreiber
+{ MSEgui Copyright (c) 2011-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -12,7 +12,7 @@ unit msesercomm;
 
 interface
 uses
- classes,msesockets,msecommport,mseclasses;
+ classes,mclasses,msesockets,msecommport,mseclasses;
 //todo: timeouts, cryptio
  
 type

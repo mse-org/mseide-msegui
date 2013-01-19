@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2009-2012 by Martin Schreiber
+{ MSEgui Copyright (c) 2009-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -11,7 +11,7 @@ unit msedial;
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
 interface
 uses
- classes,msewidgets,msegraphutils,msegraphics,msegui,msearrayprops,mseclasses,
+ classes,mclasses,msewidgets,msegraphutils,msegraphics,msegui,msearrayprops,mseclasses,
  msetypes,mseglob,mseguiglob,msestrings,msemenus,mseevent,msestat;
 
 const

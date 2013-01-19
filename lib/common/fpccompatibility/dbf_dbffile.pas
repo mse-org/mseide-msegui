@@ -7,7 +7,7 @@ interface
 {$I dbf_common.inc}
 
 uses
-  Classes, SysUtils,
+  classes,mclasses,SysUtils,
 {$ifdef WINDOWS}
   Windows,
 {$else}

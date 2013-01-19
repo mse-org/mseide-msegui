@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -13,7 +13,7 @@ unit msepropertyeditors;
 
 interface
 uses
- Classes,TypInfo,msedesignintf,msetypes,msestrings,sysutils,
+ classes,mclasses,TypInfo,msedesignintf,msetypes,msestrings,sysutils,
  msearrayutils,msedatalist,
  msemenus,mseevent,msegui,mseglob,mseguiglob,
  mseclasses,mseforms,msegraphics,mserichstring;

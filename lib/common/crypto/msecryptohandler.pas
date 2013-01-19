@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2012 by Martin Schreiber
+{ MSEgui Copyright (c) 2012-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -11,7 +11,7 @@ unit msecryptohandler;
 {$ifdef FPC}{$mode objfpc}{$h+}{$goto on}{$endif}
 interface
 uses
- msestream,classes,sysutils,msestrings,mseformatstr,mseglob;
+ msestream,classes,mclasses,sysutils,msestrings,mseformatstr,mseglob;
  
 type
  cryptoerrorty = (cerr_error,cerr_ciphernotfound,cerr_notseekable,

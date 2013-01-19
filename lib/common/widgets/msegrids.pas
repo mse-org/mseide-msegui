@@ -18,7 +18,7 @@ unit msegrids;
 
 interface
 uses
- {$ifdef FPC}classes,sysutils{$else}Classes,SysUtils{$endif},mseclasses,msegui,
+ classes,mclasses,sysutils,mseclasses,msegui,
  msegraphics,msetypes,msestrings,msegraphutils,msebitmap,
  msescrollbar,msearrayprops,mseglob,mseguiglob,typinfo,msearrayutils,
  msedatalist,msedrawtext,msewidgets,mseevent,mseinplaceedit,mseeditglob,

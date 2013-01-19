@@ -8,7 +8,7 @@ interface
 
 uses
   SysUtils,
-  Classes,
+  classes,mclasses,
 {$ifdef KYLIX}
   Libc,
 {$endif}

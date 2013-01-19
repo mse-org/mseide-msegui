@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -16,8 +16,8 @@ unit mselistbrowser;
 
 interface
 uses
- mseglob,classes,msegrids,msedatanodes,msedatalist,msegraphics,msegraphutils,
- msetypes,msestrings,msemenus,
+ mseglob,classes,mclasses,msegrids,msedatanodes,msedatalist,
+ msegraphics,msegraphutils,msetypes,msestrings,msemenus,
  msebitmap,mseclasses,mseguiglob,msedrawtext,msefileutils,msedataedits,
  mseeditglob,msewidgetgrid,msewidgets,mseedit,mseevent,msegui,msedropdownlist,
  msesys,msedrag,msestat,mseinplaceedit,msepointer,msegridsglob,

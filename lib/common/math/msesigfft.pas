@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2010-2011 by Martin Schreiber
+{ MSEgui Copyright (c) 2010-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -16,7 +16,7 @@ unit msesigfft;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- msesignal,msefft,classes,msetypes,mseglob;
+ msesignal,msefft,classes,mclasses,msetypes,mseglob;
  
 type
 

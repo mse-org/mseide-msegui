@@ -1,6 +1,5 @@
 {
     Copyright (c) 2004 by Joost van der Sluis
-    Modified 2006-2009 by Martin Schreiber
     
     See the file COPYING.FPC, included in this distribution,
     for details about the copyright.
@@ -8,6 +7,8 @@
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+  Modified 2006-2013 by Martin Schreiber
 
  **********************************************************************}
  
@@ -30,8 +31,8 @@ interface
 //todo: use execute_immediate if possible
 
 uses
- Classes,SysUtils,msqldb,mdb,math,dbconst,msebufdataset,msedbevents,msesystypes,
- msestrings,msedb,msetypes,
+ classes,mclasses,SysUtils,msqldb,mdb,math,dbconst,msebufdataset,msedbevents,
+ msesystypes,msestrings,msedb,msetypes,
 {$IfDef LinkDynamically}
   ibase60dyn;
 {$Else}

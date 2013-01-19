@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2011 by Martin Schreiber
+{ MSEgui Copyright (c) 2011-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -12,8 +12,8 @@ unit msebarcode;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- classes,msewidgets,msebitmap,msegraphics,mseclasses,msegraphutils,msestrings,
- msegui,msemenus,mseguiglob;
+ classes,mclasses,msewidgets,msebitmap,msegraphics,mseclasses,msegraphutils,
+ msestrings,msegui,msemenus,mseguiglob;
  
 type
  barcodestatety = (bcs_bitmapvalid,bcs_layoutvalid,bcs_painting);

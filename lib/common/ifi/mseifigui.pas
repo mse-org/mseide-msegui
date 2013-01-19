@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2007-2012 by Martin Schreiber
+{ MSEgui Copyright (c) 2007-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -11,7 +11,7 @@ unit mseifigui;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- classes,mseclasses,mseguiglob,mseifiglob,mseifi,mseact,msegui,typinfo,
+ classes,mclasses,mseclasses,mseguiglob,mseifiglob,mseifi,mseact,msegui,typinfo,
  msestrings,mseapplication,mseforms,
  msearrayprops,mseglob,msetypes,mseifilink,msewidgetgrid,msemenus,
  mseevent,msegrids,msegraphutils,msedatalist,mseificomp,mseificompglob,

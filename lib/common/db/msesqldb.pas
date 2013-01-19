@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -11,7 +11,7 @@ unit msesqldb;
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$goto on}{$endif}
 interface
 uses
- classes,mdb,msebufdataset,msqldb,msedb,mseclasses,msetypes,mseglob,
+ classes,mclasses,mdb,msebufdataset,msqldb,msedb,mseclasses,msetypes,mseglob,
  msedatabase,sysutils,msetimer,msestrings,msearrayprops,mseapplication,
  msesqlquery;
 

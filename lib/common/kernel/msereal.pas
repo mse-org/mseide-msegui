@@ -13,7 +13,7 @@ unit msereal;
 
 interface
 uses
- msetypes,{mseformatstr,}Classes,msestrings;
+ msetypes,classes,mclasses,msestrings;
 
 const
  emptyrealstring = '';   //stringsymbol for empty realty

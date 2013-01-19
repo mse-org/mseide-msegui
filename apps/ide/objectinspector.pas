@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2012 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2013 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@ unit objectinspector;
 interface
 
 uses
- mseforms,msewidgets,msegrids,msewidgetgrid,classes,mseclasses,
+ mseforms,msewidgets,msegrids,msewidgetgrid,classes,mclasses,mseclasses,
  msepropertyeditors,mseglob,mseguiglob,msearrayutils,
  msegui,mseedit,msedataedits,mselistbrowser,msedatanodes,
  msedesignintf,typinfo,msecomponenteditors,msesimplewidgets,msegraphutils,

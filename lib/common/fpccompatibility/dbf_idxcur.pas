@@ -8,7 +8,7 @@ interface
 
 uses
   SysUtils,
-  Classes,
+  classes,mclasses,
   mdb,
   dbf_cursor,
   dbf_idxfile,

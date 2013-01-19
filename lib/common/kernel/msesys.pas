@@ -172,7 +172,7 @@ procedure initdefaultformatsettings;
              //initialization order is wrong, FPC bug?
 implementation
 uses
- Classes,{msestreaming,}msesysintf1,msesysintf,msearrayutils,
+ classes,mclasses,msesysintf1,msesysintf,msearrayutils,
  mseglob,msesysutils,mseformatstr;
 {$ifdef FPC}
  {$ifdef MSWINDOWS}

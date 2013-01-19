@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -16,7 +16,8 @@ unit msedataimage;
 {$endif}
 interface
 uses
- classes,mseguiglob,msegui,mseimage,msewidgetgrid,msegrids,msedatalist,msegraphutils,
+ classes,mclasses,mseguiglob,msegui,mseimage,msewidgetgrid,msegrids,msedatalist,
+ msegraphutils,
  msegraphics,mseclasses,mseeditglob,msebitmap,msemenus,mseevent,msestrings,
  msepointer,msegridsglob{$ifdef mse_with_ifi},mseificomp{$endif},mseglob;
  

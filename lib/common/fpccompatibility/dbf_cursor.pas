@@ -6,7 +6,7 @@ interface
 
 uses
   SysUtils,
-  Classes,
+  classes,mclasses,
   dbf_pgfile,
   dbf_common;
 

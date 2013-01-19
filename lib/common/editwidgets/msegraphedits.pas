@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -18,7 +18,7 @@ unit msegraphedits;
 
 interface
 uses
- {$ifdef FPC}classes{$else}Classes{$endif},msegui,
+ classes,mclasses,msegui,
  mseglob,mseguiglob,msescrollbar,msegraphutils,msegraphics,mseevent,
  msewidgets,mseeditglob,msestockobjects,msestat,msestatfile,
  mseclasses,msesimplewidgets,msemenus,mseact,typinfo,

@@ -13,7 +13,7 @@ unit msetimer;
 
 interface
 uses
- Classes,msetypes,mseevent,mseclasses,mseglob;
+ classes,mclasses,msetypes,mseevent,mseclasses,mseglob;
 
 type
  timeroptionty = (to_single,   //single shot

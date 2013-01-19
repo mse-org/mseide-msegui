@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2007-2012 by Martin Schreiber
+{ MSEgui Copyright (c) 2007-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -12,8 +12,8 @@ unit msechart;
 interface
 
 uses
- classes,msegui,mseguiglob,mseclasses,msearrayprops,msetypes,msegraphics,
- msegraphutils,mseglob,msereal,
+ classes,mclasses,msegui,mseguiglob,mseclasses,msearrayprops,msetypes,
+ msegraphics,msegraphutils,mseglob,msereal,
  msewidgets,msesimplewidgets,msedial,msebitmap,msemenus,mseevent,
  msedatalist,msestatfile,msestat,msestrings;
 

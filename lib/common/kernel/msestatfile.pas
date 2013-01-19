@@ -11,7 +11,7 @@ unit msestatfile;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- classes,msestat,mseapplication,msetypes,msestrings,mseclasses,msestream,
+ classes,mclasses,msestat,mseapplication,msetypes,msestrings,mseclasses,msestream,
  mseglob,msearrayprops;
  
 type

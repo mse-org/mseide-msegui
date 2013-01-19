@@ -29,7 +29,8 @@ uses
  mseforms,msesimplewidgets,mseguiglob,msegui,msegdbutils,mseactions,
  msedispwidgets,msedataedits,msestat,msestatfile,msemenus,msebitmap,msetoolbar,
  msegrids,msefiledialog,msetypes,sourcepage,msetabs,msedesignintf,msedesigner,
- classes,mseclasses,msegraphutils,typinfo,msedock,sysutils,msesysenv,msemacros,
+ classes,mclasses,mseclasses,msegraphutils,typinfo,msedock,sysutils,msesysenv,
+ msemacros,
  msestrings,msepostscriptprinter,msegraphics,mseglob,mseprocmonitorcomp,
  msesystypes,mserttistat,msedatanodes,mseedit,mseifiglob,mselistbrowser,
  projecttreeform,msepipestream,msestringcontainer,msesys;

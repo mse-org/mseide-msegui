@@ -29,7 +29,7 @@ unit msestrings;
 
 interface
 uses
- classes,{msegraphutils,}msetypes{$ifdef FPC},strings{$endif},typinfo;
+ classes,mclasses,msetypes{$ifdef FPC},strings{$endif},typinfo;
 {$ifdef FPC}
  {$ifndef mse_nounicodestring}
   {$if defined(FPC) and (fpc_fullversion >= 020300)}

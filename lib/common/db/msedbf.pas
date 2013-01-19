@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2009 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -12,7 +12,7 @@ unit msedbf;
 interface
 uses
 {$warnings off}
- classes,mdb,mdbf,msedb,msestrings,dbf_idxfile,mseapplication;
+ classes,mclasses,mdb,mdbf,msedb,msestrings,dbf_idxfile,mseapplication;
 {$warnings on}
  
 type

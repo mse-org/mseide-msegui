@@ -15,7 +15,7 @@ interface
 uses
  mseact,msegui,msearrayprops,mseclasses,msegraphutils,
  msedrawtext,msegraphics,mseevent,mseglob,mseguiglob,mseshapes,mserichstring,
- msetypes,msestrings,classes,msekeyboard,msebitmap;
+ msetypes,msestrings,classes,mclasses,msekeyboard,msebitmap;
 
 type
  menuoptionty = (mo_insertfirst,mo_noseparator,mo_singleregion,mo_shortcutright,mo_commonwidth,

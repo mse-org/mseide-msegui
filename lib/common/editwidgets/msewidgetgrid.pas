@@ -19,7 +19,7 @@ unit msewidgetgrid;
 interface
 uses
  mseclasses,msegrids,msegui,msegraphutils,mseglob,mseguiglob,mseeditglob,
- Classes,msemenus,msearrayutils,
+ classes,mclasses,msemenus,msearrayutils,
  msegraphics,mseevent,msedatalist,msetypes,msepointer,msestrings,
  msegridsglob{$ifdef mse_with_ifi},mseificomp{$endif};
 

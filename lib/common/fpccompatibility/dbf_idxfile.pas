@@ -16,7 +16,7 @@ uses
   Types, dbf_wtil,
 {$endif}
   SysUtils,
-  Classes,
+  classes,mclasses,
   mdb,
   dbf_pgfile,
 {$ifdef USE_CACHE}

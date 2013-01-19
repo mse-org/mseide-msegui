@@ -13,7 +13,7 @@ unit msetabs;
 
 interface
 uses
- msetabsglob,msewidgets,mseclasses,msearrayprops,classes,mseshapes,
+ msetabsglob,msewidgets,mseclasses,msearrayprops,classes,mclasses,mseshapes,
  mserichstring,msetypes,msegraphics,msegraphutils,mseevent,
  mseglob,mseguiglob,msegui,msebitmap,
  mseforms,rtlconsts,msesimplewidgets,msedrag,mseact,

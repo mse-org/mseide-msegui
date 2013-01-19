@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2012 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2013 by Martin Schreiber
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@ unit regifirem;
 interface
 implementation
 uses
- classes,mseifi,msedesignintf,msepropertyeditors,msestrings,msedesigner,
+ classes,mclasses,mseifi,msedesignintf,msepropertyeditors,msestrings,msedesigner,
  mseclasses,mseifids,mseifiglob,msegui,typinfo,msesockets,mseifigui,
  mseifilink,msessl,mdb,regifirem_bmp,mseifidbgui,msecryptohandler;
  

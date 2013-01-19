@@ -26,7 +26,7 @@ interface
 
 uses
   SysUtils,
-  Classes,
+  classes,mclasses,
   mdb,
   dbf_prssupp,
   dbf_prsdef;

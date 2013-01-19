@@ -1,6 +1,5 @@
 {
     Copyright (c) 2004 by Joost van der Sluis
-    Modified 2006-2010 by Martin Schreiber
     
     See the file COPYING.FPC, included in this distribution,
     for details about the copyright.
@@ -8,6 +7,8 @@
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+  Modified 2006-2013 by Martin Schreiber
 
  **********************************************************************}
  
@@ -24,7 +25,7 @@ unit mpqconnection;
 interface
 
 uses
-  Classes, SysUtils, msqldb, mdb, dbconst,msedbevents,msestrings,msedb,
+  classes,mclasses,SysUtils, msqldb, mdb, dbconst,msedbevents,msestrings,msedb,
 {$IfDef LinkDynamically}
   postgres3dyn;
 {$Else}

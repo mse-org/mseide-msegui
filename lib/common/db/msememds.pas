@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -11,7 +11,7 @@ unit msememds;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- classes,mdb,memds,msedb,msestrings,mseapplication;
+ classes,mclasses,mdb,memds,msedb,msestrings,mseapplication;
 type
  tmsememdataset = class(tmemdataset,imselocate,idscontroller,igetdscontroller,
                                iactivatorclient)

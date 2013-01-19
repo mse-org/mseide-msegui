@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2007-2011 by Martin Schreiber
+{ MSEgui Copyright (c) 2007-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -17,7 +17,7 @@ unit msesqlite3conn;
 
 interface
 uses
- classes,msedb,msqldb,msestrings,mdb,sqlite3dyn,msetypes,msedatabase;
+ classes,mclasses,msedb,msqldb,msestrings,mdb,sqlite3dyn,msetypes,msedatabase;
 { 
       Type name        SQLite storage class  Field type    Data type
 +--------------------+---------------------+-------------+-------------+

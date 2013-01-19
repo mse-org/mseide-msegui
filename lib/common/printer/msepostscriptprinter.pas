@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -13,7 +13,8 @@ unit msepostscriptprinter;
 interface
 
 uses
- msegraphics,mseclasses,classes,msegraphutils,msestream,msestrings,msetypes,
+ msegraphics,mseclasses,classes,mclasses,msegraphutils,
+ msestream,msestrings,msetypes,
  msedrawtext,mserichstring,mseprinter,mseguiglob;
 
 const

@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -15,7 +15,7 @@ interface
 
 uses
  mseclasses,msegui,mseglob,mseguiglob,
- mseforms,msedataedits,mseedit,classes,mseevent,
+ mseforms,msedataedits,mseedit,classes,mclasses,mseevent,
  msemenus,msestrings,mseeditglob,msetypes;
 
 type

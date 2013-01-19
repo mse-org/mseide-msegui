@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2007-2011 by Martin Schreiber
+{ MSEgui Copyright (c) 2007-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -11,7 +11,8 @@ unit mseifilink;
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
 interface
 uses
- classes,mseclasses,mseifiglob,mseifi,msearrayprops,mseapplication,mseact,
+ classes,mclasses,mseclasses,mseifiglob,mseifi,msearrayprops,mseapplication,
+ mseact,
  mseevent,mseglob,msestrings,msetypes,msedatalist,msegraphutils,typinfo,
  mseeditglob;
  

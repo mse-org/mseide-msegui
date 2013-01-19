@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2011 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2013 by Martin Schreiber
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@ interface
 
 implementation
 uses
- classes,msefft,msedesignintf,msesignal,msefilter,
+ classes,mclasses,msefft,msedesignintf,msesignal,msefilter,
  msepropertyeditors,msestrings,msedesigner,msesigfft,regmath_bmp,
  msesiggui,msesigfftgui,msesignoise,msesigmidi;
 
