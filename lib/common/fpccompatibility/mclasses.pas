@@ -23,7 +23,6 @@ unit mclasses;
 {$define classesinline}
 
 {$INLINE ON}
-
 interface
 
 uses
