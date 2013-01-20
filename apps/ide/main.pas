@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2012 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2013 by Martin Schreiber
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -2660,7 +2660,7 @@ begin
              'MSEide version: '+versiontext+c_linefeed+
              'Host: '+ platformtext+ c_linefeed+
              c_linefeed+
-             'Copyright 1999-2012'+c_linefeed+
+             'Copyright 1999-2013'+c_linefeed+
              'by Martin Schreiber'
              ,actionsmo.c[ord(ac_about)]+' MSEide');
 end;
