@@ -23,6 +23,11 @@ unit mclasses;
 {$define classesinline}
 
 {$INLINE ON}
+
+{$if defined(FPC) and (fpc_fullversion >= 020601)}
+ {$define mse_fpc_2_6_2} 
+{$endif}
+
 interface
 
 uses
@@ -30,6 +35,9 @@ uses
 
 type
 
+{$ifndef mse_fpc_2_6_2}
+ tbytes = array of byte;
+{$endif}
  tstrings = class;
  tstringlist = class;
  tfiler = class;
@@ -8185,20 +8193,29 @@ begin
 end;
 
 
+{$ifdef mse_fpc_2_6_2} 
 procedure TCollection.RemoveItem(Item: TCollectionItem);
-
 Var
-  I : Integer;
-
+ I : Integer;
 begin
-  Notify(Item,cnExtracting);
-  I:=FItems.IndexOfItem(Item,fromEnd);
-  If (I<>-1) then
-    FItems.Delete(I);
-  Item.FCollection:=Nil;
-  Changed;
+ Notify(Item,cnExtracting);
+ I:=FItems.IndexOfItem(Item,fromEnd);
+ If (I<>-1) then
+   FItems.Delete(I);
+ Item.FCollection:=Nil;
+ Changed;
 end;
 
+{$else}
+
+procedure TCollection.RemoveItem(Item: TCollectionItem);
+begin
+Notify(Item,cnExtracting);
+FItems.Remove(Pointer(Item));
+Item.FCollection:=Nil;
+Changed;
+end;
+{$endif}
 
 function TCollection.GetAttrCount: Integer;
 begin
