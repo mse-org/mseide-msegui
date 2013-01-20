@@ -166,11 +166,11 @@ type
 
   TFPMemoryImage = class (TFPCustomImage)
     private
+    protected
+      FData : PFPIntegerArray;
       function GetInternalColor(x,y:integer):TFPColor;override;
       procedure SetInternalColor (x,y:integer; const Value:TFPColor);override;
       procedure SetUsePalette (Value:boolean);override;
-    protected
-      FData : PFPIntegerArray;
       procedure SetInternalPixel (x,y:integer; Value:integer); override;
       function GetInternalPixel (x,y:integer) : integer; override;
     public

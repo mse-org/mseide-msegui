@@ -259,8 +259,6 @@ type
     function  IsCursorOpen: Boolean; override; {virtual abstract}
     procedure SetBookmarkFlag(Buffer: TRecordBuffer; Value: TBookmarkFlag); override; {virtual abstract}
     procedure SetBookmarkData(Buffer: TRecordBuffer; Data: Pointer); override; {virtual abstract}
-    procedure SetFieldData(Field: TField; Buffer: Pointer);
-      {$ifdef SUPPORT_OVERLOAD} overload; {$endif} override; {virtual abstract}
 
     { virtual methods (mostly optionnal) }
     function  GetDataSource: TDataSource; {$ifndef VER1_0}override;{$endif}
@@ -290,6 +288,8 @@ type
     destructor Destroy; override;
 
     { abstract methods }
+    procedure SetFieldData(Field: TField; Buffer: Pointer);
+      {$ifdef SUPPORT_OVERLOAD} overload; {$endif} override; {virtual abstract}
     function GetFieldData(Field: TField; Buffer: Pointer): Boolean;
       {$ifdef SUPPORT_OVERLOAD} overload; {$endif} override; {virtual abstract}
     { virtual methods (mostly optionnal) }

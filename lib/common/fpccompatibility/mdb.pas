@@ -345,9 +345,7 @@ type
     function GetCurValue: Variant; virtual;
     function GetNewValue: Variant; virtual;
     function GetIsNull: Boolean; virtual;
-    function GetParentComponent: TComponent; override;
     procedure GetText(var AText: string; ADisplayText: Boolean); virtual;
-    function HasParent: Boolean; override;
     procedure Notification(AComponent: TComponent; Operation: TOperation); override;
     procedure PropertyChanged(LayoutAffected: Boolean);
     procedure ReadState(Reader: TReader); override;
@@ -375,6 +373,8 @@ type
     destructor Destroy; override;
     procedure Assign(Source: TPersistent); override;
     procedure AssignValue(const AValue: TVarRec);
+    function GetParentComponent: TComponent; override;
+    function HasParent: Boolean; override;
     procedure Clear; virtual;
     procedure FocusControl;
     function GetData(Buffer: Pointer): Boolean; overload;
@@ -985,7 +985,6 @@ type
     FOptions : TIndexOptions;
     FSource : String;
   protected
-    procedure Assign(Source: TPersistent); override;
     function GetExpression: string;
     procedure SetCaseInsFields(const AValue: string); virtual;
     procedure SetDescFields(const AValue: string);
@@ -993,6 +992,7 @@ type
   public
     constructor Create(Owner: TIndexDefs; const AName, TheFields: string;
       TheOptions: TIndexOptions); overload;
+    procedure Assign(Source: TPersistent); override;
     property Expression: string read GetExpression write SetExpression;
     property Fields: string read FFields write FFields;
     property CaseInsFields: string read FCaseinsFields write SetCaseInsFields;
@@ -1245,7 +1245,7 @@ type
 { TDataSet }
 
   TBookmark = Pointer;
-  TBookmarkStr = string deprecated 'TBookmarkStr will disappear in 2.6.3 in favour of TBookmark'; 
+  TBookmarkStr = string; 
 
   PBookmarkFlag = ^TBookmarkFlag;
   TBookmarkFlag = (bfCurrent, bfBOF, bfEOF, bfInserted);
@@ -2345,6 +2345,7 @@ end;
 function TIndexDefs.FindIndexForFields(const Fields: string): TIndexDef;
 
 begin
+ result:= nil;
   //!! To be implemented
 end;
 
@@ -2969,6 +2970,7 @@ end;
 Function TDataset.FindRecord(Restart, GoForward: Boolean): Boolean;
 
 begin
+ result:= false;
   //!! To be implemented
 end;
 
@@ -5374,11 +5376,13 @@ end;
 function TField.GetAsBCD: TBCD;
 begin
   raise AccessError(SBCD);
+  result:= 0; //compiler warning
 end;
 
 function TField.GetAsBoolean: Boolean;
 begin
   raise AccessError(SBoolean);
+  result:= false; //compiler warning
 end;
 
 function TField.GetAsBytes: TBytes;
@@ -5392,24 +5396,28 @@ function TField.GetAsDateTime: TDateTime;
 
 begin
   raise AccessError(SdateTime);
+  result:= 0; //compiler warning
 end;
 
 function TField.GetAsFloat: Double;
 
 begin
   raise AccessError(SDateTime);
+  result:= 0; //compiler warning
 end;
 
 function TField.GetAsLongint: Longint;
 
 begin
   raise AccessError(SInteger);
+  result:= 0; //compiler warning
 end;
 
 function TField.GetAsVariant: Variant;
 
 begin
   raise AccessError(SVariant);
+  result:= 0; //compiler warning
 end;
 
 
@@ -5592,6 +5600,7 @@ end;
 function TField.GetAsLargeInt: LargeInt;
 begin
   Raise AccessError(SLargeInt);
+  result:= 0; //compiler warning
 end;
 
 function TField.GetAsCurrency: Currency;
@@ -6794,7 +6803,7 @@ begin
     ff := ffGeneral
   else
     begin
-    Digits := CurrencyDecimals;
+    Digits := defaultformatsettings.CurrencyDecimals;
     if ADisplayText then
       ff := ffCurrency
     else
@@ -6850,7 +6859,7 @@ begin
   Inherited Create(AOwner);
   SetDatatype(ftfloat);
   FPrecision:=15;
-  FValidChars := [DecimalSeparator, '+', '-', '0'..'9', 'E', 'e'];
+  FValidChars := [defaultformatsettings.DecimalSeparator, '+', '-', '0'..'9', 'E', 'e'];
 end;
 
 Function TFloatField.CheckRange(AValue : Double) : Boolean;
@@ -7060,8 +7069,8 @@ begin
       F:=FDisplayFormat
     else
       Case DataType of
-       ftTime : F:=LongTimeFormat;
-       ftDate : F:=ShortDateFormat;
+       ftTime : F:=defaultformatsettings.LongTimeFormat;
+       ftDate : F:=defaultformatsettings.ShortDateFormat;
       else
        F:='c'
       end;
@@ -7462,7 +7471,7 @@ begin
   Inherited Create(AOwner);
   FMaxvalue := 0;
   FMinvalue := 0;
-  FValidChars := [DecimalSeparator, '+', '-', '0'..'9'];
+  FValidChars := [defaultformatsettings.DecimalSeparator, '+', '-', '0'..'9'];
   SetDataType(ftBCD);
   FPrecision := 15;
   Size:=4;
@@ -7482,7 +7491,7 @@ begin
   Inherited Create(AOwner);
   FMaxValue := 0;
   FMinValue := 0;
-  FValidChars := [DecimalSeparator, '+', '-', '0'..'9'];
+  FValidChars := [defaultformatsettings.DecimalSeparator, '+', '-', '0'..'9'];
   SetDataType(ftFMTBCD);
 // Max.precision for NUMERIC,DECIMAL datatypes supported by some databases:
 //  Firebird-18; Oracle,SqlServer-38; MySQL-65; PostgreSQL-1000

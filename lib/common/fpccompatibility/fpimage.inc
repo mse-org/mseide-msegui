@@ -75,7 +75,7 @@ procedure TFPCustomImage.SaveToFile (const filename:String);
 
 var e,s : string;
     r : integer;
-    f : TFileStream;
+//    f : TFileStream;
     h : TFPCustomImageWriterClass;
     Writer : TFPCustomImageWriter;
     d : TIHData;

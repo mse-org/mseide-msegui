@@ -3406,9 +3406,9 @@ end;
 
   procedure TStream.FakeSeekForward(Offset: Int64;  const Origin: TSeekOrigin; const Pos: Int64);
 
-  var
-    Buffer: Pointer;
-    BufferSize, i: LongInt;
+//  var
+//    Buffer: Pointer;
+//    BufferSize, i: LongInt;
 
   begin
     if Origin=soBeginning then

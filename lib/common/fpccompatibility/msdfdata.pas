@@ -195,7 +195,6 @@ type
     function GetRecordSize: Word; override;
     procedure SetBookmarkFlag(Buffer: TRecordBuffer; Value: TBookmarkFlag); override;
     procedure SetBookmarkData(Buffer: TRecordBuffer; Data: Pointer); override;
-    procedure SetFieldData(Field: TField; Buffer: Pointer); override;
     procedure ClearCalcFields(Buffer: TRecordBuffer); override;
     function GetRecordCount: Integer; override;
     function GetRecNo: Integer; override;
@@ -210,6 +209,7 @@ type
       write FDefaultRecordLength default 250;
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
+    procedure SetFieldData(Field: TField; Buffer: Pointer); override;
     function  GetFieldData(Field: TField; Buffer: Pointer): Boolean; override;
     procedure RemoveBlankRecords; dynamic;
     procedure RemoveExtraColumns; dynamic;
@@ -685,7 +685,7 @@ begin
       BufEnd := StrEnd(pansichar(ActiveBuffer));  // Fill with blanks when necessary
       if BufEnd > RecBuf then
         BufEnd := RecBuf;
-      FillChar(BufEnd[0], Field.Size + PtrInt(RecBuf) - PtrInt(BufEnd), Ord(' '));
+      FillChar(BufEnd[0], Field.Size + PtruInt(RecBuf) - PtruInt(BufEnd), Ord(' '));
       p := StrLen(Buffer);
       if p > Field.Size then
         p := Field.Size;

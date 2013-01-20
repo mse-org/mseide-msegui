@@ -403,7 +403,7 @@ end;
 function TFPReaderPNG.CalcColor: TColorData;
 var cd : longword;
     r : word;
-    b : byte;
+//    b : byte;
     tmp : pbytearray;
 begin
   if UsingBitGroup = 0 then

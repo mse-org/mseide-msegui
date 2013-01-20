@@ -272,17 +272,21 @@ begin
 end;
 
 procedure TDbfFieldDef.AssignTo(Dest: TPersistent);
+{$ifdef SUPPORT_FIELDDEF_TPERSISTENT}
+ {$ifdef SUPPORT_FIELDDEF_ATTRIBUTES}
 var
   DbDest: TFieldDef;
+ {$endif}
+{$endif}
 begin
 {$ifdef SUPPORT_FIELDDEF_TPERSISTENT}
   // copy to VCL fielddef?
   if Dest is TFieldDef then
   begin
-    DbDest := TFieldDef(Dest);
     // VCL TFieldDef does not know how to handle TDbfFieldDef!
     // what a shame :-)
 {$ifdef SUPPORT_FIELDDEF_ATTRIBUTES}
+    DbDest := TFieldDef(Dest);
     DbDest.Attributes := [];
     DbDest.ChildDefs.Clear;
     DbDest.DataType := FFieldType;

@@ -252,7 +252,7 @@ var
     SampRow: JSAMPROW;
     Color: TFPColor;
     LinesRead: Cardinal;
-    x: Integer;
+//    x: Integer;
     y: Integer;
     c: word;
     Status,Scan: integer;

@@ -160,8 +160,8 @@ type
   TDateTimeFieldVar = class(TFieldVar)
   private
     FFieldVal: TDateTimeRec;
-    function GetFieldType: TExpressionType; override;
   protected
+    function GetFieldType: TExpressionType; override;
     function GetFieldVal: Pointer; override;
   public
     procedure Refresh(Buffer: TRecordBuffer); override;
@@ -170,8 +170,8 @@ type
   TBooleanFieldVar = class(TFieldVar)
   private
     FFieldVal: boolean;
-    function GetFieldType: TExpressionType; override;
   protected
+    function GetFieldType: TExpressionType; override;
     function GetFieldVal: Pointer; override;
   public
     procedure Refresh(Buffer: TRecordBuffer); override;
