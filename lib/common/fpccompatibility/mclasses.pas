@@ -1027,7 +1027,7 @@ function ExtractStrings(Separators, WhiteSpace: TSysCharSet; Content: PChar; Str
 implementation
 
 uses
- rtlconsts;
+ {$ifdef MSWINDOWS}windows,{$endif}rtlconsts;
 
 Const
   // Ratio of Pointer and Word Size.
