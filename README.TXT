@@ -1,13 +1,14 @@
 MSEide+MSEgui Pascal Cross Platform GUI Development System.
 
-2013-01-02 Version 2.8.6
+2013-xx-xx Version 3.0
 Copyright (c) 1999-2013 by Martin Schreiber
 
-* 2.8.4 -> 2.8.6: The misleading OS directory names have been changed
-* lib/common/kernel/i386-linux -> lib/common/kernel/linux
-* lib/common/kernel/i386-win32 -> lib/common/kernel/windows
-* There is a new settings macro ${TARGETOSDIR} which points to the new directory.
-* Please replace ${TARGET} by ${TARGETOSDIR} in your existing project options.
+* 2.8.8 -> 3.0:
+* MSEgui now has own implementations for "classes" and "db" units.
+* FPC has no support for unit alias
+* http://www.mail-archive.com/fpc-pascal%40lists.freepascal.org/msg31117.html
+* Please change "db" to "mdb" in useses and add 
+* "mclasses" after "classes" in uses
 
 - Compiles with FPC 2.6.0 or 2.6.2
 - Tested on i386-linux SuSE 12.2, x84_64-linux SuSE 12.2 and
