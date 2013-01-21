@@ -1283,61 +1283,8 @@ type
  tmsevariantfield1 = class(tmsevariantfield);
  tmsebooleanfield1 = class(tmsebooleanfield);
  tmsedatetimefield1 = class(tmsedatetimefield);
- { 
- TFieldcracker = class(TComponent)
-  private
-   FAlignMent : TAlignment;
-   FAttributeSet : String;
-   FCalculated : Boolean;
-   FConstraintErrorMessage : String;
-   FCustomConstraint : String;
-   FDataSet : TDataSet;
-//    FDataSize : Word;
-   FDataType : TFieldType;
-   FDefaultExpression : String;
-   FDisplayLabel : String;
-   FDisplayWidth : Longint;
-   FFieldKind : TFieldKind;
-   FFieldName : String;
-   FFieldNo : Longint;
- end;
-}
-{ 
-  TDataSetcracker = class(TComponent)
-  Private
-    FOpenAfterRead : boolean;
-    FActiveRecord: Longint;
-    FAfterCancel: TDataSetNotifyEvent;
-    FAfterClose: TDataSetNotifyEvent;
-    FAfterDelete: TDataSetNotifyEvent;
-    FAfterEdit: TDataSetNotifyEvent;
-    FAfterInsert: TDataSetNotifyEvent;
-    FAfterOpen: TDataSetNotifyEvent;
-    FAfterPost: TDataSetNotifyEvent;
-    FAfterRefresh: TDataSetNotifyEvent;
-    FAfterScroll: TDataSetNotifyEvent;
-    FAutoCalcFields: Boolean;
-    FBOF: Boolean;
-    FBeforeCancel: TDataSetNotifyEvent;
-    FBeforeClose: TDataSetNotifyEvent;
-    FBeforeDelete: TDataSetNotifyEvent;
-    FBeforeEdit: TDataSetNotifyEvent;
-    FBeforeInsert: TDataSetNotifyEvent;
-    FBeforeOpen: TDataSetNotifyEvent;
-    FBeforePost: TDataSetNotifyEvent;
-    FBeforeRefresh: TDataSetNotifyEvent;
-    FBeforeScroll: TDataSetNotifyEvent;
-    FBlobFieldCount: Longint;
-    FBookmarkSize: Longint;
-    FBuffers : TBufferArray;
-    FBufferCount: Longint;
-    FCalcBuffer: PChar;
-    FCalcFieldsSize: Longint;
-    FConstraints: TCheckConstraints;
-    FDisableControlsCount : Integer;
-    FDisableControlsState : TDatasetState;
-  end;  
- }  
+ tfield1 = class(tfield);
+ 
 const
  fielddatacompatibility: array[tfieldtype] of fieldtypesty = (
     //ftUnknown, ftString,    ftSmallint,    ftInteger,     ftWord,
@@ -3114,7 +3061,7 @@ var
  int1: integer;
 begin
  {$ifdef FPC}{$warnings off}{$endif}
- with tfieldcracker(sender) do begin
+ with tfield1(sender) do begin
  {$ifdef FPC}{$warnings on}{$endif}
   if fvalidating then begin
    result:= (fvaluebuffer <> nil) and (foffset and 1 = 0);
@@ -3139,7 +3086,7 @@ var
  int1: integer;
 begin
  {$ifdef FPC}{$warnings off}{$endif}
- with tfieldcracker(sender) do begin
+ with tfield1(sender) do begin
  {$ifdef FPC}{$warnings on}{$endif}
   if fvalidating then begin
    result:= (fvaluebuffer <> nil) and (foffset and 1 = 0);
@@ -3160,7 +3107,7 @@ end;
 procedure tmsebufdataset.checkfreebuffer(const afield: tfield);
 begin
  {$ifdef FPC}{$warnings off}{$endif}
- with tfieldcracker(afield) do begin
+ with tfield1(afield) do begin
  {$ifdef FPC}{$warnings on}{$endif}
   if foffset and 2 <> 0 then begin
    freemem(fvaluebuffer);
@@ -3174,7 +3121,7 @@ function tmsebufdataset.callvalidate(const afield: tfield;
               //true if not nulled
 begin
  {$ifdef FPC}{$warnings off}{$endif}
- with tfieldcracker(afield) do begin
+ with tfield1(afield) do begin
  {$ifdef FPC}{$warnings on}{$endif}
   foffset:= 0;
   fvaluebuffer:= avalue;
@@ -3187,7 +3134,7 @@ procedure tmsebufdataset.checkvaluebuffer(const afield: tfield;
                                                    const asize: integer);
 begin
  {$ifdef FPC}{$warnings off}{$endif}
- with tfieldcracker(afield) do begin
+ with tfield1(afield) do begin
  {$ifdef FPC}{$warnings on}{$endif}
   foffset:= foffset and not 1;
   if fvaluebuffer = nil then begin
@@ -3205,7 +3152,7 @@ var
  datasize1: integer;
 begin
  {$ifdef FPC}{$warnings off}{$endif}
- with tfieldcracker(field) do begin
+ with tfield1(field) do begin
  {$ifdef FPC}{$warnings on}{$endif}
   if fvalidating then begin
    if buffer = nil then begin
@@ -3258,7 +3205,7 @@ var
  int1: integer;
 begin
  {$ifdef FPC}{$warnings off}{$endif}
- with tfieldcracker(sender) do begin
+ with tfield1(sender) do begin
  {$ifdef FPC}{$warnings on}{$endif}
   if fvalidating then begin
    checkvaluebuffer(sender,sizeof(msestring));
@@ -3294,7 +3241,7 @@ var
  int1: integer;
 begin
  {$ifdef FPC}{$warnings off}{$endif}
- with tfieldcracker(sender) do begin
+ with tfield1(sender) do begin
  {$ifdef FPC}{$warnings on}{$endif}
   if fvalidating then begin
    checkvaluebuffer(sender,sizeof(variant));
@@ -4150,7 +4097,7 @@ begin
    if (field1 <> nil) and (field1.fieldkind = fkdata) then begin
     if fieldno = 0 then begin
 {$warnings off}
-     tfieldcracker(field1).ffieldno:= int1 + 1; //local mode without connection
+     tfield1(field1).ffieldno:= int1 + 1; //local mode without connection
 {$warnings on}
     end;
     addfield(int1,datatype,size,field1);
@@ -4164,7 +4111,7 @@ begin
    if fieldkind = fkinternalcalc then begin
     addfield(int2,datatype,size,field1);
 {$warnings off}
-    tfieldcracker(field1).ffieldno:= int2 + 1;
+    tfield1(field1).ffieldno:= int2 + 1;
 {$warnings on}
     inc(int2);
    end;
@@ -4188,7 +4135,7 @@ begin
   with field1 do begin
    if fieldkind in dsbuffieldkinds then begin
 {$warnings off}
-    tfieldcracker(field1).ffieldno:= -1 - int2;
+    tfield1(field1).ffieldno:= -1 - int2;
 {$warnings on}
     fcalcfieldbufpositions[int2]:= fcalcrecordsize;
     if field1 is tmsestringfield then begin
@@ -6504,36 +6451,7 @@ begin
   fafterapplyupdate(self);
  end;
 end;
-{
-procedure tmsebufdataset.refresh(const aenablecontrols: boolean = false);
-var
- int1: integer;
-begin
- if aenablecontrols then begin
-//  with tdatasetcracker(self) do begin
-   int1:= 0;
-   while controlsdisabled do begin
-    inc(int1);
-    restorestate(state);
-   end;
-//   int1:= fdisablecontrolscount;
-//   fdisablecontrolscount:= 0;
-   try
-    inherited refresh;
-   finally
-    while int1 > 0 do begin
-     dec(int1);
-     settempstate(state);
-    end;
-//    fdisablecontrolscount:= int1;
-   end;
-//  end;
- end
- else begin
-  inherited refresh;
- end;
-end;
-}
+
 procedure tmsebufdataset.notifycontrols;
 var
  int1: integer;

@@ -915,114 +915,6 @@ function debugcomprootname(const acomponent: tcomponent): string;
 function debugcomprootnames(const acomponents: componentarty): string;
 {$endif}
 
-type
-{$ifdef FPC}
-  TFilercracker = class(TObject)
-   public
-     FRoot: TComponent;
-     FLookupRoot: TComponent;
-     FAncestor: TPersistent;
-     FIgnoreChildren: Boolean;
-  end;
- {$ifdef mse_fpc_2_4_3}
-  TReadercracker = class(TFiler)
-  public
-    FDriver: TAbstractObjectReader;
-    FOwner: TComponent;
-    FParent: TComponent;
-    FFixups: TObject;
-    FLoaded: TFpList;
-  end;
- {$else}
-  TReadercracker = class(TFiler)
-  public
-    FDriver: TAbstractObjectReader;
-    FOwner: TComponent;
-    FParent: TComponent;
-    FFixups: TList;
-    FLoaded: TList;
-  end;
- {$endif}
-  TWritercracker = class(TFilercracker)
-  public
-    FDriver: TAbstractObjectWriter;
-    FDestroyDriver: Boolean;
-    FRootAncestor: TComponent;
-    FPropPath: String;
-    FAncestors: TStringList;
-    FAncestorPos: Integer;
-    FCurrentPos: Integer;
-    FOnFindAncestor: TFindAncestorEvent;
-    FOnWriteMethodProperty: TWriteMethodPropertyEvent;
-    FOnWriteStringProperty:TReadWriteStringPropertyEvent;
-  end;
- {$ifdef mse_fpc_2_4_3}
-  TComponentcracker = class(TPersistent{,IUnknown,IInterfaceComponentReference})
-  public
-    FOwner: TComponent;
-    FName: TComponentName;
-    FTag: Longint;
-    FComponents: TFpList;
-    FFreeNotifies: TFpList;
-    FDesignInfo: Longint;
-    FVCLComObject: Pointer;
-    FComponentState: TComponentState;
-  end;
- {$else}
-  TComponentcracker = class(TPersistent)
-  public
-    FOwner: TComponent;
-    FName: TComponentName;
-    FTag: Longint;
-    FComponents: TList;
-    FFreeNotifies: TList;
-    FDesignInfo: Longint;
-    FVCLComObject: Pointer;
-    FComponentState: TComponentState;
-  end;
- {$endif}
-{$else} //delphi
-  TComponentcracker = class(TPersistent{, IInterface, IInterfaceComponentReference})
-  public
-    FOwner: TComponent;
-    FName: TComponentName;
-    FTag: Longint;
-    FComponents: TList;
-    FFreeNotifies: TList;
-    FDesignInfo: Longint;
-    FComponentState: TComponentState;
-  end;
-  TFilercracker = class(TObject)
-   public
-     FStream: TStream;
-     FBuffer: Pointer;
-     FBufSize: Integer;
-     FBufPos: Integer;
-     FBufEnd: Integer;
-     FRoot: TComponent;
-     FLookupRoot: TComponent;
-     FAncestor: TPersistent;
-     FIgnoreChildren: Boolean;
-   end;
-  TReadercracker = class(TFilercracker)
-  public
-    FOwner: TComponent;
-    FParent: TComponent;
-    FFixups: TList;
-    FLoaded: TList;
-  end;
-  TWritercracker = class(TFilercracker)
-  public
-    FRootAncestor: TComponent;
-    FPropPath: string;
-    FAncestorList: TList;
-    FAncestorPos: Integer;
-    FChildPos: Integer;
-    FOnFindAncestor: TFindAncestorEvent;
-    FUseQualifiedNames: Boolean;
-  end;
-{$endif}
-
 implementation
 uses
 {$ifdef debugobjectlink}
@@ -1265,14 +1157,14 @@ end;
 function getfproppath(const writer:twriter): string;
 begin
 {$warnings off}
- result:= twritercracker(writer).fproppath;
+ result:= twriter1(writer).fproppath;
 {$warnings on}
 end;
 
 procedure setfproppath(const writer:twriter; const value: string);
 begin
 {$warnings off}
- twritercracker(writer).fproppath:= value;
+ twriter1(writer).fproppath:= value;
 {$warnings on}
 end;
 
@@ -1291,7 +1183,7 @@ function getcomponentlist(const acomponent: tcomponent): tlist;
 {$endif}
 begin
 {$warnings off}
- with tcomponentcracker(acomponent) do begin
+ with tcomponent1(acomponent) do begin
 {$warnings on}
   if fcomponents = nil then begin
    {$ifdef mse_fpc_2_4_3}
@@ -1307,7 +1199,7 @@ end;
 procedure clearcomponentlist(const acomponent: tcomponent);
 begin
 {$warnings off}
- freeandnil(tcomponentcracker(acomponent).fcomponents);
+ freeandnil(tcomponent1(acomponent).fcomponents);
 {$warnings on}
 end;
 
@@ -1363,7 +1255,7 @@ function setloading(const acomponent: tcomponent; const avalue: boolean): boolea
 begin
  result:= csdesigning in acomponent.componentstate;
 {$warnings off}
- with tcomponentcracker(acomponent) do begin
+ with tcomponent1(acomponent) do begin
 {$warnings on}
   if avalue then begin
    include(fcomponentstate,csloading);
@@ -1392,7 +1284,7 @@ var
  comp1: tcomponent;
 begin
 {$warnings off}
- with tcomponentcracker(acomponent) do begin
+ with tcomponent1(acomponent) do begin
 {$warnings on}
   exclude(fcomponentstate,csancestor);
   include(fcomponentstate,csinline);   
@@ -1411,7 +1303,7 @@ var
 begin
  if csinline in acomponent.componentstate then begin
 {$warnings off}
-  with tcomponentcracker(acomponent) do begin
+  with tcomponent1(acomponent) do begin
 {$warnings on}
    exclude(fcomponentstate,csancestor);
   end;
@@ -1712,7 +1604,7 @@ begin
  for int1:= 0 to high(anames) do begin
   comp1:= owner.findcomponent(anames[int1]);
 {$warnings off}
-  with tcomponentcracker(owner).fcomponents do begin
+  with tcomponent1(owner).fcomponents do begin
 {$warnings on}
    remove(comp1);
    add(comp1);
@@ -1809,7 +1701,7 @@ var
 begin
  result:= nil;
 {$warnings off}
- with tcomponentcracker(acomponent) do begin
+ with tcomponent1(acomponent) do begin
 {$warnings on}
   if ffreenotifies <> nil then begin
    for int1:= 0 to ffreenotifies.count - 1 do begin
@@ -2193,7 +2085,7 @@ begin
    if component = nil then begin
     component:= tcomponent(componentclass.newinstance);
   {$warnings off}
-    with tcomponentcracker(component) do begin
+    with tcomponent1(component) do begin
   {$warnings on}
      fcomponentstate:= componentstate + [csloading,csancestor];
     end;
@@ -2212,7 +2104,7 @@ end;
 type
  tcomponentdeleter = class(tcomponent)
   private
-   fcomponents: componentarty;
+   fdelcomponents: componentarty;
   protected
    procedure notification(acomponent: tcomponent; operation: toperation); override;
   public
@@ -2226,10 +2118,10 @@ var
  int1: integer;
 begin
  inherited create(nil);
- fcomponents:= acomponents;
- for int1:= 0 to high(fcomponents) do begin
-  if fcomponents[int1] <> nil then begin
-   fcomponents[int1].freenotification(self);
+ fdelcomponents:= acomponents;
+ for int1:= 0 to high(fdelcomponents) do begin
+  if fdelcomponents[int1] <> nil then begin
+   fdelcomponents[int1].freenotification(self);
   end;
  end;
 end;
@@ -2241,9 +2133,9 @@ var
 begin
  inherited;
  if operation = opremove then begin
-  for int1:= 0 to high(fcomponents) do begin
-   if fcomponents[int1] = acomponent then begin
-    fcomponents[int1]:= nil;
+  for int1:= 0 to high(fdelcomponents) do begin
+   if fdelcomponents[int1] = acomponent then begin
+    fdelcomponents[int1]:= nil;
    end;
   end;
  end;
@@ -4246,29 +4138,21 @@ end;
 
 procedure tmsecomponent.setinline(value: boolean);
 begin
-{$warnings off}
- with tcomponentcracker(self) do begin
-{$warnings on}
-  if value then begin
-   include(fcomponentstate,csinline);
-  end
-  else begin
-   exclude(fcomponentstate,csinline);
-  end;
+ if value then begin
+  include(fcomponentstate,csinline);
+ end
+ else begin
+  exclude(fcomponentstate,csinline);
  end;
 end;
 
 procedure tmsecomponent.setancestor(value: boolean);
 begin
-{$warnings off}
- with tcomponentcracker(self) do begin
-{$warnings on}
-  if value then begin
-   include(fcomponentstate,csancestor);
-  end
-  else begin
-   exclude(fcomponentstate,csancestor);
-  end;
+ if value then begin
+  include(fcomponentstate,csancestor);
+ end
+ else begin
+  exclude(fcomponentstate,csancestor);
  end;
 end;
 
@@ -5325,12 +5209,8 @@ end;
 // Used as argument for calls to TComponent.GetChildren:
 procedure TWritermse.AddToAncestorList(Component: TComponent);
 begin
-{$warnings off}
- with twritercracker(self) do begin
-{$warnings on}
-  FAncestors.AddObject(rootcompname(Component,fancestorlookuplevel),
+ FAncestors.AddObject(rootcompname(Component,fancestorlookuplevel),
                         TPosComponent.Create(FAncestors.Count,Component));
- end;
 end;
 
 
@@ -5342,31 +5222,27 @@ Var
  int1: integer;
 begin
   // Should be set only when we write an inherited with children.
-{$warnings off}
- with twritercracker(self) do begin
-{$warnings on}
-  if Not Assigned(FAncestors) then begin
-   exit;
+ if Not Assigned(FAncestors) then begin
+  exit;
+ end;
+ comp1:= froot;
+ for int1:= fancestorlookuplevel-1 downto 0 do begin
+  comp1:= comp1.owner;
+ end;
+ if comp1 = nil then begin
+  comp1:= flookuproot; //should not happen
+ end;
+ I:=FAncestors.IndexOf(rootcompname(Component,comp1));
+ If (I=-1) then
+   begin
+   FAncestor:=Nil;
+   FAncestorPos:=-1;
+   end
+ else begin
+  With TPosComponent(FAncestors.Objects[i]) do begin
+   FAncestor:=FComponent;
+   FAncestorPos:=FPos;
   end;
-  comp1:= froot;
-  for int1:= fancestorlookuplevel-1 downto 0 do begin
-   comp1:= comp1.owner;
-  end;
-  if comp1 = nil then begin
-   comp1:= flookuproot; //should not happen
-  end;
-  I:=FAncestors.IndexOf(rootcompname(Component,comp1));
-  If (I=-1) then
-    begin
-    FAncestor:=Nil;
-    FAncestorPos:=-1;
-    end
-  else
-    With TPosComponent(FAncestors.Objects[i]) do
-      begin
-      FAncestor:=FComponent;
-      FAncestorPos:=FPos;
-      end;
  end;
 end;
 
@@ -5376,19 +5252,15 @@ Var
   C : TComponent;
 
 begin
-{$warnings off}
- with twritercracker(self) do begin
-{$warnings on}
-  if Assigned(FOnFindAncestor) then
-    if (Ancestor=Nil) or (Ancestor is TComponent) then
-      begin
-      C:=TComponent(Ancestor);
-      FOnFindAncestor(Self,Component,Component.Name,C,FRootAncestor);
-      Ancestor:=C;
-      end;
-  if frootrootancestor = nil then begin
-   frootrootancestor:= tcomponent(fancestor);
-  end;
+ if Assigned(FOnFindAncestor) then
+   if (Ancestor=Nil) or (Ancestor is TComponent) then
+     begin
+     C:=TComponent(Ancestor);
+     FOnFindAncestor(Self,Component,Component.Name,C,FRootAncestor);
+     Ancestor:=C;
+     end;
+ if frootrootancestor = nil then begin
+  frootrootancestor:= tcomponent(fancestor);
  end;
 end;
 
@@ -5398,45 +5270,41 @@ var
   SA : TPersistent;
   SR, SRA : TComponent;
 begin
+ SR:=FRoot;
+ SA:=FAncestor;
+ SRA:=FRootAncestor;
+ inc(fchildlevel);
+ Try
 {$warnings off}
- with twritercracker(self) do begin
+   tcomponent1(Component).FComponentState:=
+              tcomponent1(Component).FComponentState+[csWriting];
 {$warnings on}
-  SR:=FRoot;
-  SA:=FAncestor;
-  SRA:=FRootAncestor;
-  inc(fchildlevel);
-  Try
-{$warnings off}
-    tcomponentcracker(Component).FComponentState:=
-               tcomponentcracker(Component).FComponentState+[csWriting];
-{$warnings on}
-    Try
-     if not fnoancestor or (csinline in component.componentstate) or
-                                                 (fchildlevel > 1) then begin
-      // Possibly set ancestor.
-      DetermineAncestor(Component);
-      DoFindAncestor(Component);
-            // Mainly for IDE when a parent form had an ancestor renamed...
-     end;
-     tcomponent1(Component).WriteState(Self);
-           // Will call WriteComponentData.
-    {$ifdef FPC}
-     FDriver.EndList;
-    {$else}
-     writelistend;
-    {$endif}
-    Finally
-{$warnings off}
-      tcomponentcracker(Component).FComponentState:=
-                   tcomponentcracker(Component).FComponentState-[csWriting];
-{$warnings on}
+   Try
+    if not fnoancestor or (csinline in component.componentstate) or
+                                                (fchildlevel > 1) then begin
+     // Possibly set ancestor.
+     DetermineAncestor(Component);
+     DoFindAncestor(Component);
+           // Mainly for IDE when a parent form had an ancestor renamed...
     end;
-  Finally
-   dec(fchildlevel);
-   FAncestor:=SA;
-   FRoot:=SR;
-   FRootAncestor:=SRA;
-  end;
+    tcomponent1(Component).WriteState(Self);
+          // Will call WriteComponentData.
+   {$ifdef FPC}
+    FDriver.EndList;
+   {$else}
+    writelistend;
+   {$endif}
+   Finally
+{$warnings off}
+     tcomponent1(Component).FComponentState:=
+                  tcomponent1(Component).FComponentState-[csWriting];
+{$warnings on}
+   end;
+ Finally
+  dec(fchildlevel);
+  FAncestor:=SA;
+  FRoot:=SR;
+  FRootAncestor:=SRA;
  end;
 end;
 
@@ -5451,55 +5319,51 @@ Var
   rootrootancestorbefore: tcomponent;
   
 begin
-{$warnings off}
- with twritercracker(self) do begin
-{$warnings on}
-  // Write children list. 
-  // While writing children, the ancestor environment must be saved
-  // This is recursive...
-  SRoot:=FRoot;
-  SRootA:=FRootAncestor;
-  SList:=FAncestors;
-  SPos:=FCurrentPos;
-  ancestorlookuplevelbefore:= fancestorlookuplevel;
-  rootrootancestorbefore:= frootrootancestor;
-  try
-    FAncestors:=Nil;
-    FCurrentPos:=0;
-    FAncestorPos:=-1;
-    if csInline in Component.ComponentState then
-       FRoot:=Component;
-    if (FAncestor is TComponent) then
-       begin
-       FAncestors:=TStringList.Create;
-       if csInline in TComponent(FAncestor).ComponentState then begin
-        FRootAncestor := TComponent(FAncestor);
-        if frootrootancestor <> frootancestor then begin
-         inc(fancestorlookuplevel);
-        end;
+ // Write children list. 
+ // While writing children, the ancestor environment must be saved
+ // This is recursive...
+ SRoot:=FRoot;
+ SRootA:=FRootAncestor;
+ SList:=FAncestors;
+ SPos:=FCurrentPos;
+ ancestorlookuplevelbefore:= fancestorlookuplevel;
+ rootrootancestorbefore:= frootrootancestor;
+ try
+   FAncestors:=Nil;
+   FCurrentPos:=0;
+   FAncestorPos:=-1;
+   if csInline in Component.ComponentState then
+      FRoot:=Component;
+   if (FAncestor is TComponent) then
+      begin
+      FAncestors:=TStringList.Create;
+      if csInline in TComponent(FAncestor).ComponentState then begin
+       FRootAncestor := TComponent(FAncestor);
+       if frootrootancestor <> frootancestor then begin
+        inc(fancestorlookuplevel);
        end;
+      end;
 //       TComponent1(FAncestor).GetChildren(@AddToAncestorList,frootancestor);
-       GetChildren1(tcomponent(FAncestor),{$ifdef FPC}@{$endif}AddToAncestorList,frootancestor);
-       FAncestors.Sorted:=True;
-       end;
-    try
+      GetChildren1(tcomponent(FAncestor),{$ifdef FPC}@{$endif}AddToAncestorList,frootancestor);
+      FAncestors.Sorted:=True;
+      end;
+   try
 //      tcomponent1(Component).GetChildren(@WriteComponent, FRoot);
-      GetChildren1(component,{$ifdef FPC}@{$endif}WriteComponent, FRoot);
-    Finally
-      If Assigned(Fancestors) then
-        For I:=0 to FAncestors.Count-1 do
-          FAncestors.Objects[i].Free;
-      FreeAndNil(FAncestors);
-    end;    
-  finally
-   FAncestors:=Slist;
-   FRoot:=SRoot;
-   FRootAncestor:=SRootA;
-   FCurrentPos:=SPos;
-   FAncestorPos:=Spos;
-   fancestorlookuplevel:= ancestorlookuplevelbefore;
-   frootrootancestor:= rootrootancestorbefore;
-  end;
+     GetChildren1(component,{$ifdef FPC}@{$endif}WriteComponent, FRoot);
+   Finally
+     If Assigned(Fancestors) then
+       For I:=0 to FAncestors.Count-1 do
+         FAncestors.Objects[i].Free;
+     FreeAndNil(FAncestors);
+   end;    
+ finally
+  FAncestors:=Slist;
+  FRoot:=SRoot;
+  FRootAncestor:=SRootA;
+  FCurrentPos:=SPos;
+  FAncestorPos:=Spos;
+  fancestorlookuplevel:= ancestorlookuplevelbefore;
+  frootrootancestor:= rootrootancestorbefore;
  end;
 end;
 
@@ -5533,31 +5397,28 @@ procedure TWritermse.WriteComponentData(Instance: TComponent);
 var
   Flags: TFilerFlags;
 begin
-{$warnings off}
- with twritercracker(self) do begin
-{$warnings on}
-  Flags := [];
-  If (Assigned(FAncestor)) and  //has ancestor
-     (not (csInline in Instance.ComponentState) or // no inline component
-      // .. or the inline component is inherited
-      (csAncestor in Instance.Componentstate) and (FAncestors <> nil)) then
-    Flags:=[ffInherited]
-  else If csInline in Instance.ComponentState then
-    Flags:=[ffInline];
-  If (FAncestors<>Nil) and ((FCurrentPos<>FAncestorPos) or (FAncestor=Nil)) then
-    Include(Flags,ffChildPos);
- {$ifdef fpc}
-  FDriver.BeginComponent(Instance,Flags,FCurrentPos);
- {$else}
-  BeginComponent(Instance,Flags,FCurrentPos);
- {$endif}
-  If (FAncestors<>Nil) then
-    Inc(FCurrentPos);
-  WriteProperties(Instance);
-  WriteListEnd;
-  // Needs special handling of ancestor.
-  If not IgnoreChildren then
-    WriteChildren(Instance);
+ Flags := [];
+ If (Assigned(FAncestor)) and  //has ancestor
+    (not (csInline in Instance.ComponentState) or // no inline component
+     // .. or the inline component is inherited
+     (csAncestor in Instance.Componentstate) and (FAncestors <> nil)) then
+   Flags:=[ffInherited]
+ else If csInline in Instance.ComponentState then
+   Flags:=[ffInline];
+ If (FAncestors<>Nil) and ((FCurrentPos<>FAncestorPos) or (FAncestor=Nil)) then
+   Include(Flags,ffChildPos);
+{$ifdef fpc}
+ FDriver.BeginComponent(Instance,Flags,FCurrentPos);
+{$else}
+ BeginComponent(Instance,Flags,FCurrentPos);
+{$endif}
+ If (FAncestors<>Nil) then
+   Inc(FCurrentPos);
+ WriteProperties(Instance);
+ WriteListEnd;
+ // Needs special handling of ancestor.
+ If not IgnoreChildren then begin
+   WriteChildren(Instance);
  end;
 end;
 {
@@ -5633,16 +5494,12 @@ procedure twritermse.writedescendent(const aroot: tcomponent;
 begin
  frootrootancestor:= aancestor;
  frootroot:= aroot;
-{$warnings off}
- with twritercracker(self) do begin
-{$warnings on}
-  FRoot := ARoot;
-  FAncestor := AAncestor;
-  FRootAncestor := AAncestor;
-  FLookupRoot := ARoot;
+ FRoot := ARoot;
+ FAncestor := AAncestor;
+ FRootAncestor := AAncestor;
+ FLookupRoot := ARoot;
 
-  WriteComponent(ARoot);
- end;
+ WriteComponent(ARoot);
 // inherited writedescendent(aroot,aancestor);
 end;
 

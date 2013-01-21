@@ -166,7 +166,7 @@ type
                         
  tparamsourcedatalink = class(tfielddatalink)
   private
-   fowner: tfieldparamlink;
+   fownerlink: tfieldparamlink;
    fparamset: boolean;
    fchangelock: integer;
    frefreshlock: integer;
@@ -182,7 +182,7 @@ type
 
  tparamdestdatalink = class(tmsedatalink)
   private
-   fowner: tfieldparamlink;
+   fownerlink: tfieldparamlink;
   protected
    procedure updatedata; override;
    function cansync(out sourceds: tdataset): boolean;
@@ -358,7 +358,7 @@ type
  
  tsequencedatalink = class(tfielddatalink)
   private
-   fowner: tsequencelink;
+   fownerlink: tsequencelink;
   protected
    procedure updatedata; override;
   public
@@ -925,51 +925,27 @@ end;
 
 constructor tparamsourcedatalink.create(const aowner: tfieldparamlink);
 begin
- fowner:= aowner;
+ fownerlink:= aowner;
  inherited create;
 end;
-{
-procedure tparamsourcedatalink.checkrefresh;
-begin
- with fowner do begin
-  if (fplo_autorefresh in foptions) and (destdataset <> nil) and 
-                        (destdataset.state = dsbrowse) then begin
-   if fplo_waitcursor in fowner.foptions then begin
-    application.beginwait;
-   end;
-   try
-    if fdestcontroller <> nil then begin
-     fdestcontroller.refresh(fplo_restorerecno in foptions);
-    end
-    else begin
-     fdestdataset.refresh;
-    end;
-   finally
-    if fplo_waitcursor in fowner.foptions then begin
-     application.endwait;
-    end;
-   end;
-  end;
- end;
-end;
-}
+
 procedure tparamsourcedatalink.recordchanged(afield: tfield);
 var
  bo1,bo2: boolean;
  int1: integer;
  var1: variant;
 begin
- if not (csloading in fowner.componentstate) then begin
+ if not (csloading in fownerlink.componentstate) then begin
   inherited;
 //  if frefreshlock = 0 then begin
   if active and (field <> nil) and
                 ((afield = nil) or (afield = self.field)) then begin
    if fchangelock <> 0 then begin
-    databaseerror('Recursive recordchanged.',fowner);
+    databaseerror('Recursive recordchanged.',fownerlink);
    end;
    inc(fchangelock);
    try
-    with fowner do begin
+    with fownerlink do begin
      if not (csdesigning in componentstate) then begin
       fparamset:= true;
       bo1:= false;
@@ -979,7 +955,7 @@ begin
        var1:= param.value;
       end;
       if assigned(fonsetparam) then begin
-       fonsetparam(fowner,bo1);
+       fonsetparam(fownerlink,bo1);
       end;
       if not bo1 and (dataset <> nil) then begin
        if fparamname <> '' then begin
@@ -996,7 +972,7 @@ begin
        end;
       end;
       if assigned(fonaftersetparam) then begin
-       fonaftersetparam(fowner);
+       fonaftersetparam(fownerlink);
       end;
       bo2:= bo2 or (var1 <> param.value);
       if (frefreshlock = 0) and (fplo_autorefresh in foptions) and 
@@ -1038,14 +1014,14 @@ end;
 procedure tparamsourcedatalink.DataEvent(Event: TDataEvent; Info: Ptrint);
 begin
  inherited;
- with fowner do begin
+ with fownerlink do begin
   if (destdataset <> nil) and destdataset.active then begin
    inc(frefreshlock);
    try
     case ord(event) of
      ord(deupdatestate): begin
       if (fplo_syncmasteredit in foptions) and (dataset.state = dsedit) and 
-                      not (fowner.destdataset.state = dsedit) then begin
+                      not (fownerlink.destdataset.state = dsedit) then begin
        destdataset.edit;
       end;
       if (fplo_syncmasterinsert in foptions) and(dataset.state = dsinsert) and
@@ -1072,7 +1048,7 @@ label
 var
  intf: igetdscontroller;
 begin
- with fowner do begin
+ with fownerlink do begin
   if (destdataset <> nil) and destdataset.active then begin
    inc(frefreshlock);
    try
@@ -1336,7 +1312,7 @@ end;
 
 constructor tsequencedatalink.create(const aowner: tsequencelink);
 begin
- fowner:= aowner;
+ fownerlink:= aowner;
  inherited create;
 end;
 
@@ -1347,10 +1323,10 @@ begin
       ((dataset.modified) or 
                (fdscontroller <> nil) and fdscontroller.posting) then begin
   if field.datatype in [ftlargeint,ftfloat,ftcurrency,ftbcd] then begin
-   field.aslargeint:= fowner.aslargeint;
+   field.aslargeint:= fownerlink.aslargeint;
   end
   else begin
-   field.asinteger:= fowner.asinteger;
+   field.asinteger:= fownerlink.asinteger;
   end;
  end;
 end;
@@ -1510,13 +1486,13 @@ end;
 
 constructor tparamdestdatalink.create(const aowner: tfieldparamlink);
 begin
- fowner:= aowner;
+ fownerlink:= aowner;
  inherited create;
 end;
 
 function tparamdestdatalink.cansync(out sourceds: tdataset): boolean;
 begin
- with fowner.fsourcedatalink do begin
+ with fownerlink.fsourcedatalink do begin
   result:= false;
   sourceds:= dataset;
   if sourceds <> nil then begin
@@ -1530,7 +1506,7 @@ var
  sourceds: tdataset;
 begin
  inherited;
- with fowner do begin
+ with fownerlink do begin
   if cansync(sourceds) then begin
    case ord(event) of
     ord(deupdatestate): begin
@@ -1562,7 +1538,7 @@ var
  canceling: boolean;
 begin
  if cansync(sourceds) then begin
-  with fowner do begin
+  with fownerlink do begin
    inc(fsourcedatalink.frefreshlock);
    try
     canceling:= mseclasses.getcorbainterface(
@@ -1618,7 +1594,7 @@ var
  int1: integer;
  field1: tfield;
 begin
- with fowner do begin
+ with fownerlink do begin
   with fdestfields do begin
    for int1:= 0 to high(fitems) do begin
     with tdestfield(fitems[int1]) do begin

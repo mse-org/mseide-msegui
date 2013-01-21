@@ -365,26 +365,6 @@ uses
  msetabs,mseapplication,mseobjecttext,msedatamodules;
  
 type
- {$ifdef FPC}
- {$notes off}
-  TFilercracker = class(TObject)
-  private
-//    FRoot: TComponent;
-//    FLookupRoot: TComponent;
-  end;
- {$notes on}
-  {$else}
-  TFilercracker = class(TObject)
-  private
-    FStream: TStream;
-    FBuffer: Pointer;
-    FBufSize: Integer;
-    FBufPos: Integer;
-    FBufEnd: Integer;
-    FRoot: TComponent;
-    FLookupRoot: TComponent;
-  end;
-  {$endif}
  treader1 = class(treader);
  twriter1 = class(twriter);  
  tcomponent1 = class(tcomponent);

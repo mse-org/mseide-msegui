@@ -126,7 +126,7 @@ type
  
  ttxactiondestroyhandler = class(tcomponent)
   private
-   fowner: ttxlinkactions;
+   fowneractions: ttxlinkactions;
   protected
    procedure notification(acomponent: tcomponent;
                            operation: toperation); override;
@@ -1047,7 +1047,7 @@ end;
 
 constructor ttxactiondestroyhandler.create(aowner: ttxlinkactions);
 begin
- fowner:= aowner;
+ fowneractions:= aowner;
  inherited create(nil);
 end;
 
@@ -1058,7 +1058,7 @@ var
 begin
  inherited;
  if operation = opremove then begin
-  with fowner do begin
+  with fowneractions do begin
    for int1:= 0 to high(fitems) do begin
     with ttxlinkaction(fitems[int1]) do begin
      if acomponent = fificomp then begin

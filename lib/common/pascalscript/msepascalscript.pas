@@ -34,7 +34,7 @@ type
  
  tformscript = class(tpasc)
   private
-   fowner: tmsecomponent;
+   fownercomp: tmsecomponent;
   protected
    procedure docompimport(Sender: TObject; x: TPSPascalCompiler);
    procedure docompile(sender: tpsscript);
@@ -346,7 +346,7 @@ end;
 
 constructor tformscript.create(aowner: tmsecomponent);
 begin
- fowner:= aowner;
+ fownercomp:= aowner;
  inherited create(nil);
  compileroptions:= [icAllowNoBegin,icAllowNoEnd,icBooleanShortCircuit];
  oncompimport:= @docompimport;
@@ -359,7 +359,7 @@ procedure tformscript.docompimport(Sender: TObject; x: TPSPascalCompiler);
 var
  int1: integer;
 begin
- with fowner do begin
+ with fownercomp do begin
   with x.addclassn(x.findclass('TCOMPONENT'),'ttestobj') do begin
    registermethod('procedure testproc;');
    registermethod('procedure testproc1;');
@@ -379,7 +379,7 @@ procedure tformscript.docompile(sender: tpsscript);
 var
  int1: integer;
 begin
- with fowner do begin
+ with fownercomp do begin
   for int1:= 0 to componentcount - 1 do begin
    with components[int1] do begin
     sender.addregisteredvariable(name,classname);
@@ -405,7 +405,7 @@ var
 begin
  with sender do begin
   setvartoinstance('SELF',owner);
-  with fowner do begin
+  with fownercomp do begin
    for int1:= 0 to componentcount - 1 do begin
     comp1:= components[int1];
     setvartoinstance(struppercase(comp1.name),comp1);

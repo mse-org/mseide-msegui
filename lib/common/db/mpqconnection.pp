@@ -246,12 +246,9 @@ const
  varhdrsz = 4;
  nbase = 10000; //base for numeric digits
  maxprecision = 18;
- 
-type 
-  TDatabasecracker = class(TComponent)
-  private
-    FConnected : Boolean;
-  end;
+
+type
+ tdatabase1 = class(tdatabase);
 
 { TPQCursor }
 
@@ -436,14 +433,10 @@ begin
  if pqparameterstatus <> nil then begin
   FIntegerDatetimes := pqparameterstatus(FHandle,'integer_datetimes') = 'on';
  end;
-{$warnings off}
- with tdatabasecracker(self) do begin
-{$warnings on}
-  bo1:= fconnected;
-  fconnected:= true;
-  feventcontroller.connect;
-  fconnected:= bo1;
- end;
+ bo1:= fconnected;
+ fconnected:= true;
+ feventcontroller.connect;
+ fconnected:= bo1;
 end;
 
 procedure TPQConnection.DoInternalDisconnect;

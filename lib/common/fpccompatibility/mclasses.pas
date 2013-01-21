@@ -83,11 +83,9 @@ type
     FOwner: tcomponent;
     FName: TComponentName;
     FTag: Ptrint;
-    FComponents: TFpList;
-    FFreeNotifies: TFpList;
     FDesignInfo: Longint;
     FVCLComObject: Pointer;
-    FComponentState: TComponentState;
+    FComponentStyle: TComponentStyle;
 //    function GetComObject: IUnknown;
     function GetComponent(AIndex: Integer): tcomponent;
     function GetComponentCount: Integer;
@@ -102,7 +100,9 @@ type
     procedure WriteLeft(Writer: twriter);
     procedure WriteTop(Writer: twriter);
   protected
-    FComponentStyle: TComponentStyle;
+    FComponents: TFpList;
+    FFreeNotifies: TFpList;
+    FComponentState: TComponentState;
     procedure ChangeName(const NewName: TComponentName);
     procedure DefineProperties(Filer: tfiler); override;
     procedure GetChildren(Proc: TGetChildProc; Root: tcomponent); dynamic;
@@ -228,7 +228,6 @@ type
 
   TCollection = class(TPersistent)
   private
-    FItemClass: TCollectionItemClass;
     FItems: TFpList;
     FUpdateCount: Integer;
     FNextID: Integer;
@@ -239,6 +238,7 @@ type
     procedure RemoveItem(Item: TCollectionItem);
     procedure DoClear;
   protected
+    FItemClass: TCollectionItemClass;
     { Design-time editor support }
     function GetAttrCount: Integer; dynamic;
     function GetAttr(Index: Integer): string; dynamic;
@@ -317,11 +317,11 @@ type
 
   tfiler = class(TObject)
   private
+    FIgnoreChildren: Boolean;
+  protected
     FRoot: tcomponent;
     FLookupRoot: tcomponent;
     FAncestor: tpersistent;
-    FIgnoreChildren: Boolean;
-  protected
     procedure SetRoot(ARoot: tcomponent); virtual;
   public
     procedure DefineProperty(const Name: string;
@@ -425,7 +425,6 @@ type
     FOwner: tcomponent;
     FParent: tcomponent;
     FFixups: TObject;
-    FLoaded: TFpList;
     FOnFindMethod: TFindMethodEvent;
     FOnSetMethodProperty: TSetMethodPropertyEvent;
     FOnSetName: TSetNameEvent;
@@ -441,6 +440,7 @@ type
     procedure DoFixupReferences;
     function FindComponentClass(const AClassName: string): TComponentClass;
   protected
+    FLoaded: TFpList;
     function Error(const Message: string): Boolean; virtual;
     function FindMethod(ARoot: tcomponent; const AMethodName: string): Pointer; virtual;
     procedure ReadProperty(AInstance: tpersistent);
@@ -600,14 +600,7 @@ type
 
   twriter = class(tfiler)
   private
-    FDriver: TAbstractObjectWriter;
     FDestroyDriver: Boolean;
-    FRootAncestor: tcomponent;
-    FPropPath: String;
-    FAncestors: tstringlist;
-    FAncestorPos: Integer;
-    FCurrentPos: Integer;
-    FOnFindAncestor: TFindAncestorEvent;
     FOnWriteMethodProperty: TWriteMethodPropertyEvent;
     FOnWriteStringProperty:TReadWriteStringPropertyEvent;
     procedure AddToAncestorList(Component: tcomponent);
@@ -615,6 +608,13 @@ type
     Procedure DetermineAncestor(Component: tcomponent);
     procedure DoFindAncestor(Component : tcomponent);
   protected
+    FPropPath: String;
+    FAncestors: tstringlist;
+    FAncestorPos: Integer;
+    FRootAncestor: tcomponent;
+    FOnFindAncestor: TFindAncestorEvent;
+    FDriver: TAbstractObjectWriter;
+    FCurrentPos: Integer;
     procedure SetRoot(ARoot: tcomponent); override;
     procedure WriteBinary(AWriteData: TStreamProc);
     procedure WriteProperty(Instance: tpersistent; PropInfo: Pointer);

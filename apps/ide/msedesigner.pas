@@ -98,7 +98,7 @@ type
 
  tcomponentslink = class(tcomponent)
   private
-   fowner: tcomponents;
+   fownercomps: tcomponents;
   protected
    procedure notification(acomponent: tcomponent; operation: toperation); override;
  end;
@@ -2100,7 +2100,7 @@ begin
  fowner:= aowner;
  fdesigner:= adesigner;
  fcomponent:= tcomponentslink.Create(nil);
- fcomponent.fowner:= self;
+ fcomponent.fownercomps:= self;
  inherited create(sizeof(componentinfoty));
  fstate:= fstate + [hls_needsnull,hls_needsfinalize];
 end;
@@ -5591,7 +5591,7 @@ procedure tcomponentslink.notification(acomponent: tcomponent;
   operation: toperation);
 begin
  if operation = opremove then begin
-  fowner.destroynotification(acomponent);
+  fownercomps.destroynotification(acomponent);
  end;
  inherited;
 end;

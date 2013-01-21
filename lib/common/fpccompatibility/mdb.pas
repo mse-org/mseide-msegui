@@ -171,7 +171,6 @@ type
   TFieldDef = class(TNamedItem)
   Private
     FDataType : TFieldType;
-    FFieldNo : Longint;
     FInternalCalcField : Boolean;
     FPrecision : Longint;
     FRequired : Boolean;
@@ -183,6 +182,8 @@ type
     procedure SetPrecision(const AValue: Longint);
     procedure SetSize(const AValue: Integer);
     procedure SetRequired(const AValue: Boolean);
+   protected
+    FFieldNo : Longint;
   public
     constructor create(ACollection : TCollection); override;
     constructor Create(AOwner: TFieldDefs; const AName: string;
@@ -276,7 +277,6 @@ type
     FEditMask: TEditMask;
     FFieldKind : TFieldKind;
     FFieldName : String;
-    FFieldNo : Longint;
     FFields : TFields;
     FHasConstraints : Boolean;
     FImportedConstraint : String;
@@ -287,7 +287,6 @@ type
     FLookupKeyfields : String;
     FLookupresultField : String;
     FLookupList: TLookupList;
-    FOffset : Word;
     FOnChange : TFieldNotifyEvent;
     FOnGetText: TFieldGetTextEvent;
     FOnSetText: TFieldSetTextEvent;
@@ -297,8 +296,6 @@ type
     FRequired : Boolean;
     FSize : integer;
     FValidChars : TFieldChars;
-    FValueBuffer : Pointer;
-    FValidating : Boolean;
     FVisible : Boolean;
     FProviderFlags : TProviderFlags;
     function GetIndex : longint;
@@ -318,6 +315,10 @@ type
     function GetLookupList: TLookupList;
     procedure CalcLookupValue;
   protected
+    FValidating : Boolean;
+    FValueBuffer : Pointer;
+    FOffset : Word;
+    FFieldNo : Longint;
     function AccessError(const TypeName: string): EDatabaseError;
     procedure CheckInactive;
     class procedure CheckTypeSize(AValue: Longint); virtual;
@@ -1122,12 +1123,12 @@ type
     FNumericScale: Integer;
     FName: string;
     FDataType: TFieldType;
-    FBound: Boolean;
     FParamType: TParamType;
     FSize: Integer;
     Function GetDataSet: TDataSet;
     Function IsParamStored: Boolean;
   protected
+    FBound: Boolean;
     Procedure AssignParam(Param: TParam);
     Procedure AssignTo(Dest: TPersistent); override;
     Function GetAsBoolean: Boolean;
@@ -1338,6 +1339,24 @@ type
 
   TDataSet = class(TComponent)
   Private
+    Procedure DoInsertAppend(DoAppend : Boolean);
+    Procedure DoInternalOpen;
+    Function  GetBuffer (Index : longint) : TRecordBuffer;
+    Function  GetField (Index : Longint) : TField;
+    Procedure RegisterDataSource(ADatasource : TDataSource);
+    Procedure RemoveField (Field : TField);
+    procedure SetConstraints(Value: TCheckConstraints);
+    Procedure SetField (Index : Longint;Value : TField);
+    Procedure ShiftBuffersForward;
+    Procedure ShiftBuffersBackward;
+    Function  TryDoing (P : TDataOperation; Ev : TDatasetErrorEvent) : Boolean;
+    Function GetActive : boolean;
+    Procedure UnRegisterDataSource(ADatasource : TDatasource);
+    Procedure UpdateFieldDefs;
+    procedure SetBlockReadSize(AValue: Integer); virtual;
+    Procedure SetFieldDefs(AFieldDefs: TFieldDefs);
+    procedure DoInsertAppendRecord(const Values: array of const; DoAppend : boolean);
+  protected
     FOpenAfterRead : boolean;
     FActiveRecord: Longint;
     FAfterCancel: TDataSetNotifyEvent;
@@ -1393,24 +1412,6 @@ type
     FIsUniDirectional: Boolean;
     FState : TDataSetState;
     FInternalOpenComplete: Boolean;
-    Procedure DoInsertAppend(DoAppend : Boolean);
-    Procedure DoInternalOpen;
-    Function  GetBuffer (Index : longint) : TRecordBuffer;
-    Function  GetField (Index : Longint) : TField;
-    Procedure RegisterDataSource(ADatasource : TDataSource);
-    Procedure RemoveField (Field : TField);
-    procedure SetConstraints(Value: TCheckConstraints);
-    Procedure SetField (Index : Longint;Value : TField);
-    Procedure ShiftBuffersForward;
-    Procedure ShiftBuffersBackward;
-    Function  TryDoing (P : TDataOperation; Ev : TDatasetErrorEvent) : Boolean;
-    Function GetActive : boolean;
-    Procedure UnRegisterDataSource(ADatasource : TDatasource);
-    Procedure UpdateFieldDefs;
-    procedure SetBlockReadSize(AValue: Integer); virtual;
-    Procedure SetFieldDefs(AFieldDefs: TFieldDefs);
-    procedure DoInsertAppendRecord(const Values: array of const; DoAppend : boolean);
-  protected
     procedure RecalcBufListSize;
     procedure ActivateBuffers; virtual;
     procedure BindFields(Binding: Boolean);

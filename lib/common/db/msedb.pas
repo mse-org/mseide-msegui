@@ -260,7 +260,7 @@ type
 //   fvaluebuffer: msestring;
 //   fvalidating: boolean;
    fisftwidestring: boolean;
-   fdefaultexpression: msestring;
+   fdefaultexpressionstr: msestring;
    fdefaultexpressionbefore: string; 
                   //synchronize with TField.DefaultExpression
    fproviderflags1: providerflags1ty;
@@ -1652,47 +1652,6 @@ type
    property values: variantarty read getvalues write setvalues;
  end;
 
- TFieldcracker = class(TComponent)
-  Public
-    FAlignMent : TAlignment;
-    FAttributeSet : String;
-    FCalculated : Boolean;
-    FConstraintErrorMessage : String;
-    FCustomConstraint : String;
-    FDataSet : TDataSet;
-//    FDataSize : Word;
-    FDataType : TFieldType;
-    FDefaultExpression : String;
-    FDisplayLabel : String;
-    FDisplayWidth : Longint;
-{$ifdef mse_fpc_2_4_3}FEditMask: TEditMask;{$endif}
-    FFieldKind : TFieldKind;
-    FFieldName : String;
-    FFieldNo : Longint;
-    FFields : TFields;
-    FHasConstraints : Boolean;
-    FImportedConstraint : String;
-    FIsIndexField : Boolean;
-    FKeyFields : String;
-    FLookupCache : Boolean;
-    FLookupDataSet : TDataSet;
-    FLookupKeyfields : String;
-    FLookupresultField : String;
-    FLookupList: TLookupList;
-    FOffset : Word;
-    FOnChange : TFieldNotifyEvent;
-    FOnGetText: TFieldGetTextEvent;
-    FOnSetText: TFieldSetTextEvent;
-    FOnValidate: TFieldNotifyEvent;
-    FOrigin : String;
-    FReadOnly : Boolean;
-    FRequired : Boolean;
-    FSize : integer;
-    FValidChars : TFieldChars;
-    FValueBuffer : Pointer;
-    FValidating : Boolean;
-  end;
- 
 const
  fieldtypeclasses: array[fieldclasstypety] of fieldclassty = 
           (tfield,tstringfield,tnumericfield,
@@ -1850,176 +1809,11 @@ var
          //   ft_variant
            tmsevariantfield);
            
-type
- {$ifdef mse_FPC_2_2}
- TFieldDefcracker = class(TNamedItem)
- {$else}
- TFieldDefcracker = class(TCollectionItem)
- {$endif}
-  Private
-    FDataType : TFieldType;
-    FFieldNo : Longint;
-    FInternalCalcField : Boolean;
-    FPrecision : Longint;
-    FRequired : Boolean;
-    FSize : integer;
- end;
-
- tfielddefcrackerxx = class(tfielddefcracker) //no "not used" compiler messages 
-  public
-   property DataType : TFieldType read FDataType;
-   property FieldNo : Longint read FFieldNo;
-   property InternalCalcField : Boolean read FInternalCalcField;
-   property Precision : Longint read FPrecision;
-   property Required : Boolean read FRequired;
-   property Size : integer read FSize;
- end;
- 
-  TCollectioncracker = class(TPersistent)
-   private
-    FItemClass: TCollectionItemClass;
-  end;
-  TParamcracker = class(TCollectionItem)
-  private
-    FNativeStr: string;
-    FValue: Variant;
-    FPrecision: Integer;
-    FNumericScale: Integer;
-    FName: string;
-    FDataType: TFieldType;
-    FBound: Boolean;
-    FParamType: TParamType;
-    FSize: Integer;
-  end;
-  
-  TParamcrackerxx = class(tparamcracker) //no "not used" compiler messages
-  public
-    property NativeStr: string read FNativeStr;
-    property Value: Variant read FValue;
-    property Precision: Integer read FPrecision;
-    property NumericScale: Integer read FNumericScale;
-    property Name: string read FName;
-    property DataType: TFieldType read FDataType;
-    property Bound: Boolean read FBound;
-    property ParamType: TParamType read FParamType;
-    property Size: Integer read FSize;
-  end;
-  
-  TDataSetcracker = class(TComponent)
-   Private
-{$ifdef mse_fpc_2_6}
-    FOpenAfterRead : boolean;
-    FActiveRecord: Longint;
-    FAfterCancel: TDataSetNotifyEvent;
-    FAfterClose: TDataSetNotifyEvent;
-    FAfterDelete: TDataSetNotifyEvent;
-    FAfterEdit: TDataSetNotifyEvent;
-    FAfterInsert: TDataSetNotifyEvent;
-    FAfterOpen: TDataSetNotifyEvent;
-    FAfterPost: TDataSetNotifyEvent;
-    FAfterRefresh: TDataSetNotifyEvent;
-    FAfterScroll: TDataSetNotifyEvent;
-    FAutoCalcFields: Boolean;
-    FBOF: Boolean;
-    FBeforeCancel: TDataSetNotifyEvent;
-    FBeforeClose: TDataSetNotifyEvent;
-    FBeforeDelete: TDataSetNotifyEvent;
-    FBeforeEdit: TDataSetNotifyEvent;
-    FBeforeInsert: TDataSetNotifyEvent;
-    FBeforeOpen: TDataSetNotifyEvent;
-    FBeforePost: TDataSetNotifyEvent;
-    FBeforeRefresh: TDataSetNotifyEvent;
-    FBeforeScroll: TDataSetNotifyEvent;
-    FBlobFieldCount: Longint;
-    FBlockReadSize: Integer;
-    FBookmarkSize: Longint;
-    FBuffers : TBufferArray;
-    FBufferCount: Longint;
-    FCalcBuffer: PChar;
-    FCalcFieldsSize: Longint;
-    FConstraints: TCheckConstraints;
-    FDisableControlsCount : Integer;
-    FDisableControlsState : TDatasetState;
-    FCurrentRecord: Longint;
-    FDataSources : TList;
-{$else}
-    FOpenAfterRead : boolean;
-    FActiveRecord: Longint;
-    FAfterCancel: TDataSetNotifyEvent;
-    FAfterClose: TDataSetNotifyEvent;
-    FAfterDelete: TDataSetNotifyEvent;
-    FAfterEdit: TDataSetNotifyEvent;
-    FAfterInsert: TDataSetNotifyEvent;
-    FAfterOpen: TDataSetNotifyEvent;
-    FAfterPost: TDataSetNotifyEvent;
-    FAfterRefresh: TDataSetNotifyEvent;
-    FAfterScroll: TDataSetNotifyEvent;
-    FAutoCalcFields: Boolean;
-    FBOF: Boolean;
-    FBeforeCancel: TDataSetNotifyEvent;
-    FBeforeClose: TDataSetNotifyEvent;
-    FBeforeDelete: TDataSetNotifyEvent;
-    FBeforeEdit: TDataSetNotifyEvent;
-    FBeforeInsert: TDataSetNotifyEvent;
-    FBeforeOpen: TDataSetNotifyEvent;
-    FBeforePost: TDataSetNotifyEvent;
-    FBeforeRefresh: TDataSetNotifyEvent;
-    FBeforeScroll: TDataSetNotifyEvent;
-    FBlobFieldCount: Longint;
-    FBookmarkSize: Longint;
-    FBuffers : TBufferArray;
-    FBufferCount: Longint;
-    FCalcBuffer: PChar;
-    FCalcFieldsSize: Longint;
-    FConstraints: TCheckConstraints;
-    FDisableControlsCount : Integer;
-    FDisableControlsState : TDatasetState;
-    FCurrentRecord: Longint;
-    FDataSources : TList;
-  {$endif}
-  end;
-
-  TDataSetcrackerxx = class(TDataSetcracker) //no "not used note"
-   public
-    property OpenAfterRead : boolean read FOpenAfterRead;
-    property ActiveRecord: Longint read FActiveRecord;
-    property AfterCancel: TDataSetNotifyEvent read FAfterCancel;
-    property AfterClose: TDataSetNotifyEvent read FAfterClose;
-    property AfterDelete: TDataSetNotifyEvent read FAfterDelete;
-    property AfterEdit: TDataSetNotifyEvent read FAfterEdit;
-    property AfterInsert: TDataSetNotifyEvent read FAfterInsert;
-    property AfterOpen: TDataSetNotifyEvent read FAfterOpen;
-    property AfterPost: TDataSetNotifyEvent read FAfterPost;
-    property AfterRefresh: TDataSetNotifyEvent read FAfterRefresh;
-    property AfterScroll: TDataSetNotifyEvent read FAfterScroll;
-    property AutoCalcFields: Boolean read FAutoCalcFields;
-    property BOF: Boolean read FBOF;
-    property BeforeCancel: TDataSetNotifyEvent read FBeforeCancel;
-    property BeforeClose: TDataSetNotifyEvent read FBeforeClose;
-    property BeforeDelete: TDataSetNotifyEvent read FBeforeDelete;
-    property BeforeEdit: TDataSetNotifyEvent read FBeforeEdit;
-    property BeforeInsert: TDataSetNotifyEvent read FBeforeInsert;
-    property BeforeOpen: TDataSetNotifyEvent read FBeforeOpen;
-    property BeforePost: TDataSetNotifyEvent read FBeforePost;
-    property BeforeRefresh: TDataSetNotifyEvent read FBeforeRefresh;
-    property BeforeScroll: TDataSetNotifyEvent read FBeforeScroll;
-    property BlobFieldCount: Longint read FBlobFieldCount;
-    property BookmarkSize: Longint read FBookmarkSize;
-    property Buffers : TBufferArray read FBuffers;
-    property BufferCount: Longint read FBufferCount;
-    property CalcBuffer: PChar read FCalcBuffer;
-    property CalcFieldsSize: Longint read FCalcFieldsSize;
-    property Constraints: TCheckConstraints read FConstraints;
-    property DisableControlsCount : Integer read FDisableControlsCount;
-    property DisableControlsState : TDatasetState read FDisableControlsState;
-    property CurrentRecord: Longint read Fcurrentrecord;
-    property DataSources : TList read FDataSources;
-   {$ifdef mse_fpc_2_6}
-    property BlockReadSize: Integer read FBlockReadSize;
-   {$endif}
-  end;
-  
+type 
  tdataset1 = class(tdataset);
+ tfielddef1 = class(tfielddef);
+ tcollection1 = class(tcollection);
+ tparam1 = class(tparam);
 
 function opentodynarrayft(const items: array of tfieldtype): fieldtypearty;
 var
@@ -3787,14 +3581,14 @@ function tmsestringfield.getdefaultexpression: msestring;
 begin
  if inherited defaultexpression <> fdefaultexpressionbefore then begin
   fdefaultexpressionbefore:= inherited defaultexpression;
-  fdefaultexpression:= fdefaultexpressionbefore;
+  fdefaultexpressionstr:= fdefaultexpressionbefore;
  end;
- result:= fdefaultexpression;
+ result:= fdefaultexpressionstr;
 end;
 
 procedure tmsestringfield.setdefaultexpression(const avalue: msestring);
 begin
- fdefaultexpression:= avalue;
+ fdefaultexpressionstr:= avalue;
  try
   fdefaultexpressionbefore:= avalue;
   inherited defaultexpression:= fdefaultexpressionbefore;
@@ -7371,7 +7165,7 @@ begin
   }
   for int1:= 0 to fielddefs.count - 1 do begin
 {$warnings off}
-   with tfielddefcracker(fielddefs[int1]) do begin
+   with tfielddef1(fielddefs[int1]) do begin
 {$warnings on}
     if ffieldno = 0 then begin
      ffieldno:= int1 + 1;
@@ -8270,7 +8064,7 @@ constructor tmseparams.create(aowner: tpersistent);
 begin
  inherited create(aowner);
 {$warnings off}
- tcollectioncracker(self).fitemclass:= tmseparam;
+ tcollection1(self).fitemclass:= tmseparam;
 {$warnings on}
 end;
 
@@ -8738,7 +8532,7 @@ procedure tmseparam.setasvariant(const avalue: variant);
 begin
  inherited setasvariant(avalue);
 {$warnings off}
- tparamcracker(self).fbound:= not varisclear(avalue);
+ tparam1(self).fbound:= not varisclear(avalue);
 {$warnings on}
 end;
 //{$endif mse_withpublishedparamvalue}
@@ -8836,7 +8630,7 @@ var
 begin
  if (dataset <> nil) then begin
 {$warnings off}
-  with tdatasetcracker(dataset) do begin
+  with tdataset1(dataset) do begin
 {$warnings on}
    int1:= fdatasources.indexof(self);
    if int1 >= 0 then begin
