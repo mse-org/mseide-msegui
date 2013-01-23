@@ -237,6 +237,8 @@ const
  oid_time_ar      = 1183;
  oid_numeric      = 1700;
  oid_numeric_ar   = 1231;
+ oid_uuid         = 2950;
+ oid_uuid_ar      = 2951;
  pg_diag_sqlstate = 'C';
  
  inv_read =  $40000;
