@@ -583,6 +583,14 @@ begin
    isarray:= true;
    vartype:= varcurrency;
   end;
+  oid_uuid: begin
+   result:= ftguid;
+  end;
+  oid_uuid_ar: begin
+   result:= ftguid;
+   isarray:= true;
+   vartype:= varstring;
+  end;
   Oid_Unknown: begin
    Result:= ftUnknown;
   end;
@@ -651,7 +659,7 @@ const TypeStrings : array[TFieldType] of string =
       'Unknown',  //ftVariant
       'Unknown',  //ftInterface
       'Unknown',  //ftIDispatch
-      'Unknown',  //ftGuid
+      'uuid',     //ftGuid
       'Unknown',  //ftTimeStamp
       'Unknown'   //ftFMTBcd
       {$ifdef mse_FPC_2_2}
@@ -1065,6 +1073,7 @@ var
    tel: byte;
    numericrecord: tnumericrecord;
    str1: string;
+   guid1: tguid;
   begin
    with TPQCursor(cursor) do begin
     case aDataType of
@@ -1210,6 +1219,19 @@ var
        move(wbo1,buffer^,sizeof(wbo1));
        inc(buffer,sizeof(wbo1));
       end;
+      inc(currbuff,asize);
+     end;
+     ftguid: begin
+      with pguid(currbuff)^ do begin
+       guid1.time_low:= beton(time_low);
+       guid1.time_mid:= beton(time_mid);
+       guid1.time_hi_and_version:= beton(time_hi_and_version);
+       guid1.clock_seq_hi_and_reserved:= clock_seq_hi_and_reserved;
+       guid1.clock_seq_low:= clock_seq_low;
+       guid1.node:= node;
+      end;
+      pguidbufferty(buffer)^:= guidtostring(guid1);
+      inc(buffer,sizeof(guidbufferty));
       inc(currbuff,asize);
      end;
      else begin

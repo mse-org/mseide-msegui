@@ -371,7 +371,7 @@ begin
       tmsebooleanfield,tmsedatetimefield,tmsedatefield,tmsetimefield,
       tmsebinaryfield,tmsebytesfield,tmsevarbytesfield,
       tmsebcdfield,tmseblobfield,tmsememofield,tmsegraphicfield,
-      tmsevariantfield,
+      tmsevariantfield,tmseguidfield,
       tfieldparamlink,tfieldlink,ttimestampfieldlink,tfieldfieldlink,
       tsequencelink,tdbevent,tparamconnector,tsqlresultconnector,
       tdblabel,tdbstringdisp,tdbintegerdisp,tdbbooleandisp,

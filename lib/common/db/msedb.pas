@@ -44,15 +44,20 @@ uses
  sysutils,msebintree,mseact,msetimer{$ifdef mse_fpc_2_4_3},maskutils{$endif},
  msevariants;
 
+const
+ guidbuffersize = 38;
 type
  bookmarkty = string; 
    //use instead of TBookmarkStr in order to avoid
    // FPC deprecated warning
- 
+ guidbufferty = array[0..guidbuffersize-1] of char;
+ pguidbufferty = ^guidbufferty;
+
  fieldtypearty = array of tfieldtype;
  fieldtypesty = set of tfieldtype;
  fieldtypesarty = array of fieldtypesty;
  datasetarty = array of tdataset;
+ 
 const
  int32fields = [ftsmallint,ftinteger,ftword];
  int64fields = [ftlargeint];
@@ -61,7 +66,7 @@ const
  charfields = [ftstring,ftfixedchar];
 
  widecharfields = [ftwidestring,ftfixedwidechar,ftwidememo];
- textfields = [ftstring,ftfixedchar,ftwidestring,ftfixedwidechar,ftmemo];
+ textfields = [ftstring,ftfixedchar,ftwidestring,ftfixedwidechar,ftmemo,ftguid];
  memofields = textfields+[ftmemo];
  integerfields = [ftsmallint,ftinteger,ftword,ftlargeint,ftbcd];
  booleanfields = [ftboolean,ftstring,ftfixedchar]+integerfields-[ftbcd];
@@ -230,6 +235,8 @@ type
   public
    function HasParent: Boolean; override;
    procedure Clear; override;
+   function assql: string;
+   function asoldsql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
    property tagpo: pointer read ftagpo write ftagpo;
   published
@@ -332,6 +339,24 @@ type
    property Transliterate default false;
  end;
 
+ tmseguidfield = class(tmsefield,imsefield)
+  private
+  protected
+   function getasvariant: variant; override;
+   procedure setvarvalue(const avalue: variant); override;
+   function getasstring: string; override;
+   procedure setasstring(const avalue: string); override;
+   function getdefaultwidth: longint; override;
+
+   function getasguid: tguid;
+   procedure setasguid(const avalue: tguid);
+  public
+   constructor create(aowner: tcomponent); override;
+   property asguid: tguid read getasguid write setasguid;
+   property value: string read getasstring write setasstring;
+  published
+ end;
+ 
  tmsenumericfield = class(tnumericfield,imsefield)
   private
    fstate: fieldstatesty;
@@ -1215,7 +1240,7 @@ type
  
  fieldclassty = class of tfield;
  
- fieldclasstypety = (ft_unknown,ft_string,ft_numeric,
+ fieldclasstypety = (ft_unknown,ft_string,ft_guid,ft_numeric,
                      ft_longint,ft_largeint,ft_smallint,
                      ft_word,ft_autoinc,ft_float,ft_currency,ft_boolean,
                      ft_datetime,ft_date,ft_time,
@@ -1654,7 +1679,7 @@ type
 
 const
  fieldtypeclasses: array[fieldclasstypety] of fieldclassty = 
-          (tfield,tstringfield,tnumericfield,
+          (tfield,tstringfield,tguidfield,tnumericfield,
            tlongintfield,tlargeintfield,tsmallintfield,
            twordfield,tautoincfield,tfloatfield,tcurrencyfield,
            tbooleanfield,
@@ -1677,7 +1702,7 @@ const
     //ftDataSet, ftOraBlob, ftOraClob, ftVariant, ftInterface,
       ft_unknown,ft_unknown,ft_unknown,ft_variant,ft_unknown,
     //ftIDispatch, ftGuid, ftTimeStamp, ftFMTBcd
-      ft_unknown,ft_unknown,ft_unknown,ft_unknown
+      ft_unknown,  ft_guid,ft_unknown,  ft_unknown
       {$ifdef mse_FPC_2_2}
     //ftFixedWideChar,ftWideMemo
       ,ft_string,    ft_string 
@@ -1690,7 +1715,8 @@ const
  memofcomp = [ftmemo];
  longintfcomp = [ftboolean,ftsmallint,ftinteger,ftword];
  largeintfcomp = longintfcomp + [ftlargeint];
- stringfcomp = [ftstring,ftfixedchar,ftwidestring,ftfixedwidechar,ftwidememo];
+ stringfcomp = [ftstring,ftguid,ftfixedchar,ftwidestring,ftfixedwidechar,
+                ftwidememo];
  booleanfcomp = [ftboolean,ftsmallint,ftinteger,ftword];
       
  fieldcompatibility: array[tfieldtype] of fieldtypesty = (
@@ -1792,8 +1818,8 @@ const
  fieldnamedummy = ';%)(mse';
 var
  msefieldtypeclasses: array[fieldclasstypety] of fieldclassty = 
-         // ft_unknown, ft_string,       ft_numeric,
-          (tmsefield,tmsestringfield,tmsenumericfield,
+         // ft_unknown, ft_string,   ft_guid,      ft_numeric,
+          (tmsefield,tmsestringfield,tmseguidfield,tmsenumericfield,
          //  ft_longint,         ft_largeint,    ft_smallint,
            tmselongintfield,tmselargeintfield,tmsesmallintfield,
          //    ft_word,     ft_autoinc,       ft_float,      ft_currency,
@@ -2385,7 +2411,7 @@ begin
  end
  else begin
   case field.datatype of
-   ftstring: begin
+   ftstring,ftguid: begin
     if not (field is tmsestringfield) {or 
          (tmsestringfield(field).fdsintf = nil)} then begin
      result:= encodesqlstring(field.asstring);
@@ -2469,7 +2495,7 @@ begin
     ftwidestring: begin
      result:= encodesqlstring(aswidestring);
     end;
-    ftstring: begin
+    ftstring,ftguid: begin
      result:= encodesqlstring(asstring);
     end;
     ftmemo: begin
@@ -2540,7 +2566,7 @@ begin
   end
   else begin
    case field.datatype of
-    ftString,ftFixedChar,ftmemo,ftblob: begin
+    ftString,ftFixedChar,ftmemo,ftblob,ftguid: begin
      str1:= field.asstring;
      ds1.settempstate(astate); 
      result:= (field.isnull xor isnull) or (str1 <> field.asstring);
@@ -3322,6 +3348,17 @@ begin
  setdata(nil);
 end;
 
+
+function tmsefield.assql: string;
+begin
+ result:= fieldtosql(self);
+end;
+
+function tmsefield.asoldsql: string;
+begin
+ result:= fieldtooldsql(self);
+end;
+
 {$ifdef hasaswidestring}
 function tmsefield.getaswidestring: widestring;
 begin
@@ -3709,6 +3746,80 @@ end;
 procedure tmsememofield.gettext(var thetext: string; adisplaytext: boolean);
 begin
  thetext:= asstring;
+end;
+
+{ tmseguidfield }
+
+constructor tmseguidfield.create(aowner: tcomponent);
+begin
+ inherited;
+ setdatatype(ftguid);
+end;
+
+function tmseguidfield.getasstring: string;
+var
+ buf1: guidbufferty;
+begin
+ if not getdata(@buf1) then begin
+  result:= '';
+ end
+ else begin
+  result:= buf1;
+ end;
+end;
+
+procedure tmseguidfield.setasstring(const avalue: string);
+var
+ buf1: guidbufferty;
+begin
+ if avalue = '' then begin
+  clear;
+ end
+ else begin
+  buf1:= avalue;
+  setdata(@buf1);
+ end;
+end;
+
+function tmseguidfield.getdefaultwidth: longint;
+begin
+ result:= guidbuffersize;
+end;
+
+function tmseguidfield.getasguid: tguid;
+var
+ str1: string;
+begin
+ str1:= getasstring;
+ if str1 = '' then begin
+  fillchar(result,sizeof(result),0);
+ end
+ else begin
+  result:= stringtoguid(str1);
+ end;
+end;
+
+procedure tmseguidfield.setasguid(const avalue: tguid);
+begin
+ setasstring(guidtostring(avalue));
+end;
+
+function tmseguidfield.getasvariant: variant;
+var
+ str1: string;
+begin
+ str1:= asstring;
+ if str1 = '' then begin
+  result:= null;
+ end
+ else begin
+  result:= str1;
+ end;
+end;
+
+procedure tmseguidfield.setvarvalue(const avalue: variant);
+begin
+ asstring:= avalue;
 end;
 
 { tmsenumericfield }
