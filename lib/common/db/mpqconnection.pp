@@ -1230,7 +1230,7 @@ var
        guid1.clock_seq_low:= clock_seq_low;
        guid1.node:= node;
       end;
-      pguidbufferty(buffer)^:= guidtostring(guid1);
+      pguidbufferty(buffer)^:= dbguidtostring(guid1);
       inc(buffer,sizeof(guidbufferty));
       inc(currbuff,asize);
      end;

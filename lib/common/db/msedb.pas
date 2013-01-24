@@ -45,7 +45,7 @@ uses
  msevariants;
 
 const
- guidbuffersize = 38;
+ guidbuffersize = 36; //aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee
 type
  bookmarkty = string; 
    //use instead of TBookmarkStr in order to avoid
@@ -1807,12 +1807,17 @@ function idtovariant(const value: int64): variant; //-1 -> null
 function varianttomsestring(const value: variant): msestring; //null -> ''
 function msestringtovariant(const value: msestring): variant; //'' -> null
 
+function dbtrystringtoguid(const value: string; out guid: tguid): boolean;
+function dbstringtoguid(const value: string): tguid;
+function dbguidtostring(const avalue: tguid): string;
+function dbcreateguidstring: string;
+
 function opentodynarrayft(const items: array of tfieldtype): fieldtypearty;
 
 implementation
 uses
  rtlconsts,msefileutils,typinfo,dbconst,msearrayutils,mseformatstr,msebits,
- msereal,variants,msedate,msesys
+ msereal,variants,msedate,msesys,sysconst
  {,msedbgraphics}{$ifdef unix},cwstring{$endif};
 const
  fieldnamedummy = ';%)(mse';
@@ -1840,6 +1845,89 @@ type
  tfielddef1 = class(tfielddef);
  tcollection1 = class(tcollection);
  tparam1 = class(tparam);
+
+function dbtrystringtoguid(const value: string; out guid: tguid): boolean;
+var
+ int1: integer;
+ po1: pchar;
+ 
+ function readbyte: byte;
+ var 
+  by1: byte;
+ begin
+  by1:= hexchars[po1^];
+  inc(po1);
+  if shortint(by1) < 0 then begin
+   dbtrystringtoguid:= false;
+  end;
+  result:= hexchars[po1^];
+  inc(po1);
+  if shortint(result) < 0 then begin
+   dbtrystringtoguid:= false;
+  end;
+  result:= result or (by1 shl 4);
+ end;
+ 
+ function checkhyphen: boolean; inline;
+ begin
+  result:= po1^ = '-';
+  inc(po1);
+ end;
+  
+begin
+ result:= true;
+ if length(value) = guidbuffersize then begin
+  po1:= pointer(value);
+  with guid do begin
+   time_low:= (readbyte shl 24) or (readbyte shl 16) or (readbyte shl 8) or
+                                                                     readbyte;
+   if checkhyphen then begin
+    time_mid:= (readbyte shl 8) or readbyte;
+    if checkhyphen then begin
+     time_hi_and_version:= (readbyte shl 8) or readbyte;
+     if checkhyphen then begin
+      clock_seq_hi_and_reserved:= (readbyte shl 8) or readbyte;
+      clock_seq_low:= (readbyte shl 8) or readbyte;
+      if checkhyphen then begin
+       for int1:= 0 to high(node) do begin
+        node[int1]:= readbyte;
+       end;
+      end;
+     end;
+    end;
+   end;
+  end;
+ end;
+end;
+
+function dbstringtoguid(const value: string): tguid;
+begin
+ if not dbtrystringtoguid(value,result) then begin
+  raise econverterror.createfmt(sinvalidguid, [value]);
+ end;
+end;
+
+function dbguidtostring(const avalue: tguid): string;
+var
+ int1: integer;
+begin
+ with avalue do begin
+  result:= valtohex(time_low)+'-'+valtohex(time_mid)+'-'+
+           valtohex(time_hi_and_version)+'-'+
+           valtohex(clock_seq_hi_and_reserved)+valtohex(clock_seq_low)+'-';  
+  for int1:= 0 to high(node) do begin
+   result:= result+valtohex(node[int1]);
+  end;
+ end;
+end;
+
+function dbcreateguidstring: string;
+var
+ id: tguid;
+begin
+ createguid(id);
+ result:= dbguidtostring(id);
+end;
 
 function opentodynarrayft(const items: array of tfieldtype): fieldtypearty;
 var
@@ -3792,16 +3880,16 @@ var
 begin
  str1:= getasstring;
  if str1 = '' then begin
-  fillchar(result,sizeof(result),0);
+  result:= GUID_NULL;
  end
  else begin
-  result:= stringtoguid(str1);
+  result:= dbstringtoguid(str1);
  end;
 end;
 
 procedure tmseguidfield.setasguid(const avalue: tguid);
 begin
- setasstring(guidtostring(avalue));
+ setasstring(dbguidtostring(avalue));
 end;
 
 function tmseguidfield.getasvariant: variant;
