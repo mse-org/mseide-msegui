@@ -50,8 +50,8 @@ type
  bookmarkty = string; 
    //use instead of TBookmarkStr in order to avoid
    // FPC deprecated warning
- guidbufferty = array[0..guidbuffersize-1] of char;
- pguidbufferty = ^guidbufferty;
+// guidbufferty = array[0..guidbuffersize-1] of char;
+// pguidbufferty = ^guidbufferty;
 
  fieldtypearty = array of tfieldtype;
  fieldtypesty = set of tfieldtype;
@@ -347,13 +347,14 @@ type
    function getasstring: string; override;
    procedure setasstring(const avalue: string); override;
    function getdefaultwidth: longint; override;
+   function getdatasize: integer; override;
 
    function getasguid: tguid;
    procedure setasguid(const avalue: tguid);
   public
    constructor create(aowner: tcomponent); override;
    property asguid: tguid read getasguid write setasguid;
-   property value: string read getasstring write setasstring;
+   property value: tguid read getasguid write setasguid;
   published
  end;
  
@@ -1873,11 +1874,16 @@ var
   result:= po1^ = '-';
   inc(po1);
  end;
-  
+
 begin
- result:= true;
- if length(value) = guidbuffersize then begin
-  po1:= pointer(value);
+ po1:= pointer(value);
+ result:= length(value) = guidbuffersize;
+ if not result and (length(value) = guidbuffersize+2) and (value[1]='{') and
+                              (value[guidbuffersize+2]='}') then begin
+  inc(po1);
+  result:= true;
+ end;  
+ if result then begin
   with guid do begin
    time_low:= (readbyte shl 24) or (readbyte shl 16) or (readbyte shl 8) or
                                                                      readbyte;
@@ -1886,8 +1892,8 @@ begin
     if checkhyphen then begin
      time_hi_and_version:= (readbyte shl 8) or readbyte;
      if checkhyphen then begin
-      clock_seq_hi_and_reserved:= (readbyte shl 8) or readbyte;
-      clock_seq_low:= (readbyte shl 8) or readbyte;
+      clock_seq_hi_and_reserved:= readbyte;
+      clock_seq_low:= readbyte;
       if checkhyphen then begin
        for int1:= 0 to high(node) do begin
         node[int1]:= readbyte;
@@ -3846,26 +3852,28 @@ end;
 
 function tmseguidfield.getasstring: string;
 var
- buf1: guidbufferty;
+ id1: tguid;
 begin
- if not getdata(@buf1) then begin
+ if not getdata(@id1) then begin
   result:= '';
  end
  else begin
-  result:= buf1;
+  result:= dbguidtostring(id1);
  end;
 end;
 
 procedure tmseguidfield.setasstring(const avalue: string);
-var
- buf1: guidbufferty;
 begin
  if avalue = '' then begin
   clear;
  end
  else begin
-  buf1:= avalue;
-  setdata(@buf1);
+  if avalue[1] = '{' then begin
+   asguid:= stringtoguid(avalue);
+  end
+  else begin
+   asguid:= dbstringtoguid(avalue);
+  end;
  end;
 end;
 
@@ -3875,39 +3883,37 @@ begin
 end;
 
 function tmseguidfield.getasguid: tguid;
-var
- str1: string;
 begin
- str1:= getasstring;
- if str1 = '' then begin
+ if not getdata(@result) then begin
   result:= GUID_NULL;
- end
- else begin
-  result:= dbstringtoguid(str1);
  end;
 end;
 
 procedure tmseguidfield.setasguid(const avalue: tguid);
 begin
- setasstring(dbguidtostring(avalue));
+ setdata(@avalue);
 end;
 
 function tmseguidfield.getasvariant: variant;
 var
- str1: string;
+ id1: tguid;
 begin
- str1:= asstring;
- if str1 = '' then begin
+ if not getdata(@id1) then begin
   result:= null;
  end
  else begin
-  result:= str1;
+  result:= dbguidtostring(id1);
  end;
 end;
 
 procedure tmseguidfield.setvarvalue(const avalue: variant);
 begin
  asstring:= avalue;
+end;
+
+function tmseguidfield.getdatasize: integer;
+begin
+ result:= sizeof(tguid);
 end;
 
 { tmsenumericfield }

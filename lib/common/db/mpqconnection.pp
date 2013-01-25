@@ -1073,7 +1073,6 @@ var
    tel: byte;
    numericrecord: tnumericrecord;
    str1: string;
-   guid1: tguid;
   begin
    with TPQCursor(cursor) do begin
     case aDataType of
@@ -1223,15 +1222,14 @@ var
      end;
      ftguid: begin
       with pguid(currbuff)^ do begin
-       guid1.time_low:= beton(time_low);
-       guid1.time_mid:= beton(time_mid);
-       guid1.time_hi_and_version:= beton(time_hi_and_version);
-       guid1.clock_seq_hi_and_reserved:= clock_seq_hi_and_reserved;
-       guid1.clock_seq_low:= clock_seq_low;
-       guid1.node:= node;
+       pguid(buffer)^.time_low:= beton(time_low);
+       pguid(buffer)^.time_mid:= beton(time_mid);
+       pguid(buffer)^.time_hi_and_version:= beton(time_hi_and_version);
+       pguid(buffer)^.clock_seq_hi_and_reserved:= clock_seq_hi_and_reserved;
+       pguid(buffer)^.clock_seq_low:= clock_seq_low;
+       pguid(buffer)^.node:= node;
       end;
-      pguidbufferty(buffer)^:= dbguidtostring(guid1);
-      inc(buffer,sizeof(guidbufferty));
+      inc(buffer,sizeof(tguid));
       inc(currbuff,asize);
      end;
      else begin

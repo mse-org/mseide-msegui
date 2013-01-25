@@ -49,6 +49,7 @@ type
    function getasmsestring: msestring; virtual;
    function getasmsestring1: msestring; virtual;
    function getassql: msestring; virtual;
+   function getasguid: tguid; virtual;
    function getisnull: boolean; virtual;
    function loadfield(const buffer: pointer; var bufsize: integer): boolean; overload;
                 //false if null or inactive
@@ -73,6 +74,7 @@ type
    property asmsestring: msestring read getasmsestring1;
    property assql: msestring read getassql1;
    property asid: int64 read getasid;
+   property asguiid: tguid read getasguid;
    property isnull: boolean read getisnull;
    
  end;
@@ -94,6 +96,7 @@ type
  tguiddbcol = class(tdbcol)
   private
   protected
+   function getasguid: tguid; override;
    function getvariantvar: variant; override;
    function getassql: msestring; override;
    function getasstring: string; override;
@@ -722,6 +725,12 @@ begin
  result:= ''; //compiler warning;
 end;
 
+function tdbcol.getasguid: tguid;
+begin
+ raise accesserror('Guid');
+ result:= guid_null; //compiler warning;
+end;
+
 function tdbcol.getassql1: msestring;
 begin
  if isnull then begin
@@ -1130,13 +1139,20 @@ end;
 
 function tguiddbcol.getasstring: string;
 var
- buf1: guidbufferty;
+ id1: tguid;
 begin
- if not loadfield(@buf1) then begin
+ if not loadfield(@id1) then begin
   result:= '';
  end
  else begin
-  result:= buf1;
+  result:= dbguidtostring(id1);
+ end;
+end;
+
+function tguiddbcol.getasguid: tguid;
+begin
+ if not loadfield(@result) then begin
+  result:= guid_null;
  end;
 end;
 
