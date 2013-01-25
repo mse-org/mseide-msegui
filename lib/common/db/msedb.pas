@@ -58,6 +58,14 @@ type
  fieldtypesty = set of tfieldtype;
  fieldtypesarty = array of fieldtypesty;
  datasetarty = array of tdataset;
+
+ fielddefty = record
+  datatype: tfieldtype;
+  size: integer;
+  name: string;
+ end;
+ pfielddefty = ^fielddefty;
+ fielddefarty = array of fielddefty;
  
 const
  int32fields = [ftsmallint,ftinteger,ftword];
@@ -1749,6 +1757,7 @@ const
 function getdsfields(const adataset: tdataset;
                   const afields: array of tfield): fieldarty;
                      //[] -> all
+function getfielddefar(const fielddefs: tfielddefs): fielddefarty;
 
 function getmsefieldclass(const afieldtype: tfieldtype): tfieldclass; overload;
 function getmsefieldclass(const afieldtype: fieldclasstypety): tfieldclass; overload;
@@ -2072,6 +2081,22 @@ begin
    for int1:= 0 to high(result) do begin
     result[int1]:= fields[int1];
    end;
+  end;
+ end;
+end;
+
+function getfielddefar(const fielddefs: tfielddefs): fielddefarty;
+var
+ po1: pfielddefty;
+ int1: integer;
+begin
+ setlength(result,fielddefs.count);
+ for int1:= 0 to high(result) do begin
+  po1:= @result[int1];
+  with fielddefs[int1] do begin
+   po1^.datatype:= datatype;
+   po1^.size:= size;
+   po1^.name:= name;
   end;
  end;
 end;

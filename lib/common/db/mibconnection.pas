@@ -113,12 +113,11 @@ type
    flasterror: statusvectorty;
    flasterrormessage: msestring;
    flastsqlcode: integer;
-//   flibname: filenamety;
    procedure SetDBDialect;
    procedure AllocSQLDA(var aSQLDA : PXSQLDA;Count : integer);
    procedure TranslateFldType(SQLType,sqlsubtype,SQLLen,SQLScale: integer;
                                out TrType: TFieldType; out TrLen: word);
-   // conversion methods
+   //conversion methods
    procedure GetDateTime(CurrBuff, Buffer : pointer; AType : integer);
    procedure SetDateTime(CurrBuff: pointer; PTime : TDateTime; AType : integer);
    procedure GetFloat(const CurrBuff,Buffer: pointer; 
@@ -204,7 +203,7 @@ type
           //if bufsize < 0 -> buffer was to small, should be -bufsize
     function fetchblob(const cursor: tsqlcursor;
                               const fieldnum: integer): ansistring; override;
-                              //null based
+                              //zero based
     procedure createdatabase(const asql: ansistring);
     function version: fbversionty;
     property lasterror: statusvectorty read flasterror;
@@ -212,14 +211,11 @@ type
     property lastsqlcode: integer read flastsqlcode;
   published
     property Dialect  : integer read FDialect write FDialect default 0;
-//    property libname: filenamety read flibname write flibname;
     property options: ibconnectionoptionsty read foptions 
                                            write foptions default [];
     property DatabaseName;
     property KeepConnection;
-//    property LoginPrompt;
     property Params;
-//    property OnLogin;
   end;
 
 function clientversion: string;
@@ -283,7 +279,6 @@ type
 procedure TIBCursor.close;
 begin
  inherited;
-// if fopen and (fibstatementtype <> isc_info_sql_stmt_exec_procedure) then begin
  if fopen and (fibstatementtype = isc_info_sql_stmt_select) then begin
   if isc_dsql_free_statement(@status, @statement, dsql_close) <> 0 then begin 
    fconnection.checkerror('close cursor', status{,fname});
@@ -306,9 +301,7 @@ procedure TIBConnection.CheckError(const ProcName : string;
 var
   buf: array [0..1024] of char;
   p: pointer;
-  Msg: msestring;
-//  E: eiberror;
-  
+  Msg: msestring;  
 begin
  if ((Status[0] = 1) and (Status[1] <> 0)) then begin
   p:= @Status;
@@ -379,7 +372,6 @@ function TIBConnection.StartDBTransaction(
 var
   DBHandle : pointer;
   tr       : TIBTrans;
-//  i        : integer;
   s        : string;
   int1: integer;
 begin
@@ -445,11 +437,6 @@ var
 begin
 {$IfDef LinkDynamically}
  useembeddedfirebird:= ibo_embedded in foptions;
-{
- if flibname <> '' then begin
-  ibase60dyn.libname:= flibname;
- end;
-}
  InitializeIBase60([]);
  try 
 {$EndIf}
@@ -531,9 +518,6 @@ begin
 end;
 
 procedure TIBConnection.AllocSQLDA(var aSQLDA : PXSQLDA;Count : integer);
-
-//var x : shortint;
-
 begin
   FreeSQLDABuffer(aSQLDA);
 
@@ -661,18 +645,17 @@ procedure tibconnection.preparestatement(const cursor: tsqlcursor;
                   const atransaction : tsqltransaction;
                   const asql: msestring; const aparams : tmseparams);
 
-var dh    : pointer;
-    tr    : pointer;
-//    p     : pchar;
-//    x     : shortint;
-    x     : integer;
-//    i     : integer;
+var
+ dh: pointer;
+ tr: pointer;
+ x: integer;
  TransLen: word;
  TransType: TFieldType;
  str1: string;
  buf1: array[0..15] of byte;
  int1: integer;
  by1: byte;
+
 begin
  with TIBcursor(cursor) do begin
   ffetched:= false;
@@ -724,10 +707,8 @@ begin
      else begin
        SQLData := AllocMem(in_SQLDA^.SQLVar[x].SQLLen);
      end;
-  //       if (sqltype and 1) = 1 then begin //check not null constraint
      sqltype:= sqltype or 1; //always use null flag
      New(SQLInd);
-  //       end;
     end;
    end;
   end;
@@ -892,111 +873,7 @@ begin
   end;
  end;
 end;
-(*
-type
- tcharlengthgetter = class
-  private
-   ftransaction: tsqltransaction;
-   fcursor: tsqlcursor;
-   fowner: tibconnection;
-   fparams: tmseparams;
-   frelationlen,ffieldlen: integer;
-  public
-   constructor create(const aowner: tibconnection);
-   destructor destroy; override;
-   function characterlength(const relationname,fieldname: string): integer;
-        //-maxint if invalid
- end;
 
-{ tcharlengthgetter }
-
-constructor tcharlengthgetter.create(const aowner: tibconnection);
-begin
- fowner:= aowner;
- fparams:= tmseparams.create;
- with tparam.create(fparams,ptoutput) do begin
-  datatype:= ftstring;
-  name:= 'RELATION';
- end;
- with tparam.create(fparams,ptoutput) do begin
-  datatype:= ftstring;
-  name:= 'FIELD';
- end;
- fcursor:= fowner.allocatecursorhandle(nil,aowner.name);
- fcursor.fstatementtype:= stselect;
- ftransaction:= tsqltransaction.create(nil);
- ftransaction.database:= aowner;
- ftransaction.starttransaction;
- fowner.preparestatement(fcursor,ftransaction,
-   'SELECT B.RDB$CHARACTER_LENGTH FROM RDB$RELATION_FIELDS A '+
-   'INNER JOIN  RDB$FIELDS B ON A.RDB$FIELD_SOURCE = B.RDB$FIELD_NAME '+
-   'WHERE (A.RDB$RELATION_NAME = :RELATION) AND (A.RDB$FIELD_NAME = :FIELD);',
-                                     fparams);
- with tibcursor(fcursor).in_sqlda^ do begin
-  if sqld = 2 then begin
-   frelationlen:= sqlvar[0].sqllen;
-   ffieldlen:= sqlvar[1].sqllen;
-  end;
- end;
-end;
-
-destructor tcharlengthgetter.destroy;
-begin
- with fowner do begin
-  try
-   freefldbuffers(fcursor);
-   unpreparestatement(fcursor);
-  finally
-   fparams.free;
-   deallocatecursorhandle(fcursor);
-   ftransaction.free;
-  end;
- end;
- inherited;
-end;
-
-function fixsize(const avalue: string; const alen: integer): string;
-begin
- result:= avalue;
- setlength(result,alen);
- if alen > length(avalue) then begin
-  fillchar(result[length(avalue)+1],alen-length(avalue),' ');
- end;
-end;
-
-function tcharlengthgetter.characterlength(const relationname: string;
-               const fieldname: string): integer;
-var 
- tr: pointer;
-begin
- result:= -maxint;
- fparams[0].asstring:= fixsize(relationname,frelationlen);
- fparams[1].asstring:= fixsize(fieldname,ffieldlen);
- fowner.SetParameters(fcursor, fparams);
- with tibcursor(fcursor) do begin
-  tr:= ftransaction.handle;
-  if isc_dsql_execute2(@Status,@tr,@Statement,1,in_SQLDA,nil) <> 0 then begin
-   fowner.CheckError('Execute', Status);
-  end;
-  isc_dsql_set_cursor_name(@status,@statement,'charlencu',0);
-  if fowner.fetch(fcursor) then begin
-   with sqlda^ do begin
-    if sqld = 1 then begin
-     with sqlvar[0] do begin
-      if not (assigned(SQLInd) and (SQLInd^ = -1)) then begin
-                     //not null
-       if (sqltype and not 1 = sql_short) then begin
-        result:= psmallint(sqldata)^;
-       end;
-      end;
-     end;
-    end;
-   end;
-  end; 
-  isc_dsql_free_statement(@status,@statement,DSQL_close);
- end;
-end;
-*)
 function sqlvarnametostring(const avalue: pointer): string;
 type
  sqlnamety = packed record
@@ -1041,56 +918,58 @@ var
  TransLen: word;
  TransType: TFieldType;
  FD: TFieldDef;
-// chlengetter: tcharlengthgetter;
-// int1: integer;
+ ar1: fielddefarty;
+ int1: integer;
 begin
+ ar1:= getfielddefar(fielddefs);
  fielddefs.clear;
-// chlengetter:= tcharlengthgetter.create(self);
-// try
-  with tibcursor(cursor) do begin
-   for x := 0 to SQLDA^.SQLD - 1 do begin
-    with SQLDA^.SQLVar[x] do begin
-     TranslateFldType(SQLType,sqlsubtype,SQLLen,SQLScale,TransType,TransLen);
-     case transtype of
-      ftstring: begin
-       translen:= sqlsubtypetocharlen(sqlsubtype,translen);
-//       int1:= chlengetter.characterlength(sqlvarnametostring(@relname_length),
-//                  sqlvarnametostring(@sqlname_length));
-//       if int1 >= 0 then begin
-//        translen:= int1;
-//       end;
+ with tibcursor(cursor) do begin
+  for x := 0 to SQLDA^.SQLD - 1 do begin
+   with SQLDA^.SQLVar[x] do begin
+    TranslateFldType(SQLType,sqlsubtype,SQLLen,SQLScale,TransType,TransLen);
+    case transtype of
+     ftstring: begin
+      translen:= sqlsubtypetocharlen(sqlsubtype,translen);
+     end;
+     ftbcd: begin
+      if translen > 4 then begin
+       translen:= 4;
       end;
-      ftbcd: begin
-       if translen > 4 then begin
-        translen:= 4;
+     end;
+     ftbytes: begin
+      if translen = 16 then begin
+       for int1:= 0 to high(ar1) do begin
+        with ar1[int1] do begin
+         if (datatype = ftguid) and (name = aliasname) then begin
+          transtype:= ftguid;
+         end;
+        end;
        end;
       end;
      end;
-     if not(transtype in varsizefields) then begin
-      translen:= 0;
-     end;
-     FD:= TFieldDef.Create(nil,AliasName,TransType,
-                TransLen,False,(x + 1));
-     if TransType = ftBCD then begin
-      case sqllen of
-       2: fd.precision:= 4;
-       4: fd.precision:= 9;
-       8: fd.precision:= 18;
-       else begin
-        FD.precision:= SQLLen;
-       end;
-      end;
-     end;
-     {$ifndef mse_FPC_2_2} //???
-     FD.DisplayName:= AliasName;
-     {$endif}
-     fd.collection:= fielddefs;
     end;
+    if not(transtype in varsizefields) then begin
+     translen:= 0;
+    end;
+    FD:= TFieldDef.Create(nil,AliasName,TransType,
+               TransLen,False,(x + 1));
+    if TransType = ftBCD then begin
+     case sqllen of
+      2: fd.precision:= 4;
+      4: fd.precision:= 9;
+      8: fd.precision:= 18;
+      else begin
+       FD.precision:= SQLLen;
+      end;
+     end;
+    end;
+    {$ifndef mse_FPC_2_2} //???
+    FD.DisplayName:= AliasName;
+    {$endif}
+    fd.collection:= fielddefs;
    end;
   end;
-// finally
-//  chlengetter.free;
-// end;
+ end;
 end;
 
 function TIBConnection.GetHandle: pointer;
@@ -1125,25 +1004,6 @@ begin
    end;
    ffetched:= true;
   end;
-  {
-  result:= sqlda^.sqld > 0;
-  if result then begin
-   result:= fprefetched;
-   fprefetched:= false;
-   if fibstatementtype = isc_info_sql_stmt_exec_procedure then begin
-    result:= not ffetched;
-    ffetched:= true;
-   end
-   else begin
-    retcode:= isc_dsql_fetch(@Status,@Statement,1,SQLDA);
-    if (retcode <> 0) and (retcode <> 100) and (retcode <> 335544364) then begin
-                       //request synchronizing error, FireBird bug?
-     CheckError('Fetch',Status);
-    end;
-    Result:= retcode = 0;
-   end;
-  end;
-  }
  end;
 end;
 
@@ -1157,12 +1017,13 @@ var
  currbuff: pchar;
  w: word;
  cur1: currency;
+ id1: tguid;
  po1: pxsqlvar;
  bo1: boolean;
 
 begin
  with tibcursor(cursor) do begin
-  for SQLVarNr := 0 to High(ParamBinding){AParams.count-1} do begin
+  for SQLVarNr := 0 to High(ParamBinding) do begin
    ParNr:= ParamBinding[SQLVarNr];
    po1:= @in_sqlda^.SQLvar[SQLVarNr];
    with AParams[ParNr] do begin
@@ -1196,44 +1057,51 @@ begin
        cur1:= ascurrency;
        with po1^ do begin
         cur1:= scaleexp10(cur1,-(4+sqlscale));
- //       reallocmem(sqldata,sizeof(cur1));
- //       move(cur1,sqldata^,sizeof(cur1));
         move(cur1,sqldata^,po1^.sqllen);
        end;
       end;
       ftString,ftFixedChar,ftwidestring,ftbytes,ftvarbytes: begin
-       bo1:= paramtypes[sqlvarnr] in [ftbytes,ftvarbytes];
-       if bo1 then begin
-        s:= asstring;
+       if (datatype = ftguid) and (paramtypes[sqlvarnr] = ftbytes) and
+                    (po1^.sqllen = sizeof(tguid)) then begin
+        with po1^ do begin
+         id1:= dbstringtoguid(asstring);
+         move(id1,sqldata^,po1^.sqllen);
+        end;
        end
        else begin
-        s:= aparams.AsdbString(parnr);
-       end;
-       w:= length(s);
-       with po1^ do begin
-        if ((SQLType and not 1) = SQL_VARYING) then begin
-         SQLLen:= w;
-         ReAllocMem(SQLData,SQLLen+sizeof(w));
-         CurrBuff:= SQLData;
-         move(w,CurrBuff^,sizeof(w));
-         inc(CurrBuff,sizeof(w));
+        bo1:= paramtypes[sqlvarnr] in [ftbytes,ftvarbytes];
+        if bo1 then begin
+         s:= asstring;
         end
         else begin
-         if w > sqllen then begin
-          w:= sqllen;
-         end;
-         CurrBuff:= SQLData;
-         if w < sqllen then begin
-          if bo1 then begin
-           fillchar((currbuff+w)^,sqllen-w,0);
-          end
-          else begin
-           fillchar((currbuff+w)^,sqllen-w,' ');
+         s:= aparams.AsdbString(parnr);
+        end;
+        w:= length(s);
+        with po1^ do begin
+         if ((SQLType and not 1) = SQL_VARYING) then begin
+          SQLLen:= w;
+          ReAllocMem(SQLData,SQLLen+sizeof(w));
+          CurrBuff:= SQLData;
+          move(w,CurrBuff^,sizeof(w));
+          inc(CurrBuff,sizeof(w));
+         end
+         else begin
+          if w > sqllen then begin
+           w:= sqllen;
+          end;
+          CurrBuff:= SQLData;
+          if w < sqllen then begin
+           if bo1 then begin
+            fillchar((currbuff+w)^,sqllen-w,0);
+           end
+           else begin
+            fillchar((currbuff+w)^,sqllen-w,' ');
+           end;
           end;
          end;
         end;
+        Move(pointer(s)^,CurrBuff^,w);
        end;
-       Move(pointer(s)^,CurrBuff^,w);
       end;
       ftDate, ftTime, ftDateTime: begin
        SetDateTime(po1^.SQLData,AsDateTime, po1^.SQLType);
@@ -1262,7 +1130,6 @@ begin
       ftFloat,ftcurrency: begin
        with po1^ do begin
         if sqlscale < 0 then begin
- //        reallocmem(sqldata,sizeof(int64));
          int64(cur1):= round(asfloat * intexp10(-SQLScale));
          move(cur1,sqldata^,po1^.sqllen);
         end
@@ -1290,11 +1157,7 @@ function tibconnection.loadfield(const cursor: tsqlcursor;
 var
  VarcharLen: word;
  CurrBuff: pchar;
-// b: longint;
-// c: currency;
-// i64: int64;
  po1: pxsqlvar;
-// do1: double;
  
  function getint64: int64;
  begin
@@ -1311,9 +1174,6 @@ var
   end;
  end;
 
-//var
-// int1: integer;
- 
 begin
  po1:= @TIBCursor(cursor).SQLDA^.SQLVar[fieldnum];
  with TIBCursor(cursor),po1^ do begin
@@ -1350,6 +1210,9 @@ begin
     end;
     ftDate,ftTime,ftDateTime: begin
      GetDateTime(CurrBuff,Buffer,SQLType);
+    end;
+    ftguid: begin
+     pguid(buffer)^:= pguid(currbuff)^;
     end;
     ftString,ftBytes,ftvarbytes: begin
      if datatype = ftvarbytes then begin
