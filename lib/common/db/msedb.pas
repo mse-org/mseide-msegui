@@ -45,6 +45,7 @@ uses
  msevariants;
 
 const
+ mse_vtguid = $ff;
  guidbuffersize = 36; //aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee
 type
  bookmarkty = string; 
@@ -349,8 +350,8 @@ type
    function getdefaultwidth: longint; override;
    function getdatasize: integer; override;
 
-   function getasguid: tguid;
-   procedure setasguid(const avalue: tguid);
+   function getasguid: tguid; override;
+   procedure setasguid(const avalue: tguid); override;
   public
    constructor create(aowner: tcomponent); override;
    property asguid: tguid read getasguid write setasguid;
@@ -1812,6 +1813,7 @@ function dbtrystringtoguid(const value: string; out guid: tguid): boolean;
 function dbstringtoguid(const value: string): tguid;
 function dbguidtostring(const avalue: tguid): string;
 function dbcreateguidstring: string;
+function guidparam(const value: tguid): varrecarty;
 
 function opentodynarrayft(const items: array of tfieldtype): fieldtypearty;
 
@@ -1933,6 +1935,15 @@ var
 begin
  createguid(id);
  result:= dbguidtostring(id);
+end;
+
+function guidparam(const value: tguid): varrecarty;
+begin
+ setlength(result,1);
+ with result[0] do begin
+  vtype:= mse_vtguid;
+  vpointer:= @value;
+ end;
 end;
 
 function opentodynarrayft(const items: array of tfieldtype): fieldtypearty;

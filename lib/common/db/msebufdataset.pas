@@ -1434,7 +1434,7 @@ const
           cvtype: {$ifdef mse_hasvtunicodestring}vtunicodestring
                   {$else}vtwidestring{$endif}; compfunc: @compstring;
                                   compfunci: @compstringi),
-   (datatypes: guidindexfields; cvtype: vtansistring; compfunc: @compguid;
+   (datatypes: guidindexfields; cvtype: mse_vtguid; compfunc: @compguid;
                                     compfunci: @compguid)
 );
 
@@ -9335,9 +9335,9 @@ begin
      vtpointer: begin
       bo1:= true;
      end;
-//     vtansistring: begin
-//      pguidbufferty(po2)^:= ansistring(vansistring);
-//     end;
+     mse_vtguid: begin
+      pguid(po2)^:= pguid(vpointer)^;
+     end;
      else begin
       paramerror;
      end;
@@ -9582,6 +9582,8 @@ var
  rea1: extended;
  cur1: currency;
  lint1: int64;
+ id1: tguid;
+  
 begin
  setlength(consts1,length(avalues));
  setlength(isnull1,length(avalues));
@@ -9622,6 +9624,11 @@ begin
       cur1:= ascurrency;
       vtype:= vtcurrency;
       vcurrency:= @cur1;
+     end;
+     ftguid: begin
+      id1:= asguid;
+      vtype:= mse_vtguid;
+      vpointer:= @id1;
      end;
      ftWideString: begin
       mstr1:= aswidestring;

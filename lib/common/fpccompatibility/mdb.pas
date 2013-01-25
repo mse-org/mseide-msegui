@@ -369,6 +369,8 @@ type
     procedure SetParentComponent(AParent: TComponent); override;
     procedure SetText(const AValue: string); virtual;
     procedure SetVarValue(const AValue: Variant); virtual;
+    function getasguid: tguid; virtual;
+    procedure setasguid(const avalue: tguid); virtual;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -393,6 +395,7 @@ type
     property AsCurrency: Currency read GetAsCurrency write SetAsCurrency;
     property AsDateTime: TDateTime read GetAsDateTime write SetAsDateTime;
     property AsFloat: Double read GetAsFloat write SetAsFloat;
+    property asguid: tguid read getasguid write setasguid;
     property AsLongint: Longint read GetAsLongint write SetAsLongint;
     property AsLargeInt: LargeInt read GetAsLargeInt write SetAsLargeInt;
     property AsInteger: Integer read GetAsInteger write SetAsInteger;
@@ -962,11 +965,11 @@ type
     class procedure CheckTypeSize(AValue: Longint); override;
     function GetDefaultWidth: Longint; override;
 
-    function GetAsGuid: TGUID;
-    procedure SetAsGuid(const aValue: TGUID);
+    function GetAsGuid: TGUID; override;
+    procedure SetAsGuid(const aValue: TGUID); override;
   public
     constructor Create(AOwner: TComponent); override;
-    property AsGuid: TGUID read GetAsGuid write SetAsGuid;
+//    property AsGuid: TGUID read GetAsGuid write SetAsGuid;
   end;
 
 { TIndexDef }
@@ -5787,6 +5790,15 @@ begin
   SetAsString(aValue);
 end;
 
+function TField.getasguid: tguid;
+begin
+ result:= stringtoguid(asstring);
+end;
+
+procedure TField.setasguid(const avalue: tguid);
+begin
+ asstring:= guidtostring(avalue);
+end;
 
 procedure TField.SetData(Buffer: Pointer);
 
@@ -5966,7 +5978,6 @@ begin
     PropertyChanged(True);
     end;
 end;
-
 
 { ---------------------------------------------------------------------
     TStringField
