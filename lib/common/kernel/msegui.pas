@@ -5551,121 +5551,9 @@ begin
 end;
 
 procedure tcustomface.paint(const canvas: tcanvas; const rect: rectty);
-const
- epsilon = 0.00001;
-
- function calcscale(x,a,b: real): real;
- var
-  rea1: real;
- begin
-  rea1:= b-a;
-  if rea1 > epsilon then begin
-   result:= (x - a) / rea1;
-  end
-  else begin
-   result:= x;
-  end;
- end;
-
- function scalecolor(x: real; const a,b: rgbtriplety): rgbtriplety;
- begin
-  with result do begin
-   red:= a.red + round((b.red - a.red) * x);
-   green:= a.green + round((b.green - a.green) * x);
-   blue:= a.blue + round((b.blue - a.blue) * x);
-   res:= 0;
-  end;
- end;
 
 var
  rect1: rectty;
- bmp: tbitmap;
- ipos,imax: integer;
- rgbs: array of rgbtriplety;
- poss: realarty;
- pixelscale: real;
- vert,reverse: boolean;
- first,last: integer;
- fade: prgbtripleaty;
-
- procedure interpolate(index: integer);
- var
-  int1,int2,int3: integer;
-  by1,by2: byte;
-  po1,po2: prgbtriplety;
-  posstep,colorstep: real;
-  pos,color: real;
-  rea1,rea2: real;
-  co1: rgbtriplety;
-                              //todo: optimize
- begin
-  po1:= @rgbs[index];
-  po2:= @rgbs[index+1];
-  with po2^ do begin //find bigest difference
-   by1:= abs(red - po1^.red);
-   by2:= abs(green - po1^.green);
-   if by2 > by1 then begin
-    by1:= by2;
-   end;
-   by2:= abs(blue - po1^.blue);
-   if by2 > by1 then begin
-    by1:= by2;
-   end;
-  end;
-  rea1:= poss[index+1] - poss[index];
-  if rea1 > epsilon then begin
-   rea2:= 1/(rea1*pixelscale); //step for one pixel
-   if by1 = 0 then begin
-    by1:= 1;
-   end;
-   colorstep:= 1 / by1;
-   if colorstep < rea2 then begin
-    colorstep:= rea2;
-    by1:= ceil(1 / colorstep);
-   end;
-   posstep:= colorstep * pixelscale * rea1; //pixel for step
-   if reverse then begin
-    posstep:= -posstep;
-    pos:= poss[last] - poss[index];
-   end
-   else begin
-    pos:= poss[index];
-   end;
-   pos:=  pos * pixelscale;
-   color:= 0;
-   for int1:= 0 to by1 - 1 do begin
-    if (ipos < 0) or (ipos >= imax) then begin
-     break;
-    end;
-    pos:= pos + posstep;
-    int2:= ipos;
-    ipos:= round(pos);
-    co1:= scalecolor(color,po1^,po2^);
-{$ifdef FPC}{$checkpointer off}{$endif} //scanline is not in heap on win32
-    if reverse then begin
-     if ipos < 0 then begin
-      ipos:= 0;
-     end;
-     for int3:= int2 downto ipos + 1 do begin
-      fade^[int3]:= co1;
-     end;
-    end
-    else begin
-     if ipos > imax then begin
-      ipos:= imax;
-     end;
-     for int3:= int2 to ipos - 1 do begin
-      fade^[int3]:= co1;
-     end;
-    end;
-    color:= color + colorstep;
-   end;
-   if (ipos >= 0) and (ipos < imax) then begin
-    fade^[ipos]:= co1;
-   end;
-  end;
-{$ifdef FPC}{$checkpointer default}{$endif}
- end;
 
  procedure createalphabuffer(const amasked: boolean);
  begin
@@ -5681,9 +5569,20 @@ var
  end;
 
 var
- a,b,rea1: real;
- int1: integer;
- col1,col2: rgbtriplety;
+ bmp: tbitmap;
+ rgbs: array of rgbtriplety;
+ pixelscale: real;
+ vert: boolean;
+ rea1: real;
+ int1,int2: integer;
+ col1,col2: prgbtriplety;
+ curnode,nextnode: integer;
+ posar: realarty;
+ pixelstep: real;
+ po1: prgbtriplety;
+ startpix,curpix,nextpix,pixcount: integer;
+ pixinc: integer;
+ redsum,greensum,bluesum,lengthsum: real;
 
 begin
  if intersectrect(rect,canvas.clipbox,rect1) then begin
@@ -5691,112 +5590,138 @@ begin
    if (fi.fade_color.count > 1) or 
                 (fi.fade_transparency <> cl_none) and 
                                (fi.options * faceoptionsmask = []) then begin
-    with tfadecolorarrayprop1(fi.fade_color) do begin
+    posar:= trealarrayprop1(fi.fade_pos).fitems;
+    with tfadecolorarrayprop(fi.fade_color) do begin
      setlength(rgbs,length(fitems));
      for int1:= 0 to high(rgbs) do begin
       rgbs[int1]:= colortorgb(fintf.translatecolor(fitems[int1]));
      end;
     end;
+    
     case fi.fade_direction of
      gd_up,gd_down: begin
-      a:= (rect1.y - rect.y) / rect.cy;
-      b:= (rect1.y + rect1.cy - rect.y) / rect.cy;
       pixelscale:= rect.cy;
       vert:= true;
-      imax:= rect1.cy;
+      startpix:= rect1.y-rect.y;
+      pixcount:= rect1.cy;
      end
      else begin //gd_right,gd_left
-      a:= (rect1.x - rect.x) / rect.cx;
-      b:= (rect1.x + rect1.cx - rect.x) / rect.cx;
       pixelscale:= rect.cx;
       vert:= false;
-      imax:= rect1.cx;
+      startpix:= rect1.x-rect.x;
+      pixcount:= rect1.cx;
      end;
     end;
-    if fi.fade_direction in [gd_up,gd_left] then begin
-     reverse:= true;
-     rea1:= 1 - b;
-     b:= 1 - a;
-     a:= rea1;
+    bmp:= tbitmap.create(false);
+    if vert then begin
+     bmp.size:= makesize(1,rect1.cy);
     end
     else begin
-     reverse:= false;
+     bmp.size:= makesize(rect1.cx,1);
     end;
-    with trealarrayprop1(fi.fade_pos) do begin
-     first:= 0;
-     if count > 1 then begin
-      last:= count - 1;
-      for int1:= 1 to last do begin
-       if fitems[int1] < a then begin
-        first:= int1;
-       end;
-       if trealarrayprop1(fi.fade_pos).fitems[int1] >= b then begin
-        last:= int1;
-        break;
-       end;
-      end;
-      if (first < high(fitems))  then begin
-       col1:= scalecolor(calcscale(a,fitems[first],fitems[first+1]),
-                             rgbs[first],rgbs[first+1]);
+    if high(rgbs) > 0 then begin
+     po1:= bmp.scanline[0];
+     pixelstep:= 1/pixelscale;
+     pixinc:= sizeof(rgbtriplety);
+     if fi.fade_direction in [gd_up,gd_left] then begin //revert
+      if fi.fade_direction = gd_left then begin
+       startpix:= rect.x+rect.cx-startpix-rect1.cx;
       end
       else begin
-       col1:= rgbs[high(fitems)];
+       startpix:= rect.y+rect.cy-startpix-rect1.cy;
       end;
-      col2:= scalecolor(calcscale(b,fitems[last-1],fitems[last]),
-                             rgbs[last-1],rgbs[last]);
-      rgbs[first]:= col1;
-      rgbs[last]:= col2;
-      poss:= copy(fitems);
-      poss[first]:= a;
-      poss[last]:= b;
-      for int1:= first to last do begin
-       poss[int1]:= poss[int1] - a;
+      inc(po1,pixcount-1);
+      pixinc:= -pixinc;
+     end;
+     curnode:= 0;
+     int1:= 0;
+     while int1 < pixcount do begin
+      rea1:= (int1+startpix)*pixelstep + 0.000001;
+      while posar[curnode] < rea1 do begin
+       inc(curnode);
       end;
-     end;
-     bmp:= tbitmap.create(false);
-     if vert then begin
-      bmp.size:= makesize(1,rect1.cy);
-     end
-     else begin
-      bmp.size:= makesize(rect1.cx,1);
-     end;
-     if count > 1 then begin
-      fade:= bmp.scanline[0];
-      if reverse then begin
-       if vert then begin
-        ipos:= rect1.cy-1;
+      dec(curnode);
+      rea1:= rea1 + pixelstep;
+      nextnode:= curnode + 1;
+      while posar[nextnode] < rea1 do begin
+       inc(nextnode);
+      end;
+      if nextnode > curnode+1 then begin //calc average
+       redsum:= 0;
+       greensum:= 0;
+       bluesum:= 0;
+       lengthsum:= 0;
+       for int2:= curnode to nextnode - 2 do begin //todo: optimize
+        rea1:= posar[int2+1] - posar[int2];
+        redsum:= redsum + (rgbs[int2].red+rgbs[int2+1].red)*rea1;
+        greensum:= greensum + (rgbs[int2].green+rgbs[int2+1].green)*rea1;
+        bluesum:= bluesum + (rgbs[int2].blue+rgbs[int2+1].blue)*rea1;
+        lengthsum:= lengthsum + rea1;
+       end;
+       if lengthsum > 0 then begin
+        rea1:= 1/(2*lengthsum);
+        with po1^ do begin
+         red:= round(redsum*rea1);
+         green:= round(greensum*rea1);
+         blue:= round(bluesum*rea1);
+         res:= 0;
+        end;
        end
        else begin
-        ipos:= rect1.cx-1;
+        po1^:= rgbs[curnode];
        end;
       end
       else begin
-       reverse:= false;
-       ipos:= 0;
+       nextpix:= int1 + trunc((posar[nextnode]-posar[curnode])*pixelscale);
+       if nextpix > pixcount then begin
+        nextpix:= pixcount;
+       end;
+       if int1 = nextpix then begin
+        po1^:= rgbs[curnode];
+       end
+       else begin
+        curpix:= trunc(posar[curnode]*pixelscale);
+        col1:= @rgbs[curnode];
+        col2:= @rgbs[nextnode];
+        rea1:= 1/(nextpix-curpix);
+        for int1:= int1 to nextpix-1 do begin
+         with po1^ do begin
+          res:= 0;
+          red:= col1^.red + 
+                        round((col2^.red-col1^.red)*(int1-curpix)*rea1);
+          green:= col1^.green + 
+                        round((col2^.green-col1^.green)*(int1-curpix)*rea1);
+          blue:= col1^.blue + 
+                        round((col2^.blue-col1^.blue)*(int1-curpix)*rea1);
+         end;
+         inc(pchar(po1),pixinc);
+        end;
+        dec(pchar(po1),pixinc);
+       end;         
       end;
-      for int1:= first to last-1 do begin
-       interpolate(int1);
-      end;
-     end
-     else begin //count = 1
-      if vert then begin
-       bmp.canvas.drawline(nullpoint,makepoint(0,rect1.cy-1),fi.fade_color[0]);
-      end
-      else begin
-       bmp.canvas.drawline(nullpoint,makepoint(rect1.cx-1,0),fi.fade_color[0]);
-      end;
+      curnode:= nextnode;
+      inc(int1);
+      inc(pchar(po1),pixinc);
      end;
-     if fi.options * faceoptionsmask = [] then begin
-      bmp.transparency:= fi.fade_transparency;
-      bmp.paint(canvas,rect1,[al_stretchx,al_stretchy]);
+    end
+    else begin //count = 1
+     if vert then begin
+      bmp.canvas.drawline(nullpoint,makepoint(0,rect1.cy-1),fi.fade_color[0]);
      end
      else begin
-      createalphabuffer(true);
-      bmp.paint(falphabuffer.mask.canvas,makerect(nullpoint,rect1.size),
-       makerect(nullpoint,bmp.size),[al_stretchx,al_stretchy]);
+      bmp.canvas.drawline(nullpoint,makepoint(rect1.cx-1,0),fi.fade_color[0]);
      end;
-     bmp.Free;
     end;
+    if fi.options * faceoptionsmask = [] then begin
+     bmp.transparency:= fi.fade_transparency;
+     bmp.paint(canvas,rect1,[al_stretchx,al_stretchy]);
+    end
+    else begin
+     createalphabuffer(true);
+     bmp.paint(falphabuffer.mask.canvas,makerect(nullpoint,rect1.size),
+      makerect(nullpoint,bmp.size),[al_stretchx,al_stretchy]);
+    end;
+    bmp.Free;
    end
    else begin //fade_color.count = 1
     if fi.options * faceoptionsmask <> [] then begin
