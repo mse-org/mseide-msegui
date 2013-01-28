@@ -75,6 +75,7 @@ type
                                       const aoffset: integer): integer;
   protected
    procedure change;
+   procedure doasyncevent(var atag: integer); override;
  end;
 
  tfacefadecoloreditor = class(tcolorarraypropertyeditor)
@@ -538,28 +539,33 @@ end;
 procedure tfadeeditfo.rowinsertev(const sender: tcustomgrid;
                const aindex: Integer; const acount: Integer);
 begin
- grid.beginupdate;
- if aindex < grid.rowhigh then begin
-  if aindex = 0 then begin
-   colored[0]:= colored[1]; //pos = 0
-   posed[0]:= 0;
+ if sender.userinput then begin
+  grid.beginupdate;
+  if aindex < grid.rowhigh then begin
+   if aindex = 0 then begin
+    colored[0]:= colored[1]; //pos = 0
+    posed[0]:= 0;
+   end
+   else begin
+    colored[aindex]:= blendcolor(0.5,colored[aindex+1],colored[aindex-1]);
+    posed[aindex]:= (posed[aindex+1] + posed[aindex-1]) / 2;
+   end
   end
   else begin
-   colored[aindex]:= blendcolor(0.5,colored[aindex+1],colored[aindex-1]);
-   posed[aindex]:= (posed[aindex+1] + posed[aindex-1]) / 2;
-  end
+   if grid.rowhigh = 0 then begin
+    posed[aindex]:= 0;
+   end
+   else begin
+    colored[aindex]:= colored[grid.rowhigh-1];
+    posed[aindex]:= 1;
+   end;
+  end;
+  grid.endupdate;
+  change;
  end
  else begin
-  if grid.rowhigh = 0 then begin
-   posed[aindex]:= 0;
-  end
-  else begin
-   colored[aindex]:= colored[grid.rowhigh-1];
-   posed[aindex]:= 1;
-  end;
+  asyncevent;
  end;
- grid.endupdate;
- change;
 end;
 
 procedure tfadeeditfo.beforedrawev(const sender: tcol; const canvas: tcanvas;
@@ -586,6 +592,12 @@ begin
   fadestatfile.readstat(filedialog.controller.filename);
   change;
  end;
+end;
+
+procedure tfadeeditfo.doasyncevent(var atag: integer);
+begin
+ inherited;
+ change;
 end;
 
 { tfacefadecoloreditor }

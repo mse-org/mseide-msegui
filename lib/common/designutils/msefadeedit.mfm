@@ -1,11 +1,11 @@
 object fadeeditfo: tfadeeditfo
-  optionswidget = [ow_arrowfocus, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
+  optionswidget = [ow_arrowfocus, ow_subfocus, ow_destroywidgets, ow_hinton]
   visible = False
   bounds_x = 160
   bounds_y = 221
   bounds_cx = 408
   bounds_cy = 281
-  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets]
   container.frame.clientwidth = 408
   container.frame.zoomwidthstep = 1
   container.frame.zoomheightstep = 1
@@ -21,7 +21,7 @@ object fadeeditfo: tfadeeditfo
   oncreate = createev
   moduleclassname = 'tmseform'
   object posedit: tpickwidget
-    optionswidget = [ow_destroywidgets, ow_autoscale]
+    optionswidget = [ow_destroywidgets]
     frame.leveli = -1
     frame.framei_bottom = 2
     frame.localprops = [frl_leveli, frl_fibottom]
@@ -42,7 +42,7 @@ object fadeeditfo: tfadeeditfo
     onendpickmove = endpickev
     onpaintxorpic = paintxorev
     object fadedisp: tsimplewidget
-      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_mousetransparent, ow_destroywidgets]
       color = -1610612731
       face.dummy = 0
       visible = True
@@ -69,22 +69,23 @@ object fadeeditfo: tfadeeditfo
         numstep = 1
       end>
     datacols.count = 3
-    datacols.options = [co_savestate, co_mousescrollrow]
+    datacols.options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
     datacols.items = <    
       item
         colorselect = -2147483642
         width = 24
         onbeforedrawcell = beforedrawev
-        options = [co_nofocus, co_savestate, co_mousescrollrow]
+        options = [co_nofocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_mousescrollrow]
       end    
-      item
+      item[posed]
         width = 63
+        options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savevalue, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
         widgetname = 'posed'
         dataclass = tgridrealdatalist
       end    
-      item
+      item[colored]
         width = 204
-        options = [co_fill, co_savevalue, co_savestate, co_nosort, co_mousescrollrow]
+        options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savevalue, co_savestate, co_nosort, co_cancopy, co_canpaste, co_mousescrollrow]
         widthmin = 63
         widgetname = 'colored'
         dataclass = tgridenumdatalist
@@ -96,7 +97,7 @@ object fadeeditfo: tfadeeditfo
     oncellevent = gridcellev
     reffontheight = 14
     object posed: trealedit
-      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight]
+      optionswidget1 = [ow1_fontglyphheight]
       optionsskin = [osk_framebuttononly]
       frame.levelo = 0
       frame.colorclient = -2147483645
@@ -140,7 +141,7 @@ object fadeeditfo: tfadeeditfo
     end
   end
   object fadevert: tsimplewidget
-    optionswidget = [ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+    optionswidget = [ow_mousetransparent, ow_destroywidgets]
     color = -1610612731
     frame.leveli = -1
     frame.localprops = [frl_leveli]
