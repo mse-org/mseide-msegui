@@ -5573,7 +5573,7 @@ var
  rgbs: array of rgbtriplety;
  pixelscale: real;
  vert: boolean;
- rea1: real;
+ rea1,rea2: real;
  int1,int2: integer;
  col1,col2: prgbtriplety;
  curnode,nextnode: integer;
@@ -5637,12 +5637,14 @@ begin
      int1:= 0;
      while int1 < pixcount do begin
       rea1:= (int1+startpix)*pixelstep + 0.000001;
-      while posar[curnode] < rea1 do begin
-       inc(curnode);
+      if int1 = 0 then begin
+       while posar[curnode] < rea1 do begin
+        inc(curnode);
+       end;
+       dec(curnode);
       end;
-      dec(curnode);
+      nextnode:= curnode;
       rea1:= rea1 + pixelstep;
-      nextnode:= curnode + 1;
       while posar[nextnode] < rea1 do begin
        inc(nextnode);
       end;
@@ -5670,33 +5672,36 @@ begin
        else begin
         po1^:= rgbs[curnode];
        end;
+       dec(nextnode);
       end
       else begin
-       nextpix:= int1 + trunc((posar[nextnode]-posar[curnode])*pixelscale);
-       if nextpix > pixcount then begin
-        nextpix:= pixcount;
-       end;
+       nextpix:= trunc(posar[nextnode]*pixelscale)-startpix;
        if int1 = nextpix then begin
         po1^:= rgbs[curnode];
        end
        else begin
-        curpix:= trunc(posar[curnode]*pixelscale);
+        curpix:= trunc(posar[curnode]*pixelscale)-startpix;
+        rea1:= 1/(nextpix-curpix);
+        if nextpix > pixcount then begin
+         nextpix:= pixcount;
+        end;
         col1:= @rgbs[curnode];
         col2:= @rgbs[nextnode];
-        rea1:= 1/(nextpix-curpix);
-        for int1:= int1 to nextpix-1 do begin
+        for int2:= int1-curpix to nextpix-curpix-1 do begin
+         rea2:= rea1*int2;
          with po1^ do begin
           res:= 0;
           red:= col1^.red + 
-                        round((col2^.red-col1^.red)*(int1-curpix)*rea1);
+                        round((col2^.red-col1^.red)*rea2);
           green:= col1^.green + 
-                        round((col2^.green-col1^.green)*(int1-curpix)*rea1);
+                        round((col2^.green-col1^.green)*rea2);
           blue:= col1^.blue + 
-                        round((col2^.blue-col1^.blue)*(int1-curpix)*rea1);
+                        round((col2^.blue-col1^.blue)*rea2);
          end;
          inc(pchar(po1),pixinc);
         end;
         dec(pchar(po1),pixinc);
+        int1:= nextpix-1;
        end;         
       end;
       curnode:= nextnode;
