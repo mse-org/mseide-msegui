@@ -136,6 +136,7 @@ object watchfo: twatchfo
         color = -2147483646
         coloractive = -1879048185
         width = 12
+        options = [co_fixwidth, co_savevalue, co_savestate, co_mousescrollrow]
         widgetname = 'formatcode'
         dataclass = tgridintegerdatalist
       end    

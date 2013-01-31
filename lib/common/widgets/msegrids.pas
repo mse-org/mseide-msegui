@@ -476,7 +476,9 @@ type
    frowcoloroffsetselect: integer;
    ffontactivenum: integer;
    ffontfocusednum: integer;
-   function getcolindex: integer;
+   fwidthmax: integer;
+   fwidthmin: integer;
+  function getcolindex: integer;
    procedure setfocusrectdist(const avalue: integer);
    procedure updatepropwidth;
    procedure setrowcoloroffset(const avalue: integer);
@@ -597,8 +599,6 @@ type
 
  tdatacol = class(tcol)
   private
-   fwidthmax: integer;
-   fwidthmin: integer;
    foncellevent: celleventty;
    fonshowhint: showcolhinteventty;
    fselectedrow: integer; //-1 none, -2 more than one
@@ -13356,23 +13356,47 @@ begin
      end
      else begin
       int1:= offset.x;
-      if co_nohscroll in col1.foptions then begin
-       if col1.fend + int1 > fdatarect.x + fdatarect.cx then begin
-        int1:= fdatarect.x + fdatarect.cx - col1.fend;
+      with col1 do begin
+       if co_nohscroll in foptions then begin
+        if fend + int1 > fdatarect.x + fdatarect.cx then begin
+         int1:= fdatarect.x + fdatarect.cx - fend;
+        end;
        end;
-      end;
-      if co_fill in col1.options then begin
-       for int2:= col1.index to datacols.count - 1 do begin
-        with datacols[int2] do begin
-         if options * [co_fixwidth,co_fill,co_invisible] = [] then begin
-          width:= width - int1;
-          int1:= 0;
-          break;
+       if co_fill in options then begin
+        if (int1 < 0) then begin
+         if width + int1 < fwidthmin then begin
+          int1:= fwidthmin - width;
+         end;
+        end
+        else begin
+         if (fwidthmax <> 0) and 
+                         (width + int1 > fwidthmax) then begin
+          int1:= fwidthmax - width;
+         end;
+        end;
+        for int2:= index to datacols.count - 1 do begin
+         with datacols[int2] do begin
+          if options * [co_fixwidth,co_fill,co_invisible] = [] then begin
+           width:= width - int1;
+           int1:= 0;
+           break;
+          end;
+         end;
+        end;
+        if int1 <> 0 then begin
+         for int2:= index-1 downto 0 do begin
+          with datacols[int2] do begin
+           if options * [co_fixwidth,co_fill,co_invisible] = [] then begin
+            width:= width - int1;
+            int1:= 0;
+            break;
+           end;
+          end;
          end;
         end;
        end;
+       width:= width + int1;
       end;
-      col1.width:= col1.width + int1;
      end;
     end;
    end;
