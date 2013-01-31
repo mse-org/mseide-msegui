@@ -26,14 +26,17 @@ type
                 var avalue: complexarty; var accept: boolean) of object;
  setrealareventty = procedure(const sender: tobject;
                 var avalue: realarty; var accept: boolean) of object;
- charteditoptionty = (ceo_thumbtrack,ceo_noinsert,ceo_nodelete);
+ charteditoptionty = (ceo_thumbtrack,ceo_noinsert,ceo_nodelete,ceo_nodehint);
  charteditoptionsty = set of charteditoptionty;
 
  charteditmovestatety = (cems_markermoving,cems_canbottomlimit,cems_cantoplimit,
                          cems_xbottomlimit,cems_ybottomlimit,
                          cems_xtoplimit,cems_ytoplimit);
  charteditmovestatesty = set of charteditmovestatety;
-
+ 
+ nodehinteventty = procedure(const atrace,aindex: integer;
+                                        var ahint: hintinfoty) of object;
+                                        
  tcustomchartedit = class(tcustomchart,iobjectpicker)
   private
    factivetrace: integer;
@@ -47,6 +50,9 @@ type
    foptions: charteditoptionsty;
    fpickref: pointty;
    fmovestate: charteditmovestatesty;
+   fonnodehint: nodehinteventty;
+   fnodehintindex: integer;
+   fnodehinttrace: integer;
    procedure setactivetrace(avalue: integer);
    function limitmoveoffset(const aoffset: pointty): pointty;
    function getreadonly: boolean;
@@ -54,6 +60,7 @@ type
    procedure setoptions(const avalue: charteditoptionsty);
    procedure dopickmove(const sender: tobjectpicker);
   protected
+   procedure resetnodehint;
    function hasactivetrace: boolean;
    function nodepos(const atrace: integer; const aindex: integer): pointty;
    function nearestnode(const apos: pointty; out atrace: integer): integer;   
@@ -66,6 +73,7 @@ type
                                 const avalue: xseriesdataty): pointty;
    function tracecoordxseries(const atrace: integer;
                                 const apos: pointty): xseriesdataty;
+   procedure nodehint(const atrace,aindex: integer);
    procedure clientmouseevent(var info: mouseeventinfoty); override;
    procedure dokeydown(var ainfo: keyeventinfoty); override;
    procedure dobeforepaint(const acanvas: tcanvas); override;
@@ -122,7 +130,7 @@ type
                                               default defaultsnapdist;
    property options: charteditoptionsty read foptions write setoptions default [];
    property onchange: notifyeventty read fonchange write fonchange;
-
+   property onnodehint: nodehinteventty read fonnodehint write fonnodehint;
  end;
 
  tcustomxychartedit = class(tcustomchartedit)
@@ -180,6 +188,7 @@ type
    property snapdist;
    property options;
    property onchange;
+   property onnodehint;
  end;
   
  tcustomorderedxychartedit = class(tcustomxychartedit)
@@ -212,6 +221,7 @@ type
    property snapdist;
    property options;
    property onchange;
+   property onnodehint;
  end;
  
  tcustomxserieschartedit = class(tcustomchartedit)
@@ -262,6 +272,7 @@ type
    property snapdist;
    property options;
    property onchange;
+   property onnodehint;
  end;
    
 implementation
@@ -278,6 +289,7 @@ constructor tcustomchartedit.create(aowner: tcomponent);
 begin
  fsnapdist:= defaultsnapdist;
  foptionsedit:= defaultchartoptionsedit;
+ resetnodehint;
  inherited;
  traces.count:= 1;
  fobjectpicker:= tobjectpicker.create(iobjectpicker(self));
@@ -314,38 +326,71 @@ begin
  end;
 end;
 
+procedure tcustomchartedit.resetnodehint;
+begin
+ fnodehintindex:= -1;
+ fnodehinttrace:= -1;
+end;
+
 function tcustomchartedit.hasactivetrace: boolean;
 begin
  result:= (factivetrace >= 0) and (factivetrace < traces.count);
+end;
+
+procedure tcustomchartedit.nodehint(const atrace,aindex: integer);
+begin
 end;
 
 procedure tcustomchartedit.clientmouseevent(var info: mouseeventinfoty);
 var
  co1: complexty;
  co2: xseriesdataty;
+ index1,trace1: integer;
 begin
  if not (es_processed in info.eventstate) then begin
   fobjectpicker.mouseevent(info);
   if not (es_processed in info.eventstate) and 
-     not (csdesigning in componentstate) and 
-     not (oe_readonly in foptionsedit) and  not (ceo_noinsert in foptions) and 
-                                                      hasactivetrace then begin
-   if (info.eventkind = ek_buttonpress) and 
-             (info.shiftstate * shiftstatesmask = [ss_left]) then begin
-    if pointinrect(info.pos,innerclientrect) then begin
-     with activetraceitem do begin
-      if kind = trk_xseries then begin
-       co2:= tracecoordxseries(factivetrace,info.pos);
-       insertxseriesdata(co2);
+                      not (csdesigning in componentstate) then begin
+   case info.eventkind of
+    ek_mousepark: begin
+     if ceo_nodehint in foptions then begin
+      index1:= nearestnode(info.pos,trace1);
+      if index1 < 0 then begin
+       resetnodehint;
       end
       else begin
-       co1:= tracecoordxy(factivetrace,info.pos);
-       addxydata(co1.re,co1.im);
+       if (index1 <> fnodehintindex) or (trace1 <> fnodehinttrace) then begin
+//        fnodehintindex:= index1;
+//        fnodehinttrace:= trace1;
+        nodehint(trace1,index1);
+        include(info.eventstate,es_processed);
+       end;
       end;
      end;
-     include(info.eventstate,es_processed);
-     checkvalue;
-    end;   
+    end;
+    ek_clientmouseleave: begin
+     resetnodehint;
+    end;
+    ek_buttonpress: begin
+     if not (oe_readonly in foptionsedit) and 
+              not (ceo_noinsert in foptions) and hasactivetrace and
+                (info.shiftstate * shiftstatesmask = [ss_left]) then begin
+      if pointinrect(info.pos,innerclientrect) then begin
+       with activetraceitem do begin
+        if kind = trk_xseries then begin
+         co2:= tracecoordxseries(factivetrace,info.pos);
+         insertxseriesdata(co2);
+        end
+        else begin
+         co1:= tracecoordxy(factivetrace,info.pos);
+         addxydata(co1.re,co1.im);
+        end;
+       end;
+       include(info.eventstate,es_processed);
+       checkvalue;
+      end;   
+     end;
+    end;
    end;
    if not (es_processed in info.eventstate) then begin
     inherited;
@@ -1202,6 +1247,7 @@ end;
 
 procedure tcustomchartedit.dochange;
 begin
+ resetnodehint;
  if not (ws_loadedproc in fwidgetstate) then begin
   if canevent(tmethod(fonchange)) then begin
    fonchange(self);
