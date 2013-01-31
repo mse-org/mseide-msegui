@@ -1867,18 +1867,23 @@ begin
  with finfo do begin
   if ydata <> nil then begin
    result:= length(ydata);
+   exit;
   end;
   if xdata <> nil then begin
    result:= length(xdata);
+   exit;
   end;
   if xydata <> nil then begin
    result:= length(xydata);
+   exit;
   end;
   if ydatalist <> nil then begin
    result:= ydatalist.count;
+   exit;
   end;
   if xdatalist <> nil then begin
    result:= xdatalist.count;
+   exit;
   end;
  end;
 end;

@@ -42,13 +42,12 @@ type
    fsnapdist: integer;
    foffsetmin: pointty;
    foffsetmax: pointty;
-//   fvaluechecking: integer;
    fonchange: notifyeventty;
    fondataentered: notifyeventty;
    foptions: charteditoptionsty;
    fpickref: pointty;
    fmovestate: charteditmovestatesty;
-   procedure setactivetrace(const avalue: integer);
+   procedure setactivetrace(avalue: integer);
    function limitmoveoffset(const aoffset: pointty): pointty;
    function getreadonly: boolean;
    procedure setreadonly(const avalue: boolean);
@@ -56,13 +55,17 @@ type
    procedure dopickmove(const sender: tobjectpicker);
   protected
    function hasactivetrace: boolean;
-   function nodepos(const aindex: integer): pointty;
-   function nearestnode(const apos: pointty): integer;   
+   function nodepos(const atrace: integer; const aindex: integer): pointty;
+   function nearestnode(const apos: pointty; out atrace: integer): integer;   
    function nodesinrect(const arect: rectty): integerarty;
-   function chartcoordxy(const avalue: complexty): pointty;
-   function tracecoordxy(const apos: pointty): complexty;
-   function chartcoordxseries(const avalue: xseriesdataty): pointty;
-   function tracecoordxseries(const apos: pointty): xseriesdataty;
+   function chartcoordxy(const atrace: integer;
+                                const avalue: complexty): pointty;
+   function tracecoordxy(const atrace: integer;
+                                const apos: pointty): complexty;
+   function chartcoordxseries(const atrace: integer;
+                                const avalue: xseriesdataty): pointty;
+   function tracecoordxseries(const atrace: integer;
+                                const apos: pointty): xseriesdataty;
    procedure clientmouseevent(var info: mouseeventinfoty); override;
    procedure dokeydown(var ainfo: keyeventinfoty); override;
    procedure dobeforepaint(const acanvas: tcanvas); override;
@@ -91,6 +94,10 @@ type
 
    procedure drawcrosshaircursor(const canvas: tcanvas;
                                          const center: pointty); virtual;
+   function encodenodes(const atrace: integer;
+                   const aitems: array of integer): integerarty;
+   function decodenodes(const aitems: integerarty;
+                             out atrace: integer): integerarty;
     //iobjectpicker
    function getcursorshape(const sender: tobjectpicker;
                             var shape: cursorshapety): boolean;
@@ -284,23 +291,27 @@ begin
  inherited;
 end;
 
-procedure tcustomchartedit.setactivetrace(const avalue: integer);
+procedure tcustomchartedit.setactivetrace(avalue: integer);
 begin
  if avalue < 0 then begin
-  raise exception.create('Negative value');
+  avalue:= -1;
+//  raise exception.create('Negative value');
  end;
  factivetrace:= avalue;
- if traces.count <= avalue then begin
-  traces.count:= avalue+1;
- end;
+// if traces.count <= avalue then begin
+//  traces.count:= avalue+1;
+// end;
 end;
 
 function tcustomchartedit.activetraceitem: ttrace;
 begin
- if factivetrace >= traces.count then begin
-  traces.count:= factivetrace+1;
+ result:= nil;
+ if factivetrace >= 0 then begin
+  if factivetrace >= traces.count then begin
+   traces.count:= factivetrace+1;
+  end;
+  result:= ttrace(ttraces1(traces).fitems[factivetrace]);
  end;
- result:= ttrace(ttraces1(traces).fitems[factivetrace]);
 end;
 
 function tcustomchartedit.hasactivetrace: boolean;
@@ -324,11 +335,11 @@ begin
     if pointinrect(info.pos,innerclientrect) then begin
      with activetraceitem do begin
       if kind = trk_xseries then begin
-       co2:= tracecoordxseries(info.pos);
+       co2:= tracecoordxseries(factivetrace,info.pos);
        insertxseriesdata(co2);
       end
       else begin
-       co1:= tracecoordxy(info.pos);
+       co1:= tracecoordxy(factivetrace,info.pos);
        addxydata(co1.re,co1.im);
       end;
      end;
@@ -383,126 +394,164 @@ begin
  end;
 end;
 
-function tcustomchartedit.tracecoordxy(const apos: pointty): complexty;
+function tcustomchartedit.tracecoordxy(const atrace: integer;
+                                              const apos: pointty): complexty;
 var
  rect1: rectty;
 begin
- rect1:= innerclientrect;
- with traces[factivetrace] do begin
-  if rect1.cx <= 0 then begin
-   result.re:= xstart;
-  end
-  else begin
-   result.re:= xstart + ((apos.x - rect1.x) / rect1.cx)*xrange;
-  end;
-  if rect1.cy <= 0 then begin
-   result.im:= ystart;
-  end
-  else begin
-   result.im:= ystart + ((rect1.y+rect1.cy-apos.y) / rect1.cy)*yrange;
-  end;
- end;
-end;
-
-function tcustomchartedit.tracecoordxseries(const apos: pointty): xseriesdataty;
-var
- rect1: rectty;
-begin
- rect1:= innerclientrect;
- with traces[factivetrace] do begin
-  result.index:= 0;
-  if (count > 0) and (rect1.cx > 0) then begin
-   if cto_seriescentered in options then begin
-    result.index:= ((apos.x-rect1.x)*count + rect1.cx div 2) div rect1.cx;
+ if (atrace >= 0) and (atrace < ftraces.count) then begin
+// if hasactivetrace then begin
+  rect1:= innerclientrect;
+  with traces[atrace] do begin
+   if rect1.cx <= 0 then begin
+    result.re:= xstart;
    end
    else begin
-    result.index:= ((apos.x-rect1.x)*(count-1)) div rect1.cx;
+    result.re:= xstart + ((apos.x - rect1.x) / rect1.cx)*xrange;
+   end;
+   if rect1.cy <= 0 then begin
+    result.im:= ystart;
+   end
+   else begin
+    result.im:= ystart + ((rect1.y+rect1.cy-apos.y) / rect1.cy)*yrange;
    end;
   end;
-  if rect1.cy <= 0 then begin
-   result.value:= ystart;
-  end
-  else begin
-   result.value:= ystart + ((rect1.y+rect1.cy-apos.y) / rect1.cy)*yrange;
-  end;
+ end
+ else begin
+  result:= nullcomplex;
  end;
 end;
 
-function tcustomchartedit.chartcoordxy(const avalue: complexty): pointty;
+function tcustomchartedit.tracecoordxseries(const atrace: integer;
+                                           const apos: pointty): xseriesdataty;
 var
  rect1: rectty;
 begin
- rect1:= innerclientrect;
- with traces[factivetrace] do begin
-  result.x:= rect1.x + round(((avalue.re-xstart)/xrange)*rect1.cx);
-  result.y:= rect1.y + rect1.cy - round(((avalue.im-ystart)/yrange)*rect1.cy);
+ if (atrace >= 0) and (atrace < ftraces.count) then begin
+// if hasactivetrace then begin
+  rect1:= innerclientrect;
+  with traces[atrace] do begin
+   result.index:= 0;
+   if (count > 0) and (rect1.cx > 0) then begin
+    if cto_seriescentered in options then begin
+     result.index:= ((apos.x-rect1.x)*count + rect1.cx div 2) div rect1.cx;
+    end
+    else begin
+     result.index:= ((apos.x-rect1.x)*(count-1)) div rect1.cx;
+    end;
+   end;
+   if rect1.cy <= 0 then begin
+    result.value:= ystart;
+   end
+   else begin
+    result.value:= ystart + ((rect1.y+rect1.cy-apos.y) / rect1.cy)*yrange;
+   end;
+  end;
+ end
+ else begin
+  result.value:= 0;
+  result.index:= -1;
  end;
 end;
 
-function tcustomchartedit.chartcoordxseries(const avalue: xseriesdataty): pointty;
+function tcustomchartedit.chartcoordxy(const atrace: integer;
+                                            const avalue: complexty): pointty;
 var
  rect1: rectty;
 begin
- rect1:= innerclientrect;
- with traces[factivetrace] do begin
-  if (cto_seriescentered in options) or (count = 1) then begin
-   result.x:= rect1.x + (avalue.index * rect1.cx+rect1.cx div 2) div count;
-  end
-  else begin
-   result.x:= rect1.x + (avalue.index * rect1.cx) div (count-1);
+ if (atrace >= 0) and (atrace < ftraces.count) then begin
+// if hasactivetrace then begin
+  rect1:= innerclientrect;
+  with traces[atrace] do begin
+   result.x:= rect1.x + round(((avalue.re-xstart)/xrange)*rect1.cx);
+   result.y:= rect1.y + rect1.cy - round(((avalue.im-ystart)/yrange)*rect1.cy);
   end;
-  result.y:= rect1.y + rect1.cy - round(((avalue.value-ystart)/yrange)*rect1.cy);
+ end
+ else begin
+  result:= nullpoint;
  end;
 end;
 
-function tcustomchartedit.nodepos(const aindex: integer): pointty;
+function tcustomchartedit.chartcoordxseries(const atrace: integer;
+                                        const avalue: xseriesdataty): pointty;
+var
+ rect1: rectty;
 begin
- with traces[factivetrace] do begin
-  if kind = trk_xseries then begin
-   result:= chartcoordxseries(makexseriesdata(yvalue[aindex],aindex));
-  end
-  else begin
-   result:= chartcoordxy(xyvalue[aindex]);
+// if hasactivetrace then begin
+ if (atrace >= 0) and (atrace < ftraces.count) then begin
+  rect1:= innerclientrect;
+  with traces[atrace] do begin
+   if (cto_seriescentered in options) or (count = 1) then begin
+    result.x:= rect1.x + (avalue.index * rect1.cx+rect1.cx div 2) div count;
+   end
+   else begin
+    result.x:= rect1.x + (avalue.index * rect1.cx) div (count-1);
+   end;
+   result.y:= rect1.y + rect1.cy - round(((avalue.value-ystart)/yrange)*rect1.cy);
   end;
+ end
+ else begin
+  result:= nullpoint;
+ end; 
+end;
+
+function tcustomchartedit.nodepos(const atrace: integer;
+                                       const aindex: integer): pointty;
+begin
+// if hasactivetrace then begin
+ if (atrace >= 0) and (atrace < ftraces.count) then begin
+  with traces[atrace] do begin
+   if kind = trk_xseries then begin
+    result:= chartcoordxseries(atrace,makexseriesdata(yvalue[aindex],aindex));
+   end
+   else begin
+    result:= chartcoordxy(atrace,xyvalue[aindex]);
+   end;
+  end;
+ end
+ else begin
+  result:= nullpoint;
  end;
 end;
 
-function tcustomchartedit.nearestnode(const apos: pointty): integer;   
+function tcustomchartedit.nearestnode(const apos: pointty;
+                                  out atrace: integer): integer;   
 var
  dist: integer;
- int1: integer;
 
- procedure handlepoint(const pt1: pointty);
+ function checkdist(const atrace: integer): integer;
+                      //todo: optimze for ordered data
  var
-  int2,int3: integer;
- begin
-  int2:= apos.x - pt1.x;
-  int2:= int2*int2;
-  int3:= apos.y - pt1.y;
-  int3:= int3*int3;
-  int3:= int2+int3;
-  if int3 < dist then begin
-   dist:= int3;
-   result:= int1;
-  end;
- end;
+  int1: integer;
 
-var 
- datahigh: integer;
- px,py: preal;
- pxy: pcomplexty;
-// pt1: pointty;
-begin
- result:= -1;
- if hasactivetrace then begin
-  with traces[factivetrace] do begin
-   dist:= maxint;
+  procedure handlepoint(const pt1: pointty);
+  var
+   int2,int3: integer;
+  begin
+   int2:= apos.x - pt1.x;
+   int2:= int2*int2;
+   int3:= apos.y - pt1.y;
+   int3:= int3*int3;
+   int3:= int2+int3;
+   if int3 < dist then begin
+    dist:= int3;
+    result:= int1;
+   end;
+  end; //handlepoint
+
+ var 
+  datahigh: integer;
+  px,py: preal;
+  pxy: pcomplexty;
+ begin
+  result:= -1;
+  with ftraces[atrace] do begin
    datahigh:= count-1;
    if kind = trk_xseries then begin
     py:= ydatapo;
     if py <> nil then begin
      for int1:= 0 to datahigh do begin
-      handlepoint(chartcoordxseries(makexseriesdata(py^,int1)));
+      handlepoint(chartcoordxseries(atrace,makexseriesdata(py^,int1)));
       inc(py);
      end;
     end;
@@ -511,8 +560,7 @@ begin
     pxy:= xydatapo;
     if pxy <> nil then begin
      for int1:= 0 to datahigh do begin
-      handlepoint(chartcoordxy(pxy^));
-      
+      handlepoint(chartcoordxy(atrace,pxy^));      
       inc(pxy);
      end;
     end
@@ -521,17 +569,37 @@ begin
      py:= ydatapo;
      if (px <> nil) and (py <> nil) then begin
       for int1:= 0 to datahigh do begin
-       handlepoint(chartcoordxy(makecomplex(px^,py^)));
+       handlepoint(chartcoordxy(atrace,makecomplex(px^,py^)));
        inc(px);
        inc(py);
       end;
      end;
     end;
    end;
-   if (dist >= fsnapdist*fsnapdist) then begin
-    result:= -1;
-   end;
   end;
+ end; //checkdist
+
+var
+ int1,int2: integer;
+  
+begin
+ dist:= maxint;
+ if hasactivetrace then begin
+  atrace:= factivetrace;
+  result:= checkdist(factivetrace);
+ end
+ else begin
+  for int1:= 0 to traces.count-1 do begin
+   int2:= checkdist(int1);
+   if int2 >= 0 then begin
+    result:= int2;
+    atrace:= int1;
+   end;
+  end;    
+ end;
+ if (dist >= fsnapdist*fsnapdist) then begin
+  result:= -1;
+  atrace:= -1;
  end;
 end;
 
@@ -550,7 +618,7 @@ begin
     py:= ydatapo;
     if py <> nil then begin
      for int1:= 0 to high(result) do begin
-      if pointinrect(chartcoordxseries(
+      if pointinrect(chartcoordxseries(factivetrace,
                         makexseriesdata(py^,int1)),arect) then begin
        result[int2]:= int1;
        inc(int2);
@@ -563,7 +631,7 @@ begin
     pxy:= xydatapo;
     if pxy <> nil then begin
      for int1:= 0 to high(result) do begin
-      if pointinrect(chartcoordxy(pxy^),arect) then begin
+      if pointinrect(chartcoordxy(factivetrace,pxy^),arect) then begin
        result[int2]:= int1;
        inc(int2);
       end;
@@ -575,7 +643,8 @@ begin
      py:= ydatapo;
      if (px <> nil) and (py <> nil) then begin
       for int1:= 0 to high(result) do begin
-       if pointinrect(chartcoordxy(makecomplex(px^,py^)),arect) then begin
+       if pointinrect(chartcoordxy(factivetrace,
+                                       makecomplex(px^,py^)),arect) then begin
         result[int2]:= int1;
         inc(int2);
        end;
@@ -616,21 +685,72 @@ begin
  end;
 end;
 
+function tcustomchartedit.encodenodes(const atrace: integer;
+                   const aitems: array of integer): integerarty;
+var
+ int1,int2: integer;
+begin
+ int2:= 0;
+ for int1:= 0 to atrace - 1 do begin
+  int2:= int2 + ftraces[int1].count;
+ end;
+ setlength(result,length(aitems));
+ for int1:= 0 to high(result) do begin
+  result[int1]:= int2 + aitems[int1];
+ end;
+end;
+
+function tcustomchartedit.decodenodes(const aitems: integerarty;
+                             out atrace: integer): integerarty;
+var
+ int1,int2,int3: integer;
+ min,max: integer;
+begin
+ atrace:= -1;
+ setlength(result,length(aitems));
+ for int1:= 0 to high(result) do begin
+  int2:= aitems[int1];
+  if int2 >= 0 then begin
+   if atrace < 0 then begin
+    min:= 0;
+    max:= 0;
+    for int3:= 0 to ftraces.count - 1 do begin
+     min:= max;
+     max:= max + ttrace(ttraces1(ftraces).fitems[int3]).count;
+     atrace:= int3;
+     if max > int2 then begin
+      break;
+     end;
+    end;
+    max:= max-min;
+   end;
+   int2:= int2 - min;
+   if (int2 < 0) or (int2 >= max) then begin //in other trace, invalid
+    result:= nil;
+    atrace:= -1;
+    break;
+   end;
+  end;
+  result[int1]:= int2;
+ end;
+end;
+
 procedure tcustomchartedit.getpickobjects(const sender: tobjectpicker;
                                                     var objects: integerarty);
 var
- int1: integer;
+ int1,int2: integer;
  rect: rectty;
 begin
  rect:= sender.pickrect;
  if sender.rectselecting then begin
-  objects:= nodesinrect(rect);
+  objects:= encodenodes(factivetrace,nodesinrect(rect));
  end
  else begin
-  int1:= nearestnode(rect.pos);
+  int1:= nearestnode(rect.pos,int2);
   if int1 >= 0 then begin
-   setlength(objects,1);
-   objects[0]:= int1;
+   objects:= encodenodes(int2,int1);
+//   setlength(objects,1);
+//   objects[0]:= ;
   end
   else begin
    objects:= nil;
@@ -679,6 +799,7 @@ var
  pt1: pointty;
  ar1: pointarty;
  objs: integerarty;
+ trace1: integer;
 begin
  fpickref:= nullpoint;
  rect1:= innerclientrect;
@@ -686,7 +807,7 @@ begin
  mi.y:= maxint;
  ma.x:= minint;
  ma.y:= minint;
- objs:= sender.currentobjects;
+ objs:= decodenodes(sender.currentobjects,trace1);
  setlength(ar1,length(objs));
  exclude(fmovestate,cems_markermoving);
  for int1:= 0 to high(objs) do begin
@@ -746,7 +867,7 @@ begin
    end;
   end
   else begin
-   pt1:= nodepos(objs[int1]);
+   pt1:= nodepos(trace1,objs[int1]);
    ar1[int1]:= pt1;
    if pt1.x < mi.x then begin
     mi.x:= pt1.x;
@@ -773,7 +894,7 @@ begin
    foffsetmax.x:= x + cx - ma.x;
    foffsetmax.y:= y + cy - ma.y;
   end;
-  with activetraceitem do begin
+  with ftraces[trace1] do begin
    if kind = trk_xseries then begin
     foffsetmin.x:= 0;
     foffsetmax.x:= 0;   
@@ -784,16 +905,16 @@ begin
      for int1:= 0 to high(ar1) do begin
       int2:= objs[int1];
       if (int2 > 0) and ((int1 = 0) or (objs[int1-1] <> int2 - 1)) then begin
-       pt1:= nodepos(int2-1);
+       pt1:= nodepos(trace1,int2-1);
        int3:= pt1.x - ar1[int1].x;
        if int3 > foffsetmin.x then begin
         foffsetmin.x:= int3;
        end;
       end;
-      int4:= traces[factivetrace].count - 1;
+      int4:= ftraces[trace1].count - 1;
       if (int2 < int4) and ((int1 = high(ar1)) or 
                             (objs[int1+1] <> int2 + 1)) then begin
-       pt1:= nodepos(int2+1);
+       pt1:= nodepos(trace1,int2+1);
        int3:= pt1.x - ar1[int1].x;
        if int3 < foffsetmax.x then begin
         foffsetmax.x:= int3;
@@ -816,6 +937,7 @@ var
  offs: pointty;
  objs: integerarty;
  marker1: tdialmarker;
+ trace1,tracebefore: integer;
 begin
  offs:= limitmoveoffset(subpoint(sender.pickoffset,fpickref));
  if cems_markermoving in fmovestate then begin
@@ -863,37 +985,45 @@ begin
  end
  else begin
   addpoint1(fpickref,offs);
-  objs:= sender.currentobjects;
-  with activetraceitem do begin
-   if kind = trk_xseries then begin
-    for int1:= 0 to high(objs) do begin
-     int2:= objs[int1];
-     pt1:= nodepos(int2);
-     rea1:= yvalue[int2];
-     da1:= tracecoordxseries(addpoint(pt1,offs));
-     if offs.y <> 0 then begin //no rounding if nochange
-      rea1:= da1.value;
+  objs:= decodenodes(sender.currentobjects,trace1);
+  if trace1 >= 0 then begin
+   tracebefore:= activetrace;
+   activetrace:= trace1;
+   try
+    with activetraceitem do begin
+     if kind = trk_xseries then begin
+      for int1:= 0 to high(objs) do begin
+       int2:= objs[int1];
+       pt1:= nodepos(trace1,int2);
+       rea1:= yvalue[int2];
+       da1:= tracecoordxseries(trace1,addpoint(pt1,offs));
+       if offs.y <> 0 then begin //no rounding if nochange
+        rea1:= da1.value;
+       end;
+       yvalue[int2]:= rea1;
+      end;
+     end
+     else begin
+      for int1:= 0 to high(objs) do begin
+       int2:= objs[int1];
+       pt1:= nodepos(trace1,int2);
+       co1:= xyvalue[int2];
+       co2:= tracecoordxy(trace1,addpoint(pt1,offs));
+       if offs.x <> 0 then begin //no rounding if nochange
+        co1.re:= co2.re;
+       end;
+       if offs.y <> 0 then begin //no rounding if nochange
+        co1.im:= co2.im;
+       end;
+       xyvalue[int2]:= co1;
+      end;
      end;
-     yvalue[int2]:= rea1;
     end;
-   end
-   else begin
-    for int1:= 0 to high(objs) do begin
-     int2:= objs[int1];
-     pt1:= nodepos(int2);
-     co1:= xyvalue[int2];
-     co2:= tracecoordxy(addpoint(pt1,offs));
-     if offs.x <> 0 then begin //no rounding if nochange
-      co1.re:= co2.re;
-     end;
-     if offs.y <> 0 then begin //no rounding if nochange
-      co1.im:= co2.im;
-     end;
-     xyvalue[int2]:= co1;
-    end;
+    checkvalue;
+   finally
+    activetrace:= tracebefore;
    end;
   end;
-  checkvalue;
  end;
 end;
 
@@ -935,7 +1065,7 @@ var
  int1,int2,int3: integer;
  offs: pointty;
  objs: integerarty;
-// pt1: pointty;
+ trace1: integer;
  rect1: rectty;
 begin
  with sender do begin
@@ -955,7 +1085,7 @@ begin
    end;
   end
   else begin
-   objs:= currentobjects;
+   objs:= decodenodes(currentobjects,trace1);
    if objs <> nil then begin
     if ceo_thumbtrack in foptions then begin
      offs:= nullpoint;
@@ -967,10 +1097,10 @@ begin
     setlength(ar2,length(objs)*2); //max
     int2:= 0;
     for int1:= 0 to high(objs) do begin
-     ar1[int1]:= addpoint(nodepos(objs[int1]),offs);
+     ar1[int1]:= addpoint(nodepos(trace1,objs[int1]),offs);
      int3:= objs[int1]-1;
      if int3 >= 0 then begin
-      ar2[int2].a:= nodepos(int3);
+      ar2[int2].a:= nodepos(trace1,int3);
       ar2[int2].b:= ar1[int1];
       if finditem(objs,int3) >= 0 then begin
        addpoint1(ar2[int2].a,offs);
@@ -978,9 +1108,9 @@ begin
       inc(int2);
      end;
      int3:= objs[int1]+1;
-     if int3 < traces[factivetrace].count then begin
+     if int3 < traces[trace1].count then begin
       ar2[int2].a:= ar1[int1];
-      ar2[int2].b:= nodepos(int3);
+      ar2[int2].b:= nodepos(trace1,int3);
       if finditem(objs,int3) < 0 then begin
        inc(int2);
       end;
@@ -992,9 +1122,9 @@ begin
      canvas.drawellipse(makerect(ar1[int1],makesize(6,6)));
     end;
     if (ops_moving in fobjectpicker.state) {and (high(objs) = 0)} then begin
-     objs:= sender.mouseoverobjects;
+     objs:= decodenodes(sender.mouseoverobjects,trace1);
      if objs <> nil then begin
-      drawcrosshaircursor(canvas,addpoint(nodepos(objs[0]),offs));
+      drawcrosshaircursor(canvas,addpoint(nodepos(trace1,objs[0]),offs));
      end;
     end;
    end;
@@ -1018,6 +1148,9 @@ begin
 end;
 
 procedure tcustomchartedit.dokeydown(var ainfo: keyeventinfoty);
+var
+ trace1,tracebefore: integer;
+ ar1: integerarty;
 begin
  if not (es_processed in ainfo.eventstate) then begin
   inherited;
@@ -1029,10 +1162,19 @@ begin
      not readonly and not (ceo_nodelete in foptions) and
      (ainfo.shiftstate*shiftstatesmask = []) and 
                                  fobjectpicker.hascurrentobjects  then begin
-  activetraceitem.deletedata(fobjectpicker.currentobjects);
-  fobjectpicker.clear;
-  include(ainfo.eventstate,es_processed);
-  checkvalue;
+  ar1:= decodenodes(fobjectpicker.currentobjects,trace1);
+  if trace1 >= 0 then begin
+   tracebefore:= activetrace;
+   activetrace:= trace1;
+   try
+    activetraceitem.deletedata(ar1);
+    fobjectpicker.clear;
+    include(ainfo.eventstate,es_processed);
+    checkvalue;
+   finally
+    activetrace:= tracebefore;
+   end;
+  end;
  end;
 end;
 
@@ -1143,7 +1285,7 @@ end;
 procedure tcustomchartedit.statread;
 begin
  inherited;
- if oe_checkvaluepaststatread in foptionsedit then begin
+ if (oe_checkvaluepaststatread in foptionsedit) and hasactivetrace then begin
   checkvalue;
  end;
 end;
