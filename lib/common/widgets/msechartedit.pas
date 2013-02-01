@@ -33,9 +33,10 @@ type
                          cems_xbottomlimit,cems_ybottomlimit,
                          cems_xtoplimit,cems_ytoplimit);
  charteditmovestatesty = set of charteditmovestatety;
- 
- nodehinteventty = procedure(const atrace,aindex: integer;
-                                        var ahint: hintinfoty) of object;
+
+ tcustomchartedit = class; 
+ nodehinteventty = procedure(const sender: tcustomchartedit;
+          const atrace,aindex: integer; var ahint: hintinfoty) of object;
                                         
  tcustomchartedit = class(tcustomchart,iobjectpicker)
   private
@@ -53,6 +54,7 @@ type
    fonnodehint: nodehinteventty;
    fnodehintindex: integer;
    fnodehinttrace: integer;
+   fformatnodehint: msestring;
    procedure setactivetrace(avalue: integer);
    function limitmoveoffset(const aoffset: pointty): pointty;
    function getreadonly: boolean;
@@ -63,7 +65,8 @@ type
    procedure resetnodehint;
    function hasactivetrace: boolean;
    function nodepos(const atrace: integer; const aindex: integer): pointty;
-   function nearestnode(const apos: pointty; out atrace: integer): integer;   
+   function nearestnode(const apos: pointty; const all: boolean;
+                                              out atrace: integer): integer;   
    function nodesinrect(const arect: rectty): integerarty;
    function chartcoordxy(const atrace: integer;
                                 const avalue: complexty): pointty;
@@ -128,6 +131,7 @@ type
                            write foptionsedit default defaultchartoptionsedit;
    property snapdist: integer read fsnapdist write fsnapdist 
                                               default defaultsnapdist;
+   property formatnodehint: msestring read fformatnodehint write fformatnodehint;
    property options: charteditoptionsty read foptions write setoptions default [];
    property onchange: notifyeventty read fonchange write fonchange;
    property onnodehint: nodehinteventty read fonnodehint write fonnodehint;
@@ -174,6 +178,10 @@ type
    property yrange;
    property xdials;
    property ydials;
+   property fitframe_left;
+   property fitframe_top;
+   property fitframe_right;
+   property fitframe_bottom;
    property statfile;
    property statvarname;
    property onbeforepaint;
@@ -186,6 +194,7 @@ type
    property activetrace;
    property optionsedit;
    property snapdist;
+   property formatnodehint;
    property options;
    property onchange;
    property onnodehint;
@@ -207,6 +216,10 @@ type
    property yrange;
    property xdials;
    property ydials;
+   property fitframe_left;
+   property fitframe_top;
+   property fitframe_right;
+   property fitframe_bottom;
    property statfile;
    property statvarname;
    property onbeforepaint;
@@ -219,6 +232,7 @@ type
    property activetrace;
    property optionsedit;
    property snapdist;
+   property formatnodehint;
    property options;
    property onchange;
    property onnodehint;
@@ -258,6 +272,10 @@ type
    property yrange;
    property xdials;
    property ydials;
+   property fitframe_left;
+   property fitframe_top;
+   property fitframe_right;
+   property fitframe_bottom;
    property statfile;
    property statvarname;
    property onbeforepaint;
@@ -270,6 +288,7 @@ type
    property activetrace;
    property optionsedit;
    property snapdist;
+   property formatnodehint;
    property options;
    property onchange;
    property onnodehint;
@@ -277,7 +296,7 @@ type
    
 implementation
 uses
- msereal,msekeyboard,msedatalist,sysutils,msearrayutils;
+ msereal,msekeyboard,msedatalist,sysutils,msearrayutils,mseformatstr;
  
 type
  ttraces1 = class(ttraces);
@@ -338,7 +357,41 @@ begin
 end;
 
 procedure tcustomchartedit.nodehint(const atrace,aindex: integer);
+var
+ info: hintinfoty;
+ x,y: real;
 begin
+ fillchar(info,sizeof(info),0);
+ with info do begin
+  with posrect do begin
+   pos:= nodepos(atrace,aindex);
+   addpoint1(pos,mp(-20,-20));
+   cx:= 40;
+   cy:= 40;
+  end;
+  placement:= cp_bottomleft;
+ end;
+ with traces[atrace] do begin
+  case kind of
+   trk_xy: begin
+    x:= xvalue[aindex];
+    y:= yvalue[aindex];
+    info.caption:= 'x: '+formatfloatmse(x,fformatnodehint)+lineend+
+                   'y: '+formatfloatmse(y,fformatnodehint);
+   end;
+   else begin
+    y:= yvalue[aindex];
+    info.caption:= 'n: '+inttostr(aindex)+lineend+
+                   'y: '+formatfloatmse(y,fformatnodehint);
+   end;
+  end;
+ end;
+ if canevent(tmethod(fonnodehint)) then begin
+  fonnodehint(self,atrace,aindex,info);
+ end;
+ if info.caption <> '' then begin
+  application.showhint(self,info);
+ end;
 end;
 
 procedure tcustomchartedit.clientmouseevent(var info: mouseeventinfoty);
@@ -354,7 +407,7 @@ begin
    case info.eventkind of
     ek_mousepark: begin
      if ceo_nodehint in foptions then begin
-      index1:= nearestnode(info.pos,trace1);
+      index1:= nearestnode(info.pos,true,trace1);
       if index1 < 0 then begin
        resetnodehint;
       end
@@ -559,7 +612,7 @@ begin
  end;
 end;
 
-function tcustomchartedit.nearestnode(const apos: pointty;
+function tcustomchartedit.nearestnode(const apos: pointty; const all: boolean;
                                   out atrace: integer): integer;   
 var
  dist: integer;
@@ -629,11 +682,18 @@ var
   
 begin
  dist:= maxint;
- if hasactivetrace then begin
+ if hasactivetrace and not all then begin
   atrace:= factivetrace;
   result:= checkdist(factivetrace);
  end
  else begin
+  if hasactivetrace then begin
+   int2:= checkdist(factivetrace);
+   if int2 >= 0 then begin
+    result:= int2;
+    atrace:= factivetrace;
+   end;   
+  end;
   for int1:= 0 to traces.count-1 do begin
    int2:= checkdist(int1);
    if int2 >= 0 then begin
@@ -791,7 +851,7 @@ begin
   objects:= encodenodes(factivetrace,nodesinrect(rect));
  end
  else begin
-  int1:= nearestnode(rect.pos,int2);
+  int1:= nearestnode(rect.pos,false,int2);
   if int1 >= 0 then begin
    objects:= encodenodes(int2,int1);
 //   setlength(objects,1);
@@ -1431,7 +1491,9 @@ end;
 
 procedure tcustomxychartedit.dochange;
 begin
- activetraceitem.xydata:= fvalue;
+ if hasactivetrace then begin
+  activetraceitem.xydata:= fvalue;
+ end;
  inherited;
 end;
 
@@ -1538,7 +1600,9 @@ end;
 
 procedure tcustomxserieschartedit.dochange;
 begin
- activetraceitem.ydata:= fvalue;
+ if hasactivetrace then begin
+  activetraceitem.ydata:= fvalue;
+ end;
  inherited;
 end;
 

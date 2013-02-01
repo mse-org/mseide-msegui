@@ -5625,10 +5625,10 @@ begin
      pixinc:= sizeof(rgbtriplety);
      if fi.fade_direction in [gd_up,gd_left] then begin //revert
       if fi.fade_direction = gd_left then begin
-       startpix:= rect.x+rect.cx-startpix-rect1.cx;
+       startpix:= rect.x+rect.cx-rect1.x-rect1.cx;
       end
       else begin
-       startpix:= rect.y+rect.cy-startpix-rect1.cy;
+       startpix:= rect.y+rect.cy-rect1.y-rect1.cy;
       end;
       inc(po1,pixcount-1);
       pixinc:= -pixinc;
@@ -5645,7 +5645,7 @@ begin
       end;
       nextnode:= curnode;
       rea1:= rea1 + pixelstep;
-      while posar[nextnode] < rea1 do begin
+      while (posar[nextnode] < rea1) and (nextnode < high(posar)) do begin
        inc(nextnode);
       end;
       if nextnode > curnode+1 then begin //calc average
@@ -5681,7 +5681,12 @@ begin
        end
        else begin
         curpix:= trunc(posar[curnode]*pixelscale)-startpix;
-        rea1:= 1/(nextpix-curpix);
+        if nextpix = curpix then begin
+         rea1:= 1;
+        end
+        else begin
+         rea1:= 1/(nextpix-curpix);
+        end;
         if nextpix > pixcount then begin
          nextpix:= pixcount;
         end;
