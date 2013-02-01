@@ -15447,7 +15447,7 @@ var
  window1: twindow;
 begin
  result:= appinst.findwindow(aid,window1) and
-              (window1.fowner.name = aname);
+              (window1.fownerwidget.name = aname);
 end;
 
 {$endif}
