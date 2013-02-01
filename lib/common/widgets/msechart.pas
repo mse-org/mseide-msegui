@@ -116,6 +116,8 @@ type
    fimli1: timagelist;
    frect1: rectty;
    fimagealignment: alignmentsty;
+   fnodehint_captionx: msestring;
+   fnodehint_captiony: msestring;
    procedure setxydata(const avalue: complexarty);
    procedure datachange;
    procedure legendchange;
@@ -209,6 +211,8 @@ type
    function getwidget: twidget;
    function getwidgetrect: rectty;
    function getframestateflags: framestateflagsty;
+   function nodehintx: msestring;
+   function nodehinty: msestring;
     //iface
    function translatecolor(const acolor: colorty): colorty;
    function getclientrect: rectty;
@@ -294,6 +298,10 @@ type
    property legend_caption: msestring read finfo.legend write setlegend_caption;
    property legend_font: ttracefont read getlegend_font 
                                 write setlegend_font stored isfontstored;
+   property nodehint_captionx: msestring read fnodehint_captionx
+                                 write fnodehint_captionx;
+   property nodehint_captiony: msestring read fnodehint_captiony
+                                 write fnodehint_captiony;
  end;
 
  traceaty = array[0..0] of ttrace;
@@ -665,6 +673,8 @@ type
 
  tcustomchart = class(tcuchart)
   private
+   fnodehint_captionx: msestring;
+   fnodehint_captiony: msestring;
    procedure settraces(const avalue: ttraces);
    procedure setxstart(const avalue: real); override;
    procedure setystart(const avalue: real); override;
@@ -690,6 +700,10 @@ type
                                              const aendmargin: real = 0);
    procedure addsample(const asamples: array of real); virtual;
    property traces: ttraces read ftraces write settraces;
+   property nodehint_captionx: msestring read fnodehint_captionx
+                                 write fnodehint_captionx;
+   property nodehint_captiony: msestring read fnodehint_captiony
+                                 write fnodehint_captiony;
  end;
 
  tchart = class(tcustomchart)
@@ -805,6 +819,7 @@ uses
 type
  tcustomdialcontroller1 = class(tcustomdialcontroller);
  tdialticks1 = class(tdialticks);
+ tdialmarkers1 = class(tdialmarkers);
  tcustomframe1 = class(tcustomframe);
 
 function makexseriesdata(const value: real; const index: integer): xseriesdataty;
@@ -2351,29 +2366,23 @@ begin
  finfo.legend:= avalue;
  legendchange;
 end;
-{
-procedure ttrace.setlegend_x(const avalue: integer);
+
+function ttrace.nodehintx: msestring;
 begin
- if finfo.legendpos.x <> avalue then begin
-  finfo.legendpos.x:= avalue;
-  datachange;
+ result:= fnodehint_captionx;
+ if result = '' then begin
+  result:= tcustomchart(fowner).nodehint_captionx;
  end;
 end;
 
-procedure ttrace.setlegend_y(const avalue: integer);
+function ttrace.nodehinty: msestring;
 begin
- if finfo.legendpos.y <> avalue then begin
-  finfo.legendpos.y:= avalue;
-  datachange;
+ result:= fnodehint_captiony;
+ if result = '' then begin
+  result:= tcustomchart(fowner).nodehint_captiony;
  end;
 end;
 
-procedure ttrace.setlegend_pos(const avalue: pointty);
-begin
- finfo.legendpos:= avalue;
- datachange;
-end;
-}
 { ttracesfont }
 
 class function ttracesfont.getinstancepo(owner: tobject): pfont;
@@ -3450,6 +3459,7 @@ var
    end;
    checklayout;
    expandrectext1(ext1,tdialticks1(ticks).fdim);
+   expandrectext1(ext1,tdialmarkers1(markers).fdim);
    with tdialticks1(ticks).fdim do begin
     if isx then begin
      int1:= fitdist + bottom - top;

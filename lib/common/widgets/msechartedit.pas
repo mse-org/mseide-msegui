@@ -54,7 +54,6 @@ type
    fonnodehint: nodehinteventty;
    fnodehintindex: integer;
    fnodehinttrace: integer;
-   fformatnodehint: msestring;
    procedure setactivetrace(avalue: integer);
    function limitmoveoffset(const aoffset: pointty): pointty;
    function getreadonly: boolean;
@@ -131,7 +130,6 @@ type
                            write foptionsedit default defaultchartoptionsedit;
    property snapdist: integer read fsnapdist write fsnapdist 
                                               default defaultsnapdist;
-   property formatnodehint: msestring read fformatnodehint write fformatnodehint;
    property options: charteditoptionsty read foptions write setoptions default [];
    property onchange: notifyeventty read fonchange write fonchange;
    property onnodehint: nodehinteventty read fonnodehint write fonnodehint;
@@ -194,7 +192,8 @@ type
    property activetrace;
    property optionsedit;
    property snapdist;
-   property formatnodehint;
+   property nodehint_captionx;
+   property nodehint_captiony;
    property options;
    property onchange;
    property onnodehint;
@@ -232,7 +231,8 @@ type
    property activetrace;
    property optionsedit;
    property snapdist;
-   property formatnodehint;
+   property nodehint_captionx;
+   property nodehint_captiony;
    property options;
    property onchange;
    property onnodehint;
@@ -288,7 +288,8 @@ type
    property activetrace;
    property optionsedit;
    property snapdist;
-   property formatnodehint;
+   property nodehint_captionx;
+   property nodehint_captiony;
    property options;
    property onchange;
    property onnodehint;
@@ -361,6 +362,7 @@ procedure tcustomchartedit.nodehint(const atrace,aindex: integer);
 var
  info: hintinfoty;
  x,y: real;
+ mstr1,mstr2: msestring;
 begin
  fillchar(info,sizeof(info),0);
  with info do begin
@@ -372,20 +374,29 @@ begin
   end;
   placement:= cp_bottomleft;
  end;
- with traces[atrace] do begin
-  case kind of
-   trk_xy: begin
-    x:= xvalue[aindex];
-    y:= yvalue[aindex];
-    info.caption:= 'x: '+formatfloatmse(x,fformatnodehint)+lineend+
-                   'y: '+formatfloatmse(y,fformatnodehint);
-   end;
-   else begin
-    y:= yvalue[aindex];
-    info.caption:= 'n: '+inttostr(aindex)+lineend+
-                   'y: '+formatfloatmse(y,fformatnodehint);
-   end;
+ with ttrace1(traces[atrace]) do begin
+  y:= yvalue[aindex];
+  if kind = trk_xy then begin
+   x:= xvalue[aindex];
+  end
+  else begin
+   x:= aindex;
   end;
+  mstr1:= nodehintx;
+  if mstr1 = '' then begin
+   mstr1:= 'x: '+formatfloatmse(x,'');
+  end
+  else begin
+   mstr1:= formatfloatmse(x,mstr1);
+  end;
+  mstr2:= nodehinty;
+  if mstr2 = '' then begin
+   mstr2:= 'y: '+formatfloatmse(y,'');
+  end
+  else begin
+   mstr2:= formatfloatmse(x,mstr2);
+  end;
+  info.caption:= mstr1+lineend+mstr2;
  end;
  if canevent(tmethod(fonnodehint)) then begin
   fonnodehint(self,atrace,aindex,info);

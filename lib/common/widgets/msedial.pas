@@ -164,6 +164,7 @@ type
    function getitems(const aindex: integer): tdialmarker;
    procedure changed;
   protected
+   fdim: rectextty;
    procedure dosizechanged; override;
   public
    constructor create(const aowner: tcustomdialcontroller); reintroduce;
@@ -452,6 +453,28 @@ begin
  end;
 end;
 
+procedure extenddim(const textwidth,asc,desc: integer; const pos: pointty;
+                                                       var dim: rectextty);
+var
+ int2: integer;
+begin
+ with dim do begin
+  int2:= pos.x + textwidth;
+  if pos.x < left then begin
+   left:= pos.x;
+  end;
+  if int2 > right then begin
+   right:= int2;
+  end;
+  if top > pos.y - asc then begin
+   top:= pos.y - asc;
+  end;
+  if bottom < pos.y + desc then begin
+   bottom:= pos.y + desc;
+  end;
+ end;
+end;
+
 { tdialpropfont }
 
 class function tdialpropfont.getinstancepo(owner: tobject): pfont;
@@ -734,6 +757,8 @@ var
  size1: sizety;
  pt1: pointty;
  rectext1: rectextty;
+ int1: integer;
+ 
 begin
  with tcustomdialcontroller(fowner),fli,finfo,line do begin
   getactdialrect(rect1);
@@ -751,7 +776,6 @@ begin
      exit;
     end;
     rea1:= (chartln(value) - rea2)/rea1;
-//    rea1:= (chartln(value)-chartln(fstart))/chartln({fstart+}frange);
    end
    else begin
     rea1:= (value - fsstart)/frange;
@@ -827,8 +851,10 @@ begin
     afont:= self.font;
     acaption:= getactcaption(value,caption);
     captionpos:= a;
+    int1:= fintf.getwidget.getcanvas.getstringwidth(acaption,afont);
     adjustcaption(dir1,dmo_rotatetext in self.finfo.options,fli,afont,
-      fintf.getwidget.getcanvas.getstringwidth(acaption,afont),captionpos);
+                                                           int1,captionpos);
+    extenddim(int1,afont.ascent,afont.descent,captionpos,fmarkers.fdim);
    end;
    transform(a);
    transform(b);
@@ -1343,6 +1369,9 @@ const
    result:= 0;
   end;
  end;
+
+var
+ asc,desc: integer;
   
 var
  rect1: rectty;
@@ -1365,7 +1394,6 @@ var
  ar1: realarty;
  ar2: booleanarty;
  pt1: pointty;
- asc,desc: integer;
  rectext1: rectextty;
  
 begin
@@ -1632,10 +1660,6 @@ begin
         first:= first + 1;
        end;
        offs:= -offs;
-//       int1:= round(intervalcount);
-//       if int1/intervalcount + offs > 1.0001 then begin
-//        dec(int1);
-//       end;
        int1:= trunc((1.0001-offs)*intervalcount);
        first:= (first * frange) / intervalcount; //real value
       end;
@@ -1787,21 +1811,7 @@ begin
          adjustcaption(dir1,dto_rotatetext in options,fli,afont,
                int2,pos);
          angle:= ticksreal[int1] * rea2 + rea3;
-         with fticks.fdim do begin
-          int2:= pos.x + int2;
-          if pos.x < left then begin
-           left:= pos.x;
-          end;
-          if int2 > right then begin
-           right:= int2;
-          end;
-          if top > pos.y - asc then begin
-           top:= pos.y - asc;
-          end;
-          if bottom < pos.y + desc then begin
-           bottom:= pos.y + desc;
-          end;
-         end;
+         extenddim(int2,asc,desc,pos,fticks.fdim);        
         end;
        end;
        //todo: variable unitcaption pos.
@@ -1832,6 +1842,15 @@ begin
        b:= pt1;
       end;
      end;
+    end;
+   end;
+  end;
+  with fmarkers do begin
+   fdim:= emptyrectext;
+   for int1:= 0 to count - 1 do begin
+    with tdialmarker(fitems[int1]) do begin
+     flayoutvalid:= false;
+     checklayout;
     end;
    end;
   end;
