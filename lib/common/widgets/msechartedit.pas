@@ -428,7 +428,7 @@ begin
      if not (oe_readonly in foptionsedit) and 
               not (ceo_noinsert in foptions) and hasactivetrace and
                 (info.shiftstate * shiftstatesmask = [ss_left]) then begin
-      if pointinrect(info.pos,innerclientrect) then begin
+      if pointinrect(info.pos,getdialrect) then begin
        with activetraceitem do begin
         if kind = trk_xseries then begin
          co2:= tracecoordxseries(factivetrace,info.pos);
@@ -456,7 +456,7 @@ function tcustomchartedit.xmarkertochart(const avalue: real): integer;
 var
  rect1: rectty;
 begin
- rect1:= innerclientrect;
+ rect1:= getdialrect;
  with xdials[0] do begin
   result:= rect1.x + round(((avalue-xstart)/xrange)*rect1.cx);
  end;
@@ -466,7 +466,7 @@ function tcustomchartedit.ymarkertochart(const avalue: real): integer;
 var
  rect1: rectty;
 begin
- rect1:= innerclientrect;
+ rect1:= getdialrect;
  with ydials[0] do begin
   result:= rect1.y + rect1.cy - round(((avalue-ystart)/yrange)*rect1.cy);
  end;
@@ -476,7 +476,7 @@ function tcustomchartedit.xcharttomarker(const apos: integer): real;
 var
  rect1: rectty;
 begin
- rect1:= innerclientrect;
+ rect1:= getdialrect;
  with xdials[0] do begin
   result:= xstart + ((apos - rect1.x) / rect1.cx)*xrange;
  end;
@@ -486,7 +486,7 @@ function tcustomchartedit.ycharttomarker(const apos: integer): real;
 var
  rect1: rectty;
 begin
- rect1:= innerclientrect;
+ rect1:= getdialrect;
  with ydials[0] do begin
   result:= ystart + ((rect1.y+rect1.cy-apos) / rect1.cy)*yrange;
  end;
@@ -499,7 +499,7 @@ var
 begin
  if (atrace >= 0) and (atrace < ftraces.count) then begin
 // if hasactivetrace then begin
-  rect1:= innerclientrect;
+  rect1:= getdialrect;
   with traces[atrace] do begin
    if rect1.cx <= 0 then begin
     result.re:= xstart;
@@ -527,7 +527,7 @@ var
 begin
  if (atrace >= 0) and (atrace < ftraces.count) then begin
 // if hasactivetrace then begin
-  rect1:= innerclientrect;
+  rect1:= getdialrect;
   with traces[atrace] do begin
    result.index:= 0;
    if (count > 0) and (rect1.cx > 0) then begin
@@ -559,7 +559,7 @@ var
 begin
  if (atrace >= 0) and (atrace < ftraces.count) then begin
 // if hasactivetrace then begin
-  rect1:= innerclientrect;
+  rect1:= getdialrect;
   with traces[atrace] do begin
    result.x:= rect1.x + round(((avalue.re-xstart)/xrange)*rect1.cx);
    result.y:= rect1.y + rect1.cy - round(((avalue.im-ystart)/yrange)*rect1.cy);
@@ -577,7 +577,7 @@ var
 begin
 // if hasactivetrace then begin
  if (atrace >= 0) and (atrace < ftraces.count) then begin
-  rect1:= innerclientrect;
+  rect1:= getdialrect;
   with traces[atrace] do begin
    if (cto_seriescentered in options) or (count = 1) then begin
     result.x:= rect1.x + (avalue.index * rect1.cx+rect1.cx div 2) div count;
@@ -907,7 +907,7 @@ var
  trace1: integer;
 begin
  fpickref:= nullpoint;
- rect1:= innerclientrect;
+ rect1:= getdialrect;
  mi.x:= maxint;
  mi.y:= maxint;
  ma.x:= minint;
@@ -1176,7 +1176,7 @@ begin
  with sender do begin
   if cems_markermoving in fmovestate then begin
    offs:= limitmoveoffset(pickoffset);
-   rect1:= innerclientrect;
+   rect1:= getdialrect;
    int1:= -(sender.currentobjects[0]+1);
    with rect1 do begin
     if odd(int1) then begin

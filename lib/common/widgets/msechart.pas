@@ -172,11 +172,6 @@ type
    function getlegend_font: ttracefont;
    procedure setlegend_font(const avalue: ttracefont);
    procedure setlegend_caption(const avalue: msestring);
-{
-   procedure setlegend_x(const avalue: integer);
-   procedure setlegend_y(const avalue: integer);
-   procedure setlegend_pos(const avalue: pointty);
-}
    function isfontstored: boolean;
    procedure fontchanged(const sender: tobject);
   protected
@@ -261,7 +256,6 @@ type
    property logx: boolean read getlogx write setlogx;
    property logy: boolean read getlogy write setlogy;
    property visible: boolean read getvisible write setvisible;
-//   property legend_pos: pointty read finfo.legendpos write setlegend_pos;
    
   published
    property color: colorty read finfo.color write setcolor default cl_black;
