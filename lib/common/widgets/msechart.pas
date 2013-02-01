@@ -119,7 +119,6 @@ type
    procedure setxydata(const avalue: complexarty);
    procedure datachange;
    procedure legendchange;
-//   procedure layoutchange;
    procedure setcolor(const avalue: colorty);
    procedure setcolorimage(const avalue: colorty);
    procedure setxserrange(const avalue: real);
@@ -177,6 +176,10 @@ type
   protected
    ftraces: ttraces;
    fcurfont: tfont;
+   flnxstart: real;
+   flnxrange: real;
+   flnystart: real;
+   flnyrange: real;
    procedure setkind(const avalue: tracekindty); virtual;
    procedure setoptions(const avalue: charttraceoptionsty); virtual;
    function getxitempo(const aindex: integer): preal;
@@ -289,8 +292,6 @@ type
    property imagenr: imagenrty read finfo.imagenr write setimagenr default -1;
    property name: string read finfo.name write finfo.name;
    property legend_caption: msestring read finfo.legend write setlegend_caption;
-//   property legend_x: integer read finfo.legendpos.x write setlegend_x;
-//   property legend_y: integer read finfo.legendpos.y write setlegend_y;
    property legend_font: ttracefont read getlegend_font 
                                 write setlegend_font stored isfontstored;
  end;
@@ -1511,12 +1512,17 @@ begin
  tcustomchart(fowner).traces.change;
 end;
 
-procedure ttrace.setxserrange(const avalue: real);
+procedure ttrace.setxserstart(const avalue: real);
 begin
- if avalue = 0 then begin
-  scaleerror;
- end;
- finfo.xserrange:= avalue;
+ finfo.xserstart:= avalue;
+ datachange;
+end;
+
+procedure ttrace.setxstart(const avalue: real);
+begin
+ finfo.xstart:= avalue;
+ flnxstart:= chartln(avalue);
+ flnxrange:= chartln(finfo.xstart+finfo.xrange)-flnxstart;
  datachange;
 end;
 
@@ -1526,6 +1532,34 @@ begin
   scaleerror;
  end;
  finfo.xrange:= avalue;
+ flnxrange:= chartln(finfo.xstart+finfo.xrange)-flnxstart;
+ datachange;
+end;
+
+procedure ttrace.setxserrange(const avalue: real);
+begin
+ if avalue = 0 then begin
+  scaleerror;
+ end;
+ finfo.xserrange:= avalue;
+ datachange;
+end;
+
+procedure ttrace.setystart(const avalue: real);
+begin
+ finfo.ystart:= avalue;
+ flnystart:= chartln(avalue);
+ flnyrange:= chartln(finfo.ystart+finfo.yrange)-flnystart;
+ datachange;
+end;
+
+procedure ttrace.setyrange(const avalue: real);
+begin
+ if avalue = 0 then begin
+  scaleerror;
+ end;
+ finfo.yrange:= avalue;
+ flnyrange:= chartln(finfo.ystart+finfo.yrange)-flnystart;
  datachange;
 end;
 
@@ -1567,33 +1601,6 @@ begin
   finfo.bar_ref:= avalue;
   datachange;
  end;
-end;
-
-procedure ttrace.setxserstart(const avalue: real);
-begin
- finfo.xserstart:= avalue;
- datachange;
-end;
-
-procedure ttrace.setxstart(const avalue: real);
-begin
- finfo.xstart:= avalue;
- datachange;
-end;
-
-procedure ttrace.setyrange(const avalue: real);
-begin
- if avalue = 0 then begin
-  scaleerror;
- end;
- finfo.yrange:= avalue;
- datachange;
-end;
-
-procedure ttrace.setystart(const avalue: real);
-begin
- finfo.ystart:= avalue;
- datachange;
 end;
 
 procedure ttrace.scaleerror;
@@ -2170,7 +2177,7 @@ end;
 
 function ttrace.getclientrect: rectty;
 begin
- result:= tcustomchart(fowner).innerclientrect;
+ result:= tcustomchart(fowner).getdialrect;
 end;
 
 procedure ttrace.setlinkedvar(const source: tmsecomponent;
@@ -2422,7 +2429,6 @@ var
  align1: alignmentsty;
  imli1: timagelist;
 begin
-// checkgraphic;
  for int1:= 0 to high(fitems) do begin
   ptraceaty(fitems)^[int1].paint(acanvas);
  end;

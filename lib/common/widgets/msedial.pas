@@ -411,6 +411,7 @@ type
 procedure checknullrange(const avalue: real);
 function chartln(const avalue: real): real;
                 //big neg value for avalue <= 0
+function chartround(const avalue: real): integer; //limit to +-bigint
  
 implementation
 uses
@@ -433,6 +434,21 @@ begin
  end
  else begin
   result:= ln(avalue);
+ end;
+end;
+
+function chartround(const avalue: real): integer; //limit to +-bigint
+begin
+ if avalue > bigint then begin
+  result:= bigint;
+ end
+ else begin
+  if avalue < -bigint then begin
+   result:= -bigint;
+  end
+  else begin
+   result:= round(avalue);
+  end;
  end;
 end;
 

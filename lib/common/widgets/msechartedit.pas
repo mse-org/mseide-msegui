@@ -300,6 +300,7 @@ uses
  
 type
  ttraces1 = class(ttraces);
+ ttrace1 = class(ttrace);
  tdialmarkers1 = class(tdialmarkers);
   
 { tcustomchartedit }
@@ -458,7 +459,7 @@ var
 begin
  rect1:= getdialrect;
  with xdials[0] do begin
-  result:= rect1.x + round(((avalue-xstart)/xrange)*rect1.cx);
+  result:= rect1.x + chartround(((avalue-xstart)/xrange)*rect1.cx);
  end;
 end;
 
@@ -468,7 +469,7 @@ var
 begin
  rect1:= getdialrect;
  with ydials[0] do begin
-  result:= rect1.y + rect1.cy - round(((avalue-ystart)/yrange)*rect1.cy);
+  result:= rect1.y + rect1.cy - chartround(((avalue-ystart)/yrange)*rect1.cy);
  end;
 end;
 
@@ -498,20 +499,31 @@ var
  rect1: rectty;
 begin
  if (atrace >= 0) and (atrace < ftraces.count) then begin
-// if hasactivetrace then begin
   rect1:= getdialrect;
-  with traces[atrace] do begin
+  with ttrace1(traces[atrace]) do begin
    if rect1.cx <= 0 then begin
     result.re:= xstart;
    end
    else begin
-    result.re:= xstart + ((apos.x - rect1.x) / rect1.cx)*xrange;
+    if cto_logx in options then begin
+     result.re:= exp(((apos.x - rect1.x) / rect1.cx)*flnxrange+flnxstart);
+    end
+    else begin
+     result.re:= xstart + ((apos.x - rect1.x) / rect1.cx)*xrange;
+    end;
    end;
    if rect1.cy <= 0 then begin
     result.im:= ystart;
    end
    else begin
-    result.im:= ystart + ((rect1.y+rect1.cy-apos.y) / rect1.cy)*yrange;
+    if cto_logy in options then begin
+     result.im:= exp(
+             ((rect1.y+rect1.cy-apos.y) / rect1.cy)*flnyrange+flnystart);
+     
+    end
+    else begin
+     result.im:= ystart + ((rect1.y+rect1.cy-apos.y) / rect1.cy)*yrange;
+    end;
    end;
   end;
  end
@@ -526,7 +538,6 @@ var
  rect1: rectty;
 begin
  if (atrace >= 0) and (atrace < ftraces.count) then begin
-// if hasactivetrace then begin
   rect1:= getdialrect;
   with traces[atrace] do begin
    result.index:= 0;
@@ -558,11 +569,23 @@ var
  rect1: rectty;
 begin
  if (atrace >= 0) and (atrace < ftraces.count) then begin
-// if hasactivetrace then begin
   rect1:= getdialrect;
-  with traces[atrace] do begin
-   result.x:= rect1.x + round(((avalue.re-xstart)/xrange)*rect1.cx);
-   result.y:= rect1.y + rect1.cy - round(((avalue.im-ystart)/yrange)*rect1.cy);
+  with ttrace1(traces[atrace]) do begin
+   if cto_logx in options then begin
+    result.x:= rect1.x + 
+      chartround(rect1.cx*(chartln(avalue.re)-flnxstart)/flnxrange);
+   end
+   else begin
+    result.x:= rect1.x + chartround(((avalue.re-xstart)/xrange)*rect1.cx);
+   end;
+   if cto_logy in options then begin
+    result.y:= rect1.y + rect1.cy -
+      chartround(rect1.cy*(chartln(avalue.im)-flnystart)/flnyrange);
+   end
+   else begin
+    result.y:= rect1.y + rect1.cy - 
+                         chartround(((avalue.im-ystart)/yrange)*rect1.cy);
+   end;
   end;
  end
  else begin
@@ -575,17 +598,23 @@ function tcustomchartedit.chartcoordxseries(const atrace: integer;
 var
  rect1: rectty;
 begin
-// if hasactivetrace then begin
  if (atrace >= 0) and (atrace < ftraces.count) then begin
   rect1:= getdialrect;
-  with traces[atrace] do begin
+  with ttrace1(traces[atrace]) do begin
    if (cto_seriescentered in options) or (count = 1) then begin
     result.x:= rect1.x + (avalue.index * rect1.cx+rect1.cx div 2) div count;
    end
    else begin
     result.x:= rect1.x + (avalue.index * rect1.cx) div (count-1);
    end;
-   result.y:= rect1.y + rect1.cy - round(((avalue.value-ystart)/yrange)*rect1.cy);
+   if cto_logy in options then begin
+    result.y:= rect1.y + rect1.cy -
+      chartround(rect1.cy*(chartln(avalue.value)-flnystart)/flnyrange);
+   end
+   else begin
+    result.y:= rect1.y + rect1.cy - 
+                         chartround(((avalue.value-ystart)/yrange)*rect1.cy);
+   end;
   end;
  end
  else begin
@@ -596,7 +625,6 @@ end;
 function tcustomchartedit.nodepos(const atrace: integer;
                                        const aindex: integer): pointty;
 begin
-// if hasactivetrace then begin
  if (atrace >= 0) and (atrace < ftraces.count) then begin
   with traces[atrace] do begin
    if kind = trk_xseries then begin
