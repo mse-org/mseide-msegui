@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -396,6 +396,7 @@ begin
       if hascurrentobjects then begin
        paintxorpic;
       end;
+      checkcursorshape;
      end
      else begin
       if ops_rectselecting in fstate then begin

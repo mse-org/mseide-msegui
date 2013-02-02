@@ -116,8 +116,8 @@ type
    fimli1: timagelist;
    frect1: rectty;
    fimagealignment: alignmentsty;
-   fnodehint_captionx: msestring;
-   fnodehint_captiony: msestring;
+   fhint_captionx: msestring;
+   fhint_captiony: msestring;
    procedure setxydata(const avalue: complexarty);
    procedure datachange;
    procedure legendchange;
@@ -211,8 +211,8 @@ type
    function getwidget: twidget;
    function getwidgetrect: rectty;
    function getframestateflags: framestateflagsty;
-   function nodehintx: msestring;
-   function nodehinty: msestring;
+   function hintx: msestring;
+   function hinty: msestring;
     //iface
    function translatecolor(const acolor: colorty): colorty;
    function getclientrect: rectty;
@@ -298,10 +298,10 @@ type
    property legend_caption: msestring read finfo.legend write setlegend_caption;
    property legend_font: ttracefont read getlegend_font 
                                 write setlegend_font stored isfontstored;
-   property nodehint_captionx: msestring read fnodehint_captionx
-                                 write fnodehint_captionx;
-   property nodehint_captiony: msestring read fnodehint_captiony
-                                 write fnodehint_captiony;
+   property hint_captionx: msestring read fhint_captionx
+                                 write fhint_captionx;
+   property hint_captiony: msestring read fhint_captiony
+                                 write fhint_captiony;
  end;
 
  traceaty = array[0..0] of ttrace;
@@ -673,8 +673,9 @@ type
 
  tcustomchart = class(tcuchart)
   private
-   fnodehint_captionx: msestring;
-   fnodehint_captiony: msestring;
+   ftracehint_captionx: msestring;
+   ftracehint_captiony: msestring;
+   fmarkerhintcaption: msestring;
    procedure settraces(const avalue: ttraces);
    procedure setxstart(const avalue: real); override;
    procedure setystart(const avalue: real); override;
@@ -700,10 +701,12 @@ type
                                              const aendmargin: real = 0);
    procedure addsample(const asamples: array of real); virtual;
    property traces: ttraces read ftraces write settraces;
-   property nodehint_captionx: msestring read fnodehint_captionx
-                                 write fnodehint_captionx;
-   property nodehint_captiony: msestring read fnodehint_captiony
-                                 write fnodehint_captiony;
+   property tracehint_captionx: msestring read ftracehint_captionx
+                                 write ftracehint_captionx;
+   property tracehint_captiony: msestring read ftracehint_captiony
+                                 write ftracehint_captiony;
+   property markerhintcaption: msestring read fmarkerhintcaption
+                                 write fmarkerhintcaption;
  end;
 
  tchart = class(tcustomchart)
@@ -2367,19 +2370,19 @@ begin
  legendchange;
 end;
 
-function ttrace.nodehintx: msestring;
+function ttrace.hintx: msestring;
 begin
- result:= fnodehint_captionx;
+ result:= fhint_captionx;
  if result = '' then begin
-  result:= tcustomchart(fowner).nodehint_captionx;
+  result:= tcustomchart(fowner).tracehint_captionx;
  end;
 end;
 
-function ttrace.nodehinty: msestring;
+function ttrace.hinty: msestring;
 begin
- result:= fnodehint_captiony;
+ result:= fhint_captiony;
  if result = '' then begin
-  result:= tcustomchart(fowner).nodehint_captiony;
+  result:= tcustomchart(fowner).tracehint_captiony;
  end;
 end;
 

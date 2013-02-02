@@ -26,7 +26,8 @@ type
                 var avalue: complexarty; var accept: boolean) of object;
  setrealareventty = procedure(const sender: tobject;
                 var avalue: realarty; var accept: boolean) of object;
- charteditoptionty = (ceo_thumbtrack,ceo_noinsert,ceo_nodelete,ceo_nodehint);
+ charteditoptionty = (ceo_thumbtrack,ceo_noinsert,ceo_nodelete,
+                      ceo_tracehint,ceo_markerhint);
  charteditoptionsty = set of charteditoptionty;
 
  charteditmovestatety = (cems_markermoving,cems_canbottomlimit,cems_cantoplimit,
@@ -35,8 +36,11 @@ type
  charteditmovestatesty = set of charteditmovestatety;
 
  tcustomchartedit = class; 
- nodehinteventty = procedure(const sender: tcustomchartedit;
+ tracehinteventty = procedure(const sender: tcustomchartedit;
           const atrace,aindex: integer; var ahint: hintinfoty) of object;
+ markerhinteventty = procedure(const sender: tcustomchartedit;
+          const isy: boolean; const adial,aindex: integer;
+                                     var ahint: hintinfoty) of object;
                                         
  tcustomchartedit = class(tcustomchart,iobjectpicker)
   private
@@ -51,7 +55,8 @@ type
    foptions: charteditoptionsty;
    fpickref: pointty;
    fmovestate: charteditmovestatesty;
-   fonnodehint: nodehinteventty;
+   fontracehint: tracehinteventty;
+   fonmarkerhint: markerhinteventty;
    fnodehintindex: integer;
    fnodehinttrace: integer;
    procedure setactivetrace(avalue: integer);
@@ -65,8 +70,13 @@ type
    function hasactivetrace: boolean;
    function nodepos(const atrace: integer; const aindex: integer): pointty;
    function nearestnode(const apos: pointty; const all: boolean;
-                                              out atrace: integer): integer;   
+                       out atrace,aindex: integer): boolean;
    function nodesinrect(const arect: rectty): integerarty;
+   function encodenodes(const atrace: integer;
+                                const aindex: array of integer): integerarty;
+   function decodenodes(const aitems: integerarty;
+                     out atrace: integer; out aindex: integerarty): boolean;
+
    function chartcoordxy(const atrace: integer;
                                 const avalue: complexty): pointty;
    function tracecoordxy(const atrace: integer;
@@ -75,7 +85,21 @@ type
                                 const avalue: xseriesdataty): pointty;
    function tracecoordxseries(const atrace: integer;
                                 const apos: pointty): xseriesdataty;
-   procedure nodehint(const atrace,aindex: integer);
+
+   function encodemarker(const isy: boolean;
+                                     const adial,aindex: integer): integerarty;
+   function decodemarker(const aitems: integerarty; out isy: boolean;
+                         out adial: integer; out aindex: integer): boolean;
+   function xmarkertochart(const avalue: real; const adial: integer): integer;
+   function ymarkertochart(const avalue: real; const adial: integer): integer;
+   function xcharttomarker(const apos: integer; const adial: integer): real;
+   function ycharttomarker(const apos: integer; const adial: integer): real;
+   function getmarker(const apos: pointty; out isy: boolean;
+                                         out adial,aindex: integer): boolean; 
+
+   procedure tracehint(const atrace,aindex: integer);
+   procedure markerhint(const apos: pointty; const isy: boolean;
+                                                const adial,aindex: integer);
    procedure clientmouseevent(var info: mouseeventinfoty); override;
    procedure dokeydown(var ainfo: keyeventinfoty); override;
    procedure dobeforepaint(const acanvas: tcanvas); override;
@@ -95,19 +119,9 @@ type
    procedure loaded; override;
    procedure docheckvalue(var accept: boolean); virtual; abstract;
    procedure doclear; virtual; abstract;
-   function xmarkertochart(const avalue: real): integer;
-   function ymarkertochart(const avalue: real): integer;
-   function xcharttomarker(const apos: integer): real;
-   function ycharttomarker(const apos: integer): real;
-   function getmarker(const apos: pointty): integer; 
-                             //-1 if none, even -> x, odd -> y, first dial only
-
    procedure drawcrosshaircursor(const canvas: tcanvas;
                                          const center: pointty); virtual;
-   function encodenodes(const atrace: integer;
-                   const aitems: array of integer): integerarty;
-   function decodenodes(const aitems: integerarty;
-                             out atrace: integer): integerarty;
+                         
     //iobjectpicker
    function getcursorshape(const sender: tobjectpicker;
                             var shape: cursorshapety): boolean;
@@ -130,9 +144,12 @@ type
                            write foptionsedit default defaultchartoptionsedit;
    property snapdist: integer read fsnapdist write fsnapdist 
                                               default defaultsnapdist;
-   property options: charteditoptionsty read foptions write setoptions default [];
+   property options: charteditoptionsty read foptions
+                                                 write setoptions default [];
    property onchange: notifyeventty read fonchange write fonchange;
-   property onnodehint: nodehinteventty read fonnodehint write fonnodehint;
+   property ontracehint: tracehinteventty read fontracehint write fontracehint;
+   property onmarkerhint: markerhinteventty read fonmarkerhint 
+                                                         write fonmarkerhint;
  end;
 
  tcustomxychartedit = class(tcustomchartedit)
@@ -192,11 +209,12 @@ type
    property activetrace;
    property optionsedit;
    property snapdist;
-   property nodehint_captionx;
-   property nodehint_captiony;
+   property tracehint_captionx;
+   property tracehint_captiony;
    property options;
    property onchange;
-   property onnodehint;
+   property ontracehint;
+   property onmarkerhint;
  end;
   
  tcustomorderedxychartedit = class(tcustomxychartedit)
@@ -231,11 +249,12 @@ type
    property activetrace;
    property optionsedit;
    property snapdist;
-   property nodehint_captionx;
-   property nodehint_captiony;
+   property tracehint_captionx;
+   property tracehint_captiony;
    property options;
    property onchange;
-   property onnodehint;
+   property ontracehint;
+   property onmarkerhint;
  end;
  
  tcustomxserieschartedit = class(tcustomchartedit)
@@ -288,11 +307,12 @@ type
    property activetrace;
    property optionsedit;
    property snapdist;
-   property nodehint_captionx;
-   property nodehint_captiony;
+   property tracehint_captionx;
+   property tracehint_captiony;
    property options;
    property onchange;
-   property onnodehint;
+   property ontracehint;
+   property onmarkerhint;
  end;
    
 implementation
@@ -303,6 +323,7 @@ type
  ttraces1 = class(ttraces);
  ttrace1 = class(ttrace);
  tdialmarkers1 = class(tdialmarkers);
+ tcustomdialcontroller1 = class(tcustomdialcontroller);
   
 { tcustomchartedit }
 
@@ -358,7 +379,7 @@ begin
  result:= (factivetrace >= 0) and (factivetrace < traces.count);
 end;
 
-procedure tcustomchartedit.nodehint(const atrace,aindex: integer);
+procedure tcustomchartedit.tracehint(const atrace,aindex: integer);
 var
  info: hintinfoty;
  x,y: real;
@@ -382,14 +403,14 @@ begin
   else begin
    x:= aindex;
   end;
-  mstr1:= nodehintx;
+  mstr1:= hintx;
   if mstr1 = '' then begin
    mstr1:= 'x: '+formatfloatmse(x,'');
   end
   else begin
    mstr1:= formatfloatmse(x,mstr1);
   end;
-  mstr2:= nodehinty;
+  mstr2:= hinty;
   if mstr2 = '' then begin
    mstr2:= 'y: '+formatfloatmse(y,'');
   end
@@ -398,8 +419,47 @@ begin
   end;
   info.caption:= mstr1+lineend+mstr2;
  end;
- if canevent(tmethod(fonnodehint)) then begin
-  fonnodehint(self,atrace,aindex,info);
+ if canevent(tmethod(fontracehint)) then begin
+  fontracehint(self,atrace,aindex,info);
+ end;
+ if info.caption <> '' then begin
+  application.showhint(self,info);
+ end;
+end;
+
+procedure tcustomchartedit.markerhint(const apos: pointty; const isy: boolean;
+                                             const adial,aindex: integer);
+var
+ info: hintinfoty;
+ mstr1: msestring;
+ marker1: tdialmarker;
+ 
+begin
+ fillchar(info,sizeof(info),0);
+ with info do begin
+  with posrect do begin
+   pos:= apos;
+   addpoint1(pos,mp(-20,-20));
+   cx:= 40;
+   cy:= 40;
+   placement:= cp_bottomleft;
+  end;
+  if isy then begin
+   marker1:= ydials[adial].markers[aindex];
+  end
+  else begin
+   marker1:= xdials[adial].markers[aindex];
+  end;
+ end;
+ with marker1 do begin
+  mstr1:= hintcaption;
+  if mstr1 = '' then begin
+   mstr1:= markerhintcaption;
+  end;
+  info.caption:= formatfloatmse(value,mstr1)
+ end;
+ if canevent(tmethod(fonmarkerhint)) then begin
+  fonmarkerhint(self,isy,adial,aindex,info);
  end;
  if info.caption <> '' then begin
   application.showhint(self,info);
@@ -410,27 +470,35 @@ procedure tcustomchartedit.clientmouseevent(var info: mouseeventinfoty);
 var
  co1: complexty;
  co2: xseriesdataty;
- index1,trace1: integer;
+ trace1: integer;
+ ar1: integerarty;
+ int1,int2: integer;
+ bo1: boolean;
 begin
  if not (es_processed in info.eventstate) then begin
   fobjectpicker.mouseevent(info);
-  if not (es_processed in info.eventstate) and 
+  if (not (es_processed in info.eventstate) or 
+                             (info.eventkind = ek_mousepark)) and 
                       not (csdesigning in componentstate) then begin
    case info.eventkind of
     ek_mousepark: begin
-     if ceo_nodehint in foptions then begin
-      index1:= nearestnode(info.pos,true,trace1);
-      if index1 < 0 then begin
+     if ceo_tracehint in foptions then begin
+      if not decodenodes(fobjectpicker.currentobjects,trace1,ar1) then begin
        resetnodehint;
       end
       else begin
-       if (index1 <> fnodehintindex) or (trace1 <> fnodehinttrace) then begin
-//        fnodehintindex:= index1;
-//        fnodehinttrace:= trace1;
-        nodehint(trace1,index1);
-        include(info.eventstate,es_processed);
+       if (ar1[0] <> fnodehintindex) or (trace1 <> fnodehinttrace) then begin
+        tracehint(trace1,ar1[0]);
+        exit;
+//        include(info.eventstate,es_processed);
        end;
       end;
+     end;
+     if (ceo_markerhint in foptions) and
+                                   getmarker(info.pos,bo1,int1,int2) then begin
+      markerhint(info.pos,bo1,int1,int2);
+      exit;
+//      include(info.eventstate,es_processed);
      end;
     end;
     ek_clientmouseleave: begin
@@ -464,43 +532,78 @@ begin
  end;
 end;
 
-function tcustomchartedit.xmarkertochart(const avalue: real): integer;
+function tcustomchartedit.xmarkertochart(const avalue: real;
+                                 const adial: integer): integer;
 var
  rect1: rectty;
 begin
  rect1:= getdialrect;
- with xdials[0] do begin
-  result:= rect1.x + chartround(((avalue-xstart)/xrange)*rect1.cx);
+{$warnings off}
+ with tcustomdialcontroller1(xdials[adial]) do begin
+{$warnings on}
+  if do_log in options then begin
+   result:= rect1.x + 
+                   chartround(rect1.cx*(chartln(avalue)-flnsstart)/flnrange);
+  end
+  else begin
+   result:= rect1.x + chartround(((avalue-fsstart)/frange)*rect1.cx);
+  end;
  end;
 end;
 
-function tcustomchartedit.ymarkertochart(const avalue: real): integer;
+function tcustomchartedit.ymarkertochart(const avalue: real;
+                                   const adial: integer): integer;
 var
  rect1: rectty;
 begin
  rect1:= getdialrect;
- with ydials[0] do begin
-  result:= rect1.y + rect1.cy - chartround(((avalue-ystart)/yrange)*rect1.cy);
+{$warnings off}
+ with tcustomdialcontroller1(ydials[adial]) do begin
+{$warnings on}
+  if do_log in options then begin
+   result:= rect1.y + rect1.cy -
+                   chartround(rect1.cy*(chartln(avalue)-flnsstart)/flnrange);
+  end
+  else begin
+   result:= rect1.y + rect1.cy - chartround(((avalue-fsstart)/frange)*rect1.cy);
+  end;
  end;
 end;
 
-function tcustomchartedit.xcharttomarker(const apos: integer): real;
+function tcustomchartedit.xcharttomarker(const apos: integer;
+                                            const adial: integer): real;
 var
  rect1: rectty;
 begin
  rect1:= getdialrect;
- with xdials[0] do begin
-  result:= xstart + ((apos - rect1.x) / rect1.cx)*xrange;
+{$warnings off}
+ with tcustomdialcontroller1(xdials[adial]) do begin
+{$warnings on}
+  if do_log in options then begin
+   result:= exp(((apos - rect1.x) / rect1.cx)*flnrange+flnsstart);
+  end
+  else begin
+   result:= start + ((apos - rect1.x) / rect1.cx)*range;
+  end;
  end;
 end;
 
-function tcustomchartedit.ycharttomarker(const apos: integer): real;
+function tcustomchartedit.ycharttomarker(const apos: integer;
+                                           const adial: integer): real;
 var
  rect1: rectty;
 begin
  rect1:= getdialrect;
- with ydials[0] do begin
-  result:= ystart + ((rect1.y+rect1.cy-apos) / rect1.cy)*yrange;
+{$warnings off}
+ with tcustomdialcontroller1(ydials[adial]) do begin
+{$warnings on}
+  if do_log in options then begin
+   result:= exp(
+             ((rect1.y+rect1.cy-apos) / rect1.cy)*flnrange+flnsstart);
+  end
+  else begin
+   result:= start + ((rect1.y+rect1.cy-apos) / rect1.cy)*range;
+  end;
  end;
 end;
 
@@ -529,8 +632,7 @@ begin
    else begin
     if cto_logy in options then begin
      result.im:= exp(
-             ((rect1.y+rect1.cy-apos.y) / rect1.cy)*flnyrange+flnystart);
-     
+             ((rect1.y+rect1.cy-apos.y) / rect1.cy)*flnyrange+flnystart);     
     end
     else begin
      result.im:= ystart + ((rect1.y+rect1.cy-apos.y) / rect1.cy)*yrange;
@@ -652,7 +754,7 @@ begin
 end;
 
 function tcustomchartedit.nearestnode(const apos: pointty; const all: boolean;
-                                  out atrace: integer): integer;   
+                         out atrace,aindex: integer): boolean;   
 var
  dist: integer;
 
@@ -723,28 +825,26 @@ begin
  dist:= maxint;
  if hasactivetrace and not all then begin
   atrace:= factivetrace;
-  result:= checkdist(factivetrace);
+  aindex:= checkdist(factivetrace);
  end
  else begin
   if hasactivetrace then begin
-   int2:= checkdist(factivetrace);
-   if int2 >= 0 then begin
-    result:= int2;
-    atrace:= factivetrace;
-   end;   
+   aindex:= checkdist(factivetrace);
+   atrace:= factivetrace;
   end;
   for int1:= 0 to traces.count-1 do begin
    int2:= checkdist(int1);
    if int2 >= 0 then begin
-    result:= int2;
+    aindex:= int2;
     atrace:= int1;
    end;
   end;    
  end;
  if (dist >= fsnapdist*fsnapdist) then begin
-  result:= -1;
+  aindex:= -1;
   atrace:= -1;
  end;
+ result:= aindex >= 0;
 end;
 
 function tcustomchartedit.nodesinrect(const arect: rectty): integerarty;
@@ -807,6 +907,7 @@ function tcustomchartedit.getcursorshape(const sender: tobjectpicker;
                                            var shape: cursorshapety): boolean;
 var
  int1: integer;
+ bo1: boolean;
 begin
  result:= not (cems_markermoving in fmovestate) and sender.moving and
                                                       sender.hascurrentobjects;
@@ -815,10 +916,9 @@ begin
  end
  else begin
   if not sender.hascurrentobjects or (cems_markermoving in fmovestate) then begin
-   int1:= getmarker(sender.pickpos);
-   if int1 >= 0 then begin
-    result:= true;
-    if odd(int1) then begin
+   result:= getmarker(sender.pickrect.pos,bo1,int1,int1);
+   if result then begin
+    if bo1 then begin
      shape:= cr_sizever;
     end
     else begin
@@ -829,8 +929,8 @@ begin
  end;
 end;
 
-function tcustomchartedit.encodenodes(const atrace: integer;
-                   const aitems: array of integer): integerarty;
+function tcustomchartedit.encodenodes(const atrace: integer; 
+                              const aindex: array of integer): integerarty;
 var
  int1,int2: integer;
 begin
@@ -838,21 +938,21 @@ begin
  for int1:= 0 to atrace - 1 do begin
   int2:= int2 + ftraces[int1].count;
  end;
- setlength(result,length(aitems));
+ setlength(result,length(aindex));
  for int1:= 0 to high(result) do begin
-  result[int1]:= int2 + aitems[int1];
+  result[int1]:= int2 + aindex[int1];
  end;
 end;
 
 function tcustomchartedit.decodenodes(const aitems: integerarty;
-                             out atrace: integer): integerarty;
+                       out atrace: integer; out aindex: integerarty): boolean;
 var
  int1,int2,int3: integer;
  min,max: integer;
 begin
  atrace:= -1;
- setlength(result,length(aitems));
- for int1:= 0 to high(result) do begin
+ setlength(aindex,length(aitems));
+ for int1:= 0 to high(aindex) do begin
   int2:= aitems[int1];
   if int2 >= 0 then begin
    if atrace < 0 then begin
@@ -870,19 +970,21 @@ begin
    end;
    int2:= int2 - min;
    if (int2 < 0) or (int2 >= max) then begin //in other trace, invalid
-    result:= nil;
+    aindex:= nil;
     atrace:= -1;
     break;
    end;
   end;
-  result[int1]:= int2;
+  aindex[int1]:= int2;
  end;
+ result:= atrace >= 0;
 end;
 
 procedure tcustomchartedit.getpickobjects(const sender: tobjectpicker;
                                                     var objects: integerarty);
 var
  int1,int2: integer;
+ bo1: boolean; 
  rect: rectty;
 begin
  rect:= sender.pickrect;
@@ -890,21 +992,26 @@ begin
   objects:= encodenodes(factivetrace,nodesinrect(rect));
  end
  else begin
-  int1:= nearestnode(rect.pos,false,int2);
-  if int1 >= 0 then begin
-   objects:= encodenodes(int2,int1);
-//   setlength(objects,1);
-//   objects[0]:= ;
+  if nearestnode(rect.pos,false,int1,int2) then begin
+   objects:= encodenodes(int1,int2);
   end
   else begin
+  {
+   if getmarker(rect.pos,bo1,int1,int2) then begin
+    objects:= encodemarker(bo1,int1,int2);
+   end
+   else begin
+    objects:= nil;
+   end;
+   }
+//{
    objects:= nil;
    if sender.picking then begin
-    int1:= getmarker(sender.pickpos);
-    if int1 >= 0 then begin
-     setlength(objects,1);
-     objects[0]:= -int1-1;
+    if getmarker(sender.pickpos,bo1,int1,int2) then begin
+     objects:= encodemarker(bo1,int1,int2);
     end;
    end;
+//}
   end;
  end;
 end;
@@ -944,6 +1051,8 @@ var
  ar1: pointarty;
  objs: integerarty;
  trace1: integer;
+ isy: boolean;
+ dial1,index1: integer;
 begin
  fpickref:= nullpoint;
  rect1:= getdialrect;
@@ -951,83 +1060,81 @@ begin
  mi.y:= maxint;
  ma.x:= minint;
  ma.y:= minint;
- objs:= decodenodes(sender.currentobjects,trace1);
- setlength(ar1,length(objs));
- exclude(fmovestate,cems_markermoving);
- for int1:= 0 to high(objs) do begin
-  if objs[int1] < 0 then begin
-   include(fmovestate,cems_markermoving);
-   fmovestate:= fmovestate - [cems_canbottomlimit,cems_cantoplimit];
-   int2:= -objs[int1]-1;
-   with rect1 do begin
-    if odd(int2) then begin
-     int2:= int2 div 2;
-     with ydials[0].markers[int2] do begin
-      int3:= ymarkertochart(value);
-      ma.y:= y-int3;
-      mi.y:= y+cy-int3;
-      if (dmo_ordered in options) then begin
-       if int2 < ydials[0].markers.count - 1 then begin
-        int4:= ymarkertochart(ydials[0].markers[int2+1].value);
-        if int4 > y then begin
-         ma.y:= int4-int3;
-         include(fmovestate,cems_canbottomlimit);
-        end;
+ if decodemarker(sender.currentobjects,isy,dial1,index1) then begin
+  include(fmovestate,cems_markermoving);
+  fmovestate:= fmovestate - [cems_canbottomlimit,cems_cantoplimit];
+  with rect1 do begin
+   if isy then begin
+    with ydials[dial1].markers[index1] do begin
+     int3:= ymarkertochart(value,dial1);
+     ma.y:= y-int3;
+     mi.y:= y+cy-int3;
+     if (dmo_ordered in options) then begin
+      if index1 < ydials[dial1].markers.count - 1 then begin
+       int4:= ymarkertochart(ydials[dial1].markers[index1+1].value,dial1);
+       if int4 > y then begin
+        ma.y:= int4-int3;
+        include(fmovestate,cems_canbottomlimit);
        end;
-       if int2 > 0 then begin
-        int4:= ymarkertochart(ydials[0].markers[int2-1].value);
-        if int4 < y+cy then begin
-         mi.y:= int4-int3;
-         include(fmovestate,cems_cantoplimit);
-        end;
+      end;
+      if index1 > 0 then begin
+       int4:= ymarkertochart(ydials[dial1].markers[index1-1].value,dial1);
+       if int4 < y+cy then begin
+        mi.y:= int4-int3;
+        include(fmovestate,cems_cantoplimit);
        end;
       end;
      end;
-    end
-    else begin
-     int2:= int2 div 2;
-     with xdials[0].markers[int2] do begin
-      int3:= xmarkertochart(value);
-      ma.x:= x-int3;
-      mi.x:= x+cx-int3;
-      if (dmo_ordered in options) then begin
-       if int2 > 0 then begin
-        int4:= xmarkertochart(xdials[0].markers[int2-1].value);
-        if int4 > x then begin
-         ma.x:= int4-int3;
-         include(fmovestate,cems_canbottomlimit);
-        end;
+    end;
+   end
+   else begin //x
+    with xdials[dial1].markers[index1] do begin
+     int3:= xmarkertochart(value,dial1);
+     ma.x:= x-int3;
+     mi.x:= x+cx-int3;
+     if (dmo_ordered in options) then begin
+      if index1 > 0 then begin
+       int4:= xmarkertochart(xdials[dial1].markers[index1-1].value,dial1);
+       if int4 > x then begin
+        ma.x:= int4-int3;
+        include(fmovestate,cems_canbottomlimit);
        end;
-       if int2 < xdials[0].markers.count - 1 then begin
-        int4:= xmarkertochart(xdials[0].markers[int2+1].value);
-        if int4 < x+cx then begin
-         mi.x:= int4-int3;
-         include(fmovestate,cems_cantoplimit);
-        end;
+      end;
+      if index1 < xdials[dial1].markers.count - 1 then begin
+       int4:= xmarkertochart(xdials[dial1].markers[index1+1].value,dial1);
+       if int4 < x+cx then begin
+        mi.x:= int4-int3;
+        include(fmovestate,cems_cantoplimit);
        end;
       end;
      end;
     end;
    end;
-  end
-  else begin
-   pt1:= nodepos(trace1,objs[int1]);
-   ar1[int1]:= pt1;
-   if pt1.x < mi.x then begin
-    mi.x:= pt1.x;
-   end;
-   if pt1.y < mi.y then begin
-    mi.y:= pt1.y;
-   end;
-   if pt1.x > ma.x then begin
-    ma.x:= pt1.x;
-   end;
-   if pt1.y > ma.y then begin
-    ma.y:= pt1.y;
+  end;
+ end
+ else begin
+  exclude(fmovestate,cems_markermoving);
+  if decodenodes(sender.currentobjects,trace1,objs) then begin
+   setlength(ar1,length(objs));
+   for int1:= 0 to high(objs) do begin
+    pt1:= nodepos(trace1,objs[int1]);
+    ar1[int1]:= pt1;
+    if pt1.x < mi.x then begin
+     mi.x:= pt1.x;
+    end;
+    if pt1.y < mi.y then begin
+     mi.y:= pt1.y;
+    end;
+    if pt1.x > ma.x then begin
+     ma.x:= pt1.x;
+    end;
+    if pt1.y > ma.y then begin
+     ma.y:= pt1.y;
+    end;
    end;
   end;
  end;
- if  cems_markermoving in fmovestate then begin
+ if cems_markermoving in fmovestate then begin
   foffsetmin:= ma;
   foffsetmax:= mi;
  end
@@ -1071,6 +1178,33 @@ begin
  end;
 end;
 
+function tcustomchartedit.encodemarker(const isy: boolean;
+                         const adial,aindex: integer): integerarty;
+begin
+ setlength(result,1);
+ result[0]:= (-2*(aindex+1)) and ((not adial shl 24) or $80fffffe);
+ if isy then begin
+  inc(result[0]);
+ end;
+end;
+
+function tcustomchartedit.decodemarker(const aitems: integerarty;
+                     out isy: boolean; out adial,aindex: integer): boolean;
+begin
+ result:= (high(aitems) = 0) and (aitems[0] < 0);
+ if result then begin
+  aindex:= aitems[0];
+  isy:= odd(aindex);
+  adial:= (not aindex and $7f000000) shr 24;
+  aindex:= -((aindex or $7f000000) and $fffffffe) div 2 - 1;
+// end
+// else begin
+//  aindex:= -1;
+//  adial:= -1;
+//  isy:= false;
+ end;
+end;
+
 procedure tcustomchartedit.dopickmove(const sender: tobjectpicker);
 var
  int1,int2: integer;
@@ -1082,45 +1216,50 @@ var
  objs: integerarty;
  marker1: tdialmarker;
  trace1,tracebefore: integer;
+ dialindex: integer;
+ bo1: boolean;
+ 
 begin
  offs:= limitmoveoffset(subpoint(sender.pickoffset,fpickref));
  if cems_markermoving in fmovestate then begin
-  int1:= -(sender.currentobjects[0]+1);
-  if odd(int1) then begin
-   int1:= int1 div 2;
-   marker1:= ydials[0].markers[int1];
+  decodemarker(sender.currentobjects,bo1,dialindex,int1);
+  if bo1 then begin
+   marker1:= ydials[dialindex].markers[int1];
    if fmovestate * [cems_cantoplimit,cems_ytoplimit] = 
                            [cems_cantoplimit,cems_ytoplimit] then begin
-    marker1.value:= ydials[0].markers[int1-1].value; //y is screen reverted
+    marker1.value:= ydials[dialindex].markers[int1-1].value; 
+                                             //y is screen reversed
    end
    else begin
     if fmovestate * [cems_canbottomlimit,cems_ybottomlimit] = 
                            [cems_canbottomlimit,cems_ybottomlimit] then begin
-     marker1.value:= ydials[0].markers[int1+1].value; //y is screen reverted
+     marker1.value:= ydials[dialindex].markers[int1+1].value; 
+                                            //y is screen reversed
     end
     else begin
      if offs.y <> 0 then begin
-      marker1.value:= ycharttomarker(ymarkertochart(marker1.value)+offs.y);
+      marker1.value:= ycharttomarker(
+                 ymarkertochart(marker1.value,dialindex)+offs.y,dialindex);
       domarkerchange;
      end;
     end;
    end;
   end
   else begin
-   int1:= int1 div 2;
-   marker1:= xdials[0].markers[int1];
+   marker1:= xdials[dialindex].markers[int1];
    if fmovestate * [cems_cantoplimit,cems_xtoplimit] = 
                            [cems_cantoplimit,cems_xtoplimit] then begin
-    marker1.value:= xdials[0].markers[int1+1].value;
+    marker1.value:= xdials[dialindex].markers[int1+1].value;
    end
    else begin
     if fmovestate * [cems_canbottomlimit,cems_xbottomlimit] = 
                            [cems_canbottomlimit,cems_xbottomlimit] then begin
-     marker1.value:= xdials[0].markers[int1-1].value;
+     marker1.value:= xdials[dialindex].markers[int1-1].value;
     end
     else begin
      if offs.y <> 0 then begin
-      marker1.value:= xcharttomarker(xmarkertochart(marker1.value)+offs.x);
+      marker1.value:= xcharttomarker(
+               xmarkertochart(marker1.value,dialindex) + offs.x,dialindex);
       domarkerchange;
      end;
     end;
@@ -1129,8 +1268,7 @@ begin
  end
  else begin
   addpoint1(fpickref,offs);
-  objs:= decodenodes(sender.currentobjects,trace1);
-  if trace1 >= 0 then begin
+  if decodenodes(sender.currentobjects,trace1,objs) then begin
    tracebefore:= activetrace;
    activetrace:= trace1;
    try
@@ -1207,30 +1345,33 @@ var
  ar1: pointarty;
  ar2: segmentarty;
  int1,int2,int3: integer;
+ dialindex: integer;
  offs: pointty;
  objs: integerarty;
  trace1: integer;
  rect1: rectty;
+ bo1: boolean;
 begin
  with sender do begin
   if cems_markermoving in fmovestate then begin
    offs:= limitmoveoffset(pickoffset);
    rect1:= getdialrect;
-   int1:= -(sender.currentobjects[0]+1);
+   decodemarker(sender.currentobjects,bo1,dialindex,int1);
    with rect1 do begin
-    if odd(int1) then begin
-     int2:= ymarkertochart(ydials[0].markers[int1 div 2].value)+offs.y;
+    if bo1 then begin
+     int2:= ymarkertochart(ydials[dialindex].markers[int1].value,dialindex)+
+                                                                        offs.y;
      canvas.drawline(makepoint(x,int2),makepoint(x+cx,int2));
     end
     else begin
-     int2:= xmarkertochart(xdials[0].markers[int1 div 2].value)+offs.x;
+     int2:= xmarkertochart(xdials[dialindex].markers[int1].value,dialindex)+
+                                                                        offs.x;
      canvas.drawline(makepoint(int2,y),makepoint(int2,y+cy));
     end;
    end;
   end
   else begin
-   objs:= decodenodes(currentobjects,trace1);
-   if objs <> nil then begin
+   if decodenodes(currentobjects,trace1,objs) then begin
     if ceo_thumbtrack in foptions then begin
      offs:= nullpoint;
     end
@@ -1265,9 +1406,8 @@ begin
     for int1:= 0 to high(ar1) do begin
      canvas.drawellipse(makerect(ar1[int1],makesize(6,6)));
     end;
-    if (ops_moving in fobjectpicker.state) {and (high(objs) = 0)} then begin
-     objs:= decodenodes(sender.mouseoverobjects,trace1);
-     if objs <> nil then begin
+    if (ops_moving in fobjectpicker.state) then begin
+     if decodenodes(sender.mouseoverobjects,trace1,objs) then begin
       drawcrosshaircursor(canvas,addpoint(nodepos(trace1,objs[0]),offs));
      end;
     end;
@@ -1306,8 +1446,7 @@ begin
      not readonly and not (ceo_nodelete in foptions) and
      (ainfo.shiftstate*shiftstatesmask = []) and 
                                  fobjectpicker.hascurrentobjects  then begin
-  ar1:= decodenodes(fobjectpicker.currentobjects,trace1);
-  if trace1 >= 0 then begin
+  if decodenodes(fobjectpicker.currentobjects,trace1,ar1) then begin
    tracebefore:= activetrace;
    activetrace:= trace1;
    try
@@ -1468,38 +1607,41 @@ begin
  change;
 end;
 
-function tcustomchartedit.getmarker(const apos: pointty): integer;
+function tcustomchartedit.getmarker(const apos: pointty; out isy: boolean;
+                                         out adial,aindex: integer): boolean; 
 var
- int1,int2: integer;
+ int1,int3: integer;
  marker1: tdialmarker;
 begin
- result:= -1;
- if xdials.count > 0 then begin
-  with xdials[0] do begin
-   int2:= high(tdialmarkers1(markers).fitems);
-   if int2 >= 0 then begin
-    for int1:= 0 to int2 do begin
-     marker1:= tdialmarker(tdialmarkers1(markers).fitems[int1]);
-     if not (dmo_fix in marker1.options) and 
-          (abs(apos.x-xmarkertochart(marker1.value)) <= markersnapdist) then begin
-      result:= 2*int1;
-      exit;
-     end;
+ result:= false;
+ for int3:= 0 to xdials.count -1 do begin
+  with xdials[int3] do begin
+   for int1:= 0 to high(tdialmarkers1(markers).fitems) do begin
+    marker1:= tdialmarker(tdialmarkers1(markers).fitems[int1]);
+    if not (dmo_fix in marker1.options) and 
+       (abs(apos.x-xmarkertochart(marker1.value,int3)) <=
+                                                     markersnapdist) then begin
+     result:= true;
+     isy:= false;
+     adial:= int3;
+     aindex:= int1;
+     exit;
     end;
    end;
   end;
  end;
- if ydials.count > 0 then begin
-  with ydials[0] do begin
-   int2:= high(tdialmarkers1(markers).fitems);
-   if int2 >= 0 then begin
-    for int1:= 0 to int2 do begin
-     marker1:= tdialmarker(tdialmarkers1(markers).fitems[int1]);
-     if not (dmo_fix in marker1.options) and 
-          (abs(apos.y-ymarkertochart(marker1.value)) <= markersnapdist) then begin
-      result:= 2*int1+1;
-      exit;
-     end;
+ for int3:= 0 to ydials.count -1 do begin
+  with ydials[int3] do begin
+   for int1:= 0 to high(tdialmarkers1(markers).fitems) do begin
+    marker1:= tdialmarker(tdialmarkers1(markers).fitems[int1]);
+    if not (dmo_fix in marker1.options) and 
+       (abs(apos.y-ymarkertochart(marker1.value,int3)) <=
+                                               markersnapdist) then begin
+     result:= true;
+     isy:= true;
+     adial:= int3;
+     aindex:= int1;
+     exit;
     end;
    end;
   end;
@@ -1519,7 +1661,6 @@ end;
 function tcustomxychartedit.getvalue: complexarty;
 begin
  result:= fvalue;
-// result:= traces[factivetrace].xydata;
 end;
 
 procedure tcustomxychartedit.setvalue(const avalue: complexarty);

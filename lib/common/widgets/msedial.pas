@@ -127,6 +127,7 @@ type
  
  markerinfoty = record
   active: boolean;
+  limited: boolean;
   line: segmentty;
   value: realty;
   captionpos: pointty;
@@ -139,6 +140,7 @@ type
  tdialmarker = class(tdialprop)
   private
    finfo: markerinfoty;
+   fhintcaption: msestring;
    procedure checklayout;
    procedure readvalue(reader: treader);
    procedure setvalue(const avalue: realty);
@@ -155,6 +157,8 @@ type
    property value: realty read finfo.value write setvalue {stored false};
    property options: dialmarkeroptionsty read finfo.options 
                           write setoptions default [];
+   property hintcaption: msestring read fhintcaption
+                                 write fhintcaption;
  end;
 
  tcustomdialcontroller = class;
@@ -230,10 +234,6 @@ type
   private
    fdirection: graphicdirectionty;
    fstate: dialstatesty;
-   fsstart: real;
-   fstart: real;
-   fshift: real;
-   frange: real;
    fmarkers: tdialmarkers;
    fticks: tdialticks;
    foptions: dialoptionsty;
@@ -287,6 +287,12 @@ type
    procedure setfront(const avalue: boolean);
    procedure setfitdist(const avalue: integer);
   protected
+   fsstart: real;
+   flnsstart: real;
+   fstart: real;
+   fshift: real;
+   frange: real;
+   flnrange: real;
    procedure setdirection(const avalue: graphicdirectionty); virtual;
    procedure changed;
    procedure calclineend(const ainfo: diallineinfoty; const aopposite: boolean; 
@@ -665,13 +671,15 @@ begin
  checklayout;
  with finfo,fli do begin
   if active then begin
-   acanvas.linewidthmm:= actualwidthmm;
-   if dashes <> '' then begin
-    acanvas.dashes:= dashes;
-   end;
-   acanvas.drawline(line.a,line.b,actualcolor);
-   if dashes <> '' then begin
-    acanvas.dashes:= '';
+   if not limited then begin
+    acanvas.linewidthmm:= actualwidthmm;
+    if dashes <> '' then begin
+     acanvas.dashes:= dashes;
+    end;
+    acanvas.drawline(line.a,line.b,actualcolor);
+    if dashes <> '' then begin
+     acanvas.dashes:= '';
+    end;
    end;
    if caption <> '' then begin
     acanvas.drawstring(acaption,captionpos,self.font,false,aangle);
@@ -753,8 +761,8 @@ var
  linestart,lineend: integer;
  dir1: graphicdirectionty;
  rea1,rea2: real;
- start1,stop1: real;
- size1: sizety;
+// start1,stop1: real;
+// size1: sizety;
  pt1: pointty;
  rectext1: rectextty;
  int1: integer;
@@ -762,16 +770,15 @@ var
 begin
  with tcustomdialcontroller(fowner),fli,finfo,line do begin
   getactdialrect(rect1);
-  size1:= fintf.getdialsize;
-  if (rect1.cx  <= 0) or (rect1.cy <= 0) then begin
-   active:= false;
-  end
-  else begin
+//  size1:= fintf.getdialsize;
+  active:= false;
+  limited:= false;
+  if (rect1.cx  > 0) and (rect1.cy > 0) then begin
    calclineend(fli,dmo_opposite in options,rect1,linestart,lineend,dir1,
                                                                      rectext1);
    if do_log in foptions then begin
-    rea2:= chartln(fsstart);
-    rea1:= (chartln(frange+fsstart)-rea2);
+    rea2:= flnsstart;
+    rea1:= flnrange;
     if rea1 = 0 then begin
      exit;
     end;
@@ -780,6 +787,7 @@ begin
    else begin
     rea1:= (value - fsstart)/frange;
    end;
+   {
    case fdirection of
     gd_right: begin
      start1:= -rect1.x / rect1.cx;
@@ -798,13 +806,26 @@ begin
      stop1:= (size1.cy - rect1.y - 1) / rect1.cy;
     end;
    end;
+   }
    if dmo_hideoverload in options then begin
     if (rea1 < 0) or (rea1 > 1) then begin
-     active:= false;
      exit;
     end;
    end;
    if dmo_limitoverload in options then begin
+//   {
+    if rea1 < 0 then begin
+     rea1:= 0;
+     limited:= true;
+    end
+    else begin
+     if rea1 > 1 then begin
+      rea1:= 1;
+      limited:= true;
+     end;
+    end;
+//   }
+    {
     if rea1 < start1 then begin
      rea1:= start1;
     end
@@ -813,6 +834,7 @@ begin
       rea1:= stop1;
      end;
     end;
+    }
    end;
    case fdirection of
     gd_right: begin
@@ -863,6 +885,7 @@ begin
     a:= b;
     b:= pt1;
    end;
+   active:= true;
   end;
  end;
 end;
@@ -1627,8 +1650,8 @@ begin
                                                                  dir1,rectext1);
       expandrectext1(fticks.fdim,rectext1);
       if islog then begin
-       offs:= -chartln(fsstart);
-       rea1:= (chartln(fsstart+frange) + offs);
+       offs:= -flnsstart;
+       rea1:= flnrange;
        if rea1 = 0 then begin
         exit;
        end;
@@ -1941,6 +1964,8 @@ begin
  if fstart <> avalue then begin
   fstart:= avalue;
   fsstart:= fshift+avalue;
+  flnsstart:= chartln(fsstart);
+  flnrange:= chartln(fsstart+frange)-flnsstart;
   changed;
  end;
 end;
@@ -1950,6 +1975,8 @@ begin
  if fshift <> avalue then begin
   fshift:= avalue;
   fsstart:= fstart+avalue;
+  flnsstart:= chartln(fsstart);
+  flnrange:= chartln(fsstart+frange)-flnsstart;
   changed;
  end;
 end;
@@ -1959,6 +1986,7 @@ begin
  if frange <> avalue then begin
   checknullrange(avalue);
   frange:= avalue;
+  flnrange:= chartln(fsstart+frange)-flnsstart;
   changed;
  end;
 end;
