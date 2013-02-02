@@ -211,6 +211,7 @@ type
                      const agdifuncs: pgdifunctionaty = nil);
                                         //nil -> default
    destructor destroy; override;
+   procedure clear; override;
    class procedure freeimageinfo(var ainfo: imagebufferinfoty);
    procedure loadfromimagebuffer(const abuffer: imagebufferinfoty);
    procedure savetoimagebuffer(out abuffer: imagebufferinfoty);
@@ -1381,6 +1382,12 @@ begin
  freemask;
  inherited;
  fobjectlinker.free;
+end;
+
+procedure tmaskedbitmap.clear;
+begin
+ forigformatdata:= '';
+ inherited;
 end;
 
 class procedure tmaskedbitmap.freeimageinfo(var ainfo: imagebufferinfoty);

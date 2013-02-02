@@ -1068,7 +1068,7 @@ type
    procedure assign(source: tpersistent); override;
    procedure assignnegative(source: tsimplebitmap);
                       //gets negative copy
-   procedure clear;//sets with and height to 0
+   procedure clear; virtual;//sets with and height to 0
    procedure init(const acolor: colorty); virtual;
    procedure freecanvas;
    function canvasallocated: boolean;
