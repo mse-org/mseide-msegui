@@ -154,7 +154,7 @@ type
  end;
 }
  bitmapoptionty = (bmo_monochrome,bmo_masked,bmo_colormask,
-                   bmo_storeorigformat);
+                   bmo_storeorigformat,bmo_runtimeformatdata);
  bitmapoptionsty = set of bitmapoptionty;
 
  tmaskedbitmap = class(tbitmap,iobjectlink)
@@ -1920,6 +1920,10 @@ begin
  filer.DefineBinaryProperty('imagedata',{$ifdef FPC}@{$endif}readimagedata,
                                      {$ifdef FPC}@{$endif}writeimagedata,
                            bo1 and writedata(tmaskedbitmap(filer.ancestor)));
+ if (filer is treader) and not(csdesigning in filer.root.componentstate) and 
+                not(bmo_runtimeformatdata in options) then begin
+  forigformatdata:= '';
+ end;
 end;
 
 procedure tmaskedbitmap.writeimage(stream: tstream);
