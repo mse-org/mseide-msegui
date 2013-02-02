@@ -4255,6 +4255,7 @@ begin
  if imagefilepropedit(mstr1,format1) = mr_ok then begin
   bmp:= tmaskedbitmap.create(false);
   try
+   bmp.options:= bmp.options + [bmo_storeorigformat];
    bmp.loadfromfile(mstr1,format1);
    for int1:= 0 to high(fprops) do begin
     bmp1:= tmaskedbitmap(getpointervalue(int1));
