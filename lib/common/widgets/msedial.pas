@@ -143,8 +143,8 @@ type
 
  tdialmarker = class(tdialprop)
   private
-   finfo: markerinfoty;
    fhintcaption: msestring;
+   finfo: markerinfoty;
    procedure checklayout;
    procedure readvalue(reader: treader);
    procedure setvalue(const avalue: realty);
@@ -155,6 +155,7 @@ type
    procedure defineproperties(filer: tfiler); override;
    procedure updatemarker;
   public
+   function pos: integer;
    procedure paint(const acanvas: tcanvas);
    property visible: boolean read getvisible write setvisible;
   published
@@ -960,6 +961,16 @@ begin
  else begin
   options:= options + [dmo_invisible];
  end; 
+end;
+
+function tdialmarker.pos: integer;
+begin
+ if tcustomdialcontroller(fowner).direction in [gd_left,gd_right] then begin
+  result:= finfo.line.a.x;
+ end
+ else begin
+  result:= finfo.line.a.y;
+ end;
 end;
 
 { tdialmarkers }

@@ -1083,19 +1083,19 @@ begin
   with rect1 do begin
    if isy then begin
     with ydials[dial1].markers[index1] do begin
-     int3:= ymarkertochart(value,dial1);
+     int3:= pos;
      ma.y:= y-int3;
      mi.y:= y+cy-int3;
      if (dmo_ordered in options) then begin
       if index1 < ydials[dial1].markers.count - 1 then begin
-       int4:= ymarkertochart(ydials[dial1].markers[index1+1].value,dial1);
+       int4:= ydials[dial1].markers[index1+1].pos;
        if int4 > y then begin
         ma.y:= int4-int3;
         include(fmovestate,cems_canbottomlimit);
        end;
       end;
       if index1 > 0 then begin
-       int4:= ymarkertochart(ydials[dial1].markers[index1-1].value,dial1);
+       int4:= ydials[dial1].markers[index1-1].pos;
        if int4 < y+cy then begin
         mi.y:= int4-int3;
         include(fmovestate,cems_cantoplimit);
@@ -1106,19 +1106,19 @@ begin
    end
    else begin //x
     with xdials[dial1].markers[index1] do begin
-     int3:= xmarkertochart(value,dial1);
+     int3:= pos;
      ma.x:= x-int3;
      mi.x:= x+cx-int3;
      if (dmo_ordered in options) then begin
       if index1 > 0 then begin
-       int4:= xmarkertochart(xdials[dial1].markers[index1-1].value,dial1);
+       int4:= xdials[dial1].markers[index1-1].pos;
        if int4 > x then begin
         ma.x:= int4-int3;
         include(fmovestate,cems_canbottomlimit);
        end;
       end;
       if index1 < xdials[dial1].markers.count - 1 then begin
-       int4:= xmarkertochart(xdials[dial1].markers[index1+1].value,dial1);
+       int4:= xdials[dial1].markers[index1+1].pos;
        if int4 < x+cx then begin
         mi.x:= int4-int3;
         include(fmovestate,cems_cantoplimit);
@@ -1255,8 +1255,7 @@ begin
     end
     else begin
      if offs.y <> 0 then begin
-      rea1:= ycharttomarker(
-                 ymarkertochart(marker1.value,dialindex)+offs.y,dialindex);
+      rea1:= ycharttomarker(marker1.pos+offs.y,dialindex);
       if canevent(tmethod(fonsetmarker)) then begin
        fonsetmarker(self,true,dialindex,int1,rea1);
       end;
@@ -1282,8 +1281,7 @@ begin
     end
     else begin
      if offs.x <> 0 then begin
-      rea1:= xcharttomarker(
-               xmarkertochart(marker1.value,dialindex) + offs.x,dialindex);
+      rea1:= xcharttomarker(marker1.pos + offs.x,dialindex);
       if canevent(tmethod(fonsetmarker)) then begin
        fonsetmarker(self,false,dialindex,int1,rea1);
       end;
@@ -1390,13 +1388,11 @@ begin
    decodemarker(sender.currentobjects,bo1,dialindex,int1);
    with rect1 do begin
     if bo1 then begin
-     int2:= ymarkertochart(ydials[dialindex].markers[int1].value,dialindex)+
-                                                                        offs.y;
+     int2:= ydials[dialindex].markers[int1].pos + offs.y;
      canvas.drawline(makepoint(x,int2),makepoint(x+cx,int2));
     end
     else begin
-     int2:= xmarkertochart(xdials[dialindex].markers[int1].value,dialindex)+
-                                                                        offs.x;
+     int2:= xdials[dialindex].markers[int1].pos + offs.x;
      canvas.drawline(makepoint(int2,y),makepoint(int2,y+cy));
     end;
    end;
@@ -1650,8 +1646,7 @@ begin
    for int1:= 0 to high(tdialmarkers1(markers).fitems) do begin
     marker1:= tdialmarker(tdialmarkers1(markers).fitems[int1]);
     if not (dmo_fix in marker1.options) and 
-       (abs(apos.x-xmarkertochart(marker1.value,int3)) <=
-                                                     markersnapdist) then begin
+                 (abs(apos.x-marker1.pos) <= markersnapdist) then begin
      result:= true;
      isy:= false;
      adial:= int3;
@@ -1666,8 +1661,7 @@ begin
    for int1:= 0 to high(tdialmarkers1(markers).fitems) do begin
     marker1:= tdialmarker(tdialmarkers1(markers).fitems[int1]);
     if not (dmo_fix in marker1.options) and 
-       (abs(apos.y-ymarkertochart(marker1.value,int3)) <=
-                                               markersnapdist) then begin
+                    (abs(apos.y-marker1.pos) <= markersnapdist) then begin
      result:= true;
      isy:= true;
      adial:= int3;
