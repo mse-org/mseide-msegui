@@ -418,7 +418,7 @@ begin
    mstr2:= 'y: '+formatfloatmse(y,'');
   end
   else begin
-   mstr2:= formatfloatmse(x,mstr2);
+   mstr2:= formatfloatmse(y,mstr2);
   end;
   info.caption:= mstr1+lineend+mstr2;
  end;
