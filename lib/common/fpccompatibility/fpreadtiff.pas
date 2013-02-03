@@ -43,7 +43,7 @@ unit FPReadTiff;
 interface
 
 uses
-  Math, Classes, SysUtils, ctypes, zinflate, zbase, FPimage, FPTiffCmn;
+  Math, Classes, mclasses, SysUtils, ctypes, zinflate, zbase, FPimage, FPTiffCmn;
 
 type
   TFPReaderTiff = class;

@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2012 by Martin Schreiber
+{ MSEgui Copyright (c) 2012-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -15,7 +15,7 @@ const
  
 implementation
 uses
- classes,msegraphics,msebitmap,fpwritetiff,msegraphicstream,msestockobjects,
+ classes,mclasses,msegraphics,msebitmap,fpwritetiff,msegraphicstream,msestockobjects,
  fpimage;
 
 //

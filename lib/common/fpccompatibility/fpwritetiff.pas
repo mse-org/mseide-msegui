@@ -38,7 +38,7 @@ unit FPWriteTiff;
 interface
 
 uses
-  Math, Classes, SysUtils, zbase, zdeflate, FPimage, FPTiffCmn;
+  Math, Classes, mclasses, SysUtils, zbase, zdeflate, FPimage, FPTiffCmn;
 
 type
 

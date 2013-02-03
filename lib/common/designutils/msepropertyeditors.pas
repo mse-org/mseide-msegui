@@ -909,7 +909,7 @@ uses
  mseshapes,msestockobjects,msetexteditor,
  msegraphicstream,msedate,
  mseformatbmpicoread{$ifdef FPC},mseformatjpgread,mseformatpngread,
- mseformatpnmread,mseformattgaread,mseformatxpmread{$endif},
+ mseformatpnmread,mseformattgaread,mseformatxpmread,mseformattiffread{$endif},
  msestat,msestatfile,msefileutils,
  msedesigner,variants,mseeditglob,msepropertyeditorsmodule;
 
