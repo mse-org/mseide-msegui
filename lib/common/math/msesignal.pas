@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2010-2011 by Martin Schreiber
+{ MSEgui Copyright (c) 2010-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -17,7 +17,7 @@ unit msesignal;
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
 interface
 uses
- msedatalist,mseclasses,classes,msetypes,msearrayprops,mseevent,msehash,
+ msedatalist,mseclasses,classes,mclasses,msetypes,msearrayprops,mseevent,msehash,
  msesystypes,msereal,msetimer,mseglob;
  
 const

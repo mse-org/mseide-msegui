@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -11,7 +11,7 @@ unit mseodbcconn;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- db,classes,modbcconn,msestrings,msedb,msedatabase,msqldb;
+ mdb,classes,mclasses,modbcconn,msestrings,msedb,msedatabase,msqldb;
 type
  tmseodbcconnection = class(todbcconnection,idbcontroller)
   private

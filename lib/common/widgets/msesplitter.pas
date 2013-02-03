@@ -13,7 +13,8 @@ unit msesplitter;
 
 interface
 uses
- msegui,msewidgets,mseobjectpicker,classes,msegraphutils,msepointer,msetypes,
+ msegui,msewidgets,mseobjectpicker,classes,mclasses,msegraphutils,
+ msepointer,msetypes,
  msestrings,msegraphics,mseevent,msestat,msestatfile,msestockobjects,mseclasses,
  msesimplewidgets,mseguiglob,msemenus;
 type

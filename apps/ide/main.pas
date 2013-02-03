@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2012 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2013 by Martin Schreiber
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -29,7 +29,8 @@ uses
  mseforms,msesimplewidgets,mseguiglob,msegui,msegdbutils,mseactions,
  msedispwidgets,msedataedits,msestat,msestatfile,msemenus,msebitmap,msetoolbar,
  msegrids,msefiledialog,msetypes,sourcepage,msetabs,msedesignintf,msedesigner,
- classes,mseclasses,msegraphutils,typinfo,msedock,sysutils,msesysenv,msemacros,
+ classes,mclasses,mseclasses,msegraphutils,typinfo,msedock,sysutils,msesysenv,
+ msemacros,
  msestrings,msepostscriptprinter,msegraphics,mseglob,mseprocmonitorcomp,
  msesystypes,mserttistat,msedatanodes,mseedit,mseifiglob,mselistbrowser,
  projecttreeform,msepipestream,msestringcontainer,msesys;
@@ -292,7 +293,6 @@ uses
  {$ifdef mse_with_ifi}
   regifi,{$ifdef mse_with_ifirem}regifirem,{$endif}
  {$endif}
- {$ifdef mse_with_zeoslib}regzeoslib,{$endif}
  {$ifdef mse_with_pascalscript}regpascalscript,{$endif}
  regdesignutils,regsysutils,regcrypto,regserialcomm,regexperimental,
  regdeprecated,
@@ -2660,7 +2660,7 @@ begin
              'MSEide version: '+versiontext+c_linefeed+
              'Host: '+ platformtext+ c_linefeed+
              c_linefeed+
-             'Copyright 1999-2012'+c_linefeed+
+             'Copyright 1999-2013'+c_linefeed+
              'by Martin Schreiber'
              ,actionsmo.c[ord(ac_about)]+' MSEide');
 end;

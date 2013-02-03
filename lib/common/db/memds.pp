@@ -25,7 +25,7 @@
 unit memds;
 interface
 uses
- sysutils,classes,db,msetypes;
+ sysutils,classes,mclasses,mdb,msetypes;
 const
   // Stream Markers.
   MarkerSize  = SizeOf(Integer);

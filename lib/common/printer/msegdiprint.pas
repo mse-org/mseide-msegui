@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2007-2008 by Martin Schreiber
+{ MSEgui Copyright (c) 2007-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -21,7 +21,7 @@ unit msegdiprint;
 
 interface
 uses
- classes,mseprinter,msegraphics,msegraphutils,msetypes,msestrings,msedrawtext,
+ classes,mclasses,mseprinter,msegraphics,msegraphutils,msetypes,msestrings,msedrawtext,
  msegui,mseguiglob{$ifdef mswindows},windows{$endif};
 const
  mmtoinch = 1/25.4;

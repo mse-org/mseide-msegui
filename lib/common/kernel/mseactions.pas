@@ -16,7 +16,7 @@ unit mseactions;
 {$endif}
 interface
 uses
- classes,mseact,mseglob,mseguiglob,msegui,mseevent,mseclasses,msebitmap,
+ classes,mclasses,mseact,mseglob,mseguiglob,msegui,mseevent,mseclasses,msebitmap,
  msekeyboard,msetypes,msestrings,msearrayprops,msestatfile,msestat;
 
 type

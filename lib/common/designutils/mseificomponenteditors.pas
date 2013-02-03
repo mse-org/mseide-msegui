@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2009 by Martin Schreiber
+{ MSEgui Copyright (c) 2009-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -11,7 +11,7 @@ unit mseificomponenteditors;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- msecomponenteditors,msedesignintf,classes,mseificlienteditor;
+ msecomponenteditors,msedesignintf,classes,mclasses,mseificlienteditor;
  
 type
  tifilinkcompeditor = class(tcomponenteditor)

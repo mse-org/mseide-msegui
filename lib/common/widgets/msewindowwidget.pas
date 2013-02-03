@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2007 by Martin Schreiber
+{ MSEgui Copyright (c) 2007-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -11,8 +11,8 @@ unit msewindowwidget;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- classes,msegui,msetypes,msegraphutils,mseguiintf,msewidgets,msegraphics,
- msesimplewidgets,mseevent,msemenus,mseguiglob,msetimer;
+ classes,mclasses,msegui,msetypes,msegraphutils,mseguiintf,msewidgets,
+ msegraphics,msesimplewidgets,mseevent,msemenus,mseguiglob,msetimer;
  
 type
  tcustomwindowwidget = class;

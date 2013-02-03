@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2007-2011 by Martin Schreiber
+{ MSEgui Copyright (c) 2007-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -17,7 +17,7 @@ unit msesqlite3conn;
 
 interface
 uses
- classes,msedb,msqldb,msestrings,db,sqlite3dyn,msetypes,msedatabase;
+ classes,mclasses,msedb,msqldb,msestrings,mdb,sqlite3dyn,msetypes,msedatabase;
 { 
       Type name        SQLite storage class  Field type    Data type
 +--------------------+---------------------+-------------+-------------+
@@ -345,30 +345,16 @@ const
   {$ifdef mse_FPC_2_2},-1,             -1 {$endif}
   );
 
-type
- defbeforety = record
-  datatype: tfieldtype;
-  size: integer;
-  name: string;
- end;
 var
  int1,int2,int3: integer;
  str1,str2: string;
  ft1: tfieldtype;
-// size1: word;
  size1: integer;
  ar1: stringarty;
- defsbefore: array of defbeforety;
+ defsbefore: fielddefarty;
  fd: tfielddef;
 begin
- setlength(defsbefore,fielddefs.count);
- for int1:= 0 to high(defsbefore) do begin
-  with fielddefs[int1] do begin
-   defsbefore[int1].datatype:= datatype;
-   defsbefore[int1].size:= size;
-   defsbefore[int1].name:= name;
-  end;
- end;
+ defsbefore:= getfielddefar(fielddefs);
  fielddefs.clear;
  with tsqlite3cursor(cursor) do begin
   for int1:= 0 to sqlite3_column_count(fstatement) - 1 do begin

@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2009-2012 by Martin Schreiber
+{ MSEgui Copyright (c) 2009-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -11,13 +11,16 @@ unit msedial;
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
 interface
 uses
- classes,msewidgets,msegraphutils,msegraphics,msegui,msearrayprops,mseclasses,
+ classes,mclasses,msewidgets,msegraphutils,msegraphics,msegui,msearrayprops,mseclasses,
  msetypes,mseglob,mseguiglob,msestrings,msemenus,mseevent,msestat;
 
 const
  defaultdialcolor = cl_dkgray;
   
 type
+ rectsidety = (rs_left,rs_top,rs_right,rs_bottom);
+ rectsidesty = set of rectsidety;
+
  dialstatety = (dis_layoutvalid,dis_needstransform);
  dialstatesty = set of dialstatety;
 
@@ -121,12 +124,14 @@ type
  end;
 
  dialmarkeroptionty = (dmo_invisible,dmo_opposite,dmo_rotatetext,
-                       dmo_hideoverload,dmo_limitoverload,
+                       dmo_hideoverload,dmo_limitoverload,dmo_limitoverloadi,
+                       dmo_hidelimit,
                        dmo_fix,dmo_ordered,dmo_savevalue); //for tchartedit
  dialmarkeroptionsty = set of dialmarkeroptionty;
  
  markerinfoty = record
   active: boolean;
+  limited: boolean;
   line: segmentty;
   value: realty;
   captionpos: pointty;
@@ -138,6 +143,7 @@ type
 
  tdialmarker = class(tdialprop)
   private
+   fhintcaption: msestring;
    finfo: markerinfoty;
    procedure checklayout;
    procedure readvalue(reader: treader);
@@ -149,12 +155,17 @@ type
    procedure defineproperties(filer: tfiler); override;
    procedure updatemarker;
   public
+   function pos: integer;
    procedure paint(const acanvas: tcanvas);
    property visible: boolean read getvisible write setvisible;
+   property active: boolean read finfo.active;
+   property limited: boolean read finfo.limited;
   published
    property value: realty read finfo.value write setvalue {stored false};
    property options: dialmarkeroptionsty read finfo.options 
                           write setoptions default [];
+   property hintcaption: msestring read fhintcaption
+                                 write fhintcaption;
  end;
 
  tcustomdialcontroller = class;
@@ -164,6 +175,7 @@ type
    function getitems(const aindex: integer): tdialmarker;
    procedure changed;
   protected
+   fdim: rectextty;
    procedure dosizechanged; override;
   public
    constructor create(const aowner: tcustomdialcontroller); reintroduce;
@@ -222,17 +234,13 @@ type
   procedure layoutchanged;
   function getwidget: twidget;
   function getdialrect: rectty;
-  function getdialsize: sizety;
+  function getlimitrect: rectty;
  end;
  
  tcustomdialcontroller = class(tvirtualpersistent)
   private
    fdirection: graphicdirectionty;
    fstate: dialstatesty;
-   fsstart: real;
-   fstart: real;
-   fshift: real;
-   frange: real;
    fmarkers: tdialmarkers;
    fticks: tdialticks;
    foptions: dialoptionsty;
@@ -286,6 +294,12 @@ type
    procedure setfront(const avalue: boolean);
    procedure setfitdist(const avalue: integer);
   protected
+   fsstart: real;
+   flnsstart: real;
+   fstart: real;
+   fshift: real;
+   frange: real;
+   flnrange: real;
    procedure setdirection(const avalue: graphicdirectionty); virtual;
    procedure changed;
    procedure calclineend(const ainfo: diallineinfoty; const aopposite: boolean; 
@@ -380,23 +394,63 @@ type
    property font;
    property angle;
  end;
+
+ optiondialty = (odi_autofitleft,odi_autofittop,odi_autofitright,
+                    odi_autofitbottom); //same layout as rectsidesty
+ optionsdialty = set of optiondialty;
+
+const
+ allrectsides = [rs_left,rs_top,rs_right,rs_bottom];
+ rectsidesmask = [odi_autofitleft,odi_autofittop,odi_autofitright,
+                    odi_autofitbottom];
+ defaultoptionsdial = [odi_autofitleft,odi_autofittop,odi_autofitright,
+                                                          odi_autofitbottom];
+type
+ dialwidgetstatety = (dws_layoutvalid);
+ dialwidgetstatesty = set of dialwidgetstatety;
  
  tcustomdial = class(tpublishedwidget,idialcontroller)
   private
    fdial: tdialcontroller;
+   ffitframe: framety;
+   foptions: optionsdialty;
+   fstate: dialwidgetstatesty;
    procedure setdial(const avalue: tdialcontroller);
+   procedure setfitframe(const avalue: framety);
+   procedure setfitframe_left(const avalue: integer);
+   procedure setfitframe_top(const avalue: integer);
+   procedure setfitframe_right(const avalue: integer);
+   procedure setfitframe_bottom(const avalue: integer);
+   procedure setoptions(const avalue: optionsdialty);
   protected
    procedure dopaint(const acanvas: tcanvas); override;
    procedure clientrectchanged; override;
+   procedure invalidatelayout;
+   function checklayout: boolean; virtual; //true if changes made
           //idialcontroller
    procedure layoutchanged;
    procedure directionchanged(const dir,dirbefore: graphicdirectionty);
    function getdialrect: rectty;
-   function getdialsize: sizety;
+   function getlimitrect: rectty;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   procedure paint(const acanvas: tcanvas); override;
+   function fit(const asides: rectsidesty = allrectsides): boolean; 
+           //adjust fitframe for extents of dial
+           //returns true if changes made
    property dial: tdialcontroller read fdial write setdial;
+   property fitframe: framety read ffitframe write setfitframe;
+   property fitframe_left: integer read ffitframe.left
+                          write setfitframe_left default 0;
+   property fitframe_top: integer read ffitframe.top
+                          write setfitframe_top default 0;
+   property fitframe_right: integer read ffitframe.right
+                          write setfitframe_right default 0;
+   property fitframe_bottom: integer read ffitframe.bottom
+                          write setfitframe_bottom default 0;
+   property options: optionsdialty read foptions write setoptions 
+                                                 default defaultoptionsdial;
   published
    property color default cl_transparent;
  end;
@@ -406,11 +460,17 @@ type
    property dial;
    property bounds_cy default 15;
    property bounds_cx default 100;
+   property fitframe_left;
+   property fitframe_top;
+   property fitframe_right;
+   property fitframe_bottom;
+   property options;
  end;
 
 procedure checknullrange(const avalue: real);
 function chartln(const avalue: real): real;
                 //big neg value for avalue <= 0
+function chartround(const avalue: real): integer; //limit to +-bigint
  
 implementation
 uses
@@ -433,6 +493,43 @@ begin
  end
  else begin
   result:= ln(avalue);
+ end;
+end;
+
+function chartround(const avalue: real): integer; //limit to +-bigint
+begin
+ if avalue > bigint then begin
+  result:= bigint;
+ end
+ else begin
+  if avalue < -bigint then begin
+   result:= -bigint;
+  end
+  else begin
+   result:= round(avalue);
+  end;
+ end;
+end;
+
+procedure extenddim(const textwidth,asc,desc: integer; const pos: pointty;
+                                                       var dim: rectextty);
+var
+ int2: integer;
+begin
+ with dim do begin
+  int2:= pos.x + textwidth;
+  if pos.x < left then begin
+   left:= pos.x;
+  end;
+  if int2 > right then begin
+   right:= int2;
+  end;
+  if top > pos.y - asc then begin
+   top:= pos.y - asc;
+  end;
+  if bottom < pos.y + desc then begin
+   bottom:= pos.y + desc;
+  end;
  end;
 end;
 
@@ -626,13 +723,15 @@ begin
  checklayout;
  with finfo,fli do begin
   if active then begin
-   acanvas.linewidthmm:= actualwidthmm;
-   if dashes <> '' then begin
-    acanvas.dashes:= dashes;
-   end;
-   acanvas.drawline(line.a,line.b,actualcolor);
-   if dashes <> '' then begin
-    acanvas.dashes:= '';
+   if not limited or not(dmo_hidelimit in options) then begin
+    acanvas.linewidthmm:= actualwidthmm;
+    if dashes <> '' then begin
+     acanvas.dashes:= dashes;
+    end;
+    acanvas.drawline(line.a,line.b,actualcolor);
+    if dashes <> '' then begin
+     acanvas.dashes:= '';
+    end;
    end;
    if caption <> '' then begin
     acanvas.drawstring(acaption,captionpos,self.font,false,aangle);
@@ -715,62 +814,77 @@ var
  dir1: graphicdirectionty;
  rea1,rea2: real;
  start1,stop1: real;
- size1: sizety;
+ rect2: rectty;
  pt1: pointty;
  rectext1: rectextty;
+ int1: integer;
+ 
 begin
  with tcustomdialcontroller(fowner),fli,finfo,line do begin
   getactdialrect(rect1);
-  size1:= fintf.getdialsize;
-  if (rect1.cx  <= 0) or (rect1.cy <= 0) then begin
-   active:= false;
-  end
-  else begin
+  active:= false;
+  limited:= false;
+  if (rect1.cx  > 0) and (rect1.cy > 0) then begin
    calclineend(fli,dmo_opposite in options,rect1,linestart,lineend,dir1,
                                                                      rectext1);
    if do_log in foptions then begin
-    rea2:= chartln(fsstart);
-    rea1:= (chartln(frange+fsstart)-rea2);
+    rea2:= flnsstart;
+    rea1:= flnrange;
     if rea1 = 0 then begin
      exit;
     end;
     rea1:= (chartln(value) - rea2)/rea1;
-//    rea1:= (chartln(value)-chartln(fstart))/chartln({fstart+}frange);
    end
    else begin
     rea1:= (value - fsstart)/frange;
    end;
-   case fdirection of
-    gd_right: begin
-     start1:= -rect1.x / rect1.cx;
-     stop1:= (size1.cx - rect1.x - 1) / rect1.cx;
-    end;
-    gd_up: begin
-     start1:= ((rect1.y+rect1.cy)-size1.cy - 1) / rect1.cy;
-     stop1:= (rect1.y+rect1.cy) / rect1.cy;
-    end;
-    gd_left: begin
-     start1:= ((rect1.x+rect1.cx)-size1.cx - 1) / rect1.cx;
-     stop1:= (rect1.x+rect1.cx) / rect1.cx;
-    end;
-    gd_down: begin
-     start1:= -rect1.y / rect1.cy;
-     stop1:= (size1.cy - rect1.y - 1) / rect1.cy;
-    end;
-   end;
    if dmo_hideoverload in options then begin
     if (rea1 < 0) or (rea1 > 1) then begin
-     active:= false;
      exit;
     end;
    end;
-   if dmo_limitoverload in options then begin
-    if rea1 < start1 then begin
-     rea1:= start1;
+   if dmo_limitoverloadi in options then begin
+    if rea1 < 0 then begin
+     rea1:= 0;
+     limited:= true;
     end
     else begin
-     if rea1 > stop1 then begin
-      rea1:= stop1;
+     if rea1 > 1 then begin
+      rea1:= 1;
+      limited:= true;
+     end;
+    end;
+   end
+   else begin
+    if dmo_limitoverload in options then begin
+     rect2:= fintf.getlimitrect;
+     case fdirection of
+      gd_right: begin
+       start1:= (rect2.x - rect1.x) / rect1.cx;
+       stop1:= (rect2.x + rect2.cx - rect1.x {- 1}) / rect1.cx;
+      end;
+      gd_up: begin
+       start1:= (rect1.y + rect1.cy - rect2.y - rect2.cy {- 1}) / rect1.cy;
+       stop1:= (rect1.y + rect1.cy - rect2.y) / rect1.cy;
+      end;
+      gd_left: begin
+       start1:= (rect1.x + rect1.cx - rect2.x - rect2.cx {- 1}) / rect1.cx;
+       stop1:= (rect1.x + rect1.cx - rect2.x) / rect1.cx;
+      end;
+      gd_down: begin
+       start1:= (rect2.y - rect1.y) / rect1.cy;
+       stop1:= (rect2.y + rect2.cy - rect1.y {- 1}) / rect1.cy;
+      end;
+     end;
+     if rea1 < start1 then begin
+      rea1:= start1;
+      limited:= true;
+     end
+     else begin
+      if rea1 > stop1 then begin
+       rea1:= stop1;
+       limited:= true;
+      end;
      end;
     end;
    end;
@@ -811,8 +925,10 @@ begin
     afont:= self.font;
     acaption:= getactcaption(value,caption);
     captionpos:= a;
+    int1:= fintf.getwidget.getcanvas.getstringwidth(acaption,afont);
     adjustcaption(dir1,dmo_rotatetext in self.finfo.options,fli,afont,
-      fintf.getwidget.getcanvas.getstringwidth(acaption,afont),captionpos);
+                                                           int1,captionpos);
+    extenddim(int1,afont.ascent,afont.descent,captionpos,fmarkers.fdim);
    end;
    transform(a);
    transform(b);
@@ -821,6 +937,7 @@ begin
     a:= b;
     b:= pt1;
    end;
+   active:= true;
   end;
  end;
 end;
@@ -846,6 +963,16 @@ begin
  else begin
   options:= options + [dmo_invisible];
  end; 
+end;
+
+function tdialmarker.pos: integer;
+begin
+ if tcustomdialcontroller(fowner).direction in [gd_left,gd_right] then begin
+  result:= finfo.line.a.x;
+ end
+ else begin
+  result:= finfo.line.a.y;
+ end;
 end;
 
 { tdialmarkers }
@@ -1327,6 +1454,9 @@ const
    result:= 0;
   end;
  end;
+
+var
+ asc,desc: integer;
   
 var
  rect1: rectty;
@@ -1349,7 +1479,6 @@ var
  ar1: realarty;
  ar2: booleanarty;
  pt1: pointty;
- asc,desc: integer;
  rectext1: rectextty;
  
 begin
@@ -1583,8 +1712,8 @@ begin
                                                                  dir1,rectext1);
       expandrectext1(fticks.fdim,rectext1);
       if islog then begin
-       offs:= -chartln(fsstart);
-       rea1:= (chartln(fsstart+frange) + offs);
+       offs:= -flnsstart;
+       rea1:= flnrange;
        if rea1 = 0 then begin
         exit;
        end;
@@ -1616,10 +1745,6 @@ begin
         first:= first + 1;
        end;
        offs:= -offs;
-//       int1:= round(intervalcount);
-//       if int1/intervalcount + offs > 1.0001 then begin
-//        dec(int1);
-//       end;
        int1:= trunc((1.0001-offs)*intervalcount);
        first:= (first * frange) / intervalcount; //real value
       end;
@@ -1771,21 +1896,7 @@ begin
          adjustcaption(dir1,dto_rotatetext in options,fli,afont,
                int2,pos);
          angle:= ticksreal[int1] * rea2 + rea3;
-         with fticks.fdim do begin
-          int2:= pos.x + int2;
-          if pos.x < left then begin
-           left:= pos.x;
-          end;
-          if int2 > right then begin
-           right:= int2;
-          end;
-          if top > pos.y - asc then begin
-           top:= pos.y - asc;
-          end;
-          if bottom < pos.y + desc then begin
-           bottom:= pos.y + desc;
-          end;
-         end;
+         extenddim(int2,asc,desc,pos,fticks.fdim);        
         end;
        end;
        //todo: variable unitcaption pos.
@@ -1816,6 +1927,15 @@ begin
        b:= pt1;
       end;
      end;
+    end;
+   end;
+  end;
+  with fmarkers do begin
+   fdim:= emptyrectext;
+   for int1:= 0 to count - 1 do begin
+    with tdialmarker(fitems[int1]) do begin
+     flayoutvalid:= false;
+     checklayout;
     end;
    end;
   end;
@@ -1906,6 +2026,8 @@ begin
  if fstart <> avalue then begin
   fstart:= avalue;
   fsstart:= fshift+avalue;
+  flnsstart:= chartln(fsstart);
+  flnrange:= chartln(fsstart+frange)-flnsstart;
   changed;
  end;
 end;
@@ -1915,6 +2037,8 @@ begin
  if fshift <> avalue then begin
   fshift:= avalue;
   fsstart:= fstart+avalue;
+  flnsstart:= chartln(fsstart);
+  flnrange:= chartln(fsstart+frange)-flnsstart;
   changed;
  end;
 end;
@@ -1924,6 +2048,7 @@ begin
  if frange <> avalue then begin
   checknullrange(avalue);
   frange:= avalue;
+  flnrange:= chartln(fsstart+frange)-flnsstart;
   changed;
  end;
 end;
@@ -2175,6 +2300,7 @@ end;
 
 constructor tcustomdial.create(aowner: tcomponent);
 begin
+ foptions:= defaultoptionsdial;
  fdial:= tdialcontroller.create(idialcontroller(self));
  inherited;
  size:= makesize(100,15);
@@ -2198,6 +2324,7 @@ begin
   if fframe <> nil then begin
    rotateframe1(tcustomframe1(fframe).fi.innerframe,dirbefore,dir);    
   end;
+  rotateframe1(ffitframe,dirbefore,dir);    
   widgetrect:= changerectdirection(widgetrect,dirbefore,dir);
  end;
 end;
@@ -2205,11 +2332,12 @@ end;
 function tcustomdial.getdialrect: rectty;
 begin
  result:= innerclientrect;
+ deflaterect1(result,ffitframe);
 end;
 
-function tcustomdial.getdialsize: sizety;
+function tcustomdial.getlimitrect: rectty;
 begin
- result:= clientsize;
+ result:= innerclientrect;
 end;
 
 procedure tcustomdial.dopaint(const acanvas: tcanvas);
@@ -2219,15 +2347,131 @@ begin
  fdial.afterpaint(acanvas);
 end;
 
+procedure tcustomdial.paint(const acanvas: tcanvas);
+begin
+ checklayout;
+ inherited;
+end;
+
 procedure tcustomdial.clientrectchanged;
 begin
- fdial.changed;
+ invalidatelayout;
  inherited;
+end;
+
+procedure tcustomdial.invalidatelayout;
+begin
+ if componentstate * [csloading,csdestroying] = [] then begin
+  exclude(fstate,dws_layoutvalid);
+  fdial.changed;
+ end;
 end;
 
 procedure tcustomdial.layoutchanged;
 begin
+ exclude(fstate,dws_layoutvalid);
  invalidate;
+end;
+
+procedure tcustomdial.setfitframe(const avalue: framety);
+begin
+ ffitframe:= avalue;
+ invalidatelayout;
+end;
+
+procedure tcustomdial.setfitframe_left(const avalue: integer);
+begin
+ if ffitframe.left <> avalue then begin
+  ffitframe.left:= avalue;
+  invalidatelayout;
+ end;
+end;
+
+procedure tcustomdial.setfitframe_top(const avalue: integer);
+begin
+ if ffitframe.top <> avalue then begin
+  ffitframe.top:= avalue;
+  invalidatelayout;
+ end;
+end;
+
+procedure tcustomdial.setfitframe_right(const avalue: integer);
+begin
+ if ffitframe.right <> avalue then begin
+  ffitframe.right:= avalue;
+  invalidatelayout;
+ end;
+end;
+
+procedure tcustomdial.setfitframe_bottom(const avalue: integer);
+begin
+ if ffitframe.bottom <> avalue then begin
+  ffitframe.bottom:= avalue;
+  invalidatelayout;
+ end;
+end;
+
+procedure tcustomdial.setoptions(const avalue: optionsdialty);
+begin
+ if avalue <> foptions then begin
+  foptions:= avalue;
+  invalidatelayout;
+ end;
+end;
+
+function tcustomdial.fit(const asides: rectsidesty = allrectsides): boolean;
+var
+ ext1: rectextty;
+// int1: integer;
+ fra1: framety;
+ rect1: rectty;
+ si1: sizety;
+begin
+ result:= false;
+ si1:= clientsize;
+ rect1:= getdialrect;
+ ext1.topleft:= rect1.pos;
+ ext1.bottomright:= addpoint(rect1.pos,pointty(rect1.size));
+ fra1:= ffitframe;
+
+ with fdial do begin
+  checklayout;
+  expandrectext1(ext1,fticks.fdim);
+  expandrectext1(ext1,fmarkers.fdim);
+ end;
+
+ if fframe <> nil then begin
+  inflaterectext1(ext1,tcustomframe1(fframe).fi.innerframe);
+ end;
+ 
+ if rs_left in asides then begin
+  fra1.left:= fra1.left - ext1.left;
+ end;
+ if rs_top in asides then begin
+  fra1.top:= fra1.top - ext1.top;
+ end;
+ if rs_right in asides then begin
+  fra1.right:= fra1.right + (ext1.right - si1.cx);
+ end;
+ if rs_bottom in asides then begin
+  fra1.bottom:= fra1.bottom + (ext1.bottom - si1.cy);
+ end;
+
+ if not frameisequal(fra1,ffitframe) then begin
+  result:= true;
+  fitframe:= fra1;
+ end;
+end;
+
+function tcustomdial.checklayout: boolean;
+begin
+ result:= false;
+ if not (dws_layoutvalid in fstate) then begin
+  if foptions * rectsidesmask <> [] then begin
+   result:= fit(rectsidesty(foptions*rectsidesmask));
+  end;
+ end;
+ include(fstate,dws_layoutvalid);
 end;
 
 { tcustomdialcontrollers }

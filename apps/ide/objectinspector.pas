@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2012 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2013 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@ unit objectinspector;
 interface
 
 uses
- mseforms,msewidgets,msegrids,msewidgetgrid,classes,mseclasses,
+ mseforms,msewidgets,msegrids,msewidgetgrid,classes,mclasses,mseclasses,
  msepropertyeditors,mseglob,mseguiglob,msearrayutils,
  msegui,mseedit,msedataedits,mselistbrowser,msedatanodes,
  msedesignintf,typinfo,msecomponenteditors,msesimplewidgets,msegraphutils,
@@ -129,7 +129,7 @@ type
    factcomp: tcomponent;
    flastcomp: tcomponent;
    factcomps: componentarty;
-   fcomponents: componentnamearty;
+   fcomponentnames: componentnamearty;
    fcomponentinfos: tcomponentinfos;
    fchanging: integer;
    frereadprops: boolean;
@@ -1179,10 +1179,10 @@ begin
    int2:= -1;
    po1:= designer.modules.findmodulebyinstance(factmodule);
    if po1 <> nil then begin
-    fcomponents:= po1^.components.getdispnames;
+    fcomponentnames:= po1^.components.getdispnames;
     cols[0].count:= po1^.components.count;
     for int1:= 0 to cols[0].count-1 do begin
-     with fcomponents[int1] do begin
+     with fcomponentnames[int1] do begin
       cols[0][int1]:= dispname + ' (' + designer.getclassname(instance)+')';
       if cols[0][int1] = str1 then begin
        int2:= int1;
@@ -1213,7 +1213,7 @@ begin
    factcomp:= nil;
   end
   else begin
-   factcomp:= fcomponents[itemindex].instance;
+   factcomp:= fcomponentnames[itemindex].instance;
   end;
  end;
  if comp1 <> factcomp then begin

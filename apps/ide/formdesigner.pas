@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2012 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2013 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@ unit formdesigner;
 
 interface
 uses
- classes,mseforms,mseguiglob,msegui,mseevent,msegraphutils,msegraphics,
+ classes,mclasses,mseforms,mseguiglob,msegui,mseevent,msegraphutils,msegraphics,
  msedesignintf,mseclasses,msemenuwidgets,msemenus,msefiledialog,msedesigner,
  typinfo,componentpaletteform,msestrings,msewidgets,
  mseglob{$ifndef mse_no_db}{$ifdef FPC},msereport{$endif}{$endif},msetimer,
@@ -521,7 +521,7 @@ begin
  end
  else begin
   result.cx:= complabelleftmargin + 
-                  fowner.getcanvas.getstringwidth(component.name) +
+                  fownerwidget.getcanvas.getstringwidth(component.name) +
                    complabelrightmargin;
   if not bo1 then begin 
    result.cx:= result.cx + componentsize;
@@ -543,7 +543,7 @@ begin
   end;
   comp1:= comp1.owner;
  end;
- if tformdesignerfo(fowner).fform <> nil then begin
+ if tformdesignerfo(fownerwidget).fform <> nil then begin
   comp1:= component.owner;
   bo1:= false;
   while (comp1 <> module) and (comp1 <> nil) do begin
@@ -633,13 +633,13 @@ var
  end;
  
 begin
- with tformdesignerfo(fowner) do begin
+ with tformdesignerfo(fownerwidget) do begin
   isdatamodule:= fform = nil;
   widoff:= hidewidgetact.checked;
   compoff:= hidecompact.checked;
   toplevel:= true;
-  result:= checkcomponent(tformdesignerfo(fowner).fmodule,apos,true);
-  if result = tformdesignerfo(fowner).fmodule then begin
+  result:= checkcomponent(tformdesignerfo(fownerwidget).fmodule,apos,true);
+  if result = tformdesignerfo(fownerwidget).fmodule then begin
    result:= nil;
   end;
  end;
@@ -691,7 +691,7 @@ var
  bo1,bo2: boolean;
 begin
  result:= false;
- amodule:= tformdesignerfo(fowner.fowner).fmodule;
+ amodule:= tformdesignerfo(fowner.fownerwidget).fmodule;
  checkowned;
  inherited assign(source);
  if not result then begin
@@ -723,7 +723,7 @@ begin
    end;
    inc(po1);
   end;
-  with tformdesignerfo(fowner.fowner) do begin
+  with tformdesignerfo(fowner.fownerwidget) do begin
    if bo1 then begin
     hidewidgetact.checked:= false;
    end;
@@ -914,10 +914,10 @@ begin
       end;
       if comp2 = nil then begin
        rect1:= fowner.getcomponentrect1(tcomponent(comp1));
-       fowner.fowner.invalidaterect(rect1);
+       fowner.fownerwidget.invalidaterect(rect1);
        pt1:= rect1.pos;
        addpoint1(rect1.pos,dist);
-       with tformdesignerfo(fowner.fowner) do begin
+       with tformdesignerfo(fowner.fownerwidget) do begin
         rect2:= compplacementrect;
         if form <> nil then begin      
          shiftinrect(rect1,rect2);
@@ -933,7 +933,7 @@ begin
        end;
        setcomponentpos(comp1,addpoint(getcomponentpos(comp1),
                                               subpoint(rect1.pos,pt1)));
-       fowner.fowner.invalidaterect(rect1);
+       fowner.fownerwidget.invalidaterect(rect1);
        result:= true;
       end;
      end;
@@ -981,7 +981,7 @@ end;
 procedure tformdesignerselections.dochanged;
 begin
  inherited;
- fowner.fowner.invalidate;
+ fowner.fownerwidget.invalidate;
 end;
 
 procedure tformdesignerselections.componentschanged;
@@ -999,7 +999,7 @@ procedure tformdesignerselections.externalcomponentchanged(
 begin
  finfovalid:= false;
  if count > 0 then begin
-  fowner.fowner.invalidate;
+  fowner.fownerwidget.invalidate;
  end;
 end;
 
@@ -1151,7 +1151,7 @@ begin
  if fxorpicactive then begin
   canvas.save;
 //  canvas.intersectcliprect(fowner.container.paintrect);
-  canvas.intersectcliprect(tformdesignerfo(fowner).gridrect);
+  canvas.intersectcliprect(tformdesignerfo(fownerwidget).gridrect);
 //  canvas.move(fowner.container.clientpos);
   case factarea of
    firsthandle..lasthandle: begin
@@ -1198,7 +1198,7 @@ begin
  if isnullpoint(dist) then begin
   exit;
  end;
- canvas:= fowner.getcanvas(org_widget);
+ canvas:= fownerwidget.getcanvas(org_widget);
  hidexorpic(canvas);
  fxorpicactive:= false;
  fselections.change;
@@ -1210,7 +1210,7 @@ procedure tdesignwindow.dobeforepaint(const canvas: tcanvas);
 begin
  hidexorpic(canvas);
  if not fclientsizevalid then begin
-  tformdesignerfo(fowner).recalcclientsize;
+  tformdesignerfo(fownerwidget).recalcclientsize;
   fclientsizevalid:= true;
   fselections.finfovalid:= false;
  end;
@@ -1220,13 +1220,13 @@ end;
 procedure tdesignwindow.adjustchildcomponentpos(var apos: pointty);
 begin
  subpoint1(apos,componentoffset);
- addpoint1(apos,tformdesignerfo(fowner).widgetrefpoint);
+ addpoint1(apos,tformdesignerfo(fownerwidget).widgetrefpoint);
 end;
 
 procedure tdesignwindow.readjustchildcomponentpos(var apos: pointty);
 begin
  addpoint1(apos,componentoffset);
- subpoint1(apos,tformdesignerfo(fowner).widgetrefpoint);
+ subpoint1(apos,tformdesignerfo(fownerwidget).widgetrefpoint);
 end;
 
 procedure tdesignwindow.doafterpaint(const canvas: tcanvas);
@@ -1286,7 +1286,7 @@ var
      rect1:= gridrect;
     end
     else begin
-     if tformdesignerfo(fowner).hidewidgetact.checked then begin
+     if tformdesignerfo(fownerwidget).hidewidgetact.checked then begin
       goto endlab;
      end;
      rect1:= twidget(component).widgetrect;
@@ -1368,13 +1368,13 @@ begin
   fcompoffsbefore:= offs;
   fselections.finfovalid:= false;
  end;
- gridrect:= tformdesignerfo(fowner).gridrect;
- with tformdesignerfo(fowner) do begin
+ gridrect:= tformdesignerfo(fownerwidget).gridrect;
+ with tformdesignerfo(fownerwidget) do begin
   if fmodule <> nil then begin
-   canvas.intersectcliprect(tformdesignerfo(fowner).gridrect);
+   canvas.intersectcliprect(tformdesignerfo(fownerwidget).gridrect);
    if not hidecompact.checked then begin
     level:= 0;
-    drawcomponent(tformdesignerfo(fowner).fmodule);
+    drawcomponent(tformdesignerfo(fownerwidget).fmodule);
    end;
    if form <> nil then begin
     drawgrid(canvas);
@@ -1419,7 +1419,7 @@ function tdesignwindow.componentscrollsize: sizety;
  
 begin
  result:= nullsize;
- check(tformdesignerfo(fowner).fmodule,nullpoint);
+ check(tformdesignerfo(fownerwidget).fmodule,nullpoint);
  inc(result.cx,handlesize);
  inc(result.cy,handlesize);
 end;
@@ -1431,9 +1431,9 @@ var
 begin
  comp1:= acomponent.owner;
  if (comp1 <> nil) and not 
-            issubcomponent(tformdesignerfo(fowner).fmodule,comp1) then begin
+            issubcomponent(tformdesignerfo(fownerwidget).fmodule,comp1) then begin
  {$ifdef FPC}{$warnings off}{$endif}
-  with tcomponentcracker(comp1) do begin
+  with tcomponent1(comp1) do begin
  {$ifdef FPC}{$warnings on}{$endif}
    comps:= fcomponents;
    fcomponents:= nil; //do not propagate freenotifiaction to children
@@ -1688,7 +1688,7 @@ begin
      end;
      key_escape: begin
       if not (factarea in [ar_none,ar_component]) then begin
-       hidexorpic(fowner.container.getcanvas(org_widget));
+       hidexorpic(fownerwidget.container.getcanvas(org_widget));
        fxorpicactive:= false;
        factarea:= ar_none;
       end
@@ -1709,7 +1709,7 @@ begin
            comp1:= twidget(comp1).parentwidget;
           until (comp1 = nil) or (ws_iswidget in twidget(comp1).widgetstate);
           actareabefore:= factarea;
-          if (comp1 <> nil) and (comp1 <> fowner) then begin
+          if (comp1 <> nil) and (comp1 <> fownerwidget) then begin
            if fselections.count > 1 then begin
             selectparentwidget(twidget(comp1));
            end
@@ -1760,7 +1760,7 @@ begin
        fselections.move(po1);
        if fselections.count > 0 then begin
         fselections.updateinfos;
-        tformdesignerfo(fowner).componentmoving(
+        tformdesignerfo(fownerwidget).componentmoving(
              rectcenter(fselections.itempo(0)^.handles[ht_topleft]));
        end;
       end
@@ -1769,12 +1769,12 @@ begin
        if fselections.count > 0 then begin
         fselections.updateinfos;
         with fselections.itempo(0)^.handles[ht_bottomright] do begin
-         tformdesignerfo(fowner).componentmoving(
+         tformdesignerfo(fownerwidget).componentmoving(
                              makepoint(x+cx div 2 + 1,y+cy div 2 +1));
         end;
        end;
       end;
-      fowner.invalidate;
+      fownerwidget.invalidate;
       clientsizechanged;
      end;
     end;
@@ -1834,7 +1834,7 @@ var
  selectcomp: tcomponent;
  comp1: tcomponent;
 begin
- with tformdesignerfo(fowner),popupme,menu do begin
+ with tformdesignerfo(fownerwidget),popupme,menu do begin
   selectcomp:= nil;
   if fselections.count = 1 then begin
    selectcomp:= fselections[0];
@@ -1854,7 +1854,8 @@ begin
            not fowner.checkdescendent(twidget(fselections.items[0]))
            );
   }
-  bo1:= iswidgetcomp(selectcomp) and fowner.checkdescendent(twidget(selectcomp));
+  bo1:= iswidgetcomp(selectcomp) and 
+                    fownerwidget.checkdescendent(twidget(selectcomp));
   itembyname('insertsub').enabled:= bo1 or (selectcomp = module) or
                                                isdatasubmodule(selectcomp);
                       
@@ -1921,7 +1922,7 @@ begin
     end;
    end;
   end;
-  show(fowner,info);
+  show(fownerwidget,info);
   item1.submenu.clear; 
  end;
 end;
@@ -1931,7 +1932,7 @@ var
  widgetinfo: widgetatposinfoty;
 begin
  result:= nil;
- if pointinrect(apos,tformdesignerfo(fowner).gridrect) then begin
+ if pointinrect(apos,tformdesignerfo(fownerwidget).gridrect) then begin
   fillchar(widgetinfo,sizeof(widgetinfo),0);
   with widgetinfo do begin
    pos:= subpoint(apos,form.rootpos);
@@ -2053,7 +2054,7 @@ begin
  checkmousewidget(info.mouse,capture);
  with info.mouse do begin
   ss1:= shiftstate * shiftstatesmask;
-  isinpaintrect:= pointinrect(pos,tformdesignerfo(fowner).gridrect);
+  isinpaintrect:= pointinrect(pos,tformdesignerfo(fownerwidget).gridrect);
   posbefore:= pos;
   if eventkind in [ek_buttonpress,ek_buttonrelease] then begin
    fmousepos:= pos;
@@ -2077,7 +2078,7 @@ begin
        component:= componentatpos(pos);
        if (component = nil) then begin
         if (form <> nil) and 
-                 not tformdesignerfo(fowner).hidewidgetact.checked then begin
+                 not tformdesignerfo(fownerwidget).hidewidgetact.checked then begin
          component:= widgetatpos(pos,true);
         end
         else begin
@@ -2120,7 +2121,7 @@ begin
       fclickedcompbefore:= component;
      end
      else begin
-      fowner.capturemouse;
+      fownerwidget.capturemouse;
       include(eventstate,es_processed);
      end;
     end
@@ -2147,7 +2148,7 @@ begin
      if not (es_processed in eventstate) then begin
       if (capture = nil) or not 
              (ws1_designactive in twidget1(capture).fwidgetstate1) then begin
-       fowner.capturemouse; //capture mouse
+       fownerwidget.capturemouse; //capture mouse
       end;
       updatecursorshape(factarea);
      end
@@ -2166,7 +2167,7 @@ begin
        end;
       end;
       if component <> nil then begin
-       tformdesignerfo(fowner).placecomponent(component,pos);
+       tformdesignerfo(fownerwidget).placecomponent(component,pos);
       end;
      end
      else begin
@@ -2177,13 +2178,13 @@ begin
         fpickwidget:= widgetatpos(pos,false);
        end
        else begin
-        fpickwidget:= fowner;
+        fpickwidget:= fownerwidget;
        end;
       end;
      end;
     end;
     if (eventkind = ek_buttonrelease) and (button = mb_left) then begin
-     hidexorpic(fowner.container.getcanvas(org_widget));
+     hidexorpic(fownerwidget.container.getcanvas(org_widget));
      fxorpicactive:= false;
      case factarea of
       firsthandle..lasthandle: begin
@@ -2211,11 +2212,11 @@ begin
          end;
         end;
        end;
-       fowner.invalidate;
+       fownerwidget.invalidate;
       end;
       ar_componentmove: begin
        if fselections.move(griddelta) then begin
-        fowner.invalidate; //redraw handles
+        fownerwidget.invalidate; //redraw handles
         clientsizechanged;
        end;
       end;
@@ -2249,7 +2250,7 @@ begin
            end;
           end;
          end;
-         if fpickwidget <> fowner then begin
+         if fpickwidget <> fownerwidget then begin
           rect1.pos:= subpoint(fpickpos,fpickwidget.rootpos);
           for int1:= 0 to fpickwidget.widgetcount -1 do begin
            widget1:= fpickwidget[int1];
@@ -2270,12 +2271,12 @@ begin
       factcompindex:= -1;
       updateclickedcomponent; //update objectionspector componentname
      end;
-     fowner.releasemouse;
+     fownerwidget.releasemouse;
     end;
  
     if not (es_processed in eventstate) then begin
      if (eventkind = ek_mousemove) or (eventkind = ek_mousepark) then begin
-      hidexorpic(fowner.getcanvas(org_widget));
+      hidexorpic(fownerwidget.getcanvas(org_widget));
       bo1:= true;
       case factarea of
        firsthandle..lasthandle: begin
@@ -2306,7 +2307,7 @@ begin
        if factarea <> ar_component then begin
         fselections.beforepaintmoving; //resets canvas
        end;
-       showxorpic(fowner.container.getcanvas(org_widget));
+       showxorpic(fownerwidget.container.getcanvas(org_widget));
       end;
      end;
     end;
@@ -2316,7 +2317,7 @@ begin
   if (eventkind in mouseposevents) and (fselections.count = 1) then begin
    fselections.updateinfos;
    po1:= fselections.itempo(0);
-   if po1^.selectedinfo.instance <> tformdesignerfo(fowner).fmodule then begin
+   if po1^.selectedinfo.instance <> tformdesignerfo(fownerwidget).fmodule then begin
     bo1:= true;
     case factarea of
      ar_component: begin
@@ -2380,7 +2381,7 @@ begin
      end;
     end;
     if bo1 then begin
-     tformdesignerfo(fowner).componentmoving(pt1);
+     tformdesignerfo(fownerwidget).componentmoving(pt1);
     end;
    end;
   end;
@@ -2393,8 +2394,8 @@ begin
  try
   fselections.beginupdate;   
   if fselections.assign(aselection) then begin
-   tformdesignerfo(fowner).componentselected(fselections);
-   fowner.invalidate;
+   tformdesignerfo(fownerwidget).componentselected(fselections);
+   fownerwidget.invalidate;
   end;
  finally
   fselections.decupdate;
@@ -2404,16 +2405,16 @@ end;
 procedure tdesignwindow.poschanged;
 begin
  inherited;
- if tformdesignerfo(fowner).fmodulesetting = 0 then begin
+ if tformdesignerfo(fownerwidget).fmodulesetting = 0 then begin
   doModified;
  end;
 end;
 
 function tdesignwindow.snaptogriddelta(const pos: pointty): pointty;
 begin
- if tformdesignerfo(fowner).snaptogrid then begin
-  result.x:= roundint(pos.x,tformdesignerfo(fowner).gridsizex);
-  result.y:= roundint(pos.y,tformdesignerfo(fowner).gridsizey);
+ if tformdesignerfo(fownerwidget).snaptogrid then begin
+  result.x:= roundint(pos.x,tformdesignerfo(fownerwidget).gridsizex);
+  result.y:= roundint(pos.y,tformdesignerfo(fownerwidget).gridsizey);
  end
  else begin
   result:= pos;
@@ -2422,9 +2423,9 @@ end;
 
 function tdesignwindow.dosnaptogrid(const pos: pointty): pointty;
 begin
- if tformdesignerfo(fowner).snaptogrid then begin
-  result:= snaptogriddelta(subpoint(pos,tformdesignerfo(fowner).gridoffset));
-  addpoint1(result,tformdesignerfo(fowner).gridoffset);
+ if tformdesignerfo(fownerwidget).snaptogrid then begin
+  result:= snaptogriddelta(subpoint(pos,tformdesignerfo(fownerwidget).gridoffset));
+  addpoint1(result,tformdesignerfo(fownerwidget).gridoffset);
  end
  else begin
   result:= pos;
@@ -2440,11 +2441,11 @@ var
  points1: pointarty;
  int1,gridcx,gridcy: integer;
 begin
- if tformdesignerfo(fowner).showgrid then begin
-  rect2:= tformdesignerfo(fowner).gridrect;
+ if tformdesignerfo(fownerwidget).showgrid then begin
+  rect2:= tformdesignerfo(fownerwidget).gridrect;
   msegraphutils.intersectrect(canvas.clipbox,rect2,rect1);
-  offset:= tformdesignerfo(fowner).gridoffset;
-  with tformdesignerfo(fowner) do begin
+  offset:= tformdesignerfo(fownerwidget).gridoffset;
+  with tformdesignerfo(fownerwidget) do begin
    gridcx:= gridsizex;
    gridcy:= gridsizey;
   end;
@@ -2483,12 +2484,12 @@ end;
 
 function tdesignwindow.form: twidget;
 begin
- result:= tformdesignerfo(fowner).fform;
+ result:= tformdesignerfo(fownerwidget).fform;
 end;
 
 function tdesignwindow.module: tmsecomponent;
 begin
- result:= tformdesignerfo(fowner).fmodule;
+ result:= tformdesignerfo(fownerwidget).fmodule;
 end;
 
 procedure tdesignwindow.selectcomponent(const component: tcomponent;
@@ -2572,7 +2573,7 @@ end;
 procedure tdesignwindow.updateclickedcomponent;
 begin           
  objectinspectorfo.clickedcomponentchanged(
-                     tformdesignerfo(fowner).clickedcomponent);
+                     tformdesignerfo(fownerwidget).clickedcomponent);
 end;
 
 procedure tdesignwindow.beginselect;
@@ -2592,8 +2593,8 @@ end;
 
 procedure tdesignwindow.domodified;
 begin
- fowner.invalidate;
- fdesigner.componentmodified(tformdesignerfo(fowner).fmodule);
+ fownerwidget.invalidate;
+ fdesigner.componentmodified(tformdesignerfo(fownerwidget).fmodule);
 end;
 
 procedure tdesignwindow.methodcreated(const adesigner: idesigner;
@@ -2680,7 +2681,7 @@ procedure tdesignwindow.componentnamechanging(const adesigner: idesigner;
                      const amodule: tmsecomponent; const aitem: tcomponent;
                      const newname: string);
 begin
- if (amodule = tformdesignerfo(fowner).fmodule) and
+ if (amodule = tformdesignerfo(fownerwidget).fmodule) and
                                   not (aitem is twidget) then begin
   fclientsizevalid:= false;
  end;
@@ -2702,7 +2703,7 @@ procedure tdesignwindow.setshowgrid(const avalue: boolean);
 begin
  if fshowgrid <> avalue then begin
   fshowgrid:= avalue;
-  fowner.invalidate;
+  fownerwidget.invalidate;
  end;
 end;
 
@@ -2710,7 +2711,7 @@ procedure tdesignwindow.setgridsizex(const avalue: integer);
 begin
  if fgridsizex <> avalue then begin
   fgridsizex:= avalue;
-  fowner.invalidate;
+  fownerwidget.invalidate;
  end;
 end;
 
@@ -2718,7 +2719,7 @@ procedure tdesignwindow.setgridsizey(const avalue: integer);
 begin
  if fgridsizey <> avalue then begin
   fgridsizey:= avalue;
-  fowner.invalidate;
+  fownerwidget.invalidate;
  end;
 end;
 
@@ -2728,7 +2729,7 @@ begin
  snaptogrid:= projectoptions.e.snaptogrid;
  gridsizex:= projectoptions.e.gridsizex;
  gridsizey:= projectoptions.e.gridsizey;
- fowner.invalidate;
+ fownerwidget.invalidate;
 end;
 
 procedure tdesignwindow.beforemake(const adesigner: idesigner;
@@ -2752,7 +2753,7 @@ end;
 function tdesignwindow.componentoffset: pointty;
 begin
 // result:= tformdesignerfo(fowner).gridrect.pos;
- with tformdesignerfo(fowner) do begin
+ with tformdesignerfo(fownerwidget) do begin
   result:= gridoffset;
  end;
 end;
@@ -3072,7 +3073,7 @@ begin
   try
    rea1:= 1.0;
    if component is tmsecomponent then begin
-    with tformdesignerfo(fowner).fmoduleintf^ do begin
+    with tformdesignerfo(fownerwidget).fmoduleintf^ do begin
      if assigned(getscale) then begin
       rea1:= getscale(module);
      end;

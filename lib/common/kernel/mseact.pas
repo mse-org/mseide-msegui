@@ -19,7 +19,7 @@ unit mseact;
 interface
 
 uses
- {$ifdef FPC}classes{$else}Classes{$endif},mseclasses,mserichstring,
+ classes,mclasses,mseclasses,mserichstring,
  msetypes,mseglob,mseapplication, mseevent,msestat,msestatfile,msestrings,
  typinfo,msegraphutils
  {$ifdef mse_with_ifi},mseifiglob,mseificomp,mseificompglob{$endif};

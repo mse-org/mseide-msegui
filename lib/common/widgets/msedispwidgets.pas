@@ -18,7 +18,8 @@ unit msedispwidgets;
 
 interface
 uses
- classes,msegui,mseguiglob,msewidgets,msegraphics,msedrawtext,msegraphutils,
+ classes,mclasses,msegui,mseguiglob,msewidgets,msegraphics,
+ msedrawtext,msegraphutils,
  msemenus,msetypes,msestrings,mseformatstr,mseevent,mseclasses,mserichstring
  {$ifdef mse_with_ifi}
   ,mseificomp,mseifiglob,mseificompglob,typinfo,msedatalist

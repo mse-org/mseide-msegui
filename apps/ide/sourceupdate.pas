@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2010 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2013 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@ unit sourceupdate;
 
 interface
 uses
- msedesigner,mseclasses,msedesignintf,classes,typinfo,
+ msedesigner,mseclasses,msedesignintf,classes,mclasses,typinfo,
  msetypes,msestrings,pascaldesignparser,cdesignparser,mseglob,
  msestream,mseparser,msesyntaxedit,mselist,msehash,msedesignparser;
 

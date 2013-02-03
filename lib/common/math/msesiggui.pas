@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2011 by Martin Schreiber
+{ MSEgui Copyright (c) 2011-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -11,7 +11,8 @@ unit msesiggui;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- classes,msegraphedits,msesignal,mseguiglob,mseevent,msechartedit,msetypes,
+ classes,mclasses,msegraphedits,msesignal,mseguiglob,mseevent,msechartedit,
+ msetypes,
  msechart,mseclasses,msefft,msewidgets,msegraphics,msegraphutils,msedial,
  msesplitter,msegui,msestat,msestatfile,msestrings,msestockobjects,
  msemenus,mseact,msedataedits,msereal,mseedit;
@@ -1893,7 +1894,7 @@ procedure tenvelopechartedit.drawcrosshaircursor(const canvas: tcanvas;
   co1: complexty;
   pt1: pointty;
  begin
-  co1:= tracecoordxy(center);
+  co1:= tracecoordxy(0,center);
   if (sero_exp in sourceoptions) xor (sero_exp in destoptions) then begin
    if (sero_exp in sourceoptions) then begin
     tsigenvelope1(fenvelope.fenvelope).exptolin(co1.im);
@@ -1902,7 +1903,7 @@ procedure tenvelopechartedit.drawcrosshaircursor(const canvas: tcanvas;
     tsigenvelope1(fenvelope.fenvelope).lintoexp(co1.im);
    end;
   end;
-  pt1:= dest.chartcoordxy(co1);
+  pt1:= dest.chartcoordxy(0,co1);
   canvas.drawvect(subpoint(
      makepoint(dest.paintparentpos.x-paintparentpos.x,pt1.y),clientpos),
                                           gd_right,dest.paintsize.cx);

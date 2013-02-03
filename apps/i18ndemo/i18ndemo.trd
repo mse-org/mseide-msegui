@@ -14,7 +14,7 @@ mainfo,vaNull,F,,,,
 "mainfo,container.frame.dummy",vaInt8,F,,0,,
 "mainfo,optionswindow",vaSet,F,,[wo_groupleader],,
 "mainfo,options",vaSet,F,,"[fo_main,fo_terminateonclose,fo_autoreadstat,fo_autowritestat,fo_savepos,fo_savestate]",,
-"mainfo,onloaded",vaIdent,F,,formonloaded,,
+"mainfo,oneventloopstart",vaIdent,F,,formonloaded
 "mainfo,moduleclassname",vaString,T,,tmseform,tmseform,tmseform
 "mainfo,disp1",vaNull,F,,,,
 "mainfo,disp1,bounds_x",vaInt8,F,,16,,
@@ -72,7 +72,7 @@ mainfo,vaNull,F,,,,
 "mainfo,francais,bounds_cx",vaInt8,F,,114,,
 "mainfo,francais,bounds_cy",vaInt8,F,,30,,
 "mainfo,francais,taborder",vaInt8,F,,2,,
-"mainfo,francais,caption",vaString,T,,Français,Français,Français
+"mainfo,francais,caption",vaWString,T,,Français,Français,Français
 "mainfo,francais,font.height",vaInt8,F,,14,14,18
 "mainfo,francais,font.name",vaString,T,,stf_default,stf_default,stf_default
 "mainfo,francais,font.dummy",vaInt8,F,,0,,

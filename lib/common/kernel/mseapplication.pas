@@ -23,7 +23,7 @@ unit mseapplication;
 {$endif}
 interface
 uses
- classes,mseclasses,mseevent,mseglob,sysutils,msetypes,mselist,
+ classes,mclasses,mseclasses,mseevent,mseglob,sysutils,msetypes,mselist,
      msethread,msesystypes,msesys,{msethreadcomp,}msestrings
      {$ifdef mse_with_ifi},mseifiglob{$endif};
  

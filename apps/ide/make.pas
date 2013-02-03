@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2012 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2013 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -42,7 +42,7 @@ uses
  sourceform,mseeditglob,msefileutils,msesys,
  msesysutils,msegraphics,messageform,msedesignintf,msedesigner,
  mseprocmonitor,mseevent,
- msetypes,classes,mseclasses,mseapplication,msestream,
+ msetypes,classes,mclasses,mseclasses,mseapplication,msestream,
  msegui,actionsmodule;
  
 type

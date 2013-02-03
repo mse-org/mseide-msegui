@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -13,7 +13,7 @@ unit msepropertyeditors;
 
 interface
 uses
- Classes,TypInfo,msedesignintf,msetypes,msestrings,sysutils,
+ classes,mclasses,TypInfo,msedesignintf,msetypes,msestrings,sysutils,
  msearrayutils,msedatalist,
  msemenus,mseevent,msegui,mseglob,mseguiglob,
  mseclasses,mseforms,msegraphics,mserichstring;
@@ -4255,6 +4255,7 @@ begin
  if imagefilepropedit(mstr1,format1) = mr_ok then begin
   bmp:= tmaskedbitmap.create(false);
   try
+   bmp.options:= bmp.options + [bmo_storeorigformat];
    bmp.loadfromfile(mstr1,format1);
    for int1:= 0 to high(fprops) do begin
     bmp1:= tmaskedbitmap(getpointervalue(int1));

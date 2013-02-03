@@ -11,7 +11,7 @@ unit mseglob;
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
 interface
 uses 
- classes,mseerr,msetypes;
+ classes,mclasses,mseerr,msetypes;
 const
  invalidaxis = -bigint;
  defaultbase64linelength = 76; //todo: find better place

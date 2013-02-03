@@ -1,8 +1,18 @@
+{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
+
+    See the file COPYING.MSE, included in this distribution,
+    for details about the copyright.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+}
 unit msedbdispwidgets;
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
 interface
 uses
- db,classes,msesimplewidgets,msedb,msetypes,mseclasses,mseguiglob,mseglob,
+ mdb,classes,mclasses,msesimplewidgets,msedb,msetypes,mseclasses,mseguiglob,
+ mseglob,
  msedispwidgets,msestrings,mselookupbuffer,msegui,msemenus,mseevent,
  msebarcode;
  

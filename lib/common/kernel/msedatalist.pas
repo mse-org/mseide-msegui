@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -14,7 +14,7 @@ unit msedatalist;
 interface
 
 uses
- sysutils,classes,msestrings,typinfo,msereal,msetypes,msestream,
+ sysutils,classes,mclasses,msestrings,typinfo,msereal,msetypes,msestream,
  mseclasses,mselist,mseglob,msearrayutils;
 
 type

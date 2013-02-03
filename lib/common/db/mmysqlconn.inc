@@ -28,7 +28,7 @@
 interface
 
 uses
-  Classes, SysUtils,msqldb,db,dynlibs,msestrings,msedb,
+  classes,mclasses,SysUtils,msqldb,mdb,dynlibs,msestrings,msedb,
 {$IfDef mysql50}
   mysql50dyn;
   {$DEFINE TConnectionName:=TMySQL50Connection}

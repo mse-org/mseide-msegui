@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2008 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2013 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@ interface
 uses
  msegui,mseclasses,mseforms,msetabs,msetextedit,msewidgetgrid,msegrids,
  msethreadcomp,findinfileform,msesimplewidgets,msedispwidgets,msestrings,
- classes,msestringcontainer;
+ classes,mclasses,msestringcontainer;
 
 type 
 

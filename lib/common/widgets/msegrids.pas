@@ -18,7 +18,7 @@ unit msegrids;
 
 interface
 uses
- {$ifdef FPC}classes,sysutils{$else}Classes,SysUtils{$endif},mseclasses,msegui,
+ classes,mclasses,sysutils,mseclasses,msegui,
  msegraphics,msetypes,msestrings,msegraphutils,msebitmap,
  msescrollbar,msearrayprops,mseglob,mseguiglob,typinfo,msearrayutils,
  msedatalist,msedrawtext,msewidgets,mseevent,mseinplaceedit,mseeditglob,
@@ -476,7 +476,9 @@ type
    frowcoloroffsetselect: integer;
    ffontactivenum: integer;
    ffontfocusednum: integer;
-   function getcolindex: integer;
+   fwidthmax: integer;
+   fwidthmin: integer;
+  function getcolindex: integer;
    procedure setfocusrectdist(const avalue: integer);
    procedure updatepropwidth;
    procedure setrowcoloroffset(const avalue: integer);
@@ -597,8 +599,6 @@ type
 
  tdatacol = class(tcol)
   private
-   fwidthmax: integer;
-   fwidthmin: integer;
    foncellevent: celleventty;
    fonshowhint: showcolhinteventty;
    fselectedrow: integer; //-1 none, -2 more than one
@@ -13356,23 +13356,47 @@ begin
      end
      else begin
       int1:= offset.x;
-      if co_nohscroll in col1.foptions then begin
-       if col1.fend + int1 > fdatarect.x + fdatarect.cx then begin
-        int1:= fdatarect.x + fdatarect.cx - col1.fend;
+      with col1 do begin
+       if co_nohscroll in foptions then begin
+        if fend + int1 > fdatarect.x + fdatarect.cx then begin
+         int1:= fdatarect.x + fdatarect.cx - fend;
+        end;
        end;
-      end;
-      if co_fill in col1.options then begin
-       for int2:= col1.index to datacols.count - 1 do begin
-        with datacols[int2] do begin
-         if options * [co_fixwidth,co_fill,co_invisible] = [] then begin
-          width:= width - int1;
-          int1:= 0;
-          break;
+       if co_fill in options then begin
+        if (int1 < 0) then begin
+         if width + int1 < fwidthmin then begin
+          int1:= fwidthmin - width;
+         end;
+        end
+        else begin
+         if (fwidthmax <> 0) and 
+                         (width + int1 > fwidthmax) then begin
+          int1:= fwidthmax - width;
+         end;
+        end;
+        for int2:= index to datacols.count - 1 do begin
+         with datacols[int2] do begin
+          if options * [co_fixwidth,co_fill,co_invisible] = [] then begin
+           width:= width - int1;
+           int1:= 0;
+           break;
+          end;
+         end;
+        end;
+        if int1 <> 0 then begin
+         for int2:= index-1 downto 0 do begin
+          with datacols[int2] do begin
+           if options * [co_fixwidth,co_fill,co_invisible] = [] then begin
+            width:= width - int1;
+            int1:= 0;
+            break;
+           end;
+          end;
          end;
         end;
        end;
+       width:= width + int1;
       end;
-      col1.width:= col1.width + int1;
      end;
     end;
    end;
@@ -15952,19 +15976,22 @@ begin
     setlength(ar4,high(ar4)); //remove terminator
    end;
    int5:= row;
+   if int5 < 0 then begin
+    int5:= 0;
+   end;
    beginupdate;
    try
     datacols.clearselection;
-    int1:= row;
+//    int1:= row;
     bo2:= og_rowinserting in optionsgrid;
     if bo2 then begin
-     insertrow(row,length(ar4));
+     insertrow(int5,length(ar4));
     end;
-    if high(ar4) >= rowcount - int1 then begin
-     setlength(ar4,rowcount-int1);
+    if high(ar4) >= rowcount - int5 then begin
+     setlength(ar4,rowcount-int5);
     end;
-    for int2:= int1 to int1 + high(ar4) do begin
-    end;
+//    for int2:= int1 to int1 + high(ar4) do begin 
+//    end;
     for int1:= 0 to high(ar4) do begin
      if bo2 then begin
       datacols.selected[makegridcoord(invalidaxis,int5)]:= true;

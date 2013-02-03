@@ -13,7 +13,7 @@ unit msethreadcomp;
 
 interface
 uses
- mseclasses,msethread,classes,mseevent,msetypes,msestrings,mseapplication;
+ mseclasses,msethread,classes,mclasses,mseevent,msetypes,msestrings,mseapplication;
 
 type
  tthreadcomp = class;

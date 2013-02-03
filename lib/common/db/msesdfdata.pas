@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2009 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -11,7 +11,7 @@ unit msesdfdata;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- classes,db,sdfdata,msedb,msestrings,mseapplication;
+ classes,mclasses,mdb,msdfdata,msedb,msestrings,mseapplication;
 type
  tmsefixedformatdataset = class(tfixedformatdataset,imselocate,
                              idscontroller,igetdscontroller,iactivatorclient)

@@ -6,7 +6,7 @@ interface
 implementation
 uses
  msedesignintf,mybutton;
-
+ 
 procedure register;
 begin
  registercomponents('My',[tmybutton]);

@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2012 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2013 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -21,7 +21,8 @@ unit sourcepage;
 interface
 
 uses
- msetextedit,msewidgetgrid,mseforms,classes,msegdbutils,msegraphedits,mseevent,
+ msetextedit,msewidgetgrid,mseforms,classes,mclasses,msegdbutils,
+ msegraphedits,mseevent,
  msehash,msebitmap,msetabs,msetypes,msedataedits,
  mseglob,mseguiglob,msegui,msesyntaxedit,mseeditglob,
  mseinplaceedit,msedispwidgets,msegraphutils,msegrids,breakpointsform,

@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2006-2012 by Martin Schreiber
+{ MSEgui Copyright (c) 2006-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -12,8 +12,8 @@ unit msegraphicstream;
 
 interface
 uses
- sysutils,classes,msebitmap,msegraphics{$ifdef FPC},fpimage{$endif},msestrings,
- msetypes;
+ sysutils,classes,mclasses,msebitmap,msegraphics{$ifdef FPC},fpimage{$endif},
+ msestrings,msetypes;
 
 const
  graphicformatdelimiter = ';'; 

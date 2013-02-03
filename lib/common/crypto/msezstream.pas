@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2012 by Martin Schreiber
+{ MSEgui Copyright (c) 2012-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -11,7 +11,7 @@ unit msezstream;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- classes,msezlib,msecryptohandler,msestream,mseclasses;
+ classes,mclasses,msezlib,msecryptohandler,msestream,mseclasses;
 
 const
  defaultzstreambuffersize = 16384;

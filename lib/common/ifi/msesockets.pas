@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2007-2011 by Martin Schreiber
+{ MSEgui Copyright (c) 2007-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -13,7 +13,7 @@ unit msesockets;
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
 interface
 uses
- classes,mseglob,mseclasses,msesystypes,msesys,msestrings,msepipestream,
+ classes,mclasses,mseglob,mseclasses,msesystypes,msesys,msestrings,msepipestream,
  mseapplication,msethread,mseevent,msecryptio,msetypes;
 
 const

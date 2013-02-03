@@ -14,8 +14,8 @@ unit msescrollbar;
 interface
 
 uses
- mseguiglob,msegraphics,msegraphutils,msetimer,mseevent,mseshapes,classes,
- msetypes,msegui,mseclasses,mseglob;
+ mseguiglob,msegraphics,msegraphutils,msetimer,mseevent,mseshapes,
+ classes,mclasses,msetypes,msegui,mseclasses,mseglob;
 
 const
  defaultscrollbarwidth = 15;

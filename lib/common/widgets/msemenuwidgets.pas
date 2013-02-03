@@ -13,7 +13,7 @@ unit msemenuwidgets;
 
 interface
 uses
- classes,msewidgets,mseshapes,msemenus,msegraphutils,msegraphics,msetypes,
+ classes,mclasses,msewidgets,mseshapes,msemenus,msegraphutils,msegraphics,msetypes,
  msegui,mseglob,mseguiglob,mseevent,mseclasses;
 
 const

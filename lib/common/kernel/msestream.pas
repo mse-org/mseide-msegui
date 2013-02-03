@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -23,7 +23,7 @@ unit msestream;
 // {$WARN SYMBOL_PLATFORM off}
 interface
 uses 
- Classes,Sysutils,msestrings,msetypes,msethread,msesystypes,msesys,msereal,
+ classes,mclasses,sysutils,msestrings,msetypes,msethread,msesystypes,msesys,msereal,
  mseevent,mseclasses,mseglob{,mseformatstr};
 
 const

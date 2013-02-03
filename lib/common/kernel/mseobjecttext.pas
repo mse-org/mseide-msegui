@@ -9,14 +9,14 @@
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-    Modified 2010 by Martin Schreiber
+    Modified 2010-2013 by Martin Schreiber
 }
 unit mseobjecttext;
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- classes;
+ classes,mclasses;
 
 procedure objectbinarytotextmse(input, output: tstream);
 procedure objecttexttobinarymse(input, output: tstream);

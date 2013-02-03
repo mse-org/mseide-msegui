@@ -13,6 +13,7 @@ unit msepopupcalendar;
 interface
 uses
  msegui,mseclasses,mseforms,msegraphutils,msegrids,msedispwidgets,classes,
+ mclasses,
  msegraphics,mseeditglob,msetypes,msedropdownlist,msetimer,msesimplewidgets,
  mseinplaceedit,mseevent,mseguiglob,msegridsglob,msestrings;
  

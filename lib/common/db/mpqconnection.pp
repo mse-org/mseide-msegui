@@ -1,6 +1,5 @@
 {
     Copyright (c) 2004 by Joost van der Sluis
-    Modified 2006-2010 by Martin Schreiber
     
     See the file COPYING.FPC, included in this distribution,
     for details about the copyright.
@@ -8,6 +7,8 @@
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+  Modified 2006-2013 by Martin Schreiber
 
  **********************************************************************}
  
@@ -24,7 +25,7 @@ unit mpqconnection;
 interface
 
 uses
-  Classes, SysUtils, msqldb, db, dbconst,msedbevents,msestrings,msedb,
+  classes,mclasses,SysUtils, msqldb, mdb, dbconst,msedbevents,msestrings,msedb,
 {$IfDef LinkDynamically}
   postgres3dyn;
 {$Else}
@@ -236,6 +237,8 @@ const
  oid_time_ar      = 1183;
  oid_numeric      = 1700;
  oid_numeric_ar   = 1231;
+ oid_uuid         = 2950;
+ oid_uuid_ar      = 2951;
  pg_diag_sqlstate = 'C';
  
  inv_read =  $40000;
@@ -245,12 +248,9 @@ const
  varhdrsz = 4;
  nbase = 10000; //base for numeric digits
  maxprecision = 18;
- 
-type 
-  TDatabasecracker = class(TComponent)
-  private
-    FConnected : Boolean;
-  end;
+
+type
+ tdatabase1 = class(tdatabase);
 
 { TPQCursor }
 
@@ -435,14 +435,10 @@ begin
  if pqparameterstatus <> nil then begin
   FIntegerDatetimes := pqparameterstatus(FHandle,'integer_datetimes') = 'on';
  end;
-{$warnings off}
- with tdatabasecracker(self) do begin
-{$warnings on}
-  bo1:= fconnected;
-  fconnected:= true;
-  feventcontroller.connect;
-  fconnected:= bo1;
- end;
+ bo1:= fconnected;
+ fconnected:= true;
+ feventcontroller.connect;
+ fconnected:= bo1;
 end;
 
 procedure TPQConnection.DoInternalDisconnect;
@@ -587,6 +583,14 @@ begin
    isarray:= true;
    vartype:= varcurrency;
   end;
+  oid_uuid: begin
+   result:= ftguid;
+  end;
+  oid_uuid_ar: begin
+   result:= ftguid;
+   isarray:= true;
+   vartype:= varstring;
+  end;
   Oid_Unknown: begin
    Result:= ftUnknown;
   end;
@@ -655,7 +659,7 @@ const TypeStrings : array[TFieldType] of string =
       'Unknown',  //ftVariant
       'Unknown',  //ftInterface
       'Unknown',  //ftIDispatch
-      'Unknown',  //ftGuid
+      'uuid',     //ftGuid
       'Unknown',  //ftTimeStamp
       'Unknown'   //ftFMTBcd
       {$ifdef mse_FPC_2_2}
@@ -1214,6 +1218,18 @@ var
        move(wbo1,buffer^,sizeof(wbo1));
        inc(buffer,sizeof(wbo1));
       end;
+      inc(currbuff,asize);
+     end;
+     ftguid: begin
+      with pguid(currbuff)^ do begin
+       pguid(buffer)^.time_low:= beton(time_low);
+       pguid(buffer)^.time_mid:= beton(time_mid);
+       pguid(buffer)^.time_hi_and_version:= beton(time_hi_and_version);
+       pguid(buffer)^.clock_seq_hi_and_reserved:= clock_seq_hi_and_reserved;
+       pguid(buffer)^.clock_seq_low:= clock_seq_low;
+       pguid(buffer)^.node:= node;
+      end;
+      inc(buffer,sizeof(tguid));
       inc(currbuff,asize);
      end;
      else begin

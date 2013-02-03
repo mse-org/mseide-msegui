@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -19,8 +19,8 @@ interface
 uses
  msewidgets,msemenus,msegraphics,mseapplication,msegui,msegraphutils,mseevent,
  msetypes,msestrings,mseglob,mseguiglob,mseguiintf,
- msemenuwidgets,msestat,msestatfile,mseclasses,Classes,msedock,msesimplewidgets,
- msebitmap,typinfo
+ msemenuwidgets,msestat,msestatfile,mseclasses,classes,mclasses,msedock,
+ msesimplewidgets,msebitmap,typinfo
  {$ifdef mse_with_ifi},mseifiglob,mseificompglob,mseificomp{$endif};
 
 {$if defined(FPC) and (fpc_fullversion >= 020403)}
@@ -580,6 +580,7 @@ type
  twidget1 = class(twidget);
  twindow1 = class(twindow);
  tcustomframe1 = class(tcustomframe);
+ treader1 = class(treader);
 
 
 function createmseform(const aclass: tclass; 
@@ -929,29 +930,29 @@ begin
  include(fscrollbox.fwidgetstate,ws_loadlock);
  bo1:= false;
 {$warnings off}
- with treadercracker(reader) do begin
+ with treader1(reader) do begin
 {$warnings on}
   if floaded <> nil then begin
    if floaded.IndexOf(fscrollbox) < 0 then begin
     floaded.add(fscrollbox);
 {$warnings off}
-    tcomponentcracker(fscrollbox).FComponentState:=
-     tcomponentcracker(fscrollbox).FComponentState + [csloading];
+    tcomponent1(fscrollbox).FComponentState:=
+     tcomponent1(fscrollbox).FComponentState + [csloading];
 {$warnings on}
    end;
   end;
   bo1:= not (csreading in fscrollbox.componentstate);
   if bo1 then begin
 {$warnings off}
-   tcomponentcracker(fscrollbox).FComponentState:=
-             tcomponentcracker(fscrollbox).FComponentState + [csreading];
+   tcomponent1(fscrollbox).FComponentState:=
+             tcomponent1(fscrollbox).FComponentState + [csreading];
 {$warnings on}
   end;
  end;
  inherited;
  if bo1 then begin
 {$warnings off}
-  exclude(tcomponentcracker(fscrollbox).FComponentState,csreading);
+  exclude(tcomponent1(fscrollbox).FComponentState,csreading);
 {$warnings on}
  end;
  if not (acs_dooncreatecalled in factstate) then begin

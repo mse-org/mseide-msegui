@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -11,7 +11,7 @@ unit msemysql50conn;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- db,classes,mmysql50conn,msestrings,msedb,msqldb,msedatabase;
+ mdb,classes,mclasses,mmysql50conn,msestrings,msedb,msqldb,msedatabase;
  
 type
  tmsemysql50connection = class(tmysql50connection,idbcontroller)

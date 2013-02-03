@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2012 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2013 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@ unit msedesigner;
 
 interface
 uses
- classes,msegraphutils,mseglob,mseguiglob,msedesignintf,
+ classes,mclasses,msegraphutils,mseglob,mseguiglob,msedesignintf,
  mseforms,mselist,msearrayutils,msebitmap,msetypes,sysutils,msehash,mseclasses,
  mseformdatatools,typinfo,msepropertyeditors,msecomponenteditors,msegraphics,
  mseapplication,msegui,msestrings,msedesignparser,msecomptree,mseevent;
@@ -98,7 +98,7 @@ type
 
  tcomponentslink = class(tcomponent)
   private
-   fowner: tcomponents;
+   fownercomps: tcomponents;
   protected
    procedure notification(acomponent: tcomponent; operation: toperation); override;
  end;
@@ -2100,7 +2100,7 @@ begin
  fowner:= aowner;
  fdesigner:= adesigner;
  fcomponent:= tcomponentslink.Create(nil);
- fcomponent.fowner:= self;
+ fcomponent.fownercomps:= self;
  inherited create(sizeof(componentinfoty));
  fstate:= fstate + [hls_needsnull,hls_needsfinalize];
 end;
@@ -5591,7 +5591,7 @@ procedure tcomponentslink.notification(acomponent: tcomponent;
   operation: toperation);
 begin
  if operation = opremove then begin
-  fowner.destroynotification(acomponent);
+  fownercomps.destroynotification(acomponent);
  end;
  inherited;
 end;

@@ -3,7 +3,6 @@
     Copyright (c) 1999-2000 by Michael Van Canneyt, member of the
     Free Pascal development team
     
-    Rewritten 2006-2012 by Martin Schreiber
     
     BufDataset implementation
 
@@ -13,6 +12,8 @@
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+  Rewritten 2006-2013 by Martin Schreiber
 
  **********************************************************************}
  
@@ -31,7 +32,8 @@ unit msebufdataset;
 interface 
 
 uses
- db,classes,variants,msetypes,msearrayprops,mseclasses,mselist,msestrings,
+ mdb,classes,mclasses,variants,msetypes,msearrayprops,mseclasses,mselist,
+ msestrings,
  msedb,msedatabase,mseglob,msearrayutils,msedatalist,msevariants,
  msestream;
   
@@ -42,8 +44,9 @@ const
  floatindexfields = [ftfloat,{ftcurrency,}ftdatetime,ftdate,fttime];
  currencyindexfields = [ftcurrency,ftbcd];
  stringindexfields = [ftstring,ftfixedchar];
+ guidindexfields = [ftguid];
  indexfieldtypes =  integerindexfields+largeintindexfields+floatindexfields+
-                    currencyindexfields+stringindexfields;
+                    currencyindexfields+stringindexfields+guidindexfields;
  dsbuffieldkinds = [fkcalculated,fklookup];
  bufferfieldkinds = [fkdata];
  
@@ -544,7 +547,7 @@ type
    property response: resolverresponsesty read fresponse write fresponse;
  end;
 
- lookupdataty = record
+ lookupdataty = record      //todo: case items?
   po: pointer;
   int: integer;
   lint: int64;
@@ -554,6 +557,7 @@ type
   boo: longbool;
   vari: variant;
   dt: tdatetime;
+  guid: tguid;
  end;
   
  getbmvalueeventty = procedure (const afield: tfield; const bm: bookmarkdataty;
@@ -708,6 +712,9 @@ type
                    aindex: integer): msestring;
    procedure setcurrentasmsestring(const afield: tfield; aindex: integer;
                    const avalue: msestring);
+   function getcurrentasguid(const afield: tfield; aindex: integer): tguid;
+   procedure setcurrentasguid(const afield: tfield; aindex: integer;
+                   const avalue: tguid);
    function getcurrentasid(const afield: tfield; aindex: integer): int64;
    procedure setcurrentasid(const afield: tfield; aindex: integer;
                    const avalue: int64);
@@ -754,6 +761,11 @@ type
    procedure setcurrentbmasmsestring(const afield: tfield;
                                      const abm: bookmarkdataty;
                    const avalue: msestring);
+   function getcurrentbmasguid(const afield: tfield;
+                                     const abm: bookmarkdataty): tguid;
+   procedure setcurrentbmasguid(const afield: tfield;
+                                     const abm: bookmarkdataty;
+                   const avalue: tguid);
    procedure docurrentassign(const po1: pointer;
                           const abasetype: tfieldtype; const df: tfield);
    procedure lookupdschanged(const sender: tmsebufdataset);
@@ -833,6 +845,8 @@ type
    procedure getbmdatetime(const afield: tfield; const bm: bookmarkdataty;
                                           var adata: lookupdataty);
    procedure getbmvariant(const afield: tfield; const bm: bookmarkdataty;
+                                          var adata: lookupdataty);
+   procedure getbmguid(const afield: tfield; const bm: bookmarkdataty;
                                           var adata: lookupdataty);
    
    function getfieldbuffer(const afield: tfield;
@@ -1174,6 +1188,8 @@ type
                   read getcurrentascurrency write setcurrentascurrency;
    property currentasmsestring[const afield: tfield; aindex: integer]: msestring
                   read getcurrentasmsestring write setcurrentasmsestring;
+   property currentasguid[const afield: tfield; aindex: integer]: tguid
+                  read getcurrentasguid write setcurrentasguid;
 
    procedure currentbmclear(const afield: tfield; const abm: bookmarkdataty);
    procedure currentbmassign(const source: tfield; const dest: tfield;
@@ -1207,6 +1223,9 @@ type
    property currentbmasmsestring[const afield: tfield;
                   const abm: bookmarkdataty]: msestring
                   read getcurrentbmasmsestring write setcurrentbmasmsestring;
+   property currentbmasguid[const afield: tfield;
+                  const abm: bookmarkdataty]: tguid
+                  read getcurrentbmasguid write setcurrentbmasguid;
 
    procedure getcoldata(const afield: tfield; const adatalist: tdatalist);
    procedure asarray(const afield: tfield; out avalue: int64arty); overload;
@@ -1281,61 +1300,8 @@ type
  tmsevariantfield1 = class(tmsevariantfield);
  tmsebooleanfield1 = class(tmsebooleanfield);
  tmsedatetimefield1 = class(tmsedatetimefield);
- { 
- TFieldcracker = class(TComponent)
-  private
-   FAlignMent : TAlignment;
-   FAttributeSet : String;
-   FCalculated : Boolean;
-   FConstraintErrorMessage : String;
-   FCustomConstraint : String;
-   FDataSet : TDataSet;
-//    FDataSize : Word;
-   FDataType : TFieldType;
-   FDefaultExpression : String;
-   FDisplayLabel : String;
-   FDisplayWidth : Longint;
-   FFieldKind : TFieldKind;
-   FFieldName : String;
-   FFieldNo : Longint;
- end;
-}
-{ 
-  TDataSetcracker = class(TComponent)
-  Private
-    FOpenAfterRead : boolean;
-    FActiveRecord: Longint;
-    FAfterCancel: TDataSetNotifyEvent;
-    FAfterClose: TDataSetNotifyEvent;
-    FAfterDelete: TDataSetNotifyEvent;
-    FAfterEdit: TDataSetNotifyEvent;
-    FAfterInsert: TDataSetNotifyEvent;
-    FAfterOpen: TDataSetNotifyEvent;
-    FAfterPost: TDataSetNotifyEvent;
-    FAfterRefresh: TDataSetNotifyEvent;
-    FAfterScroll: TDataSetNotifyEvent;
-    FAutoCalcFields: Boolean;
-    FBOF: Boolean;
-    FBeforeCancel: TDataSetNotifyEvent;
-    FBeforeClose: TDataSetNotifyEvent;
-    FBeforeDelete: TDataSetNotifyEvent;
-    FBeforeEdit: TDataSetNotifyEvent;
-    FBeforeInsert: TDataSetNotifyEvent;
-    FBeforeOpen: TDataSetNotifyEvent;
-    FBeforePost: TDataSetNotifyEvent;
-    FBeforeRefresh: TDataSetNotifyEvent;
-    FBeforeScroll: TDataSetNotifyEvent;
-    FBlobFieldCount: Longint;
-    FBookmarkSize: Longint;
-    FBuffers : TBufferArray;
-    FBufferCount: Longint;
-    FCalcBuffer: PChar;
-    FCalcFieldsSize: Longint;
-    FConstraints: TCheckConstraints;
-    FDisableControlsCount : Integer;
-    FDisableControlsState : TDatasetState;
-  end;  
- }  
+ tfield1 = class(tfield);
+ 
 const
  fielddatacompatibility: array[tfieldtype] of fieldtypesty = (
     //ftUnknown, ftString,    ftSmallint,    ftInteger,     ftWord,
@@ -1432,14 +1398,28 @@ begin
  result:= msecomparetext(msestring(l),msestring(r));
 end;
 
+function compguid(const l,r): integer;
+var
+ int1: integer;
+begin
+ for int1:= 0 to (sizeof(tguid) div sizeof(integer)) - 1 do begin
+  result:= pintegeraty(@l)^[int1]-pintegeraty(@r)^[int1];
+  if result <> 0 then begin
+   break;
+  end;
+ end;
+end;
+
 type
- fieldcomparekindty = (fct_integer,fct_largeint,fct_float,fct_currency,fct_text);
+ fieldcomparekindty = (fct_integer,fct_largeint,fct_float,fct_currency,fct_text,
+                       fct_guid);
  fieldcompareinfoty = record
   datatypes: set of tfieldtype;
   cvtype: integer;
   compfunc: arraysortcomparety;
   compfunci: arraysortcomparety;
  end;
+ 
 const
  comparefuncs: array[fieldcomparekindty] of fieldcompareinfoty = 
   ((datatypes: integerindexfields; cvtype: vtinteger; compfunc: @compinteger;
@@ -1453,7 +1433,10 @@ const
    (datatypes: stringindexfields; 
           cvtype: {$ifdef mse_hasvtunicodestring}vtunicodestring
                   {$else}vtwidestring{$endif}; compfunc: @compstring;
-                                  compfunci: @compstringi));
+                                  compfunci: @compstringi),
+   (datatypes: guidindexfields; cvtype: mse_vtguid; compfunc: @compguid;
+                                    compfunci: @compguid)
+);
 
 procedure alignfieldpos(var avalue: integer);
 const
@@ -2779,6 +2762,10 @@ begin
    result:= varsize + sizeof(word);
    basetype:= ftvarbytes;
   end;
+  ftguid: begin
+   result:= sizeof(tguid);
+   basetype:= ftguid;
+  end;
   ftsmallint,ftinteger,ftword: begin
    result:= sizeof(longint);
    basetype:= ftinteger;
@@ -3112,7 +3099,7 @@ var
  int1: integer;
 begin
  {$ifdef FPC}{$warnings off}{$endif}
- with tfieldcracker(sender) do begin
+ with tfield1(sender) do begin
  {$ifdef FPC}{$warnings on}{$endif}
   if fvalidating then begin
    result:= (fvaluebuffer <> nil) and (foffset and 1 = 0);
@@ -3137,7 +3124,7 @@ var
  int1: integer;
 begin
  {$ifdef FPC}{$warnings off}{$endif}
- with tfieldcracker(sender) do begin
+ with tfield1(sender) do begin
  {$ifdef FPC}{$warnings on}{$endif}
   if fvalidating then begin
    result:= (fvaluebuffer <> nil) and (foffset and 1 = 0);
@@ -3158,7 +3145,7 @@ end;
 procedure tmsebufdataset.checkfreebuffer(const afield: tfield);
 begin
  {$ifdef FPC}{$warnings off}{$endif}
- with tfieldcracker(afield) do begin
+ with tfield1(afield) do begin
  {$ifdef FPC}{$warnings on}{$endif}
   if foffset and 2 <> 0 then begin
    freemem(fvaluebuffer);
@@ -3172,7 +3159,7 @@ function tmsebufdataset.callvalidate(const afield: tfield;
               //true if not nulled
 begin
  {$ifdef FPC}{$warnings off}{$endif}
- with tfieldcracker(afield) do begin
+ with tfield1(afield) do begin
  {$ifdef FPC}{$warnings on}{$endif}
   foffset:= 0;
   fvaluebuffer:= avalue;
@@ -3185,7 +3172,7 @@ procedure tmsebufdataset.checkvaluebuffer(const afield: tfield;
                                                    const asize: integer);
 begin
  {$ifdef FPC}{$warnings off}{$endif}
- with tfieldcracker(afield) do begin
+ with tfield1(afield) do begin
  {$ifdef FPC}{$warnings on}{$endif}
   foffset:= foffset and not 1;
   if fvaluebuffer = nil then begin
@@ -3203,7 +3190,7 @@ var
  datasize1: integer;
 begin
  {$ifdef FPC}{$warnings off}{$endif}
- with tfieldcracker(field) do begin
+ with tfield1(field) do begin
  {$ifdef FPC}{$warnings on}{$endif}
   if fvalidating then begin
    if buffer = nil then begin
@@ -3256,7 +3243,7 @@ var
  int1: integer;
 begin
  {$ifdef FPC}{$warnings off}{$endif}
- with tfieldcracker(sender) do begin
+ with tfield1(sender) do begin
  {$ifdef FPC}{$warnings on}{$endif}
   if fvalidating then begin
    checkvaluebuffer(sender,sizeof(msestring));
@@ -3292,7 +3279,7 @@ var
  int1: integer;
 begin
  {$ifdef FPC}{$warnings off}{$endif}
- with tfieldcracker(sender) do begin
+ with tfield1(sender) do begin
  {$ifdef FPC}{$warnings on}{$endif}
   if fvalidating then begin
    checkvaluebuffer(sender,sizeof(variant));
@@ -4098,19 +4085,6 @@ var
    else begin
     getfieldsize(afield.datatype,0,result);
    end;
- {   
-   with tmsebufdataset(afield.dataset) do begin
-    if afield.fieldno > 0 then begin
-     result:= ffieldinfos[afield.fieldno-1].ext.basetype;
-    end
-    else begin
-     if afield.fieldno < 0 then begin
-      result:= getbasetype(
-                   flookupfieldinfos[-1-afield.fieldno].lookupvaluefield);
-     end;
-    end;
-   end;
-  }
   end;
  end; //getbasetype
  
@@ -4148,7 +4122,7 @@ begin
    if (field1 <> nil) and (field1.fieldkind = fkdata) then begin
     if fieldno = 0 then begin
 {$warnings off}
-     tfieldcracker(field1).ffieldno:= int1 + 1; //local mode without connection
+     tfield1(field1).ffieldno:= int1 + 1; //local mode without connection
 {$warnings on}
     end;
     addfield(int1,datatype,size,field1);
@@ -4162,7 +4136,7 @@ begin
    if fieldkind = fkinternalcalc then begin
     addfield(int2,datatype,size,field1);
 {$warnings off}
-    tfieldcracker(field1).ffieldno:= int2 + 1;
+    tfield1(field1).ffieldno:= int2 + 1;
 {$warnings on}
     inc(int2);
    end;
@@ -4186,7 +4160,7 @@ begin
   with field1 do begin
    if fieldkind in dsbuffieldkinds then begin
 {$warnings off}
-    tfieldcracker(field1).ffieldno:= -1 - int2;
+    tfield1(field1).ffieldno:= -1 - int2;
 {$warnings on}
     fcalcfieldbufpositions[int2]:= fcalcrecordsize;
     if field1 is tmsestringfield then begin
@@ -4225,6 +4199,9 @@ begin
               case basedatatype of
                ftwidestring: begin
                 getvalue:= @getbmstring;
+               end;
+               ftguid: begin
+                getvalue:= @getbmguid;
                end;
                ftinteger: begin
                 getvalue:= @getbminteger;
@@ -5091,19 +5068,6 @@ begin
      setlength(mstr1,characterlength);
     end;
     dest.aswidestring:= mstr1;
-{
-    if isftwidestring then begin
-     dest.aswidestring:= mstr1;
-    end
-    else begin
-     if bs_utf8 in fbstate then begin
-      dest.asstring:= stringtoutf8(mstr1);
-     end
-     else begin
-      dest.asstring:= mstr1;
-     end;
-    end;
-}
     if fixedchar then begin
      dest.datatype:= ftfixedwidechar;
     end;
@@ -6502,36 +6466,7 @@ begin
   fafterapplyupdate(self);
  end;
 end;
-{
-procedure tmsebufdataset.refresh(const aenablecontrols: boolean = false);
-var
- int1: integer;
-begin
- if aenablecontrols then begin
-//  with tdatasetcracker(self) do begin
-   int1:= 0;
-   while controlsdisabled do begin
-    inc(int1);
-    restorestate(state);
-   end;
-//   int1:= fdisablecontrolscount;
-//   fdisablecontrolscount:= 0;
-   try
-    inherited refresh;
-   finally
-    while int1 > 0 do begin
-     dec(int1);
-     settempstate(state);
-    end;
-//    fdisablecontrolscount:= int1;
-   end;
-//  end;
- end
- else begin
-  inherited refresh;
- end;
-end;
-}
+
 procedure tmsebufdataset.notifycontrols;
 var
  int1: integer;
@@ -7057,6 +6992,33 @@ begin
  end; 
 end;
 
+function tmsebufdataset.getcurrentasguid(const afield: tfield;
+                                                 aindex: integer): tguid;
+var
+ po1: pguid;
+begin
+ po1:= beforecurrentget(afield,ftfloat,aindex);
+ if po1 = nil then begin
+  result:= guid_null;
+ end
+ else begin
+  result:= po1^;
+ end;
+end;
+
+procedure tmsebufdataset.setcurrentasguid(const afield: tfield; aindex: integer;
+                   const avalue: tguid);
+var
+ po1: pguid;
+ bo1: boolean;
+begin
+ po1:= beforecurrentset(afield,ftfloat,aindex,false,bo1);
+ if bo1 or not isequalguid(po1^,avalue) then begin
+  po1^:= avalue;
+  aftercurrentset(afield);
+ end;
+end;
+
 function tmsebufdataset.getcurrentasfloat(const afield: tfield;
                aindex: integer): double;
 var
@@ -7463,6 +7425,20 @@ begin
  end;
 end;
 
+function tmsebufdataset.getcurrentbmasguid(const afield: tfield;
+                                     const abm: bookmarkdataty): tguid;
+var
+ po1: pguid;
+begin
+ po1:= beforecurrentbmget(afield,ftguid,abm);
+ if po1 = nil then begin
+  result:= guid_null;
+ end
+ else begin
+  result:= po1^;
+ end;
+end;
+
 procedure tmsebufdataset.setcurrentasmsestring(const afield: tfield;
                aindex: integer; const avalue: msestring);
 var
@@ -7484,6 +7460,20 @@ var
 begin
  po1:= beforecurrentbmset(afield,ftwidestring,abm,false,bo1);
  if bo1 or (po1^ <> avalue) then begin
+  po1^:= avalue;
+  aftercurrentset(afield);
+ end;
+end;
+
+procedure tmsebufdataset.setcurrentbmasguid(const afield: tfield;
+                                     const abm: bookmarkdataty;
+                   const avalue: tguid);
+var
+ po1: pguid;
+ bo1: boolean;
+begin
+ po1:= beforecurrentbmset(afield,ftguid,abm,false,bo1);
+ if bo1 or not isequalguid(po1^,avalue) then begin
   po1^:= avalue;
   aftercurrentset(afield);
  end;
@@ -7546,6 +7536,18 @@ begin
  if po1 <> nil then begin
   adata.mstr:= po1^;
   adata.po:= @adata.mstr;
+ end;
+end;
+
+procedure tmsebufdataset.getbmguid(const afield: tfield;
+               const bm: bookmarkdataty; var adata: lookupdataty);
+var
+ po1: pguid;
+begin
+ po1:= getcurrentpo(afield,ftunknown,@bm.recordpo^.header);
+ if po1 <> nil then begin
+  adata.guid:= po1^;
+  adata.po:= @adata.guid;
  end;
 end;
 
@@ -8839,14 +8841,6 @@ begin
       else begin
        result:=  msepartialcomparestr(ldata.mstr,rdata.mstr);
       end;
-{
-      if ainfo.caseinsensitive and 
-         mseissametextlen(ldata.mstr,rdata.mstr) or
-       not ainfo.caseinsensitive and 
-         mseissamestrlen(ldata.mstr,rdata.mstr) then begin
-       result:= 0;
-      end;
-}
      end;
     end;
    end;    
@@ -8905,26 +8899,6 @@ begin
      end;
      break;
     end;
-     
-//    if result <> 0 then begin
-    {
-     if apartialstring and canpartialstring and (int1 = alastindex) and
-      (caseinsensitive and 
-//         mseissametextlen(pmsestring(pointer(l)+recoffset)^,
-//                 pmsestring(pointer(r)+recoffset)^) or
-         (msecomparetextlen(pmsestring(pointer(l)+recoffset)^,
-                 pmsestring(pointer(r)+recoffset)^) = 0) or
-       not caseinsensitive and 
-//         mseissamestrlen(pmsestring(pointer(l)+recoffset)^,
-//                 pmsestring(pointer(r)+recoffset)^)
-         (msecomparestrlen(pmsestring(pointer(l)+recoffset)^,
-                 pmsestring(pointer(r)+recoffset)^) = 0)
-      )                                                   then begin
-      result:= 0;
-     end;               
-     break;
-    end;
-      }
    end;
   end;
  end;
@@ -9361,6 +9335,9 @@ begin
      vtpointer: begin
       bo1:= true;
      end;
+     mse_vtguid: begin
+      pguid(po2)^:= pguid(vpointer)^;
+     end;
      else begin
       paramerror;
      end;
@@ -9605,6 +9582,8 @@ var
  rea1: extended;
  cur1: currency;
  lint1: int64;
+ id1: tguid;
+  
 begin
  setlength(consts1,length(avalues));
  setlength(isnull1,length(avalues));
@@ -9645,6 +9624,11 @@ begin
       cur1:= ascurrency;
       vtype:= vtcurrency;
       vcurrency:= @cur1;
+     end;
+     ftguid: begin
+      id1:= asguid;
+      vtype:= mse_vtguid;
+      vpointer:= @id1;
      end;
      ftWideString: begin
       mstr1:= aswidestring;

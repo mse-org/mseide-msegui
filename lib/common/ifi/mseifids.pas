@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2007-2012 by Martin Schreiber
+{ MSEgui Copyright (c) 2007-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -14,7 +14,8 @@ unit mseifids;
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
 interface
 uses
- classes,db,mseifi,mseclasses,mseglob,mseevent,msedb,msetypes,msebufdataset,
+ classes,mclasses,mdb,mseifi,mseclasses,mseglob,mseevent,msedb,msetypes,
+ msebufdataset,
  msestrings,mseifilink,msesqldb,msearrayprops,msehash,mseapplication;
 
 

@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -11,7 +11,7 @@ unit mseibconnection;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- db,classes,mibconnection,msestrings,msedb,msesqldb,msqldb,ibase60dyn,
+ mdb,classes,mclasses,mibconnection,msestrings,msedb,msesqldb,msqldb,ibase60dyn,
  msebufdataset,msedatabase;
 type
  tmseibconnection = class(tibconnection,idbcontroller)

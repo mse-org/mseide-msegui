@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2010-2011 by Martin Schreiber
+{ MSEgui Copyright (c) 2010-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -11,8 +11,8 @@ unit msesigmidi;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- msesignal,classes,msemidi,msetypes,mseclasses,msedatamodules,msearrayprops,
- msehash,msesockets;
+ msesignal,classes,mclasses,msemidi,msetypes,mseclasses,msedatamodules,
+ msearrayprops,msehash,msesockets;
 const
  defaultmidiattackvalueoptions = [vso_exp,vso_null];
  defaultmidiattackvaluemin = 0.1; //20 dB

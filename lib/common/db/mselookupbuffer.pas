@@ -12,7 +12,7 @@ unit mselookupbuffer;
 interface
 
 uses
- classes,db,msedb,msetypes,msestrings,mseclasses,msearrayprops,mselist,
+ classes,mclasses,mdb,msedb,msetypes,msestrings,mseclasses,msearrayprops,mselist,
  msearrayutils,mseapplication,mseglob;
  
 type

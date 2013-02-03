@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2007-2011 by Martin Schreiber
+{ MSEgui Copyright (c) 2007-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -11,7 +11,8 @@ unit mseifilink;
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
 interface
 uses
- classes,mseclasses,mseifiglob,mseifi,msearrayprops,mseapplication,mseact,
+ classes,mclasses,mseclasses,mseifiglob,mseifi,msearrayprops,mseapplication,
+ mseact,
  mseevent,mseglob,msestrings,msetypes,msedatalist,msegraphutils,typinfo,
  mseeditglob;
  
@@ -125,7 +126,7 @@ type
  
  ttxactiondestroyhandler = class(tcomponent)
   private
-   fowner: ttxlinkactions;
+   fowneractions: ttxlinkactions;
   protected
    procedure notification(acomponent: tcomponent;
                            operation: toperation); override;
@@ -1046,7 +1047,7 @@ end;
 
 constructor ttxactiondestroyhandler.create(aowner: ttxlinkactions);
 begin
- fowner:= aowner;
+ fowneractions:= aowner;
  inherited create(nil);
 end;
 
@@ -1057,7 +1058,7 @@ var
 begin
  inherited;
  if operation = opremove then begin
-  with fowner do begin
+  with fowneractions do begin
    for int1:= 0 to high(fitems) do begin
     with ttxlinkaction(fitems[int1]) do begin
      if acomponent = fificomp then begin

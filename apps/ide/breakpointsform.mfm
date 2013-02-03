@@ -208,9 +208,9 @@ object breakpointsfo: tbreakpointsfo
       end    
       item[condition]
         linecolorfix = -1610612733
-        width = 200
+        width = 145
         options = [co_fill, co_savevalue, co_savestate]
-        widthmin = 200
+        widthmin = 0
         widgetname = 'condition'
         dataclass = tgridmsestringdatalist
       end    
@@ -372,7 +372,7 @@ object breakpointsfo: tbreakpointsfo
       visible = False
       bounds_x = 438
       bounds_y = 0
-      bounds_cx = 200
+      bounds_cx = 145
       bounds_cy = 16
       optionsedit1 = [oe1_autopopupmenu]
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_trimright, oe_trimleft, oe_savevalue, oe_savestate]
@@ -385,7 +385,7 @@ object breakpointsfo: tbreakpointsfo
       optionsskin = [osk_framebuttononly]
       taborder = 12
       visible = False
-      bounds_x = 639
+      bounds_x = 584
       bounds_y = 0
       bounds_cx = 19
       bounds_cy = 16
@@ -397,7 +397,7 @@ object breakpointsfo: tbreakpointsfo
       optionsskin = [osk_framebuttononly]
       taborder = 13
       visible = False
-      bounds_x = 659
+      bounds_x = 604
       bounds_y = 0
       bounds_cx = 17
       bounds_cy = 16

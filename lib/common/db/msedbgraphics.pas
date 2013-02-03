@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2009 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -13,8 +13,8 @@ unit msedbgraphics;
 
 interface
 uses
- classes,db,mseimage,mseguiglob,msedataimage,msedbdispwidgets,msedb,msetypes,
- msedbedit,
+ classes,mclasses,mdb,mseimage,mseguiglob,msedataimage,msedbdispwidgets,msedb,
+ msetypes,msedbedit,
  msegrids,msewidgetgrid,msedatalist,msebitmap,msebintree,msegraphics,
  msemenus,mseevent,msegui;
 

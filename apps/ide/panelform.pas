@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2009 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2013 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -20,7 +20,8 @@ unit panelform;
 
 interface
 uses
- classes,msegui,mseclasses,mseforms,msemenus,msestat,msestrings,msedock;
+ classes,mclasses,msegui,mseclasses,mseforms,msemenus,msestat,msestrings,
+ msedock;
 
 type
 

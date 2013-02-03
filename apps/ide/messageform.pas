@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2012 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2013 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@ unit messageform;
 interface
 uses
  msegui,mseclasses,mseforms,msegrids,msemenus,msedataedits,msesimplewidgets,
- classes,projectoptionsform;
+ classes,mclasses,projectoptionsform;
 
 type
  tmessagefo = class(tdockform)

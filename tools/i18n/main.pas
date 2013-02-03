@@ -21,7 +21,7 @@ interface
 uses
  mseforms,msefiledialog,msestat,msestatfile,msesimplewidgets,msegrids,
  msewidgetgrid,msegraphics,msegraphutils,mselistbrowser,msedataedits,typinfo,
- msedatanodes,msegraphedits,msestream,mseglob,msemenus,classes,msetypes,
+ msedatanodes,msegraphedits,msestream,mseglob,msemenus,classes,mclasses,msetypes,
  msestrings,msethreadcomp,mseguiglob,msegui,mseresourceparser,msedialog,
  msememodialog,mseobjecttext,mseifiglob,msesysenv,msemacros;
 

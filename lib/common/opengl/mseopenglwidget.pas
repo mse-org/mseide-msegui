@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2007-2011 by Martin Schreiber
+{ MSEgui Copyright (c) 2007-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -11,7 +11,8 @@ unit mseopenglwidget;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- classes,msewindowwidget,msegl,{$ifdef unix}mseglx,x,xlib,{$else}windows,{$endif}
+ classes,mclasses,msewindowwidget,msegl,
+ {$ifdef unix}mseglx,x,xlib,{$else}windows,{$endif}
  mseguiintf,msetypes,mseguiglob,mseclasses,msemenus,mseevent,msegui,msegraphics,
  msegraphutils;
  

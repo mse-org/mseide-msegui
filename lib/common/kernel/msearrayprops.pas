@@ -14,7 +14,7 @@ unit msearrayprops;
 interface
 
 uses
-  {$ifdef FPC}sysutils,classes{$else}SysUtils,Classes{$endif},typinfo,mselist,
+  sysutils,classes,mclasses,typinfo,mselist,
   msegraphutils,msetypes,msestrings,mseclasses,mseglob,msestat;
 
 type

@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -11,10 +11,10 @@ unit msereport;
 {$ifdef FPC}{$mode objfpc}{$h+}{$GOTO ON}{$interfaces corba}{$endif}
 interface
 uses
- classes,mseapplication,msegui,msegraphics,msetypes,msewidgets,msegraphutils,
- mseclasses,
+ classes,mclasses,mseapplication,msegui,msegraphics,msetypes,msewidgets,
+ msegraphutils,mseclasses,
  msetabs,mseprinter,msestream,msearrayprops,mseguiglob,msesimplewidgets,
- msedrawtext,msestrings,mserichstring,msedb,db,msethread,mseobjectpicker,
+ msedrawtext,msestrings,mserichstring,msedb,mdb,msethread,mseobjectpicker,
  msepointer,mseevent,msesplitter,msestatfile,mselookupbuffer,mseformatstr,
  msegdiprint,msemenus,mseglob;
 

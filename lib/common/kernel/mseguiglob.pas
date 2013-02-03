@@ -13,7 +13,8 @@ unit mseguiglob;
 
 interface
 uses
- Classes,msegraphutils,msetypes,msekeyboard,mseerr,mseevent,msestrings,mseglob;
+ classes,mclasses,msegraphutils,msetypes,msekeyboard,mseerr,mseevent,msestrings,
+ mseglob;
 {$ifdef FPC}
  
 {$endif}

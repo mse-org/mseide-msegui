@@ -31,7 +31,7 @@ uses
  msegraphutils,mseevent,msetabsglob,msearrayutils,msegraphics,msedropdownlist,
  mseformatstr,mseinplaceedit,msedatanodes,mselistbrowser,msebitmap,
  msecolordialog,msedrawtext,msewidgets,msepointer,mseguiglob,msepipestream,
- msemenus,sysutils,mseglob,mseedit,db,msedialog,msescrollbar,msememodialog,
+ msemenus,sysutils,mseglob,mseedit,msedialog,msescrollbar,msememodialog,
  msecodetemplates,mseifiglob,mseapplication,msestream,msestringcontainer;
 
 const

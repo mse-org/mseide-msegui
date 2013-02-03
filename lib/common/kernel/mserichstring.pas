@@ -13,7 +13,7 @@ unit mserichstring;
 
 interface
 uses
- SysUtils,msetypes,msekeyboard,mseevent,msedatalist,msegraphutils,Classes,
+ SysUtils,msetypes,msekeyboard,mseevent,msedatalist,msegraphutils,classes,mclasses,
  msestrings;
 
 const

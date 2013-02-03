@@ -1,4 +1,4 @@
-{ MSEtools Copyright (c) 1999-2011 by Martin Schreiber
+{ MSEtools Copyright (c) 1999-2013 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -21,8 +21,8 @@ unit mseresourceparser;
 
 interface
 uses
- classes,msetypes,mselist,msedatanodes,mselistbrowser,mseparser,msestrings,
- msestream,mseclasses;
+ classes,mclasses,msetypes,mselist,msedatanodes,mselistbrowser,mseparser,
+ msestrings,msestream,mseclasses;
 
 type
 

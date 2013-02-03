@@ -1,10 +1,20 @@
+{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
+
+    See the file COPYING.MSE, included in this distribution,
+    for details about the copyright.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+}
 unit msesqlresult;
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
 interface
 {$ifdef VER2_1_5} {$define mse_FPC_2_2} {$endif}
 {$ifdef VER2_2} {$define mse_FPC_2_2} {$endif}
 uses
- classes,db,msqldb,mseclasses,msedb,msedatabase,msearrayprops,msestrings,msereal,
+ classes,mclasses,mdb,msqldb,mseclasses,msedb,msedatabase,msearrayprops,
+ msestrings,msereal,
  msetypes,mselookupbuffer,mseglob,msedatalist,msevariants,mseevent;
  
 type
@@ -39,6 +49,7 @@ type
    function getasmsestring: msestring; virtual;
    function getasmsestring1: msestring; virtual;
    function getassql: msestring; virtual;
+   function getasguid: tguid; virtual;
    function getisnull: boolean; virtual;
    function loadfield(const buffer: pointer; var bufsize: integer): boolean; overload;
                 //false if null or inactive
@@ -63,6 +74,7 @@ type
    property asmsestring: msestring read getasmsestring1;
    property assql: msestring read getassql1;
    property asid: int64 read getasid;
+   property asguiid: tguid read getasguid;
    property isnull: boolean read getisnull;
    
  end;
@@ -81,6 +93,15 @@ type
    property value: msestring read getasmsestring;
  end;
  
+ tguiddbcol = class(tdbcol)
+  private
+  protected
+   function getasguid: tguid; override;
+   function getvariantvar: variant; override;
+   function getassql: msestring; override;
+   function getasstring: string; override;
+ end;
+
  tnumericdbcol = class(tdbcol)
   private
   protected
@@ -487,16 +508,16 @@ uses
  sysutils,dbconst,rtlconsts,mseapplication,variants,mseformatstr,msefloattostr;
 const 
  msedbcoltypeclasses: array[fieldclasstypety] of dbcolclassty = 
-//        ft_unknown,ft_string,   ft_numeric,
-          (tdbcol,   tstringdbcol,tlongintdbcol,
+//        ft_unknown,ft_string,   ft_guid,     ft_numeric,
+          (tdbcol,   tstringdbcol,tguiddbcol,tlongintdbcol,
 //         ft_longint,   ft_largeint,   ft_smallint,
            tlongintdbcol,tlargeintdbcol,tsmallintdbcol,
 //         ft_word,   ft_autoinc,   ft_float,   ft_currency,   ft_boolean,
            tworddbcol,tlongintdbcol,tfloatdbcol,tcurrencydbcol,tbooleandbcol,
 //         ft_datetime,   ft_date,       ft_time,
            tdatetimedbcol,tdatetimedbcol,tdatetimedbcol,
-//         ft_binary,ft_bytes,ft_varbytes,
-           tdbcol,   tstringdbcol,  tstringdbcol,
+//         ft_binary,ft_bytes,     ft_varbytes,
+           tdbcol,   tstringdbcol, tstringdbcol,
 //         ft_bcd,        ft_blob,   ft_memo,   ft_graphic, ft_variant);
            tcurrencydbcol,tblobdbcol,tmemodbcol,tblobdbcol,tvariantdbcol);
  SBoolean = 'Boolean';
@@ -702,6 +723,12 @@ function tdbcol.getassql: msestring;
 begin
  raise accesserror('SQL');
  result:= ''; //compiler warning;
+end;
+
+function tdbcol.getasguid: tguid;
+begin
+ raise accesserror('Guid');
+ result:= guid_null; //compiler warning;
 end;
 
 function tdbcol.getassql1: msestring;
@@ -1096,6 +1123,37 @@ end;
 function tblobdbcol.getassql: msestring;
 begin
  result:= encodesqlblob(asstring);
+end;
+
+{ tguiddbcol }
+
+function tguiddbcol.getvariantvar: variant;
+begin
+ result:= asstring;
+end;
+
+function tguiddbcol.getassql: msestring;
+begin
+ result:= encodesqlstring(asstring);
+end;
+
+function tguiddbcol.getasstring: string;
+var
+ id1: tguid;
+begin
+ if not loadfield(@id1) then begin
+  result:= '';
+ end
+ else begin
+  result:= dbguidtostring(id1);
+ end;
+end;
+
+function tguiddbcol.getasguid: tguid;
+begin
+ if not loadfield(@result) then begin
+  result:= guid_null;
+ end;
 end;
 
 { tnumericdbcol }

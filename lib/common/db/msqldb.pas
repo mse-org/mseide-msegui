@@ -1,6 +1,5 @@
 {
     Copyright (c) 2004 by Joost van der Sluis
-    Modified 2006-2011 by Martin Schreiber
 
     SQL database & dataset
 
@@ -10,6 +9,8 @@
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+  Modified 2006-2013 by Martin Schreiber
 
  **********************************************************************}
 
@@ -25,8 +26,8 @@ unit msqldb;
 interface
 
 uses 
- sysutils,classes,db,msebufdataset,msetypes,msedb,mseclasses,msedatabase,
- msestrings,msearrayutils,msedatalist,
+ sysutils,classes,mclasses,mdb,msebufdataset,msetypes,msedb,mseclasses,
+ msedatabase,msestrings,msearrayutils,msedatalist,
  mseapplication,mseglob,msetimer,msearrayprops,msemacros;
 
 type 
@@ -712,42 +713,7 @@ uses
 type
  tdataset1 = class(tdataset);
  tmdatabase1 = class(tmdatabase);
-{
-  TDataSetcracker = class(TComponent)
-  Private
-    FOpenAfterRead : boolean;
-    FActiveRecord: Longint;
-    FAfterCancel: TDataSetNotifyEvent;
-    FAfterClose: TDataSetNotifyEvent;
-    FAfterDelete: TDataSetNotifyEvent;
-    FAfterEdit: TDataSetNotifyEvent;
-    FAfterInsert: TDataSetNotifyEvent;
-    FAfterOpen: TDataSetNotifyEvent;
-    FAfterPost: TDataSetNotifyEvent;
-    FAfterRefresh: TDataSetNotifyEvent;
-    FAfterScroll: TDataSetNotifyEvent;
-    FAutoCalcFields: Boolean;
-    FBOF: Boolean;
-    FBeforeCancel: TDataSetNotifyEvent;
-    FBeforeClose: TDataSetNotifyEvent;
-    FBeforeDelete: TDataSetNotifyEvent;
-    FBeforeEdit: TDataSetNotifyEvent;
-    FBeforeInsert: TDataSetNotifyEvent;
-    FBeforeOpen: TDataSetNotifyEvent;
-    FBeforePost: TDataSetNotifyEvent;
-    FBeforeRefresh: TDataSetNotifyEvent;
-    FBeforeScroll: TDataSetNotifyEvent;
-    FBlobFieldCount: Longint;
-    FBookmarkSize: Longint;
-    FBuffers : TBufferArray;
-    FBufferCount: Longint;
-    FCalcBuffer: PChar;
-    FCalcFieldsSize: Longint;
-    FConstraints: TCheckConstraints;
-    FDisableControlsCount : Integer;
-    FDisableControlsState : TDatasetState;
-  end;  
-}  
+
 procedure updateparams(const aparams: tmseparams; const autf8: boolean);
 var
  int1: integer;
@@ -809,126 +775,6 @@ begin
   end;
  end;
 end;
-
-(*
-type
- TDBTransactioncracker = Class(TComponent)
-  Private
-    FActive        : boolean;
-    FDatabase      : tmdatabase;
-    FDataSets      : TList;
-    FOpenAfterRead : boolean;
- end;
-{$ifdef mse_FPC_2_2}
-  TDatabasecracker = class(TCustomConnection)
-  private
-    FConnected : Boolean;
-    FDataBaseName : String;
-    FDataSetxx : TList;
-    FTransactionsxx : TList;
-    FDirectory : String;
-    FKeepConnection : Boolean;
-    FParams : TStrings;
-    FSQLBased : Boolean;
-    FOpenAfterRead : boolean;
-  end;
-{$else}
-  TDatabasecracker = class(TComponent)
-  private
-    FConnected : Boolean;
-    FDataBaseName : String;
-    FDataSetsxx : TList;
-    FTransactionsxx : TList;
-    FDirectory : String;
-    FKeepConnection : Boolean;
-    FLoginPrompt : Boolean;
-    FOnLogin : TLoginEvent;
-    FParams : TStrings;
-    FSQLBased : Boolean;
-    FOpenAfterRead : boolean;
-  end;
-{$endif}
-*)
-(*
-function splitsqlstatements(const asqltext: msestring): msestringarty;
-var
- count: integer;
- po1,po2: pmsechar;
- mstr1: msestring;
-begin
- result:= nil;
- count:= 0;
- po1:= pmsechar(asqltext);
- po2:= po1;
- while po1^ <> #0 do begin
-  case po1^ of
-   '''': begin // single quote delimited string
-    inc(po1);
-    while (po1^ <> #0) and (po1 <> '''') do begin
-     if po1^ = '\' then begin
-      inc(po1,2) // make sure we handle \' and \\ correct
-     end
-     else begin
-      inc(ppo1);
-     end;
-    end;
-    if po1^ = '''' then begin
-     inc(po1);
-    end; // skip final '
-   end;
-   '"': begin // double quote delimited string
-    inc(po1);
-    while (po1^ <> #0) and (po1 <> '"') do begin
-     if po1^ = '\' then begin
-      inc(po1,2) // make sure we handle \' and \\ correct
-     end
-     else begin
-      inc(po1);
-     end;
-    end;
-    if po1^ = '"' then begin
-     inc(po1);
-    end; // skip final "
-   end;
-   '-': begin// possible start of -- comment
-    inc(po1);
-    if po1^ = '-' then begin// -- comment
-     repeat // skip until at end of line
-      inc(po1);
-     until po1^ = #0 or po1^ = #10;
-    end;
-   end;
-   '/': begin // possible start of /* */ comment
-    inc(po1);
-    if po1^ = '*' then begin // /* */ comment
-     repeat
-      inc(po1);
-      if po1 = '*' then begin// possible end of comment
-       inc(po1);
-       if po1^ = '/' then begin 
-        break;  // end of comment
-       end;
-      end;
-     until po1^ = #0;
-     if po1^ = '/' then begin 
-      inc(p);             // skip final /
-     end;
-    end;
-   end;
-   ';': begin
-    setlength(str1,po1-po2);
-    move(po2^,str1[1],length(str1)*sizeof(msechar));
-    po2:= po1;
-    additem(result,str1,count);
-   end;
-   else begin
-    inc(po1);
-   end;
-  end; {case}
- end;
- setlength(result,count);
-end;
-*)
 
 function splitsql(const asql: msestring;
                   const term: msechar = ';';

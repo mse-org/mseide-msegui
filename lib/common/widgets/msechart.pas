@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2007-2012 by Martin Schreiber
+{ MSEgui Copyright (c) 2007-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -12,8 +12,8 @@ unit msechart;
 interface
 
 uses
- classes,msegui,mseguiglob,mseclasses,msearrayprops,msetypes,msegraphics,
- msegraphutils,mseglob,msereal,
+ classes,mclasses,msegui,mseguiglob,mseclasses,msearrayprops,msetypes,
+ msegraphics,msegraphutils,mseglob,msereal,
  msewidgets,msesimplewidgets,msedial,msebitmap,msemenus,mseevent,
  msedatalist,msestatfile,msestat,msestrings;
 
@@ -116,10 +116,11 @@ type
    fimli1: timagelist;
    frect1: rectty;
    fimagealignment: alignmentsty;
+   fhint_captionx: msestring;
+   fhint_captiony: msestring;
    procedure setxydata(const avalue: complexarty);
    procedure datachange;
    procedure legendchange;
-//   procedure layoutchange;
    procedure setcolor(const avalue: colorty);
    procedure setcolorimage(const avalue: colorty);
    procedure setxserrange(const avalue: real);
@@ -172,16 +173,15 @@ type
    function getlegend_font: ttracefont;
    procedure setlegend_font(const avalue: ttracefont);
    procedure setlegend_caption(const avalue: msestring);
-{
-   procedure setlegend_x(const avalue: integer);
-   procedure setlegend_y(const avalue: integer);
-   procedure setlegend_pos(const avalue: pointty);
-}
    function isfontstored: boolean;
    procedure fontchanged(const sender: tobject);
   protected
    ftraces: ttraces;
    fcurfont: tfont;
+   flnxstart: real;
+   flnxrange: real;
+   flnystart: real;
+   flnyrange: real;
    procedure setkind(const avalue: tracekindty); virtual;
    procedure setoptions(const avalue: charttraceoptionsty); virtual;
    function getxitempo(const aindex: integer): preal;
@@ -211,6 +211,8 @@ type
    function getwidget: twidget;
    function getwidgetrect: rectty;
    function getframestateflags: framestateflagsty;
+   function hintx: msestring;
+   function hinty: msestring;
     //iface
    function translatecolor(const acolor: colorty): colorty;
    function getclientrect: rectty;
@@ -261,7 +263,6 @@ type
    property logx: boolean read getlogx write setlogx;
    property logy: boolean read getlogy write setlogy;
    property visible: boolean read getvisible write setvisible;
-//   property legend_pos: pointty read finfo.legendpos write setlegend_pos;
    
   published
    property color: colorty read finfo.color write setcolor default cl_black;
@@ -295,10 +296,12 @@ type
    property imagenr: imagenrty read finfo.imagenr write setimagenr default -1;
    property name: string read finfo.name write finfo.name;
    property legend_caption: msestring read finfo.legend write setlegend_caption;
-//   property legend_x: integer read finfo.legendpos.x write setlegend_x;
-//   property legend_y: integer read finfo.legendpos.y write setlegend_y;
    property legend_font: ttracefont read getlegend_font 
                                 write setlegend_font stored isfontstored;
+   property hint_captionx: msestring read fhint_captionx
+                                 write fhint_captionx;
+   property hint_captiony: msestring read fhint_captiony
+                                 write fhint_captiony;
  end;
 
  traceaty = array[0..0] of ttrace;
@@ -550,8 +553,6 @@ type
    property colorclient default cl_foreground;
  end;
 
- rectsidety = (rs_left,rs_top,rs_right,rs_bottom);
- rectsidesty = set of rectsidety;
  optionchartty = (oca_autofitleft,oca_autofittop,oca_autofitright,
                     oca_autofitbottom); //same layout as rectsidesty
  optionschartty = set of optionchartty;
@@ -621,7 +622,7 @@ type
     //idialcontroller
    procedure directionchanged(const dir,dirbefore: graphicdirectionty);
    function getdialrect: rectty;
-   function getdialsize: sizety;
+   function getlimitrect: rectty;
    procedure internalcreateframe; override;
    procedure defineproperties(filer: tfiler); override;
     //istatfile
@@ -670,6 +671,9 @@ type
 
  tcustomchart = class(tcuchart)
   private
+   ftracehint_captionx: msestring;
+   ftracehint_captiony: msestring;
+   fmarkerhintcaption: msestring;
    procedure settraces(const avalue: ttraces);
    procedure setxstart(const avalue: real); override;
    procedure setystart(const avalue: real); override;
@@ -695,6 +699,12 @@ type
                                              const aendmargin: real = 0);
    procedure addsample(const asamples: array of real); virtual;
    property traces: ttraces read ftraces write settraces;
+   property tracehint_captionx: msestring read ftracehint_captionx
+                                 write ftracehint_captionx;
+   property tracehint_captiony: msestring read ftracehint_captiony
+                                 write ftracehint_captiony;
+   property markerhintcaption: msestring read fmarkerhintcaption
+                                 write fmarkerhintcaption;
  end;
 
  tchart = class(tcustomchart)
@@ -810,6 +820,7 @@ uses
 type
  tcustomdialcontroller1 = class(tcustomdialcontroller);
  tdialticks1 = class(tdialticks);
+ tdialmarkers1 = class(tdialmarkers);
  tcustomframe1 = class(tcustomframe);
 
 function makexseriesdata(const value: real; const index: integer): xseriesdataty;
@@ -1517,12 +1528,17 @@ begin
  tcustomchart(fowner).traces.change;
 end;
 
-procedure ttrace.setxserrange(const avalue: real);
+procedure ttrace.setxserstart(const avalue: real);
 begin
- if avalue = 0 then begin
-  scaleerror;
- end;
- finfo.xserrange:= avalue;
+ finfo.xserstart:= avalue;
+ datachange;
+end;
+
+procedure ttrace.setxstart(const avalue: real);
+begin
+ finfo.xstart:= avalue;
+ flnxstart:= chartln(avalue);
+ flnxrange:= chartln(finfo.xstart+finfo.xrange)-flnxstart;
  datachange;
 end;
 
@@ -1532,6 +1548,34 @@ begin
   scaleerror;
  end;
  finfo.xrange:= avalue;
+ flnxrange:= chartln(finfo.xstart+finfo.xrange)-flnxstart;
+ datachange;
+end;
+
+procedure ttrace.setxserrange(const avalue: real);
+begin
+ if avalue = 0 then begin
+  scaleerror;
+ end;
+ finfo.xserrange:= avalue;
+ datachange;
+end;
+
+procedure ttrace.setystart(const avalue: real);
+begin
+ finfo.ystart:= avalue;
+ flnystart:= chartln(avalue);
+ flnyrange:= chartln(finfo.ystart+finfo.yrange)-flnystart;
+ datachange;
+end;
+
+procedure ttrace.setyrange(const avalue: real);
+begin
+ if avalue = 0 then begin
+  scaleerror;
+ end;
+ finfo.yrange:= avalue;
+ flnyrange:= chartln(finfo.ystart+finfo.yrange)-flnystart;
  datachange;
 end;
 
@@ -1573,33 +1617,6 @@ begin
   finfo.bar_ref:= avalue;
   datachange;
  end;
-end;
-
-procedure ttrace.setxserstart(const avalue: real);
-begin
- finfo.xserstart:= avalue;
- datachange;
-end;
-
-procedure ttrace.setxstart(const avalue: real);
-begin
- finfo.xstart:= avalue;
- datachange;
-end;
-
-procedure ttrace.setyrange(const avalue: real);
-begin
- if avalue = 0 then begin
-  scaleerror;
- end;
- finfo.yrange:= avalue;
- datachange;
-end;
-
-procedure ttrace.setystart(const avalue: real);
-begin
- finfo.ystart:= avalue;
- datachange;
 end;
 
 procedure ttrace.scaleerror;
@@ -1867,18 +1884,23 @@ begin
  with finfo do begin
   if ydata <> nil then begin
    result:= length(ydata);
+   exit;
   end;
   if xdata <> nil then begin
    result:= length(xdata);
+   exit;
   end;
   if xydata <> nil then begin
    result:= length(xydata);
+   exit;
   end;
   if ydatalist <> nil then begin
    result:= ydatalist.count;
+   exit;
   end;
   if xdatalist <> nil then begin
    result:= xdatalist.count;
+   exit;
   end;
  end;
 end;
@@ -2171,7 +2193,7 @@ end;
 
 function ttrace.getclientrect: rectty;
 begin
- result:= tcustomchart(fowner).innerclientrect;
+ result:= tcustomchart(fowner).getdialrect;
 end;
 
 procedure ttrace.setlinkedvar(const source: tmsecomponent;
@@ -2345,29 +2367,23 @@ begin
  finfo.legend:= avalue;
  legendchange;
 end;
-{
-procedure ttrace.setlegend_x(const avalue: integer);
+
+function ttrace.hintx: msestring;
 begin
- if finfo.legendpos.x <> avalue then begin
-  finfo.legendpos.x:= avalue;
-  datachange;
+ result:= fhint_captionx;
+ if result = '' then begin
+  result:= tcustomchart(fowner).tracehint_captionx;
  end;
 end;
 
-procedure ttrace.setlegend_y(const avalue: integer);
+function ttrace.hinty: msestring;
 begin
- if finfo.legendpos.y <> avalue then begin
-  finfo.legendpos.y:= avalue;
-  datachange;
+ result:= fhint_captiony;
+ if result = '' then begin
+  result:= tcustomchart(fowner).tracehint_captiony;
  end;
 end;
 
-procedure ttrace.setlegend_pos(const avalue: pointty);
-begin
- finfo.legendpos:= avalue;
- datachange;
-end;
-}
 { ttracesfont }
 
 class function ttracesfont.getinstancepo(owner: tobject): pfont;
@@ -2423,7 +2439,6 @@ var
  align1: alignmentsty;
  imli1: timagelist;
 begin
-// checkgraphic;
  for int1:= 0 to high(fitems) do begin
   ptraceaty(fitems)^[int1].paint(acanvas);
  end;
@@ -3289,9 +3304,9 @@ begin
  end;
 end;
 
-function tcuchart.getdialsize: sizety;
+function tcuchart.getlimitrect: rectty;
 begin
- result:= clientsize;
+ result:= innerclientrect;
 end;
 
 procedure tcuchart.internalcreateframe;
@@ -3445,6 +3460,7 @@ var
    end;
    checklayout;
    expandrectext1(ext1,tdialticks1(ticks).fdim);
+   expandrectext1(ext1,tdialmarkers1(markers).fdim);
    with tdialticks1(ticks).fdim do begin
     if isx then begin
      int1:= fitdist + bottom - top;

@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2012 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2013 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -44,7 +44,7 @@ var
 implementation
 uses
  componentpaletteform_mfm,main,projectoptionsform,msedesignintf,mseshapes,
- mseactions,classes,mseact,componentstore;
+ mseactions,classes,mclasses,mseact,componentstore;
 
 procedure tcomponentpalettefo.componentpalettedragdrop(const sender: TObject;
       const apos: pointty; var dragobject: tdragobject; var processed: boolean);

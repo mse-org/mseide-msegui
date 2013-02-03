@@ -14,7 +14,7 @@ unit msestreaming;
 interface
 
 uses
- {$ifdef FPC}Classes{$else}classes{$endif},msetypes,msegraphutils,mseglob;
+ classes,mclasses,msetypes,msegraphutils,mseglob;
 
 type
 {$ifdef FPC}

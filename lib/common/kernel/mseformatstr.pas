@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -13,7 +13,7 @@ unit mseformatstr;     //stringwandelroutinen 31.5.99 mse
 
 interface
 uses
- Classes, msetypes,msestrings,SysUtils,msemacros,mseglob;
+ classes,mclasses,msetypes,msestrings,SysUtils,msemacros,mseglob;
 
 type
  dateconvertty = (dc_none,dc_tolocal,dc_toutc);
@@ -184,7 +184,11 @@ function bytetohex(const inp: byte): string;
  //wandelt byte in zwei ascii hexzeichen
 function wordtohex(const inp: word; lsbfirst: boolean = false): string;
  //wandelt word in vier ascii hexzeichen
-
+ 
+function valtohex(const avalue: byte): string; overload;
+function valtohex(const avalue: word): string; overload;
+function valtohex(const avalue: longword): string; overload;
+function valtohex(const avalue: qword): string; overload;
 
 function dectostr(const inp: integer; digits: integer): string; overload;
           //leading zeroes if digits < 0
@@ -375,6 +379,8 @@ var
 const
  charhex: array[0..15] of char =
           ('0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F');
+ charhexlower: array[0..15] of char =
+          ('0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f');
  hexchars: array[char] of byte = (
   $80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80, //0
   $80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80, //1
@@ -3268,6 +3274,40 @@ begin
  else begin
   result:=  bytetohex(inp shr 8) + bytetohex(inp);
  end;
+end;
+
+function valtohex(const avalue: byte): string;
+begin
+ setlength(result,2);
+ pchar(pointer(result))^:= charhexlower[avalue shr 4];
+ pchar(pointer(result)+1)^:= charhexlower[avalue and $f];
+end;
+
+function valtohex(const avalue: word): string; overload;
+begin
+ setlength(result,4);
+ pchar(pointer(result))^:= charhexlower[avalue shr 12];
+ pchar(pointer(result)+1)^:= charhexlower[(avalue shr 8) and $f];
+ pchar(pointer(result)+2)^:= charhexlower[(avalue shr 4) and $f];
+ pchar(pointer(result)+3)^:= charhexlower[avalue and $f];
+end;
+
+function valtohex(const avalue: longword): string; overload;
+begin
+ setlength(result,8);
+ pchar(pointer(result))^:= charhexlower[avalue shr 28];
+ pchar(pointer(result)+1)^:= charhexlower[(avalue shr 24) and $f];
+ pchar(pointer(result)+2)^:= charhexlower[(avalue shr 20) and $f];
+ pchar(pointer(result)+3)^:= charhexlower[(avalue shr 16) and $f];
+ pchar(pointer(result)+4)^:= charhexlower[(avalue shr 12) and $f];
+ pchar(pointer(result)+5)^:= charhexlower[(avalue shr 8) and $f];
+ pchar(pointer(result)+6)^:= charhexlower[(avalue shr 4) and $f];
+ pchar(pointer(result)+7)^:= charhexlower[avalue and $f];
+end;
+
+function valtohex(const avalue: qword): string; overload;
+begin
+ result:= valtohex(avalue shr 32)+valtohex(avalue);
 end;
 
 function bytestrtostr(const inp: ansistring; base: numbasety = nb_hex;

@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -13,7 +13,7 @@ unit msebitmap;
 
 interface
 uses
- {$ifdef FPC}classes{$else}Classes{$endif},msegraphics,msetypes,msestrings,
+ classes,mclasses,msegraphics,msetypes,msestrings,
  msegraphutils,mseclasses,mseglob,sysutils,mseguiglob;
 
 const
@@ -153,7 +153,11 @@ type
    constructor create(const user: tbitmap);
  end;
 }
- bitmapoptionty = (bmo_monochrome,bmo_masked,bmo_colormask);
+ bitmapoptionty = (bmo_monochrome,bmo_masked,bmo_colormask,
+                   bmo_storeorigformat, //needs mseformat*read unit at runtime
+                                        //in uses
+                   bmo_runtimeformatdata); //do not clear origformatdata after
+                                           //load at runtime
  bitmapoptionsty = set of bitmapoptionty;
 
  tmaskedbitmap = class(tbitmap,iobjectlink)
@@ -163,6 +167,8 @@ type
    fobjectlinker: tobjectlinker;
    foptions: bitmapoptionsty;
    fmaskcolorforeground,fmaskcolorbackground: colorty;
+   forigformat: string;
+   forigformatdata: string;
    procedure checkmask;
    procedure freemask;
    procedure settransparentcolor(const Value: colorty);
@@ -173,11 +179,14 @@ type
    procedure setmasked(const Value: boolean);
    procedure readimage(stream: tstream);
    procedure writeimage(stream: tstream);
+   procedure readimagedata(stream: tstream);
+   procedure writeimagedata(stream: tstream);
    function getmask1: tbitmap;
    function getoptions: bitmapoptionsty;
    procedure setoptions(const avalue: bitmapoptionsty);
    function getcolormask: boolean;
    procedure setcolormask(const avalue: boolean);
+   procedure setorigformatdata(const avalue: string);
   protected
    fmask: tbitmap;
    procedure setmonochrome(const avalue: boolean); override;
@@ -205,6 +214,7 @@ type
                      const agdifuncs: pgdifunctionaty = nil);
                                         //nil -> default
    destructor destroy; override;
+   procedure clear; override;
    class procedure freeimageinfo(var ainfo: imagebufferinfoty);
    procedure loadfromimagebuffer(const abuffer: imagebufferinfoty);
    procedure savetoimagebuffer(out abuffer: imagebufferinfoty);
@@ -244,11 +254,14 @@ type
    property maskcolorbackground: colorty read fmaskcolorbackground 
                     write fmaskcolorbackground default $000000; //max transparent
                      //used to convert monchrome mask to colormask
+   property origformatdata: string read forigformatdata write setorigformatdata;
   published
-   property transparentcolor: colorty read ftransparentcolor write settransparentcolor
-                default cl_default; //cl_default ->bottom right pixel
+   property transparentcolor: colorty read ftransparentcolor 
+                              write settransparentcolor default cl_default;
+                     //cl_default ->bottom right pixel
    property options: bitmapoptionsty read getoptions write setoptions default [];
    property source: tbitmapcomp read fsource write setsource;
+   property origformat: string read forigformat write forigformat;
    property colorforeground;
    property colorbackground;
    property alignment;
@@ -1374,6 +1387,12 @@ begin
  fobjectlinker.free;
 end;
 
+procedure tmaskedbitmap.clear;
+begin
+ forigformatdata:= '';
+ inherited;
+end;
+
 class procedure tmaskedbitmap.freeimageinfo(var ainfo: imagebufferinfoty);
 begin
  with ainfo do begin
@@ -1721,6 +1740,8 @@ begin
       end;
      end;
      self.ftransparentcolor:= ftransparentcolor;
+     self.forigformat:= forigformat;
+     self.forigformatdata:= forigformatdata;
     end;
    end;
   end
@@ -1866,7 +1887,9 @@ begin
            (colormask <> ancestor.colormask) or
            (monochrome <> ancestor.monochrome) or
            (size.cx <> ancestor.size.cx) or
-           (size.cy <> ancestor.size.cy);
+           (size.cy <> ancestor.size.cy) or
+           (bmo_storeorigformat in options) and 
+               (origformatdata <> ancestor.origformatdata);
   if not result then begin
    if masked then begin
     fmask.checkimage(false);
@@ -1889,11 +1912,21 @@ begin
 end;
 
 procedure tmaskedbitmap.defineproperties(filer: tfiler);
+var
+ bo1: boolean;
 begin
  inherited;
+ bo1:= (forigformatdata <> '') and (bmo_storeorigformat in options);
  filer.DefineBinaryProperty('image',{$ifdef FPC}@{$endif}readimage,
                                      {$ifdef FPC}@{$endif}writeimage,
-                                     writedata(tmaskedbitmap(filer.ancestor)));
+                      not bo1 and writedata(tmaskedbitmap(filer.ancestor)));
+ filer.DefineBinaryProperty('imagedata',{$ifdef FPC}@{$endif}readimagedata,
+                                     {$ifdef FPC}@{$endif}writeimagedata,
+                           bo1 and writedata(tmaskedbitmap(filer.ancestor)));
+ if (filer is treader) and not(csdesigning in filer.root.componentstate) and 
+                not(bmo_runtimeformatdata in options) then begin
+  forigformatdata:= '';
+ end;
 end;
 
 procedure tmaskedbitmap.writeimage(stream: tstream);
@@ -1978,10 +2011,42 @@ begin
  end;
 end;
 
+procedure tmaskedbitmap.readimagedata(stream: tstream);
+var
+ lint1: int64;
+ str1: string;
+begin
+ stream.readbuffer(lint1,sizeof(lint1));
+ lint1:= leton(lint1);
+ setlength(str1,lint1);
+ stream.readbuffer(pchar(pointer(str1))^,lint1);
+ origformatdata:= str1;
+end;
+
+procedure tmaskedbitmap.writeimagedata(stream: tstream);
+var
+ lint1: int64;
+begin
+ lint1:= length(forigformatdata);
+ stream.writebuffer(lint1,sizeof(ntole(lint1))); 
+ stream.writebuffer(pchar(pointer(forigformatdata))^,lint1);
+end;
+
 function tmaskedbitmap.loadfromstream(const stream: tstream;
            const format: string = ''; const index: integer = -1): string;
+var
+ int1,int2: integer;
 begin
+ int1:= stream.position;
  result:= readgraphic(stream,self,format,index);
+ int2:= stream.position;
+ if bmo_storeorigformat in options then begin
+  forigformat:= result;
+  int2:= int2-int1;
+  setlength(forigformatdata,int2);
+  stream.position:= int1;
+  stream.readbuffer(pchar(pointer(forigformatdata))^,int2);
+ end;
 end;
 
 function tmaskedbitmap.loadfromfile(const filename: filenamety;
@@ -2105,6 +2170,14 @@ begin
  if fmask <> nil then begin
   fmask.checkimage(bgr);
   aimage.mask:= fmask.fimage;
+ end;
+end;
+
+procedure tmaskedbitmap.setorigformatdata(const avalue: string);
+begin
+ forigformatdata:= avalue;
+ if avalue <> '' then begin
+  loadfromstring(avalue,forigformat);
  end;
 end;
 

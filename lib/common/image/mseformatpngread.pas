@@ -15,7 +15,8 @@ const
  
 implementation
 uses
- classes,msegraphics,msebitmap,fpreadpng,msegraphicstream,msestockobjects;
+ classes,mclasses,msegraphics,msebitmap,fpreadpng,msegraphicstream,
+ msestockobjects;
  
 type
  tmsefpreaderpng = class(tfpreaderpng)

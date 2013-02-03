@@ -1,9 +1,18 @@
+{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
+
+    See the file COPYING.MSE, included in this distribution,
+    for details about the copyright.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+}
 unit msedockpanelform;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- classes,mselist,msetypes,mseglob,mseguiglob,mseguiintf,mseapplication,msestat,
- msemenus,msegui,msedatalist,
+ classes,mclasses,mselist,msetypes,mseglob,mseguiglob,mseguiintf,mseapplication,
+ msestat,msemenus,msegui,msedatalist,
  msegraphics,msegraphutils,mseevent,mseclasses,mseforms,msedock,
  msestrings,msestatfile;
 

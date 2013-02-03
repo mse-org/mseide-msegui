@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2004-2012 by Martin Schreiber
+{ MSEgui Copyright (c) 2004-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -39,19 +39,34 @@ unit msedb;
 interface
 
 uses
- classes,db,mseclasses,mseglob,msestrings,msetypes,msearrayprops,mseapplication,
+ classes,mclasses,mdb,mseclasses,mseglob,msestrings,msetypes,msearrayprops,
+ mseapplication,
  sysutils,msebintree,mseact,msetimer{$ifdef mse_fpc_2_4_3},maskutils{$endif},
  msevariants;
 
+const
+ mse_vtguid = $ff;
+ guidbuffersize = 36; //aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee
 type
  bookmarkty = string; 
    //use instead of TBookmarkStr in order to avoid
    // FPC deprecated warning
- 
+// guidbufferty = array[0..guidbuffersize-1] of char;
+// pguidbufferty = ^guidbufferty;
+
  fieldtypearty = array of tfieldtype;
  fieldtypesty = set of tfieldtype;
  fieldtypesarty = array of fieldtypesty;
  datasetarty = array of tdataset;
+
+ fielddefty = record
+  datatype: tfieldtype;
+  size: integer;
+  name: string;
+ end;
+ pfielddefty = ^fielddefty;
+ fielddefarty = array of fielddefty;
+ 
 const
  int32fields = [ftsmallint,ftinteger,ftword];
  int64fields = [ftlargeint];
@@ -60,7 +75,7 @@ const
  charfields = [ftstring,ftfixedchar];
 
  widecharfields = [ftwidestring,ftfixedwidechar,ftwidememo];
- textfields = [ftstring,ftfixedchar,ftwidestring,ftfixedwidechar,ftmemo];
+ textfields = [ftstring,ftfixedchar,ftwidestring,ftfixedwidechar,ftmemo,ftguid];
  memofields = textfields+[ftmemo];
  integerfields = [ftsmallint,ftinteger,ftword,ftlargeint,ftbcd];
  booleanfields = [ftboolean,ftstring,ftfixedchar]+integerfields-[ftbcd];
@@ -229,6 +244,8 @@ type
   public
    function HasParent: Boolean; override;
    procedure Clear; override;
+   function assql: string;
+   function asoldsql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
    property tagpo: pointer read ftagpo write ftagpo;
   published
@@ -259,7 +276,7 @@ type
 //   fvaluebuffer: msestring;
 //   fvalidating: boolean;
    fisftwidestring: boolean;
-   fdefaultexpression: msestring;
+   fdefaultexpressionstr: msestring;
    fdefaultexpressionbefore: string; 
                   //synchronize with TField.DefaultExpression
    fproviderflags1: providerflags1ty;
@@ -331,6 +348,25 @@ type
    property Transliterate default false;
  end;
 
+ tmseguidfield = class(tmsefield,imsefield)
+  private
+  protected
+   function getasvariant: variant; override;
+   procedure setvarvalue(const avalue: variant); override;
+   function getasstring: string; override;
+   procedure setasstring(const avalue: string); override;
+   function getdefaultwidth: longint; override;
+   function getdatasize: integer; override;
+
+   function getasguid: tguid; override;
+   procedure setasguid(const avalue: tguid); override;
+  public
+   constructor create(aowner: tcomponent); override;
+   property asguid: tguid read getasguid write setasguid;
+   property value: tguid read getasguid write setasguid;
+  published
+ end;
+ 
  tmsenumericfield = class(tnumericfield,imsefield)
   private
    fstate: fieldstatesty;
@@ -1214,7 +1250,7 @@ type
  
  fieldclassty = class of tfield;
  
- fieldclasstypety = (ft_unknown,ft_string,ft_numeric,
+ fieldclasstypety = (ft_unknown,ft_string,ft_guid,ft_numeric,
                      ft_longint,ft_largeint,ft_smallint,
                      ft_word,ft_autoinc,ft_float,ft_currency,ft_boolean,
                      ft_datetime,ft_date,ft_time,
@@ -1651,50 +1687,9 @@ type
    property values: variantarty read getvalues write setvalues;
  end;
 
- TFieldcracker = class(TComponent)
-  Public
-    FAlignMent : TAlignment;
-    FAttributeSet : String;
-    FCalculated : Boolean;
-    FConstraintErrorMessage : String;
-    FCustomConstraint : String;
-    FDataSet : TDataSet;
-//    FDataSize : Word;
-    FDataType : TFieldType;
-    FDefaultExpression : String;
-    FDisplayLabel : String;
-    FDisplayWidth : Longint;
-{$ifdef mse_fpc_2_4_3}FEditMask: TEditMask;{$endif}
-    FFieldKind : TFieldKind;
-    FFieldName : String;
-    FFieldNo : Longint;
-    FFields : TFields;
-    FHasConstraints : Boolean;
-    FImportedConstraint : String;
-    FIsIndexField : Boolean;
-    FKeyFields : String;
-    FLookupCache : Boolean;
-    FLookupDataSet : TDataSet;
-    FLookupKeyfields : String;
-    FLookupresultField : String;
-    FLookupList: TLookupList;
-    FOffset : Word;
-    FOnChange : TFieldNotifyEvent;
-    FOnGetText: TFieldGetTextEvent;
-    FOnSetText: TFieldSetTextEvent;
-    FOnValidate: TFieldNotifyEvent;
-    FOrigin : String;
-    FReadOnly : Boolean;
-    FRequired : Boolean;
-    FSize : integer;
-    FValidChars : TFieldChars;
-    FValueBuffer : Pointer;
-    FValidating : Boolean;
-  end;
- 
 const
  fieldtypeclasses: array[fieldclasstypety] of fieldclassty = 
-          (tfield,tstringfield,tnumericfield,
+          (tfield,tstringfield,tguidfield,tnumericfield,
            tlongintfield,tlargeintfield,tsmallintfield,
            twordfield,tautoincfield,tfloatfield,tcurrencyfield,
            tbooleanfield,
@@ -1717,7 +1712,7 @@ const
     //ftDataSet, ftOraBlob, ftOraClob, ftVariant, ftInterface,
       ft_unknown,ft_unknown,ft_unknown,ft_variant,ft_unknown,
     //ftIDispatch, ftGuid, ftTimeStamp, ftFMTBcd
-      ft_unknown,ft_unknown,ft_unknown,ft_unknown
+      ft_unknown,  ft_guid,ft_unknown,  ft_unknown
       {$ifdef mse_FPC_2_2}
     //ftFixedWideChar,ftWideMemo
       ,ft_string,    ft_string 
@@ -1730,7 +1725,8 @@ const
  memofcomp = [ftmemo];
  longintfcomp = [ftboolean,ftsmallint,ftinteger,ftword];
  largeintfcomp = longintfcomp + [ftlargeint];
- stringfcomp = [ftstring,ftfixedchar,ftwidestring,ftfixedwidechar,ftwidememo];
+ stringfcomp = [ftstring,ftguid,ftfixedchar,ftwidestring,ftfixedwidechar,
+                ftwidememo];
  booleanfcomp = [ftboolean,ftsmallint,ftinteger,ftword];
       
  fieldcompatibility: array[tfieldtype] of fieldtypesty = (
@@ -1761,6 +1757,7 @@ const
 function getdsfields(const adataset: tdataset;
                   const afields: array of tfield): fieldarty;
                      //[] -> all
+function getfielddefar(const fielddefs: tfielddefs): fielddefarty;
 
 function getmsefieldclass(const afieldtype: tfieldtype): tfieldclass; overload;
 function getmsefieldclass(const afieldtype: fieldclasstypety): tfieldclass; overload;
@@ -1821,19 +1818,25 @@ function idtovariant(const value: int64): variant; //-1 -> null
 function varianttomsestring(const value: variant): msestring; //null -> ''
 function msestringtovariant(const value: msestring): variant; //'' -> null
 
+function dbtrystringtoguid(const value: string; out guid: tguid): boolean;
+function dbstringtoguid(const value: string): tguid;
+function dbguidtostring(const avalue: tguid): string;
+function dbcreateguidstring: string;
+function guidparam(const value: tguid): varrecarty;
+
 function opentodynarrayft(const items: array of tfieldtype): fieldtypearty;
 
 implementation
 uses
  rtlconsts,msefileutils,typinfo,dbconst,msearrayutils,mseformatstr,msebits,
- msereal,variants,msedate,msesys
+ msereal,variants,msedate,msesys,sysconst
  {,msedbgraphics}{$ifdef unix},cwstring{$endif};
 const
  fieldnamedummy = ';%)(mse';
 var
  msefieldtypeclasses: array[fieldclasstypety] of fieldclassty = 
-         // ft_unknown, ft_string,       ft_numeric,
-          (tmsefield,tmsestringfield,tmsenumericfield,
+         // ft_unknown, ft_string,   ft_guid,      ft_numeric,
+          (tmsefield,tmsestringfield,tmseguidfield,tmsenumericfield,
          //  ft_longint,         ft_largeint,    ft_smallint,
            tmselongintfield,tmselargeintfield,tmsesmallintfield,
          //    ft_word,     ft_autoinc,       ft_float,      ft_currency,
@@ -1849,176 +1852,108 @@ var
          //   ft_variant
            tmsevariantfield);
            
-type
- {$ifdef mse_FPC_2_2}
- TFieldDefcracker = class(TNamedItem)
- {$else}
- TFieldDefcracker = class(TCollectionItem)
- {$endif}
-  Private
-    FDataType : TFieldType;
-    FFieldNo : Longint;
-    FInternalCalcField : Boolean;
-    FPrecision : Longint;
-    FRequired : Boolean;
-    FSize : integer;
- end;
+type 
+ tdataset1 = class(tdataset);
+ tfielddef1 = class(tfielddef);
+ tcollection1 = class(tcollection);
+ tparam1 = class(tparam);
 
- tfielddefcrackerxx = class(tfielddefcracker) //no "not used" compiler messages 
-  public
-   property DataType : TFieldType read FDataType;
-   property FieldNo : Longint read FFieldNo;
-   property InternalCalcField : Boolean read FInternalCalcField;
-   property Precision : Longint read FPrecision;
-   property Required : Boolean read FRequired;
-   property Size : integer read FSize;
+function dbtrystringtoguid(const value: string; out guid: tguid): boolean;
+var
+ int1: integer;
+ po1: pchar;
+ 
+ function readbyte: byte;
+ var 
+  by1: byte;
+ begin
+  by1:= hexchars[po1^];
+  inc(po1);
+  if shortint(by1) < 0 then begin
+   dbtrystringtoguid:= false;
+  end;
+  result:= hexchars[po1^];
+  inc(po1);
+  if shortint(result) < 0 then begin
+   dbtrystringtoguid:= false;
+  end;
+  result:= result or (by1 shl 4);
  end;
  
-  TCollectioncracker = class(TPersistent)
-   private
-    FItemClass: TCollectionItemClass;
-  end;
-  TParamcracker = class(TCollectionItem)
-  private
-    FNativeStr: string;
-    FValue: Variant;
-    FPrecision: Integer;
-    FNumericScale: Integer;
-    FName: string;
-    FDataType: TFieldType;
-    FBound: Boolean;
-    FParamType: TParamType;
-    FSize: Integer;
-  end;
-  
-  TParamcrackerxx = class(tparamcracker) //no "not used" compiler messages
-  public
-    property NativeStr: string read FNativeStr;
-    property Value: Variant read FValue;
-    property Precision: Integer read FPrecision;
-    property NumericScale: Integer read FNumericScale;
-    property Name: string read FName;
-    property DataType: TFieldType read FDataType;
-    property Bound: Boolean read FBound;
-    property ParamType: TParamType read FParamType;
-    property Size: Integer read FSize;
-  end;
-  
-  TDataSetcracker = class(TComponent)
-   Private
-{$ifdef mse_fpc_2_6}
-    FOpenAfterRead : boolean;
-    FActiveRecord: Longint;
-    FAfterCancel: TDataSetNotifyEvent;
-    FAfterClose: TDataSetNotifyEvent;
-    FAfterDelete: TDataSetNotifyEvent;
-    FAfterEdit: TDataSetNotifyEvent;
-    FAfterInsert: TDataSetNotifyEvent;
-    FAfterOpen: TDataSetNotifyEvent;
-    FAfterPost: TDataSetNotifyEvent;
-    FAfterRefresh: TDataSetNotifyEvent;
-    FAfterScroll: TDataSetNotifyEvent;
-    FAutoCalcFields: Boolean;
-    FBOF: Boolean;
-    FBeforeCancel: TDataSetNotifyEvent;
-    FBeforeClose: TDataSetNotifyEvent;
-    FBeforeDelete: TDataSetNotifyEvent;
-    FBeforeEdit: TDataSetNotifyEvent;
-    FBeforeInsert: TDataSetNotifyEvent;
-    FBeforeOpen: TDataSetNotifyEvent;
-    FBeforePost: TDataSetNotifyEvent;
-    FBeforeRefresh: TDataSetNotifyEvent;
-    FBeforeScroll: TDataSetNotifyEvent;
-    FBlobFieldCount: Longint;
-    FBlockReadSize: Integer;
-    FBookmarkSize: Longint;
-    FBuffers : TBufferArray;
-    FBufferCount: Longint;
-    FCalcBuffer: PChar;
-    FCalcFieldsSize: Longint;
-    FConstraints: TCheckConstraints;
-    FDisableControlsCount : Integer;
-    FDisableControlsState : TDatasetState;
-    FCurrentRecord: Longint;
-    FDataSources : TList;
-{$else}
-    FOpenAfterRead : boolean;
-    FActiveRecord: Longint;
-    FAfterCancel: TDataSetNotifyEvent;
-    FAfterClose: TDataSetNotifyEvent;
-    FAfterDelete: TDataSetNotifyEvent;
-    FAfterEdit: TDataSetNotifyEvent;
-    FAfterInsert: TDataSetNotifyEvent;
-    FAfterOpen: TDataSetNotifyEvent;
-    FAfterPost: TDataSetNotifyEvent;
-    FAfterRefresh: TDataSetNotifyEvent;
-    FAfterScroll: TDataSetNotifyEvent;
-    FAutoCalcFields: Boolean;
-    FBOF: Boolean;
-    FBeforeCancel: TDataSetNotifyEvent;
-    FBeforeClose: TDataSetNotifyEvent;
-    FBeforeDelete: TDataSetNotifyEvent;
-    FBeforeEdit: TDataSetNotifyEvent;
-    FBeforeInsert: TDataSetNotifyEvent;
-    FBeforeOpen: TDataSetNotifyEvent;
-    FBeforePost: TDataSetNotifyEvent;
-    FBeforeRefresh: TDataSetNotifyEvent;
-    FBeforeScroll: TDataSetNotifyEvent;
-    FBlobFieldCount: Longint;
-    FBookmarkSize: Longint;
-    FBuffers : TBufferArray;
-    FBufferCount: Longint;
-    FCalcBuffer: PChar;
-    FCalcFieldsSize: Longint;
-    FConstraints: TCheckConstraints;
-    FDisableControlsCount : Integer;
-    FDisableControlsState : TDatasetState;
-    FCurrentRecord: Longint;
-    FDataSources : TList;
-  {$endif}
-  end;
+ function checkhyphen: boolean; inline;
+ begin
+  result:= po1^ = '-';
+  inc(po1);
+ end;
 
-  TDataSetcrackerxx = class(TDataSetcracker) //no "not used note"
-   public
-    property OpenAfterRead : boolean read FOpenAfterRead;
-    property ActiveRecord: Longint read FActiveRecord;
-    property AfterCancel: TDataSetNotifyEvent read FAfterCancel;
-    property AfterClose: TDataSetNotifyEvent read FAfterClose;
-    property AfterDelete: TDataSetNotifyEvent read FAfterDelete;
-    property AfterEdit: TDataSetNotifyEvent read FAfterEdit;
-    property AfterInsert: TDataSetNotifyEvent read FAfterInsert;
-    property AfterOpen: TDataSetNotifyEvent read FAfterOpen;
-    property AfterPost: TDataSetNotifyEvent read FAfterPost;
-    property AfterRefresh: TDataSetNotifyEvent read FAfterRefresh;
-    property AfterScroll: TDataSetNotifyEvent read FAfterScroll;
-    property AutoCalcFields: Boolean read FAutoCalcFields;
-    property BOF: Boolean read FBOF;
-    property BeforeCancel: TDataSetNotifyEvent read FBeforeCancel;
-    property BeforeClose: TDataSetNotifyEvent read FBeforeClose;
-    property BeforeDelete: TDataSetNotifyEvent read FBeforeDelete;
-    property BeforeEdit: TDataSetNotifyEvent read FBeforeEdit;
-    property BeforeInsert: TDataSetNotifyEvent read FBeforeInsert;
-    property BeforeOpen: TDataSetNotifyEvent read FBeforeOpen;
-    property BeforePost: TDataSetNotifyEvent read FBeforePost;
-    property BeforeRefresh: TDataSetNotifyEvent read FBeforeRefresh;
-    property BeforeScroll: TDataSetNotifyEvent read FBeforeScroll;
-    property BlobFieldCount: Longint read FBlobFieldCount;
-    property BookmarkSize: Longint read FBookmarkSize;
-    property Buffers : TBufferArray read FBuffers;
-    property BufferCount: Longint read FBufferCount;
-    property CalcBuffer: PChar read FCalcBuffer;
-    property CalcFieldsSize: Longint read FCalcFieldsSize;
-    property Constraints: TCheckConstraints read FConstraints;
-    property DisableControlsCount : Integer read FDisableControlsCount;
-    property DisableControlsState : TDatasetState read FDisableControlsState;
-    property CurrentRecord: Longint read Fcurrentrecord;
-    property DataSources : TList read FDataSources;
-   {$ifdef mse_fpc_2_6}
-    property BlockReadSize: Integer read FBlockReadSize;
-   {$endif}
+begin
+ po1:= pointer(value);
+ result:= length(value) = guidbuffersize;
+ if not result and (length(value) = guidbuffersize+2) and (value[1]='{') and
+                              (value[guidbuffersize+2]='}') then begin
+  inc(po1);
+  result:= true;
+ end;  
+ if result then begin
+  with guid do begin
+   time_low:= (readbyte shl 24) or (readbyte shl 16) or (readbyte shl 8) or
+                                                                     readbyte;
+   if checkhyphen then begin
+    time_mid:= (readbyte shl 8) or readbyte;
+    if checkhyphen then begin
+     time_hi_and_version:= (readbyte shl 8) or readbyte;
+     if checkhyphen then begin
+      clock_seq_hi_and_reserved:= readbyte;
+      clock_seq_low:= readbyte;
+      if checkhyphen then begin
+       for int1:= 0 to high(node) do begin
+        node[int1]:= readbyte;
+       end;
+      end;
+     end;
+    end;
+   end;
   end;
-  
- tdataset1 = class(tdataset);
+ end;
+end;
+
+function dbstringtoguid(const value: string): tguid;
+begin
+ if not dbtrystringtoguid(value,result) then begin
+  raise econverterror.createfmt(sinvalidguid, [value]);
+ end;
+end;
+
+function dbguidtostring(const avalue: tguid): string;
+var
+ int1: integer;
+begin
+ with avalue do begin
+  result:= valtohex(time_low)+'-'+valtohex(time_mid)+'-'+
+           valtohex(time_hi_and_version)+'-'+
+           valtohex(clock_seq_hi_and_reserved)+valtohex(clock_seq_low)+'-';  
+  for int1:= 0 to high(node) do begin
+   result:= result+valtohex(node[int1]);
+  end;
+ end;
+end;
+
+function dbcreateguidstring: string;
+var
+ id: tguid;
+begin
+ createguid(id);
+ result:= dbguidtostring(id);
+end;
+
+function guidparam(const value: tguid): varrecarty;
+begin
+ setlength(result,1);
+ with result[0] do begin
+  vtype:= mse_vtguid;
+  vpointer:= @value;
+ end;
+end;
 
 function opentodynarrayft(const items: array of tfieldtype): fieldtypearty;
 var
@@ -2146,6 +2081,22 @@ begin
    for int1:= 0 to high(result) do begin
     result[int1]:= fields[int1];
    end;
+  end;
+ end;
+end;
+
+function getfielddefar(const fielddefs: tfielddefs): fielddefarty;
+var
+ po1: pfielddefty;
+ int1: integer;
+begin
+ setlength(result,fielddefs.count);
+ for int1:= 0 to high(result) do begin
+  po1:= @result[int1];
+  with fielddefs[int1] do begin
+   po1^.datatype:= datatype;
+   po1^.size:= size;
+   po1^.name:= name;
   end;
  end;
 end;
@@ -2590,7 +2541,7 @@ begin
  end
  else begin
   case field.datatype of
-   ftstring: begin
+   ftstring,ftguid: begin
     if not (field is tmsestringfield) {or 
          (tmsestringfield(field).fdsintf = nil)} then begin
      result:= encodesqlstring(field.asstring);
@@ -2674,7 +2625,7 @@ begin
     ftwidestring: begin
      result:= encodesqlstring(aswidestring);
     end;
-    ftstring: begin
+    ftstring,ftguid: begin
      result:= encodesqlstring(asstring);
     end;
     ftmemo: begin
@@ -2745,7 +2696,7 @@ begin
   end
   else begin
    case field.datatype of
-    ftString,ftFixedChar,ftmemo,ftblob: begin
+    ftString,ftFixedChar,ftmemo,ftblob,ftguid: begin
      str1:= field.asstring;
      ds1.settempstate(astate); 
      result:= (field.isnull xor isnull) or (str1 <> field.asstring);
@@ -3527,6 +3478,17 @@ begin
  setdata(nil);
 end;
 
+
+function tmsefield.assql: string;
+begin
+ result:= fieldtosql(self);
+end;
+
+function tmsefield.asoldsql: string;
+begin
+ result:= fieldtooldsql(self);
+end;
+
 {$ifdef hasaswidestring}
 function tmsefield.getaswidestring: widestring;
 begin
@@ -3786,14 +3748,14 @@ function tmsestringfield.getdefaultexpression: msestring;
 begin
  if inherited defaultexpression <> fdefaultexpressionbefore then begin
   fdefaultexpressionbefore:= inherited defaultexpression;
-  fdefaultexpression:= fdefaultexpressionbefore;
+  fdefaultexpressionstr:= fdefaultexpressionbefore;
  end;
- result:= fdefaultexpression;
+ result:= fdefaultexpressionstr;
 end;
 
 procedure tmsestringfield.setdefaultexpression(const avalue: msestring);
 begin
- fdefaultexpression:= avalue;
+ fdefaultexpressionstr:= avalue;
  try
   fdefaultexpressionbefore:= avalue;
   inherited defaultexpression:= fdefaultexpressionbefore;
@@ -3914,6 +3876,80 @@ end;
 procedure tmsememofield.gettext(var thetext: string; adisplaytext: boolean);
 begin
  thetext:= asstring;
+end;
+
+{ tmseguidfield }
+
+constructor tmseguidfield.create(aowner: tcomponent);
+begin
+ inherited;
+ setdatatype(ftguid);
+end;
+
+function tmseguidfield.getasstring: string;
+var
+ id1: tguid;
+begin
+ if not getdata(@id1) then begin
+  result:= '';
+ end
+ else begin
+  result:= dbguidtostring(id1);
+ end;
+end;
+
+procedure tmseguidfield.setasstring(const avalue: string);
+begin
+ if avalue = '' then begin
+  clear;
+ end
+ else begin
+  if avalue[1] = '{' then begin
+   asguid:= stringtoguid(avalue);
+  end
+  else begin
+   asguid:= dbstringtoguid(avalue);
+  end;
+ end;
+end;
+
+function tmseguidfield.getdefaultwidth: longint;
+begin
+ result:= guidbuffersize;
+end;
+
+function tmseguidfield.getasguid: tguid;
+begin
+ if not getdata(@result) then begin
+  result:= GUID_NULL;
+ end;
+end;
+
+procedure tmseguidfield.setasguid(const avalue: tguid);
+begin
+ setdata(@avalue);
+end;
+
+function tmseguidfield.getasvariant: variant;
+var
+ id1: tguid;
+begin
+ if not getdata(@id1) then begin
+  result:= null;
+ end
+ else begin
+  result:= dbguidtostring(id1);
+ end;
+end;
+
+procedure tmseguidfield.setvarvalue(const avalue: variant);
+begin
+ asstring:= avalue;
+end;
+
+function tmseguidfield.getdatasize: integer;
+begin
+ result:= sizeof(tguid);
 end;
 
 { tmsenumericfield }
@@ -7370,7 +7406,7 @@ begin
   }
   for int1:= 0 to fielddefs.count - 1 do begin
 {$warnings off}
-   with tfielddefcracker(fielddefs[int1]) do begin
+   with tfielddef1(fielddefs[int1]) do begin
 {$warnings on}
     if ffieldno = 0 then begin
      ffieldno:= int1 + 1;
@@ -8269,7 +8305,7 @@ constructor tmseparams.create(aowner: tpersistent);
 begin
  inherited create(aowner);
 {$warnings off}
- tcollectioncracker(self).fitemclass:= tmseparam;
+ tcollection1(self).fitemclass:= tmseparam;
 {$warnings on}
 end;
 
@@ -8737,7 +8773,7 @@ procedure tmseparam.setasvariant(const avalue: variant);
 begin
  inherited setasvariant(avalue);
 {$warnings off}
- tparamcracker(self).fbound:= not varisclear(avalue);
+ tparam1(self).fbound:= not varisclear(avalue);
 {$warnings on}
 end;
 //{$endif mse_withpublishedparamvalue}
@@ -8835,7 +8871,7 @@ var
 begin
  if (dataset <> nil) then begin
 {$warnings off}
-  with tdatasetcracker(dataset) do begin
+  with tdataset1(dataset) do begin
 {$warnings on}
    int1:= fdatasources.indexof(self);
    if int1 >= 0 then begin

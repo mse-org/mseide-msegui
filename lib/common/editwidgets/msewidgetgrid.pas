@@ -19,7 +19,7 @@ unit msewidgetgrid;
 interface
 uses
  mseclasses,msegrids,msegui,msegraphutils,mseglob,mseguiglob,mseeditglob,
- Classes,msemenus,msearrayutils,
+ classes,mclasses,msemenus,msearrayutils,
  msegraphics,mseevent,msedatalist,msetypes,msepointer,msestrings,
  msegridsglob{$ifdef mse_with_ifi},mseificomp{$endif};
 
@@ -3339,16 +3339,19 @@ begin
     setlength(ar4,high(ar4)); //remove terminator
    end;
    int5:= row;
+   if int5 < 0 then begin
+    int5:= 0;
+   end;
    beginupdate;
    try
     datacols.clearselection;
-    int1:= row;
+//    int1:= row;
     bo2:= og_rowinserting in optionsgrid;
     if bo2 then begin
-     insertrow(row,length(ar4));
+     insertrow(int5,length(ar4));
     end;
-    if high(ar4) >= rowcount - int1 then begin
-     setlength(ar4,rowcount-int1);
+    if high(ar4) >= rowcount - int5 then begin
+     setlength(ar4,rowcount-int5);
     end;
     for int1:= 0 to high(ar4) do begin
      if bo2 then begin

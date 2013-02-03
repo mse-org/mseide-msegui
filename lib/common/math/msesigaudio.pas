@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2010 by Martin Schreiber
+{ MSEgui Copyright (c) 2010-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -11,7 +11,7 @@ unit msesigaudio;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- mseaudio,msesignal,classes,msethread,msetypes;
+ mseaudio,msesignal,classes,mclasses,msethread,msetypes;
  
 const 
  defaultblocksize = 1000;
