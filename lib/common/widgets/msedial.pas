@@ -158,6 +158,8 @@ type
    function pos: integer;
    procedure paint(const acanvas: tcanvas);
    property visible: boolean read getvisible write setvisible;
+   property active: boolean read finfo.active;
+   property limited: boolean read finfo.limited;
   published
    property value: realty read finfo.value write setvalue {stored false};
    property options: dialmarkeroptionsty read finfo.options 

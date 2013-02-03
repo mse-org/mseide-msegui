@@ -99,8 +99,8 @@ type
    function ymarkertochart(const avalue: real; const adial: integer): integer;
    function xcharttomarker(const apos: integer; const adial: integer): real;
    function ycharttomarker(const apos: integer; const adial: integer): real;
-   function getmarker(const apos: pointty; out isy: boolean;
-                                         out adial,aindex: integer): boolean; 
+   function getmarker(const apos: pointty; const nolimited: boolean;
+                         out isy: boolean; out adial,aindex: integer): boolean; 
 
    procedure tracehint(const atrace,aindex: integer);
    procedure markerhint(const apos: pointty; const isy: boolean;
@@ -512,7 +512,7 @@ begin
       end;
      end;
      if (ceo_markerhint in foptions) and
-                                   getmarker(info.pos,bo1,int1,int2) then begin
+                               getmarker(info.pos,true,bo1,int1,int2) then begin
       markerhint(info.pos,bo1,int1,int2);
       exit;
 //      include(info.eventstate,es_processed);
@@ -933,7 +933,7 @@ begin
  end
  else begin
   if not sender.hascurrentobjects or (cems_markermoving in fmovestate) then begin
-   result:= getmarker(sender.pickrect.pos,bo1,int1,int1);
+   result:= getmarker(sender.pickrect.pos,false,bo1,int1,int1);
    if result then begin
     if bo1 then begin
      shape:= cr_sizever;
@@ -1013,22 +1013,12 @@ begin
    objects:= encodenodes(int1,int2);
   end
   else begin
-  {
-   if getmarker(rect.pos,bo1,int1,int2) then begin
-    objects:= encodemarker(bo1,int1,int2);
-   end
-   else begin
-    objects:= nil;
-   end;
-   }
-//{
    objects:= nil;
    if sender.picking then begin
-    if getmarker(sender.pickpos,bo1,int1,int2) then begin
+    if getmarker(sender.pickpos,false,bo1,int1,int2) then begin
      objects:= encodemarker(bo1,int1,int2);
     end;
    end;
-//}
   end;
  end;
 end;
@@ -1634,7 +1624,8 @@ begin
  change;
 end;
 
-function tcustomchartedit.getmarker(const apos: pointty; out isy: boolean;
+function tcustomchartedit.getmarker(const apos: pointty;
+       const nolimited: boolean; out isy: boolean;
                                          out adial,aindex: integer): boolean; 
 var
  int1,int3: integer;
@@ -1646,6 +1637,7 @@ begin
    for int1:= 0 to high(tdialmarkers1(markers).fitems) do begin
     marker1:= tdialmarker(tdialmarkers1(markers).fitems[int1]);
     if not (dmo_fix in marker1.options) and 
+        (not nolimited or not marker1.limited) and marker1.active and
                  (abs(apos.x-marker1.pos) <= markersnapdist) then begin
      result:= true;
      isy:= false;
@@ -1661,6 +1653,7 @@ begin
    for int1:= 0 to high(tdialmarkers1(markers).fitems) do begin
     marker1:= tdialmarker(tdialmarkers1(markers).fitems[int1]);
     if not (dmo_fix in marker1.options) and 
+        (not nolimited or not marker1.limited) and marker1.active and
                     (abs(apos.y-marker1.pos) <= markersnapdist) then begin
      result:= true;
      isy:= true;
