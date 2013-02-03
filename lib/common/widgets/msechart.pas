@@ -553,8 +553,6 @@ type
    property colorclient default cl_foreground;
  end;
 
- rectsidety = (rs_left,rs_top,rs_right,rs_bottom);
- rectsidesty = set of rectsidety;
  optionchartty = (oca_autofitleft,oca_autofittop,oca_autofitright,
                     oca_autofitbottom); //same layout as rectsidesty
  optionschartty = set of optionchartty;
@@ -624,7 +622,7 @@ type
     //idialcontroller
    procedure directionchanged(const dir,dirbefore: graphicdirectionty);
    function getdialrect: rectty;
-   function getdialsize: sizety;
+   function getlimitrect: rectty;
    procedure internalcreateframe; override;
    procedure defineproperties(filer: tfiler); override;
     //istatfile
@@ -3306,9 +3304,9 @@ begin
  end;
 end;
 
-function tcuchart.getdialsize: sizety;
+function tcuchart.getlimitrect: rectty;
 begin
- result:= clientsize;
+ result:= innerclientrect;
 end;
 
 procedure tcuchart.internalcreateframe;

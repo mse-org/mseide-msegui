@@ -154,7 +154,10 @@ type
  end;
 }
  bitmapoptionty = (bmo_monochrome,bmo_masked,bmo_colormask,
-                   bmo_storeorigformat,bmo_runtimeformatdata);
+                   bmo_storeorigformat, //needs mseformat*read unit at runtime
+                                        //in uses
+                   bmo_runtimeformatdata); //do not clear origformatdata after
+                                           //load at runtime
  bitmapoptionsty = set of bitmapoptionty;
 
  tmaskedbitmap = class(tbitmap,iobjectlink)

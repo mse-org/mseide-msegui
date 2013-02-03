@@ -212,6 +212,7 @@ type
    property tracehint_captionx;
    property tracehint_captiony;
    property options;
+   property optionschart;
    property onchange;
    property ontracehint;
    property onmarkerhint;
@@ -252,6 +253,7 @@ type
    property tracehint_captionx;
    property tracehint_captiony;
    property options;
+   property optionschart;
    property onchange;
    property ontracehint;
    property onmarkerhint;
@@ -310,6 +312,7 @@ type
    property tracehint_captionx;
    property tracehint_captiony;
    property options;
+   property optionschart;
    property onchange;
    property ontracehint;
    property onmarkerhint;
