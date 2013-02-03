@@ -41,6 +41,9 @@ type
  markerhinteventty = procedure(const sender: tcustomchartedit;
           const isy: boolean; const adial,aindex: integer;
                                      var ahint: hintinfoty) of object;
+ markerseteventty = procedure(const sender: tcustomchartedit;
+          const isy: boolean; const adial,aindex: integer;
+                                     var avalue: realty) of object;
                                         
  tcustomchartedit = class(tcustomchart,iobjectpicker)
   private
@@ -59,6 +62,8 @@ type
    fonmarkerhint: markerhinteventty;
    fnodehintindex: integer;
    fnodehinttrace: integer;
+   fonsetmarker: markerseteventty;
+   fonmarkerentered: notifyeventty;
    procedure setactivetrace(avalue: integer);
    function limitmoveoffset(const aoffset: pointty): pointty;
    function getreadonly: boolean;
@@ -147,6 +152,9 @@ type
    property options: charteditoptionsty read foptions
                                                  write setoptions default [];
    property onchange: notifyeventty read fonchange write fonchange;
+   property onsetmarker: markerseteventty read fonsetmarker write fonsetmarker;
+   property onmarkerentered: notifyeventty read fonmarkerentered
+                                                        write fonmarkerentered;
    property ontracehint: tracehinteventty read fontracehint write fontracehint;
    property onmarkerhint: markerhinteventty read fonmarkerhint 
                                                          write fonmarkerhint;
@@ -214,6 +222,8 @@ type
    property options;
    property optionschart;
    property onchange;
+   property onsetmarker;
+   property onmarkerentered;
    property ontracehint;
    property onmarkerhint;
  end;
@@ -255,6 +265,8 @@ type
    property options;
    property optionschart;
    property onchange;
+   property onsetmarker;
+   property onmarkerentered;
    property ontracehint;
    property onmarkerhint;
  end;
@@ -314,6 +326,8 @@ type
    property options;
    property optionschart;
    property onchange;
+   property onsetmarker;
+   property onmarkerentered;
    property ontracehint;
    property onmarkerhint;
  end;
@@ -1241,9 +1255,16 @@ begin
     end
     else begin
      if offs.y <> 0 then begin
-      marker1.value:= ycharttomarker(
+      rea1:= ycharttomarker(
                  ymarkertochart(marker1.value,dialindex)+offs.y,dialindex);
+      if canevent(tmethod(fonsetmarker)) then begin
+       fonsetmarker(self,true,dialindex,int1,rea1);
+      end;
+      marker1.value:= rea1;
       domarkerchange;
+      if canevent(tmethod(fonmarkerentered)) then begin
+       fonmarkerentered(self);
+      end;
      end;
     end;
    end;
@@ -1260,10 +1281,17 @@ begin
      marker1.value:= xdials[dialindex].markers[int1-1].value;
     end
     else begin
-     if offs.y <> 0 then begin
-      marker1.value:= xcharttomarker(
+     if offs.x <> 0 then begin
+      rea1:= xcharttomarker(
                xmarkertochart(marker1.value,dialindex) + offs.x,dialindex);
+      if canevent(tmethod(fonsetmarker)) then begin
+       fonsetmarker(self,false,dialindex,int1,rea1);
+      end;
+      marker1.value:= rea1;
       domarkerchange;
+      if canevent(tmethod(fonmarkerentered)) then begin
+       fonmarkerentered(self);
+      end;
      end;
     end;
    end;
