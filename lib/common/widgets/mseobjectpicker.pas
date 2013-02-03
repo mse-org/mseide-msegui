@@ -97,7 +97,7 @@ type
    property mouseoverobjects: integerarty read fmouseoverobjects;
    property selectobjects: integerarty read fselectobjects;
    property currentobjects: integerarty read getcurrentobjects;
-             //mouseoverobjects ot selectobjects dependent on state
+             //mouseoverobjects or selectobjects dependent on state
    property options: objectpickeroptionsty read foptions write foptions;
    property state: objectpickerstatesty read fstate;
    property pickoffset: pointty read fpickoffset;
@@ -583,6 +583,7 @@ procedure tobjectpicker.clear;
 begin
  fselectobjects:= nil;
  fmouseoverobjects:= nil;
+// exclude(fstate,ops_moving);
 end;
 
 function tobjectpicker.hasselectobjects: boolean;

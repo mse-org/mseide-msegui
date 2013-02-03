@@ -70,6 +70,7 @@ type
    procedure setreadonly(const avalue: boolean);
    procedure setoptions(const avalue: charteditoptionsty);
    procedure dopickmove(const sender: tobjectpicker);
+   procedure setoptionsedit(const avalue: optionseditty);
   protected
    procedure resetnodehint;
    function hasactivetrace: boolean;
@@ -146,7 +147,7 @@ type
    property activetrace: integer read factivetrace 
                            write setactivetrace default 0;
    property optionsedit: optionseditty read foptionsedit 
-                           write foptionsedit default defaultchartoptionsedit;
+                           write setoptionsedit default defaultchartoptionsedit;
    property snapdist: integer read fsnapdist write fsnapdist 
                                               default defaultsnapdist;
    property options: charteditoptionsty read foptions
@@ -1004,16 +1005,18 @@ var
  bo1: boolean; 
  rect: rectty;
 begin
+ objects:= nil;
  rect:= sender.pickrect;
  if sender.rectselecting then begin
-  objects:= encodenodes(factivetrace,nodesinrect(rect));
+  if not readonly then begin
+   objects:= encodenodes(factivetrace,nodesinrect(rect));
+  end;
  end
  else begin
   if nearestnode(rect.pos,false,int1,int2) then begin
    objects:= encodenodes(int1,int2);
   end
   else begin
-   objects:= nil;
    if sender.picking then begin
     if getmarker(sender.pickpos,false,bo1,int1,int2) then begin
      objects:= encodemarker(bo1,int1,int2);
@@ -1121,22 +1124,28 @@ begin
  end
  else begin
   exclude(fmovestate,cems_markermoving);
-  if decodenodes(sender.currentobjects,trace1,objs) then begin
-   setlength(ar1,length(objs));
-   for int1:= 0 to high(objs) do begin
-    pt1:= nodepos(trace1,objs[int1]);
-    ar1[int1]:= pt1;
-    if pt1.x < mi.x then begin
-     mi.x:= pt1.x;
-    end;
-    if pt1.y < mi.y then begin
-     mi.y:= pt1.y;
-    end;
-    if pt1.x > ma.x then begin
-     ma.x:= pt1.x;
-    end;
-    if pt1.y > ma.y then begin
-     ma.y:= pt1.y;
+  if readonly then begin
+   sender.clear;
+   exit;
+  end
+  else begin
+   if decodenodes(sender.currentobjects,trace1,objs) then begin
+    setlength(ar1,length(objs));
+    for int1:= 0 to high(objs) do begin
+     pt1:= nodepos(trace1,objs[int1]);
+     ar1[int1]:= pt1;
+     if pt1.x < mi.x then begin
+      mi.x:= pt1.x;
+     end;
+     if pt1.y < mi.y then begin
+      mi.y:= pt1.y;
+     end;
+     if pt1.x > ma.x then begin
+      ma.x:= pt1.x;
+     end;
+     if pt1.y > ma.y then begin
+      ma.y:= pt1.y;
+     end;
     end;
    end;
   end;
@@ -1338,7 +1347,7 @@ end;
 procedure tcustomchartedit.endpickmove(const sender: tobjectpicker);
 begin
  dopickmove(sender);
- if not (cems_markermoving in fmovestate) then begin
+ if not (cems_markermoving in fmovestate) and not readonly then begin
   addpoint1(sender.mouseeventinfopo^.pos,subpoint(fpickref,sender.pickoffset));
  end;
  exclude(fmovestate,cems_markermoving);
@@ -1662,6 +1671,19 @@ begin
      exit;
     end;
    end;
+  end;
+ end;
+end;
+
+procedure tcustomchartedit.setoptionsedit(const avalue: optionseditty);
+begin
+ if foptionsedit <> avalue then begin
+  foptionsedit:= avalue;
+  if oe_readonly in foptionsedit then begin
+   fobjectpicker.options:= fobjectpicker.options - [opo_rectselect];
+  end
+  else begin
+   fobjectpicker.options:= fobjectpicker.options + [opo_rectselect];
   end;
  end;
 end;
