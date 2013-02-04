@@ -84,7 +84,7 @@ var
 begin
  filedialog.controller.filename:= filedialog.controller.lastdir;
  filedialog.controller.filterlist.asarraya:= graphicfilefilternames;
- filedialog.controller.filterlist.asarrayb:= graphicfilemasks;
+ filedialog.controller.filterlist.asarrayb:= graphicfilefiltermasks;
  if filedialog.execute = mr_ok then begin
   unquotefilename(filedialog.controller.filename,ar1);
   bmp:= tmaskedbitmap.create(false);
@@ -100,7 +100,12 @@ begin
     if bmp.masked and bmp.colormask then begin
      imagelist.colormask:= true;
     end;
-    imagelist.addimage(bmp,stretch.value);
+    if stretch.value then begin
+     imagelist.addimage(bmp,[al_stretchx,al_stretchy,al_intpol]);
+    end
+    else begin
+     imagelist.addimage(bmp);
+    end;
    end;
   finally
    bmp.Free;

@@ -72,8 +72,9 @@ procedure registergraphicformat(const aformatlabel: string;
                            const afiltername: msestring;
                            const afilemask: array of msestring);
 function graphicformatlabels: stringarty;
+function graphicfilemasks: filenamearty;
 function graphicfilefilternames: msestringarty;
-function graphicfilemasks: msestringarty;
+function graphicfilefiltermasks: msestringarty;
 function graphicfilefilterlabel(const index: integer): string;
 
 {$ifdef FPC}
@@ -154,7 +155,7 @@ begin
  stackarray(ar1,result);
 end;
 
-function graphicfilemasks: msestringarty;
+function graphicfilefiltermasks: msestringarty;
 var
  ar1: msestringararty;
  int1,int2: integer;
@@ -192,6 +193,19 @@ begin
  for int1:= 0 to high(ar2) do begin
   result[int1+1]:= ar2[int1];
  end;
+end;
+
+function graphicfilemasks: filenamearty;
+var
+ co: integer = 0;
+ int1,int2: integer;
+begin
+ for int1:= 0 to high(formats) do begin
+  for int2:= 0 to high(formats[int1].filemask) do begin
+   additem(result,formats[int1].filemask[int2],co);
+  end;
+ end;
+ setlength(result,co);
 end;
 
 procedure formaterror(const text,format: string);

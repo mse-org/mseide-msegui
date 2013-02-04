@@ -961,7 +961,7 @@ begin
    statfile1.options:= [sfo_memory];
    statfile1.filename:= bmpfiledialogstatname;
    filterlist.asarraya:= graphicfilefilternames;
-   filterlist.asarrayb:= graphicfilemasks;
+   filterlist.asarrayb:= graphicfilefiltermasks;
    captionopen:= mo.c[ord(openimagefile)];;
    statfile:= statfile1;
    statfile.readstat;

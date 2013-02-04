@@ -32,12 +32,6 @@ const
 type
  gckindty = (gck_screen,gck_pixmap,gck_printer,gck_metafile);
  
- alignmentty = (al_left,al_xcentered,al_right,al_top,al_ycentered,al_bottom,
-                al_grayed,
-                al_stretchx,al_stretchy,al_fit,al_tiled,
-                al_intpol,al_or,al_and);
- alignmentsty = set of alignmentty;
-
  drawingflagty = (df_canvasispixmap,df_canvasismonochrome,df_highresfont,
                   df_doublebuffer,
                   df_colorconvert,
@@ -2072,7 +2066,7 @@ begin
   amask:= nil;
  end;
  canvas.internalcopyarea(asource.canvas,asourcerect,
-                         adestrect,acopymode,
+                calcrectalignment(adestrect,asourcerect,aalignment),acopymode,
                          cl_default,amask,aalignment,nullpoint,atransparency);
  if bo1 then begin
   canvas.restore;

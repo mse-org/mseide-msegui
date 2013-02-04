@@ -285,6 +285,13 @@ type
  pgraphicdirectionty = ^graphicdirectionty;
  graphicdirectionsty = set of graphicdirectionty;
  pgraphicdirectionsty = ^graphicdirectionsty;
+
+ alignmentty = (al_left,al_xcentered,al_right,al_top,al_ycentered,al_bottom,
+                al_grayed,
+                al_stretchx,al_stretchy,al_fit,al_tiled,
+                al_intpol,al_or,al_and);
+ alignmentsty = set of alignmentty;
+
  
  fontstylety = (fs_bold,fs_italic,
                 fs_underline,fs_strikeout,fs_selected,fs_blank,
@@ -602,6 +609,8 @@ function clipinrect1(var point: pointty;
 function clipinrect1(var rect: rectty; 
                               const boundsrect: rectty): boolean; overload;
             //true if changed
+function calcrectalignment(const dest: rectty; source: rectty;
+                                 const alignment: alignmentsty): rectty;
 
 function pointinrect(const point: pointty; const rect: rectty): boolean;
      //true if point is in rect
@@ -652,6 +661,53 @@ const
    'Could not create a GLXPixmap.',
    'Could not create canvas window.'
  );
+
+function calcrectalignment(const dest: rectty; source: rectty;
+                                 const alignment: alignmentsty): rectty;
+begin
+ result:= dest;
+ if al_tiled in alignment then begin
+  exit;
+ end;
+ if al_fit in alignment then begin
+  if source.cy * dest.cx > source.cx * dest.cy then begin //fit vert
+   if source.cy <> 0 then begin
+    source.cx:= (source.cx * dest.cy) div source.cy;
+    source.cy:= (source.cy * dest.cy) div source.cy;
+   end;
+  end
+  else begin
+   if source.cx <> 0 then begin
+    source.cy:= (source.cy * dest.cx) div source.cx;
+    source.cx:= (source.cx * dest.cx) div source.cx; //fit horz
+   end;
+  end;
+ end;
+ if al_stretchx in alignment then begin
+  source.cx:= dest.cx;
+ end;
+ if al_stretchy in alignment then begin
+  source.cy:= dest.cy;
+ end;
+ result.size:= source.size;
+ if al_xcentered in alignment then begin
+  result.x:= dest.x + (dest.cx - source.cx) div 2
+ end
+ else begin
+  if al_right in alignment then begin
+   result.x:= dest.x + dest.cx - source.cx;
+  end;
+ end;
+ if al_ycentered in alignment then begin
+  result.y:= dest.y + (dest.cy - source.cy) div 2
+ end
+ else begin
+  if al_bottom in alignment then begin
+   result.y:= dest.y + dest.cy - source.cy;
+  end;
+ end;
+ intersectrect1(result,dest);
+end;
 
 procedure removeduplicatedpoints(var vect: pointarty);
 var
