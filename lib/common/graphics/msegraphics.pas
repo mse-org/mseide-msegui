@@ -1215,13 +1215,21 @@ end;
 {$endif}
 
 procedure movealignment(const source: alignmentsty; var dest: alignmentsty);
+(*
 const
  mask1: alignmentsty = [al_intpol,al_or,al_and];
  mask2: alignmentsty = [al_left,al_xcentered,al_right];
  mask3: alignmentsty = [al_top,al_ycentered,al_bottom];
 var
  value1,value2,value3: alignmentsty;
+*)
 begin
+ dest:= alignmentsty(setsinglebit(longword(source),longword(dest),
+                            [longword([al_intpol,al_or,al_and]),
+                             longword([al_left,al_xcentered,al_right]),
+                             longword([al_top,al_ycentered,al_bottom]),
+                             longword([al_fit,al_tiled])]));
+(*
   value1:= alignmentsty(setsinglebit(
                           {$ifdef FPC}longword{$else}word{$endif}(source),
                           {$ifdef FPC}longword{$else}word{$endif}(dest),
@@ -1236,6 +1244,7 @@ begin
                           {$ifdef FPC}longword{$else}word{$endif}(mask3)));
   dest:= (source - (mask1+mask2+mask3))+
                               (value1*mask1)+(value2*mask2)+(value3*mask3);
+*)
 end;
 
 procedure allocimage(out image: imagety; const asize: sizety;
