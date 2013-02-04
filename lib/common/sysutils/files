@@ -1,9 +1,0 @@
-BPLFILES = \
-  linmseguisysutils
-FILES= \
-  msesysenv\
-  mseprocutils\
-  mseinputcontroller\
-  msefilechange\
-
-
