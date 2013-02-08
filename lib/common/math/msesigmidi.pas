@@ -214,13 +214,13 @@ type
    fbytebuffer: array[0..15] of byte;
    fsigstate: sigmidisourcestatesty;
    fchannels: sigchannelinfoarty;
-   procedure setcommserverintf(const aintf: icommserver);
    procedure registerconnector(const avalue: tsigmidiconnector);
    procedure unregisterconnector(const avalue: tsigmidiconnector);
    procedure dotrackevent; override;
    procedure updatepatch;
    procedure patchchanged;
     //icommclient
+   procedure setcommserverintf(const aintf: icommserver);
    procedure dorxchange(const areader: tcommreader);
   public
    constructor create(avalue: tcomponent); override;

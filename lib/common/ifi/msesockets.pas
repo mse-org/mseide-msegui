@@ -120,7 +120,8 @@ type
    procedure internaldisconnect; override;
    procedure closepipes(const sender: tcustomcommpipes); override;
    procedure doasyncevent(var atag: integer); override;
-  public
+   procedure writedata(const adata: string); override;
+ public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    property pipes: tsocketpipes read fpipes write setpipes;
@@ -452,6 +453,11 @@ begin
  if atag = closepipestag then begin
   disconnect;
  end;
+end;
+
+procedure tcustomsocketclient.writedata(const adata: string);
+begin
+ fpipes.tx.writestr(adata);
 end;
 
 { tserversocketpipes }

@@ -38,9 +38,10 @@ type
   protected
    procedure dotimer;
   public
-   constructor create(const interval: longword; 
-                const ontimer: notifyeventty; const active: boolean;
-                const aoptions: timeroptionsty);
+   constructor create(const interval: longword = 0; 
+                const ontimer: notifyeventty = nil;
+                const active: boolean = false;
+                const aoptions: timeroptionsty = []);
              //activates timer
    destructor destroy; override;
    procedure firependingandstop;
@@ -48,7 +49,7 @@ type
    procedure fire;
    property interval: longword read finterval write setinterval;
              //in microseconds, max +2000 seconds
-             //restarts timer if active
+             //restarts timer if enabled
              //0 -> fire once in mainloop idle
    property singleshot: boolean read getsingleshot write setsingleshot;
    property options: timeroptionsty read foptions write foptions;
