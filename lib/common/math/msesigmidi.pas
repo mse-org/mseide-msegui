@@ -12,7 +12,7 @@ unit msesigmidi;
 interface
 uses
  msesignal,classes,mclasses,msemidi,msetypes,mseclasses,msedatamodules,
- msearrayprops,msehash,msesockets;
+ msearrayprops,msehash,msesercomm;
 const
  defaultmidiattackvalueoptions = [vso_exp,vso_null];
  defaultmidiattackvaluemin = 0.1; //20 dB

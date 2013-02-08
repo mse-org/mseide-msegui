@@ -14,7 +14,7 @@ uses
  classes,mclasses,mseapplication,mseclasses,msearrayprops,mseact,msestrings,
  msetypes,mseevent,
  mseglob,msestream,msepipestream,{msegui,}mseifiglob,typinfo,msebintree,
- msesystypes,msesockets,msecryptio,msethread,msedatalist;
+ msesystypes,msesockets,msecryptio,msethread,msedatalist,msesercomm;
 
 //todo: use icommclient instead of oninputavailable
 
