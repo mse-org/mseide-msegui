@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -333,7 +333,14 @@ type
    procedure releaseobject(const aobject: tobject);
    function ismainthread: boolean;
    function islockthread: boolean;
-   procedure waitforthread(athread: tmsethread); //does unlock-relock before waiting
+   procedure waitforthread(athread: tmsethread); 
+                        //does unlock-relock for waiting
+   function semwait(var sem: semty;  timeoutusec: integer): syserrorty;
+    //does unlock-relock for waiting
+          //timeoutusec <= 0 -> no timeout
+          //sye_ok -> semaphore signaled
+          //sye_timeout -> timeout
+          //sye_semaphore -> error
    procedure wakeupmainthread;
    procedure langchanged; virtual;
    procedure beginwait(const aprocessmessages: boolean = false); virtual;
@@ -1293,6 +1300,20 @@ begin
  int1:= unlockall;
  try
   athread.waitfor;
+ finally
+  relockall(int1);
+ end;
+end;
+
+function tcustomapplication.semwait(var sem: semty;
+                                        timeoutusec: integer): syserrorty;
+                        //does unlock-relock before waiting
+var
+ int1: integer;
+begin
+ int1:= unlockall;
+ try
+  result:= sys_semwait(sem,timeoutusec);
  finally
   relockall(int1);
  end;

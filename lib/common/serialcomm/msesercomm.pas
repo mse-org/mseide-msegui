@@ -263,7 +263,7 @@ type
  tcustomsercommchannel = class;
  commresponseeventty = procedure(const sender: tcustomsercommchannel;
                 var adata: string; var aflags: commresponseflagsty) of object;
- sercommchannelstatety = (sccs_pending);
+ sercommchannelstatety = (sccs_pending,sccs_sync);
  sercommchannelstatesty = set of sercommchannelstatety;
  
  tcustomsercommchannel = class(tmsecomponent,icommclient)
@@ -273,27 +273,37 @@ type
    fonresponse: commresponseeventty;
    ftimer: tsimpletimer;
    ftimeoutus: integer;
+   fsem: semty;
    procedure setsercomm(const avalue: tcustomcommcomp);
    procedure dotimer(const sender: tobject);
   protected
+   fstate: sercommchannelstatesty;
    fexpected: integer;
    fsent: integer;
-   fstate: sercommchannelstatesty;
    fdata: string;
+   fflags: commresponseflagsty;
+   function internaltransmit(const adata: string;
+           const aresponselength: integer; const atimeoutus: integer;
+                                const sync: boolean): syserrorty;
+   procedure checksercomm;
+   procedure doresponse;
     //icommclient
    procedure setcommserverintf(const aintf: icommserver);
    procedure dorxchange(const areader: tcommreader);
-   procedure doresponse(var aflags: commresponseflagsty);
-   procedure checksercomm;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    procedure clear;
    procedure transmit(const adata: string; const aresponselength: integer;
-                      const atimeoutus: integer = -1);
+                      const atimeoutus: integer = -1); overload; //threadsafe
+     //async, answer by onresponse
                       //0 -> timeoutus property,
                       //-1 -> timeoutus + guessed transmission time,
                       //-2 unlimited
+   function transmit(const adata: string; const aresponselength: integer;
+                                                       out aresult: string;
+           const atimeoutus: integer = -1): commresponseflagsty; overload;
+                        //synchronous, threadsafe
    property sercomm: tcustomcommcomp read fsercomm write setsercomm;
    property timeoutus: integer read ftimeoutus write ftimeoutus default 0;
                         //0 -> unlimited,
@@ -317,7 +327,7 @@ procedure connectcryptoio(const acryptoio: tcryptoio; const tx: tcommwriter;
  
 implementation
 uses
- msesys,msestream,msearrayutils,sysutils;
+ msesys,msestream,msearrayutils,sysutils,msebits,msesysintf1;
  
 procedure setcomcomp(const alink: icommclient;
                const acommcomp: tcustomcommcomp; var dest: tcustomcommcomp);
@@ -913,6 +923,7 @@ end;
 
 constructor tcustomsercommchannel.create(aowner: tcomponent);
 begin
+ sys_semcreate(fsem,0);
  ftimer:= tsimpletimer.create(0,@dotimer,false,[to_single]);
  inherited;
 end;
@@ -922,6 +933,7 @@ begin
  clear;
  ftimer.free;
  sercomm:= nil;
+ sys_semdestroy(fsem);
  inherited;
 end;
 
@@ -937,73 +949,114 @@ begin
  fserverintf:= aintf;
 end;
 
-procedure tcustomsercommchannel.doresponse(var aflags: commresponseflagsty);
+procedure tcustomsercommchannel.doresponse;
 begin
- if fsercomm.gethalfduplex then begin
-  fdata:= copy(fdata,fsent+1,bigint);
-  fexpected:= fexpected - fsent;
- end;
- if length(fdata) < fexpected then begin
-  include(aflags,crf_trunc);
- end;
  if canevent(tmethod(fonresponse)) then begin
-  fonresponse(self,fdata,aflags);
+  fonresponse(self,fdata,fflags);
  end;
 end;
 
 procedure tcustomsercommchannel.dorxchange(const areader: tcommreader);
-var
- flags1: commresponseflagsty;
 begin
  if sccs_pending in fstate then begin
   fdata:= fdata + areader.readdatastring;
-  flags1:= [];
+  fflags:= [];
   if areader.eof then begin
-   include(flags1,crf_eof);
+   include(fflags,crf_eof);
   end;
-  if (flags1 <> []) or (length(fdata) >= fexpected) then begin
+  if (fflags <> []) or (length(fdata) >= fexpected) then begin
+   exclude(fstate,sccs_pending);
+   if fsercomm.gethalfduplex then begin
+    fdata:= copy(fdata,fsent+1,bigint);
+    fexpected:= fexpected - fsent;
+   end;
+   if length(fdata) < fexpected then begin
+    include(fflags,crf_trunc);
+   end;
    ftimer.enabled:= false;
-   doresponse(flags1);
+   if sccs_sync in fstate then begin
+    sys_sempost(fsem);
+   end
+   else begin
+    doresponse;
+   end;
   end;
+ end
+ else begin
+  areader.readdatastring; //drop the data
  end;
 end;
 
 procedure tcustomsercommchannel.dotimer(const sender: tobject);
-var
- flags1: commresponseflagsty;
 begin
- flags1:= [crf_timeout];
- doresponse(flags1);
+ fflags:= [crf_timeout];
+ doresponse;
+end;
+
+function tcustomsercommchannel.internaltransmit(const adata: string;
+               const aresponselength: integer; const atimeoutus: integer;
+               const sync: boolean): syserrorty;
+var
+ int1: integer;
+begin
+ result:= sye_ok;
+ application.lock;
+ try
+  clear;
+  checksercomm;
+  fsent:= length(adata);
+  fexpected:= aresponselength;
+  if fsercomm.gethalfduplex then begin
+   fexpected:= fexpected+fsent;
+  end;
+  int1:= ftimeoutus;
+  if atimeoutus <> 0 then begin
+   int1:= atimeoutus;
+  end;
+  if atimeoutus = -2 then begin
+   int1:= 0;
+  end;
+  if int1 = -1 then begin
+   int1:= 2*fsercomm.calctransmissiontime(fexpected+fsent)+ftimeoutus;
+  end;
+  updatebit(longword(fstate),ord(sccs_sync),sync);
+  include(fstate, sccs_pending);
+  fsercomm.writedata(adata);
+  if sync then begin
+   sys_semtrywait(fsem); //clear
+   result:= application.semwait(fsem,int1);
+   exclude(fstate, sccs_pending);
+  end
+  else begin  
+   if int1 > 0 then begin
+    ftimer.interval:= int1;
+    ftimer.enabled:= true;
+   end;
+  end;
+ finally
+  application.unlock;
+ end;
 end;
 
 procedure tcustomsercommchannel.transmit(const adata: string;
                const aresponselength: integer; const atimeoutus: integer = -1);
-var
- int1: integer;
 begin
- clear;
- checksercomm;
- fsent:= length(adata);
- fexpected:= aresponselength;
- if fsercomm.gethalfduplex then begin
-  fexpected:= fexpected+fsent;
+ internaltransmit(adata,aresponselength,atimeoutus,false);
+end;
+
+function tcustomsercommchannel.transmit(const adata: string;
+                      const aresponselength: integer;
+                      out aresult: string;
+                      const atimeoutus: integer = -1): commresponseflagsty;
+                                                       //synchronous
+begin
+ if internaltransmit(adata,aresponselength,atimeoutus,true) <> sye_ok then begin
+  result:= [crf_timeout];
+ end
+ else begin
+  result:= fflags;
  end;
- int1:= ftimeoutus;
- if atimeoutus <> 0 then begin
-  int1:= atimeoutus;
- end;
- if atimeoutus = -2 then begin
-  int1:= 0;
- end;
- if int1 = -1 then begin
-  int1:= fsercomm.calctransmissiontime(fexpected+fsent)+ftimeoutus;
- end;
- include(fstate, sccs_pending);
- fsercomm.writedata(adata);
- if int1 > 0 then begin
-  ftimer.interval:= int1;
-  ftimer.enabled:= true;
- end;
+ aresult:= fdata;
 end;
 
 procedure tcustomsercommchannel.checksercomm;
@@ -1020,7 +1073,7 @@ procedure tcustomsercommchannel.clear;
 begin
  ftimer.enabled:= false;
  fdata:= '';
- fstate:= [];
+ fstate:= fstate-[sccs_pending];
 end;
 
 end.
