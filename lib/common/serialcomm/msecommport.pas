@@ -180,6 +180,7 @@ type
    procedure resetinput;
    procedure resetoutput;
    procedure setrts(active: boolean);
+   procedure setdtr(active: boolean);
    function writestring(const dat: string; timeout: longword = 0;
                 waitforeot: boolean = false): boolean;
   //timeout in us, wenn = 0 -> warten auf uebertragungsende, bei halbduplex sowiso
@@ -982,6 +983,32 @@ begin
   end
   else begin
    escapecommfunction(fhandle,windows.clrrts);
+  end;
+  {$endif}
+ end;
+end;
+
+procedure tcustomrs232.setdtr(active: boolean);
+{$ifndef mswindows}
+var
+ flags: integer;
+{$endif}
+begin
+ if opened then begin
+ {$ifdef UNIX}
+  flags:= TIOCM_DTR;
+  if active then begin
+   ioctl(fhandle,TIOCMBIS,@flags);
+  end
+  else begin
+   ioctl(fhandle,TIOCMBIC,@flags);
+  end;
+  {$else}
+  if active then begin
+   escapecommfunction(fhandle,windows.setdtr);
+  end
+  else begin
+   escapecommfunction(fhandle,windows.clrdtr);
   end;
   {$endif}
  end;

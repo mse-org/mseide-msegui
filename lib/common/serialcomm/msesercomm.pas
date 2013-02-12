@@ -405,6 +405,7 @@ begin
   fpipes.handle:= fport.handle;
  end;
  factive:= true;
+ doafterconnect(fpipes);
 end;
 
 procedure tcustomsercommcomp.internaldisconnect;

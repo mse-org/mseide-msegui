@@ -796,6 +796,8 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   property c: tcustomificlientcontroller read fcontroller 
+                                                         write setcontroller;
    property controller: tcustomificlientcontroller read fcontroller 
                                                          write setcontroller;
   published
@@ -805,6 +807,7 @@ type
   private
    function getcontroller: tvalueclientcontroller;
   public
+   property c: tvalueclientcontroller read getcontroller;
    property controller: tvalueclientcontroller read getcontroller;
  end;
  
@@ -814,6 +817,9 @@ type
    procedure setcontroller(const avalue: tstringclientcontroller);
   protected
    function getcontrollerclass: customificlientcontrollerclassty; override;
+  public
+   property c: tstringclientcontroller read getcontroller
+                                                         write setcontroller;
   published
    property controller: tstringclientcontroller read getcontroller
                                                          write setcontroller;
@@ -825,6 +831,9 @@ type
    procedure setcontroller(const avalue: tdropdownlistclientcontroller);
   protected
    function getcontrollerclass: customificlientcontrollerclassty; override;
+  public
+   property c: tdropdownlistclientcontroller read getcontroller
+                                                         write setcontroller;
   published
    property controller: tdropdownlistclientcontroller read getcontroller
                                                          write setcontroller;
@@ -836,6 +845,9 @@ type
    procedure setcontroller(const avalue: tintegerclientcontroller);
   protected
    function getcontrollerclass: customificlientcontrollerclassty; override;
+  public
+   property c: tintegerclientcontroller read getcontroller
+                                                         write setcontroller;
   published
    property controller: tintegerclientcontroller read getcontroller
                                                          write setcontroller;
@@ -847,6 +859,9 @@ type
    procedure setcontroller(const avalue: tint64clientcontroller);
   protected
    function getcontrollerclass: customificlientcontrollerclassty; override;
+  public
+   property c: tint64clientcontroller read getcontroller
+                                                         write setcontroller;
   published
    property controller: tint64clientcontroller read getcontroller
                                                          write setcontroller;
@@ -858,6 +873,9 @@ type
    procedure setcontroller(const avalue: tenumclientcontroller);
   protected
    function getcontrollerclass: customificlientcontrollerclassty; override;
+  public
+   property c: tenumclientcontroller read getcontroller
+                                                         write setcontroller;
   published
    property controller: tenumclientcontroller read getcontroller
                                                          write setcontroller;
@@ -869,6 +887,9 @@ type
    procedure setcontroller(const avalue: tbooleanclientcontroller);
   protected
    function getcontrollerclass: customificlientcontrollerclassty; override;
+  public
+   property c: tbooleanclientcontroller read getcontroller
+                                                         write setcontroller;
   published
    property controller: tbooleanclientcontroller read getcontroller
                                                          write setcontroller;
@@ -880,6 +901,9 @@ type
    procedure setcontroller(const avalue: trealclientcontroller);
   protected
    function getcontrollerclass: customificlientcontrollerclassty; override;
+  public
+   property c: trealclientcontroller read getcontroller
+                                                         write setcontroller;
   published
    property controller: trealclientcontroller read getcontroller
                                                          write setcontroller;
@@ -891,6 +915,9 @@ type
    procedure setcontroller(const avalue: tdatetimeclientcontroller);
   protected
    function getcontrollerclass: customificlientcontrollerclassty; override;
+  public
+   property c: tdatetimeclientcontroller read getcontroller
+                                                         write setcontroller;
   published
    property controller: tdatetimeclientcontroller read getcontroller
                                                          write setcontroller;
@@ -902,6 +929,9 @@ type
    procedure setcontroller(const avalue: texecclientcontroller);
   protected
    function getcontrollerclass: customificlientcontrollerclassty; override;
+  public
+   property c: texecclientcontroller read getcontroller
+                                                         write setcontroller;
   published
    property controller: texecclientcontroller read getcontroller
                                                          write setcontroller;
@@ -913,6 +943,9 @@ type
    procedure setcontroller(const avalue: tformclientcontroller);
   protected
    function getcontrollerclass: customificlientcontrollerclassty; override;
+  public
+   property c: tformclientcontroller read getcontroller
+                                                         write setcontroller;
   published
    property controller: tformclientcontroller read getcontroller
                                                          write setcontroller;
@@ -924,6 +957,9 @@ type
    procedure setcontroller(const avalue: tgridclientcontroller);
   protected
    function getcontrollerclass: customificlientcontrollerclassty; override;
+  public
+   property c: tgridclientcontroller read getcontroller
+                                                         write setcontroller;
   published
    property controller: tgridclientcontroller read getcontroller
                                                          write setcontroller;
