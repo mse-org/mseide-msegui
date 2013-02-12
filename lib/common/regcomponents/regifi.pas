@@ -71,12 +71,12 @@ begin
  registercomponents('Ifi',[tifiintegerendpoint,tifiint64endpoint,
        tifibooleanendpoint,tifirealendpoint,tifidatetimeendpoint,
        tifistringendpoint,
-       tifiactionlinkcomp,tififormlinkcomp,
-       tifidialoglinkcomp,tifidialog,
        tifiintegerlinkcomp,tifiint64linkcomp,
        tifibooleanlinkcomp,
        tifireallinkcomp,tifidatetimelinkcomp,tifistringlinkcomp,
-       tifidropdownlistlinkcomp,tifienumlinkcomp,
+       tifienumlinkcomp,tifidropdownlistlinkcomp,
+       tifiactionlinkcomp,tififormlinkcomp,
+       tifidialoglinkcomp,tifidialog,
        tifigridlinkcomp,
        tconnectedifidatasource{,tifisqldatasource,}
        {$ifndef mse_no_db}{$ifdef FPC},tifisqlresult{$endif}{$endif}]);
