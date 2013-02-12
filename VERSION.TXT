@@ -1,6 +1,8 @@
 MSEide+MSEgui breaking changes version history
 
-2013-0-20
+2013-02-12
+ t*dispwidget.onchange -> ondatachange.
+2013-01-20
  Forking of classes.pp. Add "mclasses" after "classes" in uses.
 2013-01-19
  Forking of db.pas. Change "db" -> "mdb" in uses.

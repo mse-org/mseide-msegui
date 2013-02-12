@@ -22,7 +22,7 @@ uses
  classes,mseificomp,msedesignintf,regifi_bmp,msepropertyeditors,mseclasses,
  msecomponenteditors,mseificomponenteditors,msestrings,msedatalist,
  {$ifndef mse_no_db}{$ifdef FPC}mseifidbcomp,{$endif}{$endif}
- mseifidialogcomp,mseifigui,
+ mseifidialogcomp,mseifigui,mseifiendpoint,
  typinfo; 
     
 type
@@ -68,7 +68,10 @@ type
  
 procedure register;
 begin
- registercomponents('Ifi',[tifiactionlinkcomp,tififormlinkcomp,
+ registercomponents('Ifi',[tifiintegerendpoint,tifiint64endpoint,
+       tifibooleanendpoint,tifirealendpoint,tifidatetimeendpoint,
+       tifistringendpoint,
+       tifiactionlinkcomp,tififormlinkcomp,
        tifidialoglinkcomp,tifidialog,
        tifiintegerlinkcomp,tifiint64linkcomp,
        tifibooleanlinkcomp,

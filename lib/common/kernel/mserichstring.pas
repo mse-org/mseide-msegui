@@ -70,6 +70,9 @@ type
  richstringaty = array[0..0] of richstringty;
  prichstringaty = ^richstringaty;
 
+ updaterichstringeventty = procedure(const sender: tobject; 
+                                        var avalue: richstringty) of object;
+
  trichstringdatalist = class(tmsestringdatalist)
   private
    fposition: pointty;

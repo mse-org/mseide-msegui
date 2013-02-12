@@ -37,20 +37,6 @@ const
 
 type
 
- changeansistringeventty = procedure(sender: tobject; 
-                                    var avalue: ansistring) of object;
- changestringeventty = procedure(sender: tobject;
-                                    var avalue: msestring) of object;
- changerichstringeventty = procedure(sender: tobject;
-                                    var avalue: richstringty) of object;
- changeintegereventty = procedure(sender: tobject;
-                                    var avalue: integer) of object;
- changerealeventty = procedure(sender: tobject; var avalue: realty) of object;
- changedatetimeeventty = procedure(sender: tobject; 
-                                    var avalue: tdatetime) of object;
- changebooleaneventty = procedure(sender: tobject;
-                                    var avalue: boolean) of object;
-
  tdispframe = class(tcustomcaptionframe)
   public
    constructor create(const intf: icaptionframe);
@@ -126,7 +112,8 @@ type
    ftextrectvalid: boolean;
 {$ifdef mse_with_ifi}
    fifilink: tifilinkcomp;
-//   procedure ifisetvalue(var avalue; var accept: boolean);
+    //iifidatalink
+   fonchange: notifyeventty;
    function getifilinkkind: ptypeinfo;
    procedure setifilink(const avalue: tifilinkcomp);
    function ifigriddata: tdatalist;
@@ -169,6 +156,7 @@ type
    property optionswidget default defaultdispwidgetoptions;
    property optionswidget1 default defaultdispwidgetoptions1;
    property options: dispwidgetoptionsty read foptions write setoptions default [];
+   property onchange: notifyeventty read fonchange write fonchange;
  end;
 
  tbasestringdisp = class(tdispwidget)
@@ -187,7 +175,7 @@ type
  tcustomstringdisp = class(tbasestringdisp)
   private
    fvalue: msestring;
-   fonchange: changestringeventty;
+   fondatachange: updatestringeventty;
    procedure setvalue(const Value: msestring);
   protected
    function getvaluetext: msestring; override;
@@ -195,7 +183,8 @@ type
   public
    property value: msestring read fvalue write setvalue;
   published
-   property onchange: changestringeventty read fonchange write fonchange;
+   property ondatachange: updatestringeventty read fondatachange 
+                                                    write fondatachange;
  end;
  
  tstringdisp = class(tcustomstringdisp)
@@ -206,7 +195,7 @@ type
  tcustomrichstringdisp = class(tbasestringdisp)
   private
 //   fvalue: richstringty;
-   fonchange: changerichstringeventty;
+   fondatachange: updaterichstringeventty;
    procedure setvalue(const avalue: msestring);
    procedure setrichvalue(const avalue: richstringty);
   protected
@@ -216,7 +205,8 @@ type
    property value: msestring read finfo.text.text write setvalue;
    property richvalue: richstringty read finfo.text write setrichvalue;
   published
-   property onchange: changerichstringeventty read fonchange write fonchange;
+   property ondatachange: updaterichstringeventty read fondatachange
+                                                      write fondatachange;
  end;
 
  trichstringdisp = class(tcustomrichstringdisp)
@@ -227,7 +217,7 @@ type
  tbytestringdisp = class(tdispwidget)
   private
    fvalue: string;
-   fonchange: changeansistringeventty;
+   fondatachange: updateansistringeventty;
    fbase: numbasety;
    procedure setvalue(const Value: string);
    procedure setbase(const Value: numbasety);
@@ -238,7 +228,8 @@ type
    constructor create(aowner: tcomponent); override;
   published
    property value: string read fvalue write setvalue;
-   property onchange: changeansistringeventty read fonchange write fonchange;
+   property ondatachange: updateansistringeventty read fondatachange 
+                                                       write fondatachange;
    property base: numbasety read fbase write setbase default nb_hex;
  end;
 
@@ -257,7 +248,7 @@ type
  tcustomintegerdisp = class(tnumdisp)
   private
    fvalue: integer;
-   fonchange: changeintegereventty;
+   fondatachange: updateintegereventty;
    fbase: numbasety;
    fbitcount: integer;
    procedure setvalue(const Value: integer);
@@ -276,7 +267,8 @@ type
   published
    property base: numbasety read fbase write setbase default nb_dec;
    property bitcount: integer read fbitcount write setbitcount default 32;
-   property onchange: changeintegereventty read fonchange write fonchange;
+   property ondatachange: updateintegereventty read fondatachange
+                                                       write fondatachange;
 {$ifdef mse_with_ifi}
    property ifilink: tifiintegerlinkcomp read getifilink write setifilink;
 {$endif}
@@ -290,7 +282,7 @@ type
  tcustomrealdisp = class(tnumdisp)
   private
    fvalue: realty;
-   fonchange: changerealeventty;
+   fondatachange: updaterealeventty;
    fformat: msestring;
    fvaluerange: real;
    fvaluestart: real;
@@ -316,7 +308,8 @@ type
    property valuerange: real read fvaluerange write setvaluerange;
    property valuestart: real read fvaluestart write setvaluestart;
    property format: msestring read fformat write setformat;
-   property onchange: changerealeventty read fonchange write fonchange;
+   property ondatachange: updaterealeventty read fondatachange 
+                                                    write fondatachange;
 {$ifdef mse_with_ifi}
    property ifilink: tifireallinkcomp read getifilink write setifilink;
 {$endif}
@@ -330,7 +323,7 @@ type
  tcustomdatetimedisp = class(tnumdisp)
   private
    fvalue: tdatetime;
-   fonchange: changedatetimeeventty;
+   fondatachange: updatedatetimeeventty;
    fformat: msestring;
    fkind: datetimekindty;
    fconvert: dateconvertty;
@@ -353,7 +346,8 @@ type
    property value: tdatetime read fvalue write setvalue;
   published
    property format: msestring read fformat write setformat;
-   property onchange: changedatetimeeventty read fonchange write fonchange;
+   property ondatachange: updatedatetimeeventty read fondatachange 
+                                                         write fondatachange;
    property kind: datetimekindty read fkind write setkind default dtk_date;
 {$ifdef mse_with_ifi}
    property ifilink: tifidatetimelinkcomp read getifilink write setifilink;
@@ -368,7 +362,7 @@ type
  tcustombooleandisp = class(tdispwidget)
   private
    fvalue: boolean;
-   fonchange: changebooleaneventty;
+   fondatachange: updatebooleaneventty;
    ftext_false: msestring;
    ftext_true: msestring;
    procedure setvalue(const Value: boolean);
@@ -382,7 +376,8 @@ type
    property value: boolean read fvalue write setvalue default false;
   published
    property textflags default defaultdisptextflags + [tf_xcentered];
-   property onchange: changebooleaneventty read fonchange write fonchange;
+   property ondatachange: updatebooleaneventty read fondatachange 
+                                                       write fondatachange;
    property text_false: msestring read ftext_false write settext_false;
    property text_true: msestring read ftext_true write settext_true;
  end;
@@ -513,6 +508,9 @@ begin
   end;
  end;
 {$endif}
+ if canevent(tmethod(fonchange)) then begin
+  fonchange(self);
+ end;
 end;
 
 {$ifdef mse_with_ifi}
@@ -653,8 +651,8 @@ end;
 
 procedure tcustomstringdisp.valuechanged;
 begin
- if canevent(tmethod(fonchange)) then begin
-  fonchange(self,fvalue);
+ if canevent(tmethod(fondatachange)) then begin
+  fondatachange(self,fvalue);
  end;
  inherited;
 end;
@@ -683,8 +681,8 @@ end;
 
 procedure tcustomrichstringdisp.valuechanged;
 begin
- if canevent(tmethod(fonchange)) then begin
-  fonchange(self,finfo.text);
+ if canevent(tmethod(fondatachange)) then begin
+  fondatachange(self,finfo.text);
  end;
  inherited;
 end;
@@ -720,8 +718,8 @@ end;
 
 procedure tbytestringdisp.valuechanged;
 begin
- if canevent(tmethod(fonchange)) then begin
-  fonchange(self,fvalue);
+ if canevent(tmethod(fondatachange)) then begin
+  fondatachange(self,fvalue);
  end;
  inherited;
 end;
@@ -788,8 +786,8 @@ end;
 
 procedure tcustomintegerdisp.valuechanged;
 begin
- if canevent(tmethod(fonchange)) then begin
-  fonchange(self,fvalue);
+ if canevent(tmethod(fondatachange)) then begin
+  fondatachange(self,fvalue);
  end;
  inherited;
 end;
@@ -853,8 +851,8 @@ end;
 
 procedure tcustomrealdisp.valuechanged;
 begin
- if canevent(tmethod(fonchange)) then begin
-  fonchange(self,fvalue);
+ if canevent(tmethod(fondatachange)) then begin
+  fondatachange(self,fvalue);
  end;
  inherited;
 end;
@@ -913,8 +911,8 @@ end;
 
 procedure tcustomdatetimedisp.valuechanged;
 begin
- if canevent(tmethod(fonchange)) then begin
-  fonchange(self,fvalue);
+ if canevent(tmethod(fondatachange)) then begin
+  fondatachange(self,fvalue);
  end;
  inherited;
 end;
@@ -1023,8 +1021,8 @@ end;
 
 procedure tcustombooleandisp.valuechanged;
 begin
- if canevent(tmethod(fonchange)) then begin
-  fonchange(self,fvalue);
+ if canevent(tmethod(fondatachange)) then begin
+  fondatachange(self,fvalue);
  end;
  inherited;
 end;

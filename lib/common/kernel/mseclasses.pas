@@ -99,7 +99,16 @@ type
                                  var avalue: msestring) of object;
  updateansistringeventty = procedure(const sender: tobject; 
                                  var avalue: ansistring) of object;
- updateint64eventty = procedure(const sender: tobject; var avalue: int64) of object;
+ updateintegereventty = procedure(const sender: tobject; 
+                                        var avalue: integer) of object;
+ updateint64eventty = procedure(const sender: tobject;
+                                        var avalue: int64) of object;
+ updatebooleaneventty = procedure(const sender: tobject; 
+                                        var avalue: boolean) of object;
+ updaterealeventty = procedure(const sender: tobject; 
+                                        var avalue: real) of object;
+ updatedatetimeeventty = procedure(const sender: tobject; 
+                                        var avalue: tdatetime) of object;
  
  setbooleaneventty = procedure(const sender: tobject; var avalue: boolean;
                           var accept: boolean) of object;
