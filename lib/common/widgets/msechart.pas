@@ -106,7 +106,17 @@ type
   public
    constructor create(const intf: iframe);
  end;
+ ttrace = class;
 
+ ttracedatalist = class(trealdatalist)
+  private
+   fowner: ttrace;
+  protected
+   procedure dochange; override;
+  public
+   constructor create(const aowner: ttrace); reintroduce;
+ end;
+ 
  ttrace = class(townedeventpersistent,iimagelistinfo,iframe,iface)
   private
    finfo: traceinfoty;
@@ -141,7 +151,9 @@ type
    procedure readyscale(reader: treader);
    procedure readyoffset(reader: treader);
    procedure setstart(const avalue: integer);
+   function getxdatalist: trealdatalist;
    procedure setxdatalist(const avalue: trealdatalist);
+   function getydatalist: trealdatalist;
    procedure setydatalist(const avalue: trealdatalist);
    procedure setimagenr(const avalue: imagenrty);
    function getimagelist: timagelist;
@@ -175,8 +187,6 @@ type
    procedure setlegend_caption(const avalue: msestring);
    function isfontstored: boolean;
    procedure fontchanged(const sender: tobject);
-   function getxdatalist: trealdatalist;
-   function getydatalist: trealdatalist;
   protected
    fstate: tracestatesty;
    ftraces: ttraces;
@@ -876,6 +886,20 @@ begin
  result:= @ttrace(owner).finfo.font;
 end;
 
+{ ttracedatalist }
+
+constructor ttracedatalist.create(const aowner: ttrace);
+begin
+ fowner:= aowner;
+ inherited create;
+end;
+
+procedure ttracedatalist.dochange;
+begin
+ fowner.datachange;
+ inherited;
+end;
+
 { ttrace }
 
 constructor ttrace.create(aowner: tobject);
@@ -956,11 +980,28 @@ procedure ttrace.setxdatalist(const avalue: trealdatalist);
 begin
  finfo.xdata:= nil;
  finfo.xydata:= nil;
- if trs_ownsxdatalist in fstate then begin
-  finfo.xdatalist.free;
-  exclude(fstate,trs_ownsxdatalist);
+ if csdesigning in tcustomchart(fowner).componentstate then begin
+  if avalue = nil then begin
+   freeandnil(finfo.xdatalist);
+   exclude(fstate,trs_ownsxdatalist);
+  end
+  else begin
+   if finfo.xdatalist = nil then begin
+    finfo.xdatalist:= ttracedatalist.create(self);
+    include(finfo.state,trs_ownsxdatalist);
+   end;
+   if (ptruint(pointer(avalue)) <> 1) then begin
+    finfo.xdatalist.assign(avalue);   
+   end;
+  end;
+ end
+ else begin
+  if trs_ownsxdatalist in fstate then begin
+   finfo.xdatalist.free;
+   exclude(fstate,trs_ownsxdatalist);
+  end;
+  finfo.xdatalist:= avalue;
  end;
- finfo.xdatalist:= avalue;
  datachange;
 end;
 
@@ -968,26 +1009,48 @@ procedure ttrace.setydatalist(const avalue: trealdatalist);
 begin
  finfo.ydata:= nil;
  finfo.xydata:= nil;
- if trs_ownsydatalist in fstate then begin
-  finfo.ydatalist.free;
-  exclude(fstate,trs_ownsydatalist);
+ if csdesigning in tcustomchart(fowner).componentstate then begin
+  if avalue = nil then begin
+   freeandnil(finfo.ydatalist);
+   exclude(fstate,trs_ownsydatalist);
+  end
+  else begin
+   if finfo.ydatalist = nil then begin
+    finfo.ydatalist:= ttracedatalist.create(self);
+    include(finfo.state,trs_ownsydatalist);
+   end;
+   if (ptruint(pointer(avalue)) <> 1) then begin
+    finfo.ydatalist.assign(avalue);   
+   end;
+  end;
+ end
+ else begin
+  if trs_ownsydatalist in fstate then begin
+   finfo.ydatalist.free;
+   exclude(fstate,trs_ownsydatalist);
+  end;
+  finfo.ydatalist:= avalue;
  end;
- finfo.ydatalist:= avalue;
  datachange;
 end;
 
 function ttrace.getxdatalist: trealdatalist;
 begin
- if (finfo.ydatalist = nil) and 
+ if (finfo.xdatalist = nil) and 
            (csreading in tcustomchart(fowner).componentstate) then begin
-  finfo.ydatalist:= trealdatalist.create;
+  finfo.xdatalist:= ttracedatalist.create(self);
   include(finfo.state,trs_ownsxdatalist);
  end;
- result:= finfo.ydatalist;
+ result:= finfo.xdatalist;
 end;
 
 function ttrace.getydatalist: trealdatalist;
 begin
+ if (finfo.ydatalist = nil) and 
+           (csreading in tcustomchart(fowner).componentstate) then begin
+  finfo.ydatalist:= ttracedatalist.create(self);
+  include(finfo.state,trs_ownsydatalist);
+ end;
  result:= finfo.ydatalist;
 end;
 

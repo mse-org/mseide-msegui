@@ -564,7 +564,20 @@ type
    procedure edit; override;
    function getvalue: msestring; override;
  end;
- 
+
+ toptionaldatalistpropertyeditor = class(tdatalistpropertyeditor)
+  protected
+   function getniltext: string; virtual;
+   function getinstance: tpersistent; virtual;
+   procedure deleteinstance;
+   function getdefaultstate: propertystatesty; override;
+  public
+   function canrevert: boolean; override;
+   procedure setvalue(const avalue: msestring); override;
+   function getvalue: msestring; override;
+   procedure edit; override;
+ end;
+  
  tmsestringdatalistpropertyeditor = class(tdialogclasspropertyeditor)
    procedure edit; override;
    function getvalue: msestring; override;
@@ -5516,6 +5529,66 @@ end;
 procedure tcomponentinterfacepropertyeditor.updatedefaultvalue;
 begin
  fintfinfo:= getintfinfo;
+end;
+
+{ toptionaldatalistpropertyeditor }
+
+function toptionaldatalistpropertyeditor.getniltext: string;
+begin
+ result:= '<disabled>';
+end;
+
+function toptionaldatalistpropertyeditor.getinstance: tpersistent;
+begin
+ result:= tpersistent(getpointervalue);
+end;
+
+procedure toptionaldatalistpropertyeditor.deleteinstance;
+begin
+ if checkfreeoptionalclass then begin
+  setordvalue(0);
+ end;
+end;
+
+function toptionaldatalistpropertyeditor.canrevert: boolean;
+begin
+ result:= false;
+end;
+
+procedure toptionaldatalistpropertyeditor.setvalue(const avalue: msestring);
+begin
+ if avalue = '' then begin
+  deleteinstance;
+ end
+ else begin
+  inherited;
+ end;
+end;
+
+function toptionaldatalistpropertyeditor.getvalue: msestring;
+begin
+ if getinstance = nil then begin
+  result:= getniltext;
+ end
+ else begin
+  result:= inherited getvalue;
+ end;
+end;
+
+procedure toptionaldatalistpropertyeditor.edit;
+var
+ obj1: tobject;
+begin
+ obj1:= getinstance;
+ if obj1 = nil then begin
+  setordvalue(1);
+ end;
+ inherited;
+end;
+
+function toptionaldatalistpropertyeditor.getdefaultstate: propertystatesty;
+begin
+ result:= inherited getdefaultstate + [ps_dialog];
 end;
 
 initialization

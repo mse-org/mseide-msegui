@@ -47,7 +47,7 @@ uses
  msesplitter,msedock,mseforms,mseclasses,typinfo,msearrayprops,msewidgets,
  msegui,formdesigner,msedial,msemenuwidgets,msewindowwidget,msechart,
  msepolygon,msepickwidget,msetraywidget,msedockpanelform,msechartedit,mseedit,
- msebarcode
+ msebarcode,msedatalist
  {$ifndef mse_no_opengl}
   {$ifdef FPC}
      ,mseopenglwidget
@@ -208,6 +208,8 @@ begin
                                  tchildwidgetpropertyeditor);
 
  registerpropertyeditor(typeinfo(ttraces),nil,'',ttraceseditor);
+ registerpropertyeditor(typeinfo(trealdatalist),ttrace,'',
+                                toptionaldatalistpropertyeditor);
  
  registerpropertyeditor(typeinfo(boolean),tcustombutton,'visible',
                            trefreshbooleanpropertyeditor);
