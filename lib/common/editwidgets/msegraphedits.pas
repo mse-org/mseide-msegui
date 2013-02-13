@@ -2977,6 +2977,7 @@ procedure tcustomintegergraphdataedit.setifilink(const avalue: tifiintegerlinkco
 begin
  inherited setifilink(avalue);
 end;
+{$endif}
 
 procedure tcustomintegergraphdataedit.setmin(const avalue: integer);
 begin
@@ -3011,7 +3012,6 @@ begin
  result:= tintegerdatalist(checkgriddata);
 end;
 
-{$endif}
 
 { tvaluefacearrayprop }
 

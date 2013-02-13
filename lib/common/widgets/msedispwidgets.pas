@@ -110,10 +110,10 @@ type
    foptions: dispwidgetoptionsty;
    ftextflags: textflagsty;
    ftextrectvalid: boolean;
+   fonchange: notifyeventty;
 {$ifdef mse_with_ifi}
    fifilink: tifilinkcomp;
     //iifidatalink
-   fonchange: notifyeventty;
    function getifilinkkind: ptypeinfo;
    procedure setifilink(const avalue: tifilinkcomp);
    function ifigriddata: tdatalist;

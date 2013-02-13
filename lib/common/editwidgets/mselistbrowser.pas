@@ -512,9 +512,11 @@ type
                                       var asize: sizety); override;
    procedure calclayout(const asize: sizety; 
                                        out alayout: listitemlayoutinfoty);
+  {$ifdef mse_with_ifi}
     //iifidatalink
    procedure updateifigriddata(const sender: tobject;
                                            const alist: tdatalist); override;
+  {$endif}
     //iedit
    function locatecount: integer; override;        //number of locate values
    function getkeystring(const index: integer): msestring; override;

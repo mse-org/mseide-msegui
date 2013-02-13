@@ -39,7 +39,7 @@ const
 
 type
  tcustomchart = class;
- tracestatety = (trs_datapointsvalid);
+ tracestatety = (trs_datapointsvalid,trs_ownsxdatalist,trs_ownsydatalist);
  tracestatesty = set of tracestatety;
  tracekindty = (trk_xseries,trk_xy);
  tracechartkindty = (tck_line,tck_bar);
@@ -175,7 +175,10 @@ type
    procedure setlegend_caption(const avalue: msestring);
    function isfontstored: boolean;
    procedure fontchanged(const sender: tobject);
+   function getxdatalist: trealdatalist;
+   function getydatalist: trealdatalist;
   protected
+   fstate: tracestatesty;
    ftraces: ttraces;
    fcurfont: tfont;
    flnxstart: real;
@@ -246,8 +249,6 @@ type
    property xdata: realarty read finfo.xdata write setxdata;
    property ydata: realarty read finfo.ydata write setydata;
    property xydata: complexarty read finfo.xydata write setxydata;
-   property xdatalist: trealdatalist read finfo.xdatalist write setxdatalist;
-   property ydatalist: trealdatalist read finfo.ydatalist write setydatalist;
    property breaks: integerarty read fbreaks write setbreaks;
                              //for xy without cto_xordered only
 
@@ -265,6 +266,8 @@ type
    property visible: boolean read getvisible write setvisible;
    
   published
+   property xdatalist: trealdatalist read getxdatalist write setxdatalist;
+   property ydatalist: trealdatalist read getydatalist write setydatalist;
    property color: colorty read finfo.color write setcolor default cl_black;
    property colorimage: colorty read finfo.colorimage 
                       write setcolorimage default cl_default;
@@ -890,6 +893,8 @@ end;
 
 destructor ttrace.destroy;
 begin
+ xdatalist:= nil;
+ ydatalist:= nil;
  inherited;
  finfo.bar_frame.free;
  finfo.bar_face.free;
@@ -917,8 +922,8 @@ end;
 
 procedure ttrace.setxydata(const avalue: complexarty);
 begin
- finfo.xdatalist:= nil;
- finfo.ydatalist:= nil;
+ xdatalist:= nil;
+ ydatalist:= nil;
  finfo.xdata:= nil;
  finfo.ydata:= nil;
  finfo.xydata:= avalue;
@@ -933,7 +938,7 @@ end;
 
 procedure ttrace.setxdata(const avalue: realarty);
 begin
- finfo.xdatalist:= nil;
+ xdatalist:= nil;
  finfo.xydata:= nil;
  finfo.xdata:= avalue;
  datachange;
@@ -941,7 +946,7 @@ end;
 
 procedure ttrace.setydata(const avalue: realarty);
 begin
- finfo.ydatalist:= nil;
+ ydatalist:= nil;
  finfo.xydata:= nil;
  finfo.ydata:= avalue;
  datachange;
@@ -951,6 +956,10 @@ procedure ttrace.setxdatalist(const avalue: trealdatalist);
 begin
  finfo.xdata:= nil;
  finfo.xydata:= nil;
+ if trs_ownsxdatalist in fstate then begin
+  finfo.xdatalist.free;
+  exclude(fstate,trs_ownsxdatalist);
+ end;
  finfo.xdatalist:= avalue;
  datachange;
 end;
@@ -959,8 +968,27 @@ procedure ttrace.setydatalist(const avalue: trealdatalist);
 begin
  finfo.ydata:= nil;
  finfo.xydata:= nil;
+ if trs_ownsydatalist in fstate then begin
+  finfo.ydatalist.free;
+  exclude(fstate,trs_ownsydatalist);
+ end;
  finfo.ydatalist:= avalue;
  datachange;
+end;
+
+function ttrace.getxdatalist: trealdatalist;
+begin
+ if (finfo.ydatalist = nil) and 
+           (csreading in tcustomchart(fowner).componentstate) then begin
+  finfo.ydatalist:= trealdatalist.create;
+  include(finfo.state,trs_ownsxdatalist);
+ end;
+ result:= finfo.ydatalist;
+end;
+
+function ttrace.getydatalist: trealdatalist;
+begin
+ result:= finfo.ydatalist;
 end;
 
 procedure ttrace.checkgraphic;

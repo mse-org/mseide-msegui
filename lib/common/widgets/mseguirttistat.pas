@@ -9,6 +9,9 @@
 }
 unit mseguirttistat;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+{$ifndef mse_no_ifi}
+ {$define mse_with_ifi}
+{$endif}
 interface
 uses
  msegui,mserttistat,mseglob,mseclasses,msestat,msestatfile;
@@ -61,13 +64,17 @@ begin
   fdialog:= cla1.create(nil);
   fediting:= true;
   try
+ {$ifdef mse_with_ifi}
    objtovalues(fdialog);
+ {$endif}
    if canevent(tmethod(fonbeforeedit)) then begin
     fonbeforeedit(self);
    end;
    result:= fdialog.show(ml_application);
    if result = mr_ok then begin
+ {$ifdef mse_with_ifi}
     valuestoobj(fdialog);
+ {$endif}
     if canevent(tmethod(fonafteredit)) then begin
      fonafteredit(self);
     end;
