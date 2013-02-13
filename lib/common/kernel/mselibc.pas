@@ -1511,7 +1511,7 @@ const
 {$endif}
  _STAT_VER = _STAT_VER_LINUX;
    
-{$ifdef linux}
+{$ifdef unix}
 
 function __fxstat(__ver:longint; __fildes:longint; __stat_buf:Pstat):longint;
                              cdecl;external clib name '__fxstat';
@@ -2406,7 +2406,7 @@ begin
  result:= mode and __S_IFDIR = __S_IFDIR;
 end;
 
-{$ifdef linux}
+{$ifdef unix}
 
 function stat(__file:Pchar; __buf: Pstat): longint;
 begin
