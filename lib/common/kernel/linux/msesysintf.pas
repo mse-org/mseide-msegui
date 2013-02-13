@@ -517,7 +517,7 @@ end;
 
 function threadexec(infopo : pointer) : ptrint{longint};
 begin
- threadinfoty(infopo^).id:= getcurrentthreadid;
+ threadinfoty(infopo^).id:= threadty(getcurrentthreadid);
  pthread_setcanceltype(pthread_cancel_asynchronous,nil);
  pthread_setcancelstate(pthread_cancel_enable,nil);
  result:= threadinfoty(infopo^).threadproc();
@@ -551,7 +551,7 @@ begin
  {$ifdef FPC}
  with info do begin
   id:= 0;
-  id:= beginthread(@threadexec,@info,id1,info.stacksize);
+  id:= threadty(beginthread(@threadexec,@info,tthreadid(id1),info.stacksize));
   if id = 0 then begin
    result:= sye_thread;
   end
@@ -577,7 +577,7 @@ end;
 function sys_threadwaitfor(var info: threadinfoty): syserrorty;
 begin
 {$ifdef FPC}
- waitforthreadterminate(info.id,0);
+ waitforthreadterminate(tthreadid(info.id),0);
  result:= sye_ok;
 {$else}
   result:= syeseterror(pthread_join(info.id,nil));
@@ -588,7 +588,7 @@ function sys_threaddestroy(var info: threadinfoty): syserrorty;
 begin
  result:= sye_ok;
 {$ifdef FPC}
- killthread(info.id);
+ killthread(tthreadid(info.id));
 {$else}
  pthread_detach(info.id);
  pthread_cancel(info.id);
