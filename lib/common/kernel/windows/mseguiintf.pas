@@ -204,7 +204,7 @@ var
  eventlist: tobjectqueue;
 // timer: longword;
  mouseidletimer: longword;
- mainthread: longword;
+ mainthread: threadty;
  mousewindow: hwnd;
  lastfocuswindow: hwnd;
  groupleaderwindow: hwnd;
@@ -1033,11 +1033,11 @@ end;
 
 function gui_setappfocus(id: winidty): guierrorty;
 var
- selfthread,otherthread: integer;
+ selfthread,otherthread: threadty;
 begin
  result:= gue_error;
- selfthread:= getcurrentthreadid;
- otherthread:= getwindowthreadprocessid(id,nil);
+ selfthread:= threadty(getcurrentthreadid);
+ otherthread:= threadty(getwindowthreadprocessid(id,nil));
  if otherthread <> 0 then begin
   if attachthreadinput(selfthread,otherthread,true) then begin
    if windows.setfocus(id) <> 0 then begin
@@ -2779,7 +2779,7 @@ end;
 
 function gui_setmainthread: guierrorty; //set mainthread to currentthread
 begin
- mainthread:= getcurrentthreadid;
+ mainthread:= threadty(getcurrentthreadid);
  result:= gue_ok;
 end;
 

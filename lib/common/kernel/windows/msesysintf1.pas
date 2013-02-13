@@ -125,7 +125,7 @@ begin
     interlockeddecrement(trycount);
     windows.sleep(0);
    end;
-   id:= windows.getcurrentthreadid;
+   id:= threadty(windows.getcurrentthreadid);
    if noblock and not((lockco = 0) or (owningth = id)) then begin
     interlockeddecrement(trycount);
     result:= sye_busy;

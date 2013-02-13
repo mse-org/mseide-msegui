@@ -1746,7 +1746,7 @@ end;
 
 function tiosynchronizer.preparewait(const asequence: sequencety): twaitingclient;
 begin
- if getcurrentthreadid = id then begin
+ if threadty(getcurrentthreadid) = id then begin
   raise exception.create('Deadlock in tiosynchrionizer.waitforanswer.');
  end;
  result:= twaitingclient.create(asequence);
