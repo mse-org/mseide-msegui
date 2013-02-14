@@ -2263,7 +2263,7 @@ type
    flastmousewheeltimestampbefore: longword;
    
    fcurrmodalinfo: pmodalinfoty;
-//   fmodallevel: integer;
+   flooplevel: integer;
    
    procedure invalidated;
    function grabpointer(const aid: winidty): boolean;
@@ -2790,9 +2790,6 @@ type
    function focusinpending: boolean;
    procedure checkapplicationactive;
    function winiddestroyed(const aid: winidty): boolean;
-//   function eventloop(const amodalwindow: twindow; 
-//                              const once: boolean = false): boolean;
-                 //true if actual modalwindow destroyed
    procedure eventloop(const once: boolean = false);
    function beginmodal(const sender: twindow;
                                const showinfo: pshowinfoty): boolean;
@@ -7270,7 +7267,7 @@ begin
  end;
  updateskin;
  if ws1_childscaled in fwidgetstate1 then begin
-  appinst.postevent(tobjectevent.create(ek_childscaled,ievent(self)),true);
+  appinst.postevent(tobjectevent.create(ek_childscaled,ievent(self)),[peo_local]);
  end;
 end;
 
@@ -11309,7 +11306,8 @@ begin
  if not (ws1_childscaled in fwidgetstate1) then begin
   include(fwidgetstate1,ws1_childscaled);
   if not (csloading in componentstate) then begin
-   appinst.postevent(tobjectevent.create(ek_childscaled,ievent(self)),true);
+   appinst.postevent(tobjectevent.create(
+                                    ek_childscaled,ievent(self)),[peo_local]);
   end;
  end;
 end;
@@ -12969,7 +12967,6 @@ var
  win1: winidty;
  focusedwidgetbefore: twidget;
  window1: twindow;
-// widget1: twidget;
 begin
  fmodalresult:= mr_none;
  with appinst do begin
@@ -12977,18 +12974,6 @@ begin
   if (fmousecapturewidget <> nil) then begin
    fmousecapturewidget.releasemouse;
    releasemouse;
-  {
-   if showinfo = nil then begin
-    widget1:= fowner;
-   end
-   else begin
-    widget1:= showinfo^.widget;
-   end;
-   if not widget1.checkdescendent(fmousecapturewidget) then begin
-    fmousecapturewidget.releasemouse;
-    releasemouse;
-   end;
-   }
   end;
   if fmodalwindow = nil then begin
    fwantedactivewindow:= nil; //init for lowest level
@@ -13027,7 +13012,7 @@ begin
   finally
    setlinkedvar(nil,tmsecomponent(focusedwidgetbefore));
   end;
-  if appinst.modallevel = 0 then begin
+  if appinst.modallevel = 1 then begin
    exclude(appinst.fstate,aps_cancelloop);
   end;
   if (factivewindow <> nil) and not factivewindow.fownerwidget.releasing then begin
@@ -15473,9 +15458,7 @@ begin
  end;
 end;
 
-procedure tinternalapplication.eventloop({const amodalwindow: twindow;}
-                                    const once: boolean = false);
-                   //true if actual modalwindow destroyed
+procedure tinternalapplication.eventloop(const once: boolean = false);
                    
  function checkiflast(const akind: eventkindty): boolean;
  var
@@ -15511,8 +15494,6 @@ procedure tinternalapplication.eventloop({const amodalwindow: twindow;}
  end; //canuievent
  
 var
-// modalinfo: modalinfoty;
-// modalinfobefore: pmodalinfoty;
  event: tmseevent;
  int1: integer;
  bo1,bo2: boolean;
@@ -15523,9 +15504,9 @@ var
  waitcountbefore: integer;
  ar1: integerarty;
  ar2: eventarty;
+ modalinfo: modalinfoty;
  
 begin       //eventloop
-// result:= false;
  if aps_looplocked in fstate then begin
   exit;
  end;
@@ -15533,414 +15514,389 @@ begin       //eventloop
   raise exception.create('Eventloop must be in main thread.');
  end;
 
- ftimertick:= false;
-// fillchar(modalinfo,sizeof(modalinfo),0);
-// if fcurrmodalinfo <> nil then begin
-//  modalinfo.parent:= fcurrmodalinfo;
-//  modalinfo.level:= fcurrmodalinfo^.level+1;
-// end;
-// fcurrmodalinfo:= @modalinfo;
- waitcountbefore:= fwaitcount;
- if not once then begin
-  fwaitcount:= 0;
+ inc(flooplevel);
+ if fcurrmodalinfo = nil then begin
+  fillchar(modalinfo,sizeof(modalinfo),0);
+  fcurrmodalinfo:= @modalinfo;
  end;
- checkcursorshape;
- {
- if amodalwindow <> nil then begin
-  if fmodalwindow <> nil then begin
-   setlinkedvar(fmodalwindow,tlinkedobject(modalinfo.modalwindowbefore));
+ try
+  ftimertick:= false;
+  waitcountbefore:= fwaitcount;
+  if not once then begin
+   fwaitcount:= 0;
   end;
-  modalinfobefore:= amodalwindow.fmodalinfopo;
-  amodalwindow.fmodalinfopo:= @modalinfo;
-  setlinkedvar(amodalwindow,tlinkedobject(fmodalwindow));
-  amodalwindow.internalactivate(false,true);
- end;
- }
- while not ((fcurrmodalinfo <> nil) and fcurrmodalinfo^.modalend) and 
-      not terminated and (fstate * [aps_exitloop,aps_cancelloop] = []) do begin 
-                                                 //main eventloop
-  try
-   if ((fcurrmodalinfo = nil) or (high(fcurrmodalinfo^.events) < 0)) and 
-                                                    (getevents = 0) then begin
-    checkwindowstack;
-    repeat
-     bo1:= false;
-     fwindowupdateindex:= 0;
-     while fwindowupdateindex <= high(fwindows) do begin
-      try
-       bo1:= fwindows[fwindowupdateindex].internalupdate or bo1;
-      except
-       handleexception(self);
+  checkcursorshape;
+  while not ((fcurrmodalinfo <> nil) and fcurrmodalinfo^.modalend) and 
+       not terminated and (fstate * [aps_exitloop,aps_cancelloop] = []) do begin 
+                                                  //main eventloop
+   try
+    if ((fcurrmodalinfo = nil) or (high(fcurrmodalinfo^.events) < 0)) and 
+                                                     (getevents = 0) then begin
+     checkwindowstack;
+     repeat
+      bo1:= false;
+      fwindowupdateindex:= 0;
+      while fwindowupdateindex <= high(fwindows) do begin
+       try
+        bo1:= fwindows[fwindowupdateindex].internalupdate or bo1;
+       except
+        handleexception(self);
+       end;
+       inc(fwindowupdateindex);
       end;
-      inc(fwindowupdateindex);
-     end;
-    until not bo1 and not terminated; //no more to paint
-    exclude(fstate,aps_invalidated);
-    if terminated or (aps_exitloop in fstate) then begin
-     break;
-    end;
-    if not gui_hasevent then begin
-     try
-      if (fcurrmodalinfo{amodalwindow} = nil) and 
-                         not (aps_activewindowchecked in fstate) then begin
-       include(fstate,aps_activewindowchecked);
-       checkactivewindow;
-      end;
-      ftimertick:= false;
-      msetimer.tick(self);    //tick called in every idle
-     except
-      handleexception(self);
+     until not bo1 and not terminated; //no more to paint
+     exclude(fstate,aps_invalidated);
+     if terminated or (aps_exitloop in fstate) then begin
+      break;
      end;
      if not gui_hasevent then begin
       try
-       doidle;
+//       if (fcurrmodalinfo{amodalwindow} = nil) and 
+       if (fcurrmodalinfo^.level = 0) and 
+                          not (aps_activewindowchecked in fstate) then begin
+        include(fstate,aps_activewindowchecked);
+        checkactivewindow;
+       end;
+       ftimertick:= false;
+       msetimer.tick(self);    //tick called in every idle
       except
        handleexception(self);
       end;
-     end;
-     if terminated then begin
-      break;
-     end;
-     if (aps_needsupdatewindowstack in fstate) then begin
-      updatewindowstack;
-      exclude(fstate,aps_needsupdatewindowstack);
-     end
-     else begin
-      checkwindowstack;
-     end;
-     checkcursorshape;
-     if once then begin
-      break;
-     end;
-     if gui_hasevent or not (aps_invalidated in fstate) then begin
-      waitevent;
+      if not gui_hasevent then begin
+       try
+        doidle;
+       except
+        handleexception(self);
+       end;
+      end;
+      if terminated then begin
+       break;
+      end;
+      if (aps_needsupdatewindowstack in fstate) then begin
+       updatewindowstack;
+       exclude(fstate,aps_needsupdatewindowstack);
+      end
+      else begin
+       checkwindowstack;
+      end;
+      checkcursorshape;
+      if once then begin
+       break;
+      end;
+      if gui_hasevent or not (aps_invalidated in fstate) then begin
+       waitevent;
+      end;
      end;
     end;
-   end;
-   if terminated then begin
-    break;
-   end;
-   getevents;
-   if (fcurrmodalinfo <> nil) and (high(fcurrmodalinfo^.events) >= 0) then begin
-    event:= fcurrmodalinfo^.events[0];
-    tobjectevent1(event).fmodallevel:= -1;
-    deleteitem(pointerarty(fcurrmodalinfo^.events),0);
-   end
-   else begin
-    event:= tmseevent(eventlist.getfirst);
-   end;
-   if event <> nil then begin
-    try
+    if terminated then begin
+     break;
+    end;
+    getevents;
+    if {(fcurrmodalinfo <> nil) and} (high(fcurrmodalinfo^.events) >= 0) then begin
+     event:= fcurrmodalinfo^.events[0];
+     tobjectevent1(event).fmodallevel:= -1;
+     deleteitem(pointerarty(fcurrmodalinfo^.events),0);
+    end
+    else begin
+     event:= tmseevent(eventlist.getfirst);
+    end;
+    if event <> nil then begin
      try
-      case event.kind of
-       ek_timer: begin
-        ftimertick:= true;
-       end;
-       ek_show,ek_hide: begin
-       {$ifdef mse_debugwindowfocus}
-        if event.kind = ek_show then begin
-         debugwindow('ek_show ',twindowevent(event).fwinid);
-        end
-        else begin
-         debugwindow('ek_hide ',twindowevent(event).fwinid);
+      try
+       case event.kind of
+        ek_timer: begin
+         ftimertick:= true;
         end;
-       {$endif}
-        processshowingevent(twindowevent(event));
-       end;
-       ek_close: begin
-        if findwindow(twindowevent(event).fwinid,window) then begin
-         if (fmodalwindow = nil) or (fmodalwindow = window) then begin
-          window.close;
+        ek_show,ek_hide: begin
+        {$ifdef mse_debugwindowfocus}
+         if event.kind = ek_show then begin
+          debugwindow('ek_show ',twindowevent(event).fwinid);
          end
          else begin
-          fmodalwindow.fownerwidget.canclose(nil);
+          debugwindow('ek_hide ',twindowevent(event).fwinid);
          end;
+        {$endif}
+         processshowingevent(twindowevent(event));
         end;
-       end;
-       ek_destroy: begin
-        if findwindow(twindowevent(event).fwinid,window) then begin
-         window.windowdestroyed;
-        end;
-        windowdestroyed(twindowevent(event).fwinid);
-       end;
-       ek_terminate: begin
-        doterminate(true);
-       end;
-       ek_focusin: begin
-       {$ifdef mse_debugwindowfocus}
-        debugwindow('ek_focusin ',twindowevent(event).fwinid);
-       {$endif}
-        getevents;
-        bo1:= true;
-        id1:= twindowevent(event).fwinid;
-        po1:= pointer(eventlist.datapo);
-        for int1:= 0 to eventlist.count - 1 do begin
-         if po1^ <> nil then begin //find last focusin
-          with po1^ do begin
-           case kind of
-            ek_focusin: begin
-             id1:= fwinid;
-            end;
-            ek_focusout: begin
-             if fwinid = twindowevent(event).fwinid then begin
-              id1:= 0;
-             end;
-            end;
-           end; 
+        ek_close: begin
+         if findwindow(twindowevent(event).fwinid,window) then begin
+          if (fmodalwindow = nil) or (fmodalwindow = window) then begin
+           window.close;
+          end
+          else begin
+           fmodalwindow.fownerwidget.canclose(nil);
           end;
          end;
-         inc(po1);
         end;
-        bo2:= id1 = twindowevent(event).fwinid; //last focus is current window
-        po1:= pointer(eventlist.datapo);
-        for int1:= 0 to eventlist.count - 1 do begin
-         if po1^ <> nil then begin
-          with po1^ do begin
-           if (kind = ek_destroy) and 
-                           (fwinid = twindowevent(event).fwinid) then begin
-            bo1:= false;
+        ek_destroy: begin
+         if findwindow(twindowevent(event).fwinid,window) then begin
+          window.windowdestroyed;
+         end;
+         windowdestroyed(twindowevent(event).fwinid);
+        end;
+        ek_terminate: begin
+         doterminate(true);
+        end;
+        ek_focusin: begin
+        {$ifdef mse_debugwindowfocus}
+         debugwindow('ek_focusin ',twindowevent(event).fwinid);
+        {$endif}
+         getevents;
+         bo1:= true;
+         id1:= twindowevent(event).fwinid;
+         po1:= pointer(eventlist.datapo);
+         for int1:= 0 to eventlist.count - 1 do begin
+          if po1^ <> nil then begin //find last focusin
+           with po1^ do begin
+            case kind of
+             ek_focusin: begin
+              id1:= fwinid;
+             end;
+             ek_focusout: begin
+              if fwinid = twindowevent(event).fwinid then begin
+               id1:= 0;
+              end;
+             end;
+            end; 
            end;
-           if bo2 then begin //last focus is current window
-            if kind in [ek_focusin,ek_focusout] then begin
-            {$ifdef mse_debugwindowfocus}
-             debugwindow(' '+getenumname(typeinfo(eventkindty),ord(kind))+
-                          ' deleted',twindowevent(event).fwinid);
-            {$endif}
-             freeandnil(po1^); //ignore
-            end;
-           end
-           else begin
-            if (kind = ek_focusout) and 
-                              (fwinid = twindowevent(event).fwinid) then begin
-            {$ifdef mse_debugwindowfocus}
-             debugwindow(' spurious ek_focusout deleted ',twindowevent(event).fwinid);
-            {$endif}
+          end;
+          inc(po1);
+         end;
+         bo2:= id1 = twindowevent(event).fwinid; //last focus is current window
+         po1:= pointer(eventlist.datapo);
+         for int1:= 0 to eventlist.count - 1 do begin
+          if po1^ <> nil then begin
+           with po1^ do begin
+            if (kind = ek_destroy) and 
+                            (fwinid = twindowevent(event).fwinid) then begin
              bo1:= false;
-             freeandnil(po1^); 
-                //spurious focus, for instance minimize window group on windows
+            end;
+            if bo2 then begin //last focus is current window
+             if kind in [ek_focusin,ek_focusout] then begin
+             {$ifdef mse_debugwindowfocus}
+              debugwindow(' '+getenumname(typeinfo(eventkindty),ord(kind))+
+                           ' deleted',twindowevent(event).fwinid);
+             {$endif}
+              freeandnil(po1^); //ignore
+             end;
+            end
+            else begin
+             if (kind = ek_focusout) and 
+                               (fwinid = twindowevent(event).fwinid) then begin
+             {$ifdef mse_debugwindowfocus}
+              debugwindow(' spurious ek_focusout deleted ',twindowevent(event).fwinid);
+             {$endif}
+              bo1:= false;
+              freeandnil(po1^); 
+                 //spurious focus, for instance minimize window group on windows
+              break;
+             end;
+            end;
+           end;
+          end;
+          inc(po1);
+         end;
+         include(fstate,aps_needsupdatewindowstack);
+         if bo1 then begin
+          setwindowfocus(twindowevent(event).fwinid);
+          checkapplicationactive;
+         end;
+        {$ifdef mse_debugwindowfocus}
+         if not bo1 then begin
+          debugwriteln(' ek_focusin ignored');
+         end;
+        {$endif}
+        end;
+        ek_focusout: begin
+        {$ifdef mse_debugwindowfocus}
+         debugwindow('ek_focusout ',twindowevent(event).fwinid);
+        {$endif}
+         getevents;
+         po1:= pointer(eventlist.datapo);
+         bo1:= true; 
+         for int1:= 0 to eventlist.count - 1 do begin
+          if po1^ <> nil then begin
+           with po1^ do begin
+            if (kind = ek_focusin) then begin
+            {$ifdef mse_debugwindowfocus}
+             debugwindow(' ek_focusout ignored ',twindowevent(event).fwinid);
+            {$endif}
+             bo1:= false; //ignore the event
              break;
             end;
            end;
           end;
+          inc(po1);
          end;
-         inc(po1);
-        end;
-        include(fstate,aps_needsupdatewindowstack);
-        if bo1 then begin
-         setwindowfocus(twindowevent(event).fwinid);
-         checkapplicationactive;
-        end;
-       {$ifdef mse_debugwindowfocus}
-        if not bo1 then begin
-         debugwriteln(' ek_focusin ignored');
-        end;
-       {$endif}
-       end;
-       ek_focusout: begin
-       {$ifdef mse_debugwindowfocus}
-        debugwindow('ek_focusout ',twindowevent(event).fwinid);
-       {$endif}
-        getevents;
-        po1:= pointer(eventlist.datapo);
-        bo1:= true; 
-        for int1:= 0 to eventlist.count - 1 do begin
-         if po1^ <> nil then begin
-          with po1^ do begin
-           if (kind = ek_focusin) then begin
-           {$ifdef mse_debugwindowfocus}
-            debugwindow(' ek_focusout ignored ',twindowevent(event).fwinid);
-           {$endif}
-            bo1:= false; //ignore the event
-            break;
-           end;
-          end;
-         end;
-         inc(po1);
-        end;
-        if bo1 then begin
-         unsetwindowfocus(twindowevent(event).fwinid);
-         postevent(tmseevent.create(ek_checkapplicationactive));
-        end
-        else begin
-         include(fstate,aps_restorelocktransientfor);
-        end;
-       end;
-       ek_checkapplicationactive: begin
-        if checkiflast(ek_checkapplicationactive) then begin
-         checkapplicationactive;
-        end;
-       end;
-       ek_expose: begin
-        exclude(fstate,aps_zordervalid);
-        processexposeevent(twindowrectevent(event));
-       end;
-       ek_configure: begin
-        exclude(fstate,aps_zordervalid);
-        id1:= twindowrectevent(event).fwinid;
-        getevents;
-        po1:= pointer(eventlist.datapo);
-        for int1:= 0 to eventlist.count - 1 do begin
-         if po1^ <> nil then begin   //use last configure event for the window
-          with twindowrectevent(po1^) do begin
-           if (kind = ek_configure) and (fwinid = id1) then begin
-            event.free;
-            event:= po1^;
-            po1^:= nil;
-           end;
-          end;
+         if bo1 then begin
+          unsetwindowfocus(twindowevent(event).fwinid);
+          postevent(tmseevent.create(ek_checkapplicationactive));
+         end
+         else begin
+          include(fstate,aps_restorelocktransientfor);
          end;
         end;
-        processconfigureevent(twindowrectevent(event));
-       end;
-       ek_enterwindow: begin
-        if fmousewinid <> twindowevent(event).fwinid then begin
-                  //there can be an additional enterwindow by mouse click
-         processwindowcrossingevent(twindowevent(event));
-         if canuievent and (event is tmouseenterevent) then begin
-          processmouseevent(tmouseenterevent(event));
+        ek_checkapplicationactive: begin
+         if checkiflast(ek_checkapplicationactive) then begin
+          checkapplicationactive;
          end;
         end;
-       end;
-       ek_leavewindow: begin
-        getevents;
-        ar1:= nil;
-        po1:= pointer(eventlist.datapo);
-        bo1:= true;
-        for int1:= 0 to eventlist.count - 1 do begin
-         if po1^ <> nil then begin
-          with po1^ do begin
-           if kind in [ek_enterwindow,ek_leavewindow] then begin
-            additem(ar1,int1);
-           end;
-           if (kind = ek_enterwindow) and (fwinid = twindowevent(event).fwinid) then begin
-            bo1:= false;
-               //spurious leavewindow
-            break;
-           end;
-          end;
-         end;
-         inc(po1);
+        ek_expose: begin
+         exclude(fstate,aps_zordervalid);
+         processexposeevent(twindowrectevent(event));
         end;
-        if bo1 then begin
-         processwindowcrossingevent(twindowevent(event))
-        end
-        else begin
+        ek_configure: begin
+         exclude(fstate,aps_zordervalid);
+         id1:= twindowrectevent(event).fwinid;
+         getevents;
          po1:= pointer(eventlist.datapo);
-         for int1:= 0 to high(ar1) do begin
-          freeandnil(pobjectaty(po1)^[ar1[int1]]);
-         end;
-        end;
-       end;
-       ek_mousemove: begin
-        if checkiflast(ek_mousemove) and canuievent then begin
-         processmouseevent(tmouseevent(event));
-        end;
-       end;
-       ek_buttonpress,ek_buttonrelease,ek_mousewheel: begin
-        if canuievent then begin
-         processmouseevent(tmouseevent(event));
-        end;
-       end;
-       ek_keypress,ek_keyrelease: begin
-        if canuievent then begin
-         processkeyevent(tkeyevent(event));
-        end;
-       end;
-       ek_asyncexec: begin
-        texecuteevent(event).deliver;
-       end;
-       ek_sysdnd: begin
-        if findwindow(tsysdndevent(event).fwinid,window) then begin
-         window.processsysdnd(tsysdndevent(event));
-        end;
-       end;
-       else begin
-        if event is tobjectevent then begin
-         with tobjectevent(event) do begin
-          if fcurrmodalinfo = nil then begin
-           int1:= -modallevel;
-          end
-          else begin
-           int1:= fcurrmodalinfo^.level-modallevel;
-          end;
-          if (int1 > 0) and (modallevel >= 0) then begin
-           po2:= fcurrmodalinfo^.parent;
-           for int1:= int1 - 2 downto 0 do begin
-            po2:= po2^.parent;
+         for int1:= 0 to eventlist.count - 1 do begin
+          if po1^ <> nil then begin   //use last configure event for the window
+           with twindowrectevent(po1^) do begin
+            if (kind = ek_configure) and (fwinid = id1) then begin
+             event.free;
+             event:= po1^;
+             po1^:= nil;
+            end;
            end;
-           additem(pointerarty(po2^.events),event);
-           event:= nil;
-          end
-          else begin
-           deliver;
+          end;
+         end;
+         processconfigureevent(twindowrectevent(event));
+        end;
+        ek_enterwindow: begin
+         if fmousewinid <> twindowevent(event).fwinid then begin
+                   //there can be an additional enterwindow by mouse click
+          processwindowcrossingevent(twindowevent(event));
+          if canuievent and (event is tmouseenterevent) then begin
+           processmouseevent(tmouseenterevent(event));
+          end;
+         end;
+        end;
+        ek_leavewindow: begin
+         getevents;
+         ar1:= nil;
+         po1:= pointer(eventlist.datapo);
+         bo1:= true;
+         for int1:= 0 to eventlist.count - 1 do begin
+          if po1^ <> nil then begin
+           with po1^ do begin
+            if kind in [ek_enterwindow,ek_leavewindow] then begin
+             additem(ar1,int1);
+            end;
+            if (kind = ek_enterwindow) and (fwinid = twindowevent(event).fwinid) then begin
+             bo1:= false;
+                //spurious leavewindow
+             break;
+            end;
+           end;
+          end;
+          inc(po1);
+         end;
+         if bo1 then begin
+          processwindowcrossingevent(twindowevent(event))
+         end
+         else begin
+          po1:= pointer(eventlist.datapo);
+          for int1:= 0 to high(ar1) do begin
+           freeandnil(pobjectaty(po1)^[ar1[int1]]);
+          end;
+         end;
+        end;
+        ek_mousemove: begin
+         if checkiflast(ek_mousemove) and canuievent then begin
+          processmouseevent(tmouseevent(event));
+         end;
+        end;
+        ek_buttonpress,ek_buttonrelease,ek_mousewheel: begin
+         if canuievent then begin
+          processmouseevent(tmouseevent(event));
+         end;
+        end;
+        ek_keypress,ek_keyrelease: begin
+         if canuievent then begin
+          processkeyevent(tkeyevent(event));
+         end;
+        end;
+        ek_asyncexec: begin
+         texecuteevent(event).deliver;
+        end;
+        ek_sysdnd: begin
+         if findwindow(tsysdndevent(event).fwinid,window) then begin
+          window.processsysdnd(tsysdndevent(event));
+         end;
+        end;
+        else begin
+         if event is tobjectevent then begin
+          with tobjectevent(event) do begin
+//           if fcurrmodalinfo = nil then begin
+//            int1:= -modallevel;
+//           end
+//           else begin
+            int1:= fcurrmodalinfo^.level-modallevel;
+//           end;
+           if (int1 > 0) and (modallevel >= 0) then begin
+            po2:= fcurrmodalinfo^.parent;
+            for int1:= int1 - 2 downto 0 do begin
+             po2:= po2^.parent;
+            end;
+            additem(pointerarty(po2^.events),event);
+            event:= nil;
+           end
+           else begin
+            deliver;
+           end;
           end;
          end;
         end;
        end;
+      finally
+       event.free1;
       end;
-     finally
-      event.free1;
+     except
+      handleexception(self);
      end;
-    except
-     handleexception(self);
+     checkcursorshape;
     end;
-    checkcursorshape;
-   end;
-  except
-  end;
- end;
- exclude(fstate,aps_exitloop);
-// result:= false;
- (*
- if amodalwindow <> nil then begin
-  if fmodalwindow <> nil then begin
-   fmodalwindow.fmodalinfopo:= modalinfobefore{nil};
-  end
-  else begin
-   result:= true;
-  end; 
-  if modalinfo.modalwindowbefore <> nil then begin
-   setlinkedvar(modalinfo.modalwindowbefore,tlinkedobject(fmodalwindow));
-   setlinkedvar(nil,tlinkedobject(modalinfo.modalwindowbefore));
-  end
-  else begin
-   if fmodalwindow <> nil then begin
-    setlinkedvar(nil,tlinkedobject(fmodalwindow));
-    //no lower modalwindow alive
+   except
    end;
   end;
- end;
- *)
- fwaitcount:= waitcountbefore;
- if fwaitcount > 0 then begin
-  mouse.shape:= cr_wait;
- end;
- checkcursorshape;
- if (fcurrmodalinfo <> nil) and (fcurrmodalinfo^.parent <> nil) then begin
-  stackarray(pointer(fcurrmodalinfo^.events),
-                        pointerarty(fcurrmodalinfo^.parent^.events));
- end
- else begin
-  if fcurrmodalinfo <> nil then begin
-   ar2:= fcurrmodalinfo^.events;
-   fcurrmodalinfo^.events:= nil;
+  exclude(fstate,aps_exitloop);
+  fwaitcount:= waitcountbefore;
+  if fwaitcount > 0 then begin
+   mouse.shape:= cr_wait;
+  end;
+  checkcursorshape;
+ 
+  if {(fcurrmodalinfo <> nil) and} (fcurrmodalinfo^.parent <> nil) then begin
+   stackarray(pointer(fcurrmodalinfo^.events),
+                         pointerarty(fcurrmodalinfo^.parent^.events));
   end
   else begin
-   ar2:= nil;
-  end;
-  for int1:= 0 to high(ar2) do begin
-   if ar2[int1] is tobjectevent then begin
-    with tobjectevent1(ar2[int1]) do begin
-     fmodallevel:= -1;
-     free1;
+//   if fcurrmodalinfo <> nil then begin
+    ar2:= fcurrmodalinfo^.events;
+    fcurrmodalinfo^.events:= nil;
+//   end
+//   else begin
+//    ar2:= nil;
+//   end;
+   for int1:= 0 to high(ar2) do begin
+    if ar2[int1] is tobjectevent then begin
+     with tobjectevent1(ar2[int1]) do begin
+      fmodallevel:= -1;
+      free1;
+     end;
+    end
+    else begin
+     ar2[int1].free;
     end;
-   end
-   else begin
-    ar2[int1].free;
    end;
   end;
+ finally
+  dec(flooplevel);
+  if fcurrmodalinfo = @modalinfo then begin
+   fcurrmodalinfo:= nil;
+  end;
  end;
-// fcurrmodalinfo:= modalinfo.parent;
 end;
 
 function tinternalapplication.beginmodal(const sender: twindow;
@@ -15967,6 +15923,9 @@ begin
  if fcurrmodalinfo <> nil then begin
   modalinfo.parent:= fcurrmodalinfo;
   modalinfo.level:= fcurrmodalinfo^.level+1;
+ end
+ else begin
+  modalinfo.level:= 1;
  end;
  fcurrmodalinfo:= @modalinfo;
  if fmodalwindow <> nil then begin
@@ -17693,8 +17652,11 @@ end;
 function tguiapplication.modallevel: integer;
 begin
  result:= -1;
- if fcurrmodalinfo <> nil then begin
-  result:= fcurrmodalinfo^.level;
+ if flooplevel > 0 then begin
+  result:= 0;
+  if fcurrmodalinfo <> nil then begin
+   result:= fcurrmodalinfo^.level;
+  end;
  end;
 end;
 

@@ -1648,7 +1648,7 @@ begin
  result:= false;
  if newactive <> nil then begin
   widget2:= self;
-  int1:= 0;
+  int1:= 1;
   while (widget2 <> nil) do begin
    if widget2.window = newactive then begin
     exit;

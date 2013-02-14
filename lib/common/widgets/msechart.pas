@@ -111,10 +111,14 @@ type
  ttracedatalist = class(trealdatalist)
   private
    fowner: ttrace;
+   procedure readdummy(reader: treader);
+   procedure writedummy(writer: twriter);
   protected
    procedure dochange; override;
+   procedure defineproperties(filer: tfiler); override;
   public
    constructor create(const aowner: ttrace); reintroduce;
+   property defaultzero default true;
  end;
  
  ttrace = class(townedeventpersistent,iimagelistinfo,iframe,iface)
@@ -892,12 +896,32 @@ constructor ttracedatalist.create(const aowner: ttrace);
 begin
  fowner:= aowner;
  inherited create;
+ defaultzero:= true;
+ min:= -bigreal;
 end;
 
 procedure ttracedatalist.dochange;
 begin
  fowner.datachange;
  inherited;
+end;
+
+procedure ttracedatalist.readdummy(reader: treader);
+begin
+ reader.readinteger;
+end;
+
+procedure ttracedatalist.writedummy(writer: twriter);
+begin
+ writer.writeinteger(0);
+end;
+
+procedure ttracedatalist.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('dummy',{$ifdef FPC}@{$endif}readdummy,
+        {$ifdef FPC}@{$endif}writedummy,(filer.ancestor = nil)and (count = 0));
+ //in order to create optional instance
 end;
 
 { ttrace }

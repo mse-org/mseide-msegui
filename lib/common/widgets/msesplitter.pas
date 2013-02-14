@@ -818,7 +818,7 @@ begin //doasyncevent
         (fregionchangedmark <> fregionchangedcount) then begin
       fregionchangedmark:= fregionchangedcount;
       inc(fupdating);
-      asyncevent(retrypropeventtag,true);
+      asyncevent(retrypropeventtag,[peo_local]);
      end
      else begin
       inc(fpropoffsetrecursion);
@@ -881,7 +881,7 @@ procedure tcustomsplitter.postupdatepropevent;
 begin
  if not (sps_propnotified in fstate) then begin
   include(fstate,sps_propnotified);
-  asyncevent(updatepropeventtag,true,true);
+  asyncevent(updatepropeventtag,[peo_local,peo_first]);
  end;
 end;
 

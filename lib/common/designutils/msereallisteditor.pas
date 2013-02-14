@@ -36,7 +36,7 @@ type
 
 implementation
 uses
- msereallisteditor_mfm;
+ msereallisteditor_mfm,mseglob;
  
 { treallisteditor }
 

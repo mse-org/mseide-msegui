@@ -967,7 +967,8 @@ end;
 procedure tsubmodulelist.renewbackup(const amodule: tmsecomponent);
 begin
  if frenewbackuplist = nil then begin
-  application.postevent(tasyncevent.create(ievent(self),renewbackuptag),true);
+  application.postevent(tasyncevent.create(ievent(self),renewbackuptag),
+                                                               [peo_local]);
  end;
  additem(pointerarty(frenewbackuplist),amodule);
 end;

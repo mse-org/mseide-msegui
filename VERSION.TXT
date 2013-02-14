@@ -1,11 +1,16 @@
 MSEide+MSEgui breaking changes version history
 
+2012-02-14
+ tapplication.postevent() boolean parameters -> posteventoptionsty.
+ application.modallevel returns 0 instead of -1 for single loop stack.
 2013-02-12
  t*dispwidget.onchange -> ondatachange.
 2013-01-20
  Forking of classes.pp. Add "mclasses" after "classes" in uses.
 2013-01-19
  Forking of db.pas. Change "db" -> "mdb" in uses.
+ 
+Version 2.8.6
 2012-12-31
  lib/common/kernel/i386-linux -> lib/common/kernel/linux
  lib/common/kernel/i386-win32 -> lib/common/kernel/windows

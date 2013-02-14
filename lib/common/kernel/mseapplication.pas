@@ -35,7 +35,7 @@ type
  activatoroptionsty = set of activatoroptionty;
  activatorabortactionty = (aaa_abortexception,aaa_abort,aaa_deactivate,
                            aaa_retry);
- 
+
 const
  defaultactivatoroptions = [avo_handleexceptions,avo_quietexceptions];
  
@@ -278,14 +278,16 @@ type
    function running: boolean; //true if eventloop entered
    procedure processmessages; virtual; //handle with care!
    function idle: boolean; virtual;
-   function modallevel: integer; virtual; abstract;
+   function modallevel: integer; virtual; abstract; //-1 invalid,
+                                                    //0 single loop stack
    property applicationname: msestring read fapplicationname 
                                                  write fapplicationname;
    
-   procedure postevent(event: tmseevent; const alocal: boolean = false;
-                                            const afirst: boolean = false);
-                            //local -> direcly to the internal queue
-                            //afirst for local = true only
+   procedure postevent(event: tmseevent;
+                   const aoptions: posteventoptionsty = []);
+                            //peo_local -> direcly to the internal queue
+                            //peo_afirst imlpies peo_local
+                            //peo_modaldefer -> deliver in current modallevel
    function checkoverload(const asleepus: integer = 100000): boolean;
               //true if never idle since last call,
               // unlocks application and calls sleep if not mainthread and asleepus >= 0
@@ -324,11 +326,11 @@ type
    procedure lockifnotmainthread;
    procedure unlockifnotmainthread;
    function synchronize(const proc: proceventty;
-                       const quite: boolean = false): boolean; overload;
+                       const quiet: boolean = false): boolean; overload;
    function synchronize(const proc: synchronizeeventty; const data: pointer;
-                       const quite: boolean = false): boolean; overload;
+                       const quiet: boolean = false): boolean; overload;
    function synchronize(const proc: synchronizeprocty; const data: pointer;
-                       const quite: boolean = false): boolean; overload;
+                       const quiet: boolean = false): boolean; overload;
      //true if not aborted, quiet -> show no exceptions
    procedure releaseobject(const aobject: tobject);
    function ismainthread: boolean;
@@ -1244,11 +1246,11 @@ begin
 end;
 
 function tcustomapplication.synchronize(const proc: proceventty;
-                                     const quite: boolean = false): boolean;
+                                     const quiet: boolean = false): boolean;
 var
  event: tappsynchronizeevent;
 begin
- event:= tappsynchronizeevent.create(proc,quite);
+ event:= tappsynchronizeevent.create(proc,quiet);
  try
   result:= synchronizeevent(event);
  finally
@@ -1257,11 +1259,11 @@ begin
 end;
 
 function tcustomapplication.synchronize(const proc: synchronizeeventty;
-                   const data: pointer; const quite: boolean = false): boolean;
+                   const data: pointer; const quiet: boolean = false): boolean;
 var
  event: tappsynchronizedataevent;
 begin
- event:= tappsynchronizedataevent.create(proc,data,quite);
+ event:= tappsynchronizedataevent.create(proc,data,quiet);
  try
   result:= synchronizeevent(event);
  finally
@@ -1270,11 +1272,11 @@ begin
 end;
 
 function tcustomapplication.synchronize(const proc: synchronizeprocty;
-                   const data: pointer; const quite: boolean = false): boolean;
+                   const data: pointer; const quiet: boolean = false): boolean;
 var
  event: tappsynchronizeprocevent;
 begin
- event:= tappsynchronizeprocevent.create(proc,data,quite);
+ event:= tappsynchronizeprocevent.create(proc,data,quiet);
  try
   result:= synchronizeevent(event);
  finally
@@ -1362,24 +1364,30 @@ begin
 end;
 
 procedure tcustomapplication.postevent(event: tmseevent;
-                const alocal: boolean = false; const afirst: boolean = false);
+                                        const aoptions: posteventoptionsty);
+var
+ bo1: boolean;
 begin
  if csdestroying in componentstate then begin
   event.free1;
  end
  else begin
+  bo1:= event is tobjectevent;
+  if (peo_modaldefer in aoptions) and bo1 then begin
+   include(tobjectevent1(event).fstate,oes_modaldeferred);
+  end;
   if trylock then begin
    try
-    if (event is tobjectevent) {and ismainthread} then begin
+    if bo1 then begin
      with tobjectevent1(event) do begin
-      if oes_modaldeferred in fstate then begin
+      if (oes_modaldeferred in fstate) then begin
        fmodallevel:= self.modallevel;
       end;
      end;
     end;
     flusheventbuffer;
-    if alocal then begin
-     if afirst then begin
+    if aoptions * [peo_local,peo_first] <> [] then begin
+     if peo_first in aoptions then begin
       eventlist.insert(0,event);
      end
      else begin
@@ -1399,7 +1407,7 @@ begin
   end
   else begin
    sys_mutexlock(feventlock);
-   if alocal then begin
+   if (peo_local in aoptions) then begin
     setlength(fpostedeventslocal,high(fpostedeventslocal) + 2);
     fpostedeventslocal[high(fpostedeventslocal)]:= event;
    end

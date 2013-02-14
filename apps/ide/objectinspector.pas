@@ -1031,7 +1031,7 @@ end;
 procedure tobjectinspectorfo.refresh;
 begin
  if not frereadprops and (fchanging = 0) then begin
-  asyncevent(ado_rereadprops);
+  asyncevent(ado_rereadprops,[peo_modaldefer]);
   frereadprops:= true;
  end;
 end;
@@ -1683,13 +1683,7 @@ procedure tobjectinspectorfo.closeobjecttext(const adesigner: idesigner;
 begin
  //dummy
 end;
-{
-function tobjectinspectorfo.show(const modallevel: modallevelty;
-             const transientfor: twindow = nil): modalresultty;
-begin
- result:= inherited show(modallevel,transientfor);
-end;
-}
+
 procedure tobjectinspectorfo.objectinspectoronchildscaled(const sender: TObject);
 begin
  placeyorder(0,[2],[compselector,grid]);

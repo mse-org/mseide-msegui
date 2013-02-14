@@ -72,6 +72,9 @@ const
      '{$ifdef FPC}{$mode objfpc}{$h+}{$endif}';
 
 type
+ posteventoptionty = (peo_local,peo_first,peo_modaldefer);
+ posteventoptionsty = set of posteventoptionty;
+ 
  notifyeventty = procedure (const sender: tobject) of object;
  componenteventty = procedure (const acomponent: tcomponent) of object;
  checkeventty = function (const sender: tobject): boolean of object;
@@ -512,11 +515,11 @@ type
    procedure sendrootcomponentevent(const event: tcomponentevent;
                                         const destroyevent: boolean = true);
                   //event will be destroyed if not async
-   procedure asyncevent(atag: integer = 0; const alocal: boolean = false;
-                                            const afirst: boolean = false);
+   procedure asyncevent(atag: integer = 0;
+                   const aoptions: posteventoptionsty = []);
                           //posts event for doasyncevent to self
    procedure postcomponentevent(const event: tcomponentevent;
-                                             const alocal: boolean = false);
+                                     const aoptions: posteventoptionsty = []);
 
    property moduleclassname: string read getmoduleclassname;
    property actualclassname: string read getactualclassname;
@@ -4126,9 +4129,9 @@ begin
 end;
 
 procedure tmsecomponent.asyncevent(atag: integer = 0;
-               const alocal: boolean = false; const afirst: boolean = false);
+                                    const aoptions: posteventoptionsty = []);
 begin
- application.postevent(tasyncevent.create(ievent(self),atag),alocal,afirst);
+ application.postevent(tasyncevent.create(ievent(self),atag),aoptions);
 end;
 
 procedure tmsecomponent.doasyncevent(var atag: integer);
@@ -4137,10 +4140,10 @@ begin
 end;
 
 procedure tmsecomponent.postcomponentevent(const event: tcomponentevent;
-                                                  const alocal: boolean = false);
+                                  const aoptions: posteventoptionsty = []);
 begin
  event.create(event.kind,ievent(self));
- application.postevent(event,alocal);
+ application.postevent(event,aoptions);
 end;
 
 {$ifdef FPC}

@@ -124,12 +124,14 @@ type
  tuserevent = class(tobjectevent)
    ftag: integer;
   public
-   constructor create(const dest: ievent; tag: integer);
+   constructor create(const dest: ievent; tag: integer;
+                               const amodaldefer: boolean = false);
    property tag: integer read ftag;
  end;
 
  tasyncevent = class(tuserevent)
-  constructor create(const dest: ievent; atag: integer);
+  constructor create(const dest: ievent; atag: integer;
+                                  const amodaldefer: boolean = false);
  end;
 
  texecuteevent = class(tmseevent)
@@ -201,7 +203,7 @@ begin
 // if akind = ek_releasedefer then begin
  if modaldefer then begin
   include(fstate,oes_modaldeferred);
-	 end;
+ end;
  if (finterface <> nil) then begin
   if application.locked then begin
    include(fstate,oes_islinked);
@@ -278,15 +280,17 @@ end;
 
 { tuserevent }
 
-constructor tuserevent.create(const dest: ievent; tag: integer);
+constructor tuserevent.create(const dest: ievent; tag: integer;
+                                           const amodaldefer: boolean = false);
 begin
  ftag:= tag;
- inherited create(ek_user,dest);
+ inherited create(ek_user,dest,amodaldefer);
 end;
 
 { tasyncevent }
 
-constructor tasyncevent.create(const dest: ievent; atag: integer);
+constructor tasyncevent.create(const dest: ievent; atag: integer;
+                                     const amodaldefer: boolean = false);
 begin
  inherited;
  fkind:= ek_async;
