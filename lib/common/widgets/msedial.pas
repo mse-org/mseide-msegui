@@ -301,6 +301,7 @@ type
    frange: real;
    flnrange: real;
    procedure setdirection(const avalue: graphicdirectionty); virtual;
+   procedure layoutchanged;
    procedure changed;
    procedure calclineend(const ainfo: diallineinfoty; const aopposite: boolean; 
                    const arect: rectty; out linestart,lineend: integer;
@@ -566,7 +567,7 @@ end;
 procedure tdialprop.changed;
 begin
  flayoutvalid:= false;
- tcustomdialcontroller(fowner).changed;
+ tcustomdialcontroller(fowner).layoutchanged;
 end;
 
 procedure tdialprop.setcolor(const avalue: colorty);
@@ -1202,21 +1203,17 @@ begin
  end;
 end;
 
-procedure tcustomdialcontroller.changed;
+procedure tcustomdialcontroller.layoutchanged;
 begin
  fintf.layoutchanged;
+ exclude(fstate,dis_layoutvalid);
+end;
+
+procedure tcustomdialcontroller.changed;
+begin
  fmarkers.changed;
  fticks.changed;
- exclude(fstate,dis_layoutvalid);
-{
- with fintf.getwidget do begin
-  if not (csloading in componentstate) then begin
-   exclude(fstate,dis_layoutvalid);
-   invalidate;
-   fmarkers.changed;
-  end;
- end;
-}
+ layoutchanged;
 end;
 
 procedure tcustomdialcontroller.calclineend(const ainfo: diallineinfoty;

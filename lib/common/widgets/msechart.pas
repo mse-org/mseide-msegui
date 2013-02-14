@@ -1448,7 +1448,6 @@ begin
       rect1.cy:= b.y - a.y;
       acanvas.fillrect(rect1,finfo.color);
       if finfo.bar_frame <> nil then begin
-//       normalizerect1(rect1);
        if rect1.cy < 0 then begin
         rect1.y:= rect1.y + rect1.cy;
         rect1.y:= -rect1.y;
@@ -1462,6 +1461,11 @@ begin
        end;
        acanvas.restore;
        finfo.bar_frame.paintoverlay(acanvas,rect1);
+      end
+      else begin
+       if finfo.bar_face <> nil then begin
+        finfo.bar_face.paint(acanvas,rect1);
+       end;
       end;
      end;
     end;
