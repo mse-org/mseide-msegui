@@ -26,6 +26,7 @@ type
 
  tickcaptionty = record
   caption: msestring;
+  width: integer;
   pos: pointty;
   angle: real;
  end;
@@ -59,7 +60,8 @@ type
  end;
 
  dialtickoptionty =  (dto_invisible,dto_opposite,dto_rotatetext,
-                      dto_multiplecaptions); 
+                      dto_multiplecaptions,
+                      dto_alignstart,dto_aligncenter,dto_alignend); 
                       //allow captions of different ticks at same position
                                     
  dialtickoptionsty = set of dialtickoptionty;
@@ -1026,7 +1028,10 @@ end;
 procedure tdialtick.setoptions(const avalue: dialtickoptionsty);
 begin
  if finfo.options <> avalue then begin
-  finfo.options:= avalue;
+  finfo.options:= dialtickoptionsty(
+                 setsinglebit(longword(avalue),longword(finfo.options),
+                 longword([dto_alignstart,dto_aligncenter,dto_alignend])));
+//  finfo.options:= avalue;
   changed;
  end;
 end;
@@ -1865,6 +1870,8 @@ begin
         end;
        end;
        rea3:= rea3+escapement * 2 * pi;
+       int2:= -bigint;
+       bo1:= direction in [gd_left.gd_right];
        for int1:= 0 to high(captions) do begin
         if islog then begin
          rea1:= ar1[int1];
@@ -1889,11 +1896,72 @@ begin
         end;
         with captions[int1] do begin
          pos:= ticks[int1].a;
-         int2:= canvas1.getstringwidth(caption,afont);
+         width:= canvas1.getstringwidth(caption,afont);
+         if width > int2 then begin
+          int2:= width;
+         end;
          adjustcaption(dir1,dto_rotatetext in options,fli,afont,
-               int2,pos);
+               width,pos);
+         if bo1 then begin
+          if dto_alignstart in options then begin
+           pos.x:= pos.x + width div 2;
+          end
+          else begin
+           if dto_alignend in options then begin
+            pos.x:= pos.x - width div 2;
+           end;
+          end;
+         end;
          angle:= ticksreal[int1] * rea2 + rea3;
-         extenddim(int2,asc,desc,pos,fticks.fdim);        
+         extenddim(width,asc,desc,pos,fticks.fdim);        
+        end;
+       end;
+       if options * [dto_alignstart,dto_aligncenter,dto_alignend] <> [] then begin
+        if dto_aligncenter in options then begin
+         case direction of
+          gd_up,gd_down: begin
+           if (dto_opposite in options) xor opposite then begin
+            for int1:= 0 to high(captions) do begin
+             with captions[int1] do begin
+              pos.x:= pos.x - (int2-width) div 2;
+             end;
+            end;
+           end
+           else begin
+            for int1:= 0 to high(captions) do begin
+             with captions[int1] do begin
+              pos.x:= pos.x + (int2-width) div 2;
+             end;
+            end;
+           end;
+          end;
+         end;
+        end
+        else begin
+         if dto_alignend in options then begin
+          case direction of
+           gd_up,gd_down: begin
+            if (dto_opposite in options) xor opposite then begin
+             for int1:= 0 to high(captions) do begin
+              with captions[int1] do begin
+               pos.x:= pos.x - (int2-width);
+              end;
+             end;
+            end
+            else begin
+             for int1:= 0 to high(captions) do begin
+              with captions[int1] do begin
+               pos.x:= pos.x + (int2-width);
+              end;
+             end;
+            end;
+           end;
+          end;
+         end
+         else begin
+          if dto_alignstart in options then begin
+          end;
+         end;
         end;
        end;
        //todo: variable unitcaption pos.

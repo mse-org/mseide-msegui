@@ -3727,7 +3727,7 @@ end;
 
 procedure tcuchart.createfacechart;
 begin
- if ffacechart <> nil then begin
+ if ffacechart = nil then begin
   ffacechart:= tface.create(iface(self));
  end;
 end;

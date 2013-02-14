@@ -15,7 +15,7 @@ const
  
 implementation
 uses
- classes,msegraphics,msebitmap,fpwritepng,msegraphicstream,msestockobjects,
+ classes,mclasses,msegraphics,msebitmap,fpwritepng,msegraphicstream,msestockobjects,
  fpimage;
 
 procedure writegraphic(const dest: tstream;

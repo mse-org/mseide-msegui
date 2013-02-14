@@ -17,7 +17,7 @@ unit FPWritePNG;
 
 interface
 
-uses sysutils, classes, FPImage, FPImgCmn, PNGComn, ZStream;
+uses sysutils, classes, mclasses, FPImage, FPImgCmn, PNGComn, ZStream;
 
 type
 

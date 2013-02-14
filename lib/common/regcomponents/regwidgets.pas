@@ -207,6 +207,7 @@ begin
  registerpropertyeditor(typeinfo(twidget),tlayouter,'align_leader',
                                  tchildwidgetpropertyeditor);
 
+// registerpropertyeditor(typeinfo(tface),tdial,'',toptionalclasspropertyeditor);
  registerpropertyeditor(typeinfo(ttraces),nil,'',ttraceseditor);
  registerpropertyeditor(typeinfo(trealdatalist),ttrace,'',
                                 toptionaldatalistpropertyeditor);
