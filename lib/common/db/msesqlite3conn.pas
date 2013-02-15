@@ -460,8 +460,9 @@ begin
        size1:= size;
       end;
      end;
-    end
-    else begin
+    end;
+    if ft1 = ftunknown then begin
+     size1:= 0;
      case storagetypety(sqlite3_column_type(fstatement,int1)) of
       st_integer: ft1:= ftinteger;
       st_float: ft1:= ftfloat;
