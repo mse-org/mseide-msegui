@@ -71,9 +71,9 @@ type
    function execthread(thread: tmsethread): integer; virtual;
    procedure sethandle(value: integer); override;
    procedure setbuflen(const Value: integer); override;
-   function doread(var buf; const acount: integer;
-                  const nonblocked: boolean = false): integer; virtual;
-          //nonblocked -> result = 0 for no data, < = for error
+   function doread(var buf; const acount: integer; out readcount: integer;
+                  const nonblocked: boolean = false): boolean; virtual;
+          //true of no error
    function readbytes(var buf): integer; override;
    procedure doinputavailable;
    procedure dochange; virtual;
@@ -328,27 +328,36 @@ begin
 end;
 
 function tpipereader.doread(var buf; const acount: integer;
-                             const nonblocked: boolean = false): integer;
+                              out readcount: integer;
+                             const nonblocked: boolean = false): boolean;
 {$ifndef mswindows}
 var
  bo1: boolean;
 {$endif}
 begin
 {$ifdef mswindows}
- result:= fileRead(Handle,buf,acount)
+ readcount:= sys_read(Handle,@buf,acount);
+ if readcount < 0 then begin
+  result:= false;
+ end;
+// result:= fileRead(Handle,buf,acount)
 {$else}
  bo1:= nonblocked and not (tss_unblocked in fstate);
  if bo1 then begin
   setfilenonblock(handle,true);
  end;
- result:= sys_read(Handle,@buf,acount);
+ readcount:= sys_read(Handle,@buf,acount);
  if bo1 then begin
   if (result < 0) and (sys_getlasterror = EAGAIN) then begin 
-   result:= 0;
+   readcount:= 0;
   end;
   setfilenonblock(handle,false);
  end;
 {$endif}
+ result:= readcount >= 0;
+ if not result then begin
+  readcount:= 0;
+ end;
 end;
 
 function tpipereader.readbytes(var buf): integer;
@@ -362,29 +371,16 @@ function tpipereader.readbytes(var buf): integer;
    if int1 > sizeof(fmsbuf) then begin
     int1:= sizeof(fmsbuf);
    end;
-   int1:= doread(fmsbuf,int1);
-//   int1:= fileRead(Handle,fmsBuf,int1);
-   if (int1 < 0) then begin
-    fmsbufcount:= 0;
+   if not doread(fmsbuf,int1,fmsbufcount) then begin
     fstate:= fstate + [tss_error,tss_eof];
-   end
-   else begin
-    fmsbufcount:= int1;
    end;
   end
   else begin
    fmsbufcount:= 0;
   end;
   {$else}
-  int1:= doread(fmsbuf,sizeof(fmsbuf),true);
-  if int1 <= 0 then begin
-   fmsbufcount:= 0;
-   if int1 < 0 then begin
+  if not doread(fmsbuf,sizeof(fmsbuf),fmsbufcount,true) then begin
     fstate:= fstate + [tss_error,tss_eof]; //broken pipe
-   end
-  end
-  else begin
-   fmsbufcount:= int1;
   end;
   {$endif}
   if fmsbufcount = 0 then begin

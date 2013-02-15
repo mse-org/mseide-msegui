@@ -25,8 +25,8 @@ type
   protected
    procedure settimeoutms(const avalue: integer); override;
    procedure sethandle(value: integer); override;
-   function internalread(var buf; const acount: integer;
-                    const nonblocked: boolean = false): integer; override;
+   function internalread(var buf; const acount: integer; out readcount: integer;
+                    const nonblocked: boolean = false): boolean; override;
    procedure closehandle(const ahandle: integer); override;
   public
    constructor create(const aowner: tcustomcommpipes);
@@ -751,7 +751,8 @@ begin
 end;
 
 function tsocketreader.internalread(var buf; const acount: integer;
-                   const nonblocked: boolean = false): integer;
+                   out readcount: integer;
+                   const nonblocked: boolean = false): boolean;
 var
  int1: integer;
 begin
@@ -761,7 +762,11 @@ begin
  else begin
   int1:= 0;
  end;
- soc_read(handle,@buf,acount,result,int1);
+ soc_read(handle,@buf,acount,readcount,int1);
+ result:= readcount >= 0;
+ if not result then begin
+  readcount:= 0;
+ end;
 end;
 
 procedure tsocketreader.closehandle(const ahandle: integer);

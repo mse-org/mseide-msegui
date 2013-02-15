@@ -43,10 +43,10 @@ type
    fonafterconnect: proceventty;
    procedure settimeoutms(const avalue: integer); virtual;
    function execthread(thread: tmsethread): integer; override;
-   function internalread(var buf; const acount: integer;
-                    const nonblocked: boolean = false): integer; virtual;
-   function doread(var buf; const acount: integer;
-                    const nonblocked: boolean = false): integer; override;
+   function internalread(var buf; const acount: integer;  out readcount: integer;
+                    const nonblocked: boolean = false): boolean; virtual;
+   function doread(var buf; const acount: integer; out readcount: integer;
+                    const nonblocked: boolean = false): boolean; override;
    procedure dochange; override;
   public
    constructor create(const aowner: tcustomcommpipes);
@@ -72,6 +72,9 @@ type
  end;
  
  tsercommreader = class(tcommreader)
+  protected
+   function internalread(var buf; const acount: integer; out readcount: integer;
+                    const nonblocked: boolean = false): boolean; override;
  end;
 
  tcustomcommcomp = class;
@@ -466,7 +469,7 @@ end;
 constructor tasyncserport.create(const aowner: tmsecomponent;
                const aoncheckabort: checkeventty = nil);
 begin
- inherited;
+ inherited create(aowner,aoncheckabort,true);
  fvmin:= #1; //blocking
 end;
 
@@ -813,7 +816,7 @@ end;
 
 function tcommreader.execthread(thread: tmsethread): integer;
 var
- int1: integer;
+ bo1: boolean;
 begin                          
 {$ifdef mse_debugsockets}
  debugout(self,'socketreader execthread');
@@ -832,15 +835,12 @@ begin
   end;
   with fthread do begin
    while not terminated and not (tss_error in fstate) do begin
-    int1:= doread(fmsbuf,sizeof(fmsbuf));
+    bo1:= doread(fmsbuf,sizeof(fmsbuf),fmsbufcount);
     if not terminated then begin
-     if int1 <= 0 then begin
+     if not bo1 then begin
       include(fstate,tss_error); //broken socket
-     end
-     else begin
-      fmsbufcount:= int1;
      end;
-     if (int1 > 0) or (tss_error in fstate) then begin
+     if (fmsbufcount > 0) or (tss_error in fstate) then begin
       include(fstate,tss_pipeactive);
       doinputavailable;
       if not terminated and not (tss_error in fstate) then begin
@@ -863,13 +863,15 @@ begin
 end;
 
 function tcommreader.internalread(var buf; const acount: integer;
-               const nonblocked: boolean = false): integer;
+               out readcount: integer;
+               const nonblocked: boolean = false): boolean;
 begin
- result:= inherited doread(buf,acount,nonblocked);
+ result:= inherited doread(buf,acount,readcount,nonblocked);
 end;
 
 function tcommreader.doread(var buf; const acount: integer;
-               const nonblocked: boolean = false): integer;
+               out readcount: integer;
+               const nonblocked: boolean = false): boolean;
 var
  int1: integer;
 begin
@@ -880,10 +882,14 @@ begin
   else begin
    int1:= 0;
   end;
-  result:= cryptoread(fcrypto^,@buf,acount,int1);
+  readcount:= cryptoread(fcrypto^,@buf,acount,int1);
+  result:= readcount >= 0;
+  if not result then begin
+   readcount:= 0;
+  end;
  end
  else begin  
-  result:= internalread(buf,acount,nonblocked);
+  result:= internalread(buf,acount,readcount,nonblocked);
  end;
 end;
 
@@ -1075,6 +1081,15 @@ begin
  ftimer.enabled:= false;
  fdata:= '';
  fstate:= fstate-[sccs_pending];
+end;
+
+{ tsercommreader }
+
+function tsercommreader.internalread(var buf; const acount: integer;
+               out readcount: integer;
+               const nonblocked: boolean = false): boolean;
+begin
+ result:= inherited internalread(buf,acount,readcount,nonblocked);
 end;
 
 end.

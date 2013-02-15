@@ -832,7 +832,7 @@ type
    property oninit;
  end;
   
- tenumdropdowncontroller = class(tnocolsdropdownlistcontroller)
+ tnocolsenumdropdowncontroller = class(tnocolsdropdownlistcontroller)
   private
    procedure readitemindex(reader: treader);
   protected
@@ -846,11 +846,15 @@ type
    property imageframe_top;
    property imageframe_right;
    property imageframe_bottom;
-   property cols;
    property valuecol;
 //   property itemindex;
  end;
- 
+
+ tenumdropdowncontroller = class(tnocolsenumdropdowncontroller)
+  published
+   property cols;
+ end;
+  
  tcustomenuedit = class(tcustomdropdownlistedit)
   private
    fbitcount: integer;
@@ -4940,20 +4944,20 @@ begin
  fdropdown.assign(avalue);
 end;
 
-{ tenumdropdowncontroller }
+{ tnocolsenumdropdowncontroller }
 
-constructor tenumdropdowncontroller.create(const intf: idropdownlist);
+constructor tnocolsenumdropdowncontroller.create(const intf: idropdownlist);
 begin
  inherited;
  options:= defaultenumdropdownoptions;
 end;
 
-procedure tenumdropdowncontroller.readitemindex(reader: treader);
+procedure tnocolsenumdropdowncontroller.readitemindex(reader: treader);
 begin
  reader.readinteger; //dummy
 end;
 
-procedure tenumdropdowncontroller.defineproperties(filer: tfiler);
+procedure tnocolsenumdropdowncontroller.defineproperties(filer: tfiler);
 begin
  inherited;
  filer.defineproperty('itemindex',{$ifdef FPC}@{$endif}readitemindex,

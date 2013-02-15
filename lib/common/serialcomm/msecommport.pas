@@ -151,9 +151,9 @@ type
    {$ifdef mswindows}
    overlapped: toverlapped;
    timer: tmmtimermse;
-//   txemptoverlapped: toverlapped;
    {$endif}
    fdatabits: commdatabitsty;
+   fnooverlapped: boolean;
    procedure updatebyteinfo;
    procedure Setbaud(const Value: commbaudratety);
    procedure Setcommnr(const Value: commnrty);
@@ -162,6 +162,7 @@ type
    function waitfortx(timeout: integer): boolean;    //timeout in us
    function defaulttimeout(us: longword; anzahl: integer; out timeout: longword): boolean;
              // timeout in us 0 -> 2*uebertragungszeit,
+             // infinitemse -> kein timeout
    {$ifdef mswindows}
    procedure eotevent(sender: tobject);
    {$endif}
@@ -171,7 +172,8 @@ type
    function canevent(const aevent: tmethod): boolean;
   public
    constructor create(const aowner: tmsecomponent;  //aowner can be nil
-                                  const aoncheckabort: checkeventty = nil);
+                      const aoncheckabort: checkeventty = nil;
+                      const anooverlapped: boolean = false);
    destructor destroy; override;
    function open: boolean;
    procedure close;
@@ -663,7 +665,8 @@ end;
 { tcustomrs232 }
 
 constructor tcustomrs232.create(const aowner: tmsecomponent; const
-                      aoncheckabort: checkeventty = nil);
+                      aoncheckabort: checkeventty = nil;
+                      const anooverlapped: boolean = false);
 begin
  fowner:= aowner;
  fhandle:= invalidfilehandle;
@@ -671,6 +674,7 @@ begin
  fdatabits:= cdb_8;
  fstopbit:= csb_1;
  faparity:= cpa_none;
+ fnooverlapped:= anooverlapped;
  foncheckabort:= aoncheckabort;
  updatebyteinfo;
 end;
@@ -921,13 +925,19 @@ begin       //open
   reset;
  end;
  {$else}
- overlapped.hevent:= createevent(nil,true,false,nil);
+ if not fnooverlapped then begin
+  overlapped.hevent:= createevent(nil,true,false,nil);
+ end;
  int1:= 0;
  repeat
-  fhandle:= createfile(pchar(commname[fcommnr]), GENERIC_READ or GENERIC_WRITE, 0, nil,
+  if not fnooverlapped then begin
+   fhandle:= createfile(pchar(commname[fcommnr]), GENERIC_READ or GENERIC_WRITE, 0, nil,
                OPEN_EXISTING,FILE_FLAG_OVERLAPPED,0);
-//  fhandle:= createfile(pchar(commname[fcommnr]), GENERIC_READ or GENERIC_WRITE, 0, nil,
-//               OPEN_EXISTING,0,0);
+  end
+  else begin
+   fhandle:= createfile(pchar(commname[fcommnr]), GENERIC_READ or GENERIC_WRITE, 0, nil,
+               OPEN_EXISTING,0,0);
+  end;
   if fhandle = invalidfilehandle then begin
    sleep(100);
   end;
@@ -1258,10 +1268,12 @@ begin
  po:= @dat;
  if opened then begin
   if anzahl > 0 then begin
-   defaulttimeout(timeout,anzahl,timeout);
+   if defaulttimeout(timeout,anzahl,timeout) then begin
+    timeout:= timeout div 1000;
+   end;
    bo1:= windows.readfile(fhandle,po^,anzahl,longword(result),@overlapped);
    if not bo1 and (getlasterror = ERROR_IO_PENDING) then begin
-    bo1:= waitforsingleobject(overlapped.hevent,timeout div 1000) = WAIT_OBJECT_0;
+    bo1:= waitforsingleobject(overlapped.hevent,timeout) = WAIT_OBJECT_0;
    end;
    if not bo1 then begin
     purgecomm(fhandle,PURGE_RXABORT); //puffer freigeben

@@ -29,6 +29,7 @@ type
   protected
    procedure getdropdowninfo(var aenums: integerarty;
          const names: tdropdowncols); override;
+   function createdropdowncontroller: tcustomdropdowncontroller; override;
   public
    constructor create(aowner: tcomponent); override;
   published
@@ -137,6 +138,11 @@ end;
 procedure tcommselector.setvalue(const aValue: commnrty);
 begin
  inherited setvalue(integer(avalue));
+end;
+
+function tcommselector.createdropdowncontroller: tcustomdropdowncontroller;
+begin
+ result:= tnocolsenumdropdowncontroller.create(idropdownlist(self));
 end;
 
 end.
