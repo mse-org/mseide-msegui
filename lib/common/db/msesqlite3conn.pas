@@ -409,14 +409,12 @@ begin
              else begin
               if pos('VARCHAR',str2) = 1 then begin
                ft1:= ftstring;
-//               size1:= 255; //default
                ar1:= splitstring(str2,'(');
                if high(ar1) >= 1 then begin
                 ar1:= splitstring(ar1[1],')');
                 if high(ar1) >= 0 then begin
-                 try
-                  size1:= strtoint(ar1[0]);
-                 except
+                 if not trystrtoint(ar1[0],size1) then begin
+                  size1:= 0;
                  end;
                 end;
                end;
@@ -461,6 +459,14 @@ begin
       if ft1 = ftstring then begin
        size1:= size;
       end;
+     end;
+    end
+    else begin
+     case storagetypety(sqlite3_column_type(fstatement,int1)) of
+      st_integer: ft1:= ftinteger;
+      st_float: ft1:= ftfloat;
+      st_text: ft1:= ftstring;
+      st_blob: ft1:= ftblob;
      end;
     end;
    end;
