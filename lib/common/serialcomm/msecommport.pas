@@ -585,6 +585,7 @@ end;
 function checkcommport(commnr: commnrty): boolean;  //true wenn comport zur verfuegung //clx
 var
  hcomm: thandle;
+ info: termios;
 begin
  {$ifdef mswindows}
  hcomm:= createfile(pchar(commname[commnr]), GENERIC_READ or GENERIC_WRITE, 0, nil,
@@ -603,7 +604,7 @@ begin
   result:= false;
  end
  else begin
-  result:= true;
+  result:=  msetcgetattr(hcomm,info) = 0;
   __close(hcomm);
  end;
  {$endif}
