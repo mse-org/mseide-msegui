@@ -160,7 +160,7 @@ end;
  end;
 
 {$ifdef UNIX}
-function readfilenonblock(const handle: thandle; var buf; const acount;
+function readfilenonblock(const handle: thandle; var buf; const acount: integer;
                      const nonblocked: boolean): integer; //-1 on error
 {$endif}
 
@@ -333,7 +333,7 @@ begin
 end;
 
 {$ifdef UNIX}
-function readfilenonblock(const handle: thandle; var buf; const acount;
+function readfilenonblock(const handle: thandle; var buf; const acount: integer;
                      const nonblocked: boolean): integer; //-1 on error
 begin
  if nonblocked then begin
@@ -342,7 +342,7 @@ begin
  result:= sys_read(handle,@buf,acount);
  if nonblocked then begin
   if (result < 0) and (sys_getlasterror = EAGAIN) then begin 
-   readcount:= 0;
+   result:= 0;
   end;
   setfilenonblock(handle,false);
  end;
@@ -360,7 +360,7 @@ begin
  end;
 // result:= fileRead(Handle,buf,acount)
 {$else}
- readcount:= readfilenonblock(buf,acount,
+ readcount:= readfilenonblock(handle,buf,acount,
                          nonblocked and not (tss_unblocked in fstate));
 {$endif}
  result:= readcount >= 0;
@@ -372,10 +372,12 @@ end;
 function tpipereader.readbytes(var buf): integer;
  
  procedure getmorebytes;
+{$ifdef mswindows}
  var
   int1: integer;
+{$endif}
  begin
-  {$ifdef mswindows}
+ {$ifdef mswindows}
   if peeknamedpipe(handle,nil,0,nil,@int1,nil) and (int1 > 0) then begin
    if int1 > sizeof(fmsbuf) then begin
     int1:= sizeof(fmsbuf);
@@ -387,11 +389,11 @@ function tpipereader.readbytes(var buf): integer;
   else begin
    fmsbufcount:= 0;
   end;
-  {$else}
+ {$else}
   if not doread(fmsbuf,sizeof(fmsbuf),fmsbufcount,true) then begin
     fstate:= fstate + [tss_error,tss_eof]; //broken pipe
   end;
-  {$endif}
+ {$endif}
   if fmsbufcount = 0 then begin
    exclude(fstate,tss_pipeactive);
    fthread.sempost;

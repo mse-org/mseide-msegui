@@ -462,7 +462,7 @@ begin
 end;
 
 
-function sys_read(fd:longint; buf:pointer; nbytes: dword): integer;
+function sys_read(fd: longint; buf: pointer; nbytes: dword): integer;
 begin
  result:= mselibc.__read(fd,buf^,nbytes);
 end;

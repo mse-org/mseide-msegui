@@ -172,7 +172,7 @@ type
    fvmin: char;
    function canevent(const aevent: tmethod): boolean;
    function piperead(var buf; const acount: integer; out readcount: integer;
-                    const nonblocked: boolean = false): boolean;
+                    const nonblocked: boolean): boolean;
    function pipewrite(const buffer; count: longint): longint;
   public
    constructor create(const aowner: tmsecomponent;  //aowner can be nil
@@ -435,7 +435,8 @@ function asciitobin(const chars: string): string;
 implementation
 uses
 // {$ifdef UNIX} {kernelioctl,}msesysbindings, {$endif}
- sysutils,mseapplication,msesysintf1,msesysintf,msesys,msesysutils;
+ sysutils,mseapplication,msesysintf1,msesysintf,msesys,msesysutils,
+ msepipestream;
 
 const
  asciipufferlaenge = 255;
@@ -1323,7 +1324,7 @@ end;
 
 function tcustomrs232.piperead(var buf; const acount: integer;
                out readcount: integer;
-               const nonblocked: boolean = false): boolean;
+               const nonblocked: boolean): boolean;
 {$ifdef mswindows}
 var
  w1: ptruint;
@@ -1361,18 +1362,16 @@ begin
   end;
  end;  
  if not bo1 then begin
-  readcount:= -1;
+  readcount:= 0;
  end
  else begin
   readcount:= w1;
  end;
+ result:= bo1;
 {$else}
- readcount:= piperead(handle,buf,acount,nonblocked);
-{$endif}
+ readcount:= readfilenonblock(handle,buf,acount,nonblocked);
  result:= readcount >= 0;
- if not result then begin
-  readcount:= 0;
- end;
+{$endif}
 end;
 
 function tcustomrs232.pipewrite(const buffer; count: longint): longint;
