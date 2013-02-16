@@ -69,6 +69,8 @@ type
  end;
   
  tsercommwriter = class(tcommwriter)
+  protected
+   function internalwrite(const buffer; count: longint): longint; override;
  end;
  
  tsercommreader = class(tcommreader)
@@ -237,7 +239,7 @@ type
    procedure closepipes(const sender: tcustomcommpipes); override;
    procedure doasyncevent(var atag: integer); override;
    function gethalfduplex: boolean; override;
-  public
+ public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    function calctransmissiontime(const alength: integer): integer; override;
@@ -420,12 +422,12 @@ end;
 
 procedure tcustomsercommcomp.closepipes(const sender: tcustomcommpipes);
 begin
- if (csdestroying in componentstate) and application.ismainthread then begin
+// if (csdestroying in componentstate) and application.ismainthread then begin
   disconnect;
- end
- else begin
-  asyncevent(closepipestag);
- end;
+// end
+// else begin
+//  asyncevent(closepipestag);
+// end;
 end;
 
 procedure tcustomsercommcomp.doasyncevent(var atag: integer);
@@ -469,8 +471,8 @@ end;
 constructor tasyncserport.create(const aowner: tmsecomponent;
                const aoncheckabort: checkeventty = nil);
 begin
- inherited create(aowner,aoncheckabort,true);
- fvmin:= #1; //blocking
+ inherited create(aowner,aoncheckabort);
+ fvmin:= #1; //blocking until first byte
 end;
 
 { tcustomcommpipes }
@@ -1089,7 +1091,16 @@ function tsercommreader.internalread(var buf; const acount: integer;
                out readcount: integer;
                const nonblocked: boolean = false): boolean;
 begin
- result:= inherited internalread(buf,acount,readcount,nonblocked);
+ result:= tcustomsercommcomp(fowner.fowner).port.piperead(buf,acount,readcount,
+                                    nonblocked);
+// result:= inherited internalread(buf,acount,readcount,nonblocked);
+end;
+
+{ tsercommwriter }
+
+function tsercommwriter.internalwrite(const buffer; count: longint): longint;
+begin
+ result:= tcustomsercommcomp(fowner.fowner).port.pipewrite(buffer,count);
 end;
 
 end.

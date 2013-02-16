@@ -151,9 +151,9 @@ type
    {$ifdef mswindows}
    overlapped: toverlapped;
    timer: tmmtimermse;
+   commtimeouts: tcommtimeouts;
    {$endif}
    fdatabits: commdatabitsty;
-   fnooverlapped: boolean;
    procedure updatebyteinfo;
    procedure Setbaud(const Value: commbaudratety);
    procedure Setcommnr(const Value: commnrty);
@@ -165,15 +165,18 @@ type
              // infinitemse -> kein timeout
    {$ifdef mswindows}
    procedure eotevent(sender: tobject);
+   function setreadnonblocked(const anonblocked: boolean): boolean;
    {$endif}
    procedure setdatabits(const avalue: commdatabitsty);
   protected
    fvmin: char;
    function canevent(const aevent: tmethod): boolean;
+   function piperead(var buf; const acount: integer; out readcount: integer;
+                    const nonblocked: boolean = false): boolean;
+   function pipewrite(const buffer; count: longint): longint;
   public
    constructor create(const aowner: tmsecomponent;  //aowner can be nil
-                      const aoncheckabort: checkeventty = nil;
-                      const anooverlapped: boolean = false);
+                      const aoncheckabort: checkeventty = nil);
    destructor destroy; override;
    function open: boolean;
    procedure close;
@@ -303,7 +306,7 @@ type
    procedure loaded; override;
    function extracterrortext(error: integer; errors: array of errorrecty;
              var text: msestring): boolean; //true if found
-   //istatfile
+    //istatfile
    procedure dostatread(const reader: tstatreader); virtual;
    procedure dostatwrite(const writer: tstatwriter); virtual;
    procedure statreading;
@@ -665,8 +668,7 @@ end;
 { tcustomrs232 }
 
 constructor tcustomrs232.create(const aowner: tmsecomponent; const
-                      aoncheckabort: checkeventty = nil;
-                      const anooverlapped: boolean = false);
+                      aoncheckabort: checkeventty = nil);
 begin
  fowner:= aowner;
  fhandle:= invalidfilehandle;
@@ -674,7 +676,6 @@ begin
  fdatabits:= cdb_8;
  fstopbit:= csb_1;
  faparity:= cpa_none;
- fnooverlapped:= anooverlapped;
  foncheckabort:= aoncheckabort;
  updatebyteinfo;
 end;
@@ -842,7 +843,6 @@ var
 var
  int1: integer;
  dcb: tdcb;
- commtimeouts: tcommtimeouts;
 // bitzeit: real;
 const           // fuer tdcb.flags
     fBinary =           $0001;  // binary mode, no EOF check
@@ -868,7 +868,7 @@ const           // fuer tdcb.flags
  defaultdcb: tdcb = (
     DCBlength: sizeof(tdcb);
     BaudRate: 9600;
-    Flags: fbinary+fdtrcontrolenable+frtscontrolenable;
+    Flags: fbinary{+fdtrcontrolenable+frtscontrolenable};
     wReserved: 0;
     XonLim: 256;
     XoffLim: 128;
@@ -891,7 +891,7 @@ const           // fuer tdcb.flags
   close;
   syserror(syelasterror,'trs232: Can not set port mode.');
  end;
- 
+
 begin       //open
  close;
  {$ifdef UNIX}
@@ -925,19 +925,13 @@ begin       //open
   reset;
  end;
  {$else}
- if not fnooverlapped then begin
-  overlapped.hevent:= createevent(nil,true,false,nil);
- end;
  int1:= 0;
+ fillchar(overlapped,sizeof(overlapped),0);
+ overlapped.hevent:= createevent(nil,true,false,nil);
  repeat
-  if not fnooverlapped then begin
-   fhandle:= createfile(pchar(commname[fcommnr]), GENERIC_READ or GENERIC_WRITE, 0, nil,
+  fhandle:= createfile(pchar(commname[fcommnr]),
+                             GENERIC_READ or GENERIC_WRITE, 0, nil,
                OPEN_EXISTING,FILE_FLAG_OVERLAPPED,0);
-  end
-  else begin
-   fhandle:= createfile(pchar(commname[fcommnr]), GENERIC_READ or GENERIC_WRITE, 0, nil,
-               OPEN_EXISTING,0,0);
-  end;
   if fhandle = invalidfilehandle then begin
    sleep(100);
   end;
@@ -945,12 +939,12 @@ begin       //open
  until (fhandle <> invalidfilehandle) or (int1 > 2);
  if fhandle <> invalidfilehandle then begin
   fillchar(commtimeouts,sizeof(commtimeouts),#0);  //keine timeouts
-  commtimeouts.readintervaltimeout:= maxdword;     //bei read sofortige rueckkehr
+//  commtimeouts.readintervaltimeout:= maxdword;     //bei read sofortige rueckkehr
   setcommtimeouts(fhandle,commtimeouts);
   dcb:= defaultdcb;
   if fhalfduplex then begin
 //   dcb.flags:= fbinary+fdtrcontrolenable+frtscontroltoggle;    //geht nicht bei win95!
-   dcb.flags:= fbinary+fdtrcontrolenable+frtscontroldisable;
+//   dcb.flags:= fbinary+fdtrcontrolenable+frtscontroldisable;
    timer:= tmmtimermse.create;
   end;
   dcb.baudrate:= commbaudrates[fbaud];
@@ -1303,6 +1297,105 @@ begin
   setlength(dat,int1);
   result:= int1 = anzahl;
  end;
+end;
+
+{$ifdef mswindows}
+function tcustomrs232.setreadnonblocked(const anonblocked: boolean): boolean;
+begin
+ result:= true;
+ if anonblocked then begin
+  if commtimeouts.readintervaltimeout <> maxdword then begin
+   commtimeouts.readintervaltimeout:= maxdword;  
+   result:= setcommtimeouts(fhandle,commtimeouts);
+  end;
+ end
+ else begin  
+  if commtimeouts.readintervaltimeout <> 0 then begin
+   commtimeouts.readintervaltimeout:= 0;  
+   result:= setcommtimeouts(fhandle,commtimeouts);
+  end;
+ end;
+ if not result then begin
+  commtimeouts.readintervaltimeout:= maxdword div 2; //setting invalid
+ end;
+end;
+{$endif}
+
+function tcustomrs232.piperead(var buf; const acount: integer;
+               out readcount: integer;
+               const nonblocked: boolean = false): boolean;
+{$ifdef mswindows}
+var
+ w1: ptruint;
+ bo1: boolean;
+{$endif}
+begin
+{$ifdef mswindows}
+ bo1:= true;
+ w1:= 0;
+ bo1:= setreadnonblocked(nonblocked);
+ if bo1 then begin
+  if nonblocked then begin
+   bo1:= windows.readfile(fhandle,buf,acount,w1,@overlapped);
+  end
+  else begin
+   if acount > 0 then begin
+    bo1:= windows.readfile(fhandle,buf,1,w1,@overlapped);
+   end
+   else begin
+    bo1:= windows.readfile(fhandle,buf,0,w1,@overlapped);
+   end;
+   if not bo1 and (getlasterror = ERROR_IO_PENDING) then begin
+    bo1:= getoverlappedresult(fhandle,overlapped,w1,true);
+   end;
+   if bo1 and (acount > 1) then begin
+    bo1:= setreadnonblocked(true) and 
+        windows.readfile(fhandle,(pchar(@buf)+1)^,acount-1,w1,@overlapped);
+    if not bo1 and (getlasterror = ERROR_IO_PENDING) then begin
+     bo1:= getoverlappedresult(fhandle,overlapped,w1,true);
+    end;
+    if bo1 then begin
+     w1:= w1 + 1;
+    end;
+   end;
+  end;
+ end;  
+ if not bo1 then begin
+  readcount:= -1;
+ end
+ else begin
+  readcount:= w1;
+ end;
+{$else}
+ readcount:= piperead(handle,buf,acount,nonblocked);
+{$endif}
+ result:= readcount >= 0;
+ if not result then begin
+  readcount:= 0;
+ end;
+end;
+
+function tcustomrs232.pipewrite(const buffer; count: longint): longint;
+{$ifdef mswindows}
+var
+ w1: ptruint;
+ bo1: boolean;
+{$endif}
+begin
+{$ifdef mswindows}
+ bo1:= windows.writefile(fhandle,buffer,count,w1,@overlapped);
+ if not bo1 and (getlasterror = ERROR_IO_PENDING) then begin
+  bo1:= getoverlappedresult(fhandle,overlapped,w1,true);
+ end;
+ if bo1 then begin
+  result:= w1;
+ end
+ else begin
+  result:= -1;
+ end;
+{$else}
+ result:= sys_write(fhandle,@buffer,count);
+{$endif}
 end;
 
 { tcommthread }

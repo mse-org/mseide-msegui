@@ -159,6 +159,11 @@ end;
    property onpipebroken: pipereadereventty read getonpipebroken write setonpipebroken;
  end;
 
+{$ifdef UNIX}
+function readfilenonblock(const handle: thandle; var buf; const acount;
+                     const nonblocked: boolean): integer; //-1 on error
+{$endif}
+
 implementation
 uses
   {$ifdef UNIX}mselibc, {$else}windows, {$endif}
@@ -327,13 +332,26 @@ begin
  end;
 end;
 
+{$ifdef UNIX}
+function readfilenonblock(const handle: thandle; var buf; const acount;
+                     const nonblocked: boolean): integer; //-1 on error
+begin
+ if nonblocked then begin
+  setfilenonblock(handle,true);
+ end;
+ result:= sys_read(handle,@buf,acount);
+ if nonblocked then begin
+  if (result < 0) and (sys_getlasterror = EAGAIN) then begin 
+   readcount:= 0;
+  end;
+  setfilenonblock(handle,false);
+ end;
+end; 
+{$endif}
+
 function tpipereader.doread(var buf; const acount: integer;
                               out readcount: integer;
                              const nonblocked: boolean = false): boolean;
-{$ifndef mswindows}
-var
- bo1: boolean;
-{$endif}
 begin
 {$ifdef mswindows}
  readcount:= sys_read(Handle,@buf,acount);
@@ -342,17 +360,8 @@ begin
  end;
 // result:= fileRead(Handle,buf,acount)
 {$else}
- bo1:= nonblocked and not (tss_unblocked in fstate);
- if bo1 then begin
-  setfilenonblock(handle,true);
- end;
- readcount:= sys_read(Handle,@buf,acount);
- if bo1 then begin
-  if (result < 0) and (sys_getlasterror = EAGAIN) then begin 
-   readcount:= 0;
-  end;
-  setfilenonblock(handle,false);
- end;
+ readcount:= readfilenonblock(buf,acount,
+                         nonblocked and not (tss_unblocked in fstate));
 {$endif}
  result:= readcount >= 0;
  if not result then begin

@@ -19,9 +19,12 @@ uses
 type
  setcommnreventty =  procedure(const sender: tobject; var avalue: commnrty;
                           var accept: boolean) of object;
-
+ getcommnreventty = procedure(const sender: tobject;
+                          var avalue: commnrty) of object;
+ 
  tcommselector = class(tcustomselector)
   private
+   fongetactivecommnr: getcommnreventty;
    function getvalue: commnrty;
    procedure setvalue(const aValue: commnrty);
    function readonsetvalue: setcommnreventty;
@@ -41,6 +44,8 @@ type
    property onsetvalue: setcommnreventty read readonsetvalue write writeonsetvalue;
    property onbeforedropdown;
    property onafterclosedropdown;
+   property ongetactivecommnr: getcommnreventty read fongetactivecommnr 
+                                                       write fongetactivecommnr;
  end;
 
 implementation
@@ -106,12 +111,17 @@ procedure tcommselector.getdropdowninfo(var aenums: integerarty;
 var
  comm: commnrty;
  int1: integer;
+ activecomm: commnrty;
 begin
  setlength(aenums,integer(high(commnrty))+1);
  names[0].clear;
+ activecomm:= commnrty(-1);
+ if canevent(tmethod(fongetactivecommnr)) then begin
+  fongetactivecommnr(self,activecomm);
+ end;
  int1:= 0;
  for comm:= low(commnrty) to high(commnrty) do begin
-  if checkcommport(comm) then begin
+  if (comm = activecomm) or checkcommport(comm) then begin
    aenums[int1]:= integer(comm);
    names[0].add(comminfo[comm].dropdowntext);
    inc(int1);
