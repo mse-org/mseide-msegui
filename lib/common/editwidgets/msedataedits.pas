@@ -846,13 +846,14 @@ type
    property imageframe_top;
    property imageframe_right;
    property imageframe_bottom;
-   property valuecol;
+//   property valuecol;
 //   property itemindex;
  end;
 
  tenumdropdowncontroller = class(tnocolsenumdropdowncontroller)
   published
    property cols;
+   property valuecol; //after cols
  end;
   
  tcustomenuedit = class(tcustomdropdownlistedit)
@@ -946,6 +947,7 @@ type
  
  tenumedit = class(tcustomenumedit)
   published
+   property dropdown; //first
    property valueoffset; //before value
    property value;
    property valuedefault;
@@ -958,7 +960,6 @@ type
 {$ifdef mse_with_ifi}
    property ifilink;
 {$endif}
-   property dropdown;
    property onbeforedropdown;
    property onafterclosedropdown;
    property oninit;
