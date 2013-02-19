@@ -213,6 +213,8 @@ type
                         const imagealignment: alignmentsty);
    procedure paint2(const acanvas: tcanvas);
    procedure defineproperties(filer: tfiler); override;
+   function hintx: msestring;
+   function hinty: msestring;
     //iframe
    procedure setframeinstance(instance: tcustomframe);
    procedure setstaticframe(value: boolean);
@@ -228,8 +230,6 @@ type
    function getwidget: twidget;
    function getwidgetrect: rectty;
    function getframestateflags: framestateflagsty;
-   function hintx: msestring;
-   function hinty: msestring;
     //iface
    function translatecolor(const acolor: colorty): colorty;
    function getclientrect: rectty;

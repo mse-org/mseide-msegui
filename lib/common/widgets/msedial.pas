@@ -11,7 +11,8 @@ unit msedial;
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
 interface
 uses
- classes,mclasses,msewidgets,msegraphutils,msegraphics,msegui,msearrayprops,mseclasses,
+ classes,mclasses,msewidgets,msegraphutils,msegraphics,msegui,msearrayprops,
+ mseclasses,
  msetypes,mseglob,mseguiglob,msestrings,msemenus,mseevent,msestat;
 
 const
@@ -125,12 +126,18 @@ type
    property escapement: real read fli.escapement write setescapement;
  end;
 
- dialmarkeroptionty = (dmo_invisible,dmo_opposite,dmo_rotatetext,
+ dialmarkeroptionty = (dmo_invisible,dmo_opposite,dmo_back,dmo_rotatetext,
+                       dmo_bar,dmo_barfront,
                        dmo_hideoverload,dmo_limitoverload,dmo_limitoverloadi,
                        dmo_hidelimit,
                        dmo_fix,dmo_ordered,dmo_savevalue); //for tchartedit
  dialmarkeroptionsty = set of dialmarkeroptionty;
- 
+
+ tmarkerframe = class(tframe)
+  public
+   constructor create(const intf: iframe);
+ end;
+
  markerinfoty = record
   active: boolean;
   limited: boolean;
@@ -141,9 +148,19 @@ type
   afont: tfont;
   acaption: msestring;
   options: dialmarkeroptionsty;
+  barrect: rectty;
+  bar_color: colorty;
+  bar_width: integer;
+  bar_shift: integer;
+  bar_frame: tframe;
+  bar_face: tface;
  end;
 
- tdialmarker = class(tdialprop)
+const
+ defaultmarkerwidth = 3;
+ 
+type
+ tdialmarker = class(tdialprop,iframe,iface)
   private
    fhintcaption: msestring;
    finfo: markerinfoty;
@@ -153,10 +170,42 @@ type
    procedure setoptions(const avalue: dialmarkeroptionsty);
    function getvisible: boolean;
    procedure setvisible(const avalue: boolean);
+   function getbar_frame: tframe;
+   procedure setbar_frame(const avalue: tframe);
+   function getbar_face: tface;
+   procedure setbar_face(const avalue: tface);
+   procedure setbar_width(const avalue: integer);
+   procedure setbar_shift(const avalue: integer);
+   procedure setbar_color(const avalue: colorty);
   protected
    procedure defineproperties(filer: tfiler); override;
    procedure updatemarker;
+    //iframe
+   procedure setframeinstance(instance: tcustomframe);
+   procedure setstaticframe(value: boolean);
+   function getstaticframe: boolean;
+   procedure scrollwidgets(const dist: pointty);
+   procedure clientrectchanged;
+   function getcomponentstate: tcomponentstate;
+   function getmsecomponentstate: msecomponentstatesty;
+   procedure invalidate;
+   procedure invalidatewidget;
+   procedure invalidaterect(const rect: rectty; 
+               const org: originty = org_client; const noclip: boolean = false);
+   function getwidget: twidget;
+   function getwidgetrect: rectty;
+   function getframestateflags: framestateflagsty;
+    //iface
+   function translatecolor(const acolor: colorty): colorty;
+   function getclientrect: rectty;
+   procedure setlinkedvar(const source: tmsecomponent; var dest: tmsecomponent;
+               const linkintf: iobjectlink = nil);
+   procedure widgetregioninvalid;
   public
+   constructor create(aowner: tobject); override;
+   destructor destroy; override;
+   procedure createframe;
+   procedure createface;
    function pos: integer;
    procedure paint(const acanvas: tcanvas);
    property visible: boolean read getvisible write setvisible;
@@ -168,6 +217,14 @@ type
                           write setoptions default [];
    property hintcaption: msestring read fhintcaption
                                  write fhintcaption;
+   property bar_color: colorty read finfo.bar_color 
+                                         write setbar_color default cl_none;
+   property bar_width: integer read finfo.bar_width write setbar_width 
+                                        default defaultmarkerwidth;
+   property bar_shift: integer read finfo.bar_shift write setbar_shift 
+                                        default 0;
+   property bar_frame: tframe read getbar_frame write setbar_frame;
+   property bar_face: tface read getbar_face write setbar_face;
  end;
 
  tcustomdialcontroller = class;
@@ -181,8 +238,9 @@ type
    procedure dosizechanged; override;
   public
    constructor create(const aowner: tcustomdialcontroller); reintroduce;
+   procedure paint1(const acanvas: tcanvas);
+   procedure paint2(const acanvas: tcanvas);
    class function getitemclasstype: persistentclassty; override;
-   procedure paint(const acanvas: tcanvas);
    property items[const index: integer]: tdialmarker read getitems; default;
  end;
 
@@ -583,6 +641,7 @@ end;
 procedure tdialprop.setwidthmm(const avalue: real);
 begin
  fli.widthmm:= avalue;
+// changed;
  tcustomdialcontroller(fowner).invalidate;
 end;
 
@@ -713,6 +772,20 @@ end;
 
 { tdialmarker }
 
+constructor tdialmarker.create(aowner: tobject);
+begin
+ finfo.bar_color:= cl_none;
+ finfo.bar_width:= defaultmarkerwidth;
+ inherited;
+end;
+
+destructor tdialmarker.destroy;
+begin
+ inherited;
+ finfo.bar_frame.free;
+ finfo.bar_face.free;
+end;
+
 procedure tdialmarker.setvalue(const avalue: realty);
 begin
  if finfo.value <> avalue then begin
@@ -722,11 +795,39 @@ begin
 end;
 
 procedure tdialmarker.paint(const acanvas: tcanvas);
+ procedure drawbar;
+ var
+  rect2: rectty;
+ begin
+  if finfo.bar_color <> cl_none then begin
+   acanvas.fillrect(finfo.barrect,finfo.bar_color);
+  end;
+  if finfo.bar_frame <> nil then begin
+   acanvas.save;
+   finfo.bar_frame.paintbackground(acanvas,finfo.barrect,true);
+   if finfo.bar_face <> nil then begin
+    rect2:= deflaterect(finfo.barrect,finfo.bar_frame.innerframe);
+    acanvas.remove(pointty(finfo.bar_frame.paintframe.topleft));
+    finfo.bar_face.paint(acanvas,rect2);
+   end;
+   acanvas.restore;
+   finfo.bar_frame.paintoverlay(acanvas,finfo.barrect);
+  end
+  else begin
+   if finfo.bar_face <> nil then begin
+    finfo.bar_face.paint(acanvas,finfo.barrect);
+   end;
+  end;
+ end; //drawbar
+
 begin
  checklayout;
  with finfo,fli do begin
   if active then begin
    if not limited or not(dmo_hidelimit in options) then begin
+    if not (dmo_barfront in options) then begin
+     drawbar;
+    end;
     acanvas.linewidthmm:= actualwidthmm;
     if dashes <> '' then begin
      acanvas.dashes:= dashes;
@@ -734,6 +835,9 @@ begin
     acanvas.drawline(line.a,line.b,actualcolor);
     if dashes <> '' then begin
      acanvas.dashes:= '';
+    end;
+    if dmo_barfront in options then begin
+     drawbar;
     end;
    end;
    if caption <> '' then begin
@@ -821,7 +925,7 @@ var
  pt1: pointty;
  rectext1: rectextty;
  int1: integer;
- 
+  
 begin
  with tcustomdialcontroller(fowner),fli,finfo,line do begin
   getactdialrect(rect1);
@@ -917,6 +1021,72 @@ begin
      b.x:= lineend;
     end;
    end;
+   if dmo_bar in options then begin
+    case fdirection of
+     gd_right: begin
+      barrect.x:= rect1.x;
+      barrect.cx:= a.x - barrect.x;
+      barrect.y:= rect1.y + (rect1.cy - bar_width) div 2 + bar_shift;
+      barrect.cy:= bar_width;
+     end;
+     gd_up: begin
+      barrect.y:= a.y;
+      barrect.cy:= rect1.y + rect1.cy - barrect.y;
+      barrect.x:= rect1.x + (rect1.cx - bar_width) div 2 + bar_shift;
+      barrect.cx:= bar_width;
+     end;
+     gd_left: begin
+      barrect.x:= a.x;
+      barrect.cx:= rect1.x + rect1.cx - barrect.x;
+      barrect.y:= rect1.y + (rect1.cy - bar_width) div 2 - bar_shift;
+      barrect.cy:= bar_width;
+     end;
+     gd_down: begin
+      barrect.y:= rect1.y;
+      barrect.cy:= a.y - barrect.y;
+      barrect.x:= rect1.x + (rect1.cx - bar_width) div 2 - bar_shift;
+      barrect.cx:= bar_width;
+     end;
+    end;
+   end
+   else begin
+    if fdirection in [gd_left,gd_right] then begin
+     barrect.x:= a.x - bar_width div 2;
+     if fdirection = gd_right then begin
+      barrect.x:= barrect.x + bar_shift;
+     end
+     else begin
+      barrect.x:= barrect.x - bar_shift;
+     end;
+     barrect.cx:= bar_width;
+     if linestart > lineend then begin
+      barrect.y:= lineend;
+      barrect.cy:= linestart-lineend;
+     end
+     else begin
+      barrect.y:= linestart;
+      barrect.cy:= lineend-linestart;
+     end;
+    end
+    else begin
+     barrect.y:= a.y - bar_width div 2;
+     if fdirection = gd_up then begin
+      barrect.y:= barrect.y - bar_shift;
+     end
+     else begin
+      barrect.y:= barrect.y + bar_shift;
+     end;
+     barrect.cy:= bar_width;
+     if linestart > lineend then begin
+      barrect.x:= lineend;
+      barrect.cx:= linestart-lineend;
+     end
+     else begin
+      barrect.x:= linestart;
+      barrect.cx:= lineend-linestart;
+     end;
+    end;
+   end;
    if dmo_rotatetext in self.finfo.options then begin
     aangle:= -angle * (rea1-0.5) * 2*pi;
    end
@@ -978,6 +1148,166 @@ begin
  end;
 end;
 
+function tdialmarker.getbar_frame: tframe;
+begin
+ tcustomdialcontroller(fowner).fintf.getwidget.getoptionalobject(
+                             finfo.bar_frame,{$ifdef FPC}@{$endif}createframe);
+ result:= finfo.bar_frame;
+end;
+
+procedure tdialmarker.setbar_frame(const avalue: tframe);
+begin
+ tcustomdialcontroller(fowner).fintf.getwidget.setoptionalobject(
+             avalue,finfo.bar_frame,{$ifdef FPC}@{$endif}createframe);
+ changed;
+end;
+
+procedure tdialmarker.createframe;
+begin
+ if finfo.bar_frame = nil then begin
+  tmarkerframe.create(iframe(self));
+ end;
+end;
+
+procedure tdialmarker.setframeinstance(instance: tcustomframe);
+begin
+ finfo.bar_frame:= tframe(instance);
+end;
+
+procedure tdialmarker.setstaticframe(value: boolean);
+begin
+ //dummy
+end;
+
+function tdialmarker.getstaticframe: boolean;
+begin
+ result:= false;
+end;
+
+procedure tdialmarker.scrollwidgets(const dist: pointty);
+begin
+ //dummy
+end;
+
+procedure tdialmarker.clientrectchanged;
+begin
+ invalidate;
+end;
+
+function tdialmarker.getcomponentstate: tcomponentstate;
+begin
+ result:= tcustomdialcontroller(fowner).fintf.getwidget.componentstate;
+end;
+
+function tdialmarker.getmsecomponentstate: msecomponentstatesty;
+begin
+ result:= tcustomdialcontroller(fowner).fintf.getwidget.msecomponentstate;
+end;
+
+procedure tdialmarker.invalidate;
+begin
+ tcustomdialcontroller(fowner).fintf.getwidget.invalidate;
+end;
+
+procedure tdialmarker.invalidatewidget;
+begin
+ tcustomdialcontroller(fowner).fintf.getwidget.invalidatewidget;
+end;
+
+procedure tdialmarker.invalidaterect(const rect: rectty;
+               const org: originty = org_client; const noclip: boolean = false);
+begin
+ tcustomdialcontroller(fowner).fintf.getwidget.invalidaterect(rect,org,noclip);
+end;
+
+function tdialmarker.getwidget: twidget;
+begin
+ result:= tcustomdialcontroller(fowner).fintf.getwidget;
+end;
+
+function tdialmarker.getwidgetrect: rectty;
+begin
+ result:= finfo.barrect;
+end;
+
+function tdialmarker.getframestateflags: framestateflagsty;
+begin
+ result:= [];
+end;
+
+function tdialmarker.getbar_face: tface;
+begin
+ tcustomdialcontroller(fowner).fintf.getwidget.getoptionalobject(
+             finfo.bar_face,{$ifdef FPC}@{$endif}createface);
+ result:= finfo.bar_face;
+end;
+
+procedure tdialmarker.setbar_face(const avalue: tface);
+begin
+ tcustomdialcontroller(fowner).fintf.getwidget.setoptionalobject(
+                 avalue,finfo.bar_face,{$ifdef FPC}@{$endif}createface);
+ changed;
+end;
+
+procedure tdialmarker.createface;
+begin
+ if finfo.bar_face = nil then begin
+  finfo.bar_face:= tface.create(iface(self));
+ end;
+end;
+
+function tdialmarker.translatecolor(const acolor: colorty): colorty;
+begin
+ result:= acolor;
+ if acolor = cl_default then begin
+  result:= fli.color;
+ end
+ else begin
+  result:= acolor;
+ end;
+end;
+
+function tdialmarker.getclientrect: rectty;
+begin
+ result:= finfo.barrect;
+end;
+
+procedure tdialmarker.setlinkedvar(const source: tmsecomponent;
+               var dest: tmsecomponent; const linkintf: iobjectlink = nil);
+begin
+ twidget1(tcustomdialcontroller(fowner).fintf.getwidget).setlinkedvar(
+                                                   source,dest,linkintf);
+end;
+
+procedure tdialmarker.widgetregioninvalid;
+begin
+ //dummy
+end;
+
+procedure tdialmarker.setbar_width(const avalue: integer);
+begin
+ if finfo.bar_width <> avalue then begin
+  finfo.bar_width:= avalue;
+  changed;
+ end;
+end;
+
+procedure tdialmarker.setbar_shift(const avalue: integer);
+begin
+ if finfo.bar_shift <> avalue then begin
+  finfo.bar_shift:= avalue;
+  changed;
+ end;
+end;
+
+procedure tdialmarker.setbar_color(const avalue: colorty);
+begin
+ if finfo.bar_color <> avalue then begin
+  finfo.bar_color:= avalue;
+  changed;
+ end;
+end;
+
 { tdialmarkers }
 
 constructor tdialmarkers.create(const aowner: tcustomdialcontroller);
@@ -995,13 +1325,26 @@ begin
  result:= tdialmarker(inherited items[aindex]);
 end;
 
-procedure tdialmarkers.paint(const acanvas: tcanvas);
+procedure tdialmarkers.paint1(const acanvas: tcanvas);
 var
  int1: integer;
 begin
  for int1:= high(fitems) downto 0 do begin
   with tdialmarker(fitems[int1]) do begin
-   if visible then begin
+   if visible and (dmo_back in options) then begin
+    paint(acanvas);
+   end;
+  end;
+ end;
+end;
+
+procedure tdialmarkers.paint2(const acanvas: tcanvas);
+var
+ int1: integer;
+begin
+ for int1:= high(fitems) downto 0 do begin
+  with tdialmarker(fitems[int1]) do begin
+   if visible and not (dmo_back in options) then begin
     paint(acanvas);
    end;
   end;
@@ -1185,6 +1528,7 @@ end;
 procedure tcustomdialcontroller.setdirection(const avalue: graphicdirectionty);
 var
  dir1,dir2: graphicdirectionty;
+ int1: integer;
 begin
  if avalue <> fdirection then begin
   dir1:= fdirection;
@@ -1194,16 +1538,22 @@ begin
   end;
   dir2:= fdirection;
   changed;
-{
-  case dir1 of
-   gd_up: dir1:= gd_down;
-   gd_down: dir1:= gd_up;
+  if fintf.getwidget.componentstate * 
+                        [csreading,csdesigning] = [csdesigning] then begin
+   with fmarkers do begin
+    for int1:= 0 to high(fitems) do begin
+     with tdialmarker(fitems[int1]) do begin
+      if finfo.bar_frame <> nil then begin
+       finfo.bar_frame.changedirection(dir1,dir2);
+      end;
+      if finfo.bar_face <> nil then begin
+       finfo.bar_face.fade_direction:= rotatedirection(
+                                   finfo.bar_face.fade_direction,dir1,dir2);
+      end;
+     end;
+    end;
+   end;
   end;
-  case dir2 of
-   gd_up: dir2:= gd_down;
-   gd_down: dir2:= gd_up;
-  end;
-}
   fintf.directionchanged(dir2,dir1);
  end;
 end;
@@ -2017,6 +2367,7 @@ procedure tcustomdialcontroller.paintdial(const acanvas: tcanvas);
 var
  int1,int2: integer;
 begin
+ fmarkers.paint1(acanvas);
  if visible then begin
   for int1:= high(fticks.fitems) downto 0 do begin
    with tdialtick(fticks.fitems[int1]),finfo do begin
@@ -2040,7 +2391,7 @@ begin
    end;
   end;
  end;
- fmarkers.paint(acanvas);
+ fmarkers.paint2(acanvas);
  acanvas.linewidth:= 0;
 end;
 
@@ -2202,6 +2553,7 @@ procedure tcustomdialcontroller.setwidthmm(const avalue: real);
 begin
  fwidthmm:= avalue;
  fintf.getwidget.invalidate;
+// changed;
 end;
 
 procedure tcustomdialcontroller.setangle(const avalue: real);
@@ -2646,6 +2998,14 @@ constructor tdialcontroller.create(const aintf: idialcontroller);
 begin
  inherited;
  options:= defaultdialcontrolleroptions;
+end;
+
+{ tmarkerframe }
+
+constructor tmarkerframe.create(const intf: iframe);
+begin
+ inherited;
+ include(fstate,fs_nowidget);
 end;
 
 end.
