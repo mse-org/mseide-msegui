@@ -1383,7 +1383,8 @@ begin
  with sender do begin
   if cems_markermoving in fmovestate then begin
    offs:= limitmoveoffset(pickoffset);
-   rect1:= getdialrect;
+//   rect1:= getdialrect;
+   rect1:= innerclientrect;
    decodemarker(sender.currentobjects,bo1,dialindex,int1);
    with rect1 do begin
     if bo1 then begin
