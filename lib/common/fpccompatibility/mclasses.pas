@@ -4709,18 +4709,30 @@ type
     Function RootMatches(ARoot : TComponent) : Boolean; {$ifdef CLASSESINLINE} inline; {$endif CLASSESINLINE} // True if Froot matches or ARoot is nil.
     Function NextRef : TUnresolvedReference; {$ifdef CLASSESINLINE} inline; {$endif CLASSESINLINE}
   end;
+
+  tfixups = class(tlinkedlist)
+   public
+    constructor create; reintroduce;
+    function newreference(const aprop: ppropinfo): TUnResolvedReference;
+  end;
   
   TLocalUnResolvedReference = class(TUnresolvedReference)
     Finstance : TPersistent;
   end;
-
+ 
+  tlocalfixups = class(tlinkedlist)
+   public
+    constructor create; reintroduce;
+    function newreference(const ainstance: tpersistent;
+                       const aprop: ppropinfo): TLocalUnResolvedReference;
+  end;
   // Linked list of TPersistent items that have unresolved properties.  
 
   { TUnResolvedInstance }
 
   TUnResolvedInstance = Class(TLinkedListItem)
     Instance : TPersistent; // Instance we're handling unresolveds for
-    FUnresolved : TLinkedList; // The list
+    FUnresolved : tfixups; // The list
     Destructor Destroy; override;
     Function AddReference(ARoot : TComponent; APropInfo : PPropInfo; AGlobal,ARelative : String) : TUnresolvedReference;
     Function RootUnresolved : TUnresolvedReference; {$ifdef CLASSESINLINE} inline; {$endif CLASSESINLINE} // Return root element in list.
@@ -4809,6 +4821,45 @@ begin
   Result:=TUnresolvedReference(Next);
 end;
 
+{ tfixups }
+
+constructor tfixups.create;
+begin
+ inherited create(TUnresolvedReference);
+end;
+
+function tfixups.newreference(const aprop: ppropinfo): TUnResolvedReference;
+begin
+ result:= tunresolvedreference(root);
+ while result <> nil do begin
+  if (result.fpropinfo = aprop) then begin
+   exit;
+  end;
+  result:= tunresolvedreference(result.next);
+ end;
+ result:= tunresolvedreference(add);
+end;
+
+{ tlocalfixups }
+
+constructor tlocalfixups.create;
+begin
+ inherited create(TLocalUnresolvedReference);
+end;
+
+function tlocalfixups.newreference(const ainstance: tpersistent;
+               const aprop: ppropinfo): TLocalUnResolvedReference;
+begin
+ result:= tlocalunresolvedreference(root);
+ while result <> nil do begin
+  if ((result.finstance) = ainstance) and (result.fpropinfo = aprop) then begin
+   exit;
+  end;
+  result:= tlocalunresolvedreference(result.next);
+ end;
+ result:= tlocalunresolvedreference(add);
+end;
+
 { TUnResolvedInstance }
 
 destructor TUnResolvedInstance.Destroy;
@@ -4820,9 +4871,10 @@ end;
 function TUnResolvedInstance.AddReference(ARoot: TComponent;
   APropInfo: PPropInfo; AGlobal, ARelative: String): TUnresolvedReference;
 begin
-  If (FUnResolved=Nil) then
-    FUnResolved:=TLinkedList.Create(TUnresolvedReference);
-  Result:=FUnResolved.Add as TUnresolvedReference;
+  If (FUnResolved = Nil) then begin
+   FUnResolved:= tfixups.create;
+  end;
+  Result:= FUnResolved.newreference(apropinfo);
   Result.FGlobal:=AGLobal;
   Result.FRelative:=ARelative;
   Result.FPropInfo:=APropInfo;
@@ -5466,15 +5518,13 @@ begin
       C:=FindNestedComponent(R.FRoot,Ref);
       If Assigned(C) then
         SetObjectProp(R.FInstance,R.FPropInfo,C)
-      else
-        begin
+      else begin
         P:=Pos('.',R.FRelative);
-        If (P<>0) then
-          begin
-          G:=AddToResolveList(R.FInstance);
+        If (P<>0) then begin
+          G:= AddToResolveList(R.FInstance);
           G.Addreference(R.FRoot,R.FPropInfo,Copy(R.FRelative,1,P-1),Copy(R.FRelative,P+1,Length(R.FRelative)-P));
-          end;
         end;
+      end;
       L.RemoveItem(R,True);
       R:=RN;
       end;
@@ -6134,18 +6184,19 @@ begin
             FDriver.ReadValue;
             ReadCollection(TCollection(GetObjectProp(Instance, PropInfo)));
           end
-        else
-          begin
-          If Not Assigned(FFixups) then
-            FFixups:=TLinkedList.Create(TLocalUnresolvedReference);
-          With TLocalUnresolvedReference(TLinkedList(FFixups).Add) do
-            begin
-            FInstance:=Instance;
-            FRoot:=Root;
-            FPropInfo:=PropInfo;
-            FRelative:=ReadIdent;
-            end;
+        else begin
+          If Not Assigned(FFixups) then begin
+//            FFixups:=TLinkedList.Create(TLocalUnresolvedReference);
+           FFixups:= tlocalfixups.create;
           end;
+//          With tfixups(FFixups).newreference(instance,propinfo) do begin
+          With TLocalUnresolvedReference(tlocalfixups(FFixups).add) do begin
+           FInstance:= Instance;
+           FRoot:= Root;
+           FPropInfo:= PropInfo;
+           FRelative:= ReadIdent;
+          end;
+        end;
       end;
     tkInt64, tkQWord: SetInt64Prop(Instance, PropInfo, ReadInt64);
     else
