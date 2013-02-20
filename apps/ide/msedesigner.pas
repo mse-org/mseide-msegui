@@ -3114,8 +3114,10 @@ begin
  asubmoduleinfopo:= fsubmoduleinfopo;    //can be recursive
  if asubmoduleinfopo <> nil then begin
   fsubmoduleinfopo:= nil;
+//  component:= copycomponent(asubmoduleinfopo^.instance,
+//                                   asubmoduleinfopo^.instance,false,false);
   component:= copycomponent(asubmoduleinfopo^.instance,
-                                   asubmoduleinfopo^.instance,false,false);
+                                   asubmoduleinfopo^.instance,false,true);
   reader.root.insertcomponent(component);
   initinline(component);
   if (des_inheritednewmodule in fstate) then begin

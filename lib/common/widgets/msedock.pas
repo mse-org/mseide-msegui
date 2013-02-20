@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -2626,7 +2626,7 @@ end;
 
 function tdockcontroller.writechild(const index: integer): msestring;
 begin
- with twidget1(fintf.getwidget).widgets[index] do begin
+ with twidget1(fintf.getwidget).container.widgets[index] do begin
   result:= encoderecord([name,bounds_x,bounds_y,bounds_cx,bounds_cy]);
   if entered then begin
    ffocusedchild:= index;
@@ -2698,7 +2698,7 @@ begin
    end;
   end;
   if od_savechildren in foptionsdock then begin
-   writer.writerecordarray('children',widgetcount,
+   writer.writerecordarray('children',container.widgetcount,
              {$ifdef FPC}@{$endif}writechild);
    writer.writeinteger('focusedchild',ffocusedchild);
   end;
