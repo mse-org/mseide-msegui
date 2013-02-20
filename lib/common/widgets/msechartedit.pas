@@ -1643,7 +1643,10 @@ var
 begin
  result:= false;
  for int3:= 0 to xdials.count -1 do begin
-  with xdials[int3] do begin
+{$warnings off}
+  with tcustomdialcontroller1(xdials[int3]) do begin
+{$warnings on}
+   checklayout;
    for int1:= 0 to high(tdialmarkers1(markers).fitems) do begin
     marker1:= tdialmarker(tdialmarkers1(markers).fitems[int1]);
     if not (dmo_fix in marker1.options) and 
@@ -1659,7 +1662,10 @@ begin
   end;
  end;
  for int3:= 0 to ydials.count -1 do begin
-  with ydials[int3] do begin
+{$warnings off}
+  with tcustomdialcontroller1(ydials[int3]) do begin
+{$warnings on}
+   checklayout;
    for int1:= 0 to high(tdialmarkers1(markers).fitems) do begin
     marker1:= tdialmarker(tdialmarkers1(markers).fitems[int1]);
     if not (dmo_fix in marker1.options) and 

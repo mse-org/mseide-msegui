@@ -214,7 +214,7 @@ var
   addpoint1(fpickrect.pos,subpoint(pt1,widget1.refpos(forigin)));
   fpickrect.size:= nullsize;
   fpickoffset:= nullpoint;
-  
+
   with fintf.getwidget do begin
    fcursorshape:= actualcursor(widgetmousepos(info));
   end;
