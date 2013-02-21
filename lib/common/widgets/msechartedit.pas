@@ -394,7 +394,8 @@ end;
 
 function tcustomchartedit.hasactivetrace: boolean;
 begin
- result:= (factivetrace >= 0) and (factivetrace < traces.count);
+ result:= (factivetrace >= 0) and (factivetrace < traces.count) and
+               traces[factivetrace].visible;
 end;
 
 procedure tcustomchartedit.tracehint(const atrace,aindex: integer);
@@ -803,32 +804,34 @@ var
  begin
   result:= -1;
   with ftraces[atrace] do begin
-   datahigh:= count-1;
-   if kind = trk_xseries then begin
-    py:= ydatapo;
-    if py <> nil then begin
-     for int1:= 0 to datahigh do begin
-      handlepoint(chartcoordxseries(atrace,makexseriesdata(py^,int1)));
-      inc(py);
-     end;
-    end;
-   end
-   else begin
-    pxy:= xydatapo;
-    if pxy <> nil then begin
-     for int1:= 0 to datahigh do begin
-      handlepoint(chartcoordxy(atrace,pxy^));      
-      inc(pxy);
+   if visible then begin
+    datahigh:= count-1;
+    if kind = trk_xseries then begin
+     py:= ydatapo;
+     if py <> nil then begin
+      for int1:= 0 to datahigh do begin
+       handlepoint(chartcoordxseries(atrace,makexseriesdata(py^,int1)));
+       inc(py);
+      end;
      end;
     end
     else begin
-     px:= xdatapo;
-     py:= ydatapo;
-     if (px <> nil) and (py <> nil) then begin
+     pxy:= xydatapo;
+     if pxy <> nil then begin
       for int1:= 0 to datahigh do begin
-       handlepoint(chartcoordxy(atrace,makecomplex(px^,py^)));
-       inc(px);
-       inc(py);
+       handlepoint(chartcoordxy(atrace,pxy^));      
+       inc(pxy);
+      end;
+     end
+     else begin
+      px:= xdatapo;
+      py:= ydatapo;
+      if (px <> nil) and (py <> nil) then begin
+       for int1:= 0 to datahigh do begin
+        handlepoint(chartcoordxy(atrace,makecomplex(px^,py^)));
+        inc(px);
+        inc(py);
+       end;
       end;
      end;
     end;
