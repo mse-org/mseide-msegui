@@ -43,7 +43,13 @@ type
    procedure dostatwrite(const writer: tstatwriter); virtual;
   public
    destructor destroy; override;
-   procedure expandmacros(const amacrolist: tmacrolist);  
+   procedure expandmacros(const amacrolist: tmacrolist); overload;
+   procedure expandmacros(const macros: macroinfoarty;
+                      const options: macrooptionsty = 
+                               [mao_caseinsensitive]); overload;
+   procedure expandmacros(const anames,avalues: array of msestring;
+                              const options: macrooptionsty = 
+                                        [mao_caseinsensitive]); overload;
  end;
 
  tcustomrttistat = class(tmsecomponent,istatfile)
@@ -1138,6 +1144,28 @@ begin
    end;
   end;
  end;
+end;
+
+procedure toptions.expandmacros(const macros: macroinfoarty;
+                      const options: macrooptionsty = 
+                               [mao_caseinsensitive]);
+var
+ list: tmacrolist;
+begin
+ list:= tmacrolist.create(options);
+ try
+  list.add(macros);
+  expandmacros(list);
+ finally
+  list.free;
+ end;
+end;
+
+procedure toptions.expandmacros(const anames,avalues: array of msestring;
+                      const options: macrooptionsty = 
+                               [mao_caseinsensitive]);
+begin
+ expandmacros(initmacros(anames,avalues),options);
 end;
 
 function toptions.gett: tobject;

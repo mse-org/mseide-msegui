@@ -392,8 +392,6 @@ object projectoptionsfo: tprojectoptionsfo
               bounds_y = 0
               bounds_cx = 84
               bounds_cy = 37
-              value = 0
-              onsetvalue = encodingsetvalue
               dropdown.options = [deo_selectonly, deo_forceselect, deo_autodropdown, deo_keydropdown]
               dropdown.cols.count = 1
               dropdown.cols.items = <              
@@ -404,6 +402,8 @@ object projectoptionsfo: tprojectoptionsfo
                     'iso8859-1'
                   )
                 end>
+              value = 0
+              onsetvalue = encodingsetvalue
               reffontheight = 14
             end
             object scrollheight: tintegeredit
@@ -2455,7 +2455,6 @@ object projectoptionsfo: tprojectoptionsfo
           optionsedit1 = [oe1_autopopupmenu]
           optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_savevalue, oe_savestate]
           textflags = [tf_xcentered, tf_ycentered, tf_noselect]
-          value = 0
           dropdown.options = [deo_selectonly, deo_forceselect, deo_autodropdown]
           dropdown.cols.count = 1
           dropdown.cols.items = <          
@@ -2470,6 +2469,7 @@ object projectoptionsfo: tprojectoptionsfo
                 'None'
               )
             end>
+          value = 0
           reffontheight = 14
         end
         object mainfile: tfilenameedit
