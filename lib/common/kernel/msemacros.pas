@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -58,7 +58,7 @@ type
    procedure asarray(out names,values: msestringarty); overload;
    property options: macrooptionsty read foptions write foptions;
  end;
-
+ 
 //function expandmacros(const value: msestring; const macros:macroinfoarty;
 //              const caseinsensitive: boolean = true): msestring; overload;
 function initmacros(const anames,avalues: array of msestring): macroinfoarty;

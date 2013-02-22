@@ -19,7 +19,7 @@ unit mserttistat;
 interface
 uses
  classes,mclasses,mseclasses,msestat,msestatfile,msestrings,typinfo,msetypes,
- msehash;
+ msehash,msemacros;
  
 type
  objectinfoty = record
@@ -33,11 +33,17 @@ type
  getobjectseventty = procedure(const sender: tobject;
                                    var aobjects: objectinfoarty) of object;
 
-{$M+} //toptionsclass needs RTTI
- toptionsclass = class(tobject)
+{$M+} //toptions and toptionsclass needs RTTI
+
+ toptions = class(tobject)
   protected
+   function gett: tobject; virtual;
+   function gettexp: tobject; virtual;
    procedure dostatread(const reader: tstatreader); virtual;
    procedure dostatwrite(const writer: tstatwriter); virtual;
+  public
+   destructor destroy; override;
+   procedure expandmacros(const amacrolist: tmacrolist);  
  end;
 
  tcustomrttistat = class(tmsecomponent,istatfile)
@@ -940,8 +946,8 @@ begin
     if mseclasses.getcorbainterface(obj,typeinfo(istatfile),intf1) then begin
      intf1.dostatread(reader);
     end;
-    if obj is toptionsclass then begin
-     toptionsclass(obj).dostatread(reader);
+    if obj is toptions then begin
+     toptions(obj).dostatread(reader);
     end;
    end;
   end;
@@ -963,8 +969,8 @@ begin
  if getobj(obj1) then begin
   for int1:= 0 to high(obj1) do begin
    with obj1[int1] do begin
-    if obj is toptionsclass then begin
-     toptionsclass(obj).dostatwrite(writer);
+    if obj is toptions then begin
+     toptions(obj).dostatwrite(writer);
     end;
     if mseclasses.getcorbainterface(obj1[int1].obj,typeinfo(istatfile),
                                                               intf1) then begin
@@ -1068,16 +1074,80 @@ end;
 
 { trttistat }
 
-{ toptionsclass }
+{ toptions }
 
-procedure toptionsclass.dostatread(const reader: tstatreader);
+destructor toptions.destroy;
+begin
+ gett.free;
+ gettexp.free;
+ inherited;
+end;
+
+procedure toptions.dostatread(const reader: tstatreader);
 begin
  //dummy
 end;
 
-procedure toptionsclass.dostatwrite(const writer: tstatwriter);
+procedure toptions.dostatwrite(const writer: tstatwriter);
 begin
  //dummy
+end;
+
+procedure toptions.expandmacros(const amacrolist: tmacrolist);
+var
+ ar1: propinfopoarty;
+ int1,int2: integer;
+ po1: ptypedata;
+ mstr1: msestring;
+ ar2: msestringarty;
+ t,texp: tobject;
+begin
+ t:= gett;
+ texp:= gettexp;
+ if (t <> nil) and (texp <> nil) then begin
+  ar1:= getpropinfoar(t);
+  for int1:= 0 to high(ar1) do begin
+   po1:= gettypedata(ar1[int1]^.proptype{$ifndef FPC}^{$endif});
+   case ar1[int1]^.proptype^.kind of
+   {$ifdef FPC}
+    tkustring: begin
+     mstr1:= getunicodestrprop(t,ar1[int1]);
+     amacrolist.expandmacros(mstr1);
+     setunicodestrprop(texp,ar1[int1],mstr1);
+   {$else}
+    tkwstring: begin
+     mstr1:= getwidestrprop(t,ar1[int1]);
+     amacrolist.expandmacros(mstr1);
+     setwidestrprop(texp,ar1[int1],mstr1);
+   {$endif}
+    end;
+    tkdynarray: begin
+    {$ifdef FPC}
+     if ptypeinfo(pointer(po1^.eltype2))^.kind = tkustring then begin
+                           //wrong define in ttypedata
+    {$else}
+     if po1^.eltype2^^.kind = tkwstring then begin
+    {$endif}
+      ar2:= copy(getmsestringar(t,ar1[int1]));
+      for int2:= 0 to high(ar2) do begin
+       amacrolist.expandmacros(ar2[int2]);
+      end;
+      setmsestringar(texp,ar1[int1],ar2);
+     end;
+    end;
+   end;
+  end;
+ end;
+end;
+
+function toptions.gett: tobject;
+begin
+ result:= nil;
+end;
+
+function toptions.gettexp: tobject;
+begin
+ result:= nil;
 end;
 
 end.

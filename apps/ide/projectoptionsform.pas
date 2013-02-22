@@ -32,7 +32,8 @@ uses
  mseformatstr,mseinplaceedit,msedatanodes,mselistbrowser,msebitmap,
  msecolordialog,msedrawtext,msewidgets,msepointer,mseguiglob,msepipestream,
  msemenus,sysutils,mseglob,mseedit,msedialog,msescrollbar,msememodialog,
- msecodetemplates,mseifiglob,mseapplication,msestream,msestringcontainer;
+ msecodetemplates,mseifiglob,mseapplication,msestream,msestringcontainer,
+ mserttistat;
 
 const
  defaultsourceprintfont = 'Courier';
@@ -65,16 +66,6 @@ type
  end;
  sigsetinfoarty = array of sigsetinfoty;
 
-{$M+} //tprojectoptions needs RTTI
- toptions = class
-  protected
-   function gett: tobject; virtual;
-   function gettexp: tobject; virtual;
-  public
-   destructor destroy; override;
-   procedure expandmacros(const amacrolist: tmacrolist);  
- end;
- 
  ttextprojectoptions = class
   private
    fmainfile: filenamety;
@@ -855,7 +846,7 @@ uses
  msedesigner,panelform,watchpointsform,commandlineform,messageform,
  componentpaletteform,mserichstring,msesettings,formdesigner,actionsmodule,
  msestringlisteditor,msetexteditor,msepropertyeditors,mseshapes,mseactions,
- componentstore,cpuform,msesysutils,msecomptree,msefont,typinfo,mserttistat
+ componentstore,cpuform,msesysutils,msecomptree,msefont,typinfo
  {$ifndef mse_no_db}{$ifdef FPC},msedbfieldeditor{$endif}{$endif};
 
 var
@@ -2568,72 +2559,6 @@ begin
  if avalue = '' then begin
   avalue:= defaultxtermcommand;
  end;
-end;
-
-{ toptions }
-
-destructor toptions.destroy;
-begin
- gett.free;
- gettexp.free;
- inherited;
-end;
-
-procedure toptions.expandmacros(const amacrolist: tmacrolist);
-var
- ar1: propinfopoarty;
- int1,int2: integer;
- po1: ptypedata;
- mstr1: msestring;
- ar2: msestringarty;
- t,texp: tobject;
-begin
- t:= gett;
- texp:= gettexp;
- if (t <> nil) and (texp <> nil) then begin
-  ar1:= getpropinfoar(t);
-  for int1:= 0 to high(ar1) do begin
-   po1:= gettypedata(ar1[int1]^.proptype{$ifndef FPC}^{$endif});
-   case ar1[int1]^.proptype^.kind of
-   {$ifdef FPC}
-    tkustring: begin
-     mstr1:= getunicodestrprop(t,ar1[int1]);
-     amacrolist.expandmacros(mstr1);
-     setunicodestrprop(texp,ar1[int1],mstr1);
-   {$else}
-    tkwstring: begin
-     mstr1:= getwidestrprop(t,ar1[int1]);
-     amacrolist.expandmacros(mstr1);
-     setwidestrprop(texp,ar1[int1],mstr1);
-   {$endif}
-    end;
-    tkdynarray: begin
-    {$ifdef FPC}
-     if ptypeinfo(pointer(po1^.eltype2))^.kind = tkustring then begin
-                           //wrong define in ttypedata
-    {$else}
-     if po1^.eltype2^^.kind = tkwstring then begin
-    {$endif}
-      ar2:= copy(getmsestringar(t,ar1[int1]));
-      for int2:= 0 to high(ar2) do begin
-       amacrolist.expandmacros(ar2[int2]);
-      end;
-      setmsestringar(texp,ar1[int1],ar2);
-     end;
-    end;
-   end;
-  end;
- end;
-end;
-
-function toptions.gett: tobject;
-begin
- result:= nil;
-end;
-
-function toptions.gettexp: tobject;
-begin
- result:= nil;
 end;
 
 { tprojectoptions }
