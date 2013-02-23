@@ -61,7 +61,10 @@ type
  
 //function expandmacros(const value: msestring; const macros:macroinfoarty;
 //              const caseinsensitive: boolean = true): msestring; overload;
-function initmacros(const anames,avalues: array of msestring): macroinfoarty;
+function initmacros(const anames,avalues: array of msestring
+                                                ): macroinfoarty; overload;
+function initmacros(const anames,avalues: array of msestringarty
+                                                ): macroinfoarty; overload;
 function expandmacros(const value: msestring; const macros: macroinfoarty;
    const options: macrooptionsty = [mao_caseinsensitive]): msestring; overload;
 function expandmacros(const value: msestring; 
@@ -83,6 +86,29 @@ begin
    if int1 <= high(avalues) then begin
     value:= avalues[int1];
    end;
+  end;
+ end;
+end;
+
+function initmacros(const anames,avalues: array of msestringarty): macroinfoarty;
+var
+ int1,int2,int3: integer;
+begin
+ int3:= 0;
+ for int1:= 0 to high(anames) do begin
+  int3:= int3 + length(anames[int1]);
+ end;
+ setlength(result,int3);
+ int3:= 0;
+ for int1:= 0 to high(anames) do begin
+  for int2:= 0 to high(anames[int1]) do begin
+   with result[int3] do begin
+    name:= anames[int1,int2];
+    if int2 <= high(avalues[int1]) then begin
+     value:= avalues[int1,int2];
+    end;
+   end;
+   inc(int3);
   end;
  end;
 end;

@@ -1014,6 +1014,7 @@ begin
  expandprmacros1(info.caption);
  include(info.flags,hfl_show); //show empty caption
 end;
+
 function gettargetfile: filenamety;
 begin
  with projectoptions,d.texp do begin
