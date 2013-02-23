@@ -11692,6 +11692,9 @@ begin
  end
  else begin
   setoptionalobject(avalue,fframe,{$ifdef FPC}@{$endif}internalcreateframe);
+  if (componentstate*[csloading,csdestroying] = []) then begin
+   clientrectchanged;
+  end;
  end;
 end;
 
