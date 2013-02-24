@@ -1962,6 +1962,7 @@ type
    procedure checkrecursivetransientfor(const value: twindow);
    procedure settransientfor(const Value: twindow; const windowevent: boolean);
    procedure sizeconstraintschanged;
+   procedure setsizeconstraints(const amin,amax: sizety);
    procedure createwindow;
    procedure checkwindowid;
    procedure checkwindow(windowevent: boolean);
@@ -6876,6 +6877,7 @@ var
  ar2,ar3: integerarty;
  autosizecha: boolean;
  autosi: sizety;
+ simi,sima: sizety;
 begin
  autosizecha:= false;
  if ([ow1_autowidth,ow1_autoheight]*foptionswidget1 <> []) and 
@@ -6921,6 +6923,19 @@ begin
   if (an_bottom in fanchors) and not 
                   (ow1_noautosizeanbottom in foptionswidget1) then begin
    dec(value.y,value.cy-size2.cy);
+  end;
+  if ownswindow and windowevent and not (csloading in componentstate) then begin
+   simi:= fminsize;
+   sima:= fmaxsize;
+   if ow1_autowidth in foptionswidget1 then begin
+    simi.cx:= value.cx;
+    sima.cx:= value.cx;
+   end;
+   if ow1_autoheight in foptionswidget1 then begin
+    simi.cy:= value.cy;
+    sima.cy:= value.cy;
+   end;
+   fwindow.setsizeconstraints(simi,sima);
   end;
  end
  else begin
@@ -7540,7 +7555,7 @@ var
  int1: integer;
 
 begin
- if not (csloading in componentstate) and (fparentwidget <> nil) and
+ if ([csloading,csdestroying]*componentstate = []) and (fparentwidget <> nil) and
         not (ws1_anchorsizing in fwidgetstate1) then begin
   if ws1_scaling in fparentwidget.fwidgetstate1 then begin
    fparentclientsize:= fparentwidget.minclientsize;
@@ -12259,12 +12274,17 @@ begin
  end;
 end;
 
-procedure twindow.sizeconstraintschanged;
+procedure twindow.setsizeconstraints(const amin,amax: sizety);
 begin
  if fwindow.id <> 0 then begin
   guierror(gui_setsizeconstraints(
-                    fwindow.id,fownerwidget.fminsize,fownerwidget.fmaxsize));
+                    fwindow.id,amin,amax));
  end;
+end;
+
+procedure twindow.sizeconstraintschanged;
+begin
+ setsizeconstraints(fownerwidget.fminsize,fownerwidget.fmaxsize);
 end;
 
 function twindow.haswinid: boolean;

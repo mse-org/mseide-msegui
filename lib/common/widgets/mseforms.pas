@@ -68,6 +68,9 @@ type
    fboundsread: boolean;
    procedure setoptionswidget(const avalue: optionswidgetty); override;
    procedure defineproperties(filer: tfiler); override;
+   procedure clientrectchanged; override;
+   procedure widgetregionchanged(const sender: twidget); override;
+   procedure docheckautosize;
   public
    constructor create(aowner: tcustommseform); reintroduce;
    procedure dolayout(const sender: twidget); override;
@@ -194,6 +197,13 @@ type
    procedure doshortcut(var info: keyeventinfoty; const sender: twidget); override;
    function getframe: tgripframe;
    procedure setframe(const Value: tgripframe);
+   procedure windowcreated; override;
+   procedure dofontheightdelta(var delta: integer); override;
+   procedure widgetregionchanged(const sender: twidget); override;
+
+   function getcontainer: twidget; override;
+   function getchildwidgets(const index: integer): twidget; override;
+   procedure getautopaintsize(var asize: sizety); override;
     //istatfile
    procedure dostatread(const reader: tstatreader); virtual;
    procedure dostatread1(const reader: tstatreader); virtual;
@@ -203,12 +213,6 @@ type
    procedure statread; virtual;
    function getstatvarname: msestring;
    function getwindowcaption: msestring; virtual;
-   procedure windowcreated; override;
-   procedure dofontheightdelta(var delta: integer); override;
-   procedure widgetregionchanged(const sender: twidget); override;
-
-   function getcontainer: twidget; override;
-   function getchildwidgets(const index: integer): twidget; override;
    //idockcontroller
    function checkdock(var info: draginfoty): boolean;
    function getbuttonrects(const index: dockbuttonrectty): rectty;  
@@ -727,6 +731,27 @@ procedure tformscrollbox.dolayout(const sender: twidget);
 begin
  tcustommseform(owner).updatelayout(sender);
  inherited;
+end;
+
+procedure tformscrollbox.docheckautosize;
+begin
+ with tcustommseform(owner) do begin 
+  if optionswidget1 * [ow1_autowidth,ow1_autoheight] <> [] then begin
+   checkautosize;
+  end;
+ end;
+end;
+
+procedure tformscrollbox.clientrectchanged;
+begin
+ inherited;
+ docheckautosize;
+end;
+
+procedure tformscrollbox.widgetregionchanged(const sender: twidget);
+begin
+ inherited;
+ docheckautosize;
 end;
 
 { tdockformscrollbox }
@@ -1871,6 +1896,13 @@ begin
                                            [fo_autoreadstat]) then begin
   fstatfile.readstat;
  end;
+end;
+
+procedure tcustommseform.getautopaintsize(var asize: sizety);
+begin
+ asize:= fscrollbox.calcminscrollsize;
+ asize.cx:= asize.cx + fscrollbox.bounds_x;
+ asize.cy:= asize.cy + fscrollbox.bounds_y;
 end;
 
 { tmseform }
