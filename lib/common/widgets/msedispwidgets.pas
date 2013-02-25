@@ -157,6 +157,7 @@ type
    property optionswidget1 default defaultdispwidgetoptions1;
    property options: dispwidgetoptionsty read foptions write setoptions default [];
    property onchange: notifyeventty read fonchange write fonchange;
+   property onshowhint;
  end;
 
  tbasestringdisp = class(tdispwidget)

@@ -2414,6 +2414,14 @@ begin
 //   rowbytes:= arowbytes;
    fimagecacheused:= fimagecacheused + bytecount;
   end;
+  if asource <> nil then begin
+   registergclink(asource);
+//   tcanvas1(asource).registergclink(self);
+  end;
+  if amask <> nil then begin
+   registergclink(amask);
+//   tcanvas1(amask).registergclink(self);
+  end;
   str1:='/'+varname+' '+inttostr(length(bytes))+' string def currentfile '+
            varname + ' readhexstring'+nl;
   streamwrite(str1);
