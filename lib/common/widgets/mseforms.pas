@@ -1899,10 +1899,16 @@ begin
 end;
 
 procedure tcustommseform.getautopaintsize(var asize: sizety);
+var
+ size1: sizety;
 begin
- asize:= fscrollbox.calcminscrollsize;
- asize.cx:= asize.cx + fscrollbox.bounds_x;
- asize.cy:= asize.cy + fscrollbox.bounds_y;
+ with fscrollbox do begin
+  asize:= calcminscrollsize;
+  size1:= frame.paintframewidth;
+  subpoint1(pointty(size1),self.paintpos);
+  asize.cx:= asize.cx + fscrollbox.bounds_x + size1.cx;
+  asize.cy:= asize.cy + fscrollbox.bounds_y + size1.cy;
+ end;
 end;
 
 { tmseform }
