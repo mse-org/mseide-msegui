@@ -99,7 +99,10 @@ type
   public
    constructor create(const aowner: tformdesignerfo);
  end;
- 
+
+ formdesignerstatety = (fds_sizesyncing);
+ formdesignerstatesty = set of formdesignerstatety;
+  
  tformdesignerfo = class(tmseform,iformdesigner)
    popupme: tpopupmenu;
    hidecompact: taction;
@@ -142,9 +145,11 @@ type
    fmodulesetting: integer;
    fformcont: tformcontainer;
    fmoduleoptions: moduleoptionsty;
+   fsizeerrorcount: integer;
    procedure setmodule(const value: tmsecomponent);
    function getselections: tformdesignerselections;
   protected
+   ffostate: formdesignerstatesty;
    property selections: tformdesignerselections read getselections;
    procedure formcontainerscrolled;
    procedure sizechanged; override;
@@ -2875,7 +2880,18 @@ begin
    if not fixformsize then begin
     if form <> nil then begin
      form.widgetrect:= makerect(nullpoint,size);
-     size:= form.size;
+     if sizeisequal(form.size,size) then begin
+      fsizeerrorcount:= 0;
+     end;
+     if fsizeerrorcount < 4 then begin
+      inc(fsizeerrorcount);
+      include(ffostate,fds_sizesyncing);
+      try
+       size:= form.size;
+      finally
+       exclude(ffostate,fds_sizesyncing);
+      end;
+     end;
     end
     else begin
      if module is tmsedatamodule then begin
@@ -2906,7 +2922,8 @@ begin
   minsize:= form.minsize;
   maxsize:= form.maxsize;
  end;
- if not (ws_loadedproc in widgetstate) and (fmodulesetting = 0) then begin
+ if not (ws_loadedproc in widgetstate) and (fmodulesetting = 0) and
+                                    not (fds_sizesyncing in ffostate) then begin
   asyncevent(ord(fde_syncsize));
  end;
 end;

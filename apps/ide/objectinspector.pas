@@ -203,7 +203,7 @@ type
                          var abort: boolean);
    procedure aftermake(const adesigner: idesigner; const exitcode: integer);
 
-   //iobjectinspector
+    //iobjectinspector
    function getproperties(const objects: objectarty; const amodule: tmsecomponent;
                           const acomponent: tcomponent): propertyeditorarty;
    procedure propertymodified(const sender: tpropertyeditor);

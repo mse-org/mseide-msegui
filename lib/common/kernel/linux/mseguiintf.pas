@@ -5903,6 +5903,5 @@ initialization
  noreconfigurewmwindow:= true;
  stackmodebelowworkaround:= false;
  hassm:= geticelib and getsmlib;
-
 end.
 
