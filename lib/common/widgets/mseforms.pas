@@ -407,7 +407,7 @@ type
 
  mainformclassty = class of tmainform;
   
- tformdockcontroller = class(tdockcontroller)
+ tformdockcontroller = class(tnochildrendockcontroller)
   protected
    procedure setoptionsdock(const avalue: optionsdockty); override;
  end;

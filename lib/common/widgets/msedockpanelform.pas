@@ -156,6 +156,13 @@ type
  tmsecomponent1 = class(tmsecomponent);
  
  pdockpanelform = ^tdockpanelform;
+
+ tpanelformdockcontroller = class(tformdockcontroller)
+  public
+   constructor create(aintf: idockcontroller);
+  published
+   property optionsdock default defaultoptionsdock;
+ end;
  
 function createdockpanelform(const aclass: tclass; 
                     const aclassname: pshortstring): tmsecomponent;
@@ -393,6 +400,9 @@ end;
 
 constructor tdockpanelform.create(aowner: tcomponent; load: boolean);
 begin
+ if fdragdock = nil then begin
+  fdragdock:= tpanelformdockcontroller.create(idockcontroller(self));
+ end;
  include(fmsecomponentstate,cs_ismodule);
  inherited;
 end;
@@ -586,6 +596,14 @@ end;
 class function tdockpanelform.getmoduleclassname: string;
 begin
  result:= 'tdockpanelform';
+end;
+
+{ tpanelformdockcontroller }
+
+constructor tpanelformdockcontroller.create(aintf: idockcontroller);
+begin
+ inherited;
+ foptionsdock:= defaultoptionsdock;
 end;
 
 end.

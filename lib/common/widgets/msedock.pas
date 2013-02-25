@@ -44,6 +44,7 @@ type
                      dbr_top,dbr_background,dbr_lock);
 const
  defaultoptionsdock = [od_savepos,od_savezorder,od_savechildren];
+ defaultoptionsdocknochildren = defaultoptionsdock - [od_savechildren];
  dbr_first = dbr_handle;
  dbr_last = dbr_lock;
  defaulttaboptions= [tabo_dragdest,tabo_dragsource];
@@ -406,6 +407,13 @@ type
                               write fonmdistatechanged;
  end;
 
+ tnochildrendockcontroller = class(tdockcontroller)
+  public
+   constructor create(aintf: idockcontroller);
+  published
+   property optionsdock default defaultoptionsdocknochildren;
+ end;
+ 
  idocktarget = interface(inullinterface)['{1A50A4E4-5B46-4C7C-A992-51EFEA1202B8}']
   function getdockcontroller: tdockcontroller;
  end;
@@ -3851,6 +3859,14 @@ begin
  else begin
   inherited;
  end;
+end;
+
+{ tnochildrendockcontroller }
+
+constructor tnochildrendockcontroller.create(aintf: idockcontroller);
+begin
+ inherited;
+ foptionsdock:= defaultoptionsdocknochildren;
 end;
 
 { tgripframe }
