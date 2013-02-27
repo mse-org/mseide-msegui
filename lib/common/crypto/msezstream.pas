@@ -30,7 +30,7 @@ type
  pzstreamhandlerdatadty = ^zstreamhandlerdatadty;
  {$if sizeof(zstreamhandlerdatadty) > sizeof(cryptohandlerdataty)} 
   {$error 'buffer overflow'}
- {$endif}
+ {$ifend}
  zstreamhandlerdataty = record
   case integer of
    0: (d: zstreamhandlerdatadty;);
@@ -46,8 +46,10 @@ type
    procedure internalflush(var aclient: cryptoclientinfoty;
                                                      const mode: integer);
    procedure flush(var aclient: cryptoclientinfoty); override;
-   procedure checkinflate(var aclient: cryptoclientinfoty); inline;
-   procedure checknoinflate(var aclient: cryptoclientinfoty); inline;
+   procedure checkinflate(var aclient: cryptoclientinfoty);
+                                          {$ifdef FPC}inline;{$endif}
+   procedure checknoinflate(var aclient: cryptoclientinfoty);
+                                          {$ifdef FPC}inline;{$endif}
    function writedeflate(var aclient: cryptoclientinfoty;
                                  const aflush: integer): boolean;
    procedure open(var aclient: cryptoclientinfoty); override;
@@ -202,7 +204,7 @@ begin
    end;
    strm^.next_out:= pointer(po1);
    checkerror(aclient,inflate(strm,z_no_flush));
-   int1:= pointer(strm^.next_out) - po1;
+   int1:= pchar(pointer(strm^.next_out)) - pchar(po1);
    if (int1 = 0) and (zs_fileeof in state) and (strm^.avail_in = 0) then begin
     break;
    end;
@@ -223,7 +225,7 @@ begin
    strm^.next_out:= pointer(buf);
    strm^.avail_out:= bufsize;
    deflate(strm,aflush);
-   int1:= pointer(strm^.next_out) - buf;
+   int1:= pchar(pointer(strm^.next_out)) - pchar(buf);
    if int1 = 0 then begin
     break;
    end;

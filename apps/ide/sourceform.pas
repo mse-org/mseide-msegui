@@ -552,7 +552,8 @@ begin
    for int1:= 0 to designer.modules.count - 1 do begin
     with designer.modules[int1]^ do begin
      modulenames[int1]:= filename;
-     moduleoptions[int1]:= longword(designformintf.moduleoptions);
+     moduleoptions[int1]:=
+         {$ifdef FPC}longword{$else}byte{$endif}(designformintf.moduleoptions);
      ar1[int1]:= designform.visible;
      ar2[int1]:= not hasmenuitem;
     end;
@@ -637,8 +638,8 @@ begin
       end;
       if (po1 <> nil) then begin
        po1^.designformintf.moduleoptions:= 
-            moduleoptionsty(longword(moduleoptions[int1])) *
-                                                 [mo_hidewidgets,mo_hidecomp];
+            moduleoptionsty({$ifdef FPC}longword{$else}byte{$endif}
+                        (moduleoptions[int1])) * [mo_hidewidgets,mo_hidecomp];
       end;
      except
       if checkprojectloadabort then begin

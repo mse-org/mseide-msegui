@@ -94,8 +94,9 @@ type
                  sr_accesswatchpointtrigger,
                  sr_end_stepping_range,sr_function_finished,
                  sr_exited_normally,sr_exited,sr_detached,sr_signal_received);
+ stopreasontextty =  array[stopreasonty] of string;
 const
- defaultstopreasontext: array[stopreasonty] of string = (
+ defaultstopreasontext: stopreasontextty = (
           '',
           'Unknown',
           'Error',
@@ -114,7 +115,7 @@ const
           'Signal received'
           );
 var
- stopreasontext: array[stopreasonty] of string;
+ stopreasontext: stopreasontextty;
 
 type
  stopinfoty = record

@@ -91,7 +91,9 @@ const
  ZLIB_VER_REVISION = 7;
  ZLIB_VER_SUBREVISION = 0;
 
+{$ifdef FPC} //todo: fix for delphi
 {$packrecords c}
+{$endif}
 
 type
  int = cint;
@@ -666,7 +668,7 @@ procedure releasezlib;
 
 implementation
 uses
- msesystypes,dynlibs,msesysintf1,msesysintf;
+ msesystypes,{$ifdef FPC}dynlibs,{$endif}msesysintf1,msesysintf;
 var 
  libinfo: dynlibinfoty;
 
@@ -697,15 +699,15 @@ procedure initializezlib(const sonames: array of filenamety);
 const
  errormessage = 'Can not load OpenSSL library, ';
  funcs: array[0..8] of funcinfoty = (
-  (n: 'zlibVersion'; d: @zlibVersion),
-  (n: 'deflateInit_'; d: @deflateInit_),
-  (n: 'deflateInit2_'; d: @deflateInit2_),
-  (n: 'deflate'; d: @deflate),
-  (n: 'deflateEnd'; d: @deflateEnd),
-  (n: 'inflateInit_'; d: @inflateInit_),
-  (n: 'inflateInit2_'; d: @inflateInit2_),
-  (n: 'inflate'; d: @inflate),
-  (n: 'inflateEnd'; d: @inflateEnd)
+  (n: 'zlibVersion'; d: {$ifndef FPC}@{$endif}@zlibVersion),
+  (n: 'deflateInit_'; d: {$ifndef FPC}@{$endif}@deflateInit_),
+  (n: 'deflateInit2_'; d: {$ifndef FPC}@{$endif}@deflateInit2_),
+  (n: 'deflate'; d: {$ifndef FPC}@{$endif}@deflate),
+  (n: 'deflateEnd'; d: {$ifndef FPC}@{$endif}@deflateEnd),
+  (n: 'inflateInit_'; d: {$ifndef FPC}@{$endif}@inflateInit_),
+  (n: 'inflateInit2_'; d: {$ifndef FPC}@{$endif}@inflateInit2_),
+  (n: 'inflate'; d: {$ifndef FPC}@{$endif}@inflate),
+  (n: 'inflateEnd'; d: {$ifndef FPC}@{$endif}@inflateEnd)
  );
  
 begin

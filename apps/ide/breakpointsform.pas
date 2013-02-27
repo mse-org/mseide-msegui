@@ -135,7 +135,7 @@ uses
 
 type
  stringconsts = (
-  breakpointerror,       //0 Breakpoint error.
+  breakpointerror0,      //0 Breakpoint error.
   breakpointerror1,      //1 BREAKPOINT ERROR
   delbr,                 //2 Do you wish to delete all breakpoints?
   confirmation           //3 Confirmation
@@ -356,7 +356,7 @@ begin
    str1:= gdb.errormessage;
   end
   else begin
-   str1:= c[ord(breakpointerror)];
+   str1:= c[ord(breakpointerror0)];
   end;
   errme:= str1;
   showmessage(str1,c[ord(breakpointerror1)]);
