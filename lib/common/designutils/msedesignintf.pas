@@ -11,7 +11,7 @@ unit msedesignintf;
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
 {$ifndef mse_methodswap}
- {$ifdef FPC} {$define mse_nomethodswap}{$endif}
+  {$define mse_nomethodswap}
 {$endif}
 
 interface
@@ -917,9 +917,6 @@ begin
        writer.ancestor:= comp2;
        writer.rootancestor:= comp2;
        writer.onfindancestor:= {$ifdef FPC}@{$endif}designer.findancestor;
-       {$ifndef FPC}
-       writer.WriteSignature;
-       {$endif}
        writer.writecomponent(component);
       finally
        designer.descendentinstancelist.endstreaming; 
@@ -987,9 +984,6 @@ begin
     textstream:= ttextstream.create;
     try
      writer.root:= co1.owner;
-     {$ifndef FPC}
-     writer.writesignature;
-     {$endif}
      writer.writecomponent(co1);
      freeandnil(writer);
      binstream.position:= 0;
@@ -1081,7 +1075,7 @@ end;
 procedure tdesignerselections.addchildren(child: tcomponent);
 begin
  add(child);
- tcomponent1(child).getchildren(@addchildren,fpasteroot);
+ tcomponent1(child).getchildren({$ifdef FPC}@{$endif}addchildren,fpasteroot);
 end;
 
 function tdesignerselections.pastefromobjecttext(const aobjecttext: string; 
@@ -1142,7 +1136,7 @@ begin
       reader.onancestornotfound:= {$ifdef FPC}@{$endif}designer.ancestornotfound;
       reader.onfindcomponentclass:= 
                            {$ifdef FPC}@{$endif}designer.findcomponentclass;
-      reader.oncreatecomponent:= designer.createcomponent;
+      reader.oncreatecomponent:= designer.createcomponent();
       factcomp:= nil;
       begingloballoading;
       validaterenamebefore:= ondesignvalidaterename;

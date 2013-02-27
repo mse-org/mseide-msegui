@@ -26,7 +26,7 @@ uses
  mseapplication,msegui,msestrings,msedesignparser,msecomptree,mseevent;
 
 {$ifndef mse_methodswap}
- {$ifdef FPC} {$define mse_nomethodswap}{$endif}
+ {$define mse_nomethodswap}
 {$endif}
 
 const
@@ -1562,7 +1562,7 @@ begin
                                   oldancestor1,false,
          {$ifdef FPC}@{$endif}fdesigner.findancestor,
          {$ifdef FPC}@{$endif}fdesigner.findcomponentclass,
-         fdesigner.createcomponent,
+         fdesigner.createcomponent(),
         {$ifdef mse_nomethodswap}
          {$ifdef FPC}@{$endif}setrefreshmethod,
          {$ifdef FPC}@{$endif}fdesigner.writedesignmethod,
@@ -1607,7 +1607,7 @@ begin
                              oldancestor1,false,
          {$ifdef FPC}@{$endif}fdesigner.findancestor,
          {$ifdef FPC}@{$endif}fdesigner.findcomponentclass,
-         fdesigner.createcomponent,
+         fdesigner.createcomponent(),
         {$ifdef mse_nomethodswap}
          {$ifdef FPC}@{$endif}setrefreshmethod,
          {$ifdef FPC}@{$endif}fdesigner.writedesignmethod,
@@ -3143,7 +3143,7 @@ end;
 function tdesigner.createcomponent: tcreatecomponentevent;
 begin
  fsubmoduleinfopo:= nil; //reset
- result:= @createcomponent1;
+ result:= {$ifdef FPC}@{$endif}createcomponent1;
 end;
 
 {$ifndef mse_nomethodswap}
@@ -3646,7 +3646,7 @@ begin
         {$ifdef FPC}@{$endif}fdescendentinstancelist.setrefreshmethod;
     {$endif}
      reader.onfindcomponentclass:= {$ifdef FPC}@{$endif}findcomponentclass;
-     reader.oncreatecomponent:= createcomponent;
+     reader.oncreatecomponent:= createcomponent();
      reader.onancestornotfound:= {$ifdef FPC}@{$endif}ancestornotfound;
    {$ifdef mse_debugcopycomponent}
      debugwriteln('*read '+inttostr(int1)+' '+
@@ -3753,7 +3753,7 @@ begin
     refreshancestor(delcomps,acomponent,comp1,comp1,true,
      {$ifdef FPC}@{$endif}findancestor,
      {$ifdef FPC}@{$endif}findcomponentclass,
-     createcomponent,
+     createcomponent(),
     {$ifdef mse_nomethodswap}
      {$ifdef FPC}@{$endif}fdescendentinstancelist.setrefreshmethod,
      {$ifdef FPC}@{$endif}writedesignmethod
@@ -4441,27 +4441,16 @@ begin //loadformfile
      reader:= treader.create(stream2,4096);
      try
       with treader1(reader) do begin
-      {$ifdef FPC}
        driver.beginrootcomponent;
        driver.begincomponent(flags,pos,moduleclassname1,modulename);
-      {$else}
-       readsignature;
-       ReadPrefix(flags,pos);
-       moduleclassname1:= ReadStr;
-       modulename:= ReadStr;
-       {$endif}
        isinherited:= ffinherited in flags;
        while not endoflist do begin
-      {$ifdef FPC}
         str1:= driver.beginproperty;
-      {$else}
-        str1:= readstr;
-       {$endif}
         if str1 = moduleclassnamename then begin
          designmoduleclassname:= readstring;
         end
         else begin
-         {$ifdef FPC}driver.{$endif}skipvalue;
+         driver.skipvalue;
         end;
        end;
       end;
@@ -4506,7 +4495,7 @@ begin //loadformfile
         {$endif}
          reader.onfindcomponentclass:= {$ifdef FPC}@{$endif}findcomponentclass;
          reader.onancestornotfound:= {$ifdef FPC}@{$endif}ancestornotfound;
-         reader.oncreatecomponent:= createcomponent;
+         reader.oncreatecomponent:= createcomponent();
          reader.onerror:= {$ifdef FPC}@{$endif}readererror;
          module.Name:= modulename;
          reader.ReadrootComponent(module);

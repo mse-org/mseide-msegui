@@ -70,7 +70,7 @@ begin
    end;
    if as_checked in button.state then begin
     componentstorefo.resetselected;
-    selectedclass:= tcomponentclass(button.tagpointer);
+    selectedclass:= mclasses.tcomponentclass(button.tagpointer);
    end;
   end;
  end;
