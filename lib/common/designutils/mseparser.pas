@@ -1531,7 +1531,7 @@ begin
  end;
 end;
 
-function tparser.checkident(const ident: array of integer): integer; overload;
+function tparser.checkident(const ident: array of integer): integer;
 var
  int1,int2: integer;
 begin

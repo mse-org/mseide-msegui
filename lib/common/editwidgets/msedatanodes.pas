@@ -198,8 +198,10 @@ type
  treelistitemclassty = class of ttreelistitem;
  checktreelistitemprocty = procedure(const sender: ttreelistitem;
                               var delete: boolean) of object;
- treelistitemcomparefuncty = function(
+ ttreelistitemcomparefuncty = function(
                                  const l,r: ttreelistitem): integer of object;
+ tlistitemcomparefuncty = function (const r: tlistitem;
+                           const acasesensitive: boolean): integer of object;
 
  ttreelistitem = class(tlistitem)
   private
@@ -1918,7 +1920,7 @@ end;
 procedure ttreelistitem.insert(const aitem: ttreelistitem;
                                                   aindex: integer);
 var
- int1: integer;
+ int1,int2: integer;
 begin
  if aindex > count then begin
   aindex:= count;
@@ -1934,7 +1936,7 @@ begin
   if aindex <> count then begin
    checkindex(aindex);
   end;
-  int1:= treeheight;
+  int2:= treeheight;
   if aitem.fparent <> nil then begin
    aitem.fparent.remove(aitem.fparentindex);
   end;
@@ -1945,7 +1947,7 @@ begin
    fitems[int1].fparentindex:= int1;
   end;
   dosetitems(aindex,aitem);
-  countchange(int1,true);
+  countchange(int2,true);
   checksort;
  end;
 end;
@@ -2391,25 +2393,35 @@ procedure ttreelistitem.sort(const casesensitive: boolean;
 var
  int1: integer;
 {$ifndef FPC}
- po1: treelistitemcomparefuncty;
+ po1: ttreelistitemcomparefuncty;
 {$endif}
 begin
  if ns1_customsort in fstate1 then begin
   {$ifdef FPC}
   mergesort(pointerarty(fitems),fcount,pointercomparemethodty(@customcompare));
   {$else}
-  po1:= self.compare;
+  po1:= self.customcompare;
   mergesort(pointerarty(fitems),fcount,pointercomparemethodty(po1));
   {$endif}
  end
  else begin
   if casesensitive then begin
+  {$ifdef FPC}
    mergesort(pointerarty(fitems),fcount,pointercomparemethodty(
                                                     @comparecasesens));
+  {$else}
+   po1:= self.comparecasesens;
+   mergesort(pointerarty(fitems),fcount,pointercomparemethodty(po1));
+  {$endif}
   end
   else begin
+  {$ifdef FPC}
    mergesort(pointerarty(fitems),fcount,pointercomparemethodty(
                                                     @comparecaseinsens));
+  {$else}
+   po1:= self.comparecaseinsens;
+   mergesort(pointerarty(fitems),fcount,pointercomparemethodty(po1));
+ {$endif}
   end;
  end;
  for int1:= 0 to fcount-1 do begin
@@ -2544,7 +2556,7 @@ var
   end
   else begin
    result:= po1 = poend;
-   while po1 < poend do begin
+   while pchar(po1) < pchar(poend) do begin
     if po1^.treelevel <= aitem.treelevel then begin
      result:= po1^.treelevel = aitem.treelevel;
      break;
@@ -2598,8 +2610,8 @@ begin
    po1:= nil;
    if (fowner <> nil) and fowner.frearanged then begin
     po1:= ptreelistitem(fowner.datapo);
-    poend:= po1 + fowner.count-1;
-    po1:= po1 + rowindex + 1;
+    poend:= @ppointeraty(po1)[fowner.count-1];
+    po1:= @ppointeraty(po1)[rowindex + 1];
    end;
    bo1:= (fparent = nil) or isnotlast(self); 
            //bo1 not used if parent = nil

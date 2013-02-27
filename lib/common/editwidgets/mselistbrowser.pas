@@ -4144,7 +4144,7 @@ begin
          include(self.fitemstate,ils_freelock);
         {$warnings off}
          with tcustomgrid1(self.fowner.fgridintf.getcol.grid) do begin
-        {$earnings on}
+        {$warnings on}
           try
            bo1:= gs1_autoappendlock in fstate1;
            include(fstate1,gs1_autoappendlock);
@@ -5274,8 +5274,8 @@ begin
  if fitemlist <> nil then begin
   col1:= fgridintf.getcol;
   pol:= fitemlist.datapo;
-  por:= pol+rindex;
-  pol:= pol+lindex;
+  por:= @ppointeraty(pol)[rindex];
+  pol:= @ppointeraty(pol)[lindex];
   if (col1.grid.datacols.sortcol = col1.index) or
            (pol^.count = 0) and (por^.count = 0) and
                              (pol^.parent = por^.parent) then begin

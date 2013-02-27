@@ -507,12 +507,12 @@ type
                      const filter: compfilterfuncty = nil;
                            const allmodules: boolean = false): componentarty;
    function getcomponentnamelist(const acomponents: componentarty;
-                             const amodule: tmsecomponent): msestringarty;
+           const amodule: tmsecomponent): msestringarty; overload;
                                       //nil values ignored
    function getcomponentnamelist(const acomponentclass: tcomponentclass;
                                  const includeinherited: boolean;
                                  const aowner: tcomponent = nil;
-                          const filter: compfilterfuncty = nil): msestringarty;
+           const filter: compfilterfuncty = nil): msestringarty; overload;
    function getcomponentnametree(const acomponentclass: tcomponentclass;
                                  const includeinherited: boolean;
                                  const aowner: tcomponent = nil;

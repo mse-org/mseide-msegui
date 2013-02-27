@@ -615,17 +615,17 @@ type
 
  tobjectlinkrecordlist = class(trecordlist,iobjectlink)
   private
+  protected
+   fobjectlinker: tobjectlinker;
+   procedure finalizerecord(var item); override;
+   procedure dounlink(var item); virtual; abstract;
+   procedure itemdestroyed(const sender: iobjectlink); virtual; abstract;
     //iobjectlink
    procedure link(const source,dest: iobjectlink; valuepo: pointer = nil;
                       ainterfacetype: pointer = nil; once: boolean = false);
    procedure unlink(const source,dest: iobjectlink; valuepo: pointer = nil);
    procedure objevent(const sender: iobjectlink; const event: objecteventty);
    function getinstance: tobject;
-  protected
-   fobjectlinker: tobjectlinker;
-   procedure finalizerecord(var item); override;
-   procedure dounlink(var item); virtual; abstract;
-   procedure itemdestroyed(const sender: iobjectlink); virtual; abstract;
   public
    constructor create(arecordsize: integer; aoptions: recordliststatesty = []);
    destructor destroy; override;

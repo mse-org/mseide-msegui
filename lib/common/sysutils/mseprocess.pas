@@ -776,19 +776,25 @@ begin
 end;
 
 procedure tmseprocess.setoptions(const avalue: processoptionsty);
-//const
-// mask1: processoptionsty = [pro_erroroutput,pro_errorouttoout];
-// mask2: processoptionsty = [pro_shell,pro_noshell];
+{$ifndef FPC}
+const
+ mask1: processoptionsty = [pro_erroroutput,pro_errorouttoout];
+ mask2: processoptionsty = [pro_shell,pro_noshell];
+ mask3: processoptionsty = [pro_sessionleader,pro_group];
+{$endif}
 begin
  foptions:= processoptionsty(
-   setsinglebit({$ifdef FPC}longword{$else}word{$endif}(avalue),
-                {$ifdef FPC}longword{$else}word{$endif}(foptions),
-                [{$ifdef FPC}longword{$else}word{$endif}
-                ([pro_erroroutput,pro_errorouttoout]),
-                 {$ifdef FPC}longword{$else}word{$endif}
-                 ([pro_shell,pro_noshell]),
-                 {$ifdef FPC}longword{$else}word{$endif}
-                 ([pro_sessionleader,pro_group])]));
+ {$ifdef FPC}
+   setsinglebit(longword(avalue),
+                longword(foptions),
+                [longword([pro_erroroutput,pro_errorouttoout]),
+                 longword([pro_shell,pro_noshell]),
+                 longword([pro_sessionleader,pro_group])]));
+ {$else}
+   setsinglebitar32(longword(avalue),
+                longword(foptions),
+                [longword(mask1),longword(mask2),longword(mask3)]));
+ {$endif}
  if foptions * [pro_nowaitforpipeeof,pro_nopipeterminate] = [] then begin
   exclude(foptions,pro_usepipewritehandles);
  end;

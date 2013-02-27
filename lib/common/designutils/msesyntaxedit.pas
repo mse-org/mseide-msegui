@@ -918,7 +918,7 @@ end;
 procedure tsyntaxedit.defineproperties(filer: tfiler);
 begin
  inherited;
- filer.defineproperty('autoindent',@readautoindent,nil,false);
+ filer.defineproperty('autoindent',{$ifdef FPC}@{$endif}readautoindent,nil,false);
 end;
 
 procedure tsyntaxedit.editnotification(var info: editnotificationinfoty);
