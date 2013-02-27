@@ -874,6 +874,7 @@ function checkcanevent(const event: tmethod): boolean;
 
 procedure readstringar(const reader: treader; out ar: stringarty);
 procedure writestringar(const writer: twriter; const ar: stringarty);
+function valuescaletorange(const reader: treader): real;
 
 function swapmethodtable(const instance: tobject; const newtable: pointer): pointer;
 
@@ -1484,6 +1485,14 @@ begin
  end;
  reader.readlistend;
  setlength(ar,int1);
+end;
+
+function valuescaletorange(const reader: treader): real;
+begin
+ result:= reader.readfloat;
+ if result <> 0 then begin
+  result:= 1/result;
+ end;
 end;
 
 procedure lockfindglobalcomponent;   //switch of findglobalcomponent

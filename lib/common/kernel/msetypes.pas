@@ -58,6 +58,8 @@ type
   qword = uint64;
   pqword = ^qword;
   size_t = dword;
+  unicodestring = widestring;
+  unicodechar = widechar;
 {$else}
  {$ifndef mse_fpc_2_4_2}
   ppdouble = ^pdouble;
@@ -250,13 +252,15 @@ function isemptydatetime(const avalue: tdatetime): boolean;
                          {$ifdef FPC}inline;{$endif} deprecated;
             //use x = emptydatetime instead
 //function emptydatetime: tdatetime;
-function makecomplex(const are: real; aim: real): complexty; inline;
-function mc(const are: real; aim: real): complexty; inline;
-procedure splitcomplexar(const acomplex: complexarty; out re,im: realarty);
+function makecomplex(const are: real; aim: real): complexty;
+         {$ifdef FPC} inline; {$endif}
+function mc(const are: real; aim: real): complexty;
+         {$ifdef FPC} inline; {$endif}
+//procedure splitcomplexar(const acomplex: complexarty; out re,im: realarty);
 
 implementation
-uses
- msearrayutils;
+//uses
+// msearrayutils;
 (*
 const
 {$ifdef FPC_DOUBLE_HILO_SWAPPED}
@@ -304,23 +308,6 @@ function mc(const are: real; aim: real): complexty;
 begin
  result.re:= are;
  result.im:= aim;
-end;
-
-procedure splitcomplexar(const acomplex: complexarty; out re,im: realarty);
-var
- int1: integer;
-begin
- re:= nil; //compiler warning
- im:= nil; //compiler warning
- int1:= length(acomplex);
- if int1 > 0 then begin
-  allocuninitedarray(int1,sizeof(re[0]),re);
-  allocuninitedarray(int1,sizeof(im[0]),im);
-  for int1:= int1-1 downto 0 do begin
-   re[int1]:= acomplex[int1].re;
-   im[int1]:= acomplex[int1].im;
-  end;
- end;
 end;
 
 end.

@@ -15,26 +15,37 @@ unit mclasses;
  Modified 2013 by Martin Schreiber
 
  **********************************************************************}
+{$ifdef FPC}
+ {$mode objfpc}
+ {$h+}
+ { determine the type of the resource/form file }
+ {$define Win16Res}
+ {$define classesinline}
 
-{$mode objfpc}
-{$h+}
-{ determine the type of the resource/form file }
-{$define Win16Res}
-{$define classesinline}
-
-{$INLINE ON}
+ {$INLINE ON}
+{$endif}
 
 {$if defined(FPC) and (fpc_fullversion >= 020601)}
- {$define mse_fpc_2_6_2} 
-{$endif}
+ {$define mse_fpc_2_6_2}
+{$ifend}
 
 interface
 
 uses
- classes,typinfo,sysutils;
+ classes,typinfo,sysutils,msetypes {$ifndef FPC},classes_del{$endif};
 
 type
 
+{$ifndef FPC}
+  TTextLineBreakStyle = (tlbsLF,tlbsCRLF,tlbsCR);
+  TValueType = (vaNull, vaList, vaInt8, vaInt16, vaInt32, vaExtended,
+    vaString, vaIdent, vaFalse, vaTrue, vaBinary, vaSet, vaLString,
+    vaNil, vaCollection, vaSingle, vaCurrency, vaDate, vaWString, vaInt64,
+    vaUTF8String, vaUString, vaQWord);
+const
+  feInvalidHandle : THandle = THandle(-1);  //return value on FileOpen error
+type
+{$endif}
 {$ifndef mse_fpc_2_6_2}
  tbytes = array of byte;
 {$endif}
@@ -60,6 +71,9 @@ type
 //    FObservers : TFPList;
     procedure AssignError(Source: tpersistent);
   protected
+  {$ifndef FPC}
+    function Equals(Obj: TObject) : boolean;virtual;
+  {$endif}
     procedure AssignTo(Dest: tpersistent); virtual;
     procedure DefineProperties(Filer: tfiler); virtual;
     function  GetOwner: tpersistent; dynamic;
@@ -622,8 +636,8 @@ type
     procedure WriteChildren(Component: tcomponent);
     function CreateDriver(Stream: TStream; BufSize: Integer): TAbstractObjectWriter; virtual;
   public
-    constructor Create(ADriver: TAbstractObjectWriter);
-    constructor Create(Stream: TStream; BufSize: Integer);
+    constructor Create(ADriver: TAbstractObjectWriter); overload;
+    constructor Create(Stream: TStream; BufSize: Integer); overload;
     destructor Destroy; override;
     procedure DefineProperty(const Name: string;
       ReadData: TReaderProc; AWriteData: TWriterProc;
@@ -704,8 +718,8 @@ TStringsEnumerator = class
     procedure WriteData(Writer: TWriter);
   protected
     procedure DefineProperties(Filer: tfiler); override;
-    procedure Error(const Msg: string; Data: Integer);
-    procedure Error(const Msg: pstring; Data: Integer);
+    procedure Error(const Msg: string; Data: Integer); overload;
+    procedure Error(const Msg: pstring; Data: Integer); overload;
     function Get(Index: Integer): string; virtual; abstract;
     function GetCapacity: Integer; virtual;
     function GetCount: Integer; virtual; abstract;
@@ -735,8 +749,8 @@ TStringsEnumerator = class
     procedure Clear; virtual; abstract;
     procedure Delete(Index: Integer); virtual; abstract;
     procedure EndUpdate;
-    function Equals(Obj: TObject): Boolean; override; overload;
-    function Equals(TheStrings: tstrings): Boolean; overload;
+    function Equals(Obj: TObject): Boolean; overload; override;
+    function Equals(TheStrings: tstrings): Boolean; reintroduce; overload;
     procedure Exchange(Index1, Index2: Integer); virtual;
     function GetEnumerator: TStringsEnumerator;
     function GetText: PChar; virtual;
@@ -802,8 +816,9 @@ TStringsEnumerator = class
     procedure PutObject(Index: Integer; AObject: TObject); override;
     procedure SetCapacity(NewCapacity: Integer); override;
     procedure SetUpdateState(Updating: Boolean); override;
-    procedure InsertItem(Index: Integer; const S: string); virtual;
-    procedure InsertItem(Index: Integer; const S: string; O: TObject); virtual;
+    procedure InsertItem(Index: Integer; const S: string); overload; virtual;
+    procedure InsertItem(Index: Integer; const S: string; O: TObject);
+                                                   overload; virtual;
     Function DoCompareText(const s1,s2 : string) : PtrInt; override;
 
   public
@@ -836,15 +851,16 @@ TStringsEnumerator = class
     procedure SetPosition(const Pos: Int64); virtual;
     function  GetSize: Int64; virtual;
     procedure SetSize64(const NewSize: Int64); virtual;
-    procedure SetSize(NewSize: Longint); virtual;overload;
-    procedure SetSize(const NewSize: Int64); virtual;overload;
+    procedure SetSize(NewSize: Longint); overload; virtual;
+    procedure SetSize(const NewSize: Int64); overload; virtual;
     procedure ReadNotImplemented;
     procedure WriteNotImplemented;
   public
     function Read(var Buffer; Count: Longint): Longint; virtual;
     function Write(const Buffer; Count: Longint): Longint; virtual;
-    function Seek(Offset: Longint; Origin: Word): Longint; virtual; overload;
-    function Seek(const Offset: Int64; Origin: TSeekOrigin): Int64; virtual; overload;
+    function Seek(Offset: Longint; Origin: Word): Longint; overload; virtual;
+    function Seek(const Offset: Int64; Origin: TSeekOrigin): Int64;
+                                             overload; virtual;
     procedure ReadBuffer(var Buffer; Count: Longint);
     procedure WriteBuffer(const Buffer; Count: Longint);
     function CopyFrom(Source: TStream; Count: Int64): Int64;
@@ -889,8 +905,9 @@ TStringsEnumerator = class
   Private
     FFileName : String;
   public
-    constructor Create(const AFileName: string; Mode: Word);
+    constructor Create(const AFileName: string; Mode: Word); overload;
     constructor Create(const AFileName: string; Mode: Word; Rights: Cardinal);
+                                            overload;
     destructor Destroy; override;
     property FileName : String Read FFilename;
   end;
@@ -944,7 +961,7 @@ TStringsEnumerator = class
     procedure WriteString(const AString: string);
     property DataString: string read FDataString;
   end;
-  
+{$ifdef FPC}
 {$ifdef UNICODE}
   TResourceStream = class(TCustomMemoryStream)
   private
@@ -968,6 +985,7 @@ TStringsEnumerator = class
     destructor Destroy; override;
   end;
 {$endif UNICODE}
+{$endif}
 
   TOwnerStream = Class(TStream)
   private
@@ -1010,8 +1028,9 @@ procedure BeginGlobalLoading;
 procedure NotifyGlobalLoading;
 procedure EndGlobalLoading;
 
-function CollectionsEqual(C1, C2: TCollection): Boolean;
-function CollectionsEqual(C1, C2: TCollection; Owner1, Owner2: TComponent): Boolean;
+function CollectionsEqual(C1, C2: TCollection): Boolean; overload;
+function CollectionsEqual(C1, C2: TCollection; Owner1,
+                           Owner2: TComponent): Boolean; overload;
 
 procedure RegisterClass(AClass: TPersistentClass);
 procedure RegisterClasses(AClasses: array of TPersistentClass);
@@ -1024,10 +1043,201 @@ function GetClass(const AClassName: string): TPersistentClass;
 
 function ExtractStrings(Separators, WhiteSpace: TSysCharSet; Content: PChar; Strings: TStrings): Integer;
 
+{$ifndef FPC}
+function NtoLE(const AValue: SmallInt): SmallInt;{$ifdef SYSTEMINLINE}inline;{$endif}
+                               overload;
+function NtoLE(const AValue: Word): Word;{$ifdef SYSTEMINLINE}inline;{$endif}
+                               overload;
+function NtoLE(const AValue: LongInt): LongInt;{$ifdef SYSTEMINLINE}inline;{$endif}
+                               overload;
+function NtoLE(const AValue: DWord): DWord;{$ifdef SYSTEMINLINE}inline;{$endif}
+                               overload;
+function NtoLE(const AValue: Int64): Int64;{$ifdef SYSTEMINLINE}inline;{$endif}
+                               overload;
+function NtoLE(const AValue: QWord): QWord;{$ifdef SYSTEMINLINE}inline;{$endif}
+                               overload;
+function LEtoN(const AValue: SmallInt): SmallInt;{$ifdef SYSTEMINLINE}inline;{$endif}
+                               overload;
+function LEtoN(const AValue: Word): Word;{$ifdef SYSTEMINLINE}inline;{$endif}
+                               overload;
+function LEtoN(const AValue: LongInt): LongInt;{$ifdef SYSTEMINLINE}inline;{$endif}
+                               overload;
+function LEtoN(const AValue: DWord): DWord;{$ifdef SYSTEMINLINE}inline;{$endif}
+                               overload;
+function LEtoN(const AValue: Int64): Int64;{$ifdef SYSTEMINLINE}inline;{$endif}
+                               overload;
+function LEtoN(const AValue: QWord): QWord;{$ifdef SYSTEMINLINE}inline;{$endif}
+                               overload;
+
+resourcestring
+  SStreamNoReading              = 'Reading from %s is not supported';
+  SStreamNoWriting              = 'Writing to %s is not supported';
+  SRangeError                   = 'Range error';
+  SStreamInvalidSeek            = 'Invalid stream operation %s.Seek';
+  SEmptyStreamIllegalReader     = 'Illegal Nil stream for TReader constructor';
+  SEmptyStreamIllegalWriter     = 'Illegal Nil stream for TWriter constructor';
+  SErrNoVariantSupport          = 'No variant support for properties. Please use the variants unit in your project and recompile';
+  SUnsupportedPropertyVariantType = 'Unsupported property variant type %d';
+  SUnknownPropertyType          = 'Unknown property type %d';
+
+Const
+  FilerSignature : Array[1..4] of char = 'TPF0';
+{$endif}
+
 implementation
 
 uses
  {$ifdef MSWINDOWS}windows,{$endif}rtlconsts;
+
+{$ifndef FPC}
+{$define endian_little}
+{$define FPC_HAS_TYPE_EXTENDED}
+type
+ ar4ty = packed array[0..3] of byte;
+ ar8ty = packed array[0..7] of byte;
+
+function Unassigned: Variant; // Unassigned standard constant
+begin
+  VarClearProc(TVarData(Result));
+  TVarData(Result).VType := varempty;
+end;
+
+
+function Null: Variant;       // Null standard constant
+  begin
+    VarClearProc(TVarData(Result));
+    TVarData(Result).VType := varnull;
+  end;
+
+function NtoLE(const AValue: SmallInt): SmallInt;{$ifdef SYSTEMINLINE}inline;{$endif}
+  begin
+    {$IFDEF ENDIAN_LITTLE}
+      Result := AValue;
+    {$ELSE}
+      Result := SwapEndian(AValue);
+    {$ENDIF}
+  end;
+
+
+function NtoLE(const AValue: Word): Word;{$ifdef SYSTEMINLINE}inline;{$endif}
+  begin
+    {$IFDEF ENDIAN_LITTLE}
+      Result := AValue;
+    {$ELSE}
+      Result := SwapEndian(AValue);
+    {$ENDIF}
+  end;
+
+
+function NtoLE(const AValue: LongInt): LongInt;{$ifdef SYSTEMINLINE}inline;{$endif}
+  begin
+    {$IFDEF ENDIAN_LITTLE}
+      Result := AValue;
+    {$ELSE}
+      Result := SwapEndian(AValue);
+    {$ENDIF}
+  end;
+
+
+function NtoLE(const AValue: DWord): DWord;{$ifdef SYSTEMINLINE}inline;{$endif}
+  begin
+    {$IFDEF ENDIAN_LITTLE}
+      Result := AValue;
+    {$ELSE}
+      Result := SwapEndian(AValue);
+    {$ENDIF}
+  end;
+
+
+function NtoLE(const AValue: Int64): Int64;{$ifdef SYSTEMINLINE}inline;{$endif}
+  begin
+    {$IFDEF ENDIAN_LITTLE}
+      Result := AValue;
+    {$ELSE}
+      Result := SwapEndian(AValue);
+    {$ENDIF}
+  end;
+
+
+function NtoLE(const AValue: QWord): QWord;{$ifdef SYSTEMINLINE}inline;{$endif}
+  begin
+    {$IFDEF ENDIAN_LITTLE}
+      Result := AValue;
+    {$ELSE}
+      Result := SwapEndian(AValue);
+    {$ENDIF}
+  end;
+
+function LEtoN(const AValue: SmallInt): SmallInt;{$ifdef SYSTEMINLINE}inline;{$endif}
+  begin
+    {$IFDEF ENDIAN_LITTLE}
+      Result := AValue;
+    {$ELSE}
+      Result := SwapEndian(AValue);
+    {$ENDIF}
+  end;
+
+
+function LEtoN(const AValue: Word): Word;{$ifdef SYSTEMINLINE}inline;{$endif}
+  begin
+    {$IFDEF ENDIAN_LITTLE}
+      Result := AValue;
+    {$ELSE}
+      Result := SwapEndian(AValue);
+    {$ENDIF}
+  end;
+
+
+function LEtoN(const AValue: LongInt): LongInt;{$ifdef SYSTEMINLINE}inline;{$endif}
+  begin
+    {$IFDEF ENDIAN_LITTLE}
+      Result := AValue;
+    {$ELSE}
+      Result := SwapEndian(AValue);
+    {$ENDIF}
+  end;
+
+
+function LEtoN(const AValue: DWord): DWord;{$ifdef SYSTEMINLINE}inline;{$endif}
+  begin
+    {$IFDEF ENDIAN_LITTLE}
+      Result := AValue;
+    {$ELSE}
+      Result := SwapEndian(AValue);
+    {$ENDIF}
+  end;
+
+
+function LEtoN(const AValue: Int64): Int64;{$ifdef SYSTEMINLINE}inline;{$endif}
+  begin
+    {$IFDEF ENDIAN_LITTLE}
+      Result := AValue;
+    {$ELSE}
+      Result := SwapEndian(AValue);
+    {$ENDIF}
+  end;
+
+
+function LEtoN(const AValue: QWord): QWord;{$ifdef SYSTEMINLINE}inline;{$endif}
+  begin
+    {$IFDEF ENDIAN_LITTLE}
+      Result := AValue;
+    {$ELSE}
+      Result := SwapEndian(AValue);
+    {$ENDIF}
+  end;
+
+Function FileTruncate (Handle : THandle;Size: Int64) : boolean;
+begin
+{
+  Result:=longint(SetFilePointer(handle,Size,nil,FILE_BEGIN))<>-1;
+}
+  if FileSeek (Handle, Size, FILE_BEGIN) = Size then
+   Result:=SetEndOfFile(handle)
+  else
+   Result := false;
+end;
+{$endif}
 
 Const
   // Ratio of Pointer and Word Size.
@@ -1039,7 +1249,7 @@ Type
     Next : TLinkedListItem;
   end;
   TLinkedListItemClass = Class of TLinkedListItem;
-  
+
   { TLinkedListVisitor }
 
   TLinkedListVisitor = Class
@@ -1150,10 +1360,17 @@ begin
     end;
 end;
 
- 
+
 {****************************************************************************}
 {*                             TPersistent                                  *}
 {****************************************************************************}
+
+{$ifndef FPC}
+function tpersistent.Equals(Obj: TObject) : boolean;
+begin
+ result:= Obj = Self;
+end;
+{$endif}
 
 procedure TPersistent.AssignError(Source: TPersistent);
 
@@ -1460,9 +1677,11 @@ begin
   Temp:=0;
   Ancestor:=TComponent(Filer.Ancestor);
   If Assigned(Ancestor) then Temp:=Ancestor.FDesignInfo;
-  Filer.Defineproperty('left',@readleft,@writeleft,
+  Filer.Defineproperty('left',{$ifdef FPC}@{$endif}readleft,
+                              {$ifdef FPC}@{$endif}writeleft,
                        (longrec(FDesignInfo).Lo<>Longrec(temp).Lo));
-  Filer.Defineproperty('top',@readtop,@writetop,
+  Filer.Defineproperty('top',{$ifdef FPC}@{$endif}readtop,
+                             {$ifdef FPC}@{$endif}writetop,
                        (longrec(FDesignInfo).Hi<>Longrec(temp).Hi));
 end;
 
@@ -2016,7 +2235,7 @@ begin
     FDelimiter:=',';
     FNameValueSeparator:='=';
     FSpecialCharsInited:=true;
-    FLBS:=DefaultTextLineBreakStyle;
+    FLBS:= ttextlinebreakstyle(DefaultTextLineBreakStyle);
     end;
 end;
 
@@ -2340,19 +2559,22 @@ begin
       HasData := True
   else
     HasData := Count > 0;
-  Filer.DefineProperty('Strings', @ReadData, @WriteData, HasData);
+  Filer.DefineProperty('Strings', {$ifdef FPC}@{$endif}ReadData,
+                                {$ifdef FPC}@{$endif}WriteData, HasData);
 end;
 
 
 Procedure TStrings.Error(const Msg: string; Data: Integer);
 begin
-  Raise EStringListError.CreateFmt(Msg,[Data]) at get_caller_addr(get_frame);
+  Raise EStringListError.CreateFmt(Msg,[Data])
+                   {$ifdef FPC} at get_caller_addr(get_frame){$endif};
 end;
 
 
 Procedure TStrings.Error(const Msg: pstring; Data: Integer);
 begin
-  Raise EStringListError.CreateFmt(Msg^,[Data]) at get_caller_addr(get_frame);
+  Raise EStringListError.CreateFmt(Msg^,[Data])
+                   {$ifdef FPC} at get_caller_addr(get_frame){$endif};
 end;
 
 
@@ -2384,7 +2606,7 @@ begin
   Case FLBS of
     tlbsLF   : NL:=#10;
     tlbsCRLF : NL:=#13#10;
-    tlbsCR   : NL:=#13; 
+    tlbsCR   : NL:=#13;
   end;
   L:=0;
   NLS:=Length(NL);
@@ -2445,13 +2667,14 @@ begin
   L:=Length(Value);
   S:='';
   Result:=False;
-  If ((L-P)<0) then 
+  If ((L-P)<0) then
     exit;
   if ((L-P)=0) and (not (value[P] in [#10,#13])) Then
     Begin
       s:=value[P];
       inc(P);
-      Exit(True);
+      result:= true;
+      Exit;
     End;
   PS:=PChar(Value)+P-1;
   IP:=P;
@@ -3065,7 +3288,11 @@ begin
       begin
       MSize:=FCapacity*Sizeof(TStringItem);
       System.Move (FList^,NewList^,MSize);
+    {$ifdef FPC}
       FillWord (Pchar(NewList)[MSize],(NewCapacity-FCapacity)*WordRatio, 0);
+    {$else}
+      Fillchar(Pchar(NewList)[MSize],(NewCapacity-FCapacity)*sizeof(pointer),0);
+    {$endif}
       FreeMem (Flist,MSize);
       end;
     Flist:=NewList;
@@ -3271,12 +3498,14 @@ end;
 
 procedure TStream.ReadNotImplemented;
 begin
-  raise EStreamError.CreateFmt(SStreamNoReading, [ClassName]) at get_caller_addr(get_frame);
+  raise EStreamError.CreateFmt(SStreamNoReading, [ClassName])
+                       {$ifdef FPC}  at get_caller_addr(get_frame){$endif};
 end;
 
 procedure TStream.WriteNotImplemented;
 begin
-  raise EStreamError.CreateFmt(SStreamNoWriting, [ClassName]) at get_caller_addr(get_frame);
+  raise EStreamError.CreateFmt(SStreamNoWriting, [ClassName])
+                       {$ifdef FPC}  at get_caller_addr(get_frame){$endif};
 end;
 
 function TStream.Read(var Buffer; Count: Longint): Longint;
@@ -3357,12 +3586,12 @@ end;
        CurrClass:=CurrClass.Classparent;
       if CurrClass<>nil then
        begin
-         CurrSeek:=@Self.Seek;
-         TStreamSeek:=@TStream(@CurrClass).Seek;
+         CurrSeek:= {$ifdef FPC}@{$endif}Self.Seek;
+         TStreamSeek:={$ifdef FPC}@{$endif}TStream(@CurrClass).Seek;
          if TMethod(TStreamSeek).Code=TMethod(CurrSeek).Code then
           CurrSeek:=nil;
        end;
-      if CurrSeek<>nil then
+      if {$ifndef FPC}@{$endif}CurrSeek <> nil then
        Result:=Seek(Int64(offset),TSeekOrigin(origin))
       else
        raise EStreamError.CreateFmt(SSeekNotImplemented,[ClassName]);
@@ -3409,7 +3638,8 @@ end;
   procedure TStream.InvalidSeek;
 
   begin
-    raise EStreamError.CreateFmt(SStreamInvalidSeek, [ClassName]) at get_caller_addr(get_frame);
+    raise EStreamError.CreateFmt(SStreamInvalidSeek, [ClassName])
+                     {$ifdef FPC} at get_caller_addr(get_frame){$endif};
   end;
 
   procedure TStream.FakeSeekForward(Offset: Int64;  const Origin: TSeekOrigin; const Pos: Int64);
@@ -3696,7 +3926,7 @@ end;
     if TheSize>0 then
      begin
        ReadBuffer (Pointer(Result)^,TheSize);
-       P:=Pointer(Result)+TheSize;
+       P:= pointer(pchar(Pointer(Result))+TheSize);
        p^:=0;
      end;
    end;
@@ -3767,7 +3997,7 @@ begin
     begin
     Result:=FSize-FPosition;
     If Result>Count then Result:=Count;
-    Move ((FMemory+FPosition)^,Buffer,Result);
+    Move ((pchar(FMemory)+FPosition)^,Buffer,Result);
     FPosition:=Fposition+Result;
     end;
 end;
@@ -3842,7 +4072,12 @@ begin
     Result:=FMemory
   else
     begin
-      Result:=Reallocmem(FMemory,Newcapacity);
+    {$ifdef FPC}
+      Result:= Reallocmem(FMemory,Newcapacity);
+    {$else}
+      Reallocmem(FMemory,Newcapacity);
+      result:= fmemory;
+    {$endif}
       If (Result=Nil) and (Newcapacity>0) then
         Raise EStreamError.Create(SMemoryStreamError);
     end;
@@ -3903,8 +4138,10 @@ function TMemoryStream.Write(const Buffer; Count: LongInt): LongInt;
 Var NewPos : PtrInt;
 
 begin
-  If (Count=0) or (FPosition<0) then
-    exit(0);
+  If (Count=0) or (FPosition<0) then begin
+   result:= 0;
+   exit;
+  end;
   NewPos:=FPosition+Count;
   If NewPos>Fsize then
     begin
@@ -3912,7 +4149,7 @@ begin
       SetCapacity (NewPos);
     FSize:=Newpos;
     end;
-  System.Move (Buffer,(FMemory+FPosition)^,Count);
+  System.Move (Buffer,(pchar(FMemory)+FPosition)^,Count);
   FPosition:=NewPos;
   Result:=Count;
 end;
@@ -4057,7 +4294,11 @@ var
 begin
   { Read filer signature }
   Read(Signature, 4);
+  {$ifdef FPC}
   if Signature <> LongInt(unaligned(FilerSignature)) then
+  {$else}
+  if Signature <> LongInt(FilerSignature) then
+  {$endif}
     raise EReadError.Create(SInvalidImage);
 end;
 
@@ -4072,7 +4313,7 @@ begin
   if (Byte(NextValue) and $f0) = $f0 then
   begin
     Prefix := Byte(ReadValue);
-    Flags := TFilerFlags(longint(Prefix and $0f));
+    Flags := TFilerFlags({$ifdef FPC}longword{$else}byte{$endif}(Prefix and $0f));
     if ffChildPos in Flags then
     begin
       ValueType := ReadValue;
@@ -4110,24 +4351,36 @@ end;
 {$ifndef FPUNONE}
 function TBinaryObjectReader.ReadFloat: Extended;
 begin
-  Result:=ReadExtended;
+  Result:= ReadExtended;
 end;
 
 function TBinaryObjectReader.ReadSingle: Single;
 begin
-  Result:=single(ReadDWord);
+{$ifdef FPC}
+  Result:= single(ReadDWord);
+{$else}
+  Result:= single(ar4ty(ReadDWord()));
+{$endif}
 end;
 {$endif}
 
 function TBinaryObjectReader.ReadCurrency: Currency;
 begin
+ {$ifdef FPC}
   Result:=currency(ReadQWord);
+ {$else}
+  Result:=currency(ar8ty(ReadQWord()));
+ {$endif}
 end;
 
 {$ifndef FPUNONE}
 function TBinaryObjectReader.ReadDate: TDateTime;
 begin
-  Result:=TDateTime(ReadQWord);
+ {$ifdef FPC}
+  Result:= TDateTime(ReadQWord);
+ {$else}
+  Result:= TDateTime(ar8ty(ReadQWord()));
+ {$endif}
 end;
 {$endif}
 
@@ -4337,11 +4590,13 @@ begin
         Count:=LongInt(ReadDWord);
         SkipBytes(Count*sizeof(widechar));
       end;
+{$ifdef FPC}
     vaUString:
       begin
         Count:=LongInt(ReadDWord);
         SkipBytes(Count*sizeof(widechar));
       end;
+{$endif}
     vaSet:
       SkipSetBody;
     vaCollection:
@@ -4393,7 +4648,7 @@ begin
       CopyNow := Count;
     Move(PChar(FBuffer)[FBufPos], Dest^, CopyNow);
     Inc(FBufPos, CopyNow);
-    Inc(Dest, CopyNow);
+    Inc(pchar(Dest), CopyNow);
     Dec(Count, CopyNow);
   end;
 end;
@@ -4445,8 +4700,10 @@ begin
   with IntConstList.LockList do
   try
     for i := 0 to Count - 1 do
-      if TIntConst(Items[i]).IntegerType = AIntegerType then
-        exit(TIntConst(Items[i]).IntToIdentFn);
+      if TIntConst(Items[i]).IntegerType = AIntegerType then begin
+       result:= TIntConst(Items[i]).IntToIdentFn;
+       exit;
+      end;
     Result := nil;
   finally
     IntConstList.UnlockList;
@@ -4461,8 +4718,10 @@ begin
   try
     for i := 0 to Count - 1 do
       with TIntConst(Items[I]) do
-        if TIntConst(Items[I]).IntegerType = AIntegerType then
-          exit(IdentToIntFn);
+        if TIntConst(Items[I]).IntegerType = AIntegerType then begin
+         result:= IdentToIntFn;
+         exit;
+        end;
     Result := nil;
   finally
     IntConstList.UnlockList;
@@ -4478,7 +4737,8 @@ begin
     if CompareText(Map[i].Name, Ident) = 0 then
     begin
       Int := Map[i].Value;
-      exit(True);
+      result:= true;
+      exit;
     end;
   Result := False;
 end;
@@ -4492,7 +4752,8 @@ begin
     if Map[i].Value = Int then
     begin
       Ident := Map[i].Name;
-      exit(True);
+      result:= true;
+      exit;
     end;
   Result := False;
 end;
@@ -4504,8 +4765,10 @@ begin
   with IntConstList.LockList do
     try
       for i := 0 to Count - 1 do
-        if TIntConst(Items[I]).IdentToIntFn(Ident, Int) then
-          Exit(True);
+        if TIntConst(Items[I]).IdentToIntFn(Ident, Int) then begin
+         result:= true;
+         Exit;
+        end;
       Result := false;
     finally
       IntConstList.UnlockList;
@@ -4521,7 +4784,7 @@ Type
     AHandler : TInitComponentHandler;
     AClass : TComponentClass;
   end;
-
+{$ifdef FPC}
 function CreateComponentfromRes(const res : string;Inst : THandle;var Component : TComponent) : Boolean;
   var
     ResStream : TResourceStream;
@@ -4543,16 +4806,19 @@ function CreateComponentfromRes(const res : string;Inst : THandle;var Component 
         result:=false;
     end;
   end;
+{$endif}
 
 function DefaultInitHandler(Instance: TComponent; RootAncestor: TClass): Boolean;
 
   function doinit(_class : TClass) : boolean;
     begin
       result:=false;
-      if (_class.ClassType=TComponent) or (_class.ClassType=RootAncestor) then
+      if (_class{.ClassType}=TComponent) or (_class{.ClassType}=RootAncestor) then
         exit;
       result:=doinit(_class.ClassParent);
+  {$ifdef FPC}
       result:=CreateComponentfromRes(_class.ClassName,0,Instance) or result;
+  {$endif}
     end;
 
   begin
@@ -4636,27 +4902,30 @@ procedure RegisterFindGlobalComponentProc(AFindGlobalComponent: TFindGlobalCompo
   begin
     if not(assigned(FindGlobalComponentList)) then
       FindGlobalComponentList:=TList.Create;
-    if FindGlobalComponentList.IndexOf(Pointer(AFindGlobalComponent))<0 then
-      FindGlobalComponentList.Add(Pointer(AFindGlobalComponent));
+    if FindGlobalComponentList.IndexOf(
+     Pointer({$ifndef FPC}@{$endif}AFindGlobalComponent))<0 then
+      FindGlobalComponentList.Add(
+         Pointer({$ifndef FPC}@{$endif}AFindGlobalComponent));
   end;
 
 procedure UnregisterFindGlobalComponentProc(AFindGlobalComponent: TFindGlobalComponent);
   begin
     if assigned(FindGlobalComponentList) then
-      FindGlobalComponentList.Remove(Pointer(AFindGlobalComponent));
+      FindGlobalComponentList.Remove(
+              Pointer({$ifndef FPC}@{$endif}AFindGlobalComponent));
   end;
 
 function FindGlobalComponent(const Name: string): TComponent;
   var
   	i : sizeint;
   begin
-    FindGlobalComponent:=nil;
+    result:=nil;
     if assigned(FindGlobalComponentList) then
       begin
       	for i:=FindGlobalComponentList.Count-1 downto 0 do
       	  begin
-      	    FindGlobalComponent:=TFindGlobalComponent(FindGlobalComponentList[i])(name);
-      	    if assigned(FindGlobalComponent) then
+      	    result:=TFindGlobalComponent(FindGlobalComponentList[i])(name);
+      	    if assigned(result) then
       	      break;
       	  end;
       end;
@@ -5311,7 +5580,12 @@ function CollectionsEqual(C1, C2: TCollection; Owner1, Owner2: TComponent): Bool
       try
         stream_collection(s1,c1,owner1);
         stream_collection(s2,c2,owner2);
-        result:=(s1.size=s2.size) and (CompareChar(s1.memory^,s2.memory^,s1.size)=0);
+        result:=(s1.size=s2.size) and
+        {$ifdef FPC}
+         (CompareChar(s1.memory^,s2.memory^,s1.size) = 0);
+        {$else}
+         Comparemem(s1.memory,s2.memory,s1.size);
+        {$endif}
       finally
         s2.free;
       end;
@@ -5376,7 +5650,12 @@ begin
   while ClassType <> TPersistent do
   begin
 {    FieldTable := PFieldTable((Pointer(ClassType) + vmtFieldTable)^); }
+{$ifdef FPC}
     ClassTable := PFieldTable((Pointer(ClassType) + vmtFieldTable)^)^.ClassTable;
+{$else}
+    ClassTable:= PFieldTable(pointer((pchar(Pointer(ClassType)) +
+                                   vmtFieldTable))^)^.ClassTable;
+{$endif}
     if Assigned(ClassTable) then
       for i := 0 to ClassTable^.Count - 1 do
       begin
@@ -5923,12 +6202,12 @@ begin
   case nv of
     vaNil:
       begin
-        Result:=system.unassigned;
+        Result:= {$ifdef FPC}system.{$endif}unassigned;
         readvalue;
       end;
     vaNull:
       begin
-        Result:=system.null;
+        Result:= {$ifdef FPC}system.{$endif}null;
         readvalue;
       end;
     { all integer sizes must be split for big endian systems }
@@ -6103,7 +6382,11 @@ begin
   if not Assigned(PPropInfo(PropInfo)^.SetProc) then
     raise EReadError.Create(SReadOnlyProperty);
 
+{$ifdef FPC}
   PropType := PPropInfo(PropInfo)^.PropType;
+{$else}
+  PropType := PPropInfo(PropInfo)^.PropType^;
+{$endif}
   case PropType^.Kind of
     tkInteger:
       if FDriver.NextValue = vaIdent then
@@ -6115,12 +6398,14 @@ begin
           raise EReadError.Create(SInvalidPropertyValue);
       end else
         SetOrdProp(Instance, PropInfo, ReadInteger);
+{$ifdef FPC}
     tkBool:
       SetOrdProp(Instance, PropInfo, Ord(ReadBoolean));
+{$endif}
     tkChar:
       SetOrdProp(Instance, PropInfo, Ord(ReadChar));
-    tkWChar,tkUChar:
-      SetOrdProp(Instance, PropInfo, Ord(ReadWideChar));  
+    tkWChar{$ifdef FPC},tkUChar{$endif}:
+      SetOrdProp(Instance, PropInfo, Ord(ReadWideChar));
     tkEnumeration:
       begin
         Value := GetEnumValue(PropType, ReadIdent);
@@ -6157,15 +6442,21 @@ begin
             SetMethodProp(Instance, PropInfo, Method);
         end;
       end;
+    {$ifdef FPC}
     tkSString, tkLString, tkAString:
+    {$else}
+    tkString, tkLString:
+    {$endif}
       begin
         TmpStr:=ReadString;
         if Assigned(FOnReadStringProperty) then
           FOnReadStringProperty(Self,Instance,PropInfo,TmpStr);
         SetStrProp(Instance, PropInfo, TmpStr);
       end;
+    {$ifdef FPC}
     tkUstring:
       SetUnicodeStrProp(Instance,PropInfo,ReadUnicodeString);
+    {$endif}
     tkWString:
       SetWideStrProp(Instance,PropInfo,ReadWideString);
     tkVariant:
@@ -6198,7 +6489,8 @@ begin
           end;
         end;
       end;
-    tkInt64, tkQWord: SetInt64Prop(Instance, PropInfo, ReadInt64);
+    tkInt64{$ifdef FPC}, tkQWord{$endif}:
+     SetInt64Prop(Instance, PropInfo, ReadInt64);
     else
       raise EReadError.CreateFmt(SUnknownPropertyType, [Ord(PropType^.Kind)]);
   end;
@@ -6477,7 +6769,13 @@ var
     // descendants of TComponent
     while ComponentClassType<>TComponent do begin
       FieldClassTable :=
+      {$ifdef FPC}
         PFieldTable((Pointer(ComponentClassType)+vmtFieldTable)^)^.ClassTable;
+      {$else}
+        PFieldTable(
+         pointer((pchar(Pointer(ComponentClassType))+vmtFieldTable))^
+                   )^.ClassTable;
+      {$endif}
       if assigned(FieldClassTable) then begin
         for i := 0 to FieldClassTable^.Count -1 do begin
           Entry := FieldClassTable^.Entries[i];
@@ -6751,11 +7049,12 @@ begin
        FAncestors:=TStringList.Create;
        if csInline in TComponent(FAncestor).ComponentState then
          FRootAncestor := TComponent(FAncestor);
-       TComponent(FAncestor).GetChildren(@AddToAncestorList,FRootAncestor);
+       TComponent(FAncestor).GetChildren(
+                   {$ifdef FPC}@{$endif}AddToAncestorList,FRootAncestor);
        FAncestors.Sorted:=True;
        end;
     try
-      Component.GetChildren(@WriteComponent, FRoot);
+      Component.GetChildren({$ifdef FPC}@{$endif}WriteComponent, FRoot);
     Finally
       If Assigned(Fancestors) then
         For I:=0 to FAncestors.Count-1 do 
@@ -6912,7 +7211,7 @@ begin
   if not Assigned(PPropInfo(PropInfo)^.GetProc) then
     exit;
   // properties without setter are only allowed, if they are subcomponents
-  PropType := PPropInfo(PropInfo)^.PropType;
+  PropType := PPropInfo(PropInfo)^.PropType{$ifndef FPC}^{$endif};
   if not Assigned(PPropInfo(PropInfo)^.SetProc) then begin
     if PropType^.Kind<>tkClass then
       exit;
@@ -7009,7 +7308,11 @@ begin
           Driver.EndProperty;
         end;
       end;
+{$ifdef FPC}
     tkSString, tkLString, tkAString:
+{$else}
+    tkString, tkLString:
+{$endif}
       begin
         StrValue := GetStrProp(Instance, PropInfo);
         if HasAncestor then
@@ -7041,6 +7344,7 @@ begin
           Driver.EndProperty;
         end;
       end;
+{$ifdef FPC}
     tkUString:
       begin
         UStrValue := GetUnicodeStrProp(Instance, PropInfo);
@@ -7056,6 +7360,7 @@ begin
           Driver.EndProperty;
         end;
       end;
+{$endif}
     tkVariant:
       begin
         { Ensure that a Variant manager is installed }
@@ -7067,8 +7372,11 @@ begin
           DefVarValue := tvardata(GetVariantProp(Ancestor, PropInfo))
         else
           FillChar(DefVarValue,sizeof(DefVarValue),0);
-
+{$ifdef FPC}
         if (CompareByte(VarValue,DefVarValue,sizeof(VarValue)) <> 0) then
+{$else}
+        if Comparemem(@VarValue,@DefVarValue,sizeof(VarValue)) then
+{$endif}
           begin
             Driver.BeginProperty(FPropPath + PPropInfo(PropInfo)^.Name);
             { can't use variant() typecast, pulls in variants unit }
@@ -7181,7 +7489,7 @@ begin
             end;
           end; // Inheritsfrom(TPersistent)
       end;
-    tkInt64, tkQWord:
+    tkInt64 {$ifdef FPC}, tkQWord{$endif}:
       begin
         Int64Value := GetInt64Prop(Instance, PropInfo);
         if HasAncestor then
@@ -7195,6 +7503,7 @@ begin
           Driver.EndProperty;
         end;
       end;
+{$ifdef FPC}
     tkBool:
       begin
         BoolValue := GetOrdProp(Instance, PropInfo)<>0;
@@ -7213,6 +7522,7 @@ begin
           Driver.EndProperty;
           end;
       end;
+{$endif}
   end;
 end;
 
@@ -7356,7 +7666,7 @@ begin
   { Only write the flags if they are needed! }
   if Flags <> [] then
   begin
-    Prefix := Integer(Flags) or $f0;
+    Prefix := {$ifdef FPC}longword{$else}byte{$endif}(Flags) or $f0;
     Write(Prefix, 1);
     if ffChildPos in Flags then
       WriteInteger(ChildPos);
@@ -7410,14 +7720,22 @@ end;
 procedure TBinaryObjectWriter.WriteSingle(const Value: Single);
 begin
   WriteValue(vaSingle);
+{$ifdef FPC}
   WriteDWord(longword(Value));
+{$else}
+  WriteDWord(longword(ar4ty(Value)));
+{$endif}
 end;
 {$endif}
 
 procedure TBinaryObjectWriter.WriteCurrency(const Value: Currency);
 begin
   WriteValue(vaCurrency);
+{$ifdef FPC}
   WriteQWord(qword(Value));
+{$else}
+  WriteQWord(qword(ar8ty(Value)));
+{$endif}
 end;
 
 
@@ -7425,7 +7743,11 @@ end;
 procedure TBinaryObjectWriter.WriteDate(const Value: TDateTime);
 begin
   WriteValue(vaDate);
+{$ifdef FPC}
   WriteQWord(qword(Value));
+{$else}
+  WriteQWord(qword(ar8ty(Value)));
+{$endif}
 end;
 {$endif}
 
@@ -7464,7 +7786,11 @@ begin
     WriteValue(vaInt16);
     i := Value;
     WriteWord(word(i));
+{$ifdef FPC}
   end else if (Value >= -$80000000) and (Value <= $7fffffff) then
+{$else}
+  end else if (Value >= $80000000) and (Value <= $7fffffff) then
+{$endif}
   begin
     WriteValue(vaInt32);
     l := Value;
@@ -7500,7 +7826,11 @@ begin
     WriteDWord(longword(l));
   end else
   begin
+{$ifdef FPC}
     WriteValue(vaQWord);
+{$else}
+    WriteValue(vaint64);
+{$endif}
     WriteQWord(Value);
   end;
 end;
@@ -7615,10 +7945,12 @@ begin
       begin
         WriteInteger(VarValue);
       end;
+{$ifdef FPC}
     varQWord:
       begin
         WriteUInt64(VarValue);
       end;
+{$endif}
     varBoolean:
       begin
         WriteBoolean(VarValue);
@@ -7708,6 +8040,16 @@ var
 aClassname : String;
 begin
   //Classlist is created during initialization.
+ {
+  if classlist = nil then begin
+   classlist:= tthreadlist.create; 
+         //initialization order sometimes wrong in FPC
+  end;
+  if classaliaslist = nil then begin
+   classaliaslist:= tstringlist.create; 
+         //initialization order sometimes wrong in FPC
+  end;
+ }
   with Classlist.Locklist do
      try
       while Indexof(AClass) = -1 do
@@ -7806,11 +8148,15 @@ constructor TFileStream.Create(const AFileName: string; Mode: Word; Rights: Card
 begin
   FFileName:=AFileName;
   If (Mode and fmCreate) > 0 then
+{$ifdef FPC}
     FHandle:=FileCreate(AFileName,Mode,Rights)
+{$else}
+    FHandle:=FileCreate(AFileName,Rights)
+{$endif}
   else
     FHAndle:=FileOpen(AFileName,Mode);
 
-  If (THandle(FHandle)=feInvalidHandle) then
+  If (THandle(FHandle) = feInvalidHandle) then
     If Mode=fmcreate then
       raise EFCreateError.createfmt(SFCreateError,[AFileName])
     else
@@ -7956,7 +8302,7 @@ procedure TStringStream.WriteString(const AString: string);
 begin
   Write (PChar(Astring)[0],Length(AString));
 end;
-
+{$ifdef FPC}
 {****************************************************************************}
 {*                             TResourceStream                              *}
 {****************************************************************************}
@@ -8027,6 +8373,7 @@ destructor TResourceStream.Destroy;
     FreeResource(Handle);
     inherited destroy;
   end;
+{$endif}
 
 {****************************************************************************}
 {*                             TOwnerStream                                 *}
@@ -8556,12 +8903,20 @@ begin
 //  SynchronizeTimeoutEvent:=RtlEventCreate;
 //  DoSynchronizeMethod:=false;
 //  MainThreadID:=GetCurrentThreadID;
+{$ifdef FPC}
   InitCriticalsection(ResolveSection);
+{$else}
+  InitializeCriticalsection(ResolveSection);
+{$endif}
   InitHandlerList:=Nil;
   FindGlobalComponentList:=nil;
   IntConstList := TThreadList.Create;
-  ClassList := TThreadList.Create;
-  ClassAliasList := TStringList.Create;
+//  if classlist = nil then begin
+   ClassList := TThreadList.Create;
+//  end;
+//  if classaliaslist = nil then begin
+   ClassAliasList := TStringList.Create;
+//  end;
   { on unix this maps to a simple rw synchornizer }
   GlobalNameSpace := TMultiReadExclusiveWriteSynchronizer.Create;
   RegisterInitComponentHandler(TComponent,@DefaultInitHandler);
@@ -8584,7 +8939,11 @@ begin
   ClassList.Free;
   ClassAliasList.Free;
   RemoveFixupReferences(nil, '');
+{$ifdef FPC}
   DoneCriticalsection(ResolveSection);
+{$else}
+  DeleteCriticalsection(ResolveSection);
+{$endif}
   GlobalLists.Free;
  // ComponentPages.Free;
   FreeAndNil(NeedResolving);

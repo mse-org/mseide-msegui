@@ -444,15 +444,15 @@ function wordatindex(const value: msestring; const index: integer;
             const delimchars: msestring;
             const nodelimstrings:  array of msestring): msestring; overload;
 function checkkeyword(const aname: string; const anames; //stringaty
-                                        const ahigh: integer): cardinal;
+                             const ahigh: integer): cardinal; overload;
           //scans from 1 to ahigh, 0 -> unknown
 function checkkeyword(const aname: msestring; const anames; //msestringaty
-                                        const ahigh: integer): cardinal;
+                             const ahigh: integer): cardinal; overload;
 function checkkeyword(const aname: pchar; const anames; //stringaty
-                                        const ahigh: integer): cardinal;
+                             const ahigh: integer): cardinal; overload;
           //scans from 1 to ahigh, 0 -> unknown
 function checkkeyword(const aname: pmsechar; const anames; //msestringaty
-                                        const ahigh: integer): cardinal;
+                             const ahigh: integer): cardinal; overload;
 
 function quotestring(value: string; quotechar: char): string; overload;
 function quotestring(value: msestring; quotechar: msechar): msestring; overload;

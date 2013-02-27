@@ -13,7 +13,7 @@ unit msereal;
 
 interface
 uses
- msetypes,classes,mclasses,msestrings;
+ msetypes{,classes,mclasses},msestrings;
 
 const
  emptyrealstring = '';   //stringsymbol for empty realty
@@ -34,7 +34,6 @@ function applyrange(const avalue: realty; const arange: real;
                                        const astart: real): realty;
 function reapplyrange(const avalue: realty; const arange: real;
                                        const astart: real): realty;
-function valuescaletorange(const reader: treader): real;
 function expscale(const value: real; const min: real; const max: real): real;
 
 implementation
@@ -77,14 +76,6 @@ begin
  else begin
   result:= (avalue-astart) / arange;
  end;  
-end;
-
-function valuescaletorange(const reader: treader): real;
-begin
- result:= reader.readfloat;
- if result <> 0 then begin
-  result:= 1/result;
- end;
 end;
 
 function addrealty(const a,b: realty): realty; //result = a - b

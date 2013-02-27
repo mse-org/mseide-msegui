@@ -162,6 +162,7 @@ function packarray(source: msestringarty): msestringarty; overload;
 
 procedure checkarrayindex(const value; const index: integer);
           //value = dynamic array, exception bei ungueltigem index
+procedure splitcomplexar(const acomplex: complexarty; out re,im: realarty);
 
 function comparepointer(const l,r): integer;
 function compareinteger(const l,r): integer;
@@ -292,6 +293,24 @@ function opentodynarrayby(const items: array of byte): bytearty;
 implementation
 uses
  rtlconsts,classes,sysutils,msereal,msesys;
+
+procedure splitcomplexar(const acomplex: complexarty; out re,im: realarty);
+var
+ int1: integer;
+begin
+ re:= nil; //compiler warning
+ im:= nil; //compiler warning
+ int1:= length(acomplex);
+ if int1 > 0 then begin
+  allocuninitedarray(int1,sizeof(re[0]),re);
+  allocuninitedarray(int1,sizeof(im[0]),im);
+  for int1:= int1-1 downto 0 do begin
+   re[int1]:= acomplex[int1].re;
+   im[int1]:= acomplex[int1].im;
+  end;
+ end;
+end;
+
  
 function DynArraySize(a: Pointer): sizeint;
 {$ifdef FPC}
