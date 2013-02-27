@@ -214,7 +214,7 @@ begin
     tdragobject1(fdragobject).finstancepo:= @dragobj;
     dragobj:= fdragobject;
     if ftimer = nil then begin
-     ftimer:= tsimpletimer.create(sdndexpiretime,@doexpiresdnd,
+     ftimer:= tsimpletimer.create(sdndexpiretime,{$ifdef FPC}@{$endif}doexpiresdnd,
                                                     true,[to_single]);
     end
     else begin

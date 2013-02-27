@@ -197,9 +197,10 @@ end;
 
 function graphicfilemasks: filenamearty;
 var
- co: integer = 0;
+ co: integer;
  int1,int2: integer;
 begin
+ co:= 0;
  for int1:= 0 to high(formats) do begin
   for int2:= 0 to high(formats[int1].filemask) do begin
    additem(result,formats[int1].filemask[int2],co);

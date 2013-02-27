@@ -15,6 +15,38 @@ uses
  mseclasses,activex,mseglob;
 
 type
+ {$ifndef FPC}
+  WINOLEAPI = HResult;
+  HMetaFilePict = Pointer;
+  OleChar = WChar;
+  HALFPARAM = WORD;
+  HALFLRESULT = WORD;
+  LPOLESTR = ^OLECHAR;
+  tmessage = tmsg;
+ const
+  WM_QUIT = 18;
+  WM_USER = 1024;
+type
+ {$endif}
+
+ TagSTGMEDIUM = Record
+                 Tymed : DWord;
+                 Case Integer Of
+                  0: (dummy: pointer;
+                      PUnkForRelease:  Pointer {IUnknown});
+                  1: (HBITMAP        : hBitmap);
+                  2: (HMETAFILEPICT  : hMetaFilePict);
+                  3: (HENHMETAFILE   : hEnhMetaFile);
+                  4: (HGLOBAL        : hGlobal);
+                  5: (lpszFileName   : LPOLESTR);
+                  6: (pstm           : Pointer{IStream});
+                  7: (pstg           : Pointer{IStorage});
+                 End;
+   USTGMEDIUM                   = TagSTGMEDIUM;
+   STGMEDIUM                    = USTGMEDIUM;
+   TStgMedium                   = TagSTGMEDIUM;
+   PStgMedium                   = ^TStgMedium;
+
   IDropSource = interface(IUnknown)
     ['{00000121-0000-0000-C000-000000000046}']
     function QueryContinueDrag(fEscapePressed: BOOL;
@@ -66,6 +98,8 @@ function RevokeDragDrop(hwnd:HWND):WINOLEAPI;
 function DoDragDrop(pDataObj: IDataObject; pDropSource: IDropSource;
        dwOKEffects: DWORD; pdwEffect: LPDWORD): WINOLEAPI;
                stdcall; external 'ole32.dll' name 'DoDragDrop';
+procedure ReleaseStgMedium(var _para1:STGMEDIUM);stdcall;
+                             external 'ole32.dll' name 'ReleaseStgMedium';
  
 procedure regsysdndwindow(const awindow: winidty);
 procedure windnddeinit;
@@ -81,9 +115,7 @@ function sysdndreadtext(var atext: msestring;
 implementation
 uses
  msethread,msesysutils,sysutils,mseevent,msesysdnd;
- 
 type
-
  sdndeventkindty = (sdndk_regwindow,sdndk_unregwindow,sdndk_reject,sdndk_accept,
                     sdndk_finished,sdndk_readdataortext,
                     sdndk_writebegin,sdndk_writecheck,sdndk_writeend);
@@ -171,7 +203,7 @@ type
    function getwinid(const apos: pointty): winidty;
    procedure clearformats;
    procedure writecheck(const aactions: dndactionsty; var aresult: boolean);
-   
+
     //iunknown
    function queryinterface({$ifdef fpc_has_constref}constref{$else}const{$endif}
                      iid: tguid; out obj): hresult; virtual; stdcall;
@@ -708,7 +740,7 @@ end;
 constructor tsysdndhandler.create;
 begin
  fdata:= tdataobject.create;
- inherited;
+ inherited create;
 end;
 
 destructor tsysdndhandler.destroy;
@@ -764,10 +796,10 @@ begin
  if not cannotole then begin
   repeat
    try
-    int1:= integer(getmessage(@msg,0,0,0));
+    int1:= integer(getmessage({$ifdef FPC}@{$endif}msg,0,0,0));
     if int1 <> -1 then begin
-     translatemessage(@msg);
-     dispatchmessage(@msg);
+     translatemessage({$ifdef FPC}@{$endif}msg);
+     dispatchmessage({$ifdef FPC}@{$endif}msg);
     end;
     repeat
      ev1:= tsdndevent(waitevent(0));

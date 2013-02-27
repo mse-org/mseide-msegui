@@ -250,7 +250,7 @@ type
  dragobjstatesty = set of dragobjstatety;
  
  pdragobject = ^tdragobject;
- tdragobject = class
+ tdragobject = class(tnullinterfacedobject)
   private
    fpickpos: pointty;
    fdroppos: pointty;
