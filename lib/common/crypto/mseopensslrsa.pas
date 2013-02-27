@@ -90,26 +90,26 @@ uses
 procedure init(const info: dynlibinfoty);
 const
  funcs: array[0..19] of funcinfoty = (
-   (n: 'RSA_new'; d: @RSA_new),
-   (n: 'RSA_free'; d: @RSA_free),
-   (n: 'RSA_new_method'; d: @RSA_new_method),
-   (n: 'RSA_size'; d: @RSA_size),
-   (n: 'RSA_check_key'; d: @RSA_check_key),
-   (n: 'RSA_public_encrypt'; d: @RSA_public_encrypt),
-   (n: 'RSA_private_encrypt'; d: @RSA_private_encrypt),
-   (n: 'RSA_public_decrypt'; d: @RSA_public_decrypt),
-   (n: 'RSA_private_decrypt'; d: @RSA_private_decrypt),
-   (n: 'RSA_flags'; d: @RSA_flags),
-   (n: 'RSA_set_default_method'; d: @RSA_set_default_method),
-   (n: 'RSA_get_default_method'; d: @RSA_get_default_method),
-   (n: 'RSA_get_method'; d: @RSA_get_method),
-   (n: 'RSA_set_method'; d: @RSA_set_method),
-   (n: 'RSA_memory_lock'; d: @RSA_memory_lock),
-   (n: 'RSA_PKCS1_SSLeay'; d: @RSA_PKCS1_SSLeay),
-   (n: 'ERR_load_RSA_strings'; d: @ERR_load_RSA_strings),
-   (n: 'RSA_generate_key'; d: @RSA_generate_key),
-   (n:  'd2i_RSAPrivateKey_bio'; d: @d2i_RSAPrivateKey_bio),
-   (n:  'i2d_RSAPrivateKey_bio'; d: @i2d_RSAPrivateKey_bio)
+   (n: 'RSA_new'; d: {$ifndef FPC}@{$endif}@RSA_new),
+   (n: 'RSA_free'; d: {$ifndef FPC}@{$endif}@RSA_free),
+   (n: 'RSA_new_method'; d: {$ifndef FPC}@{$endif}@RSA_new_method),
+   (n: 'RSA_size'; d: {$ifndef FPC}@{$endif}@RSA_size),
+   (n: 'RSA_check_key'; d: {$ifndef FPC}@{$endif}@RSA_check_key),
+   (n: 'RSA_public_encrypt'; d: {$ifndef FPC}@{$endif}@RSA_public_encrypt),
+   (n: 'RSA_private_encrypt'; d: {$ifndef FPC}@{$endif}@RSA_private_encrypt),
+   (n: 'RSA_public_decrypt'; d: {$ifndef FPC}@{$endif}@RSA_public_decrypt),
+   (n: 'RSA_private_decrypt'; d: {$ifndef FPC}@{$endif}@RSA_private_decrypt),
+   (n: 'RSA_flags'; d: {$ifndef FPC}@{$endif}@RSA_flags),
+   (n: 'RSA_set_default_method'; d: {$ifndef FPC}@{$endif}@RSA_set_default_method),
+   (n: 'RSA_get_default_method'; d: {$ifndef FPC}@{$endif}@RSA_get_default_method),
+   (n: 'RSA_get_method'; d: {$ifndef FPC}@{$endif}@RSA_get_method),
+   (n: 'RSA_set_method'; d: {$ifndef FPC}@{$endif}@RSA_set_method),
+   (n: 'RSA_memory_lock'; d: {$ifndef FPC}@{$endif}@RSA_memory_lock),
+   (n: 'RSA_PKCS1_SSLeay'; d: {$ifndef FPC}@{$endif}@RSA_PKCS1_SSLeay),
+   (n: 'ERR_load_RSA_strings'; d: {$ifndef FPC}@{$endif}@ERR_load_RSA_strings),
+   (n: 'RSA_generate_key'; d: {$ifndef FPC}@{$endif}@RSA_generate_key),
+   (n:  'd2i_RSAPrivateKey_bio'; d: {$ifndef FPC}@{$endif}@d2i_RSAPrivateKey_bio),
+   (n:  'i2d_RSAPrivateKey_bio'; d: {$ifndef FPC}@{$endif}@i2d_RSAPrivateKey_bio)
   );
 begin
  getprocaddresses(info,funcs);

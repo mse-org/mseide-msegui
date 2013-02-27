@@ -36,9 +36,9 @@ uses
 procedure init(const info: dynlibinfoty);
 const
  funcs: array[0..2] of funcinfoty = (
-   (n: 'DES_set_odd_parity'; d: @DES_set_odd_parity),
-   (n: 'DES_set_key_checked'; d: @DES_set_key_checked),
-   (n: 'DES_ecb_encrypt'; d: @DES_ecb_encrypt)
+   (n: 'DES_set_odd_parity'; d: {$ifndef FPC}@{$endif}@DES_set_odd_parity),
+   (n: 'DES_set_key_checked'; d: {$ifndef FPC}@{$endif}@DES_set_key_checked),
+   (n: 'DES_ecb_encrypt'; d: {$ifndef FPC}@{$endif}@DES_ecb_encrypt)
   );
 begin
  getprocaddresses(info,funcs);

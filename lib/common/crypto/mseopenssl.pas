@@ -8,9 +8,9 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 }
 unit mseopenssl;
-
+{$ifdef FPC}
 {$MODE OBJFPC}{$H+}
-
+{$endif}
 interface
 
 uses
@@ -268,7 +268,8 @@ procedure regopenssldeinit(const deinitproc: dynlibprocty);
 
 implementation
 uses
- msesystypes,dynlibs,msesysintf1,msesysintf;
+ msesystypes,{$ifdef FPC}dynlibs,{$endif}msesysintf1,msesysintf
+ {$ifndef FPC},classes_del{$endif};
 var 
  libinfo,libinfoutil: dynlibinfoty;
 
@@ -353,7 +354,7 @@ begin
  Ssl_Library_Init;
  Ssl_Load_Error_Strings;
  OPENSSL_add_all_algorithms_noconf;
- pointer(rand_screen):= getprocedureaddress(
+ pointer({$ifndef FPC}@{$endif}rand_screen):= getprocedureaddress(
                       libinfoutil.libhandle,'RAND_screen');
  if assigned(rand_screen) then begin
   Rand_Screen; //windows, todo: better random
@@ -371,91 +372,91 @@ procedure initializeopenssl(const sonames: array of filenamety;
                                      //[] = default
 const
  funcs: array[0..{$ifndef mswindows}54{$else}44{$endif}] of funcinfoty = (
-   (n: 'SSL_get_error'; d: @SSL_get_error),
-   (n: 'SSL_library_init'; d: @SSL_library_init),
-   (n: 'SSL_load_error_strings'; d: @SSL_load_error_strings),
-   (n: 'SSL_CTX_set_cipher_list'; d: @SSL_CTX_set_cipher_list),
-   (n: 'SSL_CTX_new'; d: @SSL_CTX_new),
-   (n: 'SSL_CTX_free'; d: @SSL_CTX_free),
-   (n: 'SSL_set_fd'; d: @SSL_set_fd),
-   (n: 'SSL_set_rfd'; d: @SSL_set_rfd),
-   (n: 'SSL_set_wfd'; d: @SSL_set_wfd),
-   (n: 'SSL_set_cipher_list'; d: @SSL_set_cipher_list),
-   (n: 'SSLv2_method'; d: @SSLv2_method),
-   (n: 'SSLv3_method'; d: @SSLv3_method),
-   (n: 'TLSv1_method'; d: @TLSv1_method),
-   (n: 'SSLv23_method'; d: @SSLv23_method),
-   (n: 'SSL_CTX_use_PrivateKey'; d: @SSL_CTX_use_PrivateKey),
-   (n: 'SSL_CTX_use_PrivateKey_ASN1'; d: @SSL_CTX_use_PrivateKey_ASN1),
-   (n: 'SSL_CTX_use_PrivateKey_file'; d: @SSL_CTX_use_PrivateKey_file),
-   (n: 'SSL_CTX_use_RSAPrivateKey_file'; d: @SSL_CTX_use_RSAPrivateKey_file),
-   (n: 'SSL_CTX_use_certificate'; d: @SSL_CTX_use_certificate),
-   (n: 'SSL_CTX_use_certificate_ASN1'; d: @SSL_CTX_use_certificate_ASN1),
-   (n: 'SSL_CTX_use_certificate_file'; d: @SSL_CTX_use_certificate_file),
-   (n: 'SSL_CTX_use_certificate_chain_file'; d: @SSL_CTX_use_certificate_chain_file),
-   (n: 'SSL_CTX_check_private_key'; d: @SSL_CTX_check_private_key),
-   (n: 'SSL_CTX_set_default_passwd_cb'; d: @SSL_CTX_set_default_passwd_cb),
-   (n: 'SSL_CTX_set_default_passwd_cb_userdata'; d: @SSL_CTX_set_default_passwd_cb_userdata),
-   (n: 'SSL_CTX_load_verify_locations'; d: @SSL_CTX_load_verify_locations),
-   (n: 'SSL_new'; d: @SSL_new),
-   (n: 'SSL_free'; d: @SSL_free),
-   (n: 'SSL_ctrl'; d: @SSL_ctrl),
-   (n: 'SSL_use_certificate_file'; d: @SSL_use_certificate_file),
-   (n: 'SSL_use_PrivateKey_file'; d: @SSL_use_PrivateKey_file),
-   (n: 'SSL_accept'; d: @SSL_accept),
-   (n: 'SSL_connect'; d: @SSL_connect),
-   (n: 'SSL_shutdown'; d: @SSL_shutdown),
-   (n: 'SSL_read'; d: @SSL_read),
-   (n: 'SSL_peek'; d: @SSL_peek),
-   (n: 'SSL_write'; d: @SSL_write),
-   (n: 'SSL_pending'; d: @SSL_pending),
-   (n: 'SSL_get_peer_certificate'; d: @SSL_get_peer_certificate),
-   (n: 'SSL_get_version'; d: @SSL_get_version),
-   (n: 'SSL_CTX_set_verify'; d: @SSL_CTX_set_verify),
-   (n: 'SSL_get_current_cipher'; d: @SSL_get_current_cipher),
-   (n: 'SSL_CIPHER_get_name'; d: @SSL_CIPHER_get_name),
-   (n: 'SSL_CIPHER_get_bits'; d: @SSL_CIPHER_get_bits),
-   (n: 'SSL_get_verify_result'; d: @SSL_get_verify_result)
+   (n: 'SSL_get_error'; d: {$ifndef FPC}@{$endif}@SSL_get_error),
+   (n: 'SSL_library_init'; d: {$ifndef FPC}@{$endif}@SSL_library_init),
+   (n: 'SSL_load_error_strings'; d: {$ifndef FPC}@{$endif}@SSL_load_error_strings),
+   (n: 'SSL_CTX_set_cipher_list'; d: {$ifndef FPC}@{$endif}@SSL_CTX_set_cipher_list),
+   (n: 'SSL_CTX_new'; d: {$ifndef FPC}@{$endif}@SSL_CTX_new),
+   (n: 'SSL_CTX_free'; d: {$ifndef FPC}@{$endif}@SSL_CTX_free),
+   (n: 'SSL_set_fd'; d: {$ifndef FPC}@{$endif}@SSL_set_fd),
+   (n: 'SSL_set_rfd'; d: {$ifndef FPC}@{$endif}@SSL_set_rfd),
+   (n: 'SSL_set_wfd'; d: {$ifndef FPC}@{$endif}@SSL_set_wfd),
+   (n: 'SSL_set_cipher_list'; d: {$ifndef FPC}@{$endif}@SSL_set_cipher_list),
+   (n: 'SSLv2_method'; d: {$ifndef FPC}@{$endif}@SSLv2_method),
+   (n: 'SSLv3_method'; d: {$ifndef FPC}@{$endif}@SSLv3_method),
+   (n: 'TLSv1_method'; d: {$ifndef FPC}@{$endif}@TLSv1_method),
+   (n: 'SSLv23_method'; d: {$ifndef FPC}@{$endif}@SSLv23_method),
+   (n: 'SSL_CTX_use_PrivateKey'; d: {$ifndef FPC}@{$endif}@SSL_CTX_use_PrivateKey),
+   (n: 'SSL_CTX_use_PrivateKey_ASN1'; d: {$ifndef FPC}@{$endif}@SSL_CTX_use_PrivateKey_ASN1),
+   (n: 'SSL_CTX_use_PrivateKey_file'; d: {$ifndef FPC}@{$endif}@SSL_CTX_use_PrivateKey_file),
+   (n: 'SSL_CTX_use_RSAPrivateKey_file'; d: {$ifndef FPC}@{$endif}@SSL_CTX_use_RSAPrivateKey_file),
+   (n: 'SSL_CTX_use_certificate'; d: {$ifndef FPC}@{$endif}@SSL_CTX_use_certificate),
+   (n: 'SSL_CTX_use_certificate_ASN1'; d: {$ifndef FPC}@{$endif}@SSL_CTX_use_certificate_ASN1),
+   (n: 'SSL_CTX_use_certificate_file'; d: {$ifndef FPC}@{$endif}@SSL_CTX_use_certificate_file),
+   (n: 'SSL_CTX_use_certificate_chain_file'; d: {$ifndef FPC}@{$endif}@SSL_CTX_use_certificate_chain_file),
+   (n: 'SSL_CTX_check_private_key'; d: {$ifndef FPC}@{$endif}@SSL_CTX_check_private_key),
+   (n: 'SSL_CTX_set_default_passwd_cb'; d: {$ifndef FPC}@{$endif}@SSL_CTX_set_default_passwd_cb),
+   (n: 'SSL_CTX_set_default_passwd_cb_userdata'; d: {$ifndef FPC}@{$endif}@SSL_CTX_set_default_passwd_cb_userdata),
+   (n: 'SSL_CTX_load_verify_locations'; d: {$ifndef FPC}@{$endif}@SSL_CTX_load_verify_locations),
+   (n: 'SSL_new'; d: {$ifndef FPC}@{$endif}@SSL_new),
+   (n: 'SSL_free'; d: {$ifndef FPC}@{$endif}@SSL_free),
+   (n: 'SSL_ctrl'; d: {$ifndef FPC}@{$endif}@SSL_ctrl),
+   (n: 'SSL_use_certificate_file'; d: {$ifndef FPC}@{$endif}@SSL_use_certificate_file),
+   (n: 'SSL_use_PrivateKey_file'; d: {$ifndef FPC}@{$endif}@SSL_use_PrivateKey_file),
+   (n: 'SSL_accept'; d: {$ifndef FPC}@{$endif}@SSL_accept),
+   (n: 'SSL_connect'; d: {$ifndef FPC}@{$endif}@SSL_connect),
+   (n: 'SSL_shutdown'; d: {$ifndef FPC}@{$endif}@SSL_shutdown),
+   (n: 'SSL_read'; d: {$ifndef FPC}@{$endif}@SSL_read),
+   (n: 'SSL_peek'; d: {$ifndef FPC}@{$endif}@SSL_peek),
+   (n: 'SSL_write'; d: {$ifndef FPC}@{$endif}@SSL_write),
+   (n: 'SSL_pending'; d: {$ifndef FPC}@{$endif}@SSL_pending),
+   (n: 'SSL_get_peer_certificate'; d: {$ifndef FPC}@{$endif}@SSL_get_peer_certificate),
+   (n: 'SSL_get_version'; d: {$ifndef FPC}@{$endif}@SSL_get_version),
+   (n: 'SSL_CTX_set_verify'; d: {$ifndef FPC}@{$endif}@SSL_CTX_set_verify),
+   (n: 'SSL_get_current_cipher'; d: {$ifndef FPC}@{$endif}@SSL_get_current_cipher),
+   (n: 'SSL_CIPHER_get_name'; d: {$ifndef FPC}@{$endif}@SSL_CIPHER_get_name),
+   (n: 'SSL_CIPHER_get_bits'; d: {$ifndef FPC}@{$endif}@SSL_CIPHER_get_bits),
+   (n: 'SSL_get_verify_result'; d: {$ifndef FPC}@{$endif}@SSL_get_verify_result)
   {$ifndef mswindows}
       ,
-   (n: 'SSLeay'; d: @SSLeay),
-   (n: 'OpenSSL_add_all_ciphers'; d: @OpenSSL_add_all_ciphers),
-   (n: 'OpenSSL_add_all_digests'; d: @OpenSSL_add_all_digests),
-   (n: 'ERR_load_crypto_strings'; d: @ERR_load_crypto_strings),
-   (n: 'ERR_peek_error'; d: @ERR_peek_error),
-   (n: 'ERR_peek_last_error'; d: @ERR_peek_last_error),
-   (n: 'CRYPTO_malloc'; d: @CRYPTO_malloc),
-   (n: 'CRYPTO_realloc'; d: @CRYPTO_realloc),
-   (n: 'CRYPTO_remalloc'; d: @CRYPTO_remalloc),
-   (n: 'CRYPTO_free'; d: @CRYPTO_free)
+   (n: 'SSLeay'; d: {$ifndef FPC}@{$endif}@SSLeay),
+   (n: 'OpenSSL_add_all_ciphers'; d: {$ifndef FPC}@{$endif}@OpenSSL_add_all_ciphers),
+   (n: 'OpenSSL_add_all_digests'; d: {$ifndef FPC}@{$endif}@OpenSSL_add_all_digests),
+   (n: 'ERR_load_crypto_strings'; d: {$ifndef FPC}@{$endif}@ERR_load_crypto_strings),
+   (n: 'ERR_peek_error'; d: {$ifndef FPC}@{$endif}@ERR_peek_error),
+   (n: 'ERR_peek_last_error'; d: {$ifndef FPC}@{$endif}@ERR_peek_last_error),
+   (n: 'CRYPTO_malloc'; d: {$ifndef FPC}@{$endif}@CRYPTO_malloc),
+   (n: 'CRYPTO_realloc'; d: {$ifndef FPC}@{$endif}@CRYPTO_realloc),
+   (n: 'CRYPTO_remalloc'; d: {$ifndef FPC}@{$endif}@CRYPTO_remalloc),
+   (n: 'CRYPTO_free'; d: {$ifndef FPC}@{$endif}@CRYPTO_free)
   {$endif}
   );
  funcsutil: array[0..20] of funcinfoty = (
-   (n: 'SSLeay_version'; d: @SSLeay_version),
-   (n: 'ERR_error_string_n'; d: @ERR_error_string_n),
-   (n: 'ERR_get_error'; d: @ERR_get_error),
-   (n: 'ERR_clear_error'; d: @ERR_clear_error),
-   (n: 'ERR_free_strings'; d: @ERR_free_strings),
-   (n: 'ERR_remove_state'; d: @ERR_remove_state),
-   (n: 'OPENSSL_add_all_algorithms_noconf'; d: @OPENSSL_add_all_algorithms_noconf),
-   (n: 'CRYPTO_cleanup_all_ex_data'; d: @CRYPTO_cleanup_all_ex_data),
+   (n: 'SSLeay_version'; d: {$ifndef FPC}@{$endif}@SSLeay_version),
+   (n: 'ERR_error_string_n'; d: {$ifndef FPC}@{$endif}@ERR_error_string_n),
+   (n: 'ERR_get_error'; d: {$ifndef FPC}@{$endif}@ERR_get_error),
+   (n: 'ERR_clear_error'; d: {$ifndef FPC}@{$endif}@ERR_clear_error),
+   (n: 'ERR_free_strings'; d: {$ifndef FPC}@{$endif}@ERR_free_strings),
+   (n: 'ERR_remove_state'; d: {$ifndef FPC}@{$endif}@ERR_remove_state),
+   (n: 'OPENSSL_add_all_algorithms_noconf'; d: {$ifndef FPC}@{$endif}@OPENSSL_add_all_algorithms_noconf),
+   (n: 'CRYPTO_cleanup_all_ex_data'; d: {$ifndef FPC}@{$endif}@CRYPTO_cleanup_all_ex_data),
 //        'RAND_screen',
-   (n: 'i2d_X509_bio'; d: @i2d_X509_bio),
-   (n: 'i2d_PrivateKey_bio'; d: @i2d_PrivateKey_bio),
+   (n: 'i2d_X509_bio'; d: {$ifndef FPC}@{$endif}@i2d_X509_bio),
+   (n: 'i2d_PrivateKey_bio'; d: {$ifndef FPC}@{$endif}@i2d_PrivateKey_bio),
         // 3DES functions
       //
-   (n: 'CRYPTO_num_locks'; d: @CRYPTO_num_locks),
-   (n: 'CRYPTO_set_locking_callback'; d: @CRYPTO_set_locking_callback),
-   (n: 'CRYPTO_set_id_callback'; d: @CRYPTO_set_id_callback),
+   (n: 'CRYPTO_num_locks'; d: {$ifndef FPC}@{$endif}@CRYPTO_num_locks),
+   (n: 'CRYPTO_set_locking_callback'; d: {$ifndef FPC}@{$endif}@CRYPTO_set_locking_callback),
+   (n: 'CRYPTO_set_id_callback'; d: {$ifndef FPC}@{$endif}@CRYPTO_set_id_callback),
 
-   (n:  'OBJ_obj2nid'; d: @OBJ_obj2nid),
-   (n:  'OBJ_txt2nid'; d: @OBJ_txt2nid),
-   (n:  'OBJ_txt2obj'; d: @OBJ_txt2obj),
-   (n:  'sk_new_null'; d: @sk_new_null),
-   (n:  'sk_free'; d: @sk_free),
-   (n:  'sk_push'; d: @sk_push),
-   (n:  'sk_num'; d: @sk_num),
-   (n:  'sk_value'; d: @sk_value)
+   (n:  'OBJ_obj2nid'; d: {$ifndef FPC}@{$endif}@OBJ_obj2nid),
+   (n:  'OBJ_txt2nid'; d: {$ifndef FPC}@{$endif}@OBJ_txt2nid),
+   (n:  'OBJ_txt2obj'; d: {$ifndef FPC}@{$endif}@OBJ_txt2obj),
+   (n:  'sk_new_null'; d: {$ifndef FPC}@{$endif}@sk_new_null),
+   (n:  'sk_free'; d: {$ifndef FPC}@{$endif}@sk_free),
+   (n:  'sk_push'; d: {$ifndef FPC}@{$endif}@sk_push),
+   (n:  'sk_num'; d: {$ifndef FPC}@{$endif}@sk_num),
+   (n:  'sk_value'; d: {$ifndef FPC}@{$endif}@sk_value)
 
    );
 

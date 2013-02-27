@@ -126,7 +126,7 @@ function BIO_get_fd(bp: pBIO; var c: cint): cint;
 
 implementation
 uses
- dynlibs,msedynload;
+ {$ifdef FPC}dynlibs,{$endif}msedynload;
  
 function BIO_flush(b: pBIO): cint;
 begin
@@ -210,32 +210,32 @@ end;
 procedure init(const info: dynlibinfoty);
 const
  funcs: array[0..19] of funcinfoty = (
-   (n: 'BIO_new'; d: @BIO_new),
-   (n: 'BIO_new_fd'; d: @BIO_new_fd),
-   (n: 'BIO_free_all'; d: @BIO_free_all),
-   (n: 'BIO_s_mem'; d: @BIO_s_mem),
-   (n: 'BIO_ctrl_pending'; d: @BIO_ctrl_pending),
-   (n: 'BIO_read'; d: @BIO_read),
-   (n: 'BIO_write'; d: @BIO_write),
-   (n: 'd2i_PKCS12_bio'; d: @d2i_PKCS12_bio),
-   (n: 'BIO_new_file'; d: @BIO_new_file),
-   (n: 'BIO_set'; d: @BIO_set),
-   (n: 'BIO_free'; d: @BIO_free),
-   (n: 'BIO_vfree'; d: @BIO_vfree),
-   (n: 'BIO_push'; d: @BIO_push),
-   (n: 'BIO_pop'; d: @BIO_pop),
-   (n: 'BIO_ctrl'; d: @BIO_ctrl),
-   (n: 'BIO_gets'; d: @BIO_gets),
-   (n: 'BIO_puts'; d: @BIO_puts),
-   (n: 'BIO_f_base64'; d: @BIO_f_base64),
-   (n: 'BIO_s_fd'; d: @BIO_s_fd),
-   (n: 'BIO_s_file'; d: @BIO_s_file)
+   (n: 'BIO_new'; d: {$ifndef FPC}@{$endif}@BIO_new),
+   (n: 'BIO_new_fd'; d: {$ifndef FPC}@{$endif}@BIO_new_fd),
+   (n: 'BIO_free_all'; d: {$ifndef FPC}@{$endif}@BIO_free_all),
+   (n: 'BIO_s_mem'; d: {$ifndef FPC}@{$endif}@BIO_s_mem),
+   (n: 'BIO_ctrl_pending'; d: {$ifndef FPC}@{$endif}@BIO_ctrl_pending),
+   (n: 'BIO_read'; d: {$ifndef FPC}@{$endif}@BIO_read),
+   (n: 'BIO_write'; d: {$ifndef FPC}@{$endif}@BIO_write),
+   (n: 'd2i_PKCS12_bio'; d: {$ifndef FPC}@{$endif}@d2i_PKCS12_bio),
+   (n: 'BIO_new_file'; d: {$ifndef FPC}@{$endif}@BIO_new_file),
+   (n: 'BIO_set'; d: {$ifndef FPC}@{$endif}@BIO_set),
+   (n: 'BIO_free'; d: {$ifndef FPC}@{$endif}@BIO_free),
+   (n: 'BIO_vfree'; d: {$ifndef FPC}@{$endif}@BIO_vfree),
+   (n: 'BIO_push'; d: {$ifndef FPC}@{$endif}@BIO_push),
+   (n: 'BIO_pop'; d: {$ifndef FPC}@{$endif}@BIO_pop),
+   (n: 'BIO_ctrl'; d: {$ifndef FPC}@{$endif}@BIO_ctrl),
+   (n: 'BIO_gets'; d: {$ifndef FPC}@{$endif}@BIO_gets),
+   (n: 'BIO_puts'; d: {$ifndef FPC}@{$endif}@BIO_puts),
+   (n: 'BIO_f_base64'; d: {$ifndef FPC}@{$endif}@BIO_f_base64),
+   (n: 'BIO_s_fd'; d: {$ifndef FPC}@{$endif}@BIO_s_fd),
+   (n: 'BIO_s_file'; d: {$ifndef FPC}@{$endif}@BIO_s_file)
   );
  funcsopt: array[0..3] of funcinfoty = (
-   (n: 'BIO_set_mem_eof_return'; d: @BIO_set_mem_eof_return),
-   (n: 'BIO_set_mem_buf'; d: @BIO_set_mem_buf),
-   (n: 'BIO_get_mem_ptr'; d: @BIO_get_mem_ptr),
-   (n: 'BIO_new_mem_buf'; d: @BIO_new_mem_buf)
+   (n: 'BIO_set_mem_eof_return'; d: {$ifndef FPC}@{$endif}@BIO_set_mem_eof_return),
+   (n: 'BIO_set_mem_buf'; d: {$ifndef FPC}@{$endif}@BIO_set_mem_buf),
+   (n: 'BIO_get_mem_ptr'; d: {$ifndef FPC}@{$endif}@BIO_get_mem_ptr),
+   (n: 'BIO_new_mem_buf'; d: {$ifndef FPC}@{$endif}@BIO_new_mem_buf)
   );
    
 begin

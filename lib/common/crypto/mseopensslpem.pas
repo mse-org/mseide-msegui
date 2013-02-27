@@ -56,25 +56,25 @@ uses
 procedure init(const info: dynlibinfoty);
 const
  funcs: array[0..18] of funcinfoty = (
-   (n: 'PEM_read_bio_RSAPrivateKey'; d: @PEM_read_bio_RSAPrivateKey),
-   (n: 'PEM_write_bio_RSAPrivateKey'; d: @PEM_write_bio_RSAPrivateKey),
-   (n: 'PEM_read_bio_RSAPublicKey'; d: @PEM_read_bio_RSAPublicKey),
-   (n: 'PEM_write_bio_RSAPublicKey'; d: @PEM_write_bio_RSAPublicKey),
-   (n: 'PEM_read_bio_DSAPrivateKey'; d: @PEM_read_bio_DSAPrivateKey),
-   (n: 'PEM_write_bio_DSAPrivateKey'; d: @PEM_write_bio_DSAPrivateKey),
-   (n: 'PEM_read_bio_PUBKEY'; d: @PEM_read_bio_PUBKEY),
-   (n: 'PEM_write_bio_PUBKEY'; d: @PEM_write_bio_PUBKEY),
-   (n: 'PEM_read_bio_X509'; d: @PEM_read_bio_X509),
-   (n: 'PEM_write_bio_X509'; d: @PEM_write_bio_X509),
-   (n: 'PEM_read_bio_X509_AUX'; d: @PEM_read_bio_X509_AUX),
-   (n: 'PEM_write_bio_X509_AUX'; d: @PEM_write_bio_X509_AUX),
-   (n: 'PEM_read_bio_X509_REQ'; d: @PEM_read_bio_X509_REQ),
-   (n: 'PEM_write_bio_X509_REQ'; d: @PEM_write_bio_X509_REQ),
-   (n: 'PEM_read_bio_X509_CRL'; d: @PEM_read_bio_X509_CRL),
-   (n: 'PEM_write_bio_X509_CRL'; d: @PEM_write_bio_X509_CRL),
-   (n: 'PEM_read_bio_PrivateKey'; d: @PEM_read_bio_PrivateKey),
-   (n: 'PEM_write_bio_PrivateKey'; d: @PEM_write_bio_PrivateKey),
-   (n: 'PEM_write_bio_PKCS7'; d: @PEM_write_bio_PKCS7)
+   (n: 'PEM_read_bio_RSAPrivateKey'; d: {$ifndef FPC}@{$endif}@PEM_read_bio_RSAPrivateKey),
+   (n: 'PEM_write_bio_RSAPrivateKey'; d: {$ifndef FPC}@{$endif}@PEM_write_bio_RSAPrivateKey),
+   (n: 'PEM_read_bio_RSAPublicKey'; d: {$ifndef FPC}@{$endif}@PEM_read_bio_RSAPublicKey),
+   (n: 'PEM_write_bio_RSAPublicKey'; d: {$ifndef FPC}@{$endif}@PEM_write_bio_RSAPublicKey),
+   (n: 'PEM_read_bio_DSAPrivateKey'; d: {$ifndef FPC}@{$endif}@PEM_read_bio_DSAPrivateKey),
+   (n: 'PEM_write_bio_DSAPrivateKey'; d: {$ifndef FPC}@{$endif}@PEM_write_bio_DSAPrivateKey),
+   (n: 'PEM_read_bio_PUBKEY'; d: {$ifndef FPC}@{$endif}@PEM_read_bio_PUBKEY),
+   (n: 'PEM_write_bio_PUBKEY'; d: {$ifndef FPC}@{$endif}@PEM_write_bio_PUBKEY),
+   (n: 'PEM_read_bio_X509'; d: {$ifndef FPC}@{$endif}@PEM_read_bio_X509),
+   (n: 'PEM_write_bio_X509'; d: {$ifndef FPC}@{$endif}@PEM_write_bio_X509),
+   (n: 'PEM_read_bio_X509_AUX'; d: {$ifndef FPC}@{$endif}@PEM_read_bio_X509_AUX),
+   (n: 'PEM_write_bio_X509_AUX'; d: {$ifndef FPC}@{$endif}@PEM_write_bio_X509_AUX),
+   (n: 'PEM_read_bio_X509_REQ'; d: {$ifndef FPC}@{$endif}@PEM_read_bio_X509_REQ),
+   (n: 'PEM_write_bio_X509_REQ'; d: {$ifndef FPC}@{$endif}@PEM_write_bio_X509_REQ),
+   (n: 'PEM_read_bio_X509_CRL'; d: {$ifndef FPC}@{$endif}@PEM_read_bio_X509_CRL),
+   (n: 'PEM_write_bio_X509_CRL'; d: {$ifndef FPC}@{$endif}@PEM_write_bio_X509_CRL),
+   (n: 'PEM_read_bio_PrivateKey'; d: {$ifndef FPC}@{$endif}@PEM_read_bio_PrivateKey),
+   (n: 'PEM_write_bio_PrivateKey'; d: {$ifndef FPC}@{$endif}@PEM_write_bio_PrivateKey),
+   (n: 'PEM_write_bio_PKCS7'; d: {$ifndef FPC}@{$endif}@PEM_write_bio_PKCS7)
   );
 begin
  getprocaddresses(info,funcs);

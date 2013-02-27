@@ -43,20 +43,20 @@ uses
 procedure init(const info: dynlibinfoty);
 const
  funcs: array[0..13] of funcinfoty = (
-   (n: 'RAND_seed'; d: @RAND_seed),
-   (n: 'RAND_add'; d: @RAND_add),
-   (n: 'RAND_status'; d: @RAND_status),
-   (n: 'RAND_file_name'; d: @RAND_file_name),
-   (n: 'RAND_load_file'; d: @RAND_load_file),
-   (n: 'RAND_write_file'; d: @RAND_write_file),
-   (n: 'RAND_set_rand_engine'; d: @RAND_set_rand_engine),
-   (n: 'RAND_bytes'; d: @RAND_bytes),
-   (n: 'RAND_pseudo_bytes'; d: @RAND_pseudo_bytes),
-   (n: 'RAND_egd'; d: @RAND_egd),
-   (n: 'RAND_set_rand_method'; d: @RAND_set_rand_method),
-   (n: 'RAND_get_rand_method'; d: @RAND_get_rand_method),
-   (n: 'RAND_SSLeay'; d: @RAND_SSLeay),
-   (n: 'RAND_cleanup'; d: @RAND_cleanup)
+   (n: 'RAND_seed'; d: {$ifndef FPC}@{$endif}@RAND_seed),
+   (n: 'RAND_add'; d: {$ifndef FPC}@{$endif}@RAND_add),
+   (n: 'RAND_status'; d: {$ifndef FPC}@{$endif}@RAND_status),
+   (n: 'RAND_file_name'; d: {$ifndef FPC}@{$endif}@RAND_file_name),
+   (n: 'RAND_load_file'; d: {$ifndef FPC}@{$endif}@RAND_load_file),
+   (n: 'RAND_write_file'; d: {$ifndef FPC}@{$endif}@RAND_write_file),
+   (n: 'RAND_set_rand_engine'; d: {$ifndef FPC}@{$endif}@RAND_set_rand_engine),
+   (n: 'RAND_bytes'; d: {$ifndef FPC}@{$endif}@RAND_bytes),
+   (n: 'RAND_pseudo_bytes'; d: {$ifndef FPC}@{$endif}@RAND_pseudo_bytes),
+   (n: 'RAND_egd'; d: {$ifndef FPC}@{$endif}@RAND_egd),
+   (n: 'RAND_set_rand_method'; d: {$ifndef FPC}@{$endif}@RAND_set_rand_method),
+   (n: 'RAND_get_rand_method'; d: {$ifndef FPC}@{$endif}@RAND_get_rand_method),
+   (n: 'RAND_SSLeay'; d: {$ifndef FPC}@{$endif}@RAND_SSLeay),
+   (n: 'RAND_cleanup'; d: {$ifndef FPC}@{$endif}@RAND_cleanup)
   );
 begin
  getprocaddresses(info,funcs);

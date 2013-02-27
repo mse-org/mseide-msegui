@@ -31,7 +31,7 @@ type
  end;
  {$if sizeof(ssldataty) > sizeof(cryptodataty)}
   {$error 'buffer overflow'}
- {$endif}
+ {$ifend}
  
  sslprotocolty = (ssp_sslv2,ssp_sslv3,ssp_tlsv1);
  sslprotocolsty = set of sslprotocolty;
@@ -86,7 +86,7 @@ type
  pdigesthandlerdatadty = ^digesthandlerdatadty;
  {$if sizeof(digesthandlerdatadty) > sizeof(cryptohandlerdataty)} 
   {$error 'buffer overflow'}
- {$endif}
+ {$ifend}
  digesthandlerdataty = record
   case integer of
    0: (d: digesthandlerdatadty;);
@@ -144,7 +144,7 @@ type
  psslhandlerdatadty = ^sslhandlerdatadty;
  {$if sizeof(sslhandlerdatadty) > sizeof(cryptohandlerdataty)} 
   {$error 'buffer overflow'}
- {$endif}
+ {$ifend}
  sslhandlerdataty = record
   case integer of
    0: (d: sslhandlerdatadty;);
@@ -172,7 +172,7 @@ type
    foptions: opensslcryptooptionsty;
    procedure setkeyphrase(const avalue: msestring);
   protected
-   procedure clearerror; inline;
+   procedure clearerror; {$ifdef FPC}inline;{$endif}
    procedure checkerror(const err: cryptoerrorty = cerr_error); override;
    procedure cipherupdate(var aclient: cryptoclientinfoty;
           const source: pbyte; const sourcelen: integer;
@@ -433,7 +433,8 @@ begin
 end;
 
 function checknilerror(const avalue: pointer;
-                  const err: cryptoerrorty = cerr_error): pointer; inline;
+                  const err: cryptoerrorty = cerr_error): pointer;
+                        {$ifdef FPC} inline;{$endif}
 begin
  result:= avalue;
  if avalue = nil then begin
@@ -442,7 +443,8 @@ begin
 end;
 
 function checknullerror(const avalue: integer;
-                  const err: cryptoerrorty = cerr_error): integer; inline;
+                  const err: cryptoerrorty = cerr_error): integer;
+                        {$ifdef FPC} inline;{$endif}
 begin
  result:= avalue;
  if avalue = 0 then begin
@@ -464,7 +466,7 @@ begin
   checknullerror(evp_digestinit_ex(ctx,md,nil));
   checknullerror(evp_digestupdate(ctx,pointer(adata),length(adata)));
   setlength(str1,evp_max_md_size);
-  checknullerror(evp_digestfinal_ex(ctx,pointer(str1),int1));
+  checknullerror(evp_digestfinal_ex(ctx,pointer(str1),cardinal(int1)));
   setlength(str1,int1);
   result:= str1;
  finally
@@ -713,7 +715,7 @@ begin
   getmem(keybuf,sizeof(keybuf^));
   getmem(ivbuf,sizeof(ivbuf^));
 
-  cipher:= checknilerror(evp_get_cipherbyname(pchar(fciphername)),
+  cipher:= checknilerror(evp_get_cipherbyname(pcchar(pchar(fciphername))),
                                                      cerr_ciphernotfound);
   checknullerror(evp_cipherinit_ex(ctx,cipher,nil,nil,nil,p.mode),
                                           cerr_cipherinit);
@@ -810,7 +812,7 @@ procedure tcustomopensslcryptohandler.cipherfinal(
                const dest: pbyte; out destlen: integer);
 begin
  with sslhandlerdataty(aclient.handlerdata).d do begin
-  checknullerror(evp_cipherfinal(ctx,dest,destlen));
+  checknullerror(evp_cipherfinal(ctx,pcuchar(dest),destlen));
  end;
 end;
 
@@ -840,7 +842,7 @@ var
  key1,salt1: string;
 begin
  with sslhandlerdataty(aclient.handlerdata).d do begin
-  digest:= checknilerror(evp_get_digestbyname(pchar(fkeydigestname)),
+  digest:= checknilerror(evp_get_digestbyname(pcchar(pchar(fkeydigestname))),
                                                      cerr_digestnotfound);
   getkey(key1,salt1);
   if key1 = '' then begin
@@ -927,7 +929,7 @@ begin
     if fprivkeyfile = '' then begin
      error(cerr_nopubkey);
     end;
-    asymkey:= readprivkey(fprivkeyfile,@getkey);
+    asymkey:= readprivkey(fprivkeyfile,{$ifdef FPC}@{$endif}getkey);
     if asymkey^._type <> EVP_PKEY_RSA then begin
      error(cerr_norsakey);
     end;
@@ -1039,7 +1041,7 @@ begin
    error(cerr_notactive);
   end;
   setlength(str1,evp_max_md_size);
-  checknullerror(evp_digestfinal_ex(ctx,pointer(str1),int1));
+  checknullerror(evp_digestfinal_ex(ctx,pcuchar(pointer(str1)),cardinal(int1)));
   setlength(str1,int1);
   result:= str1;
   checknullerror(evp_digestinit_ex(ctx,md,nil));

@@ -101,10 +101,18 @@ type
   end;
 
 function  GetCurrentThreadId : threadty;
+Function GetProcedureAddress(Lib : TLibHandle;
+                  const ProcName : AnsiString) : Pointer;
 
 implementation
 uses
  rtlconsts,windows;
+
+Function GetProcedureAddress(Lib : TLibHandle;
+                  const ProcName : AnsiString) : Pointer;
+begin
+  Result:=Windows.GetProcAddress(Lib,PChar(ProcName));
+end;
 
 function  GetCurrentThreadId : threadty;
 begin
