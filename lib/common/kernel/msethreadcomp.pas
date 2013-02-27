@@ -139,7 +139,7 @@ begin
    end;
   end;
   if assigned(fonterminated) then begin
-   application.synchronize(@doterminated);
+   application.synchronize({$ifdef FPC}@{$endif}doterminated);
   end;
   result:= 0;
  finally

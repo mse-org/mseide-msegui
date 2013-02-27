@@ -1780,7 +1780,8 @@ begin
   placement:= placement_;
   minwidth:= minwidth_;
   setlength(actions,length(actions_));
-  move(actions_[0],actions[0],length(actions)*sizeof(actions[0]));
+  move(actions_[0],actions[0],length(actions)*
+                             sizeof({$ifndef FPC}@{$endif}actions[0]));
   exttext:= exttext_;
  end;
  if application.ismainthread then  begin

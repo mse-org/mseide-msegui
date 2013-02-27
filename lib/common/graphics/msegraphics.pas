@@ -805,18 +805,19 @@ type
                           const acolor: colorty = cl_default;
                           first: integer = 0; acount: integer = -1); //-1 -> all
 
-   procedure drawline(const startpoint,endpoint: pointty; const acolor: colorty = cl_default);
+   procedure drawline(const startpoint,endpoint: pointty;
+                                        const acolor: colorty = cl_default);
    procedure drawlinesegments(const apoints: array of segmentty;
                          const acolor: colorty = cl_default);
    procedure drawlines(const apoints: array of pointty;
-                       const aclosed: boolean = false; 
+                       const aclosed: boolean = false;
                        const acolor: colorty = cl_default;
-                       const first: integer = 0; const acount: integer = -1);
+              const first: integer = 0; const acount: integer = -1); overload;
                                                           //-1 -> all
    procedure drawlines(const apoints: array of pointty;
                        const abreaks: array of integer; //ascending order
-                       const aclosed: boolean = false; 
-                       const acolor: colorty = cl_default);
+                       const aclosed: boolean = false;
+                       const acolor: colorty = cl_default); overload;
    procedure drawvect(const startpoint: pointty; const direction: graphicdirectionty;
                       const length: integer; const acolor: colorty = cl_default);
                                                            overload;

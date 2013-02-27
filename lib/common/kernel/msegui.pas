@@ -1371,7 +1371,7 @@ type
    procedure objectchanged(const sender: tobject); virtual;
    procedure objectevent(const sender: tobject; const event: objecteventty); override;
    procedure receiveevent(const event: tobjectevent); override;
-   procedure setchildorder(child: tcomponent; order: integer); override;
+   procedure setchildorder(child: tcomponent; order: integer); overload; override;
    procedure setparentcomponent(value: tcomponent); override;
    function clearparentwidget: twidget;
              //returns old parentwidget
@@ -1620,7 +1620,7 @@ type
    procedure bringtofront;
    procedure sendtoback;
    procedure stackunder(const predecessor: twidget);
-   procedure setchildorder(const achildren: widgetarty);
+   procedure setchildorder(const achildren: widgetarty); overload;
                 //last is top, nil items ignored
 
    procedure paint(const canvas: tcanvas); virtual;

@@ -1886,7 +1886,7 @@ begin
 end;
 
 function tpopupmenu.show(const atransientfor: twidget;
-           const pos: pointty): tmenuitem; overload;
+                                    const pos: pointty): tmenuitem;
 begin
  ftransientfor:= atransientfor;
  try
