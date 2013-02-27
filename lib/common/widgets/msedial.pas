@@ -287,7 +287,7 @@ type
  dialoptionty = (do_invisible,do_opposite,do_sideline,do_boxline,do_log,
                  do_front,do_scrollwithdata,do_shiftwithdata,
                  do_savestate);
- dialoptionsty = set of dialoptionty;  
+ dialoptionsty = set of dialoptionty;
 
  idialcontroller = interface(inullinterface)
   procedure directionchanged(const dir,dirbefore: graphicdirectionty);
@@ -1369,12 +1369,19 @@ end;
 { tdialtick }
 
 procedure tdialtick.setoptions(const avalue: dialtickoptionsty);
+{$ifndef FPC}
+const
+ mask1: dialtickoptionsty = [dto_alignstart,dto_aligncenter,dto_alignend];
+{$endif}
 begin
  if finfo.options <> avalue then begin
   finfo.options:= dialtickoptionsty(
+ {$ifdef FPC}
                  setsinglebit(longword(avalue),longword(finfo.options),
                  longword([dto_alignstart,dto_aligncenter,dto_alignend])));
-//  finfo.options:= avalue;
+ {$else}
+                 setsinglebit(byte(avalue),byte(finfo.options),byte(mask1)));
+ {$endif}
   changed;
  end;
 end;
@@ -2221,7 +2228,7 @@ begin
        end;
        rea3:= rea3+escapement * 2 * pi;
        int2:= -bigint;
-       bo1:= direction in [gd_left.gd_right];
+       bo1:= direction in [gd_left,gd_right];
        for int1:= 0 to high(captions) do begin
         if islog then begin
          rea1:= ar1[int1];
@@ -2488,9 +2495,9 @@ const
 begin
  if foptions <> avalue then begin
   foptions:= dialoptionsty(
-   setsinglebit({$ifdef FPC}longword{$else}byte{$endif}(avalue),
-                 {$ifdef FPC}longword{$else}byte{$endif}(foptions),
-                 {$ifdef FPC}longword{$else}byte{$endif}(mask)));
+   setsinglebit({$ifdef FPC}longword{$else}word{$endif}(avalue),
+                 {$ifdef FPC}longword{$else}word{$endif}(foptions),
+                 {$ifdef FPC}longword{$else}word{$endif}(mask)));
   changed;
  end;
 end;

@@ -18,6 +18,16 @@ uses
  msedatalist,msestatfile,msestat,msestrings;
 
 type
+ optionchartty = (oca_autofitleft,oca_autofittop,oca_autofitright,
+                    oca_autofitbottom); //same layout as rectsidesty
+ optionschartty = set of optionchartty;
+const
+ allrectsides = [rs_left,rs_top,rs_right,rs_bottom];
+ rectsidesmask = [oca_autofitleft,oca_autofittop,oca_autofitright,
+                    oca_autofitbottom];
+ defaultoptionschart = [oca_autofitleft,oca_autofittop,oca_autofitright,
+                    oca_autofitbottom];
+type
  chartstatety = (chs_nocolorchart,chs_hasdialscroll,chs_hasdialshift,
                  chs_started,chs_full,chs_chartvalid, //for tchartrecorder
                  chs_layoutvalid); 
@@ -570,17 +580,6 @@ type
    property colorclient default cl_foreground;
  end;
 
- optionchartty = (oca_autofitleft,oca_autofittop,oca_autofitright,
-                    oca_autofitbottom); //same layout as rectsidesty
- optionschartty = set of optionchartty;
-const
- allrectsides = [rs_left,rs_top,rs_right,rs_bottom];
- rectsidesmask = [oca_autofitleft,oca_autofittop,oca_autofitright,
-                    oca_autofitbottom];
- defaultoptionschart = [oca_autofitleft,oca_autofittop,oca_autofitright,
-                    oca_autofitbottom];
-type
- 
  tcuchart = class(tscrollbox,ichartdialcontroller,istatfile,iframe)
   private
    fxdials: tchartdialshorz;

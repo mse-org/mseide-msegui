@@ -155,7 +155,7 @@ type
  pdatetime = ^tdatetime;
  ppvariant = ^pvariant;
 
- complexty = record re,im: double; end;
+ complexty = record re,im: real; end;
  pcomplexty = ^complexty;
  complexarty = array of complexty;
  pcomplexarty = ^complexarty;

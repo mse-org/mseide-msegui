@@ -353,8 +353,8 @@ type
    function getsbvert: tscrollboxscrollbar;
    procedure setzoom1(const avalue: complexty);
    procedure setzoom(const avalue: complexty);
-   procedure setzoomwidth(const avalue: double);
-   procedure setzoomheight(const avalue: double);
+   procedure setzoomwidth(const avalue: real);
+   procedure setzoomheight(const avalue: real);
    function getscrollpos_x: integer;
    procedure setscrollpos_x(const avalue: integer);
    function getscrollpos_y: integer;
@@ -395,8 +395,8 @@ type
    property scrollpos_y: integer read getscrollpos_y write setscrollpos_y;
                //origin = paintpos
    property zoom: complexty read fzoom write setzoom; //default 1,1
-   property zoomwidth: double read fzoom.re write setzoomwidth;   //default 1
-   property zoomheight: double read fzoom.im write setzoomheight; //default 1
+   property zoomwidth: real read fzoom.re write setzoomwidth;   //default 1
+   property zoomheight: real read fzoom.im write setzoomheight; //default 1
    property zoomwidthstep: real read fzoomwidthstep write fzoomwidthstep;
                                  //default 1
    property zoomheightstep: real read fzoomheightstep write fzoomheightstep;
@@ -4394,12 +4394,12 @@ begin
  internalupdatestate;
 end;
 
-procedure tcustomscrollboxframe.setzoomwidth(const avalue: double);
+procedure tcustomscrollboxframe.setzoomwidth(const avalue: real);
 begin
  setzoom(makecomplex(avalue,fzoom.im));
 end;
 
-procedure tcustomscrollboxframe.setzoomheight(const avalue: double);
+procedure tcustomscrollboxframe.setzoomheight(const avalue: real);
 begin
  setzoom(makecomplex(fzoom.re,avalue));
 end;

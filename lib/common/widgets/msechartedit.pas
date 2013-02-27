@@ -1259,7 +1259,7 @@ begin
      if offs.y <> 0 then begin
       rea1:= ycharttomarker(marker1.pos+offs.y,dialindex);
       if canevent(tmethod(fonsetmarker)) then begin
-       fonsetmarker(self,true,dialindex,int1,rea1);
+       fonsetmarker(self,true,dialindex,int1,realty(rea1));
       end;
       marker1.value:= rea1;
       domarkerchange;
@@ -1285,7 +1285,7 @@ begin
      if offs.x <> 0 then begin
       rea1:= xcharttomarker(marker1.pos + offs.x,dialindex);
       if canevent(tmethod(fonsetmarker)) then begin
-       fonsetmarker(self,false,dialindex,int1,rea1);
+       fonsetmarker(self,false,dialindex,int1,realty(rea1));
       end;
       marker1.value:= rea1;
       domarkerchange;

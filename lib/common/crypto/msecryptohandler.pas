@@ -31,9 +31,11 @@ type
    procedure error(const err: cryptoerrorty);
    procedure checkerror(const err: cryptoerrorty = cerr_error); virtual;
    function checknullerror(const avalue: integer;
-                   const err: cryptoerrorty = cerr_error): integer; inline;
+                   const err: cryptoerrorty = cerr_error): integer;
+                               {$ifdef FPC} inline;{$endif}
    function checknilerror(const avalue: pointer;
-                   const err: cryptoerrorty = cerr_error): pointer; inline;
+                   const err: cryptoerrorty = cerr_error): pointer;
+                               {$ifdef FPC} inline;{$endif}
  end;
  
  tdummycryptohandler = class(tbasecryptohandler)
@@ -42,7 +44,7 @@ type
  sslhandlerstatety = (sslhs_hasfirstblock,sslhs_eofflag,sslhs_finalized,
                       sslhs_fileeof);
  sslhandlerstatesty = set of sslhandlerstatety;
- 
+
  padbufty = array[0..0] of byte; //variable
 
  paddedhandlerdatadty = record
@@ -60,7 +62,7 @@ type
  ppaddedhandlerdatadty = ^paddedhandlerdatadty;
  {$if sizeof(paddedhandlerdatadty) > sizeof(cryptohandlerdataty)} 
   {$error 'buffer overflow'}
- {$endif}
+ {$ifend}
  paddedhandlerdataty = record
   case integer of
    0: (d: paddedhandlerdatadty;);
@@ -116,7 +118,7 @@ type
  pbase64handlerdatadty = ^base64handlerdatadty;
  {$if sizeof(base64handlerdatadty) > sizeof(cryptohandlerdataty)} 
   {$error 'buffer overflow'}
- {$endif}
+ {$ifend}
  base64handlerdataty = record
   case integer of
    0: (d: base64handlerdatadty;);
@@ -173,10 +175,10 @@ const
   'Not active.',
   'Wrong data direction.'
   );
- 
+
 implementation
 uses
- msebits,msesystypes,msesys;
+ msebits,msesystypes,msesys,msetypes;
 
 { tbasecryptohandler }
  
@@ -266,7 +268,8 @@ begin
      ps:= po1;
      try       
       int2:= inherited read(aclient,(ps)^,int1);
-      updatebit1(longword(state),ord(sslhs_eofflag),int2 < int1);
+      updatebit1({$ifdef FPC}longword{$else}byte{$endif}(state),
+                    ord(sslhs_eofflag),int2 < int1);
       seekoffset:= seekoffset + ((count div blocksize) * blocksize - int2);
                        //set to zero later if eofflag
       pb:= pointer(padbuf);
@@ -638,8 +641,8 @@ begin
    pb:= po1;
 
    bufindex:= scount mod 3; //tail
-   pbend:= source + sourcelen - bufindex;
-   while pb < pbend do begin
+   pbend:= pbyte(pchar(source) + sourcelen - bufindex);
+   while pchar(pb) < pchar(pbend) do begin
     putgroup(info);
    end;
    destlen:= pc - pointer(dest);
@@ -761,13 +764,13 @@ var
   by1: byte;
  begin  
   result:= true;
-  while (ps < psend) and (pd < pdend) do begin
+  while (pchar(ps) < pchar(psend)) and (pchar(pd) < pchar(pdend)) do begin
    psgroup:= ps;
    pdgroup:= pd;
    by1:= base64decoding[ord(ps^)];       //s0
    while shortint(by1) < 0 do begin
     inc(ps);
-    if (ps >= psend) or (char(by1) = '=') then begin
+    if (pchar(ps) >= pchar(psend)) or (char(by1) = '=') then begin
      exit;
     end;
     by1:= base64decoding[ord(ps^)];
@@ -777,7 +780,7 @@ var
    by1:= base64decoding[ord(ps^)];      //s1
    while shortint(by1) < 0 do begin
     inc(ps);
-    if (ps >= psend) or (char(by1) = '=') then begin
+    if (pchar(ps) >= pchar(psend)) or (char(by1) = '=') then begin
      exit;
     end;
     by1:= base64decoding[ord(ps^)];
@@ -789,7 +792,7 @@ var
    by1:= base64decoding[ord(ps^)];      //s2
    while shortint(by1) < 0 do begin
     inc(ps);
-    if (ps >= psend) or (char(by1) = '=') then begin
+    if (pchar(ps) >= pchar(psend)) or (char(by1) = '=') then begin
      exit;
     end;
     by1:= base64decoding[ord(ps^)];
@@ -801,7 +804,7 @@ var
    by1:= base64decoding[ord(ps^)];      //s3
    while shortint(by1) < 0 do begin
     inc(ps);
-    if (ps >= psend) or (char(by1) = '=') then begin
+    if (pchar(ps) >= pchar(psend)) or (char(by1) = '=') then begin
      exit;
     end;
     by1:= base64decoding[ord(ps^)];
@@ -819,12 +822,12 @@ var
  begin
   with base64handlerdataty(aclient.handlerdata).d do begin
    readbufferlength:= aoffset + 
-         inherited readdata(aclient,(readbuffer+aoffset)^,
+         inherited readdata(aclient,(pchar(readbuffer)+aoffset)^,
                                     readbuffersize-aoffset);
    if readbufferlength < readbuffersize then begin
     include(p.state,sslhs_fileeof);
    end;
-   psend:= readbuffer + readbufferlength;
+   psend:= pbyte(pchar(readbuffer) + readbufferlength);
   end;
  end;
 
@@ -842,16 +845,17 @@ var
     readindex:= 0;
     fillbuffer(0);
    end;
-   ps:= readbuffer + readindex;
-   psend:= readbuffer + readbufferlength;
+   ps:= pbyte(pchar(readbuffer) + readindex);
+   psend:= pbyte(pchar(readbuffer) + readbufferlength);
    while true do begin
     if decode then begin
-     if (ps >= psend) and (pd < pdend) then begin  //text end, try to get more
-      if (sslhs_fileeof in p.state) or ((ps-1)^ = byte('=')) then begin
+     if (pchar(ps) >= pchar(psend)) and (pchar(pd) < pchar(pdend)) then begin
+                                               //text end, try to get more
+      if (sslhs_fileeof in p.state) or ((pchar(ps)-1)^ = '=') then begin
        include(p.state,sslhs_eofflag);
        break;
       end;
-      int1:= ps-psgroup;
+      int1:= pchar(ps)-pchar(psgroup);
       if newbufsize > readbuffersize then begin //need a bigger buffer
        po1:= readbuffer;
        getmem(readbuffer,readbuffersize);
@@ -872,7 +876,7 @@ var
      break;
     end;
    end;
-   readindex:= ps - readbuffer;
+   readindex:= pchar(ps) - pchar(readbuffer);
   end;
  end;
 
@@ -888,16 +892,16 @@ begin
   pd:= @buffer;
   tail:= acount mod 3;
   if (acount > tail) then begin
-   pdend:= pd + acount - tail;
+   pdend:= pbyte(pchar(pd) + acount - tail);
    getdata;
-   result:= pd - @buffer;
+   result:= pchar(pd) - @buffer;
   end;
   if not (sslhs_eofflag in p.state) then begin
    po1:= pd;
    pd:= pointer(p.padbuf);
-   pdend:= pd + 3;
+   pdend:= pbyte(pchar(pd) + 3);
    getdata;
-   p.padcount:= pd - pointer(p.padbuf);
+   p.padcount:= pchar(pd) - pchar(pointer(p.padbuf));
    if tail > 0 then begin
     int1:= tail;
     if int1 > p.padcount then begin
@@ -908,7 +912,7 @@ begin
     p.padindex:= int1;
    end;   
   end;
-  if ps >= psend then begin
+  if pchar(ps) >= pchar(psend) then begin
    freemem(readbuffer);
    readbuffer:= nil;
    readbufferlength:= 0;

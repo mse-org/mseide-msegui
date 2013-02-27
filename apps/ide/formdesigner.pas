@@ -369,7 +369,8 @@ uses
  formdesigner_mfm,mselist,msekeyboard,msepointer,msebits,sysutils,
  msestockobjects,msedrawtext,selectsubmoduledialogform,mseshapes,settaborderform,
  msedatalist,objectinspector,projectoptionsform,main,msedatamodules,msetypes,
- setcreateorderform,componentstore,msearrayutils,actionsmodule;
+ setcreateorderform,componentstore,msearrayutils,actionsmodule
+ {$ifndef FPC},classes_del{$endif};
 
 type
  stringconsts = (
@@ -3516,7 +3517,11 @@ var
  changes: moduleoptionsty;
 begin
  if fform <> nil then begin
+ {$ifdef FPC}
   changes:= aoptions><fmoduleoptions;
+ {$else}
+  changes:= moduleoptionsty(byte(aoptions) xor byte(fmoduleoptions));
+ {$endif}
   if changes <> [] then begin
    fmoduleoptions:= aoptions;
    hidewidgetact.checked:= mo_hidewidgets in aoptions;

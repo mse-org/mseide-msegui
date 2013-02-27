@@ -73,6 +73,12 @@ type
   protected
   {$ifndef FPC}
     function Equals(Obj: TObject) : boolean;virtual;
+    { IUnknown }
+    function QueryInterface(
+     {$IFDEF FPC_HAS_CONSTREF}constref{$ELSE}const{$ENDIF} IID: TGUID;
+      out Obj): Hresult; virtual; {$IFNDEF msWINDOWS}cdecl{$ELSE}stdcall{$ENDIF};
+    function _AddRef: Integer; {$IFNDEF msWINDOWS}cdecl{$ELSE}stdcall{$ENDIF};
+    function _Release: Integer; {$IFNDEF msWINDOWS}cdecl{$ELSE}stdcall{$ENDIF};
   {$endif}
     procedure AssignTo(Dest: tpersistent); virtual;
     procedure DefineProperties(Filer: tfiler); virtual;
@@ -143,12 +149,14 @@ type
       const CurName, NewName: string); virtual;
     procedure ValidateContainer(AComponent: tcomponent); dynamic;
     procedure ValidateInsert(AComponent: tcomponent); dynamic;
+  {$ifdef FPC}
     { IUnknown }
     function QueryInterface(
      {$IFDEF FPC_HAS_CONSTREF}constref{$ELSE}const{$ENDIF} IID: TGUID;
       out Obj): Hresult; virtual; {$IFNDEF msWINDOWS}cdecl{$ELSE}stdcall{$ENDIF};
     function _AddRef: Integer; {$IFNDEF msWINDOWS}cdecl{$ELSE}stdcall{$ENDIF};
     function _Release: Integer; {$IFNDEF msWINDOWS}cdecl{$ELSE}stdcall{$ENDIF};
+  {$endif}
     function iicrGetComponent: tcomponent;
     { IDispatch }
     function GetTypeInfoCount(out Count: Integer): HResult; stdcall;
@@ -1372,6 +1380,27 @@ function tpersistent.Equals(Obj: TObject) : boolean;
 begin
  result:= Obj = Self;
 end;
+
+function tpersistent.QueryInterface(
+{$IFDEF FPC_HAS_CONSTREF}constref{$ELSE}const{$ENDIF} IID: TGUID;
+ out Obj): HResult;{$IFNDEF msWINDOWS}cdecl{$ELSE}stdcall{$ENDIF};
+begin
+  if GetInterface(IID, Obj) then
+    Result := S_OK
+  else
+    Result := E_NOINTERFACE;
+end;
+
+function tpersistent._AddRef: Integer;{$IFNDEF msWINDOWS}cdecl{$ELSE}stdcall{$ENDIF};
+begin
+ Result := -1;
+end;
+
+function tpersistent._Release: Integer;{$IFNDEF msWINDOWS}cdecl{$ELSE}stdcall{$ENDIF};
+begin
+ Result := -1;
+end;
+
 {$endif}
 
 procedure TPersistent.AssignError(Source: TPersistent);
@@ -2104,6 +2133,7 @@ begin
     Result := False;
 end;
 
+{$ifdef FPC}
 function TComponent.QueryInterface(
 {$IFDEF FPC_HAS_CONSTREF}constref{$ELSE}const{$ENDIF} IID: TGUID;
  out Obj): HResult;{$IFNDEF msWINDOWS}cdecl{$ELSE}stdcall{$ENDIF};
@@ -2132,6 +2162,7 @@ begin
   else
     Result := -1;
 end;
+{$endif}
 
 function TComponent.iicrGetComponent: TComponent;
 

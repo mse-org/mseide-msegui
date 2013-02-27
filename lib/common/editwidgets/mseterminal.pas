@@ -765,19 +765,19 @@ lab1:
         inc(s);
         goto lab1; //multiple attributes
        end;
-       if not (s^ in ['n','h','l','H','A','B','C','D',
+       if not (char(word(s^)) in ['n','h','l','H','A','B','C','D',
                  'f','r','g','K','J','i','m']) then begin
         dec(s);
        end;
       end
-      else begin      
-       if not (s^ in ['c','s','u','r','g','K','J','i']) then begin
+      else begin
+       if not (char(word(s^)) in ['c','s','u','r','g','K','J','i']) then begin
         dec(s);
        end;
       end;
      end;
      else begin
-      if not (s^ in ['c','(',')','7','8','D','M','H']) then begin
+      if not (char(word(s^)) in ['c','(',')','7','8','D','M','H']) then begin
        dec(s);
       end;
      end;
