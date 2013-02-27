@@ -1078,6 +1078,8 @@ function LEtoN(const AValue: Int64): Int64;{$ifdef SYSTEMINLINE}inline;{$endif}
                                overload;
 function LEtoN(const AValue: QWord): QWord;{$ifdef SYSTEMINLINE}inline;{$endif}
                                overload;
+function Unassigned: Variant; // Unassigned standard constant
+function Null: Variant;       // Null standard constant
 
 resourcestring
   SStreamNoReading              = 'Reading from %s is not supported';

@@ -360,8 +360,9 @@ begin
     with tvaluewidgetlink(fitems[int1]) do begin
      if (fintf = sender) then begin
       if options * widgetstateoptionsty <> [] then begin
-       states1:= ifiwidgetstatesty(longword(fwidgetstatebefore) xor 
-                                 longword(astate));
+       states1:= ifiwidgetstatesty(
+       {$ifdef FPC}longword{$else}byte{$endif}(fwidgetstatebefore) xor
+                            {$ifdef FPC}longword{$else}byte{$endif}(astate));
        if (iws_visible in states1) and 
            ((iwlo_sendshow in options) and (iws_visible in astate) or
              (iwlo_sendhide in options) and not (iws_visible in astate)) or
@@ -742,15 +743,15 @@ begin
    case fdatacols.rowstate.infolevel of
     ril_normal: begin
      senditem(ik_rowstatechange,
-               encoderowstatedata(arow,fdatacols.rowstate.items[arow]));
+               [encoderowstatedata(arow,fdatacols.rowstate.items[arow])]);
     end;
     ril_colmerge: begin
      senditem(ik_rowstatechange,
-               encoderowstatedata(arow,fdatacols.rowstate.itemscolmerge[arow]));
+        [encoderowstatedata(arow,fdatacols.rowstate.itemscolmerge[arow])]);
     end;
     ril_rowheight: begin
      senditem(ik_rowstatechange,
-               encoderowstatedata(arow,fdatacols.rowstate.itemsrowheight[arow]));
+        [encoderowstatedata(arow,fdatacols.rowstate.itemsrowheight[arow])]);
     end;
    end;
   end;
@@ -763,7 +764,7 @@ begin
  inherited;
  with fifi do begin
   if cancommandsend(igo_selection) then begin
-   senditem(ik_selection,encodeselectiondata(cell,avalue));
+   senditem(ik_selection,[encodeselectiondata(cell,avalue)]);
   end;
  end;
 end;

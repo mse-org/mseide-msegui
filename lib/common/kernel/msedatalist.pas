@@ -784,6 +784,7 @@ type
  pmsestringintty = ^msestringintty;
  msestringintarty = array of msestringintty;
  msestringintaty = array[0..0] of msestringintty;
+ pmsestringintaty = ^msestringintaty;
                    
  tmsestringintdatalist = class(tpoorstringdatalist)
   private

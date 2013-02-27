@@ -15,12 +15,15 @@ uses
  mseact,
  mseevent,mseglob,msestrings,msetypes,msedatalist,msegraphutils,typinfo,
  mseeditglob;
- 
+
+type
+ formlinkoptionty = (flo_useclientchannel);
+ formlinkoptionsty = set of formlinkoptionty;
 const
+ defaultformlinkoptions = [flo_useclientchannel];
  ifidatatypes = [dl_integer,dl_int64,dl_currency,dl_real,
                  dl_msestring,dl_ansistring,dl_msestringint,
                  dl_realint,dl_realsum];
- 
 type
  tmodulelinkarrayprop = class;
  
@@ -41,7 +44,7 @@ type
    property tag: integer read ftag write ftag default 0;
  end;
  modulelinkpropclassty = class of tmodulelinkprop;
-   
+
  tcustommodulelink = class;
 
  tmodulelinkarrayprop = class(tpersistentarrayprop)
@@ -133,7 +136,7 @@ type
   public
    constructor create(aowner: ttxlinkactions); reintroduce;
  end;
-  
+
  ttxlinkactions = class(tlinkactions)
   private
    fdestroyhandler: ttxactiondestroyhandler;
@@ -294,7 +297,7 @@ type
   public
    class function getitemclasstype: persistentclassty; override;
    function byname(const aname: string): tvaluelink;
-   property items[const index: integer]: tvaluelink read getitems; default;   
+   property items[const index: integer]: tvaluelink read getitems; default;
  end;
 
  tcustomvaluecomponentlink = class(tvaluelink)
@@ -331,12 +334,6 @@ type
    function byname(const aname: string): tvaluecomponentlink;
    property items[const index: integer]: tvaluecomponentlink read getitems; default;   
  end;
- 
- formlinkoptionty = (flo_useclientchannel);
- formlinkoptionsty = set of formlinkoptionty;
-const
- defaultformlinkoptions = [flo_useclientchannel];
-type 
 
  iifimodulelink = interface(inullinterface)
                           ['{90279F1E-E80F-4657-9531-3C3A2CF151BD}']
@@ -460,7 +457,7 @@ type
                                const data: array of ansistring): sequencety;
                 //returns sequence number
    procedure inititemheader(out arec: string;
-               const akind: ifireckindty; const asequence: sequencety; 
+               const akind: ifireckindty; const asequence: sequencety;
                 const datasize: integer; out datapo: pchar);
    procedure processdata(const adata: pifirecty; var adatapo: pchar); 
                                     virtual; abstract;
@@ -553,7 +550,7 @@ type
                                write setasint64;
    property ascurrency[const aindex: integer]: currency read getascurrency 
                                write setascurrency;
-   property asreal[const aindex: integer]: real read getasreal 
+   property asreal[const aindex: integer]: real read getasreal
                                write setasreal;
    property asmsestring[const aindex: integer]: msestring read getasmsestring 
                                write setasmsestring;
@@ -690,7 +687,7 @@ type
    fifi: ttxdatagridcontroller;
    fdatacols: tifidatacols;
    frowcount: integer;
-   frow: integer;   
+   frow: integer;
    fonrowsdeleted: ifigridblockeventty;
    fonrowsinserted: ifigridblockeventty;
    fonrowsmoved: ifigridblockmovedeventty;
@@ -737,7 +734,7 @@ type
                         write setrowreadonlystate;
    property rowhidden[const index: integer]: boolean read getrowhidden 
                         write setrowhidden;
-   property rowfoldlevel[const index: integer]: byte read getrowfoldlevel 
+   property rowfoldlevel[const index: integer]: byte read getrowfoldlevel
                         write setrowfoldlevel;
    property rowfoldissum[const index: integer]: boolean read getrowfoldissum 
                         write setrowfoldissum;
@@ -759,10 +756,10 @@ type
  end;
    
 function ifidatatodatalist(const akind: listdatatypety; const arowcount: integer;
-                       const adata: pchar; const adatalist: tdatalist): integer;
+        const adata: pchar; const adatalist: tdatalist): integer; overload;
        //returns datasize
 function ifidatatodatalist(const akind: listdatatypety; const arowcount: integer;
-                       const adata: pchar; const adatalist: subdatainfoty): integer;
+        const adata: pchar; const adatalist: subdatainfoty): integer; overload;
        //returns datasize
 function datalisttoifidata(const adatalist: tdatalist): integer; overload;
 procedure datalisttoifidata(const adatalist: tdatalist;
@@ -778,18 +775,18 @@ function encodecolchangedata(const acolname: string; const arow: integer;
                             const alist: tcustomrowstatelist;
                             const subindex: rowstatememberty): string; overload;
 function encoderowstatedata(const arow: integer; 
-                                            const astate: rowstatety): string;
-function encoderowstatedata(const arow: integer; 
-                                            const astate: rowstatecolmergety): string;
-function encoderowstatedata(const arow: integer; 
-                                            const astate: rowstaterowheightty): string;
-function encodeselectiondata(const acell: gridcoordty; 
+                      const astate: rowstatety): string; overload;
+function encoderowstatedata(const arow: integer;
+                      const astate: rowstatecolmergety): string; overload;
+function encoderowstatedata(const arow: integer;
+                      const astate: rowstaterowheightty): string; overload;
+function encodeselectiondata(const acell: gridcoordty;
                                             const avalue: boolean): string;
 
 implementation
 uses
  sysutils,msestream,msesysutils,msetmpmodules,msebits,mseobjecttext,
- msestreaming;
+ msestreaming{$ifndef FPC},classes_del{$endif};
 
 type
  tcustomrowstatelist1 = class(tcustomrowstatelist);
@@ -1272,7 +1269,7 @@ begin
        
  inc(po1,stringtoifiname(apropertyname,pifinamety(po1)));
  pifidataty(po1)^.header.kind:= akind;
- datapo:= po1 + sizeof(ifidataty.header);
+ datapo:= po1 + sizeof(ifidataheaderty);
 end;
 
 procedure tvaluelink.sendcommand(const acommand: ifiwidgetcommandty);
@@ -1618,7 +1615,7 @@ begin
     end
     else begin
      case aproperty^.proptype^.kind of
-      tkInteger,tkBool,tkInt64,tkset: begin
+      tkInteger,{$ifdef FPC}tkBool,{$endif}tkInt64,tkset: begin
        setordprop(instance,aproperty,aslargeint);
       end;
       tkFloat: begin
@@ -1627,13 +1624,17 @@ begin
       tkWString: begin
        setwidestrprop(instance,aproperty,asmsestring);
       end;
-      {$if FPC_FULLVERSION >= 20300}
+     {$if defined(FPC) and (FPC_FULLVERSION >= 20300)}
 //     {$ifdef mse_unicodestring}
       tkUString: begin
        setunicodestrprop(instance,aproperty,asmsestring);
       end;
-     {$endif}
+     {$ifend}
+     {$ifdef FPC}
       tkSString,tkLString,tkAString: begin
+     {$else}
+      tkString,tkLString: begin
+     {$endif}
        setstrprop(instance,aproperty,asstring);
       end;
      end;
@@ -1649,22 +1650,30 @@ procedure tcustomvaluecomponentlink.sendvalue(const aproperty: ppropinfo);
 begin
  if aproperty <> nil then begin
   case aproperty^.proptype^.kind of
-   tkInteger,tkBool,tkInt64: begin
+   tkInteger,{$ifdef FPC}tkBool,{$endif}tkInt64: begin
     sendvalue(aproperty^.name,getordprop(fcomponent,aproperty));
    end;
    tkFloat: begin
+   {$ifdef FPC}
     sendvalue(aproperty^.name,double(getfloatprop(fcomponent,aproperty)));
+   {$else}
+    sendvalue(aproperty^.name,getfloatprop(fcomponent,aproperty));
+   {$endif}
    end;
-  {$if FPC_FULLVERSION >= 20300}
+  {$if defined(FPC) and (FPC_FULLVERSION >= 20300)}
 //  {$ifdef mse_unicodestring}
    tkUString: begin
     sendvalue(aproperty^.name,getunicodestrprop(fcomponent,aproperty));
    end;
-  {$endif}
+  {$ifend}
    tkWString: begin
     sendvalue(aproperty^.name,getwidestrprop(fcomponent,aproperty));
    end;
+  {$ifdef FPC}
    tkSString,tkLString,tkAString: begin
+  {$else}
+   tkString,tkLString: begin
+  {$endif}
     sendvalue(aproperty^.name,getstrprop(fcomponent,aproperty));
    end;
   end;
@@ -1673,7 +1682,7 @@ end;
 
 procedure tcustomvaluecomponentlink.sendstate(const astate: ifiwidgetstatesty);
 begin
- sendvalue(ifiwidgetstatename,integer(astate));
+ sendvalue(ifiwidgetstatename,{$ifdef FPC}integer{$else}byte{$endif}(astate));
 end;
 
 procedure tcustomvaluecomponentlink.sendmodalresult(const amodalresult: modalresultty);
@@ -1946,7 +1955,7 @@ begin
      with pifibytesty(po1)^ do begin
       stream1:= tmemorycopystream.create(@data,length);
       try
-       fmodule:= createtmpmodule(str1,stream1,@moduleloaded);
+       fmodule:= createtmpmodule(str1,stream1,{$ifdef FPC}@{$endif}moduleloaded);
        fmodule.getcorbainterface(typeinfo(iificommand),fcommandintf);
       finally
        stream1.free;
@@ -2099,7 +2108,7 @@ begin
    with pifibytesty(po1)^ do begin
     stream1:= tmemorycopystream.create(@data,length);
     try
-     comp1:= createtmpmodule(str1,stream1,@moduleloaded);
+     comp1:= createtmpmodule(str1,stream1,{$ifdef FPC}@{$endif}moduleloaded);
      comp1.getcorbainterface(typeinfo(iificommand),fcommandintf);
     finally
      stream1.free;
@@ -2125,7 +2134,8 @@ function tcustommodulelink.propertychangereceived(const atag: integer;
     setdata(adata,apropertyname);
     if apropertyname = ifiwidgetstatename then begin
      if assigned(fonwidgetstatechanged) then begin
-      fonwidgetstatechanged(wi1,atag,ifiwidgetstatesty(asinteger));
+      fonwidgetstatechanged(wi1,atag,ifiwidgetstatesty(
+      {$ifndef FPC}byte({$endif}asinteger{$ifndef FPC}){$endif}));
      end;
     end
     else begin
@@ -2451,7 +2461,7 @@ begin
   end;
  end;
  fdata.count:= ttxdatagrid(fowner).rowcount;
- fdata.onitemchange:= @dochange;
+ fdata.onitemchange:= {$ifdef FPC}@{$endif}dochange;
 end;
 
 procedure tifidatacol.checkdatalist(const akind: ifidatakindty);
@@ -3309,7 +3319,7 @@ begin
  with fifi do begin
   if cancommandsend(igo_rowstate) then begin
    senditem(ik_rowstatechange,
-               encoderowstatedata(aindex,fdatacols.rowstate.itemscolmerge[aindex]));
+         [encoderowstatedata(aindex,fdatacols.rowstate.itemscolmerge[aindex])]);
   end;
  end;
 end;
@@ -3334,7 +3344,7 @@ procedure ttxdatagrid.setselected(const cell: gridcoordty;
 begin
  with fifi do begin
   if cancommandsend(igo_selection) then begin
-   senditem(ik_selection,encodeselectiondata(cell,avalue));
+   senditem(ik_selection,[encodeselectiondata(cell,avalue)]);
   end;
  end;
 end;
@@ -3600,7 +3610,7 @@ begin
       result:= result + int2;
       inc(po2);
       move(po2^,pointer(po1^)^,int2);
-      inc(pointer(po2),int2);
+      inc(pchar(pointer(po2)),int2);
       inc(pchar(po1),deststep);
      end;
     end
@@ -3609,7 +3619,7 @@ begin
       int2:= po2^*sizeof(msechar);
       result:= result + int2;
       inc(po2);
-      inc(pointer(po2),int2);
+      inc(pchar(pointer(po2)),int2);
      end;
     end;    
    end;
@@ -3628,7 +3638,7 @@ begin
       result:= result + int2;
       inc(po2);
       move(po2^,po4^.mstr[1],int2);
-      inc(pointer(po2),int2);
+      inc(pchar(pointer(po2)),int2);
       inc(pchar(po4),deststep);
      end;
     end
@@ -3638,9 +3648,9 @@ begin
       int2:= po2^*sizeof(msechar);
       result:= result + int2;
       inc(po2);
-      inc(pointer(po2),int2);
+      inc(pchar(pointer(po2)),int2);
      end;
-    end;    
+    end;
    end;
    dl_realint,dl_realsum: begin
     result:= list.setdatablock(adata,sizeof(ifirealintty),arowcount);
@@ -3686,8 +3696,8 @@ begin
       setlength(po3^,int2);
       result:= result + int2;
       inc(po2);
-      move(po2^,po3[int1][1],int2);
-      inc(pointer(po2),int2);
+      move(po2^,pansistringaty(po3)^[int1][1],int2);
+      inc(pchar(pointer(po2)),int2);
       inc(pchar(po3),deststep);
      end;
     end
@@ -3696,7 +3706,7 @@ begin
       int2:= po2^;
       result:= result + int2;
       inc(po2);
-      inc(pointer(po2),int2);
+      inc(pchar(pointer(po2)),int2);
      end;
     end;    
    end;
@@ -3744,29 +3754,29 @@ begin
    end;
    dl_msestring: begin
     for int1:= 0 to count - 1 do begin
-     int2:= length(pmsestring(po4)[int1]);
+     int2:= length(pmsestringaty(po4)^[int1]);
      move(int2,dest^,sizeof(integer));
      int2:= int2 * sizeof(msechar);
      inc(dest,sizeof(integer));
-     move(pointer(pmsestring(po4)[int1])^,dest^,int2);
+     move(pointer(pmsestringaty(po4)^[int1])^,dest^,int2);
      inc(dest,int2);
     end;
    end;
    dl_msestringint: begin
     for int1:= 0 to count - 1 do begin
-     move(pmsestringintty(po4)[int1].int,dest^,sizeof(integer));
+     move(pmsestringintaty(po4)^[int1].int,dest^,sizeof(integer));
      inc(dest,sizeof(integer));
-     int2:= length(pmsestringintty(po4)[int1].mstr);
+     int2:= length(pmsestringintaty(po4)^[int1].mstr);
      move(int2,dest^,sizeof(integer));
      int2:= int2 * sizeof(msechar);
      inc(dest,sizeof(integer));
-     move(pmsestringintty(po4)[int1].mstr[1],dest^,int2);
+     move(pmsestringintaty(po4)^[int1].mstr[1],dest^,int2);
      inc(dest,int2);
     end;
    end;
    dl_rowstate: begin
-    move(integer(tcustomrowstatelist(adatalist).infolevel),dest^,
-                                                       sizeof(integer));
+    int1:= integer(tcustomrowstatelist(adatalist).infolevel);
+    move(int1,dest^,sizeof(integer));
     inc(dest,sizeof(integer));
     int2:= count * size;
     move(po4^,dest^,int2);
@@ -3774,10 +3784,10 @@ begin
    end;
    dl_ansistring: begin
     for int1:= 0 to count - 1 do begin
-     int2:= length(pansistring(po4)[int1]);
+     int2:= length(pansistringaty(po4)^[int1]);
      move(int2,dest^,sizeof(integer));
      inc(dest,sizeof(integer));
-     move(pointer(pansistring(po4)[int1])^,dest^,int2);
+     move(pointer(pansistringaty(po4)^[int1])^,dest^,int2);
      inc(dest,int2);
     end;
    end;
