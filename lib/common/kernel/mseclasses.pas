@@ -16,13 +16,14 @@ unit mseclasses;
  {$define mse_with_ifi}
 {$endif}
 {$ifndef mse_methodswap}
- {$ifdef FPC} {$define mse_nomethodswap}{$endif}
+ {$define mse_nomethodswap}
 {$endif}
 
 interface
 uses
  classes,mclasses,mseglob,mseevent,msetypes,msestrings,sysutils,typinfo,mselist,
- msegraphutils{$ifdef mse_with_ifi},mseifiglob{$endif};
+ msegraphutils{$ifdef mse_with_ifi},mseifiglob{$endif}
+  {$ifndef FPC},classes_del{$endif};
 
 {$if defined(FPC) and (fpc_fullversion >= 020403)}
  {$define mse_fpc_2_4_3}
@@ -110,7 +111,7 @@ type
                                         var avalue: boolean) of object;
  updaterealeventty = procedure(const sender: tobject; 
                                         var avalue: real) of object;
- updatedatetimeeventty = procedure(const sender: tobject; 
+ updatedatetimeeventty = procedure(const sender: tobject;
                                         var avalue: tdatetime) of object;
  
  setbooleaneventty = procedure(const sender: tobject; var avalue: boolean;
@@ -138,7 +139,7 @@ type
  setintegerindexeventty = procedure(const sender: tobject; var avalue: integer; 
                           var accept: boolean; const aindex: integer) of object; 
                           //equal parameters as setcoloreventty for tcoloredit!
- setint64indexeventty = procedure(const sender: tobject; var avalue: int64; 
+ setint64indexeventty = procedure(const sender: tobject; var avalue: int64;
                           var accept: boolean; const aindex: integer) of object; 
  setrealindexeventty = procedure(const sender: tobject; var avalue: realty;
                           var accept: boolean; const aindex: integer) of object;
@@ -502,7 +503,7 @@ type
    procedure initnewcomponent(const ascale: real); virtual;
    function checkowned(component: tcomponent): boolean; 
                  //true if component is owned or self
-   function checkowner(component: tcomponent): boolean; 
+   function checkowner(component: tcomponent): boolean;
                  //true if component is owner or self
    function rootowner: tcomponent;
    function getrootcomponentpath: componentarty;
@@ -670,7 +671,7 @@ type
   public 
    procedure notify(const sender: tobject);
  end;
-  
+
  tmodulelist = class(tcomponentqueue)
   protected
    flocked: integer;
@@ -708,16 +709,10 @@ type
                              const aroot: tcomponent): string; overload;
    function rootcompname(const acomp: tcomponent;
                              arootlevel: integer): string; overload;
-//   procedure dogetchildren(const sender: tmsecomponent;
-//                             const proc: tgetchildproc; const aroot: tcomponent);
    procedure getchildren1(const acomp: tcomponent;
                              const proc: tgetchildproc; const aroot: tcomponent);
    procedure WriteChildren(Component : TComponent);
    procedure WriteComponentData(Instance: TComponent);
-  {$ifndef FPC}
-   procedure BeginComponent(Component: TComponent;
-                           Flags: TFilerFlags; ChildPos: Integer);
-  {$endif}
   public
    constructor create(const stream: tstream; const bufsize: integer;
                             const anoancestor: boolean = false;
@@ -900,15 +895,9 @@ var
  oninitskinobject: skineventty;
 //threadvar
 // onstreaminggetchildren: getchildreneventty;
-  
-{$ifdef mse_fpc_2_4_3}
+
 function getcomponentlist(const acomponent: tcomponent): tfplist;
-{$else}
-function getcomponentlist(const acomponent: tcomponent): tlist;
-{$endif}
-                    //uses tcomponentcracker;
 procedure clearcomponentlist(const acomponent: tcomponent);
-                    //uses tcomponentcracker;
 procedure clearpastedcomponents;
 procedure addpastedcomponentname(const acomp: tcomponent);
 function findpastedcomponent(const origname: string): tcomponent;
@@ -1189,21 +1178,13 @@ begin
  result:= fmodules;
 end;
 
-{$ifdef mse_fpc_2_4_3}
 function getcomponentlist(const acomponent: tcomponent): tfplist;
-{$else}
-function getcomponentlist(const acomponent: tcomponent): tlist;
-{$endif}
 begin
 {$warnings off}
  with tcomponent1(acomponent) do begin
 {$warnings on}
   if fcomponents = nil then begin
-   {$ifdef mse_fpc_2_4_3}
    fcomponents:= tfplist.create;
-   {$else}
-   fcomponents:= tlist.create;
-   {$endif}
   end;
   result:= fcomponents;
  end;
@@ -1367,17 +1348,7 @@ var
 begin
  basetype:= gettypedata(atypeinfo)^.comptype{$ifndef FPC}^{$endif};
  with twriter1(writer) do begin
- {$ifdef FPC}
   driver.writeset(longint(value),basetype);
- {$else}
-  writevalue(vaset);
-  for i := 0 to sizeof(tintegerset) * 8 - 1 do begin
-   if i in tintegerset(value) then begin
-    writestr(getenumname(basetype, i));
-   end;
-  end;
-  writestr('');
-  {$endif}
  end;
 end;
 
@@ -1422,7 +1393,7 @@ begin
   while true do begin
    po1:= gettypedata(maintype)^.comptype{$ifndef FPC}^{$endif};
    po2:= gettypedata(splittype)^.comptype{$ifndef FPC}^{$endif};
-   str1:= reader.{$ifdef FPC}driver.{$endif}readstr;
+   str1:= reader.driver.readstr;
    if str1 = '' then begin
     break;
    end;
@@ -1444,7 +1415,7 @@ begin
    end;
    if int1 < 0 then begin
     repeat
-    until reader.{$ifdef FPC}driver.{$endif}readstr = '';
+    until reader.driver.readstr = '';
     raise ereaderror.create(sinvalidpropertyvalue);
    end;
   end;
@@ -2187,7 +2158,7 @@ procedure trefreshancestoreventhandler.setchildancestor(child: tcomponent);
 begin
  with tcomponent1(child) do begin
   setancestor(true);
-  getchildren(@setchildancestor,fsetancestorroot);
+  getchildren({$ifdef FPC}@{$endif}setchildancestor,fsetancestorroot);
  end;
 end;
 
@@ -2682,10 +2653,10 @@ function initmsecomponent(instance: tmsecomponent; rootancestor: tclass;
 var
  allloaded: boolean;
  ancestorloaded: boolean;
- loadlevel: integer = 0;
- 
+ loadlevel: integer;
+
  rootancestor1: tclass;
- 
+
  procedure doload(const aclass: msecomponentclassty);
  var
   po1: pobjectdatainfoty;
@@ -2708,11 +2679,11 @@ var
     po1:= objectdatalist.find(aclass,instance.name);
     if (po1 = nil) and (rootancestor <> nil) then begin
      po1:= objectdatalist.find(aclass,'');
-    end; 
+    end;
    end;
    if (po1 <> nil) then begin
     if not ancestorloaded then begin
-     ancestorloaded:= true;    
+     ancestorloaded:= true;
      inc(moduleloadlevel);
      if (moduleloadlevel = 1) and (globalloadlevel = 0) then begin
       begingloballoading;
@@ -2728,8 +2699,9 @@ var
    end;
   end;
  end;
- 
+
 begin
+ loadlevel:= 0;
  if (rootancestor = nil) then begin
   rootancestor1:= instance.classtype.classparent;
  end
@@ -5388,32 +5360,6 @@ begin
  end;
 end;
 
-{$ifndef FPC}
-procedure twritermse.BeginComponent(Component: TComponent;
-  Flags: TFilerFlags; ChildPos: Integer);
-var
-  Prefix: Byte;
-begin
-  if not FSignatureWritten then
-  begin
-    Write(FilerSignature, SizeOf(FilerSignature));
-    FSignatureWritten := True;
-  end;
-
-  { Only write the flags if they are needed! }
-  if Flags <> [] then
-  begin
-    Prefix := byte(Flags) or $f0;
-    Write(Prefix, 1);
-    if ffChildPos in Flags then
-      WriteInteger(ChildPos);
-  end;
-
-  WriteStr(Component.ClassName);
-  WriteStr(Component.Name);
-end;
-{$endif}
-
 procedure TWritermse.WriteComponentData(Instance: TComponent);
 var
   Flags: TFilerFlags;
@@ -5428,11 +5374,7 @@ begin
    Flags:=[ffInline];
  If (FAncestors<>Nil) and ((FCurrentPos<>FAncestorPos) or (FAncestor=Nil)) then
    Include(Flags,ffChildPos);
-{$ifdef fpc}
  FDriver.BeginComponent(Instance,Flags,FCurrentPos);
-{$else}
- BeginComponent(Instance,Flags,FCurrentPos);
-{$endif}
  If (FAncestors<>Nil) then
    Inc(FCurrentPos);
  WriteProperties(Instance);

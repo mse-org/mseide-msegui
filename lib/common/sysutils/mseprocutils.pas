@@ -386,10 +386,11 @@ var
 
 var
  startupinfo: tstartupinfo;
- creationflags: dword = 0;
+ creationflags: dword;
  processinfo: tprocessinformation;
  bo1: boolean;
 begin
+ creationflags:= 0;
  result:= invalidprochandle;
  fillchar(startupinfo,sizeof(startupinfo),0);
  startupinfo.hStdInput:= stdinputhandle;

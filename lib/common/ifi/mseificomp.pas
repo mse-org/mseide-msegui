@@ -155,7 +155,7 @@ type
    function getstatvarname: msestring;
   public
    constructor create(const aowner: tmsecomponent; const akind: ttypekind);
-                              reintroduce;
+                              reintroduce; overload;
    constructor create(const aowner: tmsecomponent); overload; virtual;
    function canconnect(const acomponent: tcomponent): boolean; virtual;
 

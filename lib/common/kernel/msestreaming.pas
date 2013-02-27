@@ -72,7 +72,6 @@ uses
 type
  tcomponent1 = class(tcomponent);
   
-{$ifdef FPC} 
 {
 function findexistingcomponent(const aname: string;
                   const aclassname: string; 
@@ -134,7 +133,8 @@ begin
   freader.fexistingcomp:= nil;
   freader.fexistingcompname:= struppercase(compname);
   while (freader.fexistingcomp = nil) and (comp1 <> nil) do begin
-   tcomponent1(freader.parent).getchildren(@findexistingcomponent,comp1);
+   tcomponent1(freader.parent).getchildren(
+                      {$ifdef FPC}@{$endif}findexistingcomponent,comp1);
    if comp1 = freader.root then begin
     break;
    end;
@@ -164,53 +164,6 @@ function tasinheritedreader.createdriver(stream: tstream;
 begin
  result:= tasinheritedobjectreader.create(self,stream, bufsize);
 end;
-
-{$else}
-
-constructor tasinheritedreader.Create(Stream: TStream; BufSize: Integer;
-                    const forceinherited: boolean);
-begin
- fforceinherited:= forceinherited;
- inherited create(stream,bufsize);
-end;
-
-procedure tasinheritedreader.readprefix(var flags: tfilerflags;
-                                              var achildpos: integer);
-var
- pos1: integer;
- comp1: tcomponent;
-begin
- inherited;
- fexistingcomp:= nil;
- if (lookuproot = nil) or fforceinherited then begin
-  include(flags,ffinherited);
- end
- else begin
-  pos1:= position;
-  readstr; //type
-  fexistingcompname:= struppercase(readstr);
-  flushbuffer;
-  treadercracker(self).fstream.position:= pos1;
-  fexistingcomp:= 0;
-  comp1:= parent.owner;
-  if comp1 = nil then begin
-   comp1:= parent;
-  end;
-  parent.getchildren(@findexisting,comp1);
-  exclude(flags,ffinherited);
-  if fexistingcomp <> nil then begin
-   include(flags,ffinherited);
-  end;
- end;
- {
- inherited;
-// if findinheritedcomponent(compname,compclassname,self) then begin
- //todo!!!!
- include(flags,ffinherited);
- }
-end;
-
-{$endif}
 
 type
  treader1 = class(treader);

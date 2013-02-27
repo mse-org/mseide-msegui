@@ -222,7 +222,8 @@ type
    fidlecount: integer;
    fcheckoverloadlock: integer;
 //   fexceptionactive: integer;
-   fexceptioncount: longword;
+//   fexceptioncount: longword;
+   fexceptioncount: integer;
    fonexception: exceptioneventty;
    finiting: integer;
    fhighrestimercount: integer;
@@ -356,7 +357,7 @@ type
    property mainthread: threadty read fthread;
    property lockthread: threadty read flockthread;
    property lockcount: integer read flockcount;
-   property exceptioncount: longword read fexceptioncount;
+   property exceptioncount: integer read fexceptioncount;
    property onexception: exceptioneventty read fonexception write fonexception;
  end;
  applicationclassty = class of tcustomapplication;

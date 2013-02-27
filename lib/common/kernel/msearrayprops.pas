@@ -447,9 +447,7 @@ uses
  rtlconsts,msedatalist,msearrayutils;
 
 type
-{$ifdef FPC}
  tbinaryobjectreader1 = class(tbinaryobjectreader);
-{$endif}
  twriter1 = class(twriter);
  treader1 = class(treader);
 
@@ -1584,11 +1582,7 @@ begin
      treader1(reader).ReadProperty(getitems(int2));
     end
     else begin
-     {$ifdef FPC}
      tbinaryobjectreader1(reader.driver).skipproperty;
-     {$else}
-     treader1(reader).skipproperty;
-     {$endif}
     end;
    end;
    ReadListEnd;
@@ -1612,11 +1606,7 @@ begin
  ancestorbefore:= tpersistentarrayprop(writer.ancestor);
  try
   with twriter1(writer) do begin
-  {$ifdef FPC}
    driver.begincollection;
-  {$else}
-   WriteValue(vaCollection);
-   {$endif}
    for int1 := 0 to Count - 1 do begin
     str1:= getcollectionname(int1);
     if str1 <> '' then begin
