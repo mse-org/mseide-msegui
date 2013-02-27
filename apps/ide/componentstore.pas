@@ -360,15 +360,8 @@ begin
    stream2.position:= 0;
    reader1:= treader.create(stream2,4096);
    with info,treader1(reader1) do begin
-   {$ifdef FPC}
     driver.beginrootcomponent;
     driver.begincomponent(flags,int1,compclass,componentname);
-   {$else}
-    readsignature;
-    ReadPrefix(flags,int1);
-    compclass:= ReadStr;
-    componentname:= ReadStr;
-   {$endif}
    end;    
   except
    if not apaste then begin

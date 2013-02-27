@@ -191,7 +191,13 @@ procedure tfindinfilepagefo.threadonexecute(const sender: tthreadcomp);
    filelist.options:= [flo_sortname];
    try
     if fifo_subdirs in options then begin
-     if filelist.adddirectory(dir,fil_ext1,'',[fa_dir],[],[],nil,true) then begin
+    {$ifndef FPC}
+     if filelist.adddirectory2(dir,fil_ext1,'',
+                             [fa_dir],[],[],nil,true) then begin
+    {$else}
+     if filelist.adddirectory(dir,fil_ext1,'',
+                             [fa_dir],[],[],nil,true) then begin
+    {$endif}
       for int1:= 0 to filelist.count - 1 do begin
        if terminated then begin
         break;
@@ -203,8 +209,13 @@ procedure tfindinfilepagefo.threadonexecute(const sender: tthreadcomp);
      end;
     end;
     filelist.clear;
+   {$ifndef FPC}
+    if filelist.adddirectory2(dir,fil_ext1,filemask,
+                               [fa_all],[fa_dir],[],nil,true) then begin
+   {$else}
     if filelist.adddirectory(dir,fil_ext1,filemask,
                                [fa_all],[fa_dir],[],nil,true) then begin
+   {$endif}
      for int1:= 0 to filelist.count - 1 do begin
       if terminated then begin
        break;

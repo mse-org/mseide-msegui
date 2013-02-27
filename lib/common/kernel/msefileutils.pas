@@ -70,6 +70,24 @@ type
         const acheckproc: checkfileeventty = nil;
         const noexception: boolean = false): boolean; overload;
         //amask = '' -> all, true if ok
+   {$ifndef FPC}
+   function adddirectory1(const directoryname: filenamety;
+        ainfolevel: fileinfolevelty = fil_name; const amask: filenamearty = nil;
+        const aincludeattrib: fileattributesty = [fa_all];
+        const aexcludeattrib: fileattributesty = [];
+        const aoptions: dirstreamoptionsty = [];
+        const acheckproc: checkfileeventty = nil;
+        const noexception: boolean = false): boolean;
+        //amask = nil -> all, true if ok
+   function adddirectory2(const directoryname: filenamety;
+        ainfolevel: fileinfolevelty; const amask: filenamety;
+        const aincludeattrib: fileattributesty = [fa_all];
+        const aexcludeattrib: fileattributesty = [];
+        const aoptions: dirstreamoptionsty = [];
+        const acheckproc: checkfileeventty = nil;
+        const noexception: boolean = false): boolean;
+        //amask = '' -> all, true if ok
+   {$endif}
    function itempo(const index: integer): pfileinfoty;
     //invalid after capacity change!
    function indexof(const filename: filenamety): integer;
@@ -1870,6 +1888,34 @@ begin
  result:= adddirectory(directoryname,ainfolevel,ar1,
               aincludeattrib,aexcludeattrib,aoptions,acheckproc,noexception);
 end;
+
+{$ifndef FPC}
+function tcustomfiledatalist.adddirectory1(const directoryname: filenamety;
+    ainfolevel: fileinfolevelty = fil_name; const amask: filenamearty = nil;
+    const aincludeattrib: fileattributesty = [fa_all];
+    const aexcludeattrib: fileattributesty = [];
+    const aoptions: dirstreamoptionsty = [];
+    const acheckproc: checkfileeventty = nil;
+    const noexception: boolean = false): boolean;
+    //amask = nil -> all, true if ok
+begin
+ result:= adddirectory(directoryname,ainfolevel,amask,aincludeattrib,
+             aexcludeattrib,aoptions,acheckproc,noexception);
+end;
+
+function tcustomfiledatalist.adddirectory2(const directoryname: filenamety;
+    ainfolevel: fileinfolevelty; const amask: filenamety;
+    const aincludeattrib: fileattributesty = [fa_all];
+    const aexcludeattrib: fileattributesty = [];
+    const aoptions: dirstreamoptionsty = [];
+    const acheckproc: checkfileeventty = nil;
+    const noexception: boolean = false): boolean;
+    //amask = '' -> all, true if ok
+begin
+ result:= adddirectory(directoryname,ainfolevel,amask,aincludeattrib,
+               aexcludeattrib,aoptions,acheckproc,noexception);
+end;
+{$endif}
 
 function tcustomfiledatalist.itempo(const index: integer): pfileinfoty;
 begin
