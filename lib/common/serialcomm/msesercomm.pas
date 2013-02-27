@@ -933,7 +933,7 @@ end;
 constructor tcustomsercommchannel.create(aowner: tcomponent);
 begin
  sys_semcreate(fsem,0);
- ftimer:= tsimpletimer.create(0,@dotimer,false,[to_single]);
+ ftimer:= tsimpletimer.create(0,{$ifdef FPC}@{$endif}dotimer,false,[to_single]);
  inherited;
 end;
 
@@ -1028,7 +1028,7 @@ begin
   if int1 = -1 then begin
    int1:= 2*fsercomm.calctransmissiontime(fexpected+fsent)+ftimeoutus;
   end;
-  updatebit(longword(fstate),ord(sccs_sync),sync);
+  updatebit({$ifdef FPC}longword{$else}byte{$endif}(fstate),ord(sccs_sync),sync);
   include(fstate, sccs_pending);
   fsercomm.writedata(adata);
   if sync then begin

@@ -17,7 +17,7 @@ unit classes_del;
 
 interface
 uses
- msetypes,sysutils;
+ msetypes,sysutils,msesystypes;
 
 const
   MaxListSize = Maxint div 16;
@@ -100,9 +100,16 @@ type
     property List: PPointerList read FList;
   end;
 
+function  GetCurrentThreadId : threadty;
+
 implementation
 uses
- rtlconsts;
+ rtlconsts,windows;
+
+function  GetCurrentThreadId : threadty;
+begin
+ result:= getcurrentthread;
+end;
 
 {****************************************************************************}
 {*                           TFPList                                        *}

@@ -470,7 +470,7 @@ type
             //stdin, stdout if ''
    property localconn;
  end;
- 
+
  tsocketstdiochannel = class(tcustompipeiochannel)
   private
    fcryptoio: tcryptoio;
@@ -563,14 +563,14 @@ procedure inititemheader(const atag: integer; const aname: string;
 function ifinametostring(const source: pifinamety; out dest: string): integer;
 function stringtoifiname(const source: string; const dest: pifinamety): integer;
 
-function encodeifinull(const headersize: integer = 0): string;               
-function encodeifidata(const avalue: boolean; 
+function encodeifinull(const headersize: integer = 0): string;
+function encodeifidata(const avalue: boolean;
                        const headersize: integer = 0): string; overload;
-function encodeifidata(const avalue: integer; 
+function encodeifidata(const avalue: integer;
                        const headersize: integer = 0): string; overload;
-function encodeifidata(const avalue: int64; 
+function encodeifidata(const avalue: int64;
                        const headersize: integer = 0): string; overload;
-function encodeifidata(const avalue: currency; 
+function encodeifidata(const avalue: currency;
                        const headersize: integer = 0): string; overload;
 function encodeifidata(const avalue: real; 
                        const headersize: integer = 0): string; overload;
@@ -608,7 +608,7 @@ function decodeifidata(const source: pifidataty; out dest: realintty): integer;
                                                         overload;
 function decodeifidata(const source: pifidataty; out dest: currency): integer;
                                                         overload;
-function decodeifidata(const source: pifidataty; 
+function decodeifidata(const source: pifidataty;
                                  out dest: msestringintty): integer; overload;
 function decodeifidata(const source: pifidataty; out dest: variant): integer;
                                                         overload;
@@ -632,7 +632,7 @@ function readifivariant(const adata: pifirecty; var adatapo: pchar): variant;
 function setifibytes(const source: pointer; const size: integer;
                  const dest: pifibytesty): integer; overload;
 
-const 
+const
  datarecsizes: array[ifidatakindty] of integer = (
   sizeof(ifidataty),                                   //idk_none
   sizeof(ifidataty),                                   //idk_null
@@ -652,7 +652,7 @@ const
 implementation
 uses
  sysutils,mseprocutils,msesysintf1,msesysintf,{mseforms,}msetmpmodules,
- msesysutils,variants,msesumlist;
+ msesysutils,variants,msesumlist {$ifndef FPC},classes_del{$endif};
 type
  tsocketreader1 = class(tsocketreader);
  tsocketwriter1 = class(tsocketwriter);
@@ -713,7 +713,7 @@ begin
  fillchar(result^,headersize,0);
  inc(result,headersize);
  pifidataty(result)^.header.kind:= kind;
- inc(result,sizeof(ifidataty.header));
+ inc(result,sizeof(ifidataheaderty));
 end;
 
 function encodeifinull(const headersize: integer = 0): string;               
@@ -746,19 +746,27 @@ begin
  pint64(initdataheader(headersize,idk_int64,0,result))^:= avalue;
 end;
 
-function encodeifidata(const avalue: currency; 
+function encodeifidata(const avalue: currency;
                        const headersize: integer = 0): string; overload;
 begin
  pcurrency(initdataheader(headersize,idk_currency,0,result))^:= avalue;
 end;
 
-function encodeifidata(const avalue: real; 
+function encodeifidata(const avalue: real;
                        const headersize: integer = 0): string; overload;
 begin
  preal(initdataheader(headersize,idk_real,0,result))^:= avalue;
 end;
 
-function encodeifidata(const avalue: realintty; 
+{$ifndef FPC}
+function encodeifidatareal(const avalue: real;
+                       const headersize: integer = 0): string; overload;
+begin
+ preal(initdataheader(headersize,idk_real,0,result))^:= avalue;
+end;
+{$endif}
+
+function encodeifidata(const avalue: realintty;
                        const headersize: integer = 0): string; overload;
 begin
  with pifirealintty(initdataheader(headersize,idk_realint,0,result))^ do begin
@@ -808,7 +816,11 @@ begin
    result:= encodeifidata(tmsestringdatalist(alist).items[aindex],headersize);
   end;
   dl_real: begin
+ {$ifdef FPC}
    result:= encodeifidata(trealdatalist(alist).items[aindex],headersize);
+ {$else}
+   result:= encodeifidatareal(trealdatalist(alist).items[aindex],headersize);
+ {$endif}
   end;
   dl_msestringint: begin
    result:= encodeifidata(tmsestringintdatalist(alist).doubleitems[aindex],headersize);
@@ -856,7 +868,7 @@ begin
  setlength(adata,adatapo-pointer(adata));
  adata:= adata + encodeifidata(avalue);
  pifirecty(adata)^.header.size:= length(adata);
- adatapo:= pointer(adata) + length(adata);
+ adatapo:= pchar(pointer(adata)) + length(adata);
 end;
 
 function readifivariant(const adata: pifirecty; var adatapo: pchar): variant;
@@ -1213,7 +1225,7 @@ begin
 //  sequence:= fsequence;
   kind:= akind;
  end;
- datapo:= pointer(arec) + sizeof(ifiheaderty);
+ datapo:= pchar(pointer(arec)) + sizeof(ifiheaderty);
 end;
 
 function stringtoifiname(const source: string; const dest: pifinamety): integer;
@@ -1265,7 +1277,7 @@ end;
 
 constructor tcustomiochannel.create(aowner: tcomponent);
 begin
- fsynchronizer:= tiosynchronizer.create(@datareceived);
+ fsynchronizer:= tiosynchronizer.create({$ifdef FPC}@{$endif}datareceived);
  inherited;
 end;
 
@@ -1620,8 +1632,8 @@ begin
   ftx:= tpipewriter.create;
  end;
  fprochandle:= invalidprochandle;
- frx.oninputavailable:= @doinputavailable;
- frx.onpipebroken:= @dopipebroken;
+ frx.oninputavailable:= {$ifdef FPC}@{$endif}doinputavailable;
+ frx.onpipebroken:= {$ifdef FPC}@{$endif}dopipebroken;
  inherited;
 end;
 
@@ -1838,8 +1850,8 @@ constructor tsocketclientiochannel.create(aowner: tcomponent);
 begin
  fsocket:= tifisocketclient.create(self{nil});
  fsocket.setsubcomponent(true);
- fsocket.pipes.rx.oninputavailable:= @doinputavailable;
- fsocket.pipes.onbeforedisconnect:= @dobeforedisconnect;
+ fsocket.pipes.rx.oninputavailable:= {$ifdef FPC}@{$endif}doinputavailable;
+ fsocket.pipes.onbeforedisconnect:= {$ifdef FPC}@{$endif}dobeforedisconnect;
  inherited;
 end;
 
@@ -1913,8 +1925,8 @@ begin
  unlink;
  dobeforeconnect;
  setlinkedvar(apipes,tlinkedpersistent(fpipes));
- fpipes.onbeforedisconnect:= @dobeforedisconnect;
- fpipes.rx.oninputavailable:= @doinputavailable;
+ fpipes.onbeforedisconnect:= {$ifdef FPC}@{$endif}dobeforedisconnect;
+ fpipes.rx.oninputavailable:= {$ifdef FPC}@{$endif}doinputavailable;
  doafterconnect; 
 end;
 
@@ -2009,9 +2021,9 @@ end;
 
 constructor tsocketstdiochannel.create(aowner: tcomponent);
 begin
- frx:= tsocketreader.create;
- tsocketreader1(frx).fonafterconnect:= @doafterconnect;
- ftx:= tsocketwriter.create;
+ frx:= tsocketreader.create(nil); //todo: test!!!!!!
+ tsocketreader1(frx).fonafterconnect:= {$ifdef FPC}@{$endif}doafterconnect;
+ ftx:= tsocketwriter.create(nil);
  inherited;
 end;
 
