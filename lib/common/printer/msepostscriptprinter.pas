@@ -1228,7 +1228,7 @@ end;
 procedure tpostscriptcanvas.textout(const text: richstringty; const dest: rectty;
          const flags: textflagsty; const tabdist: real);
 const
- fontstylemask = [ni_bold,ni_italic,ni_underline,ni_strikeout];
+ fontstylemask{: newinfosty} = [ni_bold,ni_italic,ni_underline,ni_strikeout];
  mask1 = [tf_xcentered,tf_right];
  mask2 = [tf_ycentered,tf_bottom];
 var
@@ -1310,7 +1310,9 @@ begin
     end;
     if newinfos * fontstylemask <> [] then begin
      style1:= style1 * fontstylesty(
-           not {$ifdef FPC}longword{$else}byte{$endif}(newinfos)) + style.fontstyle;
+       {$ifndef FPC}byte({$endif}
+           not {$ifdef FPC}longword{$else}word{$endif}(newinfos))
+           {$ifndef FPC}){$endif} + style.fontstyle;
     end;
     font.style:= style1;
     checkfont(font.handle,(word(text.text[int2]) and $ff00) shr 8);

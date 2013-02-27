@@ -48,7 +48,7 @@ uses
 constructor tmessagefo.create(aowner: tcomponent);
 begin
  fcolorrow:= -1;
- inherited;
+ inherited create(aowner);
 end;
  
 procedure tmessagefo.messagesoncellevent(const sender: tobject;
