@@ -1309,7 +1309,7 @@ begin
   tdatalist1(fdata).readdata(reader);
  end
  else begin
-  reader.{$ifdef FPC}driver.{$endif}skipvalue;
+  reader.driver.skipvalue;
  end;
  reader.readlistend;
 end;
@@ -2110,7 +2110,8 @@ begin
    end;
   end;
  end;
- filer.defineproperty('colorder',@readorder,@writeorder,bo1);
+ filer.defineproperty('colorder',{$ifdef FPC}@{$endif}readorder,
+                                  {$ifdef FPC}@{$endif}writeorder,bo1);
  inherited;
 end;
 

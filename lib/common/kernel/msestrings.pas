@@ -3716,7 +3716,7 @@ begin
      ch1:= #$2400; //unicode null glyph
     end;
     if not stripcontrolchars or (ord(ch1) >= ord(' ')) or (ch1 = c_tab) then begin
-     (pmsechar(pointer(str1)+int3))^:= ch1;
+     (pmsechar(pointer(str1))+int3)^:= ch1;
      inc(int3);
     end;
    end;

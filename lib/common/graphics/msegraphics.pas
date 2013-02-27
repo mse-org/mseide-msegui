@@ -1216,20 +1216,25 @@ end;
 {$endif}
 
 procedure movealignment(const source: alignmentsty; var dest: alignmentsty);
-(*
+{$ifndef FPC}
 const
  mask1: alignmentsty = [al_intpol,al_or,al_and];
  mask2: alignmentsty = [al_left,al_xcentered,al_right];
  mask3: alignmentsty = [al_top,al_ycentered,al_bottom];
-var
- value1,value2,value3: alignmentsty;
-*)
+ mask4: alignmentsty = [al_fit,al_tiled];
+{$endif}
 begin
- dest:= alignmentsty(setsinglebit(longword(source),longword(dest),
-                            [longword([al_intpol,al_or,al_and]),
-                             longword([al_left,al_xcentered,al_right]),
-                             longword([al_top,al_ycentered,al_bottom]),
-                             longword([al_fit,al_tiled])]));
+ {$ifdef FPC}
+ dest:= alignmentsty(setsinglebit(
+                longword(source),longword(dest),
+                [longword([al_intpol,al_or,al_and]),
+                 longword([al_left,al_xcentered,al_right]),
+                longword([al_top,al_ycentered,al_bottom]),
+                longword([al_fit,al_tiled])]));
+ {$else}
+ dest:= alignmentsty(setsinglebitar16(word(source),word(dest),
+                    [word(mask1),word(mask2),word(mask3),word(mask4)]));
+ {$endif}
 (*
   value1:= alignmentsty(setsinglebit(
                           {$ifdef FPC}longword{$else}word{$endif}(source),
@@ -3311,7 +3316,7 @@ end;
 // painting
 //
 
-function ispaintcolor(acolor: colorty): boolean; inline;
+function ispaintcolor(acolor: colorty): boolean; {$ifdef FPC}inline;{$endif}
 begin
  result:= (acolor <> cl_transparent) and (acolor <> cl_none);
 end;

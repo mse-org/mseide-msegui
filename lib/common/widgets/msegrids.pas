@@ -3894,8 +3894,8 @@ begin
 // avalue:= avalue - deprecatedcoloptions1;
  optionsbefore:= foptions1;
  foptions1:= avalue;
- opt1:= coloptions1ty({$ifdef FPC}longword{$else}byte{$endif}(optionsbefore) xor
-                      {$ifdef FPC}longword{$else}byte{$endif}(foptions1));
+ opt1:= coloptions1ty({$ifdef FPC}longword{$else}word{$endif}(optionsbefore) xor
+                      {$ifdef FPC}longword{$else}word{$endif}(foptions1));
  if co1_autorowheight in opt1 then begin
   if co1_autorowheight in foptions1 then begin
    include(fstate,gps_needsrowheight);
@@ -6981,14 +6981,14 @@ var
 begin
  foptionsfix:= avalue;
  opt1:= coloptions1ty(
-           {$ifndef FPC}byte({$endif}
+           {$ifndef FPC}word({$endif}
                replacebits(
                  longword(
                  {$ifndef FPC}byte({$endif}avalue{$ifndef FPC}){$endif})
                             shr longword(fixcoloptionsshift1),
                      longword(foptions),
                      longword(
-                      {$ifndef FPC}byte({$endif}
+                      {$ifndef FPC}word({$endif}
                        fixcoloptionsmask
                       {$ifndef FPC}){$endif}
                       )
@@ -7351,15 +7351,15 @@ var
  mask: {$ifdef FPC}longword{$else}byte{$endif};
 begin
  if foptions1 <> value then begin
-  mask:= {$ifdef FPC}longword{$else}byte{$endif}(value) xor
-         {$ifdef FPC}longword{$else}byte{$endif}(foptions1);
+  mask:= {$ifdef FPC}longword{$else}word{$endif}(value) xor
+         {$ifdef FPC}longword{$else}word{$endif}(foptions1);
   foptions1:= Value;
   if not (csloading in fgrid.componentstate) then begin
    for int1:= 0 to count - 1 do begin
     tcol(items[int1]).options1:= coloptions1ty(
             replacebits(
-              {$ifdef FPC}longword{$else}byte{$endif}(value),
-              {$ifdef FPC}longword{$else}byte{$endif}(tcol(items[int1]).options1),
+              {$ifdef FPC}longword{$else}word{$endif}(value),
+              {$ifdef FPC}longword{$else}word{$endif}(tcol(items[int1]).options1),
                  mask));
    end;
   end;

@@ -853,7 +853,7 @@ end;
 procedure tcustomrealdisp.valuechanged;
 begin
  if canevent(tmethod(fondatachange)) then begin
-  fondatachange(self,fvalue);
+  fondatachange(self,real(fvalue));
  end;
  inherited;
 end;

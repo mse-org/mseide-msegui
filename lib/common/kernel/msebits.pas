@@ -107,10 +107,12 @@ function setsinglebit(const new,old: word;
 function setsinglebit(const new,old: longword;
                             const mask: array of longword): longword; overload;
 {$ifndef FPC}
+function setsinglebitar8(const new,old: byte;
+                            const mask: array of byte): byte;
 function setsinglebitar16(const new,old: word;
-                            const mask: array of word): word; overload;
+                            const mask: array of word): word;
 function setsinglebitar32(const new,old: longword;
-                            const mask: array of longword): longword; overload;
+                            const mask: array of longword): longword;
 {$endif}
 
 function checkbit(const value: byte; const bitnum: integer): boolean; overload;
@@ -483,6 +485,16 @@ begin
  end;
 end;
 {$ifndef FPC}
+function setsinglebitar8(const new,old: byte;
+                            const mask: array of byte): byte;
+var
+ int1: integer;
+begin
+ result:= new;
+ for int1:= 0 to high(mask) do begin
+  result:= setsinglebit(result,old,mask[int1]);
+ end;
+end;
 function setsinglebitar16(const new,old: word;
                             const mask: array of word): word;
 var

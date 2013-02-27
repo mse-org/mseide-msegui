@@ -213,7 +213,7 @@ type
   public
    constructor create(const agrid: tcustomgrid;
               const aowner: tgridarrayprop;
-      const acontroller: tcustomdropdownlistcontroller); virtual; reintroduce;
+      const acontroller: tcustomdropdownlistcontroller); reintroduce; virtual;
  end;
  dropdownfixcolclassty = class of tdropdownfixcol;
 
