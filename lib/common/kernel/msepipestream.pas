@@ -185,13 +185,7 @@ end;
 function tpipewriter.releasehandle: integer;
 begin
  result:= handle;
-{$ifdef FPC}
-{$warnings off}
- thandlestreamcracker(self).fhandle:= invalidfilehandle;
-{$warnings on}
-{$else}
  fhandle:= invalidfilehandle;
-{$endif}
 end;
 
 procedure tpipewriter.connect(const ahandle: integer);
@@ -203,13 +197,7 @@ end;
 procedure tpipewriter.sethandle(value: integer);
 begin
  if fconnected then begin
- {$ifdef FPC}
-{$warnings off}
-  thandlestreamcracker(self).fhandle:= invalidfilehandle;
-{$warnings on}
- {$else}
   fhandle:= invalidfilehandle;
- {$endif}
   fconnected:= false;
  end;
  inherited;

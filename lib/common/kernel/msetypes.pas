@@ -7,7 +7,7 @@
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 } 
-unit msetypes; 
+unit msetypes;
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
 
@@ -60,6 +60,7 @@ type
   size_t = dword;
   unicodestring = widestring;
   unicodechar = widechar;
+  WINBOOL = longbool;
 {$else}
  {$ifndef mse_fpc_2_4_2}
   ppdouble = ^pdouble;
@@ -239,6 +240,7 @@ type
  winidaty = array[0..0] of winidty;
  pwinidaty = ^winidaty;
  winidararty = array of winidarty;
+ filehandlety = longint;
 
  procedurety = procedure;
  

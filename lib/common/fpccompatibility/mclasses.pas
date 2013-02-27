@@ -144,9 +144,11 @@ type
     procedure ValidateContainer(AComponent: tcomponent); dynamic;
     procedure ValidateInsert(AComponent: tcomponent); dynamic;
     { IUnknown }
-    function QueryInterface({$IFDEF FPC_HAS_CONSTREF}constref{$ELSE}const{$ENDIF} IID: TGUID; out Obj): Hresult; virtual; {$IFNDEF WINDOWS}cdecl{$ELSE}stdcall{$ENDIF};
-    function _AddRef: Integer; {$IFNDEF WINDOWS}cdecl{$ELSE}stdcall{$ENDIF};
-    function _Release: Integer; {$IFNDEF WINDOWS}cdecl{$ELSE}stdcall{$ENDIF};
+    function QueryInterface(
+     {$IFDEF FPC_HAS_CONSTREF}constref{$ELSE}const{$ENDIF} IID: TGUID;
+      out Obj): Hresult; virtual; {$IFNDEF msWINDOWS}cdecl{$ELSE}stdcall{$ENDIF};
+    function _AddRef: Integer; {$IFNDEF msWINDOWS}cdecl{$ELSE}stdcall{$ENDIF};
+    function _Release: Integer; {$IFNDEF msWINDOWS}cdecl{$ELSE}stdcall{$ENDIF};
     function iicrGetComponent: tcomponent;
     { IDispatch }
     function GetTypeInfoCount(out Count: Integer): HResult; stdcall;
@@ -889,8 +891,8 @@ TStringsEnumerator = class
 
   THandleStream = class(TStream)
   private
-    FHandle: THandle;
   protected
+    FHandle: filehandlety;
     procedure SetSize(NewSize: Longint); override;
     procedure SetSize(const NewSize: Int64); override;
   public
@@ -898,7 +900,7 @@ TStringsEnumerator = class
     function Read(var Buffer; Count: Longint): Longint; override;
     function Write(const Buffer; Count: Longint): Longint; override;
     function Seek(const Offset: Int64; Origin: TSeekOrigin): Int64; override;
-    property Handle: THandle read FHandle;
+    property Handle: filehandlety read FHandle;
   end;
 
   TFileStream = class(THandleStream)
@@ -2102,7 +2104,9 @@ begin
     Result := False;
 end;
 
-function TComponent.QueryInterface({$IFDEF FPC_HAS_CONSTREF}constref{$ELSE}const{$ENDIF} IID: TGUID; out Obj): HResult;{$IFNDEF WINDOWS}cdecl{$ELSE}stdcall{$ENDIF};
+function TComponent.QueryInterface(
+{$IFDEF FPC_HAS_CONSTREF}constref{$ELSE}const{$ENDIF} IID: TGUID;
+ out Obj): HResult;{$IFNDEF msWINDOWS}cdecl{$ELSE}stdcall{$ENDIF};
 begin
   if Assigned(VCLComObject) then
     Result := IVCLComObject(VCLComObject).QueryInterface(IID, Obj)
@@ -2113,7 +2117,7 @@ begin
     Result := E_NOINTERFACE;
 end;
 
-function TComponent._AddRef: Integer;{$IFNDEF WINDOWS}cdecl{$ELSE}stdcall{$ENDIF};
+function TComponent._AddRef: Integer;{$IFNDEF msWINDOWS}cdecl{$ELSE}stdcall{$ENDIF};
 begin
   if Assigned(VCLComObject) then
     Result := IVCLComObject(VCLComObject)._AddRef
@@ -2121,7 +2125,7 @@ begin
     Result := -1;
 end;
 
-function TComponent._Release: Integer;{$IFNDEF WINDOWS}cdecl{$ELSE}stdcall{$ENDIF};
+function TComponent._Release: Integer;{$IFNDEF msWINDOWS}cdecl{$ELSE}stdcall{$ENDIF};
 begin
   if Assigned(VCLComObject) then
     Result := IVCLComObject(VCLComObject)._Release

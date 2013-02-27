@@ -64,7 +64,7 @@ type
    procedure setchain(const avalue: tcustomcryptohandler);
   protected
    fchainend: tcustomcryptohandler;
-   procedure flush(var aclient: cryptoclientinfoty); virtual; overload;
+   procedure flush(var aclient: cryptoclientinfoty); overload; virtual;
    procedure flushchain(var aclient: cryptoclientinfoty);
    procedure writeerror(var aclient: cryptoclientinfoty);
    procedure readerror(var aclient: cryptoclientinfoty);
@@ -453,14 +453,6 @@ function tryreadfiledatastring(const afilename: filenamety;
 procedure writefiledatastring(const afilename: filenamety; const adata: string);
 function trywritefiledatastring(const afilename: filenamety;
                                     const adata: string): boolean;
-
-{$ifdef FPC}
-type
-  THandleStreamcracker = class(TStream)
-   public
-    FHandle: Integer;
-  end;
-{$endif}
 
 implementation
 
@@ -1092,13 +1084,7 @@ begin
    flushbuffer;
    closehandle(handle);
   end;
-  {$ifdef FPC}
-{$warnings off}
-  thandlestreamcracker(self).fhandle:= value;
-{$warnings on}
-  {$else}
   fhandle:= value;
-  {$endif}
  end;
 end;
 
@@ -1328,15 +1314,11 @@ begin
   result:= fmemorystream.Read(buffer,count);
  end
  else begin
-{$warnings off}
-  result:= sys_read({$ifdef FPC}thandlestreamcracker(self).{$endif}fhandle,
-                                     @buffer,count);
-{$warnings on}
+  result:= sys_read(fhandle,@buffer,count);
  end;
  if result < 0 then begin
   result:= 0;
  end;
-// result:= inherited read(buffer,count);
 end;
 
 function tmsefilestream.inheritedwrite(const buffer; count: longint): longint;
@@ -1345,15 +1327,11 @@ begin
   result:= fmemorystream.Write(Buffer,count);
  end
  else begin
- {$warnings off}
-  result:= sys_write({$ifdef FPC}thandlestreamcracker(self).{$endif}fhandle,
-                             @buffer,count);
- {$warnings on}
+  result:= sys_write(fhandle,@buffer,count);
  end;
  if result < 0 then begin
   result:= 0;
  end;
-// result:= inherited write(buffer,count);
 end;
 
 function tmsefilestream.inheritedseek(const offset: int64;

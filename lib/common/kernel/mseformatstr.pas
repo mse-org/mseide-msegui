@@ -361,9 +361,9 @@ function stringtopascalstring(const value: msestring): string;
 function pascalstringtostring(const value: string): msestring;
                                     //increments inputpointer
 function encodebase64(const abinary: string;
-        const maxlinelength: integer = defaultbase64linelength): string;
+      const maxlinelength: integer = defaultbase64linelength): string; overload;
 function encodebase64(const abinary: pbyte; acount: integer;
-        const maxlinelength: integer = defaultbase64linelength): string;
+      const maxlinelength: integer = defaultbase64linelength): string; overload;
 function decodebase64(const atext: string): string;
 
 {$ifndef FPC}
@@ -3280,29 +3280,29 @@ function valtohex(const avalue: byte): string;
 begin
  setlength(result,2);
  pchar(pointer(result))^:= charhexlower[avalue shr 4];
- pchar(pointer(result)+1)^:= charhexlower[avalue and $f];
+ pchar(pchar(pointer(result))+1)^:= charhexlower[avalue and $f];
 end;
 
 function valtohex(const avalue: word): string; overload;
 begin
  setlength(result,4);
  pchar(pointer(result))^:= charhexlower[avalue shr 12];
- pchar(pointer(result)+1)^:= charhexlower[(avalue shr 8) and $f];
- pchar(pointer(result)+2)^:= charhexlower[(avalue shr 4) and $f];
- pchar(pointer(result)+3)^:= charhexlower[avalue and $f];
+ pchar(pchar(pointer(result))+1)^:= charhexlower[(avalue shr 8) and $f];
+ pchar(pchar(pointer(result))+2)^:= charhexlower[(avalue shr 4) and $f];
+ pchar(pchar(pointer(result))+3)^:= charhexlower[avalue and $f];
 end;
 
 function valtohex(const avalue: longword): string; overload;
 begin
  setlength(result,8);
  pchar(pointer(result))^:= charhexlower[avalue shr 28];
- pchar(pointer(result)+1)^:= charhexlower[(avalue shr 24) and $f];
- pchar(pointer(result)+2)^:= charhexlower[(avalue shr 20) and $f];
- pchar(pointer(result)+3)^:= charhexlower[(avalue shr 16) and $f];
- pchar(pointer(result)+4)^:= charhexlower[(avalue shr 12) and $f];
- pchar(pointer(result)+5)^:= charhexlower[(avalue shr 8) and $f];
- pchar(pointer(result)+6)^:= charhexlower[(avalue shr 4) and $f];
- pchar(pointer(result)+7)^:= charhexlower[avalue and $f];
+ pchar(pchar(pointer(result))+1)^:= charhexlower[(avalue shr 24) and $f];
+ pchar(pchar(pointer(result))+2)^:= charhexlower[(avalue shr 20) and $f];
+ pchar(pchar(pointer(result))+3)^:= charhexlower[(avalue shr 16) and $f];
+ pchar(pchar(pointer(result))+4)^:= charhexlower[(avalue shr 12) and $f];
+ pchar(pchar(pointer(result))+5)^:= charhexlower[(avalue shr 8) and $f];
+ pchar(pchar(pointer(result))+6)^:= charhexlower[(avalue shr 4) and $f];
+ pchar(pchar(pointer(result))+7)^:= charhexlower[avalue and $f];
 end;
 
 function valtohex(const avalue: qword): string; overload;

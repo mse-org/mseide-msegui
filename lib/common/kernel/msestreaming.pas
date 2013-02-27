@@ -17,7 +17,6 @@ uses
  classes,mclasses,msetypes,msegraphutils,mseglob;
 
 type
-{$ifdef FPC}
  tasinheritedreader = class;
  tasinheritedobjectreader = class(tbinaryobjectreader)
   protected
@@ -46,25 +45,6 @@ type
    property existingcomp: tcomponent read fexistingcomp;
    property newcomp: boolean read fnewcomp write fnewcomp;
  end;
-
-{$else}
-
- tasinheritedreader = class(treader)
-  private
-   fnewcomp: boolean;
-  protected
-   fforceinherited: boolean;
-   fexistingcomp: tcomponent;
-  public
-   constructor Create(Stream: TStream; BufSize: Integer;
-                    const forceinherited: boolean);
-   procedure readprefix(var flags: tfilerflags; var achildpos: integer); override;
-   property existingcomp: tcomponent read fexistingcomp;
-   property newcomp: boolean read fnewcomp write fnewcomp);
-                                
- end;
-
-{$endif}
 
 function readshortcutarty(const reader: treader): shortcutarty;
 procedure writeshortcutarty(const writer: twriter; const avalue: shortcutarty);
