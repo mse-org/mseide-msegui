@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -14,15 +14,16 @@ interface
 uses
  classes,mclasses,mdb,msedb,msetypes,msestrings,mseclasses,msearrayprops,mselist,
  msearrayutils,mseapplication,mseglob;
- 
-type
 
+const
+ changeeventtag = 85839;
+type
  tcustomlookupbuffer = class;
  tcustomdblookupbuffer = class;
  
  lookupbufferfieldnoty = type integer;
  lbdatakindty = (lbdk_none,lbdk_integer,lbdk_int64,lbdk_float,lbdk_text);
- 
+
  ilookupbufferfieldinfo = interface(inullinterface)
                              ['{7F51DC33-BFF6-4577-97FA-248486892C19}']
   function getlbdatakind(const apropname: string): lbdatakindty;
@@ -84,9 +85,6 @@ type
                          lbs_sourceclosed);
  lookupbufferstatesty = set of lookupbufferstatety;
 
-const
- changeeventtag = 85839;
-type   
  tcustomlookupbuffer = class(tactcomponent)
   private
  //  fbuffervalid: boolean;
@@ -633,7 +631,7 @@ begin
 end;
 
 function tcustomlookupbuffer.findphys(const fieldno: integer; const avalue: integer;
-         out aindex: integer; const filter: lbfiltereventty = nil): boolean; overload;
+         out aindex: integer; const filter: lbfiltereventty = nil): boolean;
               //physical index, true if found else -1
 var
  int1: integer;
@@ -647,8 +645,9 @@ begin
  end;
 end;
 
-function tcustomlookupbuffer.findphys(const fieldno: integer; const avalue: realty;
-                 out aindex: integer; const filter: lbfiltereventty = nil): boolean; overload;
+function tcustomlookupbuffer.findphys(const fieldno: integer;
+           const avalue: realty; out aindex: integer;
+                            const filter: lbfiltereventty = nil): boolean;
               //physical index, true if found else -1
 var
  int1: integer;
@@ -662,8 +661,9 @@ begin
  end;
 end;
 
-function tcustomlookupbuffer.findphys(const fieldno: integer; const avalue: int64;
-                 out aindex: integer; const filter: lbfiltereventty = nil): boolean; overload;
+function tcustomlookupbuffer.findphys(const fieldno: integer;
+                const avalue: int64; out aindex: integer;
+                            const filter: lbfiltereventty = nil): boolean;
               //physical index, true if found else -1
 var
  int1: integer;
@@ -680,7 +680,7 @@ end;
 function tcustomlookupbuffer.findphys(const fieldno: integer; const avalue: msestring;
                  out aindex: integer;
                  const caseinsensitive: boolean;
-                 const filter: lbfiltereventty = nil): boolean; overload;
+                 const filter: lbfiltereventty = nil): boolean;
               //physical index, true if found else -1
 var
  int1: integer;
@@ -1387,10 +1387,10 @@ begin
                       {$ifdef FPC}@{$endif}getdatasource);
  fint64fields:= tdbfieldnamearrayprop.create([ftlargeint],
                       {$ifdef FPC}@{$endif}getdatasource);
- fintegerfields.onchange:= @fieldschanged;
- ftextfields.onchange:= @fieldschanged;
- ffloatfields.onchange:= @fieldschanged;
- fint64fields.onchange:= @fieldschanged;
+ fintegerfields.onchange:= {$ifdef FPC}@{$endif}fieldschanged;
+ ftextfields.onchange:= {$ifdef FPC}@{$endif}fieldschanged;
+ ffloatfields.onchange:= {$ifdef FPC}@{$endif}fieldschanged;
+ fint64fields.onchange:= {$ifdef FPC}@{$endif}fieldschanged;
  inherited;
 end;
 
@@ -1563,10 +1563,10 @@ procedure tdblookupbuffer.loadbuffer;
 var
  int1,int3,int4: integer;
  bm: string;
- textf: array of tfield;
- integerf: array of tfield;
- realf: array of tfield;
- int64f: array of tfield;
+ textf: fieldarty;
+ integerf: fieldarty;
+ realf: fieldarty;
+ int64f: fieldarty;
  datas: tdataset;
  utf8: boolean;
  bo1: boolean;
@@ -1738,10 +1738,10 @@ end;
 
 procedure tdbmemolookupbuffer.loadbuffer;
 var
- textf: array of tfield;
- integerf: array of tfield;
- realf: array of tfield;
- int64f: array of tfield;
+ textf: fieldarty;
+ integerf: fieldarty;
+ realf: fieldarty;
+ int64f: fieldarty;
  ar3: stringarty;
  int1,int2: integer;
  utf8: boolean;

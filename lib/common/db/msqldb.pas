@@ -16,12 +16,9 @@
 
 unit msqldb;
 
-{$ifdef VER2_1_5} {$define mse_FPC_2_2} {$endif}
-{$ifdef VER2_2} {$define mse_FPC_2_2} {$endif}
-{$mode objfpc}{$interfaces corba}{$goto on}
-{$H+}
-//{$M+}   // ### remove this!!!
-
+{$ifdef FPC}
+{$mode objfpc}{$interfaces corba}{$goto on}{$H+}
+{$endif}
 
 interface
 
@@ -30,16 +27,13 @@ uses
  msedatabase,msestrings,msearrayutils,msedatalist,
  mseapplication,mseglob,msetimer,msearrayprops,msemacros;
 
-type 
+type
  TSchemaType = (stNoSchema,stTables,stSysTables,stProcedures,stColumns,
                     stProcedureParams,stIndexes,stPackages);
  sqlconnoptionty = (sco_supportparams,sco_emulateretaining,sco_nounprepared);
  sqlconnoptionsty = set of sqlconnoptionty;
 
- tcustomsqlconnection = class;
- TSQLTransaction = class;
 // TSQLQuery = class;
- tmacroproperty = class;
 
  TStatementType = (stNone, stSelect, stInsert, stUpdate, stDelete,
     stDDL, stGetSegment, stPutSegment, stExecProcedure,
@@ -49,8 +43,18 @@ const
  updatestatementtypes: array[tupdatekind] of tstatementtype =
         //(ukModify, ukInsert, ukDelete)
           (stupdate, stinsert, stdelete);
+ StatementTokens : Array[TStatementType] of msestring =
+                 ('(none)', 'select',
+                  'insert', 'update', 'delete',
+                  'create', 'get', 'put', 'execute',
+                  'start','commit','rollback', '?'
+                 );
+ datareturningtypes = [stselect,stexecprocedure];
 
 type
+ tcustomsqlconnection = class;
+ TSQLTransaction = class;
+ tmacroproperty = class;
  tsqlstringlist = class(tmsestringdatalist)
   private
    fmacros: tmacroproperty;
@@ -165,18 +169,6 @@ type
                      const asstring: boolean = false);
   end;
 
-
-const
- StatementTokens : Array[TStatementType] of msestring = 
-                 ('(none)', 'select',
-                  'insert', 'update', 'delete',
-                  'create', 'get', 'put', 'execute',
-                  'start','commit','rollback', '?'
-                 );
- datareturningtypes = [stselect,stexecprocedure];
-
-type
- 
  econnectionerror = class(edatabaseerror)
   private
    ferror: integer;
@@ -322,7 +314,7 @@ type
    procedure preparestatement(const cursor: tsqlcursor; 
                  const atransaction : tsqltransaction;
                  const asql: msestring; const aparams : tmseparams); 
-                                virtual; abstract; overload;
+                                 overload; virtual; abstract;
    procedure UnPrepareStatement(cursor : TSQLCursor); virtual; abstract;
    procedure AddFieldDefs(const cursor: TSQLCursor;
                        const FieldDefs: TfieldDefs); virtual; abstract;
@@ -603,7 +595,7 @@ type
    fterm: msechar;
    fcharescapement: boolean;
   protected
-   procedure execute; override; overload;
+   procedure execute; overload; override;
   public
    constructor create(aowner: tcomponent); override;
    procedure execute(adatabase: tcustomsqlconnection = nil;
@@ -708,8 +700,8 @@ function splitsql(const asql: msestring; const term: msechar = ';';
 
 implementation
 uses 
- dbconst,strutils,msereal,msestream,msebits,msefileutils,mseformatstr,typinfo,
- msesysutils,msesqlresult;
+ {$ifdef FPC}dbconst{$else}dbconst_del{$endif},strutils,msereal,msestream,
+ msebits,msefileutils,mseformatstr,typinfo,msesysutils,msesqlresult;
 type
  tdataset1 = class(tdataset);
  tmdatabase1 = class(tmdatabase);
@@ -911,7 +903,7 @@ begin
   int2:= 0;
   po1:= pointer(fdatapo);
   for int1:= 0 to count - 1 do begin
-   inc(int2,length(po1[int1]));
+   inc(int2,length(pmsestringaty(po1)^[int1]));
   end;
   mstr1:= lineend;
   setlength(result,int2+(count-1)*length(mstr1));
@@ -992,7 +984,8 @@ end;
 procedure tsqlstringlist.defineproperties(filer: tfiler);
 begin
  inherited;
- filer.defineproperty('Strings',@readstrings,nil{@writestrings},false);
+ filer.defineproperty('Strings',{$ifdef FPC}@{$endif}readstrings,
+                                                nil{@writestrings},false);
 end;
 
 procedure tsqlstringlist.setmacros(const avalue: tmacroproperty);
@@ -1085,8 +1078,10 @@ const
 begin
  if foptions <> avalue then begin
 //  tmdatabase1(fowner).checkdisconnected;
-  foptions:= databaseoptionsty(setsinglebit(longword(avalue),
-                longword(foptions),longword(mask)));
+  foptions:= databaseoptionsty(setsinglebit(
+  {$ifdef FPC}longword{$else}byte{$endif}(avalue),
+    {$ifdef FPC}longword{$else}byte{$endif}(foptions),
+    {$ifdef FPC}longword{$else}byte{$endif}(mask)));
  end;
 end;
 
@@ -1159,8 +1154,10 @@ begin
  result:= stnone;
   S:= mseLowercase(s);
   For t:= stselect to strollback do
-    if (S=StatementTokens[t]) then
-      Exit(t);
+    if (S=StatementTokens[t]) then begin
+     result:= t;
+     Exit;
+    end;
 end;
 
 procedure tcustomsqlconnection.settransaction(const avalue : tsqltransaction);
@@ -2242,11 +2239,11 @@ begin
                                        sender.getcomponentinstance);
  end;
 // intf1:= itransactionclient(sender);
- removeitem(pointerarty(fdatasets),sender);
+ removeitem(pointerarty(fdatasets),pointer(sender));
  try
   active:= false;
  finally
-  insertitem(pointerarty(fdatasets),0,sender);
+  insertitem(pointerarty(fdatasets),0,pointer(sender));
  end;
  {
  if fdatasets.count > int1 then begin
@@ -2519,7 +2516,7 @@ constructor tcustomsqlstatement.create(aowner: tcomponent);
 begin
  fparams:= tmseparams.create(self);
  fsql:= tsqlstringlist.create;
- fsql.onchange:= @dosqlchange;
+ fsql.onchange:= {$ifdef FPC}@{$endif}dosqlchange;
  inherited;
 end;
 
@@ -2653,7 +2650,9 @@ const
 begin
  if foptions <> avalue then begin
   foptions:= sqlstatementoptionsty(setsinglebit(
-           longword(avalue),longword(foptions),longword(mask)));
+           {$ifdef FPC}longword{$else}byte{$endif}(avalue),
+           {$ifdef FPC}longword{$else}byte{$endif}(foptions),
+           {$ifdef FPC}longword{$else}byte{$endif}(mask)));
  end;
 end;
 

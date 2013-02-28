@@ -164,6 +164,10 @@ type
  pstringarty = ^stringarty;
  stringararty = array of stringarty;
  pstringararty = ^stringararty;
+ ansistringarty = array of ansistring;
+ pansistringarty = ^ansistringarty;
+ ansistringararty = array of ansistringarty;
+ pansistringararty = ^ansistringararty;
 
  pointeraty = array[0..0] of pointer;
  ppointeraty = ^pointeraty;

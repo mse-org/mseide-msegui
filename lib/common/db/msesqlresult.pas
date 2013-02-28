@@ -76,9 +76,10 @@ type
    property asid: int64 read getasid;
    property asguiid: tguid read getasguid;
    property isnull: boolean read getisnull;
-   
+
  end;
  dbcolclassty = class of tdbcol;
+ dbcolarty = array of tdbcol;
 
  tstringdbcol = class(tdbcol)
   private
@@ -230,7 +231,6 @@ type
  end;
   
 // tgraphicdbcol = class(tdbcol);
- dbcolarty = array of tdbcol;
 
  getnamefuncty = function:ansistring of object;
  
@@ -242,7 +242,7 @@ type
                   const acursor: tsqlcursor; const afielddefs: tfielddefs);
   public
    constructor create(const agetname: getnamefuncty);
-   function findcol(const aname: ansistring): tdbcol;   
+   function findcol(const aname: ansistring): tdbcol;
    function findcolindex(const aname: ansistring): integer;
    function colbyname(const aname: ansistring): tdbcol;
    function colsbyname(const anames: array of ansistring): dbcolarty;
@@ -494,20 +494,21 @@ procedure getsqlresult(const avalues: array of tdatalist;
                         const aparams: array of variant); overload;
            //whole resultset
 function getsqlresultvar( const atransaction: tsqltransaction;
-                      const asql: msestring; 
+                      const asql: msestring;
                       const aparams: array of variant): variant;
 function getsqlresultvarar( const atransaction: tsqltransaction;
-                      const asql: msestring; 
+                      const asql: msestring;
                       const aparams: array of variant): variantarty;
 function getsqlresultvararar( const atransaction: tsqltransaction;
-                      const asql: msestring; 
+                      const asql: msestring;
                       const aparams: array of variant): variantararty;
-                      
+
 implementation
 uses
- sysutils,dbconst,rtlconsts,mseapplication,variants,mseformatstr,msefloattostr;
-const 
- msedbcoltypeclasses: array[fieldclasstypety] of dbcolclassty = 
+ sysutils,{$ifdef FPC}dbconst{$else}dbconst_del,classes_del{$endif},rtlconsts,
+                          mseapplication,variants,mseformatstr,msefloattostr;
+const
+ msedbcoltypeclasses: array[fieldclasstypety] of dbcolclassty =
 //        ft_unknown,ft_string,   ft_guid,     ft_numeric,
           (tdbcol,   tstringdbcol,tguiddbcol,tlongintdbcol,
 //         ft_longint,   ft_largeint,   ft_smallint,
@@ -1295,7 +1296,7 @@ begin
  fbof:= true;
  feof:= true;
 // fparams:= tmseparams.create(self);
- fcols:= tdbcols.create(@getname);
+ fcols:= tdbcols.create({$ifdef FPC}@{$endif}getname);
  ffielddefs:= tsqlresultfielddefs.create(nil);
 // fsql:= tsqlstringlist.create;
 // fsql.onchange:= @onchangesql;
@@ -1961,10 +1962,10 @@ begin
                   {$ifdef FPC}@{$endif}getsqlresult);
  ffloatcols:= tdbcolnamearrayprop.create(msedb.realfields + msedb.datetimefields,
                       {$ifdef FPC}@{$endif}getsqlresult);
- fintegercols.onchange:= @fieldschanged;
- fint64cols.onchange:= @fieldschanged;
- ftextcols.onchange:= @fieldschanged;
- ffloatcols.onchange:= @fieldschanged;
+ fintegercols.onchange:= {$ifdef FPC}@{$endif}fieldschanged;
+ fint64cols.onchange:= {$ifdef FPC}@{$endif}fieldschanged;
+ ftextcols.onchange:= {$ifdef FPC}@{$endif}fieldschanged;
+ ffloatcols.onchange:= {$ifdef FPC}@{$endif}fieldschanged;
  inherited;
 end;
 
@@ -2060,11 +2061,11 @@ end;
 procedure tsqllookupbuffer.loadbuffer;
 var
  int1,int3,int4: integer;
- textf: array of tdbcol;
- integerf: array of tdbcol;
- int64f: array of tdbcol;
- realf: array of tdbcol;
- ar1: stringarty;
+ textf: dbcolarty;
+ integerf: dbcolarty;
+ int64f: dbcolarty;
+ realf: dbcolarty;
+ ar1: ansistringarty;
  bo1: boolean;
 begin
  application.beginwait;
