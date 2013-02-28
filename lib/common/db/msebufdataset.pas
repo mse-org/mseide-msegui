@@ -680,7 +680,6 @@ type
    procedure setoninternalcalcfields(const avalue: internalcalcfieldseventty);
    procedure checkfilterstate;
    procedure checklogfile;
-   procedure openlocal;
    procedure initsavepoint;
    procedure dointernalopen;
    procedure doloadfromstream;
@@ -807,6 +806,7 @@ type
    flastcurrentindex: integer;
    fsavepointlevel: integer;
 
+   procedure openlocal;
    procedure fixupcurrentset; virtual;
    procedure currentcheckbrowsemode;
 

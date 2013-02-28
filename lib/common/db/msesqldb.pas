@@ -15,8 +15,26 @@ uses
  msedatabase,sysutils,msetimer,msestrings,msearrayprops,mseapplication,
  msesqlquery;
 
+type
+ fieldparamlinkoptionty = (
+              fplo_autorefresh,fplo_refreshifactiveonly,
+              fplo_refreshifchangedonly,fplo_checkbrowsemodeonrefresh,
+              fplo_restorerecno,
+              fplo_syncmasterpost,fplo_syncmastercheckbrowsemode,
+              fplo_syncmasteredit,
+              fplo_syncmasterinsert,
+              fplo_syncmasterdelete,
+              fplo_syncslavepost,
+              fplo_syncslavecancel,
+              fplo_syncslaveedit,
+              fplo_syncslaveinsert,
+              fplo_syncslavedelete
+              );
+ fieldparamlinkoptionsty = set of fieldparamlinkoptionty;
 const
- defaultsqlcontrolleroptions = defaultdscontrolleroptions + 
+ defaultfieldparamlinkoptions = [fplo_autorefresh,fplo_refreshifchangedonly];
+
+ defaultsqlcontrolleroptions = defaultdscontrolleroptions +
                          [dso_autoapply,dso_autocommitret];
 type
  tmsesqltransaction = class(tsqltransaction,iactivatorclient)
@@ -57,7 +75,7 @@ type
   published
    property options default defaultsqlcontrolleroptions;
  end;
-                              
+
  tmsesqlquery = class(tsqlquery,imselocate,idscontroller,igetdscontroller,
                               isqlpropertyeditor,iactivatorclient)
   private
@@ -130,9 +148,9 @@ type
    procedure applyupdates(const maxerrors: integer; 
                 const cancelonerror: boolean;
                 const cancelondeleteerror: boolean = false;
-                const editonerror: boolean = false); override; overload;
-   procedure applyupdates(const maxerrors: integer = 0); override; overload;
-   procedure applyupdate; override; overload;
+                const editonerror: boolean = false); overload; override;
+   procedure applyupdates(const maxerrors: integer = 0); overload; override;
+   procedure applyupdate; overload; override;
   published
    property FieldDefs;
    property controller: tdscontroller read fcontroller write setcontroller;
@@ -163,7 +181,7 @@ type
 
  setparameventty = procedure(const sender: tfieldparamlink;
                         var done: boolean) of object;  
-                        
+
  tparamsourcedatalink = class(tfielddatalink)
   private
    fownerlink: tfieldparamlink;
@@ -191,26 +209,7 @@ type
   public
    constructor create(const aowner: tfieldparamlink);
  end;
-  
- fieldparamlinkoptionty = (
-              fplo_autorefresh,fplo_refreshifactiveonly,
-              fplo_refreshifchangedonly,fplo_checkbrowsemodeonrefresh,
-              fplo_restorerecno,
-              fplo_syncmasterpost,fplo_syncmastercheckbrowsemode,
-              fplo_syncmasteredit,
-              fplo_syncmasterinsert,
-              fplo_syncmasterdelete,
-              fplo_syncslavepost,
-              fplo_syncslavecancel,
-              fplo_syncslaveedit,
-              fplo_syncslaveinsert,
-              fplo_syncslavedelete
-              );
- fieldparamlinkoptionsty = set of fieldparamlinkoptionty;
-const
- defaultfieldparamlinkoptions = [fplo_autorefresh,fplo_refreshifchangedonly];
- 
-type  
+
  tdestvalue = class(townedpersistent,idbeditinfo,idbparaminfo)
   private
    fdatalink: tfielddatalink;
@@ -317,19 +316,19 @@ type
                                 operation: toperation); override;
    function truedelayus: integer;
    procedure checkrefresh;
-   function param(const aname: string): tparam;
-   function field(const aname: string): tfield;
+   function param(const aname: string): tparam; overload;
+   function field(const aname: string): tfield; overload;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    function param: tparam; overload;
-   function field: tfield;
+   function field: tfield; overload;
    procedure delayoff;
    procedure delayon;
   published
    property fieldname: string read getfieldname write setfieldname;
    property datasource: tdatasource read getdatasource write setdatasource;
-   property visualcontrol: boolean read getvisualcontrol 
+   property visualcontrol: boolean read getvisualcontrol
                     write setvisualcontrol default false;
    property destdataset: tsqlquery read getdestdataset write setdestdataset;
    property paramname: string read fparamname write fparamname;
@@ -348,10 +347,10 @@ type
                      write fonupdatemasteredit;
    property onupdatemasterinsert: masterdataseteventty read fonupdatemasterinsert 
                      write fonupdatemasterinsert;
-   property onupdateslaveedit: slavedataseteventty read fonupdateslaveedit 
-                     write fonupdatemasteredit;
-   property onupdateslaveinsert: slavedataseteventty read fonupdateslaveinsert 
-                     write fonupdatemasterinsert;
+   property onupdateslaveedit: slavedataseteventty read fonupdateslaveedit
+                     write fonupdateslaveedit;
+   property onupdateslaveinsert: slavedataseteventty read fonupdateslaveinsert
+                     write fonupdateslaveinsert;
  end;
 
  tsequencelink = class;
@@ -409,7 +408,8 @@ type
  
 implementation
 uses
- dbconst,msesysutils,typinfo,msedatalist,msesqlresult;
+ {$ifdef FPC}dbconst{$else}dbconst_del{$endif},msesysutils,typinfo,msedatalist,
+ msesqlresult;
  
 { tmsesqltransaction }
 
@@ -650,7 +650,7 @@ end;
 
 procedure tmsesqlquery.post;
 begin
- fcontroller.post(@afterpost);
+ fcontroller.post({$ifdef FPC}@{$endif}afterpost);
 end;
 
 procedure tmsesqlquery.afterapply;
@@ -1295,7 +1295,7 @@ end;
 procedure tfieldparamlink.defineproperties(filer: tfiler);
 begin
  inherited;
- filer.defineproperty('datafield',@readdatafield,nil,false);
+ filer.defineproperty('datafield',{$ifdef FPC}@{$endif}readdatafield,nil,false);
 end;
 
 procedure tfieldparamlink.readdatafield(reader: treader);

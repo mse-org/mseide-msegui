@@ -121,7 +121,6 @@ type
    procedure setoptionsedit(const avalue: optionseditty);
    function getreadonly: boolean;
    procedure setreadonly(const avalue: boolean);
-   function getedited: boolean; virtual;
    procedure setedited(const avalue: boolean); virtual;
   protected
    fdatalist: tdatalist;
@@ -129,8 +128,9 @@ type
    fgriddatalink: pointer;
    fstate: dataeditstatesty;
 //   fisdb: boolean;
- 
-//   procedure setisdb;  
+
+//   procedure setisdb;
+   function getedited: boolean; virtual;
    function geteditstate: dataeditstatesty;
    procedure seteditstate(const avalue: dataeditstatesty);
    function getoptionsedit: optionseditty; virtual;

@@ -267,7 +267,7 @@ procedure querytoupdateparams(const source: tsqlquery; const dest: tparams);
 
 implementation
 uses
- sysutils,dbconst,msearrayutils,typinfo;
+ sysutils,{$ifdef FPC}dbconst{$else}dbconst_del,classes_del{$endif},msearrayutils,typinfo;
  
 type
  tcustomsqlconnection1 = class(tcustomsqlconnection);
@@ -284,7 +284,7 @@ begin
       begin
         Inc(p);
         Result := True;
-        while not (p^ in [#0, '''']) do
+        while not ((p^ = #0) or (p^ = '''')) do
         begin
           if p^='\' then Inc(p,2) // make sure we handle \' and \\ correct
           else Inc(p);
@@ -295,7 +295,7 @@ begin
       begin
         Inc(p);
         Result := True;
-        while not (p^ in [#0, '"']) do
+        while not ((p^ = #0) or (p^ = '"')) do
         begin
           if p^='\'  then Inc(p,2) // make sure we handle \" and \\ correct
           else Inc(p);
@@ -310,7 +310,7 @@ begin
           Result := True;
           repeat // skip until at end of line
             Inc(p);
-          until p^ in [#10, #0];
+          until (p^ = #10) or (p^ = #0);
         end
       end;
     '/': // possible start of /* */ comment
@@ -414,8 +414,8 @@ begin
    end
    else begin
     if ftimer = nil then begin
-     ftimer:= tsimpletimer.create(fquery.masterdelayus,@dorefresh,true,
-                                                               [to_single]);
+     ftimer:= tsimpletimer.create(fquery.masterdelayus,
+                      {$ifdef FPC}@{$endif}dorefresh,true,[to_single]);
     end
     else begin
      ftimer.interval:= fquery.masterdelayus; //single shot
@@ -574,11 +574,11 @@ begin
   inherited Create(AOwner);
   FParams := TmseParams.create(self);
   FSQL := TsqlStringList.Create;
-  FSQL.OnChange := @OnChangeSQL;
+  FSQL.OnChange := {$ifdef FPC}@{$endif}OnChangeSQL;
 
   for k1:= low(tupdatekind) to high(tupdatekind) do begin
    fapplysql[k1]:= tupdatestringlist.create;
-   fapplysql[k1].onchange:= @onchangemodifysql;
+   fapplysql[k1].onchange:= {$ifdef FPC}@{$endif}onchangemodifysql;
   end;
   {
   FSQLUpdate := TupdatesqlStringList.Create;
@@ -1020,10 +1020,12 @@ begin
  repeat begin
  	inc(CurrentP);
 
-        if SkipComments(CurrentP) then
-         if ParsePart = ppStart then PhraseP := CurrentP;
-       	if CurrentP^ in [' ',#13,#10,#9,#0,'(',')',';'] then begin { if(1) }
-	    if (CurrentP-PhraseP > 0) or (CurrentP^ in [';',#0]) then begin { if(2) }
+  if SkipComments(CurrentP) then
+   if ParsePart = ppStart then PhraseP := CurrentP;
+ 	if (currentp^<#128) and
+         (char(byte(CurrentP^)) in [' ',#13,#10,#9,#0,'(',')',';']) then begin { if(1) }
+   if (CurrentP-PhraseP > 0) or (CurrentP^ = ';') or
+                                      (currentp^ = #0) then begin { if(2) }
 		strLength := CurrentP-PhraseP;
 		Setlength(S,strLength);
 		

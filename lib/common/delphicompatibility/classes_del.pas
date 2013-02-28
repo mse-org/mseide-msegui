@@ -169,6 +169,7 @@ function InterlockedExchange(var A: Integer; B: Integer): Integer;
 function InterlockedExchangeAdd(var A: Integer; B: Integer): Integer;
  {$endif}
 {$endif}
+function LeftStr(const S: string; Count: integer): string;
 
 implementation
 uses
@@ -177,6 +178,11 @@ uses
 {$define endian_little}
 {$define FPC_HAS_TYPE_EXTENDED}
 {$endif}
+
+function LeftStr(const S: string; Count: integer): string;
+begin
+  result := Copy(S, 1, Count);
+end ;
 
 {$ifndef FPC}
  {$ifdef MSWINDOWS}

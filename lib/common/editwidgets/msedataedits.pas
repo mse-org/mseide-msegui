@@ -532,9 +532,9 @@ type
    procedure setifilink1(const avalue: tifidropdownlistlinkcomp);
    procedure ifidropdownlistchanged(const acols: tifidropdowncols);
   {$endif}
+  protected
     //idropdownlist
    procedure imagelistchanged;
-  protected
    procedure paintimage(const canvas: tcanvas); override;
    procedure dochange; override;
   {$ifdef mse_with_ifi}
