@@ -103,10 +103,28 @@ type
 function  GetCurrentThreadId : threadty;
 Function GetProcedureAddress(Lib : TLibHandle;
                   const ProcName : AnsiString) : Pointer;
-
+procedure copycharbuf(const asource: string; const asize: integer; out buffer);
 implementation
 uses
  rtlconsts,windows;
+
+procedure copycharbuf(const asource: string; const asize: integer; out buffer);
+var
+ int1: integer;
+begin
+ if asize > 0 then begin
+  if asource = '' then begin
+   pchar(@buffer)^:= #0;
+  end
+  else begin
+   int1:= length(asource)+1;
+   if int1 > asize then begin
+    int1:= asize;
+   end;
+   move(pchar(pointer(asource))^,pchar(@buffer)^,int1);
+  end;
+ end;
+end;
 
 Function GetProcedureAddress(Lib : TLibHandle;
                   const ProcName : AnsiString) : Pointer;

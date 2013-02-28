@@ -14,17 +14,16 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
  Modified 2013 by Martin Schreiber
- 
+
  **********************************************************************}
 unit mdb;
-
-{$mode objfpc}
-
-{$h+}
+{$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 
 interface
 
-uses classes,mclasses,Sysutils,Variants,FmtBCD,MaskUtils;
+uses
+ classes,mclasses,Sysutils,Variants,FmtBCD,MaskUtils,msetypes
+   {$ifndef FPC},classes_del{$endif};
 
 const
 
@@ -185,9 +184,10 @@ type
    protected
     FFieldNo : Longint;
   public
-    constructor create(ACollection : TCollection); override;
+    constructor create(ACollection : TCollection); overload; override;
     constructor Create(AOwner: TFieldDefs; const AName: string;
-      ADataType: TFieldType; ASize: Integer; ARequired: Boolean; AFieldNo: Longint); overload;
+      ADataType: TFieldType; ASize: Integer; ARequired: Boolean;
+                                          AFieldNo: Longint); overload;
     destructor Destroy; override;
     procedure Assign(APersistent: TPersistent); override;
     function CreateField(AOwner: TComponent): TField;
@@ -1012,7 +1012,7 @@ type
     Function  GetItem(Index: Integer): TIndexDef;
     Procedure SetItem(Index: Integer; Value: TIndexDef);
   public
-    constructor Create(ADataSet: TDataSet); virtual; overload;
+    constructor Create(ADataSet: TDataSet); overload; virtual;
     procedure Add(const Name, Fields: string; Options: TIndexOptions);
     Function AddIndexDef: TIndexDef;
     function Find(const IndexName: string): TIndexDef;
@@ -1266,6 +1266,8 @@ type
   PBufferList = ^TBufferList;
   TBufferList = array[0..dsMaxBufferCount - 1] of TRecordBuffer;  // Dynamic array in Delphi.
   TBufferArray = ^TRecordBuffer;
+  bufferaty = array[0..1] of trecordbuffer;
+  pbufferaty = ^bufferaty;
   
   TGetMode = (gmCurrent, gmNext, gmPrior);
 
@@ -1635,7 +1637,8 @@ type
     property RecordSize: Word read GetRecordSize;
     property State: TDataSetState read FState;
     property Fields : TFields read FFieldList;
-    property FieldValues[fieldname : string] : Variant read GetFieldValues write SetFieldValues; default;
+    property FieldValues[const fieldname: string] : Variant read GetFieldValues
+                                        write SetFieldValues; default;
     property Filter: string read FFilterText write SetFilterText;
     property Filtered: Boolean read FFiltered write SetFiltered default False;
     property FilterOptions: TFilterOptions read FFilterOptions write SetFilterOptions;
@@ -2109,7 +2112,8 @@ function SkipComments(var p: PChar; EscapeSlash, EscapeRepeat : Boolean) : boole
 
 implementation
 
-uses dbconst,typinfo;
+uses
+ {$ifdef FPC}dbconst{$else}dbconst_del{$endif},typinfo;
 
 { ---------------------------------------------------------------------
     Auxiliary functions
@@ -2548,7 +2552,11 @@ end;
 function BuffersEqual(Buf1, Buf2: Pointer; Size: Integer): Boolean; 
 
 begin
-  Result:=CompareByte(Buf1,Buf2,Size)=0
+ {$ifdef FPC}
+  Result:= CompareByte(Buf1,Buf2,Size) = 0;
+ {$else}
+  Result:= Comparemem(Buf1,Buf2,Size);
+ {$endif}
 end;
 
 { ---------------------------------------------------------------------
@@ -2570,7 +2578,7 @@ begin
 // FBuffer must be allocated on create, to make Activebuffer return nil
   ReAllocMem(FBuffers,SizeOf(TRecordBuffer));
 //  pointer(FBuffers^) := nil;
-  FBuffers[0] := nil;
+  pbufferaty(FBuffers)^[0] := nil;
   FActiveRecord := 0;
   FBufferCount := -1;
   FEOF := True;
@@ -2597,7 +2605,7 @@ begin
     Free;
     end;
   for i := 0 to FBufferCount do
-    FreeRecordBuffer(FBuffers[i]);
+    FreeRecordBuffer(pbufferaty(FBuffers)^[i]);
   FConstraints.Free;
   FreeMem(FBuffers);
   Inherited Destroy;
@@ -3001,7 +3009,7 @@ end;
 Function TDataset.GetBuffer (Index : longint) : TRecordBuffer;
 
 begin
-  Result:=FBuffers[Index];
+  Result:= pbufferaty(FBuffers)^[Index];
 end;
 
 Procedure TDataset.GetCalcFields(Buffer: TRecordBuffer);
@@ -3079,7 +3087,8 @@ procedure TDataSet.DataConvert(aField: TField; aSource, aDest: Pointer;
    counter := 0;
    while Source[counter] <> #0 do
    begin
-     Dest[counter] := char(Source[counter]);
+//     Dest[counter] := char(Source[counter]);
+     Dest[counter] := Source[counter];
      Inc(counter);
    end;
    { terminate the string }
@@ -3097,7 +3106,11 @@ begin
     case DT of
       ftDate, ftTime, ftDateTime: TDateTimeRec(aDest^) := DateTimeToDateTimeRec(DT, TDateTime(aSource^));
       ftTimeStamp               : TTimeStamp(aDest^) := TTimeStamp(aSource^);
+{$ifdef FPC}
       ftBCD                     : TBCD(aDest^) := CurrToBCD(Currency(aSource^));
+{$else}
+      ftBCD                     : CurrToBCD(Currency(aSource^),TBCD(aDest^));
+{$endif}
       ftFMTBCD                  : TBcd(aDest^) := TBcd(aSource^);
   // See notes from mantis bug-report 8204 for more information
   //    ftBytes                   : ;
@@ -3282,7 +3295,7 @@ end;
 
 Function TDataset.GetNextRecord: Boolean;
 
-  procedure ExchangeBuffers(var buf1,buf2 : pointer);
+  procedure ExchangeBuffers(var buf1,buf2 : trecordbuffer);
 
   var tempbuf : pointer;
 
@@ -3297,7 +3310,7 @@ begin
   Writeln ('Getting next record. Internal RecordCount : ',FRecordCount);
 {$endif}
   If FRecordCount>0 Then SetCurrentRecord(FRecordCount-1);
-  Result:=GetRecord(FBuffers[FBuffercount],gmNext,True)=grOK;
+  Result:=GetRecord(pbufferaty(FBuffers)^[FBuffercount],gmNext,True)=grOK;
 
   if result then
     begin
@@ -3308,7 +3321,8 @@ begin
         begin
           inc(FRecordCount);
           FCurrentRecord:=FRecordCount - 1;
-          ExchangeBuffers(Fbuffers[FCurrentRecord],FBuffers[FBuffercount]);
+          ExchangeBuffers(pbufferaty(FBuffers)^[FCurrentRecord],
+                     pbufferaty(FBuffers)^[FBuffercount]);
         end;
     end
   else
@@ -3340,7 +3354,7 @@ begin
 {$endif}
   CheckBiDirectional;
   If FRecordCount>0 Then SetCurrentRecord(0);
-  Result:=GetRecord(FBuffers[FBuffercount],gmPrior,True)=grOK;
+  Result:=GetRecord(pbufferaty(FBuffers)^[FBuffercount],gmPrior,True)=grOK;
   if result then
     begin
       If FRecordCount=0 then ActivateBuffers;
@@ -3724,7 +3738,7 @@ begin
     Writeln ('   Filling memory :',(Value+1-FBufferCount)*SizeOf(TRecordBuffer));
 {$endif}
     inc(FBufferCount); // Cause FBuffers[FBufferCount] is already allocated
-    FillChar(FBuffers[FBufferCount],(Value+1-FBufferCount)*SizeOF(TRecordBuffer),#0);
+    FillChar(pbufferaty(FBuffers)^[FBufferCount],(Value+1-FBufferCount)*SizeOF(TRecordBuffer),#0);
 {$ifdef dsdebug}
     Writeln ('   Filled memory :');
 {$endif}
@@ -3733,7 +3747,7 @@ begin
       Writeln ('   Assigning buffers :',(Value)*SizeOf(TRecordBuffer));
 {$endif}
       For I:=FBufferCount to Value do
-        FBuffers[i]:=AllocRecordBuffer;
+        pbufferaty(FBuffers)^[i]:=AllocRecordBuffer;
 {$ifdef dsdebug}
       Writeln ('   Assigned buffers ',FBufferCount,' :',(Value)*SizeOf(TRecordBuffer));
 {$endif}
@@ -3741,7 +3755,7 @@ begin
       I:=FBufferCount;
       While (I<(Value+1)) do
         begin
-        FreeRecordBuffer(FBuffers[i]);
+        FreeRecordBuffer(pbufferaty(FBuffers)^[i]);
         Inc(i);
         end;
       raise;
@@ -3762,12 +3776,12 @@ begin
     If Assigned(FBuffers) then
       begin
       For I:=Value+1 to FBufferCount do
-        FreeRecordBuffer(FBuffers[i]);
+        FreeRecordBuffer(pbufferaty(FBuffers)^[i]);
       // FBuffer must stay allocated, to make sure that Activebuffer returns nil
       if Value = -1 then
         begin
         ReAllocMem(FBuffers,SizeOf(TRecordBuffer));
-        FBuffers[0] := nil;
+        pbufferaty(FBuffers)^[0] := nil;
         end
       else
         ReAllocMem(FBuffers,(Value+1)*SizeOf(TRecordBuffer));
@@ -3800,8 +3814,8 @@ begin
 {$ifdef DSdebug}
     Writeln ('Setting current record to',index);
 {$endif}
-    if not FIsUniDirectional then Case GetBookMarkFlag(FBuffers[Index]) of
-      bfCurrent : InternalSetToRecord(FBuffers[Index]);
+    if not FIsUniDirectional then Case GetBookMarkFlag(pbufferaty(FBuffers)^[Index]) of
+      bfCurrent : InternalSetToRecord(pbufferaty(FBuffers)^[Index]);
       bfBOF : InternalFirst;
       bfEOF : InternalLast;
       end;
@@ -3915,7 +3929,7 @@ end;
 Function TDataset.Tempbuffer: TRecordBuffer;
 
 begin
-  Result := FBuffers[FRecordCount];
+  Result := pbufferaty(FBuffers)^[FRecordCount];
 end;
 
 Procedure TDataset.UpdateIndexDefs;
@@ -3956,7 +3970,7 @@ begin
 {$ifdef dsdebug}
   Writeln ('Active buffer requested. Returning:',ActiveRecord);
 {$endif}
-  Result:=FBuffers[FActiveRecord];
+  Result:=pbufferaty(FBuffers)^[FActiveRecord];
 end;
 
 Procedure TDataset.Append;
@@ -4082,7 +4096,7 @@ begin
 {$endif}
     DoBeforeDelete;
     DoBeforeScroll;
-    If Not TryDoing(@InternalDelete,OnPostError) then exit;
+    If Not TryDoing({$ifdef FPC}@{$endif}InternalDelete,OnPostError) then exit;
 {$ifdef dsdebug}
     writeln ('Delete: Internaldelete succeeded');
 {$endif}
@@ -4131,9 +4145,11 @@ Procedure TDataset.DoInsertAppend(DoAppend : Boolean);
     begin
     if FRecordCount > 0 then
       begin
-      TempBuf := FBuffers[FBuffercount];
-      move(FBuffers[FActiveRecord],FBuffers[FActiveRecord+1],(Fbuffercount-FActiveRecord)*sizeof(FBuffers[0]));
-      FBuffers[FActiveRecord]:=TempBuf;
+      TempBuf := pbufferaty(FBuffers)^[FBuffercount];
+      move(pbufferaty(FBuffers)^[FActiveRecord],
+            pbufferaty(FBuffers)^[FActiveRecord+1],
+            (Fbuffercount-FActiveRecord)*sizeof(pbufferaty(FBuffers)^[0]));
+      pbufferaty(FBuffers)^[FActiveRecord]:=TempBuf;
       end;
     end
   else if FRecordcount=FBuffercount then
@@ -4145,7 +4161,7 @@ Procedure TDataset.DoInsertAppend(DoAppend : Boolean);
     end;
 
   // Active buffer is now edit buffer. Initialize.
-  InitRecord(FBuffers[FActiveRecord]);
+  InitRecord(pbufferaty(FBuffers)^[FActiveRecord]);
   cursorposchanged;
 
   // Put bookmark in edit buffer.
@@ -4230,7 +4246,7 @@ begin
     Exit;
     end;
   DoBeforeEdit;
-  If Not TryDoing(@InternalEdit,OnEditError) then exit;
+  If Not TryDoing({$ifdef FPC}@{$endif}InternalEdit,OnEditError) then exit;
   GetCalcFields(ActiveBuffer);
   SetState(dsedit);
   DataEvent(deRecordChange,0);
@@ -4578,7 +4594,7 @@ begin
     writeln ('Post: checking required fields');
 {$endif}
     DoBeforePost;
-    If Not TryDoing(@InternalPost,OnPostError) then exit;
+    If Not TryDoing({$ifdef FPC}@{$endif}InternalPost,OnPostError) then exit;
     cursorposchanged;
 {$ifdef dsdebug}
     writeln ('Post: Internalpost succeeded');
@@ -4639,13 +4655,13 @@ begin
 //  SetCurrentRecord(FActiverecord);
 
 // Now look if the data on the current cursor of the underlying dataset is still available
-  If GetRecord(Fbuffers[0],gmcurrent,False)<>grOk Then
+  If GetRecord(pbufferaty(FBuffers)^[0],gmcurrent,False)<>grOk Then
 // If that fails and rmExact is set, then raise an exception
     If rmExact in Mode then
       DatabaseError(SNoSuchRecord,Self)
 // else, if rmexact is not set, try to fetch the next  or prior record in the underlying dataset
-    else if (GetRecord(Fbuffers[0],gmnext,True)<>grOk) and
-            (GetRecord(Fbuffers[0],gmprior,True)<>grOk) then
+    else if (GetRecord(pbufferaty(FBuffers)^[0],gmnext,True)<>grOk) and
+            (GetRecord(pbufferaty(FBuffers)^[0],gmprior,True)<>grOk) then
       begin
 {$ifdef dsdebug}
       Writeln ('Resync: fuzzy resync');
@@ -4781,9 +4797,10 @@ Procedure TDataset.ShiftBuffersBackward;
 var TempBuf : pointer;
 
 begin
-  TempBuf := FBuffers[0];
-  move(FBuffers[1],FBuffers[0],(fbuffercount)*sizeof(FBuffers[0]));
-  FBuffers[buffercount]:=TempBuf;
+  TempBuf := pbufferaty(FBuffers)^[0];
+  move(pbufferaty(FBuffers)^[1],pbufferaty(FBuffers)^[0],
+                  (fbuffercount)*sizeof(pbufferaty(FBuffers)^[0]));
+  pbufferaty(FBuffers)^[buffercount]:=TempBuf;
 end;
 
 Procedure TDataset.ShiftBuffersForward;
@@ -4791,9 +4808,10 @@ Procedure TDataset.ShiftBuffersForward;
 var TempBuf : pointer;
 
 begin
-  TempBuf := FBuffers[FBufferCount];
-  move(FBuffers[0],FBuffers[1],(fbuffercount)*sizeof(FBuffers[0]));
-  FBuffers[0]:=TempBuf;
+  TempBuf := pbufferaty(FBuffers)^[FBufferCount];
+  move(pbufferaty(FBuffers)^[0],pbufferaty(FBuffers)^[1],
+                               (fbuffercount)*sizeof(pbufferaty(FBuffers)^[0]));
+  pbufferaty(FBuffers)^[0]:=TempBuf;
 end;
 
 function TDataset.GetFieldValues(const Fieldname: string): Variant;
@@ -5380,7 +5398,9 @@ end;
 function TField.GetAsBCD: TBCD;
 begin
   raise AccessError(SBCD);
+{$ifdef FPC}
   result:= 0; //compiler warning
+{$endif}
 end;
 
 function TField.GetAsBoolean: Boolean;
@@ -6161,7 +6181,11 @@ begin
     begin
     // The data is copied into the buffer, since some TDataset descendents copy
     // the whole buffer-length in SetData. (See bug 8477)
+{$ifdef FPC}
     Buf := AValue;
+{$else}
+    copycharbuf(avalue,sizeof(buf),buf);
+{$endif}
     // If length(AValue) > Datasize the buffer isn't terminated properly
     Buf[DataSize-1] := #0;
     SetData(@Buf);
@@ -6809,13 +6833,13 @@ begin
     Fmt:=FDisplayFormat
   else
     Fmt:=FEditFormat;
-    
+
   Digits := 0;
   if not FCurrency then
     ff := ffGeneral
   else
     begin
-    Digits := defaultformatsettings.CurrencyDecimals;
+    Digits := {$ifdef FPC}defaultformatsettings.{$endif}CurrencyDecimals;
     if ADisplayText then
       ff := ffCurrency
     else
@@ -6871,7 +6895,8 @@ begin
   Inherited Create(AOwner);
   SetDatatype(ftfloat);
   FPrecision:=15;
-  FValidChars := [defaultformatsettings.DecimalSeparator, '+', '-', '0'..'9', 'E', 'e'];
+  FValidChars := [{$ifdef FPC}defaultformatsettings.{$endif}DecimalSeparator,
+                                                  '+', '-', '0'..'9', 'E', 'e'];
 end;
 
 Function TFloatField.CheckRange(AValue : Double) : Boolean;
@@ -7081,8 +7106,8 @@ begin
       F:=FDisplayFormat
     else
       Case DataType of
-       ftTime : F:=defaultformatsettings.LongTimeFormat;
-       ftDate : F:=defaultformatsettings.ShortDateFormat;
+       ftTime : F:= {$ifdef FPC}defaultformatsettings.{$endif}LongTimeFormat;
+       ftDate : F:= {$ifdef FPC}defaultformatsettings.{$endif}ShortDateFormat;
       else
        F:='c'
       end;
@@ -7189,13 +7214,14 @@ end;
 
 
 function TBinaryField.GetAsString: string;
-var B: TBytes;
+var
+ B: TBytes;
 begin
   B := GetAsBytes;
   if length(B) = 0 then
     Result := ''
   else
-    SetString(Result, @B[0], length(B) div SizeOf(Char));
+    SetString(Result, pchar(@B[0]), length(B) div SizeOf(Char));
 end;
 
 
@@ -7240,11 +7266,11 @@ begin
 
     if DataType = ftVarBytes then begin
       PWord(P)^ := Len;
-      Move(AValue[0], P[sizeof(Word)], Len);
+      Move(AValue[0], pchar(P)[sizeof(Word)], Len);
     end
     else begin // ftBytes
       Move(AValue[0], P^, Len);
-      FillChar(P[Len], DataSize-Len, 0); // right pad with #0
+      FillChar(pchar(P)[Len], DataSize-Len, 0); // right pad with #0
     end;
   end;
   SetData(P, True)
@@ -7483,7 +7509,8 @@ begin
   Inherited Create(AOwner);
   FMaxvalue := 0;
   FMinvalue := 0;
-  FValidChars := [defaultformatsettings.DecimalSeparator, '+', '-', '0'..'9'];
+  FValidChars := [{$ifdef FPC}defaultformatsettings.{$endif}DecimalSeparator,
+                                                            '+', '-', '0'..'9'];
   SetDataType(ftBCD);
   FPrecision := 15;
   Size:=4;
@@ -7501,9 +7528,10 @@ end;
 constructor TFMTBCDField.Create(AOwner: TComponent);
 begin
   Inherited Create(AOwner);
-  FMaxValue := 0;
-  FMinValue := 0;
-  FValidChars := [defaultformatsettings.DecimalSeparator, '+', '-', '0'..'9'];
+  FMaxValue := nullbcd;
+  FMinValue := nullbcd;
+  FValidChars := [{$ifdef FPC}defaultformatsettings.{$endif}DecimalSeparator,
+                                                            '+', '-', '0'..'9'];
   SetDataType(ftFMTBCD);
 // Max.precision for NUMERIC,DECIMAL datatypes supported by some databases:
 //  Firebird-18; Oracle,SqlServer-38; MySQL-65; PostgreSQL-1000
@@ -7615,8 +7643,10 @@ end;
 
 Function TFMTBCDField.CheckRange(AValue: TBCD) : Boolean;
 begin
-  If (FMinValue<>0) or (FMaxValue<>0) then
-    Result:=(AValue>=FMinValue) and (AValue<=FMaxValue)
+  If (bcdcompare(FMinValue,nullbcd) <> 0) or
+                          (bcdcompare(FMaxValue,nullbcd)<> 0) then
+    Result:= (bcdcompare(AValue,FMinValue) >= 0) and
+             (bcdcompare(AValue,FMaxValue) <= 0)
   else
     Result:=True;
 end;
@@ -7626,7 +7656,8 @@ begin
   if CheckRange(AValue) then
     SetData(@AValue)
   else
-    RangeError(AValue, BCDToDouble(FMinValue), BCDToDouble(FMaxValue));
+    RangeError(bcdtodouble(AValue), BCDToDouble(FMinValue),
+                                                BCDToDouble(FMaxValue));
 end;
 
 procedure TFMTBCDField.SetAsCurrency(AValue: Currency);
@@ -10102,7 +10133,7 @@ end;
 function TParam.GetAsFMTBCD: TBCD;
 begin
   If IsNull then
-    Result:=0
+    Result:= nullbcd
   else
     Result:=VarToBCD(FValue);
 end;
