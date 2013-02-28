@@ -13,6 +13,12 @@ unit msedatalist;
 
 interface
 
+{$ifndef FPC}
+ {$ifdef mswindows}
+  {$define msestringsarenotrefcounted}
+ {$endif}
+{$endif}
+
 uses
  sysutils,classes,mclasses,msestrings,typinfo,msereal,msetypes,msestream,
  mseclasses,mselist,mseglob,msearrayutils;
@@ -680,7 +686,11 @@ type
    procedure readitem(const reader: treader; var value); override;
    procedure writeitem(const writer: twriter; var value); override;
    procedure freedata(var data); override; //gibt daten frei
+{$ifdef msestringsarenotrefcounted}
+   procedure aftercopy(var data); override;
+{$else}
    procedure beforecopy(var data); override;
+{$endif}
    procedure assignto(dest: tpersistent); override;
    procedure setstatdata(const index: integer; const value: msestring); override;
    function getstatdata(const index: integer): msestring; override;
@@ -707,7 +717,7 @@ type
 
    function gettext: msestring;
    procedure settext(const avalue: msestring);
-   
+
    function indexof(const value: msestring): integer;
    function empty(const index: integer): boolean; override;   //true wenn leer
    function concatstring(const delim: msestring = '';
@@ -755,7 +765,11 @@ type
    procedure writeitem(const writer: twriter; var value); override;
    function compare(const l,r): integer; override;
    procedure freedata(var data); override; //gibt daten frei
+{$ifdef msestringsarenotrefcounted}
+   procedure aftercopy(var data); override;
+{$else}
    procedure beforecopy(var data); override;
+{$endif}
   public
    constructor create; override;
 //   procedure assign(source: tpersistent); override;
@@ -4744,10 +4758,17 @@ begin
  msestring(data):= '';
 end;
 
+{$ifdef msestringsarenotrefcounted}
+procedure tpoorstringdatalist.aftercopy(var data);
+begin
+ stringaddref(msestring(data));
+end;
+{$else}
 procedure tpoorstringdatalist.beforecopy(var data);
 begin
  stringaddref(msestring(data));
 end;
+{$endif}
 
 procedure tpoorstringdatalist.assignto(dest: tpersistent);
 var
@@ -5191,11 +5212,19 @@ begin
  result:= adddata(value);
 end;
 
+{$ifdef msestringsarenotrefcounted}
+procedure tdoublemsestringdatalist.aftercopy(var data);
+begin
+ inherited;
+ stringaddref(doublemsestringty(data).b);
+end;
+{$else}
 procedure tdoublemsestringdatalist.beforecopy(var data);
 begin
  inherited;
  stringaddref(doublemsestringty(data).b);
 end;
+{$endif}
 
 constructor tdoublemsestringdatalist.create;
 begin
