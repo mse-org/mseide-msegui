@@ -28,7 +28,7 @@ uses
  {$ifdef mse_with_ifi},mseifiglob,mseificompglob,mseificomp{$endif};
 
 type
-                         //0       1         2         3          4    
+                         //0       1         2         3          4
  dbnavigbuttonty = (dbnb_first,dbnb_prior,dbnb_next,dbnb_last,dbnb_insert,
  //             5             6            7
            dbnb_delete,dbnb_copyrecord,dbnb_edit,
@@ -38,11 +38,15 @@ type
            dbnb_filter,dbnb_filtermin,dbnb_filtermax,dbnb_filteronoff,dbnb_find,
  //            16           17
            dbnb_autoedit,dbnb_dialog);
-           
+
  dbnavigbuttonsty = set of dbnavigbuttonty;
- 
+
 const
- defaultvisibledbnavigbuttons = 
+ defaultdbscrollbaroptions =
+    (defaultthumbtrackscrollbaroptions - [sbo_showauto])+
+             [sbo_show,sbo_thumbtrack];
+
+ defaultvisibledbnavigbuttons =
           [dbnb_first,dbnb_prior,dbnb_next,dbnb_last,dbnb_insert,
            dbnb_delete,dbnb_edit,dbnb_post,dbnb_cancel,dbnb_refresh];
  filterdbnavigbuttons = [dbnb_filter,dbnb_filtermin,dbnb_filtermax,dbnb_find];
@@ -50,9 +54,10 @@ const
  defaultdbnavigatorwidth = (ord(dbnb_refresh))*defaultdbnavigatorheight;
 
  defaultindicatorcoloptions = [fco_mousefocus];
- 
-type
 
+ maxautodisplaywidth = 20;
+
+type
  dbnavigatoroptionty = (dno_confirmdelete,dno_confirmcopy,
                         dno_append,dno_shortcuthint,
                         dno_norefreshrecno,
@@ -82,16 +87,18 @@ const
  designdbnavigbuttons = [dbnb_first,dbnb_prior,dbnb_next,dbnb_last];
  editnavigbuttons = [dbnb_insert,dbnb_delete,dbnb_edit];
 
- defaultdbdropdownoptions = [deo_selectonly,deo_autodropdown,deo_keydropdown];   
+ defaultdbdropdownoptions = [deo_selectonly,deo_autodropdown,deo_keydropdown];
  defaultdropdowndatalinkoptions = [gdo_propscrollbar,gdo_thumbtrack];
 
-type 
- updaterowdataeventty = procedure(const sender: tcustomgrid; 
+ defaulteddropdownoptions = [deo_selectonly,deo_autodropdown,deo_keydropdown];
+
+type
+ updaterowdataeventty = procedure(const sender: tcustomgrid;
                         const arow: integer; const adataset: tdataset)of object;
 
  optiondbty = (odb_copyitems,odb_opendataset,odb_closedataset,odb_directdata);
  optionsdbty = set of optiondbty;
- 
+
  idbnaviglink = interface(inullinterface)
   procedure setactivebuttons(const abuttons: dbnavigbuttonsty;
                const afiltered: boolean);
@@ -525,7 +532,7 @@ type
    function createdropdowncontroller: tcustomdropdowncontroller; override;
    procedure recordselected(const arecordnum: integer; const akey: keyty);
   //ilbdropdownlist
-   function getlbkeydatakind: lbdatakindty;                     
+   function getlbkeydatakind: lbdatakindty;
   published
    property dropdown: tdropdownlistcontrollerlb read getdropdown
                                                        write setdropdown;
@@ -789,7 +796,7 @@ type
    property max;
 
  end;
- 
+
  tdbbooleaneditradio = class(tcustombooleaneditradio,idbeditfieldlink,ireccontrol)
   private
    fdatalink: teditwidgetdatalink;
@@ -1063,14 +1070,13 @@ type
    property valuedefault;
    property onsetvalue;
  end;
- 
 
  tnolistdropdowncol = class(tdropdowncol)
  end;
- 
+
  tnolistdropdowncols = class(tdropdowncols)
  end;
- 
+
  tdbdropdowncol = class(tnolistdropdowncol,idbeditinfo)
   private
    fdatafield: string;
@@ -1340,7 +1346,7 @@ type
                                        write setfieldname_readonly;
    property fieldname_merged: string read ffieldname_merged 
                                        write setfieldname_merged;
-   property fieldname_selected: string read ffieldname_selected 
+   property fieldname_selected: string read ffieldname_selected
                                        write setfieldname_selected;
    property navigator: tdbnavigator read fnavigator write setnavigator;
    property onbeginedit: notifyeventty read fonbeginedit write fonbeginedit;
@@ -1584,12 +1590,6 @@ type
                     write setdbindicatorcol default -1;
  end;
 
-const
- defaultdbscrollbaroptions = 
-    (defaultthumbtrackscrollbaroptions - [sbo_showauto])+ 
-             [sbo_show,sbo_thumbtrack];
- 
-type
  tdbscrollbar = class(tthumbtrackscrollbar)
   protected
    procedure setoptions(const avalue: scrollbaroptionsty); override;
@@ -1621,7 +1621,7 @@ type
   public
    class function getitemclasstype: persistentclassty; override;
  end;
-  
+
  tcustomdbwidgetgrid = class(tcustomwidgetgrid,igriddatalink)
   private
    fdatalink: tgriddatalink;
@@ -1741,7 +1741,7 @@ type
    procedure updatedata; override;
    procedure layoutchanged; override;
  end;
- 
+
  tdbstringcol = class(tcustomstringcol,idbeditfieldlink,idbeditinfo)
   private
    fdatalink: tstringcoldatalink;
@@ -1750,7 +1750,7 @@ type
    procedure setdatafield(const avalue: string);
     //idbeditinfo
    procedure getfieldtypes(out propertynames: stringarty;
-                          out fieldtypes: fieldtypesarty);
+                          out fieldtypes: fieldtypesarty); overload;
    function getdataset(const aindex: integer): tdataset;
    function getoptionsdb: optionseditdbty;
    procedure setoptionsdb(const avalue: optionseditdbty);
@@ -1763,7 +1763,7 @@ type
    function getrowtext(const arow: integer): msestring; override;
    function createdatalist: tdatalist; override;
     //idbeditfieldlink
-   procedure getfieldtypes(var afieldtypes: fieldtypesty);
+   procedure getfieldtypes(var afieldtypes: fieldtypesty); overload;
    function getgriddatasource: tdatasource; virtual;
    function getgridintf: iwidgetgrid;
    function getwidget: twidget;
@@ -1844,7 +1844,7 @@ type
    constructor create(const aowner: tcustomgrid;
                        const adatalink: tgriddatalink);
   published
-   property dbindicatorcol: integer read getdbindicatorcol 
+   property dbindicatorcol: integer read getdbindicatorcol
                                  write setdbindicatorcol default -1;
  end;
 
@@ -1856,10 +1856,6 @@ type
    procedure activechanged; override;
  end;
 
-const
- maxautodisplaywidth = 20;
- 
-type
  tcustomdbstringgrid = class(tcustomstringgrid,iwidgetgrid,igriddatalink)
   private
    fdatalink: tstringgriddatalink;
@@ -2103,11 +2099,6 @@ type
   public
    property items[const index: integer]: tlbdropdowncol read getitems; default;
  end;
-
-const
- defaulteddropdownoptions = [deo_selectonly,deo_autodropdown,deo_keydropdown];
- 
-type
 
  optionlbty = (olb_copyitems);
  optionslbty = set of optionlbty;
@@ -3540,11 +3531,13 @@ begin
 end;
 
 procedure tcustomeditwidgetdatalink.setoptions(const avalue: optionseditdbty);
-var
+const
  mask: optionseditdbty = [oed_autoedit,oed_noautoedit];
 begin
  foptions:= optionseditdbty(
-        setsinglebit(longword(avalue),longword(foptions),longword(mask)));
+        setsinglebit({$ifdef FPC}longword{$else}word{$endif}(avalue),
+                      {$ifdef FPC}longword{$else}word{$endif}(foptions),
+                      {$ifdef FPC}longword{$else}word{$endif}(mask)));
 end;
 
 { tdbstringedit }
@@ -11259,7 +11252,7 @@ end;
 procedure tdbnavigbutton.defineproperties(filer: tfiler);
 begin
  inherited;              //backward compatibility
- filer.defineproperty('tag',@readtag,nil,false);
+ filer.defineproperty('tag',{$ifdef FPC}@{$endif}readtag,nil,false);
 end;
 
 { tdbwidgetcols }

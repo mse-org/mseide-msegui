@@ -478,7 +478,7 @@ type
    ffontfocusednum: integer;
    fwidthmax: integer;
    fwidthmin: integer;
-  function getcolindex: integer;
+   function getcolindex: integer;
    procedure setfocusrectdist(const avalue: integer);
    procedure updatepropwidth;
    procedure setrowcoloroffset(const avalue: integer);
@@ -493,8 +493,6 @@ type
    procedure setfontfocusednum(const avalue: integer);
    function getvisible: boolean;
    procedure setvisible(const avalue: boolean);
-   function getenabled: boolean;
-   procedure setenabled(const avalue: boolean);
    function getreadonly: boolean;
    procedure setreadonly(const avalue: boolean);
   protected
@@ -504,6 +502,8 @@ type
    ffontselect: tcolselectfont;
    ffocusrectdist: integer;
    fmaxwidth: integer;
+   function getenabled: boolean;
+   procedure setenabled(const avalue: boolean);
    function checkautocolwidth: boolean; //true if width changed
    procedure updatecolwidth(const acol,acount: integer; var acolwidth: integer);
    procedure createfontselect;
