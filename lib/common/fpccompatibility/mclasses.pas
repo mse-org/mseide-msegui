@@ -6844,16 +6844,17 @@ begin
   Result := nil;
   UClassName:=UpperCase(AClassName);
   FindInFieldTable(Root);
-  
+
   if (Result=nil) and assigned(LookupRoot) and (LookupRoot<>Root) then
     FindInFieldTable(LookupRoot);
 
   if (Result=nil) then begin
     PersistentClass := GetClass(AClassName);
-    if PersistentClass.InheritsFrom(TComponent) then
+    if {$ifndef FPC}(persistentclass <> nil) and{$endif}
+             PersistentClass.InheritsFrom(TComponent) then
       Result := TComponentClass(PersistentClass);
   end;
-    
+
   if (Result=nil) and assigned(OnFindComponentClass) then
     OnFindComponentClass(Self, AClassName, Result);
 

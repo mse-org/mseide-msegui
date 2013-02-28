@@ -66,7 +66,7 @@ type
  end;
  sigsetinfoarty = array of sigsetinfoty;
 
- ttextprojectoptions = class
+ ttextprojectoptions = class(toptions)
   private
    fmainfile: filenamety;
    ftargetfile: filenamety;
@@ -148,7 +148,7 @@ type
    property newfoforms: msestringarty read fnewfoforms write fnewfoforms;
  end;
 
- ttexteditoptions = class
+ ttexteditoptions = class(toptions)
   private
    fsourcefilemasks: msestringarty;
    fsyntaxdeffiles: msestringarty;
@@ -244,7 +244,7 @@ type
                   setcodetemplatedirs;
  end;
 
- ttextdebugoptions = class
+ ttextdebugoptions = class(toptions)
   private
    fdebugcommand: filenamety;
    fdebugoptions: msestring;
