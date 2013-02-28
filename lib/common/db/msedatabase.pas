@@ -238,7 +238,7 @@ type
    property KeepConnection: Boolean read FKeepConnection 
                               write FKeepConnection default false;
    property Params : TStrings read FParams Write setparams;
-   property onbeforeconnect: databaseeventty read fonbeforeconnect 
+   property onbeforeconnect: databaseeventty read fonbeforeconnect
                                    write fonbeforeconnect;  
    property onafterconnect: databaseeventty read fonafterconnect 
                                    write fonafterconnect;  
@@ -288,21 +288,22 @@ type
                                     const aintf: iactivatorclient);
  end;
 
- 
+
 procedure dosetdatabase(const sender: idatabaseclient; const avalue: tmdatabase;
                  var dest: tmdatabase);
-procedure dosettransaction(const sender: itransactionclient; 
+procedure dosettransaction(const sender: itransactionclient;
         const avalue: tmdbtransaction; var dest: tmdbtransaction;
         const awrite: boolean);
 procedure checkdatabase(const aname: ansistring; const adatabase: tmdatabase);
 procedure checktransaction(const aname: ansistring; const atransaction: tmdbtransaction);
 procedure checkinactive(const active: boolean; const aname: ansistring);
 procedure checkactive(const active: boolean; const aname: ansistring);
-                 
+
 implementation
 uses
- dbconst,msefileutils,msearrayutils,msebits;
- 
+ {$ifdef FPC}dbconst{$else}dbconst_del{$endif},msefileutils,msearrayutils,msebits
+ {$ifndef FPC},classes_del{$endif};
+
 procedure checkdatabase(const aname: ansistring; const adatabase: tmdatabase);
 begin
  if adatabase = nil then begin
@@ -654,7 +655,7 @@ var
  int1: integer;
 begin
  int1:= high(fdatasets);
- if adduniqueitem(pointerarty(fdatasets),ds) <= int1 then begin
+ if adduniqueitem(pointerarty(fdatasets),pointer(ds)) <= int1 then begin
   DatabaseErrorFmt(SDatasetRegistered,[DS.getname]);
  end;
 end;
@@ -673,7 +674,7 @@ end;
 
 procedure tmdatabase.UnRegisterDataset(const DS: idatabaseclient);
 begin
- if removeitem(pointerarty(fdatasets),ds) < 0 then begin
+ if removeitem(pointerarty(fdatasets),pointer(ds)) < 0 then begin
   DatabaseErrorFmt(SNoDatasetRegistered,[DS.getName]);
  end;
 end;
@@ -924,7 +925,7 @@ begin
   ar1:= @fdatasets;
   ar2:= @fdatasetsactive;
  end;
- int1:= removeitem(pointerarty(ar1^),ds);
+ int1:= removeitem(pointerarty(ar1^),pointer(ds));
  if int1 < 0 then begin
   DatabaseErrorFmt(SNoDatasetRegistered,[DS.getName]);
  end;
@@ -946,7 +947,7 @@ begin
   ar1:= @fdatasets;
  end;
  int1:= high(ar1^);
- if adduniqueitem(pointerarty(ar1^),ds) <= int1 then begin
+ if adduniqueitem(pointerarty(ar1^),pointer(ds)) <= int1 then begin
   DatabaseErrorFmt(SDatasetRegistered,[DS.getname]);
  end;
 end;

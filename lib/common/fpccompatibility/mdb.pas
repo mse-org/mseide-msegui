@@ -1355,7 +1355,6 @@ type
     Procedure ShiftBuffersForward;
     Procedure ShiftBuffersBackward;
     Function  TryDoing (P : TDataOperation; Ev : TDatasetErrorEvent) : Boolean;
-    Function GetActive : boolean;
     Procedure UnRegisterDataSource(ADatasource : TDatasource);
     Procedure UpdateFieldDefs;
     procedure SetBlockReadSize(AValue: Integer); virtual;
@@ -1417,6 +1416,7 @@ type
     FIsUniDirectional: Boolean;
     FState : TDataSetState;
     FInternalOpenComplete: Boolean;
+    Function GetActive : boolean;
     procedure RecalcBufListSize;
     procedure ActivateBuffers; virtual;
     procedure BindFields(Binding: Boolean);

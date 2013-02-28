@@ -2639,8 +2639,8 @@ implementation
 uses
  msesysintf,typinfo,msestreaming,msetimer,msebits,msewidgets,
  mseshapes,msestockobjects,msefileutils,msedatalist,Math,msesysutils,
- {$ifdef FPCc} rtlconst {$else} RtlConsts{$endif},mseformatstr,mseprocutils,
- msesys,msesysdnd;
+ rtlconsts,{$ifndef FPC}classes_del,{$endif}mseformatstr,
+ mseprocutils,msesys,msesysdnd;
 
 const
  faceoptionsmask: faceoptionsty = [fao_alphafadeimage,fao_alphafadenochildren,

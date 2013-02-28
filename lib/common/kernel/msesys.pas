@@ -155,14 +155,6 @@ procedure deletecommandlineargument(const index: integer);
 function getexceptiontext(obj: tobject; addr: pointer; framecount: longint;
                                      frames: ppointer): msestring;
 {$endif}
-{$ifndef FPC}
- {$ifdef MSWINDOWS}
-function InterlockedIncrement(var I: Integer): Integer;
-function InterlockedDecrement(var I: Integer): Integer;
-function InterlockedExchange(var A: Integer; B: Integer): Integer;
-function InterlockedExchangeAdd(var A: Integer; B: Integer): Integer;
- {$endif}
-{$endif}
 threadvar
  mselasterror: integer;
  mselasterrormessage: msestring;
@@ -202,30 +194,6 @@ begin
   end;
  end;
 end;
-
-{$ifndef FPC}
- {$ifdef MSWINDOWS}
-function InterlockedIncrement(var I: Integer): Integer;
-begin
- result:= windows.interlockedincrement(i);
-end;
-
-function InterlockedDecrement(var I: Integer): Integer;
-begin
- result:= windows.interlockeddecrement(i);
-end;
-
-function InterlockedExchange(var A: Integer; B: Integer): Integer;
-begin
- result:= windows.interlockedexchange(a,b);
-end;
-
-function InterlockedExchangeAdd(var A: Integer; B: Integer): Integer;
-begin
- result:= windows.interlockedexchangeadd(a,b);
-end;
- {$endif}
-{$endif}
 
 const
  errortexts: array[syserrorty] of string =

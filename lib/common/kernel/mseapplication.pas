@@ -393,7 +393,7 @@ var
 implementation
 uses
  msebits,msesysintf1,msesysintf,msesysutils,msefileutils,msedatalist,
- msearrayutils
+ msearrayutils{$ifndef FPC},classes_del{$endif}
  {$ifdef mse_debuggdisync},msegraphics{$endif};
 
 type

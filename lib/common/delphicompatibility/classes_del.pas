@@ -159,6 +159,14 @@ Function GetProcedureAddress(Lib : TLibHandle;
                   const ProcName : AnsiString) : Pointer;
 procedure copycharbuf(const asource: string; const asize: integer; out buffer);
 Function FileTruncate (Handle : THandle;Size: Int64) : boolean;
+{$ifndef FPC}
+ {$ifdef MSWINDOWS}
+function InterlockedIncrement(var I: Integer): Integer;
+function InterlockedDecrement(var I: Integer): Integer;
+function InterlockedExchange(var A: Integer; B: Integer): Integer;
+function InterlockedExchangeAdd(var A: Integer; B: Integer): Integer;
+ {$endif}
+{$endif}
 
 implementation
 uses
@@ -166,6 +174,30 @@ uses
 {$ifndef FPC}
 {$define endian_little}
 {$define FPC_HAS_TYPE_EXTENDED}
+{$endif}
+
+{$ifndef FPC}
+ {$ifdef MSWINDOWS}
+function InterlockedIncrement(var I: Integer): Integer;
+begin
+ result:= windows.interlockedincrement(i);
+end;
+
+function InterlockedDecrement(var I: Integer): Integer;
+begin
+ result:= windows.interlockeddecrement(i);
+end;
+
+function InterlockedExchange(var A: Integer; B: Integer): Integer;
+begin
+ result:= windows.interlockedexchange(a,b);
+end;
+
+function InterlockedExchangeAdd(var A: Integer; B: Integer): Integer;
+begin
+ result:= windows.interlockedexchangeadd(a,b);
+end;
+ {$endif}
 {$endif}
 
 function Unassigned: Variant; // Unassigned standard constant

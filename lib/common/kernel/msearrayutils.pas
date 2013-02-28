@@ -292,7 +292,7 @@ function opentodynarrayby(const items: array of byte): bytearty;
 
 implementation
 uses
- rtlconsts,classes,sysutils,msereal,msesys;
+ rtlconsts,classes,sysutils,msereal,msesys{$ifndef FPC},classes_del{$endif};
 
 procedure splitcomplexar(const acomplex: complexarty; out re,im: realarty);
 var
