@@ -194,6 +194,8 @@ type
  pmethodaty = ^methodaty;
  stringaty = array[0..0] of string;
  pstringaty = ^stringaty;
+ widestringaty = array[0..0] of widestring;
+ pwidestringaty = ^widestringaty;
  ansistringaty = array[0..0] of ansistring;
  pansistringaty = ^ansistringaty;
 

@@ -2,8 +2,8 @@
     This file is part of the Free Pascal run time library.
     Copyright (c) 1999-2000 by Michael Van Canneyt, member of the
     Free Pascal development team
-    
-    
+
+
     BufDataset implementation
 
     See the file COPYING.MSE, included in this distribution,
@@ -16,20 +16,14 @@
   Rewritten 2006-2013 by Martin Schreiber
 
  **********************************************************************}
- 
+
 unit msebufdataset;
 {$ifdef FPC}
- {$define mse_FPC_2_2}
  {$mode objfpc}{$h+}{$GOTO ON}{$interfaces corba}
- {$if defined(FPC) and (fpc_fullversion >= 020501)}
-  {$define mse_fpc_2_6} 
- {$ifend}
- {$ifdef mse_fpc_2_6}
-  {$define mse_hasvtunicodestring}
- {$endif}
+ {$define mse_hasvtunicodestring}
 {$endif}
 
-interface 
+interface
 
 uses
  mdb,classes,mclasses,variants,msetypes,msearrayprops,mseclasses,mselist,
@@ -154,8 +148,8 @@ type
  pdsrecordty = ^dsrecordty;
  
 const
- intheadersize = sizeof(intrecordty.intheader);
- dsheadersize = sizeof(dsrecordty.dsheader);
+ intheadersize = sizeof(intheaderty);
+ dsheadersize = sizeof(dsheaderty);
      
 // structure of internal recordbuffer:
 //                 +---------<frecordsize>---------+
@@ -249,7 +243,7 @@ type
 
  resolverresponsety = (rr_abort,rr_quiet,rr_revert,rr_again,rr_applied);
  resolverresponsesty = set of resolverresponsety;
- 
+
  updateerroreventty = procedure(
       const sender: tmsebufdataset;
       var e: edatabaseerror; const updatekind: tupdatekind;
@@ -473,15 +467,13 @@ type
    function fieldmodified(const afield: tfield; const delayed: boolean): boolean;
    procedure preparefixup; //clear changed indexes
   published
-   property onindexchanged: bufdataseteventty read fonindexchanged 
+   property onindexchanged: bufdataseteventty read fonindexchanged
                                                         write fonindexchanged;
  end;
-  
-type
- 
+
  recupdateflagty = (ruf_applied,ruf_error);
  recupdateflagsty = set of recupdateflagty;
- 
+
  recupdateinfoty = record
   updatekind: tupdatekind;
   flags: recupdateflagsty;
@@ -853,7 +845,8 @@ type
              out buffer: pointer; out datasize: integer): boolean; overload; 
              //read, true if not null
    function getfieldbuffer(const afield: tfield;
-             const isnull: boolean; out datasize: integer): pointer; virtual; overload;
+             const isnull: boolean; out datasize: integer): pointer;
+                                                       overload; virtual;
              //write
    procedure fieldchanged(const field: tfield);
    function getfiltereditkind: filtereditkindty;
@@ -1098,10 +1091,12 @@ type
           //keyindex must be unique, copies equally named visible fields,
           //inserts record if key not found.   
 
-   procedure copyfieldvalues(const bm: bookmarkdataty; const dest: tdataset);
+   procedure copyfieldvalues(const bm: bookmarkdataty;
+                               const dest: tdataset); overload;
                         //copies field values with same name
    procedure copyfieldvalues(const bm: bookmarkdataty;
-                const dest: tmsebufdataset; const acancelupdate: boolean);
+                const dest: tmsebufdataset;
+                       const acancelupdate: boolean); overload;
                         //copies field values with same name
 
    function isutf8: boolean; virtual;
@@ -1137,15 +1132,15 @@ type
    property applyerrorcount: integer read getapplyerrorcount;
    property applyerrorrecords: recupdateinfoarty read getapplyerrorrecords;
    
-   procedure applyupdates(const maxerrors: integer = 0); virtual; overload;
+   procedure applyupdates(const maxerrors: integer = 0); overload; virtual;
    procedure applyupdates(const maxerrors: integer;
                          const cancelonerror: boolean;
                 const cancelondeleteerror: boolean = false;
-                const editonerror: boolean = false); virtual; overload;
+                const editonerror: boolean = false); overload; virtual;
    procedure applyupdate(const cancelonerror: boolean;
                 const cancelondeleteerror: boolean = false;
-                const editonerror: boolean = false); virtual; overload;
-   procedure applyupdate; virtual; overload;
+                const editonerror: boolean = false); overload; virtual;
+   procedure applyupdate; overload; virtual;
                    //applies current record
    function recapplying: boolean;
    procedure cancelupdates; virtual;
@@ -1239,10 +1234,10 @@ type
    
    function getdata(const afields: array of tfield): variantararty;
                              //[] -> all
-   procedure sumfield(const afield: tfield; out asum: double);
-   procedure sumfield(const afield: tfield; out asum: currency);
-   procedure sumfield(const afield: tfield; out asum: integer);
-   procedure sumfield(const afield: tfield; out asum: int64);
+   procedure sumfield(const afield: tfield; out asum: double); overload;
+   procedure sumfield(const afield: tfield; out asum: currency); overload;
+   procedure sumfield(const afield: tfield; out asum: integer); overload;
+   procedure sumfield(const afield: tfield; out asum: int64); overload;
    function sumfielddouble(const afield: tfield): double;
    function sumfieldcurrency(const afield: tfield): currency;
    function sumfieldinteger(const afield: tfield): integer;
@@ -1284,15 +1279,13 @@ procedure alignfieldpos(var avalue: integer);
 
 implementation
 uses
- rtlconsts,dbconst,sysutils,mseformatstr,msereal,msesys,
- msefileutils,mseapplication,msesysutils;
+ rtlconsts,{$ifdef FPC}dbconst{$else}dbconst_del{$endif},sysutils,mseformatstr,
+ msereal,msesys,msefileutils,mseapplication,msesysutils;
  
-{$ifdef mse_FPC_2_2}
 const
- snotineditstate = 
+ snotineditstate =
  'Operation not allowed, dataset "%s" is not in an edit or insert state.';
             //name changed in FPC 2_2
-{$endif}
 
 type
  tmsestringfield1 = class(tmsestringfield); 
@@ -1422,20 +1415,26 @@ type
  
 const
  comparefuncs: array[fieldcomparekindty] of fieldcompareinfoty = 
-  ((datatypes: integerindexfields; cvtype: vtinteger; compfunc: @compinteger;
-                                   compfunci: @compinteger),
-   (datatypes: largeintindexfields; cvtype: vtint64; compfunc: @compint64;
-                                   compfunci: @compint64),
-   (datatypes: floatindexfields; cvtype: vtextended; compfunc: @compfloat;
-                                 compfunci: @compfloat),
-   (datatypes: currencyindexfields; cvtype: vtcurrency; compfunc: @compcurrency;
-                                    compfunci: @compcurrency),
-   (datatypes: stringindexfields; 
+  ((datatypes: integerindexfields; cvtype: vtinteger;
+                compfunc: {$ifdef FPC}@{$endif}compinteger;
+                compfunci: {$ifdef FPC}@{$endif}compinteger),
+   (datatypes: largeintindexfields; cvtype: vtint64;
+                compfunc: {$ifdef FPC}@{$endif}compint64;
+                compfunci: {$ifdef FPC}@{$endif}compint64),
+   (datatypes: floatindexfields; cvtype: vtextended;
+                compfunc: {$ifdef FPC}@{$endif}compfloat;
+                compfunci: {$ifdef FPC}@{$endif}compfloat),
+   (datatypes: currencyindexfields; cvtype: vtcurrency;
+                compfunc: {$ifdef FPC}@{$endif}compcurrency;
+                compfunci: {$ifdef FPC}@{$endif}compcurrency),
+   (datatypes: stringindexfields;
           cvtype: {$ifdef mse_hasvtunicodestring}vtunicodestring
-                  {$else}vtwidestring{$endif}; compfunc: @compstring;
-                                  compfunci: @compstringi),
-   (datatypes: guidindexfields; cvtype: mse_vtguid; compfunc: @compguid;
-                                    compfunci: @compguid)
+                  {$else}vtwidestring{$endif};
+                compfunc: {$ifdef FPC}@{$endif}compstring;
+                compfunci: {$ifdef FPC}@{$endif}compstringi),
+   (datatypes: guidindexfields; cvtype: mse_vtguid;
+                compfunc: {$ifdef FPC}@{$endif}compguid;
+                compfunci: {$ifdef FPC}@{$endif}compguid)
 );
 
 procedure alignfieldpos(var avalue: integer);
@@ -1446,11 +1445,18 @@ begin
 end;
 
 const
+{$ifdef FPC}
  ormask:  array[0..7] of byte = (%00000001,%00000010,%00000100,%00001000,
                                  %00010000,%00100000,%01000000,%10000000);
  andmask: array[0..7] of byte = (%11111110,%11111101,%11111011,%11110111,
                                  %11101111,%11011111,%10111111,%01111111);
-          
+{$else}
+ ormask:  array[0..7] of byte = ($01,$02,$04,$08,$10,$20,$40,$80);
+ andmask: array[0..7] of byte =
+              (byte(not$01),byte(not$02),byte(not$04),byte(not$08),
+               byte(not$10),byte(not$20),byte(not$40),byte(not$80));
+{$endif}
+
 procedure setfieldflag(nullmask: pbyte; const x: integer);
 //var
 // int1: integer;
@@ -1509,7 +1515,7 @@ begin
   if fbufindex >= bufstreambuffersize then begin
    flushbuffer;
   end;
-  inc(po1,int1);
+  inc(pchar(po1),int1);
   dec(length,int1);
  end;
 end;
@@ -1521,7 +1527,7 @@ var
  blobinfo: blobstreaminfoty;
 begin
  with fowner.ffieldinfos[aindex].base do begin
-  fielddata:= pointer(data) + offset;
+  fielddata:= pchar(pointer(data)) + offset;
   case fieldtype of
    ftstring,ftfixedchar,ftwidestring,ftfixedwidechar: begin
     writemsestring(msestring(fielddata^));
@@ -1592,6 +1598,10 @@ begin
  write(avalue,sizeof(pointer));
 end;
 
+type
+ pointeraty1 = array[0..1] of pointer;
+ ppointeraty1 = ^pointeraty1;
+
 procedure tbufstreamwriter.writevariant(const avalue: variant);
 var
  int1,int2: integer;
@@ -1609,7 +1619,7 @@ begin
   if vtype and vararray <> 0 then begin
    write(varray^,sizeof(tvararray));
    with varray^ do begin
-    write((varray+1)^,(dimcount-1)*sizeof(tvararrayboundarray));
+    write(ppointeraty1(varray)^[1],(dimcount-1)*sizeof(tvararrayboundarray));
                //additional dims
     int2:= 1;
     for int1:= 0 to dimcount-1 do begin
@@ -1619,17 +1629,17 @@ begin
     case vtype and vartypemask of
      varstring: begin
       for int1:= 0 to int2 - 1 do begin
-       writestring((pstring(data)+int1)^);
+       writestring(pstringaty(data)^[int1]);
       end;
      end;
      varolestr: begin
       for int1:= 0 to int2 - 1 do begin
-       writemsestring((pwidestring(data)+int1)^);
+       writemsestring(pwidestringaty(data)^[int1]);
       end;
      end;
      varvariant: begin
       for int1:= 0 to int2 - 1 do begin
-       writevariant((pvariant(data)+int1)^);
+       writevariant(pvariantaty(data)^[int1]);
       end;
      end;
     end;
@@ -1660,7 +1670,7 @@ begin
    int1:= fbuflen - fbufindex;
   end;
   move(fbuffer[fbufindex],po1^,int1);
-  inc(po1,int1);
+  inc(pchar(po1),int1);
   inc(result,int1);
   dec(length,int1);
   inc(fbufindex,int1);
@@ -1688,7 +1698,7 @@ var
  blobinfo: blobstreaminfoty;
 begin
  with fowner.ffieldinfos[aindex].base do begin
-  fielddata:= pointer(data) + offset;
+  fielddata:= pchar(pointer(data)) + offset;
   case fieldtype of
    ftstring,ftfixedchar,ftwidestring,ftfixedwidechar: begin
     msestring(fielddata^):= readmsestring;
@@ -1809,36 +1819,36 @@ begin
    end;
   end;
   if vtype and vararray <> 0 then begin
-   varray:= getmem(sizeof(tvararray));
+   getmem(pointer(varray),sizeof(tvararray));
    read(varray^,sizeof(tvararray));
    varray^.lockcount:= 0;
    reallocmem(varray,sizeof(tvararray)+
                    (varray^.dimcount-1)*sizeof(tvararrayboundarray));
    with varray^ do begin
-    read(pointer(varray+1)^,(dimcount-1)*sizeof(tvararrayboundarray));
+    read(ppointeraty1(varray)^[1],(dimcount-1)*sizeof(tvararrayboundarray));
     int2:= 1;
     for int1:= 0 to dimcount-1 do begin
      int2:= int2 * bounds[int1].elementcount;
     end;
-    data:= getmem(elementsize*int2);
+    getmem(data,elementsize*int2);
     read(data^,elementsize*int2);
     case vtype and vartypemask of
      varstring: begin
       for int1:= 0 to int2 - 1 do begin
-       (ppointer(data)+int1)^:= nil;
-       (pansistring(data)+int1)^:= readstring;
+       ppointeraty(data)^[int1]:= nil;
+       pansistringaty(data)^[int1]:= readstring;
       end;
      end;
      varolestr: begin
       for int1:= 0 to int2 - 1 do begin
-       (ppointer(data)+int1)^:= nil;
-       (pwidestring(data)+int1)^:= readmsestring;
+       ppointeraty(data)^[int1]:= nil;
+       pwidestringaty(data)^[int1]:= readmsestring;
       end;
      end;
      varvariant: begin
       for int1:= 0 to int2 - 1 do begin
-       (pvardata(data)+int1)^.vtype:= 0;
-       (pvariant(data)+int1)^:= readvariant;
+       pvardataaty(data)^[int1].vtype:= 0;
+       pvariantaty(data)^[int1]:= readvariant;
       end;
      end;
     end;
@@ -1971,10 +1981,10 @@ var
  int1: integer;
 begin
  for int1:= high(fstringpositions) downto 0 do begin
-  pmsestring(pointer(@header)+fstringpositions[int1])^:= '';
+  pmsestring(pchar(pointer(@header))+fstringpositions[int1])^:= '';
  end;
  for int1:= high(fvarpositions) downto 0 do begin
-  freedbvariant(pvariant(pointer(@header)+fvarpositions[int1])^);
+  freedbvariant(pvariant(pchar(pointer(@header))+fvarpositions[int1])^);
  end;
 end;
 
@@ -1983,10 +1993,10 @@ var
  int1: integer;
 begin
  for int1:= high(fcalcstringpositions) downto 0 do begin
-  pmsestring(pointer(@header)+fcalcstringpositions[int1])^:= '';
+  pmsestring(pchar(pointer(@header))+fcalcstringpositions[int1])^:= '';
  end;
  for int1:= high(fcalcvarpositions) downto 0 do begin
-  freedbvariant(pvariant(pointer(@header)+fcalcvarpositions[int1])^)
+  freedbvariant(pvariant(pchar(pointer(@header))+fcalcvarpositions[int1])^)
  end;
 end;
 {
@@ -2014,10 +2024,10 @@ var
  int1: integer;
 begin
  for int1:= high(fstringpositions) downto 0 do begin
-  stringaddref(pmsestring(pointer(@header)+fstringpositions[int1])^);
+  stringaddref(pmsestring(pchar(pointer(@header))+fstringpositions[int1])^);
  end;
  for int1:= high(fvarpositions) downto 0 do begin
-  addrefdbvariant(pvariant(pointer(@header)+fvarpositions[int1])^)
+  addrefdbvariant(pvariant(pchar(pointer(@header))+fvarpositions[int1])^)
  end;
 end;
 
@@ -2052,12 +2062,12 @@ var
 begin
  with pdsrecordty(buffer)^ do begin
   for int1:= high(fcalcstringpositions) downto 0 do begin
-   pmsestring(pointer(@header)+fcalcstringpositions[int1])^:= '';
+   pmsestring(pchar(pointer(@header))+fcalcstringpositions[int1])^:= '';
   end;
   for int1:= high(fcalcvarpositions) downto 0 do begin
-   freedbvariant(pvariant(pointer(@header)+fcalcvarpositions[int1])^)
+   freedbvariant(pvariant(pchar(pointer(@header))+fcalcvarpositions[int1])^)
   end;
-  fillchar((pointer(@header)+frecordsize)^,fcalcrecordsize-frecordsize,0);
+  fillchar((pchar(pointer(@header))+frecordsize)^,fcalcrecordsize-frecordsize,0);
  end;
 end;
 

@@ -17,6 +17,8 @@ type
  variantaty = array[0..0] of variant;
  pvariantaty = ^variantaty;
  variantararty = array of variantarty;
+ vardataaty = array[0..0] of tvardata;
+ pvardataaty = ^vardataaty;
  
 function mseVarTypeIsValidArrayType(const aVarType: TVarType): Boolean;
 function mseVarArrayCreate(const Bounds: PVarArrayBoundArray; Dims : SizeInt;
