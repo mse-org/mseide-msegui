@@ -9,30 +9,11 @@
 }
 unit msedb;
 
-{$if fpc_fullversion >= 020403}
- {$define mse_fpc_2_4_3} 
-{$endif}
-{$if fpc_fullversion >= 020501}
- {$define mse_fpc_2_6} 
-{$endif}
-{$ifdef mse_fpc_2_6}
+{$ifdef FPC}
  {$define mse_hasvtunicodestring}
 {$endif}
-{$ifdef VER2_2_0} {$define focuscontrolbug} {$endif}
-{$define mse_FPC_2_2}
 {$define hasaswidestring}
 {$define integergetdatasize}
-{$ifdef VER2_0_4}
- {$undef mse_FPC_2_2}
- {$undef hasaswidestring}
- {$undef integergetdatasize}
-{$endif}
-{$ifdef VER2_2_0}
- {$undef integergetdatasize}
-{$endif}
-{$ifdef VER2_2_2}
- {$undef integergetdatasize}
-{$endif}
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
 
@@ -41,14 +22,23 @@ interface
 uses
  classes,mclasses,mdb,mseclasses,mseglob,msestrings,msetypes,msearrayprops,
  mseapplication,
- sysutils,msebintree,mseact,msetimer{$ifdef mse_fpc_2_4_3},maskutils{$endif},
- msevariants;
+ sysutils,msebintree,mseact,msetimer,maskutils,
+ msevariants{$ifndef FPC},classes_del{$endif};
 
 const
  mse_vtguid = $ff;
  guidbuffersize = 36; //aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee
+
+ de_modified = ord(high(tdataevent))+1;
+ de_afterdelete = ord(high(tdataevent))+2;
+ de_afterpost = ord(high(tdataevent))+3;
+ de_hasactiveedit = ord(high(tdataevent))+4;
+
+ defaultdscontrolleroptions = [{dso_cancelupdateondeleteerror}];
+ allfieldkinds = [fkData,fkCalculated,fkLookup,fkInternalCalc];
+
 type
- bookmarkty = string; 
+ bookmarkty = string;
    //use instead of TBookmarkStr in order to avoid
    // FPC deprecated warning
 // guidbufferty = array[0..guidbuffersize-1] of char;
@@ -134,11 +124,14 @@ type
   function gettextindex(const afield: tfield;
                  const acaseinsensitive: boolean): integer; //-1 if none
   function lookuptext(const indexnum: integer; const akey: integer;
-         const aisnull: boolean; const valuefield: tmsestringfield): msestring;
+         const aisnull: boolean;
+          const valuefield: tmsestringfield): msestring; overload;
   function lookuptext(const indexnum: integer; const akey: int64;
-         const aisnull: boolean; const valuefield: tmsestringfield): msestring;
+          const aisnull: boolean;
+         const valuefield: tmsestringfield): msestring; overload;
   function lookuptext(const indexnum: integer; const akey: msestring;
-         const aisnull: boolean; const valuefield: tmsestringfield): msestring;
+         const aisnull: boolean;
+          const valuefield: tmsestringfield): msestring; overload;
   function findtext(const indexnum: integer; const searchtext: msestring;
                     out arecord: integer): boolean;
   function getrowtext(const indexnum: integer; const arecord: integer;
@@ -166,14 +159,14 @@ type
  end;
  
  idatasetsum = interface(inullinterface)['{125A1501-400E-4CAC-905C-DF730E41EFA7}']
-  procedure sumfield(const afield: tfield; out asum: integer);
-  procedure sumfield(const afield: tfield; out asum: int64);
-  procedure sumfield(const afield: tfield; out asum: currency);
-  procedure sumfield(const afield: tfield; out asum: double);
+  procedure sumfield(const afield: tfield; out asum: integer); overload;
+  procedure sumfield(const afield: tfield; out asum: int64); overload;
+  procedure sumfield(const afield: tfield; out asum: currency); overload;
+  procedure sumfield(const afield: tfield; out asum: double); overload;
  end;
  
  getdatasourcefuncty = function: tdatasource of object;
- 
+
  tdbfieldnamearrayprop = class(tstringarrayprop,idbeditinfo)
   private
    ffieldtypes: fieldtypesty;
@@ -189,11 +182,10 @@ type
    property fieldtypes: fieldtypesty read ffieldtypes write ffieldtypes;
  end;
 
-type
  tdscontroller = class;
 
  ifieldcomponent = interface;
-  
+
  idsfieldcontroller = interface(inullinterface)
   function getcontroller: tdscontroller;
   procedure fielddestroyed(const sender: ifieldcomponent);
@@ -235,10 +227,8 @@ type
    procedure readlookup(reader: treader); 
          //workaround for breaking fix of FPC Mantis 12809
    procedure defineproperties(filer: tfiler); override;
-  {$ifdef hasaswidestring}
    function getaswidestring: widestring; override;
    procedure setaswidestring(const avalue: widestring); override;
-  {$endif}
    procedure change; override;
    procedure SetDataset(AValue : TDataset); override;
   public
@@ -264,7 +254,7 @@ type
                      out avalue: msestring): boolean of object; //false if null
  setmsestringdataty = procedure(const sender: tmsestringfield;
                           avalue: msestring) of object;
- 
+
  tmsestringfield = class(tstringfield,ifieldcomponent,imsefield)
   private
    fstate: fieldstatesty;
@@ -296,19 +286,13 @@ type
    procedure readlookup(reader: treader);
          //workaround for breaking fix of FPC Mantis 12809
    procedure defineproperties(filer: tfiler); override;
-  {$ifdef hasaswidestring}
    function getaswidestring: widestring; override;
    procedure setaswidestring(const avalue: widestring); override;
-  {$endif}
    procedure setismsestring(const getter: getmsestringdataty;
                             const setter: setmsestringdataty;
                             const acharacterlength: integer;
                             const aisftwidestring: boolean);
-   {$ifdef integergetdatasize}
    function GetDataSize: integer; override;
-   {$else}
-   function GetDataSize: Word; override;
-   {$endif}
    function GetAsString: string; override;
    function GetAsVariant: variant; override;
    procedure SetAsString(const AValue: string); override;
@@ -366,7 +350,7 @@ type
    property value: tguid read getasguid write setasguid;
   published
  end;
- 
+
  tmsenumericfield = class(tnumericfield,imsefield)
   private
    fstate: fieldstatesty;
@@ -382,10 +366,8 @@ type
    procedure readlookup(reader: treader);
          //workaround for breaking fix of FPC Mantis 12809
    procedure defineproperties(filer: tfiler); override;
-  {$ifdef hasaswidestring}
    function getaswidestring: widestring; override;
    procedure setaswidestring(const avalue: widestring); override;
-  {$endif}
    procedure change; override;
    procedure SetDataset(AValue : TDataset); override;
   public
@@ -425,10 +407,8 @@ type
    procedure readlookup(reader: treader);
          //workaround for breaking fix of FPC Mantis 12809
    procedure defineproperties(filer: tfiler); override;
-  {$ifdef hasaswidestring}
    function getaswidestring: widestring; override;
    procedure setaswidestring(const avalue: widestring); override;
-  {$endif}
    function getasboolean: boolean; override;
    procedure setasboolean(avalue: boolean); override;
    procedure setaslargeint(avalue: largeint); override;
@@ -476,10 +456,8 @@ type
    procedure readlookup(reader: treader);
          //workaround for breaking fix of FPC Mantis 12809
    procedure defineproperties(filer: tfiler); override;
-  {$ifdef hasaswidestring}
    function getaswidestring: widestring; override;
    procedure setaswidestring(const avalue: widestring); override;
-  {$endif}
    function getasboolean: boolean; override;
    procedure setasboolean(avalue: boolean); override;
    procedure gettext(var thetext: string; adisplaytext: boolean); override;
@@ -523,10 +501,8 @@ type
    procedure readlookup(reader: treader);
          //workaround for breaking fix of FPC Mantis 12809
    procedure defineproperties(filer: tfiler); override;
-  {$ifdef hasaswidestring}
    function getaswidestring: widestring; override;
    procedure setaswidestring(const avalue: widestring); override;
-  {$endif}
    function getasboolean: boolean; override;
    procedure setasboolean(avalue: boolean); override;
    procedure setaslargeint(avalue: largeint); override;
@@ -567,10 +543,8 @@ type
    procedure readlookup(reader: treader);
          //workaround for breaking fix of FPC Mantis 12809
    procedure defineproperties(filer: tfiler); override;
-  {$ifdef hasaswidestring}
    function getaswidestring: widestring; override;
    procedure setaswidestring(const avalue: widestring); override;
-  {$endif}
    function getasboolean: boolean; override;
    procedure setasboolean(avalue: boolean); override;
    procedure setaslargeint(avalue: largeint); override;
@@ -611,10 +585,8 @@ type
    procedure readlookup(reader: treader);
          //workaround for breaking fix of FPC Mantis 12809
    procedure defineproperties(filer: tfiler); override;
-  {$ifdef hasaswidestring}
    function getaswidestring: widestring; override;
    procedure setaswidestring(const avalue: widestring); override;
-  {$endif}
    procedure change; override;
    procedure SetDataset(AValue : TDataset); override;
   public
@@ -651,10 +623,8 @@ type
    procedure readlookup(reader: treader);
          //workaround for breaking fix of FPC Mantis 12809
    procedure defineproperties(filer: tfiler); override;
-  {$ifdef hasaswidestring}
    function getaswidestring: widestring; override;
    procedure setaswidestring(const avalue: widestring); override;
-  {$endif}
    function getasfloat: double; override;
    function getascurrency: currency; override;
    procedure setasfloat(avalue: double); override;
@@ -705,15 +675,9 @@ type
    procedure readlookup(reader: treader);
          //workaround for breaking fix of FPC Mantis 12809
    procedure defineproperties(filer: tfiler); override;
-  {$ifdef hasaswidestring}
    function getaswidestring: widestring; override;
    procedure setaswidestring(const avalue: widestring); override;
-  {$endif}
-   {$ifdef integergetdatasize}
    function GetDataSize: integer; override;
-   {$else}
-   function GetDataSize: Word; override;
-   {$endif}
    function GetAsBoolean: Boolean; override;
    procedure SetAsBoolean(AValue: Boolean); override;
    function getasstring: string; override;
@@ -768,10 +732,8 @@ type
    procedure readlookup(reader: treader);
          //workaround for breaking fix of FPC Mantis 12809
    procedure defineproperties(filer: tfiler); override;
-  {$ifdef hasaswidestring}
    function getaswidestring: widestring; override;
    procedure setaswidestring(const avalue: widestring); override;
-  {$endif}
    function getasdatetime: tdatetime; override;
    procedure setasdatetime(avalue: tdatetime); override;
    procedure setasstring(const avalue: string); override;
@@ -823,10 +785,8 @@ type
    procedure readlookup(reader: treader);
          //workaround for breaking fix of FPC Mantis 12809
    procedure defineproperties(filer: tfiler); override;
-  {$ifdef hasaswidestring}
    function getaswidestring: widestring; override;
    procedure setaswidestring(const avalue: widestring); override;
-  {$endif}
    procedure change; override;
    procedure SetDataset(AValue : TDataset); override;
   public
@@ -862,10 +822,8 @@ type
    procedure readlookup(reader: treader);
          //workaround for breaking fix of FPC Mantis 12809
    procedure defineproperties(filer: tfiler); override;
-  {$ifdef hasaswidestring}
    function getaswidestring: widestring; override;
    procedure setaswidestring(const avalue: widestring); override;
-  {$endif}
    function getasvariant: variant; override;
    function getasstring: string; override;
    procedure setasstring(const avalue: string); override;
@@ -904,10 +862,8 @@ type
    procedure readlookup(reader: treader);
          //workaround for breaking fix of FPC Mantis 12809
    procedure defineproperties(filer: tfiler); override;
-  {$ifdef hasaswidestring}
    function getaswidestring: widestring; override;
    procedure setaswidestring(const avalue: widestring); override;
-  {$endif}
    function getasvariant: variant; override;
    procedure setasstring(const avalue: string); override;
    function getasstring: string; override;
@@ -946,10 +902,8 @@ type
    procedure readlookup(reader: treader);
          //workaround for breaking fix of FPC Mantis 12809
    procedure defineproperties(filer: tfiler); override;
-  {$ifdef hasaswidestring}
    function getaswidestring: widestring; override;
    procedure setaswidestring(const avalue: widestring); override;
-  {$endif}
    procedure setasfloat(avalue: double); override;
    procedure gettext(var thetext: string; adisplaytext: boolean); override;
    class procedure checktypesize(avalue: longint); override;
@@ -1024,7 +978,7 @@ type
    procedure readlookup(reader: treader);
          //workaround for breaking fix of FPC Mantis 12809
    procedure defineproperties(filer: tfiler); override;
-   procedure removecache(const aid: blobidty); virtual; overload;
+   procedure removecache(const aid: blobidty); overload; virtual;
    procedure removecache; overload;
    function getasvariant: variant; override;
    function getasstring: string; override;
@@ -1116,7 +1070,7 @@ type
    function getasfloat: double; override;
    function getasstring: string; override;
    function getaswidestring: widestring; override;
-   
+
    function getaslongint: longint; override;
    procedure setaslongint(avalue: longint); override;
    function getaslargeint: largeint; override;
@@ -1140,7 +1094,7 @@ type
    property Required default false;
    property DisplayWidth default 15;
  end;
-  
+
  tmsedatalink = class(tdatalink)
   private
    function getrecnonullbased: integer;
@@ -1344,16 +1298,6 @@ type
   function getcontroller: tdscontroller;
  end;
 
-const
- de_modified = ord(high(tdataevent))+1;
- de_afterdelete = ord(high(tdataevent))+2;
- de_afterpost = ord(high(tdataevent))+3;
- de_hasactiveedit = ord(high(tdataevent))+4;
-
- defaultdscontrolleroptions = [{dso_cancelupdateondeleteerror}];
- allfieldkinds = [fkData,fkCalculated,fkLookup,fkInternalCalc];
-  
-type
  fieldlinkarty = array of ifieldcomponent;
  dscontrollerstatety = (dscs_posting,dscs_posting1,dscs_canceling,
                         dscs_onidleregistered,
@@ -1444,8 +1388,8 @@ type
    procedure getfieldclass(const fieldtype: tfieldtype; out result: tfieldclass);
    procedure beginfilteredit(const akind: filtereditkindty);
    procedure endfilteredit;
-   procedure begindisplaydata; inline;
-   procedure enddisplaydata; inline;
+   procedure begindisplaydata; {$ifdef FPC}inline;{$endif}
+   procedure enddisplaydata; {$ifdef FPC}inline;{$endif}
    function getcanmodify: boolean;
    function updatesortfield(const alink: tfielddatalink;
                               const adescend: boolean): boolean;
@@ -1468,8 +1412,8 @@ type
    procedure internaldelete;
    procedure internalopen;
    procedure internalclose;
-   procedure closequery(var amodalresult: modalresultty);
-   function closequery: boolean; //true if ok
+   procedure closequery(var amodalresult: modalresultty); overload;
+   function closequery: boolean; overload; //true if ok
    function post(const aafterpost: afterposteventty = nil): boolean;
                            //calls post if in edit or insert state,
                            //returns true if ok
@@ -1581,14 +1525,14 @@ type
   protected
    procedure updatedata(const afield: tfield); override;
  end;
-   
+
  tfieldfieldlink = class(tfieldlink,idbeditinfo)
   private
    fsourcedatalink: tfielddatalink;
    function getfieldname: string;
    procedure setfieldname(const avalue: string);
-   function getdatasource: tdatasource; overload;
-   function getdatasource(const aindex: integer): tdatasource; overload;
+   function getdatasource: tdatasource;
+   function getdatasource1(const aindex: integer): tdatasource;
    procedure setdatasource(const avalue: tdatasource);
    procedure readdatafield(reader: treader);
    //idbeditinfo
@@ -1683,7 +1627,7 @@ type
                      //returns index in anames for paramnames, -1 if not found
                      //case sensitive
    property isutf8: boolean read fisutf8 write fisutf8;
-   property items[index: integer]: tmseparam read getitem write setitem; default;
+   property items[const index: integer]: tmseparam read getitem write setitem; default;
    property values: variantarty read getvalues write setvalues;
  end;
 
@@ -1713,10 +1657,8 @@ const
       ft_unknown,ft_unknown,ft_unknown,ft_variant,ft_unknown,
     //ftIDispatch, ftGuid, ftTimeStamp, ftFMTBcd
       ft_unknown,  ft_guid,ft_unknown,  ft_unknown
-      {$ifdef mse_FPC_2_2}
     //ftFixedWideChar,ftWideMemo
-      ,ft_string,    ft_string 
-      {$endif}
+      ,ft_string,    ft_string
       );
 
  realfcomp = [ftfloat,ftcurrency];
@@ -1748,10 +1690,8 @@ const
       [ftDataSet],[ftOraBlob],[ftOraClob],[ftVariant],[ftInterface],
     //ftIDispatch, ftGuid, ftTimeStamp, ftFMTBcd);
       [ftIDispatch],[ftGuid],[ftTimeStamp],[ftFMTBcd]
-    {$ifdef mse_FPC_2_2}
     //ftFixedWideChar,ftWideMemo
-      ,stringfcomp,stringfcomp   
-    {$endif}
+      ,stringfcomp,stringfcomp
       );
 
 function getdsfields(const adataset: tdataset;
@@ -1828,7 +1768,8 @@ function opentodynarrayft(const items: array of tfieldtype): fieldtypearty;
 
 implementation
 uses
- rtlconsts,msefileutils,typinfo,dbconst,msearrayutils,mseformatstr,msebits,
+ rtlconsts,msefileutils,typinfo,{$ifdef FPC}dbconst{$else}dbconst_del{$endif},
+ msearrayutils,mseformatstr,msebits,
  msereal,variants,msedate,msesys,sysconst
  {,msedbgraphics}{$ifdef unix},cwstring{$endif};
 const
@@ -1879,8 +1820,8 @@ var
   end;
   result:= result or (by1 shl 4);
  end;
- 
- function checkhyphen: boolean; inline;
+
+ function checkhyphen: boolean; {$ifdef FPC}inline;{$endif}
  begin
   result:= po1^ = '-';
   inc(po1);
@@ -1893,9 +1834,9 @@ begin
                               (value[guidbuffersize+2]='}') then begin
   inc(po1);
   result:= true;
- end;  
+ end;
  if result then begin
-  with guid do begin
+  with {$ifndef FPC}tguid_fpc({$endif}guid{$ifndef FPC}){$endif} do begin
    time_low:= (readbyte shl 24) or (readbyte shl 16) or (readbyte shl 8) or
                                                                      readbyte;
    if checkhyphen then begin
@@ -1928,7 +1869,7 @@ function dbguidtostring(const avalue: tguid): string;
 var
  int1: integer;
 begin
- with avalue do begin
+ with {$ifndef FPC}tguid_fpc({$endif}avalue{$ifndef FPC}){$endif}do begin
   result:= valtohex(time_low)+'-'+valtohex(time_mid)+'-'+
            valtohex(time_hi_and_version)+'-'+
            valtohex(clock_seq_hi_and_reserved)+valtohex(clock_seq_low)+'-';  
@@ -2341,9 +2282,9 @@ begin
  inc(po1);
  po2:= pointer(avalue);
  for int1:= 0 to length(avalue) - 1 do begin
-  po1^:= charhex[po2^ shr 4];
+  po1^:= msechar(byte(charhex[po2^ shr 4]));
   inc(po1);
-  po1^:= charhex[po2^ and $0f];
+  po1^:= msechar(byte(charhex[po2^ and $0f]));
   inc(po1);
   inc(po2);
  end;
@@ -2458,8 +2399,9 @@ function encodesqlvariant(const avalue: variant;
    varword: result:= encodesqlinteger(pword(abase)^);
    varlongword: result:= encodesqlinteger(plongword(abase)^);
    varint64: result:= encodesqllargeint(pint64(abase)^);
+{$ifdef FPC}
    varqword: result:= encodesqlinteger(pinteger(abase)^);
-
+{$endif}
 //   varrecord = 36;
 
 //   varstrarg = $48;
@@ -2492,7 +2434,7 @@ function encodesqlvariant(const avalue: variant;
      result:= result+',';
     end;
     result:= result + encode(atype,data);
-    inc(data,elementsize);     
+    inc(pchar(data),elementsize);
    end;
   end
   else begin
@@ -3199,17 +3141,25 @@ begin
 end;
 
 const
- ansistringcomp: array[0..7] of locatefuncty = 
-          (@locateansistring,@locateansistringupper,
-           @locateansistringpartial,@locateansistringupperpartial,
-           @locateansistringposins,@locateansistringupperposins,
-           @locateansistringposins,@locateansistringupperposins);
- msestringcomp: array[0..7] of locatefuncty = 
-          (@locatemsestring,@locatemsestringupper,
-           @locatemsestringpartial,@locatemsestringupperpartial,
-           @locatemsestringposins,@locatemsestringupperposins,
-           @locatemsestringposins,@locatemsestringupperposins);
-           
+ ansistringcomp: array[0..7] of locatefuncty =
+          ({$ifdef FPC}@{$endif}locateansistring,
+           {$ifdef FPC}@{$endif}locateansistringupper,
+           {$ifdef FPC}@{$endif}locateansistringpartial,
+           {$ifdef FPC}@{$endif}locateansistringupperpartial,
+           {$ifdef FPC}@{$endif}locateansistringposins,
+           {$ifdef FPC}@{$endif}locateansistringupperposins,
+           {$ifdef FPC}@{$endif}locateansistringposins,
+           {$ifdef FPC}@{$endif}locateansistringupperposins);
+ msestringcomp: array[0..7] of locatefuncty =
+          ({$ifdef FPC}@{$endif}locatemsestring,
+           {$ifdef FPC}@{$endif}locatemsestringupper,
+           {$ifdef FPC}@{$endif}locatemsestringpartial,
+           {$ifdef FPC}@{$endif}locatemsestringupperpartial,
+           {$ifdef FPC}@{$endif}locatemsestringposins,
+           {$ifdef FPC}@{$endif}locatemsestringupperposins,
+           {$ifdef FPC}@{$endif}locatemsestringposins,
+           {$ifdef FPC}@{$endif}locatemsestringupperposins);
+
 function locaterecord(const adataset: tdataset;
                       const fields: array of tfield;
                       const keys: array of const; //nil -> NULL field
@@ -3287,11 +3237,11 @@ begin
     {$endif}
      vtwidestring: begin
       if fields[int1] is tmsestringfield then begin
-       comparefuncar[int1]:= msestringcomp[longword(opt1)];
+       comparefuncar[int1]:= msestringcomp[{$ifdef FPC}longword{$else}byte{$endif}(opt1)];
        if lko_caseinsensitive in opt1 then begin
     {$ifdef mse_hasvtunicodestring}
         if vtype = vtunicodestring then begin
-         keymsestrings[int1]:= 
+         keymsestrings[int1]:=
                   mseuppercase(msestring(tvarrec(keys[int1]).vunicodestring));
          pvarrec(@keys[int1])^.vunicodestring:= pointer(keymsestrings[int1]);
         end
@@ -3340,31 +3290,33 @@ begin
         if lko_caseinsensitive in opt1 then begin
     {$ifdef mse_hasvtunicodestring}
          if vtype = vtunicodestring then begin
-          keyansistrings[int1]:= 
+          keyansistrings[int1]:=
                        mseuppercase(msestring(tvarrec(keys[int1]).vunicodestring));
          end
          else begin
     {$endif}
-          keyansistrings[int1]:= 
+          keyansistrings[int1]:=
                        mseuppercase(msestring(tvarrec(keys[int1]).vwidestring));
     {$ifdef mse_hasvtunicodestring}
          end;
     {$endif}
         end
         else begin
-         keyansistrings[int1]:= 
+         keyansistrings[int1]:=
                        msestring(tvarrec(keys[int1]).vwidestring);
         end;
        end;
        pvarrec(@keys[int1])^.vansistring:= pointer(keyansistrings[int1]);
-       comparefuncar[int1]:= ansistringcomp[longword(opt1)];
+       comparefuncar[int1]:=
+             ansistringcomp[{$ifdef FPC}longword{$else}byte{$endif}(opt1)];
       end;
      end;
      vtansistring: begin
       if fields[int1] is tmsestringfield then begin
-       comparefuncar[int1]:= msestringcomp[longword(opt1)];
+       comparefuncar[int1]:=
+               msestringcomp[{$ifdef FPC}longword{$else}byte{$endif}(opt1)];
        if lko_caseinsensitive in opt1 then begin
-        keymsestrings[int1]:= 
+        keymsestrings[int1]:=
                   mseuppercase(ansistring(tvarrec(keys[int1]).vansistring));
        end
        else begin
@@ -3384,7 +3336,8 @@ begin
 //        keyansistrings[int1]:= 
 //                      msestring(tvarrec(keys[int1]).vwidestring);
        end;
-       comparefuncar[int1]:= ansistringcomp[longword(opt1)];
+       comparefuncar[int1]:=
+               ansistringcomp[{$ifdef FPC}longword{$else}byte{$endif}(opt1)];
       end;
      end;
      vtvariant: begin
@@ -3489,7 +3442,6 @@ begin
  result:= fieldtooldsql(self);
 end;
 
-{$ifdef hasaswidestring}
 function tmsefield.getaswidestring: widestring;
 begin
  result:= asmsestring;
@@ -3499,7 +3451,6 @@ procedure tmsefield.setaswidestring(const avalue: widestring);
 begin
  asmsestring:= avalue;
 end;
-{$endif}
 
 procedure tmsefield.readlookup(reader: treader);
 begin
@@ -3509,7 +3460,7 @@ end;
 procedure tmsefield.defineproperties(filer: tfiler);
 begin
  inherited;
- filer.defineproperty('Lookup',@readlookup,nil,false);
+ filer.defineproperty('Lookup',{$ifdef FPC}@{$endif}readlookup,nil,false);
 end;
 
 function tmsefield.getproviderflags1: providerflags1ty;
@@ -3602,10 +3553,9 @@ end;
 procedure tmsestringfield.defineproperties(filer: tfiler);
 begin
  inherited;
- filer.defineproperty('Lookup',@readlookup,nil,false);
+ filer.defineproperty('Lookup',{$ifdef FPC}@{$endif}readlookup,nil,false);
 end;
 
-{$ifdef hasaswidestring}
 function tmsestringfield.getaswidestring: widestring;
 begin
  result:= asmsestring;
@@ -3615,7 +3565,6 @@ procedure tmsestringfield.setaswidestring(const avalue: widestring);
 begin
  asmsestring:= avalue;
 end;
-{$endif}
 
 procedure tmsestringfield.setdsintf(const avalue: idsfieldcontroller);
 begin
@@ -3678,11 +3627,7 @@ begin
  fisftwidestring:= aisftwidestring;
 end;
 
-{$ifdef integergetdatasize}
 function tmsestringfield.GetDataSize: integer;
-{$else}
-function tmsestringfield.GetDataSize: Word;
-{$endif}
 begin
  if assigned(fgetmsestringdata) then begin
   result:= sizeof(msestring);
@@ -3982,10 +3927,9 @@ end;
 procedure tmsenumericfield.defineproperties(filer: tfiler);
 begin
  inherited;
- filer.defineproperty('Lookup',@readlookup,nil,false);
+ filer.defineproperty('Lookup',{$ifdef FPC}@{$endif}readlookup,nil,false);
 end;
 
-{$ifdef hasaswidestring}
 function tmsenumericfield.getaswidestring: widestring;
 begin
  result:= asmsestring;
@@ -3995,7 +3939,6 @@ procedure tmsenumericfield.setaswidestring(const avalue: widestring);
 begin
  asmsestring:= avalue;
 end;
-{$endif}
 
 procedure tmsenumericfield.Clear;
 begin
@@ -4074,10 +4017,9 @@ end;
 procedure tmselongintfield.defineproperties(filer: tfiler);
 begin
  inherited;
- filer.defineproperty('Lookup',@readlookup,nil,false);
+ filer.defineproperty('Lookup',{$ifdef FPC}@{$endif}readlookup,nil,false);
 end;
 
-{$ifdef hasaswidestring}
 function tmselongintfield.getaswidestring: widestring;
 begin
  result:= asmsestring;
@@ -4087,7 +4029,6 @@ procedure tmselongintfield.setaswidestring(const avalue: widestring);
 begin
  asmsestring:= avalue;
 end;
-{$endif}
 
 function tmselongintfield.getasboolean: boolean;
 begin
@@ -4276,10 +4217,9 @@ end;
 procedure tmselargeintfield.defineproperties(filer: tfiler);
 begin
  inherited;
- filer.defineproperty('Lookup',@readlookup,nil,false);
+ filer.defineproperty('Lookup',{$ifdef FPC}@{$endif}readlookup,nil,false);
 end;
 
-{$ifdef hasaswidestring}
 function tmselargeintfield.getaswidestring: widestring;
 begin
  result:= asmsestring;
@@ -4289,7 +4229,6 @@ procedure tmselargeintfield.setaswidestring(const avalue: widestring);
 begin
  asmsestring:= avalue;
 end;
-{$endif}
 
 function tmselargeintfield.getasboolean: boolean;
 begin
@@ -4455,10 +4394,9 @@ end;
 procedure tmsesmallintfield.defineproperties(filer: tfiler);
 begin
  inherited;
- filer.defineproperty('Lookup',@readlookup,nil,false);
+ filer.defineproperty('Lookup',{$ifdef FPC}@{$endif}readlookup,nil,false);
 end;
 
-{$ifdef hasaswidestring}
 function tmsesmallintfield.getaswidestring: widestring;
 begin
  result:= asmsestring;
@@ -4468,7 +4406,6 @@ procedure tmsesmallintfield.setaswidestring(const avalue: widestring);
 begin
  asmsestring:= avalue;
 end;
-{$endif}
 
 function tmsesmallintfield.getasboolean: boolean;
 begin
@@ -4575,10 +4512,9 @@ end;
 procedure tmsewordfield.defineproperties(filer: tfiler);
 begin
  inherited;
- filer.defineproperty('Lookup',@readlookup,nil,false);
+ filer.defineproperty('Lookup',{$ifdef FPC}@{$endif}readlookup,nil,false);
 end;
 
-{$ifdef hasaswidestring}
 function tmsewordfield.getaswidestring: widestring;
 begin
  result:= asmsestring;
@@ -4588,7 +4524,6 @@ procedure tmsewordfield.setaswidestring(const avalue: widestring);
 begin
  asmsestring:= avalue;
 end;
-{$endif}
 
 function tmsewordfield.getasboolean: boolean;
 begin
@@ -4695,10 +4630,9 @@ end;
 procedure tmseautoincfield.defineproperties(filer: tfiler);
 begin
  inherited;
- filer.defineproperty('Lookup',@readlookup,nil,false);
+ filer.defineproperty('Lookup',{$ifdef FPC}@{$endif}readlookup,nil,false);
 end;
 
-{$ifdef hasaswidestring}
 function tmseautoincfield.getaswidestring: widestring;
 begin
  result:= asmsestring;
@@ -4708,7 +4642,6 @@ procedure tmseautoincfield.setaswidestring(const avalue: widestring);
 begin
  asmsestring:= avalue;
 end;
-{$endif}
 
 procedure tmseautoincfield.Clear;
 begin
@@ -4787,10 +4720,9 @@ end;
 procedure tmsefloatfield.defineproperties(filer: tfiler);
 begin
  inherited;
- filer.defineproperty('Lookup',@readlookup,nil,false);
+ filer.defineproperty('Lookup',{$ifdef FPC}@{$endif}readlookup,nil,false);
 end;
 
-{$ifdef hasaswidestring}
 function tmsefloatfield.getaswidestring: widestring;
 begin
  result:= asmsestring;
@@ -4800,7 +4732,6 @@ procedure tmsefloatfield.setaswidestring(const avalue: widestring);
 begin
  asmsestring:= avalue;
 end;
-{$endif}
 
 function tmsefloatfield.getasfloat: double;
 begin
@@ -4996,10 +4927,9 @@ end;
 procedure tmsebooleanfield.defineproperties(filer: tfiler);
 begin
  inherited;
- filer.defineproperty('Lookup',@readlookup,nil,false);
+ filer.defineproperty('Lookup',{$ifdef FPC}@{$endif}readlookup,nil,false);
 end;
 
-{$ifdef hasaswidestring}
 function tmsebooleanfield.getaswidestring: widestring;
 begin
  result:= asmsestring;
@@ -5009,7 +4939,6 @@ procedure tmsebooleanfield.setaswidestring(const avalue: widestring);
 begin
  asmsestring:= avalue;
 end;
-{$endif}
 
 procedure tmsebooleanfield.Clear;
 begin
@@ -5021,7 +4950,7 @@ var
  ar1: msestringarty;
 begin
  if fdisplayvalues <> avalue then begin
-  ar1:= splitstring(avalue,';');
+  ar1:= splitstring(avalue,msechar(';'));
   if (high(ar1) <> 1) or (ar1[0] = ar1[1]) then begin
    databaseerrorfmt(SInvalidDisplayValues,[string(avalue)]);
   end;
@@ -5079,11 +5008,7 @@ begin
  end;
 end;
 
-{$ifdef integergetdatasize}
 function tmsebooleanfield.GetDataSize: integer;
-{$else}
-function tmsebooleanfield.GetDataSize: Word;
-{$endif}
 begin
  result:= sizeof(longbool);
 end;
@@ -5229,10 +5154,9 @@ end;
 procedure tmsedatetimefield.defineproperties(filer: tfiler);
 begin
  inherited;
- filer.defineproperty('Lookup',@readlookup,nil,false);
+ filer.defineproperty('Lookup',{$ifdef FPC}@{$endif}readlookup,nil,false);
 end;
 
-{$ifdef hasaswidestring}
 function tmsedatetimefield.getaswidestring: widestring;
 begin
  result:= asmsestring;
@@ -5242,7 +5166,6 @@ procedure tmsedatetimefield.setaswidestring(const avalue: widestring);
 begin
  asmsestring:= avalue;
 end;
-{$endif}
 
 function tmsedatetimefield.getasdatetime: tdatetime;
 begin
@@ -5289,8 +5212,10 @@ procedure tmsedatetimefield.setoptions(const avalue: datetimefieldoptionsty);
 const
  mask: datetimefieldoptionsty = [dtfo_utc,dtfo_local];
 begin
- foptions:= datetimefieldoptionsty(setsinglebit(longword(avalue),
-                                        longword(foptions),longword(mask)));
+ foptions:= datetimefieldoptionsty(setsinglebit(
+              {$ifdef FPC}longword{$else}byte{$endif}(avalue),
+              {$ifdef FPC}longword{$else}byte{$endif}(foptions),
+              {$ifdef FPC}longword{$else}byte{$endif}(mask)));
 end;
 
 procedure tmsedatetimefield.setasstring(const avalue: string);
@@ -5308,8 +5233,8 @@ begin
  end
  else begin
   case datatype of
-   fttime: f:= defaultformatsettings.shorttimeformat;
-   ftdate: f:= defaultformatsettings.shortdateformat;
+   fttime: f:= {$ifdef FPC}defaultformatsettings.{$endif}shorttimeformat;
+   ftdate: f:= {$ifdef FPC}defaultformatsettings.{$endif}shortdateformat;
    else f:= 'c'
   end;
  end;
@@ -5412,10 +5337,9 @@ end;
 procedure tmsebinaryfield.defineproperties(filer: tfiler);
 begin
  inherited;
- filer.defineproperty('Lookup',@readlookup,nil,false);
+ filer.defineproperty('Lookup',{$ifdef FPC}@{$endif}readlookup,nil,false);
 end;
 
-{$ifdef hasaswidestring}
 function tmsebinaryfield.getaswidestring: widestring;
 begin
  result:= asmsestring;
@@ -5425,7 +5349,6 @@ procedure tmsebinaryfield.setaswidestring(const avalue: widestring);
 begin
  asmsestring:= avalue;
 end;
-{$endif}
 
 procedure tmsebinaryfield.Clear;
 begin
@@ -5504,10 +5427,9 @@ end;
 procedure tmsebytesfield.defineproperties(filer: tfiler);
 begin
  inherited;
- filer.defineproperty('Lookup',@readlookup,nil,false);
+ filer.defineproperty('Lookup',{$ifdef FPC}@{$endif}readlookup,nil,false);
 end;
 
-{$ifdef hasaswidestring}
 function tmsebytesfield.getaswidestring: widestring;
 begin
  result:= asmsestring;
@@ -5517,7 +5439,6 @@ procedure tmsebytesfield.setaswidestring(const avalue: widestring);
 begin
  asmsestring:= avalue;
 end;
-{$endif}
 
 procedure tmsebytesfield.Clear;
 begin
@@ -5627,10 +5548,9 @@ end;
 procedure tmsevarbytesfield.defineproperties(filer: tfiler);
 begin
  inherited;
- filer.defineproperty('Lookup',@readlookup,nil,false);
+ filer.defineproperty('Lookup',{$ifdef FPC}@{$endif}readlookup,nil,false);
 end;
 
-{$ifdef hasaswidestring}
 function tmsevarbytesfield.getaswidestring: widestring;
 begin
  result:= asmsestring;
@@ -5640,7 +5560,6 @@ procedure tmsevarbytesfield.setaswidestring(const avalue: widestring);
 begin
  asmsestring:= avalue;
 end;
-{$endif}
 
 procedure tmsevarbytesfield.Clear;
 begin
@@ -5755,10 +5674,9 @@ end;
 procedure tmsebcdfield.defineproperties(filer: tfiler);
 begin
  inherited;
- filer.defineproperty('Lookup',@readlookup,nil,false);
+ filer.defineproperty('Lookup',{$ifdef FPC}@{$endif}readlookup,nil,false);
 end;
 
-{$ifdef hasaswidestring}
 function tmsebcdfield.getaswidestring: widestring;
 begin
  result:= asmsestring;
@@ -5768,7 +5686,6 @@ procedure tmsebcdfield.setaswidestring(const avalue: widestring);
 begin
  asmsestring:= avalue;
 end;
-{$endif}
 
 procedure tmsebcdfield.Clear;
 begin
@@ -6017,7 +5934,7 @@ end;
 procedure tmseblobfield.defineproperties(filer: tfiler);
 begin
  inherited;
- filer.defineproperty('Lookup',@readlookup,nil,false);
+ filer.defineproperty('Lookup',{$ifdef FPC}@{$endif}readlookup,nil,false);
 end;
 
 procedure tmseblobfield.removecache(const aid: blobidty);
@@ -6515,7 +6432,9 @@ begin
     include(state1,fds_isstring);
    end;
   end;
-  replacebits1(longword(fstate),longword(state1),longword(mask));
+  replacebits1({$ifdef FPC}longword{$else}byte{$endif}(fstate),
+               {$ifdef FPC}longword{$else}byte{$endif}(state1),
+               {$ifdef FPC}longword{$else}byte{$endif}(mask));
   fieldchanged;
   editingchanged; //???
  end;
@@ -7002,7 +6921,7 @@ end;
 
 procedure tdscontroller.fielddestroyed(const sender: ifieldcomponent);
 begin
- removeitem(pointerarty(flinkedfields),sender);
+ removeitem(pointerarty(flinkedfields),pointer(sender));
 end;
 
 procedure tdscontroller.setowneractive(const avalue: boolean); 
@@ -7252,8 +7171,8 @@ begin
   for int1:= 0 to fields.count - 1 do begin
    field1:= fields[int1];
    if getcorbainterface(field1,typeinfo(ifieldcomponent),intf1) and 
-       (finditem(pointerarty(flinkedfields),intf1) < 0) then begin
-    additem(pointerarty(flinkedfields),intf1);
+       (finditem(pointerarty(flinkedfields),pointer(intf1)) < 0) then begin
+    additem(pointerarty(flinkedfields),pointer(intf1));
     intf1.setdsintf(idsfieldcontroller(self));
    end;
   end;
@@ -7288,12 +7207,6 @@ begin
     cancel;
    end;
   end;
-{$ifdef focuscontrolbug}
-  defocuscontrol: begin
-   field1:= tfield(info); //workaround for fpc bug 
-   info:= ptrint(@field1);
-  end;
-{$endif}
  end;
  if not fmovebylock or (event <> dedatasetchange) then begin
   with tdataset(fowner) do begin
@@ -7461,7 +7374,7 @@ end;
 procedure tdscontroller.registeronidle;
 begin
  if not(dscs_onidleregistered in fstate) then begin
-  application.registeronidle(@doonidle);
+  application.registeronidle({$ifdef FPC}@{$endif}doonidle);
   include(fstate,dscs_onidleregistered);
  end;
 end;
@@ -7469,7 +7382,7 @@ end;
 procedure tdscontroller.unregisteronidle;
 begin
  if dscs_onidleregistered in fstate then begin
-  application.unregisteronidle(@doonidle);
+  application.unregisteronidle({$ifdef FPC}@{$endif}doonidle);
   exclude(fstate,dscs_onidleregistered);
  end;
 end;
@@ -7552,14 +7465,27 @@ begin
   result:= 'NULL';
  end
  else begin
+ {$ifdef FPC}
   result:= assql(currency(avalue));
+ {$else}
+  if idscontroller(fintf).getint64currency then begin
+   result:= inttostr(int64(ar8ty(currency(avalue))));
+  end
+  else begin
+   result:= encodesqlcurrency(avalue);
+  end;
+ {$endif}
  end;
 end;
 
 function tdscontroller.assql(const avalue: currency): string;
 begin
  if idscontroller(fintf).getint64currency then begin
+ {$ifdef FPC}
   result:= inttostr(int64(avalue));
+ {$else}
+  result:= inttostr(int64(ar8ty(avalue)));
+ {$endif}
  end
  else begin
   result:= encodesqlcurrency(avalue);
@@ -7757,8 +7683,12 @@ begin
 end;
 
 procedure tdscontroller.setoptions(const avalue: datasetoptionsty);
-//const
-// mask: datasetoptionsty = [dso_autocommitret,dso_autocommit];
+{$ifndef FPC}
+const
+ mask1: datasetoptionsty = [dso_autocommitret,dso_autocommit];
+ mask2: datasetoptionsty = [dso_editonapplyerror,dso_cancelupdatesonerror,
+                      dso_cancelupdateonerror,dso_cancelupdateondeleteerror];
+{$endif}
 var
  opt,options1,optionsbefore: datasetoptionsty;
 begin
@@ -7768,12 +7698,15 @@ begin
   include(opt,dso_waitcursor);
  end;
  options1:= datasetoptionsty(longword(foptions) xor longword(opt));
+{$ifdef FPC}
  foptions:= datasetoptionsty(setsinglebit(longword(opt),longword(foptions),
                  [longword([dso_autocommitret,dso_autocommit]),
                   longword([dso_editonapplyerror,dso_cancelupdatesonerror,
-                      dso_cancelupdateonerror,dso_cancelupdateondeleteerror])]));
-// foptions:= datasetoptionsty(setsinglebit(longword(opt),longword(foptions),
-//                    longword(mask)));
+                     dso_cancelupdateonerror,dso_cancelupdateondeleteerror])]));
+{$else}
+ foptions:= datasetoptionsty(setsinglebitar32(longword(opt),longword(foptions),
+                                          [longword(mask1),longword(mask2)]));
+{$endif}
  if dso_noedit in options1 then begin
   if (dso_noedit in opt) and tdataset(fowner).active then begin
    tdataset(fowner).checkbrowsemode;
@@ -7935,7 +7868,8 @@ begin
  end
  else begin
   if ftimer = nil then begin
-   ftimer:= tsimpletimer.create(delayus,@dorefresh,true,[to_single]);
+   ftimer:= tsimpletimer.create(delayus,{$ifdef FPC}@{$endif}dorefresh,
+                                                           true,[to_single]);
   end
   else begin
    ftimer.interval:= delayus; //single shot
@@ -8224,7 +8158,7 @@ begin
  result:= fsourcedatalink.datasource;
 end;
 
-function tfieldfieldlink.getdatasource(const aindex: integer): tdatasource;
+function tfieldfieldlink.getdatasource1(const aindex: integer): tdatasource;
 begin
  if aindex = 0 then begin
   result:= fsourcedatalink.datasource;
@@ -8283,7 +8217,7 @@ end;
 procedure tfieldfieldlink.defineproperties(filer: tfiler);
 begin
  inherited;
- filer.defineproperty('datafield',@readdatafield,nil,false);
+ filer.defineproperty('datafield',{$ifdef FPC}@{$endif}readdatafield,nil,false);
 end;
 
 { ttimestampfieldlink }
@@ -8365,7 +8299,7 @@ begin
      '''': // single quote delimited string
        begin
          Inc(p);
-         while not (p^ in [#0, '''']) do
+         while not ((p^ = #0) or (p^ = '''')) do
          begin
            if p^='\' then Inc(p,2) // make sure we handle \' and \\ correct
            else Inc(p);
@@ -8375,7 +8309,7 @@ begin
      '"':  // double quote delimited string
        begin
          Inc(p);
-         while not (p^ in [#0, '"']) do
+         while not ((p^ = #0) or (p^ = '"')) do
          begin
            if p^='\'  then Inc(p,2) // make sure we handle \" and \\ correct
            else Inc(p);
@@ -8389,7 +8323,7 @@ begin
          begin
            repeat // skip until at end of line
              Inc(p);
-           until p^ in [#10, #0];
+           until (p^ = #10) or (p^ = #0);
          end
        end;
      '/': // possible start of /* */ comment
@@ -8422,8 +8356,9 @@ begin
            else
            begin
              ParamNameStart:=p;
-             while not (p^ in (SQLDelimiterCharacters+
-                 [#0,'=','+','-','*','\','[',']'])) do
+             while (p^ > #127) or
+              not (char(byte(p^)) in (SQLDelimiterCharacters +
+                                      [#0,'=','+','-','*','\','[',']'])) do
                Inc(p);
              ParamName:=Copy(ParamNameStart,1,p-ParamNameStart);
            end;
@@ -8564,7 +8499,7 @@ end;
 
 function tmseparams.expandvalues(sql: msestring;
           const aparambindings: tparambinding;
-          const aparamreplacestring: msestring): msestring; overload;
+          const aparamreplacestring: msestring): msestring;
 var
  int1,int2,int3,int4: integer;
  po1: pmsechar;

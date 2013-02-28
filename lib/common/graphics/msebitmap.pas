@@ -404,7 +404,8 @@ procedure freeimage(var aimage: imagety);
 
 implementation
 uses
- mseguiintf,msebits,msestream,mseevent,msesys,msearrayutils,msegraphicstream;
+ mseguiintf,msebits,msestream,mseevent,msesys,msearrayutils,msegraphicstream
+ {$ifndef FPC},classes_del{$endif};
 
 type
  tsimplebitmap1 = class(tsimplebitmap);

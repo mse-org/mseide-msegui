@@ -10,7 +10,8 @@
 unit msevariants;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
-
+uses
+ msetypes;
 type
  variantarty = array of variant;
  variantaty = array[0..0] of variant;

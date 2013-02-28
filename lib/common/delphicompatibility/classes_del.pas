@@ -21,8 +21,35 @@ uses
 
 const
   MaxListSize = Maxint div 16;
+  GUID_NULL: TGuid = '{00000000-0000-0000-0000-000000000000}';
 
 type
+ ar4ty = packed array[0..3] of byte;
+ ar8ty = packed array[0..7] of byte;
+
+       TGuid_fpc = packed record
+          case integer of
+             1 : (
+                  Data1 : DWord;
+                  Data2 : word;
+                  Data3 : word;
+                  Data4 : array[0..7] of byte;
+                 );
+             2 : (
+                  D1 : DWord;
+                  D2 : word;
+                  D3 : word;
+                  D4 : array[0..7] of byte;
+                 );
+             3 : ( { uuid fields according to RFC4122 }
+                  time_low : dword;			// The low field of the timestamp
+                  time_mid : word;                      // The middle field of the timestamp
+                  time_hi_and_version : word;           // The high field of the timestamp multiplexed with the version number
+                  clock_seq_hi_and_reserved : byte;     // The high field of the clock sequence multiplexed with the variant
+                  clock_seq_low : byte;                 // The low field of the clock sequence
+                  node : array[0..5] of byte;           // The spatially unique node identifier
+                 );
+       end;
 
   EListError = class(Exception);
 
@@ -100,13 +127,188 @@ type
     property List: PPointerList read FList;
   end;
 
+function NtoLE(const AValue: SmallInt): SmallInt;{$ifdef SYSTEMINLINE}inline;{$endif}
+                               overload;
+function NtoLE(const AValue: Word): Word;{$ifdef SYSTEMINLINE}inline;{$endif}
+                               overload;
+function NtoLE(const AValue: LongInt): LongInt;{$ifdef SYSTEMINLINE}inline;{$endif}
+                               overload;
+function NtoLE(const AValue: DWord): DWord;{$ifdef SYSTEMINLINE}inline;{$endif}
+                               overload;
+function NtoLE(const AValue: Int64): Int64;{$ifdef SYSTEMINLINE}inline;{$endif}
+                               overload;
+function NtoLE(const AValue: QWord): QWord;{$ifdef SYSTEMINLINE}inline;{$endif}
+                               overload;
+function LEtoN(const AValue: SmallInt): SmallInt;{$ifdef SYSTEMINLINE}inline;{$endif}
+                               overload;
+function LEtoN(const AValue: Word): Word;{$ifdef SYSTEMINLINE}inline;{$endif}
+                               overload;
+function LEtoN(const AValue: LongInt): LongInt;{$ifdef SYSTEMINLINE}inline;{$endif}
+                               overload;
+function LEtoN(const AValue: DWord): DWord;{$ifdef SYSTEMINLINE}inline;{$endif}
+                               overload;
+function LEtoN(const AValue: Int64): Int64;{$ifdef SYSTEMINLINE}inline;{$endif}
+                               overload;
+function LEtoN(const AValue: QWord): QWord;{$ifdef SYSTEMINLINE}inline;{$endif}
+                               overload;
+function Unassigned: Variant; // Unassigned standard constant
+function Null: Variant;       // Null standard constant
+
 function  GetCurrentThreadId : threadty;
 Function GetProcedureAddress(Lib : TLibHandle;
                   const ProcName : AnsiString) : Pointer;
 procedure copycharbuf(const asource: string; const asize: integer; out buffer);
+Function FileTruncate (Handle : THandle;Size: Int64) : boolean;
+
 implementation
 uses
  rtlconsts,windows;
+{$ifndef FPC}
+{$define endian_little}
+{$define FPC_HAS_TYPE_EXTENDED}
+{$endif}
+
+function Unassigned: Variant; // Unassigned standard constant
+begin
+  VarClearProc(TVarData(Result));
+  TVarData(Result).VType := varempty;
+end;
+
+
+function Null: Variant;       // Null standard constant
+  begin
+    VarClearProc(TVarData(Result));
+    TVarData(Result).VType := varnull;
+  end;
+
+function NtoLE(const AValue: SmallInt): SmallInt;{$ifdef SYSTEMINLINE}inline;{$endif}
+  begin
+    {$IFDEF ENDIAN_LITTLE}
+      Result := AValue;
+    {$ELSE}
+      Result := SwapEndian(AValue);
+    {$ENDIF}
+  end;
+
+
+function NtoLE(const AValue: Word): Word;{$ifdef SYSTEMINLINE}inline;{$endif}
+  begin
+    {$IFDEF ENDIAN_LITTLE}
+      Result := AValue;
+    {$ELSE}
+      Result := SwapEndian(AValue);
+    {$ENDIF}
+  end;
+
+
+function NtoLE(const AValue: LongInt): LongInt;{$ifdef SYSTEMINLINE}inline;{$endif}
+  begin
+    {$IFDEF ENDIAN_LITTLE}
+      Result := AValue;
+    {$ELSE}
+      Result := SwapEndian(AValue);
+    {$ENDIF}
+  end;
+
+
+function NtoLE(const AValue: DWord): DWord;{$ifdef SYSTEMINLINE}inline;{$endif}
+  begin
+    {$IFDEF ENDIAN_LITTLE}
+      Result := AValue;
+    {$ELSE}
+      Result := SwapEndian(AValue);
+    {$ENDIF}
+  end;
+
+
+function NtoLE(const AValue: Int64): Int64;{$ifdef SYSTEMINLINE}inline;{$endif}
+  begin
+    {$IFDEF ENDIAN_LITTLE}
+      Result := AValue;
+    {$ELSE}
+      Result := SwapEndian(AValue);
+    {$ENDIF}
+  end;
+
+
+function NtoLE(const AValue: QWord): QWord;{$ifdef SYSTEMINLINE}inline;{$endif}
+  begin
+    {$IFDEF ENDIAN_LITTLE}
+      Result := AValue;
+    {$ELSE}
+      Result := SwapEndian(AValue);
+    {$ENDIF}
+  end;
+
+function LEtoN(const AValue: SmallInt): SmallInt;{$ifdef SYSTEMINLINE}inline;{$endif}
+  begin
+    {$IFDEF ENDIAN_LITTLE}
+      Result := AValue;
+    {$ELSE}
+      Result := SwapEndian(AValue);
+    {$ENDIF}
+  end;
+
+
+function LEtoN(const AValue: Word): Word;{$ifdef SYSTEMINLINE}inline;{$endif}
+  begin
+    {$IFDEF ENDIAN_LITTLE}
+      Result := AValue;
+    {$ELSE}
+      Result := SwapEndian(AValue);
+    {$ENDIF}
+  end;
+
+
+function LEtoN(const AValue: LongInt): LongInt;{$ifdef SYSTEMINLINE}inline;{$endif}
+  begin
+    {$IFDEF ENDIAN_LITTLE}
+      Result := AValue;
+    {$ELSE}
+      Result := SwapEndian(AValue);
+    {$ENDIF}
+  end;
+
+
+function LEtoN(const AValue: DWord): DWord;{$ifdef SYSTEMINLINE}inline;{$endif}
+  begin
+    {$IFDEF ENDIAN_LITTLE}
+      Result := AValue;
+    {$ELSE}
+      Result := SwapEndian(AValue);
+    {$ENDIF}
+  end;
+
+
+function LEtoN(const AValue: Int64): Int64;{$ifdef SYSTEMINLINE}inline;{$endif}
+  begin
+    {$IFDEF ENDIAN_LITTLE}
+      Result := AValue;
+    {$ELSE}
+      Result := SwapEndian(AValue);
+    {$ENDIF}
+  end;
+
+
+function LEtoN(const AValue: QWord): QWord;{$ifdef SYSTEMINLINE}inline;{$endif}
+  begin
+    {$IFDEF ENDIAN_LITTLE}
+      Result := AValue;
+    {$ELSE}
+      Result := SwapEndian(AValue);
+    {$ENDIF}
+  end;
+
+Function FileTruncate (Handle : THandle;Size: Int64) : boolean;
+begin
+{
+  Result:=longint(SetFilePointer(handle,Size,nil,FILE_BEGIN))<>-1;
+}
+  if FileSeek (Handle, Size, FILE_BEGIN) = Size then
+   Result:=SetEndOfFile(handle)
+  else
+   Result := false;
+end;
 
 procedure copycharbuf(const asource: string; const asize: integer; out buffer);
 var
