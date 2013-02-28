@@ -22,6 +22,8 @@ uses
 const
   MaxListSize = Maxint div 16;
   GUID_NULL: TGuid = '{00000000-0000-0000-0000-000000000000}';
+  OrdinalVarTypes = [varSmallInt, varInteger, varBoolean, varShortInt,
+                     varByte, varWord,varLongWord,varInt64];
 
 type
  ar4ty = packed array[0..3] of byte;

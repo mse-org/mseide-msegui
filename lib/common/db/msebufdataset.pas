@@ -312,7 +312,7 @@ type
   canpartialstring: boolean;
  end;
  indexfieldinfoarty = array of indexfieldinfoty;
-  
+
  tlocalindex = class(townedpersistent)
   private
    ffields: tindexfields;
@@ -330,6 +330,9 @@ type
    function compare1(l,r: pintrecordty; const alastindex: integer;
                     const apartialstring: boolean): integer;
    function compare2(l,r: pintrecordty): integer;
+ {$ifndef FPC}
+   function compare3(l,r: pointer): integer;
+ {$endif}
    procedure quicksort(l,r: integer);
    procedure mergesort(var adata: pointerarty);
    procedure sort(var adata: pointerarty);
@@ -347,6 +350,14 @@ type
    procedure setdefault(const avalue: boolean);
   protected
    procedure change;
+ {$ifndef FPC}
+   function findval(const avalues: array of const;
+               const aisnull: array of boolean;
+               out abookmark: bookmarkdataty;
+               const abigger: boolean = false;
+               const partialstring: boolean = false;
+               const nocheckbrowsemode: boolean = false): boolean; overload;
+ {$endif}
   public
    constructor create(aowner: tobject); override;
    destructor destroy; override;
@@ -1013,10 +1024,18 @@ type
    procedure checkfreebuffer(const afield: tfield);
    function callvalidate(const afield: tfield; const avalue: pointer): boolean;
    procedure checkvaluebuffer(const afield: tfield; const asize: integer);
+ {$ifndef FPC}
+   function refreshrecordvarar(const sourcedatasets: array of tdataset;
+              const akeyvalue: array of variant;
+              const keyindex: integer;
+              const acancelupdate: boolean;
+              const restorerecno: boolean;
+              const noinsert: boolean): bookmarkdataty;
+  {$endif}
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   
+
    procedure post; override;
    procedure gotobookmark(const abookmark: bookmarkdataty); overload;
    function findbookmark(const abookmark: bookmarkdataty): boolean;
@@ -1033,8 +1052,8 @@ type
    procedure notifycontrols; //calls enablecontrols/disablecontrols
 
    //logging works with persistent fields only
-   procedure recover; 
-            //load from logfile, start logging, 
+   procedure recover;
+            //load from logfile, start logging,
    procedure startlogging;
             //close logfile, save state with truncated log, open logfile
    procedure stoplogging; //close logfile
@@ -1047,7 +1066,7 @@ type
                       const acryptohandler: tcustomcryptohandler = nil);
    function streamloading: boolean;
 
-    //imasterlink   
+    //imasterlink
    function refreshing: boolean;
 
    function refreshrecord(const akeyfield: array of tfield;
@@ -1256,7 +1275,7 @@ type
                                  write setonupdateerror;
    property oninternalcalcfields: internalcalcfieldseventty 
                       read foninternalcalcfields write setoninternalcalcfields;
-   property beforeapplyupdate: tdatasetnotifyevent read fbeforeapplyupdate 
+   property beforeapplyupdate: tdatasetnotifyevent read fbeforeapplyupdate
                        write  fbeforeapplyupdate;
    property afterapplyupdate: tdatasetnotifyevent read fafterapplyupdate 
                        write  fafterapplyupdate;
@@ -1279,8 +1298,8 @@ procedure alignfieldpos(var avalue: integer);
 
 implementation
 uses
- rtlconsts,{$ifdef FPC}dbconst{$else}dbconst_del{$endif},sysutils,mseformatstr,
- msereal,msesys,msefileutils,mseapplication,msesysutils;
+ rtlconsts,{$ifdef FPC}dbconst{$else}dbconst_del,classes_del{$endif},sysutils,
+ mseformatstr,msereal,msesys,msefileutils,mseapplication,msesysutils;
  
 const
  snotineditstate =
@@ -2146,8 +2165,8 @@ begin
 //todo: free offline blobs
  if bs_blobscached in fbstate then begin
   fieldindex:= afield.fieldno-1;
-  if getfieldflag(arec^.fielddata.nullmask,fieldindex) then begin
-   blobid:= pinteger(pbyte(arec) + ffieldinfos[fieldindex].base.offset)^;   
+  if getfieldflag(@arec^.fielddata.nullmask,fieldindex) then begin
+   blobid:= pinteger(pchar(arec) + ffieldinfos[fieldindex].base.offset)^;
    fblobcache[blobid].data:= '';
    additem(ffreedblobs,blobid,ffreedblobcount,(high(ffreedblobs)+129)*2);
   end;
@@ -2206,10 +2225,10 @@ begin
     new:= true;
    end;
    if size = 0 then begin
-    clearfieldflag(fielddata.nullmask,field.fieldno-1);
+    clearfieldflag(@fielddata.nullmask,field.fieldno-1);
    end
    else begin
-    setfieldflag(fielddata.nullmask,field.fieldno-1);
+    setfieldflag(@fielddata.nullmask,field.fieldno-1);
    end;
    fieldchanged(field);
   end;
@@ -2379,7 +2398,7 @@ begin
   fopen:= false;
   with findexes[0] do begin
    for int1:= 0 to fbrecordcount - 1 do begin
-    intfreerecord(ind[int1]);
+    intfreerecord(pintrecordty(ind[int1]));
    end;
   end;
   intfreerecord(femptybuffer);
@@ -2841,7 +2860,7 @@ begin
       int2:= int2*4+4; //room for multibyte encodings
       setlength(str1,int2); 
       if not loadfield(fno,fieldtype,pointer(str1),int2) then begin
-       clearfieldflag(buffer.fielddata.nullmask,fno);
+       clearfieldflag(@buffer.fielddata.nullmask,fno);
       end
       else begin
        if int2 < 0 then begin //buffer to small
@@ -2850,7 +2869,7 @@ begin
         loadfield(fno,fieldtype,pointer(str1),int2);
        end;
        setlength(str1,int2);
-       po2:= pointer(@buffer) + offset;
+       po2:= pointer(pchar(@buffer) + offset);
        if fieldtype in widecharfields then begin
         setlength(po2^,int2 div 2);
         move(pointer(str1)^,pointer(po2^)^,int2);
@@ -2873,14 +2892,14 @@ begin
       end;
      end
      else begin
-      if not loadfield(fno,fieldtype,pointer(@buffer)+offset,int2) or 
+      if not loadfield(fno,fieldtype,pchar(@buffer)+offset,int2) or
                            (int2 < 0)then begin
-       clearfieldflag(buffer.fielddata.nullmask,fno);        //buffer too small
+       clearfieldflag(@buffer.fielddata.nullmask,fno);        //buffer too small
       end;
      end;
     end;
     fkinternalcalc: begin
-     clearfieldflag(buffer.fielddata.nullmask,fno);
+     clearfieldflag(@buffer.fielddata.nullmask,fno);
     end;
    end;
   end;
@@ -2895,7 +2914,7 @@ function tmsebufdataset.getfieldbuffer(const afield: tfield;
 var
  int1: integer;
  st1: integer;
-begin 
+begin
  result:= false;
  buffer:= nil;
  if not fopen{active} then begin
@@ -2904,8 +2923,8 @@ begin
  int1:= afield.fieldno - 1;
  if (flookuppo <> nil) and (int1 >= 0) then begin
   buffer:= flookuppo;
-  result:= getfieldflag(precheaderty(buffer)^.fielddata.nullmask,int1);
-  inc(buffer,ffieldinfos[int1].base.offset{ffieldbufpositions[int1]});
+  result:= getfieldflag(@precheaderty(buffer)^.fielddata.nullmask,int1);
+  inc(pchar(buffer),ffieldinfos[int1].base.offset{ffieldbufpositions[int1]});
   datasize:= ffieldinfos[int1].base.size{ffieldsizes[int1]};
   exit;
  end;
@@ -2970,8 +2989,8 @@ begin
    end;
   end;
   if buffer <> nil then begin
-   result:= getfieldflag(precheaderty(buffer)^.fielddata.nullmask,int1);
-   inc(buffer,ffieldinfos[int1].base.offset{ffieldbufpositions[int1]});
+   result:= getfieldflag(@precheaderty(buffer)^.fielddata.nullmask,int1);
+   inc(pchar(buffer),ffieldinfos[int1].base.offset{ffieldbufpositions[int1]});
    datasize:= ffieldinfos[int1].base.size{ffieldsizes[int1]};
   end
   else begin
@@ -2981,8 +3000,8 @@ begin
  else begin   
   int1:= -2 - int1;
   if int1 >= 0 then begin //calc field
-   result:= getfieldflag(pbyte(buffer+frecordsize),int1);
-   inc(buffer,fcalcfieldbufpositions[int1]);
+   result:= getfieldflag(pointer(pchar(buffer)+frecordsize),int1);
+   inc(pchar(buffer),fcalcfieldbufpositions[int1]);
    datasize:= fcalcfieldsizes[int1];
   end
   else begin
@@ -3049,24 +3068,24 @@ begin
  end;
  if int1 >= 0 then begin // data field
   if isnull then begin
-   clearfieldflag(precheaderty(result)^.fielddata.nullmask,int1);
+   clearfieldflag(@precheaderty(result)^.fielddata.nullmask,int1);
   end
   else begin
-   setfieldflag(precheaderty(result)^.fielddata.nullmask,int1);
+   setfieldflag(@precheaderty(result)^.fielddata.nullmask,int1);
   end;
-  inc(result,ffieldinfos[int1].base.offset{ffieldbufpositions[int1]});
+  inc(pchar(result),ffieldinfos[int1].base.offset{ffieldbufpositions[int1]});
   datasize:= ffieldinfos[int1].base.size{ffieldsizes[int1]};
  end
  else begin
   int1:= -2 - int1;
   if int1 >= 0 then begin //calc field
    if isnull then begin
-    clearfieldflag(pbyte(result+frecordsize),int1);
+    clearfieldflag(pbyte(pchar(result)+frecordsize),int1);
    end
    else begin
-    setfieldflag(pbyte(result+frecordsize),int1);
+    setfieldflag(pbyte(pchar(result)+frecordsize),int1);
    end;
-   inc(result,fcalcfieldbufpositions[int1]);
+   inc(pchar(result),fcalcfieldbufpositions[int1]);
    datasize:= fcalcfieldsizes[int1];
   end
   else begin
@@ -3141,7 +3160,7 @@ begin
    po1:= fvaluebuffer;
   end
   else begin
-   result:= getfieldbuffer(sender,po1,int1);
+   result:= getfieldbuffer(sender,pointer(po1),int1);
   end;
  end;
  if result then begin
@@ -3697,8 +3716,8 @@ begin
 end;
 
 procedure tmsebufdataset.applyupdate(const cancelonerror: boolean;
-                               const cancelondeleteerror: boolean;
-                               const editonerror: boolean = false);
+               const cancelondeleteerror: boolean = false;
+                                    const editonerror: boolean = false);
                                                //applies current record
 var
  response: resolverresponsesty;
@@ -3947,7 +3966,7 @@ begin
        po2^[int1]:= po1^[int1];
        with po2^[int1] do begin
         if datalength > 0 then begin
-         po3:= getmem(datalength);
+         getmem(po3,datalength);
          move(data^,po3^,datalength);
          data:= po3;
         end
@@ -4208,31 +4227,31 @@ begin
               basedatatype:= getbasetype(lookupvaluefield);
               case basedatatype of
                ftwidestring: begin
-                getvalue:= @getbmstring;
+                getvalue:= {$ifdef FPC}@{$endif}getbmstring;
                end;
                ftguid: begin
-                getvalue:= @getbmguid;
+                getvalue:= {$ifdef FPC}@{$endif}getbmguid;
                end;
                ftinteger: begin
-                getvalue:= @getbminteger;
+                getvalue:= {$ifdef FPC}@{$endif}getbminteger;
                end;
                ftboolean: begin
-                getvalue:= @getbmboolean;
+                getvalue:= {$ifdef FPC}@{$endif}getbmboolean;
                end;
                ftbcd: begin
-                getvalue:= @getbmcurrency;
+                getvalue:= {$ifdef FPC}@{$endif}getbmcurrency;
                end;
                ftfloat: begin
-                getvalue:= @getbmfloat;
+                getvalue:= {$ifdef FPC}@{$endif}getbmfloat;
                end;
                ftlargeint: begin
-                getvalue:= @getbmlargeint;
+                getvalue:= {$ifdef FPC}@{$endif}getbmlargeint;
                end;
                ftdatetime: begin
-                getvalue:= @getbmdatetime;
+                getvalue:= {$ifdef FPC}@{$endif}getbmdatetime;
                end;
                ftvariant: begin
-                getvalue:= @getbmvariant;
+                getvalue:= {$ifdef FPC}@{$endif}getbmvariant;
                end;
                else begin
                 indexnum:= -1;
@@ -4681,7 +4700,7 @@ begin
     for int1:= 0 to recordcount - 1 do begin
      fcurrentbuf:= ind1[int1];
      for int2:= 0 to high(fieldar1) do begin
-      if getfieldflag(fcurrentbuf^.header.fielddata.nullmask,
+      if getfieldflag(@fcurrentbuf^.header.fielddata.nullmask,
                                                         ar1[int2]) then begin
        stream1:= tmemorystream(createblobstream(fieldar1[int2],bmread));
        int3:= addblobcache(stream1.memory,stream1.size);
@@ -4703,7 +4722,7 @@ begin
 end;
 
 function tmsebufdataset.findcachedblob(const id: int64; 
-                           out info: blobcacheinfoty): boolean; overload;
+                           out info: blobcacheinfoty): boolean;
 begin
  info.id:= id;
  result:= findcachedblob(info);
@@ -4717,7 +4736,7 @@ var
 begin
  with ffieldinfos[aindex],base,ext do begin
   cacheinfo.id:= 0; //field size can be 32 bit
-  move((pointer(data)+offset)^,cacheinfo.id,size);
+  move((pchar(data)+offset)^,cacheinfo.id,size);
   with data^ do begin
    for int1:= high(blobinfo) downto 0 do begin
     if blobinfo[int1].field = field then begin
@@ -4748,7 +4767,7 @@ procedure tmsebufdataset.setofflineblob(const adata: precheaderty;
 begin
  with ainfo,info do begin
   with ffieldinfos[aindex],base,ext do begin
-   move(id,(pointer(adata)+offset)^,size);
+   move(id,(pchar(adata)+offset)^,size);
    if current then begin
     with adata^ do begin
      setlength(blobinfo,high(blobinfo) + 2);
@@ -4756,7 +4775,7 @@ begin
       field:= ffieldinfos[aindex].ext.field;
       new:= info.new; //??
       datalength:= length(ainfo.data);
-      data:= getmem(datalength); //todo: no move
+      getmem(data,datalength); //todo: no move
       move(pointer(ainfo.data)^,data^,datalength);
      end;
     end;
@@ -4784,12 +4803,12 @@ begin
  end;
  int1:= afield.fieldno - 1;
  if avalue <> '' then begin
-  move(avalue[1],(po1+ffieldinfos[int1].base.offset{ffieldbufpositions[int1]})^,
+  move(avalue[1],(pchar(po1)+ffieldinfos[int1].base.offset)^,
                                  length(avalue));
-  setfieldflag(precheaderty(po1)^.fielddata.nullmask,int1);
+  setfieldflag(@precheaderty(po1)^.fielddata.nullmask,int1);
  end
  else begin
-  clearfieldflag(precheaderty(po1)^.fielddata.nullmask,int1);
+  clearfieldflag(@precheaderty(po1)^.fielddata.nullmask,int1);
  end;
 end; 
 
@@ -4896,7 +4915,7 @@ begin
  dec(fbrecordcount);
  po1:= arecord;
  with findexes[0] do begin
-  po2:= pointer(ind) + fbrecordcount*sizeof(pointer);
+  po2:= pointer(pchar(pointer(ind)) + fbrecordcount*sizeof(pointer));
   for int1:= fbrecordcount downto 0 do begin
    if po2^ = po1 then begin
     result:= int1;
@@ -5166,8 +5185,8 @@ begin
     if fielddef1 <> nil then begin
      int2:= fielddef1.size;
     end;
-    tmsestringfield1(field1).setismsestring(@getmsestringdata,
-         @setmsestringdata,int2,(fielddef1 <> nil) and 
+    tmsestringfield1(field1).setismsestring({$ifdef FPC}@{$endif}getmsestringdata,
+         {$ifdef FPC}@{$endif}setmsestringdata,int2,(fielddef1 <> nil) and
                         (fielddef1.datatype in widestringfields));
    end
    else begin
@@ -5177,7 +5196,7 @@ begin
   else begin
    if field1 is tmseblobfield then begin
     if bind then begin
-     tmseblobfield1(field1).fgetblobid:= @getfieldblobid;
+     tmseblobfield1(field1).fgetblobid:= {$ifdef FPC}@{$endif}getfieldblobid;
     end
     else begin
      tmseblobfield1(field1).fgetblobid:= nil;
@@ -5186,8 +5205,8 @@ begin
    else begin
     if field1 is tmsevariantfield then begin
      if bind then begin
-      tmsevariantfield1(field1).fsetvardata:= @setvardata;
-      tmsevariantfield1(field1).fgetvardata:= @getvardata;
+      tmsevariantfield1(field1).fsetvardata:= {$ifdef FPC}@{$endif}setvardata;
+      tmsevariantfield1(field1).fgetvardata:= {$ifdef FPC}@{$endif}getvardata;
      end
      else begin
       tmsevariantfield1(field1).fsetvardata:= nil;
@@ -5593,18 +5612,20 @@ begin
   po2:= pointer(findexes[0]);
   if bo1 then begin
    for int1:= 0 to fbrecordcount - 1 do begin
-    fcheckfilterbuffer:= pdsrecordty(pchar(po2[int1])-sizeof(dsheaderty));
+    fcheckfilterbuffer:= pdsrecordty(pchar(ppointeraty(po2)^[int1])-
+                                                           sizeof(dsheaderty));
     bo2:= true;
     onfilterrecord(self,bo2);
-    if bo2 and getfieldflag(fcheckfilterbuffer^.header.fielddata.nullmask,index1) then begin
+    if bo2 and getfieldflag(@fcheckfilterbuffer^.header.fielddata.nullmask,
+                                                             index1) then begin
      asum:= asum + pdouble(pchar(@fcheckfilterbuffer^.header)+int2)^;
     end;
    end;
   end
   else begin
    for int1:= 0 to fbrecordcount - 1 do begin
-    po1:= po2[int1];
-    if getfieldflag(po1^.fielddata.nullmask,index1) then begin
+    po1:= ppointeraty(po2)^[int1];
+    if getfieldflag(@po1^.fielddata.nullmask,index1) then begin
      asum:= asum + pdouble(pchar(po1)+int2)^;
     end;
    end;
@@ -5635,18 +5656,20 @@ begin
    ftbcd: begin
     if bo1 then begin
      for int1:= 0 to fbrecordcount - 1 do begin
-      fcheckfilterbuffer:= pdsrecordty(pchar(po2[int1])-sizeof(dsheaderty));
+      fcheckfilterbuffer:= pdsrecordty(pchar(ppointeraty(po2)[int1])-
+                                                          sizeof(dsheaderty));
       bo2:= true;
       onfilterrecord(self,bo2);
-      if bo2 and getfieldflag(fcheckfilterbuffer^.header.fielddata.nullmask,index1) then begin
+      if bo2 and getfieldflag(
+              @fcheckfilterbuffer^.header.fielddata.nullmask,index1) then begin
        asum:= asum + pcurrency(pchar(@fcheckfilterbuffer^.header)+int2)^;
       end;
      end;
     end
     else begin
      for int1:= 0 to fbrecordcount - 1 do begin
-      po1:= po2[int1];
-      if getfieldflag(po1^.fielddata.nullmask,index1) then begin
+      po1:= ppointeraty(po2)^[int1];
+      if getfieldflag(@po1^.fielddata.nullmask,index1) then begin
        asum:= asum + pcurrency(pchar(po1)+int2)^;
       end;
      end;
@@ -5655,18 +5678,20 @@ begin
    ftfloat: begin
     if bo1 then begin
      for int1:= 0 to fbrecordcount - 1 do begin
-      fcheckfilterbuffer:= pdsrecordty(pchar(po2[int1])-sizeof(dsheaderty));
+      fcheckfilterbuffer:= pdsrecordty(
+                           pchar(ppointeraty(po2)^[int1])-sizeof(dsheaderty));
       bo2:= true;
       onfilterrecord(self,bo2);
-      if bo2 and getfieldflag(fcheckfilterbuffer^.header.fielddata.nullmask,index1) then begin
+      if bo2 and getfieldflag(
+            @fcheckfilterbuffer^.header.fielddata.nullmask,index1) then begin
        asum:= asum + pdouble(pchar(@fcheckfilterbuffer^.header)+int2)^;
       end;
      end;
     end
     else begin
      for int1:= 0 to fbrecordcount - 1 do begin
-      po1:= po2[int1];
-      if getfieldflag(po1^.fielddata.nullmask,index1) then begin
+      po1:= ppointeraty(po2)^[int1];
+      if getfieldflag(@po1^.fielddata.nullmask,index1) then begin
        asum:= asum + pdouble(pchar(po1)+int2)^;
       end;
      end;
@@ -5699,18 +5724,20 @@ begin
    ftlargeint: begin
     if bo1 then begin
      for int1:= 0 to fbrecordcount - 1 do begin
-      fcheckfilterbuffer:= pdsrecordty(pchar(po2[int1])-sizeof(dsheaderty));
+      fcheckfilterbuffer:= pdsrecordty(pchar(ppointeraty(po2)^[int1])-
+                                                           sizeof(dsheaderty));
       bo2:= true;
       onfilterrecord(self,bo2);
-      if bo2 and getfieldflag(fcheckfilterbuffer^.header.fielddata.nullmask,index1) then begin
+      if bo2 and getfieldflag(
+            @fcheckfilterbuffer^.header.fielddata.nullmask,index1) then begin
        asum:= asum + pint64(pchar(@fcheckfilterbuffer^.header)+int2)^;
       end;
      end;
     end
     else begin
      for int1:= 0 to fbrecordcount - 1 do begin
-      po1:= po2[int1];
-      if getfieldflag(po1^.fielddata.nullmask,index1) then begin
+      po1:= ppointeraty(po2)^[int1];
+      if getfieldflag(@po1^.fielddata.nullmask,index1) then begin
        asum:= asum + pint64(pchar(po1)+int2)^;
       end;
      end;
@@ -5719,18 +5746,20 @@ begin
    ftinteger,ftsmallint,ftword: begin
     if bo1 then begin
      for int1:= 0 to fbrecordcount - 1 do begin
-      fcheckfilterbuffer:= pdsrecordty(pchar(po2[int1])-sizeof(dsheaderty));
+      fcheckfilterbuffer:= pdsrecordty(pchar(ppointeraty(po2)^[int1])-
+                                                        sizeof(dsheaderty));
       bo2:= true;
       onfilterrecord(self,bo2);
-      if bo2 and getfieldflag(fcheckfilterbuffer^.header.fielddata.nullmask,index1) then begin
+      if bo2 and getfieldflag(
+              @fcheckfilterbuffer^.header.fielddata.nullmask,index1) then begin
        asum:= asum + pinteger(pchar(@fcheckfilterbuffer^.header)+int2)^;
       end;
      end;
     end
     else begin
      for int1:= 0 to fbrecordcount - 1 do begin
-      po1:= po2[int1];
-      if getfieldflag(po1^.fielddata.nullmask,index1) then begin
+      po1:= ppointeraty(po2)^[int1];
+      if getfieldflag(@po1^.fielddata.nullmask,index1) then begin
        asum:= asum + pinteger(pchar(po1)+int2)^;
       end;
      end;
@@ -5763,18 +5792,20 @@ begin
    ftinteger,ftsmallint,ftword: begin
     if bo1 then begin
      for int1:= 0 to fbrecordcount - 1 do begin
-      fcheckfilterbuffer:= pdsrecordty(pchar(po2[int1])-sizeof(dsheaderty));
+      fcheckfilterbuffer:= pdsrecordty(pchar(ppointeraty(po2)^[int1])-
+                                                         sizeof(dsheaderty));
       bo2:= true;
       onfilterrecord(self,bo2);
-      if bo2 and getfieldflag(fcheckfilterbuffer^.header.fielddata.nullmask,index1) then begin
+      if bo2 and getfieldflag(
+             @fcheckfilterbuffer^.header.fielddata.nullmask,index1) then begin
        asum:= asum + pinteger(pchar(@fcheckfilterbuffer^.header)+int2)^;
       end;
      end;
     end
     else begin
      for int1:= 0 to fbrecordcount - 1 do begin
-      po1:= po2[int1];
-      if getfieldflag(po1^.fielddata.nullmask,index1) then begin
+      po1:= ppointeraty(po2)^[int1];
+      if getfieldflag(@po1^.fielddata.nullmask,index1) then begin
        asum:= asum + pinteger(pchar(po1)+int2)^;
       end;
      end;
@@ -5783,11 +5814,12 @@ begin
    ftboolean: begin
     if bo1 then begin
      for int1:= 0 to fbrecordcount - 1 do begin
-      fcheckfilterbuffer:= pdsrecordty(pchar(po2[int1])-sizeof(dsheaderty));
+      fcheckfilterbuffer:= pdsrecordty(pchar(ppointeraty(po2)^[int1])-
+                                                        sizeof(dsheaderty));
       bo2:= true;
       onfilterrecord(self,bo2);
       if bo2 and getfieldflag(
-                  fcheckfilterbuffer^.header.fielddata.nullmask,index1) and
+                  @fcheckfilterbuffer^.header.fielddata.nullmask,index1) and
                   pwordbool(pchar(@fcheckfilterbuffer^.header)+int2)^ then begin
        inc(asum);
       end;
@@ -5795,8 +5827,8 @@ begin
     end
     else begin
      for int1:= 0 to fbrecordcount - 1 do begin
-      po1:= po2[int1];
-      if getfieldflag(po1^.fielddata.nullmask,index1) and
+      po1:= ppointeraty(po2)^[int1];
+      if getfieldflag(@po1^.fielddata.nullmask,index1) and
                  pwordbool(pchar(po1)+int2)^ then begin
        inc(asum);
       end;
@@ -6094,7 +6126,7 @@ begin
     try
      reader.readbuffer(po1^,int1*fieldco);
      for int2:= 0 to fieldco-1 do begin
-      if not comparemem(po1+int1*int2,@ffieldinfos[int2],
+      if not comparemem(pchar(po1)+int1*int2,@ffieldinfos[int2],
                                    sizeof(fieldinfobasety)) then begin
        formaterror;
       end;
@@ -6167,7 +6199,7 @@ begin
           end;
           if po = nil then begin
            info.bookmark.recordpo:= nil;   //deleting of inserted record
-           intfreerecord(po1);
+           intfreerecord(pintrecordty(po1));
           end
           else begin                  //deleting of modified record
            intfreerecord(updabuf[int3].info.bookmark.recordpo);
@@ -6178,7 +6210,7 @@ begin
          end
          else begin
           if logging then begin
-           if not findrec(deletedrecord,info.bookmark.recordpo,
+           if not findrec(deletedrecord,pointer(info.bookmark.recordpo),
                                          info.bookmark.recno,true) then begin
             formaterror;
            end;
@@ -6192,7 +6224,8 @@ begin
          oldvalues:= info.bookmark.recordpo;
         end
         else begin
-         if not findrec(po,info.bookmark.recordpo,info.bookmark.recno) then begin
+         if not findrec(po,pointer(info.bookmark.recordpo),
+                                         info.bookmark.recno) then begin
           formaterror;        //old pointer not found
          end;
         end;
@@ -6600,7 +6633,7 @@ var
  int1: integer;
 begin
  int1:= afield.fieldno-1;
- if not getfieldflag(arecord^.header.fielddata.nullmask,int1) then begin 
+ if not getfieldflag(@arecord^.header.fielddata.nullmask,int1) then begin
   result:= nil;
  end
  else begin
@@ -6609,7 +6642,7 @@ begin
         not (ext.basetype in fielddatacompatibility[afieldtype]) then begin
     raise ecurrentvalueaccess.create(self,afield,'Invalid fieldtype.');  
    end;   
-   result:= pointer(arecord) + base.offset;
+   result:= pchar(pointer(arecord)) + base.offset;
   end;
  end;
 end;
@@ -6692,6 +6725,7 @@ begin
   raise ecurrentvalueaccess.create(self,afield,
                'Field can not be be fkCalculated.');
  end;
+ result:= nil;
  if abm.recordpo <> nil then begin
   if (afield.fieldno < 0) then begin
    result:= getcurrentlookuppo(afield,afieldtype,abm.recordpo);
@@ -6710,7 +6744,7 @@ var
  int1: integer;
 begin
 // flastcurrentrec:= pointer(arecord) - sizeof(intrecordty.intheader);
- po1:= arecord^.fielddata.nullmask;
+ po1:= @arecord^.fielddata.nullmask;
  int1:= afield.fieldno-1;
  with ffieldinfos[int1] do begin
   if (afieldtype <> ftunknown) and 
@@ -6726,7 +6760,7 @@ begin
     setfieldflag(po1,int1);
    end;
   end;
-  result:= pointer(arecord) + base.offset;
+  result:= pchar(pointer(arecord)) + base.offset;
  end;
 end;
 
@@ -7632,44 +7666,44 @@ begin
  case afieldtype of
   ftinteger: begin
    for int1:= 0 to fbrecordcount-1 do begin
-    pinteger(po2)^:= pinteger(indexpo[int1]+offs)^;
-    inc(po2,step);
+    pinteger(po2)^:= pinteger(pchar(ppointeraty(indexpo)^[int1])+offs)^;
+    inc(pchar(po2),step);
    end;
   end;
   ftlargeint: begin
    for int1:= 0 to fbrecordcount-1 do begin
-    pint64(po2)^:= pint64(indexpo[int1]+offs)^;
-    inc(po2,step);
+    pint64(po2)^:= pint64(pchar(ppointeraty(indexpo)^[int1])+offs)^;
+    inc(pchar(po2),step);
    end;
   end;
   ftboolean: begin
    for int1:= 0 to fbrecordcount-1 do begin
-    pboolean(po2)^:= plongbool(indexpo[int1]+offs)^;
-    inc(po2,step);
+    pboolean(po2)^:= plongbool(pchar(ppointeraty(indexpo)^[int1])+offs)^;
+    inc(pchar(po2),step);
    end;
   end;
   ftcurrency: begin
    for int1:= 0 to fbrecordcount-1 do begin
-    pcurrency(po2)^:= pcurrency(indexpo[int1]+offs)^;
-    inc(po2,step);
+    pcurrency(po2)^:= pcurrency(pchar(ppointeraty(indexpo)^[int1])+offs)^;
+    inc(pchar(po2),step);
    end;
   end;
   ftfloat,ftdatetime: begin
    for int1:= 0 to fbrecordcount-1 do begin
-    prealty(po2)^:= pdouble(indexpo[int1]+offs)^;
-    inc(po2,step);
+    prealty(po2)^:= pdouble(pchar(ppointeraty(indexpo)^[int1])+offs)^;
+    inc(pchar(po2),step);
    end;
   end;
   ftstring: begin
    for int1:= 0 to fbrecordcount-1 do begin
-    pansistring(po2)^:= pmsestring(indexpo[int1]+offs)^;
-    inc(po2,step);
+    pansistring(po2)^:= pmsestring(pchar(ppointeraty(indexpo)^[int1])+offs)^;
+    inc(pchar(po2),step);
    end;
   end;
   ftwidestring: begin
    for int1:= 0 to fbrecordcount-1 do begin
-    pmsestring(po2)^:= pmsestring(indexpo[int1]+offs)^;
-    inc(po2,step);
+    pmsestring(po2)^:= pmsestring(pchar(ppointeraty(indexpo)^[int1])+offs)^;
+    inc(pchar(po2),step);
    end;
   end;
  end;
@@ -7721,7 +7755,7 @@ begin
 end;
 
 procedure tmsebufdataset.asarray(const afield: tfield;
-                                      out avalue: int64arty); overload;
+                                      out avalue: int64arty);
 begin
  currentcheckbrowsemode;
  setlength(avalue,fbrecordcount);
@@ -7854,7 +7888,7 @@ begin
        df.clear;
       end
       else begin
-       docurrentassign(pointer(bm.recordpo)+base.offset,
+       docurrentassign(pchar(bm.recordpo)+base.offset,
                           ffieldinfos[int2].ext.basetype,df);
 {
        case ext.basetype of
@@ -8101,13 +8135,31 @@ begin
                          noinsert);
 end;
 
+{$ifndef FPC}
+function tmsebufdataset.refreshrecordvarar(const sourcedatasets: array of tdataset;
+              const akeyvalue: array of variant;
+              const keyindex: integer;
+              const acancelupdate: boolean;
+              const restorerecno: boolean;
+              const noinsert: boolean): bookmarkdataty;
+begin
+ result:= refreshrecord(sourcedatasets,akeyvalue,keyindex,acancelupdate,
+                          restorerecno,noinsert);
+end;
+{$endif}
+
 function tmsebufdataset.refreshrecord(const akeyfield: array of tfield;
           const keyindex: integer = 0; const acancelupdate: boolean = true;
           const restorerecno: boolean = true;
               const noinsert: boolean = false): bookmarkdataty;
 begin
+{$ifdef fpc}
  result:= refreshrecord([akeyfield[0].dataset],fieldvariants(akeyfield),keyindex,
                         acancelupdate,restorerecno,noinsert);
+{$else}
+ result:= refreshrecordvarar([akeyfield[0].dataset],fieldvariants(akeyfield),keyindex,
+                        acancelupdate,restorerecno,noinsert);
+{$endif}
 end;
 
 function tmsebufdataset.getindex(const afield: tfield): integer;
@@ -8185,7 +8237,11 @@ var
  bm1: bookmarkdataty;
 begin
  result:= '';
+{$ifdef FPC}
  if indexlocal[indexnum].find([akey],[aisnull],bm1) then begin
+{$else}
+ if indexlocal[indexnum].findval([akey],[aisnull],bm1) then begin
+{$endif}
   result:= currentbmasmsestring[valuefield,bm1];
  end;
 end;
@@ -8196,7 +8252,11 @@ var
  bm1: bookmarkdataty;
 begin
  result:= '';
+{$ifdef FPC}
  if indexlocal[indexnum].find([akey],[aisnull],bm1) then begin
+{$else}
+ if indexlocal[indexnum].findval([akey],[aisnull],bm1) then begin
+{$endif}
   result:= currentbmasmsestring[valuefield,bm1];
  end;
 end;
@@ -8207,7 +8267,11 @@ var
  bm1: bookmarkdataty;
 begin
  result:= '';
+{$ifdef FPC}
  if indexlocal[indexnum].find([akey],[aisnull],bm1) then begin
+{$else}
+ if indexlocal[indexnum].findval([akey],[aisnull],bm1) then begin
+{$endif}
   result:= currentbmasmsestring[valuefield,bm1];
  end;
 end;
@@ -8218,7 +8282,11 @@ var
  bm1: bookmarkdataty;
 begin
  arecord:= -1;
+{$ifdef FPC}
  result:= indexlocal[indexnum].find([searchtext],[false],bm1,false,true);
+{$else}
+ result:= indexlocal[indexnum].findval([searchtext],[false],bm1,false,true);
+{$endif}
  if result then begin
   arecord:= bm1.recno;
  end;
@@ -8890,18 +8958,18 @@ begin
       inc(result);
      end
      else begin    
-      result:= comparefunc((pointer(l)+recoffset)^,(pointer(r)+recoffset)^);
+      result:= comparefunc((pchar(l)+recoffset)^,(pchar(r)+recoffset)^);
      end;
     end;
     if (result <> 0) then begin
      if apartialstring and canpartialstring and (int1 = alastindex) then begin
       if caseinsensitive then begin
-       result:=  msepartialcomparetext(pmsestring(pointer(l)+recoffset)^,
-                 pmsestring(pointer(r)+recoffset)^);
+       result:=  msepartialcomparetext(pmsestring(pointer(pchar(l)+recoffset))^,
+                 pmsestring(pointer(pchar(r)+recoffset))^);
       end
       else begin
-       result:=  msepartialcomparestr(pmsestring(pointer(l)+recoffset)^,
-                 pmsestring(pointer(r)+recoffset)^);
+       result:=  msepartialcomparestr(pmsestring(pointer(pchar(l)+recoffset))^,
+                 pmsestring(pointer(pchar(r)+recoffset))^);
       end;
      end;
      if desc then begin
@@ -8946,8 +9014,8 @@ begin
      if not getfieldflag(@r^.header.fielddata.nullmask,fieldindex) then begin
       inc(result);
      end
-     else begin    
-      result:= comparefunc((pointer(l)+recoffset)^,(pointer(r)+recoffset)^);
+     else begin
+      result:= comparefunc((pchar(l)+recoffset)^,(pchar(r)+recoffset)^);
      end;
     end;
     if desc then begin
@@ -8963,6 +9031,13 @@ begin
   result:= -result;
  end;
 end;
+
+{$ifndef FPC}
+function tlocalindex.compare3(l,r: pointer): integer;
+begin
+ result:= compare2(l,r);
+end;
+{$endif}
 
 procedure tlocalindex.quicksort(l,r: integer);
 var
@@ -9025,11 +9100,11 @@ begin
  while step < acount do begin
   d:= dest;
   l:= source;
-  r:= source + step;
+  r:= @ppointeraty(source)^[step];
   stopl:= r;
-  stopr:= r+step;
-  stops:= source + acount;
-  if stopr > stops then begin
+  stopr:= @ppointeraty(r)^[step];
+  stops:= @ppointeraty(source)^[acount];
+  if pchar(stopr) > pchar(stops) then begin
    stopr:= stops;
   end;
   while true do begin //runs
@@ -9066,17 +9141,17 @@ endstep:
     break;  //run finished
    end;
    l:= stopr; //next step
-   r:= l + step;
-   if r >= stops then begin
-    r:= stops-1;
+   r:= @ppointerarty(l)^[step];
+   if pchar(r) >= pchar(stops) then begin
+    r:= pointer(pchar(stops)-sizeof(pointer));
    end;
    if r = l then begin
     d^:= l^;
     break;
    end;
    stopl:= r;
-   stopr:= r + step;
-   if stopr > stops then begin
+   stopr:= @ppointerarty(r)^[step];
+   if pchar(stopr) > pchar(stops) then begin
     stopr:= stops;
    end;
   end;
@@ -9107,7 +9182,11 @@ begin
   end
   else begin
    msearrayutils.mergesort(adata,tmsebufdataset(fowner).fbrecordcount,
+   {$ifdef FPC}
                  pointercomparemethodty(@compare2));
+   {$else}
+                 compare3);
+   {$endif}
 //   mergesort(adata);
   end;
  end;
@@ -9289,7 +9368,7 @@ function tlocalindex.find(const avalues: array of const;
              const partialstring: boolean = false;
              const nocheckbrowsemode: boolean = false): boolean;
 var
- int1: integer; 
+ int1: integer;
 // v: tvarrec;
  po1: pintrecordty;
  po2: pointer;
@@ -9318,7 +9397,7 @@ begin
  try
   for int1:= lastind downto 0 do begin
    with findexfieldinfos[int1],avalues[int1] do begin
-    po2:= pointer(po1) + recoffset;
+    po2:= pchar(po1) + recoffset;
     bo1:= false;
     case vtype of
      vtinteger: begin
@@ -9427,7 +9506,7 @@ begin
         goto endlab;
        end;
       end;
-     end;          
+     end;
      abookmark.recno:= int1;
      abookmark.recordpo:= ind[int1];
     end;
@@ -9439,12 +9518,23 @@ endlab:
  end;
 end;
 
+{$ifndef FPC}
+function tlocalindex.findval(const avalues: array of const;
+             const aisnull: array of boolean; out abookmark: bookmarkdataty;
+             const abigger: boolean = false;
+             const partialstring: boolean = false;
+             const nocheckbrowsemode: boolean = false): boolean;
+begin
+ result:= find(avalues,aisnull,abookmark,abigger,partialstring,nocheckbrowsemode);
+end;
+{$endif}
+
 function tlocalindex.find(const avalues: array of const; const aisnull: array of boolean;
                  //itemcount of avalues can be smaller than fields count in index
                out abookmark: string;
                const abigger: boolean = false;
                const partialstring: boolean = false;
-               const nocheckbrowsemode: boolean = false): boolean; overload;
+               const nocheckbrowsemode: boolean = false): boolean;
                 //true if found else nearest lower or bigger,
                 //abookmark = '' if no lower or bigger found
                 //string values must be msestring
@@ -9474,7 +9564,7 @@ function tlocalindex.find(const avalues: array of tfield;
                const abigger: boolean = false;
                const partialstring: boolean = false;
                const nocheckbrowsemode: boolean = false;
-               const exact: boolean = true): boolean; overload;
+               const exact: boolean = true): boolean;
                 //sets dataset cursor if found
 var
  str1: string;
@@ -9493,7 +9583,7 @@ function tlocalindex.findvariant(const avalue: array of variant;
                out abookmark: string;
                const abigger: boolean = false;
                const partialstring: boolean = false;
-               const nocheckbrowsemode: boolean = false): boolean; overload;
+               const nocheckbrowsemode: boolean = false): boolean;
                 //true if found else nearest lower or bigger,
                 //abookmark = '' if no lower or bigger found
                 //string values must be msestring
@@ -9564,7 +9654,7 @@ function tlocalindex.findvariant(const avalue: array of variant;
                const abigger: boolean = false;
                const partialstring: boolean = false;
                const nocheckbrowsemode: boolean = false;
-               const exact: boolean = true): boolean; overload;
+               const exact: boolean = true): boolean;
                 //sets dataset cursor if found
 var
  str1: string;
@@ -9579,7 +9669,7 @@ function tlocalindex.find(const avalues: array of tfield;
                out abookmark: bookmarkdataty;
                const abigger: boolean = false;
                const partialstring: boolean = false;
-               const nocheckbrowsemode: boolean = false): boolean; overload;
+               const nocheckbrowsemode: boolean = false): boolean;
                 //true if found else nearest lower or bigger,
                 //abookmark = '' if no lower or bigger found
 var
@@ -9664,7 +9754,7 @@ function tlocalindex.find(const avalues: array of tfield;
                out abookmark: string;
                const abigger: boolean = false;
                const partialstring: boolean = false;
-               const nocheckbrowsemode: boolean = false): boolean; overload;
+               const nocheckbrowsemode: boolean = false): boolean;
                 //true if found else nearest lower or bigger,
                 //abookmark = '' if no lower or bigger found
 var
