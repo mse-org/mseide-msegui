@@ -384,7 +384,7 @@ type
     function ReadInt16: SmallInt; virtual; abstract;
     function ReadInt32: LongInt; virtual; abstract;
     function ReadInt64: Int64; virtual; abstract;
-    function ReadSet(EnumType: Pointer): Integer; virtual; abstract;
+    function ReadSet(EnumType: ptypeinfo): Integer; virtual; abstract;
     function ReadStr: String; virtual; abstract;
     function ReadString(StringType: TValueType): String; virtual; abstract;
     function ReadWideString: WideString;virtual;abstract;
@@ -434,7 +434,7 @@ type
     function ReadInt16: SmallInt; override;
     function ReadInt32: LongInt; override;
     function ReadInt64: Int64; override;
-    function ReadSet(EnumType: Pointer): Integer; override;
+    function ReadSet(EnumType: ptypeinfo): Integer; override;
     function ReadStr: String; override;
     function ReadString(StringType: TValueType): String; override;
     function ReadWideString: WideString;override;
@@ -4463,7 +4463,7 @@ begin
   Result:=Int64(ReadQWord);
 end;
 
-function TBinaryObjectReader.ReadSet(EnumType: Pointer): Integer;
+function TBinaryObjectReader.ReadSet(EnumType: ptypeinfo): Integer;
 type
   tset = set of 0..31;
 var
@@ -5659,7 +5659,11 @@ type
 {$endif FPC_REQUIRES_PROPER_ALIGNMENT}
   record
     Count: Word;
+   {$ifdef FPC}
     Entries: array[Word] of TPersistentClass;
+   {$else}
+    Entries: array[Word] of ^TPersistentClass;
+   {$endif}
   end;
 
   PFieldTable = ^TFieldTable;
@@ -5673,30 +5677,35 @@ type
     // Fields: array[Word] of TFieldInfo;  Elements have variant size!
   end;
 
+function getfieldclasstable(const aclass: tclass): pfieldclasstable;
+begin
+ pointer(result):= ppointer(pchar(pointer(aclass))+vmtFieldTable)^;
+ if result <> nil then begin
+  result:= pfieldtable(pointer(result))^.classtable;
+ end;
+end;
+
 function GetFieldClass(Instance: TObject; const ClassName: string): TPersistentClass;
 var
   UClassName: String;
   ClassType: TClass;
   ClassTable: PFieldClassTable;
   i: Integer;
-{  FieldTable: PFieldTable; }
 begin
   // At first, try to locate the class in the class tables
   UClassName := UpperCase(ClassName);
   ClassType := Instance.ClassType;
   while ClassType <> TPersistent do
   begin
-{    FieldTable := PFieldTable((Pointer(ClassType) + vmtFieldTable)^); }
-{$ifdef FPC}
-    ClassTable := PFieldTable((Pointer(ClassType) + vmtFieldTable)^)^.ClassTable;
-{$else}
-    ClassTable:= PFieldTable(pointer((pchar(Pointer(ClassType)) +
-                                   vmtFieldTable))^)^.ClassTable;
-{$endif}
+    classtable:= getfieldclasstable(classtype);
     if Assigned(ClassTable) then
       for i := 0 to ClassTable^.Count - 1 do
       begin
+      {$ifdef FPC}
         Result := ClassTable^.Entries[i];
+      {$else}
+        Result := ClassTable^.Entries[i]^;
+      {$endif}
         if UpperCase(Result.ClassName) = UClassName then
           exit;
       end;
@@ -6458,7 +6467,11 @@ begin
       begin
         CheckValue(vaSet);
         SetOrdProp(Instance, PropInfo,
+        {$ifdef FPC}
           FDriver.ReadSet(GetTypeData(PropType)^.CompType));
+        {$else}
+          FDriver.ReadSet(GetTypeData(PropType)^.CompType^));
+        {$endif}
       end;
     tkMethod:
       if FDriver.NextValue = vaNil then
@@ -6800,36 +6813,33 @@ var
     i: Integer;
     ComponentClassType: TClass;
   begin
-    ComponentClassType := RootComponent.ClassType;
+    ComponentClassType:= RootComponent.ClassType;
     // it is not necessary to look in the FieldTable of TComponent,
     // because TComponent doesn't have published properties that are
     // descendants of TComponent
-    while ComponentClassType<>TComponent do begin
-      FieldClassTable :=
-      {$ifdef FPC}
-        PFieldTable((Pointer(ComponentClassType)+vmtFieldTable)^)^.ClassTable;
-      {$else}
-        PFieldTable(
-         pointer((pchar(Pointer(ComponentClassType))+vmtFieldTable))^
-                   )^.ClassTable;
-      {$endif}
+    while ComponentClassType <> TComponent do begin
+      fieldclasstable:= getfieldclasstable(componentclasstype);
       if assigned(FieldClassTable) then begin
-        for i := 0 to FieldClassTable^.Count -1 do begin
-          Entry := FieldClassTable^.Entries[i];
+        for i:= 0 to FieldClassTable^.Count -1 do begin
+         {$ifdef FPC}
+          Entry:= FieldClassTable^.Entries[i];
+         {$else}
+          Entry:= FieldClassTable^.Entries[i]^;
+         {$endif}
           //writeln(format('Looking for %s in field table of class %s. Found %s',
             //[AClassName, ComponentClassType.ClassName, Entry.ClassName]));
-          if (UpperCase(Entry.ClassName)=UClassName) and
-            (Entry.InheritsFrom(TComponent)) then begin
-            Result := TComponentClass(Entry);
+          if (UpperCase(Entry.ClassName) = UClassName) and
+                             Entry.InheritsFrom(TComponent) then begin
+            Result:= TComponentClass(Entry);
             Exit;
           end;
         end;
       end;
       // look in parent class
-      ComponentClassType := ComponentClassType.ClassParent;
+      ComponentClassType:= ComponentClassType.ClassParent;
     end;
   end;
-  
+
 begin
   Result := nil;
   UClassName:=UpperCase(AClassName);
