@@ -13,7 +13,7 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 }
-{Modified 2006-2010 by Martin Schreiber}
+{Modified 2006-2013 by Martin Schreiber}
 
 unit mmysqlconn;
 
@@ -32,7 +32,7 @@ interface
 
 uses
   classes,mclasses,SysUtils,msqldb,mdb,{$ifdef FPC}dynlibs,{$endif}msestrings,
-  msedb,mysqldyn,msetypes,ctypes;
+  msedb,mysqldyn,msetypes,msectypes;
 
 Type
 
@@ -232,7 +232,8 @@ Type
 
 implementation
 uses 
- dbconst,msebufdataset,typinfo,dateutils,msefileutils,msedatabase,msedynload,
+ {$ifdef FPC}dbconst{$else}dbconst_del{$endif},
+ msebufdataset,typinfo,dateutils,msefileutils,msedatabase,msedynload,
  msesqlresult;
 type
  tmsebufdataset1 = class(tmsebufdataset);
@@ -319,19 +320,28 @@ begin
   int1:= acount * sizeof(mysql_bind_50);
  end;
  if int1 > 0 then begin
-  result:= getmem(int1);
+  getmem(result,int1);
   fillchar(result^,int1,0);
  end;
 end;
 
 function getbind(const abindings: pointer; const index: integer): pointer;
 begin
+{$ifdef FPC}
  if is51 then begin
   result:= @pmysql_bind_51(abindings)[index];
  end
  else begin
   result:= @pmysql_bind_50(abindings)[index];
  end;
+{$else}
+ if is51 then begin
+  result:= pointer(pchar(abindings)+sizeof(mysql_bind_51)*index);
+ end
+ else begin
+  result:= pointer(pchar(abindings)+sizeof(mysql_bind_50)*index);
+ end;
+{$endif}
 end;
 
 procedure freebindings(var abindings: pointer);
@@ -353,7 +363,11 @@ var
 begin
  bi:= @bindinginfo[index];
  if is51 then begin
+{$ifdef FPC}
   with pmysql_bind_51(bindings)[index] do begin
+{$else}
+  with pmysql_bind_51(pointer(pchar(bindings)+sizeof(mysql_bind_51)*index))^ do begin
+{$endif}
    pbuffer_type:= @buffer_type;
    pbuffer_length:= @buffer_length;
    length:= @bi^.length;
@@ -361,7 +375,11 @@ begin
   end;
  end
  else begin
+ {$ifdef FPC}
   with pmysql_bind_50(bindings)[index] do begin
+ {$else}
+  with pmysql_bind_50(pointer(pchar(bindings)+sizeof(mysql_bind_50)*index))^ do begin
+ {$endif}
    pbuffer_type:= @buffer_type;
    pbuffer_length:= @buffer_length;
    length:= @bi^.length;
@@ -414,7 +432,11 @@ var
 begin
  bi:= @bindinginfo[index];
  if is51 then begin
+{$ifdef FPC}
   with pmysql_bind_51(bindings)[index] do begin
+{$else}
+  with pmysql_bind_51(pointer(pchar(bindings)+sizeof(mysql_bind_51)*index))^ do begin
+{$endif}
    pbuffer_type:= @buffer_type;
    pbuffer_length:= @buffer_length;
    length:= @bi^.length;
@@ -423,7 +445,11 @@ begin
   end;
  end
  else begin
+{$ifdef FPC}
   with pmysql_bind_50(bindings)[index] do begin
+{$else}
+  with pmysql_bind_50(pointer(pchar(bindings)+sizeof(mysql_bind_50)*index))^ do begin
+{$endif}
    pbuffer_type:= @buffer_type;
    pbuffer_length:= @buffer_length;
    length:= @bi^.length;
@@ -476,22 +502,32 @@ begin
  for int1:= 0 to high(bindinfos) do begin
   bufsum:= bufsum + bindinfos[int1].length;
  end;
- result:= getmem(bufsum);
+ getmem(result,bufsum);
  bufsum:= 0;
  for int1:= 0 to high(bindinfos) do begin
   with bindinfos[int1] do begin
    if length > 0 then begin
-    buffer:= result + bufsum;
+    buffer:= pchar(result) + bufsum;
     if is51 then begin
+{$ifdef FPC}
      pmysql_bind_51(bindings)[int1].buffer:= buffer;
+{$else}
+     pmysql_bind_51(pointer(pchar(bindings)+
+                 sizeof(mysql_bind_51)*int1))^.buffer:= buffer;
+{$endif}
     end
     else begin
+{$ifdef FPC}
      pmysql_bind_50(bindings)[int1].buffer:= buffer;
+{$else}
+     pmysql_bind_50(pointer(pchar(bindings)+
+                 sizeof(mysql_bind_50)*int1))^.buffer:= buffer;
+{$endif}
     end;
     bufsum:= bufsum + length;
    end;
   end;
- end;   
+ end;
 end;
 
 procedure freebindingbuffers(var abuffer: pointer);
@@ -506,13 +542,21 @@ procedure setbindingbuffer(const bindings: pointer; const index: integer;
                           const abuffer: pointer; const alength: integer);
 begin
  if is51 then begin
+{$ifdef FPC}
   with pmysql_bind_51(bindings)[index] do begin
+{$else}
+  with pmysql_bind_51(pointer(pchar(bindings)+sizeof(mysql_bind_51)*index))^ do begin
+{$endif}
    buffer:= abuffer;
    buffer_length:= alength;
   end;
  end
  else begin
+{$ifdef FPC}
   with pmysql_bind_50(bindings)[index] do begin
+{$else}
+  with pmysql_bind_50(pointer(pchar(bindings)+sizeof(mysql_bind_50)*index))^ do begin
+{$endif}
    buffer:= abuffer;
    buffer_length:= alength;
   end;
@@ -566,7 +610,10 @@ function tmysqlconnection.StrToStatementType(s : msestring) : TStatementType;
 
 begin
   S:=Lowercase(s);
-  if s = 'show' then exit(stSelect);
+  if s = 'show' then begin
+   result:= stSelect;
+   exit;
+  end;
   result := inherited StrToStatementType(s);
 end;
 
@@ -616,7 +663,8 @@ begin
  If (HMySQL1=Nil) then begin
   checkerror(SErrServerConnectFailed,hmysql);
  end;
- if (myo_ssl in foptions) and (mysql_get_ssl_cipher <> nil) then begin
+ if (myo_ssl in foptions) and
+              ({$ifndef FPC}@{$endif}mysql_get_ssl_cipher <> nil) then begin
   actcipher:= mysql_get_ssl_cipher(hmysql);
   if actcipher =  nil then begin
    closeconnection(hmysql);

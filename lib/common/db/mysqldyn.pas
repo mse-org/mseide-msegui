@@ -111,7 +111,8 @@ procedure releasemysql;
      Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA  }
 
     type
-       my_bool = cchar;
+//       my_bool = cchar;
+       my_bool = byte;
        Pmy_bool  = ^my_bool;
 
        PVIO = Pointer;
@@ -407,7 +408,6 @@ type
          MYSQL_TYPE_BLOB := 252,MYSQL_TYPE_VAR_STRING := 253,
          MYSQL_TYPE_STRING := 254,MYSQL_TYPE_GEOMETRY := 255
          );
-       penum_field_types = ^enum_field_types;
     { For backward compatibility  }
     {$else}
      const
@@ -443,6 +443,8 @@ type
 type
  enum_field_types = cint; //correct?
     {$endif}
+ penum_field_types = ^enum_field_types;
+
     const
        CLIENT_MULTI_QUERIES = CLIENT_MULTI_STATEMENTS;
        FIELD_TYPE_DECIMAL = MYSQL_TYPE_DECIMAL;
