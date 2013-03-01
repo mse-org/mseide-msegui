@@ -174,7 +174,7 @@ type
 implementation
 
 uses
-  Math, DBConst,msedatabase;
+  Math, {$ifdef FPC}DBConst{$else}dbconst_del{$endif},msedatabase;
   
 {$define ODBCVER3}
 
@@ -278,8 +278,9 @@ const
 
  blobidsize = sizeof(integer);
  maxstrlen = 3000;
- maxprecision = 18; 
-  DefaultEnvironment:TODBCEnvironment = nil;
+ maxprecision = 18;
+var
+ DefaultEnvironment:TODBCEnvironment = nil;
 //  ODBCLoadCount:integer = 0; // ODBC is loaded when > 0; modified by TODBCEnvironment.Create/Destroy
 
 { Generic ODBC helper functions }
@@ -516,7 +517,7 @@ procedure TODBCConnection.SetParameters(ODBCCursor: TODBCCursor; AParams: TmsePa
                      parametertype,          // ParameterType
                      strlen,                 // ColumnSize
                      0,                      // DecimalDigits
-                     buf+SizeOf(SQLINTEGER), // ParameterValuePtr
+                     pchar(buf)+SizeOf(SQLINTEGER), // ParameterValuePtr
                      buflen,                 // BufferLength
                      buf),                   // StrLen_or_IndPtr
     SQL_HANDLE_STMT, ODBCCursor.FSTMTHandle, 'Could not bind parameter %d',[i]);
@@ -524,9 +525,9 @@ procedure TODBCConnection.SetParameters(ODBCCursor: TODBCCursor; AParams: TmsePa
 
  procedure bindnull(i: integer; valuetype: sqlsmallint; parametertype: sqlsmallint);
  var
-  buf: psqlinteger;
+  buf: psqllen;
  begin
-  buf:= getmem(sizeof(sqlinteger));
+  getmem(buf,sizeof(sqllen));
   ODBCCursor.FParamBuf[i]:= Buf;
   buf^:= SQL_NULL_DATA;
   ODBCCheckResult(
@@ -586,7 +587,7 @@ begin
       bindnull(i,SQL_C_LONG,SQL_INTEGER);
      end
      else begin
-      Buf:= GetMem(sizeof(longint));
+      GetMem(buf,sizeof(longint));
       plongint(buf)^:= AsInteger;
       bindnum(i,SQL_C_LONG,SQL_INTEGER,buf);
      end;
@@ -596,7 +597,7 @@ begin
       bindnull(i,SQL_C_SBIGINT,SQL_BIGINT);
      end
      else begin
-      Buf:= GetMem(sizeof(int64));
+      GetMem(buf,sizeof(int64));
       pint64(buf)^:= Aslargeint;
       bindnum(i,SQL_C_SBIGINT,SQL_BIGINT,buf);
      end;
@@ -606,7 +607,7 @@ begin
       bindnull(i,SQL_C_CHAR,SQL_CHAR);
      end
      else begin
-      Buf:= GetMem(sizeof(double));
+      GetMem(buf,sizeof(double));
       pdouble(buf)^:= Asfloat;
       bindnum(i,SQL_C_DOUBLE,SQL_DOUBLE,buf);
      end;
@@ -616,7 +617,7 @@ begin
       bindnull(i,SQL_C_TYPE_TIMESTAMP,SQL_TYPE_TIMESTAMP);
      end
      else begin
-      Buf:= GetMem(sizeof(sql_timestamp_struct));
+      GetMem(buf,sizeof(sql_timestamp_struct));
       datetime2timestampstruct(psql_timestamp_struct(buf)^,Asdatetime);
       bindnum(i,SQL_C_TYPE_TIMESTAMP,SQL_TYPE_TIMESTAMP,buf);
      end;
@@ -628,8 +629,8 @@ begin
      else begin
       StrVal:= asstring;
       StrLen:= Length(StrVal);
-      Buf:= GetMem(StrLen+sizeof(sqlinteger));
-      Move(StrVal[1],(buf+sizeof(sqlinteger))^,StrLen);
+      GetMem(buf,StrLen+sizeof(sqlinteger));
+      Move(StrVal[1],(pchar(buf)+sizeof(sqlinteger))^,StrLen);
       if datatype1 = ftmemo then begin
        bindstr(i,SQL_C_CHAR,SQL_LONGVARCHAR,buf,strlen,strlen)
       end
@@ -646,8 +647,8 @@ begin
      else begin
       StrVal:= AParams.AsdbString(paramindex);
       StrLen:= Length(StrVal);
-      Buf:= GetMem(StrLen+sizeof(sqlinteger));
-      Move(StrVal[1],(buf+sizeof(sqlinteger))^,StrLen);
+      GetMem(buf,StrLen+sizeof(sqlinteger));
+      Move(StrVal[1],(pchar(buf)+sizeof(sqlinteger))^,StrLen);
       if strlen > maxstrlen then begin
        bindstr(i,SQL_C_CHAR,SQL_LONGVARCHAR,buf,strlen,strlen)
       end
@@ -665,8 +666,8 @@ begin
       widestrval:= aparams[paramindex].aswidestring;
       strlen:= length(widestrval);
       buflen:= strlen*sizeof(msechar);
-      buf:= getmem(buflen+sizeof(sqlinteger));
-      move(widestrval[1],(buf+sizeof(sqlinteger))^,buflen);
+      getmem(buf,buflen+sizeof(sqlinteger));
+      move(widestrval[1],(pchar(buf)+sizeof(sqlinteger))^,buflen);
       if strlen > maxstrlen then begin
        bindstr(i,SQL_C_WCHAR,SQL_WLONGVARCHAR,buf,strlen,buflen);
       end
@@ -724,8 +725,8 @@ begin
   // make sure we have an environment
   if not Assigned(FEnvironment) then
   begin
-    if not Assigned(DefaultEnvironment) then
-      DefaultEnvironment:=TODBCEnvironment.Create;
+    if DefaultEnvironment = nil then
+      DefaultEnvironment:= TODBCEnvironment.Create;
     FEnvironment:=DefaultEnvironment;
   end;
 
@@ -1106,7 +1107,7 @@ begin
       repeat
        setlength(str1,int1+blobbuffersize);
        Res:= SQLGetData(ODBCCursor.FSTMTHandle, fno, SQL_C_BINARY,
-                       pointer(str1)+int1, BlobBufferSize, @StrLenOrInd);
+                       pchar(pointer(str1))+int1, BlobBufferSize, @StrLenOrInd);
        ODBCCheckResult(Res, SQL_HANDLE_STMT, ODBCCursor.FSTMTHandle,
         'Could not get field data for field ''%s'' (index %d).',
         [odbccursor.ffieldNames[fieldnum], fno]);
@@ -1687,6 +1688,7 @@ end;
 
 { finalization }
 
+initialization
 finalization
 
   if Assigned(DefaultEnvironment) then
