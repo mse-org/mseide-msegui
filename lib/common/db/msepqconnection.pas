@@ -149,7 +149,9 @@ const
  mask: pqconnectionoptionsty = [pqco_usesavepoint,pqco_closetransactiononfail];
 begin
  foptions:= pqconnectionoptionsty(
-          setsinglebit(longword(avalue),longword(foptions),longword(mask)));
+          setsinglebit({$ifdef FPC}longword{$else}byte{$endif}(avalue),
+          {$ifdef FPC}longword{$else}byte{$endif}(foptions),
+          {$ifdef FPC}longword{$else}byte{$endif}(mask)));
 end;
 
 function tmsepqconnection.readsequence(const sequencename: string): string;
