@@ -1,17 +1,17 @@
 {
 }
-
-{$MODE objfpc}
-{$MACRO on}
+{$ifdef FPC}{$MODE objfpc}{$MACRO on}{$endif}
 
 interface
 
 {$IFDEF LinkDynamically}
-uses 
- Dynlibs, sysutils, msestrings;
+uses
+ {$ifdef FPC}Dynlibs,{$else}msetypes,{$endif} sysutils, msestrings;
 
 const
+ {$define cvcall}
 {$ifdef mswindows}
+ {$define wincall}
  fbembedlib: array[0..0] of filenamety = ('fbembed.dll');
  fbcgdslib: array[0..1] of filenamety = ('fbclient.dll','gds32.dll');
 {$else}
@@ -30,7 +30,7 @@ procedure initializeibase60(const sonames: array of filenamety);
 procedure releaseibase60;
 
 {$ENDIF}
-
+(*
 {$DEFINE extdeclvararg:= cdecl}
 
 {$IFDEF Unix}
@@ -61,7 +61,7 @@ procedure releaseibase60;
 }
 {$ENDIF}
 
-
+*)
 type
   {  Unsigned types }
 
@@ -88,7 +88,7 @@ type
   PUChar               = ^UChar;
   PVoid                = ^Pointer;
 
-{$PACKRECORDS C}
+{$ifdef FPC}{$PACKRECORDS C}{$endif} //todo: check delphi record packing
 
   const
      ISC_TRUE = 1;
@@ -1664,362 +1664,362 @@ type
   {                          }
 
   function isc_attach_database(_para1:PISC_STATUS; _para2:smallint; _para3:Pchar; _para4:Pisc_db_handle; _para5:smallint;
-             _para6:Pchar):ISC_STATUS; extdecl; external gdslib;
+             _para6:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_array_gen_sdl(_para1:PISC_STATUS; _para2:PISC_ARRAY_DESC; _para3:Psmallint; _para4:Pchar; _para5:Psmallint):ISC_STATUS; extdecl; external gdslib;
+  function isc_array_gen_sdl(_para1:PISC_STATUS; _para2:PISC_ARRAY_DESC; _para3:Psmallint; _para4:Pchar; _para5:Psmallint):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
   function isc_array_get_slice(_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:PISC_QUAD; _para5:PISC_ARRAY_DESC;
-             _para6:pointer; _para7:PISC_LONG):ISC_STATUS; extdecl; external gdslib;
+             _para6:pointer; _para7:PISC_LONG):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
   function isc_array_lookup_bounds(_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:Pchar; _para5:Pchar;
-             _para6:PISC_ARRAY_DESC):ISC_STATUS; extdecl; external gdslib;
+             _para6:PISC_ARRAY_DESC):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
   function isc_array_lookup_desc(_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:Pchar; _para5:Pchar;
-             _para6:PISC_ARRAY_DESC):ISC_STATUS; extdecl; external gdslib;
+             _para6:PISC_ARRAY_DESC):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
   function isc_array_set_desc(_para1:PISC_STATUS; _para2:Pchar; _para3:Pchar; _para4:Psmallint; _para5:Psmallint;
-             _para6:Psmallint; _para7:PISC_ARRAY_DESC):ISC_STATUS; extdecl; external gdslib;
+             _para6:Psmallint; _para7:PISC_ARRAY_DESC):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
   function isc_array_put_slice(_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:PISC_QUAD; _para5:PISC_ARRAY_DESC;
-             _para6:pointer; _para7:PISC_LONG):ISC_STATUS; extdecl; external gdslib;
+             _para6:pointer; _para7:PISC_LONG):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  procedure isc_blob_default_desc(_para1:PISC_BLOB_DESC; _para2:Pbyte; _para3:Pbyte); extdecl; external gdslib;
+  procedure isc_blob_default_desc(_para1:PISC_BLOB_DESC; _para2:Pbyte; _para3:Pbyte); {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
   function isc_blob_gen_bpb(_para1:PISC_STATUS; _para2:PISC_BLOB_DESC; _para3:PISC_BLOB_DESC; _para4:word; _para5:Pbyte;
-             _para6:Pword):ISC_STATUS; extdecl; external gdslib;
+             _para6:Pword):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
   function isc_blob_info(_para1:PISC_STATUS; _para2:Pisc_blob_handle; _para3:smallint; _para4:Pchar; _para5:smallint;
-             _para6:Pchar):ISC_STATUS; extdecl; external gdslib;
+             _para6:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
   function isc_blob_lookup_desc(_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:Pbyte; _para5:Pbyte;
-             _para6:PISC_BLOB_DESC; _para7:Pbyte):ISC_STATUS; extdecl; external gdslib;
+             _para6:PISC_BLOB_DESC; _para7:Pbyte):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
   function isc_blob_set_desc(_para1:PISC_STATUS; _para2:Pbyte; _para3:Pbyte; _para4:smallint; _para5:smallint;
-             _para6:smallint; _para7:PISC_BLOB_DESC):ISC_STATUS; extdecl; external gdslib;
+             _para6:smallint; _para7:PISC_BLOB_DESC):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_cancel_blob(_para1:PISC_STATUS; _para2:Pisc_blob_handle):ISC_STATUS; extdecl; external gdslib;
+  function isc_cancel_blob(_para1:PISC_STATUS; _para2:Pisc_blob_handle):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_cancel_events(_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:PISC_LONG):ISC_STATUS; extdecl; external gdslib;
+  function isc_cancel_events(_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:PISC_LONG):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_close_blob(_para1:PISC_STATUS; _para2:Pisc_blob_handle):ISC_STATUS; extdecl; external gdslib;
+  function isc_close_blob(_para1:PISC_STATUS; _para2:Pisc_blob_handle):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_commit_retaining(_para1:PISC_STATUS; _para2:Pisc_tr_handle):ISC_STATUS; extdecl; external gdslib;
+  function isc_commit_retaining(_para1:PISC_STATUS; _para2:Pisc_tr_handle):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_commit_transaction(_para1:PISC_STATUS; _para2:Pisc_tr_handle):ISC_STATUS; extdecl; external gdslib;
+  function isc_commit_transaction(_para1:PISC_STATUS; _para2:Pisc_tr_handle):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_create_blob(_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:Pisc_blob_handle; _para5:PISC_QUAD):ISC_STATUS; extdecl; external gdslib;
+  function isc_create_blob(_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:Pisc_blob_handle; _para5:PISC_QUAD):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
   function isc_create_blob2(_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:Pisc_blob_handle; _para5:PISC_QUAD;
-             _para6:smallint; _para7:Pchar):ISC_STATUS; extdecl; external gdslib;
+             _para6:smallint; _para7:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
   function isc_create_database(_para1:PISC_STATUS; _para2:smallint; _para3:Pchar; _para4:Pisc_db_handle; _para5:smallint;
-             _para6:Pchar; _para7:smallint):ISC_STATUS; extdecl; external gdslib;
+             _para6:Pchar; _para7:smallint):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
   function isc_database_info(_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:smallint; _para4:Pchar; _para5:smallint;
-             _para6:Pchar):ISC_STATUS; extdecl; external gdslib;
+             _para6:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  procedure isc_decode_date(_para1:PISC_QUAD; _para2:pointer); extdecl; external gdslib;
+  procedure isc_decode_date(_para1:PISC_QUAD; _para2:pointer); {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  procedure isc_decode_sql_date(_para1:PISC_DATE; _para2:pointer); extdecl; external gdslib;
+  procedure isc_decode_sql_date(_para1:PISC_DATE; _para2:pointer); {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  procedure isc_decode_sql_time(_para1:PISC_TIME; _para2:pointer); extdecl; external gdslib;
+  procedure isc_decode_sql_time(_para1:PISC_TIME; _para2:pointer); {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  procedure isc_decode_timestamp(_para1:PISC_TIMESTAMP; _para2:pointer); extdecl; external gdslib;
+  procedure isc_decode_timestamp(_para1:PISC_TIMESTAMP; _para2:pointer); {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_detach_database(_para1:PISC_STATUS; _para2:Pisc_db_handle):ISC_STATUS; extdecl; external gdslib;
+  function isc_detach_database(_para1:PISC_STATUS; _para2:Pisc_db_handle):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_drop_database(_para1:PISC_STATUS; _para2:Pisc_db_handle):ISC_STATUS; extdecl; external gdslib;
+  function isc_drop_database(_para1:PISC_STATUS; _para2:Pisc_db_handle):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_dsql_allocate_statement(_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_stmt_handle):ISC_STATUS; extdecl; external gdslib;
+  function isc_dsql_allocate_statement(_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_stmt_handle):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_dsql_alloc_statement2(_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_stmt_handle):ISC_STATUS; extdecl; external gdslib;
+  function isc_dsql_alloc_statement2(_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_stmt_handle):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_dsql_describe(_para1:PISC_STATUS; _para2:Pisc_stmt_handle; _para3:word; _para4:PXSQLDA):ISC_STATUS; extdecl; external gdslib;
+  function isc_dsql_describe(_para1:PISC_STATUS; _para2:Pisc_stmt_handle; _para3:word; _para4:PXSQLDA):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_dsql_describe_bind(_para1:PISC_STATUS; _para2:Pisc_stmt_handle; _para3:word; _para4:PXSQLDA):ISC_STATUS; extdecl; external gdslib;
+  function isc_dsql_describe_bind(_para1:PISC_STATUS; _para2:Pisc_stmt_handle; _para3:word; _para4:PXSQLDA):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
   function isc_dsql_exec_immed2(_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:word; _para5:Pchar;
-             _para6:word; _para7:PXSQLDA; _para8:PXSQLDA):ISC_STATUS; extdecl; external gdslib;
+             _para6:word; _para7:PXSQLDA; _para8:PXSQLDA):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_dsql_execute(_para1:PISC_STATUS; _para2:Pisc_tr_handle; _para3:Pisc_stmt_handle; _para4:word; _para5:PXSQLDA):ISC_STATUS; extdecl; external gdslib;
+  function isc_dsql_execute(_para1:PISC_STATUS; _para2:Pisc_tr_handle; _para3:Pisc_stmt_handle; _para4:word; _para5:PXSQLDA):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
   function isc_dsql_execute2(_para1:PISC_STATUS; _para2:Pisc_tr_handle; _para3:Pisc_stmt_handle; _para4:word; _para5:PXSQLDA;
-             _para6:PXSQLDA):ISC_STATUS; extdecl; external gdslib;
+             _para6:PXSQLDA):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
   function isc_dsql_execute_immediate(_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:word; _para5:Pchar;
-             _para6:word; _para7:PXSQLDA):ISC_STATUS; extdecl; external gdslib;
+             _para6:word; _para7:PXSQLDA):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_dsql_fetch(_para1:PISC_STATUS; _para2:Pisc_stmt_handle; _para3:word; _para4:PXSQLDA):ISC_STATUS; extdecl; external gdslib;
+  function isc_dsql_fetch(_para1:PISC_STATUS; _para2:Pisc_stmt_handle; _para3:word; _para4:PXSQLDA):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_dsql_finish(_para1:Pisc_db_handle):ISC_STATUS; extdecl; external gdslib;
+  function isc_dsql_finish(_para1:Pisc_db_handle):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_dsql_free_statement(_para1:PISC_STATUS; _para2:Pisc_stmt_handle; _para3:word):ISC_STATUS; extdecl; external gdslib;
+  function isc_dsql_free_statement(_para1:PISC_STATUS; _para2:Pisc_stmt_handle; _para3:word):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_dsql_insert(_para1:PISC_STATUS; _para2:Pisc_stmt_handle; _para3:word; _para4:PXSQLDA):ISC_STATUS; extdecl; external gdslib;
+  function isc_dsql_insert(_para1:PISC_STATUS; _para2:Pisc_stmt_handle; _para3:word; _para4:PXSQLDA):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
   function isc_dsql_prepare(_para1:PISC_STATUS; _para2:Pisc_tr_handle; _para3:Pisc_stmt_handle; _para4:word; _para5:Pchar;
-             _para6:word; _para7:PXSQLDA):ISC_STATUS; extdecl; external gdslib;
+             _para6:word; _para7:PXSQLDA):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_dsql_set_cursor_name(_para1:PISC_STATUS; _para2:Pisc_stmt_handle; _para3:Pchar; _para4:word):ISC_STATUS; extdecl; external gdslib;
+  function isc_dsql_set_cursor_name(_para1:PISC_STATUS; _para2:Pisc_stmt_handle; _para3:Pchar; _para4:word):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
   function isc_dsql_sql_info(_para1:PISC_STATUS; _para2:Pisc_stmt_handle; _para3:smallint; _para4:Pchar; _para5:smallint;
-             _para6:Pchar):ISC_STATUS; extdecl; external gdslib;
+             _para6:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  procedure isc_encode_date(_para1:pointer; _para2:PISC_QUAD); extdecl; external gdslib;
+  procedure isc_encode_date(_para1:pointer; _para2:PISC_QUAD); {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  procedure isc_encode_sql_date(_para1:pointer; _para2:PISC_DATE); extdecl; external gdslib;
+  procedure isc_encode_sql_date(_para1:pointer; _para2:PISC_DATE); {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  procedure isc_encode_sql_time(_para1:pointer; _para2:PISC_TIME); extdecl; external gdslib;
+  procedure isc_encode_sql_time(_para1:pointer; _para2:PISC_TIME); {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  procedure isc_encode_timestamp(_para1:pointer; _para2:PISC_TIMESTAMP); extdecl; external gdslib;
+  procedure isc_encode_timestamp(_para1:pointer; _para2:PISC_TIMESTAMP); {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
   function isc_event_block(_para1:PPchar; _para2:PPchar; _para3:word;
-                      args: array of const):ISC_LONG; extdeclvararg; external gdslib;
+                      args: array of const):ISC_LONG; {$ifdef cvcall}cdecl{$else}error{$endif}; external gdslib;
   procedure isc_event_count(_para1: PISC_STATUS; _para2: short;
-                     _para3: pchar; _para4: pchar); extdecl;  external gdslib;
-  {!!MVC
+                     _para3: pchar; _para4: pchar); {$ifdef wincall}stdcall{$else}cdecl{$endif};  external gdslib;
+  (*!!MVC
   void         isc_event_counts (unsigned ISC_LONG   ,
                                          short,
                                          char   ,
-                                         char   ); extdecl; external gdslib;
-  !!MVC }
+                                         char   ); {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
+  !!MVC *)
   procedure isc_expand_dpb(_para1:PPchar; _para2:Psmallint; args:array of const);
-                        extdeclvararg; external gdslib;
+                        {$ifdef cvcall}cdecl{$else}error{$endif}; external gdslib;
 
-  function isc_modify_dpb(_para1:PPchar; _para2:Psmallint; _para3:word; _para4:Pchar; _para5:smallint):longint; extdecl; external gdslib;
+  function isc_modify_dpb(_para1:PPchar; _para2:Psmallint; _para3:word; _para4:Pchar; _para5:smallint):longint; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_free(_para1:Pchar):ISC_LONG; extdecl; external gdslib;
+  function isc_free(_para1:Pchar):ISC_LONG; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_get_segment(_para1:PISC_STATUS; _para2:Pisc_blob_handle; _para3:Pword; _para4:word; _para5:Pchar):ISC_STATUS; extdecl; external gdslib;
+  function isc_get_segment(_para1:PISC_STATUS; _para2:Pisc_blob_handle; _para3:Pword; _para4:word; _para5:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
   function isc_get_slice(_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:PISC_QUAD; _para5:smallint;
              _para6:Pchar; _para7:smallint; _para8:PISC_LONG; _para9:ISC_LONG; _para10:pointer;
-             _para11:PISC_LONG):ISC_STATUS; extdecl; external gdslib;
+             _para11:PISC_LONG):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_interprete(_para1:Pchar; _para2:PPISC_STATUS):ISC_STATUS; extdecl; external gdslib;
+  function isc_interprete(_para1:Pchar; _para2:PPISC_STATUS):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_open_blob(_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:Pisc_blob_handle; _para5:PISC_QUAD):ISC_STATUS; extdecl; external gdslib;
+  function isc_open_blob(_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:Pisc_blob_handle; _para5:PISC_QUAD):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
   function isc_open_blob2(_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:Pisc_blob_handle; _para5:PISC_QUAD;
-             _para6:smallint; _para7:Pchar):ISC_STATUS; extdecl; external gdslib;
+             _para6:smallint; _para7:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_prepare_transaction2(_para1:PISC_STATUS; _para2:Pisc_tr_handle; _para3:smallint; _para4:Pchar):ISC_STATUS; extdecl; external gdslib;
+  function isc_prepare_transaction2(_para1:PISC_STATUS; _para2:Pisc_tr_handle; _para3:smallint; _para4:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  procedure isc_print_sqlerror(_para1:smallint; _para2:PISC_STATUS); extdecl; external gdslib;
+  procedure isc_print_sqlerror(_para1:smallint; _para2:PISC_STATUS); {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_print_status(_para1:PISC_STATUS):ISC_STATUS; extdecl; external gdslib;
+  function isc_print_status(_para1:PISC_STATUS):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_put_segment(_para1:PISC_STATUS; _para2:Pisc_blob_handle; _para3:word; _para4:Pchar):ISC_STATUS; extdecl; external gdslib;
+  function isc_put_segment(_para1:PISC_STATUS; _para2:Pisc_blob_handle; _para3:word; _para4:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
   function isc_put_slice(_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:PISC_QUAD; _para5:smallint;
-             _para6:Pchar; _para7:smallint; _para8:PISC_LONG; _para9:ISC_LONG; _para10:pointer):ISC_STATUS; extdecl; external gdslib;
+             _para6:Pchar; _para7:smallint; _para8:PISC_LONG; _para9:ISC_LONG; _para10:pointer):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
   function isc_que_events(_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:PISC_LONG; _para4:smallint; _para5:Pchar;
-             _para6:isc_callback; _para7:pointer):ISC_STATUS; extdecl; external gdslib;
+             _para6:isc_callback; _para7:pointer):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_rollback_retaining(_para1:PISC_STATUS; _para2:Pisc_tr_handle):ISC_STATUS; extdecl; external gdslib;
+  function isc_rollback_retaining(_para1:PISC_STATUS; _para2:Pisc_tr_handle):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_rollback_transaction(_para1:PISC_STATUS; _para2:Pisc_tr_handle):ISC_STATUS; extdecl; external gdslib;
+  function isc_rollback_transaction(_para1:PISC_STATUS; _para2:Pisc_tr_handle):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_start_multiple(_para1:PISC_STATUS; _para2:Pisc_tr_handle; _para3:smallint; _para4:pointer):ISC_STATUS; extdecl; external gdslib;
+  function isc_start_multiple(_para1:PISC_STATUS; _para2:Pisc_tr_handle; _para3:smallint; _para4:pointer):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
   function isc_start_transaction(_para1:PISC_STATUS; _para2:Pisc_tr_handle;
-    _para3:smallint; args:array of const):ISC_STATUS; extdeclvararg; external gdslib;
+    _para3:smallint; args:array of const):ISC_STATUS; {$ifdef cvcall}cdecl{$else}error{$endif}; external gdslib;
 
-  function isc_sqlcode(_para1:PISC_STATUS):ISC_LONG; extdecl; external gdslib;
+  function isc_sqlcode(_para1:PISC_STATUS):ISC_LONG; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  procedure isc_sql_interprete(_para1:smallint; _para2:Pchar; _para3:smallint); extdecl; external gdslib;
+  procedure isc_sql_interprete(_para1:smallint; _para2:Pchar; _para3:smallint); {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
   function isc_transaction_info(_para1:PISC_STATUS; _para2:Pisc_tr_handle; _para3:smallint; _para4:Pchar; _para5:smallint;
-             _para6:Pchar):ISC_STATUS; extdecl; external gdslib;
+             _para6:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
   function isc_transact_request(_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:word; _para5:Pchar;
-             _para6:word; _para7:Pchar; _para8:word; _para9:Pchar):ISC_STATUS; extdecl; external gdslib;
+             _para6:word; _para7:Pchar; _para8:word; _para9:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_vax_integer(_para1:Pchar; _para2:smallint):ISC_LONG; extdecl; external gdslib;
+  function isc_vax_integer(_para1:Pchar; _para2:smallint):ISC_LONG; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_portable_integer(_para1:Pbyte; _para2:smallint):ISC_INT64; extdecl; external gdslib;
+  function isc_portable_integer(_para1:Pbyte; _para2:smallint):ISC_INT64; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
   {                                    }
   { Security Functions                 }
   {                                    }
 
 
-  function isc_add_user(_para1:PISC_STATUS; _para2:PUSER_SEC_DATA):longint; extdecl; external gdslib;
+  function isc_add_user(_para1:PISC_STATUS; _para2:PUSER_SEC_DATA):longint; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_delete_user(_para1:PISC_STATUS; _para2:PUSER_SEC_DATA):longint; extdecl; external gdslib;
+  function isc_delete_user(_para1:PISC_STATUS; _para2:PUSER_SEC_DATA):longint; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_modify_user(_para1:PISC_STATUS; _para2:PUSER_SEC_DATA):longint; extdecl; external gdslib;
+  function isc_modify_user(_para1:PISC_STATUS; _para2:PUSER_SEC_DATA):longint; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
   {                                 }
   {  Other OSRI functions           }
   {                                 }
-  function isc_compile_request(_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_req_handle; _para4:smallint; _para5:Pchar):ISC_STATUS; extdecl; external gdslib;
+  function isc_compile_request(_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_req_handle; _para4:smallint; _para5:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_compile_request2(_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_req_handle; _para4:smallint; _para5:Pchar):ISC_STATUS; extdecl; external gdslib;
+  function isc_compile_request2(_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_req_handle; _para4:smallint; _para5:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_ddl(_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:smallint; _para5:Pchar):ISC_STATUS; extdecl; external gdslib;
+  function isc_ddl(_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:smallint; _para5:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_prepare_transaction(_para1:PISC_STATUS; _para2:Pisc_tr_handle):ISC_STATUS; extdecl; external gdslib;
+  function isc_prepare_transaction(_para1:PISC_STATUS; _para2:Pisc_tr_handle):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
   function isc_receive(_para1:PISC_STATUS; _para2:Pisc_req_handle; _para3:smallint; _para4:smallint; _para5:pointer;
-             _para6:smallint):ISC_STATUS; extdecl; external gdslib;
+             _para6:smallint):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_reconnect_transaction(_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:smallint; _para5:Pchar):ISC_STATUS; extdecl; external gdslib;
+  function isc_reconnect_transaction(_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:smallint; _para5:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_release_request(_para1:PISC_STATUS; _para2:Pisc_req_handle):ISC_STATUS; extdecl; external gdslib;
+  function isc_release_request(_para1:PISC_STATUS; _para2:Pisc_req_handle):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
   function isc_request_info(_para1:PISC_STATUS; _para2:Pisc_req_handle; _para3:smallint; _para4:smallint; _para5:Pchar;
-             _para6:smallint; _para7:Pchar):ISC_STATUS; extdecl; external gdslib;
+             _para6:smallint; _para7:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_seek_blob(_para1:PISC_STATUS; _para2:Pisc_blob_handle; _para3:smallint; _para4:ISC_LONG; _para5:PISC_LONG):ISC_STATUS; extdecl; external gdslib;
+  function isc_seek_blob(_para1:PISC_STATUS; _para2:Pisc_blob_handle; _para3:smallint; _para4:ISC_LONG; _para5:PISC_LONG):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
   function isc_send(_para1:PISC_STATUS; _para2:Pisc_req_handle; _para3:smallint; _para4:smallint; _para5:pointer;
-             _para6:smallint):ISC_STATUS; extdecl; external gdslib;
+             _para6:smallint):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
   function isc_start_and_send(_para1:PISC_STATUS; _para2:Pisc_req_handle; _para3:Pisc_tr_handle; _para4:smallint; _para5:smallint;
-             _para6:pointer; _para7:smallint):ISC_STATUS; extdecl; external gdslib;
+             _para6:pointer; _para7:smallint):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_start_request(_para1:PISC_STATUS; _para2:Pisc_req_handle; _para3:Pisc_tr_handle; _para4:smallint):ISC_STATUS; extdecl; external gdslib;
+  function isc_start_request(_para1:PISC_STATUS; _para2:Pisc_req_handle; _para3:Pisc_tr_handle; _para4:smallint):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_unwind_request(_para1:PISC_STATUS; _para2:Pisc_tr_handle; _para3:smallint):ISC_STATUS; extdecl; external gdslib;
+  function isc_unwind_request(_para1:PISC_STATUS; _para2:Pisc_tr_handle; _para3:smallint):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_wait_for_event(_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:smallint; _para4:Pchar; _para5:Pchar):ISC_STATUS; extdecl; external gdslib;
+  function isc_wait_for_event(_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:smallint; _para4:Pchar; _para5:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
   {                            }
   { Other Sql functions        }
   {                            }
-  function isc_close(_para1:PISC_STATUS; _para2:Pchar):ISC_STATUS; extdecl; external gdslib;
+  function isc_close(_para1:PISC_STATUS; _para2:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_declare(_para1:PISC_STATUS; _para2:Pchar; _para3:Pchar):ISC_STATUS; extdecl; external gdslib;
+  function isc_declare(_para1:PISC_STATUS; _para2:Pchar; _para3:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_describe(_para1:PISC_STATUS; _para2:Pchar; _para3:PXSQLDA):ISC_STATUS; extdecl; external gdslib;
+  function isc_describe(_para1:PISC_STATUS; _para2:Pchar; _para3:PXSQLDA):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_describe_bind(_para1:PISC_STATUS; _para2:Pchar; _para3:PXSQLDA):ISC_STATUS; extdecl; external gdslib;
+  function isc_describe_bind(_para1:PISC_STATUS; _para2:Pchar; _para3:PXSQLDA):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_execute(_para1:PISC_STATUS; _para2:Pisc_tr_handle; _para3:Pchar; _para4:PXSQLDA):ISC_STATUS; extdecl; external gdslib;
+  function isc_execute(_para1:PISC_STATUS; _para2:Pisc_tr_handle; _para3:Pchar; _para4:PXSQLDA):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_execute_immediate(_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:Psmallint; _para5:Pchar):ISC_STATUS; extdecl; external gdslib;
+  function isc_execute_immediate(_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:Psmallint; _para5:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_fetch(_para1:PISC_STATUS; _para2:Pchar; _para3:PXSQLDA):ISC_STATUS; extdecl; external gdslib;
+  function isc_fetch(_para1:PISC_STATUS; _para2:Pchar; _para3:PXSQLDA):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_open(_para1:PISC_STATUS; _para2:Pisc_tr_handle; _para3:Pchar; _para4:PXSQLDA):ISC_STATUS; extdecl; external gdslib;
+  function isc_open(_para1:PISC_STATUS; _para2:Pisc_tr_handle; _para3:Pchar; _para4:PXSQLDA):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
   function isc_prepare(_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:Pchar; _para5:Psmallint;
-             _para6:Pchar; _para7:PXSQLDA):ISC_STATUS; extdecl; external gdslib;
+             _para6:Pchar; _para7:PXSQLDA):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
   {                                    }
   { Other Dynamic sql functions        }
   {                                    }
   function isc_dsql_execute_m(_para1:PISC_STATUS; _para2:Pisc_tr_handle; _para3:Pisc_stmt_handle; _para4:word; _para5:Pchar;
-             _para6:word; _para7:word; _para8:Pchar):ISC_STATUS; extdecl; external gdslib;
+             _para6:word; _para7:word; _para8:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
   function isc_dsql_execute2_m(_para1:PISC_STATUS; _para2:Pisc_tr_handle; _para3:Pisc_stmt_handle; _para4:word; _para5:Pchar;
              _para6:word; _para7:word; _para8:Pchar; _para9:word; _para10:Pchar;
-             _para11:word; _para12:word; _para13:Pchar):ISC_STATUS; extdecl; external gdslib;
+             _para11:word; _para12:word; _para13:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
   function isc_dsql_execute_immediate_m(_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:word; _para5:Pchar;
              _para6:word; _para7:word; _para8:Pchar; _para9:word; _para10:word;
-             _para11:Pchar):ISC_STATUS; extdecl; external gdslib;
+             _para11:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
   function isc_dsql_exec_immed3_m(_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:word; _para5:Pchar;
              _para6:word; _para7:word; _para8:Pchar; _para9:word; _para10:word;
              _para11:Pchar; _para12:word; _para13:Pchar; _para14:word; _para15:word;
-             _para16:Pchar):ISC_STATUS; extdecl; external gdslib;
+             _para16:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
   function isc_dsql_fetch_m(_para1:PISC_STATUS; _para2:Pisc_stmt_handle; _para3:word; _para4:Pchar; _para5:word;
-             _para6:word; _para7:Pchar):ISC_STATUS; extdecl; external gdslib;
+             _para6:word; _para7:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
   function isc_dsql_insert_m(_para1:PISC_STATUS; _para2:Pisc_stmt_handle; _para3:word; _para4:Pchar; _para5:word;
-             _para6:word; _para7:Pchar):ISC_STATUS; extdecl; external gdslib;
+             _para6:word; _para7:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
   function isc_dsql_prepare_m(_para1:PISC_STATUS; _para2:Pisc_tr_handle; _para3:Pisc_stmt_handle; _para4:word; _para5:Pchar;
-             _para6:word; _para7:word; _para8:Pchar; _para9:word; _para10:Pchar):ISC_STATUS; extdecl; external gdslib;
+             _para6:word; _para7:word; _para8:Pchar; _para9:word; _para10:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_dsql_release(_para1:PISC_STATUS; _para2:Pchar):ISC_STATUS; extdecl; external gdslib;
+  function isc_dsql_release(_para1:PISC_STATUS; _para2:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_embed_dsql_close(_para1:PISC_STATUS; _para2:Pchar):ISC_STATUS; extdecl; external gdslib;
+  function isc_embed_dsql_close(_para1:PISC_STATUS; _para2:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_embed_dsql_declare(_para1:PISC_STATUS; _para2:Pchar; _para3:Pchar):ISC_STATUS; extdecl; external gdslib;
+  function isc_embed_dsql_declare(_para1:PISC_STATUS; _para2:Pchar; _para3:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_embed_dsql_describe(_para1:PISC_STATUS; _para2:Pchar; _para3:word; _para4:PXSQLDA):ISC_STATUS; extdecl; external gdslib;
+  function isc_embed_dsql_describe(_para1:PISC_STATUS; _para2:Pchar; _para3:word; _para4:PXSQLDA):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_embed_dsql_describe_bind(_para1:PISC_STATUS; _para2:Pchar; _para3:word; _para4:PXSQLDA):ISC_STATUS; extdecl; external gdslib;
+  function isc_embed_dsql_describe_bind(_para1:PISC_STATUS; _para2:Pchar; _para3:word; _para4:PXSQLDA):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_embed_dsql_execute(_para1:PISC_STATUS; _para2:Pisc_tr_handle; _para3:Pchar; _para4:word; _para5:PXSQLDA):ISC_STATUS; extdecl; external gdslib;
+  function isc_embed_dsql_execute(_para1:PISC_STATUS; _para2:Pisc_tr_handle; _para3:Pchar; _para4:word; _para5:PXSQLDA):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
   function isc_embed_dsql_execute2(_para1:PISC_STATUS; _para2:Pisc_tr_handle; _para3:Pchar; _para4:word; _para5:PXSQLDA;
-             _para6:PXSQLDA):ISC_STATUS; extdecl; external gdslib;
+             _para6:PXSQLDA):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
   function isc_embed_dsql_execute_immed(_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:word; _para5:Pchar;
-             _para6:word; _para7:PXSQLDA):ISC_STATUS; extdecl; external gdslib;
+             _para6:word; _para7:PXSQLDA):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_embed_dsql_fetch(_para1:PISC_STATUS; _para2:Pchar; _para3:word; _para4:PXSQLDA):ISC_STATUS; extdecl; external gdslib;
+  function isc_embed_dsql_fetch(_para1:PISC_STATUS; _para2:Pchar; _para3:word; _para4:PXSQLDA):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_embed_dsql_open(_para1:PISC_STATUS; _para2:Pisc_tr_handle; _para3:Pchar; _para4:word; _para5:PXSQLDA):ISC_STATUS; extdecl; external gdslib;
+  function isc_embed_dsql_open(_para1:PISC_STATUS; _para2:Pisc_tr_handle; _para3:Pchar; _para4:word; _para5:PXSQLDA):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
   function isc_embed_dsql_open2(_para1:PISC_STATUS; _para2:Pisc_tr_handle; _para3:Pchar; _para4:word; _para5:PXSQLDA;
-             _para6:PXSQLDA):ISC_STATUS; extdecl; external gdslib;
+             _para6:PXSQLDA):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_embed_dsql_insert(_para1:PISC_STATUS; _para2:Pchar; _para3:word; _para4:PXSQLDA):ISC_STATUS; extdecl; external gdslib;
+  function isc_embed_dsql_insert(_para1:PISC_STATUS; _para2:Pchar; _para3:word; _para4:PXSQLDA):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
   function isc_embed_dsql_prepare(_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:Pchar; _para5:word;
-             _para6:Pchar; _para7:word; _para8:PXSQLDA):ISC_STATUS; extdecl; external gdslib;
+             _para6:Pchar; _para7:word; _para8:PXSQLDA):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_embed_dsql_release(_para1:PISC_STATUS; _para2:Pchar):ISC_STATUS; extdecl; external gdslib;
+  function isc_embed_dsql_release(_para1:PISC_STATUS; _para2:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
   {                             }
   { Other Blob functions        }
   {                             }
-  function BLOB_open(_para1:isc_blob_handle; _para2:Pchar; _para3:longint):PBSTREAM; extdecl; external gdslib;
+  function BLOB_open(_para1:isc_blob_handle; _para2:Pchar; _para3:longint):PBSTREAM; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function BLOB_put(_para1:char; _para2:PBSTREAM):longint; extdecl; external gdslib;
+  function BLOB_put(_para1:char; _para2:PBSTREAM):longint; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function BLOB_close(_para1:PBSTREAM):longint; extdecl; external gdslib;
+  function BLOB_close(_para1:PBSTREAM):longint; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function BLOB_get(_para1:PBSTREAM):longint; extdecl; external gdslib;
+  function BLOB_get(_para1:PBSTREAM):longint; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function BLOB_display(_para1:PISC_QUAD; _para2:isc_db_handle; _para3:isc_tr_handle; _para4:Pchar):longint; extdecl; external gdslib;
+  function BLOB_display(_para1:PISC_QUAD; _para2:isc_db_handle; _para3:isc_tr_handle; _para4:Pchar):longint; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function BLOB_dump(_para1:PISC_QUAD; _para2:isc_db_handle; _para3:isc_tr_handle; _para4:Pchar):longint; extdecl; external gdslib;
+  function BLOB_dump(_para1:PISC_QUAD; _para2:isc_db_handle; _para3:isc_tr_handle; _para4:Pchar):longint; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function BLOB_edit(_para1:PISC_QUAD; _para2:isc_db_handle; _para3:isc_tr_handle; _para4:Pchar):longint; extdecl; external gdslib;
+  function BLOB_edit(_para1:PISC_QUAD; _para2:isc_db_handle; _para3:isc_tr_handle; _para4:Pchar):longint; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function BLOB_load(_para1:PISC_QUAD; _para2:isc_db_handle; _para3:isc_tr_handle; _para4:Pchar):longint; extdecl; external gdslib;
+  function BLOB_load(_para1:PISC_QUAD; _para2:isc_db_handle; _para3:isc_tr_handle; _para4:Pchar):longint; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function BLOB_text_dump(_para1:PISC_QUAD; _para2:isc_db_handle; _para3:isc_tr_handle; _para4:Pchar):longint; extdecl; external gdslib;
+  function BLOB_text_dump(_para1:PISC_QUAD; _para2:isc_db_handle; _para3:isc_tr_handle; _para4:Pchar):longint; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function BLOB_text_load(_para1:PISC_QUAD; _para2:isc_db_handle; _para3:isc_tr_handle; _para4:Pchar):longint; extdecl; external gdslib;
+  function BLOB_text_load(_para1:PISC_QUAD; _para2:isc_db_handle; _para3:isc_tr_handle; _para4:Pchar):longint; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function Bopen(_para1:PISC_QUAD; _para2:isc_db_handle; _para3:isc_tr_handle; _para4:Pchar):PBSTREAM; extdecl; external gdslib;
+  function Bopen(_para1:PISC_QUAD; _para2:isc_db_handle; _para3:isc_tr_handle; _para4:Pchar):PBSTREAM; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
 {$IFDEF Unix}
-  function Bopen2(_para1:PISC_QUAD; _para2:isc_db_handle; _para3:isc_tr_handle; _para4:Pchar; _para5:word):PBSTREAM; extdecl; external gdslib;
+  function Bopen2(_para1:PISC_QUAD; _para2:isc_db_handle; _para3:isc_tr_handle; _para4:Pchar; _para5:word):PBSTREAM; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 {$ENDIF}
 
   {                             }
   { Other Misc functions        }
   {                             }
-  function isc_ftof(_para1:Pchar; _para2:word; _para3:Pchar; _para4:word):ISC_LONG; extdecl; external gdslib;
+  function isc_ftof(_para1:Pchar; _para2:word; _para3:Pchar; _para4:word):ISC_LONG; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_print_blr(_para1:Pchar; _para2:isc_callback; _para3:pointer; _para4:smallint):ISC_STATUS; extdecl; external gdslib;
+  function isc_print_blr(_para1:Pchar; _para2:isc_callback; _para3:pointer; _para4:smallint):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  procedure isc_set_debug(_para1:longint); extdecl; external gdslib;
+  procedure isc_set_debug(_para1:longint); {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  procedure isc_qtoq(_para1:PISC_QUAD; _para2:PISC_QUAD); extdecl; external gdslib;
+  procedure isc_qtoq(_para1:PISC_QUAD; _para2:PISC_QUAD); {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  procedure isc_vtof(_para1:Pchar; _para2:Pchar; _para3:word); extdecl; external gdslib;
+  procedure isc_vtof(_para1:Pchar; _para2:Pchar; _para3:word); {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  procedure isc_vtov(_para1:Pchar; _para2:Pchar; _para3:smallint); extdecl; external gdslib;
+  procedure isc_vtov(_para1:Pchar; _para2:Pchar; _para3:smallint); {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_version(_para1:Pisc_db_handle; _para2:isc_versioncallback; _para3:pointer):longint; extdecl; external gdslib;
+  function isc_version(_para1:Pisc_db_handle; _para2:isc_versioncallback; _para3:pointer):longint; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  procedure isc_get_client_version(aversion: pchar); extdecl; external gdslib;
-  function isc_get_client_major_version: integer; extdecl; external gdslib;
-  function isc_get_client_minor_version: integer; extdecl; external gdslib;
+  procedure isc_get_client_version(aversion: pchar); {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
+  function isc_get_client_major_version: integer; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
+  function isc_get_client_minor_version: integer; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
   
 {$IFDEF Unix}
-  function isc_reset_fpe(_para1:word):ISC_LONG; extdecl; external gdslib;
+  function isc_reset_fpe(_para1:word):ISC_LONG; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 {$ENDIF}
 
   {                                        }
@@ -2036,234 +2036,234 @@ type
   !!MVC *)
 
   function isc_service_attach(_para1:PISC_STATUS; _para2:word; _para3:Pchar; _para4:Pisc_svc_handle; _para5:word;
-             _para6:Pchar):ISC_STATUS; extdecl; external gdslib;
+             _para6:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_service_detach(_para1:PISC_STATUS; _para2:Pisc_svc_handle):ISC_STATUS; extdecl; external gdslib;
+  function isc_service_detach(_para1:PISC_STATUS; _para2:Pisc_svc_handle):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
   function isc_service_query(_para1:PISC_STATUS; _para2:Pisc_svc_handle; _para3:Pisc_resv_handle; _para4:word; _para5:Pchar;
-             _para6:word; _para7:Pchar; _para8:word; _para9:Pchar):ISC_STATUS; extdecl; external gdslib;
+             _para6:word; _para7:Pchar; _para8:word; _para9:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_service_start(_para1:PISC_STATUS; _para2:Pisc_svc_handle; _para3:Pisc_resv_handle; _para4:word; _para5:Pchar):ISC_STATUS; extdecl; external gdslib;
+  function isc_service_start(_para1:PISC_STATUS; _para2:Pisc_svc_handle; _para3:Pisc_resv_handle; _para4:word; _para5:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
   {                              }
   { Forms functions              }
   {                              }
 {$IFDEF Unix}
-  function isc_compile_map(_para1:PISC_STATUS; _para2:Pisc_form_handle; _para3:Pisc_req_handle; _para4:Psmallint; _para5:Pchar):ISC_STATUS; extdecl; external gdslib;
+  function isc_compile_map(_para1:PISC_STATUS; _para2:Pisc_form_handle; _para3:Pisc_req_handle; _para4:Psmallint; _para5:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_compile_menu(_para1:PISC_STATUS; _para2:Pisc_form_handle; _para3:Pisc_req_handle; _para4:Psmallint; _para5:Pchar):ISC_STATUS; extdecl; external gdslib;
+  function isc_compile_menu(_para1:PISC_STATUS; _para2:Pisc_form_handle; _para3:Pisc_req_handle; _para4:Psmallint; _para5:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_compile_sub_map(_para1:PISC_STATUS; _para2:Pisc_win_handle; _para3:Pisc_req_handle; _para4:Psmallint; _para5:Pchar):ISC_STATUS; extdecl; external gdslib;
+  function isc_compile_sub_map(_para1:PISC_STATUS; _para2:Pisc_win_handle; _para3:Pisc_req_handle; _para4:Psmallint; _para5:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
   function isc_create_window(_para1:PISC_STATUS; _para2:Pisc_win_handle; _para3:Psmallint; _para4:Pchar; _para5:Psmallint;
-             _para6:Psmallint):ISC_STATUS; extdecl; external gdslib;
+             _para6:Psmallint):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_delete_window(_para1:PISC_STATUS; _para2:Pisc_win_handle):ISC_STATUS; extdecl; external gdslib;
+  function isc_delete_window(_para1:PISC_STATUS; _para2:Pisc_win_handle):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
   function isc_drive_form(_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:Pisc_win_handle; _para5:Pisc_req_handle;
-             _para6:Pbyte; _para7:Pbyte):ISC_STATUS; extdecl; external gdslib;
+             _para6:Pbyte; _para7:Pbyte):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
   function isc_drive_menu(_para1:PISC_STATUS; _para2:Pisc_win_handle; _para3:Pisc_req_handle; _para4:Psmallint; _para5:Pchar;
              _para6:Psmallint; _para7:Pchar; _para8:Psmallint; _para9:Psmallint; _para10:Pchar;
-             _para11:PISC_LONG):ISC_STATUS; extdecl; external gdslib;
+             _para11:PISC_LONG):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_form_delete(_para1:PISC_STATUS; _para2:Pisc_form_handle):ISC_STATUS; extdecl; external gdslib;
+  function isc_form_delete(_para1:PISC_STATUS; _para2:Pisc_form_handle):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_form_fetch(_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:Pisc_req_handle; _para5:Pbyte):ISC_STATUS; extdecl; external gdslib;
+  function isc_form_fetch(_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:Pisc_req_handle; _para5:Pbyte):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_form_insert(_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:Pisc_req_handle; _para5:Pbyte):ISC_STATUS; extdecl; external gdslib;
+  function isc_form_insert(_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:Pisc_req_handle; _para5:Pbyte):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
   function isc_get_entree(_para1:PISC_STATUS; _para2:Pisc_req_handle; _para3:Psmallint; _para4:Pchar; _para5:PISC_LONG;
-             _para6:Psmallint):ISC_STATUS; extdecl; external gdslib;
+             _para6:Psmallint):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_initialize_menu(_para1:PISC_STATUS; _para2:Pisc_req_handle):ISC_STATUS; extdecl; external gdslib;
+  function isc_initialize_menu(_para1:PISC_STATUS; _para2:Pisc_req_handle):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_menu(_para1:PISC_STATUS; _para2:Pisc_win_handle; _para3:Pisc_req_handle; _para4:Psmallint; _para5:Pchar):ISC_STATUS; extdecl; external gdslib;
+  function isc_menu(_para1:PISC_STATUS; _para2:Pisc_win_handle; _para3:Pisc_req_handle; _para4:Psmallint; _para5:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
   function isc_load_form(_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:Pisc_form_handle; _para5:Psmallint;
-             _para6:Pchar):ISC_STATUS; extdecl; external gdslib;
+             _para6:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_pop_window(_para1:PISC_STATUS; _para2:Pisc_win_handle):ISC_STATUS; extdecl; external gdslib;
+  function isc_pop_window(_para1:PISC_STATUS; _para2:Pisc_win_handle):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_put_entree(_para1:PISC_STATUS; _para2:Pisc_req_handle; _para3:Psmallint; _para4:Pchar; _para5:PISC_LONG):ISC_STATUS; extdecl; external gdslib;
+  function isc_put_entree(_para1:PISC_STATUS; _para2:Pisc_req_handle; _para3:Psmallint; _para4:Pchar; _para5:PISC_LONG):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_reset_form(_para1:PISC_STATUS; _para2:Pisc_req_handle):ISC_STATUS; extdecl; external gdslib;
+  function isc_reset_form(_para1:PISC_STATUS; _para2:Pisc_req_handle):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_suspend_window(_para1:PISC_STATUS; _para2:Pisc_win_handle):ISC_STATUS; extdecl; external gdslib;
+  function isc_suspend_window(_para1:PISC_STATUS; _para2:Pisc_win_handle):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 {$ENDIF}
 
-  function isc_attach_database:ISC_STATUS; extdecl; external gdslib;
+  function isc_attach_database:ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_array_gen_sdl:ISC_STATUS; extdecl; external gdslib;
+  function isc_array_gen_sdl:ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_array_get_slice:ISC_STATUS; extdecl; external gdslib;
+  function isc_array_get_slice:ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_array_lookup_bounds:ISC_STATUS; extdecl; external gdslib;
+  function isc_array_lookup_bounds:ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_array_lookup_desc:ISC_STATUS; extdecl; external gdslib;
+  function isc_array_lookup_desc:ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_array_set_desc:ISC_STATUS; extdecl; external gdslib;
+  function isc_array_set_desc:ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_array_put_slice:ISC_STATUS; extdecl; external gdslib;
+  function isc_array_put_slice:ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_blob_gen_bpb:ISC_STATUS; extdecl; external gdslib;
+  function isc_blob_gen_bpb:ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_blob_info:ISC_STATUS; extdecl; external gdslib;
+  function isc_blob_info:ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_blob_lookup_desc:ISC_STATUS; extdecl; external gdslib;
+  function isc_blob_lookup_desc:ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_blob_set_desc:ISC_STATUS; extdecl; external gdslib;
+  function isc_blob_set_desc:ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_cancel_blob:ISC_STATUS; extdecl; external gdslib;
+  function isc_cancel_blob:ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_cancel_events:ISC_STATUS; extdecl; external gdslib;
+  function isc_cancel_events:ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_close_blob:ISC_STATUS; extdecl; external gdslib;
+  function isc_close_blob:ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_commit_retaining:ISC_STATUS; extdecl; external gdslib;
+  function isc_commit_retaining:ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_commit_transaction:ISC_STATUS; extdecl; external gdslib;
+  function isc_commit_transaction:ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_compile_request:ISC_STATUS; extdecl; external gdslib;
+  function isc_compile_request:ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_compile_request2:ISC_STATUS; extdecl; external gdslib;
+  function isc_compile_request2:ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_create_blob:ISC_STATUS; extdecl; external gdslib;
+  function isc_create_blob:ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_create_blob2:ISC_STATUS; extdecl; external gdslib;
+  function isc_create_blob2:ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_create_database:ISC_STATUS; extdecl; external gdslib;
+  function isc_create_database:ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_database_info:ISC_STATUS; extdecl; external gdslib;
+  function isc_database_info:ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_ddl:ISC_STATUS; extdecl; external gdslib;
+  function isc_ddl:ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  procedure isc_decode_date; extdecl; external gdslib;
+  procedure isc_decode_date; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  procedure isc_decode_sql_date; extdecl; external gdslib;
+  procedure isc_decode_sql_date; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  procedure isc_decode_sql_time; extdecl; external gdslib;
+  procedure isc_decode_sql_time; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  procedure isc_decode_timestamp; extdecl; external gdslib;
+  procedure isc_decode_timestamp; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_detach_database:ISC_STATUS; extdecl; external gdslib;
+  function isc_detach_database:ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_drop_database:ISC_STATUS; extdecl; external gdslib;
+  function isc_drop_database:ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  procedure isc_encode_date; extdecl; external gdslib;
+  procedure isc_encode_date; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  procedure isc_encode_sql_date; extdecl; external gdslib;
+  procedure isc_encode_sql_date; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  procedure isc_encode_sql_time; extdecl; external gdslib;
+  procedure isc_encode_sql_time; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  procedure isc_encode_timestamp; extdecl; external gdslib;
+  procedure isc_encode_timestamp; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_event_block:ISC_LONG; extdecl; external gdslib;
+  function isc_event_block:ISC_LONG; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  procedure isc_event_counts; extdecl; external gdslib;
+  procedure isc_event_counts; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  procedure isc_expand_dpb; extdecl; external gdslib;
+  procedure isc_expand_dpb; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_modify_dpb:longint; extdecl; external gdslib;
+  function isc_modify_dpb:longint; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_free:ISC_LONG; extdecl; external gdslib;
+  function isc_free:ISC_LONG; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_get_segment:ISC_STATUS; extdecl; external gdslib;
+  function isc_get_segment:ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_get_slice:ISC_STATUS; extdecl; external gdslib;
+  function isc_get_slice:ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_interprete:ISC_STATUS; extdecl; external gdslib;
+  function isc_interprete:ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_open_blob:ISC_STATUS; extdecl; external gdslib;
+  function isc_open_blob:ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_open_blob2:ISC_STATUS; extdecl; external gdslib;
+  function isc_open_blob2:ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_prepare_transaction:ISC_STATUS; extdecl; external gdslib;
+  function isc_prepare_transaction:ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_prepare_transaction2:ISC_STATUS; extdecl; external gdslib;
+  function isc_prepare_transaction2:ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  procedure isc_print_sqlerror; extdecl; external gdslib;
+  procedure isc_print_sqlerror; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_print_status:ISC_STATUS; extdecl; external gdslib;
+  function isc_print_status:ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_put_segment:ISC_STATUS; extdecl; external gdslib;
+  function isc_put_segment:ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_put_slice:ISC_STATUS; extdecl; external gdslib;
+  function isc_put_slice:ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_que_events:ISC_STATUS; extdecl; external gdslib;
+  function isc_que_events:ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_receive:ISC_STATUS; extdecl; external gdslib;
+  function isc_receive:ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_reconnect_transaction:ISC_STATUS; extdecl; external gdslib;
+  function isc_reconnect_transaction:ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_release_request:ISC_STATUS; extdecl; external gdslib;
+  function isc_release_request:ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_request_info:ISC_STATUS; extdecl; external gdslib;
+  function isc_request_info:ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
 {$IFDEF Unix}
-  function isc_reset_fpe:ISC_LONG; extdecl; external gdslib;
+  function isc_reset_fpe:ISC_LONG; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 {$ENDIF}
 
-  function isc_rollback_transaction:ISC_STATUS; extdecl; external gdslib;
+  function isc_rollback_transaction:ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_rollback_retaining:ISC_STATUS; extdecl; external gdslib;
+  function isc_rollback_retaining:ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_seek_blob:ISC_STATUS; extdecl; external gdslib;
+  function isc_seek_blob:ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_send:ISC_STATUS; extdecl; external gdslib;
+  function isc_send:ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_service_attach:ISC_STATUS; extdecl; external gdslib;
+  function isc_service_attach:ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_service_detach:ISC_STATUS; extdecl; external gdslib;
+  function isc_service_detach:ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_service_query:ISC_STATUS; extdecl; external gdslib;
+  function isc_service_query:ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_service_start:ISC_STATUS; extdecl; external gdslib;
+  function isc_service_start:ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_start_and_send:ISC_STATUS; extdecl; external gdslib;
+  function isc_start_and_send:ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_start_multiple:ISC_STATUS; extdecl; external gdslib;
+  function isc_start_multiple:ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_start_request:ISC_STATUS; extdecl; external gdslib;
+  function isc_start_request:ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_start_transaction:ISC_STATUS; extdecl; external gdslib;
+  function isc_start_transaction:ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_sqlcode:ISC_LONG; extdecl; external gdslib;
+  function isc_sqlcode:ISC_LONG; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_transaction_info:ISC_STATUS; extdecl; external gdslib;
+  function isc_transaction_info:ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_transact_request:ISC_STATUS; extdecl; external gdslib;
+  function isc_transact_request:ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_unwind_request:ISC_STATUS; extdecl; external gdslib;
+  function isc_unwind_request:ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_wait_for_event:ISC_STATUS; extdecl; external gdslib;
+  function isc_wait_for_event:ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_ftof:ISC_LONG; extdecl; external gdslib;
+  function isc_ftof:ISC_LONG; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_print_blr:ISC_STATUS; extdecl; external gdslib;
+  function isc_print_blr:ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  procedure isc_set_debug; extdecl; external gdslib;
+  procedure isc_set_debug; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  procedure isc_qtoq; extdecl; external gdslib;
+  procedure isc_qtoq; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_vax_integer:ISC_LONG; extdecl; external gdslib;
+  function isc_vax_integer:ISC_LONG; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  procedure isc_vtof; extdecl; external gdslib;
+  procedure isc_vtof; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  procedure isc_vtov; extdecl; external gdslib;
+  procedure isc_vtov; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function isc_version:longint; extdecl; external gdslib;
+  function isc_version:longint; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
   {                 }
   { Blob functions  }
   {                 }
 
-  function Bopen:PBSTREAM; extdecl; external gdslib;
+  function Bopen:PBSTREAM; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
-  function BLOB_open:PBSTREAM; extdecl; external gdslib;
+  function BLOB_open:PBSTREAM; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
 {$IFDEF Unix}
-  function Bopen2:PBSTREAM; extdecl; external gdslib;
+  function Bopen2:PBSTREAM; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 {$ENDIF}
 
 {$ELSE} // LinkDynamically
@@ -2273,189 +2273,189 @@ var
 {                          }
 { OSRI database functions  }
 {                          }
-  isc_attach_database : function (_para1:PISC_STATUS; _para2:smallint; _para3:Pchar; _para4:Pisc_db_handle; _para5:smallint;_para6:Pchar):ISC_STATUS; extdecl;
-  isc_array_gen_sdl : function (_para1:PISC_STATUS; _para2:PISC_ARRAY_DESC; _para3:Psmallint; _para4:Pchar; _para5:Psmallint):ISC_STATUS; extdecl;
-  isc_array_get_slice : function (_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:PISC_QUAD; _para5:PISC_ARRAY_DESC;_para6:pointer; _para7:PISC_LONG):ISC_STATUS; extdecl;
-  isc_array_lookup_bounds : function (_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:Pchar; _para5:Pchar;_para6:PISC_ARRAY_DESC):ISC_STATUS; extdecl;
-  isc_array_lookup_desc : function (_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:Pchar; _para5:Pchar;_para6:PISC_ARRAY_DESC):ISC_STATUS; extdecl;
-  isc_array_set_desc : function (_para1:PISC_STATUS; _para2:Pchar; _para3:Pchar; _para4:Psmallint; _para5:Psmallint;_para6:Psmallint; _para7:PISC_ARRAY_DESC):ISC_STATUS; extdecl;
-  isc_array_put_slice : function (_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:PISC_QUAD; _para5:PISC_ARRAY_DESC;_para6:pointer; _para7:PISC_LONG):ISC_STATUS; extdecl;
-  isc_blob_default_desc : procedure (_para1:PISC_BLOB_DESC; _para2:Pbyte; _para3:Pbyte); extdecl;
-  isc_blob_gen_bpb : function (_para1:PISC_STATUS; _para2:PISC_BLOB_DESC; _para3:PISC_BLOB_DESC; _para4:word; _para5:Pbyte;_para6:Pword):ISC_STATUS; extdecl;
-  isc_blob_info : function (_para1:PISC_STATUS; _para2:Pisc_blob_handle; _para3:smallint; _para4:Pchar; _para5:smallint;_para6:Pchar):ISC_STATUS; extdecl;
-  isc_blob_lookup_desc : function (_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:Pbyte; _para5:Pbyte;_para6:PISC_BLOB_DESC; _para7:Pbyte):ISC_STATUS; extdecl;
-  isc_blob_set_desc : function (_para1:PISC_STATUS; _para2:Pbyte; _para3:Pbyte; _para4:smallint; _para5:smallint;_para6:smallint; _para7:PISC_BLOB_DESC):ISC_STATUS; extdecl;
-  isc_cancel_blob : function (_para1:PISC_STATUS; _para2:Pisc_blob_handle):ISC_STATUS; extdecl;
-  isc_cancel_events : function (_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:PISC_LONG):ISC_STATUS; extdecl;
-  isc_close_blob : function (_para1:PISC_STATUS; _para2:Pisc_blob_handle):ISC_STATUS; extdecl;
-  isc_commit_retaining : function (_para1:PISC_STATUS; _para2:Pisc_tr_handle):ISC_STATUS; extdecl;
-  isc_commit_transaction : function (_para1:PISC_STATUS; _para2:Pisc_tr_handle):ISC_STATUS; extdecl;
-  isc_create_blob : function (_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:Pisc_blob_handle; _para5:PISC_QUAD):ISC_STATUS; extdecl;
-  isc_create_blob2 : function (_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:Pisc_blob_handle; _para5:PISC_QUAD;_para6:smallint; _para7:Pchar):ISC_STATUS; extdecl;
-  isc_create_database : function (_para1:PISC_STATUS; _para2:smallint; _para3:Pchar; _para4:Pisc_db_handle; _para5:smallint;_para6:Pchar; _para7:smallint):ISC_STATUS; extdecl;
-  isc_database_info : function (_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:smallint; _para4:Pchar; _para5:smallint;_para6:Pchar):ISC_STATUS; extdecl;
-  isc_decode_date : procedure (_para1:PISC_QUAD; _para2:pointer); extdecl;
-  isc_decode_sql_date : procedure (_para1:PISC_DATE; _para2:pointer); extdecl;
-  isc_decode_sql_time : procedure (_para1:PISC_TIME; _para2:pointer); extdecl;
-  isc_decode_timestamp : procedure (_para1:PISC_TIMESTAMP; _para2:pointer); extdecl;
-  isc_detach_database : function (_para1:PISC_STATUS; _para2:Pisc_db_handle):ISC_STATUS; extdecl;
-  isc_drop_database : function (_para1:PISC_STATUS; _para2:Pisc_db_handle):ISC_STATUS; extdecl;
-  isc_dsql_allocate_statement : function (_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_stmt_handle):ISC_STATUS; extdecl;
-  isc_dsql_alloc_statement2 : function (_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_stmt_handle):ISC_STATUS; extdecl;
-  isc_dsql_describe : function (_para1:PISC_STATUS; _para2:Pisc_stmt_handle; _para3:word; _para4:PXSQLDA):ISC_STATUS; extdecl;
-  isc_dsql_describe_bind : function (_para1:PISC_STATUS; _para2:Pisc_stmt_handle; _para3:word; _para4:PXSQLDA):ISC_STATUS; extdecl;
-  isc_dsql_exec_immed2 : function (_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:word; _para5:Pchar;_para6:word; _para7:PXSQLDA; _para8:PXSQLDA):ISC_STATUS; extdecl;
-  isc_dsql_execute : function (_para1:PISC_STATUS; _para2:Pisc_tr_handle; _para3:Pisc_stmt_handle; _para4:word; _para5:PXSQLDA):ISC_STATUS; extdecl;
-  isc_dsql_execute2 : function (_para1:PISC_STATUS; _para2:Pisc_tr_handle; _para3:Pisc_stmt_handle; _para4:word; _para5:PXSQLDA;_para6:PXSQLDA):ISC_STATUS; extdecl;
-  isc_dsql_execute_immediate : function (_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:word; _para5:Pchar;_para6:word; _para7:PXSQLDA):ISC_STATUS; extdecl;
-  isc_dsql_fetch : function (_para1:PISC_STATUS; _para2:Pisc_stmt_handle; _para3:word; _para4:PXSQLDA):ISC_STATUS; extdecl;
-  isc_dsql_finish : function (_para1:Pisc_db_handle):ISC_STATUS; extdecl;
-  isc_dsql_free_statement : function (_para1:PISC_STATUS; _para2:Pisc_stmt_handle; _para3:word):ISC_STATUS; extdecl;
-  isc_dsql_insert : function (_para1:PISC_STATUS; _para2:Pisc_stmt_handle; _para3:word; _para4:PXSQLDA):ISC_STATUS; extdecl;
-  isc_dsql_prepare : function (_para1:PISC_STATUS; _para2:Pisc_tr_handle; _para3:Pisc_stmt_handle; _para4:word; _para5:Pchar;_para6:word; _para7:PXSQLDA):ISC_STATUS; extdecl;
-  isc_dsql_set_cursor_name : function (_para1:PISC_STATUS; _para2:Pisc_stmt_handle; _para3:Pchar; _para4:word):ISC_STATUS; extdecl;
+  isc_attach_database : function (_para1:PISC_STATUS; _para2:smallint; _para3:Pchar; _para4:Pisc_db_handle; _para5:smallint;_para6:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; 
+  isc_array_gen_sdl : function (_para1:PISC_STATUS; _para2:PISC_ARRAY_DESC; _para3:Psmallint; _para4:Pchar; _para5:Psmallint):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_array_get_slice : function (_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:PISC_QUAD; _para5:PISC_ARRAY_DESC;_para6:pointer; _para7:PISC_LONG):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_array_lookup_bounds : function (_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:Pchar; _para5:Pchar;_para6:PISC_ARRAY_DESC):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_array_lookup_desc : function (_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:Pchar; _para5:Pchar;_para6:PISC_ARRAY_DESC):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_array_set_desc : function (_para1:PISC_STATUS; _para2:Pchar; _para3:Pchar; _para4:Psmallint; _para5:Psmallint;_para6:Psmallint; _para7:PISC_ARRAY_DESC):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_array_put_slice : function (_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:PISC_QUAD; _para5:PISC_ARRAY_DESC;_para6:pointer; _para7:PISC_LONG):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_blob_default_desc : procedure (_para1:PISC_BLOB_DESC; _para2:Pbyte; _para3:Pbyte); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_blob_gen_bpb : function (_para1:PISC_STATUS; _para2:PISC_BLOB_DESC; _para3:PISC_BLOB_DESC; _para4:word; _para5:Pbyte;_para6:Pword):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_blob_info : function (_para1:PISC_STATUS; _para2:Pisc_blob_handle; _para3:smallint; _para4:Pchar; _para5:smallint;_para6:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_blob_lookup_desc : function (_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:Pbyte; _para5:Pbyte;_para6:PISC_BLOB_DESC; _para7:Pbyte):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_blob_set_desc : function (_para1:PISC_STATUS; _para2:Pbyte; _para3:Pbyte; _para4:smallint; _para5:smallint;_para6:smallint; _para7:PISC_BLOB_DESC):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_cancel_blob : function (_para1:PISC_STATUS; _para2:Pisc_blob_handle):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_cancel_events : function (_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:PISC_LONG):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_close_blob : function (_para1:PISC_STATUS; _para2:Pisc_blob_handle):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_commit_retaining : function (_para1:PISC_STATUS; _para2:Pisc_tr_handle):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_commit_transaction : function (_para1:PISC_STATUS; _para2:Pisc_tr_handle):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_create_blob : function (_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:Pisc_blob_handle; _para5:PISC_QUAD):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_create_blob2 : function (_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:Pisc_blob_handle; _para5:PISC_QUAD;_para6:smallint; _para7:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_create_database : function (_para1:PISC_STATUS; _para2:smallint; _para3:Pchar; _para4:Pisc_db_handle; _para5:smallint;_para6:Pchar; _para7:smallint):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_database_info : function (_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:smallint; _para4:Pchar; _para5:smallint;_para6:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_decode_date : procedure (_para1:PISC_QUAD; _para2:pointer); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_decode_sql_date : procedure (_para1:PISC_DATE; _para2:pointer); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_decode_sql_time : procedure (_para1:PISC_TIME; _para2:pointer); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_decode_timestamp : procedure (_para1:PISC_TIMESTAMP; _para2:pointer); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_detach_database : function (_para1:PISC_STATUS; _para2:Pisc_db_handle):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_drop_database : function (_para1:PISC_STATUS; _para2:Pisc_db_handle):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_dsql_allocate_statement : function (_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_stmt_handle):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_dsql_alloc_statement2 : function (_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_stmt_handle):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_dsql_describe : function (_para1:PISC_STATUS; _para2:Pisc_stmt_handle; _para3:word; _para4:PXSQLDA):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_dsql_describe_bind : function (_para1:PISC_STATUS; _para2:Pisc_stmt_handle; _para3:word; _para4:PXSQLDA):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_dsql_exec_immed2 : function (_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:word; _para5:Pchar;_para6:word; _para7:PXSQLDA; _para8:PXSQLDA):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_dsql_execute : function (_para1:PISC_STATUS; _para2:Pisc_tr_handle; _para3:Pisc_stmt_handle; _para4:word; _para5:PXSQLDA):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_dsql_execute2 : function (_para1:PISC_STATUS; _para2:Pisc_tr_handle; _para3:Pisc_stmt_handle; _para4:word; _para5:PXSQLDA;_para6:PXSQLDA):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_dsql_execute_immediate : function (_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:word; _para5:Pchar;_para6:word; _para7:PXSQLDA):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_dsql_fetch : function (_para1:PISC_STATUS; _para2:Pisc_stmt_handle; _para3:word; _para4:PXSQLDA):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_dsql_finish : function (_para1:Pisc_db_handle):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_dsql_free_statement : function (_para1:PISC_STATUS; _para2:Pisc_stmt_handle; _para3:word):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_dsql_insert : function (_para1:PISC_STATUS; _para2:Pisc_stmt_handle; _para3:word; _para4:PXSQLDA):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_dsql_prepare : function (_para1:PISC_STATUS; _para2:Pisc_tr_handle; _para3:Pisc_stmt_handle; _para4:word; _para5:Pchar;_para6:word; _para7:PXSQLDA):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_dsql_set_cursor_name : function (_para1:PISC_STATUS; _para2:Pisc_stmt_handle; _para3:Pchar; _para4:word):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
   isc_dsql_sql_info : function (_para1:PISC_STATUS; _para2:Pisc_stmt_handle;
    _para3:smallint; _para4:Pchar; _para5:smallint;
-                                 _para6:Pchar):ISC_STATUS; extdecl;
-  isc_encode_date : procedure (_para1:pointer; _para2:PISC_QUAD); extdecl;
-  isc_encode_sql_date : procedure (_para1:pointer; _para2:PISC_DATE); extdecl;
-  isc_encode_sql_time : procedure (_para1:pointer; _para2:PISC_TIME); extdecl;
-  isc_encode_timestamp : procedure (_para1:pointer; _para2:PISC_TIMESTAMP); extdecl;
+                                 _para6:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_encode_date : procedure (_para1:pointer; _para2:PISC_QUAD); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_encode_sql_date : procedure (_para1:pointer; _para2:PISC_DATE); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_encode_sql_time : procedure (_para1:pointer; _para2:PISC_TIME); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_encode_timestamp : procedure (_para1:pointer; _para2:PISC_TIMESTAMP); {$ifdef wincall}stdcall{$else}cdecl{$endif};
 {$warnings off}
   isc_event_block : function (_para1:PPchar; _para2:PPchar; _para3:word;
-                            args: array of const):ISC_LONG; extdeclvararg; {varargs;}
+                            args: array of const):ISC_LONG; {$ifdef cvcall}cdecl{$else}error{$endif}; {varargs;}
 {$warnings on}
   isc_event_counts: procedure (_para1: PISC_STATUS; _para2: short;
-                     _para3: pchar; _para4: pchar); extdecl;
-{!!MVC
+                     _para3: pchar; _para4: pchar); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+(*!!MVC
   void         isc_event_counts (unsigned ISC_LONG   ,
   short,
   char   ,
-  char   ); extdecl; external gdslib;
-!!MVC }
+  char   ); {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
+!!MVC *)
 {$warnings off}
   isc_expand_dpb : procedure (_para1:PPchar; _para2:Psmallint;
-                args:array of const); extdeclvararg;
+                args:array of const); {$ifdef cvcall}cdecl{$else}error{$endif};
 {$warnings on}
-  isc_modify_dpb : function (_para1:PPchar; _para2:Psmallint; _para3:word; _para4:Pchar; _para5:smallint):longint; extdecl;
-  isc_free : function (_para1:Pchar):ISC_LONG; extdecl;
-  isc_get_segment : function (_para1:PISC_STATUS; _para2:Pisc_blob_handle; _para3:Pword; _para4:word; _para5:Pchar):ISC_STATUS; extdecl;
-  isc_get_slice : function (_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:PISC_QUAD; _para5:smallint;_para6:Pchar; _para7:smallint; _para8:PISC_LONG; _para9:ISC_LONG; _para10:pointer;_para11:PISC_LONG):ISC_STATUS; extdecl;
-  isc_interprete : function (_para1:Pchar; _para2:PPISC_STATUS):ISC_STATUS; extdecl;
-  isc_open_blob : function (_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:Pisc_blob_handle; _para5:PISC_QUAD):ISC_STATUS; extdecl;
-  isc_open_blob2 : function (_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:Pisc_blob_handle; _para5:PISC_QUAD;_para6:smallint; _para7:Pchar):ISC_STATUS; extdecl;
-  isc_prepare_transaction2 : function (_para1:PISC_STATUS; _para2:Pisc_tr_handle; _para3:smallint; _para4:Pchar):ISC_STATUS; extdecl;
-  isc_print_sqlerror : procedure (_para1:smallint; _para2:PISC_STATUS); extdecl;
-  isc_print_status : function (_para1:PISC_STATUS):ISC_STATUS; extdecl;
-  isc_put_segment : function (_para1:PISC_STATUS; _para2:Pisc_blob_handle; _para3:word; _para4:Pchar):ISC_STATUS; extdecl;
-  isc_put_slice : function (_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:PISC_QUAD; _para5:smallint;_para6:Pchar; _para7:smallint; _para8:PISC_LONG; _para9:ISC_LONG; _para10:pointer):ISC_STATUS; extdecl;
-  isc_que_events : function (_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:PISC_LONG; _para4:smallint; _para5:Pchar;_para6:isc_callback; _para7:pointer):ISC_STATUS; extdecl;
-  isc_rollback_retaining : function (_para1:PISC_STATUS; _para2:Pisc_tr_handle):ISC_STATUS; extdecl;
-  isc_rollback_transaction : function (_para1:PISC_STATUS; _para2:Pisc_tr_handle):ISC_STATUS; extdecl;
-  isc_start_multiple : function (_para1:PISC_STATUS; _para2:Pisc_tr_handle; _para3:smallint; _para4:pointer):ISC_STATUS; extdecl;
+  isc_modify_dpb : function (_para1:PPchar; _para2:Psmallint; _para3:word; _para4:Pchar; _para5:smallint):longint; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_free : function (_para1:Pchar):ISC_LONG; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_get_segment : function (_para1:PISC_STATUS; _para2:Pisc_blob_handle; _para3:Pword; _para4:word; _para5:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_get_slice : function (_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:PISC_QUAD; _para5:smallint;_para6:Pchar; _para7:smallint; _para8:PISC_LONG; _para9:ISC_LONG; _para10:pointer;_para11:PISC_LONG):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_interprete : function (_para1:Pchar; _para2:PPISC_STATUS):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_open_blob : function (_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:Pisc_blob_handle; _para5:PISC_QUAD):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_open_blob2 : function (_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:Pisc_blob_handle; _para5:PISC_QUAD;_para6:smallint; _para7:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_prepare_transaction2 : function (_para1:PISC_STATUS; _para2:Pisc_tr_handle; _para3:smallint; _para4:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_print_sqlerror : procedure (_para1:smallint; _para2:PISC_STATUS); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_print_status : function (_para1:PISC_STATUS):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_put_segment : function (_para1:PISC_STATUS; _para2:Pisc_blob_handle; _para3:word; _para4:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_put_slice : function (_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:PISC_QUAD; _para5:smallint;_para6:Pchar; _para7:smallint; _para8:PISC_LONG; _para9:ISC_LONG; _para10:pointer):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_que_events : function (_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:PISC_LONG; _para4:smallint; _para5:Pchar;_para6:isc_callback; _para7:pointer):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_rollback_retaining : function (_para1:PISC_STATUS; _para2:Pisc_tr_handle):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_rollback_transaction : function (_para1:PISC_STATUS; _para2:Pisc_tr_handle):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_start_multiple : function (_para1:PISC_STATUS; _para2:Pisc_tr_handle; _para3:smallint; _para4:pointer):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
 {$warnings off}
   isc_start_transaction : function (_para1:PISC_STATUS; _para2:Pisc_tr_handle;
          _para3:smallint; args:array of const):ISC_STATUS; 
-                                     extdeclvararg;
+                                     {$ifdef cvcall}cdecl{$else}error{$endif};
 {$warnings on}
-  isc_sqlcode : function (_para1:PISC_STATUS):ISC_LONG; extdecl;
-  isc_sql_interprete : procedure (_para1:smallint; _para2:Pchar; _para3:smallint); extdecl;
-  isc_transaction_info : function (_para1:PISC_STATUS; _para2:Pisc_tr_handle; _para3:smallint; _para4:Pchar; _para5:smallint;_para6:Pchar):ISC_STATUS; extdecl;
-  isc_transact_request : function (_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:word; _para5:Pchar;_para6:word; _para7:Pchar; _para8:word; _para9:Pchar):ISC_STATUS; extdecl;
-  isc_vax_integer : function (_para1:Pchar; _para2:smallint):ISC_LONG; extdecl;
-  isc_portable_integer : function (_para1:Pbyte; _para2:smallint):ISC_INT64; extdecl;
+  isc_sqlcode : function (_para1:PISC_STATUS):ISC_LONG; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_sql_interprete : procedure (_para1:smallint; _para2:Pchar; _para3:smallint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_transaction_info : function (_para1:PISC_STATUS; _para2:Pisc_tr_handle; _para3:smallint; _para4:Pchar; _para5:smallint;_para6:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_transact_request : function (_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:word; _para5:Pchar;_para6:word; _para7:Pchar; _para8:word; _para9:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_vax_integer : function (_para1:Pchar; _para2:smallint):ISC_LONG; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_portable_integer : function (_para1:Pbyte; _para2:smallint):ISC_INT64; {$ifdef wincall}stdcall{$else}cdecl{$endif};
 {                                    }
 { Security Functions                 }
 {                                    }
-  isc_add_user : function (_para1:PISC_STATUS; _para2:PUSER_SEC_DATA):longint; extdecl;
-  isc_delete_user : function (_para1:PISC_STATUS; _para2:PUSER_SEC_DATA):longint; extdecl;
-  isc_modify_user : function (_para1:PISC_STATUS; _para2:PUSER_SEC_DATA):longint; extdecl;
+  isc_add_user : function (_para1:PISC_STATUS; _para2:PUSER_SEC_DATA):longint; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_delete_user : function (_para1:PISC_STATUS; _para2:PUSER_SEC_DATA):longint; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_modify_user : function (_para1:PISC_STATUS; _para2:PUSER_SEC_DATA):longint; {$ifdef wincall}stdcall{$else}cdecl{$endif};
 {                                 }
 {  Other OSRI functions           }
 {                                 }
-  isc_compile_request : function (_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_req_handle; _para4:smallint; _para5:Pchar):ISC_STATUS; extdecl;
-  isc_compile_request2 : function (_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_req_handle; _para4:smallint; _para5:Pchar):ISC_STATUS; extdecl;
-  isc_ddl : function (_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:smallint; _para5:Pchar):ISC_STATUS; extdecl;
-  isc_prepare_transaction : function (_para1:PISC_STATUS; _para2:Pisc_tr_handle):ISC_STATUS; extdecl;
-  isc_receive : function (_para1:PISC_STATUS; _para2:Pisc_req_handle; _para3:smallint; _para4:smallint; _para5:pointer;_para6:smallint):ISC_STATUS; extdecl;
-  isc_reconnect_transaction : function (_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:smallint; _para5:Pchar):ISC_STATUS; extdecl;
-  isc_release_request : function (_para1:PISC_STATUS; _para2:Pisc_req_handle):ISC_STATUS; extdecl;
-  isc_request_info : function (_para1:PISC_STATUS; _para2:Pisc_req_handle; _para3:smallint; _para4:smallint; _para5:Pchar;_para6:smallint; _para7:Pchar):ISC_STATUS; extdecl;
-  isc_seek_blob : function (_para1:PISC_STATUS; _para2:Pisc_blob_handle; _para3:smallint; _para4:ISC_LONG; _para5:PISC_LONG):ISC_STATUS; extdecl;
-  isc_send : function (_para1:PISC_STATUS; _para2:Pisc_req_handle; _para3:smallint; _para4:smallint; _para5:pointer;_para6:smallint):ISC_STATUS; extdecl;
-  isc_start_and_send : function (_para1:PISC_STATUS; _para2:Pisc_req_handle; _para3:Pisc_tr_handle; _para4:smallint; _para5:smallint;_para6:pointer; _para7:smallint):ISC_STATUS; extdecl;
-  isc_start_request : function (_para1:PISC_STATUS; _para2:Pisc_req_handle; _para3:Pisc_tr_handle; _para4:smallint):ISC_STATUS; extdecl;
-  isc_unwind_request : function (_para1:PISC_STATUS; _para2:Pisc_tr_handle; _para3:smallint):ISC_STATUS; extdecl;
-  isc_wait_for_event : function (_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:smallint; _para4:Pchar; _para5:Pchar):ISC_STATUS; extdecl;
+  isc_compile_request : function (_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_req_handle; _para4:smallint; _para5:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_compile_request2 : function (_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_req_handle; _para4:smallint; _para5:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_ddl : function (_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:smallint; _para5:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_prepare_transaction : function (_para1:PISC_STATUS; _para2:Pisc_tr_handle):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_receive : function (_para1:PISC_STATUS; _para2:Pisc_req_handle; _para3:smallint; _para4:smallint; _para5:pointer;_para6:smallint):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_reconnect_transaction : function (_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:smallint; _para5:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_release_request : function (_para1:PISC_STATUS; _para2:Pisc_req_handle):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_request_info : function (_para1:PISC_STATUS; _para2:Pisc_req_handle; _para3:smallint; _para4:smallint; _para5:Pchar;_para6:smallint; _para7:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_seek_blob : function (_para1:PISC_STATUS; _para2:Pisc_blob_handle; _para3:smallint; _para4:ISC_LONG; _para5:PISC_LONG):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_send : function (_para1:PISC_STATUS; _para2:Pisc_req_handle; _para3:smallint; _para4:smallint; _para5:pointer;_para6:smallint):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_start_and_send : function (_para1:PISC_STATUS; _para2:Pisc_req_handle; _para3:Pisc_tr_handle; _para4:smallint; _para5:smallint;_para6:pointer; _para7:smallint):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_start_request : function (_para1:PISC_STATUS; _para2:Pisc_req_handle; _para3:Pisc_tr_handle; _para4:smallint):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_unwind_request : function (_para1:PISC_STATUS; _para2:Pisc_tr_handle; _para3:smallint):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_wait_for_event : function (_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:smallint; _para4:Pchar; _para5:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
 {                            }
 { Other Sql functions        }
 {                            }
-  isc_close : function (_para1:PISC_STATUS; _para2:Pchar):ISC_STATUS; extdecl;
-  isc_declare : function (_para1:PISC_STATUS; _para2:Pchar; _para3:Pchar):ISC_STATUS; extdecl;
-  isc_describe : function (_para1:PISC_STATUS; _para2:Pchar; _para3:PXSQLDA):ISC_STATUS; extdecl;
-  isc_describe_bind : function (_para1:PISC_STATUS; _para2:Pchar; _para3:PXSQLDA):ISC_STATUS; extdecl;
-  isc_execute : function (_para1:PISC_STATUS; _para2:Pisc_tr_handle; _para3:Pchar; _para4:PXSQLDA):ISC_STATUS; extdecl;
-  isc_execute_immediate : function (_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:Psmallint; _para5:Pchar):ISC_STATUS; extdecl;
-  isc_fetch : function (_para1:PISC_STATUS; _para2:Pchar; _para3:PXSQLDA):ISC_STATUS; extdecl;
-  isc_open : function (_para1:PISC_STATUS; _para2:Pisc_tr_handle; _para3:Pchar; _para4:PXSQLDA):ISC_STATUS; extdecl;
-  isc_prepare : function (_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:Pchar; _para5:Psmallint;_para6:Pchar; _para7:PXSQLDA):ISC_STATUS; extdecl;
+  isc_close : function (_para1:PISC_STATUS; _para2:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_declare : function (_para1:PISC_STATUS; _para2:Pchar; _para3:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_describe : function (_para1:PISC_STATUS; _para2:Pchar; _para3:PXSQLDA):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_describe_bind : function (_para1:PISC_STATUS; _para2:Pchar; _para3:PXSQLDA):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_execute : function (_para1:PISC_STATUS; _para2:Pisc_tr_handle; _para3:Pchar; _para4:PXSQLDA):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_execute_immediate : function (_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:Psmallint; _para5:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_fetch : function (_para1:PISC_STATUS; _para2:Pchar; _para3:PXSQLDA):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_open : function (_para1:PISC_STATUS; _para2:Pisc_tr_handle; _para3:Pchar; _para4:PXSQLDA):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_prepare : function (_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:Pchar; _para5:Psmallint;_para6:Pchar; _para7:PXSQLDA):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
 {                                    }
 { Other Dynamic sql functions        }
 {                                    }
-  isc_dsql_execute_m : function (_para1:PISC_STATUS; _para2:Pisc_tr_handle; _para3:Pisc_stmt_handle; _para4:word; _para5:Pchar;_para6:word; _para7:word; _para8:Pchar):ISC_STATUS; extdecl;
-  isc_dsql_execute2_m : function (_para1:PISC_STATUS; _para2:Pisc_tr_handle; _para3:Pisc_stmt_handle; _para4:word; _para5:Pchar;_para6:word; _para7:word; _para8:Pchar; _para9:word; _para10:Pchar;_para11:word; _para12:word; _para13:Pchar):ISC_STATUS; extdecl;
-  isc_dsql_execute_immediate_m : function (_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:word; _para5:Pchar;_para6:word; _para7:word; _para8:Pchar; _para9:word; _para10:word;_para11:Pchar):ISC_STATUS; extdecl;
-  isc_dsql_exec_immed3_m : function (_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:word; _para5:Pchar;_para6:word; _para7:word; _para8:Pchar; _para9:word; _para10:word;_para11:Pchar; _para12:word; _para13:Pchar; _para14:word; _para15:word;_para16:Pchar):ISC_STATUS; extdecl;
-  isc_dsql_fetch_m : function (_para1:PISC_STATUS; _para2:Pisc_stmt_handle; _para3:word; _para4:Pchar; _para5:word;_para6:word; _para7:Pchar):ISC_STATUS; extdecl;
-  isc_dsql_insert_m : function (_para1:PISC_STATUS; _para2:Pisc_stmt_handle; _para3:word; _para4:Pchar; _para5:word;_para6:word; _para7:Pchar):ISC_STATUS; extdecl;
-  isc_dsql_prepare_m : function (_para1:PISC_STATUS; _para2:Pisc_tr_handle; _para3:Pisc_stmt_handle; _para4:word; _para5:Pchar;_para6:word; _para7:word; _para8:Pchar; _para9:word; _para10:Pchar):ISC_STATUS; extdecl;
-  isc_dsql_release : function (_para1:PISC_STATUS; _para2:Pchar):ISC_STATUS; extdecl;
-  isc_embed_dsql_close : function (_para1:PISC_STATUS; _para2:Pchar):ISC_STATUS; extdecl;
-  isc_embed_dsql_declare : function (_para1:PISC_STATUS; _para2:Pchar; _para3:Pchar):ISC_STATUS; extdecl;
-  isc_embed_dsql_describe : function (_para1:PISC_STATUS; _para2:Pchar; _para3:word; _para4:PXSQLDA):ISC_STATUS; extdecl;
-  isc_embed_dsql_describe_bind : function (_para1:PISC_STATUS; _para2:Pchar; _para3:word; _para4:PXSQLDA):ISC_STATUS; extdecl;
-  isc_embed_dsql_execute : function (_para1:PISC_STATUS; _para2:Pisc_tr_handle; _para3:Pchar; _para4:word; _para5:PXSQLDA):ISC_STATUS; extdecl;
-  isc_embed_dsql_execute2 : function (_para1:PISC_STATUS; _para2:Pisc_tr_handle; _para3:Pchar; _para4:word; _para5:PXSQLDA;_para6:PXSQLDA):ISC_STATUS; extdecl;
-  isc_embed_dsql_execute_immed : function (_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:word; _para5:Pchar;_para6:word; _para7:PXSQLDA):ISC_STATUS; extdecl;
-  isc_embed_dsql_fetch : function (_para1:PISC_STATUS; _para2:Pchar; _para3:word; _para4:PXSQLDA):ISC_STATUS; extdecl;
-  isc_embed_dsql_open : function (_para1:PISC_STATUS; _para2:Pisc_tr_handle; _para3:Pchar; _para4:word; _para5:PXSQLDA):ISC_STATUS; extdecl;
-  isc_embed_dsql_open2 : function (_para1:PISC_STATUS; _para2:Pisc_tr_handle; _para3:Pchar; _para4:word; _para5:PXSQLDA;_para6:PXSQLDA):ISC_STATUS; extdecl;
-  isc_embed_dsql_insert : function (_para1:PISC_STATUS; _para2:Pchar; _para3:word; _para4:PXSQLDA):ISC_STATUS; extdecl;
-  isc_embed_dsql_prepare : function (_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:Pchar; _para5:word;_para6:Pchar; _para7:word; _para8:PXSQLDA):ISC_STATUS; extdecl;
-  isc_embed_dsql_release : function (_para1:PISC_STATUS; _para2:Pchar):ISC_STATUS; extdecl;
+  isc_dsql_execute_m : function (_para1:PISC_STATUS; _para2:Pisc_tr_handle; _para3:Pisc_stmt_handle; _para4:word; _para5:Pchar;_para6:word; _para7:word; _para8:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_dsql_execute2_m : function (_para1:PISC_STATUS; _para2:Pisc_tr_handle; _para3:Pisc_stmt_handle; _para4:word; _para5:Pchar;_para6:word; _para7:word; _para8:Pchar; _para9:word; _para10:Pchar;_para11:word; _para12:word; _para13:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_dsql_execute_immediate_m : function (_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:word; _para5:Pchar;_para6:word; _para7:word; _para8:Pchar; _para9:word; _para10:word;_para11:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_dsql_exec_immed3_m : function (_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:word; _para5:Pchar;_para6:word; _para7:word; _para8:Pchar; _para9:word; _para10:word;_para11:Pchar; _para12:word; _para13:Pchar; _para14:word; _para15:word;_para16:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_dsql_fetch_m : function (_para1:PISC_STATUS; _para2:Pisc_stmt_handle; _para3:word; _para4:Pchar; _para5:word;_para6:word; _para7:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_dsql_insert_m : function (_para1:PISC_STATUS; _para2:Pisc_stmt_handle; _para3:word; _para4:Pchar; _para5:word;_para6:word; _para7:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_dsql_prepare_m : function (_para1:PISC_STATUS; _para2:Pisc_tr_handle; _para3:Pisc_stmt_handle; _para4:word; _para5:Pchar;_para6:word; _para7:word; _para8:Pchar; _para9:word; _para10:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_dsql_release : function (_para1:PISC_STATUS; _para2:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_embed_dsql_close : function (_para1:PISC_STATUS; _para2:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_embed_dsql_declare : function (_para1:PISC_STATUS; _para2:Pchar; _para3:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_embed_dsql_describe : function (_para1:PISC_STATUS; _para2:Pchar; _para3:word; _para4:PXSQLDA):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_embed_dsql_describe_bind : function (_para1:PISC_STATUS; _para2:Pchar; _para3:word; _para4:PXSQLDA):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_embed_dsql_execute : function (_para1:PISC_STATUS; _para2:Pisc_tr_handle; _para3:Pchar; _para4:word; _para5:PXSQLDA):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_embed_dsql_execute2 : function (_para1:PISC_STATUS; _para2:Pisc_tr_handle; _para3:Pchar; _para4:word; _para5:PXSQLDA;_para6:PXSQLDA):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_embed_dsql_execute_immed : function (_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:word; _para5:Pchar;_para6:word; _para7:PXSQLDA):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_embed_dsql_fetch : function (_para1:PISC_STATUS; _para2:Pchar; _para3:word; _para4:PXSQLDA):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_embed_dsql_open : function (_para1:PISC_STATUS; _para2:Pisc_tr_handle; _para3:Pchar; _para4:word; _para5:PXSQLDA):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_embed_dsql_open2 : function (_para1:PISC_STATUS; _para2:Pisc_tr_handle; _para3:Pchar; _para4:word; _para5:PXSQLDA;_para6:PXSQLDA):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_embed_dsql_insert : function (_para1:PISC_STATUS; _para2:Pchar; _para3:word; _para4:PXSQLDA):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_embed_dsql_prepare : function (_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:Pchar; _para5:word;_para6:Pchar; _para7:word; _para8:PXSQLDA):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_embed_dsql_release : function (_para1:PISC_STATUS; _para2:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
 {                             }
 { Other Blob functions        }
 {                             }
-  BLOB_open : function (_para1:isc_blob_handle; _para2:Pchar; _para3:longint):PBSTREAM; extdecl;
-  BLOB_put : function (_para1:char; _para2:PBSTREAM):longint; extdecl;
-  BLOB_close : function (_para1:PBSTREAM):longint; extdecl;
-  BLOB_get : function (_para1:PBSTREAM):longint; extdecl;
-  BLOB_display : function (_para1:PISC_QUAD; _para2:isc_db_handle; _para3:isc_tr_handle; _para4:Pchar):longint; extdecl;
-  BLOB_dump : function (_para1:PISC_QUAD; _para2:isc_db_handle; _para3:isc_tr_handle; _para4:Pchar):longint; extdecl;
-  BLOB_edit : function (_para1:PISC_QUAD; _para2:isc_db_handle; _para3:isc_tr_handle; _para4:Pchar):longint; extdecl;
-  BLOB_load : function (_para1:PISC_QUAD; _para2:isc_db_handle; _para3:isc_tr_handle; _para4:Pchar):longint; extdecl;
-  BLOB_text_dump : function (_para1:PISC_QUAD; _para2:isc_db_handle; _para3:isc_tr_handle; _para4:Pchar):longint; extdecl;
-  BLOB_text_load : function (_para1:PISC_QUAD; _para2:isc_db_handle; _para3:isc_tr_handle; _para4:Pchar):longint; extdecl;
-  Bopen : function (_para1:PISC_QUAD; _para2:isc_db_handle; _para3:isc_tr_handle; _para4:Pchar):PBSTREAM; extdecl;
+  BLOB_open : function (_para1:isc_blob_handle; _para2:Pchar; _para3:longint):PBSTREAM; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  BLOB_put : function (_para1:char; _para2:PBSTREAM):longint; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  BLOB_close : function (_para1:PBSTREAM):longint; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  BLOB_get : function (_para1:PBSTREAM):longint; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  BLOB_display : function (_para1:PISC_QUAD; _para2:isc_db_handle; _para3:isc_tr_handle; _para4:Pchar):longint; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  BLOB_dump : function (_para1:PISC_QUAD; _para2:isc_db_handle; _para3:isc_tr_handle; _para4:Pchar):longint; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  BLOB_edit : function (_para1:PISC_QUAD; _para2:isc_db_handle; _para3:isc_tr_handle; _para4:Pchar):longint; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  BLOB_load : function (_para1:PISC_QUAD; _para2:isc_db_handle; _para3:isc_tr_handle; _para4:Pchar):longint; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  BLOB_text_dump : function (_para1:PISC_QUAD; _para2:isc_db_handle; _para3:isc_tr_handle; _para4:Pchar):longint; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  BLOB_text_load : function (_para1:PISC_QUAD; _para2:isc_db_handle; _para3:isc_tr_handle; _para4:Pchar):longint; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  Bopen : function (_para1:PISC_QUAD; _para2:isc_db_handle; _para3:isc_tr_handle; _para4:Pchar):PBSTREAM; {$ifdef wincall}stdcall{$else}cdecl{$endif};
 {$IFDEF Unix}
-  Bopen2 : function (_para1:PISC_QUAD; _para2:isc_db_handle; _para3:isc_tr_handle; _para4:Pchar; _para5:word):PBSTREAM; extdecl;
+  Bopen2 : function (_para1:PISC_QUAD; _para2:isc_db_handle; _para3:isc_tr_handle; _para4:Pchar; _para5:word):PBSTREAM; {$ifdef wincall}stdcall{$else}cdecl{$endif};
 {$ENDIF}
 {                             }
 { Other Misc functions        }
 {                             }
-  isc_ftof : function (_para1:Pchar; _para2:word; _para3:Pchar; _para4:word):ISC_LONG; extdecl;
-  isc_print_blr : function (_para1:Pchar; _para2:isc_callback; _para3:pointer; _para4:smallint):ISC_STATUS; extdecl;
-  isc_set_debug : procedure (_para1:longint); extdecl;
-  isc_qtoq : procedure (_para1:PISC_QUAD; _para2:PISC_QUAD); extdecl;
-  isc_vtof : procedure (_para1:Pchar; _para2:Pchar; _para3:word); extdecl;
-  isc_vtov : procedure (_para1:Pchar; _para2:Pchar; _para3:smallint); extdecl;
+  isc_ftof : function (_para1:Pchar; _para2:word; _para3:Pchar; _para4:word):ISC_LONG; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_print_blr : function (_para1:Pchar; _para2:isc_callback; _para3:pointer; _para4:smallint):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_set_debug : procedure (_para1:longint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_qtoq : procedure (_para1:PISC_QUAD; _para2:PISC_QUAD); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_vtof : procedure (_para1:Pchar; _para2:Pchar; _para3:word); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_vtov : procedure (_para1:Pchar; _para2:Pchar; _para3:smallint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
   isc_version : function (_para1:Pisc_db_handle; _para2:isc_versioncallback;
-                                _para3:pointer):longint; extdecl;
-  isc_get_client_version: procedure (aversion: pchar); extdecl;
-  isc_get_client_major_version: function: integer; extdecl;
-  isc_get_client_minor_version: function: integer; extdecl;
+                                _para3:pointer):longint; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_get_client_version: procedure (aversion: pchar); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_get_client_major_version: function: integer; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_get_client_minor_version: function: integer; {$ifdef wincall}stdcall{$else}cdecl{$endif};
 {$IFDEF Unix}
-  isc_reset_fpe : function (_para1:word):ISC_LONG; extdecl;
+  isc_reset_fpe : function (_para1:word):ISC_LONG; {$ifdef wincall}stdcall{$else}cdecl{$endif};
 {$ENDIF}
 {                                        }
 { Service manager functions              }
@@ -2469,32 +2469,32 @@ var
   (p)++ = (data) >> 16; \
   (p)++ = (data) >> 24;}
 !!MVC *)
-  isc_service_attach : function (_para1:PISC_STATUS; _para2:word; _para3:Pchar; _para4:Pisc_svc_handle; _para5:word;_para6:Pchar):ISC_STATUS; extdecl;
-  isc_service_detach : function (_para1:PISC_STATUS; _para2:Pisc_svc_handle):ISC_STATUS; extdecl;
-  isc_service_query : function (_para1:PISC_STATUS; _para2:Pisc_svc_handle; _para3:Pisc_resv_handle; _para4:word; _para5:Pchar;_para6:word; _para7:Pchar; _para8:word; _para9:Pchar):ISC_STATUS; extdecl;
-  isc_service_start : function (_para1:PISC_STATUS; _para2:Pisc_svc_handle; _para3:Pisc_resv_handle; _para4:word; _para5:Pchar):ISC_STATUS; extdecl;
+  isc_service_attach : function (_para1:PISC_STATUS; _para2:word; _para3:Pchar; _para4:Pisc_svc_handle; _para5:word;_para6:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_service_detach : function (_para1:PISC_STATUS; _para2:Pisc_svc_handle):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_service_query : function (_para1:PISC_STATUS; _para2:Pisc_svc_handle; _para3:Pisc_resv_handle; _para4:word; _para5:Pchar;_para6:word; _para7:Pchar; _para8:word; _para9:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_service_start : function (_para1:PISC_STATUS; _para2:Pisc_svc_handle; _para3:Pisc_resv_handle; _para4:word; _para5:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
 {                              }
 { Forms functions              }
 {                              }
 {$IFDEF Unix}
-  isc_compile_map : function (_para1:PISC_STATUS; _para2:Pisc_form_handle; _para3:Pisc_req_handle; _para4:Psmallint; _para5:Pchar):ISC_STATUS; extdecl;
-  isc_compile_menu : function (_para1:PISC_STATUS; _para2:Pisc_form_handle; _para3:Pisc_req_handle; _para4:Psmallint; _para5:Pchar):ISC_STATUS; extdecl;
-  isc_compile_sub_map : function (_para1:PISC_STATUS; _para2:Pisc_win_handle; _para3:Pisc_req_handle; _para4:Psmallint; _para5:Pchar):ISC_STATUS; extdecl;
-  isc_create_window : function (_para1:PISC_STATUS; _para2:Pisc_win_handle; _para3:Psmallint; _para4:Pchar; _para5:Psmallint;_para6:Psmallint):ISC_STATUS; extdecl;
-  isc_delete_window : function (_para1:PISC_STATUS; _para2:Pisc_win_handle):ISC_STATUS; extdecl;
-  isc_drive_form : function (_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:Pisc_win_handle; _para5:Pisc_req_handle;_para6:Pbyte; _para7:Pbyte):ISC_STATUS; extdecl;
-  isc_drive_menu : function (_para1:PISC_STATUS; _para2:Pisc_win_handle; _para3:Pisc_req_handle; _para4:Psmallint; _para5:Pchar;_para6:Psmallint; _para7:Pchar; _para8:Psmallint; _para9:Psmallint; _para10:Pchar;_para11:PISC_LONG):ISC_STATUS; extdecl;
-  isc_form_delete : function (_para1:PISC_STATUS; _para2:Pisc_form_handle):ISC_STATUS; extdecl;
-  isc_form_fetch : function (_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:Pisc_req_handle; _para5:Pbyte):ISC_STATUS; extdecl;
-  isc_form_insert : function (_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:Pisc_req_handle; _para5:Pbyte):ISC_STATUS; extdecl;
-  isc_get_entree : function (_para1:PISC_STATUS; _para2:Pisc_req_handle; _para3:Psmallint; _para4:Pchar; _para5:PISC_LONG;_para6:Psmallint):ISC_STATUS; extdecl;
-  isc_initialize_menu : function (_para1:PISC_STATUS; _para2:Pisc_req_handle):ISC_STATUS; extdecl;
-  isc_menu : function (_para1:PISC_STATUS; _para2:Pisc_win_handle; _para3:Pisc_req_handle; _para4:Psmallint; _para5:Pchar):ISC_STATUS; extdecl;
-  isc_load_form : function (_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:Pisc_form_handle; _para5:Psmallint;_para6:Pchar):ISC_STATUS; extdecl;
-  isc_pop_window : function (_para1:PISC_STATUS; _para2:Pisc_win_handle):ISC_STATUS; extdecl;
-  isc_put_entree : function (_para1:PISC_STATUS; _para2:Pisc_req_handle; _para3:Psmallint; _para4:Pchar; _para5:PISC_LONG):ISC_STATUS; extdecl;
-  isc_reset_form : function (_para1:PISC_STATUS; _para2:Pisc_req_handle):ISC_STATUS; extdecl;
-  isc_suspend_window : function (_para1:PISC_STATUS; _para2:Pisc_win_handle):ISC_STATUS; extdecl;
+  isc_compile_map : function (_para1:PISC_STATUS; _para2:Pisc_form_handle; _para3:Pisc_req_handle; _para4:Psmallint; _para5:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_compile_menu : function (_para1:PISC_STATUS; _para2:Pisc_form_handle; _para3:Pisc_req_handle; _para4:Psmallint; _para5:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_compile_sub_map : function (_para1:PISC_STATUS; _para2:Pisc_win_handle; _para3:Pisc_req_handle; _para4:Psmallint; _para5:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_create_window : function (_para1:PISC_STATUS; _para2:Pisc_win_handle; _para3:Psmallint; _para4:Pchar; _para5:Psmallint;_para6:Psmallint):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_delete_window : function (_para1:PISC_STATUS; _para2:Pisc_win_handle):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_drive_form : function (_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:Pisc_win_handle; _para5:Pisc_req_handle;_para6:Pbyte; _para7:Pbyte):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_drive_menu : function (_para1:PISC_STATUS; _para2:Pisc_win_handle; _para3:Pisc_req_handle; _para4:Psmallint; _para5:Pchar;_para6:Psmallint; _para7:Pchar; _para8:Psmallint; _para9:Psmallint; _para10:Pchar;_para11:PISC_LONG):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_form_delete : function (_para1:PISC_STATUS; _para2:Pisc_form_handle):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_form_fetch : function (_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:Pisc_req_handle; _para5:Pbyte):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_form_insert : function (_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:Pisc_req_handle; _para5:Pbyte):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_get_entree : function (_para1:PISC_STATUS; _para2:Pisc_req_handle; _para3:Psmallint; _para4:Pchar; _para5:PISC_LONG;_para6:Psmallint):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_initialize_menu : function (_para1:PISC_STATUS; _para2:Pisc_req_handle):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_menu : function (_para1:PISC_STATUS; _para2:Pisc_win_handle; _para3:Pisc_req_handle; _para4:Psmallint; _para5:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_load_form : function (_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:Pisc_form_handle; _para5:Psmallint;_para6:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_pop_window : function (_para1:PISC_STATUS; _para2:Pisc_win_handle):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_put_entree : function (_para1:PISC_STATUS; _para2:Pisc_req_handle; _para3:Psmallint; _para4:Pchar; _para5:PISC_LONG):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_reset_form : function (_para1:PISC_STATUS; _para2:Pisc_req_handle):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_suspend_window : function (_para1:PISC_STATUS; _para2:Pisc_win_handle):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
 {$ENDIF}
 
 //var IBaseLibraryHandle : TLibHandle;
@@ -2914,173 +2914,173 @@ end;
 Procedure InitializeIBase60(const sonames: array of filenamety);
 const
  funcs: array[0..{$ifdef unix}163{$else}143{$endif}] of funcinfoty = (
-  (n: 'isc_attach_database'; d:  @isc_attach_database),
-  (n: 'isc_array_gen_sdl'; d: @isc_array_gen_sdl),
-  (n: 'isc_array_get_slice'; d: @isc_array_get_slice),
-  (n: 'isc_array_lookup_bounds'; d: @isc_array_lookup_bounds),
-  (n: 'isc_array_lookup_desc'; d: @isc_array_lookup_desc),
-  (n: 'isc_array_set_desc'; d: @isc_array_set_desc),
-  (n: 'isc_array_put_slice'; d: @isc_array_put_slice),
-  (n: 'isc_blob_default_desc'; d: @isc_blob_default_desc),
-  (n: 'isc_blob_gen_bpb'; d: @isc_blob_gen_bpb),
-  (n: 'isc_blob_info'; d: @isc_blob_info),
-  (n: 'isc_blob_lookup_desc'; d: @isc_blob_lookup_desc),
-  (n: 'isc_blob_set_desc'; d: @isc_blob_set_desc),
-  (n: 'isc_cancel_blob'; d: @isc_cancel_blob),
-  (n: 'isc_cancel_events'; d: @isc_cancel_events),
-  (n: 'isc_close_blob'; d: @isc_close_blob),
-  (n: 'isc_commit_retaining'; d: @isc_commit_retaining),
-  (n: 'isc_commit_transaction'; d: @isc_commit_transaction),
-  (n: 'isc_create_blob'; d: @isc_create_blob),
-  (n: 'isc_create_blob2'; d: @isc_create_blob2),
-  (n: 'isc_create_database'; d: @isc_create_database),
-  (n: 'isc_database_info'; d: @isc_database_info),
-  (n: 'isc_decode_date'; d: @isc_decode_date),
-  (n: 'isc_decode_sql_date'; d: @isc_decode_sql_date),
-  (n: 'isc_decode_sql_time'; d: @isc_decode_sql_time),
-  (n: 'isc_decode_timestamp'; d: @isc_decode_timestamp),
-  (n: 'isc_detach_database'; d: @isc_detach_database),
-  (n: 'isc_drop_database'; d: @isc_drop_database),
-  (n: 'isc_dsql_allocate_statement'; d: @isc_dsql_allocate_statement),
-  (n: 'isc_dsql_alloc_statement2'; d: @isc_dsql_alloc_statement2),
-  (n: 'isc_dsql_describe'; d: @isc_dsql_describe),
-  (n: 'isc_dsql_describe_bind'; d: @isc_dsql_describe_bind),
-  (n: 'isc_dsql_exec_immed2'; d: @isc_dsql_exec_immed2),
-  (n: 'isc_dsql_execute'; d: @isc_dsql_execute),
-  (n: 'isc_dsql_execute2'; d: @isc_dsql_execute2),
-  (n: 'isc_dsql_execute_immediate'; d: @isc_dsql_execute_immediate),
-  (n: 'isc_dsql_fetch'; d: @isc_dsql_fetch),
-  (n: 'isc_dsql_finish'; d: @isc_dsql_finish),
-  (n: 'isc_dsql_free_statement'; d: @isc_dsql_free_statement),
-  (n: 'isc_dsql_insert'; d: @isc_dsql_insert),
-  (n: 'isc_dsql_prepare'; d: @isc_dsql_prepare),
-  (n: 'isc_dsql_set_cursor_name'; d: @isc_dsql_set_cursor_name),
-  (n: 'isc_dsql_sql_info'; d: @isc_dsql_sql_info),
-  (n: 'isc_encode_date'; d: @isc_encode_date),
-  (n: 'isc_encode_sql_date'; d: @isc_encode_sql_date),
-  (n: 'isc_encode_sql_time'; d: @isc_encode_sql_time),
-  (n: 'isc_encode_timestamp'; d: @isc_encode_timestamp),
-  (n: 'isc_event_block'; d: @isc_event_block),
-  (n: 'isc_event_counts'; d: @isc_event_counts),
-  (n: 'isc_expand_dpb'; d: @isc_expand_dpb),
-  (n: 'isc_modify_dpb'; d: @isc_modify_dpb),
-  (n: 'isc_free'; d: @isc_free),
-  (n: 'isc_get_segment'; d: @isc_get_segment),
-  (n: 'isc_get_slice'; d: @isc_get_slice),
-  (n: 'isc_interprete'; d: @isc_interprete),
-  (n: 'isc_open_blob'; d: @isc_open_blob),
-  (n: 'isc_open_blob2'; d: @isc_open_blob2),
-  (n: 'isc_prepare_transaction2'; d: @isc_prepare_transaction2),
-  (n: 'isc_print_sqlerror'; d: @isc_print_sqlerror),
-  (n: 'isc_print_status'; d: @isc_print_status),
-  (n: 'isc_put_segment'; d: @isc_put_segment),
-  (n: 'isc_put_slice'; d: @isc_put_slice),
-  (n: 'isc_que_events'; d: @isc_que_events),
-  (n: 'isc_rollback_retaining'; d: @isc_rollback_retaining),
-  (n: 'isc_rollback_transaction'; d: @isc_rollback_transaction),
-  (n: 'isc_start_multiple'; d: @isc_start_multiple),
-  (n: 'isc_start_transaction'; d: @isc_start_transaction),
-  (n: 'isc_sqlcode'; d: @isc_sqlcode),
-  (n: 'isc_sql_interprete'; d: @isc_sql_interprete),
-  (n: 'isc_transaction_info'; d: @isc_transaction_info),
-  (n: 'isc_transact_request'; d: @isc_transact_request),
-  (n: 'isc_vax_integer'; d: @isc_vax_integer),
-  (n: 'isc_portable_integer'; d: @isc_portable_integer),
-  (n: 'isc_add_user'; d: @isc_add_user),
-  (n: 'isc_delete_user'; d: @isc_delete_user),
-  (n: 'isc_modify_user'; d: @isc_modify_user),
-  (n: 'isc_compile_request'; d: @isc_compile_request),
-  (n: 'isc_compile_request2'; d: @isc_compile_request2),
-  (n: 'isc_ddl'; d: @isc_ddl),
-  (n: 'isc_prepare_transaction'; d: @isc_prepare_transaction),
-  (n: 'isc_receive'; d: @isc_receive),
-  (n: 'isc_reconnect_transaction'; d: @isc_reconnect_transaction),
-  (n: 'isc_release_request'; d: @isc_release_request),
-  (n: 'isc_request_info'; d: @isc_request_info),
-  (n: 'isc_seek_blob'; d: @isc_seek_blob),
-  (n: 'isc_send'; d: @isc_send),
-  (n: 'isc_start_and_send'; d: @isc_start_and_send),
-  (n: 'isc_start_request'; d: @isc_start_request),
-  (n: 'isc_unwind_request'; d: @isc_unwind_request),
-  (n: 'isc_wait_for_event'; d: @isc_wait_for_event),
-  (n: 'isc_close'; d: @isc_close),
-  (n: 'isc_declare'; d: @isc_declare),
-  (n: 'isc_describe'; d: @isc_describe),
-  (n: 'isc_describe_bind'; d: @isc_describe_bind),
-  (n: 'isc_execute'; d: @isc_execute),
-  (n: 'isc_execute_immediate'; d: @isc_execute_immediate),
-  (n: 'isc_fetch'; d: @isc_fetch),
-  (n: 'isc_open'; d: @isc_open),
-  (n: 'isc_prepare'; d: @isc_prepare),
-  (n: 'isc_dsql_execute_m'; d: @isc_dsql_execute_m),
-  (n: 'isc_dsql_execute2_m'; d: @isc_dsql_execute2_m),
-  (n: 'isc_dsql_execute_immediate_m'; d: @isc_dsql_execute_immediate_m),
-  (n: 'isc_dsql_exec_immed3_m'; d: @isc_dsql_exec_immed3_m),
-  (n: 'isc_dsql_fetch_m'; d: @isc_dsql_fetch_m),
-  (n: 'isc_dsql_insert_m'; d: @isc_dsql_insert_m),
-  (n: 'isc_dsql_prepare_m'; d: @isc_dsql_prepare_m),
-  (n: 'isc_dsql_release'; d: @isc_dsql_release),
-  (n: 'isc_embed_dsql_close'; d: @isc_embed_dsql_close),
-  (n: 'isc_embed_dsql_declare'; d: @isc_embed_dsql_declare),
-  (n: 'isc_embed_dsql_describe'; d: @isc_embed_dsql_describe),
-  (n: 'isc_embed_dsql_describe_bind'; d: @isc_embed_dsql_describe_bind),
-  (n: 'isc_embed_dsql_execute'; d: @isc_embed_dsql_execute),
-  (n: 'isc_embed_dsql_execute2'; d: @isc_embed_dsql_execute2),
-  (n: 'isc_embed_dsql_execute_immed'; d: @isc_embed_dsql_execute_immed),
-  (n: 'isc_embed_dsql_fetch'; d: @isc_embed_dsql_fetch),
-  (n: 'isc_embed_dsql_open'; d: @isc_embed_dsql_open),
-  (n: 'isc_embed_dsql_open2'; d: @isc_embed_dsql_open2),
-  (n: 'isc_embed_dsql_insert'; d: @isc_embed_dsql_insert),
-  (n: 'isc_embed_dsql_prepare'; d: @isc_embed_dsql_prepare),
-  (n: 'isc_embed_dsql_release'; d: @isc_embed_dsql_release),
-  (n: 'BLOB_open'; d: @BLOB_open),
-  (n: 'BLOB_put'; d: @BLOB_put),
-  (n: 'BLOB_close'; d: @BLOB_close),
-  (n: 'BLOB_get'; d: @BLOB_get),
-  (n: 'BLOB_display'; d: @BLOB_display),
-  (n: 'BLOB_dump'; d: @BLOB_dump),
-  (n: 'BLOB_edit'; d: @BLOB_edit),
-  (n: 'BLOB_load'; d: @BLOB_load),
-  (n: 'BLOB_text_dump'; d: @BLOB_text_dump),
-  (n: 'BLOB_text_load'; d: @BLOB_text_load),
-  (n: 'Bopen'; d: @Bopen),
-  (n: 'isc_ftof'; d: @isc_ftof),
-  (n: 'isc_print_blr'; d: @isc_print_blr),
-  (n: 'isc_set_debug'; d: @isc_set_debug),
-  (n: 'isc_qtoq'; d: @isc_qtoq),
-  (n: 'isc_vtof'; d: @isc_vtof),
-  (n: 'isc_vtov'; d: @isc_vtov),
-  (n: 'isc_version'; d: @isc_version),
-  (n: 'isc_get_client_version'; d: @isc_get_client_version),
-  (n: 'isc_get_client_major_version'; d: @isc_get_client_major_version),
-  (n: 'isc_get_client_minor_version'; d: @isc_get_client_minor_version),
-  (n: 'isc_service_attach'; d: @isc_service_attach),
-  (n: 'isc_service_detach'; d: @isc_service_detach),
-  (n: 'isc_service_query'; d: @isc_service_query),
-  (n: 'isc_service_start'; d: @isc_service_start)
+  (n: 'isc_attach_database'; d: {$ifndef FPC}@{$endif}@isc_attach_database),
+  (n: 'isc_array_gen_sdl'; d: {$ifndef FPC}@{$endif}@isc_array_gen_sdl),
+  (n: 'isc_array_get_slice'; d: {$ifndef FPC}@{$endif}@isc_array_get_slice),
+  (n: 'isc_array_lookup_bounds'; d: {$ifndef FPC}@{$endif}@isc_array_lookup_bounds),
+  (n: 'isc_array_lookup_desc'; d: {$ifndef FPC}@{$endif}@isc_array_lookup_desc),
+  (n: 'isc_array_set_desc'; d: {$ifndef FPC}@{$endif}@isc_array_set_desc),
+  (n: 'isc_array_put_slice'; d: {$ifndef FPC}@{$endif}@isc_array_put_slice),
+  (n: 'isc_blob_default_desc'; d: {$ifndef FPC}@{$endif}@isc_blob_default_desc),
+  (n: 'isc_blob_gen_bpb'; d: {$ifndef FPC}@{$endif}@isc_blob_gen_bpb),
+  (n: 'isc_blob_info'; d: {$ifndef FPC}@{$endif}@isc_blob_info),
+  (n: 'isc_blob_lookup_desc'; d: {$ifndef FPC}@{$endif}@isc_blob_lookup_desc),
+  (n: 'isc_blob_set_desc'; d: {$ifndef FPC}@{$endif}@isc_blob_set_desc),
+  (n: 'isc_cancel_blob'; d: {$ifndef FPC}@{$endif}@isc_cancel_blob),
+  (n: 'isc_cancel_events'; d: {$ifndef FPC}@{$endif}@isc_cancel_events),
+  (n: 'isc_close_blob'; d: {$ifndef FPC}@{$endif}@isc_close_blob),
+  (n: 'isc_commit_retaining'; d: {$ifndef FPC}@{$endif}@isc_commit_retaining),
+  (n: 'isc_commit_transaction'; d: {$ifndef FPC}@{$endif}@isc_commit_transaction),
+  (n: 'isc_create_blob'; d: {$ifndef FPC}@{$endif}@isc_create_blob),
+  (n: 'isc_create_blob2'; d: {$ifndef FPC}@{$endif}@isc_create_blob2),
+  (n: 'isc_create_database'; d: {$ifndef FPC}@{$endif}@isc_create_database),
+  (n: 'isc_database_info'; d: {$ifndef FPC}@{$endif}@isc_database_info),
+  (n: 'isc_decode_date'; d: {$ifndef FPC}@{$endif}@isc_decode_date),
+  (n: 'isc_decode_sql_date'; d: {$ifndef FPC}@{$endif}@isc_decode_sql_date),
+  (n: 'isc_decode_sql_time'; d: {$ifndef FPC}@{$endif}@isc_decode_sql_time),
+  (n: 'isc_decode_timestamp'; d: {$ifndef FPC}@{$endif}@isc_decode_timestamp),
+  (n: 'isc_detach_database'; d: {$ifndef FPC}@{$endif}@isc_detach_database),
+  (n: 'isc_drop_database'; d: {$ifndef FPC}@{$endif}@isc_drop_database),
+  (n: 'isc_dsql_allocate_statement'; d: {$ifndef FPC}@{$endif}@isc_dsql_allocate_statement),
+  (n: 'isc_dsql_alloc_statement2'; d: {$ifndef FPC}@{$endif}@isc_dsql_alloc_statement2),
+  (n: 'isc_dsql_describe'; d: {$ifndef FPC}@{$endif}@isc_dsql_describe),
+  (n: 'isc_dsql_describe_bind'; d: {$ifndef FPC}@{$endif}@isc_dsql_describe_bind),
+  (n: 'isc_dsql_exec_immed2'; d: {$ifndef FPC}@{$endif}@isc_dsql_exec_immed2),
+  (n: 'isc_dsql_execute'; d: {$ifndef FPC}@{$endif}@isc_dsql_execute),
+  (n: 'isc_dsql_execute2'; d: {$ifndef FPC}@{$endif}@isc_dsql_execute2),
+  (n: 'isc_dsql_execute_immediate'; d: {$ifndef FPC}@{$endif}@isc_dsql_execute_immediate),
+  (n: 'isc_dsql_fetch'; d: {$ifndef FPC}@{$endif}@isc_dsql_fetch),
+  (n: 'isc_dsql_finish'; d: {$ifndef FPC}@{$endif}@isc_dsql_finish),
+  (n: 'isc_dsql_free_statement'; d: {$ifndef FPC}@{$endif}@isc_dsql_free_statement),
+  (n: 'isc_dsql_insert'; d: {$ifndef FPC}@{$endif}@isc_dsql_insert),
+  (n: 'isc_dsql_prepare'; d: {$ifndef FPC}@{$endif}@isc_dsql_prepare),
+  (n: 'isc_dsql_set_cursor_name'; d: {$ifndef FPC}@{$endif}@isc_dsql_set_cursor_name),
+  (n: 'isc_dsql_sql_info'; d: {$ifndef FPC}@{$endif}@isc_dsql_sql_info),
+  (n: 'isc_encode_date'; d: {$ifndef FPC}@{$endif}@isc_encode_date),
+  (n: 'isc_encode_sql_date'; d: {$ifndef FPC}@{$endif}@isc_encode_sql_date),
+  (n: 'isc_encode_sql_time'; d: {$ifndef FPC}@{$endif}@isc_encode_sql_time),
+  (n: 'isc_encode_timestamp'; d: {$ifndef FPC}@{$endif}@isc_encode_timestamp),
+  (n: 'isc_event_block'; d: {$ifndef FPC}@{$endif}@isc_event_block),
+  (n: 'isc_event_counts'; d: {$ifndef FPC}@{$endif}@isc_event_counts),
+  (n: 'isc_expand_dpb'; d: {$ifndef FPC}@{$endif}@isc_expand_dpb),
+  (n: 'isc_modify_dpb'; d: {$ifndef FPC}@{$endif}@isc_modify_dpb),
+  (n: 'isc_free'; d: {$ifndef FPC}@{$endif}@isc_free),
+  (n: 'isc_get_segment'; d: {$ifndef FPC}@{$endif}@isc_get_segment),
+  (n: 'isc_get_slice'; d: {$ifndef FPC}@{$endif}@isc_get_slice),
+  (n: 'isc_interprete'; d: {$ifndef FPC}@{$endif}@isc_interprete),
+  (n: 'isc_open_blob'; d: {$ifndef FPC}@{$endif}@isc_open_blob),
+  (n: 'isc_open_blob2'; d: {$ifndef FPC}@{$endif}@isc_open_blob2),
+  (n: 'isc_prepare_transaction2'; d: {$ifndef FPC}@{$endif}@isc_prepare_transaction2),
+  (n: 'isc_print_sqlerror'; d: {$ifndef FPC}@{$endif}@isc_print_sqlerror),
+  (n: 'isc_print_status'; d: {$ifndef FPC}@{$endif}@isc_print_status),
+  (n: 'isc_put_segment'; d: {$ifndef FPC}@{$endif}@isc_put_segment),
+  (n: 'isc_put_slice'; d: {$ifndef FPC}@{$endif}@isc_put_slice),
+  (n: 'isc_que_events'; d: {$ifndef FPC}@{$endif}@isc_que_events),
+  (n: 'isc_rollback_retaining'; d: {$ifndef FPC}@{$endif}@isc_rollback_retaining),
+  (n: 'isc_rollback_transaction'; d: {$ifndef FPC}@{$endif}@isc_rollback_transaction),
+  (n: 'isc_start_multiple'; d: {$ifndef FPC}@{$endif}@isc_start_multiple),
+  (n: 'isc_start_transaction'; d: {$ifndef FPC}@{$endif}@isc_start_transaction),
+  (n: 'isc_sqlcode'; d: {$ifndef FPC}@{$endif}@isc_sqlcode),
+  (n: 'isc_sql_interprete'; d: {$ifndef FPC}@{$endif}@isc_sql_interprete),
+  (n: 'isc_transaction_info'; d: {$ifndef FPC}@{$endif}@isc_transaction_info),
+  (n: 'isc_transact_request'; d: {$ifndef FPC}@{$endif}@isc_transact_request),
+  (n: 'isc_vax_integer'; d: {$ifndef FPC}@{$endif}@isc_vax_integer),
+  (n: 'isc_portable_integer'; d: {$ifndef FPC}@{$endif}@isc_portable_integer),
+  (n: 'isc_add_user'; d: {$ifndef FPC}@{$endif}@isc_add_user),
+  (n: 'isc_delete_user'; d: {$ifndef FPC}@{$endif}@isc_delete_user),
+  (n: 'isc_modify_user'; d: {$ifndef FPC}@{$endif}@isc_modify_user),
+  (n: 'isc_compile_request'; d: {$ifndef FPC}@{$endif}@isc_compile_request),
+  (n: 'isc_compile_request2'; d: {$ifndef FPC}@{$endif}@isc_compile_request2),
+  (n: 'isc_ddl'; d: {$ifndef FPC}@{$endif}@isc_ddl),
+  (n: 'isc_prepare_transaction'; d: {$ifndef FPC}@{$endif}@isc_prepare_transaction),
+  (n: 'isc_receive'; d: {$ifndef FPC}@{$endif}@isc_receive),
+  (n: 'isc_reconnect_transaction'; d: {$ifndef FPC}@{$endif}@isc_reconnect_transaction),
+  (n: 'isc_release_request'; d: {$ifndef FPC}@{$endif}@isc_release_request),
+  (n: 'isc_request_info'; d: {$ifndef FPC}@{$endif}@isc_request_info),
+  (n: 'isc_seek_blob'; d: {$ifndef FPC}@{$endif}@isc_seek_blob),
+  (n: 'isc_send'; d: {$ifndef FPC}@{$endif}@isc_send),
+  (n: 'isc_start_and_send'; d: {$ifndef FPC}@{$endif}@isc_start_and_send),
+  (n: 'isc_start_request'; d: {$ifndef FPC}@{$endif}@isc_start_request),
+  (n: 'isc_unwind_request'; d: {$ifndef FPC}@{$endif}@isc_unwind_request),
+  (n: 'isc_wait_for_event'; d: {$ifndef FPC}@{$endif}@isc_wait_for_event),
+  (n: 'isc_close'; d: {$ifndef FPC}@{$endif}@isc_close),
+  (n: 'isc_declare'; d: {$ifndef FPC}@{$endif}@isc_declare),
+  (n: 'isc_describe'; d: {$ifndef FPC}@{$endif}@isc_describe),
+  (n: 'isc_describe_bind'; d: {$ifndef FPC}@{$endif}@isc_describe_bind),
+  (n: 'isc_execute'; d: {$ifndef FPC}@{$endif}@isc_execute),
+  (n: 'isc_execute_immediate'; d: {$ifndef FPC}@{$endif}@isc_execute_immediate),
+  (n: 'isc_fetch'; d: {$ifndef FPC}@{$endif}@isc_fetch),
+  (n: 'isc_open'; d: {$ifndef FPC}@{$endif}@isc_open),
+  (n: 'isc_prepare'; d: {$ifndef FPC}@{$endif}@isc_prepare),
+  (n: 'isc_dsql_execute_m'; d: {$ifndef FPC}@{$endif}@isc_dsql_execute_m),
+  (n: 'isc_dsql_execute2_m'; d: {$ifndef FPC}@{$endif}@isc_dsql_execute2_m),
+  (n: 'isc_dsql_execute_immediate_m'; d: {$ifndef FPC}@{$endif}@isc_dsql_execute_immediate_m),
+  (n: 'isc_dsql_exec_immed3_m'; d: {$ifndef FPC}@{$endif}@isc_dsql_exec_immed3_m),
+  (n: 'isc_dsql_fetch_m'; d: {$ifndef FPC}@{$endif}@isc_dsql_fetch_m),
+  (n: 'isc_dsql_insert_m'; d: {$ifndef FPC}@{$endif}@isc_dsql_insert_m),
+  (n: 'isc_dsql_prepare_m'; d: {$ifndef FPC}@{$endif}@isc_dsql_prepare_m),
+  (n: 'isc_dsql_release'; d: {$ifndef FPC}@{$endif}@isc_dsql_release),
+  (n: 'isc_embed_dsql_close'; d: {$ifndef FPC}@{$endif}@isc_embed_dsql_close),
+  (n: 'isc_embed_dsql_declare'; d: {$ifndef FPC}@{$endif}@isc_embed_dsql_declare),
+  (n: 'isc_embed_dsql_describe'; d: {$ifndef FPC}@{$endif}@isc_embed_dsql_describe),
+  (n: 'isc_embed_dsql_describe_bind'; d: {$ifndef FPC}@{$endif}@isc_embed_dsql_describe_bind),
+  (n: 'isc_embed_dsql_execute'; d: {$ifndef FPC}@{$endif}@isc_embed_dsql_execute),
+  (n: 'isc_embed_dsql_execute2'; d: {$ifndef FPC}@{$endif}@isc_embed_dsql_execute2),
+  (n: 'isc_embed_dsql_execute_immed'; d: {$ifndef FPC}@{$endif}@isc_embed_dsql_execute_immed),
+  (n: 'isc_embed_dsql_fetch'; d: {$ifndef FPC}@{$endif}@isc_embed_dsql_fetch),
+  (n: 'isc_embed_dsql_open'; d: {$ifndef FPC}@{$endif}@isc_embed_dsql_open),
+  (n: 'isc_embed_dsql_open2'; d: {$ifndef FPC}@{$endif}@isc_embed_dsql_open2),
+  (n: 'isc_embed_dsql_insert'; d: {$ifndef FPC}@{$endif}@isc_embed_dsql_insert),
+  (n: 'isc_embed_dsql_prepare'; d: {$ifndef FPC}@{$endif}@isc_embed_dsql_prepare),
+  (n: 'isc_embed_dsql_release'; d: {$ifndef FPC}@{$endif}@isc_embed_dsql_release),
+  (n: 'BLOB_open'; d: {$ifndef FPC}@{$endif}@BLOB_open),
+  (n: 'BLOB_put'; d: {$ifndef FPC}@{$endif}@BLOB_put),
+  (n: 'BLOB_close'; d: {$ifndef FPC}@{$endif}@BLOB_close),
+  (n: 'BLOB_get'; d: {$ifndef FPC}@{$endif}@BLOB_get),
+  (n: 'BLOB_display'; d: {$ifndef FPC}@{$endif}@BLOB_display),
+  (n: 'BLOB_dump'; d: {$ifndef FPC}@{$endif}@BLOB_dump),
+  (n: 'BLOB_edit'; d: {$ifndef FPC}@{$endif}@BLOB_edit),
+  (n: 'BLOB_load'; d: {$ifndef FPC}@{$endif}@BLOB_load),
+  (n: 'BLOB_text_dump'; d: {$ifndef FPC}@{$endif}@BLOB_text_dump),
+  (n: 'BLOB_text_load'; d: {$ifndef FPC}@{$endif}@BLOB_text_load),
+  (n: 'Bopen'; d: {$ifndef FPC}@{$endif}@Bopen),
+  (n: 'isc_ftof'; d: {$ifndef FPC}@{$endif}@isc_ftof),
+  (n: 'isc_print_blr'; d: {$ifndef FPC}@{$endif}@isc_print_blr),
+  (n: 'isc_set_debug'; d: {$ifndef FPC}@{$endif}@isc_set_debug),
+  (n: 'isc_qtoq'; d: {$ifndef FPC}@{$endif}@isc_qtoq),
+  (n: 'isc_vtof'; d: {$ifndef FPC}@{$endif}@isc_vtof),
+  (n: 'isc_vtov'; d: {$ifndef FPC}@{$endif}@isc_vtov),
+  (n: 'isc_version'; d: {$ifndef FPC}@{$endif}@isc_version),
+  (n: 'isc_get_client_version'; d: {$ifndef FPC}@{$endif}@isc_get_client_version),
+  (n: 'isc_get_client_major_version'; d: {$ifndef FPC}@{$endif}@isc_get_client_major_version),
+  (n: 'isc_get_client_minor_version'; d: {$ifndef FPC}@{$endif}@isc_get_client_minor_version),
+  (n: 'isc_service_attach'; d: {$ifndef FPC}@{$endif}@isc_service_attach),
+  (n: 'isc_service_detach'; d: {$ifndef FPC}@{$endif}@isc_service_detach),
+  (n: 'isc_service_query'; d: {$ifndef FPC}@{$endif}@isc_service_query),
+  (n: 'isc_service_start'; d: {$ifndef FPC}@{$endif}@isc_service_start)
 
 {$IFDEF Unix}
   ,           
-  (n: 'Bopen2'; d: @Bopen2),
-  (n: 'isc_reset_fpe'; d: @isc_reset_fpe),
-  (n: 'isc_compile_map'; d: @isc_compile_map),
-  (n: 'isc_compile_menu'; d: @isc_compile_menu),
-  (n: 'isc_compile_sub_map'; d: @isc_compile_sub_map),
-  (n: 'isc_create_window'; d: @isc_create_window),
-  (n: 'isc_delete_window'; d: @isc_delete_window),
-  (n: 'isc_drive_form'; d: @isc_drive_form),
-  (n: 'isc_drive_menu'; d: @isc_drive_menu),
-  (n: 'isc_form_delete'; d: @isc_form_delete),
-  (n: 'isc_form_fetch'; d: @isc_form_fetch),
-  (n: 'isc_form_insert'; d: @isc_form_insert),
-  (n: 'isc_get_entree'; d: @isc_get_entree),
-  (n: 'isc_initialize_menu'; d: @isc_initialize_menu),
-  (n: 'isc_menu'; d: @isc_menu),
-  (n: 'isc_load_form'; d: @isc_load_form),
-  (n: 'isc_pop_window'; d: @isc_pop_window),
-  (n: 'isc_put_entree'; d: @isc_put_entree),
-  (n: 'isc_reset_form'; d: @isc_reset_form),
-  (n: 'isc_suspend_window'; d: @isc_suspend_window)
+  (n: 'Bopen2'; d: {$ifndef FPC}@{$endif}@Bopen2),
+  (n: 'isc_reset_fpe'; d: {$ifndef FPC}@{$endif}@isc_reset_fpe),
+  (n: 'isc_compile_map'; d: {$ifndef FPC}@{$endif}@isc_compile_map),
+  (n: 'isc_compile_menu'; d: {$ifndef FPC}@{$endif}@isc_compile_menu),
+  (n: 'isc_compile_sub_map'; d: {$ifndef FPC}@{$endif}@isc_compile_sub_map),
+  (n: 'isc_create_window'; d: {$ifndef FPC}@{$endif}@isc_create_window),
+  (n: 'isc_delete_window'; d: {$ifndef FPC}@{$endif}@isc_delete_window),
+  (n: 'isc_drive_form'; d: {$ifndef FPC}@{$endif}@isc_drive_form),
+  (n: 'isc_drive_menu'; d: {$ifndef FPC}@{$endif}@isc_drive_menu),
+  (n: 'isc_form_delete'; d: {$ifndef FPC}@{$endif}@isc_form_delete),
+  (n: 'isc_form_fetch'; d: {$ifndef FPC}@{$endif}@isc_form_fetch),
+  (n: 'isc_form_insert'; d: {$ifndef FPC}@{$endif}@isc_form_insert),
+  (n: 'isc_get_entree'; d: {$ifndef FPC}@{$endif}@isc_get_entree),
+  (n: 'isc_initialize_menu'; d: {$ifndef FPC}@{$endif}@isc_initialize_menu),
+  (n: 'isc_menu'; d: {$ifndef FPC}@{$endif}@isc_menu),
+  (n: 'isc_load_form'; d: {$ifndef FPC}@{$endif}@isc_load_form),
+  (n: 'isc_pop_window'; d: {$ifndef FPC}@{$endif}@isc_pop_window),
+  (n: 'isc_put_entree'; d: {$ifndef FPC}@{$endif}@isc_put_entree),
+  (n: 'isc_reset_form'; d: {$ifndef FPC}@{$endif}@isc_reset_form),
+  (n: 'isc_suspend_window'; d: {$ifndef FPC}@{$endif}@isc_suspend_window)
 {$ENDIF} 
   );
  errormessage = 'Can not load Firebird library. ';

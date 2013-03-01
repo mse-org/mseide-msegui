@@ -17,7 +17,7 @@ unit classes_del;
 
 interface
 uses
- msetypes,sysutils,msesystypes;
+ msetypes,sysutils,msesystypes,windows;
 
 const
   MaxListSize = Maxint div 16;
@@ -28,7 +28,18 @@ const
 type
  ar4ty = packed array[0..3] of byte;
  ar8ty = packed array[0..7] of byte;
-
+{
+ TSystemTime = packed record
+    Year: Word;
+    Month: Word;
+    DayOfWeek: Word;
+    Day: Word;
+    Hour: Word;
+    Minute: Word;
+    Second: Word;
+    Millisecond: Word;
+  end;
+}
        TGuid_fpc = packed record
           case integer of
              1 : (
@@ -173,7 +184,7 @@ function LeftStr(const S: string; Count: integer): string;
 
 implementation
 uses
- rtlconsts,windows;
+ rtlconsts;
 {$ifndef FPC}
 {$define endian_little}
 {$define FPC_HAS_TYPE_EXTENDED}
