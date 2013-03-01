@@ -1265,6 +1265,15 @@ begin
       isc_decode_timestamp(PISC_TIMESTAMP(CurrBuff), @CTime);
   end;
 
+{$ifdef FPC}
+  STime.Year        := CTime.tm_year + 1900;
+  STime.Month       := CTime.tm_mon + 1;
+  STime.Day         := CTime.tm_mday;
+  STime.Hour        := CTime.tm_hour;
+  STime.Minute      := CTime.tm_min;
+  STime.Second      := CTime.tm_sec;
+  STime.Millisecond := 0;
+{$else}
   STime.wYear        := CTime.tm_year + 1900;
   STime.wMonth       := CTime.tm_mon + 1;
   STime.wDay         := CTime.tm_mday;
@@ -1272,7 +1281,7 @@ begin
   STime.wMinute      := CTime.tm_min;
   STime.wSecond      := CTime.tm_sec;
   STime.wMilliseconds := 0;
-
+{$endif}
   pdatetime(buffer)^:= SystemTimeToDateTime(STime);
 end;
 
@@ -1282,14 +1291,22 @@ var
   STime : TSystemTime;  // System time
 begin
   DateTimeToSystemTime(PTime,STime);
-  
+
+{$ifdef FPC}
+  CTime.tm_year := STime.Year - 1900;
+  CTime.tm_mon  := STime.Month -1;
+  CTime.tm_mday := STime.Day;
+  CTime.tm_hour := STime.Hour;
+  CTime.tm_min  := STime.Minute;
+  CTime.tm_sec  := STime.Second;
+{$else}  
   CTime.tm_year := STime.wYear - 1900;
   CTime.tm_mon  := STime.wMonth -1;
   CTime.tm_mday := STime.wDay;
   CTime.tm_hour := STime.wHour;
   CTime.tm_min  := STime.wMinute;
   CTime.tm_sec  := STime.wSecond;
-
+{$endif}
   case (AType and not 1) of
     SQL_TYPE_DATE :
       isc_encode_sql_date(@CTime, PISC_DATE(CurrBuff));
