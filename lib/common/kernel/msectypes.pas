@@ -56,6 +56,8 @@ type
  pcshort = ^cshort;
  cushort = __U16_TYPE;
  pcushort = ^cushort;
+ cuint16 = __U16_TYPE;
+ cint64 = __SQUAD_TYPE;
 
  cfloat = single;
  pcfloat = ^cfloat;

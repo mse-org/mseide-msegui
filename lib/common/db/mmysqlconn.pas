@@ -17,13 +17,7 @@
 
 unit mmysqlconn;
 
-{$if fpc_fullversion >= 020105}
- {$define mse_FPC_2_2} 
-{$endif}
-
-{$mode objfpc}{$H+}
-{$MACRO on}
-
+{$ifdef FPC}{$mode objfpc}{$H+}{$MACRO on}{$endif}
 
 {$DEFINE mysql51}
 
@@ -37,8 +31,8 @@ unit mmysqlconn;
 interface
 
 uses
-  classes,mclasses,SysUtils,msqldb,mdb,dynlibs,msestrings,msedb,
-  mysqldyn,msetypes,ctypes;
+  classes,mclasses,SysUtils,msqldb,mdb,{$ifdef FPC}dynlibs,{$endif}msestrings,
+  msedb,mysqldyn,msetypes,ctypes;
 
 Type
 

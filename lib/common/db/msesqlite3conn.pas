@@ -149,7 +149,7 @@ type
    property Connected: boolean read getconnected write setconnected default false;
    property controller: tdbcontroller read fcontroller write setcontroller;
    property options: sqliteoptionsty read foptions write setoptions default [];
-   property busytimeoutms: integer read fbusytimeoutms 
+   property busytimeoutms: integer read fbusytimeoutms
                                         write setbusytimeoutms default 0;
    property Transaction;
    property transactionwrite;
@@ -159,7 +159,9 @@ type
 
 implementation
 uses
- msesqldb,msebufdataset,dbconst,sysutils,typinfo,dateutils,msesysintf,msedate,
+ msesqldb,msebufdataset,
+ {$ifdef FPC}dbconst{$else}dbconst_del,classes_del{$endif},
+ sysutils,typinfo,dateutils,msesysintf,msedate,
  msefileutils;
 const
  maxprecision = 18;
@@ -173,7 +175,7 @@ type
    fstatement: psqlite3_stmt;
    ftail: pchar;
    fstate: integer;
-   fparambinding: integerarty;
+   fparambinding: tparambinding;
    fopen: boolean;
    fconnection: tsqlite3connection;
   public
@@ -922,11 +924,11 @@ var
 begin
    //@ operator and some indexing do not work with -O2 and FPC 2.2
  setlength(stringararty(adata),high(stringararty(adata))+2);
- po1:= pointer(adata) + high(stringararty(adata))*sizeof(pointer);
+ po1:= pointer(pchar(pointer(adata)) + high(stringararty(adata))*sizeof(pointer));
  setlength(po1^,ncols);
  po2:= pointer(po1^);
  for int1:= 0 to ncols - 1 do begin
-  po2^:= avalues[int1];
+  po2^:= pcharpoaty(avalues)^[int1];
   inc(po2);
  end;
  result:= 0;
@@ -1065,7 +1067,11 @@ begin
     result:= encodesqlfloat(field.asdatetime);
    end;
    ftbcd: begin
+   {$ifdef FPC}
     result:= inttostr(int64(field.ascurrency));
+   {$else}
+    result:= inttostr(int64(ar8ty(field.ascurrency)));
+   {$endif}
    end;
    else begin
     result:= inherited getassqltext(field);
@@ -1085,7 +1091,11 @@ begin
     result:= encodesqlfloat(param.asdatetime);
    end;
    ftbcd: begin
+   {$ifdef FPC}
     result:= inttostr(int64(param.ascurrency));
+   {$else}
+    result:= inttostr(int64(ar8ty(param.ascurrency)));
+   {$endif}
    end;
    else begin
     result:= inherited getassqltext(param);

@@ -45,9 +45,7 @@ unit mysqldyn;
 {$IFDEF mysql50}
   {$DEFINE mysql41}
 {$ENDIF mysql50}
-
-{$MODE objfpc}
-{$MACRO on}
+{$ifdef FPC}{$MODE objfpc}{$MACRO on}{$endif}
 
 interface
 
@@ -55,7 +53,7 @@ uses
 {$IFDEF LinkDynamically}
       sysutils,
 {$ENDIF}
-     dynlibs,ctypes,msestrings;
+     {$ifdef FPC}dynlibs,{$endif}msectypes,msestrings;
 
 const
 {$ifdef mswindows}
@@ -93,8 +91,7 @@ procedure releasemysql;
 *)
 {$ENDIF}
 
-
-{$PACKRECORDS C}
+{$ifdef FPC}{$PACKRECORDS C}{$endif} //todo: check delphi record packing
 
   { Copyright (C) 2000-2003 MySQL AB
   
@@ -102,7 +99,7 @@ procedure releasemysql;
      it under the terms of the GNU General Public License as published by
      the Free Software Foundation; either version 2 of the License, or
      (at your option) any later version.
-  
+
      This program is distributed in the hope that it will be useful,
      but WITHOUT ANY WARRANTY; without even the implied warranty of
      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -281,7 +278,8 @@ type
        CLIENT_SECURE_CONNECTION = 32768;   // New 4.1 authentication
        CLIENT_MULTI_STATEMENTS = 65536;    // Enable/disable multi-stmt support
        CLIENT_MULTI_RESULTS = 131072;      // Enable/disable multi-results
-       CLIENT_REMEMBER_OPTIONS : longword = 1 shl 31;
+//       CLIENT_REMEMBER_OPTIONS : longword = 1 shl 31;
+       CLIENT_REMEMBER_OPTIONS = 1 shl 31;
 
 
        SERVER_STATUS_IN_TRANS = 1;         // Transaction has started
@@ -390,6 +388,7 @@ type
     const
        packet_error : culong = culong(not(0));
 
+    {$ifdef FPC}
     type
        enum_field_types = (MYSQL_TYPE_DECIMAL,MYSQL_TYPE_TINY,
          MYSQL_TYPE_SHORT,MYSQL_TYPE_LONG,MYSQL_TYPE_FLOAT,
@@ -409,7 +408,40 @@ type
          );
        penum_field_types = ^enum_field_types;
     { For backward compatibility  }
-
+    {$else}
+     const
+       MYSQL_TYPE_DECIMAL =   0;
+       MYSQL_TYPE_TINY =      1;
+       MYSQL_TYPE_SHORT =     2;
+       MYSQL_TYPE_LONG =      3;
+       MYSQL_TYPE_FLOAT =     4;
+       MYSQL_TYPE_DOUBLE =    5;
+       MYSQL_TYPE_NULL =      6;
+       MYSQL_TYPE_TIMESTAMP = 7;
+       MYSQL_TYPE_LONGLONG =  8;
+       MYSQL_TYPE_INT24 =     9;
+       MYSQL_TYPE_DATE =     10;
+       MYSQL_TYPE_TIME =     11;
+       MYSQL_TYPE_DATETIME = 12;
+       MYSQL_TYPE_YEAR =     13;
+       MYSQL_TYPE_NEWDATE =  14;
+{$IFDEF mysql50}
+       MYSQL_TYPE_VARCHAR =  15;
+       MYSQL_TYPE_BIT =      16;
+       MYSQL_TYPE_NEWDECIMAL = 246;
+{$ENDIF}
+       MYSQL_TYPE_ENUM = 247;
+       MYSQL_TYPE_SET = 248;
+       MYSQL_TYPE_TINY_BLOB = 249;
+       MYSQL_TYPE_MEDIUM_BLOB = 250;
+       MYSQL_TYPE_LONG_BLOB = 251;
+       MYSQL_TYPE_BLOB = 252;
+       MYSQL_TYPE_VAR_STRING = 253;
+       MYSQL_TYPE_STRING = 254;
+       MYSQL_TYPE_GEOMETRY = 255;
+type
+ fieldtypety = cint; //correct?
+    {$endif}
     const
        CLIENT_MULTI_QUERIES = CLIENT_MULTI_STATEMENTS;
        FIELD_TYPE_DECIMAL = MYSQL_TYPE_DECIMAL;
@@ -455,6 +487,7 @@ type
     {   We want levels to be in growing order of hardness (because we use number
         comparisons). Note that DEFAULT does not respect the growing property, but
         it's ok.  }
+    {$ifdef FPC}
     type
        mysql_enum_shutdown_level = (SHUTDOWN_DEFAULT := 0,
          SHUTDOWN_WAIT_CONNECTIONS := 1, //MYSQL_SHUTDOWN_KILLABLE_CONNECT,     // wait for existing connections to finish
@@ -468,12 +501,47 @@ type
 { $endif}
          KILL_CONNECTION := 255
          );
+   {$else}
+const
+     SHUTDOWN_DEFAULT = 0;
+     SHUTDOWN_WAIT_CONNECTIONS = 1; //MYSQL_SHUTDOWN_KILLABLE_CONNECT,     // wait for existing connections to finish
+     SHUTDOWN_WAIT_TRANSACTIONS = 2; //MYSQL_SHUTDOWN_KILLABLE_TRANS,      // wait for existing trans to finish
+     SHUTDOWN_WAIT_UPDATES = 8; //MYSQL_SHUTDOWN_KILLABLE_UPDATE,          // wait for existing updates to finish (=> no partial MyISAM update)
+     SHUTDOWN_WAIT_ALL_BUFFERS = 16; //MYSQL_SHUTDOWN_KILLABLE_UPDATE shl 1,// flush InnoDB buffers and other storage engines' buffers
+     SHUTDOWN_WAIT_CRITICAL_BUFFERS = 17; //(MYSQL_SHUTDOWN_KILLABLE_UPDATE shl 1)+1, // don't flush InnoDB buffers, flush other storage engines' buffers
+    { Now the 2 levels of the KILL command  }
+{ $if MYSQL_VERSION_ID >= 50000}
+     KILL_QUERY = 254;
+{ $endif}
+     KILL_CONNECTION = 255;
+   {$endif}
 
 {$IFDEF mysql50}
+  {$ifdef FPC}
        enum_cursor_type = (CURSOR_TYPE_NO_CURSOR := 0,CURSOR_TYPE_READ_ONLY := 1,
          CURSOR_TYPE_FOR_UPDATE := 2,CURSOR_TYPE_SCROLLABLE := 4
          );
+ {$else}
+ CURSOR_TYPE_NO_CURSOR = 0;
+ CURSOR_TYPE_READ_ONLY = 1;
+ CURSOR_TYPE_FOR_UPDATE = 2;
+ CURSOR_TYPE_SCROLLABLE = 4;
+ {$endif}
 {$ENDIF}
+
+{$ifdef FPC}
+       enum_mysql_stmt_state = (MYSQL_STMT_INIT_DONE := 1,MYSQL_STMT_PREPARE_DONE,
+         MYSQL_STMT_EXECUTE_DONE,MYSQL_STMT_FETCH_DONE
+         );
+{$else}
+const
+  MYSQL_STMT_INIT_DONE =    1;
+  MYSQL_STMT_PREPARE_DONE = 2;
+  MYSQL_STMT_EXECUTE_DONE = 3;
+  MYSQL_STMT_FETCH_DONE =   4;
+type
+ statementstatety = cint; //correct?
+{$endif}
 
     { options for mysql_set_option  }
        enum_mysql_set_option = (MYSQL_OPTION_MULTI_STATEMENTS_ON,
@@ -664,7 +732,11 @@ type
 {$IFDEF mysql41}
             charsetnr : cuint;        // Character set
 {$ENDIF}
+{$ifdef FPC}
             ftype : enum_field_types; // Type of field. See mysql_com.h for types
+{$else}
+            ftype : fieldtypety;
+{$endif}
 {$ifdef mysql51}
             extension: pointer;
 {$endif}
@@ -681,7 +753,11 @@ type
     function IS_PRI_KEY(n : longint) : boolean;
     function IS_NOT_NULL(n : longint) : boolean;
     function IS_BLOB(n : longint) : boolean;
+{$ifdef FPC}
     function IS_NUM(t : enum_field_types) : boolean;
+{$else}
+    function IS_NUM(t : fieldtypety) : boolean;
+{$endif}
     function INTERNAL_NUM_FIELD(f : Pst_mysql_field) : boolean;
     function IS_NUM_FIELD(f : Pst_mysql_field) : boolean;
 
@@ -692,7 +768,7 @@ type
        my_ulonglong = cint64;
 {$else}
        my_ulonglong = culonglong;
-{$endif}
+{$ifend}
        Pmy_ulonglong = ^my_ulonglong;
 
     const
@@ -1139,10 +1215,6 @@ type
 
     { statement state  }
 
-       enum_mysql_stmt_state = (MYSQL_STMT_INIT_DONE := 1,MYSQL_STMT_PREPARE_DONE,
-         MYSQL_STMT_EXECUTE_DONE,MYSQL_STMT_FETCH_DONE
-         );
-
     {
       Note: this info is from the mysql-5.0 version:
     
@@ -1224,7 +1296,11 @@ type
             length_value : culong;          //  Used if length is 0
             param_number : cuint;           // For null count and error messages
             pack_length : cuint;            // Internal length for packed data
+{$ifdef FPC}
             buffer_type : enum_field_types; // buffer type
+{$else}
+            buffer_type : fieldtypety; // buffer type
+{$endif}
             error_value : my_bool;         // used if error is 0
             is_unsigned : my_bool;          // set if integer type is unsigned
             long_data_used : my_bool;       // If used with mysql_send_long_data
@@ -1241,7 +1317,11 @@ type
             is_null : Pmy_bool;             // Pointer to null indicator
             buffer : pointer;               // buffer to get/put data
             error: pmy_bool;                // set this if you want to track data truncations happened during fetch
+{$ifdef FPC}
             buffer_type : enum_field_types; // buffer type
+{$else}
+            buffer_type : fieldtypety; // buffer type
+{$endif}
             buffer_length : culong;         // buffer length, must be set for str/binary
     { Following are for internal use. Set by mysql_stmt_bind_param  }
             row_ptr : PByte;                // for the current data position
@@ -1327,7 +1407,11 @@ type
             last_errno : cuint;             // error code
             param_count : cuint;            // input parameter count
             field_count : cuint;            // number of columns in result set
+{$ifdef FPC}
             state : enum_mysql_stmt_state;  // statement state
+{$else}
+            state : statementstatety;  // statement state
+{$endif}
             last_error : array[0..(MYSQL_ERRMSG_SIZE)-1] of char;  // error message
             sqlstate : array[0..(SQLSTATE_LENGTH+1)-1] of char;
             send_types_to_server : my_bool; // Types of input parameters should be sent to server
