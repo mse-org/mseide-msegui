@@ -13,7 +13,8 @@ unit mseglextglob;
 
 interface
 uses
- msesys,{$ifdef FPC}dynlibs,{$endif}msedynload,msegraphics;
+ msesys,{$ifdef FPC}dynlibs,{$else}msetypes,classes_del,{$endif}msedynload,
+ msegraphics;
  
 type
  glextensionty = (
@@ -29,7 +30,7 @@ type
   gle_GL_ARB_transpose_matrix,
   gle_GL_ARB_multisample,
   gle_GL_ARB_texture_env_add,
-{$IFDEF Windows}
+{$IFDEF msWindows}
   gle_WGL_ARB_extensions_string,
   gle_WGL_ARB_buffer_region,
 {$ENDIF}
@@ -117,7 +118,7 @@ type
   gle_GL_ATI_texture_mirror_once,
   gle_GL_ATI_vertex_array_object,
   gle_GL_ATI_vertex_streams,
-{$IFDEF Windows}
+{$IFDEF msWindows}
   gle_WGL_I3D_image_buffer,
   gle_WGL_I3D_swap_frame_lock,
   gle_WGL_I3D_swap_frame_usage,
@@ -155,7 +156,7 @@ type
   gle_GL_APPLE_fence,
   gle_GL_APPLE_vertex_array_object,
   gle_GL_APPLE_vertex_array_range,
-{$IFDEF Windows}
+{$IFDEF msWindows}
   gle_WGL_ARB_pixel_format,
   gle_WGL_ARB_make_current_read,
   gle_WGL_ARB_pbuffer,
@@ -175,14 +176,14 @@ type
   gle_GL_NV_fragment_program,
   gle_GL_NV_primitive_restart,
   gle_GL_NV_vertex_program2,
-  {$IFDEF Windows}
+  {$IFDEF msWindows}
   gle_WGL_NV_render_texture_rectangle,
   {$ENDIF}
   gle_GL_NV_pixel_data_range,
   gle_GL_EXT_texture_rectangle,
   gle_GL_S3_s3tc,
   gle_GL_ATI_draw_buffers,
-  {$IFDEF Windows}
+  {$IFDEF msWindows}
   gle_WGL_ATI_pixel_format_float,
   {$ENDIF}
   gle_GL_ATI_texture_env_combine3,
@@ -374,7 +375,7 @@ const
    (name: 'GL_ARB_transpose_matrix'; loader: @load_GL_ARB_transpose_matrix),
    (name: 'GL_ARB_multisample'; loader: @load_GL_ARB_multisample),
    (name: 'GL_ARB_texture_env_add'; loader: @load_GL_ARB_texture_env_add),
-{$IFDEF Windows}
+{$IFDEF msWindows}
    (name: 'WGL_ARB_extensions_string'; loader: @load_WGL_ARB_extensions_string),
    (name: 'WGL_ARB_buffer_region'; loader: @load_WGL_ARB_buffer_region),
 {$ENDIF}
@@ -462,7 +463,7 @@ const
    (name: 'GL_ATI_texture_mirror_once'; loader: @load_GL_ATI_texture_mirror_once),
    (name: 'GL_ATI_vertex_array_object'; loader: @load_GL_ATI_vertex_array_object),
    (name: 'GL_ATI_vertex_streams'; loader: @load_GL_ATI_vertex_streams),
-{$IFDEF Windows}
+{$IFDEF msWindows}
    (name: 'WGL_I3D_image_buffer'; loader: @load_WGL_I3D_image_buffer),
    (name: 'WGL_I3D_swap_frame_lock'; loader: @load_WGL_I3D_swap_frame_lock),
    (name: 'WGL_I3D_swap_frame_usage'; loader: @load_WGL_I3D_swap_frame_usage),
@@ -500,7 +501,7 @@ const
    (name: 'GL_APPLE_fence'; loader: @load_GL_APPLE_fence),
    (name: 'GL_APPLE_vertex_array_object'; loader: @load_GL_APPLE_vertex_array_object),
    (name: 'GL_APPLE_vertex_array_range'; loader: @load_GL_APPLE_vertex_array_range),
-{$IFDEF Windows}
+{$IFDEF msWindows}
    (name: 'WGL_ARB_pixel_format'; loader: @load_WGL_ARB_pixel_format),
    (name: 'WGL_ARB_make_current_read'; loader: @load_WGL_ARB_make_current_read),
    (name: 'WGL_ARB_pbuffer'; loader: @load_WGL_ARB_pbuffer),
@@ -520,14 +521,14 @@ const
    (name: 'GL_NV_fragment_program'; loader: @load_GL_NV_fragment_program),
    (name: 'GL_NV_primitive_restart'; loader: @load_GL_NV_primitive_restart),
    (name: 'GL_NV_vertex_program2'; loader: @load_GL_NV_vertex_program2),
-  {$IFDEF Windows}
+  {$IFDEF msWindows}
    (name: 'WGL_NV_render_texture_rectangle'; loader: @load_WGL_NV_render_texture_rectangle),
   {$ENDIF}
    (name: 'GL_NV_pixel_data_range'; loader: @load_GL_NV_pixel_data_range),
    (name: 'GL_EXT_texture_rectangle'; loader: @load_GL_EXT_texture_rectangle),
    (name: 'GL_S3_s3tc'; loader: @load_GL_S3_s3tc),
    (name: 'GL_ATI_draw_buffers'; loader: @load_GL_ATI_draw_buffers),
-  {$IFDEF Windows}
+  {$IFDEF msWindows}
    (name: 'WGL_ATI_pixel_format_float'; loader: @load_WGL_ATI_pixel_format_float),
   {$ENDIF}
    (name: 'GL_ATI_texture_env_combine3'; loader: @load_GL_ATI_texture_env_combine3),

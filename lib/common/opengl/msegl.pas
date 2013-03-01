@@ -43,12 +43,13 @@
 {******************************************************************************}
 
 //{$MODE Delphi}
-{$mode objfpc} {$h+}
-{$macro on}
+{$ifdef FPC}{$mode objfpc} {$h+}{$endif}
+//{$macro on}
 {$ifdef mswindows}
-  {$define extdecl := stdcall}
+ {$define wincall}
+//  {$define extdecl := stdcall}
 {$else}
-  {$define extdecl := cdecl}
+//  {$define extdecl := cdecl}
 {$endif}
 
 unit msegl;
@@ -1184,378 +1185,378 @@ const
 
 {$ELSE MORPHOS}
 var
-  glAccum: procedure(op: GLenum; value: GLfloat); extdecl;
-  glAlphaFunc: procedure(func: GLenum; ref: GLclampf); extdecl;
-  glAreTexturesResident: function (n: GLsizei; const textures: PGLuint; residences: PGLboolean): GLboolean; extdecl;
-  glArrayElement: procedure(i: GLint); extdecl;
-  glBegin: procedure(mode: GLenum); extdecl;
-  glBindTexture: procedure(target: GLenum; texture: GLuint); extdecl;
-  glBitmap: procedure (width, height: GLsizei; xorig, yorig: GLfloat; xmove, ymove: GLfloat; const bitmap: PGLubyte); extdecl;
-  glBlendFunc: procedure(sfactor, dfactor: GLenum); extdecl;
-  glCallList: procedure(list: GLuint); extdecl;
-  glCallLists: procedure(n: GLsizei; atype: GLenum; const lists: Pointer); extdecl;
-  glClear: procedure(mask: GLbitfield); extdecl;
-  glClearAccum: procedure(red, green, blue, alpha: GLfloat); extdecl;
-  glClearColor: procedure(red, green, blue, alpha: GLclampf); extdecl;
-  glClearDepth: procedure(depth: GLclampd); extdecl;
-  glClearIndex: procedure(c: GLfloat); extdecl;
-  glClearStencil: procedure(s: GLint); extdecl;
-  glClipPlane: procedure(plane: GLenum; const equation: PGLdouble); extdecl;
-  glColor3b: procedure(red, green, blue: GLbyte); extdecl;
-  glColor3bv: procedure(const v: PGLbyte); extdecl;
-  glColor3d: procedure(red, green, blue: GLdouble); extdecl;
-  glColor3dv: procedure(const v: PGLdouble); extdecl;
-  glColor3f: procedure(red, green, blue: GLfloat); extdecl;
-  glColor3fv: procedure(const v: PGLfloat); extdecl;
-  glColor3i: procedure(red, green, blue: GLint); extdecl;
-  glColor3iv: procedure(const v: PGLint); extdecl;
-  glColor3s: procedure(red, green, blue: GLshort); extdecl;
-  glColor3sv: procedure(const v: PGLshort); extdecl;
-  glColor3ub: procedure(red, green, blue: GLubyte); extdecl;
-  glColor3ubv: procedure(const v: PGLubyte); extdecl;
-  glColor3ui: procedure(red, green, blue: GLuint); extdecl;
-  glColor3uiv: procedure(const v: PGLuint); extdecl;
-  glColor3us: procedure(red, green, blue: GLushort); extdecl;
-  glColor3usv: procedure(const v: PGLushort); extdecl;
-  glColor4b: procedure(red, green, blue, alpha: GLbyte); extdecl;
-  glColor4bv: procedure(const v: PGLbyte); extdecl;
-  glColor4d: procedure(red, green, blue, alpha: GLdouble); extdecl;
-  glColor4dv: procedure(const v: PGLdouble); extdecl;
-  glColor4f: procedure(red, green, blue, alpha: GLfloat); extdecl;
-  glColor4fv: procedure(const v: PGLfloat); extdecl;
-  glColor4i: procedure(red, green, blue, alpha: GLint); extdecl;
-  glColor4iv: procedure(const v: PGLint); extdecl;
-  glColor4s: procedure(red, green, blue, alpha: GLshort); extdecl;
-  glColor4sv: procedure(const v: PGLshort); extdecl;
-  glColor4ub: procedure(red, green, blue, alpha: GLubyte); extdecl;
-  glColor4ubv: procedure(const v: PGLubyte); extdecl;
-  glColor4ui: procedure(red, green, blue, alpha: GLuint); extdecl;
-  glColor4uiv: procedure(const v: PGLuint); extdecl;
-  glColor4us: procedure(red, green, blue, alpha: GLushort); extdecl;
-  glColor4usv: procedure(const v: PGLushort); extdecl;
-  glColorMask: procedure(red, green, blue, alpha: GLboolean); extdecl;
-  glColorMaterial: procedure(face, mode: GLenum); extdecl;
-  glColorPointer: procedure(size: GLint; atype: GLenum; stride: GLsizei; const pointer: Pointer); extdecl;
-  glCopyPixels: procedure(x, y: GLint; width, height: GLsizei; atype: GLenum); extdecl;
-  glCopyTexImage1D: procedure (target: GLenum; level: GLint; internalFormat: GLenum; x, y: GLint; width: GLsizei; border: GLint); extdecl;
-  glCopyTexImage2D: procedure(target: GLenum; level: GLint; internalFormat: GLenum; x, y: GLint; width, height: GLsizei; border: GLint); extdecl;
-  glCopyTexSubImage1D: procedure(target: GLenum; level, xoffset, x, y: GLint; width: GLsizei); extdecl;
-  glCopyTexSubImage2D: procedure(target: GLenum; level, xoffset, yoffset, x, y: GLint; width, height: GLsizei); extdecl;
-  glCullFace: procedure(mode: GLenum); extdecl;
-  glDeleteLists: procedure(list: GLuint; range: GLsizei); extdecl;
-  glDeleteTextures: procedure(n: GLsizei; const textures: PGLuint); extdecl;
-  glDepthFunc: procedure(func: GLenum); extdecl;
-  glDepthMask: procedure(flag: GLboolean); extdecl;
-  glDepthRange: procedure(zNear, zFar: GLclampd); extdecl;
-  glDisable: procedure(cap: GLenum); extdecl;
-  glDisableClientState: procedure(aarray: GLenum); extdecl;
-  glDrawArrays: procedure(mode: GLenum; first: GLint; count: GLsizei); extdecl;
-  glDrawBuffer: procedure(mode: GLenum); extdecl;
-  glDrawElements: procedure(mode: GLenum; count: GLsizei; atype: GLenum; const indices: Pointer); extdecl;
-  glDrawPixels: procedure(width, height: GLsizei; format, atype: GLenum; const pixels: Pointer); extdecl;
-  glEdgeFlag: procedure(flag: GLboolean); extdecl;
-  glEdgeFlagPointer: procedure(stride: GLsizei; const pointer: Pointer); extdecl;
-  glEdgeFlagv: procedure(const flag: PGLboolean); extdecl;
-  glEnable: procedure(cap: GLenum); extdecl;
-  glEnableClientState: procedure(aarray: GLenum); extdecl;
-  glEnd: procedure; extdecl;
-  glEndList: procedure; extdecl;
-  glEvalCoord1d: procedure(u: GLdouble); extdecl;
-  glEvalCoord1dv: procedure(const u: PGLdouble); extdecl;
-  glEvalCoord1f: procedure(u: GLfloat); extdecl;
-  glEvalCoord1fv: procedure(const u: PGLfloat); extdecl;
-  glEvalCoord2d: procedure(u, v: GLdouble); extdecl;
-  glEvalCoord2dv: procedure(const u: PGLdouble); extdecl;
-  glEvalCoord2f: procedure(u, v: GLfloat); extdecl;
-  glEvalCoord2fv: procedure(const u: PGLfloat); extdecl;
-  glEvalMesh1: procedure(mode: GLenum; i1, i2: GLint); extdecl;
-  glEvalMesh2: procedure(mode: GLenum; i1, i2, j1, j2: GLint); extdecl;
-  glEvalPoint1: procedure(i: GLint); extdecl;
-  glEvalPoint2: procedure(i, j: GLint); extdecl;
-  glFeedbackBuffer: procedure(size: GLsizei; atype: GLenum; buffer: PGLfloat); extdecl;
-  glFinish: procedure; extdecl;
-  glFlush: procedure; extdecl;
-  glFogf: procedure(pname: GLenum; param: GLfloat); extdecl;
-  glFogfv: procedure(pname: GLenum; const params: PGLfloat); extdecl;
-  glFogi: procedure(pname: GLenum; param: GLint); extdecl;
-  glFogiv: procedure(pname: GLenum; const params: PGLint); extdecl;
-  glFrontFace: procedure(mode: GLenum); extdecl;
-  glFrustum: procedure(left, right, bottom, top, zNear, zFar: GLdouble); extdecl;
-  glGenLists: function(range: GLsizei): GLuint; extdecl;
-  glGenTextures: procedure(n: GLsizei; textures: PGLuint); extdecl;
-  glGetBooleanv: procedure(pname: GLenum; params: PGLboolean); extdecl;
-  glGetClipPlane: procedure(plane: GLenum; equation: PGLdouble); extdecl;
-  glGetDoublev: procedure(pname: GLenum; params: PGLdouble); extdecl;
-  glGetError: function: GLenum; extdecl;
-  glGetFloatv: procedure(pname: GLenum; params: PGLfloat); extdecl;
-  glGetIntegerv: procedure(pname: GLenum; params: PGLint); extdecl;
-  glGetLightfv: procedure(light, pname: GLenum; params: PGLfloat); extdecl;
-  glGetLightiv: procedure(light, pname: GLenum; params: PGLint); extdecl;
-  glGetMapdv: procedure(target, query: GLenum; v: PGLdouble); extdecl;
-  glGetMapfv: procedure(target, query: GLenum; v: PGLfloat); extdecl;
-  glGetMapiv: procedure(target, query: GLenum; v: PGLint); extdecl;
-  glGetMaterialfv: procedure(face, pname: GLenum; params: PGLfloat); extdecl;
-  glGetMaterialiv: procedure(face, pname: GLenum; params: PGLint); extdecl;
-  glGetPixelMapfv: procedure(map: GLenum; values: PGLfloat); extdecl;
-  glGetPixelMapuiv: procedure(map: GLenum; values: PGLuint); extdecl;
-  glGetPixelMapusv: procedure(map: GLenum; values: PGLushort); extdecl;
-  glGetPointerv: procedure(pname: GLenum; params: Pointer); extdecl;
-  glGetPolygonStipple: procedure(mask: PGLubyte); extdecl;
-  glGetString: function(name: GLenum): PChar; extdecl;
-  glGetTexEnvfv: procedure(target, pname: GLenum; params: PGLfloat); extdecl;
-  glGetTexEnviv: procedure(target, pname: GLenum; params: PGLint); extdecl;
-  glGetTexGendv: procedure(coord, pname: GLenum; params: PGLdouble); extdecl;
-  glGetTexGenfv: procedure(coord, pname: GLenum; params: PGLfloat); extdecl;
-  glGetTexGeniv: procedure(coord, pname: GLenum; params: PGLint); extdecl;
-  glGetTexImage: procedure(target: GLenum; level: GLint; format: GLenum; atype: GLenum; pixels: Pointer); extdecl;
-  glGetTexLevelParameterfv: procedure(target: GLenum; level: GLint; pname: GLenum; params: Pointer); extdecl;
-  glGetTexLevelParameteriv: procedure(target: GLenum; level: GLint; pname: GLenum; params: PGLint); extdecl;
-  glGetTexParameterfv: procedure(target, pname: GLenum; params: PGLfloat); extdecl;
-  glGetTexParameteriv: procedure(target, pname: GLenum; params: PGLint); extdecl;
-  glHint: procedure(target, mode: GLenum); extdecl;
-  glIndexMask: procedure(mask: GLuint); extdecl;
-  glIndexPointer: procedure(atype: GLenum; stride: GLsizei; const pointer: Pointer); extdecl;
-  glIndexd: procedure(c: GLdouble); extdecl;
-  glIndexdv: procedure(const c: PGLdouble); extdecl;
-  glIndexf: procedure(c: GLfloat); extdecl;
-  glIndexfv: procedure(const c: PGLfloat); extdecl;
-  glIndexi: procedure(c: GLint); extdecl;
-  glIndexiv: procedure(const c: PGLint); extdecl;
-  glIndexs: procedure(c: GLshort); extdecl;
-  glIndexsv: procedure(const c: PGLshort); extdecl;
-  glIndexub: procedure(c: GLubyte); extdecl;
-  glIndexubv: procedure(const c: PGLubyte); extdecl;
-  glInitNames: procedure; extdecl;
-  glInterleavedArrays: procedure(format: GLenum; stride: GLsizei; const pointer: Pointer); extdecl;
-  glIsEnabled: function(cap: GLenum): GLboolean; extdecl;
-  glIsList: function(list: GLuint): GLboolean; extdecl;
-  glIsTexture: function(texture: GLuint): GLboolean; extdecl;
-  glLightModelf: procedure(pname: GLenum; param: GLfloat); extdecl;
-  glLightModelfv: procedure(pname: GLenum; const params: PGLfloat); extdecl;
-  glLightModeli: procedure(pname: GLenum; param: GLint); extdecl;
-  glLightModeliv: procedure(pname: GLenum; const params: PGLint); extdecl;
-  glLightf: procedure(light, pname: GLenum; param: GLfloat); extdecl;
-  glLightfv: procedure(light, pname: GLenum; const params: PGLfloat); extdecl;
-  glLighti: procedure(light, pname: GLenum; param: GLint); extdecl;
-  glLightiv: procedure(light, pname: GLenum; const params: PGLint); extdecl;
-  glLineStipple: procedure(factor: GLint; pattern: GLushort); extdecl;
-  glLineWidth: procedure(width: GLfloat); extdecl;
-  glListBase: procedure(base: GLuint); extdecl;
-  glLoadIdentity: procedure; extdecl;
-  glLoadMatrixd: procedure(const m: PGLdouble); extdecl;
-  glLoadMatrixf: procedure(const m: PGLfloat); extdecl;
-  glLoadName: procedure(name: GLuint); extdecl;
-  glLogicOp: procedure(opcode: GLenum); extdecl;
-  glMap1d: procedure(target: GLenum; u1, u2: GLdouble; stride, order: GLint; const points: PGLdouble); extdecl;
-  glMap1f: procedure(target: GLenum; u1, u2: GLfloat; stride, order: GLint; const points: PGLfloat); extdecl;
-  glMap2d: procedure(target: GLenum; u1, u2: GLdouble; ustride, uorder: GLint; v1, v2: GLdouble; vstride, vorder: GLint; const points: PGLdouble); extdecl;
-  glMap2f: procedure(target: GLenum; u1, u2: GLfloat; ustride, uorder: GLint; v1, v2: GLfloat; vstride, vorder: GLint; const points: PGLfloat); extdecl;
-  glMapGrid1d: procedure(un: GLint; u1, u2: GLdouble); extdecl;
-  glMapGrid1f: procedure(un: GLint; u1, u2: GLfloat); extdecl;
-  glMapGrid2d: procedure(un: GLint; u1, u2: GLdouble; vn: GLint; v1, v2: GLdouble); extdecl;
-  glMapGrid2f: procedure(un: GLint; u1, u2: GLfloat; vn: GLint; v1, v2: GLfloat); extdecl;
-  glMaterialf: procedure(face, pname: GLenum; param: GLfloat); extdecl;
-  glMaterialfv: procedure(face, pname: GLenum; const params: PGLfloat); extdecl;
-  glMateriali: procedure(face, pname: GLenum; param: GLint); extdecl;
-  glMaterialiv: procedure(face, pname: GLenum; const params: PGLint); extdecl;
-  glMatrixMode: procedure(mode: GLenum); extdecl;
-  glMultMatrixd: procedure(const m: PGLdouble); extdecl;
-  glMultMatrixf: procedure(const m: PGLfloat); extdecl;
-  glNewList: procedure(list: GLuint; mode: GLenum); extdecl;
-  glNormal3b: procedure(nx, ny, nz: GLbyte); extdecl;
-  glNormal3bv: procedure(const v: PGLbyte); extdecl;
-  glNormal3d: procedure(nx, ny, nz: GLdouble); extdecl;
-  glNormal3dv: procedure(const v: PGLdouble); extdecl;
-  glNormal3f: procedure(nx, ny, nz: GLfloat); extdecl;
-  glNormal3fv: procedure(const v: PGLfloat); extdecl;
-  glNormal3i: procedure(nx, ny, nz: GLint); extdecl;
-  glNormal3iv: procedure(const v: PGLint); extdecl;
-  glNormal3s: procedure(nx, ny, nz: GLshort); extdecl;
-  glNormal3sv: procedure(const v: PGLshort); extdecl;
-  glNormalPointer: procedure(atype: GLenum; stride: GLsizei; const pointer: Pointer); extdecl;
-  glOrtho: procedure(left, right, bottom, top, zNear, zFar: GLdouble); extdecl;
-  glPassThrough: procedure(token: GLfloat); extdecl;
-  glPixelMapfv: procedure(map: GLenum; mapsize: GLsizei; const values: PGLfloat); extdecl;
-  glPixelMapuiv: procedure(map: GLenum; mapsize: GLsizei; const values: PGLuint); extdecl;
-  glPixelMapusv: procedure(map: GLenum; mapsize: GLsizei; const values: PGLushort); extdecl;
-  glPixelStoref: procedure(pname: GLenum; param: GLfloat); extdecl;
-  glPixelStorei: procedure(pname: GLenum; param: GLint); extdecl;
-  glPixelTransferf: procedure(pname: GLenum; param: GLfloat); extdecl;
-  glPixelTransferi: procedure(pname: GLenum; param: GLint); extdecl;
-  glPixelZoom: procedure(xfactor, yfactor: GLfloat); extdecl;
-  glPointSize: procedure(size: GLfloat); extdecl;
-  glPolygonMode: procedure(face, mode: GLenum); extdecl;
-  glPolygonOffset: procedure(factor, units: GLfloat); extdecl;
-  glPolygonStipple: procedure(const mask: PGLubyte); extdecl;
-  glPopAttrib: procedure; extdecl;
-  glPopClientAttrib: procedure; extdecl;
-  glPopMatrix: procedure; extdecl;
-  glPopName: procedure; extdecl;
-  glPrioritizeTextures: procedure(n: GLsizei; const textures: PGLuint; const priorities: PGLclampf); extdecl;
-  glPushAttrib: procedure(mask: GLbitfield); extdecl;
-  glPushClientAttrib: procedure(mask: GLbitfield); extdecl;
-  glPushMatrix: procedure; extdecl;
-  glPushName: procedure(name: GLuint); extdecl;
-  glRasterPos2d: procedure(x, y: GLdouble); extdecl;
-  glRasterPos2dv: procedure(const v: PGLdouble); extdecl;
-  glRasterPos2f: procedure(x, y: GLfloat); extdecl;
-  glRasterPos2fv: procedure(const v: PGLfloat); extdecl;
-  glRasterPos2i: procedure(x, y: GLint); extdecl;
-  glRasterPos2iv: procedure(const v: PGLint); extdecl;
-  glRasterPos2s: procedure(x, y: GLshort); extdecl;
-  glRasterPos2sv: procedure(const v: PGLshort); extdecl;
-  glRasterPos3d: procedure(x, y, z: GLdouble); extdecl;
-  glRasterPos3dv: procedure(const v: PGLdouble); extdecl;
-  glRasterPos3f: procedure(x, y, z: GLfloat); extdecl;
-  glRasterPos3fv: procedure(const v: PGLfloat); extdecl;
-  glRasterPos3i: procedure(x, y, z: GLint); extdecl;
-  glRasterPos3iv: procedure(const v: PGLint); extdecl;
-  glRasterPos3s: procedure(x, y, z: GLshort); extdecl;
-  glRasterPos3sv: procedure(const v: PGLshort); extdecl;
-  glRasterPos4d: procedure(x, y, z, w: GLdouble); extdecl;
-  glRasterPos4dv: procedure(const v: PGLdouble); extdecl;
-  glRasterPos4f: procedure(x, y, z, w: GLfloat); extdecl;
-  glRasterPos4fv: procedure(const v: PGLfloat); extdecl;
-  glRasterPos4i: procedure(x, y, z, w: GLint); extdecl;
-  glRasterPos4iv: procedure(const v: PGLint); extdecl;
-  glRasterPos4s: procedure(x, y, z, w: GLshort); extdecl;
-  glRasterPos4sv: procedure(const v: PGLshort); extdecl;
-  glReadBuffer: procedure(mode: GLenum); extdecl;
-  glReadPixels: procedure(x, y: GLint; width, height: GLsizei; format, atype: GLenum; pixels: Pointer); extdecl;
-  glRectd: procedure(x1, y1, x2, y2: GLdouble); extdecl;
-  glRectdv: procedure(const v1: PGLdouble; const v2: PGLdouble); extdecl;
-  glRectf: procedure(x1, y1, x2, y2: GLfloat); extdecl;
-  glRectfv: procedure(const v1: PGLfloat; const v2: PGLfloat); extdecl;
-  glRecti: procedure(x1, y1, x2, y2: GLint); extdecl;
-  glRectiv: procedure(const v1: PGLint; const v2: PGLint); extdecl;
-  glRects: procedure(x1, y1, x2, y2: GLshort); extdecl;
-  glRectsv: procedure(const v1: PGLshort; const v2: PGLshort); extdecl;
-  glRenderMode: function(mode: GLint): GLint; extdecl;
-  glRotated: procedure(angle, x, y, z: GLdouble); extdecl;
-  glRotatef: procedure(angle, x, y, z: GLfloat); extdecl;
-  glScaled: procedure(x, y, z: GLdouble); extdecl;
-  glScalef: procedure(x, y, z: GLfloat); extdecl;
-  glScissor: procedure(x, y: GLint; width, height: GLsizei); extdecl;
-  glSelectBuffer: procedure(size: GLsizei; buffer: PGLuint); extdecl;
-  glShadeModel: procedure(mode: GLenum); extdecl;
-  glStencilFunc: procedure(func: GLenum; ref: GLint; mask: GLuint); extdecl;
-  glStencilMask: procedure(mask: GLuint); extdecl;
-  glStencilOp: procedure(fail, zfail, zpass: GLenum); extdecl;
-  glTexCoord1d: procedure(s: GLdouble); extdecl;
-  glTexCoord1dv: procedure(const v: PGLdouble); extdecl;
-  glTexCoord1f: procedure(s: GLfloat); extdecl;
-  glTexCoord1fv: procedure(const v: PGLfloat); extdecl;
-  glTexCoord1i: procedure(s: GLint); extdecl;
-  glTexCoord1iv: procedure(const v: PGLint); extdecl;
-  glTexCoord1s: procedure(s: GLshort); extdecl;
-  glTexCoord1sv: procedure(const v: PGLshort); extdecl;
-  glTexCoord2d: procedure(s, t: GLdouble); extdecl;
-  glTexCoord2dv: procedure(const v: PGLdouble); extdecl;
-  glTexCoord2f: procedure(s, t: GLfloat); extdecl;
-  glTexCoord2fv: procedure(const v: PGLfloat); extdecl;
-  glTexCoord2i: procedure(s, t: GLint); extdecl;
-  glTexCoord2iv: procedure(const v: PGLint); extdecl;
-  glTexCoord2s: procedure(s, t: GLshort); extdecl;
-  glTexCoord2sv: procedure(const v: PGLshort); extdecl;
-  glTexCoord3d: procedure(s, t, r: GLdouble); extdecl;
-  glTexCoord3dv: procedure(const v: PGLdouble); extdecl;
-  glTexCoord3f: procedure(s, t, r: GLfloat); extdecl;
-  glTexCoord3fv: procedure(const v: PGLfloat); extdecl;
-  glTexCoord3i: procedure(s, t, r: GLint); extdecl;
-  glTexCoord3iv: procedure(const v: PGLint); extdecl;
-  glTexCoord3s: procedure(s, t, r: GLshort); extdecl;
-  glTexCoord3sv: procedure(const v: PGLshort); extdecl;
-  glTexCoord4d: procedure(s, t, r, q: GLdouble); extdecl;
-  glTexCoord4dv: procedure(const v: PGLdouble); extdecl;
-  glTexCoord4f: procedure(s, t, r, q: GLfloat); extdecl;
-  glTexCoord4fv: procedure(const v: PGLfloat); extdecl;
-  glTexCoord4i: procedure(s, t, r, q: GLint); extdecl;
-  glTexCoord4iv: procedure(const v: PGLint); extdecl;
-  glTexCoord4s: procedure(s, t, r, q: GLshort); extdecl;
-  glTexCoord4sv: procedure(const v: PGLshort); extdecl;
-  glTexCoordPointer: procedure(size: GLint; atype: GLenum; stride: GLsizei; const pointer: Pointer); extdecl;
-  glTexEnvf: procedure(target: GLenum; pname: GLenum; param: GLfloat); extdecl;
-  glTexEnvfv: procedure(target: GLenum; pname: GLenum; const params: PGLfloat); extdecl;
-  glTexEnvi: procedure(target: GLenum; pname: GLenum; param: GLint); extdecl;
-  glTexEnviv: procedure(target: GLenum; pname: GLenum; const params: PGLint); extdecl;
-  glTexGend: procedure(coord: GLenum; pname: GLenum; param: GLdouble); extdecl;
-  glTexGendv: procedure(coord: GLenum; pname: GLenum; const params: PGLdouble); extdecl;
-  glTexGenf: procedure(coord: GLenum; pname: GLenum; param: GLfloat); extdecl;
-  glTexGenfv: procedure(coord: GLenum; pname: GLenum; const params: PGLfloat); extdecl;
-  glTexGeni: procedure(coord: GLenum; pname: GLenum; param: GLint); extdecl;
-  glTexGeniv: procedure(coord: GLenum; pname: GLenum; const params: PGLint); extdecl;
-  glTexImage1D: procedure(target: GLenum; level, internalformat: GLint; width: GLsizei; border: GLint; format, atype: GLenum; const pixels: Pointer); extdecl;
-  glTexImage2D: procedure(target: GLenum; level, internalformat: GLint; width, height: GLsizei; border: GLint; format, atype: GLenum; const pixels: Pointer); extdecl;
-  glTexParameterf: procedure(target: GLenum; pname: GLenum; param: GLfloat); extdecl;
-  glTexParameterfv: procedure(target: GLenum; pname: GLenum; const params: PGLfloat); extdecl;
-  glTexParameteri: procedure(target: GLenum; pname: GLenum; param: GLint); extdecl;
-  glTexParameteriv: procedure(target: GLenum; pname: GLenum; const params: PGLint); extdecl;
-  glTexSubImage1D: procedure(target: GLenum; level, xoffset: GLint; width: GLsizei; format, atype: GLenum; const pixels: Pointer); extdecl;
-  glTexSubImage2D: procedure(target: GLenum; level, xoffset, yoffset: GLint; width, height: GLsizei; format, atype: GLenum; const pixels: Pointer); extdecl;
-  glTranslated: procedure(x, y, z: GLdouble); extdecl;
-  glTranslatef: procedure(x, y, z: GLfloat); extdecl;
-  glVertex2d: procedure(x, y: GLdouble); extdecl;
-  glVertex2dv: procedure(const v: PGLdouble); extdecl;
-  glVertex2f: procedure(x, y: GLfloat); extdecl;
-  glVertex2fv: procedure(const v: PGLfloat); extdecl;
-  glVertex2i: procedure(x, y: GLint); extdecl;
-  glVertex2iv: procedure(const v: PGLint); extdecl;
-  glVertex2s: procedure(x, y: GLshort); extdecl;
-  glVertex2sv: procedure(const v: PGLshort); extdecl;
-  glVertex3d: procedure(x, y, z: GLdouble); extdecl;
-  glVertex3dv: procedure(const v: PGLdouble); extdecl;
-  glVertex3f: procedure(x, y, z: GLfloat); extdecl;
-  glVertex3fv: procedure(const v: PGLfloat); extdecl;
-  glVertex3i: procedure(x, y, z: GLint); extdecl;
-  glVertex3iv: procedure(const v: PGLint); extdecl;
-  glVertex3s: procedure(x, y, z: GLshort); extdecl;
-  glVertex3sv: procedure(const v: PGLshort); extdecl;
-  glVertex4d: procedure(x, y, z, w: GLdouble); extdecl;
-  glVertex4dv: procedure(const v: PGLdouble); extdecl;
-  glVertex4f: procedure(x, y, z, w: GLfloat); extdecl;
-  glVertex4fv: procedure(const v: PGLfloat); extdecl;
-  glVertex4i: procedure(x, y, z, w: GLint); extdecl;
-  glVertex4iv: procedure(const v: PGLint); extdecl;
-  glVertex4s: procedure(x, y, z, w: GLshort); extdecl;
-  glVertex4sv: procedure(const v: PGLshort); extdecl;
-  glVertexPointer: procedure(size: GLint; atype: GLenum; stride: GLsizei; const pointer: Pointer); extdecl;
-  glViewport: procedure(x, y: GLint; width, height: GLsizei); extdecl;
-  {$IFDEF Windows}
-  ChoosePixelFormat: function(DC: HDC; p2: PPixelFormatDescriptor): Integer; extdecl;
+  glAccum: procedure(op: GLenum; value: GLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glAlphaFunc: procedure(func: GLenum; ref: GLclampf); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glAreTexturesResident: function (n: GLsizei; const textures: PGLuint; residences: PGLboolean): GLboolean; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glArrayElement: procedure(i: GLint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glBegin: procedure(mode: GLenum); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glBindTexture: procedure(target: GLenum; texture: GLuint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glBitmap: procedure (width, height: GLsizei; xorig, yorig: GLfloat; xmove, ymove: GLfloat; const bitmap: PGLubyte); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glBlendFunc: procedure(sfactor, dfactor: GLenum); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glCallList: procedure(list: GLuint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glCallLists: procedure(n: GLsizei; atype: GLenum; const lists: Pointer); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glClear: procedure(mask: GLbitfield); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glClearAccum: procedure(red, green, blue, alpha: GLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glClearColor: procedure(red, green, blue, alpha: GLclampf); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glClearDepth: procedure(depth: GLclampd); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glClearIndex: procedure(c: GLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glClearStencil: procedure(s: GLint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glClipPlane: procedure(plane: GLenum; const equation: PGLdouble); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glColor3b: procedure(red, green, blue: GLbyte); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glColor3bv: procedure(const v: PGLbyte); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glColor3d: procedure(red, green, blue: GLdouble); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glColor3dv: procedure(const v: PGLdouble); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glColor3f: procedure(red, green, blue: GLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glColor3fv: procedure(const v: PGLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glColor3i: procedure(red, green, blue: GLint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glColor3iv: procedure(const v: PGLint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glColor3s: procedure(red, green, blue: GLshort); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glColor3sv: procedure(const v: PGLshort); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glColor3ub: procedure(red, green, blue: GLubyte); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glColor3ubv: procedure(const v: PGLubyte); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glColor3ui: procedure(red, green, blue: GLuint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glColor3uiv: procedure(const v: PGLuint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glColor3us: procedure(red, green, blue: GLushort); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glColor3usv: procedure(const v: PGLushort); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glColor4b: procedure(red, green, blue, alpha: GLbyte); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glColor4bv: procedure(const v: PGLbyte); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glColor4d: procedure(red, green, blue, alpha: GLdouble); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glColor4dv: procedure(const v: PGLdouble); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glColor4f: procedure(red, green, blue, alpha: GLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glColor4fv: procedure(const v: PGLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glColor4i: procedure(red, green, blue, alpha: GLint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glColor4iv: procedure(const v: PGLint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glColor4s: procedure(red, green, blue, alpha: GLshort); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glColor4sv: procedure(const v: PGLshort); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glColor4ub: procedure(red, green, blue, alpha: GLubyte); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glColor4ubv: procedure(const v: PGLubyte); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glColor4ui: procedure(red, green, blue, alpha: GLuint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glColor4uiv: procedure(const v: PGLuint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glColor4us: procedure(red, green, blue, alpha: GLushort); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glColor4usv: procedure(const v: PGLushort); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glColorMask: procedure(red, green, blue, alpha: GLboolean); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glColorMaterial: procedure(face, mode: GLenum); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glColorPointer: procedure(size: GLint; atype: GLenum; stride: GLsizei; const pointer: Pointer); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glCopyPixels: procedure(x, y: GLint; width, height: GLsizei; atype: GLenum); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glCopyTexImage1D: procedure (target: GLenum; level: GLint; internalFormat: GLenum; x, y: GLint; width: GLsizei; border: GLint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glCopyTexImage2D: procedure(target: GLenum; level: GLint; internalFormat: GLenum; x, y: GLint; width, height: GLsizei; border: GLint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glCopyTexSubImage1D: procedure(target: GLenum; level, xoffset, x, y: GLint; width: GLsizei); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glCopyTexSubImage2D: procedure(target: GLenum; level, xoffset, yoffset, x, y: GLint; width, height: GLsizei); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glCullFace: procedure(mode: GLenum); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glDeleteLists: procedure(list: GLuint; range: GLsizei); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glDeleteTextures: procedure(n: GLsizei; const textures: PGLuint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glDepthFunc: procedure(func: GLenum); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glDepthMask: procedure(flag: GLboolean); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glDepthRange: procedure(zNear, zFar: GLclampd); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glDisable: procedure(cap: GLenum); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glDisableClientState: procedure(aarray: GLenum); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glDrawArrays: procedure(mode: GLenum; first: GLint; count: GLsizei); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glDrawBuffer: procedure(mode: GLenum); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glDrawElements: procedure(mode: GLenum; count: GLsizei; atype: GLenum; const indices: Pointer); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glDrawPixels: procedure(width, height: GLsizei; format, atype: GLenum; const pixels: Pointer); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glEdgeFlag: procedure(flag: GLboolean); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glEdgeFlagPointer: procedure(stride: GLsizei; const pointer: Pointer); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glEdgeFlagv: procedure(const flag: PGLboolean); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glEnable: procedure(cap: GLenum); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glEnableClientState: procedure(aarray: GLenum); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glEnd: procedure; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glEndList: procedure; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glEvalCoord1d: procedure(u: GLdouble); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glEvalCoord1dv: procedure(const u: PGLdouble); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glEvalCoord1f: procedure(u: GLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glEvalCoord1fv: procedure(const u: PGLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glEvalCoord2d: procedure(u, v: GLdouble); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glEvalCoord2dv: procedure(const u: PGLdouble); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glEvalCoord2f: procedure(u, v: GLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glEvalCoord2fv: procedure(const u: PGLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glEvalMesh1: procedure(mode: GLenum; i1, i2: GLint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glEvalMesh2: procedure(mode: GLenum; i1, i2, j1, j2: GLint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glEvalPoint1: procedure(i: GLint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glEvalPoint2: procedure(i, j: GLint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glFeedbackBuffer: procedure(size: GLsizei; atype: GLenum; buffer: PGLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glFinish: procedure; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glFlush: procedure; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glFogf: procedure(pname: GLenum; param: GLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glFogfv: procedure(pname: GLenum; const params: PGLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glFogi: procedure(pname: GLenum; param: GLint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glFogiv: procedure(pname: GLenum; const params: PGLint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glFrontFace: procedure(mode: GLenum); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glFrustum: procedure(left, right, bottom, top, zNear, zFar: GLdouble); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glGenLists: function(range: GLsizei): GLuint; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glGenTextures: procedure(n: GLsizei; textures: PGLuint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glGetBooleanv: procedure(pname: GLenum; params: PGLboolean); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glGetClipPlane: procedure(plane: GLenum; equation: PGLdouble); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glGetDoublev: procedure(pname: GLenum; params: PGLdouble); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glGetError: function: GLenum; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glGetFloatv: procedure(pname: GLenum; params: PGLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glGetIntegerv: procedure(pname: GLenum; params: PGLint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glGetLightfv: procedure(light, pname: GLenum; params: PGLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glGetLightiv: procedure(light, pname: GLenum; params: PGLint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glGetMapdv: procedure(target, query: GLenum; v: PGLdouble); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glGetMapfv: procedure(target, query: GLenum; v: PGLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glGetMapiv: procedure(target, query: GLenum; v: PGLint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glGetMaterialfv: procedure(face, pname: GLenum; params: PGLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glGetMaterialiv: procedure(face, pname: GLenum; params: PGLint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glGetPixelMapfv: procedure(map: GLenum; values: PGLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glGetPixelMapuiv: procedure(map: GLenum; values: PGLuint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glGetPixelMapusv: procedure(map: GLenum; values: PGLushort); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glGetPointerv: procedure(pname: GLenum; params: Pointer); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glGetPolygonStipple: procedure(mask: PGLubyte); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glGetString: function(name: GLenum): PChar; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glGetTexEnvfv: procedure(target, pname: GLenum; params: PGLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glGetTexEnviv: procedure(target, pname: GLenum; params: PGLint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glGetTexGendv: procedure(coord, pname: GLenum; params: PGLdouble); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glGetTexGenfv: procedure(coord, pname: GLenum; params: PGLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glGetTexGeniv: procedure(coord, pname: GLenum; params: PGLint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glGetTexImage: procedure(target: GLenum; level: GLint; format: GLenum; atype: GLenum; pixels: Pointer); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glGetTexLevelParameterfv: procedure(target: GLenum; level: GLint; pname: GLenum; params: Pointer); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glGetTexLevelParameteriv: procedure(target: GLenum; level: GLint; pname: GLenum; params: PGLint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glGetTexParameterfv: procedure(target, pname: GLenum; params: PGLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glGetTexParameteriv: procedure(target, pname: GLenum; params: PGLint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glHint: procedure(target, mode: GLenum); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glIndexMask: procedure(mask: GLuint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glIndexPointer: procedure(atype: GLenum; stride: GLsizei; const pointer: Pointer); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glIndexd: procedure(c: GLdouble); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glIndexdv: procedure(const c: PGLdouble); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glIndexf: procedure(c: GLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glIndexfv: procedure(const c: PGLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glIndexi: procedure(c: GLint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glIndexiv: procedure(const c: PGLint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glIndexs: procedure(c: GLshort); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glIndexsv: procedure(const c: PGLshort); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glIndexub: procedure(c: GLubyte); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glIndexubv: procedure(const c: PGLubyte); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glInitNames: procedure; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glInterleavedArrays: procedure(format: GLenum; stride: GLsizei; const pointer: Pointer); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glIsEnabled: function(cap: GLenum): GLboolean; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glIsList: function(list: GLuint): GLboolean; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glIsTexture: function(texture: GLuint): GLboolean; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glLightModelf: procedure(pname: GLenum; param: GLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glLightModelfv: procedure(pname: GLenum; const params: PGLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glLightModeli: procedure(pname: GLenum; param: GLint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glLightModeliv: procedure(pname: GLenum; const params: PGLint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glLightf: procedure(light, pname: GLenum; param: GLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glLightfv: procedure(light, pname: GLenum; const params: PGLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glLighti: procedure(light, pname: GLenum; param: GLint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glLightiv: procedure(light, pname: GLenum; const params: PGLint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glLineStipple: procedure(factor: GLint; pattern: GLushort); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glLineWidth: procedure(width: GLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glListBase: procedure(base: GLuint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glLoadIdentity: procedure; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glLoadMatrixd: procedure(const m: PGLdouble); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glLoadMatrixf: procedure(const m: PGLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glLoadName: procedure(name: GLuint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glLogicOp: procedure(opcode: GLenum); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glMap1d: procedure(target: GLenum; u1, u2: GLdouble; stride, order: GLint; const points: PGLdouble); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glMap1f: procedure(target: GLenum; u1, u2: GLfloat; stride, order: GLint; const points: PGLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glMap2d: procedure(target: GLenum; u1, u2: GLdouble; ustride, uorder: GLint; v1, v2: GLdouble; vstride, vorder: GLint; const points: PGLdouble); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glMap2f: procedure(target: GLenum; u1, u2: GLfloat; ustride, uorder: GLint; v1, v2: GLfloat; vstride, vorder: GLint; const points: PGLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glMapGrid1d: procedure(un: GLint; u1, u2: GLdouble); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glMapGrid1f: procedure(un: GLint; u1, u2: GLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glMapGrid2d: procedure(un: GLint; u1, u2: GLdouble; vn: GLint; v1, v2: GLdouble); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glMapGrid2f: procedure(un: GLint; u1, u2: GLfloat; vn: GLint; v1, v2: GLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glMaterialf: procedure(face, pname: GLenum; param: GLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glMaterialfv: procedure(face, pname: GLenum; const params: PGLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glMateriali: procedure(face, pname: GLenum; param: GLint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glMaterialiv: procedure(face, pname: GLenum; const params: PGLint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glMatrixMode: procedure(mode: GLenum); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glMultMatrixd: procedure(const m: PGLdouble); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glMultMatrixf: procedure(const m: PGLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glNewList: procedure(list: GLuint; mode: GLenum); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glNormal3b: procedure(nx, ny, nz: GLbyte); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glNormal3bv: procedure(const v: PGLbyte); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glNormal3d: procedure(nx, ny, nz: GLdouble); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glNormal3dv: procedure(const v: PGLdouble); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glNormal3f: procedure(nx, ny, nz: GLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glNormal3fv: procedure(const v: PGLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glNormal3i: procedure(nx, ny, nz: GLint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glNormal3iv: procedure(const v: PGLint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glNormal3s: procedure(nx, ny, nz: GLshort); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glNormal3sv: procedure(const v: PGLshort); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glNormalPointer: procedure(atype: GLenum; stride: GLsizei; const pointer: Pointer); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glOrtho: procedure(left, right, bottom, top, zNear, zFar: GLdouble); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glPassThrough: procedure(token: GLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glPixelMapfv: procedure(map: GLenum; mapsize: GLsizei; const values: PGLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glPixelMapuiv: procedure(map: GLenum; mapsize: GLsizei; const values: PGLuint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glPixelMapusv: procedure(map: GLenum; mapsize: GLsizei; const values: PGLushort); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glPixelStoref: procedure(pname: GLenum; param: GLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glPixelStorei: procedure(pname: GLenum; param: GLint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glPixelTransferf: procedure(pname: GLenum; param: GLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glPixelTransferi: procedure(pname: GLenum; param: GLint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glPixelZoom: procedure(xfactor, yfactor: GLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glPointSize: procedure(size: GLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glPolygonMode: procedure(face, mode: GLenum); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glPolygonOffset: procedure(factor, units: GLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glPolygonStipple: procedure(const mask: PGLubyte); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glPopAttrib: procedure; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glPopClientAttrib: procedure; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glPopMatrix: procedure; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glPopName: procedure; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glPrioritizeTextures: procedure(n: GLsizei; const textures: PGLuint; const priorities: PGLclampf); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glPushAttrib: procedure(mask: GLbitfield); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glPushClientAttrib: procedure(mask: GLbitfield); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glPushMatrix: procedure; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glPushName: procedure(name: GLuint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glRasterPos2d: procedure(x, y: GLdouble); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glRasterPos2dv: procedure(const v: PGLdouble); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glRasterPos2f: procedure(x, y: GLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glRasterPos2fv: procedure(const v: PGLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glRasterPos2i: procedure(x, y: GLint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glRasterPos2iv: procedure(const v: PGLint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glRasterPos2s: procedure(x, y: GLshort); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glRasterPos2sv: procedure(const v: PGLshort); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glRasterPos3d: procedure(x, y, z: GLdouble); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glRasterPos3dv: procedure(const v: PGLdouble); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glRasterPos3f: procedure(x, y, z: GLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glRasterPos3fv: procedure(const v: PGLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glRasterPos3i: procedure(x, y, z: GLint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glRasterPos3iv: procedure(const v: PGLint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glRasterPos3s: procedure(x, y, z: GLshort); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glRasterPos3sv: procedure(const v: PGLshort); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glRasterPos4d: procedure(x, y, z, w: GLdouble); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glRasterPos4dv: procedure(const v: PGLdouble); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glRasterPos4f: procedure(x, y, z, w: GLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glRasterPos4fv: procedure(const v: PGLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glRasterPos4i: procedure(x, y, z, w: GLint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glRasterPos4iv: procedure(const v: PGLint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glRasterPos4s: procedure(x, y, z, w: GLshort); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glRasterPos4sv: procedure(const v: PGLshort); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glReadBuffer: procedure(mode: GLenum); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glReadPixels: procedure(x, y: GLint; width, height: GLsizei; format, atype: GLenum; pixels: Pointer); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glRectd: procedure(x1, y1, x2, y2: GLdouble); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glRectdv: procedure(const v1: PGLdouble; const v2: PGLdouble); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glRectf: procedure(x1, y1, x2, y2: GLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glRectfv: procedure(const v1: PGLfloat; const v2: PGLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glRecti: procedure(x1, y1, x2, y2: GLint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glRectiv: procedure(const v1: PGLint; const v2: PGLint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glRects: procedure(x1, y1, x2, y2: GLshort); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glRectsv: procedure(const v1: PGLshort; const v2: PGLshort); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glRenderMode: function(mode: GLint): GLint; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glRotated: procedure(angle, x, y, z: GLdouble); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glRotatef: procedure(angle, x, y, z: GLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glScaled: procedure(x, y, z: GLdouble); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glScalef: procedure(x, y, z: GLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glScissor: procedure(x, y: GLint; width, height: GLsizei); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glSelectBuffer: procedure(size: GLsizei; buffer: PGLuint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glShadeModel: procedure(mode: GLenum); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glStencilFunc: procedure(func: GLenum; ref: GLint; mask: GLuint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glStencilMask: procedure(mask: GLuint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glStencilOp: procedure(fail, zfail, zpass: GLenum); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glTexCoord1d: procedure(s: GLdouble); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glTexCoord1dv: procedure(const v: PGLdouble); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glTexCoord1f: procedure(s: GLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glTexCoord1fv: procedure(const v: PGLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glTexCoord1i: procedure(s: GLint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glTexCoord1iv: procedure(const v: PGLint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glTexCoord1s: procedure(s: GLshort); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glTexCoord1sv: procedure(const v: PGLshort); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glTexCoord2d: procedure(s, t: GLdouble); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glTexCoord2dv: procedure(const v: PGLdouble); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glTexCoord2f: procedure(s, t: GLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glTexCoord2fv: procedure(const v: PGLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glTexCoord2i: procedure(s, t: GLint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glTexCoord2iv: procedure(const v: PGLint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glTexCoord2s: procedure(s, t: GLshort); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glTexCoord2sv: procedure(const v: PGLshort); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glTexCoord3d: procedure(s, t, r: GLdouble); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glTexCoord3dv: procedure(const v: PGLdouble); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glTexCoord3f: procedure(s, t, r: GLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glTexCoord3fv: procedure(const v: PGLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glTexCoord3i: procedure(s, t, r: GLint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glTexCoord3iv: procedure(const v: PGLint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glTexCoord3s: procedure(s, t, r: GLshort); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glTexCoord3sv: procedure(const v: PGLshort); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glTexCoord4d: procedure(s, t, r, q: GLdouble); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glTexCoord4dv: procedure(const v: PGLdouble); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glTexCoord4f: procedure(s, t, r, q: GLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glTexCoord4fv: procedure(const v: PGLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glTexCoord4i: procedure(s, t, r, q: GLint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glTexCoord4iv: procedure(const v: PGLint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glTexCoord4s: procedure(s, t, r, q: GLshort); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glTexCoord4sv: procedure(const v: PGLshort); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glTexCoordPointer: procedure(size: GLint; atype: GLenum; stride: GLsizei; const pointer: Pointer); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glTexEnvf: procedure(target: GLenum; pname: GLenum; param: GLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glTexEnvfv: procedure(target: GLenum; pname: GLenum; const params: PGLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glTexEnvi: procedure(target: GLenum; pname: GLenum; param: GLint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glTexEnviv: procedure(target: GLenum; pname: GLenum; const params: PGLint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glTexGend: procedure(coord: GLenum; pname: GLenum; param: GLdouble); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glTexGendv: procedure(coord: GLenum; pname: GLenum; const params: PGLdouble); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glTexGenf: procedure(coord: GLenum; pname: GLenum; param: GLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glTexGenfv: procedure(coord: GLenum; pname: GLenum; const params: PGLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glTexGeni: procedure(coord: GLenum; pname: GLenum; param: GLint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glTexGeniv: procedure(coord: GLenum; pname: GLenum; const params: PGLint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glTexImage1D: procedure(target: GLenum; level, internalformat: GLint; width: GLsizei; border: GLint; format, atype: GLenum; const pixels: Pointer); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glTexImage2D: procedure(target: GLenum; level, internalformat: GLint; width, height: GLsizei; border: GLint; format, atype: GLenum; const pixels: Pointer); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glTexParameterf: procedure(target: GLenum; pname: GLenum; param: GLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glTexParameterfv: procedure(target: GLenum; pname: GLenum; const params: PGLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glTexParameteri: procedure(target: GLenum; pname: GLenum; param: GLint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glTexParameteriv: procedure(target: GLenum; pname: GLenum; const params: PGLint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glTexSubImage1D: procedure(target: GLenum; level, xoffset: GLint; width: GLsizei; format, atype: GLenum; const pixels: Pointer); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glTexSubImage2D: procedure(target: GLenum; level, xoffset, yoffset: GLint; width, height: GLsizei; format, atype: GLenum; const pixels: Pointer); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glTranslated: procedure(x, y, z: GLdouble); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glTranslatef: procedure(x, y, z: GLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glVertex2d: procedure(x, y: GLdouble); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glVertex2dv: procedure(const v: PGLdouble); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glVertex2f: procedure(x, y: GLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glVertex2fv: procedure(const v: PGLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glVertex2i: procedure(x, y: GLint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glVertex2iv: procedure(const v: PGLint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glVertex2s: procedure(x, y: GLshort); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glVertex2sv: procedure(const v: PGLshort); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glVertex3d: procedure(x, y, z: GLdouble); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glVertex3dv: procedure(const v: PGLdouble); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glVertex3f: procedure(x, y, z: GLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glVertex3fv: procedure(const v: PGLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glVertex3i: procedure(x, y, z: GLint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glVertex3iv: procedure(const v: PGLint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glVertex3s: procedure(x, y, z: GLshort); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glVertex3sv: procedure(const v: PGLshort); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glVertex4d: procedure(x, y, z, w: GLdouble); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glVertex4dv: procedure(const v: PGLdouble); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glVertex4f: procedure(x, y, z, w: GLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glVertex4fv: procedure(const v: PGLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glVertex4i: procedure(x, y, z, w: GLint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glVertex4iv: procedure(const v: PGLint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glVertex4s: procedure(x, y, z, w: GLshort); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glVertex4sv: procedure(const v: PGLshort); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glVertexPointer: procedure(size: GLint; atype: GLenum; stride: GLsizei; const pointer: Pointer); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  glViewport: procedure(x, y: GLint; width, height: GLsizei); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  {$IFDEF msWindows}
+  ChoosePixelFormat: function(DC: HDC; p2: PPixelFormatDescriptor): Integer; {$ifdef wincall}stdcall{$else}cdecl{$endif};
   {$ENDIF}
 {$ENDIF MORPHOS}
 
 type
   // EXT_vertex_array
-  PFNGLARRAYELEMENTEXTPROC = procedure(i: GLint); extdecl;
-  PFNGLDRAWARRAYSEXTPROC = procedure(mode: GLenum; first: GLint; count: GLsizei); extdecl;
+  PFNGLARRAYELEMENTEXTPROC = procedure(i: GLint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  PFNGLDRAWARRAYSEXTPROC = procedure(mode: GLenum; first: GLint; count: GLsizei); {$ifdef wincall}stdcall{$else}cdecl{$endif};
   PFNGLVERTEXPOINTEREXTPROC = procedure(size: GLint; atype: GLenum;
-                                        stride, count: GLsizei; const pointer: Pointer); extdecl;
+                                        stride, count: GLsizei; const pointer: Pointer); {$ifdef wincall}stdcall{$else}cdecl{$endif};
   PFNGLNORMALPOINTEREXTPROC = procedure(atype: GLenum; stride, count: GLsizei;
-                                        const pointer: Pointer); extdecl;
+                                        const pointer: Pointer); {$ifdef wincall}stdcall{$else}cdecl{$endif};
   PFNGLCOLORPOINTEREXTPROC = procedure(size: GLint; atype: GLenum; stride, count: GLsizei;
-                                       const pointer: Pointer); extdecl;
+                                       const pointer: Pointer); {$ifdef wincall}stdcall{$else}cdecl{$endif};
   PFNGLINDEXPOINTEREXTPROC = procedure(atype: GLenum; stride, count: GLsizei;
-                                       const pointer: Pointer); extdecl;
+                                       const pointer: Pointer); {$ifdef wincall}stdcall{$else}cdecl{$endif};
   PFNGLTEXCOORDPOINTEREXTPROC = procedure(size: GLint; atype: GLenum;
-                                          stride, count: GLsizei; const pointer: Pointer); extdecl;
+                                          stride, count: GLsizei; const pointer: Pointer); {$ifdef wincall}stdcall{$else}cdecl{$endif};
   PFNGLEDGEFLAGPOINTEREXTPROC = procedure(stride, count: GLsizei;
-                                          const pointer: PGLboolean); extdecl;
-  PFNGLGETPOINTERVEXTPROC = procedure(pname: GLenum; params: Pointer); extdecl;
+                                          const pointer: PGLboolean); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  PFNGLGETPOINTERVEXTPROC = procedure(pname: GLenum; params: Pointer); {$ifdef wincall}stdcall{$else}cdecl{$endif};
   PFNGLARRAYELEMENTARRAYEXTPROC = procedure(mode: GLenum; count: GLsizei;
-                                            const pi: Pointer); extdecl;
+                                            const pi: Pointer); {$ifdef wincall}stdcall{$else}cdecl{$endif};
 
   // WIN_swap_hint
-  PFNGLADDSWAPHINTRECTWINPROC = procedure(x, y: GLint; width, height: GLsizei); extdecl;
+  PFNGLADDSWAPHINTRECTWINPROC = procedure(x, y: GLint; width, height: GLsizei); {$ifdef wincall}stdcall{$else}cdecl{$endif};
 
   // EXT_paletted_texture
   PFNGLCOLORTABLEEXTPROC = procedure(target, internalFormat: GLenum; width: GLsizei;
-                                     format, atype: GLenum; const data: Pointer); extdecl;
+                                     format, atype: GLenum; const data: Pointer); {$ifdef wincall}stdcall{$else}cdecl{$endif};
   PFNGLCOLORSUBTABLEEXTPROC = procedure(target: GLenum; start, count: GLsizei;
-                                        format, atype: GLenum; const data: Pointer); extdecl;
-  PFNGLGETCOLORTABLEEXTPROC = procedure(target, format, atype: GLenum; data: Pointer); extdecl;
-  PFNGLGETCOLORTABLEPARAMETERIVEXTPROC = procedure(target, pname: GLenum; params: PGLint); extdecl;
-  PFNGLGETCOLORTABLEPARAMETERFVEXTPROC = procedure(target, pname: GLenum; params: PGLfloat); extdecl;
+                                        format, atype: GLenum; const data: Pointer); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  PFNGLGETCOLORTABLEEXTPROC = procedure(target, format, atype: GLenum; data: Pointer); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  PFNGLGETCOLORTABLEPARAMETERIVEXTPROC = procedure(target, pname: GLenum; params: PGLint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  PFNGLGETCOLORTABLEPARAMETERFVEXTPROC = procedure(target, pname: GLenum; params: PGLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
 
 //procedure LoadOpenGL(const dll: String);
 //procedure FreeOpenGL;
@@ -1569,12 +1570,13 @@ implementation
 uses
 {$if defined(cpui386) or defined(cpux86_64)}
   math,
-{$endif}
+{$ifend}
   msesys,msetypes,msedatalist{$ifdef mswindows}{$else}{$endif};
 
 {$ifdef mswindows}
 function WinChoosePixelFormat(DC: HDC; p2: PPixelFormatDescriptor): Integer;
-                           extdecl; external 'gdi32' name 'ChoosePixelFormat';
+                           {$ifdef wincall}stdcall{$else}cdecl{$endif}
+                           ; external 'gdi32' name 'ChoosePixelFormat';
 {$endif}
 
 var
@@ -1598,7 +1600,7 @@ begin
 {$if defined(cpui386) or defined(cpux86_64)}
  SetExceptionMask([exInvalidOp, exDenormalized, exZeroDivide,exOverflow,
                                                     exUnderflow, exPrecision]);
-{$endif}
+{$ifend}
 {$ifdef mswindows}
 {$else}
  if not mseglloadextensions([gle_glx]) then begin
@@ -1616,346 +1618,346 @@ end;
 procedure initializeopengl(const sonames: array of filenamety); //[] = default
 const
  funcs: array[0..335] of funcinfoty = (
-    (n: 'glAccum'; d: @glAccum),
-    (n: 'glAlphaFunc'; d: @glAlphaFunc),
-    (n: 'glAreTexturesResident'; d: @glAreTexturesResident),
-    (n: 'glArrayElement'; d: @glArrayElement),
-    (n: 'glBegin'; d: @glBegin),
-    (n: 'glBindTexture'; d: @glBindTexture),
-    (n: 'glBitmap'; d: @glBitmap),
-    (n: 'glBlendFunc'; d: @glBlendFunc),
-    (n: 'glCallList'; d: @glCallList),
-    (n: 'glCallLists'; d: @glCallLists),
-    (n: 'glClear'; d: @glClear),
-    (n: 'glClearAccum'; d: @glClearAccum),
-    (n: 'glClearColor'; d: @glClearColor),
-    (n: 'glClearDepth'; d: @glClearDepth),
-    (n: 'glClearIndex'; d: @glClearIndex),
-    (n: 'glClearStencil'; d: @glClearStencil),
-    (n: 'glClipPlane'; d: @glClipPlane),
-    (n: 'glColor3b'; d: @glColor3b),
-    (n: 'glColor3bv'; d: @glColor3bv),
-    (n: 'glColor3d'; d: @glColor3d),
-    (n: 'glColor3dv'; d: @glColor3dv),
-    (n: 'glColor3f'; d: @glColor3f),
-    (n: 'glColor3fv'; d: @glColor3fv),
-    (n: 'glColor3i'; d: @glColor3i),
-    (n: 'glColor3iv'; d: @glColor3iv),
-    (n: 'glColor3s'; d: @glColor3s),
-    (n: 'glColor3sv'; d: @glColor3sv),
-    (n: 'glColor3ub'; d: @glColor3ub),
-    (n: 'glColor3ubv'; d: @glColor3ubv),
-    (n: 'glColor3ui'; d: @glColor3ui),
-    (n: 'glColor3uiv'; d: @glColor3uiv),
-    (n: 'glColor3us'; d: @glColor3us),
-    (n: 'glColor3usv'; d: @glColor3usv),
-    (n: 'glColor4b'; d: @glColor4b),
-    (n: 'glColor4bv'; d: @glColor4bv),
-    (n: 'glColor4d'; d: @glColor4d),
-    (n: 'glColor4dv'; d: @glColor4dv),
-    (n: 'glColor4f'; d: @glColor4f),
-    (n: 'glColor4fv'; d: @glColor4fv),
-    (n: 'glColor4i'; d: @glColor4i),
-    (n: 'glColor4iv'; d: @glColor4iv),
-    (n: 'glColor4s'; d: @glColor4s),
-    (n: 'glColor4sv'; d: @glColor4sv),
-    (n: 'glColor4ub'; d: @glColor4ub),
-    (n: 'glColor4ubv'; d: @glColor4ubv),
-    (n: 'glColor4ui'; d: @glColor4ui),
-    (n: 'glColor4uiv'; d: @glColor4uiv),
-    (n: 'glColor4us'; d: @glColor4us),
-    (n: 'glColor4usv'; d: @glColor4usv),
-    (n: 'glColorMask'; d: @glColorMask),
-    (n: 'glColorMaterial'; d: @glColorMaterial),
-    (n: 'glColorPointer'; d: @glColorPointer),
-    (n: 'glCopyPixels'; d: @glCopyPixels),
-    (n: 'glCopyTexImage1D'; d: @glCopyTexImage1D),
-    (n: 'glCopyTexImage2D'; d: @glCopyTexImage2D),
-    (n: 'glCopyTexSubImage1D'; d: @glCopyTexSubImage1D),
-    (n: 'glCopyTexSubImage2D'; d: @glCopyTexSubImage2D),
-    (n: 'glCullFace'; d: @glCullFace),
-    (n: 'glDeleteLists'; d: @glDeleteLists),
-    (n: 'glDeleteTextures'; d: @glDeleteTextures),
-    (n: 'glDepthFunc'; d: @glDepthFunc),
-    (n: 'glDepthMask'; d: @glDepthMask),
-    (n: 'glDepthRange'; d: @glDepthRange),
-    (n: 'glDisable'; d: @glDisable),
-    (n: 'glDisableClientState'; d: @glDisableClientState),
-    (n: 'glDrawArrays'; d: @glDrawArrays),
-    (n: 'glDrawBuffer'; d: @glDrawBuffer),
-    (n: 'glDrawElements'; d: @glDrawElements),
-    (n: 'glDrawPixels'; d: @glDrawPixels),
-    (n: 'glEdgeFlag'; d: @glEdgeFlag),
-    (n: 'glEdgeFlagPointer'; d: @glEdgeFlagPointer),
-    (n: 'glEdgeFlagv'; d: @glEdgeFlagv),
-    (n: 'glEnable'; d: @glEnable),
-    (n: 'glEnableClientState'; d: @glEnableClientState),
-    (n: 'glEnd'; d: @glEnd),
-    (n: 'glEndList'; d: @glEndList),
-    (n: 'glEvalCoord1d'; d: @glEvalCoord1d),
-    (n: 'glEvalCoord1dv'; d: @glEvalCoord1dv),
-    (n: 'glEvalCoord1f'; d: @glEvalCoord1f),
-    (n: 'glEvalCoord1fv'; d: @glEvalCoord1fv),
-    (n: 'glEvalCoord2d'; d: @glEvalCoord2d),
-    (n: 'glEvalCoord2dv'; d: @glEvalCoord2dv),
-    (n: 'glEvalCoord2f'; d: @glEvalCoord2f),
-    (n: 'glEvalCoord2fv'; d: @glEvalCoord2fv),
-    (n: 'glEvalMesh1'; d: @glEvalMesh1),
-    (n: 'glEvalMesh2'; d: @glEvalMesh2),
-    (n: 'glEvalPoint1'; d: @glEvalPoint1),
-    (n: 'glEvalPoint2'; d: @glEvalPoint2),
-    (n: 'glFeedbackBuffer'; d: @glFeedbackBuffer),
-    (n: 'glFinish'; d: @glFinish),
-    (n: 'glFlush'; d: @glFlush),
-    (n: 'glFogf'; d: @glFogf),
-    (n: 'glFogfv'; d: @glFogfv),
-    (n: 'glFogi'; d: @glFogi),
-    (n: 'glFogiv'; d: @glFogiv),
-    (n: 'glFrontFace'; d: @glFrontFace),
-    (n: 'glFrustum'; d: @glFrustum),
-    (n: 'glGenLists'; d: @glGenLists),
-    (n: 'glGenTextures'; d: @glGenTextures),
-    (n: 'glGetBooleanv'; d: @glGetBooleanv),
-    (n: 'glGetClipPlane'; d: @glGetClipPlane),
-    (n: 'glGetDoublev'; d: @glGetDoublev),
-    (n: 'glGetError'; d: @glGetError),
-    (n: 'glGetFloatv'; d: @glGetFloatv),
-    (n: 'glGetIntegerv'; d: @glGetIntegerv),
-    (n: 'glGetLightfv'; d: @glGetLightfv),
-    (n: 'glGetLightiv'; d: @glGetLightiv),
-    (n: 'glGetMapdv'; d: @glGetMapdv),
-    (n: 'glGetMapfv'; d: @glGetMapfv),
-    (n: 'glGetMapiv'; d: @glGetMapiv),
-    (n: 'glGetMaterialfv'; d: @glGetMaterialfv),
-    (n: 'glGetMaterialiv'; d: @glGetMaterialiv),
-    (n: 'glGetPixelMapfv'; d: @glGetPixelMapfv),
-    (n: 'glGetPixelMapuiv'; d: @glGetPixelMapuiv),
-    (n: 'glGetPixelMapusv'; d: @glGetPixelMapusv),
-    (n: 'glGetPointerv'; d: @glGetPointerv),
-    (n: 'glGetPolygonStipple'; d: @glGetPolygonStipple),
-    (n: 'glGetString'; d: @glGetString),
-    (n: 'glGetTexEnvfv'; d: @glGetTexEnvfv),
-    (n: 'glGetTexEnviv'; d: @glGetTexEnviv),
-    (n: 'glGetTexGendv'; d: @glGetTexGendv),
-    (n: 'glGetTexGenfv'; d: @glGetTexGenfv),
-    (n: 'glGetTexGeniv'; d: @glGetTexGeniv),
-    (n: 'glGetTexImage'; d: @glGetTexImage),
-    (n: 'glGetTexLevelParameterfv'; d: @glGetTexLevelParameterfv),
-    (n: 'glGetTexLevelParameteriv'; d: @glGetTexLevelParameteriv),
-    (n: 'glGetTexParameterfv'; d: @glGetTexParameterfv),
-    (n: 'glGetTexParameteriv'; d: @glGetTexParameteriv),
-    (n: 'glHint'; d: @glHint),
-    (n: 'glIndexMask'; d: @glIndexMask),
-    (n: 'glIndexPointer'; d: @glIndexPointer),
-    (n: 'glIndexd'; d: @glIndexd),
-    (n: 'glIndexdv'; d: @glIndexdv),
-    (n: 'glIndexf'; d: @glIndexf),
-    (n: 'glIndexfv'; d: @glIndexfv),
-    (n: 'glIndexi'; d: @glIndexi),
-    (n: 'glIndexiv'; d: @glIndexiv),
-    (n: 'glIndexs'; d: @glIndexs),
-    (n: 'glIndexsv'; d: @glIndexsv),
-    (n: 'glIndexub'; d: @glIndexub),
-    (n: 'glIndexubv'; d: @glIndexubv),
-    (n: 'glInitNames'; d: @glInitNames),
-    (n: 'glInterleavedArrays'; d: @glInterleavedArrays),
-    (n: 'glIsEnabled'; d: @glIsEnabled),
-    (n: 'glIsList'; d: @glIsList),
-    (n: 'glIsTexture'; d: @glIsTexture),
-    (n: 'glLightModelf'; d: @glLightModelf),
-    (n: 'glLightModelfv'; d: @glLightModelfv),
-    (n: 'glLightModeli'; d: @glLightModeli),
-    (n: 'glLightModeliv'; d: @glLightModeliv),
-    (n: 'glLightf'; d: @glLightf),
-    (n: 'glLightfv'; d: @glLightfv),
-    (n: 'glLighti'; d: @glLighti),
-    (n: 'glLightiv'; d: @glLightiv),
-    (n: 'glLineStipple'; d: @glLineStipple),
-    (n: 'glLineWidth'; d: @glLineWidth),
-    (n: 'glListBase'; d: @glListBase),
-    (n: 'glLoadIdentity'; d: @glLoadIdentity),
-    (n: 'glLoadMatrixd'; d: @glLoadMatrixd),
-    (n: 'glLoadMatrixf'; d: @glLoadMatrixf),
-    (n: 'glLoadName'; d: @glLoadName),
-    (n: 'glLogicOp'; d: @glLogicOp),
-    (n: 'glMap1d'; d: @glMap1d),
-    (n: 'glMap1f'; d: @glMap1f),
-    (n: 'glMap2d'; d: @glMap2d),
-    (n: 'glMap2f'; d: @glMap2f),
-    (n: 'glMapGrid1d'; d: @glMapGrid1d),
-    (n: 'glMapGrid1f'; d: @glMapGrid1f),
-    (n: 'glMapGrid2d'; d: @glMapGrid2d),
-    (n: 'glMapGrid2f'; d: @glMapGrid2f),
-    (n: 'glMaterialf'; d: @glMaterialf),
-    (n: 'glMaterialfv'; d: @glMaterialfv),
-    (n: 'glMateriali'; d: @glMateriali),
-    (n: 'glMaterialiv'; d: @glMaterialiv),
-    (n: 'glMatrixMode'; d: @glMatrixMode),
-    (n: 'glMultMatrixd'; d: @glMultMatrixd),
-    (n: 'glMultMatrixf'; d: @glMultMatrixf),
-    (n: 'glNewList'; d: @glNewList),
-    (n: 'glNormal3b'; d: @glNormal3b),
-    (n: 'glNormal3bv'; d: @glNormal3bv),
-    (n: 'glNormal3d'; d: @glNormal3d),
-    (n: 'glNormal3dv'; d: @glNormal3dv),
-    (n: 'glNormal3f'; d: @glNormal3f),
-    (n: 'glNormal3fv'; d: @glNormal3fv),
-    (n: 'glNormal3i'; d: @glNormal3i),
-    (n: 'glNormal3iv'; d: @glNormal3iv),
-    (n: 'glNormal3s'; d: @glNormal3s),
-    (n: 'glNormal3sv'; d: @glNormal3sv),
-    (n: 'glNormalPointer'; d: @glNormalPointer),
-    (n: 'glOrtho'; d: @glOrtho),
-    (n: 'glPassThrough'; d: @glPassThrough),
-    (n: 'glPixelMapfv'; d: @glPixelMapfv),
-    (n: 'glPixelMapuiv'; d: @glPixelMapuiv),
-    (n: 'glPixelMapusv'; d: @glPixelMapusv),
-    (n: 'glPixelStoref'; d: @glPixelStoref),
-    (n: 'glPixelStorei'; d: @glPixelStorei),
-    (n: 'glPixelTransferf'; d: @glPixelTransferf),
-    (n: 'glPixelTransferi'; d: @glPixelTransferi),
-    (n: 'glPixelZoom'; d: @glPixelZoom),
-    (n: 'glPointSize'; d: @glPointSize),
-    (n: 'glPolygonMode'; d: @glPolygonMode),
-    (n: 'glPolygonOffset'; d: @glPolygonOffset),
-    (n: 'glPolygonStipple'; d: @glPolygonStipple),
-    (n: 'glPopAttrib'; d: @glPopAttrib),
-    (n: 'glPopClientAttrib'; d: @glPopClientAttrib),
-    (n: 'glPopMatrix'; d: @glPopMatrix),
-    (n: 'glPopName'; d: @glPopName),
-    (n: 'glPrioritizeTextures'; d: @glPrioritizeTextures),
-    (n: 'glPushAttrib'; d: @glPushAttrib),
-    (n: 'glPushClientAttrib'; d: @glPushClientAttrib),
-    (n: 'glPushMatrix'; d: @glPushMatrix),
-    (n: 'glPushName'; d: @glPushName),
-    (n: 'glRasterPos2d'; d: @glRasterPos2d),
-    (n: 'glRasterPos2dv'; d: @glRasterPos2dv),
-    (n: 'glRasterPos2f'; d: @glRasterPos2f),
-    (n: 'glRasterPos2fv'; d: @glRasterPos2fv),
-    (n: 'glRasterPos2i'; d: @glRasterPos2i),
-    (n: 'glRasterPos2iv'; d: @glRasterPos2iv),
-    (n: 'glRasterPos2s'; d: @glRasterPos2s),
-    (n: 'glRasterPos2sv'; d: @glRasterPos2sv),
-    (n: 'glRasterPos3d'; d: @glRasterPos3d),
-    (n: 'glRasterPos3dv'; d: @glRasterPos3dv),
-    (n: 'glRasterPos3f'; d: @glRasterPos3f),
-    (n: 'glRasterPos3fv'; d: @glRasterPos3fv),
-    (n: 'glRasterPos3i'; d: @glRasterPos3i),
-    (n: 'glRasterPos3iv'; d: @glRasterPos3iv),
-    (n: 'glRasterPos3s'; d: @glRasterPos3s),
-    (n: 'glRasterPos3sv'; d: @glRasterPos3sv),
-    (n: 'glRasterPos4d'; d: @glRasterPos4d),
-    (n: 'glRasterPos4dv'; d: @glRasterPos4dv),
-    (n: 'glRasterPos4f'; d: @glRasterPos4f),
-    (n: 'glRasterPos4fv'; d: @glRasterPos4fv),
-    (n: 'glRasterPos4i'; d: @glRasterPos4i),
-    (n: 'glRasterPos4iv'; d: @glRasterPos4iv),
-    (n: 'glRasterPos4s'; d: @glRasterPos4s),
-    (n: 'glRasterPos4sv'; d: @glRasterPos4sv),
-    (n: 'glReadBuffer'; d: @glReadBuffer),
-    (n: 'glReadPixels'; d: @glReadPixels),
-    (n: 'glRectd'; d: @glRectd),
-    (n: 'glRectdv'; d: @glRectdv),
-    (n: 'glRectf'; d: @glRectf),
-    (n: 'glRectfv'; d: @glRectfv),
-    (n: 'glRecti'; d: @glRecti),
-    (n: 'glRectiv'; d: @glRectiv),
-    (n: 'glRects'; d: @glRects),
-    (n: 'glRectsv'; d: @glRectsv),
-    (n: 'glRenderMode'; d: @glRenderMode),
-    (n: 'glRotated'; d: @glRotated),
-    (n: 'glRotatef'; d: @glRotatef),
-    (n: 'glScaled'; d: @glScaled),
-    (n: 'glScalef'; d: @glScalef),
-    (n: 'glScissor'; d: @glScissor),
-    (n: 'glSelectBuffer'; d: @glSelectBuffer),
-    (n: 'glShadeModel'; d: @glShadeModel),
-    (n: 'glStencilFunc'; d: @glStencilFunc),
-    (n: 'glStencilMask'; d: @glStencilMask),
-    (n: 'glStencilOp'; d: @glStencilOp),
-    (n: 'glTexCoord1d'; d: @glTexCoord1d),
-    (n: 'glTexCoord1dv'; d: @glTexCoord1dv),
-    (n: 'glTexCoord1f'; d: @glTexCoord1f),
-    (n: 'glTexCoord1fv'; d: @glTexCoord1fv),
-    (n: 'glTexCoord1i'; d: @glTexCoord1i),
-    (n: 'glTexCoord1iv'; d: @glTexCoord1iv),
-    (n: 'glTexCoord1s'; d: @glTexCoord1s),
-    (n: 'glTexCoord1sv'; d: @glTexCoord1sv),
-    (n: 'glTexCoord2d'; d: @glTexCoord2d),
-    (n: 'glTexCoord2dv'; d: @glTexCoord2dv),
-    (n: 'glTexCoord2f'; d: @glTexCoord2f),
-    (n: 'glTexCoord2fv'; d: @glTexCoord2fv),
-    (n: 'glTexCoord2i'; d: @glTexCoord2i),
-    (n: 'glTexCoord2iv'; d: @glTexCoord2iv),
-    (n: 'glTexCoord2s'; d: @glTexCoord2s),
-    (n: 'glTexCoord2sv'; d: @glTexCoord2sv),
-    (n: 'glTexCoord3d'; d: @glTexCoord3d),
-    (n: 'glTexCoord3dv'; d: @glTexCoord3dv),
-    (n: 'glTexCoord3f'; d: @glTexCoord3f),
-    (n: 'glTexCoord3fv'; d: @glTexCoord3fv),
-    (n: 'glTexCoord3i'; d: @glTexCoord3i),
-    (n: 'glTexCoord3iv'; d: @glTexCoord3iv),
-    (n: 'glTexCoord3s'; d: @glTexCoord3s),
-    (n: 'glTexCoord3sv'; d: @glTexCoord3sv),
-    (n: 'glTexCoord4d'; d: @glTexCoord4d),
-    (n: 'glTexCoord4dv'; d: @glTexCoord4dv),
-    (n: 'glTexCoord4f'; d: @glTexCoord4f),
-    (n: 'glTexCoord4fv'; d: @glTexCoord4fv),
-    (n: 'glTexCoord4i'; d: @glTexCoord4i),
-    (n: 'glTexCoord4iv'; d: @glTexCoord4iv),
-    (n: 'glTexCoord4s'; d: @glTexCoord4s),
-    (n: 'glTexCoord4sv'; d: @glTexCoord4sv),
-    (n: 'glTexCoordPointer'; d: @glTexCoordPointer),
-    (n: 'glTexEnvf'; d: @glTexEnvf),
-    (n: 'glTexEnvfv'; d: @glTexEnvfv),
-    (n: 'glTexEnvi'; d: @glTexEnvi),
-    (n: 'glTexEnviv'; d: @glTexEnviv),
-    (n: 'glTexGend'; d: @glTexGend),
-    (n: 'glTexGendv'; d: @glTexGendv),
-    (n: 'glTexGenf'; d: @glTexGenf),
-    (n: 'glTexGenfv'; d: @glTexGenfv),
-    (n: 'glTexGeni'; d: @glTexGeni),
-    (n: 'glTexGeniv'; d: @glTexGeniv),
-    (n: 'glTexImage1D'; d: @glTexImage1D),
-    (n: 'glTexImage2D'; d: @glTexImage2D),
-    (n: 'glTexParameterf'; d: @glTexParameterf),
-    (n: 'glTexParameterfv'; d: @glTexParameterfv),
-    (n: 'glTexParameteri'; d: @glTexParameteri),
-    (n: 'glTexParameteriv'; d: @glTexParameteriv),
-    (n: 'glTexSubImage1D'; d: @glTexSubImage1D),
-    (n: 'glTexSubImage2D'; d: @glTexSubImage2D),
-    (n: 'glTranslated'; d: @glTranslated),
-    (n: 'glTranslatef'; d: @glTranslatef),
-    (n: 'glVertex2d'; d: @glVertex2d),
-    (n: 'glVertex2dv'; d: @glVertex2dv),
-    (n: 'glVertex2f'; d: @glVertex2f),
-    (n: 'glVertex2fv'; d: @glVertex2fv),
-    (n: 'glVertex2i'; d: @glVertex2i),
-    (n: 'glVertex2iv'; d: @glVertex2iv),
-    (n: 'glVertex2s'; d: @glVertex2s),
-    (n: 'glVertex2sv'; d: @glVertex2sv),
-    (n: 'glVertex3d'; d: @glVertex3d),
-    (n: 'glVertex3dv'; d: @glVertex3dv),
-    (n: 'glVertex3f'; d: @glVertex3f),
-    (n: 'glVertex3fv'; d: @glVertex3fv),
-    (n: 'glVertex3i'; d: @glVertex3i),
-    (n: 'glVertex3iv'; d: @glVertex3iv),
-    (n: 'glVertex3s'; d: @glVertex3s),
-    (n: 'glVertex3sv'; d: @glVertex3sv),
-    (n: 'glVertex4d'; d: @glVertex4d),
-    (n: 'glVertex4dv'; d: @glVertex4dv),
-    (n: 'glVertex4f'; d: @glVertex4f),
-    (n: 'glVertex4fv'; d: @glVertex4fv),
-    (n: 'glVertex4i'; d: @glVertex4i),
-    (n: 'glVertex4iv'; d: @glVertex4iv),
-    (n: 'glVertex4s'; d: @glVertex4s),
-    (n: 'glVertex4sv'; d: @glVertex4sv),
-    (n: 'glVertexPointer'; d: @glVertexPointer),
-    (n: 'glViewport'; d: @glViewport)
+    (n: 'glAccum'; d: {$ifndef FPC}@{$endif}@glAccum),
+    (n: 'glAlphaFunc'; d: {$ifndef FPC}@{$endif}@glAlphaFunc),
+    (n: 'glAreTexturesResident'; d: {$ifndef FPC}@{$endif}@glAreTexturesResident),
+    (n: 'glArrayElement'; d: {$ifndef FPC}@{$endif}@glArrayElement),
+    (n: 'glBegin'; d: {$ifndef FPC}@{$endif}@glBegin),
+    (n: 'glBindTexture'; d: {$ifndef FPC}@{$endif}@glBindTexture),
+    (n: 'glBitmap'; d: {$ifndef FPC}@{$endif}@glBitmap),
+    (n: 'glBlendFunc'; d: {$ifndef FPC}@{$endif}@glBlendFunc),
+    (n: 'glCallList'; d: {$ifndef FPC}@{$endif}@glCallList),
+    (n: 'glCallLists'; d: {$ifndef FPC}@{$endif}@glCallLists),
+    (n: 'glClear'; d: {$ifndef FPC}@{$endif}@glClear),
+    (n: 'glClearAccum'; d: {$ifndef FPC}@{$endif}@glClearAccum),
+    (n: 'glClearColor'; d: {$ifndef FPC}@{$endif}@glClearColor),
+    (n: 'glClearDepth'; d: {$ifndef FPC}@{$endif}@glClearDepth),
+    (n: 'glClearIndex'; d: {$ifndef FPC}@{$endif}@glClearIndex),
+    (n: 'glClearStencil'; d: {$ifndef FPC}@{$endif}@glClearStencil),
+    (n: 'glClipPlane'; d: {$ifndef FPC}@{$endif}@glClipPlane),
+    (n: 'glColor3b'; d: {$ifndef FPC}@{$endif}@glColor3b),
+    (n: 'glColor3bv'; d: {$ifndef FPC}@{$endif}@glColor3bv),
+    (n: 'glColor3d'; d: {$ifndef FPC}@{$endif}@glColor3d),
+    (n: 'glColor3dv'; d: {$ifndef FPC}@{$endif}@glColor3dv),
+    (n: 'glColor3f'; d: {$ifndef FPC}@{$endif}@glColor3f),
+    (n: 'glColor3fv'; d: {$ifndef FPC}@{$endif}@glColor3fv),
+    (n: 'glColor3i'; d: {$ifndef FPC}@{$endif}@glColor3i),
+    (n: 'glColor3iv'; d: {$ifndef FPC}@{$endif}@glColor3iv),
+    (n: 'glColor3s'; d: {$ifndef FPC}@{$endif}@glColor3s),
+    (n: 'glColor3sv'; d: {$ifndef FPC}@{$endif}@glColor3sv),
+    (n: 'glColor3ub'; d: {$ifndef FPC}@{$endif}@glColor3ub),
+    (n: 'glColor3ubv'; d: {$ifndef FPC}@{$endif}@glColor3ubv),
+    (n: 'glColor3ui'; d: {$ifndef FPC}@{$endif}@glColor3ui),
+    (n: 'glColor3uiv'; d: {$ifndef FPC}@{$endif}@glColor3uiv),
+    (n: 'glColor3us'; d: {$ifndef FPC}@{$endif}@glColor3us),
+    (n: 'glColor3usv'; d: {$ifndef FPC}@{$endif}@glColor3usv),
+    (n: 'glColor4b'; d: {$ifndef FPC}@{$endif}@glColor4b),
+    (n: 'glColor4bv'; d: {$ifndef FPC}@{$endif}@glColor4bv),
+    (n: 'glColor4d'; d: {$ifndef FPC}@{$endif}@glColor4d),
+    (n: 'glColor4dv'; d: {$ifndef FPC}@{$endif}@glColor4dv),
+    (n: 'glColor4f'; d: {$ifndef FPC}@{$endif}@glColor4f),
+    (n: 'glColor4fv'; d: {$ifndef FPC}@{$endif}@glColor4fv),
+    (n: 'glColor4i'; d: {$ifndef FPC}@{$endif}@glColor4i),
+    (n: 'glColor4iv'; d: {$ifndef FPC}@{$endif}@glColor4iv),
+    (n: 'glColor4s'; d: {$ifndef FPC}@{$endif}@glColor4s),
+    (n: 'glColor4sv'; d: {$ifndef FPC}@{$endif}@glColor4sv),
+    (n: 'glColor4ub'; d: {$ifndef FPC}@{$endif}@glColor4ub),
+    (n: 'glColor4ubv'; d: {$ifndef FPC}@{$endif}@glColor4ubv),
+    (n: 'glColor4ui'; d: {$ifndef FPC}@{$endif}@glColor4ui),
+    (n: 'glColor4uiv'; d: {$ifndef FPC}@{$endif}@glColor4uiv),
+    (n: 'glColor4us'; d: {$ifndef FPC}@{$endif}@glColor4us),
+    (n: 'glColor4usv'; d: {$ifndef FPC}@{$endif}@glColor4usv),
+    (n: 'glColorMask'; d: {$ifndef FPC}@{$endif}@glColorMask),
+    (n: 'glColorMaterial'; d: {$ifndef FPC}@{$endif}@glColorMaterial),
+    (n: 'glColorPointer'; d: {$ifndef FPC}@{$endif}@glColorPointer),
+    (n: 'glCopyPixels'; d: {$ifndef FPC}@{$endif}@glCopyPixels),
+    (n: 'glCopyTexImage1D'; d: {$ifndef FPC}@{$endif}@glCopyTexImage1D),
+    (n: 'glCopyTexImage2D'; d: {$ifndef FPC}@{$endif}@glCopyTexImage2D),
+    (n: 'glCopyTexSubImage1D'; d: {$ifndef FPC}@{$endif}@glCopyTexSubImage1D),
+    (n: 'glCopyTexSubImage2D'; d: {$ifndef FPC}@{$endif}@glCopyTexSubImage2D),
+    (n: 'glCullFace'; d: {$ifndef FPC}@{$endif}@glCullFace),
+    (n: 'glDeleteLists'; d: {$ifndef FPC}@{$endif}@glDeleteLists),
+    (n: 'glDeleteTextures'; d: {$ifndef FPC}@{$endif}@glDeleteTextures),
+    (n: 'glDepthFunc'; d: {$ifndef FPC}@{$endif}@glDepthFunc),
+    (n: 'glDepthMask'; d: {$ifndef FPC}@{$endif}@glDepthMask),
+    (n: 'glDepthRange'; d: {$ifndef FPC}@{$endif}@glDepthRange),
+    (n: 'glDisable'; d: {$ifndef FPC}@{$endif}@glDisable),
+    (n: 'glDisableClientState'; d: {$ifndef FPC}@{$endif}@glDisableClientState),
+    (n: 'glDrawArrays'; d: {$ifndef FPC}@{$endif}@glDrawArrays),
+    (n: 'glDrawBuffer'; d: {$ifndef FPC}@{$endif}@glDrawBuffer),
+    (n: 'glDrawElements'; d: {$ifndef FPC}@{$endif}@glDrawElements),
+    (n: 'glDrawPixels'; d: {$ifndef FPC}@{$endif}@glDrawPixels),
+    (n: 'glEdgeFlag'; d: {$ifndef FPC}@{$endif}@glEdgeFlag),
+    (n: 'glEdgeFlagPointer'; d: {$ifndef FPC}@{$endif}@glEdgeFlagPointer),
+    (n: 'glEdgeFlagv'; d: {$ifndef FPC}@{$endif}@glEdgeFlagv),
+    (n: 'glEnable'; d: {$ifndef FPC}@{$endif}@glEnable),
+    (n: 'glEnableClientState'; d: {$ifndef FPC}@{$endif}@glEnableClientState),
+    (n: 'glEnd'; d: {$ifndef FPC}@{$endif}@glEnd),
+    (n: 'glEndList'; d: {$ifndef FPC}@{$endif}@glEndList),
+    (n: 'glEvalCoord1d'; d: {$ifndef FPC}@{$endif}@glEvalCoord1d),
+    (n: 'glEvalCoord1dv'; d: {$ifndef FPC}@{$endif}@glEvalCoord1dv),
+    (n: 'glEvalCoord1f'; d: {$ifndef FPC}@{$endif}@glEvalCoord1f),
+    (n: 'glEvalCoord1fv'; d: {$ifndef FPC}@{$endif}@glEvalCoord1fv),
+    (n: 'glEvalCoord2d'; d: {$ifndef FPC}@{$endif}@glEvalCoord2d),
+    (n: 'glEvalCoord2dv'; d: {$ifndef FPC}@{$endif}@glEvalCoord2dv),
+    (n: 'glEvalCoord2f'; d: {$ifndef FPC}@{$endif}@glEvalCoord2f),
+    (n: 'glEvalCoord2fv'; d: {$ifndef FPC}@{$endif}@glEvalCoord2fv),
+    (n: 'glEvalMesh1'; d: {$ifndef FPC}@{$endif}@glEvalMesh1),
+    (n: 'glEvalMesh2'; d: {$ifndef FPC}@{$endif}@glEvalMesh2),
+    (n: 'glEvalPoint1'; d: {$ifndef FPC}@{$endif}@glEvalPoint1),
+    (n: 'glEvalPoint2'; d: {$ifndef FPC}@{$endif}@glEvalPoint2),
+    (n: 'glFeedbackBuffer'; d: {$ifndef FPC}@{$endif}@glFeedbackBuffer),
+    (n: 'glFinish'; d: {$ifndef FPC}@{$endif}@glFinish),
+    (n: 'glFlush'; d: {$ifndef FPC}@{$endif}@glFlush),
+    (n: 'glFogf'; d: {$ifndef FPC}@{$endif}@glFogf),
+    (n: 'glFogfv'; d: {$ifndef FPC}@{$endif}@glFogfv),
+    (n: 'glFogi'; d: {$ifndef FPC}@{$endif}@glFogi),
+    (n: 'glFogiv'; d: {$ifndef FPC}@{$endif}@glFogiv),
+    (n: 'glFrontFace'; d: {$ifndef FPC}@{$endif}@glFrontFace),
+    (n: 'glFrustum'; d: {$ifndef FPC}@{$endif}@glFrustum),
+    (n: 'glGenLists'; d: {$ifndef FPC}@{$endif}@glGenLists),
+    (n: 'glGenTextures'; d: {$ifndef FPC}@{$endif}@glGenTextures),
+    (n: 'glGetBooleanv'; d: {$ifndef FPC}@{$endif}@glGetBooleanv),
+    (n: 'glGetClipPlane'; d: {$ifndef FPC}@{$endif}@glGetClipPlane),
+    (n: 'glGetDoublev'; d: {$ifndef FPC}@{$endif}@glGetDoublev),
+    (n: 'glGetError'; d: {$ifndef FPC}@{$endif}@glGetError),
+    (n: 'glGetFloatv'; d: {$ifndef FPC}@{$endif}@glGetFloatv),
+    (n: 'glGetIntegerv'; d: {$ifndef FPC}@{$endif}@glGetIntegerv),
+    (n: 'glGetLightfv'; d: {$ifndef FPC}@{$endif}@glGetLightfv),
+    (n: 'glGetLightiv'; d: {$ifndef FPC}@{$endif}@glGetLightiv),
+    (n: 'glGetMapdv'; d: {$ifndef FPC}@{$endif}@glGetMapdv),
+    (n: 'glGetMapfv'; d: {$ifndef FPC}@{$endif}@glGetMapfv),
+    (n: 'glGetMapiv'; d: {$ifndef FPC}@{$endif}@glGetMapiv),
+    (n: 'glGetMaterialfv'; d: {$ifndef FPC}@{$endif}@glGetMaterialfv),
+    (n: 'glGetMaterialiv'; d: {$ifndef FPC}@{$endif}@glGetMaterialiv),
+    (n: 'glGetPixelMapfv'; d: {$ifndef FPC}@{$endif}@glGetPixelMapfv),
+    (n: 'glGetPixelMapuiv'; d: {$ifndef FPC}@{$endif}@glGetPixelMapuiv),
+    (n: 'glGetPixelMapusv'; d: {$ifndef FPC}@{$endif}@glGetPixelMapusv),
+    (n: 'glGetPointerv'; d: {$ifndef FPC}@{$endif}@glGetPointerv),
+    (n: 'glGetPolygonStipple'; d: {$ifndef FPC}@{$endif}@glGetPolygonStipple),
+    (n: 'glGetString'; d: {$ifndef FPC}@{$endif}@glGetString),
+    (n: 'glGetTexEnvfv'; d: {$ifndef FPC}@{$endif}@glGetTexEnvfv),
+    (n: 'glGetTexEnviv'; d: {$ifndef FPC}@{$endif}@glGetTexEnviv),
+    (n: 'glGetTexGendv'; d: {$ifndef FPC}@{$endif}@glGetTexGendv),
+    (n: 'glGetTexGenfv'; d: {$ifndef FPC}@{$endif}@glGetTexGenfv),
+    (n: 'glGetTexGeniv'; d: {$ifndef FPC}@{$endif}@glGetTexGeniv),
+    (n: 'glGetTexImage'; d: {$ifndef FPC}@{$endif}@glGetTexImage),
+    (n: 'glGetTexLevelParameterfv'; d: {$ifndef FPC}@{$endif}@glGetTexLevelParameterfv),
+    (n: 'glGetTexLevelParameteriv'; d: {$ifndef FPC}@{$endif}@glGetTexLevelParameteriv),
+    (n: 'glGetTexParameterfv'; d: {$ifndef FPC}@{$endif}@glGetTexParameterfv),
+    (n: 'glGetTexParameteriv'; d: {$ifndef FPC}@{$endif}@glGetTexParameteriv),
+    (n: 'glHint'; d: {$ifndef FPC}@{$endif}@glHint),
+    (n: 'glIndexMask'; d: {$ifndef FPC}@{$endif}@glIndexMask),
+    (n: 'glIndexPointer'; d: {$ifndef FPC}@{$endif}@glIndexPointer),
+    (n: 'glIndexd'; d: {$ifndef FPC}@{$endif}@glIndexd),
+    (n: 'glIndexdv'; d: {$ifndef FPC}@{$endif}@glIndexdv),
+    (n: 'glIndexf'; d: {$ifndef FPC}@{$endif}@glIndexf),
+    (n: 'glIndexfv'; d: {$ifndef FPC}@{$endif}@glIndexfv),
+    (n: 'glIndexi'; d: {$ifndef FPC}@{$endif}@glIndexi),
+    (n: 'glIndexiv'; d: {$ifndef FPC}@{$endif}@glIndexiv),
+    (n: 'glIndexs'; d: {$ifndef FPC}@{$endif}@glIndexs),
+    (n: 'glIndexsv'; d: {$ifndef FPC}@{$endif}@glIndexsv),
+    (n: 'glIndexub'; d: {$ifndef FPC}@{$endif}@glIndexub),
+    (n: 'glIndexubv'; d: {$ifndef FPC}@{$endif}@glIndexubv),
+    (n: 'glInitNames'; d: {$ifndef FPC}@{$endif}@glInitNames),
+    (n: 'glInterleavedArrays'; d: {$ifndef FPC}@{$endif}@glInterleavedArrays),
+    (n: 'glIsEnabled'; d: {$ifndef FPC}@{$endif}@glIsEnabled),
+    (n: 'glIsList'; d: {$ifndef FPC}@{$endif}@glIsList),
+    (n: 'glIsTexture'; d: {$ifndef FPC}@{$endif}@glIsTexture),
+    (n: 'glLightModelf'; d: {$ifndef FPC}@{$endif}@glLightModelf),
+    (n: 'glLightModelfv'; d: {$ifndef FPC}@{$endif}@glLightModelfv),
+    (n: 'glLightModeli'; d: {$ifndef FPC}@{$endif}@glLightModeli),
+    (n: 'glLightModeliv'; d: {$ifndef FPC}@{$endif}@glLightModeliv),
+    (n: 'glLightf'; d: {$ifndef FPC}@{$endif}@glLightf),
+    (n: 'glLightfv'; d: {$ifndef FPC}@{$endif}@glLightfv),
+    (n: 'glLighti'; d: {$ifndef FPC}@{$endif}@glLighti),
+    (n: 'glLightiv'; d: {$ifndef FPC}@{$endif}@glLightiv),
+    (n: 'glLineStipple'; d: {$ifndef FPC}@{$endif}@glLineStipple),
+    (n: 'glLineWidth'; d: {$ifndef FPC}@{$endif}@glLineWidth),
+    (n: 'glListBase'; d: {$ifndef FPC}@{$endif}@glListBase),
+    (n: 'glLoadIdentity'; d: {$ifndef FPC}@{$endif}@glLoadIdentity),
+    (n: 'glLoadMatrixd'; d: {$ifndef FPC}@{$endif}@glLoadMatrixd),
+    (n: 'glLoadMatrixf'; d: {$ifndef FPC}@{$endif}@glLoadMatrixf),
+    (n: 'glLoadName'; d: {$ifndef FPC}@{$endif}@glLoadName),
+    (n: 'glLogicOp'; d: {$ifndef FPC}@{$endif}@glLogicOp),
+    (n: 'glMap1d'; d: {$ifndef FPC}@{$endif}@glMap1d),
+    (n: 'glMap1f'; d: {$ifndef FPC}@{$endif}@glMap1f),
+    (n: 'glMap2d'; d: {$ifndef FPC}@{$endif}@glMap2d),
+    (n: 'glMap2f'; d: {$ifndef FPC}@{$endif}@glMap2f),
+    (n: 'glMapGrid1d'; d: {$ifndef FPC}@{$endif}@glMapGrid1d),
+    (n: 'glMapGrid1f'; d: {$ifndef FPC}@{$endif}@glMapGrid1f),
+    (n: 'glMapGrid2d'; d: {$ifndef FPC}@{$endif}@glMapGrid2d),
+    (n: 'glMapGrid2f'; d: {$ifndef FPC}@{$endif}@glMapGrid2f),
+    (n: 'glMaterialf'; d: {$ifndef FPC}@{$endif}@glMaterialf),
+    (n: 'glMaterialfv'; d: {$ifndef FPC}@{$endif}@glMaterialfv),
+    (n: 'glMateriali'; d: {$ifndef FPC}@{$endif}@glMateriali),
+    (n: 'glMaterialiv'; d: {$ifndef FPC}@{$endif}@glMaterialiv),
+    (n: 'glMatrixMode'; d: {$ifndef FPC}@{$endif}@glMatrixMode),
+    (n: 'glMultMatrixd'; d: {$ifndef FPC}@{$endif}@glMultMatrixd),
+    (n: 'glMultMatrixf'; d: {$ifndef FPC}@{$endif}@glMultMatrixf),
+    (n: 'glNewList'; d: {$ifndef FPC}@{$endif}@glNewList),
+    (n: 'glNormal3b'; d: {$ifndef FPC}@{$endif}@glNormal3b),
+    (n: 'glNormal3bv'; d: {$ifndef FPC}@{$endif}@glNormal3bv),
+    (n: 'glNormal3d'; d: {$ifndef FPC}@{$endif}@glNormal3d),
+    (n: 'glNormal3dv'; d: {$ifndef FPC}@{$endif}@glNormal3dv),
+    (n: 'glNormal3f'; d: {$ifndef FPC}@{$endif}@glNormal3f),
+    (n: 'glNormal3fv'; d: {$ifndef FPC}@{$endif}@glNormal3fv),
+    (n: 'glNormal3i'; d: {$ifndef FPC}@{$endif}@glNormal3i),
+    (n: 'glNormal3iv'; d: {$ifndef FPC}@{$endif}@glNormal3iv),
+    (n: 'glNormal3s'; d: {$ifndef FPC}@{$endif}@glNormal3s),
+    (n: 'glNormal3sv'; d: {$ifndef FPC}@{$endif}@glNormal3sv),
+    (n: 'glNormalPointer'; d: {$ifndef FPC}@{$endif}@glNormalPointer),
+    (n: 'glOrtho'; d: {$ifndef FPC}@{$endif}@glOrtho),
+    (n: 'glPassThrough'; d: {$ifndef FPC}@{$endif}@glPassThrough),
+    (n: 'glPixelMapfv'; d: {$ifndef FPC}@{$endif}@glPixelMapfv),
+    (n: 'glPixelMapuiv'; d: {$ifndef FPC}@{$endif}@glPixelMapuiv),
+    (n: 'glPixelMapusv'; d: {$ifndef FPC}@{$endif}@glPixelMapusv),
+    (n: 'glPixelStoref'; d: {$ifndef FPC}@{$endif}@glPixelStoref),
+    (n: 'glPixelStorei'; d: {$ifndef FPC}@{$endif}@glPixelStorei),
+    (n: 'glPixelTransferf'; d: {$ifndef FPC}@{$endif}@glPixelTransferf),
+    (n: 'glPixelTransferi'; d: {$ifndef FPC}@{$endif}@glPixelTransferi),
+    (n: 'glPixelZoom'; d: {$ifndef FPC}@{$endif}@glPixelZoom),
+    (n: 'glPointSize'; d: {$ifndef FPC}@{$endif}@glPointSize),
+    (n: 'glPolygonMode'; d: {$ifndef FPC}@{$endif}@glPolygonMode),
+    (n: 'glPolygonOffset'; d: {$ifndef FPC}@{$endif}@glPolygonOffset),
+    (n: 'glPolygonStipple'; d: {$ifndef FPC}@{$endif}@glPolygonStipple),
+    (n: 'glPopAttrib'; d: {$ifndef FPC}@{$endif}@glPopAttrib),
+    (n: 'glPopClientAttrib'; d: {$ifndef FPC}@{$endif}@glPopClientAttrib),
+    (n: 'glPopMatrix'; d: {$ifndef FPC}@{$endif}@glPopMatrix),
+    (n: 'glPopName'; d: {$ifndef FPC}@{$endif}@glPopName),
+    (n: 'glPrioritizeTextures'; d: {$ifndef FPC}@{$endif}@glPrioritizeTextures),
+    (n: 'glPushAttrib'; d: {$ifndef FPC}@{$endif}@glPushAttrib),
+    (n: 'glPushClientAttrib'; d: {$ifndef FPC}@{$endif}@glPushClientAttrib),
+    (n: 'glPushMatrix'; d: {$ifndef FPC}@{$endif}@glPushMatrix),
+    (n: 'glPushName'; d: {$ifndef FPC}@{$endif}@glPushName),
+    (n: 'glRasterPos2d'; d: {$ifndef FPC}@{$endif}@glRasterPos2d),
+    (n: 'glRasterPos2dv'; d: {$ifndef FPC}@{$endif}@glRasterPos2dv),
+    (n: 'glRasterPos2f'; d: {$ifndef FPC}@{$endif}@glRasterPos2f),
+    (n: 'glRasterPos2fv'; d: {$ifndef FPC}@{$endif}@glRasterPos2fv),
+    (n: 'glRasterPos2i'; d: {$ifndef FPC}@{$endif}@glRasterPos2i),
+    (n: 'glRasterPos2iv'; d: {$ifndef FPC}@{$endif}@glRasterPos2iv),
+    (n: 'glRasterPos2s'; d: {$ifndef FPC}@{$endif}@glRasterPos2s),
+    (n: 'glRasterPos2sv'; d: {$ifndef FPC}@{$endif}@glRasterPos2sv),
+    (n: 'glRasterPos3d'; d: {$ifndef FPC}@{$endif}@glRasterPos3d),
+    (n: 'glRasterPos3dv'; d: {$ifndef FPC}@{$endif}@glRasterPos3dv),
+    (n: 'glRasterPos3f'; d: {$ifndef FPC}@{$endif}@glRasterPos3f),
+    (n: 'glRasterPos3fv'; d: {$ifndef FPC}@{$endif}@glRasterPos3fv),
+    (n: 'glRasterPos3i'; d: {$ifndef FPC}@{$endif}@glRasterPos3i),
+    (n: 'glRasterPos3iv'; d: {$ifndef FPC}@{$endif}@glRasterPos3iv),
+    (n: 'glRasterPos3s'; d: {$ifndef FPC}@{$endif}@glRasterPos3s),
+    (n: 'glRasterPos3sv'; d: {$ifndef FPC}@{$endif}@glRasterPos3sv),
+    (n: 'glRasterPos4d'; d: {$ifndef FPC}@{$endif}@glRasterPos4d),
+    (n: 'glRasterPos4dv'; d: {$ifndef FPC}@{$endif}@glRasterPos4dv),
+    (n: 'glRasterPos4f'; d: {$ifndef FPC}@{$endif}@glRasterPos4f),
+    (n: 'glRasterPos4fv'; d: {$ifndef FPC}@{$endif}@glRasterPos4fv),
+    (n: 'glRasterPos4i'; d: {$ifndef FPC}@{$endif}@glRasterPos4i),
+    (n: 'glRasterPos4iv'; d: {$ifndef FPC}@{$endif}@glRasterPos4iv),
+    (n: 'glRasterPos4s'; d: {$ifndef FPC}@{$endif}@glRasterPos4s),
+    (n: 'glRasterPos4sv'; d: {$ifndef FPC}@{$endif}@glRasterPos4sv),
+    (n: 'glReadBuffer'; d: {$ifndef FPC}@{$endif}@glReadBuffer),
+    (n: 'glReadPixels'; d: {$ifndef FPC}@{$endif}@glReadPixels),
+    (n: 'glRectd'; d: {$ifndef FPC}@{$endif}@glRectd),
+    (n: 'glRectdv'; d: {$ifndef FPC}@{$endif}@glRectdv),
+    (n: 'glRectf'; d: {$ifndef FPC}@{$endif}@glRectf),
+    (n: 'glRectfv'; d: {$ifndef FPC}@{$endif}@glRectfv),
+    (n: 'glRecti'; d: {$ifndef FPC}@{$endif}@glRecti),
+    (n: 'glRectiv'; d: {$ifndef FPC}@{$endif}@glRectiv),
+    (n: 'glRects'; d: {$ifndef FPC}@{$endif}@glRects),
+    (n: 'glRectsv'; d: {$ifndef FPC}@{$endif}@glRectsv),
+    (n: 'glRenderMode'; d: {$ifndef FPC}@{$endif}@glRenderMode),
+    (n: 'glRotated'; d: {$ifndef FPC}@{$endif}@glRotated),
+    (n: 'glRotatef'; d: {$ifndef FPC}@{$endif}@glRotatef),
+    (n: 'glScaled'; d: {$ifndef FPC}@{$endif}@glScaled),
+    (n: 'glScalef'; d: {$ifndef FPC}@{$endif}@glScalef),
+    (n: 'glScissor'; d: {$ifndef FPC}@{$endif}@glScissor),
+    (n: 'glSelectBuffer'; d: {$ifndef FPC}@{$endif}@glSelectBuffer),
+    (n: 'glShadeModel'; d: {$ifndef FPC}@{$endif}@glShadeModel),
+    (n: 'glStencilFunc'; d: {$ifndef FPC}@{$endif}@glStencilFunc),
+    (n: 'glStencilMask'; d: {$ifndef FPC}@{$endif}@glStencilMask),
+    (n: 'glStencilOp'; d: {$ifndef FPC}@{$endif}@glStencilOp),
+    (n: 'glTexCoord1d'; d: {$ifndef FPC}@{$endif}@glTexCoord1d),
+    (n: 'glTexCoord1dv'; d: {$ifndef FPC}@{$endif}@glTexCoord1dv),
+    (n: 'glTexCoord1f'; d: {$ifndef FPC}@{$endif}@glTexCoord1f),
+    (n: 'glTexCoord1fv'; d: {$ifndef FPC}@{$endif}@glTexCoord1fv),
+    (n: 'glTexCoord1i'; d: {$ifndef FPC}@{$endif}@glTexCoord1i),
+    (n: 'glTexCoord1iv'; d: {$ifndef FPC}@{$endif}@glTexCoord1iv),
+    (n: 'glTexCoord1s'; d: {$ifndef FPC}@{$endif}@glTexCoord1s),
+    (n: 'glTexCoord1sv'; d: {$ifndef FPC}@{$endif}@glTexCoord1sv),
+    (n: 'glTexCoord2d'; d: {$ifndef FPC}@{$endif}@glTexCoord2d),
+    (n: 'glTexCoord2dv'; d: {$ifndef FPC}@{$endif}@glTexCoord2dv),
+    (n: 'glTexCoord2f'; d: {$ifndef FPC}@{$endif}@glTexCoord2f),
+    (n: 'glTexCoord2fv'; d: {$ifndef FPC}@{$endif}@glTexCoord2fv),
+    (n: 'glTexCoord2i'; d: {$ifndef FPC}@{$endif}@glTexCoord2i),
+    (n: 'glTexCoord2iv'; d: {$ifndef FPC}@{$endif}@glTexCoord2iv),
+    (n: 'glTexCoord2s'; d: {$ifndef FPC}@{$endif}@glTexCoord2s),
+    (n: 'glTexCoord2sv'; d: {$ifndef FPC}@{$endif}@glTexCoord2sv),
+    (n: 'glTexCoord3d'; d: {$ifndef FPC}@{$endif}@glTexCoord3d),
+    (n: 'glTexCoord3dv'; d: {$ifndef FPC}@{$endif}@glTexCoord3dv),
+    (n: 'glTexCoord3f'; d: {$ifndef FPC}@{$endif}@glTexCoord3f),
+    (n: 'glTexCoord3fv'; d: {$ifndef FPC}@{$endif}@glTexCoord3fv),
+    (n: 'glTexCoord3i'; d: {$ifndef FPC}@{$endif}@glTexCoord3i),
+    (n: 'glTexCoord3iv'; d: {$ifndef FPC}@{$endif}@glTexCoord3iv),
+    (n: 'glTexCoord3s'; d: {$ifndef FPC}@{$endif}@glTexCoord3s),
+    (n: 'glTexCoord3sv'; d: {$ifndef FPC}@{$endif}@glTexCoord3sv),
+    (n: 'glTexCoord4d'; d: {$ifndef FPC}@{$endif}@glTexCoord4d),
+    (n: 'glTexCoord4dv'; d: {$ifndef FPC}@{$endif}@glTexCoord4dv),
+    (n: 'glTexCoord4f'; d: {$ifndef FPC}@{$endif}@glTexCoord4f),
+    (n: 'glTexCoord4fv'; d: {$ifndef FPC}@{$endif}@glTexCoord4fv),
+    (n: 'glTexCoord4i'; d: {$ifndef FPC}@{$endif}@glTexCoord4i),
+    (n: 'glTexCoord4iv'; d: {$ifndef FPC}@{$endif}@glTexCoord4iv),
+    (n: 'glTexCoord4s'; d: {$ifndef FPC}@{$endif}@glTexCoord4s),
+    (n: 'glTexCoord4sv'; d: {$ifndef FPC}@{$endif}@glTexCoord4sv),
+    (n: 'glTexCoordPointer'; d: {$ifndef FPC}@{$endif}@glTexCoordPointer),
+    (n: 'glTexEnvf'; d: {$ifndef FPC}@{$endif}@glTexEnvf),
+    (n: 'glTexEnvfv'; d: {$ifndef FPC}@{$endif}@glTexEnvfv),
+    (n: 'glTexEnvi'; d: {$ifndef FPC}@{$endif}@glTexEnvi),
+    (n: 'glTexEnviv'; d: {$ifndef FPC}@{$endif}@glTexEnviv),
+    (n: 'glTexGend'; d: {$ifndef FPC}@{$endif}@glTexGend),
+    (n: 'glTexGendv'; d: {$ifndef FPC}@{$endif}@glTexGendv),
+    (n: 'glTexGenf'; d: {$ifndef FPC}@{$endif}@glTexGenf),
+    (n: 'glTexGenfv'; d: {$ifndef FPC}@{$endif}@glTexGenfv),
+    (n: 'glTexGeni'; d: {$ifndef FPC}@{$endif}@glTexGeni),
+    (n: 'glTexGeniv'; d: {$ifndef FPC}@{$endif}@glTexGeniv),
+    (n: 'glTexImage1D'; d: {$ifndef FPC}@{$endif}@glTexImage1D),
+    (n: 'glTexImage2D'; d: {$ifndef FPC}@{$endif}@glTexImage2D),
+    (n: 'glTexParameterf'; d: {$ifndef FPC}@{$endif}@glTexParameterf),
+    (n: 'glTexParameterfv'; d: {$ifndef FPC}@{$endif}@glTexParameterfv),
+    (n: 'glTexParameteri'; d: {$ifndef FPC}@{$endif}@glTexParameteri),
+    (n: 'glTexParameteriv'; d: {$ifndef FPC}@{$endif}@glTexParameteriv),
+    (n: 'glTexSubImage1D'; d: {$ifndef FPC}@{$endif}@glTexSubImage1D),
+    (n: 'glTexSubImage2D'; d: {$ifndef FPC}@{$endif}@glTexSubImage2D),
+    (n: 'glTranslated'; d: {$ifndef FPC}@{$endif}@glTranslated),
+    (n: 'glTranslatef'; d: {$ifndef FPC}@{$endif}@glTranslatef),
+    (n: 'glVertex2d'; d: {$ifndef FPC}@{$endif}@glVertex2d),
+    (n: 'glVertex2dv'; d: {$ifndef FPC}@{$endif}@glVertex2dv),
+    (n: 'glVertex2f'; d: {$ifndef FPC}@{$endif}@glVertex2f),
+    (n: 'glVertex2fv'; d: {$ifndef FPC}@{$endif}@glVertex2fv),
+    (n: 'glVertex2i'; d: {$ifndef FPC}@{$endif}@glVertex2i),
+    (n: 'glVertex2iv'; d: {$ifndef FPC}@{$endif}@glVertex2iv),
+    (n: 'glVertex2s'; d: {$ifndef FPC}@{$endif}@glVertex2s),
+    (n: 'glVertex2sv'; d: {$ifndef FPC}@{$endif}@glVertex2sv),
+    (n: 'glVertex3d'; d: {$ifndef FPC}@{$endif}@glVertex3d),
+    (n: 'glVertex3dv'; d: {$ifndef FPC}@{$endif}@glVertex3dv),
+    (n: 'glVertex3f'; d: {$ifndef FPC}@{$endif}@glVertex3f),
+    (n: 'glVertex3fv'; d: {$ifndef FPC}@{$endif}@glVertex3fv),
+    (n: 'glVertex3i'; d: {$ifndef FPC}@{$endif}@glVertex3i),
+    (n: 'glVertex3iv'; d: {$ifndef FPC}@{$endif}@glVertex3iv),
+    (n: 'glVertex3s'; d: {$ifndef FPC}@{$endif}@glVertex3s),
+    (n: 'glVertex3sv'; d: {$ifndef FPC}@{$endif}@glVertex3sv),
+    (n: 'glVertex4d'; d: {$ifndef FPC}@{$endif}@glVertex4d),
+    (n: 'glVertex4dv'; d: {$ifndef FPC}@{$endif}@glVertex4dv),
+    (n: 'glVertex4f'; d: {$ifndef FPC}@{$endif}@glVertex4f),
+    (n: 'glVertex4fv'; d: {$ifndef FPC}@{$endif}@glVertex4fv),
+    (n: 'glVertex4i'; d: {$ifndef FPC}@{$endif}@glVertex4i),
+    (n: 'glVertex4iv'; d: {$ifndef FPC}@{$endif}@glVertex4iv),
+    (n: 'glVertex4s'; d: {$ifndef FPC}@{$endif}@glVertex4s),
+    (n: 'glVertex4sv'; d: {$ifndef FPC}@{$endif}@glVertex4sv),
+    (n: 'glVertexPointer'; d: {$ifndef FPC}@{$endif}@glVertexPointer),
+    (n: 'glViewport'; d: {$ifndef FPC}@{$endif}@glViewport)
     );
 {$ifdef mswindows}
  funcsopt: array[0..0] of funcinfoty = (
-    (n: 'ChoosePixelFormat'; d: @ChoosePixelFormat)
+    (n: 'ChoosePixelFormat'; d: {$ifndef FPC}@{$endif}@ChoosePixelFormat)
     );
 {$endif}
 const
@@ -1965,7 +1967,7 @@ begin
  initializedynlib(libinfo,sonames,opengllib,funcs,
             {$ifdef mswindows}funcsopt{$else}[]{$endif},errormessage,@init);
 {$ifdef mswindows}
- if ChoosePixelFormat = nil then begin
+ if {$ifndef FPC}@{$endif}ChoosePixelFormat = nil then begin
   ChoosePixelFormat:= @WinChoosePixelFormat;
  end;
 {$endif}

@@ -65,7 +65,7 @@ procedure FreeMemAndNil(var P: Pointer);
 
 {$ifndef SUPPORT_PATHDELIM}
 const
-{$ifdef WINDOWS}
+{$ifdef msWINDOWS}
   PathDelim = '\';
 {$else}
   PathDelim = '/';
@@ -113,7 +113,7 @@ function Max(x, y: integer): integer;
 
 implementation
 
-{$ifdef WINDOWS}
+{$ifdef msWINDOWS}
 uses
   Windows;
 {$endif}
@@ -139,7 +139,7 @@ end;
 
 function IsFullFilePath(const Path: string): Boolean; // full means not relative
 begin
-{$ifdef WINDOWS}
+{$ifdef msWINDOWS}
   Result := Length(Path) > 1;
   if Result then
     // check for 'x:' or '\\' at start of path
@@ -227,7 +227,7 @@ end;
 
 function IncludeTrailingPathDelimiter(const Path: string): string;
 begin
-{$ifdef WINDOWS}
+{$ifdef msWINDOWS}
   Result := IncludeTrailingBackslash(Path);
 {$else}
   Result := IncludeTrailingSlash(Path);

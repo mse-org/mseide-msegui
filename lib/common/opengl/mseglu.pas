@@ -57,7 +57,7 @@ Abstract:
 {$mode objfpc} {$h+}
 {$MACRO ON}
 //{$MODE Delphi}
-{$IFDEF Windows}
+{$IFDEF msWindows}
   {$DEFINE extdecl := stdcall}
 {$ELSE}
   {$DEFINE extdecl := cdecl}
@@ -74,7 +74,7 @@ interface
 
 uses
   SysUtils,
-  {$IFDEF Windows}
+  {$IFDEF msWindows}
   Windows,
   {$ELSE}
   {$IFDEF MORPHOS}

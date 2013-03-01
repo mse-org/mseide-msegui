@@ -10,7 +10,7 @@
 {$MACRO ON}
 //{$MODE Delphi}
 {$mode objfpc} {$h+}
-{$IFDEF Windows}
+{$IFDEF msWindows}
   {$DEFINE extdecl:=stdcall }
 {$ELSE}
   {$DEFINE extdecl:=cdecl }
@@ -506,7 +506,7 @@ function Load_GL_ARB_multisample: Boolean;
 
 function Load_GL_ARB_texture_env_add: Boolean;
 
-{$IFDEF Windows}
+{$IFDEF msWindows}
 //***** WGL_ARB_extensions_string *****//
 var
   wglGetExtensionsStringARB: function(hdc: HDC): Pchar; extdecl;
@@ -1937,7 +1937,7 @@ const
 var
   glVertexArrayRangeNV: procedure(length: GLsizei; pointer: PGLvoid); extdecl;
   glFlushVertexArrayRangeNV: procedure(); extdecl;
-{$IFDEF Windows}
+{$IFDEF msWindows}
   wglAllocateMemoryNV: function(size: GLsizei; readFrequency: GLfloat; writeFrequency: GLfloat; priority: GLfloat): PGLvoid; extdecl;
   wglFreeMemoryNV: procedure(pointer: PGLvoid); extdecl;
 {$ENDIF}
@@ -2311,7 +2311,7 @@ var
 
 function Load_GL_ATI_vertex_streams: Boolean;
 
-{$IFDEF Windows}
+{$IFDEF msWindows}
 //***** WGL_I3D_image_buffer *****//
 const
   WGL_IMAGE_BUFFER_MIN_ACCESS_I3D = $0001;
@@ -2884,7 +2884,7 @@ var
 
 function Load_GL_APPLE_vertex_array_range: Boolean;
 
-{$IFDEF Windows}
+{$IFDEF msWindows}
 //***** WGL_ARB_pixel_format *****//
 const
   WGL_NUMBER_PIXEL_FORMATS_ARB = $2000;
@@ -3214,7 +3214,7 @@ const
   GL_TEXTURE_FLOAT_COMPONENTS_NV = $888C;
   GL_FLOAT_CLEAR_COLOR_VALUE_NV = $888D;
   GL_FLOAT_RGBA_MODE_NV = $888E;
-{$IFDEF Windows}
+{$IFDEF msWindows}
   WGL_FLOAT_COMPONENTS_NV = $20B0;
   WGL_BIND_TO_TEXTURE_RECTANGLE_FLOAT_R_NV = $20B1;
   WGL_BIND_TO_TEXTURE_RECTANGLE_FLOAT_RG_NV = $20B2;
@@ -3264,7 +3264,7 @@ function Load_GL_NV_primitive_restart: Boolean;
 
 function Load_GL_NV_vertex_program2: Boolean;
 
-{$IFDEF Windows}
+{$IFDEF msWindows}
 //***** WGL_NV_render_texture_rectangle *****//
 const
   WGL_BIND_TO_TEXTURE_RECTANGLE_RGB_NV = $20A0;
@@ -3332,7 +3332,7 @@ var
 
 function Load_GL_ATI_draw_buffers: Boolean;
 
-{$IFDEF Windows}
+{$IFDEF msWindows}
 //***** WGL_ATI_pixel_format_float *****//
 const
   WGL_RGBA_FLOAT_MODE_ATI = $8820;
@@ -6973,7 +6973,7 @@ begin
  result:= true; //no procs
 end;
 
-{$IFDEF Windows}
+{$IFDEF msWindows}
 function Load_WGL_NV_render_texture_rectangle: Boolean;
 begin
  result:= true; //no procs
@@ -7016,7 +7016,7 @@ begin
  result:= getprocaddresses(libgl,funcs);
 end;
 
-{$IFDEF Windows}
+{$IFDEF msWindows}
 function Load_WGL_ATI_pixel_format_float: Boolean;
 begin
  result:= true; //no procs
@@ -7930,7 +7930,7 @@ begin
   else if ext = 'GL_ARB_transpose_matrix' then Result := Load_GL_ARB_transpose_matrix
   else if ext = 'GL_ARB_multisample' then Result := Load_GL_ARB_multisample
   else if ext = 'GL_ARB_texture_env_add' then Result := Load_GL_ARB_texture_env_add
-{$IFDEF Windows}
+{$IFDEF msWindows}
   else if ext = 'WGL_ARB_extensions_string' then Result := Load_WGL_ARB_extensions_string
   else if ext = 'WGL_ARB_buffer_region' then Result := Load_WGL_ARB_buffer_region
 {$ENDIF}
@@ -8018,7 +8018,7 @@ begin
   else if ext = 'GL_ATI_texture_mirror_once' then Result := Load_GL_ATI_texture_mirror_once
   else if ext = 'GL_ATI_vertex_array_object' then Result := Load_GL_ATI_vertex_array_object
   else if ext = 'GL_ATI_vertex_streams' then Result := Load_GL_ATI_vertex_streams
-{$IFDEF Windows}
+{$IFDEF msWindows}
   else if ext = 'WGL_I3D_image_buffer' then Result := Load_WGL_I3D_image_buffer
   else if ext = 'WGL_I3D_swap_frame_lock' then Result := Load_WGL_I3D_swap_frame_lock
   else if ext = 'WGL_I3D_swap_frame_usage' then Result := Load_WGL_I3D_swap_frame_usage
@@ -8056,7 +8056,7 @@ begin
   else if ext = 'GL_APPLE_fence' then Result := Load_GL_APPLE_fence
   else if ext = 'GL_APPLE_vertex_array_object' then Result := Load_GL_APPLE_vertex_array_object
   else if ext = 'GL_APPLE_vertex_array_range' then Result := Load_GL_APPLE_vertex_array_range
-{$IFDEF Windows}
+{$IFDEF msWindows}
   else if ext = 'WGL_ARB_pixel_format' then Result := Load_WGL_ARB_pixel_format
   else if ext = 'WGL_ARB_make_current_read' then Result := Load_WGL_ARB_make_current_read
   else if ext = 'WGL_ARB_pbuffer' then Result := Load_WGL_ARB_pbuffer
@@ -8076,14 +8076,14 @@ begin
   else if ext = 'GL_NV_fragment_program' then Result := Load_GL_NV_fragment_program
   else if ext = 'GL_NV_primitive_restart' then Result := Load_GL_NV_primitive_restart
   else if ext = 'GL_NV_vertex_program2' then Result := Load_GL_NV_vertex_program2
-  {$IFDEF Windows}
+  {$IFDEF msWindows}
   else if ext = 'WGL_NV_render_texture_rectangle' then Result := Load_WGL_NV_render_texture_rectangle
   {$ENDIF}
   else if ext = 'GL_NV_pixel_data_range' then Result := Load_GL_NV_pixel_data_range
   else if ext = 'GL_EXT_texture_rectangle' then Result := Load_GL_EXT_texture_rectangle
   else if ext = 'GL_S3_s3tc' then Result := Load_GL_S3_s3tc
   else if ext = 'GL_ATI_draw_buffers' then Result := Load_GL_ATI_draw_buffers
-  {$IFDEF Windows}
+  {$IFDEF msWindows}
   else if ext = 'WGL_ATI_pixel_format_float' then Result := Load_WGL_ATI_pixel_format_float
   {$ENDIF}
   else if ext = 'GL_ATI_texture_env_combine3' then Result := Load_GL_ATI_texture_env_combine3

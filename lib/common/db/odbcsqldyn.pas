@@ -40,7 +40,7 @@ uses
 //  const
 //    odbclib = 'libodbc.'+sharedsuffix;
 {$ENDIF}
-{$IFDEF Windows}
+{$IFDEF msWindows}
   {$DEFINE extdecl:=stdcall}
 //  const
 //    odbclib = 'odbc32.dll';

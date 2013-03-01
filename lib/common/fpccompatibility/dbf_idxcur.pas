@@ -62,7 +62,7 @@ type
 //====================================================================
 implementation
 
-{$ifdef WINDOWS}
+{$ifdef msWINDOWS}
 uses
   Windows;
 {$endif}

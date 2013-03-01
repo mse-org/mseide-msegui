@@ -49,11 +49,11 @@ uses
  msepolygon,msepickwidget,msetraywidget,msedockpanelform,msechartedit,mseedit,
  msebarcode,msedatalist
  {$ifndef mse_no_opengl}
-  {$ifdef FPC}
+//  {$ifdef FPC}
      ,mseopenglwidget
    {$ifdef mse_with_openglcanvas}
      ,mseopenglcanvaswidget
-   {$endif}
+//   {$endif}
   {$endif}
  {$endif};
  

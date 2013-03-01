@@ -8,7 +8,7 @@ interface
 
 uses
   classes,mclasses,SysUtils,
-{$ifdef WINDOWS}
+{$ifdef msWINDOWS}
   Windows,
 {$else}
 {$ifdef KYLIX}
@@ -223,13 +223,17 @@ begin
   endChar := (Src + Size)^;
   (Src + Size)^ := #0;
   // we only have to convert if decimal separator different
+{$warnings off}
   if DecimalSeparator <> sDBF_DEC_SEP then
+{$warnings on}
   begin
     // search dec sep
     iPos := StrScan(Src, sDBF_DEC_SEP);
     // replace
     if iPos <> nil then
+{$warnings off}
       iPos^ := DecimalSeparator;
+{$warnings on}
   end else
     iPos := nil;
   // convert to double
@@ -258,9 +262,13 @@ begin
   // null-terminate buffer
   Buffer[resLen] := #0;
   // we only have to convert if decimal separator different
+{$warnings off}
   if DecimalSeparator <> sDBF_DEC_SEP then
+{$warnings on}
   begin
+{$warnings off}
     iPos := StrScan(@Buffer[0], DecimalSeparator);
+{$warnings on}
     if iPos <> nil then
       iPos^ := sDBF_DEC_SEP;
   end;
@@ -2715,13 +2723,13 @@ end;
 
 procedure TDbfGlobals.InitUserName;
 {$ifdef FPC}
-{$ifndef WINDOWS}
+{$ifndef msWINDOWS}
 var
   TempName: UTSName;
 {$endif}
 {$endif}
 begin
-{$ifdef WINDOWS}
+{$ifdef msWINDOWS}
 {$ifdef wince}
   FUserName:='cedevice';
   FUserNameLen:=Length(FUserName);

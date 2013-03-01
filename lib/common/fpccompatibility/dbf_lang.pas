@@ -5,7 +5,7 @@ unit dbf_lang;
 interface
 
 uses
-{$ifdef WINDOWS}
+{$ifdef msWINDOWS}
   Windows;
 {$else}
 {$ifdef KYLIX}

@@ -30,6 +30,7 @@ type
  ar8ty = packed array[0..7] of byte;
  culongaty = array[0..0] of culong;
  pculongaty = ^culongaty;
+ tlibhandle = thandle;
 
 {
  TSystemTime = packed record
