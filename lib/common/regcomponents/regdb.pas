@@ -148,7 +148,7 @@ type
   
 implementation
 uses
- dbconst,mdb,mseibconnection,
+ {$ifdef FPC}dbconst{$else} dbconst_del{$endif},mdb,mseibconnection,
  msepqconnection,mseodbcconn,{sqldb,}
  mselookupbuffer,mselocaldataset,
  msearrayutils,msedbfieldeditor,sysutils,msetexteditor,

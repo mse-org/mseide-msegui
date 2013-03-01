@@ -1,6 +1,6 @@
 {
     Copyright (c) 2004 by Joost van der Sluis
-    
+
     See the file COPYING.FPC, included in this distribution,
     for details about the copyright.
 
@@ -11,13 +11,9 @@
   Modified 2006-2013 by Martin Schreiber
 
  **********************************************************************}
- 
-unit mibconnection;
-{$if fpc_fullversion >= 020105}
- {$define mse_FPC_2_2} 
-{$endif}
 
-{$mode objfpc}{$H+}{$macro on}
+unit mibconnection;
+{$ifdef FPC}{$mode objfpc}{$H+}{$macro on}{$endif}
 
 {$Define LinkDynamically}
 {$R-}
@@ -31,8 +27,9 @@ interface
 //todo: use execute_immediate if possible
 
 uses
- classes,mclasses,SysUtils,msqldb,mdb,math,dbconst,msebufdataset,msedbevents,
- msesystypes,msestrings,msedb,msetypes,
+ classes,mclasses,SysUtils,msqldb,mdb,math,
+  {$ifdef FPC}dbconst{$else}dbconst_del{$endif},msebufdataset,msedbevents,
+     msesystypes,msestrings,msedb,msetypes,
 {$IfDef LinkDynamically}
   ibase60dyn;
 {$Else}
@@ -60,13 +57,13 @@ type
     fopen: boolean;
     ffetched: boolean;
     fempty: boolean;
-    Status               : array [0..19] of ISC_STATUS;
+    Status               : statusvectorty;
     Statement            : pointer;
     fibstatementtype: integer;
     SQLDA                : PXSQLDA;
     in_SQLDA             : PXSQLDA;
     fexecsqlda: pxsqlda;
-    ParamBinding         : array of integer;
+    ParamBinding         : tparambinding;
     paramtypes: fieldtypearty;
    public
     constructor create(const aowner: icursorclient; const aconnection: tibconnection);
@@ -77,7 +74,7 @@ type
     protected
     TransactionHandle   : pointer;
     TPB                 : string;                // Transaction parameter buffer
-    Status              : array [0..19] of ISC_STATUS;
+    Status              : statusvectorty;
   end;
 
   fbeventbufferty = record
@@ -123,7 +120,7 @@ type
    procedure GetFloat(const CurrBuff,Buffer: pointer; 
                                     const datalength: integer);
    procedure SetFloat(CurrBuff: pointer; Dbl: Double; Size: integer);
-   procedure CheckError(const ProcName : string; 
+   procedure CheckError(const ProcName : string;
                             const Status : statusvectorty); overload;
    procedure CheckError(const ProcName : string;
                             const Status: integer); overload;
@@ -160,16 +157,18 @@ type
    function CreateBlobStream(const Field: TField; const Mode: TBlobStreamMode;
                           const acursor: tsqlcursor): TStream; override;
    function getblobdatasize: integer; override;
-                          
+
    procedure writeblobdata(const atransactionhandle: pointer;
               const tablename: string; const acursor: tsqlcursor;
               const adata: pointer; const alength: integer;
               const afield: tfield; const aparam: tparam; out newid: string);
-          //iblobconnection                           
+                                                 overload;
+          //iblobconnection
    procedure writeblobdata(const atransaction: tsqltransaction;
               const tablename: string; const acursor: tsqlcursor;
               const adata: pointer; const alength: integer;
               const afield: tfield; const aparam: tparam; out newid: string);
+                                                 overload;
    procedure setupblobdata(const afield: tfield; const acursor: tsqlcursor;
                               const aparam: tparam);
    function blobscached: boolean;
@@ -196,7 +195,7 @@ type
    procedure AddFieldDefs(const cursor: TSQLCursor;
                     const FieldDefs : TfieldDefs); override;
    function Fetch(cursor : TSQLCursor) : boolean; override;
-   function loadfield(const cursor: tsqlcursor; 
+   function loadfield(const cursor: tsqlcursor;
                const datatype: tfieldtype; const fieldnum: integer; //null based
      const buffer: pointer; var bufsize: integer;
                                 const aisutf8: boolean): boolean; override;
@@ -222,11 +221,12 @@ function clientversion: string;
 function clientmajorversion: integer;
 function clientminorversion: integer;
            //library must be inited before calling
-           
+
 implementation
 
-uses 
- strutils,msesysintf1,msebits,msefloattostr,msedatabase,msesqlresult;
+uses
+ strutils,msesysintf1,msebits,msefloattostr,msedatabase,msesqlresult
+ {$ifndef FPC},classes_del,windows{$endif};
 
 function clientversion: string;
 var
@@ -311,7 +311,7 @@ begin
   end;
   flasterror:= status;
   flasterrormessage:= msg;
-  flastsqlcode:= isc_sqlcode(status);
+  flastsqlcode:= isc_sqlcode(@status);
   raise eiberror.create(self,msg,status,flastsqlcode);
  end;
 end;
@@ -963,9 +963,7 @@ begin
       end;
      end;
     end;
-    {$ifndef mse_FPC_2_2} //???
     FD.DisplayName:= AliasName;
-    {$endif}
     fd.collection:= fielddefs;
    end;
   end;
@@ -1130,7 +1128,11 @@ begin
       ftFloat,ftcurrency: begin
        with po1^ do begin
         if sqlscale < 0 then begin
+        {$ifdef FPC}
          int64(cur1):= round(asfloat * intexp10(-SQLScale));
+        {$else}
+         int64(ar8ty(cur1)):= round(asfloat * intexp10(-SQLScale));
+        {$endif}
          move(cur1,sqldata^,po1^.sqllen);
         end
         else begin
@@ -1263,13 +1265,13 @@ begin
       isc_decode_timestamp(PISC_TIMESTAMP(CurrBuff), @CTime);
   end;
 
-  STime.Year        := CTime.tm_year + 1900;
-  STime.Month       := CTime.tm_mon + 1;
-  STime.Day         := CTime.tm_mday;
-  STime.Hour        := CTime.tm_hour;
-  STime.Minute      := CTime.tm_min;
-  STime.Second      := CTime.tm_sec;
-  STime.Millisecond := 0;
+  STime.wYear        := CTime.tm_year + 1900;
+  STime.wMonth       := CTime.tm_mon + 1;
+  STime.wDay         := CTime.tm_mday;
+  STime.wHour        := CTime.tm_hour;
+  STime.wMinute      := CTime.tm_min;
+  STime.wSecond      := CTime.tm_sec;
+  STime.wMilliseconds := 0;
 
   pdatetime(buffer)^:= SystemTimeToDateTime(STime);
 end;
@@ -1281,12 +1283,12 @@ var
 begin
   DateTimeToSystemTime(PTime,STime);
   
-  CTime.tm_year := STime.Year - 1900;
-  CTime.tm_mon  := STime.Month -1;
-  CTime.tm_mday := STime.Day;
-  CTime.tm_hour := STime.Hour;
-  CTime.tm_min  := STime.Minute;
-  CTime.tm_sec  := STime.Second;
+  CTime.tm_year := STime.wYear - 1900;
+  CTime.tm_mon  := STime.wMonth -1;
+  CTime.tm_mday := STime.wDay;
+  CTime.tm_hour := STime.wHour;
+  CTime.tm_min  := STime.wMinute;
+  CTime.tm_sec  := STime.wSecond;
 
   case (AType and not 1) of
     SQL_TYPE_DATE :
@@ -1458,10 +1460,11 @@ end;
 
 function TIBConnection.getMaxBlobSize(blobHandle : TIsc_Blob_Handle) : longInt;
 var
-  iscInfoBlobMaxSegment : byte = isc_info_blob_max_segment;
+  iscInfoBlobMaxSegment : byte;
   blobInfo : array[0..50] of byte;
 
 begin
+  iscInfoBlobMaxSegment:= isc_info_blob_max_segment;
   if isc_blob_info(@Fstatus, @blobHandle, sizeof(iscInfoBlobMaxSegment),
           @iscInfoBlobMaxSegment, sizeof(blobInfo) - 2, @blobInfo) <> 0 then
     CheckError('isc_blob_info', FStatus);
@@ -1591,7 +1594,7 @@ begin
    end;
    check(isc_put_segment(@fstatus,@blobhandle,step,po1));
    dec(int1,step);
-   inc(po1,step);
+   inc(pchar(po1),step);
   end;
   if aparam = nil then begin
    setlength(newid,sizeof(blobid));
@@ -1638,10 +1641,12 @@ end;
 
 procedure TIBConnection.createdatabase(const asql: ansistring);
 var
- dbha: isc_db_handle = nil;
- trha: isc_tr_handle = nil;
+ dbha: isc_db_handle;
+ trha: isc_tr_handle;
  bo1: boolean;
 begin
+ dbha:= nil;
+ trha:= nil;
 {$ifdef linkdynamically}
  useembeddedfirebird:= ibo_embedded in foptions;
  initializeibase60([]);
