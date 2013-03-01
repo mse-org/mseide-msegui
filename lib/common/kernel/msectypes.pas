@@ -52,6 +52,7 @@ type
  cuint = __U32_TYPE;
  pcuint = ^cuint;
  cshort = __S16_TYPE;
+ csshort  = __S16_TYPE;
  pcshort = ^cshort;
  cushort = __U16_TYPE;
  pcushort = ^cushort;

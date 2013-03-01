@@ -21,7 +21,7 @@ interface
 
 uses
   classes,mclasses,SysUtils, msqldb, mdb,
-  {$ifdef FPC}dbconst{$else}dbconst_del,{$endif}
+  {$ifdef FPC}dbconst{$else}dbconst_del{$endif},
             msedbevents,msestrings,msedb,
 {$IfDef LinkDynamically}
   postgres3dyn;

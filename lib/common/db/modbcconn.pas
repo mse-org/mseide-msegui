@@ -12,11 +12,7 @@
 
 unit modbcconn;
 
-{$if fpc_fullversion >= 020105}
- {$define mse_FPC_2_2} 
-{$endif}
-
-{$mode objfpc}{$H+}
+{$ifdef FPC}{$mode objfpc}{$H+}{$endif}
 
 interface
 

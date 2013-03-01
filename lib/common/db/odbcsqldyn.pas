@@ -13,12 +13,12 @@ unit odbcsqldyn;
 {$ifdef fpc}
  // define ODBC version 3.51 by default
 {$define ODBCVER:=$0351}
-{$if ODBCVER >= $0300}
+{$if defined(FPC) and (ODBCVER >= $0300)}
  {$define ODBCVER3}
-{$endif}
-{$if ODBCVER >= $0350}
+{$ifend}
+{$if defined(FPC) and (ODBCVER >= $0350)}
   {$define ODBCVER35}
-{$endif}
+{$ifend}
 {$else fpc}
   {$define ODBCVER3}
   {$define ODBCVER35}
@@ -32,7 +32,7 @@ interface
 
 uses
      msetypes,msestrings,
-     ctypes,
+     msectypes,
      sysutils;
 
 {$IFDEF Unix}
@@ -146,10 +146,10 @@ const
   SQL_DATE       = 9;
   SQL_TIME       = 10;
   SQL_TIMESTAMP  = 11;
-  {$if ODBCVER >= $0300}
+  {$ifdef ODBCVER3}
   SQL_INTERVAL   = 10;
   {$endif}
-  {$if ODBCVER >= $0350}
+  {$ifdef ODBCVER35}
   SQL_GUID       = -11;
   {$endif}
   
@@ -1709,50 +1709,50 @@ procedure initializeodbc(const sonames: array of filenamety);
 
 const
  funcs: array[0..41] of funcinfoty = (
-    (n: 'SQLAllocHandle'; d: @SQLAllocHandle),
-    (n: 'SQLSetEnvAttr'; d: @SQLSetEnvAttr),
-    (n: 'SQLFreeHandle'; d: @SQLFreeHandle),
-    (n: 'SQLGetInfo'; d: @SQLGetInfo),
-    (n: 'SQLProcedures'; d: @SQLProcedures),
-    (n: 'SQLColumns'; d: @SQLColumns),
-    (n: 'SQLSpecialColumns'; d: @SQLSpecialColumns),
-    (n: 'SQLGetDiagRec'; d: @SQLGetDiagRec),
-    (n: 'SQLGetDiagField'; d: @SQLGetDiagField),
-    (n: 'SQLConnect'; d: @SQLConnect),
-    (n: 'SQLDisconnect'; d: @SQLDisconnect),
-    (n: 'SQLDriverConnect'; d: @SQLDriverConnect),
-    (n: 'SQLExecDirect'; d: @SQLExecDirect),
-    (n: 'SQLPrepare'; d: @SQLPrepare),
-    (n: 'SQLCloseCursor'; d: @SQLCloseCursor),
-    (n: 'SQLExecute'; d: @SQLExecute),
-    (n: 'SQLFetch'; d: @SQLFetch),
-    (n: 'SQLNumResultCols'; d: @SQLNumResultCols),
-    (n: 'SQLDescribeCol'; d: @SQLDescribeCol),
-    (n: 'SQLFetchScroll'; d: @SQLFetchScroll),
-    (n: 'SQLExtendedFetch'; d: @SQLExtendedFetch),
-    (n: 'SQLGetData'; d: @SQLGetData),
-    (n: 'SQLSetStmtAttr'; d: @SQLSetStmtAttr),
-    (n: 'SQLGetStmtAttr'; d: @SQLGetStmtAttr),
-    (n: 'SQLBulkOperations'; d: @SQLBulkOperations),
-    (n: 'SQLPutData'; d: @SQLPutData),
-    (n: 'SQLBindCol'; d: @SQLBindCol),
-    (n: 'SQLSetPos'; d: @SQLSetPos),
-    (n: 'SQLDataSources'; d: @SQLDataSources),
-    (n: 'SQLDrivers'; d: @SQLDrivers),
-    (n: 'SQLSetConnectAttr'; d: @SQLSetConnectAttr),
-    (n: 'SQLGetCursorName'; d: @SQLGetCursorName),
-    (n: 'SQLSetCursorName'; d: @SQLSetCursorName),
-    (n: 'SQLRowCount'; d: @SQLRowCount),
-    (n: 'SQLBindParameter'; d: @SQLBindParameter),
-//    (n: 'SQLGetFunctions'; d: @SQLGetFunctions),
-//    (n: 'SQLDescribeParam'; d: @SQLDescribeParam),
-    (n: 'SQLFreeStmt'; d: @SQLFreeStmt),
-    (n: 'SQLColAttribute'; d: @SQLColAttribute),
-    (n: 'SQLEndTran'; d: @SQLEndTran),
-    (n: 'SQLTables'; d: @SQLTables),
-    (n: 'SQLPrimaryKeys'; d: @SQLPrimaryKeys),
-    (n: 'SQLProcedureColumns'; d: @SQLProcedureColumns),
-    (n: 'SQLStatistics'; d: @SQLStatistics)
+    (n: 'SQLAllocHandle'; d: {$ifndef FPC}@{$endif}@SQLAllocHandle),
+    (n: 'SQLSetEnvAttr'; d: {$ifndef FPC}@{$endif}@SQLSetEnvAttr),
+    (n: 'SQLFreeHandle'; d: {$ifndef FPC}@{$endif}@SQLFreeHandle),
+    (n: 'SQLGetInfo'; d: {$ifndef FPC}@{$endif}@SQLGetInfo),
+    (n: 'SQLProcedures'; d: {$ifndef FPC}@{$endif}@SQLProcedures),
+    (n: 'SQLColumns'; d: {$ifndef FPC}@{$endif}@SQLColumns),
+    (n: 'SQLSpecialColumns'; d: {$ifndef FPC}@{$endif}@SQLSpecialColumns),
+    (n: 'SQLGetDiagRec'; d: {$ifndef FPC}@{$endif}@SQLGetDiagRec),
+    (n: 'SQLGetDiagField'; d: {$ifndef FPC}@{$endif}@SQLGetDiagField),
+    (n: 'SQLConnect'; d: {$ifndef FPC}@{$endif}@SQLConnect),
+    (n: 'SQLDisconnect'; d: {$ifndef FPC}@{$endif}@SQLDisconnect),
+    (n: 'SQLDriverConnect'; d: {$ifndef FPC}@{$endif}@SQLDriverConnect),
+    (n: 'SQLExecDirect'; d: {$ifndef FPC}@{$endif}@SQLExecDirect),
+    (n: 'SQLPrepare'; d: {$ifndef FPC}@{$endif}@SQLPrepare),
+    (n: 'SQLCloseCursor'; d: {$ifndef FPC}@{$endif}@SQLCloseCursor),
+    (n: 'SQLExecute'; d: {$ifndef FPC}@{$endif}@SQLExecute),
+    (n: 'SQLFetch'; d: {$ifndef FPC}@{$endif}@SQLFetch),
+    (n: 'SQLNumResultCols'; d: {$ifndef FPC}@{$endif}@SQLNumResultCols),
+    (n: 'SQLDescribeCol'; d: {$ifndef FPC}@{$endif}@SQLDescribeCol),
+    (n: 'SQLFetchScroll'; d: {$ifndef FPC}@{$endif}@SQLFetchScroll),
+    (n: 'SQLExtendedFetch'; d: {$ifndef FPC}@{$endif}@SQLExtendedFetch),
+    (n: 'SQLGetData'; d: {$ifndef FPC}@{$endif}@SQLGetData),
+    (n: 'SQLSetStmtAttr'; d: {$ifndef FPC}@{$endif}@SQLSetStmtAttr),
+    (n: 'SQLGetStmtAttr'; d: {$ifndef FPC}@{$endif}@SQLGetStmtAttr),
+    (n: 'SQLBulkOperations'; d: {$ifndef FPC}@{$endif}@SQLBulkOperations),
+    (n: 'SQLPutData'; d: {$ifndef FPC}@{$endif}@SQLPutData),
+    (n: 'SQLBindCol'; d: {$ifndef FPC}@{$endif}@SQLBindCol),
+    (n: 'SQLSetPos'; d: {$ifndef FPC}@{$endif}@SQLSetPos),
+    (n: 'SQLDataSources'; d: {$ifndef FPC}@{$endif}@SQLDataSources),
+    (n: 'SQLDrivers'; d: {$ifndef FPC}@{$endif}@SQLDrivers),
+    (n: 'SQLSetConnectAttr'; d: {$ifndef FPC}@{$endif}@SQLSetConnectAttr),
+    (n: 'SQLGetCursorName'; d: {$ifndef FPC}@{$endif}@SQLGetCursorName),
+    (n: 'SQLSetCursorName'; d: {$ifndef FPC}@{$endif}@SQLSetCursorName),
+    (n: 'SQLRowCount'; d: {$ifndef FPC}@{$endif}@SQLRowCount),
+    (n: 'SQLBindParameter'; d: {$ifndef FPC}@{$endif}@SQLBindParameter),
+//    (n: 'SQLGetFunctions'; d: {$ifndef FPC}@{$endif}@SQLGetFunctions),
+//    (n: 'SQLDescribeParam'; d: {$ifndef FPC}@{$endif}@SQLDescribeParam),
+    (n: 'SQLFreeStmt'; d: {$ifndef FPC}@{$endif}@SQLFreeStmt),
+    (n: 'SQLColAttribute'; d: {$ifndef FPC}@{$endif}@SQLColAttribute),
+    (n: 'SQLEndTran'; d: {$ifndef FPC}@{$endif}@SQLEndTran),
+    (n: 'SQLTables'; d: {$ifndef FPC}@{$endif}@SQLTables),
+    (n: 'SQLPrimaryKeys'; d: {$ifndef FPC}@{$endif}@SQLPrimaryKeys),
+    (n: 'SQLProcedureColumns'; d: {$ifndef FPC}@{$endif}@SQLProcedureColumns),
+    (n: 'SQLStatistics'; d: {$ifndef FPC}@{$endif}@SQLStatistics)
    );
  errormessage = 'Can not load ODBC library. ';
 begin
