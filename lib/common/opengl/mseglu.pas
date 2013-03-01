@@ -54,13 +54,13 @@ Abstract:
 { For the latest updates, visit Delphi3D: http://www.delphi3d.net              }
 {******************************************************************************}
 
-{$mode objfpc} {$h+}
-{$MACRO ON}
+{$ifdef FPC}{$mode objfpc} {$h+}{$MACRO ON}{$endif}
 //{$MODE Delphi}
 {$IFDEF msWindows}
-  {$DEFINE extdecl := stdcall}
+ {$define wincall}
+//  {$DEFINE extdecl := stdcall}
 {$ELSE}
-  {$DEFINE extdecl := cdecl}
+//  {$DEFINE extdecl := cdecl}
 {$ENDIF}
 
 {$IFDEF MORPHOS}
@@ -128,83 +128,83 @@ type
 
 {$ELSE MORPHOS}
 var
-  gluErrorString: function(errCode: GLenum): PChar; extdecl;
-  gluErrorUnicodeStringEXT: function(errCode: GLenum): PWideChar; extdecl;
+  gluErrorString: function(errCode: GLenum): PChar; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  gluErrorUnicodeStringEXT: function(errCode: GLenum): PWideChar; {$ifdef wincall}stdcall{$else}cdecl{$endif};
                             //not on linux
-  gluGetString: function(name: GLenum): PChar; extdecl;
-  gluOrtho2D: procedure(left,right, bottom, top: GLdouble); extdecl;
-  gluPerspective: procedure(fovy, aspect, zNear, zFar: GLdouble); extdecl;
-  gluPickMatrix: procedure(x, y, width, height: GLdouble; var viewport: TViewPortArray); extdecl;
-  gluLookAt: procedure(eyex, eyey, eyez, centerx, centery, centerz, upx, upy, upz: GLdouble); extdecl;
-  gluProject: function(objx, objy, objz: GLdouble; var modelMatrix, projMatrix: T16dArray; var viewport: TViewPortArray; winx, winy, winz: PGLdouble): Integer; extdecl;
-  gluUnProject: function(winx, winy, winz: GLdouble; var modelMatrix, projMatrix: T16dArray; var viewport: TViewPortArray; objx, objy, objz: PGLdouble): Integer; extdecl;
-  gluScaleImage: function(format: GLenum; widthin, heightin: GLint; typein: GLenum; const datain: Pointer; widthout, heightout: GLint; typeout: GLenum; dataout: Pointer): Integer; extdecl;
-  gluBuild1DMipmaps: function(target: GLenum; components, width: GLint; format, atype: GLenum; const data: Pointer): Integer; extdecl;
-  gluBuild2DMipmaps: function(target: GLenum; components, width, height: GLint; format, atype: GLenum; const data: Pointer): Integer; extdecl;
+  gluGetString: function(name: GLenum): PChar; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  gluOrtho2D: procedure(left,right, bottom, top: GLdouble); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  gluPerspective: procedure(fovy, aspect, zNear, zFar: GLdouble); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  gluPickMatrix: procedure(x, y, width, height: GLdouble; var viewport: TViewPortArray); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  gluLookAt: procedure(eyex, eyey, eyez, centerx, centery, centerz, upx, upy, upz: GLdouble); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  gluProject: function(objx, objy, objz: GLdouble; var modelMatrix, projMatrix: T16dArray; var viewport: TViewPortArray; winx, winy, winz: PGLdouble): Integer; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  gluUnProject: function(winx, winy, winz: GLdouble; var modelMatrix, projMatrix: T16dArray; var viewport: TViewPortArray; objx, objy, objz: PGLdouble): Integer; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  gluScaleImage: function(format: GLenum; widthin, heightin: GLint; typein: GLenum; const datain: Pointer; widthout, heightout: GLint; typeout: GLenum; dataout: Pointer): Integer; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  gluBuild1DMipmaps: function(target: GLenum; components, width: GLint; format, atype: GLenum; const data: Pointer): Integer; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  gluBuild2DMipmaps: function(target: GLenum; components, width, height: GLint; format, atype: GLenum; const data: Pointer): Integer; {$ifdef wincall}stdcall{$else}cdecl{$endif};
 
 var
-  gluNewQuadric: function: PGLUquadric; extdecl;
-  gluDeleteQuadric: procedure(state: PGLUquadric); extdecl;
-  gluQuadricNormals: procedure(quadObject: PGLUquadric; normals: GLenum); extdecl;
-  gluQuadricTexture: procedure(quadObject: PGLUquadric; textureCoords: GLboolean); extdecl;
-  gluQuadricOrientation: procedure(quadObject: PGLUquadric; orientation: GLenum); extdecl;
-  gluQuadricDrawStyle: procedure(quadObject: PGLUquadric; drawStyle: GLenum); extdecl;
-  gluCylinder: procedure(qobj: PGLUquadric; baseRadius, topRadius, height: GLdouble; slices, stacks: GLint); extdecl;
-  gluDisk: procedure(qobj: PGLUquadric; innerRadius, outerRadius: GLdouble; slices, loops: GLint); extdecl;
-  gluPartialDisk: procedure(qobj: PGLUquadric; innerRadius, outerRadius: GLdouble; slices, loops: GLint; startAngle, sweepAngle: GLdouble); extdecl;
-  gluSphere: procedure(qobj: PGLuquadric; radius: GLdouble; slices, stacks: GLint); extdecl;
-  gluQuadricCallback: procedure(qobj: PGLUquadric; which: GLenum; fn: TCallBack); extdecl;
-  gluNewTess: function: PGLUtesselator; extdecl;
-  gluDeleteTess: procedure(tess: PGLUtesselator); extdecl;
-  gluTessBeginPolygon: procedure(tess: PGLUtesselator; polygon_data: Pointer); extdecl;
-  gluTessBeginContour: procedure(tess: PGLUtesselator); extdecl;
-  gluTessVertex: procedure(tess: PGLUtesselator; var coords: T3dArray; data: Pointer); extdecl;
-  gluTessEndContour: procedure(tess: PGLUtesselator); extdecl;
-  gluTessEndPolygon: procedure(tess: PGLUtesselator); extdecl;
-  gluTessProperty: procedure(tess: PGLUtesselator; which: GLenum; value: GLdouble); extdecl;
-  gluTessNormal: procedure(tess: PGLUtesselator; x, y, z: GLdouble); extdecl;
-  gluTessCallback: procedure(tess: PGLUtesselator; which: GLenum;fn: TCallBack); extdecl;
-  gluGetTessProperty: procedure(tess: PGLUtesselator; which: GLenum; value: PGLdouble); extdecl;
-  gluNewNurbsRenderer: function: PGLUnurbs; extdecl;
-  gluDeleteNurbsRenderer: procedure(nobj: PGLUnurbs); extdecl;
-  gluBeginSurface: procedure(nobj: PGLUnurbs); extdecl;
-  gluBeginCurve: procedure(nobj: PGLUnurbs); extdecl;
-  gluEndCurve: procedure(nobj: PGLUnurbs); extdecl;
-  gluEndSurface: procedure(nobj: PGLUnurbs); extdecl;
-  gluBeginTrim: procedure(nobj: PGLUnurbs); extdecl;
-  gluEndTrim: procedure(nobj: PGLUnurbs); extdecl;
-  gluPwlCurve: procedure(nobj: PGLUnurbs; count: GLint; aarray: PGLfloat; stride: GLint; atype: GLenum); extdecl;
-  gluNurbsCurve: procedure(nobj: PGLUnurbs; nknots: GLint; knot: PGLfloat; stride: GLint; ctlarray: PGLfloat; order: GLint; atype: GLenum); extdecl;
-  gluNurbsSurface: procedure(nobj: PGLUnurbs; sknot_count: GLint; sknot: PGLfloat; tknot_count: GLint; tknot: PGLfloat; s_stride, t_stride: GLint; ctlarray: PGLfloat; sorder, torder: GLint; atype: GLenum); extdecl;
-  gluLoadSamplingMatrices: procedure(nobj: PGLUnurbs; var modelMatrix, projMatrix: T16dArray; var viewport: TViewPortArray); extdecl;
-  gluNurbsProperty: procedure(nobj: PGLUnurbs; aproperty: GLenum; value: GLfloat); extdecl;
-  gluGetNurbsProperty: procedure(nobj: PGLUnurbs; aproperty: GLenum; value: PGLfloat); extdecl;
-  gluNurbsCallback: procedure(nobj: PGLUnurbs; which: GLenum; fn: TCallBack); extdecl;
+  gluNewQuadric: function: PGLUquadric; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  gluDeleteQuadric: procedure(state: PGLUquadric); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  gluQuadricNormals: procedure(quadObject: PGLUquadric; normals: GLenum); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  gluQuadricTexture: procedure(quadObject: PGLUquadric; textureCoords: GLboolean); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  gluQuadricOrientation: procedure(quadObject: PGLUquadric; orientation: GLenum); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  gluQuadricDrawStyle: procedure(quadObject: PGLUquadric; drawStyle: GLenum); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  gluCylinder: procedure(qobj: PGLUquadric; baseRadius, topRadius, height: GLdouble; slices, stacks: GLint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  gluDisk: procedure(qobj: PGLUquadric; innerRadius, outerRadius: GLdouble; slices, loops: GLint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  gluPartialDisk: procedure(qobj: PGLUquadric; innerRadius, outerRadius: GLdouble; slices, loops: GLint; startAngle, sweepAngle: GLdouble); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  gluSphere: procedure(qobj: PGLuquadric; radius: GLdouble; slices, stacks: GLint); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  gluQuadricCallback: procedure(qobj: PGLUquadric; which: GLenum; fn: TCallBack); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  gluNewTess: function: PGLUtesselator; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  gluDeleteTess: procedure(tess: PGLUtesselator); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  gluTessBeginPolygon: procedure(tess: PGLUtesselator; polygon_data: Pointer); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  gluTessBeginContour: procedure(tess: PGLUtesselator); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  gluTessVertex: procedure(tess: PGLUtesselator; var coords: T3dArray; data: Pointer); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  gluTessEndContour: procedure(tess: PGLUtesselator); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  gluTessEndPolygon: procedure(tess: PGLUtesselator); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  gluTessProperty: procedure(tess: PGLUtesselator; which: GLenum; value: GLdouble); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  gluTessNormal: procedure(tess: PGLUtesselator; x, y, z: GLdouble); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  gluTessCallback: procedure(tess: PGLUtesselator; which: GLenum;fn: TCallBack); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  gluGetTessProperty: procedure(tess: PGLUtesselator; which: GLenum; value: PGLdouble); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  gluNewNurbsRenderer: function: PGLUnurbs; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  gluDeleteNurbsRenderer: procedure(nobj: PGLUnurbs); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  gluBeginSurface: procedure(nobj: PGLUnurbs); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  gluBeginCurve: procedure(nobj: PGLUnurbs); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  gluEndCurve: procedure(nobj: PGLUnurbs); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  gluEndSurface: procedure(nobj: PGLUnurbs); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  gluBeginTrim: procedure(nobj: PGLUnurbs); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  gluEndTrim: procedure(nobj: PGLUnurbs); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  gluPwlCurve: procedure(nobj: PGLUnurbs; count: GLint; aarray: PGLfloat; stride: GLint; atype: GLenum); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  gluNurbsCurve: procedure(nobj: PGLUnurbs; nknots: GLint; knot: PGLfloat; stride: GLint; ctlarray: PGLfloat; order: GLint; atype: GLenum); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  gluNurbsSurface: procedure(nobj: PGLUnurbs; sknot_count: GLint; sknot: PGLfloat; tknot_count: GLint; tknot: PGLfloat; s_stride, t_stride: GLint; ctlarray: PGLfloat; sorder, torder: GLint; atype: GLenum); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  gluLoadSamplingMatrices: procedure(nobj: PGLUnurbs; var modelMatrix, projMatrix: T16dArray; var viewport: TViewPortArray); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  gluNurbsProperty: procedure(nobj: PGLUnurbs; aproperty: GLenum; value: GLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  gluGetNurbsProperty: procedure(nobj: PGLUnurbs; aproperty: GLenum; value: PGLfloat); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  gluNurbsCallback: procedure(nobj: PGLUnurbs; which: GLenum; fn: TCallBack); {$ifdef wincall}stdcall{$else}cdecl{$endif};
 {$ENDIF MORPHOS}
 
 (**** Callback function prototypes ****)
 
 type
   // gluQuadricCallback
-  GLUquadricErrorProc = procedure(p: GLenum); extdecl;
+  GLUquadricErrorProc = procedure(p: GLenum); {$ifdef wincall}stdcall{$else}cdecl{$endif};
 
   // gluTessCallback
-  GLUtessBeginProc = procedure(p: GLenum); extdecl;
-  GLUtessEdgeFlagProc = procedure(p: GLboolean); extdecl;
-  GLUtessVertexProc = procedure(p: Pointer); extdecl;
-  GLUtessEndProc = procedure; extdecl;
-  GLUtessErrorProc = procedure(p: GLenum); extdecl;
-  GLUtessCombineProc = procedure(var p1: T3dArray; p2: T4pArray; p3: T4fArray; p4: PPointer); extdecl;
-  GLUtessBeginDataProc = procedure(p1: GLenum; p2: Pointer); extdecl;
-  GLUtessEdgeFlagDataProc = procedure(p1: GLboolean; p2: Pointer); extdecl;
-  GLUtessVertexDataProc = procedure(p1, p2: Pointer); extdecl;
-  GLUtessEndDataProc = procedure(p: Pointer); extdecl;
-  GLUtessErrorDataProc = procedure(p1: GLenum; p2: Pointer); extdecl;
+  GLUtessBeginProc = procedure(p: GLenum); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  GLUtessEdgeFlagProc = procedure(p: GLboolean); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  GLUtessVertexProc = procedure(p: Pointer); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  GLUtessEndProc = procedure; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  GLUtessErrorProc = procedure(p: GLenum); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  GLUtessCombineProc = procedure(var p1: T3dArray; p2: T4pArray; p3: T4fArray; p4: PPointer); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  GLUtessBeginDataProc = procedure(p1: GLenum; p2: Pointer); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  GLUtessEdgeFlagDataProc = procedure(p1: GLboolean; p2: Pointer); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  GLUtessVertexDataProc = procedure(p1, p2: Pointer); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  GLUtessEndDataProc = procedure(p: Pointer); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  GLUtessErrorDataProc = procedure(p1: GLenum; p2: Pointer); {$ifdef wincall}stdcall{$else}cdecl{$endif};
   GLUtessCombineDataProc = procedure(var p1: T3dArray; var p2: T4pArray; var p3: T4fArray;
-                                     p4: PPointer; p5: Pointer); extdecl;
+                                     p4: PPointer; p5: Pointer); {$ifdef wincall}stdcall{$else}cdecl{$endif};
 
   // gluNurbsCallback
-  GLUnurbsErrorProc = procedure(p: GLenum); extdecl;
+  GLUnurbsErrorProc = procedure(p: GLenum); {$ifdef wincall}stdcall{$else}cdecl{$endif};
 
 
 //***           Generic constants               ****/
@@ -380,9 +380,9 @@ const
 //***           Backwards compatibility for old tesselator           ****/
 
 var
-  gluBeginPolygon: procedure(tess: PGLUtesselator); extdecl;
-  gluNextContour: procedure(tess: PGLUtesselator; atype: GLenum); extdecl;
-  gluEndPolygon: procedure(tess: PGLUtesselator); extdecl;
+  gluBeginPolygon: procedure(tess: PGLUtesselator); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  gluNextContour: procedure(tess: PGLUtesselator; atype: GLenum); {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  gluEndPolygon: procedure(tess: PGLUtesselator); {$ifdef wincall}stdcall{$else}cdecl{$endif};
 
 const
   // Contours types -- obsolete!
@@ -414,60 +414,60 @@ var
 procedure initializeglu(const sonames: array of filenamety); //[] = default
 const
  funcs: array[0..50] of funcinfoty = (
-    (n: 'gluErrorString'; d: @gluErrorString),
-    (n: 'gluGetString'; d: @gluGetString),
-    (n: 'gluOrtho2D'; d: @gluOrtho2D),
-    (n: 'gluPerspective'; d: @gluPerspective),
-    (n: 'gluPickMatrix'; d: @gluPickMatrix),
-    (n: 'gluLookAt'; d: @gluLookAt),
-    (n: 'gluProject'; d: @gluProject),
-    (n: 'gluUnProject'; d: @gluUnProject),
-    (n: 'gluScaleImage'; d: @gluScaleImage),
-    (n: 'gluBuild1DMipmaps'; d: @gluBuild1DMipmaps),
-    (n: 'gluBuild2DMipmaps'; d: @gluBuild2DMipmaps),
-    (n: 'gluNewQuadric'; d: @gluNewQuadric),
-    (n: 'gluDeleteQuadric'; d: @gluDeleteQuadric),
-    (n: 'gluQuadricNormals'; d: @gluQuadricNormals),
-    (n: 'gluQuadricTexture'; d: @gluQuadricTexture),
-    (n: 'gluQuadricOrientation'; d: @gluQuadricOrientation),
-    (n: 'gluQuadricDrawStyle'; d: @gluQuadricDrawStyle),
-    (n: 'gluCylinder'; d: @gluCylinder),
-    (n: 'gluDisk'; d: @gluDisk),
-    (n: 'gluPartialDisk'; d: @gluPartialDisk),
-    (n: 'gluSphere'; d: @gluSphere),
-    (n: 'gluQuadricCallback'; d: @gluQuadricCallback),
-    (n: 'gluNewTess'; d: @gluNewTess),
-    (n: 'gluDeleteTess'; d: @gluDeleteTess),
-    (n: 'gluTessBeginPolygon'; d: @gluTessBeginPolygon),
-    (n: 'gluTessBeginContour'; d: @gluTessBeginContour),
-    (n: 'gluTessVertex'; d: @gluTessVertex),
-    (n: 'gluTessEndContour'; d: @gluTessEndContour),
-    (n: 'gluTessEndPolygon'; d: @gluTessEndPolygon),
-    (n: 'gluTessProperty'; d: @gluTessProperty),
-    (n: 'gluTessNormal'; d: @gluTessNormal),
-    (n: 'gluTessCallback'; d: @gluTessCallback),
-    (n: 'gluGetTessProperty'; d: @gluGetTessProperty),
-    (n: 'gluNewNurbsRenderer'; d: @gluNewNurbsRenderer),
-    (n: 'gluDeleteNurbsRenderer'; d: @gluDeleteNurbsRenderer),
-    (n: 'gluBeginSurface'; d: @gluBeginSurface),
-    (n: 'gluBeginCurve'; d: @gluBeginCurve),
-    (n: 'gluEndCurve'; d: @gluEndCurve),
-    (n: 'gluEndSurface'; d: @gluEndSurface),
-    (n: 'gluBeginTrim'; d: @gluBeginTrim),
-    (n: 'gluEndTrim'; d: @gluEndTrim),
-    (n: 'gluPwlCurve'; d: @gluPwlCurve),
-    (n: 'gluNurbsCurve'; d: @gluNurbsCurve),
-    (n: 'gluNurbsSurface'; d: @gluNurbsSurface),
-    (n: 'gluLoadSamplingMatrices'; d: @gluLoadSamplingMatrices),
-    (n: 'gluNurbsProperty'; d: @gluNurbsProperty),
-    (n: 'gluGetNurbsProperty'; d: @gluGetNurbsProperty),
-    (n: 'gluNurbsCallback'; d: @gluNurbsCallback),
-    (n: 'gluBeginPolygon'; d: @gluBeginPolygon),
-    (n: 'gluNextContour'; d: @gluNextContour),
-    (n: 'gluEndPolygon'; d: @gluEndPolygon)
+    (n: 'gluErrorString'; d: {$ifndef FPC}@{$endif}@gluErrorString),
+    (n: 'gluGetString'; d: {$ifndef FPC}@{$endif}@gluGetString),
+    (n: 'gluOrtho2D'; d: {$ifndef FPC}@{$endif}@gluOrtho2D),
+    (n: 'gluPerspective'; d: {$ifndef FPC}@{$endif}@gluPerspective),
+    (n: 'gluPickMatrix'; d: {$ifndef FPC}@{$endif}@gluPickMatrix),
+    (n: 'gluLookAt'; d: {$ifndef FPC}@{$endif}@gluLookAt),
+    (n: 'gluProject'; d: {$ifndef FPC}@{$endif}@gluProject),
+    (n: 'gluUnProject'; d: {$ifndef FPC}@{$endif}@gluUnProject),
+    (n: 'gluScaleImage'; d: {$ifndef FPC}@{$endif}@gluScaleImage),
+    (n: 'gluBuild1DMipmaps'; d: {$ifndef FPC}@{$endif}@gluBuild1DMipmaps),
+    (n: 'gluBuild2DMipmaps'; d: {$ifndef FPC}@{$endif}@gluBuild2DMipmaps),
+    (n: 'gluNewQuadric'; d: {$ifndef FPC}@{$endif}@gluNewQuadric),
+    (n: 'gluDeleteQuadric'; d: {$ifndef FPC}@{$endif}@gluDeleteQuadric),
+    (n: 'gluQuadricNormals'; d: {$ifndef FPC}@{$endif}@gluQuadricNormals),
+    (n: 'gluQuadricTexture'; d: {$ifndef FPC}@{$endif}@gluQuadricTexture),
+    (n: 'gluQuadricOrientation'; d: {$ifndef FPC}@{$endif}@gluQuadricOrientation),
+    (n: 'gluQuadricDrawStyle'; d: {$ifndef FPC}@{$endif}@gluQuadricDrawStyle),
+    (n: 'gluCylinder'; d: {$ifndef FPC}@{$endif}@gluCylinder),
+    (n: 'gluDisk'; d: {$ifndef FPC}@{$endif}@gluDisk),
+    (n: 'gluPartialDisk'; d: {$ifndef FPC}@{$endif}@gluPartialDisk),
+    (n: 'gluSphere'; d: {$ifndef FPC}@{$endif}@gluSphere),
+    (n: 'gluQuadricCallback'; d: {$ifndef FPC}@{$endif}@gluQuadricCallback),
+    (n: 'gluNewTess'; d: {$ifndef FPC}@{$endif}@gluNewTess),
+    (n: 'gluDeleteTess'; d: {$ifndef FPC}@{$endif}@gluDeleteTess),
+    (n: 'gluTessBeginPolygon'; d: {$ifndef FPC}@{$endif}@gluTessBeginPolygon),
+    (n: 'gluTessBeginContour'; d: {$ifndef FPC}@{$endif}@gluTessBeginContour),
+    (n: 'gluTessVertex'; d: {$ifndef FPC}@{$endif}@gluTessVertex),
+    (n: 'gluTessEndContour'; d: {$ifndef FPC}@{$endif}@gluTessEndContour),
+    (n: 'gluTessEndPolygon'; d: {$ifndef FPC}@{$endif}@gluTessEndPolygon),
+    (n: 'gluTessProperty'; d: {$ifndef FPC}@{$endif}@gluTessProperty),
+    (n: 'gluTessNormal'; d: {$ifndef FPC}@{$endif}@gluTessNormal),
+    (n: 'gluTessCallback'; d: {$ifndef FPC}@{$endif}@gluTessCallback),
+    (n: 'gluGetTessProperty'; d: {$ifndef FPC}@{$endif}@gluGetTessProperty),
+    (n: 'gluNewNurbsRenderer'; d: {$ifndef FPC}@{$endif}@gluNewNurbsRenderer),
+    (n: 'gluDeleteNurbsRenderer'; d: {$ifndef FPC}@{$endif}@gluDeleteNurbsRenderer),
+    (n: 'gluBeginSurface'; d: {$ifndef FPC}@{$endif}@gluBeginSurface),
+    (n: 'gluBeginCurve'; d: {$ifndef FPC}@{$endif}@gluBeginCurve),
+    (n: 'gluEndCurve'; d: {$ifndef FPC}@{$endif}@gluEndCurve),
+    (n: 'gluEndSurface'; d: {$ifndef FPC}@{$endif}@gluEndSurface),
+    (n: 'gluBeginTrim'; d: {$ifndef FPC}@{$endif}@gluBeginTrim),
+    (n: 'gluEndTrim'; d: {$ifndef FPC}@{$endif}@gluEndTrim),
+    (n: 'gluPwlCurve'; d: {$ifndef FPC}@{$endif}@gluPwlCurve),
+    (n: 'gluNurbsCurve'; d: {$ifndef FPC}@{$endif}@gluNurbsCurve),
+    (n: 'gluNurbsSurface'; d: {$ifndef FPC}@{$endif}@gluNurbsSurface),
+    (n: 'gluLoadSamplingMatrices'; d: {$ifndef FPC}@{$endif}@gluLoadSamplingMatrices),
+    (n: 'gluNurbsProperty'; d: {$ifndef FPC}@{$endif}@gluNurbsProperty),
+    (n: 'gluGetNurbsProperty'; d: {$ifndef FPC}@{$endif}@gluGetNurbsProperty),
+    (n: 'gluNurbsCallback'; d: {$ifndef FPC}@{$endif}@gluNurbsCallback),
+    (n: 'gluBeginPolygon'; d: {$ifndef FPC}@{$endif}@gluBeginPolygon),
+    (n: 'gluNextContour'; d: {$ifndef FPC}@{$endif}@gluNextContour),
+    (n: 'gluEndPolygon'; d: {$ifndef FPC}@{$endif}@gluEndPolygon)
    );
  funcsopt: array[0..0] of funcinfoty = (
-    (n: 'gluErrorUnicodeStringEXT'; d: @gluErrorUnicodeStringEXT)
+    (n: 'gluErrorUnicodeStringEXT'; d: {$ifndef FPC}@{$endif}@gluErrorUnicodeStringEXT)
    );
  errormessage = 'Can not load glu library';
 begin
