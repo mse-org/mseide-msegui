@@ -68,7 +68,7 @@ procedure initializemysql(const sonames: array of filenamety);
 procedure releasemysql;
 
 {$IFDEF Unix}
-  {$DEFINE extdecl:=cdecl}
+//  {$DEFINE extdecl:=cdecl}
 (*
   const
     mysqllib = 'libmysqlclient.'+sharedsuffix;
@@ -82,8 +82,9 @@ procedure releasemysql;
   {$ENDIF}
 *)
 {$ENDIF}
-{$IFDEF Windows}
-  {$DEFINE extdecl:=stdcall}
+{$IFDEF msWindows}
+//  {$DEFINE extdecl:=stdcall}
+ {$define wincall}
 (*
   const
     mysqllib = 'libmysql.dll';
@@ -440,7 +441,7 @@ type
        MYSQL_TYPE_STRING = 254;
        MYSQL_TYPE_GEOMETRY = 255;
 type
- fieldtypety = cint; //correct?
+ enum_field_types = cint; //correct?
     {$endif}
     const
        CLIENT_MULTI_QUERIES = CLIENT_MULTI_STATEMENTS;
@@ -514,6 +515,8 @@ const
      KILL_QUERY = 254;
 { $endif}
      KILL_CONNECTION = 255;
+type
+ mysql_enum_shutdown_level = cint; //correct?
    {$endif}
 
 {$IFDEF mysql50}
@@ -522,10 +525,13 @@ const
          CURSOR_TYPE_FOR_UPDATE := 2,CURSOR_TYPE_SCROLLABLE := 4
          );
  {$else}
+const
  CURSOR_TYPE_NO_CURSOR = 0;
  CURSOR_TYPE_READ_ONLY = 1;
  CURSOR_TYPE_FOR_UPDATE = 2;
  CURSOR_TYPE_SCROLLABLE = 4;
+type
+ enum_cursor_type = cint; //correct?
  {$endif}
 {$ENDIF}
 
@@ -540,7 +546,7 @@ const
   MYSQL_STMT_EXECUTE_DONE = 3;
   MYSQL_STMT_FETCH_DONE =   4;
 type
- statementstatety = cint; //correct?
+ enum_mysql_stmt_state = cint; //correct?
 {$endif}
 
     { options for mysql_set_option  }
@@ -668,7 +674,7 @@ type
 
 {$ifdef _global_h}
 {$IFNDEF LinkDynamically}
-    function net_field_length(packet:PPuchar):culong;extdecl;external mysqllib name 'net_field_length_ll';
+    function net_field_length(packet:PPuchar):culong;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'net_field_length_ll';
     function net_field_length_ll(packet:PPuchar):my_ulonglong;cdecl;external mysqllib name 'net_field_length_ll';
     function net_store_length(pkg:Pchar; length:ulonglong):Pchar;cdecl;external mysqllib name 'net_store_length';
 {$ENDIF}
@@ -732,11 +738,7 @@ type
 {$IFDEF mysql41}
             charsetnr : cuint;        // Character set
 {$ENDIF}
-{$ifdef FPC}
             ftype : enum_field_types; // Type of field. See mysql_com.h for types
-{$else}
-            ftype : fieldtypety;
-{$endif}
 {$ifdef mysql51}
             extension: pointer;
 {$endif}
@@ -753,11 +755,7 @@ type
     function IS_PRI_KEY(n : longint) : boolean;
     function IS_NOT_NULL(n : longint) : boolean;
     function IS_BLOB(n : longint) : boolean;
-{$ifdef FPC}
     function IS_NUM(t : enum_field_types) : boolean;
-{$else}
-    function IS_NUM(t : fieldtypety) : boolean;
-{$endif}
     function INTERNAL_NUM_FIELD(f : Pst_mysql_field) : boolean;
     function IS_NUM_FIELD(f : Pst_mysql_field) : boolean;
 
@@ -1296,11 +1294,7 @@ type
             length_value : culong;          //  Used if length is 0
             param_number : cuint;           // For null count and error messages
             pack_length : cuint;            // Internal length for packed data
-{$ifdef FPC}
             buffer_type : enum_field_types; // buffer type
-{$else}
-            buffer_type : fieldtypety; // buffer type
-{$endif}
             error_value : my_bool;         // used if error is 0
             is_unsigned : my_bool;          // set if integer type is unsigned
             long_data_used : my_bool;       // If used with mysql_send_long_data
@@ -1317,11 +1311,7 @@ type
             is_null : Pmy_bool;             // Pointer to null indicator
             buffer : pointer;               // buffer to get/put data
             error: pmy_bool;                // set this if you want to track data truncations happened during fetch
-{$ifdef FPC}
             buffer_type : enum_field_types; // buffer type
-{$else}
-            buffer_type : fieldtypety; // buffer type
-{$endif}
             buffer_length : culong;         // buffer length, must be set for str/binary
     { Following are for internal use. Set by mysql_stmt_bind_param  }
             row_ptr : PByte;                // for the current data position
@@ -1407,11 +1397,7 @@ type
             last_errno : cuint;             // error code
             param_count : cuint;            // input parameter count
             field_count : cuint;            // number of columns in result set
-{$ifdef FPC}
             state : enum_mysql_stmt_state;  // statement state
-{$else}
-            state : statementstatety;  // statement state
-{$endif}
             last_error : array[0..(MYSQL_ERRMSG_SIZE)-1] of char;  // error message
             sqlstate : array[0..(SQLSTATE_LENGTH+1)-1] of char;
             send_types_to_server : my_bool; // Types of input parameters should be sent to server
@@ -1503,46 +1489,46 @@ type
     function mysql_library_init(argc:cint; argv:PPchar; groups:PPchar):cint;cdecl;external mysqllib name 'mysql_server_init';
     procedure mysql_library_end;cdecl;external mysqllib name 'mysql_server_end';
 
-    function mysql_get_parameters:PMYSQL_PARAMETERS;extdecl;external mysqllib name 'mysql_get_parameters';
+    function mysql_get_parameters:PMYSQL_PARAMETERS;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_get_parameters';
 
     { Set up and bring down a thread; these function should be called
       for each thread in an application which opens at least one MySQL
       connection.  All uses of the connection(s) should be between these
       function calls.     }
-    function mysql_thread_init:my_bool;extdecl;external mysqllib name 'mysql_thread_init';
-    procedure mysql_thread_end;extdecl;external mysqllib name 'mysql_thread_end';
+    function mysql_thread_init:my_bool;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_thread_init';
+    procedure mysql_thread_end;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_thread_end';
     { Functions to get information from the MYSQL and MYSQL_RES structures
       Should definitely be used if one uses shared libraries.     }
-    function mysql_num_rows(res:PMYSQL_RES):my_ulonglong;extdecl;external mysqllib name 'mysql_num_rows';
-    function mysql_num_fields(res:PMYSQL_RES):cuint;extdecl;external mysqllib name 'mysql_num_fields';
-    function mysql_eof(res:PMYSQL_RES):my_bool;extdecl;external mysqllib name 'mysql_eof';
-    function mysql_fetch_field_direct(res:PMYSQL_RES; fieldnr:cuint):PMYSQL_FIELD;extdecl;external mysqllib name 'mysql_fetch_field_direct';
-    function mysql_fetch_fields(res:PMYSQL_RES):PMYSQL_FIELD;extdecl;external mysqllib name 'mysql_fetch_fields';
-    function mysql_row_tell(res:PMYSQL_RES):MYSQL_ROW_OFFSET;extdecl;external mysqllib name 'mysql_row_tell';
-    function mysql_field_tell(res:PMYSQL_RES):MYSQL_FIELD_OFFSET;extdecl;external mysqllib name 'mysql_field_tell';
-    function mysql_field_count(mysql:PMYSQL):cuint;extdecl;external mysqllib name 'mysql_field_count';
-    function mysql_affected_rows(mysql:PMYSQL):my_ulonglong;extdecl;external mysqllib name 'mysql_affected_rows';
-    function mysql_insert_id(mysql:PMYSQL):my_ulonglong;extdecl;external mysqllib name 'mysql_insert_id';
-    function mysql_errno(mysql:PMYSQL):cuint;extdecl;external mysqllib name 'mysql_errno';
-    function mysql_error(mysql:PMYSQL):Pchar;extdecl;external mysqllib name 'mysql_error';
-    function mysql_sqlstate(mysql:PMYSQL):Pchar;extdecl;external mysqllib name 'mysql_sqlstate';
-    function mysql_warning_count(mysql:PMYSQL):cuint;extdecl;external mysqllib name 'mysql_warning_count';
-    function mysql_info(mysql:PMYSQL):Pchar;extdecl;external mysqllib name 'mysql_info';
-    function mysql_thread_id(mysql:PMYSQL):culong;extdecl;external mysqllib name 'mysql_thread_id';
-    function mysql_character_set_name(mysql:PMYSQL):Pchar;extdecl;external mysqllib name 'mysql_character_set_name';
-    function mysql_set_character_set(mysql:PMYSQL; csname:Pchar):longint;extdecl;external mysqllib name 'mysql_set_character_set';
-    function mysql_init(mysql:PMYSQL):PMYSQL;extdecl;external mysqllib name 'mysql_init';
+    function mysql_num_rows(res:PMYSQL_RES):my_ulonglong;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_num_rows';
+    function mysql_num_fields(res:PMYSQL_RES):cuint;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_num_fields';
+    function mysql_eof(res:PMYSQL_RES):my_bool;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_eof';
+    function mysql_fetch_field_direct(res:PMYSQL_RES; fieldnr:cuint):PMYSQL_FIELD;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_fetch_field_direct';
+    function mysql_fetch_fields(res:PMYSQL_RES):PMYSQL_FIELD;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_fetch_fields';
+    function mysql_row_tell(res:PMYSQL_RES):MYSQL_ROW_OFFSET;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_row_tell';
+    function mysql_field_tell(res:PMYSQL_RES):MYSQL_FIELD_OFFSET;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_field_tell';
+    function mysql_field_count(mysql:PMYSQL):cuint;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_field_count';
+    function mysql_affected_rows(mysql:PMYSQL):my_ulonglong;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_affected_rows';
+    function mysql_insert_id(mysql:PMYSQL):my_ulonglong;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_insert_id';
+    function mysql_errno(mysql:PMYSQL):cuint;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_errno';
+    function mysql_error(mysql:PMYSQL):Pchar;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_error';
+    function mysql_sqlstate(mysql:PMYSQL):Pchar;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_sqlstate';
+    function mysql_warning_count(mysql:PMYSQL):cuint;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_warning_count';
+    function mysql_info(mysql:PMYSQL):Pchar;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_info';
+    function mysql_thread_id(mysql:PMYSQL):culong;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_thread_id';
+    function mysql_character_set_name(mysql:PMYSQL):Pchar;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_character_set_name';
+    function mysql_set_character_set(mysql:PMYSQL; csname:Pchar):longint;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_set_character_set';
+    function mysql_init(mysql:PMYSQL):PMYSQL;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_init';
     function mysql_ssl_set(mysql:PMYSQL; key:Pchar; cert:Pchar; ca:Pchar; capath:Pchar;
-               cipher:Pchar):my_bool;extdecl;external mysqllib name 'mysql_ssl_set';
-    function mysql_change_user(mysql:PMYSQL; user:Pchar; passwd:Pchar; db:Pchar):my_bool;extdecl;external mysqllib name 'mysql_change_user';
+               cipher:Pchar):my_bool;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_ssl_set';
+    function mysql_change_user(mysql:PMYSQL; user:Pchar; passwd:Pchar; db:Pchar):my_bool;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_change_user';
     function mysql_real_connect(mysql:PMYSQL; host:Pchar; user:Pchar; passwd:Pchar; db:Pchar;
-               port:cuint; unix_socket:Pchar; clientflag:culong):PMYSQL;extdecl;external mysqllib name 'mysql_real_connect';
-    function mysql_select_db(mysql:PMYSQL; db:Pchar):cint;extdecl;external mysqllib name 'mysql_select_db';
-    function mysql_query(mysql:PMYSQL; q:Pchar):cint;extdecl;external mysqllib name 'mysql_query';
-    function mysql_send_query(mysql:PMYSQL; q:Pchar; length:culong):cint;extdecl;external mysqllib name 'mysql_send_query';
-    function mysql_real_query(mysql:PMYSQL; q:Pchar; length:culong):cint;extdecl;external mysqllib name 'mysql_real_query';
-    function mysql_store_result(mysql:PMYSQL):PMYSQL_RES;extdecl;external mysqllib name 'mysql_store_result';
-    function mysql_use_result(mysql:PMYSQL):PMYSQL_RES;extdecl;external mysqllib name 'mysql_use_result';
+               port:cuint; unix_socket:Pchar; clientflag:culong):PMYSQL;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_real_connect';
+    function mysql_select_db(mysql:PMYSQL; db:Pchar):cint;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_select_db';
+    function mysql_query(mysql:PMYSQL; q:Pchar):cint;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_query';
+    function mysql_send_query(mysql:PMYSQL; q:Pchar; length:culong):cint;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_send_query';
+    function mysql_real_query(mysql:PMYSQL; q:Pchar; length:culong):cint;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_real_query';
+    function mysql_store_result(mysql:PMYSQL):PMYSQL_RES;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_store_result';
+    function mysql_use_result(mysql:PMYSQL):PMYSQL_RES;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_use_result';
 
 {$ELSE}
 
@@ -1550,14 +1536,14 @@ type
 
 {$IFNDEF LinkDynamically}
     { perform query on master  }
-    function mysql_master_query(mysql:PMYSQL; q:Pchar; length:culong):my_bool;extdecl;external mysqllib name 'mysql_master_query';
-    function mysql_master_send_query(mysql:PMYSQL; q:Pchar; length:culong):my_bool;extdecl;external mysqllib name 'mysql_master_send_query';
+    function mysql_master_query(mysql:PMYSQL; q:Pchar; length:culong):my_bool;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_master_query';
+    function mysql_master_send_query(mysql:PMYSQL; q:Pchar; length:culong):my_bool;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_master_send_query';
 
     { perform query on slave  }
-    function mysql_slave_query(mysql:PMYSQL; q:Pchar; length:culong):my_bool;extdecl;external mysqllib name 'mysql_slave_query';
-    function mysql_slave_send_query(mysql:PMYSQL; q:Pchar; length:culong):my_bool;extdecl;external mysqllib name 'mysql_slave_send_query';
+    function mysql_slave_query(mysql:PMYSQL; q:Pchar; length:culong):my_bool;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_slave_query';
+    function mysql_slave_send_query(mysql:PMYSQL; q:Pchar; length:culong):my_bool;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_slave_send_query';
 {$IFDEF mysql50}
-    procedure mysql_get_character_set_info(mysql : PMYSQL; charset : PMY_CHARSET_INFO);extdecl;external mysqllib name 'mysql_get_character_set_info';
+    procedure mysql_get_character_set_info(mysql : PMYSQL; charset : PMY_CHARSET_INFO);{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_get_character_set_info';
 {$ENDIF}
 {$ENDIF}
 
@@ -1573,111 +1559,111 @@ type
 
     { enable/disable parsing of all queries to decide if they go on master or
       slave     }
-    procedure mysql_enable_rpl_parse(mysql:PMYSQL);extdecl;external mysqllib name 'mysql_enable_rpl_parse';
-    procedure mysql_disable_rpl_parse(mysql:PMYSQL);extdecl;external mysqllib name 'mysql_disable_rpl_parse';
+    procedure mysql_enable_rpl_parse(mysql:PMYSQL);{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_enable_rpl_parse';
+    procedure mysql_disable_rpl_parse(mysql:PMYSQL);{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_disable_rpl_parse';
 
     { get the value of the parse flag  }
-    function mysql_rpl_parse_enabled(mysql:PMYSQL):cint;extdecl;external mysqllib name 'mysql_rpl_parse_enabled';
+    function mysql_rpl_parse_enabled(mysql:PMYSQL):cint;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_rpl_parse_enabled';
 
     {  enable/disable reads from master  }
-    procedure mysql_enable_reads_from_master(mysql:PMYSQL);extdecl;external mysqllib name 'mysql_enable_reads_from_master';
-    procedure mysql_disable_reads_from_master(mysql:PMYSQL);extdecl;external mysqllib name 'mysql_disable_reads_from_master';
+    procedure mysql_enable_reads_from_master(mysql:PMYSQL);{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_enable_reads_from_master';
+    procedure mysql_disable_reads_from_master(mysql:PMYSQL);{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_disable_reads_from_master';
 
     { get the value of the master read flag  }
-    function mysql_reads_from_master_enabled(mysql:PMYSQL):my_bool;extdecl;external mysqllib name 'mysql_reads_from_master_enabled';
+    function mysql_reads_from_master_enabled(mysql:PMYSQL):my_bool;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_reads_from_master_enabled';
 
-    function mysql_rpl_query_type(q : pchar;len : cint):mysql_rpl_type;extdecl;external mysqllib name 'mysql_rpl_query_type';
+    function mysql_rpl_query_type(q : pchar;len : cint):mysql_rpl_type;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_rpl_query_type';
 
     { discover the master and its slaves  }
-    function mysql_rpl_probe(mysql:PMYSQL):my_bool;extdecl;external mysqllib name 'mysql_rpl_probe';
+    function mysql_rpl_probe(mysql:PMYSQL):my_bool;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_rpl_probe';
 
     { set the master, close/free the old one, if it is not a pivot  }
-    function mysql_set_master(mysql:PMYSQL; host:Pchar; port:cuint; user:Pchar; passwd:Pchar):cint;extdecl;external mysqllib name 'mysql_set_master';
-    function mysql_add_slave(mysql:PMYSQL; host:Pchar; port:cuint; user:Pchar; passwd:Pchar):cint;extdecl;external mysqllib name 'mysql_add_slave';
-    function mysql_shutdown(mysql:PMYSQL; shutdown_level:mysql_enum_shutdown_level):cint;extdecl;external mysqllib name 'mysql_shutdown';
-    function mysql_dump_debug_info(mysql:PMYSQL):cint;extdecl;external mysqllib name 'mysql_dump_debug_info';
-    function mysql_refresh(mysql:PMYSQL; refresh_options:cuint):cint;extdecl;external mysqllib name 'mysql_refresh';
-    function mysql_kill(mysql:PMYSQL; pid:culong):cint;extdecl;external mysqllib name 'mysql_kill';
-    function mysql_set_server_option(mysql:PMYSQL; option:enum_mysql_set_option):cint;extdecl;external mysqllib name 'mysql_set_server_option';
-    function mysql_ping(mysql:PMYSQL):cint;extdecl;external mysqllib name 'mysql_ping';
-    function mysql_stat(mysql:PMYSQL):Pchar;extdecl;external mysqllib name 'mysql_stat';
-    function mysql_get_server_info(mysql:PMYSQL):Pchar;extdecl;external mysqllib name 'mysql_get_server_info';
-    function mysql_get_client_info:Pchar;extdecl;external mysqllib name 'mysql_get_client_info';
-    function mysql_get_client_version:culong;extdecl;external mysqllib name 'mysql_get_client_version';
-    function mysql_get_host_info(mysql:PMYSQL):Pchar;extdecl;external mysqllib name 'mysql_get_host_info';
-    function mysql_get_server_version(mysql:PMYSQL):culong;extdecl;external mysqllib name 'mysql_get_server_version';
-    function mysql_get_proto_info(mysql:PMYSQL):cuint;extdecl;external mysqllib name 'mysql_get_proto_info';
-    function mysql_list_dbs(mysql:PMYSQL; wild:Pchar):PMYSQL_RES;extdecl;external mysqllib name 'mysql_list_dbs';
+    function mysql_set_master(mysql:PMYSQL; host:Pchar; port:cuint; user:Pchar; passwd:Pchar):cint;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_set_master';
+    function mysql_add_slave(mysql:PMYSQL; host:Pchar; port:cuint; user:Pchar; passwd:Pchar):cint;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_add_slave';
+    function mysql_shutdown(mysql:PMYSQL; shutdown_level:mysql_enum_shutdown_level):cint;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_shutdown';
+    function mysql_dump_debug_info(mysql:PMYSQL):cint;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_dump_debug_info';
+    function mysql_refresh(mysql:PMYSQL; refresh_options:cuint):cint;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_refresh';
+    function mysql_kill(mysql:PMYSQL; pid:culong):cint;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_kill';
+    function mysql_set_server_option(mysql:PMYSQL; option:enum_mysql_set_option):cint;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_set_server_option';
+    function mysql_ping(mysql:PMYSQL):cint;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_ping';
+    function mysql_stat(mysql:PMYSQL):Pchar;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_stat';
+    function mysql_get_server_info(mysql:PMYSQL):Pchar;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_get_server_info';
+    function mysql_get_client_info:Pchar;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_get_client_info';
+    function mysql_get_client_version:culong;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_get_client_version';
+    function mysql_get_host_info(mysql:PMYSQL):Pchar;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_get_host_info';
+    function mysql_get_server_version(mysql:PMYSQL):culong;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_get_server_version';
+    function mysql_get_proto_info(mysql:PMYSQL):cuint;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_get_proto_info';
+    function mysql_list_dbs(mysql:PMYSQL; wild:Pchar):PMYSQL_RES;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_list_dbs';
 
-    function mysql_list_tables(mysql:PMYSQL; wild:Pchar):PMYSQL_RES;extdecl;external mysqllib name 'mysql_list_tables';
-    function mysql_list_processes(mysql:PMYSQL):PMYSQL_RES;extdecl;external mysqllib name 'mysql_list_processes';
+    function mysql_list_tables(mysql:PMYSQL; wild:Pchar):PMYSQL_RES;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_list_tables';
+    function mysql_list_processes(mysql:PMYSQL):PMYSQL_RES;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_list_processes';
 {$ifdef mysql51}
-    function mysql_options(mysql:PMYSQL; option:mysql_option; arg: pointer):cint;extdecl;external mysqllib name 'mysql_options';
+    function mysql_options(mysql:PMYSQL; option:mysql_option; arg: pointer):cint;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_options';
 {$else}
-    function mysql_options(mysql:PMYSQL; option:mysql_option; arg:Pchar):cint;extdecl;external mysqllib name 'mysql_options';
+    function mysql_options(mysql:PMYSQL; option:mysql_option; arg:Pchar):cint;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_options';
 {$endif}
-    procedure mysql_free_result(result:PMYSQL_RES);extdecl;external mysqllib name 'mysql_free_result';
-    procedure mysql_data_seek(result:PMYSQL_RES; offset:my_ulonglong);extdecl;external mysqllib name 'mysql_data_seek';
-    function mysql_row_seek(result:PMYSQL_RES; offset:MYSQL_ROW_OFFSET):MYSQL_ROW_OFFSET;extdecl;external mysqllib name 'mysql_row_seek';
-    function mysql_field_seek(result:PMYSQL_RES; offset:MYSQL_FIELD_OFFSET):MYSQL_FIELD_OFFSET;extdecl;external mysqllib name 'mysql_field_seek';
-    function mysql_fetch_row(result:PMYSQL_RES):MYSQL_ROW;extdecl;external mysqllib name 'mysql_fetch_row';
-    function mysql_fetch_lengths(result:PMYSQL_RES):pculong;extdecl;external mysqllib name 'mysql_fetch_lengths';
-    function mysql_fetch_field(result:PMYSQL_RES):PMYSQL_FIELD;extdecl;external mysqllib name 'mysql_fetch_field';
-    function mysql_list_fields(mysql:PMYSQL; table:Pchar; wild:Pchar):PMYSQL_RES;extdecl;external mysqllib name 'mysql_list_fields';
-    function mysql_escape_string(fto:Pchar; from:Pchar; from_length:culong):culong;extdecl;external mysqllib name 'mysql_escape_string';
-    function mysql_hex_string(fto:Pchar; from:Pchar; from_length:culong):culong;extdecl;external mysqllib name 'mysql_hex_string';
-    function mysql_real_escape_string(mysql:PMYSQL; fto:Pchar; from:Pchar; length:culong):culong;extdecl;external mysqllib name 'mysql_real_escape_string';
-    procedure mysql_debug(debug:Pchar);extdecl;external mysqllib name 'mysql_debug';
-{    function mysql_odbc_escape_string(mysql:PMYSQL; fto:Pchar; to_length:dword; from:Pchar; from_length:dword;
-               param:pointer; extend_buffer:function (_para1:pointer; to:Pchar; length:Pdword):Pchar):Pchar;extdecl;external mysqllib name 'mysql_odbc_escape_string';}
-    procedure myodbc_remove_escape(mysql:PMYSQL; name:Pchar);extdecl;external mysqllib name 'myodbc_remove_escape';
-    function mysql_thread_safe:cuint;extdecl;external mysqllib name 'mysql_thread_safe';
-    function mysql_embedded:my_bool;extdecl;external mysqllib name 'mysql_embedded';
-    function mysql_manager_init(con:PMYSQL_MANAGER):PMYSQL_MANAGER;extdecl;external mysqllib name 'mysql_manager_init';
-    function mysql_manager_connect(con:PMYSQL_MANAGER; host:Pchar; user:Pchar; passwd:Pchar; port:cuint):PMYSQL_MANAGER;extdecl;external mysqllib name 'mysql_manager_connect';
-    procedure mysql_manager_close(con:PMYSQL_MANAGER);extdecl;external mysqllib name 'mysql_manager_close';
-    function mysql_manager_command(con:PMYSQL_MANAGER; cmd:Pchar; cmd_len:cint):cint;extdecl;external mysqllib name 'mysql_manager_command';
-    function mysql_manager_fetch_line(con:PMYSQL_MANAGER; res_buf:Pchar; res_buf_size:cint):cint;extdecl;external mysqllib name 'mysql_manager_fetch_line';
-    function mysql_read_query_result(mysql:PMYSQL):my_bool;extdecl;external mysqllib name 'mysql_read_query_result';
+    procedure mysql_free_result(result:PMYSQL_RES);{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_free_result';
+    procedure mysql_data_seek(result:PMYSQL_RES; offset:my_ulonglong);{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_data_seek';
+    function mysql_row_seek(result:PMYSQL_RES; offset:MYSQL_ROW_OFFSET):MYSQL_ROW_OFFSET;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_row_seek';
+    function mysql_field_seek(result:PMYSQL_RES; offset:MYSQL_FIELD_OFFSET):MYSQL_FIELD_OFFSET;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_field_seek';
+    function mysql_fetch_row(result:PMYSQL_RES):MYSQL_ROW;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_fetch_row';
+    function mysql_fetch_lengths(result:PMYSQL_RES):pculong;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_fetch_lengths';
+    function mysql_fetch_field(result:PMYSQL_RES):PMYSQL_FIELD;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_fetch_field';
+    function mysql_list_fields(mysql:PMYSQL; table:Pchar; wild:Pchar):PMYSQL_RES;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_list_fields';
+    function mysql_escape_string(fto:Pchar; from:Pchar; from_length:culong):culong;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_escape_string';
+    function mysql_hex_string(fto:Pchar; from:Pchar; from_length:culong):culong;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_hex_string';
+    function mysql_real_escape_string(mysql:PMYSQL; fto:Pchar; from:Pchar; length:culong):culong;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_real_escape_string';
+    procedure mysql_debug(debug:Pchar);{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_debug';
+(*    function mysql_odbc_escape_string(mysql:PMYSQL; fto:Pchar; to_length:dword; from:Pchar; from_length:dword;
+               param:pointer; extend_buffer:function (_para1:pointer; to:Pchar; length:Pdword):Pchar):Pchar;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_odbc_escape_string';*)
+    procedure myodbc_remove_escape(mysql:PMYSQL; name:Pchar);{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'myodbc_remove_escape';
+    function mysql_thread_safe:cuint;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_thread_safe';
+    function mysql_embedded:my_bool;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_embedded';
+    function mysql_manager_init(con:PMYSQL_MANAGER):PMYSQL_MANAGER;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_manager_init';
+    function mysql_manager_connect(con:PMYSQL_MANAGER; host:Pchar; user:Pchar; passwd:Pchar; port:cuint):PMYSQL_MANAGER;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_manager_connect';
+    procedure mysql_manager_close(con:PMYSQL_MANAGER);{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_manager_close';
+    function mysql_manager_command(con:PMYSQL_MANAGER; cmd:Pchar; cmd_len:cint):cint;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_manager_command';
+    function mysql_manager_fetch_line(con:PMYSQL_MANAGER; res_buf:Pchar; res_buf_size:cint):cint;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_manager_fetch_line';
+    function mysql_read_query_result(mysql:PMYSQL):my_bool;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_read_query_result';
 
-    function mysql_stmt_init(mysql:PMYSQL):PMYSQL_STMT;extdecl;external mysqllib name 'mysql_stmt_init';
-    function mysql_stmt_prepare(stmt:PMYSQL_STMT; query:Pchar; length:culong):cint;extdecl;external mysqllib name 'mysql_stmt_prepare';
-    function mysql_stmt_execute(stmt:PMYSQL_STMT):cint;extdecl;external mysqllib name 'mysql_stmt_execute';
-    function mysql_stmt_fetch(stmt:PMYSQL_STMT):cint;extdecl;external mysqllib name 'mysql_stmt_fetch';
+    function mysql_stmt_init(mysql:PMYSQL):PMYSQL_STMT;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_stmt_init';
+    function mysql_stmt_prepare(stmt:PMYSQL_STMT; query:Pchar; length:culong):cint;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_stmt_prepare';
+    function mysql_stmt_execute(stmt:PMYSQL_STMT):cint;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_stmt_execute';
+    function mysql_stmt_fetch(stmt:PMYSQL_STMT):cint;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_stmt_fetch';
 {$ifdef mysql51}
-    function mysql_stmt_fetch_column(stmt:PMYSQL_STMT; bind: pointer{PMYSQL_BIND}; column:cuint; offset:culong):cint;extdecl;external mysqllib name 'mysql_stmt_fetch_column';
+    function mysql_stmt_fetch_column(stmt:PMYSQL_STMT; bind: pointer{PMYSQL_BIND}; column:cuint; offset:culong):cint;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_stmt_fetch_column';
 {$else}
-    function mysql_stmt_fetch_column(stmt:PMYSQL_STMT; bind:PMYSQL_BIND; column:cuint; offset:culong):cint;extdecl;external mysqllib name 'mysql_stmt_fetch_column';
+    function mysql_stmt_fetch_column(stmt:PMYSQL_STMT; bind:PMYSQL_BIND; column:cuint; offset:culong):cint;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_stmt_fetch_column';
 {$endif}
-    function mysql_stmt_store_result(stmt:PMYSQL_STMT):cint;extdecl;external mysqllib name 'mysql_stmt_store_result';
-    function mysql_stmt_param_count(stmt:PMYSQL_STMT):culong;extdecl;external mysqllib name 'mysql_stmt_param_count';
-    function mysql_stmt_attr_set(stmt:PMYSQL_STMT; attr_type:enum_stmt_attr_type; attr:pointer):my_bool;extdecl;external mysqllib name 'mysql_stmt_attr_set';
-    function mysql_stmt_attr_get(stmt:PMYSQL_STMT; attr_type:enum_stmt_attr_type; attr:pointer):my_bool;extdecl;external mysqllib name 'mysql_stmt_attr_get';
-    function mysql_stmt_bind_param(stmt:PMYSQL_STMT; bnd:PMYSQL_BIND):my_bool;extdecl;external mysqllib name 'mysql_stmt_bind_param';
-    function mysql_stmt_bind_result(stmt:PMYSQL_STMT; bnd:PMYSQL_BIND):my_bool;extdecl;external mysqllib name 'mysql_stmt_bind_result';
-    function mysql_stmt_close(stmt:PMYSQL_STMT):my_bool;extdecl;external mysqllib name 'mysql_stmt_close';
-    function mysql_stmt_reset(stmt:PMYSQL_STMT):my_bool;extdecl;external mysqllib name 'mysql_stmt_reset';
-    function mysql_stmt_free_result(stmt:PMYSQL_STMT):my_bool;extdecl;external mysqllib name 'mysql_stmt_free_result';
-    function mysql_stmt_send_long_data(stmt:PMYSQL_STMT; param_number:cuint; data:Pchar; length:culong):my_bool;extdecl;external mysqllib name 'mysql_stmt_send_long_data';
-    function mysql_stmt_result_metadata(stmt:PMYSQL_STMT):PMYSQL_RES;extdecl;external mysqllib name 'mysql_stmt_result_metadata';
-    function mysql_stmt_param_metadata(stmt:PMYSQL_STMT):PMYSQL_RES;extdecl;external mysqllib name 'mysql_stmt_param_metadata';
-    function mysql_stmt_errno(stmt:PMYSQL_STMT):cuint;extdecl;external mysqllib name 'mysql_stmt_errno';
-    function mysql_stmt_error(stmt:PMYSQL_STMT):Pchar;extdecl;external mysqllib name 'mysql_stmt_error';
-    function mysql_stmt_sqlstate(stmt:PMYSQL_STMT):Pchar;extdecl;external mysqllib name 'mysql_stmt_sqlstate';
-    function mysql_stmt_row_seek(stmt:PMYSQL_STMT; offset:MYSQL_ROW_OFFSET):MYSQL_ROW_OFFSET;extdecl;external mysqllib name 'mysql_stmt_row_seek';
-    function mysql_stmt_row_tell(stmt:PMYSQL_STMT):MYSQL_ROW_OFFSET;extdecl;external mysqllib name 'mysql_stmt_row_tell';
-    procedure mysql_stmt_data_seek(stmt:PMYSQL_STMT; offset:my_ulonglong);extdecl;external mysqllib name 'mysql_stmt_data_seek';
-    function mysql_stmt_num_rows(stmt:PMYSQL_STMT):my_ulonglong;extdecl;external mysqllib name 'mysql_stmt_num_rows';
-    function mysql_stmt_affected_rows(stmt:PMYSQL_STMT):my_ulonglong;extdecl;external mysqllib name 'mysql_stmt_affected_rows';
-    function mysql_stmt_insert_id(stmt:PMYSQL_STMT):my_ulonglong;extdecl;external mysqllib name 'mysql_stmt_insert_id';
-    function mysql_stmt_field_count(stmt:PMYSQL_STMT):cuint;extdecl;external mysqllib name 'mysql_stmt_field_count';
+    function mysql_stmt_store_result(stmt:PMYSQL_STMT):cint;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_stmt_store_result';
+    function mysql_stmt_param_count(stmt:PMYSQL_STMT):culong;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_stmt_param_count';
+    function mysql_stmt_attr_set(stmt:PMYSQL_STMT; attr_type:enum_stmt_attr_type; attr:pointer):my_bool;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_stmt_attr_set';
+    function mysql_stmt_attr_get(stmt:PMYSQL_STMT; attr_type:enum_stmt_attr_type; attr:pointer):my_bool;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_stmt_attr_get';
+    function mysql_stmt_bind_param(stmt:PMYSQL_STMT; bnd:PMYSQL_BIND):my_bool;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_stmt_bind_param';
+    function mysql_stmt_bind_result(stmt:PMYSQL_STMT; bnd:PMYSQL_BIND):my_bool;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_stmt_bind_result';
+    function mysql_stmt_close(stmt:PMYSQL_STMT):my_bool;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_stmt_close';
+    function mysql_stmt_reset(stmt:PMYSQL_STMT):my_bool;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_stmt_reset';
+    function mysql_stmt_free_result(stmt:PMYSQL_STMT):my_bool;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_stmt_free_result';
+    function mysql_stmt_send_long_data(stmt:PMYSQL_STMT; param_number:cuint; data:Pchar; length:culong):my_bool;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_stmt_send_long_data';
+    function mysql_stmt_result_metadata(stmt:PMYSQL_STMT):PMYSQL_RES;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_stmt_result_metadata';
+    function mysql_stmt_param_metadata(stmt:PMYSQL_STMT):PMYSQL_RES;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_stmt_param_metadata';
+    function mysql_stmt_errno(stmt:PMYSQL_STMT):cuint;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_stmt_errno';
+    function mysql_stmt_error(stmt:PMYSQL_STMT):Pchar;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_stmt_error';
+    function mysql_stmt_sqlstate(stmt:PMYSQL_STMT):Pchar;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_stmt_sqlstate';
+    function mysql_stmt_row_seek(stmt:PMYSQL_STMT; offset:MYSQL_ROW_OFFSET):MYSQL_ROW_OFFSET;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_stmt_row_seek';
+    function mysql_stmt_row_tell(stmt:PMYSQL_STMT):MYSQL_ROW_OFFSET;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_stmt_row_tell';
+    procedure mysql_stmt_data_seek(stmt:PMYSQL_STMT; offset:my_ulonglong);{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_stmt_data_seek';
+    function mysql_stmt_num_rows(stmt:PMYSQL_STMT):my_ulonglong;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_stmt_num_rows';
+    function mysql_stmt_affected_rows(stmt:PMYSQL_STMT):my_ulonglong;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_stmt_affected_rows';
+    function mysql_stmt_insert_id(stmt:PMYSQL_STMT):my_ulonglong;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_stmt_insert_id';
+    function mysql_stmt_field_count(stmt:PMYSQL_STMT):cuint;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_stmt_field_count';
 
-    function mysql_commit(mysql:PMYSQL):my_bool;extdecl;external mysqllib name 'mysql_commit';
-    function mysql_rollback(mysql:PMYSQL):my_bool;extdecl;external mysqllib name 'mysql_rollback';
-    function mysql_autocommit(mysql:PMYSQL; auto_mode:my_bool):my_bool;extdecl;external mysqllib name 'mysql_autocommit';
-    function mysql_more_results(mysql:PMYSQL):my_bool;extdecl;external mysqllib name 'mysql_more_results';
-    function mysql_next_result(mysql:PMYSQL):cint;extdecl;external mysqllib name 'mysql_next_result';
-    procedure mysql_close(sock:PMYSQL);extdecl;external mysqllib name 'mysql_close';
+    function mysql_commit(mysql:PMYSQL):my_bool;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_commit';
+    function mysql_rollback(mysql:PMYSQL):my_bool;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_rollback';
+    function mysql_autocommit(mysql:PMYSQL; auto_mode:my_bool):my_bool;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_autocommit';
+    function mysql_more_results(mysql:PMYSQL):my_bool;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_more_results';
+    function mysql_next_result(mysql:PMYSQL):cint;{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_next_result';
+    procedure mysql_close(sock:PMYSQL);{$ifdef wincall}stdcall{$else}cdecl{$endif};external mysqllib name 'mysql_close';
 
 {$ELSE}
 
@@ -1694,9 +1680,9 @@ type
 
 {$IFNDEF LinkDynamically}
 {$ifdef USE_OLD_FUNCTIONS}
-    function mysql_connect(mysql:PMYSQL; host:Pchar; user:Pchar; passwd:Pchar):PMYSQL;extdecl;external External_library name 'mysql_connect';
-    function mysql_create_db(mysql:PMYSQL; DB:Pchar):cint;extdecl;external External_library name 'mysql_create_db';
-    function mysql_drop_db(mysql:PMYSQL; DB:Pchar):cint;extdecl;external External_library name 'mysql_drop_db';
+    function mysql_connect(mysql:PMYSQL; host:Pchar; user:Pchar; passwd:Pchar):PMYSQL;{$ifdef wincall}stdcall{$else}cdecl{$endif};external External_library name 'mysql_connect';
+    function mysql_create_db(mysql:PMYSQL; DB:Pchar):cint;{$ifdef wincall}stdcall{$else}cdecl{$endif};external External_library name 'mysql_create_db';
+    function mysql_drop_db(mysql:PMYSQL; DB:Pchar):cint;{$ifdef wincall}stdcall{$else}cdecl{$endif};external External_library name 'mysql_drop_db';
     function mysql_reload(mysql : PMySQL) : cint;
 {$endif}
 {$endif}
@@ -1727,121 +1713,121 @@ type
 //      my_thread_end : procedure ;cdecl;
     var
       mysql_server_init: function (argc:cint; argv:PPchar; groups:PPchar):cint;cdecl;
-      mysql_server_end: procedure ;extdecl;
+      mysql_server_end: procedure ;{$ifdef wincall}stdcall{$else}cdecl{$endif};
       mysql_library_init: function (argc:cint; argv:PPchar; groups:PPchar):cint;cdecl;
-      mysql_library_end: procedure ;extdecl;
-      mysql_num_rows: function (res:PMYSQL_RES):my_ulonglong;extdecl;
-      mysql_num_fields: function (res:PMYSQL_RES):cuint;extdecl;
-      mysql_eof: function (res:PMYSQL_RES):my_bool;extdecl;
-      mysql_fetch_field_direct: function (res:PMYSQL_RES; fieldnr:cuint):PMYSQL_FIELD;extdecl;
-      mysql_fetch_fields: function (res:PMYSQL_RES):PMYSQL_FIELD;extdecl;
-      mysql_row_tell: function (res:PMYSQL_RES):MYSQL_ROW_OFFSET;extdecl;
-      mysql_field_tell: function (res:PMYSQL_RES):MYSQL_FIELD_OFFSET;extdecl;
-      mysql_field_count: function (mysql:PMYSQL):cuint;extdecl;
-      mysql_affected_rows: function (mysql:PMYSQL):my_ulonglong;extdecl;
-      mysql_insert_id: function (mysql:PMYSQL):my_ulonglong;extdecl;
-      mysql_errno: function (mysql:PMYSQL):cuint;extdecl;
-      mysql_error: function (mysql:PMYSQL):Pchar;extdecl;
-      mysql_sqlstate: function (mysql:PMYSQL):Pchar;extdecl;
-      mysql_warning_count: function (mysql:PMYSQL):cuint;extdecl;
-      mysql_info: function (mysql:PMYSQL):Pchar;extdecl;
-      mysql_thread_id: function (mysql:PMYSQL):culong;extdecl;
-      mysql_character_set_name: function (mysql:PMYSQL):Pchar;extdecl;
-      mysql_set_character_set: function (mysql:PMYSQL; csname:Pchar):cint;extdecl;
-      mysql_get_character_set_info: procedure(mysql : PMYSQL; charset : PMY_CHARSET_INFO);extdecl;
-      mysql_init: function (mysql:PMYSQL):PMYSQL;extdecl;
+      mysql_library_end: procedure ;{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_num_rows: function (res:PMYSQL_RES):my_ulonglong;{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_num_fields: function (res:PMYSQL_RES):cuint;{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_eof: function (res:PMYSQL_RES):my_bool;{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_fetch_field_direct: function (res:PMYSQL_RES; fieldnr:cuint):PMYSQL_FIELD;{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_fetch_fields: function (res:PMYSQL_RES):PMYSQL_FIELD;{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_row_tell: function (res:PMYSQL_RES):MYSQL_ROW_OFFSET;{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_field_tell: function (res:PMYSQL_RES):MYSQL_FIELD_OFFSET;{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_field_count: function (mysql:PMYSQL):cuint;{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_affected_rows: function (mysql:PMYSQL):my_ulonglong;{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_insert_id: function (mysql:PMYSQL):my_ulonglong;{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_errno: function (mysql:PMYSQL):cuint;{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_error: function (mysql:PMYSQL):Pchar;{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_sqlstate: function (mysql:PMYSQL):Pchar;{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_warning_count: function (mysql:PMYSQL):cuint;{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_info: function (mysql:PMYSQL):Pchar;{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_thread_id: function (mysql:PMYSQL):culong;{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_character_set_name: function (mysql:PMYSQL):Pchar;{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_set_character_set: function (mysql:PMYSQL; csname:Pchar):cint;{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_get_character_set_info: procedure(mysql : PMYSQL; charset : PMY_CHARSET_INFO);{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_init: function (mysql:PMYSQL):PMYSQL;{$ifdef wincall}stdcall{$else}cdecl{$endif};
       mysql_ssl_set: function (mysql:PMYSQL; key:Pchar; cert:Pchar; ca:Pchar; capath:Pchar;
-                 cipher:Pchar):my_bool;extdecl;
-      mysql_get_ssl_cipher: function (mysql: pmysql): pchar; extdecl;
-      mysql_change_user: function (mysql:PMYSQL; user:Pchar; passwd:Pchar; db:Pchar):my_bool;extdecl;
+                 cipher:Pchar):my_bool;{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_get_ssl_cipher: function (mysql: pmysql): pchar; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_change_user: function (mysql:PMYSQL; user:Pchar; passwd:Pchar; db:Pchar):my_bool;{$ifdef wincall}stdcall{$else}cdecl{$endif};
       mysql_real_connect: function (mysql:PMYSQL; host:Pchar; user:Pchar; passwd:Pchar; db:Pchar;
-                 port:cuint; unix_socket:Pchar; clientflag:culong):PMYSQL;extdecl;
-      mysql_select_db: function (mysql:PMYSQL; db:Pchar):cint;extdecl;
-      mysql_query: function (mysql:PMYSQL; q:Pchar):cint;extdecl;
-      mysql_send_query: function (mysql:PMYSQL; q:Pchar; length:culong):cint;extdecl;
-      mysql_real_query: function (mysql:PMYSQL; q:Pchar; length:culong):cint;extdecl;
-      mysql_store_result: function (mysql:PMYSQL):PMYSQL_RES;extdecl;
-      mysql_use_result: function (mysql:PMYSQL):PMYSQL_RES;extdecl;
+                 port:cuint; unix_socket:Pchar; clientflag:culong):PMYSQL;{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_select_db: function (mysql:PMYSQL; db:Pchar):cint;{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_query: function (mysql:PMYSQL; q:Pchar):cint;{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_send_query: function (mysql:PMYSQL; q:Pchar; length:culong):cint;{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_real_query: function (mysql:PMYSQL; q:Pchar; length:culong):cint;{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_store_result: function (mysql:PMYSQL):PMYSQL_RES;{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_use_result: function (mysql:PMYSQL):PMYSQL_RES;{$ifdef wincall}stdcall{$else}cdecl{$endif};
     var
-      mysql_shutdown: function (mysql:PMYSQL; shutdown_level:mysql_enum_shutdown_level):cint;extdecl;
-      mysql_dump_debug_info: function (mysql:PMYSQL):cint;extdecl;
-      mysql_refresh: function (mysql:PMYSQL; refresh_options:cuint):cint;extdecl;
-      mysql_kill: function (mysql:PMYSQL; pid:culong):cint;extdecl;
-      mysql_set_server_option: function (mysql:PMYSQL; option:enum_mysql_set_option):cint;extdecl;
-      mysql_ping: function (mysql:PMYSQL):cint;extdecl;
-      mysql_stat: function (mysql:PMYSQL):Pchar;extdecl;
-      mysql_get_server_info: function (mysql:PMYSQL):Pchar;extdecl;
-      mysql_get_client_info: function :Pchar;extdecl;
-      mysql_get_client_version: function :culong;extdecl;
-      mysql_get_host_info: function (mysql:PMYSQL):Pchar;extdecl;
-      mysql_get_server_version: function (mysql:PMYSQL):culong;extdecl;
-      mysql_get_proto_info: function (mysql:PMYSQL):cuint;extdecl;
-      mysql_list_dbs: function (mysql:PMYSQL; wild:Pchar):PMYSQL_RES;extdecl;
+      mysql_shutdown: function (mysql:PMYSQL; shutdown_level:mysql_enum_shutdown_level):cint;{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_dump_debug_info: function (mysql:PMYSQL):cint;{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_refresh: function (mysql:PMYSQL; refresh_options:cuint):cint;{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_kill: function (mysql:PMYSQL; pid:culong):cint;{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_set_server_option: function (mysql:PMYSQL; option:enum_mysql_set_option):cint;{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_ping: function (mysql:PMYSQL):cint;{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_stat: function (mysql:PMYSQL):Pchar;{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_get_server_info: function (mysql:PMYSQL):Pchar;{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_get_client_info: function :Pchar;{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_get_client_version: function :culong;{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_get_host_info: function (mysql:PMYSQL):Pchar;{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_get_server_version: function (mysql:PMYSQL):culong;{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_get_proto_info: function (mysql:PMYSQL):cuint;{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_list_dbs: function (mysql:PMYSQL; wild:Pchar):PMYSQL_RES;{$ifdef wincall}stdcall{$else}cdecl{$endif};
 
-      mysql_list_tables: function (mysql:PMYSQL; wild:Pchar):PMYSQL_RES;extdecl;
-      mysql_list_processes: function (mysql:PMYSQL):PMYSQL_RES;extdecl;
+      mysql_list_tables: function (mysql:PMYSQL; wild:Pchar):PMYSQL_RES;{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_list_processes: function (mysql:PMYSQL):PMYSQL_RES;{$ifdef wincall}stdcall{$else}cdecl{$endif};
 {$ifdef mysql51}
-      mysql_options: function (mysql:PMYSQL; option:mysql_option; arg: pointer):cint;extdecl;
+      mysql_options: function (mysql:PMYSQL; option:mysql_option; arg: pointer):cint;{$ifdef wincall}stdcall{$else}cdecl{$endif};
 {$else}
-      mysql_options: function (mysql:PMYSQL; option:mysql_option; arg:Pchar):cint;extdecl;
+      mysql_options: function (mysql:PMYSQL; option:mysql_option; arg:Pchar):cint;{$ifdef wincall}stdcall{$else}cdecl{$endif};
 {$endif}
-      mysql_free_result: procedure (result:PMYSQL_RES);extdecl;
-      mysql_data_seek: procedure (result:PMYSQL_RES; offset:my_ulonglong);extdecl;
-      mysql_row_seek: function (result:PMYSQL_RES; offset:MYSQL_ROW_OFFSET):MYSQL_ROW_OFFSET;extdecl;
-      mysql_field_seek: function (result:PMYSQL_RES; offset:MYSQL_FIELD_OFFSET):MYSQL_FIELD_OFFSET;extdecl;
-      mysql_fetch_row: function (result:PMYSQL_RES):MYSQL_ROW;extdecl;
-      mysql_fetch_lengths: function (result:PMYSQL_RES):pculong;extdecl;
-      mysql_fetch_field: function (result:PMYSQL_RES):PMYSQL_FIELD;extdecl;
-      mysql_list_fields: function (mysql:PMYSQL; table:Pchar; wild:Pchar):PMYSQL_RES;extdecl;
-      mysql_escape_string: function (fto:Pchar; from:Pchar; from_length:culong):culong;extdecl;
-      mysql_hex_string: function (fto:Pchar; from:Pchar; from_length:culong):culong;extdecl;
-      mysql_real_escape_string: function (mysql:PMYSQL; fto:Pchar; from:Pchar; length:culong):culong;extdecl;
-      mysql_debug: procedure (debug:Pchar);extdecl;
+      mysql_free_result: procedure (result:PMYSQL_RES);{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_data_seek: procedure (result:PMYSQL_RES; offset:my_ulonglong);{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_row_seek: function (result:PMYSQL_RES; offset:MYSQL_ROW_OFFSET):MYSQL_ROW_OFFSET;{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_field_seek: function (result:PMYSQL_RES; offset:MYSQL_FIELD_OFFSET):MYSQL_FIELD_OFFSET;{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_fetch_row: function (result:PMYSQL_RES):MYSQL_ROW;{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_fetch_lengths: function (result:PMYSQL_RES):pculong;{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_fetch_field: function (result:PMYSQL_RES):PMYSQL_FIELD;{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_list_fields: function (mysql:PMYSQL; table:Pchar; wild:Pchar):PMYSQL_RES;{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_escape_string: function (fto:Pchar; from:Pchar; from_length:culong):culong;{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_hex_string: function (fto:Pchar; from:Pchar; from_length:culong):culong;{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_real_escape_string: function (mysql:PMYSQL; fto:Pchar; from:Pchar; length:culong):culong;{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_debug: procedure (debug:Pchar);{$ifdef wincall}stdcall{$else}cdecl{$endif};
 
-      mysql_rollback: function (mysql:PMYSQL):my_bool;extdecl;
-      mysql_autocommit: function (mysql:PMYSQL; auto_mode:my_bool):my_bool;extdecl;
-      mysql_commit: function (mysql:PMYSQL):my_bool;extdecl;
-      mysql_more_results: function (mysql:PMYSQL):my_bool;extdecl;
-      mysql_next_result: function (mysql:PMYSQL):cint;extdecl;
-      mysql_close: procedure (sock:PMYSQL);extdecl;
+      mysql_rollback: function (mysql:PMYSQL):my_bool;{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_autocommit: function (mysql:PMYSQL; auto_mode:my_bool):my_bool;{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_commit: function (mysql:PMYSQL):my_bool;{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_more_results: function (mysql:PMYSQL):my_bool;{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_next_result: function (mysql:PMYSQL):cint;{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_close: procedure (sock:PMYSQL);{$ifdef wincall}stdcall{$else}cdecl{$endif};
 
-      mysql_stmt_init: function (mysql:PMYSQL):PMYSQL_STMT;extdecl;
-      mysql_stmt_prepare: function (stmt:PMYSQL_STMT; query:Pchar; length:culong):cint;extdecl;
-      mysql_stmt_execute: function (stmt:PMYSQL_STMT):cint;extdecl;
-      mysql_stmt_fetch: function (stmt:PMYSQL_STMT):cint;extdecl;
+      mysql_stmt_init: function (mysql:PMYSQL):PMYSQL_STMT;{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_stmt_prepare: function (stmt:PMYSQL_STMT; query:Pchar; length:culong):cint;{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_stmt_execute: function (stmt:PMYSQL_STMT):cint;{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_stmt_fetch: function (stmt:PMYSQL_STMT):cint;{$ifdef wincall}stdcall{$else}cdecl{$endif};
 {$ifdef mysql51}
-      mysql_stmt_fetch_column: function (stmt:PMYSQL_STMT; bind:pointer{PMYSQL_BIND}; column:cuint; offset:culong):cint;extdecl;
+      mysql_stmt_fetch_column: function (stmt:PMYSQL_STMT; bind:pointer{PMYSQL_BIND}; column:cuint; offset:culong):cint;{$ifdef wincall}stdcall{$else}cdecl{$endif};
 {$else}
-      mysql_stmt_fetch_column: function (stmt:PMYSQL_STMT; bind:PMYSQL_BIND; column:cuint; offset:culong):cint;extdecl;
+      mysql_stmt_fetch_column: function (stmt:PMYSQL_STMT; bind:PMYSQL_BIND; column:cuint; offset:culong):cint;{$ifdef wincall}stdcall{$else}cdecl{$endif};
 {$endif}
-      mysql_stmt_store_result: function (stmt:PMYSQL_STMT):cint;extdecl;
-      mysql_stmt_param_count: function (stmt:PMYSQL_STMT):culong;extdecl;
-      mysql_stmt_attr_set: function (stmt:PMYSQL_STMT; attr_type:enum_stmt_attr_type; attr:pointer):my_bool;extdecl;
-      mysql_stmt_attr_get: function (stmt:PMYSQL_STMT; attr_type:enum_stmt_attr_type; attr:pointer):my_bool;extdecl;
+      mysql_stmt_store_result: function (stmt:PMYSQL_STMT):cint;{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_stmt_param_count: function (stmt:PMYSQL_STMT):culong;{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_stmt_attr_set: function (stmt:PMYSQL_STMT; attr_type:enum_stmt_attr_type; attr:pointer):my_bool;{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_stmt_attr_get: function (stmt:PMYSQL_STMT; attr_type:enum_stmt_attr_type; attr:pointer):my_bool;{$ifdef wincall}stdcall{$else}cdecl{$endif};
 {$ifdef mysql51}
-      mysql_stmt_bind_param: function (stmt:PMYSQL_STMT; bnd:pointer{PMYSQL_BIND}):my_bool;extdecl;
-      mysql_stmt_bind_result: function (stmt:PMYSQL_STMT; bnd:pointer{PMYSQL_BIND}):my_bool;extdecl;
+      mysql_stmt_bind_param: function (stmt:PMYSQL_STMT; bnd:pointer{PMYSQL_BIND}):my_bool;{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_stmt_bind_result: function (stmt:PMYSQL_STMT; bnd:pointer{PMYSQL_BIND}):my_bool;{$ifdef wincall}stdcall{$else}cdecl{$endif};
 {$else}
-      mysql_stmt_bind_param: function (stmt:PMYSQL_STMT; bnd:PMYSQL_BIND):my_bool;extdecl;
-      mysql_stmt_bind_result: function (stmt:PMYSQL_STMT; bnd:PMYSQL_BIND):my_bool;extdecl;
+      mysql_stmt_bind_param: function (stmt:PMYSQL_STMT; bnd:PMYSQL_BIND):my_bool;{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_stmt_bind_result: function (stmt:PMYSQL_STMT; bnd:PMYSQL_BIND):my_bool;{$ifdef wincall}stdcall{$else}cdecl{$endif};
 {$endif}
-      mysql_stmt_close: function (stmt:PMYSQL_STMT):my_bool;extdecl;
-      mysql_stmt_reset: function (stmt:PMYSQL_STMT):my_bool;extdecl;
-      mysql_stmt_free_result: function (stmt:PMYSQL_STMT):my_bool;extdecl;
-      mysql_stmt_send_long_data: function (stmt:PMYSQL_STMT; param_number:cuint; data:Pchar; length:culong):my_bool;extdecl;
-      mysql_stmt_result_metadata: function (stmt:PMYSQL_STMT):PMYSQL_RES;extdecl;
-      mysql_stmt_param_metadata: function (stmt:PMYSQL_STMT):PMYSQL_RES;extdecl;
-      mysql_stmt_errno: function (stmt:PMYSQL_STMT):cuint;extdecl;
-      mysql_stmt_error: function (stmt:PMYSQL_STMT):Pchar;extdecl;
-      mysql_stmt_sqlstate: function (stmt:PMYSQL_STMT):Pchar;extdecl;
+      mysql_stmt_close: function (stmt:PMYSQL_STMT):my_bool;{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_stmt_reset: function (stmt:PMYSQL_STMT):my_bool;{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_stmt_free_result: function (stmt:PMYSQL_STMT):my_bool;{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_stmt_send_long_data: function (stmt:PMYSQL_STMT; param_number:cuint; data:Pchar; length:culong):my_bool;{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_stmt_result_metadata: function (stmt:PMYSQL_STMT):PMYSQL_RES;{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_stmt_param_metadata: function (stmt:PMYSQL_STMT):PMYSQL_RES;{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_stmt_errno: function (stmt:PMYSQL_STMT):cuint;{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_stmt_error: function (stmt:PMYSQL_STMT):Pchar;{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_stmt_sqlstate: function (stmt:PMYSQL_STMT):Pchar;{$ifdef wincall}stdcall{$else}cdecl{$endif};
       mysql_stmt_row_seek: function (stmt:PMYSQL_STMT; offset:MYSQL_ROW_OFFSET):
-                                MYSQL_ROW_OFFSET;extdecl;
-      mysql_stmt_row_tell: function (stmt:PMYSQL_STMT):MYSQL_ROW_OFFSET;extdecl;
-      mysql_stmt_data_seek: procedure (stmt:PMYSQL_STMT; offset:my_ulonglong);extdecl;
-      mysql_stmt_num_rows: function (stmt:PMYSQL_STMT):my_ulonglong;extdecl;
-      mysql_stmt_affected_rows: function (stmt:PMYSQL_STMT):my_ulonglong;extdecl;
-      mysql_stmt_insert_id: function (stmt:PMYSQL_STMT):my_ulonglong;extdecl;
-      mysql_stmt_field_count: function (stmt:PMYSQL_STMT):cuint;extdecl;
+                                MYSQL_ROW_OFFSET;{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_stmt_row_tell: function (stmt:PMYSQL_STMT):MYSQL_ROW_OFFSET;{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_stmt_data_seek: procedure (stmt:PMYSQL_STMT; offset:my_ulonglong);{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_stmt_num_rows: function (stmt:PMYSQL_STMT):my_ulonglong;{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_stmt_affected_rows: function (stmt:PMYSQL_STMT):my_ulonglong;{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_stmt_insert_id: function (stmt:PMYSQL_STMT):my_ulonglong;{$ifdef wincall}stdcall{$else}cdecl{$endif};
+      mysql_stmt_field_count: function (stmt:PMYSQL_STMT):cuint;{$ifdef wincall}stdcall{$else}cdecl{$endif};
 
 implementation
 uses
@@ -2191,102 +2177,102 @@ end;
 procedure initializemysql(const sonames: array of filenamety);
 const 
  funcs: array[0..92] of funcinfoty = (
-  (n: 'mysql_affected_rows'; d: @mysql_affected_rows),
-  (n: 'mysql_autocommit'; d: @mysql_autocommit),
-  (n: 'mysql_change_user'; d: @mysql_change_user),
-  (n: 'mysql_close'; d: @mysql_close),
-  (n: 'mysql_commit'; d: @mysql_commit),
-  (n: 'mysql_data_seek'; d: @mysql_data_seek),
-  (n: 'mysql_debug'; d: @mysql_debug),
-  (n: 'mysql_dump_debug_info'; d: @mysql_dump_debug_info),
-  (n: 'mysql_eof'; d: @mysql_eof),
-  (n: 'mysql_errno'; d: @mysql_errno),
-  (n: 'mysql_error'; d: @mysql_error),
-  (n: 'mysql_escape_string'; d: @mysql_escape_string),
-  (n: 'mysql_fetch_field'; d: @mysql_fetch_field),
-  (n: 'mysql_fetch_field_direct'; d: @mysql_fetch_field_direct),
-  (n: 'mysql_fetch_fields'; d: @mysql_fetch_fields),
-  (n: 'mysql_fetch_lengths'; d: @mysql_fetch_lengths),
-  (n: 'mysql_fetch_row'; d: @mysql_fetch_row),
-  (n: 'mysql_field_seek'; d: @mysql_field_seek),
-  (n: 'mysql_field_count'; d: @mysql_field_count),
-  (n: 'mysql_field_tell'; d: @mysql_field_tell),
-  (n: 'mysql_free_result'; d: @mysql_free_result),
-  (n: 'mysql_get_client_info'; d: @mysql_get_client_info),
-  (n: 'mysql_get_client_version'; d: @mysql_get_client_version),
-  (n: 'mysql_get_host_info'; d: @mysql_get_host_info),
-  (n: 'mysql_get_server_version'; d: @mysql_get_server_version),
-  (n: 'mysql_get_proto_info'; d: @mysql_get_proto_info),
-  (n: 'mysql_get_server_info'; d: @mysql_get_server_info),
-  (n: 'mysql_info'; d: @mysql_info),
-  (n: 'mysql_init'; d: @mysql_init),
-  (n: 'mysql_insert_id'; d: @mysql_insert_id),
-  (n: 'mysql_kill'; d: @mysql_kill),
-  (n: 'mysql_server_end'; d: @mysql_server_end),
-  (n: 'mysql_server_init'; d: @mysql_server_init),
-  (n: 'mysql_list_dbs'; d: @mysql_list_dbs),
-  (n: 'mysql_list_fields'; d: @mysql_list_fields),
-  (n: 'mysql_list_processes'; d: @mysql_list_processes),
-  (n: 'mysql_list_tables'; d: @mysql_list_tables),
-  (n: 'mysql_more_results'; d: @mysql_more_results),
-  (n: 'mysql_next_result'; d: @mysql_next_result),
-  (n: 'mysql_num_fields'; d: @mysql_num_fields),
-  (n: 'mysql_num_rows'; d: @mysql_num_rows),
-  (n: 'mysql_options'; d: @mysql_options),
-  (n: 'mysql_ping'; d: @mysql_ping),
-  (n: 'mysql_query'; d: @mysql_query),
-  (n: 'mysql_real_connect'; d: @mysql_real_connect),
-  (n: 'mysql_real_escape_string'; d: @mysql_real_escape_string),
-  (n: 'mysql_real_query'; d: @mysql_real_query),
-  (n: 'mysql_refresh'; d: @mysql_refresh),
-  (n: 'mysql_rollback'; d: @mysql_rollback),
-  (n: 'mysql_row_seek'; d: @mysql_row_seek),
-  (n: 'mysql_row_tell'; d: @mysql_row_tell),
-  (n: 'mysql_select_db'; d: @mysql_select_db),
-  (n: 'mysql_server_end'; d: @mysql_server_end),
-  (n: 'mysql_server_init'; d: @mysql_server_init),
-  (n: 'mysql_set_server_option'; d: @mysql_set_server_option),
-  (n: 'mysql_sqlstate'; d: @mysql_sqlstate),
-  (n: 'mysql_shutdown'; d: @mysql_shutdown),
-  (n: 'mysql_stat'; d: @mysql_stat),
-  (n: 'mysql_store_result'; d: @mysql_store_result),
-  (n: 'mysql_thread_id'; d: @mysql_thread_id),
-  (n: 'mysql_use_result'; d: @mysql_use_result),
-  (n: 'mysql_warning_count'; d: @mysql_warning_count),
-  (n: 'mysql_stmt_init'; d: @mysql_stmt_init),
-  (n: 'mysql_stmt_prepare'; d: @mysql_stmt_prepare),
-  (n: 'mysql_stmt_execute'; d: @mysql_stmt_execute),
-  (n: 'mysql_stmt_fetch'; d: @mysql_stmt_fetch),
-  (n: 'mysql_stmt_fetch_column'; d: @mysql_stmt_fetch_column),
-  (n: 'mysql_stmt_store_result'; d: @mysql_stmt_store_result),
-  (n: 'mysql_stmt_param_count'; d: @mysql_stmt_param_count),
-  (n: 'mysql_stmt_attr_set'; d: @mysql_stmt_attr_set),
-  (n: 'mysql_stmt_attr_get'; d: @mysql_stmt_attr_get),
-  (n: 'mysql_stmt_bind_param'; d: @mysql_stmt_bind_param),
-  (n: 'mysql_stmt_bind_result'; d: @mysql_stmt_bind_result),
-  (n: 'mysql_stmt_close'; d: @mysql_stmt_close),
-  (n: 'mysql_stmt_reset'; d: @mysql_stmt_reset),
-  (n: 'mysql_stmt_free_result'; d: @mysql_stmt_free_result),
-  (n: 'mysql_stmt_send_long_data'; d: @mysql_stmt_send_long_data),
-  (n: 'mysql_stmt_result_metadata'; d: @mysql_stmt_result_metadata),
-  (n: 'mysql_stmt_param_metadata'; d: @mysql_stmt_param_metadata),
-  (n: 'mysql_stmt_errno'; d: @mysql_stmt_errno),
-  (n: 'mysql_stmt_error'; d: @mysql_stmt_error),
-  (n: 'mysql_stmt_sqlstate'; d: @mysql_stmt_sqlstate),
-  (n: 'mysql_stmt_row_seek'; d: @mysql_stmt_row_seek),
-  (n: 'mysql_stmt_row_tell'; d: @mysql_stmt_row_tell),
-  (n: 'mysql_stmt_data_seek'; d: @mysql_stmt_data_seek),
-  (n: 'mysql_stmt_num_rows'; d: @mysql_stmt_num_rows),
-  (n: 'mysql_stmt_affected_rows'; d: @mysql_stmt_affected_rows),
-  (n: 'mysql_stmt_insert_id'; d: @mysql_stmt_insert_id),
-  (n: 'mysql_stmt_field_count'; d: @mysql_stmt_field_count),
-  (n: 'mysql_ssl_set'; d: @mysql_ssl_set),
-  (n: 'mysql_character_set_name'; d: @mysql_character_set_name),
-  (n: 'mysql_get_character_set_info'; d: @mysql_get_character_set_info),
-  (n: 'mysql_set_character_set'; d: @mysql_set_character_set)
+  (n: 'mysql_affected_rows'; d: {$ifndef FPC}@{$endif}@mysql_affected_rows),
+  (n: 'mysql_autocommit'; d: {$ifndef FPC}@{$endif}@mysql_autocommit),
+  (n: 'mysql_change_user'; d: {$ifndef FPC}@{$endif}@mysql_change_user),
+  (n: 'mysql_close'; d: {$ifndef FPC}@{$endif}@mysql_close),
+  (n: 'mysql_commit'; d: {$ifndef FPC}@{$endif}@mysql_commit),
+  (n: 'mysql_data_seek'; d: {$ifndef FPC}@{$endif}@mysql_data_seek),
+  (n: 'mysql_debug'; d: {$ifndef FPC}@{$endif}@mysql_debug),
+  (n: 'mysql_dump_debug_info'; d: {$ifndef FPC}@{$endif}@mysql_dump_debug_info),
+  (n: 'mysql_eof'; d: {$ifndef FPC}@{$endif}@mysql_eof),
+  (n: 'mysql_errno'; d: {$ifndef FPC}@{$endif}@mysql_errno),
+  (n: 'mysql_error'; d: {$ifndef FPC}@{$endif}@mysql_error),
+  (n: 'mysql_escape_string'; d: {$ifndef FPC}@{$endif}@mysql_escape_string),
+  (n: 'mysql_fetch_field'; d: {$ifndef FPC}@{$endif}@mysql_fetch_field),
+  (n: 'mysql_fetch_field_direct'; d: {$ifndef FPC}@{$endif}@mysql_fetch_field_direct),
+  (n: 'mysql_fetch_fields'; d: {$ifndef FPC}@{$endif}@mysql_fetch_fields),
+  (n: 'mysql_fetch_lengths'; d: {$ifndef FPC}@{$endif}@mysql_fetch_lengths),
+  (n: 'mysql_fetch_row'; d: {$ifndef FPC}@{$endif}@mysql_fetch_row),
+  (n: 'mysql_field_seek'; d: {$ifndef FPC}@{$endif}@mysql_field_seek),
+  (n: 'mysql_field_count'; d: {$ifndef FPC}@{$endif}@mysql_field_count),
+  (n: 'mysql_field_tell'; d: {$ifndef FPC}@{$endif}@mysql_field_tell),
+  (n: 'mysql_free_result'; d: {$ifndef FPC}@{$endif}@mysql_free_result),
+  (n: 'mysql_get_client_info'; d: {$ifndef FPC}@{$endif}@mysql_get_client_info),
+  (n: 'mysql_get_client_version'; d: {$ifndef FPC}@{$endif}@mysql_get_client_version),
+  (n: 'mysql_get_host_info'; d: {$ifndef FPC}@{$endif}@mysql_get_host_info),
+  (n: 'mysql_get_server_version'; d: {$ifndef FPC}@{$endif}@mysql_get_server_version),
+  (n: 'mysql_get_proto_info'; d: {$ifndef FPC}@{$endif}@mysql_get_proto_info),
+  (n: 'mysql_get_server_info'; d: {$ifndef FPC}@{$endif}@mysql_get_server_info),
+  (n: 'mysql_info'; d: {$ifndef FPC}@{$endif}@mysql_info),
+  (n: 'mysql_init'; d: {$ifndef FPC}@{$endif}@mysql_init),
+  (n: 'mysql_insert_id'; d: {$ifndef FPC}@{$endif}@mysql_insert_id),
+  (n: 'mysql_kill'; d: {$ifndef FPC}@{$endif}@mysql_kill),
+  (n: 'mysql_server_end'; d: {$ifndef FPC}@{$endif}@mysql_server_end),
+  (n: 'mysql_server_init'; d: {$ifndef FPC}@{$endif}@mysql_server_init),
+  (n: 'mysql_list_dbs'; d: {$ifndef FPC}@{$endif}@mysql_list_dbs),
+  (n: 'mysql_list_fields'; d: {$ifndef FPC}@{$endif}@mysql_list_fields),
+  (n: 'mysql_list_processes'; d: {$ifndef FPC}@{$endif}@mysql_list_processes),
+  (n: 'mysql_list_tables'; d: {$ifndef FPC}@{$endif}@mysql_list_tables),
+  (n: 'mysql_more_results'; d: {$ifndef FPC}@{$endif}@mysql_more_results),
+  (n: 'mysql_next_result'; d: {$ifndef FPC}@{$endif}@mysql_next_result),
+  (n: 'mysql_num_fields'; d: {$ifndef FPC}@{$endif}@mysql_num_fields),
+  (n: 'mysql_num_rows'; d: {$ifndef FPC}@{$endif}@mysql_num_rows),
+  (n: 'mysql_options'; d: {$ifndef FPC}@{$endif}@mysql_options),
+  (n: 'mysql_ping'; d: {$ifndef FPC}@{$endif}@mysql_ping),
+  (n: 'mysql_query'; d: {$ifndef FPC}@{$endif}@mysql_query),
+  (n: 'mysql_real_connect'; d: {$ifndef FPC}@{$endif}@mysql_real_connect),
+  (n: 'mysql_real_escape_string'; d: {$ifndef FPC}@{$endif}@mysql_real_escape_string),
+  (n: 'mysql_real_query'; d: {$ifndef FPC}@{$endif}@mysql_real_query),
+  (n: 'mysql_refresh'; d: {$ifndef FPC}@{$endif}@mysql_refresh),
+  (n: 'mysql_rollback'; d: {$ifndef FPC}@{$endif}@mysql_rollback),
+  (n: 'mysql_row_seek'; d: {$ifndef FPC}@{$endif}@mysql_row_seek),
+  (n: 'mysql_row_tell'; d: {$ifndef FPC}@{$endif}@mysql_row_tell),
+  (n: 'mysql_select_db'; d: {$ifndef FPC}@{$endif}@mysql_select_db),
+  (n: 'mysql_server_end'; d: {$ifndef FPC}@{$endif}@mysql_server_end),
+  (n: 'mysql_server_init'; d: {$ifndef FPC}@{$endif}@mysql_server_init),
+  (n: 'mysql_set_server_option'; d: {$ifndef FPC}@{$endif}@mysql_set_server_option),
+  (n: 'mysql_sqlstate'; d: {$ifndef FPC}@{$endif}@mysql_sqlstate),
+  (n: 'mysql_shutdown'; d: {$ifndef FPC}@{$endif}@mysql_shutdown),
+  (n: 'mysql_stat'; d: {$ifndef FPC}@{$endif}@mysql_stat),
+  (n: 'mysql_store_result'; d: {$ifndef FPC}@{$endif}@mysql_store_result),
+  (n: 'mysql_thread_id'; d: {$ifndef FPC}@{$endif}@mysql_thread_id),
+  (n: 'mysql_use_result'; d: {$ifndef FPC}@{$endif}@mysql_use_result),
+  (n: 'mysql_warning_count'; d: {$ifndef FPC}@{$endif}@mysql_warning_count),
+  (n: 'mysql_stmt_init'; d: {$ifndef FPC}@{$endif}@mysql_stmt_init),
+  (n: 'mysql_stmt_prepare'; d: {$ifndef FPC}@{$endif}@mysql_stmt_prepare),
+  (n: 'mysql_stmt_execute'; d: {$ifndef FPC}@{$endif}@mysql_stmt_execute),
+  (n: 'mysql_stmt_fetch'; d: {$ifndef FPC}@{$endif}@mysql_stmt_fetch),
+  (n: 'mysql_stmt_fetch_column'; d: {$ifndef FPC}@{$endif}@mysql_stmt_fetch_column),
+  (n: 'mysql_stmt_store_result'; d: {$ifndef FPC}@{$endif}@mysql_stmt_store_result),
+  (n: 'mysql_stmt_param_count'; d: {$ifndef FPC}@{$endif}@mysql_stmt_param_count),
+  (n: 'mysql_stmt_attr_set'; d: {$ifndef FPC}@{$endif}@mysql_stmt_attr_set),
+  (n: 'mysql_stmt_attr_get'; d: {$ifndef FPC}@{$endif}@mysql_stmt_attr_get),
+  (n: 'mysql_stmt_bind_param'; d: {$ifndef FPC}@{$endif}@mysql_stmt_bind_param),
+  (n: 'mysql_stmt_bind_result'; d: {$ifndef FPC}@{$endif}@mysql_stmt_bind_result),
+  (n: 'mysql_stmt_close'; d: {$ifndef FPC}@{$endif}@mysql_stmt_close),
+  (n: 'mysql_stmt_reset'; d: {$ifndef FPC}@{$endif}@mysql_stmt_reset),
+  (n: 'mysql_stmt_free_result'; d: {$ifndef FPC}@{$endif}@mysql_stmt_free_result),
+  (n: 'mysql_stmt_send_long_data'; d: {$ifndef FPC}@{$endif}@mysql_stmt_send_long_data),
+  (n: 'mysql_stmt_result_metadata'; d: {$ifndef FPC}@{$endif}@mysql_stmt_result_metadata),
+  (n: 'mysql_stmt_param_metadata'; d: {$ifndef FPC}@{$endif}@mysql_stmt_param_metadata),
+  (n: 'mysql_stmt_errno'; d: {$ifndef FPC}@{$endif}@mysql_stmt_errno),
+  (n: 'mysql_stmt_error'; d: {$ifndef FPC}@{$endif}@mysql_stmt_error),
+  (n: 'mysql_stmt_sqlstate'; d: {$ifndef FPC}@{$endif}@mysql_stmt_sqlstate),
+  (n: 'mysql_stmt_row_seek'; d: {$ifndef FPC}@{$endif}@mysql_stmt_row_seek),
+  (n: 'mysql_stmt_row_tell'; d: {$ifndef FPC}@{$endif}@mysql_stmt_row_tell),
+  (n: 'mysql_stmt_data_seek'; d: {$ifndef FPC}@{$endif}@mysql_stmt_data_seek),
+  (n: 'mysql_stmt_num_rows'; d: {$ifndef FPC}@{$endif}@mysql_stmt_num_rows),
+  (n: 'mysql_stmt_affected_rows'; d: {$ifndef FPC}@{$endif}@mysql_stmt_affected_rows),
+  (n: 'mysql_stmt_insert_id'; d: {$ifndef FPC}@{$endif}@mysql_stmt_insert_id),
+  (n: 'mysql_stmt_field_count'; d: {$ifndef FPC}@{$endif}@mysql_stmt_field_count),
+  (n: 'mysql_ssl_set'; d: {$ifndef FPC}@{$endif}@mysql_ssl_set),
+  (n: 'mysql_character_set_name'; d: {$ifndef FPC}@{$endif}@mysql_character_set_name),
+  (n: 'mysql_get_character_set_info'; d: {$ifndef FPC}@{$endif}@mysql_get_character_set_info),
+  (n: 'mysql_set_character_set'; d: {$ifndef FPC}@{$endif}@mysql_set_character_set)
   );
  funcsopt: array[0..0] of funcinfoty = (
-   (n: 'mysql_get_ssl_cipher'; d: @mysql_get_ssl_cipher)
+   (n: 'mysql_get_ssl_cipher'; d: {$ifndef FPC}@{$endif}@mysql_get_ssl_cipher)
   );
  errormessage = 'Can not load MySQL library. ';
 begin
