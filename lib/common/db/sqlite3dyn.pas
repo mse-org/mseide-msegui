@@ -1,4 +1,5 @@
-{$mode objfpc} {$h+}
+unit sqlite3dyn;
+{$ifdef FPC}{$mode objfpc} {$h+}{$endif}
 
 {$ifdef BSD}
   {$linklib c}
@@ -7,11 +8,10 @@
 
 // use mse_sqlite3static for static linking of the SQLite3 library
 //
-unit sqlite3dyn;
 
 interface
 uses
- {msesonames,}msedynload,msestrings;
+ {msesonames,}msedynload,msestrings{$ifndef FPC},msetypes{$endif};
 const
 {$ifdef mswindows}
  sqlite3lib: array[0..0] of filenamety = ('sqlite3.dll');  
@@ -33,7 +33,7 @@ const
 procedure initializesqlite3(const sonames: array of filenamety); //[] = default
 procedure releasesqlite3;
 
-{$PACKRECORDS C}
+{$ifdef FPC}{$PACKRECORDS C}{$endif} //todo: check delphi recordpacking
 const
 
 {$ifdef mse_sqlite3static}
@@ -577,7 +577,7 @@ function sqlite3_version: PChar;
 {$endif} //not mse_sqlite3static
 implementation
 uses
- sysutils,{$ifndef mse_sqlite3static}dynlibs,{$endif}msesys,msesysintf;
+ sysutils,{$ifndef mse_sqlite3static}{$ifdef FPC}dynlibs,{$endif}{$endif}msesys,msesysintf;
 {$ifndef mse_sqlite3static}
 var
  libinfo: dynlibinfoty;
@@ -818,101 +818,101 @@ end;
 procedure initializesqlite3(const sonames: array of filenamety);
 const
  funcs: array[0..93] of funcinfoty = (
-  (n: 'sqlite3_close'; d: @sqlite3_close),
-  (n: 'sqlite3_exec'; d: @sqlite3_exec),
-  (n: 'sqlite3_last_insert_rowid'; d: @sqlite3_last_insert_rowid),
-  (n: 'sqlite3_changes'; d: @sqlite3_changes),
-  (n: 'sqlite3_total_changes'; d: @sqlite3_total_changes),
-  (n: 'sqlite3_interrupt'; d: @sqlite3_interrupt),
-  (n: 'sqlite3_complete'; d: @sqlite3_complete),
-  (n: 'sqlite3_complete16'; d: @sqlite3_complete16),
-  (n: 'sqlite3_busy_handler'; d: @sqlite3_busy_handler),
-  (n: 'sqlite3_busy_timeout'; d: @sqlite3_busy_timeout),
-  (n: 'sqlite3_get_table'; d: @sqlite3_get_table),
-  (n: 'sqlite3_free_table'; d: @sqlite3_free_table),
-  (n: 'sqlite3_mprintf'; d: @sqlite3_mprintf),
-  (n: 'sqlite3_free'; d: @sqlite3_free),
-  (n: 'sqlite3_snprintf'; d: @sqlite3_snprintf),
-  (n: 'sqlite3_set_authorizer'; d: @sqlite3_set_authorizer),
-  (n: 'sqlite3_trace'; d: @sqlite3_trace),
-  (n: 'sqlite3_progress_handler'; d: @sqlite3_progress_handler),
-  (n: 'sqlite3_commit_hook'; d: @sqlite3_commit_hook),
-  (n: 'sqlite3_open'; d: @sqlite3_open),
-  (n: 'sqlite3_open16'; d: @sqlite3_open16),
-  (n: 'sqlite3_errcode'; d: @sqlite3_errcode),
-  (n: 'sqlite3_errmsg'; d: @sqlite3_errmsg),
-  (n: 'sqlite3_errmsg16'; d: @sqlite3_errmsg16),
-  (n: 'sqlite3_prepare'; d: @sqlite3_prepare),
-  (n: 'sqlite3_prepare16'; d: @sqlite3_prepare16),
-  (n: 'sqlite3_bind_blob'; d: @sqlite3_bind_blob),
-  (n: 'sqlite3_bind_double'; d: @sqlite3_bind_double),
-  (n: 'sqlite3_bind_int'; d: @sqlite3_bind_int),
-  (n: 'sqlite3_bind_int64'; d: @sqlite3_bind_int64),
-  (n: 'sqlite3_bind_null'; d: @sqlite3_bind_null),
-  (n: 'sqlite3_bind_text'; d: @sqlite3_bind_text),
-  (n: 'sqlite3_bind_text16'; d: @sqlite3_bind_text16),
-  (n: 'sqlite3_bind_blob'; d: @sqlite3_bind_blob),
-  (n: 'sqlite3_bind_text'; d: @sqlite3_bind_text),
-  (n: 'sqlite3_bind_text16'; d: @sqlite3_bind_text16),
-  (n: 'sqlite3_bind_parameter_count'; d: @sqlite3_bind_parameter_count),
-  (n: 'sqlite3_bind_parameter_name'; d: @sqlite3_bind_parameter_name),
-  (n: 'sqlite3_bind_parameter_index'; d: @sqlite3_bind_parameter_index),
-  (n: 'sqlite3_column_count'; d: @sqlite3_column_count),
-  (n: 'sqlite3_column_name'; d: @sqlite3_column_name),
-  (n: 'sqlite3_column_name16'; d: @sqlite3_column_name16),
-  (n: 'sqlite3_column_decltype'; d: @sqlite3_column_decltype),
-  (n: 'sqlite3_column_decltype16'; d: @sqlite3_column_decltype16),
-  (n: 'sqlite3_step'; d: @sqlite3_step),
-  (n: 'sqlite3_data_count'; d: @sqlite3_data_count),
-  (n: 'sqlite3_column_blob'; d: @sqlite3_column_blob),
-  (n: 'sqlite3_column_bytes'; d: @sqlite3_column_bytes),
-  (n: 'sqlite3_column_bytes16'; d: @sqlite3_column_bytes16),
-  (n: 'sqlite3_column_double'; d: @sqlite3_column_double),
-  (n: 'sqlite3_column_int'; d: @sqlite3_column_int),
-  (n: 'sqlite3_column_int64'; d: @sqlite3_column_int64),
-  (n: 'sqlite3_column_text'; d: @sqlite3_column_text),
-  (n: 'sqlite3_column_text16'; d: @sqlite3_column_text16),
-  (n: 'sqlite3_column_type'; d: @sqlite3_column_type),
-  (n: 'sqlite3_finalize'; d: @sqlite3_finalize),
-  (n: 'sqlite3_reset'; d: @sqlite3_reset),
-  (n: 'sqlite3_create_function'; d: @sqlite3_create_function),
-  (n: 'sqlite3_create_function16'; d: @sqlite3_create_function16),
-  (n: 'sqlite3_aggregate_count'; d: @sqlite3_aggregate_count),
-  (n: 'sqlite3_value_blob'; d: @sqlite3_value_blob),
-  (n: 'sqlite3_value_bytes'; d: @sqlite3_value_bytes),
-  (n: 'sqlite3_value_bytes16'; d: @sqlite3_value_bytes16),
-  (n: 'sqlite3_value_double'; d: @sqlite3_value_double),
-  (n: 'sqlite3_value_int'; d: @sqlite3_value_int),
-  (n: 'sqlite3_value_int64'; d: @sqlite3_value_int64),
-  (n: 'sqlite3_value_text'; d: @sqlite3_value_text),
-  (n: 'sqlite3_value_text16'; d: @sqlite3_value_text16),
-  (n: 'sqlite3_value_text16le'; d: @sqlite3_value_text16le),
-  (n: 'sqlite3_value_text16be'; d: @sqlite3_value_text16be),
-  (n: 'sqlite3_value_type'; d: @sqlite3_value_type),
-  (n: 'sqlite3_aggregate_context'; d: @sqlite3_aggregate_context),
-  (n: 'sqlite3_user_data'; d: @sqlite3_user_data),
-  (n: 'sqlite3_get_auxdata'; d: @sqlite3_get_auxdata),
-  (n: 'sqlite3_set_auxdata'; d: @sqlite3_set_auxdata),
-  (n: 'sqlite3_result_blob'; d: @sqlite3_result_blob),
-  (n: 'sqlite3_result_double'; d: @sqlite3_result_double),
-  (n: 'sqlite3_result_error'; d: @sqlite3_result_error),
-  (n: 'sqlite3_result_error16'; d: @sqlite3_result_error16),
-  (n: 'sqlite3_result_int'; d: @sqlite3_result_int),
-  (n: 'sqlite3_result_int64'; d: @sqlite3_result_int64),
-  (n: 'sqlite3_result_null'; d: @sqlite3_result_null),
-  (n: 'sqlite3_result_text'; d: @sqlite3_result_text),
-  (n: 'sqlite3_result_text16'; d: @sqlite3_result_text16),
-  (n: 'sqlite3_result_text16le'; d: @sqlite3_result_text16le),
-  (n: 'sqlite3_result_text16be'; d: @sqlite3_result_text16be),
-  (n: 'sqlite3_result_value'; d: @sqlite3_result_value),
-  (n: 'sqlite3_create_collation'; d: @sqlite3_create_collation),
-  (n: 'sqlite3_create_collation16'; d: @sqlite3_create_collation16),
-  (n: 'sqlite3_collation_needed'; d: @sqlite3_collation_needed),
-  (n: 'sqlite3_collation_needed16'; d: @sqlite3_collation_needed16),
-  (n: 'sqlite3_libversion'; d: @sqlite3_libversion),
-//  (n: 'sqlite3_version'; d: @sqlite3_version),
-  (n: 'sqlite3_libversion_number'; d: @sqlite3_libversion_number),
-  (n: 'sqlite3_clear_bindings'; d: @sqlite3_clear_bindings)
+  (n: 'sqlite3_close'; d: {$ifndef FPC}@{$endif}@sqlite3_close),
+  (n: 'sqlite3_exec'; d: {$ifndef FPC}@{$endif}@sqlite3_exec),
+  (n: 'sqlite3_last_insert_rowid'; d: {$ifndef FPC}@{$endif}@sqlite3_last_insert_rowid),
+  (n: 'sqlite3_changes'; d: {$ifndef FPC}@{$endif}@sqlite3_changes),
+  (n: 'sqlite3_total_changes'; d: {$ifndef FPC}@{$endif}@sqlite3_total_changes),
+  (n: 'sqlite3_interrupt'; d: {$ifndef FPC}@{$endif}@sqlite3_interrupt),
+  (n: 'sqlite3_complete'; d: {$ifndef FPC}@{$endif}@sqlite3_complete),
+  (n: 'sqlite3_complete16'; d: {$ifndef FPC}@{$endif}@sqlite3_complete16),
+  (n: 'sqlite3_busy_handler'; d: {$ifndef FPC}@{$endif}@sqlite3_busy_handler),
+  (n: 'sqlite3_busy_timeout'; d: {$ifndef FPC}@{$endif}@sqlite3_busy_timeout),
+  (n: 'sqlite3_get_table'; d: {$ifndef FPC}@{$endif}@sqlite3_get_table),
+  (n: 'sqlite3_free_table'; d: {$ifndef FPC}@{$endif}@sqlite3_free_table),
+  (n: 'sqlite3_mprintf'; d: {$ifndef FPC}@{$endif}@sqlite3_mprintf),
+  (n: 'sqlite3_free'; d: {$ifndef FPC}@{$endif}@sqlite3_free),
+  (n: 'sqlite3_snprintf'; d: {$ifndef FPC}@{$endif}@sqlite3_snprintf),
+  (n: 'sqlite3_set_authorizer'; d: {$ifndef FPC}@{$endif}@sqlite3_set_authorizer),
+  (n: 'sqlite3_trace'; d: {$ifndef FPC}@{$endif}@sqlite3_trace),
+  (n: 'sqlite3_progress_handler'; d: {$ifndef FPC}@{$endif}@sqlite3_progress_handler),
+  (n: 'sqlite3_commit_hook'; d: {$ifndef FPC}@{$endif}@sqlite3_commit_hook),
+  (n: 'sqlite3_open'; d: {$ifndef FPC}@{$endif}@sqlite3_open),
+  (n: 'sqlite3_open16'; d: {$ifndef FPC}@{$endif}@sqlite3_open16),
+  (n: 'sqlite3_errcode'; d: {$ifndef FPC}@{$endif}@sqlite3_errcode),
+  (n: 'sqlite3_errmsg'; d: {$ifndef FPC}@{$endif}@sqlite3_errmsg),
+  (n: 'sqlite3_errmsg16'; d: {$ifndef FPC}@{$endif}@sqlite3_errmsg16),
+  (n: 'sqlite3_prepare'; d: {$ifndef FPC}@{$endif}@sqlite3_prepare),
+  (n: 'sqlite3_prepare16'; d: {$ifndef FPC}@{$endif}@sqlite3_prepare16),
+  (n: 'sqlite3_bind_blob'; d: {$ifndef FPC}@{$endif}@sqlite3_bind_blob),
+  (n: 'sqlite3_bind_double'; d: {$ifndef FPC}@{$endif}@sqlite3_bind_double),
+  (n: 'sqlite3_bind_int'; d: {$ifndef FPC}@{$endif}@sqlite3_bind_int),
+  (n: 'sqlite3_bind_int64'; d: {$ifndef FPC}@{$endif}@sqlite3_bind_int64),
+  (n: 'sqlite3_bind_null'; d: {$ifndef FPC}@{$endif}@sqlite3_bind_null),
+  (n: 'sqlite3_bind_text'; d: {$ifndef FPC}@{$endif}@sqlite3_bind_text),
+  (n: 'sqlite3_bind_text16'; d: {$ifndef FPC}@{$endif}@sqlite3_bind_text16),
+  (n: 'sqlite3_bind_blob'; d: {$ifndef FPC}@{$endif}@sqlite3_bind_blob),
+  (n: 'sqlite3_bind_text'; d: {$ifndef FPC}@{$endif}@sqlite3_bind_text),
+  (n: 'sqlite3_bind_text16'; d: {$ifndef FPC}@{$endif}@sqlite3_bind_text16),
+  (n: 'sqlite3_bind_parameter_count'; d: {$ifndef FPC}@{$endif}@sqlite3_bind_parameter_count),
+  (n: 'sqlite3_bind_parameter_name'; d: {$ifndef FPC}@{$endif}@sqlite3_bind_parameter_name),
+  (n: 'sqlite3_bind_parameter_index'; d: {$ifndef FPC}@{$endif}@sqlite3_bind_parameter_index),
+  (n: 'sqlite3_column_count'; d: {$ifndef FPC}@{$endif}@sqlite3_column_count),
+  (n: 'sqlite3_column_name'; d: {$ifndef FPC}@{$endif}@sqlite3_column_name),
+  (n: 'sqlite3_column_name16'; d: {$ifndef FPC}@{$endif}@sqlite3_column_name16),
+  (n: 'sqlite3_column_decltype'; d: {$ifndef FPC}@{$endif}@sqlite3_column_decltype),
+  (n: 'sqlite3_column_decltype16'; d: {$ifndef FPC}@{$endif}@sqlite3_column_decltype16),
+  (n: 'sqlite3_step'; d: {$ifndef FPC}@{$endif}@sqlite3_step),
+  (n: 'sqlite3_data_count'; d: {$ifndef FPC}@{$endif}@sqlite3_data_count),
+  (n: 'sqlite3_column_blob'; d: {$ifndef FPC}@{$endif}@sqlite3_column_blob),
+  (n: 'sqlite3_column_bytes'; d: {$ifndef FPC}@{$endif}@sqlite3_column_bytes),
+  (n: 'sqlite3_column_bytes16'; d: {$ifndef FPC}@{$endif}@sqlite3_column_bytes16),
+  (n: 'sqlite3_column_double'; d: {$ifndef FPC}@{$endif}@sqlite3_column_double),
+  (n: 'sqlite3_column_int'; d: {$ifndef FPC}@{$endif}@sqlite3_column_int),
+  (n: 'sqlite3_column_int64'; d: {$ifndef FPC}@{$endif}@sqlite3_column_int64),
+  (n: 'sqlite3_column_text'; d: {$ifndef FPC}@{$endif}@sqlite3_column_text),
+  (n: 'sqlite3_column_text16'; d: {$ifndef FPC}@{$endif}@sqlite3_column_text16),
+  (n: 'sqlite3_column_type'; d: {$ifndef FPC}@{$endif}@sqlite3_column_type),
+  (n: 'sqlite3_finalize'; d: {$ifndef FPC}@{$endif}@sqlite3_finalize),
+  (n: 'sqlite3_reset'; d: {$ifndef FPC}@{$endif}@sqlite3_reset),
+  (n: 'sqlite3_create_function'; d: {$ifndef FPC}@{$endif}@sqlite3_create_function),
+  (n: 'sqlite3_create_function16'; d: {$ifndef FPC}@{$endif}@sqlite3_create_function16),
+  (n: 'sqlite3_aggregate_count'; d: {$ifndef FPC}@{$endif}@sqlite3_aggregate_count),
+  (n: 'sqlite3_value_blob'; d: {$ifndef FPC}@{$endif}@sqlite3_value_blob),
+  (n: 'sqlite3_value_bytes'; d: {$ifndef FPC}@{$endif}@sqlite3_value_bytes),
+  (n: 'sqlite3_value_bytes16'; d: {$ifndef FPC}@{$endif}@sqlite3_value_bytes16),
+  (n: 'sqlite3_value_double'; d: {$ifndef FPC}@{$endif}@sqlite3_value_double),
+  (n: 'sqlite3_value_int'; d: {$ifndef FPC}@{$endif}@sqlite3_value_int),
+  (n: 'sqlite3_value_int64'; d: {$ifndef FPC}@{$endif}@sqlite3_value_int64),
+  (n: 'sqlite3_value_text'; d: {$ifndef FPC}@{$endif}@sqlite3_value_text),
+  (n: 'sqlite3_value_text16'; d: {$ifndef FPC}@{$endif}@sqlite3_value_text16),
+  (n: 'sqlite3_value_text16le'; d: {$ifndef FPC}@{$endif}@sqlite3_value_text16le),
+  (n: 'sqlite3_value_text16be'; d: {$ifndef FPC}@{$endif}@sqlite3_value_text16be),
+  (n: 'sqlite3_value_type'; d: {$ifndef FPC}@{$endif}@sqlite3_value_type),
+  (n: 'sqlite3_aggregate_context'; d: {$ifndef FPC}@{$endif}@sqlite3_aggregate_context),
+  (n: 'sqlite3_user_data'; d: {$ifndef FPC}@{$endif}@sqlite3_user_data),
+  (n: 'sqlite3_get_auxdata'; d: {$ifndef FPC}@{$endif}@sqlite3_get_auxdata),
+  (n: 'sqlite3_set_auxdata'; d: {$ifndef FPC}@{$endif}@sqlite3_set_auxdata),
+  (n: 'sqlite3_result_blob'; d: {$ifndef FPC}@{$endif}@sqlite3_result_blob),
+  (n: 'sqlite3_result_double'; d: {$ifndef FPC}@{$endif}@sqlite3_result_double),
+  (n: 'sqlite3_result_error'; d: {$ifndef FPC}@{$endif}@sqlite3_result_error),
+  (n: 'sqlite3_result_error16'; d: {$ifndef FPC}@{$endif}@sqlite3_result_error16),
+  (n: 'sqlite3_result_int'; d: {$ifndef FPC}@{$endif}@sqlite3_result_int),
+  (n: 'sqlite3_result_int64'; d: {$ifndef FPC}@{$endif}@sqlite3_result_int64),
+  (n: 'sqlite3_result_null'; d: {$ifndef FPC}@{$endif}@sqlite3_result_null),
+  (n: 'sqlite3_result_text'; d: {$ifndef FPC}@{$endif}@sqlite3_result_text),
+  (n: 'sqlite3_result_text16'; d: {$ifndef FPC}@{$endif}@sqlite3_result_text16),
+  (n: 'sqlite3_result_text16le'; d: {$ifndef FPC}@{$endif}@sqlite3_result_text16le),
+  (n: 'sqlite3_result_text16be'; d: {$ifndef FPC}@{$endif}@sqlite3_result_text16be),
+  (n: 'sqlite3_result_value'; d: {$ifndef FPC}@{$endif}@sqlite3_result_value),
+  (n: 'sqlite3_create_collation'; d: {$ifndef FPC}@{$endif}@sqlite3_create_collation),
+  (n: 'sqlite3_create_collation16'; d: {$ifndef FPC}@{$endif}@sqlite3_create_collation16),
+  (n: 'sqlite3_collation_needed'; d: {$ifndef FPC}@{$endif}@sqlite3_collation_needed),
+  (n: 'sqlite3_collation_needed16'; d: {$ifndef FPC}@{$endif}@sqlite3_collation_needed16),
+  (n: 'sqlite3_libversion'; d: {$ifndef FPC}@{$endif}@sqlite3_libversion),
+//  (n: 'sqlite3_version'; d: {$ifndef FPC}@{$endif}@sqlite3_version),
+  (n: 'sqlite3_libversion_number'; d: {$ifndef FPC}@{$endif}@sqlite3_libversion_number),
+  (n: 'sqlite3_clear_bindings'; d: {$ifndef FPC}@{$endif}@sqlite3_clear_bindings)
  );
  errormessage = 'Can not load Sqlite3 library. ';
 begin

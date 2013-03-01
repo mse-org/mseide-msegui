@@ -27,7 +27,6 @@ type
    fonchange: notifyeventty;
    fformat: string;
    fgridsetting: integer;
-   procedure setformat(const avalue: string);
    procedure checkgrid;
    function getgridvalue(index: integer): string;
    procedure setgridvalue(index: integer; const avalue: string);
@@ -45,6 +44,7 @@ type
    function getgridintf: iwidgetgrid;
    procedure defineproperties(filer: tfiler); override;
    procedure setvalue(const avalue: string); virtual;
+   procedure setformat(const avalue: string);
 
     //igridwidget
    procedure initgridwidget; virtual;

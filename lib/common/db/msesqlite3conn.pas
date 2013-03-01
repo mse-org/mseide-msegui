@@ -9,10 +9,6 @@
 }
 unit msesqlite3conn;
 
-{$if fpc_fullversion >= 020105}
- {$define mse_FPC_2_2} 
-{$endif}
-
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 
 interface
@@ -342,7 +338,7 @@ const
   //ftIDispatch,ftGuid,ftTimeStamp,ftFMTBcd,
   -1,           -1,    -1,         -1 
   //                   ftFixedWideChar,ftWideMemo
-  {$ifdef mse_FPC_2_2},-1,             -1 {$endif}
+                         ,-1,             -1
   );
 
 var

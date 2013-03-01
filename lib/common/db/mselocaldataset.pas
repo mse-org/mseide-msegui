@@ -11,7 +11,7 @@ unit mselocaldataset;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- classes,mclasses,mdb,msestrings,msebufdataset,msedb,mseapplication;
+ classes,mclasses,mdb,msestrings,msebufdataset,msedb,mseapplication,msetypes;
 
 const
  defaultlocaldsoptions = defaultdscontrolleroptions + [dso_local,dso_utf8]; 
