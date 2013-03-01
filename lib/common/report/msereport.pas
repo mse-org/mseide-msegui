@@ -45,7 +45,7 @@ type
                   lv_firstofgroup,lv_lastofgroup,
                   lv_firstrecord,lv_lastrecord);
  linevisiblesty = set of linevisiblety;
-  
+
  tablineinfoty = record
   widthmm: real;
   color: colorty;
@@ -68,11 +68,72 @@ const
                           lv_firstofpage,lv_normal,lv_lastofpage,
                           lv_firstofgroup,lv_lastofgroup,    
                           lv_firstrecord,lv_lastrecord];
- defaulttablineinfo: tablineinfoty = (widthmm: defaulttablinewidth; 
+ defaulttablineinfo: tablineinfoty = (widthmm: defaulttablinewidth;
          color: defaulttablinecolor; colorgap: defaulttablinecolorgap;
          capstyle: defaulttablinecapstyle;
          dashes: defaulttablinedashes; dist: defaulttablinedist;
          visible: defaulttablinevisible);
+type
+ bandoptionshowty = (
+                   //show only on first/last record of group
+                 bos_showfirstpage,bos_hidefirstpage,
+                 bos_shownormalpage,bos_hidenormalpage,
+                  //checks current treportpage
+                 bos_showevenpage,bos_hideevenpage,
+                 bos_showoddpage,bos_hideoddpage,
+                  //checks the printed page number
+                 bos_showtopofpage,bos_hidetopofpage,
+                 bos_shownottopofpage,bos_hidenottopofpage,
+                 bos_showfirstofpage,bos_hidefirstofpage,
+                 bos_shownormalofpage,bos_hidenormalofpage,
+                 bos_showlastofpage,bos_hidelastofpage,
+                  //checks the position in the bandarea
+                 bos_showfirstrecord,bos_hidefirstrecord,
+                 bos_shownormalrecord,bos_hidenormalrecord,
+                 bos_showlastrecord,bos_hidelastrecord
+                  //checks the connected dataset
+                  );
+ bandoptionshowsty = set of bandoptionshowty;
+
+ bandoptionty = (bo_once,bo_evenpage,bo_oddpage,
+                  //defines hasdata, page nums are null based
+                 bo_visigroupfirst,bo_visigroupnotfirst,
+                 bo_visigrouplast,bo_visigroupnotlast,
+                 bo_delayednextrecord,
+                 bo_localvalue,
+                  //used in treppagenumdisp to show the number of the current
+                  //treportpage instead the number of the printed pages
+                  //and in trepprinttimedisp to show now instead of
+                  //print start time
+                 bo_topofarea //sets areafull if not first of page before render
+                 );
+ bandoptionsty = set of bandoptionty;
+
+ const
+ visibilitymask = [bos_showfirstpage,bos_hidefirstpage,
+                   bos_shownormalpage,bos_hidenormalpage,
+                   bos_showevenpage,bos_hideevenpage,
+                   bos_showoddpage,bos_hideoddpage,
+                   bos_showtopofpage,bos_hidetopofpage,
+                   bos_shownottopofpage,bos_hidenottopofpage,
+                   bos_showfirstofpage,bos_hidefirstofpage,
+                   bos_shownormalofpage,bos_hidenormalofpage,
+                   bos_showlastofpage,bos_hidelastofpage,
+                   bos_showfirstrecord,bos_hidefirstrecord,
+                   bos_shownormalrecord,bos_hidenormalrecord,
+                   bos_showlastrecord,bos_hidelastrecord
+                   ];
+ defaultrepvaluedispoptions = [bo_evenpage,bo_oddpage];
+
+type
+ reportoptionty = (reo_autorelease,reo_prepass,reo_nodisablecontrols,
+                   reo_nothread,reo_waitdialog,
+                   reo_autoreadstat,reo_autowritestat,reo_delayedreadstat);
+ reportoptionsty = set of reportoptionty;
+
+const
+ defaultreportoptions = [];
+
 type
  tbasebandarea = class;
  tcustomrecordband = class;
@@ -82,7 +143,7 @@ type
  beforerenderrecordeventty = procedure(const sender: tcustomrecordband;
                                           var empty: boolean) of object;
  synceventty = procedure() of object;
- 
+
  treptabfont = class(tparentfont)
   protected
    procedure setname(const avalue: string); override;
@@ -507,58 +568,7 @@ type
 
  trecordbanddatalink = class(tmsedatalink)
  end;
- 
- bandoptionty = (bo_once,bo_evenpage,bo_oddpage,
-                  //defines hasdata, page nums are null based
-                 bo_visigroupfirst,bo_visigroupnotfirst,
-                 bo_visigrouplast,bo_visigroupnotlast,
-                 bo_delayednextrecord,
-                 bo_localvalue,
-                  //used in treppagenumdisp to show the number of the current 
-                  //treportpage instead the number of the printed pages
-                  //and in trepprinttimedisp to show now instead of 
-                  //print start time
-                 bo_topofarea //sets areafull if not first of page before render
-                 );
- bandoptionsty = set of bandoptionty;
 
- bandoptionshowty = (
-                   //show only on first/last record of group
-                 bos_showfirstpage,bos_hidefirstpage,
-                 bos_shownormalpage,bos_hidenormalpage,
-                  //checks current treportpage
-                 bos_showevenpage,bos_hideevenpage,
-                 bos_showoddpage,bos_hideoddpage,
-                  //checks the printed page number
-                 bos_showtopofpage,bos_hidetopofpage,
-                 bos_shownottopofpage,bos_hidenottopofpage,
-                 bos_showfirstofpage,bos_hidefirstofpage,
-                 bos_shownormalofpage,bos_hidenormalofpage,                 
-                 bos_showlastofpage,bos_hidelastofpage,
-                  //checks the position in the bandarea                 
-                 bos_showfirstrecord,bos_hidefirstrecord, 
-                 bos_shownormalrecord,bos_hidenormalrecord,
-                 bos_showlastrecord,bos_hidelastrecord
-                  //checks the connected dataset
-                  );
- bandoptionshowsty = set of bandoptionshowty;
-
-const 
- visibilitymask = [bos_showfirstpage,bos_hidefirstpage,
-                   bos_shownormalpage,bos_hidenormalpage,
-                   bos_showevenpage,bos_hideevenpage,
-                   bos_showoddpage,bos_hideoddpage,
-                   bos_showtopofpage,bos_hidetopofpage,
-                   bos_shownottopofpage,bos_hidenottopofpage,
-                   bos_showfirstofpage,bos_hidefirstofpage,
-                   bos_shownormalofpage,bos_hidenormalofpage,
-                   bos_showlastofpage,bos_hidelastofpage,
-                   bos_showfirstrecord,bos_hidefirstrecord,
-                   bos_shownormalrecord,bos_hidenormalrecord,
-                   bos_showlastrecord,bos_hidelastrecord
-                   ];
- defaultrepvaluedispoptions = [bo_evenpage,bo_oddpage];
-type                     
  trepspacer = class(tlayouter,ireportclient)
   private
    foptionsrep: bandoptionshowsty;   
@@ -579,7 +589,7 @@ type
  end;
  
  bandareaarty = array of tbasebandarea;
- 
+
  recordbandarty = array of tcustomrecordband;
  recordbandeventty = procedure(const sender: tcustomrecordband) of object; 
  
@@ -809,7 +819,7 @@ type
    procedure render(const acanvas: tcanvas; var empty: boolean); override;
   public
    constructor create(aowner: tcomponent); override;
-   property textflags: textflagsty read ftextflags write settextflags default 
+   property textflags: textflagsty read ftextflags write settextflags default
                                             defaultrepvaluedisptextflags;
    property format: msestring read fformat write setformat;
    property optionsscale default defaultrepvaluedispoptionsscale;
@@ -1246,7 +1256,7 @@ type
 
    property options: tileareaoptionsty read foptions write foptions default [];
  end;
- 
+
  ttilearea = class(tcustomtilearea)
   published
    property colcount;
@@ -1402,7 +1412,7 @@ type
    procedure unregisterclient(const aclient: ireportclient);
    function beginband(const acanvas: tcanvas;
                                const sender: tcustomrecordband): boolean;
-   procedure endband(const acanvas: tcanvas; const sender: tcustomrecordband);  
+   procedure endband(const acanvas: tcanvas; const sender: tcustomrecordband);
    function istopband: boolean;
    function isfirstband: boolean;
    function islastband(const addheight: integer = 0): boolean;
@@ -1425,7 +1435,7 @@ type
    function isfirstrecord: boolean;
    function islastrecord: boolean;
    procedure insertwidget(const awidget: twidget; const apos: pointty); override;
-   
+
    procedure recordchanged;   
    property report: tcustomreport read freport;
    property pagenum: integer read fpagenum write fpagenum; 
@@ -1494,7 +1504,7 @@ type
    property onfirstpage;
    property onbeforerender;
    property onafterrender;
-   property onpaint;   
+   property onpaint;
    property onafterpaint;
    property onbeforenextrecord;
    property onafternextrecord;
@@ -1515,16 +1525,6 @@ type
  reporteventty = procedure(const sender: tcustomreport) of object;
  preambleeventty = procedure(const sender: tcustomreport; var apreamble: string) of object;
  
-
- reportoptionty = (reo_autorelease,reo_prepass,reo_nodisablecontrols,
-                   reo_nothread,reo_waitdialog,
-                   reo_autoreadstat,reo_autowritestat,reo_delayedreadstat);
- reportoptionsty = set of reportoptionty;
-
-const
- defaultreportoptions = [];
- 
-type 
  tcustomreport = class(twidget)
   private
    fppmm: real;
@@ -2510,12 +2510,14 @@ begin
 end;
 
 procedure treptabulatoritem.setoptions(const avalue: reptabulatoritemoptionsty);
-var
+const
  mask: reptabulatoritemoptionsty = [rto_count,rto_sum,rto_average];
 begin
  if avalue <> foptions then begin
-  foptions:= reptabulatoritemoptionsty(setsinglebit(longword(avalue),
-                                 longword(foptions),longword(mask)));
+  foptions:= reptabulatoritemoptionsty(setsinglebit(
+            {$ifdef FPC}longword{$else}byte{$endif}(avalue),
+            {$ifdef FPC}longword{$else}byte{$endif}(foptions),
+            {$ifdef FPC}longword{$else}byte{$endif}(mask)));
   changed;
  end;
 end;
@@ -3870,7 +3872,7 @@ begin
   application.lock;
   try
    fdatalink.dataset.first;
-   if checkislastrecord(fdatalink,@dosyncnextrecord) then begin
+   if checkislastrecord(fdatalink,{$ifdef FPC}@{$endif}dosyncnextrecord) then begin
     include(fstate,rbs_lastrecord);
    end;
    recchanged;
@@ -3966,7 +3968,8 @@ begin
   if fdatalink.active then begin
    fdatalink.dataset.next;
    if setflag then begin
-    if checkislastrecord(fdatalink,@dosyncnextrecord) then begin
+    if checkislastrecord(fdatalink,
+                           {$ifdef FPC}@{$endif}dosyncnextrecord) then begin
      include(fstate,rbs_lastrecord);
     end; 
     fparentintf.getreppage.recordchanged;
@@ -5299,8 +5302,8 @@ procedure tcustomreportpage.registerclient(const aclient: ireportclient);
 var
  widget1: twidget;
 begin
- if finditem(pointerarty(fclients),aclient) < 0 then begin
-  additem(pointerarty(fclients),aclient);
+ if finditem(pointerarty(fclients),pointer(aclient)) < 0 then begin
+  additem(pointerarty(fclients),pointer(aclient));
  end;
  widget1:= aclient.getwidget;
  if widget1 is tcustomrecordband then begin
@@ -5312,7 +5315,7 @@ end;
 
 procedure tcustomreportpage.unregisterclient(const aclient: ireportclient);
 begin
- removeitem(pointerarty(fclients),aclient);
+ removeitem(pointerarty(fclients),pointer(aclient));
  removeitem(pointerarty(fbands),aclient.getwidget);
 end;
 
@@ -5375,7 +5378,7 @@ begin
   end;
   dobeforenextrecord(fdatalink.datasource);
   fdatalink.dataset.next;
-  if checkislastrecord(fdatalink,@dosyncnextrecord) then begin
+  if checkislastrecord(fdatalink,{$ifdef FPC}@{$endif}dosyncnextrecord) then begin
    include(fstate,rpps_lastrecord);
   end; 
   if canevent(tmethod(fonafternextrecord)) then begin
@@ -5629,7 +5632,7 @@ begin
    application.lock;
    try
     dataset.first;
-    if checkislastrecord(fdatalink,@dosyncnextrecord) then begin
+    if checkislastrecord(fdatalink,{$ifdef FPC}@{$endif}dosyncnextrecord) then begin
      include(fstate,rpps_lastrecord);
     end;
    finally
@@ -5895,8 +5898,10 @@ procedure tcustomreportpage.setoptions(const avalue: reportpageoptionsty);
 const
  mask: reportpageoptionsty = [rpo_firsteven,rpo_firstodd];
 begin
- foptions:= reportpageoptionsty(setsinglebit(longword(avalue),
-                 longword(foptions),longword(mask)));
+ foptions:= reportpageoptionsty(setsinglebit(
+            {$ifdef FPC}longword{$else}byte{$endif}(avalue),
+            {$ifdef FPC}longword{$else}byte{$endif}(foptions),
+            {$ifdef FPC}longword{$else}byte{$endif}(mask)));
 end;
 
 function tcustomreportpage.getreppage: tcustomreportpage;
@@ -6359,7 +6364,8 @@ begin
   application.beginwait;
   try
    if reo_waitdialog in foptions then begin
-    application.waitdialog(nil,fdialogtext,fdialogcaption,@docancel,@doexec);
+    application.waitdialog(nil,fdialogtext,fdialogcaption,
+            {$ifdef FPC}@{$endif}docancel,{$ifdef FPC}@{$endif}doexec);
     if not canceled then begin
      application.terminatewait;
     end;

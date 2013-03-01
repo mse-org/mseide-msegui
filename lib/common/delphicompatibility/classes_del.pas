@@ -17,7 +17,7 @@ unit classes_del;
 
 interface
 uses
- msetypes,sysutils,msesystypes,windows;
+ msetypes,sysutils,msesystypes,windows,msectypes;
 
 const
   MaxListSize = Maxint div 16;
@@ -28,6 +28,9 @@ const
 type
  ar4ty = packed array[0..3] of byte;
  ar8ty = packed array[0..7] of byte;
+ culongaty = array[0..0] of culong;
+ pculongaty = ^culongaty;
+
 {
  TSystemTime = packed record
     Year: Word;

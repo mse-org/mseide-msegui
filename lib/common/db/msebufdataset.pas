@@ -350,6 +350,9 @@ type
    procedure setdefault(const avalue: boolean);
   protected
    procedure change;
+  public
+   constructor create(aowner: tobject); override;
+   destructor destroy; override;
  {$ifndef FPC}
    function findval(const avalues: array of const;
                const aisnull: array of boolean;
@@ -358,9 +361,6 @@ type
                const partialstring: boolean = false;
                const nocheckbrowsemode: boolean = false): boolean; overload;
  {$endif}
-  public
-   constructor create(aowner: tobject); override;
-   destructor destroy; override;
    function find(const avalues: array of const;
                  //nil -> NULL field
                const aisnull: array of boolean;

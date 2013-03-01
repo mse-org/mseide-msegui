@@ -312,9 +312,11 @@ type
   published
    property datalink: tlookuplbdispfielddatalink read getdatalink 
                                                        write setdatalink;
-   property lookupbuffer: tcustomlookupbuffer read getlookupbuffer 
+{
+   property lookupbuffer: tcustomlookupbuffer read getlookupbuffer
                                             write setlookupbuffer; deprecated;
                   //use datalink.lookupbuffer
+}
  end;
   
  tdblookup32lb = class(tdblookuplb,ireccontrol)
@@ -2232,12 +2234,12 @@ function tlookup32dbdispfielddatalink.datatotext(const data): msestring;
   with flookupdatalink do begin
    if fcanlookup and (field <> nil) and
      tmsebufdataset(dataset).indexlocal[flookupindexnum].
-                                    find([akey],[],bm1) then begin
+               {$ifdef FPC}find{$else}findval{$endif}([akey],[],bm1) then begin
     result:= idblookupdbdispfieldlink(fintf).lookuptext(bm1);
    end;
   end;
  end; //lookup
-  
+
 begin
  if (@data = nil) and fisnull then begin
   result:= '';
@@ -2260,7 +2262,7 @@ begin
  with flookupdatalink do begin
   if fcanlookup then begin
    if not tmsebufdataset(dataset).indexlocal[flookupindexnum].
-                         find([fkey],[],bm1) then begin
+              {$ifdef FPC}find{$else}findval{$endif}([fkey],[],bm1) then begin
     bm1.recordpo:= nil;
    end;
   end;
@@ -2292,7 +2294,7 @@ function tlookup64dbdispfielddatalink.datatotext(const data): msestring;
   with flookupdatalink do begin
    if fcanlookup and (field <> nil) and
      tmsebufdataset(dataset).indexlocal[flookupindexnum].
-                                    find([akey],[],bm1) then begin
+               {$ifdef FPC}find{$else}findval{$endif}([akey],[],bm1) then begin
     result:= idblookupdbdispfieldlink(fintf).lookuptext(bm1);
    end;
   end;
@@ -2320,7 +2322,7 @@ begin
  with flookupdatalink do begin
   if not fisnull and fcanlookup then begin
    if not tmsebufdataset(dataset).indexlocal[flookupindexnum].
-                         find([fkey],[],bm1) then begin
+           {$ifdef FPC}find{$else}findval{$endif}([fkey],[],bm1) then begin
     bm1.recordpo:= nil;
    end;
   end;
@@ -2352,7 +2354,7 @@ function tlookupstrdbdispfielddatalink.datatotext(const data): msestring;
   with flookupdatalink do begin
    if fcanlookup and (field <> nil) and
      tmsebufdataset(dataset).indexlocal[flookupindexnum].
-                                    find([akey],[],bm1) then begin
+              {$ifdef FPC}find{$else}findval{$endif}([akey],[],bm1) then begin
     result:= idblookupdbdispfieldlink(fintf).lookuptext(bm1);
    end;
   end;
@@ -2380,7 +2382,7 @@ begin
  with flookupdatalink do begin
   if not fisnull and fcanlookup then begin
    if not tmsebufdataset(dataset).indexlocal[flookupindexnum].
-                         find([fkey],[],bm1) then begin
+            {$ifdef FPC}find{$else}findval{$endif}([fkey],[],bm1) then begin
     bm1.recordpo:= nil;
    end;
   end;
@@ -2405,7 +2407,8 @@ end;
 constructor tlookuplbdispfielddatalink.create(const aowner: tcustomdataedit;
                const intf: idblookuplbdispfieldlink);
 begin
- fobjectlinker:= tobjectlinker.create(iobjectlink(self),@objectevent);
+ fobjectlinker:= tobjectlinker.create(iobjectlink(self),
+                                {$ifdef FPC}@{$endif}objectevent);
  inherited create(aowner,intf);
 end;
 
@@ -2677,8 +2680,10 @@ end;
 procedure tdblookuplb.defineproperties(filer: tfiler);
 begin
  inherited;
- filer.defineproperty('lookupkeyfieldno',@readlookupkeyfieldno,nil,false);
- filer.defineproperty('lookupvaluefieldno',@readlookupvaluefieldno,nil,false);
+ filer.defineproperty('lookupkeyfieldno',
+                      {$ifdef FPC}@{$endif}readlookupkeyfieldno,nil,false);
+ filer.defineproperty('lookupvaluefieldno',
+                      {$ifdef FPC}@{$endif}readlookupvaluefieldno,nil,false);
 end;
 
 

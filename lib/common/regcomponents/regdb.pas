@@ -140,15 +140,15 @@ type
   public
    function getvalue: msestring; override;
  end;
- 
+
  tsqlmacroseditor = class(tpersistentarraypropertyeditor)
   protected
    function geteditorclass: propertyeditorclassty; override;
  end;
-  
+
 implementation
 uses
- {$ifdef FPC}dbconst{$else} dbconst_del{$endif},mdb,mseibconnection,
+ {$ifdef FPC}dbconst{$else} dbconst_del,classes_del{$endif},mdb,mseibconnection,
  msepqconnection,mseodbcconn,{sqldb,}
  mselookupbuffer,mselocaldataset,
  msearrayutils,msedbfieldeditor,sysutils,msetexteditor,
@@ -1425,7 +1425,11 @@ begin
    ftBoolean: setvariantvalue(boolean(var1));
    ftsmallint: setvariantvalue(word(var1));
    ftinteger: setvariantvalue(integer(var1));
+{$ifdef FPC}
    ftlargeint: setvariantvalue(int64(var1));
+{$else}
+   ftlargeint: setvariantvalue(integer(var1));
+{$endif}
    ftcurrency: setvariantvalue(currency(var1));
    ftfloat: setvariantvalue(double(var1));
    ftdatetime: setvariantvalue(tdatetime(var1));
@@ -1521,8 +1525,17 @@ end;
 { tdatasetoptionspropertyeditor }
 
 function tdatasetoptionspropertyeditor.getinvisibleitems: tintegerset;
+{$ifndef FPC}
+const
+ mask1: datasetoptionsty = [dso_refreshwaitcursor];
+{$endif}
 begin
- result:= tintegerset(longword([dso_refreshwaitcursor]));
+ result:= tintegerset(
+     {$ifdef FPC}
+        longword([dso_refreshwaitcursor])
+     {$else}
+        mask1
+     {$endif});
 end;
 
 initialization

@@ -231,8 +231,8 @@ Type
 //  EMySQLError = Class(Exception);
 
 implementation
-uses 
- {$ifdef FPC}dbconst{$else}dbconst_del{$endif},
+uses
+ {$ifdef FPC}dbconst{$else}dbconst_del,classes_del{$endif},
  msebufdataset,typinfo,dateutils,msefileutils,msedatabase,msedynload,
  msesqlresult;
 type
@@ -1413,8 +1413,12 @@ begin
    field:= mysql_fetch_field_direct(C.FRES,c.MapDSRowToMSQLRow[fno]);
    if datatype = ftstring then begin
  //   alen:= strlen(row^);
+{$ifdef FPC}
     alen:= mysql_fetch_lengths(c.fres)[c.MapDSRowToMSQLRow[fno]];
-    if abufsize < alen then begin 
+{$else}
+    alen:= pculongaty(mysql_fetch_lengths(c.fres))^[c.MapDSRowToMSQLRow[fno]];
+{$endif}
+    if abufsize < alen then begin
      abufsize:= -alen;
      result:= true;
      exit;
@@ -1425,7 +1429,11 @@ begin
    end
    else begin
     if datatype in [ftmemo,ftgraphic,ftblob] then begin
+{$ifdef FPC}
      alen:= mysql_fetch_lengths(c.fres)[c.MapDSRowToMSQLRow[fno]];
+{$else}
+     alen:= pculongaty(mysql_fetch_lengths(c.fres))^[c.MapDSRowToMSQLRow[fno]];
+{$endif}
     end
     else begin
      alen:= field^.length;
@@ -1449,7 +1457,11 @@ begin
    int1:= MapDSRowToMSQLRow[fieldnum];
    row1:= row;
    inc(row1,int1);
+{$ifdef FPC}
    setlength(result,mysql_fetch_lengths(fres)[int1]);
+{$else}
+   setlength(result,pculongaty(mysql_fetch_lengths(fres))^[int1]);
+{$endif}
    if result <> '' then begin
     move(row1^^,result[1],length(result));
    end;
@@ -1468,7 +1480,7 @@ begin
   for I := 1 to Length(S) do
     begin
     if not (S[I] in ['0'..'9', '+', '-', 'E', 'e']) then
-      Tmp := Tmp + defaultformatsettings.DecimalSeparator
+      Tmp := Tmp + {$ifdef FPC}defaultformatsettings.{$endif}DecimalSeparator
     else
       Tmp := Tmp + S[I];
     end;
@@ -1486,7 +1498,7 @@ begin
   for I := 1 to Length(S) do
     begin
     if not (S[I] in ['0'..'9', '+', '-', 'E', 'e']) then
-      Tmp := Tmp + defaultformatsettings.DecimalSeparator
+      Tmp := Tmp + {$ifdef FPC}defaultformatsettings.{$endif}DecimalSeparator
     else
       Tmp := Tmp + S[I];
     end;
