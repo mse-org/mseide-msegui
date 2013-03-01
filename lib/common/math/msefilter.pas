@@ -623,19 +623,19 @@ function tsigfilter.gethandler: sighandlerprocty;
 begin
  case fkind of
   sfk_lp1impulseinvariant: begin
-   result:= @sighandlerlp1inv;
+   result:= {$ifdef FPC}@{$endif}sighandlerlp1inv;
   end;
   sfk_lp2bilinear: begin
-   result:= @sighandlerlp2bi;
+   result:= {$ifdef FPC}@{$endif}sighandlerlp2bi;
   end;
   sfk_bp2bilinear: begin
-   result:= @sighandlerbp2bi;
+   result:= {$ifdef FPC}@{$endif}sighandlerbp2bi;
   end;
   sfk_bs2bilinear: begin
-   result:= @sighandlerbs2bi;
+   result:= {$ifdef FPC}@{$endif}sighandlerbs2bi;
   end;
   else begin //sfk_lp1bilinear
-   result:= @sighandlerlp1bi;
+   result:= {$ifdef FPC}@{$endif}sighandlerlp1bi;
   end;
  end;
 end;
@@ -1012,7 +1012,7 @@ end;
 
 function tsigfilterbank.gethandler: sighandlerprocty;
 begin
-  result:= @sighandler;
+  result:= {$ifdef FPC}@{$endif}sighandler;
 end;
 
 procedure tsigfilterbank.sighandler(const ainfo: psighandlerinfoty);

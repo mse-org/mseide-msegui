@@ -378,7 +378,7 @@ end;
 
 function tsigmidiconnector.gethandler: sighandlerprocty;
 begin
- result:= @sighandler;
+ result:= {$ifdef FPC}@{$endif}sighandler;
 end;
 
 procedure tsigmidiconnector.setfrequout(const avalue: tdoubleoutputconn);
@@ -960,7 +960,7 @@ end;
 
 function tsigmidimulticonnector.gethandler: sighandlerprocty;
 begin
- result:= @sighandler;
+ result:= {$ifdef FPC}@{$endif}sighandler;
 end;
 
 procedure tsigmidimulticonnector.sighandler(const ainfo: psighandlerinfoty);

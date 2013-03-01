@@ -91,20 +91,20 @@ begin
  if fsamplecount = 1 then begin
   case fkind of
    nk_pink: begin
-    result:= @sighandlerpink1;
+    result:= {$ifdef FPC}@{$endif}sighandlerpink1;
    end
    else begin //nk_white
-    result:= @sighandler1;
+    result:= {$ifdef FPC}@{$endif}sighandler1;
    end;
   end;
  end
  else begin
   case fkind of
    nk_pink: begin
-    result:= @sighandlerpinkn;
+    result:= {$ifdef FPC}@{$endif}sighandlerpinkn;
    end
    else begin //nk_white
-    result:= @sighandlern;
+    result:= {$ifdef FPC}@{$endif}sighandlern;
    end;
   end;
  end;

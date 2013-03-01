@@ -389,8 +389,8 @@ begin
  inherited;
  if sso_fftmag in options then begin
   for int1:= 0 to high(ffftbuffer) do begin
-   ffft.inpreal:= fsigbuffer[int1];
-   ffftbuffer[int1]:= ffft.outreal;
+   ffft.inpreal:= realarty(fsigbuffer[int1]);
+   ffftbuffer[int1]:= doublearty(ffft.outreal);
   end;
   if assigned(fonfft) then begin
    fonfft(self,ffftbuffer);

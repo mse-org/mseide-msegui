@@ -87,7 +87,7 @@ type
    function readtrackdatabyte(out adata: byte): boolean; //check bit 7
    function readtrackword(out adata: word): boolean;
    function readtracklongword(out adata: word): boolean;
-   function readtrackdata(out adata; const acount: integer): boolean;
+   function readtrackdata(out adata; const acount: integer): boolean; overload;
    function readtrackvarlength(out adata: longword): boolean;
 
    function readbyte(out adata: byte): boolean;
@@ -104,7 +104,7 @@ type
    function initfile: boolean;
    function starttrack: boolean;
    function skiptrack: boolean;
-   function readtrackdata(out adata: trackeventinfoty): boolean;
+   function readtrackdata(out adata: trackeventinfoty): boolean; overload;
    function getmetadata(const alen: integer; out avalue: longword): boolean;
    property timedivision: longword read ftimedivision;
    property metadata: string read fmetadata;
@@ -166,7 +166,7 @@ type
    procedure start;
    procedure stop;
    function checkresult(const aresult: boolean;
-                       const aerror: midierrorty): boolean; inline;
+                       const aerror: midierrorty): boolean; {$ifdef FPC}inline;{$endif}
    procedure processevent;
    procedure dotrackevent; virtual;
    procedure dotimer(const sender: tobject);
@@ -214,22 +214,25 @@ const
   'Invalid track data.'
   );
   
-function swap(const avalue: word): word; inline;
+function swap(const avalue: word): word; {$ifdef FPC}inline;{$endif}
+                                                overload;
 begin
  result:= (avalue shl 8) or (avalue shr 8);
 end;
 
-procedure swap1(var avalue: word); inline;
+procedure swap1(var avalue: word); {$ifdef FPC}inline;{$endif}
+                                                 overload;
 begin
  avalue:= (avalue shl 8) or (avalue shr 8);
 end;
 
-function swap(const avalue: longword): longword; inline;
+function swap(const avalue: longword): longword; {$ifdef FPC}inline;{$endif}
+                                                            overload;
 begin
  result:= (swap(word(avalue)) shl 16) or swap(word(avalue shr 16));
 end;
 
-procedure swap1(var avalue: longword); inline;
+procedure swap1(var avalue: longword); {$ifdef FPC}inline;{$endif} overload;
 begin
  avalue:= (swap(word(avalue)) shl 16) or swap(word(avalue shr 16));
 end;
@@ -536,7 +539,7 @@ constructor tmidisource.create(aowner: tcomponent);
 begin
  tempo:= defaulttempo;
  inherited;
- ftimer:= tsimpletimer.create(0,@dotimer,false,
+ ftimer:= tsimpletimer.create(0,{$ifdef FPC}@{$endif}dotimer,false,
                      [to_single,to_absolute,to_autostart]);
 end;
 

@@ -27,11 +27,19 @@ const
  defaultsamplecount = 4096;
  defaultharmonicscount = 16;
  functionsegmentcount = 32;
+{$ifdef FPC}
  semitoneln = ln(2)/12;
  chromaticscale: array[0..12] of double =
     (1.0,exp(1*semitoneln),exp(2*semitoneln),exp(3*semitoneln),exp(4*semitoneln),
      exp(5*semitoneln),exp(6*semitoneln),exp(7*semitoneln),exp(8*semitoneln),
      exp(9*semitoneln),exp(10*semitoneln),exp(11*semitoneln),2.0);
+{$else}
+ semitoneln = 5.77622650467e-2;
+ chromaticscale: array[0..12] of double =
+    (1.0,1.05946309436,1.12246204831,1.189207115,
+     1.2599210499,1.33483985417,1.41421356237,1.49830707688,
+     1.58740105197,1.6817928179283051,1.78179743628,1.88774862536,2.0);
+{$endif}
 
 type
  siginchangeflagty = (sic_value,sic_stream);
@@ -41,11 +49,18 @@ const
  siginchangeresetflags = [sic_value];
 
 type
+ sigsampleroptionty = (sso_fulltick,sso_negtrig,sso_autorun,
+                       sso_fftmag); //used by tsigsamplerfft
+ sigsampleroptionsty = set of sigsampleroptionty;
+
+const
+ defaultsigsampleroptions = [sso_fulltick];
+type
  tcustomsigcomp = class;
  tdoublesigcomp = class;
  tsigcontroller = class;
- 
- tcustomsigcomp = class(tmsecomponent)  
+
+ tcustomsigcomp = class(tmsecomponent)
   protected
    fupdating: integer;
    procedure coeffchanged(const sender: tdatalist;
@@ -355,7 +370,7 @@ type
                                const sig: real) of object; 
  sigoutbursteventty = procedure(const sender: tobject;
                                const sig: realarty) of object; 
-                              
+
  tsigout = class(tsigconnection)
   private
    finput: tdoubleinputconn;
@@ -484,13 +499,6 @@ type
    property inputs: tdoubleinpconnarrayprop read finputs write setinputs;
  end;
 
- sigsampleroptionty = (sso_fulltick,sso_negtrig,sso_autorun,
-                       sso_fftmag); //used by tsigsamplerfft
- sigsampleroptionsty = set of sigsampleroptionty;
-
-const
- defaultsigsampleroptions = [sso_fulltick];
-type
  tsigsampler = class;
  samplerbufferty = array of doublearty;
  samplerbufferfulleventty = procedure(const sender: tsigsampler;
@@ -953,7 +961,7 @@ type
  
  tsigcontroller = class(tmsecomponent)
   private
-{$notes off}
+{$ifdef FPC}{$notes off}{$endif}
    finphash: tsiginfohash;
    foutphash: tsiginfohash;
 //   fvaluedummy: double;
@@ -969,7 +977,7 @@ type
    fonafterupdatemodel: notifyeventty;
    fonafterstep: afterstepeventty;
    fsamplefrequ: real;
-{$notes on}
+{$ifdef FPC}{$notes on}{$endif}
    procedure settickdiv(const avalue: integer);
    procedure setonbeforetick(const avalue: notifyeventty);
    procedure setonaftertick(const avalue: notifyeventty);
@@ -2343,7 +2351,7 @@ end;
 
 function tsigdelayvar.gethandler: sighandlerprocty;
 begin
- result:= @sighandler;
+ result:= {$ifdef FPC}@{$endif}sighandler;
 end;
 
 procedure tsigdelayvar.sighandler(const ainfo: psighandlerinfoty);
@@ -2760,7 +2768,11 @@ begin
   po1^.options:= fclients[int1].getsigoptions;
   if sco_tick in po1^.options then begin
    setlength(fticks,high(fticks)+2);
+  {$ifdef FPC}
    fticks[high(fticks)]:= @fclients[int1].sigtick;
+  {$else}
+   fticks[high(fticks)]:= nil; //fclients[int1].sigtick; todo:!
+  {$endif}
   end;
   fclients[int1].getsigclientinfopo^.infopo:= po1;
   with po1^ do begin
@@ -3549,7 +3561,7 @@ end;
 
 function tsigfuncttable.gethandler: sighandlerprocty;
 begin
- result:= @sighandler;
+ result:= {$ifdef FPC}@{$endif}sighandler;
 end;
 
 procedure tsigfuncttable.initmodel;
@@ -3807,7 +3819,7 @@ begin
  frelease_options:= [sero_exp];
  inherited;
  ftrigger:= tchangedoubleinputconn.create(self,isigclient(self),
-                                                             @dotriggerchange);
+                                        {$ifdef fpc}@{$endif}dotriggerchange);
  ftrigger.name:= 'trigger';
  famplitude:= tdoubleinputconn.create(self,isigclient(self));
  famplitude.name:= 'amplitude';
@@ -3889,9 +3901,9 @@ var
  end; //setscale
  
  procedure setend(const options: sigenveloperangeoptionsty;
-                      var progindex: integer; var ti: integer; var sta: real);
+                      var progindex: integer; var ti: integer; var sta: double);
  begin
-  setscale(options,progindex,sta);
+  setscale(options,progindex,double(sta));
   with ainfo.fprog[progindex] do begin //end item
    startval:= sta;
    ramp:= 0;
@@ -3902,13 +3914,13 @@ var
  end; //setend
 
  procedure calc(const options: sigenveloperangeoptionsty;
-                   const maxeventtime: real;
+                   const maxeventtime: double;
                    const valueitem: complexty; var progindex: integer;
-                                            var ti: integer; var sta: real);
+                                            var ti: integer; var sta: double);
  var
   int3: integer;
  begin
-  setscale(options,progindex,sta);
+  setscale(options,progindex,double(sta));
   with ainfo.fprog[progindex] do begin
    maxeventdelay:= round(maxeventtime*eventtimescale);
    starttime:= ti;
@@ -4255,7 +4267,7 @@ end;
 
 function tsigenvelope.gethandler: sighandlerprocty;
 begin
- result:= @sighandler;
+ result:= {$ifdef FPC}@{$endif}sighandler;
 end;
 
 procedure tsigenvelope.checkindex(const index: integer);
@@ -4557,12 +4569,12 @@ begin
  foptions:= defaultsigsampleroptions;
  inherited;
  ftrigger:= tchangedoubleinputconn.create(self,isigclient(self),
-                                                             @dotriggerchange);
+                                   {$ifdef FPC}@{$endif}dotriggerchange);
  ftrigger.name:= 'trigger';
  ftriggerlevel:= tchangedoubleinputconn.create(self,isigclient(self),
-                                                             @dotriggerchange);
+                                   {$ifdef FPC}@{$endif}dotriggerchange);
  ftriggerlevel.name:= 'triggerlevel';
- ftimer:= tsimpletimer.create(0,@dotimer,false,[to_leak]);
+ ftimer:= tsimpletimer.create(0,{$ifdef FPC}@{$endif}dotimer,false,[to_leak]);
 end;
 
 destructor tsigsampler.destroy;
@@ -4573,7 +4585,7 @@ end;
 
 function tsigsampler.gethandler: sighandlerprocty;
 begin
- result:= @sighandler;
+ result:= {$ifdef FPC}@{$endif}sighandler;
 end;
 
 procedure tsigsampler.sighandler(const ainfo: psighandlerinfoty);
@@ -4799,7 +4811,7 @@ end;
 
 function tsigconnector.gethandler: sighandlerprocty;
 begin
- result:= @sighandler;
+ result:= {$ifdef FPC}@{$endif}sighandler;
 end;
 
 procedure tsigconnector.sighandler(const ainfo: psighandlerinfoty);

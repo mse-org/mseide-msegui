@@ -1302,9 +1302,10 @@ const
  mask: optionswavetablety = [owt_rotate,owt_mirror];
 begin
  if foptionswave <> avalue then begin
-  foptionswave:= optionswavetablety(setsinglebit(longword(avalue),
-                               longword(foptionswave),
-                               longword(mask)));
+  foptionswave:= optionswavetablety(setsinglebit(
+  {$ifdef FPC}longword{$else}byte{$endif}(avalue),
+  {$ifdef FPC}longword{$else}byte{$endif}(foptionswave),
+  {$ifdef FPC}longword{$else}byte{$endif}(mask)));
   if not (csloading in componentstate) then begin
    dochange;
   end;
@@ -1374,9 +1375,10 @@ const
  mask: optionsfuncteditty = [ofe_rotate,ofe_mirror];
 begin
  if foptionsfunct <> avalue then begin
-  foptionsfunct:= optionsfuncteditty(setsinglebit(longword(avalue),
-                               longword(foptionsfunct),
-                               longword(mask)));
+  foptionsfunct:= optionsfuncteditty(setsinglebit(
+  {$ifdef FPC}longword{$else}byte{$endif}(avalue),
+  {$ifdef FPC}longword{$else}byte{$endif}(foptionsfunct),
+  {$ifdef FPC}longword{$else}byte{$endif}(mask)));
   if not (csloading in componentstate) then begin
    dochange;
   end;
@@ -1897,10 +1899,10 @@ procedure tenvelopechartedit.drawcrosshaircursor(const canvas: tcanvas;
   co1:= tracecoordxy(0,center);
   if (sero_exp in sourceoptions) xor (sero_exp in destoptions) then begin
    if (sero_exp in sourceoptions) then begin
-    tsigenvelope1(fenvelope.fenvelope).exptolin(co1.im);
+    tsigenvelope1(fenvelope.fenvelope).exptolin(double(co1.im));
    end
    else begin
-    tsigenvelope1(fenvelope.fenvelope).lintoexp(co1.im);
+    tsigenvelope1(fenvelope.fenvelope).lintoexp(double(co1.im));
    end;
   end;
   pt1:= dest.chartcoordxy(0,co1);
@@ -1969,7 +1971,7 @@ begin
     if int1 >= count then begin
      break;
     end;
-    items[int1].ydata:= buf1[int1];
+    items[int1].ydata:= realarty(buf1[int1]);
    end;
   end;
  finally

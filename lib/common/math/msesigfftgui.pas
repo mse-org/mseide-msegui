@@ -17,7 +17,7 @@ unit msesigfftgui;
 interface
 uses
  msesignal,msechart,classes,mclasses,msesigfft,msegui,msegraphutils,msemenus,
- msegraphics,mseguiglob,mseclasses;
+ msegraphics,mseguiglob,mseclasses,msetypes;
  
 type
  tsigscopefft = class;
@@ -129,7 +129,7 @@ procedure tscopesamplerfft.dobufferfull;
       if int1 >= count then begin
        break;
       end;
-      items[int1].ydata:= buf1[int1];
+      items[int1].ydata:= realarty(buf1[int1]);
      end;
     end;
    finally
