@@ -615,9 +615,6 @@ begin
      dfs:= 0;
     end;
     fd:= TFieldDef.Create(nil,str1,DFT,DFS,False,TF);
-    {$ifndef mse_FPC_2_2} 
-    fd.displayname:= str1;
-    {$endif}
     fd.collection:= fielddefs;
     
     c.MapDSRowToMSQLRow[TF-1] := I;

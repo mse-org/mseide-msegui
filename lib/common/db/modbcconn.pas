@@ -1375,9 +1375,6 @@ begin
      fieldsize:= 0;
     end;
     fd:= TFieldDef.Create(FieldDefs, ColName, FieldType, FieldSize, False, i);
-    {$ifndef mse_FPC_2_2} 
-    fd.displayname:= colname;
-    {$endif}
     fd.collection:= fielddefs;
     if fieldtype = ftbcd then begin
      int1:= columnsize;

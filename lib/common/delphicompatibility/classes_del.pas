@@ -63,6 +63,7 @@ type
                   node : array[0..5] of byte;           // The spatially unique node identifier
                  );
        end;
+       pguid_fpc = ^tguid_fpc;
 
   EListError = class(Exception);
 
@@ -164,6 +165,19 @@ function LEtoN(const AValue: Int64): Int64;{$ifdef SYSTEMINLINE}inline;{$endif}
                                overload;
 function LEtoN(const AValue: QWord): QWord;{$ifdef SYSTEMINLINE}inline;{$endif}
                                overload;
+function BEtoN(const AValue: SmallInt): SmallInt;{$ifdef SYSTEMINLINE}inline;{$endif}
+                               overload;
+function BEtoN(const AValue: Word): Word;{$ifdef SYSTEMINLINE}inline;{$endif}
+                               overload;
+function BEtoN(const AValue: LongInt): LongInt;{$ifdef SYSTEMINLINE}inline;{$endif}
+                               overload;
+function BEtoN(const AValue: DWord): DWord;{$ifdef SYSTEMINLINE}inline;{$endif}
+                               overload;
+function BEtoN(const AValue: Int64): Int64;{$ifdef SYSTEMINLINE}inline;{$endif}
+                               overload;
+function BEtoN(const AValue: QWord): QWord;{$ifdef SYSTEMINLINE}inline;{$endif}
+                               overload;
+
 function Unassigned: Variant; // Unassigned standard constant
 function Null: Variant;       // Null standard constant
 
@@ -230,6 +244,71 @@ function Null: Variant;       // Null standard constant
   begin
     VarClearProc(TVarData(Result));
     TVarData(Result).VType := varnull;
+  end;
+
+function SwapEndian(const AValue: SmallInt): SmallInt;{$ifdef SYSTEMINLINE}inline;{$endif}
+                               overload;
+  begin
+    { the extra Word type cast is necessary because the "AValue shr 8" }
+    { is turned into "longint(AValue) shr 8", so if AValue < 0 then    }
+    { the sign bits from the upper 16 bits are shifted in rather than  }
+    { zeroes.                                                          }
+    Result := SmallInt((Word(AValue) shr 8) or (Word(AValue) shl 8));
+  end;
+
+
+function SwapEndian(const AValue: Word): Word;{$ifdef SYSTEMINLINE}inline;{$endif}
+                               overload;
+  begin
+    Result := Word((AValue shr 8) or (AValue shl 8));
+  end;
+
+
+function SwapEndian(const AValue: LongInt): LongInt;
+                               overload;
+  begin
+    Result := (AValue shl 24)
+           or ((AValue and $0000FF00) shl 8)
+           or ((AValue and $00FF0000) shr 8)
+           or (AValue shr 24);
+  end;
+
+
+function SwapEndian(const AValue: DWord): DWord;
+                               overload;
+  begin
+    Result := (AValue shl 24)
+           or ((AValue and $0000FF00) shl 8)
+           or ((AValue and $00FF0000) shr 8)
+           or (AValue shr 24);
+  end;
+
+
+function SwapEndian(const AValue: Int64): Int64;
+                               overload;
+  begin
+    Result := (AValue shl 56)
+           or ((AValue and $000000000000FF00) shl 40)
+           or ((AValue and $0000000000FF0000) shl 24)
+           or ((AValue and $00000000FF000000) shl 8)
+           or ((AValue and $000000FF00000000) shr 8)
+           or ((AValue and $0000FF0000000000) shr 24)
+           or ((AValue and $00FF000000000000) shr 40)
+           or (AValue shr 56);
+  end;
+
+
+function SwapEndian(const AValue: QWord): QWord;
+                               overload;
+  begin
+    Result := (AValue shl 56)
+           or ((AValue and $000000000000FF00) shl 40)
+           or ((AValue and $0000000000FF0000) shl 24)
+           or ((AValue and $00000000FF000000) shl 8)
+           or ((AValue and $000000FF00000000) shr 8)
+           or ((AValue and $0000FF0000000000) shr 24)
+           or ((AValue and $00FF000000000000) shr 40)
+           or (AValue shr 56);
   end;
 
 function NtoLE(const AValue: SmallInt): SmallInt;{$ifdef SYSTEMINLINE}inline;{$endif}
@@ -344,6 +423,65 @@ function LEtoN(const AValue: Int64): Int64;{$ifdef SYSTEMINLINE}inline;{$endif}
 function LEtoN(const AValue: QWord): QWord;{$ifdef SYSTEMINLINE}inline;{$endif}
   begin
     {$IFDEF ENDIAN_LITTLE}
+      Result := AValue;
+    {$ELSE}
+      Result := SwapEndian(AValue);
+    {$ENDIF}
+  end;
+
+function BEtoN(const AValue: SmallInt): SmallInt;{$ifdef SYSTEMINLINE}inline;{$endif}
+  begin
+    {$IFDEF ENDIAN_BIG}
+      Result := AValue;
+    {$ELSE}
+      Result := SwapEndian(AValue);
+    {$ENDIF}
+  end;
+
+
+function BEtoN(const AValue: Word): Word;{$ifdef SYSTEMINLINE}inline;{$endif}
+  begin
+    {$IFDEF ENDIAN_BIG}
+      Result := AValue;
+    {$ELSE}
+      Result := SwapEndian(AValue);
+    {$ENDIF}
+  end;
+
+
+function BEtoN(const AValue: LongInt): LongInt;{$ifdef SYSTEMINLINE}inline;{$endif}
+  begin
+    {$IFDEF ENDIAN_BIG}
+      Result := AValue;
+    {$ELSE}
+      Result := SwapEndian(AValue);
+    {$ENDIF}
+  end;
+
+
+function BEtoN(const AValue: DWord): DWord;{$ifdef SYSTEMINLINE}inline;{$endif}
+  begin
+    {$IFDEF ENDIAN_BIG}
+      Result := AValue;
+    {$ELSE}
+      Result := SwapEndian(AValue);
+    {$ENDIF}
+  end;
+
+
+function BEtoN(const AValue: Int64): Int64;{$ifdef SYSTEMINLINE}inline;{$endif}
+  begin
+    {$IFDEF ENDIAN_BIG}
+      Result := AValue;
+    {$ELSE}
+      Result := SwapEndian(AValue);
+    {$ENDIF}
+  end;
+
+
+function BEtoN(const AValue: QWord): QWord;{$ifdef SYSTEMINLINE}inline;{$endif}
+  begin
+    {$IFDEF ENDIAN_BIG}
       Result := AValue;
     {$ELSE}
       Result := SwapEndian(AValue);

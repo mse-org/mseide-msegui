@@ -963,7 +963,7 @@ begin
       end;
      end;
     end;
-    FD.DisplayName:= AliasName;
+//    FD.DisplayName:= AliasName;
     fd.collection:= fielddefs;
    end;
   end;

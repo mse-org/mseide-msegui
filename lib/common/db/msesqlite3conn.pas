@@ -485,9 +485,6 @@ begin
     size1:= 0;
    end;
    fd:= tfielddef.create(nil,str1,ft1,size1,false,int1+1);
-   {$ifndef mse_FPC_2_2} 
-   fd.displayname:= str1;
-   {$endif}
    fd.collection:= fielddefs;
    if ft1 = ftbcd then begin
     fd.precision:= maxprecision;       //precision fix

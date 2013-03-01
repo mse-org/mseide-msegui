@@ -13,19 +13,16 @@
  **********************************************************************}
  
 unit mpqconnection;
-
-{$if fpc_fullversion >= 020105}
- {$define mse_FPC_2_2} 
-{$endif}
-
-{$mode objfpc}{$H+}
+{$ifdef FPC}{$mode objfpc}{$H+}{$endif}
 
 {$Define LinkDynamically}
 
 interface
 
 uses
-  classes,mclasses,SysUtils, msqldb, mdb, dbconst,msedbevents,msestrings,msedb,
+  classes,mclasses,SysUtils, msqldb, mdb,
+  {$ifdef FPC}dbconst{$else}dbconst_del,{$endif}
+            msedbevents,msestrings,msedb,
 {$IfDef LinkDynamically}
   postgres3dyn;
 {$Else}
@@ -187,9 +184,9 @@ type
 
 implementation
 
-uses 
+uses
  math,msestream,msetypes,msedatalist,mseformatstr,msedatabase,msectypes,
- variants,msevariants,msesqlresult;
+ variants,msevariants,msesqlresult{$ifndef FPC},classes_del{$endif};
 
 ResourceString
   SErrRollbackFailed = 'Rollback transaction failed';
@@ -432,7 +429,7 @@ begin
  fconnectstring:= constructconnectstring;
  openconnection(fconnectstring,fhandle);
 // This does only work for pg>=8.0, so timestamps won't work with earlier versions of pg which are compiled with integer_datetimes on
- if pqparameterstatus <> nil then begin
+ if {$ifndef FPC}@{$endif}pqparameterstatus <> nil then begin
   FIntegerDatetimes := pqparameterstatus(FHandle,'integer_datetimes') = 'on';
  end;
  bo1:= fconnected;
@@ -662,10 +659,8 @@ const TypeStrings : array[TFieldType] of string =
       'uuid',     //ftGuid
       'Unknown',  //ftTimeStamp
       'Unknown'   //ftFMTBcd
-      {$ifdef mse_FPC_2_2}
       ,'varchar', //ftFixedWideChar
       'Unknown'   //ftWideMemo
-      {$endif}
     );
 
 const
@@ -687,7 +682,7 @@ begin
   if FStatementType in [stInsert,stUpdate,stDelete,stSelect] then begin
    tr:= TPQTrans(aTransaction.Handle);
    repeat
-    n:= interlockedincrement(fcursorcount) and $ffffff; 
+    n:= interlockedincrement(fcursorcount) and $ffffff;
              //limit range 0..167774655
     nr:= inttostr(n);
     // Only available for pq 8.0, so don't use it...
@@ -954,9 +949,6 @@ begin
     size:= 0;
    end;
    fd:= TFieldDef.Create(nil,str1,fieldtype,size,False,(i+1));
-   {$ifndef mse_FPC_2_2} 
-   fd.displayname:= str1;
-   {$endif}
    fd.collection:= fielddefs;
    if fieldtype = ftbcd then begin
     if precision > maxprecision then begin
@@ -1017,7 +1009,7 @@ type
  pnumericrecord = ^tnumericrecord;
   
 function tpqconnection.loadfield(const cursor: tsqlcursor;
-      const datatype: tfieldtype; const fieldnum: integer; //null based
+      const datatype: tfieldtype; const fieldnum: integer; //zero based
       const buffer: pointer; var bufsize: integer;
                              const aisutf8: boolean): boolean;
            //if bufsize < 0 -> buffer was to small, should be -bufsize
@@ -1039,7 +1031,7 @@ var
   NumericRecord.Scale := BEtoN(pNumericRecord(currbuff)^.Scale);
   NumericRecord.Weight := BEtoN(pNumericRecord(currbuff)^.Weight);
   numericrecord.sign:= beton(pnumericrecord(currbuff)^.sign);
-  inc(pointer(currbuff),sizeof(TNumericRecord));
+  inc(currbuff,sizeof(TNumericRecord));
   result:= numericrecord.sign and numericnan = 0;
 //          if (NumericRecord^.Digits = 0) and (NumericRecord^.Scale = 0) then 
 // = NaN, which is not supported by Currency-type, so we return NULL 
@@ -1050,13 +1042,21 @@ var
  var
   si1: single;
  begin
+ {$ifdef FPC}
   integer(si1):= beton(pinteger(currbuff)^);
+ {$else}
+  integer(ar4ty(si1)):= beton(pinteger(currbuff)^);
+ {$endif}
   result:= si1;
  end;
  
  function getfloat8: double;
  begin
+ {$ifdef FPC}
   int64(result):= beton(pint64(currbuff)^);
+ {$else}
+  int64(ar8ty(result)):= beton(pint64(currbuff)^);
+ {$endif}
  end;
  
   procedure handleitem(const adatatype: tfieldtype;{ const currbuff: pointer;}
@@ -1101,7 +1101,7 @@ var
         do1:= 0;
         for int1 := NumericRecord.Digits - 1 downto 0 do begin
          do1:= do1 + beton(pword(currbuff)^) * intpower(nbase,int1);
-         inc(pointer(currbuff),2);
+         inc(currbuff,2);
         end;
         int1:= numericrecord.weight - numericrecord.digits + 1;
         if int1 < 0 then begin
@@ -1167,7 +1167,11 @@ var
       inc(currbuff,asize);
      end;
      ftDateTime,fttime: begin
+     {$ifdef FPC}
       do1:= double(BEtoN(pint64(CurrBuff)^));
+     {$else}
+      do1:= double(ar8ty(BEtoN(pint64(CurrBuff)^)));
+     {$endif}
       if FIntegerDatetimes then begin
        do1:= do1/1000000;
       end;
@@ -1196,7 +1200,7 @@ var
          for tel := 1 to NumericRecord.Digits  do begin
            cur := cur + beton(pword(currbuff)^) * intpower(10000,-(tel-1)+
                                                        NumericRecord.weight);
-           inc(pointer(currbuff),2);
+           inc(currbuff,2);
          end;
          if NumericRecord.Sign <> 0 then begin
           cur := -cur;
@@ -1221,6 +1225,7 @@ var
       inc(currbuff,asize);
      end;
      ftguid: begin
+     {$ifdef FPC}
       with pguid(currbuff)^ do begin
        pguid(buffer)^.time_low:= beton(time_low);
        pguid(buffer)^.time_mid:= beton(time_mid);
@@ -1229,6 +1234,16 @@ var
        pguid(buffer)^.clock_seq_low:= clock_seq_low;
        pguid(buffer)^.node:= node;
       end;
+     {$else}
+      with pguid_fpc(currbuff)^ do begin
+       pguid_fpc(buffer)^.time_low:= beton(time_low);
+       pguid_fpc(buffer)^.time_mid:= beton(time_mid);
+       pguid_fpc(buffer)^.time_hi_and_version:= beton(time_hi_and_version);
+       pguid_fpc(buffer)^.clock_seq_hi_and_reserved:= clock_seq_hi_and_reserved;
+       pguid_fpc(buffer)^.clock_seq_low:= clock_seq_low;
+       pguid_fpc(buffer)^.node:= node;
+      end;
+     {$endif}
       inc(buffer,sizeof(tguid));
       inc(currbuff,asize);
      end;
@@ -1282,14 +1297,14 @@ begin
     for int1:= 0 to int2-1 do begin
      int3:= beton(pinteger(currbuff)^); //alignment?
      inc(pinteger(currbuff));
-     handleitem(typ1,int3,eltype,po2);
+     handleitem(typ1,int3,eltype,pchar(po2));
     end;
    end;
   end
   else begin
    po2:= buffer;
    handleitem(datatype,{currbuff,}PQfsize(res,fieldnum),pqftype(res,fieldnum),
-                      po2);
+                      pchar(po2));
   end;
  end;
 {$ifdef FPC}{$checkpointer default}{$endif}

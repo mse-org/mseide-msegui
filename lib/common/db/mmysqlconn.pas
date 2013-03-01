@@ -1225,9 +1225,6 @@ begin
    str1:= field^.name;
 
    fd:= TFieldDef.Create(nil,str1,DFT,DFS,False,TF);
-   {$ifndef mse_FPC_2_2} 
-   fd.displayname:= str1;
-   {$endif}
    fd.collection:= fielddefs;
    if dft = ftbcd then begin
     fd.precision:= precision;
