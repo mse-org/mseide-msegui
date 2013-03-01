@@ -1151,10 +1151,10 @@ begin
  fnote:= aevent.par1 and $7f;
  fnoterange:= bigint;
  puint1:= (aevent.track shl 5) or aevent.channel;
- internalfind(puint1,@checkeventindex);
+ internalfind(puint1,{$ifdef FPC}@{$endif}checkeventindex);
  if findexresult = -1 then begin
   puint1:= puint1 or ($ffffffff shl 5); //-1
-  internalfind(puint1,@checkeventindex);
+  internalfind(puint1,{$ifdef FPC}@{$endif}checkeventindex);
  end;
  result:= findexresult;
 end;

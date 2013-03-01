@@ -105,7 +105,11 @@ type
   function getsigcontroller: tsigcontroller;
   function getsigclientinfopo: psigclientinfoty;
   function getsigoptions: sigclientoptionsty;
+ {$ifdef FPC}
   procedure sigtick;
+ {$else}
+  procedure sigtick();
+ {$endif}
  end;
  sigclientintfarty = array of isigclient;
 
@@ -2771,7 +2775,7 @@ begin
   {$ifdef FPC}
    fticks[high(fticks)]:= @fclients[int1].sigtick;
   {$else}
-   fticks[high(fticks)]:= nil; //fclients[int1].sigtick; todo:!
+   fticks[high(fticks)]:= nil;//fclients[int1].sigtick; //todo:!!!
   {$endif}
   end;
   fclients[int1].getsigclientinfopo^.infopo:= po1;

@@ -182,6 +182,13 @@ function BEtoN(const AValue: Int64): Int64;{$ifdef SYSTEMINLINE}inline;{$endif}
 function BEtoN(const AValue: QWord): QWord;{$ifdef SYSTEMINLINE}inline;{$endif}
                                overload;
 
+function SwapEndian(const AValue: SmallInt): SmallInt; overload;
+function SwapEndian(const AValue: Word): Word; overload;
+function SwapEndian(const AValue: LongInt): LongInt; overload;
+function SwapEndian(const AValue: DWord): DWord; overload;
+function SwapEndian(const AValue: Int64): Int64; overload;
+function SwapEndian(const AValue: QWord): QWord; overload;
+
 function Unassigned: Variant; // Unassigned standard constant
 function Null: Variant;       // Null standard constant
 

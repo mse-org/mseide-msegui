@@ -174,13 +174,13 @@ var
 procedure initializepulsesimple(const sonames: array of filenamety); //[] = default
 const
  funcs: array[0..6] of funcinfoty = (
-   (n: 'pa_simple_new'; d: @pa_simple_new),     //0
-   (n: 'pa_simple_free'; d: @pa_simple_free),   //1
-   (n: 'pa_simple_write'; d: @pa_simple_write), //2
-   (n: 'pa_simple_drain'; d: @pa_simple_drain), //3
-   (n: 'pa_simple_read'; d: @pa_simple_read),   //4
-   (n: 'pa_simple_get_latency'; d: @pa_simple_get_latency), //5
-   (n: 'pa_simple_flush'; d: @pa_simple_flush)  //6
+   (n: 'pa_simple_new'; d: {$ifndef FPC}@{$endif}@pa_simple_new),     //0
+   (n: 'pa_simple_free'; d: {$ifndef FPC}@{$endif}@pa_simple_free),   //1
+   (n: 'pa_simple_write'; d: {$ifndef FPC}@{$endif}@pa_simple_write), //2
+   (n: 'pa_simple_drain'; d: {$ifndef FPC}@{$endif}@pa_simple_drain), //3
+   (n: 'pa_simple_read'; d: {$ifndef FPC}@{$endif}@pa_simple_read),   //4
+   (n: 'pa_simple_get_latency'; d: {$ifndef FPC}@{$endif}@pa_simple_get_latency), //5
+   (n: 'pa_simple_flush'; d: {$ifndef FPC}@{$endif}@pa_simple_flush)  //6
    );
  errormessage = 'Can not load Pulseaudio simple library. ';
 begin

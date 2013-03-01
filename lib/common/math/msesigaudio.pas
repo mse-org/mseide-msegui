@@ -65,10 +65,10 @@ type
   published
    property audio: tsigaudioout read faudio write setaudio;
  end;
- 
+
 implementation
 uses
- msesysintf,msepulsesimple,sysutils;
+ msesysintf,msepulsesimple,sysutils{$ifndef FPC},classes_del{$endif};
  
 { tsigaudioout }
 
@@ -146,9 +146,15 @@ begin
     do1:= -1;
    end;
    int2:= round(do1*$7fffff);
+  {$ifdef FPC}
    pbyte(dest)[0]:= pbyte(@int2)[0];
    pbyte(dest)[1]:= pbyte(@int2)[1];
    pbyte(dest)[2]:= pbyte(@int2)[2];
+  {$else}
+   pchar(dest)[0]:= pchar(@int2)[0];
+   pchar(dest)[1]:= pchar(@int2)[1];
+   pchar(dest)[2]:= pchar(@int2)[2];
+  {$endif}
    inc(source);
    inc(pbyte(dest),3);
   end;
@@ -247,9 +253,15 @@ begin
     do1:= -1;
    end;
    int2:= round(do1*$7fffff);
+  {$ifdef FPC}
    pbyte(dest)[0]:= pbyte(@int2)[2];
    pbyte(dest)[1]:= pbyte(@int2)[1];
    pbyte(dest)[2]:= pbyte(@int2)[0];
+  {$else}
+   pchar(dest)[0]:= pchar(@int2)[2];
+   pchar(dest)[1]:= pchar(@int2)[1];
+   pchar(dest)[2]:= pchar(@int2)[0];
+  {$endif}
    inc(source);
    inc(pbyte(dest),3);
   end;
@@ -284,7 +296,11 @@ var
 begin
  with info do begin
   for int1:= valuehigh downto 0 do begin
+ {$ifdef FPC}
    si1:= single(source^);
+ {$else}
+   si1:= source^;
+ {$endif}
    plongword(dest)^:= swapendian(longword(plongword(@si1)^));
    inc(source);
    inc(psingle(dest));
@@ -465,7 +481,7 @@ end;
 
 function tsigoutaudio.gethandler: sighandlerprocty;
 begin
- result:= @sighandler;
+ result:= {$ifdef FPC}@{$endif}sighandler;
 end;
 
 procedure tsigoutaudio.sighandler(const ainfo: psighandlerinfoty);

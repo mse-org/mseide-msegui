@@ -39,7 +39,7 @@ var
 procedure initializepulse(const sonames: array of filenamety); //[] = default
 const
  funcs: array[0..0] of funcinfoty = (
-   (n: 'pa_strerror'; d: @pa_strerror)          //0
+   (n: 'pa_strerror'; d: {$ifndef FPC}@{$endif}@pa_strerror)          //0
    );
  errormessage = 'Can not load Pulseaudio simple library. ';
 begin
