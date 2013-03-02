@@ -11,7 +11,7 @@ unit mseprocmonitor;
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
 interface
 uses
- msesystypes,mseglob;
+ msesystypes,mseglob,msetypes;
  
  {$include ../mseprocmonitor.inc}
 implementation

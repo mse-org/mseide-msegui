@@ -38,11 +38,12 @@ implementation
 
 Uses
 //  BaseUnix,
-  ctypes,
-  unix,
-  unixtype,
+  msectypes,
+//  unix,
+//  unixtype,
 //  sysutils,
-  initc,{msedatalist,}msesysintf,msestrings;
+//  initc,
+  {msedatalist,}msesysintf1,msesysintf,msestrings;
 
 Const
 {$ifndef useiconv}
@@ -186,7 +187,8 @@ procedure Wide2AnsiMove(source:pwidechar;var dest:ansistring;len:SizeInt);
           else
             begin
               unlockiconv(lock_wide2ansi);
-              raise eiconv.Create('iconv error '+IntToStr(fpgetCerrno));
+              raise eiconv.Create('iconv error '+
+                       IntToStr(sys_getlasterror{fpgetCerrno}));
             end;
         end;
       end;
@@ -244,7 +246,8 @@ procedure Ansi2WideMove(source:pchar;var dest:widestring;len:SizeInt);
           else
             begin
               unlockiconv(lock_ansi2wide);
-              raise eiconv.Create('iconv error '+IntToStr(fpgetCerrno));
+              raise eiconv.Create('iconv error '+
+                     IntToStr(sys_getlasterror{fpgetCerrno}));
             end;
         end;
       end;
@@ -311,7 +314,8 @@ procedure Ansi2UCS4Move(source:pchar;var dest:UCS4String;len:SizeInt);
           else
             begin
               unlockiconv(lock_ansi2ucs4);
-              raise eiconv.Create('iconv error '+IntToStr(fpgetCerrno));
+              raise eiconv.Create('iconv error '+
+                          IntToStr(sys_getlasterror{fpgetCerrno}));
             end;
         end;
       end;

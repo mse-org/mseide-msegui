@@ -2214,6 +2214,8 @@ procedure freeaddrinfo(__ai:Paddrinfo);cdecl;external clib name 'freeaddrinfo';
 function ntohs(__netshort:uint16_t):uint16_t;cdecl;external clib name 'ntohs';
 
 function gai_strerror(__ecode:longint):Pchar;cdecl;external clib name 'gai_strerror';
+function syscall(SysNo: Longint): Integer; cdecl; varargs;
+                                    external clib name 'syscall';
 
 
 {$ifdef FPC}

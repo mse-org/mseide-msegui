@@ -74,11 +74,9 @@ type
   {$ifndef FPC}
     function Equals(Obj: TObject) : boolean;virtual;
     { IUnknown }
-    function QueryInterface(
-     {$IFDEF FPC_HAS_CONSTREF}constref{$ELSE}const{$ENDIF} IID: TGUID;
-      out Obj): Hresult; virtual; {$IFNDEF msWINDOWS}cdecl{$ELSE}stdcall{$ENDIF};
-    function _AddRef: Integer; {$IFNDEF msWINDOWS}cdecl{$ELSE}stdcall{$ENDIF};
-    function _Release: Integer; {$IFNDEF msWINDOWS}cdecl{$ELSE}stdcall{$ENDIF};
+    function QueryInterface(const IID: TGUID;out Obj): Hresult; stdcall;
+    function _AddRef: Integer; stdcall;
+    function _Release: Integer; stdcall;
   {$endif}
     procedure AssignTo(Dest: tpersistent); virtual;
     procedure DefineProperties(Filer: tfiler); virtual;
@@ -1211,9 +1209,8 @@ begin
  result:= Obj = Self;
 end;
 
-function tpersistent.QueryInterface(
-{$IFDEF FPC_HAS_CONSTREF}constref{$ELSE}const{$ENDIF} IID: TGUID;
- out Obj): HResult;{$IFNDEF msWINDOWS}cdecl{$ELSE}stdcall{$ENDIF};
+function tpersistent.QueryInterface(const IID: TGUID;
+                            out Obj): HResult; stdcall;
 begin
   if GetInterface(IID, Obj) then
     Result := S_OK
@@ -1221,16 +1218,15 @@ begin
     Result := E_NOINTERFACE;
 end;
 
-function tpersistent._AddRef: Integer;{$IFNDEF msWINDOWS}cdecl{$ELSE}stdcall{$ENDIF};
+function tpersistent._AddRef: Integer; stdcall;
 begin
  Result := -1;
 end;
 
-function tpersistent._Release: Integer;{$IFNDEF msWINDOWS}cdecl{$ELSE}stdcall{$ENDIF};
+function tpersistent._Release: Integer; stdcall;
 begin
  Result := -1;
 end;
-
 {$endif}
 
 procedure TPersistent.AssignError(Source: TPersistent);

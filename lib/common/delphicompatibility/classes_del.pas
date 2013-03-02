@@ -145,6 +145,34 @@ type
     property List: PPointerList read FList;
   end;
 
+{$ifndef mswindows}
+  TMonthNameArray = array[1..12] of string;
+  TWeekNameArray = array[1..7] of string;
+
+  TFormatSettings = record
+    CurrencyFormat: Byte;
+    NegCurrFormat: Byte;
+    ThousandSeparator: Char;
+    DecimalSeparator: Char;
+    CurrencyDecimals: Byte;
+    DateSeparator: Char;
+    TimeSeparator: Char;
+    ListSeparator: Char;
+    CurrencyString: string;
+    ShortDateFormat: string;
+    LongDateFormat: string;
+    TimeAMString: string;
+    TimePMString: string;
+    ShortTimeFormat: string;
+    LongTimeFormat: string;
+    ShortMonthNames: TMonthNameArray;
+    LongMonthNames: TMonthNameArray;
+    ShortDayNames: TWeekNameArray;
+    LongDayNames: TWeekNameArray;
+    TwoDigitYearCenturyWindow: Word;
+  end;
+{$endif}
+
 function NtoLE(const AValue: SmallInt): SmallInt;{$ifdef SYSTEMINLINE}inline;{$endif}
                                overload;
 function NtoLE(const AValue: Word): Word;{$ifdef SYSTEMINLINE}inline;{$endif}

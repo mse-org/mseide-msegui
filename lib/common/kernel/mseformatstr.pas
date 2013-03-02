@@ -13,7 +13,8 @@ unit mseformatstr;     //stringwandelroutinen 31.5.99 mse
 
 interface
 uses
- classes,mclasses,msetypes,msestrings,SysUtils,msemacros,mseglob;
+ classes,mclasses,msetypes,msestrings,SysUtils,msemacros,mseglob
+ {$ifndef FPC},classes_del{$endif};
 
 type
  dateconvertty = (dc_none,dc_tolocal,dc_toutc);
@@ -372,6 +373,13 @@ function TryStrToQWord(const S: string; out Value: QWord): Boolean;
 
 function formatmacros: tformatmacrolist;
 procedure clearformatmacros;
+
+{$ifdef FPC}
+ {$define withformatsettings}
+{$endif}
+{$ifdef mswindows}
+ {$define withformatsettings}
+{$endif}
 
 var
  defaultformatsettingsdot: tformatsettings; //mit '.' als dezitrenner
@@ -3070,29 +3078,29 @@ end;
 }
 function realToStr(const value: double): string;     //immer'.' als separator
 begin
-// {$ifdef withformatsettings}
+{$ifdef withformatsettings}
  result:= floattostr(value,defaultformatsettingsdot)
-// {$else}
-// result:= replacechar(floattostr(value),decimalseparator,'.');
-// {$endif}
+{$else}
+ result:= replacechar(floattostr(value),decimalseparator,'.');
+{$endif}
 end;
 
 function StrToreal(const S: string): double;   //immer'.' als separator
 begin
-// {$ifdef withformatsettings}
+{$ifdef withformatsettings}
  result:= strtofloat(s,defaultformatsettingsdot);
-// {$else}
-// result:= strtofloat(replacechar(s,'.',decimalseparator));
-// {$endif}
+{$else}
+ result:= strtofloat(replacechar(s,'.',decimalseparator));
+{$endif}
 end;
 
 function trystrtoreal(const s: string; out value: real): boolean;
 begin
-// {$ifdef withformatsettings}
+{$ifdef withformatsettings}
  result:= trystrtofloat(s,double(value),defaultformatsettingsdot);
-// {$else}
-// result:= trystrtofloat(replacechar(s,'.',decimalseparator),double(value));
-// {$endif}
+{$else}
+ result:= trystrtofloat(replacechar(s,'.',decimalseparator),double(value));
+{$endif}
 end;
 
 function realtytostr(const val: realty; const format: msestring = '';
