@@ -3195,11 +3195,11 @@ begin
   result:= emptyrealstring;
  end
  else begin
-// {$ifdef withformatsettings}
+ {$ifdef withformatsettings}
   result:= floattostr(val,defaultformatsettingsdot);
-// {$else}
-//  result:= replacechar(floattostr(val),decimalseparator,'.');
-// {$endif}
+ {$else}
+  result:= replacechar(floattostr(val),decimalseparator,'.');
+ {$endif}
  end;
 end;
 
@@ -3210,11 +3210,11 @@ begin
   result:= emptyreal;
  end
  else begin
-// {$ifdef withformatsettings}
+ {$ifdef withformatsettings}
   result:= strtofloat(ein,defaultformatsettingsdot);
-// {$else}
-//  result:= strtofloat(replacechar(ein,'.',decimalseparator));
-// {$endif}
+ {$else}
+  result:= strtofloat(replacechar(ein,'.',decimalseparator));
+ {$endif}
  end;
 end;
 
@@ -3225,11 +3225,11 @@ begin
   value:= emptyreal;
  end
  else begin
-// {$ifdef withformatsettings}
+ {$ifdef withformatsettings}
   result:= trystrtofloat(ein,double(value),defaultformatsettingsdot);
-// {$else}
-//  result:= trystrtofloat(replacechar(ein,'.',decimalseparator),double(value));
-// {$endif}
+ {$else}
+  result:= trystrtofloat(replacechar(ein,'.',decimalseparator),double(value));
+ {$endif}
  end;
 end;
 
@@ -4324,7 +4324,11 @@ end;
 
 initialization
 {$ifndef FPC}
+ {$ifdef mswindows}
  getlocaleformatsettings(0,defaultformatsettingsdot);
+ {$else}
+ defaultformatsettingsdot:= defaultformatsettings;
+ {$endif}
 {$else}
  defaultformatsettingsdot:= sysutils.defaultformatsettings;
 {$endif}
