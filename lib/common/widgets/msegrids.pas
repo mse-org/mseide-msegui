@@ -18,7 +18,7 @@ unit msegrids;
 
 interface
 uses
- classes,mclasses,sysutils,mseclasses,msegui,
+ classes,mclasses,sysutils,mseclasses,msegui,msedragglob,
  msegraphics,msetypes,msestrings,msegraphutils,msebitmap,
  msescrollbar,msearrayprops,mseglob,mseguiglob,typinfo,msearrayutils,
  msedatalist,msedrawtext,msewidgets,mseevent,mseinplaceedit,mseeditglob,

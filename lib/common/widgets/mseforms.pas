@@ -18,7 +18,7 @@ unit mseforms;
 interface
 uses
  msewidgets,msemenus,msegraphics,mseapplication,msegui,msegraphutils,mseevent,
- msetypes,msestrings,mseglob,mseguiglob,mseguiintf,
+ msetypes,msestrings,mseglob,mseguiglob,mseguiintf,msedragglob,
  msemenuwidgets,msestat,msestatfile,mseclasses,classes,mclasses,msedock,
  msesimplewidgets,msebitmap,typinfo
  {$ifdef mse_with_ifi},mseifiglob,mseificompglob,mseificomp{$endif};

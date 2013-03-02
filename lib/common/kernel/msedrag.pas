@@ -13,8 +13,13 @@ unit msedrag;
 
 interface
 uses
- msegui,msegraphutils,mseevent,classes,mseclasses,mseglob,mseguiglob,
- msetimer;
+ msegraphutils,mseevent,classes,mseclasses,mseglob,mseguiglob,msedragglob,
+ msegui,msetimer;
+type
+ idragcontroller = interface(inullinterface)
+  function getwidget: twidget;
+  function getdragrect(const apos: pointty): rectty;
+ end;
 
 type
  drageventty = procedure(const asender: tobject; const apos: pointty;
@@ -46,11 +51,6 @@ type
  tstringdragobject = class(tdragobject)
   public
    data: string;
- end;
-
- idragcontroller = interface(inullinterface)
-  function getwidget: twidget;
-  function getdragrect(const apos: pointty): rectty;
  end;
 
  dragstatety = (ds_clicked,ds_beginchecked,ds_cursorshapechanged,
@@ -147,11 +147,12 @@ function isobjectdrag(const dragobject: tdragobject;
 
 implementation
 uses
- msebits,msepointer,msekeyboard,msesysdnd,sysutils,msesysutils;
-
+ msebits,msepointer,msekeyboard,msesysdnd,sysutils,msesysutils,
+ mseguiintf;
 type
+// tguiapplication1 = class(tguiapplication);
  tdragobject1 = class(tdragobject);
- 
+
 function isobjectdrag(const dragobject: tdragobject; 
                                                 objectclass: tclass): boolean;
 begin

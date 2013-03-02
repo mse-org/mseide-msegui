@@ -1072,7 +1072,7 @@ Const
 implementation
 
 uses
- {$ifdef MSWINDOWS}windows,{$endif}rtlconsts,msesysintf;
+ {$ifdef MSWINDOWS}windows,{$endif}rtlconsts,msesysintf,msesys;
 
 {$ifndef FPC}
 {$define endian_little}
@@ -8083,7 +8083,7 @@ end;
 Procedure THandleStream.SetSize(const NewSize: Int64);
 
 begin
-  sys_truncatefile(FHandle,NewSize);
+  syserror(sys_truncatefile(FHandle,NewSize));
 end;
 
 

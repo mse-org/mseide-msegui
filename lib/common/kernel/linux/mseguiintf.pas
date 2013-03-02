@@ -490,7 +490,7 @@ function Xutf8TextPropertyToTextList(para1:PDisplay; para2:PXTextProperty;
 implementation
 
 uses
- msebits,msekeyboard,sysutils,msesysutils,msefileutils,msedatalist
+ msebits,msekeyboard,sysutils,msesysutils,msefileutils,msedatalist,msedragglob
  {$ifdef with_sm},sm,ice{$endif},msesonames,msegui,mseactions,msex11gdi,
  msearrayutils,msesys,msesysintf1,msesysdnd,mseclasses,mseglob,msetimer
  {$ifdef mse_debug},mseformatstr{$endif};

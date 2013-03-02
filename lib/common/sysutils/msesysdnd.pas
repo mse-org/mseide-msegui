@@ -13,7 +13,7 @@ unit msesysdnd;
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
 interface
 uses
- mseevent,msetypes,msegraphutils,mseguiglob,msedrag,msestrings,
+ mseevent,msetypes,msegraphutils,mseguiglob,msedragglob,msedrag,msestrings,
  msemime,mseglob,msegui;
  
 type

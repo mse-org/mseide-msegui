@@ -21,7 +21,7 @@ uses
  classes,mclasses,msegui,
  mseglob,mseguiglob,msescrollbar,msegraphutils,msegraphics,mseevent,
  msewidgets,mseeditglob,msestockobjects,msestat,msestatfile,
- mseclasses,msesimplewidgets,msemenus,mseact,typinfo,
+ mseclasses,msesimplewidgets,msemenus,mseact,typinfo,msedragglob,
  msegrids,msewidgetgrid,msedatalist,msebitmap,msetypes,msestrings,msearrayprops,
  msedrawtext,mseshapes
  {$ifdef mse_with_ifi}{,mseifi},mseifiglob,mseificomp,mseificompglob{$endif},
