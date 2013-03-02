@@ -615,7 +615,7 @@ procedure setfilenonblock(handle: integer; value: boolean);
 var
  int1: integer;
 begin
- int1:= fcntl(handle,f_getfl,0);
+ int1:= fcntl(handle,f_getfl,[0]);
  if int1 = -1 then begin
   streamerror;
  end;
@@ -625,7 +625,7 @@ begin
  else begin
   int1:= int1 and not o_nonblock;
  end;
- if fcntl(handle,f_setfl,int1) = -1 then begin
+ if fcntl(handle,f_setfl,[int1]) = -1 then begin
   streamerror;
  end;
 end;

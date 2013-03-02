@@ -4081,7 +4081,9 @@ end;
 function TBinaryObjectReader.ReadQWord : qword; {$ifdef CLASSESINLINE}inline;{$endif CLASSESINLINE}
 begin
   Read(Result,8);
+ {$ifdef FPC}
   Result:=LEtoN(Result);
+ {$endif}
 end;
 
 {$IFDEF FPC_DOUBLE_HILO_SWAPPED}
@@ -6062,10 +6064,11 @@ function TReader.ReadVariant: variant;
 var
   nv: TValueType;
 begin
+{$ifdef FPC}
   { Ensure that a Variant manager is installed }
   if not Assigned(VarClearProc) then
     raise EReadError.Create(SErrNoVariantSupport);
-
+{$endif}
   FillChar(Result,sizeof(Result),0);
 
   nv:=NextValue;
@@ -7236,9 +7239,10 @@ begin
     tkVariant:
       begin
         { Ensure that a Variant manager is installed }
+  {$ifdef FPC}
         if not assigned(VarClearProc) then
           raise EWriteError.Create(SErrNoVariantSupport);
-
+  {$endif}
         VarValue := tvardata(GetVariantProp(Instance, PropInfo));
         if HasAncestor then
           DefVarValue := tvardata(GetVariantProp(Ancestor, PropInfo))
@@ -7475,7 +7479,9 @@ end;
 
 procedure TBinaryObjectWriter.WriteQWord(qw : qword); {$ifdef CLASSESINLINE}inline;{$endif CLASSESINLINE}
 begin
+{$ifdef FPC}
   qw:=NtoLE(qw);
+{$endif}
   Write(qw,8);
 end;
 

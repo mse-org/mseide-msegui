@@ -74,7 +74,8 @@ function quotelibnames(const libnames: array of filenamety): msestring;
 implementation
 
 uses
- msesysintf1{$ifndef FPC},windows{$endif}{,msedatalist},msearrayutils;
+ msesysintf1{$ifndef FPC}{$ifdef mswindows},windows{$endif}{$endif}
+ {,msedatalist},msearrayutils;
 
 function getprocaddresses(const lib: tlibhandle;
                           const procedures: array of funcinfoty;

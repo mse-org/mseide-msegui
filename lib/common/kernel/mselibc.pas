@@ -2365,7 +2365,7 @@ var
 procedure initlib;
 const
  funcs: array[0..0] of funcinfoty = (
-   (n: 'clock_gettime'; d: @clock_gettime) //0
+   (n: 'clock_gettime'; d: {$ifndef FPC}@{$endif}@clock_gettime) //0
    );    
 begin
  try

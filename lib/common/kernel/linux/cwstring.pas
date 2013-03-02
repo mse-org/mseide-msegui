@@ -16,6 +16,11 @@
 
 {$define unicodeversion}
 unit cwstring;
+{$ifndef FPC}
+interface          //dummy
+implementation
+
+{$else}
 
 interface
 uses
@@ -38,7 +43,7 @@ implementation
 
 Uses
 //  BaseUnix,
-  msectypes,
+  msectypes,{$ifndef FPC}msetypes,{$endif}
 //  unix,
 //  unixtype,
 //  sysutils,
@@ -138,7 +143,7 @@ begin
  interlockeddecrement(lockcount);
 end;
   
-procedure Wide2AnsiMove(source:pwidechar;var dest:ansistring;len:SizeInt);
+procedure Wide2AnsiMove(source:pwidechar; var dest:ansistring; len:SizeInt);
   var
     outlength,
     outoffset,
@@ -576,4 +581,5 @@ finalization
  iconv_close(iconv_ansi2wide);
  iconv_close(iconv_ucs42ansi);
  iconv_close(iconv_ansi2ucs4);
+{$endif}
 end.

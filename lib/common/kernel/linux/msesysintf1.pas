@@ -11,7 +11,7 @@ unit msesysintf1;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- msesystypes,mselibc;
+ msesystypes,mselibc,sysutils;
 type
  linuxmutexty = record
   case integer of
@@ -45,11 +45,12 @@ type
 {$endif}
  
 function unigettimestamp(timeoutusec: integer): timespec;
+procedure initmutex(out mutex: pthread_mutex_t);
 
 implementation
 
 uses
- {$ifdef FPC}dateutils,{$endif}msedate;
+ dateutils,msedate;
 
 {$ifdef mse_debugmutex}
 var
@@ -204,7 +205,7 @@ function sys_semcreate(out sem: semty; count: integer): syserrorty;
 begin
  fillchar(sem,sizeof(sem),0);
  with linuxsemty(sem) do begin
-  if sem_init(d.sema,{$ifdef FPC}0{$else}false{$endif},count) = 0 then begin
+  if sem_init(d.sema,0,count) = 0 then begin
    result:= sye_ok;
   end
   else begin
@@ -308,7 +309,7 @@ end;
 function sys_semcount(var sem: semty): integer;
 begin
  with linuxsemty(sem) do begin
-  sem_getvalue(d.sema,{$ifdef FPC}@{$endif}result);
+  sem_getvalue(d.sema,@result);
  end;
 end;
 

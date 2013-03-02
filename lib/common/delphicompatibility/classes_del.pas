@@ -17,7 +17,8 @@ unit classes_del;
 
 interface
 uses
- msetypes,sysutils,msesystypes,{$ifdef mswindows}windows,{$endif}msectypes;
+ msetypes,sysutils,msesystypes,
+ {$ifdef mswindows}windows,{$else}mselibc,{$endif}msectypes;
  
 const
   MaxListSize = Maxint div 16;
@@ -32,6 +33,21 @@ type
  pculongaty = ^culongaty;
  tlibhandle = thandle;
 
+{$ifndef mswindows}
+  TRTLCriticalSection = pthread_mutex_t;
+  pRTLCriticalSection = trtlcriticalsection;
+function InitializeCriticalSection(
+         var lpCriticalSection: TRTLCriticalSection): Integer;
+function EnterCriticalSection(
+         var lpCriticalSection: TRTLCriticalSection): Integer; cdecl;
+function LeaveCriticalSection(
+         var lpCriticalSection: TRTLCriticalSection): Integer; cdecl;
+function TryEnterCriticalSection(
+         var lpCriticalSection: TRTLCriticalSection): Boolean;
+function DeleteCriticalSection(
+         var lpCriticalSection: TRTLCriticalSection): Integer; cdecl;
+type
+{$endif}
 {
  TSystemTime = packed record
     Year: Word;
@@ -263,7 +279,7 @@ function LeftStr(const S: string; Count: integer): string;
 
 implementation
 uses
- rtlconsts,msesysintf;
+ rtlconsts,msesysintf,msesysintf1;
 {$ifndef FPC}
 {$define endian_little}
 {$define FPC_HAS_TYPE_EXTENDED}
@@ -305,6 +321,40 @@ begin
   TVarData(Result).VType := varempty;
 end;
 
+{$ifndef mswindows}
+
+function InitializeCriticalSection(
+         var lpCriticalSection: TRTLCriticalSection): Integer;
+begin
+ result:= 0;
+ initmutex(lpCriticalSection);
+end;
+
+function EnterCriticalSection(
+         var lpCriticalSection: TRTLCriticalSection): Integer;
+begin
+ result:= pthread_mutex_lock(lpcriticalsection);
+end;
+
+function LeaveCriticalSection(
+         var lpCriticalSection: TRTLCriticalSection): Integer;
+begin
+ result:= pthread_mutex_unlock(lpcriticalsection);
+end;
+
+function TryEnterCriticalSection(
+         var lpCriticalSection: TRTLCriticalSection): Boolean;
+begin
+ result:= pthread_mutex_trylock(lpcriticalsection) <> ebusy;
+end;
+
+function DeleteCriticalSection(
+         var lpCriticalSection: TRTLCriticalSection): Integer;
+begin
+ result:= pthread_mutex_destroy(lpcriticalsection);
+end;
+
+{$endif}
 
 function Null: Variant;       // Null standard constant
   begin

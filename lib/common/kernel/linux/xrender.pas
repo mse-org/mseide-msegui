@@ -41,7 +41,10 @@ uses
     }
                                        
   type
-  
+
+{$ifndef FPC}
+ txid = xid;
+{$endif}  
      TBool = integer;
      dword = longword;
      Pdword = ^dword;
