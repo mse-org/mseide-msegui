@@ -2,7 +2,7 @@ unit mselibc;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- msectypes;
+ msectypes{$ifndef FPC},msetypes{$endif};
 
 const
  clib = 'c';
@@ -252,29 +252,29 @@ const
    ENOMEDIUM = 123;
    EMEDIUMTYPE = 124;
 
-   O_ACCMODE  = &00003;
-   O_RDONLY   = &00000;
-   O_WRONLY   = &00001;
-   O_RDWR     = &00002;
-   O_CREAT    = &00100;
-   O_EXCL     = &00200;
-   O_NOCTTY   = &00400;
-   O_TRUNC    = &01000;
-   O_APPEND   = &02000;
-   O_NONBLOCK = &04000;
+   O_ACCMODE  = $00003;
+   O_RDONLY   = $00000;
+   O_WRONLY   = $00001;
+   O_RDWR     = $00002;
+   O_CREAT    = $00040;//&00100;
+   O_EXCL     = $00080;//&00200;
+   O_NOCTTY   = $00100;//&00400;
+   O_TRUNC    = $00200;//&01000;
+   O_APPEND   = $00400;//&02000;
+   O_NONBLOCK = $00800;//&04000;
    O_NDELAY   = O_NONBLOCK;
-   O_SYNC     = &010000;
+   O_SYNC     = $01000;//&010000;
    O_FSYNC    = O_SYNC;
-   O_ASYNC    = &020000;
+   O_ASYNC    = $02000;//&020000;
 
-   O_DIRECT    = &0040000;
-   O_DIRECTORY = &0200000;
-   O_NOFOLLOW  = &0400000;
+   O_DIRECT    = $04000;//&0040000;
+   O_DIRECTORY = $10000;//&0200000;
+   O_NOFOLLOW  = $20000;//&0400000;
 
    O_DSYNC = O_SYNC;
    O_RSYNC = O_SYNC;
 
-   O_LARGEFILE = &0100000;
+   O_LARGEFILE = $08000;//&0100000;
 
    F_DUPFD   = 0;
    F_GETFD   = 1;
@@ -1322,8 +1322,12 @@ const
    S_IFLNK  = __S_IFLNK;
    S_IFSOCK = __S_IFSOCK;
 
-function sigaction(__sig:longint; Const act: _sigaction; Var oldact: _sigaction):longint;cdecl;external clib name 'sigaction';
-function sigaction(__sig: longint; Action: PSigAction; OldAction: PSigAction): Integer; cdecl;external clib name 'sigaction';
+function sigaction(__sig:longint; Const act: _sigaction;
+       Var oldact: _sigaction):longint;
+                   cdecl;external clib name 'sigaction'; overload;
+function sigaction(__sig: longint; Action: PSigAction;
+       OldAction: PSigAction): Integer;
+                    cdecl;external clib name 'sigaction'; overload;
 
 function m_sigprocmask(__how:longint; var SigSet : TSigSet;
             var oldset: Tsigset):longint;cdecl;external clib name 'sigprocmask';
@@ -1452,13 +1456,13 @@ function pthread_mutexattr_destroy(var __attr: pthread_mutexattr_t):longint;cdec
 function __mkdir(__path:Pchar; __mode:__mode_t):longint;cdecl;
                                             external clib name 'mkdir';
 function fcntl(__fd: cint; __cmd: cint; args: array of const): cint;
-                                      cdecl; external clib name 'fcntl';
+                   cdecl; external clib name 'fcntl'; overload;
 function fcntl(__fd: cint; __cmd: cint): cint;
-                                 cdecl; varargs; external clib name 'fcntl';
+                   cdecl; varargs; external clib name 'fcntl'; overload;
 function open(__file:Pchar; __oflag: cint; args:array of const): cint; 
-                                              cdecl; external clib name 'open';
+                                cdecl; external clib name 'open'; overload;
 function open(__file:Pchar; __oflag: cint): cint;
-                                      cdecl; varargs; external clib name 'open';
+                    cdecl; varargs; external clib name 'open'; overload;
 function __close(Handle: cint): cint; cdecl;external clib name 'close';
 function ftruncate64(handle: cint; size: cint64): cint; cdecl; 
                                            external clib name 'ftruncate64';
@@ -1470,9 +1474,9 @@ function __read(Handle: cint; var Buffer; Count: size_t): ssize_t;
 function __write(Handle: cint; const Buffer; Count: size_t): ssize_t;
                                            cdecl; external clib name 'write';
 function sem_init(__sem:Psem_t; __pshared: cint; __value: cuint): cint;
-                             cdecl; external threadslib name 'sem_init';
+                  cdecl; external threadslib name 'sem_init'; overload;
 function sem_init(var __sem: sem_t; __pshared: cint; __value: cuint): cint;
-                             cdecl; external threadslib name 'sem_init';
+                  cdecl; external threadslib name 'sem_init'; overload;
 function sem_destroy(var __sem: sem_t): cint;
                         cdecl; external threadslib name 'sem_destroy';
 function sem_post(var __sem: sem_t): cint;
@@ -1496,10 +1500,14 @@ Const
   NONRECURSIVE  = 0;
   RECURSIVE     = 1;
 
-function pthread_setcanceltype(__type:longint;var __oldtype:longint):longint;cdecl; external threadslib;
-function pthread_setcanceltype(__type:longint; __oldtype:Plongint):longint;cdecl;external threadslib name 'pthread_setcanceltype';
-function pthread_setcancelstate(__state:longint; __oldstate:Plongint):longint;cdecl;external threadslib name 'pthread_setcancelstate';
-function pthread_equal(__thread1:pthread_t; __thread2:pthread_t):longint;cdecl;external threadslib name 'pthread_equal';
+function pthread_setcanceltype(__type:longint; var __oldtype:longint):longint;
+                          cdecl; external threadslib; overload;
+function pthread_setcanceltype(__type:longint; __oldtype:Plongint):longint;
+            cdecl;external threadslib name 'pthread_setcanceltype'; overload;
+function pthread_setcancelstate(__state:longint;__oldstate:Plongint):longint;
+                       cdecl;external threadslib name 'pthread_setcancelstate';
+function pthread_equal(__thread1:pthread_t; __thread2:pthread_t):longint;
+                       cdecl;external threadslib name 'pthread_equal';
 function pthread_self:pthread_t;cdecl;external threadslib name 'pthread_self';
 
 const
@@ -1574,8 +1582,10 @@ type
   TUnixTime = tm;
   PUnixTime = ^TUnixTime;
   TTime_T = Time_t;
-function __time(var __timer : ttime_t):time_t;cdecl;external clib name 'time';
-function __time(__timer:Ptime_t):time_t;cdecl;external clib name 'time';
+function __time(var __timer : ttime_t):time_t;cdecl;
+                                 external clib name 'time'; overload;
+function __time(__timer:Ptime_t):time_t;
+                                 cdecl;external clib name 'time'; overload;
 function timelocal(var __tp: tm):time_t;cdecl;external clib name 'timelocal';
 function setlocale(__category:longint; __locale:Pchar):Pchar;cdecl;
                                                external clib name 'setlocale';
@@ -1647,9 +1657,9 @@ type
    sighandler_t = __sighandler_t;
    
   __itimer_which = (
-   ITIMER_REAL := 0,
-   ITIMER_VIRTUAL := 1,
-   ITIMER_PROF := 2
+   ITIMER_REAL,   // := 0,
+   ITIMER_VIRTUAL,// := 1,
+   ITIMER_PROF    // := 2
   );
 
   Pitimerval = ^itimerval;
@@ -1878,9 +1888,9 @@ const
 function SIGRTMIN: cint; cdecl; external clib name '__libc_current_sigrtmin';
 function SIGRTMAX: cint; cdecl; external clib name '__libc_current_sigrtmax';
 function ioctl(__fd: cint; __request:dword; args: array of const): cint;
-                                             cdecl;external clib name 'ioctl';
+                               cdecl;external clib name 'ioctl'; overload;
 function ioctl(__fd: cint; __request: cuint; args: pointer): cint;
-                                             cdecl;external clib name 'ioctl';
+                               cdecl;external clib name 'ioctl'; overload;
 function cfsetispeed(var __termios_p: termios; __speed:speed_t): cint;
                                        cdecl;external clib name 'cfsetispeed';
 function cfsetospeed(var __termios_p: termios; __speed:speed_t): cint;
@@ -1920,9 +1930,9 @@ const
    N_HCI = 15;
    
 function gettimeofday(var __tv:timeval; var _tz:timezone):longint;
-                          cdecl;external clib name 'gettimeofday';
+                          cdecl;external clib name 'gettimeofday'; overload;
 function gettimeofday(var __tv:timeval; __tz:__timezone_ptr_t):longint;
-                          cdecl;external clib name 'gettimeofday';
+                          cdecl;external clib name 'gettimeofday'; overload;
 function pthread_kill(__thread:pthread_t; __signo:longint):longint;
                           cdecl;external threadslib name 'pthread_kill';
 const
@@ -1930,8 +1940,11 @@ const
    WUNTRACED = 2;
    __WALL = $40000000;
    __WCLONE = $80000000;
-function waitpid(__pid:__pid_t; __stat_loc:Plongint; __options:longint):__pid_t;cdecl;external clib name 'waitpid';
-function waitpid(__pid:__pid_t; var __stat_loc:longint; __options:longint):__pid_t;cdecl;external clib name 'waitpid';
+function waitpid(__pid:__pid_t; __stat_loc:Plongint; __options:longint):__pid_t;
+             cdecl;external clib name 'waitpid'; overload;
+function waitpid(__pid:__pid_t; var __stat_loc:longint;
+                         __options:longint):__pid_t;
+                             cdecl;external clib name 'waitpid'; overload;
 function WEXITSTATUS(Status: longint): longint;
 function __system(__command:Pchar):longint;cdecl;external clib name 'system';
 type
@@ -1944,9 +1957,10 @@ type
   TPipes = Array[0..1] of longint;
   PPipes = ^TPipes;
   
-function pipe(var __pipedes: TPipes):longint; cdecl; external clib name 'pipe';
+function pipe(var __pipedes: TPipes):longint;
+                   cdecl; external clib name 'pipe'; overload;
 function pipe(var PipeDes: TPipeDescriptors): Integer; cdecl;
-                                                external clib name 'pipe';
+                               external clib name 'pipe'; overload;
 function vfork: __pid_t; cdecl; external clib name 'vfork';
 function setsid: __pid_t; cdecl; external clib name 'setsid';
 function getsid(pid: __pid_t): __pid_t; cdecl; external clib name 'getsid';
@@ -1959,8 +1973,10 @@ const
    EXIT_SUCCESS = 0;
 
 procedure _exit (__status : longint); cdecl; external clib name '_exit';
-function execl(__path:Pchar; __arg:Pchar):longint;cdecl;varargs;external clib name 'execl';
-function execl(__path:Pchar; __arg:Pchar; args:array of const):longint;cdecl;external clib name 'execl';
+function execl(__path:Pchar; __arg:Pchar):longint;
+               cdecl;varargs;external clib name 'execl'; overload;
+function execl(__path:Pchar; __arg:Pchar; args:array of const):longint;
+                    cdecl;external clib name 'execl'; overload;
 
 Type
   error_t = Integer;
@@ -2105,6 +2121,7 @@ Const
   SOMAXCONN = 128;
 
 type
+{$ifdef FPC}
    __socket_type = (
   SOCK_STREAM := 1,
   SOCK_DGRAM := 2,
@@ -2113,6 +2130,17 @@ type
   SOCK_SEQPACKET := 5,
   SOCK_PACKET := 10
   );
+ {$else}
+  __socket_type = type cenum;
+const
+  SOCK_STREAM = 1;
+  SOCK_DGRAM = 2;
+  SOCK_RAW = 3;
+  SOCK_RDM = 4;
+  SOCK_SEQPACKET = 5;
+  SOCK_PACKET = 10;
+type
+ {$endif}
   TSocket = longint;
   SOCKLEN_T = __socklen_t;
   PSOCKLEN_T = ^SOCKLEN_T;
@@ -2163,11 +2191,16 @@ const
    SCM_TIMESTAMP = SO_TIMESTAMP;
    SO_ACCEPTCONN = 30;
 
-function socket(__domain:longint; __type:longint; __protocol:longint):longint;cdecl;external clib name 'socket';
-function socket(__domain: Integer; __type: __socket_type; __protocol: Integer): TSocket; cdecl;external clib name 'socket';
+function socket(__domain:longint; __type:longint; __protocol:longint):longint;
+             cdecl;external clib name 'socket'; overload;
+function socket(__domain: Integer; __type: __socket_type;
+               __protocol: Integer): TSocket;
+                cdecl;external clib name 'socket'; overload;
 function shutdown(__fd:longint; __how:longint):longint;cdecl;external clib name 'shutdown';
-function connect(__fd:longint; const __addr: sockaddr; __len:socklen_t):longint;cdecl;external clib name 'connect';
-function connect(__fd:longint; __addr:Psockaddr; __len:socklen_t):longint;cdecl;external clib name 'connect';
+function connect(__fd:longint; const __addr: sockaddr;
+ __len:socklen_t):longint;cdecl;external clib name 'connect'; overload;
+function connect(__fd:longint; __addr:Psockaddr;
+       __len:socklen_t):longint;cdecl;external clib name 'connect'; overload;
 function __libc_sa_len(__af: sa_family_t): Integer; cdecl;external clib name '__libc_sa_len';
 function bind(__fd:longint; __addr:Psockaddr; __len:socklen_t):longint;cdecl;external clib name 'bind';
 function SA_LEN(const buf): longword; // Untyped buffer; this is *unsafe*.
@@ -2194,143 +2227,8 @@ const
 type
  tcondvar = array[0..__SIZEOF_PTHREAD_COND_T-1] of byte;
 
-{$ifndef FPC}
-type
- dword=longword;
-  P_pthread_fastlock = ^_pthread_fastlock;
-  _pthread_fastlock = record
-    __status : longint;
-    __spinlock : longint;
-  end;
-
-  P_pthread_descr = ^_pthread_descr;
-  _pthread_descr = pointer; // Opaque type.
-
-  P__pthread_attr_s = ^__pthread_attr_s;
-  __pthread_attr_s = record
-       __detachstate : longint;
-       __schedpolicy : longint;
-       __schedparam : __sched_param;
-       __inheritsched : longint;
-       __scope : longint;
-       __guardsize : size_t;
-       __stackaddr_set : longint;
-       __stackaddr : pointer;
-       __stacksize : size_t;
-    end;
-  pthread_attr_t = __pthread_attr_s;
-  Ppthread_attr_t = ^pthread_attr_t;
-
-  Ppthread_cond_t = ^pthread_cond_t;
-  pthread_cond_t = record
-       __c_lock : _pthread_fastlock;
-       __c_waiting : _pthread_descr;
-    end;
-
-  Ppthread_condattr_t = ^pthread_condattr_t;
-  pthread_condattr_t = record
-       __dummy : longint;
-    end;
-
-  Ppthread_key_t = ^pthread_key_t;
-  pthread_key_t = dword;
-
-  Ppthread_mutex_t = ^pthread_mutex_t;
-  pthread_mutex_t = record
-       __m_reserved : longint;
-       __m_count : longint;
-       __m_owner : _pthread_descr;
-       __m_kind : longint;
-       __m_lock : _pthread_fastlock;
-    end;
-
-  Ppthread_mutexattr_t = ^pthread_mutexattr_t;
-  pthread_mutexattr_t = record
-       __mutexkind : longint;
-    end;
-
-  Ppthread_once_t = ^pthread_once_t;
-  pthread_once_t = longint;
-
-  P_pthread_rwlock_t = ^_pthread_rwlock_t;
-  _pthread_rwlock_t = record
-       __rw_lock : _pthread_fastlock;
-       __rw_readers : longint;
-       __rw_writer : _pthread_descr;
-       __rw_read_waiting : _pthread_descr;
-       __rw_write_waiting : _pthread_descr;
-       __rw_kind : longint;
-       __rw_pshared : longint;
-    end;
-  pthread_rwlock_t = _pthread_rwlock_t;
-  Ppthread_rwlock_t = ^pthread_rwlock_t;
-
-  Ppthread_rwlockattr_t = ^pthread_rwlockattr_t;
-  pthread_rwlockattr_t = record
-       __lockkind : longint;
-       __pshared : longint;
-    end;
-
-  Ppthread_spinlock_t = ^pthread_spinlock_t;
-  pthread_spinlock_t = longint;
-
-  Ppthread_barrier_t = ^pthread_barrier_t;
-  pthread_barrier_t = record
-       __ba_lock : _pthread_fastlock;
-       __ba_required : longint;
-       __ba_present : longint;
-       __ba_waiting : _pthread_descr;
-    end;
-
-  Ppthread_barrierattr_t = ^pthread_barrierattr_t;
-  pthread_barrierattr_t = record
-       __pshared : longint;
-    end;
-
-  Ppthread_t = ^pthread_t;
-  pthread_t = dword;
-
-  TStartRoutine = function (_para1:pointer): integer; cdecl;
-   DIR = record end;
-   __dirstream = DIR;
-  PDIR = ^DIR;
-  pdirectorystream = pdir;
-   Ptm = ^tm;
-   tm = record
-        tm_sec : longint;
-        tm_min : longint;
-        tm_hour : longint;
-        tm_mday : longint;
-        tm_mon : longint;
-        tm_year : longint;
-        tm_wday : longint;
-        tm_yday : longint;
-        tm_isdst : longint;
-        tm_gmtoff : longint;
-        tm_zone : Pchar;
-        __tm_gmtoff : longint;
-        __tm_zone : Pchar;
-     end;
-
-  Paddrinfo = ^addrinfo;
-  addrinfo = record
-       ai_flags : longint;
-       ai_family : longint;
-       ai_socktype : longint;
-       ai_protocol : longint;
-       ai_addrlen : socklen_t;
-       ai_addr : Psockaddr;
-       ai_canonname : Pchar;
-       ai_next : Paddrinfo;
-    end;
-
- const
-  threadslib = libpthreadmodulename;
-  clib = libcmodulename;
-{$endif}
- 
 function gettimeofday(__tv:Ptimeval; __tz:ptimezone):longint;cdecl;
-                                           external clib name 'gettimeofday';
+                     external clib name 'gettimeofday'; overload;
 function  msetcgetattr(filedes: longint;
          var msetermios: termios{ty}): longint;
                                     cdecl;external clib name 'tcgetattr';

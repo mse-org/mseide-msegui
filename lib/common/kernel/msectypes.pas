@@ -70,5 +70,7 @@ type
  cdouble = double;
  pcdouble = ^cdouble;
 
+ cenum = cint;
+ 
 implementation
 end.

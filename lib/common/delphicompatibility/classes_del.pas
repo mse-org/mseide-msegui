@@ -209,7 +209,7 @@ function LeftStr(const S: string; Count: integer): string;
 
 implementation
 uses
- rtlconsts;
+ rtlconsts,msesysintf;
 {$ifndef FPC}
 {$define endian_little}
 {$define FPC_HAS_TYPE_EXTENDED}
@@ -557,12 +557,13 @@ end;
 Function GetProcedureAddress(Lib : TLibHandle;
                   const ProcName : AnsiString) : Pointer;
 begin
-  Result:=Windows.GetProcAddress(Lib,PChar(ProcName));
+  Result:= {$ifdef mswindows}Windows.{$endif}GetProcAddress(Lib,PChar(ProcName));
 end;
 
 function  GetCurrentThreadId : threadty;
 begin
- result:= getcurrentthread;
+ result:= sys_getcurrentthread;
+// result:= getcurrentthread;
 end;
 
 {****************************************************************************}
