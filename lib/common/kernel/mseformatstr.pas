@@ -15,7 +15,8 @@ interface
 uses
  classes,mclasses,msetypes,msestrings,SysUtils,msemacros,mseglob
  {$ifndef FPC},classes_del{$endif};
-
+{$ifdef FPC}{$define hasqword}{$endif}
+{$ifdef mswindows}{$define hasqword}{$endif}
 type
  dateconvertty = (dc_none,dc_tolocal,dc_toutc);
  
@@ -159,8 +160,9 @@ function formatfloatmse(const value: double; const format: msestring;
 function inttostrmse(const value: integer): msestring; overload;
 function inttostrmse(const value: longword): msestring; overload;
 function inttostrmse(const value: int64): msestring; overload;
+{$ifdef hasqword}
 function inttostrmse(const value: qword): msestring; overload;
-   
+{$endif}
 function realtostr(const value: double): string;     //immer'.' als separator
 function strtoreal(const s: string): double;   //immer'.' als separator
 function trystrtoreal(const s: string; out value: real): boolean;
@@ -3037,6 +3039,7 @@ begin
  move(buffer[int1+1],pointer(result)^,int2*sizeof(msechar));
 end;
 
+{$ifdef hasqword}
 function inttostrmse(const value: qword): msestring;
 var
  buffer: array[0..22] of msechar;
@@ -3059,7 +3062,7 @@ begin
  setlength(result,int2);
  move(buffer[int1+1],pointer(result)^,int2*sizeof(msechar));
 end;
-
+{$endif}
 {
 function formatfloatmse(const value: double; const format: msestring;
                                  const dot: boolean = false): msestring;
