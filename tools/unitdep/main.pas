@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 2011 by Martin Schreiber
+{ MSEide Copyright (c) 2011-2013 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@ uses
  msegraphics,msegraphutils,mseevent,mseclasses,mseforms,msestatfile,msebitmap,
  msedataedits,msedatanodes,mseedit,msefiledialog,msegrids,mseifiglob,
  mselistbrowser,msestrings,msesys,msetypes,msesimplewidgets,msewidgets,
- msewidgetgrid,mselist,classes,mseificomp,mseificompglob,msedispwidgets,
+ msewidgetgrid,mselist,classes,mclasses,mseificomp,mseificompglob,msedispwidgets,
  msesplitter;
 
 type
