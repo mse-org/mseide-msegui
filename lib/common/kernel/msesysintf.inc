@@ -82,6 +82,7 @@ function sys_openfile(const path: filenamety; const openmode: fileopenmodety;
 function sys_closefile(const handle: integer): syserrorty;
 function sys_flushfile(const handle: integer): syserrorty;
 function sys_dup(const source: integer; out dest: integer): syserrorty;
+function sys_truncatefile(const handle: integer; const size: int64): syserrorty;
 
 
 function sys_read(fd: longint; buf: pointer; nbytes: longword): integer;

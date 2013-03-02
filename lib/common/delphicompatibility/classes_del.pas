@@ -17,8 +17,8 @@ unit classes_del;
 
 interface
 uses
- msetypes,sysutils,msesystypes,windows,msectypes;
-
+ msetypes,sysutils,msesystypes,{$ifdef mswindows}windows,{$endif}msectypes;
+ 
 const
   MaxListSize = Maxint div 16;
   GUID_NULL: TGuid = '{00000000-0000-0000-0000-000000000000}';
@@ -196,7 +196,7 @@ function  GetCurrentThreadId : threadty;
 Function GetProcedureAddress(Lib : TLibHandle;
                   const ProcName : AnsiString) : Pointer;
 procedure copycharbuf(const asource: string; const asize: integer; out buffer);
-Function FileTruncate (Handle : THandle;Size: Int64) : boolean;
+//Function FileTruncate (Handle : THandle;Size: Int64) : boolean;
 {$ifndef FPC}
  {$ifdef MSWINDOWS}
 function InterlockedIncrement(var I: Integer): Integer;
@@ -246,14 +246,16 @@ end;
 
 function Unassigned: Variant; // Unassigned standard constant
 begin
-  VarClearProc(TVarData(Result));
+//  VarClearProc(TVarData(Result));
+  VarClear(variant(Result));
   TVarData(Result).VType := varempty;
 end;
 
 
 function Null: Variant;       // Null standard constant
   begin
-    VarClearProc(TVarData(Result));
+//    VarClearProc(TVarData(Result));
+    VarClear(variant(Result));
     TVarData(Result).VType := varnull;
   end;
 
@@ -308,9 +310,33 @@ function SwapEndian(const AValue: Int64): Int64;
            or (AValue shr 56);
   end;
 
+function SwapEndiani64(const AValue: Int64): Int64;
+  begin
+    Result := (AValue shl 56)
+           or ((AValue and $000000000000FF00) shl 40)
+           or ((AValue and $0000000000FF0000) shl 24)
+           or ((AValue and $00000000FF000000) shl 8)
+           or ((AValue and $000000FF00000000) shr 8)
+           or ((AValue and $0000FF0000000000) shr 24)
+           or ((AValue and $00FF000000000000) shr 40)
+           or (AValue shr 56);
+  end;
+
 
 function SwapEndian(const AValue: QWord): QWord;
                                overload;
+  begin
+    Result := (AValue shl 56)
+           or ((AValue and $000000000000FF00) shl 40)
+           or ((AValue and $0000000000FF0000) shl 24)
+           or ((AValue and $00000000FF000000) shl 8)
+           or ((AValue and $000000FF00000000) shr 8)
+           or ((AValue and $0000FF0000000000) shr 24)
+           or ((AValue and $00FF000000000000) shr 40)
+           or (AValue shr 56);
+  end;
+
+function SwapEndianq64(const AValue: QWord): QWord;
   begin
     Result := (AValue shl 56)
            or ((AValue and $000000000000FF00) shl 40)
@@ -485,7 +511,7 @@ function BEtoN(const AValue: Int64): Int64;{$ifdef SYSTEMINLINE}inline;{$endif}
     {$IFDEF ENDIAN_BIG}
       Result := AValue;
     {$ELSE}
-      Result := SwapEndian(AValue);
+      Result := SwapEndiani64(AValue);
     {$ENDIF}
   end;
 
@@ -495,10 +521,10 @@ function BEtoN(const AValue: QWord): QWord;{$ifdef SYSTEMINLINE}inline;{$endif}
     {$IFDEF ENDIAN_BIG}
       Result := AValue;
     {$ELSE}
-      Result := SwapEndian(AValue);
+      Result := SwapEndianq64(AValue);
     {$ENDIF}
   end;
-
+(*
 Function FileTruncate (Handle : THandle;Size: Int64) : boolean;
 begin
 {
@@ -509,7 +535,7 @@ begin
   else
    Result := false;
 end;
-
+*)
 procedure copycharbuf(const asource: string; const asize: integer; out buffer);
 var
  int1: integer;

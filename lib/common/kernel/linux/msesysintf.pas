@@ -461,6 +461,16 @@ begin
  end;
 end;
 
+function sys_truncatefile(const handle: integer; const size: int64): syserrorty;
+begin
+ result:= sye_ok;
+ while mselibc.ftruncate64(handle,size) <> 0 do begin
+  if sys_getlasterror <> eintr then begin
+   result:= syelasterror;
+   break;
+  end;
+ end;
+end;
 
 function sys_read(fd: longint; buf: pointer; nbytes: dword): integer;
 begin

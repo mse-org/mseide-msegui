@@ -1,6 +1,12 @@
 unit msectypes;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
+{$ifndef FPC}
+ {$ifndef mswindows}
+uses
+ msetypes; //for uint64 in kylix
+ {$endif}
+{$endif}
 //todo: win64
 type
 // from bits/types.h

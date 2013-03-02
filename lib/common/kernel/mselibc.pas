@@ -1460,6 +1460,8 @@ function open(__file:Pchar; __oflag: cint; args:array of const): cint;
 function open(__file:Pchar; __oflag: cint): cint;
                                       cdecl; varargs; external clib name 'open';
 function __close(Handle: cint): cint; cdecl;external clib name 'close';
+function ftruncate64(handle: cint; size: cint64): cint; cdecl; 
+                                           external clib name 'ftruncate64';
 function fsync(__fd: cint): cint; cdecl; external clib name 'fsync';
 function dup(__fd: cint): cint; cdecl; external clib name 'dup';
 function dup2(__fd: cint; __fd2: cint):longint; cdecl; external clib name 'dup2';
