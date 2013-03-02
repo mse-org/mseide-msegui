@@ -38,14 +38,18 @@ type
    1: (_bufferspace: semty;);
  end;
 
-{$include ..\msesysintf1.inc}
+{$ifdef FPC}
+ {$include ..\msesysintf1.inc}
+{$else}
+ {$include msesysintf1.inc}
+{$endif}
  
 function unigettimestamp(timeoutusec: integer): timespec;
 
 implementation
 
 uses
- dateutils,msedate;
+ {$ifdef FPC}dateutils,{$endif}msedate;
 
 {$ifdef mse_debugmutex}
 var
