@@ -1929,9 +1929,9 @@ const
    N_SYNC_PPP = 14;
    N_HCI = 15;
    
-function gettimeofday(var __tv:timeval; var _tz:timezone):longint;
+function gettimeofday(var __tv: timeval; var _tz: timezone):longint;
                           cdecl;external clib name 'gettimeofday'; overload;
-function gettimeofday(var __tv:timeval; __tz:__timezone_ptr_t):longint;
+function gettimeofday(var __tv: timeval; __tz:__timezone_ptr_t):longint;
                           cdecl;external clib name 'gettimeofday'; overload;
 function pthread_kill(__thread:pthread_t; __signo:longint):longint;
                           cdecl;external threadslib name 'pthread_kill';
@@ -2218,11 +2218,9 @@ function syscall(SysNo: Longint): Integer; cdecl; varargs;
                                     external clib name 'syscall';
 
 
-{$ifdef FPC}
 const
  recursiveconst = PTHREAD_MUTEX_RECURSIVE;
 // libcmodulename = 'c';
-{$endif}
 const
  NR_sendfile = 187;
  __SIZEOF_PTHREAD_COND_T = {$ifdef CPU64}48{$else}48{$endif};
@@ -2246,6 +2244,13 @@ function pthread_create(__thread:Ppthread_t; __attr:Ppthread_attr_t;
                         external threadslib name 'pthread_create';
 function pthread_join(__th:pthread_t; __thread_return:Ppointer):longint;cdecl;
                         external threadslib name 'pthread_join';
+function pthread_detach(__th:pthread_t):longint;cdecl;
+                        external threadslib name 'pthread_detach';
+function pthread_cancel(__thread: pthread_t):longint;
+                        cdecl;external threadslib name 'pthread_cancel';
+
+function pthread_attr_init(var __attr: pthread_attr_t):longint;cdecl;
+                        external threadslib name 'pthread_attr_init';
 
 function pthread_cond_init(var Cond: TCondVar;
           CondAttr: PPthreadCondattr): Integer; cdecl;

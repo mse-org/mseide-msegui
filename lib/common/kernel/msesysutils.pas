@@ -106,7 +106,7 @@ function timestamp: longword;
 var
  t1: timeval;
 begin
- gettimeofday(t1,ptimezone(nil));
+ gettimeofday(t1,ptimezone(nil)^);
  result:= t1.tv_sec * 1000000 + t1.tv_usec;
  if result = 0 then begin
   result:= 1;

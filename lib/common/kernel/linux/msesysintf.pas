@@ -50,7 +50,7 @@ procedure setcloexec(const fd: integer);
 implementation
 uses
  msesysintf1,sysutils,msesysutils,msefileutils
- {$ifdef FPC},dateutils{$else},DateUtils{$endif},msedate
+ {$ifdef FPC},dateutils{$else},DateUtils,classes_del{$endif},msedate
  {$ifdef mse_debugmutex},mseapplication{$endif};
  
 function sigactionex(SigNum: Integer; var Action: TSigActionex;
@@ -103,7 +103,7 @@ type
  end;
  {$if sizeof(dirstreamlinuxdty) > sizeof(dirstreampty)} 
   {$error 'buffer overflow'}
- {$endif}
+ {$ifend}
  dirstreamlinuxty = record
   case integer of
    0: (d: dirstreamlinuxdty;);
@@ -199,7 +199,8 @@ begin
      stream.readln(str1);
      with result[int2] do begin
       if mselibc.sscanf(pchar(str1),'%d (%*a[^)]) %*c %d',
-     {$ifdef FPC}[{$endif}@pid,@ppid{$ifdef FPC}]{$endif}) = 2 then begin
+//     {$ifdef FPC}[{$endif}@pid,@ppid{$ifdef FPC}]{$endif}) = 2 then begin
+                           [@pid,@ppid]) = 2 then begin
        inc(int2);
       end;
      end;
@@ -314,8 +315,13 @@ var
  ti: timeval;
 begin
  gettimeofday(@ti,nil);
+{$ifdef FPC}
  result:= ti.tv_sec / (double(24.0)*60.0*60.0) + 
           ti.tv_usec / (double(24.0)*60.0*60.0*1e6) - unidatetimeoffset;
+{$else}
+ result:= ti.tv_sec / (24.0*60.0*60.0) + 
+          ti.tv_usec / (24.0*60.0*60.0*1e6) - unidatetimeoffset;
+{$endif}
 end;
 
 function sys_getlocaltime: tdatetime;
@@ -323,8 +329,13 @@ var
  ti: timeval;
 begin
  gettimeofday(@ti,nil);
+{$ifdef FPC}
  result:= ti.tv_sec / (double(24.0)*60.0*60.0) + 
           ti.tv_usec / (double(24.0)*60.0*60.0*1e6) - unidatetimeoffset;
+{$else}
+ result:= ti.tv_sec / (24.0*60.0*60.0) + 
+          ti.tv_usec / (24.0*60.0*60.0*1e6) - unidatetimeoffset;
+{$endif}
  if ti.tv_sec = lastlocaltime then begin
   result:= result + gmtoff;
  end
@@ -385,7 +396,7 @@ begin
  flags:= fcntl(fd,f_getfd); 
  if flags <> -1 then begin
   flags:= flags or fd_cloexec;
-  fcntl(fd,f_setfd,flags)
+  fcntl(fd,f_setfd,[flags])
  end;
 end;
 
@@ -403,8 +414,7 @@ begin
  sys_tosysfilepath(str2);
  str1:= str2;
  handle:= Integer(mselibc.open(PChar(str1), openmodes[openmode] or 
-                            defaultopenflags,
-        {$ifdef FPC}[{$endif}getfilerights(rights){$ifdef FPC}]{$endif}));
+                            defaultopenflags,[getfilerights(rights)]));
  if handle >= 0 then begin
   if fstat(handle,@stat1) = 0 then begin  
    if s_isdir(stat1.st_mode) then begin
@@ -514,7 +524,8 @@ var
  time1: timeval;
  time2: timespec;
 begin
- if (clock_gettime = nil) or (clock_gettime(clock_monotonic,@time2) <> 0) then begin
+ if ({$ifndef FPC}@{$endif}clock_gettime = nil) or 
+                  (clock_gettime(clock_monotonic,@time2) <> 0) then begin
   gettimeofday(@time1,ptimezone(nil));
   result:= time1.tv_sec * 1000000 + time1.tv_usec;
  end
@@ -553,7 +564,7 @@ end;
 function sys_threadcreate(var info: threadinfoty): syserrorty;
 var
 {$ifndef FPC}
- attr: tthreadattr;
+ attr: pthread_attr_t;
 {$else}
  id1: threadty;
 {$endif}
@@ -632,9 +643,8 @@ begin
  source:= mselibc.open(pchar(str1),o_rdonly);
  if source <> -1 then begin
   if fstat64(source,@stat) = 0 then begin
-   dest:= mselibc.open(pchar(str2),
-   o_rdwr or o_creat or o_trunc,
-   {$ifdef FPC}[{$endif}s_irusr or s_iwusr{$ifdef FPC}]{$endif});
+   dest:= mselibc.open(pchar(str2),o_rdwr or o_creat or o_trunc,
+                                                    [s_irusr or s_iwusr]);
    if dest <> -1 then begin
     getmem(po1,bufsize);
     lwo1:= 0; //compiler warning
@@ -740,8 +750,13 @@ end;
 
 function filetimetodatetime(sec: time_t; nsec: longword): tdatetime;
 begin
+{$ifdef FPC}
  result:= sec / (double(24.0)*60.0*60.0) + 
           nsec / (double(24.0)*60.0*60.0*1e9) - unidatetimeoffset;
+{$else}
+ result:= sec / (24.0*60.0*60.0) + 
+          nsec / (24.0*60.0*60.0*1e9) - unidatetimeoffset;
+{$endif}
 end;
 
 function sys_getcurrentdir: msestring;
@@ -815,7 +830,11 @@ begin
  checkdirstreamdata(stream);
  str1:= stream.dirinfo.dirname;
  with stream,dirinfo,dirstreamlinuxty(platformdata) do begin
+{$ifdef FPC}
   d.dir:= pdir(opendir(pchar(str1)));
+{$else}
+  pointer(d.dir):= pdir(opendir(pchar(str1)));
+{$endif}
   if d.dir = nil then begin
    result:= syelasterror;
   end
@@ -863,7 +882,7 @@ begin
  with stream,dirinfo,dirstreamlinuxty(platformdata) do begin
   if not ((include <> []) and (fa_all in exclude)) then begin
    while true do begin
-    if (readdir64_r(d.dir,@dirent,@po1) = 0) and
+    if (readdir64_r(pdir(d.dir),@dirent,@po1) = 0) and
           (po1 <> nil) then begin
      with info do begin
       str1:= dirent.d_name;
