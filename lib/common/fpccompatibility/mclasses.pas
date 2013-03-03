@@ -8786,8 +8786,8 @@ begin
 {$else}
   InitializeCriticalsection(ResolveSection);
 {$endif}
-  InitHandlerList:=Nil;
-  FindGlobalComponentList:=nil;
+//  InitHandlerList:=Nil;
+//  FindGlobalComponentList:=nil;
   IntConstList := TThreadList.Create;
 //  if classlist = nil then begin
    ClassList := TThreadList.Create;

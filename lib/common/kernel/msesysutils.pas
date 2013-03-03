@@ -294,14 +294,24 @@ end;
 
 procedure debugout(const sender: tcomponent; const atext: ansistring);
 begin
- debugwriteln(hextostr(ptruint(sender),8)+' '+
+ if sender = nil then begin
+  debugwriteln('NIL '+atext);
+ end
+ else begin
+  debugwriteln(hextostr(ptruint(sender),8)+' '+
                       sender.name+':'+sender.classname+' '+atext);
+ end;
 end;
 
 procedure debugout(const sender: tobject; const atext: ansistring);
 begin
- debugwriteln(hextostr(ptruint(sender),8)+' '+
+ if sender = nil then begin
+  debugwriteln('NIL '+atext);
+ end
+ else begin
+  debugwriteln(hextostr(ptruint(sender),8)+' '+
                       sender.classname+' '+atext);
+ end;
 end;
 
 procedure debugoutstart(out ts: longword;

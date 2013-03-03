@@ -894,7 +894,7 @@ begin
  result:= finfo.captiontext;
 end;
 
-procedure tcustomaction.setcaption(const Value: msestring);
+procedure tcustomaction.setcaption(const Value: captionty);
 begin
  finfo.captiontext:= value;
  changed;
