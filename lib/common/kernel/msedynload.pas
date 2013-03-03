@@ -58,6 +58,9 @@ function getprocaddresses(const lib: tlibhandle; const anames: array of string;
 function getprocaddresses(const libinfo: dynlibinfoty;
                        const procedures: array of funcinfoty;
                        const noexception: boolean = false): boolean; overload;
+function getprocaddresses(const libnames: array of msestring;
+                       const procedures: array of funcinfoty;
+                       const noexception: boolean = false):  tlibhandle; overload;
 function getprocaddresses(const libinfo: dynlibinfoty;
                const anames: array of string;
                const adest: array of ppointer;
@@ -141,6 +144,16 @@ begin
  with libinfo do begin
   result:= getprocaddresses(libhandle,procedures,noexception,libname);
  end;
+end;
+
+function getprocaddresses(const libnames: array of msestring;
+                       const procedures: array of funcinfoty;
+                       const noexception: boolean = false): tlibhandle;
+var
+ str1: msestring;
+begin
+ result:= loadlib(libnames,str1);
+ getprocaddresses(result,procedures,noexception,str1);
 end;
 
 function getprocaddresses(const libinfo: dynlibinfoty;

@@ -58,6 +58,9 @@ var
  { $define with_saveyourself}
 {$endif}
 type
+{$ifndef FPC}
+ txevent = xevent;
+{$endif}
 
  x11internalwindowoptionsdty = record
   depth: cint;
@@ -66,7 +69,7 @@ type
  end;
  {$if sizeof(x11internalwindowoptionsdty) > sizeof(internalwindowoptionspty)} 
   {$error 'buffer overflow'}
- {$endif} 
+ {$ifend} 
  x11internalwindowoptionsty =  record
   case integer of
    0: (d: x11internalwindowoptionsdty;);
@@ -75,7 +78,7 @@ type
   
  {$if sizeof(x11internalwindowoptionsdty) > sizeof(internalwindowoptionspty)}
   {$error 'buffer overflow'}
- {$endif}
+ {$ifend}
 
  syseventty = type txevent;
 const
@@ -337,7 +340,7 @@ function mserootwindow(id: winidty = 0): winidty;
 function msedefaultscreen: pscreen;
 function msedefaultscreenno: integer;
 
-{$PACKRECORDS C}
+{$ifdef FPC}{$PACKRECORDS C}{$endif}//todo: check kylix recort packing
 
 type
  _XIM = record end;

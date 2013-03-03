@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2011 by Martin Schreiber
+{ MSEgui Copyright (c) 2011-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -11,7 +11,7 @@ unit msefontconfig;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- msestrings,msectypes;
+ msestrings,msectypes,msetypes;
  
 const
  {$ifdef mswindows}
@@ -268,49 +268,49 @@ end;
 procedure initializefontconfig(const sonames: array of filenamety);
 const
  funcs: array[0..42] of funcinfoty = (
-  (n: 'FcPatternDestroy'; d: @FcPatternDestroy),            //0
-  (n: 'FcFontSetDestroy'; d: @FcFontSetDestroy),            //1
-  (n: 'FcObjectSetCreate'; d: @FcObjectSetCreate),          //2
-  (n: 'FcObjectSetAdd'; d: @FcObjectSetAdd),                //3
-  (n: 'FcObjectSetDestroy'; d: @FcObjectSetDestroy),        //4
-  (n: 'FcFontList'; d: @FcFontList),                        //5
-  (n: 'FcCharSetCreate'; d: @FcCharSetCreate),              //6
-  (n: 'FcCharSetDestroy'; d: @FcCharSetDestroy),            //7
-  (n: 'FcCharSetAddChar'; d: @FcCharSetAddChar),            //8
-  (n: 'FcPatternAdd'; d: @FcPatternAdd),                    //9
-  (n: 'FcPatternCreate'; d: @FcPatternCreate),              //10
-  (n: 'FcConfigSubstitute'; d: @FcConfigSubstitute),        //11
-  (n: 'FcDefaultSubstitute'; d: @FcDefaultSubstitute),      //12
-  (n: 'FcFontSort'; d: @FcFontSort),                        //13
-  (n: 'FcCharSetHasChar'; d: @FcCharSetHasChar),            //14
-  (n: 'FcPatternDuplicate'; d: @FcPatternDuplicate),        //15
-  (n: 'FcPatternGetCharSet'; d: @FcPatternGetCharSet),      //16
-  (n: 'FcFontRenderPrepare'; d: @FcFontRenderPrepare),      //17
-  (n: 'FcMatrixRotate'; d: @FcMatrixRotate),                //18
-  (n: 'FcMatrixScale'; d: @FcMatrixScale),                  //19
-  (n: 'FcPatternAddInteger'; d: @FcPatternAddInteger),      //20
-  (n: 'FcPatternAddDouble'; d: @FcPatternAddDouble),        //21
-  (n: 'FcPatternAddString'; d: @FcPatternAddString),        //22
-  (n: 'FcPatternAddMatrix'; d: @FcPatternAddMatrix),        //23
-  (n: 'FcPatternAddCharSet'; d: @FcPatternAddCharSet),      //24
-  (n: 'FcPatternAddBool'; d: @FcPatternAddBool),            //25
-  (n: 'FcPatternAddLangSet'; d: @FcPatternAddLangSet),      //26
-  (n: 'FcPatternGetString'; d: @FcPatternGetString),        //27
-  (n: 'FcInit'; d: @FcInit),                                //28
-  (n: 'FcFini'; d: @FcFini),                                //29
-  (n: 'FcNameParse'; d: @FcNameParse),                      //30
-  (n: 'FcFontMatch'; d: @FcFontMatch),                      //31
-  (n: 'FcPatternGetInteger'; d: @FcPatternGetInteger),      //32
-  (n: 'FcPatternGetDouble'; d: @FcPatternGetDouble),        //33
-  (n: 'FcConfigFilename'; d: @FcConfigFilename),            //34
-  (n: 'FcConfigCreate'; d: @FcConfigCreate),                //35
-  (n: 'FcConfigParseAndLoad'; d: @FcConfigParseAndLoad),    //36
-  (n: 'FcStrListNext'; d: @FcStrListNext),                  //37
-  (n: 'FcStrListDone'; d: @FcStrListDone),                  //38
-  (n: 'FcConfigGetConfigFiles'; d: @FcConfigGetConfigFiles),//39
-  (n: 'FcConfigGetFontDirs'; d: @FcConfigGetFontDirs),      //40
-  (n: 'FcConfigBuildFonts'; d: @FcConfigBuildFonts),        //41
-  (n: 'FcConfigGetCurrent'; d: @FcConfigGetCurrent)         //42
+  (n: 'FcPatternDestroy'; d: {$ifndef FPC}@{$endif}@FcPatternDestroy),            //0
+  (n: 'FcFontSetDestroy'; d: {$ifndef FPC}@{$endif}@FcFontSetDestroy),            //1
+  (n: 'FcObjectSetCreate'; d: {$ifndef FPC}@{$endif}@FcObjectSetCreate),          //2
+  (n: 'FcObjectSetAdd'; d: {$ifndef FPC}@{$endif}@FcObjectSetAdd),                //3
+  (n: 'FcObjectSetDestroy'; d: {$ifndef FPC}@{$endif}@FcObjectSetDestroy),        //4
+  (n: 'FcFontList'; d: {$ifndef FPC}@{$endif}@FcFontList),                        //5
+  (n: 'FcCharSetCreate'; d: {$ifndef FPC}@{$endif}@FcCharSetCreate),              //6
+  (n: 'FcCharSetDestroy'; d: {$ifndef FPC}@{$endif}@FcCharSetDestroy),            //7
+  (n: 'FcCharSetAddChar'; d: {$ifndef FPC}@{$endif}@FcCharSetAddChar),            //8
+  (n: 'FcPatternAdd'; d: {$ifndef FPC}@{$endif}@FcPatternAdd),                    //9
+  (n: 'FcPatternCreate'; d: {$ifndef FPC}@{$endif}@FcPatternCreate),              //10
+  (n: 'FcConfigSubstitute'; d: {$ifndef FPC}@{$endif}@FcConfigSubstitute),        //11
+  (n: 'FcDefaultSubstitute'; d: {$ifndef FPC}@{$endif}@FcDefaultSubstitute),      //12
+  (n: 'FcFontSort'; d: {$ifndef FPC}@{$endif}@FcFontSort),                        //13
+  (n: 'FcCharSetHasChar'; d: {$ifndef FPC}@{$endif}@FcCharSetHasChar),            //14
+  (n: 'FcPatternDuplicate'; d: {$ifndef FPC}@{$endif}@FcPatternDuplicate),        //15
+  (n: 'FcPatternGetCharSet'; d: {$ifndef FPC}@{$endif}@FcPatternGetCharSet),      //16
+  (n: 'FcFontRenderPrepare'; d: {$ifndef FPC}@{$endif}@FcFontRenderPrepare),      //17
+  (n: 'FcMatrixRotate'; d: {$ifndef FPC}@{$endif}@FcMatrixRotate),                //18
+  (n: 'FcMatrixScale'; d: {$ifndef FPC}@{$endif}@FcMatrixScale),                  //19
+  (n: 'FcPatternAddInteger'; d: {$ifndef FPC}@{$endif}@FcPatternAddInteger),      //20
+  (n: 'FcPatternAddDouble'; d: {$ifndef FPC}@{$endif}@FcPatternAddDouble),        //21
+  (n: 'FcPatternAddString'; d: {$ifndef FPC}@{$endif}@FcPatternAddString),        //22
+  (n: 'FcPatternAddMatrix'; d: {$ifndef FPC}@{$endif}@FcPatternAddMatrix),        //23
+  (n: 'FcPatternAddCharSet'; d: {$ifndef FPC}@{$endif}@FcPatternAddCharSet),      //24
+  (n: 'FcPatternAddBool'; d: {$ifndef FPC}@{$endif}@FcPatternAddBool),            //25
+  (n: 'FcPatternAddLangSet'; d: {$ifndef FPC}@{$endif}@FcPatternAddLangSet),      //26
+  (n: 'FcPatternGetString'; d: {$ifndef FPC}@{$endif}@FcPatternGetString),        //27
+  (n: 'FcInit'; d: {$ifndef FPC}@{$endif}@FcInit),                                //28
+  (n: 'FcFini'; d: {$ifndef FPC}@{$endif}@FcFini),                                //29
+  (n: 'FcNameParse'; d: {$ifndef FPC}@{$endif}@FcNameParse),                      //30
+  (n: 'FcFontMatch'; d: {$ifndef FPC}@{$endif}@FcFontMatch),                      //31
+  (n: 'FcPatternGetInteger'; d: {$ifndef FPC}@{$endif}@FcPatternGetInteger),      //32
+  (n: 'FcPatternGetDouble'; d: {$ifndef FPC}@{$endif}@FcPatternGetDouble),        //33
+  (n: 'FcConfigFilename'; d: {$ifndef FPC}@{$endif}@FcConfigFilename),            //34
+  (n: 'FcConfigCreate'; d: {$ifndef FPC}@{$endif}@FcConfigCreate),                //35
+  (n: 'FcConfigParseAndLoad'; d: {$ifndef FPC}@{$endif}@FcConfigParseAndLoad),    //36
+  (n: 'FcStrListNext'; d: {$ifndef FPC}@{$endif}@FcStrListNext),                  //37
+  (n: 'FcStrListDone'; d: {$ifndef FPC}@{$endif}@FcStrListDone),                  //38
+  (n: 'FcConfigGetConfigFiles'; d: {$ifndef FPC}@{$endif}@FcConfigGetConfigFiles),//39
+  (n: 'FcConfigGetFontDirs'; d: {$ifndef FPC}@{$endif}@FcConfigGetFontDirs),      //40
+  (n: 'FcConfigBuildFonts'; d: {$ifndef FPC}@{$endif}@FcConfigBuildFonts),        //41
+  (n: 'FcConfigGetCurrent'; d: {$ifndef FPC}@{$endif}@FcConfigGetCurrent)         //42
  );
  errormessage = 'Can not load FontConfig library. ';
 begin
