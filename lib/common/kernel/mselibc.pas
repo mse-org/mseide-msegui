@@ -5,8 +5,13 @@ uses
  msectypes{$ifndef FPC},msetypes{$endif};
 
 const
+{$ifdef FPC}
  clib = 'c';
  threadslib = 'pthread';
+{$else}
+ clib = 'libc.so.6';
+ threadslib = 'libpthread.so.0';
+{$endif}
 
 type
  
@@ -1885,8 +1890,8 @@ const
   TCSADRAIN = 1;
   TCSAFLUSH = 2;
 
-function SIGRTMIN: cint; cdecl; external clib name '__libc_current_sigrtmin';
-function SIGRTMAX: cint; cdecl; external clib name '__libc_current_sigrtmax';
+function SIGRTMIN(): cint; cdecl; external clib name '__libc_current_sigrtmin';
+function SIGRTMAX(): cint; cdecl; external clib name '__libc_current_sigrtmax';
 function ioctl(__fd: cint; __request:dword; args: array of const): cint;
                                cdecl;external clib name 'ioctl'; overload;
 function ioctl(__fd: cint; __request: cuint; args: pointer): cint;
