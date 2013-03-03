@@ -4,7 +4,10 @@ interface
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 
 {$IFDEF FPC}
-{$PACKRECORDS C}
+ {$PACKRECORDS C}
+{$else}
+ {$ALIGN 4}
+ {$MINENUMSIZE 4}
 {$ENDIF}
 
 

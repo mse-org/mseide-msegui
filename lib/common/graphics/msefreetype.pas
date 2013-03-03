@@ -25,7 +25,12 @@ uses
  
 const
 
-{$packrecords c}
+{$ifdef FPC}
+ {$packrecords c}
+{$else}
+ {$ALIGN 4}
+ {$MINENUMSIZE 4}
+{$endif}
 
 {$ifdef mswindows}
  freetypelib: array[0..1] of filenamety = ('libfreetype-6.dll','freetype6.dll');  

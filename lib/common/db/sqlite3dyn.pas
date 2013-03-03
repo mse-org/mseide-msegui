@@ -33,7 +33,12 @@ const
 procedure initializesqlite3(const sonames: array of filenamety); //[] = default
 procedure releasesqlite3;
 
-{$ifdef FPC}{$PACKRECORDS C}{$endif} //todo: check delphi recordpacking
+{$ifdef FPC}
+ {$PACKRECORDS C}
+{$else}
+ {$ALIGN 4}
+ {$MINENUMSIZE 4}
+{$endif}
 const
 
 {$ifdef mse_sqlite3static}
