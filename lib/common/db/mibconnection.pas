@@ -14,14 +14,17 @@
 
 unit mibconnection;
 {$ifdef FPC}{$mode objfpc}{$H+}{$macro on}{$endif}
+{$ifdef linux}{$define unix}{$endif}
 
 {$Define LinkDynamically}
 {$R-}
+(*
 {$IFDEF Unix}
   {$DEFINE extdecl:=cdecl}
 {$else}
   {$DEFINE extdecl:=stdcall}
 {$endif}
+*)
 interface
 
 //todo: use execute_immediate if possible
@@ -226,7 +229,7 @@ implementation
 
 uses
  strutils,msesysintf1,msebits,msefloattostr,msedatabase,msesqlresult
- {$ifndef FPC},classes_del,windows{$endif};
+ {$ifndef FPC},classes_del{$ifdef mswindows},windows{$endif}{$endif};
 
 function clientversion: string;
 var

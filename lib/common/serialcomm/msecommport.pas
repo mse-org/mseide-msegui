@@ -766,7 +766,7 @@ procedure tcustomrs232.reset;
 begin
  if opened then begin
  {$ifdef UNIX}
-  ioctl(fhandle,TCFLSH,{$ifdef FPC}[{$endif}2{$ifdef FPC}]{$endif}); //input und output flushen
+  ioctl(fhandle,TCFLSH,[2]); //input und output flushen
  {$else}
   purgecomm(fhandle,PURGE_TXABORT+PURGE_RXABORT+PURGE_TXCLEAR+PURGE_RXCLEAR);
  {$endif}
@@ -777,7 +777,7 @@ procedure tcustomrs232.resetinput;
 begin
  if opened then begin
  {$ifdef UNIX}
-  ioctl(fhandle,TCFLSH,{$ifdef FPC}[{$endif}0{$ifdef FPC}]{$endif}); //input flushen
+  ioctl(fhandle,TCFLSH,[0]); //input flushen
  {$else}
   purgecomm(fhandle,PURGE_RXABORT+PURGE_RXCLEAR);
  {$endif}
@@ -788,7 +788,7 @@ procedure tcustomrs232.resetoutput;
 begin
  if opened then begin
  {$ifdef UNIX}
-  ioctl(fhandle,TCFLSH,{$ifdef FPC}[{$endif}1{$ifdef FPC}]{$endif}); //output flushen
+  ioctl(fhandle,TCFLSH,[1]); //output flushen
  {$else}
   purgecomm(fhandle,PURGE_TXABORT+PURGE_TXCLEAR);
  {$endif}
@@ -1032,7 +1032,7 @@ var
  {$endif}
 begin
  {$ifdef UNIX}
- ioctl(fhandle,tcsbrk,{$ifdef FPC}[{$endif}-1{$ifdef FPC}]{$endif});
+ ioctl(fhandle,tcsbrk,[-1]);
  result:= true;
  {$else}
  getcommmask(fhandle,ca1);

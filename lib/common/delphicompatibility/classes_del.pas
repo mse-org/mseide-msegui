@@ -34,6 +34,17 @@ type
  tlibhandle = thandle;
 
 {$ifndef mswindows}
+   TSystemTime = record
+    case integer of
+     0:(
+      Year, Month, Day: word;
+      Hour, Minute, Second, MilliSecond: word;
+     );
+     1:(
+      wYear, wMonth, wDay: word;
+      wHour, wMinute, wSecond, wMilliSeconds: word;
+     )
+   end ;
   TRTLCriticalSection = pthread_mutex_t;
   pRTLCriticalSection = trtlcriticalsection;
 function InitializeCriticalSection(
@@ -46,6 +57,9 @@ function TryEnterCriticalSection(
          var lpCriticalSection: TRTLCriticalSection): Boolean;
 function DeleteCriticalSection(
          var lpCriticalSection: TRTLCriticalSection): Integer; cdecl;
+procedure DateTimeToSystemTime(DateTime: TDateTime; out SystemTime: TSystemTime);
+function SystemTimeToDateTime(const SystemTime: TSystemTime): TDateTime;
+
 type
 {$endif}
 {
@@ -251,6 +265,8 @@ function BEtoN(const AValue: Int64): Int64;{$ifdef SYSTEMINLINE}inline;{$endif}
                                overload;
 function BEtoN(const AValue: QWord): QWord;{$ifdef SYSTEMINLINE}inline;{$endif}
                                overload;
+function BEtoN8(const AValue: Int64): Int64;{$ifdef SYSTEMINLINE}inline;{$endif}
+                               overload;
 
 function SwapEndian(const AValue: SmallInt): SmallInt; overload;
 function SwapEndian(const AValue: Word): Word; overload;
@@ -322,6 +338,80 @@ begin
 end;
 
 {$ifndef mswindows}
+
+Function TryEncodeDate(Year,Month,Day : Word; Out Date : TDateTime) : Boolean;
+
+var
+  c, ya: cardinal;
+begin
+  Result:=(Year>0) and (Year<10000) and
+          (Month in [1..12]) and
+          (Day>0) and (Day<=MonthDays[IsleapYear(Year),Month]);
+ If Result then
+   begin
+     if month > 2 then
+      Dec(Month,3)
+     else
+      begin
+        Inc(Month,9);
+        Dec(Year);
+      end;
+     c:= Year DIV 100;
+     ya:= Year - 100*c;
+     Date := (146097*c) SHR 2 + (1461*ya) SHR 2 + (153*cardinal(Month)+2) DIV 5 + cardinal(Day);
+     // Note that this line can't be part of the line above, since TDateTime is
+     // signed and c and ya are not
+     Date := Date - 693900;
+   end
+end;
+
+function TryEncodeTime(Hour, Min, Sec, MSec:word; Out Time : TDateTime) : boolean;
+
+begin
+  Result:=(Hour<24) and (Min<60) and (Sec<60) and (MSec<1000);
+  If Result then begin
+    Time:= (cardinal(Hour)*3600000+cardinal(Min)*60000+cardinal(Sec)*1000+MSec)/
+                                     MSecsPerDay;
+  end; 
+end;
+
+Function DoEncodeDate(Year, Month, Day: Word): longint;
+
+Var
+  D : TDateTime;
+
+begin
+  If TryEncodeDate(Year,Month,Day,D) then
+    Result:=Trunc(D)
+  else
+    Result:=0;
+end;
+
+function DoEncodeTime(Hour, Minute, Second, MilliSecond: word): TDateTime;
+
+begin
+  If not TryEncodeTime(Hour,Minute,Second,MilliSecond,Result) then
+    Result:=0;
+end;
+
+function ComposeDateTime(Date,Time : TDateTime) : TDateTime;
+
+begin
+  if Date < 0 then Result := trunc(Date) - Abs(frac(Time))
+  else Result := trunc(Date) + Abs(frac(Time));
+end;
+
+procedure DateTimeToSystemTime(DateTime: TDateTime; out SystemTime: TSystemTime);
+begin
+  DecodeDate(DateTime, SystemTime.Year, SystemTime.Month, SystemTime.Day);
+  DecodeTime(DateTime, SystemTime.Hour, SystemTime.Minute, SystemTime.Second, SystemTime.MilliSecond);
+end ;
+
+function SystemTimeToDateTime(const SystemTime: TSystemTime): TDateTime;
+begin
+  result := ComposeDateTime(DoEncodeDate(SystemTime.Year, SystemTime.Month, SystemTime.Day),
+                            DoEncodeTime(SystemTime.Hour, SystemTime.Minute, SystemTime.Second, SystemTime.MilliSecond));
+end ;
 
 function InitializeCriticalSection(
          var lpCriticalSection: TRTLCriticalSection): Integer;
@@ -611,6 +701,15 @@ function BEtoN(const AValue: DWord): DWord;{$ifdef SYSTEMINLINE}inline;{$endif}
 
 
 function BEtoN(const AValue: Int64): Int64;{$ifdef SYSTEMINLINE}inline;{$endif}
+  begin
+    {$IFDEF ENDIAN_BIG}
+      Result := AValue;
+    {$ELSE}
+      Result := SwapEndiani64(AValue);
+    {$ENDIF}
+  end;
+
+function BEtoN8(const AValue: Int64): Int64;{$ifdef SYSTEMINLINE}inline;{$endif}
   begin
     {$IFDEF ENDIAN_BIG}
       Result := AValue;

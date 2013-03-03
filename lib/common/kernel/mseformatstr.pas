@@ -3198,11 +3198,14 @@ begin
   result:= emptyrealstring;
  end
  else begin
+  result:= doubletostring(val);
+(*
  {$ifdef withformatsettings}
   result:= floattostr(val,defaultformatsettingsdot);
  {$else}
   result:= replacechar(floattostr(val),decimalseparator,'.');
  {$endif}
+ *)
  end;
 end;
 
