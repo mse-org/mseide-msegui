@@ -9,14 +9,39 @@
 }
 unit mseopenglwidget;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+{$ifdef linux} {$define unix}{$endif}
 interface
 uses
  classes,mclasses,msewindowwidget,msegl,
- {$ifdef unix}mseglx,x,xlib,{$else}windows,{$endif}
+ {$ifdef unix}mseglx,{$ifdef FPC}x,{$endif}xlib,{$else}windows,{$endif}
  mseguiintf,msetypes,mseguiglob,mseclasses,msemenus,mseevent,msegui,msegraphics,
  msegraphutils;
  
 {$ifdef unix}
+{$ifdef FPC}
+ {$macro on}
+ {$define xchar2b:=txchar2b}
+ {$define xcharstruct:=txcharstruct}
+ {$define xfontstruct:=txfontstruct}
+ {$define xfontprop:=txfontprop}
+ {$define xpoint:=txpoint}
+ {$define xgcvalues:=txgcvalues}
+ {$define region:=tregion}
+ {$define ximage:=tximage}
+ {$define xwindowattributes:=txwindowattributes}
+ {$define xclientmessageevent:=txclientmessageevent}
+ {$define xtype:=_type}
+ {$define xrectangle:=txrectangle}
+ {$define keysym:=tkeysym}
+ {$define xsetwindowattributes:=txsetwindowattributes}
+ {$define xwindowchanges:=txwindowchanges}
+ {$define xevent:=txevent}
+ {$define xfunction:=_function}
+ {$define xwindow:=window}
+ {$define xlookupkeysym_:=xlookupkeysymval}
+ {$define c_class:= _class}
+ {$define xtextproperty:= txtextproperty}
+{$endif}
 const
   defaultvisualattributes: array[0..8] of integer = 
   (GLX_RGBA,GLX_RED_SIZE,8,GLX_GREEN_SIZE,8,GLX_BLUE_SIZE,8,
@@ -152,7 +177,7 @@ type
   
 implementation
 uses
- sysutils{$ifdef unix},xutil{$endif},mseglextglob;
+ sysutils{$ifdef unix}{$ifdef FPC},xutil{$endif}{$endif},mseglextglob;
  
 { tcustomopenglwidget }
 
@@ -239,11 +264,11 @@ var
 var
  int1,int2: integer;
  visinfo: pxvisualinfo;
- attributes: txsetwindowattributes;
+ attributes: xsetwindowattributes;
  
 begin
  fdpy:= msedisplay;
- fscreen:= defaultscreen(fdpy);
+ fscreen:= xdefaultscreen(fdpy);
  initializeopengl([]);
  if not glxqueryextension(fdpy,int1,int2) then begin
   raise exception.create('GLX extension not supported.');

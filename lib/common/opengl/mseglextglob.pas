@@ -285,7 +285,7 @@ begin
   result:= result + mseglparseextensions(wglGetExtensionsStringARB(device));
  end;
 {$else}
- if glxqueryextensionsstring <> nil then begin
+ if {$ifndef FPC}@{$endif}glxqueryextensionsstring <> nil then begin
   result:= mseglparseextensions(
        glxqueryextensionsstring(msedisplay,msedefaultscreenno));
  end;

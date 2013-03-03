@@ -333,6 +333,7 @@ type
  atomarty = array of atom;
  atomaty = array[0..0] of atom;
  patomaty = ^atomaty;
+ ulongarty = array of culong;
 
 function msedisplay: pdisplay;
 function msevisual: pvisual;
@@ -528,6 +529,7 @@ type
  {$define ximage:=tximage}
  {$define xwindowattributes:=txwindowattributes}
  {$define xclientmessageevent:=txclientmessageevent}
+ {$define xselectionevent:= txselectionevent}
  {$define xselectionclearevent:=txselectionclearevent}
  {$define xselectionrequestevent:=txselectionrequestevent}
  {$define xtype:=_type}
@@ -544,6 +546,7 @@ type
  {$define xcolor:= txcolor}
  {$define xpointer:= txpointer}
 {$else}
+   tboolresult = longbool;
    PXIM = ^TXIM;
    TXIM = record
      end;
@@ -1456,7 +1459,7 @@ begin
       @itemcount,@bytesafterreturn,@po1) = success then begin
 {$ifdef FPC} {$checkpointer off} {$endif}
   if (format = 32) and (itemcount = 2) then begin
-   {$ifdef FPC}longword{$else}byte{$endif}(result):= po1^.state + longword(wms_withdrawn);
+   longword(result):= po1^.state + longword(wms_withdrawn);
   end;
 {$ifdef FPC} {$checkpointer default} {$endif}
   xfree(po1);
@@ -4507,7 +4510,7 @@ begin
   end;
  end;
  if high(fformats) > 2 then begin
-  setlongproperty(fsource,xdndatoms[xdnd_typelist],fformats,atomatom);
+  setlongproperty(fsource,xdndatoms[xdnd_typelist],ulongarty(fformats),atomatom);
  end;
  gdi_lock;
  xsetselectionowner(appdisp,xdndatoms[xdnd_selection],fsource,ftimestamp);
@@ -4623,7 +4626,8 @@ const
 procedure tsysdndwriter.startcheckrepeater;
 begin
  if frepeater = nil then begin
-  frepeater:= tsimpletimer.create(checkrepeatinterval,@docheckrepeat,true,[]);
+  frepeater:= tsimpletimer.create(checkrepeatinterval,
+                 {$ifdef FPC}@{$endif}docheckrepeat,true,[]);
  end
  else begin
   frepeater.interval:= checkrepeatinterval;
@@ -4865,7 +4869,7 @@ end;
 
 procedure handleselectionrequest(var aevent: xselectionrequestevent);
 var
- event1: txselectionevent;
+ event1: xselectionevent;
  str1: string;
  bo1: boolean;
 begin
@@ -5254,7 +5258,8 @@ eventrestart:
    with xev.xconfigure do begin
     w:= xwindow;
     xsync(appdisp,0);
-    if xchecktypedwindowevent(appdisp,w,destroynotify,@xev2) then begin
+    if tboolresult(xchecktypedwindowevent(
+                             appdisp,w,destroynotify,@xev2)) then begin
      result:= twindowevent.create(ek_destroy,xwindow);
     end
     else begin
@@ -5274,7 +5279,8 @@ eventrestart:
      debugwriteln('                  '+inttostr(x)+' '+inttostr(y)+
                  ' '+inttostr(width)+' '+inttostr(height));
     {$endif}
-     while xchecktypedwindowevent(appdisp,w,configurenotify,@xev) do begin
+     while tboolresult(xchecktypedwindowevent(
+                        appdisp,w,configurenotify,@xev)) do begin
     {$ifdef mse_debugconfigure}
       debugwriteln('                  '+inttostr(x)+' '+inttostr(y)+
                  ' '+inttostr(width)+' '+inttostr(height));
