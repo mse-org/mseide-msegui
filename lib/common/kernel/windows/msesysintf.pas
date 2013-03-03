@@ -24,7 +24,7 @@ var
 
 implementation
 uses
- sysutils,msebits,msefileutils,{msedatalist,}dateutils,
+ sysutils,msebits,msefileutils,{msedatalist,}dateutils,msectypes,
  msesystimer,msearrayutils,msesysintf1,msedynload;
 
 //todo: correct unicode implementation, long filepaths, stubs for win95
@@ -486,6 +486,22 @@ end;
 function sys_dup(const source: integer; out dest: integer): syserrorty;
 begin
  result:= sye_notimplemented;
+end;
+
+const
+ invalid_set_file_pointer = dword(-1);
+
+function sys_truncatefile(const handle: integer; const size: int64): syserrorty;
+var
+ res: dword;
+ lo1: clong;
+begin
+ result:= sye_ok;
+ lo1:= size shr 32;
+ res:= setfilepointer(handle,size,@lo1,file_begin);
+ if (res = invalid_set_file_pointer) and (getlasterror <> no_error) then begin
+  result:= syelasterror;
+ end;
 end;
 
 function sys_poll(const handle: integer; const kind: pollkindsty;
