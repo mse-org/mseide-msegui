@@ -88,7 +88,12 @@ type
   PUChar               = ^UChar;
   PVoid                = ^Pointer;
 
-{$ifdef FPC}{$PACKRECORDS C}{$endif} //todo: check delphi record packing
+{$ifdef FPC}
+ {$PACKRECORDS C}
+{$else}
+ {$ALIGN 4}
+ {$MINENUMSIZE 4}
+{$endif}
 
   const
      ISC_TRUE = 1;

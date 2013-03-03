@@ -21,38 +21,6 @@ function sys_threaddestroy(var info: threadinfoty): syserrorty;
 function sys_threadschedyield: syserrorty;
 function sys_getcurrentthread: threadty;
 function sys_issamethread(const a,b: threadty): boolean;
-(*
-function sys_mutexcreate(out mutex: mutexty): syserrorty;
-function sys_mutexdestroy(var mutex: mutexty): syserrorty;
-function sys_mutexlock(var mutex: mutexty): syserrorty;
-function sys_mutextrylock(var mutex: mutexty): syserrorty;
-  //sye_ok if calling thread has lock, sye_busy if already locked by other thread
-function sys_mutexunlock(var mutex: mutexty): syserrorty;
-
-function sys_semcreate(out sem: semty; count: integer): syserrorty;
-function sys_semdestroy(var sem: semty): syserrorty;
-//function sys_semreset(var sem: semty): syserrorty; //call from single thread!
-function sys_sempost(var sem: semty): syserrorty;
-function sys_semwait(var sem: semty;  timeoutusec: integer): syserrorty;
-          //timeoutusec <= 0 -> no timeout
-          //sye_ok -> semaphore signaled
-          //sye_timeout -> timeout
-          //sye_semaphore -> error
-function sys_semtrywait(var sem: semty): boolean;
-function sys_semcount(var sem: semty): integer;
-
-function sys_condcreate(out cond: condty): syserrorty;
-function sys_conddestroy(var cond: condty): syserrorty;
-function sys_condlock(var cond: condty): syserrorty;
-function sys_condunlock(var cond: condty): syserrorty;
-function sys_condsignal(var cond: condty): syserrorty;
-function sys_condbroadcast(var cond: condty): syserrorty;
-function sys_condwait(var cond: condty; timeoutusec: integer): syserrorty;
-          //timeoutusec = 0 -> no timeout
-          //sye_ok -> condition signaled
-          //sye_timeout -> timeout
-          //sye_cond -> error
-*)
 function sys_getapplicationpath: filenamety;
 function sys_getcommandlinearguments: stringarty;
 function sys_getenv(const aname: msestring; out avalue: msestring): boolean;
@@ -82,7 +50,7 @@ function sys_openfile(const path: filenamety; const openmode: fileopenmodety;
 function sys_closefile(const handle: integer): syserrorty;
 function sys_flushfile(const handle: integer): syserrorty;
 function sys_dup(const source: integer; out dest: integer): syserrorty;
-
+function sys_truncatefile(const handle: integer; const size: int64): syserrorty;
 
 function sys_read(fd: longint; buf: pointer; nbytes: longword): integer;
 function sys_write(fd: longint; buf: pointer; nbytes: longword): integer;

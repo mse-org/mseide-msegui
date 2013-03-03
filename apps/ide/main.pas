@@ -15,7 +15,7 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 }
 unit main;
-
+{$ifdef linux}{$define unix}{$endif}
 {$ifdef FPC}
  {$mode objfpc}{$h+}
 {$endif}

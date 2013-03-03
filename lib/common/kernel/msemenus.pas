@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -462,7 +462,7 @@ procedure freetransientmenu(var amenu: tcustommenu);
 implementation
 uses
  sysutils,msestockobjects,rtlconsts,msebits,msemenuwidgets,msedatalist,
- mseactions,msestreaming,msearrayutils;
+ mseactions,msestreaming,msearrayutils,msesysutils;
 
 procedure freetransientmenu(var amenu: tcustommenu); 
 begin

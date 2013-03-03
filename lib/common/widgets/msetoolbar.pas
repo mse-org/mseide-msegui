@@ -14,7 +14,7 @@ unit msetoolbar;
 interface
 uses
  classes,mclasses,msewidgets,msearrayprops,mseclasses,msebitmap,
- mseact,mseshapes,msemenus,
+ mseact,mseshapes,msemenus,msedragglob,
  msegraphutils,msegraphics,mseevent,
  mseglob,mseguiglob,msegui,msesimplewidgets,
  msestat,msestatfile,msedrag,msestrings;

@@ -29,7 +29,8 @@ function gui_escapepressed: boolean;
 procedure gui_resetescapepressed;
 
 
-function gui_createwindow(const rect: rectty; const options: internalwindowoptionsty;
+function gui_createwindow(const rect: rectty;
+                               var options: internalwindowoptionsty;
                                var awindow: windowty): guierrorty;
 function gui_destroywindow(var awindow: windowty): guierrorty;
                       //id can be 0

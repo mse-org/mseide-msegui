@@ -96,6 +96,9 @@ uses
  msetypes;
 {$ifdef FPC}
  {$packrecords c}
+{$else}
+ {$ALIGN 4}
+ {$MINENUMSIZE 4}
 {$endif}
 const
  PA_CHANNELS_MAX = 32;   //** Maximum number of allowed channels */

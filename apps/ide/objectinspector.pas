@@ -22,7 +22,7 @@ interface
 
 uses
  mseforms,msewidgets,msegrids,msewidgetgrid,classes,mclasses,mseclasses,
- msepropertyeditors,mseglob,mseguiglob,msearrayutils,
+ msepropertyeditors,mseglob,mseguiglob,msearrayutils,msedragglob,
  msegui,mseedit,msedataedits,mselistbrowser,msedatanodes,
  msedesignintf,typinfo,msecomponenteditors,msesimplewidgets,msegraphutils,
  msemenus,mseevent,msedesigner,msetypes,msestrings,mselist,msegraphics;

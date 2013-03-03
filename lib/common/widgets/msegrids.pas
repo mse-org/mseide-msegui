@@ -18,7 +18,7 @@ unit msegrids;
 
 interface
 uses
- classes,mclasses,sysutils,mseclasses,msegui,
+ classes,mclasses,sysutils,mseclasses,msegui,msedragglob,
  msegraphics,msetypes,msestrings,msegraphutils,msebitmap,
  msescrollbar,msearrayprops,mseglob,mseguiglob,typinfo,msearrayutils,
  msedatalist,msedrawtext,msewidgets,mseevent,mseinplaceedit,mseeditglob,
@@ -828,11 +828,15 @@ type
    property valuetrue: msestring read fvaluetrue write fvaluetrue;
    property valuefalse: msestring read fvaluefalse write fvaluefalse;
    property onsetvalue: setstringeventty read fonsetvalue write fonsetvalue;
+                                  //sender is tcustomstringcol
    property ondataentered: notifyeventty read fondataentered write fondataentered;
+                                  //sender is tcustomstringcol
    property oncopytoclipboard: updatestringeventty read foncopytoclipboard 
                   write foncopytoclipboard;
+                                  //sender is tcustomstringcol
    property onpastefromclipboard: updatestringeventty read fonpastefromclipboard 
                   write fonpastefromclipboard;       
+                                  //sender is tcustomstringcol
  end;
 
  tstringcol = class(tcustomstringcol)
@@ -16123,19 +16127,25 @@ begin
 end;
 
 procedure tcustomstringgrid.updatecopytoclipboard(var atext: msestring);
+var
+ col1: tcustomstringcol;
 begin
- with tcustomstringcol(fdatacols[ffocusedcell.col]) do begin
+ col1:= tcustomstringcol(fdatacols[ffocusedcell.col]);
+ with col1 do begin
   if canevent(tmethod(foncopytoclipboard)) then begin
-   foncopytoclipboard(self,atext);
+   foncopytoclipboard(col1,atext);
   end;
  end;
 end;
 
 procedure tcustomstringgrid.updatepastefromclipboard(var atext: msestring);
+var
+ col1: tcustomstringcol;
 begin
- with tcustomstringcol(fdatacols[ffocusedcell.col]) do begin
+ col1:= tcustomstringcol(fdatacols[ffocusedcell.col]);
+ with col1 do begin
   if canevent(tmethod(fonpastefromclipboard)) then begin
-   fonpastefromclipboard(self,atext);
+   fonpastefromclipboard(col1,atext);
   end;
  end;
 end;

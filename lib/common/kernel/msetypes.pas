@@ -42,6 +42,9 @@ type
 {$endif}
 
 {$ifndef FPC} //delphi
+ {$ifndef mswindows}
+  uint64 = type int64; //kylix
+ {$endif}
   DWord = Longword;
   SizeInt = Longint;
   psizeint = ^sizeint;

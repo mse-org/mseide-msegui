@@ -291,6 +291,7 @@ type
 *)
  tnullinterfacedpersistent = class(tvirtualpersistent,iunknown)
   protected
+  {$ifdef FPC}
    function _addref: integer; 
                       {$ifdef mswindows}stdcall{$else} cdecl{$endif};
    function _release: integer;
@@ -298,6 +299,7 @@ type
    function QueryInterface({$ifdef fpc_has_constref}constref{$else}const{$endif}
                  IID: TGUID; out Obj): HResult; 
                       {$ifdef mswindows}stdcall{$else} cdecl{$endif};
+  {$endif}
  end;
 
  toptionalpersistent = class(tnullinterfacedpersistent)
@@ -3772,7 +3774,7 @@ begin
 end;
 *)
 { tnullinterfacedpersistent }
-
+{$ifdef FPC}
 function tnullinterfacedpersistent._addref: integer;
                    {$ifdef mswindows}stdcall{$else} cdecl{$endif};
 begin
@@ -3797,6 +3799,7 @@ begin
   result:= integer(e_nointerface);
  end;
 end;
+{$endif}
 
 { toptionalpersistent }
 

@@ -16,7 +16,7 @@ unit mselistbrowser;
 
 interface
 uses
- mseglob,classes,mclasses,msegrids,msedatanodes,msedatalist,
+ mseglob,classes,mclasses,msegrids,msedatanodes,msedatalist,msedragglob,
  msegraphics,msegraphutils,msetypes,msestrings,msemenus,
  msebitmap,mseclasses,mseguiglob,msedrawtext,msefileutils,msedataedits,
  mseeditglob,msewidgetgrid,msewidgets,mseedit,mseevent,msegui,msedropdownlist,

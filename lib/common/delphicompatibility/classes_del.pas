@@ -17,8 +17,9 @@ unit classes_del;
 
 interface
 uses
- msetypes,sysutils,msesystypes,windows,msectypes;
-
+ msetypes,sysutils,msesystypes,
+ {$ifdef mswindows}windows,{$else}mselibc,{$endif}msectypes;
+ 
 const
   MaxListSize = Maxint div 16;
   GUID_NULL: TGuid = '{00000000-0000-0000-0000-000000000000}';
@@ -32,6 +33,35 @@ type
  pculongaty = ^culongaty;
  tlibhandle = thandle;
 
+{$ifndef mswindows}
+   TSystemTime = record
+    case integer of
+     0:(
+      Year, Month, Day: word;
+      Hour, Minute, Second, MilliSecond: word;
+     );
+     1:(
+      wYear, wMonth, wDay: word;
+      wHour, wMinute, wSecond, wMilliSeconds: word;
+     )
+   end ;
+  TRTLCriticalSection = pthread_mutex_t;
+  pRTLCriticalSection = trtlcriticalsection;
+function InitializeCriticalSection(
+         var lpCriticalSection: TRTLCriticalSection): Integer;
+function EnterCriticalSection(
+         var lpCriticalSection: TRTLCriticalSection): Integer; cdecl;
+function LeaveCriticalSection(
+         var lpCriticalSection: TRTLCriticalSection): Integer; cdecl;
+function TryEnterCriticalSection(
+         var lpCriticalSection: TRTLCriticalSection): Boolean;
+function DeleteCriticalSection(
+         var lpCriticalSection: TRTLCriticalSection): Integer; cdecl;
+procedure DateTimeToSystemTime(DateTime: TDateTime; out SystemTime: TSystemTime);
+function SystemTimeToDateTime(const SystemTime: TSystemTime): TDateTime;
+
+type
+{$endif}
 {
  TSystemTime = packed record
     Year: Word;
@@ -145,6 +175,60 @@ type
     property List: PPointerList read FList;
   end;
 
+{$ifndef mswindows}
+  TMonthNameArray = array[1..12] of string;
+  TWeekNameArray = array[1..7] of string;
+
+  TFormatSettings = record
+    CurrencyFormat: Byte;
+    NegCurrFormat: Byte;
+    ThousandSeparator: Char;
+    DecimalSeparator: Char;
+    CurrencyDecimals: Byte;
+    DateSeparator: Char;
+    TimeSeparator: Char;
+    ListSeparator: Char;
+    CurrencyString: string;
+    ShortDateFormat: string;
+    LongDateFormat: string;
+    TimeAMString: string;
+    TimePMString: string;
+    ShortTimeFormat: string;
+    LongTimeFormat: string;
+    ShortMonthNames: TMonthNameArray;
+    LongMonthNames: TMonthNameArray;
+    ShortDayNames: TWeekNameArray;
+    LongDayNames: TWeekNameArray;
+    TwoDigitYearCenturyWindow: Word;
+  end;
+
+var
+  DefaultFormatSettings : TFormatSettings = (
+    CurrencyFormat: 1;
+    NegCurrFormat: 5;
+    ThousandSeparator: ',';
+    DecimalSeparator: '.';
+    CurrencyDecimals: 2;
+    DateSeparator: '-';
+    TimeSeparator: ':';
+    ListSeparator: ',';
+    CurrencyString: '$';
+    ShortDateFormat: 'd/m/y';
+    LongDateFormat: 'dd" "mmmm" "yyyy';
+    TimeAMString: 'AM';
+    TimePMString: 'PM';
+    ShortTimeFormat: 'hh:nn';
+    LongTimeFormat: 'hh:nn:ss';
+    ShortMonthNames: ('Jan','Feb','Mar','Apr','May','Jun', 
+                      'Jul','Aug','Sep','Oct','Nov','Dec');
+    LongMonthNames: ('January','February','March','April','May','June',
+                     'July','August','September','October','November','December');
+    ShortDayNames: ('Sun','Mon','Tue','Wed','Thu','Fri','Sat');
+    LongDayNames:  ('Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday');
+    TwoDigitYearCenturyWindow: 50;
+  );
+{$endif}
+
 function NtoLE(const AValue: SmallInt): SmallInt;{$ifdef SYSTEMINLINE}inline;{$endif}
                                overload;
 function NtoLE(const AValue: Word): Word;{$ifdef SYSTEMINLINE}inline;{$endif}
@@ -181,6 +265,8 @@ function BEtoN(const AValue: Int64): Int64;{$ifdef SYSTEMINLINE}inline;{$endif}
                                overload;
 function BEtoN(const AValue: QWord): QWord;{$ifdef SYSTEMINLINE}inline;{$endif}
                                overload;
+function BEtoN8(const AValue: Int64): Int64;{$ifdef SYSTEMINLINE}inline;{$endif}
+                               overload;
 
 function SwapEndian(const AValue: SmallInt): SmallInt; overload;
 function SwapEndian(const AValue: Word): Word; overload;
@@ -196,7 +282,7 @@ function  GetCurrentThreadId : threadty;
 Function GetProcedureAddress(Lib : TLibHandle;
                   const ProcName : AnsiString) : Pointer;
 procedure copycharbuf(const asource: string; const asize: integer; out buffer);
-Function FileTruncate (Handle : THandle;Size: Int64) : boolean;
+//Function FileTruncate (Handle : THandle;Size: Int64) : boolean;
 {$ifndef FPC}
  {$ifdef MSWINDOWS}
 function InterlockedIncrement(var I: Integer): Integer;
@@ -209,7 +295,7 @@ function LeftStr(const S: string; Count: integer): string;
 
 implementation
 uses
- rtlconsts;
+ rtlconsts,msesysintf,msesysintf1;
 {$ifndef FPC}
 {$define endian_little}
 {$define FPC_HAS_TYPE_EXTENDED}
@@ -246,14 +332,124 @@ end;
 
 function Unassigned: Variant; // Unassigned standard constant
 begin
-  VarClearProc(TVarData(Result));
+//  VarClearProc(TVarData(Result));
+  VarClear(variant(Result));
   TVarData(Result).VType := varempty;
 end;
 
+{$ifndef mswindows}
+
+Function TryEncodeDate(Year,Month,Day : Word; Out Date : TDateTime) : Boolean;
+
+var
+  c, ya: cardinal;
+begin
+  Result:=(Year>0) and (Year<10000) and
+          (Month in [1..12]) and
+          (Day>0) and (Day<=MonthDays[IsleapYear(Year),Month]);
+ If Result then
+   begin
+     if month > 2 then
+      Dec(Month,3)
+     else
+      begin
+        Inc(Month,9);
+        Dec(Year);
+      end;
+     c:= Year DIV 100;
+     ya:= Year - 100*c;
+     Date := (146097*c) SHR 2 + (1461*ya) SHR 2 + (153*cardinal(Month)+2) DIV 5 + cardinal(Day);
+     // Note that this line can't be part of the line above, since TDateTime is
+     // signed and c and ya are not
+     Date := Date - 693900;
+   end
+end;
+
+function TryEncodeTime(Hour, Min, Sec, MSec:word; Out Time : TDateTime) : boolean;
+
+begin
+  Result:=(Hour<24) and (Min<60) and (Sec<60) and (MSec<1000);
+  If Result then begin
+    Time:= (cardinal(Hour)*3600000+cardinal(Min)*60000+cardinal(Sec)*1000+MSec)/
+                                     MSecsPerDay;
+  end; 
+end;
+
+Function DoEncodeDate(Year, Month, Day: Word): longint;
+
+Var
+  D : TDateTime;
+
+begin
+  If TryEncodeDate(Year,Month,Day,D) then
+    Result:=Trunc(D)
+  else
+    Result:=0;
+end;
+
+function DoEncodeTime(Hour, Minute, Second, MilliSecond: word): TDateTime;
+
+begin
+  If not TryEncodeTime(Hour,Minute,Second,MilliSecond,Result) then
+    Result:=0;
+end;
+
+function ComposeDateTime(Date,Time : TDateTime) : TDateTime;
+
+begin
+  if Date < 0 then Result := trunc(Date) - Abs(frac(Time))
+  else Result := trunc(Date) + Abs(frac(Time));
+end;
+
+procedure DateTimeToSystemTime(DateTime: TDateTime; out SystemTime: TSystemTime);
+begin
+  DecodeDate(DateTime, SystemTime.Year, SystemTime.Month, SystemTime.Day);
+  DecodeTime(DateTime, SystemTime.Hour, SystemTime.Minute, SystemTime.Second, SystemTime.MilliSecond);
+end ;
+
+function SystemTimeToDateTime(const SystemTime: TSystemTime): TDateTime;
+begin
+  result := ComposeDateTime(DoEncodeDate(SystemTime.Year, SystemTime.Month, SystemTime.Day),
+                            DoEncodeTime(SystemTime.Hour, SystemTime.Minute, SystemTime.Second, SystemTime.MilliSecond));
+end ;
+
+function InitializeCriticalSection(
+         var lpCriticalSection: TRTLCriticalSection): Integer;
+begin
+ result:= 0;
+ initmutex(lpCriticalSection);
+end;
+
+function EnterCriticalSection(
+         var lpCriticalSection: TRTLCriticalSection): Integer;
+begin
+ result:= pthread_mutex_lock(lpcriticalsection);
+end;
+
+function LeaveCriticalSection(
+         var lpCriticalSection: TRTLCriticalSection): Integer;
+begin
+ result:= pthread_mutex_unlock(lpcriticalsection);
+end;
+
+function TryEnterCriticalSection(
+         var lpCriticalSection: TRTLCriticalSection): Boolean;
+begin
+ result:= pthread_mutex_trylock(lpcriticalsection) <> ebusy;
+end;
+
+function DeleteCriticalSection(
+         var lpCriticalSection: TRTLCriticalSection): Integer;
+begin
+ result:= pthread_mutex_destroy(lpcriticalsection);
+end;
+
+{$endif}
 
 function Null: Variant;       // Null standard constant
   begin
-    VarClearProc(TVarData(Result));
+//    VarClearProc(TVarData(Result));
+    VarClear(variant(Result));
     TVarData(Result).VType := varnull;
   end;
 
@@ -308,9 +504,33 @@ function SwapEndian(const AValue: Int64): Int64;
            or (AValue shr 56);
   end;
 
+function SwapEndiani64(const AValue: Int64): Int64;
+  begin
+    Result := (AValue shl 56)
+           or ((AValue and $000000000000FF00) shl 40)
+           or ((AValue and $0000000000FF0000) shl 24)
+           or ((AValue and $00000000FF000000) shl 8)
+           or ((AValue and $000000FF00000000) shr 8)
+           or ((AValue and $0000FF0000000000) shr 24)
+           or ((AValue and $00FF000000000000) shr 40)
+           or (AValue shr 56);
+  end;
+
 
 function SwapEndian(const AValue: QWord): QWord;
                                overload;
+  begin
+    Result := (AValue shl 56)
+           or ((AValue and $000000000000FF00) shl 40)
+           or ((AValue and $0000000000FF0000) shl 24)
+           or ((AValue and $00000000FF000000) shl 8)
+           or ((AValue and $000000FF00000000) shr 8)
+           or ((AValue and $0000FF0000000000) shr 24)
+           or ((AValue and $00FF000000000000) shr 40)
+           or (AValue shr 56);
+  end;
+
+function SwapEndianq64(const AValue: QWord): QWord;
   begin
     Result := (AValue shl 56)
            or ((AValue and $000000000000FF00) shl 40)
@@ -485,7 +705,16 @@ function BEtoN(const AValue: Int64): Int64;{$ifdef SYSTEMINLINE}inline;{$endif}
     {$IFDEF ENDIAN_BIG}
       Result := AValue;
     {$ELSE}
-      Result := SwapEndian(AValue);
+      Result := SwapEndiani64(AValue);
+    {$ENDIF}
+  end;
+
+function BEtoN8(const AValue: Int64): Int64;{$ifdef SYSTEMINLINE}inline;{$endif}
+  begin
+    {$IFDEF ENDIAN_BIG}
+      Result := AValue;
+    {$ELSE}
+      Result := SwapEndiani64(AValue);
     {$ENDIF}
   end;
 
@@ -495,10 +724,10 @@ function BEtoN(const AValue: QWord): QWord;{$ifdef SYSTEMINLINE}inline;{$endif}
     {$IFDEF ENDIAN_BIG}
       Result := AValue;
     {$ELSE}
-      Result := SwapEndian(AValue);
+      Result := SwapEndianq64(AValue);
     {$ENDIF}
   end;
-
+(*
 Function FileTruncate (Handle : THandle;Size: Int64) : boolean;
 begin
 {
@@ -509,7 +738,7 @@ begin
   else
    Result := false;
 end;
-
+*)
 procedure copycharbuf(const asource: string; const asize: integer; out buffer);
 var
  int1: integer;
@@ -531,12 +760,13 @@ end;
 Function GetProcedureAddress(Lib : TLibHandle;
                   const ProcName : AnsiString) : Pointer;
 begin
-  Result:=Windows.GetProcAddress(Lib,PChar(ProcName));
+  Result:= {$ifdef mswindows}Windows.{$endif}GetProcAddress(Lib,PChar(ProcName));
 end;
 
 function  GetCurrentThreadId : threadty;
 begin
- result:= getcurrentthread;
+ result:= sys_getcurrentthread;
+// result:= getcurrentthread;
 end;
 
 {****************************************************************************}

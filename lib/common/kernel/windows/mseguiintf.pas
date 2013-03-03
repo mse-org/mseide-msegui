@@ -2612,7 +2612,7 @@ begin
 end;
 
 function gui_createwindow(const rect: rectty;
-                             const options: internalwindowoptionsty;
+                             var options: internalwindowoptionsty;
                              var awindow: windowty): guierrorty;
 var
  windowstyle,windowstyleex,ca2: longword;

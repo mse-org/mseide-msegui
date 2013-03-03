@@ -12,13 +12,15 @@
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  **********************************************************************}
+{$ifdef FPC}{$mode objfpc}{$endif}
 
-{$mode objfpc}
-
-{$if fpc_fullversion >= 020300}
- {$define unicodeversion}
-{$endif}
+{$define unicodeversion}
 unit cwstring;
+{$ifndef FPC}
+interface          //dummy
+implementation
+
+{$else}
 
 interface
 uses
@@ -30,7 +32,7 @@ type
 procedure SetCWidestringManager;
 
 implementation
-{$linklib c}
+{$ifdef FPC}{$linklib c}{$endif}
 
 {$ifndef linux}  // Linux (and maybe glibc platforms in general), have iconv in glibc.
 {$ifndef FreeBSD5}
@@ -40,12 +42,13 @@ implementation
 {$endif linux}
 
 Uses
-  BaseUnix,
-  ctypes,
-  unix,
-  unixtype,
+//  BaseUnix,
+  msectypes,{$ifndef FPC}msetypes,{$endif}
+//  unix,
+//  unixtype,
 //  sysutils,
-  initc,{msedatalist,}msesysintf,msestrings;
+//  initc,
+  {msedatalist,}msesysintf1,msesysintf,msestrings;
 
 Const
 {$ifndef useiconv}
@@ -140,7 +143,7 @@ begin
  interlockeddecrement(lockcount);
 end;
   
-procedure Wide2AnsiMove(source:pwidechar;var dest:ansistring;len:SizeInt);
+procedure Wide2AnsiMove(source:pwidechar; var dest:ansistring; len:SizeInt);
   var
     outlength,
     outoffset,
@@ -163,8 +166,9 @@ procedure Wide2AnsiMove(source:pwidechar;var dest:ansistring;len:SizeInt);
     lockiconv(lock_wide2ansi);
     while iconv(iconv_wide2ansi,@srcpos,@srclen,@destpos,@outleft)=size_t(-1) do
       begin
-        case fpgetCerrno of
-          ESysEILSEQ:
+        case __errno_location()^ of
+//        case fpgetCerrno of
+          EILSEQ:
             begin
               { skip and set to '?' }
               inc(srcpos);
@@ -175,7 +179,7 @@ procedure Wide2AnsiMove(source:pwidechar;var dest:ansistring;len:SizeInt);
               { reset }
               iconv(iconv_wide2ansi,@mynil,@my0,@mynil,@my0);
             end;
-          ESysE2BIG:
+          E2BIG:
             begin
               outoffset:=destpos-pchar(dest);
               { extend }
@@ -188,7 +192,8 @@ procedure Wide2AnsiMove(source:pwidechar;var dest:ansistring;len:SizeInt);
           else
             begin
               unlockiconv(lock_wide2ansi);
-              raise eiconv.Create('iconv error '+IntToStr(fpgetCerrno));
+              raise eiconv.Create('iconv error '+
+                       IntToStr(sys_getlasterror{fpgetCerrno}));
             end;
         end;
       end;
@@ -220,8 +225,9 @@ procedure Ansi2WideMove(source:pchar;var dest:widestring;len:SizeInt);
     lockiconv(lock_ansi2wide);
     while iconv(iconv_ansi2wide,@srcpos,@len,@destpos,@outleft)=size_t(-1) do
       begin
-        case fpgetCerrno of
-         ESysEILSEQ:
+//        case fpgetCerrno of
+        case __errno_location()^ of
+         EILSEQ:
             begin
               { skip and set to '?' }
               inc(srcpos);
@@ -232,7 +238,7 @@ procedure Ansi2WideMove(source:pchar;var dest:widestring;len:SizeInt);
               { reset }
               iconv(iconv_ansi2wide,@mynil,@my0,@mynil,@my0);
             end;
-          ESysE2BIG:
+          E2BIG:
             begin
               outoffset:=destpos-pchar(dest);
               { extend }
@@ -245,7 +251,8 @@ procedure Ansi2WideMove(source:pchar;var dest:widestring;len:SizeInt);
           else
             begin
               unlockiconv(lock_ansi2wide);
-              raise eiconv.Create('iconv error '+IntToStr(fpgetCerrno));
+              raise eiconv.Create('iconv error '+
+                     IntToStr(sys_getlasterror{fpgetCerrno}));
             end;
         end;
       end;
@@ -297,8 +304,9 @@ procedure Ansi2UCS4Move(source:pchar;var dest:UCS4String;len:SizeInt);
     lockiconv(lock_ansi2ucs4);
     while iconv(iconv_ansi2ucs4,@srcpos,@len,@destpos,@outleft)=size_t(-1) do
       begin
-        case fpgetCerrno of
-          ESysE2BIG:
+//        case fpgetCerrno of
+        case __errno_location()^ of
+          E2BIG:
             begin
               outoffset:=destpos-pchar(dest);
               { extend }
@@ -311,7 +319,8 @@ procedure Ansi2UCS4Move(source:pchar;var dest:UCS4String;len:SizeInt);
           else
             begin
               unlockiconv(lock_ansi2ucs4);
-              raise eiconv.Create('iconv error '+IntToStr(fpgetCerrno));
+              raise eiconv.Create('iconv error '+
+                          IntToStr(sys_getlasterror{fpgetCerrno}));
             end;
         end;
       end;
@@ -572,4 +581,5 @@ finalization
  iconv_close(iconv_ansi2wide);
  iconv_close(iconv_ucs42ansi);
  iconv_close(iconv_ansi2ucs4);
+{$endif}
 end.

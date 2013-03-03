@@ -74,11 +74,9 @@ type
   {$ifndef FPC}
     function Equals(Obj: TObject) : boolean;virtual;
     { IUnknown }
-    function QueryInterface(
-     {$IFDEF FPC_HAS_CONSTREF}constref{$ELSE}const{$ENDIF} IID: TGUID;
-      out Obj): Hresult; virtual; {$IFNDEF msWINDOWS}cdecl{$ELSE}stdcall{$ENDIF};
-    function _AddRef: Integer; {$IFNDEF msWINDOWS}cdecl{$ELSE}stdcall{$ENDIF};
-    function _Release: Integer; {$IFNDEF msWINDOWS}cdecl{$ELSE}stdcall{$ENDIF};
+    function QueryInterface(const IID: TGUID;out Obj): Hresult; stdcall;
+    function _AddRef: Integer; stdcall;
+    function _Release: Integer; stdcall;
   {$endif}
     procedure AssignTo(Dest: tpersistent); virtual;
     procedure DefineProperties(Filer: tfiler); virtual;
@@ -1072,7 +1070,7 @@ Const
 implementation
 
 uses
- {$ifdef MSWINDOWS}windows,{$endif}rtlconsts;
+ {$ifdef MSWINDOWS}windows,{$endif}rtlconsts,msesysintf,msesys;
 
 {$ifndef FPC}
 {$define endian_little}
@@ -1211,9 +1209,8 @@ begin
  result:= Obj = Self;
 end;
 
-function tpersistent.QueryInterface(
-{$IFDEF FPC_HAS_CONSTREF}constref{$ELSE}const{$ENDIF} IID: TGUID;
- out Obj): HResult;{$IFNDEF msWINDOWS}cdecl{$ELSE}stdcall{$ENDIF};
+function tpersistent.QueryInterface(const IID: TGUID;
+                            out Obj): HResult; stdcall;
 begin
   if GetInterface(IID, Obj) then
     Result := S_OK
@@ -1221,16 +1218,15 @@ begin
     Result := E_NOINTERFACE;
 end;
 
-function tpersistent._AddRef: Integer;{$IFNDEF msWINDOWS}cdecl{$ELSE}stdcall{$ENDIF};
+function tpersistent._AddRef: Integer; stdcall;
 begin
  Result := -1;
 end;
 
-function tpersistent._Release: Integer;{$IFNDEF msWINDOWS}cdecl{$ELSE}stdcall{$ENDIF};
+function tpersistent._Release: Integer; stdcall;
 begin
  Result := -1;
 end;
-
 {$endif}
 
 procedure TPersistent.AssignError(Source: TPersistent);
@@ -4085,7 +4081,9 @@ end;
 function TBinaryObjectReader.ReadQWord : qword; {$ifdef CLASSESINLINE}inline;{$endif CLASSESINLINE}
 begin
   Read(Result,8);
+ {$ifdef FPC}
   Result:=LEtoN(Result);
+ {$endif}
 end;
 
 {$IFDEF FPC_DOUBLE_HILO_SWAPPED}
@@ -6066,10 +6064,11 @@ function TReader.ReadVariant: variant;
 var
   nv: TValueType;
 begin
+{$ifdef FPC}
   { Ensure that a Variant manager is installed }
   if not Assigned(VarClearProc) then
     raise EReadError.Create(SErrNoVariantSupport);
-
+{$endif}
   FillChar(Result,sizeof(Result),0);
 
   nv:=NextValue;
@@ -7240,9 +7239,10 @@ begin
     tkVariant:
       begin
         { Ensure that a Variant manager is installed }
+  {$ifdef FPC}
         if not assigned(VarClearProc) then
           raise EWriteError.Create(SErrNoVariantSupport);
-
+  {$endif}
         VarValue := tvardata(GetVariantProp(Instance, PropInfo));
         if HasAncestor then
           DefVarValue := tvardata(GetVariantProp(Ancestor, PropInfo))
@@ -7479,7 +7479,9 @@ end;
 
 procedure TBinaryObjectWriter.WriteQWord(qw : qword); {$ifdef CLASSESINLINE}inline;{$endif CLASSESINLINE}
 begin
+{$ifdef FPC}
   qw:=NtoLE(qw);
+{$endif}
   Write(qw,8);
 end;
 
@@ -8083,7 +8085,7 @@ end;
 Procedure THandleStream.SetSize(const NewSize: Int64);
 
 begin
-  FileTruncate(FHandle,NewSize);
+  syserror(sys_truncatefile(FHandle,NewSize));
 end;
 
 
@@ -8784,8 +8786,8 @@ begin
 {$else}
   InitializeCriticalsection(ResolveSection);
 {$endif}
-  InitHandlerList:=Nil;
-  FindGlobalComponentList:=nil;
+//  InitHandlerList:=Nil;
+//  FindGlobalComponentList:=nil;
   IntConstList := TThreadList.Create;
 //  if classlist = nil then begin
    ClassList := TThreadList.Create;

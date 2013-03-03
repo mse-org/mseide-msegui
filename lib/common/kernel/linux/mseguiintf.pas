@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -58,6 +58,9 @@ var
  { $define with_saveyourself}
 {$endif}
 type
+{$ifndef FPC}
+ txevent = xevent;
+{$endif}
 
  x11internalwindowoptionsdty = record
   depth: cint;
@@ -66,7 +69,7 @@ type
  end;
  {$if sizeof(x11internalwindowoptionsdty) > sizeof(internalwindowoptionspty)} 
   {$error 'buffer overflow'}
- {$endif} 
+ {$ifend} 
  x11internalwindowoptionsty =  record
   case integer of
    0: (d: x11internalwindowoptionsdty;);
@@ -75,7 +78,7 @@ type
   
  {$if sizeof(x11internalwindowoptionsdty) > sizeof(internalwindowoptionspty)}
   {$error 'buffer overflow'}
- {$endif}
+ {$ifend}
 
  syseventty = type txevent;
 const
@@ -322,14 +325,15 @@ type
  Atom = type culong;
 // Atom = type longword;
  Cursor = TXID;
- wchar_t = longword;
- pwchar_t = ^wchar_t;
  ppwchar_t = ^pwchar_t;
 {$endif}
+ wchar_t = longword;
+ pwchar_t = ^wchar_t;
  patom = ^atom;
  atomarty = array of atom;
  atomaty = array[0..0] of atom;
  patomaty = ^atomaty;
+ ulongarty = array of culong;
 
 function msedisplay: pdisplay;
 function msevisual: pvisual;
@@ -337,7 +341,12 @@ function mserootwindow(id: winidty = 0): winidty;
 function msedefaultscreen: pscreen;
 function msedefaultscreenno: integer;
 
-{$PACKRECORDS C}
+{$ifdef FPC}
+ {$PACKRECORDS C}
+{$else}
+ {$ALIGN 4}
+ {$MINENUMSIZE 4}
+{$endif}
 
 type
  _XIM = record end;
@@ -490,9 +499,10 @@ function Xutf8TextPropertyToTextList(para1:PDisplay; para2:PXTextProperty;
 implementation
 
 uses
- msebits,msekeyboard,sysutils,msesysutils,msefileutils,msedatalist
+ msebits,msekeyboard,sysutils,msesysutils,msefileutils,msedatalist,msedragglob
  {$ifdef with_sm},sm,ice{$endif},msesonames,msegui,mseactions,msex11gdi,
- msearrayutils,msesys,msesysintf1,msesysdnd,mseclasses,mseglob,msetimer
+ msearrayutils,msesys,msesysintf1,msesysdnd,classes,rtlconsts,mseclasses,
+ mseglob,msetimer
  {$ifdef mse_debug},mseformatstr{$endif};
 
 const
@@ -519,6 +529,9 @@ type
  {$define ximage:=tximage}
  {$define xwindowattributes:=txwindowattributes}
  {$define xclientmessageevent:=txclientmessageevent}
+ {$define xselectionevent:= txselectionevent}
+ {$define xselectionclearevent:=txselectionclearevent}
+ {$define xselectionrequestevent:=txselectionrequestevent}
  {$define xtype:=_type}
  {$define xrectangle:=txrectangle}
  {$define keysym:=tkeysym}
@@ -530,9 +543,10 @@ type
  {$define xlookupkeysym_:=xlookupkeysymval}
  {$define c_class:= _class}
  {$define xtextproperty:= txtextproperty}
-
+ {$define xcolor:= txcolor}
+ {$define xpointer:= txpointer}
 {$else}
- txpointer = pointer;
+   tboolresult = longbool;
    PXIM = ^TXIM;
    TXIM = record
      end;
@@ -540,18 +554,18 @@ type
    PXIC = ^TXIC;
    TXIC = record
      end;
-   TXIMProc = procedure (para1:TXIM; para2:TXPointer; para3:TXPointer);cdecl;
+   TXIMProc = procedure (para1:TXIM; para2:XPointer; para3:XPointer);cdecl;
 
-   TXICProc = function (para1:TXIC; para2:TXPointer; para3:TXPointer):TBool;cdecl;
+   TXICProc = function (para1:TXIC; para2:XPointer; para3:XPointer):TBool;cdecl;
    PXIMCallback = ^TXIMCallback;
    TXIMCallback = record
-        client_data : TXPointer;
+        client_data : XPointer;
         callback : TXIMProc;
      end;
 
    PXICCallback = ^TXICCallback;
    TXICCallback = record
-        client_data : TXPointer;
+        client_data : XPointer;
         callback : TXICProc;
      end;
 {$endif}
@@ -800,6 +814,24 @@ var
  clipboardtimestamp: ttime; 
  fidnum: integer;
 
+procedure deleteitemat(var dest: atomarty; index: integer); overload;
+begin
+ if (index < 0) or (index > high(dest)) then begin
+  tlist.Error(SListIndexError, Index);
+ end;
+ move(dest[index+1],dest[index],sizeof(dest[0])*(high(dest)-index));
+ setlength(dest,high(dest));
+end;
+
+procedure deleteitemwi(var dest: winidarty; index: integer); overload;
+begin
+ if (index < 0) or (index > high(dest)) then begin
+  tlist.Error(SListIndexError, Index);
+ end;
+ move(dest[index+1],dest[index],sizeof(dest[0])*(high(dest)-index));
+ setlength(dest,high(dest));
+end;
+
 procedure usevariables;
 begin
  if (multipleatom = 0) and (wmnameatom = 0) and (defcolormap = 0) then begin
@@ -827,7 +859,7 @@ begin
  po2:= pwchar_t(result);
  while true do begin
   {$ifdef FPC} {$checkpointer off} {$endif} //po1 can be in textsegment
-  po2^:= ord(po1^);
+  po2^:= pword(pointer(po1))^;
   if po1^ = #0 then begin
    break;
   end;
@@ -942,7 +974,7 @@ begin
  bo1:= false;
  for int1:= high(ar1) downto 0 do begin
   if ar1[int1] = value then begin
-   deleteitem(ar1,int1);
+   deleteitemat(ar1,int1);
    bo1:= true;
   end;
  end;
@@ -1207,7 +1239,11 @@ var
     case event.xany.xtype of
      selectionnotify: begin
       with event.xselection do begin
+     {$ifdef FPC}
        if _property <> convertselectionpropertyatom then begin
+     {$else}
+       if xproperty <> convertselectionpropertyatom then begin
+     {$endif}
         exit;
        end;
       end;
@@ -1423,7 +1459,7 @@ begin
       @itemcount,@bytesafterreturn,@po1) = success then begin
 {$ifdef FPC} {$checkpointer off} {$endif}
   if (format = 32) and (itemcount = 2) then begin
-   {$ifdef FPC}longword{$else}byte{$endif}(result):= po1^.state + longword(wms_withdrawn);
+   longword(result):= po1^.state + longword(wms_withdrawn);
   end;
 {$ifdef FPC} {$checkpointer default} {$endif}
   xfree(po1);
@@ -1575,7 +1611,7 @@ begin
  int1:= 0;
  result:= false;
  repeat
-  xsync(appdisp,false);    //windowmanager has to work
+  xsync(appdisp,0);    //windowmanager has to work
 //  xflush(appdisp);    //windowmanager has to work
   sys_schedyield;
   if gui_windowvisible(id) then begin
@@ -2639,7 +2675,7 @@ begin
 // xseticfocus(getic(id));
  waitfordecoration(id);
  xsetinputfocus(appdisp,id,reverttoparent,currenttime);
- xsync(appdisp,false);
+ xsync(appdisp,0);
 // xflush(appdisp);
  result:= gue_ok;
  gdi_unlock;
@@ -2704,7 +2740,7 @@ function gui_setcursorshape(winid: winidty; shape: cursorshapety): guierrorty;
 var
  cursor1: cursor;
  bmp: pixmapty;
- color: txcolor;
+ color: xcolor;
 begin 
  result:= gue_ok;
  if winid = 0 then begin
@@ -2798,7 +2834,7 @@ begin
  fillchar(timerval,sizeof(timerval),0);
  timerval.it_value.tv_sec:= us div 1000000;
  timerval.it_value.tv_usec:= us mod 1000000;
- if mselibc.setitimer(itimer_real,{$ifdef FPC}@{$endif}timerval,nil) = 0 then begin
+ if mselibc.setitimer(itimer_real,@timerval,nil) = 0 then begin
   result:= gue_ok;
  end
  else begin
@@ -3223,7 +3259,7 @@ begin
  if chi <> nil then begin
   setlength(children,ca1);
   for int1:= 0 to high(children) do begin
-   children[int1]:= chi[int1];
+   children[int1]:= pwinidaty(chi)^[int1];
   end;
   xfree(chi);
  end;
@@ -3377,7 +3413,7 @@ net_wm_window_type_notification,net_wm_window_type_combo,net_wm_window_type_dnd
  );                 
  
 function gui_createwindow(const rect: rectty;
-     const options: internalwindowoptionsty; var awindow: windowty): guierrorty;
+     var options: internalwindowoptionsty; var awindow: windowty): guierrorty;
 var
  attributes: xsetwindowattributes;
  valuemask: longword;
@@ -3786,9 +3822,9 @@ begin
  if wi1 = 0 then begin
   wi1:= rootid;
  end;
- xsync(appdisp,false);
+ xsync(appdisp,0);
  xreparentwindow(appdisp,child,wi1,pos.x,pos.y);
- xsync(appdisp,false);
+ xsync(appdisp,0);
  gdi_unlock;
 end;
 
@@ -3906,10 +3942,10 @@ begin
     end;
    end;
    int1:= 0;
-   xsync(appdisp,false);
+   xsync(appdisp,0);
    sys_schedyield;
    while (gui_getparentwindow(child.id) = parentbefore) and (int1 < 40) do begin
-    xsync(appdisp,false);
+    xsync(appdisp,0);
     sleep(5);
     inc(int1);
    end;
@@ -3944,7 +3980,7 @@ begin
   with event1 do begin
    xtype:= clientmessage;
    display:= appdisp;
-   window:= awindow.id;
+   xwindow:= awindow.id;
    format:= 8;
    message_type:= at1;
    po1:= pchar(str1);
@@ -4032,7 +4068,7 @@ function gui_flushgdi(const synchronize: boolean = false): guierrorty;
 begin
  gdi_lock;
  if synchronize then begin
-  xsync(appdisp,false);
+  xsync(appdisp,0);
  end
  else begin
   xflush(appdisp);
@@ -4230,9 +4266,9 @@ type
    fscroll: boolean;
    fdroptimestamp: longword;
   protected
-   function handleevent(var aevent: txclientmessageevent): tmseevent;
+   function handleevent(var aevent: xclientmessageevent): tmseevent;
   public
-   constructor create(const aevent: txclientmessageevent);
+   constructor create(const aevent: xclientmessageevent);
    property winid: winidty read fwinid;
    function readdata(var adata: string;
                               const typeindex: integer): guierrorty;
@@ -4260,11 +4296,11 @@ type
    procedure startcheckrepeater;
    procedure docheckrepeat(const sender: tobject);
    procedure resetdest;
-   procedure selectioncleared(var aevent: txselectionclearevent);
+   procedure selectioncleared(var aevent: xselectionclearevent);
    function check(const apos: pointty): boolean;
-   function handleevent(var aevent: txclientmessageevent): tmseevent;
+   function handleevent(var aevent: xclientmessageevent): tmseevent;
    function drop: boolean;
-   function getdata(var aevent: txselectionrequestevent;
+   function getdata(var aevent: xselectionrequestevent;
                    var adata: string; var aproperty: atom): boolean; 
                                         //false if no data
    procedure objevent(const sender: iobjectlink;
@@ -4280,7 +4316,7 @@ var
 
 { tsysdndreader }
 
-constructor tsysdndreader.create(const aevent: txclientmessageevent);
+constructor tsysdndreader.create(const aevent: xclientmessageevent);
 var
  lwo1: longword;
  int1,int2: integer;
@@ -4366,7 +4402,7 @@ begin
  end;
 end;
 
-function tsysdndreader.handleevent(var aevent: txclientmessageevent): tmseevent;
+function tsysdndreader.handleevent(var aevent: xclientmessageevent): tmseevent;
 
  function checkhandler(const updateposition: boolean): boolean;
  begin
@@ -4474,7 +4510,7 @@ begin
   end;
  end;
  if high(fformats) > 2 then begin
-  setlongproperty(fsource,xdndatoms[xdnd_typelist],fformats,atomatom);
+  setlongproperty(fsource,xdndatoms[xdnd_typelist],ulongarty(fformats),atomatom);
  end;
  gdi_lock;
  xsetselectionowner(appdisp,xdndatoms[xdnd_selection],fsource,ftimestamp);
@@ -4508,7 +4544,7 @@ begin
  end;
 end;
 
-procedure tsysdndwriter.selectioncleared(var aevent: txselectionclearevent);
+procedure tsysdndwriter.selectioncleared(var aevent: xselectionclearevent);
 begin
  if laterorsame(ftimestamp,aevent.time) then begin
   if fintf <> nil then begin
@@ -4590,14 +4626,15 @@ const
 procedure tsysdndwriter.startcheckrepeater;
 begin
  if frepeater = nil then begin
-  frepeater:= tsimpletimer.create(checkrepeatinterval,@docheckrepeat,true,[]);
+  frepeater:= tsimpletimer.create(checkrepeatinterval,
+                 {$ifdef FPC}@{$endif}docheckrepeat,true,[]);
  end
  else begin
   frepeater.interval:= checkrepeatinterval;
  end;
 end;
 
-function tsysdndwriter.handleevent(var aevent: txclientmessageevent): tmseevent;
+function tsysdndwriter.handleevent(var aevent: xclientmessageevent): tmseevent;
 begin
  result:= nil;
  with aevent do begin
@@ -4622,7 +4659,7 @@ begin
                                                 [fsource,0,ftimestamp]);
 end;
 
-function tsysdndwriter.getdata(var aevent: txselectionrequestevent;
+function tsysdndwriter.getdata(var aevent: xselectionrequestevent;
                var adata: string; var aproperty: atom): boolean;
 var
  int1: integer;
@@ -4741,7 +4778,7 @@ begin
  end;
 end;
  
-function handlexdnd(var aevent: txclientmessageevent): tmseevent;
+function handlexdnd(var aevent: xclientmessageevent): tmseevent;
 
 begin
  result:= nil;
@@ -4763,7 +4800,7 @@ begin
  end;
 end;
 
-function getclipboarddata(var aevent: txselectionrequestevent;
+function getclipboarddata(var aevent: xselectionrequestevent;
                    var adata: string; var aproperty: atom): boolean; 
                                         //false if no data
 var
@@ -4830,9 +4867,9 @@ begin
  end;
 end;
 
-procedure handleselectionrequest(var aevent: txselectionrequestevent);
+procedure handleselectionrequest(var aevent: xselectionrequestevent);
 var
- event1: txselectionevent;
+ event1: xselectionevent;
  str1: string;
  bo1: boolean;
 begin
@@ -5220,8 +5257,9 @@ eventrestart:
   configurenotify: begin
    with xev.xconfigure do begin
     w:= xwindow;
-    xsync(appdisp,false);
-    if xchecktypedwindowevent(appdisp,w,destroynotify,@xev2) then begin
+    xsync(appdisp,0);
+    if tboolresult(xchecktypedwindowevent(
+                             appdisp,w,destroynotify,@xev2)) then begin
      result:= twindowevent.create(ek_destroy,xwindow);
     end
     else begin
@@ -5241,7 +5279,8 @@ eventrestart:
      debugwriteln('                  '+inttostr(x)+' '+inttostr(y)+
                  ' '+inttostr(width)+' '+inttostr(height));
     {$endif}
-     while xchecktypedwindowevent(appdisp,w,configurenotify,@xev) do begin
+     while tboolresult(xchecktypedwindowevent(
+                        appdisp,w,configurenotify,@xev)) do begin
     {$ifdef mse_debugconfigure}
       debugwriteln('                  '+inttostr(x)+' '+inttostr(y)+
                  ' '+inttostr(width)+' '+inttostr(height));
@@ -5315,7 +5354,7 @@ const
  blues = 6;
 }
 var
- map1: array[0..255] of {$ifdef FPC}txcolor{$else}xcolor{$endif};
+ map1: array[0..255] of xcolor;
  int1: integer;
 begin
  msecolormap:= xcreatecolormap(appdisp,rootid,pointer(defvisual),allocall);
@@ -5401,8 +5440,8 @@ begin
  end;
 end;
 
-procedure imdestroyed(ic: txim; client_data: txpointer;
-                                          call_data: txpointer); cdecl;
+procedure imdestroyed(ic: txim; client_data: xpointer;
+                                          call_data: xpointer); cdecl;
 var
  po1: pchar;
 begin
@@ -5761,7 +5800,7 @@ begin
  
   result:= gue_ok;
   {$ifdef mse_flushgdi}
-  xsynchronize(appdisp,{$ifdef xboolean}true{$else}1{$endif});
+  xsynchronize(appdisp,1);
   {$endif}
   errorhandlerbefore:= xseterrorhandler({$ifdef FPC}@{$endif}errorhandler);
   exit;

@@ -92,7 +92,12 @@ procedure releasemysql;
 *)
 {$ENDIF}
 
-{$ifdef FPC}{$PACKRECORDS C}{$endif} //todo: check delphi record packing
+{$ifdef FPC}
+ {$PACKRECORDS C}
+{$else}
+ {$ALIGN 4}
+ {$MINENUMSIZE 4}
+{$endif}
 
   { Copyright (C) 2000-2003 MySQL AB
   

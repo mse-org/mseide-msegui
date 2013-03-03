@@ -70,7 +70,11 @@ function expandmacros(const value: msestring; const macros: macroinfoarty;
 function expandmacros(const value: msestring; 
                const anames,avalues: array of msestring;
    const options: macrooptionsty = [mao_caseinsensitive]): msestring; overload;
-
+{$ifndef FPC}
+function expandmacrosstr(const value: msestring; 
+               const anames,avalues: array of msestring;
+   const options: macrooptionsty = [mao_caseinsensitive]): msestring;
+{$endif}
 implementation
 uses
  msestream;
@@ -131,6 +135,13 @@ end;
 function expandmacros(const value: msestring; 
                const anames,avalues: array of msestring;
    const options: macrooptionsty = [mao_caseinsensitive]): msestring; overload;
+begin
+ result:= expandmacros(value,initmacros(anames,avalues),options);
+end;
+
+function expandmacrosstr(const value: msestring; 
+               const anames,avalues: array of msestring;
+   const options: macrooptionsty = [mao_caseinsensitive]): msestring;
 begin
  result:= expandmacros(value,initmacros(anames,avalues),options);
 end;

@@ -2044,7 +2044,9 @@ var
  str1: string;
 begin
  stream.readbuffer(lint1,sizeof(lint1));
+{$ifdef FPC}
  lint1:= leton(lint1);
+{$endif}
  setlength(str1,lint1);
  stream.readbuffer(pchar(pointer(str1))^,lint1);
  origformatdata:= str1;
@@ -2055,7 +2057,11 @@ var
  lint1: int64;
 begin
  lint1:= length(forigformatdata);
+{$ifdef FPC}
  stream.writebuffer(lint1,sizeof(ntole(lint1))); 
+{$else}
+ stream.writebuffer(lint1,sizeof(lint1)); 
+{$endif}
  stream.writebuffer(pchar(pointer(forigformatdata))^,lint1);
 end;
 

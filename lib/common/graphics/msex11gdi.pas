@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -12,7 +12,7 @@ unit msex11gdi;
 interface
 uses
  {$ifdef FPC}xlib{$else}Xlib{$endif},xft,
- {$ifdef FPC}x,xutil,dynlibs{$endif},
+ {$ifdef FPC}x,xutil,dynlibs,{$endif}
  msegraphics,mseguiglob,msestrings,msegraphutils,mseguiintf,msetypes,
  msectypes,xrender,msefontconfig;
 
@@ -99,7 +99,7 @@ type
   xftstate: xftstatesty;
  // fontdirection: graphicdirectionty;
  end;
- {$if sizeof(x11gcdty) > sizeof(gcpty)} {$error 'buffer overflow'}{$endif}
+ {$if sizeof(x11gcdty) > sizeof(gcpty)} {$error 'buffer overflow'}{$ifend}
  x11gcty = record
   case integer of
    0: (d: x11gcdty;);
@@ -2313,50 +2313,33 @@ var
  fhasfontconfig: boolean;
  
 function getxftlib: boolean;
+const
+ funcs: array[0..16] of funcinfoty = (
+  (n: 'XftDrawDestroy'; d: {$ifndef FPC}@{$endif}@XftDrawDestroy),
+  (n: 'XftDrawSetClipRectangles'; d: {$ifndef FPC}@{$endif}@XftDrawSetClipRectangles),
+  (n: 'XftDrawCreate'; d: {$ifndef FPC}@{$endif}@XftDrawCreate),
+  (n: 'XftDrawSetClip'; d: {$ifndef FPC}@{$endif}@XftDrawSetClip),
+  (n: 'XftTextExtents16'; d: {$ifndef FPC}@{$endif}@XftTextExtents16),
+  (n: 'XftFontOpenName'; d: {$ifndef FPC}@{$endif}@XftFontOpenName),
+  (n: 'XftFontClose'; d: {$ifndef FPC}@{$endif}@XftFontClose),
+  (n: 'XftDrawString16'; d: {$ifndef FPC}@{$endif}@XftDrawString16),
+  (n: 'XftDefaultHasRender'; d: {$ifndef FPC}@{$endif}@XftDefaultHasRender),
+  (n: 'XftGetVersion'; d: {$ifndef FPC}@{$endif}@XftGetVersion),
+  (n: 'XftInit'; d: {$ifndef FPC}@{$endif}@XftInit),
+  (n: 'XftInitFtLibrary'; d: {$ifndef FPC}@{$endif}@XftInitFtLibrary),
+  (n: 'XftCharExists'; d: {$ifndef FPC}@{$endif}@XftCharExists),
+  (n: 'XftNameParse'; d: {$ifndef FPC}@{$endif}@XftNameParse),
+  (n: 'XftFontMatch'; d: {$ifndef FPC}@{$endif}@XftFontMatch),
+  (n: 'XftFontOpenPattern'; d: {$ifndef FPC}@{$endif}@XftFontOpenPattern),
+  (n: 'XftDefaultSubstitute'; d: {$ifndef FPC}@{$endif}@XftDefaultSubstitute)
+  );
 begin
 {$ifndef staticxft}
  result:= false;
  try
   initializefontconfig([]);
   fhasfontconfig:= true;
-  getprocaddresses(xftnames,[
-    'XftDrawDestroy',            //0
-    'XftDrawSetClipRectangles',  //1
-    'XftDrawCreate',             //2 
-    'XftDrawSetClip',            //3
-    'XftTextExtents16',          //4 
-    'XftFontOpenName',           //5
-    'XftFontClose',              //6
-    'XftDrawString16',           //7
-    'XftDefaultHasRender',       //8
-    'XftGetVersion',             //9
-    'XftInit',                   //10
-    'XftInitFtLibrary',          //11
-    'XftCharExists',             //12
-    'XftNameParse',              //13  
-    'XftFontMatch',              //14
-    'XftFontOpenPattern',        //15
-    'XftDefaultSubstitute'       //16
-    ],
-    [
-    {$ifndef FPC}@{$endif}@XftDrawDestroy,              //0
-    {$ifndef FPC}@{$endif}@XftDrawSetClipRectangles,    //1
-    {$ifndef FPC}@{$endif}@XftDrawCreate,               //2
-    {$ifndef FPC}@{$endif}@XftDrawSetClip,              //3
-    {$ifndef FPC}@{$endif}@XftTextExtents16,            //4
-    {$ifndef FPC}@{$endif}@XftFontOpenName,             //5
-    {$ifndef FPC}@{$endif}@XftFontClose,                //6
-    {$ifndef FPC}@{$endif}@XftDrawString16,             //7
-    {$ifndef FPC}@{$endif}@XftDefaultHasRender,         //8
-    {$ifndef FPC}@{$endif}@XftGetVersion,               //9
-    {$ifndef FPC}@{$endif}@XftInit,                     //10
-    {$ifndef FPC}@{$endif}@XftInitFtLibrary,            //11
-    {$ifndef FPC}@{$endif}@XftCharExists,               //12
-    {$ifndef FPC}@{$endif}@XftNameParse,                //13
-    {$ifndef FPC}@{$endif}@XftFontMatch,                //14
-    {$ifndef FPC}@{$endif}@XftFontOpenPattern,          //15
-    {$ifndef FPC}@{$endif}@XftDefaultSubstitute         //16
-    ]);
+  getprocaddresses(xftnames,funcs);
  except
   exit;
  end;
@@ -2366,33 +2349,23 @@ begin
 end;
 
 function getxrenderlib: boolean;
+const
+ funcs: array[0..9] of funcinfoty = (
+  (n: 'XRenderSetPictureClipRectangles'; d: {$ifndef FPC}@{$endif}@XRenderSetPictureClipRectangles),
+  (n: 'XRenderCreatePicture'; d: {$ifndef FPC}@{$endif}@XRenderCreatePicture),
+  (n: 'XRenderFillRectangle'; d: {$ifndef FPC}@{$endif}@XRenderFillRectangle),
+  (n: 'XRenderSetPictureTransform'; d: {$ifndef FPC}@{$endif}@XRenderSetPictureTransform),
+  (n: 'XRenderSetPictureFilter'; d: {$ifndef FPC}@{$endif}@XRenderSetPictureFilter),
+  (n: 'XRenderFreePicture'; d: {$ifndef FPC}@{$endif}@XRenderFreePicture),
+  (n: 'XRenderComposite'; d: {$ifndef FPC}@{$endif}@XRenderComposite),
+  (n: 'XRenderQueryExtension'; d: {$ifndef FPC}@{$endif}@XRenderQueryExtension),
+  (n: 'XRenderFindVisualFormat'; d: {$ifndef FPC}@{$endif}@XRenderFindVisualFormat),
+  (n: 'XRenderFindStandardFormat'; d: {$ifndef FPC}@{$endif}@XRenderFindStandardFormat)
+  );
 begin
  result:= false;
  try
-  getprocaddresses(xrendernames,[
-    'XRenderSetPictureClipRectangles',  //0
-    'XRenderCreatePicture',             //1
-    'XRenderFillRectangle',             //2
-    'XRenderSetPictureTransform',       //3
-    'XRenderSetPictureFilter',          //4
-    'XRenderFreePicture',               //5
-    'XRenderComposite',                 //6
-    'XRenderQueryExtension',            //7
-    'XRenderFindVisualFormat',          //8
-    'XRenderFindStandardFormat'         //9
-    ],
-    [
-    {$ifndef FPC}@{$endif}@XRenderSetPictureClipRectangles,  //0
-    {$ifndef FPC}@{$endif}@XRenderCreatePicture,             //1
-    {$ifndef FPC}@{$endif}@XRenderFillRectangle,             //2
-    {$ifndef FPC}@{$endif}@XRenderSetPictureTransform,       //3
-    {$ifndef FPC}@{$endif}@XRenderSetPictureFilter,          //4
-    {$ifndef FPC}@{$endif}@XRenderFreePicture,               //5
-    {$ifndef FPC}@{$endif}@XRenderComposite,                 //6
-    {$ifndef FPC}@{$endif}@XRenderQueryExtension,            //7
-    {$ifndef FPC}@{$endif}@XRenderFindVisualFormat,          //8
-    {$ifndef FPC}@{$endif}@XRenderFindStandardFormat         //9
-    ]);
+  getprocaddresses(xrendernames,funcs);
  except
   exit;
  end;  

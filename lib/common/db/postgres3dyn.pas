@@ -38,8 +38,11 @@ procedure releasepostgres3;
     pqlib = 'libpq.dll';
 {$ENDIF}
 *)
-{$ifdef FPC} //todo: check delphi record packing
-{$PACKRECORDS C}
+{$ifdef FPC}
+ {$PACKRECORDS C}
+{$else}
+ {$ALIGN 4}
+ {$MINENUMSIZE 4}
 {$endif}
 //{$i postgres3types.inc}
 Type

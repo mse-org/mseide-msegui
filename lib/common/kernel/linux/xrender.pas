@@ -8,10 +8,10 @@ uses
     External_library='libXrender.so';
 
 {$IFDEF FPC}
-{$PACKRECORDS C}
+ {$PACKRECORDS C}
 {$ELSE}
-{$ALIGN 4}
-{$MINENUMSIZE 4}
+ {$ALIGN 4}
+ {$MINENUMSIZE 4}
 {$ENDIF}
 
 
@@ -41,7 +41,10 @@ uses
     }
                                        
   type
-  
+
+{$ifndef FPC}
+ txid = xid;
+{$endif}  
      TBool = integer;
      dword = longword;
      Pdword = ^dword;

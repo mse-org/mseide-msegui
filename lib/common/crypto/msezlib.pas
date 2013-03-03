@@ -91,8 +91,11 @@ const
  ZLIB_VER_REVISION = 7;
  ZLIB_VER_SUBREVISION = 0;
 
-{$ifdef FPC} //todo: fix for delphi
-{$packrecords c}
+{$ifdef FPC} 
+ {$packrecords c}
+{$else}
+ {$ALIGN 4}
+ {$MINENUMSIZE 4}
 {$endif}
 
 type

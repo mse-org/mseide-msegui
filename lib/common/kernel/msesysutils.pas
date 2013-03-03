@@ -106,7 +106,7 @@ function timestamp: longword;
 var
  t1: timeval;
 begin
- gettimeofday(t1,ptimezone(nil));
+ gettimeofday(t1,ptimezone(nil)^);
  result:= t1.tv_sec * 1000000 + t1.tv_usec;
  if result = 0 then begin
   result:= 1;
@@ -294,14 +294,24 @@ end;
 
 procedure debugout(const sender: tcomponent; const atext: ansistring);
 begin
- debugwriteln(hextostr(ptruint(sender),8)+' '+
+ if sender = nil then begin
+  debugwriteln('NIL '+atext);
+ end
+ else begin
+  debugwriteln(hextostr(ptruint(sender),8)+' '+
                       sender.name+':'+sender.classname+' '+atext);
+ end;
 end;
 
 procedure debugout(const sender: tobject; const atext: ansistring);
 begin
- debugwriteln(hextostr(ptruint(sender),8)+' '+
+ if sender = nil then begin
+  debugwriteln('NIL '+atext);
+ end
+ else begin
+  debugwriteln(hextostr(ptruint(sender),8)+' '+
                       sender.classname+' '+atext);
+ end;
 end;
 
 procedure debugoutstart(out ts: longword;

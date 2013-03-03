@@ -12,7 +12,7 @@ unit msewindnd;
 interface
 uses
  windows,msetypes,msegui,mseguiintf,mseguiglob,msegraphutils,msestrings,
- mseclasses,activex,mseglob;
+ mseclasses,activex,mseglob,msedragglob;
 
 type
  {$ifndef FPC}

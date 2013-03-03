@@ -19,10 +19,10 @@ uses
 }
 
 {$IFDEF FPC}
-{$PACKRECORDS C}
+ {$PACKRECORDS C}
 {$ELSE}
-{$ALIGN 4}
-{$MINENUMSIZE 4}
+ {$ALIGN 4}
+ {$MINENUMSIZE 4}
 {$ENDIF}
 
 type           //from fontconfig.h, XftCompat.h

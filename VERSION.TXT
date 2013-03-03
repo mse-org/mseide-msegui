@@ -1,6 +1,10 @@
 MSEide+MSEgui breaking changes version history
 
-2012-02-14
+2013-03-03
+ sender parameter of tcustomstringcol.oncopytoclipboard, onpastefromclipboard
+ is tcustomstringcol.
+
+2013-02-14
  tapplication.postevent() boolean parameters -> posteventoptionsty.
  application.modallevel returns 0 instead of -1 for single loop stack.
 2013-02-12

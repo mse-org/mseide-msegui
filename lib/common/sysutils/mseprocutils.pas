@@ -682,7 +682,7 @@ function execwaitmse(const commandline: string;
                       //const inactive: boolean = true
                       ): integer;
 begin
- result:= mselibc.{$ifdef FPC}__system{$else}system{$endif}(pchar(commandline));
+ result:= mselibc.__system(pchar(commandline));
 end;
 
 function pipe(out desc: pipedescriptorty; write: boolean): boolean;
@@ -734,14 +734,15 @@ type
 var
  procid: integer;
  topipehandles,frompipehandles,errorpipehandles: tpipedescriptors;
- ptyout: integer = -1;
- ptyerr: integer = -1;
+ ptyout: integer;// = -1;
+ ptyerr: integer;// = -1;
  ptynameout: namebufferty;
  ptynameerr: namebufferty;
  
 {$ifndef FPC}
  params: array[0..3] of pchar;
 {$endif}
+
  procedure execerr;
  var
   errorbefore: integer;
@@ -837,6 +838,8 @@ var
  bo1: boolean;
 begin
 // lockvar:= 0;
+ ptyout:= -1;
+ ptyerr:= -1;
  result:= invalidprochandle; //compilerwarnung;
  topipehandles.writedes:= invalidfilehandle;
  topipehandles.readdes:= invalidfilehandle;
@@ -1081,11 +1084,11 @@ begin
  try
   fillchar(result,sizeof(result),0);
   stream.readln(str1);
-  {$ifdef FPC}
+//  {$ifdef FPC}
   sscanf(pchar(str1),'%*d (%*a[^)]) %*c %d',[@result]);
-  {$else}
-  sscanf(pchar(str1),'%*d (%*a[^)]) %*c %d',@result);
-  {$endif}
+//  {$else}
+//  sscanf(pchar(str1),'%*d (%*a[^)]) %*c %d',@result);
+//  {$endif}
  finally
   stream.free;
  end;
@@ -1105,7 +1108,8 @@ begin
    mselibc.sscanf(pchar(str1),'%d (%a[^)]) %c %d %d %d %d %d %lu %lu '+
     '%lu %lu %lu %lu %lu %ld %ld %ld %ld %ld %ld %lu %lu %ld %lu %lu %lu %lu %lu '+
     '%lu %lu %lu %lu %lu %lu %lu %lu %d %d',
-    {$ifdef FPC}[{$endif}
+//    {$ifdef FPC}[{$endif}
+    [
     @pid,
     @commpo,
     @state,
@@ -1145,7 +1149,8 @@ begin
     @cnswap,
     @exitsignal,
     @processor
-    {$ifdef FPC}]{$endif}
+    ]
+//    {$ifdef FPC}]{$endif}
                    );
    comm:= string(commpo);
    mselibc.free(commpo);

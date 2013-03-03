@@ -1055,7 +1055,7 @@ var
  {$ifdef FPC}
   int64(result):= beton(pint64(currbuff)^);
  {$else}
-  int64(ar8ty(result)):= beton(pint64(currbuff)^);
+  int64(ar8ty(result)):= beton8(pint64(currbuff)^);
  {$endif}
  end;
  
@@ -1090,7 +1090,11 @@ var
       inc(currbuff,asize);
      end;
      ftlargeint: begin
+     {$ifdef FPC}
       lint1:= BEtoN(pint64(CurrBuff)^);
+     {$else}
+      lint1:= BEtoN8(pint64(CurrBuff)^);
+     {$endif}
       move(lint1,buffer^,sizeof(lint1));
       inc(buffer,sizeof(int64));
       inc(currbuff,asize);
@@ -1170,7 +1174,7 @@ var
      {$ifdef FPC}
       do1:= double(BEtoN(pint64(CurrBuff)^));
      {$else}
-      do1:= double(ar8ty(BEtoN(pint64(CurrBuff)^)));
+      do1:= double(ar8ty(BEtoN8(pint64(CurrBuff)^)));
      {$endif}
       if FIntegerDatetimes then begin
        do1:= do1/1000000;

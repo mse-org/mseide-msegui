@@ -31,15 +31,15 @@
  This is necessary for supporting different platforms with different calling
  conventions via a single unit.}
 
-{$mode objfpc} {$h+}
+{$ifdef FPC}{$mode objfpc} {$h+}{$endif}
 
 unit mseglx;
 
 interface
-
+{$ifdef linux}{$define unix}{$endif}
 {$IFDEF Unix}
   uses
-    X, XLib, XUtil,mseglextglob;
+    {$ifdef FPC}X,{$endif} XLib,{$ifdef FPC} XUtil,{$endif}mseglextglob;
   {$DEFINE HasGLX}  // Activate GLX stuff
 {$ELSE}
   {$MESSAGE Unsupported platform.}
@@ -111,6 +111,9 @@ const
   GLX_TRANSPARENT_INDEX_EXT             = $8009;
 
 type
+{$ifndef FPC}
+  txid = xid;
+{$endif}
   // From XLib:
   XPixmap = TXID;
   XFont = TXID;
@@ -170,36 +173,36 @@ function load_glx: boolean;
 function load_glx_mesa: boolean;
 
 implementation
-{$LINKLIB m}
+{$ifdef FPC}{$LINKLIB m}{$endif}
 
 uses 
- msegl,msedynload,msesys,dynlibs;
+ msegl,msedynload,msesys{$ifdef FPC},dynlibs{$endif};
 
 function load_glx: boolean;
 const
  funcs: array[0..19] of funcinfoty =
    (
-    (n: 'glXChooseVisual'; d: @glXChooseVisual),
-    (n: 'glXCreateContext'; d: @glXCreateContext),
-    (n: 'glXDestroyContext'; d: @glXDestroyContext),
-    (n: 'glXMakeCurrent'; d: @glXMakeCurrent),
-    (n: 'glXCopyContext'; d: @glXCopyContext),
-    (n: 'glXSwapBuffers'; d: @glXSwapBuffers),
-    (n: 'glXCreateGLXPixmap'; d: @glXCreateGLXPixmap),
-    (n: 'glXDestroyGLXPixmap'; d: @glXDestroyGLXPixmap),
-    (n: 'glXQueryExtension'; d: @glXQueryExtension),
-    (n: 'glXQueryVersion'; d: @glXQueryVersion),
-    (n: 'glXIsDirect'; d: @glXIsDirect),
-    (n: 'glXGetConfig'; d: @glXGetConfig),
-    (n: 'glXGetCurrentContext'; d: @glXGetCurrentContext),
-    (n: 'glXGetCurrentDrawable'; d: @glXGetCurrentDrawable),
-    (n: 'glXWaitGL'; d: @glXWaitGL),
-    (n: 'glXWaitX'; d: @glXWaitX),
-    (n: 'glXUseXFont'; d: @glXUseXFont),
+    (n: 'glXChooseVisual'; d: {$ifndef FPC}@{$endif}@glXChooseVisual),
+    (n: 'glXCreateContext'; d: {$ifndef FPC}@{$endif}@glXCreateContext),
+    (n: 'glXDestroyContext'; d: {$ifndef FPC}@{$endif}@glXDestroyContext),
+    (n: 'glXMakeCurrent'; d: {$ifndef FPC}@{$endif}@glXMakeCurrent),
+    (n: 'glXCopyContext'; d: {$ifndef FPC}@{$endif}@glXCopyContext),
+    (n: 'glXSwapBuffers'; d: {$ifndef FPC}@{$endif}@glXSwapBuffers),
+    (n: 'glXCreateGLXPixmap'; d: {$ifndef FPC}@{$endif}@glXCreateGLXPixmap),
+    (n: 'glXDestroyGLXPixmap'; d: {$ifndef FPC}@{$endif}@glXDestroyGLXPixmap),
+    (n: 'glXQueryExtension'; d: {$ifndef FPC}@{$endif}@glXQueryExtension),
+    (n: 'glXQueryVersion'; d: {$ifndef FPC}@{$endif}@glXQueryVersion),
+    (n: 'glXIsDirect'; d: {$ifndef FPC}@{$endif}@glXIsDirect),
+    (n: 'glXGetConfig'; d: {$ifndef FPC}@{$endif}@glXGetConfig),
+    (n: 'glXGetCurrentContext'; d: {$ifndef FPC}@{$endif}@glXGetCurrentContext),
+    (n: 'glXGetCurrentDrawable'; d: {$ifndef FPC}@{$endif}@glXGetCurrentDrawable),
+    (n: 'glXWaitGL'; d: {$ifndef FPC}@{$endif}@glXWaitGL),
+    (n: 'glXWaitX'; d: {$ifndef FPC}@{$endif}@glXWaitX),
+    (n: 'glXUseXFont'; d: {$ifndef FPC}@{$endif}@glXUseXFont),
     // GLX 1.1 and later
-    (n: 'glXQueryExtensionsString'; d: @glXQueryExtensionsString),
-    (n: 'glXQueryServerString'; d: @glXQueryServerString),
-    (n: 'glXGetClientString'; d: @glXGetClientString)
+    (n: 'glXQueryExtensionsString'; d: {$ifndef FPC}@{$endif}@glXQueryExtensionsString),
+    (n: 'glXQueryServerString'; d: {$ifndef FPC}@{$endif}@glXQueryServerString),
+    (n: 'glXGetClientString'; d: {$ifndef FPC}@{$endif}@glXGetClientString)
    );
 begin
  result:= getprocaddresses(libgl,funcs,true);
@@ -209,11 +212,11 @@ function load_glx_mesa: boolean;
 const
  funcs: array[0..4] of funcinfoty =
    (
-    (n: 'glXCreateGLXPixmapMESA'; d: @glXCreateGLXPixmapMESA),
-    (n: 'glXReleaseBufferMESA'; d: @glXReleaseBufferMESA),
-    (n: 'glXCopySubBufferMESA'; d: @glXCopySubBufferMESA),
-    (n: 'glXGetVideoSyncSGI'; d: @glXGetVideoSyncSGI),
-    (n: 'glXWaitVideoSyncSGI'; d: @glXWaitVideoSyncSGI)
+    (n: 'glXCreateGLXPixmapMESA'; d: {$ifndef FPC}@{$endif}@glXCreateGLXPixmapMESA),
+    (n: 'glXReleaseBufferMESA'; d: {$ifndef FPC}@{$endif}@glXReleaseBufferMESA),
+    (n: 'glXCopySubBufferMESA'; d: {$ifndef FPC}@{$endif}@glXCopySubBufferMESA),
+    (n: 'glXGetVideoSyncSGI'; d: {$ifndef FPC}@{$endif}@glXGetVideoSyncSGI),
+    (n: 'glXWaitVideoSyncSGI'; d: {$ifndef FPC}@{$endif}@glXWaitVideoSyncSGI)
    );
 begin
  result:= getprocaddresses(libgl,funcs,true);

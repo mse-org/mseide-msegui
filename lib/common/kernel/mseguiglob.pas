@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -246,50 +246,6 @@ type
   function convertmimetext(const atypeindex: integer): msestring;
  end;
  
- dragobjstatety = (dos_sysdnd,dos_write,dos_sysdroppending);
- dragobjstatesty = set of dragobjstatety;
- 
- pdragobject = ^tdragobject;
- tdragobject = class(tnullinterfacedobject)
-  private
-   fpickpos: pointty;
-   fdroppos: pointty;
-  protected
-   finstancepo: pdragobject;
-   fsender: tobject;
-   fstate: dragobjstatesty;
-   fsysdndintf: isysdnd;
-   feventintf: ievent;
-   factions: dndactionsty;
-   function checksysdnd(const aaction: sysdndactionty;
-                             const arect: rectty): boolean;
-    //isysdnd
-   function geteventintf: ievent;
-  public
-   constructor create(const asender: tobject; var instance: tdragobject;
-                          const apickpos: pointty;
-                          const aactions: dndactionsty = []);
-   destructor destroy; override;
-   function sender: tobject;
-   procedure acepted(const apos: pointty); virtual;        //screenorigin
-   procedure refused(const apos: pointty); virtual;        //screenorigin
-   property pickpos: pointty read fpickpos write fpickpos; //screenorigin
-   property droppos: pointty read fdroppos write fdroppos; //screenorigin
-   property state: dragobjstatesty read fstate;
-   property actions: dndactionsty read factions write factions;
- end;
-
- drageventkindty = (dek_begin,dek_check,dek_drop,dek_leave);
-
- draginfoty = record
-  eventkind: drageventkindty;
-  pos: pointty;           //origin = clientrect.pos
-  pickpos: pointty;       //origin = screenorigin
-  clientpickpos: pointty; //origin = clientrect.pos
-  dragobjectpo: pdragobject;
-  accept: boolean;
- end;
-
 type
  guierrorty = (gue_ok,gue_error,
                gue_alreadyregistered,gue_notregistered,
@@ -340,9 +296,7 @@ procedure guierror(error: guierrorty; sender: tobject;
 implementation
 
 uses
- mseclasses,msestreaming,mseapplication,msegui,mseguiintf;
-type
- tguiapplication1 = class(tguiapplication);
+ mseclasses,msestreaming{,mseapplication,msegui,mseguiintf};
  
 const
  errortexts: array[guierrorty] of string =
@@ -437,59 +391,6 @@ end;
 function egui.geterror: guierrorty;
 begin
  result:= guierrorty(ferror);
-end;
-
-{ tdragobject }
-
-constructor tdragobject.create(const asender: tobject; var instance: tdragobject;
-                                 const apickpos: pointty;
-                                 const aactions: dndactionsty);
-begin
- fsender:= asender;
- finstancepo:= @instance;
- instance.Free;
- instance:= self;
- fpickpos:= apickpos;
- factions:= aactions;
- tguiapplication1(application).dragstarted;
-end;
-
-destructor tdragobject.destroy;
-begin
- checksysdnd(sdnda_destroyed,nullrect);
- if finstancepo <> nil then begin
-  finstancepo^:= nil;
- end;
- inherited;
-end;
-
-procedure tdragobject.acepted(const apos: pointty);
-begin
- //dummy
-end;
-
-procedure tdragobject.refused(const apos: pointty);
-begin
- //dummy
-end;
-
-function tdragobject.sender: tobject;
-begin
- result:= fsender;
-end;
-
-function tdragobject.checksysdnd(const aaction: sysdndactionty;
-                                 const arect: rectty): boolean;
-begin
- result:= false;
- if dos_sysdnd in fstate then begin
-  gui_sysdnd(aaction,fsysdndintf,arect,result);
- end;
-end;
-
-function tdragobject.geteventintf: ievent;
-begin
- result:= feventintf;
 end;
 
 end.

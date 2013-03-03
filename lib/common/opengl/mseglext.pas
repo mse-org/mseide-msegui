@@ -31,7 +31,7 @@ uses
   {$IFDEF msWindows}
   Windows,
   {$ELSE}
-  dynlibs,
+  {$ifdef FPC}dynlibs,{$endif}
   {$ENDIF}
   msegl,mseglextglob{$ifndef FPC},msetypes{$endif};
 

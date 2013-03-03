@@ -19,7 +19,7 @@ unit msegui;
 interface
 uses
  classes,mclasses,sysutils,msegraphics,msetypes,
- msestrings,mseerr,msegraphutils,mseapplication,
+ msestrings,mseerr,msegraphutils,mseapplication,msedragglob,
  msepointer,mseevent,msekeyboard,mseclasses,mseglob,mseguiglob,mselist,
  msesystypes,msethread,mseguiintf,{msesysdnd,}
  msebitmap,msearrayprops,msethreadcomp,mserichstring,msearrayutils
@@ -41,6 +41,7 @@ const
  mousebuttons = [ss_left,ss_right,ss_middle];
 
 type
+
  gdiregionty = record
   gdi: pgdifunctionaty;
   region: regionty;

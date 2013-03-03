@@ -19,7 +19,7 @@ unit msetextedit;
 interface
 uses
  mseeditglob,mseedit,msewidgetgrid,classes,mclasses,msedatalist,
- msegraphics,msestream,
+ msegraphics,msestream,msedragglob,
  msetypes,mserichstring,msestat,msestatfile,mseclasses,mseinplaceedit,msegrids,
  mseevent,mseguiglob,msegui,msegraphutils,msestrings,msedrawtext,msearrayprops,
  msemenus,msepointer,msegridsglob{$ifdef mse_with_ifi},mseificomp{$endif},

@@ -22,7 +22,7 @@ unit mdb;
 interface
 
 uses
- classes,mclasses,Sysutils,Variants,FmtBCD,MaskUtils,msetypes
+ classes,mclasses,sysutils,variants,fmtbcd,maskutils,msetypes
    {$ifndef FPC},classes_del{$endif};
 
 const

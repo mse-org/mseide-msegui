@@ -802,7 +802,7 @@ begin
  ftargetconsole:= tmseprocess.create(nil);
  ftargetconsole.options:= [pro_output,pro_errorouttoout];
 // ftargetconsole.filename:= 'xterm';
- ftargetconsole.output.oninputavailable:= @xtermfrom;
+ ftargetconsole.output.oninputavailable:= {$ifdef FPC}@{$endif}xtermfrom;
  {$endif}
  foverloadsleepus:= -1;
  inherited;
@@ -1784,8 +1784,13 @@ begin
   end;
   ptsh:= inttostr(ftargetterminal.fpty);
   ftargetconsole.commandline:=
-               expandmacros(fxtermcommand,['PTS','PTSN','PTSH'],[pts,ptsn,ptsh],
-                                                          [mao_caseinsensitive]);
+{$ifdef FPC}
+       expandmacros(fxtermcommand,['PTS','PTSN','PTSH'],[pts,ptsn,ptsh],
+                                                        [mao_caseinsensitive]);
+{$else}
+       expandmacrosstr(fxtermcommand,['PTS','PTSN','PTSH'],[pts,ptsn,ptsh],
+                                                        [mao_caseinsensitive]);
+{$endif}
   ftargetconsole.active:= true;
   result:= ftargetconsole.running;
  end;

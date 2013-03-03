@@ -19,7 +19,7 @@ unit componentstore;
 interface
 uses
  classes,mclasses,mseglob,mseguiglob,mseapplication,msestat,msemenus,msegui,
- msegraphics,
+ msegraphics,msedragglob,
  msegraphutils,mseevent,mseclasses,mseforms,msedock,mseact,mseactions,
  msestrings,msedataedits,mseedit,msegrids,msetypes,msewidgetgrid,msedatanodes,
  mselistbrowser,msewidgets,msestatfile,msebitmap,msefiledialog,msesys,msedialog,

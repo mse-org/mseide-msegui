@@ -1769,7 +1769,7 @@ function opentodynarrayft(const items: array of tfieldtype): fieldtypearty;
 implementation
 uses
  rtlconsts,msefileutils,typinfo,{$ifdef FPC}dbconst{$else}dbconst_del{$endif},
- msearrayutils,mseformatstr,msebits,
+ msearrayutils,mseformatstr,msebits,msefloattostr,
  msereal,variants,msedate,msesys,sysconst
  {,msedbgraphics}{$ifdef unix},cwstring{$endif};
 const
@@ -2328,7 +2328,8 @@ end;
 
 function encodesqlfloat(const avalue: real): msestring;
 begin
- result:= floattostr(avalue,defaultformatsettingsdot);
+// result:= floattostr(avalue,defaultformatsettingsdot);
+  result:= doubletostring(avalue);
 // result:= replacechar(floattostr(avalue),
 //                    defaultformatsettings.decimalseparator,'.');
 //( result:= formatfloatmse(avalue,'');
@@ -2336,7 +2337,8 @@ end;
 
 function encodesqlcurrency(const avalue: currency): msestring;
 begin
- result:= formatfloat('0.####',avalue,defaultformatsettingsdot);
+// result:= formatfloat('0.####',avalue,defaultformatsettingsdot);
+ result:= formatfloatmse(avalue,'0.####',defaultformatsettingsmse,true);
 // result:= replacechar(formatfloat('0.####',avalue),
 //                         defaultformatsettings.decimalseparator,'.')
 // result:= formatfloatmse(avalue,'0.####');

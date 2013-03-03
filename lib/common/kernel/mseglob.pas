@@ -34,13 +34,20 @@ type
  tnullinterfacedobject = class(tobject,iunknown)
   protected
    function _addref: integer;
-                      {$ifdef mswindows}stdcall{$else} cdecl{$endif};
+                  {$ifdef FPC}
+                    {$ifdef mswindows}stdcall{$else} cdecl{$endif};
+                  {$else}stdcall;{$endif}
+                   
    function _release: integer;
-         {$ifdef mswindows}stdcall{$else} cdecl{$endif};
+                  {$ifdef FPC}
+                   {$ifdef mswindows}stdcall{$else} cdecl{$endif};
+                  {$else}stdcall;{$endif}
    function queryinterface(
                 {$ifdef fpc_has_constref}constref{$else}const{$endif}
                  iid: tguid; out obj): hresult;
+                  {$ifdef FPC}
                    {$ifdef mswindows}stdcall{$else} cdecl{$endif};
+                  {$else}stdcall;{$endif}
  end;
 
  objecteventty = (oe_destroyed,oe_connect,oe_disconnect,
@@ -117,13 +124,17 @@ end;
 { tnullinterfacedobject }
 
 function tnullinterfacedobject._addref: integer;
+                  {$ifdef FPC}
                        {$ifdef mswindows}stdcall{$else} cdecl{$endif};
+                  {$else}stdcall;{$endif}
 begin
  result:= -1;
 end;
 
 function tnullinterfacedobject._release: integer;
+                  {$ifdef FPC}
                    {$ifdef mswindows}stdcall{$else} cdecl{$endif};
+                  {$else}stdcall;{$endif}
 begin
  result:= -1;
 end;
@@ -131,7 +142,9 @@ end;
 function tnullinterfacedobject.QueryInterface(
              {$ifdef fpc_has_constref}constref{$else}const{$endif}
                                         IID: TGUID; out Obj): HResult;
+                  {$ifdef FPC}
                                 {$ifdef mswindows}stdcall{$else} cdecl{$endif};
+                  {$else}stdcall;{$endif}
 begin
  if getinterface(iid, obj) then begin
    result:=0

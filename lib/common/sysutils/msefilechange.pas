@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -173,8 +173,8 @@ begin
   end;
   Flags:= notifyflags;
   if not((sigactionex(dirinfosig,action, nil) = 0) and
-    (fcntl(result, F_SETSIG,dirinfosig) = 0) and
-        (fcntl(result, F_NOTIFY, Flags) = 0)) then begin
+    (fcntl(result, F_SETSIG,[dirinfosig]) = 0) and
+        (fcntl(result, F_NOTIFY,[Flags]) = 0)) then begin
    sys_closefile(result);  //es hat nicht geklappt
    result:= -1;
    exit;
@@ -248,7 +248,7 @@ var
  aevent: tfilechangeevent;
 begin
  {$ifdef UNIX}
- fcntl(fdirhandle,F_NOTIFY,notifyflags);
+ fcntl(fdirhandle,F_NOTIFY,[notifyflags]);
  {$endif}
  for int1:= 0 to length(ffileinfos) - 1 do begin
   with ffileinfos[int1] do begin

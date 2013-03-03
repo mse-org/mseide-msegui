@@ -11,7 +11,8 @@ unit msemime;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- msegui,msedrag,msestrings,msetypes,msegraphutils,mseglob,mseguiglob,mseclasses;
+ msegui,msedrag,msestrings,msetypes,msegraphutils,mseglob,mseguiglob,mseclasses,
+ msedragglob;
  
 type
 
