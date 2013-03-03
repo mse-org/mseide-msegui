@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2007 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -13,8 +13,11 @@ unit msesocketintf;
 interface
 uses
  msesystypes,msesys;
- 
-{$include ..\msesocketintf}
+{$ifdef FPC}
+ {$include ..\msesocketintf.inc}
+{$else}
+ {$include msesocketintf.inc}
+{$endif}
 
 implementation
 uses
@@ -57,7 +60,7 @@ var
  int1: integer;
 begin
  result:= sye_ok;
- int1:= fcntl(handle,f_getfl,0);
+ int1:= fcntl(handle,f_getfl,[0]);
  if int1 = -1 then begin
   result:= syelasterror
  end
@@ -68,7 +71,7 @@ begin
   else begin
    int1:= int1 and not o_nonblock;
   end;
-  if fcntl(handle,f_setfl,int1) = -1 then begin
+  if fcntl(handle,f_setfl,[int1]) = -1 then begin
    result:= sye_lasterror;
   end;
  end;
@@ -80,9 +83,9 @@ var
  int1: integer;
 begin
  case kind of 
-  sok_local: int1:= pf_local;
   sok_inet: int1:= pf_inet;
   sok_inet6: int1:= pf_inet6;
+  else int1:= pf_local; //sok_local
  end;
  handle:= socket(int1,sock_stream,0);
  if handle = -1 then begin
@@ -236,18 +239,10 @@ begin
    po1^.sa_family:= af_local;
    move(str1[1],po1^.sa_data,length(str1));
    pchar(@po1^.sa_data)[length(str1)]:= #0;
-   {$ifdef FPC}
    int2:= bind(handle,pointer(po1),int1);
-   {$else}
-   int2:= bind(handle,psockaddr(po1)^,int1);
-   {$endif}
    if (int2 <> 0) and (sys_getlasterror = EADDRINUSE) then begin
     mselibc.unlink(pchar(str1));
-    {$ifdef FPC}
     int2:= bind(handle,pointer(po1),int1);
-    {$else}
-    int2:= bind(handle,psockaddr(po1)^,int1);
-    {$endif}
    end;
    if int2 <> 0 then begin
     result:= syelasterror;
@@ -349,11 +344,7 @@ begin
     end;
    end;
   end;
-  {$ifdef FPC}
   int1:= getaddrinfo(pchar(str1),nil,@info1,@po1);
-  {$else}
-  int1:= getaddrinfo(pchar(str1),nil,@info1,paddressinfo(po1));
-  {$endif}
   if int1 <> 0 then begin
    mselasterror:= int1;
    result:= sye_sockaddr;

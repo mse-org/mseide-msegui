@@ -2193,9 +2193,11 @@ const
 
 function socket(__domain:longint; __type:longint; __protocol:longint):longint;
              cdecl;external clib name 'socket'; overload;
+{$ifdef FPC}
 function socket(__domain: Integer; __type: __socket_type;
                __protocol: Integer): TSocket;
                 cdecl;external clib name 'socket'; overload;
+{$endif}
 function shutdown(__fd:longint; __how:longint):longint;cdecl;external clib name 'shutdown';
 function connect(__fd:longint; const __addr: sockaddr;
  __len:socklen_t):longint;cdecl;external clib name 'connect'; overload;
