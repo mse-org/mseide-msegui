@@ -43,8 +43,8 @@ unit fpreadtiff;
 interface
 
 uses
-  math, classes, mclasses, sysutils, msectypes, zinflate,
-     {$ifndef FPC}msetypes,classes_del,{$endif}
+  math, classes, mclasses, sysutils, msectypes, zinflate,msetypes,
+     {$ifndef FPC}classes_del,{$endif}
      zbase, fpimage, fptiffcmn;
 
 type
@@ -219,7 +219,7 @@ begin
   for i:=0 to SampleCnt-1 do begin
     if pwordaty(SampleBits)^[i]>64 then
       TiffError('Samples bigger than 64 bit not supported');
-    if not (pwordaty(SampleBits)[i] in [8, 16]) then
+    if not (pwordaty(SampleBits)^[i] in [8, 16]) then
       TiffError('Only samples of 8 and 16 bit are supported');
     inc(SampleBitsPerPixel, pwordaty(SampleBits)^[i]);
   end;
@@ -1837,7 +1837,7 @@ begin
                   ReadImgValue(AlphaBits,pointer(Run),cx,IFD.Predictor,
                                                     LastAlphaValue,AlphaValue);
                 end else begin
-                  inc(Run,pwordaty(ExtraSamples)[i] div 8);
+                  inc(Run,pwordaty(ExtraSamples)^[i] div 8);
                 end;
               end;
               // CMYK to RGB

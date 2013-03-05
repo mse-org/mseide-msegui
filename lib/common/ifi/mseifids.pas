@@ -147,7 +147,7 @@ type
                                    const amodifiedfields: pbyte);
    procedure receiveevent(const event: tobjectevent);
   {$ifdef FPC}
-   procedure sendchangedrecord(var aitem: pptruintdataty);
+   procedure sendchangedrecord(var aitem: ptruintdataty);
   {$else}
    procedure sendchangedrecord(var aitem{: pptruintdataty});
   {$endif}
