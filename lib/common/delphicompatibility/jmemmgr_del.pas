@@ -19,6 +19,7 @@ unit jmemmgr_del;
   memory then you shouldn't care about a little bit of unused code...) }
 
 { Original : jmemmgr.c ; Copyright (C) 1991-1997, Thomas G. Lane. }
+//modified 2013 by Martin Schreiber
 
 interface
 

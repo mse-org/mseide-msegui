@@ -5,6 +5,7 @@ Unit jmemnobs_del;
 
 { Check jmemnobs.c }
 { Copyright (C) 1996, Jacques Nomssi Nzali }
+//modified 2013 by Martin Schreiber
 
 
 interface

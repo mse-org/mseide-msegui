@@ -9,6 +9,7 @@ Unit jinclude_del;
   JPEG library.  Most applications need only include jpeglib.h. }
 
 { Original: jinclude.h Copyright (C) 1991-1994, Thomas G. Lane. }
+//modified 2013 by Martin Schreiber
 
 interface
 

@@ -3,6 +3,7 @@ unit jdcolor_del;
 { This file contains output colorspace conversion routines. }
 
 { Original: jdcolor.c ; Copyright (C) 1991-1997, Thomas G. Lane. }
+//modified 2013 by Martin Schreiber
 
 interface
 

@@ -21,6 +21,7 @@ unit jidctint_del;
   scaled fixed-point arithmetic, with a minimal number of shifts. }
 
 { Original : jidctint.c ;  Copyright (C) 1991-1998, Thomas G. Lane. }
+//modified 2013 by Martin Schreiber
 
 
 interface

@@ -13,6 +13,7 @@ unit jquant2_del;
   fundamental assumptions even hold with an irregularly spaced color map. }
 
 { Original: jquant2.c; Copyright (C) 1991-1996, Thomas G. Lane. }
+//modified 2013 by Martin Schreiber
 
 interface
 

@@ -27,6 +27,7 @@ unit jidctfst_del;
   quality-setting files than with low-quality ones. }
 
 { Original : jidctfst.c ; Copyright (C) 1994-1996, Thomas G. Lane. }
+//modified 2013 by Martin Schreiber
 
 
 interface

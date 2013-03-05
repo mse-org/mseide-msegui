@@ -11,6 +11,7 @@ unit zdeflate_del;
   For conditions of distribution and use, see copyright notice in readme.txt
 }
 
+//modified 2013 by Martin Schreiber
 
 {  ALGORITHM
 

@@ -27,6 +27,7 @@ unit jdmerge_del;
   general code in jdsample.c and jdcolor.c.) }
 
 { Original: jdmerge.c ;  Copyright (C) 1994-1996, Thomas G. Lane. }
+//modified 2013 by Martin Schreiber
 
 interface
 

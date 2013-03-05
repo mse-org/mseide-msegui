@@ -6,6 +6,7 @@ unit jdmaster_del;
   pass. }
 
 { Original: jdmaster.c ; Copyright (C) 1991-1998, Thomas G. Lane.  }
+//modified 2013 by Martin Schreiber
 
 interface
 

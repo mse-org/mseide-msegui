@@ -1,6 +1,7 @@
 unit jdct_del;
 
 { Orignal: jdct.h; Copyright (C) 1994-1996, Thomas G. Lane. }
+//modified 2013 by Martin Schreiber
 
 { This include file contains common declarations for the forward and
   inverse DCT modules.  These declarations are private to the DCT managers

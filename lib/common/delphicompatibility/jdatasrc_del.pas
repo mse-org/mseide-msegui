@@ -9,6 +9,7 @@ unit jdatasrc_del;
   than 8 bits on your machine, you may need to do some tweaking. }
 
 { jdatasrc.c ; Copyright (C) 1994-1996, Thomas G. Lane. }
+//modified 2013 by Martin Schreiber
 
 interface
 

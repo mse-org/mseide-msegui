@@ -17,6 +17,7 @@ unit jidctred_del;
 
 
 { Original : jidctred.c ; Copyright (C) 1994-1998, Thomas G. Lane. }
+//modified 2013 by Martin Schreiber
 
 interface
 

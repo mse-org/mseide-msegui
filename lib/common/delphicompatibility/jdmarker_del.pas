@@ -10,6 +10,7 @@ unit jdmarker_del;
 { History
    9.7.96                   Conversion to pascal started      jnn
    22.3.98                  updated to 6b                     jnn }
+//modified 2013 by Martin Schreiber
 
 
 interface

@@ -6,6 +6,7 @@ unit jpeglib_del;
 
 { Source:jpeglib.h+jpegint.h; Copyright (C) 1991-1998, Thomas G. Lane. }
 
+//modified 2013 by Martin Schreiber
 
 interface
 

@@ -1,6 +1,7 @@
 unit jdpostct_del;
 
 { Original: jdpostct.c ; Copyright (C) 1994-1996, Thomas G. Lane. }
+//modified 2013 by Martin Schreiber
 
 { This file contains the decompression postprocessing controller.
   This controller manages the upsampling, color conversion, and color

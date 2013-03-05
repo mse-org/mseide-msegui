@@ -5,6 +5,7 @@ unit jquant1_del;
   color values.  Optional Floyd-Steinberg or ordered dithering is available. }
 
 { Original: jquant1.c; Copyright (C) 1991-1996, Thomas G. Lane. }
+//modified 2013 by Martin Schreiber
 
 interface
 

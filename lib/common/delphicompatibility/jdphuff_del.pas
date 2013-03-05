@@ -9,6 +9,7 @@ unit jdphuff_del;
   storage only upon successful completion of an MCU. }
 
 { Original: jdphuff.c ; Copyright (C) 1995-1997, Thomas G. Lane. }
+//modified 2013 by Martin Schreiber
 
 interface
 

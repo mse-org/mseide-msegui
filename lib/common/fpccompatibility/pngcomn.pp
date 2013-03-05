@@ -12,6 +12,8 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
  **********************************************************************}
+//modified 2013 by Martin Schreiber
+
 {$mode objfpc}{$h+}
 unit PNGcomn;
 

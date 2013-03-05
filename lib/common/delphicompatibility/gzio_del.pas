@@ -10,6 +10,7 @@ unit gzio_del;
   Copyright (C) 1998 by Jacques Nomssi Nzali
   For conditions of distribution and use, see copyright notice in readme.txt
 }
+//modified 2013 by Martin Schreiber
 
 interface
 {$ifdef FPC}{$mode objfpc}{$endif}

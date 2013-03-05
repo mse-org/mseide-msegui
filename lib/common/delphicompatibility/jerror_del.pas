@@ -9,6 +9,8 @@ unit jerror_del;
 
 { Source: jerror.c;  Copyright (C) 1991-1996, Thomas G. Lane. }
 { note: format_message still contains a hack }
+//modified 2013 by Martin Schreiber
+
 {$i jconfig_del.inc}
 interface
 

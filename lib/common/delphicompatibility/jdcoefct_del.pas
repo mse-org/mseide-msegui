@@ -9,6 +9,8 @@ unit jdcoefct_del;
   Also, the input side (only) is used when reading a file for transcoding. }
 
 { Original: jdcoefct.c ; Copyright (C) 1994-1997, Thomas G. Lane. }
+//modified 2013 by Martin Schreiber
+
 {$I jconfig_del.inc}
 
 interface

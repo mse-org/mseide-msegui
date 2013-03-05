@@ -9,6 +9,7 @@ unit jdinput_del;
   These routines are concerned with controlling the decompressor's input
   processing (marker reading and coefficient decoding).  The actual input
   reading is done in jdmarker.c, jdhuff.c, and jdphuff.c. }
+//modified 2013 by Martin Schreiber
 
 interface
 

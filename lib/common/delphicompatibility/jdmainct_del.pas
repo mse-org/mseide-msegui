@@ -12,6 +12,7 @@ unit jdmainct_del;
   supplies the equivalent of the main buffer in that case. }
 
 { Original: jdmainct.c ; Copyright (C) 1994-1996, Thomas G. Lane.  }
+//modified 2013 by Martin Schreiber
 
 
 { In the current system design, the main buffer need never be a full-image

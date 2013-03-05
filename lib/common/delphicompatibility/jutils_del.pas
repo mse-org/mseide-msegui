@@ -6,6 +6,7 @@ Unit jutils_del;
   a surrounding application. }
 
 { Source: jutils.c; Copyright (C) 1991-1996, Thomas G. Lane. }
+//modified 2013 by Martin Schreiber
 
 interface
 

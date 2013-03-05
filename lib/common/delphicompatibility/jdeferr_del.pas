@@ -7,6 +7,7 @@ unit jdeferr_del;
   some other language. }
 
 { Original cderror.h  ; Copyright (C) 1994, Thomas G. Lane.  }
+//modified 2013 by Martin Schreiber
 
 interface
 

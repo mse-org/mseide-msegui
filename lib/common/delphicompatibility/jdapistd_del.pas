@@ -12,6 +12,7 @@ unit jdapistd_del;
   jpeg_start_decompress, it will end up linking in the entire decompressor.
   We thus must separate this file from jdapimin.c to avoid linking the
   whole decompression library into a transcoder. }
+//modified 2013 by Martin Schreiber
 
 interface
 

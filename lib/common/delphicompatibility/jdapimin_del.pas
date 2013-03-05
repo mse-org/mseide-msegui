@@ -13,6 +13,7 @@ unit jdapimin_del;
   case. }
 
 { Original : jdapimin.c ;  Copyright (C) 1994-1998, Thomas G. Lane. }
+//modified 2013 by Martin Schreiber
 
 interface
 

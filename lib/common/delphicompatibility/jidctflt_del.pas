@@ -32,6 +32,7 @@ unit jidctflt_del;
   we use floating point arithmetic. }
 
 { Original: jidctflt.c ; Copyright (C) 1994-1996, Thomas G. Lane. }
+//modified 2013 by Martin Schreiber
 
 interface
 

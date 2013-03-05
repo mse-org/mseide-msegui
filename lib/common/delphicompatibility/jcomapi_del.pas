@@ -4,6 +4,7 @@ unit jcomapi_del;
   compression and decompression. }
 
 { Original: jcomapi.c;  Copyright (C) 1994-1997, Thomas G. Lane. }
+//modified 2013 by Martin Schreiber
 
 interface
 

@@ -6,6 +6,7 @@ unit zbase_del;
   version 1.1.0, Feb 24th, 1998
 
   Copyright (C) 1995-1998 Jean-loup Gailly and Mark Adler
+//modified 2013 by Martin Schreiber
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages

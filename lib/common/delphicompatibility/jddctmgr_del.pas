@@ -1,6 +1,7 @@
 unit jddctmgr_del;
 
 { Original : jddctmgr.c ;  Copyright (C) 1994-1996, Thomas G. Lane. }
+//modified 2013 by Martin Schreiber
 
 { This file contains the inverse-DCT management logic.
   This code selects a particular IDCT implementation to be used,

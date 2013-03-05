@@ -13,6 +13,7 @@ unit jdhuff_del;
   storage only upon successful completion of an MCU. }
 
 { Original: jdhuff.h+jdhuff.c;  Copyright (C) 1991-1997, Thomas G. Lane. }
+//modified 2013 by Martin Schreiber
 
 
 

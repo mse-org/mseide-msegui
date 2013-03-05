@@ -1,6 +1,7 @@
 unit jdsample_del;
 
 { Original: jdsample.c; Copyright (C) 1991-1996, Thomas G. Lane. }
+//modified 2013 by Martin Schreiber
 
 { This file contains upsampling routines.
 
