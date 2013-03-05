@@ -45,7 +45,7 @@ uses
   {$ifdef ZLIB_DEBUG}
   sysutils,
   {$endif}
-  zbase{$ifndef FPC},msetypes{$endif}
+  zbase,msetypes
   ;
 
 { ===========================================================================

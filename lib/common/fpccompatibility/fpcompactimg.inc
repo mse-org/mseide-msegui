@@ -276,7 +276,7 @@ var
 begin
   v.g:=Value.red shr 8;
   v.a:=Value.alpha shr 8;
-  pFPCompactImgGrayAlpha8BitValueaty(FData)[x+y*Width]:=v;
+  pFPCompactImgGrayAlpha8BitValueaty(FData)^[x+y*Width]:=v;
 end;
 
 procedure TFPCompactImgGrayAlpha8Bit.SetInternalPixel(x, y: integer; Value: integer
@@ -353,7 +353,7 @@ end;
 
 function TFPCompactImgGray8Bit.GetInternalColor(x, y: integer): TFPColor;
 begin
-  Result.red:=pbyteaty(FData)[x+y*Width];
+  Result.red:=pbyteaty(FData)^[x+y*Width];
   Result.red:=(Word(Result.red) shl 8)+Result.red;
   Result.green:=Result.red;
   Result.blue:=Result.red;
@@ -559,7 +559,7 @@ end;
 
 function TFPCompactImgRGBA16Bit.GetInternalColor(x, y: integer): TFPColor;
 begin
-  Result:= pFPColoraty(FData)[x+y*Width];
+  Result:= pFPColoraty(FData)^[x+y*Width];
 end;
 
 function TFPCompactImgRGBA16Bit.GetInternalPixel(x, y: integer): integer;
