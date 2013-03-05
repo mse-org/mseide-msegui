@@ -12,7 +12,7 @@ unit msegraphicstream;
 
 interface
 uses
- sysutils,classes,mclasses,msebitmap,msegraphics{$ifdef FPC},fpimage{$endif},
+ sysutils,classes,mclasses,msebitmap,msegraphics,fpimage,
  msestrings,msetypes;
 
 const
@@ -20,7 +20,6 @@ const
 type
  egraphicformat = class(exception);
  
-{$ifdef FPC}
  fpreaderclassty = class of tfpcustomimagereader;
  
  tmsefpmemoryimage = class(tfpmemoryimage)
@@ -36,7 +35,6 @@ type
    property hasalpha: boolean read fhasalpha;
    property monoalpha: boolean read fmonoalpha;
  end;  
-{$endif}
 
  readgraphicprocty = function(const source: tstream; const index: integer; 
                                const dest: tobject): boolean;
@@ -77,11 +75,8 @@ function graphicfilefilternames: msestringarty;
 function graphicfilefiltermasks: msestringarty;
 function graphicfilefilterlabel(const index: integer): string;
 
-{$ifdef FPC}
-
 function readfpgraphic(const source: tstream; const readerclass: fpreaderclassty;
                              const dest: tpersistent): boolean;
-{$endif}
 
 implementation
 uses
@@ -375,8 +370,6 @@ procedure writegraphic(const dest: tstream; const source: timagelist); overload;
 begin
  writegraphic1(dest,source,'ico',[]);
 end;
-
-{$ifdef FPC}
 
 function readfpgraphic(const source: tstream; const readerclass: fpreaderclassty;
                                const dest: tpersistent): boolean;
@@ -692,7 +685,5 @@ begin
   end;
  end;
 end;
-
-{$endif}
 
 end.

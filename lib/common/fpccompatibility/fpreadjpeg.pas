@@ -20,15 +20,15 @@
  Modified 2013 by Martin Schreiber
 
 }
-unit FPReadJPEG;
+unit fpreadjpeg;
 
-{$mode objfpc}{$H+}
+{$ifdef FPC}{$mode objfpc}{$H+}{$endif}
 
 interface
 
 uses
-  classes,mclasses, SysUtils, FPImage, JPEGLib, JdAPImin,
-  JDataSrc, JdAPIstd, JmoreCfg;
+  classes,mclasses, sysutils, fpimage, jpeglib, jdapimin,
+  jdatasrc, jdapistd, jmorecfg;
 
 type
   { TFPReaderJPEG }

@@ -12,11 +12,17 @@ unit msei18nutils;
 {$ifndef FPC}{$ifdef linux} {$define UNIX} {$endif}{$endif}
 
 {$undef internalresstrhandling}
+{$ifndef FPC}
+ {$define internalresstrhandling}
+{$endif}
+
+(*
 {$ifdef FPC}
  {$if fpc_fullversion < 20301}
   {$ifndef VER2_2}{$define internalresstrhandling}{$endif}
  {$endif}
 {$endif}
+*)
 
 interface
 uses
@@ -87,7 +93,9 @@ Type          //copied from objpas.pp
 
 
 Var
-  ResourceStringTable : TResourceTablelist; External Name 'FPC_RESOURCESTRINGTABLES';
+  ResourceStringTable : TResourceTablelist; 
+                {$ifdef FPC} External Name 'FPC_RESOURCESTRINGTABLES';{$endif}
+                //todo: fix for delphi
 {$endif}
 
 var

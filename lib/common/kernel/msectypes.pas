@@ -10,6 +10,8 @@ uses
 //todo: win64
 type
 // from bits/types.h
+ __S8_TYPE = shortint;
+ __U8_TYPE = byte;
  __S16_TYPE = smallint;
  __U16_TYPE = word;
  __S32_TYPE = longint;
@@ -62,8 +64,22 @@ type
  pcshort = ^cshort;
  cushort = __U16_TYPE;
  pcushort = ^cushort;
+ cint8 = __S8_TYPE;
+ pcint8 = ^cint8;
+ cuint8 = __U8_TYPE;
+ pcuint8 = ^cuint8;
+ cint16 = __S16_TYPE;
+ pcint16 = ^cint16;
  cuint16 = __U16_TYPE;
+ pcuint16 = ^cuint16;
+ cint32 = __S32_TYPE;
+ pcint32 = ^cint32;
+ cuint32 = __U32_TYPE;
+ pcuint32 = ^cuint32;
  cint64 = __SQUAD_TYPE;
+ pcint64 = ^cint64;
+ cuint64 = __UQUAD_TYPE;
+ pucint64 = ^cuint64;
 
  cfloat = single;
  pcfloat = ^cfloat;

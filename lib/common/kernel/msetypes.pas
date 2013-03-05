@@ -46,6 +46,7 @@ type
   uint64 = type int64; //kylix
  {$endif}
   DWord = Longword;
+  pdword = ^dword;
   SizeInt = Longint;
   psizeint = ^sizeint;
   SizeUInt = DWord;

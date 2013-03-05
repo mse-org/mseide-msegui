@@ -31,14 +31,17 @@
    endian - currently using system endianess
    orientation with rotation
 }
-unit FPWriteTiff;
+//modified 2013 by Martin Schreiber
 
-{$mode objfpc}{$H+}
+unit fpwritetiff;
+
+{$ifdef FPC}{$mode objfpc}{$H+}{$endif}
 
 interface
 
 uses
-  Math, Classes, mclasses, SysUtils, zbase, zdeflate, FPimage, FPTiffCmn;
+  math, classes, mclasses, sysutils, zbase, zdeflate, fpimage, fptiffcmn
+  {$ifndef FPC},msetypes,classes_del{$endif};
 
 type
 
@@ -60,6 +63,8 @@ type
     Bytes: DWord;
   end;
   PTiffWriterChunk = ^TTiffWriterChunk;
+  TiffWriterChunkaty = array[0..0] of TTiffWriterChunk;
+  pTiffWriterChunkaty = ^TiffWriterChunkaty;
 
   { TTiffWriterChunkOffsets }
 
@@ -100,8 +105,8 @@ type
     procedure AddEntryRational(Tag: word; const Value: TTiffRational);
     procedure AddEntry(Tag: Word; EntryType: Word; EntryCount: DWord;
                        Data: Pointer; Bytes: DWord;
-                       CopyData: boolean = true);
-    procedure AddEntry(Entry: TTiffWriterEntry);
+                       CopyData: boolean = true); overload;
+    procedure AddEntry(Entry: TTiffWriterEntry); overload;
     procedure TiffError(Msg: string);
     procedure EncodeDeflate(var Buffer: Pointer; var Count: DWord);
   public
@@ -138,7 +143,8 @@ begin
   Compressed:=nil;
   if InputCount=0 then begin
     CompressedCount:=0;
-    exit(true);
+    result:= true;
+    exit;
   end;
 
   err := deflateInit(stream{%H-}, Z_DEFAULT_COMPRESSION);
@@ -179,8 +185,8 @@ begin
       end else
         CompressedCount:=CompressedCount+1024;
       ReAllocMem(Compressed,CompressedCount);
-      stream.next_out:=Compressed+stream.total_out;
-      stream.avail_out:=CompressedCount-stream.total_out;
+      stream.next_out:= pointer(pchar(Compressed)+stream.total_out);
+      stream.avail_out:= CompressedCount-stream.total_out;
     end;
     err := deflate(stream, Z_FINISH);
     if err = Z_STREAM_END then
@@ -330,14 +336,14 @@ begin
         Chunks:=TTiffWriterChunkOffsets(Entry);
         // write Chunks
         for k:=0 to Chunks.Count-1 do begin
-          PDWord(Chunks.Data)[k]:=fPosition;
-          Bytes:=Chunks.Chunks[k].Bytes;
-          PDWord(Chunks.ChunkByteCounts.Data)[k]:=Bytes;
+          plongwordaty(Chunks.Data)^[k]:= fPosition;
+          Bytes:= pTiffWriterChunkaty(Chunks.Chunks)^[k].Bytes;
+          plongwordaty(Chunks.ChunkByteCounts.Data)^[k]:=Bytes;
           {$IFDEF FPC_Debug_Image}
           //writeln('TFPWriterTiff.WriteData Chunk fPosition=',fPosition,' Bytes=',Bytes);
           {$ENDIF}
           if Bytes>0 then
-            WriteBuf(Chunks.Chunks[k].Data^,Bytes);
+            WriteBuf(pTiffWriterChunkaty(Chunks.Chunks)^[k].Data^,Bytes);
         end;
       end;
     end;
@@ -579,8 +585,11 @@ begin
           ChunkBytes:=ChunkBytesPerLine*ChunkHeight;
         end;
         GetMem(Chunk,ChunkBytes);
+       {$ifdef FPC}
         FillByte(Chunk^,ChunkBytes,0); // fill unused bytes with 0 to help compression
-
+       {$else}
+        Fillchar(Chunk^,ChunkBytes,0); // fill unused bytes with 0 to help compression
+       {$endif}
         // Orientation
         if IFD.Orientation in [1..4] then begin
           x:=ChunkLeft; y:=ChunkTop;
@@ -604,7 +613,7 @@ begin
         sx:=x; // save start x
         for cy:=0 to ChunkHeight-1 do begin
           x:=sx;
-          Run:=Chunk+cy*ChunkBytesPerLine;
+          Run:= pointer(pchar(Chunk)+cy*ChunkBytesPerLine);
           for cx:=0 to ChunkWidth-1 do begin
             Col:=Img.Colors[x,y];
             case IFD.PhotoMetricInterpretation of
@@ -671,11 +680,11 @@ begin
 
         // compress
         case Compression of
-        TiffCompressionDeflateZLib: EncodeDeflate(Chunk,ChunkBytes);
+        TiffCompressionDeflateZLib: EncodeDeflate(pointer(Chunk),ChunkBytes);
         end;
 
-        ChunkOffsets.Chunks[ChunkIndex].Data:=Chunk;
-        ChunkOffsets.Chunks[ChunkIndex].Bytes:=ChunkBytes;
+        pTiffWriterChunkaty(ChunkOffsets.Chunks)^[ChunkIndex].Data:=Chunk;
+        pTiffWriterChunkaty(ChunkOffsets.Chunks)^[ChunkIndex].Bytes:=ChunkBytes;
         // next chunk
       end;
       // created chunks
@@ -842,7 +851,7 @@ var
 begin
   if Chunks<>nil then begin
     for i:=0 to Count-1 do
-      ReAllocMem(Chunks[i].Data,0);
+      ReAllocMem(pTiffWriterChunkaty(Chunks)^[i].Data,0);
     ReAllocMem(Chunks,0);
   end;
   inherited Destroy;
@@ -858,15 +867,27 @@ begin
   Count:=NewCount;
   Size:=Count*SizeOf(TTiffWriterChunk);
   ReAllocMem(Chunks,Size);
+ {$ifdef FPC}
   if Size>0 then FillByte(Chunks^,Size,0);
+ {$else}
+  if Size>0 then Fillchar(Chunks^,Size,0);
+ {$endif}
   Size:=Count*SizeOf(DWord);
   // Offsets
   ReAllocMem(Data,Size);
+ {$ifdef FPC}
   if Size>0 then FillByte(Data^,Size,0);
+ {$else}
+  if Size>0 then Fillchar(Data^,Size,0);
+ {$endif}
   Bytes:=Size;
   // ByteCounts
   ReAllocMem(ChunkByteCounts.Data,Size);
+ {$ifdef FPC}
   if Size>0 then FillByte(ChunkByteCounts.Data^,Size,0);
+ {$else}
+  if Size>0 then Fillchar(ChunkByteCounts.Data^,Size,0);
+ {$endif}
   ChunkByteCounts.Count:=Count;
   ChunkByteCounts.Bytes:=Size;
 end;

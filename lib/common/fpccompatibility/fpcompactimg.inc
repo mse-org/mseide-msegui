@@ -13,6 +13,7 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
     
  **********************************************************************}
+//modified 2013 by MArtin Schreiber
 
 function GetFPCompactImgDesc(Gray: boolean; Depth: word; HasAlpha: boolean
   ): TFPCompactImgDesc;
@@ -92,7 +93,7 @@ var
   AllLoEqualsHi, AllLoAre0: Boolean;
   FuzzyMaskLoHi: Word;
 
-  procedure Need16Bit(c: word); inline;
+  procedure Need16Bit(c: word); {$ifdef FPC}inline;{$endif}
   var
     l: Byte;
   begin
@@ -175,8 +176,10 @@ var
 begin
   Desc:=GetMinimumPTDesc(Img,FuzzyDepth);
   ImgClass:=GetFPCompactImgClass(Desc);
-  if Img.ClassType=ImgClass then
-    exit(Img);
+  if Img.ClassType=ImgClass then begin
+   result:= img;
+   exit;
+  end;
   Result:=CreateFPCompactImg(Desc,Img.Width,Img.Height);
   for y:=0 to Img.Height-1 do
     for x:=0 to Img.Width-1 do
@@ -201,7 +204,7 @@ function TFPCompactImgGrayAlpha16Bit.GetInternalColor(x, y: integer): TFPColor;
 var
   v: TFPCompactImgGrayAlpha16BitValue;
 begin
-  v:=FData[x+y*Width];
+  v:= pFPCompactImgGrayAlpha16BitValueaty(FData)^[x+y*Width];
   Result.red:=v.g;
   Result.green:=Result.red;
   Result.blue:=Result.red;
@@ -220,7 +223,7 @@ var
 begin
   v.g:=Value.red;
   v.a:=Value.alpha;
-  FData[x+y*Width]:=v;
+  pFPCompactImgGrayAlpha16BitValueaty(FData)^[x+y*Width]:=v;
 end;
 
 procedure TFPCompactImgGrayAlpha16Bit.SetInternalPixel(x, y: integer; Value: integer
@@ -254,7 +257,7 @@ function TFPCompactImgGrayAlpha8Bit.GetInternalColor(x, y: integer): TFPColor;
 var
   v: TFPCompactImgGrayAlpha8BitValue;
 begin
-  v:=FData[x+y*Width];
+  v:= pFPCompactImgGrayAlpha8BitValueaty(FData)^[x+y*Width];
   Result.red:=(v.g shl 8)+v.g;
   Result.green:=Result.red;
   Result.blue:=Result.red;
@@ -273,7 +276,7 @@ var
 begin
   v.g:=Value.red shr 8;
   v.a:=Value.alpha shr 8;
-  FData[x+y*Width]:=v;
+  pFPCompactImgGrayAlpha8BitValueaty(FData)[x+y*Width]:=v;
 end;
 
 procedure TFPCompactImgGrayAlpha8Bit.SetInternalPixel(x, y: integer; Value: integer
@@ -305,7 +308,7 @@ end;
 
 function TFPCompactImgGray16Bit.GetInternalColor(x, y: integer): TFPColor;
 begin
-  Result.red:=FData[x+y*Width];
+  Result.red:= pwordaty(FData)^[x+y*Width];
   Result.green:=Result.red;
   Result.blue:=Result.red;
   Result.alpha:=alphaOpaque;
@@ -319,7 +322,7 @@ end;
 procedure TFPCompactImgGray16Bit.SetInternalColor(x, y: integer;
   const Value: TFPColor);
 begin
-  FData[x+y*Width]:=Value.red;
+  pwordaty(FData)^[x+y*Width]:=Value.red;
 end;
 
 procedure TFPCompactImgGray16Bit.SetInternalPixel(x, y: integer; Value: integer);
@@ -350,7 +353,7 @@ end;
 
 function TFPCompactImgGray8Bit.GetInternalColor(x, y: integer): TFPColor;
 begin
-  Result.red:=FData[x+y*Width];
+  Result.red:=pbyteaty(FData)[x+y*Width];
   Result.red:=(Word(Result.red) shl 8)+Result.red;
   Result.green:=Result.red;
   Result.blue:=Result.red;
@@ -365,7 +368,7 @@ end;
 procedure TFPCompactImgGray8Bit.SetInternalColor(x, y: integer;
   const Value: TFPColor);
 begin
-  FData[x+y*Width]:=Value.red shr 8;
+  pbyteaty(FData)^[x+y*Width]:=Value.red shr 8;
 end;
 
 procedure TFPCompactImgGray8Bit.SetInternalPixel(x, y: integer; Value: integer);
@@ -398,7 +401,7 @@ function TFPCompactImgRGBA8Bit.GetInternalColor(x, y: integer): TFPColor;
 var
   v: TFPCompactImgRGBA8BitValue;
 begin
-  v:=FData[x+y*Width];
+  v:= pFPCompactImgRGBA8BitValueaty(FData)^[x+y*Width];
   Result.red:=(v.r shl 8)+v.r;
   Result.green:=(v.g shl 8)+v.g;
   Result.blue:=(v.b shl 8)+v.b;
@@ -419,7 +422,7 @@ begin
   v.g:=Value.green shr 8;
   v.b:=Value.blue shr 8;
   v.a:=Value.alpha shr 8;
-  FData[x+y*Width]:=v;
+  pFPCompactImgRGBA8BitValueaty(FData)^[x+y*Width]:=v;
 end;
 
 procedure TFPCompactImgRGBA8Bit.SetInternalPixel(x, y: integer; Value: integer);
@@ -452,7 +455,7 @@ function TFPCompactImgRGB8Bit.GetInternalColor(x, y: integer): TFPColor;
 var
   v: TFPCompactImgRGB8BitValue;
 begin
-  v:=FData[x+y*Width];
+  v:= pFPCompactImgRGB8BitValueaty(FData)^[x+y*Width];
   Result.red:=(v.r shl 8)+v.r;
   Result.green:=(v.g shl 8)+v.g;
   Result.blue:=(v.b shl 8)+v.b;
@@ -472,7 +475,7 @@ begin
   v.r:=Value.red shr 8;
   v.g:=Value.green shr 8;
   v.b:=Value.blue shr 8;
-  FData[x+y*Width]:=v;
+  pFPCompactImgRGB8BitValueaty(FData)^[x+y*Width]:=v;
 end;
 
 procedure TFPCompactImgRGB8Bit.SetInternalPixel(x, y: integer; Value: integer);
@@ -505,7 +508,7 @@ function TFPCompactImgRGB16Bit.GetInternalColor(x, y: integer): TFPColor;
 var
   v: TFPCompactImgRGB16BitValue;
 begin
-  v:=FData[x+y*Width];
+  v:=pFPCompactImgRGB16BitValueaty(FData)^[x+y*Width];
   Result.red:=v.r;
   Result.green:=v.g;
   Result.blue:=v.b;
@@ -525,7 +528,7 @@ begin
   v.r:=Value.red;
   v.g:=Value.green;
   v.b:=Value.blue;
-  FData[x+y*Width]:=v;
+  pFPCompactImgRGB16BitValueaty(FData)^[x+y*Width]:=v;
 end;
 
 procedure TFPCompactImgRGB16Bit.SetInternalPixel(x, y: integer; Value: integer);
@@ -556,7 +559,7 @@ end;
 
 function TFPCompactImgRGBA16Bit.GetInternalColor(x, y: integer): TFPColor;
 begin
-  Result:=FData[x+y*Width];
+  Result:= pFPColoraty(FData)[x+y*Width];
 end;
 
 function TFPCompactImgRGBA16Bit.GetInternalPixel(x, y: integer): integer;
@@ -567,7 +570,7 @@ end;
 procedure TFPCompactImgRGBA16Bit.SetInternalColor(x, y: integer;
   const Value: TFPColor);
 begin
-  FData[x+y*Width]:=Value;
+  pFPColoraty(FData)^[x+y*Width]:=Value;
 end;
 
 procedure TFPCompactImgRGBA16Bit.SetInternalPixel(x, y: integer; Value: integer);

@@ -495,7 +495,11 @@ begin
     else
       begin
       GetMem (NewData, r);
+     {$ifdef FPC}
       FillWord (Newdata^[0], r div sizeof(word), 0);
+     {$else}
+      Fillchar (Newdata^[0], r, 0);
+     {$endif}
       end;
     // MG: missing "and (NewData<>nil)"
     if (old <> 0) and assigned(FData) and (NewData<>nil) then

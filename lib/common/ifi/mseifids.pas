@@ -60,8 +60,13 @@ type
  pdsrecordty = ^dsrecordty;
 *) 
 const
+{$ifdef FPC}
  intheadersize = sizeof(intrecordty.intheader);
  dsheadersize = sizeof(dsrecordty.dsheader);
+{$else}
+ intheadersize = sizeof(intheaderty);
+ dsheadersize = sizeof(dsheaderty);
+{$endif}
 type
      
 // structure of internal recordbuffer:
@@ -141,7 +146,11 @@ type
    procedure postrecord1(const akind: fieldreckindty;
                                    const amodifiedfields: pbyte);
    procedure receiveevent(const event: tobjectevent);
-   procedure sendchangedrecord(const aitem: pptruintdataty);
+  {$ifdef FPC}
+   procedure sendchangedrecord(var aitem: pptruintdataty);
+  {$else}
+   procedure sendchangedrecord(var aitem{: pptruintdataty});
+  {$endif}
    procedure setowneractive(const avalue: boolean); override;
   public
    constructor create(const aowner: tdataset; const aintf: iifidscontroller);
@@ -469,18 +478,13 @@ function decodefielddefs(const adata: pfdefdataty;
  
 implementation
 uses
- sysutils,msearrayutils,msedatalist,dbconst,msereal;
+ sysutils,msearrayutils,msedatalist,
+                {$ifdef FPC}dbconst{$else}dbconst_del{$endif},msereal;
 type
  tmsestringfield1 = class(tmsestringfield);
  tdataset1 = class(tdataset);
  
 const
-{$ifdef mse_FPC_2_2}
- snotineditstate = 
- 'Operation not allowed, dataset "%s" is not in an edit or insert state.';
-            //name changed in FPC 2_2
-{$endif}
-
  ifidskinds = [ik_requestfielddefs,ik_requestopen,ik_fielddefsdata,
                ik_fieldrec,ik_dsdata,ik_postresult,ik_coldatachange,
                ik_gridcommand];
@@ -640,7 +644,7 @@ begin
   inc(po1,ifinametostring(pifinamety(po1),str1));
   tfielddef.create(fielddefs,str1,datatype1,size1,false,int1+1);
  end;
- asize:= pointer(po1) - pointer(adata);
+ asize:= pchar(pointer(po1)) - pchar(pointer(adata));
  result:= true;
 end;
 
@@ -673,10 +677,18 @@ begin
      result:= encodeifidata(field.aslargeint,headersize);
     end;
     ftfloat,ftcurrency: begin
+    {$ifdef FPC}
      result:= encodeifidata(field.asfloat,headersize);
+    {$else}
+     result:= encodeifidatareal(field.asfloat,headersize);
+    {$endif}
     end;
     ftbcd: begin
+    {$ifdef FPC}
      result:= encodeifidata(field.ascurrency,headersize);
+    {$else}
+     result:= encodeifidatareal(field.ascurrency,headersize);
+    {$endif}
     end;
     ftblob,ftgraphic,ftmemo: begin
      result:= encodeifidata(field.asstring,headersize);
@@ -755,7 +767,7 @@ begin
    inc(po1,stringtoifiname(field.fieldname,pifinamety(po1)));
   end;
  end;
- setlength(result,pointer(po1)-pointer(result));
+ setlength(result,pchar(pointer(po1))-pchar(pointer(result)));
 end;
 
 procedure tifidscontroller.postrecord1(const akind: fieldreckindty;
@@ -848,11 +860,19 @@ begin
  end;
 end;
 
-procedure tifidscontroller.sendchangedrecord(const aitem: pptruintdataty);
+{$ifdef FPC}
+procedure tifidscontroller.sendchangedrecord(var aitem: ptruintdataty);
 begin
- fdscontroller.recnonullbased:= aitem^.key;
- postrecord1(frk_edit,pbyte(@aitem^.data));
+ fdscontroller.recnonullbased:= aitem.key;
+ postrecord1(frk_edit,pbyte(@aitem.data));
 end;
+{$else}
+procedure tifidscontroller.sendchangedrecord(var aitem{: pptruintdataty});
+begin
+ fdscontroller.recnonullbased:= ptruintdataty(aitem).key;
+ postrecord1(frk_edit,pbyte(@ptruintdataty(aitem).data));
+end;
+{$endif}
 
 procedure tifidscontroller.sendchangedrecords(const alist: tcurrentchangedlist);
 //var
@@ -861,7 +881,11 @@ begin
  if alist.count > 0 then begin
   fdscontroller.beginupdate;
   try
+  {$ifdef FPC}
    alist.iterate(hashiteratorprocty(@sendchangedrecord));
+  {$else}
+   alist.iterate(sendchangedrecord);
+  {$endif}
   finally
    fdscontroller.endupdate;
   end;
@@ -1012,7 +1036,11 @@ begin
        index1:= pfielddataty(po1)^.header.index;
        if (index1 >= 0) and (index1 <= high(frxbindings)) then begin
         with ar1[frxbindings[index1]],base,ext do begin
+        {$ifdef FPC}
          inc(po1,sizeof(mseifi.fielddataty.header));
+        {$else}
+         inc(po1,sizeof(mseifi.fielddataheaderty));
+        {$endif}
          inc(po1,ifidatatofield(pifidataty(po1),field));
          clearfieldflag(pbyte(iifidscontroller(fintf).getmodifiedfields),index1);
                      //reset changeflag
@@ -1157,25 +1185,33 @@ begin
   with iifidscontroller(fintf).getfieldinfos[aindex],base,ext do begin
    case fieldtype of
     ftinteger: begin
-     result:= encodeifidata(pinteger(pointer(recpo)+offset)^);
+     result:= encodeifidata(pinteger(pchar(pointer(recpo))+offset)^);
     end;
     ftlargeint: begin
-     result:= encodeifidata(plargeint(pointer(recpo)+offset)^);
+     result:= encodeifidata(plargeint(pchar(pointer(recpo))+offset)^);
     end;
     ftsmallint: begin
-     result:= encodeifidata(integer(psmallint(pointer(recpo)+offset)^));
+     result:= encodeifidata(integer(psmallint(pchar(pointer(recpo))+offset)^));
     end;
     ftword: begin
-     result:= encodeifidata(integer(pword(pointer(recpo)+offset)^));
+     result:= encodeifidata(integer(pword(pchar(pointer(recpo))+offset)^));
     end;
     ftboolean: begin
-     result:= encodeifidata(integer(pwordbool(pointer(recpo)+offset)^));
+     result:= encodeifidata(integer(pwordbool(pchar(pointer(recpo))+offset)^));
     end;
     ftfloat,ftcurrency: begin
-     result:= encodeifidata(pdouble(pointer(recpo)+offset)^);
+    {$ifdef FPC}
+     result:= encodeifidata(pdouble(pchar(pointer(recpo))+offset)^);
+    {$else}
+     result:= encodeifidatareal(pdouble(pchar(pointer(recpo))+offset)^);
+    {$endif}
     end;
     ftbcd: begin
-     result:= encodeifidata(pcurrency(pointer(recpo)+offset)^);
+    {$ifdef FPC}
+     result:= encodeifidata(pcurrency(pchar(pointer(recpo))+offset)^);
+    {$else}
+     result:= encodeifidatareal(pcurrency(pchar(pointer(recpo))+offset)^);
+    {$endif}
     end;
     ftmemo: begin
      mstr1:= field.aswidestring;
@@ -1186,7 +1222,7 @@ begin
      result:= encodeifidata(str1);
     end;
     ftstring: begin
-     result:= encodeifidata(pmsestring(pointer(recpo)+offset)^);
+     result:= encodeifidata(pmsestring(pchar(pointer(recpo))+offset)^);
     end;
     else begin
      result:= encodeifinull;
@@ -1250,7 +1286,7 @@ var
 begin
  str2:= stringtoutf8(amessage);
  inititemheader(str1,ik_postresult,asequence,
-                                     length(str2),po1); 
+                                     length(str2),pchar(po1)); 
  with ppostresultdataty(po1)^ do begin
   code:= acode;
   stringtoifiname(str2,@message);
@@ -1392,10 +1428,10 @@ var
  int1: integer;
 begin
  for int1:= high(fmsestringpositions) downto 0 do begin
-  pmsestring(pointer(@header)+fmsestringpositions[int1])^:= '';
+  pmsestring(pointer(pchar(@header)+fmsestringpositions[int1]))^:= '';
  end;
  for int1:= high(fansistringpositions) downto 0 do begin
-  pansistring(pointer(@header)+fansistringpositions[int1])^:= '';
+  pansistring(pointer(pchar(@header)+fansistringpositions[int1]))^:= '';
  end;
 end;
 
@@ -1409,15 +1445,15 @@ var
  int1: integer;
 begin
  for int1:= high(fmsestringpositions) downto 0 do begin
-  if ppointer(pointer(@tocompare)+fmsestringpositions[int1])^ <>
-     ppointer(pointer(@tofinalize)+fmsestringpositions[int1])^ then begin
-   pmsestring(pointer(@tofinalize)+fmsestringpositions[int1])^:= '';
+  if ppointer(pointer(pchar(@tocompare)+fmsestringpositions[int1]))^ <>
+     ppointer(pointer(pchar(@tofinalize)+fmsestringpositions[int1]))^ then begin
+   pmsestring(pointer(pchar(@tofinalize)+fmsestringpositions[int1]))^:= '';
   end;
  end;
  for int1:= high(fansistringpositions) downto 0 do begin
-  if ppointer(pointer(@tocompare)+fansistringpositions[int1])^ <>
-     ppointer(pointer(@tofinalize)+fansistringpositions[int1])^ then begin
-   pansistring(pointer(@tofinalize)+fansistringpositions[int1])^:= '';
+  if ppointer(pointer(pchar(@tocompare)+fansistringpositions[int1]))^ <>
+     ppointer(pointer(pchar(@tofinalize)+fansistringpositions[int1]))^ then begin
+   pansistring(pointer(pchar(@tofinalize)+fansistringpositions[int1]))^:= '';
   end;
  end;
 end;
@@ -1427,10 +1463,10 @@ var
  int1: integer;
 begin
  for int1:= high(fmsestringpositions) downto 0 do begin
-  stringaddref(pmsestring(pointer(@header)+fmsestringpositions[int1])^);
+  stringaddref(pmsestring(pointer(pchar(@header)+fmsestringpositions[int1]))^);
  end;
  for int1:= high(fansistringpositions) downto 0 do begin
-  stringaddref(pansistring(pointer(@header)+fansistringpositions[int1])^);
+  stringaddref(pansistring(pointer(pchar(@header)+fansistringpositions[int1]))^);
  end;
 end;
 
@@ -1574,8 +1610,8 @@ begin
     if fielddef1 <> nil then begin
      int2:= fielddef1.size;
     end;
-    tmsestringfield1(field1).setismsestring(@getmsestringdata,
-                                                  @setmsestringdata,int2,false);
+    tmsestringfield1(field1).setismsestring({$ifdef FPC}@{$endif}getmsestringdata,
+                            {$ifdef FPC}@{$endif}setmsestringdata,int2,false);
    end
    else begin
     tmsestringfield1(field1).setismsestring(nil,nil,int2,false);
@@ -1661,8 +1697,8 @@ begin
   end;
   }
   if buffer <> nil then begin
-   result:= getfieldflag(precheaderty(buffer)^.fielddata.nullmask,int1);
-   inc(buffer,ffieldinfos[int1].base.offset{ffieldbufpositions[int1]});
+   result:= getfieldflag(@precheaderty(buffer)^.fielddata.nullmask,int1);
+   inc(pchar(buffer),ffieldinfos[int1].base.offset{ffieldbufpositions[int1]});
    datasize:= ffieldinfos[int1].base.size{ffieldsizes[int1]};
   end
   else begin
@@ -1696,7 +1732,7 @@ begin
                                 (state = dsinternalcalc) or
        (afield.fieldkind = fkcalculated) and 
                                 (state = dscalcfields)) then begin
-  databaseerrorfmt(snotineditstate,[name],self);
+  databaseerrorfmt(snotediting,[name],self);
  end;
  int1:= afield.fieldno-1;
  case state of
@@ -1732,12 +1768,12 @@ begin
  if int1 >= 0 then begin // data field
   setfieldflag(pointer(fmodifiedfields),int1); //modified
   if isnull then begin
-   clearfieldflag(precheaderty(result)^.fielddata.nullmask,int1);
+   clearfieldflag(@precheaderty(result)^.fielddata.nullmask,int1);
   end
   else begin
-   setfieldflag(precheaderty(result)^.fielddata.nullmask,int1);
+   setfieldflag(@precheaderty(result)^.fielddata.nullmask,int1);
   end;
-  inc(result,ffieldinfos[int1].base.offset{ffieldbufpositions[int1]});
+  inc(pchar(result),ffieldinfos[int1].base.offset{ffieldbufpositions[int1]});
   datasize:= ffieldinfos[int1].base.size{ffieldsizes[int1]};
  end
  else begin
@@ -2223,7 +2259,7 @@ begin
   destroyfields;
  end;
  for int1:= 0 to fbrecordcount - 1 do begin
-  intfreerecord(fbufs[int1]);
+  intfreerecord(pintrecordty(fbufs[int1]));
  end;
  frecno:= -1;
  fcurrentbuf:= nil;
@@ -2525,34 +2561,38 @@ begin
    with ffieldinfos[fificontroller.frxbindings[int1]].base do begin
     case fieldtype of 
      ftinteger: begin
-      inc(adata,decodeifidata(pifidataty(adata),integer1));
-      pinteger(pointer(dest)+offset)^:= integer1;
+      inc(pchar(adata),decodeifidata(pifidataty(adata),integer1));
+      pinteger(pchar(pointer(dest))+offset)^:= integer1;
      end;
      ftlargeint: begin
-      inc(adata,decodeifidata(pifidataty(adata),int641));
-      plargeint(pointer(dest)+offset)^:= int641;
+      inc(pchar(adata),decodeifidata(pifidataty(adata),int641));
+      plargeint(pchar(pointer(dest))+offset)^:= int641;
      end;
      ftfloat,ftcurrency: begin
-      inc(adata,decodeifidata(pifidataty(adata),double1));
-      pdouble(pointer(dest)+offset)^:= double1;
+     {$ifdef FPC}
+      inc(pchar(adata),decodeifidata(pifidataty(adata),double1));
+     {$else}
+      inc(pchar(adata),decodeifidatareal(pifidataty(adata),double1));
+     {$endif}
+      pdouble(pchar(pointer(dest))+offset)^:= double1;
      end;
      ftbcd: begin
-      inc(adata,decodeifidata(pifidataty(adata),cur1));
-      pcurrency(pointer(dest)+offset)^:= cur1;
+      inc(pchar(adata),decodeifidata(pifidataty(adata),cur1));
+      pcurrency(pchar(pointer(dest))+offset)^:= cur1;
      end;
      ftblob,ftgraphic,ftmemo: begin
-      inc(adata,decodeifidata(pifidataty(adata),str1));
-      pstring(pointer(dest)+offset)^:= str1;
+      inc(pchar(adata),decodeifidata(pifidataty(adata),str1));
+      pstring(pchar(pointer(dest))+offset)^:= str1;
      end;
      ftstring: begin
-      inc(adata,decodeifidata(pifidataty(adata),mstr1));
-      pmsestring(pointer(dest)+offset)^:= mstr1;
+      inc(pchar(adata),decodeifidata(pifidataty(adata),mstr1));
+      pmsestring(pchar(pointer(dest))+offset)^:= mstr1;
      end;
     end;
    end;
   end
   else begin
-   inc(adata,skipifidata(pifidataty(adata)));
+   inc(pchar(adata),skipifidata(pifidataty(adata)));
   end;
  end;
 end;
@@ -2571,7 +2611,7 @@ begin
   fbufs[int1]:= intallocrecord;  
   decoderecord(po1,fbufs[int1]);
  end;
- asize:= po1 -  pointer(adata);
+ asize:= pchar(po1) -  pchar(pointer(adata));
 end;
 
 function tifidataset.getfiltereditkind: filtereditkindty;
@@ -2721,7 +2761,7 @@ begin
   if decodefielddefs(@adata^.data,fielddefs,int1) then begin
    inherited inheritedinternalopen;
    fificontroller.updaterxbindings;
-   if decoderecords(@adata^.data+int1,int2) then begin
+   if decoderecords(pointer(pchar(@adata^.data)+int1),int2) then begin
     exclude(fificontroller.fistate,ids_openpending);
     include(fificontroller.fistate,ids_fielddefsreceived);
    end;
@@ -2741,7 +2781,7 @@ begin
   if (channel <> nil) or 
     not ((csdesigning in componentstate) and 
          (irxo_useclientchannel in foptions)) then begin
-   inititemheader(str1,ik_requestopen,0,0,po1);
+   inititemheader(str1,ik_requestopen,0,0,pchar(po1));
    include(fistate,ids_openpending);
    if senddataandwait(str1,ffielddefsequence) and 
               (ids_fielddefsreceived in fistate) then begin
@@ -2792,7 +2832,7 @@ begin
  with pfielddefsdatadataty(po1)^ do begin
 //  sequence:= asequence;
   move(str2[1],data,length(str2));
-  move(str3[1],(@data+length(str2))^,length(str3));
+  move(str3[1],(pointer(pchar(@data)+length(str2)))^,length(str3));
  end;
  fificontroller.senddata(str1);
 end;
@@ -2838,7 +2878,7 @@ begin
  with pfielddefsdatadataty(po1)^ do begin
 //  sequence:= asequence;
   move(str2[1],data,length(str2));
-  move(str3[1],(@data+length(str2))^,length(str3));
+  move(str3[1],(pointer(pchar(@data)+length(str2)))^,length(str3));
  end;
  fificontroller.senddata(str1);
  if checkcanevent(self,tmethod(fclientafteropen)) then begin

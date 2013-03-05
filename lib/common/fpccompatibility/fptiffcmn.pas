@@ -13,14 +13,15 @@
 
  **********************************************************************
 }
-unit FPTiffCmn;
+//modified 2013 by Martin Schreiber
+unit fptiffcmn;
 
-{$mode objfpc}{$H+}
+{$ifdef FPC}{$mode objfpc}{$H+}{$endif}
 
 interface
 
 uses
-  Classes, sysutils, FPimage;
+  classes, sysutils, fpimage,msetypes;
 
 type
   TTiffRational = packed record
@@ -159,7 +160,7 @@ type
     procedure Clear;
     procedure Assign(IFD: TTiffIFD);
     procedure ReadFPImgExtras(Src: TFPCustomImage);
-    function ImageLength: DWord; inline;
+    function ImageLength: DWord; {$ifdef FPC}inline;{$endif}
     destructor Destroy; override;
   end;
 

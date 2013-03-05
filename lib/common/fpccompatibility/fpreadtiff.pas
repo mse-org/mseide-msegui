@@ -34,16 +34,18 @@
    ICC profile tag 34675
    orientation with rotation
 }
-unit FPReadTiff;
+//modified 2013 by Martin Schreiber
 
-{$mode objfpc}{$H+}
+unit fpreadtiff;
 
-{$inline on}
+{$ifdef FPC}{$mode objfpc}{$H+}{$inline on}{$endif}
 
 interface
 
 uses
-  Math, Classes, mclasses, SysUtils, ctypes, zinflate, zbase, FPimage, FPTiffCmn;
+  math, classes, mclasses, sysutils, msectypes, zinflate,
+     {$ifndef FPC}msetypes,classes_del,{$endif}
+     zbase, fpimage, fptiffcmn;
 
 type
   TFPReaderTiff = class;
@@ -98,9 +100,10 @@ type
       out ExtraSamples: PWord; out ExtraSampleCnt: DWord;
       out SampleBits: PWord; out SampleBitsPerPixel: DWord);
     procedure ReadImgValue(BitCount: Word; var Run: Pointer; x: dword;
-      Predictor: word; var LastValue: word; out Value: Word); inline;
-    function FixEndian(w: Word): Word; inline;
-    function FixEndian(d: DWord): DWord; inline;
+      Predictor: word; var LastValue: word; out Value: Word); 
+                {$ifdef FPC}inline;{$endif}
+    function FixEndian(w: Word): Word; {$ifdef FPC}inline;{$endif} overload;
+    function FixEndian(d: DWord): DWord; {$ifdef FPC}inline;{$endif} overload;
     procedure SetFPImgExtras(CurImg: TFPCustomImage);
     procedure DecodePackBits(var Buffer: Pointer; var Count: PtrInt);
     procedure DecodeLZW(var Buffer: Pointer; var Count: PtrInt);
@@ -166,6 +169,10 @@ begin
   Result:=TTiffIFD(ImageList[Index]);
 end;
 
+type
+ worda4ty = array[0..3] of word;
+ pworda4ty = ^worda4ty;
+ 
 procedure TFPReaderTiff.ReadImageProperties(out RedBits, GreenBits, BlueBits,
   GrayBits, AlphaBits: Word; out ExtraSamples: PWord; out
   ExtraSampleCnt: DWord; out SampleBits: PWord; out SampleBitsPerPixel: DWord);
@@ -210,20 +217,20 @@ begin
   BytesPerPixel:=0;
   SampleBitsPerPixel:=0;
   for i:=0 to SampleCnt-1 do begin
-    if SampleBits[i]>64 then
+    if pwordaty(SampleBits)^[i]>64 then
       TiffError('Samples bigger than 64 bit not supported');
-    if not (SampleBits[i] in [8, 16]) then
+    if not (pwordaty(SampleBits)[i] in [8, 16]) then
       TiffError('Only samples of 8 and 16 bit are supported');
-    inc(SampleBitsPerPixel, SampleBits[i]);
+    inc(SampleBitsPerPixel, pwordaty(SampleBits)^[i]);
   end;
   case IFD.PhotoMetricInterpretation of
   0, 1:
     begin
-      GrayBits:=SampleBits[0];
+      GrayBits:=pwordaty(SampleBits)^[0];
       IFD.GrayBits:=GrayBits;
       for i:=0 to ExtraSampleCnt-1 do begin
-        if ExtraSamples[i] in [1, 2] then begin
-          AlphaBits:=SampleBits[1+i];
+        if pwordaty(ExtraSamples)^[i] in [1, 2] then begin
+          AlphaBits:= pwordaty(SampleBits)^[1+i];
           IFD.AlphaBits:=AlphaBits;
         end;
       end;
@@ -234,17 +241,17 @@ begin
     end;
   2:
     begin
-      RedBits:=SampleBits[0];
-      GreenBits:=SampleBits[1];
-      BlueBits:=SampleBits[2];
+      RedBits:= pworda4ty(SampleBits)^[0];
+      GreenBits:= pworda4ty(SampleBits)^[1];
+      BlueBits:= pworda4ty(SampleBits)^[2];
       IFD.RedBits:=RedBits;
       IFD.GreenBits:=GreenBits;
       IFD.BlueBits:=BlueBits;
       IFD.AlphaBits:=0;
       for i:=0 to ExtraSampleCnt-1 do begin
         //writeln('  ',i,'/',ExtraSampleCnt,' Type=',ExtraSamples[i],' Count=',SampleBits[3+i]);
-        if ExtraSamples[i] in [1, 2] then begin
-          AlphaBits:=SampleBits[3+i];
+        if pwordaty(ExtraSamples)^[i] in [1, 2] then begin
+          AlphaBits:= pwordaty(SampleBits)^[3+i];
           IFD.AlphaBits:=AlphaBits;
         end;
       end;
@@ -259,18 +266,18 @@ begin
     end;
   5:
     begin
-      RedBits:=SampleBits[0];
-      GreenBits:=SampleBits[1];
-      BlueBits:=SampleBits[2];
-      GrayBits:=SampleBits[3];
+      RedBits:= pworda4ty(SampleBits)^[0];
+      GreenBits:= pworda4ty(SampleBits)^[1];
+      BlueBits:= pworda4ty(SampleBits)^[2];
+      GrayBits:= pworda4ty(SampleBits)^[3];
       IFD.RedBits:=RedBits;
       IFD.GreenBits:=GreenBits;
       IFD.BlueBits:=BlueBits;
       IFD.GrayBits:=GrayBits;
       IFD.AlphaBits:=0;
       for i:=0 to ExtraSampleCnt-1 do begin
-        if ExtraSamples[i] in [1, 2] then begin
-          AlphaBits:=SampleBits[4+i];
+        if pwordaty(ExtraSamples)^[i] in [1, 2] then begin
+          AlphaBits:= pwordaty(SampleBits)^[4+i];
           IFD.AlphaBits:=AlphaBits;
         end;
       end;
@@ -357,7 +364,8 @@ begin
 end;
 
 procedure TFPReaderTiff.ReadImgValue(BitCount: Word; var Run: Pointer; x: dword;
-  Predictor: word; var LastValue: word; out Value: Word); inline;
+  Predictor: word; var LastValue: word; out Value: Word); 
+                                        {$ifdef FPC}inline;{$endif}
 begin
   if BitCount=8 then begin
     Value:=PCUInt8(Run)^;
@@ -368,7 +376,7 @@ begin
       LastValue:=Value;
     end;
     Value:=Value shl 8+Value;
-    inc(Run);
+    inc(pchar(Run));
   end else if BitCount=16 then begin
     Value:=FixEndian(PCUInt16(Run)^);
     if Predictor=2 then begin
@@ -377,7 +385,7 @@ begin
         Value:=(Value+LastValue) and $ffff;
       LastValue:=Value;
     end;
-    inc(Run,2);
+    inc(pchar(Run),2);
   end;
 end;
 
@@ -653,7 +661,7 @@ begin
       try
         SetLength(IFD.BitsPerSampleArray,Count);
         for i:=0 to Count-1 do
-          IFD.BitsPerSampleArray[i]:=WordBuffer[i];
+          IFD.BitsPerSampleArray[i]:= pwordaty(WordBuffer)^[i];
       finally
         ReAllocMem(WordBuffer,0);
       end;
@@ -1034,8 +1042,8 @@ begin
           {$endif}
           TiffError('PageNumber Count=2 expected, but found '+IntToStr(Count));
         end;
-        IFD.PageNumber:=WordBuffer[0];
-        IFD.PageCount:=WordBuffer[1];
+        IFD.PageNumber:= pworda4ty(WordBuffer)^[0];
+        IFD.PageCount:= pworda4ty(WordBuffer)^[1];
         if IFD.PageNumber>=IFD.PageCount then begin
           // broken order => repair
           UValue:=IFD.PageNumber;
@@ -1512,14 +1520,15 @@ begin
       // short
       GetMem(Buffer,SizeOf(DWord)*Count);
       for i:=0 to Count-1 do
-        Buffer[i]:=FixEndian(PWord(p)[i]);
+        plongwordaty(Buffer)^[i]:=FixEndian(pwordaty(PWord(p))^[i]);
     end else if EntryType=4 then begin
       // long
       Buffer:=p;
       p:=nil;
       if FReverseEndian then
         for i:=0 to Count-1 do
-          Buffer[i]:=FixEndian(PDWord(Buffer)[i]);
+          plongwordaty(Buffer)^[i]:= 
+                          FixEndian(plongwordaty(PDWord(Buffer))^[i]);
     end else
       TiffError('only short or long allowed');
   finally
@@ -1548,7 +1557,7 @@ begin
       p:=nil;
       if FReverseEndian then
         for i:=0 to Count-1 do
-          Buffer[i]:=FixEndian(Buffer[i]);
+          pwordaty(Buffer)^[i]:=FixEndian(pwordaty(Buffer)^[i]);
       //for i:=0 to Count-1 do writeln(i,' ',Buffer[i]);
     end else
       TiffError('only short allowed, but found '+IntToStr(EntryType));
@@ -1685,8 +1694,8 @@ begin
 
     // read chunks
     for ChunkIndex:=0 to ChunkCount-1 do begin
-      CurOffset:=ChunkOffsets[ChunkIndex];
-      CurByteCnt:=ChunkByteCounts[ChunkIndex];
+      CurOffset:= plongwordaty(ChunkOffsets)^[ChunkIndex];
+      CurByteCnt:= plongwordaty(ChunkByteCounts)^[ChunkIndex];
       //writeln('TFPReaderTiff.LoadImageFromStream CurOffset=',CurOffset,' CurByteCnt=',CurByteCnt);
       if CurByteCnt<=0 then continue;
       ReAllocMem(Chunk,CurByteCnt);
@@ -1700,10 +1709,10 @@ begin
         ExpectedChunkLength:=((SampleBitsPerPixel*IFD.ImageWidth+7) div 8)*IFD.RowsPerStrip;
       case IFD.Compression of
       TiffCompressionNone: ;
-      TiffCompressionPackBits: DecodePackBits(Chunk,CurByteCnt);
-      TiffCompressionLZW: DecodeLZW(Chunk,CurByteCnt);
+      TiffCompressionPackBits: DecodePackBits(pointer(Chunk),CurByteCnt);
+      TiffCompressionLZW: DecodeLZW(pointer(Chunk),CurByteCnt);
       TiffCompressionDeflateAdobe,
-      TiffCompressionDeflateZLib: DecodeDeflate(Chunk,CurByteCnt,ExpectedChunkLength);
+      TiffCompressionDeflateZLib: DecodeDeflate(pointer(Chunk),CurByteCnt,ExpectedChunkLength);
       else
         TiffError('compression '+TiffCompressionName(IFD.Compression)+' not supported yet');
       end;
@@ -1765,7 +1774,7 @@ begin
       sx:=x;
       for cy:=0 to ChunkHeight-1 do begin
         //writeln('TFPReaderTiff.LoadImageFromStream y=',y);
-        Run:=Chunk+ChunkBytesPerLine*cy;
+        Run:= pointer(pchar(Chunk)+ChunkBytesPerLine*cy);
         LastRedValue:=0;
         LastGreenValue:=0;
         LastBlueValue:=0;
@@ -1776,15 +1785,17 @@ begin
           case IFD.PhotoMetricInterpretation of
           0,1:
             begin
-              ReadImgValue(GrayBits,Run,cx,IFD.Predictor,LastGrayValue,GrayValue);
+              ReadImgValue(GrayBits,pointer(Run),cx,IFD.Predictor,
+                                            LastGrayValue,GrayValue);
               if IFD.PhotoMetricInterpretation=0 then
                 GrayValue:=$ffff-GrayValue;
               AlphaValue:=alphaOpaque;
               for i:=0 to ExtraSampleCnt-1 do begin
-                if ExtraSamples[i] in [1,2] then begin
-                  ReadImgValue(AlphaBits,Run,cx,IFD.Predictor,LastAlphaValue,AlphaValue);
+                if pwordaty(ExtraSamples)^[i] in [1,2] then begin
+                  ReadImgValue(AlphaBits,pointer(Run),cx,IFD.Predictor,
+                                                   LastAlphaValue,AlphaValue);
                 end else begin
-                  inc(Run,ExtraSamples[i] div 8);
+                  inc(pchar(Run),pwordaty(ExtraSamples)^[i] div 8);
                 end;
               end;
               Col:=FPColor(GrayValue,GrayValue,GrayValue,AlphaValue);
@@ -1792,15 +1803,19 @@ begin
 
           2: // RGB(A)
             begin
-              ReadImgValue(RedBits,Run,cx,IFD.Predictor,LastRedValue,RedValue);
-              ReadImgValue(GreenBits,Run,cx,IFD.Predictor,LastGreenValue,GreenValue);
-              ReadImgValue(BlueBits,Run,cx,IFD.Predictor,LastBlueValue,BlueValue);
+              ReadImgValue(RedBits,pointer(Run),cx,IFD.Predictor,
+                                                LastRedValue,RedValue);
+              ReadImgValue(GreenBits,pointer(Run),cx,IFD.Predictor,
+                                                 LastGreenValue,GreenValue);
+              ReadImgValue(BlueBits,pointer(Run),cx,IFD.Predictor,
+                                                   LastBlueValue,BlueValue);
               AlphaValue:=alphaOpaque;
               for i:=0 to ExtraSampleCnt-1 do begin
-                if ExtraSamples[i] in [1,2] then begin
-                  ReadImgValue(AlphaBits,Run,cx,IFD.Predictor,LastAlphaValue,AlphaValue);
+                if pwordaty(ExtraSamples)^[i] in [1,2] then begin
+                  ReadImgValue(AlphaBits,pointer(Run),cx,IFD.Predictor,
+                                                   LastAlphaValue,AlphaValue);
                 end else begin
-                  inc(Run,ExtraSamples[i] div 8);
+                  inc(Run,pwordaty(ExtraSamples)^[i] div 8);
                 end;
               end;
               Col:=FPColor(RedValue,GreenValue,BlueValue,AlphaValue);
@@ -1808,16 +1823,21 @@ begin
 
           5: // CMYK plus optional alpha
             begin
-              ReadImgValue(RedBits,Run,cx,IFD.Predictor,LastRedValue,RedValue);
-              ReadImgValue(GreenBits,Run,cx,IFD.Predictor,LastGreenValue,GreenValue);
-              ReadImgValue(BlueBits,Run,cx,IFD.Predictor,LastBlueValue,BlueValue);
-              ReadImgValue(GrayBits,Run,cx,IFD.Predictor,LastGrayValue,GrayValue);
+              ReadImgValue(RedBits,pointer(Run),cx,IFD.Predictor,
+                                                     LastRedValue,RedValue);
+              ReadImgValue(GreenBits,pointer(Run),cx,IFD.Predictor,
+                                                     LastGreenValue,GreenValue);
+              ReadImgValue(BlueBits,pointer(Run),cx,IFD.Predictor,
+                                                     LastBlueValue,BlueValue);
+              ReadImgValue(GrayBits,pointer(Run),cx,IFD.Predictor,
+                                                     LastGrayValue,GrayValue);
               AlphaValue:=alphaOpaque;
               for i:=0 to ExtraSampleCnt-1 do begin
-                if ExtraSamples[i] in [1,2] then begin
-                  ReadImgValue(AlphaBits,Run,cx,IFD.Predictor,LastAlphaValue,AlphaValue);
+                if pwordaty(ExtraSamples)^[i] in [1,2] then begin
+                  ReadImgValue(AlphaBits,pointer(Run),cx,IFD.Predictor,
+                                                    LastAlphaValue,AlphaValue);
                 end else begin
-                  inc(Run,ExtraSamples[i] div 8);
+                  inc(Run,pwordaty(ExtraSamples)[i] div 8);
                 end;
               end;
               // CMYK to RGB
@@ -1847,14 +1867,14 @@ begin
   end;
 end;
 
-function TFPReaderTiff.FixEndian(w: Word): Word; inline;
+function TFPReaderTiff.FixEndian(w: Word): Word; {$ifdef FPC}inline;{$endif}
 begin
   Result:=w;
   if FReverseEndian then
     Result:=((Result and $ff) shl 8) or (Result shr 8);
 end;
 
-function TFPReaderTiff.FixEndian(d: DWord): DWord; inline;
+function TFPReaderTiff.FixEndian(d: DWord): DWord; {$ifdef FPC}inline;{$endif}
 begin
   Result:=d;
   if FReverseEndian then
@@ -1880,7 +1900,7 @@ var
   NewBuffer: Pointer;
   NewCount: PtrInt;
 begin
-  DecompressLZW(Buffer,Count,NewBuffer,NewCount);
+  DecompressLZW(Buffer,Count,pbyte(NewBuffer),NewCount);
   FreeMem(Buffer);
   Buffer:=NewBuffer;
   Count:=NewCount;
@@ -2016,8 +2036,8 @@ begin
   NewBuffer:=nil;
   if Count=0 then exit;
   p:=Pcint8(Buffer);
-  EndP:=p+Count;
-  while p<EndP do begin
+  EndP:= pointer(pchar(p)+Count);
+  while pchar(p) < pchar(EndP) do begin
     n:=p^;
     case n of
     0..127:   begin inc(NewCount,n+1);  inc(p,n+2); end; // copy the next n+1 bytes
@@ -2031,7 +2051,7 @@ begin
   GetMem(NewBuffer,NewCount);
   p:=Pcint8(Buffer);
   d:=Pcint8(NewBuffer);
-  while p<EndP do begin
+  while pchar(p) < pchar(EndP) do begin
     n:=p^;
     case n of
     0..127:
@@ -2052,7 +2072,7 @@ begin
         inc(p);
         n:=p^;
         for j:=0 to i-1 do
-          d[j]:=n;
+          pbyteaty(d)^[j]:=n;
         inc(d,i);
         inc(p);
       end;
@@ -2099,18 +2119,18 @@ var
     if CurBitLength+SrcPosBit>16 then begin
       // read from three bytes
       if SrcPos+3>Count then Error('LZW stream overrun');
-      v:=PByte(Buffer)[SrcPos];
+      v:= pbyteaty(PByte(Buffer))^[SrcPos];
       inc(SrcPos);
-      v:=(v shl 8)+PByte(Buffer)[SrcPos];
+      v:=(v shl 8)+ pbyteaty(PByte(Buffer))^[SrcPos];
       inc(SrcPos);
-      v:=(v shl 8)+PByte(Buffer)[SrcPos];
+      v:=(v shl 8)+ pbyteaty(PByte(Buffer))^[SrcPos];
       v:=v shr (24-CurBitLength-SrcPosBit);
     end else begin
       // read from two bytes
       if SrcPos+2>Count then Error('LZW stream overrun');
-      v:=PByte(Buffer)[SrcPos];
+      v:= pbyteaty(PByte(Buffer))^[SrcPos];
       inc(SrcPos);
-      v:=(v shl 8)+PByte(Buffer)[SrcPos];
+      v:=(v shl 8)+ pbyteaty(PByte(Buffer))^[SrcPos];
       if CurBitLength+SrcPosBit=16 then
         inc(SrcPos);
       v:=v shr (16-CurBitLength-SrcPosBit);
@@ -2125,7 +2145,7 @@ var
     i: Integer;
   begin
     for i:=0 to TableCount-1 do
-      ReAllocMem(Table[i].Data,0);
+      ReAllocMem(plzwstring(ppointeraty(Table)^[i])^.Data,0);
     TableCount:=0;
   end;
 
@@ -2155,18 +2175,18 @@ var
       // write string
       if Code-258>=TableCount then
         Error('LZW code out of bounds');
-      s:=Table[Code-258];
+      s:= plzwstring(ppointeraty(Table)^[Code-258])^;
     end else
       Error('LZW code out of bounds');
     if NewCount+s.Count+1>NewCapacity then begin
       NewCapacity:=NewCapacity*2+8;
       ReAllocMem(NewBuffer,NewCapacity);
     end;
-    System.Move(s.Data^,NewBuffer[NewCount],s.Count);
+    System.Move(s.Data^,pbyteaty(NewBuffer)^[NewCount],s.Count);
     //for i:=0 to s.Count-1 do write(HexStr(NewBuffer[NewCount+i],2)); // debug
     inc(NewCount,s.Count);
     if AddFirstChar then begin
-      NewBuffer[NewCount]:=s.Data^;
+      pbyteaty(NewBuffer)^[NewCount]:= s.Data^;
       //write(HexStr(NewBuffer[NewCount],2)); // debug
       inc(NewCount);
     end;
@@ -2198,7 +2218,7 @@ var
       // normal string
       if Code-258>=TableCount then
         Error('LZW code out of bounds');
-      s1:=Table[Code-258];
+      s1:= plzwstring(ppointeraty(Table)^[Code-258])^;
     end else
       Error('LZW code out of bounds');
     // find string 2
@@ -2211,16 +2231,16 @@ var
       // normal string
       if AddFirstCharFromCode-258>=TableCount then
         Error('LZW code out of bounds');
-      s2:=Table[AddFirstCharFromCode-258];
+      s2:= plzwstring(ppointeraty(Table)^[AddFirstCharFromCode-258])^;
     end;
     // set new table entry
-    Table[TableCount].Count:=s1.Count+1;
+    plzwstring(ppointeraty(Table)^[TableCount])^.Count:= s1.Count+1;
     p:=nil;
     GetMem(p,s1.Count+1);
-    Table[TableCount].Data:=p;
+    plzwstring(ppointeraty(Table)^[TableCount])^.Data:=p;
     System.Move(s1.Data^,p^,s1.Count);
     // add first character from string 2
-    p[s1.Count]:=s2.Data^;
+    pbyteaty(p)^[s1.Count]:= s2.Data^;
     // increase TableCount
     inc(TableCount);
     case TableCount+259 of
@@ -2328,8 +2348,8 @@ begin
       end else
         DecompressedCount:=DecompressedCount*2;
       ReAllocMem(Decompressed,DecompressedCount);
-      stream.next_out:=Decompressed+stream.total_out;
-      stream.avail_out:=DecompressedCount-stream.total_out;
+      stream.next_out:= pointer(pchar(Decompressed)+stream.total_out);
+      stream.avail_out:= DecompressedCount-stream.total_out;
     end;
     err := inflate(stream, Z_NO_FLUSH);
     if err = Z_STREAM_END then

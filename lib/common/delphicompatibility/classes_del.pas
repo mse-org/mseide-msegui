@@ -32,6 +32,64 @@ type
  culongaty = array[0..0] of culong;
  pculongaty = ^culongaty;
  tlibhandle = thandle;
+(* 
+{$ifdef Windows}
+  TPoint = Windows.TPoint;
+{$else}
+  TPoint =
+{$ifndef FPC_REQUIRES_PROPER_ALIGNMENT}
+  packed
+{$endif FPC_REQUIRES_PROPER_ALIGNMENT}
+  record
+    X : Longint;
+    Y : Longint;
+  end;
+{$endif}
+  PPoint = ^TPoint;
+  tagPOINT = TPoint;
+
+{$ifdef Windows}
+  TRect = Windows.TRect;
+{$else}
+  TRect =
+{$ifndef FPC_REQUIRES_PROPER_ALIGNMENT}
+  packed
+{$endif FPC_REQUIRES_PROPER_ALIGNMENT}
+  record
+    case Integer of
+      0: (Left,Top,Right,Bottom : Longint);
+      1: (TopLeft,BottomRight : TPoint);
+    end;
+{$endif Windows}
+  PRect = ^TRect;
+
+{$ifdef Windows}
+  TSize = Windows.TSize;
+{$else}
+  TSize =
+{$ifndef FPC_REQUIRES_PROPER_ALIGNMENT}
+  packed
+{$endif FPC_REQUIRES_PROPER_ALIGNMENT}
+  record
+     cx : Longint;
+     cy : Longint;
+  end;
+{$endif Windows}
+  PSize = ^TSize;
+  tagSIZE = TSize;
+//  SIZE = TSize;
+
+
+  TSmallPoint =
+{$ifndef FPC_REQUIRES_PROPER_ALIGNMENT}
+  packed
+{$endif FPC_REQUIRES_PROPER_ALIGNMENT}
+  record
+     x : SmallInt;
+     y : SmallInt;
+  end;
+  PSmallPoint = ^TSmallPoint;
+*)
 
 {$ifndef mswindows}
    TSystemTime = record

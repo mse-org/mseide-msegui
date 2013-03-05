@@ -159,7 +159,11 @@ begin
   result := FCount;
   repeat
     dec (result);
+ {$ifdef FPC}
   until (result < 0) or (FData^[result]=AColor);
+ {$else}
+  until (result < 0) or col_equ(FData^[result],AColor);
+ {$endif}
   if result < 0 then
     result := Add (AColor);
 end;

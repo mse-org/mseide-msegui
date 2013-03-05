@@ -1301,11 +1301,6 @@ uses
  rtlconsts,{$ifdef FPC}dbconst{$else}dbconst_del,classes_del{$endif},sysutils,
  mseformatstr,msereal,msesys,msefileutils,mseapplication,msesysutils;
  
-const
- snotineditstate =
- 'Operation not allowed, dataset "%s" is not in an edit or insert state.';
-            //name changed in FPC 2_2
-
 type
  tmsestringfield1 = class(tmsestringfield); 
  tmseblobfield1 = class(tmseblobfield);
@@ -3031,7 +3026,7 @@ begin
         (afield.fieldkind = fklookup)
                                  {or 
         (bs_curvaluesetting in fbstate) and (state = dscurvalue)}) then begin
-   databaseerrorfmt(snotineditstate,[name],self);
+   databaseerrorfmt(snotediting,[name],self);
   end;
   state1:= state;
  end;
@@ -4569,7 +4564,7 @@ var
 begin
  if (mode <> bmread) and not ((state in dseditmodes) or 
                               (bs_recapplying in fbstate)) then begin
-  databaseerrorfmt(snotineditstate,[name],self);
+  databaseerrorfmt(snotediting,[name],self);
  end;  
  result:= nil;
  if mode = bmread then begin

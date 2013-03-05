@@ -13,13 +13,13 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
  **********************************************************************}
-{$mode objfpc}{$h+}
-unit FPReadPNG;
+{$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+unit fpreadpng;
 
 interface
 
 uses
-  SysUtils,classes,mclasses, FPImage, FPImgCmn, PNGComn, ZStream;
+  sysutils,classes,mclasses, fpimage, fpimgcmn, pngcomn, zstream;
 
 Type
 

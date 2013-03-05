@@ -574,6 +574,10 @@ function encodeifidata(const avalue: currency;
                        const headersize: integer = 0): string; overload;
 function encodeifidata(const avalue: real; 
                        const headersize: integer = 0): string; overload;
+{$ifndef FPC}
+function encodeifidatareal(const avalue: real; 
+                       const headersize: integer = 0): string; overload;
+{$endif}
 function encodeifidata(const avalue: realintty; 
                        const headersize: integer = 0): string; overload;
 function encodeifidata(const avalue: msestring; 
@@ -604,6 +608,10 @@ function decodeifidata(const source: pifidataty; out dest: int64): integer;
                                                         overload;
 function decodeifidata(const source: pifidataty; out dest: real): integer;
                                                         overload;
+{$ifndef FPC}
+function decodeifidatareal(const source: pifidataty; out dest: double): integer;
+                                                        overload;
+{$endif}
 function decodeifidata(const source: pifidataty; out dest: realintty): integer;
                                                         overload;
 function decodeifidata(const source: pifidataty; out dest: currency): integer;
@@ -974,6 +982,17 @@ begin
  dest:= preal(@source^.data)^;
  result:= datarecsizes[idk_real];
 end;
+
+{$ifndef FPC}
+function decodeifidatareal(const source: pifidataty; out dest: double): integer;
+begin
+ if source^.header.kind <> idk_real then begin
+  datakinderror;
+ end;
+ dest:= preal(@source^.data)^;
+ result:= datarecsizes[idk_real];
+end;
+{$endif}
 
 function decodeifidata(const source: pifidataty; out dest: realintty): integer;
 begin

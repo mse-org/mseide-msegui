@@ -12,13 +12,14 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
  **********************************************************************}
-{$mode objfpc}{$h+}
+//modified 2013 by Martin Schreiber
+{$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 unit fpimage;
 
 interface
 
 uses 
- sysutils,classes,mclasses;
+ sysutils,classes,mclasses,msetypes{$ifndef FPC},classes_del,types{$endif};
 
 type
 
@@ -32,6 +33,8 @@ type
     red,green,blue,alpha : word;
   end;
   PFPColor = ^TFPColor;
+  FPColoraty = array[0..0] of TFPColor;
+  pFPColoraty = ^FPColoraty;
 
   TColorFormat = (cfMono,cfGray2,cfGray4,cfGray8,cfGray16,cfGray24,
                   cfGrayA8,cfGrayA16,cfGrayA32,
@@ -127,13 +130,16 @@ type
       destructor destroy; override;
       procedure Assign(Source: TPersistent); override;
       // Saving and loading
-      procedure LoadFromStream (Str:TStream; Handler:TFPCustomImageReader);
-      procedure LoadFromStream (Str:TStream);
-      procedure LoadFromFile (const filename:String; Handler:TFPCustomImageReader);
-      procedure LoadFromFile (const filename:String);
+      procedure LoadFromStream (Str:TStream;
+                            Handler:TFPCustomImageReader); overload;
+      procedure LoadFromStream (Str:TStream); overload;
+      procedure LoadFromFile (const filename:String;
+                              Handler:TFPCustomImageReader); overload;
+      procedure LoadFromFile (const filename:String); overload;
       procedure SaveToStream (Str:TStream; Handler:TFPCustomImageWriter);
-      procedure SaveToFile (const filename:String; Handler:TFPCustomImageWriter);
-      procedure SaveToFile (const filename:String);
+      procedure SaveToFile (const filename:String;
+                              Handler:TFPCustomImageWriter); overload;
+      procedure SaveToFile (const filename:String); overload;
       // Size and data
       procedure SetSize (AWidth, AHeight : integer); virtual;
       property  Height : integer read FHeight write SetHeight;
@@ -235,8 +241,8 @@ type
       function GetExt (const TypeName:string) : string;
       function GetDefExt (const TypeName:string) : string;
       function GetTypeName (index:integer) : string;
-      function GetData (const ATypeName:string) : TIHData;
-      function GetData (index : integer) : TIHData;
+      function GetData (const ATypeName:string) : TIHData; overload;
+      function GetData (index : integer) : TIHData; overload;
       function GetCount : integer;
     public
       constructor Create;
@@ -270,14 +276,22 @@ function ConvertColor (const From : TDeviceColor; Fmt : TColorFormat) : TDeviceC
 
 function AlphaBlend(color1, color2: TFPColor): TFPColor;
 
-function FPColor (r,g,b,a:word) : TFPColor;
-function FPColor (r,g,b:word) : TFPColor;
+function FPColor (r,g,b,a:word) : TFPColor; overload;
+function FPColor (r,g,b:word) : TFPColor; overload;
 {$ifdef debug}function MakeHex (n:TColordata;nr:byte): string;{$endif}
 
+{$ifdef FPC}
 operator = (const c,d:TFPColor) : boolean;
 operator or (const c,d:TFPColor) : TFPColor;
 operator and (const c,d:TFPColor) : TFPColor;
 operator xor (const c,d:TFPColor) : TFPColor;
+{$else}
+function col_equ(const c,d:TFPColor) : boolean;
+function col_or (const c,d:TFPColor) : TFPColor;
+function col_and (const c,d:TFPColor) : TFPColor;
+function col_xor (const c,d:TFPColor) : TFPColor;
+{$endif}
+
 function CompareColors(const Color1, Color2: TFPColor): integer;
 
 var ImageHandlers : TImageHandlersManager;
@@ -380,6 +394,9 @@ Type
     g,a: word;
   end;
   PFPCompactImgGrayAlpha16BitValue = ^TFPCompactImgGrayAlpha16BitValue;
+  FPCompactImgGrayAlpha16BitValueaty = 
+                              array[0..0] of TFPCompactImgGrayAlpha16BitValue;
+  pFPCompactImgGrayAlpha16BitValueaty = ^FPCompactImgGrayAlpha16BitValueaty;
 
   { TFPCompactImgGrayAlpha16Bit }
 
@@ -415,6 +432,9 @@ Type
     g,a: byte;
   end;
   PFPCompactImgGrayAlpha8BitValue = ^TFPCompactImgGrayAlpha8BitValue;
+  FPCompactImgGrayAlpha8BitValueaty = 
+                              array[0..0] of TFPCompactImgGrayAlpha8BitValue;
+  pFPCompactImgGrayAlpha8BitValueaty = ^FPCompactImgGrayAlpha8BitValueaty;
 
   { TFPCompactImgGrayAlpha8Bit }
 
@@ -435,6 +455,8 @@ Type
     r,g,b,a: byte;
   end;
   PFPCompactImgRGBA8BitValue = ^TFPCompactImgRGBA8BitValue;
+  FPCompactImgRGBA8BitValueaty = array of TFPCompactImgRGBA8BitValue;
+  pFPCompactImgRGBA8BitValueaty = ^FPCompactImgRGBA8BitValueaty;
 
   { TFPCompactImgRGBA8Bit }
 
@@ -455,6 +477,8 @@ Type
     r,g,b: byte;
   end;
   PFPCompactImgRGB8BitValue = ^TFPCompactImgRGB8BitValue;
+  FPCompactImgRGB8BitValueaty = array[0..0] of TFPCompactImgRGB8BitValue;
+  pFPCompactImgRGB8BitValueaty = ^FPCompactImgRGB8BitValueaty;
 
   { TFPCompactImgRGB8Bit }
 
@@ -475,6 +499,8 @@ Type
     r,g,b: word;
   end;
   PFPCompactImgRGB16BitValue = ^TFPCompactImgRGB16BitValue;
+  FPCompactImgRGB16BitValueaty = array[0..0] of TFPCompactImgRGB16BitValue;
+  pFPCompactImgRGB16BitValueaty = ^FPCompactImgRGB16BitValueaty;
 
   { TFPCompactImgRGB16Bit }
 
@@ -542,20 +568,20 @@ FuzzyDepth: word = 4): TFPCustomImage;
 
 implementation
 
-procedure FPImgError (Fmt:TErrorTextIndices; data : array of const);
+procedure FPImgError (Fmt:TErrorTextIndices; data : array of const); overload;
 begin
   raise FPImageException.CreateFmt (ErrorText[Fmt],data);
 end;
 
-procedure FPImgError (Fmt:TErrorTextIndices);
+procedure FPImgError (Fmt:TErrorTextIndices); overload;
 begin
   raise FPImageException.Create (ErrorText[Fmt]);
 end;
 
-{$i FPImage.inc}
-{$i FPHandler.inc}
-{$i FPPalette.inc}
-{$i FPColCnv.inc}
+{$i fpimage.inc}
+{$i fphandler.inc}
+{$i fppalette.inc}
+{$i fpcolcnv.inc}
 {$i fpcompactimg.inc}
 
 function FPColor (r,g,b:word) : TFPColor;
@@ -580,6 +606,7 @@ begin
     end;
 end;
 
+{$ifdef FPC}
 operator = (const c,d:TFPColor) : boolean;
 begin
   result := (c.Red = d.Red) and
@@ -587,6 +614,15 @@ begin
             (c.Blue = d.Blue) and
             (c.Alpha = d.Alpha);
 end;
+{$else}
+function col_equ(const c,d:TFPColor) : boolean;
+begin
+  result := (c.Red = d.Red) and
+            (c.Green = d.Green) and
+            (c.Blue = d.Blue) and
+            (c.Alpha = d.Alpha);
+end;
+{$endif}
 
 function GetFullColorData (color:TFPColor) : TColorData;
 begin
@@ -598,6 +634,7 @@ begin
   result := PFPColor (@color)^;
 end;
 
+{$ifdef FPC}
 operator or (const c,d:TFPColor) : TFPColor;
 begin
   result := SetFullColorData(GetFullColorData(c) OR GetFullColorData(d));
@@ -612,6 +649,21 @@ operator xor (const c,d:TFPColor) : TFPColor;
 begin
   result := SetFullColorData(GetFullColorData(c) XOR GetFullColorData(d));
 end;
+{$else}
+function col_or(const c,d:TFPColor) : TFPColor;
+begin
+  result := SetFullColorData(GetFullColorData(c) OR GetFullColorData(d));
+end;
+
+function col_and(const c,d:TFPColor) : TFPColor;
+begin
+  result := SetFullColorData(GetFullColorData(c) AND GetFullColorData(d));
+end;
+function col_xor(const c,d:TFPColor) : TFPColor;
+begin
+  result := SetFullColorData(GetFullColorData(c) XOR GetFullColorData(d));
+end;
+{$endif}
 
 {$ifdef debug}
 function MakeHex (n:TColordata;nr:byte): string;
