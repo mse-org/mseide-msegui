@@ -1,4 +1,4 @@
-unit jdatasrc;
+unit jdatasrc_del;
 
 { This file contains decompression data source routines for the case of
   reading JPEG data from a file (or any stdio stream).  While these routines
@@ -12,16 +12,16 @@ unit jdatasrc;
 
 interface
 
-{$I jconfig.inc}
+{$I jconfig_del.inc}
 
 { this is not a core library module, so it doesn't define JPEG_INTERNALS }
 uses
-  jmorecfg,
-  jinclude,
-  jpeglib,
-  jdmarker,
-  jdeferr,
-  jerror;
+  jmorecfg_del,
+  jinclude_del,
+  jpeglib_del,
+  jdmarker_del,
+  jdeferr_del,
+  jerror_del;
 
 
 { Prepare for input from a stdio stream.

@@ -1,4 +1,4 @@
-unit jcomapi;
+unit jcomapi_del;
 
 { This file contains application interface routines that are used for both
   compression and decompression. }
@@ -7,12 +7,12 @@ unit jcomapi;
 
 interface
 
-{$I jconfig.inc}
+{$I jconfig_del.inc}
 
 uses
-  jmorecfg,
-  jinclude,
-  jpeglib;
+  jmorecfg_del,
+  jinclude_del,
+  jpeglib_del;
 
 { Abort processing of a JPEG compression or decompression operation,
   but don't destroy the object itself. }

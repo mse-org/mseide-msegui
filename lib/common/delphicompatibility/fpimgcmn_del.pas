@@ -13,7 +13,7 @@
 
  **********************************************************************}
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
-unit fpimgcmn;
+unit fpimgcmn_del;
 
 interface
 {$ifndef FPC}

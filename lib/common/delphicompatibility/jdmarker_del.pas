@@ -1,4 +1,4 @@
-unit jdmarker;
+unit jdmarker_del;
 
 { This file contains routines to decode JPEG datastream markers.
   Most of the complexity arises from our desire to support input
@@ -14,15 +14,15 @@ unit jdmarker;
 
 interface
 
-{$I jconfig.inc}
+{$I jconfig_del.inc}
 
 uses
-  jmorecfg,
-  jinclude,
-  jdeferr,
-  jerror,
-  jcomapi,
-  jpeglib;
+  jmorecfg_del,
+  jinclude_del,
+  jdeferr_del,
+  jerror_del,
+  jcomapi_del,
+  jpeglib_del;
 
 const                   { JPEG marker codes }
   M_SOF0  = $c0;
@@ -138,7 +138,7 @@ Var
 implementation
 
 uses
-  jutils;
+  jutils_del;
 
 { At all times, cinfo1.src.next_input_byte and .bytes_in_buffer reflect
   the current restart point; we update them only when we have reached a

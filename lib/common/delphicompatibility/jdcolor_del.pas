@@ -1,4 +1,4 @@
-unit jdcolor;
+unit jdcolor_del;
 
 { This file contains output colorspace conversion routines. }
 
@@ -6,15 +6,15 @@ unit jdcolor;
 
 interface
 
-{$I jconfig.inc}
+{$I jconfig_del.inc}
 
 uses
-  jmorecfg,
-  jinclude,
-  jutils,
-  jdeferr,
-  jerror,
-  jpeglib;
+  jmorecfg_del,
+  jinclude_del,
+  jutils_del,
+  jdeferr_del,
+  jerror_del,
+  jpeglib_del;
 
 { Module initialization routine for output colorspace conversion. }
 

@@ -1,4 +1,4 @@
-unit jddctmgr;
+unit jddctmgr_del;
 
 { Original : jddctmgr.c ;  Copyright (C) 1994-1996, Thomas G. Lane. }
 
@@ -13,24 +13,24 @@ unit jddctmgr;
 
 interface
 
-{$I jconfig.inc}
+{$I jconfig_del.inc}
 
 {$N+}
 
 uses
-  jmorecfg,
-  jinclude,
-  jdeferr,
-  jerror,
-  jpeglib,
-  jdct,         { Private declarations for DCT subsystem }
-  jidctfst,
+  jmorecfg_del,
+  jinclude_del,
+  jdeferr_del,
+  jerror_del,
+  jpeglib_del,
+  jdct_del,         { Private declarations for DCT subsystem }
+  jidctfst_del,
   {$IFDEF BASM}
-  jidctasm,
+  jidctasm_del,
   {$ELSE}
-  jidctint,
+  jidctint_del,
   {$ENDIF}
-  jidctflt, jidctred;
+  jidctflt_del, jidctred_del;
 
 
 

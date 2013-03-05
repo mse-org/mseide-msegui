@@ -19,7 +19,12 @@ unit fpreadpng;
 interface
 
 uses
-  sysutils,classes,mclasses, fpimage, fpimgcmn, pngcomn, zstream;
+  sysutils,classes,mclasses, fpimage,zstream,
+      {$ifdef FPC}
+       fpimgcmn, pngcomn
+      {$else}
+       fpimgcmn_del, pngcomn_del
+      {$endif};
 
 Type
 
@@ -380,14 +385,14 @@ function TFPReaderPNG.DecideSetPixel : TSetPixelProc;
 begin
   if Pltte then
     if TheImage.UsePalette then
-      result := @SetPalettePixel
+      result := {$ifdef FPC}@{$endif}SetPalettePixel
     else
-      result := @SetPalColPixel
+      result := {$ifdef FPC}@{$endif}SetPalColPixel
   else
     if UseTransparent then
-      result := @SetColorTrPixel
+      result := {$ifdef FPC}@{$endif}SetColorTrPixel
     else
-      result := @SetColorPixel;
+      result := {$ifdef FPC}@{$endif}SetColorPixel;
 end;
 
 function TFPReaderPNG.CalcX (relX:integer) : integer;
@@ -641,34 +646,34 @@ procedure TFPReaderPNG.DoDecompress;
       case colortype of
         0 : case Bitdepth of
               1  : begin
-                   FConvertColor := @ColorGray1; //CFmt := cfMono;
+                   FConvertColor := {$ifdef FPC}@{$endif}ColorGray1; //CFmt := cfMono;
                    ByteWidth := 1;
                    end;
               2  : begin
-                   FConvertColor := @ColorGray2; //CFmt := cfGray2;
+                   FConvertColor := {$ifdef FPC}@{$endif}ColorGray2; //CFmt := cfGray2;
                    ByteWidth := 1;
                    end;
               4  : begin
-                   FConvertColor := @ColorGray4; //CFmt := cfGray4;
+                   FConvertColor := {$ifdef FPC}@{$endif}ColorGray4; //CFmt := cfGray4;
                    ByteWidth := 1;
                    end;
               8  : begin
-                   FConvertColor := @ColorGray8; //CFmt := cfGray8;
+                   FConvertColor := {$ifdef FPC}@{$endif}ColorGray8; //CFmt := cfGray8;
                    ByteWidth := 1;
                    end;
               16 : begin
-                   FConvertColor := @ColorGray16; //CFmt := cfGray16;
+                   FConvertColor := {$ifdef FPC}@{$endif}ColorGray16; //CFmt := cfGray16;
                    ByteWidth := 2;
                    end;
             end;
         2 : if BitDepth = 8 then
               begin
-              FConvertColor := @ColorColor8; //CFmt := cfBGR24
+              FConvertColor := {$ifdef FPC}@{$endif}ColorColor8; //CFmt := cfBGR24
               ByteWidth := 3;
               end
             else
               begin
-              FConvertColor := @ColorColor16; //CFmt := cfBGR48;
+              FConvertColor := {$ifdef FPC}@{$endif}ColorColor16; //CFmt := cfBGR48;
               ByteWidth := 6;
               end;
         3 : if BitDepth = 16 then
@@ -677,22 +682,22 @@ procedure TFPReaderPNG.DoDecompress;
               ByteWidth := 1;
         4 : if BitDepth = 8 then
               begin
-              FConvertColor := @ColorGrayAlpha8; //CFmt := cfGrayA16
+              FConvertColor := {$ifdef FPC}@{$endif}ColorGrayAlpha8; //CFmt := cfGrayA16
               ByteWidth := 2;
               end
             else
               begin
-              FConvertColor := @ColorGrayAlpha16; //CFmt := cfGrayA32;
+              FConvertColor := {$ifdef FPC}@{$endif}ColorGrayAlpha16; //CFmt := cfGrayA32;
               ByteWidth := 4;
               end;
         6 : if BitDepth = 8 then
               begin
-              FConvertColor := @ColorColorAlpha8; //CFmt := cfABGR32
+              FConvertColor := {$ifdef FPC}@{$endif}ColorColorAlpha8; //CFmt := cfABGR32
               ByteWidth := 4;
               end
             else
               begin
-              FConvertColor := @ColorColorAlpha16; //CFmt := cfABGR64;
+              FConvertColor := {$ifdef FPC}@{$endif}ColorColorAlpha16; //CFmt := cfABGR64;
               ByteWidth := 8;
               end;
       end;
@@ -726,7 +731,7 @@ procedure TFPReaderPNG.DoDecompress;
   var y, rp, ry, rx, l : integer;
       lf : byte;
   begin
-    FSetPixel := DecideSetPixel;
+    FSetPixel := DecideSetPixel();
     for rp := StartPass to EndPass do
       begin
       FCurrentPass := rp;

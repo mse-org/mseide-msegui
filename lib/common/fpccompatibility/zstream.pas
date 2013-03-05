@@ -25,7 +25,8 @@ unit zstream;
                                     interface
 {***************************************************************************}
 
-uses    classes,mclasses,zbase,gzio;
+uses    classes,mclasses,
+       {$ifdef FPC}zbase,gzio{$else}zbase_del,gzio_del{$endif};
 
 type
         Tcompressionlevel=(
@@ -109,7 +110,7 @@ type
                                  implementation
 {***************************************************************************}
 
-uses    zdeflate,zinflate;
+uses    {$ifdef FPC}zdeflate,zinflate{$else}zdeflate_del,zinflate_del{$endif};
 
 const   bufsize=16384;     {Size of the buffer used for temporarily storing
                             data from the child stream.}
@@ -130,7 +131,7 @@ end;
 procedure Tcustomzlibstream.progress(sender:Tobject);
 
 begin
-  if Fonprogress<>nil then
+  if {$ifndef FPC}@{$endif}Fonprogress<>nil then
     Fonprogress(sender);
 end;
 
@@ -410,8 +411,8 @@ end;
 function Tgzfilestream.seek(offset:longint;origin:word):longint;
 
 begin
-  seek:=gzseek(Fgzfile,offset,origin);
-  if seek=-1 then
+  result:= gzseek(Fgzfile,offset,origin);
+  if result = -1 then
     raise egzfileerror.create(Sseek_failed);
 end;
 

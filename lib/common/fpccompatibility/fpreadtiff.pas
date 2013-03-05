@@ -43,9 +43,9 @@ unit fpreadtiff;
 interface
 
 uses
-  math, classes, mclasses, sysutils, msectypes, zinflate,msetypes,
-     {$ifndef FPC}classes_del,{$endif}
-     zbase, fpimage, fptiffcmn;
+  math, classes, mclasses, sysutils, msectypes,
+   {$ifdef FPC}zinflate,zbase,{$else}zinflate_del,zbase_del,classes_del,{$endif}
+     msetypes, fpimage, fptiffcmn;
 
 type
   TFPReaderTiff = class;

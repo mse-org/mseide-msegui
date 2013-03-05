@@ -1,4 +1,4 @@
-unit infcodes;
+unit infcodes_del;
 
 { infcodes.c -- process literals and length/distance pairs
   Copyright (C) 1995-1998 Mark Adler
@@ -11,10 +11,10 @@ unit infcodes;
 
 interface
 
-{$I zconf.inc}
+{$I zconf_del.inc}
 
 uses
-  zbase,msetypes;
+  zbase_del,msetypes;
 
 function inflate_codes_new (bl : cardinal;
                             bd : cardinal;
@@ -32,7 +32,7 @@ procedure inflate_codes_free(c : pInflate_codes_state;
 implementation
 
 uses
-  infutil, inffast;
+  infutil_del, inffast_del;
 
 
 function inflate_codes_new (bl : cardinal;

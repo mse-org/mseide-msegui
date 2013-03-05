@@ -1,4 +1,4 @@
-unit jdinput;
+unit jdinput_del;
 
 { Original: jdinput.c ; Copyright (C) 1991-1997, Thomas G. Lane. }
 
@@ -12,14 +12,14 @@ unit jdinput;
 
 interface
 
-{$I jconfig.inc}
+{$I jconfig_del.inc}
 
 uses
-  jmorecfg,
-  jpeglib,
-  jdeferr,
-  jerror,
-  jinclude, jutils;
+  jmorecfg_del,
+  jpeglib_del,
+  jdeferr_del,
+  jerror_del,
+  jinclude_del, jutils_del;
 
 { Initialize the input controller module.
   This is called only once, when the decompression object is created. }

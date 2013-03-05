@@ -1,4 +1,4 @@
-unit gzio;
+unit gzio_del;
 
 {
   Pascal unit based on gzio.c -- IO on .gz files
@@ -13,7 +13,7 @@ unit gzio;
 
 interface
 {$ifdef FPC}{$mode objfpc}{$endif}
-{$I zconf.inc}
+{$I zconf_del.inc}
 {$ifdef linux}{$define unix}{$endif}
 uses
 (* todo: delphi compatibility
@@ -23,7 +23,7 @@ uses
   dos,
   {$endif}
 *)
-  zbase, crc, zdeflate, zinflate;
+  zbase_del, crc_del, zdeflate_del, zinflate_del,sysutils;
 
 type gzFile = pointer;
 type z_off_t = longint;
@@ -118,7 +118,7 @@ procedure check_header(s:gz_streamp); forward;
 ============================================================================}
 
 function gzopen (path:string; mode:string) : gzFile;
-
+(*
 var
 
   i        : cardinal;
@@ -138,8 +138,9 @@ var
   doseek,
   exists,
   writing : boolean;
-(* todo: delphi compatibility
+*)
 begin
+(* todo: delphi compatibility
 
   if (path='') or (mode='') then begin
     gzopen := nil;
@@ -628,7 +629,7 @@ begin
     if (s^.z_err = Z_STREAM_END) then begin
     {$ifdef pointer_arith}
       crclen := 0;
-      crclen:=s^.stream.next_out-start;
+      crclen:= pchar(s^.stream.next_out)-pchar(start);
     {$else}
       next_out := s^.stream.next_out;
       while (next_out <> start ) do begin
@@ -665,7 +666,7 @@ begin
   end; {WHILE}
 
 {$ifdef pointer_arith}
-  crclen:=s^.stream.next_out-start;
+  crclen:= pchar(s^.stream.next_out)-pchar(start);
 {$else}
   crclen := 0;
   next_out := s^.stream.next_out;

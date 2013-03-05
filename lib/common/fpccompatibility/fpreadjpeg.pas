@@ -27,8 +27,12 @@ unit fpreadjpeg;
 interface
 
 uses
-  classes,mclasses, sysutils, fpimage, jpeglib, jdapimin,
-  jdatasrc, jdapistd, jmorecfg;
+  classes,mclasses, sysutils,fpimage,
+   {$ifdef FPC}
+    jpeglib, jdapimin,jdatasrc, jdapistd, jmorecfg
+   {$else}
+    jpeglib_del, jdapimin_del,jdatasrc_del, jdapistd_del, jmorecfg_del
+   {$endif};
 
 type
   { TFPReaderJPEG }

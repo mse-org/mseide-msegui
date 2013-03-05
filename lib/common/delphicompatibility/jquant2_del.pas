@@ -1,4 +1,4 @@
-unit jquant2;
+unit jquant2_del;
 
 
 { This file contains 2-pass color quantization (color mapping) routines.
@@ -16,14 +16,14 @@ unit jquant2;
 
 interface
 
-{$I jconfig.inc}
+{$I jconfig_del.inc}
 
 uses
-  jmorecfg,
-  jdeferr,
-  jerror,
-  jutils,
-  jpeglib;
+  jmorecfg_del,
+  jdeferr_del,
+  jerror_del,
+  jutils_del,
+  jpeglib_del;
 
 { Module initialization routine for 2-pass color quantization. }
 

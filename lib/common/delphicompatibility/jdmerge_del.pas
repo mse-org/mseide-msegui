@@ -1,4 +1,4 @@
-unit jdmerge;
+unit jdmerge_del;
 
 {  This file contains code for merged upsampling/color conversion.
 
@@ -30,13 +30,13 @@ unit jdmerge;
 
 interface
 
-{$I jconfig.inc}
+{$I jconfig_del.inc}
 
 uses
-  jmorecfg,
-  jinclude,
-  jpeglib,
-  jutils;
+  jmorecfg_del,
+  jinclude_del,
+  jpeglib_del,
+  jutils_del;
 
 { Module initialization routine for merged upsampling/color conversion.
 

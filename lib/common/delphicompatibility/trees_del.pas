@@ -1,4 +1,4 @@
-unit trees;
+unit trees_del;
 
 {$T-}
 {$define ORG_DEBUG}
@@ -39,13 +39,13 @@ unit trees;
 
 interface
 
-{$I zconf.inc}
+{$I zconf_del.inc}
 
 uses
   {$ifdef ZLIB_DEBUG}
   sysutils,
   {$endif}
-  zbase,msetypes
+  zbase_del,msetypes
   ;
 
 { ===========================================================================

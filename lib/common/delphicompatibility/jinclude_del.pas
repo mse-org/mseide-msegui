@@ -1,4 +1,4 @@
-Unit jinclude;
+Unit jinclude_del;
 
 { This file exists to provide a single place to fix any problems with
   including the wrong system include files.  (Common problems are taken
@@ -12,7 +12,7 @@ Unit jinclude;
 
 interface
 
-{$I jconfig.inc}
+{$I jconfig_del.inc}
 
 { Include auto-config file to find out which system include files we need. }
 
@@ -20,7 +20,7 @@ uses
 {$ifdef Delphi_Stream}
   classes,
 {$endif}
-  jmorecfg;
+  jmorecfg_del;
 
 { Nomssi:
   To write a dest/source manager that handle streams rather than files,

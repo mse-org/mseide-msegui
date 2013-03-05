@@ -1,4 +1,4 @@
-unit jdapistd;
+unit jdapistd_del;
 
 { Original : jdapistd.c ;  Copyright (C) 1994-1996, Thomas G. Lane. }
 
@@ -15,15 +15,15 @@ unit jdapistd;
 
 interface
 
-{$I jconfig.inc}
+{$I jconfig_del.inc}
 
 uses
-  jmorecfg,
-  jinclude,
-  jdeferr,
-  jerror,
-  jpeglib,
-  jdmaster;
+  jmorecfg_del,
+  jinclude_del,
+  jdeferr_del,
+  jerror_del,
+  jpeglib_del,
+  jdmaster_del;
 
 { Read some scanlines of data from the JPEG decompressor.
 

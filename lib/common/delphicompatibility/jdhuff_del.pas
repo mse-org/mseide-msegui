@@ -1,4 +1,4 @@
-unit jdhuff;
+unit jdhuff_del;
 
 { This file contains declarations for Huffman entropy decoding routines
   that are shared between the sequential decoder (jdhuff.c) and the
@@ -18,15 +18,15 @@ unit jdhuff;
 
 interface
 
-{$I jconfig.inc}
+{$I jconfig_del.inc}
 
 uses
-  jmorecfg,
-  jinclude,
-  jdeferr,
-  jerror,
-  jutils,
-  jpeglib;
+  jmorecfg_del,
+  jinclude_del,
+  jdeferr_del,
+  jerror_del,
+  jutils_del,
+  jpeglib_del;
 
 
 { Declarations shared with jdphuff.c }

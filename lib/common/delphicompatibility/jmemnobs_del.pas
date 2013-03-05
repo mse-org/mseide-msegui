@@ -1,4 +1,4 @@
-Unit jmemnobs;
+Unit jmemnobs_del;
 { Delphi3 -- > jmemnobs from jmemwin }
 { This file provides an Win32-compatible implementation of the system-
   dependent portion of the JPEG memory manager. }
@@ -9,13 +9,13 @@ Unit jmemnobs;
 
 interface
 
-{$I jconfig.inc}
+{$I jconfig_del.inc}
 
 uses
-  jmorecfg,
-  jdeferr,
-  jerror,
-  jpeglib;
+  jmorecfg_del,
+  jdeferr_del,
+  jerror_del,
+  jpeglib_del;
 
 { The macro MAX_ALLOC_CHUNK designates the maximum number of bytes that may
   be requested in a single call to jpeg_get_large (and jpeg_get_small for that

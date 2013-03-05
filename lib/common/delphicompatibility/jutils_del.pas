@@ -1,4 +1,4 @@
-Unit jutils;
+Unit jutils_del;
 
 { This file contains tables and miscellaneous utility routines needed
   for both compression and decompression.
@@ -9,12 +9,12 @@ Unit jutils;
 
 interface
 
-{$I jconfig.inc}
+{$I jconfig_del.inc}
 
 uses
-  jmorecfg,
-  jinclude,
-  jpeglib;
+  jmorecfg_del,
+  jinclude_del,
+  jpeglib_del;
 
 
 { jpeg_zigzag_order[i] is the zigzag-order position of the i'th element

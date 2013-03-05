@@ -1,4 +1,4 @@
-unit zbase;
+unit zbase_del;
 
 
 { Original:
@@ -39,7 +39,7 @@ unit zbase;
 
 interface
 
-{$I zconf.inc}
+{$I zconf_del.inc}
 
 { zconf.h -- configuration of the zlib compression library }
 { zutil.c -- target dependent utility functions for the compression library }

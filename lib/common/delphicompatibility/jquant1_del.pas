@@ -1,4 +1,4 @@
-unit jquant1;
+unit jquant1_del;
 
 { This file contains 1-pass color quantization (color mapping) routines.
   These routines provide mapping to a fixed color map using equally spaced
@@ -8,10 +8,10 @@ unit jquant1;
 
 interface
 
-{$I jconfig.inc}
+{$I jconfig_del.inc}
 
 uses
-  jpeglib;
+  jpeglib_del;
 
 
 {GLOBAL}
@@ -20,10 +20,10 @@ procedure jinit_1pass_quantizer (cinfo : j_decompress_ptr);
 implementation
 
 uses
-  jmorecfg,
-  jdeferr,
-  jerror,
-  jutils;
+  jmorecfg_del,
+  jdeferr_del,
+  jerror_del,
+  jutils_del;
 
 { The main purpose of 1-pass quantization is to provide a fast, if not very
   high quality, colormapped output capability.  A 2-pass quantizer usually

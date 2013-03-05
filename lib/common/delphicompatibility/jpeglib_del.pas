@@ -1,4 +1,4 @@
-unit jpeglib;
+unit jpeglib_del;
 
 { This file defines the application interface for the JPEG library.
   Most applications using the library need only include this file,
@@ -9,7 +9,7 @@ unit jpeglib;
 
 interface
 
-{$I jconfig.inc}
+{$I jconfig_del.inc}
 
 { First we include the configuration files that record how this
   installation of the JPEG library is set up.  jconfig.h can be
@@ -17,8 +17,8 @@ interface
   manual configuration options that most people need not worry about. }
 
 uses
-  jdeferr,
-  jmorecfg;                     { seldom changed options }
+  jdeferr_del,
+  jmorecfg_del;                     { seldom changed options }
 
 { Version ID for the JPEG library.
   Might be useful for tests like "#if JPEG_LIB_VERSION >= 60". }

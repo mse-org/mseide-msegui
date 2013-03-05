@@ -1,4 +1,4 @@
-unit jdapimin;
+unit jdapimin_del;
 
 {$N+}  { Nomssi: cinfo^.output_gamma }
 
@@ -16,15 +16,15 @@ unit jdapimin;
 
 interface
 
-{$I jconfig.inc}
+{$I jconfig_del.inc}
 
 uses
-  jmorecfg,
-  jinclude,
-  jdeferr,
-  jerror,
-  jpeglib,
-  jmemmgr, jdmarker, jdinput, jcomapi;
+  jmorecfg_del,
+  jinclude_del,
+  jdeferr_del,
+  jerror_del,
+  jpeglib_del,
+  jmemmgr_del, jdmarker_del, jdinput_del, jcomapi_del;
 
 { Nomssi }
 procedure jpeg_create_decompress(cinfo : j_decompress_ptr);

@@ -1,4 +1,4 @@
-unit jdpostct;
+unit jdpostct_del;
 
 { Original: jdpostct.c ; Copyright (C) 1994-1996, Thomas G. Lane. }
 
@@ -12,17 +12,17 @@ unit jdpostct;
   An integrated upsample/convert/quantize process would replace this module
   entirely. }
 
-{$I jconfig.inc}
+{$I jconfig_del.inc}
 
 interface
 
 uses
-  jmorecfg,
-  jinclude,
-  jdeferr,
-  jerror,
-  jutils,
-  jpeglib;
+  jmorecfg_del,
+  jinclude_del,
+  jdeferr_del,
+  jerror_del,
+  jutils_del,
+  jpeglib_del;
 
 
 { Initialize postprocessing controller. }

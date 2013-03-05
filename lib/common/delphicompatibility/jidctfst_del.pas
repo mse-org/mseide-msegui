@@ -1,4 +1,4 @@
-unit jidctfst;
+unit jidctfst_del;
 
 { This file contains a fast, not so accurate integer implementation of the
   inverse DCT (Discrete Cosine Transform).  In the IJG code, this routine
@@ -31,13 +31,13 @@ unit jidctfst;
 
 interface
 
-{$I jconfig.inc}
+{$I jconfig_del.inc}
 
 uses
-  jmorecfg,
-  jinclude,
-  jpeglib,
-  jdct;                 { Private declarations for DCT subsystem }
+  jmorecfg_del,
+  jinclude_del,
+  jpeglib_del,
+  jdct_del;                 { Private declarations for DCT subsystem }
 
 
 { Perform dequantization and inverse DCT on one block of coefficients. }

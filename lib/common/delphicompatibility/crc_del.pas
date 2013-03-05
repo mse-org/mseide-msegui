@@ -1,4 +1,4 @@
-unit crc;
+unit crc_del;
 
 {$ifdef FPC}{$mode objfpc}{$endif}
 
@@ -53,8 +53,8 @@ function crc32(crc: cardinal; buf: Pbyte; len: cardinal): cardinal;
 }
 
 function get_crc32_table: Pcardinal;  { can be used by asm versions of crc32() }
-function get_crc_table: Pcardinal; 
-     {$ifdef FPC} external name 'get_crc32_table';{$endif}
+{$ifdef FPC} function get_crc_table: Pcardinal; 
+                     external name 'get_crc32_table';{$endif}
 
 
 
@@ -260,8 +260,10 @@ end;
 
 function crc32 (crc : cardinal; buf : Pbyte; len : cardinal): cardinal;
 begin
-  if buf = nil then
-    exit(0);
+ if buf = nil then begin
+  result:= 0;
+  exit;
+ end;
 
 {$IFDEF DYNAMIC_CRC_TABLE}
   if crc32_table_empty then
@@ -345,9 +347,11 @@ end;
 { ========================================================================
   Table of CRC-64's of all single-byte values (made by make_crc64_table) }
 
+{$ifdef FPC}
 {$push}
 {$r-}
 {$warnings off}
+{$endif}
 
 {local}
 const
@@ -397,7 +401,7 @@ const
     $A6DF411FBFB21CA3,$DC0731D78F8795DA,$536FA08FDFD90E51,$29B7D047EFEC8728
   );
 
-{$pop}
+{$ifdef FPC}{$pop}{$endif}
 
 {$ENDIF}
 
@@ -433,8 +437,10 @@ end;
 }
 function crc64(crc: qword; buf: Pbyte; len: cardinal): qword;
 begin
-  if (buf = nil) then
-    exit(INITIALCRC64);
+  if (buf = nil) then begin
+   result:= INITIALCRC64;
+   exit;
+  end;
 
 {$IFDEF DYNAMIC_CRC_TABLE}
   if crc64_table_empty then
@@ -477,15 +483,17 @@ end;
 (******************************************************************************
  * CRC128
  ******************************************************************************)
-
+{$ifdef FPC}
 {$push}
 {$r-}
 {$warnings off}
+{$endif}
 const
   POLY128REV: u128 = (lo: $d5ca646569316db3; hi:$95AC9329AC4BC9B5);
   INITIALCRC128: u128 = (lo:$FFFFFFFFFFFFFFFF; hi:$FFFFFFFFFFFFFFFF);
-{$pop}
+{$ifdef FPC}{$pop}{$endif}
 
+{$ifdef FPC}
 operator := (v: qword): u128; inline;
 begin
   Result.lo := v;
@@ -531,6 +539,53 @@ operator and (const a: u128; const b: qword): qword; inline;
 begin
   Result := a.lo and b;
 end;
+{$else}
+function u128_ass(v: qword): u128; {$ifdef FPC}inline;{$endif}
+begin
+  Result.lo := v;
+  Result.hi := 0;
+end;
+
+function u128_equ(a, b: u128): boolean; {$ifdef FPC}inline;{$endif}
+begin
+  Result := (a.lo=b.lo) and (a.hi=b.hi);
+end;
+
+function u128_xor (const a: u128; const b: u128): u128; {$ifdef FPC}inline;{$endif}
+begin
+  Result.lo := a.lo xor b.lo;
+  Result.hi := a.hi xor b.hi;
+end;
+
+function u128_xor (const a: u128; const b: byte): u128; {$ifdef FPC}inline;{$endif}
+begin
+  Result.lo := a.lo xor b;
+  Result.hi := a.hi xor 0;
+end;
+
+function u128_shr (const a: u128; const b: byte): u128; {$ifdef FPC}inline;{$endif}
+begin
+  Result.lo := (a.lo shr b) or (a.hi shl (64-b));
+  Result.hi := a.hi shr b;
+end;
+
+function u128_shl (const a: u128; const b: byte): u128; {$ifdef FPC}inline;{$endif}
+begin
+  Result.lo := a.lo shl b;
+  Result.hi := (a.hi shl b) or (a.lo shr (64-b));
+end;
+
+function u128_and (const a: u128; const b: u128): u128; {$ifdef FPC}inline;{$endif}
+begin
+  Result.lo := a.lo and b.lo;
+  Result.hi := a.hi and b.hi;
+end;
+
+function u128_and (const a: u128; const b: qword): qword; {$ifdef FPC}inline;{$endif}
+begin
+  Result := a.lo and b;
+end;
+{$endif}
 
 {$IFDEF DYNAMIC_CRC_TABLE}
 
@@ -566,10 +621,11 @@ end;
 
 { ========================================================================
   Table of CRC-128's of all single-byte values (made by make_crc128_table) }
-
+{$ifdef FPC}
 {$push}
 {$r-}
 {$warnings off}
+{$endif}
 
 {local}
 const
@@ -832,7 +888,7 @@ const
     (lo:$7CAAFDC01BA4F406;hi:$F2606E63D8E0F40A)
 );
 
-{$pop}
+{$ifdef FPC}{$pop}{$endif}
 
 {$ENDIF}
 
@@ -847,14 +903,16 @@ end;
 
 function crc128(crc: u128; buf: Pbyte; len: cardinal): u128;
 begin
-  if (buf = nil) then
-    exit(INITIALCRC128);
+  if (buf = nil) then begin
+   result:= INITIALCRC128;
+   exit;
+  end;
 
 {$IFDEF DYNAMIC_CRC_TABLE}
   if crc128_table_empty then
     make_crc128_table;
 {$ENDIF}
-
+{$ifdef FPC}
   while (len >= 8) do
   begin
     crc := crc128_table[(crc xor buf^) and $ff] xor (crc shr 8);
@@ -882,7 +940,44 @@ begin
     inc(buf);
     dec(len);
   end;
+ {$else}
+  while (len >= 8) do
+  begin
+    crc := u128_xor(crc128_table[u128_and(u128_xor(crc,buf^),$ff)],
+                                                          u128_shr(crc,8));
+    inc(buf);
+    crc := u128_xor(crc128_table[u128_and(u128_xor(crc,buf^),$ff)],
+                                                          u128_shr(crc,8));
+    inc(buf);
+    crc := u128_xor(crc128_table[u128_and(u128_xor(crc,buf^),$ff)],
+                                                          u128_shr(crc,8));
+    inc(buf);
+    crc := u128_xor(crc128_table[u128_and(u128_xor(crc,buf^),$ff)],
+                                                          u128_shr(crc,8));
+    inc(buf);
+    crc := u128_xor(crc128_table[u128_and(u128_xor(crc,buf^),$ff)],
+                                                          u128_shr(crc,8));
+    inc(buf);
+    crc := u128_xor(crc128_table[u128_and(u128_xor(crc,buf^),$ff)],
+                                                          u128_shr(crc,8));
+    inc(buf);
+    crc := u128_xor(crc128_table[u128_and(u128_xor(crc,buf^),$ff)],
+                                                          u128_shr(crc,8));
+    inc(buf);
+    crc := u128_xor(crc128_table[u128_and(u128_xor(crc,buf^),$ff)],
+                                                          u128_shr(crc,8));
+    inc(buf);
+    dec(len, 8);
+  end;
 
+  while (len > 0) do
+  begin
+    crc := u128_xor(crc128_table[u128_and(u128_xor(crc,buf^),$ff)],
+                                                          u128_shr(crc,8));
+    inc(buf);
+    dec(len);
+  end;
+ {$endif}
   result := crc;
 end;
 

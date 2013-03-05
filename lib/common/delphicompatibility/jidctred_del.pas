@@ -1,4 +1,4 @@
-unit jidctred;
+unit jidctred_del;
 
 
 { This file contains inverse-DCT routines that produce reduced-size output:
@@ -20,13 +20,13 @@ unit jidctred;
 
 interface
 
-{$I jconfig.inc}
+{$I jconfig_del.inc}
 
 uses
-  jmorecfg,
-  jinclude,
-  jpeglib,
-  jdct;                 { Private declarations for DCT subsystem }
+  jmorecfg_del,
+  jinclude_del,
+  jpeglib_del,
+  jdct_del;                 { Private declarations for DCT subsystem }
 
 { Perform dequantization and inverse DCT on one block of coefficients,
   producing a reduced-size 1x1 output block. }

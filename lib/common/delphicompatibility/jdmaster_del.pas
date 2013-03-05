@@ -1,4 +1,4 @@
-unit jdmaster;
+unit jdmaster_del;
 
 { This file contains master control logic for the JPEG decompressor.
   These routines are concerned with selecting the modules to be executed
@@ -9,25 +9,26 @@ unit jdmaster;
 
 interface
 
-{$I jconfig.inc}
+{$I jconfig_del.inc}
 
 uses
-  jmorecfg,
-  jinclude,
-  jutils,
-  jerror,
-  jdeferr,
-  jdcolor, jdsample, jdpostct, jddctmgr, jdphuff, jdhuff, jdcoefct, jdmainct,
+  jmorecfg_del,
+  jinclude_del,
+  jutils_del,
+  jerror_del,
+  jdeferr_del,
+  jdcolor_del, jdsample_del, jdpostct_del, jddctmgr_del, jdphuff_del,
+   jdhuff_del, jdcoefct_del, jdmainct_del,
 {$ifdef QUANT_1PASS_SUPPORTED}
-  jquant1,
+  jquant1_del,
 {$endif}
 {$ifdef QUANT_2PASS_SUPPORTED}
-  jquant2,
+  jquant2_del,
 {$endif}
 {$ifdef UPSAMPLE_MERGING_SUPPORTED}
-  jdmerge,
+  jdmerge_del,
 {$endif}
-  jpeglib;
+  jpeglib_del;
 
 
 { Compute output image dimensions and related values.

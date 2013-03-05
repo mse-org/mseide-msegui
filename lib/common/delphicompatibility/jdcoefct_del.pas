@@ -1,4 +1,4 @@
-unit jdcoefct;
+unit jdcoefct_del;
 
 { This file contains the coefficient buffer controller for decompression.
   This controller is the top level of the JPEG decompressor proper.
@@ -9,17 +9,17 @@ unit jdcoefct;
   Also, the input side (only) is used when reading a file for transcoding. }
 
 { Original: jdcoefct.c ; Copyright (C) 1994-1997, Thomas G. Lane. }
-{$I jconfig.inc}
+{$I jconfig_del.inc}
 
 interface
 
 uses
-  jmorecfg,
-  jinclude,
-  jdeferr,
-  jerror,
-  jutils,
-  jpeglib;
+  jmorecfg_del,
+  jinclude_del,
+  jdeferr_del,
+  jerror_del,
+  jutils_del,
+  jpeglib_del;
 
 
 {GLOBAL}

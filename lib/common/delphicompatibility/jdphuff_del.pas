@@ -1,4 +1,4 @@
-unit jdphuff;
+unit jdphuff_del;
 
 { This file contains Huffman entropy decoding routines for progressive JPEG.
 
@@ -12,16 +12,16 @@ unit jdphuff;
 
 interface
 
-{$I jconfig.inc}
+{$I jconfig_del.inc}
 
 uses
-  jmorecfg,
-  jinclude,
-  jpeglib,
-  jdeferr,
-  jerror,
-  jutils,
-  jdhuff;               { Declarations shared with jdhuff.c }
+  jmorecfg_del,
+  jinclude_del,
+  jpeglib_del,
+  jdeferr_del,
+  jerror_del,
+  jutils_del,
+  jdhuff_del;               { Declarations shared with jdhuff.c }
 
 
 {GLOBAL}

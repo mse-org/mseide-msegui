@@ -1,4 +1,4 @@
-unit jidctint;
+unit jidctint_del;
 {$Q+}
 
 { This file contains a slow-but-accurate integer implementation of the
@@ -25,13 +25,13 @@ unit jidctint;
 
 interface
 
-{$I jconfig.inc}
+{$I jconfig_del.inc}
 
 uses
-  jmorecfg,
-  jinclude,
-  jpeglib,
-  jdct;         { Private declarations for DCT subsystem }
+  jmorecfg_del,
+  jinclude_del,
+  jpeglib_del,
+  jdct_del;         { Private declarations for DCT subsystem }
 
 { Perform dequantization and inverse DCT on one block of coefficients. }
 

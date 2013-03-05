@@ -1,4 +1,4 @@
-unit jmemmgr;
+unit jmemmgr_del;
 
 { This file contains the JPEG system-independent memory management
   routines.  This code is usable across a wide variety of machines; most
@@ -22,15 +22,15 @@ unit jmemmgr;
 
 interface
 
-{$I jconfig.inc}
+{$I jconfig_del.inc}
 
 uses
-   jmorecfg,
-   jinclude,
-   jdeferr,
-   jerror,
-   jpeglib,
-   jutils,
+   jmorecfg_del,
+   jinclude_del,
+   jdeferr_del,
+   jerror_del,
+   jpeglib_del,
+   jutils_del,
 {$IFDEF VER70}
 {$ifndef NO_GETENV}
    Dos,                         { DOS unit should declare getenv() }
@@ -38,7 +38,7 @@ uses
 {$endif}
    jmemdos;                     { import the system-dependent declarations }
 {$ELSE}
-   jmemnobs;
+   jmemnobs_del;
   {$DEFINE NO_GETENV}
 {$ENDIF}
 

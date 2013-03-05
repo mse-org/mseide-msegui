@@ -1,4 +1,4 @@
-unit jerror;
+unit jerror_del;
 
 { This file contains simple error-reporting and trace-message routines.
   These are suitable for Unix-like systems and others where writing to
@@ -9,13 +9,13 @@ unit jerror;
 
 { Source: jerror.c;  Copyright (C) 1991-1996, Thomas G. Lane. }
 { note: format_message still contains a hack }
-{$i jconfig.inc}
+{$i jconfig_del.inc}
 interface
 
 uses
-  jmorecfg,
-  jdeferr,
-  jpeglib;
+  jmorecfg_del,
+  jdeferr_del,
+  jpeglib_del;
 {
   jversion;
 }
@@ -99,7 +99,7 @@ uses
     sysutils,  { Delphi Unit with Format() }
   {$ENDIF}
 {$ENDIF}
-  jcomapi;
+  jcomapi_del;
 
 { Error exit handler: must not return to caller.
 

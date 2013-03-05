@@ -1,4 +1,4 @@
-unit jdct;
+unit jdct_del;
 
 { Orignal: jdct.h; Copyright (C) 1994-1996, Thomas G. Lane. }
 
@@ -10,10 +10,10 @@ unit jdct;
 
 interface
 
-{$I jconfig.inc}
+{$I jconfig_del.inc}
 
 uses
-  jmorecfg;
+  jmorecfg_del;
 
 
 { A forward DCT routine is given a pointer to a work area of type DCTELEM[];

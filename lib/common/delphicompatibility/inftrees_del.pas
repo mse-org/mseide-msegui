@@ -1,4 +1,4 @@
-unit inftrees;
+unit inftrees_del;
 
 { inftrees.h -- header to use inftrees.c
   inftrees.c -- generate Huffman trees for efficient decoding
@@ -16,10 +16,10 @@ unit inftrees;
 
 interface
 
-{$I zconf.inc}
+{$I zconf_del.inc}
 
 uses
-  zbase,msetypes;
+  zbase_del,msetypes;
 
 
 { Maximum size of dynamic tree.  The maximum found in a long but non-

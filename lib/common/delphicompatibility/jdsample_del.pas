@@ -1,4 +1,4 @@
-unit jdsample;
+unit jdsample_del;
 
 { Original: jdsample.c; Copyright (C) 1991-1996, Thomas G. Lane. }
 
@@ -16,15 +16,15 @@ unit jdsample;
 
 interface
 
-{$I jconfig.inc}
+{$I jconfig_del.inc}
 
 uses
-  jmorecfg,
-  jinclude,
-  jutils,
-  jpeglib,
-  jdeferr,
-  jerror;
+  jmorecfg_del,
+  jinclude_del,
+  jutils_del,
+  jpeglib_del,
+  jdeferr_del,
+  jerror_del;
 
 
 { Pointer to routine to upsample a single component }

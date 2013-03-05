@@ -1,4 +1,4 @@
-unit inffast;
+unit inffast_del;
 
 {
   inffast.h and
@@ -13,10 +13,10 @@ unit inffast;
 
 interface
 
-{$I zconf.inc}
+{$I zconf_del.inc}
 
 uses
-  zbase,msetypes;
+  zbase_del,msetypes;
 
 function inflate_fast( bl : cardinal;
                        bd : cardinal;
@@ -29,7 +29,7 @@ function inflate_fast( bl : cardinal;
 implementation
 
 uses
-  infutil;
+  infutil_del;
 
 
 { Called with number of bytes left to write in window at least 258

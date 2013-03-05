@@ -1,4 +1,4 @@
-Unit infutil;
+Unit infutil_del;
 
 { types and macros common to blocks and codes
   Copyright (C) 1995-1998 Mark Adler
@@ -15,10 +15,10 @@ Unit infutil;
 
 interface
 
-{$I zconf.inc}
+{$I zconf_del.inc}
 
 uses
-  zbase,msetypes;
+  zbase_del,msetypes;
 
 { copy as much as possible from the sliding window to the output area }
 function inflate_flush(var s : inflate_blocks_state;

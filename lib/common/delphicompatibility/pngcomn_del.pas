@@ -13,11 +13,11 @@
 
  **********************************************************************}
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
-unit pngcomn;
+unit pngcomn_del;
 
 interface
 
-uses sysutils, fpimage, fpimgcmn;
+uses sysutils, fpimage, fpimgcmn_del;
 
 type
 

@@ -1,4 +1,4 @@
-unit zdeflate;
+unit zdeflate_del;
 
 {$ifdef FPC}{$goto on}{$endif}
 
@@ -59,10 +59,10 @@ unit zdeflate;
 
 interface
 
-{$I zconf.inc}
+{$I zconf_del.inc}
 
 uses
- zbase{$ifndef FPC},msetypes{$endif};
+ zbase_del{$ifndef FPC},msetypes{$endif};
 
 
 function deflateInit_(strm : z_streamp;
@@ -339,7 +339,7 @@ const
 implementation
 
 uses
-  trees, adler;
+  trees_del, adler_del;
 
 {  ===========================================================================
    Function prototypes. }

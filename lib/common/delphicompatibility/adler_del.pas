@@ -1,4 +1,4 @@
-unit adler;
+unit adler_del;
 
 {
   adler32.c -- compute the Adler-32 checksum of a data stream
@@ -11,7 +11,7 @@ unit adler;
 
 interface
 
-{$I zconf.inc}
+{$I zconf_del.inc}
 
 function adler32(adler : cardinal; buf : Pbyte; len : cardinal) : cardinal;
 

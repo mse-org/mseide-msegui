@@ -1,4 +1,4 @@
-unit jdmainct;
+unit jdmainct_del;
 
 
 { This file is part of the Independent JPEG Group's software.
@@ -105,17 +105,17 @@ unit jdmainct;
 
 interface
 
-{$I jconfig.inc}
+{$I jconfig_del.inc}
 
 uses
-  jmorecfg,
-  jinclude,
+  jmorecfg_del,
+  jinclude_del,
 {$ifdef QUANT_2PASS_SUPPORTED}
-  jquant2,
+  jquant2_del,
 {$endif}
-  jdeferr,
-  jerror,
-  jpeglib;
+  jdeferr_del,
+  jerror_del,
+  jpeglib_del;
 
 
 {GLOBAL}

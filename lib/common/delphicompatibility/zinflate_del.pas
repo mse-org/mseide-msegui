@@ -1,4 +1,4 @@
-unit  zinflate;
+unit  zinflate_del;
 
 {  inflate.c -- zlib interface to inflate modules
    Copyright (C) 1995-1998 Mark Adler
@@ -11,10 +11,10 @@ unit  zinflate;
 
 interface
 
-{$I zconf.inc}
+{$I zconf_del.inc}
 
 uses
-  zbase, infblock, infutil,msetypes;
+ zbase_del,infblock_del,infutil_del,msetypes;
 
 function inflateInit(var z : z_stream) : integer;
 
@@ -198,7 +198,7 @@ function inflateSyncPoint(var z : z_stream) : integer;
 implementation
 
 uses
-  adler;
+  adler_del;
 
 function inflateReset(var z : z_stream) : integer;
 begin

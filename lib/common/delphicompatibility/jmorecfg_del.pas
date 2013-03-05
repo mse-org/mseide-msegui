@@ -1,4 +1,4 @@
-unit jmorecfg;
+unit jmorecfg_del;
 
 { This file contains additional configuration options that customize the
   JPEG software for special applications or support machine-dependent
@@ -8,7 +8,7 @@ unit jmorecfg;
 
 interface
 
-{$I jconfig.inc}
+{$I jconfig_del.inc}
 
 //{$IFDEF FPC}  { Free Pascal Compiler }
     type
