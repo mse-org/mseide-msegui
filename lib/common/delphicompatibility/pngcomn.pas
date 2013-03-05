@@ -12,12 +12,12 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
  **********************************************************************}
-{$mode objfpc}{$h+}
-unit PNGcomn;
+{$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+unit pngcomn;
 
 interface
 
-uses SysUtils, FPImage, FPImgCmn;
+uses sysutils, fpimage, fpimgcmn;
 
 type
 

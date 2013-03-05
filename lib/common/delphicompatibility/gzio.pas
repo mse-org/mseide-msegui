@@ -12,15 +12,17 @@ unit gzio;
 }
 
 interface
-{$mode objfpc}
+{$ifdef FPC}{$mode objfpc}{$endif}
 {$I zconf.inc}
-
+{$ifdef linux}{$define unix}{$endif}
 uses
+(* todo: delphi compatibility
   {$ifdef UNIX}
   baseunix,
   {$else}
   dos,
   {$endif}
+*)
   zbase, crc, zdeflate, zinflate;
 
 type gzFile = pointer;
@@ -136,6 +138,7 @@ var
   doseek,
   exists,
   writing : boolean;
+(* todo: delphi compatibility
 begin
 
   if (path='') or (mode='') then begin
@@ -275,6 +278,7 @@ begin
   end;
 
   gzopen := gzFile(s);
+*)
 end;
 
 
