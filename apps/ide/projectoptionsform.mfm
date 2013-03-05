@@ -3370,6 +3370,7 @@ object projectoptionsfo: tprojectoptionsfo
                 0
               )
               taborder = 1
+              onshowhint = hintexpandedmacros
               bounds_x = 1
               bounds_y = 5
               bounds_cx = 84
@@ -3388,6 +3389,7 @@ object projectoptionsfo: tprojectoptionsfo
                 0
               )
               taborder = 2
+              onshowhint = hintexpandedmacros
               bounds_x = 89
               bounds_y = 5
               bounds_cx = 84
@@ -3406,6 +3408,7 @@ object projectoptionsfo: tprojectoptionsfo
                 0
               )
               taborder = 3
+              onshowhint = hintexpandedmacros
               bounds_x = 177
               bounds_y = 5
               bounds_cx = 84
@@ -3424,6 +3427,7 @@ object projectoptionsfo: tprojectoptionsfo
                 0
               )
               taborder = 4
+              onshowhint = hintexpandedmacros
               bounds_x = 265
               bounds_y = 5
               bounds_cx = 84
