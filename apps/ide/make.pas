@@ -179,7 +179,7 @@ begin
  with projectoptions,o,texp do begin
   str3:= quotefilename(tosysfilepath(makecommand));
   str1:= str3;
-  if targetfile <> '' then begin
+  if (targetfile <> '') and (targpref <> '') then begin
    str1:= str1 + ' '+quotefilename(targpref+tosysfilepath(targetfile));
   end;
   int2:= high(unitdirs);
