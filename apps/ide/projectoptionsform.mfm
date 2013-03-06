@@ -3649,6 +3649,7 @@ object projectoptionsfo: tprojectoptionsfo
             0
           )
           taborder = 2
+          onshowhint = hintexpandedmacros
           bounds_x = 586
           bounds_y = 2
           bounds_cx = 216
