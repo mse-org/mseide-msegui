@@ -40,11 +40,11 @@ unit fpwritetiff;
 interface
 
 uses
-  math, classes, mclasses, sysutils, fpimage, fptiffcmn,
+  math, classes, mclasses, sysutils, fpimage, fptiffcmn,msetypes,
   {$ifdef FPC}
    zbase, zdeflate
   {$else}
-   zbase_del,zdeflate_del,msetypes,classes_del
+   zbase_del,zdeflate_del,classes_del
   {$endif};
 
 type
