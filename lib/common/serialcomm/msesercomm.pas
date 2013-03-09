@@ -186,6 +186,7 @@ type
    procedure internaldisconnect; virtual;
    procedure closepipes(const sender: tcustomcommpipes); virtual; abstract;
    procedure writedata(const adata: string); virtual; abstract;
+   function trywritedata(const adata: string): syserrorty; virtual; abstract;
    procedure connect;
    procedure disconnect;
    procedure checkinactive;
@@ -234,6 +235,7 @@ type
    fpipes: tsercommpipes;
    fport: tasyncserport;
    procedure writedata(const adata: string); override;
+   function trywritedata(const adata: string): syserrorty; override;
    procedure internalconnect; override;
    procedure internaldisconnect; override;
    procedure closepipes(const sender: tcustomcommpipes); override;
@@ -263,7 +265,7 @@ type
    property onafterdisconnect;
  end;
  
- commresponseflagty = (crf_timeout,crf_eof,crf_trunc);
+ commresponseflagty = (crf_timeout,crf_eof,crf_trunc,crf_writeerror);
  commresponseflagsty = set of commresponseflagty;
  tcustomsercommchannel = class;
  commresponseeventty = procedure(const sender: tcustomsercommchannel;
@@ -291,7 +293,7 @@ type
            const aresponselength: integer; const atimeoutus: integer;
                                 const sync: boolean): syserrorty;
    procedure checksercomm;
-   procedure doresponse;
+   procedure doresponse; virtual;
     //icommclient
    procedure setcommserverintf(const aintf: icommserver);
    procedure dorxchange(const areader: tcommreader);
@@ -299,8 +301,8 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    procedure clear;
-   procedure transmit(const adata: string; const aresponselength: integer;
-                      const atimeoutus: integer = -1); overload; //threadsafe
+   function transmit(const adata: string; const aresponselength: integer;
+            const atimeoutus: integer = -1): syserrorty; overload; //threadsafe
      //async, answer by onresponse
                       //0 -> timeoutus property,
                       //-1 -> timeoutus + guessed transmission time,
@@ -318,6 +320,24 @@ type
  tsercommchannel = class(tcustomsercommchannel)
   published
    property sercomm;
+   property timeoutus;
+   property onresponse;
+ end;
+
+ setupcommeventty = procedure(const sender: tobject;
+                           const acomm: tcustomsercommcomp) of object;
+
+ tasynsercommchannel = class(tcustomsercommchannel)
+  private
+   fonsetupcomm: setupcommeventty;
+   function getsercomm: tcustomsercommcomp;
+   procedure setsercomm(const avalue: tcustomsercommcomp);
+  protected
+   procedure loaded; override;
+   procedure setupcomm(const acomm: tcustomsercommcomp); virtual;
+  published
+   property sercomm: tcustomsercommcomp read getsercomm write setsercomm;
+   property onsetuppcomm: setupcommeventty read fonsetupcomm write fonsetupcomm;
    property timeoutus;
    property onresponse;
  end;
@@ -445,6 +465,14 @@ end;
 procedure tcustomsercommcomp.writedata(const adata: string);
 begin
  fpipes.tx.writestr(adata);
+end;
+
+function tcustomsercommcomp.trywritedata(const adata: string): syserrorty;
+begin
+ result:= sye_ok;
+ if fpipes.tx.write(pointer(adata)^,length(adata)) <> length(adata) then begin
+  result:= sye_write;
+ end;
 end;
 
 function tcustomsercommcomp.gethalfduplex: boolean;
@@ -1030,16 +1058,18 @@ begin
   end;
   updatebit({$ifdef FPC}longword{$else}byte{$endif}(fstate),ord(sccs_sync),sync);
   include(fstate, sccs_pending);
-  fsercomm.writedata(adata);
-  if sync then begin
-   sys_semtrywait(fsem); //clear
-   result:= application.semwait(fsem,int1);
-   exclude(fstate, sccs_pending);
-  end
-  else begin  
-   if int1 > 0 then begin
-    ftimer.interval:= int1;
-    ftimer.enabled:= true;
+  result:= fsercomm.trywritedata(adata);
+  if result = sye_ok then begin
+   if sync then begin
+    sys_semtrywait(fsem); //clear
+    result:= application.semwait(fsem,int1);
+    exclude(fstate, sccs_pending);
+   end
+   else begin  
+    if int1 > 0 then begin
+     ftimer.interval:= int1;
+     ftimer.enabled:= true;
+    end;
    end;
   end;
  finally
@@ -1047,10 +1077,11 @@ begin
  end;
 end;
 
-procedure tcustomsercommchannel.transmit(const adata: string;
-               const aresponselength: integer; const atimeoutus: integer = -1);
+function tcustomsercommchannel.transmit(const adata: string;
+                  const aresponselength: integer; 
+                  const atimeoutus: integer = -1): syserrorty;
 begin
- internaltransmit(adata,aresponselength,atimeoutus,false);
+ result:= internaltransmit(adata,aresponselength,atimeoutus,false);
 end;
 
 function tcustomsercommchannel.transmit(const adata: string;
@@ -1059,11 +1090,16 @@ function tcustomsercommchannel.transmit(const adata: string;
                       const atimeoutus: integer = -1): commresponseflagsty;
                                                        //synchronous
 begin
- if internaltransmit(adata,aresponselength,atimeoutus,true) <> sye_ok then begin
-  result:= [crf_timeout];
- end
- else begin
-  result:= fflags;
+ case internaltransmit(adata,aresponselength,atimeoutus,true) of
+  sye_ok: begin
+   result:= fflags;
+  end;
+  sye_write: begin
+   result:= [crf_writeerror];
+  end;
+  else begin  
+   result:= [crf_timeout];
+  end;
  end;
  aresult:= fdata;
 end;
@@ -1101,6 +1137,36 @@ end;
 function tsercommwriter.internalwrite(const buffer; count: longint): longint;
 begin
  result:= tcustomsercommcomp(fowner.fowner).port.pipewrite(buffer,count);
+end;
+
+{ tasynsercommchannel }
+
+function tasynsercommchannel.getsercomm: tcustomsercommcomp;
+begin
+ result:= tcustomsercommcomp(inherited sercomm);
+end;
+
+procedure tasynsercommchannel.setsercomm(const avalue: tcustomsercommcomp);
+begin
+ inherited setsercomm(avalue);
+ if (avalue <> nil) and not (csloading in componentstate) then begin
+  setupcomm(avalue);
+ end;
+end;
+
+procedure tasynsercommchannel.loaded;
+begin
+ inherited;
+ if fsercomm <> nil then begin
+  setupcomm(tcustomsercommcomp(fsercomm));
+ end;
+end;
+
+procedure tasynsercommchannel.setupcomm(const acomm: tcustomsercommcomp);
+begin
+ if canevent(tmethod(fonsetupcomm)) then begin
+  fonsetupcomm(self,acomm);
+ end;
 end;
 
 end.
