@@ -178,6 +178,7 @@ type
   protected
    fhandle: integer;
    factive: boolean;
+   factiveafterload: boolean;
    fcryptoio: tcryptoio;
    procedure setactive(const avalue: boolean); override;
    procedure doactivated; override;
@@ -185,7 +186,7 @@ type
    procedure internalconnect; virtual; abstract;
    procedure internaldisconnect; virtual;
    procedure closepipes(const sender: tcustomcommpipes); virtual; abstract;
-   procedure writedata(const adata: string); virtual; abstract;
+   procedure writedata(const adata: string);
    function trywritedata(const adata: string): syserrorty; virtual; abstract;
    procedure connect;
    procedure disconnect;
@@ -234,7 +235,7 @@ type
   protected
    fpipes: tsercommpipes;
    fport: tasyncserport;
-   procedure writedata(const adata: string); override;
+//   procedure writedata(const adata: string); override;
    function trywritedata(const adata: string): syserrorty; override;
    procedure internalconnect; override;
    procedure internaldisconnect; override;
@@ -329,17 +330,31 @@ type
 
  tasynsercommchannel = class(tcustomsercommchannel)
   private
+   fonconnect: notifyeventty;
+   fondisconnect: notifyeventty;
    fonsetupcomm: setupcommeventty;
+   fconnected: boolean;
+   fconnectafterload: boolean;
    function getsercomm: tcustomsercommcomp;
    procedure setsercomm(const avalue: tcustomsercommcomp);
+   procedure setconnected(const avalue: boolean);
   protected
    procedure loaded; override;
    procedure setupcomm(const acomm: tcustomsercommcomp); virtual;
+   procedure doconnect; virtual;
+   procedure dodisconnect; virtual;
+   property onconnect: notifyeventty read fonconnect write fonconnect;
+   property ondisconnect: notifyeventty read fondisconnect write fondisconnect;
+  public
+   procedure connect; virtual;
+   procedure disconnect; virtual;
   published
    property sercomm: tcustomsercommcomp read getsercomm write setsercomm;
    property onsetuppcomm: setupcommeventty read fonsetupcomm write fonsetupcomm;
    property timeoutus;
    property onresponse;
+   property connected: boolean read fconnected write setconnected
+                                                           default false;
  end;
  
 procedure setcomcomp(const alink: icommclient; const acommcomp: tcustomcommcomp;
@@ -462,17 +477,9 @@ begin
  fport.assign(avalue);
 end;
 
-procedure tcustomsercommcomp.writedata(const adata: string);
-begin
- fpipes.tx.writestr(adata);
-end;
-
 function tcustomsercommcomp.trywritedata(const adata: string): syserrorty;
 begin
- result:= sye_ok;
- if fpipes.tx.write(pointer(adata)^,length(adata)) <> length(adata) then begin
-  result:= sye_write;
- end;
+ result:= fpipes.tx.trywritebuffer(pointer(adata)^,length(adata));
 end;
 
 function tcustomsercommcomp.gethalfduplex: boolean;
@@ -762,7 +769,7 @@ end;
 procedure tcustomcommcomp.setactive(const avalue: boolean);
 begin
  if factive <> avalue then begin
-  if not (csloading in componentstate) then begin
+  if not (csreading in componentstate) then begin
    if avalue then begin
     connect;
    end
@@ -771,7 +778,7 @@ begin
    end;
   end
   else begin
-   factive:= avalue;
+   factiveafterload:= avalue;
   end;
  end;
 end;
@@ -815,8 +822,8 @@ end;
 procedure tcustomcommcomp.loaded;
 begin
  inherited;
- if factive then begin
-  connect;
+ if factiveafterload then begin
+  active:= true;
  end;
 end;
 
@@ -828,6 +835,11 @@ end;
 function tcustomcommcomp.calctransmissiontime(const alength: integer): integer;
 begin
  result:= 0;
+end;
+
+procedure tcustomcommcomp.writedata(const adata: string);
+begin
+ syserror(trywritedata(adata));
 end;
 
 { tcommreader }
@@ -1148,9 +1160,43 @@ end;
 
 procedure tasynsercommchannel.setsercomm(const avalue: tcustomsercommcomp);
 begin
+ if avalue = nil then begin
+  connected:= false;
+ end;
  inherited setsercomm(avalue);
  if (avalue <> nil) and not (csloading in componentstate) then begin
   setupcomm(avalue);
+ end;
+end;
+
+procedure tasynsercommchannel.doconnect;
+begin
+ if canevent(tmethod(fonconnect)) then begin
+  fonconnect(self);
+ end;
+end;
+
+procedure tasynsercommchannel.dodisconnect;
+begin
+ if canevent(tmethod(fondisconnect)) then begin
+  fondisconnect(self);
+ end;
+end;
+
+procedure tasynsercommchannel.setconnected(const avalue: boolean);
+begin
+ if csloading in componentstate then begin
+  fconnectafterload:= avalue;
+ end
+ else begin
+  if fconnected <> avalue then begin
+   if avalue then begin
+    connect;
+   end
+   else begin
+    disconnect;
+   end;
+  end;
  end;
 end;
 
@@ -1160,6 +1206,9 @@ begin
  if fsercomm <> nil then begin
   setupcomm(tcustomsercommcomp(fsercomm));
  end;
+ if fconnectafterload then begin
+  connect;
+ end;
 end;
 
 procedure tasynsercommchannel.setupcomm(const acomm: tcustomsercommcomp);
@@ -1167,6 +1216,19 @@ begin
  if canevent(tmethod(fonsetupcomm)) then begin
   fonsetupcomm(self,acomm);
  end;
+end;
+
+procedure tasynsercommchannel.connect;
+begin
+ if fsercomm <> nil then begin
+  fsercomm.active:= true;
+ end;
+ fconnected:= true;
+end;
+
+procedure tasynsercommchannel.disconnect;
+begin
+ fconnected:= false;
 end;
 
 end.

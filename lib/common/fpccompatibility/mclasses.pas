@@ -32,7 +32,7 @@ unit mclasses;
 interface
 
 uses
- classes,typinfo,sysutils,msetypes {$ifndef FPC},classes_del{$endif};
+ classes,typinfo,sysutils,msetypes,msesystypes {$ifndef FPC},classes_del{$endif};
 
 type
 
@@ -870,7 +870,9 @@ TStringsEnumerator = class
     function Seek(const Offset: Int64; Origin: TSeekOrigin): Int64;
                                              overload; virtual;
     procedure ReadBuffer(var Buffer; Count: Longint);
+    function tryreadbuffer(var buffer; count: longint): syserrorty; virtual;
     procedure WriteBuffer(const Buffer; Count: Longint);
+    function trywritebuffer(const buffer; count: longint): syserrorty; virtual;
     function CopyFrom(Source: TStream; Count: Int64): Int64;
     function ReadComponent(Instance: TComponent): TComponent;
     function ReadComponentRes(Instance: TComponent): TComponent;
@@ -3824,6 +3826,22 @@ end;
     begin
       WriteBuffer(q,8);
     end;
+
+function TStream.trywritebuffer(const buffer; count: longint): syserrorty;
+begin
+ result:= sye_ok;
+ if write(buffer,count) < count then begin
+  result:= sye_write;
+ end;
+end;
+
+function TStream.tryreadbuffer(var buffer; count: longint): syserrorty;
+begin
+ result:= sye_ok;
+ if read(buffer,count) < count then begin
+  result:= sye_read;
+ end;
+end;
 
 
 {****************************************************************************}

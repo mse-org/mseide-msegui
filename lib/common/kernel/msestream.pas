@@ -261,7 +261,7 @@ type
              const accessmode: fileaccessmodesty = [];
              const rights: filerightsty = defaultfilerights): boolean;
    procedure return;    //setzt filepointer auf letzte readln position
-
+   
    procedure writestr(const value: string); //no encoding
    procedure writestrln(const value: string); //no encoding
    function readstrln(var value: string): boolean; overload; virtual;

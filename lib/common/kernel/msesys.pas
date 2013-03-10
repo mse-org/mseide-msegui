@@ -197,7 +197,7 @@ end;
 
 const
  errortexts: array[syserrorty] of string =
-  ('','','','Busy','Dirstream','Network error','Write error',
+  ('','','','Busy','Dirstream','Network error','Write error','Read error',
      'Thread error',
     'Mutex error',
     'Semaphore error',

@@ -120,7 +120,7 @@ type
    procedure internaldisconnect; override;
    procedure closepipes(const sender: tcustomcommpipes); override;
    procedure doasyncevent(var atag: integer); override;
-   procedure writedata(const adata: string); override;
+   function trywritedata(const adata: string): syserrorty; override;
  public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -455,9 +455,9 @@ begin
  end;
 end;
 
-procedure tcustomsocketclient.writedata(const adata: string);
+function tcustomsocketclient.trywritedata(const adata: string): syserrorty;
 begin
- fpipes.tx.writestr(adata);
+ result:= fpipes.tx.trywritebuffer(pointer(adata)^,length(adata));
 end;
 
 { tserversocketpipes }
