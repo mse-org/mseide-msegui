@@ -1,5 +1,7 @@
 MSEide+MSEgui breaking changes version history
 
+2013-03-10
+ tcustomgrid.optionsgrid og_noresetselect -> optionsgrid1 og1_noresetselect.
 2013-03-03
  sender parameter of tcustomstringcol.oncopytoclipboard, onpastefromclipboard
  is tcustomstringcol.

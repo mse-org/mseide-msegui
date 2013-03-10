@@ -121,6 +121,11 @@ type
   protected
    function getinvisibleitems: tintegerset; override;
  end;
+
+ tgridoptionseditor = class(tsetpropertyeditor)
+  protected
+   function getinvisibleitems: tintegerset; override;
+ end;
  
 const
  mseformintf: designmoduleintfty = 
@@ -218,6 +223,8 @@ begin
                            trefreshbooleanpropertyeditor);
  registerpropertyeditor(typeinfo(coloptionsty),nil,'',
                                            tcoloptionseditor);
+ registerpropertyeditor(typeinfo(optionsgridty),nil,'',
+                                           tgridoptionseditor);
   
  registerunitgroup(['msegrids'],['msegui','msegraphutils','mseclasses']);
  registerunitgroup(['msewidgetgrid'],['msedataedits',
@@ -366,6 +373,13 @@ end;
 function tcoloptionseditor.getinvisibleitems: tintegerset;
 begin
  result:= invisiblecoloptions;
+end;
+
+{ tgridoptionseditor }
+
+function tgridoptionseditor.getinvisibleitems: tintegerset;
+begin
+ result:= invisibleoptionsgrid;
 end;
 
 initialization

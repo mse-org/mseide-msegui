@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -102,14 +102,19 @@ type
                  og_wraprow,og_wrapcol,
                  og_visiblerowpagestep,
                  og_autopopup,
-                 og_mousescrollcol,og_noresetselect);
+                 og_mousescrollcol,
+                 og_noresetselect //deprecated -> og1_noresetselect
+                 );
  optionsgridty = set of optiongridty;
  optiongrid1ty = (og1_norowdeletequery,og1_swaprowinsertappend,//for Ctrl+Insert
-                  og1_focusmorerows,og1_scrollmorerows); 
+                  og1_focusmorerows,og1_scrollmorerows,
+                  og1_noresetselect,og1_pasteinselection); 
  optionsgrid1ty = set of optiongrid1ty;
 
 const
  rowstateoptions = [og_colmerged,og_rowheight]; //variable rowstate size
+ deprecatedoptionsgrid = [og_noresetselect];
+ invisibleoptionsgrid = [ord(og_noresetselect)];
  
 type
  pickobjectkindty = (pok_none,pok_fixcolsize,pok_fixcol,pok_datacolsize,pok_datacol,
@@ -2559,6 +2564,7 @@ type
  tstringgrid = class(tcustomstringgrid)
   published
    property optionsgrid;
+   property optionsgrid1;
    property optionsfold;
    property datacols;
    property rowstatelist;
@@ -11100,7 +11106,7 @@ function tcustomgrid.focuscell(cell: gridcoordty;
     fca_entergrid,fca_focusin,fca_focusinshift,fca_focusinrepeater,
                fca_focusinforce,fca_setfocusedcell: begin
      if (selectaction <> fca_entergrid) then begin
-      if not (og_noresetselect in foptionsgrid) then begin
+      if not (og1_noresetselect in foptionsgrid1) then begin
        fdatacols.selected[invalidcell]:= false;
       end;
      end;
@@ -14246,8 +14252,14 @@ var
  optionsbefore: optionsgridty;
 begin
  if foptionsgrid <> avalue then begin
+  if (csreading in componentstate) then begin
+   if (og_noresetselect in avalue) then begin
+    include(foptionsgrid1,og1_noresetselect);
+   end;
+  end;
+   
   optionsbefore:= foptionsgrid;
-  foptionsgrid:= avalue;
+  foptionsgrid:= avalue-deprecatedoptionsgrid;
   if (longword(avalue) xor longword(optionsbefore)) and longword(mask1) <> 0 then begin
    fdatacols.frowstate.free;
    fdatacols.frowstate:= trowstatelist.create(self);
@@ -15965,6 +15977,7 @@ var
  wstr1: msestring;
  int1,int2,int3,int5: integer;
  ar4,ar5: msestringarty;
+ ar1: gridcoordarty;
  bo2: boolean;
 begin
  result:= inherited pasteselection;
@@ -15975,48 +15988,63 @@ begin
  ar5:= nil; //compiler warning
  if fdatacols.canpaste{bo1} and pastefromclipboard(wstr1) then begin
   ar4:= breaklines(wstr1);
-  if high(ar4) > 0 then begin
+  bo2:= high(ar4) > 0;
+  if high(ar4) >= 0 then begin
    if ar4[high(ar4)] = '' then begin
     setlength(ar4,high(ar4)); //remove terminator
    end;
-   int5:= row;
-   if int5 < 0 then begin
-    int5:= 0;
-   end;
    beginupdate;
    try
-    datacols.clearselection;
-//    int1:= row;
-    bo2:= og_rowinserting in optionsgrid;
-    if bo2 then begin
-     insertrow(int5,length(ar4));
-    end;
-    if high(ar4) >= rowcount - int5 then begin
-     setlength(ar4,rowcount-int5);
-    end;
-//    for int2:= int1 to int1 + high(ar4) do begin 
-//    end;
-    for int1:= 0 to high(ar4) do begin
-     if bo2 then begin
-      datacols.selected[makegridcoord(invalidaxis,int5)]:= true;
+    if (og1_pasteinselection in optionsgrid1) and (high(ar4) = 0) and
+             datacols.hasselection and (findchar(ar4[0],c_tab) = 0) then begin
+     ar1:= datacols.selectedcells;
+     for int1:= 0 to high(ar1) do begin
+      with ar1[int1] do begin
+       datacols[col][row]:= ar4[0];
+      end;
      end;
-     ar5:= splitstring(ar4[int1],c_tab);
-     int3:= 0;
-     for int2:= 0 to high(ar5) do begin
-      while (int3 < datacols.count) and
-                 not (co_canpaste in datacols[int3].options) do begin
+    end
+    else begin
+     if not bo2 then begin
+      exit;
+     end;
+     int5:= row;
+     if int5 < 0 then begin
+      int5:= 0;
+     end;
+     datacols.clearselection;
+ //    int1:= row;
+     bo2:= og_rowinserting in optionsgrid;
+     if bo2 then begin
+      insertrow(int5,length(ar4));
+     end;
+     if high(ar4) >= rowcount - int5 then begin
+      setlength(ar4,rowcount-int5);
+     end;
+ //    for int2:= int1 to int1 + high(ar4) do begin 
+ //    end;
+     for int1:= 0 to high(ar4) do begin
+      if bo2 then begin
+       datacols.selected[makegridcoord(invalidaxis,int5)]:= true;
+      end;
+      ar5:= splitstring(ar4[int1],c_tab);
+      int3:= 0;
+      for int2:= 0 to high(ar5) do begin
+       while (int3 < datacols.count) and
+                  not (co_canpaste in datacols[int3].options) do begin
+        inc(int3);
+       end;
+       if int3 >= datacols.count then begin
+        break;
+       end;
+       if not bo2 then begin
+        datacols[int3].selected[int5]:= true;
+       end;
+       datacols[int3][int5]:= ar5[int2];
        inc(int3);
       end;
-      if int3 >= datacols.count then begin
-       break;
-      end;
-      if not bo2 then begin
-       datacols[int3].selected[int5]:= true;
-      end;
-      datacols[int3][int5]:= ar5[int2];
-      inc(int3);
+      inc(int5);
      end;
-     inc(int5);
     end;
    finally
     endupdate;

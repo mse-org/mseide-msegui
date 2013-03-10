@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -3313,6 +3313,21 @@ var
  ar4,ar5: msestringarty;
  bo1,bo2: boolean;
 
+ procedure setcelltext(const atext: msestring; const acol,arow: integer);
+ begin
+  if ar2[acol] <> nil then begin
+   if ar3[acol] <> nil then begin
+    tdataedit1(ar2[acol]).texttodata(atext,ar3[acol].getitempo(arow)^);
+    ar3[acol].change(arow);         
+   end;
+  end
+  else begin
+   if ar3[acol] <> nil then begin
+    ar3[acol].setastext(arow,atext);
+   end;
+  end;
+ end; //setcelltext
+
 begin
  result:= inherited pasteselection;
  if result then begin
@@ -3335,66 +3350,64 @@ begin
  end;
  if bo1 and pastefromclipboard(wstr1) then begin
   ar4:= breaklines(wstr1);
-  if high(ar4) > 0 then begin
+  bo2:= high(ar4) > 0;
+  if high(ar4) >= 0 then begin
    if ar4[high(ar4)] = '' then begin
     setlength(ar4,high(ar4)); //remove terminator
    end;
-   int5:= row;
-   if int5 < 0 then begin
-    int5:= 0;
-   end;
    beginupdate;
    try
-    datacols.clearselection;
-//    int1:= row;
-    bo2:= og_rowinserting in optionsgrid;
-    if bo2 then begin
-     insertrow(int5,length(ar4));
-    end;
-    if high(ar4) >= rowcount - int5 then begin
-     setlength(ar4,rowcount-int5);
-    end;
-    for int1:= 0 to high(ar4) do begin
-     if bo2 then begin
-      datacols.selected[makegridcoord(invalidaxis,int5)]:= true;
+    if (og1_pasteinselection in optionsgrid1) and (high(ar4) = 0) and
+             datacols.hasselection and (findchar(ar4[0],c_tab) = 0) then begin
+     ar1:= datacols.selectedcells;
+     for int1:= 0 to high(ar1) do begin
+      with ar1[int1] do begin
+       setcelltext(ar4[0],col,row);
+      end;
      end;
-     ar5:= splitstring(ar4[int1],c_tab);
-     int3:= 0;
-     for int2:= 0 to high(ar5) do begin
-      while (int3 < datacols.count) and
-                 not (co_canpaste in datacols[int3].options) do begin
+    end
+    else begin
+     if not bo2 then begin
+      exit;
+     end;
+     int5:= row;
+     if int5 < 0 then begin
+      int5:= 0;
+     end;
+     datacols.clearselection;
+ //    int1:= row;
+     bo2:= og_rowinserting in optionsgrid;
+     if bo2 then begin
+      insertrow(int5,length(ar4));
+     end;
+     if high(ar4) >= rowcount - int5 then begin
+      setlength(ar4,rowcount-int5);
+     end;
+     for int1:= 0 to high(ar4) do begin
+      if bo2 then begin
+       datacols.selected[makegridcoord(invalidaxis,int5)]:= true;
+      end;
+      ar5:= splitstring(ar4[int1],c_tab);
+      int3:= 0;
+      for int2:= 0 to high(ar5) do begin
+       while (int3 < datacols.count) and
+                  not (co_canpaste in datacols[int3].options) do begin
+        inc(int3);
+       end;
+       if int3 >= datacols.count then begin
+        break;
+       end;
+       if not bo2 then begin
+        datacols[int3].selected[int5]:= true;
+       end;
+       try
+        setcelltext(ar5[int2],int3,int5);
+       except
+       end;
        inc(int3);
       end;
-      if int3 >= datacols.count then begin
-       break;
-      end;
-      if not bo2 then begin
-       datacols[int3].selected[int5]:= true;
-      end;
-      try
-       if ar2[int3] <> nil then begin
-        if ar3[int3] <> nil then begin
-         tdataedit1(ar2[int3]).texttodata(ar5[int2],ar3[int3].getitempo(int5)^);
-         ar3[int3].change(int5);         
-        end;
-       end
-       else begin
-        if ar3[int3] <> nil then begin
-         ar3[int3].setastext(int5,ar5[int2]);
-         {
-         case ar3[int3].datatype of
-          dl_integer: begin
-           tintegerdatalist(ar3[int3]).items[int5]:= strtoint(ar5[int2]);
-          end;
-         end;
-         }
-        end;
-       end;
-      except
-      end;
-      inc(int3);
+      inc(int5);
      end;
-     inc(int5);
     end;
    finally
     try
