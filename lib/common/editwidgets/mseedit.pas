@@ -1092,7 +1092,7 @@ begin
  fwidgetrect.cx:= defaulteditwidgetwidth;
  fwidgetrect.cy:= defaulteditwidgetheight;
  if feditor = nil then begin
-  feditor:= tinplaceedit.create(self,iedit(self));
+  feditor:= tinplaceedit.create(self,iedit(self),true);
  end;
  maxlength:= -1;
  foptionswidget:= defaulteditwidgetoptions;
