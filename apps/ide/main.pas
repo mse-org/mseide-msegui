@@ -298,7 +298,7 @@ uses
  regpascalscript,
 {$endif}
  regdesignutils,regsysutils,regcrypto,regserialcomm,regexperimental,
-{$ifdef mse_with_deprecated}
+{$ifndef mse_no_deprecated}
  regdeprecated,
 {$endif}
  {$ifdef morecomponents}
