@@ -750,7 +750,7 @@ begin
   addrow(aitems);
  end
  else begin
-  checkindex(aindex);  
+  checkrowindex(aindex);  
   beginupdate;
   try
    for int1:= 0 to count - 1 do begin
@@ -774,7 +774,7 @@ procedure tdropdowncols.deleterow(const aindex: integer);
 var
  int1,int2: integer;
 begin
- checkindex(aindex);
+ checkrowindex(aindex);
  int2:= maxrowcount;
  beginupdate;
  try
