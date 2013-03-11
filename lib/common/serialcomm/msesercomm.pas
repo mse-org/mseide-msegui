@@ -438,7 +438,9 @@ end;
 procedure tcustomsercommcomp.internalconnect;
 begin
  if not (csdesigning in componentstate) then begin
-  fport.open;
+  if not fport.open then begin
+   componentexception(self,'Can not open comm port.');
+  end;
   {$ifdef unix}
   setfilenonblock(fport.handle,false);
   {$endif};

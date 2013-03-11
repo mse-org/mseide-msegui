@@ -101,7 +101,10 @@ procedure tthreadcomp.run(const adatapo: pointer = nil);
 begin
  terminateandwait;
  fdatapo:= adatapo;
- fthread:= teventthread.create({$ifdef FPC}@{$endif}threadproc,false,
+// fthread:= teventthread.create({$ifdef FPC}@{$endif}threadproc,false,
+//                                      fstacksizekb);
+ fthread:= teventthread(teventthread.newinstance);
+ fthread.create({$ifdef FPC}@{$endif}threadproc,false,
                                       fstacksizekb);
 end;
 
@@ -117,7 +120,7 @@ end;
 
 function tthreadcomp.threadproc(sender: tmsethread): integer;
 begin
- fthread:= teventthread(sender);
+// fthread:= teventthread(sender);
  try
   if assigned(fonstart) then begin
    application.lock;
