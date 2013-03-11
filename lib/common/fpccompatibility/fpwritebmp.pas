@@ -18,14 +18,13 @@
    - Rewritten a large part of the file, so we can handle all bmp color depths
    - Support for RLE4 and RLE8 encoding
 }
-//modified 2013 by Martin Schreiber
 
 {$mode objfpc}{$h+}
-unit fpwritebmp;
+unit FPWriteBMP;
 
 interface
 
-uses fpimage, classes, mclasses, sysutils, bmpcomn;
+uses FPImage, classes, sysutils, BMPComn;
 
 type
 
