@@ -21,8 +21,8 @@ unit FPWriteJPEG;
 interface
 
 uses
-  Classes, SysUtils, FPImage, JPEGLib, FPReadJPEG, JcAPIstd, JcAPImin, JDataDst,
-  JcParam, JError;
+  Classes, mclasses,SysUtils, FPImage, JPEGLib, FPReadJPEG, JcAPIstd, JcAPImin,
+  JDataDst,JcParam, JError;
 
 type
   { TFPWriterJPEG }
