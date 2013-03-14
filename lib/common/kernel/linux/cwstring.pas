@@ -47,7 +47,7 @@ Uses
 //  unix,
 //  unixtype,
 //  sysutils,
-//  initc,
+  initc,
   {msedatalist,}msesysintf1,msesysintf,msestrings;
 
 Const
