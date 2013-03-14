@@ -171,6 +171,12 @@ begin
 end;
 
 function buildmakecommandline(const atag: integer): string;
+ 
+ function normalizename(const aname: filenamety): filenamety;
+ begin
+  result:= tosysfilepath(filepath(trim(aname),fk_default,true));
+ end;
+ 
 var
  int1,int2: integer;
  str1,str2,str3: msestring;
@@ -180,7 +186,7 @@ begin
   str3:= quotefilename(tosysfilepath(makecommand));
   str1:= str3;
   if (targetfile <> '') and (targpref <> '') then begin
-   str1:= str1 + ' '+quotefilename(targpref+tosysfilepath(targetfile));
+   str1:= str1 + ' '+quotefilename(targpref+normalizename(targetfile));
   end;
   int2:= high(unitdirs);
   int1:= high(unitdirson);
@@ -190,7 +196,7 @@ begin
   for int1:= 0 to int2 do begin
    if (atag and unitdirson[int1] <> 0) and
          (unitdirs[int1] <> '') then begin
-    str2:= tosysfilepath(trim(unitdirs[int1]));
+    str2:= normalizename(unitdirs[int1]);
     if unitdirson[int1] and $10000 <> 0 then begin
      str1:= str1 + ' ' + quotefilename(unitpref+str2);
     end;
@@ -211,7 +217,7 @@ begin
     str1:= str1 + ' ' + makeoptions[int1];
    end;
   end;
-  str1:= str1 + ' ' + quotefilename(tosysfilepath(mainfile));
+  str1:= str1 + ' ' + quotefilename(normalizename(mainfile));
  end;
  result:= str1;
 end;
