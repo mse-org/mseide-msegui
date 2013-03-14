@@ -311,6 +311,7 @@ type
   protected
    function getactface: tcustomface; override;
    procedure dopaint(const canvas: tcanvas); override;
+   procedure objectchanged(const sender: tobject); override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -1548,6 +1549,23 @@ begin
   end;
  end;
  inherited;
+end;
+
+procedure tcustomrichbutton.objectchanged(const sender: tobject);
+begin
+ inherited;
+ if ffaceactive <> nil then begin
+  ffaceactive.checktemplate(sender);
+ end;
+ if ffacedisabled <> nil then begin
+  ffacedisabled.checktemplate(sender);
+ end;
+ if ffacemouse <> nil then begin
+  ffacemouse.checktemplate(sender);
+ end;
+ if ffaceclicked <> nil then begin
+  ffaceclicked.checktemplate(sender);
+ end;
 end;
 
 {
