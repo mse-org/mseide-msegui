@@ -1780,15 +1780,16 @@ begin
    end;
   end;
  end;
+ akind:= fk_default;
  if fdo_directory in foptions then begin
   akind:= fk_dir;
+  if fdo_file in foptions then begin
+   akind:= fk_file;
+  end;
  end
  else begin
   if fdo_file in foptions then begin
    akind:= fk_file;
-  end
-  else begin
-   akind:= fk_default;
   end;
  end;
  if fdo_relative in foptions then begin
@@ -1799,7 +1800,7 @@ begin
  end
  else begin
   if high(ffilenames) = 0 then begin
-   if akind = fk_dir then begin
+   if fdo_directory in foptions{akind = fk_dir} then begin
     flastdir:= filepath(avalue,fk_dir);
    end
    else begin
@@ -1845,17 +1846,17 @@ end;
 procedure tfiledialogcontroller.setoptions(Value: filedialogoptionsty);
 const
  mask1: filedialogoptionsty = [fdo_absolute,fdo_relative];
- mask2: filedialogoptionsty = [fdo_directory,fdo_file];
+// mask2: filedialogoptionsty = [fdo_directory,fdo_file];
  mask3: filedialogoptionsty = [fdo_filtercasesensitive,fdo_filtercaseinsensitive];
 begin
  {$ifdef FPC}longword{$else}longword{$endif}(value):=
       setsinglebit({$ifdef FPC}longword{$else}longword{$endif}(value),
       {$ifdef FPC}longword{$else}longword{$endif}(foptions),
       {$ifdef FPC}longword{$else}longword{$endif}(mask1));
- {$ifdef FPC}longword{$else}longword{$endif}(value):=
-      setsinglebit({$ifdef FPC}longword{$else}longword{$endif}(value),
-      {$ifdef FPC}longword{$else}longword{$endif}(foptions),
-      {$ifdef FPC}longword{$else}longword{$endif}(mask2));
+// {$ifdef FPC}longword{$else}longword{$endif}(value):=
+//      setsinglebit({$ifdef FPC}longword{$else}longword{$endif}(value),
+//      {$ifdef FPC}longword{$else}longword{$endif}(foptions),
+//      {$ifdef FPC}longword{$else}longword{$endif}(mask2));
  {$ifdef FPC}longword{$else}longword{$endif}(value):=
       setsinglebit({$ifdef FPC}longword{$else}longword{$endif}(value),
       {$ifdef FPC}longword{$else}longword{$endif}(foptions),

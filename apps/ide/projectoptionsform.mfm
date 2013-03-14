@@ -3351,7 +3351,7 @@ object projectoptionsfo: tprojectoptionsfo
                 bounds_cy = 16
                 optionsedit1 = [oe1_autopopupmenu]
                 optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_savevalue, oe_savestate]
-                controller.options = [fdo_directory]
+                controller.options = [fdo_directory, fdo_file]
                 controller.historymaxcount = 0
                 controller.captionopen = 'Select unit directory'
                 controller.ongetfilename = expandfilename

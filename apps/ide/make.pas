@@ -174,7 +174,7 @@ function buildmakecommandline(const atag: integer): string;
  
  function normalizename(const aname: filenamety): filenamety;
  begin
-  result:= tosysfilepath(filepath(trim(aname),fk_default,true));
+  result:= tosysfilepath(filepath(trim(aname),fk_file,true));
  end;
  
 var
