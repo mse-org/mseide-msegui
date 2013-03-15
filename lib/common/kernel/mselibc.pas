@@ -365,9 +365,9 @@ type
   ptrdiff_t = Integer;
   __long_double_t = Extended;
   P__long_double_t = ^__long_double_t;
-  size_t = longword;
+//  size_t = longword;
   Psize_t = ^size_t;
-  UInt64 = 0..High(Int64); // Must be unsigned.
+//  UInt64 = 0..High(Int64); // Must be unsigned.
   wchar_t = widechar;
   Pwchar_t = ^wchar_t;
   PPwchar_t = ^Pwchar_t;

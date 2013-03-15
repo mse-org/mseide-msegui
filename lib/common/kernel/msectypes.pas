@@ -87,6 +87,18 @@ type
  pcdouble = ^cdouble;
 
  cenum = cint;
+
+{$ifdef cpu64}
+  size_t = cuint64;
+  ssize_t = cint64;
+  clock_t = cuint64;
+  time_t = cint64;
+{$else}
+  size_t = cuint32;
+  ssize_t = cint32;
+  clock_t = culong;
+  time_t = clong;
+{$endif}
  
 implementation
 end.
