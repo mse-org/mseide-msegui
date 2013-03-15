@@ -2,7 +2,7 @@ unit mselibc;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- msectypes{$ifndef FPC},msetypes{$endif};
+ {$ifdef FPC}initc,{$endif}msectypes{$ifndef FPC},msetypes{$endif};
 
 const
 {$ifdef FPC}
