@@ -430,7 +430,8 @@ procedure tsqlmasterparamsdatalink.domasterdisable;
 var
  intf: imasterlink;
 begin
- if not getcorbainterface(dataset,typeinfo(imasterlink),intf) or
+ if (dataset = nil) or 
+          not getcorbainterface(dataset,typeinfo(imasterlink),intf) or
           not intf.refreshing then begin
   if assigned(onmasterdisable) then begin
    onmasterdisable(self);
