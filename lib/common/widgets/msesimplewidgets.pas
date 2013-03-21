@@ -188,7 +188,7 @@ type
 
    property bounds_cx default defaultbuttonwidth;
    property bounds_cy default defaultbuttonheight;
-   property frame: tframe read getframe write setframe;
+//   property frame: tframe read getframe write setframe;
    property font: twidgetfont read getfont write setfont stored isfontstored;
    property modalresult: modalresultty read fmodalresult write fmodalresult
                                 default mr_none;
