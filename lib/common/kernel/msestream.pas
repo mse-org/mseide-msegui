@@ -270,13 +270,18 @@ type
    procedure writetotext(var dest: text);   //no encoding
 
    procedure write(const value: string); reintroduce; overload;
-   procedure writeln(const value: string); overload; virtual;
    procedure write(const value: msestring); reintroduce; overload;
+   procedure write(const value: real); reintroduce;  overload;
+   procedure write(const value: integer); reintroduce; overload;
+   procedure write(const values: array of const); reintroduce; overload;
+
+   procedure writeln(const value: string); overload; virtual;
    procedure writeln(const value: msestring); overload;
    procedure writeln(const value: real);  overload;
    procedure writeln(const value: integer);  overload;
    procedure writeln(const value: msestringarty);  overload;
    procedure writeln(const value: stringarty);  overload;
+   procedure writeln(const values: array of const); overload;
 
    function readln: boolean; overload;
    function readln(var value: string): boolean; overload;      
@@ -1779,6 +1784,53 @@ end;
 procedure ttextstream.write(const value: msestring);
 begin
  writestr(encode(value));
+end;
+
+procedure ttextstream.write(const value: real);
+begin
+ write(realtostr(value));
+end;
+
+procedure ttextstream.write(const value: integer);
+begin
+ write(inttostr(value));
+end;
+
+procedure ttextstream.write(const values: array of const);
+var
+ int1: integer;
+begin
+ for int1:= 0 to high(values) do begin
+  with tvarrec(values[int1]) do begin
+   case vtype of
+    vtInteger: write(VInteger);
+//    vtBoolean       : (VBoolean: Boolean);
+    vtChar: write(string(VChar));
+    vtWideChar: write(msestring(VWideChar));
+    vtExtended: write(VExtended^);
+    vtString: write(VString^);
+//           vtPointer       : (VPointer: Pointer);
+    vtPChar: write(string(VPChar));
+//           vtObject        : (VObject: TObject);
+//           vtClass         : (VClass: TClass);
+    vtPWideChar: write(msestring(VPWideChar));
+    vtAnsiString: write(string(VAnsiString));
+    vtCurrency: write(VCurrency^);
+    vtVariant: write(msestring(VVariant^));
+//           vtInterface     : (VInterface: Pointer);
+    vtWideString: write(msestring(widestring(VWideString)));
+//           vtInt64         : (VInt64: PInt64);
+    vtUnicodeString: write(msestring(unicodestring(VUnicodeString)));
+//           vtQWord         : (VQWord: PQWord);
+   end;
+  end;
+ end;
+end;
+
+procedure ttextstream.writeln(const values: array of const);
+begin
+ write(values);
+ write(eor);
 end;
 
 procedure ttextstream.writestrln(const value: string);
