@@ -161,12 +161,13 @@ const
  scrollbarframestates: framestatesty = [fs_sbleft,fs_sbtop,fs_sbright,fs_sbbottom];
 
 type
- tscrollboxscrollbar = class(tcustomscrollbar)
+ tscrollboxscrollbar = class(tscrollbar{tcustomscrollbar})
   public
    constructor create(intf: iscrollbar; org: originty = org_client;
               ondimchanged: proceventty = nil); override;
   published
    property options default defaultscrollboxscrollbaroptions;
+{
    property width;
    property indentstart;
    property indentend;
@@ -183,18 +184,20 @@ type
    property colorglyph;
    property onbeforeevent;
    property onafterevent;
+ }
  end;
 
 const
  defaultthumbtrackscrollbaroptions = [sbo_thumbtrack,sbo_showauto];
 
 type
- tthumbtrackscrollbar = class(tcustomnomoveautoscrollbar)
+ tthumbtrackscrollbar = class(tnomoveautoscrollbar{tcustomnomoveautoscrollbar})
   public
    constructor create(intf: iscrollbar; org: originty = org_client;
               ondimchanged: proceventty = nil); override;
   published
    property options default defaultthumbtrackscrollbaroptions;
+  {
    property width;
    property indentstart;
    property indentend;
@@ -207,6 +210,7 @@ type
    property frameendbutton1;
    property frameendbutton2;
    property color;
+  }
  end;
  
  framescrollbarclassty = class of tcustomscrollbar;

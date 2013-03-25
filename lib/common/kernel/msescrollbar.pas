@@ -282,6 +282,33 @@ type
    property color;
    property colorpattern;
    property colorglyph;
+   property onbeforeevent;
+   property onafterevent;
+ end;
+
+ tnomoveautoscrollbar = class(tcustomnomoveautoscrollbar)
+  published
+   property options;
+   property width;
+   property indentstart;
+   property indentend;
+   property stepsize;
+   property stepctrlfact;
+   property pagesize;
+   property wheelsensitivity;
+   property buttonlength;
+   property buttonminlength;
+   property buttonendlength;
+   property facebutton;
+   property faceendbutton;
+   property framebutton;
+   property frameendbutton1;
+   property frameendbutton2;
+   property color;
+   property colorpattern;
+   property colorglyph;
+   property onbeforeevent;
+   property onafterevent;
  end;
 
 implementation
