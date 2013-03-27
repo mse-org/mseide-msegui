@@ -187,7 +187,34 @@ procedure defstoarguments(const defs: msestring;
 implementation
 uses
  msesysutils,RTLConsts,msestream,msesys{$ifdef UNIX},mselibc{$endif},
- typinfo;
+ typinfo,mseapplication;
+
+procedure defstoarguments(const defs: msestring; 
+                 out arguments: argumentdefarty; out alias: stringararty);
+var
+ ar1,ar2: msestringarty;
+ int1: integer;
+begin
+ ar1:= breaklines(defs);
+ setlength(arguments,length(ar1));
+ setlength(alias,length(ar1));
+ for int1:= 0 to high(ar1) do begin
+  splitstringquoted(ar1[int1],ar2,'"',',');
+  setlength(ar2,5); //max
+  with arguments[int1] do begin
+   kind:= argumentkindty(checkenumvalue(typeinfo(argumentkindty),ar2[0]));
+   name:= ar2[1];
+   splitstringquoted(ar2[2],alias[int1]);
+   if alias[int1] <> nil then begin
+    setlength(alias[int1],high(alias[int1])+2);
+   end;
+   anames:= pointer(alias[int1]); 
+   flags:= argumentflagsty(stringtoset(
+                          ptypeinfo(typeinfo(argumentflagsty)),ar2[3]));
+   initvalue:= ar2[4];
+  end;
+ end;
+end;
 
 { tsysenvmanager }
 
@@ -291,6 +318,21 @@ begin
    if fdefs <> '' then begin
     defstoarguments(fdefs,ar1,ar2);
     init(ar1);
+   end;
+  end;
+ end
+ else begin
+  if fdefs <> '' then begin
+   try
+    try
+     defstoarguments(fdefs,ar1,ar2);
+    except
+     on e: exception do begin
+      componentexception(self,e.message);
+     end;
+    end;
+   except
+    application.handleexception
    end;
   end;
  end;
@@ -861,44 +903,7 @@ procedure tsysenvmanager.setdefs(const avalue: msestring);
 begin
  fdefs:= avalue;
  if not (csloading in componentstate) then begin
-//  defstoarguments;
- end;
-end;
-{
-  kind: argumentkindty;
-  name: string;   //case sensitive, single char ->
-                  //  short parameter 'a' 'b' -> '-a' '-b' or '-ab' or '-ba',
-                  // '-abcde' -> '--abcde'
-  anames: pstring;//pointer auf array[0..0] of string alias,
-                     //letzter string muss leer sein ('abc','def','');
-  flags: argumentflagsty;
-  initvalue: string;
-}
-
-procedure defstoarguments(const defs: msestring; 
-                 out arguments: argumentdefarty; out alias: stringararty);
-var
- ar1,ar2: msestringarty;
- int1: integer;
-begin
- ar1:= breaklines(defs);
- setlength(arguments,length(ar1));
- setlength(alias,length(ar1));
- for int1:= 0 to high(ar1) do begin
-  splitstringquoted(ar1[int1],ar2,'"',',');
-  setlength(ar2,5); //max
-  with arguments[int1] do begin
-   kind:= argumentkindty(checkenumvalue(typeinfo(argumentkindty),ar2[0]));
-   name:= ar2[1];
-   splitstringquoted(ar2[2],alias[int1]);
-   if alias[int1] <> nil then begin
-    setlength(alias[int1],high(alias[int1])+2);
-   end;
-   anames:= pointer(alias[int1]); 
-   flags:= argumentflagsty(stringtoset(
-                          ptypeinfo(typeinfo(argumentflagsty)),ar2[3]));
-   initvalue:= ar2[4];
-  end;
+  doinit;
  end;
 end;
 

@@ -1,19 +1,344 @@
 object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
-  bounds_x = 337
+  visible = False
+  bounds_x = 51
   bounds_y = 266
-  bounds_cx = 100
-  bounds_cy = 100
+  bounds_cx = 620
+  bounds_cy = 229
   container.frame.zoomwidthstep = 1
   container.frame.zoomheightstep = 1
   container.frame.sbhorz.stepctrlfact = 0
+  container.frame.sbhorz.pagesize = 0.95223880597015
   container.frame.sbhorz.wheelsensitivity = 1
   container.frame.sbvert.stepctrlfact = 0
+  container.frame.sbvert.pagesize = 0.95964125560538
   container.frame.sbvert.wheelsensitivity = 1
   container.bounds = (
     0
     0
-    100
-    100
+    620
+    229
   )
+  options = [fo_freeonclose, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savezorder, fo_savestate]
+  statfile = statfile1
+  caption = 'Edit tsysenvmanager'
   moduleclassname = 'tmseform'
+  object la2: tlayouter
+    bounds_x = 0
+    bounds_y = 200
+    bounds_cx = 0
+    bounds_cy = 0
+    anchors = [an_top]
+    optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
+    dist_top = 4
+    optionslayout = [lao_aligny]
+  end
+  object tlayouter2: tlayouter
+    taborder = 1
+    bounds_x = 508
+    bounds_y = 200
+    bounds_cx = 105
+    bounds_cy = 21
+    anchors = [an_top, an_right]
+    optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
+    dist_top = 3
+    optionslayout = [lao_placex]
+    place_mindist = 5
+    place_maxdist = 5
+    object ok: tbutton
+      optionswidget1 = [ow1_fontglyphheight, ow1_autoscale, ow1_autowidth]
+      bounds_x = 0
+      bounds_y = 1
+      bounds_cx = 50
+      bounds_cy = 20
+      bounds_cxmin = 50
+      state = [as_default, as_localdefault, as_localcaption]
+      caption = '&OK'
+      modalresult = mr_ok
+      reffontheight = 14
+    end
+    object cancel: tbutton
+      optionswidget1 = [ow1_fontglyphheight, ow1_autoscale, ow1_autowidth]
+      taborder = 1
+      bounds_x = 55
+      bounds_y = 1
+      bounds_cx = 50
+      bounds_cy = 20
+      bounds_cxmin = 50
+      state = [as_localcaption]
+      caption = '&Cancel'
+      modalresult = mr_cancel
+      reffontheight = 14
+    end
+  end
+  object grid: twidgetgrid
+    frame.sbvert.stepctrlfact = 0
+    frame.sbvert.wheelsensitivity = 1
+    frame.sbhorz.stepctrlfact = 0
+    frame.sbhorz.wheelsensitivity = 1
+    taborder = 2
+    bounds_x = 0
+    bounds_y = 0
+    bounds_cx = 620
+    bounds_cy = 194
+    anchors = [an_top, an_bottom]
+    optionsgrid = [og_colsizing, og_rowmoving, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_colchangeontabkey, og_wrapcol, og_autopopup, og_mousescrollcol]
+    fixrows.count = 1
+    fixrows.items = <    
+      item
+        height = 16
+      end>
+    datacols.count = 12
+    datacols.options = [co_proportional, co_savestate, co_mousescrollrow]
+    datacols.items = <    
+      item[kinded]
+        width = 78
+        options = [co_proportional, co_savestate, co_mousescrollrow]
+        widgetname = 'kinded'
+        dataclass = tgridenumdatalist
+      end    
+      item[nameed]
+        width = 70
+        options = [co_proportional, co_savestate, co_mousescrollrow]
+        widgetname = 'nameed'
+        dataclass = tgridmsestringdatalist
+      end    
+      item[aliased]
+        width = 162
+        options = [co_proportional, co_savestate, co_mousescrollrow]
+        widgetname = 'aliased'
+        dataclass = tgridmsestringdatalist
+      end    
+      item[envdefined]
+        width = 15
+        options = [co_fixwidth, co_proportional, co_savestate, co_mousescrollrow]
+        widgetname = 'envdefined'
+        dataclass = tgridintegerdatalist
+      end    
+      item[statdefined]
+        width = 15
+        options = [co_fixwidth, co_proportional, co_savestate, co_mousescrollrow]
+        widgetname = 'statdefined'
+        dataclass = tgridintegerdatalist
+      end    
+      item[setdefined]
+        width = 15
+        options = [co_fixwidth, co_proportional, co_savestate, co_mousescrollrow]
+        widgetname = 'setdefined'
+        dataclass = tgridintegerdatalist
+      end    
+      item[argopt]
+        width = 15
+        options = [co_fixwidth, co_proportional, co_savestate, co_mousescrollrow]
+        widgetname = 'argopt'
+        dataclass = tgridintegerdatalist
+      end    
+      item[filenames]
+        width = 15
+        options = [co_fixwidth, co_proportional, co_savestate, co_mousescrollrow]
+        widgetname = 'filenames'
+        dataclass = tgridintegerdatalist
+      end    
+      item[statoverride]
+        width = 15
+        options = [co_fixwidth, co_proportional, co_savestate, co_mousescrollrow]
+        widgetname = 'statoverride'
+        dataclass = tgridintegerdatalist
+      end    
+      item[stataddval]
+        width = 15
+        options = [co_fixwidth, co_proportional, co_savestate, co_mousescrollrow]
+        widgetname = 'stataddval'
+        dataclass = tgridintegerdatalist
+      end    
+      item[integer]
+        width = 15
+        options = [co_drawfocus, co_fixwidth, co_proportional, co_savestate, co_mousescrollrow]
+        widgetname = 'integer'
+        dataclass = tgridintegerdatalist
+      end    
+      item[initvalueed]
+        width = 174
+        options = [co_fill, co_savestate, co_mousescrollrow]
+        widgetname = 'initvalueed'
+        dataclass = tgridmsestringdatalist
+      end>
+    datarowheight = 16
+    statfile = statfile1
+    reffontheight = 14
+    object kinded: tenumtypeedit
+      optionsskin = [osk_framebuttononly]
+      frame.levelo = 0
+      frame.colorclient = -2147483645
+      frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
+      frame.button.color = -1879048187
+      taborder = 1
+      visible = False
+      bounds_x = 0
+      bounds_y = 0
+      bounds_cx = 78
+      bounds_cy = 16
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_savestate, oe_checkvaluepaststatread]
+      dropdown.cols.count = 1
+      dropdown.cols.items = <      
+        item
+        end>
+      oninit = kindedinit
+      reffontheight = 14
+    end
+    object nameed: tstringedit
+      optionswidget1 = [ow1_fontglyphheight]
+      optionsskin = [osk_framebuttononly]
+      taborder = 2
+      visible = False
+      bounds_x = 79
+      bounds_y = 0
+      bounds_cx = 70
+      bounds_cy = 16
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_savestate, oe_checkvaluepaststatread]
+      reffontheight = 14
+    end
+    object aliased: tmemodialogedit
+      optionswidget1 = [ow1_fontglyphheight]
+      optionsskin = [osk_framebuttononly]
+      frame.levelo = 0
+      frame.colorclient = -2147483645
+      frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
+      frame.button.color = -1879048187
+      frame.button.imagenr = 17
+      taborder = 3
+      visible = False
+      bounds_x = 150
+      bounds_y = 0
+      bounds_cx = 162
+      bounds_cy = 16
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_savestate, oe_checkvaluepaststatread]
+      reffontheight = 14
+    end
+    object envdefined: tbooleanedit
+      optionswidget1 = []
+      optionsskin = [osk_framebuttononly]
+      taborder = 4
+      bounds_x = 313
+      bounds_y = 0
+      bounds_cx = 15
+      bounds_cy = 16
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_savestate, oe_checkvaluepaststatread]
+      visible = False
+      group = 1
+    end
+    object statdefined: tbooleanedit
+      Tag = 1
+      optionswidget1 = []
+      optionsskin = [osk_framebuttononly]
+      taborder = 5
+      bounds_x = 329
+      bounds_y = 0
+      bounds_cx = 15
+      bounds_cy = 16
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_savestate, oe_checkvaluepaststatread]
+      visible = False
+      group = 1
+    end
+    object setdefined: tbooleanedit
+      Tag = 2
+      optionswidget1 = []
+      optionsskin = [osk_framebuttononly]
+      taborder = 6
+      bounds_x = 345
+      bounds_y = 0
+      bounds_cx = 15
+      bounds_cy = 16
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_savestate, oe_checkvaluepaststatread]
+      visible = False
+      group = 1
+    end
+    object argopt: tbooleanedit
+      Tag = 8
+      optionswidget1 = []
+      optionsskin = [osk_framebuttononly]
+      taborder = 7
+      bounds_x = 361
+      bounds_y = 0
+      bounds_cx = 15
+      bounds_cy = 16
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_savestate, oe_checkvaluepaststatread]
+      visible = False
+      group = 1
+    end
+    object filenames: tbooleanedit
+      Tag = 9
+      optionswidget1 = []
+      optionsskin = [osk_framebuttononly]
+      taborder = 8
+      bounds_x = 377
+      bounds_y = 0
+      bounds_cx = 15
+      bounds_cy = 16
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_savestate, oe_checkvaluepaststatread]
+      visible = False
+      group = 1
+    end
+    object statoverride: tbooleanedit
+      Tag = 10
+      optionswidget1 = []
+      optionsskin = [osk_framebuttononly]
+      taborder = 9
+      bounds_x = 393
+      bounds_y = 0
+      bounds_cx = 15
+      bounds_cy = 16
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_savestate, oe_checkvaluepaststatread]
+      visible = False
+      group = 1
+    end
+    object stataddval: tbooleanedit
+      Tag = 11
+      optionswidget1 = []
+      optionsskin = [osk_framebuttononly]
+      taborder = 10
+      bounds_x = 409
+      bounds_y = 0
+      bounds_cx = 15
+      bounds_cy = 16
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_savestate, oe_checkvaluepaststatread]
+      visible = False
+      group = 1
+    end
+    object integer: tbooleanedit
+      Tag = 12
+      optionswidget1 = []
+      optionsskin = [osk_framebuttononly]
+      taborder = 11
+      bounds_x = 425
+      bounds_y = 0
+      bounds_cx = 15
+      bounds_cy = 16
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_savestate, oe_checkvaluepaststatread]
+      visible = False
+      group = 1
+    end
+    object initvalueed: tmemodialogedit
+      optionswidget1 = [ow1_fontglyphheight]
+      optionsskin = [osk_framebuttononly]
+      frame.levelo = 0
+      frame.colorclient = -2147483645
+      frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
+      frame.button.color = -1879048187
+      frame.button.imagenr = 17
+      taborder = 12
+      visible = False
+      bounds_x = 441
+      bounds_y = 0
+      bounds_cx = 174
+      bounds_cy = 16
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_savestate, oe_checkvaluepaststatread]
+      reffontheight = 14
+    end
+  end
+  object statfile1: tstatfile
+    filename = 'sysenvmanagereditor.sta'
+    options = [sfo_memory]
+    left = 192
+    top = 72
+  end
 end

@@ -8,6 +8,10 @@ object imagelisteditorfo: timagelisteditorfo
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets]
   container.frame.zoomwidthstep = 1
   container.frame.zoomheightstep = 1
+  container.frame.sbhorz.stepctrlfact = 0
+  container.frame.sbhorz.wheelsensitivity = 1
+  container.frame.sbvert.stepctrlfact = 0
+  container.frame.sbvert.wheelsensitivity = 1
   container.bounds = (
     0
     0
@@ -20,6 +24,10 @@ object imagelisteditorfo: timagelisteditorfo
   moduleclassname = 'tmseform'
   object disp: tlistview
     optionswidget1 = [ow1_fontglyphheight]
+    frame.sbvert.stepctrlfact = 0
+    frame.sbvert.wheelsensitivity = 1
+    frame.sbhorz.stepctrlfact = 0
+    frame.sbhorz.wheelsensitivity = 1
     bounds_x = 0
     bounds_y = 0
     bounds_cx = 301
@@ -201,7 +209,7 @@ object imagelisteditorfo: timagelisteditorfo
     top = 176
   end
   object statfile1: tstatfile
-    filename = 'imagelisteditor'
+    filename = 'imagelisteditor.sta'
     options = [sfo_memory]
     left = 200
     top = 176

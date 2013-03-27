@@ -18,6 +18,8 @@ uses
  msegraphedits,msecolordialog,msemenus,msesplitter,msegraphutils,msewidgets,
  mseifiglob,msetypes,msedataedits,mseedit;
 
+const
+ imagelisteditorstatname =  'imagelisteditor.sta';
 type
  timagelisteditorfo = class(tmseform)
    disp: tlistview;

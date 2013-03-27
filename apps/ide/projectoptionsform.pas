@@ -842,7 +842,8 @@ uses
  projectoptionsform_mfm,breakpointsform,sourceform,mseact,msereal,
  objectinspector,msebits,msefileutils,msedesignintf,guitemplates,
  watchform,stackform,main,projecttreeform,findinfileform,
- selecteditpageform,programparametersform,sourceupdate,
+ selecteditpageform,programparametersform,sourceupdate,mseimagelisteditor,
+ msesysenvmanagereditor,
  msedesigner,panelform,watchpointsform,commandlineform,messageform,
  componentpaletteform,mserichstring,msesettings,formdesigner,actionsmodule,
  msestringlisteditor,msetexteditor,msepropertyeditors,mseshapes,mseactions,
@@ -1666,6 +1667,8 @@ begin
   updatememorystatstream('imageselector',imageselectorstatname);
   updatememorystatstream('fadeeditor',fadeeditorstatname);
   updatememorystatstream('stringlisteditor',stringlisteditorstatname);
+  updatememorystatstream('imagelisteditor',imagelisteditorstatname);
+  updatememorystatstream('sysenvmanagereditor',sysenvmanagereditorstatname);
   updatememorystatstream('texteditor',texteditorstatname);
   updatememorystatstream('colordialog',colordialogstatname);
   updatememorystatstream('compnamedialog',compnamedialogstatname);
