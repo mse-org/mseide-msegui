@@ -85,9 +85,10 @@ type
   initvalue: string;
  end;
 
- argumentdefpoty = ^argumentdefty;
- argumentdefarty = array [0..0] of argumentdefty;
- argumentdefarpoty = ^argumentdefarty;
+ pargumentdefty = ^argumentdefty;
+ argumentdefaty = array [0..0] of argumentdefty;
+ pargumentdefaty = ^argumentdefaty;
+ argumentdefarty = array of argumentdefty;
 
  envvarty = record
   flags: argumentflagsty;
@@ -112,6 +113,7 @@ type
    fstatfile: tstatfile;
    fstatvarname: msestring;
    fonvalueread: sysenvmanagervalueeventty;
+   fdefs: msestring;
    procedure setoninit(const Value: sysenvmanagereventty);
    procedure doinit;
    procedure errorme(nr: sysenverrornrty; value: string);
@@ -132,6 +134,7 @@ type
              adefined: argumentflagsty): sysenverrornrty; overload;
    function getintegervalue1(index: integer): integer;
    procedure setintegervalue(index: integer; const Value: integer);
+   procedure setdefs(const avalue: msestring);
   protected
    //istatfiler
    procedure dostatread(const reader: tstatreader); virtual;
@@ -172,14 +175,19 @@ type
    property errorcode: integer read ferrorcode write ferrorcode default defaulterrorcode;
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read getstatvarname write fstatvarname;
+   property defs: msestring read fdefs write setdefs;
 
    property onvalueread: sysenvmanagervalueeventty read fonvalueread write fonvalueread;
    property oninit: sysenvmanagereventty read foninit write setoninit;
  end;
 
+procedure defstoarguments(const defs: msestring; 
+                 out arguments: argumentdefarty; out alias: stringararty);
+
 implementation
 uses
- msesysutils,RTLConsts,msestream,msesys{$ifdef UNIX},mselibc{$endif};
+ msesysutils,RTLConsts,msestream,msesys{$ifdef UNIX},mselibc{$endif},
+ typinfo;
 
 { tsysenvmanager }
 
@@ -271,10 +279,20 @@ begin
 end;
 
 procedure tsysenvmanager.doinit;
+var
+ ar1: argumentdefarty;
+ ar2: stringararty;
 begin
- if not (csdesigning in componentstate) and
-    assigned(foninit) then begin
-  foninit(self);
+ if not (csdesigning in componentstate) then begin
+  if assigned(foninit) then begin
+   foninit(self);
+  end
+  else begin
+   if fdefs <> '' then begin
+    defstoarguments(fdefs,ar1,ar2);
+    init(ar1);
+   end;
+  end;
  end;
 end;
 
@@ -834,6 +852,52 @@ begin
      end;
     end;
    end;
+  end;
+ end;
+end;
+
+procedure tsysenvmanager.setdefs(const avalue: msestring);
+
+begin
+ fdefs:= avalue;
+ if not (csloading in componentstate) then begin
+//  defstoarguments;
+ end;
+end;
+{
+  kind: argumentkindty;
+  name: string;   //case sensitive, single char ->
+                  //  short parameter 'a' 'b' -> '-a' '-b' or '-ab' or '-ba',
+                  // '-abcde' -> '--abcde'
+  anames: pstring;//pointer auf array[0..0] of string alias,
+                     //letzter string muss leer sein ('abc','def','');
+  flags: argumentflagsty;
+  initvalue: string;
+}
+
+procedure defstoarguments(const defs: msestring; 
+                 out arguments: argumentdefarty; out alias: stringararty);
+var
+ ar1,ar2: msestringarty;
+ int1: integer;
+begin
+ ar1:= breaklines(defs);
+ setlength(arguments,length(ar1));
+ setlength(alias,length(ar1));
+ for int1:= 0 to high(ar1) do begin
+  splitstringquoted(ar1[int1],ar2,'"',',');
+  setlength(ar2,5); //max
+  with arguments[int1] do begin
+   kind:= argumentkindty(checkenumvalue(typeinfo(argumentkindty),ar2[0]));
+   name:= ar2[1];
+   splitstringquoted(ar2[2],alias[int1]);
+   if alias[int1] <> nil then begin
+    setlength(alias[int1],high(alias[int1])+2);
+   end;
+   anames:= pointer(alias[int1]); 
+   flags:= argumentflagsty(stringtoset(
+                          ptypeinfo(typeinfo(argumentflagsty)),ar2[3]));
+   initvalue:= ar2[4];
   end;
  end;
 end;

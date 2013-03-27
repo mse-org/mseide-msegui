@@ -22,11 +22,36 @@ interface
 
 implementation
 uses
- msedesignintf,msesysenv,msefilechange,regsysutils_bmp,mseprocess;
+ msedesignintf,msesysenv,msefilechange,regsysutils_bmp,mseprocess,
+ msecomponenteditors,mclasses,msesysenvmanagereditor,mseglob;
+type
+ tsysenvmanagereditor = class(tcomponenteditor)
+  public
+   constructor create(const adesigner: idesigner;
+                           acomponent: tcomponent); override;
+   procedure edit; override;
+ end;
 
 procedure Register;
 begin
  registercomponents('NoGui',[tsysenvmanager,tfilechangenotifyer,tmseprocess]);
+ registercomponenteditor(tsysenvmanager,tsysenvmanagereditor);
+end;
+
+{ tsysenvmanagereditor }
+
+constructor tsysenvmanagereditor.create(const adesigner: idesigner;
+               acomponent: tcomponent);
+begin
+ inherited;
+ fstate:= fstate + [cs_canedit];
+end;
+
+procedure tsysenvmanagereditor.edit;
+begin
+ if editsysenvmanager(tsysenvmanager(fcomponent)) = mr_ok then begin
+  fdesigner.componentmodified(fcomponent);
+ end;
 end;
 
 initialization

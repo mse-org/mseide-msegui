@@ -875,6 +875,8 @@ function valuescaletorange(const reader: treader): real;
 
 function swapmethodtable(const instance: tobject; const newtable: pointer): pointer;
 
+function checkenumvalue(typeinfo : ptypeinfo;const name : string) : integer;
+                 //exception on error
 function readenum(const reader: treader; const atypeinfo: ptypeinfo): integer;
 procedure writeenum(const writer: twriter; const value: integer;
                                                  const atypeinfo: ptypeinfo);
@@ -1351,6 +1353,15 @@ begin
  basetype:= gettypedata(atypeinfo)^.comptype{$ifndef FPC}^{$endif};
  with twriter1(writer) do begin
   driver.writeset(longint(value),basetype);
+ end;
+end;
+
+function checkenumvalue(typeinfo : ptypeinfo;const name : string) : integer;
+begin
+ result:= getenumvalue(typeinfo,name);
+ if result < 0 then begin
+  raise exception.create('In valid enum name for '+typeinfo^.name+
+                                                         ': "'+name+'".');
  end;
 end;
 
