@@ -82,82 +82,134 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
     bounds_cy = 194
     anchors = [an_top, an_bottom]
     optionsgrid = [og_colsizing, og_rowmoving, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_colchangeontabkey, og_wrapcol, og_autopopup, og_mousescrollcol]
+    fixcols.count = 1
+    fixcols.items = <    
+      item
+        width = 24
+        numstep = 1
+      end>
     fixrows.count = 1
     fixrows.items = <    
       item
         height = 16
+        captions.count = 12
+        captions.items = <        
+          item
+            caption = 'Kind'
+          end        
+          item
+            caption = 'Name'
+          end        
+          item
+            caption = 'Alias'
+          end        
+          item
+            caption = 'ED'
+            hint = 'arf_envdefined'
+          end        
+          item
+            caption = 'SD'
+            hint = 'arf_statdefined'
+          end        
+          item
+            caption = 'TD'
+            hint = 'arf_setdefined'
+          end        
+          item
+            caption = 'AO'
+            hint = 'arf_argopt'
+          end        
+          item
+            caption = 'FN'
+            hint = 'arf_filenames'
+          end        
+          item
+            caption = 'SO'
+            hint = 'arf_statoverride'
+          end        
+          item
+            caption = 'SA'
+            hint = 'arf_statadval'
+          end        
+          item
+            caption = 'IN'
+            hint = 'arf_integer'
+          end        
+          item
+            caption = 'Initvalue'
+          end>
       end>
     datacols.count = 12
     datacols.options = [co_proportional, co_savestate, co_mousescrollrow]
     datacols.items = <    
       item[kinded]
-        width = 78
+        width = 75
         options = [co_proportional, co_savestate, co_mousescrollrow]
         widgetname = 'kinded'
         dataclass = tgridenumdatalist
       end    
       item[nameed]
-        width = 70
+        width = 67
         options = [co_proportional, co_savestate, co_mousescrollrow]
         widgetname = 'nameed'
         dataclass = tgridmsestringdatalist
       end    
       item[aliased]
-        width = 162
+        width = 156
         options = [co_proportional, co_savestate, co_mousescrollrow]
         widgetname = 'aliased'
         dataclass = tgridmsestringdatalist
       end    
       item[envdefined]
-        width = 15
+        width = 17
         options = [co_fixwidth, co_proportional, co_savestate, co_mousescrollrow]
         widgetname = 'envdefined'
         dataclass = tgridintegerdatalist
       end    
       item[statdefined]
-        width = 15
+        width = 17
         options = [co_fixwidth, co_proportional, co_savestate, co_mousescrollrow]
         widgetname = 'statdefined'
         dataclass = tgridintegerdatalist
       end    
       item[setdefined]
-        width = 15
+        width = 17
         options = [co_fixwidth, co_proportional, co_savestate, co_mousescrollrow]
         widgetname = 'setdefined'
         dataclass = tgridintegerdatalist
       end    
       item[argopt]
-        width = 15
+        width = 17
         options = [co_fixwidth, co_proportional, co_savestate, co_mousescrollrow]
         widgetname = 'argopt'
         dataclass = tgridintegerdatalist
       end    
       item[filenames]
-        width = 15
+        width = 17
         options = [co_fixwidth, co_proportional, co_savestate, co_mousescrollrow]
         widgetname = 'filenames'
         dataclass = tgridintegerdatalist
       end    
       item[statoverride]
-        width = 15
+        width = 17
         options = [co_fixwidth, co_proportional, co_savestate, co_mousescrollrow]
         widgetname = 'statoverride'
         dataclass = tgridintegerdatalist
       end    
       item[stataddval]
-        width = 15
+        width = 17
         options = [co_fixwidth, co_proportional, co_savestate, co_mousescrollrow]
         widgetname = 'stataddval'
         dataclass = tgridintegerdatalist
       end    
       item[integer]
-        width = 15
+        width = 17
         options = [co_drawfocus, co_fixwidth, co_proportional, co_savestate, co_mousescrollrow]
         widgetname = 'integer'
         dataclass = tgridintegerdatalist
       end    
       item[initvalueed]
-        width = 174
+        width = 145
         options = [co_fill, co_savestate, co_mousescrollrow]
         widgetname = 'initvalueed'
         dataclass = tgridmsestringdatalist
@@ -175,9 +227,9 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
       visible = False
       bounds_x = 0
       bounds_y = 0
-      bounds_cx = 78
+      bounds_cx = 75
       bounds_cy = 16
-      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_savestate, oe_checkvaluepaststatread]
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_hintclippedtext, oe_savestate, oe_checkvaluepaststatread]
       dropdown.cols.count = 1
       dropdown.cols.items = <      
         item
@@ -190,11 +242,11 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
       optionsskin = [osk_framebuttononly]
       taborder = 2
       visible = False
-      bounds_x = 79
+      bounds_x = 76
       bounds_y = 0
-      bounds_cx = 70
+      bounds_cx = 67
       bounds_cy = 16
-      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_savestate, oe_checkvaluepaststatread]
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_hintclippedtext, oe_savestate, oe_checkvaluepaststatread]
       reffontheight = 14
     end
     object aliased: tmemodialogedit
@@ -207,20 +259,20 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
       frame.button.imagenr = 17
       taborder = 3
       visible = False
-      bounds_x = 150
+      bounds_x = 144
       bounds_y = 0
-      bounds_cx = 162
+      bounds_cx = 156
       bounds_cy = 16
-      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_savestate, oe_checkvaluepaststatread]
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_hintclippedtext, oe_savestate, oe_checkvaluepaststatread]
       reffontheight = 14
     end
     object envdefined: tbooleanedit
       optionswidget1 = []
       optionsskin = [osk_framebuttononly]
       taborder = 4
-      bounds_x = 313
+      bounds_x = 301
       bounds_y = 0
-      bounds_cx = 15
+      bounds_cx = 17
       bounds_cy = 16
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_savestate, oe_checkvaluepaststatread]
       visible = False
@@ -231,9 +283,9 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
       optionswidget1 = []
       optionsskin = [osk_framebuttononly]
       taborder = 5
-      bounds_x = 329
+      bounds_x = 319
       bounds_y = 0
-      bounds_cx = 15
+      bounds_cx = 17
       bounds_cy = 16
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_savestate, oe_checkvaluepaststatread]
       visible = False
@@ -244,9 +296,9 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
       optionswidget1 = []
       optionsskin = [osk_framebuttononly]
       taborder = 6
-      bounds_x = 345
+      bounds_x = 337
       bounds_y = 0
-      bounds_cx = 15
+      bounds_cx = 17
       bounds_cy = 16
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_savestate, oe_checkvaluepaststatread]
       visible = False
@@ -257,9 +309,9 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
       optionswidget1 = []
       optionsskin = [osk_framebuttononly]
       taborder = 7
-      bounds_x = 361
+      bounds_x = 355
       bounds_y = 0
-      bounds_cx = 15
+      bounds_cx = 17
       bounds_cy = 16
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_savestate, oe_checkvaluepaststatread]
       visible = False
@@ -270,9 +322,9 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
       optionswidget1 = []
       optionsskin = [osk_framebuttononly]
       taborder = 8
-      bounds_x = 377
+      bounds_x = 373
       bounds_y = 0
-      bounds_cx = 15
+      bounds_cx = 17
       bounds_cy = 16
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_savestate, oe_checkvaluepaststatread]
       visible = False
@@ -283,9 +335,9 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
       optionswidget1 = []
       optionsskin = [osk_framebuttononly]
       taborder = 9
-      bounds_x = 393
+      bounds_x = 391
       bounds_y = 0
-      bounds_cx = 15
+      bounds_cx = 17
       bounds_cy = 16
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_savestate, oe_checkvaluepaststatread]
       visible = False
@@ -298,7 +350,7 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
       taborder = 10
       bounds_x = 409
       bounds_y = 0
-      bounds_cx = 15
+      bounds_cx = 17
       bounds_cy = 16
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_savestate, oe_checkvaluepaststatread]
       visible = False
@@ -309,9 +361,9 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
       optionswidget1 = []
       optionsskin = [osk_framebuttononly]
       taborder = 11
-      bounds_x = 425
+      bounds_x = 427
       bounds_y = 0
-      bounds_cx = 15
+      bounds_cx = 17
       bounds_cy = 16
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_savestate, oe_checkvaluepaststatread]
       visible = False
@@ -327,11 +379,11 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
       frame.button.imagenr = 17
       taborder = 12
       visible = False
-      bounds_x = 441
+      bounds_x = 445
       bounds_y = 0
-      bounds_cx = 174
+      bounds_cx = 145
       bounds_cy = 16
-      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_savestate, oe_checkvaluepaststatread]
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_hintclippedtext, oe_savestate, oe_checkvaluepaststatread]
       reffontheight = 14
     end
   end

@@ -46,13 +46,14 @@ function editsysenvmanager(asysenvmanager: tsysenvmanager): modalresultty;
 
 implementation
 uses
- msesysenvmanagereditor_mfm;
+ msesysenvmanagereditor_mfm,typinfo;
 
 function editsysenvmanager(asysenvmanager: tsysenvmanager): modalresultty;
 var
  ar1: argumentdefarty;
  ar2: stringararty;
  int1: integer;
+ ar3,ar4: stringarty;
 begin
  try
   defstoarguments(asysenvmanager.defs,ar1,ar2);
@@ -71,6 +72,20 @@ begin
    end;
   end;
   result:= show(ml_application);
+  if result = mr_ok then begin
+   setlength(ar4,5);
+   setlength(ar3,grid.datarowhigh+1);
+   for int1:= 0 to high(ar3) do begin
+    ar4[0]:= getenumname(typeinfo(argumentkindty),kinded[int1]);
+    ar4[1]:= nameed[int1];
+    ar4[2]:= aliased[int1];
+    ar4[3]:= settostring(ptypeinfo(typeinfo(argumentflagsty)),
+                        envdefined.gridvaluebitmask[int1],false);
+    ar4[4]:= initvalueed[int1];
+    ar3[int1]:= concatstrings(ar4,',','"');
+   end;
+   asysenvmanager.defs:= string(concatstrings(ar3,lineend));
+  end;
  end;
 end;
 

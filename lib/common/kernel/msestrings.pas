@@ -454,10 +454,18 @@ function checkkeyword(const aname: pchar; const anames; //stringaty
 function checkkeyword(const aname: pmsechar; const anames; //msestringaty
                              const ahigh: integer): cardinal; overload;
 
-function quotestring(value: string; quotechar: char): string; overload;
-function quotestring(value: msestring; quotechar: msechar): msestring; overload;
-function quoteescapedstring(value: string; quotechar: char): string; overload;
-function quoteescapedstring(value: msestring; quotechar: msechar): msestring; overload;
+function quotestring(value: string; quotechar: char;
+                               const force: boolean = true;
+                      const separator: char = ' '): string; overload;
+function quotestring(value: msestring; quotechar: msechar;
+                               const force: boolean = true;
+                      const separator: msechar = ' '): msestring; overload;
+function quoteescapedstring(value: string; quotechar: char;
+                               const force: boolean = true;
+                      const separator: char = ' '): string; overload;
+function quoteescapedstring(value: msestring; quotechar: msechar;
+                               const force: boolean = true;
+                      const separator: msechar = ' '): msestring; overload;
 function unquotestring(value: string; quotechar: char): string; overload;
 function unquotestring(value: msestring; quotechar: msechar): msestring; overload;
 function extractquotedstr(const value: msestring): msestring;
@@ -510,9 +518,14 @@ procedure splitstringquoted(const source: msestring; out dest: msestringarty;
            //separator = #0 -> ' ' and c_tab for separators
 
 function concatstrings(const source: msestringarty;
-              const separator: msestring = ' '): msestring; overload;
+                        const separator: msestring = ' ';
+                   const quotechar: msechar = #0; //#0 -> no quote
+                   const force: boolean = false): msestring; overload;
+                                   
 function concatstrings(const source: stringarty;
-              const separator: string = ' '): string; overload;
+              const separator: string = ' ';
+                           const quotechar: char = #0; //#0 -> no quote
+                           const force: boolean = false): string; overload;
 
 function parsecommandline(const s: pchar): stringarty; overload;
 function parsecommandline(const s: pmsechar): msestringarty; overload;
@@ -966,33 +979,57 @@ begin
 end;
 
 function concatstrings(const source: msestringarty;
-        const separator: msestring = ' '): msestring;
+        const separator: msestring = ' '; const quotechar: msechar = #0;
+                                    const force: boolean = false): msestring;
 var
  int1: integer;
+ sepchar: msechar;
 begin
  if source = nil then begin
   result:= '';
  end
  else begin
-  result:= source[0];
-  for int1:= 1 to high(source) do begin
-   result:= result + separator + source[int1];
+  if quotechar = #0 then begin
+   result:= source[0];
+   for int1:= 1 to high(source) do begin
+    result:= result + separator + source[int1];
+   end;
+  end
+  else begin
+   sepchar:= pmsechar(separator)^;
+   result:= quotestring(source[0],quotechar,force);
+   for int1:= 1 to high(source) do begin
+    result:= result + separator + 
+                      quotestring(source[int1],quotechar,force,sepchar);
+   end;
   end;
  end;
 end;
 
 function concatstrings(const source: stringarty;
-        const separator: string = ' '): string;
+        const separator: string = ' '; const quotechar: char = #0;
+                                    const force: boolean = false): string;
 var
  int1: integer;
+ sepchar: char;
 begin
  if source = nil then begin
   result:= '';
  end
  else begin
-  result:= source[0];
-  for int1:= 1 to high(source) do begin
-   result:= result + separator + source[int1];
+  if quotechar = #0 then begin
+   result:= source[0];
+   for int1:= 1 to high(source) do begin
+    result:= result + separator + source[int1];
+   end;
+  end
+  else begin
+   sepchar:= pchar(separator)^;
+   result:= quotestring(source[0],quotechar,force);
+   for int1:= 1 to high(source) do begin
+    result:= result + separator + 
+             quotestring(source[int1],quotechar,force,sepchar);
+   end;
   end;
  end;
 end;
@@ -2720,57 +2757,72 @@ begin
  if wholeword then include(result,so_wholeword);
 end;
 
-function quotestring(value: string; quotechar: char): string; overload;
+function quotestring(value: string; quotechar: char;
+                         const force: boolean = true;
+                         const separator: char = ' '): string; overload;
 var
  ps,pd,pe: pchar;
 begin
- setlength(result,length(value)*2+2); //max
- pd:= pchar(pointer(result));
- pd^:= quotechar;
- inc(pd);
- if value <> '' then begin
-  ps:= pchar(pointer(value));
-  pe:= ps+length(value);
-  while ps < pe do begin
-   pd^:= ps^;
-   inc(pd);
-   if ps^ = quotechar then begin
-    pd^:= quotechar;
+ if force or (findchar(value,quotechar) > 0) or 
+               (separator <> #0) and (findchar(value,separator) > 0)then begin
+  setlength(result,length(value)*2+2); //max
+  pd:= pchar(pointer(result));
+  pd^:= quotechar;
+  inc(pd);
+  if value <> '' then begin
+   ps:= pchar(pointer(value));
+   pe:= ps+length(value);
+   while ps < pe do begin
+    pd^:= ps^;
     inc(pd);
+    if ps^ = quotechar then begin
+     pd^:= quotechar;
+     inc(pd);
+    end;
+    inc(ps);
    end;
-   inc(ps);
   end;
+  pd^:= quotechar;
+  inc(pd);
+  setlength(result,pd-pchar(pointer(result)));
+ end
+ else begin
+  result:= value;
  end;
- pd^:= quotechar;
- inc(pd);
- setlength(result,pd-pchar(pointer(result)));
 end;
 
-function quotestring(value: msestring;
-                                quotechar: msechar): msestring; overload;
+function quotestring(value: msestring; quotechar: msechar;
+                      const force: boolean = true;
+                      const separator: msechar = ' '): msestring; overload;
 var
  ps,pd,pe: pmsechar;
 begin
- setlength(result,length(value)*2+2); //max
- pd:= pmsechar(pointer(result));
- pd^:= quotechar;
- inc(pd);
- if value <> '' then begin
-  ps:= pmsechar(pointer(value));
-  pe:= ps+length(value);
-  while ps < pe do begin
-   pd^:= ps^;
-   inc(pd);
-   if ps^ = quotechar then begin
-    pd^:= quotechar;
+ if force or (findchar(value,quotechar) > 0) or 
+              (separator <> #0) and (findchar(value,separator) > 0) then begin
+  setlength(result,length(value)*2+2); //max
+  pd:= pmsechar(pointer(result));
+  pd^:= quotechar;
+  inc(pd);
+  if value <> '' then begin
+   ps:= pmsechar(pointer(value));
+   pe:= ps+length(value);
+   while ps < pe do begin
+    pd^:= ps^;
     inc(pd);
+    if ps^ = quotechar then begin
+     pd^:= quotechar;
+     inc(pd);
+    end;
+    inc(ps);
    end;
-   inc(ps);
   end;
+  pd^:= quotechar;
+  inc(pd);
+  setlength(result,pd-pmsechar(pointer(result)));
+ end
+ else begin
+  result:= value;
  end;
- pd^:= quotechar;
- inc(pd);
- setlength(result,pd-pmsechar(pointer(result)));
 end;
 
 function unquotestring(value: string; quotechar: char): string; overload;
@@ -2798,73 +2850,8 @@ begin
  end;
 end;
 
-const
- escapechar = '\';
- 
-function quoteescapedstring(value: string; quotechar: char): string;
-var
- ps,pd,pe: pchar;
-begin
- setlength(result,length(value)*2+2); //max
- pd:= pchar(pointer(result));
- pd^:= quotechar;
- inc(pd);
- if value <> '' then begin
-  ps:= pchar(pointer(value));
-  pe:= ps+length(value);
-  while ps < pe do begin
-   pd^:= ps^;
-   if ps^ = quotechar then begin
-    pd^:= escapechar;
-    inc(pd);
-    pd^:= quotechar;
-   end;
-   if ps^ = escapechar then begin
-    inc(pd);
-    pd^:= escapechar;
-   end;
-   inc(pd);
-   inc(ps);
-  end;
- end;
- pd^:= quotechar;
- inc(pd);
- setlength(result,pd-pchar(pointer(result)));
-end;
-
-function quoteescapedstring(value: msestring; quotechar: msechar): msestring;
-var
- ps,pd,pe: pmsechar;
-begin
- setlength(result,length(value)*2+2); //max
- pd:= pmsechar(pointer(result));
- pd^:= quotechar;
- inc(pd);
- if value <> '' then begin
-  ps:= pmsechar(pointer(value));
-  pe:= ps+length(value);
-  while ps < pe do begin
-   pd^:= ps^;
-   if ps^ = quotechar then begin
-    pd^:= escapechar;
-    inc(pd);
-    pd^:= quotechar;
-   end;
-   if ps^ = escapechar then begin
-    inc(pd);
-    pd^:= escapechar;
-   end;
-   inc(pd);
-   inc(ps);
-  end;
- end;
- pd^:= quotechar;
- inc(pd);
- setlength(result,pd-pmsechar(pointer(result)));
-end;
-
 function unquotestring(value: msestring;
-                                       quotechar: msechar): msestring; overload;
+                                       quotechar: msechar): msestring;
 var
  ps,pd,pe: pmsechar;
 begin
@@ -2886,6 +2873,88 @@ begin
    dec(pd); //remove trailing quote
   end;
   setlength(result,pd-pmsechar(pointer(result)));
+ end;
+end;
+
+
+const
+ escapechar = '\';
+ 
+function quoteescapedstring(value: string; quotechar: char;
+                                      const force: boolean = true;
+                                      const separator: char = ' '): string;
+var
+ ps,pd,pe: pchar;
+begin
+ if force or (findchar(value,quotechar) > 0) or
+          (separator <> #0) and (findchar(value,separator) > 0) then begin
+  setlength(result,length(value)*2+2); //max
+  pd:= pchar(pointer(result));
+  pd^:= quotechar;
+  inc(pd);
+  if value <> '' then begin
+   ps:= pchar(pointer(value));
+   pe:= ps+length(value);
+   while ps < pe do begin
+    pd^:= ps^;
+    if ps^ = quotechar then begin
+     pd^:= escapechar;
+     inc(pd);
+     pd^:= quotechar;
+    end;
+    if ps^ = escapechar then begin
+     inc(pd);
+     pd^:= escapechar;
+    end;
+    inc(pd);
+    inc(ps);
+   end;
+  end;
+  pd^:= quotechar;
+  inc(pd);
+  setlength(result,pd-pchar(pointer(result)));
+ end
+ else begin
+  result:= value;
+ end;
+end;
+
+function quoteescapedstring(value: msestring; quotechar: msechar;
+                                  const force: boolean = true;
+                                  const separator: msechar = ' '): msestring;
+var
+ ps,pd,pe: pmsechar;
+begin
+ if force or (findchar(value,quotechar) > 0) or
+           (separator <> #0) and (findchar(value,separator) > 0) then begin
+  setlength(result,length(value)*2+2); //max
+  pd:= pmsechar(pointer(result));
+  pd^:= quotechar;
+  inc(pd);
+  if value <> '' then begin
+   ps:= pmsechar(pointer(value));
+   pe:= ps+length(value);
+   while ps < pe do begin
+    pd^:= ps^;
+    if ps^ = quotechar then begin
+     pd^:= escapechar;
+     inc(pd);
+     pd^:= quotechar;
+    end;
+    if ps^ = escapechar then begin
+     inc(pd);
+     pd^:= escapechar;
+    end;
+    inc(pd);
+    inc(ps);
+   end;
+  end;
+  pd^:= quotechar;
+  inc(pd);
+  setlength(result,pd-pmsechar(pointer(result)));
+ end
+ else begin
+  result:= value;
  end;
 end;
 
