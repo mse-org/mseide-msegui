@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -11,7 +11,7 @@ unit msenogui;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- sysutils,classes,mseapplication,mseevent,msesystypes,msestrings;
+ sysutils,classes,mclasses,mseapplication,mseevent,msesystypes,msestrings;
 type
  tnoguiapplication = class(tcustomapplication)
   private
