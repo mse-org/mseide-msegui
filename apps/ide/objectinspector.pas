@@ -79,7 +79,7 @@ type
    props: ttreeitemedit;
    tpopupmenu1: tpopupmenu;
    values: tmbdropdownitemedit;
-   compedit: tbutton;
+   compedit: trichbutton;
    procedure propsoncheckrowmove(const curindex: Integer; 
                   const newindex: Integer; var accept: Boolean);
    procedure createexe(const sender: TObject);
@@ -1625,8 +1625,8 @@ procedure tobjectinspectorfo.objectinspectorfoonloaded(const sender: tobject);
 begin
  grid.top:= compselector.bottom + 1;
  grid.height:= height-grid.top;
- compedit.left:= compedit.right - compedit.height;
- compedit.width:= compedit.height;
+ compedit.width:= compedit.height+4;
+// compedit.left:= compedit.right - compedit.height-;
  compselector.right:= compedit.left - 1;
 // with values.frame.buttons[0] do begin
 //  imagelist:= stockobjects.glyphs;

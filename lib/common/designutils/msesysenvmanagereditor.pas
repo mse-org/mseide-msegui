@@ -29,9 +29,6 @@ type
    kinded: tenumtypeedit;
    nameed: tstringedit;
    aliased: tmemodialogedit;
-   envdefined: tbooleanedit;
-   statdefined: tbooleanedit;
-   setdefined: tbooleanedit;
    argopt: tbooleanedit;
    filenames: tbooleanedit;
    statoverride: tbooleanedit;
@@ -41,6 +38,8 @@ type
    statfile1: tstatfile;
    mandatory: tbooleanedit;
    helped: tmemodialogedit;
+   help: tbooleanedit;
+   argumented: tstringedit;
    procedure kindedinit(const sender: tenumtypeedit);
  end;
 
@@ -63,8 +62,10 @@ begin
     kinded[int1]:= ord(kind);
     nameed[int1]:= name;
     aliased[int1]:= concatstrings(anames,' ','"');
-    envdefined.gridvaluebitmask[int1]:= longword(flags);
+    mandatory.gridvaluebitmask[int1]:= longword(flags);
     initvalueed[int1]:= initvalue;
+    argumented[int1]:= argument;
+    helped[int1]:= help;
    end;
   end;
   result:= show(ml_application);
@@ -76,8 +77,9 @@ begin
      kind:= argumentkindty(kinded[int1]);
      name:= nameed[int1];
      splitstringquoted(aliased[int1],anames);
-     flags:= argumentflagsty(envdefined.gridvaluebitmask[int1]);
+     flags:= argumentflagsty(mandatory.gridvaluebitmask[int1]);
      initvalue:= initvalueed[int1];
+     argument:= argumented[int1];
      help:= helped[int1];
     end;
    end;

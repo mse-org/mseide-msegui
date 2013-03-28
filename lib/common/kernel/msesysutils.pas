@@ -75,7 +75,7 @@ uses
 {$else}
  mselibc,
 {$endif}
- msesysintf1,msesysintf,msestrings,mseformatstr,msetypes,msesys;
+ msesysintf1,msesysintf,msestrings,mseformatstr,msetypes,msesys,msesystypes;
 
 function createguidstring: string;
 var
@@ -197,16 +197,25 @@ end;
 function stdinputhandle: integer;
 begin
  result:= getstdhandle(std_input_handle);
+ if result <= 0 then begin
+  result:= invalidfilehandle;
+ end;
 end;
 
 function stdoutputhandle: integer;
 begin
  result:= getstdhandle(std_output_handle);
+ if result <= 0 then begin
+  result:= invalidfilehandle;
+ end;
 end;
 
 function stderrorhandle: integer;
 begin
  result:= getstdhandle(std_error_handle);
+ if result <= 0 then begin
+  result:= invalidfilehandle;
+ end;
 end;
 
 {$else}

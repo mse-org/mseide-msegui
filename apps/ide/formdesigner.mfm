@@ -10,6 +10,10 @@ object formdesignerfo: tformdesignerfo
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent]
   container.frame.zoomwidthstep = 1
   container.frame.zoomheightstep = 1
+  container.frame.sbhorz.stepctrlfact = 0
+  container.frame.sbhorz.wheelsensitivity = 1
+  container.frame.sbvert.stepctrlfact = 0
+  container.frame.sbvert.wheelsensitivity = 1
   container.oncalcminscrollsize = calcscrollsize
   container.bounds = (
     0
@@ -184,7 +188,7 @@ object formdesignerfo: tformdesignerfo
         state = [as_localcaption]
       end    
       item
-        caption = 'Edit Component'
+        caption = '&Edit Component'
         name = 'editcomp'
         state = [as_localcaption, as_localonexecute]
         onexecute = doeditcomponent

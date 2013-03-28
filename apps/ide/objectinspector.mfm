@@ -10,6 +10,10 @@ object objectinspectorfo: tobjectinspectorfo
   bounds_cy = 248
   container.frame.zoomwidthstep = 1
   container.frame.zoomheightstep = 1
+  container.frame.sbhorz.stepctrlfact = 0
+  container.frame.sbhorz.wheelsensitivity = 1
+  container.frame.sbvert.stepctrlfact = 0
+  container.frame.sbvert.wheelsensitivity = 1
   container.onlayout = objectinspectoronchildscaled
   container.bounds = (
     0
@@ -101,7 +105,7 @@ object objectinspectorfo: tobjectinspectorfo
     taborder = 2
     bounds_x = 0
     bounds_y = 1
-    bounds_cx = 220
+    bounds_cx = 219
     anchors = [an_left, an_top, an_right]
     onsetvalue = compselectoronsetvalue
     dropdown.options = [deo_selectonly, deo_autodropdown, deo_keydropdown]
@@ -113,6 +117,10 @@ object objectinspectorfo: tobjectinspectorfo
     reffontheight = 14
   end
   object grid: twidgetgrid
+    frame.sbvert.stepctrlfact = 0
+    frame.sbvert.wheelsensitivity = 1
+    frame.sbhorz.stepctrlfact = 0
+    frame.sbhorz.wheelsensitivity = 1
     frame.localprops = [frl_levelo, frl_colorclient]
     taborder = 1
     popupmenu = tpopupmenu1
@@ -121,7 +129,8 @@ object objectinspectorfo: tobjectinspectorfo
     bounds_cx = 244
     bounds_cy = 224
     anchors = [an_top, an_bottom]
-    optionsgrid = [og_colsizing, og_colmoving, og_focuscellonenter, og_colchangeontabkey, og_wrapcol, og_noresetselect]
+    optionsgrid = [og_colsizing, og_colmoving, og_focuscellonenter, og_colchangeontabkey, og_wrapcol]
+    optionsgrid1 = [og1_noresetselect]
     rowcolors.count = 1
     rowcolors.items = (
       16777202
@@ -165,7 +174,7 @@ object objectinspectorfo: tobjectinspectorfo
       end>
     datacols.count = 2
     datacols.items = <    
-      item
+      item[props]
         linecolor = -1610612731
         linecolorfix = -1610612733
         colorselect = -1610612717
@@ -180,7 +189,7 @@ object objectinspectorfo: tobjectinspectorfo
         widgetname = 'props'
         dataclass = ttreeitemeditlist
       end    
-      item
+      item[values]
         linecolorfix = -1610612733
         width = 148
         rowfontoffset = 4
@@ -267,17 +276,33 @@ object objectinspectorfo: tobjectinspectorfo
       reffontheight = 14
     end
   end
-  object compedit: tbutton
+  object compedit: trichbutton
     optionswidget1 = [ow1_fontglyphheight, ow1_autoscale]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_disabledhint, ow_timedhint]
+    optionsskin = [osk_noface]
+    face.fade_pos.count = 2
+    face.fade_pos.items = (
+      0
+      1
+    )
+    face.fade_color.count = 2
+    face.fade_color.items = (
+      16760767
+      15571610
+    )
+    face.fade_direction = gd_down
+    face.localprops = [fal_fadirection]
+    face.dummy = 0
     hint = 'Show component editor.'
-    bounds_x = 223
+    bounds_x = 220
     bounds_y = 2
-    bounds_cx = 19
+    bounds_cx = 22
     bounds_cy = 18
     anchors = [an_top, an_right]
     state = [as_disabled, as_localdisabled, as_localcaption, as_localhint, as_localonexecute]
-    caption = 'ED'
+    facedisabled.template = guitemplatesmo.fadevertkonvex
+    facedisabled.dummy = 0
+    caption = '&ED'
     onexecute = compeditonexecute
     reffontheight = 14
   end

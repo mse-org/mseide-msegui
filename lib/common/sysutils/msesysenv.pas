@@ -57,7 +57,8 @@ type
                                      // ev. auch geloescht
                    arf_stataddval,   // wert wird von statfile geschrieben falls
                                      // noch nicht gesetzt
-                   arf_integer       //fuer arg und pararg
+                   arf_integer,      //fuer arg und pararg
+                   arf_help          //print help and terminate
                    );
 
  argumentflagsty = set of argumentflagty;
@@ -84,6 +85,7 @@ type
                      //letzter string muss leer sein ('abc','def','');
   flags: argumentflagsty;
   initvalue: string;
+  argument: string;
   help: string;
  end;
 
@@ -112,6 +114,7 @@ type
   anames: msestringarty;
   flags: argumentflagsty;
   initvalue: msestring;  
+  argument: msestring;
   help: msestring;
  end;
  psysenvdefty = ^sysenvdefty;
@@ -127,6 +130,9 @@ type
    fstatvarname: msestring;
    fonvalueread: sysenvmanagervalueeventty;
    fdefs: sysenvdefarty;
+   fhelp1: msestring;
+   fhelp2: msestring;
+   fonafterinit: sysenvmanagereventty;
    procedure setoninit(const Value: sysenvmanagereventty);
    procedure doinit;
    procedure errorme(nr: sysenverrornrty; value: string);
@@ -168,6 +174,7 @@ type
    procedure init(const arguments: array of argumentdefty);
    procedure processinfo(index: integer; value: string);
    procedure errormessage(const mess: string);
+   procedure printhelp;
    function getcommandlinemacros(
            const macrodef: integer;
            const firstenvvarmacro: integer = -1; const lastenvvarmacro: integer = -1;
@@ -191,13 +198,22 @@ type
                  //bringt letztes filevorkommen
    property defs: sysenvdefarty read fdefs write setdefs;
   published
-   property options: sysenvoptionsty read foptions write foptions default defaultsysenvmanageroptions;
-   property errorcode: integer read ferrorcode write ferrorcode default defaulterrorcode;
+   property options: sysenvoptionsty read foptions write foptions 
+                                         default defaultsysenvmanageroptions;
+   property errorcode: integer read ferrorcode write ferrorcode 
+                                                   default defaulterrorcode;
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read getstatvarname write fstatvarname;
+   property help1: msestring read fhelp1 write fhelp1; 
+                         //printed before param items
+   property help2: msestring read fhelp2 write fhelp2;
+                         //printed after param items
 
-   property onvalueread: sysenvmanagervalueeventty read fonvalueread write fonvalueread;
+   property onvalueread: sysenvmanagervalueeventty read fonvalueread 
+                                                         write fonvalueread;
    property oninit: sysenvmanagereventty read foninit write setoninit;
+   property onafterinit: sysenvmanagereventty read fonafterinit 
+                                                           write fonafterinit;
  end;
 
 procedure defstoarguments(const defs: sysenvdefarty; 
@@ -211,7 +227,6 @@ uses
 procedure defstoarguments(const defs: sysenvdefarty; 
                  out arguments: argumentdefarty; out alias: stringararty);
 var
- ar2: msestringarty;
  int1,int2: integer;
  d: psysenvdefty;
 begin
@@ -232,6 +247,8 @@ begin
    anames:= pointer(alias[int1]); 
    flags:= d^.flags;
    initvalue:= d^.initvalue;
+   argument:= d^.argument;
+   help:= d^.help;
   end;
  end;
 end;
@@ -369,6 +386,9 @@ begin
     init(ar1);
    end;
   end;
+  if assigned(fonafterinit) then begin
+   fonafterinit(self);
+  end;
  end
  else begin
   if fdefs <> nil then begin
@@ -414,6 +434,102 @@ begin
   end;
  end;
 end;
+
+procedure tsysenvmanager.errormessage(const mess: string);
+begin
+ errorme(ern_user,mess);
+end;
+
+procedure tsysenvmanager.printhelp;
+var
+ int1,int2: integer;
+ mstr1: msestring;
+ ar1: msestringarty;
+begin
+ if fhelp1 <> '' then begin
+  writestderr(fhelp1,true);
+ end;
+ mstr1:= '';
+ for int1:= 0 to high(fdefs) do begin
+  with fdefs[int1] do begin
+   if name <> '' then begin
+    if (kind = ak_par) then begin
+     if name[1] <> '-' then begin
+      mstr1:= '  -'+name;
+     end
+     else begin
+      mstr1:= '      -'+name;
+     end;
+     if anames <> nil then begin
+      mstr1:= mstr1+',';
+      extendstring(mstr1,6);
+      for int2:= 0 to high(anames) do begin
+       mstr1:= mstr1+'-'+anames[int2];
+       mstr1:= mstr1+',';
+      end;
+      setlength(mstr1,length(mstr1)-1); //remove last comma
+     end;
+    end
+    else begin
+     if (kind = ak_pararg) then begin
+      if name[1] <> '-' then begin
+       mstr1:= '  -'+name;
+      end
+      else begin
+       mstr1:= '      -'+name+'=';
+      end;
+      mstr1:= mstr1+argument;
+      if anames <> nil then begin
+       mstr1:= mstr1+',';
+       extendstring(mstr1,6);
+       for int2:= 0 to high(anames) do begin
+        if anames[int2] <> '' then begin
+         if anames[int2][1] = '-' then begin
+          mstr1:= mstr1+'-'+anames[int2]+'='+argument;
+         end
+         else begin
+          mstr1:= mstr1+'-'+anames[int2]+argument;
+         end;
+        end;
+        mstr1:= mstr1+',';
+       end;
+       setlength(mstr1,length(mstr1)-1); //remove last comma
+      end;
+     end
+     else begin
+      if (kind = ak_envvar) and (help <> '') then begin
+       mstr1:= '  '+name;
+       for int2:= 0 to high(anames) do begin
+        mstr1:= mstr1+','+anames[int2];
+       end;
+      end
+      else begin
+       continue;
+      end;
+     end;
+    end;
+   end;
+   if help <> '' then begin
+    ar1:= breaklines(help);
+    if length(mstr1) < 29 then begin
+     extendstring(mstr1,29);
+     mstr1:= mstr1 + ar1[0];
+    end
+    else begin
+     mstr1:= mstr1+lineend+charstring(msechar(' '),29)+ar1[0];
+    end;
+    for int2:= 1 to high(ar1) do begin
+     mstr1:= mstr1+lineend+charstring(msechar(' '),29);
+    end;
+   end;
+   writestderr(mstr1,true);
+  end;
+ end;
+ if fhelp2 <> '' then begin
+  writestderr(fhelp1,true);
+ end;
+end;
+
 
 procedure tsysenvmanager.printmessage(value: string);
 begin
@@ -826,6 +942,14 @@ begin            //init
   inc(index);
  end;
  for int1:= 0 to high(arguments) do begin
+  if (arf_help in arguments[int1].flags) and 
+        (fenvvars[int1].flags * arf_defined <> []) then begin
+   printhelp;
+   application.terminated:= true;
+   exit;
+  end;
+ end;
+ for int1:= 0 to high(arguments) do begin
   with arguments[int1] do begin
    if kind = ak_envvar then begin
     {$ifdef mswindows}
@@ -844,7 +968,7 @@ begin            //init
     {$endif};
    end;
    if (arf_mandatory in flags) and not defined[int1] then begin
-     errorme(ern_mandatoryparameter,name);
+    errorme(ern_mandatoryparameter,name);
    end;
   end;
  end;
@@ -879,6 +1003,7 @@ begin
   readstringar(reader,anames);
   longword(flags):= reader.readset(typeinfo(flags));
   initvalue:= reader.readunicodestring;
+  argument:= reader.readunicodestring;
   help:= reader.readunicodestring;
  end;
 end;
@@ -887,6 +1012,7 @@ procedure tsysenvmanager.readdefs(reader: treader);
 var
  ar1: sysenvdefarty;
 begin
+ ar1:= nil; //compiler warning
  readrecordar(reader,ar1,typeinfo(ar1),@readdefdata);
  defs:= ar1;
 end;
@@ -899,6 +1025,7 @@ begin
   writestringar(writer,anames);
   writer.writeset(longword(flags),typeinfo(flags));
   writer.writeunicodestring(initvalue);
+  writer.writeunicodestring(argument);
   writer.writeunicodestring(help);
  end;
 end;
@@ -925,9 +1052,50 @@ begin
 end;
 }
 procedure tsysenvmanager.defineproperties(filer: tfiler);
+ 
+ function needswritedefs: boolean;
+ var
+  po1: psysenvdefty;
+  int1,int2: integer;
+ begin
+  with tsysenvmanager(filer.ancestor) do begin
+   result:= high(fdefs) <> high(self.fdefs);
+   if not result then begin
+    for int1:= 0 to high(fdefs) do begin
+     po1:= @self.fdefs[int1];
+     with fdefs[int1] do begin
+      result:= high(anames) <> high(po1^.anames);
+      if not result then begin
+       for int2:= 0 to high(anames) do begin
+        if anames[int2] <> po1^.anames[int2] then begin
+         result:= true;
+         break;
+        end;
+       end;
+       if not result then begin
+        result:= 
+                (kind <> po1^.kind) or
+                (name <> po1^.name) or
+                (flags <> po1^.flags) or
+                (initvalue <> po1^.initvalue) or
+                (argument <> po1^.argument) or
+                (help <> po1^.help);
+       end;
+      end;
+     end;
+     if result then begin
+      break;
+     end;
+    end;
+   end;
+  end;
+ end;
+ 
 begin
  inherited;
- filer.defineproperty('defs',@readdefs,@writedefs,fdefs <> nil);
+ filer.defineproperty('defs',@readdefs,@writedefs,
+           (filer.ancestor = nil) and (fdefs <> nil) or 
+           (filer.ancestor <> nil) and needswritedefs);
 // filer.defineproperty('default',@readinitvalues,@writeinitvalues,fdefs <> nil);
 // filer.defineproperty('help',@readhelps,@writehelps,fdefs <> nil);
 end;
@@ -959,11 +1127,6 @@ procedure tsysenvmanager.setintegervalue(index: integer;
   const Value: integer);
 begin
  setvalue(index,inttostr(value));
-end;
-
-procedure tsysenvmanager.errormessage(const mess: string);
-begin
- errorme(ern_user,mess);
 end;
 
 function tsysenvmanager.getcommandlinemacros(
