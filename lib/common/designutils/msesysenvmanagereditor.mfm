@@ -162,49 +162,49 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
       end    
       item[envdefined]
         width = 17
-        options = [co_fixwidth, co_proportional, co_savestate, co_mousescrollrow]
+        options = [co_fixwidth, co_savestate, co_mousescrollrow]
         widgetname = 'envdefined'
         dataclass = tgridintegerdatalist
       end    
       item[statdefined]
         width = 17
-        options = [co_fixwidth, co_proportional, co_savestate, co_mousescrollrow]
+        options = [co_fixwidth, co_savestate, co_mousescrollrow]
         widgetname = 'statdefined'
         dataclass = tgridintegerdatalist
       end    
       item[setdefined]
         width = 17
-        options = [co_fixwidth, co_proportional, co_savestate, co_mousescrollrow]
+        options = [co_fixwidth, co_savestate, co_mousescrollrow]
         widgetname = 'setdefined'
         dataclass = tgridintegerdatalist
       end    
       item[argopt]
         width = 17
-        options = [co_fixwidth, co_proportional, co_savestate, co_mousescrollrow]
+        options = [co_fixwidth, co_savestate, co_mousescrollrow]
         widgetname = 'argopt'
         dataclass = tgridintegerdatalist
       end    
       item[filenames]
         width = 17
-        options = [co_fixwidth, co_proportional, co_savestate, co_mousescrollrow]
+        options = [co_fixwidth, co_savestate, co_mousescrollrow]
         widgetname = 'filenames'
         dataclass = tgridintegerdatalist
       end    
       item[statoverride]
         width = 17
-        options = [co_fixwidth, co_proportional, co_savestate, co_mousescrollrow]
+        options = [co_fixwidth, co_savestate, co_mousescrollrow]
         widgetname = 'statoverride'
         dataclass = tgridintegerdatalist
       end    
       item[stataddval]
         width = 17
-        options = [co_fixwidth, co_proportional, co_savestate, co_mousescrollrow]
+        options = [co_fixwidth, co_savestate, co_mousescrollrow]
         widgetname = 'stataddval'
         dataclass = tgridintegerdatalist
       end    
       item[integer]
         width = 17
-        options = [co_drawfocus, co_fixwidth, co_proportional, co_savestate, co_mousescrollrow]
+        options = [co_drawfocus, co_fixwidth, co_savestate, co_mousescrollrow]
         widgetname = 'integer'
         dataclass = tgridintegerdatalist
       end    
