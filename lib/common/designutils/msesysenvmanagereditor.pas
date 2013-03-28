@@ -39,6 +39,8 @@ type
    integer: tbooleanedit;
    initvalueed: tmemodialogedit;
    statfile1: tstatfile;
+   mandatory: tbooleanedit;
+   helped: tmemodialogedit;
    procedure kindedinit(const sender: tenumtypeedit);
  end;
 
@@ -48,6 +50,43 @@ implementation
 uses
  msesysenvmanagereditor_mfm,typinfo;
 
+function editsysenvmanager(asysenvmanager: tsysenvmanager): modalresultty;
+var
+ ar1: sysenvdefarty;
+ int1: integer;
+begin
+ ar1:= asysenvmanager.defs;
+ with tmsesysenvmanagereditorfo.create(nil) do begin
+  grid.rowcount:= length(ar1);
+  for int1:= 0 to high(ar1) do begin
+   with ar1[int1] do begin
+    kinded[int1]:= ord(kind);
+    nameed[int1]:= name;
+    aliased[int1]:= concatstrings(anames,' ','"');
+    envdefined.gridvaluebitmask[int1]:= longword(flags);
+    initvalueed[int1]:= initvalue;
+   end;
+  end;
+  result:= show(ml_application);
+  if result = mr_ok then begin
+   ar1:= nil; //init with zero
+   setlength(ar1,grid.datarowhigh+1);
+   for int1:= 0 to high(ar1) do begin
+    with ar1[int1] do begin
+     kind:= argumentkindty(kinded[int1]);
+     name:= nameed[int1];
+     splitstringquoted(aliased[int1],anames);
+     flags:= argumentflagsty(envdefined.gridvaluebitmask[int1]);
+     initvalue:= initvalueed[int1];
+     help:= helped[int1];
+    end;
+   end;
+   asysenvmanager.defs:= ar1;
+  end;
+ end;
+end;
+
+{
 function editsysenvmanager(asysenvmanager: tsysenvmanager): modalresultty;
 var
  ar1: argumentdefarty;
@@ -88,7 +127,7 @@ begin
   end;
  end;
 end;
-
+}
 procedure tmsesysenvmanagereditorfo.kindedinit(const sender: tenumtypeedit);
 begin
  sender.typeinfopo:= typeinfo(argumentkindty);

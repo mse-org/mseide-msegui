@@ -13,22 +13,22 @@ type
              env_filename);
 const
  sysenvvalues: array[envvarty] of argumentdefty =
-  ((kind: ak_pararg; name: '-macrodef'; anames: nil; flags: []; initvalue: ''),
-   (kind: ak_pararg; name: '-macrogroup'; anames: nil; flags: []; initvalue: ''),
-   (kind: ak_par; name: 'np'; anames: nil; flags: []; initvalue: ''), //no project
-   (kind: ak_par; name: 'ns'; anames: nil; flags: []; initvalue: ''), //no skin
-   (kind: ak_envvar; name: 'FPCDIR'; anames: nil; flags: []; initvalue: ''),
-   (kind: ak_envvar; name: 'FPCLIBDIR'; anames: nil; flags: []; initvalue: ''),
-   (kind: ak_envvar; name: 'MSEDIR'; anames: nil; flags: []; initvalue: ''),
-   (kind: ak_envvar; name: 'MSELIBDIR'; anames: nil; flags: []; initvalue: ''),
-   (kind: ak_envvar; name: 'SYNTAXDEFDIR'; anames: nil; flags: []; initvalue: ''),
-   (kind: ak_envvar; name: 'TEMPLATEDIR'; anames: nil; flags: []; initvalue: ''),
-   (kind: ak_envvar; name: 'COMPSTOREDIR'; anames: nil; flags: []; initvalue: ''),
-   (kind: ak_envvar; name: 'COMPILER'; anames: nil; flags: []; initvalue: ''),
-   (kind: ak_envvar; name: 'DEBUGGER'; anames: nil; flags: []; initvalue: ''),
-   (kind: ak_envvar; name: 'EXEEXT'; anames: nil; flags: []; initvalue: ''),
-   (kind: ak_envvar; name: 'TARGET'; anames: nil; flags: []; initvalue: ''),
-   (kind: ak_arg; name: ''; anames: nil; flags: []; initvalue: ''));
+  ((kind: ak_pararg; name: '-macrodef'; anames: nil; flags: []; initvalue: '';help:''),
+   (kind: ak_pararg; name: '-macrogroup'; anames: nil; flags: []; initvalue: '';help:''),
+   (kind: ak_par; name: 'np'; anames: nil; flags: []; initvalue: '';help:''), //no project
+   (kind: ak_par; name: 'ns'; anames: nil; flags: []; initvalue: '';help:''), //no skin
+   (kind: ak_envvar; name: 'FPCDIR'; anames: nil; flags: []; initvalue: '';help:''),
+   (kind: ak_envvar; name: 'FPCLIBDIR'; anames: nil; flags: []; initvalue: '';help:''),
+   (kind: ak_envvar; name: 'MSEDIR'; anames: nil; flags: []; initvalue: '';help:''),
+   (kind: ak_envvar; name: 'MSELIBDIR'; anames: nil; flags: []; initvalue: '';help:''),
+   (kind: ak_envvar; name: 'SYNTAXDEFDIR'; anames: nil; flags: []; initvalue: '';help:''),
+   (kind: ak_envvar; name: 'TEMPLATEDIR'; anames: nil; flags: []; initvalue: '';help:''),
+   (kind: ak_envvar; name: 'COMPSTOREDIR'; anames: nil; flags: []; initvalue: '';help:''),
+   (kind: ak_envvar; name: 'COMPILER'; anames: nil; flags: []; initvalue: '';help:''),
+   (kind: ak_envvar; name: 'DEBUGGER'; anames: nil; flags: []; initvalue: '';help:''),
+   (kind: ak_envvar; name: 'EXEEXT'; anames: nil; flags: []; initvalue: '';help:''),
+   (kind: ak_envvar; name: 'TARGET'; anames: nil; flags: []; initvalue: '';help:''),
+   (kind: ak_arg; name: ''; anames: nil; flags: []; initvalue: '';help:''));
 
  firstenvvarmacro = env_fpcdir;   
  lastenvvarmacro = env_target;   

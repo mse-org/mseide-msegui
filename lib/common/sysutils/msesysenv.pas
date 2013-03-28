@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-20013 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -31,7 +31,7 @@ type
                             //z.b. '-vabc', '-v abc', '-v "abc def"
                             // '--file=abc'
                  ak_arg     //commandline argument, name muss '' sein,
-                            // z.b. 'abc', '"abc def"
+                            // z.b. 'abc', '"abc def"'
                  );
 
  argumentkindsty = set of argumentkindty;
@@ -40,16 +40,17 @@ const
 
 type
  sysenverrornrty = (ern_io,ern_user,ern_invalidparameter,ern_missedargument,ern_invalidargument,
-              ern_ambiguousparameter,ern_invalidinteger);
+              ern_ambiguousparameter,ern_invalidinteger,ern_mandatoryparameter);
 const
  errtexte: array[sysenverrornrty] of string = ('','',
-  'Invalid Parameter','Missed Argument','Invalid Argument','Ambiguous Parameter',
-  'Invalid Integer');
+  'Invalid parameter','Missed argument','Invalid argument','Ambiguous parameter',
+  'Invalid integer','Parameter mandatory');
 type
  argumentflagty = (arf_envdefined,   // wert aus env. gesetzt
                    arf_statdefined,  // wert aus statfile. gesetzt
                    arf_setdefined,   // wert aus programm gesetzt
-                   arf_res1,arf_res2,arf_res3,arf_res4,arf_res5,
+                   arf_res1,arf_res2,arf_res3,arf_res4,
+                   arf_mandatory,    // obligatorisch
                    arf_argopt,       // argument optional
                    arf_filenames,    // argument wird durch pathsep gesplitted
                    arf_statoverride, // wert wird durch statfile ueberschrieben
@@ -83,6 +84,7 @@ type
                      //letzter string muss leer sein ('abc','def','');
   flags: argumentflagsty;
   initvalue: string;
+  help: string;
  end;
 
  pargumentdefty = ^argumentdefty;
@@ -102,8 +104,19 @@ type
 
  sysenvmanagervalueeventty = procedure(sender: tsysenvmanager;
            const index: integer; var defined: boolean;
-                   var argument: msestringarty; var error: sysenverrornrty) of object;
+            var argument: msestringarty; var error: sysenverrornrty) of object;
 
+ sysenvdefty = record
+  kind: argumentkindty;
+  name: msestring;
+  anames: msestringarty;
+  flags: argumentflagsty;
+  initvalue: msestring;  
+  help: msestring;
+ end;
+ psysenvdefty = ^sysenvdefty;
+ sysenvdefarty = array of sysenvdefty;
+ 
  tsysenvmanager = class(tmsecomponent,istatfile)
   private
    foninit: sysenvmanagereventty;
@@ -113,7 +126,7 @@ type
    fstatfile: tstatfile;
    fstatvarname: msestring;
    fonvalueread: sysenvmanagervalueeventty;
-   fdefs: msestring;
+   fdefs: sysenvdefarty;
    procedure setoninit(const Value: sysenvmanagereventty);
    procedure doinit;
    procedure errorme(nr: sysenverrornrty; value: string);
@@ -134,16 +147,22 @@ type
              adefined: argumentflagsty): sysenverrornrty; overload;
    function getintegervalue1(index: integer): integer;
    procedure setintegervalue(index: integer; const Value: integer);
-   procedure setdefs(const avalue: msestring);
+   procedure setdefs(const avalue: sysenvdefarty);
+   procedure readdefs(reader: treader);
+   procedure writedefs(writer: twriter);
+//   procedure readinitvalues(reader: treader);
+//   procedure writeinitvalues(writer: twriter);
+//   procedure readhelps(reader: treader);
+//   procedure writehelps(writer: twriter);
   protected
-   //istatfiler
+   procedure loaded; override;
+   procedure defineproperties(filer: tfiler); override;
+    //istatfiler
    procedure dostatread(const reader: tstatreader); virtual;
    procedure dostatwrite(const writer: tstatwriter); virtual;
    procedure statreading;
    procedure statread;
    function getstatvarname: msestring;
-
-   procedure loaded; override;
   public
    constructor create(aowner: tcomponent); override;
    procedure init(const arguments: array of argumentdefty);
@@ -170,18 +189,18 @@ type
                  //bringt erstes filevorkommen
    function findlastfile(filename: filenamety; searchinvars: array of integer): filenamety;
                  //bringt letztes filevorkommen
+   property defs: sysenvdefarty read fdefs write setdefs;
   published
    property options: sysenvoptionsty read foptions write foptions default defaultsysenvmanageroptions;
    property errorcode: integer read ferrorcode write ferrorcode default defaulterrorcode;
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read getstatvarname write fstatvarname;
-   property defs: msestring read fdefs write setdefs;
 
    property onvalueread: sysenvmanagervalueeventty read fonvalueread write fonvalueread;
    property oninit: sysenvmanagereventty read foninit write setoninit;
  end;
 
-procedure defstoarguments(const defs: msestring; 
+procedure defstoarguments(const defs: sysenvdefarty; 
                  out arguments: argumentdefarty; out alias: stringararty);
 
 implementation
@@ -189,6 +208,35 @@ uses
  msesysutils,RTLConsts,msestream,msesys{$ifdef UNIX},mselibc{$endif},
  typinfo,mseapplication;
 
+procedure defstoarguments(const defs: sysenvdefarty; 
+                 out arguments: argumentdefarty; out alias: stringararty);
+var
+ ar2: msestringarty;
+ int1,int2: integer;
+ d: psysenvdefty;
+begin
+ setlength(arguments,length(defs));
+ setlength(alias,length(defs));
+ for int1:= 0 to high(defs) do begin
+  d:= @defs[int1];
+  with arguments[int1] do begin
+   kind:= d^.kind;
+   name:= d^.name;
+   setlength(alias[int1],length(d^.anames));
+   for int2:= 0 to high(d^.anames) do begin
+    alias[int1][int2]:= d^.anames[int2];
+   end;
+   if alias[int1] <> nil then begin
+    setlength(alias[int1],high(alias[int1])+2); //end marker
+   end;
+   anames:= pointer(alias[int1]); 
+   flags:= d^.flags;
+   initvalue:= d^.initvalue;
+  end;
+ end;
+end;
+
+{
 procedure defstoarguments(const defs: msestring; 
                  out arguments: argumentdefarty; out alias: stringararty);
 var
@@ -215,6 +263,7 @@ begin
   end;
  end;
 end;
+}
 
 { tsysenvmanager }
 
@@ -315,14 +364,14 @@ begin
    foninit(self);
   end
   else begin
-   if fdefs <> '' then begin
+   if fdefs <> nil then begin
     defstoarguments(fdefs,ar1,ar2);
     init(ar1);
    end;
   end;
  end
  else begin
-  if fdefs <> '' then begin
+  if fdefs <> nil then begin
    try
     try
      defstoarguments(fdefs,ar1,ar2);
@@ -794,6 +843,9 @@ begin            //init
     end;
     {$endif};
    end;
+   if (arf_mandatory in flags) and not defined[int1] then begin
+     errorme(ern_mandatoryparameter,name);
+   end;
   end;
  end;
 end;
@@ -817,6 +869,67 @@ procedure tsysenvmanager.loaded;
 begin
  inherited;
  doinit;
+end;
+
+procedure readdefdata(const reader: treader; var data);
+begin
+ with sysenvdefty(data) do begin
+  ord(kind):= reader.readenum(typeinfo(kind));
+  name:= reader.readunicodestring;
+  readstringar(reader,anames);
+  longword(flags):= reader.readset(typeinfo(flags));
+  initvalue:= reader.readunicodestring;
+  help:= reader.readunicodestring;
+ end;
+end;
+
+procedure tsysenvmanager.readdefs(reader: treader);
+var
+ ar1: sysenvdefarty;
+begin
+ readrecordar(reader,ar1,typeinfo(ar1),@readdefdata);
+ defs:= ar1;
+end;
+
+procedure writedefdata(const writer: twriter; const data);
+begin
+ with sysenvdefty(data) do begin
+  writer.writeenum(ord(kind),typeinfo(kind));
+  writer.writeunicodestring(name);
+  writestringar(writer,anames);
+  writer.writeset(longword(flags),typeinfo(flags));
+  writer.writeunicodestring(initvalue);
+  writer.writeunicodestring(help);
+ end;
+end;
+
+procedure tsysenvmanager.writedefs(writer: twriter);
+begin
+ writerecordar(writer,fdefs,typeinfo(fdefs),@writedefdata);
+end;
+{
+procedure tsysenvmanager.readinitvalues(reader: treader);
+begin
+end;
+
+procedure tsysenvmanager.writeinitvalues(writer: twriter);
+begin
+end;
+
+procedure tsysenvmanager.readhelps(reader: treader);
+begin
+end;
+
+procedure tsysenvmanager.writehelps(writer: twriter);
+begin
+end;
+}
+procedure tsysenvmanager.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('defs',@readdefs,@writedefs,fdefs <> nil);
+// filer.defineproperty('default',@readinitvalues,@writeinitvalues,fdefs <> nil);
+// filer.defineproperty('help',@readhelps,@writehelps,fdefs <> nil);
 end;
 
 function tsysenvmanager.getintegervalue1(index: integer): integer;
@@ -898,7 +1011,7 @@ begin
  end;
 end;
 
-procedure tsysenvmanager.setdefs(const avalue: msestring);
+procedure tsysenvmanager.setdefs(const avalue: sysenvdefarty);
 
 begin
  fdefs:= avalue;

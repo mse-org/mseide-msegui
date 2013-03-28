@@ -2696,38 +2696,6 @@ procedure tcustomsqlstatement.savepointevent(const sender: tmdbtransaction;
 begin
  //dummy
 end;
-{
-procedure tcustomsqlstatement.readoptionsold(areader: treader);
-begin
- if self is tsqlresult then begin
-  if areader.readset(typeinfo(sqlresultoptionty)) <> 0 then begin
-   options:= [sso_utf8];
-  end
-  else begin
-   options:= sqlstatementoptionsty(areader.readset(
-                               typeinfo(sqlstatementoptionty)));
-  end;
- end;
-end;
-
-procedure tcustomsqlstatement.readoptions(areader: treader);
-begin
- options:= sqlstatementoptionsty(areader.readset(
-                               typeinfo(sqlstatementoptionty)));
-end;
-
-procedure tcustomsqlstatement.writeoptions(awriter: twriter);
-begin
- awriter.writeset(integer(options),typeinfo(sqlstatementoptionty));
-end;
-
-procedure tcustomsqlstatement.defineproperties(afiler: tfiler);
-begin
- inherited;
- afiler.defineproperty('options',@readoptionsold,nil,false);
- afiler.defineproperty('optionsnew',@readoptions,@writeoptions,foptions <> []);
-end;
-}
 
 { tmsesqlscript }
 

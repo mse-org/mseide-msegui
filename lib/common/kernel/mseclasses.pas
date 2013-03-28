@@ -736,6 +736,9 @@ type
                    enums: array of setsplitpairty;
                   end;
 
+ writerecordprocty = procedure(const writer: twriter; const data);
+ readrecordprocty = procedure(const reader: treader; var data);
+
 function ownscomponent(const owner: tcomponent; const child: tcomponent): boolean;
 function ownernamepath(const acomponent: tcomponent): string; 
                      //namepath from root to acomponent separated by '.'
@@ -869,8 +872,15 @@ function checkcanevent(const acomponent: tcomponent;
 function checkcanevent(const event: tmethod): boolean;
                            {$ifdef FPC}inline;{$endif} overload;
 
-procedure readstringar(const reader: treader; out ar: stringarty);
-procedure writestringar(const writer: twriter; const ar: stringarty);
+procedure readstringar(const reader: treader; out ar: stringarty); overload;
+procedure readstringar(const reader: treader; out ar: msestringarty); overload;
+procedure writestringar(const writer: twriter; const ar: stringarty); overload;
+procedure writestringar(const writer: twriter; const ar: msestringarty); overload;
+procedure readrecordar(const reader: treader; out ar; //array of type
+          const typeinfo: pdynarraytypeinfo; const readproc: readrecordprocty);
+procedure writerecordar(const writer: twriter; const ar; //array of type
+            const typeinfo: pdynarraytypeinfo; const writeproc: writerecordprocty);
+
 function valuescaletorange(const reader: treader): real;
 
 function swapmethodtable(const instance: tobject; const newtable: pointer): pointer;
@@ -1457,6 +1467,17 @@ begin
  writer.writelistend;
 end;
 
+procedure writestringar(const writer: twriter; const ar: msestringarty);
+var
+ int1: integer;
+begin
+ writer.writelistbegin;
+ for int1:= 0 to high(ar) do begin
+  writer.writeunicodestring(ar[int1]);
+ end;
+ writer.writelistend;
+end;
+
 procedure readstringar(const reader: treader; out ar: stringarty);
 var
  int1: integer;
@@ -1469,6 +1490,51 @@ begin
  end;
  reader.readlistend;
  setlength(ar,int1);
+end;
+
+procedure readstringar(const reader: treader; out ar: msestringarty);
+var
+ int1: integer;
+begin
+ int1:= 0;
+ ar:= nil;
+ reader.readlistbegin;
+ while not reader.endoflist do begin
+  additem(ar,reader.readunicodestring,int1);
+ end;
+ reader.readlistend;
+ setlength(ar,int1);
+end;
+
+procedure readrecordar(const reader: treader; out ar; 
+     const typeinfo: pdynarraytypeinfo; const readproc: readrecordprocty);
+var
+ int1: integer;
+begin
+ int1:= 0;
+ reader.readlistbegin;
+ while not reader.endoflist do begin
+  reader.readlistbegin;
+  readproc(reader,additempo(ar,typeinfo,int1)^);
+  reader.readlistend;
+ end;
+ reader.readlistend;
+ dynarraysetlength(pointer(ar),typeinfo,1,@int1);
+end;
+
+procedure writerecordar(const writer: twriter; const ar;
+       const typeinfo: pdynarraytypeinfo; const writeproc: writerecordprocty);
+var
+ int1,int2: integer;
+begin
+ writer.writelistbegin;
+ int2:= dynarrayelesize(typeinfo);
+ for int1:= 0 to high(pointerarty(ar)) do begin
+  writer.writelistbegin;
+  writeproc(writer,(pointer(ar)+int2*int1)^);
+  writer.writelistend;
+ end;
+ writer.writelistend;
 end;
 
 function valuescaletorange(const reader: treader): real;

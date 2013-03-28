@@ -508,7 +508,8 @@ type
     function ReadIdent: string;
     function ReadInteger: Longint;
     function ReadInt64: Int64;
-    function ReadSet(EnumType: Pointer): Integer;
+    function readset(settype: ptypeinfo): longword;
+    function readenum(const enumtype: ptypeinfo): longword;
     procedure ReadListBegin;
     procedure ReadListEnd;
     function ReadRootComponent(ARoot: tcomponent): tcomponent;
@@ -516,6 +517,7 @@ type
     function ReadString: string;
     function ReadWideString: WideString;
     function ReadUnicodeString: UnicodeString;
+    
     function ReadValue: TValueType;
     procedure CopyValue(Writer: twriter);
     property Driver: TAbstractObjectReader read FDriver;
@@ -671,7 +673,8 @@ type
     procedure WriteIdent(const Ident: string);
     procedure WriteInteger(Value: Longint); overload;
     procedure WriteInteger(Value: Int64); overload;
-    procedure WriteSet(Value: LongInt; SetType: Pointer);
+    procedure writeset(value: longword; settype: ptypeinfo);
+    procedure writeenum(value: longint; enumtype: ptypeinfo);
     procedure WriteListBegin;
     procedure WriteListEnd;
     procedure WriteRootComponent(ARoot: tcomponent);
@@ -6057,15 +6060,16 @@ begin
     Result := ReadInteger;
 end;
 
-function TReader.ReadSet(EnumType: Pointer): Integer; 
+function treader.readset(settype: ptypeinfo): longword; 
 begin
-  if FDriver.NextValue = vaSet then
-    begin
-      FDriver.ReadValue;
-      Result := FDriver.ReadSet(enumtype);
-    end 
-  else
-    Result := ReadInteger;
+ if fdriver.nextvalue = vaset then begin
+  fdriver.readvalue;
+  result:= fdriver.readset(
+                 gettypedata(settype)^.comptype{$ifndef FPC}^{$endif});
+ end 
+ else begin
+  result:= readinteger;
+ end;
 end;
 
 procedure TReader.ReadListBegin;
@@ -6707,6 +6711,14 @@ begin
     raise EClassNotFound.CreateFmt(SClassNotFound, [AClassName]);
 end;
 
+function treader.readenum(const enumtype: ptypeinfo): longword;
+begin
+ result:= GetEnumValue(enumtype, ReadIdent);
+ if integer(result) = -1 then begin
+  raise EReadError.Create(SInvalidPropertyValue);
+ end;
+end;
+
 {****************************************************************************}
 {*                             TWriter                                      *}
 {****************************************************************************}
@@ -7036,10 +7048,17 @@ begin
   Driver.WriteInteger(Value);
 end;
 
-procedure TWriter.WriteSet(Value: LongInt; SetType: Pointer); 
+procedure twriter.writeset(value: longword; settype: ptypeinfo); 
 
 begin
-  Driver.WriteSet(Value,SetType);
+ driver.writeset(value,
+                 gettypedata(settype)^.comptype{$ifndef FPC}^{$endif});
+end;
+
+procedure twriter.writeenum(value: longint; enumtype: ptypeinfo); 
+
+begin
+ driver.writeident(getenumname(enumtype,value));
 end;
 
 procedure TWriter.WriteVariant(const VarValue: Variant);

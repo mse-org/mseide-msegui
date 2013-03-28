@@ -47,6 +47,7 @@ procedure addpointeritem(var dest: pointerarty; const value: pointer;
 procedure additem(var dest: winidarty; const value: winidty;
                              var count: integer; step: integer = 32); overload;
 
+function dynarrayelesize(const typinfo: pdynarraytypeinfo): sizeint; inline;
 function incrementarraylength(var value: pointer; typeinfo: pdynarraytypeinfo;
                              increment: integer = 1): sizeint; overload;
   //returns new length
@@ -54,6 +55,11 @@ function additem(var value; const typeinfo: pdynarraytypeinfo;
                                   //typeinfo of dynarray
                 var count: integer; step: integer = 32): integer; overload;
   //value = array of type, returns index of new item
+function additempo(var value; const typeinfo: pdynarraytypeinfo; 
+                                  //typeinfo of dynarray
+                var count: integer; step: integer = 32): pointer; overload;
+               //returns adress of new item
+
 procedure deleteitem(var value; const typeinfo: pdynarraytypeinfo;
                           const aindex: integer); overload;
   //value = array of type which needs no finalize
@@ -334,7 +340,7 @@ begin
  dynarraysetlength(value,typeinfo,1,@result);
 end;
 
-function dynarrayelesize(const typinfo: pdynarraytypeinfo): sizeint;
+function dynarrayelesize(const typinfo: pdynarraytypeinfo): sizeint; inline;
 var
  ti: pdynarraytypeinfo;
 begin
@@ -367,6 +373,21 @@ begin
 //  incrementarraylength(pointer(value),typeinfo,count-int1+step);
  end;
  result:= count;
+ inc(count);
+end;
+
+function additempo(var value; const typeinfo: pdynarraytypeinfo; 
+                                  //typeinfo of dynarray
+                var count: integer; step: integer = 32): pointer; overload;
+               //returns adress of new item
+var
+ int1: integer;
+begin
+ int1:= high(pointerarty(value)) + 1;
+ if int1 <= count then begin
+  incrementarraylength(pointer(value),typeinfo,2*count+step);
+ end;
+ result:= pointer(value) + count*dynarrayelesize(typeinfo);
  inc(count);
 end;
 
