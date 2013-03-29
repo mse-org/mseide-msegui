@@ -38,8 +38,11 @@ uses
 begin
  registerfontalias('mseide_source',gui_getdefaultfontnames[stf_courier],
                     fam_fixnooverwrite,16);
- application.createdatamodule(tstringconstsmo,s);
  application.createdatamodule(tguitemplatesmo,guitemplatesmo);
+ if application.terminated then begin
+  exit;
+ end;
+ application.createdatamodule(tstringconstsmo,s);
  application.createdatamodule(tactionsmo,actionsmo);
  application.createform(tsourcefo, sourcefo);
  application.createform(tdebuggerfo,debuggerfo);

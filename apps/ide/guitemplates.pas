@@ -6,12 +6,13 @@ uses
  msesysenv,msemacros;
 
 type
- envvarty = (env_macrodef,env_vargroup,env_np,env_ns,
+ envvarty = (env_macrodef,env_vargroup,env_np,env_ns,env_help,
              env_fpcdir,env_fpclibdir,env_msedir,env_mselibdir,env_syntaxdefdir,
              env_templatedir,env_compstoredir,env_compiler,env_debugger,
              env_exeext,env_target,env_targetosdir,
              env_filename);
 const
+{
  sysenvvalues: array[envvarty] of argumentdefty =
   ((kind: ak_pararg; name: '-macrodef'; anames: nil; flags: []; initvalue: ''),
    (kind: ak_pararg; name: '-macrogroup'; anames: nil; flags: []; initvalue: ''),
@@ -30,7 +31,7 @@ const
    (kind: ak_envvar; name: 'TARGET'; anames: nil; flags: []; initvalue: ''),
    (kind: ak_envvar; name: 'TARGETOSDIR'; anames: nil; flags: []; initvalue: ''),
    (kind: ak_arg; name: ''; anames: nil; flags: []; initvalue: ''));
-
+}
  firstenvvarmacro = env_fpcdir;   
  lastenvvarmacro = env_target;   
  
@@ -44,7 +45,7 @@ type
    fadecontainer: tfacecomp;
    nullface: tfacecomp;
    sysenv: tsysenvmanager;
-   procedure createexe(const sender: TObject);
+   procedure loadedexe(const sender: TObject);
  end;
  
 function getcommandlinemacros: macroinfoarty;
@@ -102,9 +103,9 @@ begin
 end;
 *)
 
-procedure tguitemplatesmo.createexe(const sender: TObject);
+procedure tguitemplatesmo.loadedexe(const sender: TObject);
 begin
- sysenv.init(sysenvvalues);
+// sysenv.init(sysenvvalues);
  skin.active:= not sysenv.defined[ord(env_ns)];
 end;
 

@@ -4,14 +4,8 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
   bounds_y = 266
   bounds_cx = 861
   bounds_cy = 229
-  container.frame.zoomwidthstep = 1
-  container.frame.zoomheightstep = 1
-  container.frame.sbhorz.stepctrlfact = 0
   container.frame.sbhorz.pagesize = 0.95223880597015
-  container.frame.sbhorz.wheelsensitivity = 1
-  container.frame.sbvert.stepctrlfact = 0
   container.frame.sbvert.pagesize = 0.95964125560538
-  container.frame.sbvert.wheelsensitivity = 1
   container.bounds = (
     0
     0
@@ -71,10 +65,6 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
     end
   end
   object grid: twidgetgrid
-    frame.sbvert.stepctrlfact = 0
-    frame.sbvert.wheelsensitivity = 1
-    frame.sbhorz.stepctrlfact = 0
-    frame.sbhorz.wheelsensitivity = 1
     taborder = 2
     bounds_x = 0
     bounds_y = 0
@@ -291,6 +281,8 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
       bounds_cx = 117
       bounds_cy = 16
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_hintclippedtext, oe_savestate, oe_checkvaluepaststatread]
+      textflags = [tf_noselect]
+      textflagsactive = []
       reffontheight = 14
     end
     object mandatory: tbooleanedit
@@ -399,6 +391,8 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
       bounds_cx = 121
       bounds_cy = 16
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_hintclippedtext, oe_savestate, oe_checkvaluepaststatread]
+      textflags = [tf_noselect]
+      textflagsactive = []
       reffontheight = 14
     end
     object argumented: tstringedit
@@ -410,7 +404,7 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
       bounds_y = 0
       bounds_cx = 72
       bounds_cy = 16
-      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_savestate, oe_checkvaluepaststatread]
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_hintclippedtext, oe_savestate, oe_checkvaluepaststatread]
       reffontheight = 14
     end
     object helped: tmemodialogedit
@@ -427,7 +421,9 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
       bounds_y = 0
       bounds_cx = 102
       bounds_cy = 16
-      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_savestate, oe_checkvaluepaststatread]
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_hintclippedtext, oe_savestate, oe_checkvaluepaststatread]
+      textflags = [tf_noselect]
+      textflagsactive = []
       reffontheight = 14
     end
     object beforeed: tmemodialogedit
@@ -445,6 +441,8 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
       bounds_cx = 73
       bounds_cy = 16
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_hintclippedtext, oe_savestate, oe_checkvaluepaststatread]
+      textflags = [tf_noselect]
+      textflagsactive = []
       reffontheight = 14
     end
     object aftered: tmemodialogedit
@@ -462,6 +460,8 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
       bounds_cx = 73
       bounds_cy = 16
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_hintclippedtext, oe_savestate, oe_checkvaluepaststatread]
+      textflags = [tf_noselect]
+      textflagsactive = []
       reffontheight = 14
     end
   end

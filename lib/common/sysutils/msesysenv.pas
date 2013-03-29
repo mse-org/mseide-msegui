@@ -63,7 +63,7 @@ type
 
  argumentflagsty = set of argumentflagty;
 
- sysenvoptionty = (seo_haltonerror,seo_exceptiononerror,seo_exitoninfo,seo_noerrormess,
+ sysenvoptionty = (seo_terminateonerror,seo_haltonerror,seo_exceptiononerror,seo_exitoninfo,seo_noerrormess,
                    seo_tooutput, //info -> outputpipe
                    seo_toerror   //errormeldung -> errorpipe
                    );
@@ -162,6 +162,7 @@ type
 //   procedure writeinitvalues(writer: twriter);
 //   procedure readhelps(reader: treader);
 //   procedure writehelps(writer: twriter);
+   procedure setoptions(const avalue: sysenvoptionsty);
   protected
    procedure loaded; override;
    procedure defineproperties(filer: tfiler); override;
@@ -200,7 +201,7 @@ type
                  //bringt letztes filevorkommen
    property defs: sysenvdefarty read fdefs write setdefs;
   published
-   property options: sysenvoptionsty read foptions write foptions 
+   property options: sysenvoptionsty read foptions write setoptions 
                                          default defaultsysenvmanageroptions;
    property errorcode: integer read ferrorcode write ferrorcode 
                                                    default defaulterrorcode;
@@ -222,7 +223,7 @@ procedure defstoarguments(const defs: sysenvdefarty;
 implementation
 uses
  msesysutils,RTLConsts,msestream,msesys{$ifdef UNIX},mselibc{$endif},
- typinfo,mseapplication;
+ typinfo,mseapplication,msebits;
 
 procedure defstoarguments(const defs: sysenvdefarty; 
                  out arguments: argumentdefarty; out alias: stringararty);
@@ -426,11 +427,14 @@ begin
 //    dispfehler(str1,'Parameter Error'); //!!!!todo
    end;
   end;
-  if seo_exceptiononerror in foptions then begin
-   raise ehalt.Create('');
+  if seo_terminateonerror in foptions then begin
+   application.terminated:= true;
   end;
   if seo_haltonerror in foptions then begin
    halt(ferrorcode);
+  end;
+  if seo_exceptiononerror in foptions then begin
+   raise ehalt.Create('');
   end;
  end;
 end;
@@ -532,7 +536,7 @@ procedure tsysenvmanager.printhelp;
      mstr1:= mstr1+lineend+charstring(msechar(' '),29)+ar1[0];
     end;
     for int2:= 1 to high(ar1) do begin
-     mstr1:= mstr1+lineend+charstring(msechar(' '),29);
+     mstr1:= mstr1+lineend+charstring(msechar(' '),29)+ar1[int2];
     end;
    end;
    if mstr1 <> '' then begin
@@ -1222,6 +1226,12 @@ begin
  if not (csloading in componentstate) then begin
   doinit;
  end;
+end;
+
+procedure tsysenvmanager.setoptions(const avalue: sysenvoptionsty);
+begin
+ foptions:= sysenvoptionsty(setsinglebit(longword(avalue),longword(foptions),
+        longword([seo_terminateonerror,seo_haltonerror,seo_exceptiononerror])));
 end;
 
 end.
