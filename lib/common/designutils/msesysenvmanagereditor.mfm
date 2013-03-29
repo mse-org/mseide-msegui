@@ -38,7 +38,7 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
     bounds_y = 200
     bounds_cx = 105
     bounds_cy = 21
-    anchors = [an_top, an_right]
+    anchors = [an_right, an_bottom]
     optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
     dist_top = 3
     optionslayout = [lao_placex]

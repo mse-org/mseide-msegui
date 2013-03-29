@@ -1,7 +1,6 @@
 object guitemplatesmo: tguitemplatesmo
   bounds_cx = 483
   bounds_cy = 132
-  oncreate = createexe
   left = 99
   top = 135
   moduleclassname = 'tmsedatamodule'
@@ -110,5 +109,194 @@ object guitemplatesmo: tguitemplatesmo
   object sysenv: tsysenvmanager
     left = 24
     top = 96
+    defs = (
+      (
+        ak_pararg
+        '-macrodef'
+        (        )
+        []
+        ''
+        '<name>,<value>{,<name>,<value>}'
+        'Macro definition, will be overridden by ''Project''-''Options''-''Macros''.'#10' Example:'#10' --macrodef=MAC1,abc,MAC2,def'
+        ''
+        ''
+      )
+      (
+        ak_pararg
+        '-macrogroup'
+        (        )
+        []
+        ''
+        '<n>'
+        'Use ''Project''-''Options''-''Macros''-''Active group'' number <n>,'#10'<n> = 1..6.'
+        ''
+        ''
+      )
+      (
+        ak_par
+        'np'
+        (        )
+        []
+        ''
+        ''
+        'Do not load a project.'
+        ''
+        ''
+      )
+      (
+        ak_par
+        'ns'
+        (        )
+        []
+        ''
+        ''
+        'Do not use a skin, no fades.'
+        ''
+        ''
+      )
+      (
+        ak_envvar
+        'FPCDIR'
+        (        )
+        []
+        ''
+        ''
+        ''
+        ''
+        ''
+      )
+      (
+        ak_envvar
+        'FPCLIBDIR'
+        (        )
+        []
+        ''
+        ''
+        ''
+        ''
+        ''
+      )
+      (
+        ak_envvar
+        'MSEDIR'
+        (        )
+        []
+        ''
+        ''
+        ''
+        ''
+        ''
+      )
+      (
+        ak_envvar
+        'MSELIBDIR'
+        (        )
+        []
+        ''
+        ''
+        ''
+        ''
+        ''
+      )
+      (
+        ak_envvar
+        'SYNTAXDEFDIR'
+        (        )
+        []
+        ''
+        ''
+        ''
+        ''
+        ''
+      )
+      (
+        ak_envvar
+        'TEMPLATEDIR'
+        (        )
+        []
+        ''
+        ''
+        ''
+        ''
+        ''
+      )
+      (
+        ak_envvar
+        'COMPSTOREDIR'
+        (        )
+        []
+        ''
+        ''
+        ''
+        ''
+        ''
+      )
+      (
+        ak_envvar
+        'COMPILER'
+        (        )
+        []
+        ''
+        ''
+        ''
+        ''
+        ''
+      )
+      (
+        ak_envvar
+        'DEBUGGER'
+        (        )
+        []
+        ''
+        ''
+        ''
+        ''
+        ''
+      )
+      (
+        ak_envvar
+        'EXEEXT'
+        (        )
+        []
+        ''
+        ''
+        ''
+        ''
+        ''
+      )
+      (
+        ak_envvar
+        'TARGET'
+        (        )
+        []
+        ''
+        ''
+        ''
+        ''
+        ''
+      )
+      (
+        ak_envvar
+        'TARGETOSDIR'
+        (        )
+        []
+        ''
+        ''
+        ''
+        ''
+        ''
+      )
+      (
+        ak_arg
+        ''
+        (        )
+        []
+        ''
+        ''
+        ''
+        ''
+        ''
+      )
+    )
   end
 end
