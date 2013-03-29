@@ -133,6 +133,7 @@ type
    fhelp1: msestring;
    fhelp2: msestring;
    fonafterinit: sysenvmanagereventty;
+   fhelp3: msestring;
    procedure setoninit(const Value: sysenvmanagereventty);
    procedure doinit;
    procedure errorme(nr: sysenverrornrty; value: string);
@@ -207,6 +208,8 @@ type
    property help1: msestring read fhelp1 write fhelp1; 
                          //printed before param items
    property help2: msestring read fhelp2 write fhelp2;
+                         //printed between param and envvar items
+   property help3: msestring read fhelp3 write fhelp3;
                          //printed after param items
 
    property onvalueread: sysenvmanagervalueeventty read fonvalueread 
@@ -441,19 +444,21 @@ begin
 end;
 
 procedure tsysenvmanager.printhelp;
-var
- int1,int2: integer;
- mstr1: msestring;
- ar1: msestringarty;
-begin
- if fhelp1 <> '' then begin
-  writestderr(fhelp1,true);
- end;
- mstr1:= '';
- for int1:= 0 to high(fdefs) do begin
-  with fdefs[int1] do begin
+
+ procedure printitem(const aitem: sysenvdefty; const envvars: boolean);
+ var
+  int2: integer;
+  mstr1: msestring;
+  ar1: msestringarty;
+  a0,a1: msestring;
+ begin
+  mstr1:= '';
+  with aitem do begin
    if name <> '' then begin
     if (kind = ak_par) then begin
+     if envvars then begin
+      exit;
+     end;
      if name[1] <> '-' then begin
       mstr1:= '  -'+name;
      end
@@ -472,23 +477,34 @@ begin
     end
     else begin
      if (kind = ak_pararg) then begin
+      if envvars then begin
+       exit;
+      end;
+      if arf_argopt in flags then begin
+       a0:= '[';
+       a1:= ']';
+      end
+      else begin
+       a0:= '';
+       a1:= '';
+      end;
       if name[1] <> '-' then begin
        mstr1:= '  -'+name;
       end
       else begin
-       mstr1:= '      -'+name+'=';
+       mstr1:= '      -'+name+a0+'=';
       end;
-      mstr1:= mstr1+argument;
+      mstr1:= mstr1+argument+a1;
       if anames <> nil then begin
        mstr1:= mstr1+',';
        extendstring(mstr1,6);
        for int2:= 0 to high(anames) do begin
         if anames[int2] <> '' then begin
          if anames[int2][1] = '-' then begin
-          mstr1:= mstr1+'-'+anames[int2]+'='+argument;
+          mstr1:= mstr1+'-'+anames[int2]+a0+'='+argument+a1;
          end
          else begin
-          mstr1:= mstr1+'-'+anames[int2]+argument;
+          mstr1:= mstr1+'-'+anames[int2]+a0+argument+a1;
          end;
         end;
         mstr1:= mstr1+',';
@@ -497,14 +513,14 @@ begin
       end;
      end
      else begin
-      if (kind = ak_envvar) and (help <> '') then begin
+      if envvars and (kind = ak_envvar) and (help <> '') then begin
        mstr1:= '  '+name;
        for int2:= 0 to high(anames) do begin
         mstr1:= mstr1+','+anames[int2];
        end;
       end
       else begin
-       continue;
+       exit;
       end;
      end;
     end;
@@ -522,11 +538,30 @@ begin
      mstr1:= mstr1+lineend+charstring(msechar(' '),29);
     end;
    end;
+  end;
+  if mstr1 <> '' then begin
    writestderr(mstr1,true);
   end;
  end;
- if fhelp2 <> '' then begin
+ 
+var
+ int1: integer;
+ 
+begin
+ if fhelp1 <> '' then begin
   writestderr(fhelp1,true);
+ end;
+ for int1:= 0 to high(fdefs) do begin
+  printitem(fdefs[int1],false);
+ end;
+ if fhelp2 <> '' then begin
+  writestderr(fhelp2,true);
+ end;
+ for int1:= 0 to high(fdefs) do begin
+  printitem(fdefs[int1],true);
+ end;
+ if fhelp3 <> '' then begin
+  writestderr(fhelp2,true);
  end;
 end;
 

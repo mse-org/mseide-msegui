@@ -277,7 +277,7 @@ object objectinspectorfo: tobjectinspectorfo
     end
   end
   object compedit: trichbutton
-    optionswidget1 = [ow1_fontglyphheight, ow1_autoscale]
+    optionswidget1 = [ow1_fontglyphheight, ow1_autoscale, ow1_autowidth]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_disabledhint, ow_timedhint]
     optionsskin = [osk_noface]
     face.fade_pos.count = 2
@@ -294,9 +294,9 @@ object objectinspectorfo: tobjectinspectorfo
     face.localprops = [fal_fadirection]
     face.dummy = 0
     hint = 'Show component editor.'
-    bounds_x = 220
+    bounds_x = 215
     bounds_y = 2
-    bounds_cx = 22
+    bounds_cx = 27
     bounds_cy = 18
     anchors = [an_top, an_right]
     state = [as_disabled, as_localdisabled, as_localcaption, as_localhint, as_localonexecute]

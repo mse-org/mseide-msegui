@@ -146,83 +146,83 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
           end>
       end>
     datacols.count = 13
-    datacols.options = [co_proportional, co_savestate, co_mousescrollrow]
+    datacols.options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
     datacols.items = <    
       item[kinded]
         width = 75
-        options = [co_proportional, co_savestate, co_mousescrollrow]
+        options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
         widgetname = 'kinded'
         dataclass = tgridenumdatalist
       end    
       item[nameed]
         width = 70
-        options = [co_proportional, co_savestate, co_mousescrollrow]
+        options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
         widgetname = 'nameed'
         dataclass = tgridmsestringdatalist
       end    
       item[aliased]
         width = 149
-        options = [co_proportional, co_savestate, co_mousescrollrow]
+        options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
         widgetname = 'aliased'
         dataclass = tgridmsestringdatalist
       end    
       item[mandatory]
         width = 17
-        options = [co_drawfocus, co_fixwidth, co_savestate, co_mousescrollrow]
+        options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fixwidth, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
         widgetname = 'mandatory'
         dataclass = tgridintegerdatalist
       end    
       item[argopt]
         width = 17
-        options = [co_fixwidth, co_savestate, co_mousescrollrow]
+        options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fixwidth, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
         widgetname = 'argopt'
         dataclass = tgridintegerdatalist
       end    
       item[filenames]
         width = 17
-        options = [co_fixwidth, co_savestate, co_mousescrollrow]
+        options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fixwidth, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
         widgetname = 'filenames'
         dataclass = tgridintegerdatalist
       end    
       item[statoverride]
         width = 17
-        options = [co_fixwidth, co_savestate, co_mousescrollrow]
+        options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fixwidth, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
         widgetname = 'statoverride'
         dataclass = tgridintegerdatalist
       end    
       item[stataddval]
         width = 17
-        options = [co_fixwidth, co_savestate, co_mousescrollrow]
+        options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fixwidth, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
         widgetname = 'stataddval'
         dataclass = tgridintegerdatalist
       end    
       item[integer]
         width = 17
-        options = [co_drawfocus, co_fixwidth, co_savestate, co_mousescrollrow]
+        options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fixwidth, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
         widgetname = 'integer'
         dataclass = tgridintegerdatalist
       end    
       item[help]
         width = 17
-        options = [co_drawfocus, co_fixwidth, co_savestate, co_mousescrollrow]
+        options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fixwidth, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
         widgetname = 'help'
         dataclass = tgridintegerdatalist
       end    
       item[initvalueed]
         width = 121
-        options = [co_savestate, co_mousescrollrow]
+        options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
         widgetname = 'initvalueed'
         dataclass = tgridmsestringdatalist
       end    
       item[argumented]
         width = 73
-        options = [co_proportional, co_savestate, co_mousescrollrow]
+        options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
         widgetname = 'argumented'
         dataclass = tgridmsestringdatalist
       end    
       item[helped]
         width = 110
-        options = [co_fill, co_savestate, co_mousescrollrow]
+        options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
         widgetname = 'helped'
         dataclass = tgridmsestringdatalist
       end>

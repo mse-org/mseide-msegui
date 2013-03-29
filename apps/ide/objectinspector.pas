@@ -1625,7 +1625,7 @@ procedure tobjectinspectorfo.objectinspectorfoonloaded(const sender: tobject);
 begin
  grid.top:= compselector.bottom + 1;
  grid.height:= height-grid.top;
- compedit.width:= compedit.height+4;
+// compedit.width:= compedit.height+6;
 // compedit.left:= compedit.right - compedit.height-;
  compselector.right:= compedit.left - 1;
 // with values.frame.buttons[0] do begin
