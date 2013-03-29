@@ -208,6 +208,9 @@ type
   protected
    procedure finalizeitem(var item: pointer); override;
  end;
+
+ applicationoptionty = (apo_terminateonexception);
+ applicationoptionsty = set of applicationoptionty;
  
  tcustomapplication = class(tmsecomponent)
   private
@@ -227,6 +230,7 @@ type
    fonexception: exceptioneventty;
    finiting: integer;
    fhighrestimercount: integer;
+   foptions: applicationoptionsty;
    function dolock: boolean;
    function internalunlock(count: integer): boolean;
    function getterminated: boolean;
@@ -358,6 +362,7 @@ type
    property lockthread: threadty read flockthread;
    property lockcount: integer read flockcount;
    property exceptioncount: integer read fexceptioncount;
+   property options: applicationoptionsty read foptions write foptions;
    property onexception: exceptioneventty read fonexception write fonexception;
  end;
  applicationclassty = class of tcustomapplication;
@@ -1528,6 +1533,9 @@ begin
      end;
     finally
      dec(exceptionactive);
+     if apo_terminateonexception in foptions then begin
+      terminated:= true;
+     end;
     end;
    end
    else begin
