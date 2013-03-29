@@ -125,8 +125,8 @@ type
    procedure setindentstart(const avalue: integer);
    procedure setindentend(const avalue: integer);
    function getstepsize: real;
-   function isstepsizestored: Boolean;
-   function ispagesizestored: Boolean;
+//   function isstepsizestored: Boolean;
+//   function ispagesizestored: Boolean;
    procedure dodimchanged;
    function clickedareaisvalid: boolean;
    procedure setcolorpattern(const avalue: colorty);
@@ -161,6 +161,16 @@ type
   function getframemouse: boolean;
   function getframeactive: boolean;
   }
+   procedure readstepsize(reader: treader);
+   procedure writestepsize(writer: twriter);
+   procedure readstepctrlfact(reader: treader);
+   procedure writestepctrlfact(writer: twriter);
+   procedure readstepshiftfact(reader: treader);
+   procedure writestepshiftfact(writer: twriter);
+   procedure readpagesize(reader: treader);
+   procedure writepagesize(writer: twriter);
+   procedure readwheelsensitivity(reader: treader);
+   procedure writewheelsensitivity(writer: twriter);
   protected
    fintf: iscrollbar;
    foptions: scrollbaroptionsty;
@@ -174,6 +184,7 @@ type
    procedure dothumbevent(const aevent: scrolleventty);
    function dostepup(const ashiftstate: shiftstatesty): boolean;
    function dostepdown(const ashiftstate: shiftstatesty): boolean;
+   procedure defineproperties(filer: tfiler); override;
   public
    tag: integer;
    constructor create(intf: iscrollbar; org: originty = org_client;
@@ -215,16 +226,21 @@ type
     // 0 default behavior (width ident if horz and vert visible), < 0 no ident
    property options: scrollbaroptionsty read foptions write setoptions
                           default defaultscrollbaroptions;
-   property stepsize: real read getstepsize write fstepsize stored isstepsizestored;
+   property stepsize: real read getstepsize write fstepsize stored false;
                     //default = 0 -> pagesize /10
-   property stepctrlfact: real read fstepctrlfact write fstepctrlfact;
+   property stepctrlfact: real read fstepctrlfact 
+                                     write fstepctrlfact stored false;
                     //default = 0 -> no ctrl step
-   property stepshiftfact: real read fstepshiftfact write fstepshiftfact;
+   property stepshiftfact: real read fstepshiftfact 
+                                          write fstepshiftfact stored false;
                     //default = 0 -> no shift step
-   property pagesize: real read fpagesize write setpagesize stored ispagesizestored;
+   property pagesize: real read fpagesize write setpagesize stored false;
                     //default = defaultpagesize
-   property wheelsensitivity: real read fwheelsensitivity write fwheelsensitivity;
-   property buttonlength: integer read fbuttonlength write setbuttonlength default 0;
+   property wheelsensitivity: real read fwheelsensitivity
+                                     write fwheelsensitivity stored false;
+                    //default = 1
+   property buttonlength: integer read fbuttonlength 
+                                             write setbuttonlength default 0;
                      //0 -> proportional -1 -> square
    property buttonminlength: integer read fbuttonminlength
                  write setbuttonminlength default defaultbuttonminlength;
@@ -269,6 +285,7 @@ type
    property indentend;
    property stepsize;
    property stepctrlfact;
+   property stepshiftfact;
    property pagesize;
    property wheelsensitivity;
    property buttonlength;
@@ -294,6 +311,7 @@ type
    property indentend;
    property stepsize;
    property stepctrlfact;
+   property stepshiftfact;
    property pagesize;
    property wheelsensitivity;
    property buttonlength;
@@ -835,12 +853,12 @@ begin
   dodimchanged;
  end;
 end;
-
+{
 function tcustomscrollbar.ispagesizestored: Boolean;
 begin
  result:= fpagesize <> defaultpagesize;
 end;
-
+}
 function tcustomscrollbar.getstepsize: real;
 begin
  if fstepsize = 0 then begin
@@ -850,12 +868,12 @@ begin
   result:= fstepsize;
  end;
 end;
-
+{
 function tcustomscrollbar.isstepsizestored: Boolean;
 begin
  result:= fstepsize <> 0;
 end;
-
+}
 function tcustomscrollbar.dobuttoncommand: boolean;
 begin
  result:= true;
@@ -1513,6 +1531,81 @@ begin
                  (fframeendbutton2 <> nil) then begin
   invalidate;
  end;
+end;
+
+procedure tcustomscrollbar.readstepsize(reader: treader);
+begin
+ stepsize:= reader.readfloat;
+end;
+
+procedure tcustomscrollbar.writestepsize(writer: twriter);
+begin
+ writer.writefloat(stepsize);
+end;
+
+procedure tcustomscrollbar.readstepctrlfact(reader: treader);
+begin
+ stepctrlfact:= reader.readfloat;
+end;
+
+procedure tcustomscrollbar.writestepctrlfact(writer: twriter);
+begin
+ writer.writefloat(stepctrlfact);
+end;
+
+procedure tcustomscrollbar.readstepshiftfact(reader: treader);
+begin
+ stepshiftfact:= reader.readfloat;
+end;
+
+procedure tcustomscrollbar.writestepshiftfact(writer: twriter);
+begin
+ writer.writefloat(stepshiftfact);
+end;
+
+procedure tcustomscrollbar.readpagesize(reader: treader);
+begin
+ pagesize:= reader.readfloat;
+end;
+
+procedure tcustomscrollbar.writepagesize(writer: twriter);
+begin
+ writer.writefloat(pagesize);
+end;
+
+procedure tcustomscrollbar.readwheelsensitivity(reader: treader);
+begin
+ wheelsensitivity:= reader.readfloat;
+end;
+
+procedure tcustomscrollbar.writewheelsensitivity(writer: twriter);
+begin
+ writer.writefloat(wheelsensitivity);
+end;
+
+procedure tcustomscrollbar.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('stepsize',@readstepsize,@writestepsize,
+                      (filer.ancestor = nil) and (fstepsize <> 0) or
+   (filer.ancestor <> nil) and 
+      (tcustomscrollbar(filer.ancestor).fstepsize <> fstepsize));
+ filer.defineproperty('stepctrlfact',@readstepctrlfact,@writestepctrlfact,
+                      (filer.ancestor = nil) and (fstepctrlfact <> 0) or
+   (filer.ancestor <> nil) and 
+      (tcustomscrollbar(filer.ancestor).fstepctrlfact <> fstepctrlfact));
+ filer.defineproperty('stepshiftfact',@readstepshiftfact,@writestepshiftfact,
+                      (filer.ancestor = nil) and (fstepshiftfact <> 0) or
+   (filer.ancestor <> nil) and 
+      (tcustomscrollbar(filer.ancestor).fstepshiftfact <> fstepshiftfact));
+ filer.defineproperty('pagesize',@readpagesize,@writepagesize,
+                      (filer.ancestor = nil) and (fpagesize <> defaultpagesize) or
+   (filer.ancestor <> nil) and 
+      (tcustomscrollbar(filer.ancestor).fpagesize <> fpagesize));
+ filer.defineproperty('wheelsensitivity',@readwheelsensitivity,@writewheelsensitivity,
+                      (filer.ancestor = nil) and (fwheelsensitivity <> 1) or
+   (filer.ancestor <> nil) and 
+      (tcustomscrollbar(filer.ancestor).fwheelsensitivity <> fwheelsensitivity));
 end;
 
 { tcustomnomoveautoscrollbar }

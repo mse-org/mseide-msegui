@@ -2,7 +2,7 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
   visible = False
   bounds_x = 51
   bounds_y = 266
-  bounds_cx = 759
+  bounds_cx = 861
   bounds_cy = 229
   container.frame.zoomwidthstep = 1
   container.frame.zoomheightstep = 1
@@ -15,7 +15,7 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
   container.bounds = (
     0
     0
-    759
+    861
     229
   )
   options = [fo_freeonclose, fo_closeonesc, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savezorder, fo_savestate]
@@ -34,7 +34,7 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
   end
   object tlayouter2: tlayouter
     taborder = 1
-    bounds_x = 647
+    bounds_x = 749
     bounds_y = 200
     bounds_cx = 105
     bounds_cy = 21
@@ -78,7 +78,7 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
     taborder = 2
     bounds_x = 0
     bounds_y = 0
-    bounds_cx = 759
+    bounds_cx = 861
     bounds_cy = 194
     anchors = [an_top, an_bottom]
     optionsgrid = [og_colsizing, og_rowmoving, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_colchangeontabkey, og_wrapcol, og_autopopup, og_mousescrollcol]
@@ -92,7 +92,7 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
     fixrows.items = <    
       item
         height = 16
-        captions.count = 14
+        captions.count = 15
         captions.items = <        
           item
             caption = 'Kind'
@@ -141,27 +141,30 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
             caption = 'Help'
           end        
           item
-            caption = 'ED'
+            caption = 'Before'
             hint = 'arf_envdefined'
+          end        
+          item
+            caption = 'After'
           end>
       end>
-    datacols.count = 13
+    datacols.count = 15
     datacols.options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
     datacols.items = <    
       item[kinded]
-        width = 75
+        width = 72
         options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
         widgetname = 'kinded'
         dataclass = tgridenumdatalist
       end    
       item[nameed]
-        width = 70
+        width = 68
         options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
         widgetname = 'nameed'
         dataclass = tgridmsestringdatalist
       end    
       item[aliased]
-        width = 149
+        width = 117
         options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
         widgetname = 'aliased'
         dataclass = tgridmsestringdatalist
@@ -215,15 +218,27 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
         dataclass = tgridmsestringdatalist
       end    
       item[argumented]
-        width = 73
+        width = 72
         options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
         widgetname = 'argumented'
         dataclass = tgridmsestringdatalist
       end    
       item[helped]
-        width = 110
+        width = 102
         options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
         widgetname = 'helped'
+        dataclass = tgridmsestringdatalist
+      end    
+      item[beforeed]
+        width = 73
+        options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
+        widgetname = 'beforeed'
+        dataclass = tgridmsestringdatalist
+      end    
+      item[aftered]
+        width = 73
+        options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
+        widgetname = 'aftered'
         dataclass = tgridmsestringdatalist
       end>
     datarowheight = 16
@@ -239,7 +254,7 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
       visible = False
       bounds_x = 0
       bounds_y = 0
-      bounds_cx = 75
+      bounds_cx = 72
       bounds_cy = 16
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_hintclippedtext, oe_savestate, oe_checkvaluepaststatread]
       dropdown.cols.count = 1
@@ -254,9 +269,9 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
       optionsskin = [osk_framebuttononly]
       taborder = 2
       visible = False
-      bounds_x = 76
+      bounds_x = 73
       bounds_y = 0
-      bounds_cx = 70
+      bounds_cx = 68
       bounds_cy = 16
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_hintclippedtext, oe_savestate, oe_checkvaluepaststatread]
       reffontheight = 14
@@ -271,9 +286,9 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
       frame.button.imagenr = 17
       taborder = 3
       visible = False
-      bounds_x = 147
+      bounds_x = 142
       bounds_y = 0
-      bounds_cx = 149
+      bounds_cx = 117
       bounds_cy = 16
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_hintclippedtext, oe_savestate, oe_checkvaluepaststatread]
       reffontheight = 14
@@ -283,7 +298,7 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
       optionswidget1 = []
       optionsskin = [osk_framebuttononly]
       taborder = 4
-      bounds_x = 297
+      bounds_x = 260
       bounds_y = 0
       bounds_cx = 17
       bounds_cy = 16
@@ -296,7 +311,7 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
       optionswidget1 = []
       optionsskin = [osk_framebuttononly]
       taborder = 5
-      bounds_x = 315
+      bounds_x = 278
       bounds_y = 0
       bounds_cx = 17
       bounds_cy = 16
@@ -309,7 +324,7 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
       optionswidget1 = []
       optionsskin = [osk_framebuttononly]
       taborder = 6
-      bounds_x = 333
+      bounds_x = 296
       bounds_y = 0
       bounds_cx = 17
       bounds_cy = 16
@@ -322,7 +337,7 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
       optionswidget1 = []
       optionsskin = [osk_framebuttononly]
       taborder = 7
-      bounds_x = 351
+      bounds_x = 314
       bounds_y = 0
       bounds_cx = 17
       bounds_cy = 16
@@ -335,7 +350,7 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
       optionswidget1 = []
       optionsskin = [osk_framebuttononly]
       taborder = 8
-      bounds_x = 369
+      bounds_x = 332
       bounds_y = 0
       bounds_cx = 17
       bounds_cy = 16
@@ -348,7 +363,7 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
       optionswidget1 = []
       optionsskin = [osk_framebuttononly]
       taborder = 9
-      bounds_x = 387
+      bounds_x = 350
       bounds_y = 0
       bounds_cx = 17
       bounds_cy = 16
@@ -361,7 +376,7 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
       optionswidget1 = []
       optionsskin = [osk_framebuttononly]
       taborder = 10
-      bounds_x = 405
+      bounds_x = 368
       bounds_y = 0
       bounds_cx = 17
       bounds_cy = 16
@@ -379,7 +394,7 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
       frame.button.imagenr = 17
       taborder = 11
       visible = False
-      bounds_x = 423
+      bounds_x = 386
       bounds_y = 0
       bounds_cx = 121
       bounds_cy = 16
@@ -391,9 +406,9 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
       optionsskin = [osk_framebuttononly]
       taborder = 12
       visible = False
-      bounds_x = 545
+      bounds_x = 508
       bounds_y = 0
-      bounds_cx = 73
+      bounds_cx = 72
       bounds_cy = 16
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_savestate, oe_checkvaluepaststatread]
       reffontheight = 14
@@ -408,11 +423,45 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
       frame.button.imagenr = 17
       taborder = 13
       visible = False
-      bounds_x = 619
+      bounds_x = 581
       bounds_y = 0
-      bounds_cx = 110
+      bounds_cx = 102
       bounds_cy = 16
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_savestate, oe_checkvaluepaststatread]
+      reffontheight = 14
+    end
+    object beforeed: tmemodialogedit
+      optionswidget1 = [ow1_fontglyphheight]
+      optionsskin = [osk_framebuttononly]
+      frame.levelo = 0
+      frame.colorclient = -2147483645
+      frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
+      frame.button.color = -1879048187
+      frame.button.imagenr = 17
+      taborder = 14
+      visible = False
+      bounds_x = 684
+      bounds_y = 0
+      bounds_cx = 73
+      bounds_cy = 16
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_hintclippedtext, oe_savestate, oe_checkvaluepaststatread]
+      reffontheight = 14
+    end
+    object aftered: tmemodialogedit
+      optionswidget1 = [ow1_fontglyphheight]
+      optionsskin = [osk_framebuttononly]
+      frame.levelo = 0
+      frame.colorclient = -2147483645
+      frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
+      frame.button.color = -1879048187
+      frame.button.imagenr = 17
+      taborder = 15
+      visible = False
+      bounds_x = 758
+      bounds_y = 0
+      bounds_cx = 73
+      bounds_cy = 16
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_hintclippedtext, oe_savestate, oe_checkvaluepaststatread]
       reffontheight = 14
     end
   end

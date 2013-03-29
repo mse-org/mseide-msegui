@@ -363,6 +363,10 @@ type
    procedure setscrollpos_x(const avalue: integer);
    function getscrollpos_y: integer;
    procedure setscrollpos_y(const avalue: integer);
+   procedure readzoomwidthstep(reader: treader);
+   procedure writezoomwidthstep(writer: twriter);
+   procedure readzoomheightstep(reader: treader);
+   procedure writezoomheightstep(writer: twriter);
   protected
    fowner: twidget;
    procedure scrollpostoclientpos(var aclientrect: rectty); virtual;
@@ -379,7 +383,8 @@ type
    procedure setscrollpos(apos: pointty);
    procedure updatemousestate(const sender: twidget;
                                const info: mouseeventinfoty); override;
-  //iscrollbar
+   procedure defineproperties(filer: tfiler); override;
+    //iscrollbar
    function translatecolor(const acolor: colorty): colorty;
    procedure invalidaterect(const rect: rectty; const org: originty;
                               const noclip: boolean = false);
@@ -401,9 +406,11 @@ type
    property zoom: complexty read fzoom write setzoom; //default 1,1
    property zoomwidth: real read fzoom.re write setzoomwidth;   //default 1
    property zoomheight: real read fzoom.im write setzoomheight; //default 1
-   property zoomwidthstep: real read fzoomwidthstep write fzoomwidthstep;
+   property zoomwidthstep: real read fzoomwidthstep 
+                      write fzoomwidthstep stored false;
                                  //default 1
-   property zoomheightstep: real read fzoomheightstep write fzoomheightstep;
+   property zoomheightstep: real read fzoomheightstep 
+                      write fzoomheightstep stored false;
                                  //default 1
    property clientsize: sizety read fclientsize write setclientsize;
    property clientwidth: integer read fclientsize.cx 
@@ -4516,6 +4523,39 @@ begin
    end;
   end;
  end;
+end;
+
+procedure tcustomscrollboxframe.readzoomwidthstep(reader: treader);
+begin
+ zoomwidthstep:= reader.readfloat;
+end;
+
+procedure tcustomscrollboxframe.writezoomwidthstep(writer: twriter);
+begin
+ writer.writefloat(zoomwidthstep);
+end;
+
+procedure tcustomscrollboxframe.readzoomheightstep(reader: treader);
+begin
+ zoomheightstep:= reader.readfloat;
+end;
+
+procedure tcustomscrollboxframe.writezoomheightstep(writer: twriter);
+begin
+ writer.writefloat(zoomheightstep);
+end;
+
+procedure tcustomscrollboxframe.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('zoomwidthstep',@readzoomwidthstep,@writezoomwidthstep,
+                      (filer.ancestor = nil) and (fzoomwidthstep <> 1) or
+   (filer.ancestor <> nil) and 
+      (tcustomscrollboxframe(filer.ancestor).fzoomwidthstep <> fzoomwidthstep));
+ filer.defineproperty('zoomheightstep',@readzoomheightstep,@writezoomheightstep,
+                      (filer.ancestor = nil) and (fzoomheightstep <> 1) or
+ (filer.ancestor <> nil) and 
+    (tcustomscrollboxframe(filer.ancestor).fzoomheightstep <> fzoomheightstep));
 end;
 
 { tcustomautoscrollframe }

@@ -40,6 +40,8 @@ type
    helped: tmemodialogedit;
    help: tbooleanedit;
    argumented: tstringedit;
+   beforeed: tmemodialogedit;
+   aftered: tmemodialogedit;
    procedure kindedinit(const sender: tenumtypeedit);
  end;
 
@@ -66,6 +68,8 @@ begin
     initvalueed[int1]:= initvalue;
     argumented[int1]:= argument;
     helped[int1]:= help;
+    beforeed[int1]:= before;
+    aftered[int1]:= after;
    end;
   end;
   result:= show(ml_application);
@@ -81,6 +85,8 @@ begin
      initvalue:= initvalueed[int1];
      argument:= argumented[int1];
      help:= helped[int1];
+     before:= beforeed[int1];
+     after:= aftered[int1];
     end;
    end;
    asysenvmanager.defs:= ar1;

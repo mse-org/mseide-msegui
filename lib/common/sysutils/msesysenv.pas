@@ -85,8 +85,8 @@ type
                      //letzter string muss leer sein ('abc','def','');
   flags: argumentflagsty;
   initvalue: string;
-  argument: string;
-  help: string;
+//  argument: string;
+//  help: string;
  end;
 
  pargumentdefty = ^argumentdefty;
@@ -115,7 +115,9 @@ type
   flags: argumentflagsty;
   initvalue: msestring;  
   argument: msestring;
+  before: msestring;
   help: msestring;
+  after: msestring;
  end;
  psysenvdefty = ^sysenvdefty;
  sysenvdefarty = array of sysenvdefty;
@@ -130,10 +132,9 @@ type
    fstatvarname: msestring;
    fonvalueread: sysenvmanagervalueeventty;
    fdefs: sysenvdefarty;
-   fhelp1: msestring;
-   fhelp2: msestring;
+   fhelpheader: msestring;
+   fhelpfooter: msestring;
    fonafterinit: sysenvmanagereventty;
-   fhelp3: msestring;
    procedure setoninit(const Value: sysenvmanagereventty);
    procedure doinit;
    procedure errorme(nr: sysenverrornrty; value: string);
@@ -205,12 +206,8 @@ type
                                                    default defaulterrorcode;
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read getstatvarname write fstatvarname;
-   property help1: msestring read fhelp1 write fhelp1; 
-                         //printed before param items
-   property help2: msestring read fhelp2 write fhelp2;
-                         //printed between param and envvar items
-   property help3: msestring read fhelp3 write fhelp3;
-                         //printed after param items
+   property helpheader: msestring read fhelpheader write fhelpheader; 
+   property helpfooter: msestring read fhelpfooter write fhelpfooter;
 
    property onvalueread: sysenvmanagervalueeventty read fonvalueread 
                                                          write fonvalueread;
@@ -250,8 +247,8 @@ begin
    anames:= pointer(alias[int1]); 
    flags:= d^.flags;
    initvalue:= d^.initvalue;
-   argument:= d^.argument;
-   help:= d^.help;
+//   argument:= d^.argument;
+//   help:= d^.help;
   end;
  end;
 end;
@@ -445,7 +442,7 @@ end;
 
 procedure tsysenvmanager.printhelp;
 
- procedure printitem(const aitem: sysenvdefty; const envvars: boolean);
+ procedure printitem(const aitem: sysenvdefty{; const envvars: boolean});
  var
   int2: integer;
   mstr1: msestring;
@@ -456,9 +453,9 @@ procedure tsysenvmanager.printhelp;
   with aitem do begin
    if name <> '' then begin
     if (kind = ak_par) then begin
-     if envvars then begin
-      exit;
-     end;
+//     if envvars then begin
+//      exit;
+//     end;
      if name[1] <> '-' then begin
       mstr1:= '  -'+name;
      end
@@ -477,9 +474,9 @@ procedure tsysenvmanager.printhelp;
     end
     else begin
      if (kind = ak_pararg) then begin
-      if envvars then begin
-       exit;
-      end;
+//      if envvars then begin
+//       exit;
+//      end;
       if arf_argopt in flags then begin
        a0:= '[';
        a1:= ']';
@@ -513,7 +510,7 @@ procedure tsysenvmanager.printhelp;
       end;
      end
      else begin
-      if envvars and (kind = ak_envvar) and (help <> '') then begin
+      if {envvars and }(kind = ak_envvar) and (help <> '') then begin
        mstr1:= '  '+name;
        for int2:= 0 to high(anames) do begin
         mstr1:= mstr1+','+anames[int2];
@@ -538,9 +535,15 @@ procedure tsysenvmanager.printhelp;
      mstr1:= mstr1+lineend+charstring(msechar(' '),29);
     end;
    end;
-  end;
-  if mstr1 <> '' then begin
-   writestderr(mstr1,true);
+   if mstr1 <> '' then begin
+    if before <> '' then begin
+     writestderr(before,true);
+    end;
+    writestderr(mstr1,true);
+    if after <> '' then begin
+     writestderr(after,true);
+    end;
+   end;
   end;
  end;
  
@@ -548,20 +551,19 @@ var
  int1: integer;
  
 begin
- if fhelp1 <> '' then begin
-  writestderr(fhelp1,true);
+ if fhelpheader <> '' then begin
+  writestderr(fhelpheader,true);
  end;
  for int1:= 0 to high(fdefs) do begin
-  printitem(fdefs[int1],false);
+  printitem(fdefs[int1]{,false});
  end;
- if fhelp2 <> '' then begin
-  writestderr(fhelp2,true);
- end;
+{
  for int1:= 0 to high(fdefs) do begin
   printitem(fdefs[int1],true);
  end;
- if fhelp3 <> '' then begin
-  writestderr(fhelp2,true);
+}
+ if fhelpfooter <> '' then begin
+  writestderr(fhelpfooter,true);
  end;
 end;
 
@@ -1040,6 +1042,8 @@ begin
   initvalue:= reader.readunicodestring;
   argument:= reader.readunicodestring;
   help:= reader.readunicodestring;
+  before:= reader.readunicodestring;
+  after:= reader.readunicodestring;
  end;
 end;
 
@@ -1062,6 +1066,8 @@ begin
   writer.writeunicodestring(initvalue);
   writer.writeunicodestring(argument);
   writer.writeunicodestring(help);
+  writer.writeunicodestring(before);
+  writer.writeunicodestring(after);
  end;
 end;
 
