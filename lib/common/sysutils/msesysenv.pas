@@ -418,7 +418,7 @@ begin
     str1:= value;
    end
    else begin
-    str1:= errtexte[nr] + ': '''+value+'''.';
+    str1:= errtexte[nr] + ': '+value;
    end;
    if seo_toerror in foptions then begin
     writestderr(str1,true);
@@ -1009,7 +1009,7 @@ begin            //init
     {$endif};
    end;
    if (arf_mandatory in flags) and not defined[int1] then begin
-    errorme(ern_mandatoryparameter,name);
+    errorme(ern_mandatoryparameter,'-'+name);
    end;
   end;
  end;

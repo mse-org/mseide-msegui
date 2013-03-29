@@ -29,9 +29,9 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
   object tlayouter2: tlayouter
     taborder = 1
     bounds_x = 749
-    bounds_y = 201
+    bounds_y = 200
     bounds_cx = 105
-    bounds_cy = 20
+    bounds_cy = 21
     anchors = [an_right, an_bottom]
     optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
     dist_top = 3
@@ -43,12 +43,12 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
       bounds_x = 0
       bounds_y = 1
       bounds_cx = 50
-      bounds_cy = 19
+      bounds_cy = 20
       bounds_cxmin = 50
       state = [as_default, as_localdefault, as_localcaption]
       caption = '&OK'
       modalresult = mr_ok
-      reffontheight = 13
+      reffontheight = 14
     end
     object cancel: tbutton
       optionswidget1 = [ow1_fontglyphheight, ow1_autoscale, ow1_autowidth]
@@ -56,12 +56,12 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
       bounds_x = 55
       bounds_y = 1
       bounds_cx = 50
-      bounds_cy = 19
+      bounds_cy = 20
       bounds_cxmin = 50
       state = [as_localcaption]
       caption = '&Cancel'
       modalresult = mr_cancel
-      reffontheight = 13
+      reffontheight = 14
     end
   end
   object grid: twidgetgrid
@@ -81,7 +81,7 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
     fixrows.count = 1
     fixrows.items = <    
       item
-        height = 15
+        height = 16
         captions.count = 15
         captions.items = <        
           item
@@ -215,8 +215,7 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
       end    
       item[helped]
         width = 102
-        options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
-        widthmin = 60
+        options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
         widgetname = 'helped'
         dataclass = tgridmsestringdatalist
       end    
@@ -232,9 +231,9 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
         widgetname = 'aftered'
         dataclass = tgridmsestringdatalist
       end>
-    datarowheight = 15
+    datarowheight = 16
     statfile = statfile1
-    reffontheight = 13
+    reffontheight = 14
     object kinded: tenumtypeedit
       optionsskin = [osk_framebuttononly]
       frame.levelo = 0
@@ -246,14 +245,14 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
       bounds_x = 0
       bounds_y = 0
       bounds_cx = 72
-      bounds_cy = 15
+      bounds_cy = 16
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_hintclippedtext, oe_savestate, oe_checkvaluepaststatread]
       dropdown.cols.count = 1
       dropdown.cols.items = <      
         item
         end>
       oninit = kindedinit
-      reffontheight = 13
+      reffontheight = 14
     end
     object nameed: tstringedit
       optionswidget1 = [ow1_fontglyphheight]
@@ -263,9 +262,9 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
       bounds_x = 73
       bounds_y = 0
       bounds_cx = 68
-      bounds_cy = 15
+      bounds_cy = 16
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_hintclippedtext, oe_savestate, oe_checkvaluepaststatread]
-      reffontheight = 13
+      reffontheight = 14
     end
     object aliased: tmemodialogedit
       optionswidget1 = [ow1_fontglyphheight]
@@ -280,11 +279,11 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
       bounds_x = 142
       bounds_y = 0
       bounds_cx = 117
-      bounds_cy = 15
+      bounds_cy = 16
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_hintclippedtext, oe_savestate, oe_checkvaluepaststatread]
       textflags = [tf_noselect]
       textflagsactive = []
-      reffontheight = 13
+      reffontheight = 14
     end
     object mandatory: tbooleanedit
       Tag = 7
@@ -294,7 +293,7 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
       bounds_x = 260
       bounds_y = 0
       bounds_cx = 17
-      bounds_cy = 15
+      bounds_cy = 16
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_savestate, oe_checkvaluepaststatread]
       visible = False
       group = 1
@@ -307,7 +306,7 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
       bounds_x = 278
       bounds_y = 0
       bounds_cx = 17
-      bounds_cy = 15
+      bounds_cy = 16
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_savestate, oe_checkvaluepaststatread]
       visible = False
       group = 1
@@ -320,7 +319,7 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
       bounds_x = 296
       bounds_y = 0
       bounds_cx = 17
-      bounds_cy = 15
+      bounds_cy = 16
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_savestate, oe_checkvaluepaststatread]
       visible = False
       group = 1
@@ -333,7 +332,7 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
       bounds_x = 314
       bounds_y = 0
       bounds_cx = 17
-      bounds_cy = 15
+      bounds_cy = 16
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_savestate, oe_checkvaluepaststatread]
       visible = False
       group = 1
@@ -346,7 +345,7 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
       bounds_x = 332
       bounds_y = 0
       bounds_cx = 17
-      bounds_cy = 15
+      bounds_cy = 16
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_savestate, oe_checkvaluepaststatread]
       visible = False
       group = 1
@@ -359,7 +358,7 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
       bounds_x = 350
       bounds_y = 0
       bounds_cx = 17
-      bounds_cy = 15
+      bounds_cy = 16
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_savestate, oe_checkvaluepaststatread]
       visible = False
       group = 1
@@ -372,7 +371,7 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
       bounds_x = 368
       bounds_y = 0
       bounds_cx = 17
-      bounds_cy = 15
+      bounds_cy = 16
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_savestate, oe_checkvaluepaststatread]
       visible = False
       group = 1
@@ -390,11 +389,11 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
       bounds_x = 386
       bounds_y = 0
       bounds_cx = 121
-      bounds_cy = 15
+      bounds_cy = 16
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_hintclippedtext, oe_savestate, oe_checkvaluepaststatread]
       textflags = [tf_noselect]
       textflagsactive = []
-      reffontheight = 13
+      reffontheight = 14
     end
     object argumented: tstringedit
       optionswidget1 = [ow1_fontglyphheight]
@@ -404,9 +403,9 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
       bounds_x = 508
       bounds_y = 0
       bounds_cx = 72
-      bounds_cy = 15
+      bounds_cy = 16
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_hintclippedtext, oe_savestate, oe_checkvaluepaststatread]
-      reffontheight = 13
+      reffontheight = 14
     end
     object helped: tmemodialogedit
       optionswidget1 = [ow1_fontglyphheight]
@@ -421,11 +420,11 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
       bounds_x = 581
       bounds_y = 0
       bounds_cx = 102
-      bounds_cy = 15
+      bounds_cy = 16
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_hintclippedtext, oe_savestate, oe_checkvaluepaststatread]
       textflags = [tf_noselect]
       textflagsactive = []
-      reffontheight = 13
+      reffontheight = 14
     end
     object beforeed: tmemodialogedit
       optionswidget1 = [ow1_fontglyphheight]
@@ -440,11 +439,11 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
       bounds_x = 684
       bounds_y = 0
       bounds_cx = 73
-      bounds_cy = 15
+      bounds_cy = 16
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_hintclippedtext, oe_savestate, oe_checkvaluepaststatread]
       textflags = [tf_noselect]
       textflagsactive = []
-      reffontheight = 13
+      reffontheight = 14
     end
     object aftered: tmemodialogedit
       optionswidget1 = [ow1_fontglyphheight]
@@ -459,11 +458,11 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
       bounds_x = 758
       bounds_y = 0
       bounds_cx = 73
-      bounds_cy = 15
+      bounds_cy = 16
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_hintclippedtext, oe_savestate, oe_checkvaluepaststatread]
       textflags = [tf_noselect]
       textflagsactive = []
-      reffontheight = 13
+      reffontheight = 14
     end
   end
   object statfile1: tstatfile
