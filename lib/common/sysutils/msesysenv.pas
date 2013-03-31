@@ -1234,7 +1234,8 @@ procedure tsysenvmanager.setoptions(const avalue: sysenvoptionsty);
 begin
  foptions:= sysenvoptionsty(setsinglebit(longword(avalue),longword(foptions),
         longword([seo_terminateonerror,seo_haltonerror,seo_exceptiononerror])));
- if seo_appterminateonexception in avalue then begin
+ if not (csdesigning in componentstate) and 
+                         (seo_appterminateonexception in avalue) then begin
   application.options:= application.options + [apo_terminateonexception];
  end;
 end;
