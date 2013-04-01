@@ -362,7 +362,9 @@ function stringtocstring(const inp: pmsechar;
                                const count: integer): string; overload;
 function stringtopascalstring(const value: msestring): string;
 function pascalstringtostring(const value: string): msestring;
-                                    //increments inputpointer
+function trypascalstringtostring(const value: string;
+                                              out res: msestring ): boolean;
+
 function encodebase64(const abinary: string;
       const maxlinelength: integer = defaultbase64linelength): string; overload;
 function encodebase64(const abinary: pbyte; acount: integer;
@@ -1429,12 +1431,8 @@ begin
  end;
 end;
 
-function pascalstringtostring(const value: string): msestring;
-
- procedure doerror;
- begin
-  raise exception.Create('Invalid pascalstring: "'+value+'".');
- end;
+function trypascalstringtostring(const value: string;
+                                              out res: msestring ): boolean;
 
 var
  po1: pmsechar;
@@ -1442,8 +1440,9 @@ var
  int1: integer;
  str1: string;
 begin
- setlength(result,length(value)); //max length
- po1:= pmsechar(pointer(result));
+ result:= false;
+ setlength(res,length(value)); //max length
+ po1:= pmsechar(pointer(res));
  po2:= pchar(value);
  while po2^ <> #0 do begin
   case po2^ of
@@ -1475,18 +1474,28 @@ begin
      end;
     end
     else begin
-     doerror;
+     res:= '';
+     exit;
     end;
    end;
    ' ',c_tab: begin
     inc(po2)
    end
    else begin
-    doerror;
+    res:= '';
+    exit;
    end;
   end;
  end;
- setlength(result,po1-pmsechar(pointer(result)));
+ setlength(res,po1-pmsechar(pointer(res)));
+ result:= true;
+end;
+
+function pascalstringtostring(const value: string): msestring;
+begin
+ if not trypascalstringtostring(value,result) then begin
+  raise exception.Create('Invalid pascalstring: "'+value+'".');
+ end;
 end;
 
 function encodebase64(const abinary: pbyte; acount: integer;

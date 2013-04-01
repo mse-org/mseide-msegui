@@ -26,6 +26,8 @@ function firstitem(const source: msestringarty): msestring; overload;
 
 procedure additem(var dest: stringarty; const value: string;
                              var count: integer; step: integer = 32); overload;
+procedure additem(var dest: stringararty; const value: stringarty;
+                             var count: integer; step: integer = 32); overload;
 procedure additem(var dest: msestringarty; const value: msestring;
                              var count: integer; step: integer = 32); overload;
 procedure additem(var dest: msestringararty; const value: msestringarty;
@@ -502,6 +504,16 @@ end;
 
 procedure additem(var dest: stringarty; const value: string;
                              var count: integer; step: integer = 32);
+begin
+ if length(dest) <= count then begin
+  setlength(dest,count+step+2*length(dest));
+ end;
+ dest[count]:= value;
+ inc(count);
+end;
+
+procedure additem(var dest: stringararty; const value: stringarty;
+                             var count: integer; step: integer = 32); overload;
 begin
  if length(dest) <= count then begin
   setlength(dest,count+step+2*length(dest));

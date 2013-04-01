@@ -511,6 +511,12 @@ function splitstring(source: string; separator: char = c_tab;
                      trim: boolean = false): stringarty; overload;
 function splitstring(source: msestring; separator: msechar = c_tab;
                      trim: boolean = false): msestringarty; overload;
+function splitstringquoted(source: string; separator: char = c_tab;
+                     quotechar: char = '"';
+                     atrim: boolean = false): stringarty; overload;
+function splitstringquoted(source: msestring; separator: msechar = c_tab;
+                     quotechar: msechar = '"';
+                     atrim: boolean = false): msestringarty; overload;
 
 procedure splitstringquoted(const source: string; out dest: stringarty;
                        quotechar: char = '"'; separator: char = #0); overload;
@@ -1609,6 +1615,34 @@ function splitstring(source: msestring; separator: msechar = c_tab;
 begin
  result:= nil;
  splitstring(source,result,separator,trim);
+end;
+
+function splitstringquoted(source: string; separator: char = c_tab;
+                     quotechar: char = '"';
+                     atrim: boolean = false): stringarty;
+var
+ int1: integer;
+begin
+ splitstringquoted(source,result,quotechar,separator);
+ if atrim then begin
+  for int1:= 0 to high(result) do begin
+   result[int1]:= trim(result[int1]);
+  end;
+ end;
+end;
+
+function splitstringquoted(source: msestring; separator: msechar = c_tab;
+                     quotechar: msechar = '"';
+                     atrim: boolean = false): msestringarty; overload;
+var
+ int1: integer;
+begin
+ splitstringquoted(source,result,quotechar,separator);
+ if atrim then begin
+  for int1:= 0 to high(result) do begin
+   result[int1]:= trim(result[int1]);
+  end;
+ end;
 end;
 
 function stringfromchar(achar: char; count : integer): string;
