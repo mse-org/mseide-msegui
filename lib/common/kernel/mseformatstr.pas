@@ -4259,7 +4259,8 @@ begin
      result:= strtohex164(copy(inp,3,length(inp)-2),value);
     end
     else begin
-     result:= trystrtoint64(inp,lint1);
+//     result:= trystrtoint64(inp,lint1);
+     result:= trystrtoqword(inp,qword(lint1));
      if result then begin
       value:= lint1;
      end;
