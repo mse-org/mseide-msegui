@@ -545,6 +545,7 @@ type
                 setgloss_shifty default -1;
 
    property height: integer read getheight write setheight default 0;
+                  //pixel
    property width: integer read getwidth write setwidth default 0;
                   //avg. character width in 1/10 pixel, 0 = default
    property extraspace: integer read getextraspace write setextraspace default 0;
