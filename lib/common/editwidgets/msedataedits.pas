@@ -399,7 +399,7 @@ type
    procedure mouseevent(var info: mouseeventinfoty); override;
    procedure domousewheelevent(var info: mousewheeleventinfoty); override;
    procedure dokeydown(var info: keyeventinfoty); override;
-  //iscrollbar
+    //iscrollbar
    procedure scrollevent(sender: tcustomscrollbar; event: scrolleventty);
   public
    constructor create(aowner: tcomponent); override;

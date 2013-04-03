@@ -1518,9 +1518,9 @@ begin
      if fowner.clicked and
        not ((ies_firstclick in fstate) and autoselect1) then begin
       fmousemovepos:= minfo.pos;
-      if ies_istextedit in fstate then begin
-       fmousemovepos.y:= ftextrect.y + ftextrect.cy div 2;
-      end;
+//      if ies_istextedit in fstate then begin
+//       fmousemovepos.y:= ftextrect.y + ftextrect.cy div 2;
+//      end;
       if not pointinrect(pos,ftextrect) then begin
        if frepeater = nil then begin
         movemouseindex(nil);

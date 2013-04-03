@@ -364,6 +364,7 @@ function stringtopascalstring(const value: msestring): string;
 function pascalstringtostring(const value: string): msestring;
 function trypascalstringtostring(const value: string;
                                               out res: msestring ): boolean;
+function getpascalstring(var value: pchar): msestring;
 
 function encodebase64(const abinary: string;
       const maxlinelength: integer = defaultbase64linelength): string; overload;
@@ -1497,6 +1498,73 @@ begin
   raise exception.Create('Invalid pascalstring: "'+value+'".');
  end;
 end;
+
+function getpascalstring(var value: pchar): msestring;
+
+var
+ po2,po3: pchar;
+ int1: integer;
+ str1: string;
+ charcount: integer;
+
+ procedure addstring(const astr: msestring);
+ var
+  int1,int2: integer;
+ begin
+  int1:= length(astr);
+  int2:= charcount;
+  charcount:= charcount+int1;
+  if length(result) < charcount then begin
+   setlength(result,2*charcount+32);
+  end;
+  move(pointer(astr)^,(pmsechar(pointer(result))+int2)^,int1*sizeof(msechar));
+ end;
+ 
+begin
+ charcount:= 0;
+ po2:= value;
+ while po2^ <> #0 do begin
+  case po2^ of
+   '#': begin
+    inc(po2);
+    po3:= po2;
+    while (po2^ >= '0') and (po2^ <= '9') do begin
+     inc(po2);
+    end;
+    setstring(str1,po3,po2-po3);
+    addstring(msechar(strtoint(str1)));
+   end;
+   '''': begin               
+    inc(po2);                  //'.....
+    po3:= po2;
+    while (po2^ <> '''') and (po2^ <> #0) do begin
+     inc(po2)
+    end;
+    if po2^ <> #0 then begin   
+     setstring(str1,po3,po2-po3);
+     addstring(msestring(str1));
+     inc(po2);
+     if po2^ = '''' then begin //'abcd'?
+      addstring('''');             //'abcd''
+     end;
+    end
+    else begin
+     result:= '';
+     exit;
+    end;
+   end;
+   ' ',c_tab: begin
+    inc(po2)
+   end
+   else begin
+    break;
+   end;
+  end;
+ end;
+ setlength(result,charcount);
+ value:= po2;
+end;
+
 
 function encodebase64(const abinary: pbyte; acount: integer;
                 const maxlinelength: integer = defaultbase64linelength): string;
