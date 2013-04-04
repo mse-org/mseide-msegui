@@ -74,10 +74,13 @@ type
    function getdatapo(const aoffset: longword): pointer;
    function getdataoffset(const adata: pointer): longword;
    function internaladd(const akey): phashdataty;
+   function internaladdhash(hash1: hashvaluety): phashdataty;
    procedure internaldeleteitem(const aitem: phashdataty); overload;
    procedure internaldeleteitem(const aitem: phashdatadataty); overload;
    function internaldelete(const akey; const all: boolean): boolean;
    function internalfind(const akey): phashdataty; overload;
+   function internalfind(const akey;
+                             hash1: hashvaluety): phashdataty; overload;
    function internalfind(const akey; out acount: integer): phashdataty; overload;
    function internalfind(const akey;
                const acheckproc: findcheckprocty): phashdataty; overload;
@@ -715,10 +718,10 @@ begin
  capacity:= 2*capacity + 256;
 end;
 
-function thashdatalist.internaladd(const akey): phashdataty;
+function thashdatalist.internaladdhash(hash1: hashvaluety): phashdataty;
 var
  puint1,puint2: ptruint;
- hash1: hashvaluety;
+// hash1: hashvaluety;
 begin
 {$ifdef mse_debug_hash}
   checkhash;
@@ -740,7 +743,6 @@ begin
  checknotexists(result);
 {$endif}
  result^.header.prevhash:= 0;
- hash1:= hashkey(akey);
  result^.header.hash:= hash1;
  hash1:= hash1 and ptruint(fmask);
  puint2:= fhashtable[hash1];
@@ -758,6 +760,11 @@ begin
 {$ifdef mse_debug_hash}
  checkhash;
 {$endif}
+end;
+
+function thashdatalist.internaladd(const akey): phashdataty;
+begin
+ result:= internaladdhash(hashkey(akey));
 end;
 
 procedure thashdatalist.internaldeleteitem(const aitem: phashdataty);
@@ -926,9 +933,10 @@ begin
  //dummy
 end;
 
-function thashdatalist.internalfind(const akey): phashdataty;
+function thashdatalist.internalfind(const akey; 
+                                         hash1: hashvaluety): phashdataty;
 var
- ha1: hashvaluety;
+// ha1: hashvaluety;
  uint1: ptruint;
  po1: phashdataty;
 begin
@@ -937,12 +945,12 @@ begin
 {$endif}
  po1:= nil;
  if count > 0 then begin
-  ha1:= hashkey(akey);
-  uint1:= fhashtable[ha1 and fmask];
+//  ha1:= hashkey(akey);
+  uint1:= fhashtable[hash1 and fmask];
   if uint1 <> 0 then begin
    po1:= phashdataty(pchar(fdata) + uint1);
    while true do begin
-    if (po1^.header.hash = ha1) and checkkey(akey,po1^.data) then begin
+    if (po1^.header.hash = hash1) and checkkey(akey,po1^.data) then begin
      break;
     end;
     if po1^.header.nexthash = 0 then begin
@@ -954,6 +962,11 @@ begin
   end;
  end;
  result:= po1;
+end;
+
+function thashdatalist.internalfind(const akey): phashdataty;
+begin
+ result:= internalfind(akey,hashkey(akey));
 end;
 
 function thashdatalist.internalfind(const akey; out acount: integer): phashdataty;
