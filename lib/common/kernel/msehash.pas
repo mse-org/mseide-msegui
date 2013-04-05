@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -49,13 +49,10 @@ type
 
  thashdatalist = class
   private
-   fmask: hashvaluety;
    fdatasize: integer;
    frecsize: integer;
    fcapacity: integer;
    fcount: integer;
-   fhashtable: ptruintarty;
-   fdata: pointer;         //first record is a dummy
    fassignedroot: ptruint; //offset to fdata
    fdeletedroot: ptruint;  //offset to fdata
    fcurrentitem: ptruint;  //offset to fdata.data
@@ -63,6 +60,9 @@ type
    procedure setcapacity(const avalue: integer);
    procedure moveitem(const aitem: phashdataty);
   protected
+   fdata: pointer;         //first record is a dummy
+   fmask: hashvaluety;
+   fhashtable: ptruintarty;
    fstate: hashliststatesty;
   {$ifdef mse_debug_hash}
    procedure checkhash;

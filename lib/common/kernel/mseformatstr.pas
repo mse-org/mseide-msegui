@@ -1503,7 +1503,7 @@ function getpascalstring(var value: pchar): msestring;
 
 var
  po2,po3: pchar;
- int1: integer;
+// int1: integer;
  str1: string;
  charcount: integer;
 
