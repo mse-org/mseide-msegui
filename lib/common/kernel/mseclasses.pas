@@ -1510,6 +1510,7 @@ procedure readrecordar(const reader: treader; out ar;
      const typeinfo: pdynarraytypeinfo; const readproc: readrecordprocty);
 var
  int1: integer;
+ lint1: sizeint;
 begin
  int1:= 0;
  reader.readlistbegin;
@@ -1519,7 +1520,8 @@ begin
   reader.readlistend;
  end;
  reader.readlistend;
- dynarraysetlength(pointer(ar),typeinfo,1,@int1);
+ lint1:= int1;
+ dynarraysetlength(pointer(ar),typeinfo,1,@lint1);
 end;
 
 procedure writerecordar(const writer: twriter; const ar;
