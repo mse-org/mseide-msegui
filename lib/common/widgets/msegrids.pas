@@ -656,6 +656,7 @@ type
    procedure dokeyevent(var info: keyeventinfoty; up: boolean); virtual;
    procedure checkdirtyautorowheight(aindex: integer);
    procedure afterrowcountupdate; virtual;
+   procedure datachange(const arow: integer); virtual;
    procedure itemchanged(const sender: tdatalist; const aindex: integer); virtual;
    procedure updatewidth(var avalue: integer); override;
    procedure updatelayout; override;
@@ -6075,6 +6076,13 @@ end;
 procedure tdatacol.afterrowcountupdate;
 begin
  //dummy
+end;
+procedure tdatacol.datachange(const arow: integer);
+begin
+ if (datalist = nil) and not (gps_noinvalidate in fstate) and 
+                     not (csloading in fcellinfo.grid.componentstate) then begin
+  checkdirtyautorowheight(arow);
+ end;
 end;
 
 procedure tdatacol.itemchanged(const sender: tdatalist; const aindex: integer);

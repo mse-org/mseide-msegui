@@ -8856,7 +8856,7 @@ begin
    self.invalidatecell(fdatalink.activerecord);
   end;
  end;
-
+ datachange(fdatalink.activerecord);
 // int1:= tcustomdbstringgrid(fgrid).fdatalink.activerecord;
 // if (int1 >= 0) and (int1 < fgrid.rowcount) then begin
 //  items[int1]:= fdatalink.msedisplaytext('',true);

@@ -130,7 +130,6 @@ type
    procedure getdata(var arow: integer; var dest);
    procedure setdata(var arow: integer;
                 const source; const noinvalidate: boolean = false); virtual;
-   procedure datachange(const arow: integer); virtual;
    function getrow: integer;
    procedure setrow(arow: integer);
    function empty(arow: integer): boolean;
@@ -1957,14 +1956,6 @@ begin
     fdata.linksource(datalist1,int1);
    end;
   end;
- end;
-end;
-
-procedure twidgetcol.datachange(const arow: integer);
-begin
- if (datalist = nil) and not (gps_noinvalidate in fstate) and 
-                     not (csloading in fcellinfo.grid.componentstate) then begin
-  checkdirtyautorowheight(arow);
  end;
 end;
 
