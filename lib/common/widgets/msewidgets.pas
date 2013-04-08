@@ -1155,6 +1155,7 @@ type
                    bo_shortcutcaption,bo_altshortcut,
                    {bo_flat,bo_noanim,bo_nofocusrect,bo_nodefaultrect,}
                    bo_nodefaultframeactive,
+                   bo_coloractive,
                    bo_ellipsemouse, //mouse area is elliptical
                    bo_nocandefocus,bo_candefocuswindow, //check own window only
                    bo_radioitemcol,
@@ -1338,6 +1339,12 @@ begin
  end
  else begin
   exclude(astate,shs_ellipsemouse);
+ end;
+ if bo_coloractive in avalue then begin
+  include(astate,shs_focuscolor);
+ end
+ else begin
+  exclude(astate,shs_focuscolor);
  end;
 end;
 

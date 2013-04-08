@@ -1584,7 +1584,7 @@ procedure TIBConnection.writeblobdata(const atransactionhandle: pointer;
   end;
  end;
 const
- defsegsize = $4000; 
+ defsegsize = $ffff; 
 var
 // transactionhandle: pointer;
  blobhandle: isc_blob_handle;

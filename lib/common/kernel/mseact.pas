@@ -35,6 +35,9 @@ type
                  shs_widgetorg,shs_showfocusrect,shs_showdefaultrect,
                  shs_flat,shs_noanimation,shs_nomouseanimation,
                  shs_noclickanimation,shs_nofocusanimation,shs_focusanimation,
+                 shs_focuscolor, 
+                      //use cl_selectedtext and cl_selecetetextbackground
+                      //if focused
                  shs_checkbutton,shs_menuarrow,shs_noinnerrect);
  shapestatesty = set of shapestatety;
 

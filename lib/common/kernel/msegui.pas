@@ -118,7 +118,7 @@ type
  optionswidget1ty = set of optionwidget1ty;
  
  optionskinty = (osk_skin,osk_noskin,osk_framebuttononly,
-                 osk_noframe,osk_noface,
+                 osk_noframe,osk_noface,osk_nooptions,
                  osk_container,osk_noclientsize,
                  osk_colorcaptionframe, 
                    //use widget_colorcaptionframe independent of caption

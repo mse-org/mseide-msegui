@@ -66,6 +66,8 @@ type
   co: colorty;
   wi: widgetskininfoty;
   font: toptionalfont;
+  optionsadd: buttonoptionsty;
+  optionsremove: buttonoptionsty;
  end;  
  stepbuttonskininfoty = record
   co: colorty;
@@ -126,6 +128,11 @@ type
   empty_textcolorbackground: colorty;
   empty_fontstyle: fontstylesty;
   empty_color: colorty;
+ end;
+ booleaneditskininfoty = record
+  wi: widgetskininfoty;
+  optionsadd: buttonoptionsty;
+  optionsremove: buttonoptionsty;
  end;
  
  tskincolor = class(tvirtualpersistent)
@@ -432,7 +439,7 @@ type
    fmainmenu: mainmenuskininfoty;
    fdispwidget: dispwidgetskininfoty;
    fdataedit: dataeditskininfoty;
-   fbooleanedit: dataeditskininfoty;
+   fbooleanedit: booleaneditskininfoty;
    
    procedure setsb_vert_facebutton(const avalue: tfacecomp);
    procedure setsb_vert_faceendbutton(const avalue: tfacecomp);
@@ -625,6 +632,11 @@ type
                                                    write setbooleanedit_face;
    property booleanedit_frame: tframecomp read fbooleanedit.wi.fra 
                         write setbooleanedit_frame;
+   property booleanedit_optionsadd: buttonoptionsty read fbooleanedit.optionsadd 
+                                write fbooleanedit.optionsadd default[];
+   property booleanedit_optionsremove: buttonoptionsty 
+                       read fbooleanedit.optionsremove
+                                write fbooleanedit.optionsremove default[];
 
    property container_face: tfacecomp read fcontainer.wi.fa 
                                               write setcontainer_face;
@@ -653,6 +665,10 @@ type
    property button_face: tfacecomp read fbutton.wi.fa write setbutton_face;
    property button_frame: tframecomp read fbutton.wi.fra write setbutton_frame;
    property button_font: toptionalfont read getbutton_font write setbutton_font;
+   property button_optionsadd: buttonoptionsty read fbutton.optionsadd 
+                                write fbutton.optionsadd default[];
+   property button_optionsremove: buttonoptionsty read fbutton.optionsremove
+                                write fbutton.optionsremove default[];
 
    property databutton_color: colorty read fdatabutton.co 
                                   write fdatabutton.co default cl_default;
@@ -662,6 +678,11 @@ type
                                               write setdatabutton_frame;
    property databutton_font: toptionalfont read getdatabutton_font 
                                               write setdatabutton_font;
+   property databutton_optionsadd: buttonoptionsty read fdatabutton.optionsadd 
+                                write fdatabutton.optionsadd default[];
+   property databutton_optionsremove: buttonoptionsty 
+                       read fbooleanedit.optionsremove
+                                write fdatabutton.optionsremove default[];
 
    property framebutton_color: colorty read fframebutton.co 
                            write fframebutton.co default cl_default;
@@ -2329,6 +2350,16 @@ begin
  setwidgetcolor(twidget(ainfo.instance),fbutton.co);
  setwidgetskin(twidget(ainfo.instance),fbutton.wi);
  setwidgetfont(twidget(ainfo.instance),fbutton.font);
+ with tsimplebutton(ainfo.instance) do begin
+  if not (osk_nooptions in optionsskin) then begin
+   if fbutton.optionsadd <> [] then begin
+    options:= options + fbutton.optionsadd;
+   end;
+   if fbutton.optionsremove <> [] then begin
+    options:= options - fbutton.optionsremove;
+   end;
+  end;
+ end;
 end;
 
 procedure tskincontroller.handledatabutton(const ainfo: skininfoty);
@@ -2337,6 +2368,16 @@ begin
  setwidgetcolor(twidget(ainfo.instance),fdatabutton.co);
  setwidgetskin(twidget(ainfo.instance),fdatabutton.wi);
  setwidgetfont(twidget(ainfo.instance),fdatabutton.font);
+ with tcustomdatabutton(ainfo.instance) do begin
+  if not (osk_nooptions in optionsskin) then begin
+   if fdatabutton.optionsadd <> [] then begin
+    options:= options + fdatabutton.optionsadd;
+   end;
+   if fdatabutton.optionsremove <> [] then begin
+    options:= options - fdatabutton.optionsremove;
+   end;
+  end;
+ end;
 end;
 
 procedure tskincontroller.handlecontainer(const ainfo: skininfoty);
@@ -2478,7 +2519,18 @@ end;
 procedure tskincontroller.handlebooleanedit(const ainfo: skininfoty);
 begin
  handlewidget(ainfo);
- setgraphdataeditskin(tgraphdataedit(ainfo.instance),fbooleanedit);
+ setwidgetskin(twidget(ainfo.instance),fbooleanedit.wi);
+ with tcustombooleanedit(ainfo.instance) do begin
+  if not (osk_nooptions in optionsskin) then begin
+   if fbooleanedit.optionsadd <> [] then begin
+    options:= options + fbooleanedit.optionsadd;
+   end;
+   if fbooleanedit.optionsremove <> [] then begin
+    options:= options - fbooleanedit.optionsremove;
+   end;
+  end;
+ end;
+// setgraphdataeditskin(tgraphdataedit(ainfo.instance),fbooleanedit);
 end;
 
 procedure tskincontroller.handlemainmenu(const ainfo: skininfoty);

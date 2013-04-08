@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -960,13 +960,20 @@ begin
    if (shs_checked in state) and (int1 >= 0) then begin
     inc(int1,imagecheckedoffset);
    end;
-   if ca.colorglyph <> cl_none then begin
-    co1:= ca.colorglyph;
-    if co1 = cl_default then begin
-     co1:= cl_glyph;
+   if state*[shs_focuscolor,shs_focused] = 
+                [shs_focuscolor,shs_focused] then begin
+    canvas.fillrect(rect1,cl_selectedtextbackground);
+    co1:= cl_selectedtext;
+   end
+   else begin
+    if ca.colorglyph <> cl_none then begin
+     co1:= ca.colorglyph;
+     if co1 = cl_default then begin
+      co1:= cl_glyph;
+     end;
     end;
-    ca.imagelist.paint(canvas,int1,rect1,align1,co1);
    end;
+   ca.imagelist.paint(canvas,int1,rect1,align1,co1);
    canvas.clipregion:= reg1;
   end
   else begin

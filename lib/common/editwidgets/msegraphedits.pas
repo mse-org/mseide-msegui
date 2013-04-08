@@ -2325,6 +2325,7 @@ procedure tcustombooleanedit.paintglyph(const canvas: tcanvas;
                                const arect: rectty);
 var
  bo1: boolean;
+ co1: colorty;
 begin
  if @avalue = nil then begin
   bo1:= fvalue;
@@ -2332,8 +2333,13 @@ begin
  else begin
   bo1:= boolean(avalue);
  end;
+ co1:= acolorglyph;
+ if (bo_coloractive in foptions) and active then begin
+  canvas.fillrect(arect,cl_selectedtextbackground);
+  co1:= cl_selectedtext;
+ end;
  if bo1 xor (bo_reversed in foptions) then begin
-   stockobjects.paintglyph(canvas,getglyph,arect,not isenabled,acolorglyph);
+  stockobjects.paintglyph(canvas,getglyph,arect,not isenabled,co1);
  end;
 end;
 
