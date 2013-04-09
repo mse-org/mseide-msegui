@@ -600,7 +600,6 @@ type
    makedir: tfilenameedit;
    tsplitter1: tsplitter;
    tsplitter2: tsplitter;
-   tsplitter3: tsplitter;
    tsplitter4: tsplitter;
    tsplitter5: tsplitter;
    ttabpage1: ttabpage;
@@ -755,7 +754,6 @@ type
    formatmacrogrid: twidgetgrid;
    formatmacronames: tstringedit;
    formatmacrovalues: tstringedit;
-   tspacer4: tspacer;
    colorerror: tcoloredit;
    tspacer5: tspacer;
    colorwarning: tcoloredit;
@@ -2166,12 +2164,11 @@ procedure tprojectoptionsfo.makepageonchildscaled(const sender: TObject);
 var
  int1: integer;
 begin
- placeyorder(0,[0,0,0,15],[mainfile,makecommand,messageoutputfile,
+ placeyorder(0,[0,0,0,15],[mainfile,makecommand,colorerror,
                     defaultmake,makegroupbox],0);
  aligny(wam_center,[mainfile,targetfile,targpref]);
- aligny(wam_center,[makecommand,makedir]);
- aligny(wam_center,[messageoutputfile,copymessages,
-                                         colorerror,colorwarning,colornote]);
+ aligny(wam_center,[makecommand,makedir,messageoutputfile]);
+ aligny(wam_center,[colorerror,colorwarning,colornote,copymessages]);
  placexorder(defaultmake.bounds_x,[10-defaultmake.frame.outerframe.right,10],
              [defaultmake,showcommandline,checkmethods]);
  int1:= aligny(wam_center,[defaultmake,showcommandline]);
