@@ -11,6 +11,7 @@ object mainfo: tmainfo
   )
   optionswindow = [wo_groupleader]
   options = [fo_main, fo_terminateonclose, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
+  caption = 'MSEi18n Demo'
   oneventloopstart = formonloaded
   moduleclassname = 'tmseform'
   object disp1: tstringdisp
@@ -50,12 +51,13 @@ object mainfo: tmainfo
     bounds_y = 24
     bounds_cx = 114
     bounds_cy = 30
-    state = [as_localcaption]
+    state = [as_localcaption, as_localonexecute]
     caption = 'Default'
     font.height = 18
     font.name = 'stf_default'
     font.xscale = 1
     font.dummy = 0
+    onexecute = defaultexe
   end
   object deutsch: tbutton
     taborder = 1
@@ -63,12 +65,13 @@ object mainfo: tmainfo
     bounds_y = 24
     bounds_cx = 114
     bounds_cy = 30
-    state = [as_localcaption]
+    state = [as_localcaption, as_localonexecute]
     caption = 'Deutsch'
     font.height = 14
     font.name = 'stf_default'
     font.xscale = 1
     font.dummy = 0
+    onexecute = deutschexe
   end
   object francais: tbutton
     taborder = 2
@@ -76,11 +79,12 @@ object mainfo: tmainfo
     bounds_y = 24
     bounds_cx = 114
     bounds_cy = 30
-    state = [as_localcaption]
+    state = [as_localcaption, as_localonexecute]
     caption = 'Fran'#231'ais'
     font.height = 14
     font.name = 'stf_default'
     font.xscale = 1
     font.dummy = 0
+    onexecute = francaisexe
   end
 end
