@@ -1,11 +1,9 @@
 object programparametersfo: tprogramparametersfo
-  optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousewheel, ow_destroywidgets, ow_hinton, ow_autoscale]
   visible = False
   bounds_x = 272
   bounds_y = 243
   bounds_cx = 328
   bounds_cy = 348
-  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_mousewheel, ow_destroywidgets, ow_autoscale]
   container.bounds = (
     0
     0
@@ -17,7 +15,6 @@ object programparametersfo: tprogramparametersfo
   caption = 'Target Environment'
   moduleclassname = 'tmseform'
   object workingdirectory: tfilenameedit
-    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     frame.caption = '&Working directory'
     frame.button.color = -2147483646
     frame.button.imagenr = 17
@@ -61,7 +58,6 @@ object programparametersfo: tprogramparametersfo
     modalresult = mr_cancel
   end
   object parameters: tmemodialoghistoryedit
-    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     frame.caption = '&Parameters'
     frame.button.color = -2147483646
     frame.buttondialog.color = -2147483646
@@ -86,7 +82,6 @@ object programparametersfo: tprogramparametersfo
     reffontheight = 14
   end
   object grid: twidgetgrid
-    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_focusbackonesc, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     frame.caption = 'Environment variables'
     frame.outerframe = (
       0
@@ -118,23 +113,23 @@ object programparametersfo: tprogramparametersfo
           end>
       end>
     datacols.count = 3
-    datacols.options = [co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+    datacols.options = [co_savestate]
     datacols.items = <    
-      item
+      item[envvaron]
         width = 20
-        options = [co_drawfocus, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+        options = [co_drawfocus, co_savestate]
         widgetname = 'envvaron'
         dataclass = tgridintegerdatalist
       end    
-      item
+      item[envvarname]
         width = 103
-        options = [co_proportional, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+        options = [co_proportional, co_savestate]
         widgetname = 'envvarname'
         dataclass = tgridmsestringdatalist
       end    
-      item
+      item[envvarvalue]
         width = 194
-        options = [co_fill, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+        options = [co_fill, co_savestate]
         widgetname = 'envvarvalue'
         dataclass = tgridmsestringdatalist
       end>
@@ -151,7 +146,7 @@ object programparametersfo: tprogramparametersfo
       bounds_y = 0
       bounds_cx = 20
       bounds_cy = 16
-      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savestate]
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_savestate, oe_autopopupmenu, oe_keyexecute]
       visible = False
       valuedefault = True
     end
@@ -166,11 +161,10 @@ object programparametersfo: tprogramparametersfo
       bounds_y = 0
       bounds_cx = 103
       bounds_cy = 16
-      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savestate]
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_savestate]
       reffontheight = 14
     end
     object envvarvalue: tmemodialogedit
-      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
       frame.levelo = 0
       frame.colorclient = -2147483645
       frame.localprops = [frl_levelo, frl_colorclient]
@@ -183,7 +177,7 @@ object programparametersfo: tprogramparametersfo
       bounds_y = 0
       bounds_cx = 194
       bounds_cy = 16
-      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savestate]
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_savestate]
       reffontheight = 14
     end
   end

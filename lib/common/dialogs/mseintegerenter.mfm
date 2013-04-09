@@ -1,16 +1,19 @@
 object integerenterfo: tintegerenterfo
-  optionswidget = [ow_arrowfocus, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
   visible = False
   bounds_x = 395
   bounds_y = 323
   bounds_cx = 233
   bounds_cy = 88
   bounds_cymin = 75
-  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.bounds = (
+    0
+    0
+    233
+    88
+  )
   options = [fo_screencentered, fo_closeonesc, fo_localshortcuts, fo_autoreadstat, fo_autowritestat]
   moduleclassname = 'tmseform'
   object lab: tlabel
-    optionswidget = [ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     optionswidget1 = [ow1_autoheight]
     taborder = 3
     bounds_x = 8
@@ -20,10 +23,8 @@ object integerenterfo: tintegerenterfo
     anchors = [an_left, an_top, an_right, an_bottom]
     caption = 'lab'
     textflags = [tf_ycentered, tf_wordbreak]
-    reffontheight = 14
   end
   object ok: tbutton
-    optionswidget = [ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     taborder = 1
     bounds_x = 120
     bounds_y = 62
@@ -33,10 +34,8 @@ object integerenterfo: tintegerenterfo
     state = [as_default, as_localdefault, as_localcaption]
     caption = '&OK'
     modalresult = mr_ok
-    reffontheight = 14
   end
   object cancel: tbutton
-    optionswidget = [ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     taborder = 2
     bounds_x = 176
     bounds_y = 62
@@ -46,16 +45,13 @@ object integerenterfo: tintegerenterfo
     state = [as_localcaption]
     caption = '&Cancel'
     modalresult = mr_cancel
-    reffontheight = 14
   end
   object value: tintegeredit
     frame.dummy = 0
     bounds_x = 8
     bounds_y = 62
-    bounds_cx = 100
-    bounds_cy = 20
     anchors = [an_left, an_right, an_bottom]
-    optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
+    optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_savevalue, oe_savestate]
     reffontheight = 14
   end
 end

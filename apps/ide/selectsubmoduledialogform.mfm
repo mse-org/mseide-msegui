@@ -1,38 +1,36 @@
 object selectsubmoduledialogfo: tselectsubmoduledialogfo
-  optionswidget = [ow_arrowfocus, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
+  visible = False
   bounds_x = 391
   bounds_y = 320
   bounds_cx = 241
   bounds_cy = 81
-  taborder = 1
-  visible = False
-  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
-  container.bounds_x = 0
-  container.bounds_y = 0
-  container.bounds_cx = 241
-  container.bounds_cy = 81
-  container.frame.dummy = 0
+  container.bounds = (
+    0
+    0
+    241
+    81
+  )
   options = [fo_screencentered, fo_closeonesc, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savezorder, fo_savestate]
   caption = 'Select subform'
   moduleclassname = 'tmseform'
   object ok: tbutton
+    taborder = 1
     bounds_x = 120
     bounds_y = 48
     bounds_cx = 50
     bounds_cy = 22
     anchors = [an_top, an_right]
-    taborder = 1
     state = [as_default, as_localdefault, as_localcaption]
     caption = 'OK'
     modalresult = mr_ok
   end
   object cancel: tbutton
+    taborder = 2
     bounds_x = 184
     bounds_y = 48
     bounds_cx = 50
     bounds_cy = 22
     anchors = [an_top, an_right]
-    taborder = 2
     state = [as_localcaption]
     caption = 'Cancel'
     modalresult = mr_cancel
@@ -41,8 +39,6 @@ object selectsubmoduledialogfo: tselectsubmoduledialogfo
     bounds_x = 8
     bounds_y = 8
     bounds_cx = 228
-    bounds_cy = 20
-    frame.dummy = 0
     anchors = [an_left, an_top, an_right]
     dropdown.options = [deo_selectonly, deo_autodropdown, deo_keydropdown, deo_sorted]
     dropdown.cols.count = 1

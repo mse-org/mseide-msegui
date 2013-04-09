@@ -1,17 +1,20 @@
 object replacedialogfo: treplacedialogfo
-  optionswidget = [ow_arrowfocus, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
   visible = False
   bounds_x = 142
   bounds_y = 302
   bounds_cx = 421
   bounds_cy = 163
-  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.bounds = (
+    0
+    0
+    421
+    163
+  )
   options = [fo_freeonclose, fo_closeonesc, fo_localshortcuts, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savezorder]
   statfile = statfile1
   caption = 'Find and Replace Text'
   moduleclassname = 'tmseform'
   object findtext: thistoryedit
-    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     frame.caption = 'Text to &find'
     frame.button.color = -2147483646
     frame.outerframe = (
@@ -32,7 +35,6 @@ object replacedialogfo: treplacedialogfo
     reffontheight = 14
   end
   object replacetext: thistoryedit
-    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     frame.caption = '&Replace with'
     frame.button.color = -2147483646
     frame.outerframe = (

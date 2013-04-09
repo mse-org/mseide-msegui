@@ -1,14 +1,10 @@
 object compnametreefo: tcompnametreefo
-  optionswidget = [ow_arrowfocus, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
   visible = False
   bounds_x = 80
   bounds_y = 374
   bounds_cx = 300
   bounds_cy = 203
   bounds_cxmin = 200
-  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
-  container.frame.zoomwidthstep = 1
-  container.frame.zoomheightstep = 1
   container.bounds = (
     0
     0
@@ -32,10 +28,19 @@ object compnametreefo: tcompnametreefo
     anchors = []
     datacols.count = 1
     datacols.items = <    
-      item
+      item[treeitem]
         width = 297
         options = [co_readonly, co_fill, co_savevalue]
         widgetname = 'treeitem'
+        dataclass = ttreeitemeditlist
+        datalist.imnr_base = 2
+        datalist.imnr_expanded = 1
+        datalist.imnr_subitems = -2
+        datalist.imagelist = filedialogres.images
+        datalist.imagewidth = 16
+        datalist.imageheight = 16
+        datalist.onitemnotification = treeitemonitemnotification
+        datalist.oncreateitem = treeitemoncreateitem
       end>
     datarowlinewidth = 0
     datarowheight = 16
@@ -54,14 +59,6 @@ object compnametreefo: tcompnametreefo
       bounds_cy = 16
       optionsedit = [oe_readonly, oe_undoonesc, oe_checkmrcancel, oe_forcereturncheckvalue, oe_locate, oe_savevalue, oe_savestate]
       ondataentered = treeitemondataentered
-      itemlist.imnr_base = 2
-      itemlist.imnr_expanded = 1
-      itemlist.imnr_subitems = -2
-      itemlist.imagelist = filedialogres.images
-      itemlist.imagewidth = 16
-      itemlist.imageheight = 16
-      itemlist.onitemnotification = treeitemonitemnotification
-      itemlist.oncreateitem = treeitemoncreateitem
       oncellevent = treeitemoncellevent
       options = [teo_treecolnavig, teo_enteronimageclick]
       reffontheight = 14

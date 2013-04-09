@@ -1,59 +1,48 @@
 object reallisteditor: treallisteditor
-  optionswidget = [ow_arrowfocus, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
+  visible = False
   bounds_x = 182
   bounds_y = 208
-  bounds_cx = 119
+  bounds_cx = 128
   bounds_cy = 297
-  taborder = 1
-  visible = False
-  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
-  container.bounds_x = 0
-  container.bounds_y = 0
-  container.bounds_cx = 119
-  container.bounds_cy = 297
-  container.frame.dummy = 0
+  container.frame.sbhorz.pagesize = 0.98347107438017
+  container.bounds = (
+    0
+    0
+    128
+    297
+  )
   options = [fo_closeonesc, fo_autoreadstat, fo_autowritestat, fo_savepos]
   statfile = tstatfile1
   caption = 'Reallisteditor'
   moduleclassname = 'tmseform'
   object ok: tbutton
-    optionswidget = [ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-    bounds_x = 0
-    bounds_y = 270
+    taborder = 3
+    bounds_x = 4
+    bounds_y = 269
     bounds_cx = 50
     bounds_cy = 20
     anchors = [an_left, an_bottom]
-    taborder = 3
     state = [as_default, as_localdefault, as_localcaption]
-    autosize_cx = 0
-    autosize_cy = 0
     caption = '&OK'
     modalresult = mr_ok
-    reffontheight = 14
   end
   object cancel: tbutton
-    optionswidget = [ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-    bounds_x = 64
-    bounds_y = 270
+    bounds_x = 68
+    bounds_y = 269
     bounds_cx = 50
     bounds_cy = 20
     anchors = [an_left, an_bottom]
     state = [as_localcaption]
-    autosize_cx = 0
-    autosize_cy = 0
     caption = '&Cancel'
     modalresult = mr_cancel
-    reffontheight = 14
   end
   object grid: twidgetgrid
-    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusout, ow_focusbackonesc, ow_destroywidgets, ow_fontlineheight]
+    taborder = 1
     bounds_x = 0
     bounds_y = 0
-    bounds_cx = 121
-    bounds_cy = 242
-    frame.dummy = 0
+    bounds_cx = 128
+    bounds_cy = 241
     anchors = [an_top, an_bottom]
-    taborder = 1
     optionsgrid = [og_rowmoving, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_wrapcol, og_autopopup]
     fixcols.count = 1
     fixcols.items = <    
@@ -65,37 +54,37 @@ object reallisteditor: treallisteditor
     zebra_height = 1
     datacols.count = 1
     datacols.items = <    
-      item
-        width = 91
-        options = [co_fill, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+      item[valueedit]
+        width = 98
+        options = [co_fill, co_savevalue, co_savestate]
         widgetname = 'valueedit'
+        dataclass = tgridrealdatalist
       end>
     datarowheight = 16
     onrowcountchanged = gridonrowcountchanged
     reffontheight = 14
     object valueedit: trealedit
-      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
       optionsskin = [osk_framebuttononly]
-      bounds_x = 0
-      bounds_y = 0
-      bounds_cx = 91
-      bounds_cy = 16
       frame.levelo = 0
       frame.colorclient = -2147483645
       frame.localprops = [frl_levelo, frl_colorclient]
       frame.dummy = 0
       taborder = 1
       visible = False
-      valuescale =  1.0000000000000000E+0000
+      bounds_x = 0
+      bounds_y = 0
+      bounds_cx = 98
+      bounds_cy = 16
+      value = -Inf
+      valuedefault = -Inf
+      valuerange = 1
+      valuestart = 0
+      min = -Inf
+      max = 1E+038
       reffontheight = 14
     end
   end
   object rowcount: tintegeredit
-    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-    bounds_x = 0
-    bounds_y = 246
-    bounds_cx = 110
-    bounds_cy = 20
     frame.caption = 'Rowcount'
     frame.captionpos = cp_right
     frame.dummy = 0
@@ -105,8 +94,11 @@ object reallisteditor: treallisteditor
       58
       0
     )
-    anchors = [an_left, an_bottom]
     taborder = 2
+    bounds_x = 4
+    bounds_y = 245
+    bounds_cx = 110
+    anchors = [an_left, an_bottom]
     onsetvalue = rowcountonsetvalue
     reffontheight = 14
   end

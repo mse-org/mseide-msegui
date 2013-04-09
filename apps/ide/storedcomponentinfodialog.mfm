@@ -3,13 +3,12 @@ object storedcomponentinfodialogfo: tstoredcomponentinfodialogfo
   bounds_y = 228
   bounds_cx = 362
   bounds_cy = 255
-  taborder = 1
-  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_mousewheel, ow_destroywidgets, ow_autoscale]
-  container.bounds_x = 0
-  container.bounds_y = 0
-  container.bounds_cx = 362
-  container.bounds_cy = 255
-  container.frame.dummy = 0
+  container.bounds = (
+    0
+    0
+    362
+    255
+  )
   options = [fo_freeonclose, fo_screencentered, fo_cancelonesc, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
   onclosequery = doclosequery
   moduleclassname = 'tmseform'
@@ -24,34 +23,33 @@ object storedcomponentinfodialogfo: tstoredcomponentinfodialogfo
     modalresult = mr_ok
   end
   object tbutton2: tbutton
+    taborder = 1
     bounds_x = 304
     bounds_y = 224
     bounds_cx = 50
     bounds_cy = 20
     anchors = [an_right, an_bottom]
-    taborder = 1
     state = [as_localcaption]
     caption = '&Cancel'
     modalresult = mr_cancel
   end
   object filepath: tfilenameedit
-    bounds_x = 8
-    bounds_y = 175
-    bounds_cx = 348
-    bounds_cy = 37
     frame.caption = '&File'
     frame.button.color = -2147483646
     frame.button.imagenr = 17
-    frame.dummy = 0
     frame.outerframe = (
       0
       17
       0
       0
     )
-    anchors = [an_left, an_right, an_bottom]
     taborder = 2
-    optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_notnull, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
+    bounds_x = 8
+    bounds_y = 175
+    bounds_cx = 348
+    bounds_cy = 37
+    anchors = [an_left, an_right, an_bottom]
+    optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_notnull, oe_savevalue, oe_savestate]
     textflags = [tf_ycentered, tf_noselect, tf_ellipseleft]
     controller.filterlist.data = (
       (
@@ -69,10 +67,6 @@ object storedcomponentinfodialogfo: tstoredcomponentinfodialogfo
     reffontheight = 14
   end
   object compname: tstringedit
-    bounds_x = 8
-    bounds_y = 7
-    bounds_cx = 348
-    bounds_cy = 37
     frame.caption = '&Name'
     frame.dummy = 0
     frame.outerframe = (
@@ -81,26 +75,32 @@ object storedcomponentinfodialogfo: tstoredcomponentinfodialogfo
       0
       0
     )
-    anchors = [an_left, an_top, an_right]
     taborder = 3
+    bounds_x = 8
+    bounds_y = 7
+    bounds_cx = 348
+    bounds_cy = 37
+    anchors = [an_left, an_top, an_right]
     ondataentered = namedataentered
     reffontheight = 14
   end
   object compdesc: tmemoedit
-    bounds_x = 8
-    bounds_y = 47
-    bounds_cx = 348
-    bounds_cy = 125
+    frame.sbhorz.pagesize = 1
+    frame.sbvert.pagesize = 1
     frame.caption = '&Description'
     frame.localprops = [frl_colorclient]
-    frame.dummy = 0
     frame.outerframe = (
       0
       17
       0
       0
     )
-    anchors = [an_left, an_top, an_right, an_bottom]
     taborder = 4
+    bounds_x = 8
+    bounds_y = 47
+    bounds_cx = 348
+    bounds_cy = 125
+    anchors = [an_left, an_top, an_right, an_bottom]
+    reffontheight = 14
   end
 end

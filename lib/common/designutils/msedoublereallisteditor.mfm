@@ -1,10 +1,8 @@
 object doublereallisteditor: tdoublereallisteditor
-  optionswidget = [ow_arrowfocus, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
   bounds_x = 130
   bounds_y = 203
   bounds_cx = 279
   bounds_cy = 211
-  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
   container.bounds = (
     0
     0
@@ -15,7 +13,6 @@ object doublereallisteditor: tdoublereallisteditor
   caption = 'Doublereallisteditor'
   moduleclassname = 'tmseform'
   object ok: tbutton
-    optionswidget = [ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     taborder = 3
     bounds_x = 153
     bounds_y = 177
@@ -25,10 +22,8 @@ object doublereallisteditor: tdoublereallisteditor
     state = [as_default, as_localdefault, as_localcaption]
     caption = '&OK'
     modalresult = mr_ok
-    reffontheight = 14
   end
   object cancel: tbutton
-    optionswidget = [ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 217
     bounds_y = 177
     bounds_cx = 50
@@ -37,7 +32,6 @@ object doublereallisteditor: tdoublereallisteditor
     state = [as_localcaption]
     caption = '&Cancel'
     modalresult = mr_cancel
-    reffontheight = 14
   end
   object grid: twidgetgrid
     taborder = 2
@@ -70,13 +64,13 @@ object doublereallisteditor: tdoublereallisteditor
     datacols.count = 2
     datacols.options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savevalue, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
     datacols.items = <    
-      item
+      item[vala]
         width = 113
         options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savevalue, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
         widgetname = 'vala'
         dataclass = tgridrealdatalist
       end    
-      item
+      item[valb]
         width = 110
         options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savevalue, co_cancopy, co_canpaste]
         widgetname = 'valb'
@@ -86,7 +80,6 @@ object doublereallisteditor: tdoublereallisteditor
     onrowcountchanged = gridonrowcountchanged
     reffontheight = 14
     object vala: trealedit
-      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
       optionsskin = [osk_framebuttononly]
       frame.levelo = 0
       frame.colorclient = -2147483646
@@ -98,12 +91,16 @@ object doublereallisteditor: tdoublereallisteditor
       bounds_y = 0
       bounds_cx = 113
       bounds_cy = 16
-      valuerange =  1.0000000000000000E+0000
+      value = -Inf
+      valuedefault = -Inf
+      valuerange = 1
+      valuestart = 0
+      min = -Inf
+      max = 1E+300
       reffontheight = 14
-      ma =  1.0000000000000001E+0300
     end
     object valb: trealedit
-      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+      optionswidget1 = [ow1_fontglyphheight]
       optionsskin = [osk_framebuttononly]
       frame.levelo = 0
       frame.colorclient = -2147483646
@@ -115,12 +112,16 @@ object doublereallisteditor: tdoublereallisteditor
       bounds_y = 0
       bounds_cx = 110
       bounds_cy = 16
-      valuerange =  1.0000000000000000E+0000
+      value = -Inf
+      valuedefault = -Inf
+      valuerange = 1
+      valuestart = 0
+      min = -Inf
+      max = 1E+038
       reffontheight = 14
     end
   end
   object rowcount: tintegeredit
-    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     frame.caption = 'Rowcount'
     frame.captionpos = cp_right
     frame.dummy = 0
@@ -134,7 +135,6 @@ object doublereallisteditor: tdoublereallisteditor
     bounds_x = 8
     bounds_y = 177
     bounds_cx = 108
-    bounds_cy = 20
     anchors = [an_left, an_bottom]
     onsetvalue = rowcountonsetvalue
     reffontheight = 14

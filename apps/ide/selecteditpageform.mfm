@@ -1,13 +1,9 @@
 object selecteditpagefo: tselecteditpagefo
-  optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
   visible = False
   bounds_x = 160
   bounds_y = 124
   bounds_cx = 704
   bounds_cy = 473
-  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
-  container.frame.zoomwidthstep = 1
-  container.frame.zoomheightstep = 1
   container.onlayout = formonchildscaled
   container.bounds = (
     0
@@ -39,21 +35,20 @@ object selecteditpagefo: tselecteditpagefo
     optionsgrid = [og_colsizing, og_focuscellonenter, og_colchangeontabkey, og_wraprow, og_wrapcol, og_autopopup]
     options = [lvo_readonly, lvo_drawfocus, lvo_mousemovefocus, lvo_focusselect, lvo_mouseselect, lvo_locate, lvo_hintclippedtext]
     onitemevent = doonitemevent
+    reffontheight = 14
   end
   object pathdisp: tstringdisp
-    optionswidget = [ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     frame.dummy = 0
     taborder = 2
     bounds_x = 0
-    bounds_y = 455
+    bounds_y = 454
     bounds_cx = 650
-    bounds_cy = 17
+    bounds_cy = 18
     anchors = [an_left, an_right, an_bottom]
     textflags = [tf_ycentered, tf_ellipseleft]
-    reffontheight = 13
+    reffontheight = 14
   end
   object openfilebutton: tbutton
-    optionswidget = [ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     taborder = 1
     bounds_x = 652
     bounds_y = 455
@@ -63,6 +58,5 @@ object selecteditpagefo: tselecteditpagefo
     state = [as_localcaption, as_localonexecute]
     caption = '&open'
     onexecute = openfileonexecute
-    reffontheight = 13
   end
 end

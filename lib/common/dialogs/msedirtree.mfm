@@ -1,12 +1,16 @@
 object dirtreefo: tdirtreefo
-  optionswidget = [ow_arrowfocus, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
   visible = False
   bounds_x = 80
   bounds_y = 374
   bounds_cx = 300
   bounds_cy = 203
   bounds_cxmin = 200
-  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.bounds = (
+    0
+    0
+    300
+    203
+  )
   optionswindow = [wo_popup, wo_buttonendmodal]
   options = [fo_closeonesc, fo_localshortcuts, fo_autoreadstat, fo_autowritestat]
   moduleclassname = 'tmseform'
@@ -22,10 +26,16 @@ object dirtreefo: tdirtreefo
     anchors = []
     datacols.count = 1
     datacols.items = <    
-      item
+      item[treeitem]
         width = 297
         options = [co_readonly, co_fill, co_savevalue]
         widgetname = 'treeitem'
+        dataclass = ttreeitemeditlist
+        datalist.imagelist = filedialogres.images
+        datalist.imagewidth = 16
+        datalist.imageheight = 16
+        datalist.onitemnotification = treeitemonitemnotification
+        datalist.oncreateitem = treeitemoncreateitem
       end>
     datarowlinewidth = 0
     datarowheight = 16
@@ -44,11 +54,6 @@ object dirtreefo: tdirtreefo
       bounds_cy = 16
       optionsedit = [oe_readonly, oe_undoonesc, oe_checkmrcancel, oe_forcereturncheckvalue, oe_locate, oe_savevalue, oe_savestate]
       ondataentered = treeitemondataentered
-      itemlist.imagelist = filedialogres.images
-      itemlist.imagewidth = 16
-      itemlist.imageheight = 16
-      itemlist.onitemnotification = treeitemonitemnotification
-      itemlist.oncreateitem = treeitemoncreateitem
       oncellevent = treeitemoncellevent
       options = [teo_treecolnavig, teo_enteronimageclick]
       reffontheight = 14
