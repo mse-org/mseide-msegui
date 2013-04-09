@@ -16,9 +16,10 @@ object mainfo: tmainfo
     bounds_y = 72
     bounds_cx = 50
     bounds_cy = 22
-    state = [as_localcaption]
+    state = [as_localcaption, as_localonexecute]
     caption = 'Exit'
     font.xscale = 1
     font.dummy = 0
+    onexecute = exitonexecute
   end
 end
