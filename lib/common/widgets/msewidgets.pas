@@ -5415,8 +5415,10 @@ end;
 procedure tscrollingwidgetnwr.widgetregionchanged(const sender: twidget);
 begin
  inherited;
- if not (ws1_anchorsizing in twidget1(sender).fwidgetstate1) and
-                not (ws_destroying in fwidgetstate) and not (csloading in componentstate) then begin
+ if ((sender = nil) or 
+         not (ws1_anchorsizing in twidget1(sender).fwidgetstate1)) and
+           not (ws_destroying in fwidgetstate) and
+                                 not (csloading in componentstate) then begin
   tcustomscrollboxframe(fframe).updateclientrect;
  end;
 // else begin
@@ -5509,6 +5511,7 @@ end;
 
 procedure tscrollingwidgetnwr.clampinview(const arect: rectty; const bottomright: boolean);
 begin
+ updateroot;
  frame.showrect(removerect(arect,clientpos),bottomright);
 // frame.showrect(removerect(arect,clientwidgetpos));
 // frame.showrect(arect);

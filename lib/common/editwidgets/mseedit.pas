@@ -380,7 +380,7 @@ type
    procedure dopaint(const canvas: tcanvas); override;
    procedure paintimage(const canvas: tcanvas); virtual;
    procedure doafterpaint(const canvas: tcanvas); override;
-   procedure rootchanged; override;
+   procedure rootchanged(const awidgetregionivalid: boolean); override;
    procedure showhint(var info: hintinfoty); override;
 
    procedure dochange; virtual;
@@ -1511,7 +1511,7 @@ begin
  feditor.dofocus;
 end;
 
-procedure tcustomedit.rootchanged;
+procedure tcustomedit.rootchanged(const awidgetregionivalid: boolean);
 begin
  inherited;
  feditor.poschanged;

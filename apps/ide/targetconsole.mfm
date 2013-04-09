@@ -8,8 +8,6 @@ object targetconsolefo: ttargetconsolefo
   bounds_y = 385
   bounds_cx = 368
   bounds_cy = 137
-  container.frame.zoomwidthstep = 1
-  container.frame.zoomheightstep = 1
   container.bounds = (
     0
     0
@@ -48,7 +46,7 @@ object targetconsolefo: ttargetconsolefo
   onidle = targetconsoleonidle
   moduleclassname = 'tdockform'
   object grid: twidgetgrid
-    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_fontlineheight, ow_autoscale]
+    frame.sbhorz.pagesize = 0.117960679773409
     bounds_x = 0
     bounds_y = 0
     bounds_cx = 358
@@ -61,7 +59,7 @@ object targetconsolefo: ttargetconsolefo
     rowcountmax = 5000
     datacols.count = 1
     datacols.items = <    
-      item
+      item[terminal]
         width = 3000
         options = [co_fill, co_savestate, co_mousescrollrow]
         widthmin = 3000
@@ -72,14 +70,13 @@ object targetconsolefo: ttargetconsolefo
     datarowheight = 14
     reffontheight = 14
     object terminal: tterminal
-      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontlineheight, ow_autoscale]
       taborder = 1
       visible = False
       bounds_x = 0
       bounds_y = 0
       bounds_cx = 3000
       bounds_cy = 14
-      optionsedit = [oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_exitoncursor, oe_nofirstarrownavig, oe_caretonreadonly, oe_focusrectonreadonly, oe_autopopupmenu, oe_keyexecute, oe_checkvaluepaststatread, oe_savestate]
+      optionsedit = [oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_exitoncursor, oe_nofirstarrownavig, oe_caretonreadonly, oe_focusrectonreadonly, oe_savestate, oe_checkvaluepaststatread]
       maxchars = 120
       onsendtext = sendtext
       reffontheight = 14

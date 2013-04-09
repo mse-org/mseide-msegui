@@ -8,12 +8,18 @@ object panelfo: tpanelfo
   bounds_y = 493
   bounds_cx = 323
   bounds_cy = 195
-  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_autoscale]
+  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent]
   container.frame.framei_left = 0
   container.frame.framei_top = 0
   container.frame.framei_right = 0
   container.frame.framei_bottom = 0
   container.frame.localprops = [frl_fileft, frl_fitop, frl_firight, frl_fibottom]
+  container.bounds = (
+    0
+    0
+    313
+    195
+  )
   dragdock.tab_options = [tabo_dragsource, tabo_dragdest, tabo_hintclippedtext]
   dragdock.tab_textflags = [tf_ycentered, tf_ellipseright]
   dragdock.tab_widthmax = 100

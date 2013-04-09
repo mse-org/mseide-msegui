@@ -3453,7 +3453,7 @@ begin
  if fmodule is twidget then begin
   with twidget1(fmodule) do begin
    fwidgetrect.pos:= nullpoint;
-   rootchanged;
+   rootchanged(true);
   end;
  end;
 end;

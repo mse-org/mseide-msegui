@@ -1,5 +1,4 @@
 object disassfo: tdisassfo
-  optionswidget = [ow_arrowfocus, ow_subfocus, ow_mousewheel, ow_destroywidgets, ow_hinton, ow_autoscale]
   frame.grip_size = 10
   frame.grip_options = [go_closebutton, go_fixsizebutton, go_topbutton]
   frame.dummy = 0
@@ -10,8 +9,6 @@ object disassfo: tdisassfo
   bounds_y = 502
   bounds_cx = 564
   bounds_cy = 210
-  container.frame.zoomwidthstep = 1
-  container.frame.zoomheightstep = 1
   container.bounds = (
     0
     0
@@ -92,7 +89,6 @@ object disassfo: tdisassfo
   onshow = disassfoonshow
   moduleclassname = 'tdockform'
   object grid: tstringgrid
-    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     color = -1879048187
     bounds_x = 0
     bounds_y = 0

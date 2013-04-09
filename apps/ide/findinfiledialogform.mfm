@@ -1,13 +1,11 @@
 object findinfileadialogfo: tfindinfiledialogfo
-  optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
+  optionswidget = [ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_hinton]
   visible = False
   bounds_x = 268
   bounds_y = 415
   bounds_cx = 339
   bounds_cy = 251
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets]
-  container.frame.zoomwidthstep = 1
-  container.frame.zoomheightstep = 1
   container.bounds = (
     0
     0
@@ -19,7 +17,6 @@ object findinfileadialogfo: tfindinfiledialogfo
   caption = 'Find Text in Files'
   moduleclassname = 'tmseform'
   object findtext: thistoryedit
-    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     frame.caption = '&Text to find'
     frame.button.color = -2147483646
     frame.outerframe = (
@@ -41,7 +38,6 @@ object findinfileadialogfo: tfindinfiledialogfo
     reffontheight = 14
   end
   object dir: tfilenameedit
-    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     frame.caption = '&Directory'
     frame.button.color = -2147483646
     frame.button.imagenr = 17
@@ -66,7 +62,6 @@ object findinfileadialogfo: tfindinfiledialogfo
     reffontheight = 14
   end
   object mask: thistoryedit
-    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     frame.caption = '&File Mask'
     frame.button.color = -2147483646
     frame.outerframe = (
@@ -200,7 +195,6 @@ object findinfileadialogfo: tfindinfiledialogfo
       place_mode = wam_end
       place_options = [plo_propmargin, plo_syncmaxautosize]
       object ok: tbutton
-        optionswidget = [ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
         bounds_x = 5
         bounds_y = 5
         bounds_cx = 49
@@ -209,10 +203,8 @@ object findinfileadialogfo: tfindinfiledialogfo
         state = [as_default, as_localdefault, as_localcaption]
         caption = 'OK'
         modalresult = mr_ok
-        reffontheight = 14
       end
       object cancel: tbutton
-        optionswidget = [ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
         taborder = 1
         bounds_x = 59
         bounds_y = 5
@@ -222,7 +214,6 @@ object findinfileadialogfo: tfindinfiledialogfo
         state = [as_localcaption]
         caption = 'Cancel'
         modalresult = mr_cancel
-        reffontheight = 14
       end
     end
     object subdirs: tbooleanedit

@@ -2499,7 +2499,7 @@ type
    procedure setupeditor(const acell: gridcoordty; const focusin: boolean); virtual;
    procedure dofontheightdelta(var delta: integer); override;
    procedure checkcellvalue(var accept: boolean); override;
-   procedure rootchanged; override;
+   procedure rootchanged(const awidgetregionivalid: boolean); override;
    procedure updatelayout; override;
    procedure firstcellclick(const cell: gridcoordty; const info: mouseeventinfoty); override;
    function createdatacols: tdatacols; override;
@@ -16134,7 +16134,7 @@ begin
  end;
 end;
 
-procedure tcustomstringgrid.rootchanged;
+procedure tcustomstringgrid.rootchanged(const awidgetregionivalid: boolean);
 begin
  inherited;
  feditor.poschanged;

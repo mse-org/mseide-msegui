@@ -1,108 +1,107 @@
 object finddialogfo: tfinddialogfo
-  optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
+  optionswidget = [ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_hinton]
+  visible = False
   bounds_x = 319
   bounds_y = 205
   bounds_cx = 331
   bounds_cy = 116
-  taborder = 1
-  visible = False
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets]
-  container.bounds_x = 0
-  container.bounds_y = 0
-  container.bounds_cx = 331
-  container.bounds_cy = 116
-  container.frame.dummy = 0
+  container.bounds = (
+    0
+    0
+    331
+    116
+  )
   options = [fo_closeonesc, fo_localshortcuts, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savezorder]
   statfile = statfile1
   caption = 'Find Text'
   moduleclassname = 'tmseform'
   object tlayouter2: tlayouter
-    bounds_x = 8
-    bounds_y = 45
-    bounds_cx = 294
-    bounds_cy = 40
     frame.dummy = 0
     taborder = 2
+    bounds_x = 8
+    bounds_y = 45
+    bounds_cx = 267
+    bounds_cy = 40
     optionsscale = [osc_expandx, osc_shrinkx]
     optionslayout = [lao_placex]
     place_mindist = 4
     place_maxdist = 4
     object selectedonly: tbooleanedit
-      bounds_x = 195
-      bounds_y = 10
-      bounds_cx = 99
-      bounds_cy = 17
       frame.caption = 'select&ed only'
       frame.dummy = 0
       frame.outerframe = (
         0
-        2
-        86
+        1
+        75
         2
       )
+      bounds_x = 179
+      bounds_y = 11
+      bounds_cx = 88
+      bounds_cy = 16
       statfile = statfile1
     end
     object wholeword: tbooleanedit
-      bounds_x = 105
-      bounds_y = 10
-      bounds_cx = 86
-      bounds_cy = 17
       frame.caption = '&whole word'
       frame.dummy = 0
       frame.outerframe = (
         0
-        2
-        73
+        1
+        66
         2
       )
       taborder = 1
+      bounds_x = 96
+      bounds_y = 11
+      bounds_cx = 79
+      bounds_cy = 16
     end
     object casesensitive: tbooleanedit
-      bounds_x = 0
-      bounds_y = 10
-      bounds_cx = 101
-      bounds_cy = 17
       frame.caption = 'case&sensitive'
       frame.dummy = 0
       frame.outerframe = (
         0
-        2
-        88
+        1
+        79
         2
       )
       taborder = 2
+      bounds_x = 0
+      bounds_y = 11
+      bounds_cx = 92
+      bounds_cy = 16
     end
   end
   object findtext: thistoryedit
-    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-    bounds_x = 8
-    bounds_y = 5
-    bounds_cx = 316
-    bounds_cy = 39
     frame.caption = 'Text to &find'
-    frame.dummy = 0
     frame.outerframe = (
       0
-      18
+      17
       0
       0
     )
+    bounds_x = 8
+    bounds_y = 6
+    bounds_cx = 316
+    bounds_cy = 37
     anchors = [an_left, an_top, an_right]
-    optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_resetselectonexit, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savevalue, oe_savestate]
+    optionsedit1 = [oe1_autopopupmenu]
+    optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_savevalue, oe_savestate]
     dropdown.cols.count = 1
     dropdown.cols.items = <    
       item
       end>
-    reffontheight = 15
+    reffontheight = 14
   end
   object tlayouter1: tlayouter
-    bounds_x = 213
-    bounds_y = 88
-    bounds_cx = 109
-    bounds_cy = 21
     frame.dummy = 0
-    anchors = [an_top, an_right]
     taborder = 1
+    bounds_x = 219
+    bounds_y = 88
+    bounds_cx = 103
+    bounds_cy = 20
+    anchors = [an_top, an_right]
     optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
     optionslayout = [lao_placex, lao_aligny]
     align_glue = wam_start
@@ -111,29 +110,25 @@ object finddialogfo: tfinddialogfo
     place_mode = wam_end
     place_options = [plo_syncmaxautosize]
     object cancel: tbutton
-      optionswidget = [ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-      bounds_x = 57
+      bounds_x = 54
       bounds_y = 0
-      bounds_cx = 52
-      bounds_cy = 21
+      bounds_cx = 49
+      bounds_cy = 20
       anchors = [an_top, an_right]
       state = [as_localcaption]
       caption = '&Cancel'
       modalresult = mr_cancel
-      reffontheight = 15
     end
     object tbutton2: tbutton
-      optionswidget = [ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+      taborder = 1
       bounds_x = 0
       bounds_y = 0
-      bounds_cx = 52
-      bounds_cy = 21
+      bounds_cx = 49
+      bounds_cy = 20
       anchors = [an_top, an_right]
-      taborder = 1
       state = [as_default, as_localdefault, as_localcaption]
       caption = '&OK'
       modalresult = mr_ok
-      reffontheight = 15
     end
   end
   object statfile1: tstatfile

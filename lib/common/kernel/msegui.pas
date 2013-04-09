@@ -72,14 +72,10 @@ type
                    ow_noparentshortcut, //do not react to shortcuts from parent
                    ow_canclosenil,      // don't use, moved to optionswidget1
                    ow_mousetransparent,ow_mousewheel,
-                   ow_noscroll,ow_nochildpaintclip,
+                   ow_noscroll,ow_nochildpaintclip,ow_nochildclipsiblings,
                    ow_destroywidgets,ow_nohidewidgets,
                    ow_hinton,ow_hintoff,ow_disabledhint,ow_multiplehint,
-                   ow_timedhint,
-                   
-                   ow_fontglyphheight,ow_fontlineheight,ow_autoscale,
-                   ow_autosize,ow_autosizeanright,ow_autosizeanbottom 
-                           //don't use, moved to optionwidget1
+                   ow_timedhint
                    );
  optionswidgetty = set of optionwidgetty;
  optionwidget1ty = (
@@ -103,16 +99,8 @@ type
                     );
                                          
 const
- deprecatedoptionswidget= [ow_noautosizing,ow_canclosenil,
-                           ow_autosize,
-                           ow_autosizeanright,ow_autosizeanbottom,
-                           ow_fontglyphheight,ow_fontlineheight,
-                           ow_autoscale];
- invisibleoptionswidget = [ord(ow_noautosizing),ord(ow_canclosenil),
-                           ord(ow_autosize),
-                           ord(ow_autosizeanright),ord(ow_autosizeanbottom),
-                           ord(ow_fontglyphheight),ord(ow_fontlineheight),
-                           ord(ow_autoscale)]; 
+ deprecatedoptionswidget= [ow_noautosizing,ow_canclosenil];
+ invisibleoptionswidget = [ord(ow_noautosizing),ord(ow_canclosenil)]; 
 
 type
  optionswidget1ty = set of optionwidget1ty;
@@ -1256,7 +1244,6 @@ type
    function getsize: sizety;
 
    function invalidateneeded: boolean;
-   procedure updateroot;
    procedure addopaquechildren(var region: gdiregionty);
    procedure updatewidgetregion;
    function isclientmouseevent(var info: mouseeventinfoty): boolean;
@@ -1300,6 +1287,7 @@ type
   protected
    fwidgets: widgetarty;
    fnoinvalidate: integer;
+   fwidgetupdating: integer;
    foptionswidget: optionswidgetty;
    foptionswidget1: optionswidget1ty;
    fparentwidget: twidget;
@@ -1328,6 +1316,7 @@ type
    procedure navigrequest(var info: naviginfoty); virtual;
    function navigdistance(var info: naviginfoty): integer; virtual;
 
+   procedure updateroot;
    procedure setcolor(const avalue: colorty); virtual;
    function gethint: msestring; virtual;
    procedure sethint(const Value: msestring); virtual;
@@ -1435,7 +1424,7 @@ type
    procedure poschanged; virtual;
    procedure clientrectchanged; virtual;
    procedure parentchanged; virtual;
-   procedure rootchanged; virtual;
+   procedure rootchanged(const awidgetregioninvalid: boolean); virtual;
    function getdefaultfocuschild: twidget; virtual;
                                    //returns first focusable widget
    procedure setdefaultfocuschild(const value: twidget); virtual;
@@ -1561,6 +1550,8 @@ type
    procedure checkautosize;
 
    function isloading: boolean;      //checks ws_loadlock and csdestroing too
+   procedure beginupdate; //sets ws_loadlock and noinvalidate
+   procedure endupdate;
    function canmouseinteract: boolean; //checks csdesigning and cssubcomponent
    function widgetstate: widgetstatesty;                 //iframe
    property widgetstate1: widgetstates1ty read fwidgetstate1;
@@ -3493,6 +3484,35 @@ begin
   end
   else begin
    result:= createregion(gdi);
+  end;
+ end;
+end;
+
+procedure regmove(const region: gdiregionty; const dist: pointty);
+var
+ info: drawinfoty;
+begin
+ with region,info.regionoperation do begin
+  if region <> 0 then begin
+   source:= region;
+   rect.pos:= dist;
+   gdi_call(gdf_moveregion,info,gdi);
+  end;
+ end;
+end;
+
+function regcliprect(const region: gdiregionty): rectty;
+var
+ info: drawinfoty;
+begin
+ with region,info.regionoperation do begin
+  if region <> 0 then begin
+   source:= region;
+   gdi_call(gdf_regionclipbox,info,gdi);
+   result:= rect;
+  end
+  else begin
+   result:= nullrect;
   end;
  end;
 end;
@@ -6657,13 +6677,14 @@ begin
  end;
  setlength(fwidgets,high(fwidgets)+2);
  fwidgets[high(fwidgets)]:= child;
- child.rootchanged;
- child.updateopaque(true); //for cl_parent
+ child.rootchanged(true);
+// child.updateopaque(true); //for cl_parent
  if not isloading then begin
+  child.updateopaque(true); //for cl_parent
   child.ftaborder:= high(fwidgets);
   sortzorder;
   updatetaborder(child);
-  if child.visible then begin
+  if child.visible and not child.isloading then begin
    widgetregionchanged(child);
    if focused then begin
     checksubfocus(false);
@@ -6686,7 +6707,7 @@ begin
  if fdefaultfocuschild = child then begin
   fdefaultfocuschild:= nil;
  end;
- child.rootchanged;
+ child.rootchanged(true);
  if not isloading then begin
   updatetaborder(nil);
   if child.isvisible then begin
@@ -6867,7 +6888,21 @@ procedure twidget.internalsetwidgetrect(value: rectty;
     fparentwidget.widgetregionchanged(self); //new position
    end;
   end;
- end;
+ end; //checkwidgetregionchanged
+
+ procedure movewidgetregion(const awidget: twidget; const dist: pointty);
+ var
+  int1: integer;
+ begin
+  with awidget do begin
+   if (ws1_widgetregionvalid in fwidgetstate1) then begin
+    regmove(fwidgetregion,dist);
+   end;
+   for int1:= 0 to high(fwidgets) do begin
+    movewidgetregion(fwidgets[int1],dist);
+   end;
+  end; 
+ end; //movewidgetregion
 
 var
  bo1,bo2,poscha,sizecha: boolean;
@@ -6956,9 +6991,12 @@ begin
                                  (fwidgetrect.y <> value.y)) then begin
    include(fparentwidget.fwidgetstate1,ws1_childrectchanged);
   end;
+  if fparentwidget <> nil then begin
+   movewidgetregion(self,subpoint(value.pos,fwidgetrect.pos));
+  end;
   fwidgetrect.x:= value.x;
   fwidgetrect.y:= value.y;
-  rootchanged;
+  rootchanged(false);
  end;
  if sizecha then begin
   inc(fsetwidgetrectcount);
@@ -7308,7 +7346,8 @@ begin
  else begin
   fwidgetstate:= fwidgetstate - [ws_opaque,ws_isvisible];
  end;
- if (bo1 <> (ws_opaque in fwidgetstate)) and (fparentwidget <> nil) then begin
+ if (bo1 <> (ws_opaque in fwidgetstate)) and (fparentwidget <> nil) 
+                       and not fparentwidget.isloading then begin
   bo2:= ws1_updateopaque in fwidgetstate1;
   include(fwidgetstate1,ws1_updateopaque);
   try
@@ -7635,7 +7674,7 @@ var
  int1: integer;
 begin
  exclude(fwidgetstate,ws_minclientsizevalid);
- widgetregioninvalid;
+// widgetregioninvalid;
  if isvisible then begin
   invalidatewidget;
   reclipcaret;
@@ -7883,18 +7922,20 @@ begin
    with widget1 do begin
     if isvisible and testintersectrect(rect1,fwidgetrect) then begin
      saveindex:= canvas.save;
-     for int2:= int1 + 1 to self.widgetcount - 1 do begin
-      with self.fwidgets[int2],tcanvas1(canvas) do begin
-       if visible and testintersectrect(widget1.fwidgetrect,fwidgetrect) then begin
-            //clip higher level siblings
-        if (ws_opaque in fwidgetstate) then begin
-         subcliprect(fwidgetrect);
-        end
-        else begin
-         reg1:= msegui.createregion(self.window.fgdi);
-         addopaquechildren(reg1);
-         subclipregion(reg1.region);
-         msegui.destroyregion(reg1);
+     if not (ow_nochildclipsiblings in self.foptionswidget) then begin
+      for int2:= int1 + 1 to self.widgetcount - 1 do begin
+       with self.fwidgets[int2],tcanvas1(canvas) do begin
+        if visible and testintersectrect(widget1.fwidgetrect,fwidgetrect) then begin
+             //clip higher level siblings
+         if (ws_opaque in fwidgetstate) then begin
+          subcliprect(fwidgetrect);
+         end
+         else begin
+          reg1:= msegui.createregion(self.window.fgdi);
+          addopaquechildren(reg1);
+          subclipregion(reg1.region);
+          msegui.destroyregion(reg1);
+         end;
         end;
        end;
       end;
@@ -7940,7 +7981,12 @@ var
 begin
  if not (csdestroying in componentstate) then begin
   widgetregioninvalid;
-  invalidaterect(sender.fwidgetrect,org_widget);
+  if sender = nil then begin
+   invalidate;
+  end
+  else begin
+   invalidaterect(sender.fwidgetrect,org_widget);
+  end;
   if componentstate * [csloading,csdestroying] = [] then begin
    for int1:= 0 to high(fwidgets) do begin
     fwidgets[int1].parentwidgetregionchanged(sender);
@@ -7980,6 +8026,7 @@ begin
   if widgetcount > 0 then begin
    fwidgetregion:= createregion(window.fgdi);
    addopaquechildren(fwidgetregion);
+{
    if fframe <> nil then begin
     frame.checkstate;
     regintersectrect(fwidgetregion,makerect(fframe.fpaintrect.x+frootpos.x,
@@ -7989,6 +8036,7 @@ begin
    else begin
     regintersectrect(fwidgetregion,makerect(frootpos,fwidgetrect.size));
    end;
+}
   end;
   include(fwidgetstate1,ws1_widgetregionvalid);
  end;
@@ -8026,16 +8074,19 @@ begin
  end;
 end;
 
-procedure twidget.rootchanged;
+procedure twidget.rootchanged(const awidgetregioninvalid: boolean);
 var
  int1: integer;
 begin
  if fparentwidget <> nil then begin
   fwindow:= nil;
  end;
- fwidgetstate1:= fwidgetstate1 - [ws1_widgetregionvalid,ws1_rootvalid];
+ fwidgetstate1:= fwidgetstate1 - [{ws1_widgetregionvalid,}ws1_rootvalid];
+ if awidgetregioninvalid then begin
+  exclude(fwidgetstate1,ws1_widgetregionvalid);
+ end;
  for int1:= 0 to high(fwidgets) do begin
-  fwidgets[int1].rootchanged;
+  fwidgets[int1].rootchanged(awidgetregioninvalid);
  end;
 end;
 
@@ -9654,7 +9705,8 @@ begin
   exit; //show called
  end;
  if bo1 then begin
-  if not bo2 and (fparentwidget <> nil) then begin
+  if not bo2 and (fparentwidget <> nil) and 
+                                 not fparentwidget.isloading then begin
    fparentwidget.widgetregionchanged(self);
   end;
   if ownswindow1 then begin
@@ -10716,23 +10768,46 @@ begin
 end;
 
 procedure twidget.scrollwidgets(const dist: pointty);
+ procedure movereg(const awidget: twidget);
+ var
+  int1: integer;
+ begin
+  with awidget do begin
+   if ws1_widgetregionvalid in fwidgetstate1 then begin
+    regmove(fwidgetregion,dist);
+   end;
+   for int1:= 0 to high(fwidgets) do begin
+    movereg(fwidgets[int1]);
+   end;
+  end;
+ end;
 var
  int1: integer;
  widget1: twidget;
 begin
  if (dist.x <> 0) or (dist.y <> 0) then begin
+  if ws1_widgetregionvalid in fwidgetstate1 then begin
+   regmove(fwidgetregion,dist);
+  end;
+  widget1:= self;
+  while not (ws_opaque in widget1.fwidgetstate) and 
+                                    (widget1.parentwidget <> nil) do begin
+   widget1:= widget1.parentwidget;
+   exclude(widget1.fwidgetstate1,ws1_widgetregionvalid);
+  end;
   for int1:= 0 to widgetcount - 1 do begin
    widget1:= fwidgets[int1];
+   movereg(widget1);
    with widget1 do begin
     addpoint1(fwidgetrect.pos,dist);
     addpoint1(frootpos,dist);
-    rootchanged;
+    rootchanged(false);
    end;
    if appinst.fcaretwidget = widget1 then begin
     widget1.reclipcaret;
    end;
   end;
-  widgetregioninvalid;
+//  widgetregioninvalid;
   if fwindow <> nil then begin
    fwindow.fscrollnotifylist.notify(self);
   end;
@@ -11068,26 +11143,6 @@ begin
    opt1:= optionswidget1;
    if ow_noautosizing in avalue then begin  //don't use deprecated flags
     opt1:= opt1 + [ow1_noautosizing];
-   end;
-   if [ow_fontglyphheight,ow_fontlineheight,ow_autoscale] * avalue <> 
-                                                              [] then begin
-    updatebit1({$ifdef FPC}longword{$else}word{$endif}(opt1),
-                                                   ord(ow1_fontglyphheight),
-                                         ow_fontglyphheight in avalue);
-    updatebit1({$ifdef FPC}longword{$else}word{$endif}(opt1),
-                     ord(ow1_fontlineheight),
-                                         ow_fontlineheight in avalue);
-    updatebit1({$ifdef FPC}longword{$else}word{$endif}(opt1),
-                 ord(ow1_autoscale),ow_autoscale in avalue);
-   end;
-   if ow_autosize in avalue then begin
-    opt1:= opt1 + [ow1_autowidth,ow1_autoheight];
-   end;
-   if ow_autosizeanright in avalue then begin
-    include(opt1,ow1_autosizeanright);
-   end;
-   if ow_autosizeanbottom in avalue then begin
-    include(opt1,ow1_autosizeanbottom);
    end;
    if ow_canclosenil in avalue then begin
     include(opt1,ow1_canclosenil);
@@ -12223,6 +12278,25 @@ begin
  result:= canclose;
 end;
 
+procedure twidget.beginupdate;
+begin
+ if fwidgetupdating = 0 then begin
+  include(fwidgetstate,ws_loadlock);
+  inc(fnoinvalidate);
+ end;
+ inc(fwidgetupdating);
+end;
+
+procedure twidget.endupdate;
+begin
+ dec(fwidgetupdating);
+ if fwidgetupdating = 0 then begin
+  exclude(fwidgetstate,ws_loadlock);
+  dec(fnoinvalidate);
+  widgetregionchanged(nil);
+ end;
+end;
+
 { twindow }
 
 constructor twindow.create(const aowner: twidget; const agdi: pgdifunctionaty);
@@ -12237,7 +12311,7 @@ begin
  fasynccanvas:= creategdicanvas(fgdi,false,self,icanvas(self));
  fscrollnotifylist:= tnotifylist.create;
  inherited create;
- fownerwidget.rootchanged; //nil all references
+ fownerwidget.rootchanged(false); //nil all references
 end;
 
 destructor twindow.destroy;
@@ -12250,7 +12324,7 @@ begin
   dec(ftransientfor.ftransientforcount);
  end;
  if fownerwidget <> nil then begin
-  fownerwidget.rootchanged;
+  fownerwidget.rootchanged(false);
  end;
  destroywindow;
  fcanvas.free;
