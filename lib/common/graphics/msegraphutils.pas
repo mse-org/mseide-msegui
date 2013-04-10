@@ -628,6 +628,8 @@ function rotatedirection(const olddest,newvalue,
 
 procedure removeduplicatedpoints(var vect: pointarty);
 
+function hsbtorgb(hue,sat,bri: word): colorty;
+
 implementation
 uses
  mseglob,SysUtils,mseformatstr,classes,mclasses;
@@ -661,6 +663,75 @@ const
    'Could not create a GLXPixmap.',
    'Could not create canvas window.'
  );
+
+function hsbtorgb(hue,sat,bri: word): colorty;
+var
+ r,g,b: real;
+ int1: integer;
+ rea1,rea2: real;
+begin
+ if hue > 360 then begin
+  hue:= 360;
+ end;
+ if sat > 100 then begin
+  sat:= 100;
+ end;
+ if bri > 100 then begin
+  bri:= 100;
+ end;
+ int1:= hue;
+ r:= 0;
+ g:= 0;
+ b:= 0;
+ if int1 < 60 then begin
+  r:= 60;
+  g:= int1;
+ end
+ else begin
+  if int1 < 120 then begin
+   r:= 120 - int1;
+   g:= 60;
+  end
+  else begin
+   if int1 < 180 then begin
+    g:= 60;
+    b:= int1 - 120;
+   end
+   else begin
+    if int1 < 240 then begin
+     g:= 240 - int1;
+     b:= 60
+    end
+    else begin
+     if int1 < 300 then begin
+      b:= 60;
+      r:= int1 - 240;
+     end
+     else begin
+      b:= 360 - int1;
+      r:= 60;
+     end;
+    end;
+   end;
+  end;
+ end;
+ rea1:= sat / 100;
+ rea2:= 1-rea1;
+ rea1:= rea1 / 60;
+ r:= r * rea1 + rea2;
+ g:= g * rea1 + rea2;
+ b:= b * rea1 + rea2;
+ rea1:= bri / 100;
+ r:= r*rea1;
+ g:= g*rea1;
+ b:= b*rea1;
+ with rgbtriplety(result) do begin
+  res:= 0;
+  red:= round(r*255);
+  green:= round(g*255);
+  blue:= round(b*255);
+ end;
+end;
 
 function calcrectalignment(const dest: rectty; source: rectty;
                                  const alignment: alignmentsty): rectty;
