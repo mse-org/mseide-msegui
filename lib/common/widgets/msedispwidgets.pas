@@ -280,6 +280,40 @@ type
    property value;
  end;
  
+ tcustomint64disp = class(tnumdisp)
+  private
+   fvalue: int64;
+   fondatachange: updateint64eventty;
+   fbase: numbasety;
+   fbitcount: integer;
+   procedure setvalue(const Value: int64);
+   procedure setbase(const Value: numbasety);
+   procedure setbitcount(const Value: integer);
+  {$ifdef mse_with_ifi}
+   function getifilink: tifiint64linkcomp;
+   procedure setifilink(const avalue: tifiint64linkcomp);
+  {$endif}
+  protected
+   function getvaluetext: msestring; override;
+   procedure valuechanged; override;
+  public
+   constructor create(aowner: tcomponent); override;
+   property value: int64 read fvalue write setvalue default 0;
+  published
+   property base: numbasety read fbase write setbase default nb_dec;
+   property bitcount: integer read fbitcount write setbitcount default 64;
+   property ondatachange: updateint64eventty read fondatachange
+                                                       write fondatachange;
+{$ifdef mse_with_ifi}
+   property ifilink: tifiint64linkcomp read getifilink write setifilink;
+{$endif}
+ end;
+
+ tint64disp = class(tcustomint64disp)
+  published
+   property value;
+ end;
+ 
  tcustomrealdisp = class(tnumdisp)
   private
    fvalue: realty;
@@ -786,6 +820,65 @@ begin
 end;
 
 procedure tcustomintegerdisp.valuechanged;
+begin
+ if canevent(tmethod(fondatachange)) then begin
+  fondatachange(self,fvalue);
+ end;
+ inherited;
+end;
+
+{ tcustomint64disp }
+
+constructor tcustomint64disp.create(aowner: tcomponent);
+begin
+ fbase:= nb_dec;
+ fbitcount:= 64;
+ inherited;
+end;
+
+{$ifdef mse_with_ifi}
+
+function tcustomint64disp.getifilink: tifiint64linkcomp;
+begin
+ result:= tifiint64linkcomp(fifilink);
+end;
+
+procedure tcustomint64disp.setifilink(const avalue: tifiint64linkcomp);
+begin
+ inherited setifilink(avalue);
+end;
+{$endif}
+
+function tcustomint64disp.getvaluetext: msestring;
+begin
+ result:= intvaluetostr(fvalue,fbase,fbitcount);
+end;
+
+procedure tcustomint64disp.setbase(const Value: numbasety);
+begin
+ if fbase <> value then begin
+  fbase := Value;
+  formatchanged;
+ end;
+end;
+
+procedure tcustomint64disp.setbitcount(const Value: integer);
+begin
+ if fbitcount <> value then begin
+  fbitcount := Value;
+  formatchanged;
+ end;
+end;
+
+procedure tcustomint64disp.setvalue(const Value: int64);
+begin
+// if fvalue <> value then begin
+  fvalue := Value;
+  valuechanged;
+// end;
+end;
+
+procedure tcustomint64disp.valuechanged;
 begin
  if canevent(tmethod(fondatachange)) then begin
   fondatachange(self,fvalue);

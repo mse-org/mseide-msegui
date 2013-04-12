@@ -1449,12 +1449,23 @@ begin
   case po2^ of
    '#': begin
     inc(po2);
-    po3:= po2;
-    while (po2^ >= '0') and (po2^ <= '9') do begin
+    if po2^ = '$' then begin
      inc(po2);
+     po3:= po2;
+     while po2^ in ['0'..'9','a'..'f','A'..'F'] do begin
+      inc(po2);
+     end;
+     setstring(str1,po3,po2-po3);
+     po1^:= msechar(strtohex(str1));
+    end
+    else begin
+     po3:= po2;
+     while (po2^ >= '0') and (po2^ <= '9') do begin
+      inc(po2);
+     end;
+     setstring(str1,po3,po2-po3);
+     po1^:= msechar(strtoint(str1));
     end;
-    setstring(str1,po3,po2-po3);
-    po1^:= msechar(strtoint(str1));
     inc(po1);
    end;
    '''': begin               
@@ -1527,12 +1538,23 @@ begin
   case po2^ of
    '#': begin
     inc(po2);
-    po3:= po2;
-    while (po2^ >= '0') and (po2^ <= '9') do begin
+    if po2^ = '$' then begin
      inc(po2);
+     po3:= po2;
+     while po2^ in ['0'..'9','a'..'f','A'..'F'] do begin
+      inc(po2);
+     end;
+     setstring(str1,po3,po2-po3);
+     addstring(msechar(strtohex(str1)));
+    end
+    else begin
+     po3:= po2;
+     while (po2^ >= '0') and (po2^ <= '9') do begin
+      inc(po2);
+     end;
+     setstring(str1,po3,po2-po3);
+     addstring(msechar(strtoint(str1)));
     end;
-    setstring(str1,po3,po2-po3);
-    addstring(msechar(strtoint(str1)));
    end;
    '''': begin               
     inc(po2);                  //'.....
@@ -4244,13 +4266,83 @@ begin
 end;
 
 function strtohex1(const inp: string; out value: longword): boolean;
+var
+ po1: pchar;
+ ch1: char;
+ int1: integer;
 begin
- result:= trystrtoint('$'+inp,integer(value));
+ value:= 0;
+ int1:= length(inp);
+ result:= (int1 > 0) and (int1 <= 8);
+ if result then begin
+  po1:= pointer(inp);
+  while true do begin
+   ch1:= po1^;
+   if ch1 = #0 then begin
+    break;
+   end;
+   value:= value shl 4;
+   if (ch1 >= '0') and (ch1 <= '9') then begin
+    value:= value + ord(ch1) - ord('0');
+   end
+   else begin
+    if (ch1 >= 'a') and (ch1 <= 'f') then begin
+     value:= value + ord(ch1) - (ord('a')-10);
+    end
+    else begin
+     if (ch1 >= 'A') and (ch1 <= 'F') then begin
+      value:= value + ord(ch1) - (ord('A')-10);
+     end
+     else begin
+      result:= false;
+      break;
+     end;
+    end;
+   end;
+   inc(po1);
+  end;
+ end;
+// result:= trystrtoint('$'+inp,integer(value));
 end;
 
 function strtohex164(const inp: string; out value: qword): boolean;
+var
+ po1: pchar;
+ ch1: char;
+ int1: integer;
 begin
- result:= trystrtoint64('$'+inp,int64(value));
+ value:= 0;
+ int1:= length(inp);
+ result:= (int1 > 0) and (int1 <= 16);
+ if result then begin
+  po1:= pointer(inp);
+  while true do begin
+   ch1:= po1^;
+   if ch1 = #0 then begin
+    break;
+   end;
+   value:= value shl 4;
+   if (ch1 >= '0') and (ch1 <= '9') then begin
+    value:= value + ord(ch1) - ord('0');
+   end
+   else begin
+    if (ch1 >= 'a') and (ch1 <= 'f') then begin
+     value:= value + ord(ch1) - (ord('a')-10);
+    end
+    else begin
+     if (ch1 >= 'A') and (ch1 <= 'F') then begin
+      value:= value + ord(ch1) - (ord('A')-10);
+     end
+     else begin
+      result:= false;
+      break;
+     end;
+    end;
+   end;
+   inc(po1);
+  end;
+ end;
+// result:= trystrtoint64('$'+inp,int64(value));
 end;
 
 function trystrtohex(const inp: string; out value: longword): boolean;
