@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -1154,6 +1154,7 @@ procedure setcolormapvalue(index: colorty; const red,green,blue: integer); overl
                     //RGB values 0..255
 procedure setcolormapvalue(const index: colorty; const acolor: colorty); overload;
 function isvalidmapcolor(index: colorty): boolean;
+function transparencytoopacity(const trans: colorty): colorty;
 
 procedure drawdottedlinesegments(const acanvas: tcanvas; const lines: segmentarty;
              const colorline: colorty);
@@ -1215,6 +1216,14 @@ begin
  end;
 end;
 {$endif}
+
+function transparencytoopacity(const trans: colorty): colorty;
+begin
+ result:= trans;
+ if trans <= $00ffffff then begin
+  result:= result xor $00ffffff;
+ end;
+end;
 
 procedure movealignment(const source: alignmentsty; var dest: alignmentsty);
 {$ifndef FPC}

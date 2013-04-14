@@ -4276,7 +4276,7 @@ begin
      bmp.alignment:= bmp1.alignment;
      bmp.colorbackground:= bmp1.colorbackground;
      bmp.colorforeground:= bmp1.colorforeground;
-     bmp.transparency:= bmp1.transparency;
+     bmp.opacity:= bmp1.opacity;
      bmp.transparentcolor:= bmp1.transparentcolor;
     end;
     setpointervalue(int1,bmp);
@@ -4287,54 +4287,7 @@ begin
   end;
  end;
 end;
-{
-procedure tbitmappropertyeditor.edit;
-var
- bmp,bmp1: tmaskedbitmap;
- int1: integer;
- dialog: tfiledialog;
- statfile1: tstatfile;
-begin
- statfile1:= tstatfile.create(nil);
- dialog:= tfiledialog.create(nil);
- try
-  statfile1.options:= [sfo_memory];
-  statfile1.filename:= bmpfiledialogstatname;
-  with dialog,controller do begin
-   filterlist.asarraya:= graphicfilefilternames;
-   filterlist.asarrayb:= graphicfilemasks;
-   captionopen:= 'Open image file';
-   statfile:= statfile1;
-   statfile.readstat;
-   filename:= filedir(filename);
-   if execute = mr_ok then begin
-    statfile.writestat;
-    bmp:= tmaskedbitmap.create(false);
-    try
-     bmp.loadfromfile(filename,graphicfilefilterlabel(filterindex));
-     for int1:= 0 to high(fprops) do begin
-      bmp1:= tmaskedbitmap(getordvalue(int1));
-      if bmp1 <> nil then begin
-       bmp.alignment:= bmp1.alignment;
-       bmp.colorbackground:= bmp1.colorbackground;
-       bmp.colorforeground:= bmp1.colorforeground;
-       bmp.transparency:= bmp1.transparency;
-       bmp.transparentcolor:= bmp1.transparentcolor;
-      end;
-      setordvalue(int1,ptruint(bmp));
-     end;
-     modified;
-    finally
-     bmp.Free;
-    end;
-   end;
-  end;
- finally
-  dialog.free;
-  statfile1.free;
- end;
-end;
-}
+
 function tbitmappropertyeditor.getvalue: msestring;
 begin
  with tmaskedbitmap(getpointervalue) do begin

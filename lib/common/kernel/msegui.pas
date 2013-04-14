@@ -5806,7 +5806,7 @@ begin
       calcfade(fi.fade_opapos,fi.fade_opacolor,bmp.mask);
      end
      else begin
-      bmp.transparency:= fi.fade_transparency;
+      bmp.opacity:= fi.fade_transparency;
      end;
      bmp.paint(canvas,rect1,[al_stretchx,al_stretchy]);
     end
@@ -5820,9 +5820,11 @@ begin
    else begin //fade_color.count = 1
     if fi.options * faceoptionsmask <> [] then begin
      createalphabuffer(false);
-     falphabuffer.transparency:=
-      (longword(colortorgb(tfadecolorarrayprop1(fi.fade_color).fitems[0])) xor
-                $ffffffff) and $00ffffff;
+     falphabuffer.opacity:=
+       colorty(colortorgb(tfadecolorarrayprop1(fi.fade_color).fitems[0]));
+//     falphabuffer.opacity:=
+//      (longword(colortorgb(tfadecolorarrayprop1(fi.fade_color).fitems[0])) xor
+//                $ffffffff) and $00ffffff;
     end
     else begin
      canvas.fillrect(rect1,tfadecolorarrayprop1(fi.fade_color).fitems[0]);
@@ -5832,8 +5834,9 @@ begin
   else begin //fade_color.count = 0
    if fi.options * faceoptionsmask <> [] then begin
     createalphabuffer(false);
-    falphabuffer.transparency:=
-     (longword(colortorgb(fi.fade_transparency)) xor $ffffffff) and $00ffffff;
+    falphabuffer.opacity:= colorty(colortorgb(fi.fade_transparency));
+//    falphabuffer.transparency:=
+//     (longword(colortorgb(fi.fade_transparency)) xor $ffffffff) and $00ffffff;
    end;
   end;
   if fi.image.hasimage then begin

@@ -257,7 +257,7 @@ begin
     with bitmap do begin
      bmp.alignment:= alignment;
      bmp.options:= options;
-     bmp.transparency:= transparency;
+     bmp.opacity:= opacity;
      bmp.transparentcolor:= transparentcolor;
     end;
     loadcellbmp(canvas,bmp);
