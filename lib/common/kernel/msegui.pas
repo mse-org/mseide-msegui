@@ -970,7 +970,8 @@ type
   procedure widgetregioninvalid;
  end;
 
- faceoptionty = (fao_alphafadeimage,fao_alphafadenochildren,fao_alphafadeall);
+ faceoptionty = (fao_alphafadeimage,fao_alphafadenochildren,fao_alphafadeall,
+                 fao_fadeoverlay,fao_overlay);
  faceoptionsty = set of faceoptionty;
 
  tfadecolorarrayprop = class(tcolorarrayprop)
@@ -5781,8 +5782,47 @@ var
 var
  bmp: tmaskedbitmap;
 
+ procedure paintimage;
+ begin
+  if fi.image.hasimage then begin
+   fi.image.paint(canvas,rect);
+   if fao_alphafadeimage in fi.options then begin
+    doalphablend(canvas);
+   end;
+  end;
+  if fi.frameimage_list <> nil then begin
+   fi.frameimage_list.paint(canvas,fi.frameimage_offset,rect.pos);
+   fi.frameimage_list.paint(canvas,fi.frameimage_offset+1,
+   makerect(rect.x,
+            rect.y+fi.frameimage_list.height,
+            fi.frameimage_list.width,
+            rect.cy-2*fi.frameimage_list.height),[al_stretchy]);
+   fi.frameimage_list.paint(canvas,fi.frameimage_offset+2,rect,[al_bottom]);
+   fi.frameimage_list.paint(canvas,fi.frameimage_offset+3,
+   makerect(rect.x+fi.frameimage_list.width,
+            rect.y+rect.cy-fi.frameimage_list.height,
+            rect.cx-2*fi.frameimage_list.width,
+            fi.frameimage_list.height),[al_stretchx]);
+   fi.frameimage_list.paint(canvas,fi.frameimage_offset+4,rect,
+                                                [al_bottom,al_right]);
+   fi.frameimage_list.paint(canvas,fi.frameimage_offset+5,
+   makerect(rect.x+rect.cx-fi.frameimage_list.width,
+            rect.y+fi.frameimage_list.height,
+            fi.frameimage_list.width,
+            rect.cy-2*fi.frameimage_list.height),[al_stretchy]);
+   fi.frameimage_list.paint(canvas,fi.frameimage_offset+6,rect,[al_right]);
+   fi.frameimage_list.paint(canvas,fi.frameimage_offset+7,
+   makerect(rect.x+fi.frameimage_list.width,rect.y,
+            rect.cx-2*fi.frameimage_list.width,
+            fi.frameimage_list.height),[al_stretchx]);
+  end;
+ end;
+
 begin
  if intersectrect(rect,canvas.clipbox,rect1) then begin
+  if fao_fadeoverlay in options then begin
+   paintimage;
+  end;
   if fi.fade_color.count > 0 then begin
    if (fi.fade_color.count > 1) or 
      ((fi.fade_opacolor.count > 1) or (fi.fade_opacity <> cl_none)) and 
@@ -5848,37 +5888,8 @@ begin
 //     (longword(colortorgb(fi.fade_opacity)) xor $ffffffff) and $00ffffff;
    end;
   end;
-  if fi.image.hasimage then begin
-   fi.image.paint(canvas,rect);
-   if fao_alphafadeimage in fi.options then begin
-    doalphablend(canvas);
-   end;
-  end;
-  if fi.frameimage_list <> nil then begin
-   fi.frameimage_list.paint(canvas,fi.frameimage_offset,rect.pos);
-   fi.frameimage_list.paint(canvas,fi.frameimage_offset+1,
-   makerect(rect.x,
-            rect.y+fi.frameimage_list.height,
-            fi.frameimage_list.width,
-            rect.cy-2*fi.frameimage_list.height),[al_stretchy]);
-   fi.frameimage_list.paint(canvas,fi.frameimage_offset+2,rect,[al_bottom]);
-   fi.frameimage_list.paint(canvas,fi.frameimage_offset+3,
-   makerect(rect.x+fi.frameimage_list.width,
-            rect.y+rect.cy-fi.frameimage_list.height,
-            rect.cx-2*fi.frameimage_list.width,
-            fi.frameimage_list.height),[al_stretchx]);
-   fi.frameimage_list.paint(canvas,fi.frameimage_offset+4,rect,
-                                                [al_bottom,al_right]);
-   fi.frameimage_list.paint(canvas,fi.frameimage_offset+5,
-   makerect(rect.x+rect.cx-fi.frameimage_list.width,
-            rect.y+fi.frameimage_list.height,
-            fi.frameimage_list.width,
-            rect.cy-2*fi.frameimage_list.height),[al_stretchy]);
-   fi.frameimage_list.paint(canvas,fi.frameimage_offset+6,rect,[al_right]);
-   fi.frameimage_list.paint(canvas,fi.frameimage_offset+7,
-   makerect(rect.x+fi.frameimage_list.width,rect.y,
-            rect.cx-2*fi.frameimage_list.width,
-            fi.frameimage_list.height),[al_stretchx]);
+  if not (fao_fadeoverlay in options) then begin
+   paintimage;
   end;
  end;
 end;
@@ -7898,13 +7909,15 @@ begin
  end;
  face1:= getactface;
  if face1 <> nil then begin
-  if fframe <> nil then begin
-   canvas.remove(fframe.fclientrect.pos);
-   face1.paint(canvas,makerect(nullpoint,fframe.fpaintrect.size));
-   canvas.move(fframe.fclientrect.pos);
-  end
-  else begin
-   face1.paint(canvas,makerect(nullpoint,fwidgetrect.size));
+  if not (fao_overlay in face1.options) then begin
+   if fframe <> nil then begin
+    canvas.remove(fframe.fclientrect.pos);
+    face1.paint(canvas,makerect(nullpoint,fframe.fpaintrect.size));
+    canvas.move(fframe.fclientrect.pos);
+   end
+   else begin
+    face1.paint(canvas,makerect(nullpoint,fwidgetrect.size));
+   end;
   end;
  end;
  doonpaintbackground(canvas);
@@ -7926,7 +7939,23 @@ begin
 end;
 
 procedure twidget.dopaintoverlay(const canvas: tcanvas);
+var
+ face1: tcustomface;
 begin
+ face1:= getactface;
+ if face1 <> nil then begin
+  if fao_overlay in face1.options then begin
+   if fframe <> nil then begin
+//    canvas.remove(fframe.fclientrect.pos);
+//    face1.paint(canvas,makerect(nullpoint,fframe.fpaintrect.size));
+    face1.paint(canvas,fframe.fpaintrect);
+//    canvas.move(fframe.fclientrect.pos);
+   end
+   else begin
+    face1.paint(canvas,makerect(nullpoint,fwidgetrect.size));
+   end;
+  end;
+ end;
  if fframe <> nil then begin
   fframe.paintoverlay(canvas,makerect(nullpoint,fwidgetrect.size));
  end;

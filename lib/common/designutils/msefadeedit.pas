@@ -183,7 +183,7 @@ begin
    end;    
   end
   else begin
-   bo1:= fadepos.count = fadeopapos.count;
+   bo1:= (fadepos.count = fadeopapos.count) and (fadepos.count <> 0);
    form1.grid.rowcount:= fadepos.count;
    for int1:= 0 to form1.grid.rowhigh do begin
     form1.posed[int1]:= fadepos[int1];
