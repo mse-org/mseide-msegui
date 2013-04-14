@@ -1749,9 +1749,9 @@ begin
     rs:= (opacity.red*256 + 128) div 255;
     gs:= (opacity.green*256 + 128) div 255;
     bs:= (opacity.blue*256 + 128) div 255;
-    rd:= 256-rd;
-    gd:= 256-gd;
-    bd:= 256-bd;
+    rd:= 256-rs;
+    gd:= 256-gs;
+    bd:= 256-bs;
     for int1:= 0 to destimage.length - 1 do begin
      with rgbtriplety(destimage.pixels^[int1]) do begin
       red:= (rd*red + rs*rgbtriplety(sourceimage.pixels^[int1]).red) shr 8;
