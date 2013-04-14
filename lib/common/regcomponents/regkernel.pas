@@ -163,6 +163,16 @@ begin
                                     tfacetemplatefadecoloreditor);
  registerpropertyeditor(typeinfo(trealarrayprop),tfacetemplate,'fade_pos',
                                     tfacetemplatefadeposeditor);
+
+ registerpropertyeditor(typeinfo(tcolorarrayprop),tcustomface,'fade_transcolor',
+                                    tfacefadetranscoloreditor);
+ registerpropertyeditor(typeinfo(trealarrayprop),tcustomface,'fade_transpos',
+                                    tfacefadetransposeditor);
+ registerpropertyeditor(typeinfo(tcolorarrayprop),tfacetemplate,'fade_transcolor',
+                                    tfacetemplatefadetranscoloreditor);
+ registerpropertyeditor(typeinfo(trealarrayprop),tfacetemplate,'fade_transpos',
+                                    tfacetemplatefadetransposeditor);
+
  registerpropertyeditor(typeinfo(tsumdownarrayprop),nil,'',
                                     tlevelarraypropertyeditor);
  registerpropertyeditor(typeinfo(tsumuparrayprop),nil,'',

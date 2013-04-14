@@ -32,6 +32,7 @@ const
  defaulttoplevelwidgetcolor = cl_background;
  defaultfadecolor = cl_ltgray;
  defaultfadecolor1 = cl_dkgray;
+ defaultfadetranscolor = cl_white;
  hintdelaytime = 500000; //us
  defaulthintshowtime = 3000000; //us
  mouseparktime = 500000; //us
@@ -265,14 +266,16 @@ const
                       frl1_framefaceoffsetactiveclicked,
                       frl1_font,frl1_captiondist,frl1_captionoffset];
 type
- facelocalpropty = (fal_options,fal_fadirection,fal_image,fal_fapos,fal_facolor,
+ facelocalpropty = (fal_options,fal_fadirection,fal_image,
+                    fal_fapos,fal_facolor,fal_fatranspos,fal_fatranscolor,
                     fal_fatransparency,fal_frameimagelist,fal_frameimageoffset);
  facelocalpropsty = set of facelocalpropty;
 
 const
  allfacelocalprops: facelocalpropsty =
-                    [fal_options,fal_fadirection,fal_image,fal_fapos,fal_facolor,
-                    fal_fatransparency];
+                    [fal_options,fal_fadirection,fal_image,
+                    fal_fapos,fal_facolor,fal_fatranspos,fal_fatranscolor,
+                    fal_fatransparency,fal_frameimagelist,fal_frameimageoffset];
 type
 
  
@@ -969,6 +972,11 @@ type
   public
    constructor create;
  end;
+
+ tfadetranscolorarrayprop = class(tcolorarrayprop)
+  public
+   constructor create;
+ end;
  
  faceinfoty = record
   frameimage_offset: integer;
@@ -980,6 +988,8 @@ type
   fade_pos: trealarrayprop;
   fade_color: tfadecolorarrayprop;
   fade_transparency: colorty;
+  fade_transpos: trealarrayprop;
+  fade_transcolor: tfadetranscolorarrayprop;
  end;
 
  tfacecomp = class;
@@ -1002,6 +1012,10 @@ type
    function isfadirectionstored: boolean;
    procedure setfade_transparency(avalue: colorty);
    function isfatransparencystored: boolean;
+   procedure setfade_transcolor(const Value: tfadetranscolorarrayprop);
+   function isfatranscolorstored: boolean;
+   procedure setfade_transpos(const Value: trealarrayprop);
+   function isfatransposstored: boolean;
    procedure setframeimage_list(const avalue: timagelist);
    function isframeimage_liststored: boolean;
    procedure setframeimage_offset(const avalue: integer);
@@ -1039,6 +1053,10 @@ type
    property fade_transparency: colorty read fi.fade_transparency
                     write setfade_transparency 
                     stored isfatransparencystored default cl_none;
+   property fade_transpos: trealarrayprop read fi.fade_transpos 
+                       write setfade_transpos stored isfatransposstored;
+   property fade_transcolor: tfadetranscolorarrayprop read fi.fade_transcolor
+                       write setfade_transcolor stored isfatranscolorstored;
 
    property frameimage_list: timagelist read fi.frameimage_list 
                     write setframeimage_list stored isframeimage_liststored;
@@ -1060,6 +1078,8 @@ type
    property image;
    property fade_pos;
    property fade_color;
+   property fade_transpos;
+   property fade_transcolor;
    property fade_direction;
    property fade_transparency;
    property frameimage_list;
@@ -1104,9 +1124,11 @@ type
    fi: faceinfoty;
    procedure setoptions(const avalue: faceoptionsty);
    procedure setfade_color(const Value: tfadecolorarrayprop);
-   procedure setfade_direction(const Value: graphicdirectionty);
    procedure setfade_pos(const Value: trealarrayprop);
+   procedure setfade_transcolor(const Value: tfadetranscolorarrayprop);
+   procedure setfade_transpos(const Value: trealarrayprop);
    procedure setfade_transparency(avalue: colorty);
+   procedure setfade_direction(const Value: graphicdirectionty);
    procedure setimage(const Value: tmaskedbitmap);
    procedure doimagechange(const sender: tobject);
    procedure dochange(const sender: tarrayprop; const index: integer);
@@ -1127,6 +1149,10 @@ type
    property fade_pos: trealarrayprop read fi.fade_pos write setfade_pos;
    property fade_color: tfadecolorarrayprop read fi.fade_color 
                                                    write setfade_color;
+   property fade_transpos: trealarrayprop read fi.fade_transpos 
+                    write setfade_transpos;
+   property fade_transcolor: tfadetranscolorarrayprop read fi.fade_transcolor 
+                                                   write setfade_transcolor;
    property fade_direction: graphicdirectionty read fi.fade_direction
                 write setfade_direction default gd_right;
    property fade_transparency: colorty read fi.fade_transparency
@@ -5465,13 +5491,18 @@ end;
 procedure tcustomface.internalcreate;
 begin
  fi.image:= tmaskedbitmap.create(false);
- fi.image.onchange:= {$ifdef FPC}@{$endif}imagechanged;
- fi.fade_pos:= trealarrayprop.Create;
- fi.fade_color:= tfadecolorarrayprop.Create;
+ fi.image.onchange:= {$ifdef fpc}@{$endif}imagechanged;
+ fi.fade_pos:= trealarrayprop.create;
+ fi.fade_color:= tfadecolorarrayprop.create;
  fi.fade_pos.link([fi.fade_color,fi.fade_pos]);
+ fi.fade_transpos:= trealarrayprop.create;
+ fi.fade_transcolor:= tfadetranscolorarrayprop.create;
+ fi.fade_transpos.link([fi.fade_transcolor,fi.fade_transpos]);
  fi.fade_transparency:= cl_none;
- fi.fade_pos.onchange:= {$ifdef FPC}@{$endif}dochange;
- fi.fade_color.onchange:= {$ifdef FPC}@{$endif}dochange;
+ fi.fade_pos.onchange:= {$ifdef fpc}@{$endif}dochange;
+ fi.fade_color.onchange:= {$ifdef fpc}@{$endif}dochange;
+ fi.fade_transpos.onchange:= {$ifdef fpc}@{$endif}dochange;
+ fi.fade_transcolor.onchange:= {$ifdef fpc}@{$endif}dochange;
 end;
 
 constructor tcustomface.create;
@@ -5502,6 +5533,8 @@ begin
  fi.image.Free;
  fi.fade_pos.Free;
  fi.fade_color.free;
+ fi.fade_transpos.Free;
+ fi.fade_transcolor.free;
  falphabuffer.Free;
 end;
 
@@ -5523,6 +5556,20 @@ begin
      fitems[high(fitems)]:= 1;
     end;
     fi.fade_color.order(ar1);
+   end;
+  end;
+ end
+ else begin
+  if sender = fi.fade_transpos then begin
+   with trealarrayprop1(fi.fade_transpos) do begin
+    if high(fitems) >= 0 then begin
+     sortarray(trealarrayprop1(fi.fade_transpos).fitems,ar1);
+     fitems[0]:= 0;
+     if high(fitems) > 0 then begin
+      fitems[high(fitems)]:= 1;
+     end;
+     fi.fade_transcolor.order(ar1);
+    end;
    end;
   end;
  end;
@@ -5558,6 +5605,8 @@ begin
     self.fade_direction:= fade_direction;
     self.fade_color:= fade_color;
     self.fade_pos:= fade_pos;
+    self.fade_transcolor:= fade_transcolor;
+    self.fade_transpos:= fade_transpos;
     self.fade_transparency:= fade_transparency;
     self.image:= image;
     self.options:= options;
@@ -5588,35 +5637,147 @@ var
  end;
 
 var
- bmp: tbitmap;
- rgbs: array of rgbtriplety;
  pixelscale: real;
  vert: boolean;
- rea1,rea2: real;
- int1,int2: integer;
- col1,col2: prgbtriplety;
- curnode,nextnode: integer;
- posar: realarty;
- pixelstep: real;
- po1: prgbtriplety;
- startpix,curpix,nextpix,pixcount: integer;
- pixinc: integer;
- redsum,greensum,bluesum,lengthsum: real;
+ startpix,pixcount: integer;
+ 
+ procedure calcfade(const fadepos: trealarrayprop; 
+                    const fadecolor: tcolorarrayprop; const bmp: tbitmap);
+ var
+  posar: realarty;
+  rgbs: array of rgbtriplety;
+  int1,int2: integer;
+  po1: prgbtriplety;
+  pixelstep: real;
+  pixinc: integer;
+  curpix,nextpix: integer;
+  redsum,greensum,bluesum,lengthsum: real;
+  curnode,nextnode: integer;
+  rea1,rea2: real;
+  col1,col2: prgbtriplety;
+  
+ begin
+  posar:= trealarrayprop1(fadepos).fitems;
+  with tfadecolorarrayprop(fadecolor) do begin
+   setlength(rgbs,length(fitems));
+   for int1:= 0 to high(rgbs) do begin
+    rgbs[int1]:= colortorgb(fintf.translatecolor(fitems[int1]));
+   end;
+  end;
+  if high(rgbs) > 0 then begin
+   po1:= bmp.scanline[0];
+   pixelstep:= 1/pixelscale;
+   pixinc:= sizeof(rgbtriplety);
+   if fi.fade_direction in [gd_up,gd_left] then begin //revert
+    if fi.fade_direction = gd_left then begin
+     startpix:= rect.x+rect.cx-rect1.x-rect1.cx;
+    end
+    else begin
+     startpix:= rect.y+rect.cy-rect1.y-rect1.cy;
+    end;
+    inc(po1,pixcount-1);
+    pixinc:= -pixinc;
+   end;
+   curnode:= 0;
+   int1:= 0;
+   while int1 < pixcount do begin
+    rea1:= (int1+startpix)*pixelstep + 0.000001;
+    if int1 = 0 then begin
+     while posar[curnode] < rea1 do begin
+      inc(curnode);
+     end;
+     dec(curnode);
+    end;
+    nextnode:= curnode;
+    rea1:= rea1 + pixelstep;
+    while (posar[nextnode] < rea1) and (nextnode < high(posar)) do begin
+     inc(nextnode);
+    end;
+    if nextnode > curnode+1 then begin //calc average
+     redsum:= 0;
+     greensum:= 0;
+     bluesum:= 0;
+     lengthsum:= 0;
+     for int2:= curnode to nextnode - 2 do begin //todo: optimize
+      rea1:= posar[int2+1] - posar[int2];
+      redsum:= redsum + (rgbs[int2].red+rgbs[int2+1].red)*rea1;
+      greensum:= greensum + (rgbs[int2].green+rgbs[int2+1].green)*rea1;
+      bluesum:= bluesum + (rgbs[int2].blue+rgbs[int2+1].blue)*rea1;
+      lengthsum:= lengthsum + rea1;
+     end;
+     if lengthsum > 0 then begin
+      rea1:= 1/(2*lengthsum);
+      with po1^ do begin
+       red:= round(redsum*rea1);
+       green:= round(greensum*rea1);
+       blue:= round(bluesum*rea1);
+       res:= 0;
+      end;
+     end
+     else begin
+      po1^:= rgbs[curnode];
+     end;
+     dec(nextnode);
+    end
+    else begin
+     nextpix:= trunc(posar[nextnode]*pixelscale)-startpix;
+     if int1 = nextpix then begin
+      po1^:= rgbs[curnode];
+     end
+     else begin
+      curpix:= trunc(posar[curnode]*pixelscale)-startpix;
+      if nextpix = curpix then begin
+       rea1:= 1;
+      end
+      else begin
+       rea1:= 1/(nextpix-curpix);
+      end;
+      if nextpix > pixcount then begin
+       nextpix:= pixcount;
+      end;
+      col1:= @rgbs[curnode];
+      col2:= @rgbs[nextnode];
+      for int2:= int1-curpix to nextpix-curpix-1 do begin
+       rea2:= rea1*int2;
+       with po1^ do begin
+        res:= 0;
+        red:= col1^.red + 
+                      round((col2^.red-col1^.red)*rea2);
+        green:= col1^.green + 
+                      round((col2^.green-col1^.green)*rea2);
+        blue:= col1^.blue + 
+                      round((col2^.blue-col1^.blue)*rea2);
+       end;
+       inc(pchar(po1),pixinc);
+      end;
+      dec(pchar(po1),pixinc);
+      int1:= nextpix-1;
+     end;         
+    end;
+    curnode:= nextnode;
+    inc(int1);
+    inc(pchar(po1),pixinc);
+   end;
+  end
+  else begin //count = 1
+   if vert then begin
+    bmp.canvas.drawline(nullpoint,makepoint(0,rect1.cy-1),fadecolor[0]);
+   end
+   else begin
+    bmp.canvas.drawline(nullpoint,makepoint(rect1.cx-1,0),fadecolor[0]);
+   end;
+  end;
+ end; //calcfade
+
+var
+ bmp: tmaskedbitmap;
 
 begin
  if intersectrect(rect,canvas.clipbox,rect1) then begin
   if fi.fade_color.count > 0 then begin
    if (fi.fade_color.count > 1) or 
-                (fi.fade_transparency <> cl_none) and 
+     ((fi.fade_transcolor.count > 1) or (fi.fade_transparency <> cl_none)) and 
                                (fi.options * faceoptionsmask = []) then begin
-    posar:= trealarrayprop1(fi.fade_pos).fitems;
-    with tfadecolorarrayprop(fi.fade_color) do begin
-     setlength(rgbs,length(fitems));
-     for int1:= 0 to high(rgbs) do begin
-      rgbs[int1]:= colortorgb(fintf.translatecolor(fitems[int1]));
-     end;
-    end;
-    
     case fi.fade_direction of
      gd_up,gd_down: begin
       pixelscale:= rect.cy;
@@ -5631,118 +5792,22 @@ begin
       pixcount:= rect1.cx;
      end;
     end;
-    bmp:= tbitmap.create(false);
+    bmp:= tmaskedbitmap.create(false);
     if vert then begin
      bmp.size:= makesize(1,rect1.cy);
     end
     else begin
      bmp.size:= makesize(rect1.cx,1);
     end;
-    if high(rgbs) > 0 then begin
-     po1:= bmp.scanline[0];
-     pixelstep:= 1/pixelscale;
-     pixinc:= sizeof(rgbtriplety);
-     if fi.fade_direction in [gd_up,gd_left] then begin //revert
-      if fi.fade_direction = gd_left then begin
-       startpix:= rect.x+rect.cx-rect1.x-rect1.cx;
-      end
-      else begin
-       startpix:= rect.y+rect.cy-rect1.y-rect1.cy;
-      end;
-      inc(po1,pixcount-1);
-      pixinc:= -pixinc;
-     end;
-     curnode:= 0;
-     int1:= 0;
-     while int1 < pixcount do begin
-      rea1:= (int1+startpix)*pixelstep + 0.000001;
-      if int1 = 0 then begin
-       while posar[curnode] < rea1 do begin
-        inc(curnode);
-       end;
-       dec(curnode);
-      end;
-      nextnode:= curnode;
-      rea1:= rea1 + pixelstep;
-      while (posar[nextnode] < rea1) and (nextnode < high(posar)) do begin
-       inc(nextnode);
-      end;
-      if nextnode > curnode+1 then begin //calc average
-       redsum:= 0;
-       greensum:= 0;
-       bluesum:= 0;
-       lengthsum:= 0;
-       for int2:= curnode to nextnode - 2 do begin //todo: optimize
-        rea1:= posar[int2+1] - posar[int2];
-        redsum:= redsum + (rgbs[int2].red+rgbs[int2+1].red)*rea1;
-        greensum:= greensum + (rgbs[int2].green+rgbs[int2+1].green)*rea1;
-        bluesum:= bluesum + (rgbs[int2].blue+rgbs[int2+1].blue)*rea1;
-        lengthsum:= lengthsum + rea1;
-       end;
-       if lengthsum > 0 then begin
-        rea1:= 1/(2*lengthsum);
-        with po1^ do begin
-         red:= round(redsum*rea1);
-         green:= round(greensum*rea1);
-         blue:= round(bluesum*rea1);
-         res:= 0;
-        end;
-       end
-       else begin
-        po1^:= rgbs[curnode];
-       end;
-       dec(nextnode);
-      end
-      else begin
-       nextpix:= trunc(posar[nextnode]*pixelscale)-startpix;
-       if int1 = nextpix then begin
-        po1^:= rgbs[curnode];
-       end
-       else begin
-        curpix:= trunc(posar[curnode]*pixelscale)-startpix;
-        if nextpix = curpix then begin
-         rea1:= 1;
-        end
-        else begin
-         rea1:= 1/(nextpix-curpix);
-        end;
-        if nextpix > pixcount then begin
-         nextpix:= pixcount;
-        end;
-        col1:= @rgbs[curnode];
-        col2:= @rgbs[nextnode];
-        for int2:= int1-curpix to nextpix-curpix-1 do begin
-         rea2:= rea1*int2;
-         with po1^ do begin
-          res:= 0;
-          red:= col1^.red + 
-                        round((col2^.red-col1^.red)*rea2);
-          green:= col1^.green + 
-                        round((col2^.green-col1^.green)*rea2);
-          blue:= col1^.blue + 
-                        round((col2^.blue-col1^.blue)*rea2);
-         end;
-         inc(pchar(po1),pixinc);
-        end;
-        dec(pchar(po1),pixinc);
-        int1:= nextpix-1;
-       end;         
-      end;
-      curnode:= nextnode;
-      inc(int1);
-      inc(pchar(po1),pixinc);
-     end;
-    end
-    else begin //count = 1
-     if vert then begin
-      bmp.canvas.drawline(nullpoint,makepoint(0,rect1.cy-1),fi.fade_color[0]);
+    calcfade(fi.fade_pos,fi.fade_color,bmp);
+    if fi.options * faceoptionsmask = [] then begin
+     if fi.fade_transpos.count > 0 then begin
+      bmp.colormask:= true;
+      calcfade(fi.fade_transpos,fi.fade_transcolor,bmp.mask);
      end
      else begin
-      bmp.canvas.drawline(nullpoint,makepoint(rect1.cx-1,0),fi.fade_color[0]);
+      bmp.transparency:= fi.fade_transparency;
      end;
-    end;
-    if fi.options * faceoptionsmask = [] then begin
-     bmp.transparency:= fi.fade_transparency;
      bmp.paint(canvas,rect1,[al_stretchx,al_stretchy]);
     end
     else begin
@@ -5851,6 +5916,18 @@ begin
  fi.fade_pos.assign(Value);
 end;
 
+procedure tcustomface.setfade_transcolor(const Value: tfadetranscolorarrayprop);
+begin
+ include(flocalprops,fal_fatranscolor);
+ fi.fade_transcolor.assign(Value);
+end;
+
+procedure tcustomface.setfade_transpos(const Value: trealarrayprop);
+begin
+ include(flocalprops,fal_fatranspos);
+ fi.fade_transpos.assign(Value);
+end;
+
 procedure tcustomface.setfade_direction(const Value: graphicdirectionty);
 begin
  include(flocalprops,fal_fadirection);
@@ -5910,6 +5987,12 @@ begin
  if not (fal_fapos in flocalprops) then begin
   fade_pos:= ainfo.fade_pos;
  end;
+ if not (fal_fatranscolor in flocalprops) then begin
+  fade_transcolor:= ainfo.fade_transcolor;
+ end;
+ if not (fal_fatranspos in flocalprops) then begin
+  fade_transpos:= ainfo.fade_transpos;
+ end;
  if not (fal_image in flocalprops) then begin
   image:= ainfo.image;
  end;
@@ -5962,6 +6045,16 @@ begin
  result:= (ftemplate = nil) or (fal_fapos in flocalprops);
 end;
 
+function tcustomface.isfatranscolorstored: boolean;
+begin
+ result:= (ftemplate = nil) or (fal_fatranscolor in flocalprops);
+end;
+
+function tcustomface.isfatransposstored: boolean;
+begin
+ result:= (ftemplate = nil) or (fal_fatranspos in flocalprops);
+end;
+
 function tcustomface.isfadirectionstored: boolean;
 begin
  result:= (ftemplate = nil) or (fal_fadirection in flocalprops);
@@ -5990,10 +6083,15 @@ begin
  fi.fade_pos:= trealarrayprop.Create;
  fi.fade_color:= tfadecolorarrayprop.Create;
  fi.fade_pos.link([fi.fade_color,fi.fade_pos]);
+ fi.fade_transpos:= trealarrayprop.Create;
+ fi.fade_transcolor:= tfadetranscolorarrayprop.Create;
+ fi.fade_transpos.link([fi.fade_transcolor,fi.fade_transpos]);
  fi.fade_transparency:= cl_none;
  fi.image.onchange:= {$ifdef FPC}@{$endif}doimagechange;
  fi.fade_pos.onchange:= {$ifdef FPC}@{$endif}dochange;
  fi.fade_color.onchange:= {$ifdef FPC}@{$endif}dochange;
+ fi.fade_transpos.onchange:= {$ifdef FPC}@{$endif}dochange;
+ fi.fade_transcolor.onchange:= {$ifdef FPC}@{$endif}dochange;
 end;
 
 constructor tfacetemplate.create(const owner: tmsecomponent;
@@ -6009,6 +6107,8 @@ begin
  fi.image.Free;
  fi.fade_pos.Free;
  fi.fade_color.Free;
+ fi.fade_transpos.Free;
+ fi.fade_transcolor.Free;
 end;
 
 procedure tfacetemplate.setfade_direction(const Value: graphicdirectionty);
@@ -6045,6 +6145,16 @@ end;
 procedure tfacetemplate.setfade_pos(const Value: trealarrayprop);
 begin
  fi.fade_pos.Assign(Value);
+end;
+
+procedure tfacetemplate.setfade_transcolor(const Value: tfadetranscolorarrayprop);
+begin
+ fi.fade_transcolor.Assign(Value);
+end;
+
+procedure tfacetemplate.setfade_transpos(const Value: trealarrayprop);
+begin
+ fi.fade_transpos.Assign(Value);
 end;
 
 procedure tfacetemplate.setfade_transparency(avalue: colorty);
@@ -17837,6 +17947,14 @@ constructor tfadecolorarrayprop.create;
 begin
  inherited;
  fvaluedefault:= defaultfadecolor;
+end;
+
+{ tfadetranscolorarrayprop }
+
+constructor tfadetranscolorarrayprop.create;
+begin
+ inherited;
+ fvaluedefault:= defaultfadetranscolor;
 end;
 
 initialization
