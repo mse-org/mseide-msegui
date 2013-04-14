@@ -1581,7 +1581,7 @@ begin
             (destrect^.cy <> sourcerect^.cy)) and
             (destrect^.cx > 0) and (destrect^.cy > 0);
   colormask:= (mask <> nil) and (not mask.monochrome or needstransform);
-  if hasxrender and (needstransform or (longword(transparency) <> 0) or
+  if hasxrender and (needstransform or (longword(opacity) <> maxopacity) or
                                                            colormask) then begin
    if needstransform then begin
 //    pictop:= pictopover;
@@ -1595,9 +1595,8 @@ begin
     ax:= x;
     ay:= y;
    end;
-   if (longword(transparency) <> 0) and not colormask then begin
-    maskpic:= createmaskpicture(rgbtriplety(longword(transparency) xor 
-                                               longword($ffffff)));
+   if (longword(opacity) <> maxopacity) and not colormask then begin
+    maskpic:= createmaskpicture(opacity);
     pictop:= pictopover;
    end
    else begin

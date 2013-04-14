@@ -1675,7 +1675,7 @@ begin
   else begin
    colormask:= nil;
   end;
-  if ((longword(transparency) <> 0) or (colormask <> nil))
+  if ((longword(opacity) <> maxopacity) or (colormask <> nil))
                and not (df_canvasismonochrome in drawingflags) then begin
    maskbmp:= 0;
    destdcbefore:= handle;
@@ -1746,12 +1746,12 @@ begin
    gui_pixmaptoimage(destbmp,destimage,destbmpdc);
    gui_pixmaptoimage(bufferbmp,sourceimage,handle);
    if colormask = nil then begin
-    rd:= (transparency.red*256 + 128) div 255;
-    gd:= (transparency.green*256 + 128) div 255;
-    bd:= (transparency.blue*256 + 128) div 255;
-    rs:= 256-rd;
-    gs:= 256-gd;
-    bs:= 256-bd;
+    rs:= (opacity.red*256 + 128) div 255;
+    gs:= (opacity.green*256 + 128) div 255;
+    bs:= (opacity.blue*256 + 128) div 255;
+    rd:= 256-rd;
+    gd:= 256-gd;
+    bd:= 256-bd;
     for int1:= 0 to destimage.length - 1 do begin
      with rgbtriplety(destimage.pixels^[int1]) do begin
       red:= (rd*red + rs*rgbtriplety(sourceimage.pixels^[int1]).red) shr 8;

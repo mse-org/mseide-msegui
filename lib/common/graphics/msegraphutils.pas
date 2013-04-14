@@ -54,6 +54,7 @@ type
  colorinfoarty = array of colorinfoty;
  
 const
+ maxopacity = $00ffffff;
  speccolormask =         $f0000000;
  speccolorshift = 28;
  cl_functional = colorty($80000000);

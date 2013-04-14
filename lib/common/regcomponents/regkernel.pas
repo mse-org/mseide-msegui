@@ -127,6 +127,11 @@ type
    function getelementeditorclass: elementeditorclassty; override;
   public
  end;
+
+ tfacelocalpropseditor = class(tsetpropertyeditor)
+  protected
+   function getinvisibleitems: tintegerset; override;
+ end;
  
 const   
  datamoduleintf: designmoduleintfty = 
@@ -155,6 +160,8 @@ begin
  registerpropertyeditor(typeinfo(tcustomaction),nil,'',tactionpropertyeditor);
  registerpropertyeditor(typeinfo(tshortcutactions),nil,'',
                            tshortcutactionspropertyeditor);
+ registerpropertyeditor(typeinfo(facelocalpropsty),nil,'',
+                                           tfacelocalpropseditor);
  registerpropertyeditor(typeinfo(tcolorarrayprop),tcustomface,'fade_color',
                                     tfacefadecoloreditor);
  registerpropertyeditor(typeinfo(trealarrayprop),tcustomface,'fade_pos',
@@ -564,6 +571,13 @@ begin
  end;
 end;
 *)
+{ tfacelocalpropseditor }
+
+function tfacelocalpropseditor.getinvisibleitems: tintegerset;
+begin
+ result:= invisiblefacelocalprops;
+end;
+
 initialization
  register;
 end.

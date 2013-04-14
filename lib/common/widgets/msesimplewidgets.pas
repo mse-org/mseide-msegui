@@ -463,14 +463,15 @@ type
    fcolorglyph: colorty;
    fcolorbackground: colorty;
    falignment: alignmentsty;
-   ftransparency: colorty;
+   fopacity: colorty;
    fimagesize: sizety;
    procedure setimagelist(const avalue: timagelist);
    procedure setimagenum(const avalue: integer);
    procedure setcolorglyph(const avalue: colorty);
    procedure setcolorbackground(const avalue: colorty);
    procedure setalignment(const avalue: alignmentsty);
-   procedure settransparency(const avalue: colorty);
+   procedure setopacity(const avalue: colorty);
+   procedure readtransparency(reader: treader);
   protected
    procedure dopaint(const canvas: tcanvas); override;
    procedure enabledchanged; override;
@@ -478,6 +479,7 @@ type
    procedure clientrectchanged; override;
    procedure objectevent(const sender: tobject;
                              const event: objecteventty); override;
+   procedure defineproperties(filer: tfiler); override;
   public
    constructor create(aowner: tcomponent); override;
   public
@@ -487,8 +489,8 @@ type
                            write setcolorglyph default cl_default;
    property colorbackground: colorty read fcolorbackground 
                            write setcolorbackground default cl_default;
-   property transparency: colorty read ftransparency 
-                           write settransparency default cl_default;
+   property opacity: colorty read fopacity 
+                           write setopacity default cl_default;
    property alignment: alignmentsty read falignment 
                         write setalignment default [al_xcentered,al_ycentered];
   published
@@ -504,7 +506,7 @@ type
    property imagenum;
    property colorglyph;
    property colorbackground;
-   property transparency;
+   property opacity;
    property alignment;
  end;
   
@@ -1774,7 +1776,7 @@ begin
  fimagenum:= -1;
  fcolorglyph:= cl_default;
  fcolorbackground:= cl_default;
- ftransparency:= cl_default;
+ fopacity:= cl_default;
  falignment:= [al_xcentered,al_ycentered];
  inherited;
  foptionswidget:= defaulticonoptionswidget;
@@ -1805,7 +1807,7 @@ begin
  inherited;
  if fimagelist <> nil then begin
   fimagelist.paint(canvas,fimagenum,innerclientrect,falignment,fcolorglyph,
-                   fcolorbackground,ftransparency);
+                   fcolorbackground,fopacity);
  end;
 end;
 
@@ -1853,10 +1855,10 @@ begin
  end;
 end;
 
-procedure tcustomicon.settransparency(const avalue: colorty);
+procedure tcustomicon.setopacity(const avalue: colorty);
 begin
- if ftransparency <> avalue then begin
-  ftransparency:= avalue;
+ if fopacity <> avalue then begin
+  fopacity:= avalue;
   invalidate;
  end;
 end;
@@ -1884,6 +1886,17 @@ begin
   end;
   invalidate;
  end;
+end;
+
+procedure tcustomicon.readtransparency(reader: treader);
+begin
+ opacity:= transparencytoopacity(reader.readinteger);
+end;
+
+procedure tcustomicon.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('transparency',@readtransparency,nil,false);
 end;
 
 { tgroupboxframe }

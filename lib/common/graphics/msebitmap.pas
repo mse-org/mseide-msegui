@@ -2408,8 +2408,7 @@ procedure timagelist.paint(const acanvas: tcanvas; const index: integer;
          const dest: rectty;  const alignment: alignmentsty = [];
          const acolor: colorty = cl_default;
          const acolorbackground: colorty = cl_default;
-                         const aopacity: colorty = cl_default
-  );
+                         const aopacity: colorty = cl_default);
 begin
  if (index >= 0) and (index < count) then begin
   fbitmap.paint(acanvas,dest,makerect(indextoorg(index),fsize),alignment,acolor,
@@ -2422,8 +2421,7 @@ procedure timagelist.paint(const acanvas: tcanvas; const index: integer;
          const alignment: alignmentsty = [];
          const acolor: colorty = cl_default;
          const acolorbackground: colorty = cl_default;
-                         const aopacity: colorty = cl_default
-                                                               );
+                         const aopacity: colorty = cl_default);
 
 begin
  addpoint1(source.pos,indextoorg(index));
@@ -2436,8 +2434,7 @@ end;
 procedure timagelist.paint(const acanvas: tcanvas; const index: integer;
                    const dest: pointty; const acolor: colorty = cl_default;
                    const acolorbackground: colorty = cl_default;
-                         const aopacity: colorty = cl_default
-            );
+                         const aopacity: colorty = cl_default);
 begin
  paint(acanvas,index,makerect(dest,size),[],acolor,acolorbackground,
                               aopacity);

@@ -1524,12 +1524,13 @@ var
  im1: maskedimagety;
  mode,datatype: glenum;
  map: array[0..1] of glfloat;
- opacity: glfloat;
+ opacity1: glfloat;
 // monomask: boolean;
  ps1,pd1: prgbtripleaty;
 // ps2: plongword;
 // pd2: prgbtriplety;
  int1: integer;
+ wo1: word;
 // lwo1: longword;
  
 begin
@@ -1562,9 +1563,13 @@ begin
     glpushclientattrib(gl_client_pixel_store_bit);
     glpushattrib(gl_pixel_mode_bit or gl_color_buffer_bit or 
                       gl_stencil_buffer_bit);
-    opacity:= 1-
-      (transparency.red+transparency.blue+transparency.red+transparency.blue) / 
-      (3*255);
+    wo1:= word(opacity.red)+opacity.blue+opacity.red+opacity.blue;
+    if wo1 = 3*255 then begin
+     opacity1:= 1;
+    end
+    else begin
+     opacity1:= wo1/(3*255);
+    end;
     with sourcerect^ do begin
      glpixelzoom(destrect^.cx/cx,-destrect^.cy/cy);
      glpixelstorei(gl_unpack_row_length,im1.image.size.cx);
@@ -1602,8 +1607,8 @@ begin
      map[1]:= glcolorforeground.blue/255;
      glpixelmapfv(gl_pixel_map_i_to_b,2,@map);
      if df_opaque in drawinfo.gc.drawingflags then begin
-      map[0]:= opacity;
-      if opacity < 1 then begin
+      map[0]:= opacity1;
+      if opacity1 < 1 then begin
        glenable(gl_blend);
        glblendfunc(gl_src_alpha,gl_one_minus_src_alpha);
       end;
@@ -1613,7 +1618,7 @@ begin
       glenable(gl_blend);
       glblendfunc(gl_src_alpha,gl_one_minus_src_alpha);
      end;
-     map[1]:= opacity;
+     map[1]:= opacity1;
      glpixelmapfv(gl_pixel_map_i_to_a,2,@map);
     end
     else begin

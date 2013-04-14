@@ -268,14 +268,19 @@ const
 type
  facelocalpropty = (fal_options,fal_fadirection,fal_image,
                     fal_fapos,fal_facolor,fal_faopapos,fal_faopacolor,
-                    fal_fatransparency,fal_frameimagelist,fal_frameimageoffset);
+                    fal_fatransparency,
+                    fal_faopacity,fal_frameimagelist,fal_frameimageoffset);
  facelocalpropsty = set of facelocalpropty;
 
 const
  allfacelocalprops: facelocalpropsty =
                     [fal_options,fal_fadirection,fal_image,
                     fal_fapos,fal_facolor,fal_faopapos,fal_faopacolor,
-                    fal_fatransparency,fal_frameimagelist,fal_frameimageoffset];
+                    fal_fatransparency,
+                    fal_faopacity,fal_frameimagelist,fal_frameimageoffset];
+deprecatedfacelocalprops = [fal_fatransparency];
+invisiblefacelocalprops = [ord(fal_fatransparency)];
+
 type
 
  
@@ -987,7 +992,7 @@ type
   image: tmaskedbitmap;
   fade_pos: trealarrayprop;
   fade_color: tfadecolorarrayprop;
-  fade_transparency: colorty;
+  fade_opacity: colorty;
   fade_opapos: trealarrayprop;
   fade_opacolor: tfadeopacolorarrayprop;
  end;
@@ -1010,8 +1015,8 @@ type
    function isfaposstored: boolean;
    procedure setfade_direction(const Value: graphicdirectionty);
    function isfadirectionstored: boolean;
-   procedure setfade_transparency(avalue: colorty);
-   function isfatransparencystored: boolean;
+   procedure setfade_opacity(avalue: colorty);
+   function isfaopacitystored: boolean;
    procedure setfade_opacolor(const Value: tfadeopacolorarrayprop);
    function isfaopacolorstored: boolean;
    procedure setfade_opapos(const Value: trealarrayprop);
@@ -1021,7 +1026,8 @@ type
    procedure setframeimage_offset(const avalue: integer);
    function isframeimage_offsetstored: boolean;
    procedure settemplate(const avalue: tfacecomp);
-   procedure setlocalprops(const avalue: facelocalpropsty);
+   procedure setlocalprops(avalue: facelocalpropsty);
+   procedure readtransparency(reader: treader);
   protected
    fintf: iface;
    fi: faceinfoty;
@@ -1030,6 +1036,7 @@ type
    procedure imagechanged(const sender: tobject);
    procedure internalcreate; override;
    procedure doalphablend(const canvas: tcanvas);
+   procedure defineproperties(filer: tfiler); override;
   public
    constructor create; overload; override;
    constructor create(const owner: twidget); reintroduce; overload;
@@ -1050,9 +1057,9 @@ type
    property fade_direction: graphicdirectionty read fi.fade_direction
                     write setfade_direction
                     stored isfadirectionstored default gd_right ;
-   property fade_transparency: colorty read fi.fade_transparency
-                    write setfade_transparency 
-                    stored isfatransparencystored default cl_none;
+   property fade_opacity: colorty read fi.fade_opacity
+                    write setfade_opacity 
+                    stored isfaopacitystored default cl_none;
    property fade_opapos: trealarrayprop read fi.fade_opapos 
                        write setfade_opapos stored isfaopaposstored;
    property fade_opacolor: tfadeopacolorarrayprop read fi.fade_opacolor
@@ -1081,7 +1088,7 @@ type
    property fade_opapos;
    property fade_opacolor;
    property fade_direction;
-   property fade_transparency;
+   property fade_opacity;
    property frameimage_list;
    property frameimage_offset;
    property localprops;          //before template
@@ -1127,19 +1134,21 @@ type
    procedure setfade_pos(const Value: trealarrayprop);
    procedure setfade_opacolor(const Value: tfadeopacolorarrayprop);
    procedure setfade_opapos(const Value: trealarrayprop);
-   procedure setfade_transparency(avalue: colorty);
+   procedure setfade_opacity(avalue: colorty);
    procedure setfade_direction(const Value: graphicdirectionty);
    procedure setimage(const Value: tmaskedbitmap);
    procedure doimagechange(const sender: tobject);
    procedure dochange(const sender: tarrayprop; const index: integer);
    procedure setframeimage_list(const avalue: timagelist);
    procedure setframeimage_offset(const avalue: integer);
+   procedure readtransparency(reader: treader);
   protected
    procedure doassignto(dest: tpersistent); override;
    function getinfosize: integer; override;
    function getinfoad: pointer; override;
    procedure copyinfo(const source: tpersistenttemplate); override;
    procedure internalcreate; override;
+   procedure defineproperties(filer: tfiler); override;
   public
    constructor create(const owner: tmsecomponent; const onchange: notifyeventty); override;
    destructor destroy; override;
@@ -1155,8 +1164,8 @@ type
                                                    write setfade_opacolor;
    property fade_direction: graphicdirectionty read fi.fade_direction
                 write setfade_direction default gd_right;
-   property fade_transparency: colorty read fi.fade_transparency
-              write setfade_transparency default cl_none;
+   property fade_opacity: colorty read fi.fade_opacity
+              write setfade_opacity default cl_none;
 
    property frameimage_list: timagelist read fi.frameimage_list 
                      write setframeimage_list;
@@ -5498,7 +5507,7 @@ begin
  fi.fade_opapos:= trealarrayprop.create;
  fi.fade_opacolor:= tfadeopacolorarrayprop.create;
  fi.fade_opapos.link([fi.fade_opacolor,fi.fade_opapos]);
- fi.fade_transparency:= cl_none;
+ fi.fade_opacity:= cl_none;
  fi.fade_pos.onchange:= {$ifdef fpc}@{$endif}dochange;
  fi.fade_color.onchange:= {$ifdef fpc}@{$endif}dochange;
  fi.fade_opapos.onchange:= {$ifdef fpc}@{$endif}dochange;
@@ -5607,7 +5616,7 @@ begin
     self.fade_pos:= fade_pos;
     self.fade_opacolor:= fade_opacolor;
     self.fade_opapos:= fade_opapos;
-    self.fade_transparency:= fade_transparency;
+    self.fade_opacity:= fade_opacity;
     self.image:= image;
     self.options:= options;
    end;
@@ -5776,7 +5785,7 @@ begin
  if intersectrect(rect,canvas.clipbox,rect1) then begin
   if fi.fade_color.count > 0 then begin
    if (fi.fade_color.count > 1) or 
-     ((fi.fade_opacolor.count > 1) or (fi.fade_transparency <> cl_none)) and 
+     ((fi.fade_opacolor.count > 1) or (fi.fade_opacity <> cl_none)) and 
                                (fi.options * faceoptionsmask = []) then begin
     case fi.fade_direction of
      gd_up,gd_down: begin
@@ -5806,7 +5815,7 @@ begin
       calcfade(fi.fade_opapos,fi.fade_opacolor,bmp.mask);
      end
      else begin
-      bmp.opacity:= fi.fade_transparency;
+      bmp.opacity:= fi.fade_opacity;
      end;
      bmp.paint(canvas,rect1,[al_stretchx,al_stretchy]);
     end
@@ -5834,9 +5843,9 @@ begin
   else begin //fade_color.count = 0
    if fi.options * faceoptionsmask <> [] then begin
     createalphabuffer(false);
-    falphabuffer.opacity:= colorty(colortorgb(fi.fade_transparency));
-//    falphabuffer.transparency:=
-//     (longword(colortorgb(fi.fade_transparency)) xor $ffffffff) and $00ffffff;
+    falphabuffer.opacity:= colorty(colortorgb(fi.fade_opacity));
+//    falphabuffer.opacity:=
+//     (longword(colortorgb(fi.fade_opacity)) xor $ffffffff) and $00ffffff;
    end;
   end;
   if fi.image.hasimage then begin
@@ -5940,14 +5949,14 @@ begin
  end;
 end;
 
-procedure tcustomface.setfade_transparency(avalue: colorty);
+procedure tcustomface.setfade_opacity(avalue: colorty);
 begin
  if avalue = cl_invalid then begin
   avalue:= cl_none;
  end;
- include(flocalprops,fal_fatransparency);
- if fi.fade_transparency <> avalue then begin
-  fi.fade_transparency:= avalue;
+ include(flocalprops,fal_faopacity);
+ if fi.fade_opacity <> avalue then begin
+  fi.fade_opacity:= avalue;
   change;
  end;
 end;
@@ -6002,8 +6011,8 @@ begin
  if not (fal_fadirection in flocalprops) then begin
   fade_direction:= ainfo.fade_direction;
  end;
- if not (fal_fatransparency in flocalprops) then begin
-  fade_transparency:= ainfo.fade_transparency;
+ if not (fal_faopacity in flocalprops) then begin
+  fade_opacity:= ainfo.fade_opacity;
  end;
  if not (fal_frameimagelist in flocalprops) then begin
   fintf.setlinkedvar(ainfo.frameimage_list,
@@ -6018,10 +6027,13 @@ begin
  flocalprops:= localbefore;
 end;
 
-procedure tcustomface.setlocalprops(const avalue: facelocalpropsty);
+procedure tcustomface.setlocalprops(avalue: facelocalpropsty);
 begin
  if flocalprops <> avalue then begin
-  flocalprops:= avalue;
+  if fal_fatransparency in avalue then begin
+   include(avalue,fal_faopacity);
+  end;
+  flocalprops:= avalue - deprecatedfacelocalprops;
   if ftemplate <> nil then begin
    settemplateinfo(ftemplate.template.fi);
   end;
@@ -6063,9 +6075,9 @@ begin
  result:= (ftemplate = nil) or (fal_fadirection in flocalprops);
 end;
 
-function tcustomface.isfatransparencystored: boolean;
+function tcustomface.isfaopacitystored: boolean;
 begin
- result:= (ftemplate = nil) or (fal_fatransparency in flocalprops);
+ result:= (ftemplate = nil) or (fal_faopacity in flocalprops);
 end;
 
 function tcustomface.isframeimage_liststored: boolean;
@@ -6076,6 +6088,17 @@ end;
 function tcustomface.isframeimage_offsetstored: boolean;
 begin
  result:= (ftemplate = nil) or (fal_frameimageoffset in flocalprops);
+end;
+
+procedure tcustomface.readtransparency(reader: treader);
+begin
+ fade_opacity:= transparencytoopacity(reader.readinteger);
+end;
+
+procedure tcustomface.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('fade_transparency',@readtransparency,nil,false);
 end;
 
 { tfacetemplate }
@@ -6089,7 +6112,7 @@ begin
  fi.fade_opapos:= trealarrayprop.Create;
  fi.fade_opacolor:= tfadeopacolorarrayprop.Create;
  fi.fade_opapos.link([fi.fade_opacolor,fi.fade_opapos]);
- fi.fade_transparency:= cl_none;
+ fi.fade_opacity:= cl_none;
  fi.image.onchange:= {$ifdef FPC}@{$endif}doimagechange;
  fi.fade_pos.onchange:= {$ifdef FPC}@{$endif}dochange;
  fi.fade_color.onchange:= {$ifdef FPC}@{$endif}dochange;
@@ -6160,12 +6183,12 @@ begin
  fi.fade_opapos.Assign(Value);
 end;
 
-procedure tfacetemplate.setfade_transparency(avalue: colorty);
+procedure tfacetemplate.setfade_opacity(avalue: colorty);
 begin
  if avalue = cl_invalid then begin
   avalue:= cl_none;
  end;
- fi.fade_transparency:= avalue;
+ fi.fade_opacity:= avalue;
  changed;
 end;
 
@@ -6216,6 +6239,17 @@ end;
 function tfacetemplate.getinfoad: pointer;
 begin
  result:= @fi.fade_direction;
+end;
+
+procedure tfacetemplate.readtransparency(reader: treader);
+begin
+ fade_opacity:= transparencytoopacity(reader.readinteger);
+end;
+
+procedure tfacetemplate.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('fade_transparency',@readtransparency,nil,false);
 end;
 
 { tfacecomp }

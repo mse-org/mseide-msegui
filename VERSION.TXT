@@ -1,5 +1,7 @@
 MSEide+MSEgui breaking changes version history
 
+2013-04-14
+ transparency properties -> opacity.
 2013-03-28
  treader.readset() settype parameter is type of set instead of type of enum.
  twriter.writeset() settype parameter is type of set instead of type of enum.
