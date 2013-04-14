@@ -159,10 +159,10 @@ object fadeeditfo: tfadeeditfo
         widgetname = 'colored'
         dataclass = tgridenumdatalist
       end    
-      item[transed]
+      item[opaed]
         width = 122
         options = [co_invisible, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savevalue, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
-        widgetname = 'transed'
+        widgetname = 'opaed'
         dataclass = tgridenumdatalist
       end>
     datarowheight = 16
@@ -214,7 +214,7 @@ object fadeeditfo: tfadeeditfo
       dropdown.options = [deo_autodropdown, deo_keydropdown]
       reffontheight = 14
     end
-    object transed: tcoloredit
+    object opaed: tcoloredit
       optionswidget1 = [ow1_fontglyphheight]
       optionsskin = [osk_framebuttononly]
       frame.levelo = 0
@@ -315,27 +315,27 @@ object fadeeditfo: tfadeeditfo
   end
   object syncbu: tbutton
     taborder = 4
-    hint = 'Synchronize transparency'
+    hint = 'Synchronize opacity gradient'
     bounds_x = 83
     bounds_y = 249
     bounds_cx = 58
     bounds_cy = 28
     anchors = [an_right, an_bottom]
     state = [as_disabled, as_localdisabled, as_localcaption, as_localhint, as_localonexecute]
-    caption = 'SyncTr'
+    caption = 'SyncOpa'
     onexecute = syncexe
   end
   object clearbu: tbutton
     taborder = 5
-    hint = 'Clear transparency'
+    hint = 'Clear opacity gradient'
     bounds_x = 147
     bounds_y = 249
     bounds_cx = 58
     bounds_cy = 28
     anchors = [an_right, an_bottom]
     state = [as_disabled, as_localdisabled, as_localcaption, as_localhint, as_localonexecute]
-    caption = 'ClearTr'
-    onexecute = cleartransexe
+    caption = 'ClearOpa'
+    onexecute = clearopaexe
   end
   object formstatfile: tstatfile
     filename = 'fadeeditor.sta'

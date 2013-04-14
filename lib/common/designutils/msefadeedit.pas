@@ -41,7 +41,7 @@ type
    tbutton4: tbutton;
    filedialog: tfiledialog;
    fadestatfile: tstatfile;
-   transed: tcoloredit;
+   opaed: tcoloredit;
    syncbu: tbutton;
    tsimplewidget1: tsimplewidget;
    tsimplewidget2: tsimplewidget;
@@ -76,15 +76,15 @@ type
    procedure saveex(const sender: TObject);
    procedure loadex(const sender: TObject);
    procedure syncexe(const sender: TObject);
-   procedure cleartransexe(const sender: TObject);
+   procedure clearopaexe(const sender: TObject);
    procedure fadestatupdateexe(const sender: TObject; const filer: tstatfiler);
   private
    fnodepos: integerarty;
    fmarker: pointarty;
-   ffadepos,ffadetranspos: trealarrayprop;
-   ffadecolor,ffadetranscolor: tcolorarrayprop;
-   ftransientcleared: boolean;
-   ftrans: boolean;
+   ffadepos,ffadeopapos: trealarrayprop;
+   ffadecolor,ffadeopacolor: tcolorarrayprop;
+   fopacitycleared: boolean;
+   fopa: boolean;
    procedure movemarker(apos: integer);
    function findmarker(const apos: pointty): integer; //-1 if not found    
    function limitmarkerpos(const index: integer;
@@ -122,28 +122,28 @@ type
    procedure edit; override; 
  end;
 
- tfacefadetranscoloreditor = class(tcolorarraypropertyeditor)
+ tfacefadeopacoloreditor = class(tcolorarraypropertyeditor)
   protected
    function getdefaultstate: propertystatesty; override;
   public
    procedure edit; override;
  end;
 
- tfacefadetransposeditor = class(trealarraypropertyeditor)
+ tfacefadeopaposeditor = class(trealarraypropertyeditor)
   protected
    function getdefaultstate: propertystatesty; override;
   public
    procedure edit; override; 
  end;
  
- tfacetemplatefadetranscoloreditor = class(tcolorarraypropertyeditor)
+ tfacetemplatefadeopacoloreditor = class(tcolorarraypropertyeditor)
   protected
    function getdefaultstate: propertystatesty; override;
   public
    procedure edit; override;
  end;
 
- tfacetemplatefadetransposeditor = class(trealarraypropertyeditor)
+ tfacetemplatefadeopaposeditor = class(trealarraypropertyeditor)
   protected
    function getdefaultstate: propertystatesty; override;
   public
@@ -157,9 +157,9 @@ uses
 type
  tpropertyeditor1 = class(tpropertyeditor);
 
-function editfade(var fadedirection: graphicdirectionty; const trans: boolean;
-               const fadepos,fadetranspos: trealarrayprop;
-               const fadecolor,fadetranscolor: tcolorarrayprop): modalresultty;
+function editfade(var fadedirection: graphicdirectionty; const opa: boolean;
+               const fadepos,fadeopapos: trealarrayprop;
+               const fadecolor,fadeopacolor: tcolorarrayprop): modalresultty;
 var
  form1: tfadeeditfo;
  int1: integer;
@@ -168,37 +168,37 @@ begin
  form1:= tfadeeditfo.create(nil);
  try
   with form1 do begin
-   ftrans:= trans;
+   fopa:= opa;
    ffadepos:= fadepos;
-   ffadetranspos:= fadetranspos;
+   ffadeopapos:= fadeopapos;
    ffadecolor:= fadecolor;
-   ffadetranscolor:= fadetranscolor;
+   ffadeopacolor:= fadeopacolor;
    reverse.value:= fadedirection in [gd_left,gd_up];
   end;
-  if trans then begin
-   form1.grid.rowcount:= fadetranspos.count;
+  if opa then begin
+   form1.grid.rowcount:= fadeopapos.count;
    for int1:= 0 to form1.grid.rowhigh do begin
-    form1.posed[int1]:= fadetranspos[int1];
-    form1.colored[int1]:= fadetranscolor[int1];
+    form1.posed[int1]:= fadeopapos[int1];
+    form1.colored[int1]:= fadeopacolor[int1];
    end;    
   end
   else begin
-   bo1:= fadepos.count = fadetranspos.count;
+   bo1:= fadepos.count = fadeopapos.count;
    form1.grid.rowcount:= fadepos.count;
    for int1:= 0 to form1.grid.rowhigh do begin
     form1.posed[int1]:= fadepos[int1];
     form1.colored[int1]:= fadecolor[int1];
-    bo1:= bo1 and (fadepos[int1] = fadetranspos[int1]);
+    bo1:= bo1 and (fadepos[int1] = fadeopapos[int1]);
    end;
    if bo1 then begin
     for int1:= 0 to form1.grid.rowhigh do begin
-     form1.transed[int1]:= fadetranscolor[int1];
-     bo1:= bo1 and (fadepos[int1] = fadetranspos[int1]);
+     form1.opaed[int1]:= fadeopacolor[int1];
+     bo1:= bo1 and (fadepos[int1] = fadeopapos[int1]);
     end;
    end;
    form1.syncbu.enabled:= not bo1;
    form1.clearbu.enabled:= bo1;
-   form1.grid.datacols[3].visible:= bo1 and not trans;
+   form1.grid.datacols[3].visible:= bo1 and not opa;
   end;
   form1.change;
   result:= form1.show(true);
@@ -223,21 +223,21 @@ begin
      end;
     end;
    end;
-   if trans then begin
-    fadetranspos.assign(form1.fadedisp.face.fade_pos);
-    fadetranscolor.assign(form1.fadedisp.face.fade_color);
+   if opa then begin
+    fadeopapos.assign(form1.fadedisp.face.fade_pos);
+    fadeopacolor.assign(form1.fadedisp.face.fade_color);
    end
    else begin
     fadepos.assign(form1.fadedisp.face.fade_pos);
     fadecolor.assign(form1.fadedisp.face.fade_color);
     if form1.grid.datacols[3].visible then begin
-     fadetranspos.assign(form1.fadedisp.face.fade_transpos);
-     fadetranscolor.assign(form1.fadedisp.face.fade_transcolor);
+     fadeopapos.assign(form1.fadedisp.face.fade_opapos);
+     fadeopacolor.assign(form1.fadedisp.face.fade_opacolor);
     end
     else begin
-     if form1.ftransientcleared then begin
-      fadetranspos.count:= 0;
-      fadetranscolor.count:= 0;
+     if form1.fopacitycleared then begin
+      fadeopapos.count:= 0;
+      fadeopacolor.count:= 0;
      end;
     end;
    end;
@@ -247,33 +247,33 @@ begin
  end;
 end;
 
-procedure editfacefade(const aproperty: tpropertyeditor; const trans: boolean);
+procedure editfacefade(const aproperty: tpropertyeditor; const opa: boolean);
 var
  direct: graphicdirectionty;
- fadepos,fadetranspos: trealarrayprop;
- fadecolor,fadetranscolor: tcolorarrayprop;
+ fadepos,fadeopapos: trealarrayprop;
+ fadecolor,fadeopacolor: tcolorarrayprop;
  int1: integer;
 begin
  with tcustomface(tpropertyeditor1(aproperty).instance) do begin
   direct:= fade_direction; 
   fadepos:= fade_pos;
-  fadetranspos:= fade_transpos;
+  fadeopapos:= fade_opapos;
   fadecolor:= fade_color;
-  fadetranscolor:= fade_transcolor;
-  if editfade(direct,trans,fade_pos,fade_transpos,
-                               fade_color,fade_transcolor) = mr_ok then begin
+  fadeopacolor:= fade_opacolor;
+  if editfade(direct,opa,fade_pos,fade_opapos,
+                               fade_color,fade_opacolor) = mr_ok then begin
    fade_direction:= direct;
    with tpropertyeditor1(aproperty) do begin
     for int1:= 1 to count - 1 do begin
      with tcustomface(tpropertyeditor1(aproperty).instance(int1)) do begin
       fade_direction:= direct;
-      if trans then begin
-       fade_transpos.assign(fadetranspos);
-       fade_transcolor.assign(fadetranscolor);
+      if opa then begin
+       fade_opapos.assign(fadeopapos);
+       fade_opacolor.assign(fadeopacolor);
       end
       else begin
-       fade_transpos.assign(fadepos);
-       fade_transcolor.assign(fadecolor);
+       fade_opapos.assign(fadepos);
+       fade_opacolor.assign(fadecolor);
       end;
      end;
     end;    
@@ -362,33 +362,33 @@ end;
 }
 
 procedure editfacetemplatefade(const aproperty: tpropertyeditor;
-                                                   const trans: boolean);
+                                                   const opa: boolean);
 var
  direct: graphicdirectionty;
- fadepos,fadetranspos: trealarrayprop;
- fadecolor,fadetranscolor: tcolorarrayprop;
+ fadepos,fadeopapos: trealarrayprop;
+ fadecolor,fadeopacolor: tcolorarrayprop;
  int1: integer;
 begin
  with tfacetemplate(tpropertyeditor1(aproperty).instance) do begin
   direct:= fade_direction; 
   fadepos:= fade_pos;
-  fadetranspos:= fade_transpos;
+  fadeopapos:= fade_opapos;
   fadecolor:= fade_color;
-  fadetranscolor:= fade_transcolor;
-  if editfade(direct,trans,fade_pos,fade_transpos,
-                               fade_color,fade_transcolor) = mr_ok then begin
+  fadeopacolor:= fade_opacolor;
+  if editfade(direct,opa,fade_pos,fade_opapos,
+                               fade_color,fade_opacolor) = mr_ok then begin
    fade_direction:= direct;
    with tpropertyeditor1(aproperty) do begin
     for int1:= 1 to count - 1 do begin
      with tfacetemplate(tpropertyeditor1(aproperty).instance(int1)) do begin
       fade_direction:= direct;
-      if trans then begin
-       fade_transpos.assign(fadetranspos);
-       fade_transcolor.assign(fadetranscolor);
+      if opa then begin
+       fade_opapos.assign(fadeopapos);
+       fade_opacolor.assign(fadeopacolor);
       end
       else begin
-       fade_transpos.assign(fadepos);
-       fade_transcolor.assign(fadecolor);
+       fade_opapos.assign(fadepos);
+       fade_opacolor.assign(fadecolor);
       end;
      end;
     end;    
@@ -536,7 +536,7 @@ begin
   grid.row:= int1;
   grid.focuscell(makegridcoord(1,int1));
   colored[int1]:= blendcolor(rea3,colored[int1-1],colored[int1+1]);
-  transed[int1]:= blendcolor(rea3,transed[int1-1],transed[int1+1]);
+  opaed[int1]:= blendcolor(rea3,opaed[int1-1],opaed[int1+1]);
   grid.endupdate;
   change;
   grid.setfocus;
@@ -582,16 +582,16 @@ begin
  with fadedisp.face do begin
   fade_pos.count:= grid.rowcount;
   if grid.datacols[3].visible then begin
-   fade_transpos.count:= grid.rowcount;
+   fade_opapos.count:= grid.rowcount;
    for int1:= grid.rowhigh downto 0 do begin
     fade_pos[int1]:= posed[int1];
     fade_color[int1]:= colored[int1];
-    fade_transpos[int1]:= posed[int1];
-    fade_transcolor[int1]:= transed[int1];
+    fade_opapos[int1]:= posed[int1];
+    fade_opacolor[int1]:= opaed[int1];
    end;
   end
   else begin
-   fade_transpos.count:= 0;
+   fade_opapos.count:= 0;
    for int1:= grid.rowhigh downto 0 do begin
     fade_pos[int1]:= posed[int1];
     fade_color[int1]:= colored[int1];
@@ -599,8 +599,8 @@ begin
   end;
   fadevert.face.fade_pos.assign(fade_pos);
   fadevert.face.fade_color.assign(fade_color);
-  fadevert.face.fade_transpos.assign(fade_transpos);
-  fadevert.face.fade_transcolor.assign(fade_transcolor);
+  fadevert.face.fade_opapos.assign(fade_opapos);
+  fadevert.face.fade_opacolor.assign(fade_opacolor);
  end;
  if grid.rowcount < 3 then begin
   fnodepos:= nil;
@@ -808,12 +808,12 @@ begin
   if aindex < grid.rowhigh then begin
    if aindex = 0 then begin
     colored[0]:= colored[1]; //pos = 0
-    transed[0]:= transed[1]; //pos = 0
+    opaed[0]:= opaed[1]; //pos = 0
     posed[0]:= 0;
    end
    else begin
     colored[aindex]:= blendcolor(0.5,colored[aindex+1],colored[aindex-1]);
-    transed[aindex]:= blendcolor(0.5,transed[aindex+1],transed[aindex-1]);
+    opaed[aindex]:= blendcolor(0.5,opaed[aindex+1],opaed[aindex-1]);
     posed[aindex]:= (posed[aindex+1] + posed[aindex-1]) / 2;
    end
   end
@@ -823,7 +823,7 @@ begin
    end
    else begin
     colored[aindex]:= colored[grid.rowhigh-1];
-    transed[aindex]:= transed[grid.rowhigh-1];
+    opaed[aindex]:= opaed[grid.rowhigh-1];
     posed[aindex]:= 1;
    end;
   end;
@@ -903,51 +903,51 @@ begin
                       'with color gradient?','Confirmation') then begin
   grid.beginupdate;
   try
-   ftransientcleared:= false;
+   fopacitycleared:= false;
    int2:= 0;
-   if grid.rowcount < ffadetranspos.count then begin
+   if grid.rowcount < ffadeopapos.count then begin
     if grid.rowcount = 0 then begin
      grid.rowcount:= 1;
      posed[0]:= 0;
     end;
-    if (grid.rowcount < 2) and (grid.rowcount < ffadetranspos.count) then begin
+    if (grid.rowcount < 2) and (grid.rowcount < ffadeopapos.count) then begin
      grid.rowcount:= 2;
      posed[1]:= 1;
      colored[1]:= colored[0];
     end;
    end;
-   for int1:= 1 to ffadetranspos.count-2 do begin
-    while posed[int2] < ffadetranspos[int1] do begin
+   for int1:= 1 to ffadeopapos.count-2 do begin
+    while posed[int2] < ffadeopapos[int1] do begin
      inc(int2);
     end;
-    if posed[int2] <> ffadetranspos[int1] then begin
+    if posed[int2] <> ffadeopapos[int1] then begin
      grid.insertrow(int2);
-     posed[int2]:= ffadetranspos[int1];
+     posed[int2]:= ffadeopapos[int1];
      colored[int2]:= scale(posed[int2],posed[int2-1],posed[int2+1],
                             colored[int2-1],colored[int2+1]);
     end;
    end;
    int2:= 0;
    for int1:= 0 to grid.rowhigh do begin
-    while (int2 < ffadetranspos.count) and
-                              (ffadetranspos[int2] < posed[int1]) do begin
+    while (int2 < ffadeopapos.count) and
+                              (ffadeopapos[int2] < posed[int1]) do begin
      inc(int2);
     end;
-    case ffadetranspos.count of
+    case ffadeopapos.count of
      0: begin
-      transed[int1]:= cl_white;
+      opaed[int1]:= cl_white;
      end;
      1: begin
-      transed[int1]:= ffadetranscolor[0];
+      opaed[int1]:= ffadeopacolor[0];
      end;
      else begin
-      if int2 >= ffadetranscolor.count-1 then begin
-       transed[int1]:= ffadetranscolor[ffadetranscolor.count-1];
+      if int2 >= ffadeopacolor.count-1 then begin
+       opaed[int1]:= ffadeopacolor[ffadeopacolor.count-1];
       end
       else begin
-       transed[int1]:= scale(posed[int1],ffadetranspos[int2],
-                           ffadetranspos[int2+1],ffadetranscolor[int2],
-                           ffadetranscolor[int2+1])
+       opaed[int1]:= scale(posed[int1],ffadeopapos[int2],
+                           ffadeopapos[int2+1],ffadeopacolor[int2],
+                           ffadeopacolor[int2+1])
       end;
      end;
     end;
@@ -962,7 +962,7 @@ begin
  end;
 end;
 
-procedure tfadeeditfo.cleartransexe(const sender: TObject);
+procedure tfadeeditfo.clearopaexe(const sender: TObject);
 begin
  if askyesno(
   'Do you want to remove opacity gradient?','Confirmation') then begin
@@ -970,7 +970,7 @@ begin
   change;
   clearbu.enabled:= false;
   syncbu.enabled:= true;
-  ftransientcleared:= true;
+  fopacitycleared:= true;
  end;
 end;
 
@@ -980,11 +980,11 @@ var
  bo1: boolean;
 begin
  bo1:= grid.datacols[3].visible;
- if not filer.iswriter or ftrans then begin
+ if not filer.iswriter or fopa then begin
   bo1:= false;
  end;
- filer.updatevalue('transsynced',bo1);
- grid.datacols[3].visible:= bo1 and not ftrans;
+ filer.updatevalue('opasynced',bo1);
+ grid.datacols[3].visible:= bo1 and not fopa;
 end;
 
 { tfacefadecoloreditor }
@@ -1035,50 +1035,50 @@ begin
  editfacetemplatefade(self,false);
 end;
 
-{ tfacefadetranscoloreditor }
+{ tfacefadeopacoloreditor }
 
-function tfacefadetranscoloreditor.getdefaultstate: propertystatesty;
+function tfacefadeopacoloreditor.getdefaultstate: propertystatesty;
 begin
  result:= inherited getdefaultstate + [ps_dialog];
 end;
 
-procedure tfacefadetranscoloreditor.edit;
+procedure tfacefadeopacoloreditor.edit;
 begin
  editfacefade(self,true);
 end;
 
-{ tfacefadetransposeditor }
+{ tfacefadeopaposeditor }
 
-function tfacefadetransposeditor.getdefaultstate: propertystatesty;
+function tfacefadeopaposeditor.getdefaultstate: propertystatesty;
 begin
  result:= inherited getdefaultstate + [ps_dialog];
 end;
 
-procedure tfacefadetransposeditor.edit;
+procedure tfacefadeopaposeditor.edit;
 begin
  editfacefade(self,true);
 end;
 
-{ tfacetemplatefadetranscoloreditor }
+{ tfacetemplatefadeopacoloreditor }
 
-function tfacetemplatefadetranscoloreditor.getdefaultstate: propertystatesty;
+function tfacetemplatefadeopacoloreditor.getdefaultstate: propertystatesty;
 begin
  result:= inherited getdefaultstate + [ps_dialog];
 end;
 
-procedure tfacetemplatefadetranscoloreditor.edit;
+procedure tfacetemplatefadeopacoloreditor.edit;
 begin
  editfacetemplatefade(self,true);
 end;
 
-{ tfacetemplatefadetransposeditor }
+{ tfacetemplatefadeopaposeditor }
 
-function tfacetemplatefadetransposeditor.getdefaultstate: propertystatesty;
+function tfacetemplatefadeopaposeditor.getdefaultstate: propertystatesty;
 begin
  result:= inherited getdefaultstate + [ps_dialog];
 end;
 
-procedure tfacetemplatefadetransposeditor.edit;
+procedure tfacetemplatefadeopaposeditor.edit;
 begin
  editfacetemplatefade(self,true);
 end;
