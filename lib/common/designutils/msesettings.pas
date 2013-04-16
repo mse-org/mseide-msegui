@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 2002-2008 by Martin Schreiber
+{ MSEide Copyright (c) 2002-2013 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -54,31 +54,40 @@ const
  {$endif}
                 
 type
- settingsmacrosty = array[settingsmacroty] of filenamety;
+ settingsmacroarty = array[settingsmacroty] of filenamety;
+ settingsmacrosty = record
+  macros: settingsmacroarty;
+  globmacronames: msestringarty;
+  globmacrovalues: msestringarty;
+ end;
  settingsty = record
   macros: settingsmacrosty;
   printcommand: string;
  end;
   
  tsettingsfo = class(tmseform)
-   tbutton1: tbutton;
-   tbutton2: tbutton;
-   templatedir: tfilenameedit;
-   fpcdir: tfilenameedit;
-   msedir: tfilenameedit;
-   compiler: tfilenameedit;
+   tstatfile1: tstatfile;
+   tlayouter1: tlayouter;
+   printcomm: tstringedit;
    debugger: tfilenameedit;
+   compiler: tfilenameedit;
+   compstoredir: tfilenameedit;
+   templatedir: tfilenameedit;
    syntaxdefdir: tfilenameedit;
    mselibdir: tfilenameedit;
+   msedir: tfilenameedit;
    fpclibdir: tfilenameedit;
-   tstatfile1: tstatfile;
-   exeext: tstringedit;
-   target: tstringedit;
-   printcomm: tstringedit;
-   compstoredir: tfilenameedit;
-   shortcutbu: tbutton;
+   fpcdir: tfilenameedit;
+   tspacer1: tspacer;
    targetosdir: tstringedit;
    tsplitter2: tsplitter;
+   target: tstringedit;
+   exeext: tstringedit;
+   tsplitter1: tsplitter;
+   tbutton2: tbutton;
+   tbutton1: tbutton;
+   shortcutbu: tbutton;
+   macrogrid: tstringgrid;
    procedure epandfilenamemacro(const sender: TObject; var avalue: msestring;
                      var accept: Boolean);
    procedure formoncreate(const sender: TObject);
@@ -107,14 +116,22 @@ implementation
 uses
  msesettings_mfm,classes,msesysintf,msefileutils,mseshortcutdialog;
  
-function getsettingsmacros1(const amacros: settingsmacrosty): macroinfoarty;
+function getsettingsmacros1(var amacros: settingsmacrosty): macroinfoarty;
 var
  ma1: settingsmacroty;
+ int1: integer;
 begin
- setlength(result,ord(high(settingsmacroty))+1);
- for  ma1:= low(settingsmacroty) to high(settingsmacroty) do begin
-  result[ord(ma1)].name:= settingsmacronames[ma1]; 
-  result[ord(ma1)].value:= amacros[ma1];
+ with amacros do begin
+  setlength(globmacrovalues,length(globmacronames));
+  setlength(result,ord(high(settingsmacroty))+1+length(globmacronames));
+  for  ma1:= low(settingsmacroty) to high(settingsmacroty) do begin
+   result[ord(ma1)].name:= settingsmacronames[ma1]; 
+   result[ord(ma1)].value:= macros[ma1];
+  end;
+  for int1:= 0 to high(globmacronames) do begin
+   result[ord(high(settingsmacroty))+1+int1].name:= globmacronames[int1]; 
+   result[ord(high(settingsmacroty))+1+int1].value:= globmacrovalues[int1]; 
+  end;
  end;
 end;
 
@@ -142,7 +159,7 @@ procedure updatesettings(const filer: tstatfiler);
 var
  ma1: settingsmacroty;
 begin
- with settings do begin
+ with settings,macros do begin
   if filer.iswriter then begin
    for ma1:= low(settingsmacroty) to high(settingsmacroty) do begin
     filer.updatevalue(settingsmacronames[ma1],macros[ma1]);
@@ -156,7 +173,9 @@ begin
    end;
    printcommand:= sys_getprintcommand;
   end;
-  filer.updatevalue('printcommand',printcommand); 
+  filer.updatevalue('printcommand',printcommand);
+  filer.updatevalue('globmacronames',globmacronames); 
+  filer.updatevalue('globmacrovalues',globmacrovalues); 
  end;
 end;
 
@@ -194,7 +213,7 @@ end;
 
 procedure tsettingsfo.formoncreate(const sender: TObject);
 begin
- with settings do begin
+ with settings,macros do begin
   fpcdir.value:= macros[sma_fpcdir];
   fpclibdir.value:= macros[sma_fpclibdir];
   msedir.value:= macros[sma_msedir];
@@ -208,29 +227,38 @@ begin
   target.value:= macros[sma_target];
   targetosdir.value:= macros[sma_targetosdir];
   printcomm.value:= printcommand;
+  macrogrid[0].datalist.asarray:= globmacronames;
+  macrogrid[1].datalist.asarray:= globmacrovalues;
  end;
 end;
 
 function tsettingsfo.widgetstomacros: settingsmacrosty;
 begin
- result[sma_fpcdir]:= fpcdir.value;
- result[sma_fpclibdir]:= fpclibdir.value;
- result[sma_msedir]:= msedir.value;
- result[sma_mselibdir]:= mselibdir.value;
- result[sma_syntaxdefdir]:= syntaxdefdir.value;
- result[sma_templatedir]:= templatedir.value;
- result[sma_compstoredir]:= compstoredir.value;
- result[sma_compiler]:= compiler.value;
- result[sma_debugger]:= debugger.value;
- result[sma_exeext]:= exeext.value;
- result[sma_target]:= target.value;
- result[sma_targetosdir]:= targetosdir.value;
+ with result do begin
+  macros[sma_fpcdir]:= fpcdir.value;
+  macros[sma_fpclibdir]:= fpclibdir.value;
+  macros[sma_msedir]:= msedir.value;
+  macros[sma_mselibdir]:= mselibdir.value;
+  macros[sma_syntaxdefdir]:= syntaxdefdir.value;
+  macros[sma_templatedir]:= templatedir.value;
+  macros[sma_compstoredir]:= compstoredir.value;
+  macros[sma_compiler]:= compiler.value;
+  macros[sma_debugger]:= debugger.value;
+  macros[sma_exeext]:= exeext.value;
+  macros[sma_target]:= target.value;
+  macros[sma_targetosdir]:= targetosdir.value;
+  globmacronames:= macrogrid[0].datalist.asarray;
+  globmacrovalues:= macrogrid[1].datalist.asarray;
+ end;
 end;
 
 procedure tsettingsfo.epandfilenamemacro(const sender: TObject;
                var avalue: msestring; var accept: Boolean);
+var
+ mac1: settingsmacrosty;
 begin
- avalue:= expandmacros(avalue,getsettingsmacros1(widgetstomacros));
+ mac1:= widgetstomacros;
+ avalue:= expandmacros(avalue,getsettingsmacros1(mac1));
 end;
 
 procedure tsettingsfo.setvalue(const sender: TObject; var avalue: msestring;

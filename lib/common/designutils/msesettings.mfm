@@ -3,75 +3,396 @@ object settingsfo: tsettingsfo
   visible = False
   bounds_x = 100
   bounds_y = 106
-  bounds_cx = 358
-  bounds_cy = 574
+  bounds_cx = 349
+  bounds_cy = 570
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets]
-  container.frame.zoomwidthstep = 1
-  container.frame.zoomheightstep = 1
+  container.frame.clientwidthmin = 340
+  container.frame.sbhorz.pagesize = 0.99444444444444
+  container.frame.sbvert.pagesize = 0.9965034965035
   container.bounds = (
     0
     0
-    358
-    574
+    349
+    570
   )
   options = [fo_closeonesc, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
   statfile = tstatfile1
   caption = 'Configure MSE environment'
   oncreate = formoncreate
   moduleclassname = 'tmseform'
-  object templatedir: tfilenameedit
-    Tag = 5
-    frame.caption = '${TEMPLATEDIR}'
-    frame.button.imagenr = 17
-    frame.outerframe = (
-      0
-      17
-      0
-      0
-    )
-    taborder = 6
-    hint = 'Directory for project template files.'
-    bounds_x = 8
-    bounds_y = 247
-    bounds_cx = 340
-    bounds_cy = 37
-    anchors = [an_left, an_top, an_right]
-    onsetvalue = setvalue
-    controller.filterlist.data = (
-      (
-        'Project files'
-        '*.prj'
+  object tsplitter1: tsplitter
+    optionswidget = [ow_tabfocus, ow_parenttabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets]
+    color = -2147483645
+    taborder = 2
+    bounds_x = 0
+    bounds_y = 520
+    bounds_cx = 349
+    bounds_cy = 38
+    anchors = [an_bottom]
+    optionsscale = [osc_expandy, osc_shrinky]
+    linktop = macrogrid
+    grip = stb_none
+    object tbutton2: tbutton
+      taborder = 2
+      bounds_x = 286
+      bounds_y = 16
+      bounds_cx = 50
+      bounds_cy = 22
+      anchors = [an_top, an_right]
+      state = [as_localcaption]
+      caption = '&Cancel'
+      modalresult = mr_cancel
+    end
+    object tbutton1: tbutton
+      taborder = 1
+      bounds_x = 230
+      bounds_y = 16
+      bounds_cx = 50
+      bounds_cy = 22
+      anchors = [an_top, an_right]
+      state = [as_default, as_localdefault, as_localcaption]
+      caption = '&OK'
+      modalresult = mr_ok
+    end
+    object shortcutbu: tbutton
+      bounds_x = 9
+      bounds_y = 16
+      bounds_cx = 78
+      bounds_cy = 22
+      state = [as_localcaption, as_localonexecute]
+      caption = '&Shortcuts'
+      onexecute = editshortcuts
+    end
+  end
+  object tlayouter1: tlayouter
+    bounds_x = 0
+    bounds_y = 0
+    bounds_cx = 349
+    bounds_cy = 406
+    anchors = [an_top]
+    optionsscale = [osc_expandy, osc_shrinky]
+    linkbottom = macrogrid
+    optionslayout = [lao_placey]
+    object tspacer1: tspacer
+      optionswidget = [ow_tabfocus, ow_parenttabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets]
+      taborder = 9
+      visible = True
+      bounds_x = 0
+      bounds_y = 333
+      bounds_cx = 349
+      bounds_cy = 36
+      anchors = [an_top]
+      optionsscale = [osc_expandy, osc_shrinky]
+      object targetosdir: tstringedit
+        Tag = 11
+        frame.caption = '${TARGETOSDIR}'
+        frame.dummy = 0
+        frame.outerframe = (
+          0
+          17
+          0
+          0
+        )
+        taborder = 2
+        bounds_x = 202
+        bounds_y = -1
+        bounds_cx = 137
+        bounds_cy = 37
+        anchors = [an_left, an_top, an_right]
+        onsetvalue = setvalue
+        reffontheight = 14
+      end
+      object tsplitter2: tsplitter
+        color = -1879048189
+        taborder = 3
+        visible = False
+        bounds_x = 192
+        bounds_y = 16
+        bounds_cx = 10
+        bounds_cy = 20
+        options = [spo_hprop, spo_dockleft, spo_docktop, spo_dockright, spo_dockbottom]
+        linkleft = target
+        linkright = targetosdir
+        grip = stb_none
+        statfile = tstatfile1
+      end
+      object target: tstringedit
+        Tag = 10
+        frame.caption = '${TARGET}'
+        frame.dummy = 0
+        frame.outerframe = (
+          0
+          17
+          0
+          0
+        )
+        taborder = 1
+        bounds_x = 98
+        bounds_y = -1
+        bounds_cx = 94
+        bounds_cy = 37
+        onsetvalue = setvalue
+        reffontheight = 14
+      end
+      object exeext: tstringedit
+        Tag = 9
+        frame.caption = '${EXEEXT}'
+        frame.dummy = 0
+        frame.outerframe = (
+          0
+          17
+          0
+          0
+        )
+        bounds_x = 8
+        bounds_y = -1
+        bounds_cx = 80
+        bounds_cy = 37
+        onsetvalue = setvalue
+        reffontheight = 14
+      end
+    end
+    object printcomm: tstringedit
+      frame.caption = 'Print command'
+      frame.dummy = 0
+      frame.outerframe = (
+        0
+        17
+        0
+        0
       )
-    )
-    controller.options = [fdo_directory]
-    controller.captionopen = 'Project template directory'
-    controller.ongetfilename = epandfilenamemacro
-    reffontheight = 14
+      taborder = 10
+      bounds_x = 8
+      bounds_y = 369
+      bounds_cx = 331
+      bounds_cy = 37
+      anchors = [an_left, an_top, an_right]
+      onsetvalue = setprintcomm
+      reffontheight = 14
+    end
+    object debugger: tfilenameedit
+      Tag = 8
+      frame.caption = '${DEBUGGER}'
+      frame.button.imagenr = 17
+      frame.outerframe = (
+        0
+        17
+        0
+        0
+      )
+      taborder = 8
+      hint = 'Path to debugger (gdb).'
+      bounds_x = 8
+      bounds_y = 296
+      bounds_cx = 331
+      bounds_cy = 37
+      anchors = [an_left, an_top, an_right]
+      onsetvalue = setvalue
+      controller.captionopen = 'Debugger path'
+      controller.ongetfilename = epandfilenamemacro
+      reffontheight = 14
+    end
+    object compiler: tfilenameedit
+      Tag = 7
+      frame.caption = '${COMPILER}'
+      frame.button.imagenr = 17
+      frame.outerframe = (
+        0
+        17
+        0
+        0
+      )
+      taborder = 7
+      hint = 'Path to compiler (ppc386).'
+      bounds_x = 8
+      bounds_y = 259
+      bounds_cx = 331
+      bounds_cy = 37
+      anchors = [an_left, an_top, an_right]
+      onsetvalue = setvalue
+      controller.captionopen = 'Compiler path'
+      controller.ongetfilename = epandfilenamemacro
+      reffontheight = 14
+    end
+    object compstoredir: tfilenameedit
+      Tag = 6
+      frame.caption = '${COMPSTOREDIR}'
+      frame.button.imagenr = 17
+      frame.outerframe = (
+        0
+        17
+        0
+        0
+      )
+      taborder = 6
+      hint = 'Directory for component store files.'
+      bounds_x = 8
+      bounds_y = 222
+      bounds_cx = 331
+      bounds_cy = 37
+      anchors = [an_left, an_top, an_right]
+      onsetvalue = setvalue
+      controller.filterlist.data = (
+        (
+          'Project files'
+          '*.prj'
+        )
+      )
+      controller.options = [fdo_directory]
+      controller.captionopen = 'Directory for component stores'
+      controller.ongetfilename = epandfilenamemacro
+      reffontheight = 14
+    end
+    object templatedir: tfilenameedit
+      Tag = 5
+      frame.caption = '${TEMPLATEDIR}'
+      frame.button.imagenr = 17
+      frame.outerframe = (
+        0
+        17
+        0
+        0
+      )
+      taborder = 5
+      hint = 'Directory for project template files.'
+      bounds_x = 8
+      bounds_y = 185
+      bounds_cx = 331
+      bounds_cy = 37
+      anchors = [an_left, an_top, an_right]
+      onsetvalue = setvalue
+      controller.filterlist.data = (
+        (
+          'Project files'
+          '*.prj'
+        )
+      )
+      controller.options = [fdo_directory]
+      controller.captionopen = 'Project template directory'
+      controller.ongetfilename = epandfilenamemacro
+      reffontheight = 14
+    end
+    object syntaxdefdir: tfilenameedit
+      Tag = 4
+      frame.caption = '${SYNTAXDEFDIR}'
+      frame.button.imagenr = 17
+      frame.outerframe = (
+        0
+        17
+        0
+        0
+      )
+      taborder = 4
+      hint = 'Directory for syntax definition files.'
+      bounds_x = 8
+      bounds_y = 148
+      bounds_cx = 331
+      bounds_cy = 37
+      anchors = [an_left, an_top, an_right]
+      onsetvalue = setvalue
+      controller.filterlist.data = (
+        (
+          'Syntax definitions'
+          '*.sdef'
+        )
+      )
+      controller.options = [fdo_directory]
+      controller.captionopen = 'Directory for syntax definition files'
+      controller.ongetfilename = epandfilenamemacro
+      reffontheight = 14
+    end
+    object mselibdir: tfilenameedit
+      Tag = 3
+      frame.caption = '${MSELIBDIR}'
+      frame.button.imagenr = 17
+      frame.outerframe = (
+        0
+        17
+        0
+        0
+      )
+      taborder = 3
+      hint = 'Root directory of msegui library.'
+      bounds_x = 8
+      bounds_y = 111
+      bounds_cx = 331
+      bounds_cy = 37
+      anchors = [an_left, an_top, an_right]
+      onsetvalue = setvalue
+      controller.options = [fdo_directory]
+      controller.captionopen = 'MSEgui library directory'
+      controller.ongetfilename = epandfilenamemacro
+      reffontheight = 14
+    end
+    object msedir: tfilenameedit
+      Tag = 2
+      frame.caption = '${MSEDIR}'
+      frame.button.imagenr = 17
+      frame.outerframe = (
+        0
+        17
+        0
+        0
+      )
+      taborder = 2
+      hint = 'Root directory of msegui.'
+      bounds_x = 8
+      bounds_y = 74
+      bounds_cx = 331
+      bounds_cy = 37
+      anchors = [an_left, an_top, an_right]
+      onsetvalue = setvalue
+      controller.options = [fdo_directory]
+      controller.captionopen = 'MSEgui root directory'
+      controller.ongetfilename = epandfilenamemacro
+      reffontheight = 14
+    end
+    object fpclibdir: tfilenameedit
+      Tag = 1
+      frame.caption = '${FPCLIBDIR}'
+      frame.button.imagenr = 17
+      frame.outerframe = (
+        0
+        17
+        0
+        0
+      )
+      taborder = 1
+      hint = 'Root directory of FPC library (not used by the default project templates).'
+      bounds_x = 8
+      bounds_y = 37
+      bounds_cx = 331
+      bounds_cy = 37
+      anchors = [an_left, an_top, an_right]
+      controller.options = [fdo_directory]
+      controller.captionopen = 'FPC library directory'
+      reffontheight = 14
+    end
+    object fpcdir: tfilenameedit
+      frame.caption = '${FPCDIR}'
+      frame.button.imagenr = 17
+      frame.outerframe = (
+        0
+        17
+        0
+        0
+      )
+      hint = 'Root directory of Free Pascal system (not used by the default project templates).'
+      bounds_x = 8
+      bounds_y = 0
+      bounds_cx = 331
+      bounds_cy = 37
+      anchors = [an_left, an_top, an_right]
+      onsetvalue = setvalue
+      controller.options = [fdo_directory]
+      controller.captionopen = 'FPC root directory'
+      controller.ongetfilename = epandfilenamemacro
+      reffontheight = 14
+    end
   end
-  object tbutton1: tbutton
-    taborder = 14
-    bounds_x = 240
-    bounds_y = 541
-    bounds_cx = 50
-    bounds_cy = 22
-    anchors = [an_top, an_right]
-    state = [as_default, as_localdefault, as_localcaption]
-    caption = 'OK'
-    modalresult = mr_ok
-  end
-  object tbutton2: tbutton
-    bounds_x = 296
-    bounds_y = 541
-    bounds_cx = 50
-    bounds_cy = 22
-    anchors = [an_top, an_right]
-    state = [as_localcaption]
-    caption = 'Cancel'
-    modalresult = mr_cancel
-  end
-  object fpcdir: tfilenameedit
-    frame.caption = '${FPCDIR}'
-    frame.button.imagenr = 17
+  object macrogrid: tstringgrid
+    frame.sbhorz.pagesize = 0.99694189602447
+    frame.caption = 'Global Macros'
     frame.outerframe = (
       0
       17
@@ -79,282 +400,50 @@ object settingsfo: tsettingsfo
       0
     )
     taborder = 1
-    hint = 'Root directory of Free Pascal system (not used by the default project templates).'
     bounds_x = 8
-    bounds_y = 7
-    bounds_cx = 340
-    bounds_cy = 37
-    anchors = [an_left, an_top, an_right]
-    onsetvalue = setvalue
-    controller.options = [fdo_directory]
-    controller.captionopen = 'FPC root directory'
-    controller.ongetfilename = epandfilenamemacro
+    bounds_y = 406
+    bounds_cx = 331
+    bounds_cy = 114
+    bounds_cymin = 80
+    anchors = [an_left, an_top, an_right, an_bottom]
+    optionsgrid = [og_colsizing, og_rowmoving, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_noinsertempty, og_colchangeontabkey, og_wrapcol, og_autopopup, og_mousescrollcol]
+    datacols.count = 2
+    datacols.options = [co_savevalue, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
+    datacols.items = <    
+      item
+        width = 152
+        options = [co_proportional, co_savevalue, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
+        valuefalse = '0'
+        valuetrue = '1'
+      end    
+      item
+        width = 144
+        options = [co_fill, co_savevalue, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
+        valuefalse = '0'
+        valuetrue = '1'
+      end>
+    fixcols.count = 1
+    fixcols.items = <    
+      item
+        width = 28
+        numstart = 1
+        numstep = 1
+      end>
+    fixrows.count = 1
+    fixrows.items = <    
+      item
+        height = 16
+        captions.count = 2
+        captions.items = <        
+          item
+            caption = 'Name'
+          end        
+          item
+            caption = 'Value'
+          end>
+      end>
+    datarowheight = 16
     reffontheight = 14
-  end
-  object msedir: tfilenameedit
-    Tag = 2
-    frame.caption = '${MSEDIR}'
-    frame.button.imagenr = 17
-    frame.outerframe = (
-      0
-      17
-      0
-      0
-    )
-    taborder = 3
-    hint = 'Root directory of msegui.'
-    bounds_x = 8
-    bounds_y = 103
-    bounds_cx = 340
-    bounds_cy = 37
-    anchors = [an_left, an_top, an_right]
-    onsetvalue = setvalue
-    controller.options = [fdo_directory]
-    controller.captionopen = 'MSEgui root directory'
-    controller.ongetfilename = epandfilenamemacro
-    reffontheight = 14
-  end
-  object compiler: tfilenameedit
-    Tag = 7
-    frame.caption = '${COMPILER}'
-    frame.button.imagenr = 17
-    frame.outerframe = (
-      0
-      17
-      0
-      0
-    )
-    taborder = 8
-    hint = 'Path to compiler (ppc386).'
-    bounds_x = 8
-    bounds_y = 343
-    bounds_cx = 340
-    bounds_cy = 37
-    anchors = [an_left, an_top, an_right]
-    onsetvalue = setvalue
-    controller.captionopen = 'Compiler path'
-    controller.ongetfilename = epandfilenamemacro
-    reffontheight = 14
-  end
-  object debugger: tfilenameedit
-    Tag = 8
-    frame.caption = '${DEBUGGER}'
-    frame.button.imagenr = 17
-    frame.outerframe = (
-      0
-      17
-      0
-      0
-    )
-    taborder = 9
-    hint = 'Path to debugger (gdb).'
-    bounds_x = 8
-    bounds_y = 391
-    bounds_cx = 340
-    bounds_cy = 37
-    anchors = [an_left, an_top, an_right]
-    onsetvalue = setvalue
-    controller.captionopen = 'Debugger path'
-    controller.ongetfilename = epandfilenamemacro
-    reffontheight = 14
-  end
-  object syntaxdefdir: tfilenameedit
-    Tag = 4
-    frame.caption = '${SYNTAXDEFDIR}'
-    frame.button.imagenr = 17
-    frame.outerframe = (
-      0
-      17
-      0
-      0
-    )
-    taborder = 5
-    hint = 'Directory for syntax definition files.'
-    bounds_x = 8
-    bounds_y = 199
-    bounds_cx = 340
-    bounds_cy = 37
-    anchors = [an_left, an_top, an_right]
-    onsetvalue = setvalue
-    controller.filterlist.data = (
-      (
-        'Syntax definitions'
-        '*.sdef'
-      )
-    )
-    controller.options = [fdo_directory]
-    controller.captionopen = 'Directory for syntax definition files'
-    controller.ongetfilename = epandfilenamemacro
-    reffontheight = 14
-  end
-  object exeext: tstringedit
-    Tag = 9
-    frame.caption = '${EXEEXT}'
-    frame.dummy = 0
-    frame.outerframe = (
-      0
-      17
-      0
-      0
-    )
-    taborder = 10
-    bounds_x = 8
-    bounds_y = 439
-    bounds_cx = 80
-    bounds_cy = 37
-    onsetvalue = setvalue
-    reffontheight = 14
-  end
-  object target: tstringedit
-    Tag = 10
-    frame.caption = '${TARGET}'
-    frame.dummy = 0
-    frame.outerframe = (
-      0
-      17
-      0
-      0
-    )
-    taborder = 11
-    bounds_x = 98
-    bounds_y = 439
-    bounds_cx = 94
-    bounds_cy = 37
-    onsetvalue = setvalue
-    reffontheight = 14
-  end
-  object mselibdir: tfilenameedit
-    Tag = 3
-    frame.caption = '${MSELIBDIR}'
-    frame.button.imagenr = 17
-    frame.outerframe = (
-      0
-      17
-      0
-      0
-    )
-    taborder = 4
-    hint = 'Root directory of msegui library.'
-    bounds_x = 8
-    bounds_y = 151
-    bounds_cx = 340
-    bounds_cy = 37
-    anchors = [an_left, an_top, an_right]
-    onsetvalue = setvalue
-    controller.options = [fdo_directory]
-    controller.captionopen = 'MSEgui library directory'
-    controller.ongetfilename = epandfilenamemacro
-    reffontheight = 14
-  end
-  object fpclibdir: tfilenameedit
-    Tag = 1
-    frame.caption = '${FPCLIBDIR}'
-    frame.button.imagenr = 17
-    frame.outerframe = (
-      0
-      17
-      0
-      0
-    )
-    taborder = 2
-    hint = 'Root directory of FPC library (not used by the default project templates).'
-    bounds_x = 8
-    bounds_y = 55
-    bounds_cx = 340
-    bounds_cy = 37
-    anchors = [an_left, an_top, an_right]
-    controller.options = [fdo_directory]
-    controller.captionopen = 'FPC library directory'
-    reffontheight = 14
-  end
-  object printcomm: tstringedit
-    frame.caption = 'Print command'
-    frame.dummy = 0
-    frame.outerframe = (
-      0
-      17
-      0
-      0
-    )
-    taborder = 13
-    bounds_x = 8
-    bounds_y = 487
-    bounds_cx = 340
-    bounds_cy = 37
-    anchors = [an_left, an_top, an_right]
-    onsetvalue = setprintcomm
-    reffontheight = 14
-  end
-  object compstoredir: tfilenameedit
-    Tag = 6
-    frame.caption = '${COMPSTOREDIR}'
-    frame.button.imagenr = 17
-    frame.outerframe = (
-      0
-      17
-      0
-      0
-    )
-    taborder = 7
-    hint = 'Directory for component store files.'
-    bounds_x = 8
-    bounds_y = 295
-    bounds_cx = 340
-    bounds_cy = 37
-    anchors = [an_left, an_top, an_right]
-    onsetvalue = setvalue
-    controller.filterlist.data = (
-      (
-        'Project files'
-        '*.prj'
-      )
-    )
-    controller.options = [fdo_directory]
-    controller.captionopen = 'Directory for component stores'
-    controller.ongetfilename = epandfilenamemacro
-    reffontheight = 14
-  end
-  object shortcutbu: tbutton
-    taborder = 15
-    bounds_x = 10
-    bounds_y = 541
-    bounds_cx = 78
-    bounds_cy = 22
-    state = [as_localcaption, as_localonexecute]
-    caption = 'Shortcuts'
-    onexecute = editshortcuts
-  end
-  object targetosdir: tstringedit
-    Tag = 11
-    frame.caption = '${TARGETOSDIR}'
-    frame.dummy = 0
-    frame.outerframe = (
-      0
-      17
-      0
-      0
-    )
-    taborder = 12
-    bounds_x = 202
-    bounds_y = 439
-    bounds_cx = 146
-    bounds_cy = 37
-    anchors = [an_left, an_top, an_right]
-    onsetvalue = setvalue
-    reffontheight = 14
-  end
-  object tsplitter2: tsplitter
-    taborder = 16
-    visible = False
-    bounds_x = 192
-    bounds_y = 456
-    bounds_cx = 10
-    bounds_cy = 20
-    options = [spo_hprop, spo_dockleft, spo_docktop, spo_dockright, spo_dockbottom]
-    linkleft = target
-    linkright = targetosdir
-    grip = stb_none
-    statfile = tstatfile1
   end
   object tstatfile1: tstatfile
     filename = 'settingsfo.sta'

@@ -10,7 +10,7 @@ object mseshortcutdialogfo: tmseshortcutdialogfo
     578
     340
   )
-  options = [fo_screencentered, fo_localshortcuts, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
+  options = [fo_screencentered, fo_closeonesc, fo_localshortcuts, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
   caption = 'Shortcuts'
   moduleclassname = 'tmseform'
   object grid: twidgetgrid
