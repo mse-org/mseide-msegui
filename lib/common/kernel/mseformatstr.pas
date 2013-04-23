@@ -4419,8 +4419,12 @@ begin
      result:= strtohex164(copy(inp,3,length(inp)-2),value);
     end
     else begin
-//     result:= trystrtoint64(inp,lint1);
-     result:= trystrtoqword(inp,qword(lint1));
+     if (inp <> '') and (inp[1] = '-') then begin
+      result:= trystrtoint64(inp,lint1);
+     end
+     else begin
+      result:= trystrtoqword(inp,qword(lint1));
+     end;
      if result then begin
       value:= lint1;
      end;
