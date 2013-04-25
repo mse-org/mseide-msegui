@@ -417,6 +417,8 @@ type
  getsubformeventty = procedure(const sender: tobject;
                           var submoduleclass: widgetclassty;
                           var instancevarpo: pwidget) of object;
+ initsubformeventty = procedure(const sender: tobject;
+                          const asubform: twidget) of object;
                           
  ttabpage = class(tscrollingwidget,itabpage,iimagelistinfo)
   private
@@ -436,6 +438,7 @@ type
    fongetsubform: getsubformeventty;
    fsubform: twidget;
    fsubforminstancevarpo: pwidget;
+   foninitsubform: initsubformeventty;
    function getcaption: captionty;
    procedure setcaption(const Value: captionty);
    function gettabhint: msestring;
@@ -520,6 +523,8 @@ type
    property ondeselect: notifyeventty read fondeselect write fondeselect;
    property ongetsubform: getsubformeventty read fongetsubform
                                                    write fongetsubform;
+   property oninitsubform: initsubformeventty read foninitsubform
+                                                   write foninitsubform;
    property visible stored false default false;
    property optionsskin default defaulttabpageskinoptions;
  end;
@@ -3024,6 +3029,9 @@ begin
     insertwidget(fsubform,nullpoint);
     if fsubforminstancevarpo <> nil then begin
      fsubforminstancevarpo^:= fsubform;
+    end;
+    if canevent(tmethod(foninitsubform)) then begin
+     foninitsubform(self,fsubform);
     end;
     fsubform.visible:= true;
    end;
