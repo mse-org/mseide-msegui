@@ -286,6 +286,7 @@ uses
  
 procedure configureide;
 begin
+ disassfo.resetshortcuts;
  if editsettings(actionsmo.c[ord(ac_configuremseide)],
                                       actionsmo.shortcuts) then begin
   expandprojectmacros;

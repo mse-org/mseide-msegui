@@ -49,6 +49,7 @@ type
    procedure refresh(const addr: qword);
    procedure clear;
    procedure resetactiverow;
+   procedure resetshortcuts;
  end;
 
 var
@@ -243,11 +244,18 @@ begin
  end;
 end;
 
-procedure tdisassfo.deact(const sender: TObject);
+procedure tdisassfo.resetshortcuts;
 begin
- if (application.inactivewindow <> window) and fshortcutsswapped then begin
+ if fshortcutsswapped then begin
   swapshortcuts;
   fshortcutsswapped:= false;
+ end;
+end;
+
+procedure tdisassfo.deact(const sender: TObject);
+begin
+ if (application.inactivewindow <> window) then begin
+  resetshortcuts;
  end; 
 end;
 
