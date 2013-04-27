@@ -224,7 +224,7 @@ type
    property parity;
  end;
 
- sercommoptionty = (sco_halfduplex);
+ sercommoptionty = (sco_halfduplex,sco_nopipe);
  sercommoptionsty = set of sercommoptionty;
   
  tcustomsercommcomp = class(tcustomcommcomp)
@@ -266,7 +266,7 @@ type
    property onafterdisconnect;
  end;
  
- commresponseflagty = (crf_timeout,crf_eof,crf_trunc,crf_writeerror);
+ commresponseflagty = (crf_error,crf_timeout,crf_eof,crf_trunc,crf_writeerror);
  commresponseflagsty = set of commresponseflagty;
  tcustomsercommchannel = class;
  commresponseeventty = procedure(const sender: tcustomsercommchannel;
@@ -303,14 +303,15 @@ type
    destructor destroy; override;
    procedure clear;
    function transmit(const adata: string; const aresponselength: integer;
-            const atimeoutus: integer = -1): syserrorty; overload; //threadsafe
+            const atimeoutus: integer = -1): syserrorty; virtual; overload; 
+                                                                 //threadsafe
      //async, answer by onresponse
                       //0 -> timeoutus property,
                       //-1 -> timeoutus + guessed transmission time,
                       //-2 unlimited
    function transmit(const adata: string; const aresponselength: integer;
                                                        out aresult: string;
-           const atimeoutus: integer = -1): commresponseflagsty; overload;
+      const atimeoutus: integer = -1): commresponseflagsty; virtual; overload;
                         //synchronous, threadsafe
    property sercomm: tcustomcommcomp read fsercomm write setsercomm;
    property timeoutus: integer read ftimeoutus write ftimeoutus default 0;
@@ -442,9 +443,11 @@ begin
    componentexception(self,'Can not open comm port.');
   end;
   {$ifdef unix}
-  setfilenonblock(fport.handle,false);
+  setfilenonblock(fport.handle,sco_nopipe in foptions);
   {$endif};
-  fpipes.handle:= fport.handle;
+  if not (sco_nopipe in foptions) then begin
+   fpipes.handle:= fport.handle;
+  end;
  end;
  factive:= true;
  doafterconnect(fpipes);

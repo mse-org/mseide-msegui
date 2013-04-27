@@ -484,7 +484,12 @@ end;
 
 function sys_read(fd: longint; buf: pointer; nbytes: dword): integer;
 begin
- result:= mselibc.__read(fd,buf^,nbytes);
+ repeat
+  result:= mselibc.__read(fd,buf^,nbytes);
+ until (result >= 0) or (sys_getlasterror <> eintr);
+ if (result < 0) and (sys_getlasterror = EAGAIN) then begin
+  result:= 0; //nonblock
+ end;
 end;
 
 function sys_write(fd:longint; buf: pointer; nbytes: longword): integer;
