@@ -32,13 +32,13 @@ type
  tifivaluelinkcomp = class;
  
  ificlienteventty = procedure(const sender: tobject;
-                              const alink: iificlient) of object;
+                              const aclient: iificlient) of object;
  ificlientstateeventty = procedure(const sender: tobject;
-                           const alink: iificlient;
+                           const aclient: iificlient;
                            const astate: ifiwidgetstatesty;
                            const achangedstate: ifiwidgetstatesty) of object;
  ificlientmodalresulteventty = procedure(const sender: tobject;
-                                   const link: iificlient; 
+                                   const aclient: iificlient; 
                                    const amodalresult: modalresultty) of object;
 
  ifivaluelinkstatety = (ivs_linking,ivs_valuesetting,ivs_loadedproc);
@@ -234,8 +234,36 @@ type
   function ififieldname: string;
  end;
  
- indexeventty = procedure(const sender: tobject;
+ indexeventty = procedure(const sender: tobject; const aclient: iificlient;
                             const aindex: integer) of object;
+
+ setbooleanclienteventty =
+                 procedure(const sender: tobject; const aclient: iificlient;
+                          var avalue: boolean;
+                          var accept: boolean; const aindex: integer) of object;
+ setstringclienteventty = 
+                 procedure(const sender: tobject; const aclient: iificlient;
+                          var avalue: msestring;
+                          var accept: boolean; const aindex: integer) of object;
+ setansistringclienteventty = procedure(const sender: tobject; var avalue: ansistring;
+                          var accept: boolean; const aindex: integer) of object;
+ setintegerclienteventty = 
+                 procedure(const sender: tobject; const aclient: iificlient;
+                          var avalue: integer; 
+                          var accept: boolean; const aindex: integer) of object; 
+                          //equal parameters as setcoloreventty for tcoloredit!
+ setint64clienteventty = 
+                 procedure(const sender: tobject; const aclient: iificlient;
+                          var avalue: int64;
+                          var accept: boolean; const aindex: integer) of object; 
+ setrealclienteventty = 
+                 procedure(const sender: tobject; const aclient: iificlient;
+                          var avalue: realty;
+                          var accept: boolean; const aindex: integer) of object;
+ setdatetimeclienteventty = 
+                 procedure(const sender: tobject; const aclient: iificlient;
+                          var avalue: tdatetime;
+                          var accept: boolean; const aindex: integer) of object;
 
  tvalueclientcontroller = class(tificlientcontroller,
                                          iififieldinfo,iifidatasourceclient)
@@ -301,7 +329,7 @@ type
   private
    fvalue: msestring;
    fvaluedefault: msestring;
-   fonclientsetvalue: setstringindexeventty;
+   fonclientsetvalue: setstringclienteventty;
    procedure setvalue1(const avalue: msestring);
    function getgriddata: tifimsestringdatalist;
   protected
@@ -323,7 +351,7 @@ type
   published
    property value: msestring read fvalue write setvalue1;
    property valuedefault: msestring read fvaluedefault write fvaluedefault;
-   property onclientsetvalue: setstringindexeventty 
+   property onclientsetvalue: setstringclienteventty 
                 read fonclientsetvalue write fonclientsetvalue;
  end;
 
@@ -401,7 +429,7 @@ type
    fvaluedefault: integer;
    fmin: integer;
    fmax: integer;
-   fonclientsetvalue: setintegerindexeventty;
+   fonclientsetvalue: setintegerclienteventty;
    procedure setvalue1(const avalue: integer);
    procedure setmin(const avalue: integer);
    procedure setmax(const avalue: integer);
@@ -426,7 +454,7 @@ type
                                         write fvaluedefault default 0;
    property min: integer read fmin write setmin default 0;
    property max: integer read fmax write setmax default maxint;
-   property onclientsetvalue: setintegerindexeventty 
+   property onclientsetvalue: setintegerclienteventty 
                 read fonclientsetvalue write fonclientsetvalue;
  end;
 
@@ -438,7 +466,7 @@ type
    fvaluedefault: int64;
    fmin: int64;
    fmax: int64;
-   fonclientsetvalue: setint64indexeventty;
+   fonclientsetvalue: setint64clienteventty;
    procedure setvalue1(const avalue: int64);
    procedure setmin(const avalue: int64);
    procedure setmax(const avalue: int64);
@@ -463,7 +491,7 @@ type
                                         write fvaluedefault default 0;
    property min: int64 read fmin write setmin default 0;
    property max: int64 read fmax write setmax default maxint;
-   property onclientsetvalue: setint64indexeventty 
+   property onclientsetvalue: setint64clienteventty 
                 read fonclientsetvalue write fonclientsetvalue;
  end;
 
@@ -490,7 +518,7 @@ type
   private
    fvalue: longbool;
    fvaluedefault: longbool;
-   fonclientsetvalue: setbooleanindexeventty;
+   fonclientsetvalue: setbooleanclienteventty;
    function getvalue: boolean;
    procedure setvalue1(const avalue: boolean);
    function getvaluedefault: boolean;
@@ -519,7 +547,7 @@ type
    property value: boolean read getvalue write setvalue1 default false;
    property valuedefault: boolean read getvaluedefault write setvaluedefault 
                                                                 default false;
-   property onclientsetvalue: setbooleanindexeventty 
+   property onclientsetvalue: setbooleanclienteventty 
                 read fonclientsetvalue write fonclientsetvalue;
  end;
 
@@ -531,7 +559,7 @@ type
    fvaluedefault: realty;
    fmin: realty;
    fmax: realty;
-   fonclientsetvalue: setrealindexeventty;
+   fonclientsetvalue: setrealclienteventty;
    procedure setvalue1(const avalue: realty);
    procedure setmin(const avalue: realty);
    procedure setmax(const avalue: realty);
@@ -562,7 +590,7 @@ type
                                           write fvaluedefault {stored false};
    property min: realty read fmin write setmin {stored false};
    property max: realty read fmax write setmax {stored false};
-   property onclientsetvalue: setrealindexeventty 
+   property onclientsetvalue: setrealclienteventty 
                        read fonclientsetvalue write fonclientsetvalue;
  end;
 
@@ -574,7 +602,7 @@ type
    fvaluedefault: tdatetime;
    fmin: tdatetime;
    fmax: tdatetime;
-   fonclientsetvalue: setdatetimeindexeventty;
+   fonclientsetvalue: setdatetimeclienteventty;
    procedure setvalue1(const avalue: tdatetime);
    procedure setmin(const avalue: tdatetime);
    procedure setmax(const avalue: tdatetime);
@@ -602,7 +630,7 @@ type
                                              write fvaluedefault {stored false};
    property min: tdatetime read fmin write setmin {stored false};
    property max: tdatetime read fmax write setmax {stored false};
-   property onclientsetvalue: setdatetimeindexeventty 
+   property onclientsetvalue: setdatetimeclienteventty 
                        read fonclientsetvalue write fonclientsetvalue;
  end;
  
@@ -2265,7 +2293,7 @@ procedure tvalueclientcontroller.dataentered(const sender: iificlient;
 begin
  inherited;
  if fowner.canevent(tmethod(fonclientdataentered)) then begin
-  fonclientdataentered(fowner,arow);
+  fonclientdataentered(fowner,sender,arow);
  end;
 end;
 
@@ -2463,7 +2491,7 @@ procedure tstringclientcontroller.setvalue(const sender: iificlient;
                    var avalue; var accept: boolean; const arow: integer);
 begin
  if fowner.canevent(tmethod(fonclientsetvalue)) then begin
-  fonclientsetvalue(self,msestring(avalue),accept,arow);
+  fonclientsetvalue(self,sender,msestring(avalue),accept,arow);
  end;
  inherited;
 end;
@@ -2550,7 +2578,7 @@ procedure tintegerclientcontroller.setvalue(const sender: iificlient;
                       var avalue; var accept: boolean; const arow: integer);
 begin
  if fowner.canevent(tmethod(fonclientsetvalue)) then begin
-  fonclientsetvalue(self,integer(avalue),accept,arow);
+  fonclientsetvalue(self,sender,integer(avalue),accept,arow);
  end;
  inherited;
 end;
@@ -2649,7 +2677,7 @@ procedure tint64clientcontroller.setvalue(const sender: iificlient;
                        var avalue; var accept: boolean; const arow: integer);
 begin
  if fowner.canevent(tmethod(fonclientsetvalue)) then begin
-  fonclientsetvalue(self,int64(avalue),accept,arow);
+  fonclientsetvalue(self,sender,int64(avalue),accept,arow);
  end;
  inherited;
 end;
@@ -2749,7 +2777,7 @@ procedure tbooleanclientcontroller.setvalue(const sender: iificlient;
                    var avalue; var accept: boolean; const arow: integer);
 begin
  if fowner.canevent(tmethod(fonclientsetvalue)) then begin
-  fonclientsetvalue(self,boolean(avalue),accept,arow);
+  fonclientsetvalue(self,sender,boolean(avalue),accept,arow);
  end;
  inherited;
 end;
@@ -2850,7 +2878,7 @@ procedure trealclientcontroller.setvalue(const sender: iificlient;
                         var avalue; var accept: boolean; const arow: integer);
 begin
  if fowner.canevent(tmethod(fonclientsetvalue)) then begin
-  fonclientsetvalue(self,realty(avalue),accept,arow);
+  fonclientsetvalue(self,sender,realty(avalue),accept,arow);
  end;
  inherited;
 end;
@@ -2955,7 +2983,7 @@ procedure tdatetimeclientcontroller.setvalue(const sender: iificlient;
                        var avalue; var accept: boolean; const arow: integer);
 begin
  if fowner.canevent(tmethod(fonclientsetvalue)) then begin
-  fonclientsetvalue(self,tdatetime(avalue),accept,arow);
+  fonclientsetvalue(self,sender,tdatetime(avalue),accept,arow);
  end;
  inherited;
 end;

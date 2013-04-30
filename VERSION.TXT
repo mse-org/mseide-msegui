@@ -1,5 +1,7 @@
 MSEide+MSEgui breaking changes version history
 
+2013-04-30
+ onsetvalue of IfI t*clientcontroller have a iificlient parameter.
 2013-04-14
  transparency properties -> opacity.
 2013-03-28
