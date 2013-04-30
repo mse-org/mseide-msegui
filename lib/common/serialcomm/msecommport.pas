@@ -236,11 +236,11 @@ type
 
  tcommthread = class(teventthread)
   private
+  protected
    fowner: tmsecomponent;
    fport: trs232;
    fabort: boolean;
    fsendretries: integer;
-  protected
    function checkabort(const sender: tobject): boolean; virtual;
    function execute(thread: tmsethread): integer; override;
   public
@@ -265,7 +265,6 @@ type
    Fonconnectedchange: booleanchangedeventty;
    flastresult: integer;
    Fonportchange: notifyeventty;
-   fthread: tcommthread;
    fopened: boolean;
    factive: boolean;
    fstatfile: tstatfile;
@@ -297,6 +296,7 @@ type
    procedure setdatabits(const avalue: commdatabitsty);
   protected
    ftimeout: integer;
+   fthread: tcommthread;
    procedure portchanged; virtual;
 //   function createdatascanner(slavenr,adresse,anzahl,zykluszeit: integer;
 //                   empfaengerproc: empfaengerprocty): tdatascanner; virtual;
