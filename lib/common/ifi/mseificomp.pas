@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2009-2012 by Martin Schreiber
+{ MSEgui Copyright (c) 2009-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -2491,7 +2491,7 @@ procedure tstringclientcontroller.setvalue(const sender: iificlient;
                    var avalue; var accept: boolean; const arow: integer);
 begin
  if fowner.canevent(tmethod(fonclientsetvalue)) then begin
-  fonclientsetvalue(self,sender,msestring(avalue),accept,arow);
+  fonclientsetvalue(fowner,sender,msestring(avalue),accept,arow);
  end;
  inherited;
 end;
@@ -2578,7 +2578,7 @@ procedure tintegerclientcontroller.setvalue(const sender: iificlient;
                       var avalue; var accept: boolean; const arow: integer);
 begin
  if fowner.canevent(tmethod(fonclientsetvalue)) then begin
-  fonclientsetvalue(self,sender,integer(avalue),accept,arow);
+  fonclientsetvalue(fowner,sender,integer(avalue),accept,arow);
  end;
  inherited;
 end;
@@ -2677,7 +2677,7 @@ procedure tint64clientcontroller.setvalue(const sender: iificlient;
                        var avalue; var accept: boolean; const arow: integer);
 begin
  if fowner.canevent(tmethod(fonclientsetvalue)) then begin
-  fonclientsetvalue(self,sender,int64(avalue),accept,arow);
+  fonclientsetvalue(fowner,sender,int64(avalue),accept,arow);
  end;
  inherited;
 end;
@@ -2777,7 +2777,7 @@ procedure tbooleanclientcontroller.setvalue(const sender: iificlient;
                    var avalue; var accept: boolean; const arow: integer);
 begin
  if fowner.canevent(tmethod(fonclientsetvalue)) then begin
-  fonclientsetvalue(self,sender,boolean(avalue),accept,arow);
+  fonclientsetvalue(fowner,sender,boolean(avalue),accept,arow);
  end;
  inherited;
 end;
@@ -2878,7 +2878,7 @@ procedure trealclientcontroller.setvalue(const sender: iificlient;
                         var avalue; var accept: boolean; const arow: integer);
 begin
  if fowner.canevent(tmethod(fonclientsetvalue)) then begin
-  fonclientsetvalue(self,sender,realty(avalue),accept,arow);
+  fonclientsetvalue(fowner,sender,realty(avalue),accept,arow);
  end;
  inherited;
 end;
@@ -2983,7 +2983,7 @@ procedure tdatetimeclientcontroller.setvalue(const sender: iificlient;
                        var avalue; var accept: boolean; const arow: integer);
 begin
  if fowner.canevent(tmethod(fonclientsetvalue)) then begin
-  fonclientsetvalue(self,sender,tdatetime(avalue),accept,arow);
+  fonclientsetvalue(fowner,sender,tdatetime(avalue),accept,arow);
  end;
  inherited;
 end;

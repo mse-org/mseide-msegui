@@ -1,5 +1,8 @@
 MSEide+MSEgui breaking changes version history
 
+2013-05-2
+ sender parameter of IfI t*clientcontroller onsetvalue event is the owning
+ component instead of the controller.
 2013-04-30
  onsetvalue of IfI t*clientcontroller have a iificlient parameter.
 2013-04-14
