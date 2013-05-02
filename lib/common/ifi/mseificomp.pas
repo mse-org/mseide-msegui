@@ -30,14 +30,15 @@ uses
 type
  tifilinkcomp = class;
  tifivaluelinkcomp = class;
+ tcustomificlientcontroller = class;
  
- ificlienteventty = procedure(const sender: tobject;
+ ificlienteventty = procedure(const sender: tcustomificlientcontroller;
                               const aclient: iificlient) of object;
- ificlientstateeventty = procedure(const sender: tobject;
+ ificlientstateeventty = procedure(const sender: tcustomificlientcontroller;
                            const aclient: iificlient;
                            const astate: ifiwidgetstatesty;
                            const achangedstate: ifiwidgetstatesty) of object;
- ificlientmodalresulteventty = procedure(const sender: tobject;
+ ificlientmodalresulteventty = procedure(const sender: tcustomificlientcontroller;
                                    const aclient: iificlient; 
                                    const amodalresult: modalresultty) of object;
 
@@ -234,18 +235,18 @@ type
   function ififieldname: string;
  end;
  
- indexeventty = procedure(const sender: tobject; const aclient: iificlient;
+ indexeventty = procedure(const sender: tcustomificlientcontroller; const aclient: iificlient;
                             const aindex: integer) of object;
 
  setbooleanclienteventty =
-                 procedure(const sender: tobject; const aclient: iificlient;
+                 procedure(const sender: tcustomificlientcontroller; const aclient: iificlient;
                           var avalue: boolean;
                           var accept: boolean; const aindex: integer) of object;
  setstringclienteventty = 
-                 procedure(const sender: tobject; const aclient: iificlient;
+                 procedure(const sender: tcustomificlientcontroller; const aclient: iificlient;
                           var avalue: msestring;
                           var accept: boolean; const aindex: integer) of object;
- setansistringclienteventty = procedure(const sender: tobject; var avalue: ansistring;
+ setansistringclienteventty = procedure(const sender: tcustomificlientcontroller; var avalue: ansistring;
                           var accept: boolean; const aindex: integer) of object;
  setintegerclienteventty = 
                  procedure(const sender: tobject; const aclient: iificlient;
@@ -253,15 +254,15 @@ type
                           var accept: boolean; const aindex: integer) of object; 
                           //equal parameters as setcoloreventty for tcoloredit!
  setint64clienteventty = 
-                 procedure(const sender: tobject; const aclient: iificlient;
+                 procedure(const sender: tcustomificlientcontroller; const aclient: iificlient;
                           var avalue: int64;
                           var accept: boolean; const aindex: integer) of object; 
  setrealclienteventty = 
-                 procedure(const sender: tobject; const aclient: iificlient;
+                 procedure(const sender: tcustomificlientcontroller; const aclient: iificlient;
                           var avalue: realty;
                           var accept: boolean; const aindex: integer) of object;
  setdatetimeclienteventty = 
-                 procedure(const sender: tobject; const aclient: iificlient;
+                 procedure(const sender: tcustomificlientcontroller; const aclient: iificlient;
                           var avalue: tdatetime;
                           var accept: boolean; const aindex: integer) of object;
 
@@ -2293,7 +2294,7 @@ procedure tvalueclientcontroller.dataentered(const sender: iificlient;
 begin
  inherited;
  if fowner.canevent(tmethod(fonclientdataentered)) then begin
-  fonclientdataentered(fowner,sender,arow);
+  fonclientdataentered(self,sender,arow);
  end;
 end;
 
@@ -2491,7 +2492,7 @@ procedure tstringclientcontroller.setvalue(const sender: iificlient;
                    var avalue; var accept: boolean; const arow: integer);
 begin
  if fowner.canevent(tmethod(fonclientsetvalue)) then begin
-  fonclientsetvalue(fowner,sender,msestring(avalue),accept,arow);
+  fonclientsetvalue(self,sender,msestring(avalue),accept,arow);
  end;
  inherited;
 end;
@@ -2677,7 +2678,7 @@ procedure tint64clientcontroller.setvalue(const sender: iificlient;
                        var avalue; var accept: boolean; const arow: integer);
 begin
  if fowner.canevent(tmethod(fonclientsetvalue)) then begin
-  fonclientsetvalue(fowner,sender,int64(avalue),accept,arow);
+  fonclientsetvalue(self,sender,int64(avalue),accept,arow);
  end;
  inherited;
 end;
@@ -2777,7 +2778,7 @@ procedure tbooleanclientcontroller.setvalue(const sender: iificlient;
                    var avalue; var accept: boolean; const arow: integer);
 begin
  if fowner.canevent(tmethod(fonclientsetvalue)) then begin
-  fonclientsetvalue(fowner,sender,boolean(avalue),accept,arow);
+  fonclientsetvalue(self,sender,boolean(avalue),accept,arow);
  end;
  inherited;
 end;
@@ -2878,7 +2879,7 @@ procedure trealclientcontroller.setvalue(const sender: iificlient;
                         var avalue; var accept: boolean; const arow: integer);
 begin
  if fowner.canevent(tmethod(fonclientsetvalue)) then begin
-  fonclientsetvalue(fowner,sender,realty(avalue),accept,arow);
+  fonclientsetvalue(self,sender,realty(avalue),accept,arow);
  end;
  inherited;
 end;
@@ -2983,7 +2984,7 @@ procedure tdatetimeclientcontroller.setvalue(const sender: iificlient;
                        var avalue; var accept: boolean; const arow: integer);
 begin
  if fowner.canevent(tmethod(fonclientsetvalue)) then begin
-  fonclientsetvalue(fowner,sender,tdatetime(avalue),accept,arow);
+  fonclientsetvalue(self,sender,tdatetime(avalue),accept,arow);
  end;
  inherited;
 end;
