@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -66,7 +66,7 @@ type
   areas: array[scrollbarareaty] of shapeinfoty;
  end;
 
- scrollbarstatety = (scs_mousecaptured);
+ scrollbarstatety = (scs_mousecaptured,scs_streampagesize);
  scrollbarstatesty = set of scrollbarstatety;
 
  beforescrollbareventty = procedure(const sender: tcustomscrollbar;
@@ -99,7 +99,6 @@ type
    fframeendbutton2: tframe;
    fondimchanged: proceventty;
    fbuttonendlength: integer;
-   fstate: scrollbarstatesty;
    fpaintedbutton: scrollbarareaty;
    fonbeforeevent: beforescrollbareventty;
    fonafterevent: scrollbareventty;
@@ -172,6 +171,7 @@ type
    procedure readwheelsensitivity(reader: treader);
    procedure writewheelsensitivity(writer: twriter);
   protected
+   fstate: scrollbarstatesty;
    fintf: iscrollbar;
    foptions: scrollbaroptionsty;
    fdrawinfo: scrollbardrawinfoty;
@@ -277,16 +277,47 @@ type
  end;
 
 
- tscrollbar = class(tcustomscrollbar)
+ tnopagesizescrollbar = class(tcustomscrollbar)
   published
    property options;
    property width;
    property indentstart;
    property indentend;
-   property stepsize;
    property stepctrlfact;
    property stepshiftfact;
+   property wheelsensitivity;
+   property buttonlength;
+   property buttonminlength;
+   property buttonendlength;
+   property facebutton;
+   property faceendbutton;
+   property framebutton;
+   property frameendbutton1;
+   property frameendbutton2;
+   property color;
+   property colorpattern;
+   property colorglyph;
+   property onbeforeevent;
+   property onafterevent;
+ end;
+ 
+ tscrollbar = class(tnopagesizescrollbar)
+  public
+   constructor create(intf: iscrollbar; org: originty = org_client;
+                               ondimchanged: proceventty = nil); override;
+  published
    property pagesize;
+   property stepsize;   
+ end;
+ 
+ tnomoveautonopagesizescrollbar = class(tcustomnomoveautoscrollbar)
+  published
+   property options;
+   property width;
+   property indentstart;
+   property indentend;
+   property stepctrlfact;
+   property stepshiftfact;
    property wheelsensitivity;
    property buttonlength;
    property buttonminlength;
@@ -303,30 +334,13 @@ type
    property onafterevent;
  end;
 
- tnomoveautoscrollbar = class(tcustomnomoveautoscrollbar)
+ tnomoveautoscrollbar = class(tnomoveautonopagesizescrollbar)
+  public
+   constructor create(intf: iscrollbar; org: originty = org_client;
+              ondimchanged: proceventty = nil); override;
   published
-   property options;
-   property width;
-   property indentstart;
-   property indentend;
    property stepsize;
-   property stepctrlfact;
-   property stepshiftfact;
    property pagesize;
-   property wheelsensitivity;
-   property buttonlength;
-   property buttonminlength;
-   property buttonendlength;
-   property facebutton;
-   property faceendbutton;
-   property framebutton;
-   property frameendbutton1;
-   property frameendbutton2;
-   property color;
-   property colorpattern;
-   property colorglyph;
-   property onbeforeevent;
-   property onafterevent;
  end;
 
 implementation
@@ -1587,9 +1601,10 @@ procedure tcustomscrollbar.defineproperties(filer: tfiler);
 begin
  inherited;
  filer.defineproperty('stepsize',@readstepsize,@writestepsize,
-                      (filer.ancestor = nil) and (fstepsize <> 0) or
-   (filer.ancestor <> nil) and 
-      (tcustomscrollbar(filer.ancestor).fstepsize <> fstepsize));
+                      (scs_streampagesize in fstate) and 
+                      ((filer.ancestor = nil) and (fstepsize <> 0) or
+                                              (filer.ancestor <> nil) and 
+      (tcustomscrollbar(filer.ancestor).fstepsize <> fstepsize)));
  filer.defineproperty('stepctrlfact',@readstepctrlfact,@writestepctrlfact,
                       (filer.ancestor = nil) and (fstepctrlfact <> 0) or
    (filer.ancestor <> nil) and 
@@ -1599,9 +1614,10 @@ begin
    (filer.ancestor <> nil) and 
       (tcustomscrollbar(filer.ancestor).fstepshiftfact <> fstepshiftfact));
  filer.defineproperty('pagesize',@readpagesize,@writepagesize,
-                      (filer.ancestor = nil) and (fpagesize <> defaultpagesize) or
-   (filer.ancestor <> nil) and 
-      (tcustomscrollbar(filer.ancestor).fpagesize <> fpagesize));
+                      (scs_streampagesize in fstate) and 
+                  ((filer.ancestor = nil) and (fpagesize <> defaultpagesize) or
+       (filer.ancestor <> nil) and 
+      (tcustomscrollbar(filer.ancestor).fpagesize <> fpagesize)));
  filer.defineproperty('wheelsensitivity',@readwheelsensitivity,@writewheelsensitivity,
                       (filer.ancestor = nil) and (fwheelsensitivity <> 1) or
    (filer.ancestor <> nil) and 
@@ -1621,6 +1637,24 @@ procedure tcustomnomoveautoscrollbar.setoptions(
   const avalue: scrollbaroptionsty);
 begin
  inherited setoptions(avalue - [sbo_moveauto]);
+end;
+
+{ tscrollbar }
+
+constructor tscrollbar.create(intf: iscrollbar; org: originty = org_client;
+               ondimchanged: proceventty = nil);
+begin
+ inherited;
+ include(fstate,scs_streampagesize);
+end;
+
+{ tnomoveautoscrollbar }
+
+constructor tnomoveautoscrollbar.create(intf: iscrollbar;
+               org: originty = org_client; ondimchanged: proceventty = nil);
+begin
+ inherited;
+ include(fstate,scs_streampagesize);
 end;
 
 end.

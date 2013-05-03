@@ -282,7 +282,7 @@ type
                                                          write fonpaintglyph;
  end;
  
- tsliderscrollbar = class(tcustomscrollbar,iface)
+ tsliderscrollbar = class(tscrollbar,iface)
   private
    fface: tface;
    procedure setface(const avalue: tface);
@@ -302,22 +302,22 @@ type
    procedure paint(const canvas: tcanvas; const acolor: colorty = cl_none); override;
   published
    property options default defaultsliderscrollbaroptions;
-   property stepsize;
-   property stepctrlfact;
-   property stepshiftfact;
-   property pagesize;
-   property wheelsensitivity;
+//   property stepsize;
+//   property stepctrlfact;
+//   property stepshiftfact;
+//   property pagesize;
+//   property wheelsensitivity;
    property buttonlength default defaultbuttonminlength;
-   property buttonendlength;
-   property buttonminlength;
-   property color;
-   property colorpattern;
-   property colorglyph;
-   property facebutton;
-   property faceendbutton;
-   property framebutton;
-   property frameendbutton1;
-   property frameendbutton2;
+//   property buttonendlength;
+//   property buttonminlength;
+//   property color;
+//   property colorpattern;
+//   property colorglyph;
+//   property facebutton;
+//   property faceendbutton;
+//   property framebutton;
+//   property frameendbutton1;
+//   property frameendbutton2;
    property face: tface read fface write setface;
  end;
 

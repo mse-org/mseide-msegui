@@ -2869,7 +2869,7 @@ end;
 
 function tgridframe.getscrollbarclass(vert: boolean): framescrollbarclassty;
 begin
- result:= tthumbtrackscrollbar;
+ result:= tthumbtracknopagesizescrollbar;
 end;
 
 { tgridpropfont }

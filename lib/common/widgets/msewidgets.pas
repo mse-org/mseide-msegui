@@ -161,56 +161,32 @@ const
  scrollbarframestates: framestatesty = [fs_sbleft,fs_sbtop,fs_sbright,fs_sbbottom];
 
 type
- tscrollboxscrollbar = class(tscrollbar{tcustomscrollbar})
+ tscrollboxscrollbar = class(tnopagesizescrollbar)
   public
    constructor create(intf: iscrollbar; org: originty = org_client;
               ondimchanged: proceventty = nil); override;
   published
    property options default defaultscrollboxscrollbaroptions;
-{
-   property width;
-   property indentstart;
-   property indentend;
-   property buttonlength;
-   property buttonminlength;
-   property buttonendlength;
-   property facebutton;
-   property faceendbutton;
-   property framebutton;
-   property frameendbutton1;
-   property frameendbutton2;
-   property color;
-   property colorpattern;
-   property colorglyph;
-   property onbeforeevent;
-   property onafterevent;
- }
  end;
 
 const
  defaultthumbtrackscrollbaroptions = [sbo_thumbtrack,sbo_showauto];
 
 type
- tthumbtrackscrollbar = class(tnomoveautoscrollbar{tcustomnomoveautoscrollbar})
+ tthumbtrackscrollbar = class(tnomoveautoscrollbar)
   public
    constructor create(intf: iscrollbar; org: originty = org_client;
               ondimchanged: proceventty = nil); override;
   published
    property options default defaultthumbtrackscrollbaroptions;
-  {
-   property width;
-   property indentstart;
-   property indentend;
-   property buttonlength;
-   property buttonminlength;
-   property buttonendlength;
-   property facebutton;
-   property faceendbutton;
-   property framebutton;
-   property frameendbutton1;
-   property frameendbutton2;
-   property color;
-  }
+ end;
+
+ tthumbtracknopagesizescrollbar = class(tnomoveautonopagesizescrollbar)
+  public
+   constructor create(intf: iscrollbar; org: originty = org_client;
+              ondimchanged: proceventty = nil); override;
+  published
+   property options default defaultthumbtrackscrollbaroptions;
  end;
  
  framescrollbarclassty = class of tcustomscrollbar;
@@ -3865,6 +3841,15 @@ begin
  foptions:= defaultthumbtrackscrollbaroptions;
 end;
 
+{ tthumbtracknopagesizescrollbar }
+
+constructor tthumbtracknopagesizescrollbar.create(intf: iscrollbar; org: originty;
+  ondimchanged: proceventty);
+begin
+ inherited;
+ foptions:= defaultthumbtrackscrollbaroptions;
+end;
+
 { tcustomscrollboxframe }
 
 constructor tcustomscrollboxframe.create(const intf: iscrollframe;
@@ -4277,7 +4262,8 @@ begin
  end;
 end;
 
-function tcustomscrollboxframe.getscrollbarclass(vert: boolean): framescrollbarclassty;
+function tcustomscrollboxframe.getscrollbarclass(
+                             vert: boolean): framescrollbarclassty;
 begin
  result:= tscrollboxscrollbar;
 end;
