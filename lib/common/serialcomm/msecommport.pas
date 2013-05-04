@@ -312,10 +312,12 @@ type
    procedure statreading;
    procedure statread;
    function getstatvarname: msestring;
+   procedure doafteropen; virtual;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   function openport(raiseexception: boolean = false): boolean;   // true wenn gelungen
+   function openport(raiseexception: boolean = false): boolean;
+                                           // true wenn gelungen
    procedure closeport;
    procedure abort;
       //bricht laufende auftraege mit timeout ab, wird automatisch rueckgesetzt
@@ -1885,6 +1887,7 @@ begin
 //  raise EFCreateError.Create(commname[fport.fcommnr]+' '+t_nichtoffen+'.');
   raise exception.Create(commname[fthread.fport.fcommnr]+' '+t_nichtoffen+'.');
  end;
+ doafteropen;
  portchanged;
 end;
 
@@ -1954,6 +1957,11 @@ end;
 procedure tcommport.statread;
 begin
  //dummy
+end;
+
+procedure tcommport.doafteropen;
+begin
+ //dummy;
 end;
 
 { tasciicommport }
