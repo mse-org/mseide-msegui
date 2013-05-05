@@ -435,6 +435,11 @@ function getrecordtypechars(const fields: array of const): string;
                 // S -> msestring
                 // r -> real
 
+function encodestring(const value: msestring; 
+                           const encoding: charencodingty = ce_utf8n): string;
+function decodestring(const value: string; 
+                   const encoding: charencodingty = ce_utf8n): msestring;
+
 function encoderecord(const fields: array of const;
                forcequote: boolean = false; const quotechar: msechar = '"';
                const separator: msechar = ','): msestring;
@@ -696,7 +701,7 @@ begin
  end;
 end;
 
-function encode(const value: msestring; 
+function encodestring(const value: msestring; 
                            const encoding: charencodingty = ce_utf8n): string;
 begin
  case encoding  of
@@ -715,7 +720,7 @@ begin
  end;
 end;
 
-function decode(const value: string; 
+function decodestring(const value: string; 
                    const encoding: charencodingty = ce_utf8n): msestring;
 begin
  case encoding  of
@@ -1763,12 +1768,12 @@ end;
 
 function ttextstream.encode(const value: msestring): string;
 begin
- result:= msestream.encode(value,fencoding);
+ result:= msestream.encodestring(value,fencoding);
 end;
 
 function ttextstream.decode(const value: string): msestring;
 begin
- result:= msestream.decode(value,fencoding);
+ result:= msestream.decodestring(value,fencoding);
 end;
 
 procedure ttextstream.write(const value: string);
