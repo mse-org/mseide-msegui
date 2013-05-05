@@ -4161,7 +4161,7 @@ begin
     end;
     if (value = factivepageindex) then begin
      doactivepagechanged;
-     if value >= 0 then begin
+     if (value >= 0) and (value = factivepageindex) then begin
       ftabs.tabs[value].active:= true
      end;
     end;
