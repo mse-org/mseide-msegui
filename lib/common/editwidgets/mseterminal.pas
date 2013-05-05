@@ -22,7 +22,7 @@ type
                        var atext: msestring; var donotsend: boolean) of object;
  receivetexteventty = procedure(const sender: tobject; 
                        var atext: ansistring; const errorinput: boolean) of object;
- terminaloptionty = (teo_readonly,teo_bufferchunks,teo_stripescsequence);
+ terminaloptionty = (teo_readonly,teo_bufferchunks,teo_stripescsequence,teo_utf8);
  terminaloptionsty = set of terminaloptionty;
 const
  defaultterminaleditoptions = (defaulttexteditoptions + [oe_caretonreadonly])-
@@ -318,7 +318,12 @@ begin
       if not bo1 then begin
        bo2:= echooff(bo3);
        try
-        fprocess.input.writeln(mstr1);
+        if teo_utf8 in foptions then begin
+         fprocess.input.writeln(stringtoutf8(mstr1));
+        end
+        else begin
+         fprocess.input.writeln(mstr1);
+        end;
         if not bo3 then begin
          datalist.add('');
         end;
@@ -512,7 +517,12 @@ begin
    if canevent(tmethod(fonreceivetext)) then begin
     fonreceivetext(self,str1,sender = fprocess.erroroutput.pipereader);
    end;
-   addchars(str1);
+   if teo_utf8 in foptions then begin
+    addchars(utf8tostring(str1));
+   end
+   else begin
+    addchars(str1);
+   end;
    if teo_bufferchunks in foptions then begin
     int1:= application.unlockall;
     sleepus(0); //sched_yield
