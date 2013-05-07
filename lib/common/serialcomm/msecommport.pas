@@ -898,7 +898,7 @@ const           // fuer tdcb.flags
 begin       //open
  close;
  {$ifdef UNIX}
- fhandle:= mselibc.open(PChar('/dev/'+commname[fcommnr]), o_rdwr or o_nonblock
+ fhandle:= mselibc.open(PChar('/dev/'+commname[fcommnr]), o_rdwr{ or o_nonblock}
              {,FileAccessRights});
  if integer(fhandle) >= 0 then begin
   msetcgetattr(fhandle,info);
@@ -1169,6 +1169,7 @@ var
  int1: integer;
  {$ifdef UNIX}
  time: longword;
+ pollinfo: array[0..0] of pollfd;
  {$else}
  time: longword;
  bo1: boolean;
@@ -1183,10 +1184,31 @@ begin
    time:= timestep(timeout);
   {$ifdef mswindows}
    bo1:= windows.readfile(fhandle,po^,anzahl,longword(int1),@overlapped);
+  {$else}
+   if timed then begin
+    fillchar(pollinfo,sizeof(pollinfo),0);
+    with pollinfo[0] do begin
+     fd:= fhandle;
+     events:= pollin;
+    end;
+   end;
   {$endif}
    while true do begin
    {$ifdef UNIX}
-    int1:= __read(fhandle,po^,anzahl); //todo: use poll
+    if timed then begin
+     repeat
+      int1:= poll(@pollinfo,1,timeout div 1000 + 1);
+      if (int1 < 0) and (sys_getlasterror <> eintr) then begin
+       break;
+      end;
+     until int1 >= 0;
+     if int1 > 0 then begin
+      int1:= __read(fhandle,po^,anzahl);
+     end;
+    end
+    else begin
+     int1:= __read(fhandle,po^,anzahl);
+    end;
    {$else}
     if not bo1 then begin
      if not getoverlappedresult(fhandle,
@@ -1194,7 +1216,7 @@ begin
       bo1:= windows.getlasterror = error_io_incomplete;
       if bo1 then begin
        bo1:= waitforsingleobject(
-                        overlapped.hevent,timeout div 1000+1) = WAIT_OBJECT_0;
+                        overlapped.hevent,timeout div 1000 + 1) = WAIT_OBJECT_0;
        if bo1 then begin
         bo1:= getoverlappedresult(fhandle,
                                    overlapped,longword(int1),false);
@@ -1218,15 +1240,16 @@ begin
     if (anzahl <= 0) or timed and msesysutils.timeout(time) or
        (canevent(tmethod(foncheckabort)) and foncheckabort(self)) then begin
      break;
-    end
-    else begin
-     sleepus(fbyteus);
+//    end
+//    else begin
+//     sleepus(fbyteus);
     end;
    end;
   end;
  end;
 end;
-{$if 0=1}
+
+(*
 {$ifdef UNIX}
 function tcustomrs232.readbuffer(anzahl: integer; out dat;
                        timeout: longword = 0): integer;
@@ -1299,7 +1322,7 @@ begin
 end;
 {$endif} //not unix
 {$ifend}
-
+*)
 
 function tcustomrs232.readstring(anzahl: integer; out dat: string;
   timeout: longword = infinitemse): boolean;
