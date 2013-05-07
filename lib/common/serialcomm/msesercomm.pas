@@ -43,7 +43,7 @@ type
    fonafterconnect: proceventty;
    procedure settimeoutms(const avalue: integer); virtual;
    function execthread(thread: tmsethread): integer; override;
-   function internalread(var buf; const acount: integer;  out readcount: integer;
+   function internalread(var buf; const acount: integer; out readcount: integer;
                     const nonblocked: boolean = false): boolean; virtual;
    function doread(var buf; const acount: integer; out readcount: integer;
                     const nonblocked: boolean = false): boolean; override;

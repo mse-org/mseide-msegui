@@ -1121,7 +1121,7 @@ begin
   setcommmask(fhandle,ev_txempty); //funktioniert nicht fuer w2k, waitcommevent kehrt sofort zurueck!
   if not writefile(fhandle,dat[1],len,ca1,@overlapped) then begin
    if getlasterror = ERROR_IO_PENDING then begin
-    result:= waitforsingleobject(overlapped.hevent,timeout div 1000) = WAIT_OBJECT_0;
+    result:= waitforsingleobject(overlapped.hevent,timeout div 1000+1) = WAIT_OBJECT_0;
    end;
   end
   else begin
@@ -1181,15 +1181,29 @@ begin
   if anzahl > 0 then begin
    timed:= defaulttimeout(timeout,anzahl,timeout);
    time:= timestep(timeout);
+  {$ifdef mswindows}
+   bo1:= windows.readfile(fhandle,po^,anzahl,longword(int1),@overlapped);
+  {$endif}
    while true do begin
    {$ifdef UNIX}
-    int1:= __read(fhandle,po^,anzahl);
+    int1:= __read(fhandle,po^,anzahl); //todo: use poll
    {$else}
-    bo1:= windows.readfile(fhandle,po^,anzahl,longword(int1),@overlapped);
     if not bo1 then begin
-     if not getoverlappedresult(fhandle,overlapped,longword(int1),true) then begin
-      int1:= -1;
-      purgecomm(fhandle,PURGE_RXABORT); //puffer freigeben
+     if not getoverlappedresult(fhandle,
+                                   overlapped,longword(int1),false) then begin
+      bo1:= windows.getlasterror = error_io_incomplete;
+      if bo1 then begin
+       bo1:= waitforsingleobject(
+                        overlapped.hevent,timeout div 1000+1) = WAIT_OBJECT_0;
+       if bo1 then begin
+        bo1:= getoverlappedresult(fhandle,
+                                   overlapped,longword(int1),false);
+       end;
+      end;
+      if not bo1 then begin
+       int1:= -1;
+       purgecomm(fhandle,PURGE_RXABORT); //puffer freigeben
+      end;
      end;
     end;
    {$endif}
