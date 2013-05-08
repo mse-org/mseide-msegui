@@ -898,7 +898,7 @@ const           // fuer tdcb.flags
 begin       //open
  close;
  {$ifdef UNIX}
- fhandle:= mselibc.open(PChar('/dev/'+commname[fcommnr]), o_rdwr{ or o_nonblock}
+ fhandle:= mselibc.open(PChar('/dev/'+commname[fcommnr]), o_rdwr or o_nonblock
              {,FileAccessRights});
  if integer(fhandle) >= 0 then begin
   msetcgetattr(fhandle,info);
