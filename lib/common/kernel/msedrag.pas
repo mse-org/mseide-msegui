@@ -296,6 +296,9 @@ var
 begin
  owner:= fintf.getwidget;
  case info.eventkind of
+  ek_clientmouseleave,ek_mouseleave: begin
+   enddrag;
+  end;
   ek_buttonpress: begin
    if checkclickstate(info) then begin
     fpickpos:= info.pos;
