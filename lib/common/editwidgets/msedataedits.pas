@@ -3412,13 +3412,13 @@ end;
 procedure thexstringedit.readstatvalue(const reader: tstatreader);
 begin
 // if fgridintf = nil then begin
-  value:= reader.readstring(valuevarname,value);
+  value:= reader.readbinarystring(valuevarname,value);
 // end;
 end;
 
 procedure thexstringedit.writestatvalue(const writer: tstatwriter);
 begin
- writer.writestring(valuevarname,value);
+ writer.writebinarystring(valuevarname,value);
 end;
 
 function thexstringedit.sortfunc(const l,r): integer;
