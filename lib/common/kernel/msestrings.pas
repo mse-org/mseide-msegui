@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -213,7 +213,11 @@ procedure addstringsegment(var dest: msestring; const a,b: pmsechar);
 function stringsegment(a,b: pmsechar): msestring;
 
 function lstringtostring(const value: lmsestringty): msestring; overload;
+function lstringtostring(const value: pmsechar;
+                                    const len: integer): msestring; overload;
 function lstringtostring(const value: lstringty): string; overload;
+function lstringtostring(const value: pchar;
+                                    const len: integer): string; overload;
 procedure stringtolstring(const value: string; var{out} res: lstringty); overload;  //todo!!!!! fpbug 3221
 procedure stringtolstring(const value: msestring; var{out} res: lmsestringty); overload;
 function stringtolstring(const value: string): lstringty; overload;
@@ -2462,10 +2466,24 @@ begin
  move(value.po^,result[1],value.len*sizeof(msechar));
 end;
 
+function lstringtostring(const value: pmsechar;
+                                    const len: integer): msestring; overload;
+begin
+ setlength(result,len);
+ move(value^,result[1],len*sizeof(msechar));
+end;
+
 function lstringtostring(const value: lstringty): string; overload;
 begin
  setlength(result,value.len);
  move(value.po^,result[1],value.len*sizeof(char));
+end;
+
+function lstringtostring(const value: pchar;
+                                    const len: integer): string; overload;
+begin
+ setlength(result,len);
+ move(value^,result[1],len*sizeof(char));
 end;
 
 procedure stringtolstring(const value: string; var{out} res: lstringty);
