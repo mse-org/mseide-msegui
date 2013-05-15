@@ -273,12 +273,14 @@ type
    procedure write(const value: msestring); reintroduce; overload;
    procedure write(const value: real); reintroduce;  overload;
    procedure write(const value: integer); reintroduce; overload;
+   procedure write(const value: boolean); reintroduce; overload;
    procedure write(const values: array of const); reintroduce; overload;
 
    procedure writeln(const value: string); overload; virtual;
    procedure writeln(const value: msestring); overload;
    procedure writeln(const value: real);  overload;
    procedure writeln(const value: integer);  overload;
+   procedure writeln(const value: boolean);  overload;
    procedure writeln(const value: msestringarty);  overload;
    procedure writeln(const value: stringarty);  overload;
    procedure writeln(const values: array of const); overload;
@@ -289,6 +291,8 @@ type
    function readln(var value: msestring): boolean; overload;       
            //true wenn zeile vollstaendig, sonst eof erreicht
    function readln(out value: integer): boolean; overload;
+           //true wenn zeile vollstaendig, sonst eof erreicht
+   function readln(out value: boolean): boolean; overload;
            //true wenn zeile vollstaendig, sonst eof erreicht
    function readln(out value: real): boolean; overload;
            //true wenn zeile vollstaendig, sonst eof erreicht
@@ -307,6 +311,8 @@ type
    function readinteger(default: integer; min: integer = minint;
                             max: integer = maxint): integer;
                 //liest integer, bringt defaultwert bei fehler
+   function readboolean(default: boolean): boolean;
+                //liest boolean, bringt defaultwert bei fehler
    function readreal(default: real; min: real = -bigreal;
                             max: real = bigreal): real;
                 //liest double, bringt defaultwert bei fehler
@@ -1801,6 +1807,11 @@ begin
  write(inttostr(value));
 end;
 
+procedure ttextstream.write(const value: boolean);
+begin
+ write(booltostr(value));
+end;
+
 procedure ttextstream.write(const values: array of const);
 var
  int1: integer;
@@ -1863,6 +1874,11 @@ begin
  writestrln(inttostr(value));
 end;
 
+procedure ttextstream.writeln(const value: boolean);
+begin
+ writestrln(booltostr(value));
+end;
+
 procedure ttextstream.writeln(const value: msestringarty);
 var
  int1: integer;
@@ -1912,6 +1928,14 @@ var
 begin
  result:= readstrln(str1);
  value:= strtoint(str1);
+end;
+
+function ttextstream.readln(out value: boolean): boolean;
+var
+ str1: string;
+begin
+ result:= readstrln(str1);
+ value:= strtobool(str1);
 end;
 
 function ttextstream.readln(out value: real): boolean;
@@ -1980,6 +2004,16 @@ begin
     result:= max;
    end;
   end;
+ except
+  result:= default;
+ end;
+end;
+
+function ttextstream.readboolean(default: boolean): boolean;
+  //liest boolean, bringt defaultwert bei fehler
+begin
+ try
+  readln(result);
  except
   result:= default;
  end;
