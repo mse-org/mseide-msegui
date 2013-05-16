@@ -386,6 +386,8 @@ function msestrlcopy(const str: pmsechar; len: integer): msestring;
                        //nicht nullterminiert
 function psubstr(const start,stop: pchar): string; overload;
 function psubstr(const start,stop: pmsechar): msestring; overload;
+function singleline(const start: pchar): string; overload;
+function singleline(const start: pmsechar): msestring; overload;
 
 function msePosEx(const SubStr, S: msestring; Offset: longword = 1): Integer;
 
@@ -986,6 +988,44 @@ begin
   int1:= stop-start;
   setlength(result,int1);
   move(start^,result[1],int1*sizeof(msechar));
+ end;
+end;
+
+function singleline(const start: pchar): string;
+var 
+ po1: pchar;
+begin
+ if start = nil then begin
+  result:= '';
+ end
+ else begin
+  po1:= start;
+  while po1^ <> #0 do begin
+   if (po1^ = c_linefeed) or (po1^ = c_return) then begin
+    break;
+   end;
+   inc(po1);
+  end;
+  result:= psubstr(start,po1);
+ end;
+end;
+
+function singleline(const start: pmsechar): msestring;
+var 
+ po1: pmsechar;
+begin
+ if start = nil then begin
+  result:= '';
+ end
+ else begin
+  po1:= start;
+  while po1^ <> msechar(#0) do begin
+   if (po1^ = msechar(c_linefeed)) or (po1^ = msechar(c_return)) then begin
+    break;
+   end;
+   inc(po1);
+  end;
+  result:= psubstr(start,po1);
  end;
 end;
 
