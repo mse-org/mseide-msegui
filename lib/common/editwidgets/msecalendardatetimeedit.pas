@@ -11,6 +11,10 @@
 unit msecalendardatetimeedit;
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+
+{$ifndef mse_no_ifi}
+ {$define mse_with_ifi}
+{$endif}
 interface
 uses
  classes,mclasses,msedataedits,msepopupcalendar,msedropdownlist,msetypes,

@@ -8,12 +8,6 @@ object formdesignerfo: tformdesignerfo
   bounds_cx = 287
   bounds_cy = 300
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent]
-  container.frame.zoomwidthstep = 1
-  container.frame.zoomheightstep = 1
-  container.frame.sbhorz.stepctrlfact = 0
-  container.frame.sbhorz.wheelsensitivity = 1
-  container.frame.sbvert.stepctrlfact = 0
-  container.frame.sbvert.wheelsensitivity = 1
   container.oncalcminscrollsize = calcscrollsize
   container.bounds = (
     0
