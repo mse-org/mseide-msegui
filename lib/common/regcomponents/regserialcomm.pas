@@ -27,7 +27,7 @@ uses
 procedure Register;
 begin
  registercomponents('Comm',[tcommport,tasciicommport,tasciiprotport,
-                            tsercommcomp,tsercommchannel,
+                            tsercommcomp,tsercommchannel,tasynsercommchannel,
                             tcommselector]);
  registercomponenttabhints(['Comm'],['Components for serial port (RS232)']);
 end;

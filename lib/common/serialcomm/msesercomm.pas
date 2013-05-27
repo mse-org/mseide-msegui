@@ -351,7 +351,7 @@ type
    procedure disconnect; virtual;
   published
    property sercomm: tcustomsercommcomp read getsercomm write setsercomm;
-   property onsetuppcomm: setupcommeventty read fonsetupcomm write fonsetupcomm;
+   property onsetupcomm: setupcommeventty read fonsetupcomm write fonsetupcomm;
    property timeoutus;
    property onresponse;
    property connected: boolean read fconnected write setconnected
