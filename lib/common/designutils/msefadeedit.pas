@@ -32,6 +32,7 @@ type
   grid: tcustomgrid;
   posed: trealedit;
   colored: tcoloredit;
+  opaed: tcoloredit;
  end;
  pnodeinfoty = ^nodeinfoty;
 
@@ -565,7 +566,9 @@ begin
    grid.row:= int1;
    grid.focuscell(makegridcoord(1,int1));
    colored[int1]:= blendcolor(rea3,colored[int1-1],colored[int1+1]);
-   opaed[int1]:= blendcolor(rea3,opaed[int1-1],opaed[int1+1]);
+   if opaed <> nil then begin
+    opaed[int1]:= blendcolor(rea3,opaed[int1-1],opaed[int1+1]);
+   end;
    grid.endupdate;
    change;
    grid.setfocus;
@@ -582,6 +585,7 @@ begin
   grid:= self.grid;
   posed:= self.posed;
   colored:= self.colored;
+  opaed:= self.opaed;
   setlength(marker,3);
   marker[0].y:= rect1.y + rect1.cy - 1;
   marker[1].y:= marker[0].y - markerheight;
@@ -591,6 +595,7 @@ begin
   grid:= self.opagrid;
   posed:= self.opaposed;
   colored:= self.opacolored;
+  opaed:= nil;
   marker:= copy(fnodeinfo.marker);
  end;
 end;
