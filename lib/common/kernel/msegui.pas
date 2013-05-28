@@ -5825,7 +5825,7 @@ begin
   end;
   if fi.fade_color.count > 0 then begin
    if (fi.fade_color.count > 1) or 
-     ((fi.fade_opacolor.count > 1) or (fi.fade_opacity <> cl_none)) and 
+     ((fi.fade_opacolor.count > 0) or (fi.fade_opacity <> cl_none)) and 
                                (fi.options * faceoptionsmask = []) then begin
     case fi.fade_direction of
      gd_up,gd_down: begin
