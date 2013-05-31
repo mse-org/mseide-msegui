@@ -856,6 +856,11 @@ procedure unlockfindglobalcomponent; //switch on findglobalcomponent
 function findglobalcomponentlocked: boolean;
 
 function getenumnames(const atypeinfo: ptypeinfo): msestringarty;
+function getclasspropvalue(const instance: tobject; const apropname: string;
+                   const aclass: tclass): tobject;
+function getclasspropvalue(const instance: tobject; const apropname: string;
+                 const aclass: tclass; out avalue: tobject): boolean;
+
 
 procedure nosupportfor(const sender: tcomponent; const avalue: tcomponent;
                           const ainterface: ptypeinfo);
@@ -1822,6 +1827,36 @@ begin
   end;
   }
  end;
+end;
+
+function getclasspropvalue(const instance: tobject; const apropname: string;
+                                                const aclass: tclass): tobject;
+var
+ po1: ppropinfo;
+ po2: ptypeinfo;
+begin
+ result:= nil;
+ if instance <> nil then begin
+  po1:= getpropinfo(instance,apropname);
+  if (po1 <> nil) then begin
+   po2:= po1^.proptype;
+   if (po2^.kind = tkclass) and 
+              (gettypedata(po2)^.classtype.inheritsfrom(aclass)) then begin
+ {$ifdef cpu64}
+    result:= tobject(ptruint(getint64prop(instance,po1)));
+ {$else}
+    result:= tobject(ptruint(getordprop(instance,po1)));
+ {$endif}
+   end;
+  end;
+ end;
+end;
+
+function getclasspropvalue(const instance: tobject; const apropname: string;
+                 const aclass: tclass; out avalue: tobject): boolean;
+begin
+ avalue:= getclasspropvalue(instance,apropname,aclass);
+ result:= avalue <> nil;
 end;
 
 type
