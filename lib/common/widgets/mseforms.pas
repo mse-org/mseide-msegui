@@ -469,6 +469,7 @@ type
    property oneventloopstart;
    property ondestroy;
    property ondestroyed;
+   property onbeforeclosequery;
    property onclosequery;
    property onclose;
    property onidle;
@@ -496,6 +497,7 @@ type
    property onactivate;
    property onenter;
    property onexit;
+   property onfocusedwidgetchanged;
    property ondeactivate;
    property onhide;
    property onevent;
@@ -511,6 +513,9 @@ type
 
    property onfontheightdelta;
    property onlayout;
+
+   property onsysevent;
+   property onsyswindowevent;
  end;
 
  tdockform = class(tdockformwidget)
