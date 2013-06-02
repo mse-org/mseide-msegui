@@ -89,8 +89,6 @@ type
   private
    fdatalink: tgraphicdatalink;
    fvaluebuffer: string;
-   procedure doenter; override;
-   procedure doexit; override;
     //idbeditfieldlink
    function getgriddatasource: tdatasource;
    function getedited: boolean;
@@ -108,6 +106,8 @@ type
    procedure recchanged;
    procedure setdatalink(const avalue: tgraphicdatalink);
   protected   
+   procedure doenter; override;
+   procedure doexit; override;
    procedure griddatasourcechanged; override;
    procedure loadcellbmp(const acanvas: tcanvas; const abmp: tmaskedbitmap); override;
    function getrowdatapo(const arow: integer): pointer; override;
