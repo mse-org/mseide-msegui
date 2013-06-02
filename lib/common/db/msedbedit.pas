@@ -401,6 +401,8 @@ type
    procedure modified; override;
    function getoptionsedit: optionseditty; override;
    procedure dochange; override;
+   procedure doenter; override;
+   procedure doexit; override;
 
    function getrowdatapo(const arow: integer): pointer; override;
    function getnulltext: msestring; override;
@@ -472,14 +474,16 @@ type
    procedure modified; override;
    function getoptionsedit: optionseditty; override;
    procedure dochange; override;
+   procedure doenter; override;
+   procedure doexit; override;
    function getrowdatapo(const arow: integer): pointer; override;
    function getnulltext: msestring; override;
-  //idbeditfieldlink
+    //idbeditfieldlink
    procedure valuetofield;
    procedure fieldtovalue;
    procedure getfieldtypes(var afieldtypes: fieldtypesty);
    function getfieldlink: tcustomeditwidgetdatalink;
-  //ireccontrol
+    //ireccontrol
    procedure recchanged;
   public
    constructor create(aowner: tcomponent); override;
@@ -576,6 +580,8 @@ type
    procedure modified; override;
    function getoptionsedit: optionseditty; override;
    procedure dochange; override;
+   procedure doenter; override;
+   procedure doexit; override;
    function getrowdatapo(const arow: integer): pointer; override;
    function getnulltext: msestring; override;
     //idbeditfieldlink
@@ -612,14 +618,16 @@ type
    procedure modified; override;
    function getoptionsedit: optionseditty; override;
    procedure dochange; override;
+   procedure doenter; override;
+   procedure doexit; override;
    function getrowdatapo(const arow: integer): pointer; override;
    function getnulltext: msestring; override;
-  //idbeditfieldlink
+    //idbeditfieldlink
    procedure valuetofield;
    procedure fieldtovalue;
    procedure getfieldtypes(var afieldtypes: fieldtypesty);
    function getfieldlink: tcustomeditwidgetdatalink;
-  //ireccontrol
+    //ireccontrol
    procedure recchanged;
   public
    constructor create(aowner: tcomponent); override;
@@ -644,6 +652,8 @@ type
    procedure modified; override;
    function getoptionsedit: optionseditty; override;
    procedure dochange; override;
+   procedure doenter; override;
+   procedure doexit; override;
    function internaldatatotext(const data): msestring; override;
    procedure texttovalue(var accept: boolean; const quiet: boolean); override;
    procedure setnullvalue; override;
@@ -679,6 +689,8 @@ type
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    function checkvalue(const quiet: boolean = false): boolean; reintroduce;
    procedure dochange; override;
+   procedure doenter; override;
+   procedure doexit; override;
    procedure modified; override;
    function getoptionsedit: optionseditty; override;
    function getrowdatapo(const arow: integer): pointer; override;
@@ -713,6 +725,8 @@ type
    function checkvalue(const quiet: boolean = false): boolean; reintroduce;
    procedure modified; override;
    procedure dochange; override;
+   procedure doenter; override;
+   procedure doexit; override;
    function getoptionsedit: optionseditty; override;
    function getrowdatapo(const arow: integer): pointer; override;
     //idbeditfieldlink
@@ -747,6 +761,8 @@ type
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    function checkvalue(const quiet: boolean = false): boolean; reintroduce;
    procedure dochange; override;
+   procedure doenter; override;
+   procedure doexit; override;
    procedure modified; override;
    function getoptionsedit: optionseditty; override;
    function getrowdatapo(const arow: integer): pointer; override;
@@ -809,6 +825,8 @@ type
    function checkvalue(const quiet: boolean = false): boolean; reintroduce;
    function docheckvalue(var avalue): boolean; override;
    procedure dochange; override;
+   procedure doenter; override;
+   procedure doexit; override;
    procedure modified; override;
    function getoptionsedit: optionseditty; override;
    function getrowdatapo(const arow: integer): pointer; override;
@@ -844,6 +862,8 @@ type
    procedure modified; override;
    function getoptionsedit: optionseditty; override;
    procedure dochange; override;
+   procedure doenter; override;
+   procedure doexit; override;
    function getrowdatapo(const arow: integer): pointer; override;
     //idbeditfieldlink
    procedure valuetofield;
@@ -880,13 +900,15 @@ type
    procedure modified; override;
    function getoptionsedit: optionseditty; override;
    procedure dochange; override;
+   procedure doenter; override;
+   procedure doexit; override;
    function getrowdatapo(const arow: integer): pointer; override;
-  //idbeditfieldlink
+    //idbeditfieldlink
    procedure valuetofield;
    procedure fieldtovalue;
    procedure getfieldtypes(var afieldtypes: fieldtypesty);
    function getfieldlink: tcustomeditwidgetdatalink;
-  //ireccontrol
+    //ireccontrol
    procedure recchanged;
   public
    constructor create(aowner: tcomponent); override;
@@ -917,6 +939,8 @@ type
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    function getoptionsedit: optionseditty; override;
    procedure dochange; override;
+   procedure doenter; override;
+   procedure doexit; override;
    procedure modified; override;
    function getrowdatapo(const arow: integer): pointer; override;
     //idbeditfieldlink
@@ -979,6 +1003,8 @@ type
    procedure modified; override;
    function getoptionsedit: optionseditty; override;
    procedure dochange; override;
+   procedure doenter; override;
+   procedure doexit; override;
    function getrowdatapo(const arow: integer): pointer; override;
     //idbeditfieldlink
    procedure valuetofield;
@@ -1014,6 +1040,8 @@ type
    procedure modified; override;
    function getoptionsedit: optionseditty; override;
    procedure dochange; override;
+   procedure doenter; override;
+   procedure doexit; override;
    function getrowdatapo(const arow: integer): pointer; override;
     //idbeditfieldlink
    procedure valuetofield; virtual;
@@ -1658,6 +1686,8 @@ type
    function isfirstrow: boolean; override;
    function islastrow: boolean; override;
    procedure defineproperties(filer: tfiler); override;
+   procedure doenter; override;
+   procedure doexit; override;
     //igriddatalink
    function getdbindicatorcol: integer;
    procedure setnavigator(const avalue: tdbnavigator);
@@ -1762,6 +1792,7 @@ type
    procedure modified; override;
    function getrowtext(const arow: integer): msestring; override;
    function createdatalist: tdatalist; override;
+   procedure docellevent(var info: celleventinfoty); override;
     //idbeditfieldlink
    procedure getfieldtypes(var afieldtypes: fieldtypesty); overload;
    function getgriddatasource: tdatasource; virtual;
@@ -1895,6 +1926,8 @@ type
   protected
    function canautoappend: boolean; override;
    procedure setupeditor(const acell: gridcoordty; const focusin: boolean); override;
+   procedure doenter; override;
+   procedure doexit; override;
     //igriddatalink
    function getdbindicatorcol: integer;
    procedure setnavigator(const avalue: tdbnavigator);
@@ -2303,14 +2336,16 @@ type
    procedure modified; override;
    function getoptionsedit: optionseditty; override;
    procedure dochange; override;
+   procedure doenter; override;
+   procedure doexit; override;
 
    function getrowdatapo(const arow: integer): pointer; override;
-  //idbeditfieldlink
+    //idbeditfieldlink
    procedure valuetofield; virtual;
    procedure fieldtovalue; virtual;
    procedure getfieldtypes(var afieldtypes: fieldtypesty);
    function getfieldlink: tcustomeditwidgetdatalink;
-  //ireccontrol
+    //ireccontrol
    procedure recchanged;
   public
    constructor create(aowner: tcomponent); override;
@@ -2358,13 +2393,15 @@ type
    procedure modified; override;
    function getoptionsedit: optionseditty; override;
    procedure dochange; override;
+   procedure doenter; override;
+   procedure doexit; override;
    function getrowdatapo(const arow: integer): pointer; override;
-  //idbeditfieldlink
+    //idbeditfieldlink
    procedure valuetofield; virtual;
    procedure fieldtovalue; virtual;
    procedure getfieldtypes(var afieldtypes: fieldtypesty);
    function getfieldlink: tcustomeditwidgetdatalink;
-  //ireccontrol
+    //ireccontrol
    procedure recchanged;
   public
    constructor create(aowner: tcomponent); override;
@@ -3654,6 +3691,18 @@ begin
  inherited;
 end;
 
+procedure tdbstringedit.doenter;
+begin
+ fdatalink.doenter(self);
+ inherited;
+end;
+
+procedure tdbstringedit.doexit;
+begin
+ fdatalink.doexit(self);
+ inherited;
+end;
+
 function tdbstringedit.getfieldlink: tcustomeditwidgetdatalink;
 begin
  result:= fdatalink;
@@ -3876,6 +3925,18 @@ begin
  result:= fdatalink;
 end;
 
+procedure tcustomdbdropdownlistedit.doenter;
+begin
+ fdatalink.doenter(self);
+ inherited;
+end;
+
+procedure tcustomdbdropdownlistedit.doexit;
+begin
+ fdatalink.doexit(self);
+ inherited;
+end;
+
 { tdbkeystringedit }
 
 constructor tdbkeystringedit.create(aowner: tcomponent);
@@ -3990,6 +4051,18 @@ begin
  result:= fdatalink;
 end;
 
+procedure tdbkeystringedit.doenter;
+begin
+ fdatalink.doenter(self);
+ inherited;
+end;
+
+procedure tdbkeystringedit.doexit;
+begin
+ fdatalink.doexit(self);
+ inherited;
+end;
+
 { tdbmemoedit }
 
 constructor tdbmemoedit.create(aowner: tcomponent);
@@ -4097,6 +4170,18 @@ end;
 function tdbmemoedit.getfieldlink: tcustomeditwidgetdatalink;
 begin
  result:= fdatalink;
+end;
+
+procedure tdbmemoedit.doenter;
+begin
+ fdatalink.doenter(self);
+ inherited;
+end;
+
+procedure tdbmemoedit.doexit;
+begin
+ fdatalink.doexit(self);
+ inherited;
 end;
 
 { tdbintegeredit }
@@ -4227,6 +4312,18 @@ begin
  result:= fdatalink;
 end;
 
+procedure tdbintegeredit.doenter;
+begin
+ fdatalink.doenter(self);
+ inherited;
+end;
+
+procedure tdbintegeredit.doexit;
+begin
+ fdatalink.doexit(self);
+ inherited;
+end;
+
 { tdbbooleanedit }
 
 constructor tdbbooleanedit.create(aowner: tcomponent);
@@ -4329,6 +4426,18 @@ end;
 function tdbbooleanedit.getfieldlink: tcustomeditwidgetdatalink;
 begin
  result:= fdatalink;
+end;
+
+procedure tdbbooleanedit.doenter;
+begin
+ fdatalink.doenter(self);
+ inherited;
+end;
+
+procedure tdbbooleanedit.doexit;
+begin
+ fdatalink.doexit(self);
+ inherited;
 end;
 
 { tdbdataicon }
@@ -4440,6 +4549,18 @@ begin
  result:= fdatalink;
 end;
 
+procedure tdbdataicon.doenter;
+begin
+ fdatalink.doenter(self);
+ inherited;
+end;
+
+procedure tdbdataicon.doexit;
+begin
+ fdatalink.doexit(self);
+ inherited;
+end;
+
 { tdbdatabutton }
 
 constructor tdbdatabutton.create(aowner: tcomponent);
@@ -4547,6 +4668,18 @@ end;
 function tdbdatabutton.getfieldlink: tcustomeditwidgetdatalink;
 begin
  result:= fdatalink;
+end;
+
+procedure tdbdatabutton.doenter;
+begin
+ fdatalink.doenter(self);
+ inherited;
+end;
+
+procedure tdbdatabutton.doexit;
+begin
+ fdatalink.doexit(self);
+ inherited;
 end;
 
 { tdbbooleaneditradio }
@@ -4673,6 +4806,18 @@ begin
  result:= fdatalink;
 end;
 
+procedure tdbbooleaneditradio.doenter;
+begin
+ fdatalink.doenter(self);
+ inherited;
+end;
+
+procedure tdbbooleaneditradio.doexit;
+begin
+ fdatalink.doexit(self);
+ inherited;
+end;
+
 { tdbrealedit }
 
 constructor tdbrealedit.create(aowner: tcomponent);
@@ -4782,6 +4927,18 @@ begin
  result:= fdatalink;
 end;
 
+procedure tdbrealedit.doenter;
+begin
+ fdatalink.doenter(self);
+ inherited;
+end;
+
+procedure tdbrealedit.doexit;
+begin
+ fdatalink.doexit(self);
+ inherited;
+end;
+
 { tdbrealspinedit }
 
 constructor tdbrealspinedit.create(aowner: tcomponent);
@@ -4889,6 +5046,18 @@ end;
 function tdbrealspinedit.getfieldlink: tcustomeditwidgetdatalink;
 begin
  result:= fdatalink;
+end;
+
+procedure tdbrealspinedit.doenter;
+begin
+ fdatalink.doenter(self);
+ inherited;
+end;
+
+procedure tdbrealspinedit.doexit;
+begin
+ fdatalink.doexit(self);
+ inherited;
 end;
 
 { tdbslider }
@@ -5014,6 +5183,18 @@ end;
 function tdbslider.getfieldlink: tcustomeditwidgetdatalink;
 begin
  result:= fdatalink;
+end;
+
+procedure tdbslider.doenter;
+begin
+ fdatalink.doenter(self);
+ inherited;
+end;
+
+procedure tdbslider.doexit;
+begin
+ fdatalink.doexit(self);
+ inherited;
 end;
 
 { tdbprogressbar }
@@ -5229,6 +5410,18 @@ begin
  result:= fdatalink;
 end;
 
+procedure tdbdatetimeedit.doenter;
+begin
+ fdatalink.doenter(self);
+ inherited;
+end;
+
+procedure tdbdatetimeedit.doexit;
+begin
+ fdatalink.doexit(self);
+ inherited;
+end;
+
 
 { tcustomdbenumedit }
 
@@ -5343,6 +5536,18 @@ end;
 function tcustomdbenumedit.getfieldlink: tcustomeditwidgetdatalink;
 begin
  result:= fdatalink;
+end;
+
+procedure tcustomdbenumedit.doenter;
+begin
+ fdatalink.doenter(self);
+ inherited;
+end;
+
+procedure tcustomdbenumedit.doexit;
+begin
+ fdatalink.doexit(self);
+ inherited;
 end;
 
 { tdbbooleantextedit }
@@ -8688,6 +8893,18 @@ begin
  result:= tdbwidgetcols.create(self);
 end;
 
+procedure tcustomdbwidgetgrid.doenter;
+begin
+ fdatalink.doenter(self);
+ inherited;
+end;
+
+procedure tcustomdbwidgetgrid.doexit;
+begin
+ fdatalink.doexit(self);
+ inherited;
+end;
+
 { tstringcoldatalink }
 
 procedure tstringcoldatalink.layoutchanged;
@@ -8932,6 +9149,23 @@ end;
 function tdbstringcol.getfieldlink: tcustomeditwidgetdatalink;
 begin
  result:= fdatalink;
+end;
+
+procedure tdbstringcol.docellevent(var info: celleventinfoty);
+begin
+ with info do begin
+  if cellbefore.col <> newcell.col then begin
+   if (info.eventkind = cek_enter) and (newcell.col = index) then begin
+    fdatalink.doenter(self);
+   end
+   else begin
+    if (info.eventkind = cek_exit) and (cellbefore.col = index) then begin
+     fdatalink.doexit(self);
+    end;
+   end;
+  end;  
+ end;
+ inherited;
 end;
 
 { tdropdowndbstringcol }
@@ -9581,6 +9815,18 @@ begin
  end;
 end;
 
+procedure tcustomdbstringgrid.doenter;
+begin
+ fdatalink.doenter(self);
+ inherited;
+end;
+
+procedure tcustomdbstringgrid.doexit;
+begin
+ fdatalink.doexit(self);
+ inherited;
+end;
+
 { tlbdropdowncol }
 
 procedure tlbdropdowncol.setfieldno(const avalue: lookupbufferfieldnoty);
@@ -10184,6 +10430,18 @@ begin
  result:= fdatalink;
 end;
 
+procedure tdbenum64editlb.doenter;
+begin
+ fdatalink.doenter(self);
+ inherited;
+end;
+
+procedure tdbenum64editlb.doexit;
+begin
+ fdatalink.doexit(self);
+ inherited;
+end;
+
 { tdbenum64editdb }
 
 constructor tdbenum64editdb.create(aowner: tcomponent);
@@ -10300,6 +10558,18 @@ end;
 function tdbenum64editdb.getfieldlink: tcustomeditwidgetdatalink;
 begin
  result:= fdatalink;
+end;
+
+procedure tdbenum64editdb.doenter;
+begin
+ fdatalink.doenter(self);
+ inherited;
+end;
+
+procedure tdbenum64editdb.doexit;
+begin
+ fdatalink.doexit(self);
+ inherited;
 end;
 
 { tdbkeystringeditlb }

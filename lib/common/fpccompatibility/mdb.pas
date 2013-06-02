@@ -1709,6 +1709,8 @@ type
     procedure UpdateData; virtual;
     property VisualControl: Boolean read FVisualControl write FVisualControl;
     property FirstRecord: Integer read FFirstRecord write FFirstRecord;
+    procedure doenter(const aobject: tobject);
+    procedure doexit(const aobject: tobject);
   public
     constructor Create;
     destructor Destroy; override;
@@ -1769,6 +1771,8 @@ type
 
   TDataChangeEvent = procedure(Sender: TObject; Field: TField) of object;
 
+  datasourcelinkobjecteventty = procedure(const sender: tdatasource;
+                   const alink: tdatalink; const aobject: tobject) of object;
   TDataSource = class(TComponent)
   private
     FDataSet: TDataSet;
@@ -1779,6 +1783,8 @@ type
     FOnStateChange: TNotifyEvent;
     FOnDataChange: TDataChangeEvent;
     FOnUpdateData: TNotifyEvent;
+    fonenter: datasourcelinkobjecteventty;
+    fonexit: datasourcelinkobjecteventty;
     procedure DistributeEvent(Event: TDataEvent; Info: Ptrint);
     procedure RegisterDataLink(DataLink: TDataLink);
     Procedure ProcessEvent(Event : TDataEvent; Info : Ptrint);
@@ -1790,6 +1796,8 @@ type
     Procedure DoStateChange; virtual;
     Procedure DoUpdateData;
     property DataLinks: TList read FDataLinks;
+    procedure doenter(const alink: tdatalink; const aobject: tobject);
+    procedure doexit(const alink: tdatalink; const aobject: tobject);
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -1803,6 +1811,8 @@ type
     property OnStateChange: TNotifyEvent read FOnStateChange write FOnStateChange;
     property OnDataChange: TDataChangeEvent read FOnDataChange write FOnDataChange;
     property OnUpdateData: TNotifyEvent read FOnUpdateData write FOnUpdateData;
+    property onenter: datasourcelinkobjecteventty read fonenter write fonenter;
+    property onexit: datasourcelinkobjecteventty read fonexit write fonexit;
   end;
 
  { TDBDataset }
@@ -8652,6 +8662,20 @@ begin
  else Result := False;
 end;
 
+procedure TDataLink.doenter(const aobject: tobject);
+begin
+ if fdatasource <> nil then begin
+  fdatasource.doenter(self,aobject);
+ end;
+end;
+
+procedure TDataLink.doexit(const aobject: tobject);
+begin
+ if fdatasource <> nil then begin
+  fdatasource.doexit(self,aobject);
+ end;
+end;
+
 
 { ---------------------------------------------------------------------
     TDetailDataLink
@@ -9011,6 +9035,22 @@ begin
       DoUpdateData;
     end;
  end;
+
+procedure TDataSource.doenter(const alink: tdatalink; const aobject: tobject);
+begin
+ if assigned(fonenter) and 
+             (componentstate * [csloading,csdestroying] = []) then begin
+  fonenter(self,alink,aobject);
+ end;
+end;
+
+procedure TDataSource.doexit(const alink: tdatalink; const aobject: tobject);
+begin
+ if assigned(fonexit) and 
+             (componentstate * [csloading,csdestroying] = []) then begin
+  fonexit(self,alink,aobject);
+ end;
+end;
 
 { ---------------------------------------------------------------------
     TDatabase

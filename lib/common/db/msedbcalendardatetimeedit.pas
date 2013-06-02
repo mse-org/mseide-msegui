@@ -34,6 +34,8 @@ type
    procedure modified; override;
    function getoptionsedit: optionseditty; override;
    procedure dochange; override;
+   procedure doenter; override;
+   procedure doexit; override;
    function getrowdatapo(const arow: integer): pointer; override;
     //idbeditfieldlink
    procedure valuetofield;
@@ -58,7 +60,9 @@ type
  end;
  
 implementation
- 
+type
+ teditwidgetdatalink1 = class(teditwidgetdatalink);
+  
 { tdbcalendardatetimeedit }
 
 constructor tdbcalendardatetimeedit.create(aowner: tcomponent);
@@ -170,6 +174,18 @@ end;
 function tdbcalendardatetimeedit.getfieldlink: tcustomeditwidgetdatalink;
 begin
  result:= fdatalink;
+end;
+
+procedure tdbcalendardatetimeedit.doenter;
+begin
+ teditwidgetdatalink1(fdatalink).doenter(self);
+ inherited;
+end;
+
+procedure tdbcalendardatetimeedit.doexit;
+begin
+ teditwidgetdatalink1(fdatalink).doexit(self);
+ inherited;
 end;
 
 end.

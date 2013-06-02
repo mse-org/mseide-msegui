@@ -89,6 +89,8 @@ type
   private
    fdatalink: tgraphicdatalink;
    fvaluebuffer: string;
+   procedure doenter; override;
+   procedure doexit; override;
     //idbeditfieldlink
    function getgriddatasource: tdatasource;
    function getedited: boolean;
@@ -285,6 +287,18 @@ end;
 function tdbdataimage.getfieldlink: tcustomeditwidgetdatalink;
 begin
  result:= fdatalink;
+end;
+
+procedure tdbdataimage.doenter;
+begin
+ fdatalink.doenter(self);
+ inherited;
+end;
+
+procedure tdbdataimage.doexit;
+begin
+ fdatalink.doexit(self);
+ inherited;
 end;
 
 { tmsegraphicfield }

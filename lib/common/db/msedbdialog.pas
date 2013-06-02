@@ -35,6 +35,8 @@ type
    procedure modified; override;
    function getoptionsedit: optionseditty; override;
    procedure dochange; override;
+   procedure doenter; override;
+   procedure doexit; override;
    function getrowdatapo(const arow: integer): pointer; override;
    function getfieldlink: tcustomeditwidgetdatalink;
     //idbeditfieldlink
@@ -70,6 +72,8 @@ type
    procedure modified; override;
    function getoptionsedit: optionseditty; override;
    procedure dochange; override;
+   procedure doenter; override;
+   procedure doexit; override;
    function getrowdatapo(const arow: integer): pointer; override;
    function getfieldlink: tcustomeditwidgetdatalink;
     //idbeditfieldlink
@@ -106,6 +110,8 @@ type
    procedure modified; override;
    function getoptionsedit: optionseditty; override;
    procedure dochange; override;
+   procedure doenter; override;
+   procedure doexit; override;
 
    function getrowdatapo(const arow: integer): pointer; override;
     //idbeditfieldlink
@@ -204,6 +210,7 @@ uses
  typinfo,msememodialog; 
 type
  teditwidgetdatalink1 = class(teditwidgetdatalink);
+ tstringeditwidgetdatalink1 = class(tstringeditwidgetdatalink);
  treader1 = class(treader);
  
 { tdbfilenameedit }
@@ -326,6 +333,18 @@ begin
  result:= fdatalink;
 end;
 
+procedure tdbfilenameedit.doenter;
+begin
+ tstringeditwidgetdatalink1(fdatalink).doenter(self);
+ inherited;
+end;
+
+procedure tdbfilenameedit.doexit;
+begin
+ tstringeditwidgetdatalink1(fdatalink).doexit(self);
+ inherited;
+end;
+
 { tdbremotefilenameedit }
 
 constructor tdbremotefilenameedit.create(aowner: tcomponent);
@@ -444,6 +463,18 @@ end;
 function tdbremotefilenameedit.getfieldlink: tcustomeditwidgetdatalink;
 begin
  result:= fdatalink;
+end;
+
+procedure tdbremotefilenameedit.doenter;
+begin
+ tstringeditwidgetdatalink1(fdatalink).doenter(self);
+ inherited;
+end;
+
+procedure tdbremotefilenameedit.doexit;
+begin
+ tstringeditwidgetdatalink1(fdatalink).doexit(self);
+ inherited;
 end;
 
 { tdbcoloredit }
@@ -569,6 +600,18 @@ end;
 function tdbcoloredit.getfieldlink: tcustomeditwidgetdatalink;
 begin
  result:= fdatalink;
+end;
+
+procedure tdbcoloredit.doenter;
+begin
+ teditwidgetdatalink1(fdatalink).doenter(self);
+ inherited;
+end;
+
+procedure tdbcoloredit.doexit;
+begin
+ teditwidgetdatalink1(fdatalink).doexit(self);
+ inherited;
 end;
 
 { tdbdialogstringedit }
