@@ -16,7 +16,7 @@ uses
  classes,mclasses,mdb,mseimage,mseguiglob,msedataimage,msedbdispwidgets,msedb,
  msetypes,msedbedit,
  msegrids,msewidgetgrid,msedatalist,msebitmap,msebintree,msegraphics,
- msemenus,mseevent,msegui;
+ msemenus,mseevent,msegui,mseifiglob;
 
 { add the needed graphic format units to your project:
  mseformatbmpicoread,
@@ -106,8 +106,8 @@ type
    procedure recchanged;
    procedure setdatalink(const avalue: tgraphicdatalink);
   protected   
-   procedure doenter; override;
-   procedure doexit; override;
+//   procedure doenter; override;
+//   procedure doexit; override;
    procedure griddatasourcechanged; override;
    procedure loadcellbmp(const acanvas: tcanvas; const abmp: tmaskedbitmap); override;
    function getrowdatapo(const arow: integer): pointer; override;
@@ -273,7 +273,7 @@ begin
  fvaluebuffer:= avalue;
  try
   fdatalink.modified;
-  fdatalink.dataentered;
+  fdatalink.valuechanged(iificlient(self));
  finally
   fvaluebuffer:= bufferbefore;
  end; 
@@ -287,18 +287,6 @@ end;
 function tdbdataimage.getfieldlink: tcustomeditwidgetdatalink;
 begin
  result:= fdatalink;
-end;
-
-procedure tdbdataimage.doenter;
-begin
- fdatalink.doenter(self);
- inherited;
-end;
-
-procedure tdbdataimage.doexit;
-begin
- fdatalink.doexit(self);
- inherited;
 end;
 
 { tmsegraphicfield }
