@@ -33,10 +33,10 @@ type
    function getgriddatasource: tdatasource;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    procedure modified; override;
-   function getoptionsedit: optionseditty; override;
-   procedure dochange; override;
-   procedure doenter; override;
-   procedure doexit; override;
+//   function getoptionsedit: optionseditty; override;
+//   procedure dochange; override;
+//   procedure doenter; override;
+//   procedure doexit; override;
    function getrowdatapo(const arow: integer): pointer; override;
    function getfieldlink: tcustomeditwidgetdatalink;
     //idbeditfieldlink
@@ -70,10 +70,10 @@ type
    function getgriddatasource: tdatasource;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    procedure modified; override;
-   function getoptionsedit: optionseditty; override;
-   procedure dochange; override;
-   procedure doenter; override;
-   procedure doexit; override;
+//   function getoptionsedit: optionseditty; override;
+//   procedure dochange; override;
+//   procedure doenter; override;
+//   procedure doexit; override;
    function getrowdatapo(const arow: integer): pointer; override;
    function getfieldlink: tcustomeditwidgetdatalink;
     //idbeditfieldlink
@@ -108,10 +108,10 @@ type
    function getgriddatasource: tdatasource;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    procedure modified; override;
-   function getoptionsedit: optionseditty; override;
-   procedure dochange; override;
-   procedure doenter; override;
-   procedure doexit; override;
+//   function getoptionsedit: optionseditty; override;
+//   procedure dochange; override;
+//   procedure doenter; override;
+//   procedure doexit; override;
 
    function getrowdatapo(const arow: integer): pointer; override;
     //idbeditfieldlink
@@ -226,25 +226,25 @@ begin
  inherited;
  fdatalink.free;
 end;
-
+{
 procedure tdbfilenameedit.dochange;
 begin
- fdatalink.dataentered;
+ fdatalink.datachanged;
  inherited;
 end;
-
+}
 procedure tdbfilenameedit.modified;
 begin
  fdatalink.modified;
  inherited;
 end;
-
+{
 function tdbfilenameedit.getoptionsedit: optionseditty;
 begin
  result:= inherited getoptionsedit;
  fdatalink.updateoptionsedit(result);
 end;
-
+}
 procedure tdbfilenameedit.valuetofield;
 begin
  if value = '' then begin
@@ -332,7 +332,7 @@ function tdbfilenameedit.getfieldlink: tcustomeditwidgetdatalink;
 begin
  result:= fdatalink;
 end;
-
+{
 procedure tdbfilenameedit.doenter;
 begin
  tstringeditwidgetdatalink1(fdatalink).doenter(self);
@@ -344,7 +344,7 @@ begin
  tstringeditwidgetdatalink1(fdatalink).doexit(self);
  inherited;
 end;
-
+}
 { tdbremotefilenameedit }
 
 constructor tdbremotefilenameedit.create(aowner: tcomponent);
@@ -358,25 +358,25 @@ begin
  inherited;
  fdatalink.free;
 end;
-
+{
 procedure tdbremotefilenameedit.dochange;
 begin
- fdatalink.dataentered;
+ fdatalink.datachanged;
  inherited;
 end;
-
+}
 procedure tdbremotefilenameedit.modified;
 begin
  fdatalink.modified;
  inherited;
 end;
-
+{
 function tdbremotefilenameedit.getoptionsedit: optionseditty;
 begin
  result:= inherited getoptionsedit;
  fdatalink.updateoptionsedit(result);
 end;
-
+}
 procedure tdbremotefilenameedit.valuetofield;
 begin
  if value = '' then begin
@@ -464,7 +464,7 @@ function tdbremotefilenameedit.getfieldlink: tcustomeditwidgetdatalink;
 begin
  result:= fdatalink;
 end;
-
+{
 procedure tdbremotefilenameedit.doenter;
 begin
  tstringeditwidgetdatalink1(fdatalink).doenter(self);
@@ -476,7 +476,7 @@ begin
  tstringeditwidgetdatalink1(fdatalink).doexit(self);
  inherited;
 end;
-
+}
 { tdbcoloredit }
 
 constructor tdbcoloredit.create(aowner: tcomponent);
@@ -491,26 +491,26 @@ begin
  inherited;
  fdatalink.free;
 end;
-
+{
 procedure tdbcoloredit.dochange;
 begin
- fdatalink.dataentered;
+ fdatalink.datachanged;
  inherited;
 end;
-
+}
 procedure tdbcoloredit.modified;
 begin
  fdatalink.modified;
  inherited;
 end;
-
+{
 function tdbcoloredit.getoptionsedit: optionseditty;
 begin
  result:= inherited getoptionsedit;
  fdatalink.updateoptionsedit(result);
  frame.readonly:= oe_readonly in result;
 end;
-
+}
 procedure tdbcoloredit.valuetofield;
 begin
  if value = colorty(-1) then begin
@@ -601,7 +601,7 @@ function tdbcoloredit.getfieldlink: tcustomeditwidgetdatalink;
 begin
  result:= fdatalink;
 end;
-
+{
 procedure tdbcoloredit.doenter;
 begin
  teditwidgetdatalink1(fdatalink).doenter(self);
@@ -613,7 +613,7 @@ begin
  teditwidgetdatalink1(fdatalink).doexit(self);
  inherited;
 end;
-
+}
 { tdbdialogstringedit }
 
 constructor tdbdialogstringedit.create(aowner: tcomponent);

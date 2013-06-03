@@ -13,7 +13,7 @@ interface
 uses
  mseglob,mseeditglob,typinfo;
 const
- ifiwidgetstatename = '#widgestate#';
+ ifiwidgetstatename = '#widgetstate#';
  ifiwidgetmodalresultname = '#modalres#';
 {$ifdef FPC}
  boolprops = [tkbool,tkinteger,tkenumeration];

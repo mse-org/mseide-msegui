@@ -32,10 +32,10 @@ type
    function getgriddatasource: tdatasource;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    procedure modified; override;
-   function getoptionsedit: optionseditty; override;
-   procedure dochange; override;
-   procedure doenter; override;
-   procedure doexit; override;
+//   function getoptionsedit: optionseditty; override;
+//   procedure dochange; override;
+//   procedure doenter; override;
+//   procedure doexit; override;
    function getrowdatapo(const arow: integer): pointer; override;
     //idbeditfieldlink
    procedure valuetofield;
@@ -82,13 +82,13 @@ begin
  fdatalink.modified;
  inherited;
 end;
-
+{
 function tdbcalendardatetimeedit.getoptionsedit: optionseditty;
 begin
  result:= inherited getoptionsedit;
  fdatalink.updateoptionsedit(result);
 end;
-
+}
 procedure tdbcalendardatetimeedit.valuetofield;
 begin
  if value = emptydatetime then begin
@@ -164,18 +164,18 @@ procedure tdbcalendardatetimeedit.recchanged;
 begin
  fdatalink.recordchanged(nil);
 end;
-
+{
 procedure tdbcalendardatetimeedit.dochange;
 begin
- fdatalink.dataentered;
+ fdatalink.datachanged;
  inherited;
 end;
-
+}
 function tdbcalendardatetimeedit.getfieldlink: tcustomeditwidgetdatalink;
 begin
  result:= fdatalink;
 end;
-
+{
 procedure tdbcalendardatetimeedit.doenter;
 begin
  teditwidgetdatalink1(fdatalink).doenter(self);
@@ -187,5 +187,5 @@ begin
  teditwidgetdatalink1(fdatalink).doexit(self);
  inherited;
 end;
-
+}
 end.

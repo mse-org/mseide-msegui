@@ -22,7 +22,7 @@ interface
 uses
  classes,mclasses,mdb,mseclasses,mseglob,msestrings,msetypes,msearrayprops,
  mseapplication,
- sysutils,msebintree,mseact,msetimer,maskutils,
+ sysutils,msebintree,mseact,msetimer,maskutils,mseifiglob,mseeditglob,
  msevariants{$ifndef FPC},classes_del{$endif};
 
 const
@@ -1128,12 +1128,24 @@ type
                               fds_filtereditdisabled);
  fielddatalinkstatesty = set of fielddatalinkstatety;
 
- tfieldsdatalink = class(tmsedatalink)
+ tfieldsdatalink = class(tmsedatalink,iifiserver)
   protected
    procedure activechanged; override;
    procedure layoutchanged; override;
    procedure updatefields; virtual;
    procedure fieldchanged; virtual;
+    //iifiserver
+   procedure execute(const sender: iificlient); virtual;
+   procedure valuechanged(const sender: iificlient); virtual;
+   procedure statechanged(const sender: iificlient;
+                            const astate: ifiwidgetstatesty); virtual;
+   procedure setvalue(const sender: iificlient;
+                var avalue; var accept: boolean; const arow: integer); virtual;
+   procedure dataentered(const sender: iificlient; 
+                                                 const arow: integer); virtual;
+   procedure sendmodalresult(const sender: iificlient; 
+                             const amodalresult: modalresultty); virtual;
+   procedure updateoptionsedit(var avalue: optionseditty); virtual;
  end;
   
  tfielddatalink = class(tfieldsdatalink)
@@ -1798,6 +1810,7 @@ type
  tfielddef1 = class(tfielddef);
  tcollection1 = class(tcollection);
  tparam1 = class(tparam);
+ tdatasource1 = class(tdatasource);
 
 function dbtrystringtoguid(const value: string; out guid: tguid): boolean;
 var
@@ -6401,6 +6414,46 @@ end;
 procedure tfieldsdatalink.fieldchanged;
 begin
  recordchanged(nil);
+end;
+
+procedure tfieldsdatalink.execute(const sender: iificlient);
+begin
+end;
+
+procedure tfieldsdatalink.valuechanged(const sender: iificlient);
+begin
+ //dummy
+end;
+
+procedure tfieldsdatalink.statechanged(const sender: iificlient;
+               const astate: ifiwidgetstatesty);
+begin
+ if datasource <> nil then begin
+  tdatasource1(datasource).ifistatechanged(self,sender,astate);
+ end;
+end;
+
+procedure tfieldsdatalink.setvalue(const sender: iificlient; var avalue;
+               var accept: boolean; const arow: integer);
+begin
+ //dummy
+end;
+
+procedure tfieldsdatalink.dataentered(const sender: iificlient;
+               const arow: integer);
+begin
+ //dummy
+end;
+
+procedure tfieldsdatalink.sendmodalresult(const sender: iificlient;
+               const amodalresult: modalresultty);
+begin
+ //dummy
+end;
+
+procedure tfieldsdatalink.updateoptionsedit(var avalue: optionseditty);
+begin
+ //dummy
 end;
 
 { tfielddatalink }

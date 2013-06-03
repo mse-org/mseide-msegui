@@ -9751,10 +9751,22 @@ begin
 end;
 
 procedure twidget.internaldofocus;
+ {$ifdef mse_with_ifi}
+var
+ lwo1: longword;
+ {$endif}
 begin
  if not (ws_focused in fwidgetstate) then begin
   include(fwidgetstate,ws_focused);
+ {$ifdef mse_with_ifi}
+  lwo1:= window.focuscount;
+ {$endif}
   dofocus;
+ {$ifdef mse_with_ifi}
+  if lwo1 = window.focuscount then begin
+   ifiwidgetstatechanged;
+  end;
+ {$endif}
   if fparentwidget <> nil then begin
    fparentwidget.dochildfocused(self);
   end;
@@ -9781,10 +9793,22 @@ begin
 end;
 
 procedure twidget.internaldodefocus;
+ {$ifdef mse_with_ifi}
+var
+ lwo1: longword;
+ {$endif}
 begin
  if ws_focused in fwidgetstate then begin
   exclude(fwidgetstate,ws_focused);
+ {$ifdef mse_with_ifi}
+  lwo1:= window.focuscount;
+ {$endif}
   dodefocus;
+ {$ifdef mse_with_ifi}
+  if lwo1 = window.focuscount then begin
+   ifiwidgetstatechanged;
+  end;
+ {$endif}
  end;
 end;
 

@@ -22,6 +22,9 @@ unit main;
 {$ifndef mse_no_ifi}
  {$define mse_with_ifi}
 {$endif}
+{$ifdef mse_no_ifi}
+ {$define mse_no_db}
+{$endif}
 
 interface
 

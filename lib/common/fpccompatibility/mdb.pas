@@ -22,7 +22,7 @@ unit mdb;
 interface
 
 uses
- classes,mclasses,sysutils,variants,fmtbcd,maskutils,msetypes
+ classes,mclasses,sysutils,variants,fmtbcd,maskutils,msetypes,mseifiglob
    {$ifndef FPC},classes_del{$endif};
 
 const
@@ -1709,8 +1709,8 @@ type
     procedure UpdateData; virtual;
     property VisualControl: Boolean read FVisualControl write FVisualControl;
     property FirstRecord: Integer read FFirstRecord write FFirstRecord;
-    procedure doenter(const aobject: tobject);
-    procedure doexit(const aobject: tobject);
+//    procedure doenter(const aobject: tobject);
+//    procedure doexit(const aobject: tobject);
   public
     constructor Create;
     destructor Destroy; override;
@@ -1771,8 +1771,9 @@ type
 
   TDataChangeEvent = procedure(Sender: TObject; Field: TField) of object;
 
-  datasourcelinkobjecteventty = procedure(const sender: tdatasource;
-                   const alink: tdatalink; const aobject: tobject) of object;
+  ifistatechangedeventty = procedure(const sender: tdatasource;
+                   const alink: tdatalink; const aclient: iificlient;
+                   const astate: ifiwidgetstatesty) of object;
   TDataSource = class(TComponent)
   private
     FDataSet: TDataSet;
@@ -1783,8 +1784,9 @@ type
     FOnStateChange: TNotifyEvent;
     FOnDataChange: TDataChangeEvent;
     FOnUpdateData: TNotifyEvent;
-    fonenter: datasourcelinkobjecteventty;
-    fonexit: datasourcelinkobjecteventty;
+//    fonenter: datasourcelinkobjecteventty;
+//    fonexit: datasourcelinkobjecteventty;
+   fonifistatechanged: ifistatechangedeventty;
     procedure DistributeEvent(Event: TDataEvent; Info: Ptrint);
     procedure RegisterDataLink(DataLink: TDataLink);
     Procedure ProcessEvent(Event : TDataEvent; Info : Ptrint);
@@ -1796,8 +1798,11 @@ type
     Procedure DoStateChange; virtual;
     Procedure DoUpdateData;
     property DataLinks: TList read FDataLinks;
-    procedure doenter(const alink: tdatalink; const aobject: tobject);
-    procedure doexit(const alink: tdatalink; const aobject: tobject);
+    procedure ifistatechanged(const sender: tdatalink;
+                            const aclient: iificlient;
+                            const astate: ifiwidgetstatesty); virtual;
+//    procedure doenter(const alink: tdatalink; const aobject: tobject);
+//    procedure doexit(const alink: tdatalink; const aobject: tobject);
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -1811,8 +1816,10 @@ type
     property OnStateChange: TNotifyEvent read FOnStateChange write FOnStateChange;
     property OnDataChange: TDataChangeEvent read FOnDataChange write FOnDataChange;
     property OnUpdateData: TNotifyEvent read FOnUpdateData write FOnUpdateData;
-    property onenter: datasourcelinkobjecteventty read fonenter write fonenter;
-    property onexit: datasourcelinkobjecteventty read fonexit write fonexit;
+    property onifistatechanged: ifistatechangedeventty 
+                           read fonifistatechanged write fonifistatechanged;
+//    property onenter: datasourcelinkobjecteventty read fonenter write fonenter;
+//    property onexit: datasourcelinkobjecteventty read fonexit write fonexit;
   end;
 
  { TDBDataset }
@@ -8661,7 +8668,7 @@ begin
  end
  else Result := False;
 end;
-
+{
 procedure TDataLink.doenter(const aobject: tobject);
 begin
  if fdatasource <> nil then begin
@@ -8675,7 +8682,7 @@ begin
   fdatasource.doexit(self,aobject);
  end;
 end;
-
+}
 
 { ---------------------------------------------------------------------
     TDetailDataLink
@@ -9036,6 +9043,15 @@ begin
     end;
  end;
 
+procedure TDataSource.ifistatechanged(const sender: tdatalink;
+               const aclient: iificlient; const astate: ifiwidgetstatesty);
+begin
+ if assigned(fonifistatechanged) and 
+             (componentstate * [csloading,csdestroying] = []) then begin
+  fonifistatechanged(self,sender,aclient,astate);
+ end;
+end;
+{
 procedure TDataSource.doenter(const alink: tdatalink; const aobject: tobject);
 begin
  if assigned(fonenter) and 
@@ -9051,7 +9067,7 @@ begin
   fonexit(self,alink,aobject);
  end;
 end;
-
+}
 { ---------------------------------------------------------------------
     TDatabase
   ---------------------------------------------------------------------}

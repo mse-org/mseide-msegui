@@ -423,9 +423,9 @@ type
 
 {$ifdef mse_with_ifi}
    fifiserverintf: iifiserver;
-  //iificlient
+    //iificlient
    procedure setifiserverintf(const aintf: iifiserver);
-   //iificommand
+    //iificommand
    procedure executeificommand(var acommand: ificommandcodety); virtual;
 {$endif}   
 
@@ -4275,15 +4275,15 @@ var
  typedata1: ptypedata;
  po1: pshortstring;
 begin
- typedata1:= gettypedata(aintf);
- po1:= pshortstring(
-        ptruint(@typedata1^.rawintfunit)+length(typedata1^.rawintfunit)+1);
- if po1^[0] <> #0 then begin
-  result:= aobject.getinterfacebystr(po1^,obj); //works in FPC 2.4+
- end
- else begin
-  pointer(obj):= nil;
-  result:= false;
+ pointer(obj):= nil;
+ result:= false;
+ if aobject <> nil then begin
+  typedata1:= gettypedata(aintf);
+  po1:= pshortstring(
+         ptruint(@typedata1^.rawintfunit)+length(typedata1^.rawintfunit)+1);
+  if po1^[0] <> #0 then begin
+   result:= aobject.getinterfacebystr(po1^,obj); //works in FPC 2.4+
+  end
  end;
 end;
 
