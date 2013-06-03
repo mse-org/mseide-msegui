@@ -29,7 +29,8 @@ type
  captionframeoptionty = (cfo_fixleft,cfo_fixright,cfo_fixtop,cfo_fixbottom,
                          cfo_captionnogray,
                          cfo_captiondistouter,cfo_captionframecentered,
-                         cfo_captionnoclip,cfo_nofocusrect);
+                         cfo_captionnoclip,cfo_nofocusrect,
+                         cfo_captionfocus);
  captionframeoptionsty = set of captionframeoptionty;
 
 const
@@ -2823,7 +2824,7 @@ begin
                    not (ow_mousetransparent in sender.optionswidget) then begin
   with twidget1(sender) do begin
    include(fwidgetstate,ws_wantmousebutton);    //for twidget.iswidgetclick
-   if fs_captionfocus in fstate then begin
+   if cfo_captionfocus in foptions then begin
     include(fwidgetstate,ws_wantmousefocus);
    end;
    if fs_captionhint in fstate then begin

@@ -32,13 +32,14 @@ const
  defaultsliderheight = 20;
  defaultboxsize = 13;
  defaultsliderscrollbaroptions = defaultscrollbaroptions + [sbo_valuekeys];
+ defaultgrapheditframeoptions = defaultcaptionframeoptions + [cfo_captionfocus];
  
 type
  tgrapheditframe = class(tcustomcaptionframe)
   public
    constructor create(const intf: icaptionframe);
   published
-   property options;
+   property options default defaultgrapheditframeoptions;
    property levelo default -2;
    property leveli;
    property framewidth;
@@ -1052,6 +1053,7 @@ const
 constructor tgrapheditframe.create(const intf: icaptionframe);
 begin
  inherited;
+ options:= defaultgrapheditframeoptions;
  fstate:= fstate + [fs_drawfocusrect,fs_captionfocus,fs_captionhint,
                      fs_paintrectfocus];
  fi.colorclient:= cl_foreground;
