@@ -95,11 +95,12 @@ type
    property autoindent: boolean read getautoindent write setautoindent;
    property markbrackets: boolean read getmarkbrackets write setmarkbrackets;
   published
-   property syntaxpainter: tsyntaxpainter read fsyntaxpainter write setsyntaxpainter;
+   property syntaxpainter: tsyntaxpainter read fsyntaxpainter
+                                                    write setsyntaxpainter;
    property defaultsyntax: boolean read fdefaultsyntax 
                              write setdefaultsyntax default false;
-   property options: syntaxeditoptionsty read foptions write foptions;
-//   property autoindent: boolean read fautoindent write fautoindent default false;
+   property options: syntaxeditoptionsty read foptions write foptions 
+                                                                  default [];
  end;
 
 function checkbracketkind(const achar: msechar; out open: boolean): bracketkindty;
