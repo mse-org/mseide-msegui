@@ -307,8 +307,12 @@ function mseextractprintchars(const value: msestring): msestring;
 
 function findchar(const str: string; achar: char): integer; overload;
   //bringt index des ersten vorkommens von zeichen in string, 0 wenn nicht gefunden
+function findchar(const str: string; const astart: integer;
+                                             achar: char): integer; overload;
 function findchar(const str: msestring; achar: msechar): integer; overload;
   //bringt index des ersten vorkommens von zeichen in string, 0 wenn nicht gefunden
+function findchar(const str: msestring; const astart: integer;
+                                         achar: msechar): integer; overload;
 function findchar(const str: pchar; achar: char): integer; overload;
   //bringt index des ersten vorkommens von zeichen in string, 0 wenn nicht gefunden
 function findchar(const str: pmsechar; achar: msechar): integer; overload;
@@ -3976,6 +3980,19 @@ begin
  end;
 end;
 
+function findchar(const str: string; const astart: integer; achar: char): integer; overload;
+var
+ int1: integer;
+begin
+ result:= 0;
+ for int1:= astart to length(str) do begin
+  if str[int1] = achar then begin
+   result:= int1;
+   exit;
+  end;
+ end;
+end;
+
 function findchar(const str: msestring; achar: msechar): integer;
   //bringt index des ersten vorkommens von zeichen in string, 0 wenn nicht gefunden
 var
@@ -3990,8 +4007,22 @@ begin
  end;
 end;
 
+function findchar(const str: msestring; const astart: integer;
+                                         achar: msechar): integer; overload;
+var
+ int1: integer;
+begin
+ result:= 0;
+ for int1:= astart to length(str) do begin
+  if str[int1] = achar then begin
+   result:= int1;
+   exit;
+  end;
+ end;
+end;
+
 function findchar(const str: pchar; achar: char): integer;
-  //bringt erstes vorkommens von zeichen in string, -1 wenn nicht gefunden
+  //bringt erstes vorkommens von zeichen in string, 0 wenn nicht gefunden
 var
  po1: pchar;
 begin
