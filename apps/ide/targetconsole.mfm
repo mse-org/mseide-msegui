@@ -2,7 +2,7 @@ object targetconsolefo: ttargetconsolefo
   frame.grip_size = 10
   frame.grip_options = [go_closebutton, go_fixsizebutton, go_topbutton]
   frame.dummy = 0
-  popupmenu = tpopupmenu1
+  popupmenu = popupmen
   visible = False
   bounds_x = 209
   bounds_y = 385
@@ -46,7 +46,6 @@ object targetconsolefo: ttargetconsolefo
   onidle = targetconsoleonidle
   moduleclassname = 'tdockform'
   object grid: twidgetgrid
-    frame.sbhorz.pagesize = 0.117960679773409
     bounds_x = 0
     bounds_y = 0
     bounds_cx = 358
@@ -82,15 +81,25 @@ object targetconsolefo: ttargetconsolefo
       reffontheight = 14
     end
   end
-  object tpopupmenu1: tpopupmenu
-    menu.submenu.count = 1
+  object popupmen: tpopupmenu
+    onupdate = popupupdateexe
+    menu.submenu.count = 4
     menu.submenu.items = <    
+      item
+        action = actionsmo.find
+      end    
+      item
+        action = actionsmo.repeatfind
+      end    
+      item
+        options = [mao_separator, mao_shortcutcaption]
+      end    
       item
         caption = 'Clear'
         state = [as_localcaption, as_localonexecute]
         onexecute = clearexe
       end>
-    left = 88
-    top = 48
+    left = 32
+    top = 32
   end
 end

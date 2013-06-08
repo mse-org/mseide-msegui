@@ -21,32 +21,44 @@ unit targetconsole;
 interface
 uses
  msegui,mseclasses,mseforms,mseterminal,msewidgetgrid,msestrings,msedatalist,
- classes,mclasses,msemenus;
+ classes,mclasses,msemenus,msestat,msetypes;
 
 type
  ttargetconsolefo = class(tdockform)
    terminal: tterminal;
    grid: twidgetgrid;
-   tpopupmenu1: tpopupmenu;
+   popupmen: tpopupmenu;
    procedure sendtext(const sender: tobject; var atext: msestring;
                                                  var donotsend: Boolean);
    procedure targetconsoleonidle(var again: Boolean);
    procedure clearexe(const sender: TObject);
+   procedure popupupdateexe(const sender: tcustommenu);
   private
    fbuffer: tmsestringdatalist;
+   ffindpos: gridcoordty;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    procedure clear;
    procedure addtext(const atext: string);
+   procedure dofind;
+   procedure repeatfind;
  end;
  
 var
  targetconsolefo: ttargetconsolefo;
+
+procedure updatestat(const statfiler: tstatfiler);
  
 implementation
 uses
- targetconsole_mfm,msegdbutils,main;
+ targetconsole_mfm,msegdbutils,main,finddialogform,projectoptionsform,
+ actionsmodule,sourcepage;
+
+procedure updatestat(const statfiler: tstatfiler);
+begin
+ updatefindvalues(statfiler,projectoptions.targetconsolefindinfo);
+end;
 
 procedure ttargetconsolefo.sendtext(const sender: tobject;
                                var atext: msestring; var donotsend: Boolean);
@@ -101,6 +113,34 @@ end;
 procedure ttargetconsolefo.clearexe(const sender: TObject);
 begin
  grid.clear;
+end;
+
+procedure ttargetconsolefo.dofind;
+var
+ ainfo: findinfoty;
+begin
+ ainfo:= projectoptions.targetconsolefindinfo;
+ if not terminal.hasselection then begin
+  ainfo.selectedonly:= false;
+ end;
+// ainfo.text:= edit.selectedtext;
+ if finddialogexecute(ainfo) then begin
+  projectoptions.targetconsolefindinfo:= ainfo;
+  findintextedit(terminal,projectoptions.targetconsolefindinfo,ffindpos);
+ end;
+end;
+
+procedure ttargetconsolefo.repeatfind;
+begin
+ findintextedit(terminal,projectoptions.targetconsolefindinfo,ffindpos);
+end;
+
+procedure ttargetconsolefo.popupupdateexe(const sender: tcustommenu);
+begin
+ with actionsmo do begin
+  find.enabled:= true;
+  repeatfind.enabled:= true;
+ end;
 end;
 
 end.

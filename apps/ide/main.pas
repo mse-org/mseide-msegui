@@ -1448,10 +1448,10 @@ begin
     line.enabled:= grid.rowcount > 0;
     togglebkpt.enabled:= line.enabled;
     togglebkptenable.enabled:= togglebkpt.enabled;
-    find.enabled:= true;
+//    find.enabled:= true;
     replace.enabled:= true;
-    actionsmo.repeatfind.enabled:= find.enabled and 
-           (projectoptions.findreplaceinfo.find.text <> '');
+//    actionsmo.repeatfind.enabled:= find.enabled and 
+//           (projectoptions.findreplaceinfo.find.text <> '');
    end;
   end
   else begin
@@ -1491,8 +1491,8 @@ begin
    line.enabled:= false;
    togglebkpt.enabled:= false;
    togglebkptenable.enabled:= false;
-   find.enabled:= false;
-   actionsmo.repeatfind.enabled:= false;
+//   find.enabled:= false;
+//   actionsmo.repeatfind.enabled:= false;
    replace.enabled:= false;
   end;
   if (factivedesignmodule <> nil) then begin

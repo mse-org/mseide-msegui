@@ -42,11 +42,27 @@ type
    procedure infotovalues(const info: findinfoty);
  end;
 
+procedure updatefindvalues(const astatfiler: tstatfiler;
+                                          var aoptions: findinfoty);
 function finddialogexecute(var info: findinfoty): boolean;
 
 implementation
 uses
  mseguiglob,finddialogform_mfm;
+
+procedure updatefindvalues(const astatfiler: tstatfiler;
+                                          var aoptions: findinfoty);
+var
+ int1: integer;
+begin
+ with astatfiler,aoptions do begin
+  updatevalue('finddtext',text);
+  updatevalue('findhistory',history);
+  int1:= {$ifdef FPC}longword{$else}byte{$endif}(options);
+  updatevalue('findoptions',int1);
+  options:= searchoptionsty({$ifdef FPC}longword{$else}byte{$endif}(int1));
+ end;
+end;
 
 function finddialogexecute(var info: findinfoty): boolean;
 var

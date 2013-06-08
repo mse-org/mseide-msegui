@@ -519,15 +519,7 @@ begin
   setsection('edit');
   updatevalue('hintwidth',hintsize.cx);
   updatevalue('hintheight',hintsize.cy);
-  with projectoptions do begin
-   with findreplaceinfo do begin
-    updatevalue('finddtext',find.text);
-    updatevalue('findhistory',find.history);
-    int1:= {$ifdef FPC}longword{$else}byte{$endif}(find.options);
-    updatevalue('findoptions',int1);
-    find.options:= searchoptionsty({$ifdef FPC}longword{$else}byte{$endif}(int1));
-   end;
-  end;
+  updatefindvalues(statfiler,projectoptions.findreplaceinfo.find);
   if iswriter then begin
    intar1:= tabwidget.idents;
    sortarray(intar1,intar2);

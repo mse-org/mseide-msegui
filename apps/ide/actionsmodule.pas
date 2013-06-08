@@ -22,7 +22,8 @@ interface
 uses
  mseclasses,mseact,mseactions,msebitmap,msestrings,msegui,msedatamodules,
  mseglob,msestat,mseifiglob,msegraphics,msegraphutils,mseguiglob,msemenus,
- msesimplewidgets,msewidgets,projecttreeform,msestringcontainer;
+ msesimplewidgets,msewidgets,projecttreeform,msestringcontainer,
+ targetconsole;
  
 type
  stringconsts = (
@@ -270,6 +271,7 @@ type
    procedure projectsaveexe(const sender: TObject);
    procedure projectcloeseexe(const sender: TObject);
    procedure creadstateexe(const sender: TObject);
+   procedure findupdateexe(const sender: tcustomaction);
  end;
 
 var
@@ -474,12 +476,22 @@ end;
 
 procedure tactionsmo.findactonexecute(const sender: tobject);
 begin
- sourcefo.activepage.dofind;
+ if targetconsolefo.activeentered then begin
+  targetconsolefo.dofind;
+ end
+ else begin
+  sourcefo.activepage.dofind;
+ end;
 end;
 
 procedure tactionsmo.repeatfindactonexecute(const sender: tobject);
 begin
- sourcefo.activepage.repeatfind;
+ if targetconsolefo.activeentered then begin
+  targetconsolefo.repeatfind;
+ end
+ else begin
+  sourcefo.activepage.repeatfind;
+ end;
 end;
 
 procedure tactionsmo.replaceactonexecute(const sender: tobject);
@@ -719,6 +731,20 @@ end;
 procedure tactionsmo.creadstateexe(const sender: TObject);
 begin
  msegdbutils.localizetext;
+end;
+
+procedure tactionsmo.findupdateexe(const sender: tcustomaction);
+begin
+ if targetconsolefo.activeentered then begin
+  find.enabled:= true;
+  repeatfind.enabled:= projectoptions.targetconsolefindinfo.text <> ''
+ end
+ else begin
+  find.enabled:= (sourcefo.activepage <> nil) and 
+        sourcefo.activepage.activeentered;
+  repeatfind.enabled:= find.enabled and 
+           (projectoptions.findreplaceinfo.find.text <> '');
+ end;
 end;
 
 end.

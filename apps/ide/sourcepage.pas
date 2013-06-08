@@ -27,7 +27,7 @@ uses
  mseglob,mseguiglob,msegui,msesyntaxedit,mseeditglob,
  mseinplaceedit,msedispwidgets,msegraphutils,msegrids,breakpointsform,
  pascaldesignparser,msefilechange,msestrings,mserichstring,mseparser,
- msegridsglob;
+ msegridsglob,projectoptionsform;
 
 
 type
@@ -83,13 +83,13 @@ type
    function getfilename: filenamety;
    function getfilepath: filenamety;
    function getrelpath: filenamety;
-   procedure find;
+//   procedure find;
    procedure replace(all: boolean);
    procedure showprocheaders(const apos: gridcoordty);
    procedure showsourceitems(const apos: gridcoordty);
    procedure showlink(const apos: gridcoordty);
    procedure showsourcehint(const apos: gridcoordty; const values: stringarty);
-   procedure textnotfound;
+//   procedure textnotfound;
    procedure setsyntaxdef(const value: filenamety);
    procedure updatelinedisp;
   protected
@@ -156,16 +156,18 @@ type
  end;
 
 function getpascalvarname(const edit: tsyntaxedit; pos: gridcoordty;
-                                  out startpos: gridcoordty): msestring; overload;
-function getpascalvarname(const edit: tsyntaxedit; const pos: pointty): msestring; overload;
-
+                      out startpos: gridcoordty): msestring; overload;
+function getpascalvarname(const edit: tsyntaxedit;
+                             const pos: pointty): msestring; overload;
+procedure findintextedit(const edit: tcustomtextedit; var info: findinfoty;
+                     var findpos: gridcoordty);
 implementation
 
 uses
  sourcepage_mfm,msefileutils,sourceform,main,
  sysutils,msewidgets,finddialogform,replacedialogform,msekeyboard,
  sourceupdate,msefiledialog,mseintegerenter,msedesigner,
- projectoptionsform,msesys,make,actionsmodule,msegraphics,sourcehintform,
+ msesys,make,actionsmodule,msegraphics,sourcehintform,
  mseedit,msedrawtext,msebits,msearrayutils,msestream,msedesignintf,
  msesysutils,msedesignparser,msesyntaxpainter,msemacros,msecodetemplates;
 
@@ -900,23 +902,24 @@ begin
  end;
 end;
 
-procedure tsourcepage.textnotfound;
+procedure textnotfound(const ainfo: findinfoty);
 begin
  showmessage(sourcefo.c[ord(str_text)]+' '''+
-           projectoptions.findreplaceinfo.find.text+''' '+
+           ainfo.text+''' '+
            sourcefo.c[ord(notfound)]);
 end;
- 
-procedure tsourcepage.find;
+
+procedure findintextedit(const edit: tcustomtextedit; var info: findinfoty;
+                     var findpos: gridcoordty);
 var
  pt1: gridcoordty;
 begin
- with projectoptions.findreplaceinfo.find do begin
+ with info do begin
   if selectedonly then begin
    if edit.hasselection then begin
-    normalizetextrect(edit.selectstart,edit.selectend,ffindpos,pt1);
-    if not edit.find(text,options,ffindpos,pt1,true) then begin
-     textnotfound;
+    normalizetextrect(edit.selectstart,edit.selectend,findpos,pt1);
+    if not edit.find(text,options,findpos,pt1,true) then begin
+     textnotfound(info);
     end
     else begin
      selectedonly:= false;
@@ -924,19 +927,19 @@ begin
    end;
   end
   else begin
-   ffindpos:= edit.editpos;
+   findpos:= edit.editpos;
 //   dec(ffindpos.col);
-   if not edit.find(text,options,ffindpos,bigcoord,true,findshowpos) then begin
-    if (ffindpos.row = 0) and (ffindpos.col = 0) then begin
-     textnotfound;
+   if not edit.find(text,options,findpos,bigcoord,true,findshowpos) then begin
+    if (findpos.row = 0) and (findpos.col = 0) then begin
+     textnotfound(info);
     end
     else begin
      if askok(sourcefo.c[ord(str_text)]+' '''+text+
               ''' '+sourcefo.c[ord(notfound)]+' '+
               sourcefo.c[ord(restartbegin)]) then begin
-      ffindpos:= nullcoord;
-      if not edit.find(text,options,ffindpos,edit.editpos,true,findshowpos) then begin
-       textnotfound;
+      findpos:= nullcoord;
+      if not edit.find(text,options,findpos,edit.editpos,true,findshowpos) then begin
+       textnotfound(info);
       end;
      end;
     end;
@@ -944,7 +947,12 @@ begin
   end;
  end;
 end;
-
+{
+procedure tsourcepage.find;
+begin
+ findintextedit(edit,projectoptions.findreplaceinfo.find,ffindpos);
+end;
+}
 procedure tsourcepage.beginupdate;
 begin
  edit.beginupdate;
@@ -997,7 +1005,7 @@ begin
     pos1:= bigcoord;
    end;
    if not edit.find(text,options,ffindpos,pos1,true,findshowpos) then begin
-    textnotfound;
+    textnotfound(find);
    end
    else begin
     res1:= mr_yes;
@@ -1064,7 +1072,7 @@ begin
 // ainfo.text:= edit.selectedtext;
  if finddialogexecute(ainfo) then begin
   projectoptions.findreplaceinfo.find:= ainfo;
-  find;
+  findintextedit(edit,projectoptions.findreplaceinfo.find,ffindpos);
  end;
 end;
 
@@ -1084,7 +1092,8 @@ end;
 
 procedure tsourcepage.repeatfind;
 begin
- find;
+ findintextedit(edit,projectoptions.findreplaceinfo.find,ffindpos);
+// find;
 end;
 
 procedure tsourcepage.hidehint;

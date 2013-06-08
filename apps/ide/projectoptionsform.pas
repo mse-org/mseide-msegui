@@ -500,6 +500,7 @@ type
   propgparamhistory: msestringarty;
   envvarons: longboolarty;
   findreplaceinfo: replaceinfoty;
+  targetconsolefindinfo: findinfoty;
  end;
 
  tprojectoptionsfo = class(tmseform)
@@ -841,7 +842,7 @@ uses
  objectinspector,msebits,msefileutils,msedesignintf,guitemplates,
  watchform,stackform,main,projecttreeform,findinfileform,
  selecteditpageform,programparametersform,sourceupdate,mseimagelisteditor,
- msesysenvmanagereditor,
+ msesysenvmanagereditor,targetconsole,
  msedesigner,panelform,watchpointsform,commandlineform,messageform,
  componentpaletteform,mserichstring,msesettings,formdesigner,actionsmodule,
  msestringlisteditor,msetexteditor,msepropertyeditors,mseshapes,mseactions,
@@ -1354,6 +1355,7 @@ begin
    modified:= false;
    savechecked:= false;
    findreplaceinfo.find.options:= [so_caseinsensitive];
+   targetconsolefindinfo.options:= [so_caseinsensitive];
   end;
   sigsettings:= defaultsigsettings;
   ignoreexceptionclasses:= nil;
@@ -1701,6 +1703,8 @@ begin
   setsection('layout');       
   mainfo.projectstatfile.updatestat('windowlayout',statfiler);
   sourcefo.updatestat(statfiler);   //needs actual fontalias
+  setsection('targetconsole');
+  targetconsole.updatestat(statfiler);
 
   modified:= false;
   savechecked:= false;
