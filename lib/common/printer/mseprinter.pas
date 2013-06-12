@@ -1080,11 +1080,13 @@ begin
      for int1:= 0 to high(lineinfos) do begin
       with lineinfos[int1] do begin
        if (tf_xjustify in flags) and (high(justifychars) >= 0) and 
-                   (int1 < high(lineinfos)) then begin
+         ((int1 < high(lineinfos)) or 
+              (tf_wordbreak in flags) and (int1 = high(lineinfos))) then begin
         rstr1:= richcopy(text,liindex,justifychars[0].index-liindex);
         dotextout(rstr1,rect1,flags2,0,acolorshadow); //first word
-        rea1:= (dest.cx - liwidth + getstringwidth(' ') * length(justifychars)) /
-                         length(justifychars); //gap width
+        rea1:= (dest.cx - liwidth + getstringwidth(' ') *
+                               length(justifychars)) /
+                                      length(justifychars); //gap width
         rect2:= rect1;        //x justify text
         if xyswapped then begin
          rect2.cy:= 0;                                    

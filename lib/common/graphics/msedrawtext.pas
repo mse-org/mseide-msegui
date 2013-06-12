@@ -674,7 +674,11 @@ begin
    if (tf_xjustify in flags) and (dest.cx > 0) then begin
     po1:= pointer(info.text.text);
     bo1:= false;
-    for int3:= 0 to high(lineinfos) - 1 do begin
+    int3:= high(lineinfos);
+    if tf_wordbreak in flags then begin
+     dec(int3);
+    end; 
+    for int3:= 0 to int3 do begin
      with lineinfos[int3] do begin     
       if not linebreak then begin
        bo1:= true;
