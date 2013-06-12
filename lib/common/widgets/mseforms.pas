@@ -935,7 +935,7 @@ end;
 
 procedure tcustommseform.loaded;
 begin
- if factivatortarget <> nil then begin
+ if (factivatortarget <> nil)  and not (csdesigning in componentstate) then begin
   factivatortarget.active:= true;
  end;
  exclude(fscrollbox.fwidgetstate,ws_loadlock);
@@ -959,7 +959,7 @@ end;
 
 procedure tcustommseform.freeinstance;
 begin
- if factivatortarget <> nil then begin
+ if (factivatortarget <> nil)  and not (csdesigning in componentstate) then begin
   try
    factivatortarget.active:= false;
   finally

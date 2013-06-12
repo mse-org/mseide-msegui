@@ -227,7 +227,7 @@ end;
 
 procedure tmsedatamodule.loaded;
 begin
- if factivatortarget <> nil then begin
+ if (factivatortarget <> nil)  and not (csdesigning in componentstate) then begin
   factivatortarget.active:= true;
  end;
  inherited;
@@ -236,7 +236,7 @@ end;
 
 procedure tmsedatamodule.freeinstance;
 begin
- if factivatortarget <> nil then begin
+ if (factivatortarget <> nil) and not (csdesigning in componentstate) then begin
   try
    factivatortarget.active:= false;
   finally
