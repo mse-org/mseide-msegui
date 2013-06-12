@@ -3019,6 +3019,7 @@ procedure ttabpage.doselect;
 var
  subformclass: widgetclassty;
  po1: pwidget;
+ wi1: twidget;
 begin
  if canevent(tmethod(fongetsubform)) then begin
   if fsubform = nil then begin
@@ -3028,7 +3029,7 @@ begin
    if subformclass <> nil then begin
     po1:= fsubforminstancevarpo;
     if po1 = nil then begin
-     po1:= @fsubform;
+     po1:= @wi1;
     end;
     mseclasses.createmodule(self,subformclass,po1^);
     setlinkedvar(po1^,tmsecomponent(fsubform));
