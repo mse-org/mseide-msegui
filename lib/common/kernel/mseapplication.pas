@@ -94,6 +94,7 @@ type
    fonafterdeactivate: notifyeventty;
    factive: boolean;
    factivated: boolean;
+   factivecount: integer;
    fonactivateerror: activateerroreventty;
    fonabort: activatoraborteventty;
    fabortaction: activatorabortactionty;
@@ -123,9 +124,12 @@ type
    destructor destroy; override;
    class procedure addclient(const aactivator: tactivator; 
               const aclient: iobjectlink; var dest: tactivator);
+   procedure activaterecursive; //increments activecount
+   procedure deactivaterecursive; //decrements activecount
    procedure activateclients;
    procedure deactivateclients;
    property activated: boolean read factivated;
+   property activecount: integer read factivecount;
   published
    property clients: integer read getclients write setclients; 
                                   //hook for object inspector
@@ -954,6 +958,7 @@ var
  int1: integer;
 begin
  factive:= false;
+ factivecount:= 0;
  if canevent(tmethod(fonbeforedeactivate)) then begin
   fonbeforedeactivate(self);
  end;
@@ -1002,6 +1007,23 @@ begin
                          {$ifdef FPC}longword{$else}byte{$endif}(avalue),
                          {$ifdef FPC}longword{$else}byte{$endif}(foptions),
                          {$ifdef FPC}longword{$else}byte{$endif}(mask)));
+end;
+
+procedure tactivator.activaterecursive;
+begin
+ inc(factivecount);
+ active:= true;
+end;
+
+procedure tactivator.deactivaterecursive;
+begin
+ dec(factivecount);
+ if factivecount < 0 then begin
+  factivecount:= 0;
+ end;
+ if factivecount = 0 then begin
+  active:= false;
+ end;
 end;
 
 { tonterminatequerylist }

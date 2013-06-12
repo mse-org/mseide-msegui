@@ -228,7 +228,7 @@ end;
 procedure tmsedatamodule.loaded;
 begin
  if (factivatortarget <> nil)  and not (csdesigning in componentstate) then begin
-  factivatortarget.active:= true;
+  factivatortarget.activaterecursive;
  end;
  inherited;
  application.postevent(tobjectevent.create(ek_loaded,ievent(self)));
@@ -238,7 +238,7 @@ procedure tmsedatamodule.freeinstance;
 begin
  if (factivatortarget <> nil) and not (csdesigning in componentstate) then begin
   try
-   factivatortarget.active:= false;
+   factivatortarget.deactivaterecursive;
   finally
    inherited;
   end;
