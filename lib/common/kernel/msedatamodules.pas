@@ -40,6 +40,7 @@ type
    fonterminated: notifyeventty;
 //   procedure writesize(writer: twriter);
    fonidle: idleeventty;
+   factivatortarget: tactivator;
    procedure readsize(reader: treader);
    {
    procedure readsize_x(reader: treader);
@@ -56,6 +57,7 @@ type
    procedure setbounds_cy(const avalue: integer);
    procedure setsize(const avalue: sizety);
    procedure setoptions(const avalue: datamoduleoptionsty);
+   procedure setactivatortarget(const avalue: tactivator);
   protected
    procedure boundschanged;
    procedure doterminated(const sender: tobject);
@@ -83,8 +85,11 @@ type
    function hasparent: boolean; override;               
    function getparentcomponent: tcomponent; override;
    procedure beforedestruction; override;
+   procedure freeinstance override;
    property size: sizety read fsize write setsize;
   published
+   property activatortarget: tactivator read factivatortarget 
+                                              write setactivatortarget;
    property options: datamoduleoptionsty read foptions write setoptions 
                            default defaultdatamoduleoptions;
    property bounds_x: integer read getbounds_x write setbounds_x stored false;
@@ -222,12 +227,25 @@ end;
 
 procedure tmsedatamodule.loaded;
 begin
+ if factivatortarget <> nil then begin
+  factivatortarget.active:= true;
+ end;
  inherited;
-// if canevent(tmethod(fonloaded)) then begin
-//  fonloaded(self);
-// end;
-// autoreadstat;
  application.postevent(tobjectevent.create(ek_loaded,ievent(self)));
+end;
+
+procedure tmsedatamodule.freeinstance;
+begin
+ if factivatortarget <> nil then begin
+  try
+   factivatortarget.active:= false;
+  finally
+   inherited;
+  end;
+ end
+ else begin
+  inherited;
+ end;
 end;
 
 procedure tmsedatamodule.readstate(reader: treader);
@@ -447,6 +465,11 @@ begin
                                            [dmo_autoreadstat]) then begin
   fstatfile.readstat;
  end;
+end;
+
+procedure tmsedatamodule.setactivatortarget(const avalue: tactivator);
+begin
+ setlinkedvar(avalue,tmsecomponent(factivatortarget));
 end;
 
 end.

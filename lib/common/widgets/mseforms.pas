@@ -132,6 +132,7 @@ type
    fonsyswindowevent: syseventeventty;
 {$ifdef mse_with_ifi}
    fifilink: tififormlinkcomp;
+   factivatortarget: tactivator;
    function getifilinkkind: ptypeinfo;
    procedure setifilink(const avalue: tififormlinkcomp);
 {$endif}
@@ -156,6 +157,7 @@ type
    procedure setsyseventty(const avalue: syseventeventty);
    procedure setsyswindoweventty(const avalue: syseventeventty);
    procedure readonchildscaled(reader: treader);
+   procedure setactivatortarget(const avalue: tactivator);
   protected
    fscrollbox: tformscrollbox;
     //needed to distinguish between scrolled and unscrolled (mainmenu...) widgets
@@ -235,6 +237,7 @@ type
    constructor create(aowner: tcomponent; load: boolean); reintroduce; overload;  virtual;
    destructor destroy; override;
    procedure afterconstruction; override;
+   procedure freeinstance override;
    procedure reload;
    
    procedure insertwidget(const widget: twidget; const apos: pointty); override;
@@ -312,6 +315,8 @@ type
 {$ifdef mse_with_ifi}
    property ifilink: tififormlinkcomp read fifilink write setifilink;
 {$endif}
+   property activatortarget: tactivator read factivatortarget 
+                                             write setactivatortarget;
  end;
 
  custommseformclassty = class of tcustommseform;
@@ -930,6 +935,9 @@ end;
 
 procedure tcustommseform.loaded;
 begin
+ if factivatortarget <> nil then begin
+  factivatortarget.active:= true;
+ end;
  exclude(fscrollbox.fwidgetstate,ws_loadlock);
  if not (csdesigning in componentstate) then begin
   if fo_screencentered in foptions then begin
@@ -947,6 +955,20 @@ begin
  updatemainmenutemplates;
  application.postevent(tobjectevent.create(ek_loaded,ievent(self)){,true});
                         //to the OS queue
+end;
+
+procedure tcustommseform.freeinstance;
+begin
+ if factivatortarget <> nil then begin
+  try
+   factivatortarget.active:= false;
+  finally
+   inherited;
+  end;
+ end
+ else begin
+  inherited;
+ end;
 end;
 
 procedure tcustommseform.readstate(reader: treader);
@@ -1910,6 +1932,11 @@ begin
   asize.cx:= asize.cx + fscrollbox.bounds_x + size1.cx;
   asize.cy:= asize.cy + fscrollbox.bounds_y + size1.cy;
  end;
+end;
+
+procedure tcustommseform.setactivatortarget(const avalue: tactivator);
+begin
+ setlinkedvar(avalue,tmsecomponent(factivatortarget));
 end;
 
 { tmseform }
