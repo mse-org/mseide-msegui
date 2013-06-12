@@ -11327,7 +11327,7 @@ begin     //focuscell
    end;
   end;
   if (selectaction in [fca_focusin,fca_focusinrepeater,fca_focusinforce]) and 
-      ((cell.col < 0) or  
+      ((cell.col < 0) or (cell.col >= fdatacols.count) or
         not fdatacols[cell.col].canfocus(mb_none,[],false,bo1)) then begin
    selectaction:= fca_setfocusedcell;
   end;
