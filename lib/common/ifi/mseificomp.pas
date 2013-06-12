@@ -1448,6 +1448,7 @@ end;
 
 procedure tcustomificlientcontroller.linkset(const alink: iificlient);
 begin
+ fwidgetstatebefore:= [];
  change(alink);
 end;
 

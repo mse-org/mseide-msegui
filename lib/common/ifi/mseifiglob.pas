@@ -22,7 +22,8 @@ const
 {$endif}
  
 type
- ifiwidgetstatety = ({iws_closed,}iws_visible,iws_focused,iws_active); 
+ ifiwidgetstatety = ({iws_closed,}iws_loaded,iws_releasing,iws_destroying,
+                     iws_visible,iws_enabled,iws_entered,iws_focused,iws_active); 
  ifiwidgetstatesty = set of ifiwidgetstatety;
  
 type

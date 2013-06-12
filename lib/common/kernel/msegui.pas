@@ -7543,9 +7543,22 @@ end;
 
 function twidget.getifiwidgetstate: ifiwidgetstatesty;
 begin
- result:= [];
+ result:= [iws_loaded];
+ if acs_releasing in factstate then begin
+  include(result,iws_releasing);
+ end;
+ if csdestroying in componentstate then begin
+  include(result,iws_releasing);
+  include(result,iws_destroying);
+ end;
  if ws_visible in fwidgetstate then begin
   include(result,iws_visible);
+ end;
+ if ws_enabled in fwidgetstate then begin
+  include(result,iws_enabled);
+ end;
+ if ws_entered in fwidgetstate then begin
+  include(result,iws_entered);
  end;
  if ws_focused in fwidgetstate then begin
   include(result,iws_focused);
