@@ -109,10 +109,12 @@ type
                  write foverloadsleepus default -1;
            //checks application.checkoverload before calling oninputavaliable
            //if >= 0
-   property options: pipereaderoptionsty read foptions write foptions;
+   property options: pipereaderoptionsty read foptions 
+                                             write foptions default [];
    property oninputavailable: pipereadereventty read foninputavailable 
-                         write foninputavailable;
-   property onpipebroken: pipereadereventty read fonpipebroken write fonpipebroken;
+                                                      write foninputavailable;
+   property onpipebroken: pipereadereventty read fonpipebroken 
+                                                           write fonpipebroken;
 end;
 
  tpipereadercomp = class(tmsecomponent)
@@ -124,11 +126,15 @@ end;
    procedure setonpipebroken(const Value: pipereadereventty);
    function getoverloadsleepus: integer;
    procedure setoverloadsleepus(const avalue: integer);
+   function getopions: pipereaderoptionsty;
+   procedure setoptions(const avalue: pipereaderoptionsty);
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    property pipereader: tpipereader read fpipereader;
   published
+   property options: pipereaderoptionsty read getopions 
+                                        write setoptions default [];
    property overloadsleepus: integer read getoverloadsleepus 
                   write setoverloadsleepus default -1;
             //checks application.checkoverload before calling oninputavaliable
@@ -699,6 +705,16 @@ end;
 procedure tpipereadercomp.setoverloadsleepus(const avalue: integer);
 begin
  fpipereader.overloadsleepus:= avalue;
+end;
+
+function tpipereadercomp.getopions: pipereaderoptionsty;
+begin
+ result:= fpipereader.options;
+end;
+
+procedure tpipereadercomp.setoptions(const avalue: pipereaderoptionsty);
+begin
+ fpipereader.options:= avalue;
 end;
 
 { tpipereaderpers }
