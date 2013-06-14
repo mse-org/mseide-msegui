@@ -119,6 +119,7 @@ type
    destructor destroy; override;
    function newpanel(aname: string = ''): tdockpanelform;
    procedure updatewindowcaptions(const avalue: msestring);
+   procedure removepanels;
   published
    property menu: tcustommenu read fmenu write setmenu;
    property statfile: tstatfile read fstatfile write setstatfile;
@@ -298,6 +299,9 @@ begin
   if int2 > item1.count - 2 then begin
    int2:= item1.count - 2;
   end;
+  if int2 < 0 then begin
+   int2:= 0;
+  end;
   item1.submenu.insert(int2,result.fmenuitem);
  end;
 end;
@@ -369,6 +373,13 @@ end;
 procedure tdockpanelformcontroller.setstatfileclients(const avalue: tstatfilearrayprop);
 begin
  fstatfileclients.assign(avalue);
+end;
+
+procedure tdockpanelformcontroller.removepanels;
+begin
+ while fpanellist.count > 0 do begin
+  tobject(fpanellist.items[fpanellist.count-1]).free;
+ end; 
 end;
 
 { tdockpanelformmenuitem }

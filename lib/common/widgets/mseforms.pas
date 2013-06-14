@@ -238,7 +238,7 @@ type
    destructor destroy; override;
    procedure afterconstruction; override;
    procedure freeinstance override;
-   procedure reload;
+   procedure reload(const callafterload: boolean = false);
    
    procedure insertwidget(const widget: twidget; const apos: pointty); override;
    procedure dolayout(const sender: twidget); override;
@@ -1008,7 +1008,7 @@ begin
  end;
 end;
 
-procedure tcustommseform.reload;
+procedure tcustommseform.reload(const callafterload: boolean = false);
 begin
  name:= '';
  unregisterhandlers;
@@ -1017,7 +1017,9 @@ begin
  finally
   registerhandlers;
  end;
-// doafterload;
+ if callafterload then begin
+  doafterload;
+ end;
 end;
 
 {$ifdef mse_with_ifi}
