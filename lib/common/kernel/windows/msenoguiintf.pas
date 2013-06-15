@@ -97,8 +97,12 @@ begin
   checkevents;
   while eventlist.count = 0 do begin
    application.unlock;
-   msgwaitformultipleobjects(1,{$ifdef FPC}@{$endif}win32semty(sempo^).event,
-                                      false,infinite,qs_allinput);
+   with win32semty(sempo^) do begin
+    if interlockeddecrement(semacount) < 0 then begin
+     msgwaitformultipleobjects(1,{$ifdef FPC}@{$endif}event,
+                                       false,infinite,qs_allinput);
+    end;
+   end;
    application.lock;
    if iswin95 then begin
     while peekmessagea(msg1,0,0,0,pm_remove) do begin
