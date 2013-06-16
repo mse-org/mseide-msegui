@@ -3533,19 +3533,60 @@ end;
       Result:=Seek(longint(Offset),ord(Origin));
     end;
 
-  procedure TStream.ReadBuffer(var Buffer; Count: Longint);
+function TStream.tryreadbuffer(var buffer; count: longint): syserrorty;
+var
+ po1: pbyte;
+ int1: integer;
+begin
+ result:= sye_ok;
+ po1:= @buffer;
+ repeat
+  int1:= read(po1^,count);
+  if int1 <= 0 then begin
+   break;
+  end;
+  count:= count - int1;
+  inc(po1,int1);
+ until count <= 0;
+ if (count <> 0) or (int1 < 0) then begin
+  result:= sye_read;
+ end;
+end;
 
-    begin
-       if Read(Buffer,Count)<Count then
-         Raise EReadError.Create(SReadError);
-    end;
+procedure TStream.ReadBuffer(var Buffer; Count: Longint);
+begin
+ if tryreadbuffer(buffer,count) <> sye_ok then begin 
+  Raise EReadError.Create(SReadError);
+ end;
+end;
 
-  procedure TStream.WriteBuffer(const Buffer; Count: Longint);
+function TStream.trywritebuffer(const buffer; count: longint): syserrorty;
+var
+ po1: pbyte;
+ int1: integer;
+begin
+ result:= sye_ok;
+ po1:= @buffer;
+ repeat
+  int1:= write(po1^,count);
+  if int1 <= 0 then begin
+   break;
+  end;
+  count:= count - int1;
+  inc(po1,int1);
+ until count <= 0;
+ if (count <> 0) or (int1 < 0) then begin
+  result:= sye_write;
+ end;
+end;
 
-    begin
-       if Write(Buffer,Count)<Count then
-         Raise EWriteError.Create(SWriteError);
-    end;
+procedure TStream.WriteBuffer(const Buffer; Count: Longint);
+
+begin
+ if trywritebuffer(buffer,count) <> sye_ok then begin
+  Raise EWriteError.Create(SWriteError);
+ end;
+end;
 
   function TStream.CopyFrom(Source: TStream; Count: Int64): Int64;
 
@@ -3829,22 +3870,6 @@ end;
     begin
       WriteBuffer(q,8);
     end;
-
-function TStream.trywritebuffer(const buffer; count: longint): syserrorty;
-begin
- result:= sye_ok;
- if write(buffer,count) < count then begin
-  result:= sye_write;
- end;
-end;
-
-function TStream.tryreadbuffer(var buffer; count: longint): syserrorty;
-begin
- result:= sye_ok;
- if read(buffer,count) < count then begin
-  result:= sye_read;
- end;
-end;
 
 
 {****************************************************************************}
