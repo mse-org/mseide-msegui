@@ -103,6 +103,8 @@ type
    function getclients: integer;
    procedure setclients(const avalue: integer);
    procedure setoptions(const avalue: activatoroptionsty);
+   function getclientinstances(const index: integer): tobject;
+   function getclientinterfaces(const index: integer): iobjectlink;
   protected
    fclientnames: stringarty;
    fclients: pointerarty;
@@ -130,6 +132,11 @@ type
    procedure deactivateclients;
    property activated: boolean read factivated;
    property activecount: integer read factivecount;
+   property clientinstances[const index: integer]: tobject 
+                                            read getclientinstances;
+   property clientinterfaces[const index: integer]: iobjectlink
+                                            read getclientinterfaces;
+   property clientcount: integer read getclients;
   published
    property clients: integer read getclients write setclients; 
                                   //hook for object inspector
@@ -1024,6 +1031,23 @@ begin
  if factivecount = 0 then begin
   active:= false;
  end;
+end;
+
+function tactivator.getclientinstances(const index: integer): tobject;
+var
+ intf1: iobjectlink;
+begin
+ intf1:= getclientinterfaces(index);
+ result:= nil;
+ if intf1 <> nil then begin
+  result:= intf1.getinstance;
+ end;
+end;
+
+function tactivator.getclientinterfaces(const index: integer): iobjectlink;
+begin
+ checkarrayindex(fclients,index);
+ result:= iobjectlink(fclients[index]);
 end;
 
 { tonterminatequerylist }
