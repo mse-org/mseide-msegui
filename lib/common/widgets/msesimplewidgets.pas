@@ -550,6 +550,7 @@ type
    procedure clientrectchanged; override;
    procedure poschanged; override;
    procedure sizechanged; override;
+   procedure loaded; override;
    procedure visiblepropchanged; override;
    function getminshrinksize: sizety; override;
    procedure defineproperties(filer: tfiler); override;
@@ -2135,6 +2136,14 @@ begin
  inherited;
  filer.defineproperty('onchildscaled',
                           {$ifdef FPC}@{$endif}readonchildscaled,nil,false);
+end;
+
+procedure tcustomscalingwidget.loaded;
+begin
+ inherited;
+ if canevent(tmethod(fonlayout)) then begin
+  postchildscaled;
+ end;
 end;
 
 { tgroupbox }
