@@ -319,6 +319,7 @@ type
    fzoom: complexty;
    fzoomwidthstep: real;
    fzoomheightstep: real;
+   fzoomwheelsensitivity: real;
    procedure clientrecttoscrollbar(const rect: rectty);
    procedure setclientsize(const avalue: sizety);
    procedure setclientheight(const avalue: integer);
@@ -344,10 +345,13 @@ type
    procedure writezoomwidthstep(writer: twriter);
    procedure readzoomheightstep(reader: treader);
    procedure writezoomheightstep(writer: twriter);
+   procedure readzoomwheelsensitivity(reader: treader);
+   procedure writezoomwheelsensitivity(writer: twriter);
   protected
    fowner: twidget;
    procedure scrollpostoclientpos(var aclientrect: rectty); virtual;
    procedure checkminscrollsize(var asize: sizety); override;
+   procedure checkminclientsize(var asize: sizety); override;
    function isdragstart(const sender: twidget; 
                                   const info: mouseeventinfoty): boolean;
    procedure initinnerframe; virtual;
@@ -389,6 +393,9 @@ type
    property zoomheightstep: real read fzoomheightstep 
                       write fzoomheightstep stored false;
                                  //default 1
+   property zoomwheelsensitivity: real read fzoomwheelsensitivity
+                      write fzoomwheelsensitivity stored false;
+                                 //default 0
    property clientsize: sizety read fclientsize write setclientsize;
    property clientwidth: integer read fclientsize.cx 
                                      write setclientwidth default 0;
@@ -416,6 +423,7 @@ type
    property clientheightmin;
    property zoomwidthstep;
    property zoomheightstep;
+   property zoomwheelsensitivity;
    property levelo;
    property leveli;
    property framewidth;
@@ -3860,6 +3868,7 @@ begin
  fzoom.im:= 1;
  fzoomwidthstep:= 1;
  fzoomheightstep:= 1;
+// fzoomwheelsensitivity:= 1;
  fowner:= owner;
  inherited create(intf,iscrollbox(self));
  initinnerframe;
@@ -4367,6 +4376,17 @@ begin
  end;
 end;
 
+procedure tcustomscrollboxframe.checkminclientsize(var asize: sizety);
+begin
+ if clientwidth <> 0 then begin
+  asize.cx:= clientwidth;
+ end;
+ if clientheight <> 0 then begin
+  asize.cy:= clientheight;
+ end;
+ inherited;
+end;
+
 procedure tcustomscrollboxframe.setzoom1(const avalue: complexty);
 var
  size1: sizety;
@@ -4437,6 +4457,8 @@ var
  co1: complexty;
  bo1: boolean;
  ma1: shiftstatesty;
+ rea1: real;
+ fra1: framety;
 begin
  with info do begin
   if not (es_processed in eventstate) then begin
@@ -4452,15 +4474,17 @@ begin
      size1:= fclientrect.size;
      co1:= fzoom;
      bo1:= false;
+     rea1:= 1 + (abs(delta) - application.mousewheeldeltamin)*
+               fzoomwheelsensitivity*application.mousewheeldeltamin;
      if (fzoomwidthstep <> 1) and (fzoomwidthstep > 0) and 
                           (oscr_zoomwidth in foptionsscroll) and 
           not (ss_shift in shiftstate) then begin
       bo1:= true;
       if wheel = mw_down then begin
-       co1.re:= zoomwidth / fzoomwidthstep;
+       co1.re:= zoomwidth / (fzoomwidthstep*rea1);
       end
       else begin
-       co1.re:= zoomwidth * fzoomwidthstep;
+       co1.re:= zoomwidth * (fzoomwidthstep*rea1);
       end;
      end;     
      if (fzoomheightstep <> 1) and (fzoomheightstep > 0) and 
@@ -4468,14 +4492,31 @@ begin
                                   not (ss_alt in shiftstate) then begin
       bo1:= true;
       if wheel = mw_down then begin
-       co1.im:= zoomheight / fzoomheightstep;
+       co1.im:= zoomheight / (fzoomheightstep*rea1);
       end
       else begin
-       co1.im:= zoomheight * fzoomheightstep;
+       co1.im:= zoomheight * (fzoomheightstep*rea1);
       end;
      end;
      if bo1 then begin
       setzoom1(co1);
+      pt1:= fclientrect.pos;
+      fra1:= iscrollframe(fintf).getzoomrefframe;
+      with fra1 do begin
+       size1.cx:= size1.cx - left - right;
+       size1.cy:= size1.cy - top - bottom;
+       if size1.cx > 0 then begin
+        pt1.x:= info.pos.x - fpaintrect.x - left -
+        round((info.pos.x - fpaintrect.x - fclientrect.x - left)*
+          (fclientsize.cx-left-right)/size1.cx);
+       end;
+       if size1.cy > 0 then begin
+        pt1.y:= info.pos.y - fpaintrect.y - top -
+        round((info.pos.y - fpaintrect.y - fclientrect.y - top)*
+                (fclientsize.cy-top-bottom)/size1.cy);
+       end;
+      end;
+    {
       pt1:= nullpoint;
       with pt2 do begin
        x:= info.pos.x-fpaintrect.x;
@@ -4501,13 +4542,17 @@ begin
       if (size1.cy > 0) and (fclientsize.cy > 0) then begin
        pt1.y:= -round(pt2.y*((fclientsize.cy/size1.cy)-1.0));
       end;
-      addpoint1(fclientrect.pos,pt1);
+//      setscrollpos(addpoint(fclientrect.pos,pt1));
+}
+      pt2:= fclientrect.pos;
+      fclientrect.pos:= pt1;
       if fclientrect.x > 0 then begin
        fclientrect.x:= 0;
       end;
       if fclientrect.y > 0 then begin
        fclientrect.y:= 0;
       end;
+      fowner.scrollwidgets(subpoint(fclientrect.pos,pt2));
       internalupdatestate;
      end;
     end;
@@ -4539,6 +4584,16 @@ begin
  writer.writefloat(zoomheightstep);
 end;
 
+procedure tcustomscrollboxframe.readzoomwheelsensitivity(reader: treader);
+begin
+ zoomwheelsensitivity:= reader.readfloat;
+end;
+
+procedure tcustomscrollboxframe.writezoomwheelsensitivity(writer: twriter);
+begin
+ writer.writefloat(zoomwheelsensitivity);
+end;
+
 procedure tcustomscrollboxframe.defineproperties(filer: tfiler);
 begin
  inherited;
@@ -4550,6 +4605,12 @@ begin
                       (filer.ancestor = nil) and (fzoomheightstep <> 1) or
  (filer.ancestor <> nil) and 
     (tcustomscrollboxframe(filer.ancestor).fzoomheightstep <> fzoomheightstep));
+ filer.defineproperty('zoomwheelsensitivity',
+     @readzoomwheelsensitivity,@writezoomwheelsensitivity,
+         (filer.ancestor = nil) and (fzoomwheelsensitivity <> 0) or
+   (filer.ancestor <> nil) and 
+      (tcustomscrollboxframe(filer.ancestor).fzoomwheelsensitivity <>
+                                        fzoomwheelsensitivity));
 end;
 
 { tcustomautoscrollframe }

@@ -312,6 +312,7 @@ type
 
  iscrollframe = interface(icaptionframe)
   function widgetstate: widgetstatesty;
+  function getzoomrefframe: framety;
  end;
 
  tfacelist = class;
@@ -528,6 +529,7 @@ type
    procedure activechanged; virtual;
    function needsfocuspaint: boolean; virtual;
    procedure checkminscrollsize(var asize: sizety); virtual;
+   procedure checkminclientsize(var asize: sizety); virtual;
    class procedure drawframe(const canvas: tcanvas; const rect2: rectty; 
            const afi: baseframeinfoty; const astate: framestateflagsty
            {const disabled,active,clicked,mouse: boolean});
@@ -1372,6 +1374,8 @@ type
    function updateopaque(const children: boolean): boolean;
                    //true if widgetregionchanged called
    procedure dragstarted; virtual; //called by tapplication.dragstarted
+    //iscrollframe
+   function getzoomrefframe: framety; virtual;
     //idragcontroller
    function getdragrect(const apos: pointty): rectty; virtual;
     //iface
@@ -2455,7 +2459,6 @@ type
                const fmin,fmax,deltamin,deltamax: real);  
    function mousewheelacceleration(const avalue: real): real; overload;
    function mousewheelacceleration(const avalue: integer): integer; overload;
-
    procedure clearkeyhistory; //called by matching shortcut sequence
    property keyhistory: keyinfoarty read fkeyhistory;   
                         //does not contain modifier keys
@@ -5078,6 +5081,17 @@ begin
  //dummy
 end;
 
+procedure tcustomframe.checkminclientsize(var asize: sizety);
+begin
+ checkstate;
+ if asize.cx < fpaintrect.cx then begin
+  asize.cx:= fpaintrect.cx;
+ end;
+ if asize.cy < fpaintrect.cy then begin
+  asize.cy:= fpaintrect.cy;
+ end;
+end;
+
 function tcustomframe.isoptional: boolean;
 begin
  result:= not fintf.getstaticframe;
@@ -7004,15 +7018,7 @@ begin
   fminscrollsize:= calcminscrollsize;
   fminclientsize:= fminscrollsize;
   if fframe <> nil then begin
-   with fframe do begin
-    checkstate;
-    if fminclientsize.cx < fpaintrect.cx then begin
-     fminclientsize.cx:= fpaintrect.cx;
-    end;
-    if fminclientsize.cy < fpaintrect.cy then begin
-     fminclientsize.cy:= fpaintrect.cy;
-    end;
-   end;
+   fframe.checkminclientsize(fminclientsize);
   end
   else begin
    fminclientsize:= fwidgetrect.size;
@@ -12508,6 +12514,11 @@ begin
   dec(fnoinvalidate);
   widgetregionchanged(nil);
  end;
+end;
+
+function twidget.getzoomrefframe: framety;
+begin
+ result:= innerclientframe;
 end;
 
 { twindow }

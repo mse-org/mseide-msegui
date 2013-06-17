@@ -635,6 +635,8 @@ type
    procedure dopaintcontent(const acanvas: tcanvas); virtual;
    procedure dopaintcontent1(const acanvas: tcanvas); virtual;
    procedure dopaint(const acanvas: tcanvas); override;
+    //iscrollframe
+   function getzoomrefframe: framety; override;
     //idialcontroller
    procedure directionchanged(const dir,dirbefore: graphicdirectionty);
    function getdialrect: rectty;
@@ -3621,7 +3623,7 @@ begin
  extendfit(asides,ext1);
  inflaterectext1(ext1,tcustomframe1(fframe).fi.innerframe);
  if fframechart <> nil then begin
-  inflaterectext1(ext1,fframechart.innerframe);
+  inflaterectext1(ext1,fframechart.framei);
  end;
  
  fra1:= ffitframe;
@@ -3757,6 +3759,15 @@ end;
 procedure tcuchart.extendfit(const asides: rectsidesty; var aext: rectextty);
 begin
  //dummy
+end;
+
+function tcuchart.getzoomrefframe: framety;
+begin
+ result:= inherited getzoomrefframe;
+ addframe1(result,ffitframe);
+ if fframechart <> nil then begin
+  addframe1(result,fframechart.innerframe);
+ end; 
 end;
 
 { tcustomchart }
