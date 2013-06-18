@@ -2625,14 +2625,14 @@ begin
   ownerwindow:= applicationwindow;
   windowstyleex:= 0;
 //  if wo_popup in options then begin
+  if wo_notaskbar in options then begin
+   showwindow(applicationwindow,sw_hide);
+  end;    
   if options * noframewindowtypes <> [] then begin
    windowstyle:= ws_popup;
 //   windowstyleex:= windowstyleex or ws_ex_toolwindow;
   end
   else begin
-   if wo_notaskbar in options then begin
-    showwindow(applicationwindow,sw_hide);
-   end;    
    if wo_message in options then begin
     windowstyle:= ws_overlappedwindow;
     windowstyleex:= windowstyleex or ws_ex_toolwindow;

@@ -12820,7 +12820,7 @@ begin
   debugwriteln(' NIL');
  end
  else begin
-  debugwriteln(appinst.fmodalwindow.fowner.name);
+  debugwriteln(appinst.fmodalwindow.fownerwidget.name);
  end;
 {$endif}
  inc(factivating);
@@ -13098,7 +13098,7 @@ begin
       end;
      {$ifdef mse_debugwindowfocus}
       for int1:= 0 to high(appinst.fgroupzorder) do begin
-       debugwriteln(' groupzorder '+appinst.fgroupzorder[int1].fowner.name);
+       debugwriteln(' groupzorder '+appinst.fgroupzorder[int1].fownerwidget.name);
       end;
      {$endif}
       if bo1 then begin
@@ -15473,7 +15473,7 @@ begin
  if findwindow(winid,window) and (window.fstate*[tws_grouphidden] = []) then begin
   try
 {$ifdef mse_debugwindowfocus}
-   debugwriteln('setwindowfocus '+window.fowner.name+' '+hextostr(winid,8));
+   debugwriteln('setwindowfocus '+window.fownerwidget.name+' '+hextostr(winid,8));
 {$endif}
    if (fmodalwindow = nil) or (fmodalwindow = window) then begin
     window.activated;
@@ -15481,7 +15481,7 @@ begin
    else begin
     if fmodalwindow.fwindow.id <> 0 then begin
 {$ifdef mse_debugwindowfocus}
-     debugwriteln('call trycancelmodal '+window.fowner.name+' '+hextostr(winid,8));
+     debugwriteln('call trycancelmodal '+window.fownerwidget.name+' '+hextostr(winid,8));
 {$endif}
 {$warnings on}
      if {$ifdef mswindows}false{$else}
@@ -15489,7 +15489,7 @@ begin
          {$endif} then begin
 {$warnings off}
  {$ifdef mse_debugwindowfocus}
-      debugwriteln('trycancelmodal true '+window.fowner.name+' '+hextostr(winid,8));
+      debugwriteln('trycancelmodal true '+window.fownerwidget.name+' '+hextostr(winid,8));
  {$endif}
       include(appinst.fstate,aps_cancelloop);
       appinst.ffocuslockwindow:= nil;
@@ -15525,7 +15525,7 @@ begin
    debugwriteln('setwindowfocus '+hextostr(winid,8)+' not found');
   end
   else begin
-   debugwriteln('setwindowfocus '+window.fowner.name+' '+
+   debugwriteln('setwindowfocus '+window.fownerwidget.name+' '+
        hextostr(winid,8)+' grouphidden');
   end;
  end;
@@ -15543,7 +15543,7 @@ begin
  end;
  if findwindow(winid,window) then begin
 {$ifdef mse_debugwindowfocus}
-  debugwriteln('unsetwindowfocus '+window.fowner.name+' '+hextostr(winid,8));
+  debugwriteln('unsetwindowfocus '+window.fownerwidget.name+' '+hextostr(winid,8));
 {$endif}
   if (ffocuslockwindow <> nil) and (factivewindow <> nil) and 
          (window = ffocuslocktransientfor) then begin
