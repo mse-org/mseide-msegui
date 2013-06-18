@@ -12727,7 +12727,7 @@ begin
    if fstate * [tws_posvalid,tws_sizevalid] <>
            [tws_posvalid,tws_sizevalid] then begin
     if not windowevent and not (tws_needsdefaultpos in fstate) and
-        (fmoving <= 0) and (windowpos <> wp_maximized) then begin
+        (fmoving <= 0) and (windowpos = wp_normal) then begin
      fnormalwindowrect:= fownerwidget.fwidgetrect;
     {$ifdef mse_debugconfigure}
      with fnormalwindowrect do begin
