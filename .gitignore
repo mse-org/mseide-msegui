@@ -1,5 +1,7 @@
 *.o
 *.ppu
+*.dcu
+*.~*
 *.a
 *.bak
 *.bak?
