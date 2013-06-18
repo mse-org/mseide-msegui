@@ -15818,7 +15818,7 @@ procedure tinternalapplication.eventloop(const once: boolean = false);
 var
  event: tmseevent;
  int1: integer;
- bo1,bo2: boolean;
+ bo1,bo2,bo3: boolean;
  window: twindow;
  id1: winidty;
  po1: ^twindowevent;
@@ -15967,14 +15967,17 @@ begin       //eventloop
          bo1:= true;
          id1:= twindowevent(event).fwinid;
          po1:= pointer(eventlist.datapo);
+         bo3:= false;
          for int1:= 0 to eventlist.count - 1 do begin
           if po1^ <> nil then begin //find last focusin
            with po1^ do begin
             case kind of
              ek_focusin: begin
+              bo3:= false;
               id1:= fwinid;
              end;
              ek_focusout: begin
+              bo3:= true;
               if fwinid = twindowevent(event).fwinid then begin
                id1:= 0;
               end;
@@ -16011,6 +16014,10 @@ begin       //eventloop
               bo1:= false;
               freeandnil(po1^); 
                  //spurious focus, for instance minimize window group on windows
+              if bo3 and (factivewindow <> nil) then begin
+               unsetwindowfocus(factivewindow.fwindow.id);
+               postevent(tmseevent.create(ek_checkapplicationactive));
+              end;
               break;
              end;
             end;
@@ -16034,21 +16041,26 @@ begin       //eventloop
          debugwindow('ek_focusout ',twindowevent(event).fwinid);
         {$endif}
          getevents;
-         po1:= pointer(eventlist.datapo);
+         po1:= pointer(@eventlist.datapo^[eventlist.count-1]);
          bo1:= true; 
          for int1:= 0 to eventlist.count - 1 do begin
           if po1^ <> nil then begin
            with po1^ do begin
-            if (kind = ek_focusin) then begin
-            {$ifdef mse_debugwindowfocus}
-             debugwindow(' ek_focusout ignored ',twindowevent(event).fwinid);
-            {$endif}
-             bo1:= false; //ignore the event
-             break;
+            case kind of
+             ek_focusin: begin
+             {$ifdef mse_debugwindowfocus}
+              debugwindow(' ek_focusout ignored ',twindowevent(event).fwinid);
+             {$endif}
+              bo1:= false; //ignore the event
+              break;
+             end;
+             ek_focusout: begin
+              break;
+             end;
             end;
            end;
           end;
-          inc(po1);
+          dec(po1);
          end;
          if bo1 then begin
           unsetwindowfocus(twindowevent(event).fwinid);
