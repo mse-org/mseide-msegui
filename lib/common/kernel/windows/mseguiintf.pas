@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -2630,6 +2630,9 @@ begin
 //   windowstyleex:= windowstyleex or ws_ex_toolwindow;
   end
   else begin
+   if wo_notaskbar in options then begin
+    showwindow(applicationwindow,sw_hide);
+   end;    
    if wo_message in options then begin
     windowstyle:= ws_overlappedwindow;
     windowstyleex:= windowstyleex or ws_ex_toolwindow;

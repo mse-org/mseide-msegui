@@ -110,7 +110,7 @@ type
                    wo_embedded,
                    wo_buttonendmodal,wo_groupleader,
                    wo_taskbar,    //win32 only
-                   wo_notaskbar,  //linux only
+                   wo_notaskbar,  
                    wo_windowcentermessage, //showmessage centered in window
                    wo_sysdnd //activate system drag and drop (xdnd on Linux)
                    ); 
