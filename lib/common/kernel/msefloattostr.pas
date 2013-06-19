@@ -37,6 +37,7 @@ function doubletostring(const value: double; const precision: integer = 0;
                //precision <= 0 -> remove trailing 0
                //precision = 0 in fsm_default mode = maximal precision
                
+function tryintexp10(aexp: integer; out value: double): boolean;
 function intexp10(aexp: integer): double;
 
 implementation
@@ -45,6 +46,8 @@ uses
  
 const
  binexps: array[0..8] of double = (1e1,1e2,1e4,1e8,1e16,1e32,1e64,1e128,1e256);
+ binnegexps: array[0..8] of double = 
+                         (1e-1,1e-2,1e-4,1e-8,1e-16,1e-32,1e-64,1e-128,1e-256);
 
 type
  expsymty = 
@@ -61,32 +64,47 @@ const
         ' ',
         'k','M','G','T','P','E','Z','Y');
         
-function intexp10(aexp: integer): double;
+function tryintexp10(aexp: integer; out value: double): boolean;
 var
  do1: double;
  int1,int2,int3: integer;
 begin
- int2:= abs(aexp);
- if int2 = 0 then begin
-  result:= 1;
+ result:= true;
+ if aexp = 0 then begin
+  value:= 1;
   exit;
- end;
- if int2 > $1ff then begin
-  raise exception.create('Exponent overflow');
  end;
  do1:= 1;
  int3:= 1;
- for int1:= 0 to 8 do begin
-  if int2 and int3 <> 0 then begin
-   do1:= do1 * binexps[int1];
+ int2:= abs(aexp);
+ if int2 <= $1ff then begin
+  if aexp < 0 then begin
+   for int1:= 0 to 8 do begin
+    if int2 and int3 <> 0 then begin
+     do1:= do1 * binnegexps[int1];
+    end;
+    int3:= int3 shl 1;
+   end;
+  end
+  else begin
+   for int1:= 0 to 8 do begin
+    if int2 and int3 <> 0 then begin
+     do1:= do1 * binexps[int1];
+    end;
+    int3:= int3 shl 1;
+   end;
   end;
-  int3:= int3 shl 1;
- end;
- if aexp < 0 then begin
-  result:= 1/do1;
+  value:= do1;
  end
  else begin
-  result:= do1;
+  result:= false;
+ end;
+end;
+
+function intexp10(aexp: integer): double;
+begin
+ if not tryintexp10(aexp,result) then begin
+  raise exception.create('Exponent overflow');
  end;
 end;
 

@@ -163,6 +163,16 @@ function inttostrmse(const value: int64): msestring; overload;
 {$ifdef hasqword}
 function inttostrmse(const value: qword): msestring; overload;
 {$endif}
+
+function trystrtodouble(const s: lstringty; out value: double; 
+                             const decimalseparator: char): boolean; overload;
+function trystrtodouble(const s: string; out value: double; 
+                             const decimalseparator: char): boolean; overload;
+function strtodouble(const s: string;
+                             const decimalseparator: char): double;
+function trystrtodouble(const s: string; out value: double): boolean; overload;
+function strtodouble(const s: string): double;
+                                
 function realtostr(const value: double): string;     //immer'.' als separator
 function strtoreal(const s: string): double;   //immer'.' als separator
 function trystrtoreal(const s: string; out value: real): boolean;
@@ -3178,6 +3188,141 @@ begin
  end;
 end;
 }
+function trystrtodouble(const s: lstringty; out value: double; 
+                             const decimalseparator: char): boolean; overload;
+var
+ po1,decisep,mantstart,mantend: pchar;
+ pend: pchar;
+ neg,negexp: boolean;
+ mant,do1: double;
+ exp: integer;
+begin
+ result:= false;
+ pend:= s.po+s.len;
+ po1:= s.po;
+ while ((po1^ = ' ') or (po1^ = c_tab)) do begin
+  inc(po1);
+  if po1 = pend then begin
+   exit;
+  end;
+ end;
+ neg:= po1^ = '-';
+ if po1^ = '+' then begin
+  inc(po1);
+ end;
+ if neg then begin
+  inc(po1);
+ end;
+ decisep:= nil;
+ mantstart:= po1;
+ mant:= 0;
+ exp:= 0;
+ while true do begin
+  case po1^ of
+   '0'..'9': begin
+     mant:= mant*10 + (byte(po1^)-byte('0'));
+   end;
+   '.': begin
+    if decisep <> nil then begin
+     exit;
+    end;
+    decisep:= po1;
+   end;
+   'e','E': begin
+    mantend:= po1;
+    inc(po1);
+    negexp:= po1^ = '-';
+    if po1^ = '+' then begin
+     inc(po1);
+    end;
+    if negexp then begin
+     inc(po1);
+    end;
+    if (po1^ < '0') or (po1^ > '9') then begin
+     exit;
+    end;
+    while true do begin
+     case po1^ of 
+      '0'..'9': begin
+       exp:= exp * 10 + (byte(po1^)-byte('0'));
+      end;
+      else begin
+       break;
+      end;
+     end;
+     inc(po1);
+     if po1 = pend then begin
+      break;
+     end;
+    end;
+    if negexp then begin
+     exp:= -exp;
+    end;
+    break;
+   end;
+   else begin
+    mantend:= po1;
+    break;
+   end;
+  end;
+  inc(po1);
+  if po1 = pend then begin
+   mantend:= po1;
+   break;
+  end;
+ end;
+ if (mantstart = mantend) or (decisep = mantstart) and 
+                                       (mantend-mantstart = 1) then begin
+  exit; //empty
+ end;
+ if decisep <> nil then begin
+  exp:= exp-(mantend-decisep)+1;
+ end;
+ while po1 <> pend do begin
+  if not((po1^ = ' ') or (po1^ = c_tab)) then begin
+   exit;
+  end;
+  inc(po1);
+ end;
+ if not tryintexp10(exp,do1) then begin
+  exit;
+ end;
+ do1:= mant * do1;
+ if neg then begin
+  do1:= -do1;
+ end;
+ value:= do1;
+ result:= true;
+end;
+
+function trystrtodouble(const s: string; out value: double; 
+                             const decimalseparator: char): boolean; overload;
+var
+ lstr1: lstringty;
+begin
+ lstr1.po:= pointer(s);
+ lstr1.len:= length(s);
+ result:= trystrtodouble(lstr1,value,decimalseparator);
+end;
+
+function trystrtodouble(const s: string; out value: double): boolean;
+begin
+ result:= trystrtodouble(s,value,defaultformatsettings.decimalseparator);
+end;
+
+function strtodouble(const s: string;
+                             const decimalseparator: char): double;
+begin
+ if not trystrtodouble(s,result,decimalseparator) then begin
+  raise EConvertError.CreateFmt(SInvalidFloat,[s]);
+ end;
+end;
+
+function strtodouble(const s: string): double;
+begin
+ result:= strtodouble(s,defaultformatsettings.decimalseparator);
+end;
+
 function realToStr(const value: double): string;     //immer'.' als separator
 begin
 {$ifdef withformatsettings}
@@ -3189,20 +3334,12 @@ end;
 
 function StrToreal(const S: string): double;   //immer'.' als separator
 begin
-{$ifdef withformatsettings}
- result:= strtofloat(s,defaultformatsettingsdot);
-{$else}
- result:= strtofloat(replacechar(s,'.',decimalseparator));
-{$endif}
+ result:= strtodouble(s,'.');
 end;
 
 function trystrtoreal(const s: string; out value: real): boolean;
 begin
-{$ifdef withformatsettings}
- result:= trystrtofloat(s,double(value),defaultformatsettingsdot);
-{$else}
- result:= trystrtofloat(replacechar(s,'.',decimalseparator),double(value));
-{$endif}
+ result:= trystrtodouble(s,double(value),'.');
 end;
 
 function realtytostr(const val: realty; const format: msestring = '';
@@ -3280,7 +3417,7 @@ begin
     end;
    end;
   end;
-  result:= trystrtofloat(str1,double(value));
+  result:= trystrtodouble(str1,double(value));
  end;
 end;
 
@@ -3315,11 +3452,7 @@ begin
   result:= emptyreal;
  end
  else begin
- {$ifdef withformatsettings}
-  result:= strtofloat(ein,defaultformatsettingsdot);
- {$else}
-  result:= strtofloat(replacechar(ein,'.',decimalseparator));
- {$endif}
+  result:= strtodouble(ein,'.');
  end;
 end;
 
@@ -3330,11 +3463,7 @@ begin
   value:= emptyreal;
  end
  else begin
- {$ifdef withformatsettings}
-  result:= trystrtofloat(ein,double(value),defaultformatsettingsdot);
- {$else}
-  result:= trystrtofloat(replacechar(ein,'.',decimalseparator),double(value));
- {$endif}
+  result:= trystrtodouble(ein,double(value),'.');
  end;
 end;
 
