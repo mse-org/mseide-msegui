@@ -3785,10 +3785,12 @@ begin
   while s^ <> #0 do begin
    if s^ <> msechar(c_return) then begin
     d^:= s^;
-    if d - pmsechar(pointer(avalue)) <= aindex then begin
+    inc(d);
+   end
+   else begin
+    if d - pmsechar(pointer(avalue)) < aindex then begin
      dec(aindex);
     end;
-    inc(d);
    end;
    inc(s);
   end;
