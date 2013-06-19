@@ -4361,7 +4361,7 @@ begin
             (shiftstate*buttonshiftstatesmask = [ss_middle]) and
              pointinrect(translatewidgetpoint(pos,sender,fowner),fpaintrect) and 
                ((fclientrect.cx <> fpaintrect.cx) or 
-                     (fclientrect.cx <> fpaintrect.cx));
+                     (fclientrect.cy <> fpaintrect.cy));
  end;                    
 end;
 
