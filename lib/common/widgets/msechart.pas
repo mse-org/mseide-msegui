@@ -1476,45 +1476,50 @@ begin
    end;
   end
   else begin
-   acanvas.capstyle:= cs_round;
-   acanvas.joinstyle:= js_round;
-   bo1:= (kind = trk_xseries) or 
-                        (cto_xordered in finfo.options);
-   if bo1 then begin
-    po1:= pointer(finfo.datapoints);
-    pend:= po1 + length(finfo.datapoints);
-    rect1:= acanvas.clipbox;
-    int2:= (acanvas.linewidth+1) div 2;
-    int1:= rect1.x - int2;
-    while po1 < pend do begin
-     if po1^.x >= int1 then begin
-      break;
+   if finfo.datapoints <> nil then begin
+    acanvas.capstyle:= cs_round;
+    acanvas.joinstyle:= js_round;
+    bo1:= (kind = trk_xseries) or (cto_xordered in finfo.options);
+    if bo1 then begin
+     po1:= pointer(finfo.datapoints);
+     inc(po1);
+     pend:= po1 + high(finfo.datapoints);
+     rect1:= acanvas.clipbox;
+     int2:= (acanvas.linewidth+1) div 2;
+     int1:= rect1.x - int2;
+     while po1 < pend do begin
+      if po1^.x >= int1 then begin
+       break;
+      end;
+      inc(po1);
+     end;
+     dec(po1);
+     startindex:= po1 - ppointty(pointer(finfo.datapoints));
+     int1:= rect1.x+rect1.cx+int2;
+     dec(pend);
+     while po1 < pend do begin
+      if po1^.x > int1 then begin
+       break;
+      end;
+      inc(po1);
      end;
      inc(po1);
+     pointcount:= po1 - ppointty(pointer(finfo.datapoints)) - startindex;
+    end
+    else begin
+     startindex:= 0;
+     pointcount:= length(finfo.datapoints);
     end;
-    startindex:= po1 - ppointty(pointer(finfo.datapoints));
-    int1:= rect1.x+rect1.cx+int2;
-    while po1 < pend do begin
-     if po1^.x > int1 then begin
-      break;
-     end;
-     inc(po1);
+    if (fbreaks = nil) or bo1 then begin
+     acanvas.drawlines(finfo.datapoints,false,finfo.color,startindex,pointcount);
+    end
+    else begin
+     acanvas.drawlines(finfo.datapoints,fbreaks,false,finfo.color,startindex,
+                                                                     pointcount);
     end;
-    pointcount:= po1 - ppointty(pointer(finfo.datapoints)) - startindex;
-   end
-   else begin
-    startindex:= 0;
-    pointcount:= length(finfo.datapoints);
+    acanvas.capstyle:= cs_butt;
+    acanvas.joinstyle:= js_miter;
    end;
-   if (fbreaks = nil) or bo1 then begin
-    acanvas.drawlines(finfo.datapoints,false,finfo.color,startindex,pointcount);
-   end
-   else begin
-    acanvas.drawlines(finfo.datapoints,fbreaks,false,finfo.color,startindex,
-                                                                    pointcount);
-   end;
-   acanvas.capstyle:= cs_butt;
-   acanvas.joinstyle:= js_miter;
   end;
   if finfo.dashes <> '' then begin
    acanvas.dashes:= '';
