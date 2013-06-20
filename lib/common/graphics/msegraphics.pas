@@ -810,19 +810,24 @@ type
                                         const acolor: colorty = cl_default);
    procedure drawlinesegments(const apoints: array of segmentty;
                          const acolor: colorty = cl_default);
+
    procedure drawlines(const apoints: array of pointty;
                        const aclosed: boolean = false;
                        const acolor: colorty = cl_default;
               const first: integer = 0; const acount: integer = -1); overload;
-                                                          //-1 -> all
+                               //-1 = all
    procedure drawlines(const apoints: array of pointty;
                        const abreaks: array of integer; //ascending order
                        const aclosed: boolean = false;
-                       const acolor: colorty = cl_default); overload;
-   procedure drawvect(const startpoint: pointty; const direction: graphicdirectionty;
-                      const length: integer; const acolor: colorty = cl_default);
+                       const acolor: colorty = cl_default;
+              const first: integer = 0; const acount: integer = -1); overload;
+
+   procedure drawvect(const startpoint: pointty; 
+                   const direction: graphicdirectionty;
+                   const length: integer; const acolor: colorty = cl_default);
                                                            overload;
-   procedure drawvect(const startpoint: pointty; const direction: graphicdirectionty;
+   procedure drawvect(const startpoint: pointty;
+                      const direction: graphicdirectionty;
                       const length: integer; out endpoint: pointty;
                       const acolor: colorty = cl_default); overload;
                       
@@ -3845,32 +3850,45 @@ end;
 procedure tcanvas.drawlines(const apoints: array of pointty;
                        const abreaks: array of integer; //ascending order
                        const aclosed: boolean = false; 
-                       const acolor: colorty = cl_default);
+                       const acolor: colorty = cl_default;
+          const first: integer = 0; const acount: integer = -1);
 var
  int1: integer;
  s,e: integer;
+ e1: integer;
 begin
  if cs_inactive in fstate then exit;
- if length(apoints) > 0 then begin
+ if acount  > 0 then begin
   if checkforeground(acolor,true) then begin
-   s:= 0;
+   s:= first;
+   e1:= acount;
+   if e1 < 0 then begin
+    e1:= length(apoints);
+   end;
+   e1:= s + e1;
    int1:= 0;
+   while int1 <= high(abreaks) do begin
+    if abreaks[int1] > s then begin
+     break;
+    end;
+    inc(int1);
+   end;
    with fdrawinfo.points do begin
     closed:= false;
     repeat
-     e:= length(apoints);
+     e:= e1;
      if (int1 <= high(abreaks)) and (abreaks[int1] < e) then begin
       e:= abreaks[int1];
       inc(int1);
      end;
      points:= @apoints[s];
      count:= e-s;
-     if e = length(apoints) then begin
+     if (first = 0) and (e = length(apoints)) then begin
       closed:= aclosed;
      end;
      gdi(gdf_drawlines);
      s:= e;
-    until e = length(apoints);
+    until e = count;
    end;
   end;
  end;

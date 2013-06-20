@@ -634,7 +634,7 @@ type
    procedure doclipcontent1(const acanvas: tcanvas); virtual;
    procedure dopaintcontent(const acanvas: tcanvas); virtual;
    procedure dopaintcontent1(const acanvas: tcanvas); virtual;
-   procedure dopaint(const acanvas: tcanvas); override;
+   procedure doonpaint(const acanvas: tcanvas); override;
     //iscrollframe
    function getzoomrefframe: framety; override;
     //idialcontroller
@@ -1429,8 +1429,11 @@ end;
 
 procedure ttrace.paint(const acanvas: tcanvas);
 var
- int1: integer;
+ int1,int2: integer;
  rect1,rect2: rectty;
+ bo1: boolean;
+ po1,pend: ppointty;
+ startindex,pointcount: integer;
 begin
  if (finfo.widthmm > 0) and visible then begin
   acanvas.linewidthmm:= finfo.widthmm;
@@ -1475,12 +1478,40 @@ begin
   else begin
    acanvas.capstyle:= cs_round;
    acanvas.joinstyle:= js_round;
-   if (fbreaks = nil) or (kind = trk_xseries) or 
-                        (cto_xordered in finfo.options) then begin
-    acanvas.drawlines(finfo.datapoints,false,finfo.color);
+   bo1:= (kind = trk_xseries) or 
+                        (cto_xordered in finfo.options);
+   if bo1 then begin
+    po1:= pointer(finfo.datapoints);
+    pend:= po1 + length(finfo.datapoints);
+    rect1:= acanvas.clipbox;
+    int2:= (acanvas.linewidth+1) div 2;
+    int1:= rect1.x - int2;
+    while po1 < pend do begin
+     if po1^.x >= int1 then begin
+      break;
+     end;
+     inc(po1);
+    end;
+    startindex:= po1 - ppointty(pointer(finfo.datapoints));
+    int1:= rect1.x+rect1.cx+int2;
+    while po1 < pend do begin
+     if po1^.x > int1 then begin
+      break;
+     end;
+     inc(po1);
+    end;
+    pointcount:= po1 - ppointty(pointer(finfo.datapoints)) - startindex;
    end
    else begin
-    acanvas.drawlines(finfo.datapoints,fbreaks,false,finfo.color);
+    startindex:= 0;
+    pointcount:= length(finfo.datapoints);
+   end;
+   if (fbreaks = nil) or bo1 then begin
+    acanvas.drawlines(finfo.datapoints,false,finfo.color,startindex,pointcount);
+   end
+   else begin
+    acanvas.drawlines(finfo.datapoints,fbreaks,false,finfo.color,startindex,
+                                                                    pointcount);
    end;
    acanvas.capstyle:= cs_butt;
    acanvas.joinstyle:= js_miter;
@@ -3332,7 +3363,7 @@ end;
 procedure tcuchart.dopaintbackground(const canvas: tcanvas);
 begin
  inherited;
- if not (chs_nocolorchart in fstate) then begin
+ if not (chs_nocolorchart in fstate) and not canvas.clipregionisempty then begin
   if fcolorchart <> cl_default then begin
    canvas.fillrect(getdialrect,fcolorchart);
   end;
@@ -3366,7 +3397,7 @@ begin
  end;
 end;
 }
-procedure tcuchart.dopaint(const acanvas: tcanvas);
+procedure tcuchart.doonpaint(const acanvas: tcanvas);
 begin
  inherited;
  acanvas.save;
@@ -3863,11 +3894,15 @@ begin
  inherited;
  ftraces.clipoverlay(acanvas);
 end;
-
+var testvar: integer;
 procedure tcustomchart.dopaintcontent(const acanvas: tcanvas);
 var
  rect1: rectty;
 begin
+with acanvas.clipbox do begin
+writeln(testvar,' ',x,' ',y,' ',cx,' ',cy);
+inc(testvar);
+end;
  inherited;
  acanvas.save;
  rect1:= getdialrect;
