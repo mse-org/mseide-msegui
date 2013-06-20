@@ -7926,26 +7926,29 @@ begin
   fframe.paintbackground(canvas,makerect(nullpoint,fwidgetrect.size),true);
   canvas.color:= colorbefore;
  end;
- face1:= getactface;
- if face1 <> nil then begin
-  if not (fao_overlay in face1.options) then begin
-   if fframe <> nil then begin
-    canvas.remove(fframe.fclientrect.pos);
-    face1.paint(canvas,makerect(nullpoint,fframe.fpaintrect.size));
-    canvas.move(fframe.fclientrect.pos);
-   end
-   else begin
-    face1.paint(canvas,makerect(nullpoint,fwidgetrect.size));
+ if not canvas.clipregionisempty then begin
+  face1:= getactface;
+  if face1 <> nil then begin
+   if not (fao_overlay in face1.options) then begin
+    if fframe <> nil then begin
+     canvas.remove(fframe.fclientrect.pos);
+     face1.paint(canvas,makerect(nullpoint,fframe.fpaintrect.size));
+     canvas.move(fframe.fclientrect.pos);
+    end
+    else begin
+     face1.paint(canvas,makerect(nullpoint,fwidgetrect.size));
+    end;
    end;
   end;
+  doonpaintbackground(canvas);
  end;
- doonpaintbackground(canvas);
 end;
 
 procedure twidget.doonpaintbackground(const canvas: tcanvas);
 begin
  //dummy
 end;
+
 procedure twidget.dopaint(const canvas: tcanvas);
 begin
  dopaintbackground(canvas);
@@ -8091,7 +8094,9 @@ begin
    canvas.color:= actcolor;
    canvas.drawinfopo:= nil;
    dopaint(canvas);
-   doonpaint(canvas);
+   if not canvas.clipregionisempty then begin
+    doonpaint(canvas);
+   end;
   end;
   canvas.restore(saveindex);
   if bo1 then begin
