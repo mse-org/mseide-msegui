@@ -36,6 +36,8 @@ const
  
 type
  tgrapheditframe = class(tcustomcaptionframe)
+  protected
+   function getdefaultcolorclient: colorty; virtual;
   public
    constructor create(const intf: icaptionframe);
   published
@@ -81,20 +83,24 @@ type
    property frameface_offsetactivemouse;
    property frameface_offsetactiveclicked;
 
-   property colorclient default cl_foreground;
+   property colorclient default cl_transparent;
    property caption;
    property captionpos default cp_right;
    property captiondist;
-//   property captiondistouter;
-//   property captionframecentered;
    property captionoffset;
-//   property captionnoclip;
    property font;
    property localprops; //before template
    property localprops1; //before template
    property template;
  end;
 
+ ttogglegrapheditframe = class(tgrapheditframe)
+  protected
+   function getdefaultcolorclient: colorty; override;
+  published
+   property colorclient default cl_foreground;
+ end;
+ 
  tgraphdataedit = class(tactionpublishedwidget,igridwidget,istatfile
                   {$ifdef mse_with_ifi},iifidatalink{$endif})
   private
@@ -512,6 +518,7 @@ type
   protected
    fcheckcaption: boolean;
    fclickedrow: integer;
+   procedure internalcreateframe; override;
    procedure setoptions(const avalue: buttonoptionsty); virtual;
    procedure togglevalue(const areadonly: boolean;
                                const down: boolean); virtual; abstract;
@@ -1056,10 +1063,22 @@ begin
  options:= defaultgrapheditframeoptions;
  fstate:= fstate + [fs_drawfocusrect,fs_captionfocus,fs_captionhint,
                      fs_paintrectfocus];
- fi.colorclient:= cl_foreground;
+ fi.colorclient:= getdefaultcolorclient;
  fi.levelo:= -2;
  captionpos:= cp_right;
  internalupdatestate;
+end;
+
+function tgrapheditframe.getdefaultcolorclient: colorty;
+begin
+ result:= cl_transparent;
+end;
+
+{ ttogglegrapheditframe }
+
+function ttogglegrapheditframe.getdefaultcolorclient: colorty;
+begin
+ result:= cl_foreground;
 end;
 
 { tsliderscrollbar }
@@ -2110,6 +2129,11 @@ begin
  fclickedrow:= -1;
  foptions:= defaultbuttonoptions;
  inherited;
+end;
+
+procedure ttogglegraphdataedit.internalcreateframe;
+begin
+ ttogglegrapheditframe.create(iscrollframe(self));
 end;
 
 procedure ttogglegraphdataedit.dokeyup(var info: keyeventinfoty);
