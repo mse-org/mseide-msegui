@@ -3899,15 +3899,11 @@ begin
  inherited;
  ftraces.clipoverlay(acanvas);
 end;
-var testvar: integer;
+
 procedure tcustomchart.dopaintcontent(const acanvas: tcanvas);
 var
  rect1: rectty;
 begin
-with acanvas.clipbox do begin
-writeln(testvar,' ',x,' ',y,' ',cx,' ',cy);
-inc(testvar);
-end;
  inherited;
  acanvas.save;
  rect1:= getdialrect;
