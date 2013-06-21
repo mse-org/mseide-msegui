@@ -69,6 +69,12 @@ type
   optionsadd: buttonoptionsty;
   optionsremove: buttonoptionsty;
  end;  
+ sliderskininfoty = record
+  co: colorty;
+  wi: widgetskininfoty;
+  sb_vert: scrollbarskininfoty;
+  sb_horz: scrollbarskininfoty;
+ end;  
  stepbuttonskininfoty = record
   co: colorty;
   fa: tfacecomp;
@@ -368,6 +374,7 @@ type
    procedure handlegroupbox(const ainfo: skininfoty); virtual;
    procedure handlesimplebutton(const ainfo: skininfoty); virtual;
    procedure handledatabutton(const ainfo: skininfoty); virtual;
+   procedure handleslider(const ainfo: skininfoty); virtual;
    procedure handleuserobject(const ainfo: skininfoty); virtual;
    procedure handletabbar(const ainfo: skininfoty); virtual;
    procedure handletabpage(const ainfo: skininfoty); virtual;
@@ -427,6 +434,7 @@ type
    fgrid: gridskininfoty;
    fbutton: buttonskininfoty;
    fdatabutton: buttonskininfoty;
+   fslider: sliderskininfoty;
    fstepbutton: stepbuttonskininfoty;
    fframebutton: framebuttonskininfoty;
    fcontainer: containerskininfoty;
@@ -473,6 +481,19 @@ type
    procedure setdatabutton_frame(const avalue: tframecomp);
    function getdatabutton_font: toptionalfont;
    procedure setdatabutton_font(const avalue: toptionalfont);
+
+   procedure setslider_face(const avalue: tfacecomp);
+   procedure setslider_frame(const avalue: tframecomp);
+   procedure setssb_vert_facebutton(const avalue: tfacecomp);
+   procedure setssb_vert_faceendbutton(const avalue: tfacecomp);
+   procedure setssb_vert_framebutton(const avalue: tframecomp);
+   procedure setssb_vert_frameendbutton1(const avalue: tframecomp);
+   procedure setssb_vert_frameendbutton2(const avalue: tframecomp);
+   procedure setssb_horz_facebutton(const avalue: tfacecomp);
+   procedure setssb_horz_faceendbutton(const avalue: tfacecomp);
+   procedure setssb_horz_framebutton(const avalue: tframecomp);
+   procedure setssb_horz_frameendbutton1(const avalue: tframecomp);
+   procedure setssb_horz_frameendbutton2(const avalue: tframecomp);
 
    procedure setframebutton_face(const avalue: tfacecomp);
    procedure setframebutton_frame(const avalue: tframecomp);
@@ -551,6 +572,7 @@ type
    procedure handlegroupbox(const ainfo: skininfoty); override;
    procedure handlesimplebutton(const ainfo: skininfoty); override;
    procedure handledatabutton(const ainfo: skininfoty); override;
+   procedure handleslider(const ainfo: skininfoty); override;
    procedure handletabbar(const ainfo: skininfoty); override;
    procedure handletabpage(const ainfo: skininfoty); override;
    procedure handletoolbar(const ainfo: skininfoty); override;
@@ -683,6 +705,41 @@ type
    property databutton_optionsremove: buttonoptionsty 
                        read fbooleanedit.optionsremove
                                 write fdatabutton.optionsremove default[];
+
+   property slider_color: colorty read fslider.co 
+                                  write fslider.co default cl_default;
+   property slider_face: tfacecomp read fslider.wi.fa 
+                                              write setslider_face;
+   property slider_frame: tframecomp read fdatabutton.wi.fra 
+                                              write setslider_frame;
+
+   property slider_sb_horz_facebutton: tfacecomp read fslider.sb_horz.facebu 
+                        write setssb_horz_facebutton;
+   property slider_sb_horz_faceendbutton: tfacecomp 
+                        read fslider.sb_horz.faceendbu 
+                        write setssb_horz_faceendbutton;
+   property slider_sb_horz_framebutton: tframecomp read fslider.sb_horz.framebu 
+                        write setssb_horz_framebutton;
+   property slider_sb_horz_frameendbutton1: tframecomp 
+                        read fslider.sb_horz.frameendbu1 
+                        write setssb_horz_frameendbutton1;
+   property slider_sb_horz_frameendbutton2: tframecomp 
+                        read fslider.sb_horz.frameendbu2
+                        write setssb_horz_frameendbutton2;
+   property slider_sb_vert_facebutton: tfacecomp read fslider.sb_vert.facebu
+                        write setssb_vert_facebutton;
+   property slider_sb_vert_faceendbutton: tfacecomp 
+                        read fslider.sb_vert.faceendbu 
+                        write setssb_vert_faceendbutton;
+   property slider_sb_vert_framebutton: tframecomp read fslider.sb_vert.framebu 
+                        write setssb_vert_framebutton;
+   property slider_sb_vert_frameendbutton1: tframecomp 
+                        read fslider.sb_vert.frameendbu1 
+                        write setssb_vert_frameendbutton1;
+   property slider_sb_vert_frameendbutton2: tframecomp 
+                        read fslider.sb_vert.frameendbu2 
+                        write setssb_vert_frameendbutton2;
+
 
    property framebutton_color: colorty read fframebutton.co 
                            write fframebutton.co default cl_default;
@@ -1148,6 +1205,9 @@ begin
     end;
     sok_databutton: begin
      handledatabutton(ainfo);
+    end;
+    sok_slider: begin
+     handleslider(ainfo);
     end;
     sok_tabbar: begin
      handletabbar(ainfo);
@@ -1665,6 +1725,11 @@ begin
  //dummy
 end;
 
+procedure tcustomskincontroller.handleslider(const ainfo: skininfoty);
+begin
+ //dummy
+end;
+
 procedure tcustomskincontroller.handleuserobject(const ainfo: skininfoty);
 begin
  //dummy
@@ -1854,6 +1919,7 @@ begin
 
  fbutton.co:= cl_default;
  fdatabutton.co:= cl_default;
+ fslider.co:= cl_default;
  fframebutton.co:= cl_default;
  fframebutton.coglyph:= cl_default;
  ftabbar.tahorz.color:= cl_default;
@@ -2037,6 +2103,66 @@ end;
 procedure tskincontroller.setdatabutton_frame(const avalue: tframecomp);
 begin
  setlinkedvar(avalue,tmsecomponent(fdatabutton.wi.fra));
+end;
+
+procedure tskincontroller.setslider_face(const avalue: tfacecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fslider.wi.fa));
+end;
+
+procedure tskincontroller.setslider_frame(const avalue: tframecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fslider.wi.fra));
+end;
+
+procedure tskincontroller.setssb_vert_facebutton(const avalue: tfacecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fslider.sb_vert.facebu));
+end;
+
+procedure tskincontroller.setssb_vert_faceendbutton(const avalue: tfacecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fslider.sb_vert.faceendbu));
+end;
+
+procedure tskincontroller.setssb_vert_framebutton(const avalue: tframecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fslider.sb_vert.framebu));
+end;
+
+procedure tskincontroller.setssb_vert_frameendbutton1(const avalue: tframecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fslider.sb_vert.frameendbu1));
+end;
+
+procedure tskincontroller.setssb_vert_frameendbutton2(const avalue: tframecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fslider.sb_vert.frameendbu2));
+end;
+
+procedure tskincontroller.setssb_horz_facebutton(const avalue: tfacecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fslider.sb_horz.facebu));
+end;
+
+procedure tskincontroller.setssb_horz_faceendbutton(const avalue: tfacecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fslider.sb_horz.faceendbu));
+end;
+
+procedure tskincontroller.setssb_horz_framebutton(const avalue: tframecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fslider.sb_horz.framebu));
+end;
+
+procedure tskincontroller.setssb_horz_frameendbutton1(const avalue: tframecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fslider.sb_horz.frameendbu1));
+end;
+
+procedure tskincontroller.setssb_horz_frameendbutton2(const avalue: tframecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fslider.sb_horz.frameendbu2));
 end;
 
 procedure tskincontroller.setframebutton_face(const avalue: tfacecomp);
@@ -2376,6 +2502,21 @@ begin
    if fdatabutton.optionsremove <> [] then begin
     options:= options - fdatabutton.optionsremove;
    end;
+  end;
+ end;
+end;
+
+procedure tskincontroller.handleslider(const ainfo: skininfoty);
+begin
+ handlewidget(ainfo);
+ setwidgetcolor(twidget(ainfo.instance),fslider.co);
+ setwidgetskin(twidget(ainfo.instance),fslider.wi);
+ with tcustomslider(ainfo.instance) do begin
+  if direction in [gd_left,gd_right] then begin
+   setscrollbarskin(scrollbar,fslider.sb_horz);
+  end
+  else begin
+   setscrollbarskin(scrollbar,fslider.sb_vert);
   end;
  end;
 end;

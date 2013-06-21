@@ -403,6 +403,7 @@ type
    procedure dochange; override;
    procedure paintglyph(const canvas: tcanvas;  const acolorglyph: colorty;
                   const avalue; const arect: rectty); override;
+   class function classskininfo: skininfoty; override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -1428,6 +1429,12 @@ begin
  fscrollbar.options:= fscrollbar.options + 
                        [sbo_noarrowkeys,sbo_nopagekeys,sbo_noreflectedclick];
  color:= cl_parent;
+end;
+
+class function tcustomslider.classskininfo: skininfoty;
+begin
+ result:= inherited classskininfo;
+ result.objectkind:= sok_slider;
 end;
 
 { tgraphdataedit }
