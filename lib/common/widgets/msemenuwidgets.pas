@@ -86,7 +86,7 @@ type
                                const cancelmodal: boolean = false);
    procedure updatepos; virtual;
    procedure beginkeymode;
-   procedure dopaint(const canvas: tcanvas); override;
+   procedure dopaintforeground(const canvas: tcanvas); override;
    procedure mouseevent(var info: mouseeventinfoty); override;
    procedure dokeydown(var info: keyeventinfoty); override;
    procedure childdeactivated(const sender: tpopupmenuwidget); virtual;
@@ -1086,7 +1086,7 @@ begin
  updatelayout;
 end;
 
-procedure tpopupmenuwidget.dopaint(const canvas: tcanvas);
+procedure tpopupmenuwidget.dopaintforeground(const canvas: tcanvas);
 begin
  inherited;
  canvas.move(clientpos);

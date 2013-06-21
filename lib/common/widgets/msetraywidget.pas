@@ -34,7 +34,7 @@ type
    procedure dotimer(const sender: tobject);
    procedure settrayhint;
    procedure sethint(const avalue: msestring); override;
-   procedure dopaint(const acanvas: tcanvas); override;
+   procedure dopaintforeground(const acanvas: tcanvas); override;
    procedure objectevent(const sender: tobject;
                             const event: objecteventty); override;
    procedure iconchanged(const sender: tobject);
@@ -193,7 +193,7 @@ begin
  end;
 end;
 
-procedure ttraywidget.dopaint(const acanvas: tcanvas);
+procedure ttraywidget.dopaintforeground(const acanvas: tcanvas);
 begin
  inherited;
  if (fimagelist <> nil) and (fimagenum >= 0) then begin

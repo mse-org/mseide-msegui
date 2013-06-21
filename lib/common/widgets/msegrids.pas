@@ -2047,7 +2047,7 @@ type
    procedure domousewheelevent(var info: mousewheeleventinfoty); override;
    procedure dokeydown(var info: keyeventinfoty); override;
    procedure dokeyup(var info: keyeventinfoty); override;
-   procedure dopaint(const acanvas: tcanvas); override;
+   procedure dopaintforeground(const acanvas: tcanvas); override;
    procedure dobeforepaint(const canvas: tcanvas); override;
    procedure doafterpaint(const canvas: tcanvas); override;
    procedure drawfocusedcell(const acanvas: tcanvas); virtual;
@@ -9473,7 +9473,7 @@ begin
  result:= intersectrect(fdatarect,arect,arect);
 end;
 
-procedure tcustomgrid.dopaint(const acanvas: tcanvas);
+procedure tcustomgrid.dopaintforeground(const acanvas: tcanvas);
 
 var
  rect1: rectty;

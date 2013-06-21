@@ -58,7 +58,7 @@ type
   protected
    fstate: polygonstatesty;
    procedure change;
-   procedure dopaint(const canvas: tcanvas); override;
+   procedure dopaintforeground(const canvas: tcanvas); override;
    procedure checkgeometry(const appmm: real);
    procedure clientrectchanged; override;
    procedure bitmapchanged(const sender: tobject);
@@ -336,7 +336,7 @@ begin
  invalidate;
 end;
 
-procedure tpolygon.dopaint(const canvas: tcanvas);
+procedure tpolygon.dopaintforeground(const canvas: tcanvas);
 var
  rect1: rectty;
 begin

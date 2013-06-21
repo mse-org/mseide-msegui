@@ -69,7 +69,7 @@ type
    procedure updatelayout(const asize: sizety); virtual;
    procedure checkvalue; virtual;
    procedure dopaint2(const acanvas: tcanvas); virtual;
-   procedure dopaint(const acanvas: tcanvas); override;
+   procedure dopaintforeground(const acanvas: tcanvas); override;
    procedure clientrectchanged; override;
    procedure change(const alayout: boolean);
    procedure setcell(const anum: bitmapnumty; const aindex: integer; 
@@ -259,7 +259,7 @@ begin
  end; 
 end;
 
-procedure tcustombarcode.dopaint(const acanvas: tcanvas);
+procedure tcustombarcode.dopaintforeground(const acanvas: tcanvas);
 var
  reg1: regionty;
  int1: integer;

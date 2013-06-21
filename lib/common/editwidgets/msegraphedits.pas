@@ -158,7 +158,7 @@ type
    procedure valuechanged;
    procedure modified; virtual; //for dbwidgets
    procedure formatchanged;
-   procedure dopaint(const canvas: tcanvas); override;
+   procedure dopaintforeground(const canvas: tcanvas); override;
    function needsfocuspaint: boolean; override;
    procedure internalcheckvalue(var avalue; var accept: boolean);
                                                             virtual; abstract;
@@ -273,7 +273,6 @@ type
    function getdatatype: datalistclassty; override;
    procedure paintglyph(const canvas: tcanvas; const acolorglyph: colorty;
                 const avalue; const arect: rectty); override;
-//   procedure dopaint(const canvas: tcanvas); override;
    procedure gridtovalue(arow: integer); override;
    procedure valuetogrid(arow: integer); override;
   public
@@ -1461,7 +1460,7 @@ begin
  end;
 end;
 
-procedure tgraphdataedit.dopaint(const canvas: tcanvas);
+procedure tgraphdataedit.dopaintforeground(const canvas: tcanvas);
 var
  col1: colorty;
 begin
@@ -3986,12 +3985,7 @@ procedure tpointeredit.setgridvalues(const avalue: pointerarty);
 begin
  tpointerdatalist(fgridintf.getcol.datalist).asarray:= avalue;
 end;
-{
-procedure tpointeredit.dopaint(const canvas: tcanvas);
-begin
- //dummy
-end;
-}
+
 procedure tpointeredit.initnewcomponent(const ascale: real);
 begin
  //do nothing

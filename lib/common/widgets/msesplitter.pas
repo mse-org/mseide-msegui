@@ -86,7 +86,7 @@ type
    procedure sizechanged; override;
    procedure parentclientrectchanged; override;
    procedure doasyncevent(var atag: integer); override;
-   procedure dopaint(const acanvas: tcanvas); override;
+   procedure dopaintforeground(const acanvas: tcanvas); override;
    procedure parentwidgetregionchanged(const sender: twidget); override;
    function getshrinkpriority: integer; override;
    procedure tryshrink(const aclientsize: sizety); override;
@@ -910,7 +910,7 @@ begin
  end;
 end;
 
-procedure tcustomsplitter.dopaint(const acanvas: tcanvas);
+procedure tcustomsplitter.dopaintforeground(const acanvas: tcanvas);
 begin
  inherited;
  if fgrip <> stb_none then begin

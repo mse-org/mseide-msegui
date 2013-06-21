@@ -106,7 +106,7 @@ type
   protected
    function gethandlerect: rectty;
    procedure clientmouseevent(var info: mouseeventinfoty); override;
-   procedure dopaint(const canvas: tcanvas); override;
+   procedure dopaintforeground(const canvas: tcanvas); override;
   public
    constructor create(aowner: tcomponent); override;
   published
@@ -555,7 +555,7 @@ type
    procedure clientrectchanged; override;
    procedure widgetregionchanged(const sender: twidget); override;
    procedure setparentwidget(const Value: twidget); override;
-   procedure dopaint(const acanvas: tcanvas); override;
+   procedure dopaintforeground(const acanvas: tcanvas); override;
    procedure doactivate; override;
    procedure statechanged; override;
    procedure poschanged; override;
@@ -4734,7 +4734,7 @@ begin
  end;
 end;
 
-procedure tdockhandle.dopaint(const canvas: tcanvas);
+procedure tdockhandle.dopaintforeground(const canvas: tcanvas);
 var
  rect1: rectty;
  int1,int2,x,y: integer;
@@ -4945,7 +4945,7 @@ begin
  inherited;
 end;
 
-procedure tdockpanel.dopaint(const acanvas: tcanvas);
+procedure tdockpanel.dopaintforeground(const acanvas: tcanvas);
 begin
  inherited;
  fdragdock.dopaint(acanvas);

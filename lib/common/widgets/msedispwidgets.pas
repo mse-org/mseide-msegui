@@ -131,7 +131,7 @@ type
    procedure valuechanged; virtual;
    procedure formatchanged;
    function getvaluetext: msestring; virtual; abstract;
-   procedure dopaint(const canvas: tcanvas); override;
+   procedure dopaintforeground(const canvas: tcanvas); override;
    procedure clientrectchanged; override;
    procedure getautopaintsize(var asize: sizety); override;
    procedure fontchanged; override;
@@ -498,7 +498,7 @@ begin
  asize.cy:= finfo.res.size.cy + fram1.top + fram1.bottom;
 end;
 
-procedure tdispwidget.dopaint(const canvas: tcanvas);
+procedure tdispwidget.dopaintforeground(const canvas: tcanvas);
 begin
  inherited;
  drawtext(canvas,finfo);

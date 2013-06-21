@@ -1108,7 +1108,7 @@ type
   private
    fcaption: captionty;
   protected
-   procedure dopaint(const canvas: tcanvas); override;
+   procedure dopaintforeground(const canvas: tcanvas); override;
   public
    constructor create(aowner: tcomponent; transientfor: twindow;
                              var info: hintinfoty); reintroduce;
@@ -1172,7 +1172,7 @@ type
    procedure clientmouseevent(var info: mouseeventinfoty); override;
    procedure dokeydown(var info: keyeventinfoty); override;
    procedure dokeyup(var info: keyeventinfoty); override;
-   procedure dopaint(const canvas: tcanvas); override;
+   procedure dopaintforeground(const canvas: tcanvas); override;
    procedure clientrectchanged; override;
    function getframestateflags: framestateflagsty; override;
   public
@@ -1309,7 +1309,7 @@ type
   protected
    info: drawtextinfoty;
    fexttext: msestring;
-   procedure dopaint(const canvas: tcanvas); override;
+   procedure dopaintforeground(const canvas: tcanvas); override;
    procedure dokeydown(var ainfo: keyeventinfoty); override;
   public
    constructor create(const aowner: tcomponent; const apopuptransient: boolean;
@@ -2017,7 +2017,7 @@ begin
  internalexecute;
 end;
 
-procedure tactionsimplebutton.dopaint(const canvas: tcanvas);
+procedure tactionsimplebutton.dopaintforeground(const canvas: tcanvas);
 begin
  inherited;
  drawbutton(canvas,finfo);
@@ -2175,7 +2175,7 @@ begin
  inherited create(aowner,apopuptransient,ahasaction);
 end;
 
-procedure tshowmessagewidget.dopaint(const canvas: tcanvas);
+procedure tshowmessagewidget.dopaintforeground(const canvas: tcanvas);
 begin
  inherited;
  canvas.font:= stockobjects.fonts[stf_message];
@@ -5679,7 +5679,7 @@ begin
  widgetrect:= placepopuprect(transientfor,info.posrect,info.placement,rect1.size);
 end;
 
-procedure thintwidget.dopaint(const canvas: tcanvas);
+procedure thintwidget.dopaintforeground(const canvas: tcanvas);
 begin
  inherited;
  drawtext(canvas,fcaption,innerclientrect,[tf_wordbreak],

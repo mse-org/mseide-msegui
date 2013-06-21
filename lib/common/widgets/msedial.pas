@@ -484,7 +484,7 @@ type
    procedure setfitframe_bottom(const avalue: integer);
    procedure setoptions(const avalue: optionsdialty);
   protected
-   procedure dopaint(const acanvas: tcanvas); override;
+   procedure dopaintforeground(const acanvas: tcanvas); override;
    procedure clientrectchanged; override;
    procedure invalidatelayout;
    function checklayout: boolean; virtual; //true if changes made
@@ -2764,7 +2764,7 @@ begin
  result:= innerclientrect;
 end;
 
-procedure tcustomdial.dopaint(const acanvas: tcanvas);
+procedure tcustomdial.dopaintforeground(const acanvas: tcanvas);
 begin
  inherited;
  fdial.paint(acanvas);

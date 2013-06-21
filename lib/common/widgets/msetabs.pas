@@ -313,7 +313,7 @@ type
    procedure tabclicked(const sender: ttab; const info: mouseeventinfoty);
    procedure enabledchanged; override;
    procedure loaded; override;
-   procedure dopaint(const canvas: tcanvas); override;
+   procedure dopaintforeground(const canvas: tcanvas); override;
    procedure clientmouseevent(var info: mouseeventinfoty); override;
    procedure statechanged; override;
    procedure fontchanged; override;
@@ -2281,7 +2281,7 @@ begin
  doactivetabchanged;
 end;
 
-procedure tcustomtabbar.dopaint(const canvas: tcanvas);
+procedure tcustomtabbar.dopaintforeground(const canvas: tcanvas);
 var
  int1,int2,int3: integer;
  color1: colorty;

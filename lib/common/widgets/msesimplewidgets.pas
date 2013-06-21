@@ -173,7 +173,7 @@ type
    procedure doexecute; override;
    procedure doenter; override;
    procedure doexit; override;
-   procedure dopaint(const canvas: tcanvas); override;
+   procedure dopaintforeground(const canvas: tcanvas); override;
    function checkfocusshortcut(var info: keyeventinfoty): boolean; override;
    procedure doshortcut(var info: keyeventinfoty; const sender: twidget); override;
    procedure getautopaintsize(var asize: sizety); override;
@@ -310,7 +310,7 @@ type
    procedure setimagenrclicked(const avalue: imagenrty);
   protected
    function getactface: tcustomface; override;
-   procedure dopaint(const canvas: tcanvas); override;
+   procedure dopaintforeground(const canvas: tcanvas); override;
    procedure objectchanged(const sender: tobject); override;
   public
    constructor create(aowner: tcomponent); override;
@@ -424,7 +424,7 @@ type
    procedure settextflags(const Value: textflagsty);
    procedure setoptions(const avalue: labeloptionsty);
   protected
-   procedure dopaint(const canvas: tcanvas); override;
+   procedure dopaintforeground(const canvas: tcanvas); override;
    procedure enabledchanged; override;
    procedure getautopaintsize(var asize: sizety); override;
    procedure fontchanged; override;
@@ -473,7 +473,7 @@ type
    procedure setopacity(const avalue: colorty);
    procedure readtransparency(reader: treader);
   protected
-   procedure dopaint(const canvas: tcanvas); override;
+   procedure dopaintforeground(const canvas: tcanvas); override;
    procedure enabledchanged; override;
    procedure getautopaintsize(var asize: sizety); override;
    procedure clientrectchanged; override;
@@ -806,7 +806,7 @@ begin
  end;
 end;                                           
 
-procedure tcustombutton.dopaint(const canvas: tcanvas);
+procedure tcustombutton.dopaintforeground(const canvas: tcanvas);
 begin
  finfo.ca.font:= getfont;
  inherited;
@@ -1538,7 +1538,7 @@ begin
  end;
 end;
 
-procedure tcustomrichbutton.dopaint(const canvas: tcanvas);
+procedure tcustomrichbutton.dopaintforeground(const canvas: tcanvas);
 begin
  finfo.ca.imagenr:= factioninfo.imagenr;
  if shs_mouse in finfo.state then begin
@@ -1680,7 +1680,7 @@ begin
  fwidgetrect.cy:= defaultlabelwidgetheight;
 end;
 
-procedure tcustomlabel.dopaint(const canvas: tcanvas);
+procedure tcustomlabel.dopaintforeground(const canvas: tcanvas);
 begin
  inherited;
  drawtext(canvas,fcaption,innerclientrect,factualtextflags,font);
@@ -1803,7 +1803,7 @@ begin
  end;
 end;
 
-procedure tcustomicon.dopaint(const canvas: tcanvas);
+procedure tcustomicon.dopaintforeground(const canvas: tcanvas);
 begin
  inherited;
  if fimagelist <> nil then begin

@@ -556,7 +556,7 @@ type
    procedure clientmouseevent(var info: mouseeventinfoty); override;
    function getitemclass: listitemclassty; virtual;
    procedure setupeditor; override;
-   procedure dopaint(const acanvas: tcanvas); override;
+   procedure dopaintforeground(const acanvas: tcanvas); override;
    procedure dokeydown(var info: keyeventinfoty); override;
 
    procedure getitemvalues; virtual;
@@ -2845,7 +2845,7 @@ begin
  end;
 end;
 
-procedure titemedit.dopaint(const acanvas: tcanvas);
+procedure titemedit.dopaintforeground(const acanvas: tcanvas);
 begin
  inherited;
  if fvalue <> nil then begin

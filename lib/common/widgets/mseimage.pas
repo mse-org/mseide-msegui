@@ -40,7 +40,7 @@ type
   protected
    procedure paintbmp(const acanvas: tcanvas; const abmp: tmaskedbitmap;
                           const dest: rectty);
-   procedure dopaint(const canvas: tcanvas); override;
+   procedure dopaintforeground(const canvas: tcanvas); override;
    function calcminscrollsize: sizety; override;
    procedure internalcreateframe; override;
    procedure getautopaintsize(var asize: sizety); override;
@@ -107,7 +107,7 @@ begin
  acanvas.colorbackground:= col2;
 end;
 
-procedure timage.dopaint(const canvas: tcanvas);
+procedure timage.dopaintforeground(const canvas: tcanvas);
 begin
  inherited;
 // paintbmp(canvas,fbitmap,makerect(nullpoint,clientsize));

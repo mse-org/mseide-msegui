@@ -293,7 +293,7 @@ type
    procedure getautopaintsize(var asize: sizety); override;
    procedure updatelayout;
    procedure clientrectchanged; override;
-   procedure dopaint(const canvas: tcanvas); override;
+   procedure dopaintforeground(const canvas: tcanvas); override;
    procedure clientmouseevent(var info: mouseeventinfoty); override;
    procedure showhint(var info: hintinfoty); override;
    function dostep(const event: stepkindty; const adelta: real;
@@ -1342,7 +1342,7 @@ begin
  updatelayout;
 end;
 
-procedure tcustomtoolbar.dopaint(const canvas: tcanvas);
+procedure tcustomtoolbar.dopaintforeground(const canvas: tcanvas);
 begin
  inherited;
  drawtoolbuttons(canvas,flayout)

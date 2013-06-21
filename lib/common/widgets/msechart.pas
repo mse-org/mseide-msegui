@@ -634,7 +634,7 @@ type
    procedure doclipcontent1(const acanvas: tcanvas); virtual;
    procedure dopaintcontent(const acanvas: tcanvas); virtual;
    procedure dopaintcontent1(const acanvas: tcanvas); virtual;
-   procedure dopaint(const acanvas: tcanvas); override;
+   procedure dopaintforeground(const acanvas: tcanvas); override;
     //iscrollframe
    function getzoomrefframe: framety; override;
     //idialcontroller
@@ -3402,7 +3402,7 @@ begin
  end;
 end;
 }
-procedure tcuchart.dopaint(const acanvas: tcanvas);
+procedure tcuchart.dopaintforeground(const acanvas: tcanvas);
 begin
  inherited;
  acanvas.save;

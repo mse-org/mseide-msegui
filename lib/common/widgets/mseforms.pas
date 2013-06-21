@@ -535,7 +535,7 @@ type
   protected
    procedure clientrectchanged; override;
    procedure widgetregionchanged(const sender: twidget); override;
-   procedure dopaint(const acanvas: tcanvas); override;
+   procedure dopaintforeground(const acanvas: tcanvas); override;
    function getdockcontroller: tdockcontroller;
    procedure mouseevent(var info: mouseeventinfoty); override;
   public
@@ -786,7 +786,7 @@ begin
  end;
 end;
 
-procedure tdockformscrollbox.dopaint(const acanvas: tcanvas);
+procedure tdockformscrollbox.dopaintforeground(const acanvas: tcanvas);
 begin
  inherited;
  tcustomdockform(owner).fdragdock.dopaint(acanvas);
