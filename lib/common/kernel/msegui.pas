@@ -1477,10 +1477,11 @@ type
    function needsdesignframe: boolean; virtual;
    function getactface: tcustomface; virtual;
    procedure dobeforepaint(const canvas: tcanvas); virtual;
+   procedure dopaint(const canvas: tcanvas); virtual;
    procedure dopaintbackground(const canvas: tcanvas); virtual;
    procedure doonpaintbackground(const canvas: tcanvas); virtual;
-   procedure dopaint(const canvas: tcanvas); virtual;
    procedure dobeforepaintforeground(const canvas: tcanvas); virtual;
+   procedure dopaintforeground(const canvas: tcanvas); virtual;
    procedure doonpaint(const canvas: tcanvas); virtual;
    procedure dopaintoverlay(const canvas: tcanvas); virtual;
    procedure doafterpaint(const canvas: tcanvas); virtual;
@@ -7915,6 +7916,11 @@ begin
  //dummy
 end;
 
+procedure twidget.dopaintforeground(const canvas: tcanvas);
+begin
+ //dummy
+end;
+
 procedure twidget.dopaintbackground(const canvas: tcanvas);
 var
  colorbefore: colorty;
@@ -7952,7 +7958,10 @@ end;
 procedure twidget.dopaint(const canvas: tcanvas);
 begin
  dopaintbackground(canvas);
- dobeforepaintforeground(canvas);
+ if not canvas.clipregionisempty then begin
+  dobeforepaintforeground(canvas);
+  dopaintforeground(canvas);
+ end;
 end;
 
 procedure twidget.doonpaint(const canvas: tcanvas);
