@@ -377,7 +377,7 @@ type
    procedure dodeactivate; override;
    procedure dofocus; override;
    procedure dodefocus; override;
-   procedure doonpaint(const canvas: tcanvas); override;
+   procedure dopaint(const canvas: tcanvas); override;
    procedure paintimage(const canvas: tcanvas); virtual;
    procedure doafterpaint(const canvas: tcanvas); override;
    procedure rootchanged(const awidgetregionivalid: boolean); override;
@@ -1171,7 +1171,7 @@ begin
  inherited;
 end;
 
-procedure tcustomedit.doonpaint(const canvas: tcanvas);
+procedure tcustomedit.dopaint(const canvas: tcanvas);
 begin
  inherited;
  paintimage(canvas);
