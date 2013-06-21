@@ -623,7 +623,7 @@ type
    fnextbandifempty: tcustomrecordband;
    fnextbandiflast: tcustomrecordband;
    fareas: bandareaarty;
-   fonbeforepaint: painteventty;
+//   fonbeforepaint: painteventty;
    fonbeforenextrecord: notifyeventty;
    fonafternextrecord: notifyeventty;
    fzebra_color: colorty;
@@ -673,7 +673,7 @@ type
    procedure beginrender(const arestart: boolean); virtual;
    procedure endrender; virtual;
    procedure adddatasets(var adatasets: datasetarty); virtual;
-   procedure dopaint(const acanvas: tcanvas); override;
+   procedure dopaintforeground(const acanvas: tcanvas); override;
    procedure doonpaint(const acanvas: tcanvas); override;
    procedure doafterpaint(const acanvas: tcanvas); override;
    procedure dobeforenextrecord(const adatasource: tdatasource); virtual;
@@ -752,7 +752,7 @@ type
    
    property onbeforerender: beforerenderrecordeventty read fonbeforerender
                                write fonbeforerender;
-   property onbeforepaint: painteventty read fonbeforepaint write fonbeforepaint;
+//   property onbeforepaint: painteventty read fonbeforepaint write fonbeforepaint;
    property onpaint: painteventty read fonpaint write fonpaint;
    property onafterpaint: painteventty read fonafterpaint write fonafterpaint;
    property onafterrender: recordbandeventty read fonafterrender 
@@ -813,7 +813,7 @@ type
    procedure settextflags(const avalue: textflagsty);
   protected
    function calcminscrollsize: sizety; override;
-   procedure dopaint(const acanvas: tcanvas); override;
+   procedure dopaintforeground(const acanvas: tcanvas); override;
    procedure dogettext(var atext: msestring);
    function getdisptext: msestring; virtual;
    procedure render(const acanvas: tcanvas; var empty: boolean); override;
@@ -4018,11 +4018,13 @@ begin
  end;
 end;
 
-procedure tcustomrecordband.dopaint(const acanvas: tcanvas);
+procedure tcustomrecordband.dopaintforeground(const acanvas: tcanvas);
 begin
+{
  if canevent(tmethod(fonbeforepaint)) then begin
   fonbeforepaint(self,acanvas);
  end;
+}
  inherited;
  ftabs.paint(acanvas,innerclientrect);
 end;
@@ -6854,7 +6856,7 @@ begin
  fanchors:= [an_left,an_top];
 end;
 
-procedure tcustomrepvaluedisp.dopaint(const acanvas: tcanvas);
+procedure tcustomrepvaluedisp.dopaintforeground(const acanvas: tcanvas);
 begin
  inherited;
  drawtext(acanvas,getdisptext,innerclientrect,ftextflags,font);
