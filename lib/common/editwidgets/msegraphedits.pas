@@ -534,6 +534,8 @@ type
                        var info: celleventinfoty); override;
    procedure modified; override;
    procedure checkradiorow(aindex: integer);
+   function navigrect: rectty; override;
+   function navigstartrect: rectty; override;
   public
    constructor create(aowner: tcomponent); override;
    property checkedrow: integer read getcheckedrow write setcheckedrow; 
@@ -2292,6 +2294,16 @@ begin
    end;
   end; 
  end;
+end;
+
+function ttogglegraphdataedit.navigrect: rectty;
+begin
+ result:= widgetclientrect;
+end;
+
+function ttogglegraphdataedit.navigstartrect: rectty;
+begin
+ result:= clientrect;
 end;
 
 { tcustombooleanedit }

@@ -1829,6 +1829,7 @@ type
    function clientwidgetrect: rectty;        //origin = pos
    function clientwidgetpos: pointty;        //origin = pos
    function clientparentpos: pointty;        //origin = parentwidget.pos
+   function widgetclientrect: rectty;        //origin = clientrect.pos
    property parentclientpos: pointty read getparentclientpos write setparentclientpos;
                                              //origin = parentwidget.clientpos
    function paintparentpos: pointty;         //origin = parentwidget.pos
@@ -9385,6 +9386,21 @@ begin
  end;
 end;
 
+function twidget.widgetclientrect: rectty;        //origin = clientrect.pos
+begin
+ result.size:= fwidgetrect.size;
+ if fframe <> nil then begin
+  with frame do begin
+   checkstate;
+   result.x:= fpaintrect.x-fclientrect.x;
+   result.y:= fpaintrect.y-fclientrect.y;
+  end
+ end
+ else begin
+  result.pos:= nullpoint;
+ end;
+end;
+
 function twidget.clientwidgetpos: pointty;
 begin
  if fframe <> nil then begin
@@ -10165,6 +10181,7 @@ end;
 function twidget.navigdistance(var info: naviginfoty): integer;
 const
  matchweighting = 1;
+ wrapweighting = 3*matchweighting;
  dirweightings = 20*matchweighting;
  dirweightingg = 30*matchweighting;
 var
@@ -10239,6 +10256,7 @@ begin
       dist:= dist + clientheight + framewidth.cy;
      end;
     end;
+    dist:= dist * wrapweighting;
    end;
   end;
   dist:= dist * matchweighting;
