@@ -1216,6 +1216,7 @@ type
   distance: integer;
   nearest: twidget;
   down: boolean;
+  hastarget: boolean;
  end;
 
  twidgetfont = class(tparentfont)
@@ -10262,6 +10263,7 @@ procedure twidget.navigrequest(var info: naviginfoty);
 var
  int1,int2: integer;
  widget1,widget2: twidget;
+ bo1: boolean;
 begin
  with info do begin
   if not down and (ow_arrowfocusout in foptionswidget) and 
@@ -10277,16 +10279,20 @@ begin
    if (widget1 <> info.sender) and (ow_arrowfocus in widget1.foptionswidget)
          and widget1.canfocus then begin
     widget2:= nearest;
+    bo1:= hastarget;
+    hastarget:= false;
     if ow_arrowfocusin in widget1.foptionswidget then begin
      widget1.navigrequest(info);
     end;
-    if (nearest = widget2) then begin
+    if (nearest = widget2) and not hastarget then begin
+     hastarget:= true;
      int2:= widget1.navigdistance(info);
      if int2 < distance then begin
       nearest:= widget1;
       distance:= int2;
      end;
     end;
+    hastarget:= hastarget or bo1;
    end;
   end;
  end;
