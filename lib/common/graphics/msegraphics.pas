@@ -3826,8 +3826,6 @@ begin
  if length(apoints) > 0 then begin
   if checkforeground(acolor,true) then begin
    with fdrawinfo.points do begin
-    closed:= aclosed;
-    points:= @apoints[first];
     int1:= length(apoints) - first;
     if int1 < 0 then begin
      intparametererror(first,'drawlines first');
@@ -3841,6 +3839,8 @@ begin
      end;
      count:= acount;
     end;
+    closed:= aclosed;
+    points:= @apoints[first];
    end;
    gdi(gdf_drawlines);
   end;
@@ -3858,13 +3858,23 @@ var
  e1: integer;
 begin
  if cs_inactive in fstate then exit;
- if acount  > 0 then begin
+ if length(apoints) > 0 then begin
   if checkforeground(acolor,true) then begin
-   s:= first;
-   e1:= acount;
-   if e1 < 0 then begin
-    e1:= length(apoints);
+   int1:= length(apoints) - first;
+   if int1 < 0 then begin
+    intparametererror(first,'drawlines first');
    end;
+   if acount < 0 then begin
+    e1:= int1;
+   end
+   else begin
+    if acount > int1 then begin
+     intparametererror(acount,'drawlines acount');
+    end;
+    e1:= acount;
+   end;
+
+   s:= first;
    e1:= s + e1;
    int1:= 0;
    while int1 <= high(abreaks) do begin
@@ -3888,7 +3898,7 @@ begin
      end;
      gdi(gdf_drawlines);
      s:= e;
-    until e = count;
+    until e = e1;
    end;
   end;
  end;
