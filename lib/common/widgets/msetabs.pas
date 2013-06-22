@@ -4259,7 +4259,7 @@ begin
  if canevent(tmethod(fonactivepagechanged)) then begin
   fonactivepagechanged(self);
  end;
- designchanged;
+// designchanged;
 end;
 
 procedure tcustomtabwidget.dopageadded(const apage: twidget);
