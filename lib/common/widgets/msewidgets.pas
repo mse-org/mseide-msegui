@@ -1175,6 +1175,7 @@ type
    procedure dopaintforeground(const canvas: tcanvas); override;
    procedure clientrectchanged; override;
    function getframestateflags: framestateflagsty; override;
+   function navigstartrect: rectty; override;
   public
    constructor create(aowner: tcomponent); override;
    procedure execute;
@@ -2125,6 +2126,13 @@ begin
                ((shs_default in finfo.state) or focused) then begin
   include(result,fsf_offset1);
  end;
+end;
+
+function tactionsimplebutton.navigstartrect: rectty;
+begin
+ result:= inherited navigstartrect;
+ result.x:= result.x + result.cx div 2;
+ result. cx:= 0;
 end;
 
 {
