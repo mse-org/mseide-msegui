@@ -351,6 +351,7 @@ type
    procedure fontchanged; override;
    procedure enabledchanged; override;
    procedure dragstarted; override;
+   function navigrect: rectty; override;
 
    class function classskininfo: skininfoty; override;
      //iedit
@@ -1654,6 +1655,12 @@ end;
 procedure tcustomedit.paintimage(const canvas: tcanvas);
 begin
  //dummy
+end;
+
+function tcustomedit.navigrect: rectty;
+begin
+ result:= frameinnerrect;
+// result:= paintframerect;
 end;
 
 end.

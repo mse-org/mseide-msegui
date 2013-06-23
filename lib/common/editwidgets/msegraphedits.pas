@@ -535,7 +535,6 @@ type
    procedure modified; override;
    procedure checkradiorow(aindex: integer);
    function navigrect: rectty; override;
-   function navigstartrect: rectty; override;
   public
    constructor create(aowner: tcomponent); override;
    property checkedrow: integer read getcheckedrow write setcheckedrow; 
@@ -2298,12 +2297,7 @@ end;
 
 function ttogglegraphdataedit.navigrect: rectty;
 begin
- result:= widgetclientrect;
-end;
-
-function ttogglegraphdataedit.navigstartrect: rectty;
-begin
- result:= clientrect;
+ result:= widgetsizerect;
 end;
 
 { tcustombooleanedit }

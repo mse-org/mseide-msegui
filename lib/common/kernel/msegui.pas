@@ -1350,8 +1350,8 @@ type
    function skininfo: skininfoty; override;
    function hasskin: boolean; override;
 
-   function navigstartrect: rectty; virtual; //org = clientpos
-   function navigrect: rectty; virtual;      //org = clientpos
+   function navigstartrect: rectty; virtual; //origin = pos
+   function navigrect: rectty; virtual;      //origin = pos
    procedure navigrequest(var info: naviginfoty); virtual;
    function navigdistance(var info: naviginfoty): integer; virtual;
 
@@ -1806,6 +1806,7 @@ type
    function framerect: rectty;               //origin = pos
    function framepos: pointty;               //origin = pos
    function framesize: sizety;
+   function frameinnerrect: rectty;          //origin = pos
    function paintrect: rectty;               //origin = pos
    function paintclientrect: rectty;         //origin = clientrect
    function paintpos: pointty;               //origin = pos
@@ -8497,6 +8498,18 @@ begin
  end;
 end;
 
+function twidget.frameinnerrect: rectty;
+begin
+ if fframe <> nil then begin
+  fframe.checkstate;
+  result:= inflaterect(fframe.fpaintrect,fframe.fpaintframedelta);
+ end
+ else begin
+  result.pos:= nullpoint;
+  result.size:= fwidgetrect.size;
+ end;
+end;
+
 function twidget.paintrect: rectty;
 begin
  if fframe <> nil then begin
@@ -10180,64 +10193,39 @@ end;
 
 function twidget.navigdistance(var info: naviginfoty): integer;
 const
- matchweighting = 1;
- wrapweighting = 3*matchweighting;
- dirweightings = 20*matchweighting;
- dirweightingg = 30*matchweighting;
+ wrapweighting = 1;
+ orthoweighting = 30;
 var
- rect1,rect2: rectty;
  dist: integer;
  widget1: twidget;
- dwp,dwm: integer;
-// int1: integer;
+ srect,drect: rectty;
+ send,dend: integer;
+ int1: integer;
+ 
 begin
  with info do begin
-  rect1:= navigrect;
-  rect2:= startingrect;
-  translateclientpoint1(rect2.pos,nil,self);
-  if direction in [gd_right,gd_down] then begin
-   dwp:= dirweightings;
-   dwm:= -dirweightingg;
-  end
-  else begin
-   dwp:= dirweightingg;
-   dwm:= -dirweightings;
-  end;
+  drect:= navigrect;
+  srect:= startingrect;
+  translatewidgetpoint1(srect.pos,nil,self);
   if direction in [gd_right,gd_left] then begin
-   result:= rect1.y + rect1.cy div 2 - (rect2.y + rect2.cy div 2);
-   if (rect2.y >= rect1.y) and (rect2.y < rect1.y + rect1.cy) or
-        (rect1.y >= rect2.y) and (rect1.y < rect2.y + rect2.cy) then begin
-    if rect1.cy >= rect2.cy then begin
-     result:= 0;
-    end;
-   end
-   else begin
-    result:= result*matchweighting;
-//    result:= rect1.y + rect1.cy div 2 - (rect2.y + rect2.cy div 2);
+   send:= srect.y + srect.cy;
+   dend:= drect.y + drect.cy;
+   result:= (drect.y + dend - srect.y - send) div 2;
+   int1:= srect.y + srect.cy div 2;
+   if (int1 >= drect.y) and (int1 < drect.y + drect.cy) then begin
+    result:= 0;
    end;
-   dist:= rect1.x - rect2.x;
-//   dist:= (rect1.x + rect1.cx div 2) - (rect2.x + rect2.cx div 2);
+   dist:= drect.x - srect.x;
   end
   else begin
-   result:= rect1.x - rect2.x;
-   if (rect2.x >= rect1.x) and (rect2.x < rect1.x + rect1.cx) or
-        (rect1.x >= rect2.x) and (rect1.x < rect2.x + rect2.cx) then begin
-    if rect1.cx >= rect2.cx then begin
-     result:= 0;
-    end;
-   end
-   else begin
-    result:= result*matchweighting;
-//    result:= rect1.x + rect1.cx div 2 - (rect2.x + rect2.cx div 2);
+   dend:= drect.x + drect.cx;
+   result:= drect.x + srect.x;
+   if (srect.x >= drect.x) and (srect.x < dend) then begin
+    result:= 0;
    end;
-   dist:= (rect1.y + rect1.cy div 2) - (rect2.y + rect2.cy div 2);
+   dist:= (drect.y + drect.cy div 2) - (srect.y + srect.cy div 2);   
   end;
-  if result < 0 then begin
-   result:= result * dwm;
-  end
-  else begin
-   result:= result * dwp;
-  end;
+  result:= abs(result) * orthoweighting;
   if direction in [gd_left,gd_up] then begin
    dist:= -dist;
   end;
@@ -10250,16 +10238,15 @@ begin
    if widget1 <> nil then begin
     with widget1 do begin
      if direction in [gd_right,gd_left] then begin
-      dist:= dist + clientwidth + framewidth.cx;
+      dist:= dist + width;
      end
      else begin
-      dist:= dist + clientheight + framewidth.cy;
+      dist:= dist + height;
      end;
     end;
     dist:= dist * wrapweighting;
    end;
   end;
-  dist:= dist * matchweighting;
   if dist < 0 then begin
    dist:= bigint div 2;
   end;
@@ -10267,12 +10254,12 @@ begin
  end;
 end;
 
-function twidget.navigrect: rectty;        //org = clientpos
+function twidget.navigrect: rectty;       
 begin
- result:= clientrect;
+ result:= paintrect;
 end;
 
-function twidget.navigstartrect: rectty;        //org = clientpos
+function twidget.navigstartrect: rectty;      
 begin
  result:= navigrect;
 end;
@@ -10396,7 +10383,7 @@ begin
         sender:= self;
         down:= false;
         startingrect:= navigstartrect;
-        translateclientpoint1(startingrect.pos,self,nil);
+        translatewidgetpoint1(startingrect.pos,self,nil);
         fparentwidget.navigrequest(naviginfo);
         if nearest <> nil then begin
          nearest.setfocus;
