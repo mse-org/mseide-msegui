@@ -723,10 +723,10 @@ type
    function concatstring(const delim: msestring = '';
                             const separator: msestring = '';
                             const separatornoparagraph: msestring = ''): msestring;
-   procedure loadfromfile(const filename: string;
+   procedure loadfromfile(const filename: filenamety;
                               const aencoding: charencodingty = ce_locale);
    procedure loadfromstream(const stream: ttextstream);
-   procedure savetofile(const filename: string;
+   procedure savetofile(const filename: filenamety;
                               const aencoding: charencodingty = ce_locale);
    procedure savetostream(const stream: ttextstream);
    function dataastextstream: ttextstream;
@@ -4843,7 +4843,7 @@ begin
  end;
 end;
 
-procedure tpoorstringdatalist.loadfromfile(const filename: string;
+procedure tpoorstringdatalist.loadfromfile(const filename: filenamety;
                                     const aencoding: charencodingty = ce_locale);
 var
  stream: ttextstream;
@@ -4857,7 +4857,7 @@ begin
  end;
 end;
 
-procedure tpoorstringdatalist.savetofile(const filename: string;
+procedure tpoorstringdatalist.savetofile(const filename: filenamety;
                               const aencoding: charencodingty = ce_locale);
 var
  stream: ttextstream;
