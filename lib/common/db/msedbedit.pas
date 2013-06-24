@@ -2566,7 +2566,7 @@ begin
          not (datasource.state in dseditmodes) then begin
    bu1:= bu1 - [dbnb_dialog];
   end;
-  if (dno_nodialogifreadonly in options1) and noedit then begin
+  if (dno_nodialogifreadonly in options1) and not canupdate then begin
    bu1:= bu1 - [dbnb_dialog];
   end;
   case datasource.state of
@@ -2586,15 +2586,31 @@ begin
                  dbnb_filteronoff,dbnb_copyrecord];
    end;
   end;
-  if (fdscontroller <> nil) and fdscontroller.noedit then begin
-   bu1:= bu1 - editnavigbuttons;
+//  if (fdscontroller <> nil) and fdscontroller.noedit then begin
+//   bu1:= bu1 - editnavigbuttons;
+//  end;
+  if not canupdate then begin
+   exclude(bu1,dbnb_edit);
+  end;
+  if dno_append in options1 then begin
+   if not canappend then begin
+    bu1:= bu1 - [dbnb_insert,dbnb_copyrecord];
+   end;
+  end
+  else begin
+   if not caninsert then begin
+    bu1:= bu1 - [dbnb_insert,dbnb_copyrecord];
+   end;
+  end;
+  if not candelete then begin
+   exclude(bu1,dbnb_delete);
   end;
   if bof and eof then begin
-   bu1:= bu1 - [dbnb_delete];
+   bu1:= bu1 - [dbnb_delete,dbnb_copyrecord];
   end;
-  if not datasource.dataset.canmodify then begin
-   bu1:= bu1 - [dbnb_edit,dbnb_delete,dbnb_insert,dbnb_copyrecord];
-  end;
+//  if not datasource.dataset.canmodify then begin
+//   bu1:= bu1 - [dbnb_edit,dbnb_delete,dbnb_insert,dbnb_copyrecord];
+//  end;
   if csdesigning in dataset.componentstate then begin
    bu1:= bu1 * designdbnavigbuttons;
   end;
@@ -3159,7 +3175,7 @@ function tcustomeditwidgetdatalink.canmodify: Boolean;
 begin
  result:= (field <> nil) and 
            ((fds_filterediting in fstate) or 
-              not noedit and not field.readonly);
+              canupdate and not field.readonly);
 end;
 
 procedure tcustomeditwidgetdatalink.modified;

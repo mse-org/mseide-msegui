@@ -1273,7 +1273,9 @@ type
                          dso_cacheblobs,
                          dso_offline, //disconnect database after open
                          dso_local,   //do not connect database on open
-                         dso_noedit,dso_canceloncheckbrowsemode
+                         dso_noedit,dso_noinsert,dso_noappend,dso_noupdate,
+                         dso_nodelete,
+                         dso_canceloncheckbrowsemode
                          {,
                          dso_syncmasteredit,dso_syncmasterinsert, 
                                                      -> optionsmasterlink
@@ -1372,6 +1374,14 @@ type
    procedure nosavepoint;
    function getasmsestring(const afieldname: string): msestring;
    procedure setasmsestring(const afieldname: string; const avalue: msestring);
+   function getnoinsert: boolean;
+   procedure setnoinsert(const avalue: boolean);
+   function getnoappend: boolean;
+   procedure setnoappend(const avalue: boolean);
+   function getnoupdate: boolean;
+   procedure setnoupdate(const avalue: boolean);
+   function getnodelete: boolean;
+   procedure setnodelete(const avalue: boolean);
   protected
    foptions: datasetoptionsty;
    procedure setoptions(const avalue: datasetoptionsty); virtual;
@@ -1455,7 +1465,12 @@ type
    function assql(const avalue: tdatetime): string; overload;
    function assqldate(const avalue: tdatetime): string;
    function assqltime(const avalue: tdatetime): string;
+   
    property noedit: boolean read getnoedit write setnoedit;
+   property noinsert: boolean read getnoinsert write setnoinsert;
+   property noappend: boolean read getnoappend write setnoappend;
+   property noupdate: boolean read getnoupdate write setnoupdate;
+   property nodelete: boolean read getnodelete write setnodelete;
    property asmsestring[const afieldname: string]: msestring read getasmsestring 
                                                          write setasmsestring;
    
@@ -6382,22 +6397,22 @@ end;
 
 function tmsedatalink.caninsert: boolean;
 begin
- result:= canedit;
+ result:= canedit and ((fdscontroller = nil) or not fdscontroller.noinsert);
 end;
 
 function tmsedatalink.canappend: boolean;
 begin
- result:= canedit;
+ result:= canedit and ((fdscontroller = nil) or not fdscontroller.noappend);
 end;
 
 function tmsedatalink.candelete: boolean;
 begin
- result:= canedit;
+ result:= canedit and ((fdscontroller = nil) or not fdscontroller.nodelete);
 end;
 
 function tmsedatalink.canupdate: boolean;
 begin
- result:= canedit;
+ result:= canedit and ((fdscontroller = nil) or not fdscontroller.noupdate);
 end;
 
 procedure tmsedatalink.disabledstatechange;
@@ -7792,8 +7807,10 @@ begin
  foptions:= datasetoptionsty(setsinglebitar32(longword(opt),longword(foptions),
                                           [longword(mask1),longword(mask2)]));
 {$endif}
- if dso_noedit in options1 then begin
-  if (dso_noedit in opt) and tdataset(fowner).active then begin
+ if [dso_noedit,dso_noinsert,dso_noappend,dso_noupdate,dso_nodelete] *
+                                                    options1 <> [] then begin
+  if ([dso_noedit,dso_noupdate] * opt <> []) and 
+                                      tdataset(fowner).active then begin
    tdataset(fowner).checkbrowsemode;
   end;
   tdataset1(fowner).dataevent(dedisabledstatechange,0);
@@ -7897,6 +7914,66 @@ begin
  end
  else begin
   options:= options - [dso_noedit];
+ end;  
+end;
+
+function tdscontroller.getnoinsert: boolean;
+begin
+ result:= dso_noinsert in foptions;
+end;
+
+procedure tdscontroller.setnoinsert(const avalue: boolean);
+begin
+ if avalue then begin
+  options:= options + [dso_noinsert];
+ end
+ else begin
+  options:= options - [dso_noinsert];
+ end;  
+end;
+
+function tdscontroller.getnoappend: boolean;
+begin
+ result:= dso_noappend in foptions;
+end;
+
+procedure tdscontroller.setnoappend(const avalue: boolean);
+begin
+ if avalue then begin
+  options:= options + [dso_noappend];
+ end
+ else begin
+  options:= options - [dso_noappend];
+ end;  
+end;
+
+function tdscontroller.getnoupdate: boolean;
+begin
+ result:= dso_noupdate in foptions;
+end;
+
+procedure tdscontroller.setnoupdate(const avalue: boolean);
+begin
+ if avalue then begin
+  options:= options + [dso_noupdate];
+ end
+ else begin
+  options:= options - [dso_noupdate];
+ end;  
+end;
+
+function tdscontroller.getnodelete: boolean;
+begin
+ result:= dso_nodelete in foptions;
+end;
+
+procedure tdscontroller.setnodelete(const avalue: boolean);
+begin
+ if avalue then begin
+  options:= options + [dso_nodelete];
+ end
+ else begin
+  options:= options - [dso_nodelete];
  end;  
 end;
 
