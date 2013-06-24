@@ -1686,6 +1686,9 @@ type
    procedure dodeleterow(const sender: tobject); override;
    procedure beforefocuscell(const cell: gridcoordty;
                              const selectaction: focuscellactionty); override;
+   function caninsertrow: boolean; override;
+   function canappendrow: boolean; override;
+   function candeleterow: boolean; override;
    function isfirstrow: boolean; override;
    function islastrow: boolean; override;
    procedure defineproperties(filer: tfiler); override;
@@ -1962,6 +1965,10 @@ type
    procedure dohide; override;
    procedure loaded; override;
    function cangridcopy: boolean;
+
+   function caninsertrow: boolean; override;
+   function canappendrow: boolean; override;
+   function candeleterow: boolean; override;
 
    procedure doinsertrow(const sender: tobject); override;
    procedure doappendrow(const sender: tobject); override;
@@ -7945,7 +7952,7 @@ end;
 
 procedure tgriddatalink.doinsertrow;
 begin
- if active and checkvalue then begin
+ if checkvalue and caninsert then begin
   dataset.insert;
   with fgrid,datacols do begin
    if newrowcol >= 0 then begin
@@ -7957,7 +7964,7 @@ end;
 
 procedure tgriddatalink.doappendrow;
 begin
- if active and checkvalue then begin
+ if checkvalue and canappend then begin
   if not eof then begin
    moveby(1);
   end;
@@ -7977,7 +7984,7 @@ end;
 
 procedure tgriddatalink.dodeleterow;
 begin
- if active and confirmdeleterecord then begin
+ if candelete and confirmdeleterecord then begin
   dataset.delete;
  end;
 end;
@@ -7986,7 +7993,7 @@ procedure tgriddatalink.rowdown;
 begin
  if checkvalue then begin
   moveby(1);
-  if (og_autoappend in tcustomgrid1(fgrid).foptionsgrid) and active and eof and
+  if (og_autoappend in tcustomgrid1(fgrid).foptionsgrid) and canappend and eof and
                          (datasource.autoedit or 
                            (navigator <> nil) and navigator.autoedit) then begin
    dataset.append;
@@ -8928,6 +8935,21 @@ end;
 function tcustomdbwidgetgrid.createdatacols: tdatacols;
 begin
  result:= tdbwidgetcols.create(self);
+end;
+
+function tcustomdbwidgetgrid.caninsertrow: boolean;
+begin
+ result:= inherited caninsertrow and fdatalink.caninsert;
+end;
+
+function tcustomdbwidgetgrid.canappendrow: boolean;
+begin
+ result:= inherited canappendrow and fdatalink.canappend;
+end;
+
+function tcustomdbwidgetgrid.candeleterow: boolean;
+begin
+ result:= inherited candeleterow and fdatalink.candelete;
 end;
 {
 procedure tcustomdbwidgetgrid.doenter;
@@ -9883,6 +9905,21 @@ begin
  for int1:= 0 to fdatacols.count - 1 do begin
   tdbstringcol(tdbstringcols(fdatacols).fitems[int1]).fdatalink.navigator:= avalue;
  end;
+end;
+
+function tcustomdbstringgrid.caninsertrow: boolean;
+begin
+ result:= inherited caninsertrow and fdatalink.caninsert;
+end;
+
+function tcustomdbstringgrid.canappendrow: boolean;
+begin
+ result:= inherited canappendrow and fdatalink.canappend;
+end;
+
+function tcustomdbstringgrid.candeleterow: boolean;
+begin
+ result:= inherited candeleterow and fdatalink.candelete;
 end;
 {
 procedure tcustomdbstringgrid.doenter;

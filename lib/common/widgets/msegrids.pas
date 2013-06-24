@@ -2054,6 +2054,10 @@ type
    procedure drawcellbackground(const acanvas: tcanvas);
    procedure drawcelloverlay(const acanvas: tcanvas);
 
+   function caninsertrow: boolean; virtual;
+   function canappendrow: boolean; virtual;
+   function candeleterow: boolean; virtual;
+
    procedure updatepopupmenu(var amenu: tpopupmenu; 
                          var mouseinfo: mouseeventinfoty); override;
    function rowatpos(y: integer): integer; //0..rowcount-1, invalidaxis if invalid
@@ -10001,8 +10005,35 @@ begin
  end;
 end;
 
+function tcustomgrid.caninsertrow: boolean;
+begin
+ result:= true;
+end;
+
+function tcustomgrid.canappendrow: boolean;
+begin
+ result:= true;
+end;
+
+function tcustomgrid.candeleterow: boolean;
+begin
+ result:= true;
+end;
+
 procedure tcustomgrid.updatepopupmenu(var amenu: tpopupmenu; 
                                     var mouseinfo: mouseeventinfoty);
+
+ function menustates(const aenabled: boolean): actionstatesarty;
+ begin
+  if aenabled then begin
+   result:= nil;
+  end
+  else begin
+   setlength(result,1);
+   result[0]:= [as_disabled]
+  end;
+ end; //menustates
+ 
 var
  bo1: boolean;
  state1: actionstatesty;
@@ -10036,18 +10067,22 @@ begin
                  [],[],[{$ifdef FPC}@{$endif}dopastecells],not bo1);
    bo1:= true;
   end;
+  
   if og_rowinserting in foptionsgrid then begin
    tpopupmenu.additems(amenu,self,mouseinfo,[
               stockobjects.captions[sc_insert_rowhk]+sepchar+
-         '('+encodeshortcutname(sysshortcuts[sho_rowinsert])+')',
+         '('+encodeshortcutname(sysshortcuts[sho_rowinsert])+')'],[],
+         menustates(caninsertrow),
+        [{$ifdef FPC}@{$endif}doinsertrow],not bo1);
+   bo1:= true;
+   tpopupmenu.additems(amenu,self,mouseinfo,[
               stockobjects.captions[sc_append_rowhk]+sepchar+
-       '('+encodeshortcutname(sysshortcuts[sho_rowappend])+')'],[],[],
-        [{$ifdef FPC}@{$endif}doinsertrow,{$ifdef FPC}@{$endif}doappendrow],
-                                                                     not bo1);
+       '('+encodeshortcutname(sysshortcuts[sho_rowappend])+')'],[],
+            menustates(canappendrow),[{$ifdef FPC}@{$endif}doappendrow],not bo1);
    bo1:= true;
   end;
   if og_rowdeleting in foptionsgrid then begin
-   if ffocusedcell.row >= 0 then begin
+   if (ffocusedcell.row >= 0) and candeleterow then begin
     state1:= [];
    end
    else begin
@@ -11020,8 +11055,8 @@ function tcustomgrid.focuscell(cell: gridcoordty;
  function isappend(const arow: integer): boolean;
  begin
   result:= not (gs_isdb in fstate) and  not (gs1_autoappendlock in fstate1) and
-      ((og_autoappend in foptionsgrid) and (arow >= frowcount) and 
-                                                         (frowcount <> 0) or
+      ((og_autoappend in foptionsgrid) and canappendrow and 
+                       (arow >= frowcount) and (frowcount <> 0) or
        (arow = 0) and (frowcount = 0) and (og_autofirstrow in foptionsgrid));
  end;
  
@@ -12545,7 +12580,7 @@ end;
 
 function tcustomgrid.canautoappend: boolean;
 begin
- result:= (rowcount = 0) and (og_autofirstrow in foptionsgrid);
+ result:= (rowcount = 0) and (og_autofirstrow in foptionsgrid) and canappendrow;
 end;
 
 function tcustomgrid.checkreautoappend: boolean;
@@ -12829,20 +12864,28 @@ begin
    if og_rowinserting in foptionsgrid then begin
     if issysshortcut(sho_rowinsert,info) then begin
      if og1_swaprowinsertappend in foptionsgrid1 then begin
-      doappendrow(nil);
+      if canappendrow then begin
+       doappendrow(nil);
+      end;
      end
      else begin
-      doinsertrow(nil);
+      if caninsertrow then begin
+       doinsertrow(nil);
+      end;
      end;
      include(info.eventstate,es_processed);
     end
     else begin
      if issysshortcut(sho_rowappend,info) then begin
       if og1_swaprowinsertappend in foptionsgrid1 then begin
-       doinsertrow(nil);
+       if caninsertrow then begin
+        doinsertrow(nil);
+       end;
       end
       else begin
-       doappendrow(nil);
+       if canappendrow then begin
+        doappendrow(nil);
+       end;
       end;
       include(info.eventstate,es_processed);
      end;
@@ -12851,7 +12894,9 @@ begin
    if not (es_processed in info.eventstate) then begin
     if (og_rowdeleting in foptionsgrid) and 
                          issysshortcut(sho_rowdelete,info) then begin
-     dodeleterows(nil);
+     if candeleterow then begin
+      dodeleterows(nil);
+     end;
      include(info.eventstate,es_processed);
     end;
    end;

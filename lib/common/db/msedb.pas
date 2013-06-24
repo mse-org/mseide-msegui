@@ -1110,10 +1110,15 @@ type
    function  GetActiveRecord: Integer; override;
    procedure DataEvent(Event: TDataEvent; Info: Ptrint); override;
    procedure disabledstatechange; virtual;
+   function canedit: boolean;
   public
    destructor destroy; override;
    function moveby(distance: integer): integer; override;
    function noedit: boolean;
+   function caninsert: boolean;
+   function canappend: boolean;
+   function candelete: boolean;
+   function canupdate: boolean;
    property dataset: tdataset read getdataset;
    property dscontroller: tdscontroller read fdscontroller;
    property utf8: boolean read getutf8;
@@ -6368,6 +6373,31 @@ end;
 function tmsedatalink.noedit: boolean;
 begin
  result:= readonly or (dataset <> nil) and not dataset.canmodify;
+end;
+
+function tmsedatalink.canedit: boolean;
+begin
+ result:= active and not noedit;
+end;
+
+function tmsedatalink.caninsert: boolean;
+begin
+ result:= canedit;
+end;
+
+function tmsedatalink.canappend: boolean;
+begin
+ result:= canedit;
+end;
+
+function tmsedatalink.candelete: boolean;
+begin
+ result:= canedit;
+end;
+
+function tmsedatalink.canupdate: boolean;
+begin
+ result:= canedit;
 end;
 
 procedure tmsedatalink.disabledstatechange;
