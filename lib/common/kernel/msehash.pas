@@ -109,6 +109,8 @@ type
    destructor destroy; override;
    procedure clear;{ virtual;}
    procedure reset; //net next will return first
+   procedure mark(out ref: ptruint);
+   procedure release(const ref: ptruint);
    property capacity: integer read fcapacity write setcapacity;
    property count: integer read fcount;
    procedure iterate(const aiterator: hashiteratorprocty); overload;
@@ -816,6 +818,30 @@ begin
 {$ifdef mse_debug_hash}
   checkhash;
 {$endif}
+ end;
+end;
+
+procedure thashdatalist.mark(out ref: ptruint);
+begin
+ ref:= fassignedroot;
+end;
+
+procedure thashdatalist.release(const ref: ptruint);
+var
+ po1,pend: phashdataty;
+ puint1: ptruint;
+begin
+ if fassignedroot <> 0 then begin
+  pend:= pointer(pchar(fdata)+ref);
+  po1:= pointer(pchar(fdata)+fassignedroot);
+  while po1 <> pend do begin
+   puint1:= po1^.header.nextlist;
+   internaldeleteitem(po1);
+   if puint1 = 0 then begin
+    break;
+   end;
+   inc(pchar(po1),puint1);
+  end;
  end;
 end;
 
