@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2012 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2013 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -78,7 +78,8 @@ begin
 //    stopexecute(nil);
    end
    else begin
-    if (button = mb_left) and (shiftstate * keyshiftstatesmask = []) then begin
+    if stop.enabled and (button = mb_left) and 
+                       (shiftstate * keyshiftstatesmask = []) then begin
      widget1:= fparent.childatpos(translatewidgetpoint(pos,self,fparent),false);
      if widget1 <> nil then begin
       int2:= -1;
@@ -149,7 +150,6 @@ begin
   start.setfocus;
  end;
  stop.enabled:= false;
-// releasemouse;
  window.releasemouse;
 end;
 
