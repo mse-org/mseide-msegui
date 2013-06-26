@@ -6818,7 +6818,9 @@ begin
    bo1:= checkvalue; 
   end
   else begin
-   feditor.undo;
+   if deo_selectonly in dropdown.options then begin
+    feditor.undo;
+   end;
   end;
  end;
  if bo1 and (akey = key_tab) then begin
@@ -6864,7 +6866,9 @@ begin
    bo1:= checkvalue; 
   end
   else begin
-   feditor.undo;
+   if deo_selectonly in dropdown.options then begin
+    feditor.undo;
+   end;
   end;
  end;
  if bo1 and (akey = key_tab) then begin
@@ -6911,7 +6915,9 @@ begin
    bo1:= checkvalue; 
   end
   else begin
-   feditor.undo;
+   if deo_selectonly in dropdown.options then begin
+    feditor.undo;
+   end;
   end;
  end;
  if bo1 and (akey = key_tab) then begin
@@ -6963,7 +6969,9 @@ begin
    bo1:= checkvalue; 
   end
   else begin
-   feditor.undo;
+   if deo_selectonly in dropdown.options then begin
+    feditor.undo;
+   end;
   end;
  end;
  if bo1 and (akey = key_tab) then begin
