@@ -3222,12 +3222,6 @@ begin
    '0'..'9': begin
      mant:= mant*10 + (byte(po1^)-byte('0'));
    end;
-   '.': begin
-    if decisep <> nil then begin
-     exit;
-    end;
-    decisep:= po1;
-   end;
    'e','E': begin
     mantend:= po1;
     inc(po1);
@@ -3261,8 +3255,16 @@ begin
     break;
    end;
    else begin
-    mantend:= po1;
-    break;
+    if po1^ = decimalseparator then begin
+     if decisep <> nil then begin
+      exit;
+     end;
+     decisep:= po1;
+    end
+    else begin
+     mantend:= po1;
+     break;
+    end;
    end;
   end;
   inc(po1);
