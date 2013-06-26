@@ -166,23 +166,34 @@ function inttostrmse(const value: qword): msestring; overload;
 
 function trystrtodouble(const s: lstringty; out value: double; 
                              const decimalseparator: char): boolean; overload;
+function trystrtodouble(const s: lmsestringty; out value: double; 
+                             const decimalseparator: msechar): boolean; overload;
 function trystrtodouble(const s: string; out value: double; 
                              const decimalseparator: char): boolean; overload;
+function trystrtodouble(const s: msestring; out value: double; 
+                             const decimalseparator: msechar): boolean; overload;
 function strtodouble(const s: string;
                              const decimalseparator: char): double;
+function strtodouble(const s: msestring;
+                             const decimalseparator: msechar): double;
 function trystrtodouble(const s: string; out value: double): boolean; overload;
+function trystrtodouble(const s: msestring; out value: double): boolean; overload;
 function strtodouble(const s: string): double;
+function strtodouble(const s: msestring): double;
                                 
 function realtostr(const value: double): string;     //immer'.' als separator
 function strtoreal(const s: string): double;   //immer'.' als separator
 function trystrtoreal(const s: string; out value: real): boolean;
                                                //immer'.' als separator
 
-function trystrtorealty(const ein: string; out value: realty;
+function trystrtorealty(const ein: msestring; out value: realty;
                              forcevalue: boolean = false): boolean;
 function strtorealty(const ein: string; forcevalue: boolean = false): realty;
+function strtorealty(const ein: msestring; forcevalue: boolean = false): realty;
 function strtorealtydot(const ein: string): realty;
+function strtorealtydot(const ein: msestring): realty;
 function trystrtorealtydot(const ein: string; out value: realty): boolean;
+function trystrtorealtydot(const ein: msestring; out value: realty): boolean;
 //function realtytostr(const val: realty; const format: msestring = ''): msestring;
 function realtytostr(const val: realty; const format: msestring = '';
                                             const scale: real = 1): msestring;
@@ -3297,6 +3308,115 @@ begin
  result:= true;
 end;
 
+function trystrtodouble(const s: lmsestringty; out value: double; 
+                             const decimalseparator: msechar): boolean; overload;
+var
+ po1,decisep,mantstart,mantend: pmsechar;
+ pend: pmsechar;
+ neg,negexp: boolean;
+ mant,do1: double;
+ exp: integer;
+begin
+ result:= false;
+ pend:= s.po+s.len;
+ po1:= s.po;
+ while ((po1^ = ' ') or (po1^ = c_tab)) do begin
+  inc(po1);
+  if po1 = pend then begin
+   exit;
+  end;
+ end;
+ neg:= po1^ = '-';
+ if po1^ = '+' then begin
+  inc(po1);
+ end;
+ if neg then begin
+  inc(po1);
+ end;
+ decisep:= nil;
+ mantstart:= po1;
+ mant:= 0;
+ exp:= 0;
+ while true do begin
+  case po1^ of
+   '0'..'9': begin
+     mant:= mant*10 + (byte(po1^)-byte('0'));
+   end;
+   'e','E': begin
+    mantend:= po1;
+    inc(po1);
+    negexp:= po1^ = '-';
+    if po1^ = '+' then begin
+     inc(po1);
+    end;
+    if negexp then begin
+     inc(po1);
+    end;
+    if (po1^ < '0') or (po1^ > '9') then begin
+     exit;
+    end;
+    while true do begin
+     case po1^ of 
+      '0'..'9': begin
+       exp:= exp * 10 + (byte(po1^)-byte('0'));
+      end;
+      else begin
+       break;
+      end;
+     end;
+     inc(po1);
+     if po1 = pend then begin
+      break;
+     end;
+    end;
+    if negexp then begin
+     exp:= -exp;
+    end;
+    break;
+   end;
+   else begin
+    if po1^ = decimalseparator then begin
+     if decisep <> nil then begin
+      exit;
+     end;
+     decisep:= po1;
+    end
+    else begin
+     mantend:= po1;
+     break;
+    end;
+   end;
+  end;
+  inc(po1);
+  if po1 = pend then begin
+   mantend:= po1;
+   break;
+  end;
+ end;
+ if (mantstart = mantend) or (decisep = mantstart) and 
+                                       (mantend-mantstart = 1) then begin
+  exit; //empty
+ end;
+ if decisep <> nil then begin
+  exp:= exp-(mantend-decisep)+1;
+ end;
+ while po1 <> pend do begin
+  if not((po1^ = ' ') or (po1^ = c_tab)) then begin
+   exit;
+  end;
+  inc(po1);
+ end;
+ if not tryintexp10(exp,do1) then begin
+  exit;
+ end;
+ do1:= mant * do1;
+ if neg then begin
+  do1:= -do1;
+ end;
+ value:= do1;
+ result:= true;
+end;
+
 function trystrtodouble(const s: string; out value: double; 
                              const decimalseparator: char): boolean; overload;
 var
@@ -3307,9 +3427,24 @@ begin
  result:= trystrtodouble(lstr1,value,decimalseparator);
 end;
 
+function trystrtodouble(const s: msestring; out value: double; 
+                             const decimalseparator: msechar): boolean; overload;
+var
+ lstr1: lmsestringty;
+begin
+ lstr1.po:= pointer(s);
+ lstr1.len:= length(s);
+ result:= trystrtodouble(lstr1,value,decimalseparator);
+end;
+
 function trystrtodouble(const s: string; out value: double): boolean;
 begin
- result:= trystrtodouble(s,value,defaultformatsettings.decimalseparator);
+ result:= trystrtodouble(s,value,defaultformatsettingsmse.decimalseparator);
+end;
+
+function trystrtodouble(const s: msestring; out value: double): boolean;
+begin
+ result:= trystrtodouble(s,value,defaultformatsettingsmse.decimalseparator);
 end;
 
 function strtodouble(const s: string;
@@ -3320,9 +3455,22 @@ begin
  end;
 end;
 
+function strtodouble(const s: msestring;
+                             const decimalseparator: msechar): double;
+begin
+ if not trystrtodouble(s,result,decimalseparator) then begin
+  raise EConvertError.CreateFmt(SInvalidFloat,[s]);
+ end;
+end;
+
 function strtodouble(const s: string): double;
 begin
- result:= strtodouble(s,defaultformatsettings.decimalseparator);
+ result:= strtodouble(s,defaultformatsettingsmse.decimalseparator);
+end;
+
+function strtodouble(const s: msestring): double;
+begin
+ result:= strtodouble(s,defaultformatsettingsmse.decimalseparator);
 end;
 
 function realToStr(const value: double): string;     //immer'.' als separator
@@ -3408,7 +3556,35 @@ begin
   value:= emptyreal;
  end
  else begin
-  removechar(str1,{$ifdef FPC}defaultformatsettings.{$endif}thousandseparator);
+  removechar(str1,{$ifdef FPC}defaultformatsettingsmse.{$endif}thousandseparator);
+  if length(str1) > 0 then begin
+   ch1:= str1[length(str1)];
+   if (ch1 >= 'A') and (ch1 <= 'z') then begin
+    sint1:= expos[ord(ch1)];
+    if sint1 <> 0 then begin
+     setlength(str1,length(str1)-1);
+     str1:= str1 + 'E'+inttostr(sint1);
+    end;
+   end;
+  end;
+  result:= trystrtodouble(str1,double(value));
+ end;
+end;
+
+function trystrtorealty(const ein: msestring; out value: realty;
+                             forcevalue: boolean = false): boolean;
+var
+ str1: msestring;
+ ch1: msechar;
+ sint1: shortint;
+begin
+ str1:= trim(ein);
+ result:= true;
+ if not forcevalue and (str1 = emptyrealstring) then begin
+  value:= emptyreal;
+ end
+ else begin
+  removechar(str1,{$ifdef FPC}defaultformatsettingsmse.{$endif}thousandseparator);
   if length(str1) > 0 then begin
    ch1:= str1[length(str1)];
    if (ch1 >= 'A') and (ch1 <= 'z') then begin
@@ -3424,6 +3600,13 @@ begin
 end;
 
 function strtorealty(const ein: string; forcevalue: boolean = false): realty;
+begin
+ if not trystrtorealty(ein,result,forcevalue) then begin
+  raise EConvertError.CreateFmt(SInvalidFloat,[ein]);
+ end;
+end;
+
+function strtorealty(const ein: msestring; forcevalue: boolean = false): realty;
 begin
  if not trystrtorealty(ein,result,forcevalue) then begin
   raise EConvertError.CreateFmt(SInvalidFloat,[ein]);
@@ -3458,7 +3641,29 @@ begin
  end;
 end;
 
+function strtorealtydot(const ein: msestring): realty;
+
+begin
+ if trim(ein) = emptyrealstring then begin
+  result:= emptyreal;
+ end
+ else begin
+  result:= strtodouble(ein,'.');
+ end;
+end;
+
 function trystrtorealtydot(const ein: string; out value: realty): boolean;
+begin
+ result:= true;
+ if trim(ein) = emptyrealstring then begin
+  value:= emptyreal;
+ end
+ else begin
+  result:= trystrtodouble(ein,double(value),'.');
+ end;
+end;
+
+function trystrtorealtydot(const ein: msestring; out value: realty): boolean;
 begin
  result:= true;
  if trim(ein) = emptyrealstring then begin
