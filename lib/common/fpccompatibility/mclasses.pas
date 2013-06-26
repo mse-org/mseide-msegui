@@ -867,15 +867,19 @@ TStringsEnumerator = class
     procedure ReadNotImplemented;
     procedure WriteNotImplemented;
   public
-    function Read(var Buffer; Count: Longint): Longint; virtual;
-    function Write(const Buffer; Count: Longint): Longint; virtual;
+    function Read(var Buffer; Count: Longint): Longint; virtual; overload;
+    function Write(const Buffer; Count: Longint): Longint; virtual; overload;
+    function read(var buffer; const count: longint; 
+                          out acount: longint): syserrorty; virtual; overload;
+    function write(const buffer; const count: longint;
+                          out acount: longint): syserrorty; virtual; overload;
     function Seek(Offset: Longint; Origin: Word): Longint; overload; virtual;
     function Seek(const Offset: Int64; Origin: TSeekOrigin): Int64;
                                              overload; virtual;
     procedure ReadBuffer(var Buffer; Count: Longint);
-    function tryreadbuffer(var buffer; count: longint): syserrorty; virtual;
+    function tryreadbuffer(var buffer; count: longint): syserrorty;
     procedure WriteBuffer(const Buffer; Count: Longint);
-    function trywritebuffer(const buffer; count: longint): syserrorty; virtual;
+    function trywritebuffer(const buffer; count: longint): syserrorty;
     function CopyFrom(Source: TStream; Count: Int64): Int64;
     function ReadComponent(Instance: TComponent): TComponent;
     function ReadComponentRes(Instance: TComponent): TComponent;
@@ -3533,24 +3537,39 @@ end;
       Result:=Seek(longint(Offset),ord(Origin));
     end;
 
-function TStream.tryreadbuffer(var buffer; count: longint): syserrorty;
+function TStream.read(var buffer; const count: longint;
+               out acount: longint): syserrorty;
 var
  po1: pbyte;
- int1: integer;
+ int1,int2: integer;
 begin
  result:= sye_ok;
+ int2:= count;
  po1:= @buffer;
  repeat
-  int1:= read(po1^,count);
+  int1:= read(po1^,int2);
   if int1 <= 0 then begin
    break;
   end;
-  count:= count - int1;
+  int2:= int2 - int1;
   inc(po1,int1);
- until count <= 0;
- if (count <> 0) or (int1 < 0) then begin
-  result:= sye_read;
+ until int2 <= 0;
+ acount:= count - int2;
+ if int1 < 0 then begin
+  result:= syelasterror;
+ end
+ else begin
+  if (int2 > 0) then begin
+   result:= sye_read;
+  end;
  end;
+end;
+
+function TStream.tryreadbuffer(var buffer; count: longint): syserrorty;
+var
+ int1: integer;
+begin
+ result:= read(buffer,count,int1);
 end;
 
 procedure TStream.ReadBuffer(var Buffer; Count: Longint);
@@ -3560,28 +3579,42 @@ begin
  end;
 end;
 
-function TStream.trywritebuffer(const buffer; count: longint): syserrorty;
+function TStream.write(const buffer; const count: longint;
+                                   out acount: longint): syserrorty;
 var
  po1: pbyte;
- int1: integer;
+ int1,int2: integer;
 begin
  result:= sye_ok;
+ int2:= count;
  po1:= @buffer;
  repeat
-  int1:= write(po1^,count);
+  int1:= write(po1^,int2);
   if int1 <= 0 then begin
    break;
   end;
-  count:= count - int1;
+  int2:= int2 - int1;
   inc(po1,int1);
- until count <= 0;
- if (count <> 0) or (int1 < 0) then begin
-  result:= sye_write;
+ until int2 <= 0;
+ acount:= count - int2;
+ if int1 < 0 then begin
+  result:= syelasterror;
+ end
+ else begin
+  if (int2 > 0) then begin
+   result:= sye_write;
+  end;
  end;
 end;
 
-procedure TStream.WriteBuffer(const Buffer; Count: Longint);
+function TStream.trywritebuffer(const buffer; count: longint): syserrorty;
+var
+ int1: integer;
+begin
+ result:= write(buffer,count,int1);
+end;
 
+procedure TStream.WriteBuffer(const Buffer; Count: Longint);
 begin
  if trywritebuffer(buffer,count) <> sye_ok then begin
   Raise EWriteError.Create(SWriteError);

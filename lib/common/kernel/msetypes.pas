@@ -41,6 +41,21 @@ type
   longwordset = longword;
 {$endif}
 
+ uint8 = byte;
+ puint8 = ^uint8;
+ uint16 = word;
+ puint16 = ^uint16;
+ uint32 = longword;
+ puint32 = ^uint32;
+ sint8 = shortint;
+ psint8 = ^sint8;
+ sint16 = smallint;
+ psint16 = ^sint16;
+ sint32 = integer;
+ psint32 = ^sint32;
+ sint64 = int64;
+ psint64 = ^sint64;
+ 
 {$ifndef FPC} //delphi
  {$ifndef mswindows}
   uint64 = type int64; //kylix

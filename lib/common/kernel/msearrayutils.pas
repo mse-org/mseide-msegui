@@ -21,6 +21,33 @@ type
  sortcomparemethodarty = array of sortcomparemethodty;
  indexsortcomparemethodty = function (const l,r: integer): integer of object;
 
+procedure deleteitem(var value; const typeinfo: pdynarraytypeinfo;
+                          const aindex: integer); overload;
+  //value = array of type which needs no finalize
+procedure arrayaddref(var dynamicarray);
+procedure arraydecref(var dynamicarray); 
+                 //no finalize and freemem if refcount = 0
+procedure allocuninitedarray(count,itemsize: integer; out dynamicarray);
+                 //does not init memory, dynamicarray must be nil!
+procedure reallocuninitedarray(count,itemsize: integer; var dynamicarray);
+                 //does not init memory, dynamicarray must be unique!
+function arrayrefcount(var dynamicarray): sizeint;
+function arrayminhigh(arrays: array of pointer): integer;
+                       //array of dynamicarray
+function dynarrayelesize(const typinfo: pdynarraytypeinfo): sizeint; inline;
+function incrementarraylength(var value: pointer; typeinfo: pdynarraytypeinfo;
+                             increment: integer = 1): sizeint; overload;
+
+  //returns new length
+function additem(var value; const typeinfo: pdynarraytypeinfo; 
+                                  //typeinfo of dynarray
+                var count: integer; step: integer = 32): integer; overload;
+  //value = array of type, returns index of new item
+function additempo(var value; const typeinfo: pdynarraytypeinfo; 
+                                  //typeinfo of dynarray
+                var count: integer; step: integer = 32): pointer; overload;
+               //returns adress of new item
+
 function firstitem(const source: stringarty): string; overload;
 function firstitem(const source: msestringarty): msestring; overload;
 
@@ -48,31 +75,6 @@ procedure addpointeritem(var dest: pointerarty; const value: pointer;
 {$endif}
 procedure additem(var dest: winidarty; const value: winidty;
                              var count: integer; step: integer = 32); overload;
-
-function dynarrayelesize(const typinfo: pdynarraytypeinfo): sizeint; inline;
-function incrementarraylength(var value: pointer; typeinfo: pdynarraytypeinfo;
-                             increment: integer = 1): sizeint; overload;
-  //returns new length
-function additem(var value; const typeinfo: pdynarraytypeinfo; 
-                                  //typeinfo of dynarray
-                var count: integer; step: integer = 32): integer; overload;
-  //value = array of type, returns index of new item
-function additempo(var value; const typeinfo: pdynarraytypeinfo; 
-                                  //typeinfo of dynarray
-                var count: integer; step: integer = 32): pointer; overload;
-               //returns adress of new item
-
-procedure deleteitem(var value; const typeinfo: pdynarraytypeinfo;
-                          const aindex: integer); overload;
-  //value = array of type which needs no finalize
-procedure arrayaddref(var dynamicarray);
-procedure arraydecref(var dynamicarray); 
-                 //no finalize and freemem if refcount = 0
-procedure allocuninitedarray(count,itemsize: integer; out dynamicarray);
-                 //does not init memory, dynamicarray must be nil!
-function arrayrefcount(var dynamicarray): sizeint;
-function arrayminhigh(arrays: array of pointer): integer;
-                       //array of dynamicarray
 
 procedure additem(var dest: stringarty; const value: string); overload;
 procedure additem(var dest: msestringarty; const value: msestring); overload;
@@ -480,6 +482,37 @@ begin
  psizeint(pchar(po1)+sizeof(sizeint))^:= count;     //count
  {$endif}
  pointer(dynamicarray):= pointer(pchar(po1) + 2 * sizeof(sizeint));
+end;
+
+procedure reallocuninitedarray(count,itemsize: integer; var dynamicarray);
+                 //does not init memory, dynamicarray must be unique
+var
+ po1: psizeint;
+begin
+ po1:= pointer(dynamicarray);
+ if po1 <> nil then begin
+  po1:= pointer(pchar(po1) - 2 * sizeof(sizeint));
+  if po1^ <> 1 then begin
+   raise exception.Create('reallocunitedarray: dynamicarray not unique');
+  end;
+ end
+ else begin
+  allocuninitedarray(count,itemsize,dynamicarray);
+  exit;
+ end;
+ if count = 0 then begin
+  freemem(po1);
+  pointer(dynamicarray):= nil;
+ end
+ else begin
+  reallocmem(po1,count * itemsize + 2 * sizeof(sizeint));
+  {$ifdef FPC}
+  psizeint(pchar(po1)+sizeof(sizeint))^:= count - 1; //high
+  {$else}
+  psizeint(pchar(po1)+sizeof(sizeint))^:= count;     //count
+  {$endif}
+  pointer(dynamicarray):= pointer(pchar(po1) + 2 * sizeof(sizeint));
+ end;
 end;
 
 function firstitem(const source: stringarty): string; overload;
