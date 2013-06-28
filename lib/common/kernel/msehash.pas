@@ -107,7 +107,7 @@ type
   public
    constructor create(const datasize: integer);
    destructor destroy; override;
-   procedure clear;{ virtual;}
+   procedure clear; virtual;
    procedure reset; //net next will return first
    procedure mark(out ref: ptruint);
    procedure release(const ref: ptruint);
