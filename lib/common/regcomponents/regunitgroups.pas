@@ -28,12 +28,12 @@ begin
  registerunitgroup(['mseedit'],['msegui','msemenus','mseguiglob','msestrings']);
  registerunitgroup(['msetabs'],['msegui','msemenus','mseguiglob','mseapplication','sysutils','msestat','msestatfile','msestrings','msestream','msewidgets','msegraphutils','msedragglob','msescrollbar']);
  registerunitgroup(['msetoolbar'],['msegui','msemenus','mseguiglob','msewidgets']);
- registerunitgroup(['msedataedits'],['msegui','msemenus','mseguiglob','msestrings','mseedit','mseifiglob','mseglob','msetypes']);
- registerunitgroup(['msegraphedits'],['msegui','msemenus','mseguiglob','msegraphics','msetypes','mseifiglob','mseglob']);
+ registerunitgroup(['msedataedits'],['msegui','msemenus','mseguiglob','msestrings','mseedit','mseificomp','mseifiglob','mseglob','msetypes']);
+ registerunitgroup(['msegraphedits'],['msegui','msemenus','mseguiglob','msegraphics','msescrollbar','msetypes','mseificomp','mseifiglob','mseglob']);
  registerunitgroup(['msesimplewidgets'],['msegui','msemenus','mseguiglob','msegraphics','msegraphutils','msewidgets']);
  registerunitgroup(['msegrids'],['msegui','msemenus','mseguiglob','msegraphics','msetypes','msestrings']);
  registerunitgroup(['msewidgets'],['msegui','msemenus','mseguiglob']);
- registerunitgroup(['mseact'],['mseifiglob','mseglob']);
+ registerunitgroup(['mseact'],['mseificomp','mseifiglob','mseglob']);
  registerunitgroup(['mseificomp'],['mseifiglob','mseglob','mseificompglob']);
  registerunitgroup(['mseactions'],['mseact','mseclasses']);
  registerunitgroup(['msemenuwidgets'],['msegui','msemenus','mseguiglob']);
@@ -50,7 +50,7 @@ begin
  registerunitgroup(['msememodialog'],['msegui','msemenus','mseguiglob','msedataedits','msestrings','mseedit']);
  registerunitgroup(['msetextedit'],['msegui','msemenus','mseguiglob','mseedit','msestrings','mseeditglob','msegrids']);
  registerunitgroup(['msesyntaxedit'],['msegui','msemenus','mseguiglob','mseedit','msestrings','msetextedit','mseeditglob','msegrids']);
- registerunitgroup(['msereport'],['msegui','msemenus','mseguiglob','msesplitter','mdb','mserichstring','msegraphics','msestrings']);
+ registerunitgroup(['msereport'],['msegui','msemenus','mseguiglob','msesplitter','mdb','mseifiglob','mserichstring','msegraphics','msestrings']);
  registerunitgroup(['msesysenv'],['msestrings']);
  registerunitgroup(['msepostscriptprinter'],['mseprinter','sysutils']);
  registerunitgroup(['mseprocmonitorcomp'],['msesystypes']);
@@ -69,11 +69,11 @@ begin
  registerunitgroup(['msebarcode'],['msegui','msemenus','mseguiglob']);
  registerunitgroup(['mseopenglwidget'],['msegui','msemenus','mseguiglob','msegraphics','msegraphutils','msewindowwidget']);
  registerunitgroup(['mseopenglcanvaswidget'],['msegui','msemenus','mseguiglob','msegraphics','msegraphutils','msewindowwidget']);
- registerunitgroup(['msedb'],['mdb']);
+ registerunitgroup(['msedb'],['mdb','mseifiglob']);
  registerunitgroup(['msegdiprint'],['mseprinter']);
+ registerunitgroup(['mseterminal'],['msegui','msemenus','mseguiglob','mseedit','msestrings']);
  registerunitgroup(['msedataimage'],['msegui','msemenus','mseguiglob']);
  registerunitgroup(['msecalendardatetimeedit'],['msegui','msemenus','mseguiglob','msedataedits','msestrings','mseedit']);
- registerunitgroup(['mseterminal'],['msegui','msemenus','mseguiglob','mseedit','msestrings']);
  registerunitgroup(['msefoldedit'],['msegui','msemenus','mseguiglob','msedataedits','msestrings','mseedit','msegrids']);
  registerunitgroup(['mserealsumedit'],['msegui','msemenus','mseguiglob','msedataedits','msestrings','mseedit','msetypes']);
  registerunitgroup(['mseguirttistat'],['mserttistat','msestat','msegui']);
