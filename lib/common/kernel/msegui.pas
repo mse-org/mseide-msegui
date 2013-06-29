@@ -26,7 +26,7 @@ uses
                                {$ifdef mse_with_ifi},mseifiglob{$endif};
 
 const
- mseguiversiontext = '2.9 unstable';
+ mseguiversiontext = '3.0beta1';
  
  defaultwidgetcolor = cl_default;
  defaulttoplevelwidgetcolor = cl_background;
