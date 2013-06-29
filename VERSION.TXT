@@ -1,5 +1,7 @@
 MSEide+MSEgui breaking changes version history
 
+Version 3.0beta1
+2013-06-29
 2013-05-02
  sender parameter of IfI clientevents is tcustomificlientcontroller.
 2013-04-30

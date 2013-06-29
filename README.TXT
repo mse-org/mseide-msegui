@@ -1,18 +1,18 @@
 MSEide+MSEgui Pascal Cross Platform GUI Development System.
 
-2013-xx-xx Version 3.0
+2013-06-29 Version 3.0beta1
 Copyright (c) 1999-2013 by Martin Schreiber
 
-* 2.8.8 -> 3.0:
+* 2.8.6 -> 3.0:
 * MSEgui now has own implementations for "classes" and "db" units.
 * FPC has no support for unit alias
 * http://www.mail-archive.com/fpc-pascal%40lists.freepascal.org/msg31117.html
-* Please change "db" to "mdb" in useses and add 
-* "mclasses" after "classes" in uses
+* Please change "db" to "mdb" in uses and add 
+* "mclasses" after "classes" in uses in your units
 
 - Compiles with FPC 2.6.0 or 2.6.2
-- Tested on i386-linux SuSE 12.2, x84_64-linux SuSE 12.2 and
-  i386-win32 98, 2000, XP and Vista.
+- Tested on i386-linux SuSE 12.3, x84_64-linux SuSE 12.2 and
+  i386-win32 2000, XP and Vista.
 - Links to xlib and gdi32, no external widget library needed.
 - Internal character encoding is UCS2.
 - Uses anti aliased fonts on Linux (Xft).
@@ -41,9 +41,9 @@ Installation:
 *************
 1. Download and install FPC 2.6.2, you can get it from 
    http://www.freepascal.org/download.var
-2. Download mseide_msegui_src_2_8_6.zip and mseide_i386_win32_2_8_6.zip or
-   mseide_i386_linux_2_8_6.tar.gz or mseide_x84_64_linux_2_8_6.tar.gz
-   http://sourceforge.net/projects/mseide-msegui/files/mseide-msegui/2.8.6/
+2. Download mseide_msegui_src_3_0beta1.zip and mseide_i386_win32_3_0beta1.zip or
+   mseide_i386_linux_3_0beta1.tar.gz or mseide_x84_64_linux_3_0beta1.tar.gz
+   http://sourceforge.net/projects/mseide-msegui/files/mseide-msegui/3.0beta1/
 3. Extract them to a directory of your choice ('yourdirectory') .
 4. Run 'yourdirectory/bin/mseide' on linux or 
    'yourdirectory\bin\mseide.exe' on windows.
@@ -58,7 +58,7 @@ If you wish to to compile the IDE:
 
 Compiling MSEide from commandline on Linux:
 fpc -Fulib/common/* -Fulib/common/kernel/linux -Filib/common/kernel apps/ide/mseide.pas
-On windows:
+On Windows:
 ppc386.exe -Fulib\common\* -Fulib\common\kernel\windows -Filib\common\kernel apps\ide\mseide.pas
 
 
@@ -113,7 +113,7 @@ Macros in 'Settings'-'Configure MSEide' can be overridden by environment
 variables. They will be overriden by --macrodef and 'Project'-'Options'-'Macros'.
 Possible names: 
 FPCDIR, FPCLIBDIR, MSEDIR, MSELIBDIR, SYNTAXDEFDIR, TEMPLATEDIR,
-COMPSTOREDIR, COMPILER, DEBUGGER, EXEEXT, TARGET.
+COMPSTOREDIR, COMPILER, DEBUGGER, EXEEXT, TARGET, TARGETOSDIR.
 
 MSEide project macros
 *********************
@@ -249,9 +249,6 @@ tsqlite3connection field type mapping:
 | TEXT               | TEXT dso_stringmemo | ftstring    | msestring   |
 | BLOB               | BLOB                | ftblob      | string      |
 +--------------------+---------------------+-------------+-------------+
-
-*** Do not use Sqlite3 in multi-threaded applications. Set treport.options 
-reo_nothread to true for rendering a Sqlite3 report ***.
 
 Have a lot of fun!
 
