@@ -729,6 +729,8 @@ type
    procedure doflush;
    procedure gdi(const func: gdifuncty); virtual;
    procedure init;
+   procedure beforeread;
+   procedure afterread;
    procedure internalcopyarea(asource: tcanvas; const asourcerect: rectty;
               const adestrect: rectty; acopymode: rasteropty;
               atransparentcolor: colorty;
@@ -5725,6 +5727,17 @@ begin
  result.pos:= nullpoint;
  checkgcstate([cs_gc]);
  result.size:= fdrawinfo.gc.paintdevicesize;
+end;
+
+procedure tcanvas.beforeread;
+begin
+ reset;
+end;
+
+procedure tcanvas.afterread;
+begin
+ fvaluestack.stack[0]:= fvaluestack.stack[1]; //streamed values are default
+ fstate:= fstate - changedmask;
 end;
 
 initialization

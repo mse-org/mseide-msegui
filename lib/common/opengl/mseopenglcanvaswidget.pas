@@ -60,6 +60,7 @@ type
    fonrender: openglcanvasrendereventty;
    procedure setcanvas(const avalue: topenglwidgetcanvas);
   protected
+   procedure readstate(reader: treader); override;
    procedure doclientrectchanged; override;
    procedure docreatewinid(const aparent: winidty; const awidgetrect: rectty;
                   var aid: winidty); override;
@@ -195,6 +196,16 @@ procedure topenglcanvaswidget.getcanvasimage(const bgr: boolean;
                var aimage: maskedimagety);
 begin
  //dummy
+end;
+
+procedure topenglcanvaswidget.readstate(reader: treader);
+begin
+ fcanvas.beforeread;
+ try
+  inherited;
+ finally
+  fcanvas.afterread;
+ end; 
 end;
 
 { topenglwidgetcanvas }

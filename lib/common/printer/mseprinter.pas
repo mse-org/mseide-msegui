@@ -147,6 +147,7 @@ type
    procedure loaded; override;
    function getwindowsize: sizety; virtual;
    procedure defineproperties(filer: tfiler); override;
+   procedure readstate(reader: treader); override;
    
    //istatfile
    procedure dostatread(const reader: tstatreader); virtual;
@@ -395,7 +396,7 @@ type
    procedure streamwriteln(const atext: string; const apreamble: boolean = false);
                      //checks fstream = nil
   public
-   procedure reset; override;
+//   procedure reset; override;
  end;
   
  tprintervalueselector = class(tcustomselector)
@@ -812,6 +813,16 @@ begin
        (filer.ancestor = nil) and (fpa_framebottom <> defaultframe) or 
        (filer.ancestor <> nil) and 
        (tcustomprinter(filer.ancestor).fpa_framebottom <> fpa_framebottom));
+end;
+
+procedure tcustomprinter.readstate(reader: treader);
+begin
+ fcanvas.beforeread;
+ try
+  inherited;
+ finally
+  fcanvas.afterread;
+ end;
 end;
 
 { tcustomprintercanvas }
@@ -1716,15 +1727,16 @@ begin
 end;
 
 { tstreamprintercanvas }
-
+{
 procedure tstreamprintercanvas.reset;
 begin
- restore(1); //do not change the streamed values
- save;
- clipregion:= 0;
- origin:= nullpoint;
+// restore(1); //do not change the streamed values
+// save;
+ inherited;
+ clipregion:= 0;         //??
+ origin:= nullpoint;     //??
 end;
-
+}
 procedure tstreamprintercanvas.streamwrite(const atext: string;
                                   const apreamble: boolean = false);
 var
