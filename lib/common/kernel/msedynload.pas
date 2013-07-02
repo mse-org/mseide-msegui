@@ -45,7 +45,8 @@ procedure dynloadlock;
 procedure dynloadunlock;
 
 function loadlib(const libnames: array of filenamety; out libname: filenamety;
-                        const errormessage: msestring = ''): tlibhandle;
+                        const errormessage: msestring = '';
+                  const noexception: boolean = false): tlibhandle;
               
 function getprocaddresses(const lib: tlibhandle;
                        const procedures: array of funcinfoty;
@@ -152,8 +153,10 @@ function getprocaddresses(const libnames: array of msestring;
 var
  str1: msestring;
 begin
- result:= loadlib(libnames,str1);
- getprocaddresses(result,procedures,noexception,str1);
+ result:= loadlib(libnames,str1,'',noexception);
+ if result <> 0 then begin
+  getprocaddresses(result,procedures,noexception,str1);
+ end;
 end;
 
 function getprocaddresses(const libinfo: dynlibinfoty;
@@ -167,7 +170,8 @@ begin
 end;
 
 function loadlib(const libnames: array of filenamety; out libname: filenamety; 
-                                const errormessage: msestring = ''): tlibhandle;
+                 const errormessage: msestring = '';
+                  const noexception: boolean = false): tlibhandle;
 var
  int1: integer;
 begin
@@ -184,7 +188,7 @@ begin
    break;
   end;
  end;
- if result = 0 then begin
+ if (result = 0) and not noexception then begin
   raise exception.create(errormessage+
                    'Library '+quotelibnames(libnames)+' not found.');
  end;
