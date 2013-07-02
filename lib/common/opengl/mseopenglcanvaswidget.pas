@@ -27,7 +27,7 @@ type
   public
    constructor create(const user: tobject; const intf: icanvas); override;
   published
-   property lineoptions;
+   property options;
  {
    property monochrome;
    property color;

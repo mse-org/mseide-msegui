@@ -1,5 +1,8 @@
 MSEide+MSEgui breaking changes version history
 
+2013-07-02
+ tcanvas.lineoptions -> tcanvas.options
+ 
 Version 3.0beta1
 2013-06-29
 2013-05-02

@@ -828,6 +828,8 @@ begin
 //    xsetregion(appdisp,agc,region(clipregion));
    end;
   end;
+  if gvm_lineoptions in mask then begin
+  end;
  end;
 end;
 

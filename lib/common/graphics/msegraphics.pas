@@ -78,7 +78,7 @@ type
  canvasstatety =
   (cs_regioncopy,cs_clipregion,cs_origin,cs_gc,
    cs_acolorbackground,cs_acolorforeground,cs_color,cs_colorbackground,
-   cs_dashes,cs_linewidth,cs_capstyle,cs_joinstyle,cs_lineoptions,
+   cs_dashes,cs_linewidth,cs_capstyle,cs_joinstyle,cs_options,
    cs_fonthandle,cs_font,cs_fontcolor,cs_fontcolorbackground,cs_fonteffect,
    cs_rasterop,cs_brush,cs_brushorigin,
    cs_painted,cs_internaldrawtext,cs_highresdevice,
@@ -86,7 +86,7 @@ type
  canvasstatesty = set of canvasstatety;
 const
  linecanvasstates = [cs_dashes,cs_linewidth,cs_capstyle,cs_joinstyle,
-                     cs_lineoptions];
+                     cs_options];
 
 const
  fontstylehandlemask = 3; //[fs_bold,fs_italic]
@@ -372,7 +372,7 @@ type
   dashes: dashesstringty;
   capstyle: capstylety;
   joinstyle: joinstylety;
-  options: lineoptionsty;
+//  options: lineoptionsty;
  end;
 
  gcvaluesty = record
@@ -607,6 +607,9 @@ type
  gdifunctionaty = array[gdifuncty] of gdifunctionty;
 // pgdifunctionaty = ^gdifunctionaty;
 
+ canvasoptionty = (cao_antialias);
+ canvasoptionsty = set of canvasoptionty;
+ 
  canvasvaluesty = record
   changed: canvasstatesty;
   origin: pointty;
@@ -618,6 +621,7 @@ type
   font: fontinfoty;
   brush: tsimplebitmap;
   lineinfo: lineinfoty;
+  options: canvasoptionsty;
  end;
 
  canvasvaluespoty = ^canvasvaluesty;
@@ -688,16 +692,17 @@ type
    procedure setlinewidth(Value: integer);
    function getcapstyle: capstylety;
    function getjoinstyle: joinstylety;
-   function getlineoptions: lineoptionsty;
+   function getoptions: canvasoptionsty;
    procedure setcapstyle(const Value: capstylety);
    procedure setjoinstyle(const Value: joinstylety);
-   procedure setlineoptions(const avalue: lineoptionsty);
+   procedure setoptions(const avalue: canvasoptionsty);
    procedure initregrect(const adest: regionty; const arect: rectty);
    procedure initregreg(const adest: regionty; const asource: regionty);
    procedure updatecliporigin(const Value: pointty);
    function getlinewidthmm: real;
    procedure setlinewidthmm(const avalue: real);
    function getmonochrome: boolean;
+   procedure readlineoptions(reader: treader);
   protected
    fuser: tobject;
    fintf: pointer; //icanvas;
@@ -758,6 +763,7 @@ type
    function getcontextinfopo: pointer; virtual;
    procedure updatesize(const asize: sizety); virtual;
    procedure movewindowrect(const adist: pointty; const arect: rectty);
+   procedure defineproperties(filer: tfiler); override;
   public
    drawinfopo: pointer; //used to transport additional drawing information
    constructor create(const user: tobject; const intf: icanvas); virtual;
@@ -993,7 +999,7 @@ type
                 default cs_butt;
    property joinstyle: joinstylety read getjoinstyle write setjoinstyle
                 default js_miter;
-   property lineoptions: lineoptionsty read getlineoptions write setlineoptions
+   property options: canvasoptionsty read getoptions write setoptions
                 default [];
 
    property paintdevice: paintdevicety read fdrawinfo.paintdevice;
@@ -3466,7 +3472,7 @@ begin
    if cs_dashes in state then include(values.mask,gvm_dashes);
    if cs_capstyle in state then include(values.mask,gvm_capstyle);
    if cs_joinstyle in state then include(values.mask,gvm_joinstyle);
-   if cs_lineoptions in state then include(values.mask,gvm_lineoptions);
+//   if cs_options in state then include(values.mask,gvm_options);
    fstate:= fstate + state;
   end;
   if values.mask <> [] then begin
@@ -5065,9 +5071,9 @@ begin
  result:= fvaluepo^.lineinfo.joinstyle;
 end;
 
-function tcanvas.getlineoptions: lineoptionsty;
+function tcanvas.getoptions: canvasoptionsty;
 begin
- result:= fvaluepo^.lineinfo.options;
+ result:= fvaluepo^.options;
 end;
 
 procedure tcanvas.setjoinstyle(const Value: joinstylety);
@@ -5076,10 +5082,10 @@ begin
  valuechanged(cs_joinstyle);
 end;
 
-procedure tcanvas.setlineoptions(const avalue: lineoptionsty);
+procedure tcanvas.setoptions(const avalue: canvasoptionsty);
 begin
- fvaluepo^.lineinfo.options:= avalue;
- valuechanged(cs_lineoptions);
+ fvaluepo^.options:= avalue;
+ valuechanged(cs_options);
 end;
 
 function tcanvas.defaultcliprect: rectty;
@@ -5738,6 +5744,21 @@ procedure tcanvas.afterread;
 begin
  fvaluestack.stack[0]:= fvaluestack.stack[1]; //streamed values are default
  fstate:= fstate - changedmask;
+end;
+
+procedure tcanvas.readlineoptions(reader: treader);
+var
+ liopt1: lineoptionsty;
+begin
+ liopt1:= lineoptionsty(reader.readset(typeinfo(lineoptionsty)));
+ if lio_antialias in liopt1 then begin
+  options:= options + [cao_antialias];
+ end;
+end;
+
+procedure tcanvas.defineproperties(filer: tfiler);
+begin
+ filer.defineproperty('lineoptions',@readlineoptions,nil,false);
 end;
 
 initialization
