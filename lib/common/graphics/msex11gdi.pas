@@ -19,7 +19,8 @@ uses
 procedure init(const adisp: pdisplay; const avisual: msepvisual;
                  const adepth: integer);
 function hasxft: boolean;
-function fontdatatoxftpat(const fontdata: fontdataty; const highres: boolean): pfcpattern;
+function fontdatatoxftpat(const fontdata: fontdataty;
+                                       const highres: boolean): pfcpattern;
 procedure getxftfontdata(po: pxftfont; var drawinfo: drawinfoty);
  
 function x11getgdifuncs: pgdifunctionaty;
@@ -85,13 +86,14 @@ type
    1: (_bufferspace: fontdatapty;);
  end;
 
- xftstatety = (xfts_clipregionvalid{,xfts_colorvalid});
+ xftstatety = (xfts_clipregionvalid,xfts_antialias{,xfts_colorvalid});
  xftstatesty = set of xftstatety;
  x11gcdty = record
   gcdrawingflags: drawingflagsty;
   gcrasterop: rasteropty;
   gcclipregion: regionty;
   xftdraw: pxftdraw;
+  xftdrawpic: tpicture;
   xftcolor: txftcolor;
   xftcolorbackground: txftcolor;
   xftfont: pxftfont;
@@ -132,17 +134,18 @@ var //xft functions
  XftFontOpenPattern: function(dpy:PDisplay; pattern:PFcPattern):PXftFont;cdecl;
  XftDefaultSubstitute: procedure(dpy:PDisplay; screen:longint;
                         pattern:PFcPattern);cdecl;
+ XftDrawPicture: function(draw: PXftDraw): tpicture; cdecl;
 {$endif}
 var
  XRenderSetPictureClipRectangles: procedure(dpy:PDisplay; picture:TPicture;
             xOrigin:longint; yOrigin:longint; rects:PXRectangle; n:longint);
            cdecl;
  XRenderCreatePicture: function(dpy:PDisplay; drawable:TDrawable;
-      format:PXRenderPictFormat; valuemask:culong;
-      attributes:PXRenderPictureAttributes):TPicture;cdecl;
- XRenderFillRectangle: procedure(dpy:PDisplay; op:longint; dst:TPicture;
-              color:PXRenderColor; x:longint;
-              y:longint; width:dword; height:dword);cdecl;
+      format: PXRenderPictFormat; valuemask: culong;
+      attributes: PXRenderPictureAttributes): TPicture; cdecl;
+ XRenderFillRectangle: procedure(dpy: PDisplay; op: longint; dst: TPicture;
+              color: PXRenderColor; x: longint;
+              y: longint; width: dword; height: dword);cdecl;
  XRenderSetPictureTransform: procedure(dpy:PDisplay; picture:TPicture;
                                         transform:PXTransform);
           cdecl;
@@ -151,16 +154,20 @@ var
           cdecl;
  XRenderFreePicture: procedure(dpy:PDisplay; picture:TPicture);
                  cdecl;
- XRenderComposite: procedure(dpy:PDisplay; op:longint; src:TPicture; mask:TPicture; dst:TPicture;
-              src_x:longint; src_y:longint; mask_x:longint; mask_y:longint; dst_x:longint;
+ XRenderComposite: procedure(dpy:PDisplay; op:longint; src:TPicture;
+              mask:TPicture; dst:TPicture;
+              src_x:longint; src_y:longint; mask_x:longint; mask_y:longint;
+              dst_x:longint;
               dst_y:longint; width:dword; height:dword);cdecl;
  XRenderQueryExtension: function(dpy: PDisplay; event_basep: Pinteger;
                   error_basep: Pinteger): TBool;cdecl;
  XRenderFindVisualFormat: function(dpy:PDisplay; visual:PVisual):PXRenderPictFormat;cdecl;
  XRenderFindStandardFormat:  function(dpy:PDisplay;
               format:longint):PXRenderPictFormat; cdecl;
-
-
+ XRenderCompositeTriStrip: procedure(dpy: pdisplay; op: cint; src: tpicture;
+               dst: tpicture; maskFormat: PXRenderPictFormat;
+               xSrc: cint; ySrc: cint; points: PXPointFixed;
+               npoint: cint); cdecl;
 implementation
 uses
  msesys,msesonames,sysutils,msefcfontselect,msedynload;
@@ -695,6 +702,29 @@ begin
  {$ifdef FPC} {$checkpointer default} {$endif}
 end;
 
+procedure checkxftdraw(var drawinfo: drawinfoty);
+begin
+{$ifdef mse_debuggdisync}
+ checkgdilock;
+{$endif} 
+ with x11gcty(drawinfo.gc.platformdata).d do begin
+  if xftdraw = nil then begin
+   xftdraw:= xftdrawcreate(appdisp,drawinfo.paintdevice,
+                                                 xlib.pvisual(defvisual),0);
+   xftdrawpic:= xftdrawpicture(xftdraw);
+  end;
+  if not (xfts_clipregionvalid in xftstate) then begin
+   if gcclipregion = 0 then begin
+    xftdrawsetclip(xftdraw,nil);
+   end
+   else begin
+    setregion(drawinfo.gc,region(gcclipregion),0,xftdraw);
+   end;
+   include(xftstate,xfts_clipregionvalid);
+  end;
+ end;
+end;
+
 procedure gdi_changegc(var drawinfo: drawinfoty); //gdifunc
 var
  xmask: longword;
@@ -828,7 +858,16 @@ begin
 //    xsetregion(appdisp,agc,region(clipregion));
    end;
   end;
-  if gvm_lineoptions in mask then begin
+  if gvm_options in mask then begin
+   if cao_antialias in options then begin
+    if fhasxft then begin
+     checkxftdraw(drawinfo);
+     include(xftstate,xfts_antialias);
+    end;
+   end
+   else begin
+    exclude(xftstate,xfts_antialias);
+   end;
   end;
  end;
 end;
@@ -854,28 +893,6 @@ begin
   gui_movewindowrect(drawinfo.paintdevice,dist^,rect^);  
  end;
 end;
-
-procedure checkxftdraw(var drawinfo: drawinfoty);
-begin
-{$ifdef mse_debuggdisync}
- checkgdilock;
-{$endif} 
- with x11gcty(drawinfo.gc.platformdata).d do begin
-  if xftdraw = nil then begin
-   xftdraw:= xftdrawcreate(appdisp,drawinfo.paintdevice,xlib.pvisual(defvisual),0);
-  end;
-  if not (xfts_clipregionvalid in xftstate) then begin
-   if gcclipregion = 0 then begin
-    xftdrawsetclip(xftdraw,nil);
-   end
-   else begin
-    setregion(drawinfo.gc,region(gcclipregion),0,xftdraw);
-   end;
-   include(xftstate,xfts_clipregionvalid);
-  end;
- end;
-end;
-
 
 function getmatrixcharstruct(char: msechar; const fontdata: x11fontdataty): pxcharstruct;
 type
@@ -2088,14 +2105,53 @@ begin
 end;
 
 procedure gdi_fillpolygon(var drawinfo: drawinfoty); //gdifunc
+var
+ int1: integer;
+ po1,po2: ppointty;
+ po3: pxpointfixed;
+ cpic: tpicture;
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
- transformpoints(drawinfo,false);
- with drawinfo,drawinfo.points do begin
-  xfillpolygon(appdisp,paintdevice,tgc(gc.handle),buffer.buffer,
-          count,complex,coordmodeorigin);
+{$endif}
+
+ with drawinfo do begin
+  if xfts_antialias in x11gcty(gc.platformdata).d.xftstate then begin
+   if points.count > 2 then begin
+    allocbuffer(buffer,points.count*sizeof(txpointfixed));
+    po1:= points.points;
+    po2:= points.points+points.count-1;
+    po3:= buffer.buffer;
+    while po1 < po2 do begin
+     po3^.x:= (po1^.x+origin.x) shl 16;
+     po3^.y:= (po1^.y+origin.y) shl 16;
+     inc(po3);
+     po3^.x:= (po2^.x+origin.x) shl 16;
+     po3^.y:= (po2^.y+origin.y) shl 16;
+     inc(po3);
+     inc(po1);
+     dec(po2);
+    end;
+    if po1 = po2 then begin
+     po3^.x:= (po1^.x+origin.x) shl 16;
+     po3^.y:= (po1^.y+origin.y) shl 16;
+    end;
+    with x11gcty(gc.platformdata).d do begin
+     cpic:= createcolorpicture(acolorforeground);
+     xrendercompositetristrip(appdisp,pictopsrc,cpic,xftdrawpic,nil,0,0,
+                      buffer.buffer,points.count);
+     xrenderfreepicture(appdisp,cpic);
+    end;
+   end;
+//   allocbuffer(buffer,int1*sizeof(xpoint));
+  end
+  else begin
+   transformpoints(drawinfo,false);
+   with points do begin
+    xfillpolygon(appdisp,paintdevice,tgc(gc.handle),buffer.buffer,
+           count,complex,coordmodeorigin);
+   end;
+  end;
  end;
 end;
 
@@ -2315,7 +2371,7 @@ var
  
 function getxftlib: boolean;
 const
- funcs: array[0..16] of funcinfoty = (
+ funcs: array[0..17] of funcinfoty = (
   (n: 'XftDrawDestroy'; d: {$ifndef FPC}@{$endif}@XftDrawDestroy),
   (n: 'XftDrawSetClipRectangles'; d: {$ifndef FPC}@{$endif}@XftDrawSetClipRectangles),
   (n: 'XftDrawCreate'; d: {$ifndef FPC}@{$endif}@XftDrawCreate),
@@ -2332,7 +2388,8 @@ const
   (n: 'XftNameParse'; d: {$ifndef FPC}@{$endif}@XftNameParse),
   (n: 'XftFontMatch'; d: {$ifndef FPC}@{$endif}@XftFontMatch),
   (n: 'XftFontOpenPattern'; d: {$ifndef FPC}@{$endif}@XftFontOpenPattern),
-  (n: 'XftDefaultSubstitute'; d: {$ifndef FPC}@{$endif}@XftDefaultSubstitute)
+  (n: 'XftDefaultSubstitute'; d: {$ifndef FPC}@{$endif}@XftDefaultSubstitute),
+  (n: 'XftDrawPicture'; d: {$ifndef FPC}@{$endif}@XftDrawPicture)
   );
 begin
 {$ifndef staticxft}
@@ -2351,26 +2408,26 @@ end;
 
 function getxrenderlib: boolean;
 const
- funcs: array[0..9] of funcinfoty = (
+ funcs: array[0..10] of funcinfoty = (
   (n: 'XRenderSetPictureClipRectangles'; d: {$ifndef FPC}@{$endif}@XRenderSetPictureClipRectangles),
   (n: 'XRenderCreatePicture'; d: {$ifndef FPC}@{$endif}@XRenderCreatePicture),
   (n: 'XRenderFillRectangle'; d: {$ifndef FPC}@{$endif}@XRenderFillRectangle),
   (n: 'XRenderSetPictureTransform'; d: {$ifndef FPC}@{$endif}@XRenderSetPictureTransform),
-  (n: 'XRenderSetPictureFilter'; d: {$ifndef FPC}@{$endif}@XRenderSetPictureFilter),
+  (n: 'XRenderSetPictureFilter';
+                            d: {$ifndef FPC}@{$endif}@XRenderSetPictureFilter),
   (n: 'XRenderFreePicture'; d: {$ifndef FPC}@{$endif}@XRenderFreePicture),
   (n: 'XRenderComposite'; d: {$ifndef FPC}@{$endif}@XRenderComposite),
-  (n: 'XRenderQueryExtension'; d: {$ifndef FPC}@{$endif}@XRenderQueryExtension),
-  (n: 'XRenderFindVisualFormat'; d: {$ifndef FPC}@{$endif}@XRenderFindVisualFormat),
-  (n: 'XRenderFindStandardFormat'; d: {$ifndef FPC}@{$endif}@XRenderFindStandardFormat)
+  (n: 'XRenderQueryExtension'; 
+                              d: {$ifndef FPC}@{$endif}@XRenderQueryExtension),
+  (n: 'XRenderFindVisualFormat'; 
+                            d: {$ifndef FPC}@{$endif}@XRenderFindVisualFormat),
+  (n: 'XRenderFindStandardFormat'; 
+                           d: {$ifndef FPC}@{$endif}@XRenderFindStandardFormat),
+  (n: 'XRenderCompositeTriStrip'; 
+                           d: {$ifndef FPC}@{$endif}@XRenderCompositeTriStrip)
   );
 begin
- result:= false;
- try
-  getprocaddresses(xrendernames,funcs);
- except
-  exit;
- end;  
- result:= true;
+ result:= getprocaddresses(xrendernames,funcs,true) <> 0;
 end;
 
 const

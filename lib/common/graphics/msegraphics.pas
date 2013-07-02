@@ -33,15 +33,13 @@ type
  gckindty = (gck_screen,gck_pixmap,gck_printer,gck_metafile);
  
  drawingflagty = (df_canvasispixmap,df_canvasismonochrome,df_highresfont,
-                  df_doublebuffer,
+                  df_doublebuffer,df_antialias,
                   df_colorconvert,
                   df_opaque,df_monochrome,df_brush{,df_dashed},df_last = 31);
  drawingflagsty = set of drawingflagty;
 
  capstylety = (cs_butt,cs_round,cs_projecting);
  joinstylety = (js_miter,js_round,js_bevel);
- lineoptionty = (lio_antialias);
- lineoptionsty = set of lineoptionty;
 
  dashesstringty = string[9];    //last byte 0 -> opaque
 
@@ -85,8 +83,7 @@ type
    cs_inactive,cs_pagestarted,cs_metafile{,cs_monochrome});
  canvasstatesty = set of canvasstatety;
 const
- linecanvasstates = [cs_dashes,cs_linewidth,cs_capstyle,cs_joinstyle,
-                     cs_options];
+ linecanvasstates = [cs_dashes,cs_linewidth,cs_capstyle,cs_joinstyle];
 
 const
  fontstylehandlemask = 3; //[fs_bold,fs_italic]
@@ -362,7 +359,7 @@ type
   
  gcvaluemaskty = (gvm_clipregion,gvm_colorbackground,gvm_colorforeground,
                   gvm_dashes,gvm_linewidth,gvm_capstyle,gvm_joinstyle,
-                  gvm_lineoptions,
+                  gvm_options,
                   gvm_font,gvm_brush,gvm_brushorigin,gvm_rasterop,
                   gvm_brushflag);
  gcvaluemasksty = set of gcvaluemaskty;
@@ -375,6 +372,9 @@ type
 //  options: lineoptionsty;
  end;
 
+ canvasoptionty = (cao_antialias);
+ canvasoptionsty = set of canvasoptionty;
+ 
  gcvaluesty = record
   mask: gcvaluemasksty;
   clipregion: regionty;
@@ -387,6 +387,7 @@ type
   brushorigin: pointty;
   rasterop: rasteropty;
   lineinfo: lineinfoty;
+  options: canvasoptionsty;
  end;
  pgcvaluesty = ^gcvaluesty;
  
@@ -607,9 +608,6 @@ type
  gdifunctionaty = array[gdifuncty] of gdifunctionty;
 // pgdifunctionaty = ^gdifunctionaty;
 
- canvasoptionty = (cao_antialias);
- canvasoptionsty = set of canvasoptionty;
- 
  canvasvaluesty = record
   changed: canvasstatesty;
   origin: pointty;
@@ -655,6 +653,7 @@ type
   private
    fvaluestack: canvasvaluestackty;
    gccolorbackground,gccolorforeground: colorty;
+   gcoptions: canvasoptionsty;
    fdefaultfont: fontnumty;
    fcliporigin: pointty;
    fgclinksto: canvasarty;
@@ -1118,7 +1117,7 @@ const
  {$ifdef FPC}
   {$warnings on}
  {$endif}
- changedmask = [cs_clipregion,cs_origin,cs_rasterop,
+ changedmask = [cs_clipregion,cs_origin,cs_rasterop,cs_options,
                 cs_acolorbackground,cs_acolorforeground,
                 cs_color,cs_colorbackground,
                 cs_fonthandle,cs_font,cs_fontcolor,cs_fontcolorbackground,
@@ -1189,6 +1188,10 @@ implementation
 uses
  SysUtils,msegui,mseguiintf,msestreaming,mseformatstr,msestockobjects,
  msearrayutils,mselist,msebits,msewidgets,msesysintf1,msesysutils,msefont;
+
+type
+ lineoptionty = (lio_antialias);
+ lineoptionsty = set of lineoptionty;
 
 var
  gdilockcount: integer;
@@ -3096,6 +3099,7 @@ procedure tcanvas.initgcvalues;
 begin
  gccolorbackground:= cl_none;
  gccolorforeground:= cl_none;
+ gcoptions:= [];
  gcfonthandle1:= 0;
  fstate:= fstate - changedmask;
 end;
@@ -3384,6 +3388,17 @@ begin
   include(fstate,cs_rasterop);
  end;
  with fdrawinfo,gc do begin
+  if not (cs_options in fstate) and (cs_options in state) then begin
+   values.options:= fvaluepo^.options;
+   if cao_antialias in values.options then begin
+    include(drawingflags,df_antialias);
+   end
+   else begin
+    exclude(drawingflags,df_antialias);
+   end;
+   include(values.mask,gvm_options);
+   include(fstate,cs_options);
+  end;
   bo2:= df_brush in drawingflags;
   drawingflags:= drawingflags - fillmodeinfoflags;
 
@@ -3472,7 +3487,7 @@ begin
    if cs_dashes in state then include(values.mask,gvm_dashes);
    if cs_capstyle in state then include(values.mask,gvm_capstyle);
    if cs_joinstyle in state then include(values.mask,gvm_joinstyle);
-//   if cs_options in state then include(values.mask,gvm_options);
+//   if cs_lineoptions in state then include(values.mask,gvm_options);
    fstate:= fstate + state;
   end;
   if values.mask <> [] then begin
@@ -3507,14 +3522,15 @@ begin
    if lineinfo then begin
     if length(dashes) > 0 then begin
      acolorbackground:= fvaluepo^.colorbackground;
-     checkgcstate([cs_acolorforeground,cs_acolorbackground]+linecanvasstates);
+     checkgcstate([cs_options,cs_acolorforeground,cs_acolorbackground]+
+                                                          linecanvasstates);
     end
     else begin
-     checkgcstate([cs_acolorforeground]+linecanvasstates);
+     checkgcstate([cs_options,cs_acolorforeground]+linecanvasstates);
     end;
    end
    else begin
-    checkgcstate([cs_acolorforeground]);
+    checkgcstate([cs_options,cs_acolorforeground]);
    end;
    result:= true;
   end

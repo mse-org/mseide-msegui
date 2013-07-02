@@ -84,7 +84,7 @@ type
   glcolorforeground: rgbtriplety;
   glcolorbackground: rgbtriplety;
   gcrasterop: rasteropty;
-  gclineoptions: lineoptionsty;
+  gcoptions: canvasoptionsty;
   gcdrawingflags: drawingflagsty;
   gcbrushorigin: pointty;
  end;
@@ -1037,23 +1037,24 @@ begin
                               (brushsize.cx > 0) and (brushsize.cy > 0));
   end;
   gcdrawingflags:= drawingflags;
-{
-  if gvm_lineoptions in mask then begin
-   if (lio_antialias in lineinfo.options) xor 
-                (lio_antialias in gclineoptions) then begin
-    if lio_antialias in lineinfo.options then begin
+  if gvm_options in mask then begin
+   if (cao_antialias in options) xor 
+                (cao_antialias in gcoptions) then begin
+    if cao_antialias in options then begin
      glenable(gl_line_smooth);
+     glenable(gl_polygon_smooth);
      glenable(gl_blend);
      glblendfunc(gl_src_alpha,gl_one_minus_src_alpha);
     end
     else begin
      gldisable(gl_line_smooth);
+     gldisable(gl_polygon_smooth);
      gldisable(gl_blend);
     end;
    end;
-   gclineoptions:= lineinfo.options;
+   gcoptions:= options;
   end;
- }
+
   if gvm_font in mask then begin
 //   ftglfont:= pftglfontty(font)^;
    glfont:= font;
