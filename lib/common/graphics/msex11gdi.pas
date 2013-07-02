@@ -168,6 +168,9 @@ var
                dst: tpicture; maskFormat: PXRenderPictFormat;
                xSrc: cint; ySrc: cint; points: PXPointFixed;
                npoint: cint); cdecl;
+ XRenderChangePicture: procedure(dpy: pdisplay; picture: tpicture;
+             valuemask: culong; attributes: PXRenderPictureAttributes); cdecl;
+
 implementation
 uses
  msesys,msesonames,sysutils,msefcfontselect,msedynload;
@@ -703,6 +706,8 @@ begin
 end;
 
 procedure checkxftdraw(var drawinfo: drawinfoty);
+var
+ attr: txrenderpictureattributes;
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
@@ -712,6 +717,8 @@ begin
    xftdraw:= xftdrawcreate(appdisp,drawinfo.paintdevice,
                                                  xlib.pvisual(defvisual),0);
    xftdrawpic:= xftdrawpicture(xftdraw);
+   attr.poly_edge:= polyedgesmooth;
+   xrenderchangepicture(appdisp,xftdrawpic,cppolyedge,@attr);
   end;
   if not (xfts_clipregionvalid in xftstate) then begin
    if gcclipregion = 0 then begin
@@ -2138,7 +2145,7 @@ begin
     end;
     with x11gcty(gc.platformdata).d do begin
      cpic:= createcolorpicture(acolorforeground);
-     xrendercompositetristrip(appdisp,pictopsrc,cpic,xftdrawpic,nil,0,0,
+     xrendercompositetristrip(appdisp,pictopover,cpic,xftdrawpic,nil,0,0,
                       buffer.buffer,points.count);
      xrenderfreepicture(appdisp,cpic);
     end;
@@ -2408,7 +2415,7 @@ end;
 
 function getxrenderlib: boolean;
 const
- funcs: array[0..10] of funcinfoty = (
+ funcs: array[0..11] of funcinfoty = (
   (n: 'XRenderSetPictureClipRectangles'; d: {$ifndef FPC}@{$endif}@XRenderSetPictureClipRectangles),
   (n: 'XRenderCreatePicture'; d: {$ifndef FPC}@{$endif}@XRenderCreatePicture),
   (n: 'XRenderFillRectangle'; d: {$ifndef FPC}@{$endif}@XRenderFillRectangle),
@@ -2424,7 +2431,9 @@ const
   (n: 'XRenderFindStandardFormat'; 
                            d: {$ifndef FPC}@{$endif}@XRenderFindStandardFormat),
   (n: 'XRenderCompositeTriStrip'; 
-                           d: {$ifndef FPC}@{$endif}@XRenderCompositeTriStrip)
+                           d: {$ifndef FPC}@{$endif}@XRenderCompositeTriStrip),
+  (n: 'XRenderChangePicture'; 
+                           d: {$ifndef FPC}@{$endif}@XRenderChangePicture)
   );
 begin
  result:= getprocaddresses(xrendernames,funcs,true) <> 0;
