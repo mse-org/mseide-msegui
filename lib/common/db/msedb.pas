@@ -5487,7 +5487,12 @@ end;
 
 function tmsebytesfield.getasvariant: variant;
 begin
- result:= asstring;
+ if isnull then begin
+  result:= null;
+ end
+ else begin
+  result:= asstring;
+ end;
 end;
 
 procedure tmsebytesfield.setasstring(const avalue: string);
@@ -5608,7 +5613,12 @@ end;
 
 function tmsevarbytesfield.getasvariant: variant;
 begin
- result:= asstring;
+ if isnull then begin
+  result:= null;
+ end
+ else begin
+  result:= asstring;
+ end;
 end;
 
 procedure tmsevarbytesfield.setasstring(const avalue: string);
