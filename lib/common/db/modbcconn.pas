@@ -622,6 +622,16 @@ begin
       bindnum(i,SQL_C_TYPE_TIMESTAMP,SQL_TYPE_TIMESTAMP,buf);
      end;
     end;
+    ftguid: begin
+     if isnull then begin
+      bindnull(i,SQL_C_GUID,SQL_GUID);
+     end
+     else begin
+      GetMem(buf,sizeof(tguid));
+      pguid(buf)^:= dbstringtoguid(asstring);
+      bindnum(i,SQL_C_guid,SQL_guid,buf);
+     end;
+    end;
     ftblob,ftmemo: begin
      if isnull then begin
       bindnull(i,SQL_C_CHAR,SQL_CHAR);
@@ -1105,6 +1115,10 @@ begin
                     int1{aField.Size}, @StrLenOrInd);
     pword(buffer1)^:= strlenorind;
   end;
+  ftguid: begin
+    Res:=SQLGetData(ODBCCursor.FSTMTHandle, fno, SQL_C_GUID, buffer1,
+                                         SizeOf(tguid), @StrLenOrInd);
+  end;
   ftBlob,ftMemo,ftwidememo: begin      // BLOBs   
            // Try to discover BLOB data length
    if odbccursor.fcurrentblobbuffer = '' then begin
@@ -1342,7 +1356,7 @@ begin
 {      SQL_INTERVAL_HOUR_TO_MINUTE:  FieldType:=ftUnknown;}
 {      SQL_INTERVAL_HOUR_TO_SECOND:  FieldType:=ftUnknown;}
 {      SQL_INTERVAL_MINUTE_TO_SECOND:FieldType:=ftUnknown;}
-{      SQL_GUID:          begin FieldType:=ftGuid;       FieldSize:=ColumnSize; end; } // no TGuidField exists yet in the db unit
+      SQL_GUID:          begin FieldType:=ftGuid;       FieldSize:=ColumnSize; end;
     else
       begin FieldType:=ftUnknown; FieldSize:=ColumnSize; end
     end;
