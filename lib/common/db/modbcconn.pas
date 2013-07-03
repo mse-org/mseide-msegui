@@ -657,6 +657,23 @@ begin
       end;
      end;
     end;
+    ftbytes,ftvarbytes: begin
+     if isnull then begin
+      bindnull(i,SQL_C_BINARY,SQL_VARBINARY);
+     end
+     else begin
+      StrVal:= AParams[paramindex].AsString;
+      StrLen:= Length(StrVal);
+      GetMem(buf,StrLen+sizeof(sqlinteger));
+      Move(StrVal[1],(pchar(buf)+sizeof(sqlinteger))^,StrLen);
+      if strlen > maxstrlen then begin
+       bindstr(i,SQL_C_BINARY,SQL_LONGVARBINARY,buf,strlen,strlen)
+      end
+      else begin
+       bindstr(i,SQL_C_BINARY,SQL_VARBINARY,buf,strlen,strlen)
+      end;
+     end;
+    end;
     {$ifdef mswindows}
     ftwidestring,ftfixedwidechar: begin
      if isnull then begin
@@ -1079,8 +1096,10 @@ begin
                                          bufsize1{aField.Size}, @StrLenOrInd);
   end;
   ftVarBytes: begin           // mapped to TVarBytesField
-    Res:=SQLGetData(ODBCCursor.FSTMTHandle, fno, SQL_C_BINARY, buffer1,
-                                        bufsize1{aField.Size}, @StrLenOrInd);
+    Res:=SQLGetData(ODBCCursor.FSTMTHandle, fno, SQL_C_BINARY, 
+                    pchar(buffer1)+sizeof(word),
+                    bufsize1-sizeof(word){aField.Size}, @StrLenOrInd);
+    pword(buffer1)^:= strlenorind;
   end;
   ftBlob,ftMemo,ftwidememo: begin      // BLOBs   
            // Try to discover BLOB data length
