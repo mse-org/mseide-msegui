@@ -2539,7 +2539,7 @@ begin
      result:= encodesqlstring(field.asstring);
     end;
    end;
-   ftblob,ftgraphic: begin
+   ftblob,ftgraphic,ftbytes,ftvarbytes: begin
     result:= encodesqlblob(field.asstring);
    end;
    ftdate: begin
@@ -2613,7 +2613,7 @@ begin
       result:= encodesqlstring(asstring);
      end;
     end;
-    ftblob,ftgraphic: begin
+    ftblob,ftgraphic,ftbytes,ftvarbytes: begin
      result:= encodesqlblob(asstring);
     end;
     ftdate: begin

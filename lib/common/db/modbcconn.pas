@@ -1096,9 +1096,13 @@ begin
                                          bufsize1{aField.Size}, @StrLenOrInd);
   end;
   ftVarBytes: begin           // mapped to TVarBytesField
+    int1:= bufsize1-sizeof(word);
+    if int1 < 0 then begin
+     int1:= 0;
+    end;
     Res:=SQLGetData(ODBCCursor.FSTMTHandle, fno, SQL_C_BINARY, 
                     pchar(buffer1)+sizeof(word),
-                    bufsize1-sizeof(word){aField.Size}, @StrLenOrInd);
+                    int1{aField.Size}, @StrLenOrInd);
     pword(buffer1)^:= strlenorind;
   end;
   ftBlob,ftMemo,ftwidememo: begin      // BLOBs   

@@ -1037,7 +1037,10 @@ begin
   result:= getasmsestring;
  end
  else begin
-  int1:= fdatasize*4+4; //room for multibyte encodings
+  int1:= fdatasize;
+  if not (fdatatype in [ftbytes,ftvarbytes]) then begin
+   int1:= int1*4+4; //room for multibyte encodings
+  end;
   setlength(result,int1);
   if not loadfield(pointer(result),int1) then begin
    result:= '';
