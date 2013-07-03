@@ -8712,7 +8712,7 @@ end;
 function tmseparams.asdbstring(const index: integer): string;
 begin
  with items[index] do begin
-  if not (datatype in [ftblob,ftmemo]) and isutf8 then begin
+  if not (datatype in [ftblob,ftmemo,ftbytes,ftvarbytes]) and isutf8 then begin
    if vartype(value) = varolestr then begin
     result:= stringtoutf8(aswidestring);
    end
