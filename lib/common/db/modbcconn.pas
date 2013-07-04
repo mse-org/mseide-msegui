@@ -426,6 +426,9 @@ var
   EqualSignPos:integer;
 begin
   Result:='';
+  if charset <> '' then begin
+   result:= result + 'CHARSET='+charset+';';
+  end;
   if DatabaseName<>'' then Result:=Result + 'DSN='+EscapeParamValue(DatabaseName)+';';
   if Driver      <>'' then Result:=Result + 'DRIVER='+EscapeParamValue(Driver)+';';
   if UserName    <>'' then Result:=Result + 'UID='+EscapeParamValue(UserName)+';PWD='+EscapeParamValue(Password)+';';
@@ -622,6 +625,16 @@ begin
       bindnum(i,SQL_C_TYPE_TIMESTAMP,SQL_TYPE_TIMESTAMP,buf);
      end;
     end;
+    ftguid: begin
+     if isnull then begin
+      bindnull(i,SQL_C_GUID,SQL_GUID);
+     end
+     else begin
+      GetMem(buf,sizeof(tguid));
+      pguid(buf)^:= dbstringtoguid(asstring);
+      bindnum(i,SQL_C_guid,SQL_guid,buf);
+     end;
+    end;
     ftblob,ftmemo: begin
      if isnull then begin
       bindnull(i,SQL_C_CHAR,SQL_CHAR);
@@ -654,6 +667,23 @@ begin
       end
       else begin
        bindstr(i,SQL_C_CHAR,SQL_CHAR,buf,strlen,strlen)
+      end;
+     end;
+    end;
+    ftbytes,ftvarbytes: begin
+     if isnull then begin
+      bindnull(i,SQL_C_BINARY,SQL_VARBINARY);
+     end
+     else begin
+      StrVal:= AParams[paramindex].AsString;
+      StrLen:= Length(StrVal);
+      GetMem(buf,StrLen+sizeof(sqlinteger));
+      Move(StrVal[1],(pchar(buf)+sizeof(sqlinteger))^,StrLen);
+      if strlen > maxstrlen then begin
+       bindstr(i,SQL_C_BINARY,SQL_LONGVARBINARY,buf,strlen,strlen)
+      end
+      else begin
+       bindstr(i,SQL_C_BINARY,SQL_VARBINARY,buf,strlen,strlen)
       end;
      end;
     end;
@@ -962,7 +992,9 @@ function todbcconnection.loadfield(const cursor: tsqlcursor;
        const buffer: pointer; var bufsize: integer;
                                 const aisutf8: boolean): boolean;
            //if bufsize < 0 -> buffer was to small, should be -bufsize
- 
+           
+//todo: optimize
+
 const
   DEFAULT_BLOB_BUFFER_SIZE = 1024;
 var
@@ -976,12 +1008,14 @@ var
   BlobBufferSize,BytesRead:SQLINTEGER;
 //  BlobMemoryStream:TMemoryStream;
   Res:SQLRETURN;
+  targettype: sqlsmallint;
   fno: integer;
   int1: integer;
   str1: string;
   
   buffer1: pointer;
   bufsize1: integer;
+  memolen1: integer;
   dummybuf: array [0..31] of byte;  
   do1: double;
   cu1: currency;
@@ -1079,11 +1113,22 @@ begin
                                          bufsize1{aField.Size}, @StrLenOrInd);
   end;
   ftVarBytes: begin           // mapped to TVarBytesField
-    Res:=SQLGetData(ODBCCursor.FSTMTHandle, fno, SQL_C_BINARY, buffer1,
-                                        bufsize1{aField.Size}, @StrLenOrInd);
+    int1:= bufsize1-sizeof(word);
+    if int1 < 0 then begin
+     int1:= 0;
+    end;
+    Res:=SQLGetData(ODBCCursor.FSTMTHandle, fno, SQL_C_BINARY, 
+                    pchar(buffer1)+sizeof(word),
+                    int1{aField.Size}, @StrLenOrInd);
+    pword(buffer1)^:= strlenorind;
+  end;
+  ftguid: begin
+    Res:=SQLGetData(ODBCCursor.FSTMTHandle, fno, SQL_C_GUID, buffer1,
+                                         SizeOf(tguid), @StrLenOrInd);
   end;
   ftBlob,ftMemo,ftwidememo: begin      // BLOBs   
            // Try to discover BLOB data length
+   memolen1:= maxint div sizeof(widechar);
    if odbccursor.fcurrentblobbuffer = '' then begin
     Res:=SQLGetData(ODBCCursor.FSTMTHandle, fno, SQL_C_BINARY, buffer1, 0,
                                          @StrLenOrInd);
@@ -1094,19 +1139,35 @@ begin
      strlenorind:= sql_null_data; //length 0 -> NULL
     end;
     // Read the data if not NULL
-    if (StrLenOrInd<>SQL_NULL_DATA) and (buffer <> nil) then begin
+    if (StrLenOrInd <> SQL_NULL_DATA) and (buffer <> nil) then begin
      // Determine size of buffer to use
-     if StrLenOrInd<>SQL_NO_TOTAL then begin
+     if StrLenOrInd <> SQL_NO_TOTAL then begin
+      memolen1:= strlenorind;
+      if datatype = ftwidememo then begin
+       memolen1:= memolen1 * sizeof(widechar);
+      end;
       BlobBufferSize:= StrLenOrInd;
+      case datatype of
+       ftmemo: begin
+        blobbuffersize:= blobbuffersize + sizeof(char); //terminating 0
+       end;
+       ftwidememo: begin
+        blobbuffersize:= (blobbuffersize+1)*sizeof(widechar); //terminating 0
+       end;
+      end;
      end
      else begin
-      BlobBufferSize:=DEFAULT_BLOB_BUFFER_SIZE;
+      BlobBufferSize:= DEFAULT_BLOB_BUFFER_SIZE;
      end;
-     if BlobBufferSize>0 then begin
+     if BlobBufferSize > 0 then begin
       int1:= 0; //write index
+      targettype:= SQL_C_BINARY;
+      if datatype = ftwidememo then begin
+       targettype:= SQL_C_WCHAR;
+      end;
       repeat
        setlength(str1,int1+blobbuffersize);
-       Res:= SQLGetData(ODBCCursor.FSTMTHandle, fno, SQL_C_BINARY,
+       Res:= SQLGetData(ODBCCursor.FSTMTHandle, fno, targettype,
                        pchar(pointer(str1))+int1, BlobBufferSize, @StrLenOrInd);
        ODBCCheckResult(Res, SQL_HANDLE_STMT, ODBCCursor.FSTMTHandle,
         'Could not get field data for field ''%s'' (index %d).',
@@ -1119,6 +1180,13 @@ begin
        end;
        inc(int1,bytesread);              
       until Res = SQL_SUCCESS;
+      case datatype of
+       ftmemo,ftwidestring: begin
+        if memolen1 < int1 then begin
+         int1:= memolen1; //remove terminating 0
+        end;
+       end;
+      end;
       setlength(str1,int1);
      end;
      if datatype = ftwidememo then begin
@@ -1319,7 +1387,7 @@ begin
 {      SQL_INTERVAL_HOUR_TO_MINUTE:  FieldType:=ftUnknown;}
 {      SQL_INTERVAL_HOUR_TO_SECOND:  FieldType:=ftUnknown;}
 {      SQL_INTERVAL_MINUTE_TO_SECOND:FieldType:=ftUnknown;}
-{      SQL_GUID:          begin FieldType:=ftGuid;       FieldSize:=ColumnSize; end; } // no TGuidField exists yet in the db unit
+      SQL_GUID:          begin FieldType:=ftGuid;       FieldSize:=ColumnSize; end;
     else
       begin FieldType:=ftUnknown; FieldSize:=ColumnSize; end
     end;

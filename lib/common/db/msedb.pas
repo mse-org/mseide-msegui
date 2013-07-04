@@ -2539,7 +2539,7 @@ begin
      result:= encodesqlstring(field.asstring);
     end;
    end;
-   ftblob,ftgraphic: begin
+   ftblob,ftgraphic,ftbytes,ftvarbytes: begin
     result:= encodesqlblob(field.asstring);
    end;
    ftdate: begin
@@ -2613,7 +2613,7 @@ begin
       result:= encodesqlstring(asstring);
      end;
     end;
-    ftblob,ftgraphic: begin
+    ftblob,ftgraphic,ftbytes,ftvarbytes: begin
      result:= encodesqlblob(asstring);
     end;
     ftdate: begin
@@ -5487,7 +5487,12 @@ end;
 
 function tmsebytesfield.getasvariant: variant;
 begin
- result:= asstring;
+ if isnull then begin
+  result:= null;
+ end
+ else begin
+  result:= asstring;
+ end;
 end;
 
 procedure tmsebytesfield.setasstring(const avalue: string);
@@ -5608,7 +5613,12 @@ end;
 
 function tmsevarbytesfield.getasvariant: variant;
 begin
- result:= asstring;
+ if isnull then begin
+  result:= null;
+ end
+ else begin
+  result:= asstring;
+ end;
 end;
 
 procedure tmsevarbytesfield.setasstring(const avalue: string);
@@ -8702,7 +8712,7 @@ end;
 function tmseparams.asdbstring(const index: integer): string;
 begin
  with items[index] do begin
-  if not (datatype in [ftblob,ftmemo]) and isutf8 then begin
+  if not (datatype in [ftblob,ftmemo,ftbytes,ftvarbytes]) and isutf8 then begin
    if vartype(value) = varolestr then begin
     result:= stringtoutf8(aswidestring);
    end
