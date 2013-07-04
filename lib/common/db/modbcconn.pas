@@ -989,7 +989,9 @@ function todbcconnection.loadfield(const cursor: tsqlcursor;
        const buffer: pointer; var bufsize: integer;
                                 const aisutf8: boolean): boolean;
            //if bufsize < 0 -> buffer was to small, should be -bufsize
- 
+           
+//todo: optimize
+
 const
   DEFAULT_BLOB_BUFFER_SIZE = 1024;
 var
@@ -1003,6 +1005,7 @@ var
   BlobBufferSize,BytesRead:SQLINTEGER;
 //  BlobMemoryStream:TMemoryStream;
   Res:SQLRETURN;
+  targettype: sqlsmallint;
   fno: integer;
   int1: integer;
   str1: string;
@@ -1131,19 +1134,31 @@ begin
      strlenorind:= sql_null_data; //length 0 -> NULL
     end;
     // Read the data if not NULL
-    if (StrLenOrInd<>SQL_NULL_DATA) and (buffer <> nil) then begin
+    if (StrLenOrInd <> SQL_NULL_DATA) and (buffer <> nil) then begin
      // Determine size of buffer to use
-     if StrLenOrInd<>SQL_NO_TOTAL then begin
+     if StrLenOrInd <> SQL_NO_TOTAL then begin
       BlobBufferSize:= StrLenOrInd;
+      case datatype of
+       ftmemo: begin
+        blobbuffersize:= blobbuffersize + sizeof(char); //terminating 0
+       end;
+       ftwidememo: begin
+        blobbuffersize:= (blobbuffersize+1)*sizeof(widechar); //terminating 0
+       end;
+      end;
      end
      else begin
-      BlobBufferSize:=DEFAULT_BLOB_BUFFER_SIZE;
+      BlobBufferSize:= DEFAULT_BLOB_BUFFER_SIZE;
      end;
-     if BlobBufferSize>0 then begin
+     if BlobBufferSize > 0 then begin
       int1:= 0; //write index
+      targettype:= SQL_C_BINARY;
+      if datatype = ftwidememo then begin
+       targettype:= SQL_C_WCHAR;
+      end;
       repeat
        setlength(str1,int1+blobbuffersize);
-       Res:= SQLGetData(ODBCCursor.FSTMTHandle, fno, SQL_C_BINARY,
+       Res:= SQLGetData(ODBCCursor.FSTMTHandle, fno, targettype,
                        pchar(pointer(str1))+int1, BlobBufferSize, @StrLenOrInd);
        ODBCCheckResult(Res, SQL_HANDLE_STMT, ODBCCursor.FSTMTHandle,
         'Could not get field data for field ''%s'' (index %d).',
@@ -1156,6 +1171,14 @@ begin
        end;
        inc(int1,bytesread);              
       until Res = SQL_SUCCESS;
+      case datatype of
+       ftmemo: begin
+        int1:= int1 - sizeof(char); //remove terminating 0
+       end;
+       ftwidestring: begin
+        int1:= int1 - sizeof(widechar); //remove terminating 0
+       end;
+      end;
       setlength(str1,int1);
      end;
      if datatype = ftwidememo then begin
