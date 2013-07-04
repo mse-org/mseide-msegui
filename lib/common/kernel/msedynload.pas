@@ -31,7 +31,8 @@ function initializedynlib(var info: dynlibinfoty;
                               const funcs: array of funcinfoty;
                               const funcsopt: array of funcinfoty;
                               const errormessage: msestring = '';
-                              const callback: procedurety = nil): boolean;
+                              const callback: procedurety = nil;
+                              const noexception: boolean = false): boolean;
                                         //called after lib load
                               //returns true if all funcsopt found
 procedure releasedynlib(var info: dynlibinfoty;
@@ -290,7 +291,8 @@ function initializedynlib(var info: dynlibinfoty;
                               const funcs: array of funcinfoty;
                               const funcsopt: array of funcinfoty;
                               const errormessage: msestring = '';
-                              const callback: procedurety = nil): boolean;
+                              const callback: procedurety = nil;
+                              const noexception: boolean = false): boolean;
                               //true if all funcsopt found
 var
  int1: integer;
@@ -304,25 +306,33 @@ begin
     if (high(libnames) >= 0) or (high(libnamesdefault) >= 0) then begin
      wo1:= get8087cw;
      if (high(libnames) >= 0) then begin
-      libhandle:= loadlib(libnames,libname,errormessage);
+      libhandle:= loadlib(libnames,libname,errormessage,noexception);
      end
      else begin
-      libhandle:= loadlib(libnamesdefault,libname,errormessage);
+      libhandle:= loadlib(libnamesdefault,libname,errormessage,noexception);
      end;
-     cw8087:= get8087cw;
-     set8087cw(wo1);
-     try
-      getprocaddresses(libhandle,funcs,false);
-     except
-      on e: exception do begin
-       e.message:= errormessage+'Library "'+libname+'": '+e.message;
-       if unloadlibrary(libhandle) then begin
-        libhandle:= nilhandle;
+     if libhandle <> nilhandle then begin
+      cw8087:= get8087cw;
+      set8087cw(wo1);
+      try
+       result:= getprocaddresses(libhandle,funcs,noexception);
+       if not result then begin
+        if unloadlibrary(libhandle) then begin
+         libhandle:= nilhandle;
+        end;
+        exit;
        end;
-       raise;
+      except
+       on e: exception do begin
+        e.message:= errormessage+'Library "'+libname+'": '+e.message;
+        if unloadlibrary(libhandle) then begin
+         libhandle:= nilhandle;
+        end;
+        raise;
+       end;
       end;
+      result:= getprocaddresses(libhandle,funcsopt,true);
      end;
-     result:= getprocaddresses(libhandle,funcsopt,true);
     end
     else begin
      cw8087:= get8087cw;
