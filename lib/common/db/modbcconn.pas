@@ -426,6 +426,9 @@ var
   EqualSignPos:integer;
 begin
   Result:='';
+  if charset <> '' then begin
+   result:= result + 'CHARSET='+charset+';';
+  end;
   if DatabaseName<>'' then Result:=Result + 'DSN='+EscapeParamValue(DatabaseName)+';';
   if Driver      <>'' then Result:=Result + 'DRIVER='+EscapeParamValue(Driver)+';';
   if UserName    <>'' then Result:=Result + 'UID='+EscapeParamValue(UserName)+';PWD='+EscapeParamValue(Password)+';';
@@ -1012,6 +1015,7 @@ var
   
   buffer1: pointer;
   bufsize1: integer;
+  memolen1: integer;
   dummybuf: array [0..31] of byte;  
   do1: double;
   cu1: currency;
@@ -1124,6 +1128,7 @@ begin
   end;
   ftBlob,ftMemo,ftwidememo: begin      // BLOBs   
            // Try to discover BLOB data length
+   memolen1:= maxint div sizeof(widechar);
    if odbccursor.fcurrentblobbuffer = '' then begin
     Res:=SQLGetData(ODBCCursor.FSTMTHandle, fno, SQL_C_BINARY, buffer1, 0,
                                          @StrLenOrInd);
@@ -1137,6 +1142,10 @@ begin
     if (StrLenOrInd <> SQL_NULL_DATA) and (buffer <> nil) then begin
      // Determine size of buffer to use
      if StrLenOrInd <> SQL_NO_TOTAL then begin
+      memolen1:= strlenorind;
+      if datatype = ftwidememo then begin
+       memolen1:= memolen1 * sizeof(widechar);
+      end;
       BlobBufferSize:= StrLenOrInd;
       case datatype of
        ftmemo: begin
@@ -1172,11 +1181,10 @@ begin
        inc(int1,bytesread);              
       until Res = SQL_SUCCESS;
       case datatype of
-       ftmemo: begin
-        int1:= int1 - sizeof(char); //remove terminating 0
-       end;
-       ftwidestring: begin
-        int1:= int1 - sizeof(widechar); //remove terminating 0
+       ftmemo,ftwidestring: begin
+        if memolen1 < int1 then begin
+         int1:= memolen1; //remove terminating 0
+        end;
        end;
       end;
       setlength(str1,int1);
