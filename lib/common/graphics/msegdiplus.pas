@@ -72,7 +72,7 @@ type
   public
    constructor create(const aerror: GpStatus);
  end;
-  
+
   DebugEventLevel = (
    DebugEventLevelFatal,
    DebugEventLevelWarning
@@ -97,10 +97,19 @@ type
  end;
  pGdiplusStartupoutput = ^GdiplusStartupoutput;
 
- GpGraphics = record //opaque
- end;
+ GpGraphics = record end;//opaque
  PGpGraphics = ^GpGraphics;
  PPGpGraphics = ^PGpGraphics;
+
+ INT = cint;
+ ARGB = uint32;
+ pARGB = ^ARGB;
+ 
+ GpBrush = record end;
+ pGpBrush = ^GpBrush;
+ GpSolidFill = record end;
+ pGpSolidFill = ^GpSolidFill;
+ ppGpSolidFill = ^pGpSolidFill;
  
 var
  GdiplusStartup: function(token: ppointer; input: pGdiplusStartupInput;
@@ -111,10 +120,23 @@ var
                  graphics: PPGpGraphics): GpStatus; stdcall;
  GdipDeleteGraphics: function(graphics: PGpGraphics): GpStatus; stdcall;
 
+
+ GdipDeleteBrush: function(brush: pGpBrush): GpStatus; stdcall;
+ GdipCreateSolidFill: function(color: ARGB;
+                                brush: ppGpSolidFill): GpStatus; stdcall;
+ GdipSetSolidFillColor: function(brush: pGpSolidFill;
+                                              color: ARGB): GpStatus; stdcall;
+ GdipGetSolidFillColor: function(brush: pGpSolidFill;
+                                              color: pARGB): GpStatus; stdcall;
+ 
+ GdipFillRectangleI: function(graphics: pGpGraphics; brush: pGpBrush;
+                   x: INT; y: INT; width: INT; height: INT): GpStatus; stdcall;
+
 function initializegdiplus(
                      const sonames: array of filenamety): boolean;
            //false if not available
 procedure releasegdiplus;
+function gdipcheckerror(const aerror: gpstatus): boolean; //true if ok
  
 implementation
 uses
@@ -123,7 +145,7 @@ var
  libinfo: dynlibinfoty;
  instance: pointer;
 
-function checkgdipluserror(const aerror: gpstatus): boolean; //true if ok
+function gdipcheckerror(const aerror: gpstatus): boolean; //true if ok
 begin
  result:= aerror = ok;
  if not result then begin
@@ -139,7 +161,7 @@ begin
  fillchar(startupin,sizeof(startupin),0);
  startupin.gdiplusversion:= 1;
  instance:= nil;
- checkgdipluserror(gdiplusstartup(@instance,@startupin,nil{@startupout}));
+ gdipcheckerror(gdiplusstartup(@instance,@startupin,nil{@startupout}));
 end;
 
 procedure deinitgdiplus;
@@ -152,11 +174,16 @@ end;
 
 function initializegdiplus(const sonames: array of filenamety): boolean;
 const
- funcs: array[0..3] of funcinfoty = (
-  (n: 'GdiplusStartup'; d: @GdiplusStartup),            //0
-  (n: 'GdiplusShutdown'; d: @GdiplusShutdown),          //1
-  (n: 'GdipCreateFromHDC'; d: @GdipCreateFromHDC),      //2
-  (n: 'GdipDeleteGraphics'; d: @GdipDeleteGraphics)     //3
+ funcs: array[0..8] of funcinfoty = (
+  (n: 'GdiplusStartup'; d: @GdiplusStartup),              //0
+  (n: 'GdiplusShutdown'; d: @GdiplusShutdown),            //1
+  (n: 'GdipCreateFromHDC'; d: @GdipCreateFromHDC),        //2
+  (n: 'GdipDeleteGraphics'; d: @GdipDeleteGraphics),      //3
+  (n: 'GdipDeleteBrush'; d: @GdipDeleteBrush),            //4
+  (n: 'GdipCreateSolidFill'; d: @GdipCreateSolidFill),    //5
+  (n: 'GdipSetSolidFillColor'; d: @GdipSetSolidFillColor),//6
+  (n: 'GdipGetSolidFillColor'; d: @GdipGetSolidFillColor),//7
+  (n: 'GdipFillRectangleI'; d: @GdipFillRectangleI)       //8
  );
  errormessage = 'Can not load gdi+ library. ';
 begin
