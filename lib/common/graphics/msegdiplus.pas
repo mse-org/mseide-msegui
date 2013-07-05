@@ -102,6 +102,8 @@ type
  PPGpGraphics = ^PGpGraphics;
 
  INT = cint;
+ REAL = single;
+ pReal = ^REAL;
  ARGB = uint32;
  pARGB = ^ARGB;
  GpPoint = record
@@ -115,6 +117,12 @@ type
  GpSolidFill = record end;
  pGpSolidFill = ^GpSolidFill;
  ppGpSolidFill = ^pGpSolidFill;
+ GpPen = record end;
+ pGpPen = ^GpPen;
+ ppGpPen = ^pGpPen;
+ GpPath = record end;
+ pGpPath = ^GpPath;
+ ppGpPath = ^pGpPath;
 
  QualityMode = (
   QualityModeInvalid   = -1,
@@ -133,6 +141,20 @@ type
   SmoothingModeAntiAlias
  );
  pSmoothingMode = ^SmoothingMode;
+
+ GpUnit = (
+  UnitWorld,      // 0 -- World coordinate (non-physical unit)
+  UnitDisplay,    // 1 -- Variable -- for PageTransform only
+  UnitPixel,      // 2 -- Each unit is one device pixel.
+  UnitPoint,      // 3 -- Each unit is a printer's point, or 1/72 inch.
+  UnitInch,       // 4 -- Each unit is 1 inch.
+  UnitDocument,   // 5 -- Each unit is 1/300 inch.
+  UnitMillimeter  // 6 -- Each unit is 1 millimeter.
+ );
+ GpFillMode = (
+  FillModeAlternate,        // 0
+  FillModeWinding           // 1
+ );
  
 var
  GdiplusStartup: function(token: ppointer; input: pGdiplusStartupInput;
@@ -155,11 +177,45 @@ var
                                               color: ARGB): GpStatus; stdcall;
  GdipGetSolidFillColor: function(brush: pGpSolidFill;
                                               color: pARGB): GpStatus; stdcall;
- 
+
  GdipFillRectangleI: function(graphics: pGpGraphics; brush: pGpBrush;
                    x: INT; y: INT; width: INT; height: INT): GpStatus; stdcall;
  GdipFillPolygon2I: function(graphics: pGpGraphics; brush: pGpBrush;
-                  points: pGpPoint; count: INT): Gpstatus; stdcall;
+                  points: pGpPoint; count: INT): GpStatus; stdcall;
+
+ GdipCreatePen1: function(color: ARGB; width: REAL; unit_: GpUnit;
+                                    pen: ppGpPen): GpStatus; stdcall;
+ GdipDeletePen: function(pen: pGpPen): GpStatus; stdcall;
+ GdipSetPenWidth: function(pen: pGpPen; width: REAL): GpStatus; stdcall;
+ GdipGetPenWidth: function(pen: pGpPen; width: pREAL): GpStatus; stdcall;
+ GdipSetPenColor: function(pen: pGpPen; argb_: ARGB): GpStatus; stdcall;
+ GdipGetPenColor: function(pen: pGpPen; argb_: pARGB): GpStatus; stdcall;
+ 
+
+ GdipDrawLinesI: function(graphics: pGpGraphics; pen: pGpPen;
+                            points: pGpPoint; count: INT): GpStatus; stdcall;
+ GdipDrawPolygonI: function(graphics: pGpGraphics; pen: pGpPen;
+                            points: pGpPoint; count: INT): GpStatus; stdcall;
+ GdipDrawEllipseI: function(graphics: pGpGraphics; pen: pGpPen; x: INT; y: INT;
+                          width: INT;  height: INT): GpStatus; stdcall;
+ GdipFillEllipseI: function(graphics: pGpGraphics; brush: pGpBrush;
+                 x: INT; y: INT; width: INT; height: INT): GpStatus; stdcall;
+ GdipDrawArcI: function(graphics: pGpGraphics; pen: pGpPen; x: INT; y: INT;
+                       width: INT; heigh: INT;
+                       startAngle: REAL; sweepAngle: REAL): GpStatus; stdcall;
+ GdipFillPieI: function(graphics: pGpGraphics; brush: pGpBrush; x: INT; y: INT;
+                              width: INT; height: INT; startAngle: REAL;
+                                   sweepAngle: REAL): GpStatus; stdcall;
+ GdipCreatePath: function(brushMode: GpFillMode; 
+                                     path: ppGpPath): GpStatus; stdcall;
+ GdipDeletePath: function(path: pGpPath): GpStatus; stdcall;
+ GdipStartPathFigure: function(path: pGpPath): GpStatus; stdcall;
+ GdipClosePathFigure: function(path: pGpPath): GpStatus; stdcall;
+ GdipAddPathArc: function(path: pGpPath; x: REAL; y: REAL;
+                        width: REAL; height: REAL;
+                        startangle: REAL; sweepangle: REAL): GpStatus; stdcall;
+ GdipFillPath: function(graphics: pGpGraphics; brush: pGpBrush;
+                                            path: pGpPath): GpStatus; stdcall;
 
 function initializegdiplus(
                      const sonames: array of filenamety): boolean;
@@ -203,7 +259,7 @@ end;
 
 function initializegdiplus(const sonames: array of filenamety): boolean;
 const
- funcs: array[0..11] of funcinfoty = (
+ funcs: array[0..30] of funcinfoty = (
   (n: 'GdiplusStartup'; d: @GdiplusStartup),              //0
   (n: 'GdiplusShutdown'; d: @GdiplusShutdown),            //1
   (n: 'GdipCreateFromHDC'; d: @GdipCreateFromHDC),        //2
@@ -215,8 +271,28 @@ const
   (n: 'GdipFillRectangleI'; d: @GdipFillRectangleI),      //8
   (n: 'GdipFillPolygon2I'; d: @GdipFillPolygon2I),        //9
   (n: 'GdipSetSmoothingMode'; d: @GdipSetSmoothingMode),  //10
-  (n: 'GdipGetSmoothingMode'; d: @GdipGetSmoothingMode)   //11
+  (n: 'GdipGetSmoothingMode'; d: @GdipGetSmoothingMode),  //11
+  (n: 'GdipDrawLinesI'; d: @GdipDrawLinesI),              //12
+  (n: 'GdipDrawPolygonI'; d: @GdipDrawPolygonI),          //13
+  (n: 'GdipCreatePen1'; d: @GdipCreatePen1),              //14
+  (n: 'GdipDeletePen'; d: @GdipDeletePen),                //15
+  (n: 'GdipSetPenWidth'; d: @GdipSetPenWidth),            //16
+  (n: 'GdipGetPenWidth'; d: @GdipGetPenWidth),            //17
+  (n: 'GdipSetPenColor'; d: @GdipSetPenColor),            //18
+  (n: 'GdipGetPenColor'; d: @GdipGetPenColor),            //19
+  (n: 'GdipDrawEllipseI'; d: @GdipDrawEllipseI),          //20
+  (n: 'GdipFillEllipseI'; d: @GdipFillEllipseI),          //21
+  (n: 'GdipDrawArcI'; d: @GdipDrawArcI),                  //22
+  (n: 'GdipFillPieI'; d: @GdipFillPieI),                  //23
+  (n: 'GdipCreatePath'; d: @GdipCreatePath),              //24
+  (n: 'GdipDeletePath'; d: @GdipDeletePath),              //25
+  (n: 'GdipAddPathArc'; d: @GdipAddPathArc),              //26
+  (n: 'GdipStartPathFigure'; d: @GdipStartPathFigure),    //27
+  (n: 'GdipClosePathFigure'; d: @GdipClosePathFigure),    //28
+  (n: 'GdipAddPathArc'; d: @GdipAddPathArc),              //29
+  (n: 'GdipFillPath'; d: @GdipFillPath)                   //30
  );
+const
  errormessage = 'Can not load gdi+ library. ';
 begin
  result:= initializedynlib(libinfo,sonames,gdipluslib,funcs,[],errormessage,
