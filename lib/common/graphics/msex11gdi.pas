@@ -86,7 +86,7 @@ type
    1: (_bufferspace: fontdatapty;);
  end;
 
- xftstatety = (xfts_clipregionvalid,xfts_antialias{,xfts_colorvalid});
+ xftstatety = (xfts_clipregionvalid,xfts_smooth{,xfts_colorvalid});
  xftstatesty = set of xftstatety;
  x11gcdty = record
   gcdrawingflags: drawingflagsty;
@@ -866,14 +866,14 @@ begin
    end;
   end;
   if gvm_options in mask then begin
-   if cao_antialias in options then begin
+   if cao_smooth in options then begin
     if fhasxft then begin
      checkxftdraw(drawinfo);
-     include(xftstate,xfts_antialias);
+     include(xftstate,xfts_smooth);
     end;
    end
    else begin
-    exclude(xftstate,xfts_antialias);
+    exclude(xftstate,xfts_smooth);
    end;
   end;
  end;
@@ -2123,7 +2123,7 @@ begin
 {$endif}
 
  with drawinfo do begin
-  if xfts_antialias in x11gcty(gc.platformdata).d.xftstate then begin
+  if xfts_smooth in x11gcty(gc.platformdata).d.xftstate then begin
    if points.count > 2 then begin
     allocbuffer(buffer,points.count*sizeof(txpointfixed));
     po1:= points.points;

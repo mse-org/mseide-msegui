@@ -1038,9 +1038,9 @@ begin
   end;
   gcdrawingflags:= drawingflags;
   if gvm_options in mask then begin
-   if (cao_antialias in options) xor 
-                (cao_antialias in gcoptions) then begin
-    if cao_antialias in options then begin
+   if (cao_smooth in options) xor 
+                (cao_smooth in gcoptions) then begin
+    if cao_smooth in options then begin
      glenable(gl_line_smooth);
      glenable(gl_polygon_smooth);
      glenable(gl_blend);
