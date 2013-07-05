@@ -152,10 +152,11 @@ type
              gcf_foregroundpenvalid,
              gcf_selectforegroundpen,gcf_selectnullpen,gcf_selectnullbrush,
              gcf_ispatternpen,gcf_isopaquedashpen,gcf_smooth,
-             gcf_gpsolidfillvalid,
+             gcf_gpsolidfillvalid,gcf_gpspenvalid,
                           gcf_last = 31);
             //-> longword
  gcflagsty = set of gcflagty;
+
  win32gcdty = record
   flags: gcflagsty;
   backgroundcol,foregroundcol: longword;
@@ -174,6 +175,7 @@ type
   secondpen: hpen;
   gpgraphic: pgpgraphics;
   gpsolidfill: pgpsolidfill;
+  gppen: pgppen;
  end;
  {$if sizeof(win32gcdty) > sizeof(gcpty)} {$error 'buffer overflow'}{$ifend}
  win32gcty = record
@@ -635,10 +637,23 @@ begin
                 (apixel and $000000ff shl 16) or alphamax;
 end;
 
+//todo: optimize, update invalid values only
+
 procedure checkgpgc(var gc: gcty; aflags: gcflagsty);
 begin
  with gc,win32gcty(platformdata).d do begin
-  gdipsetsolidfillcolor(gpsolidfill,gpcolor(foregroundcol));
+  if gcf_gpsolidfillvalid in aflags then begin
+   gdipsetsolidfillcolor(gpsolidfill,gpcolor(foregroundcol));
+  end;
+  if gcf_gpspenvalid in aflags then begin
+   gdipsetpencolor(gppen,gpcolor(foregroundcol));
+   if peninfo.width = 0 then begin
+    gdipsetpenwidth(gppen,1);
+   end
+   else begin   
+    gdipsetpenwidth(gppen,peninfo.width);
+   end;
+  end;
  end;
 end;
 
@@ -913,10 +928,8 @@ begin
    if gpgraphic <> nil then begin
     gdipdeletegraphics(gpgraphic);
     gpgraphic:= nil;
-   end;
-   if gpsolidfill <> nil then begin
     gdipdeletebrush(pgpbrush(gpsolidfill));
-    gpsolidfill:= nil;
+    gdipdeletepen(gppen);
    end;
   end;
  end;
@@ -939,6 +952,7 @@ begin
    if gpgraphic <> nil then begin
     gdipsetsmoothingmode(gpgraphic,smoothingmodeantialias);
     gdipcreatesolidfill(alphamax,@gpsolidfill);
+    gdipcreatepen1(alphamax,1,unitpixel,@gppen);
    end;
   end;
  end;
@@ -1028,31 +1042,44 @@ var
  bo1: boolean;
 begin
  transformpoints(drawinfo,false);
- with drawinfo,points do begin
-  if closed then begin
-   bo1:= checkgc(gc,[gcf_foregroundpenvalid,gcf_selectforegroundpen,
-                        gcf_selectnullbrush]);
-   windows.polygon(gc.handle,buffer.buffer^,count);
-   if bo1 then begin
-    checkgc2(gc);
+ if gcf_smooth in win32gcty(drawinfo.gc.platformdata).d.flags then begin
+  checkgpgc(drawinfo.gc,[gcf_gpspenvalid]);
+  with drawinfo,points,win32gcty(gc.platformdata).d do begin
+   if closed then begin
+    gdipdrawpolygoni(gpgraphic,gppen,buffer.buffer,count);
+   end
+   else begin
+    gdipdrawlinesi(gpgraphic,gppen,buffer.buffer,count);
+   end;
+  end;
+ end
+ else begin
+  with drawinfo,points do begin
+   if closed then begin
+    bo1:= checkgc(gc,[gcf_foregroundpenvalid,gcf_selectforegroundpen,
+                         gcf_selectnullbrush]);
     windows.polygon(gc.handle,buffer.buffer^,count);
-   end;
-  end
-  else begin
-   bo1:= checkgc(gc,[gcf_foregroundpenvalid,gcf_selectforegroundpen]);
-   if ((win32gcty(gc.platformdata).d.peninfo.width <= 1) or
-           (win32gcty(gc.platformdata).d.peninfo.capstyle = cs_butt)) and 
-           (count > 0) then begin
-    po1:= @pointarty(buffer.buffer)[count-1]; //endpoint
-    if (po1^.x <> pointarty(buffer.buffer)[0].x) or
-           (po1^.y <> pointarty(buffer.buffer)[0].y) then  begin
-     adjustlineend(po1);
+    if bo1 then begin
+     checkgc2(gc);
+     windows.polygon(gc.handle,buffer.buffer^,count);
     end;
-   end;
-   windows.polyline(gc.handle,buffer.buffer^,count);
-   if bo1 then begin
-    checkgc2(gc);
+   end
+   else begin
+    bo1:= checkgc(gc,[gcf_foregroundpenvalid,gcf_selectforegroundpen]);
+    if ((win32gcty(gc.platformdata).d.peninfo.width <= 1) or
+            (win32gcty(gc.platformdata).d.peninfo.capstyle = cs_butt)) and 
+            (count > 0) then begin
+     po1:= @pointarty(buffer.buffer)[count-1]; //endpoint
+     if (po1^.x <> pointarty(buffer.buffer)[0].x) or
+            (po1^.y <> pointarty(buffer.buffer)[0].y) then  begin
+      adjustlineend(po1);
+     end;
+    end;
     windows.polyline(gc.handle,buffer.buffer^,count);
+    if bo1 then begin
+     checkgc2(gc);
+     windows.polyline(gc.handle,buffer.buffer^,count);
+    end;
    end;
   end;
  end;
@@ -1065,34 +1092,39 @@ var
  po3: ppointty;
  bo1: boolean;
 begin
- with drawinfo do begin
+ with drawinfo,win32gcty(gc.platformdata).d do begin
   int1:= points.count div 2;
   allocbuffer(buffer,points.count*sizeof(pointty)+int1*sizeof(integer));
       //reserve memory
   transformpoints(drawinfo,false);
-  po1:= pointer(pchar(buffer.buffer) + int1*sizeof(segmentty));
   po3:= buffer.buffer; //segments
-  inc(po3);            //segmentend
-  po2:= po1;           //counts
   int1:= points.count div 2; //segmentcount
-//  bo1:= (win32gcty(gc.platformdata).peninfo.width <= 1) or
-//          (win32gcty(gc.platformdata).peninfo.capstyle = cs_butt);
-  bo1:= (win32gcty(gc.platformdata).d.peninfo.width < 1) {or
-          (win32gcty(gc.platformdata).peninfo.capstyle = cs_butt)};
-//  bo1:= false;
-  for int2:= 0 to int1 - 1 do begin
-   if bo1 then begin
-    adjustlineend(po3);
+  if gcf_smooth in flags then begin
+   checkgpgc(drawinfo.gc,[gcf_gpspenvalid]);
+   for int2:= 0 to int1-1 do begin
+    gdipdrawlinesi(gpgraphic,gppen,pointer(po3),2);
     inc(po3,2);
    end;
-   po2^:= 2;
-   inc(po2);
-  end;
-  bo1:= checkgc(gc,[gcf_foregroundpenvalid,gcf_selectforegroundpen]);
-  windows.polyPolyline(gc.handle,buffer.buffer^,po1^,int1);
-  if bo1 then begin
-   checkgc2(gc);
+  end
+  else begin
+   po1:= pointer(pchar(buffer.buffer) + int1*sizeof(segmentty));
+   inc(po3);            //segmentend
+   po2:= po1;           //counts
+   bo1:= (win32gcty(gc.platformdata).d.peninfo.width < 1);
+   for int2:= 0 to int1 - 1 do begin
+    if bo1 then begin
+     adjustlineend(po3);
+     inc(po3,2);
+    end;
+    po2^:= 2;
+    inc(po2);
+   end;
+   bo1:= checkgc(gc,[gcf_foregroundpenvalid,gcf_selectforegroundpen]);
    windows.polyPolyline(gc.handle,buffer.buffer^,po1^,int1);
+   if bo1 then begin
+    checkgc2(gc);
+    windows.polyPolyline(gc.handle,buffer.buffer^,po1^,int1);
+   end;
   end;
  end;
 end;
@@ -1101,19 +1133,29 @@ procedure gdi_drawellipse(var drawinfo: drawinfoty);
 var
  bo1: boolean;
 begin
- transformellipseinfo(drawinfo,false);
- with drawinfo do begin
-  bo1:= checkgc(gc,[gcf_foregroundpenvalid,gcf_selectforegroundpen,gcf_selectnullbrush]);
-  windows.ellipse(gc.handle,trect(buffer.buffer^).Left,
-                            trect(buffer.buffer^).top,
-                            trect(buffer.buffer^).right,
-                            trect(buffer.buffer^).bottom);
-  if bo1 then begin
-   checkgc2(gc);
+ if gcf_smooth in win32gcty(drawinfo.gc.platformdata).d.flags then begin
+  checkgpgc(drawinfo.gc,[gcf_gpspenvalid]);
+  with drawinfo,rect.rect^,win32gcty(gc.platformdata).d do begin
+   gdipdrawellipsei(gpgraphic,gppen,origin.x+x-cx div 2,
+                              origin.y+y-cy div 2,cx,cy);
+  end;
+ end
+ else begin
+  transformellipseinfo(drawinfo,false);
+  with drawinfo do begin
+   bo1:= checkgc(gc,[gcf_foregroundpenvalid,gcf_selectforegroundpen,
+                                                        gcf_selectnullbrush]);
    windows.ellipse(gc.handle,trect(buffer.buffer^).Left,
                              trect(buffer.buffer^).top,
                              trect(buffer.buffer^).right,
                              trect(buffer.buffer^).bottom);
+   if bo1 then begin
+    checkgc2(gc);
+    windows.ellipse(gc.handle,trect(buffer.buffer^).Left,
+                              trect(buffer.buffer^).top,
+                              trect(buffer.buffer^).right,
+                              trect(buffer.buffer^).bottom);
+   end;
   end;
  end;
 end;
@@ -1125,52 +1167,84 @@ var
 begin
  with info,arc,rect^ do begin
   stopang:= (startang+extentang);
-  xstart:= (round(cos(startang)*cx) div 2) + x + origin.x;
+  xstart:= (round(cos(startang)*cy) div 2) + x + origin.x;
   ystart:= (round(-sin(startang)*cy) div 2) + y + origin.y;
-  xend:= (round(cos(stopang)*cx) div 2) + x + origin.x;
+  xend:= (round(cos(stopang)*cy) div 2) + x + origin.x;
   yend:= (round(-sin(stopang)*cy) div 2) + y + origin.y;
  end;
 end;
 
+const
+ radianttograd = -360.0/(2.0*pi);
+
+procedure adjustgparc(var drawinfo: drawinfoty);
+begin
+ with drawinfo,arc,rect^ do begin
+  x:= x + origin.x - cx div 2;
+  y:= y + origin.y - cy div 2;
+  startang:= startang*radianttograd;
+  extentang:= extentang*radianttograd;
+  {
+  if extentang < 0 then begin
+   startang:= startang+extentang;
+   extentang:= -extentang;
+  end;
+  while startang < 0 do begin
+   startang:= startang + 360;
+  end;
+  }
+ end;
+end;
+ 
 procedure gdi_drawarc(var drawinfo: drawinfoty);
 var                         //todo: optimize
  bo1: boolean;
  xstart,ystart,xend,yend: integer;
 begin
- getarcinfo(drawinfo,xstart,ystart,xend,yend);
- with drawinfo,arc,rect^ do begin
-  if (xstart = xend) and (ystart = yend) and (abs(extentang) < 1) then begin
-   checkgc(gc,[gcf_foregroundpenvalid,gcf_selectforegroundpen,gcf_selectnullbrush]);
-   movetoex(gc.handle,xstart,ystart,nil);
-   if (win32gcty(gc.platformdata).d.peninfo.width = 0) {and 
-           (win32gcty(gc.platformdata).peninfo.capstyle <> cs_butt)} then begin
-    inc(xstart);
+ if gcf_smooth in win32gcty(drawinfo.gc.platformdata).d.flags then begin
+  checkgpgc(drawinfo.gc,[gcf_gpspenvalid]);
+  adjustgparc(drawinfo);
+  with drawinfo,arc,win32gcty(gc.platformdata).d do begin
+   gdipdrawarci(gpgraphic,gppen,rect^.x,rect^.y,rect^.cx,rect^.cy,
+                                                    startang,extentang);
+  end;
+ end
+ else begin
+  getarcinfo(drawinfo,xstart,ystart,xend,yend);
+  with drawinfo,arc,rect^ do begin
+   if (xstart = xend) and (ystart = yend) and (abs(extentang) < 1) then begin
+    checkgc(gc,[gcf_foregroundpenvalid,gcf_selectforegroundpen,gcf_selectnullbrush]);
+    movetoex(gc.handle,xstart,ystart,nil);
+    if (win32gcty(gc.platformdata).d.peninfo.width = 0) {and 
+            (win32gcty(gc.platformdata).peninfo.capstyle <> cs_butt)} then begin
+     inc(xstart);
+    end;
+    lineto(gc.handle,xstart,ystart);
+    exit;
    end;
-   lineto(gc.handle,xstart,ystart);
-   exit;
+   if extentang < 0 then begin
+    setarcdirection(gc.handle,ad_clockwise);
+   end
+   else begin
+    setarcdirection(gc.handle,ad_counterclockwise);
+   end;
   end;
-  if extentang < 0 then begin
-   setarcdirection(gc.handle,ad_clockwise);
-  end
-  else begin
-   setarcdirection(gc.handle,ad_counterclockwise);
-  end;
- end;
- transformellipseinfo(drawinfo,false);
- with drawinfo do begin
-  bo1:= checkgc(gc,[gcf_foregroundpenvalid,gcf_selectforegroundpen,gcf_selectnullbrush]);
-  windows.arc(gc.handle,trect(buffer.buffer^).Left,
-                            trect(buffer.buffer^).top,
-                            trect(buffer.buffer^).right,
-                            trect(buffer.buffer^).bottom,
-                            xstart,ystart,xend,yend);
-  if bo1 then begin
-   checkgc2(gc);
+  transformellipseinfo(drawinfo,false);
+  with drawinfo do begin
+   bo1:= checkgc(gc,[gcf_foregroundpenvalid,gcf_selectforegroundpen,gcf_selectnullbrush]);
    windows.arc(gc.handle,trect(buffer.buffer^).Left,
                              trect(buffer.buffer^).top,
                              trect(buffer.buffer^).right,
                              trect(buffer.buffer^).bottom,
                              xstart,ystart,xend,yend);
+   if bo1 then begin
+    checkgc2(gc);
+    windows.arc(gc.handle,trect(buffer.buffer^).Left,
+                              trect(buffer.buffer^).top,
+                              trect(buffer.buffer^).right,
+                              trect(buffer.buffer^).bottom,
+                              xstart,ystart,xend,yend);
+   end;
   end;
  end;
 end;
@@ -1528,14 +1602,43 @@ end;
 
 procedure gdi_fillelipse(var drawinfo: drawinfoty);
 begin
- transformellipseinfo(drawinfo,true);
- fill(drawinfo,fs_ellipse);
+ if gcf_smooth in win32gcty(drawinfo.gc.platformdata).d.flags then begin
+  checkgpgc(drawinfo.gc,[gcf_gpsolidfillvalid]);
+  with drawinfo,rect.rect^,win32gcty(gc.platformdata).d do begin
+   gdipfillellipsei(gpgraphic,pgpbrush(gpsolidfill),origin.x+x-cx div 2,
+                              origin.y+y-cy div 2,cx,cy);
+  end;
+ end
+ else begin
+  transformellipseinfo(drawinfo,true);
+  fill(drawinfo,fs_ellipse);
+ end;
 end;
 
 procedure gdi_fillarc(var drawinfo: drawinfoty);
+var
+ pa1: pGpPath;
 begin
- transformellipseinfo(drawinfo,true);
- fill(drawinfo,fs_arc);
+ if gcf_smooth in win32gcty(drawinfo.gc.platformdata).d.flags then begin
+  checkgpgc(drawinfo.gc,[gcf_gpsolidfillvalid]);
+  adjustgparc(drawinfo);
+  with drawinfo,arc,win32gcty(gc.platformdata).d do begin
+   if pieslice then begin
+    gdipfillpiei(gpgraphic,pgpbrush(gpsolidfill),
+           rect^.x,rect^.y,rect^.cx,rect^.cy,startang,extentang);
+   end
+   else begin
+    gdipcreatepath(fillmodealternate,@pa1);
+    gdipaddpatharc(pa1,rect^.x,rect^.y,rect^.cx,rect^.cy,startang,extentang);
+    gdipfillpath(gpgraphic,pgpbrush(gpsolidfill),pa1);
+    gdipdeletepath(pa1);
+   end;
+  end;
+ end
+ else begin
+  transformellipseinfo(drawinfo,true);
+  fill(drawinfo,fs_arc);
+ end;
 end;
 
 procedure gdi_fillpolygon(var drawinfo: drawinfoty);
