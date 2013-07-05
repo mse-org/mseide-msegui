@@ -2113,7 +2113,7 @@ end;
 
 procedure gdi_fillpolygon(var drawinfo: drawinfoty); //gdifunc
 var
- int1: integer;
+// int1: integer;
  po1,po2: ppointty;
  po3: pxpointfixed;
  cpic: tpicture;
