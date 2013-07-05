@@ -104,12 +104,35 @@ type
  INT = cint;
  ARGB = uint32;
  pARGB = ^ARGB;
+ GpPoint = record
+  X: INT;
+  Y: INT;
+ end;
+ pGpPoint = ^GpPoint;
  
  GpBrush = record end;
  pGpBrush = ^GpBrush;
  GpSolidFill = record end;
  pGpSolidFill = ^GpSolidFill;
  ppGpSolidFill = ^pGpSolidFill;
+
+ QualityMode = (
+  QualityModeInvalid   = -1,
+  QualityModeDefault   = 0,
+  QualityModeLow       = 1, // Best performance
+  QualityModeHigh      = 2  // Best rendering quality
+ );
+ pQualityMode = ^QualityMode;
+
+ SmoothingMode = (
+  SmoothingModeInvalid     = ord(QualityModeInvalid),
+  SmoothingModeDefault     = ord(QualityModeDefault),
+  SmoothingModeHighSpeed   = ord(QualityModeLow),
+  SmoothingModeHighQuality = ord(QualityModeHigh),
+  SmoothingModeNone,
+  SmoothingModeAntiAlias
+ );
+ pSmoothingMode = ^SmoothingMode;
  
 var
  GdiplusStartup: function(token: ppointer; input: pGdiplusStartupInput;
@@ -120,6 +143,10 @@ var
                  graphics: PPGpGraphics): GpStatus; stdcall;
  GdipDeleteGraphics: function(graphics: PGpGraphics): GpStatus; stdcall;
 
+ GdipSetSmoothingMode: function(graphics: pGpGraphics;
+                        smoothingMode_: SmoothingMode): GpStatus; stdcall;
+ GdipGetSmoothingMode: function(graphics: pGpGraphics;
+                        smoothingMode: pSmoothingMode): GpStatus; stdcall;
 
  GdipDeleteBrush: function(brush: pGpBrush): GpStatus; stdcall;
  GdipCreateSolidFill: function(color: ARGB;
@@ -131,6 +158,8 @@ var
  
  GdipFillRectangleI: function(graphics: pGpGraphics; brush: pGpBrush;
                    x: INT; y: INT; width: INT; height: INT): GpStatus; stdcall;
+ GdipFillPolygon2I: function(graphics: pGpGraphics; brush: pGpBrush;
+                  points: pGpPoint; count: INT): Gpstatus; stdcall;
 
 function initializegdiplus(
                      const sonames: array of filenamety): boolean;
@@ -174,7 +203,7 @@ end;
 
 function initializegdiplus(const sonames: array of filenamety): boolean;
 const
- funcs: array[0..8] of funcinfoty = (
+ funcs: array[0..11] of funcinfoty = (
   (n: 'GdiplusStartup'; d: @GdiplusStartup),              //0
   (n: 'GdiplusShutdown'; d: @GdiplusShutdown),            //1
   (n: 'GdipCreateFromHDC'; d: @GdipCreateFromHDC),        //2
@@ -183,7 +212,10 @@ const
   (n: 'GdipCreateSolidFill'; d: @GdipCreateSolidFill),    //5
   (n: 'GdipSetSolidFillColor'; d: @GdipSetSolidFillColor),//6
   (n: 'GdipGetSolidFillColor'; d: @GdipGetSolidFillColor),//7
-  (n: 'GdipFillRectangleI'; d: @GdipFillRectangleI)       //8
+  (n: 'GdipFillRectangleI'; d: @GdipFillRectangleI),      //8
+  (n: 'GdipFillPolygon2I'; d: @GdipFillPolygon2I),        //9
+  (n: 'GdipSetSmoothingMode'; d: @GdipSetSmoothingMode),  //10
+  (n: 'GdipGetSmoothingMode'; d: @GdipGetSmoothingMode)   //11
  );
  errormessage = 'Can not load gdi+ library. ';
 begin

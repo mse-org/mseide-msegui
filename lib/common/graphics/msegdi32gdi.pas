@@ -141,7 +141,7 @@ const
 
 implementation
 uses
- mseguiintf,msegraphutils,msesysintf1,sysutils;
+ mseguiintf,msegraphutils,msesysintf1,sysutils,msegdiplus;
  
 type
  shapety = (fs_copyarea,fs_rect,fs_ellipse,fs_arc,fs_polygon);
@@ -151,7 +151,8 @@ type
              gcf_selectforegroundbrush,gcf_selectbackgroundbrush,
              gcf_foregroundpenvalid,
              gcf_selectforegroundpen,gcf_selectnullpen,gcf_selectnullbrush,
-             gcf_ispatternpen,gcf_isopaquedashpen,
+             gcf_ispatternpen,gcf_isopaquedashpen,gcf_smooth,
+             gcf_gpsolidfillvalid,
                           gcf_last = 31);
             //-> longword
  gcflagsty = set of gcflagty;
@@ -171,6 +172,8 @@ type
   selectedpen: hpen;
   selectedbrush: hbrush;
   secondpen: hpen;
+  gpgraphic: pgpgraphics;
+  gpsolidfill: pgpsolidfill;
  end;
  {$if sizeof(win32gcdty) > sizeof(gcpty)} {$error 'buffer overflow'}{$ifend}
  win32gcty = record
@@ -622,6 +625,23 @@ begin
  end;
 end;
 
+const
+ alphamax = $ff000000;
+
+function gpcolor(const apixel: pixelty): pixelty; inline;
+begin
+ result:= apixel and $0000ff00 or 
+                (apixel and $00ff0000 shr 16) or
+                (apixel and $000000ff shl 16) or alphamax;
+end;
+
+procedure checkgpgc(var gc: gcty; aflags: gcflagsty);
+begin
+ with gc,win32gcty(platformdata).d do begin
+  gdipsetsolidfillcolor(gpsolidfill,gpcolor(foregroundcol));
+ end;
+end;
+
 function createregion: regionty; overload;
 begin
 {$ifdef mse_debuggdi}
@@ -842,7 +862,10 @@ begin
  end;
 end;
 
- 
+var
+ fgdipluschecked: boolean;
+ fhasgdiplus: boolean;
+  
 procedure gdi_destroygc(var drawinfo: drawinfoty);
 begin
  with drawinfo,gc,win32gcty(platformdata).d do begin
@@ -886,6 +909,38 @@ begin
   end;
   selectedpen:= 0;
   selectedbrush:= 0;
+  if fhasgdiplus then begin
+   if gpgraphic <> nil then begin
+    gdipdeletegraphics(gpgraphic);
+    gpgraphic:= nil;
+   end;
+   if gpsolidfill <> nil then begin
+    gdipdeletebrush(pgpbrush(gpsolidfill));
+    gpsolidfill:= nil;
+   end;
+  end;
+ end;
+end;
+
+function hasgdiplus: boolean;
+begin
+ if not fhasgdiplus and not fgdipluschecked then begin
+  fgdipluschecked:= true;
+  fhasgdiplus:= initializegdiplus([]);
+ end;
+ result:= fhasgdiplus;
+end;
+
+procedure checkgdiplusgraphic(var drawinfo: drawinfoty);
+begin
+ with win32gcty(drawinfo.gc.platformdata).d do begin
+  if gpgraphic = nil then begin
+   gdipcreatefromhdc(drawinfo.gc.handle,@gpgraphic);
+   if gpgraphic <> nil then begin
+    gdipsetsmoothingmode(gpgraphic,smoothingmodeantialias);
+    gdipcreatesolidfill(alphamax,@gpsolidfill);
+   end;
+  end;
  end;
 end;
 
@@ -930,6 +985,17 @@ begin
   end;
   if gvm_font in mask then begin
    selectobject(handle,font);
+  end;
+  if gvm_options in mask then begin
+   exclude(flags,gcf_smooth);
+   if cao_smooth in options then begin
+    if hasgdiplus then begin
+     checkgdiplusgraphic(drawinfo);
+     if gpgraphic <> nil then begin
+      include(flags,gcf_smooth);
+     end;
+    end;
+   end;
   end;
  end;
 end;
@@ -1475,7 +1541,16 @@ end;
 procedure gdi_fillpolygon(var drawinfo: drawinfoty);
 begin
  transformpoints(drawinfo,false);
- fill(drawinfo,fs_polygon);
+ with win32gcty(drawinfo.gc.platformdata).d do begin
+  if gcf_smooth in flags then begin
+   checkgpgc(drawinfo.gc,[gcf_gpsolidfillvalid]);
+   gdipfillpolygon2i(gpgraphic,pgpbrush(gpsolidfill),drawinfo.buffer.buffer,
+                                                    drawinfo.points.count);
+  end
+  else begin
+   fill(drawinfo,fs_polygon);
+  end;
+ end;
 end;
 
 procedure gdi_copyarea(var drawinfo: drawinfoty);
@@ -2449,6 +2524,9 @@ begin
  nullpen:= 0;
  deleteobject(nullbrush);
  nullbrush:= 0;
+ if fhasgdiplus then begin
+  releasegdiplus;
+ end;
 end;
 
 const

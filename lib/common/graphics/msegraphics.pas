@@ -33,7 +33,7 @@ type
  gckindty = (gck_screen,gck_pixmap,gck_printer,gck_metafile);
  
  drawingflagty = (df_canvasispixmap,df_canvasismonochrome,df_highresfont,
-                  df_doublebuffer,df_antialias,
+                  df_doublebuffer,df_smooth,
                   df_colorconvert,
                   df_opaque,df_monochrome,df_brush{,df_dashed},df_last = 31);
  drawingflagsty = set of drawingflagty;
@@ -372,7 +372,7 @@ type
 //  options: lineoptionsty;
  end;
 
- canvasoptionty = (cao_antialias);
+ canvasoptionty = (cao_smooth);
  canvasoptionsty = set of canvasoptionty;
  
  gcvaluesty = record
@@ -691,7 +691,7 @@ type
    procedure setlinewidth(Value: integer);
    function getcapstyle: capstylety;
    function getjoinstyle: joinstylety;
-   function getoptions: canvasoptionsty;
+   function getoptions: canvasoptionsty; inline;
    procedure setcapstyle(const Value: capstylety);
    procedure setjoinstyle(const Value: joinstylety);
    procedure setoptions(const avalue: canvasoptionsty);
@@ -702,6 +702,8 @@ type
    procedure setlinewidthmm(const avalue: real);
    function getmonochrome: boolean;
    procedure readlineoptions(reader: treader);
+   function getsmooth: boolean;
+   procedure setsmooth(const avalue: boolean);
   protected
    fuser: tobject;
    fintf: pointer; //icanvas;
@@ -719,8 +721,8 @@ type
    
    procedure setppmm(avalue: real); virtual;
    function getfitrect: rectty; virtual;
-   procedure valuechanged(value: canvasstatety);
-   procedure valueschanged(values: canvasstatesty);
+   procedure valuechanged(value: canvasstatety); inline;
+   procedure valueschanged(values: canvasstatesty); inline;
    procedure initgcvalues; virtual;
    procedure initgcstate; virtual;
    procedure finalizegcstate; virtual;
@@ -998,6 +1000,7 @@ type
                 default cs_butt;
    property joinstyle: joinstylety read getjoinstyle write setjoinstyle
                 default js_miter;
+   property smooth: boolean read getsmooth write setsmooth;
    property options: canvasoptionsty read getoptions write setoptions
                 default [];
 
@@ -3390,11 +3393,11 @@ begin
  with fdrawinfo,gc do begin
   if not (cs_options in fstate) and (cs_options in state) then begin
    values.options:= fvaluepo^.options;
-   if cao_antialias in values.options then begin
-    include(drawingflags,df_antialias);
+   if cao_smooth in values.options then begin
+    include(drawingflags,df_smooth);
    end
    else begin
-    exclude(drawingflags,df_antialias);
+    exclude(drawingflags,df_smooth);
    end;
    include(values.mask,gvm_options);
    include(fstate,cs_options);
@@ -5768,13 +5771,28 @@ var
 begin
  liopt1:= lineoptionsty(reader.readset(typeinfo(lineoptionsty)));
  if lio_antialias in liopt1 then begin
-  options:= options + [cao_antialias];
+  options:= options + [cao_smooth];
  end;
 end;
 
 procedure tcanvas.defineproperties(filer: tfiler);
 begin
  filer.defineproperty('lineoptions',@readlineoptions,nil,false);
+end;
+
+function tcanvas.getsmooth: boolean;
+begin
+ result:= cao_smooth in options;
+end;
+
+procedure tcanvas.setsmooth(const avalue: boolean);
+begin
+ if avalue then begin
+  options:= options + [cao_smooth];
+ end
+ else begin
+  options:= options - [cao_smooth];
+ end;
 end;
 
 initialization
