@@ -1167,9 +1167,9 @@ var
 begin
  with info,arc,rect^ do begin
   stopang:= (startang+extentang);
-  xstart:= (round(cos(startang)*cx) div 2) + x + origin.x;
+  xstart:= (round(cos(startang)*cy) div 2) + x + origin.x;
   ystart:= (round(-sin(startang)*cy) div 2) + y + origin.y;
-  xend:= (round(cos(stopang)*cx) div 2) + x + origin.x;
+  xend:= (round(cos(stopang)*cy) div 2) + x + origin.x;
   yend:= (round(-sin(stopang)*cy) div 2) + y + origin.y;
  end;
 end;
