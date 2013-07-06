@@ -124,6 +124,9 @@ type
  GpPath = record end;
  pGpPath = ^GpPath;
  ppGpPath = ^pGpPath;
+ GpRegion = record end;
+ pGpRegion = ^GpRegion;
+ ppGpRegion = ^pGpRegion;
 
  QualityMode = (
   QualityModeInvalid   = -1,
@@ -196,6 +199,15 @@ type
   LineJoinRound        = 2,
   LineJoinMiterClipped = 3
  );
+
+ GpCombineMode = (
+  CombineModeReplace,     // 0
+  CombineModeIntersect,   // 1
+  CombineModeUnion,       // 2
+  CombineModeXor,         // 3
+  CombineModeExclude,     // 4
+  CombineModeComplement   // 5 (Exclude From)
+ );
  
 var
  GdiplusStartup: function(token: ppointer; input: pGdiplusStartupInput;
@@ -210,6 +222,8 @@ var
                         smoothingMode_: SmoothingMode): GpStatus; stdcall;
  GdipGetSmoothingMode: function(graphics: pGpGraphics;
                         smoothingMode: pSmoothingMode): GpStatus; stdcall;
+ GdipSetClipRegion: function(graphics: pGpGraphics; region: pGpRegion;
+                           combineMode_: GpCombineMode): GpStatus; stdcall;
 
  GdipDeleteBrush: function(brush: pGpBrush): GpStatus; stdcall;
  GdipCreateSolidFill: function(color: ARGB;
@@ -265,6 +279,9 @@ var
                         startangle: REAL; sweepangle: REAL): GpStatus; stdcall;
  GdipFillPath: function(graphics: pGpGraphics; brush: pGpBrush;
                                             path: pGpPath): GpStatus; stdcall;
+ GdipCreateRegionHrgn: function(hRgn_: HRGN;
+                                        region: ppGpRegion): GpStatus; stdcall;
+ GdipDeleteRegion: function(region: pGpRegion): GpStatus; stdcall;
 
 function initializegdiplus(
                      const sonames: array of filenamety): boolean;
@@ -308,7 +325,7 @@ end;
 
 function initializegdiplus(const sonames: array of filenamety): boolean;
 const
- funcs: array[0..35] of funcinfoty = (
+ funcs: array[0..38] of funcinfoty = (
   (n: 'GdiplusStartup'; d: @GdiplusStartup),              //0
   (n: 'GdiplusShutdown'; d: @GdiplusShutdown),            //1
   (n: 'GdipCreateFromHDC'; d: @GdipCreateFromHDC),        //2
@@ -344,7 +361,10 @@ const
   (n: 'GdipSetPenLineJoin'; d: @GdipSetPenLineJoin),      //32
   (n: 'GdipSetPenDashArray'; d: @GdipSetPenDashArray),    //33
   (n: 'GdipSetPenDashOffset'; d: @GdipSetPenDashOffset),  //34
-  (n: 'GdipSetPenDashStyle'; d: @GdipSetPenDashStyle)     //35
+  (n: 'GdipSetPenDashStyle'; d: @GdipSetPenDashStyle),    //35
+  (n: 'GdipCreateRegionHrgn'; d: @GdipCreateRegionHrgn),  //36
+  (n: 'GdipSetClipRegion'; d: @GdipSetClipRegion),        //37
+  (n: 'GdipDeleteRegion'; d: @GdipDeleteRegion)           //38
  );
 const
  errormessage = 'Can not load gdi+ library. ';

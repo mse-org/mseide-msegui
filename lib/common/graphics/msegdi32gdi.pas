@@ -152,6 +152,7 @@ type
              gcf_foregroundpenvalid,
              gcf_selectforegroundpen,gcf_selectnullpen,gcf_selectnullbrush,
              gcf_ispatternpen,gcf_isopaquedashpen,gcf_smooth,
+             gcf_gpregionvalid,
              {gcf_gpsolidfillvalid,gcf_gpspenvalid,}
                           gcf_last = 31);
             //-> longword
@@ -177,6 +178,7 @@ type
   gpgraphic: pgpgraphics;
   gpsolidfill: pgpsolidfill;
   gppen: pgppen;
+  gpregion: pgpregion;
  end;
  {$if sizeof(win32gcdty) > sizeof(gcpty)} {$error 'buffer overflow'}{$ifend}
  win32gcty = record
@@ -653,8 +655,21 @@ var
  dash1: array[0..high(dashesstringty)] of gpreal;
  int1: integer;
  dasca: real;
+ reg: hrgn;
 begin
  with gc,win32gcty(platformdata).d do begin
+  if not (gcf_gpregionvalid in gpflags) then begin
+   if gpregion <> nil then begin
+    gdipdeleteregion(gpregion);
+   end;
+//   reg:= createrectrgn(-10000,-10000,10000,10000);
+   reg:= createrectrgn(0,0,0,0);
+   getcliprgn(handle,reg);
+   GdipCreateRegionHrgn(reg,@gpregion);
+   gdipsetclipregion(gpgraphic,gpregion,combinemodereplace);
+   deleteobject(reg);
+   include(gpflags,gcf_gpregionvalid);
+  end;
   flags1:= aflags * (aflags >< gpflags);
   if flags1 <> [] then begin
    if gcf_colorbrushvalid in flags1 then begin
@@ -963,6 +978,10 @@ begin
     gpgraphic:= nil;
     gdipdeletebrush(pgpbrush(gpsolidfill));
     gdipdeletepen(gppen);
+    if gpregion <> nil then begin
+     gdipdeleteregion(gpregion);
+     gpregion:= nil;
+    end;
    end;
   end;
  end;
@@ -1029,6 +1048,7 @@ begin
    else begin
     selectcliprgn(handle,clipregion);
    end;
+   exclude(flags,gcf_gpregionvalid);
   end;
   if gvm_font in mask then begin
    selectobject(handle,font);
@@ -1039,7 +1059,8 @@ begin
      checkgdiplusgraphic(drawinfo);
      if gpgraphic <> nil then begin
       if not (gcf_smooth in flags) then begin
-       gpflags:= gpflags - [gcf_colorbrushvalid,gcf_foregroundpenvalid];
+       gpflags:= gpflags - [gcf_colorbrushvalid,gcf_foregroundpenvalid,
+                    gcf_gpregionvalid];
        include(flags,gcf_smooth);
       end;
      end;
@@ -1687,7 +1708,7 @@ begin
   if gcf_smooth in flags then begin
    checkgpgc(drawinfo.gc,[gcf_colorbrushvalid]);
    gdipfillpolygon2i(gpgraphic,pgpbrush(gpsolidfill),drawinfo.buffer.buffer,
-                                                    drawinfo.points.count);
+                                                    drawinfo.points.count);   
   end
   else begin
    fill(drawinfo,fs_polygon);
