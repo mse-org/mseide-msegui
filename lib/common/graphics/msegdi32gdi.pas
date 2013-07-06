@@ -152,13 +152,14 @@ type
              gcf_foregroundpenvalid,
              gcf_selectforegroundpen,gcf_selectnullpen,gcf_selectnullbrush,
              gcf_ispatternpen,gcf_isopaquedashpen,gcf_smooth,
-             gcf_gpsolidfillvalid,gcf_gpspenvalid,
+             {gcf_gpsolidfillvalid,gcf_gpspenvalid,}
                           gcf_last = 31);
             //-> longword
  gcflagsty = set of gcflagty;
 
  win32gcdty = record
   flags: gcflagsty;
+  gpflags: gcflagsty;
   backgroundcol,foregroundcol: longword;
   backgroundbrush: hbrush;
   colorbrush: hbrush;
@@ -640,18 +641,25 @@ end;
 //todo: optimize, update invalid values only
 
 procedure checkgpgc(var gc: gcty; aflags: gcflagsty);
+var
+ flags1: gcflagsty;
 begin
  with gc,win32gcty(platformdata).d do begin
-  if gcf_gpsolidfillvalid in aflags then begin
-   gdipsetsolidfillcolor(gpsolidfill,gpcolor(foregroundcol));
-  end;
-  if gcf_gpspenvalid in aflags then begin
-   gdipsetpencolor(gppen,gpcolor(foregroundcol));
-   if peninfo.width = 0 then begin
-    gdipsetpenwidth(gppen,1);
-   end
-   else begin   
-    gdipsetpenwidth(gppen,peninfo.width);
+  flags1:= aflags * (aflags >< gpflags);
+  if flags1 <> [] then begin
+   if gcf_colorbrushvalid in flags1 then begin
+    gdipsetsolidfillcolor(gpsolidfill,gpcolor(foregroundcol));
+    include(gpflags,gcf_colorbrushvalid);
+   end;
+   if gcf_foregroundpenvalid in aflags then begin
+    gdipsetpencolor(gppen,gpcolor(foregroundcol));
+    if peninfo.width = 0 then begin
+     gdipsetpenwidth(gppen,1);
+    end
+    else begin   
+     gdipsetpenwidth(gppen,peninfo.width);
+    end;
+    include(gpflags,gcf_foregroundpenvalid);
    end;
   end;
  end;
@@ -1001,16 +1009,22 @@ begin
    selectobject(handle,font);
   end;
   if gvm_options in mask then begin
-   exclude(flags,gcf_smooth);
    if cao_smooth in options then begin
     if hasgdiplus then begin
      checkgdiplusgraphic(drawinfo);
      if gpgraphic <> nil then begin
-      include(flags,gcf_smooth);
+      if not (gcf_smooth in flags) then begin
+       gpflags:= gpflags - [gcf_colorbrushvalid,gcf_foregroundpenvalid];
+       include(flags,gcf_smooth);
+      end;
      end;
     end;
+   end
+   else begin
+    exclude(flags,gcf_smooth);
    end;
   end;
+  gpflags:= gpflags * flags; //invalidate gdiplus
  end;
 end;
 
@@ -1043,7 +1057,7 @@ var
 begin
  transformpoints(drawinfo,false);
  if gcf_smooth in win32gcty(drawinfo.gc.platformdata).d.flags then begin
-  checkgpgc(drawinfo.gc,[gcf_gpspenvalid]);
+  checkgpgc(drawinfo.gc,[gcf_foregroundpenvalid]);
   with drawinfo,points,win32gcty(gc.platformdata).d do begin
    if closed then begin
     gdipdrawpolygoni(gpgraphic,gppen,buffer.buffer,count);
@@ -1100,7 +1114,7 @@ begin
   po3:= buffer.buffer; //segments
   int1:= points.count div 2; //segmentcount
   if gcf_smooth in flags then begin
-   checkgpgc(drawinfo.gc,[gcf_gpspenvalid]);
+   checkgpgc(drawinfo.gc,[gcf_foregroundpenvalid]);
    for int2:= 0 to int1-1 do begin
     gdipdrawlinesi(gpgraphic,gppen,pointer(po3),2);
     inc(po3,2);
@@ -1134,7 +1148,7 @@ var
  bo1: boolean;
 begin
  if gcf_smooth in win32gcty(drawinfo.gc.platformdata).d.flags then begin
-  checkgpgc(drawinfo.gc,[gcf_gpspenvalid]);
+  checkgpgc(drawinfo.gc,[gcf_foregroundpenvalid]);
   with drawinfo,rect.rect^,win32gcty(gc.platformdata).d do begin
    gdipdrawellipsei(gpgraphic,gppen,origin.x+x-cx div 2,
                               origin.y+y-cy div 2,cx,cy);
@@ -1202,7 +1216,7 @@ var                         //todo: optimize
  xstart,ystart,xend,yend: integer;
 begin
  if gcf_smooth in win32gcty(drawinfo.gc.platformdata).d.flags then begin
-  checkgpgc(drawinfo.gc,[gcf_gpspenvalid]);
+  checkgpgc(drawinfo.gc,[gcf_foregroundpenvalid]);
   adjustgparc(drawinfo);
   with drawinfo,arc,win32gcty(gc.platformdata).d do begin
    gdipdrawarci(gpgraphic,gppen,rect^.x,rect^.y,rect^.cx,rect^.cy,
@@ -1603,7 +1617,7 @@ end;
 procedure gdi_fillelipse(var drawinfo: drawinfoty);
 begin
  if gcf_smooth in win32gcty(drawinfo.gc.platformdata).d.flags then begin
-  checkgpgc(drawinfo.gc,[gcf_gpsolidfillvalid]);
+  checkgpgc(drawinfo.gc,[gcf_colorbrushvalid]);
   with drawinfo,rect.rect^,win32gcty(gc.platformdata).d do begin
    gdipfillellipsei(gpgraphic,pgpbrush(gpsolidfill),origin.x+x-cx div 2,
                               origin.y+y-cy div 2,cx,cy);
@@ -1620,7 +1634,7 @@ var
  pa1: pGpPath;
 begin
  if gcf_smooth in win32gcty(drawinfo.gc.platformdata).d.flags then begin
-  checkgpgc(drawinfo.gc,[gcf_gpsolidfillvalid]);
+  checkgpgc(drawinfo.gc,[gcf_colorbrushvalid]);
   adjustgparc(drawinfo);
   with drawinfo,arc,win32gcty(gc.platformdata).d do begin
    if pieslice then begin
@@ -1646,7 +1660,7 @@ begin
  transformpoints(drawinfo,false);
  with win32gcty(drawinfo.gc.platformdata).d do begin
   if gcf_smooth in flags then begin
-   checkgpgc(drawinfo.gc,[gcf_gpsolidfillvalid]);
+   checkgpgc(drawinfo.gc,[gcf_colorbrushvalid]);
    gdipfillpolygon2i(gpgraphic,pgpbrush(gpsolidfill),drawinfo.buffer.buffer,
                                                     drawinfo.points.count);
   end
