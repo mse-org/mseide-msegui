@@ -34,6 +34,7 @@ type
   joinstyle: joinstylety;
   brush: tmaskedbitmap;
   brushoffset: pointty;
+  smooth: boolean;
  end;
  
  projvectty = array[0..1] of real;
@@ -55,6 +56,7 @@ type
    procedure setpoly_brush(const avalue: tmaskedbitmap);
    procedure setpoly_brushoffset_x(const avalue: integer);
    procedure setpoly_brushoffset_y(const avalue: integer);
+   procedure setpolysmooth(const avalue: boolean);
   protected
    fstate: polygonstatesty;
    procedure change;
@@ -91,6 +93,8 @@ type
                         setpoly_brushoffset_x;
    property poly_brushoffset_y: integer read finfo.brushoffset.y write
                         setpoly_brushoffset_y;
+   property poly_smooth: boolean read finfo.smooth 
+                                      write setpolysmooth default false;
  end;
 
 const
@@ -344,6 +348,7 @@ begin
  checkgeometry(canvas.ppmm);
  with finfo do begin
   canvas.save;
+  canvas.smooth:= smooth;
   canvas.linewidthmm:= linewidthmm;
   canvas.dashes:= dashes;
   canvas.colorbackground:= colorlinegap;
@@ -611,6 +616,14 @@ procedure tpolygon.setpoly_brushoffset_y(const avalue: integer);
 begin
  if avalue <> finfo.brushoffset.y then begin
   finfo.brushoffset.y:= avalue;
+  invalidate;
+ end;
+end;
+
+procedure tpolygon.setpolysmooth(const avalue: boolean);
+begin
+ if avalue <> finfo.smooth then begin
+  finfo.smooth:= avalue;
   invalidate;
  end;
 end;

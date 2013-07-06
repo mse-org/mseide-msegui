@@ -103,6 +103,7 @@ type
 
  INT = cint;
  REAL = single;
+ GpREAL = REAL;
  pReal = ^REAL;
  ARGB = uint32;
  pARGB = ^ARGB;
@@ -151,9 +152,49 @@ type
   UnitDocument,   // 5 -- Each unit is 1/300 inch.
   UnitMillimeter  // 6 -- Each unit is 1 millimeter.
  );
+
  GpFillMode = (
   FillModeAlternate,        // 0
   FillModeWinding           // 1
+ );
+
+ GpLineCap = (
+  LineCapFlat             = 0,
+  LineCapSquare           = 1,
+  LineCapRound            = 2,
+  LineCapTriangle         = 3,
+
+  LineCapNoAnchor         = $10, // corresponds to flat cap
+  LineCapSquareAnchor     = $11, // corresponds to square cap
+  LineCapRoundAnchor      = $12, // corresponds to round cap
+  LineCapDiamondAnchor    = $13, // corresponds to triangle cap
+  LineCapArrowAnchor      = $14, // no correspondence
+
+  LineCapCustom           = $ff  // custom cap
+
+//  LineCapAnchorMask       = 0xf0  // mask to check for anchor or not.
+ );
+
+ GpDashCap = (
+  DashCapFlat             = 0,
+  DashCapRound            = 2,
+  DashCapTriangle         = 3
+ );
+
+ GpDashStyle = (
+  DashStyleSolid,          // 0
+  DashStyleDash,           // 1
+  DashStyleDot,            // 2
+  DashStyleDashDot,        // 3
+  DashStyleDashDotDot,     // 4
+  DashStyleCustom          // 5
+);
+
+ GpLineJoin = (
+  LineJoinMiter        = 0,
+  LineJoinBevel        = 1,
+  LineJoinRound        = 2,
+  LineJoinMiterClipped = 3
  );
  
 var
@@ -190,7 +231,15 @@ var
  GdipGetPenWidth: function(pen: pGpPen; width: pREAL): GpStatus; stdcall;
  GdipSetPenColor: function(pen: pGpPen; argb_: ARGB): GpStatus; stdcall;
  GdipGetPenColor: function(pen: pGpPen; argb_: pARGB): GpStatus; stdcall;
- 
+ GdipSetPenLineCap197819: function(pen: pGpPen; startCap: GpLineCap;
+                   endCap: GpLineCap; dashCap: GpDashCap): GpStatus; stdcall;
+ GdipSetPenLineJoin: function(pen: pGpPen;
+                                    lineJoin: GpLineJoin): GpStatus; stdcall;
+ GdipSetPenDashArray: function(pen: pGpPen; dash: pREAL;
+                                         count: INT): GpStatus; stdcall;
+ GdipSetPenDashOffset: function(pen: pGpPen; offset: REAL): GpStatus; stdcall;
+ GdipSetPenDashStyle: function(pen: pGpPen; 
+                                  dashstyle: GpDashStyle): GpStatus;  stdcall;
 
  GdipDrawLinesI: function(graphics: pGpGraphics; pen: pGpPen;
                             points: pGpPoint; count: INT): GpStatus; stdcall;
@@ -259,7 +308,7 @@ end;
 
 function initializegdiplus(const sonames: array of filenamety): boolean;
 const
- funcs: array[0..30] of funcinfoty = (
+ funcs: array[0..35] of funcinfoty = (
   (n: 'GdiplusStartup'; d: @GdiplusStartup),              //0
   (n: 'GdiplusShutdown'; d: @GdiplusShutdown),            //1
   (n: 'GdipCreateFromHDC'; d: @GdipCreateFromHDC),        //2
@@ -290,7 +339,12 @@ const
   (n: 'GdipStartPathFigure'; d: @GdipStartPathFigure),    //27
   (n: 'GdipClosePathFigure'; d: @GdipClosePathFigure),    //28
   (n: 'GdipAddPathArc'; d: @GdipAddPathArc),              //29
-  (n: 'GdipFillPath'; d: @GdipFillPath)                   //30
+  (n: 'GdipFillPath'; d: @GdipFillPath),                  //30
+  (n: 'GdipSetPenLineCap197819'; d: @GdipSetPenLineCap197819), //31
+  (n: 'GdipSetPenLineJoin'; d: @GdipSetPenLineJoin),      //32
+  (n: 'GdipSetPenDashArray'; d: @GdipSetPenDashArray),    //33
+  (n: 'GdipSetPenDashOffset'; d: @GdipSetPenDashOffset),  //34
+  (n: 'GdipSetPenDashStyle'; d: @GdipSetPenDashStyle)     //35
  );
 const
  errormessage = 'Can not load gdi+ library. ';

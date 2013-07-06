@@ -640,9 +640,19 @@ end;
 
 //todo: optimize, update invalid values only
 
+const
+ gpcaps: array[capstylety] of gplinecap = 
+                 (linecapflat,linecapround,linecapsquare);
+ gpjoins: array[joinstylety] of gplinejoin = 
+                 (linejoinmiter,linejoinround,linejoinbevel);
+
 procedure checkgpgc(var gc: gcty; aflags: gcflagsty);
 var
  flags1: gcflagsty;
+ cap1: gplinecap;
+ dash1: array[0..high(dashesstringty)] of gpreal;
+ int1: integer;
+ dasca: real;
 begin
  with gc,win32gcty(platformdata).d do begin
   flags1:= aflags * (aflags >< gpflags);
@@ -655,9 +665,24 @@ begin
     gdipsetpencolor(gppen,gpcolor(foregroundcol));
     if peninfo.width = 0 then begin
      gdipsetpenwidth(gppen,1);
+     dasca:= 1;
     end
     else begin   
      gdipsetpenwidth(gppen,peninfo.width);
+     dasca:= 1/peninfo.width;
+    end;
+    cap1:= gpcaps[peninfo.capstyle];
+    gdipsetpenlinecap197819(gppen,cap1,cap1,dashcapflat);
+    gdipsetpenlinejoin(gppen,gpjoins[peninfo.joinstyle]);
+    if length(peninfo.dashes) > 0 then begin
+     for int1:= 1 to length(peninfo.dashes) do begin
+      dash1[int1-1]:= ord(peninfo.dashes[int1])*dasca;
+     end;
+     gdipsetpendasharray(gppen,@dash1,length(peninfo.dashes));
+     gdipsetpendashoffset(gppen,0.5*dasca);
+    end
+    else begin
+     gdipsetpendashstyle(gppen,dashstylesolid);
     end;
     include(gpflags,gcf_foregroundpenvalid);
    end;
