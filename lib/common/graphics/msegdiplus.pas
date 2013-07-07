@@ -155,12 +155,20 @@ type
   UnitDocument,   // 5 -- Each unit is 1/300 inch.
   UnitMillimeter  // 6 -- Each unit is 1 millimeter.
  );
+ GpMatrixOrder = (
+  MatrixOrderPrepend    = 0,
+  MatrixOrderAppend     = 1
+);
 
  GpFillMode = (
   FillModeAlternate,        // 0
   FillModeWinding           // 1
  );
 
+ GpPenAlignment = (
+  PenAlignmentCenter       = 0,
+  PenAlignmentInset        = 1
+);
  GpLineCap = (
   LineCapFlat             = 0,
   LineCapSquare           = 1,
@@ -209,13 +217,20 @@ type
   CombineModeComplement   // 5 (Exclude From)
  );
 
- GpFlushIntention =
- (
+ GpFlushIntention = (
   FlushIntentionFlush = 0,        // Flush all batched rendering operations
   FlushIntentionSync = 1          // Flush all batched rendering operations
                                   // and wait for them to complete
  );
  
+ GpPixelOffsetMode = (
+  PixelOffsetModeInvalid     = ord(QualityModeInvalid),
+  PixelOffsetModeDefault     = ord(QualityModeDefault),
+  PixelOffsetModeHighSpeed   = ord(QualityModeLow),
+  PixelOffsetModeHighQuality = ord(QualityModeHigh),
+  PixelOffsetModeNone,    // No pixel offset
+  PixelOffsetModeHalf     // Offset by -0.5, -0.5 for fast anti-alias perf
+);
 var
  GdiplusStartup: function(token: ppointer; input: pGdiplusStartupInput;
                           output: pGdiplusStartupOutput): GpStatus; stdcall;
@@ -230,11 +245,15 @@ var
  GdipDeleteGraphics: function(graphics: PGpGraphics): GpStatus; stdcall;
  GdipFlush: function(graphics: pGpGraphics;
           intention: GpFlushIntention): Gpstatus; stdcall;
+ GdipTranslateWorldTransform: function(graphics: pGpGraphics;
+              dx: REAL; dy: REAL; order: GpMatrixOrder): GpStatus; stdcall;
 
  GdipSetSmoothingMode: function(graphics: pGpGraphics;
                         smoothingMode_: SmoothingMode): GpStatus; stdcall;
  GdipGetSmoothingMode: function(graphics: pGpGraphics;
                         smoothingMode: pSmoothingMode): GpStatus; stdcall;
+ GdipSetPixelOffsetMode: function(graphics: pGpGraphics;
+                     pixelOffsetMode: GpPixelOffsetMode): GpStatus; stdcall;
  GdipSetClipRegion: function(graphics: pGpGraphics; region: pGpRegion;
                            combineMode_: GpCombineMode): GpStatus; stdcall;
  GdipResetClip: function(graphics: pGpGraphics): GpStatus; stdcall;
@@ -255,6 +274,8 @@ var
  GdipCreatePen1: function(color: ARGB; width: REAL; unit_: GpUnit;
                                     pen: ppGpPen): GpStatus; stdcall;
  GdipDeletePen: function(pen: pGpPen): GpStatus; stdcall;
+ GdipSetPenMode: function(pen: pGpPen; 
+                           penMode: GpPenAlignment): GpStatus; stdcall;
  GdipSetPenWidth: function(pen: pGpPen; width: REAL): GpStatus; stdcall;
  GdipGetPenWidth: function(pen: pGpPen; width: pREAL): GpStatus; stdcall;
  GdipSetPenColor: function(pen: pGpPen; argb_: ARGB): GpStatus; stdcall;
@@ -296,6 +317,7 @@ var
  GdipCreateRegionHrgn: function(hRgn_: HRGN;
                                         region: ppGpRegion): GpStatus; stdcall;
  GdipDeleteRegion: function(region: pGpRegion): GpStatus; stdcall;
+ GdipResetWorldTransform: function(graphics: pGpGraphics): GpStatus; stdcall;
 
 function initializegdiplus(const sonames: array of filenamety;
                      const noexception: boolean = false): boolean;
@@ -340,7 +362,7 @@ end;
 function initializegdiplus(const sonames: array of filenamety;
                                 const noexception: boolean = false): boolean;
 const
- funcs: array[0..42] of funcinfoty = (
+ funcs: array[0..46] of funcinfoty = (
   (n: 'GdiplusStartup'; d: @GdiplusStartup),              //0
   (n: 'GdiplusShutdown'; d: @GdiplusShutdown),            //1
   (n: 'GdipCreateFromHDC'; d: @GdipCreateFromHDC),        //2
@@ -383,7 +405,11 @@ const
   (n: 'GdipFlush'; d: @GdipFlush),                        //39
   (n: 'GdipResetClip'; d: @GdipResetClip),                //40
   (n: 'GdipCreateFromHDC2'; d: @GdipCreateFromHDC2),      //41
-  (n: 'GdipCreateFromHWND'; d: @GdipCreateFromHWND)       //42
+  (n: 'GdipCreateFromHWND'; d: @GdipCreateFromHWND),      //42
+  (n: 'GdipSetPixelOffsetMode'; d: @GdipSetPixelOffsetMode),//43
+  (n: 'GdipSetPenMode'; d: @GdipSetPenMode),                //44
+  (n: 'GdipTranslateWorldTransform'; d: @GdipTranslateWorldTransform),//45
+  (n: 'GdipResetWorldTransform'; d: @GdipResetWorldTransform)//46
  );
 const
  errormessage = 'Can not load gdi+ library. ';

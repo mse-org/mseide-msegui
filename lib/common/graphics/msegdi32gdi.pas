@@ -152,12 +152,15 @@ type
              gcf_foregroundpenvalid,
              gcf_selectforegroundpen,gcf_selectnullpen,gcf_selectnullbrush,
              gcf_ispatternpen,gcf_isopaquedashpen,gcf_smooth,
-             gcf_gpregionvalid,
+             gcf_gpregionvalid,gcf_gppenmode,
              {gcf_gpsolidfillvalid,gcf_gpspenvalid,}
                           gcf_last = 31);
             //-> longword
  gcflagsty = set of gcflagty;
-
+ pgcflagsty = ^gcflagsty;
+const
+ gcfgpflags = [gcf_gppenmode];
+type
  win32gcdty = record
   flags: gcflagsty;
   gpflags: gcflagsty;
@@ -623,10 +626,7 @@ begin
    selectobject(gc.handle,nullbrush);
    selectedbrush:= nullbrush;
   end;
-  flags:= gcflagsty(longword(flags) or longword(flags1));
-//  if (df_monochrome in drawingflags)  then begin
-//   updateopaquemode(gc);
-//  end;
+  flags:= flags + flags1;
  end;
 end;
 
@@ -669,8 +669,18 @@ begin
    deleteobject(reg);
    include(gpflags,gcf_gpregionvalid);
   end;
-  flags1:= aflags * (aflags >< gpflags);
+  flags1:= (aflags+gpflags) * (aflags >< gpflags);
   if flags1 <> [] then begin
+   if gcf_gppenmode in flags1 then begin
+    gdipresetworldtransform(gpgraphic);
+    if gcf_gppenmode in aflags then begin
+     gdiptranslateworldtransform(gpgraphic,0.5,0.5,matrixorderprepend);
+     include(gpflags,gcf_gppenmode);
+    end
+    else begin
+     exclude(gpflags,gcf_gppenmode);
+    end;
+   end;
    if gcf_colorbrushvalid in flags1 then begin
     gdipsetsolidfillcolor(gpsolidfill,gpcolor(foregroundcol));
     include(gpflags,gcf_colorbrushvalid);
@@ -1012,8 +1022,11 @@ begin
    deleteobject(reg);
    if gpgraphic <> nil then begin
     gdipsetsmoothingmode(gpgraphic,smoothingmodeantialias);
+    gdipsetpixeloffsetmode(gpgraphic,pixeloffsetmodehalf);
     gdipcreatesolidfill(alphamax,@gpsolidfill);
     gdipcreatepen1(alphamax,1,unitpixel,@gppen);
+    gpflags:= [];
+//    gdipsetpenmode(gppen,penalignmentcenter);
    end;
   end;
  end;
@@ -1081,7 +1094,7 @@ begin
     exclude(flags,gcf_smooth);
    end;
   end;
-  gpflags:= gpflags * flags; //invalidate gdiplus
+  gpflags:= gpflags * (flags+gcfgpflags); //invalidate gdiplus
  end;
 end;
 
@@ -1118,7 +1131,7 @@ var
 begin
  transformpoints(drawinfo,false);
  if gcf_smooth in win32gcty(drawinfo.gc.platformdata).d.flags then begin
-  checkgpgc(drawinfo.gc,[gcf_foregroundpenvalid]);
+  checkgpgc(drawinfo.gc,[gcf_foregroundpenvalid,gcf_gppenmode]);
   with drawinfo,points,win32gcty(gc.platformdata).d do begin
    if closed then begin
     gdipdrawpolygoni(gpgraphic,gppen,buffer.buffer,count);
@@ -1175,7 +1188,7 @@ begin
   po3:= buffer.buffer; //segments
   int1:= points.count div 2; //segmentcount
   if gcf_smooth in flags then begin
-   checkgpgc(drawinfo.gc,[gcf_foregroundpenvalid]);
+   checkgpgc(drawinfo.gc,[gcf_foregroundpenvalid,gcf_gppenmode]);
    for int2:= 0 to int1-1 do begin
     gdipdrawlinesi(gpgraphic,gppen,pointer(po3),2);
     inc(po3,2);
