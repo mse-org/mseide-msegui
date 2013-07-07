@@ -5782,16 +5782,18 @@ end;
 
 function tcanvas.getsmooth: boolean;
 begin
- result:= cao_smooth in options;
+ result:= cao_smooth in fvaluepo^.options;
 end;
 
 procedure tcanvas.setsmooth(const avalue: boolean);
 begin
- if avalue then begin
-  options:= options + [cao_smooth];
- end
- else begin
-  options:= options - [cao_smooth];
+ if avalue <> (cao_smooth in fvaluepo^.options) then begin
+  if avalue then begin
+   options:= fvaluepo^.options + [cao_smooth];
+  end
+  else begin
+   options:= fvaluepo^.options - [cao_smooth];
+  end;
  end;
 end;
 

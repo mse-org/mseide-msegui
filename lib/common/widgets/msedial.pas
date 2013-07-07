@@ -285,7 +285,7 @@ type
  end;
  
  dialoptionty = (do_invisible,do_opposite,do_sideline,do_boxline,do_log,
-                 do_front,do_scrollwithdata,do_shiftwithdata,
+                 do_front,do_smooth,do_scrollwithdata,do_shiftwithdata,
                  do_savestate);
  dialoptionsty = set of dialoptionty;
 
@@ -2376,6 +2376,9 @@ var
 begin
  fmarkers.paint1(acanvas);
  if visible then begin
+  if (do_smooth in options) and (angle <> 0) then begin
+   acanvas.smooth:= true;
+  end;
   for int1:= high(fticks.fitems) downto 0 do begin
    with tdialtick(fticks.fitems[int1]),finfo do begin
     if visible then begin
@@ -2400,6 +2403,7 @@ begin
  end;
  fmarkers.paint2(acanvas);
  acanvas.linewidth:= 0;
+ acanvas.smooth:= false;
 end;
 
 procedure tcustomdialcontroller.paint(const acanvas: tcanvas);

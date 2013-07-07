@@ -32,7 +32,7 @@ type
                  chs_started,chs_full,chs_chartvalid, //for tchartrecorder
                  chs_layoutvalid); 
  chartstatesty = set of chartstatety;
- charttraceoptionty = (cto_invisible,cto_stockglyphs,cto_adddataright,
+ charttraceoptionty = (cto_invisible,cto_smooth,cto_stockglyphs,cto_adddataright,
                        cto_xordered, //optimize for big data quantity
                        cto_logx,cto_logy,cto_seriescentered,
                        cto_savexscale,cto_saveyscale
@@ -1477,6 +1477,9 @@ begin
   end
   else begin
    if finfo.datapoints <> nil then begin
+    if cto_smooth in finfo.options then begin
+     acanvas.smooth:= true;
+    end;
     acanvas.capstyle:= cs_round;
     acanvas.joinstyle:= js_round;
     bo1:= (kind = trk_xseries) or (cto_xordered in finfo.options);
@@ -1519,6 +1522,7 @@ begin
     end;
     acanvas.capstyle:= cs_butt;
     acanvas.joinstyle:= js_miter;
+    acanvas.smooth:= false;
    end;
   end;
   if finfo.dashes <> '' then begin
