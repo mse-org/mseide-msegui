@@ -208,6 +208,13 @@ type
   CombineModeExclude,     // 4
   CombineModeComplement   // 5 (Exclude From)
  );
+
+ GpFlushIntention =
+ (
+  FlushIntentionFlush = 0,        // Flush all batched rendering operations
+  FlushIntentionSync = 1          // Flush all batched rendering operations
+                                  // and wait for them to complete
+ );
  
 var
  GdiplusStartup: function(token: ppointer; input: pGdiplusStartupInput;
@@ -217,6 +224,8 @@ var
  GdipCreateFromHDC: function(hdc: HDC;
                  graphics: PPGpGraphics): GpStatus; stdcall;
  GdipDeleteGraphics: function(graphics: PGpGraphics): GpStatus; stdcall;
+ GdipFlush: function(graphics: pGpGraphics;
+          intention: GpFlushIntention): Gpstatus; stdcall;
 
  GdipSetSmoothingMode: function(graphics: pGpGraphics;
                         smoothingMode_: SmoothingMode): GpStatus; stdcall;
@@ -224,6 +233,7 @@ var
                         smoothingMode: pSmoothingMode): GpStatus; stdcall;
  GdipSetClipRegion: function(graphics: pGpGraphics; region: pGpRegion;
                            combineMode_: GpCombineMode): GpStatus; stdcall;
+ GdipResetClip: function(graphics: pGpGraphics): GpStatus; stdcall;
 
  GdipDeleteBrush: function(brush: pGpBrush): GpStatus; stdcall;
  GdipCreateSolidFill: function(color: ARGB;
@@ -283,8 +293,8 @@ var
                                         region: ppGpRegion): GpStatus; stdcall;
  GdipDeleteRegion: function(region: pGpRegion): GpStatus; stdcall;
 
-function initializegdiplus(
-                     const sonames: array of filenamety): boolean;
+function initializegdiplus(const sonames: array of filenamety;
+                     const noexception: boolean = false): boolean;
            //false if not available
 procedure releasegdiplus;
 function gdipcheckerror(const aerror: gpstatus): boolean; //true if ok
@@ -323,9 +333,10 @@ begin
  end;
 end;
 
-function initializegdiplus(const sonames: array of filenamety): boolean;
+function initializegdiplus(const sonames: array of filenamety;
+                                const noexception: boolean = false): boolean;
 const
- funcs: array[0..38] of funcinfoty = (
+ funcs: array[0..40] of funcinfoty = (
   (n: 'GdiplusStartup'; d: @GdiplusStartup),              //0
   (n: 'GdiplusShutdown'; d: @GdiplusShutdown),            //1
   (n: 'GdipCreateFromHDC'; d: @GdipCreateFromHDC),        //2
@@ -364,13 +375,15 @@ const
   (n: 'GdipSetPenDashStyle'; d: @GdipSetPenDashStyle),    //35
   (n: 'GdipCreateRegionHrgn'; d: @GdipCreateRegionHrgn),  //36
   (n: 'GdipSetClipRegion'; d: @GdipSetClipRegion),        //37
-  (n: 'GdipDeleteRegion'; d: @GdipDeleteRegion)           //38
+  (n: 'GdipDeleteRegion'; d: @GdipDeleteRegion),          //38
+  (n: 'GdipFlush'; d: @GdipFlush),                        //39
+  (n: 'GdipResetClip'; d: @GdipResetClip)                 //40
  );
 const
  errormessage = 'Can not load gdi+ library. ';
 begin
  result:= initializedynlib(libinfo,sonames,gdipluslib,funcs,[],errormessage,
-                                                @initgdiplus,true);
+                                                @initgdiplus,noexception);
 end;
 
 procedure releasegdiplus;

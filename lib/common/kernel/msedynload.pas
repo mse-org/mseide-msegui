@@ -335,16 +335,18 @@ begin
      end;
     end
     else begin
-     cw8087:= get8087cw;
-    end;    
-    for int1:= 0 to high(inithooks) do begin
-     dynlibprocty(inithooks[int1])(info);
+     cw8087:= get8087cw; //refresh
     end;
-    if ({$ifndef FPC}@{$endif}callback <> nil) then begin
-     callback();
+    if libhandle <> nilhandle then begin
+     inc(refcount);
+     for int1:= 0 to high(inithooks) do begin
+      dynlibprocty(inithooks[int1])(info);
+     end;
+     if ({$ifndef FPC}@{$endif}callback <> nil) then begin
+      callback();
+     end;
     end;
    end;
-   inc(refcount);
   finally
    sys_mutexunlock(lock);
   end;
