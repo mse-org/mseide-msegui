@@ -662,7 +662,6 @@ begin
    if gpregion <> nil then begin
     gdipdeleteregion(gpregion);
    end;
-//   reg:= createrectrgn(-10000,-10000,10000,10000);
    reg:= createrectrgn(0,0,0,0);
    getcliprgn(handle,reg);
    GdipCreateRegionHrgn(reg,@gpregion);
@@ -991,16 +990,26 @@ function hasgdiplus: boolean;
 begin
  if not fhasgdiplus and not fgdipluschecked then begin
   fgdipluschecked:= true;
-  fhasgdiplus:= initializegdiplus([]);
+  fhasgdiplus:= initializegdiplus([],true);
  end;
  result:= fhasgdiplus;
 end;
 
 procedure checkgdiplusgraphic(var drawinfo: drawinfoty);
+var
+ reg: hrgn;
+ int1: int;
 begin
- with win32gcty(drawinfo.gc.platformdata).d do begin
+ with drawinfo.gc,win32gcty(platformdata).d do begin
   if gpgraphic = nil then begin
-   gdipcreatefromhdc(drawinfo.gc.handle,@gpgraphic);
+   reg:= createrectrgn(0,0,0,0);
+   int1:= getcliprgn(handle,reg);
+   selectcliprgn(handle,0); //use full paintdevice rect
+   gdipcreatefromhdc(handle,@gpgraphic);
+   if int1 > 0 then begin
+    selectcliprgn(handle,reg);
+   end;
+   deleteobject(reg);
    if gpgraphic <> nil then begin
     gdipsetsmoothingmode(gpgraphic,smoothingmodeantialias);
     gdipcreatesolidfill(alphamax,@gpsolidfill);
@@ -1039,6 +1048,7 @@ begin
    setbrushorgex(handle,brushorigin.x,brushorigin.y,nil);
   end;
   if gvm_clipregion in mask then begin
+//{
    gccliporigin:= cliporigin;
    if ((cliporigin.x <> 0) or (cliporigin.y <> 0)) and (clipregion <> 0) then begin
     offsetrgn(clipregion,cliporigin.x,cliporigin.y);
@@ -1048,6 +1058,7 @@ begin
    else begin
     selectcliprgn(handle,clipregion);
    end;
+//}
    exclude(flags,gcf_gpregionvalid);
   end;
   if gvm_font in mask then begin
@@ -1086,7 +1097,11 @@ end;
 
 procedure gdi_flush(var drawinfo: drawinfoty); //gdifunc
 begin
- //dummy
+ with win32gcty(drawinfo.gc.platformdata).d do begin
+  if gpgraphic <> nil then begin
+   gdipflush(gpgraphic,flushintentionsync);
+  end;
+ end;
 end;
 
 procedure gdi_movewindowrect(var drawinfo: drawinfoty); //gdifunc

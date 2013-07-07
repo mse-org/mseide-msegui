@@ -221,8 +221,12 @@ var
                           output: pGdiplusStartupOutput): GpStatus; stdcall;
  GdiplusShutdown: function(token: pointer): GpStatus; stdcall;
 
- GdipCreateFromHDC: function(hdc: HDC;
+ GdipCreateFromHDC: function(hdc_: HDC;
                  graphics: PPGpGraphics): GpStatus; stdcall;
+ GdipCreateFromHDC2: function(hdc_: HDC; hDevice: HANDLE;
+                                 graphics: ppGpGraphics): GpStatus; stdcall;
+ GdipCreateFromHWND: function(hwnd_: HWND;
+                                 graphics: ppGpGraphics): GpStatus; stdcall;
  GdipDeleteGraphics: function(graphics: PGpGraphics): GpStatus; stdcall;
  GdipFlush: function(graphics: pGpGraphics;
           intention: GpFlushIntention): Gpstatus; stdcall;
@@ -336,7 +340,7 @@ end;
 function initializegdiplus(const sonames: array of filenamety;
                                 const noexception: boolean = false): boolean;
 const
- funcs: array[0..40] of funcinfoty = (
+ funcs: array[0..42] of funcinfoty = (
   (n: 'GdiplusStartup'; d: @GdiplusStartup),              //0
   (n: 'GdiplusShutdown'; d: @GdiplusShutdown),            //1
   (n: 'GdipCreateFromHDC'; d: @GdipCreateFromHDC),        //2
@@ -377,7 +381,9 @@ const
   (n: 'GdipSetClipRegion'; d: @GdipSetClipRegion),        //37
   (n: 'GdipDeleteRegion'; d: @GdipDeleteRegion),          //38
   (n: 'GdipFlush'; d: @GdipFlush),                        //39
-  (n: 'GdipResetClip'; d: @GdipResetClip)                 //40
+  (n: 'GdipResetClip'; d: @GdipResetClip),                //40
+  (n: 'GdipCreateFromHDC2'; d: @GdipCreateFromHDC2),      //41
+  (n: 'GdipCreateFromHWND'; d: @GdipCreateFromHWND)       //42
  );
 const
  errormessage = 'Can not load gdi+ library. ';
