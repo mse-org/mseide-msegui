@@ -659,6 +659,7 @@ var
 begin
  with gc,win32gcty(platformdata).d do begin
   if not (gcf_gpregionvalid in gpflags) then begin
+//  if true then begin
    if gpregion <> nil then begin
     gdipdeleteregion(gpregion);
    end;
@@ -670,9 +671,9 @@ begin
    else begin
     GdipCreateRegionHrgn(reg,@gpregion);
     gdipsetclipregion(gpgraphic,gpregion,combinemodereplace);
-    deleteobject(reg);
-    include(gpflags,gcf_gpregionvalid);
    end;
+   include(gpflags,gcf_gpregionvalid);
+   deleteobject(reg);
   end;
   flags1:= (aflags+gpflags) * (aflags >< gpflags);
   if flags1 <> [] then begin

@@ -2423,6 +2423,9 @@ begin
   acanvas.capstyle:= cs_projecting;
   acanvas.linewidthmm:= fwidthmm;
   if fboxarc.cx <> 0 then begin
+   if do_smooth in options then begin
+    acanvas.smooth:= true;
+   end;
    if fangle = 1 then begin
     if do_boxline in foptions then begin
      acanvas.drawellipse1(fboxarc,fcolor);
@@ -2439,6 +2442,7 @@ begin
      acanvas.drawarc1(fsidearc,fstartang,farcang,fcolor);
     end;
    end;
+   acanvas.smooth:= false;
   end
   else begin
    acanvas.drawlinesegments(fboxlines,fcolor);
