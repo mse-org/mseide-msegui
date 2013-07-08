@@ -663,11 +663,16 @@ begin
     gdipdeleteregion(gpregion);
    end;
    reg:= createrectrgn(0,0,0,0);
-   getcliprgn(handle,reg);
-   GdipCreateRegionHrgn(reg,@gpregion);
-   gdipsetclipregion(gpgraphic,gpregion,combinemodereplace);
-   deleteobject(reg);
-   include(gpflags,gcf_gpregionvalid);
+   if getcliprgn(handle,reg) = 0 then begin
+    gdipresetclip(gpgraphic);
+    gpregion:= nil;
+   end
+   else begin
+    GdipCreateRegionHrgn(reg,@gpregion);
+    gdipsetclipregion(gpgraphic,gpregion,combinemodereplace);
+    deleteobject(reg);
+    include(gpflags,gcf_gpregionvalid);
+   end;
   end;
   flags1:= (aflags+gpflags) * (aflags >< gpflags);
   if flags1 <> [] then begin
