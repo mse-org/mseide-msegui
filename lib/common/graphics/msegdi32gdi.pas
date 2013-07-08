@@ -659,7 +659,6 @@ var
 begin
  with gc,win32gcty(platformdata).d do begin
   if not (gcf_gpregionvalid in gpflags) then begin
-//  if true then begin
    if gpregion <> nil then begin
     gdipdeleteregion(gpregion);
    end;
@@ -1067,7 +1066,6 @@ begin
    setbrushorgex(handle,brushorigin.x,brushorigin.y,nil);
   end;
   if gvm_clipregion in mask then begin
-//{
    gccliporigin:= cliporigin;
    if ((cliporigin.x <> 0) or (cliporigin.y <> 0)) and (clipregion <> 0) then begin
     offsetrgn(clipregion,cliporigin.x,cliporigin.y);
@@ -1077,8 +1075,10 @@ begin
    else begin
     selectcliprgn(handle,clipregion);
    end;
-//}
    exclude(flags,gcf_gpregionvalid);
+  end
+  else begin
+   include(flags,gcf_gpregionvalid);
   end;
   if gvm_font in mask then begin
    selectobject(handle,font);
