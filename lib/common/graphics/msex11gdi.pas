@@ -86,7 +86,7 @@ type
    1: (_bufferspace: fontdatapty;);
  end;
 
- xftstatety = (xfts_clipregionvalid,xfts_smooth{,xfts_colorvalid});
+ xftstatety = (xfts_clipregionvalid,xfts_smooth,xfts_colorforegroundvalid);
  xftstatesty = set of xftstatety;
  x11gcdty = record
   gcdrawingflags: drawingflagsty;
@@ -99,6 +99,7 @@ type
   xftfont: pxftfont;
   xftfontdata: px11fontdatadty;
   xftstate: xftstatesty;
+  xftcolorforegroundpic: tpicture;
  // fontdirection: graphicdirectionty;
  end;
  {$if sizeof(x11gcdty) > sizeof(gcpty)} {$error 'buffer overflow'}{$ifend}
@@ -628,6 +629,7 @@ begin
   with x11gcty(gc.platformdata).d do begin
    if xftdraw <> nil then begin
     xftdrawdestroy(xftdraw);
+    xrenderfreepicture(appdisp,xftcolorforegroundpic);    
    end;
   end;
   xfreegc(appdisp,tgc(gc.handle));
@@ -638,9 +640,9 @@ end;
 function colortorendercolor(const avalue: rgbtriplety): txrendercolor; overload;
 begin
  with result do begin
-  red:= avalue.red shl 8;
-  green:= avalue.green shl 8;
-  blue:= avalue.blue shl 8;
+  red:= (avalue.red shl 8) or avalue.red;
+  green:= (avalue.green shl 8) or avalue.green;
+  blue:= (avalue.blue shl 8) or avalue.blue;
   alpha:= $ffff;
  end;
 end;
@@ -705,6 +707,87 @@ begin
  {$ifdef FPC} {$checkpointer default} {$endif}
 end;
 
+const
+ unitytransform: txtransform = ((65536,0,0),
+                                (0,65536,0),
+                                (0,0,65536));
+
+function createalphapicture(const size: sizety): tpicture;
+var
+ attributes: txrenderpictureattributes;
+ pixmap: pixmapty;
+begin
+{$ifdef mse_debuggdisync}
+ checkgdilock;
+{$endif} 
+ pixmap:= xcreatepixmap(appdisp,0,size.cx,size.cy,8);
+ result:= xrendercreatepicture(appdisp,pixmap,alpharenderpictformat,0,@attributes);
+ xfreepixmap(appdisp,pixmap);
+end;
+
+function createcolorpicture(const acolor: colorty): tpicture;
+var
+ attributes: txrenderpictureattributes;
+ col: txrendercolor;
+ pixmap: pixmapty;
+begin
+{$ifdef mse_debuggdisync}
+ checkgdilock;
+{$endif} 
+ pixmap:= gui_createpixmap(makesize(1,1));
+ attributes._repeat:= 1;
+ result:= xrendercreatepicture(appdisp,pixmap,screenrenderpictformat,
+                                                       cprepeat,@attributes);
+ col:= colortorendercolor(acolor);
+ xrenderfillrectangle(appdisp,pictopsrc,result,@col,0,0,1,1);
+ xfreepixmap(appdisp,pixmap);
+end;
+
+function createmaskpicture(const acolor: rgbtriplety): tpicture; overload;
+var
+ attributes: txrenderpictureattributes;
+ col: txrendercolor;
+ pixmap: pixmapty;
+begin
+{$ifdef mse_debuggdisync}
+ checkgdilock;
+{$endif} 
+ pixmap:= gui_createpixmap(makesize(1,1));
+ attributes._repeat:= 1;
+ attributes.component_alpha:= 1;
+ result:= xrendercreatepicture(appdisp,pixmap,screenrenderpictformat,
+       cprepeat or cpcomponentalpha,@attributes);
+ col:= colortorendercolor(acolor);
+ xrenderfillrectangle(appdisp,pictopsrc,result,@col,0,0,1,1);
+ gui_freepixmap(pixmap);
+end;
+
+function createmaskpicture(const amask: tsimplebitmap): tpicture; overload;
+var
+ attributes: txrenderpictureattributes;
+ handle1: pixmapty;
+begin
+{$ifdef mse_debuggdisync}
+ checkgdilock;
+{$endif} 
+ result:= 0;
+ if amask <> nil then begin
+  handle1:= tsimplebitmap1(amask).handle;
+  if handle1 <> 0 then begin
+   if amask.monochrome then begin
+    attributes.component_alpha:= 1;
+    result:= xrendercreatepicture(appdisp,tsimplebitmap1(amask).handle,
+                         bitmaprenderpictformat,cpcomponentalpha,@attributes);
+   end
+   else begin
+    attributes.component_alpha:= 1;
+    result:= xrendercreatepicture(appdisp,tsimplebitmap1(amask).handle,
+                         screenrenderpictformat,cpcomponentalpha,@attributes);
+   end;
+  end;
+ end;
+end;
+
 procedure checkxftdraw(var drawinfo: drawinfoty);
 var
  attr: txrenderpictureattributes;
@@ -719,6 +802,7 @@ begin
    xftdrawpic:= xftdrawpicture(xftdraw);
    attr.poly_edge:= polyedgesmooth;
    xrenderchangepicture(appdisp,xftdrawpic,cppolyedge,@attr);
+   xftcolorforegroundpic:= createcolorpicture(cl_black);
   end;
   if not (xfts_clipregionvalid in xftstate) then begin
    if gcclipregion = 0 then begin
@@ -728,6 +812,19 @@ begin
     setregion(drawinfo.gc,region(gcclipregion),0,xftdraw);
    end;
    include(xftstate,xfts_clipregionvalid);
+  end;
+ end;
+end;
+
+procedure checkxftstate(var drawinfo: drawinfoty; const aflags: xftstatesty);
+var
+ flags1: xftstatesty;
+begin
+ with x11gcty(drawinfo.gc.platformdata).d do begin
+  flags1:= (xftstate >< aflags) * aflags;
+  if xfts_colorforegroundvalid in flags1 then begin
+   xrenderfillrectangle(appdisp,pictopsrc,xftcolorforegroundpic,
+          @xftcolor.color,0,0,1,1);
   end;
  end;
 end;
@@ -810,6 +907,7 @@ begin
    if fhasxft then begin
     xftcolor.pixel:= colorforeground;
     xftcolor.color:= colortorendercolor(drawinfo.acolorforeground);
+    exclude(xftstate,xfts_colorforegroundvalid);
    end;
   end;
   if gvm_brushorigin in mask then begin
@@ -1444,86 +1542,6 @@ begin
  gdi_unlock;
 end;
 
-const
- unitytransform: txtransform = ((65536,0,0),
-                                (0,65536,0),
-                                (0,0,65536));
-
-function createalphapicture(const size: sizety): tpicture;
-var
- attributes: txrenderpictureattributes;
- pixmap: pixmapty;
-begin
-{$ifdef mse_debuggdisync}
- checkgdilock;
-{$endif} 
- pixmap:= xcreatepixmap(appdisp,0,size.cx,size.cy,8);
- result:= xrendercreatepicture(appdisp,pixmap,alpharenderpictformat,0,@attributes);
- xfreepixmap(appdisp,pixmap);
-end;
-
-function createcolorpicture(const acolor: colorty): tpicture;
-var
- attributes: txrenderpictureattributes;
- col: txrendercolor;
- pixmap: pixmapty;
-begin
-{$ifdef mse_debuggdisync}
- checkgdilock;
-{$endif} 
- pixmap:= gui_createpixmap(makesize(1,1));
- attributes._repeat:= 1;
- result:= xrendercreatepicture(appdisp,pixmap,screenrenderpictformat,
-                                                       cprepeat,@attributes);
- col:= colortorendercolor(acolor);
- xrenderfillrectangle(appdisp,pictopsrc,result,@col,0,0,1,1);
- xfreepixmap(appdisp,pixmap);
-end;
-
-function createmaskpicture(const acolor: rgbtriplety): tpicture; overload;
-var
- attributes: txrenderpictureattributes;
- col: txrendercolor;
- pixmap: pixmapty;
-begin
-{$ifdef mse_debuggdisync}
- checkgdilock;
-{$endif} 
- pixmap:= gui_createpixmap(makesize(1,1));
- attributes._repeat:= 1;
- attributes.component_alpha:= 1;
- result:= xrendercreatepicture(appdisp,pixmap,screenrenderpictformat,
-       cprepeat or cpcomponentalpha,@attributes);
- col:= colortorendercolor(acolor);
- xrenderfillrectangle(appdisp,pictopsrc,result,@col,0,0,1,1);
- gui_freepixmap(pixmap);
-end;
-
-function createmaskpicture(const amask: tsimplebitmap): tpicture; overload;
-var
- attributes: txrenderpictureattributes;
- handle1: pixmapty;
-begin
-{$ifdef mse_debuggdisync}
- checkgdilock;
-{$endif} 
- result:= 0;
- if amask <> nil then begin
-  handle1:= tsimplebitmap1(amask).handle;
-  if handle1 <> 0 then begin
-   if amask.monochrome then begin
-    attributes.component_alpha:= 1;
-    result:= xrendercreatepicture(appdisp,tsimplebitmap1(amask).handle,
-                         bitmaprenderpictformat,cpcomponentalpha,@attributes);
-   end
-   else begin
-    attributes.component_alpha:= 1;
-    result:= xrendercreatepicture(appdisp,tsimplebitmap1(amask).handle,
-                         screenrenderpictformat,cpcomponentalpha,@attributes);
-   end;
-  end;
- end;
-end;
 {
 const
  rgbwhite: rgbtriplety = (blue: $ff; green: $ff; red: $ff; res: $00);
@@ -2143,11 +2161,12 @@ begin
      po3^.x:= (po1^.x+origin.x) shl 16;
      po3^.y:= (po1^.y+origin.y) shl 16;
     end;
+    checkxftstate(drawinfo,[xfts_colorforegroundvalid]);
     with x11gcty(gc.platformdata).d do begin
-     cpic:= createcolorpicture(acolorforeground);
-     xrendercompositetristrip(appdisp,pictopover,cpic,xftdrawpic,nil,0,0,
-                      buffer.buffer,points.count);
-     xrenderfreepicture(appdisp,cpic);
+//     cpic:= createcolorpicture(acolorforeground);
+     xrendercompositetristrip(appdisp,pictopover,xftcolorforegroundpic,
+                    xftdrawpic,nil,0,0,buffer.buffer,points.count);
+//     xrenderfreepicture(appdisp,cpic);
     end;
    end;
 //   allocbuffer(buffer,int1*sizeof(xpoint));
