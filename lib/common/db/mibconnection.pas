@@ -1504,7 +1504,7 @@ const
 var
  blobHandle : Isc_blob_Handle;
  blobSegment : pointer;
- blobSegLen : smallint;
+ blobSegLen : word;
  maxBlobSize : longInt; 
 begin
  blobHandle:= nil;
