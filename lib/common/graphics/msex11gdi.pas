@@ -1947,10 +1947,11 @@ end;
 type
  lineshiftinfoty = record
   dist: integer;
-  points: ppointty;
+  pointa: ppointty;
+  pointb: ppointty;
   shift: pointty;
-  d: pointty;
-  c: integer;
+  d: pointty;  //delta
+  c: integer;  //length
   offs: pointty;
   dest: pxpointfixed;
  end;
@@ -1961,8 +1962,8 @@ type
 procedure calclineshift(var info: lineshiftinfoty);
 begin
  with info do begin
-  d.x:= points[1].x - points^.x;
-  d.y:= points[1].y - points^.y;
+  d.x:= pointb^.x - pointa^.x;
+  d.y:= pointb^.y - pointa^.y;
   c:= round(sqrt(d.x*d.x+d.y*d.y));
   if c = 0 then begin
    shift.x:= 0;
@@ -1982,15 +1983,16 @@ begin
  with info do begin
   offs.x:= (drawinfo.origin.x shl 16) + shift.x div 2;
   offs.y:= (drawinfo.origin.y shl 16) - shift.y div 2;
-  x1:= (points^.x shl 16) + offs.x;
-  y1:= (points^.y shl 16) + offs.y;
+  x1:= (pointa^.x shl 16) + offs.x;
+  y1:= (pointa^.y shl 16) + offs.y;
   dest^.x:= x1;
   dest^.y:= y1;
   inc(dest);
   dest^.x:= x1 - shift.x;
   dest^.y:= y1 + shift.y;
   inc(dest);
-  inc(points);
+  pointa:= pointb;
+  inc(pointb);
  end;
 end;
 
@@ -1999,15 +2001,16 @@ var
  x1,y1: integer;
 begin
  with info do begin
-  x1:= (points^.x shl 16) + offs.x;
-  y1:= (points^.y shl 16) + offs.y;
+  x1:= (pointa^.x shl 16) + offs.x;
+  y1:= (pointa^.y shl 16) + offs.y;
   dest^.x:= x1;
   dest^.y:= y1;
   inc(dest);
   dest^.x:= x1 - shift.x;
   dest^.y:= y1 + shift.y;
   inc(dest);
-  inc(points);
+  pointa:= pointb;
+  inc(pointb);
  end;
 end;
 
@@ -2049,9 +2052,11 @@ end;
 
 procedure gdi_drawlines(var drawinfo: drawinfoty); //gdifunc
 var
- int1: integer;
+ int1,int2: integer;
+ pointcount: integer;
  li: lineshiftinfoty;
  ints: intersectinfoty;
+ pend: ppointty;
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
@@ -2059,14 +2064,31 @@ begin
  with drawinfo,points,x11gcty(gc.platformdata).d do begin
   if xfts_smooth in xftstate then begin
    checkxftstate(drawinfo,[xfts_colorforegroundvalid]);
-   allocbuffer(buffer,2*count*sizeof(txpointfixed));
-   li.points:= points;
-   li.dest:= buffer.buffer;
-   li.dist:= xftlinewidth;
-   calclineshift(li);
-   shiftpoint(drawinfo,li);
+   pointcount:= count;
+   if closed then begin
+    inc(pointcount);
+   end;
+   pointcount:= pointcount*2;
+   allocbuffer(buffer,pointcount*sizeof(txpointfixed));
    with li do begin
-    for int1:= 0 to count-3 do begin
+    pointa:= points;
+    pend:= points+count;
+    pointb:= li.pointa+1;
+    dest:= buffer.buffer;
+    dist:= xftlinewidth;
+    calclineshift(li);
+    shiftpoint(drawinfo,li);
+    int2:= count-3;
+    if closed then begin
+     int2:= count-1;
+    end
+    else begin
+     int2:= count-3;
+    end;
+    for int1:= 0 to int2 do begin
+     if pointb = pend then begin
+      pointb:= points;
+     end;
      ints.da:= d;
      calclineshift(li);
      shiftpoint(drawinfo,li);
@@ -2075,18 +2097,22 @@ begin
      ints.p1:= li.dest-2;
      if intersect(ints) then begin
       ints.p1^:= ints.isect;
-      ints.p0:= li.dest-4;
-      ints.p1:= li.dest-2;
       inc(ints.p0);
       inc(ints.p1);
       intersect2(ints);
       ints.p1^:= ints.isect;
      end;
     end;
+    if closed then begin
+     (pxpointfixed(buffer.buffer))^:= (ints.p1-1)^;
+     (pxpointfixed(buffer.buffer)+1)^:= ints.p1^;
+    end
+    else begin
+     shiftpoint(drawinfo,li);
+    end;
    end;
-   shiftpoint(drawinfo,li);
    xrendercompositetristrip(appdisp,pictopover,xftcolorforegroundpic,
-                    xftdrawpic,nil,0,0,buffer.buffer,2*count);
+                    xftdrawpic,nil,0,0,buffer.buffer,pointcount);
   end
   else begin
    transformpoints(drawinfo,closed);
@@ -2117,7 +2143,8 @@ begin
    with drawinfo,drawinfo.points do begin
     allocbuffer(buffer,2*count*sizeof(txpointfixed));
     li.dest:= buffer.buffer;
-    li.points:= points;
+    li.pointa:= points;
+    li.pointb:= li.pointa+1;
     li.dist:= xftlinewidth;
     for int1:= 0 to (count div 2)-1 do begin
      po3:= li.dest;
