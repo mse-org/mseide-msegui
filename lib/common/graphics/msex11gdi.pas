@@ -100,6 +100,7 @@ type
   xftfontdata: px11fontdatadty;
   xftstate: xftstatesty;
   xftcolorforegroundpic: tpicture;
+  xftlinewidth: integer;
  // fontdirection: graphicdirectionty;
  end;
  {$if sizeof(x11gcdty) > sizeof(gcpty)} {$error 'buffer overflow'}{$ifend}
@@ -801,7 +802,9 @@ begin
                                                  xlib.pvisual(defvisual),0);
    xftdrawpic:= xftdrawpicture(xftdraw);
    attr.poly_edge:= polyedgesmooth;
-   xrenderchangepicture(appdisp,xftdrawpic,cppolyedge,@attr);
+   attr.poly_mode:= polymodeprecise;
+//   attr.poly_mode:= polymodeimprecise;
+   xrenderchangepicture(appdisp,xftdrawpic,cppolyedge or cppolymode,@attr);
    xftcolorforegroundpic:= createcolorpicture(cl_black);
   end;
   if not (xfts_clipregionvalid in xftstate) then begin
@@ -851,6 +854,10 @@ begin
   if gvm_linewidth in mask then begin
    xmask:= xmask or gclinewidth;
    xvalues.line_width:= (lineinfo.width + linewidthroundvalue) shr linewidthshift;
+   xftlinewidth:= xvalues.line_width shl 16;
+   if xftlinewidth = 0 then begin
+    xftlinewidth:= 1 shl 16;
+   end;
   end;
   if gvm_dashes in mask then begin
    with lineinfo do begin
@@ -1937,32 +1944,195 @@ begin
  end;
 end;
 
+type
+ lineshiftinfoty = record
+  dist: integer;
+  points: ppointty;
+  shift: pointty;
+  d: pointty;
+  c: integer;
+  offs: pointty;
+  dest: pxpointfixed;
+ end;
+ plineshiftinfoty = ^lineshiftinfoty;
+//
+//todo: optimize smooth line generation
+//
+procedure calclineshift(var info: lineshiftinfoty);
+begin
+ with info do begin
+  d.x:= points[1].x - points^.x;
+  d.y:= points[1].y - points^.y;
+  c:= round(sqrt(d.x*d.x+d.y*d.y));
+  if c = 0 then begin
+   shift.x:= 0;
+   shift.y:= 0;
+  end
+  else begin
+   shift.x:= (d.y*dist) div c;
+   shift.y:= (d.x*dist) div c;
+  end;
+ end;
+end;
+
+procedure shiftpoint(const drawinfo: drawinfoty; var info: lineshiftinfoty);
+var
+ x1,y1: integer;
+begin
+ with info do begin
+  offs.x:= (drawinfo.origin.x shl 16) + shift.x div 2;
+  offs.y:= (drawinfo.origin.y shl 16) - shift.y div 2;
+  x1:= (points^.x shl 16) + offs.x;
+  y1:= (points^.y shl 16) + offs.y;
+  dest^.x:= x1;
+  dest^.y:= y1;
+  inc(dest);
+  dest^.x:= x1 - shift.x;
+  dest^.y:= y1 + shift.y;
+  inc(dest);
+  inc(points);
+ end;
+end;
+
+procedure shiftpoint2(var info: lineshiftinfoty);
+var
+ x1,y1: integer;
+begin
+ with info do begin
+  x1:= (points^.x shl 16) + offs.x;
+  y1:= (points^.y shl 16) + offs.y;
+  dest^.x:= x1;
+  dest^.y:= y1;
+  inc(dest);
+  dest^.x:= x1 - shift.x;
+  dest^.y:= y1 + shift.y;
+  inc(dest);
+  inc(points);
+ end;
+end;
+
+type
+ intersectinfoty = record
+  da,db: pointty;
+  p0,p1: pxpointfixed;
+  isect: txpointfixed;
+  axbx,axby,aybx,ayby: int64;
+  q: integer;
+ end;
+
+procedure intersect2(var info: intersectinfoty);
+begin
+ with info do begin
+//xa == (dxa*dxb*y0 - dxa*dxb*y1 + dxa*dyb*x1 - dxb*dya*x0)/(dxa*dyb - dxb*dya)
+  isect.x:= (axbx*p0^.y - axbx*p1^.y + axby*p1^.x - aybx*p0^.x) div q;
+//ya == (dxa*dyb*y0 - dxb*dya*y1 - dya*dyb*x0 + dya*dyb*x1)/(dxa*dyb - dxb*dya)
+  isect.y:= (axby*p0^.y - aybx*p1^.y - ayby*p0^.x + ayby*p1^.x) div q;
+ end;
+end;
+ 
+function intersect(var info: intersectinfoty): boolean;
+begin
+ result:= false;
+ with info do begin
+  axby:= da.x*db.y;
+  aybx:= da.y*db.x;
+  q:= axby - aybx;
+  if q <> 0 then begin
+   result:= true;
+   axbx:= da.x*db.x;
+   ayby:= da.y*db.y;
+   intersect2(info);
+  end;
+ end;
+end;
+
+
 procedure gdi_drawlines(var drawinfo: drawinfoty); //gdifunc
 var
  int1: integer;
+ li: lineshiftinfoty;
+ ints: intersectinfoty;
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
 {$endif} 
- with drawinfo,drawinfo.points do begin
-  transformpoints(drawinfo,closed);
-  int1:= count;
-  if closed then begin
-   inc(int1);
+ with drawinfo,points,x11gcty(gc.platformdata).d do begin
+  if xfts_smooth in xftstate then begin
+   checkxftstate(drawinfo,[xfts_colorforegroundvalid]);
+   allocbuffer(buffer,2*count*sizeof(txpointfixed));
+   li.points:= points;
+   li.dest:= buffer.buffer;
+   li.dist:= xftlinewidth;
+   calclineshift(li);
+   shiftpoint(drawinfo,li);
+   with li do begin
+    for int1:= 0 to count-3 do begin
+     ints.da:= d;
+     calclineshift(li);
+     shiftpoint(drawinfo,li);
+     ints.db:= d;
+     ints.p0:= li.dest-4;
+     ints.p1:= li.dest-2;
+     if intersect(ints) then begin
+      ints.p1^:= ints.isect;
+      ints.p0:= li.dest-4;
+      ints.p1:= li.dest-2;
+      inc(ints.p0);
+      inc(ints.p1);
+      intersect2(ints);
+      ints.p1^:= ints.isect;
+     end;
+    end;
+   end;
+   shiftpoint(drawinfo,li);
+   xrendercompositetristrip(appdisp,pictopover,xftcolorforegroundpic,
+                    xftdrawpic,nil,0,0,buffer.buffer,2*count);
+  end
+  else begin
+   transformpoints(drawinfo,closed);
+   int1:= count;
+   if closed then begin
+    inc(int1);
+   end;
+   xdrawlines(appdisp,paintdevice,tgc(gc.handle),buffer.buffer,int1,
+                            coordmodeorigin);
   end;
-  xdrawlines(appdisp,paintdevice,tgc(gc.handle),buffer.buffer,int1,
-                           coordmodeorigin);
  end;
 end;
 
 procedure gdi_drawlinesegments(var drawinfo: drawinfoty); //gdifunc
+var
+ po3: pxpointfixed;
+ int1: integer;
+ li: lineshiftinfoty;
+ offs1: pointty;
+ x1,y1: integer;
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
 {$endif} 
- transformpoints(drawinfo,false);
- with drawinfo,drawinfo.points do begin
-  xdrawsegments(appdisp,paintdevice,tgc(gc.handle),buffer.buffer,count div 2);
+ with drawinfo,drawinfo.points,x11gcty(gc.platformdata).d do begin
+  if xfts_smooth in xftstate then begin
+   checkxftstate(drawinfo,[xfts_colorforegroundvalid]);
+   with drawinfo,drawinfo.points do begin
+    allocbuffer(buffer,2*count*sizeof(txpointfixed));
+    li.dest:= buffer.buffer;
+    li.points:= points;
+    li.dist:= xftlinewidth;
+    for int1:= 0 to (count div 2)-1 do begin
+     po3:= li.dest;
+     calclineshift(li);
+     shiftpoint(drawinfo,li);
+     shiftpoint2(li);
+     xrendercompositetristrip(appdisp,pictopover,xftcolorforegroundpic,
+                    xftdrawpic,nil,0,0,po3,4);
+    end;
+   end;
+  end
+  else begin
+   transformpoints(drawinfo,false);
+   xdrawsegments(appdisp,paintdevice,tgc(gc.handle),buffer.buffer,count div 2);
+  end;
  end;
 end;
 
@@ -2134,7 +2304,6 @@ var
 // int1: integer;
  po1,po2: ppointty;
  po3: pxpointfixed;
- cpic: tpicture;
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;

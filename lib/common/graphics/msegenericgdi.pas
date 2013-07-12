@@ -1216,6 +1216,7 @@ end;
 
 procedure segmentellipsef(var drawinfo: drawinfoty;
                       const segmentsproc: pointsfprocty);
+//todo: optimize
 var
  count: integer;
  po1: pfpointty;
