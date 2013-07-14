@@ -35,13 +35,13 @@ type
  drawingflagty = (df_canvasispixmap,df_canvasismonochrome,df_highresfont,
                   df_doublebuffer,df_smooth,
                   df_colorconvert,
-                  df_opaque,df_monochrome,df_brush{,df_dashed},df_last = 31);
+                  df_opaque,df_monochrome,df_brush,df_dashed,df_last = 31);
  drawingflagsty = set of drawingflagty;
 
  capstylety = (cs_butt,cs_round,cs_projecting);
  joinstylety = (js_miter,js_round,js_bevel);
 
- dashesstringty = string[9];    //last byte 0 -> opaque
+ dashesstringty = string[8];
 
 const
  fillmodeinfoflags = [df_opaque,df_monochrome,df_brush];
@@ -995,7 +995,7 @@ type
    property linewidthmm: real read getlinewidthmm write setlinewidthmm;
    
    property dashes: dashesstringty read getdashes write setdashes;
-     //last byte 0 -> opaque dash  //todo: dashoffset
+     //todo: dashoffset
    property capstyle: capstylety read getcapstyle write setcapstyle
                 default cs_butt;
    property joinstyle: joinstylety read getjoinstyle write setjoinstyle
@@ -3485,6 +3485,12 @@ begin
   state:= (state - fstate) * linecanvasstates; //update lineinfos
   if state <> [] then begin
    values.lineinfo:= fvaluepo^.lineinfo;
+   if length(dashes) > 0 then begin
+    include(fdrawinfo.gc.drawingflags,df_dashed);
+   end
+   else begin
+    exclude(fdrawinfo.gc.drawingflags,df_dashed);
+   end;
    fstate:= fstate + state;
    if cs_linewidth in state then include(values.mask,gvm_linewidth);
    if cs_dashes in state then include(values.mask,gvm_dashes);
@@ -5066,9 +5072,12 @@ begin
   dashes:= value;
   for int1:= 1 to length(dashes) do begin
    if dashes[int1] = #0 then begin
-    setlength(dashes,int1);
+    setlength(dashes,int1-1);
     break;
    end;
+  end;
+  if odd(length(dashes)) then begin
+   setlength(dashes,length(dashes)-1);
   end;
  end;
  valuechanged(cs_dashes);

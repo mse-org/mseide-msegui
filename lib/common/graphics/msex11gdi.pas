@@ -101,6 +101,7 @@ type
   xftstate: xftstatesty;
   xftcolorforegroundpic: tpicture;
   xftlinewidth: integer;
+  xftdashes: dashesstringty;
  // fontdirection: graphicdirectionty;
  end;
  {$if sizeof(x11gcdty) > sizeof(gcpty)} {$error 'buffer overflow'}{$ifend}
@@ -863,9 +864,9 @@ begin
    with lineinfo do begin
     int1:= length(dashes);
     if int1 <> 0 then begin
-     if dashes[int1] = #0 then begin
-      dec(int1);
-     end;
+//     if dashes[int1] = #0 then begin
+//      dec(int1);
+//     end;
      if df_opaque in drawingflags then begin
       xvalues.line_style:= linedoubledash;
      end
@@ -902,6 +903,15 @@ begin
   if gvm_colorbackground in mask then begin
    xmask:= xmask or gcbackground;
    xvalues.background:= colorbackground;
+   if df_dashed in drawingflags then begin
+    if df_opaque in drawingflags then begin
+     xvalues.line_style:= linedoubledash;
+    end
+    else begin
+     xvalues.line_style:= lineonoffdash;
+    end;
+    xmask:= xmask or gclinestyle;
+   end;
    if fhasxft then begin
     xftcolorbackground.pixel:= colorbackground;
     xftcolorbackground.color:= colortorendercolor(drawinfo.acolorbackground);
@@ -2146,6 +2156,7 @@ begin
     li.pointa:= points;
     li.pointb:= li.pointa+1;
     li.dist:= xftlinewidth;
+//    if length(
     for int1:= 0 to (count div 2)-1 do begin
      po3:= li.dest;
      calclineshift(li);
