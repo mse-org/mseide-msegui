@@ -217,8 +217,9 @@ type
  pgcty = ^gcty;
 
  bufferty = record
-  size: integer;
+  size: integer; //memory size
   buffer: pointer;
+  cursize: integer; //used size
  end;
 
  pdrawinfoty = ^drawinfoty;
@@ -1153,7 +1154,7 @@ procedure freefontdata(var drawinfo: drawinfoty);
 
 procedure allocbuffer(var buffer: bufferty; size: integer);
 procedure extendbuffer(var buffer: bufferty; const extension: integer;
-                                                       var size: integer);
+                                                   var reference: pointer);
 function replacebuffer(var buffer: bufferty; size: integer): pointer;
 procedure freebuffer(var buffer: bufferty);
 
@@ -1512,12 +1513,18 @@ begin
 end;
 
 procedure extendbuffer(var buffer: bufferty; const extension: integer;
-                                                       var size: integer);
+                                                   var reference: pointer);
+var
+ po1: pointer;
 begin
- size:= size + extension;
- if size > buffer.size then begin
-  reallocmem(buffer.buffer,size*2);
-  buffer.size:= size;
+ with buffer do begin
+  cursize:= cursize + extension;
+  if cursize > size then begin
+   size:= cursize*2+1024;
+   po1:= buffer;
+   reallocmem(buffer,size);
+   reference:= reference + (buffer-po1);
+  end;
  end;
 end;
 

@@ -167,6 +167,11 @@ var
  XRenderFindVisualFormat: function(dpy:PDisplay; visual:PVisual):PXRenderPictFormat;cdecl;
  XRenderFindStandardFormat:  function(dpy:PDisplay;
               format:longint):PXRenderPictFormat; cdecl;
+
+ XRenderCompositeTriangles: procedure(dpy: pDisplay; op: cint; src: tPicture;
+                  dst: tPicture; maskFormat: pXRenderPictFormat;
+                  xSrc: cint; ySrc: cint; triangles: pXTriangle;
+                  ntriangle: cint); cdecl;
  XRenderCompositeTriStrip: procedure(dpy: pdisplay; op: cint; src: tpicture;
                dst: tpicture; maskFormat: PXRenderPictFormat;
                xSrc: cint; ySrc: cint; points: PXPointFixed;
@@ -2141,7 +2146,12 @@ var
  li: lineshiftinfoty;
  offs1: pointty;
  x1,y1: integer;
+ dx,dy: integer;
  dashlen: integer;
+ dashpos: integer;
+ dashind: integer;
+ buffersize: integer;
+ pt0: txpointfixed;
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
@@ -2150,22 +2160,86 @@ begin
   if xfts_smooth in xftstate then begin
    checkxftstate(drawinfo,[xfts_colorforegroundvalid]);
    with drawinfo,drawinfo.points do begin
-    allocbuffer(buffer,2*count*sizeof(txpointfixed));
-    li.dest:= buffer.buffer;
     li.pointa:= points;
     li.pointb:= li.pointa+1;
     li.dist:= xftlinewidth;
     if df_dashed in gc.drawingflags then begin
      dashlen:= 0;
-     for int1:= 0 to length(xftdashes) do begin
+     buffer.cursize:= 0;
+     li.dest:= buffer.buffer;
+     for int1:= 1 to length(xftdashes) do begin
       dashlen:= dashlen + ord(xftdashes[int1]);
      end;
      for int1:= 0 to (count div 2)-1 do begin
       calclineshift(li);
-      
+      extendbuffer(buffer,((li.c div dashlen + 1)*length(xftdashes)+2)*
+                                            3*sizeof(txpointfixed),li.dest);
+      dashpos:= ord(xftdashes[1]);
+      dashind:= 1;
+      shiftpoint(drawinfo,li);
+      po3:= li.dest;
+      pt0:= (po3-2)^;
+      dx:= li.d.x shl 16 div li.c;
+      dy:= li.d.y shl 16 div li.c;
+      while dashpos < li.c do begin
+       x1:= pt0.x + dashpos*dx; 
+       y1:= pt0.y + dashpos*dy; 
+       po3^.x:= x1; 
+       po3^.y:= y1; 
+       inc(po3);
+       po3^:= (po3-2)^;
+       inc(po3);
+       po3^.x:= x1;
+       po3^.y:= y1;
+       inc(po3);
+       po3^.x:= x1 - li.shift.x;
+       po3^.y:= y1 + li.shift.y;
+       inc(po3);
+       inc(dashind);
+       dashpos:= dashpos + ord(xftdashes[dashind]);
+       if dashpos >= li.c then begin
+        break;
+       end;
+       x1:= pt0.x + dashpos*dx; 
+       y1:= pt0.y + dashpos*dy; 
+       po3^.x:= x1;
+       po3^.y:= y1;
+       inc(po3);
+       po3^.x:= x1 - li.shift.x;
+       po3^.y:= y1 + li.shift.y;
+       inc(po3);
+       inc(dashind);
+       if dashind > length(xftdashes) then begin
+        dashind:= 1;
+       end;
+       dashpos:= dashpos + ord(xftdashes[dashind]);
+      end;
+      if odd(dashind) then begin
+       x1:= pt0.x + (li.d.x shl 16);
+       y1:= pt0.y + (li.d.y shl 16);
+       po3^.x:= x1;
+       po3^.y:= y1;
+       inc(po3);
+       po3^:= (po3-2)^;
+       inc(po3);
+       po3^.x:= x1;
+       po3^.y:= y1;
+       inc(po3);
+       po3^.x:= x1 - li.shift.x;
+       po3^.y:= y1 + li.shift.y;
+       inc(po3);
+      end;
+      li.pointa:= li.pointb;
+      inc(li.pointb);
+      li.dest:= po3;
      end;
+     xrendercompositetriangles(appdisp,pictopover,xftcolorforegroundpic,
+                     xftdrawpic,nil,0,0,buffer.buffer,
+                     (po3-pxpointfixed(buffer.buffer)) div 3);
     end
     else begin
+     allocbuffer(buffer,2*count*sizeof(txpointfixed));
+     li.dest:= buffer.buffer;
      for int1:= 0 to (count div 2)-1 do begin
       po3:= li.dest;
       calclineshift(li);
@@ -2651,11 +2725,13 @@ end;
 
 function getxrenderlib: boolean;
 const
- funcs: array[0..11] of funcinfoty = (
-  (n: 'XRenderSetPictureClipRectangles'; d: {$ifndef FPC}@{$endif}@XRenderSetPictureClipRectangles),
+ funcs: array[0..12] of funcinfoty = (
+  (n: 'XRenderSetPictureClipRectangles'; 
+                   d: {$ifndef FPC}@{$endif}@XRenderSetPictureClipRectangles),
   (n: 'XRenderCreatePicture'; d: {$ifndef FPC}@{$endif}@XRenderCreatePicture),
   (n: 'XRenderFillRectangle'; d: {$ifndef FPC}@{$endif}@XRenderFillRectangle),
-  (n: 'XRenderSetPictureTransform'; d: {$ifndef FPC}@{$endif}@XRenderSetPictureTransform),
+  (n: 'XRenderSetPictureTransform'; 
+                         d: {$ifndef FPC}@{$endif}@XRenderSetPictureTransform),
   (n: 'XRenderSetPictureFilter';
                             d: {$ifndef FPC}@{$endif}@XRenderSetPictureFilter),
   (n: 'XRenderFreePicture'; d: {$ifndef FPC}@{$endif}@XRenderFreePicture),
@@ -2668,6 +2744,8 @@ const
                            d: {$ifndef FPC}@{$endif}@XRenderFindStandardFormat),
   (n: 'XRenderCompositeTriStrip'; 
                            d: {$ifndef FPC}@{$endif}@XRenderCompositeTriStrip),
+  (n: 'XRenderCompositeTriangles'; 
+                           d: {$ifndef FPC}@{$endif}@XRenderCompositeTriangles),
   (n: 'XRenderChangePicture'; 
                            d: {$ifndef FPC}@{$endif}@XRenderChangePicture)
   );
