@@ -2187,10 +2187,10 @@ begin
        po3^.x:= x1; 
        po3^.y:= y1; 
        inc(po3);
-       po3^:= (po3-2)^;
+       po3^.x:= x1; 
+       po3^.y:= y1; 
        inc(po3);
-       po3^.x:= x1;
-       po3^.y:= y1;
+       po3^:= (po3-3)^;
        inc(po3);
        po3^.x:= x1 - li.shift.x;
        po3^.y:= y1 + li.shift.y;
@@ -2220,10 +2220,10 @@ begin
        po3^.x:= x1;
        po3^.y:= y1;
        inc(po3);
-       po3^:= (po3-2)^;
-       inc(po3);
        po3^.x:= x1;
        po3^.y:= y1;
+       inc(po3);
+       po3^:= (po3-3)^;
        inc(po3);
        po3^.x:= x1 - li.shift.x;
        po3^.y:= y1 + li.shift.y;
