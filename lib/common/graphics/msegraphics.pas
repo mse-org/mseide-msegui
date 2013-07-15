@@ -1152,6 +1152,8 @@ function creategdicanvas(const agdi: pgdifunctionaty;
 procedure freefontdata(var drawinfo: drawinfoty);
 
 procedure allocbuffer(var buffer: bufferty; size: integer);
+procedure extendbuffer(var buffer: bufferty; const extension: integer;
+                                                       var size: integer);
 function replacebuffer(var buffer: bufferty; size: integer): pointer;
 procedure freebuffer(var buffer: bufferty);
 
@@ -1505,6 +1507,16 @@ begin
  if size > buffer.size then begin
   freebuffer(buffer);
   getmem(buffer.buffer,size);
+  buffer.size:= size;
+ end;
+end;
+
+procedure extendbuffer(var buffer: bufferty; const extension: integer;
+                                                       var size: integer);
+begin
+ size:= size + extension;
+ if size > buffer.size then begin
+  reallocmem(buffer.buffer,size*2);
   buffer.size:= size;
  end;
 end;

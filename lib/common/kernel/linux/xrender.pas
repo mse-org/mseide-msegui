@@ -440,9 +440,9 @@ procedure XRenderComposite(dpy:PDisplay; op:longint; src:TPicture; mask:TPicture
   procedure XRenderCompositeTriFan(dpy:PDisplay; op:longint; src:TPicture; dst:TPicture; maskFormat:PXRenderPictFormat;
               xSrc:longint; ySrc:longint; points:PXPointFixed; npoint:longint);cdecl;external External_library name 'XRenderCompositeTriFan';
 
-  procedure XRenderCompositeDoublePoly(dpy:PDisplay; op:longint; src:TPicture; dst:TPicture; maskFormat:PXRenderPictFormat;
-              xSrc:longint; ySrc:longint; xDst:longint; yDst:longint; fpoints:PXPointDouble;
-              npoints:longint; winding:longint);cdecl;external External_library name 'XRenderCompositeDoublePoly';
+//  procedure XRenderCompositeDoublePoly(dpy:PDisplay; op:longint; src:TPicture; dst:TPicture; maskFormat:PXRenderPictFormat;
+//              xSrc:longint; ySrc:longint; xDst:longint; yDst:longint; fpoints:PXPointDouble;
+//              npoints:longint; winding:longint);cdecl;external External_library name 'XRenderCompositeDoublePoly';
 
   function XRenderParseColor(dpy:PDisplay; spec:Pchar; def:PXRenderColor):TStatus;cdecl;external External_library name 'XRenderParseColor';
 

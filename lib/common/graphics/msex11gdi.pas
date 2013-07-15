@@ -862,11 +862,9 @@ begin
   end;
   if gvm_dashes in mask then begin
    with lineinfo do begin
+    xftdashes:= dashes;
     int1:= length(dashes);
     if int1 <> 0 then begin
-//     if dashes[int1] = #0 then begin
-//      dec(int1);
-//     end;
      if df_opaque in drawingflags then begin
       xvalues.line_style:= linedoubledash;
      end
@@ -2143,6 +2141,7 @@ var
  li: lineshiftinfoty;
  offs1: pointty;
  x1,y1: integer;
+ dashlen: integer;
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
@@ -2156,14 +2155,25 @@ begin
     li.pointa:= points;
     li.pointb:= li.pointa+1;
     li.dist:= xftlinewidth;
-//    if length(
-    for int1:= 0 to (count div 2)-1 do begin
-     po3:= li.dest;
-     calclineshift(li);
-     shiftpoint(drawinfo,li);
-     shiftpoint2(li);
-     xrendercompositetristrip(appdisp,pictopover,xftcolorforegroundpic,
-                    xftdrawpic,nil,0,0,po3,4);
+    if df_dashed in gc.drawingflags then begin
+     dashlen:= 0;
+     for int1:= 0 to length(xftdashes) do begin
+      dashlen:= dashlen + ord(xftdashes[int1]);
+     end;
+     for int1:= 0 to (count div 2)-1 do begin
+      calclineshift(li);
+      
+     end;
+    end
+    else begin
+     for int1:= 0 to (count div 2)-1 do begin
+      po3:= li.dest;
+      calclineshift(li);
+      shiftpoint(drawinfo,li);
+      shiftpoint2(li);
+      xrendercompositetristrip(appdisp,pictopover,xftcolorforegroundpic,
+                     xftdrawpic,nil,0,0,po3,4);
+     end;
     end;
    end;
   end
