@@ -862,10 +862,10 @@ begin
    xmask:= xmask or gclinewidth;
    xvalues.line_width:= (lineinfo.width + linewidthroundvalue) shr linewidthshift;
    xftlinewidth:= xvalues.line_width shl 16;
-   xftlinewidthsquare:= xvalues.line_width*xvalues.line_width shl 16;
+   xftlinewidthsquare:= xvalues.line_width*xvalues.line_width{ shl 16};
    if xftlinewidth = 0 then begin
     xftlinewidth:= 1 shl 16;
-    xftlinewidthsquare:= 1 shl 16;
+    xftlinewidthsquare:= 1{ shl 16};
    end;
   end;
   if gvm_dashes in mask then begin
@@ -1970,19 +1970,20 @@ type
   dist: integer;
   pointa: ppointty;
   pointb: ppointty;
+  linestart: ppointty;
   v: lineshiftvectorty;
   offs: pointty;
   dest: pxpointfixed;
   dashlen: integer;
   dashind: integer;
   dashpos: integer;
-  dashstop: integer;
+  dashref: integer;
  end;
  plineshiftinfoty = ^lineshiftinfoty;
 //
 //todo: optimize smooth line generation
 //
-procedure calclineshift(var info: lineshiftinfoty);
+procedure calclineshift(const drawinfo: drawinfoty; var info: lineshiftinfoty);
 begin
  with info do begin
   v.d.x:= pointb^.x - pointa^.x;
@@ -1996,30 +1997,13 @@ begin
    v.shift.x:= (v.d.y*dist) div v.c;
    v.shift.y:= (v.d.x*dist) div v.c;
   end;
- end;
-end;
-
-procedure shiftpoint(const drawinfo: drawinfoty; var info: lineshiftinfoty);
-var
- x1,y1: integer;
-begin
- with info do begin
   offs.x:= (drawinfo.origin.x shl 16) + v.shift.x div 2;
   offs.y:= (drawinfo.origin.y shl 16) - v.shift.y div 2;
-  x1:= (pointa^.x shl 16) + offs.x;
-  y1:= (pointa^.y shl 16) + offs.y;
-  dest^.x:= x1;
-  dest^.y:= y1;
-  inc(dest);
-  dest^.x:= x1 - v.shift.x;
-  dest^.y:= y1 + v.shift.y;
-  inc(dest);
-  pointa:= pointb;
-  inc(pointb);
+  linestart:= pointa;
  end;
 end;
 
-procedure shiftpoint2(var info: lineshiftinfoty);
+procedure shiftpoint(var info: lineshiftinfoty);
 var
  x1,y1: integer;
 begin
@@ -2084,8 +2068,8 @@ begin
   for int1:= 1 to length(xftdashes) do begin
    li.dashlen:= li.dashlen + ord(xftdashes[int1]);
   end;
-  li.dashpos:= ord(xftdashes[1]);
-  li.dashind:= 1;
+//  li.dashpos:= ord(xftdashes[1]);
+//  li.dashind:= 1;
  end;
 end;
 
@@ -2095,49 +2079,53 @@ var
  po3: pxpointfixed;
  pt0: txpointfixed;
  dx,dy: integer;
- dashpos,dashind: integer;
+ dashstop,dashpos,dashind: integer;
  x1,y1: integer;
 begin
  with drawinfo,x11gcty(gc.platformdata).d do begin
-  extendbuffer(buffer,((li.v.c div li.dashlen + 1)*length(xftdashes)+3*2)*
+  if start then begin
+   dashpos:= ord(xftdashes[1]);
+   dashind:= 1;
+   li.dashref:= 0;
+  end
+  else begin
+   dashpos:= li.dashpos-li.dashref;
+   dashind:= li.dashind;
+  end;
+  dashstop:= li.v.c;
+  extendbuffer(buffer,
+        (((dashstop-dashpos) div li.dashlen + 1)*length(xftdashes)+3*2)*
                                         3*sizeof(txpointfixed),li.dest);
                      //+3*2 -> additional memory for ends and vertex
-  if start then begin
-   li.dashpos:= ord(xftdashes[1]);
-   li.dashind:= 1;
-  end;
-  dashpos:= li.dashpos;
-  dashind:= li.dashind;
   po3:= li.dest;
-  pt0:= (po3-2)^;
+  pt0.x:= (li.linestart^.x shl 16) + li.offs.x;
+  pt0.y:= (li.linestart^.y shl 16) + li.offs.y;
   dx:= li.v.d.x shl 16 div li.v.c;
   dy:= li.v.d.y shl 16 div li.v.c;
-  while dashpos < li.dashstop do begin
-   x1:= pt0.x + dashpos*dx; 
-   y1:= pt0.y + dashpos*dy; 
-   po3^.x:= x1; 
-   po3^.y:= y1; 
-   inc(po3);
-   po3^:= (po3-2)^;
-   inc(po3);
-   po3^.x:= x1; 
-   po3^.y:= y1; 
-   inc(po3);
-   po3^.x:= x1 - li.v.shift.x;
-   po3^.y:= y1 + li.v.shift.y;
-   inc(po3);
-   inc(dashind);
-   dashpos:= dashpos + ord(xftdashes[dashind]);
-   if dashpos >= li.dashstop then begin
-    break;
+  while dashpos < dashstop do begin
+   if odd(dashind) then begin
+    x1:= pt0.x + dashpos*dx; 
+    y1:= pt0.y + dashpos*dy; 
+    po3^.x:= x1; 
+    po3^.y:= y1; 
+    inc(po3);
+    po3^:= (po3-2)^;
+    inc(po3);
+    po3^.x:= x1; 
+    po3^.y:= y1; 
+    inc(po3);
+    po3^.x:= x1 - li.v.shift.x;
+    po3^.y:= y1 + li.v.shift.y;
+   end
+   else begin
+    x1:= pt0.x + dashpos*dx; 
+    y1:= pt0.y + dashpos*dy; 
+    po3^.x:= x1;
+    po3^.y:= y1;
+    inc(po3);
+    po3^.x:= x1 - li.v.shift.x;
+    po3^.y:= y1 + li.v.shift.y;
    end;
-   x1:= pt0.x + dashpos*dx; 
-   y1:= pt0.y + dashpos*dy; 
-   po3^.x:= x1;
-   po3^.y:= y1;
-   inc(po3);
-   po3^.x:= x1 - li.v.shift.x;
-   po3^.y:= y1 + li.v.shift.y;
    inc(po3);
    inc(dashind);
    if dashind > length(xftdashes) then begin
@@ -2162,7 +2150,8 @@ begin
   end;
   li.dest:= po3;
   li.dashind:= dashind;
-  li.dashpos:= dashpos;
+  li.dashpos:= dashpos+li.dashref;
+  li.dashref:= li.dashref+li.v.c;
  end;
 end;
 
@@ -2174,11 +2163,11 @@ var
  ints: intersectinfoty;
  pend: ppointty;
  bo1: boolean;
- v1,v2: lineshiftvectorty;
+// v1,v2: lineshiftvectorty;
  pt0,pt1: txpointfixed;
  po0: pxpointfixed;
- vertexindent: integer;
- dx1,dy1: real;
+// vertexindent: integer;
+// dx1,dy1,rea1: real;
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
@@ -2195,7 +2184,7 @@ begin
    pend:= points+count;
    li.pointb:= li.pointa+1;
    li.dist:= xftlinewidth;
-   int2:= count-3;
+//   int2:= count-3;
    if closed then begin
     int2:= count-1;
    end
@@ -2204,57 +2193,67 @@ begin
    end;
    if df_dashed in gc.drawingflags then begin
     dashinit(drawinfo,li);
-    calclineshift(li);
-    shiftpoint(drawinfo,li);
+//    li.dashstop:= 0;
+    calclineshift(drawinfo,li);
+    shiftpoint(li);
     bo1:= true; //start dash
     for int1:= 0 to int2 do begin
      if li.pointb = pend then begin
       li.pointb:= points;
      end;
+//     li.dashstop:= li.dashstop + li.v.c;
+     dash(drawinfo,li,bo1,false);
+     bo1:= false;
+
      ints.da:= li.v.d;
-     v1:= li.v;
-     calclineshift(li);
-     shiftpoint(drawinfo,li);
+//     v1:= li.v;
+     calclineshift(drawinfo,li);
+     shiftpoint(li);
      ints.db:= li.v.d;
      ints.p0:= li.dest-4;
      ints.p1:= li.dest-2;
+//     vertexindent:= 0;
      if intersect(ints) then begin
       pt0:= ints.isect;
       inc(ints.p0);
       inc(ints.p1);
       intersect2(ints);
       pt1:= ints.isect;
-      dx1:= pt1.x-pt0.x; //todo: no floatingpoint
-      dy1:= pt1.y-pt0.y;
-      vertexindent:= round(sqrt(dx1*dx1+dy1*dy1-xftlinewidthsquare)) div 2;
+//      dx1:= (pt1.x-pt0.x) div 65536; //todo: no floatingpoint
+//      dy1:= (pt1.y-pt0.y) div 65536;
+//      rea1:= dx1*dx1+dy1*dy1-xftlinewidthsquare;
+//      if rea1 > 0 then begin
+//       vertexindent:= round(sqrt(rea1)) div 2;
+//      end;
      end
      else begin
-      vertexindent:= 0;
       pt0:= (li.dest-2)^;
       pt1:= (li.dest-1)^;
      end;
      dec(li.dest,2);
-     v2:= li.v;
-     li.v:= v1;
-     li.dashstop:= li.v.c - vertexindent;
-     dash(drawinfo,li,bo1,false);
-     li.v:= v2;
-     bo1:= false;
-     po0:= li.dest;
-     if abs(pt0.x-(po0-2)^.x)+abs(pt0.y-(po0-2)^.y) <
-        abs(pt1.x-(po0-1)^.x)+abs(pt1.y-(po0-1)^.y) then begin
-                      //positive angle
+//     v2:= li.v;
+//     li.v:= v1;
+//     li.dashstop:= li.dashstop + li.v.c;
+//     dash(drawinfo,li,bo1,false);
+//     li.v:= v2;
+//     bo1:= false;
+     if odd(li.dashind) then begin //dash
+      po0:= li.dest;
       po0^:= pt0;
       inc(po0);
-      if odd(li.dashind) then begin //no dash
-       po0^.x:= pt0.x - v1.shift.x;
-       po0^.y:= pt0.y + v1.shift.y;
-       inc(po0);
-       po0^:= pt1;
-       inc(po0);
-       po0^:= pt0;
-      end
-      else begin //dash
+      po0^:= (po0-2)^;
+      inc(po0);
+      po0^:= pt0;
+      inc(po0);
+      po0^:= pt1;
+      inc(po0);
+      po0^:= pt0;
+      inc(po0);
+      po0^:= pt1;
+      {
+      if abs(pt0.x-(po0-2)^.x)+abs(pt0.y-(po0-2)^.y) <
+         abs(pt1.x-(po0-1)^.x)+abs(pt1.y-(po0-1)^.y) then begin
+                       //positive angle
        po0^:= (po0-2)^;
        inc(po0);
        po0^:= pt0;
@@ -2262,30 +2261,8 @@ begin
        po0^:= pt1;
        inc(po0);
        po0^:= pt0;       
-      end;
-      inc(po0);
-      po0^.x:= pt0.x - v2.shift.x;
-      po0^.y:= pt0.y + v2.shift.y;       
-     end
-     else begin  //negative angle
-      if odd(li.dashind) then begin //no dash
-       po0^.x:= pt1.x + v1.shift.x;
-       po0^.y:= pt1.y - v1.shift.y;
-       inc(po0);
-       po0^:= pt1;
-       inc(po0);
-       po0^:= pt0;
-       inc(po0);
-       po0^:= pt0;
-       inc(po0);
-       po0^:= pt1;
-       inc(po0);
-       po0^.x:= pt1.x + v2.shift.x;
-       po0^.y:= pt1.y - v2.shift.y;       
       end
-      else begin //dash
-       po0^:= pt0;
-       inc(po0);
+      else begin  //negative angle
        po0^:= (po0-2)^;
        inc(po0);
        po0^:= pt0;
@@ -2299,16 +2276,19 @@ begin
        inc(po0);
        po0^:= pt1;
       end;
+      }
+      inc(po0);
+      li.dest:= po0;
      end;
-     inc(po0);
-     li.dest:= po0;
     end;
+//    li.dashstop:= li.dashstop + li.v.c;
+    dash(drawinfo,li,bo1,false);
     if closed then begin
      (pxpointfixed(buffer.buffer))^:= (ints.p1-1)^;
      (pxpointfixed(buffer.buffer)+1)^:= ints.p1^;
-    end
-    else begin
-     shiftpoint(drawinfo,li);
+//    end
+//    else begin
+//     shiftpoint(drawinfo,li);
     end;
     xrendercompositetriangles(appdisp,pictopover,xftcolorforegroundpic,
                      xftdrawpic,nil,0,0,buffer.buffer,
@@ -2317,15 +2297,15 @@ begin
    else begin
     allocbuffer(buffer,pointcount*sizeof(txpointfixed));
     li.dest:= buffer.buffer;
-    calclineshift(li);
-    shiftpoint(drawinfo,li);
+    calclineshift(drawinfo,li);
+    shiftpoint(li);
     for int1:= 0 to int2 do begin
      if li.pointb = pend then begin
       li.pointb:= points;
      end;
      ints.da:= li.v.d;
-     calclineshift(li);
-     shiftpoint(drawinfo,li);
+     calclineshift(drawinfo,li);
+     shiftpoint(li);
      ints.db:= li.v.d;
      ints.p0:= li.dest-4;
      ints.p1:= li.dest-2;
@@ -2342,7 +2322,7 @@ begin
      (pxpointfixed(buffer.buffer)+1)^:= ints.p1^;
     end
     else begin
-     shiftpoint(drawinfo,li);
+     shiftpoint(li);
     end;
     xrendercompositetristrip(appdisp,pictopover,xftcolorforegroundpic,
                      xftdrawpic,nil,0,0,buffer.buffer,pointcount);
@@ -2381,9 +2361,9 @@ begin
     if df_dashed in gc.drawingflags then begin
      dashinit(drawinfo,li);
      for int1:= 0 to (count div 2)-1 do begin
-      calclineshift(li);
-      shiftpoint(drawinfo,li);
-      li.dashstop:= li.v.c;
+      calclineshift(drawinfo,li);
+      shiftpoint(li);
+//      li.dashstop:= li.v.c;
       dash(drawinfo,li,true,true);
       li.pointa:= li.pointb;
       inc(li.pointb);
@@ -2397,9 +2377,9 @@ begin
      li.dest:= buffer.buffer;
      for int1:= 0 to (count div 2)-1 do begin
       po1:= li.dest;
-      calclineshift(li);
-      shiftpoint(drawinfo,li);
-      shiftpoint2(li);
+      calclineshift(drawinfo,li);
+      shiftpoint(li);
+      shiftpoint(li);
       xrendercompositetristrip(appdisp,pictopover,xftcolorforegroundpic,
                      xftdrawpic,nil,0,0,po1,4);
      end;
