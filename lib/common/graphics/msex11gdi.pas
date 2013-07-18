@@ -2157,17 +2157,35 @@ end;
 
 procedure gdi_drawlines(var drawinfo: drawinfoty); //gdifunc
 var
+ li: lineshiftinfoty;
+ pt0,pt1: txpointfixed;
+
+ procedure pushdashend;
+ var
+  po0: pxpointfixed;
+ begin
+  po0:= li.dest;
+  po0^:= pt0;
+  inc(po0);
+  po0^:= (po0-2)^;
+  inc(po0);
+  po0^:= pt0;
+  inc(po0);
+  po0^:= pt1;
+  inc(po0);
+  po0^:= pt0;
+  inc(po0);
+  po0^:= pt1;
+  inc(po0);
+  li.dest:= po0;
+ end; //pushdashend
+
+var
  int1,int2: integer;
  pointcount: integer;
- li: lineshiftinfoty;
  ints: intersectinfoty;
  pend: ppointty;
  bo1: boolean;
-// v1,v2: lineshiftvectorty;
- pt0,pt1: txpointfixed;
- po0: pxpointfixed;
-// vertexindent: integer;
-// dx1,dy1,rea1: real;
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
@@ -2221,20 +2239,7 @@ begin
      end;
      dec(li.dest,2);
      if odd(li.dashind) then begin //dash
-      po0:= li.dest;
-      po0^:= pt0;
-      inc(po0);
-      po0^:= (po0-2)^;
-      inc(po0);
-      po0^:= pt0;
-      inc(po0);
-      po0^:= pt1;
-      inc(po0);
-      po0^:= pt0;
-      inc(po0);
-      po0^:= pt1;
-      inc(po0);
-      li.dest:= po0;
+      pushdashend;
      end;
     end;
     if closed then begin
@@ -2245,6 +2250,10 @@ begin
      dash(drawinfo,li,bo1,false);
      if odd(li.dashind) then begin //dash
       shiftpoint(li);
+      pt0:= (li.dest-2)^;
+      pt1:= (li.dest-1)^;
+      dec(li.dest,2);
+      pushdashend;
      end;     
     end;
     xrendercompositetriangles(appdisp,pictopover,xftcolorforegroundpic,
@@ -2302,8 +2311,8 @@ var
  po1: pxpointfixed;
  int1: integer;
  li: lineshiftinfoty;
- offs1: pointty;
- x1,y1: integer;
+// offs1: pointty;
+// x1,y1: integer;
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
