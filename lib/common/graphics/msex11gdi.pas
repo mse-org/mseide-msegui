@@ -2184,7 +2184,6 @@ begin
    pend:= points+count;
    li.pointb:= li.pointa+1;
    li.dist:= xftlinewidth;
-//   int2:= count-3;
    if closed then begin
     int2:= count-1;
    end
@@ -2193,7 +2192,6 @@ begin
    end;
    if df_dashed in gc.drawingflags then begin
     dashinit(drawinfo,li);
-//    li.dashstop:= 0;
     calclineshift(drawinfo,li);
     shiftpoint(li);
     bo1:= true; //start dash
@@ -2201,42 +2199,27 @@ begin
      if li.pointb = pend then begin
       li.pointb:= points;
      end;
-//     li.dashstop:= li.dashstop + li.v.c;
      dash(drawinfo,li,bo1,false);
      bo1:= false;
 
      ints.da:= li.v.d;
-//     v1:= li.v;
      calclineshift(drawinfo,li);
      shiftpoint(li);
      ints.db:= li.v.d;
      ints.p0:= li.dest-4;
      ints.p1:= li.dest-2;
-//     vertexindent:= 0;
      if intersect(ints) then begin
       pt0:= ints.isect;
       inc(ints.p0);
       inc(ints.p1);
       intersect2(ints);
       pt1:= ints.isect;
-//      dx1:= (pt1.x-pt0.x) div 65536; //todo: no floatingpoint
-//      dy1:= (pt1.y-pt0.y) div 65536;
-//      rea1:= dx1*dx1+dy1*dy1-xftlinewidthsquare;
-//      if rea1 > 0 then begin
-//       vertexindent:= round(sqrt(rea1)) div 2;
-//      end;
      end
      else begin
       pt0:= (li.dest-2)^;
       pt1:= (li.dest-1)^;
      end;
      dec(li.dest,2);
-//     v2:= li.v;
-//     li.v:= v1;
-//     li.dashstop:= li.dashstop + li.v.c;
-//     dash(drawinfo,li,bo1,false);
-//     li.v:= v2;
-//     bo1:= false;
      if odd(li.dashind) then begin //dash
       po0:= li.dest;
       po0^:= pt0;
@@ -2250,45 +2233,19 @@ begin
       po0^:= pt0;
       inc(po0);
       po0^:= pt1;
-      {
-      if abs(pt0.x-(po0-2)^.x)+abs(pt0.y-(po0-2)^.y) <
-         abs(pt1.x-(po0-1)^.x)+abs(pt1.y-(po0-1)^.y) then begin
-                       //positive angle
-       po0^:= (po0-2)^;
-       inc(po0);
-       po0^:= pt0;
-       inc(po0);
-       po0^:= pt1;
-       inc(po0);
-       po0^:= pt0;       
-      end
-      else begin  //negative angle
-       po0^:= (po0-2)^;
-       inc(po0);
-       po0^:= pt0;
-       inc(po0);
-       po0^:= pt1;
-       inc(po0);
-       po0^:= pt0;
-       inc(po0);
-       po0^.x:= pt1.x + v2.shift.x;
-       po0^.y:= pt1.y - v2.shift.y;       
-       inc(po0);
-       po0^:= pt1;
-      end;
-      }
       inc(po0);
       li.dest:= po0;
      end;
     end;
-//    li.dashstop:= li.dashstop + li.v.c;
-    dash(drawinfo,li,bo1,false);
     if closed then begin
-     (pxpointfixed(buffer.buffer))^:= (ints.p1-1)^;
-     (pxpointfixed(buffer.buffer)+1)^:= ints.p1^;
-//    end
-//    else begin
-//     shiftpoint(drawinfo,li);
+     (pxpointfixed(buffer.buffer))^:= pt0;
+     (pxpointfixed(buffer.buffer)+1)^:= pt1;
+    end
+    else begin
+     dash(drawinfo,li,bo1,false);
+     if odd(li.dashind) then begin //dash
+      shiftpoint(li);
+     end;     
     end;
     xrendercompositetriangles(appdisp,pictopover,xftcolorforegroundpic,
                      xftdrawpic,nil,0,0,buffer.buffer,
