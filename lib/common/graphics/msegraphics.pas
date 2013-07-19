@@ -4142,7 +4142,7 @@ end;
 procedure tcanvas.fillellipse(const def: rectty; const acolor: colorty = cl_default;
                               const linecolor: colorty = cl_none);
 begin
- if cs_inactive in fstate then exit;
+ if (cs_inactive in fstate) or (def.cx = 0) or (def.cy = 0) then exit;
  if checkforeground(acolor,false) then begin
   with fdrawinfo.rect do begin
    rect:= @def;

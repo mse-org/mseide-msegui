@@ -177,6 +177,10 @@ var
                dst: tpicture; maskFormat: PXRenderPictFormat;
                xSrc: cint; ySrc: cint; points: PXPointFixed;
                npoint: cint); cdecl;
+ XRenderCompositeTriFan: procedure(dpy: pdisplay; op: cint; src: tpicture;
+               dst: tpicture; maskFormat: PXRenderPictFormat;
+               xSrc: cint; ySrc: cint; points: PXPointFixed;
+               npoint: cint); cdecl;
  XRenderChangePicture: procedure(dpy: pdisplay; picture: tpicture;
              valuemask: culong; attributes: PXRenderPictureAttributes); cdecl;
 
@@ -939,8 +943,8 @@ begin
    xvalues.ts_y_origin:= brushorigin.y;
   end;
 
-  if drawingflagsty((longword(drawingflags) xor longword(gcdrawingflags)))
-           * fillmodeinfoflags <> [] then begin
+  if (drawingflags >< gcdrawingflags)
+           * (fillmodeinfoflags+[df_smooth]) <> [] then begin
    xmask:= xmask or gcfillstyle;
    if df_brush in drawingflags then begin
     if df_monochrome in drawingflags then begin
@@ -957,6 +961,13 @@ begin
    end
    else begin
     xvalues.fill_style:= fillsolid;
+   end;
+   if (df_smooth in drawingflags) and fhasxft then begin
+    checkxftdraw(drawinfo);
+    include(xftstate,xfts_smooth);
+   end
+   else begin
+    exclude(xftstate,xfts_smooth);
    end;
   end;
 
@@ -984,17 +995,6 @@ begin
    else begin
     setregion(drawinfo.gc,region(clipregion));
 //    xsetregion(appdisp,agc,region(clipregion));
-   end;
-  end;
-  if gvm_options in mask then begin
-   if cao_smooth in options then begin
-    if fhasxft then begin
-     checkxftdraw(drawinfo);
-     include(xftstate,xfts_smooth);
-    end;
-   end
-   else begin
-    exclude(xftstate,xfts_smooth);
    end;
   end;
  end;
@@ -2068,8 +2068,6 @@ begin
   for int1:= 1 to length(xftdashes) do begin
    li.dashlen:= li.dashlen + ord(xftdashes[int1]);
   end;
-//  li.dashpos:= ord(xftdashes[1]);
-//  li.dashind:= 1;
  end;
 end;
 
@@ -2311,8 +2309,6 @@ var
  po1: pxpointfixed;
  int1: integer;
  li: lineshiftinfoty;
-// offs1: pointty;
-// x1,y1: integer;
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
@@ -2329,7 +2325,6 @@ begin
      for int1:= 0 to (count div 2)-1 do begin
       calclineshift(drawinfo,li);
       shiftpoint(li);
-//      li.dashstop:= li.v.c;
       dash(drawinfo,li,true,true);
       li.pointa:= li.pointb;
       inc(li.pointb);
@@ -2486,18 +2481,106 @@ begin
   points1[2].y:= y1;
   points1[3].y:= y1;
   
-  xfillpolygon(appdisp,paintdevice,tgc(gc.handle),@points1[0],4,complex,coordmodeorigin);
+  xfillpolygon(appdisp,paintdevice,tgc(gc.handle),@points1[0],4,
+                                                     complex,coordmodeorigin);
  end;
 end;
 
 procedure gdi_fillelipse(var drawinfo: drawinfoty); //gdifunc
+//todo: optimize
+var
+ rea1,sx,sy,f,si,co: real;
+ x1,y1: integer;
+ q0,q1,q2,q3: pxpointfixed;
+ npoints: integer;
+ int1: integer;
+ center: txpointfixed;
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
 {$endif} 
  with drawinfo,drawinfo.rect.rect^ do begin
-  xfillarc(appdisp,paintdevice,tgc(gc.handle),
-   x+origin.x-cx div 2,y+origin.y - cy div 2,cx,cy,0,wholecircle);
+  if xfts_smooth in x11gcty(gc.platformdata).d.xftstate then begin
+   int1:= cx;
+   if cy > int1 then begin
+    int1:= cy;
+   end;
+   int1:= (int1+3) div 4; //samples per quadrant
+   npoints:= 1+4*int1;
+   allocbuffer(buffer,npoints*sizeof(txpointfixed));
+   rea1:= pi/int1;
+   si:= sin(rea1);
+   co:= cos(rea1);
+   center.x:= (x+origin.x) shl 16;
+   center.y:= (y+origin.y) shl 16;
+   q0:= buffer.buffer;
+   q0^:= center;
+   inc(q0);
+   q1:= q0+int1;
+   q2:= q1+int1;
+   q3:= q2+int1;
+   if cx > cy then begin
+    f:= cy/cx;
+    sx:= cx*(65536/2);
+    sy:= 0;    
+    for int1:= int1-1 downto 0 do begin
+     y1:= round(sy*f);
+     x1:= round(sx);
+     q0^.x:= center.x + x1;
+     q0^.y:= center.y + y1;
+     inc(q0);
+     q2^.x:= center.x - x1;
+     q2^.y:= center.y - y1;
+     inc(q2);
+     x1:= round(sx*f);
+     y1:= round(sy);
+     q1^.x:= center.x + y1;
+     q1^.y:= center.y + x1;
+     inc(q1);
+     q3^.x:= center.x - y1;
+     q3^.y:= center.y - x1;
+     inc(q3);
+     rea1:= sx;
+     sx:= co*sx-si*sy;
+     sy:= co*sy+si*rea1;
+    end;
+   end
+   else begin
+    f:= cx/cy;
+    sy:= cy*(65536/2);
+    sx:= 0;    
+    for int1:= int1-1 downto 0 do begin
+     x1:= round(sx*f);
+     y1:= round(sy);
+     q0^.y:= center.y + y1;
+     q0^.x:= center.x + x1;
+     inc(q0);
+     q2^.y:= center.y - y1;
+     q2^.x:= center.x - x1;
+     inc(q2);
+     y1:= round(sy*f);
+     x1:= round(sx);
+     q1^.y:= center.y + x1;
+     q1^.x:= center.x + y1;
+     inc(q1);
+     q3^.y:= center.y - x1;
+     q3^.x:= center.x - y1;
+     inc(q3);
+     rea1:= sx;
+     sx:= co*sx-si*sy;
+     sy:= co*sy+si*rea1;
+    end;
+   end;
+   with x11gcty(gc.platformdata).d do begin
+    checkxftstate(drawinfo,[xfts_colorforegroundvalid]);
+    xrendercompositetrifan(appdisp,pictopover,xftcolorforegroundpic,
+                    xftdrawpic,nil,0,0,buffer.buffer,npoints);
+   end;  
+  end
+  else begin
+   xfillarc(appdisp,paintdevice,tgc(gc.handle),
+    x+origin.x-cx div 2,y+origin.y - cy div 2,cx,cy,0,wholecircle);
+  end;
  end;
 end;
 
@@ -2555,13 +2638,10 @@ begin
     end;
     checkxftstate(drawinfo,[xfts_colorforegroundvalid]);
     with x11gcty(gc.platformdata).d do begin
-//     cpic:= createcolorpicture(acolorforeground);
      xrendercompositetristrip(appdisp,pictopover,xftcolorforegroundpic,
                     xftdrawpic,nil,0,0,buffer.buffer,points.count);
-//     xrenderfreepicture(appdisp,cpic);
     end;
    end;
-//   allocbuffer(buffer,int1*sizeof(xpoint));
   end
   else begin
    transformpoints(drawinfo,false);
@@ -2826,7 +2906,7 @@ end;
 
 function getxrenderlib: boolean;
 const
- funcs: array[0..12] of funcinfoty = (
+ funcs: array[0..13] of funcinfoty = (
   (n: 'XRenderSetPictureClipRectangles'; 
                    d: {$ifndef FPC}@{$endif}@XRenderSetPictureClipRectangles),
   (n: 'XRenderCreatePicture'; d: {$ifndef FPC}@{$endif}@XRenderCreatePicture),
@@ -2845,6 +2925,8 @@ const
                            d: {$ifndef FPC}@{$endif}@XRenderFindStandardFormat),
   (n: 'XRenderCompositeTriStrip'; 
                            d: {$ifndef FPC}@{$endif}@XRenderCompositeTriStrip),
+  (n: 'XRenderCompositeTriFan'; 
+                           d: {$ifndef FPC}@{$endif}@XRenderCompositeTriFan),
   (n: 'XRenderCompositeTriangles'; 
                            d: {$ifndef FPC}@{$endif}@XRenderCompositeTriangles),
   (n: 'XRenderChangePicture'; 
