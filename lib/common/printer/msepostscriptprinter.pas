@@ -660,7 +660,7 @@ begin
  postscriptgcty(drawinfo.gc.platformdata).d.canvas.ps_fillrect;
 end;
 
-procedure gdi_fillelipse(var drawinfo: drawinfoty);
+procedure gdi_fillellipse(var drawinfo: drawinfoty);
 begin
  postscriptgcty(drawinfo.gc.platformdata).d.canvas.handleellipse(
                         drawinfo.rect.rect^,true);
@@ -2499,7 +2499,7 @@ initialization
  gdifunctions[gdf_drawellipse]:= {$ifdef FPC}@{$endif}gdi_drawellipse;
  gdifunctions[gdf_drawarc]:= {$ifdef FPC}@{$endif}gdi_drawarc;
  gdifunctions[gdf_fillrect]:= {$ifdef FPC}@{$endif}gdi_fillrect;
- gdifunctions[gdf_fillelipse]:= {$ifdef FPC}@{$endif}gdi_fillelipse;
+ gdifunctions[gdf_fillellipse]:= {$ifdef FPC}@{$endif}gdi_fillellipse;
  gdifunctions[gdf_fillarc]:= {$ifdef FPC}@{$endif}gdi_fillarc;
  gdifunctions[gdf_fillpolygon]:= {$ifdef FPC}@{$endif}gdi_fillpolygon;
  gdifunctions[gdf_drawstring16]:= {$ifdef FPC}@{$endif}gdi_drawstring16;

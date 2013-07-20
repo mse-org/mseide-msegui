@@ -188,6 +188,9 @@ implementation
 uses
  msesys,msesonames,sysutils,msefcfontselect,msedynload;
 
+//
+//todo: optimise tesselation
+//
 
 (*
 //function fontdatatoxftname(const fontdata: fontdataty): string;
@@ -2354,14 +2357,237 @@ begin
  end;
 end;
 
-procedure gdi_drawellipse(var drawinfo: drawinfoty); //gdifunc
+procedure gdi_fillellipse(var drawinfo: drawinfoty); //gdifunc
+//todo: optimize
+var
+ rea1,sx,sy,f,si,co: real;
+ x1,y1: integer;
+ q0,q1,q2,q3: pxpointfixed;
+ npoints: integer;
+ int1: integer;
+ center: txpointfixed;
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
 {$endif} 
  with drawinfo,drawinfo.rect.rect^ do begin
-  xdrawarc(appdisp,paintdevice,tgc(gc.handle),
-   x+origin.x-cx div 2,y+origin.y - cy div 2,cx,cy,0,wholecircle);
+  if xfts_smooth in x11gcty(gc.platformdata).d.xftstate then begin
+   int1:= cx;
+   if cy > int1 then begin
+    int1:= cy;
+   end;
+   int1:= (int1+1) div 2; //samples per quadrant
+   rea1:= pi/(2*int1);
+   npoints:= 2+4*int1; //center + endpoint
+   allocbuffer(buffer,npoints*sizeof(txpointfixed));
+   si:= sin(rea1);
+   co:= cos(rea1);
+   center.x:= (x+origin.x) shl 16;
+   center.y:= (y+origin.y) shl 16;
+   q0:= buffer.buffer;
+   q0^:= center;
+   inc(q0);
+   q1:= q0+int1;
+   q2:= q1+int1;
+   q3:= q2+int1;
+   if cx > cy then begin
+    f:= cy/cx;
+    sx:= cx*(65536/2);
+    sy:= 0;    
+    for int1:= int1-1 downto 0 do begin
+     y1:= round(sy*f);
+     x1:= round(sx);
+     q0^.x:= center.x + x1;
+     q0^.y:= center.y - y1;
+     inc(q0);
+     q2^.x:= center.x - x1;
+     q2^.y:= center.y + y1;
+     inc(q2);
+     x1:= round(sx*f);
+     y1:= round(sy);
+     q1^.x:= center.x - y1;
+     q1^.y:= center.y - x1;
+     inc(q1);
+     q3^.x:= center.x + y1;
+     q3^.y:= center.y + x1;
+     inc(q3);
+     rea1:= sx;
+     sx:= co*sx-si*sy;
+     sy:= co*sy+si*rea1;
+    end;
+   end
+   else begin
+    f:= cx/cy;
+    sy:= cy*(65536/2);
+    sx:= 0;    
+    for int1:= int1-1 downto 0 do begin
+     x1:= round(sx*f);
+     y1:= round(sy);
+     q0^.y:= center.y - y1;
+     q0^.x:= center.x + x1;
+     inc(q0);
+     q2^.y:= center.y + y1;
+     q2^.x:= center.x - x1;
+     inc(q2);
+     y1:= round(sy*f);
+     x1:= round(sx);
+     q1^.y:= center.y - x1;
+     q1^.x:= center.x - y1;
+     inc(q1);
+     q3^.y:= center.y + x1;
+     q3^.x:= center.x + y1;
+     inc(q3);
+     rea1:= sx;
+     sx:= co*sx-si*sy;
+     sy:= co*sy+si*rea1;
+    end;
+   end;
+   q3^:= (pxpointfixed(buffer.buffer)+1)^; //endpoint
+   with x11gcty(gc.platformdata).d do begin
+    checkxftstate(drawinfo,[xfts_colorforegroundvalid]);
+    xrendercompositetrifan(appdisp,pictopover,xftcolorforegroundpic,
+                    xftdrawpic,nil,0,0,buffer.buffer,npoints);
+   end;  
+  end
+  else begin
+   xfillarc(appdisp,paintdevice,tgc(gc.handle),
+    x+origin.x-cx div 2,y+origin.y - cy div 2,cx,cy,0,wholecircle);
+  end;
+ end;
+end;
+
+procedure gdi_drawellipse(var drawinfo: drawinfoty); //gdifunc
+var
+ rea1,sx,sy,f,fw,si,co: real;
+ x1,y1,x2,y2: integer;
+ q0,q1,q2,q3: pxpointfixed;
+ npoints: integer;
+ int1,int2: integer;
+ center: txpointfixed;
+begin
+{$ifdef mse_debuggdisync}
+ checkgdilock;
+{$endif} 
+ with drawinfo,x11gcty(gc.platformdata).d,rect.rect^ do begin
+  if xfts_smooth in xftstate then begin
+   int1:= cx;
+   if cy > int1 then begin
+    int1:= cy;
+   end;
+   if int1 = 0 then begin
+    cx:= xftlinewidth div 65536;
+    cy:= cx;
+    gdi_fillellipse(drawinfo);
+    exit;
+   end;
+   int1:= (int1+1) div 2; //samples per quadrant
+   rea1:= pi/(2*int1);
+   npoints:= 8*int1+2; //+ endpoint
+   allocbuffer(buffer,npoints*sizeof(txpointfixed));
+   si:= sin(rea1);
+   co:= cos(rea1);
+   center.x:= (x+origin.x) shl 16;
+   center.y:= (y+origin.y) shl 16;
+   int2:= int1*2;
+   q0:= buffer.buffer;
+   q1:= q0+int2;
+   q2:= q1+int2;
+   q3:= q2+int2;
+   if cx > cy then begin
+    f:= cy/cx;
+    sx:= cx*(65536/2);
+    fw:= (xftlinewidth div 2) / sx;
+    sy:= 0;    
+    for int1:= int1-1 downto 0 do begin
+     y1:= round(sy*f);
+     y2:= round(sy*fw);
+     x1:= round(sx);
+     x2:= round(sx*fw);
+     q0^.x:= center.x + x1 + x2;
+     q0^.y:= center.y - y1 - y2;
+     inc(q0);
+     q0^.x:= center.x + x1 - x2;
+     q0^.y:= center.y - y1 + y2;
+     inc(q0);
+     q2^.x:= center.x - x1 - x2;
+     q2^.y:= center.y + y1 + y2;
+     inc(q2);
+     q2^.x:= center.x - x1 + x2;
+     q2^.y:= center.y + y1 - y2;
+     inc(q2);
+     x1:= round(sx*f);
+     y1:= round(sy);
+     q1^.x:= center.x - y1 - y2;
+     q1^.y:= center.y - x1 - x2;
+     inc(q1);
+     q1^.x:= center.x - y1 + y2;
+     q1^.y:= center.y - x1 + x2;
+     inc(q1);
+     q3^.x:= center.x + y1 + y2;
+     q3^.y:= center.y + x1 + x2;
+     inc(q3);
+     q3^.x:= center.x + y1 - y2;
+     q3^.y:= center.y + x1 - x2;
+     inc(q3);
+     rea1:= sx;
+     sx:= co*sx-si*sy;
+     sy:= co*sy+si*rea1;
+    end;
+   end
+   else begin
+    f:= cx/cy;
+    sy:= cy*(65536/2);
+    sx:= 0;    
+    fw:= (xftlinewidth div 2) / sy;
+    for int1:= int1-1 downto 0 do begin
+     x1:= round(sx*f);
+     x2:= round(sx*fw);
+     y1:= round(sy);
+     y2:= round(sy*fw);
+     q0^.y:= center.y - y1 - y2;
+     q0^.x:= center.x + x1 + x2;
+     inc(q0);
+     q0^.y:= center.y - y1 + y2;
+     q0^.x:= center.x + x1 - x2;
+     inc(q0);
+     q2^.y:= center.y + y1 + y2;
+     q2^.x:= center.x - x1 - x2;
+     inc(q2);
+     q2^.y:= center.y + y1 - y2;
+     q2^.x:= center.x - x1 + x2;
+     inc(q2);
+     y1:= round(sy*f);
+     x1:= round(sx);
+     q1^.y:= center.y - x1 - x2;
+     q1^.x:= center.x - y1 - y2;
+     inc(q1);
+     q1^.y:= center.y - x1 + x2;
+     q1^.x:= center.x - y1 + y2;
+     inc(q1);
+     q3^.y:= center.y + x1 + x2;
+     q3^.x:= center.x + y1 + y2;
+     inc(q3);
+     q3^.y:= center.y + x1 - x2;
+     q3^.x:= center.x + y1 - y2;
+     inc(q3);
+     rea1:= sx;
+     sx:= co*sx-si*sy;
+     sy:= co*sy+si*rea1;
+    end;
+   end;
+   q3^:= pxpointfixed(buffer.buffer)^;   //endpoint
+   inc(q3);
+   q3^:= (pxpointfixed(buffer.buffer)+1)^;
+   with x11gcty(gc.platformdata).d do begin
+    checkxftstate(drawinfo,[xfts_colorforegroundvalid]);
+    xrendercompositetristrip(appdisp,pictopover,xftcolorforegroundpic,
+                    xftdrawpic,nil,0,0,buffer.buffer,npoints);
+   end;  
+  end
+  else begin
+   xdrawarc(appdisp,paintdevice,tgc(gc.handle),
+    x+origin.x-cx div 2,y+origin.y - cy div 2,cx,cy,0,wholecircle);
+  end;
  end;
 end;
 
@@ -2483,104 +2709,6 @@ begin
   
   xfillpolygon(appdisp,paintdevice,tgc(gc.handle),@points1[0],4,
                                                      complex,coordmodeorigin);
- end;
-end;
-
-procedure gdi_fillelipse(var drawinfo: drawinfoty); //gdifunc
-//todo: optimize
-var
- rea1,sx,sy,f,si,co: real;
- x1,y1: integer;
- q0,q1,q2,q3: pxpointfixed;
- npoints: integer;
- int1: integer;
- center: txpointfixed;
-begin
-{$ifdef mse_debuggdisync}
- checkgdilock;
-{$endif} 
- with drawinfo,drawinfo.rect.rect^ do begin
-  if xfts_smooth in x11gcty(gc.platformdata).d.xftstate then begin
-   int1:= cx;
-   if cy > int1 then begin
-    int1:= cy;
-   end;
-   int1:= (int1+3) div 4; //samples per quadrant
-   npoints:= 1+4*int1;
-   allocbuffer(buffer,npoints*sizeof(txpointfixed));
-   rea1:= pi/int1;
-   si:= sin(rea1);
-   co:= cos(rea1);
-   center.x:= (x+origin.x) shl 16;
-   center.y:= (y+origin.y) shl 16;
-   q0:= buffer.buffer;
-   q0^:= center;
-   inc(q0);
-   q1:= q0+int1;
-   q2:= q1+int1;
-   q3:= q2+int1;
-   if cx > cy then begin
-    f:= cy/cx;
-    sx:= cx*(65536/2);
-    sy:= 0;    
-    for int1:= int1-1 downto 0 do begin
-     y1:= round(sy*f);
-     x1:= round(sx);
-     q0^.x:= center.x + x1;
-     q0^.y:= center.y + y1;
-     inc(q0);
-     q2^.x:= center.x - x1;
-     q2^.y:= center.y - y1;
-     inc(q2);
-     x1:= round(sx*f);
-     y1:= round(sy);
-     q1^.x:= center.x + y1;
-     q1^.y:= center.y + x1;
-     inc(q1);
-     q3^.x:= center.x - y1;
-     q3^.y:= center.y - x1;
-     inc(q3);
-     rea1:= sx;
-     sx:= co*sx-si*sy;
-     sy:= co*sy+si*rea1;
-    end;
-   end
-   else begin
-    f:= cx/cy;
-    sy:= cy*(65536/2);
-    sx:= 0;    
-    for int1:= int1-1 downto 0 do begin
-     x1:= round(sx*f);
-     y1:= round(sy);
-     q0^.y:= center.y + y1;
-     q0^.x:= center.x + x1;
-     inc(q0);
-     q2^.y:= center.y - y1;
-     q2^.x:= center.x - x1;
-     inc(q2);
-     y1:= round(sy*f);
-     x1:= round(sx);
-     q1^.y:= center.y + x1;
-     q1^.x:= center.x + y1;
-     inc(q1);
-     q3^.y:= center.y - x1;
-     q3^.x:= center.x - y1;
-     inc(q3);
-     rea1:= sx;
-     sx:= co*sx-si*sy;
-     sy:= co*sy+si*rea1;
-    end;
-   end;
-   with x11gcty(gc.platformdata).d do begin
-    checkxftstate(drawinfo,[xfts_colorforegroundvalid]);
-    xrendercompositetrifan(appdisp,pictopover,xftcolorforegroundpic,
-                    xftdrawpic,nil,0,0,buffer.buffer,npoints);
-   end;  
-  end
-  else begin
-   xfillarc(appdisp,paintdevice,tgc(gc.handle),
-    x+origin.x-cx div 2,y+origin.y - cy div 2,cx,cy,0,wholecircle);
-  end;
  end;
 end;
 
@@ -2953,7 +3081,7 @@ const
    {$ifdef FPC}@{$endif}gdi_drawellipse,
    {$ifdef FPC}@{$endif}gdi_drawarc,
    {$ifdef FPC}@{$endif}gdi_fillrect,
-   {$ifdef FPC}@{$endif}gdi_fillelipse,
+   {$ifdef FPC}@{$endif}gdi_fillellipse,
    {$ifdef FPC}@{$endif}gdi_fillarc,
    {$ifdef FPC}@{$endif}gdi_fillpolygon,
    {$ifdef FPC}@{$endif}gdi_drawstring16,

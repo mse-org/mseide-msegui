@@ -1224,7 +1224,7 @@ begin
  glend;
 end;
 
-procedure gdi_fillelipse(var drawinfo: drawinfoty);
+procedure gdi_fillellipse(var drawinfo: drawinfoty);
 begin
  gdinotimplemented;
 end;
@@ -1883,7 +1883,7 @@ const
    {$ifdef FPC}@{$endif}gdi_drawellipse,
    {$ifdef FPC}@{$endif}gdi_drawarc,
    {$ifdef FPC}@{$endif}gdi_fillrect,
-   {$ifdef FPC}@{$endif}gdi_fillelipse,
+   {$ifdef FPC}@{$endif}gdi_fillellipse,
    {$ifdef FPC}@{$endif}gdi_fillarc,
    {$ifdef FPC}@{$endif}gdi_fillpolygon,
    {$ifdef FPC}@{$endif}gdi_drawstring16,

@@ -591,7 +591,7 @@ type
               gdf_getcanvasclass,gdf_endpaint,gdf_flush,gdf_movewindowrect,
               gdf_drawlines,gdf_drawlinesegments,gdf_drawellipse,gdf_drawarc,
               gdf_fillrect,
-              gdf_fillelipse,gdf_fillarc,gdf_fillpolygon,{gdf_drawstring,}
+              gdf_fillellipse,gdf_fillarc,gdf_fillpolygon,{gdf_drawstring,}
               gdf_drawstring16,
               gdf_setcliporigin,
               gdf_createemptyregion,gdf_createrectregion,gdf_createrectsregion,
@@ -4147,7 +4147,7 @@ begin
   with fdrawinfo.rect do begin
    rect:= @def;
   end;
-  gdi(gdf_fillelipse);
+  gdi(gdf_fillellipse);
  end;
  if (linecolor <> cl_none) then begin
   drawellipse(def,linecolor);

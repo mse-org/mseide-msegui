@@ -1694,7 +1694,7 @@ begin
  fill(drawinfo,fs_rect);
 end;
 
-procedure gdi_fillelipse(var drawinfo: drawinfoty);
+procedure gdi_fillellipse(var drawinfo: drawinfoty);
 begin
  if gcf_smooth in win32gcty(drawinfo.gc.platformdata).d.flags then begin
   checkgpgc(drawinfo.gc,[gcf_colorbrushvalid]);
@@ -2743,7 +2743,7 @@ const
    {$ifdef FPC}@{$endif}gdi_drawellipse,
    {$ifdef FPC}@{$endif}gdi_drawarc,
    {$ifdef FPC}@{$endif}gdi_fillrect,
-   {$ifdef FPC}@{$endif}gdi_fillelipse,
+   {$ifdef FPC}@{$endif}gdi_fillellipse,
    {$ifdef FPC}@{$endif}gdi_fillarc,
    {$ifdef FPC}@{$endif}gdi_fillpolygon,
 //   {$ifdef FPC}@{$endif}gdi_drawstring,

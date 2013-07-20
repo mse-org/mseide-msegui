@@ -170,7 +170,7 @@ procedure gdi_drawlinesegments(var drawinfo: drawinfoty);
 procedure gdi_drawellipse(var drawinfo: drawinfoty);
 procedure gdi_drawarc(var drawinfo: drawinfoty);
 procedure gdi_fillrect(var drawinfo: drawinfoty);
-procedure gdi_fillelipse(var drawinfo: drawinfoty);
+procedure gdi_fillellipse(var drawinfo: drawinfoty);
 procedure gdi_fillarc(var drawinfo: drawinfoty);
 procedure gdi_fillpolygon(var drawinfo: drawinfoty);
 procedure gdi_drawstring16(var drawinfo: drawinfoty);
