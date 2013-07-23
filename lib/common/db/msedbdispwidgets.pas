@@ -60,13 +60,13 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
   published
+   property options; //first
    property datalink: tdispfielddatalink read fdatalink write setdatalink;
    property bounds_cx default defaultlabelwidgetwidth;
    property bounds_cy default defaultlabelwidgetheight;
    property optionswidget default defaultlabeloptionswidget;
    property font;
    property textflags;
-   property options;
  end;
 
  tdbstringdisp = class(tcustomstringdisp,idbdispfieldlink,ireccontrol)

@@ -408,7 +408,7 @@ type
    property onbeforeexecute;
  end;
    
- labeloptionty = (lao_nogray);
+ labeloptionty = (lao_nogray,lao_nounderline);
  labeloptionsty = set of labeloptionty;
  
 type 
@@ -450,10 +450,10 @@ type
 
  tlabel = class(tcustomlabel)
   published
+   property options; //first
    property caption;
    property font;
    property textflags;
-   property options;
  end;
 
  tcustomicon = class(tpublishedwidget)
@@ -1688,12 +1688,22 @@ end;
 
 function tcustomlabel.getcaption: msestring;
 begin
- result:= richstringtocaption(fcaption);
+ if lao_nounderline in foptions then begin
+  result:= fcaption.text;
+ end
+ else begin
+  result:= richstringtocaption(fcaption);
+ end;
 end;
 
 procedure tcustomlabel.setcaption(const Value: msestring);
 begin
- captiontorichstring(Value,fcaption);
+ if lao_nounderline in foptions then begin
+  fcaption.text:= value;
+ end
+ else begin
+  captiontorichstring(Value,fcaption);
+ end;
  checkautosize;
  invalidate;
 end;

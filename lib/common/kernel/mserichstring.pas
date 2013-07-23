@@ -266,84 +266,73 @@ end;
 
 procedure captiontorichstring(const caption: captionty; var dest: richstringty);
 var
- int1,int2: integer;
+ int1: integer;
  ch1: msechar;
+ po1: pmsechar;
 begin
  with dest do begin
-  setlength(text,length(caption));
+  setlength(text,length(caption)); //max
   format:= nil;
+  po1:= pointer(text);
   int1:= 1;
-  int2:= 0;
   while int1 <= length(caption) do begin
    ch1:= caption[int1];
-   if ch1 = '&' then begin
-    if (int1 < length(caption)) and (caption[int1+1] = '&') then begin
-     pmsecharaty(text)^[int2]:= ch1;
-     inc(int2);
+   if (ch1 = '&') and (format = nil) then begin
+    if caption[int1+1] = '&' then begin
+     po1^:= ch1;
      inc(int1);
+     if caption[int1+1] = '&' then begin    //there is a trailing #0
+      updatefontstyle1(format,po1-pmsechar(pointer(text)),1,fs_underline,true);
+      inc(int1);
+     end;
+     inc(po1);
     end
     else begin
-     if format = nil then begin
-      updatefontstyle1(format,int2,1,fs_underline,true);
-     end;
+     updatefontstyle1(format,po1-pmsechar(pointer(text)),1,fs_underline,true);
     end;
    end
    else begin
-    pmsecharaty(text)^[int2]:= ch1;
-    inc(int2);
+    po1^:= ch1;
+    inc(po1);
    end;
    inc(int1);
   end;
-  setlength(text,int2);
+  setlength(text,po1-pmsechar(pointer(text)));
  end;
 end;
-{
-//procedure captiontorichstring(const caption: captionty; out result: richstringty);
-function captiontorichstring(const caption: captionty): richstringty;
-var
- int1,int2: integer;
- ch1: msechar;
-begin
-// with result do begin
-  setlength(result.text,length(caption));
-  result.format:= nil; ch1:= 'A'; result.text:= 'abc'+ch1; exit;
-  int1:= 1;
-  int2:= 0;
-  while int1 <= length(caption) do begin
-   ch1:= caption[int1];
-   if ch1 = '&' then begin
-    if (int1 < length(caption)) and (caption[int1+1] = '&') then begin
-     inc(int2);
-     result.text[int2]:= ch1;
-     inc(int1);
-    end
-    else begin
-     if result.format = nil then begin
-      updatefontstyle(result.format,int2,1,fs_underline,true);
-     end;
-    end;
-   end
-   else begin
-    inc(int2);
-    result.text[int2]:= ch1;
-   end;
-   inc(int1);
-  end;
-  setlength(result.text,int2);
-// end;
-end;
-}
 
 function richstringtocaption(const caption: richstringty): captionty;
+var
+ int1,int2: integer;
+ po1: pmsechar;
+ ch1: msechar;
 begin
  with caption do begin
+  int2:= bigint;
   if format <> nil then begin
-   result:= copy(text,1,format[0].index) + '&' + copy(text,format[0].index+1,bigint);
-  end
-  else begin
-   result:= text;
+   int2:= format[0].index + 1;
+  end;
+  setlength(result,length(text)*2+1);
+  po1:= pmsechar(pointer(result));
+  for int1:= 1 to length(text) do begin
+   if int1 = int2 then begin
+    po1^:= '&';
+    inc(po1);
+   end;
+   ch1:= text[int1];
+   po1^:= ch1;
+   inc(po1);
+   if (ch1 = '&') and (int1 <= int2) {and (int1 < length(text))} then begin
+    po1^:= ch1;
+    inc(po1);
+   end;
+  end;
+  if int2 - 1 = length(text) then begin
+   po1^:= '&';
+   inc(po1);
   end;
  end;
+ setlength(result,po1-pmsechar(pointer(result)));
 end;
 
 function isshortcut(key: msechar; const caption: richstringty): boolean;
