@@ -2458,7 +2458,7 @@ end;
 
 procedure gdi_drawellipse(var drawinfo: drawinfoty); //gdifunc
 var
- rea1,sx,sy,f,fw,si,co: real;
+ rea1,sx,sy,w,cxw,cyw,cx1,cy1,cx2,cy2,si,co: real;
  x1,y1,x2,y2: integer;
  q0,q1,q2,q3: pxpointfixed;
  npoints: integer;
@@ -2493,16 +2493,28 @@ begin
    q1:= q0+int2;
    q2:= q1+int2;
    q3:= q2+int2;
+   cx1:= cx * (65536 div 2);
+   cx2:= cx1*cx1;
+   cy1:= cy * (65536 div 2);
+   cy2:= cy1*cy1;
+   w:= xftlinewidth div 2;
+   cxw:= cx1*w;
+   cyw:= cy1*w;
    if cx > cy then begin
-    f:= cy/cx;
-    sx:= cx*(65536/2);
-    fw:= (xftlinewidth div 2) / sx;
+    sx:= 1;
     sy:= 0;    
     for int1:= int1-1 downto 0 do begin
-     y1:= round(sy*f);
-     y2:= round(sy*fw);
-     x1:= round(sx);
-     x2:= round(sx*fw);
+     x1:= round(cx1*sx);
+     y1:= round(cy1*sy);
+     rea1:= sqrt(cx2*sy*sy+cy2*sx*sx);
+     if rea1 = 0 then begin
+      x2:= round(w);
+      y2:= 0;
+     end
+     else begin
+      x2:= round(cyw*sx/rea1);
+      y2:= round(cxw*sy/rea1);
+     end;
      q0^.x:= center.x + x1 + x2;
      q0^.y:= center.y - y1 - y2;
      inc(q0);
@@ -2515,8 +2527,16 @@ begin
      q2^.x:= center.x - x1 + x2;
      q2^.y:= center.y + y1 - y2;
      inc(q2);
-     x1:= round(sx*f);
-     y1:= round(sy);
+     y1:= round(cy1*sx);
+     x1:= round(cx1*sy);
+     if rea1 = 0 then begin
+      y2:= round(w);
+      x2:= 0;
+     end
+     else begin
+      y2:= round(cxw*sx/rea1);
+      x2:= round(cyw*sy/rea1);
+     end;
      q1^.x:= center.x - y1 - y2;
      q1^.y:= center.y - x1 - x2;
      inc(q1);
@@ -2535,15 +2555,18 @@ begin
     end;
    end
    else begin
+exit;
+   {
     f:= cx/cy;
     sy:= cy*(65536/2);
     sx:= 0;    
-    fw:= (xftlinewidth div 2) / sy;
+    fwy:= (xftlinewidth div 2) / sy;
+    fwx:= fwy*f;
     for int1:= int1-1 downto 0 do begin
      x1:= round(sx*f);
-     x2:= round(sx*fw);
+     x2:= round(sx*fwx);
      y1:= round(sy);
-     y2:= round(sy*fw);
+     y2:= round(sy*fwy);
      q0^.y:= center.y - y1 - y2;
      q0^.x:= center.x + x1 + x2;
      inc(q0);
@@ -2574,6 +2597,7 @@ begin
      sx:= co*sx-si*sy;
      sy:= co*sy+si*rea1;
     end;
+    }
    end;
    q3^:= pxpointfixed(buffer.buffer)^;   //endpoint
    inc(q3);
