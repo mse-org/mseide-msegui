@@ -28,7 +28,7 @@ uses
  msegraphutils,mseevent,msepointer,mseguiglob,msesystypes,{msestockobjects,}
  msethread{$ifdef FPC},x,xutil,dynlibs{$endif},
  mselibc,msectypes,msesysintf,msegraphics,
- msestrings,xft,xrender;
+ msestrings,xft,mxrender;
 
 {$ifdef FPC}
  {$define xbooleanresult}

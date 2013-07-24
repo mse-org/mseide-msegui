@@ -14,7 +14,7 @@ uses
  {$ifdef FPC}xlib{$else}Xlib{$endif},xft,
  {$ifdef FPC}x,xutil,dynlibs,{$endif}
  msegraphics,mseguiglob,msestrings,msegraphutils,mseguiintf,msetypes,
- msectypes,xrender,msefontconfig;
+ msectypes,mxrender,msefontconfig;
 
 procedure init(const adisp: pdisplay; const avisual: msepvisual;
                  const adepth: integer);
