@@ -200,6 +200,9 @@ type
  tcanvas1 = class(tcanvas);
 
 const
+ xrendershiftx = 65536 div 2;
+ xrendershifty = 65536 div 2;
+ 
  capstyles: array[capstylety] of integer = (capbutt,capround,capprojecting);
  joinstyles: array[joinstylety] of integer = (joinmiter,joinround,joinbevel);
  defaultfontnames: defaultfontnamesty =
@@ -2000,8 +2003,8 @@ begin
    v.shift.x:= (v.d.y*dist) div v.c;
    v.shift.y:= (v.d.x*dist) div v.c;
   end;
-  offs.x:= (drawinfo.origin.x shl 16) + v.shift.x div 2;
-  offs.y:= (drawinfo.origin.y shl 16) - v.shift.y div 2;
+  offs.x:= (drawinfo.origin.x shl 16) + v.shift.x div 2 + xrendershiftx;
+  offs.y:= (drawinfo.origin.y shl 16) - v.shift.y div 2 + xrendershifty;
   linestart:= pointa;
  end;
 end;
@@ -2488,8 +2491,8 @@ begin
    allocbuffer(buffer,npoints*sizeof(txpointfixed));
    si:= sin(rea1);
    co:= cos(rea1);
-   center.x:= (x+origin.x) shl 16;
-   center.y:= (y+origin.y) shl 16;
+   center.x:= ((x+origin.x) shl 16) + xrendershiftx;
+   center.y:= ((y+origin.y) shl 16) + xrendershifty;
    int2:= int1*2;
    q0:= buffer.buffer;
    q1:= q0+int2;
