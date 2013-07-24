@@ -2458,18 +2458,20 @@ end;
 
 procedure gdi_drawellipse(var drawinfo: drawinfoty); //gdifunc
 var
- rea1,sx,sy,w,cxw,cyw,cx1,cy1,cx2,cy2,si,co: real;
+ rea1,sx,sy,w,cxw,cyw,cx1,cy1,cx2,cy2,xdy,ydx,si,co: real;
  x1,y1,x2,y2: integer;
  q0,q1,q2,q3: pxpointfixed;
  npoints: integer;
  int1,int2: integer;
  center: txpointfixed;
+ circle: boolean;
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
 {$endif} 
  with drawinfo,x11gcty(gc.platformdata).d,rect.rect^ do begin
   if xfts_smooth in xftstate then begin
+   circle:= cx = cy;
    int1:= cx;
    if cy > int1 then begin
     int1:= cy;
@@ -2497,107 +2499,71 @@ begin
    cx2:= cx1*cx1;
    cy1:= cy * (65536 div 2);
    cy2:= cy1*cy1;
+   if cx = 0 then begin
+    ydx:= 1; //dummy
+   end
+   else begin
+    ydx:= sqrt(cy1/cx1);
+   end;
+   if cy = 0 then begin
+    xdy:= 1; //dummy
+   end
+   else begin
+    xdy:= sqrt(cx1/cy1);
+   end;
    w:= xftlinewidth div 2;
    cxw:= cx1*w;
    cyw:= cy1*w;
-   if cx > cy then begin
-    sx:= 1;
-    sy:= 0;    
-    for int1:= int1-1 downto 0 do begin
-     x1:= round(cx1*sx);
-     y1:= round(cy1*sy);
-     rea1:= sqrt(cx2*sy*sy+cy2*sx*sx);
-     if rea1 = 0 then begin
-      x2:= round(w);
-      y2:= 0;
-     end
-     else begin
-      x2:= round(cyw*sx/rea1);
-      y2:= round(cxw*sy/rea1);
-     end;
-     q0^.x:= center.x + x1 + x2;
-     q0^.y:= center.y - y1 - y2;
-     inc(q0);
-     q0^.x:= center.x + x1 - x2;
-     q0^.y:= center.y - y1 + y2;
-     inc(q0);
-     q2^.x:= center.x - x1 - x2;
-     q2^.y:= center.y + y1 + y2;
-     inc(q2);
-     q2^.x:= center.x - x1 + x2;
-     q2^.y:= center.y + y1 - y2;
-     inc(q2);
-     y1:= round(cy1*sx);
-     x1:= round(cx1*sy);
-     if rea1 = 0 then begin
-      y2:= round(w);
-      x2:= 0;
-     end
-     else begin
-      y2:= round(cxw*sx/rea1);
-      x2:= round(cyw*sy/rea1);
-     end;
-     q1^.x:= center.x - y1 - y2;
-     q1^.y:= center.y - x1 - x2;
-     inc(q1);
-     q1^.x:= center.x - y1 + y2;
-     q1^.y:= center.y - x1 + x2;
-     inc(q1);
-     q3^.x:= center.x + y1 + y2;
-     q3^.y:= center.y + x1 + x2;
-     inc(q3);
-     q3^.x:= center.x + y1 - y2;
-     q3^.y:= center.y + x1 - x2;
-     inc(q3);
-     rea1:= sx;
-     sx:= co*sx-si*sy;
-     sy:= co*sy+si*rea1;
+   sx:= 1;
+   sy:= 0;    
+   for int1:= int1-1 downto 0 do begin
+    x1:= round(cx1*sx);
+    y1:= round(cy1*sy);
+    rea1:= sqrt(cx2*sy*sy+cy2*sx*sx);
+    if rea1 = 0 then begin
+     x2:= round(w);
+     y2:= 0;
+    end
+    else begin
+     x2:= round(cyw*sx/rea1);
+     y2:= round(cxw*sy/rea1);
     end;
-   end
-   else begin
-exit;
-   {
-    f:= cx/cy;
-    sy:= cy*(65536/2);
-    sx:= 0;    
-    fwy:= (xftlinewidth div 2) / sy;
-    fwx:= fwy*f;
-    for int1:= int1-1 downto 0 do begin
-     x1:= round(sx*f);
-     x2:= round(sx*fwx);
-     y1:= round(sy);
-     y2:= round(sy*fwy);
-     q0^.y:= center.y - y1 - y2;
-     q0^.x:= center.x + x1 + x2;
-     inc(q0);
-     q0^.y:= center.y - y1 + y2;
-     q0^.x:= center.x + x1 - x2;
-     inc(q0);
-     q2^.y:= center.y + y1 + y2;
-     q2^.x:= center.x - x1 - x2;
-     inc(q2);
-     q2^.y:= center.y + y1 - y2;
-     q2^.x:= center.x - x1 + x2;
-     inc(q2);
-     y1:= round(sy*f);
-     x1:= round(sx);
-     q1^.y:= center.y - x1 - x2;
-     q1^.x:= center.x - y1 - y2;
-     inc(q1);
-     q1^.y:= center.y - x1 + x2;
-     q1^.x:= center.x - y1 + y2;
-     inc(q1);
-     q3^.y:= center.y + x1 + x2;
-     q3^.x:= center.x + y1 + y2;
-     inc(q3);
-     q3^.y:= center.y + x1 - x2;
-     q3^.x:= center.x + y1 - y2;
-     inc(q3);
-     rea1:= sx;
-     sx:= co*sx-si*sy;
-     sy:= co*sy+si*rea1;
+    q0^.x:= center.x + x1 + x2;
+    q0^.y:= center.y - y1 - y2;
+    inc(q0);
+    q0^.x:= center.x + x1 - x2;
+    q0^.y:= center.y - y1 + y2;
+    inc(q0);
+    q2^.x:= center.x - x1 - x2;
+    q2^.y:= center.y + y1 + y2;
+    inc(q2);
+    q2^.x:= center.x - x1 + x2;
+    q2^.y:= center.y + y1 - y2;
+    inc(q2);
+    if not circle then begin
+     x1:= round(cy1*sx);
+     y1:= round(cx1*sy);
+     rea1:= sqrt(cy2*sy*sy+cx2*sx*sx);
+     if rea1 <> 0 then begin
+      x2:= round(cxw*sx/rea1);
+      y2:= round(cyw*sy/rea1);
+     end;
     end;
-    }
+    q1^.x:= center.x - y1 - y2;
+    q1^.y:= center.y - x1 - x2;
+    inc(q1);
+    q1^.x:= center.x - y1 + y2;
+    q1^.y:= center.y - x1 + x2;
+    inc(q1);
+    q3^.x:= center.x + y1 + y2;
+    q3^.y:= center.y + x1 + x2;
+    inc(q3);
+    q3^.x:= center.x + y1 - y2;
+    q3^.y:= center.y + x1 - x2;
+    inc(q3);
+    rea1:= sx;
+    sx:= co*sx-si*sy;
+    sy:= co*sy+si*rea1;
    end;
    q3^:= pxpointfixed(buffer.buffer)^;   //endpoint
    inc(q3);
