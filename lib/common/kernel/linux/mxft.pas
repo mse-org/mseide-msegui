@@ -1,4 +1,4 @@
-unit xft;
+unit mxft;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses

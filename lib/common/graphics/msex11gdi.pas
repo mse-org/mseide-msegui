@@ -11,7 +11,7 @@ unit msex11gdi;
 {$ifdef FPC}{$mode objfpc}{$h+}{$goto on}{$endif}
 interface
 uses
- {$ifdef FPC}xlib{$else}Xlib{$endif},xft,
+ {$ifdef FPC}xlib{$else}Xlib{$endif},mxft,
  {$ifdef FPC}x,xutil,dynlibs,{$endif}
  msegraphics,mseguiglob,msestrings,msegraphutils,mseguiintf,msetypes,
  msectypes,mxrender,msefontconfig;
