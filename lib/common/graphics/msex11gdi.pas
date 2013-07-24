@@ -202,6 +202,7 @@ type
 const
  xrendershiftx = 65536 div 2;
  xrendershifty = 65536 div 2;
+ xrenderop = pictopover;
  
  capstyles: array[capstylety] of integer = (capbutt,capround,capprojecting);
  joinstyles: array[joinstylety] of integer = (joinmiter,joinround,joinbevel);
@@ -2731,6 +2732,7 @@ var
 // int1: integer;
  po1,po2: ppointty;
  po3: pxpointfixed;
+ offsx,offsy: integer;
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
@@ -2743,12 +2745,14 @@ begin
     po1:= points.points;
     po2:= points.points+points.count-1;
     po3:= buffer.buffer;
+    offsx:= (origin.x shl 16) + xrendershiftx;
+    offsy:= (origin.y shl 16) + xrendershifty;
     while po1 < po2 do begin
-     po3^.x:= (po1^.x+origin.x) shl 16;
-     po3^.y:= (po1^.y+origin.y) shl 16;
+     po3^.x:= (po1^.x shl 16) + offsx;
+     po3^.y:= (po1^.y shl 16) + offsy;
      inc(po3);
-     po3^.x:= (po2^.x+origin.x) shl 16;
-     po3^.y:= (po2^.y+origin.y) shl 16;
+     po3^.x:= (po2^.x shl 16) + offsx;
+     po3^.y:= (po2^.y shl 16) + offsy;
      inc(po3);
      inc(po1);
      dec(po2);
@@ -2759,7 +2763,7 @@ begin
     end;
     checkxftstate(drawinfo,[xfts_colorforegroundvalid]);
     with x11gcty(gc.platformdata).d do begin
-     xrendercompositetristrip(appdisp,pictopover,xftcolorforegroundpic,
+     xrendercompositetristrip(appdisp,xrenderop,xftcolorforegroundpic,
                     xftdrawpic,nil,0,0,buffer.buffer,points.count);
     end;
    end;
