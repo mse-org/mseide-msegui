@@ -2385,8 +2385,8 @@ begin
    allocbuffer(buffer,npoints*sizeof(txpointfixed));
    si:= sin(rea1);
    co:= cos(rea1);
-   center.x:= (x+origin.x) shl 16;
-   center.y:= (y+origin.y) shl 16;
+   center.x:= (x+origin.x) shl 16 + xrendershiftx;
+   center.y:= (y+origin.y) shl 16 + xrendershifty;
    q0:= buffer.buffer;
    q0^:= center;
    inc(q0);
