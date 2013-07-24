@@ -203,6 +203,7 @@ const
  xrendershiftx = 65536 div 2;
  xrendershifty = 65536 div 2;
  xrenderop = pictopover;
+ xrendercolorsourcesize = 1;
  
  capstyles: array[capstylety] of integer = (capbutt,capround,capprojecting);
  joinstyles: array[joinstylety] of integer = (joinmiter,joinround,joinbevel);
@@ -753,12 +754,14 @@ begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
 {$endif} 
- pixmap:= gui_createpixmap(makesize(1,1));
- attributes._repeat:= 1;
+ pixmap:= gui_createpixmap(
+                   makesize(xrendercolorsourcesize,xrendercolorsourcesize));
+ attributes._repeat:= repeatnormal;
  result:= xrendercreatepicture(appdisp,pixmap,screenrenderpictformat,
                                                        cprepeat,@attributes);
  col:= colortorendercolor(acolor);
- xrenderfillrectangle(appdisp,pictopsrc,result,@col,0,0,1,1);
+ xrenderfillrectangle(appdisp,pictopsrc,result,@col,0,0,
+                        xrendercolorsourcesize,xrendercolorsourcesize);
  xfreepixmap(appdisp,pixmap);
 end;
 
@@ -845,7 +848,7 @@ begin
   flags1:= (xftstate >< aflags) * aflags;
   if xfts_colorforegroundvalid in flags1 then begin
    xrenderfillrectangle(appdisp,pictopsrc,xftcolorforegroundpic,
-          @xftcolor.color,0,0,1,1);
+          @xftcolor.color,0,0,xrendercolorsourcesize,xrendercolorsourcesize);
   end;
  end;
 end;
@@ -2261,7 +2264,7 @@ begin
       pushdashend;
      end;     
     end;
-    xrendercompositetriangles(appdisp,pictopover,xftcolorforegroundpic,
+    xrendercompositetriangles(appdisp,xrenderop,xftcolorforegroundpic,
                      xftdrawpic,nil,0,0,buffer.buffer,
                      (li.dest-pxpointfixed(buffer.buffer)) div 3);
    end
@@ -2295,7 +2298,7 @@ begin
     else begin
      shiftpoint(li);
     end;
-    xrendercompositetristrip(appdisp,pictopover,xftcolorforegroundpic,
+    xrendercompositetristrip(appdisp,xrenderop,xftcolorforegroundpic,
                      xftdrawpic,nil,0,0,buffer.buffer,pointcount);
    end;
   end
@@ -2336,7 +2339,7 @@ begin
       li.pointa:= li.pointb;
       inc(li.pointb);
      end;
-     xrendercompositetriangles(appdisp,pictopover,xftcolorforegroundpic,
+     xrendercompositetriangles(appdisp,xrenderop,xftcolorforegroundpic,
                      xftdrawpic,nil,0,0,buffer.buffer,
                      (li.dest-pxpointfixed(buffer.buffer)) div 3);
     end
@@ -2348,7 +2351,7 @@ begin
       calclineshift(drawinfo,li);
       shiftpoint(li);
       shiftpoint(li);
-      xrendercompositetristrip(appdisp,pictopover,xftcolorforegroundpic,
+      xrendercompositetristrip(appdisp,xrenderop,xftcolorforegroundpic,
                      xftdrawpic,nil,0,0,po1,4);
      end;
     end;
@@ -2449,7 +2452,7 @@ begin
    q3^:= (pxpointfixed(buffer.buffer)+1)^; //endpoint
    with x11gcty(gc.platformdata).d do begin
     checkxftstate(drawinfo,[xfts_colorforegroundvalid]);
-    xrendercompositetrifan(appdisp,pictopover,xftcolorforegroundpic,
+    xrendercompositetrifan(appdisp,xrenderop,xftcolorforegroundpic,
                     xftdrawpic,nil,0,0,buffer.buffer,npoints);
    end;  
   end
@@ -2574,7 +2577,7 @@ begin
    q3^:= (pxpointfixed(buffer.buffer)+1)^;
    with x11gcty(gc.platformdata).d do begin
     checkxftstate(drawinfo,[xfts_colorforegroundvalid]);
-    xrendercompositetristrip(appdisp,pictopover,xftcolorforegroundpic,
+    xrendercompositetristrip(appdisp,xrenderop,xftcolorforegroundpic,
                     xftdrawpic,nil,0,0,buffer.buffer,npoints);
    end;  
   end

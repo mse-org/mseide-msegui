@@ -190,6 +190,10 @@ type
      PictFormatAlpha = 1 shl 9;
      PictFormatAlphaMask = 1 shl 10;
      PictFormatColormap = 1 shl 11;
+     RepeatNone = 0;
+     RepeatNormal = 1;
+     RepeatPad = 2;
+     RepeatReflect = 2;
 
   type
 
