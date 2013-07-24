@@ -156,6 +156,9 @@ var
  XRenderSetPictureFilter: procedure(dpy:PDisplay; picture:TPicture;
                       filter: pchar; params: pinteger; nparams: integer);
           cdecl;
+ XRenderCreateSolidFill: function(dpy: pDisplay;
+                           color: pXRenderColor): TPicture; cdecl;
+
  XRenderFreePicture: procedure(dpy:PDisplay; picture:TPicture);
                  cdecl;
  XRenderComposite: procedure(dpy:PDisplay; op:longint; src:TPicture;
@@ -744,7 +747,7 @@ begin
  result:= xrendercreatepicture(appdisp,pixmap,alpharenderpictformat,0,@attributes);
  xfreepixmap(appdisp,pixmap);
 end;
-
+//(*
 function createcolorpicture(const acolor: colorty): tpicture;
 var
  attributes: txrenderpictureattributes;
@@ -764,7 +767,19 @@ begin
                         xrendercolorsourcesize,xrendercolorsourcesize);
  xfreepixmap(appdisp,pixmap);
 end;
-
+//*)
+(*
+function createcolorpicture(const acolor: colorty): tpicture;
+var
+ col: txrendercolor;
+begin
+{$ifdef mse_debuggdisync}
+ checkgdilock;
+{$endif} 
+ col:= colortorendercolor(acolor);
+ result:= xrendercreatesolidfill(appdisp,@col);
+end;
+*)
 function createmaskpicture(const acolor: rgbtriplety): tpicture; overload;
 var
  attributes: txrenderpictureattributes;
@@ -845,10 +860,20 @@ var
  flags1: xftstatesty;
 begin
  with x11gcty(drawinfo.gc.platformdata).d do begin
+  if not (xfts_clipregionvalid in xftstate) then begin
+   if gcclipregion = 0 then begin
+    xftdrawsetclip(xftdraw,nil);
+   end
+   else begin
+    setregion(drawinfo.gc,region(gcclipregion),0,xftdraw);
+   end;
+   include(xftstate,xfts_clipregionvalid);
+  end;
   flags1:= (xftstate >< aflags) * aflags;
   if xfts_colorforegroundvalid in flags1 then begin
    xrenderfillrectangle(appdisp,pictopsrc,xftcolorforegroundpic,
           @xftcolor.color,0,0,xrendercolorsourcesize,xrendercolorsourcesize);
+   include(xftstate,xfts_colorforegroundvalid);
   end;
  end;
 end;
@@ -3034,7 +3059,7 @@ end;
 
 function getxrenderlib: boolean;
 const
- funcs: array[0..13] of funcinfoty = (
+ funcs: array[0..14] of funcinfoty = (
   (n: 'XRenderSetPictureClipRectangles'; 
                    d: {$ifndef FPC}@{$endif}@XRenderSetPictureClipRectangles),
   (n: 'XRenderCreatePicture'; d: {$ifndef FPC}@{$endif}@XRenderCreatePicture),
@@ -3058,7 +3083,9 @@ const
   (n: 'XRenderCompositeTriangles'; 
                            d: {$ifndef FPC}@{$endif}@XRenderCompositeTriangles),
   (n: 'XRenderChangePicture'; 
-                           d: {$ifndef FPC}@{$endif}@XRenderChangePicture)
+                           d: {$ifndef FPC}@{$endif}@XRenderChangePicture),
+  (n: 'XRenderCreateSolidFill'; 
+                           d: {$ifndef FPC}@{$endif}@XRenderCreateSolidFill)
   );
 begin
  result:= getprocaddresses(xrendernames,funcs,true) <> 0;
