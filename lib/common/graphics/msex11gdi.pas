@@ -316,7 +316,17 @@ var
  fhasxft: boolean;
  screenrenderpictformat,bitmaprenderpictformat,
                              alpharenderpictformat: pxrenderpictformat;
+type
+ xftcolorcacheinfoty = record
+  picture: tpicture;
+  pixel: pixelty;
+ end;
+ 
+const
+ xftcolorcachemask = $1f;
+ 
 var
+ xftcolorcache: array[0..xftcolorcachemask] of xftcolorcacheinfoty;
  fontpropertyatoms: array[fontpropertiesty] of atom;
  
 procedure init(const adisp: pdisplay; const avisual: msepvisual;
@@ -646,13 +656,22 @@ begin
 end;
  
 procedure gdi_destroygc(var drawinfo: drawinfoty); //gdifunc
+var
+ int1: integer;
 begin
  gdi_lock;
  with drawinfo do begin
   with x11gcty(gc.platformdata).d do begin
    if xftdraw <> nil then begin
     xftdrawdestroy(xftdraw);
-    xrenderfreepicture(appdisp,xftcolorforegroundpic);    
+    for int1:= 0 to high(xftcolorcache) do begin
+     with xftcolorcache[int1] do begin
+      if picture <> 0 then begin
+       xrenderfreepicture(appdisp,picture);
+       picture:= 0;
+      end;
+     end;
+    end;
    end;
   end;
   xfreegc(appdisp,tgc(gc.handle));
@@ -747,8 +766,8 @@ begin
  result:= xrendercreatepicture(appdisp,pixmap,alpharenderpictformat,0,@attributes);
  xfreepixmap(appdisp,pixmap);
 end;
-//(*
-function createcolorpicture(const acolor: colorty): tpicture;
+
+function createcolorpicture1(const acolor: colorty): tpicture;
 var
  attributes: txrenderpictureattributes;
  col: txrendercolor;
@@ -767,9 +786,8 @@ begin
                         xrendercolorsourcesize,xrendercolorsourcesize);
  xfreepixmap(appdisp,pixmap);
 end;
-//*)
-(*
-function createcolorpicture(const acolor: colorty): tpicture;
+
+function createcolorpicture2(const acolor: colorty): tpicture;
 var
  col: txrendercolor;
 begin
@@ -779,7 +797,12 @@ begin
  col:= colortorendercolor(acolor);
  result:= xrendercreatesolidfill(appdisp,@col);
 end;
-*)
+
+type
+ createcolorpicturefuncty = function(const acolor: colorty): tpicture;
+var 
+ createcolorpicture: createcolorpicturefuncty;
+ 
 function createmaskpicture(const acolor: rgbtriplety): tpicture; overload;
 var
  attributes: txrenderpictureattributes;
@@ -841,7 +864,7 @@ begin
    attr.poly_mode:= polymodeprecise;
 //   attr.poly_mode:= polymodeimprecise;
    xrenderchangepicture(appdisp,xftdrawpic,cppolyedge or cppolymode,@attr);
-   xftcolorforegroundpic:= createcolorpicture(cl_black);
+//   xftcolorforegroundpic:= createcolorpicture(cl_black);
   end;
   if not (xfts_clipregionvalid in xftstate) then begin
    if gcclipregion = 0 then begin
@@ -858,6 +881,7 @@ end;
 procedure checkxftstate(var drawinfo: drawinfoty; const aflags: xftstatesty);
 var
  flags1: xftstatesty;
+ lwo1,lwo2: longword;
 begin
  with x11gcty(drawinfo.gc.platformdata).d do begin
   if not (xfts_clipregionvalid in xftstate) then begin
@@ -871,8 +895,27 @@ begin
   end;
   flags1:= (xftstate >< aflags) * aflags;
   if xfts_colorforegroundvalid in flags1 then begin
+   lwo1:= xftcolor.pixel; 
+   lwo2:= lwo1 + (lwo1 shr 7) + (lwo1 shr 14) + (lwo1 shr 21);
+   lwo2:= (lwo2 xor (lwo2 shr 4) xor (lwo2 shr 9)) and xftcolorcachemask;
+   with xftcolorcache[lwo2] do begin
+    if picture <> 0 then begin
+     if pixel <> xftcolor.pixel then begin
+      xrenderfreepicture(appdisp,picture);
+      picture:= createcolorpicture(xftcolor.pixel);
+      pixel:= xftcolor.pixel;
+     end;
+    end
+    else begin
+     picture:= createcolorpicture(xftcolor.pixel);
+     pixel:= xftcolor.pixel;
+    end;
+    xftcolorforegroundpic:= picture;
+   end;
+{
    xrenderfillrectangle(appdisp,pictopsrc,xftcolorforegroundpic,
           @xftcolor.color,0,0,xrendercolorsourcesize,xrendercolorsourcesize);
+}
    include(xftstate,xfts_colorforegroundvalid);
   end;
  end;
@@ -2490,7 +2533,7 @@ end;
 
 procedure gdi_drawellipse(var drawinfo: drawinfoty); //gdifunc
 var
- rea1,sx,sy,w,cxw,cyw,cx1,cy1,cx2,cy2,xdy,ydx,si,co: real;
+ rea1,sx,sy,w,cxw,cyw,cx1,cy1,cx2,cy2,{xdy,ydx,}si,co: real;
  x1,y1,x2,y2: integer;
  q0,q1,q2,q3: pxpointfixed;
  npoints: integer;
@@ -2531,6 +2574,7 @@ begin
    cx2:= cx1*cx1;
    cy1:= cy * (65536 div 2);
    cy2:= cy1*cy1;
+   {
    if cx = 0 then begin
     ydx:= 1; //dummy
    end
@@ -2543,6 +2587,7 @@ begin
    else begin
     xdy:= sqrt(cx1/cy1);
    end;
+   }
    w:= xftlinewidth div 2;
    cxw:= cx1*w;
    cyw:= cy1*w;
@@ -2641,6 +2686,7 @@ begin
   if fhasxft then begin
  {$ifdef FPC}{$checkpointer off}{$endif}
    checkxftdraw(drawinfo);
+   checkxftstate(drawinfo,[xfts_colorforegroundvalid]);
    transformpos(drawinfo);
    with pxpoint(buffer.buffer)^ do begin
     with x11gcty(gc.platformdata).d do begin
@@ -3059,7 +3105,7 @@ end;
 
 function getxrenderlib: boolean;
 const
- funcs: array[0..14] of funcinfoty = (
+ funcs: array[0..13] of funcinfoty = (
   (n: 'XRenderSetPictureClipRectangles'; 
                    d: {$ifndef FPC}@{$endif}@XRenderSetPictureClipRectangles),
   (n: 'XRenderCreatePicture'; d: {$ifndef FPC}@{$endif}@XRenderCreatePicture),
@@ -3083,12 +3129,28 @@ const
   (n: 'XRenderCompositeTriangles'; 
                            d: {$ifndef FPC}@{$endif}@XRenderCompositeTriangles),
   (n: 'XRenderChangePicture'; 
-                           d: {$ifndef FPC}@{$endif}@XRenderChangePicture),
+                           d: {$ifndef FPC}@{$endif}@XRenderChangePicture)
+  );
+  
+ funcsopt: array[0..0] of funcinfoty = (
   (n: 'XRenderCreateSolidFill'; 
                            d: {$ifndef FPC}@{$endif}@XRenderCreateSolidFill)
   );
+
+var
+ handle: tlibhandle;
 begin
- result:= getprocaddresses(xrendernames,funcs,true) <> 0;
+ handle:= getprocaddresses(xrendernames,funcs,true);
+ result:= handle <> 0;
+ if result then begin
+  getprocaddresses(handle,funcsopt,true);
+  if xrendercreatesolidfill <> nil then begin
+   createcolorpicture:= @createcolorpicture2;
+  end
+  else begin
+   createcolorpicture:= @createcolorpicture1;
+  end;
+ end;
 end;
 
 const
