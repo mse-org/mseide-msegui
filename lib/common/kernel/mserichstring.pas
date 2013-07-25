@@ -160,7 +160,10 @@ function setcharstyle1(var formats: formatinfoarty; aindex,len: halfinteger;
                                   //true if changed
 function setcharstyle(const formats: formatinfoarty; aindex,len: halfinteger;
                             const style: charstylety): formatinfoarty;
-function getcharstyle(const formats: formatinfoarty; aindex: integer): charstylety;
+function getcharstyle(const formats: formatinfoarty;
+           const aindex: integer): charstylety; //zero based
+function getfontstyle(const formats: formatinfoarty;
+           const aindex: integer): fontstylesty; //zero based
 
 procedure setselected1(var text: richstringty; start,len: halfinteger);
 function setselected(const text: richstringty;
@@ -277,7 +280,7 @@ begin
   int1:= 1;
   while int1 <= length(caption) do begin
    ch1:= caption[int1];
-   if (ch1 = '&') and (format = nil) then begin
+   if (ch1 = '&') {and (format = nil)} then begin
     if caption[int1+1] = '&' then begin
      po1^:= ch1;
      inc(int1);
@@ -303,31 +306,27 @@ end;
 
 function richstringtocaption(const caption: richstringty): captionty;
 var
- int1,int2: integer;
+ int1: integer;
  po1: pmsechar;
  ch1: msechar;
 begin
  with caption do begin
-  int2:= bigint;
-  if format <> nil then begin
-   int2:= format[0].index + 1;
-  end;
   setlength(result,length(text)*2+1);
   po1:= pmsechar(pointer(result));
   for int1:= 1 to length(text) do begin
-   if int1 = int2 then begin
+   if fs_underline in getfontstyle(format,int1-1) then begin
     po1^:= '&';
     inc(po1);
    end;
    ch1:= text[int1];
    po1^:= ch1;
    inc(po1);
-   if (ch1 = '&') and (int1 <= int2) {and (int1 < length(text))} then begin
+   if (ch1 = '&') then begin
     po1^:= ch1;
     inc(po1);
    end;
   end;
-  if int2 - 1 = length(text) then begin
+  if fs_underline in getfontstyle(format,length(text)) then begin
    po1^:= '&';
    inc(po1);
   end;
@@ -602,7 +601,8 @@ begin
  setcharstyle1(result,aindex,len,style);
 end;
 
-function getcharstyle(const formats: formatinfoarty; aindex: integer): charstylety;
+function getcharstyle(const formats: formatinfoarty;
+                                 const aindex: integer): charstylety;
 var
  int1: integer;
  foundindex: integer;
@@ -626,11 +626,39 @@ begin
    end;
   end
   else begin
-    result:= formats[high(formats)].style;
-   end
+   result:= formats[high(formats)].style;
   end
+ end
  else begin
   fillchar(result,sizeof(charstylety),0);
+ end;
+end;
+
+function getfontstyle(const formats: formatinfoarty;
+                 const aindex: integer): fontstylesty;
+var
+ int1: integer;
+ foundindex: integer;
+begin
+ result:= [];
+ if formats <> nil then begin
+  foundindex:= -1;
+  for int1:= 0 to high(formats) do begin
+   with formats[int1] do begin
+    if index > aindex then begin
+     foundindex:= int1;
+     break;
+    end;
+   end;
+  end;
+  if foundindex >= 0 then begin
+   if foundindex > 0 then begin
+    result:= formats[foundindex-1].style.fontstyle;
+   end;
+  end
+  else begin
+   result:= formats[high(formats)].style.fontstyle;
+  end
  end;
 end;
 
