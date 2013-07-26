@@ -2587,9 +2587,9 @@ begin
     int1:= cy;
    end;
    if int1 = 0 then begin
-    cx:= xftlinewidth div 65536;
-    cy:= cx;
-    gdi_fillellipse(drawinfo);
+//    cx:= xftlinewidth div 65536;
+//    cy:= cx;
+//    gdi_fillellipse(drawinfo);
     exit;
    end;
    int1:= (int1+1) div 2; //samples per quadrant
@@ -2608,20 +2608,6 @@ begin
    cx2:= cx1*cx1;
    cy1:= cy * (65536 div 2);
    cy2:= cy1*cy1;
-   {
-   if cx = 0 then begin
-    ydx:= 1; //dummy
-   end
-   else begin
-    ydx:= sqrt(cy1/cx1);
-   end;
-   if cy = 0 then begin
-    xdy:= 1; //dummy
-   end
-   else begin
-    xdy:= sqrt(cx1/cy1);
-   end;
-   }
    w:= xftlinewidth div 2;
    cxw:= cx1*w;
    cyw:= cy1*w;
@@ -2696,14 +2682,82 @@ const
  angscale = 64*360/(2*pi);
  
 procedure gdi_drawarc(var drawinfo: drawinfoty); //gdifunc
+var
+ rea1,sx,sy,w,cxw,cyw,cx1,cy1,cx2,cy2,{xdy,ydx,}si,co: real;
+ x1,y1,x2,y2: integer;
+ q0: pxpointfixed;
+ npoints: integer;
+ int1: integer;
+ center: txpointfixed;
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
 {$endif} 
- with drawinfo,drawinfo.arc,rect^ do begin
-  xdrawarc(appdisp,paintdevice,tgc(gc.handle),
-   x+origin.x-cx div 2,y+origin.y - cy div 2,cx,cy,
-   round(startang*angscale),round(extentang*angscale));
+ with drawinfo,x11gcty(gc.platformdata).d,drawinfo.arc,rect^ do begin
+  if xfts_smooth in xftstate then begin
+   int1:= cx;
+   if cy > int1 then begin
+    int1:= cy;
+   end;
+   if int1 = 0 then begin
+//    cx:= xftlinewidth div 65536;
+//    cy:= cx;
+//    gdi_fillellipse(drawinfo);
+    exit;
+   end;
+   int1:= round(int1*abs(extentang)/pi); //steps
+   rea1:= extentang/int1; //step
+   npoints:= 2*int1+2; //+ endpoint
+   allocbuffer(buffer,npoints*sizeof(txpointfixed));
+   si:= sin(rea1);
+   co:= cos(rea1);
+   adjustellipsecenter(drawinfo,center);
+   q0:= buffer.buffer;
+   cx1:= cx * (65536 div 2);
+   cx2:= cx1*cx1;
+   cy1:= cy * (65536 div 2);
+   cy2:= cy1*cy1;
+   w:= xftlinewidth div 2;
+   cxw:= cx1*w;
+   cyw:= cy1*w;
+   sx:= cos(startang);
+   sy:= sin(startang);    
+   for int1:= int1 downto 0 do begin
+    x1:= round(cx1*sx);
+    y1:= round(cy1*sy);
+    rea1:= sqrt(cx2*sy*sy+cy2*sx*sx);
+    if rea1 = 0 then begin
+     x2:= round(w);
+     y2:= 0;
+    end
+    else begin
+     x2:= round(cyw*sx/rea1);
+     y2:= round(cxw*sy/rea1);
+    end;
+    q0^.x:= center.x + x1 + x2;
+    q0^.y:= center.y - y1 - y2;
+    inc(q0);
+    q0^.x:= center.x + x1 - x2;
+    q0^.y:= center.y - y1 + y2;
+    inc(q0);
+    rea1:= sx;
+    sx:= co*sx-si*sy;
+    sy:= co*sy+si*rea1;
+   end;
+//   q0^:= pxpointfixed(buffer.buffer)^;   //endpoint
+//   inc(q0);
+//   q0^:= (pxpointfixed(buffer.buffer)+1)^;
+   with x11gcty(gc.platformdata).d do begin
+    checkxftstate(drawinfo,[xfts_colorforegroundvalid]);
+    xrendercompositetristrip(appdisp,xrenderop,xftcolorforegroundpic,
+                    xftdrawpic,alpharenderpictformat,0,0,buffer.buffer,npoints);
+   end;  
+  end
+  else begin
+   xdrawarc(appdisp,paintdevice,tgc(gc.handle),
+    x+origin.x-cx div 2,y+origin.y - cy div 2,cx,cy,
+    round(startang*angscale),round(extentang*angscale));
+  end;
  end;
 end;
 
