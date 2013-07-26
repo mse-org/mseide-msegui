@@ -20,7 +20,8 @@ type
  windowwidgeteventty = procedure(const sender: tcustomwindowwidget) of object; 
  windowwidgetpainteventty = procedure(const sender: tcustomwindowwidget;
                                 const aupdaterect: rectty) of object; 
- createwinideventty = procedure(const sender: tcustomwindowwidget; const aparent: winidty;
+ createwinideventty = procedure(const sender: tcustomwindowwidget;
+                       const aparent: winidty;
                        const awidgetrect: rectty; var aid: winidty) of object;
  destroywinideventty = procedure(const sender: tcustomwindowwidget;
                        const aid: winidty) of object;

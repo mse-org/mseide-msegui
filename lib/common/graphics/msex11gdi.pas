@@ -31,6 +31,15 @@ function x11getgdifuncs: pgdifunctionaty;
 function x11regiontorects(const aregion: regionty): rectarty;
 function x11getdefaultfontnames: defaultfontnamesty;
 
+type
+ createcolorpicturefuncty = function(const acolor: colorty): tpicture;
+var 
+ createcolorpicture: createcolorpicturefuncty;
+ screenrenderpictformat,bitmaprenderpictformat,
+                             alpharenderpictformat: pxrenderpictformat;
+
+function createalphapicture(const size: sizety): tpicture;
+
 {$ifdef FPC}
  {$macro on}
  {$define xchar2b:=txchar2b}
@@ -144,6 +153,8 @@ var
  XRenderSetPictureClipRectangles: procedure(dpy:PDisplay; picture:TPicture;
             xOrigin:longint; yOrigin:longint; rects:PXRectangle; n:longint);
            cdecl;
+ XRenderSetPictureClipRegion: procedure(dpy: pDisplay; picture: TPicture;
+                                        r: regionty); cdecl;
  XRenderCreatePicture: function(dpy:PDisplay; drawable:TDrawable;
       format: PXRenderPictFormat; valuemask: culong;
       attributes: PXRenderPictureAttributes): TPicture; cdecl;
@@ -314,8 +325,6 @@ var
  defdepth: integer;
  hasxrender: boolean;
  fhasxft: boolean;
- screenrenderpictformat,bitmaprenderpictformat,
-                             alpharenderpictformat: pxrenderpictformat;
 type
  xftcolorcacheinfoty = record
   picture: tpicture;
@@ -762,8 +771,9 @@ begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
 {$endif} 
- pixmap:= xcreatepixmap(appdisp,0,size.cx,size.cy,8);
- result:= xrendercreatepicture(appdisp,pixmap,alpharenderpictformat,0,@attributes);
+ pixmap:= xcreatepixmap(appdisp,mserootwindow,size.cx,size.cy,8);
+ result:= xrendercreatepicture(appdisp,pixmap,
+                                   alpharenderpictformat,0,@attributes);
  xfreepixmap(appdisp,pixmap);
 end;
 
@@ -797,11 +807,6 @@ begin
  col:= colortorendercolor(acolor);
  result:= xrendercreatesolidfill(appdisp,@col);
 end;
-
-type
- createcolorpicturefuncty = function(const acolor: colorty): tpicture;
-var 
- createcolorpicture: createcolorpicturefuncty;
  
 function createmaskpicture(const acolor: rgbtriplety): tpicture; overload;
 var
@@ -3132,9 +3137,11 @@ const
                            d: {$ifndef FPC}@{$endif}@XRenderChangePicture)
   );
   
- funcsopt: array[0..0] of funcinfoty = (
+ funcsopt: array[0..1] of funcinfoty = (
   (n: 'XRenderCreateSolidFill'; 
-                           d: {$ifndef FPC}@{$endif}@XRenderCreateSolidFill)
+                     d: {$ifndef FPC}@{$endif}@XRenderCreateSolidFill),
+  (n: 'XRenderSetPictureClipRegion'; 
+                     d: {$ifndef FPC}@{$endif}@XRenderSetPictureClipRegion)
   );
 
 var
