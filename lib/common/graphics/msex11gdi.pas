@@ -214,8 +214,10 @@ type
  tcanvas1 = class(tcanvas);
 
 const
- xrendershiftx = 65536 div 2;
- xrendershifty = 65536 div 2;
+// xrenderlineshiftx = 65536 div 2;
+// xrenderlineshifty = 65536 div 2;
+// xrenderfillshiftx = 0;
+// xrenderfillshifty = 0;
  xrenderop = pictopover;
  xrendercolorsourcesize = 1;
  
@@ -2067,11 +2069,15 @@ type
 //todo: optimize smooth line generation
 //
 procedure calclineshift(const drawinfo: drawinfoty; var info: lineshiftinfoty);
+var
+ offsx,offsy: integer;
 begin
  with info do begin
   v.d.x:= pointb^.x - pointa^.x;
   v.d.y:= pointb^.y - pointa^.y;
   v.c:= round(sqrt(v.d.x*v.d.x + v.d.y*v.d.y));
+  offsx:= 0;
+  offsy:= 0;
   if v.c = 0 then begin
    v.shift.x:= 0;
    v.shift.y:= 0;
@@ -2079,9 +2085,13 @@ begin
   else begin
    v.shift.x:= (v.d.y*dist) div v.c;
    v.shift.y:= (v.d.x*dist) div v.c;
+   if dist and $10000 <> 0 then begin //odd, shift 0.5 pixel
+    offsx:= v.d.y shl 15 div v.c;
+    offsy:= v.d.x shl 15 div v.c;
+   end;
   end;
-  offs.x:= (drawinfo.origin.x shl 16) + v.shift.x div 2 + xrendershiftx;
-  offs.y:= (drawinfo.origin.y shl 16) - v.shift.y div 2 + xrendershifty;
+  offs.x:= (drawinfo.origin.x shl 16) + v.shift.x div 2 - offsx;
+  offs.y:= (drawinfo.origin.y shl 16) - v.shift.y div 2 + offsy;
   linestart:= pointa;
  end;
 end;
@@ -2437,6 +2447,27 @@ begin
  end;
 end;
 
+procedure adjustellipsecenter(const drawinfo: drawinfoty;
+                                        var center: txpointfixed);
+begin
+ with drawinfo,rect.rect^ do begin
+  center.x:= (x+origin.x) shl 16;
+  if not odd(cx) then begin
+   center.x:= center.x + $8000;
+  end
+  else begin
+   center.x:= center.x + $10000;
+  end;
+  center.y:= (y+origin.y) shl 16;
+  if not odd(cy) then begin
+   center.y:= center.y + $8000;
+  end
+  else begin
+   center.y:= center.y + $10000;
+  end;
+ end;
+end;
+
 procedure gdi_fillellipse(var drawinfo: drawinfoty); //gdifunc
 //todo: optimize
 var
@@ -2462,8 +2493,7 @@ begin
    allocbuffer(buffer,npoints*sizeof(txpointfixed));
    si:= sin(rea1);
    co:= cos(rea1);
-   center.x:= (x+origin.x) shl 16 + xrendershiftx;
-   center.y:= (y+origin.y) shl 16 + xrendershifty;
+   adjustellipsecenter(drawinfo,center);
    q0:= buffer.buffer;
    q0^:= center;
    inc(q0);
@@ -2568,8 +2598,7 @@ begin
    allocbuffer(buffer,npoints*sizeof(txpointfixed));
    si:= sin(rea1);
    co:= cos(rea1);
-   center.x:= ((x+origin.x) shl 16) + xrendershiftx;
-   center.y:= ((y+origin.y) shl 16) + xrendershifty;
+   adjustellipsecenter(drawinfo,center);
    int2:= int1*2;
    q0:= buffer.buffer;
    q1:= q0+int2;
@@ -2819,13 +2848,16 @@ begin
 
  with drawinfo do begin
   if xfts_smooth in x11gcty(gc.platformdata).d.xftstate then begin
+  
+//todo: implement concave figures
+
    if points.count > 2 then begin
     allocbuffer(buffer,points.count*sizeof(txpointfixed));
     po1:= points.points;
     po2:= points.points+points.count-1;
     po3:= buffer.buffer;
-    offsx:= (origin.x shl 16) + xrendershiftx;
-    offsy:= (origin.y shl 16) + xrendershifty;
+    offsx:= (origin.x shl 16);
+    offsy:= (origin.y shl 16);
     while po1 < po2 do begin
      po3^.x:= (po1^.x shl 16) + offsx;
      po3^.y:= (po1^.y shl 16) + offsy;
