@@ -2338,7 +2338,7 @@ begin
      end;     
     end;
     xrendercompositetriangles(appdisp,xrenderop,xftcolorforegroundpic,
-                     xftdrawpic,nil,0,0,buffer.buffer,
+                     xftdrawpic,alpharenderpictformat,0,0,buffer.buffer,
                      (li.dest-pxpointfixed(buffer.buffer)) div 3);
    end
    else begin
@@ -2372,7 +2372,7 @@ begin
      shiftpoint(li);
     end;
     xrendercompositetristrip(appdisp,xrenderop,xftcolorforegroundpic,
-                     xftdrawpic,nil,0,0,buffer.buffer,pointcount);
+              xftdrawpic,alpharenderpictformat,0,0,buffer.buffer,pointcount);
    end;
   end
   else begin
@@ -2413,7 +2413,7 @@ begin
       inc(li.pointb);
      end;
      xrendercompositetriangles(appdisp,xrenderop,xftcolorforegroundpic,
-                     xftdrawpic,nil,0,0,buffer.buffer,
+                     xftdrawpic,alpharenderpictformat,0,0,buffer.buffer,
                      (li.dest-pxpointfixed(buffer.buffer)) div 3);
     end
     else begin
@@ -2425,7 +2425,7 @@ begin
       shiftpoint(li);
       shiftpoint(li);
       xrendercompositetristrip(appdisp,xrenderop,xftcolorforegroundpic,
-                     xftdrawpic,nil,0,0,po1,4);
+                     xftdrawpic,alpharenderpictformat,0,0,po1,4);
      end;
     end;
    end;
@@ -2526,7 +2526,7 @@ begin
    with x11gcty(gc.platformdata).d do begin
     checkxftstate(drawinfo,[xfts_colorforegroundvalid]);
     xrendercompositetrifan(appdisp,xrenderop,xftcolorforegroundpic,
-                    xftdrawpic,nil,0,0,buffer.buffer,npoints);
+                    xftdrawpic,alpharenderpictformat,0,0,buffer.buffer,npoints);
    end;  
   end
   else begin
@@ -2653,7 +2653,7 @@ begin
    with x11gcty(gc.platformdata).d do begin
     checkxftstate(drawinfo,[xfts_colorforegroundvalid]);
     xrendercompositetristrip(appdisp,xrenderop,xftcolorforegroundpic,
-                    xftdrawpic,nil,0,0,buffer.buffer,npoints);
+                    xftdrawpic,alpharenderpictformat,0,0,buffer.buffer,npoints);
    end;  
   end
   else begin
@@ -2843,7 +2843,7 @@ begin
     checkxftstate(drawinfo,[xfts_colorforegroundvalid]);
     with x11gcty(gc.platformdata).d do begin
      xrendercompositetristrip(appdisp,xrenderop,xftcolorforegroundpic,
-                    xftdrawpic,nil,0,0,buffer.buffer,points.count);
+             xftdrawpic,alpharenderpictformat,0,0,buffer.buffer,points.count);
     end;
    end;
   end
