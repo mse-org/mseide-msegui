@@ -2587,9 +2587,6 @@ begin
     int1:= cy;
    end;
    if int1 = 0 then begin
-//    cx:= xftlinewidth div 65536;
-//    cy:= cx;
-//    gdi_fillellipse(drawinfo);
     exit;
    end;
    int1:= (int1+1) div 2; //samples per quadrant
@@ -2684,8 +2681,9 @@ const
 procedure gdi_drawarc(var drawinfo: drawinfoty); //gdifunc
 var
  rea1,sx,sy,w,cxw,cyw,cx1,cy1,cx2,cy2,{xdy,ydx,}si,co: real;
- x1,y1,x2,y2: integer;
+ x1,y1,x2,y2,x3,y3,x4,y4: integer;
  q0: pxpointfixed;
+ po1: pxtriangle;
  npoints: integer;
  int1: integer;
  center: txpointfixed;
@@ -2700,19 +2698,14 @@ begin
     int1:= cy;
    end;
    if int1 = 0 then begin
-//    cx:= xftlinewidth div 65536;
-//    cy:= cx;
-//    gdi_fillellipse(drawinfo);
     exit;
    end;
+   checkxftstate(drawinfo,[xfts_colorforegroundvalid]);
    int1:= round(int1*abs(extentang)/pi); //steps
    rea1:= extentang/int1; //step
-   npoints:= 2*int1+2; //+ endpoint
-   allocbuffer(buffer,npoints*sizeof(txpointfixed));
    si:= sin(rea1);
    co:= cos(rea1);
    adjustellipsecenter(drawinfo,center);
-   q0:= buffer.buffer;
    cx1:= cx * (65536 div 2);
    cx2:= cx1*cx1;
    cy1:= cy * (65536 div 2);
@@ -2721,37 +2714,81 @@ begin
    cxw:= cx1*w;
    cyw:= cy1*w;
    sx:= cos(startang);
-   sy:= sin(startang);    
-   for int1:= int1 downto 0 do begin
-    x1:= round(cx1*sx);
-    y1:= round(cy1*sy);
-    rea1:= sqrt(cx2*sy*sy+cy2*sx*sx);
-    if rea1 = 0 then begin
-     x2:= round(w);
-     y2:= 0;
-    end
-    else begin
-     x2:= round(cyw*sx/rea1);
-     y2:= round(cxw*sy/rea1);
+   sy:= sin(startang);
+   if df_dashed in gc.drawingflags then begin
+    allocbuffer(buffer,(6*int1+12)*sizeof(txpointfixed));
+            //+ start dummy + endpoint, max
+    q0:= pxpointfixed(buffer.buffer)+2;
+    for int1:= int1 downto 0 do begin
+     x1:= round(cx1*sx);
+     y1:= round(cy1*sy);
+     rea1:= sqrt(cx2*sy*sy+cy2*sx*sx);
+     if rea1 = 0 then begin
+      x2:= round(w);
+      y2:= 0;
+     end
+     else begin
+      x2:= round(cyw*sx/rea1);
+      y2:= round(cxw*sy/rea1);
+     end;
+     x3:= center.x + x1 + x2;
+     y3:= center.y - y1 - y2;
+     x4:= center.x + x1 - x2;
+     y4:= center.y - y1 + y2;
+     q0^.x:= x3;
+     q0^.y:= y3;
+     inc(q0);
+     q0^:= (q0-2)^;
+     inc(q0);
+     q0^.x:= x3;
+     q0^.y:= y3;
+     inc(q0);
+     q0^.x:= x4;
+     q0^.y:= y4;
+     inc(q0);
+     q0^.x:= x3;
+     q0^.y:= y3;
+     inc(q0);
+     q0^.x:= x4;
+     q0^.y:= y4;
+     inc(q0);
+     rea1:= sx;
+     sx:= co*sx-si*sy;
+     sy:= co*sy+si*rea1;
     end;
-    q0^.x:= center.x + x1 + x2;
-    q0^.y:= center.y - y1 - y2;
-    inc(q0);
-    q0^.x:= center.x + x1 - x2;
-    q0^.y:= center.y - y1 + y2;
-    inc(q0);
-    rea1:= sx;
-    sx:= co*sx-si*sy;
-    sy:= co*sy+si*rea1;
-   end;
-//   q0^:= pxpointfixed(buffer.buffer)^;   //endpoint
-//   inc(q0);
-//   q0^:= (pxpointfixed(buffer.buffer)+1)^;
-   with x11gcty(gc.platformdata).d do begin
-    checkxftstate(drawinfo,[xfts_colorforegroundvalid]);
+    po1:= pxtriangle(buffer.buffer)+2;
+    xrendercompositetriangles(appdisp,xrenderop,xftcolorforegroundpic,
+                 xftdrawpic,alpharenderpictformat,0,0,po1,pxtriangle(q0)-po1);
+   end
+   else begin
+    npoints:= 2*int1+2; //+ endpoint
+    allocbuffer(buffer,npoints*sizeof(txpointfixed));
+    q0:= buffer.buffer;
+    for int1:= int1 downto 0 do begin
+     x1:= round(cx1*sx);
+     y1:= round(cy1*sy);
+     rea1:= sqrt(cx2*sy*sy+cy2*sx*sx);
+     if rea1 = 0 then begin
+      x2:= round(w);
+      y2:= 0;
+     end
+     else begin
+      x2:= round(cyw*sx/rea1);
+      y2:= round(cxw*sy/rea1);
+     end;
+     q0^.x:= center.x + x1 + x2;
+     q0^.y:= center.y - y1 - y2;
+     inc(q0);
+     q0^.x:= center.x + x1 - x2;
+     q0^.y:= center.y - y1 + y2;
+     inc(q0);
+     rea1:= sx;
+     sx:= co*sx-si*sy;
+     sy:= co*sy+si*rea1;
+    end;
     xrendercompositetristrip(appdisp,xrenderop,xftcolorforegroundpic,
-                    xftdrawpic,alpharenderpictformat,0,0,buffer.buffer,npoints);
-   end;  
+                     xftdrawpic,alpharenderpictformat,0,0,buffer.buffer,npoints);
+   end;
   end
   else begin
    xdrawarc(appdisp,paintdevice,tgc(gc.handle),
