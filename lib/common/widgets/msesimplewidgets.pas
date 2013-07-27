@@ -430,6 +430,7 @@ type
    procedure fontchanged; override;
    procedure clientrectchanged; override;
    function verticalfontheightdelta: boolean; override;
+   function checkfocusshortcut(var info: keyeventinfoty): boolean; override;
   public
    constructor create(aowner: tcomponent); override;
    procedure synctofontheight; override;
@@ -1778,6 +1779,11 @@ procedure tcustomlabel.initnewcomponent(const ascale: real);
 begin
  inherited;
  caption:= name;
+end;
+
+function tcustomlabel.checkfocusshortcut(var info: keyeventinfoty): boolean;
+begin
+ result:= checkshortcut(info,fcaption,true) and canfocus;
 end;
 
 { tcustomicon }
