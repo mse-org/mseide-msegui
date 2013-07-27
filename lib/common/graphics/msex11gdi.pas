@@ -2566,6 +2566,171 @@ begin
  end;
 end;
 
+const
+ angscale = 64*360/(2*pi);
+ 
+procedure gdi_drawarc(var drawinfo: drawinfoty); //gdifunc
+var
+ rea1,sx,sy,w,cxw,cyw,cx1,cy1,cx2,cy2,{xdy,ydx,}si,co: real;
+ x1,y1,x2,y2,x3,y3,x4,y4: integer;
+ q0: pxpointfixed;
+ po1: pxtriangle;
+ npoints: integer;
+ int1: integer;
+ center: txpointfixed;
+ circle: boolean;
+ step,dashstep,dashsum: real;
+ dashindex: integer;
+ wasoff: boolean;
+begin
+{$ifdef mse_debuggdisync}
+ checkgdilock;
+{$endif} 
+ with drawinfo,x11gcty(gc.platformdata).d,drawinfo.arc,rect^ do begin
+  if xfts_smooth in xftstate then begin
+   int1:= cx;
+   if cy > int1 then begin
+    int1:= cy;
+   end;
+   if int1 = 0 then begin
+    exit;
+   end;
+   checkxftstate(drawinfo,[xfts_colorforegroundvalid]);
+   int1:= round(int1*abs(extentang)/pi); //steps
+   adjustellipsecenter(drawinfo,center);
+   cx1:= cx * (65536 div 2);
+   cx2:= cx1*cx1;
+   cy1:= cy * (65536 div 2);
+   cy2:= cy1*cy1;
+   w:= xftlinewidth div 2;
+   cxw:= cx1*w;
+   cyw:= cy1*w;
+   sx:= cos(startang);
+   sy:= sin(startang);
+   if df_dashed in gc.drawingflags then begin
+    int1:= int1*4; //quarter pixel resolution
+    circle:= cx = cy;
+    step:= extentang/int1; //step
+    si:= sin(step);
+    co:= cos(step);
+    if circle then begin
+     dashstep:= cx*step/2;
+    end
+    else begin
+     step:= step / 65536;
+    end;
+    dashsum:= -ord(xftdashes[1]);
+    dashindex:= 1;
+    wasoff:= false;
+    allocbuffer(buffer,(6*int1+12)*sizeof(txpointfixed));
+            //+ start dummy + endpoint, max
+    q0:= pxpointfixed(buffer.buffer)+2;
+    for int1:= int1 downto 0 do begin
+     x1:= round(cx1*sx);
+     y1:= round(cy1*sy);
+     rea1:= sqrt(cx2*sy*sy+cy2*sx*sx);
+     if odd(dashindex) then begin
+      if rea1 = 0 then begin
+       x2:= round(w);
+       y2:= 0;
+      end
+      else begin
+       x2:= round(cyw*sx/rea1);
+       y2:= round(cxw*sy/rea1);
+      end;
+      x3:= center.x + x1 + x2;
+      y3:= center.y - y1 - y2;
+      x4:= center.x + x1 - x2;
+      y4:= center.y - y1 + y2;
+      if not wasoff then begin
+       q0^.x:= x3;
+       q0^.y:= y3;
+       inc(q0);
+       q0^:= (q0-2)^;
+       inc(q0);
+       q0^.x:= x3;
+       q0^.y:= y3;
+       inc(q0);
+       q0^.x:= x4;
+       q0^.y:= y4;
+       inc(q0);
+      end
+      else begin
+       wasoff:= false;
+      end;
+      q0^.x:= x3;
+      q0^.y:= y3;
+      inc(q0);
+      q0^.x:= x4;
+      q0^.y:= y4;
+      inc(q0);
+     end
+     else begin
+      if not wasoff then begin
+       wasoff:= true;
+       dec(q0,2);
+      end;
+     end;
+     if not circle then begin
+      dashstep:= rea1*step;
+     end;
+     dashsum:= dashsum + dashstep;
+     if dashsum >= 0 then begin
+      inc(dashindex);
+      if dashindex > length(xftdashes) then begin
+       dashindex:= 1;
+      end;
+      dashsum:= dashsum-ord(xftdashes[dashindex]);
+     end;
+     rea1:= sx;
+     sx:= co*sx-si*sy;
+     sy:= co*sy+si*rea1;
+    end;
+    po1:= pxtriangle(buffer.buffer)+2;
+    xrendercompositetriangles(appdisp,xrenderop,xftcolorforegroundpic,
+                 xftdrawpic,alpharenderpictformat,0,0,po1,pxtriangle(q0)-po1);
+   end
+   else begin
+    rea1:= extentang/int1; //step
+    si:= sin(rea1);
+    co:= cos(rea1);
+    npoints:= 2*int1+2; //+ endpoint
+    allocbuffer(buffer,npoints*sizeof(txpointfixed));
+    q0:= buffer.buffer;
+    for int1:= int1 downto 0 do begin
+     x1:= round(cx1*sx);
+     y1:= round(cy1*sy);
+     rea1:= sqrt(cx2*sy*sy+cy2*sx*sx);
+     if rea1 = 0 then begin
+      x2:= round(w);
+      y2:= 0;
+     end
+     else begin
+      x2:= round(cyw*sx/rea1);
+      y2:= round(cxw*sy/rea1);
+     end;
+     q0^.x:= center.x + x1 + x2;
+     q0^.y:= center.y - y1 - y2;
+     inc(q0);
+     q0^.x:= center.x + x1 - x2;
+     q0^.y:= center.y - y1 + y2;
+     inc(q0);
+     rea1:= sx;
+     sx:= co*sx-si*sy;
+     sy:= co*sy+si*rea1;
+    end;
+    xrendercompositetristrip(appdisp,xrenderop,xftcolorforegroundpic,
+                     xftdrawpic,alpharenderpictformat,0,0,buffer.buffer,npoints);
+   end;
+  end
+  else begin
+   xdrawarc(appdisp,paintdevice,tgc(gc.handle),
+    x+origin.x-cx div 2,y+origin.y - cy div 2,cx,cy,
+    round(startang*angscale),round(extentang*angscale));
+  end;
+ end;
+end;
+
 procedure gdi_drawellipse(var drawinfo: drawinfoty); //gdifunc
 var
  rea1,sx,sy,w,cxw,cyw,cx1,cy1,cx2,cy2,{xdy,ydx,}si,co: real;
@@ -2581,6 +2746,12 @@ begin
 {$endif} 
  with drawinfo,x11gcty(gc.platformdata).d,rect.rect^ do begin
   if xfts_smooth in xftstate then begin
+   if df_dashed in gc.drawingflags then begin
+    arc.startang:= 0;
+    arc.extentang:= 2*pi;
+    gdi_drawarc(drawinfo);
+    exit;
+   end;
    circle:= cx = cy;
    int1:= cx;
    if cy > int1 then begin
@@ -2671,129 +2842,6 @@ begin
   else begin
    xdrawarc(appdisp,paintdevice,tgc(gc.handle),
     x+origin.x-cx div 2,y+origin.y - cy div 2,cx,cy,0,wholecircle);
-  end;
- end;
-end;
-
-const
- angscale = 64*360/(2*pi);
- 
-procedure gdi_drawarc(var drawinfo: drawinfoty); //gdifunc
-var
- rea1,sx,sy,w,cxw,cyw,cx1,cy1,cx2,cy2,{xdy,ydx,}si,co: real;
- x1,y1,x2,y2,x3,y3,x4,y4: integer;
- q0: pxpointfixed;
- po1: pxtriangle;
- npoints: integer;
- int1: integer;
- center: txpointfixed;
-begin
-{$ifdef mse_debuggdisync}
- checkgdilock;
-{$endif} 
- with drawinfo,x11gcty(gc.platformdata).d,drawinfo.arc,rect^ do begin
-  if xfts_smooth in xftstate then begin
-   int1:= cx;
-   if cy > int1 then begin
-    int1:= cy;
-   end;
-   if int1 = 0 then begin
-    exit;
-   end;
-   checkxftstate(drawinfo,[xfts_colorforegroundvalid]);
-   int1:= round(int1*abs(extentang)/pi); //steps
-   rea1:= extentang/int1; //step
-   si:= sin(rea1);
-   co:= cos(rea1);
-   adjustellipsecenter(drawinfo,center);
-   cx1:= cx * (65536 div 2);
-   cx2:= cx1*cx1;
-   cy1:= cy * (65536 div 2);
-   cy2:= cy1*cy1;
-   w:= xftlinewidth div 2;
-   cxw:= cx1*w;
-   cyw:= cy1*w;
-   sx:= cos(startang);
-   sy:= sin(startang);
-   if df_dashed in gc.drawingflags then begin
-    allocbuffer(buffer,(6*int1+12)*sizeof(txpointfixed));
-            //+ start dummy + endpoint, max
-    q0:= pxpointfixed(buffer.buffer)+2;
-    for int1:= int1 downto 0 do begin
-     x1:= round(cx1*sx);
-     y1:= round(cy1*sy);
-     rea1:= sqrt(cx2*sy*sy+cy2*sx*sx);
-     if rea1 = 0 then begin
-      x2:= round(w);
-      y2:= 0;
-     end
-     else begin
-      x2:= round(cyw*sx/rea1);
-      y2:= round(cxw*sy/rea1);
-     end;
-     x3:= center.x + x1 + x2;
-     y3:= center.y - y1 - y2;
-     x4:= center.x + x1 - x2;
-     y4:= center.y - y1 + y2;
-     q0^.x:= x3;
-     q0^.y:= y3;
-     inc(q0);
-     q0^:= (q0-2)^;
-     inc(q0);
-     q0^.x:= x3;
-     q0^.y:= y3;
-     inc(q0);
-     q0^.x:= x4;
-     q0^.y:= y4;
-     inc(q0);
-     q0^.x:= x3;
-     q0^.y:= y3;
-     inc(q0);
-     q0^.x:= x4;
-     q0^.y:= y4;
-     inc(q0);
-     rea1:= sx;
-     sx:= co*sx-si*sy;
-     sy:= co*sy+si*rea1;
-    end;
-    po1:= pxtriangle(buffer.buffer)+2;
-    xrendercompositetriangles(appdisp,xrenderop,xftcolorforegroundpic,
-                 xftdrawpic,alpharenderpictformat,0,0,po1,pxtriangle(q0)-po1);
-   end
-   else begin
-    npoints:= 2*int1+2; //+ endpoint
-    allocbuffer(buffer,npoints*sizeof(txpointfixed));
-    q0:= buffer.buffer;
-    for int1:= int1 downto 0 do begin
-     x1:= round(cx1*sx);
-     y1:= round(cy1*sy);
-     rea1:= sqrt(cx2*sy*sy+cy2*sx*sx);
-     if rea1 = 0 then begin
-      x2:= round(w);
-      y2:= 0;
-     end
-     else begin
-      x2:= round(cyw*sx/rea1);
-      y2:= round(cxw*sy/rea1);
-     end;
-     q0^.x:= center.x + x1 + x2;
-     q0^.y:= center.y - y1 - y2;
-     inc(q0);
-     q0^.x:= center.x + x1 - x2;
-     q0^.y:= center.y - y1 + y2;
-     inc(q0);
-     rea1:= sx;
-     sx:= co*sx-si*sy;
-     sy:= co*sy+si*rea1;
-    end;
-    xrendercompositetristrip(appdisp,xrenderop,xftcolorforegroundpic,
-                     xftdrawpic,alpharenderpictformat,0,0,buffer.buffer,npoints);
-   end;
-  end
-  else begin
-   xdrawarc(appdisp,paintdevice,tgc(gc.handle),
-    x+origin.x-cx div 2,y+origin.y - cy div 2,cx,cy,
-    round(startang*angscale),round(extentang*angscale));
   end;
  end;
 end;
