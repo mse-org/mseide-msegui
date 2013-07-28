@@ -2956,21 +2956,71 @@ end;
 procedure gdi_fillarc(var drawinfo: drawinfoty); //gdifunc
 var
  xvalues: xgcvalues;
+ rea1,sx,sy,cx1,cy1,si,co: real;
+ x1,y1: integer;
+ q0: pxpointfixed;
+ npoints: integer;
+ int1: integer;
+ center: txpointfixed;
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
 {$endif} 
- with drawinfo,drawinfo.arc,rect^ do begin
-  if pieslice then begin
-   xvalues.arc_mode:= arcpieslice;
+ with drawinfo,x11gcty(gc.platformdata).d,drawinfo.arc,rect^ do begin
+  if xfts_smooth in xftstate then begin
+   int1:= cx;
+   if cy > int1 then begin
+    int1:= cy;
+   end;
+   if int1 = 0 then begin
+    exit;
+   end;
+   checkxftstate(drawinfo,[xfts_colorforegroundvalid]);
+   int1:= round(int1*abs(extentang)/pi); //steps
+   adjustellipsecenter(drawinfo,center);
+   cx1:= cx * (65536 div 2);
+   cy1:= cy * (65536 div 2);
+   sx:= cos(startang);
+   sy:= sin(startang);
+   rea1:= extentang/int1; //step
+   si:= sin(rea1);
+   co:= cos(rea1);
+   npoints:= int1+2; //center + endpoint
+   allocbuffer(buffer,npoints*sizeof(txpointfixed));
+   q0:= pxpointfixed(buffer.buffer)+1;
+   for int1:= int1 downto 0 do begin
+    x1:= round(cx1*sx);
+    y1:= round(cy1*sy);
+    q0^.x:= center.x + x1;
+    q0^.y:= center.y - y1;
+    inc(q0);
+    rea1:= sx;
+    sx:= co*sx-si*sy;
+    sy:= co*sy+si*rea1;
+   end;
+   if not pieslice then begin
+    dec(q0);
+    with (pxpointfixed(buffer.buffer)+1)^ do begin
+     center.x:= (q0^.x + x) div 2;
+     center.y:= (q0^.y + y) div 2;
+    end;
+   end;
+   pxpointfixed(buffer.buffer)^:= center;   
+   xrendercompositetrifan(appdisp,xrenderop,xftcolorforegroundpic,
+                 xftdrawpic,alpharenderpictformat,0,0,buffer.buffer,npoints);
   end
   else begin
-   xvalues.arc_mode:= arcchord;
+   if pieslice then begin
+    xvalues.arc_mode:= arcpieslice;
+   end
+   else begin
+    xvalues.arc_mode:= arcchord;
+   end;
+   xchangegc(appdisp,tgc(gc.handle),gcarcmode,@xvalues);
+   xfillarc(appdisp,paintdevice,tgc(gc.handle),
+    x+origin.x-cx div 2,y+origin.y - cy div 2,cx,cy,
+    round(startang*angscale),round(extentang*angscale));
   end;
-  xchangegc(appdisp,tgc(gc.handle),gcarcmode,@xvalues);
-  xfillarc(appdisp,paintdevice,tgc(gc.handle),
-   x+origin.x-cx div 2,y+origin.y - cy div 2,cx,cy,
-   round(startang*angscale),round(extentang*angscale));
  end;
 end;
 
