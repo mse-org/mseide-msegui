@@ -334,7 +334,7 @@ type
    function compare3(l,r: pointer): integer;
  {$endif}
    procedure quicksort(l,r: integer);
-   procedure mergesort(var adata: pointerarty);
+//   procedure mergesort(var adata: pointerarty);
    procedure sort(var adata: pointerarty);
    function getactive: boolean;
    procedure setactive(const avalue: boolean);
@@ -9074,7 +9074,7 @@ begin
   l:= i;
  until i >= r;
 end;
-
+{
 procedure tlocalindex.mergesort(var adata: pointerarty);
         //todo: optimize
 var
@@ -9160,6 +9160,7 @@ endstep:
   adata:= ar1;
  end;
 end;
+}
 
 procedure tlocalindex.sort(var adata: pointerarty);
 {$ifdef mse_debugdataset}
