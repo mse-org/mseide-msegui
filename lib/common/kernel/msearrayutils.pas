@@ -2619,11 +2619,120 @@ end;
 
 procedure sortarray(var dest: pointerarty; const compare: arraysortcomparety);
 var
+ ar1: pointerarty;
+ step: integer;
+ l,r,d: ppointer;
+ stopl,stopr,stops: ppointer;
+ sourcepo,destpo: ppointer;
+ acount: integer;
+label
+ endstep;
+begin
+ allocuninitedarray(length(dest),sizeof(pointer),ar1);
+ sourcepo:= pointer(dest);
+ destpo:= pointer(ar1);
+ step:= 1;
+ acount:= length(dest);
+ while step < acount do begin
+  d:= destpo;
+  l:= sourcepo;
+ {$ifdef FPC}
+  r:= sourcepo + step;
+ {$else}
+  r:= pointer(pchar(sourcepo) + step*sizeof(sourcepo^));
+ {$endif}
+  stopl:= r;
+ {$ifdef FPC}
+  stopr:= r+step;
+ {$else}
+  stopr:= pointer(pchar(r)+step*sizeof(r^));
+ {$endif}
+ {$ifdef FPC}
+  stops:= sourcepo + acount;
+ {$else}
+  stops:= pointer(pchar(sourcepo) + acount*sizeof(sourcepo^));
+ {$endif}
+  if pchar(stopr) > pchar(stops) then begin
+   stopr:= stops;
+  end;
+  while true do begin //runs
+   while true do begin //steps
+    while compare(l^,r^) <= 0 do begin //merge from left
+     d^:= l^;
+     inc(l);
+     inc(d);
+     if l = stopl then begin
+      while r <> stopr do begin
+       d^:= r^;   //copy rest
+       inc(d);
+       inc(r);
+      end;
+      goto endstep;
+     end;
+    end;
+    while compare(l^,r^) > 0 do begin //merge from right;
+     d^:= r^;
+     inc(r);
+     inc(d);
+     if r = stopr then begin
+      while l <> stopl do begin
+       d^:= l^;   //copy rest
+       inc(d);
+       inc(l);
+      end;
+      goto endstep;
+     end; 
+    end;
+   end;
+endstep:
+   if stopr = stops then begin
+    break;  //run finished
+   end;
+   l:= stopr; //next step
+  {$ifdef FPC}
+   r:= l + step;
+  {$else}
+   r:= pointer(pchar(l) + step*sizeof(l^));
+  {$endif}
+   if pchar(r) >= pchar(stops) then begin
+  {$ifdef FPC}
+    r:= stops-1;
+  {$else}
+    r:= pointer(pchar(stops)-1*sizeof(stops^));
+  {$endif}
+   end;
+   if r = l then begin
+    d^:= l^;
+    break;
+   end;
+   stopl:= r;
+  {$ifdef FPC}
+   stopr:= r + step;
+  {$else}
+   stopr:= pointer(pchar(r) + step*sizeof(r^));
+  {$endif}
+   if pchar(stopr) > pchar(stops) then begin
+    stopr:= stops;
+   end;
+  end;
+  d:= sourcepo;     //swap buffer
+  sourcepo:= destpo;
+  destpo:= d;
+  step:= step*2;
+ end;
+ if sourcepo <> pointer(dest) then begin
+  dest:= ar1;
+ end;
+end;
+
+{
+procedure sortarray(var dest: pointerarty; const compare: arraysortcomparety);
+var
  indexlist: integerarty;
 begin
  sortarray(dest,compare,indexlist);
 end;
-
+}
 procedure sortarray(var dest: msestringarty; const compare: arraysortcomparety;
                     out indexlist: integerarty);
 begin
