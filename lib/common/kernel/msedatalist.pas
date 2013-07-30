@@ -479,8 +479,10 @@ type
    max: realty;
    constructor create; override;
    class function datatype: listdatatypety; override;
-   procedure assignre(source: tcomplexdatalist);
-   procedure assignim(source: tcomplexdatalist);
+   procedure assignre(const source: tcomplexdatalist); overload;
+   procedure assignim(const source: tcomplexdatalist); overload;
+   procedure assignre(const source: complexarty); overload;
+   procedure assignim(const source: complexarty); overload;
    function empty(const index: integer): boolean; override;
    function add(const value: real): integer;
    procedure insert(index: integer; const item: realty);
@@ -3584,14 +3586,54 @@ begin
  end;
 end;
 }
-procedure trealdatalist.assignre(source: tcomplexdatalist);
+procedure trealdatalist.assignre(const source: tcomplexdatalist);
 begin
  source.assigntodata(self);
 end;
 
-procedure trealdatalist.assignim(source: tcomplexdatalist);
+procedure trealdatalist.assignim(const source: tcomplexdatalist);
 begin
  source.assigntob(self);
+end;
+
+procedure trealdatalist.assignre(const source: complexarty);
+var
+ pod,poe: preal;
+ pos: pcomplexty;
+begin
+ beginupdate;
+ count:= length(source);
+ if count > 0 then begin
+  pod:= datapo;
+  poe:= pod + fcount;
+  pos:= pointer(source);
+  repeat
+   pod^:= pos^.re;
+   inc(pos);
+   inc(pod);
+  until pod = poe;
+ end;
+ endupdate;
+end;
+
+procedure trealdatalist.assignim(const source: complexarty);
+var
+ pod,poe: preal;
+ pos: pcomplexty;
+begin
+ beginupdate;
+ count:= length(source);
+ if count > 0 then begin
+  pod:= datapo;
+  poe:= pod + fcount;
+  pos:= pointer(source);
+  repeat
+   pod^:= pos^.im;
+   inc(pos);
+   inc(pod);
+  until pod = poe;
+ end;
+ endupdate;
 end;
 
 procedure trealdatalist.insert(index: integer; const item: realty);
