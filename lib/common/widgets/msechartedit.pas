@@ -1505,7 +1505,10 @@ end;
 
 function tcustomchartedit.chartdataxy: complexarty;
 begin
- result:= copy(activetraceitem.xydata);
+ with ttrace1(activetraceitem) do begin
+  forcexyarray;
+  result:= copy(xydata);
+ end;
 end;
 
 function tcustomchartedit.chartdataxseries: realarty;

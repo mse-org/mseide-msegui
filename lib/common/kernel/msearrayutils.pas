@@ -303,6 +303,9 @@ function opentodynarrayr(const items: array of realty): realarty;
 function opentodynarraybo(const items: array of boolean): booleanarty;
 function opentodynarrayby(const items: array of byte): bytearty;
 
+procedure copytore(const source: realarty; var dest: complexarty);
+procedure copytoim(const source: realarty; var dest: complexarty);
+
 implementation
 uses
  rtlconsts,classes,sysutils,msereal,msesys{$ifndef FPC},classes_del{$endif};
@@ -3003,6 +3006,42 @@ begin
  setlength(result,length(items));
  for int1:= 0 to high(items) do begin
   result[int1]:= items[int1];
+ end;
+end;
+
+procedure copytore(const source: realarty; var dest: complexarty);
+var
+ ps,pe: preal;
+ pd: pcomplexty;
+begin
+ setlength(dest,length(source));
+ if source <> nil then begin
+  ps:= pointer(source);
+  pe:= ps+length(dest);
+  pd:= pointer(dest);
+  repeat
+   pd^.re:= ps^;
+   inc(pd);
+   inc(ps);
+  until ps = pe;
+ end;
+end;
+
+procedure copytoim(const source: realarty; var dest: complexarty);
+var
+ ps,pe: preal;
+ pd: pcomplexty;
+begin
+ setlength(dest,length(source));
+ if source <> nil then begin
+  ps:= pointer(source);
+  pe:= ps+length(source);
+  pd:= pointer(preal(pointer(dest))+1);
+  repeat
+   pd^.re:= ps^;
+   inc(pd);
+   inc(ps);
+  until ps = pe;
  end;
 end;
 

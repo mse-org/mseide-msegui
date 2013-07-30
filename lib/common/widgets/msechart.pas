@@ -246,6 +246,7 @@ type
    procedure setlinkedvar(const source: tmsecomponent; var dest: tmsecomponent;
                const linkintf: iobjectlink = nil);
    procedure widgetregioninvalid;
+   procedure forcexyarray;
   public
    constructor create(aowner: tobject); override;
    destructor destroy; override;
@@ -1057,6 +1058,32 @@ begin
   finfo.ydatalist:= avalue;
  end;
  datachange;
+end;
+
+procedure ttrace.forcexyarray;
+var
+ ar1: complexarty;
+begin
+ with finfo do begin
+  ar1:= xydata;
+  if ar1 = nil then begin
+   if xdatalist <> nil then begin
+    xdatalist.assigntore(ar1);
+   end;
+   if ydatalist <> nil then begin
+    ydatalist.assigntoim(ar1);
+   end;
+   if xdata <> nil then begin
+    copytore(xdata,ar1);
+   end;
+   if ydata <> nil then begin
+    copytoim(ydata,ar1);
+   end;
+  end;
+  if ar1 <> xydata then begin
+   self.xydata:= ar1;
+  end;
+ end;
 end;
 
 function ttrace.getxdatalist: trealdatalist;

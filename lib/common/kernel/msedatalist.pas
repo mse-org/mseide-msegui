@@ -474,6 +474,7 @@ type
    function compare(const l,r): integer; override;
    procedure setstatdata(const index: integer; const value: msestring); override;
    function getstatdata(const index: integer): msestring; override;
+   procedure copytocomplex(dest: pcomplexty);
   public
    min: realty;
    max: realty;
@@ -483,6 +484,10 @@ type
    procedure assignim(const source: tcomplexdatalist); overload;
    procedure assignre(const source: complexarty); overload;
    procedure assignim(const source: complexarty); overload;
+   procedure assigntore(const dest: tcomplexdatalist); overload;
+   procedure assigntoim(const dest: tcomplexdatalist); overload;
+   procedure assigntore(var dest: complexarty); overload;
+   procedure assigntoim(var dest: complexarty); overload;
    function empty(const index: integer): boolean; override;
    function add(const value: real): integer;
    procedure insert(index: integer; const item: realty);
@@ -3634,6 +3639,49 @@ begin
   until pod = poe;
  end;
  endupdate;
+end;
+
+procedure trealdatalist.copytocomplex(dest: pcomplexty);
+var
+ ps,pe: preal;
+begin
+ if count > 0 then begin
+  ps:= datapo;
+  pe:= ps+count;
+  repeat
+   dest^.re:= ps^; //dest possibly shifted to im
+   inc(dest);
+   inc(ps);
+  until ps = pe;
+ end;
+end;
+
+procedure trealdatalist.assigntore(const dest: tcomplexdatalist);
+begin
+ dest.beginupdate;
+ dest.count:= count;
+ copytocomplex(dest.datapo);
+ dest.endupdate;
+end;
+
+procedure trealdatalist.assigntoim(const dest: tcomplexdatalist);
+begin
+ dest.beginupdate;
+ dest.count:= count;
+ copytocomplex(pointer(preal(dest.datapo)+1));
+ dest.endupdate;
+end;
+
+procedure trealdatalist.assigntore(var dest: complexarty);
+begin
+ setlength(dest,count);
+ copytocomplex(pointer(dest));
+end;
+
+procedure trealdatalist.assigntoim(var dest: complexarty);
+begin
+ setlength(dest,count);
+ copytocomplex(pointer(preal(pointer(dest))+1));
 end;
 
 procedure trealdatalist.insert(index: integer; const item: realty);
