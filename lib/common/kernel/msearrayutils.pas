@@ -370,7 +370,7 @@ begin
 end;
 
 function additem(var value; const typeinfo: pdynarraytypeinfo;
-                             var count: integer): integer;
+                                           var count: integer): integer;
 var
  int1: integer;
 begin
@@ -385,7 +385,7 @@ end;
 
 function additempo(var value; const typeinfo: pdynarraytypeinfo; 
                                   //typeinfo of dynarray
-                var count: integer): pointer; overload;
+                                 var count: integer): pointer; overload;
                //returns adress of new item
 var
  int1: integer;

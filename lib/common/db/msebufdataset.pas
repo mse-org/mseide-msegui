@@ -2163,7 +2163,7 @@ begin
   if getfieldflag(@arec^.fielddata.nullmask,fieldindex) then begin
    blobid:= pinteger(pchar(arec) + ffieldinfos[fieldindex].base.offset)^;
    fblobcache[blobid].data:= '';
-   additem(ffreedblobs,blobid,ffreedblobcount,(high(ffreedblobs)+129)*2);
+   additem(ffreedblobs,blobid,ffreedblobcount{,(high(ffreedblobs)+129)*2});
   end;
  end;
 end;
