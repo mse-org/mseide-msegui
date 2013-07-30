@@ -12,6 +12,9 @@ unit msearrayutils;
 interface
 uses
  msetypes,msestrings;
+const
+ arrayminlenghtstep = 32;
+ 
 type
  stringsortmodety = (sms_none,sms_upascii,sms_up,sms_upi);
  pointercomparemethodty = function(l,r:pointer): integer of object; 
@@ -41,40 +44,40 @@ function incrementarraylength(var value: pointer; typeinfo: pdynarraytypeinfo;
   //returns new length
 function additem(var value; const typeinfo: pdynarraytypeinfo; 
                                   //typeinfo of dynarray
-                var count: integer; step: integer = 32): integer; overload;
+                var count: integer): integer; overload;
   //value = array of type, returns index of new item
 function additempo(var value; const typeinfo: pdynarraytypeinfo; 
                                   //typeinfo of dynarray
-                var count: integer; step: integer = 32): pointer; overload;
+                var count: integer): pointer; overload;
                //returns adress of new item
 
 function firstitem(const source: stringarty): string; overload;
 function firstitem(const source: msestringarty): msestring; overload;
 
 procedure additem(var dest: stringarty; const value: string;
-                             var count: integer; step: integer = 32); overload;
+                             var count: integer); overload;
 procedure additem(var dest: stringararty; const value: stringarty;
-                             var count: integer; step: integer = 32); overload;
+                             var count: integer); overload;
 procedure additem(var dest: msestringarty; const value: msestring;
-                             var count: integer; step: integer = 32); overload;
+                             var count: integer); overload;
 procedure additem(var dest: msestringararty; const value: msestringarty;
-                             var count: integer; step: integer = 32); overload;
+                             var count: integer); overload;
 procedure additem(var dest: lstringarty; const value: lstringty;
-                             var count: integer; step: integer = 32); overload;
+                             var count: integer); overload;
 procedure additem(var dest: lmsestringarty; const value: lmsestringty;
-                             var count: integer; step: integer = 32); overload;
+                             var count: integer); overload;
 procedure additem(var dest: integerarty; const value: integer;
-                             var count: integer; step: integer = 32); overload;
+                             var count: integer); overload;
 procedure additem(var dest: realarty; const value: real;
-                             var count: integer; step: integer = 32); overload;
+                             var count: integer); overload;
 procedure additem(var dest: pointerarty; const value: pointer;
-                             var count: integer; step: integer = 32); overload;
+                             var count: integer); overload;
 {$ifndef FPC}
 procedure addpointeritem(var dest: pointerarty; const value: pointer;
-                             var count: integer; step: integer = 32);
+                             var count: integer);
 {$endif}
 procedure additem(var dest: winidarty; const value: winidty;
-                             var count: integer; step: integer = 32); overload;
+                             var count: integer); overload;
 
 procedure additem(var dest: stringarty; const value: string); overload;
 procedure additem(var dest: msestringarty; const value: msestring); overload;
@@ -367,13 +370,13 @@ begin
 end;
 
 function additem(var value; const typeinfo: pdynarraytypeinfo;
-                             var count: integer; step: integer = 32): integer;
+                             var count: integer): integer;
 var
  int1: integer;
 begin
  int1:= high(pointerarty(value)) + 1;
  if int1 <= count then begin
-  incrementarraylength(pointer(value),typeinfo,2*count+step);
+  incrementarraylength(pointer(value),typeinfo,2*count+arrayminlenghtstep);
 //  incrementarraylength(pointer(value),typeinfo,count-int1+step);
  end;
  result:= count;
@@ -382,14 +385,14 @@ end;
 
 function additempo(var value; const typeinfo: pdynarraytypeinfo; 
                                   //typeinfo of dynarray
-                var count: integer; step: integer = 32): pointer; overload;
+                var count: integer): pointer; overload;
                //returns adress of new item
 var
  int1: integer;
 begin
  int1:= high(pointerarty(value)) + 1;
  if int1 <= count then begin
-  incrementarraylength(pointer(value),typeinfo,2*count+step);
+  incrementarraylength(pointer(value),typeinfo,2*count+arrayminlenghtstep);
  end;
  result:= pointer(value) + count*dynarrayelesize(typeinfo);
  inc(count);
@@ -536,90 +539,90 @@ begin
 end;
 
 procedure additem(var dest: stringarty; const value: string;
-                             var count: integer; step: integer = 32);
+                             var count: integer);
 begin
  if length(dest) <= count then begin
-  setlength(dest,count+step+2*length(dest));
+  setlength(dest,count+arrayminlenghtstep+2*length(dest));
  end;
  dest[count]:= value;
  inc(count);
 end;
 
 procedure additem(var dest: stringararty; const value: stringarty;
-                             var count: integer; step: integer = 32); overload;
+                             var count: integer); overload;
 begin
  if length(dest) <= count then begin
-  setlength(dest,count+step+2*length(dest));
+  setlength(dest,count+arrayminlenghtstep+2*length(dest));
  end;
  dest[count]:= value;
  inc(count);
 end;
 
 procedure additem(var dest: msestringarty; const value: msestring;
-                             var count: integer; step: integer = 32);
+                             var count: integer);
 begin
  if length(dest) <= count then begin
-  setlength(dest,count+step+2*length(dest));
+  setlength(dest,count+arrayminlenghtstep+2*length(dest));
  end;
  dest[count]:= value;
  inc(count);
 end;
 
 procedure additem(var dest: msestringararty; const value: msestringarty;
-                             var count: integer; step: integer = 32);
+                             var count: integer);
 begin
  if length(dest) <= count then begin
-  setlength(dest,count+step+2*length(dest));
+  setlength(dest,count+arrayminlenghtstep+2*length(dest));
  end;
  dest[count]:= value;
  inc(count);
 end;
 
 procedure additem(var dest: lstringarty; const value: lstringty;
-                             var count: integer; step: integer = 32);
+                             var count: integer);
 begin
  if length(dest) <= count then begin
-  setlength(dest,count+step+2*length(dest));
+  setlength(dest,count+arrayminlenghtstep+2*length(dest));
  end;
  dest[count]:= value;
  inc(count);
 end;
 
 procedure additem(var dest: lmsestringarty; const value: lmsestringty;
-                             var count: integer; step: integer = 32);
+                             var count: integer);
 begin
  if length(dest) <= count then begin
-  setlength(dest,count+step+2*length(dest));
+  setlength(dest,count+arrayminlenghtstep+2*length(dest));
  end;
  dest[count]:= value;
  inc(count);
 end;
 
 procedure additem(var dest: integerarty; const value: integer;
-                             var count: integer; step: integer = 32);
+                             var count: integer);
 begin
  if length(dest) <= count then begin
-  setlength(dest,count+step+2*length(dest));
+  setlength(dest,count+arrayminlenghtstep+2*length(dest));
  end;
  dest[count]:= value;
  inc(count);
 end;
 
 procedure additem(var dest: realarty; const value: real;
-                             var count: integer; step: integer = 32);
+                             var count: integer);
 begin
  if length(dest) <= count then begin
-  setlength(dest,count+step+2*length(dest));
+  setlength(dest,count+arrayminlenghtstep+2*length(dest));
  end;
  dest[count]:= value;
  inc(count);
 end;
 
 procedure additem(var dest: pointerarty; const value: pointer;
-                             var count: integer; step: integer = 32);
+                             var count: integer);
 begin
  if length(dest) <= count then begin
-  setlength(dest,count+step+2*length(dest));
+  setlength(dest,count+arrayminlenghtstep+2*length(dest));
  end;
  dest[count]:= value;
  inc(count);
@@ -627,7 +630,7 @@ end;
 
 {$ifndef FPC}
 procedure addpointeritem(var dest: pointerarty; const value: pointer;
-                             var count: integer; step: integer = 32);
+                             var count: integer);
 begin
  if length(dest) <= count then begin
   setlength(dest,count+step+2*length(dest));
@@ -638,10 +641,10 @@ end;
 {$endif}
 
 procedure additem(var dest: winidarty; const value: winidty;
-                             var count: integer; step: integer = 32);
+                             var count: integer);
 begin
  if length(dest) <= count then begin
-  setlength(dest,count+step+2*length(dest));
+  setlength(dest,count+arrayminlenghtstep+2*length(dest));
  end;
  dest[count]:= value;
  inc(count);
