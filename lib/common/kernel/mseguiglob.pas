@@ -131,7 +131,10 @@ type
                 wp_fullscreen,wp_fullscreenvirt);
  windowsizety = (wsi_normal,wsi_minimized,wsi_maximized,
                  wsi_fullscreen,wsi_fullscreenvirt);
-
+const
+ windowmaximizedstates = [wp_maximized,wp_fullscreen,wp_fullscreenvirt];
+ 
+type
  syswindowty = (sywi_none,sywi_tray);
  
  paintdevicety = ptruint;

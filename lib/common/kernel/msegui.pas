@@ -7237,7 +7237,7 @@ begin
   poschanged;
  end;
  if ownswindow1 then begin
-  if not (windowevent and (fwindow.windowpos = wp_maximized)) then begin
+  if not (windowevent and (fwindow.windowpos in windowmaximizedstates)) then begin
    fwindow.fnormalwindowrect:= fwidgetrect;
   end;
   if bo2 and (tws_windowvisible in fwindow.fstate) then begin
@@ -13463,8 +13463,7 @@ begin
     end;
    end;
    fwindowposbefore:= windowpos;
-   if not (fwindowposbefore in [wp_minimized,wp_maximized,
-                                wp_fullscreen,wp_fullscreenvirt]) then begin
+   if not (fwindowposbefore in [wp_minimized]+windowmaximizedstates) then begin
     fnormalwindowrect:= fownerwidget.fwidgetrect;
    end;
   end;
@@ -14289,7 +14288,8 @@ begin
     result:= wp_fullscreenvirt;
    end;
    else begin //wsi_normal
-    if fwindowpos in [wp_minimized,wp_maximized,wp_fullscreen,wp_screencentered] then begin
+    if fwindowpos in 
+           [wp_minimized,wp_screencentered]+windowmaximizedstates then begin
      result:= wp_normal;
     end
     else begin
