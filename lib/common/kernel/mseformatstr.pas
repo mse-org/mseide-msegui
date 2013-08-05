@@ -87,6 +87,10 @@ const
  
 type
  numbasety = (nb_bin,nb_oct,nb_dec,nb_hex);
+
+function lstring(const s: string; const minwidth: integer): string;
+function rstring(const s: string; const minwidth: integer): string;
+
 {$warnings off}
        // ${THEMACRO} checks formatmacros, macro name case sensitive
 {$warnings on}
@@ -470,6 +474,32 @@ implementation
 
 uses
  sysconst,msedate,msereal,Math,msefloattostr,msearrayutils,msesys;
+
+function lstring(const s: string; const minwidth: integer): string;
+var
+ int1: integer;
+begin
+ int1:= length(s);
+ if int1 < minwidth then begin
+  result:= s + charstring(' ',minwidth-int1);
+ end
+ else begin
+  result:= s;
+ end;
+end;
+
+function rstring(const s: string; const minwidth: integer): string;
+var
+ int1: integer;
+begin
+ int1:= length(s);
+ if int1 < minwidth then begin
+  result:= charstring(' ',minwidth-int1) + s;
+ end
+ else begin
+  result:= s;
+ end;
+end;
 
 var
  fformatmacros: tformatmacrolist;
