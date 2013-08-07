@@ -5263,6 +5263,12 @@ eventrestart:
      result:= twindowevent.create(ek_destroy,xwindow);
     end
     else begin
+     rect1.x:= x;
+     rect1.y:= y;
+     rect1.cx:= width;
+     rect1.cy:= height;
+     result:= twindowrectevent.create(ek_configure,w,rect1,nullpoint);
+(* gnome bug workaround
      if not application.deinitializing and 
        (getwindowrect(w,rect1,pt1) = gue_ok) then begin
                          //there can be an Xerror?
@@ -5286,6 +5292,7 @@ eventrestart:
                  ' '+inttostr(width)+' '+inttostr(height));
     {$endif}
      end;
+*)
     end;
    end;
   end;
