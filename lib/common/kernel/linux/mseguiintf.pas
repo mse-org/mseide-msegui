@@ -4933,7 +4933,7 @@ var
  button1: mousebuttonty;
  bo1: boolean;
  rect1: rectty;
- pt1: pointty;
+// pt1: pointty;
  aic: xic;
  window1: twindow;
 
@@ -5263,11 +5263,13 @@ eventrestart:
      result:= twindowevent.create(ek_destroy,xwindow);
     end
     else begin
-     rect1.x:= x;
-     rect1.y:= y;
-     rect1.cx:= width;
-     rect1.cy:= height;
-     result:= twindowrectevent.create(ek_configure,w,rect1,nullpoint);
+     if not application.deinitializing then begin
+      rect1.x:= x;
+      rect1.y:= y;
+      rect1.cx:= width;
+      rect1.cy:= height;
+      result:= twindowrectevent.create(ek_configure,w,rect1,nullpoint);
+     end; 
 (* gnome bug workaround
      if not application.deinitializing and 
        (getwindowrect(w,rect1,pt1) = gue_ok) then begin
