@@ -47,6 +47,7 @@ type
    procedure firependingandstop;
    procedure fireandstop;
    procedure fire;
+   procedure restart;
    property interval: longword read finterval write setinterval;
              //in microseconds, max +2000 seconds
              //restarts timer if enabled
@@ -505,6 +506,12 @@ end;
 procedure tsimpletimer.fire;
 begin
  dotimer;
+end;
+
+procedure tsimpletimer.restart;
+begin
+ interval:= interval;
+ enabled:= true;
 end;
 
 function tsimpletimer.getsingleshot: boolean;

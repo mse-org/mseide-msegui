@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -19,10 +19,10 @@ unit mseedit;
 interface
 uses
  msegui,mseeditglob,msegraphics,msegraphutils,msedatalist,
- mseevent,mseglob,mseguiglob,
+ mseevent,mseglob,mseguiglob,msestat,msestatfile,
  mseinplaceedit,msegrids,msetypes,mseshapes,msewidgets,
  msedrawtext,classes,mclasses,msereal,mseclasses,msearrayprops,
- msebitmap,msemenus,
+ msebitmap,msemenus,msetimer,
  msesimplewidgets,msepointer,msestrings,msescrollbar
          {$ifdef mse_with_ifi},mseifiglob{$endif};
 
@@ -354,20 +354,6 @@ type
    function navigrect: rectty; override;
 
    class function classskininfo: skininfoty; override;
-     //iedit
-   function getoptionsedit: optionseditty; virtual;
-   function hasselection: boolean; virtual;
-   function cangridcopy: boolean; virtual;
-   procedure setoptionsedit(const avalue: optionseditty); virtual;
-   procedure updatereadonlystate; virtual;
-   procedure editnotification(var info: editnotificationinfoty); virtual;
-   procedure updatecopytoclipboard(var atext: msestring); virtual;
-   procedure updatepastefromclipboard(var atext: msestring); virtual;
-   function locatecount: integer; virtual;        //number of locate values
-   function locatecurrentindex: integer; virtual; //index of current row
-   procedure locatesetcurrentindex(const aindex: integer); virtual;
-   function getkeystring(const aindex: integer): msestring; virtual; //locate text
-   function getedited: boolean; virtual;
 
     //interface to inplaceedit
    procedure dokeydown(var info: keyeventinfoty); override;
@@ -385,11 +371,26 @@ type
    procedure showhint(var info: hintinfoty); override;
 
    procedure dochange; virtual;
+   procedure internaltextedited(const aevent: texteditedeventty);
    procedure dotextedited; virtual;
    procedure readpwchar(reader: treader);
    procedure writepwchar(writer: twriter);
    procedure defineproperties(filer: tfiler); override;
    function verticalfontheightdelta: boolean; override;
+     //iedit
+   function getoptionsedit: optionseditty; virtual;
+   function hasselection: boolean; virtual;
+   function cangridcopy: boolean; virtual;
+   procedure setoptionsedit(const avalue: optionseditty); virtual;
+   procedure updatereadonlystate; virtual;
+   procedure editnotification(var info: editnotificationinfoty); virtual;
+   procedure updatecopytoclipboard(var atext: msestring); virtual;
+   procedure updatepastefromclipboard(var atext: msestring); virtual;
+   function locatecount: integer; virtual;        //number of locate values
+   function locatecurrentindex: integer; virtual; //index of current row
+   procedure locatesetcurrentindex(const aindex: integer); virtual;
+   function getkeystring(const aindex: integer): msestring; virtual; //locate text
+   function getedited: boolean; virtual;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -433,8 +434,35 @@ type
    property bounds_cy default defaulteditwidgetheight;
  end;
 
- tedit = class(tcustomedit)
+ tedit = class(tcustomedit,istatfile)
+  private
+   ftimer: tsimpletimer;
+   fontextediteddelayed: texteditedeventty;
+   fstatfile: tstatfile;
+   fstatvarname: msestring;
+   procedure dotimer(const sender: tobject); virtual;
+   function getdelay: integer;
+   procedure setdelay(const avalue: integer);
+   procedure setstatfile(const avalue: tstatfile);
+  protected
+   procedure dotextedited; override;
+   procedure editnotification(var info: editnotificationinfoty); override;
+
+    //istatfile
+   procedure dostatread(const reader: tstatreader); virtual;
+   procedure dostatwrite(const writer: tstatwriter); virtual;
+   procedure statreading;
+   procedure statread;
+   function getstatvarname: msestring;
+  public
+   constructor create(aowner: tcomponent); override;
+   destructor destroy; override;
   published
+   property statfile: tstatfile read fstatfile write setstatfile;
+   property statvarname: msestring read getstatvarname write fstatvarname;
+   property delay: integer read getdelay write setdelay default 0; //ms
+   property ontextediteddelayed: texteditedeventty read fontextediteddelayed 
+                                                   write fontextediteddelayed;
    property optionsedit1; //before optionsedit!
    property optionsedit;
    property font;
@@ -1486,18 +1514,23 @@ begin
  end;
 end;
 
-procedure tcustomedit.dotextedited;
+procedure tcustomedit.internaltextedited(const aevent: texteditedeventty);
 var
  mstr1: msestring;
 begin
- if canevent(tmethod(fontextedited)) then begin
+ if canevent(tmethod(aevent)) then begin
   mstr1:= text;
-  fontextedited(self,mstr1);
+  aevent(self,mstr1);
   if mstr1 <> text then begin
    text:= mstr1;
   end;
-  feditor.oldtext:= mstr1;
+//  feditor.oldtext:= mstr1;
  end;
+end;
+
+procedure tcustomedit.dotextedited;
+begin
+ internaltextedited(fontextedited);
 end;
 
 procedure tcustomedit.initnewcomponent(const ascale: real);
@@ -1661,6 +1694,83 @@ function tcustomedit.navigrect: rectty;
 begin
  result:= frameinnerrect;
 // result:= paintframerect;
+end;
+
+{ tedit }
+
+constructor tedit.create(aowner: tcomponent);
+begin
+ inherited;
+ ftimer:= tsimpletimer.create(0,@dotimer,false,[to_single]);
+end;
+
+destructor tedit.destroy;
+begin
+ ftimer.free;
+ inherited;
+end;
+
+procedure tedit.dotimer(const sender: tobject);
+begin
+ internaltextedited(fontextediteddelayed);
+end;
+
+function tedit.getdelay: integer;
+begin
+ result:= ftimer.interval div 1000;
+end;
+
+procedure tedit.setdelay(const avalue: integer);
+begin
+ ftimer.interval:= avalue * 1000;
+end;
+
+procedure tedit.dotextedited;
+begin
+ inherited;
+ ftimer.restart;
+end;
+
+procedure tedit.editnotification(var info: editnotificationinfoty);
+begin
+ inherited;
+ case info.action of
+  ea_textentered: begin
+   initfocus;
+  end;
+ end;
+end;
+
+procedure tedit.setstatfile(const avalue: tstatfile);
+begin
+ setstatfilevar(istatfile(self),avalue,fstatfile);
+end;
+
+procedure tedit.dostatwrite(const writer: tstatwriter);
+begin
+ writer.writemsestring('text',text);
+end;
+
+procedure tedit.dostatread(const reader: tstatreader);
+begin
+ text:= reader.readmsestring('text',text);
+end;
+
+procedure tedit.statreading;
+begin
+ //dummy
+end;
+
+procedure tedit.statread;
+begin
+ if (oe_checkvaluepaststatread in foptionsedit) then begin
+  dotextedited;
+ end;
+end;
+
+function tedit.getstatvarname: msestring;
+begin
+ result:= fstatvarname;
 end;
 
 end.

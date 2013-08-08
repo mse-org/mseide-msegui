@@ -1044,6 +1044,7 @@ begin
   curindex:= curindexbackup;
   invalidatetext(false,false);
   exclude(fstate,ies_touched);
+  notify(ea_textedited);
  end;
 end;
 
