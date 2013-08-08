@@ -19,126 +19,126 @@ uses
  
 type
  scrollbarskininfoty = record
-  facebu: tfacecomp;
-  faceendbu: tfacecomp;
-  framebu: tframecomp;
-  frameendbu1: tframecomp;
-  frameendbu2: tframecomp;
+  svfacebu: tfacecomp;
+  svfaceendbu: tfacecomp;
+  svframebu: tframecomp;
+  svframeendbu1: tframecomp;
+  svframeendbu2: tframecomp;
  end;
  widgetcolorinfoty = record
-  co: colorty;
-  cocaptionframe: colorty;
+  svcolor: colorty;
+  svcolorcaptionframe: colorty;
  end;
  pwidgetcolorinfoty = ^widgetcolorinfoty;
  widgetskininfoty = record
-  fa: tfacecomp;
-  fra: tframecomp;
+  svface: tfacecomp;
+  svframe: tframecomp;
  end;
  containerskininfoty = record
-  wi: widgetskininfoty;
+  svwidget: widgetskininfoty;
 //  face: tfacecomp;
 //  frame: tframecomp;
  end;
  groupboxskininfoty = record
-  wi: widgetskininfoty;
+  svwidget: widgetskininfoty;
 //  face: tfacecomp;
 //  frame: tframecomp;
  end;
  toolbarskininfoty = record
-  wi: widgetskininfoty;
+  svwidget: widgetskininfoty;
 //  face: tfacecomp;
 //  frame: tframecomp;
-  buttonface: tfacecomp;
+  svbuttonface: tfacecomp;
  end;
  gridpropskininfoty = record
-  face: tfacecomp;
-  frame: tframecomp;
+  svface: tfacecomp;
+  svframe: tframecomp;
  end;
  gridskininfoty = record
-  wi: widgetskininfoty;
+  svwidget: widgetskininfoty;
 //  face: tfacecomp;
 //  frame: tframecomp;
-  fixrows: gridpropskininfoty;
-  fixcols: gridpropskininfoty;
-  datacols: gridpropskininfoty;
+  svfixrows: gridpropskininfoty;
+  svfixcols: gridpropskininfoty;
+  svdatacols: gridpropskininfoty;
  end;  
  buttonskininfoty = record
-  co: colorty;
-  wi: widgetskininfoty;
-  font: toptionalfont;
-  optionsadd: buttonoptionsty;
-  optionsremove: buttonoptionsty;
+  svcolor: colorty;
+  svwidget: widgetskininfoty;
+  svfont: toptionalfont;
+  svoptionsadd: buttonoptionsty;
+  svoptionsremove: buttonoptionsty;
  end;  
  sliderskininfoty = record
-  co: colorty;
-  wi: widgetskininfoty;
-  sb_vert: scrollbarskininfoty;
-  sb_horz: scrollbarskininfoty;
+  svcolor: colorty;
+  svwidget: widgetskininfoty;
+  svsb_vert: scrollbarskininfoty;
+  svsb_horz: scrollbarskininfoty;
  end;  
  stepbuttonskininfoty = record
-  co: colorty;
-  fa: tfacecomp;
-  fra: tframecomp;
+  svcolor: colorty;
+  svface: tfacecomp;
+  svframe: tframecomp;
  end; 
  framebuttonskininfoty = record
-  co: colorty;
-  coglyph: colorty;
-  fa: tfacecomp;
-  fra: tframecomp;
+  svcolor: colorty;
+  svcolorglyph: colorty;
+  svface: tfacecomp;
+  svframe: tframecomp;
  end;
  tabsskininfoty = record
-  color: colorty;
-  coloractive: colorty;
-  frame: tframecomp;
-  face: tfacecomp;
-  faceactive: tfacecomp;
-  shift: integer;
+  svcolor: colorty;
+  svcoloractive: colorty;
+  svframe: tframecomp;
+  svface: tfacecomp;
+  svfaceactive: tfacecomp;
+  svshift: integer;
  end;
  tabbarskininfoty = record
-  wihorz: widgetskininfoty;
-  wivert: widgetskininfoty;
-  wihorzopo: widgetskininfoty;
-  wivertopo: widgetskininfoty;
-  tahorz: tabsskininfoty;
-  tavert: tabsskininfoty;
-  tahorzopo: tabsskininfoty;
-  tavertopo: tabsskininfoty;
+  svwidgethorz: widgetskininfoty;
+  svwidgetvert: widgetskininfoty;
+  svwidgethorzopo: widgetskininfoty;
+  svwidgetvertopo: widgetskininfoty;
+  svtabhorz: tabsskininfoty;
+  svtabvert: tabsskininfoty;
+  svtabhorzopo: tabsskininfoty;
+  svtabvertopo: tabsskininfoty;
  end;
  tabpageskininfoty = record
-  wi: widgetskininfoty;
-  colortab: colorty;
-  coloractivetab: colorty;
+  svwidget: widgetskininfoty;
+  svcolortab: colorty;
+  svcoloractivetab: colorty;
  end;
  menuskininfoty = record
-  face: tfacecomp;
-  frame: tframecomp;
-  itemface: tfacecomp;
-  itemframe: tframecomp;
-  itemfaceactive: tfacecomp;
-  itemframeactive: tframecomp;
+  svface: tfacecomp;
+  svframe: tframecomp;
+  svitemface: tfacecomp;
+  svitemframe: tframecomp;
+  svitemfaceactive: tfacecomp;
+  svitemframeactive: tframecomp;
 //  options: skinmenuoptionsty;
  end;  
  mainmenuskininfoty = record
-  ma: menuskininfoty;
-  pop: menuskininfoty;
+  svmain: menuskininfoty;
+  svpopup: menuskininfoty;
  end;
  dispwidgetskininfoty = record
-  wi: widgetskininfoty;
-  color: widgetcolorinfoty;
+  svwidget: widgetskininfoty;
+  svcolor: widgetcolorinfoty;
  end;
  dataeditskininfoty = record
-  wi: widgetskininfoty;
-  empty_text: msestring;
-  empty_textflags: textflagsty;
-  empty_textcolor: colorty;
-  empty_textcolorbackground: colorty;
-  empty_fontstyle: fontstylesty;
-  empty_color: colorty;
+  svwidget: widgetskininfoty;
+  svempty_text: msestring;
+  svempty_textflags: textflagsty;
+  svempty_textcolor: colorty;
+  svempty_textcolorbackground: colorty;
+  svempty_fontstyle: fontstylesty;
+  svempty_color: colorty;
  end;
  booleaneditskininfoty = record
-  wi: widgetskininfoty;
-  optionsadd: buttonoptionsty;
-  optionsremove: buttonoptionsty;
+  svwidget: widgetskininfoty;
+  svoptionsadd: buttonoptionsty;
+  svoptionsremove: buttonoptionsty;
  end;
  
  tskincolor = class(tvirtualpersistent)
@@ -589,301 +589,332 @@ type
    procedure createbutton_font;
    procedure createdatabutton_font;
   published
-   property sb_horz_facebutton: tfacecomp read fsb_horz.facebu 
+   property sb_horz_facebutton: tfacecomp read fsb_horz.svfacebu 
                         write setsb_horz_facebutton;
-   property sb_horz_faceendbutton: tfacecomp read fsb_horz.faceendbu 
+   property sb_horz_faceendbutton: tfacecomp read fsb_horz.svfaceendbu 
                         write setsb_horz_faceendbutton;
-   property sb_horz_framebutton: tframecomp read fsb_horz.framebu 
+   property sb_horz_framebutton: tframecomp read fsb_horz.svframebu 
                         write setsb_horz_framebutton;
-   property sb_horz_frameendbutton1: tframecomp read fsb_horz.frameendbu1 
+   property sb_horz_frameendbutton1: tframecomp read fsb_horz.svframeendbu1 
                         write setsb_horz_frameendbutton1;
-   property sb_horz_frameendbutton2: tframecomp read fsb_horz.frameendbu2
+   property sb_horz_frameendbutton2: tframecomp read fsb_horz.svframeendbu2
                         write setsb_horz_frameendbutton2;
-   property sb_vert_facebutton: tfacecomp read fsb_vert.facebu
+   property sb_vert_facebutton: tfacecomp read fsb_vert.svfacebu
                         write setsb_vert_facebutton;
-   property sb_vert_faceendbutton: tfacecomp read fsb_vert.faceendbu 
+   property sb_vert_faceendbutton: tfacecomp read fsb_vert.svfaceendbu 
                         write setsb_vert_faceendbutton;
-   property sb_vert_framebutton: tframecomp read fsb_vert.framebu 
+   property sb_vert_framebutton: tframecomp read fsb_vert.svframebu 
                         write setsb_vert_framebutton;
-   property sb_vert_frameendbutton1: tframecomp read fsb_vert.frameendbu1 
+   property sb_vert_frameendbutton1: tframecomp read fsb_vert.svframeendbu1 
                         write setsb_vert_frameendbutton1;
-   property sb_vert_frameendbutton2: tframecomp read fsb_vert.frameendbu2 
+   property sb_vert_frameendbutton2: tframecomp read fsb_vert.svframeendbu2 
                         write setsb_vert_frameendbutton2;
 
-   property stepbutton_color: colorty read fstepbutton.co 
-                        write fstepbutton.co default cl_default;
-   property stepbutton_frame: tframecomp read fstepbutton.fra 
+   property stepbutton_color: colorty read fstepbutton.svcolor 
+                        write fstepbutton.svcolor default cl_default;
+   property stepbutton_frame: tframecomp read fstepbutton.svframe 
                         write setstepbutton_frame;
-   property stepbutton_face: tfacecomp read fstepbutton.fa 
+   property stepbutton_face: tfacecomp read fstepbutton.svface
                         write setstepbutton_face;
                         
-   property widget_color: colorty read fwidgetcolor.co
-                        write fwidgetcolor.co default cl_default;
+   property widget_color: colorty read fwidgetcolor.svcolor
+                        write fwidgetcolor.svcolor default cl_default;
    property widget_colorcaptionframe: colorty 
-                        read fwidgetcolor.cocaptionframe 
-                        write fwidgetcolor.cocaptionframe default cl_default;
+                        read fwidgetcolor.svcolorcaptionframe 
+                 write fwidgetcolor.svcolorcaptionframe default cl_default;
                         //overrides widget_color for widgets with frame caption
 
-   property dispwidget_color: colorty read fdispwidget.color.co
-                              write fdispwidget.color.co default cl_default;
+   property dispwidget_color: colorty read fdispwidget.svcolor.svcolor
+                         write fdispwidget.svcolor.svcolor default cl_default;
    property dispwidget_colorcaptionframe: colorty 
-                         read fdispwidget.color.cocaptionframe 
-                         write fdispwidget.color.cocaptionframe default cl_default;
-   property dispwidget_face: tfacecomp read fdispwidget.wi.fa 
+                         read fdispwidget.svcolor.svcolorcaptionframe 
+              write fdispwidget.svcolor.svcolorcaptionframe default cl_default;
+   property dispwidget_face: tfacecomp read fdispwidget.svwidget.svface
                                             write setdispwidget_face;
-   property dispwidget_frame: tframecomp read fdispwidget.wi.fra 
+   property dispwidget_frame: tframecomp read fdispwidget.svwidget.svframe 
                                             write setdispwidget_frame;
-   property dataedit_face: tfacecomp read fdataedit.wi.fa write setdataedit_face;
-   property dataedit_frame: tframecomp read fdataedit.wi.fra 
-                        write setdataedit_frame;
-   property dataedit_empty_text: msestring read fdataedit.empty_text 
-                                        write fdataedit.empty_text;
-   property dataedit_empty_color: colorty read fdataedit.empty_color
-                                  write fdataedit.empty_color default cl_default;
-   property dataedit_empty_fontstyle: fontstylesty read fdataedit.empty_fontstyle 
-                    write fdataedit.empty_fontstyle default [];
-   property dataedit_empty_textflags: textflagsty read fdataedit.empty_textflags 
-                    write fdataedit.empty_textflags default [];
-   property dataedit_empty_textcolor: colorty read fdataedit.empty_textcolor 
-                                 write fdataedit.empty_textcolor default cl_default;
+   property dataedit_face: tfacecomp 
+                      read fdataedit.svwidget.svface write setdataedit_face;
+   property dataedit_frame: tframecomp read fdataedit.svwidget.svframe 
+                                                    write setdataedit_frame;
+   property dataedit_empty_text: msestring read fdataedit.svempty_text 
+                                        write fdataedit.svempty_text;
+   property dataedit_empty_color: colorty read fdataedit.svempty_color
+                        write fdataedit.svempty_color default cl_default;
+   property dataedit_empty_fontstyle: fontstylesty 
+                        read fdataedit.svempty_fontstyle 
+                    write fdataedit.svempty_fontstyle default [];
+   property dataedit_empty_textflags: textflagsty 
+                  read fdataedit.svempty_textflags 
+                    write fdataedit.svempty_textflags default [];
+   property dataedit_empty_textcolor: colorty read fdataedit.svempty_textcolor 
+                         write fdataedit.svempty_textcolor default cl_default;
    property dataedit_empty_textcolorbackground: colorty 
-                     read fdataedit.empty_textcolorbackground 
-                     write fdataedit.empty_textcolorbackground default cl_default;
+                     read fdataedit.svempty_textcolorbackground 
+             write fdataedit.svempty_textcolorbackground default cl_default;
                         
-   property booleanedit_face: tfacecomp read fbooleanedit.wi.fa 
+   property booleanedit_face: tfacecomp read fbooleanedit.svwidget.svface 
                                                    write setbooleanedit_face;
-   property booleanedit_frame: tframecomp read fbooleanedit.wi.fra 
+   property booleanedit_frame: tframecomp read fbooleanedit.svwidget.svframe 
                         write setbooleanedit_frame;
-   property booleanedit_optionsadd: buttonoptionsty read fbooleanedit.optionsadd 
-                                write fbooleanedit.optionsadd default[];
+   property booleanedit_optionsadd: buttonoptionsty 
+                        read fbooleanedit.svoptionsadd 
+                                write fbooleanedit.svoptionsadd default[];
    property booleanedit_optionsremove: buttonoptionsty 
-                       read fbooleanedit.optionsremove
-                                write fbooleanedit.optionsremove default[];
+                       read fbooleanedit.svoptionsremove
+                                write fbooleanedit.svoptionsremove default[];
 
-   property container_face: tfacecomp read fcontainer.wi.fa 
+   property container_face: tfacecomp read fcontainer.svwidget.svface 
                                               write setcontainer_face;
-   property container_frame: tframecomp read fcontainer.wi.fra 
+   property container_frame: tframecomp read fcontainer.svwidget.svframe 
                                               write setcontainer_frame;
-   property groupbox_face: tfacecomp read fgroupbox.wi.fa write setgroupbox_face;
-   property groupbox_frame: tframecomp read fgroupbox.wi.fra write setgroupbox_frame;
+   property groupbox_face: tfacecomp read fgroupbox.svwidget.svface
+                                                  write setgroupbox_face;
+   property groupbox_frame: tframecomp read fgroupbox.svwidget.svframe
+                                                       write setgroupbox_frame;
 
-   property grid_face: tfacecomp read fgrid.wi.fa write setgrid_face;
-   property grid_frame: tframecomp read fgrid.wi.fra write setgrid_frame;
-   property grid_fixrows_face: tfacecomp read fgrid.fixrows.face 
+   property grid_face: tfacecomp read fgrid.svwidget.svface write setgrid_face;
+   property grid_frame: tframecomp read fgrid.svwidget.svframe
+                                                   write setgrid_frame;
+   property grid_fixrows_face: tfacecomp read fgrid.svfixrows.svface 
                             write setgrid_fixrows_face;
-   property grid_fixrows_frame: tframecomp read fgrid.fixrows.frame
+   property grid_fixrows_frame: tframecomp read fgrid.svfixrows.svframe
                             write setgrid_fixrows_frame;
-   property grid_fixcols_face: tfacecomp read fgrid.fixcols.face 
+   property grid_fixcols_face: tfacecomp read fgrid.svfixcols.svface 
                             write setgrid_fixcols_face;
-   property grid_fixcols_frame: tframecomp read fgrid.fixcols.frame
+   property grid_fixcols_frame: tframecomp read fgrid.svfixcols.svframe
                             write setgrid_fixcols_frame;
-   property grid_datacols_face: tfacecomp read fgrid.datacols.face 
+   property grid_datacols_face: tfacecomp read fgrid.svdatacols.svface 
                             write setgrid_datacols_face;
-   property grid_datacols_frame: tframecomp read fgrid.datacols.frame
+   property grid_datacols_frame: tframecomp read fgrid.svdatacols.svframe
                             write setgrid_datacols_frame;
    
-   property button_color: colorty read fbutton.co write fbutton.co
+   property button_color: colorty read fbutton.svcolor write fbutton.svcolor
                                                   default cl_default;
-   property button_face: tfacecomp read fbutton.wi.fa write setbutton_face;
-   property button_frame: tframecomp read fbutton.wi.fra write setbutton_frame;
+   property button_face: tfacecomp read fbutton.svwidget.svface
+                                                        write setbutton_face;
+   property button_frame: tframecomp read fbutton.svwidget.svframe
+                                                 write setbutton_frame;
    property button_font: toptionalfont read getbutton_font write setbutton_font;
-   property button_optionsadd: buttonoptionsty read fbutton.optionsadd 
-                                write fbutton.optionsadd default[];
-   property button_optionsremove: buttonoptionsty read fbutton.optionsremove
-                                write fbutton.optionsremove default[];
+   property button_optionsadd: buttonoptionsty read fbutton.svoptionsadd 
+                                write fbutton.svoptionsadd default[];
+   property button_optionsremove: buttonoptionsty read fbutton.svoptionsremove
+                                write fbutton.svoptionsremove default[];
 
-   property databutton_color: colorty read fdatabutton.co 
-                                  write fdatabutton.co default cl_default;
-   property databutton_face: tfacecomp read fdatabutton.wi.fa 
+   property databutton_color: colorty read fdatabutton.svcolor 
+                                  write fdatabutton.svcolor default cl_default;
+   property databutton_face: tfacecomp read fdatabutton.svwidget.svface 
                                               write setdatabutton_face;
-   property databutton_frame: tframecomp read fdatabutton.wi.fra 
+   property databutton_frame: tframecomp read fdatabutton.svwidget.svframe 
                                               write setdatabutton_frame;
    property databutton_font: toptionalfont read getdatabutton_font 
                                               write setdatabutton_font;
-   property databutton_optionsadd: buttonoptionsty read fdatabutton.optionsadd 
-                                write fdatabutton.optionsadd default[];
+   property databutton_optionsadd: buttonoptionsty 
+                               read fdatabutton.svoptionsadd 
+                                write fdatabutton.svoptionsadd default[];
    property databutton_optionsremove: buttonoptionsty 
-                       read fbooleanedit.optionsremove
-                                write fdatabutton.optionsremove default[];
+                       read fbooleanedit.svoptionsremove
+                                write fdatabutton.svoptionsremove default[];
 
-   property slider_color: colorty read fslider.co 
-                                  write fslider.co default cl_default;
-   property slider_face: tfacecomp read fslider.wi.fa 
+   property slider_color: colorty read fslider.svcolor 
+                                  write fslider.svcolor default cl_default;
+   property slider_face: tfacecomp read fslider.svwidget.svface 
                                               write setslider_face;
-   property slider_frame: tframecomp read fdatabutton.wi.fra 
-                                              write setslider_frame;
+   property slider_frame: tframecomp read fdatabutton.svwidget.svframe 
+                                                      write setslider_frame;
 
-   property slider_sb_horz_facebutton: tfacecomp read fslider.sb_horz.facebu 
+   property slider_sb_horz_facebutton: tfacecomp 
+                        read fslider.svsb_horz.svfacebu 
                         write setssb_horz_facebutton;
    property slider_sb_horz_faceendbutton: tfacecomp 
-                        read fslider.sb_horz.faceendbu 
+                        read fslider.svsb_horz.svfaceendbu 
                         write setssb_horz_faceendbutton;
-   property slider_sb_horz_framebutton: tframecomp read fslider.sb_horz.framebu 
+   property slider_sb_horz_framebutton: tframecomp 
+                        read fslider.svsb_horz.svframebu
                         write setssb_horz_framebutton;
    property slider_sb_horz_frameendbutton1: tframecomp 
-                        read fslider.sb_horz.frameendbu1 
+                        read fslider.svsb_horz.svframeendbu1 
                         write setssb_horz_frameendbutton1;
    property slider_sb_horz_frameendbutton2: tframecomp 
-                        read fslider.sb_horz.frameendbu2
+                        read fslider.svsb_horz.svframeendbu2
                         write setssb_horz_frameendbutton2;
-   property slider_sb_vert_facebutton: tfacecomp read fslider.sb_vert.facebu
+   property slider_sb_vert_facebutton: tfacecomp 
+                        read fslider.svsb_vert.svfacebu
                         write setssb_vert_facebutton;
    property slider_sb_vert_faceendbutton: tfacecomp 
-                        read fslider.sb_vert.faceendbu 
+                        read fslider.svsb_vert.svfaceendbu 
                         write setssb_vert_faceendbutton;
-   property slider_sb_vert_framebutton: tframecomp read fslider.sb_vert.framebu 
+   property slider_sb_vert_framebutton: tframecomp 
+                        read fslider.svsb_vert.svframebu 
                         write setssb_vert_framebutton;
    property slider_sb_vert_frameendbutton1: tframecomp 
-                        read fslider.sb_vert.frameendbu1 
+                        read fslider.svsb_vert.svframeendbu1 
                         write setssb_vert_frameendbutton1;
    property slider_sb_vert_frameendbutton2: tframecomp 
-                        read fslider.sb_vert.frameendbu2 
+                        read fslider.svsb_vert.svframeendbu2 
                         write setssb_vert_frameendbutton2;
 
 
-   property framebutton_color: colorty read fframebutton.co 
-                           write fframebutton.co default cl_default;
-   property framebutton_colorglyph: colorty read fframebutton.coglyph 
-                           write fframebutton.coglyph default cl_default;
-   property framebutton_face: tfacecomp read fframebutton.fa 
+   property framebutton_color: colorty read fframebutton.svcolor 
+                           write fframebutton.svcolor default cl_default;
+   property framebutton_colorglyph: colorty read fframebutton.svcolorglyph 
+                           write fframebutton.svcolorglyph default cl_default;
+   property framebutton_face: tfacecomp read fframebutton.svface 
                                               write setframebutton_face;
-   property framebutton_frame: tframecomp read fframebutton.fra 
+   property framebutton_frame: tframecomp read fframebutton.svframe
                                               write setframebutton_frame;
 
-   property tabbar_horz_face: tfacecomp read ftabbar.wihorz.fa 
+   property tabbar_horz_face: tfacecomp read ftabbar.svwidgethorz.svface
                                             write settabbar_horz_face;
-   property tabbar_horz_frame: tframecomp read ftabbar.wihorz.fra 
+   property tabbar_horz_frame: tframecomp read ftabbar.svwidgethorz.svframe
                                             write settabbar_horz_frame;
-   property tabbar_horz_tab_color: colorty read ftabbar.tahorz.color 
-                               write ftabbar.tahorz.color default cl_default;
-   property tabbar_horz_tab_coloractive: colorty read ftabbar.tahorz.coloractive 
-                               write ftabbar.tahorz.coloractive default cl_default;
-   property tabbar_horz_tab_frame: tframecomp read ftabbar.tahorz.frame
+   property tabbar_horz_tab_color: colorty read ftabbar.svtabhorz.svcolor 
+                             write ftabbar.svtabhorz.svcolor default cl_default;
+   property tabbar_horz_tab_coloractive: colorty 
+                   read ftabbar.svtabhorz.svcoloractive 
+                   write ftabbar.svtabhorz.svcoloractive default cl_default;
+   property tabbar_horz_tab_frame: tframecomp read ftabbar.svtabhorz.svframe
                                write settabbar_horz_tab_frame;
-   property tabbar_horz_tab_face: tfacecomp read ftabbar.tahorz.face
+   property tabbar_horz_tab_face: tfacecomp read ftabbar.svtabhorz.svface
                                write settabbar_horz_tab_face;
-   property tabbar_horz_tab_faceactive: tfacecomp read ftabbar.tahorz.faceactive
+   property tabbar_horz_tab_faceactive: tfacecomp 
+                               read ftabbar.svtabhorz.svfaceactive
                                write settabbar_horz_tab_faceactive;
-   property tabbar_horz_tab_shift: integer read ftabbar.tahorz.shift
-                               write ftabbar.tahorz.shift default defaulttabshift;
+   property tabbar_horz_tab_shift: integer read ftabbar.svtabhorz.svshift
+                     write ftabbar.svtabhorz.svshift default defaulttabshift;
 
-   property tabbar_horzopo_face: tfacecomp read ftabbar.wihorzopo.fa 
+   property tabbar_horzopo_face: tfacecomp read ftabbar.svwidgethorzopo.svface
                                             write settabbar_horzopo_face;
-   property tabbar_horzopo_frame: tframecomp read ftabbar.wihorzopo.fra 
+   property tabbar_horzopo_frame: tframecomp 
+                  read ftabbar.svwidgethorzopo.svframe 
                                             write settabbar_horzopo_frame;
-   property tabbar_horzopo_tab_color: colorty read ftabbar.tahorzopo.color 
-                               write ftabbar.tahorzopo.color default cl_default;
-   property tabbar_horzopo_tab_coloractive: colorty read ftabbar.tahorzopo.coloractive 
-                               write ftabbar.tahorzopo.coloractive default cl_default;
-   property tabbar_horzopo_tab_frame: tframecomp read ftabbar.tahorzopo.frame
+   property tabbar_horzopo_tab_color: colorty read ftabbar.svtabhorzopo.svcolor 
+                      write ftabbar.svtabhorzopo.svcolor default cl_default;
+   property tabbar_horzopo_tab_coloractive: colorty 
+                     read ftabbar.svtabhorzopo.svcoloractive 
+                    write ftabbar.svtabhorzopo.svcoloractive default cl_default;
+   property tabbar_horzopo_tab_frame: tframecomp 
+                             read ftabbar.svtabhorzopo.svframe
                                write settabbar_horzopo_tab_frame;
-   property tabbar_horzopo_tab_face: tfacecomp read ftabbar.tahorzopo.face
+   property tabbar_horzopo_tab_face: tfacecomp read ftabbar.svtabhorzopo.svface
                                write settabbar_horzopo_tab_face;
-   property tabbar_horzopo_tab_faceactive: tfacecomp read ftabbar.tahorzopo.faceactive
+   property tabbar_horzopo_tab_faceactive: tfacecomp 
+                               read ftabbar.svtabhorzopo.svfaceactive
                                write settabbar_horzopo_tab_faceactive;
-   property tabbar_horzopo_tab_shift: integer read ftabbar.tahorzopo.shift
-                               write ftabbar.tahorzopo.shift default defaulttabshift;
+   property tabbar_horzopo_tab_shift: integer read ftabbar.svtabhorzopo.svshift
+                  write ftabbar.svtabhorzopo.svshift default defaulttabshift;
 
-   property tabbar_vert_face: tfacecomp read ftabbar.wivert.fa 
+   property tabbar_vert_face: tfacecomp read ftabbar.svwidgetvert.svface
                                write settabbar_vert_face;
-   property tabbar_vert_frame: tframecomp read ftabbar.wivert.fra 
+   property tabbar_vert_frame: tframecomp read ftabbar.svwidgetvert.svframe
                                write settabbar_vert_frame;
-   property tabbar_vert_tab_color: colorty read ftabbar.tavert.color 
-                               write ftabbar.tavert.color default cl_default;
-   property tabbar_vert_tab_coloractive: colorty read ftabbar.tavert.coloractive 
-                               write ftabbar.tavert.coloractive default cl_default;
-   property tabbar_vert_tab_frame: tframecomp read ftabbar.tavert.frame
+   property tabbar_vert_tab_color: colorty read ftabbar.svtabvert.svcolor 
+                               write ftabbar.svtabvert.svcolor 
+                               default cl_default;
+   property tabbar_vert_tab_coloractive: colorty 
+                               read ftabbar.svtabvert.svcoloractive 
+                 write ftabbar.svtabvert.svcoloractive default cl_default;
+   property tabbar_vert_tab_frame: tframecomp read ftabbar.svtabvert.svframe
                                write settabbar_vert_tab_frame;
-   property tabbar_vert_tab_face: tfacecomp read ftabbar.tavert.face
+   property tabbar_vert_tab_face: tfacecomp read ftabbar.svtabvert.svface
                                write settabbar_vert_tab_face;
-   property tabbar_vert_tab_faceactive: tfacecomp read ftabbar.tavert.faceactive
+   property tabbar_vert_tab_faceactive: tfacecomp 
+                             read ftabbar.svtabvert.svfaceactive
                                write settabbar_vert_tab_faceactive;
-   property tabbar_vert_tab_shift: integer read ftabbar.tavert.shift
-                               write ftabbar.tavert.shift default defaulttabshift;
+   property tabbar_vert_tab_shift: integer read ftabbar.svtabvert.svshift
+                      write ftabbar.svtabvert.svshift default defaulttabshift;
 
-   property tabbar_vertopo_face: tfacecomp read ftabbar.wivertopo.fa
+   property tabbar_vertopo_face: tfacecomp read ftabbar.svwidgetvertopo.svface
                                write settabbar_vertopo_face;
-   property tabbar_vertopo_frame: tframecomp read ftabbar.wivertopo.fra
+   property tabbar_vertopo_frame: tframecomp 
+                 read ftabbar.svwidgetvertopo.svframe
                                write settabbar_vertopo_frame;
-   property tabbar_vertopo_tab_color: colorty read ftabbar.tavertopo.color 
-                         write ftabbar.tavertopo.color default cl_default;
+   property tabbar_vertopo_tab_color: colorty read ftabbar.svtabvertopo.svcolor 
+                         write ftabbar.svtabvertopo.svcolor default cl_default;
    property tabbar_vertopo_tab_coloractive: colorty 
-                         read ftabbar.tavertopo.coloractive 
-                         write ftabbar.tavertopo.coloractive default cl_default;
-   property tabbar_vertopo_tab_frame: tframecomp read ftabbar.tavertopo.frame
+                         read ftabbar.svtabvertopo.svcoloractive 
+                   write ftabbar.svtabvertopo.svcoloractive default cl_default;
+   property tabbar_vertopo_tab_frame: tframecomp 
+                     read ftabbar.svtabvertopo.svframe
                                write settabbar_vertopo_tab_frame;
-   property tabbar_vertopo_tab_face: tfacecomp read ftabbar.tavertopo.face
+   property tabbar_vertopo_tab_face: tfacecomp 
+                       read ftabbar.svtabvertopo.svface
                          write settabbar_vertopo_tab_face;
    property tabbar_vertopo_tab_faceactive: tfacecomp 
-                         read ftabbar.tavertopo.faceactive
+                         read ftabbar.svtabvertopo.svfaceactive
                          write settabbar_vertopo_tab_faceactive;
-   property tabbar_vertopo_tab_shift: integer read ftabbar.tavertopo.shift
-                               write ftabbar.tavertopo.shift default defaulttabshift;
+   property tabbar_vertopo_tab_shift: integer read ftabbar.svtabvertopo.svshift
+                write ftabbar.svtabvertopo.svshift default defaulttabshift;
 
-   property toolbar_horz_face: tfacecomp read ftoolbar_horz.wi.fa 
+   property toolbar_horz_face: tfacecomp read ftoolbar_horz.svwidget.svface
                                         write settoolbar_horz_face;
-   property toolbar_horz_frame: tframecomp read ftoolbar_horz.wi.fra 
+   property toolbar_horz_frame: tframecomp read ftoolbar_horz.svwidget.svframe
                                         write settoolbar_horz_frame;
-   property toolbar_horz_buttonface: tfacecomp read ftoolbar_horz.buttonface 
+   property toolbar_horz_buttonface: tfacecomp read ftoolbar_horz.svbuttonface 
                             write settoolbar_horz_buttonface;
-   property toolbar_vert_face: tfacecomp read ftoolbar_vert.wi.fa 
+   property toolbar_vert_face: tfacecomp read ftoolbar_vert.svwidget.svface 
                             write settoolbar_vert_face;
-   property toolbar_vert_frame: tframecomp read ftoolbar_vert.wi.fra
+   property toolbar_vert_frame: tframecomp read ftoolbar_vert.svwidget.svframe
                             write settoolbar_vert_frame;
-   property toolbar_vert_buttonface: tfacecomp read ftoolbar_vert.buttonface 
+   property toolbar_vert_buttonface: tfacecomp read ftoolbar_vert.svbuttonface 
                             write settoolbar_vert_buttonface;
 
-   property tabpage_face: tfacecomp read ftabpage.wi.fa write settabpage_face;
-   property tabpage_frame: tframecomp read ftabpage.wi.fra write settabpage_frame;
-   property tabpage_colortab: colorty read ftabpage.colortab 
-                               write ftabpage.colortab default cl_default;
-   property tabpage_coloractive: colorty read ftabpage.coloractivetab 
-                           write ftabpage.coloractivetab default cl_default;
+   property tabpage_face: tfacecomp read ftabpage.svwidget.svface 
+                                                write settabpage_face;
+   property tabpage_frame: tframecomp read ftabpage.svwidget.svframe
+                                                 write settabpage_frame;
+   property tabpage_colortab: colorty read ftabpage.svcolortab 
+                               write ftabpage.svcolortab default cl_default;
+   property tabpage_coloractive: colorty read ftabpage.svcoloractivetab 
+                           write ftabpage.svcoloractivetab default cl_default;
 {
    property popupmenu_options: skinmenuoptionsty read fpopupmenu.options
                 write fpopupmenu.options default [];         
 }
-   property popupmenu_face: tfacecomp read fpopupmenu.face 
+   property popupmenu_face: tfacecomp read fpopupmenu.svface 
                                write setpopupmenu_face;
-   property popupmenu_frame: tframecomp read fpopupmenu.frame 
+   property popupmenu_frame: tframecomp read fpopupmenu.svframe 
                                       write setpopupmenu_frame;
-   property popupmenu_itemface: tfacecomp read fpopupmenu.itemface 
+   property popupmenu_itemface: tfacecomp read fpopupmenu.svitemface 
                                       write setpopupmenu_itemface;
-   property popupmenu_itemframe: tframecomp read fpopupmenu.itemframe 
+   property popupmenu_itemframe: tframecomp read fpopupmenu.svitemframe 
                                       write setpopupmenu_itemframe;
-   property popupmenu_itemfaceactive: tfacecomp read fpopupmenu.itemfaceactive 
+   property popupmenu_itemfaceactive: tfacecomp read fpopupmenu.svitemfaceactive 
                                       write setpopupmenu_itemfaceactive;
    property popupmenu_itemframeactive: tframecomp 
-            read fpopupmenu.itemframeactive write setpopupmenu_itemframeactive;
+            read fpopupmenu.svitemframeactive write setpopupmenu_itemframeactive;
 {            
    property mainmenu_options: skinmenuoptionsty read fmainmenu.ma.options
                 write fmainmenu.ma.options default [];         
 }
-   property mainmenu_face: tfacecomp read fmainmenu.ma.face 
+   property mainmenu_face: tfacecomp read fmainmenu.svmain.svface 
                                  write setmainmenu_face;
-   property mainmenu_frame: tframecomp read fmainmenu.ma.frame 
+   property mainmenu_frame: tframecomp read fmainmenu.svmain.svframe 
                                  write setmainmenu_frame;
-   property mainmenu_itemface: tfacecomp read fmainmenu.ma.itemface 
+   property mainmenu_itemface: tfacecomp read fmainmenu.svmain.svitemface 
                                  write setmainmenu_itemface;
-   property mainmenu_itemframe: tframecomp read fmainmenu.ma.itemframe 
+   property mainmenu_itemframe: tframecomp read fmainmenu.svmain.svitemframe 
                                  write setmainmenu_itemframe;
-   property mainmenu_itemfaceactive: tfacecomp read fmainmenu.ma.itemfaceactive
+   property mainmenu_itemfaceactive: tfacecomp 
+                                 read fmainmenu.svmain.svitemfaceactive
                                  write setmainmenu_itemfaceactive;
-   property mainmenu_itemframeactive: tframecomp read fmainmenu.ma.itemframeactive 
+   property mainmenu_itemframeactive: tframecomp 
+                                 read fmainmenu.svmain.svitemframeactive 
                                  write setmainmenu_itemframeactive;
-   property mainmenu_popupface: tfacecomp read fmainmenu.pop.face 
+   property mainmenu_popupface: tfacecomp read fmainmenu.svpopup.svface 
                                  write setmainmenu_popupface;
-   property mainmenu_popupframe: tframecomp read fmainmenu.pop.frame 
+   property mainmenu_popupframe: tframecomp read fmainmenu.svpopup.svframe 
                                  write setmainmenu_popupframe;
-   property mainmenu_popupitemface: tfacecomp read fmainmenu.pop.itemface 
+   property mainmenu_popupitemface: tfacecomp read fmainmenu.svpopup.svitemface 
                                  write setmainmenu_popupitemface;
-   property mainmenu_popupitemframe: tframecomp read fmainmenu.pop.itemframe 
+   property mainmenu_popupitemframe: tframecomp 
+                                 read fmainmenu.svpopup.svitemframe 
                                  write setmainmenu_popupitemframe;
    property mainmenu_popupitemfaceactive: tfacecomp 
-                                 read fmainmenu.pop.itemfaceactive
+                                 read fmainmenu.svpopup.svitemfaceactive
                                  write setmainmenu_popupitemfaceactive;
    property mainmenu_popupitemframeactive: tframecomp 
-                                 read fmainmenu.pop.itemframeactive 
+                                 read fmainmenu.svpopup.svitemframeactive 
                                  write setmainmenu_popupitemframeactive;
  end;
 
@@ -1382,8 +1413,8 @@ end;
 procedure tcustomskincontroller.setwidgetskin(const instance: twidget;
                const ainfo: widgetskininfoty);
 begin
- setwidgetface(instance,ainfo.fa);
- setwidgetframe(instance,ainfo.fra);
+ setwidgetface(instance,ainfo.svface);
+ setwidgetframe(instance,ainfo.svframe);
 end;
 {
 procedure tcustomskincontroller.setwidgetskintemplate(const instance: twidget;
@@ -1396,7 +1427,7 @@ end;
 procedure tcustomskincontroller.setgroupboxskin(const instance: tgroupbox;
                                             const ainfo: groupboxskininfoty);
 begin
- setwidgetskin(instance,ainfo.wi);
+ setwidgetskin(instance,ainfo.svwidget);
 // setwidgetface(instance,ainfo.face);
 // setwidgetframetemplate(instance,ainfo.frame);
 end;
@@ -1404,16 +1435,16 @@ end;
 procedure tcustomskincontroller.setgridpropskin(const instance: tgridprop;
                                    const  ainfo: gridpropskininfoty);
 begin
- if ainfo.face <> nil then begin
+ if ainfo.svface <> nil then begin
   with instance do begin
    createface;
-   setfacetemplate(ainfo.face,face);
+   setfacetemplate(ainfo.svface,face);
   end;
  end;
- if ainfo.frame <> nil then begin
+ if ainfo.svframe <> nil then begin
   with instance do begin
    createframe;
-   setframetemplate(ainfo.frame,frame);
+   setframetemplate(ainfo.svframe,frame);
   end;
  end;
 end;
@@ -1423,18 +1454,18 @@ procedure tcustomskincontroller.setgridskin(const instance: tcustomgrid;
 var
  int1{,int2}: integer;
 begin
- setwidgetskin(instance,ainfo.wi);
+ setwidgetskin(instance,ainfo.svwidget);
 // setwidgetface(instance,ainfo.face);
 // setwidgetframetemplate(instance,ainfo.frame);
  with ainfo do begin
   for int1:= -1 downto -instance.fixrows.count do begin
-   setgridpropskin(instance.fixrows[int1],ainfo.fixrows);
+   setgridpropskin(instance.fixrows[int1],ainfo.svfixrows);
   end;
   for int1:= -1 downto -instance.fixcols.count do begin
-   setgridpropskin(instance.fixcols[int1],ainfo.fixcols);
+   setgridpropskin(instance.fixcols[int1],ainfo.svfixcols);
   end;
   for int1:= 0 to instance.datacols.count - 1 do begin
-   setgridpropskin(instance.datacols[int1],ainfo.datacols);
+   setgridpropskin(instance.datacols[int1],ainfo.svdatacols);
   end;
  end;
 end;
@@ -1442,29 +1473,31 @@ end;
 procedure tcustomskincontroller.setdataeditskin(const instance: tdataedit;
                                             const ainfo: dataeditskininfoty);
 begin
- setwidgetskin(instance,ainfo.wi);
+ setwidgetskin(instance,ainfo.svwidget);
  with instance do begin
-  if (ainfo.empty_text <> '') and (empty_text = '') and 
+  if (ainfo.svempty_text <> '') and (empty_text = '') and 
          (eo_defaulttext in empty_options) then begin
-   empty_text:= ainfo.empty_text;
+   empty_text:= ainfo.svempty_text;
   end;
-  if (ainfo.empty_textflags <> []) and not(tf_force in empty_textflags) then begin
-   empty_textflags:= ainfo.empty_textflags;
+  if (ainfo.svempty_textflags <> []) and 
+                        not(tf_force in empty_textflags) then begin
+   empty_textflags:= ainfo.svempty_textflags;
   end;
-  if (ainfo.empty_textcolor <> cl_default) and 
+  if (ainfo.svempty_textcolor <> cl_default) and 
                                (empty_textcolor = cl_none) then begin
-   empty_textcolor:= ainfo.empty_textcolor;
+   empty_textcolor:= ainfo.svempty_textcolor;
   end;
-  if (ainfo.empty_textcolorbackground <> cl_default) and 
-                               (empty_textcolorbackground = cl_none) then begin
-   empty_textcolorbackground:= ainfo.empty_textcolor;
+  if (ainfo.svempty_textcolorbackground <> cl_default) and 
+                         (empty_textcolorbackground = cl_none) then begin
+   empty_textcolorbackground:= ainfo.svempty_textcolor;
   end;
-  if (ainfo.empty_fontstyle <> []) and not(fs_force in empty_fontstyle) then begin
-   empty_fontstyle:= ainfo.empty_fontstyle;
+  if (ainfo.svempty_fontstyle <> []) and 
+                        not(fs_force in empty_fontstyle) then begin
+   empty_fontstyle:= ainfo.svempty_fontstyle;
   end;
-  if (ainfo.empty_color <> cl_default) and 
+  if (ainfo.svempty_color <> cl_default) and 
                                (empty_color = cl_none) then begin
-   empty_color:= ainfo.empty_color;
+   empty_color:= ainfo.svempty_color;
   end;
  end;
 end;
@@ -1472,7 +1505,7 @@ end;
 procedure tcustomskincontroller.setgraphdataeditskin(
            const instance: tgraphdataedit; const ainfo: dataeditskininfoty);
 begin
- setwidgetskin(instance,ainfo.wi);
+ setwidgetskin(instance,ainfo.svwidget);
 // setwidgetface(instance,ainfo.face);
 // setwidgetframetemplate(instance,ainfo.frame);
 end;
@@ -1521,16 +1554,16 @@ procedure tcustomskincontroller.setstepbuttonskin(
 begin
  with instance,ainfo do begin
   if (colorbutton = cl_default) and 
-                (co <> cl_default) then begin
-   colorbutton:= co;
+                (svcolor <> cl_default) then begin
+   colorbutton:= svcolor;
   end;
-  if fra <> nil then begin
+  if svframe <> nil then begin
    instance.createbuttonframe;
-   setframetemplate(fra,buttonframe);
+   setframetemplate(svframe,buttonframe);
   end;
-  if fa <> nil then begin
+  if svface <> nil then begin
    instance.createbuttonface;
-   setfacetemplate(fa,buttonface);
+   setfacetemplate(svface,buttonface);
   end;
  end;
 end;
@@ -1539,20 +1572,20 @@ procedure tcustomskincontroller.setframebuttonskin(const instance: tframebutton;
                const ainfo: framebuttonskininfoty);
 begin
  with instance,ainfo do begin
-  if (co <> cl_default) and (color = cl_default) then begin
-   color:= co;
+  if (svcolor <> cl_default) and (color = cl_default) then begin
+   color:= svcolor;
   end;
-  if (coglyph <> cl_default) and (colorglyph = cl_default) then begin
-   colorglyph:= coglyph;
+  if (svcolorglyph <> cl_default) and (colorglyph = cl_default) then begin
+   colorglyph:= svcolorglyph;
   end;
-  if (fa <> nil) {and (face = nil)} then begin
+  if (svface <> nil) {and (face = nil)} then begin
    createface;
-   setfacetemplate(fa,face);
+   setfacetemplate(svface,face);
 //   face.template:= fa;
   end;
-  if (fra <> nil) {and (frame = nil)} then begin
+  if (svframe <> nil) {and (frame = nil)} then begin
    createframe;
-   setframetemplate(fra,frame);
+   setframetemplate(svframe,frame);
 //   frame.template:= fra;
   end;
  end;
@@ -1562,29 +1595,29 @@ procedure tcustomskincontroller.setscrollbarskin(const instance: tcustomscrollba
                const ainfo: scrollbarskininfoty);
 begin
  with instance,ainfo do begin
-  if (facebu <> nil) {and (facebutton = nil)} then begin
+  if (svfacebu <> nil) {and (facebutton = nil)} then begin
    createfacebutton;
-   setfacetemplate(facebu,facebutton);
+   setfacetemplate(svfacebu,facebutton);
 //   facebutton.template:= facebu;
   end;
-  if (faceendbu <> nil) {and (faceendbutton = nil)} then begin
+  if (svfaceendbu <> nil) {and (faceendbutton = nil)} then begin
    createfaceendbutton;
-   setfacetemplate(faceendbu,faceendbutton);
+   setfacetemplate(svfaceendbu,faceendbutton);
 //   faceendbutton.template:= faceendbu;
   end;
-  if (framebu <> nil) {and (framebutton = nil)} then begin
+  if (svframebu <> nil) {and (framebutton = nil)} then begin
    createframebutton;
-   setframetemplate(framebu,framebutton);
+   setframetemplate(svframebu,framebutton);
 //   framebutton.template:= framebu;
   end;
-  if (frameendbu1 <> nil) {and (frameendbutton1 = nil)} then begin
+  if (svframeendbu1 <> nil) {and (frameendbutton1 = nil)} then begin
    createframeendbutton1;
-   setframetemplate(frameendbu1,frameendbutton1);
+   setframetemplate(svframeendbu1,frameendbutton1);
 //   frameendbutton1.template:= frameendbu1;
   end;
-  if (frameendbu2 <> nil) {and (frameendbutton2 = nil)} then begin
+  if (svframeendbu2 <> nil) {and (frameendbutton2 = nil)} then begin
    createframeendbutton2;
-   setframetemplate(frameendbu2,frameendbutton2);
+   setframetemplate(svframeendbu2,frameendbutton2);
 //   frameendbutton2.template:= frameendbu2;
   end;
  end;
@@ -1599,32 +1632,32 @@ begin
   inc(fskinupdating);
   beginupdate;
   try
-   if (ainfo.shift <> defaulttabshift) and (shift = defaulttabshift) then begin
-    shift:= ainfo.shift;
+   if (ainfo.svshift <> defaulttabshift) and (shift = defaulttabshift) then begin
+    shift:= ainfo.svshift;
    end;
-   if {(frame = nil) and} (ainfo.frame <> nil) then begin
+   if {(frame = nil) and} (ainfo.svframe <> nil) then begin
     createframe;
-    setframetemplate(ainfo.frame,frame);
+    setframetemplate(ainfo.svframe,frame);
 //    frame.template:= ainfo.frame;
    end;
-   if {(face = nil) and} (ainfo.face <> nil) then begin
+   if {(face = nil) and} (ainfo.svface <> nil) then begin
     createface;
-    setfacetemplate(ainfo.face,face);
+    setfacetemplate(ainfo.svface,face);
 //    face.template:= ainfo.face;
    end;
-   if {(faceactive = nil) and} (ainfo.faceactive <> nil) then begin
+   if {(faceactive = nil) and} (ainfo.svfaceactive <> nil) then begin
     createfaceactive;
-    setfacetemplate(ainfo.faceactive,faceactive);
+    setfacetemplate(ainfo.svfaceactive,faceactive);
 //    faceactive.template:= ainfo.faceactive;
    end;
    for int1:= 0 to count - 1 do begin
     with items[int1] do begin
-     if (ainfo.color <> cl_default) and (color = cl_default) then begin
-      color:= ainfo.color;
+     if (ainfo.svcolor <> cl_default) and (color = cl_default) then begin
+      color:= ainfo.svcolor;
      end;
-     if (ainfo.coloractive <> cl_default) and 
+     if (ainfo.svcoloractive <> cl_default) and 
                                      (coloractive = cl_default) then begin
-      coloractive:= ainfo.coloractive;
+      coloractive:= ainfo.svcoloractive;
      end;
     end;
    end;
@@ -1647,25 +1680,25 @@ begin
    options:= options - [mo_noanim];
   end;
   }
-  if (ainfo.face <> nil) and (facetemplate = nil) then begin
-   facetemplate:= ainfo.face;
+  if (ainfo.svface <> nil) and (facetemplate = nil) then begin
+   facetemplate:= ainfo.svface;
   end;
-  if (ainfo.frame <> nil) and (frametemplate = nil) then begin
-   frametemplate:= ainfo.frame;
+  if (ainfo.svframe <> nil) and (frametemplate = nil) then begin
+   frametemplate:= ainfo.svframe;
   end;
-  if (ainfo.itemface <> nil) and (itemfacetemplate = nil) then begin
-   itemfacetemplate:= ainfo.itemface;
+  if (ainfo.svitemface <> nil) and (itemfacetemplate = nil) then begin
+   itemfacetemplate:= ainfo.svitemface;
   end;
-  if (ainfo.itemframe <> nil) and (itemframetemplate = nil) then begin
-   itemframetemplate:= ainfo.itemframe;
+  if (ainfo.svitemframe <> nil) and (itemframetemplate = nil) then begin
+   itemframetemplate:= ainfo.svitemframe;
   end;
-  if (ainfo.itemfaceactive <> nil) and 
+  if (ainfo.svitemfaceactive <> nil) and 
                  (itemfacetemplateactive = nil) then begin
-   itemfacetemplateactive:= ainfo.itemfaceactive;
+   itemfacetemplateactive:= ainfo.svitemfaceactive;
   end;
-  if (ainfo.itemframeactive <> nil) and
+  if (ainfo.svitemframeactive <> nil) and
              (itemframetemplateactive = nil) then begin
-   itemframetemplateactive:= ainfo.itemframeactive;
+   itemframetemplateactive:= ainfo.svitemframeactive;
   end;
  end;
 end;
@@ -1674,28 +1707,28 @@ procedure tcustomskincontroller.setmainmenuskin(const instance: tcustommainmenu;
                              const ainfo: mainmenuskininfoty);
 begin
 {$warnings off}
- setpopupmenuskin(tpopupmenu(instance),ainfo.ma);
+ setpopupmenuskin(tpopupmenu(instance),ainfo.svmain);
 {$warnings on}
  with instance,ainfo do begin
-  if (pop.face <> nil) and (popupfacetemplate = nil) then begin
-   popupfacetemplate:= pop.face;
+  if (svpopup.svface <> nil) and (popupfacetemplate = nil) then begin
+   popupfacetemplate:= svpopup.svface;
   end;
-  if (pop.frame <> nil) and (popupframetemplate = nil) then begin
-   popupframetemplate:= pop.frame;
+  if (svpopup.svframe <> nil) and (popupframetemplate = nil) then begin
+   popupframetemplate:= svpopup.svframe;
   end;
-  if (pop.itemface <> nil) and (popupitemfacetemplate = nil) then begin
-   popupitemfacetemplate:= pop.itemface;
+  if (svpopup.svitemface <> nil) and (popupitemfacetemplate = nil) then begin
+   popupitemfacetemplate:= svpopup.svitemface;
   end;
-  if (pop.itemframe <> nil) and (popupitemframetemplate = nil) then begin
-   popupitemframetemplate:= pop.itemframe;
+  if (svpopup.svitemframe <> nil) and (popupitemframetemplate = nil) then begin
+   popupitemframetemplate:= svpopup.svitemframe;
   end;
-  if (pop.itemfaceactive <> nil) and 
+  if (svpopup.svitemfaceactive <> nil) and 
                  (popupitemfacetemplateactive = nil) then begin
-   popupitemfacetemplateactive:= pop.itemfaceactive;
+   popupitemfacetemplateactive:= svpopup.svitemfaceactive;
   end;
-  if (pop.itemframeactive <> nil) and
+  if (svpopup.svitemframeactive <> nil) and
              (popupitemframetemplateactive = nil) then begin
-   popupitemframetemplateactive:= pop.itemframeactive;
+   popupitemframetemplateactive:= svpopup.svitemframeactive;
   end;
  end;
 end;
@@ -1906,513 +1939,513 @@ end;
 
 constructor tskincontroller.create(aowner: tcomponent);
 begin
- fwidgetcolor.co:= cl_default;
- fwidgetcolor.cocaptionframe:= cl_default;
- fstepbutton.co:= cl_default;
+ fwidgetcolor.svcolor:= cl_default;
+ fwidgetcolor.svcolorcaptionframe:= cl_default;
+ fstepbutton.svcolor:= cl_default;
 
- fdispwidget.color.co:= cl_default;
- fdispwidget.color.cocaptionframe:= cl_default;
+ fdispwidget.svcolor.svcolor:= cl_default;
+ fdispwidget.svcolor.svcolorcaptionframe:= cl_default;
  
- fdataedit.empty_color:= cl_default;
- fdataedit.empty_textcolor:= cl_default;
- fdataedit.empty_textcolorbackground:= cl_default;
+ fdataedit.svempty_color:= cl_default;
+ fdataedit.svempty_textcolor:= cl_default;
+ fdataedit.svempty_textcolorbackground:= cl_default;
 
- fbutton.co:= cl_default;
- fdatabutton.co:= cl_default;
- fslider.co:= cl_default;
- fframebutton.co:= cl_default;
- fframebutton.coglyph:= cl_default;
- ftabbar.tahorz.color:= cl_default;
- ftabbar.tahorz.coloractive:= cl_default;
- ftabbar.tahorz.shift:= defaulttabshift;
- ftabbar.tavert.color:= cl_default;
- ftabbar.tavert.coloractive:= cl_default;
- ftabbar.tavert.shift:= defaulttabshift;
- ftabbar.tahorzopo.color:= cl_default;
- ftabbar.tahorzopo.coloractive:= cl_default;
- ftabbar.tahorzopo.shift:= defaulttabshift;
- ftabbar.tavertopo.color:= cl_default;
- ftabbar.tavertopo.coloractive:= cl_default;
- ftabbar.tavertopo.shift:= defaulttabshift;
- ftabpage.colortab:= cl_default;
- ftabpage.coloractivetab:= cl_default;
+ fbutton.svcolor:= cl_default;
+ fdatabutton.svcolor:= cl_default;
+ fslider.svcolor:= cl_default;
+ fframebutton.svcolor:= cl_default;
+ fframebutton.svcolorglyph:= cl_default;
+ ftabbar.svtabhorz.svcolor:= cl_default;
+ ftabbar.svtabhorz.svcoloractive:= cl_default;
+ ftabbar.svtabhorz.svshift:= defaulttabshift;
+ ftabbar.svtabvert.svcolor:= cl_default;
+ ftabbar.svtabvert.svcoloractive:= cl_default;
+ ftabbar.svtabvert.svshift:= defaulttabshift;
+ ftabbar.svtabhorzopo.svcolor:= cl_default;
+ ftabbar.svtabhorzopo.svcoloractive:= cl_default;
+ ftabbar.svtabhorzopo.svshift:= defaulttabshift;
+ ftabbar.svtabvertopo.svcolor:= cl_default;
+ ftabbar.svtabvertopo.svcoloractive:= cl_default;
+ ftabbar.svtabvertopo.svshift:= defaulttabshift;
+ ftabpage.svcolortab:= cl_default;
+ ftabpage.svcoloractivetab:= cl_default;
  inherited;
 end;
 
 destructor tskincontroller.destroy;
 begin
  inherited;
- fbutton.font.free;
+ fbutton.svfont.free;
 end;
 
 procedure tskincontroller.setdispwidget_face(const avalue: tfacecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(fdispwidget.wi.fa));
+ setlinkedvar(avalue,tmsecomponent(fdispwidget.svwidget.svface));
 end;
 
 procedure tskincontroller.setdispwidget_frame(const avalue: tframecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(fdispwidget.wi.fra));
+ setlinkedvar(avalue,tmsecomponent(fdispwidget.svwidget.svframe));
 end;
 
 procedure tskincontroller.setdataedit_face(const avalue: tfacecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(fdataedit.wi.fa));
+ setlinkedvar(avalue,tmsecomponent(fdataedit.svwidget.svframe));
 end;
 
 procedure tskincontroller.setdataedit_frame(const avalue: tframecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(fdataedit.wi.fra));
+ setlinkedvar(avalue,tmsecomponent(fdataedit.svwidget.svframe));
 end;
 
 procedure tskincontroller.setbooleanedit_face(const avalue: tfacecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(fbooleanedit.wi.fa));
+ setlinkedvar(avalue,tmsecomponent(fbooleanedit.svwidget.svface));
 end;
 
 procedure tskincontroller.setbooleanedit_frame(const avalue: tframecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(fbooleanedit.wi.fra));
+ setlinkedvar(avalue,tmsecomponent(fbooleanedit.svwidget.svframe));
 end;
 
 procedure tskincontroller.setcontainer_face(const avalue: tfacecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(fcontainer.wi.fa));
+ setlinkedvar(avalue,tmsecomponent(fcontainer.svwidget.svface));
 end;
 
 procedure tskincontroller.setcontainer_frame(const avalue: tframecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(fcontainer.wi.fra));
+ setlinkedvar(avalue,tmsecomponent(fcontainer.svwidget.svframe));
 end;
 
 procedure tskincontroller.setsb_vert_facebutton(const avalue: tfacecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(fsb_vert.facebu));
+ setlinkedvar(avalue,tmsecomponent(fsb_vert.svfacebu));
 end;
 
 procedure tskincontroller.setsb_vert_faceendbutton(const avalue: tfacecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(fsb_vert.faceendbu));
+ setlinkedvar(avalue,tmsecomponent(fsb_vert.svfaceendbu));
 end;
 
 procedure tskincontroller.setsb_vert_framebutton(const avalue: tframecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(fsb_vert.framebu));
+ setlinkedvar(avalue,tmsecomponent(fsb_vert.svframebu));
 end;
 
 procedure tskincontroller.setsb_vert_frameendbutton1(const avalue: tframecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(fsb_vert.frameendbu1));
+ setlinkedvar(avalue,tmsecomponent(fsb_vert.svframeendbu1));
 end;
 
 procedure tskincontroller.setsb_vert_frameendbutton2(const avalue: tframecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(fsb_vert.frameendbu2));
+ setlinkedvar(avalue,tmsecomponent(fsb_vert.svframeendbu2));
 end;
 
 procedure tskincontroller.setsb_horz_facebutton(const avalue: tfacecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(fsb_horz.facebu));
+ setlinkedvar(avalue,tmsecomponent(fsb_horz.svfacebu));
 end;
 
 procedure tskincontroller.setsb_horz_faceendbutton(const avalue: tfacecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(fsb_horz.faceendbu));
+ setlinkedvar(avalue,tmsecomponent(fsb_horz.svfaceendbu));
 end;
 
 procedure tskincontroller.setsb_horz_framebutton(const avalue: tframecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(fsb_horz.framebu));
+ setlinkedvar(avalue,tmsecomponent(fsb_horz.svframebu));
 end;
 
 procedure tskincontroller.setsb_horz_frameendbutton1(const avalue: tframecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(fsb_horz.frameendbu1));
+ setlinkedvar(avalue,tmsecomponent(fsb_horz.svframeendbu1));
 end;
 
 procedure tskincontroller.setsb_horz_frameendbutton2(const avalue: tframecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(fsb_horz.frameendbu2));
+ setlinkedvar(avalue,tmsecomponent(fsb_horz.svframeendbu2));
 end;
 
 procedure tskincontroller.setgroupbox_face(const avalue: tfacecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(fgroupbox.wi.fa));
+ setlinkedvar(avalue,tmsecomponent(fgroupbox.svwidget.svface));
 end;
 
 procedure tskincontroller.setgroupbox_frame(const avalue: tframecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(fgroupbox.wi.fra));
+ setlinkedvar(avalue,tmsecomponent(fgroupbox.svwidget.svframe));
 end;
 
 procedure tskincontroller.setgrid_face(const avalue: tfacecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(fgrid.wi.fa));
+ setlinkedvar(avalue,tmsecomponent(fgrid.svwidget.svface));
 end;
 
 procedure tskincontroller.setgrid_frame(const avalue: tframecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(fgrid.wi.fra));
+ setlinkedvar(avalue,tmsecomponent(fgrid.svwidget.svframe));
 end;
 
 procedure tskincontroller.setgrid_fixrows_face(const avalue: tfacecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(fgrid.fixrows.face));
+ setlinkedvar(avalue,tmsecomponent(fgrid.svfixrows.svface));
 end;
 
 procedure tskincontroller.setgrid_fixrows_frame(const avalue: tframecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(fgrid.fixrows.frame));
+ setlinkedvar(avalue,tmsecomponent(fgrid.svfixrows.svframe));
 end;
 
 procedure tskincontroller.setgrid_fixcols_face(const avalue: tfacecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(fgrid.fixcols.face));
+ setlinkedvar(avalue,tmsecomponent(fgrid.svfixcols.svface));
 end;
 
 procedure tskincontroller.setgrid_fixcols_frame(const avalue: tframecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(fgrid.fixcols.frame));
+ setlinkedvar(avalue,tmsecomponent(fgrid.svfixcols.svframe));
 end;
 
 procedure tskincontroller.setgrid_datacols_face(const avalue: tfacecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(fgrid.datacols.face));
+ setlinkedvar(avalue,tmsecomponent(fgrid.svdatacols.svface));
 end;
 
 procedure tskincontroller.setgrid_datacols_frame(const avalue: tframecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(fgrid.datacols.frame));
+ setlinkedvar(avalue,tmsecomponent(fgrid.svdatacols.svframe));
 end;
 
 procedure tskincontroller.setbutton_face(const avalue: tfacecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(fbutton.wi.fa));
+ setlinkedvar(avalue,tmsecomponent(fbutton.svwidget.svface));
 end;
 
 procedure tskincontroller.setbutton_frame(const avalue: tframecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(fbutton.wi.fra));
+ setlinkedvar(avalue,tmsecomponent(fbutton.svwidget.svframe));
 end;
 
 procedure tskincontroller.setdatabutton_face(const avalue: tfacecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(fdatabutton.wi.fa));
+ setlinkedvar(avalue,tmsecomponent(fdatabutton.svwidget.svface));
 end;
 
 procedure tskincontroller.setdatabutton_frame(const avalue: tframecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(fdatabutton.wi.fra));
+ setlinkedvar(avalue,tmsecomponent(fdatabutton.svwidget.svframe));
 end;
 
 procedure tskincontroller.setslider_face(const avalue: tfacecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(fslider.wi.fa));
+ setlinkedvar(avalue,tmsecomponent(fslider.svwidget.svface));
 end;
 
 procedure tskincontroller.setslider_frame(const avalue: tframecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(fslider.wi.fra));
+ setlinkedvar(avalue,tmsecomponent(fslider.svwidget.svframe));
 end;
 
 procedure tskincontroller.setssb_vert_facebutton(const avalue: tfacecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(fslider.sb_vert.facebu));
+ setlinkedvar(avalue,tmsecomponent(fslider.svsb_vert.svfacebu));
 end;
 
 procedure tskincontroller.setssb_vert_faceendbutton(const avalue: tfacecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(fslider.sb_vert.faceendbu));
+ setlinkedvar(avalue,tmsecomponent(fslider.svsb_vert.svfaceendbu));
 end;
 
 procedure tskincontroller.setssb_vert_framebutton(const avalue: tframecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(fslider.sb_vert.framebu));
+ setlinkedvar(avalue,tmsecomponent(fslider.svsb_vert.svframebu));
 end;
 
 procedure tskincontroller.setssb_vert_frameendbutton1(const avalue: tframecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(fslider.sb_vert.frameendbu1));
+ setlinkedvar(avalue,tmsecomponent(fslider.svsb_vert.svframeendbu1));
 end;
 
 procedure tskincontroller.setssb_vert_frameendbutton2(const avalue: tframecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(fslider.sb_vert.frameendbu2));
+ setlinkedvar(avalue,tmsecomponent(fslider.svsb_vert.svframeendbu2));
 end;
 
 procedure tskincontroller.setssb_horz_facebutton(const avalue: tfacecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(fslider.sb_horz.facebu));
+ setlinkedvar(avalue,tmsecomponent(fslider.svsb_horz.svfacebu));
 end;
 
 procedure tskincontroller.setssb_horz_faceendbutton(const avalue: tfacecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(fslider.sb_horz.faceendbu));
+ setlinkedvar(avalue,tmsecomponent(fslider.svsb_horz.svfaceendbu));
 end;
 
 procedure tskincontroller.setssb_horz_framebutton(const avalue: tframecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(fslider.sb_horz.framebu));
+ setlinkedvar(avalue,tmsecomponent(fslider.svsb_horz.svframebu));
 end;
 
 procedure tskincontroller.setssb_horz_frameendbutton1(const avalue: tframecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(fslider.sb_horz.frameendbu1));
+ setlinkedvar(avalue,tmsecomponent(fslider.svsb_horz.svframeendbu1));
 end;
 
 procedure tskincontroller.setssb_horz_frameendbutton2(const avalue: tframecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(fslider.sb_horz.frameendbu2));
+ setlinkedvar(avalue,tmsecomponent(fslider.svsb_horz.svframeendbu2));
 end;
 
 procedure tskincontroller.setframebutton_face(const avalue: tfacecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(fframebutton.fa));
+ setlinkedvar(avalue,tmsecomponent(fframebutton.svface));
 end;
 
 procedure tskincontroller.setframebutton_frame(const avalue: tframecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(fframebutton.fra));
+ setlinkedvar(avalue,tmsecomponent(fframebutton.svframe));
 end;
 
 procedure tskincontroller.setstepbutton_face(const avalue: tfacecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(fstepbutton.fa));
+ setlinkedvar(avalue,tmsecomponent(fstepbutton.svface));
 end;
 
 procedure tskincontroller.setstepbutton_frame(const avalue: tframecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(fstepbutton.fra));
+ setlinkedvar(avalue,tmsecomponent(fstepbutton.svframe));
 end;
 
 procedure tskincontroller.settabbar_horz_face(const avalue: tfacecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(ftabbar.wihorz.fa));
+ setlinkedvar(avalue,tmsecomponent(ftabbar.svwidgethorz.svface));
 end;
 
 procedure tskincontroller.settabbar_horz_frame(const avalue: tframecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(ftabbar.wihorz.fra));
+ setlinkedvar(avalue,tmsecomponent(ftabbar.svwidgethorz.svframe));
 end;
 
 procedure tskincontroller.settabbar_horz_tab_face(const avalue: tfacecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(ftabbar.tahorz.face));
+ setlinkedvar(avalue,tmsecomponent(ftabbar.svtabhorz.svface));
 end;
 
 procedure tskincontroller.settabbar_horz_tab_frame(const avalue: tframecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(ftabbar.tahorz.frame));
+ setlinkedvar(avalue,tmsecomponent(ftabbar.svtabhorz.svframe));
 end;
 
 procedure tskincontroller.settabbar_horz_tab_faceactive(const avalue: tfacecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(ftabbar.tahorz.faceactive));
+ setlinkedvar(avalue,tmsecomponent(ftabbar.svtabhorz.svfaceactive));
 end;
 
 procedure tskincontroller.settabbar_vert_face(const avalue: tfacecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(ftabbar.wivert.fa));
+ setlinkedvar(avalue,tmsecomponent(ftabbar.svwidgetvert.svface));
 end;
 
 procedure tskincontroller.settabbar_vert_frame(const avalue: tframecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(ftabbar.wivert.fra));
+ setlinkedvar(avalue,tmsecomponent(ftabbar.svwidgetvert.svframe));
 end;
 
 procedure tskincontroller.settabbar_vert_tab_face(const avalue: tfacecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(ftabbar.tavert.face));
+ setlinkedvar(avalue,tmsecomponent(ftabbar.svtabvert.svface));
 end;
 
 procedure tskincontroller.settabbar_vert_tab_frame(const avalue: tframecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(ftabbar.tavert.frame));
+ setlinkedvar(avalue,tmsecomponent(ftabbar.svtabvert.svframe));
 end;
 
 procedure tskincontroller.settabbar_vert_tab_faceactive(const avalue: tfacecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(ftabbar.tavert.faceactive));
+ setlinkedvar(avalue,tmsecomponent(ftabbar.svtabvert.svfaceactive));
 end;
 
 procedure tskincontroller.settabbar_horzopo_face(const avalue: tfacecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(ftabbar.wihorzopo.fa));
+ setlinkedvar(avalue,tmsecomponent(ftabbar.svwidgethorzopo.svface));
 end;
 
 procedure tskincontroller.settabbar_horzopo_frame(const avalue: tframecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(ftabbar.wihorzopo.fra));
+ setlinkedvar(avalue,tmsecomponent(ftabbar.svwidgethorzopo.svframe));
 end;
 
 procedure tskincontroller.settabbar_horzopo_tab_face(const avalue: tfacecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(ftabbar.tahorzopo.face));
+ setlinkedvar(avalue,tmsecomponent(ftabbar.svtabhorzopo.svface));
 end;
 
 procedure tskincontroller.settabbar_horzopo_tab_frame(const avalue: tframecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(ftabbar.tahorzopo.frame));
+ setlinkedvar(avalue,tmsecomponent(ftabbar.svtabhorzopo.svframe));
 end;
 
 procedure tskincontroller.settabbar_horzopo_tab_faceactive(const avalue: tfacecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(ftabbar.tahorzopo.faceactive));
+ setlinkedvar(avalue,tmsecomponent(ftabbar.svtabhorzopo.svfaceactive));
 end;
 
 procedure tskincontroller.settabbar_vertopo_face(const avalue: tfacecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(ftabbar.wivertopo.fa));
+ setlinkedvar(avalue,tmsecomponent(ftabbar.svwidgetvertopo.svface));
 end;
 
 procedure tskincontroller.settabbar_vertopo_frame(const avalue: tframecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(ftabbar.wivertopo.fra));
+ setlinkedvar(avalue,tmsecomponent(ftabbar.svwidgetvertopo.svframe));
 end;
 
 procedure tskincontroller.settabbar_vertopo_tab_face(const avalue: tfacecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(ftabbar.tavertopo.face));
+ setlinkedvar(avalue,tmsecomponent(ftabbar.svtabvertopo.svface));
 end;
 
 procedure tskincontroller.settabbar_vertopo_tab_frame(const avalue: tframecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(ftabbar.tavertopo.frame));
+ setlinkedvar(avalue,tmsecomponent(ftabbar.svtabvertopo.svframe));
 end;
 
 procedure tskincontroller.settabbar_vertopo_tab_faceactive(const avalue: tfacecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(ftabbar.tavertopo.faceactive));
+ setlinkedvar(avalue,tmsecomponent(ftabbar.svtabvertopo.svfaceactive));
 end;
 
 procedure tskincontroller.settabpage_face(const avalue: tfacecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(ftabpage.wi.fa));
+ setlinkedvar(avalue,tmsecomponent(ftabpage.svwidget.svface));
 end;
 
 procedure tskincontroller.settabpage_frame(const avalue: tframecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(ftabpage.wi.fra));
+ setlinkedvar(avalue,tmsecomponent(ftabpage.svwidget.svframe));
 end;
 
 procedure tskincontroller.settoolbar_horz_face(const avalue: tfacecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(ftoolbar_horz.wi.fa));
+ setlinkedvar(avalue,tmsecomponent(ftoolbar_horz.svwidget.svface));
 end;
 
 procedure tskincontroller.settoolbar_horz_frame(const avalue: tframecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(ftoolbar_horz.wi.fra));
+ setlinkedvar(avalue,tmsecomponent(ftoolbar_horz.svwidget.svframe));
 end;
 
 procedure tskincontroller.settoolbar_horz_buttonface(const avalue: tfacecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(ftoolbar_horz.buttonface));
+ setlinkedvar(avalue,tmsecomponent(ftoolbar_horz.svbuttonface));
 end;
 
 procedure tskincontroller.settoolbar_vert_face(const avalue: tfacecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(ftoolbar_vert.wi.fa));
+ setlinkedvar(avalue,tmsecomponent(ftoolbar_vert.svwidget.svface));
 end;
 
 procedure tskincontroller.settoolbar_vert_frame(const avalue: tframecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(ftoolbar_vert.wi.fra));
+ setlinkedvar(avalue,tmsecomponent(ftoolbar_vert.svwidget.svframe));
 end;
 
 procedure tskincontroller.settoolbar_vert_buttonface(const avalue: tfacecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(ftoolbar_vert.buttonface));
+ setlinkedvar(avalue,tmsecomponent(ftoolbar_vert.svbuttonface));
 end;
 
 procedure tskincontroller.setpopupmenu_face(const avalue: tfacecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(fpopupmenu.face));
+ setlinkedvar(avalue,tmsecomponent(fpopupmenu.svface));
 end;
 
 procedure tskincontroller.setpopupmenu_frame(const avalue: tframecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(fpopupmenu.frame));
+ setlinkedvar(avalue,tmsecomponent(fpopupmenu.svframe));
 end;
 
 procedure tskincontroller.setpopupmenu_itemface(const avalue: tfacecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(fpopupmenu.itemface));
+ setlinkedvar(avalue,tmsecomponent(fpopupmenu.svitemface));
 end;
 
 procedure tskincontroller.setpopupmenu_itemframe(const avalue: tframecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(fpopupmenu.itemframe));
+ setlinkedvar(avalue,tmsecomponent(fpopupmenu.svitemframe));
 end;
 
 procedure tskincontroller.setpopupmenu_itemfaceactive(const avalue: tfacecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(fpopupmenu.itemfaceactive));
+ setlinkedvar(avalue,tmsecomponent(fpopupmenu.svitemfaceactive));
 end;
 
 procedure tskincontroller.setpopupmenu_itemframeactive(const avalue: tframecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(fpopupmenu.itemframeactive));
+ setlinkedvar(avalue,tmsecomponent(fpopupmenu.svitemframeactive));
 end;
 
 procedure tskincontroller.setmainmenu_face(const avalue: tfacecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(fmainmenu.ma.face));
+ setlinkedvar(avalue,tmsecomponent(fmainmenu.svmain.svface));
 end;
 
 procedure tskincontroller.setmainmenu_frame(const avalue: tframecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(fmainmenu.ma.frame));
+ setlinkedvar(avalue,tmsecomponent(fmainmenu.svmain.svframe));
 end;
 
 procedure tskincontroller.setmainmenu_itemface(const avalue: tfacecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(fmainmenu.ma.itemface));
+ setlinkedvar(avalue,tmsecomponent(fmainmenu.svmain.svitemface));
 end;
 
 procedure tskincontroller.setmainmenu_itemframe(const avalue: tframecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(fmainmenu.ma.itemframe));
+ setlinkedvar(avalue,tmsecomponent(fmainmenu.svmain.svitemframe));
 end;
 
 procedure tskincontroller.setmainmenu_itemfaceactive(const avalue: tfacecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(fmainmenu.ma.itemfaceactive));
+ setlinkedvar(avalue,tmsecomponent(fmainmenu.svmain.svitemfaceactive));
 end;
 
 procedure tskincontroller.setmainmenu_itemframeactive(const avalue: tframecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(fmainmenu.ma.itemframeactive));
+ setlinkedvar(avalue,tmsecomponent(fmainmenu.svmain.svitemframeactive));
 end;
 
 procedure tskincontroller.setmainmenu_popupface(const avalue: tfacecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(fmainmenu.pop.face));
+ setlinkedvar(avalue,tmsecomponent(fmainmenu.svpopup.svface));
 end;
 
 procedure tskincontroller.setmainmenu_popupframe(const avalue: tframecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(fmainmenu.pop.frame));
+ setlinkedvar(avalue,tmsecomponent(fmainmenu.svpopup.svframe));
 end;
 
 procedure tskincontroller.setmainmenu_popupitemface(const avalue: tfacecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(fmainmenu.pop.itemface));
+ setlinkedvar(avalue,tmsecomponent(fmainmenu.svpopup.svitemface));
 end;
 
 procedure tskincontroller.setmainmenu_popupitemframe(const avalue: tframecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(fmainmenu.pop.itemframe));
+ setlinkedvar(avalue,tmsecomponent(fmainmenu.svpopup.svitemframe));
 end;
 
 procedure tskincontroller.setmainmenu_popupitemfaceactive(const avalue: tfacecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(fmainmenu.pop.itemfaceactive));
+ setlinkedvar(avalue,tmsecomponent(fmainmenu.svpopup.svitemfaceactive));
 end;
 
 procedure tskincontroller.setmainmenu_popupitemframeactive(const avalue: tframecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(fmainmenu.pop.itemframeactive));
+ setlinkedvar(avalue,tmsecomponent(fmainmenu.svpopup.svitemframeactive));
 end;
 
 procedure tskincontroller.handlewidget(const askin: skininfoty;
@@ -2423,17 +2456,17 @@ var
  co1,co2: colorty;
 begin
  if acolor = nil then begin
-  co1:= fwidgetcolor.co;
-  co2:= fwidgetcolor.cocaptionframe
+  co1:= fwidgetcolor.svcolor;
+  co2:= fwidgetcolor.svcolorcaptionframe
  end
  else begin
-  co1:= acolor^.co;
+  co1:= acolor^.svcolor;
   if co1 = cl_default then begin
-   co1:= fwidgetcolor.co;
+   co1:= fwidgetcolor.svcolor;
   end;
-  co2:= acolor^.cocaptionframe;
+  co2:= acolor^.svcolorcaptionframe;
   if co2 = cl_default then begin
-   co2:= fwidgetcolor.cocaptionframe;
+   co2:= fwidgetcolor.svcolorcaptionframe;
   end;
  end;
  wi1:= twidget1(askin.instance);
@@ -2473,16 +2506,16 @@ end;
 procedure tskincontroller.handlesimplebutton(const ainfo: skininfoty);
 begin
  handlewidget(ainfo);
- setwidgetcolor(twidget(ainfo.instance),fbutton.co);
- setwidgetskin(twidget(ainfo.instance),fbutton.wi);
- setwidgetfont(twidget(ainfo.instance),fbutton.font);
+ setwidgetcolor(twidget(ainfo.instance),fbutton.svcolor);
+ setwidgetskin(twidget(ainfo.instance),fbutton.svwidget);
+ setwidgetfont(twidget(ainfo.instance),fbutton.svfont);
  with tsimplebutton(ainfo.instance) do begin
   if not (osk_nooptions in optionsskin) then begin
-   if fbutton.optionsadd <> [] then begin
-    options:= options + fbutton.optionsadd;
+   if fbutton.svoptionsadd <> [] then begin
+    options:= options + fbutton.svoptionsadd;
    end;
-   if fbutton.optionsremove <> [] then begin
-    options:= options - fbutton.optionsremove;
+   if fbutton.svoptionsremove <> [] then begin
+    options:= options - fbutton.svoptionsremove;
    end;
   end;
  end;
@@ -2491,16 +2524,16 @@ end;
 procedure tskincontroller.handledatabutton(const ainfo: skininfoty);
 begin
  handlewidget(ainfo);
- setwidgetcolor(twidget(ainfo.instance),fdatabutton.co);
- setwidgetskin(twidget(ainfo.instance),fdatabutton.wi);
- setwidgetfont(twidget(ainfo.instance),fdatabutton.font);
+ setwidgetcolor(twidget(ainfo.instance),fdatabutton.svcolor);
+ setwidgetskin(twidget(ainfo.instance),fdatabutton.svwidget);
+ setwidgetfont(twidget(ainfo.instance),fdatabutton.svfont);
  with tcustomdatabutton(ainfo.instance) do begin
   if not (osk_nooptions in optionsskin) then begin
-   if fdatabutton.optionsadd <> [] then begin
-    options:= options + fdatabutton.optionsadd;
+   if fdatabutton.svoptionsadd <> [] then begin
+    options:= options + fdatabutton.svoptionsadd;
    end;
-   if fdatabutton.optionsremove <> [] then begin
-    options:= options - fdatabutton.optionsremove;
+   if fdatabutton.svoptionsremove <> [] then begin
+    options:= options - fdatabutton.svoptionsremove;
    end;
   end;
  end;
@@ -2509,57 +2542,58 @@ end;
 procedure tskincontroller.handleslider(const ainfo: skininfoty);
 begin
  handlewidget(ainfo);
- setwidgetcolor(twidget(ainfo.instance),fslider.co);
- setwidgetskin(twidget(ainfo.instance),fslider.wi);
+ setwidgetcolor(twidget(ainfo.instance),fslider.svcolor);
+ setwidgetskin(twidget(ainfo.instance),fslider.svwidget);
  with tcustomslider(ainfo.instance) do begin
   if direction in [gd_left,gd_right] then begin
-   setscrollbarskin(scrollbar,fslider.sb_horz);
+   setscrollbarskin(scrollbar,fslider.svsb_horz);
   end
   else begin
-   setscrollbarskin(scrollbar,fslider.sb_vert);
+   setscrollbarskin(scrollbar,fslider.svsb_vert);
   end;
  end;
 end;
 
 procedure tskincontroller.handlecontainer(const ainfo: skininfoty);
 begin
- setwidgetskin(twidget(ainfo.instance),fcontainer.wi);
+ setwidgetskin(twidget(ainfo.instance),fcontainer.svwidget);
 end;
 
 procedure tskincontroller.createbutton_font;
 begin
- if fbutton.font = nil then begin
-  fbutton.font:= toptionalfont.create;
+ if fbutton.svfont = nil then begin
+  fbutton.svfont:= toptionalfont.create;
  end;
 end;
 
 procedure tskincontroller.setbutton_font(const avalue: toptionalfont);
 begin
- setoptionalobject(avalue,fbutton.font,{$ifdef FPC}@{$endif}createbutton_font);
+ setoptionalobject(avalue,fbutton.svfont,{$ifdef FPC}@{$endif}createbutton_font);
 end;
 
 function tskincontroller.getbutton_font: toptionalfont;
 begin
- getoptionalobject(fbutton.font,{$ifdef FPC}@{$endif}createbutton_font);
- result:= fbutton.font;
+ getoptionalobject(fbutton.svfont,{$ifdef FPC}@{$endif}createbutton_font);
+ result:= fbutton.svfont;
 end;
 
 procedure tskincontroller.createdatabutton_font;
 begin
- if fdatabutton.font = nil then begin
-  fdatabutton.font:= toptionalfont.create;
+ if fdatabutton.svfont = nil then begin
+  fdatabutton.svfont:= toptionalfont.create;
  end;
 end;
 
 procedure tskincontroller.setdatabutton_font(const avalue: toptionalfont);
 begin
- setoptionalobject(avalue,fdatabutton.font,{$ifdef FPC}@{$endif}createbutton_font);
+ setoptionalobject(avalue,fdatabutton.svfont,
+                                {$ifdef FPC}@{$endif}createbutton_font);
 end;
 
 function tskincontroller.getdatabutton_font: toptionalfont;
 begin
- getoptionalobject(fdatabutton.font,{$ifdef FPC}@{$endif}createbutton_font);
- result:= fdatabutton.font;
+ getoptionalobject(fdatabutton.svfont,{$ifdef FPC}@{$endif}createbutton_font);
+ result:= fdatabutton.svfont;
 end;
 
 procedure tskincontroller.handletabbar(const ainfo: skininfoty);
@@ -2570,22 +2604,22 @@ begin
  ta1:= tcustomtabbar(ainfo.instance);
  if tabo_vertical in ta1.options then begin
   if tabo_opposite in ta1.options then begin
-   setwidgetskin(ta1,ftabbar.wivertopo);
-   settabsskin(ta1,ftabbar.tavertopo);
+   setwidgetskin(ta1,ftabbar.svwidgetvertopo);
+   settabsskin(ta1,ftabbar.svtabvertopo);
   end
   else begin
-   setwidgetskin(ta1,ftabbar.wivert);
-   settabsskin(ta1,ftabbar.tavert);
+   setwidgetskin(ta1,ftabbar.svwidgetvert);
+   settabsskin(ta1,ftabbar.svtabvert);
   end;
  end
  else begin
   if tabo_opposite in ta1.options then begin
-   setwidgetskin(ta1,ftabbar.wihorzopo);
-   settabsskin(ta1,ftabbar.tahorzopo);
+   setwidgetskin(ta1,ftabbar.svwidgethorzopo);
+   settabsskin(ta1,ftabbar.svtabhorzopo);
   end
   else begin
-   setwidgetskin(ta1,ftabbar.wihorz);
-   settabsskin(ta1,ftabbar.tahorz);
+   setwidgetskin(ta1,ftabbar.svwidgethorz);
+   settabsskin(ta1,ftabbar.svtabhorz);
   end;
  end;
  setstepbuttonskin(ta1.frame,fstepbutton);
@@ -2596,18 +2630,18 @@ var
  intf1: itabpage;
 begin
  handlewidget(ainfo);
- setwidgetskin(twidget(ainfo.instance),ftabpage.wi);
- if ((ftabpage.colortab <> cl_default) or 
-               (ftabpage.coloractivetab <> cl_default)) and
+ setwidgetskin(twidget(ainfo.instance),ftabpage.svwidget);
+ if ((ftabpage.svcolortab <> cl_default) or 
+               (ftabpage.svcoloractivetab <> cl_default)) and
     twidget(ainfo.instance).getcorbainterface(typeinfo(itabpage),
                                                       intf1) then begin
-  if (ftabpage.colortab <> cl_default) and 
+  if (ftabpage.svcolortab <> cl_default) and 
                             (intf1.getcolortab = cl_default) then begin
-   intf1.setcolortab(ftabpage.colortab);
+   intf1.setcolortab(ftabpage.svcolortab);
   end;
-  if (ftabpage.coloractivetab <> cl_default) and 
+  if (ftabpage.svcoloractivetab <> cl_default) and 
                             (intf1.getcoloractivetab = cl_default) then begin
-   intf1.setcoloractivetab(ftabpage.coloractivetab);
+   intf1.setcoloractivetab(ftabpage.svcoloractivetab);
   end;
  end;
 end;
@@ -2619,22 +2653,22 @@ begin
  handlewidget(ainfo);
  tb1:= tcustomtoolbar(ainfo.instance);
  if tb1.width >= tb1.height then begin
-  setwidgetskin(tb1,ftoolbar_horz.wi);
+  setwidgetskin(tb1,ftoolbar_horz.svwidget);
   setstepbuttonskin(tb1.frame,fstepbutton);
-  if ftoolbar_horz.buttonface <> nil then begin
+  if ftoolbar_horz.svbuttonface <> nil then begin
    with tb1.buttons do begin
     createface;
-    setfacetemplate(ftoolbar_horz.buttonface,face);
+    setfacetemplate(ftoolbar_horz.svbuttonface,face);
    end;
   end;
  end
  else begin
-  setwidgetskin(tb1,ftoolbar_vert.wi);
+  setwidgetskin(tb1,ftoolbar_vert.svwidget);
   setstepbuttonskin(tb1.frame,fstepbutton);
-  if ftoolbar_vert.buttonface <> nil then begin
+  if ftoolbar_vert.svbuttonface <> nil then begin
    with tb1.buttons do begin
     createface;
-    setfacetemplate(ftoolbar_vert.buttonface,face);
+    setfacetemplate(ftoolbar_vert.svbuttonface,face);
    end;
   end;
  end;
@@ -2647,8 +2681,8 @@ end;
 
 procedure tskincontroller.handledispwidget(const ainfo: skininfoty);
 begin
- handlewidget(ainfo,@fdispwidget.color);
- setwidgetskin(twidget(ainfo.instance),fdispwidget.wi);
+ handlewidget(ainfo,@fdispwidget.svcolor);
+ setwidgetskin(twidget(ainfo.instance),fdispwidget.svwidget);
 end;
 
 procedure tskincontroller.handledataedit(const ainfo: skininfoty);
@@ -2660,14 +2694,14 @@ end;
 procedure tskincontroller.handlebooleanedit(const ainfo: skininfoty);
 begin
  handlewidget(ainfo);
- setwidgetskin(twidget(ainfo.instance),fbooleanedit.wi);
+ setwidgetskin(twidget(ainfo.instance),fbooleanedit.svwidget);
  with tcustombooleanedit(ainfo.instance) do begin
   if not (osk_nooptions in optionsskin) then begin
-   if fbooleanedit.optionsadd <> [] then begin
-    options:= options + fbooleanedit.optionsadd;
+   if fbooleanedit.svoptionsadd <> [] then begin
+    options:= options + fbooleanedit.svoptionsadd;
    end;
-   if fbooleanedit.optionsremove <> [] then begin
-    options:= options - fbooleanedit.optionsremove;
+   if fbooleanedit.svoptionsremove <> [] then begin
+    options:= options - fbooleanedit.svoptionsremove;
    end;
   end;
  end;
