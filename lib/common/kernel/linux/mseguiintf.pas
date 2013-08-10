@@ -3267,13 +3267,14 @@ begin
  gdi_unlock;
 end;
 
-function getrootoffset(const id: winidty; out offset: pointty): boolean;
+function getrootoffset(const id: winidty; var aoffset: pointty): boolean;
 var
  int1: integer;
  rootpath: longwordarty;
  ax,ay: integer;
  width,height,border: longword;
  ca1: longword;
+ offset: pointty;
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
@@ -3293,6 +3294,7 @@ begin
    end;
   end;
  end;
+ aoffset:= offset;
  result:= true;
 end;
 
@@ -5266,10 +5268,14 @@ eventrestart:
      if not application.deinitializing then begin
       rect1.x:= x;
       rect1.y:= y;
+      if send_event = 0 then begin //from window manager?
+       getrootoffset(w,rect1.pos); //no, map to screen origin
+      end;
       rect1.cx:= width;
       rect1.cy:= height;
       result:= twindowrectevent.create(ek_configure,w,rect1,nullpoint);
      end; 
+
 (* gnome bug workaround
      if not application.deinitializing and 
        (getwindowrect(w,rect1,pt1) = gue_ok) then begin
