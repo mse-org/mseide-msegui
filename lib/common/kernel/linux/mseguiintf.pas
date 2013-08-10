@@ -4935,7 +4935,7 @@ var
  button1: mousebuttonty;
  bo1: boolean;
  rect1: rectty;
-// pt1: pointty;
+ pt1: pointty;
  aic: xic;
  window1: twindow;
 
@@ -5268,12 +5268,13 @@ eventrestart:
      if not application.deinitializing then begin
       rect1.x:= x;
       rect1.y:= y;
+      pt1:= nullpoint;
       if send_event = 0 then begin //from window manager?
-       getrootoffset(w,rect1.pos); //no, map to screen origin
+       getrootoffset(w,pt1); //no, map to screen origin
       end;
       rect1.cx:= width;
       rect1.cy:= height;
-      result:= twindowrectevent.create(ek_configure,w,rect1,nullpoint);
+      result:= twindowrectevent.create(ek_configure,w,rect1,pt1);
      end; 
 
 (* gnome bug workaround
