@@ -1312,7 +1312,7 @@ type
    procedure setfoldlevel(const index: integer; avalue: byte);
    procedure setfolded(const avalue: boolean);
    procedure setheight(const index: integer; const avalue: integer);
-   procedure setlinewidth(const index: integer; const avalue: integer);
+   procedure setlinewidth(const index: integer; avalue: rowlinewidthty);
    function getrowypos(const index: integer): integer;
    procedure setsourcefoldhidden1(const avalue: string);
    procedure setsourcefoldhidden(const avalue: string);
@@ -1417,8 +1417,9 @@ type
                                                   write setfoldissum;
    property height[const index: integer]: integer read getheight 
                                                             write setheight;
-   property linewidth[const index: integer]: integer read getlinewidth 
-                                                            write setlinewidth;
+   property linewidth[const index: integer]: rowlinewidthty 
+                                       read getlinewidth write setlinewidth;
+                         //-1 = default
    function currentrowheight(const index: integer): integer;
    property rowypos[const index: integer]: integer read getrowypos;
    function rowindex(const aypos: integer): integer;
@@ -1885,8 +1886,8 @@ type
    procedure setfolded(const avalue: boolean);
    function getrowstatelist: trowstatelist;
    procedure setrowstatelist(const avalue: trowstatelist);
-   function getrowlinewidth(index: integer): integer;
-   procedure setrowlinewidth(index: integer; const avalue: integer);
+   function getrowlinewidth(index: integer): rowlinewidthty;
+   procedure setrowlinewidth(index: integer; const avalue: rowlinewidthty);
    function doonsort(const l,r: integer): integer;
    procedure readgridframewidth(reader: treader);
   protected
@@ -2323,7 +2324,7 @@ type
                         read getrowlinecolorfixstate 
                         write setrowlinecolorfixstate; 
                                //default = -1, og_rowheight must be set
-   property rowlinewidth[index: integer]: integer read getrowlinewidth 
+   property rowlinewidth[index: integer]: rowlinewidthty read getrowlinewidth 
                                        write setrowlinewidth;
                                //default = -1, og_rowheight must be set
 
@@ -3596,10 +3597,10 @@ begin
      if hasrowheight then begin
       with fcellinfo do begin
        heightextend:= rowstatelist.internalheight(row1) - fcellinfo.grid.fdatarowheight;//rect.cy;
-       int2:= rowstatelist.linewidth[row1];
-       if int2 > 0 then begin
-        heightextend:= heightextend - int2 + fcellinfo.grid.fdatarowlinewidth;
-       end;
+//       int2:= rowstatelist.linewidth[row1];
+//       if int2 > 0 then begin
+//        heightextend:= heightextend - int2 + fcellinfo.grid.fdatarowlinewidth;
+//       end;
        inc(fcellrect.cy,heightextend);      
        inc(rect.cy,heightextend);      
        inc(innerrect.cy,heightextend);      
@@ -9662,7 +9663,7 @@ begin
            lwidth:= fdatarowlinewidth;
           end
           else begin
-           lwidth:= linewidth;
+           lwidth:= linewidth-1;
           end;
           int4:= (lwidth + 1) div 2;
          end;
@@ -9685,8 +9686,10 @@ begin
          if rowheight1 then begin
           for int1:= 0 to high(lines) do begin
            with lines[int1],lineinfos[int1] do begin
-            acanvas.linewidth:= lwidth;
-            acanvas.drawline(a,b,lcolorfix);
+            if lwidth > 0 then begin
+             acanvas.linewidth:= lwidth;
+             acanvas.drawline(a,b,lcolorfix);
+            end;
            end;
           end;
          end
@@ -9730,8 +9733,10 @@ begin
         if rowheight1 then begin
          for int1:= 0 to high(lines) do begin
           with lines[int1],lineinfos[int1] do begin
-           acanvas.linewidth:= lwidth;
-           acanvas.drawline(a,b,lcolor);
+           if lwidth > 0 then begin
+            acanvas.linewidth:= lwidth;
+            acanvas.drawline(a,b,lcolor);
+           end;
           end;
          end;
         end
@@ -12175,7 +12180,7 @@ function tcustomgrid.cellrect(const cell: gridcoordty;
  
 var
  isfixr: boolean;
- int1: integer; 
+ int1,int2: integer; 
  po1: prowstatecolmergety;
  
 begin  //cellrect
@@ -12268,7 +12273,16 @@ begin  //cellrect
     end;
     y:= y + ffixrows.ffirstsize + fscrollrect.y;
     if innerlevel > cil_all then begin
-     dec(cy,fdatarowlinewidth);
+     int2:= fdatarowlinewidth;
+     if og_rowheight in foptionsgrid then begin
+      with prowstaterowheightty(
+                     fdatacols.frowstate.getitempo(row))^.rowheight do begin
+       if linewidth > 0 then begin
+        int2:= linewidth-1;
+       end;
+      end;
+     end;
+     dec(cy,int2);
     end;
     if col < 0 then begin
      if -col <= ffixcols.count then begin
@@ -15098,7 +15112,7 @@ begin
  end;
 end;
 
-function tcustomgrid.getrowlinewidth(index: integer): integer;
+function tcustomgrid.getrowlinewidth(index: integer): rowlinewidthty;
 begin
  if checkrowindex(index) then begin
   result:= fdatacols.frowstate.linewidth[index];
@@ -15108,7 +15122,8 @@ begin
  end;
 end;
 
-procedure tcustomgrid.setrowlinewidth(index: integer; const avalue: integer);
+procedure tcustomgrid.setrowlinewidth(index: integer; 
+                                           const avalue: rowlinewidthty);
 begin
  if checkrowindex(index) then begin
   fdatacols.frowstate.linewidth[index]:= avalue;
@@ -17252,7 +17267,7 @@ begin
      int4:= fgrid.fdatarowlinewidth;
     end
     else begin
-     int4:= po1^.rowheight.linewidth;
+     int4:= po1^.rowheight.linewidth - 1;
     end;
     int2:= fgrid.fdatarowheight + int4;
     po1^.rowheight.ypos:= int3;
@@ -17667,8 +17682,9 @@ begin
 end;
 
 procedure trowstatelist.setlinewidth(const index: integer;
-               const avalue: integer);
+               avalue: rowlinewidthty);
 begin
+ inc(avalue);
  with getitemporowheight(index)^ do begin
   if avalue <> rowheight.linewidth then begin
    rowheight.linewidth:= avalue;

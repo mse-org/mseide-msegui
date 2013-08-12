@@ -926,6 +926,7 @@ const
             (sizeof(rowstatety),sizeof(rowstatecolmergety),
             sizeof(rowstaterowheightty));
 type
+ rowlinewidthty = -1..254; //-1 = default
  tcustomrowstatelist = class(tdatalist)
   private
    function getrowstate(const index: integer): rowstatety;
@@ -973,7 +974,7 @@ type
    function getfoldlevel(const index: integer): byte;
    function getfoldissum(const index: integer): boolean;
    function getheight(const index: integer): integer;
-   function getlinewidth(const index: integer): integer;
+   function getlinewidth(const index: integer): rowlinewidthty;
    procedure checkinfolevel(const wantedlevel: rowinfolevelty);
    procedure initdirty; virtual;
    procedure recalchidden; virtual;
@@ -1028,7 +1029,7 @@ type
    property height[const index: integer]: integer read getheight;
    property merged[const index: integer]: longword read getmerged 
                                                             write setmerged;
-   property linewidth[const index: integer]: integer 
+   property linewidth[const index: integer]: rowlinewidthty 
                                   read getlinewidth{ write setlineheight};
    property linecolorfix[const index: integer]: rowstatenumty 
                                   read getlinecolorfix write setlinecolorfix;
@@ -6521,9 +6522,9 @@ begin
  end;
 end;
 
-function tcustomrowstatelist.getlinewidth(const index: integer): integer;
+function tcustomrowstatelist.getlinewidth(const index: integer): rowlinewidthty;
 begin
- result:= getitemporowheight(index)^.rowheight.linewidth;
+ result:= getitemporowheight(index)^.rowheight.linewidth-1;
 end;
 
 procedure tcustomrowstatelist.checkinfolevel(const wantedlevel: rowinfolevelty);
