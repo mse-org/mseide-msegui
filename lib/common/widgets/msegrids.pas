@@ -7622,6 +7622,9 @@ begin
   if int1 < fgrid.fdatarect.cx then begin
    with tdatacol(fitems[int2]) do begin
     fwidth:= fwidth + fgrid.fdatarect.cx - int1{ - (step-fwidth)};
+    if (gps_needsrowheight in fstate) then begin
+     rowstate.change(-1);
+    end;
    end;
    inherited;
   end;
