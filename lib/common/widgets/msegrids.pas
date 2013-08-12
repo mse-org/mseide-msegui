@@ -9950,6 +9950,7 @@ begin
   else begin
    fdatarowlinewidth := Value;
   end;
+  rowstatelist.change(-1);
   layoutchanged;
  end;
 end;
@@ -10179,6 +10180,7 @@ begin
     fdatarowheight:= value;
    end;
   end;
+  rowstatelist.change(-1);  
   layoutchanged;
  end;
 end;
