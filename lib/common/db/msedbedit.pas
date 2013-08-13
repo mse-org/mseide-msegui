@@ -925,6 +925,7 @@ type
    property valuerange;
    property valuestart;
    property onsetvalue;
+   property onsetintvalue;
    property step;
  end;
 

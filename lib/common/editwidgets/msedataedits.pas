@@ -1259,6 +1259,7 @@ type
  trealspinedit = class(tcustomrealspinedit)
   published
    property onsetvalue;
+   property onsetintvalue;
    property value;
    property valuedefault;
    property formatedit;
