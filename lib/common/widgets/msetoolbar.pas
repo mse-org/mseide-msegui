@@ -99,7 +99,6 @@ type
    property tagpointer: pointer read ftagpointer write ftagpointer;
    property shortcuts: shortcutarty read finfo.shortcut write setshortcuts;
    property shortcuts1: shortcutarty read finfo.shortcut1 write setshortcuts1;
-  public
    property imagelist: timagelist read getimagelist write setimagelist
                     stored isimageliststored;
    property imagenr: imagenrty read finfo.imagenr write setimagenr

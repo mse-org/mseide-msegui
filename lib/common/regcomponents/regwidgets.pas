@@ -47,7 +47,7 @@ uses
  msesplitter,msedock,mseforms,mseclasses,typinfo,msearrayprops,msewidgets,
  msegui,formdesigner,msedial,msemenuwidgets,msewindowwidget,msechart,
  msepolygon,msepickwidget,msetraywidget,msedockpanelform,msechartedit,mseedit,
- msebarcode,msedatalist
+ msebarcode,msedatalist,mseact
  {$ifndef mse_no_opengl}
 //  {$ifdef FPC}
      ,mseopenglwidget
@@ -112,6 +112,17 @@ type
  end;
  
  ttraceseditor = class(tpersistentarraypropertyeditor)
+  protected
+   function geteditorclass: propertyeditorclassty; override;  
+  public
+ end;
+
+ ttoolbuttoneditor = class(tclasselementeditor)
+  public
+   function getvalue: msestring; override;
+ end;
+ 
+ ttoolbuttonseditor = class(tpersistentarraypropertyeditor)
   protected
    function geteditorclass: propertyeditorclassty; override;  
   public
@@ -214,6 +225,7 @@ begin
 
 // registerpropertyeditor(typeinfo(tface),tdial,'',toptionalclasspropertyeditor);
  registerpropertyeditor(typeinfo(ttraces),nil,'',ttraceseditor);
+ registerpropertyeditor(typeinfo(ttoolbuttons),nil,'',ttoolbuttonseditor);
  registerpropertyeditor(typeinfo(trealdatalist),ttrace,'',
                                 toptionaldatalistpropertyeditor);
  
@@ -366,6 +378,32 @@ end;
 function ttraceseditor.geteditorclass: propertyeditorclassty;
 begin
  result:= ttraceeditor;
+end;
+
+{ ttoolbuttoneditor }
+
+function ttoolbuttoneditor.getvalue: msestring;
+begin
+ with ttoolbutton(getpointervalue) do begin
+  if mao_separator in options then begin
+   result:= '<---->';
+  end
+  else begin
+   if action <> nil then begin
+    result:= '<'+action.name+'>';
+   end
+   else begin
+    result:= '<>';
+   end;
+  end;
+ end;
+end;
+
+{ ttoolbuttonseditor }
+
+function ttoolbuttonseditor.geteditorclass: propertyeditorclassty;
+begin
+ result:= ttoolbuttoneditor;
 end;
 
 { tcoloptionseditor }
