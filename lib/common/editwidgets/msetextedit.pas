@@ -1593,7 +1593,7 @@ begin
 end;
 
 function tcustomtextedit.mousepostotextpos(const mousepos: pointty;
-                     out textpos: gridcoordty; widgetorg: boolean = false): boolean;
+             out textpos: gridcoordty; widgetorg: boolean = false): boolean;
                      //false if out of text, textpos clamped to textrange
 var
  grid: tcustomwidgetgrid1;
@@ -1645,7 +1645,9 @@ begin
  textinfo.tabulators:= ftabulators;
  po1:= textindextopos(getcanvas,textinfo,textpos.col);
  po2:= fgridintf.getcol.cellorigin;
- result.y:= po1.y + po2.y + textpos.row * tcustomwidgetgrid1(fgridintf.getcol.grid).ystep;
+ result.y:= po1.y + {po2.y +} 
+ tcustomwidgetgrid1(fgridintf.getcol.grid).cellrect(mgc(0,textpos.row)).y;
+//              textpos.row * tcustomwidgetgrid1(fgridintf.getcol.grid).ystep;
  result.x:= po1.x + po2.x;
  if screenorg then begin
   translateclientpoint1(result,fgridintf.getcol.grid,nil);
