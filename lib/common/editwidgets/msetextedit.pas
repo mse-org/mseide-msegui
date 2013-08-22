@@ -1578,15 +1578,23 @@ begin
  inherited;
 end;
 
-procedure tcustomtextedit.mousepostotextpos1( const row: integer; const mousepos: pointty;
+procedure tcustomtextedit.mousepostotextpos1( const row: integer;
+             const mousepos: pointty;
              var textpos: gridcoordty; var result: boolean);
 var
  textinfo: drawtextinfoty;
+ col1: twidgetcol;
 begin
+ col1:= fgridintf.getcol;
  textinfo.text:= flines.richitems[row];
- textinfo.font:= fgridintf.getcol.rowfont(row);
+ textinfo.font:= col1.rowfont(row);
  textinfo.flags:= feditor.textflags;
- textinfo.dest:= innerclientrect;
+ if row = col1.grid.row then begin
+  textinfo.dest:= innerclientrect;
+ end
+ else begin
+  textinfo.dest:= col1.grid.cellrect(mgc(col1.index,row),cil_inner,false,true);
+ end;
  textinfo.tabulators:= ftabulators;
  result:= postotextindex(getcanvas,textinfo,mousepos,textpos.col);
  textpos.row:= row;
@@ -1598,11 +1606,19 @@ function tcustomtextedit.mousepostotextpos(const mousepos: pointty;
 var
  grid: tcustomwidgetgrid1;
  arow: integer;
- po1: pointty;
+ {po1,}pt2: pointty;
  int1: integer;
 begin
  result:= true;
  grid:= tcustomwidgetgrid1(fgridintf.getcol.grid);
+ if widgetorg then begin
+  pt2:= widgetpostoclientpos(mousepos);
+ end
+ else begin
+  pt2:= mousepos;
+ end;
+ arow:= grid.rowatpos(pt2.y);
+ {
  if widgetorg then begin
   int1:= fgridintf.getrow * grid.ystep;
  end
@@ -1612,6 +1628,7 @@ begin
  int1:= (mousepos.y + int1);
  arow:= int1 div grid.ystep;
  int1:= int1 - arow * grid.ystep;
+ }
  if arow < 0 then begin
   result:= false;
   arow:= 0;
@@ -1622,6 +1639,9 @@ begin
    arow:= grid.frowcount-1;
   end;
  end;
+ int1:= mousepos.y - grid.rowpos(arow);
+ mousepostotextpos1(arow,makepoint(mousepos.x,int1),textpos,result);
+ {
  if widgetorg then begin
   mousepostotextpos1(arow,makepoint(mousepos.x,int1),textpos,result);
  end
@@ -1630,6 +1650,7 @@ begin
   mousepostotextpos1(arow,makepoint(mousepos.x - po1.x,
      mousepos.y - arow*grid.ystep - po1.y),textpos,result);
  end;
+ }
 end;
 
 function tcustomtextedit.textpostomousepos(const textpos: gridcoordty;

@@ -2061,7 +2061,10 @@ type
 
    procedure updatepopupmenu(var amenu: tpopupmenu; 
                          var mouseinfo: mouseeventinfoty); override;
-   function rowatpos(y: integer): integer; //0..rowcount-1, invalidaxis if invalid
+   function rowatpos(y: integer): integer; 
+            //0..rowcount-1, invalidaxis if invalid, client origin
+   function rowpos(arow: integer): integer;
+            //client origin
    function ystep: integer;
    function mergestart(const acol: integer; const arow: integer): integer;
    function mergeend(const acol: integer; const arow: integer): integer;
@@ -2173,8 +2176,10 @@ type
    function cellatpos(const apos: pointty): gridcoordty; overload;
    function cellrect(const cell: gridcoordty;
                  const innerlevel: cellinnerlevelty = cil_all;
-                 const nomerged: boolean = false): rectty;
-                 //origin = paintrect.pos
+                 const nomerged: boolean = false;
+                 const acellorigin: boolean = false): rectty;
+                 //origin = paintrect.pos if acellorigin = false,
+                 //cell origin otherwise
    function clippedcellrect(const cell: gridcoordty;
                  const innerlevel: cellinnerlevelty = cil_all): rectty;
                  //origin = paintrect.pos, clipped by datarect
@@ -10407,6 +10412,25 @@ begin
  end;
 end;
 
+function tcustomgrid.rowpos(arow: integer): integer;
+begin
+ result:= 0;
+ if arow < 0 then begin
+  arow:= 0;
+ end;
+ if arow >= frowcount then begin
+  arow:= frowcount-1;
+ end;
+ if arow > 0 then begin
+  if og_rowheight in foptionsgrid then begin
+   result:= fdatacols.frowstate.rowypos[arow];
+  end
+  else begin
+   result:= fdatacols.frowstate.visiblerow(arow) * fystep;
+  end;
+ end;
+end;
+
 procedure tcustomgrid.firstcellclick(const cell: gridcoordty;
                                               const info: mouseeventinfoty);
 begin
@@ -12140,7 +12164,8 @@ end;
 
 function tcustomgrid.cellrect(const cell: gridcoordty;
               const innerlevel: cellinnerlevelty = cil_all;
-              const nomerged: boolean = false): rectty;
+              const nomerged: boolean = false;
+              const acellorigin: boolean = false): rectty;
 
  procedure updatex(const aprop: tgridprop);
  begin
@@ -12196,7 +12221,9 @@ begin  //cellrect
    isfixr:= -row <= ffixrows.count;
    if isfixr then begin
     with ffixrows[row] do begin
-     y:= fstart;
+     if not acellorigin then begin
+      y:= fstart;
+     end;
      cy:= fend-fstart;
      if innerlevel = cil_noline then begin
       dec(cy,linewidth);
@@ -12223,7 +12250,7 @@ begin  //cellrect
        if col < fcaptions.count then begin
         with tcolheader(fcaptions.fitems[col]) do begin
          if fmergeflags * [cmf_v,cmf_h] <> [] then begin
-          result:= cellrect(frefcell,innerlevel);
+          result:= cellrect(frefcell,innerlevel,false,acellorigin);
           exit;
          end;
          inc(cx,fmergedcx);
@@ -12237,7 +12264,7 @@ begin  //cellrect
        if int1 < fcaptionsfix.count then begin
         with tcolheader(fcaptionsfix.fitems[int1]) do begin
          if fmergeflags * [cmf_v,cmf_h] <> [] then begin
-          result:= cellrect(frefcell,innerlevel);
+          result:= cellrect(frefcell,innerlevel,false,acellorigin);
           exit;
          end;
          inc(x,fmergedx);
@@ -12261,17 +12288,24 @@ begin  //cellrect
     if (og_rowheight in foptionsgrid) and (int1 >= 0) then begin
      fdatacols.frowstate.cleanrowheight(row);
      fdatacols.frowstate.internalystep(row,y,cy);
+     if acellorigin then begin
+      y:= 0;
+     end;
     end
     else begin
      cy:= fystep;
-     if int1 < 0 then begin
-      y:= row * cy;
-     end
-     else begin
-      y:= int1 * cy;
+     if not acellorigin then begin
+      if int1 < 0 then begin
+       y:= row * cy;
+      end
+      else begin
+       y:= int1 * cy;
+      end;
      end;
     end;
-    y:= y + ffixrows.ffirstsize + fscrollrect.y;
+    if not acellorigin then begin
+     y:= y + ffixrows.ffirstsize + fscrollrect.y;
+    end;
     if innerlevel > cil_all then begin
      int2:= fdatarowlinewidth;
      if og_rowheight in foptionsgrid then begin
@@ -12297,9 +12331,12 @@ begin  //cellrect
   if col < 0 then begin
    if -col <= ffixcols.count then begin
     with ffixcols[col] do begin
-     x:= x + fstart;
+     if not acellorigin then begin
+      x:= x + fstart;
+     end;
      cx:= cx + fend - fstart;
-     if (innerlevel = cil_noline) or isfixr and (innerlevel >= cil_noline) then begin
+     if (innerlevel = cil_noline) or isfixr and 
+                                    (innerlevel >= cil_noline) then begin
       dec(cx,flinewidth);
       if -cell.col > ffixcols.count - ffixcols.oppositecount then begin
         inc(x,flinewidth);
@@ -12318,12 +12355,14 @@ begin  //cellrect
   else begin
    with fdatacols[col] do begin
     cx:= cx + fend-fstart;
-    if co_nohscroll in foptions then begin
-     x:= x + fstart;
-    end
-    else begin
-     x:= x + fstart + ffixcols.ffirstsize + fdatacols.ffirstsize +
-                                                             fscrollrect.x;
+    if not acellorigin then begin
+     if co_nohscroll in foptions then begin
+      x:= x + fstart;
+     end
+     else begin
+      x:= x + fstart + ffixcols.ffirstsize + fdatacols.ffirstsize +
+                                                              fscrollrect.x;
+     end;
     end;
     if (innerlevel >= cil_noline) or 
                             isfixr and (innerlevel >= cil_noline) then begin
@@ -12361,7 +12400,9 @@ begin  //cellrect
    end;
   end;
  end;
- addpoint1(result.pos,pointty(tgridframe(fframe).fi.innerframe.topleft));
+ if not acellorigin then begin
+  addpoint1(result.pos,pointty(tgridframe(fframe).fi.innerframe.topleft));
+ end;
 end;   //cellrect
 
 function tcustomgrid.clippedcellrect(const cell: gridcoordty;
