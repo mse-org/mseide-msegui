@@ -1607,15 +1607,16 @@ var
  grid: tcustomwidgetgrid1;
  arow: integer;
  {po1,}pt2: pointty;
- int1: integer;
+// int1: integer;
 begin
  result:= true;
  grid:= tcustomwidgetgrid1(fgridintf.getcol.grid);
+ pt2:= mousepos;
  if widgetorg then begin
-  pt2:= widgetpostoclientpos(mousepos);
+  pt2.y:= pt2.y + grid.rowpos(grid.row); //grid client data origin
  end
  else begin
-  pt2:= mousepos;
+  subpoint1(pt2,fgridintf.getcol.cellorigin);
  end;
  arow:= grid.rowatpos(pt2.y);
  {
@@ -1639,8 +1640,8 @@ begin
    arow:= grid.frowcount-1;
   end;
  end;
- int1:= mousepos.y - grid.rowpos(arow);
- mousepostotextpos1(arow,makepoint(mousepos.x,int1),textpos,result);
+ pt2.y:= pt2.y - grid.rowpos(arow);
+ mousepostotextpos1(arow,pt2,textpos,result);
  {
  if widgetorg then begin
   mousepostotextpos1(arow,makepoint(mousepos.x,int1),textpos,result);
