@@ -134,7 +134,8 @@ begin
  ffirstdayofweek:= dw_mon;
  freddayofweek:= dw_sun;
  inherited create(intf);
- fforcecaret:= true;
+ include(fstate,dcs_forcecaret);
+// fforcecaret:= true;
  bounds_cx:= popupcalendarwidth;
 end;
 

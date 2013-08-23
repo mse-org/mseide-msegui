@@ -15,6 +15,6 @@ object ${%FORMNAME%}: t${%FORMNAME%}
     340
     200
   )
-  dragdock.optionsdock = [od_savepos, od_savezorder, od_savechildren, od_canmove, od_canfloat, od_candock, od_acceptsdock, od_dockparent, od_splitvert, od_splithorz, od_tabed, od_proportional, od_propsize]
+  dragdock.optionsdock = [od_savepos, od_savezorder,  od_canmove, od_canfloat, od_candock, od_acceptsdock, od_dockparent, od_splitvert, od_splithorz, od_tabed, od_proportional, od_propsize]
   moduleclassname = 'tdockpanelform'
 end

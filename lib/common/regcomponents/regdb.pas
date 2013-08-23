@@ -198,6 +198,22 @@ type
    procedure setvalue(const value: msestring); override;
  end;
 
+ toptionlbpropertyeditor = class(tsetelementeditor)
+  public
+   function getdefaultstate: propertystatesty; override;
+   procedure setvalue(const value: msestring); override;
+ end;
+
+ toptionslbpropertyeditor = class(tsetpropertyeditor)
+  public
+   constructor create(const adesigner: idesigner;
+        const amodule: tmsecomponent; const acomponent: tcomponent;
+            const aobjectinspector: iobjectinspector;
+            const aprops: propinstancearty; atypeinfo: ptypeinfo); override;
+   function getdefaultstate: propertystatesty; override;
+   procedure setvalue(const value: msestring); override;
+ end;
+ 
  tfielddefpropertyeditor = class(tclasspropertyeditor)
   public
    function getvalue: msestring; override;
@@ -459,8 +475,10 @@ begin
                              tcomponentpropertyeditor);
  registerpropertyeditor(typeinfo(tdataset),tfield,'dataset',
                              tlocalcomponentpropertyeditor);
- registerpropertyeditor(typeinfo(lbfiltereventty),tlbdropdownlistcontroller,
+ registerpropertyeditor(typeinfo(lbfiltereventty),tcustomlbdropdownlistcontroller,
                            'onfilter',tonfilterpropertyeditor);
+ registerpropertyeditor(typeinfo(optionslbty),tcustomlbdropdownlistcontroller,
+                           'optionslb',toptionslbpropertyeditor);
  registerpropertyeditor(typeinfo(tfielddefs),tdataset,'',
                               tfielddefspropertyeditor);
  registerpropertyeditor(typeinfo(boolean),tdataset,'Active',
@@ -1106,7 +1124,7 @@ procedure tonfilterpropertyeditor.setvalue(const value: msestring);
 
 begin
  inherited;
- with tlbdropdownlistcontroller(fprops[0].instance) do begin
+ with tcustomlbdropdownlistcontroller(fprops[0].instance) do begin
   if not (olb_copyitems in optionslb) then begin
    if getmethodvalue.data <> nil then begin
     if buttonlength = 0 then begin
@@ -1120,6 +1138,71 @@ begin
    end;
   end;
  end;
+end;
+
+procedure checkonfilter(const acontroller: tcustomlbdropdownlistcontroller;
+                           const optbefore: optionslbty);
+begin
+ with acontroller do begin
+  if (olb_copyitems in (optbefore >< optionslb)) and 
+      (tmethod(onfilter).data <> nil) then begin
+   if olb_copyitems in optbefore then begin
+    if buttonlength = 0 then begin
+     buttonlength:= -1;
+    end;
+   end
+   else begin
+    if buttonlength = -1 then begin
+     buttonlength:= 0;
+    end;
+   end;
+  end;
+ end;
+end;
+
+{ toptionlbpropertyeditor }
+
+function toptionlbpropertyeditor.getdefaultstate: propertystatesty;
+begin
+ result:= inherited getdefaultstate + [ps_volatile];
+end;
+
+procedure toptionlbpropertyeditor.setvalue(const value: msestring);
+var
+ opt1: optionslbty;
+ cont1: tcustomlbdropdownlistcontroller;
+begin
+ cont1:= tcustomlbdropdownlistcontroller(fprops[0].instance);
+ opt1:= cont1.optionslb;
+ inherited;
+ checkonfilter(cont1,opt1);
+end;
+
+{ toptionslbpropertyeditor }
+
+constructor toptionslbpropertyeditor.create(const adesigner: idesigner;
+               const amodule: tmsecomponent; const acomponent: tcomponent;
+               const aobjectinspector: iobjectinspector;
+               const aprops: propinstancearty; atypeinfo: ptypeinfo);
+begin
+ felementeditorclass:= toptionlbpropertyeditor;
+ inherited;
+end;
+
+function toptionslbpropertyeditor.getdefaultstate: propertystatesty;
+begin
+ result:= inherited getdefaultstate + [ps_volatile];
+end;
+
+procedure toptionslbpropertyeditor.setvalue(const value: msestring);
+var
+ opt1: optionslbty;
+ cont1: tcustomlbdropdownlistcontroller;
+begin
+ cont1:= tcustomlbdropdownlistcontroller(fprops[0].instance);
+ opt1:= cont1.optionslb;
+ inherited;
+ checkonfilter(cont1,opt1);
 end;
 
 { tfielddefspropertyeditor }

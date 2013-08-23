@@ -1222,7 +1222,7 @@ begin
   ea_textchanged: begin
    dochange;
   end;
-  ea_textedited: begin
+  ea_textedited,ea_undone: begin
    dotextedited;
   end;
  end;

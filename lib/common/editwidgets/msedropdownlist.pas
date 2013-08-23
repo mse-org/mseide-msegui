@@ -296,6 +296,8 @@ type
    property activebutton;
  end;
 
+ dropdowncontrollerstatety = (dcs_forcecaret,dcs_itemselecting,dcs_isstringkey);
+ dropdowncontrollerstatesty = set of dropdowncontrollerstatety;
  tcustomdropdowncontroller = class(teventpersistent,ibutton,ievent,
                                    idropdowncontroller,idataeditcontroller)
   private
@@ -308,7 +310,8 @@ type
    fselectkey: keyty;
    fintf: idropdown;
    foptions: dropdowneditoptionsty;
-   fforcecaret: boolean;
+   fstate: dropdowncontrollerstatesty;
+//   fforcecaret: boolean;
    procedure applicationactivechanged(const avalue: boolean); virtual;
    function getbuttonframeclass: dropdownbuttonframeclassty; virtual;
    procedure updatedropdownbounds(var arect: rectty); virtual;
@@ -417,6 +420,9 @@ type
    function getdropdowncolsclass: dropdowncolsclassty; virtual;
    procedure selectnone(const akey: keyty); override;
    procedure resetselection; override; //sets fcols.fitemindex to -1, no events
+   procedure reloadlist; virtual;
+   function getremoterowcount: integer; virtual;
+   procedure dobeforedropdown; override;
    
     //idropdownlist
    procedure itemselected(const index: integer; const akey: keyty); virtual;
@@ -1225,14 +1231,14 @@ end;
 
 procedure tcustomdropdowncontroller.dropdownactivated;
 begin
- if fforcecaret then begin
+ if dcs_forcecaret in fstate then begin
   fintf.geteditor.doactivate;
  end;
 end;
 
 procedure tcustomdropdowncontroller.dropdowndeactivated;
 begin
- if fforcecaret then begin
+ if dcs_forcecaret in fstate then begin
   fintf.geteditor.dodeactivate;
  end;
 end;
@@ -1321,7 +1327,7 @@ begin
     application.registeronapplicationactivechanged(
             {$ifdef FPC}@{$endif}applicationactivechanged);
    end;
-   if fforcecaret then begin
+   if dcs_forcecaret in fstate then begin
     fintf.geteditor.forcecaret:= true;
    end;
    try
@@ -1362,7 +1368,7 @@ end;
 
 constructor tcustomdropdownlistcontroller.create(const intf: idropdownlist);
 begin
- fforcecaret:= true;
+ include(fstate,dcs_forcecaret);
  fcols:= getdropdowncolsclass.create(self);
  fcols.onitemchange:= {$ifdef FPC}@{$endif}itemchanged;
  fcols.fitemindex:= -1;
@@ -1390,7 +1396,9 @@ begin
  case info.action of
   ea_textedited: begin
    if fdropdownlist <> nil then begin
-    fdropdownlist.filtertext:= fintf.geteditor.text;
+    if not (dcs_itemselecting in fstate) then begin
+     fdropdownlist.filtertext:= fintf.geteditor.text;
+    end;
    end
    else begin
     if (deo_autodropdown in foptions) then begin
@@ -1531,9 +1539,11 @@ begin
       fselectkey:= key_none;
       show(int1,fdropdownrowcount,int2,str1);
       fintf.geteditor.forcecaret:= false;
+      include(self.fstate,dcs_itemselecting);
       self.itemselected(int2,fselectkey);
      end;
     finally
+     exclude(self.fstate,dcs_itemselecting);
      fintf.geteditor.forcecaret:= false;
      doafterclosedropdown;
     end;
@@ -1701,6 +1711,16 @@ begin
  fcols.fitemindex:= -1;
 end;
 
+procedure tcustomdropdownlistcontroller.reloadlist;
+begin
+ //dummy
+end;
+
+function tcustomdropdownlistcontroller.getremoterowcount: integer;
+begin
+ result:= 0; //dummy
+end;
+
 procedure tcustomdropdownlistcontroller.internaldropdown;
 begin
  inherited;
@@ -1774,6 +1794,18 @@ end;
 function tcustomdropdownlistcontroller.getfixcolclass: dropdownfixcolclassty;
 begin
  result:= nil; //dummy
+end;
+
+procedure tcustomdropdownlistcontroller.dobeforedropdown;
+begin
+ if deo_livefilter in foptions then begin
+  with fintf.geteditor do begin
+   if not canundo then begin
+    text:= '';
+   end;
+  end;
+ end;
+ inherited;
 end;
 
 { tnocolsdropdownlistcontroller }
@@ -2025,7 +2057,8 @@ begin
  if arowcount = 0 then begin
   arowcount:= frowcount;
  end;
- if arowcount > frowcount then begin
+ if (arowcount > frowcount) and not 
+                      (deo_livefilter in fcontroller.foptions) then begin
   arowcount:= frowcount;
  end;
 // datarowheight:= font.lineheight;
@@ -2047,16 +2080,21 @@ begin
  fcontroller.updatedropdownpos(rect1);
 // widgetrect:= rect1;
  ffiltertext:= afiltertext;
- if (aitemindex = -1) and (ffiltertext <> '') then begin
-  application.beginnoignorewaitevents;
-  try
-   locate(ffiltertext);
-  finally
-   application.endnoignorewaitevents;
-  end;
+ if deo_livefilter in fcontroller.foptions then begin
+  setactiveitem(0);
  end
  else begin
-  setactiveitem(aitemindex);
+  if (aitemindex = -1) and (ffiltertext <> '') then begin
+   application.beginnoignorewaitevents;
+   try
+    locate(ffiltertext);
+   finally
+    application.endnoignorewaitevents;
+   end;
+  end
+  else begin
+   setactiveitem(aitemindex);
+  end;
  end;
  if inherited show(true,fcontroller.getwidget.window) = mr_ok then begin
   aitemindex:= fselectedindex;
@@ -2188,9 +2226,25 @@ begin
 end;
 
 procedure tdropdownlist.setfiltertext(const Value: msestring);
+var
+ li1: tdatalist;
 begin
- ffiltertext := Value;
- locate(ffiltertext);
+ ffiltertext:= Value;
+ if dlo_livefilter in foptions1 then begin
+  fcontroller.reloadlist;
+  if (fdatacols.count > 0) then begin
+   li1:= tdropdownstringcol(fdatacols[0]).fdata;
+   if li1 <> nil then begin
+    rowcount:= li1.count;
+   end;
+  end;
+  invalidate;
+  row:= 0;
+  setupeditor(ffocusedcell,true);
+ end
+ else begin
+  locate(ffiltertext);
+ end;
 end;
 
 procedure tdropdownlist.killrepeater;

@@ -176,7 +176,7 @@ type
    //calls destroy, not possible to use as destructor in FPC
  end;
  
- searchoptionty = (so_caseinsensitive,so_wholeword);
+ searchoptionty = (so_caseinsensitive,so_wholeword,so_wordstart);
  searchoptionsty = set of searchoptionty;
 
 procedure trimright1(var s: string); overload;
@@ -283,13 +283,14 @@ function mseissamestrlen(const apartstring,astring: msestring): boolean;
 function mseissametextlen(const apartstring,astring: msestring): boolean;
                 //case insensitive
 
-function encodesearchoptions(caseinsensitive: boolean = false;
-                        wholeword: boolean = false): searchoptionsty;
+function encodesearchoptions(const caseinsensitive: boolean = false;
+                        const wholeword: boolean = false;
+                        const wordstart: boolean = false): searchoptionsty;
 function msestringsearch(const substring,s: msestring; start: integer;
-                      options: searchoptionsty;
+                      const options: searchoptionsty;
                       const substringupcase: msestring = ''): integer; overload;
 function stringsearch(const substring,s: string; start: integer;
-                      options: searchoptionsty;
+                      const options: searchoptionsty;
                       const substringupcase: string = ''): integer; overload;
 function replacestring(const s: msestring; oldsub: msestring;
                            const newsub: msestring;
@@ -2859,12 +2860,14 @@ begin
  end;
 end;
 
-function encodesearchoptions(caseinsensitive: boolean = false;
-                        wholeword: boolean = false): searchoptionsty;
+function encodesearchoptions(const caseinsensitive: boolean = false;
+                        const wholeword: boolean = false;
+                        const wordstart: boolean = false): searchoptionsty;
 begin
  result:= [];
  if caseinsensitive then include(result,so_caseinsensitive);
  if wholeword then include(result,so_wholeword);
+ if wordstart then include(result,so_wordstart);
 end;
 
 function quotestring(value: string; quotechar: char;
@@ -3276,12 +3279,13 @@ begin
 end;
 
 function msestringsearch(const substring,s: msestring; start: integer;
-                              options: searchoptionsty; 
+                              const options: searchoptionsty; 
                               const substringupcase: msestring = ''): integer;
 var
  int1,int2: integer;
  ch1,ch2: msechar;
  str1,str2: msestring;
+ opt1: searchoptionsty;
 
 begin
  result:= 0;
@@ -3291,20 +3295,20 @@ begin
  if (length(substring) = 0) or (length(s) = 0) then begin
   exit;
  end;
- if so_wholeword in options then begin
-  exclude(options,so_wholeword);
+ if options * [so_wholeword,so_wordstart] <> [] then begin
+  opt1:= options - [so_wholeword,so_wordstart];
   result:= start;
   repeat
-   result:= msestringsearch(substring,s,result,options,substringupcase);
+   result:= msestringsearch(substring,s,result,opt1,substringupcase);
    if result <> 0 then begin
-//    if ((result = 1) or (s[result-1] = ' ') or (s[result-1] = c_tab)) then begin
     if (result = 1) or not isnamechar(s[result-1]) then begin
+     if not (so_wholeword in options) then begin
+      break; //so_wordstart
+     end;
      if (result + length(substring) > length(s)) then begin
       break;
      end
      else begin
-//      ch1:= s[result + length(substring)];
-//      if (ch1 = ' ') or (ch1 = c_tab) then begin
       if not isnamechar(s[result + length(substring)]) then begin
        break; //io
       end
@@ -3373,12 +3377,13 @@ begin
 end;
 
 function stringsearch(const substring,s: ansistring; start: integer;
-                      options: searchoptionsty;
+                      const options: searchoptionsty;
                       const substringupcase: ansistring = ''): integer; overload;
 var
  int1,int2: integer;
  ch1,ch2: char;
  str1,str2: ansistring;
+ opt1: searchoptionsty;
 
 begin
  result:= 0;
@@ -3389,19 +3394,19 @@ begin
   exit;
  end;
  if so_wholeword in options then begin
-  exclude(options,so_wholeword);
+  opt1:= options - [so_wholeword,so_wordstart];
   result:= start;
   repeat
-   result:= stringsearch(substring,s,result,options,substringupcase);
+   result:= stringsearch(substring,s,result,opt1,substringupcase);
    if result <> 0 then begin
-//    if ((result = 1) or (s[result-1] = ' ') or (s[result-1] = c_tab)) then begin
     if (result = 1) or not isnamechar(s[result-1]) then begin
+     if not (so_wholeword in options) then begin
+      break; //so_wordstart
+     end;
      if (result + length(substring) > length(s)) then begin
       break;
      end
      else begin
-//      ch1:= s[result + length(substring)];
-//      if (ch1 = ' ') or (ch1 = c_tab) then begin
       if not isnamechar(s[result + length(substring)]) then begin
        break; //io
       end
@@ -3478,7 +3483,7 @@ var
  oldhigh,newhigh: integer;
  int1,int2: integer;
  ch1: msechar;
- bo1: boolean;
+ bo1,bo2,bo3: boolean;
  s1: msestring;
 begin
  int1:= length(s);
@@ -3505,6 +3510,8 @@ begin
  setlength(result,int1); //max
  po2:= pointer(result);
  ch1:= oldsub[1];
+ bo2:= options*[so_wholeword,so_wordstart] = [];
+ bo3:= not (so_wholeword in options);
  while po1 < poend do begin
   bo1:= po3^ = ch1;
   if bo1 then begin
@@ -3514,8 +3521,8 @@ begin
      break;
     end;
    end;
-   bo1:= bo1 and (not(so_wholeword in options) or 
-             not isnamechar((po1+length(oldsub))^) and
+   bo1:= bo1 and (bo2 or 
+             (bo3 or not isnamechar((po1+length(oldsub))^)) and
               ((po1=pointer(s)) or not isnamechar((po1-1)^)));
    if bo1 then begin
     for int2:= 0 to newhigh do begin
@@ -3555,7 +3562,7 @@ var
  oldhigh,newhigh: integer;
  int1,int2: integer;
  ch1: char;
- bo1: boolean;
+ bo1,bo2,bo3: boolean;
  s1: string;
 begin
  int1:= length(s);
@@ -3582,6 +3589,8 @@ begin
  setlength(result,int1); //max
  po2:= pointer(result);
  ch1:= oldsub[1];
+ bo2:= options*[so_wholeword,so_wordstart] = [];
+ bo3:= not (so_wholeword in options);
  while po1 < poend do begin
   bo1:= po3^ = ch1;
   if bo1 then begin
@@ -3591,8 +3600,8 @@ begin
      break;
     end;
    end;
-   bo1:= bo1 and (not(so_wholeword in options) or 
-             not isnamechar((po1+length(oldsub))^) and
+   bo1:= bo1 and (bo2 or 
+             (bo3 or not isnamechar((po1+length(oldsub))^)) and
               ((po1=pointer(s)) or not isnamechar((po1-1)^)));
    if bo1 then begin
     for int2:= 0 to newhigh do begin

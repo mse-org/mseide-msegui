@@ -481,9 +481,12 @@ type
    procedure setvalue(const value: msestring); override;
  end;
 
+ setelementeditorclassty = class of tsetelementeditor;
+ 
  tsetpropertyeditor = class(tordinalpropertyeditor)
   protected
    finvisibleitems: tintegerset;
+   felementeditorclass: setelementeditorclassty;
    function getdefaultstate: propertystatesty; override;
    function getinvisibleitems: tintegerset; virtual;
   public
@@ -2426,6 +2429,9 @@ constructor tsetpropertyeditor.create(const adesigner: idesigner;
                const aprops: propinstancearty; atypeinfo: ptypeinfo);
 begin
  finvisibleitems:= getinvisibleitems;
+ if felementeditorclass = nil then begin
+  felementeditorclass:= tsetelementeditor;
+ end;
  inherited;
 end;
 
@@ -2482,7 +2488,7 @@ begin
  int2:= 0;
  for int1:= 0 to high(result) do begin
   if not (int1 in finvisibleitems) then begin
-   result[int2]:= tsetelementeditor.create(fdesigner,fmodule,fcomponent,
+   result[int2]:= felementeditorclass.create(fdesigner,fmodule,fcomponent,
                     fobjectinspector,fprops,compty,self,int1);
    inc(int2);
   end;
