@@ -3276,7 +3276,8 @@ begin
 end;
 
 function msestringsearch(const substring,s: msestring; start: integer;
-                 options: searchoptionsty; const substringupcase: msestring = ''): integer;
+                              options: searchoptionsty; 
+                              const substringupcase: msestring = ''): integer;
 var
  int1,int2: integer;
  ch1,ch2: msechar;

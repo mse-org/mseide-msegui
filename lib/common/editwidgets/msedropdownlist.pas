@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -28,7 +28,7 @@ const
 
 type
 
- dropdownlistoptionty = (dlo_casesensitive,dlo_posinsensitive);
+ dropdownlistoptionty = (dlo_casesensitive,dlo_posinsensitive,dlo_livefilter);
  dropdownlistoptionsty = set of dropdownlistoptionty;
 
  dropdownliststatety = (dls_firstmousemoved,dls_mousemoved,dls_scrollup);
@@ -39,7 +39,7 @@ type
                         deo_keydropdown,//shift down starts dropdown
                         deo_modifiedbeforedropdown, 
                         //edit.modified called before dropdown
-                        deo_casesensitive,deo_posinsensitive,
+                        deo_casesensitive,deo_posinsensitive,deo_livefilter,
                         deo_sorted,deo_disabled,deo_autosavehistory,
                         deo_cliphint,deo_right,deo_colsizing,deo_savestate);
  dropdowneditoptionsty = set of dropdowneditoptionty;
@@ -1503,6 +1503,9 @@ begin
       end;
       if deo_posinsensitive in self.foptions then begin
        options:= options + [dlo_posinsensitive];
+      end;
+      if deo_livefilter in self.foptions then begin
+       options:= options + [dlo_livefilter];
       end;
       if deo_sorted in self.foptions then begin
        sort;

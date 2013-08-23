@@ -2157,6 +2157,7 @@ type
   private
    fedrecnums: integerarty;
   protected
+   procedure reloadlist; virtual;
    procedure dofilter(var recno: integer; var accept: boolean); virtual; abstract;
    procedure valuecolchanged; override;
    function getbuttonframeclass: dropdownbuttonframeclassty; override;
@@ -2181,6 +2182,7 @@ type
    procedure setlookupbuffer(const avalue: tcustomlookupbuffer);
   protected
    procedure dofilter(var recno: integer; var accept: boolean); override;
+   procedure reloadlist; override;
    function createdropdownlist: tdropdownlist; override;
    function candropdown: boolean; override;
    procedure itemselected(const index: integer; const akey: keyty); override;
@@ -10020,6 +10022,11 @@ begin
  inherited; 
 end;
 
+procedure texterndatadropdownlistcontroller.reloadlist;
+begin
+ //dummy
+end;
+
 { tdbenumeditlb }
 
 function tdbenumeditlb.getdropdown: tlbdropdownlistcontroller;
@@ -11475,7 +11482,7 @@ begin
  fonfilter(flookupbuffer,flookupbuffer.textindex(fsortfieldno,recno,true),accept);
 end;
 
-function  tcustomlbdropdownlistcontroller.createdropdownlist: tdropdownlist;
+procedure tcustomlbdropdownlistcontroller.reloadlist;
 var
  int1,int2,int3,int4: integer;
  sortfieldno: integer;
@@ -11514,6 +11521,13 @@ begin
     end;
    end;
   end;
+ end;
+end;
+
+function  tcustomlbdropdownlistcontroller.createdropdownlist: tdropdownlist;
+begin
+ if olb_copyitems in foptionslb then begin
+  reloadlist;
   result:= tcopydropdownlist.create(self,fcols,nil);
  end
  else begin
@@ -11550,11 +11564,12 @@ begin
   end;
   tdropdowncols1(fcols).fitemindex:= int1;
  end;
+ ilbdropdownlist(fintf).recordselected(int1,akey);
  if olb_copyitems in foptionslb then begin
   cols.clear;
   fedrecnums:= nil;
  end;
- ilbdropdownlist(fintf).recordselected(int1,akey);
+// ilbdropdownlist(fintf).recordselected(int1,akey);
 end;
 
 function tcustomlbdropdownlistcontroller.getrowcount: integer;
