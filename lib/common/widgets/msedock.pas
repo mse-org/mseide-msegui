@@ -4522,7 +4522,8 @@ var
  rect: rectty;
 begin
  rect:= sender.pickrect;
- if (fcontroller.mdistate <> mds_minimized) and
+ if fcontroller.canmdisize and 
+              (fcontroller.mdistate <> mds_minimized) and
       (not pointinrect(rect.pos,fgriprect) or 
          pointinrect(rect.pos,frects[dbr_handle])) then begin
   with fintf.getwidget do begin
@@ -4631,14 +4632,18 @@ procedure tgripframe.paintxorpic(const sender: tobjectpicker;
                                                   const canvas: tcanvas);
 var
  rect1: rectty;
+ ar1: integerarty;
 begin
- rect1:= calcsizingrect(sizingkindty(sender.currentobjects[0]),sender.pickoffset);
- with fintf.getwidget do begin
-  subpoint1(rect1.pos,paintparentpos);
-  canvas.save;
-  canvas.addcliprect(paintrectparent);
-  canvas.drawxorframe(rect1,-3,stockobjects.bitmaps[stb_dens50]);
-  canvas.restore;
+ ar1:= sender.currentobjects;
+ if ar1 <> nil then begin
+  rect1:= calcsizingrect(sizingkindty(ar1[0]),sender.pickoffset);
+  with fintf.getwidget do begin
+   subpoint1(rect1.pos,paintparentpos);
+   canvas.save;
+   canvas.addcliprect(paintrectparent);
+   canvas.drawxorframe(rect1,-3,stockobjects.bitmaps[stb_dens50]);
+   canvas.restore;
+  end;
  end;
 end;
 
