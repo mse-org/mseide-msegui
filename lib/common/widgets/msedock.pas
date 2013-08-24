@@ -550,6 +550,8 @@ type
    procedure iconchanged(const sender: tobject);
   protected
    procedure mouseevent(var info: mouseeventinfoty); override;
+   procedure childmouseevent(const sender: twidget;
+                          var info: mouseeventinfoty); override;
    procedure updatewindowinfo(var info: windowinfoty); override;
    procedure internalcreateframe; override;
    procedure clientrectchanged; override;
@@ -4810,10 +4812,45 @@ begin
 end;
 
 procedure tdockpanel.mouseevent(var info: mouseeventinfoty);
+var
+ bo1: boolean;
 begin
+ bo1:= info.eventkind = ek_buttonrelease;
+ if not (es_processed in info.eventstate) and bo1 then begin
+  fdragdock.mouseevent(info);
+ end; 
+ inherited;
+ if not (es_processed in info.eventstate) and not bo1 then begin
+  fdragdock.mouseevent(info);
+ end;
+ {
  inherited;
  if not (es_processed in info.eventstate) then begin
   fdragdock.mouseevent(info);
+ end;
+ }
+end;
+
+procedure tdockpanel.childmouseevent(const sender: twidget;
+               var info: mouseeventinfoty);
+var
+ pt1,pt2: pointty;
+begin
+ pt2:= pos;
+ fdragdock.checkmouseactivate(self,info);
+ application.delayedmouseshift(subpoint(pos,pt2)); //follow shift in view
+ if (frame <> nil) and fdragdock.ismdi and 
+                       not (csdesigning in componentstate) then begin
+  pt1:= info.pos;
+  translatewidgetpoint1(info.pos,sender,self);
+  frame.mouseevent(info);
+  info.pos:= pt1;
+ end;
+ if not (es_processed in info.eventstate) then begin  
+  fdragdock.childmouseevent(sender,info);
+  if not (es_processed in info.eventstate) then begin
+   inherited;
+  end;
  end;
 end;
 
