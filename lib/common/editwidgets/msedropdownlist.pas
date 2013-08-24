@@ -427,6 +427,7 @@ type
    procedure reloadlist; virtual;
    function getremoterowcount: integer; virtual;
    procedure dobeforedropdown; override;
+   procedure doafterclosedropdown; override;
    
     //idropdownlist
    procedure itemselected(const index: integer; const akey: keyty); virtual;
@@ -1822,6 +1823,14 @@ begin
     text:= '';
    end;
   end;
+ end;
+ inherited;
+end;
+
+procedure tcustomdropdownlistcontroller.doafterclosedropdown;
+begin
+ if ftimer <> nil then begin
+  ftimer.enabled:= false; //cancel pending updates
  end;
  inherited;
 end;
