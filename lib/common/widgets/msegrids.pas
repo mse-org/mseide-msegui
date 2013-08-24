@@ -15915,7 +15915,7 @@ var
  int1: integer;
 begin
  col1:= tcustomstringcol(fdatacols[acell.col]);
- mstr1:= col1[acell.row];
+ mstr1:= col1.getrowtext(acell.row);
  col1.updatedisptext(mstr1);
  int1:= 0;
  if not focusin then begin

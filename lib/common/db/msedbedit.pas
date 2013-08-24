@@ -10955,9 +10955,12 @@ begin
   frecnums[int2]:= int3;
  end;
  ffirstrecord:= frecnums[0];
- if int1 < rowcount then begin
+ if int3 < 0 then begin
   frame.sbvert.options:= frame.sbvert.options-[sbo_show];
   rowcount:= int1;
+ end
+ else begin
+  frame.sbvert.options:= frame.sbvert.options+[sbo_show];
  end;
 end;
 
@@ -11252,7 +11255,8 @@ begin
  tdbgridframe.create(iscrollframe(self),self,iautoscrollframe(self));
 end;
 
-procedure texterndatadropdownlist.createdatacol(const index: integer; out item: tdatacol);
+procedure texterndatadropdownlist.createdatacol(const index: integer;
+                                                      out item: tdatacol);
 begin
  item:= tlbdropdownstringcol.create(self,fdatacols);
 end;
