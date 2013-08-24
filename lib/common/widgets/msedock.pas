@@ -2650,6 +2650,7 @@ var
  tabed: boolean;
  ar1: msestringarty;
  int1: integer;
+ po1: prectty;
 begin
  writer.writeinteger('splitdir',ord(fsplitdir));
  writer.writeinteger('useroptions',
@@ -2688,7 +2689,9 @@ begin
     end;
    end;
    writer.writestring('parent',str1);
-   if bounds = nil then begin
+   po1:= bounds;
+   if po1 = nil then begin
+    po1:= @fwidgetrect;
     writer.writeboolean('visible',visible);
    end;
    writer.writeinteger('mdistate',ord(fmdistate));
@@ -2696,10 +2699,10 @@ begin
    writer.writeinteger('ny',fnormalrect.y);
    writer.writeinteger('ncx',fnormalrect.cx);
    writer.writeinteger('ncy',fnormalrect.cy);
-   writer.writeinteger('x',bounds_x);
-   writer.writeinteger('y',bounds_y);
-   writer.writeinteger('cx',bounds_cx);
-   writer.writeinteger('cy',bounds_cy);
+   writer.writeinteger('x',po1^.x);
+   writer.writeinteger('y',po1^.y);
+   writer.writeinteger('cx',po1^.cx);
+   writer.writeinteger('cy',po1^.cy);
    with fhiddensizeref do begin
     writer.writeinteger('rcx',cx);
     writer.writeinteger('rcy',cy);
