@@ -2102,17 +2102,17 @@ begin
 end;
 
 procedure tcustomdockform.mouseevent(var info: mouseeventinfoty);
-//var
-// bo1: boolean;
+var
+ bo1: boolean;
 begin
-// bo1:= info.eventkind ek_buttonrelease;
-// if not (es_processed in info.eventstate) and bo1 then begin
+ bo1:= info.eventkind = ek_buttonrelease;
+ if not (es_processed in info.eventstate) and bo1 then begin
   fdragdock.mouseevent(info);
-// end; 
+ end; 
  inherited;
-// if not (es_processed in info.eventstate) and not bo1 then begin
-//  fdragdock.mouseevent(info);
-// end;
+ if not (es_processed in info.eventstate) and not bo1 then begin
+  fdragdock.mouseevent(info);
+ end;
 end;
 
 procedure tcustomdockform.childmouseevent(const sender: twidget;
