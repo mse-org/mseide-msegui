@@ -1514,6 +1514,7 @@ type
    property optionsdb;   
    property cols;
    property dropdownrowcount;
+   property delay;
    property valuecol;
    property width;
    property datarowlinewidth;
@@ -1532,6 +1533,7 @@ type
    property optionsdb;   
    property cols;
    property dropdownrowcount;
+   property delay;
    property valuecol;
    property width;
    property datarowlinewidth;
@@ -2208,6 +2210,7 @@ type
    property cols;
    property onfilter;
    property dropdownrowcount;
+   property delay;
    property valuecol;
    property width;
    property datarowlinewidth;
@@ -2226,6 +2229,7 @@ type
    property cols;
    property onfilter;
    property dropdownrowcount;
+   property delay;
    property valuecol;
    property width;
    property datarowlinewidth;

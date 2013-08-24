@@ -595,6 +595,7 @@ type
    property history: msestringarty read gethistory write sethistory;
   published
    property dropdownrowcount; //first
+   property delay;
    property historymaxcount: integer read fhistorymaxcount
                       write sethistorymaxcount default defaulthistorymaxcount;
    procedure clearhistory;

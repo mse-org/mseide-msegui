@@ -398,7 +398,10 @@ type
    procedure setimageframe_top(const avalue: integer);
    procedure setimageframe_right(const avalue: integer);
    procedure setimageframe_bottom(const avalue: integer);
+   function getdelay: integer;
+   procedure setdelay(avalue: integer);
   protected
+   ftimer: tsimpletimer;
    fimagelist: timagelist;
    fimageframe: framety;
    fdropdownrowcount: integer;
@@ -412,6 +415,7 @@ type
    fdropdownitems: tdropdowncols;
    fdropdownlist: tdropdownlist;
    fcols: tdropdowncols;
+   procedure dotimer(const sender: tobject);
    procedure objectevent(const sender: tobject;
                                const event: objecteventty); override;
    procedure valuecolchanged; virtual;
@@ -445,6 +449,8 @@ type
    property cols: tdropdowncols read fcols write setcols;
    property valuecol: integer read fvaluecol write setvaluecol default 0;
    property itemindex: integer read getitemindex write setitemindex default -1;
+   property delay: integer read getdelay write setdelay default 0;
+                     //ms, -1 = idle
    property dropdownrowcount: integer read fdropdownrowcount 
                           write fdropdownrowcount default 8;
    property width: integer read fwidth write fwidth default 0;
@@ -476,6 +482,7 @@ type
   published
    property options;
    property dropdownrowcount;
+   property delay;
    property width;
    property datarowlinewidth;
    property datarowlinecolor;
@@ -1380,6 +1387,7 @@ end;
 
 destructor tcustomdropdownlistcontroller.destroy;
 begin
+ freeandnil(ftimer);
  inherited;
  fcols.Free;
 end;
@@ -1389,27 +1397,37 @@ begin
  result:= tdropdowncols;
 end;
 
+procedure tcustomdropdownlistcontroller.dotimer(const sender: tobject);
+begin
+ if fdropdownlist <> nil then begin
+  if not (dcs_itemselecting in fstate) then begin
+   fdropdownlist.filtertext:= fintf.geteditor.text;
+  end;
+ end
+ else begin
+  if (deo_autodropdown in foptions) then begin
+   if candropdown and ((fintf.geteditor.text <> '') or 
+                         (deo_forceselect in foptions)) then begin
+    dropdown;
+   end;
+  end
+  else begin
+   fcols.fitemindex:= -1;
+  end;
+ end;
+end;
+
 procedure tcustomdropdownlistcontroller.editnotification(
                                         var info: editnotificationinfoty);
 begin
  inherited;
  case info.action of
   ea_textedited: begin
-   if fdropdownlist <> nil then begin
-    if not (dcs_itemselecting in fstate) then begin
-     fdropdownlist.filtertext:= fintf.geteditor.text;
-    end;
+   if ftimer = nil then begin
+    dotimer(nil);
    end
    else begin
-    if (deo_autodropdown in foptions) then begin
-     if candropdown and ((fintf.geteditor.text <> '') or 
-                           (deo_forceselect in foptions)) then begin
-      dropdown;
-     end;
-    end
-    else begin
-     fcols.fitemindex:= -1;
-    end;
+    ftimer.restart;
    end;
   end;
  end;
@@ -1806,6 +1824,34 @@ begin
   end;
  end;
  inherited;
+end;
+
+function tcustomdropdownlistcontroller.getdelay: integer;
+begin
+ result:= 0;
+ if ftimer <> nil then begin
+  result:= ftimer.interval div 1000;
+  if result = 0 then begin
+   result:= -1;
+  end;
+ end;
+end;
+
+procedure tcustomdropdownlistcontroller.setdelay(avalue: integer);
+begin
+ if avalue = 0 then begin
+  freeandnil(ftimer);
+ end
+ else begin
+  if avalue < 0 then begin
+   avalue:= 0;
+  end;
+  avalue:= avalue * 1000;
+  if ftimer = nil then begin
+   ftimer:= tsimpletimer.create(avalue,@dotimer,false,[to_single]);
+  end;
+  ftimer.interval:= avalue;
+ end;
 end;
 
 { tnocolsdropdownlistcontroller }
