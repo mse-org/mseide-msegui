@@ -2541,8 +2541,10 @@ var
  bo1: boolean;
  intf1: idocktarget;
 begin
- fsplitdir:= splitdirty(reader.readinteger('splitdir',ord(fsplitdir),
+ if not (od_banded in foptionsdock) then begin
+  fsplitdir:= splitdirty(reader.readinteger('splitdir',ord(fsplitdir),
                               0,ord(high(splitdirty))));
+ end;
  useroptions:= optionsdockty({$ifdef FPC}longword{$else}longword{$endif}(
      reader.readinteger('useroptions',
      integer({$ifdef FPC}longword{$else}longword{$endif}(fuseroptions)))));
