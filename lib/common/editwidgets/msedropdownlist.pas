@@ -231,6 +231,7 @@ type
    procedure itemselected(const index: integer; const akey: keyty);
   protected
    fcontroller: tcustomdropdownlistcontroller;
+   fdropdownrowcount: integer;
    procedure setfiltertext(const Value: msestring); virtual;
    procedure updatewindowinfo(var info: windowinfoty); override;
    procedure createdatacol(const index: integer; out item: tdatacol); override;
@@ -245,13 +246,14 @@ type
    procedure dorepeat(const sender: tobject);
    procedure initcols(const acols: tdropdowncols); virtual;
    procedure updatelayout; override;
+   function dropdownheight: integer;
    procedure setactiveitem(const aitemindex: integer); virtual;
   public
    constructor create(const acontroller: tcustomdropdownlistcontroller;
               const acols: tdropdowncols;
                    const afixcolclass: dropdownfixcolclassty); reintroduce;
    destructor destroy; override;
-   procedure show(awidth: integer; arowcount: integer;
+   procedure show(awidth: integer; const arowcount: integer;
                 var aitemindex: integer; afiltertext: msestring); reintroduce;
    property filtertext: msestring read ffiltertext write setfiltertext;
    property options: dropdownlistoptionsty read foptions1 write foptions1;
@@ -1556,7 +1558,7 @@ begin
        int2:= -1;
       end;
       fselectkey:= key_none;
-      show(int1,fdropdownrowcount,int2,str1);
+      show(int1,self.fdropdownrowcount,int2,str1);
       fintf.geteditor.forcecaret:= false;
       include(self.fstate,dcs_itemselecting);
       self.itemselected(int2,fselectkey);
@@ -2100,7 +2102,35 @@ begin
  focuscell(makegridcoord(0,aitemindex));
 end;
 
-procedure tdropdownlist.show(awidth: integer; arowcount: integer;
+function tdropdownlist.dropdownheight: integer;
+var
+ int1: integer;
+begin
+ if fdropdownrowcount = 0 then begin
+  int1:= frowcount;
+ end
+ else begin
+  int1:= fdropdownrowcount;
+ end;
+ if (int1 > frowcount){ and not 
+                      (deo_livefilter in fcontroller.foptions)} then begin
+  int1:= frowcount;
+ end;
+ if int1 = 0 then begin
+  result:= ystep div 2;
+ end
+ else begin
+  result:= int1 * ystep;
+ end;
+ if fixrows.count > 0 then begin
+  with fixrows[-1] do begin
+   result:= result+ height + linewidth;
+  end;
+ end;
+ result:= result + fframe.paintframewidth.cy;
+end;
+
+procedure tdropdownlist.show(awidth: integer; const arowcount: integer;
                  var aitemindex: integer; afiltertext: msestring);
 var
  rect1: rectty;
@@ -2109,31 +2139,9 @@ begin
  bounds_cx:= awidth;
  rect1:= widgetrect;
  rect1.cx:= awidth;
- if arowcount = 0 then begin
-  arowcount:= frowcount;
- end;
- if (arowcount > frowcount) and not 
-                      (deo_livefilter in fcontroller.foptions) then begin
-  arowcount:= frowcount;
- end;
-// datarowheight:= font.lineheight;
- if arowcount = 0 then begin
-  rect1.cy:= ystep div 2;
- end
- else begin
-  rect1.cy:= arowcount * ystep;
- end;
- if fixrows.count > 0 then begin
-  with fixrows[-1] do begin
-   rect1.cy:= rect1.cy + height + linewidth;
-  end;
- end;
- rect1.cy:= rect1.cy + fframe.paintframewidth.cy;
-// if rect1.cy > maxheight then begin
-//  rect1.cy:= maxheight;
-// end;
+ fdropdownrowcount:= arowcount;
+ rect1.cy:= dropdownheight;
  fcontroller.updatedropdownpos(rect1);
-// widgetrect:= rect1;
  ffiltertext:= afiltertext;
  if deo_livefilter in fcontroller.foptions then begin
   setactiveitem(0);
@@ -2283,6 +2291,7 @@ end;
 procedure tdropdownlist.setfiltertext(const Value: msestring);
 var
  li1: tdatalist;
+ rect1: rectty;
 begin
  ffiltertext:= Value;
  if dlo_livefilter in foptions1 then begin
@@ -2293,6 +2302,9 @@ begin
     rowcount:= li1.count;
    end;
   end;
+  rect1:= widgetrect;
+  rect1.cy:= dropdownheight;
+  fcontroller.updatedropdownpos(rect1);
   invalidate;
   row:= 0;
   setupeditor(ffocusedcell,true);
