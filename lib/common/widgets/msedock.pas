@@ -537,12 +537,12 @@ type
 
  tdockpanel = class(tscalingwidget,idockcontroller,idocktarget,istatfile)
   private
-   fdragdock: tdockcontroller;
+   fdragdock: tnochildrendockcontroller;
    foptionswindow: windowoptionsty;
    fstatfile: tstatfile;
    fstatvarname: string;
    ficon: tmaskedbitmap;
-   procedure setdragdock(const Value: tdockcontroller);
+   procedure setdragdock(const Value: tnochildrendockcontroller);
    function getframe: tgripframe;
    procedure setframe(const Value: tgripframe);
    procedure setstatfile(const Value: tstatfile);
@@ -580,7 +580,7 @@ type
    procedure dragevent(var info: draginfoty); override;
    function getdockcontroller: tdockcontroller;
   published
-   property dragdock: tdockcontroller read fdragdock write setdragdock;
+   property dragdock: tnochildrendockcontroller read fdragdock write setdragdock;
    property optionswidget default defaultdockpaneloptionswidget;
    property optionswindow: windowoptionsty read foptionswindow 
                                                write foptionswindow default [];
@@ -4786,7 +4786,7 @@ begin
  ficon:= tmaskedbitmap.create(false);
  ficon.onchange:= {$ifdef FPC}@{$endif}iconchanged;
  if fdragdock = nil then begin
-  fdragdock:= tdockcontroller.create(idockcontroller(self));
+  fdragdock:= tnochildrendockcontroller.create(idockcontroller(self));
  end;
  inherited;
  optionswidget:= defaultdockpaneloptionswidget;
@@ -4835,7 +4835,7 @@ begin
  inherited setframe(value);
 end;
 
-procedure tdockpanel.setdragdock(const Value: tdockcontroller);
+procedure tdockpanel.setdragdock(const Value: tnochildrendockcontroller);
 begin
  fdragdock.assign(Value);
 end;
