@@ -13757,7 +13757,8 @@ begin
  end;
 end;
 
-procedure twindow.invalidaterect(const rect: rectty; const sender: twidget = nil);
+procedure twindow.invalidaterect(const rect: rectty;
+                                         const sender: twidget = nil);
 var
  arect: rectty;
 begin
