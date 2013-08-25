@@ -313,8 +313,9 @@ type
    destructor destroy; override;
    function beforedragevent(var info: draginfoty): boolean; override;
    procedure enddrag; override;
+   procedure mouseevent(var info: mouseeventinfoty); override;
    procedure clientmouseevent(var info: mouseeventinfoty); override;
-   procedure childmouseevent(const sender: twidget;
+   procedure childormouseevent(const sender: twidget;
                                      var info: mouseeventinfoty); override;
    procedure checkmouseactivate(const sender: twidget; 
                                       var info: mouseeventinfoty);
@@ -549,7 +550,7 @@ type
    procedure seticon(const avalue: tmaskedbitmap);
    procedure iconchanged(const sender: tobject);
   protected
-   procedure mouseevent(var info: mouseeventinfoty); override;
+//   procedure mouseevent(var info: mouseeventinfoty); override;
    procedure childmouseevent(const sender: twidget;
                           var info: mouseeventinfoty); override;
    procedure updatewindowinfo(var info: windowinfoty); override;
@@ -3293,6 +3294,7 @@ procedure tdockcontroller.checkmouseactivate(const sender: twidget;
                                                  var info: mouseeventinfoty);
 var
  widget1: twidget;
+ pt1: pointty;
 begin
  if (info.eventkind = ek_buttonpress) then begin
   if ismdi then begin
@@ -3301,13 +3303,31 @@ begin
    if ((sender = widget1) or (sender = widget1.container)) and 
                   widget1.canfocus and 
           not widget1.checkdescendent(widget1.window.focusedwidget)then begin
+    pt1:= sender.pos;
     widget1.setfocus;
+    application.delayedmouseshift(subpoint(sender.pos,pt1)); 
+               //follow shift in view ???
    end;
   end;
  end;
 end;
 
-procedure tdockcontroller.childmouseevent(const sender: twidget;
+procedure tdockcontroller.mouseevent(var info: mouseeventinfoty);
+begin
+ if ismdi then begin
+  with twidget1(fintf.getwidget) do begin
+   if (fframe is tgripframe) and
+                         not (csdesigning in componentstate) then begin
+    tgripframe(fframe).mouseevent(info);
+   end;
+  end;
+ end;
+ if not (es_processed in info.eventstate) then begin
+  inherited;
+ end;
+end;
+
+procedure tdockcontroller.childormouseevent(const sender: twidget;
                var info: mouseeventinfoty);
 begin
  checkmouseactivate(sender,info);
@@ -4623,11 +4643,16 @@ begin
 end;
  
 procedure tgripframe.endpickmove(const sender: tobjectpicker);
+var
+ ar1: integerarty;
 begin
- fcontroller.fnormalrect:= calcsizingrect(sizingkindty(sender.currentobjects[0]),
-                                                       sender.pickoffset);
- fcontroller.mdistate:= mds_normal;
- fintf.getwidget.widgetrect:= fcontroller.fnormalrect;
+ ar1:= sender.currentobjects;
+ if ar1 <> nil then begin
+  fcontroller.fnormalrect:= calcsizingrect(sizingkindty(ar1[0]),
+                                                        sender.pickoffset);
+  fcontroller.mdistate:= mds_normal;
+  fintf.getwidget.widgetrect:= fcontroller.fnormalrect;
+ end;
 end;
 
 procedure tgripframe.paintxorpic(const sender: tobjectpicker;
@@ -4810,7 +4835,7 @@ function tdockpanel.checkdock(var info: draginfoty): boolean;
 begin
  result:= true;
 end;
-
+(*
 procedure tdockpanel.mouseevent(var info: mouseeventinfoty);
 var
  bo1: boolean;
@@ -4830,12 +4855,19 @@ begin
  end;
  }
 end;
-
+*)
 procedure tdockpanel.childmouseevent(const sender: twidget;
                var info: mouseeventinfoty);
-var
- pt1,pt2: pointty;
+//var
+// pt1,pt2: pointty;
 begin
+ if not (es_processed in info.eventstate) then begin  
+  fdragdock.childormouseevent(sender,info);
+  if not (es_processed in info.eventstate) then begin
+   inherited;
+  end;
+ end;
+{
  pt2:= pos;
  fdragdock.checkmouseactivate(self,info);
  application.delayedmouseshift(subpoint(pos,pt2)); //follow shift in view
@@ -4847,11 +4879,12 @@ begin
   info.pos:= pt1;
  end;
  if not (es_processed in info.eventstate) then begin  
-  fdragdock.childmouseevent(sender,info);
+  fdragdock.childormouseevent(sender,info);
   if not (es_processed in info.eventstate) then begin
    inherited;
   end;
  end;
+}
 end;
 
 procedure tdockpanel.internalcreateframe;

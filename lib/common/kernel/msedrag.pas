@@ -103,9 +103,9 @@ type
    destructor destroy; override;
    function active: boolean;
    procedure enddrag; virtual;
-   procedure mouseevent(var info: mouseeventinfoty);
+   procedure mouseevent(var info: mouseeventinfoty); virtual;
    procedure clientmouseevent(var info: mouseeventinfoty); virtual;
-   procedure childmouseevent(const sender: twidget;
+   procedure childormouseevent(const sender: twidget;
                                   var info: mouseeventinfoty); virtual;
    function beforedragevent(var info: draginfoty): boolean; virtual; abstract;
     //true if processed
@@ -405,24 +405,34 @@ begin
  end;
 end;
 
-procedure tcustomdragcontroller.childmouseevent(const sender: twidget;
+procedure tcustomdragcontroller.childormouseevent(const sender: twidget;
                var info: mouseeventinfoty);
 var
  widget1: twidget;
  pt1: pointty;
 begin
- if do_child in foptions then begin
+ if es_child in info.eventstate then begin
   widget1:= fintf.getwidget;
   if sender <> widget1 then begin
-   pt1:= info.pos;
-   translatewidgetpoint1(info.pos,sender,widget1);
-   try
-    mouseevent(info);
-   finally
-    info.pos:= pt1;
+   if (do_child in foptions) and 
+     (info.eventkind in [ek_buttonpress,ek_buttonrelease,ek_mousewheel,
+                                        ek_mousemove,ek_mousepark]) then begin
+    pt1:= info.pos;
+    translatewidgetpoint1(info.pos,sender,widget1);
+    try
+     mouseevent(info);
+    finally
+     info.pos:= pt1;
+    end;
    end;
+  end
+  else begin
+   mouseevent(info);
   end;
- end;
+ end
+ else begin
+  mouseevent(info);
+ end; 
 end;
 
 function tcustomdragcontroller.canbegindrag: boolean;

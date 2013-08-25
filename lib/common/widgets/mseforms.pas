@@ -197,8 +197,8 @@ type
    procedure receiveevent(const event: tobjectevent); override;
    procedure dokeydown(var info: keyeventinfoty); override;
    procedure doshortcut(var info: keyeventinfoty; const sender: twidget); override;
-   function getframe: tgripframe;
-   procedure setframe(const Value: tgripframe);
+//   function getframe: tgripframe;
+//   procedure setframe(const Value: tgripframe);
    procedure windowcreated; override;
    procedure dofontheightdelta(var delta: integer); override;
    procedure widgetregionchanged(const sender: twidget); override;
@@ -432,7 +432,7 @@ type
    procedure statread; override;
    procedure dostatread1(const reader: tstatreader); override;
    procedure dostatwrite1(const writer: tstatwriter); override;
-   procedure mouseevent(var info: mouseeventinfoty); override;
+//   procedure mouseevent(var info: mouseeventinfoty); override;
    procedure childmouseevent(const sender: twidget;
                           var info: mouseeventinfoty); override;
    procedure statechanged; override;
@@ -1754,7 +1754,7 @@ begin
   end;
  end;
 end;
-
+{
 function tcustommseform.getframe: tgripframe;
 begin
  result:= tgripframe(inherited getframe);
@@ -1764,6 +1764,7 @@ procedure tcustommseform.setframe(const Value: tgripframe);
 begin
  inherited setframe(value);
 end;
+}
 {
 function tcustommseform.getframescrollbox: tscrollboxframe;
 begin
@@ -2100,11 +2101,13 @@ begin
  tdockcontroller(fdragdock).statread;
  inherited;
 end;
-
+(*
 procedure tcustomdockform.mouseevent(var info: mouseeventinfoty);
 var
  bo1: boolean;
 begin
+ inherited;
+ {
  bo1:= info.eventkind = ek_buttonrelease;
  if not (es_processed in info.eventstate) and bo1 then begin
   fdragdock.mouseevent(info);
@@ -2113,13 +2116,21 @@ begin
  if not (es_processed in info.eventstate) and not bo1 then begin
   fdragdock.mouseevent(info);
  end;
+ }
 end;
-
+*)
 procedure tcustomdockform.childmouseevent(const sender: twidget;
                var info: mouseeventinfoty);
-var
- pt1,pt2: pointty;
+//var
+// pt1,pt2: pointty;
 begin
+ if not (es_processed in info.eventstate) then begin  
+  fdragdock.childormouseevent(sender,info);
+  if not (es_processed in info.eventstate) then begin
+   inherited;
+  end;
+ end;
+{
  pt2:= pos;
  fdragdock.checkmouseactivate(self,info);
  application.delayedmouseshift(subpoint(pos,pt2)); //follow shift in view
@@ -2136,6 +2147,7 @@ begin
    inherited;
   end;
  end;
+}
 end;
 
 procedure tcustomdockform.doactivate;
