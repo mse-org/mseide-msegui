@@ -965,6 +965,8 @@ end;
 procedure tcustomtextedit.clear;
 begin
  beforechange;
+ fselectstart:= nullcoord;
+ fselectend:= nullcoord;
  ffilename:= '';
  if flines <> nil then begin
   flines.clear;
