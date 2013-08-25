@@ -356,6 +356,7 @@ begin
        end;
        widget1.capturemouse(true);
        fintf.beginpickmove(self);
+       widget1.window.update;
        paintxorpic;
        include(info.eventstate,es_processed);
        checkcursorshape;
