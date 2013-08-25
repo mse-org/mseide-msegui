@@ -275,6 +275,8 @@ type
                                                      write fontextchange;
  end;
 
+ dataediteventty = procedure(const sender: tcustomdataedit) of object;
+ 
  tdataedit = class(tcustomdataedit)
   published
    property statfile;

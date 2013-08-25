@@ -2179,6 +2179,7 @@ type
    fkeyfieldno: lookupbufferfieldnoty;
    fonfilter: lbfiltereventty;
    foptionslb: optionslbty;
+   fonbeforefilter: dataediteventty;
    function getcols: tlbdropdowncols;
    procedure setcols(const avalue: tlbdropdowncols);
    procedure setlookupbuffer(const avalue: tcustomlookupbuffer);
@@ -2199,6 +2200,8 @@ type
    property lookupbuffer: tcustomlookupbuffer read flookupbuffer write setlookupbuffer;
    property keyfieldno: lookupbufferfieldnoty read fkeyfieldno write fkeyfieldno default 0;
    property onfilter: lbfiltereventty read fonfilter write fonfilter;
+   property onbeforefilter: dataediteventty read fonbeforefilter 
+                                                        write fonbeforefilter;
  end;
  
  tlbdropdownlistcontroller = class(tcustomlbdropdownlistcontroller)
@@ -2208,6 +2211,7 @@ type
    property optionslb;
    property options;
    property cols;
+   property onbeforefilter;
    property onfilter;
    property dropdownrowcount;
    property delay;
@@ -2227,6 +2231,7 @@ type
    property optionslb;
    property options;
    property cols;
+   property onbeforefilter;
    property onfilter;
    property dropdownrowcount;
    property delay;
@@ -11508,6 +11513,9 @@ var
  po1: pmsestringaty;
  ar1: msestringarty;
 begin
+ if assigned(fonbeforefilter) then begin
+  fonbeforefilter(tcustomdataedit(fintf.getwidget));
+ end;
  if olb_copyitems in foptionslb then begin
   flookupbuffer.checkbuffer; //possibly load buffer
   sortfieldno:= cols[0].fieldno;
