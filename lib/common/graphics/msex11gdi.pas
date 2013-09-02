@@ -2277,6 +2277,8 @@ var
  ints: intersectinfoty;
  pend: ppointty;
  bo1: boolean;
+ singlepoint: array[0..1] of pointty;
+ pointsbefore: ppointty;
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
@@ -2284,7 +2286,14 @@ begin
  with drawinfo,points,x11gcty(gc.platformdata).d do begin
   if xfts_smooth in xftstate then begin
    checkxftstate(drawinfo,[xfts_colorforegroundvalid]);
+   pointsbefore:= points;
    pointcount:= count;
+   if count = 1 then begin
+    singlepoint[0]:= points^;    
+    singlepoint[1]:= points^; //dummy segment
+    points:= @singlepoint[0];
+    inc(pointcount);
+   end;
    if closed then begin
     inc(pointcount);
    end;
@@ -2383,6 +2392,7 @@ begin
     end;
     xrendercompositetristrip(appdisp,xrenderop,xftcolorforegroundpic,
               xftdrawpic,alpharenderpictformat,0,0,buffer.buffer,pointcount);
+    points:= pointsbefore;
    end;
   end
   else begin

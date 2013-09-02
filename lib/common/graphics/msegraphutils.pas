@@ -306,6 +306,7 @@ type
  ppointty = ^pointty;
  pointarty = array of pointty;
  ppointarty = ^pointarty;
+ pointararty = array of pointarty;
  pointaty = array[0..0] of pointty;
  ppointaty = ^pointaty;
  pointpoarty = array of ppointty;
