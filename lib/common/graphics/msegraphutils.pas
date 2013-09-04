@@ -310,6 +310,7 @@ type
  pointaty = array[0..0] of pointty;
  ppointaty = ^pointaty;
  pointpoarty = array of ppointty;
+ pppointty = ^ppointty;
 
  fpointty = record
              x,y: single;
