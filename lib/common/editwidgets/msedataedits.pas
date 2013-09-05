@@ -1078,6 +1078,8 @@ type
   {$endif}
    function getasstring: msestring;
    procedure setasstring(const avalue: msestring);
+   function getintvalue: integer;
+   procedure setintvalue(const avalue: integer);
   protected
    fvalue: realty;
    fvaluedefault: realty;
@@ -1113,6 +1115,7 @@ type
                                   write fonsetintvalue;
                     //overrides onsetvalue
    property value: realty read fvalue write setvalue {stored false};
+   property intvalue: integer read getintvalue write setintvalue;
    property valuedefault: realty read fvaluedefault 
                                     write fvaluedefault {stored false};
    property formatedit: msestring read fformatedit write setformatedit;
@@ -5490,6 +5493,16 @@ begin
   min:= self.min;
   max:= self.max;
  end;
+end;
+
+function tcustomrealedit.getintvalue: integer;
+begin
+ result:= realtytoint(value);
+end;
+
+procedure tcustomrealedit.setintvalue(const avalue: integer);
+begin
+ value:= avalue;
 end;
 
 { tspineditframe }
