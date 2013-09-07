@@ -14,6 +14,10 @@ uses
  msetypes;
  
 type
+ mwcinfoty = record
+  fw,fz: uint32; //not 0
+ end;
+ 
  tmwcnoisegen = class
   private
    fw: uint32;
@@ -24,7 +28,8 @@ type
    function next: uint32;
  end;
 
-function mwcnoise: uint32;
+function mwcnoise(var state: mwcinfoty): uint32; overload;
+function mwcnoise: uint32; overload;
 procedure mwcnoiseinit(const w: uint32 = 0; const z: uint32 = 0);
  
 implementation
@@ -50,6 +55,15 @@ begin
  fz:= 36969 * (fz and $ffff) + (fz shr 16);
  fw:= 18000 * (fw and $ffff) + (fw shr 16);
  result:= fz shl 16 + fw;
+end;
+
+function mwcnoise(var state: mwcinfoty): uint32;
+begin
+ with state do begin
+  fz:= 36969 * (fz and $ffff) + (fz shr 16);
+  fw:= 18000 * (fw and $ffff) + (fw shr 16);
+  result:= fz shl 16 + fw;
+ end;
 end;
 
 { tmwcnoisegen }
