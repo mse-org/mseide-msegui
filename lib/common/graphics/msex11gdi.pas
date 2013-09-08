@@ -200,7 +200,7 @@ var
 
 implementation
 uses
- msesys,msesonames,sysutils,msefcfontselect,msedynload;
+ msesys,msesonames,sysutils,msefcfontselect,msedynload,msepolytria;
 
 //
 //todo: optimise tesselation
@@ -3036,9 +3036,9 @@ end;
 
 procedure gdi_fillpolygon(var drawinfo: drawinfoty); //gdifunc
 var
-// int1: integer;
- po1,po2: ppointty;
- po3: pxpointfixed;
+ int1: integer;
+ po1,po2: pxpointfixed;
+ po3: ppointty;
  offsx,offsy: integer;
 begin
 {$ifdef mse_debuggdisync}
@@ -3048,9 +3048,21 @@ begin
  with drawinfo do begin
   if xfts_smooth in x11gcty(gc.platformdata).d.xftstate then begin
   
-//todo: implement concave figures
-
    if points.count > 2 then begin
+    polytria(drawinfo,po3,int1);
+    po1:= pointer(po3);
+    po2:= pointer(po3+int1);
+    repeat
+     po1^.x:= po1^.x << 16;
+     po1^.y:= po1^.y << 16;
+     inc(po1);
+    until po1 = po2;
+    checkxftstate(drawinfo,[xfts_colorforegroundvalid]);
+    with x11gcty(gc.platformdata).d do begin
+     xrendercompositetristrip(appdisp,xrenderop,xftcolorforegroundpic,
+             xftdrawpic,alpharenderpictformat,0,0,pxpointfixed(po3),int1);
+    end;
+    {
     allocbuffer(buffer,points.count*sizeof(txpointfixed));
     po1:= points.points;
     po2:= points.points+points.count-1;
@@ -3076,6 +3088,7 @@ begin
      xrendercompositetristrip(appdisp,xrenderop,xftcolorforegroundpic,
              xftdrawpic,alpharenderpictformat,0,0,buffer.buffer,points.count);
     end;
+    }
    end;
   end
   else begin
