@@ -13,11 +13,14 @@ unit msepolytria;
 interface
 uses
  msegraphics,msegraphutils;
- 
-procedure polytria(var drawinfo: drawinfoty; out atriangles: ppointty;
-                                                    out apointcount: integer);
-implementation
 
+type
+ trianglety = array[0..2] of pointty;
+ ptrianglety = ^trianglety;
+ 
+procedure polytria(var drawinfo: drawinfoty; out atriangles: ptrianglety;
+                                             out trianglecount: integer);
+implementation
 uses
  msetypes,msenoise
  {$ifdef mse_debugpolytria}
@@ -66,8 +69,6 @@ type
    tnk_trap: (trap: ptrapinfoty);
  end;
 
- trianglety = array[0..2] of pointty;
- ptrianglety = ^trianglety;
  pmountainpointty = ^mountainpointty;
  mountainpointty = record
   p: ppointty;
@@ -628,8 +629,8 @@ begin
 end;
 {$endif mse_debugpolytria}
 
-procedure polytria(var drawinfo: drawinfoty; out atriangles: ppointty;
-                                                    out apointcount: integer);
+procedure polytria(var drawinfo: drawinfoty; out atriangles: ptrianglety;
+                                                 out trianglecount: integer);
 
 // x,y range = $7fff..-$8000 (16 bit X11 space)
 var
@@ -1500,7 +1501,7 @@ begin
  npoints:= drawinfo.points.count;
  if npoints < 3 then begin
   atriangles:= nil;
-  apointcount:= 0;
+  trianglecount:= 0;
   exit;
  end;
  
@@ -1642,8 +1643,8 @@ begin
  triangles:= pointer(newmountain)+npoints*mountainsize;
  newtriangle:= triangles;
  findmountains(segments,true);
- atriangles:= pointer(triangles);
- apointcount:= (newtriangle-triangles)*3;
+ atriangles:= triangles;
+ trianglecount:= (newtriangle-triangles);
 end;
 
 end.

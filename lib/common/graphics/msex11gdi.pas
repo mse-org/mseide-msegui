@@ -3049,9 +3049,9 @@ begin
   if xfts_smooth in x11gcty(gc.platformdata).d.xftstate then begin
   
    if points.count > 2 then begin
-    polytria(drawinfo,po3,int1);
+    polytria(drawinfo,ptrianglety(po3),int1);
     po1:= pointer(po3);
-    po2:= pointer(po3+int1);
+    po2:= pointer(ptrianglety(po3)+int1);
     repeat
      po1^.x:= po1^.x << 16;
      po1^.y:= po1^.y << 16;
@@ -3059,8 +3059,8 @@ begin
     until po1 = po2;
     checkxftstate(drawinfo,[xfts_colorforegroundvalid]);
     with x11gcty(gc.platformdata).d do begin
-     xrendercompositetristrip(appdisp,xrenderop,xftcolorforegroundpic,
-             xftdrawpic,alpharenderpictformat,0,0,pxpointfixed(po3),int1);
+     xrendercompositetriangles(appdisp,xrenderop,xftcolorforegroundpic,
+             xftdrawpic,alpharenderpictformat,0,0,pxtriangle(po3),int1);
     end;
     {
     allocbuffer(buffer,points.count*sizeof(txpointfixed));
