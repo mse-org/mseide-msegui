@@ -818,7 +818,7 @@ var
    begin
     result:= true;
     with atrap^ do begin
-     if (left = nil) or (right = nil) or 
+     if (atrap = nil) or (left = nil) or (right = nil) or 
               (top = nil) or (bottom = nil) then begin //segment crossing
       result:= false;
       exit;
