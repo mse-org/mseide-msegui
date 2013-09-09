@@ -676,58 +676,42 @@ var
   end;
  end; //isbelow
  
-function xdist(const point: ppointty; ref: pseginfoty): integer;
-var
- int1: integer;
-begin
- if ref^.dy = 0 then begin
-  result:= point^.y - ref^.h.b^.y;
-  if result = 0 then begin
-   if ref = segments then begin
-    int1:= npoints-1;
-   end
-   else begin
-    int1:= 1;
-   end;
-   if not (sf_reverse in ref^.flags) then begin
-    int1:= -int1;
-   end;
-   result:= int1*(point^.x - ref^.h.b^.x) - (point-ref^.h.b)*ref^.dx;
-   if not (sf_reverse in ref^.flags) then begin
-    result:= -result;
-   end;
-  end
-  else begin
-   if not (sf_reverse in ref^.flags) then begin //??????
-    result:= -result;
-   end;
-  end;
- end
- else begin
-//  result:= point^.x -(ref^.h.b^.x + (point^.y-ref^.h.b^.y)*ref^.dx div ref^.dy);
-  result:= ref^.dy*(point^.x - ref^.h.b^.x) - (point^.y-ref^.h.b^.y)*ref^.dx;
-  if ref^.dy < 0 then begin
-   result:= -result;
-  end;
- end;
-end;
-{ 
- function xpos(const point: ppointty; ref: pseginfoty): xposty;
+ function xdist(const point: ppointty; ref: pseginfoty): integer;
  var
   int1: integer;
  begin
-  int1:= xdist(point,ref);
-  result:= xp_left;
-  if int1 = 0 then begin
-   result:= xp_center;
+  if ref^.dy = 0 then begin
+   result:= point^.y - ref^.h.b^.y;
+   if result = 0 then begin
+    if ref = segments then begin
+     int1:= npoints-1;
+    end
+    else begin
+     int1:= 1;
+    end;
+    if not (sf_reverse in ref^.flags) then begin
+     int1:= -int1;
+    end;
+    result:= int1*(point^.x - ref^.h.b^.x) - (point-ref^.h.b)*ref^.dx;
+    if not (sf_reverse in ref^.flags) then begin
+     result:= -result;
+    end;
+   end
+   else begin
+    if not (sf_reverse in ref^.flags) then begin //??????
+     result:= -result;
+    end;
+   end;
   end
   else begin
-   if int1 > 0 then begin
-    result:= xp_right;
+ //  result:= point^.x -(ref^.h.b^.x + (point^.y-ref^.h.b^.y)*ref^.dx div ref^.dy);
+   result:= ref^.dy*(point^.x - ref^.h.b^.x) - (point^.y-ref^.h.b^.y)*ref^.dx;
+   if ref^.dy < 0 then begin
+    result:= -result;
    end;
   end;
  end;
- }
+
  function isright(const point: ppointty; ref: pseginfoty): boolean;
   //true if point right of segment
  begin
@@ -1109,7 +1093,6 @@ var
 
   procedure updatebelow(const newright: boolean; const trold,trnew: ptrapinfoty);
   var
-   int1: integer;
    aisright: boolean;
    seg1: pseginfoty;
   begin
@@ -1224,7 +1207,6 @@ var
   var
    trabove: ptrapinfoty;
    trabover: ptrapinfoty;
-   pointbelowpos: xposty;
   begin
    trnew:= newtrap;
    trabove:= old^.above;
@@ -1276,7 +1258,7 @@ var
   sd1: segdirty;
   sega,segb: pseginfoty;
   trap1,trap2,trap1l,trap1r,trbelow,trbelowr,exttrap: ptrapinfoty;
-  isright1,isright2,bo2: boolean;
+  isright1{,bo2}: boolean;
   
  begin
   if sf_reverse in aseg^.flags then begin
@@ -1330,14 +1312,11 @@ var
   dump(traps,newtraps-traps,segments,npoints,nodes,'segment0',true);
  {$endif}
 
-  bo2:= false;
   while trap1^.below <> nil do begin
    trap2:= trap1^.below;
    if trap2^.top = bottompoint then begin
     break;
    end; 
-   bo2:= true;
-
 
    isright1:= isright(trap2^.top,aseg); //point right of segment   
    if (trap1^.belowr <> nil) and not isright1 then begin
@@ -1493,23 +1472,6 @@ var
        newtriangle^[1]:= pt1^.p^;
        newtriangle^[2]:= pt1^.next^.p^;
        inc(newtriangle);
-       {
-       with pt1^.prev^.p^ do begin
-        pxpointfixedty(newtriangle)^.x:= x*65536;
-        pxpointfixedty(newtriangle)^.y:= y*65536;
-       end;
-       inc(pxpointfixedty(newtriangle));
-       with pt1^.p^ do begin
-        pxpointfixedty(newtriangle)^.x:= x*65536;
-        pxpointfixedty(newtriangle)^.y:= y*65536;
-       end;
-       inc(pxpointfixedty(newtriangle));
-       with pt1^.next^.p^ do begin
-        pxpointfixedty(newtriangle)^.x:= x*65536;
-        pxpointfixedty(newtriangle)^.y:= y*65536;
-       end;
-       inc(pxpointfixedty(newtriangle));
-       }
       end
       else begin       //no ear, try next
        if bo1 then begin
@@ -1604,11 +1566,7 @@ begin
    dy:= ppt2^.y-ppt1^.y; //b->a slope
    if dy = 0 then begin
     if ppt2 > ppt1 then begin
-//     dx:= -1;
      include(flags,sf_reverse);
-    end
-    else begin
-//     dx:= 1;
     end;
    end
    else begin

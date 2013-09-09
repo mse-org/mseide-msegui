@@ -3039,7 +3039,7 @@ var
  int1: integer;
  po1,po2: pxpointfixed;
  po3: ppointty;
- offsx,offsy: integer;
+// offsx,offsy: integer;
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
@@ -3062,33 +3062,6 @@ begin
      xrendercompositetriangles(appdisp,xrenderop,xftcolorforegroundpic,
              xftdrawpic,alpharenderpictformat,0,0,pxtriangle(po3),int1);
     end;
-    {
-    allocbuffer(buffer,points.count*sizeof(txpointfixed));
-    po1:= points.points;
-    po2:= points.points+points.count-1;
-    po3:= buffer.buffer;
-    offsx:= (origin.x shl 16);
-    offsy:= (origin.y shl 16);
-    while po1 < po2 do begin
-     po3^.x:= (po1^.x shl 16) + offsx;
-     po3^.y:= (po1^.y shl 16) + offsy;
-     inc(po3);
-     po3^.x:= (po2^.x shl 16) + offsx;
-     po3^.y:= (po2^.y shl 16) + offsy;
-     inc(po3);
-     inc(po1);
-     dec(po2);
-    end;
-    if po1 = po2 then begin
-     po3^.x:= (po1^.x+origin.x) shl 16;
-     po3^.y:= (po1^.y+origin.y) shl 16;
-    end;
-    checkxftstate(drawinfo,[xfts_colorforegroundvalid]);
-    with x11gcty(gc.platformdata).d do begin
-     xrendercompositetristrip(appdisp,xrenderop,xftcolorforegroundpic,
-             xftdrawpic,alpharenderpictformat,0,0,buffer.buffer,points.count);
-    end;
-    }
    end;
   end
   else begin
