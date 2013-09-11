@@ -47,7 +47,7 @@ uses
  msesplitter,msedock,mseforms,mseclasses,typinfo,msearrayprops,msewidgets,
  msegui,formdesigner,msedial,msemenuwidgets,msewindowwidget,msechart,
  msepolygon,msepickwidget,msetraywidget,msedockpanelform,msechartedit,mseedit,
- msebarcode,msedatalist,mseact,regglob
+ msebarcode,msedatalist,mseact
  {$ifndef mse_no_opengl}
 //  {$ifdef FPC}
      ,mseopenglwidget
@@ -237,8 +237,6 @@ begin
                                            tcoloptionseditor);
  registerpropertyeditor(typeinfo(optionsgridty),nil,'',
                                            tgridoptionseditor);
- registerpropertyeditor(typeinfo(integer),ttrace,'imagenr',
-                                          timagenrpropertyeditor);
   
  registerunitgroup(['msegrids'],['msegui','msegraphutils','mseclasses']);
  registerunitgroup(['msewidgetgrid'],['msedataedits',
