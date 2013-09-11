@@ -5003,6 +5003,7 @@ begin
   else begin
    dropdown.cols[dropdown.valuecol].clear;
   end;
+  formatchanged;
  end;
 end;
 
