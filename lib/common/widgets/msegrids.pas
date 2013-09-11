@@ -12308,7 +12308,8 @@ begin  //cellrect
     end;
     if innerlevel > cil_all then begin
      int2:= fdatarowlinewidth;
-     if og_rowheight in foptionsgrid then begin
+     if (og_rowheight in foptionsgrid) and 
+                         (row >= 0) and (row < frowcount) then begin
       with prowstaterowheightty(
                      fdatacols.frowstate.getitempo(row))^.rowheight do begin
        if linewidth > 0 then begin

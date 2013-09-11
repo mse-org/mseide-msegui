@@ -1315,6 +1315,10 @@ type
    procedure setoptions(const avalue: datetimeeditoptionsty);
    procedure setmin(const avalue: tdatetime);
    procedure setmax(const avalue: tdatetime);
+   function getshowlocal: boolean;
+   procedure setshowlocal(const avalue: boolean);
+   function getshowutc: boolean;
+   procedure setshowutc(const avalue: boolean);
   protected
    function gettextvalue(var accept: boolean; const quiet: boolean): tdatetime;
    procedure texttovalue(var accept: boolean; const quiet: boolean); override;
@@ -1347,6 +1351,8 @@ type
    property kind: datetimekindty read fkind write setkind default dtk_date;
    property options: datetimeeditoptionsty read foptions write setoptions
                                                                    default [];
+   property showlocal: boolean read getshowlocal write setshowlocal;
+   property showutc: boolean read getshowutc write setshowutc;
    property gridvalue[const index: integer]: tdatetime 
                  read getgridvalue write setgridvalue; default;
    property gridvalues: datetimearty read getgridvalues write setgridvalues;
@@ -6039,6 +6045,36 @@ begin
  with tgridrealdatalist(fdatalist) do begin
   min:= self.min;
   max:= self.max;
+ end;
+end;
+
+function tcustomdatetimeedit.getshowlocal: boolean;
+begin
+ result:= dteo_showlocal in foptions;
+end;
+
+procedure tcustomdatetimeedit.setshowlocal(const avalue: boolean);
+begin
+ if avalue then begin
+  options:= options + [dteo_showlocal];
+ end
+ else begin
+  options:= options - [dteo_showlocal];
+ end;
+end;
+
+function tcustomdatetimeedit.getshowutc: boolean;
+begin
+ result:= dteo_showutc in foptions;
+end;
+
+procedure tcustomdatetimeedit.setshowutc(const avalue: boolean);
+begin
+ if avalue then begin
+  options:= options + [dteo_showutc];
+ end
+ else begin
+  options:= options - [dteo_showutc];
  end;
 end;
 
