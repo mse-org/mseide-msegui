@@ -14,7 +14,7 @@ uses
  {$ifdef FPC}xlib{$else}Xlib{$endif},mxft,
  {$ifdef FPC}x,xutil,dynlibs,{$endif}
  msegraphics,mseguiglob,msestrings,msegraphutils,mseguiintf,msetypes,
- msectypes,mxrender,msefontconfig,mselinestria;
+ msectypes,mxrender,msefontconfig,msetriaglob;
 
 procedure init(const adisp: pdisplay; const avisual: msepvisual;
                  const adepth: integer);
@@ -199,7 +199,7 @@ var
 implementation
 uses
  msesys,msesonames,sysutils,msefcfontselect,msedynload,
- msetriaglob,msepolytria,mselinetria;
+ msepolytria,mselinetria;
 
 //
 //todo: optimise tesselation
@@ -950,10 +950,11 @@ begin
    xmask:= xmask or gclinewidth;
    xvalues.line_width:= (lineinfo.width + linewidthroundvalue) shr linewidthshift;
    triainfo.xftlinewidth:= xvalues.line_width shl 16;
-   triainfo.xftlinewidthsquare:= xvalues.line_width*xvalues.line_width{ shl 16};
-   if triainfo.xftlinewidth = 0 then begin
+//   triainfo.xftlinewidthsquare:= xvalues.line_width*xvalues.line_width{ shl 16};
+   triainfo.nullwidth:= triainfo.xftlinewidth = 0;
+   if triainfo.nullwidth then begin
     triainfo.xftlinewidth:= 1 shl 16;
-    triainfo.xftlinewidthsquare:= 1{ shl 16};
+//    triainfo.xftlinewidthsquare:= 1{ shl 16};
    end;
   end;
   if gvm_dashes in mask then begin
@@ -976,10 +977,12 @@ begin
    xmask:= xmask or gclinestyle;
   end;
   if gvm_capstyle in mask then begin
+   triainfo.capstyle:= lineinfo.capstyle;
    xvalues.cap_style:= capstyles[lineinfo.capstyle];
    xmask:= xmask or gccapstyle;
   end;
   if gvm_joinstyle in mask then begin
+   triainfo.joinstyle:= lineinfo.joinstyle;
    xvalues.join_style:= joinstyles[lineinfo.joinstyle];
    xmask:= xmask or gcjoinstyle;
   end;

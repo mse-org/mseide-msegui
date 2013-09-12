@@ -11,10 +11,25 @@ unit msetriaglob;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- msegraphutils;
+ msegraphutils,msegraphics;
 type
  trianglety = array[0..2] of pointty;
  ptrianglety = ^trianglety;
+
+ triainfoty = record
+  xftlinewidth: integer;
+//  xftlinewidthsquare: integer;
+  xftdashes: dashesstringty;
+  capstyle: capstylety;
+  joinstyle: joinstylety;
+  nullwidth: boolean;
+ end;
+ 
+ triagcty = record
+  case integer of
+   0: (d: triainfoty;);
+   1: (_bufferspace: gcpty;);
+ end;
  
 implementation
 end.

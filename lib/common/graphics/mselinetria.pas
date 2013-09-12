@@ -12,18 +12,6 @@ unit mselinetria;
 interface
 uses
  msegraphics,msegraphutils,msetriaglob;
-
-type
- triainfoty = record
-  xftlinewidth: integer;
-  xftlinewidthsquare: integer;
-  xftdashes: dashesstringty;
- end;
- triagcty = record
-  case integer of
-   0: (d: triainfoty;);
-   1: (_bufferspace: gcpty;);
- end;
  
 procedure linestria(var drawinfo: drawinfoty; out apoints: ppointty;
                                                      out apointcount: integer);
@@ -39,6 +27,7 @@ type
  end;
  lineshiftinfoty = record
   dist: integer;
+  offsx,offsy: integer;
   pointa: ppointty;
   pointb: ppointty;
   linestart: ppointty;
@@ -55,8 +44,6 @@ type
 //todo: optimize smooth line generation
 //
 procedure calclineshift(const drawinfo: drawinfoty; var info: lineshiftinfoty);
-var
- offsx,offsy: integer;
 begin
  with info do begin
   v.d.x:= pointb^.x - pointa^.x;
@@ -380,7 +367,7 @@ end;
 procedure linesegmentstria(var drawinfo: drawinfoty;
                   out atriangles: ptrianglety; out atrianglecount: integer);
 var
- int1: integer;
+ int1,sx,sy: integer;
  li: lineshiftinfoty;
 begin   
  with drawinfo,drawinfo.points,triagcty(gc.platformdata).d do begin
@@ -403,10 +390,32 @@ begin
    for int1:= 0 to (count div 2)-1 do begin
     calclineshift(drawinfo,li);
     shiftpoint(li);
+    sx:= li.v.shift.y div 2{ - li.offsy};
+    sy:= li.v.shift.x div 2{ - li.offsx};
+    if capstyle = cs_projecting then begin
+     with (li.dest-2)^ do begin
+      x:= x - sx;
+      y:= y - sy;
+     end;
+     with (li.dest-1)^ do begin
+      x:= x - sx;
+      y:= y - sy;
+     end;
+    end;
     inc(li.dest);
     li.dest^:= (li.dest-2)^;
     inc(li.dest);
     shiftpoint(li);
+    if (capstyle = cs_projecting) or nullwidth then begin
+     with (li.dest-2)^ do begin
+      x:= x + sx;
+      y:= y + sy;
+     end;
+     with (li.dest-1)^ do begin
+      x:= x + sx;
+      y:= y + sy;
+     end;
+    end;
     (li.dest-4)^:= (li.dest-2)^;
    end;
   end;
