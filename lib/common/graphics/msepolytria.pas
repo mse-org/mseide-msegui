@@ -12,12 +12,8 @@ unit msepolytria;
 //{$define mse_debugpolytria}
 interface
 uses
- msegraphics,msegraphutils;
+ msegraphics,msegraphutils,msetriaglob;
 
-type
- trianglety = array[0..2] of pointty;
- ptrianglety = ^trianglety;
- 
 procedure polytria(var drawinfo: drawinfoty; out atriangles: ptrianglety;
                                              out trianglecount: integer);
 {$ifdef mse_debugpolytria1}
