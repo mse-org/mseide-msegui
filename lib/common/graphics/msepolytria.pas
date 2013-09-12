@@ -20,6 +20,24 @@ type
  
 procedure polytria(var drawinfo: drawinfoty; out atriangles: ptrianglety;
                                              out trianglecount: integer);
+{$ifdef mse_debugpolytria1}
+type
+ trapdispinfoty = array[0..3] of pointty;
+ trity = record
+  p: array[0..2] of pointty;
+ end;
+ triarty = array of trity;
+ mountaininfoty = record
+  chain: pointarty;
+ end;
+ mountaininfoarty = array of mountaininfoty;
+var
+ debugtraps: array of trapdispinfoty;
+ debugtriangles: triarty;
+ debugmountains: mountaininfoarty;
+ debugdiags: segmentarty;
+{$endif}
+
 implementation
 uses
  msetypes,msenoise
@@ -91,24 +109,7 @@ const
  {$error 'mountain-triangles memory overflow'}
 {$endif}
 
-{$ifdef mse_debugpolytria}
-type
- trapdispinfoty = array[0..3] of pointty;
- xpointfixedty = record
-  x,y: integer;
- end;
- pxpointfixedty = ^xpointfixedty;
- 
- mountaininfoty = record
-  chain: pointarty;
- end;
- mountaininfoarty = array of mountaininfoty;
-
- trapdumpinfoty = record
-  t: ptrapinfoty;
-  index: integer;
- end;
-
+{$ifdef mse_debugpolytria1}
 function calcx(const y: integer; const seg: seginfoty): integer;
 var
  int1: integer;
@@ -134,8 +135,16 @@ begin
    result:= h.b^.x + (y - h.b^.y) * dx div dy;
   end;
  end;
-end;
- 
+end; 
+{$endif}
+
+{$ifdef mse_debugpolytria}
+type 
+ trapdumpinfoty = record
+  t: ptrapinfoty;
+  index: integer;
+ end;
+
 function calcx(const seg: pseginfoty; const y: integer): integer;
 begin
  with seg^ do begin
@@ -1407,6 +1416,13 @@ var
     if seg2 <> nil then begin
      diags[int1]:= nil; //eat
      if seg2 <> aseg then begin //new mountain
+     {$ifdef mse_debugpolytria1}
+      setlength(debugdiags,high(debugdiags)+2);
+      with debugdiags[high(debugdiags)] do begin
+      a:= seg1^.h.b^;;
+      b:= seg2^.h.b^;
+      end;
+     {$endif}
       findmountains(seg1,false);
      end;
      seg1:= seg2;
@@ -1416,6 +1432,16 @@ var
     end;
    end;
   until seg1 = aseg;
+
+ {$ifdef mse_debugpolytria1}
+  setlength(debugmountains,high(debugmountains)+2);
+  with debugmountains[high(debugmountains)] do begin
+   setlength(chain,newmountain-start);
+   for int1:= 0 to high(chain) do begin
+    chain[int1]:= start[int1].p^;
+   end;
+  end;
+ {$endif}
 
   dec(newmountain); //last
   start^.prev:= nil;
@@ -1649,12 +1675,89 @@ begin
                '          OK');
  end;
 {$endif}
+{$ifdef mse_debugpolytria1}
+ setlength(debugtraps,newtraps-traps);
+ int2:= 0;
+ for int1:= 0 to high(debugtraps) do begin
+  with traps[int1] do begin
+   if top = nil then begin
+    debugtraps[int1][0].y:= 0;
+    debugtraps[int1][1].y:= 0;
+   end
+   else begin
+    debugtraps[int1][0].y:= top^.y;
+    debugtraps[int1][1].y:= top^.y;
+   end;
+   if bottom = nil then begin
+    debugtraps[int1][2].y:= maxint;
+    debugtraps[int1][3].y:= maxint;
+   end
+   else begin
+    debugtraps[int1][2].y:= bottom^.y;
+    debugtraps[int1][3].y:= bottom^.y;
+   end;
+   if left = nil then begin
+    debugtraps[int1][0].x:= 0;
+    debugtraps[int1][3].x:= 0;
+   end
+   else begin
+    if top = nil then begin
+     debugtraps[int1][0].x:= 0;
+    end
+    else begin
+     debugtraps[int1][0].x:= calcx(top^.y,left^);
+    end;
+    if bottom = nil then begin
+     debugtraps[int1][3].x:= maxint;
+    end
+    else begin
+     debugtraps[int1][3].x:= calcx(bottom^.y,left^);
+    end;
+   end;
+   if right = nil then begin
+    debugtraps[int1][1].x:= maxint;
+    debugtraps[int1][2].x:= maxint;
+   end
+   else begin
+    if top = nil then begin
+     debugtraps[int1][1].x:= maxint;
+    end
+    else begin
+     debugtraps[int1][1].x:= calcx(top^.y,right^);
+    end;
+    if bottom = nil then begin
+     debugtraps[int1][2].x:= 0;
+    end
+    else begin
+     debugtraps[int1][2].x:= calcx(bottom^.y,right^);
+    end;
+   end;
+  end;
+ end;
+{$endif}
  
  finddiags;
  newmountain:= pointer(traps); //traps not used anymore
  triangles:= pointer(newmountain)+npoints*mountainsize;
  newtriangle:= triangles;
+{$ifdef mse_debugpolytria1}
+ debugmountains:= nil;
+ debugdiags:= nil;
+{$endif}
  findmountains(segments,true);
+{$ifdef mse_debugpolytria1}
+ setlength(debugtriangles,newtriangle-triangles);
+ for int1:= 0 to high(debugtriangles) do begin
+  with debugtriangles[int1] do begin
+   p[0].x:= triangles[int1][0].x;
+   p[0].y:= triangles[int1][0].y;
+   p[1].x:= triangles[int1][1].x;
+   p[1].y:= triangles[int1][1].y;
+   p[2].x:= triangles[int1][2].x;
+   p[2].y:= triangles[int1][2].y;
+  end;
+ end;
+{$endif}
  atriangles:= triangles;
  trianglecount:= (newtriangle-triangles);
 end;
