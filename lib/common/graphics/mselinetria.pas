@@ -61,7 +61,7 @@ begin
  with info do begin
   v.d.x:= pointb^.x - pointa^.x;
   v.d.y:= pointb^.y - pointa^.y;
-  v.c:= round(sqrt(v.d.x*v.d.x + v.d.y*v.d.y));
+  v.c:= round(sqrt(v.d.x*v.d.x + v.d.y*v.d.y)); //todo: optimize
   offsx:= 0;
   offsy:= 0;
   if v.c = 0 then begin
@@ -72,8 +72,8 @@ begin
    v.shift.x:= (v.d.y*dist) div v.c;
    v.shift.y:= (v.d.x*dist) div v.c;
    if dist and $10000 <> 0 then begin //odd, shift 0.5 pixel
-    offsx:= (v.d.y shl 15) div v.c;
-    offsy:= (v.d.x shl 15) div v.c;
+    offsx:= -(abs(v.d.y) shl 15) div v.c;
+    offsy:= (abs(v.d.x) shl 15) div v.c;
    end;
   end;
   offs.x:= (drawinfo.origin.x shl 16) + v.shift.x div 2 - offsx;
