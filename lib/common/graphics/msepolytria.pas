@@ -38,6 +38,17 @@ var
  debugdiags: segmentarty;
 {$endif}
 
+{$ifdef mse_debugpolytria}
+var
+ debugstop: integer = -1; //stop at segment n
+ debugnoa: boolean;  //do not handle point a of segment
+ debugnob: boolean;  //do not handle point b of segment
+ debugnoseg: boolean; //do not handle segment
+ debugnosegsplit: boolean; //not handle segsplit
+ debugdumperror: boolean;
+
+{$endif}
+
 implementation
 uses
  msetypes,msenoise
@@ -301,9 +312,6 @@ begin
  level:= 0;
  dump(anodes,false,false);
 end;
-
-var
- dumperror: boolean;
 
 function trapval(const atrap: ptrapinfoty; const atraps: ptrapinfoty): string;
 begin
@@ -625,7 +633,7 @@ begin
  end;
  if toterror then begin
   debugwriteln('                                               ***error***');
-  dumperror:= true;
+  debugdumperror:= true;
  end;
 end;
 
@@ -634,7 +642,7 @@ procedure dump(const atraps: ptrapinfoty; const ntraps: integer;
             const anodes: ptrapnodeinfoty; const caption: string;
             const noerr: boolean);
 begin
- dumperror:= false;
+ debugdumperror:= false;
  dumptraps(atraps,ntraps,asegments,anpoints,caption,noerr);
  debugwriteln('');
  dumpnodes(anodes,atraps,asegments);
@@ -1319,6 +1327,7 @@ var
   end;
  {$ifdef mse_debugpolytria}
   dump(traps,newtraps-traps,segments,npoints,nodes,'segment0',true);
+ if not ((segcounter = debugstop) and debugnosegsplit) then begin
  {$endif}
 
   while trap1^.below <> nil do begin
@@ -1367,6 +1376,9 @@ var
    splitnode(not isright1,trap1l,trap1r);
    trap1:= trap2;
   end;
+{$ifdef mse_debugpolytria}
+ end;
+{$endif}
   segb^.splitseg:= aseg;
  {$ifdef mse_debugpolytria}
   dump(traps,newtraps-traps,segments,npoints,nodes,'segment1',false);
@@ -1639,21 +1651,40 @@ begin
   dumpseg(seg1,segments,npoints,traps);
  {$endif}
 
+ {$ifdef mse_debugpolytria}
+ if not((segcounter = debugstop) and debugnoa) then begin
+ {$endif}
+
   if not (sf_pointhandled in seg2^.flags) then begin
    handlepoint(seg2);
   {$ifdef mse_debugpolytria}
    dump(traps,newtraps-traps,segments,npoints,nodes,'point A',false);
   {$endif}
   end;
+
+ {$ifdef mse_debugpolytria}
+ end;
+ {$endif}
+
+ {$ifdef mse_debugpolytria}
+ if not((segcounter = debugstop) and debugnoa) then begin
+ {$endif}
+
   if not (sf_pointhandled in seg1^.flags) then begin
    handlepoint(seg1);
   {$ifdef mse_debugpolytria}
    dump(traps,newtraps-traps,segments,npoints,nodes,'point B',false);
   {$endif}
   end;
+  
  {$ifdef mse_debugpolytria}
+ end;
   debugwriteln('----------------');
   dumpseg(seg1,segments,npoints,traps);
+  if (segcounter = debugstop) and 
+                          (debugnoseg or debugnoa or debugnob) then begin
+   break;
+  end;
  {$endif}
  
   handlesegment(seg1);
@@ -1666,7 +1697,7 @@ begin
  debugwriteln('toptrap: '+trapval(toptrap,traps)+' points: '+inttostr(npoints)+
      ' traps: '+inttostr(newtraps-traps)+' nodes: '+inttostr(newnodes-nodes)+
         ' '+formatfloatmse((newnodes-nodes)/npoints,'0.00'));
- if dumperror then begin
+ if debugdumperror then begin
   debugwriteln('****error****                                         '+
                '****error****');
  end
