@@ -59,11 +59,11 @@ begin
    v.shift.x:= (v.d.y*dist) div v.c;
    v.shift.y:= (v.d.x*dist) div v.c;
    if dist and $10000 <> 0 then begin //odd, shift 0.5 pixel
-    offsx:= -(abs(v.d.y) shl 15) div v.c;
-    offsy:= (abs(v.d.x) shl 15) div v.c;
+    offsx:= abs(v.d.y shl 15) div v.c;
+    offsy:= abs(v.d.x shl 15) div v.c;
    end;
   end;
-  offs.x:= (drawinfo.origin.x shl 16) + v.shift.x div 2 - offsx;
+  offs.x:= (drawinfo.origin.x shl 16) + v.shift.x div 2 + offsx;
   offs.y:= (drawinfo.origin.y shl 16) - v.shift.y div 2 + offsy;
   linestart:= pointa;
  end;
@@ -122,6 +122,47 @@ begin
  end;
 end;
 
+procedure updatestarttria(var drawinfo: drawinfoty; var li: lineshiftinfoty);
+var
+ sx1,sy1: integer;
+begin
+ with triagcty(drawinfo.gc.platformdata).d do begin
+  if capstyle = cs_projecting then begin
+   sx1:= li.v.shift.y div 2 - li.offsy;
+   sy1:= li.v.shift.x div 2 - li.offsx;
+   with (li.dest-2)^ do begin
+    x:= x - sx1;
+    y:= y - sy1;
+   end;
+   with (li.dest-1)^ do begin
+    x:= x - sx1;
+    y:= y - sy1;
+   end;
+  end;
+ end;
+end;
+
+procedure updateendtria(var drawinfo: drawinfoty; var li: lineshiftinfoty);
+var
+ sx1,sy1: integer;
+begin
+ with triagcty(drawinfo.gc.platformdata).d do begin
+  if (capstyle = cs_projecting) or nullwidth then begin
+   sx1:= li.v.shift.y div 2  + li.offsy;
+   sy1:= li.v.shift.x div 2  + li.offsx;
+   with (li.dest-2)^ do begin
+    x:= x + sx1;
+    y:= y + sy1;
+   end;
+   with (li.dest-1)^ do begin
+    x:= x + sx1;
+    y:= y + sy1;
+   end;
+  end;
+ end;
+ (li.dest-4)^:= (li.dest-2)^;
+end;
+
 procedure dashinit(var drawinfo: drawinfoty; var li: lineshiftinfoty);
 var
  int1: integer;
@@ -164,14 +205,14 @@ begin
   po3:= li.dest;
   pt0.x:= (li.linestart^.x shl 16) + li.offs.x;
   pt0.y:= (li.linestart^.y shl 16) + li.offs.y;
-  dx:= li.v.d.x shl 16 div li.v.c;
-  dy:= li.v.d.y shl 16 div li.v.c;
+  dx:= (li.v.d.x shl 16) div li.v.c;
+  dy:= (li.v.d.y shl 16) div li.v.c;
   while dashpos < dashstop do begin
-   if odd(dashind) then begin
+   if odd(dashind) then begin //end dash
     x1:= pt0.x + dashpos*dx; 
     y1:= pt0.y + dashpos*dy; 
-    po3^.x:= x1; 
-    po3^.y:= y1; 
+//    po3^.x:= x1; //handeled in updateendtria
+//    po3^.y:= y1; 
     inc(po3);
     po3^:= (po3-2)^;
     inc(po3);
@@ -180,8 +221,11 @@ begin
     inc(po3);
     po3^.x:= x1 - li.v.shift.x;
     po3^.y:= y1 + li.v.shift.y;
+    inc(po3);
+    li.dest:= po3;
+    updateendtria(drawinfo,li);
    end
-   else begin
+   else begin               //start dash
     x1:= pt0.x + dashpos*dx; 
     y1:= pt0.y + dashpos*dy; 
     po3^.x:= x1;
@@ -189,15 +233,17 @@ begin
     inc(po3);
     po3^.x:= x1 - li.v.shift.x;
     po3^.y:= y1 + li.v.shift.y;
+    inc(po3);
+    li.dest:= po3;
+    updatestarttria(drawinfo,li);
    end;
-   inc(po3);
    inc(dashind);
    if dashind > length(xftdashes) then begin
     dashind:= 1;
    end;
    dashpos:= dashpos + ord(xftdashes[dashind]);
   end;
-  if odd(dashind) and endpoint then begin
+  if odd(dashind) and endpoint then begin //end dash
    x1:= pt0.x + (li.v.d.x shl 16);
    y1:= pt0.y + (li.v.d.y shl 16);
    po3^.x:= x1;
@@ -211,6 +257,8 @@ begin
    po3^.x:= x1 - li.v.shift.x;
    po3^.y:= y1 + li.v.shift.y;
    inc(po3);
+   li.dest:= po3;
+   updateendtria(drawinfo,li);
   end;
   li.dest:= po3;
   li.dashind:= dashind;
@@ -282,6 +330,7 @@ begin
    dashinit(drawinfo,li);
    calclineshift(drawinfo,li);
    shiftpoint(li);
+   updatestarttria(drawinfo,li);
    bo1:= true; //start dash
    for int1:= 0 to int2 do begin
     if li.pointb = pend then begin
@@ -317,7 +366,8 @@ begin
     (ppointty(buffer.buffer)+1)^:= pt1;
    end
    else begin
-    dash(drawinfo,li,bo1,false);
+    dash(drawinfo,li,bo1,true);
+    {
     if odd(li.dashind) then begin //dash
      shiftpoint(li);
      pt0:= (li.dest-2)^;
@@ -325,6 +375,7 @@ begin
      dec(li.dest,2);
      pushdashend;
     end;     
+    }
    end;
   end
   else begin
@@ -367,8 +418,8 @@ end;
 procedure linesegmentstria(var drawinfo: drawinfoty;
                   out atriangles: ptrianglety; out atrianglecount: integer);
 var
- int1,sx,sy: integer;
- li: lineshiftinfoty;
+ int1: integer;
+ li: lineshiftinfoty; 
 begin   
  with drawinfo,drawinfo.points,triagcty(gc.platformdata).d do begin
   li.pointa:= points;
@@ -379,6 +430,7 @@ begin
    for int1:= 0 to (count div 2)-1 do begin
     calclineshift(drawinfo,li);
     shiftpoint(li);
+    updatestarttria(drawinfo,li);
     dash(drawinfo,li,true,true);
     li.pointa:= li.pointb;
     inc(li.pointb);
@@ -390,33 +442,13 @@ begin
    for int1:= 0 to (count div 2)-1 do begin
     calclineshift(drawinfo,li);
     shiftpoint(li);
-    sx:= li.v.shift.y div 2{ - li.offsy};
-    sy:= li.v.shift.x div 2{ - li.offsx};
-    if capstyle = cs_projecting then begin
-     with (li.dest-2)^ do begin
-      x:= x - sx;
-      y:= y - sy;
-     end;
-     with (li.dest-1)^ do begin
-      x:= x - sx;
-      y:= y - sy;
-     end;
-    end;
+    updatestarttria(drawinfo,li);
     inc(li.dest);
     li.dest^:= (li.dest-2)^;
     inc(li.dest);
     shiftpoint(li);
-    if (capstyle = cs_projecting) or nullwidth then begin
-     with (li.dest-2)^ do begin
-      x:= x + sx;
-      y:= y + sy;
-     end;
-     with (li.dest-1)^ do begin
-      x:= x + sx;
-      y:= y + sy;
-     end;
-    end;
-    (li.dest-4)^:= (li.dest-2)^;
+    updateendtria(drawinfo,li);
+//    (li.dest-4)^:= (li.dest-2)^;
    end;
   end;
   atriangles:= buffer.buffer;
