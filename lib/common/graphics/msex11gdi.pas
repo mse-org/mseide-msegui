@@ -951,8 +951,8 @@ begin
    xvalues.line_width:= (lineinfo.width + linewidthroundvalue) shr linewidthshift;
    triainfo.xftlinewidth:= xvalues.line_width shl 16;
 //   triainfo.xftlinewidthsquare:= xvalues.line_width*xvalues.line_width{ shl 16};
-   triainfo.nullwidth:= triainfo.xftlinewidth = 0;
-   if triainfo.nullwidth then begin
+   triainfo.zerowidth:= triainfo.xftlinewidth = 0;
+   if triainfo.zerowidth then begin
     triainfo.xftlinewidth:= 1 shl 16;
 //    triainfo.xftlinewidthsquare:= 1{ shl 16};
    end;

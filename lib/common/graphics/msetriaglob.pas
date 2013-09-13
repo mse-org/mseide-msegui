@@ -22,7 +22,7 @@ type
   xftdashes: dashesstringty;
   capstyle: capstylety;
   joinstyle: joinstylety;
-  nullwidth: boolean;
+  zerowidth: boolean;
  end;
  
  triagcty = record
