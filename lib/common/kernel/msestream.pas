@@ -276,6 +276,7 @@ type
    procedure write(const value: boolean); reintroduce; overload;
    procedure write(const values: array of const); reintroduce; overload;
 
+   procedure writeln; overload;
    procedure writeln(const value: string); overload; virtual;
    procedure writeln(const value: msestring); overload;
    procedure writeln(const value: real);  overload;
@@ -1852,6 +1853,11 @@ end;
 procedure ttextstream.writestrln(const value: string);
 begin
  write(value+eor);
+end;
+
+procedure ttextstream.writeln;
+begin
+ write(eor);
 end;
 
 procedure ttextstream.writeln(const value: string);
