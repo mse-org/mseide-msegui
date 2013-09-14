@@ -948,13 +948,14 @@ begin
   end;
   if gvm_linewidth in mask then begin
    xmask:= xmask or gclinewidth;
-   xvalues.line_width:= (lineinfo.width + linewidthroundvalue) shr linewidthshift;
-   triainfo.xftlinewidth:= xvalues.line_width shl 16;
-//   triainfo.xftlinewidthsquare:= xvalues.line_width*xvalues.line_width{ shl 16};
-   triainfo.zerowidth:= triainfo.xftlinewidth = 0;
-   if triainfo.zerowidth then begin
-    triainfo.xftlinewidth:= 1 shl 16;
-//    triainfo.xftlinewidthsquare:= 1{ shl 16};
+   xvalues.line_width:= 
+                   (lineinfo.width + linewidthroundvalue) shr linewidthshift;
+   triainfo.linewidth:= xvalues.line_width;
+   if triainfo.linewidth = 0 then begin
+    triainfo.linewidth16:= 1 shl 16;
+   end
+   else begin
+    triainfo.linewidth16:= triainfo.linewidth shl 16;
    end;
   end;
   if gvm_dashes in mask then begin
@@ -2260,7 +2261,7 @@ begin
    cx2:= cx1*cx1;
    cy1:= cy * (65536 div 2);
    cy2:= cy1*cy1;
-   w:= triainfo.xftlinewidth div 2;
+   w:= triainfo.linewidth16 div 2;
    cxw:= cx1*w;
    cyw:= cy1*w;
    sx:= cos(startang);
@@ -2434,7 +2435,7 @@ begin
    cx2:= cx1*cx1;
    cy1:= cy * (65536 div 2);
    cy2:= cy1*cy1;
-   w:= triainfo.xftlinewidth div 2;
+   w:= triainfo.linewidth16 div 2;
    cxw:= cx1*w;
    cyw:= cy1*w;
    sx:= 1;

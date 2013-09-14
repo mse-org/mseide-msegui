@@ -44,33 +44,33 @@ type
 const
  arctablesize = 20; // max diameter
  arcrowsize = arctablesize div 2 - 2;
- arcscaleshift = 8;  //value scaling = 256
+ arcscaleshift = 8;  //value scaling = 128
 type
  arctablety = array[0..arctablesize,0..arcrowsize] of byte;
 const
  arctable: arctablety = (
-  (0,0,0,0,0,0,0,0,0), //0
-  (0,0,0,0,0,0,0,0,0), //1
-  (0,0,0,0,0,0,0,0,0), //2
-  (191,0,0,0,0,0,0,0,0), //3
-  (222,0,0,0,0,0,0,0,0), //4
-  (235,154,0,0,0,0,0,0,0), //5
-  (241,191,0,0,0,0,0,0,0), //6
-  (245,210,132,0,0,0,0,0,0), //7
-  (248,222,169,0,0,0,0,0,0), //8
-  (250,229,191,117,0,0,0,0,0), //9
-  (251,235,205,154,0,0,0,0,0), //10
-  (252,238,215,176,107,0,0,0,0), //11
-  (252,241,222,191,142,0,0,0,0), //12
-  (253,244,227,202,164,98,0,0,0), //13
-  (253,245,231,210,179,132,0,0,0), //14
-  (254,247,235,217,191,154,92,0,0), //15
-  (254,248,237,222,200,169,124,0,0), //16
-  (254,249,240,226,207,181,145,87,0), //17
-  (254,250,241,229,213,191,161,117,0), //18
-  (255,250,243,232,218,198,173,138,82), //19
-  (255,251,244,235,222,205,183,154,112) //20
- );
+ (0,0,0,0,0,0,0,0,0), //0
+ (0,0,0,0,0,0,0,0,0), //1
+ (0,0,0,0,0,0,0,0,0), //2
+ (95,0,0,0,0,0,0,0,0), //3
+ (111,0,0,0,0,0,0,0,0), //4
+ (117,77,0,0,0,0,0,0,0), //5
+ (121,95,0,0,0,0,0,0,0), //6
+ (123,105,66,0,0,0,0,0,0), //7
+ (124,111,85,0,0,0,0,0,0), //8
+ (125,115,95,59,0,0,0,0,0), //9
+ (125,117,102,77,0,0,0,0,0), //10
+ (126,119,107,88,53,0,0,0,0), //11
+ (126,121,111,95,71,0,0,0,0), //12
+ (126,122,114,101,82,49,0,0,0), //13
+ (127,123,116,105,90,66,0,0,0), //14
+ (127,123,117,108,95,77,46,0,0), //15
+ (127,124,119,111,100,85,62,0,0), //16
+ (127,124,120,113,104,91,73,43,0), //17
+ (127,125,121,115,106,95,80,59,0), //18
+ (127,125,121,116,109,99,87,69,41), //19
+ (127,125,122,117,111,102,91,77,56) //20
+);
 //
 //todo: optimize smooth line generation
 //
@@ -158,7 +158,7 @@ var
  sx1,sy1: integer;
 begin
  with triagcty(drawinfo.gc.platformdata).d do begin
-  if (capstyle = cs_projecting) or zerowidth then begin
+  if (linewidth = 0) or (capstyle = cs_projecting) then begin
    sx1:= li.v.shift.y div 2 - li.offsy;
    sy1:= li.v.shift.x div 2 - li.offsx;
    with (li.dest-2)^ do begin
@@ -198,7 +198,7 @@ var
  sx1,sy1: integer;
 begin
  with triagcty(drawinfo.gc.platformdata).d do begin
-  if (capstyle = cs_projecting) or zerowidth then begin
+  if (linewidth = 0) or (capstyle = cs_projecting) then begin
    sx1:= li.v.shift.y div 2  + li.offsy;
    sy1:= li.v.shift.x div 2  + li.offsx;
    with (li.dest-2)^ do begin
@@ -216,10 +216,14 @@ end;
 
 procedure updateendstrip(var drawinfo: drawinfoty; var li: lineshiftinfoty);
 var
- sx1,sy1: integer;
+ sx1,sy1,sx2,sy2: integer;
+ int1: integer;
+ po1: ppointty;
+ po2: pbyte;
+ pt1,pt2: pointty;
 begin
  with triagcty(drawinfo.gc.platformdata).d do begin
-  if (capstyle = cs_projecting) or zerowidth then begin
+  if (linewidth = 0) or (capstyle = cs_projecting) then begin
    sx1:= li.v.shift.y div 2  + li.offsy;
    sy1:= li.v.shift.x div 2  + li.offsx;
    with (li.dest-2)^ do begin
@@ -229,6 +233,37 @@ begin
    with (li.dest-1)^ do begin
     x:= x + sx1;
     y:= y + sy1;
+   end;
+  end
+  else begin
+   if capstyle = cs_round then begin
+    if linewidth <= arctablesize then begin
+     po1:= li.dest;
+     pt1:= (po1-2)^;
+     pt2:= (po1-1)^;
+     po2:= @arctable[linewidth];
+     for int1:= 1 to linewidth div 2 do begin
+      sx1:= (li.v.shift.y*int1) div linewidth16;      //axial
+      sy1:= (li.v.shift.x*int1) div linewidth16;
+      sx2:= (li.v.shift.x*po2^) shr arcscaleshift;    //orthogonal
+      sy2:= (li.v.shift.y*po2^) shr arcscaleshift;
+      po1^.x:= pt1.x + sx1 + sx2;
+      po1^.y:= pt1.y + sy1 + sy2;
+      inc(po1);      
+      po1^.x:= pt2.x + sx1 - sx2;
+      po1^.y:= pt2.y + sy1 - sy2;
+      inc(po1);
+      inc(po2);
+     end;
+     if odd(linewidth) then begin
+      sx1:= (li.v.shift.y*linewidth) div linewidth16;      //axial
+      sy1:= (li.v.shift.x*linewidth) div linewidth16;      
+      po1^.x:= (pt1.x + pt2.x) div 2 +sx1;
+      po1^.y:= (pt1.y + pt2.y) div 2 +sy1;
+      inc(po1);
+     end;
+     li.dest:= po1;
+    end;
    end;
   end;
  end;
@@ -294,7 +329,7 @@ begin
     po3^.y:= y1 + li.v.shift.y;
     inc(po3);
     li.dest:= po3;
-    if not zerowidth then begin
+    if linewidth <> 0 then begin
      updateendtria(drawinfo,li);
     end;
    end
@@ -308,7 +343,7 @@ begin
     po3^.y:= y1 + li.v.shift.y;
     inc(po3);
     li.dest:= po3;
-    if not zerowidth then begin
+    if linewidth <> 0 then begin
      updatestarttria(drawinfo,li);
     end;
    end;
@@ -333,7 +368,7 @@ begin
    po3^.y:= y1 + li.v.shift.y;
    inc(po3);
    li.dest:= po3;
-   if not zerowidth then begin
+   if linewidth <> 0 then begin
     updateendtria(drawinfo,li);
    end;
   end;
@@ -396,7 +431,7 @@ begin
   li.pointa:= points;
   pend:= points+count;
   li.pointb:= li.pointa+1;
-  li.dist:= xftlinewidth;
+  li.dist:= linewidth16;
   if closed then begin
    int2:= count-1;
   end
@@ -407,7 +442,7 @@ begin
    dashinit(drawinfo,li);
    calclineshift(drawinfo,li);
    shiftpoint(li);
-   if not closed and not zerowidth then begin
+   if (linewidth <> 0) and not closed then begin
     updatestarttria(drawinfo,li);
    end;
    bo1:= true; //start dash
@@ -447,19 +482,11 @@ begin
    end
    else begin
     dash(drawinfo,li,bo1,true);
-    {
-    if odd(li.dashind) then begin //dash
-     shiftpoint(li);
-     pt0:= (li.dest-2)^;
-     pt1:= (li.dest-1)^;
-     dec(li.dest,2);
-     pushdashend;
-    end;     
-    }
    end;
   end
   else begin
-   allocbuffer(buffer,pointcount*sizeof(pointty));
+   allocbuffer(buffer,(pointcount+2*linewidth)*sizeof(pointty));
+                          //for round caps
    li.dest:= buffer.buffer;
    calclineshift(drawinfo,li);
    shiftpoint(li);
@@ -506,13 +533,13 @@ begin
  with drawinfo,drawinfo.points,triagcty(gc.platformdata).d do begin
   li.pointa:= points;
   li.pointb:= li.pointa+1;
-  li.dist:= xftlinewidth;
+  li.dist:= linewidth16;
   if df_dashed in gc.drawingflags then begin
    dashinit(drawinfo,li);
    for int1:= 0 to (count div 2)-1 do begin
     calclineshift(drawinfo,li);
     shiftpoint(li);
-    if not zerowidth then begin
+    if linewidth <> 0 then begin
      updatestarttria(drawinfo,li);
     end;
     dash(drawinfo,li,true,true);

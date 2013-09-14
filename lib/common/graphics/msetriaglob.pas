@@ -17,12 +17,13 @@ type
  ptrianglety = ^trianglety;
 
  triainfoty = record
-  xftlinewidth: integer;
+  linewidth: integer;
+  linewidth16: integer;
 //  xftlinewidthsquare: integer;
   xftdashes: dashesstringty;
   capstyle: capstylety;
   joinstyle: joinstylety;
-  zerowidth: boolean;
+//  zerowidth: boolean;
  end;
  
  triagcty = record
