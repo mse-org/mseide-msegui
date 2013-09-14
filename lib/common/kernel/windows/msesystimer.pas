@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2010 by Martin Schreiber
+{ MSEgui Copyright (c) 2010-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -22,7 +22,7 @@ function setmmtimer(const avalue: boolean): boolean;
 
 implementation
 uses
- msewinglob,mseevent,msesys,msedynload{,mseguiintf};
+ msewinglob,mseevent,msesys,msedynload{,mseguiintf},msedate;
 
 const
   MMSYSERR_NOERROR = 0;
@@ -93,15 +93,21 @@ end;
 
 function setmmtimer(const avalue: boolean): boolean;
 begin
+ result:= true;
  if avalue then begin
-  result:= checkmmtimer;
-  if result then begin
-   usemmtimer:= true;
+  if not usemmtimer then begin
+   result:= checkmmtimer;
+   if result then begin
+    usemmtimer:= true;
+    timebeginperiod(ticaps.wperiodmin);
+   end;
   end;
  end
  else begin
-  usemmtimer:= false;
-  result:= false;
+  if usemmtimer then begin
+   timeendperiod(ticaps.wperiodmin);
+   usemmtimer:= false;
+  end;
  end;
 end;
 
@@ -183,4 +189,10 @@ begin
  applicationhandle:= apphandle;
 end;
 
+initialization
+finalization
+ if usemmtimer then begin
+  timeendperiod(ticaps.wperiodmin);
+  usemmtimer:= false;
+ end;
 end.

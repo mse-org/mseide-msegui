@@ -99,9 +99,16 @@ begin
  create(getlasterror,leadingtext);
 end;
 
+function timestamp: longword;
+begin
+ result:= sys_gettimeus;
+ if result = 0 then begin
+  result:= 1;
+ end;
+end;
 
  {$ifdef UNIX}
-
+{
 function timestamp: longword;
 var
  t1: timeval;
@@ -112,7 +119,7 @@ begin
   result:= 1;
  end;
 end;
-
+}
 procedure waitus(us: integer);
 var
  time: longword;
@@ -125,7 +132,7 @@ end;
 {$endif unix}
 
 {$ifdef mswindows}
-
+{
 function timestamp: longword;
 begin
  result:= gettickcount * 1000;
@@ -133,7 +140,7 @@ begin
   result:= 1;
  end;
 end;
-
+}
 procedure waitperformancecounter(time: int64);
 var
  time1: int64;

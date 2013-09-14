@@ -246,6 +246,7 @@ type
    function internalunlock(count: integer): boolean;
    function getterminated: boolean;
    procedure setterminated(const Value: boolean);
+   function gethighrestimer: boolean;
   protected
    fthread: threadty;
    fstate: applicationstatesty;
@@ -286,6 +287,7 @@ type
    procedure deinitialize;
    procedure beginhighrestimer;
    procedure endhighrestimer;
+   property highrestimer: boolean read gethighrestimer;
    
    function procid: procidty;
    function createdatamodule(instanceclass: msecomponentclassty;
@@ -1765,6 +1767,11 @@ begin
  if fhighrestimercount = 0 then begin
   sethighrestimer(false);
  end;
+end;
+
+function tcustomapplication.gethighrestimer: boolean;
+begin
+ result:= fhighrestimercount > 0;
 end;
 
 function tcustomapplication.waitescaped: boolean;
