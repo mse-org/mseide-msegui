@@ -155,7 +155,12 @@ end;
 
 procedure updatestarttria(var drawinfo: drawinfoty; var li: lineshiftinfoty);
 var
- sx1,sy1: integer;
+ sx1,sy1,sx2,sy2: integer;
+ int1: integer;
+ po1: ppointty;
+ po2: pbyte;
+ pt1,pt2: pointty;
+ first: boolean;
 begin
  with triagcty(drawinfo.gc.platformdata).d do begin
   if (linewidth = 0) or (capstyle = cs_projecting) then begin
@@ -169,6 +174,54 @@ begin
     x:= x - sx1;
     y:= y - sy1;
    end;
+  end
+  else begin
+   if false{capstyle = cs_round} then begin
+    po1:= li.dest;
+    dec(po1);
+    pt2:= (po1)^;
+    dec(po1);
+    pt1:= (po1)^;
+    if linewidth <= arctablesize then begin
+     sx1:= (li.v.shift.y) div 2;      //axial
+     sy1:= (li.v.shift.x) div 2;      
+     po1^.x:= (pt1.x + pt2.x) div 2 - sx1;
+     po1^.y:= (pt1.y + pt2.y) div 2 - sy1;
+     inc(po1);
+     po2:= @arctable[linewidth];
+     inc(po2,(linewidth1 + 1) div 2 - 2);
+     first:= true;
+     for int1:= linewidth div 2 - 1 downto 1 do begin
+      sx1:= (li.v.shift.y*int1) div linewidth1;      //axial
+      sy1:= (li.v.shift.x*int1) div linewidth1;
+      sx2:= (li.v.shift.x*po2^) div arcscalefact;    //orthogonal
+      sy2:= (li.v.shift.y*po2^) div arcscalefact;
+      po1^.x:= pt1.x - sx1 - sx2; //0
+      po1^.y:= pt1.y - sy1 + sy2;
+      inc(po1);
+      if not first then begin
+       po1^:= (po1-2)^;            //1
+       inc(po1);
+       po1^:= (po1-2)^;            //2
+       inc(po1);
+      end;
+      po1^.x:= pt2.x - sx1 + sx2; //3
+      po1^.y:= pt2.y - sy1 - sy2;
+      inc(po1);
+      po1^:= (po1-2)^;            //4
+      inc(po1);
+      po1^:= (po1-2)^;            //5
+      inc(po1);
+      dec(po2);
+      first:= false;
+     end;
+     po1^:= pt1;
+     inc(po1);
+     po1^:= pt2;
+     inc(po1);
+     li.dest:= po1;
+    end;
+   end;   
   end;
  end;
 end;
@@ -235,7 +288,11 @@ end;
 
 procedure updateendtria(var drawinfo: drawinfoty; var li: lineshiftinfoty);
 var
- sx1,sy1: integer;
+ sx1,sy1,sx2,sy2: integer;
+ int1: integer;
+ po1: ppointty;
+ po2: pbyte;
+ pt1,pt2: pointty;
 begin
  with triagcty(drawinfo.gc.platformdata).d do begin
   if (linewidth = 0) or (capstyle = cs_projecting) then begin
@@ -248,6 +305,49 @@ begin
    with (li.dest-1)^ do begin
     x:= x + sx1;
     y:= y + sy1;
+   end;
+  end
+  else begin
+   if capstyle = cs_round then begin
+    if linewidth <= arctablesize then begin
+     po1:= li.dest;
+     (po1-4)^:= (po1-2)^;
+     pt1:= (po1-2)^;
+     pt2:= (po1-1)^;
+     po1^:= pt1;
+     inc(po1);
+     po1^:= pt2;
+     inc(po1);
+     po2:= @arctable[linewidth];
+     for int1:= 1 to linewidth div 2 - 1 do begin
+      sx1:= (li.v.shift.y*int1) div linewidth1;      //axial
+      sy1:= (li.v.shift.x*int1) div linewidth1;
+      sx2:= (li.v.shift.x*po2^) div arcscalefact;    //orthogonal
+      sy2:= (li.v.shift.y*po2^) div arcscalefact;
+      po1^.x:= pt1.x + sx1 - sx2;       //0
+      po1^.y:= pt1.y + sy1 + sy2;
+      inc(po1);      
+      po1^:= (po1-2)^;                  //1
+      inc(po1);      
+      po1^:= (po1-2)^;                  //2
+      inc(po1);
+      po1^.x:= pt2.x + sx1 + sx2;       //3
+      po1^.y:= pt2.y + sy1 - sy2;
+      inc(po1);
+      po1^:= (po1-2)^;                  //4
+      inc(po1);      
+      po1^:= (po1-2)^;                  //5      
+      inc(po1);
+      inc(po2);
+     end;
+     sx1:= (li.v.shift.y) div 2;      //axial
+     sy1:= (li.v.shift.x) div 2;      
+     po1^.x:= (pt1.x + pt2.x) div 2 + sx1;
+     po1^.y:= (pt1.y + pt2.y) div 2 + sy1;
+     inc(po1);
+     li.dest:= po1;
+     exit;
+    end;
    end;
   end;
  end;
@@ -588,7 +688,8 @@ begin
    end;
   end
   else begin
-   allocbuffer(buffer,3*count*sizeof(pointty));
+   allocbuffer(buffer,(3+4*linewidth)*count*sizeof(pointty));
+                         //for round caps
    li.dest:= buffer.buffer;
    for int1:= 0 to (count div 2)-1 do begin
     calclineshift(drawinfo,li);
