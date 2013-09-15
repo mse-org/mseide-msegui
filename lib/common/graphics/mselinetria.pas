@@ -44,7 +44,7 @@ type
 const
  arctablesize = 20; // max diameter
  arcrowsize = arctablesize div 2 - 2;
- arcscaleshift = 8;  //value scaling = 128
+ arcscalefact = 256;  //value scaling = 128
 type
  arctablety = array[0..arctablesize,0..arcrowsize] of byte;
 const
@@ -52,24 +52,24 @@ const
  (0,0,0,0,0,0,0,0,0), //0
  (0,0,0,0,0,0,0,0,0), //1
  (0,0,0,0,0,0,0,0,0), //2
- (95,0,0,0,0,0,0,0,0), //3
- (111,0,0,0,0,0,0,0,0), //4
- (117,77,0,0,0,0,0,0,0), //5
- (121,95,0,0,0,0,0,0,0), //6
- (123,105,66,0,0,0,0,0,0), //7
- (124,111,85,0,0,0,0,0,0), //8
- (125,115,95,59,0,0,0,0,0), //9
- (125,117,102,77,0,0,0,0,0), //10
- (126,119,107,88,53,0,0,0,0), //11
- (126,121,111,95,71,0,0,0,0), //12
- (126,122,114,101,82,49,0,0,0), //13
- (127,123,116,105,90,66,0,0,0), //14
- (127,123,117,108,95,77,46,0,0), //15
- (127,124,119,111,100,85,62,0,0), //16
- (127,124,120,113,104,91,73,43,0), //17
- (127,125,121,115,106,95,80,59,0), //18
- (127,125,121,116,109,99,87,69,41), //19
- (127,125,122,117,111,102,91,77,56) //20
+ (33,0,0,0,0,0,0,0,0), //3
+ (17,0,0,0,0,0,0,0,0), //4
+ (11,51,0,0,0,0,0,0,0), //5
+ (7,33,0,0,0,0,0,0,0), //6
+ (5,23,62,0,0,0,0,0,0), //7
+ (4,17,43,0,0,0,0,0,0), //8
+ (3,13,33,69,0,0,0,0,0), //9
+ (3,11,26,51,0,0,0,0,0), //10
+ (2,9,21,40,75,0,0,0,0), //11
+ (2,7,17,33,57,0,0,0,0), //12
+ (2,6,14,27,46,79,0,0,0), //13
+ (1,5,12,23,38,62,0,0,0), //14
+ (1,5,11,20,33,51,82,0,0), //15
+ (1,4,9,17,28,43,66,0,0), //16
+ (1,4,8,15,24,37,55,85,0), //17
+ (1,3,7,13,22,33,48,69,0), //18
+ (1,3,7,12,19,29,41,59,87), //19
+ (1,3,6,11,17,26,37,51,72) //20
 );
 //
 //todo: optimize smooth line generation
@@ -175,7 +175,11 @@ end;
 
 procedure updatestartstrip(var drawinfo: drawinfoty; var li: lineshiftinfoty);
 var
- sx1,sy1: integer;
+ sx1,sy1,sx2,sy2: integer;
+ int1: integer;
+ po1: ppointty;
+ po2: pbyte;
+ pt1,pt2: pointty;
 begin
  with triagcty(drawinfo.gc.platformdata).d do begin
   if capstyle = cs_projecting then begin
@@ -188,6 +192,42 @@ begin
    with (li.dest-1)^ do begin
     x:= x - sx1;
     y:= y - sy1;
+   end;
+  end
+  else begin
+   if capstyle = cs_round then begin
+    po1:= li.dest;
+    dec(po1);
+    pt2:= (po1)^;
+    dec(po1);
+    pt1:= (po1)^;
+    if linewidth <= arctablesize then begin
+     sx1:= (li.v.shift.y) div 2;      //axial
+     sy1:= (li.v.shift.x) div 2;      
+     po1^.x:= (pt1.x + pt2.x) div 2 - sx1;
+     po1^.y:= (pt1.y + pt2.y) div 2 - sy1;
+     inc(po1);
+     po2:= @arctable[linewidth];
+     inc(po2,(linewidth1 + 1) div 2 - 2);
+     for int1:= linewidth div 2 - 1 downto 1 do begin
+      sx1:= (li.v.shift.y*int1) div linewidth1;      //axial
+      sy1:= (li.v.shift.x*int1) div linewidth1;
+      sx2:= (li.v.shift.x*po2^) div arcscalefact;    //orthogonal
+      sy2:= (li.v.shift.y*po2^) div arcscalefact;
+      po1^.x:= pt1.x - sx1 - sx2;
+      po1^.y:= pt1.y - sy1 + sy2;
+      inc(po1);      
+      po1^.x:= pt2.x - sx1 + sx2;
+      po1^.y:= pt2.y - sy1 - sy2;
+      inc(po1);
+      dec(po2);
+     end;
+     po1^:= pt1;
+     inc(po1);
+     po1^:= pt2;
+     inc(po1);
+     li.dest:= po1;
+    end;
    end;
   end;
  end;
@@ -242,26 +282,24 @@ begin
      pt1:= (po1-2)^;
      pt2:= (po1-1)^;
      po2:= @arctable[linewidth];
-     for int1:= 1 to linewidth div 2 do begin
-      sx1:= (li.v.shift.y*int1) div linewidth16;      //axial
-      sy1:= (li.v.shift.x*int1) div linewidth16;
-      sx2:= (li.v.shift.x*po2^) shr arcscaleshift;    //orthogonal
-      sy2:= (li.v.shift.y*po2^) shr arcscaleshift;
-      po1^.x:= pt1.x + sx1 + sx2;
+     for int1:= 1 to linewidth div 2 - 1 do begin
+      sx1:= (li.v.shift.y*int1) div linewidth1;      //axial
+      sy1:= (li.v.shift.x*int1) div linewidth1;
+      sx2:= (li.v.shift.x*po2^) div arcscalefact;    //orthogonal
+      sy2:= (li.v.shift.y*po2^) div arcscalefact;
+      po1^.x:= pt1.x + sx1 - sx2;
       po1^.y:= pt1.y + sy1 + sy2;
       inc(po1);      
-      po1^.x:= pt2.x + sx1 - sx2;
+      po1^.x:= pt2.x + sx1 + sx2;
       po1^.y:= pt2.y + sy1 - sy2;
       inc(po1);
       inc(po2);
      end;
-     if odd(linewidth) then begin
-      sx1:= (li.v.shift.y*linewidth) div linewidth16;      //axial
-      sy1:= (li.v.shift.x*linewidth) div linewidth16;      
-      po1^.x:= (pt1.x + pt2.x) div 2 +sx1;
-      po1^.y:= (pt1.y + pt2.y) div 2 +sy1;
-      inc(po1);
-     end;
+     sx1:= (li.v.shift.y) div 2;      //axial
+     sy1:= (li.v.shift.x) div 2;      
+     po1^.x:= (pt1.x + pt2.x) div 2 + sx1;
+     po1^.y:= (pt1.y + pt2.y) div 2 + sy1;
+     inc(po1);
      li.dest:= po1;
     end;
    end;
@@ -490,7 +528,9 @@ begin
    li.dest:= buffer.buffer;
    calclineshift(drawinfo,li);
    shiftpoint(li);
-   updatestartstrip(drawinfo,li);
+   if not closed then begin
+    updatestartstrip(drawinfo,li);
+   end;
    for int1:= 0 to int2 do begin
     if li.pointb = pend then begin
      li.pointb:= points;

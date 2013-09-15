@@ -952,11 +952,12 @@ begin
                    (lineinfo.width + linewidthroundvalue) shr linewidthshift;
    triainfo.linewidth:= xvalues.line_width;
    if triainfo.linewidth = 0 then begin
-    triainfo.linewidth16:= 1 shl 16;
+    triainfo.linewidth1:= 1;
    end
    else begin
-    triainfo.linewidth16:= triainfo.linewidth shl 16;
+    triainfo.linewidth1:= triainfo.linewidth;
    end;
+   triainfo.linewidth16:= triainfo.linewidth1 shl 16;
   end;
   if gvm_dashes in mask then begin
    with lineinfo do begin

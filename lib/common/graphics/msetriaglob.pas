@@ -18,6 +18,7 @@ type
 
  triainfoty = record
   linewidth: integer;
+  linewidth1: integer;
   linewidth16: integer;
 //  xftlinewidthsquare: integer;
   xftdashes: dashesstringty;
