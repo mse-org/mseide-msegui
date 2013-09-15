@@ -176,7 +176,7 @@ begin
    end;
   end
   else begin
-   if false{capstyle = cs_round} then begin
+   if capstyle = cs_round then begin
     po1:= li.dest;
     dec(po1);
     pt2:= (po1)^;
@@ -192,32 +192,48 @@ begin
      inc(po2,(linewidth1 + 1) div 2 - 2);
      first:= true;
      for int1:= linewidth div 2 - 1 downto 1 do begin
+      if not first then begin
+       po1^:= (po1-2)^;            //0
+       inc(po1);
+       po1^:= (po1-2)^;            //1
+       inc(po1);
+      end;
       sx1:= (li.v.shift.y*int1) div linewidth1;      //axial
       sy1:= (li.v.shift.x*int1) div linewidth1;
       sx2:= (li.v.shift.x*po2^) div arcscalefact;    //orthogonal
       sy2:= (li.v.shift.y*po2^) div arcscalefact;
-      po1^.x:= pt1.x - sx1 - sx2; //0
+      po1^.x:= pt1.x - sx1 - sx2; //2
       po1^.y:= pt1.y - sy1 + sy2;
       inc(po1);
       if not first then begin
-       po1^:= (po1-2)^;            //1
+       po1^:= (po1-2)^;            //3
        inc(po1);
-       po1^:= (po1-2)^;            //2
+       po1^:= (po1-2)^;            //4
        inc(po1);
       end;
-      po1^.x:= pt2.x - sx1 + sx2; //3
+      po1^.x:= pt2.x - sx1 + sx2; //5
       po1^.y:= pt2.y - sy1 - sy2;
-      inc(po1);
-      po1^:= (po1-2)^;            //4
-      inc(po1);
-      po1^:= (po1-2)^;            //5
       inc(po1);
       dec(po2);
       first:= false;
      end;
-     po1^:= pt1;
+     if not first then begin
+      po1^:= (po1-2)^;     //0
+      inc(po1);
+      po1^:= (po1-2)^;     //1
+      inc(po1);
+      po1^:= pt1;          //2
+      inc(po1);
+      po1^:= (po1-2)^;     //3
+      inc(po1);
+     end;
+     po1^:= pt1;          //4
      inc(po1);
-     po1^:= pt2;
+     po1^:= pt2;          //5
+     inc(po1);
+     po1^:= pt1;          //0
+     inc(po1);
+     po1^:= pt2;          //1
      inc(po1);
      li.dest:= po1;
     end;
