@@ -347,6 +347,7 @@ type
   protected
    function getdefaultstate: propertystatesty; override;
    function checkfreeoptionalclass: boolean;
+   function dispname: msestring; virtual;
   public
    function getvalue: msestring; override;
    function subproperties: propertyeditorarty; override;
@@ -802,6 +803,7 @@ type
 }
  tclasselementeditor = class(tclasspropertyeditor)
   protected
+   function dispname: msestring; override;
    function getdefaultstate: propertystatesty; override;
   public
    function getvalue: msestring; override;
@@ -2607,11 +2609,16 @@ begin
           ')?',stockobjects.captions[sc_confirmation]);
 end;
 
+function tclasspropertyeditor.dispname: msestring;
+begin
+ result:= ftypeinfo^.name;
+end;
+
 function tclasspropertyeditor.getvalue: msestring;
 
 begin
 // result:= '('+fprops[0].propinfo^.proptype^.name+')';
- result:= '<'+ftypeinfo^.name+'>';
+ result:= '<'+dispname+'>';
 end;
 
 function tclasspropertyeditor.subproperties: propertyeditorarty;
@@ -3896,8 +3903,14 @@ begin
   result:= '<nil>';
  end
  else begin
-  result:= '<'+obj1.classtype.classname+'>';
+//  result:= '<'+obj1.classtype.classname+'>';
+  result:= '<'+dispname+'>';
  end;
+end;
+
+function tclasselementeditor.dispname: msestring;
+begin
+ result:= tobject(getpointervalue).classtype.classname;
 end;
 
 { tcllectionitemeditor }

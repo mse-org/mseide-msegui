@@ -98,6 +98,8 @@ type
  end;
  
  tframepropertyeditor = class(toptionalclasspropertyeditor)
+  protected
+   function dispname: msestring; override;
   public
    procedure edit; override;
  end;
@@ -132,7 +134,22 @@ type
   protected
    function getinvisibleitems: tintegerset; override;
  end;
+
+ tfacepropertyeditor = class(toptionalclasspropertyeditor)
+  protected
+   function dispname: msestring; override;
+ end;
+
+ tfaceelementeditor = class(tclasselementeditor)
+  protected
+   function dispname: msestring; override;
+ end;
  
+ tfacelistpropertyeditor = class(tpersistentarraypropertyeditor)
+  protected
+   function geteditorclass: propertyeditorclassty; override;
+ end;
+   
 const   
  datamoduleintf: designmoduleintfty = 
   (createfunc: {$ifdef FPC}@{$endif}createmsedatamodule;
@@ -157,6 +174,10 @@ begin
  registerpropertyeditor(typeinfo(tstatfile),tstatfile,'',
                                       tlinkcomponentpropertyeditor);
 
+ registerpropertyeditor(typeinfo(tcustomframe),nil,'',tframepropertyeditor);
+ registerpropertyeditor(typeinfo(tcustomface),nil,'',tfacepropertyeditor);
+ 
+ registerpropertyeditor(typeinfo(tfacearrayprop),nil,'',tfacelistpropertyeditor);
  registerpropertyeditor(typeinfo(tcustomaction),nil,'',tactionpropertyeditor);
  registerpropertyeditor(typeinfo(tshortcutactions),nil,'',
                            tshortcutactionspropertyeditor);
@@ -297,6 +318,18 @@ begin
 end;
 
 { tframepropertyeditor }
+
+function tframepropertyeditor.dispname: msestring;
+begin
+ with tcustomframe(getpointervalue) do begin
+  if template <> nil then begin
+   result:= template.name;
+  end
+  else begin
+   result:= inherited dispname;
+  end;
+ end;
+end;
 
 procedure tframepropertyeditor.edit;
 begin
@@ -576,6 +609,41 @@ end;
 function tfacelocalpropseditor.getinvisibleitems: tintegerset;
 begin
  result:= invisiblefacelocalprops;
+end;
+
+{ tfaceeditor }
+
+function tfacepropertyeditor.dispname: msestring;
+begin
+ with tcustomface(getpointervalue) do begin
+  if template <> nil then begin
+   result:= template.name;
+  end
+  else begin
+   result:= inherited dispname;
+  end;
+ end;
+end;
+
+{ tfaceelementeditor }
+
+function tfaceelementeditor.dispname: msestring;
+begin
+ with tcustomface(getpointervalue) do begin
+  if template <> nil then begin
+   result:= template.name;
+  end
+  else begin
+   result:= inherited dispname;
+  end;
+ end;
+end;
+
+{ tfacelistpropertyeditor }
+
+function tfacelistpropertyeditor.geteditorclass: propertyeditorclassty;
+begin
+ result:= tfaceelementeditor;
 end;
 
 initialization
