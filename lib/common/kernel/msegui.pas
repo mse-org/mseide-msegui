@@ -7522,7 +7522,7 @@ begin
    fparentwidget.widgetregionchanged(self);
   finally
    if not bo2 then begin
-    include(fwidgetstate1,ws1_updateopaque);
+    exclude(fwidgetstate1,ws1_updateopaque);
    end;
   end;
   result:= true;
