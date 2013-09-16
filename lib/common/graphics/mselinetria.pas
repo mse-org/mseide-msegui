@@ -189,7 +189,7 @@ begin
      po1^.y:= (pt1.y + pt2.y) div 2 - sy1;
      inc(po1);
      po2:= @arctable[linewidth];
-     inc(po2,(linewidth1 + 1) div 2 - 2);
+     inc(po2,linewidth1 div 2 - 2);
      first:= true;
      for int1:= linewidth div 2 - 1 downto 1 do begin
       if not first then begin
@@ -277,7 +277,7 @@ begin
      po1^.y:= (pt1.y + pt2.y) div 2 - sy1;
      inc(po1);
      po2:= @arctable[linewidth];
-     inc(po2,(linewidth1 + 1) div 2 - 2);
+     inc(po2,linewidth1 div 2 - 2);
      for int1:= linewidth div 2 - 1 downto 1 do begin
       sx1:= (li.v.shift.y*int1) div linewidth1;      //axial
       sy1:= (li.v.shift.x*int1) div linewidth1;
