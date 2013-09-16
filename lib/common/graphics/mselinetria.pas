@@ -428,7 +428,7 @@ var
  int1: integer;
 begin
  with drawinfo,triagcty(gc.platformdata).d do begin
-  allocbuffer(buffer,3*sizeof(pointty)); //possible first triangle
+//  allocbuffer(buffer,3*sizeof(pointty)); //possible first triangle
   buffer.cursize:= 0;
   li.dest:= buffer.buffer;
   li.dashlen:= 0;
@@ -446,6 +446,7 @@ var
  dx,dy: integer;
  dashstop,dashpos,dashind: integer;
  x1,y1: integer;
+ int1: integer;
 begin
  with drawinfo,triagcty(gc.platformdata).d do begin
   if start then begin
@@ -458,10 +459,13 @@ begin
    dashind:= li.dashind;
   end;
   dashstop:= li.v.c;
-  extendbuffer(buffer,
-        (((dashstop-dashpos) div li.dashlen + 1)*length(xftdashes)+3*2)*
-                                        3*sizeof(pointty),li.dest);
+  int1:= ((dashstop-dashpos) div li.dashlen + 1)*length(xftdashes) + 3*2;
                      //+3*2 -> additional memory for ends and vertex
+  if capstyle = cs_round then begin
+   int1:= int1*linewidth1;
+  end;
+  int1:= int1 * 6*sizeof(pointty); //2 triangles per segment
+  extendbuffer(buffer,int1,li.dest);
   po3:= li.dest;
   pt0.x:= (li.linestart^.x shl 16) + li.offs.x;
   pt0.y:= (li.linestart^.y shl 16) + li.offs.y;
@@ -485,6 +489,7 @@ begin
     li.dest:= po3;
     if linewidth <> 0 then begin
      updateendtria(drawinfo,li);
+     po3:= li.dest;
     end;
    end
    else begin               //start dash
@@ -499,6 +504,7 @@ begin
     li.dest:= po3;
     if linewidth <> 0 then begin
      updatestarttria(drawinfo,li);
+     po3:= li.dest;
     end;
    end;
    inc(dashind);
@@ -524,6 +530,7 @@ begin
    li.dest:= po3;
    if linewidth <> 0 then begin
     updateendtria(drawinfo,li);
+    po3:= li.dest;
    end;
   end;
   li.dest:= po3;
@@ -593,6 +600,8 @@ begin
    int2:= count-3;
   end;
   if df_dashed in gc.drawingflags then begin
+   allocbuffer(buffer,(pointcount+2*linewidth)*sizeof(pointty)*3);
+                                 //for round caps
    dashinit(drawinfo,li);
    calclineshift(drawinfo,li);
    shiftpoint(li);
@@ -640,7 +649,7 @@ begin
   end
   else begin
    allocbuffer(buffer,(pointcount+2*linewidth)*sizeof(pointty));
-                          //for round caps
+                                 //for round caps
    li.dest:= buffer.buffer;
    calclineshift(drawinfo,li);
    shiftpoint(li);
@@ -690,6 +699,8 @@ begin
   li.pointa:= points;
   li.pointb:= li.pointa+1;
   li.dist:= linewidth16;
+  allocbuffer(buffer,count*(6+6*linewidth)*sizeof(pointty));
+                         //for round caps
   if df_dashed in gc.drawingflags then begin
    dashinit(drawinfo,li);
    for int1:= 0 to (count div 2)-1 do begin
@@ -704,8 +715,6 @@ begin
    end;
   end
   else begin
-   allocbuffer(buffer,(3+4*linewidth)*count*sizeof(pointty));
-                         //for round caps
    li.dest:= buffer.buffer;
    for int1:= 0 to (count div 2)-1 do begin
     calclineshift(drawinfo,li);
