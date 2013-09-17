@@ -133,7 +133,9 @@ type
                                                                        default;
  end;
 
-
+const
+ emptyrichstring: richstringty = (text: ''; format: nil; flags: []);
+ 
 function setfontcolor1(var formats: formatinfoarty; aindex: integer; 
                        len: halfinteger; color: colorty): boolean;
                                  //true if changed

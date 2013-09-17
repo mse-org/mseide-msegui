@@ -979,12 +979,16 @@ begin
    xmask:= xmask or gclinestyle;
   end;
   if gvm_capstyle in mask then begin
-   triainfo.capstyle:= lineinfo.capstyle;
+//   triainfo.capstyle:= lineinfo.capstyle;
+   triainfo.triaflags:= triainfo.triaflags - triacapmask + 
+                       triacapflags[lineinfo.capstyle];
    xvalues.cap_style:= capstyles[lineinfo.capstyle];
    xmask:= xmask or gccapstyle;
   end;
   if gvm_joinstyle in mask then begin
-   triainfo.joinstyle:= lineinfo.joinstyle;
+//   triainfo.joinstyle:= lineinfo.joinstyle;
+   triainfo.triaflags:= triainfo.triaflags - triajoinmask + 
+                       triajoinflags[lineinfo.joinstyle];
    xvalues.join_style:= joinstyles[lineinfo.joinstyle];
    xmask:= xmask or gcjoinstyle;
   end;

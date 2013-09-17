@@ -16,14 +16,28 @@ type
  trianglety = array[0..2] of pointty;
  ptrianglety = ^trianglety;
 
+ triaflagty = (trf_capbutt,trf_capround,trf_capprojecting,
+               trf_joinmiter,trf_joinround,trf_joinbevel);
+ triaflagsty = set of triaflagty;
+
+const
+ triacapflags: array[capstylety] of triaflagsty = (
+                  [trf_capbutt],[trf_capround],[trf_capprojecting]);
+ triajoinflags: array[joinstylety] of triaflagsty = (
+                  [trf_joinmiter],[trf_joinround],[trf_joinbevel]);
+ triacapmask = [trf_capbutt,trf_capround,trf_capprojecting];
+ triajoinmask = [trf_joinmiter,trf_joinround,trf_joinbevel];
+ 
+type
  triainfoty = record
   linewidth: integer;
   linewidth1: integer;
   linewidth16: integer;
 //  xftlinewidthsquare: integer;
   xftdashes: dashesstringty;
-  capstyle: capstylety;
-  joinstyle: joinstylety;
+  triaflags: triaflagsty;
+//  capstyle: capstylety;
+//  joinstyle: joinstylety;
 //  zerowidth: boolean;
  end;
  

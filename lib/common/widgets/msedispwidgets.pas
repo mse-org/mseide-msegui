@@ -145,6 +145,7 @@ type
    constructor create(aowner: tcomponent); override;
    procedure initnewcomponent(const ascale: real); override;
    procedure synctofontheight; override;
+   procedure clear; virtual;
   published
    property text: msestring read ftext write settext;
                 //overrides valuetext
@@ -182,6 +183,7 @@ type
    function getvaluetext: msestring; override;
    procedure valuechanged; override;
   public
+   procedure clear; override;
    property value: msestring read fvalue write setvalue;
   published
    property ondatachange: updatestringeventty read fondatachange 
@@ -203,6 +205,7 @@ type
    function getvaluetext: msestring; override;
    procedure valuechanged; override;
   public
+   procedure clear; override;
    property value: msestring read finfo.text.text write setvalue;
    property richvalue: richstringty read finfo.text write setrichvalue;
   published
@@ -227,6 +230,7 @@ type
    procedure valuechanged; override;
   public
    constructor create(aowner: tcomponent); override;
+   procedure clear; override;
   published
    property value: string read fvalue write setvalue;
    property ondatachange: updateansistringeventty read fondatachange 
@@ -264,6 +268,7 @@ type
    procedure valuechanged; override;
   public
    constructor create(aowner: tcomponent); override;
+   procedure clear; override;
    property value: integer read fvalue write setvalue default 0;
   published
    property base: numbasety read fbase write setbase default nb_dec;
@@ -298,6 +303,7 @@ type
    procedure valuechanged; override;
   public
    constructor create(aowner: tcomponent); override;
+   procedure clear; override;
    property value: int64 read fvalue write setvalue default 0;
   published
    property base: numbasety read fbase write setbase default nb_dec;
@@ -338,6 +344,7 @@ type
    procedure defineproperties(filer: tfiler); override;
   public
    constructor create(aowner: tcomponent); override;
+   procedure clear; override;
    property value: realty read fvalue write setvalue {stored false};
   published
    property valuerange: real read fvaluerange write setvaluerange;
@@ -378,6 +385,7 @@ type
    procedure defineproperties(filer: tfiler); override;
   public
    constructor create(aowner: tcomponent); override;
+   procedure clear; override;
    property value: tdatetime read fvalue write setvalue;
   published
    property format: msestring read fformat write setformat;
@@ -408,6 +416,7 @@ type
    function getvaluetext: msestring; override;
   public
    constructor create(aowner: tcomponent); override;
+   procedure clear; override;
    property value: boolean read fvalue write setvalue default false;
   published
    property textflags default defaultdisptextflags + [tf_xcentered];
@@ -655,6 +664,11 @@ begin
  checkautosize;
 end;
 
+procedure tdispwidget.clear;
+begin
+ //dummy
+end;
+
 {$ifdef mse_with_ifi}
 
 function tbasestringdisp.getifilink: tifistringlinkcomp;
@@ -692,6 +706,11 @@ begin
  inherited;
 end;
 
+procedure tcustomstringdisp.clear;
+begin
+ value:= '';
+end;
+
 { tcustomrichstringdisp }
 
 procedure tcustomrichstringdisp.setvalue(const avalue: msestring);
@@ -720,6 +739,11 @@ begin
   fondatachange(self,finfo.text);
  end;
  inherited;
+end;
+
+procedure tcustomrichstringdisp.clear;
+begin
+ richvalue:= emptyrichstring;
 end;
 
 { tbytestringdisp }
@@ -757,6 +781,11 @@ begin
   fondatachange(self,fvalue);
  end;
  inherited;
+end;
+
+procedure tbytestringdisp.clear;
+begin
+ value:= '';
 end;
 
 { tnumdisp }
@@ -827,6 +856,11 @@ begin
  inherited;
 end;
 
+procedure tcustomintegerdisp.clear;
+begin
+ value:= 0;
+end;
+
 { tcustomint64disp }
 
 constructor tcustomint64disp.create(aowner: tcomponent);
@@ -884,6 +918,11 @@ begin
   fondatachange(self,fvalue);
  end;
  inherited;
+end;
+
+procedure tcustomint64disp.clear;
+begin
+ value:= 0;
 end;
 
 { tcustomrealdisp }
@@ -967,6 +1006,11 @@ procedure tcustomrealdisp.setvaluestart(const avalue: real);
 begin
  fvaluestart:= avalue;
  formatchanged;
+end;
+
+procedure tcustomrealdisp.clear;
+begin
+ value:= emptyreal;
 end;
 
 { tcustomdatetimedisp }
@@ -1085,6 +1129,11 @@ begin
  formatchanged;
 end;
 
+procedure tcustomdatetimedisp.clear;
+begin
+ value:= emptydatetime;
+end;
+
 { tcustombooleandisp }
 
 constructor tcustombooleandisp.create(aowner: tcomponent);
@@ -1131,6 +1180,11 @@ procedure tcustombooleandisp.settext_true(const avalue: msestring);
 begin
  ftext_true:= avalue;
  formatchanged;
+end;
+
+procedure tcustombooleandisp.clear;
+begin
+ value:= false;
 end;
 
 end.

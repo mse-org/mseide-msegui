@@ -45,6 +45,7 @@ const
  arctablesize = 20; // max diameter
  arcrowsize = arctablesize div 2 - 2;
  arcscalefact = 256;  //value scaling = 128
+ bevelangsin = sin(2*pi*11.0/360.0);
 type
  arctablety = array[0..arctablesize,0..arcrowsize] of byte;
 const
@@ -83,8 +84,8 @@ begin
   offsx:= 0;
   offsy:= 0;
   if v.c = 0 then begin
-   v.shift.x:= 0;
-   v.shift.y:= 0;
+   v.shift.x:= 0;           //default direction
+   v.shift.y:= dist;
   end
   else begin
    v.shift.x:= (v.d.y*dist) div v.c;
@@ -97,6 +98,27 @@ begin
   offs.x:= (drawinfo.origin.x shl 16) + v.shift.x div 2 + offsx;
   offs.y:= (drawinfo.origin.y shl 16) - v.shift.y div 2 + offsy;
   linestart:= pointa;
+ end;
+end;
+
+function isbevelang(const li: lineshiftinfoty; const da: pointty): boolean;
+const
+ bevelangmax = round(bevelangsin*256);
+var
+ int1,int2: integer;
+ dax,day,dbx,dby: integer;
+begin
+ result:= false;
+ with li do begin
+  dax:= da.y div 256;          //with is orthogonal to vector, negative
+  day:= da.x div 256;
+  dbx:= li.v.shift.y div 256;  
+  dby:= li.v.shift.x div 256;
+  if dax*dbx + day*dby < 0 then begin
+   int1:= dbx*day - dax*dby;
+   int2:= dist div (16*256);
+   result:= abs(int1 div (int2 * int2)) < bevelangmax;
+  end;
  end;
 end;
 
@@ -118,6 +140,23 @@ begin
  end;
 end;
 
+procedure shiftpointa(var info: lineshiftinfoty);
+           //no source increment
+var
+ x1,y1: integer;
+begin
+ with info do begin
+  x1:= (pointa^.x shl 16) + offs.x;
+  y1:= (pointa^.y shl 16) + offs.y;
+  dest^.x:= x1;
+  dest^.y:= y1;
+  inc(dest);
+  dest^.x:= x1 - v.shift.x;
+  dest^.y:= y1 + v.shift.y;
+  inc(dest);
+ end;
+end;
+
 type
  intersectinfoty = record
   da,db: pointty;
@@ -128,6 +167,7 @@ type
  end;
 
 procedure intersect2(var info: intersectinfoty);
+     //todo: limit overflow
 begin
  with info do begin
 //xa == (dxa*dxb*y0 - dxa*dxb*y1 + dxa*dyb*x1 - dxb*dya*x0)/(dxa*dyb - dxb*dya)
@@ -138,6 +178,7 @@ begin
 end;
  
 function intersect(var info: intersectinfoty): boolean;
+     //todo: limit overflow
 begin
  result:= false;
  with info do begin
@@ -163,7 +204,7 @@ var
  first: boolean;
 begin
  with triagcty(drawinfo.gc.platformdata).d do begin
-  if (linewidth = 0) or (capstyle = cs_projecting) then begin
+  if (linewidth = 0) or (trf_capprojecting in triaflags) then begin
    sx1:= li.v.shift.y div 2 - li.offsy;
    sy1:= li.v.shift.x div 2 - li.offsx;
    with (li.dest-2)^ do begin
@@ -176,7 +217,7 @@ begin
    end;
   end
   else begin
-   if capstyle = cs_round then begin
+   if trf_capround in triaflags then begin
     po1:= li.dest;
     dec(po1);
     pt2:= (po1)^;
@@ -251,7 +292,7 @@ var
  pt1,pt2: pointty;
 begin
  with triagcty(drawinfo.gc.platformdata).d do begin
-  if capstyle = cs_projecting then begin
+  if trf_capprojecting in triaflags then begin
    sx1:= li.v.shift.y div 2 - li.offsy;
    sy1:= li.v.shift.x div 2 - li.offsx;
    with (li.dest-2)^ do begin
@@ -264,7 +305,7 @@ begin
    end;
   end
   else begin
-   if capstyle = cs_round then begin
+   if trf_capround in triaflags then begin
     po1:= li.dest;
     dec(po1);
     pt2:= (po1)^;
@@ -311,7 +352,7 @@ var
  pt1,pt2: pointty;
 begin
  with triagcty(drawinfo.gc.platformdata).d do begin
-  if (linewidth = 0) or (capstyle = cs_projecting) then begin
+  if (linewidth = 0) or (trf_capprojecting in triaflags) then begin
    sx1:= li.v.shift.y div 2  + li.offsy;
    sy1:= li.v.shift.x div 2  + li.offsx;
    with (li.dest-2)^ do begin
@@ -324,7 +365,7 @@ begin
    end;
   end
   else begin
-   if capstyle = cs_round then begin
+   if trf_capround in triaflags then begin
     if linewidth <= arctablesize then begin
      po1:= li.dest;
      (po1-4)^:= (po1-2)^;
@@ -379,7 +420,7 @@ var
  pt1,pt2: pointty;
 begin
  with triagcty(drawinfo.gc.platformdata).d do begin
-  if (linewidth = 0) or (capstyle = cs_projecting) then begin
+  if (linewidth = 0) or (trf_capprojecting in triaflags) then begin
    sx1:= li.v.shift.y div 2  + li.offsy;
    sy1:= li.v.shift.x div 2  + li.offsx;
    with (li.dest-2)^ do begin
@@ -392,7 +433,7 @@ begin
    end;
   end
   else begin
-   if capstyle = cs_round then begin
+   if trf_capround in triaflags then begin
     if linewidth <= arctablesize then begin
      po1:= li.dest;
      pt1:= (po1-2)^;
@@ -461,7 +502,7 @@ begin
   dashstop:= li.v.c;
   int1:= ((dashstop-dashpos) div li.dashlen + 1)*length(xftdashes) + 3*2;
                      //+3*2 -> additional memory for ends and vertex
-  if capstyle = cs_round then begin
+  if trf_capround in triaflags then begin
    int1:= int1*linewidth1;
   end;
   int1:= int1 * 6*sizeof(pointty); //2 triangles per segment
@@ -539,6 +580,37 @@ begin
   li.dashref:= li.dashref+li.v.c;
  end;
 end;
+var
+ testvar: array[0..7] of pointty;
+ testvar0: pointty;
+ testvara: pointty;
+ testvarb: pointty;
+procedure dump(const drawinfo: drawinfoty; const li: lineshiftinfoty);
+var
+ int1: integer;
+begin
+ with drawinfo,li do begin
+  for int1:= 0 to high(testvar) do begin
+   if int1 < dest-ppointty(buffer.buffer) then begin
+    testvar[int1]:= ppointty(buffer.buffer)[int1];
+    testvar[int1].x:= testvar[int1].x div 65536 - origin.x;
+    testvar[int1].y:= testvar[int1].y div 65536 - origin.y;
+   end
+   else begin
+    testvar[int1]:= nullpoint;
+   end;
+  end;
+  testvar0:= (pointa-1)^;
+  testvar0.x:= testvar0.x - origin.x;
+  testvar0.y:= testvar0.y - origin.y;
+  testvara:= pointa^;
+  testvara.x:= testvara.x - origin.x;
+  testvara.y:= testvara.y - origin.y;
+  testvarb:= pointb^;
+  testvarb.x:= testvarb.x - origin.x;
+  testvarb.y:= testvarb.y - origin.y;
+ end;
+end;
 
 procedure linestria(var drawinfo: drawinfoty; out apoints: ppointty;
                                                      out apointcount: integer);
@@ -571,9 +643,10 @@ var
  pointcount: integer;
  ints: intersectinfoty;
  pend: ppointty;
- bo1: boolean;
+ bo1,bo2: boolean;
  singlepoint: array[0..1] of pointty;
  pointsbefore: ppointty;
+ pt2: pointty;
 
 begin
  with drawinfo,points,triagcty(gc.platformdata).d do begin
@@ -648,31 +721,47 @@ begin
    end;
   end
   else begin
-   allocbuffer(buffer,(pointcount+2*linewidth)*sizeof(pointty));
-                                 //for round caps
+   allocbuffer(buffer,(4*count+2*linewidth)*sizeof(pointty));
+                       //for bevel and round caps
    li.dest:= buffer.buffer;
-   calclineshift(drawinfo,li);
+   calclineshift(drawinfo,li); 
    shiftpoint(li);
    if not closed then begin
     updatestartstrip(drawinfo,li);
    end;
+dump(drawinfo,li);
    for int1:= 0 to int2 do begin
     if li.pointb = pend then begin
      li.pointb:= points;
     end;
+    shiftpointa(li); //no source increment
+dump(drawinfo,li);
     ints.da:= li.v.d;
+    pt2:= li.v.shift;
     calclineshift(drawinfo,li);
     shiftpoint(li);
+dump(drawinfo,li);
     ints.db:= li.v.d;
     ints.p0:= li.dest-4;
     ints.p1:= li.dest-2;
     if intersect(ints) then begin
-     ints.p1^:= ints.isect;
+     pt1:= subpoint(ints.isect,ints.p1^);
+     bo1:= ((pt1.x > 0) xor (li.v.d.x > 0)) or ((pt1.y > 0) xor (li.v.d.y > 0));
+     bo2:= (trf_joinbevel in triaflags) or 
+              (trf_joinmiter in triaflags) and isbevelang(li,pt2);
+     if not bo1 or not bo2 then begin //move to intersection
+      ints.p1^:= ints.isect;
+      (ints.p1-2)^:= ints.isect;
+     end;
      inc(ints.p0);
      inc(ints.p1);
      intersect2(ints);
-     ints.p1^:= ints.isect;
+     if bo1 or not bo2 then begin //move to intersection
+      ints.p1^:= ints.isect;
+      (ints.p1-2)^:= ints.isect;
+     end;
     end;
+dump(drawinfo,li);
    end;
    if closed then begin
     (ppointty(buffer.buffer))^:= (ints.p1-1)^;
@@ -682,6 +771,7 @@ begin
     shiftpoint(li);
     updateendstrip(drawinfo,li);
    end;
+dump(drawinfo,li);
   end;
   points:= pointsbefore;
   apoints:= buffer.buffer;
