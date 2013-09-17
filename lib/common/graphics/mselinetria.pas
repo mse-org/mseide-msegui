@@ -745,18 +745,19 @@ dump(drawinfo,li);
     ints.p0:= li.dest-4;
     ints.p1:= li.dest-2;
     if intersect(ints) then begin
-     pt1:= subpoint(ints.isect,ints.p1^);
+     pt1:= subpoint(ints.isect,ints.p1^); //intersection - bstart
      bo1:= ((pt1.x > 0) xor (li.v.d.x > 0)) or ((pt1.y > 0) xor (li.v.d.y > 0));
+               //outer
      bo2:= (trf_joinbevel in triaflags) or 
               (trf_joinmiter in triaflags) and isbevelang(li,pt2);
-     if not bo1 or not bo2 then begin //move to intersection
+     if bo1 and not bo2 then begin //move to intersection
       ints.p1^:= ints.isect;
       (ints.p1-2)^:= ints.isect;
      end;
      inc(ints.p0);
      inc(ints.p1);
      intersect2(ints);
-     if bo1 or not bo2 then begin //move to intersection
+     if not bo1 and not bo2 then begin //move to intersection
       ints.p1^:= ints.isect;
       (ints.p1-2)^:= ints.isect;
      end;
