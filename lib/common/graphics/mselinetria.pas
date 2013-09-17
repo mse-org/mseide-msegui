@@ -690,17 +690,33 @@ begin
     bo1:= false;
 
     ints.da:= li.v.d;
+    pt2:= li.v.shift;
     calclineshift(drawinfo,li);
     shiftpoint(li);
     ints.db:= li.v.d;
     ints.p0:= li.dest-4;
     ints.p1:= li.dest-2;
     if intersect(ints) then begin
-     pt0:= ints.isect;
+     pt1:= subpoint(ints.isect,ints.p1^); //intersection - bstart
+     bo1:= ((pt1.x > 0) xor (li.v.d.x > 0)) or ((pt1.y > 0) xor (li.v.d.y > 0));
+               //outer
+     bo2:= (trf_joinbevel in triaflags) or 
+              (trf_joinmiter in triaflags) and isbevelang(li,pt2);
+     if bo1 and not bo2 then begin //move to intersection
+      pt0:= ints.isect;
+     end
+     else begin
+      pt0:= (li.dest-2)^;
+     end;
      inc(ints.p0);
      inc(ints.p1);
      intersect2(ints);
-     pt1:= ints.isect;
+     if not bo1 and not bo2 then begin //move to intersection
+      pt1:= ints.isect;
+     end
+     else begin
+      pt1:= (li.dest-1)^;
+     end;
     end
     else begin
      pt0:= (li.dest-2)^;
