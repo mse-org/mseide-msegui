@@ -580,11 +580,7 @@ begin
   li.dashref:= li.dashref+li.v.c;
  end;
 end;
-var
- testvar: array[0..7] of pointty;
- testvar0: pointty;
- testvara: pointty;
- testvarb: pointty;
+{
 procedure dump(const drawinfo: drawinfoty; const li: lineshiftinfoty);
 var
  int1: integer;
@@ -611,7 +607,7 @@ begin
   testvarb.y:= testvarb.y - origin.y;
  end;
 end;
-
+}
 procedure linestria(var drawinfo: drawinfoty; out apoints: ppointty;
                                                      out apointcount: integer);
 var
@@ -745,18 +741,15 @@ begin
    if not closed then begin
     updatestartstrip(drawinfo,li);
    end;
-dump(drawinfo,li);
    for int1:= 0 to int2 do begin
     if li.pointb = pend then begin
      li.pointb:= points;
     end;
     shiftpointa(li); //no source increment
-dump(drawinfo,li);
     ints.da:= li.v.d;
     pt2:= li.v.shift;
     calclineshift(drawinfo,li);
     shiftpoint(li);
-dump(drawinfo,li);
     ints.db:= li.v.d;
     ints.p0:= li.dest-4;
     ints.p1:= li.dest-2;
@@ -778,7 +771,6 @@ dump(drawinfo,li);
       (ints.p1-2)^:= ints.isect;
      end;
     end;
-dump(drawinfo,li);
    end;
    if closed then begin
     (ppointty(buffer.buffer))^:= (ints.p1-1)^;
@@ -788,7 +780,6 @@ dump(drawinfo,li);
     shiftpoint(li);
     updateendstrip(drawinfo,li);
    end;
-dump(drawinfo,li);
   end;
   points:= pointsbefore;
   apoints:= buffer.buffer;
