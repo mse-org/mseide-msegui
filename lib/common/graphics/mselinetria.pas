@@ -157,6 +157,23 @@ begin
  end;
 end;
 
+procedure shiftpointb(var info: lineshiftinfoty);
+           //no source increment
+var
+ x1,y1: integer;
+begin
+ with info do begin
+  x1:= (pointb^.x shl 16) + offs.x;
+  y1:= (pointb^.y shl 16) + offs.y;
+  dest^.x:= x1;
+  dest^.y:= y1;
+  inc(dest);
+  dest^.x:= x1 - v.shift.x;
+  dest^.y:= y1 + v.shift.y;
+  inc(dest);
+ end;
+end;
+
 type
  intersectinfoty = record
   da,db: pointty;
@@ -194,7 +211,7 @@ begin
  end;
 end;
 
-procedure updatestarttria(var drawinfo: drawinfoty; var li: lineshiftinfoty);
+procedure roundcapstarttria(var drawinfo: drawinfoty; var li: lineshiftinfoty);
 var
  sx1,sy1,sx2,sy2: integer;
  int1: integer;
@@ -202,6 +219,74 @@ var
  po2: pbyte;
  pt1,pt2: pointty;
  first: boolean;
+begin
+ with triagcty(drawinfo.gc.platformdata).d do begin
+  po1:= li.dest;
+  dec(po1);
+  pt2:= (po1)^;
+  dec(po1);
+  pt1:= (po1)^;
+  if linewidth <= arctablesize then begin
+   sx1:= (li.v.shift.y) div 2;      //axial
+   sy1:= (li.v.shift.x) div 2;      
+   po1^.x:= (pt1.x + pt2.x) div 2 - sx1;
+   po1^.y:= (pt1.y + pt2.y) div 2 - sy1;
+   inc(po1);
+   po2:= @arctable[linewidth];
+   inc(po2,linewidth1 div 2 - 2);
+   first:= true;
+   for int1:= linewidth div 2 - 1 downto 1 do begin
+    if not first then begin
+     po1^:= (po1-2)^;            //0
+     inc(po1);
+     po1^:= (po1-2)^;            //1
+     inc(po1);
+    end;
+    sx1:= (li.v.shift.y*int1) div linewidth1;      //axial
+    sy1:= (li.v.shift.x*int1) div linewidth1;
+    sx2:= (li.v.shift.x*po2^) div arcscalefact;    //orthogonal
+    sy2:= (li.v.shift.y*po2^) div arcscalefact;
+    po1^.x:= pt1.x - sx1 - sx2; //2
+    po1^.y:= pt1.y - sy1 + sy2;
+    inc(po1);
+    if not first then begin
+     po1^:= (po1-2)^;            //3
+     inc(po1);
+     po1^:= (po1-2)^;            //4
+     inc(po1);
+    end;
+    po1^.x:= pt2.x - sx1 + sx2; //5
+    po1^.y:= pt2.y - sy1 - sy2;
+    inc(po1);
+    dec(po2);
+    first:= false;
+   end;
+   if not first then begin
+    po1^:= (po1-2)^;     //0
+    inc(po1);
+    po1^:= (po1-2)^;     //1
+    inc(po1);
+    po1^:= pt1;          //2
+    inc(po1);
+    po1^:= (po1-2)^;     //3
+    inc(po1);
+   end;
+   po1^:= pt1;          //4
+   inc(po1);
+   po1^:= pt2;          //5
+   inc(po1);
+   po1^:= pt1;          //0
+   inc(po1);
+   po1^:= pt2;          //1
+   inc(po1);
+   li.dest:= po1;
+  end;
+ end;
+end;
+
+procedure updatestarttria(var drawinfo: drawinfoty; var li: lineshiftinfoty);
+var
+ sx1,sy1: integer;
 begin
  with triagcty(drawinfo.gc.platformdata).d do begin
   if (linewidth = 0) or (trf_capprojecting in triaflags) then begin
@@ -218,78 +303,59 @@ begin
   end
   else begin
    if trf_capround in triaflags then begin
-    po1:= li.dest;
-    dec(po1);
-    pt2:= (po1)^;
-    dec(po1);
-    pt1:= (po1)^;
-    if linewidth <= arctablesize then begin
-     sx1:= (li.v.shift.y) div 2;      //axial
-     sy1:= (li.v.shift.x) div 2;      
-     po1^.x:= (pt1.x + pt2.x) div 2 - sx1;
-     po1^.y:= (pt1.y + pt2.y) div 2 - sy1;
-     inc(po1);
-     po2:= @arctable[linewidth];
-     inc(po2,linewidth1 div 2 - 2);
-     first:= true;
-     for int1:= linewidth div 2 - 1 downto 1 do begin
-      if not first then begin
-       po1^:= (po1-2)^;            //0
-       inc(po1);
-       po1^:= (po1-2)^;            //1
-       inc(po1);
-      end;
-      sx1:= (li.v.shift.y*int1) div linewidth1;      //axial
-      sy1:= (li.v.shift.x*int1) div linewidth1;
-      sx2:= (li.v.shift.x*po2^) div arcscalefact;    //orthogonal
-      sy2:= (li.v.shift.y*po2^) div arcscalefact;
-      po1^.x:= pt1.x - sx1 - sx2; //2
-      po1^.y:= pt1.y - sy1 + sy2;
-      inc(po1);
-      if not first then begin
-       po1^:= (po1-2)^;            //3
-       inc(po1);
-       po1^:= (po1-2)^;            //4
-       inc(po1);
-      end;
-      po1^.x:= pt2.x - sx1 + sx2; //5
-      po1^.y:= pt2.y - sy1 - sy2;
-      inc(po1);
-      dec(po2);
-      first:= false;
-     end;
-     if not first then begin
-      po1^:= (po1-2)^;     //0
-      inc(po1);
-      po1^:= (po1-2)^;     //1
-      inc(po1);
-      po1^:= pt1;          //2
-      inc(po1);
-      po1^:= (po1-2)^;     //3
-      inc(po1);
-     end;
-     po1^:= pt1;          //4
-     inc(po1);
-     po1^:= pt2;          //5
-     inc(po1);
-     po1^:= pt1;          //0
-     inc(po1);
-     po1^:= pt2;          //1
-     inc(po1);
-     li.dest:= po1;
-    end;
+    roundcapstarttria(drawinfo,li);    
    end;   
   end;
  end;
 end;
 
-procedure updatestartstrip(var drawinfo: drawinfoty; var li: lineshiftinfoty);
+procedure roundcapstartstrip(var drawinfo: drawinfoty; var li: lineshiftinfoty);
 var
  sx1,sy1,sx2,sy2: integer;
  int1: integer;
  po1: ppointty;
  po2: pbyte;
  pt1,pt2: pointty;
+begin
+ with triagcty(drawinfo.gc.platformdata).d do begin
+  po1:= li.dest;
+  dec(po1);
+  pt2:= (po1)^;
+  dec(po1);
+  pt1:= (po1)^;
+  if linewidth <= arctablesize then begin
+   sx1:= (li.v.shift.y) div 2;      //axial
+   sy1:= (li.v.shift.x) div 2;      
+   po1^.x:= (pt1.x + pt2.x) div 2 - sx1;
+   po1^.y:= (pt1.y + pt2.y) div 2 - sy1;
+   inc(po1);
+   po2:= @arctable[linewidth];
+   inc(po2,linewidth1 div 2 - 2);
+   for int1:= linewidth div 2 - 1 downto 1 do begin
+    sx1:= (li.v.shift.y*int1) div linewidth1;      //axial
+    sy1:= (li.v.shift.x*int1) div linewidth1;
+    sx2:= (li.v.shift.x*po2^) div arcscalefact;    //orthogonal
+    sy2:= (li.v.shift.y*po2^) div arcscalefact;
+    po1^.x:= pt1.x - sx1 - sx2;
+    po1^.y:= pt1.y - sy1 + sy2;
+    inc(po1);      
+    po1^.x:= pt2.x - sx1 + sx2;
+    po1^.y:= pt2.y - sy1 - sy2;
+    inc(po1);
+    dec(po2);
+   end;
+   po1^:= pt1;
+   inc(po1);
+   po1^:= pt2;
+   inc(po1);
+   li.dest:= po1;
+  end;
+ end;
+end;
+
+procedure updatestartstrip(var drawinfo: drawinfoty; var li: lineshiftinfoty);
+var
+ sx1,sy1: integer;
 begin
  with triagcty(drawinfo.gc.platformdata).d do begin
   if trf_capprojecting in triaflags then begin
@@ -306,38 +372,7 @@ begin
   end
   else begin
    if trf_capround in triaflags then begin
-    po1:= li.dest;
-    dec(po1);
-    pt2:= (po1)^;
-    dec(po1);
-    pt1:= (po1)^;
-    if linewidth <= arctablesize then begin
-     sx1:= (li.v.shift.y) div 2;      //axial
-     sy1:= (li.v.shift.x) div 2;      
-     po1^.x:= (pt1.x + pt2.x) div 2 - sx1;
-     po1^.y:= (pt1.y + pt2.y) div 2 - sy1;
-     inc(po1);
-     po2:= @arctable[linewidth];
-     inc(po2,linewidth1 div 2 - 2);
-     for int1:= linewidth div 2 - 1 downto 1 do begin
-      sx1:= (li.v.shift.y*int1) div linewidth1;      //axial
-      sy1:= (li.v.shift.x*int1) div linewidth1;
-      sx2:= (li.v.shift.x*po2^) div arcscalefact;    //orthogonal
-      sy2:= (li.v.shift.y*po2^) div arcscalefact;
-      po1^.x:= pt1.x - sx1 - sx2;
-      po1^.y:= pt1.y - sy1 + sy2;
-      inc(po1);      
-      po1^.x:= pt2.x - sx1 + sx2;
-      po1^.y:= pt2.y - sy1 - sy2;
-      inc(po1);
-      dec(po2);
-     end;
-     po1^:= pt1;
-     inc(po1);
-     po1^:= pt2;
-     inc(po1);
-     li.dest:= po1;
-    end;
+    roundcapstartstrip(drawinfo,li);
    end;
   end;
  end;
@@ -612,39 +647,19 @@ procedure linestria(var drawinfo: drawinfoty; out apoints: ppointty;
                                                      out apointcount: integer);
 var
  li: lineshiftinfoty;
- pt0,pt1: pointty;
-
- procedure pushdashend;
- var
-  po0: ppointty;
- begin
-  po0:= li.dest;
-  po0^:= pt0;
-  inc(po0);
-  po0^:= (po0-2)^;
-  inc(po0);
-  po0^:= pt0;
-  inc(po0);
-  po0^:= pt1;
-  inc(po0);
-  po0^:= pt0;
-  inc(po0);
-  po0^:= pt1;
-  inc(po0);
-  li.dest:= po0;
- end; //pushdashend
-
-var
+ pt0,pt1,pt3: pointty;
  int1,int2: integer;
  pointcount: integer;
  ints: intersectinfoty;
  pend: ppointty;
- bo1,bo2: boolean;
+ firstdash,bo1,bo2: boolean;
  singlepoint: array[0..1] of pointty;
  pointsbefore: ppointty;
  pt2: pointty;
+ po0: ppointty;
 
 begin
+ //todo: remove overlapping regions
  with drawinfo,points,triagcty(gc.platformdata).d do begin
   pointsbefore:= points;
   pointcount:= count;
@@ -669,58 +684,125 @@ begin
    int2:= count-3;
   end;
   if df_dashed in gc.drawingflags then begin
-   allocbuffer(buffer,(pointcount+2*linewidth)*sizeof(pointty)*3);
-                                 //for round caps
+   int1:= (pointcount+linewidth);       //for round caps
+   if trf_joinround in triaflags then begin
+    int1:= int1 + linewidth div 2; //round corners
+   end;
+   allocbuffer(buffer,int1*2*6*sizeof(pointty));
    dashinit(drawinfo,li);
    calclineshift(drawinfo,li);
    shiftpoint(li);
    if (linewidth <> 0) and not closed then begin
     updatestarttria(drawinfo,li);
    end;
-   bo1:= true; //start dash
+   firstdash:= true; //start dash
    for int1:= 0 to int2 do begin
     if li.pointb = pend then begin
      li.pointb:= points;
     end;
-    dash(drawinfo,li,bo1,false);
-    bo1:= false;
-
+    dash(drawinfo,li,firstdash,false);    
+    firstdash:= false;
+    if odd(li.dashind) then begin //dash end
+     inc(li.dest);
+     li.dest^:= (li.dest-2)^;
+     inc(li.dest);
+     shiftpointa(li);
+     (li.dest-4)^:= (li.dest-2)^;
+    end;
+    
     ints.da:= li.v.d;
     pt2:= li.v.shift;
     calclineshift(drawinfo,li);
     shiftpoint(li);
+    po0:= li.dest;
     ints.db:= li.v.d;
-    ints.p0:= li.dest-4;
-    ints.p1:= li.dest-2;
-    if intersect(ints) then begin
-     pt1:= subpoint(ints.isect,ints.p1^); //intersection - bstart
-     bo1:= ((pt1.x > 0) xor (li.v.d.x > 0)) or ((pt1.y > 0) xor (li.v.d.y > 0));
-               //outer
-     bo2:= (trf_joinbevel in triaflags) or 
-              (trf_joinmiter in triaflags) and isbevelang(li,pt2);
-     if bo1 and not bo2 then begin //move to intersection
-      pt0:= ints.isect;
-     end
-     else begin
-      pt0:= (li.dest-2)^;
-     end;
-     inc(ints.p0);
-     inc(ints.p1);
-     intersect2(ints);
-     if not bo1 and not bo2 then begin //move to intersection
-      pt1:= ints.isect;
-     end
-     else begin
-      pt1:= (li.dest-1)^;
+    ints.p0:= po0-4;
+    ints.p1:= po0-2;
+    pt0:= (li.dest-2)^;
+    pt1:= (li.dest-1)^;
+    if trf_joinround in triaflags then begin
+     if odd(li.dashind) then begin
+      roundcapstarttria(drawinfo,li);
      end;
     end
     else begin
-     pt0:= (li.dest-2)^;
-     pt1:= (li.dest-1)^;
+     if intersect(ints) then begin
+      pt3:= subpoint(ints.isect,ints.p1^); //intersection - bstart
+      bo1:= ((pt3.x > 0) xor (li.v.d.x > 0)) or ((pt3.y > 0) xor (li.v.d.y > 0));
+                //outer, cw
+      bo2:= (trf_joinbevel in triaflags) or 
+               (trf_joinmiter in triaflags) and isbevelang(li,pt2);
+                                          ///bevel
+      if not bo1 then begin
+       inc(ints.p0);
+       inc(ints.p1);
+       intersect2(ints);
+       if not bo2 then begin
+        pt1:= ints.isect;
+       end;
+      end
+      else begin
+       if not bo2 then begin
+        pt0:= ints.isect;
+       end;
+      end;
+      if odd(li.dashind) then begin
+       if bo1 then begin //cw
+        if bo2 then begin //bevel
+         po0^:= (po0-4)^;
+         inc(po0);
+         po0^:= (po0-3)^; //start next
+         inc(po0);
+         po0^:= (po0-3)^;
+         inc(po0);
+        end
+        else begin //mieter
+         pt0:= ints.isect;
+         po0^:= pt0; //8
+         inc(po0);
+         po0^:= pt0; //9
+         inc(po0);
+         po0^:= (po0-6)^;   //10
+         inc(po0);
+         po0^:= (po0-4)^;   //11
+         inc(po0);
+         po0^:= (po0-6)^;   //12
+         inc(po0);
+         po0^:= (po0-6)^;   //13
+         inc(po0);
+        end;
+       end
+       else begin     //ccw
+        if bo2 then begin //bevel
+         po0^:= (po0-3)^;
+         inc(po0);
+         po0^:= (po0-3)^; //start next
+         inc(po0);
+         po0^:= (po0-3)^;
+         inc(po0);
+        end
+        else begin     //miter
+         pt1:= ints.isect;
+         po0^:= pt1; //8
+         inc(po0);
+         po0^:= pt1; //9
+         inc(po0);
+         po0^:= (po0-5)^;   //10
+         inc(po0);
+         po0^:= (po0-5)^;   //11
+         inc(po0);
+         po0^:= (po0-6)^;   //12
+         inc(po0);
+         po0^:= (po0-6)^;   //13
+         inc(po0);
+        end;
+       end;
+      end;
+     end;
+     li.dest:= po0;
     end;
-    dec(li.dest,2);
-    if odd(li.dashind) then begin //dash
-     pushdashend;
+    if not odd(li.dashind) then begin //no dash
+     dec(li.dest,2);   //remove start
     end;
    end;
    if closed then begin
@@ -729,12 +811,16 @@ begin
     (ppointty(buffer.buffer)+3)^:= pt1;
    end
    else begin
-    dash(drawinfo,li,bo1,true);
+    dash(drawinfo,li,firstdash,true);
    end;
   end
   else begin
-   allocbuffer(buffer,(4*count+2*linewidth)*sizeof(pointty));
-                       //for bevel and round caps
+   int1:= 2; //for bevel
+   if trf_joinround in triaflags then begin
+    int1:= int1 + linewidth div 2; //round corners
+   end;
+   int1:= int1*count+linewidth;  //for round caps
+   allocbuffer(buffer,int1*(2*sizeof(pointty)));
    li.dest:= buffer.buffer;
    calclineshift(drawinfo,li); 
    shiftpoint(li);
@@ -754,21 +840,26 @@ begin
     ints.p0:= li.dest-4;
     ints.p1:= li.dest-2;
     if intersect(ints) then begin
-     pt1:= subpoint(ints.isect,ints.p1^); //intersection - bstart
-     bo1:= ((pt1.x > 0) xor (li.v.d.x > 0)) or ((pt1.y > 0) xor (li.v.d.y > 0));
-               //outer
-     bo2:= (trf_joinbevel in triaflags) or 
-              (trf_joinmiter in triaflags) and isbevelang(li,pt2);
-     if bo1 and not bo2 then begin //move to intersection
-      ints.p1^:= ints.isect;
-      (ints.p1-2)^:= ints.isect;
-     end;
-     inc(ints.p0);
-     inc(ints.p1);
-     intersect2(ints);
-     if not bo1 and not bo2 then begin //move to intersection
-      ints.p1^:= ints.isect;
-      (ints.p1-2)^:= ints.isect;
+     if trf_joinround in triaflags then begin
+      roundcapstartstrip(drawinfo,li);
+     end
+     else begin
+      pt1:= subpoint(ints.isect,ints.p1^); //intersection - bstart
+      bo1:= ((pt1.x > 0) xor (li.v.d.x > 0)) or 
+                       ((pt1.y > 0) xor (li.v.d.y > 0));  //outer
+      bo2:= (trf_joinbevel in triaflags) or 
+               (trf_joinmiter in triaflags) and isbevelang(li,pt2);
+      if bo1 and not bo2 then begin //move to intersection
+       ints.p1^:= ints.isect;
+       (ints.p1-2)^:= ints.isect;
+      end;
+      inc(ints.p0);
+      inc(ints.p1);
+      intersect2(ints);
+      if not bo1 and not bo2 then begin //move to intersection
+       ints.p1^:= ints.isect;
+       (ints.p1-2)^:= ints.isect;
+      end;
      end;
     end;
    end;
