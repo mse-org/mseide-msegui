@@ -110,7 +110,10 @@ type
   xftfontdata: px11fontdatadty;
   xftstate: xftstatesty;
   xftcolorforegroundpic: tpicture;
- // fontdirection: graphicdirectionty;
+  xftbrush: pixmapty;
+  xftbrushmonochrome: boolean;
+  xftbrushorigin: pointty;
+  xftbrushpic: tpicture;
  end;
  {$if sizeof(x11gcdty) > sizeof(gcpty)} {$error 'buffer overflow'}{$ifend}
  x11gcty = record
@@ -683,6 +686,10 @@ begin
      end;
     end;
    end;
+   if xftbrushpic <> 0 then begin
+    xrenderfreepicture(appdisp,xftbrushpic);
+    xftbrushpic:= 0;
+   end;
   end;
   xfreegc(appdisp,tgc(gc.handle));
  end;
@@ -888,6 +895,7 @@ procedure checkxftstate(var drawinfo: drawinfoty; const aflags: xftstatesty);
 var
  flags1: xftstatesty;
  lwo1,lwo2: longword;
+ attributes: txrenderpictureattributes;
 begin
  with x11gcty(drawinfo.gc.platformdata).d do begin
   if not (xfts_clipregionvalid in xftstate) then begin
@@ -901,22 +909,38 @@ begin
   end;
   flags1:= (xftstate >< aflags) * aflags;
   if xfts_colorforegroundvalid in flags1 then begin
-   lwo1:= xftcolor.pixel; 
-   lwo2:= lwo1 + (lwo1 shr 7) + (lwo1 shr 14) + (lwo1 shr 21);
-   lwo2:= (lwo2 xor (lwo2 shr 4) xor (lwo2 shr 9)) and xftcolorcachemask;
-   with xftcolorcache[lwo2] do begin
-    if picture <> 0 then begin
-     if pixel <> xftcolor.pixel then begin
-      xrenderfreepicture(appdisp,picture);
+   if df_brush in drawinfo.gc.drawingflags then begin
+    if (xftbrush <> 0) and (xftbrushpic = 0) then begin
+     attributes._repeat:= 1;
+     if xftbrushmonochrome then begin
+      xftbrushpic:= xrendercreatepicture(appdisp,xftbrush,
+                           bitmaprenderpictformat,cprepeat,@attributes);
+     end
+     else begin
+      xftbrushpic:= xrendercreatepicture(appdisp,xftbrush,
+                           screenrenderpictformat,cprepeat,@attributes);
+     end;
+    end;
+    xftcolorforegroundpic:= xftbrushpic;
+   end
+   else begin
+    lwo1:= xftcolor.pixel; 
+    lwo2:= lwo1 + (lwo1 shr 7) + (lwo1 shr 14) + (lwo1 shr 21);
+    lwo2:= (lwo2 xor (lwo2 shr 4) xor (lwo2 shr 9)) and xftcolorcachemask;
+    with xftcolorcache[lwo2] do begin
+     if picture <> 0 then begin
+      if pixel <> xftcolor.pixel then begin
+       xrenderfreepicture(appdisp,picture);
+       picture:= createcolorpicture(xftcolor.pixel);
+       pixel:= xftcolor.pixel;
+      end;
+     end
+     else begin
       picture:= createcolorpicture(xftcolor.pixel);
       pixel:= xftcolor.pixel;
      end;
-    end
-    else begin
-     picture:= createcolorpicture(xftcolor.pixel);
-     pixel:= xftcolor.pixel;
+     xftcolorforegroundpic:= picture;
     end;
-    xftcolorforegroundpic:= picture;
    end;
 {
    xrenderfillrectangle(appdisp,pictopsrc,xftcolorforegroundpic,
@@ -1034,6 +1058,7 @@ begin
    xmask:= xmask or gctilestipxorigin or gctilestipyorigin;
    xvalues.ts_x_origin:= brushorigin.x;
    xvalues.ts_y_origin:= brushorigin.y;
+   xftbrushorigin:= brushorigin;
   end;
 
   if (drawingflags >< gcdrawingflags)
@@ -1066,13 +1091,20 @@ begin
 
   gcdrawingflags:= drawingflags;
   if gvm_brush in mask then begin
+   with tsimplebitmap1(brush) do begin
+    xftbrush:= handle;
+    xftbrushmonochrome:= monochrome;
+   end;
+   if xftbrushpic <> 0 then begin
+    xrenderfreepicture(appdisp,xftbrushpic);
+    xftbrushpic:= 0;
+   end;
    if df_monochrome in drawingflags then begin
-//    xvalues.stipple:= brush;
-    xvalues.stipple:= tsimplebitmap1(brush).handle;
+    xvalues.stipple:= xftbrush;
     xmask:= xmask or gcstipple;
    end
    else begin
-    xvalues.tile:= tsimplebitmap1(brush).handle;
+    xvalues.tile:= xftbrush;
     xmask:= xmask or gctile;
    end;
   end;
@@ -2713,7 +2745,9 @@ begin
     checkxftstate(drawinfo,[xfts_colorforegroundvalid]);
     with x11gcty(gc.platformdata).d do begin
      xrendercompositetriangles(appdisp,xrenderop,xftcolorforegroundpic,
-             xftdrawpic,alpharenderpictformat,0,0,pxtriangle(po3),int1);
+             xftdrawpic,alpharenderpictformat,
+             xftbrushorigin.x,
+             xftbrushorigin.y,pxtriangle(po3),int1);
     end;
    end;
   end
