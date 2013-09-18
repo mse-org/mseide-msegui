@@ -615,34 +615,7 @@ begin
   li.dashref:= li.dashref+li.v.c;
  end;
 end;
-{
-procedure dump(const drawinfo: drawinfoty; const li: lineshiftinfoty);
-var
- int1: integer;
-begin
- with drawinfo,li do begin
-  for int1:= 0 to high(testvar) do begin
-   if int1 < dest-ppointty(buffer.buffer) then begin
-    testvar[int1]:= ppointty(buffer.buffer)[int1];
-    testvar[int1].x:= testvar[int1].x div 65536 - origin.x;
-    testvar[int1].y:= testvar[int1].y div 65536 - origin.y;
-   end
-   else begin
-    testvar[int1]:= nullpoint;
-   end;
-  end;
-  testvar0:= (pointa-1)^;
-  testvar0.x:= testvar0.x - origin.x;
-  testvar0.y:= testvar0.y - origin.y;
-  testvara:= pointa^;
-  testvara.x:= testvara.x - origin.x;
-  testvara.y:= testvara.y - origin.y;
-  testvarb:= pointb^;
-  testvarb.x:= testvarb.x - origin.x;
-  testvarb.y:= testvarb.y - origin.y;
- end;
-end;
-}
+
 procedure linestria(var drawinfo: drawinfoty; out apoints: ppointty;
                                                      out apointcount: integer);
 var
