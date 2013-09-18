@@ -2701,7 +2701,6 @@ begin
 
  with drawinfo do begin
   if xfts_smooth in x11gcty(gc.platformdata).d.xftstate then begin
-  
    if points.count > 2 then begin
     polytria(drawinfo,ptrianglety(po3),int1);
     po1:= pointer(po3);

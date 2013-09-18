@@ -657,7 +657,7 @@ begin
    int2:= count-3;
   end;
   if df_dashed in gc.drawingflags then begin
-   int1:= (pointcount+linewidth);       //for round caps
+   int1:= (pointcount+linewidth1);       //for round caps
    if trf_joinround in triaflags then begin
     int1:= int1 + linewidth div 2; //round corners
    end;
@@ -790,7 +790,7 @@ begin
   else begin
    int1:= 2; //for bevel
    if trf_joinround in triaflags then begin
-    int1:= int1 + linewidth div 2; //round corners
+    int1:= int1 + (linewidth1+1) div 2; //round corners
    end;
    int1:= int1*count+linewidth;  //for round caps
    allocbuffer(buffer,int1*(2*sizeof(pointty)));
@@ -861,7 +861,7 @@ begin
   li.pointa:= points;
   li.pointb:= li.pointa+1;
   li.dist:= linewidth16;
-  allocbuffer(buffer,count*(6+6*linewidth)*sizeof(pointty));
+  allocbuffer(buffer,count*(6+6*linewidth1)*sizeof(pointty));
                          //for round caps
   if df_dashed in gc.drawingflags then begin
    dashinit(drawinfo,li);
