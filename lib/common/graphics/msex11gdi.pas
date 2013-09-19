@@ -1058,7 +1058,8 @@ begin
    xmask:= xmask or gctilestipxorigin or gctilestipyorigin;
    xvalues.ts_x_origin:= brushorigin.x;
    xvalues.ts_y_origin:= brushorigin.y;
-   xftbrushorigin:= brushorigin;
+   xftbrushorigin.x:= -brushorigin.x;
+   xftbrushorigin.y:= -brushorigin.y;
   end;
 
   if (drawingflags >< gcdrawingflags)

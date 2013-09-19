@@ -4339,7 +4339,7 @@ function tansistringdatalist.compare(const l,r): integer;
 begin
  result:= comparestr(ansistring(l),ansistring(r));
 end;
-{$define fpcbug4519read}
+//{$define fpcbug4519read}
 (*
 {$ifdef FPC} {$define fpcbug4519} {$endif}
 
@@ -4890,7 +4890,7 @@ begin
 {$ifdef fpcbug4519read}
  msestring(value):= readwidestring4519(reader);
 {$else}
- msestring(value):= treader_readmsestring
+ msestring(value):= treader_readmsestring(reader);
 // {$ifdef mse_unicodestring}
 // msestring(value):= reader.ReadunicodeString;
 // {$else}
@@ -5180,7 +5180,8 @@ begin
  result:= items[index];
 end;
 
-procedure tpoorstringdatalist.setstatdata(const index: integer; const value: msestring);
+procedure tpoorstringdatalist.setstatdata(const index: integer;
+                                                const value: msestring);
 begin
  items[index]:= value;
 end;
