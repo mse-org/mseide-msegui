@@ -644,8 +644,8 @@ var
 begin
  with mainfo do begin
   int1:= 0;
-  if integerenter(int1,minint,maxint,c[ord(ac_processid)],
-                                  c[ord(ac_attachtoprocess)]) = mr_ok then begin
+  if integerenter(int1,minint,maxint,self.c[ord(ac_processid)],
+                      self.c[ord(ac_attachtoprocess)]) = mr_ok then begin
    startgdb(false);
    gdb.attach(int1,info);
    loadexec(true,false);
