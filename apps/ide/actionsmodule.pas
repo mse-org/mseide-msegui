@@ -284,7 +284,7 @@ uses
  main,make,actionsmodule_mfm,sourceform,msedesigner,msetypes,msefiledialog,
  projectoptionsform,findinfileform,breakpointsform,watchform,selecteditpageform,
  disassform,printform,msegdbutils,mseintegerenter,msesettings,
- componentstore,cpuform;
+ componentstore,cpuform,sysutils;
  
 procedure configureide;
 begin
@@ -646,6 +646,8 @@ begin
   int1:= 0;
   if integerenter(int1,minint,maxint,self.c[ord(ac_processid)],
                       self.c[ord(ac_attachtoprocess)]) = mr_ok then begin
+   setstattext('Attaching process '+inttostr(int1),mtk_running);
+   application.processmessages;
    startgdb(false);
    gdb.attach(int1,info);
    loadexec(true,false);

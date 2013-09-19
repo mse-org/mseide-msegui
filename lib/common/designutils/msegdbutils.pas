@@ -821,7 +821,8 @@ end;
 
 procedure tgdbmi.resetexec;
 begin
- fstate:= fstate - [gs_internalrunning,gs_running,gs_execloaded,gs_canstop,
+ fstate:= fstate - [gs_internalrunning,gs_running,gs_stopped,
+                    gs_execloaded,gs_canstop,
                     gs_attached,gs_attaching,gs_started,gs_startup,gs_detached,
                     gs_remote,gs_async,
                           gs_interrupted,gs_restarted,
@@ -1470,7 +1471,8 @@ begin
   else begin
    if assigned(fonevent) and (eventkind = gek_writeerror) or
       not ((eventkind = gek_stopped) and (gs_interrupted in fstate)) and
-      not ((eventkind = gek_running) and (gs_restarted in fstate)) and
+      not ((eventkind = gek_running) and 
+         ([gs_attaching,gs_restarted] * fstate <> [])) and
       not ((eventkind = gek_error) and (fsyncsequence <> 0) and
            (integer(token-fsyncsequence) < 0)) and
       ((token = 0) or (token <> fsyncsequence) or (eventkind = gek_running) or
@@ -1972,11 +1974,24 @@ end;
 function tgdbmi.attach(const procid: longword; out info: stopinfoty): gdbresultty;
 var
  frames1: frameinfoarty;
+ wo1: longword;
+ int1: integer;
 begin
  abort;
  resetexec;
- include(fstate,gs_attaching);
+ fstate:= fstate+[gs_attaching{,gs_stopped}];
  result:= clicommand('attach '+inttostr(procid),false,10000000);
+ if result = gdb_ok then begin
+  wo1:= timestep(5000000); //5 seconds, sometimes necessary for
+  while (gs_internalrunning in fstate) and not timeout(wo1) do begin
+   int1:= application.unlockall;
+   sleepus(50000);  //win32 gdb 7.2 sends ^running
+   application.relockall(int1);
+  end;
+  if gs_internalrunning in fstate then begin
+   result:= gdb_timeout;
+  end;
+ end;
  exclude(fstate,gs_attaching);
  finalize(info);
  fillchar(info,sizeof(info),0);
