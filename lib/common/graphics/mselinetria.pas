@@ -815,6 +815,7 @@ begin
     if intersect(ints) then begin
      if trf_joinround in triaflags then begin
       roundcapstartstrip(drawinfo,li);
+      ints.p1:= li.dest-1;
      end
      else begin
       pt1:= subpoint(ints.isect,ints.p1^); //intersection - bstart

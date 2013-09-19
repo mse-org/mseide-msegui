@@ -826,7 +826,7 @@ begin
  checkgdilock;
 {$endif} 
  pixmap:= gui_createpixmap(makesize(1,1));
- attributes._repeat:= 1;
+ attributes._repeat:= repeatnormal;
  attributes.component_alpha:= 1;
  result:= xrendercreatepicture(appdisp,pixmap,screenrenderpictformat,
        cprepeat or cpcomponentalpha,@attributes);
@@ -896,6 +896,8 @@ var
  flags1: xftstatesty;
  lwo1,lwo2: longword;
  attributes: txrenderpictureattributes;
+//todo: fix xftbrushorigin, seems to be unreliable
+//      implement monochrome color brushes  
 begin
  with x11gcty(drawinfo.gc.platformdata).d do begin
   if not (xfts_clipregionvalid in xftstate) then begin
@@ -911,7 +913,7 @@ begin
   if xfts_colorforegroundvalid in flags1 then begin
    if df_brush in drawinfo.gc.drawingflags then begin
     if (xftbrush <> 0) and (xftbrushpic = 0) then begin
-     attributes._repeat:= 1;
+     attributes._repeat:= repeatnormal;
      if xftbrushmonochrome then begin
       xftbrushpic:= xrendercreatepicture(appdisp,xftbrush,
                            bitmaprenderpictformat,cprepeat,@attributes);
@@ -1058,8 +1060,8 @@ begin
    xmask:= xmask or gctilestipxorigin or gctilestipyorigin;
    xvalues.ts_x_origin:= brushorigin.x;
    xvalues.ts_y_origin:= brushorigin.y;
-   xftbrushorigin.x:= -brushorigin.x;
-   xftbrushorigin.y:= -brushorigin.y;
+   xftbrushorigin.x:= cliporigin.x-brushorigin.x;
+   xftbrushorigin.y:= cliporigin.y-brushorigin.y;
   end;
 
   if (drawingflags >< gcdrawingflags)
@@ -2100,12 +2102,14 @@ begin
    linestria(drawinfo,po1,pointcount);
    if df_dashed in gc.drawingflags then begin
     xrendercompositetriangles(appdisp,xrenderop,xftcolorforegroundpic,
-                     xftdrawpic,alpharenderpictformat,0,0,pxtriangle(po1),
+                     xftdrawpic,alpharenderpictformat,
+                     xftbrushorigin.x,xftbrushorigin.y,pxtriangle(po1),
                      (pointcount div 3));
    end
    else begin
     xrendercompositetristrip(appdisp,xrenderop,xftcolorforegroundpic,
-        xftdrawpic,alpharenderpictformat,0,0,pxpointfixed(po1),pointcount);
+        xftdrawpic,alpharenderpictformat,
+        xftbrushorigin.x,xftbrushorigin.y,pxpointfixed(po1),pointcount);
    end;      
   end
   else begin
@@ -2134,7 +2138,8 @@ begin
    checkxftstate(drawinfo,[xfts_colorforegroundvalid]);
    linesegmentstria(drawinfo,po1,triacount);
    xrendercompositetriangles(appdisp,xrenderop,xftcolorforegroundpic,
-                     xftdrawpic,alpharenderpictformat,0,0,
+                     xftdrawpic,alpharenderpictformat,
+                     xftbrushorigin.x,xftbrushorigin.y,
                                             pxtriangle(po1),triacount);
   end
   else begin
@@ -2253,7 +2258,8 @@ begin
    with x11gcty(gc.platformdata).d do begin
     checkxftstate(drawinfo,[xfts_colorforegroundvalid]);
     xrendercompositetrifan(appdisp,xrenderop,xftcolorforegroundpic,
-                    xftdrawpic,alpharenderpictformat,0,0,buffer.buffer,npoints);
+                    xftdrawpic,alpharenderpictformat,
+                    xftbrushorigin.x,xftbrushorigin.y,buffer.buffer,npoints);
    end;  
   end
   else begin
@@ -2385,7 +2391,8 @@ begin
     end;
     po1:= pxtriangle(buffer.buffer)+2;
     xrendercompositetriangles(appdisp,xrenderop,xftcolorforegroundpic,
-                 xftdrawpic,alpharenderpictformat,0,0,po1,pxtriangle(q0)-po1);
+                 xftdrawpic,alpharenderpictformat,
+                 xftbrushorigin.x,xftbrushorigin.y,po1,pxtriangle(q0)-po1);
    end
    else begin
     rea1:= extentang/int1; //step
@@ -2417,7 +2424,8 @@ begin
      sy:= co*sy+si*rea1;
     end;
     xrendercompositetristrip(appdisp,xrenderop,xftcolorforegroundpic,
-                     xftdrawpic,alpharenderpictformat,0,0,buffer.buffer,npoints);
+                     xftdrawpic,alpharenderpictformat,
+                     xftbrushorigin.x,xftbrushorigin.y,buffer.buffer,npoints);
    end;
   end
   else begin
@@ -2533,7 +2541,8 @@ begin
    with x11gcty(gc.platformdata).d do begin
     checkxftstate(drawinfo,[xfts_colorforegroundvalid]);
     xrendercompositetristrip(appdisp,xrenderop,xftcolorforegroundpic,
-                    xftdrawpic,alpharenderpictformat,0,0,buffer.buffer,npoints);
+                    xftdrawpic,alpharenderpictformat,
+                    xftbrushorigin.x,xftbrushorigin.y,buffer.buffer,npoints);
    end;  
   end
   else begin
@@ -2704,7 +2713,8 @@ begin
    end;
    pxpointfixed(buffer.buffer)^:= center;   
    xrendercompositetrifan(appdisp,xrenderop,xftcolorforegroundpic,
-                 xftdrawpic,alpharenderpictformat,0,0,buffer.buffer,npoints);
+                 xftdrawpic,alpharenderpictformat,
+                 xftbrushorigin.x,xftbrushorigin.y,buffer.buffer,npoints);
   end
   else begin
    if pieslice then begin
@@ -2731,7 +2741,6 @@ begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
 {$endif}
-
  with drawinfo do begin
   if xfts_smooth in x11gcty(gc.platformdata).d.xftstate then begin
    if points.count > 2 then begin
