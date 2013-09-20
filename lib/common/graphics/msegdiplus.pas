@@ -112,7 +112,13 @@ type
   Y: INT;
  end;
  pGpPoint = ^GpPoint;
- 
+
+ GpImage = record end;
+ pGpImage = ^GpImage; 
+ GpBitmap = record end;
+ pGpBitmap = ^GpBitmap; 
+ GpTexture = record end;
+ pGpTexture = ^GpTexture;
  GpBrush = record end;
  pGpBrush = ^GpBrush;
  GpSolidFill = record end;
@@ -318,6 +324,8 @@ var
                                         region: ppGpRegion): GpStatus; stdcall;
  GdipDeleteRegion: function(region: pGpRegion): GpStatus; stdcall;
  GdipResetWorldTransform: function(graphics: pGpGraphics): GpStatus; stdcall;
+
+ GdipDisposeImage: function(image: pGpImage): GpStatus; stdcall;
 
 function initializegdiplus(const sonames: array of filenamety;
                      const noexception: boolean = false): boolean;

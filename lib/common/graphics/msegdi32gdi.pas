@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -147,7 +147,9 @@ type
  shapety = (fs_copyarea,fs_rect,fs_ellipse,fs_arc,fs_polygon);
 
  gcflagty = (gcf_backgroundbrushvalid,
-             gcf_colorbrushvalid,gcf_patternbrushvalid,gcf_rasterop,
+             gcf_colorbrushvalid,gcf_patternbrushvalid,
+             gcf_brushoriginvalid,
+             gcf_rasterop,
              gcf_selectforegroundbrush,gcf_selectbackgroundbrush,
              gcf_foregroundpenvalid,
              gcf_selectforegroundpen,gcf_selectnullpen,gcf_selectnullbrush,
@@ -182,6 +184,8 @@ type
   gpsolidfill: pgpsolidfill;
   gppen: pgppen;
   gpregion: pgpregion;
+  gpbrush: pgptexture;
+  gpbrushimage: pgpimage;
  end;
  {$if sizeof(win32gcdty) > sizeof(gcpty)} {$error 'buffer overflow'}{$ifend}
  win32gcty = record
@@ -649,7 +653,10 @@ const
                  (dashcapflat,dashcapround,dashcaptriangle);
  gpjoins: array[joinstylety] of gplinejoin = 
                  (linejoinmiterclipped,linejoinround,linejoinbevel);
-
+ gplineflags = [gcf_foregroundpenvalid,gcf_gppenmode,
+                                             gcf_brushoriginvalid];
+ gpfillflags = [gcf_colorbrushvalid,gcf_brushoriginvalid];
+ 
 procedure checkgpgc(var gc: gcty; aflags: gcflagsty);
 var
  flags1: gcflagsty;
@@ -691,6 +698,13 @@ begin
    if gcf_colorbrushvalid in flags1 then begin
     gdipsetsolidfillcolor(gpsolidfill,gpcolor(foregroundcol));
     include(gpflags,gcf_colorbrushvalid);
+   end;
+   if gcf_patternbrushvalid in flags1 then begin
+//    gdipsetsolidfillcolor(gpsolidfill,gpcolor(foregroundcol));
+    include(gpflags,gcf_patternbrushvalid);
+   end;
+   if gcf_brushoriginvalid in flags1 then begin
+    include(gpflags,gcf_brushoriginvalid);
    end;
    if gcf_foregroundpenvalid in aflags then begin
     gdipsetpencolor(gppen,gpcolor(foregroundcol));
@@ -999,6 +1013,14 @@ begin
      gdipdeleteregion(gpregion);
      gpregion:= nil;
     end;
+    if gpbrush <> nil then begin
+     gdipdeletebrush(pgpbrush(gpbrush));
+     gpbrush:= nil;
+    end;
+    if gpbrushimage <> nil then begin
+     gdipdisposeimage(gpbrushimage);
+     gpbrushimage:= nil;
+    end;
    end;
   end;
  end;
@@ -1063,8 +1085,17 @@ begin
   if gvm_brush in mask then begin
    flags:= flags - [gcf_patternbrushvalid];
    bru:= tsimplebitmap1(brush).handle;
+   if gpbrush <> nil then begin
+    gdipdeletebrush(pgpbrush(gpbrush));
+    gpbrush:= nil;
+   end;
+   if gpbrushimage <> nil then begin
+    gdipdisposeimage(gpbrushimage);
+    gpbrushimage:= nil;
+   end;
   end;
   if gvm_brushorigin in mask then begin
+   flags:= flags - [gcf_brushoriginvalid];
    brushorg:= brushorigin;
    setbrushorgex(handle,brushorigin.x,brushorigin.y,nil);
   end;
@@ -1140,7 +1171,7 @@ var
 begin
  transformpoints(drawinfo,false);
  if gcf_smooth in win32gcty(drawinfo.gc.platformdata).d.flags then begin
-  checkgpgc(drawinfo.gc,[gcf_foregroundpenvalid,gcf_gppenmode]);
+  checkgpgc(drawinfo.gc,gplineflags);
   with drawinfo,points,win32gcty(gc.platformdata).d do begin
    if closed then begin
     gdipdrawpolygoni(gpgraphic,gppen,buffer.buffer,count);
@@ -1197,7 +1228,7 @@ begin
   po3:= buffer.buffer; //segments
   int1:= points.count div 2; //segmentcount
   if gcf_smooth in flags then begin
-   checkgpgc(drawinfo.gc,[gcf_foregroundpenvalid,gcf_gppenmode]);
+   checkgpgc(drawinfo.gc,gplineflags);
    for int2:= 0 to int1-1 do begin
     gdipdrawlinesi(gpgraphic,gppen,pointer(po3),2);
     inc(po3,2);
@@ -1231,7 +1262,7 @@ var
  bo1: boolean;
 begin
  if gcf_smooth in win32gcty(drawinfo.gc.platformdata).d.flags then begin
-  checkgpgc(drawinfo.gc,[gcf_foregroundpenvalid]);
+  checkgpgc(drawinfo.gc,gplineflags);
   with drawinfo,rect.rect^,win32gcty(gc.platformdata).d do begin
    gdipdrawellipsei(gpgraphic,gppen,origin.x+x-cx div 2,
                               origin.y+y-cy div 2,cx,cy);
@@ -1299,7 +1330,7 @@ var                         //todo: optimize
  xstart,ystart,xend,yend: integer;
 begin
  if gcf_smooth in win32gcty(drawinfo.gc.platformdata).d.flags then begin
-  checkgpgc(drawinfo.gc,[gcf_foregroundpenvalid]);
+  checkgpgc(drawinfo.gc,gplineflags);
   adjustgparc(drawinfo);
   with drawinfo,arc,win32gcty(gc.platformdata).d do begin
    gdipdrawarci(gpgraphic,gppen,rect^.x,rect^.y,rect^.cx,rect^.cy,
@@ -1700,7 +1731,7 @@ end;
 procedure gdi_fillellipse(var drawinfo: drawinfoty);
 begin
  if gcf_smooth in win32gcty(drawinfo.gc.platformdata).d.flags then begin
-  checkgpgc(drawinfo.gc,[gcf_colorbrushvalid]);
+  checkgpgc(drawinfo.gc,gpfillflags);
   with drawinfo,rect.rect^,win32gcty(gc.platformdata).d do begin
    gdipfillellipsei(gpgraphic,pgpbrush(gpsolidfill),origin.x+x-cx div 2,
                               origin.y+y-cy div 2,cx,cy);
@@ -1717,7 +1748,7 @@ var
  pa1: pGpPath;
 begin
  if gcf_smooth in win32gcty(drawinfo.gc.platformdata).d.flags then begin
-  checkgpgc(drawinfo.gc,[gcf_colorbrushvalid]);
+  checkgpgc(drawinfo.gc,gpfillflags);
   adjustgparc(drawinfo);
   with drawinfo,arc,win32gcty(gc.platformdata).d do begin
    if pieslice then begin
@@ -1743,7 +1774,7 @@ begin
  transformpoints(drawinfo,false);
  with win32gcty(drawinfo.gc.platformdata).d do begin
   if gcf_smooth in flags then begin
-   checkgpgc(drawinfo.gc,[gcf_colorbrushvalid]);
+   checkgpgc(drawinfo.gc,gpfillflags);
    gdipfillpolygon2i(gpgraphic,pgpbrush(gpsolidfill),drawinfo.buffer.buffer,
                                                     drawinfo.points.count);   
   end

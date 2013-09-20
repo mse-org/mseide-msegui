@@ -278,7 +278,8 @@ type
                                        const newindex: integer) of object;
  tabschangedeventty = procedure(const synctabindex: boolean) of object;
 
- tabbarstatety = (tbs_layoutvalid,tbs_designdrag,tbs_shrinktozero);
+ tabbarstatety = (tbs_layoutvalid,tbs_designdrag,tbs_shrinktozero,
+                  tbs_updatesizing);
  tabbarstatesty = set of tabbarstatety;
  
  tcustomtabbar = class(tcustomstepbox)
@@ -3854,62 +3855,69 @@ var
  int1: integer;
  bo1: boolean;
 begin
- if not (csloading in componentstate) then begin
-  rect1:= innerwidgetrect;
-  if page <> nil then begin
-   updatepagesize(page);
-  end
-  else begin
-   bo1:= (tabo_multitabsonly in ftabs.options) and (count < 2);
-   if bo1 then begin
-    include(ftabs.fstate,tbs_shrinktozero);
+ if not (csloading in componentstate) and 
+                not (tbs_updatesizing in ftabs.fstate) then begin
+                     //recursion lock
+  include(ftabs.fstate,tbs_updatesizing);
+  try
+   rect1:= innerwidgetrect;
+   if page <> nil then begin
+    updatepagesize(page);
    end
    else begin
-    exclude(ftabs.fstate,tbs_shrinktozero);
-   end;
-   if tabo_vertical in ftabs.options then begin
-    if tabo_opposite in ftabs.options then begin
-     if bo1 then begin
-      ftabs.setwidgetrect(makerect(rect1.x+rect1.cx,rect1.y,
-                                          0,rect1.cy));
+    bo1:= (tabo_multitabsonly in ftabs.options) and (count < 2);
+    if bo1 then begin
+     include(ftabs.fstate,tbs_shrinktozero);
+    end
+    else begin
+     exclude(ftabs.fstate,tbs_shrinktozero);
+    end;
+    if tabo_vertical in ftabs.options then begin
+     if tabo_opposite in ftabs.options then begin
+      if bo1 then begin
+       ftabs.setwidgetrect(makerect(rect1.x+rect1.cx,rect1.y,
+                                           0,rect1.cy));
+      end
+      else begin
+       ftabs.setwidgetrect(makerect(rect1.x+rect1.cx-ftab_size,rect1.y,
+                                           ftab_size,rect1.cy));
+      end;
      end
      else begin
-      ftabs.setwidgetrect(makerect(rect1.x+rect1.cx-ftab_size,rect1.y,
-                                          ftab_size,rect1.cy));
+      if bo1 then begin
+       ftabs.setwidgetrect(makerect(rect1.x,rect1.y,0,rect1.cy));
+      end
+      else begin
+       ftabs.setwidgetrect(makerect(rect1.x,rect1.y,ftab_size,rect1.cy));
+      end;
      end;
     end
     else begin
-     if bo1 then begin
-      ftabs.setwidgetrect(makerect(rect1.x,rect1.y,0,rect1.cy));
+     if tabo_opposite in ftabs.options then begin
+      if bo1 then begin
+       ftabs.setwidgetrect(makerect(rect1.x,rect1.y+rect1.cy,
+                                          rect1.cx,0));
+      end
+      else begin
+       ftabs.setwidgetrect(makerect(rect1.x,rect1.y+rect1.cy-ftab_size,
+                                          rect1.cx,ftab_size));
+      end;
      end
      else begin
-      ftabs.setwidgetrect(makerect(rect1.x,rect1.y,ftab_size,rect1.cy));
+      if bo1 then begin
+       ftabs.setwidgetrect(makerect(rect1.x,rect1.y,rect1.cx,0));
+      end
+      else begin
+       ftabs.setwidgetrect(makerect(rect1.x,rect1.y,rect1.cx,ftab_size));
+      end;
      end;
     end;
-   end
-   else begin
-    if tabo_opposite in ftabs.options then begin
-     if bo1 then begin
-      ftabs.setwidgetrect(makerect(rect1.x,rect1.y+rect1.cy,
-                                         rect1.cx,0));
-     end
-     else begin
-      ftabs.setwidgetrect(makerect(rect1.x,rect1.y+rect1.cy-ftab_size,
-                                         rect1.cx,ftab_size));
-     end;
-    end
-    else begin
-     if bo1 then begin
-      ftabs.setwidgetrect(makerect(rect1.x,rect1.y,rect1.cx,0));
-     end
-     else begin
-      ftabs.setwidgetrect(makerect(rect1.x,rect1.y,rect1.cx,ftab_size));
-     end;
+    for int1:= 0 to ftabs.tabs.count - 1 do begin
+     updatepagesize(items[int1]);
     end;
    end;
-   for int1:= 0 to ftabs.tabs.count - 1 do begin
-    updatepagesize(items[int1]);
-   end;
+  finally
+   exclude(ftabs.fstate,tbs_updatesizing);
   end;
  end;
 end;
@@ -4779,14 +4787,6 @@ begin
   end;
   if not (csloading in componentstate) then begin
    updatesize(nil);
-  {
-   if tabo_vertical in ftabs.options then begin
-    ftab_size:= ftabs.bounds_cx;
-   end
-   else begin
-    ftab_size:= ftabs.bounds_cy;
-   end;
-  }
   end;
  end;
 end;
@@ -4795,7 +4795,8 @@ procedure tcustomtabwidget.widgetregionchanged(const sender: twidget);
 begin
  inherited;
  if not (csdestroying in componentstate) and (sender = ftabs) and 
-        not (ws1_updateopaque in twidget1(sender).fwidgetstate1) then begin
+        not (ws1_updateopaque in twidget1(sender).fwidgetstate1) and
+                          not (tbs_shrinktozero in ftabs.fstate) then begin
   if tabo_vertical in ftabs.options then begin
    tab_size:= ftabs.bounds_cx;
   end
