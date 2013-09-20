@@ -2101,7 +2101,9 @@ end;
 procedure tcustomscalingwidget.widgetregionchanged(const sender: twidget);
 begin
  inherited;
- updateoptionsscale;
+ if not (ws_loadlock in fwidgetstate) then begin
+  updateoptionsscale;
+ end;
 end;
 
 procedure tcustomscalingwidget.clientrectchanged;
@@ -2250,7 +2252,7 @@ end;
 procedure tscrollbox.widgetregionchanged(const sender: twidget);
 begin
  inherited;
- if not (csdestroying in componentstate) then begin
+ if not (ws_loadlock in fwidgetstate) and not (csdestroying in componentstate) then begin
   tscrollboxframe(fframe).updateclientrect;
  end;
 end;
