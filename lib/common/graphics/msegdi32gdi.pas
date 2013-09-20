@@ -181,11 +181,12 @@ type
   selectedbrush: hbrush;
   secondpen: hpen;
   gpgraphic: pgpgraphics;
-  gpsolidfill: pgpsolidfill;
-  gppen: pgppen;
   gpregion: pgpregion;
-  gpbrush: pgptexture;
-  gpbrushimage: pgpimage;
+  gpsolidfill: pgpsolidfill;
+  gptexture: pgptexture;
+  gptextureimage: pgpbitmap;
+  gpbrush: pgpbrush;
+  gppen: pgppen;
  end;
  {$if sizeof(win32gcdty) > sizeof(gcpty)} {$error 'buffer overflow'}{$ifend}
  win32gcty = record
@@ -655,7 +656,7 @@ const
                  (linejoinmiterclipped,linejoinround,linejoinbevel);
  gplineflags = [gcf_foregroundpenvalid,gcf_gppenmode,
                                              gcf_brushoriginvalid];
- gpfillflags = [gcf_colorbrushvalid,gcf_brushoriginvalid];
+ gpfillflags = [gcf_colorbrushvalid,gcf_brushoriginvalid,gcf_patternbrushvalid];
  
 procedure checkgpgc(var gc: gcty; aflags: gcflagsty);
 var
@@ -697,10 +698,17 @@ begin
    end;
    if gcf_colorbrushvalid in flags1 then begin
     gdipsetsolidfillcolor(gpsolidfill,gpcolor(foregroundcol));
+    gpbrush:= pgpbrush(gpsolidfill);
     include(gpflags,gcf_colorbrushvalid);
    end;
    if gcf_patternbrushvalid in flags1 then begin
-//    gdipsetsolidfillcolor(gpsolidfill,gpcolor(foregroundcol));
+    gpbrush:= pgpbrush(gpsolidfill); //for error
+    if gdipcreatebitmapfromhbitmap(bru,0,@gptextureimage) = ok then begin
+     if gdipcreatetexture(pgpimage(gptextureimage),
+                                     wrapmodetile,@gptexture) = ok then begin
+      gpbrush:= pgpbrush(gptexture);
+     end;
+    end;
     include(gpflags,gcf_patternbrushvalid);
    end;
    if gcf_brushoriginvalid in flags1 then begin
@@ -1013,13 +1021,13 @@ begin
      gdipdeleteregion(gpregion);
      gpregion:= nil;
     end;
-    if gpbrush <> nil then begin
-     gdipdeletebrush(pgpbrush(gpbrush));
-     gpbrush:= nil;
+    if gptexture <> nil then begin
+     gdipdeletebrush(pgpbrush(gptexture));
+     gptexture:= nil;
     end;
-    if gpbrushimage <> nil then begin
-     gdipdisposeimage(gpbrushimage);
-     gpbrushimage:= nil;
+    if gptextureimage <> nil then begin
+     gdipdisposeimage(pgpimage(gptextureimage));
+     gptextureimage:= nil;
     end;
    end;
   end;
@@ -1086,12 +1094,12 @@ begin
    flags:= flags - [gcf_patternbrushvalid];
    bru:= tsimplebitmap1(brush).handle;
    if gpbrush <> nil then begin
-    gdipdeletebrush(pgpbrush(gpbrush));
-    gpbrush:= nil;
+    gdipdeletebrush(pgpbrush(gptexture));
+    gptexture:= nil;
    end;
-   if gpbrushimage <> nil then begin
-    gdipdisposeimage(gpbrushimage);
-    gpbrushimage:= nil;
+   if gptextureimage <> nil then begin
+    gdipdisposeimage(pgpimage(gptextureimage));
+    gptextureimage:= nil;
    end;
   end;
   if gvm_brushorigin in mask then begin
@@ -1758,7 +1766,7 @@ begin
    else begin
     gdipcreatepath(fillmodealternate,@pa1);
     gdipaddpatharc(pa1,rect^.x,rect^.y,rect^.cx,rect^.cy,startang,extentang);
-    gdipfillpath(gpgraphic,pgpbrush(gpsolidfill),pa1);
+    gdipfillpath(gpgraphic,gpbrush,pa1);
     gdipdeletepath(pa1);
    end;
   end;
@@ -1775,7 +1783,7 @@ begin
  with win32gcty(drawinfo.gc.platformdata).d do begin
   if gcf_smooth in flags then begin
    checkgpgc(drawinfo.gc,gpfillflags);
-   gdipfillpolygon2i(gpgraphic,pgpbrush(gpsolidfill),drawinfo.buffer.buffer,
+   gdipfillpolygon2i(gpgraphic,gpbrush,drawinfo.buffer.buffer,
                                                     drawinfo.points.count);   
   end
   else begin

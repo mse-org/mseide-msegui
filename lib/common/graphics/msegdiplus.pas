@@ -117,8 +117,10 @@ type
  pGpImage = ^GpImage; 
  GpBitmap = record end;
  pGpBitmap = ^GpBitmap; 
+ ppGpBitmap = ^pGpBitmap; 
  GpTexture = record end;
  pGpTexture = ^GpTexture;
+ ppGpTexture = ^pGpTexture;
  GpBrush = record end;
  pGpBrush = ^GpBrush;
  GpSolidFill = record end;
@@ -151,6 +153,14 @@ type
   SmoothingModeAntiAlias
  );
  pSmoothingMode = ^SmoothingMode;
+
+ WrapMode = (
+  WrapModeTile,        // 0
+  WrapModeTileFlipX,   // 1
+  WrapModeTileFlipY,   // 2
+  WrapModeTileFlipXY,  // 3
+  WrapModeClamp        // 4
+ );
 
  GpUnit = (
   UnitWorld,      // 0 -- World coordinate (non-physical unit)
@@ -326,6 +336,10 @@ var
  GdipResetWorldTransform: function(graphics: pGpGraphics): GpStatus; stdcall;
 
  GdipDisposeImage: function(image: pGpImage): GpStatus; stdcall;
+ GdipCreateBitmapFromHBITMAP: function(hbm: HBITMAP; hpal: HPALETTE;
+                                        bitmap: ppGpBitmap): GpStatus; stdcall;
+ GdipCreateTexture: function(image: pGpImage; wrapmode: WrapMode;
+                           texture: ppGpTexture): GpStatus; stdcall;
 
 function initializegdiplus(const sonames: array of filenamety;
                      const noexception: boolean = false): boolean;
@@ -370,7 +384,7 @@ end;
 function initializegdiplus(const sonames: array of filenamety;
                                 const noexception: boolean = false): boolean;
 const
- funcs: array[0..46] of funcinfoty = (
+ funcs: array[0..49] of funcinfoty = (
   (n: 'GdiplusStartup'; d: @GdiplusStartup),              //0
   (n: 'GdiplusShutdown'; d: @GdiplusShutdown),            //1
   (n: 'GdipCreateFromHDC'; d: @GdipCreateFromHDC),        //2
@@ -417,7 +431,10 @@ const
   (n: 'GdipSetPixelOffsetMode'; d: @GdipSetPixelOffsetMode),//43
   (n: 'GdipSetPenMode'; d: @GdipSetPenMode),                //44
   (n: 'GdipTranslateWorldTransform'; d: @GdipTranslateWorldTransform),//45
-  (n: 'GdipResetWorldTransform'; d: @GdipResetWorldTransform)//46
+  (n: 'GdipResetWorldTransform'; d: @GdipResetWorldTransform),//46
+  (n: 'GdipDisposeImage'; d: @GdipDisposeImage), //47
+  (n: 'GdipCreateBitmapFromHBITMAP'; d: @GdipCreateBitmapFromHBITMAP),//48
+  (n: 'GdipCreateTexture'; d: @GdipCreateTexture)//49
  );
 const
  errormessage = 'Can not load gdi+ library. ';
