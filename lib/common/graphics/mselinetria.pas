@@ -13,9 +13,9 @@ interface
 uses
  msegraphics,msegraphutils,msetriaglob;
  
-procedure linestria(var drawinfo: drawinfoty; out apoints: ppointty;
-                                                     out apointcount: integer);
-           //returns tristrip, triangles for df_dashed
+function linestria(var drawinfo: drawinfoty; out apoints: ppointty;
+                                   out apointcount: integer): boolean;
+           //true if triangles, tristrip otherwise
 procedure linesegmentstria(var drawinfo: drawinfoty;
                   out atriangles: ptrianglety; out atrianglecount: integer);
 
@@ -617,8 +617,8 @@ begin
  end;
 end;
 
-procedure linestria(var drawinfo: drawinfoty; out apoints: ppointty;
-                                                out apointcount: integer);
+function linestria(var drawinfo: drawinfoty; out apoints: ppointty;
+                                     out apointcount: integer): boolean;
 var
  li: lineshiftinfoty;
  pt0,pt1,pt3: pointty;
@@ -634,6 +634,7 @@ var
 
 begin
  //todo: remove overlapping regions
+ result:= false;
  with drawinfo,points,triagcty(gc.platformdata).d do begin
   pointsbefore:= points;
   pointcount:= count;
@@ -658,6 +659,7 @@ begin
    int2:= count-3;
   end;
   if df_dashed in gc.drawingflags then begin
+   result:= true;
    int1:= (pointcount+linewidth1);       //for round caps
    if trf_joinround in triaflags then begin
     int1:= int1 + linewidth div 2; //round corners

@@ -2099,8 +2099,7 @@ begin
  with drawinfo,points,x11gcty(gc.platformdata).d do begin
   if xfts_smooth in xftstate then begin
    checkxftstate(drawinfo,[xfts_colorforegroundvalid]);
-   linestria(drawinfo,po1,pointcount);
-   if df_dashed in gc.drawingflags then begin
+   if linestria(drawinfo,po1,pointcount) then begin
     xrendercompositetriangles(appdisp,xrenderop,xftcolorforegroundpic,
                      xftdrawpic,alpharenderpictformat,
                      xftbrushorigin.x,xftbrushorigin.y,pxtriangle(po1),
