@@ -15,12 +15,6 @@ uses
 
 procedure polytria(var drawinfo: drawinfoty; out atriangles: ptrianglety;
                                              out trianglecount: integer);
-implementation
-uses
- msetypes,msenoise
- {$ifdef mse_debugpolytria}
-  ,mseformatstr,sysutils,msearrayutils,msesysutils
- {$endif};
 
 {$ifdef mse_debugpolytria1}
 type
@@ -51,6 +45,12 @@ var
 
 {$endif}
 
+implementation
+uses
+ msetypes,msenoise
+ {$ifdef mse_debugpolytria}
+  ,mseformatstr,sysutils,msearrayutils,msesysutils
+ {$endif};
 
 type
  trapnodekindty = (tnk_y,tnk_x,tnk_trap);
