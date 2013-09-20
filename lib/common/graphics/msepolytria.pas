@@ -9,13 +9,19 @@
 }
 unit msepolytria;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
-//{$define mse_debugpolytria}
 interface
 uses
  msegraphics,msegraphutils,msetriaglob;
 
 procedure polytria(var drawinfo: drawinfoty; out atriangles: ptrianglety;
                                              out trianglecount: integer);
+implementation
+uses
+ msetypes,msenoise
+ {$ifdef mse_debugpolytria}
+  ,mseformatstr,sysutils,msearrayutils,msesysutils
+ {$endif};
+
 {$ifdef mse_debugpolytria1}
 type
  trapdispinfoty = array[0..3] of pointty;
@@ -45,12 +51,6 @@ var
 
 {$endif}
 
-implementation
-uses
- msetypes,msenoise
- {$ifdef mse_debugpolytria}
-  ,mseformatstr,sysutils,msearrayutils,msesysutils
- {$endif};
 
 type
  trapnodekindty = (tnk_y,tnk_x,tnk_trap);

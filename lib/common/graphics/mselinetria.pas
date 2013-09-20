@@ -15,6 +15,7 @@ uses
  
 procedure linestria(var drawinfo: drawinfoty; out apoints: ppointty;
                                                      out apointcount: integer);
+           //returns tristrip, triangles for df_dashed
 procedure linesegmentstria(var drawinfo: drawinfoty;
                   out atriangles: ptrianglety; out atrianglecount: integer);
 
@@ -617,7 +618,7 @@ begin
 end;
 
 procedure linestria(var drawinfo: drawinfoty; out apoints: ppointty;
-                                                     out apointcount: integer);
+                                                out apointcount: integer);
 var
  li: lineshiftinfoty;
  pt0,pt1,pt3: pointty;
