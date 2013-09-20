@@ -225,6 +225,9 @@ begin
    exit;
   end;
   int1:= round(int1*abs(extentang)/pi); //steps
+  if int1 = 0 then begin
+   int1:= 1;
+  end;
   adjustellipsecenter(drawinfo,center);
   cx1:= cx * (65536 div 2);
   cx2:= cx1*cx1;
