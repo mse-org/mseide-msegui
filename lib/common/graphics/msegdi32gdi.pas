@@ -645,8 +645,10 @@ end;
 const
  gpcaps: array[capstylety] of gplinecap = 
                  (linecapflat,linecapround,linecapsquare);
+ gpdashcaps: array[capstylety] of gpdashcap = 
+                 (dashcapflat,dashcapround,dashcaptriangle);
  gpjoins: array[joinstylety] of gplinejoin = 
-                 (linejoinmiter,linejoinround,linejoinbevel);
+                 (linejoinmiterclipped,linejoinround,linejoinbevel);
 
 procedure checkgpgc(var gc: gcty; aflags: gcflagsty);
 var
@@ -701,7 +703,8 @@ begin
      dasca:= 1/peninfo.width;
     end;
     cap1:= gpcaps[peninfo.capstyle];
-    gdipsetpenlinecap197819(gppen,cap1,cap1,dashcapflat);
+    gdipsetpenlinecap197819(gppen,cap1,cap1,
+                               gpdashcaps[peninfo.capstyle]);
     gdipsetpenlinejoin(gppen,gpjoins[peninfo.joinstyle]);
     if length(peninfo.dashes) > 0 then begin
      for int1:= 1 to length(peninfo.dashes) do begin
