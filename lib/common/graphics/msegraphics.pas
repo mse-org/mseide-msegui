@@ -202,7 +202,7 @@ type
 
  canvasclassty = class of tcanvas; 
  
- gcpty = array[0..31] of pointer;
+ gcpty = array[0..63] of pointer;
  gcty = record
   handle: ptruint;//cardinal;
   refgc: ptruint;//cardinal; //for windowsmetafile

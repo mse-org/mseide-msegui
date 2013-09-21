@@ -160,9 +160,14 @@ type
             //-> longword
  gcflagsty = set of gcflagty;
  pgcflagsty = ^gcflagsty;
-const
- gcfgpflags = [gcf_gppenmode];
 type
+ monopalettety = record
+  palVersion : WORD;
+  palNumEntries : WORD;
+  val0: tpaletteentry;
+  val1: tpaletteentry;
+ end;
+
  win32gcdty = record
   flags: gcflagsty;
   gpflags: gcflagsty;
@@ -184,6 +189,8 @@ type
   gpregion: pgpregion;
   gpsolidfill: pgpsolidfill;
   gptexture: pgptexture;
+  gppalette: hpalette;
+  gppalettedata: monopalettety;
   gptextureimage: pgpbitmap;
   gpbrush: pgpbrush;
   gppen: pgppen;
@@ -654,11 +661,79 @@ const
                  (dashcapflat,dashcapround,dashcaptriangle);
  gpjoins: array[joinstylety] of gplinejoin = 
                  (linejoinmiterclipped,linejoinround,linejoinbevel);
- gplineflags = [gcf_foregroundpenvalid,gcf_gppenmode,
-                                             gcf_brushoriginvalid];
- gpfillflags = [gcf_colorbrushvalid,gcf_brushoriginvalid,gcf_patternbrushvalid];
- 
+const
+ gpstartflags = [gcf_colorbrushvalid,gcf_foregroundpenvalid,gcf_gpregionvalid];
+ gcfgpflags = [gcf_gppenmode];
+ gplineflags = [gcf_selectforegroundpen,gcf_gppenmode];
+ gpfillflags = [gcf_selectforegroundbrush];
+
+var testvar: ^win32gcdty; 
 procedure checkgpgc(var gc: gcty; aflags: gcflagsty);
+
+ procedure checkbrushorcolor;
+ var
+  pal1: hpalette;
+ begin
+  with gc,win32gcty(platformdata).d do begin
+testvar:= @win32gcty(platformdata).d;
+   if df_brush in drawingflags then begin
+    if not (gcf_patternbrushvalid in gpflags) then begin
+     if df_monochrome in drawingflags then begin
+      with gppalettedata do begin
+                           //todo: palette does not work
+       if (gppalette <> 0) and 
+             ((longword(val0) <> backgroundcol) or 
+                     (longword(val1) <> foregroundcol)) then begin
+        deleteobject(gppalette);
+        gppalette:= 0;
+       end;
+       if gppalette = 0 then begin
+        longword(val0):= backgroundcol;
+        longword(val1):= foregroundcol;
+       end;
+       gppalette:= createpalette(plogpalette(@gppalettedata)^);
+       {
+       pal1:= selectpalette(handle,gppalette,false);
+       realizepalette(handle);
+       if pal1 <> 0 then begin
+        selectpalette(handle,pal1,false);
+       end;
+       }
+      end;
+      pal1:= gppalette;
+     end
+     else begin
+      pal1:= 0;
+     end;
+     if gdipcreatebitmapfromhbitmap(bru,pal1,@gptextureimage) = ok then begin
+      gdipcreatetexture(pgpimage(gptextureimage),
+                                      wrapmodetile,@gptexture);
+     end;
+     include(gpflags,gcf_patternbrushvalid);
+    end;
+    if gptexture <> nil then begin
+     gpbrush:= pgpbrush(gptexture);
+     if not (gcf_brushoriginvalid in gpflags) then begin
+      gdipresettexturetransform(gptexture);
+      gdiptranslatetexturetransform(gptexture,brushorg.x,brushorg.y,
+                                                   matrixorderprepend);
+      include(gpflags,gcf_brushoriginvalid);
+     end;
+    end
+    else begin
+     gpbrush:= pgpbrush(gpsolidfill); //error
+    end;
+   end
+   else begin
+    if not (gcf_colorbrushvalid in gpflags) then begin
+     gdipsetsolidfillcolor(gpsolidfill,gpcolor(foregroundcol));
+     include(gpflags,gcf_colorbrushvalid);
+    end;
+    gpbrush:= pgpbrush(gpsolidfill);
+   end;
+  end;
+ end; //checkbrushorcolor
+
 var
  flags1: gcflagsty;
  cap1: gplinecap;
@@ -684,37 +759,9 @@ begin
    include(gpflags,gcf_gpregionvalid);
    deleteobject(reg);
   end;
-  flags1:= (aflags+gpflags) * (aflags >< gpflags);
-  if flags1 <> [] then begin
-   if gcf_gppenmode in flags1 then begin
-    gdipresetworldtransform(gpgraphic);
-    if gcf_gppenmode in aflags then begin
-     gdiptranslateworldtransform(gpgraphic,0.5,0.5,matrixorderprepend);
-     include(gpflags,gcf_gppenmode);
-    end
-    else begin
-     exclude(gpflags,gcf_gppenmode);
-    end;
-   end;
-   if gcf_colorbrushvalid in flags1 then begin
-    gdipsetsolidfillcolor(gpsolidfill,gpcolor(foregroundcol));
-    gpbrush:= pgpbrush(gpsolidfill);
-    include(gpflags,gcf_colorbrushvalid);
-   end;
-   if gcf_patternbrushvalid in flags1 then begin
-    gpbrush:= pgpbrush(gpsolidfill); //for error
-    if gdipcreatebitmapfromhbitmap(bru,0,@gptextureimage) = ok then begin
-     if gdipcreatetexture(pgpimage(gptextureimage),
-                                     wrapmodetile,@gptexture) = ok then begin
-      gpbrush:= pgpbrush(gptexture);
-     end;
-    end;
-    include(gpflags,gcf_patternbrushvalid);
-   end;
-   if gcf_brushoriginvalid in flags1 then begin
-    include(gpflags,gcf_brushoriginvalid);
-   end;
-   if gcf_foregroundpenvalid in aflags then begin
+  if gcf_selectforegroundpen in aflags then begin
+   checkbrushorcolor;
+   if not (gcf_foregroundpenvalid in gpflags) then begin
     gdipsetpencolor(gppen,gpcolor(foregroundcol));
     if peninfo.width = 0 then begin
      gdipsetpenwidth(gppen,1);
@@ -740,6 +787,21 @@ begin
     end;
     include(gpflags,gcf_foregroundpenvalid);
    end;
+  end;
+  if gcf_selectforegroundbrush in aflags then begin
+   checkbrushorcolor;
+   {
+   if gcf_gppenmode in flags1 then begin
+    gdipresetworldtransform(gpgraphic);
+    if gcf_gppenmode in aflags then begin
+     gdiptranslateworldtransform(gpgraphic,0.5,0.5,matrixorderprepend);
+     include(gpflags,gcf_gppenmode);
+    end
+    else begin
+     exclude(gpflags,gcf_gppenmode);
+    end;
+   end;
+   }
   end;
  end;
 end;
@@ -1029,6 +1091,10 @@ begin
      gdipdisposeimage(pgpimage(gptextureimage));
      gptextureimage:= nil;
     end;
+    if gppalette <> 0 then begin
+     deleteobject(gppalette);
+     gppalette:= 0;
+    end;
    end;
   end;
  end;
@@ -1050,6 +1116,13 @@ var
 begin
  with drawinfo.gc,win32gcty(platformdata).d do begin
   if gpgraphic = nil then begin
+   with gppalettedata do begin
+    palversion:= $300;
+    palnumentries:= 2;
+    longword(val0):= 0;
+    longword(val1):= $ffffffff;
+    val1.peflags:= 0;
+   end;
    reg:= createrectrgn(0,0,0,0);
    int1:= getcliprgn(handle,reg);
    selectcliprgn(handle,0); //use full paintdevice rect
@@ -1131,8 +1204,7 @@ begin
      checkgdiplusgraphic(drawinfo);
      if gpgraphic <> nil then begin
       if not (gcf_smooth in flags) then begin
-       gpflags:= gpflags - [gcf_colorbrushvalid,gcf_foregroundpenvalid,
-                    gcf_gpregionvalid];
+       gpflags:= gpflags - gpstartflags;
        include(flags,gcf_smooth);
       end;
      end;

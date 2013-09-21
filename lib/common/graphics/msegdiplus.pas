@@ -340,6 +340,9 @@ var
                                         bitmap: ppGpBitmap): GpStatus; stdcall;
  GdipCreateTexture: function(image: pGpImage; wrapmode: WrapMode;
                            texture: ppGpTexture): GpStatus; stdcall;
+ GdipResetTextureTransform: function (brush: pGpTexture): GpStatus; stdcall;
+ GdipTranslateTextureTransform: function(brush: pGpTexture; dx: REAL;
+                    dy: REAL; order: GpMatrixOrder): GpStatus; stdcall;
 
 function initializegdiplus(const sonames: array of filenamety;
                      const noexception: boolean = false): boolean;
@@ -384,7 +387,7 @@ end;
 function initializegdiplus(const sonames: array of filenamety;
                                 const noexception: boolean = false): boolean;
 const
- funcs: array[0..49] of funcinfoty = (
+ funcs: array[0..51] of funcinfoty = (
   (n: 'GdiplusStartup'; d: @GdiplusStartup),              //0
   (n: 'GdiplusShutdown'; d: @GdiplusShutdown),            //1
   (n: 'GdipCreateFromHDC'; d: @GdipCreateFromHDC),        //2
@@ -434,7 +437,10 @@ const
   (n: 'GdipResetWorldTransform'; d: @GdipResetWorldTransform),//46
   (n: 'GdipDisposeImage'; d: @GdipDisposeImage), //47
   (n: 'GdipCreateBitmapFromHBITMAP'; d: @GdipCreateBitmapFromHBITMAP),//48
-  (n: 'GdipCreateTexture'; d: @GdipCreateTexture)//49
+  (n: 'GdipCreateTexture'; d: @GdipCreateTexture),//49
+  (n: 'GdipResetTextureTransform'; d: @GdipResetTextureTransform),//50
+  (n: 'GdipTranslateTextureTransform'; d: @GdipTranslateTextureTransform)//51
+//  (n: ''; d: @),//
  );
 const
  errormessage = 'Can not load gdi+ library. ';
