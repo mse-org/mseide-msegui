@@ -113,6 +113,19 @@ type
  end;
  pGpPoint = ^GpPoint;
 
+const
+ PaletteFlagsHasAlpha    = $0001;
+ PaletteFlagsGrayScale   = $0002;
+ PaletteFlagsHalftone    = $0004;
+ 
+type
+ ColorPalette = record
+  Flags: UINT;                        // Palette flags
+  Count: UINT;                          // Number of color entries
+  Entries: array[0..0] of ARGB;        // Palette color entries
+ end;
+ pColorPalette = ^ColorPalette;
+
  GpImage = record end;
  pGpImage = ^GpImage; 
  GpBitmap = record end;
@@ -252,6 +265,7 @@ var
                           output: pGdiplusStartupOutput): GpStatus; stdcall;
  GdiplusShutdown: function(token: pointer): GpStatus; stdcall;
 
+ GdipFree: function(ptr: pointer): GpStatus; stdcall;
  GdipCreateFromHDC: function(hdc_: HDC;
                  graphics: PPGpGraphics): GpStatus; stdcall;
  GdipCreateFromHDC2: function(hdc_: HDC; hDevice: HANDLE;
@@ -296,6 +310,7 @@ var
  GdipGetPenWidth: function(pen: pGpPen; width: pREAL): GpStatus; stdcall;
  GdipSetPenColor: function(pen: pGpPen; argb_: ARGB): GpStatus; stdcall;
  GdipGetPenColor: function(pen: pGpPen; argb_: pARGB): GpStatus; stdcall;
+ GdipSetPenBrushFill: function(pen: pGpPen; brush: pGpBrush): GpStatus; stdcall;
  GdipSetPenLineCap197819: function(pen: pGpPen; startCap: GpLineCap;
                    endCap: GpLineCap; dashCap: GpDashCap): GpStatus; stdcall;
  GdipSetPenLineJoin: function(pen: pGpPen;
@@ -338,6 +353,9 @@ var
  GdipDisposeImage: function(image: pGpImage): GpStatus; stdcall;
  GdipCreateBitmapFromHBITMAP: function(hbm: HBITMAP; hpal: HPALETTE;
                                         bitmap: ppGpBitmap): GpStatus; stdcall;
+ GdipSetImagePalette: function(image: pGpImage;
+                                 palette: pColorPalette): GpStatus; stdcall;
+
  GdipCreateTexture: function(image: pGpImage; wrapmode: WrapMode;
                            texture: ppGpTexture): GpStatus; stdcall;
  GdipResetTextureTransform: function (brush: pGpTexture): GpStatus; stdcall;
@@ -387,7 +405,7 @@ end;
 function initializegdiplus(const sonames: array of filenamety;
                                 const noexception: boolean = false): boolean;
 const
- funcs: array[0..51] of funcinfoty = (
+ funcs: array[0..54] of funcinfoty = (
   (n: 'GdiplusStartup'; d: @GdiplusStartup),              //0
   (n: 'GdiplusShutdown'; d: @GdiplusShutdown),            //1
   (n: 'GdipCreateFromHDC'; d: @GdipCreateFromHDC),        //2
@@ -439,9 +457,12 @@ const
   (n: 'GdipCreateBitmapFromHBITMAP'; d: @GdipCreateBitmapFromHBITMAP),//48
   (n: 'GdipCreateTexture'; d: @GdipCreateTexture),//49
   (n: 'GdipResetTextureTransform'; d: @GdipResetTextureTransform),//50
-  (n: 'GdipTranslateTextureTransform'; d: @GdipTranslateTextureTransform)//51
-//  (n: ''; d: @),//
+  (n: 'GdipTranslateTextureTransform'; d: @GdipTranslateTextureTransform),//51
+  (n: 'GdipSetPenBrushFill'; d: @GdipSetPenBrushFill),//52
+  (n: 'GdipFree'; d: @GdipFree),//53
+  (n: 'GdipSetImagePalette'; d: @GdipSetImagePalette)//54
  );
+//  (n: ''; d: @),//
 const
  errormessage = 'Can not load gdi+ library. ';
 begin

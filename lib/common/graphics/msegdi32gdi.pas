@@ -162,10 +162,10 @@ type
  pgcflagsty = ^gcflagsty;
 type
  monopalettety = record
-  palVersion : WORD;
-  palNumEntries : WORD;
-  val0: tpaletteentry;
-  val1: tpaletteentry;
+  Flags: UINT;
+  Count: UINT;
+  val0: ARGB;
+  val1: ARGB;
  end;
 
  win32gcdty = record
@@ -189,7 +189,6 @@ type
   gpregion: pgpregion;
   gpsolidfill: pgpsolidfill;
   gptexture: pgptexture;
-  gppalette: hpalette;
   gppalettedata: monopalettety;
   gptextureimage: pgpbitmap;
   gpbrush: pgpbrush;
@@ -642,6 +641,21 @@ begin
  end;
 end;
 
+procedure deletepgtexture(var gc: gcty);
+begin
+ with win32gcty(gc.platformdata).d do begin
+  if gptexture <> nil then begin
+   gdipdeletebrush(pgpbrush(gptexture));
+   gptexture:= nil;
+  end;
+  if gptextureimage <> nil then begin
+   gdipdisposeimage(pgpimage(gptextureimage));
+//   gdipfree(gptextureimage);
+   gptextureimage:= nil;
+  end;
+ end;
+end;
+
 const
  alphamax = $ff000000;
 
@@ -667,45 +681,28 @@ const
  gplineflags = [gcf_selectforegroundpen,gcf_gppenmode];
  gpfillflags = [gcf_selectforegroundbrush];
 
-var testvar: ^win32gcdty; 
 procedure checkgpgc(var gc: gcty; aflags: gcflagsty);
 
  procedure checkbrushorcolor;
- var
-  pal1: hpalette;
  begin
   with gc,win32gcty(platformdata).d do begin
-testvar:= @win32gcty(platformdata).d;
    if df_brush in drawingflags then begin
     if not (gcf_patternbrushvalid in gpflags) then begin
-     if df_monochrome in drawingflags then begin
-      with gppalettedata do begin
-                           //todo: palette does not work
-       if (gppalette <> 0) and 
-             ((longword(val0) <> backgroundcol) or 
-                     (longword(val1) <> foregroundcol)) then begin
-        deleteobject(gppalette);
-        gppalette:= 0;
+     if gdipcreatebitmapfromhbitmap(bru,0,@gptextureimage) = ok then begin
+      if df_monochrome in drawingflags then begin
+       with gppalettedata do begin
+        longword(val0):= gpcolor(foregroundcol) or $ff000000;
+        if df_opaque in drawingflags then begin
+         longword(val1):= gpcolor(backgroundcol) or $ff000000;
+         flags:= 0;
+        end
+        else begin
+         longword(val1):= backgroundcol;
+         flags:= PaletteFlagsHasAlpha;
+        end;
        end;
-       if gppalette = 0 then begin
-        longword(val0):= backgroundcol;
-        longword(val1):= foregroundcol;
-       end;
-       gppalette:= createpalette(plogpalette(@gppalettedata)^);
-       {
-       pal1:= selectpalette(handle,gppalette,false);
-       realizepalette(handle);
-       if pal1 <> 0 then begin
-        selectpalette(handle,pal1,false);
-       end;
-       }
       end;
-      pal1:= gppalette;
-     end
-     else begin
-      pal1:= 0;
-     end;
-     if gdipcreatebitmapfromhbitmap(bru,pal1,@gptextureimage) = ok then begin
+      gdipsetimagepalette(pgpimage(gptextureimage),@gppalettedata);
       gdipcreatetexture(pgpimage(gptextureimage),
                                       wrapmodetile,@gptexture);
      end;
@@ -735,7 +732,6 @@ testvar:= @win32gcty(platformdata).d;
  end; //checkbrushorcolor
 
 var
- flags1: gcflagsty;
  cap1: gplinecap;
  dash1: array[0..high(dashesstringty)] of gpreal;
  int1: integer;
@@ -762,7 +758,12 @@ begin
   if gcf_selectforegroundpen in aflags then begin
    checkbrushorcolor;
    if not (gcf_foregroundpenvalid in gpflags) then begin
-    gdipsetpencolor(gppen,gpcolor(foregroundcol));
+    if df_brush in drawingflags then begin
+     gdipsetpenbrushfill(gppen,gpbrush);
+    end
+    else begin
+     gdipsetpencolor(gppen,gpcolor(foregroundcol));
+    end;
     if peninfo.width = 0 then begin
      gdipsetpenwidth(gppen,1);
      dasca:= 1;
@@ -1087,14 +1088,7 @@ begin
      gdipdeletebrush(pgpbrush(gptexture));
      gptexture:= nil;
     end;
-    if gptextureimage <> nil then begin
-     gdipdisposeimage(pgpimage(gptextureimage));
-     gptextureimage:= nil;
-    end;
-    if gppalette <> 0 then begin
-     deleteobject(gppalette);
-     gppalette:= 0;
-    end;
+    deletepgtexture(gc);
    end;
   end;
  end;
@@ -1117,11 +1111,10 @@ begin
  with drawinfo.gc,win32gcty(platformdata).d do begin
   if gpgraphic = nil then begin
    with gppalettedata do begin
-    palversion:= $300;
-    palnumentries:= 2;
-    longword(val0):= 0;
-    longword(val1):= $ffffffff;
-    val1.peflags:= 0;
+    flags:= 0;
+    count:= 2;
+    val0:= 0;
+    val1:= $ffffffff;
    end;
    reg:= createrectrgn(0,0,0,0);
    int1:= getcliprgn(handle,reg);
@@ -1166,14 +1159,7 @@ begin
   if gvm_brush in mask then begin
    flags:= flags - [gcf_patternbrushvalid];
    bru:= tsimplebitmap1(brush).handle;
-   if gpbrush <> nil then begin
-    gdipdeletebrush(pgpbrush(gptexture));
-    gptexture:= nil;
-   end;
-   if gptextureimage <> nil then begin
-    gdipdisposeimage(pgpimage(gptextureimage));
-    gptextureimage:= nil;
-   end;
+   deletepgtexture(drawinfo.gc);
   end;
   if gvm_brushorigin in mask then begin
    flags:= flags - [gcf_brushoriginvalid];
