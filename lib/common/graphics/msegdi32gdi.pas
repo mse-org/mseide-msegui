@@ -148,13 +148,15 @@ type
 
  gcflagty = (gcf_backgroundbrushvalid,
              gcf_colorbrushvalid,gcf_patternbrushvalid,
-             gcf_brushoriginvalid,
              gcf_rasterop,
              gcf_selectforegroundbrush,gcf_selectbackgroundbrush,
              gcf_foregroundpenvalid,
              gcf_selectforegroundpen,gcf_selectnullpen,gcf_selectnullbrush,
              gcf_ispatternpen,gcf_isopaquedashpen,gcf_smooth,
-             gcf_gpregionvalid,gcf_gppenmode,
+             gcf_gpregionvalid,
+             gcf_gpbrushcolorvalid,gcf_gpbrushoriginvalid,
+             gcf_gpmonochromebrush,
+             gcf_gppencolorvalid,gcf_gppenvalid,gcf_gppenmode,
              {gcf_gpsolidfillvalid,gcf_gpspenvalid,}
                           gcf_last = 31);
             //-> longword
@@ -653,6 +655,9 @@ begin
 //   gdipfree(gptextureimage);
    gptextureimage:= nil;
   end;
+  gpflags:= gpflags -
+          [gcf_gpmonochromebrush,gcf_patternbrushvalid,
+           gcf_gpbrushoriginvalid,gcf_gpbrushcolorvalid];
  end;
 end;
 
@@ -676,45 +681,62 @@ const
  gpjoins: array[joinstylety] of gplinejoin = 
                  (linejoinmiterclipped,linejoinround,linejoinbevel);
 const
- gpstartflags = [gcf_colorbrushvalid,gcf_foregroundpenvalid,gcf_gpregionvalid];
- gcfgpflags = [gcf_gppenmode];
+ gpstartflags = [gcf_patternbrushvalid,gcf_gpbrushoriginvalid,gcf_gpregionvalid,
+                 gcf_gpmonochromebrush,
+                 gcf_gpbrushcolorvalid,gcf_gppencolorvalid,gcf_gppenvalid];
+// gcfgpflags = [gcf_gppenmode];
  gplineflags = [gcf_selectforegroundpen,gcf_gppenmode];
  gpfillflags = [gcf_selectforegroundbrush];
 
 procedure checkgpgc(var gc: gcty; aflags: gcflagsty);
 
- procedure checkbrushorcolor;
+ function checkbrushorcolor: boolean; //true if changed
+  procedure updatepalette;
+  begin
+   with gc,win32gcty(platformdata).d do begin
+    if gcf_gpmonochromebrush in gpflags then begin       
+     with gppalettedata do begin
+      longword(val0):= gpcolor(foregroundcol) or $ff000000;
+      if df_opaque in drawingflags then begin
+       longword(val1):= gpcolor(backgroundcol) or $ff000000;
+       flags:= 0;
+      end
+      else begin
+       longword(val1):= backgroundcol;
+       flags:= PaletteFlagsHasAlpha;
+      end;
+     end;
+     gdipsetimagepalette(pgpimage(gptextureimage),@gppalettedata);
+    end;
+   end;
+  end; //checkgpgc
+var
+ newtexture: boolean;  
  begin
+  result:= false;
   with gc,win32gcty(platformdata).d do begin
+   newtexture:= false;
    if df_brush in drawingflags then begin
     if not (gcf_patternbrushvalid in gpflags) then begin
      if gdipcreatebitmapfromhbitmap(bru,0,@gptextureimage) = ok then begin
       if df_monochrome in drawingflags then begin
-       with gppalettedata do begin
-        longword(val0):= gpcolor(foregroundcol) or $ff000000;
-        if df_opaque in drawingflags then begin
-         longword(val1):= gpcolor(backgroundcol) or $ff000000;
-         flags:= 0;
-        end
-        else begin
-         longword(val1):= backgroundcol;
-         flags:= PaletteFlagsHasAlpha;
-        end;
-       end;
+       include(gpflags,gcf_gpmonochromebrush);
       end;
-      gdipsetimagepalette(pgpimage(gptextureimage),@gppalettedata);
-      gdipcreatetexture(pgpimage(gptextureimage),
-                                      wrapmodetile,@gptexture);
+      updatepalette;
+      gdipcreatetexture(pgpimage(gptextureimage),wrapmodetile,@gptexture);
      end;
      include(gpflags,gcf_patternbrushvalid);
+     newtexture:= true;
+     result:= true;
     end;
     if gptexture <> nil then begin
      gpbrush:= pgpbrush(gptexture);
-     if not (gcf_brushoriginvalid in gpflags) then begin
+     if not (gcf_gpbrushoriginvalid in gpflags) then begin
       gdipresettexturetransform(gptexture);
       gdiptranslatetexturetransform(gptexture,brushorg.x,brushorg.y,
                                                    matrixorderprepend);
-      include(gpflags,gcf_brushoriginvalid);
+      include(gpflags,gcf_gpbrushoriginvalid);
+      result:= true;
      end;
     end
     else begin
@@ -722,11 +744,23 @@ procedure checkgpgc(var gc: gcty; aflags: gcflagsty);
     end;
    end
    else begin
-    if not (gcf_colorbrushvalid in gpflags) then begin
-     gdipsetsolidfillcolor(gpsolidfill,gpcolor(foregroundcol));
-     include(gpflags,gcf_colorbrushvalid);
-    end;
     gpbrush:= pgpbrush(gpsolidfill);
+   end;
+   if not (gcf_gpbrushcolorvalid in gpflags) then begin
+    result:= true;
+    gdipsetsolidfillcolor(gpsolidfill,gpcolor(foregroundcol));
+    if not newtexture then begin
+     updatepalette;
+     if gpbrush = pointer(gptexture) then begin
+      gdipdeletebrush(gpbrush);
+      gdipcreatetexture(pgpimage(gptextureimage),
+                                       wrapmodetile,@gptexture);
+      gdiptranslatetexturetransform(gptexture,brushorg.x,brushorg.y,
+                                                    matrixorderprepend);
+      gpbrush:= pgpbrush(gptexture);
+     end;
+    end;
+    include(gpflags,gcf_gpbrushcolorvalid);
    end;
   end;
  end; //checkbrushorcolor
@@ -756,7 +790,14 @@ begin
    deleteobject(reg);
   end;
   if gcf_selectforegroundpen in aflags then begin
-   checkbrushorcolor;
+   if checkbrushorcolor then begin
+    if df_brush in drawingflags then begin
+     gdipsetpenbrushfill(gppen,gpbrush);
+    end
+    else begin
+     gdipsetpencolor(gppen,gpcolor(foregroundcol));
+    end;
+   end;
    if not (gcf_foregroundpenvalid in gpflags) then begin
     if df_brush in drawingflags then begin
      gdipsetpenbrushfill(gppen,gpbrush);
@@ -1141,14 +1182,17 @@ begin
  with drawinfo.gcvalues^,drawinfo.gc,win32gcty(platformdata).d do begin
   if gvm_colorbackground in mask then begin
    exclude(flags,gcf_backgroundbrushvalid);
+   exclude(gpflags,gcf_gpbrushcolorvalid);
    backgroundcol:= colorbackground;
   end;
   if gvm_colorforeground in mask then begin
    flags:= flags - [gcf_colorbrushvalid,gcf_foregroundpenvalid];
+   gpflags:= gpflags - [gcf_gpbrushcolorvalid,gcf_gppencolorvalid];
    foregroundcol:= colorforeground;
   end;
   if mask * [gvm_linewidth,gvm_dashes,gvm_capstyle,gvm_joinstyle] <> [] then begin
-   flags:= flags - [gcf_foregroundpenvalid];
+   exclude(flags,gcf_foregroundpenvalid);
+   exclude(gpflags,gcf_gppenvalid);
    peninfo:= lineinfo;
    peninfo.width:= (peninfo.width + linewidthroundvalue) shr linewidthshift;
   end;
@@ -1157,12 +1201,13 @@ begin
    rop:= rasterop;
   end;
   if gvm_brush in mask then begin
-   flags:= flags - [gcf_patternbrushvalid];
+   exclude(flags,gcf_patternbrushvalid);
+//   exclude(gpflags,gcf_patternbrushvalid);
    bru:= tsimplebitmap1(brush).handle;
-   deletepgtexture(drawinfo.gc);
+   deletepgtexture(drawinfo.gc); //resets vaildflags
   end;
   if gvm_brushorigin in mask then begin
-   flags:= flags - [gcf_brushoriginvalid];
+   exclude(gpflags,gcf_gpbrushoriginvalid);
    brushorg:= brushorigin;
    setbrushorgex(handle,brushorigin.x,brushorigin.y,nil);
   end;
@@ -1176,10 +1221,10 @@ begin
    else begin
     selectcliprgn(handle,clipregion);
    end;
-   exclude(flags,gcf_gpregionvalid);
+   exclude(gpflags,gcf_gpregionvalid);
   end
   else begin
-   include(flags,gcf_gpregionvalid);
+//   include(gpflags,gcf_gpregionvalid); //???
   end;
   if gvm_font in mask then begin
    selectobject(handle,font);
@@ -1200,7 +1245,8 @@ begin
     exclude(flags,gcf_smooth);
    end;
   end;
-  gpflags:= gpflags * (flags+gcfgpflags); //invalidate gdiplus
+//  gpflags:= gpflags - ((flags >< flagsbefore)*flagsbefore);
+                              //invalidate gdiplus
  end;
 end;
 
