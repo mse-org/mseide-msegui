@@ -156,7 +156,7 @@ type
              gcf_gpregionvalid,
              gcf_gpbrushcolorvalid,gcf_gpbrushoriginvalid,
              gcf_gpmonochromebrush,
-             gcf_gppencolorvalid,gcf_gppenvalid,gcf_gppenmode,
+             gcf_gppencolorvalid,gcf_gppenvalid,gcf_gppenmode,gcf_gpshiftpen,
              {gcf_gpsolidfillvalid,gcf_gpspenvalid,}
                           gcf_last = 31);
             //-> longword
@@ -685,7 +685,7 @@ const
                  gcf_gpmonochromebrush,
                  gcf_gpbrushcolorvalid,gcf_gppencolorvalid,gcf_gppenvalid];
 // gcfgpflags = [gcf_gppenmode];
- gplineflags = [gcf_selectforegroundpen,gcf_gppenmode];
+ gplineflags = [gcf_selectforegroundpen];
  gpfillflags = [gcf_selectforegroundbrush];
 
 procedure checkgpgc(var gc: gcty; aflags: gcflagsty);
@@ -798,18 +798,23 @@ begin
      gdipsetpencolor(gppen,gpcolor(foregroundcol));
     end;
    end;
-   if not (gcf_foregroundpenvalid in gpflags) then begin
+   if not (gcf_gppenvalid in gpflags) then begin
+    exclude(gpflags,gcf_gppenmode);
     if df_brush in drawingflags then begin
      gdipsetpenbrushfill(gppen,gpbrush);
     end
     else begin
      gdipsetpencolor(gppen,gpcolor(foregroundcol));
     end;
+    exclude(gpflags,gcf_gpshiftpen);
     if peninfo.width = 0 then begin
      gdipsetpenwidth(gppen,1);
      dasca:= 1;
     end
-    else begin   
+    else begin
+     if not odd(peninfo.width) then begin
+      include(gpflags,gcf_gpshiftpen);
+     end;
      gdipsetpenwidth(gppen,peninfo.width);
      dasca:= 1/peninfo.width;
     end;
@@ -827,23 +832,38 @@ begin
     else begin
      gdipsetpendashstyle(gppen,dashstylesolid);
     end;
-    include(gpflags,gcf_foregroundpenvalid);
+    include(gpflags,gcf_gppenvalid);
    end;
   end;
   if gcf_selectforegroundbrush in aflags then begin
    checkbrushorcolor;
-   {
-   if gcf_gppenmode in flags1 then begin
-    gdipresetworldtransform(gpgraphic);
-    if gcf_gppenmode in aflags then begin
-     gdiptranslateworldtransform(gpgraphic,0.5,0.5,matrixorderprepend);
-     include(gpflags,gcf_gppenmode);
+  end;
+  if (gcf_selectforegroundpen in aflags) xor 
+                              (gcf_gppenmode in gpflags) then begin
+   if (gcf_selectforegroundpen in aflags) then begin
+    if gcf_gpshiftpen in gpflags then begin
+     gdipsetpixeloffsetmode(gpgraphic,pixeloffsetmodehalf);
     end
     else begin
-     exclude(gpflags,gcf_gppenmode);
+     gdipsetpixeloffsetmode(gpgraphic,pixeloffsetmodenone);
     end;
+//    gdipsetpixeloffsetmode(gpgraphic,pixeloffsetmodehalf);
+    include(gpflags,gcf_gppenmode);
+   end
+   else begin
+    gdipsetpixeloffsetmode(gpgraphic,pixeloffsetmodehalf);
+    exclude(gpflags,gcf_gppenmode);
    end;
-   }
+{
+   gdipresetworldtransform(gpgraphic);
+   if gcf_gppenmode in aflags then begin
+    gdiptranslateworldtransform(gpgraphic,0.5,0.5,matrixorderprepend);
+    include(gpflags,gcf_gppenmode);
+   end
+   else begin
+    exclude(gpflags,gcf_gppenmode);
+   end;
+}
   end;
  end;
 end;
@@ -1168,6 +1188,7 @@ begin
    if gpgraphic <> nil then begin
     gdipsetsmoothingmode(gpgraphic,smoothingmodeantialias);
     gdipsetpixeloffsetmode(gpgraphic,pixeloffsetmodehalf);
+//    gdipsetpixeloffsetmode(gpgraphic,pixeloffsetmodenone);
     gdipcreatesolidfill(alphamax,@gpsolidfill);
     gdipcreatepen1(alphamax,1,unitpixel,@gppen);
     gpflags:= [];
