@@ -1050,6 +1050,28 @@ begin
  end;
 end;
 
+procedure compositetristrip(var drawinfo: drawinfoty;
+                    const points: ppointty; const pointcount: integer);
+begin
+ checkxftstate(drawinfo,[xfts_foregroundvalid]);
+ with x11gcty(drawinfo.gc.platformdata).d do begin
+  xrendercompositetristrip(appdisp,xrenderop,xftforegroundpic,
+        xftdrawpic,alpharenderpictformat,
+        xftbrushorigin.x,xftbrushorigin.y,pxpointfixed(points),pointcount);
+ end;
+end;
+
+procedure compositetrifan(var drawinfo: drawinfoty;
+                    const points: ppointty; const pointcount: integer);
+begin
+ checkxftstate(drawinfo,[xfts_foregroundvalid]);
+ with x11gcty(drawinfo.gc.platformdata).d do begin
+  xrendercompositetrifan(appdisp,xrenderop,xftforegroundpic,
+        xftdrawpic,alpharenderpictformat,
+        xftbrushorigin.x,xftbrushorigin.y,pxpointfixed(points),pointcount);
+ end;
+end;
+
 procedure gdi_changegc(var drawinfo: drawinfoty); //gdifunc
 var
  xmask: longword;
@@ -2198,17 +2220,11 @@ begin
 {$endif} 
  with drawinfo,points,x11gcty(gc.platformdata).d do begin
   if xfts_smooth in xftstate then begin
-   checkxftstate(drawinfo,[xfts_foregroundvalid]);
    if linestria(drawinfo,po1,pointcount) then begin
-    xrendercompositetriangles(appdisp,xrenderop,xftforegroundpic,
-                     xftdrawpic,alpharenderpictformat,
-                     xftbrushorigin.x,xftbrushorigin.y,pxtriangle(po1),
-                     (pointcount div 3));
+    compositetriangles(drawinfo,ptrianglety(po1),pointcount div 3);
    end
    else begin
-    xrendercompositetristrip(appdisp,xrenderop,xftforegroundpic,
-        xftdrawpic,alpharenderpictformat,
-        xftbrushorigin.x,xftbrushorigin.y,pxpointfixed(po1),pointcount);
+    compositetristrip(drawinfo,po1,pointcount);
    end;      
   end
   else begin
@@ -2234,12 +2250,8 @@ begin
 {$endif} 
  with drawinfo,drawinfo.points,x11gcty(gc.platformdata).d do begin
   if xfts_smooth in xftstate then begin
-   checkxftstate(drawinfo,[xfts_foregroundvalid]);
    linesegmentstria(drawinfo,po1,triacount);
-   xrendercompositetriangles(appdisp,xrenderop,xftforegroundpic,
-                     xftdrawpic,alpharenderpictformat,
-                     xftbrushorigin.x,xftbrushorigin.y,
-                                            pxtriangle(po1),triacount);
+   compositetriangles(drawinfo,po1,triacount);
   end
   else begin
    transformpoints(drawinfo,false);
@@ -2258,12 +2270,9 @@ begin
 {$endif} 
  with drawinfo,drawinfo.rect.rect^ do begin
   if xfts_smooth in x11gcty(gc.platformdata).d.xftstate then begin
-   checkxftstate(drawinfo,[xfts_foregroundvalid]);
    fillellipsetria(drawinfo,po1,pointcount);
    with x11gcty(gc.platformdata).d do begin
-    xrendercompositetrifan(appdisp,xrenderop,xftforegroundpic,
-         xftdrawpic,alpharenderpictformat,
-         xftbrushorigin.x,xftbrushorigin.y,pxpointfixed(po1),pointcount);
+    compositetrifan(drawinfo,po1,pointcount);
    end;  
   end
   else begin
@@ -2287,11 +2296,8 @@ begin
 {$endif} 
  with drawinfo,x11gcty(gc.platformdata).d,drawinfo.arc,rect^ do begin
   if xfts_smooth in xftstate then begin
-   checkxftstate(drawinfo,[xfts_foregroundvalid]);
    fillarctria(drawinfo,po1,pointcount);
-   xrendercompositetrifan(appdisp,xrenderop,xftforegroundpic,
-              xftdrawpic,alpharenderpictformat,
-              xftbrushorigin.x,xftbrushorigin.y,pxpointfixed(po1),pointcount);
+   compositetrifan(drawinfo,po1,pointcount);
   end
   else begin
    if pieslice then begin
@@ -2319,17 +2325,11 @@ begin
  with drawinfo,x11gcty(gc.platformdata).d,drawinfo.arc,rect^,
                                      triagcty(gc.platformdata).d do begin
   if xfts_smooth in xftstate then begin
-   checkxftstate(drawinfo,[xfts_foregroundvalid]);
    if arctria(drawinfo,po1,pointcount) then begin
-    xrendercompositetriangles(appdisp,xrenderop,xftforegroundpic,
-                     xftdrawpic,alpharenderpictformat,
-                     xftbrushorigin.x,xftbrushorigin.y,pxtriangle(po1),
-                     (pointcount div 3));
+    compositetriangles(drawinfo,ptrianglety(po1),pointcount div 3);
    end
    else begin
-    xrendercompositetristrip(appdisp,xrenderop,xftforegroundpic,
-        xftdrawpic,alpharenderpictformat,
-        xftbrushorigin.x,xftbrushorigin.y,pxpointfixed(po1),pointcount);
+    compositetristrip(drawinfo,po1,pointcount);
    end;      
   end
   else begin
@@ -2351,17 +2351,11 @@ begin
  with drawinfo,x11gcty(gc.platformdata).d,rect.rect^ do begin
   if xfts_smooth in xftstate then begin
    with x11gcty(gc.platformdata).d do begin
-    checkxftstate(drawinfo,[xfts_foregroundvalid]);
     if ellipsetria(drawinfo,po1,pointcount) then begin
-     xrendercompositetriangles(appdisp,xrenderop,xftforegroundpic,
-                    xftdrawpic,alpharenderpictformat,
-                    xftbrushorigin.x,xftbrushorigin.y,pxtriangle(po1),
-                                                          pointcount div 3);
+     compositetriangles(drawinfo,ptrianglety(po1),pointcount div 3);
     end
     else begin
-     xrendercompositetristrip(appdisp,xrenderop,xftforegroundpic,
-              xftdrawpic,alpharenderpictformat,
-               xftbrushorigin.x,xftbrushorigin.y,pxpointfixed(po1),pointcount);
+     compositetristrip(drawinfo,po1,pointcount);
     end;
    end;  
   end
