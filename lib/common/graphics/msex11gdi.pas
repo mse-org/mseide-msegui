@@ -36,9 +36,16 @@ type
 var 
  createcolorpicture: createcolorpicturefuncty;
  screenrenderpictformat,bitmaprenderpictformat,
-                             alpharenderpictformat: pxrenderpictformat;
+                   alpharenderpictformat,rgbrenderpictformat,
+                           argbrenderpictformat: pxrenderpictformat;
 
-function createalphapicture(const size: sizety): tpicture;
+function createalphapicture(const size: sizety;
+                               const arepeat: boolean = false): tpicture;
+function creatergbpicture(const size: sizety; 
+          const arepeat: boolean = false; 
+                            const alphamap: tpicture = 0): tpicture;
+function createargbpicture(const size: sizety;
+                               const arepeat: boolean = false): tpicture;
 
 {$ifdef FPC}
  {$macro on}
@@ -95,32 +102,6 @@ type
    1: (_bufferspace: fontdatapty;);
  end;
  
- xftstatety = (xfts_clipregionvalid,xfts_smooth,xfts_colorforegroundvalid);
- xftstatesty = set of xftstatety;
- x11gcdty = record
-  triainfo: triainfoty; //first!
-  gcdrawingflags: drawingflagsty;
-  gcrasterop: rasteropty;
-  gcclipregion: regionty;
-  xftdraw: pxftdraw;
-  xftdrawpic: tpicture;
-  xftcolor: txftcolor;
-  xftcolorbackground: txftcolor;
-  xftfont: pxftfont;
-  xftfontdata: px11fontdatadty;
-  xftstate: xftstatesty;
-  xftcolorforegroundpic: tpicture;
-  xftbrush: pixmapty;
-  xftbrushmonochrome: boolean;
-  xftbrushorigin: pointty;
-  xftbrushpic: tpicture;
- end;
- {$if sizeof(x11gcdty) > sizeof(gcpty)} {$error 'buffer overflow'}{$ifend}
- x11gcty = record
-  case integer of
-   0: (d: x11gcdty;);
-   1: (_bufferspace: gcpty;);
- end;
 
 {$ifndef staticxft}
 var //xft functions
@@ -149,7 +130,9 @@ var //xft functions
  XftDefaultSubstitute: procedure(dpy:PDisplay; screen:longint;
                         pattern:PFcPattern);cdecl;
  XftDrawPicture: function(draw: PXftDraw): tpicture; cdecl;
+ XftDrawSrcPicture: function(draw: pXftDraw; color: pXftColor): tpicture; cdecl;
 {$endif}
+
 var
  XRenderSetPictureClipRectangles: procedure(dpy:PDisplay; picture:TPicture;
             xOrigin:longint; yOrigin:longint; rects:PXRectangle; n:longint);
@@ -180,9 +163,12 @@ var
               dst_y:longint; width:dword; height:dword);cdecl;
  XRenderQueryExtension: function(dpy: PDisplay; event_basep: Pinteger;
                   error_basep: Pinteger): TBool;cdecl;
- XRenderFindVisualFormat: function(dpy:PDisplay; visual:PVisual):PXRenderPictFormat;cdecl;
- XRenderFindStandardFormat:  function(dpy:PDisplay;
-              format:longint):PXRenderPictFormat; cdecl;
+ XRenderFindVisualFormat: function(dpy: PDisplay;
+                            visual: PVisual): PXRenderPictFormat;cdecl;
+ XRenderFindStandardFormat:  function(dpy: PDisplay;
+                               format: longint): PXRenderPictFormat; cdecl;
+ XRenderFindFormat: function(dpy: PDisplay; mask: culong;
+         templ: PXRenderPictFormat; count: longint): PXRenderPictFormat; cdecl;
 
  XRenderCompositeTriangles: procedure(dpy: pDisplay; op: cint; src: tPicture;
                   dst: tPicture; maskFormat: pXRenderPictFormat;
@@ -222,6 +208,7 @@ const
 // xrenderfillshifty = 0;
  xrenderop = pictopover;
  xrendercolorsourcesize = 1;
+ xrendernullcolor: txrendercolor = (red: 0; green: 0; blue: 0; alpha: 0);
  
  capstyles: array[capstylety] of integer = (capbutt,capround,capprojecting);
  joinstyles: array[joinstylety] of integer = (joinmiter,joinround,joinbevel);
@@ -337,9 +324,40 @@ type
  
 const
  xftcolorcachemask = $1f;
+type
+ xftstatety = (xfts_clipregionvalid,xfts_smooth,xfts_foregroundvalid,
+               xfts_monobrush);
+ xftstatesty = set of xftstatety;
+ x11gcdty = record
+  triainfo: triainfoty; //first!
+  gcdrawingflags: drawingflagsty;
+  gcrasterop: rasteropty;
+  gcclipregion: regionty;
+  xftdraw: pxftdraw;
+  xftdrawpic: tpicture;
+  xftcolor: txftcolor;
+  xftcolorbackground: txftcolor;
+  xftfont: pxftfont;
+  xftfontdata: px11fontdatadty;
+  xftstate: xftstatesty;
+  xftforegroundpic: tpicture;
+//  xftcolorforegroundpicx: xftcolorcacheinfoty;
+//  xftcolorbackgroundpicx: xftcolorcacheinfoty;
+  xftbrush: pixmapty;
+  xftbrushorigin: pointty;
+  xftbrushsize: sizety;
+  xftbrushpic: tpicture;
+  xftbrushalphapic: tpicture;
+ end;
+ {$if sizeof(x11gcdty) > sizeof(gcpty)} {$error 'buffer overflow'}{$ifend}
+ x11gcty = record
+  case integer of
+   0: (d: x11gcdty;);
+   1: (_bufferspace: gcpty;);
+ end;
  
 var
- xftcolorcache: array[0..xftcolorcachemask] of xftcolorcacheinfoty;
+// xftcolorcache: array[0..xftcolorcachemask] of xftcolorcacheinfoty;
  fontpropertyatoms: array[fontpropertiesty] of atom;
  
 procedure init(const adisp: pdisplay; const avisual: msepvisual;
@@ -353,11 +371,14 @@ begin
  defvisual:= avisual;
  defdepth:= adepth;
  
- hasxrender:= hasxrender and (xrenderqueryextension(msedisplay,@int1,@int2) <> 0);
+ hasxrender:= hasxrender and 
+                  (xrenderqueryextension(msedisplay,@int1,@int2) <> 0);
  if hasxrender then begin
   screenrenderpictformat:= xrenderfindvisualformat(appdisp,pvisual(defvisual));
   bitmaprenderpictformat:= xrenderfindstandardformat(appdisp,pictstandarda1);
   alpharenderpictformat:= xrenderfindstandardformat(appdisp,pictstandarda8);
+  rgbrenderpictformat:= xrenderfindstandardformat(appdisp,pictstandardrgb24);
+  argbrenderpictformat:= xrenderfindstandardformat(appdisp,pictstandardargb32);
  end;
  if not noxft then begin
   fhasxft:= fhasxft and xftdefaulthasrender(appdisp) and (xftgetversion() >= 20000);
@@ -557,7 +578,8 @@ begin
    error:= gde_creategc;
   end
   else begin
-   xsetgraphicsexposures(appdisp,tgc(gcpo^.handle),{$ifdef xboolean}false{$else}0{$endif});
+   xsetgraphicsexposures(appdisp,tgc(gcpo^.handle),
+                             {$ifdef xboolean}false{$else}0{$endif});
    with x11gcty(gcpo^.platformdata) do begin
     //nothing to do, gc is nulled
    end;
@@ -668,27 +690,28 @@ begin
  end;
 end;
  
+procedure freexftbrush(var drawinfo: drawinfoty);
+begin
+ with x11gcty(drawinfo.gc.platformdata).d do begin
+  if xftbrushpic <> 0 then begin
+   xrenderfreepicture(appdisp,xftbrushpic);
+   xftbrushpic:= 0;
+  end;
+  if xftbrushalphapic <> 0 then begin
+   xrenderfreepicture(appdisp,xftbrushalphapic);
+   xftbrushalphapic:= 0;
+  end;
+ end;
+end;
+
 procedure gdi_destroygc(var drawinfo: drawinfoty); //gdifunc
-var
- int1: integer;
 begin
  gdi_lock;
  with drawinfo do begin
   with x11gcty(gc.platformdata).d do begin
    if xftdraw <> nil then begin
+    freexftbrush(drawinfo);
     xftdrawdestroy(xftdraw);
-    for int1:= 0 to high(xftcolorcache) do begin
-     with xftcolorcache[int1] do begin
-      if picture <> 0 then begin
-       xrenderfreepicture(appdisp,picture);
-       picture:= 0;
-      end;
-     end;
-    end;
-   end;
-   if xftbrushpic <> 0 then begin
-    xrenderfreepicture(appdisp,xftbrushpic);
-    xftbrushpic:= 0;
    end;
   end;
   xfreegc(appdisp,tgc(gc.handle));
@@ -771,17 +794,71 @@ const
                                 (0,65536,0),
                                 (0,0,65536));
 
-function createalphapicture(const size: sizety): tpicture;
+function creatergbpicture(const size: sizety; 
+          const arepeat: boolean = false; 
+                            const alphamap: tpicture = 0): tpicture;
 var
  attributes: txrenderpictureattributes;
  pixmap: pixmapty;
+ int1: integer;
+begin
+{$ifdef mse_debuggdisync}
+ checkgdilock;
+{$endif} 
+ pixmap:= xcreatepixmap(appdisp,mserootwindow,size.cx,size.cy,24);
+ attributes._repeat:= repeatnormal;
+ attributes.alpha_map:= alphamap;
+ int1:= 0;
+ if arepeat then begin
+  int1:= cprepeat;
+ end;
+ if alphamap <> 0 then begin
+  int1:= int1 or cpalphamap;
+ end;
+ result:= xrendercreatepicture(appdisp,pixmap,
+                                   rgbrenderpictformat,int1,@attributes);
+ xfreepixmap(appdisp,pixmap);
+end;
+
+function createalphapicture(const size: sizety; 
+                                const arepeat: boolean = false): tpicture;
+var
+ attributes: txrenderpictureattributes;
+ pixmap: pixmapty;
+ int1: integer;
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
 {$endif} 
  pixmap:= xcreatepixmap(appdisp,mserootwindow,size.cx,size.cy,8);
+ attributes._repeat:= repeatnormal;
+ int1:= cpcomponentalpha;
+ if arepeat then begin
+  int1:= cprepeat;
+ end;
  result:= xrendercreatepicture(appdisp,pixmap,
-                                   alpharenderpictformat,0,@attributes);
+                                   alpharenderpictformat,int1,@attributes);
+ xfreepixmap(appdisp,pixmap);
+end;
+
+function createargbpicture(const size: sizety;
+                              const arepeat: boolean = false): tpicture;
+var
+ attributes: txrenderpictureattributes;
+ pixmap: pixmapty;
+ int1: integer;
+begin
+{$ifdef mse_debuggdisync}
+ checkgdilock;
+{$endif} 
+ pixmap:= xcreatepixmap(appdisp,mserootwindow,size.cx,size.cy,32);
+ attributes._repeat:= repeatnormal;
+ int1:= 0;
+ if arepeat then begin
+  int1:= cprepeat;
+ end;
+ result:= xrendercreatepicture(appdisp,pixmap,
+                                   argbrenderpictformat,int1,@attributes);
  xfreepixmap(appdisp,pixmap);
 end;
 
@@ -890,16 +967,35 @@ begin
   end;
  end;
 end;
+var testvar: ^x11gcdty;
 
 procedure checkxftstate(var drawinfo: drawinfoty; const aflags: xftstatesty);
+ procedure updatemonocolor;
+ var
+  co1: txrendercolor;
+ begin
+  with drawinfo.gc,x11gcty(platformdata).d do begin
+   if df_opaque in drawingflags then begin
+    co1:= xftcolorbackground.color;
+   end
+   else begin
+    co1:= xrendernullcolor;
+   end;
+   xrenderfillrectangle(appdisp,pictopsrc,xftbrushpic,
+                          @co1,0,0,xftbrushsize.cx,xftbrushsize.cy);
+   xrendercomposite(appdisp,pictopover,xftdrawsrcpicture(xftdraw,@xftcolor),
+                   xftbrushalphapic,xftbrushpic,0,0,0,0,
+                               0,0,xftbrushsize.cx,xftbrushsize.cy);
+  end;
+ end; //updatemonocolor
+ 
 var
  flags1: xftstatesty;
- lwo1,lwo2: longword;
  attributes: txrenderpictureattributes;
 //todo: fix xftbrushorigin, seems to be unreliable
-//      implement monochrome color brushes  
 begin
- with x11gcty(drawinfo.gc.platformdata).d do begin
+testvar:= @x11gcty(drawinfo.gc.platformdata).d;
+ with drawinfo.gc,x11gcty(platformdata).d do begin
   if not (xfts_clipregionvalid in xftstate) then begin
    if gcclipregion = 0 then begin
     xftdrawsetclip(xftdraw,nil);
@@ -910,46 +1006,47 @@ begin
    include(xftstate,xfts_clipregionvalid);
   end;
   flags1:= (xftstate >< aflags) * aflags;
-  if xfts_colorforegroundvalid in flags1 then begin
+  if xfts_foregroundvalid in flags1 then begin
    if df_brush in drawinfo.gc.drawingflags then begin
-    if (xftbrush <> 0) and (xftbrushpic = 0) then begin
-     attributes._repeat:= repeatnormal;
-     if xftbrushmonochrome then begin
-      xftbrushpic:= xrendercreatepicture(appdisp,xftbrush,
-                           bitmaprenderpictformat,cprepeat,@attributes);
-     end
-     else begin
-      xftbrushpic:= xrendercreatepicture(appdisp,xftbrush,
-                           screenrenderpictformat,cprepeat,@attributes);
-     end;
-    end;
-    xftcolorforegroundpic:= xftbrushpic;
-   end
-   else begin
-    lwo1:= xftcolor.pixel; 
-    lwo2:= lwo1 + (lwo1 shr 7) + (lwo1 shr 14) + (lwo1 shr 21);
-    lwo2:= (lwo2 xor (lwo2 shr 4) xor (lwo2 shr 9)) and xftcolorcachemask;
-    with xftcolorcache[lwo2] do begin
-     if picture <> 0 then begin
-      if pixel <> xftcolor.pixel then begin
-       xrenderfreepicture(appdisp,picture);
-       picture:= createcolorpicture(xftcolor.pixel);
-       pixel:= xftcolor.pixel;
+    if (xftbrush <> 0) then begin
+     if (xftbrushpic = 0) then begin
+      attributes._repeat:= repeatnormal;
+      if xfts_monobrush in xftstate then begin
+       xftbrushalphapic:= xrendercreatepicture(appdisp,xftbrush,
+                            bitmaprenderpictformat,cprepeat,@attributes);
+       xftbrushpic:= createargbpicture(xftbrushsize,true);
+       updatemonocolor;
+      end
+      else begin
+       xftbrushpic:= xrendercreatepicture(appdisp,xftbrush,
+                            screenrenderpictformat,cprepeat,@attributes);
       end;
      end
      else begin
-      picture:= createcolorpicture(xftcolor.pixel);
-      pixel:= xftcolor.pixel;
+      if xfts_monobrush in xftstate then begin
+       updatemonocolor;
+      end;
      end;
-     xftcolorforegroundpic:= picture;
     end;
+    xftforegroundpic:= xftbrushpic;
+   end
+   else begin
+    xftforegroundpic:= xftdrawsrcpicture(xftdraw,@xftcolor);
    end;
-{
-   xrenderfillrectangle(appdisp,pictopsrc,xftcolorforegroundpic,
-          @xftcolor.color,0,0,xrendercolorsourcesize,xrendercolorsourcesize);
-}
-   include(xftstate,xfts_colorforegroundvalid);
+   include(xftstate,xfts_foregroundvalid);
   end;
+ end;
+end;
+
+procedure compositetriangles(var drawinfo: drawinfoty;
+                    const triangles: ptrianglety; const trianglecount: integer);
+begin
+ checkxftstate(drawinfo,[xfts_foregroundvalid]);
+ with x11gcty(drawinfo.gc.platformdata).d do begin
+  xrendercompositetriangles(appdisp,xrenderop,xftforegroundpic,
+           xftdrawpic,alpharenderpictformat,
+           xftbrushorigin.x,
+           xftbrushorigin.y,pxtriangle(triangles),trianglecount);
  end;
 end;
 
@@ -967,6 +1064,47 @@ begin
  xmask:= 0;
  with drawinfo.gcvalues^,drawinfo.gc,x11gcty(platformdata).d do begin
   agc:= tgc(handle);
+  if gvm_colorforeground in mask then begin
+   xmask:= xmask or gcforeground;
+   xvalues.foreground:= colorforeground;
+   xvalues.fill_style:= fillsolid;
+   if fhasxft then begin
+    xftcolor.pixel:= colorforeground;
+    xftcolor.color:= colortorendercolor(drawinfo.acolorforeground);
+    exclude(xftstate,xfts_foregroundvalid);
+   end;
+  end;
+  if (drawingflags >< gcdrawingflags)
+           * (fillmodeinfoflags+[df_smooth]) <> [] then begin
+   xmask:= xmask or gcfillstyle;
+   if df_brush in drawingflags then begin
+    if df_monochrome in drawingflags then begin
+     include(xftstate,xfts_monobrush);
+     if df_opaque in drawingflags then begin
+      xvalues.fill_style:= fillopaquestippled;
+     end
+     else begin
+      xvalues.fill_style:= fillstippled;
+     end;
+    end
+    else begin
+     xvalues.fill_style:= filltiled;
+    end;
+   end
+   else begin
+    exclude(xftstate,xfts_monobrush);
+    xvalues.fill_style:= fillsolid;
+   end;
+   if (df_smooth in drawingflags) and fhasxft then begin
+    checkxftdraw(drawinfo);
+    include(xftstate,xfts_smooth);
+   end
+   else begin
+    exclude(xftstate,xfts_smooth);
+   end;
+  end;
+  gcdrawingflags:= drawingflags;
+
   if gvm_rasterop in mask then begin
    xmask:= xmask or gcfunction;
    xvalues.xfunction:= integer(rasterop);
@@ -1044,16 +1182,9 @@ begin
    if fhasxft then begin
     xftcolorbackground.pixel:= colorbackground;
     xftcolorbackground.color:= colortorendercolor(drawinfo.acolorbackground);
-   end;
-  end;
-  if gvm_colorforeground in mask then begin
-   xmask:= xmask or gcforeground;
-   xvalues.foreground:= colorforeground;
-   xvalues.fill_style:= fillsolid;
-   if fhasxft then begin
-    xftcolor.pixel:= colorforeground;
-    xftcolor.color:= colortorendercolor(drawinfo.acolorforeground);
-    exclude(xftstate,xfts_colorforegroundvalid);
+    if xfts_monobrush in xftstate then begin
+     exclude(xftstate,xfts_foregroundvalid);
+    end;
    end;
   end;
   if gvm_brushorigin in mask then begin
@@ -1064,44 +1195,13 @@ begin
    xftbrushorigin.y:= cliporigin.y-brushorigin.y;
   end;
 
-  if (drawingflags >< gcdrawingflags)
-           * (fillmodeinfoflags+[df_smooth]) <> [] then begin
-   xmask:= xmask or gcfillstyle;
-   if df_brush in drawingflags then begin
-    if df_monochrome in drawingflags then begin
-     if df_opaque in drawingflags then begin
-      xvalues.fill_style:= fillopaquestippled;
-     end
-     else begin
-      xvalues.fill_style:= fillstippled;
-     end;
-    end
-    else begin
-     xvalues.fill_style:= filltiled;
-    end;
-   end
-   else begin
-    xvalues.fill_style:= fillsolid;
-   end;
-   if (df_smooth in drawingflags) and fhasxft then begin
-    checkxftdraw(drawinfo);
-    include(xftstate,xfts_smooth);
-   end
-   else begin
-    exclude(xftstate,xfts_smooth);
-   end;
-  end;
-
-  gcdrawingflags:= drawingflags;
   if gvm_brush in mask then begin
+   exclude(xftstate,xfts_foregroundvalid);
    with tsimplebitmap1(brush) do begin
     xftbrush:= handle;
-    xftbrushmonochrome:= monochrome;
+    xftbrushsize:= size;
    end;
-   if xftbrushpic <> 0 then begin
-    xrenderfreepicture(appdisp,xftbrushpic);
-    xftbrushpic:= 0;
-   end;
+   freexftbrush(drawinfo);
    if df_monochrome in drawingflags then begin
     xvalues.stipple:= xftbrush;
     xmask:= xmask or gcstipple;
@@ -2098,15 +2198,15 @@ begin
 {$endif} 
  with drawinfo,points,x11gcty(gc.platformdata).d do begin
   if xfts_smooth in xftstate then begin
-   checkxftstate(drawinfo,[xfts_colorforegroundvalid]);
+   checkxftstate(drawinfo,[xfts_foregroundvalid]);
    if linestria(drawinfo,po1,pointcount) then begin
-    xrendercompositetriangles(appdisp,xrenderop,xftcolorforegroundpic,
+    xrendercompositetriangles(appdisp,xrenderop,xftforegroundpic,
                      xftdrawpic,alpharenderpictformat,
                      xftbrushorigin.x,xftbrushorigin.y,pxtriangle(po1),
                      (pointcount div 3));
    end
    else begin
-    xrendercompositetristrip(appdisp,xrenderop,xftcolorforegroundpic,
+    xrendercompositetristrip(appdisp,xrenderop,xftforegroundpic,
         xftdrawpic,alpharenderpictformat,
         xftbrushorigin.x,xftbrushorigin.y,pxpointfixed(po1),pointcount);
    end;      
@@ -2134,9 +2234,9 @@ begin
 {$endif} 
  with drawinfo,drawinfo.points,x11gcty(gc.platformdata).d do begin
   if xfts_smooth in xftstate then begin
-   checkxftstate(drawinfo,[xfts_colorforegroundvalid]);
+   checkxftstate(drawinfo,[xfts_foregroundvalid]);
    linesegmentstria(drawinfo,po1,triacount);
-   xrendercompositetriangles(appdisp,xrenderop,xftcolorforegroundpic,
+   xrendercompositetriangles(appdisp,xrenderop,xftforegroundpic,
                      xftdrawpic,alpharenderpictformat,
                      xftbrushorigin.x,xftbrushorigin.y,
                                             pxtriangle(po1),triacount);
@@ -2158,10 +2258,10 @@ begin
 {$endif} 
  with drawinfo,drawinfo.rect.rect^ do begin
   if xfts_smooth in x11gcty(gc.platformdata).d.xftstate then begin
-   checkxftstate(drawinfo,[xfts_colorforegroundvalid]);
+   checkxftstate(drawinfo,[xfts_foregroundvalid]);
    fillellipsetria(drawinfo,po1,pointcount);
    with x11gcty(gc.platformdata).d do begin
-    xrendercompositetrifan(appdisp,xrenderop,xftcolorforegroundpic,
+    xrendercompositetrifan(appdisp,xrenderop,xftforegroundpic,
          xftdrawpic,alpharenderpictformat,
          xftbrushorigin.x,xftbrushorigin.y,pxpointfixed(po1),pointcount);
    end;  
@@ -2187,9 +2287,9 @@ begin
 {$endif} 
  with drawinfo,x11gcty(gc.platformdata).d,drawinfo.arc,rect^ do begin
   if xfts_smooth in xftstate then begin
-   checkxftstate(drawinfo,[xfts_colorforegroundvalid]);
+   checkxftstate(drawinfo,[xfts_foregroundvalid]);
    fillarctria(drawinfo,po1,pointcount);
-   xrendercompositetrifan(appdisp,xrenderop,xftcolorforegroundpic,
+   xrendercompositetrifan(appdisp,xrenderop,xftforegroundpic,
               xftdrawpic,alpharenderpictformat,
               xftbrushorigin.x,xftbrushorigin.y,pxpointfixed(po1),pointcount);
   end
@@ -2219,15 +2319,15 @@ begin
  with drawinfo,x11gcty(gc.platformdata).d,drawinfo.arc,rect^,
                                      triagcty(gc.platformdata).d do begin
   if xfts_smooth in xftstate then begin
-   checkxftstate(drawinfo,[xfts_colorforegroundvalid]);
+   checkxftstate(drawinfo,[xfts_foregroundvalid]);
    if arctria(drawinfo,po1,pointcount) then begin
-    xrendercompositetriangles(appdisp,xrenderop,xftcolorforegroundpic,
+    xrendercompositetriangles(appdisp,xrenderop,xftforegroundpic,
                      xftdrawpic,alpharenderpictformat,
                      xftbrushorigin.x,xftbrushorigin.y,pxtriangle(po1),
                      (pointcount div 3));
    end
    else begin
-    xrendercompositetristrip(appdisp,xrenderop,xftcolorforegroundpic,
+    xrendercompositetristrip(appdisp,xrenderop,xftforegroundpic,
         xftdrawpic,alpharenderpictformat,
         xftbrushorigin.x,xftbrushorigin.y,pxpointfixed(po1),pointcount);
    end;      
@@ -2251,15 +2351,15 @@ begin
  with drawinfo,x11gcty(gc.platformdata).d,rect.rect^ do begin
   if xfts_smooth in xftstate then begin
    with x11gcty(gc.platformdata).d do begin
-    checkxftstate(drawinfo,[xfts_colorforegroundvalid]);
+    checkxftstate(drawinfo,[xfts_foregroundvalid]);
     if ellipsetria(drawinfo,po1,pointcount) then begin
-     xrendercompositetriangles(appdisp,xrenderop,xftcolorforegroundpic,
+     xrendercompositetriangles(appdisp,xrenderop,xftforegroundpic,
                     xftdrawpic,alpharenderpictformat,
                     xftbrushorigin.x,xftbrushorigin.y,pxtriangle(po1),
                                                           pointcount div 3);
     end
     else begin
-     xrendercompositetristrip(appdisp,xrenderop,xftcolorforegroundpic,
+     xrendercompositetristrip(appdisp,xrenderop,xftforegroundpic,
               xftdrawpic,alpharenderpictformat,
                xftbrushorigin.x,xftbrushorigin.y,pxpointfixed(po1),pointcount);
     end;
@@ -2285,7 +2385,7 @@ begin
   if fhasxft then begin
  {$ifdef FPC}{$checkpointer off}{$endif}
    checkxftdraw(drawinfo);
-   checkxftstate(drawinfo,[xfts_colorforegroundvalid]);
+   checkxftstate(drawinfo,[]);
    transformpos(drawinfo);
    with pxpoint(buffer.buffer)^ do begin
     with x11gcty(gc.platformdata).d do begin
@@ -2400,13 +2500,7 @@ begin
      po1^.y:= po1^.y << 16;
      inc(po1);
     until po1 = po2;
-    checkxftstate(drawinfo,[xfts_colorforegroundvalid]);
-    with x11gcty(gc.platformdata).d do begin
-     xrendercompositetriangles(appdisp,xrenderop,xftcolorforegroundpic,
-             xftdrawpic,alpharenderpictformat,
-             xftbrushorigin.x,
-             xftbrushorigin.y,pxtriangle(po3),int1);
-    end;
+    compositetriangles(drawinfo,ptrianglety(po3),int1);
    end;
   end
   else begin
@@ -2635,7 +2729,7 @@ var
  
 function getxftlib: boolean;
 const
- funcs: array[0..17] of funcinfoty = (
+ funcs: array[0..18] of funcinfoty = (
   (n: 'XftDrawDestroy'; d: {$ifndef FPC}@{$endif}@XftDrawDestroy),
   (n: 'XftDrawSetClipRectangles'; d: {$ifndef FPC}@{$endif}@XftDrawSetClipRectangles),
   (n: 'XftDrawCreate'; d: {$ifndef FPC}@{$endif}@XftDrawCreate),
@@ -2653,7 +2747,8 @@ const
   (n: 'XftFontMatch'; d: {$ifndef FPC}@{$endif}@XftFontMatch),
   (n: 'XftFontOpenPattern'; d: {$ifndef FPC}@{$endif}@XftFontOpenPattern),
   (n: 'XftDefaultSubstitute'; d: {$ifndef FPC}@{$endif}@XftDefaultSubstitute),
-  (n: 'XftDrawPicture'; d: {$ifndef FPC}@{$endif}@XftDrawPicture)
+  (n: 'XftDrawPicture'; d: {$ifndef FPC}@{$endif}@XftDrawPicture),
+  (n: 'XftDrawSrcPicture'; d: {$ifndef FPC}@{$endif}@XftDrawSrcPicture)
   );
 begin
 {$ifndef staticxft}
@@ -2672,7 +2767,7 @@ end;
 
 function getxrenderlib: boolean;
 const
- funcs: array[0..13] of funcinfoty = (
+ funcs: array[0..14] of funcinfoty = (
   (n: 'XRenderSetPictureClipRectangles'; 
                    d: {$ifndef FPC}@{$endif}@XRenderSetPictureClipRectangles),
   (n: 'XRenderCreatePicture'; d: {$ifndef FPC}@{$endif}@XRenderCreatePicture),
@@ -2696,7 +2791,9 @@ const
   (n: 'XRenderCompositeTriangles'; 
                            d: {$ifndef FPC}@{$endif}@XRenderCompositeTriangles),
   (n: 'XRenderChangePicture'; 
-                           d: {$ifndef FPC}@{$endif}@XRenderChangePicture)
+                           d: {$ifndef FPC}@{$endif}@XRenderChangePicture),
+  (n: 'XRenderFindFormat'; 
+                           d: {$ifndef FPC}@{$endif}@XRenderFindFormat)
   );
   
  funcsopt: array[0..1] of funcinfoty = (

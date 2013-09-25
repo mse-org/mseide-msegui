@@ -349,11 +349,17 @@ type
   function XRenderQuerySubpixelOrder(dpy:PDisplay; screen:longint):longint;
         cdecl;external External_library name 'XRenderQuerySubpixelOrder';
 
-  function XRenderSetSubpixelOrder(dpy:PDisplay; screen:longint; subpixel:longint):TBool;cdecl;external External_library name 'XRenderSetSubpixelOrder';
+  function XRenderSetSubpixelOrder(dpy: PDisplay; screen: longint;
+                    subpixel: longint): TBool; cdecl;
+                    external External_library name 'XRenderSetSubpixelOrder';
 
-  function XRenderFindVisualFormat(dpy:PDisplay; visual:PVisual):PXRenderPictFormat;cdecl;external External_library name 'XRenderFindVisualFormat';
+  function XRenderFindVisualFormat(dpy: PDisplay;
+                      visual: PVisual): PXRenderPictFormat; cdecl;
+                    external External_library name 'XRenderFindVisualFormat';
 
-  function XRenderFindFormat(dpy:PDisplay; mask:culong; templ:PXRenderPictFormat; count:longint):PXRenderPictFormat;cdecl;external External_library name 'XRenderFindFormat';
+  function XRenderFindFormat(dpy: PDisplay; mask: culong;
+         templ: PXRenderPictFormat; count: longint): PXRenderPictFormat; cdecl;
+                            external External_library name 'XRenderFindFormat';
 
 
   function XRenderFindStandardFormat(dpy:PDisplay;

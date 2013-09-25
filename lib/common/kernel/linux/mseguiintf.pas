@@ -645,6 +645,7 @@ var
  xlockerror: integer = 0; 
  appdisp: pdisplay;
  appid: winidty;
+// defscreenid: cint;
  defscreen: pscreen;
  defvisual: msepvisual;
  defdepth: integer;
@@ -2448,7 +2449,7 @@ begin
 end;
 
 function gui_createpixmap(const size: sizety; winid: winidty = 0;
-                          monochrome: boolean = false; copyfrom: pixmapty = 0): pixmapty;
+           monochrome: boolean = false; copyfrom: pixmapty = 0): pixmapty;
 var
  gc: tgc;
 begin
@@ -5624,7 +5625,8 @@ begin
    goto error;
   end; 
   setlocale(lc_all,po1); //restore original
-  
+
+//  defscreenid:= xdefaultscreen(appdisp);
   defscreen:= xdefaultscreenofdisplay(appdisp);
   rootid:= xrootwindowofscreen(defscreen);
   defvisual:= msepvisual(xdefaultvisualofscreen(defscreen));
