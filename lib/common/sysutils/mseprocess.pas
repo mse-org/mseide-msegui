@@ -45,6 +45,8 @@ const
  defaultstartprocessoptions = defaultprocessoptions + [pro_inactive];
  
 type   
+ tmseprocess = class;
+ 
  tmseprocess = class(tactcomponent,istatfile,iprocmonitor)
   private
    finput: tpipewriter;
@@ -56,6 +58,7 @@ type
    fstatvarname: msestring;
    factive: boolean;
    fprochandle: prochandlety;
+   flastprochandle: prochandlety;
    foptions: processoptionsty;
    fonprocfinished: notifyeventty;
    flistenid: ptruint;
@@ -106,6 +109,7 @@ type
    property commandline: string read getcommandline write setcommandline;
                  //overrides filename and parameter
    property prochandle: prochandlety read fprochandle;
+   property lastprochandle: prochandlety read flastprochandle;
    property exitcode: integer read fexitcode;
   published
    property filename: filenamety read ffilename write ffilename;
@@ -119,7 +123,8 @@ type
    property statvarname: msestring read getstatvarname write fstatvarname;
    property output: tpipereaderpers read foutput write setoutput;
    property erroroutput: tpipereaderpers read ferroroutput write seterroroutput;
-   property onprocfinished: notifyeventty read fonprocfinished write fonprocfinished;
+   property onprocfinished: notifyeventty read fonprocfinished 
+                                                     write fonprocfinished;
  end;
 
 function getprocessoutput(const acommandline: string; const todata: string;
@@ -302,8 +307,8 @@ begin
  foptions:= defaultprocessoptions;
  fprochandle:= invalidprochandle;
  finput:= tpipewriter.create;
- foutput:= tpipereaderpers.create;
- ferroroutput:= tpipereaderpers.create;
+ foutput:= tpipereaderpers.create(self);
+ ferroroutput:= tpipereaderpers.create(self);
  fpipewaitus:= defaultpipewaitus;
  inherited;
 end;
@@ -467,6 +472,7 @@ begin
            inp,outp,erroroutp,{sessionleader,}group,opt1
            {pro_inactive in foptions,false,
                           pro_tty in foptions,pro_nostdhandle in foptions});
+     flastprochandle:= fprochandle;
      if fprochandle = invalidprochandle then begin
       finalizeexec;
      end

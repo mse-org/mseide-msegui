@@ -38,7 +38,7 @@ type
    ftimeoutms: integer;
    fonthreadterminate: proceventty;
   protected
-   fowner: tcustomcommpipes;
+   fpipes: tcustomcommpipes;
    fcrypto: pcryptoioinfoty;
    fonafterconnect: proceventty;
    procedure settimeoutms(const avalue: integer); virtual;
@@ -49,7 +49,7 @@ type
                     const nonblocked: boolean = false): boolean; override;
    procedure dochange; override;
   public
-   constructor create(const aowner: tcustomcommpipes);
+   constructor create(const apipes: tcustomcommpipes);
    property timeoutms: integer read ftimeoutms write settimeoutms;
  end;
 
@@ -849,9 +849,9 @@ end;
 
 { tcommreader }
 
-constructor tcommreader.create(const aowner: tcustomcommpipes);
+constructor tcommreader.create(const apipes: tcustomcommpipes);
 begin
- fowner:= aowner;
+ fpipes:= apipes;
  inherited create;
  fstate:= fstate + [tss_haslink];
 end;
@@ -942,7 +942,7 @@ end;
 
 procedure tcommreader.dochange;
 begin
- fowner.dorxchange(self);
+ fpipes.dorxchange(self);
 end;
 
 { tcommwriter }
@@ -1144,7 +1144,7 @@ function tsercommreader.internalread(var buf; const acount: integer;
                out readcount: integer;
                const nonblocked: boolean = false): boolean;
 begin
- result:= tcustomsercommcomp(fowner.fowner).port.piperead(buf,acount,readcount,
+ result:= tcustomsercommcomp(fpipes.fowner).port.piperead(buf,acount,readcount,
                                     nonblocked);
 // result:= inherited internalread(buf,acount,readcount,nonblocked);
 end;

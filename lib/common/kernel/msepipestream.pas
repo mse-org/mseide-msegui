@@ -68,6 +68,7 @@ type
    fthread: tsemthread;         //simulate nonblocking pipes on windows
    fmsbuf: bufferty;
    fmsbufcount: integer;
+   fowner: tmsecomponent;
    function execthread(thread: tmsethread): integer; virtual;
    procedure sethandle(value: integer); override;
    procedure setbuflen(const Value: integer); override;
@@ -115,6 +116,7 @@ type
                                                       write foninputavailable;
    property onpipebroken: pipereadereventty read fonpipebroken 
                                                            write fonpipebroken;
+   property owner: tmsecomponent read fowner;
 end;
 
  tpipereadercomp = class(tmsecomponent)
@@ -153,7 +155,7 @@ end;
    function getoverloadsleepus: integer;
    procedure setoverloadsleepus(const avalue: integer);
   public
-   constructor create;
+   constructor create(const aowner: tmsecomponent);
    destructor destroy; override;
    property pipereader: tpipereader read fpipereader;
   published
@@ -667,6 +669,7 @@ end;
 constructor tpipereadercomp.create(aowner: tcomponent);
 begin
  fpipereader:= tpipereader.create;
+ fpipereader.fowner:= self;
  inherited;
 end;
 
@@ -719,10 +722,11 @@ end;
 
 { tpipereaderpers }
 
-constructor tpipereaderpers.create;
+constructor tpipereaderpers.create(const aowner: tmsecomponent);
 begin
  fpipereader:= tpipereader.create;
- inherited;
+ fpipereader.fowner:= aowner;
+ inherited create;
 end;
 
 destructor tpipereaderpers.destroy;
