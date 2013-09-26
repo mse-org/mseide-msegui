@@ -31,6 +31,7 @@ type
   dashind: integer;
   dashpos: integer;
   dashref: integer;
+  reverse: boolean;
  end;
  plineshiftinfoty = ^lineshiftinfoty;
  
@@ -341,6 +342,10 @@ begin
     sy1:= (li.v.shift.x*int1) div linewidth1;
     sx2:= (li.v.shift.x*po2^) div arcscalefact;    //orthogonal
     sy2:= (li.v.shift.y*po2^) div arcscalefact;
+    if li.reverse then begin
+     sx2:= -sx2;
+     sy2:= -sy2;
+    end;
     po1^.x:= pt1.x - sx1 - sx2;
     po1^.y:= pt1.y - sy1 + sy2;
     inc(po1);      
@@ -484,6 +489,10 @@ begin
       sy1:= (li.v.shift.x*int1) div linewidth1;
       sx2:= (li.v.shift.x*po2^) div arcscalefact;    //orthogonal
       sy2:= (li.v.shift.y*po2^) div arcscalefact;
+      if li.reverse then begin
+       sx2:= -sx2;
+       sy2:= -sy2;
+      end;
       po1^.x:= pt1.x + sx1 - sx2;
       po1^.y:= pt1.y + sy1 + sy2;
       inc(po1);      
@@ -656,6 +665,7 @@ begin
   pend:= points+count;
   li.pointb:= li.pointa+1;
   li.dist:= linewidth16;
+  li.reverse:= false;
   if closed then begin
    int2:= count-1;
   end
@@ -869,6 +879,7 @@ begin
   li.pointa:= points;
   li.pointb:= li.pointa+1;
   li.dist:= linewidth16;
+  li.reverse:= false;
   allocbuffer(buffer,count*(6+6*linewidth1)*sizeof(pointty));
                          //for round caps
   if df_dashed in gc.drawingflags then begin

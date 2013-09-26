@@ -230,8 +230,11 @@ begin
    apointcount:= 0;
    exit;
   end;
-  shiftfact:= -2;
-  if extentang < 0 then begin
+  li.reverse:= extentang >= 0;
+  if li.reverse then begin
+   shiftfact:= -2;
+  end
+  else begin
    shiftfact:= 2;
   end;
   int1:= round(int1*abs(extentang)/pi); //steps
