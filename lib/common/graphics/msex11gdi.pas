@@ -1037,7 +1037,9 @@ testvar:= @x11gcty(drawinfo.gc.platformdata).d;
   end;
  end;
 end;
-
+const
+ posroundval = $0;//7fff;
+ 
 procedure compositetriangles(var drawinfo: drawinfoty;
                     const triangles: ptrianglety; const trianglecount: integer);
 begin
@@ -1045,8 +1047,9 @@ begin
  with x11gcty(drawinfo.gc.platformdata).d do begin
   xrendercompositetriangles(appdisp,xrenderop,xftforegroundpic,
            xftdrawpic,alpharenderpictformat,
-           xftbrushorigin.x,
-           xftbrushorigin.y,pxtriangle(triangles),trianglecount);
+           xftbrushorigin.x+(ppointty(triangles)^.x+posroundval) div 65536,
+           xftbrushorigin.y+(ppointty(triangles)^.y+posroundval) div 65536,
+           pxtriangle(triangles),trianglecount);
  end;
 end;
 
@@ -1057,7 +1060,9 @@ begin
  with x11gcty(drawinfo.gc.platformdata).d do begin
   xrendercompositetristrip(appdisp,xrenderop,xftforegroundpic,
         xftdrawpic,alpharenderpictformat,
-        xftbrushorigin.x,xftbrushorigin.y,pxpointfixed(points),pointcount);
+        xftbrushorigin.x+(points^.x+posroundval) div 65536,
+        xftbrushorigin.y+(points^.y+posroundval) div 65536,
+        pxpointfixed(points),pointcount);
  end;
 end;
 
@@ -1068,7 +1073,9 @@ begin
  with x11gcty(drawinfo.gc.platformdata).d do begin
   xrendercompositetrifan(appdisp,xrenderop,xftforegroundpic,
         xftdrawpic,alpharenderpictformat,
-        xftbrushorigin.x,xftbrushorigin.y,pxpointfixed(points),pointcount);
+        xftbrushorigin.x+(points^.x+posroundval) div 65536,
+        xftbrushorigin.y+(points^.y+posroundval) div 65536,
+        pxpointfixed(points),pointcount);
  end;
 end;
 
@@ -1080,6 +1087,7 @@ var
  int1: integer;
 
 begin
+testvar:= @x11gcty(drawinfo.gc.platformdata).d;
 {$ifdef mse_debuggdisync}
  checkgdilock;
 {$endif} 
@@ -1213,8 +1221,8 @@ begin
    xmask:= xmask or gctilestipxorigin or gctilestipyorigin;
    xvalues.ts_x_origin:= brushorigin.x;
    xvalues.ts_y_origin:= brushorigin.y;
-   xftbrushorigin.x:= cliporigin.x-brushorigin.x;
-   xftbrushorigin.y:= cliporigin.y-brushorigin.y;
+   xftbrushorigin.x:= -brushorigin.x;//-drawinfo.origin.x;
+   xftbrushorigin.y:= -brushorigin.y;//-drawinfo.origin.y;
   end;
 
   if gvm_brush in mask then begin
