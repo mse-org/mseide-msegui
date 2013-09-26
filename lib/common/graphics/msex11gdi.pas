@@ -967,7 +967,6 @@ begin
   end;
  end;
 end;
-var testvar: ^x11gcdty;
 
 procedure checkxftstate(var drawinfo: drawinfoty; const aflags: xftstatesty);
  procedure updatemonocolor;
@@ -994,7 +993,6 @@ var
  attributes: txrenderpictureattributes;
 //todo: fix xftbrushorigin, seems to be unreliable
 begin
-testvar:= @x11gcty(drawinfo.gc.platformdata).d;
  with drawinfo.gc,x11gcty(platformdata).d do begin
   if not (xfts_clipregionvalid in xftstate) then begin
    if gcclipregion = 0 then begin
@@ -1087,7 +1085,6 @@ var
  int1: integer;
 
 begin
-testvar:= @x11gcty(drawinfo.gc.platformdata).d;
 {$ifdef mse_debuggdisync}
  checkgdilock;
 {$endif} 
@@ -2495,14 +2492,16 @@ begin
   if xfts_smooth in x11gcty(gc.platformdata).d.xftstate then begin
    if points.count > 2 then begin
     polytria(drawinfo,ptrianglety(po3),int1);
-    po1:= pointer(po3);
-    po2:= pointer(ptrianglety(po3)+int1);
-    repeat
-     po1^.x:= po1^.x << 16;
-     po1^.y:= po1^.y << 16;
-     inc(po1);
-    until po1 = po2;
-    compositetriangles(drawinfo,ptrianglety(po3),int1);
+    if int1 > 0 then begin
+     po1:= pointer(po3);
+     po2:= pointer(ptrianglety(po3)+int1);
+     repeat
+      po1^.x:= po1^.x << 16;
+      po1^.y:= po1^.y << 16;
+      inc(po1);
+     until po1 = po2;
+     compositetriangles(drawinfo,ptrianglety(po3),int1);
+    end;
    end;
   end
   else begin

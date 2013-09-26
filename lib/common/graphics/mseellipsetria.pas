@@ -28,7 +28,9 @@ function ellipsetria(var drawinfo: drawinfoty; out apoints: ppointty;
                  
 
 implementation
-
+uses
+ mselinetria;
+ 
 procedure adjustellipsecenter(const drawinfo: drawinfoty;
                                         var center: pointty);
 begin
@@ -212,9 +214,13 @@ var
  step,dashstep,dashsum: real;
  dashindex: integer;
  wasoff: boolean;
+ li: lineshiftinfoty;
+ shiftfact: integer;
 begin
  result:= false;
  with drawinfo,drawinfo.arc,rect^,triagcty(gc.platformdata).d do begin
+  li.offsx:= 0;
+  li.offsy:= 0;
   int1:= cx;
   if cy > int1 then begin
    int1:= cy;
@@ -223,6 +229,10 @@ begin
    apoints:= nil;
    apointcount:= 0;
    exit;
+  end;
+  shiftfact:= -2;
+  if extentang < 0 then begin
+   shiftfact:= 2;
   end;
   int1:= round(int1*abs(extentang)/pi); //steps
   if int1 = 0 then begin
@@ -326,10 +336,10 @@ begin
    rea1:= extentang/int1; //step
    si:= sin(rea1);
    co:= cos(rea1);
-   npoints:= 2*int1+2; //+ endpoint
+   npoints:= 2*(int1+linewidth1)+2; //+ endpoint + round caps
    allocbuffer(buffer,npoints*sizeof(pointty));
    q0:= buffer.buffer;
-   for int1:= int1 downto 0 do begin
+   for int1:= 0 to int1 do begin
     x1:= round(cx1*sx);
     y1:= round(cy1*sy);
     rea1:= sqrt(cx2*sy*sy+cy2*sx*sx);
@@ -347,12 +357,28 @@ begin
     q0^.x:= center.x + x1 - x2;
     q0^.y:= center.y - y1 + y2;
     inc(q0);
+    if int1 = 0 then begin
+     if not (trf_capbutt in triaflags) then begin
+      li.v.shift.x:= shiftfact*x2;
+      li.v.shift.y:= shiftfact*y2;
+      li.dest:= q0;
+      updatestartstrip(drawinfo,li);
+      q0:= li.dest;
+     end;
+    end;
     rea1:= sx;
     sx:= co*sx-si*sy;
     sy:= co*sy+si*rea1;
    end;
+   if not (trf_capbutt in triaflags) then begin
+    li.v.shift.x:= shiftfact*x2;
+    li.v.shift.y:= shiftfact*y2;
+    li.dest:= q0;
+    updateendstrip(drawinfo,li);
+    q0:= li.dest;
+   end;
    apoints:= buffer.buffer;
-   apointcount:= npoints;
+   apointcount:= q0-apoints;
   end;
  end;
 end;

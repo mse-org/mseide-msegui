@@ -12,14 +12,6 @@ unit mselinetria;
 interface
 uses
  msegraphics,msegraphutils,msetriaglob;
- 
-function linestria(var drawinfo: drawinfoty; out apoints: ppointty;
-                                   out apointcount: integer): boolean;
-           //true if triangles, tristrip otherwise
-procedure linesegmentstria(var drawinfo: drawinfoty;
-                  out atriangles: ptrianglety; out atrianglecount: integer);
-
-implementation
 type
  lineshiftvectorty = record
   shift: pointty;
@@ -41,7 +33,19 @@ type
   dashref: integer;
  end;
  plineshiftinfoty = ^lineshiftinfoty;
+ 
+function linestria(var drawinfo: drawinfoty; out apoints: ppointty;
+                                   out apointcount: integer): boolean;
+           //true if triangles, tristrip otherwise
+procedure linesegmentstria(var drawinfo: drawinfoty;
+                  out atriangles: ptrianglety; out atrianglecount: integer);
 
+procedure updatestarttria(var drawinfo: drawinfoty; var li: lineshiftinfoty);
+procedure updatestartstrip(var drawinfo: drawinfoty; var li: lineshiftinfoty);
+procedure updateendtria(var drawinfo: drawinfoty; var li: lineshiftinfoty);
+procedure updateendstrip(var drawinfo: drawinfoty; var li: lineshiftinfoty);
+
+implementation
 const
  arctablesize = 20; // max diameter
  arcrowsize = arctablesize div 2 - 2;
