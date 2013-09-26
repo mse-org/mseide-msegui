@@ -33,7 +33,7 @@ uses
  msecolordialog,msedrawtext,msewidgets,msepointer,mseguiglob,msepipestream,
  msemenus,sysutils,mseglob,mseedit,msedialog,msescrollbar,msememodialog,
  msecodetemplates,mseifiglob,mseapplication,msestream,msestringcontainer,
- mserttistat;
+ mserttistat,mseificomp,mseificompglob;
 
 const
  defaultsourceprintfont = 'Courier';
@@ -176,6 +176,7 @@ type
    fgridsizey: integer;
    fautoindent: boolean;
    fblockindent: integer;
+   flinenumberson: boolean;
    frightmarginon: boolean;
    frightmarginchars: integer;
    fscrollheight: integer;
@@ -216,6 +217,7 @@ type
    property gridsizey: integer read fgridsizey write setgridsizey;
    property autoindent: boolean read fautoindent write fautoindent;
    property blockindent: integer read fblockindent write fblockindent;
+   property linenumberson: boolean read flinenumberson write flinenumberson;
    property rightmarginon: boolean read frightmarginon write frightmarginon;
    property rightmarginchars: integer read frightmarginchars 
                                                     write frightmarginchars;
@@ -659,7 +661,6 @@ type
    encoding: tenumedit;
    scrollheight: tintegeredit;
    rightmarginchars: tintegeredit;
-   rightmarginon: tbooleanedit;
    tlayouter10: tlayouter;
    backupfilecount: tintegeredit;
    spacetabs: tbooleanedit;
@@ -763,6 +764,9 @@ type
    c: tstringcontainer;
    xtermcommand: tmemodialogedit;
    xtermsplitter: tsplitter;
+   tlayouter14: tlayouter;
+   rightmarginon: tbooleanedit;
+   linenumberson: tbooleanedit;
    procedure acttiveselectondataentered(const sender: TObject);
    procedure colonshowhint(const sender: tdatacol; const arow: Integer; 
                       var info: hintinfoty);

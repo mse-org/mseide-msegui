@@ -125,7 +125,7 @@ object projectoptionsfo: tprojectoptionsfo
           bounds_x = 0
           bounds_y = 89
           bounds_cx = 658
-          bounds_cy = 208
+          bounds_cy = 215
           anchors = [an_top]
           optionsscale = [osc_expandx, osc_expandy, osc_shrinky]
           linkbottom = ttabwidget2
@@ -151,7 +151,7 @@ object projectoptionsfo: tprojectoptionsfo
             )
             taborder = 3
             bounds_x = 6
-            bounds_y = 117
+            bounds_y = 124
             bounds_cx = 645
             bounds_cy = 91
             anchors = [an_left, an_top, an_right]
@@ -206,7 +206,7 @@ object projectoptionsfo: tprojectoptionsfo
             frame.dummy = 0
             taborder = 2
             bounds_x = 0
-            bounds_y = 78
+            bounds_y = 85
             bounds_cx = 599
             bounds_cy = 37
             optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
@@ -365,7 +365,7 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_x = 0
             bounds_y = 39
             bounds_cx = 612
-            bounds_cy = 37
+            bounds_cy = 44
             optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
             optionslayout = [lao_aligny]
             align_glue = wam_start
@@ -443,23 +443,6 @@ object projectoptionsfo: tprojectoptionsfo
               max = 100
               reffontheight = 14
             end
-            object rightmarginon: tbooleanedit
-              frame.caption = 'Right Margin Line'
-              frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
-              frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
-              frame.dummy = 0
-              frame.outerframe = (
-                0
-                1
-                99
-                2
-              )
-              bounds_x = 23
-              bounds_y = 20
-              bounds_cx = 112
-              bounds_cy = 16
-              value = True
-            end
             object editmarkbrackets: tbooleanedit
               frame.caption = 'Mark Brackets'
               frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
@@ -500,6 +483,48 @@ object projectoptionsfo: tprojectoptionsfo
               dropdown.options = [deo_autodropdown, deo_keydropdown]
               reffontheight = 14
             end
+            object tlayouter14: tlayouter
+              bounds_x = 23
+              bounds_y = 10
+              bounds_cx = 112
+              bounds_cy = 34
+              optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
+              optionslayout = [lao_placey]
+              place_mindist = 2
+              place_maxdist = 2
+              object rightmarginon: tbooleanedit
+                frame.caption = 'Right Margin Line'
+                frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
+                frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
+                frame.dummy = 0
+                frame.outerframe = (
+                  0
+                  1
+                  99
+                  2
+                )
+                taborder = 1
+                bounds_x = 0
+                bounds_y = 18
+                bounds_cx = 112
+                bounds_cy = 16
+                value = True
+              end
+              object linenumberson: tbooleanedit
+                frame.caption = 'Line Numbers'
+                frame.dummy = 0
+                frame.outerframe = (
+                  0
+                  1
+                  82
+                  2
+                )
+                bounds_x = 0
+                bounds_y = 0
+                bounds_cx = 95
+                bounds_cy = 16
+              end
+            end
           end
           object tlayouter10: tlayouter
             color = -2147483645
@@ -525,7 +550,7 @@ object projectoptionsfo: tprojectoptionsfo
                 66
                 0
               )
-              taborder = 5
+              taborder = 6
               bounds_x = 519
               bounds_y = 0
               bounds_cx = 102
@@ -636,7 +661,7 @@ object projectoptionsfo: tprojectoptionsfo
                 65
                 2
               )
-              taborder = 6
+              taborder = 5
               bounds_x = 367
               bounds_y = 20
               bounds_cx = 78
@@ -781,9 +806,9 @@ object projectoptionsfo: tprojectoptionsfo
           optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets]
           optionswidget1 = [ow1_fontglyphheight, ow1_autoscale]
           bounds_x = 0
-          bounds_y = 299
+          bounds_y = 306
           bounds_cx = 658
-          bounds_cy = 219
+          bounds_cy = 212
           bounds_cymin = 84
           anchors = [an_top, an_bottom]
           taborder = 7
@@ -803,7 +828,7 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_x = 0
             bounds_y = 18
             bounds_cx = 658
-            bounds_cy = 201
+            bounds_cy = 194
             anchors = [an_left, an_top, an_right, an_bottom]
             caption = 'File filter'
             reffontheight = 14
@@ -824,7 +849,7 @@ object projectoptionsfo: tprojectoptionsfo
               bounds_x = 0
               bounds_y = 0
               bounds_cx = 658
-              bounds_cy = 201
+              bounds_cy = 194
               anchors = []
               optionsgrid = [og_colsizing, og_rowmoving, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_selectedrowsdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_colchangeontabkey, og_wrapcol, og_autopopup, og_mousescrollcol]
               datacols.count = 2
@@ -877,7 +902,7 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_x = 0
             bounds_y = 18
             bounds_cx = 658
-            bounds_cy = 201
+            bounds_cy = 194
             anchors = [an_left, an_top, an_right, an_bottom]
             caption = 'Syntax definition files'
             reffontheight = 14
@@ -889,7 +914,7 @@ object projectoptionsfo: tprojectoptionsfo
               bounds_x = 0
               bounds_y = 0
               bounds_cx = 658
-              bounds_cy = 201
+              bounds_cy = 194
               bounds_cymin = 60
               anchors = []
               optionsgrid = [og_colsizing, og_rowmoving, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_selectedrowsdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_colchangeontabkey, og_autopopup, og_mousescrollcol]
@@ -948,7 +973,7 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_x = 0
             bounds_y = 18
             bounds_cx = 658
-            bounds_cy = 201
+            bounds_cy = 194
             anchors = [an_left, an_top, an_right, an_bottom]
             caption = 'Code Templates'
             object twidgetgrid5: twidgetgrid
@@ -967,7 +992,7 @@ object projectoptionsfo: tprojectoptionsfo
               bounds_x = 0
               bounds_y = 0
               bounds_cx = 658
-              bounds_cy = 266
+              bounds_cy = 259
               bounds_cymin = 40
               anchors = [an_top, an_bottom]
               optionsgrid = [og_keyrowmoving, og_rowinserting, og_rowdeleting, og_selectedrowsdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_wrapcol, og_autopopup]

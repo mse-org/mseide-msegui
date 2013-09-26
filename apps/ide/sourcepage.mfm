@@ -7,8 +7,6 @@ object sourcepage: tsourcepage
   bounds_cx = 311
   bounds_cy = 228
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets]
-  container.frame.zoomwidthstep = 1
-  container.frame.zoomheightstep = 1
   container.frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
   container.bounds = (
     0
@@ -33,6 +31,13 @@ object sourcepage: tsourcepage
     bounds_cy = 206
     anchors = [an_top, an_bottom]
     optionsgrid = [og_focuscellonenter, og_autofirstrow, og_wrapcol, og_visiblerowpagestep]
+    fixcols.count = 1
+    fixcols.items = <    
+      item
+        textflags = [tf_right, tf_ycentered]
+        numstart = 1
+        numstep = 1
+      end>
     gridframecolor = -2147483645
     rowcolors.count = 4
     rowcolors.items = (
@@ -90,7 +95,7 @@ object sourcepage: tsourcepage
     end
     object dataicon: tdataicon
       optionsskin = [osk_framebuttononly]
-      bounds_x = 0
+      bounds_x = 51
       bounds_y = 0
       bounds_cx = 15
       bounds_cy = 19
