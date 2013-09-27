@@ -210,7 +210,7 @@ var
  npoints: integer;
  int1: integer;
  center: pointty;
- circle: boolean;
+ circle,lineendings: boolean;
  step,dashstep,dashsum: real;
  dashindex: integer;
  wasoff: boolean;
@@ -219,6 +219,7 @@ var
 begin
  result:= false;
  with drawinfo,drawinfo.arc,rect^,triagcty(gc.platformdata).d do begin
+  lineendings:= not (trf_capbutt in triaflags);
   li.offsx:= 0;
   li.offsy:= 0;
   int1:= cx;
@@ -258,11 +259,14 @@ begin
    step:= extentang/int1; //step
    si:= sin(step);
    co:= cos(step);
+   if not li.reverse then begin
+    step:= - step;
+   end;
    if circle then begin
-    dashstep:= cx*step/2;
+    dashstep:= cx*step/2; //constant
    end
    else begin
-    step:= step / 65536;
+    step:= step / 65536;  //variable dashstep
    end;
    dashsum:= -ord(xftdashes[1]);
    dashindex:= 1;
@@ -270,7 +274,7 @@ begin
    allocbuffer(buffer,(6*int1+12)*sizeof(pointty));
            //+ start dummy + endpoint, max
    q0:= ppointty(buffer.buffer)+2;
-   for int1:= int1 downto 0 do begin
+   for int1:= 0 to int1 do begin
     x1:= round(cx1*sx);
     y1:= round(cy1*sy);
     rea1:= sqrt(cx2*sy*sy+cy2*sx*sx);
@@ -299,6 +303,17 @@ begin
       q0^.x:= x4;
       q0^.y:= y4;
       inc(q0);
+     {
+      if int1 = 0 then begin
+       if not (trf_capbutt in triaflags) then begin
+        li.v.shift.x:= shiftfact*x2;
+        li.v.shift.y:= shiftfact*y2;
+        li.dest:= q0;
+        updatestarttria(drawinfo,li);
+        q0:= li.dest;
+       end;
+      end;
+     }
      end
      else begin
       wasoff:= false;
@@ -360,20 +375,18 @@ begin
     q0^.x:= center.x + x1 - x2;
     q0^.y:= center.y - y1 + y2;
     inc(q0);
-    if int1 = 0 then begin
-     if not (trf_capbutt in triaflags) then begin
-      li.v.shift.x:= shiftfact*x2;
-      li.v.shift.y:= shiftfact*y2;
-      li.dest:= q0;
-      updatestartstrip(drawinfo,li);
-      q0:= li.dest;
-     end;
+    if lineendings and (int1 = 0) then begin
+     li.v.shift.x:= shiftfact*x2;
+     li.v.shift.y:= shiftfact*y2;
+     li.dest:= q0;
+     updatestartstrip(drawinfo,li);
+     q0:= li.dest;
     end;
     rea1:= sx;
     sx:= co*sx-si*sy;
     sy:= co*sy+si*rea1;
    end;
-   if not (trf_capbutt in triaflags) then begin
+   if lineendings then begin
     li.v.shift.x:= shiftfact*x2;
     li.v.shift.y:= shiftfact*y2;
     li.dest:= q0;
