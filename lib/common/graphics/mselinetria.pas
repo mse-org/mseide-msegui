@@ -252,6 +252,10 @@ begin
     sy1:= (li.v.shift.x*int1) div linewidth1;
     sx2:= (li.v.shift.x*po2^) div arcscalefact;    //orthogonal
     sy2:= (li.v.shift.y*po2^) div arcscalefact;
+    if li.reverse then begin
+     sx2:= -sx2;
+     sy2:= -sy2;
+    end;
     po1^.x:= pt1.x - sx1 - sx2; //2
     po1^.y:= pt1.y - sy1 + sy2;
     inc(po1);
@@ -426,6 +430,10 @@ begin
       sy1:= (li.v.shift.x*int1) div linewidth1;
       sx2:= (li.v.shift.x*po2^) div arcscalefact;    //orthogonal
       sy2:= (li.v.shift.y*po2^) div arcscalefact;
+      if li.reverse then begin
+       sx2:= -sx2;
+       sy2:= -sy2;
+      end;
       po1^.x:= pt1.x + sx1 - sx2;       //0
       po1^.y:= pt1.y + sy1 + sy2;
       inc(po1);      

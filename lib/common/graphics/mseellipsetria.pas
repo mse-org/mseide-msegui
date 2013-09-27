@@ -262,8 +262,6 @@ begin
    if not li.reverse then begin
     step:= - step;
    end;
-//   li.reverse:= not li.reverse;
-//   shiftfact:= -shiftfact;
    if circle then begin
     dashstep:= cx*step/2; //constant
    end
@@ -349,16 +347,15 @@ begin
     sx:= co*sx-si*sy;
     sy:= co*sy+si*rea1;
    end;
-//    po1:= pxtriangle(buffer.buffer)+2;
    if odd(dashindex) then begin
     dec(q0,2);
-   end;
-   if lineendings then begin
-    li.v.shift.x:= shiftfact*x2;
-    li.v.shift.y:= shiftfact*y2;
-    li.dest:= q0;
-    updateendtria(drawinfo,li);
-    q0:= li.dest;
+    if lineendings then begin
+     li.v.shift.x:= shiftfact*x2;
+     li.v.shift.y:= shiftfact*y2;
+     li.dest:= q0;
+     updateendtria(drawinfo,li);
+     q0:= li.dest;
+    end;
    end;
    apoints:= ppointty(buffer.buffer)+2;
    apointcount:= q0-apoints;
