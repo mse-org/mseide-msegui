@@ -368,7 +368,7 @@ var
  sx1,sy1: integer;
 begin
  with triagcty(drawinfo.gc.platformdata).d do begin
-  if trf_capprojecting in triaflags then begin
+  if (linewidth = 0) or (trf_capprojecting in triaflags) then begin
    sx1:= li.v.shift.y div 2 - li.offsy;
    sy1:= li.v.shift.x div 2 - li.offsx;
    with (li.dest-2)^ do begin

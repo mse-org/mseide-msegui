@@ -262,6 +262,8 @@ begin
    if not li.reverse then begin
     step:= - step;
    end;
+//   li.reverse:= not li.reverse;
+//   shiftfact:= -shiftfact;
    if circle then begin
     dashstep:= cx*step/2; //constant
    end
@@ -270,7 +272,7 @@ begin
    end;
    dashsum:= -ord(xftdashes[1]);
    dashindex:= 1;
-   wasoff:= false;
+   wasoff:= true;
    allocbuffer(buffer,(6*int1+12)*sizeof(pointty));
            //+ start dummy + endpoint, max
    q0:= ppointty(buffer.buffer)+2;
@@ -303,20 +305,6 @@ begin
       q0^.x:= x4;
       q0^.y:= y4;
       inc(q0);
-     {
-      if int1 = 0 then begin
-       if not (trf_capbutt in triaflags) then begin
-        li.v.shift.x:= shiftfact*x2;
-        li.v.shift.y:= shiftfact*y2;
-        li.dest:= q0;
-        updatestarttria(drawinfo,li);
-        q0:= li.dest;
-       end;
-      end;
-     }
-     end
-     else begin
-      wasoff:= false;
      end;
      q0^.x:= x3;
      q0^.y:= y3;
@@ -324,11 +312,26 @@ begin
      q0^.x:= x4;
      q0^.y:= y4;
      inc(q0);
+     if lineendings and wasoff then begin
+      li.v.shift.x:= shiftfact*x2;
+      li.v.shift.y:= shiftfact*y2;
+      li.dest:= q0;
+      updatestarttria(drawinfo,li);
+      q0:= li.dest;
+     end;
+     wasoff:= false;
     end
     else begin
      if not wasoff then begin
       wasoff:= true;
       dec(q0,2);
+      if lineendings then begin
+       li.v.shift.x:= shiftfact*x2;
+       li.v.shift.y:= shiftfact*y2;
+       li.dest:= q0;
+       updateendtria(drawinfo,li);
+       q0:= li.dest;
+      end;
      end;
     end;
     if not circle then begin
@@ -347,7 +350,17 @@ begin
     sy:= co*sy+si*rea1;
    end;
 //    po1:= pxtriangle(buffer.buffer)+2;
-   apoints:= ppointty(ptrianglety(buffer.buffer)+2);
+   if odd(dashindex) then begin
+    dec(q0,2);
+   end;
+   if lineendings then begin
+    li.v.shift.x:= shiftfact*x2;
+    li.v.shift.y:= shiftfact*y2;
+    li.dest:= q0;
+    updateendtria(drawinfo,li);
+    q0:= li.dest;
+   end;
+   apoints:= ppointty(buffer.buffer)+2;
    apointcount:= q0-apoints;
   end
   else begin
