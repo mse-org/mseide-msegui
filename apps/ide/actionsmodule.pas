@@ -107,8 +107,8 @@ type
   ac_cannotreadproject,           //77 Can not read project
   ac_about,                       //78 About
   ac_objectinspector,             //79 Object Inspector
-  ac_storecomponent               //80 Store Component
-
+  ac_storecomponent,              //80 Store Component
+  ac_attachingprocess             //81 Attaching Process
  );
 
 type
@@ -646,7 +646,7 @@ begin
   int1:= 0;
   if integerenter(int1,minint,maxint,self.c[ord(ac_processid)],
                       self.c[ord(ac_attachtoprocess)]) = mr_ok then begin
-   setstattext('Attaching process '+inttostr(int1),mtk_running);
+   setstattext(self.c[ord(ac_attachingprocess)]+' '+inttostr(int1),mtk_running);
    application.processmessages;
    startgdb(false);
    gdb.attach(int1,info);
