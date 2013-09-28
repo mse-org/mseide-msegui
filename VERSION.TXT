@@ -1,5 +1,7 @@
 MSEide+MSEgui breaking changes version history
 
+Version 3.0
+2013-09-27
 2013-07-14
  No #0 for last byte in tcanvas.dashes, 
  use cl_transparent colorbackground instead.
