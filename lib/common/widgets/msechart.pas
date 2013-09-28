@@ -201,6 +201,8 @@ type
    procedure setlegend_caption(const avalue: msestring);
    function isfontstored: boolean;
    procedure fontchanged(const sender: tobject);
+   function getsmooth: boolean;
+   procedure setsmooth(const avalue: boolean);
   protected
    fstate: tracestatesty;
    ftraces: ttraces;
@@ -289,6 +291,7 @@ type
    property logx: boolean read getlogx write setlogx;
    property logy: boolean read getlogy write setlogy;
    property visible: boolean read getvisible write setvisible;
+   property smooth: boolean read getsmooth write setsmooth;
    
   published
    property xdatalist: trealdatalist read getxdatalist write setxdatalist;
@@ -2041,6 +2044,21 @@ begin
  end
  else begin
   options:= options + [cto_invisible];
+ end;
+end;
+
+function ttrace.getsmooth: boolean;
+begin
+ result:= cto_smooth in options;
+end;
+
+procedure ttrace.setsmooth(const avalue: boolean);
+begin
+ if avalue then begin
+  options:= options + [cto_smooth];
+ end
+ else begin
+  options:= options - [cto_smooth];
  end;
 end;
 
