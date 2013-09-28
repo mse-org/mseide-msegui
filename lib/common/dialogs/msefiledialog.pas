@@ -419,9 +419,11 @@ type
   private
     { Private declarations }
    fselectednames: filenamearty;
+   finit: boolean;
    procedure updatefiltertext;
 //   function readlist: boolean; //true if ok
-   function tryreadlist(const adir: filenamety): boolean;
+   function tryreadlist(const adir: filenamety;
+                                const errormessage: boolean): boolean;
                   //restores old dir on error
    procedure changedir(const adir: filenamety);
   public
@@ -610,7 +612,12 @@ begin
   if (colwidth <> nil) and (colwidth^ <> 0) then begin
    listview.cellwidth:= colwidth^;
   end;
-  filename.checkvalue;
+  finit:= true;
+  try
+   filename.checkvalue;
+  finally
+   finit:= false;
+  end;
   showhidden.value:= not (fa_hidden in excludeattrib);
   show(true);
   result:= window.modalresult;
@@ -1109,7 +1116,7 @@ end;
 
 procedure tfiledialogfo.changedir(const adir: filenamety);
 begin
- tryreadlist(filepath(adir));
+ tryreadlist(filepath(adir),true);
  with listview do begin
   if filelist.count > 0 then begin
    focuscell(makegridcoord(0,0));
@@ -1188,7 +1195,8 @@ begin
  end;
 end;
 }
-function tfiledialogfo.tryreadlist(const adir: filenamety): boolean;
+function tfiledialogfo.tryreadlist(const adir: filenamety;
+              const errormessage: boolean): boolean;
                   //restores old dir on error
 var
  dirbefore: filenamety;
@@ -1202,9 +1210,11 @@ begin
  except
   on ex: esys do begin
    result:= false;
-   with stockobjects do begin
-     showerror(captions[sc_can_not_read_directory]+ ' ' + esys(ex).text,
-               captions[sc_error]);
+   if errormessage then begin
+    with stockobjects do begin
+      showerror(captions[sc_can_not_read_directory]+ ' ' + esys(ex).text,
+                captions[sc_error]);
+    end;
    end;
   end;
   else begin
@@ -1275,7 +1285,7 @@ begin
   bo1:= true;
  end;
  if bo1 then begin
-  tryreadlist(newdir);
+  tryreadlist(newdir,not finit);
   if fdo_directory in dialogoptions then begin
    avalue:= listview.directory;
   end;
@@ -1285,7 +1295,7 @@ end;
 
 procedure tfiledialogfo.filepathentered(const sender: tobject);
 begin
- tryreadlist(listview.directory);
+ tryreadlist(listview.directory,true);
 // readlist;
 end;
 
@@ -1293,7 +1303,7 @@ procedure tfiledialogfo.dironsetvalue(const sender: TObject;
   var avalue: mseString; var accept: Boolean);
 begin
 //
- accept:= tryreadlist(avalue);
+ accept:= tryreadlist(avalue,true);
 // listview.directory:= avalue;
 end;
 
@@ -1455,7 +1465,7 @@ end;
 
 procedure tfiledialogfo.homeaction(const sender: TObject);
 begin
- tryreadlist(sys_getuserhomedir);
+ tryreadlist(sys_getuserhomedir,true);
  dir.value:= listview.directory;
 // readlist;
 end;
