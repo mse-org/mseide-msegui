@@ -1866,7 +1866,7 @@ begin
  if gcf_smooth in win32gcty(drawinfo.gc.platformdata).d.flags then begin
   checkgpgc(drawinfo.gc,gpfillflags);
   with drawinfo,rect.rect^,win32gcty(gc.platformdata).d do begin
-   gdipfillellipsei(gpgraphic,pgpbrush(gpsolidfill),origin.x+x-cx div 2,
+   gdipfillellipsei(gpgraphic,gpbrush,origin.x+x-cx div 2,
                               origin.y+y-cy div 2,cx,cy);
   end;
  end
@@ -1885,7 +1885,7 @@ begin
   adjustgparc(drawinfo);
   with drawinfo,arc,win32gcty(gc.platformdata).d do begin
    if pieslice then begin
-    gdipfillpiei(gpgraphic,pgpbrush(gpsolidfill),
+    gdipfillpiei(gpgraphic,gpbrush,
            rect^.x,rect^.y,rect^.cx,rect^.cy,startang,extentang);
    end
    else begin
