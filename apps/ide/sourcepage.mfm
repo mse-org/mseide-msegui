@@ -34,9 +34,15 @@ object sourcepage: tsourcepage
     fixcols.count = 1
     fixcols.items = <    
       item
+        color = -1610612731
+        linewidth = 0
         textflags = [tf_right, tf_ycentered]
         numstart = 1
         numstep = 1
+        font.color = -1610612733
+        font.name = 'stf_default'
+        font.xscale = 1
+        font.dummy = 0
       end>
     gridframecolor = -2147483645
     rowcolors.count = 4
@@ -95,7 +101,7 @@ object sourcepage: tsourcepage
     end
     object dataicon: tdataicon
       optionsskin = [osk_framebuttononly]
-      bounds_x = 51
+      bounds_x = 50
       bounds_y = 0
       bounds_cx = 15
       bounds_cy = 19

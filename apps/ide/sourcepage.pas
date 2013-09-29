@@ -1246,7 +1246,11 @@ begin
    grid.rowcolors[0]:= e.statementcolor;
    grid.datarowheight:= edit.font.lineheight;
    int1:= edit.getcanvas.getstringwidth('oo') div 2;
-   grid.fixcols[-1].visible:= e.linenumberson;
+   with grid.fixcols[-1] do begin
+    visible:= e.linenumberson;
+    font.height:= edit.font.height;
+    font.name:= edit.font.name;
+   end;
    if e.rightmarginon then begin
     edit.marginlinecolor:= cl_gray;
     edit.marginlinepos:= int1 * e.rightmarginchars;
