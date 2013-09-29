@@ -1258,6 +1258,10 @@ function askyesno(const atext: msestring; const caption: msestring = '';
                      const defaultbutton: modalresultty = mr_yes;  
                      const minwidth: integer = 0): boolean;
                             //true if yes pressed
+function askconfirmation(const atext: msestring;
+                     const defaultbutton: modalresultty = mr_yes;  
+                     const minwidth: integer = 0): boolean;
+                            //true if yes pressed
 function askyesnocancel(const atext: msestring; const caption: msestring = '';
                      const defaultbutton: modalresultty = mr_yes;  
                      const minwidth: integer = 0): modalresultty;
@@ -1928,6 +1932,15 @@ function askyesno(const atext: msestring; const caption: msestring = '';
                   //true if yes pressed
 begin
  result:= showmessage(atext,caption,[mr_yes,mr_no],defaultbutton,[],
+                          minwidth) = mr_yes;
+end;
+
+function askconfirmation(const atext: msestring;
+                    const defaultbutton: modalresultty = mr_yes;  
+                    const minwidth: integer = 0): boolean;
+                  //true if yes pressed
+begin
+ result:= showmessage(atext,sc(sc_confirmation),[mr_yes,mr_no],defaultbutton,[],
                           minwidth) = mr_yes;
 end;
 

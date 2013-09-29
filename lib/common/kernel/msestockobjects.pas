@@ -179,6 +179,7 @@ type
  end;
 
 function stockobjects: tstockobjects;
+function sc(const acaption: stockcaptionty): msestring;
 
 procedure init;	
 procedure deinit;
@@ -295,6 +296,11 @@ begin
   application.initialize; //stockdata needs initialized application
  end;
  result:= stockobjs;
+end;
+
+function sc(const acaption: stockcaptionty): msestring;
+begin
+ result:= stockobjects.captions[acaption];
 end;
 
 procedure init;
