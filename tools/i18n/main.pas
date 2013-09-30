@@ -27,6 +27,7 @@ uses
  msestringcontainer;
 
 const
+ msei18nversiontext = mseguiversiontext;
  drcext = '_DRC.rc';
  rstext = '_rst';
  variantshift = 5;
@@ -1137,7 +1138,7 @@ end;
 procedure tmainfo.aboutexe(const sender: TObject);
 begin
  showmessage('MSEgui version: '+mseguiversiontext+lineend+
-         'MSEi18n version: ' + mseguiversiontext,'About MSEi18n');
+         'MSEi18n version: ' + msei18nversiontext,'About MSEi18n');
 end;
 
 procedure tmainfo.exitexe(const sender: TObject);
