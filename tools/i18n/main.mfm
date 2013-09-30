@@ -4,8 +4,6 @@ object mainfo: tmainfo
   bounds_y = 283
   bounds_cx = 624
   bounds_cy = 390
-  container.frame.zoomwidthstep = 1
-  container.frame.zoomheightstep = 1
   container.frame.levelo = 1
   container.frame.localprops = [frl_levelo]
   container.frame.sbhorz.facebutton.template = concavex
@@ -574,5 +572,30 @@ object mainfo: tmainfo
   object sysenv: tsysenvmanager
     left = 24
     top = 160
+  end
+  object c: tstringcontainer
+    strings.data = (
+      'name'
+      'type'
+      'notranslate'
+      'comment'
+      'value'
+      '<no project>'
+      'Can not read module'
+      'New translate project'
+      'Exec error'
+      'Making'
+      'overwrites itself'
+      'ERROR'
+      'Finished OK'
+      'Configure MSEi18n'
+      'Data has changed'
+      'Do you wish to save'
+      'CONFIRMATION'
+      ''
+      ''
+    )
+    left = 64
+    top = 200
   end
 end

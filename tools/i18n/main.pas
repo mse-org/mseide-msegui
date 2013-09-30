@@ -21,9 +21,10 @@ interface
 uses
  mseforms,msefiledialog,msestat,msestatfile,msesimplewidgets,msegrids,
  msewidgetgrid,msegraphics,msegraphutils,mselistbrowser,msedataedits,typinfo,
- msedatanodes,msegraphedits,msestream,mseglob,msemenus,classes,mclasses,msetypes,
- msestrings,msethreadcomp,mseguiglob,msegui,mseresourceparser,msedialog,
- msememodialog,mseobjecttext,mseifiglob,msesysenv,msemacros;
+ msedatanodes,msegraphedits,msestream,mseglob,msemenus,classes,mclasses,
+ msetypes,msestrings,msethreadcomp,mseguiglob,msegui,mseresourceparser,
+ msedialog,msememodialog,mseobjecttext,mseifiglob,msesysenv,msemacros,
+ msestringcontainer;
 
 const
  drcext = '_DRC.rc';
@@ -58,6 +59,7 @@ type
    projectfiledialog: tfiledialog;
    coloron: tbooleanedit;
    sysenv: tsysenvmanager;
+   c: tstringcontainer;
    procedure onprojectopen(const sender: tobject);
    procedure onprojectsave(const sender: tobject);
    procedure onprojectedit(const sender: tobject);
@@ -139,7 +141,26 @@ uses
  rtlconsts,mseprocutils,
  msewidgets,mseparser,mseformdatatools,mseresourcetools,
  msearrayutils,msesettings,messagesform,mseclasses,mseeditglob;
-
+type
+ strinconsts = (
+  sc_name,               //0
+  sc_type,               //1
+  sc_notranslate,        //2
+  sc_comment,            //3
+  sc_value,              //4
+  sc_noproject,          //5
+  sc_cannotreadmodule,   //6
+  sc_newtranslateproject,//7
+  sc_execerror,          //8
+  sc_making,             //9
+  sc_overwritesitself,   //10
+  sc_error,              //11
+  sc_finishedok,         //12
+  sc_configuremsei18n,   //13
+  sc_datahaschanged,     //14
+  sc_doyouwishtosave,    //15
+  sc_confirmation        //16
+  );
 const
  translateext = 'trans';
  exportext = 'csv';
@@ -276,11 +297,11 @@ var
  int1: integer;
 begin
  setlength(result,variantshift + projectfo.grid2.rowcount);
- result[0]:= 'name';
- result[1]:= 'type';
- result[2]:= 'notranslate';
- result[3]:= 'comment';
- result[4]:= 'value';
+ result[0]:= c[ord(sc_name)];
+ result[1]:= c[ord(sc_type)];
+ result[2]:= c[ord(sc_notranslate)];
+ result[3]:= c[ord(sc_comment)];
+ result[4]:= c[ord(sc_value)];
  for int1:= 0 to projectfo.grid2.rowcount - 1 do begin
   result[int1 + variantshift]:= projectfo.lang[int1];
  end;
@@ -295,7 +316,7 @@ begin
   mstr1:= mstr1+'*';
  end;
  if projectfo.projectstat.filename = '' then begin
-  mstr1:= mstr1+'<no project>';
+  mstr1:= mstr1+c[ord(sc_noproject)];
  end
  else begin
   mstr1:= mstr1+msefileutils.filename(projectfo.projectstat.filename);
@@ -487,7 +508,7 @@ begin
   result:= node.info.name;
   rootnode.add(node);
  except
-  application.handleexception(self,'Can not read module '+stream.filename+':');
+  application.handleexception(self,c[ord(sc_cannotreadmodule)]+' '+stream.filename+':');
  end;
  memstream.Free;
  stream.Free;
@@ -546,18 +567,7 @@ procedure tmainfo.formatchanged(const sender: tobject);
 begin
  updatedata;
 end;
-{
-procedure tmainfo.writeonexecute(const sender: tobject);
-begin
- try
-  datastream:= ttextdatastream.Create(filename.value+'.'+translateext,fm_create);
-  datastream.writerecord(getcolumnheaders);
-  rootnode.iterate(writerecord);
- finally
-  datastream.Free;
- end;
-end;
-}
+
 procedure tmainfo.doread(stream: ttextdatastream; aencoding: charencodingty);
 var
  aname: string;
@@ -680,26 +690,13 @@ begin
   doexport(stream,charencodingty(projectfo.impexpencoding.value));
  end;
 end;
-{
-procedure tmainfo.readonexecute(const sender: tobject);
-begin
- doread(ttextdatastream.Create(filename.value+'.'+translateext,fm_read));
-end;
-}
+
 procedure tmainfo.clearonexecute(const sender: tobject);
 begin
  rootnode.clear;
  updatedata;
 end;
-{
-procedure tmainfo.scanonexecute(const sender: tobject);
-var
- stream: tmsefilestream;
-begin
- stream:= tmsefilestream.Create('main.pas',fm_read);
- readunit(stream);
-end;
-}
+
 procedure tmainfo.loadproject;
 var
  int1: integer;
@@ -783,7 +780,7 @@ end;
 procedure tmainfo.newprojectexe(const sender: TObject);
 begin
  if checksave and (projectfiledialog.controller.execute(fdk_save,
-                       'New translate project') = mr_ok) then begin
+                       c[ord(sc_newtranslateproject)]) = mr_ok) then begin
   projectfo.free;
   application.createform(tprojectfo, projectfo);
   clearonexecute(nil);
@@ -846,7 +843,7 @@ var
   else begin
    int3:= messagesfo.messages.waitforprocess;
    if int3 <> 0 then begin
-    addmessage('Exec error '+inttostr(int3)+'.');
+    addmessage(c[ord(sc_execerror)]+' '+inttostr(int3)+'.');
     error:= true;
    end
    else begin
@@ -890,7 +887,7 @@ begin
   if error then break;
   rootnode.transferlang(int1);
   try
-   addmessage('Making "'+projectfo.dir[int1]+'".'+lineend);
+   addmessage(c[ord(sc_making)]+' "'+projectfo.dir[int1]+'".'+lineend);
    modulenames:= nil;
    resourcenames:= nil;
    for int2:= 0 to projectfo.grid.rowcount - 1 do begin
@@ -898,7 +895,7 @@ begin
     node:= nil;
     afilename:= filepath(projectfo.dir[int1],msefileutils.filename(projectfo.filename[int2]));
     if issamefilename(afilename,filepath(projectfo.filename[int2])) then begin
-     addmessage(afilename+' overwrites itself.');
+     addmessage(afilename+' '+c[ord(sc_overwritesitself)]+'.');
      error:= true;
      break;
     end;
@@ -1011,10 +1008,10 @@ begin
   end;
  end;
  if error then begin
-  addmessage('**** ERROR ****'+lineend);
+  addmessage('**** '+c[ord(sc_error)]+' ****'+lineend);
  end
  else begin
-  addmessage('Finished OK'+lineend);
+  addmessage(c[ord(sc_finishedok)]+lineend);
  end;
  application.lock;
  messagesfo.running:= false;
@@ -1079,7 +1076,7 @@ end;
 
 procedure tmainfo.configureonexecute(const sender: TObject);
 begin
- editsettings('Configure MSEi18n');
+ editsettings(c[ord(sc_configuremsei18n)]);
 end;
 
 function tmainfo.checksave(cancelonly: boolean = false): boolean;
@@ -1088,9 +1085,9 @@ var
 begin
  result:= true;
  if fdatachanged then begin
-  mstr1:= 'Data has changed.'+lineend+'Do you wish to save?';
+  mstr1:= c[ord(sc_datahaschanged)]+'.'+lineend+c[ord(sc_doyouwishtosave)]+'?';
   if cancelonly then begin
-   if askok(mstr1,'CONFIRMATION') then begin
+   if askok(mstr1,c[ord(sc_confirmation)]) then begin
     writeprojectdata;
    end
    else begin
@@ -1098,7 +1095,7 @@ begin
    end;
   end
   else begin
-   case askyesnocancel(mstr1,'CONFIRMATION') of
+   case askyesnocancel(mstr1,c[ord(sc_confirmation)]) of
     mr_no: begin end;
     mr_yes: begin
      writeprojectdata;
