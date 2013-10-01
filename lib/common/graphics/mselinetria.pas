@@ -81,12 +81,21 @@ const
 //
 //todo: optimize smooth line generation
 //
-procedure calclineshift(const drawinfo: drawinfoty; var info: lineshiftinfoty);
+function calclineshift(const drawinfo: drawinfoty; var info: lineshiftinfoty;
+                   const skipzerolength: boolean): boolean;
+                                  //true if valid
+var
+ dx1,dy1: integer;
 begin
+ result:= true;
  with info do begin
-  v.d.x:= pointb^.x - pointa^.x;
-  v.d.y:= pointb^.y - pointa^.y;
-  v.c:= round(sqrt(v.d.x*v.d.x + v.d.y*v.d.y)); //todo: optimize
+  dx1:= pointb^.x - pointa^.x;
+  dy1:= pointb^.y - pointa^.y;
+  if skipzerolength and (dx1 = 0) and (dy1 = 0) then begin
+   result:= false;
+   exit;
+  end;
+  v.c:= round(sqrt(dx1*dx1 + dy1*dy1)); //todo: optimize
   offsx:= 0;
   offsy:= 0;
   if v.c = 0 then begin
@@ -94,16 +103,18 @@ begin
    v.shift.y:= dist;
   end
   else begin
-   v.shift.x:= (v.d.y*dist) div v.c;
-   v.shift.y:= (v.d.x*dist) div v.c;
+   v.shift.x:= (dy1*dist) div v.c;
+   v.shift.y:= (dx1*dist) div v.c;
    if dist and $10000 <> 0 then begin //odd, shift 0.5 pixel
-    offsx:= abs(v.d.y shl 15) div v.c;
-    offsy:= abs(v.d.x shl 15) div v.c;
+    offsx:= abs(dy1 shl 15) div v.c;
+    offsy:= abs(dx1 shl 15) div v.c;
    end;
   end;
   offs.x:= (drawinfo.origin.x shl 16) + v.shift.x div 2 + offsx;
   offs.y:= (drawinfo.origin.y shl 16) - v.shift.y div 2 + offsy;
   linestart:= pointa;
+  v.d.x:= dx1;
+  v.d.y:= dy1;
  end;
 end;
 
@@ -688,7 +699,7 @@ begin
    end;
    allocbuffer(buffer,int1*2*6*sizeof(pointty));
    dashinit(drawinfo,li);
-   calclineshift(drawinfo,li);
+   calclineshift(drawinfo,li,false);
    shiftpoint(li);
    if (linewidth <> 0) and not closed then begin
     updatestarttria(drawinfo,li);
@@ -710,7 +721,7 @@ begin
     
     ints.da:= li.v.d;
     pt2:= li.v.shift;
-    calclineshift(drawinfo,li);
+    calclineshift(drawinfo,li,false);
     shiftpoint(li);
     po0:= li.dest;
     ints.db:= li.v.d;
@@ -820,7 +831,7 @@ begin
    int1:= int1*pointcount+linewidth;  //for round caps
    allocbuffer(buffer,int1*(2*sizeof(pointty)));
    li.dest:= buffer.buffer;
-   calclineshift(drawinfo,li); 
+   calclineshift(drawinfo,li,false); 
    shiftpoint(li);
    if not closed then begin
     updatestartstrip(drawinfo,li);
@@ -832,34 +843,40 @@ begin
     shiftpointa(li); //no source increment
     ints.da:= li.v.d;
     pt2:= li.v.shift;
-    calclineshift(drawinfo,li);
-    shiftpoint(li);
-    ints.db:= li.v.d;
-    ints.p0:= li.dest-4;
-    ints.p1:= li.dest-2;
-    if intersect(ints) then begin
-     if trf_joinround in triaflags then begin
-      roundcapstartstrip(drawinfo,li);
-      ints.p1:= li.dest-1;
-     end
-     else begin
-      pt1:= subpoint(ints.isect,ints.p1^); //intersection - bstart
-      bo1:= ((pt1.x > 0) xor (li.v.d.x > 0)) or 
-                       ((pt1.y > 0) xor (li.v.d.y > 0));  //outer
-      bo2:= (trf_joinbevel in triaflags) or 
-               (trf_joinmiter in triaflags) and isbevelang(li,pt2);
-      if bo1 and not bo2 then begin //move to intersection
-       ints.p1^:= ints.isect;
-       (ints.p1-2)^:= ints.isect;
-      end;
-      inc(ints.p0);
-      inc(ints.p1);
-      intersect2(ints);
-      if not bo1 and not bo2 then begin //move to intersection
-       ints.p1^:= ints.isect;
-       (ints.p1-2)^:= ints.isect;
+    if calclineshift(drawinfo,li,true) then begin
+     shiftpoint(li);
+     ints.db:= li.v.d;
+     ints.p0:= li.dest-4;
+     ints.p1:= li.dest-2;
+     if intersect(ints) then begin
+      if trf_joinround in triaflags then begin
+       roundcapstartstrip(drawinfo,li);
+       ints.p1:= li.dest-1;
+      end
+      else begin
+       pt1:= subpoint(ints.isect,ints.p1^); //intersection - bstart
+       bo1:= ((pt1.x > 0) xor (li.v.d.x > 0)) or 
+                        ((pt1.y > 0) xor (li.v.d.y > 0));  //outer
+       bo2:= (trf_joinbevel in triaflags) or 
+                (trf_joinmiter in triaflags) and isbevelang(li,pt2);
+       if bo1 and not bo2 then begin //move to intersection
+        ints.p1^:= ints.isect;
+        (ints.p1-2)^:= ints.isect;
+       end;
+       inc(ints.p0);
+       inc(ints.p1);
+       intersect2(ints);
+       if not bo1 and not bo2 then begin //move to intersection
+        ints.p1^:= ints.isect;
+        (ints.p1-2)^:= ints.isect;
+       end;
       end;
      end;
+    end
+    else begin //zero length line
+     dec(li.dest,2);
+     li.pointa:= li.pointb;
+     inc(li.pointb);
     end;
    end;
    if closed then begin
@@ -893,7 +910,7 @@ begin
   if df_dashed in gc.drawingflags then begin
    dashinit(drawinfo,li);
    for int1:= 0 to (count div 2)-1 do begin
-    calclineshift(drawinfo,li);
+    calclineshift(drawinfo,li,false);
     shiftpoint(li);
     if linewidth <> 0 then begin
      updatestarttria(drawinfo,li);
@@ -906,7 +923,7 @@ begin
   else begin
    li.dest:= buffer.buffer;
    for int1:= 0 to (count div 2)-1 do begin
-    calclineshift(drawinfo,li);
+    calclineshift(drawinfo,li,false);
     shiftpoint(li);
     updatestarttria(drawinfo,li);
     inc(li.dest);
