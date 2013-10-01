@@ -11,7 +11,7 @@ unit msegdiplus;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- windows,msestrings,msectypes,sysutils;
+ windows,msestrings,msectypes,sysutils,msetypes;
  
 const
  gdipluslib: array[0..0] of filenamety = ('gdiplus.dll');

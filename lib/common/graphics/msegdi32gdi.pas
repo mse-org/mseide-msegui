@@ -9,6 +9,7 @@
 }
 unit msegdi32gdi;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+{$goto on}
 interface
 uses
  msegraphics,msetypes,windows,msestrings,mseguiglob;
