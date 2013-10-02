@@ -555,6 +555,7 @@ function stringtoutf8(const value: msestring): utf8string; overload;
 function stringtoutf8(const value: pmsechar;
                             const count: integer): utf8string; overload;
 function utf8tostring(const value: pchar): msestring; overload;
+function utf8tostring(const value: lstringty): msestring; overload;
 function utf8tostring(const value: utf8string): msestring; overload;
 function checkutf8(const value: ansistring): boolean;
               //true if valid utf8
@@ -916,6 +917,11 @@ end;
 function utf8tostring(const value: pchar): msestring;
 begin
  result:= doutf8tostring(pchar(value),length(value));
+end;
+
+function utf8tostring(const value: lstringty): msestring;
+begin
+ result:= doutf8tostring(value.po,value.len);
 end;
 
 function stringtolatin1(const value: msestring): string;
