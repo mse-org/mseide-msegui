@@ -254,7 +254,7 @@ ZeosLib
 *******
 Zeoslib needs to be pached in order to be used with MSEgui 3.0. A patched version
 is here:
-https://gitorious.org/mseuniverse
+https://gitorious.org/mseuniverse zeos-msegui, branch mse.
 In order to install the Zeos components add the path to the Zeos source to 'Project'-'Options'-'Make'-'Directories' and compile the IDE with -dmse_with_zeoslib -dMSEgui.
 There is a predefined IDE project apps/ide/mseide_zeos.prj, update 'Project'-
 'Options'-'Macros' according to your installation.
