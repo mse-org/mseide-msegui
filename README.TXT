@@ -1,6 +1,6 @@
 MSEide+MSEgui Pascal Cross Platform GUI Development System.
 
-2013-09-27 Version 3.0
+2013-10-03 Version 3.1
 Copyright (c) 1999-2013 by Martin Schreiber
 
 * 2.8.6 -> 3.0:
@@ -249,6 +249,15 @@ tsqlite3connection field type mapping:
 | TEXT               | TEXT dso_stringmemo | ftstring    | msestring   |
 | BLOB               | BLOB                | ftblob      | string      |
 +--------------------+---------------------+-------------+-------------+
+
+ZeosLib
+*******
+Zeoslib needs to be pached in order to be used with MSEgui 3.0. A patched version
+is here:
+https://gitorious.org/mseuniverse
+In order to install the Zeos components add the path to the Zeos source to 'Project'-'Options'-'Make'-'Directories' and compile the IDE with -dmse_with_zeoslib -dMSEgui.
+There is a predefined IDE project apps/ide/mseide_zeos.prj, update 'Project'-
+'Options'-'Macros' according to your installation.
 
 Have a lot of fun!
 
