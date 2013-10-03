@@ -129,8 +129,8 @@ messageoutputfile=
 makecommand=${COMPILER}
 makedir=
 unitdirs=5
- ${zeosdir}src/*/
- ${zeosdir}src/
+ ${zeosdir}/src/*/
+ ${zeosdir}/src/
  ${MSELIBDIR}kernel/$TARGETOSDIR
  ${MSELIBDIR}kernel/
  ${MSELIBDIR}*/
@@ -142,7 +142,7 @@ targpref=-o
 befcommand=0
 aftcommand=0
 makeoptions=4
- -Fcutf8 -dmse_with_zeoslib -dMSEgui ${fpcflags}
+ -Fcutf8 -dmse_with_zeoslib -dMSEgui
  -gl
  -B
  -O2 -XX -Xs -CX
@@ -326,7 +326,7 @@ macroon=1
 macronames=1
  zeosdir
 macrovalues=1
- <Enter the Zeoslib checkout directory>
+ <Enter the Zeoslib clone directory>
 macrogroup=0
 groupcomments=6
  
@@ -427,8 +427,8 @@ beforeload=
 afterload=
 beforerun=
 sourcedirs=5
- ${zeosdir}src/*/
- ${zeosdir}src/
+ ${zeosdir}/src/*/
+ ${zeosdir}/src/
  ${MSELIBDIR}kernel/$TARGET/
  ${MSELIBDIR}*/
  ./
@@ -523,8 +523,10 @@ cy=0
 progparamhistory=0
 envvarons=0
 [layout]
-windowlayout=567
+windowlayout=540
  [mainfo.openform]
+ filenames=0
+ filehistory=0
  filefilterindex=0
  filefilter=*.mfm
  filecolwidth=174
@@ -533,6 +535,9 @@ windowlayout=567
  cx=0
  cy=0
  [mainfo.projectfiledia]
+ filenames=0
+ lastdir=
+ filehistory=0
  filefilterindex=0
  filefilter=*.prj
  filecolwidth=130
@@ -542,6 +547,7 @@ windowlayout=567
  cy=0
  [mainfo.openfile]
  filenames=0
+ filehistory=0
  filefilterindex=2
  filefilter="*.pp" "*.pas" "*.inc" "*.dpr"
  filecolwidth=174
@@ -555,7 +561,7 @@ windowlayout=567
  [mainfo]
  splitdir=0
  useroptions=123
- stackedunder=
+ stackedunder=mainfo.panel1
  parent=
  mdistate=0
  nx=0
@@ -569,7 +575,7 @@ windowlayout=567
  rcx=0
  rcy=0
  wsize=0
- active=1
+ active=0
  visible=1
  [targetconsolefo]
  splitdir=0
@@ -610,7 +616,7 @@ windowlayout=567
  [memoryfo]
  splitdir=0
  useroptions=16507
- stackedunder=componentstorefo
+ stackedunder=cpui386fo
  parent=
  mdistate=0
  nx=0
@@ -656,7 +662,7 @@ windowlayout=567
  [findinfilefo]
  splitdir=0
  useroptions=16491
- stackedunder=cpui386fo
+ stackedunder=disassfo
  parent=
  mdistate=0
  nx=0
@@ -761,7 +767,7 @@ windowlayout=567
  [breakpointsfo]
  splitdir=0
  useroptions=16491
- stackedunder=projecttreefo
+ stackedunder=watchpointsfo
  parent=
  mdistate=0
  nx=0
@@ -782,7 +788,7 @@ windowlayout=567
  [objectinspectorfo]
  splitdir=0
  useroptions=16491
- stackedunder=disassfo
+ stackedunder=breakpointsfo
  parent=
  mdistate=0
  nx=0
@@ -928,6 +934,9 @@ windowlayout=567
  width3=98
  sortdescend3=0
  [componentstorefo.storefiledialog]
+ filenames=1
+  /home/mse/packs/standard/git/mseide-msegui/apps/ide/compstore/
+ lastdir=/home/mse/packs/standard/git/mseide-msegui/apps/ide/compstore/
  filehistory=0
  filefilterindex=0
  filefilter=
@@ -937,6 +946,9 @@ windowlayout=567
  cx=0
  cy=0
  [componentstorefo.groupfiledialog]
+ filenames=1
+  /home/mse/packs/standard/git/mseide-msegui/apps/ide/compstore/
+ lastdir=/home/mse/packs/standard/git/mseide-msegui/apps/ide/compstore/
  filehistory=0
  filefilterindex=0
  filefilter=
@@ -959,7 +971,7 @@ windowlayout=567
  [componentpalettefo]
  splitdir=0
  useroptions=24683
- stackedunder=mainfo.panel1
+ stackedunder=mainfo
  parent=
  mdistate=0
  nx=0
@@ -1005,7 +1017,7 @@ windowlayout=567
  ncy=0
  x=0
  y=0
- cx=986
+ cx=785
  cy=491
  rcx=0
  rcy=0
@@ -1017,7 +1029,7 @@ windowlayout=567
  irqoff=0
  splitdir=0
  useroptions=16491
- stackedunder=watchfo
+ stackedunder=componentstorefo
  parent=
  mdistate=0
  nx=0
@@ -1036,7 +1048,7 @@ windowlayout=567
  [mainfo.panel1]
  splitdir=2
  useroptions=33586667
- stackedunder=mainfo
+ stackedunder=
  parent=
  mdistate=0
  nx=0
@@ -1045,12 +1057,12 @@ windowlayout=567
  ncy=0
  x=4
  y=201
- cx=996
+ cx=795
  cy=491
  rcx=0
  rcy=0
  wsize=0
- active=0
+ active=1
  visible=1
 [edit]
 hintwidth=0
