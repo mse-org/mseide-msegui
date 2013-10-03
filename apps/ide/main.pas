@@ -300,6 +300,9 @@ uses
 {$ifdef mse_with_pascalscript}
  regpascalscript,
 {$endif}
+{$ifdef mse_with_zeoslib}
+ regzeoslib,
+{$endif}
  regdesignutils,regsysutils,regcrypto,regserialcomm,regexperimental,
 {$ifndef mse_no_deprecated}
  regdeprecated,

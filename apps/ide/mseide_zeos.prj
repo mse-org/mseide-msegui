@@ -123,7 +123,7 @@ debugoptions=
 debugtarget=
 defaultmake=1
 makeoptions=4
- -l -Mdelphi -Sh -Fcutf8 -dmse_with_zeoslib
+ -Fcutf8 -dmse_with_zeoslib -dMSEgui
  -gl
  -B
  -O2 -XX -Xs -CX
@@ -149,7 +149,7 @@ groupcomments=6
 sourcedirs=5
  ${zeosdir}src/*/
  ${zeosdir}src/
- ${MSELIBDIR}kernel/$TARGET/
+ ${MSELIBDIR}kernel/$TARGETOSDIR/
  ${MSELIBDIR}*/
  ./
 defines=0
@@ -157,7 +157,7 @@ defineson=0
 unitdirs=5
  ${zeosdir}src/*/
  ${zeosdir}src/
- ${MSELIBDIR}kernel/$TARGET/
+ ${MSELIBDIR}kernel/$TARGETOSDIR/
  ${MSELIBDIR}kernel/
  ${MSELIBDIR}*/
 unitdirson=5
@@ -330,17 +330,6 @@ windowlayout=322
  useroptions=6048
  [mainfo.openfile]
  filenames=0
- filehistory=10
-  /home/mse/packs/standard/svn/zeos/trunk/src/Zeos.inc
-  /home/mse/packs/standard/svn/zeos/trunk/src/dbc/ZDbcInterbase6Utils.pas
-  /home/mse/packs/standard/svn/mse/trunk/lib/common/regcomponents/regzeoslib.pas
-  /home/mse/packs/standard/svn/mse/trunk/lib/common/widgets/mseforms.pas
-  /home/mse/packs/standard/svn/mse/trunk/lib/common/db/msesqlite3conn.pas
-  /home/mse/packs/standard/svn/mse/trunk/lib/common/db/sqlite3dyn.pas
-  /home/mse/packs/standard/svn/mse/trunk/lib/common/db/mibconnection.pas
-  /home/mse/packs/standard/svn/mse/trunk/apps/ide/formdesigner.pas
-  /home/mse/packs/standard/svn/mse/trunk/lib/common/db/msememds.pas
-  /home/mse/packs/standard/svn/mse/trunk/lib/common/db/msesqldb.pas
  filefilterindex=2
  filecolwidth=174
  [actionsmo.watchesonact]
