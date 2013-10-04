@@ -2067,6 +2067,7 @@ begin
      inc(int2);
     end;
     ar2[int1]:= fitems[int2]; //we hope the best
+    fitems[int2]:= nil;
    end;
   end;
   fitems:= persistentarty(ar2);
