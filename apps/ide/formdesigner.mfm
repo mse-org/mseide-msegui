@@ -87,7 +87,7 @@ object formdesignerfo: tformdesignerfo
   top = 180
   moduleclassname = 'tmseform'
   object popupme: tpopupmenu
-    menu.submenu.count = 29
+    menu.submenu.count = 30
     menu.submenu.items = <    
       item
         caption = 'Show objectinspector'
@@ -244,6 +244,11 @@ object formdesignerfo: tformdesignerfo
         onexecute = dotouch
       end    
       item
+        caption = 'Touch all Forms'
+        state = [as_localcaption, as_localonexecute]
+        onexecute = touchallexe
+      end    
+      item
         caption = 'Insert Submodule'
         name = 'insertsub'
         state = [as_localcaption, as_localonexecute]
@@ -287,6 +292,7 @@ object formdesignerfo: tformdesignerfo
     strings.data = (
       'Do you wish to revert to inherited'
       'the selected component?'
+      'Do you want to touch all loaded forms?'
     )
     left = 64
     top = 136

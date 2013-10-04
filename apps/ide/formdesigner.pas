@@ -137,6 +137,7 @@ type
    procedure hidewidgetexe(const sender: TObject);
    procedure togglehideexe(const sender: TObject);
    procedure showallexe(const sender: TObject);
+   procedure touchallexe(const sender: TObject);
   private
    fdesigner: tdesigner;
    fform: twidget;
@@ -374,8 +375,9 @@ uses
 
 type
  stringconsts = (
-  wishrevert,        //0 Do you wish to revert to inherited
-  selectedcomp       //1 the selected component?
+  sc_wishrevert,        //0 Do you wish to revert to inherited
+  sc_selectedcomp,      //1 the selected component?
+  sc_touchall           //2 Do you want to touch all loaded forms?  
  );
  
  tcomponent1 = class(tcomponent);
@@ -3182,6 +3184,13 @@ begin
  tdesignwindow(window).domodified;
 end;
 
+procedure tformdesignerfo.touchallexe(const sender: TObject);
+begin
+ if askyesno(c[ord(sc_touchall)]) then begin
+  fdesigner.allmoduleschanged;
+ end;
+end;
+
 procedure tformdesignerfo.dobringtofront(const sender: tobject);
 begin
  with tdesignwindow(window) do begin
@@ -3369,7 +3378,7 @@ end;
 
 procedure tformdesignerfo.revertexe(const sender: TObject);
 begin
- if askok(c[ord(wishrevert)]+lineend+c[ord(selectedcomp)]) then begin
+ if askok(c[ord(sc_wishrevert)]+lineend+c[ord(sc_selectedcomp)]) then begin
   fdesigner.revert(tdesignwindow(window).fselections[0]);
   objectinspectorfo.refresh;
  end;
