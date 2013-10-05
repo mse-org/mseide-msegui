@@ -3181,13 +3181,14 @@ end;
 
 procedure tformdesignerfo.dotouch(const sender: TObject);
 begin
- tdesignwindow(window).domodified;
+ fdesigner.touch(fmodule);
+// tdesignwindow(window).domodified;
 end;
 
 procedure tformdesignerfo.touchallexe(const sender: TObject);
 begin
- if askyesno(c[ord(sc_touchall)]) then begin
-  fdesigner.allmoduleschanged;
+ if askconfirmation(c[ord(sc_touchall)]) then begin
+  fdesigner.touchall;
  end;
 end;
 

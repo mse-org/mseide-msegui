@@ -48,6 +48,7 @@ type
   procedure setmoduleoptions(const aoptions: moduleoptionsty);
   property moduleoptions: moduleoptionsty read getmoduleoptions
                                                  write setmoduleoptions;
+  procedure updatecaption;
  end;
  
  methodinfoty = record
@@ -422,6 +423,7 @@ type
    procedure internaldoswapmethodpointers(const aroot: tcomponent;
                       const ainstance: tobject; const ainit: boolean);
   {$endif}
+   procedure dotouch(const amodule: pmoduleinfoty);
   public
    constructor create; reintroduce;
    destructor destroy; override;
@@ -433,7 +435,8 @@ type
    
    function beforemake: boolean; //true if ok
    procedure modulechanged(const amodule: pmoduleinfoty);
-   procedure allmoduleschanged;
+   procedure touch(const amodule: tmsecomponent);
+   procedure touchall;
    function changemodulename(const filename: msestring; const avalue: string): string;
    function changemoduleclassname(const filename: msestring; const avalue: string): string;
    function changeinstancevarname(const filename: msestring; const avalue: string): string;
@@ -3452,12 +3455,25 @@ begin
  componentmodified(amodule^.instance);
 end;
 
-procedure tdesigner.allmoduleschanged;
+procedure tdesigner.dotouch(const amodule: pmoduleinfoty);
+begin
+ with amodule^ do begin
+  modified:= true;
+  designformintf.updatecaption
+ end;
+end;
+
+procedure tdesigner.touch(const amodule: tmsecomponent);
+begin
+ dotouch(modules.findmodule(amodule));
+end;
+
+procedure tdesigner.touchall;
 var
  int1: integer;
 begin
  for int1:= 0 to modules.count - 1 do begin
-  componentmodified(modules.itempo[int1]^.instance);
+  dotouch(modules.itempo[int1]);
  end;
 end;
 
