@@ -184,7 +184,7 @@ type
   published
    property datalist stored false; //stored by defineproperties
  end;
-
+ widgetcolarty = array of twidgetcol;
  twidgetfixrow = class(tfixrow)
  end;
   
@@ -205,6 +205,7 @@ type
  twidgetcols = class(tdatacols)
   private
    fcolorder: stringarty;
+   fcolcount: integer;
    function getcols(const index: integer): twidgetcol;
    procedure unregisterchildwidget(const child: twidget);
    procedure updatecolorder;
@@ -214,6 +215,7 @@ type
    procedure updatedatastate(var accepted: boolean); override;
    procedure defineproperties(filer: tfiler); override;
    function getcollectionname(const aindex: integer): string; override;
+   procedure setcount1(acount: integer; doinit: boolean); override;
   public
    constructor create(const aowner: tcustomwidgetgrid);
    class function getitemclasstype: persistentclassty; override;
@@ -2026,6 +2028,88 @@ begin
  inherited;
 end;
 
+procedure twidgetcols.updatecolorder;
+var
+ ar1,ar2: widgetcolarty;
+ int1,int2: integer;
+begin
+ if (count > 0) and (fcolorder <> nil) then begin //inherited
+  if length(fcolorder) > count then begin
+   fcolcount:= length(fcolorder);
+   inherited setcount1(fcolcount,true);
+  end;
+  ar1:= widgetcolarty(copy(fitems));
+  setlength(ar2,fcolcount); //new count
+  setlength(fcolorder,fcolcount);
+  for int1:= 0 to high(fcolorder) do begin
+   if fcolorder[int1] <> '' then begin
+    for int2:= 0 to high(ar1) do begin
+     if (ar1[int2] <> nil) and
+         (ar1[int2].fwidgetname = fcolorder[int1]) then begin
+      ar2[int1]:= ar1[int2];
+      ar1[int2]:= nil;
+      break;
+     end;
+    end;
+   end;
+  end;
+  int2:= 0;
+  for int1:= 0 to high(ar1) do begin
+   if (ar1[int1] <> nil) and 
+        (ar1[int1].fwidgetname <> '') then begin
+                  //new inherited widget
+    additem(pointerarty(ar2),ar1[int1]);
+    ar1[int1]:= nil;
+   end;
+  end;
+  int1:= length(ar2)-fcolcount;
+  if int1 > 0 then begin
+   fcolcount:= length(ar2);
+   int2:= count;
+   inherited setcount1(int2+int1,true);
+   setlength(ar1,length(fitems));
+   for int1:= int2 to high(fitems) do begin
+    ar1[int1]:= twidgetcol(fitems[int1]); //new inherited
+   end;
+  end;
+  int2:= 0;
+  for int1:= 0 to high(ar2) do begin
+   if ar2[int1] = nil then begin
+    while ar1[int2] = nil do begin
+     inc(int2);
+    end;
+    ar2[int1]:= ar1[int2]; //new
+    ar1[int2]:= nil;
+   end;
+  end;
+  for int1:= 0 to high(ar1) do begin
+   ar1[int1].free; //not used
+  end;
+  fitems:= persistentarty(ar2);
+  fcolorder:= nil;
+  clearorder; //new order is default  
+ end
+ else begin
+  inherited setcount1(fcolcount,true);
+ end;
+end;
+
+procedure twidgetcols.setcount1(acount: integer; doinit: boolean);
+begin
+ fcolcount:= acount;
+ if (acount = 0) or 
+  not ((fgrid.componentstate*[csdesigning,csreading] = [csdesigning,csreading])
+                                         and (acount < count)) then begin
+  inherited; //else delay to updatecolorder, possibly refreshing inherited
+ end;
+end;
+
+procedure twidgetcols.readorder(reader: treader);
+begin
+ readstringar(reader,fcolorder);
+ updatecolorder;
+end;
+
 procedure twidgetcols.writeorder(writer: twriter);
 var
  ar1: stringarty;
@@ -2036,50 +2120,6 @@ begin
   ar1[int1]:= twidgetcol(fitems[int1]).fwidgetname;
  end;
  writestringar(writer,ar1);
-end;
-
-procedure twidgetcols.updatecolorder;
-var
- ar2: pointerarty;
- int1,int2: integer;
-begin
- if (count > 0) and (fcolorder <> nil) then begin //inherited
-  if length(fcolorder) > count then begin
-   count:= length(fcolorder);
-  end;
-  setlength(ar2,count);
-  for int1:= 0 to high(fcolorder) do begin
-   if fcolorder[int1] <> '' then begin
-    for int2:= 0 to high(ar2) do begin
-     if (fitems[int2] <> nil) and
-         (twidgetcol(fitems[int2]).fwidgetname = fcolorder[int1]) then begin
-      ar2[int1]:= fitems[int2];
-      fitems[int2]:= nil;
-      break;
-     end;
-    end;
-   end;
-  end;
-  int2:= 0;
-  for int1:= 0 to high(ar2) do begin
-   if ar2[int1] = nil then begin
-    while fitems[int2] = nil do begin
-     inc(int2);
-    end;
-    ar2[int1]:= fitems[int2]; //we hope the best
-    fitems[int2]:= nil;
-   end;
-  end;
-  fitems:= persistentarty(ar2);
-  fcolorder:= nil;
-  clearorder; //new order is default  
- end;
-end;
-
-procedure twidgetcols.readorder(reader: treader);
-begin
- readstringar(reader,fcolorder);
- updatecolorder;
 end;
 
 procedure twidgetcols.defineproperties(filer: tfiler);
@@ -2094,7 +2134,7 @@ begin
     bo1:= false;
     for int1:= 0 to count-1 do begin
      if twidgetcol(fitems[int1]).fwidgetname <> 
-                            twidgetcol(self.fitems[int1]).fwidgetname then begin
+                     twidgetcol(self.fitems[int1]).fwidgetname then begin
       bo1:= true;
       break;
      end;
@@ -3021,6 +3061,7 @@ var
  str1: string;
 // intf1: igridwidget;
 begin
+ twidgetcols(fdatacols).updatecolorder;
  inc(tgridcontainer(fcontainer2).flayoutupdating);
  include(fstate,gs_layoutupdating);
  try
