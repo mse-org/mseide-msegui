@@ -73,7 +73,9 @@ const
   '&Non',         //mr_no
   '&Tous',        //mr_all
   'A&ucun',       //mr_noall
-  '&Ignorer'      //mr_ignore
+  '&Ignorer',     //mr_ignore
+  '&Skip',        //mr_skip
+  'Skip &all'     //mr_skipall
   );
 
  fr_modalresulttextnoshortcut: defaultmodalresulttextty =
@@ -91,7 +93,9 @@ const
   'Non',        //mr_no
   'Tous',       //mr_all
   'Aucun',      //mr_noall
-  'Ignorer'     //mr_ignore
+  'Ignorer',    //mr_ignore
+  'Skip',      //mr_skip
+  'Skip all'   //mr_skipall
   );
 
  fr_stockcaption: stockcaptionaty = (

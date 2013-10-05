@@ -424,6 +424,7 @@ type
                       const ainstance: tobject; const ainit: boolean);
   {$endif}
    procedure dotouch(const amodule: pmoduleinfoty);
+   procedure handledesignexception(const sender: tobject);
   public
    constructor create; reintroduce;
    destructor destroy; override;
@@ -2778,6 +2779,7 @@ begin
  ondesignchanged:= {$ifdef FPC}@{$endif}componentmodified;
  onfreedesigncomponent:= {$ifdef FPC}@{$endif}deletecomponent;
  ondesignvalidaterename:= {$ifdef FPC}@{$endif}validaterename;
+ ondesignexception:= @handledesignexception;
 end;
 
 destructor tdesigner.destroy;
@@ -3457,6 +3459,7 @@ end;
 
 procedure tdesigner.dotouch(const amodule: pmoduleinfoty);
 begin
+ fallsaved:= false;
  with amodule^ do begin
   modified:= true;
   designformintf.updatecaption
@@ -3474,6 +3477,33 @@ var
 begin
  for int1:= 0 to modules.count - 1 do begin
   dotouch(modules.itempo[int1]);
+ end;
+end;
+
+procedure tdesigner.handledesignexception(const sender: tobject);
+var
+ exceptobj: tobject;
+ mstr1: msestring;
+begin
+ exceptobj:= exceptobject;
+ if exceptobj is exception then begin
+  if not (exceptobj is eabort) then begin
+   if not application.ismainthread then begin
+    application.showasyncexception(exception(exceptobj));
+   end
+   else begin
+    mstr1:= exception(exceptobj).message;
+    case showmessage(mstr1,'Exception'{$ifdef FPC},
+       [mr_skip,mr_skipall,mr_cancel],mr_skip,[],0,lineend+
+              getexceptiontext(exceptobj,
+                   exceptaddr,exceptframecount,exceptframes){$endif}) of
+     mr_skipall: begin
+     end;
+     mr_cancel: begin
+     end;
+    end;
+   end;
+  end;
  end;
 end;
 

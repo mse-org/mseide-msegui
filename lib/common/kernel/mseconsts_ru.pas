@@ -38,7 +38,9 @@ const
   '&'#1053#1077#1090 ,                            //mr_no => &Net
   '&'#1042#1089#1077 ,                            //mr_all => &Vse
   #1053'&'#1080#1082#1072#1082#1080#1077 ,        //mr_noall =>  N&ikakie
-  #1053#1077#1074#1072'&'#1078#1085#1086          //mr_ignore => Neva&zhno
+  #1053#1077#1074#1072'&'#1078#1085#1086,         //mr_ignore => Neva&zhno
+  '&Skip',    //mr_skip
+  'Skip &all' //mr_skipall
  );
 
  ru_modalresulttextnoshortcut: defaultmodalresulttextty =
@@ -57,7 +59,9 @@ const
   #1053#1077#1090 ,                               //mr_no => Net
   #1042#1089#1077 ,                               //mr_all => Vse
   #1053#1080#1082#1072#1082#1080#1077 ,           //mr_noall =>  Nikakie  
-  #1053#1077#1074#1072#1078#1085#1086	          //mr_ignore => Nevazhno
+  #1053#1077#1074#1072#1078#1085#1086,	          //mr_ignore => Nevazhno
+  'Skip',    //mr_skip
+  'Skip all' //mr_skipall
   );
 
  ru_stockcaption: stockcaptionaty = (

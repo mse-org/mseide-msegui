@@ -37,7 +37,9 @@ const
   '&'#1049#1118#1082 ,                            //mr_no => &Net
   #1041#1072'&'#1088#1095#1072 ,                  //mr_all => &Vse
   #1202#1077'&'#1095' '#1073#1080#1088#1080 ,     //mr_noall =>  N&ikakie
-  '&'#1052#1072#1085' '#1101#1090#1080#1096       //mr_ignore => Neva&zhno
+  '&'#1052#1072#1085' '#1101#1090#1080#1096,       //mr_ignore => Neva&zhno
+  '&Skip',    //mr_skip
+  'Skip &all' //mr_skipall
  );
 
  uzcyr_modalresulttextnoshortcut: defaultmodalresulttextty =
@@ -55,7 +57,9 @@ const
   #1049#1118#1082 ,                          //mr_no => Net
   #1041#1072#1088#1095#1072 ,                //mr_all => Vse
   #1202#1077#1095' '#1073#1080#1088#1080 ,   //mr_noall =>  Nikakie  
-  #1052#1072#1085' '#1101#1090#1080#1096	 //mr_ignore => Nevazhno
+  #1052#1072#1085' '#1101#1090#1080#1096,	 //mr_ignore => Nevazhno
+  'Skip',    //mr_skip
+  'Skip all' //mr_skipall
   );
 
  uzcyr_stockcaption: stockcaptionaty = (

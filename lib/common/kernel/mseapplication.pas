@@ -407,6 +407,7 @@ var
  ondesignchanged: notifyeventty;
  onfreedesigncomponent: componenteventty;
  ondesignvalidaterename: validaterenameeventty;
+ ondesignexception: notifyeventty;
  
 implementation
 uses
@@ -1833,7 +1834,12 @@ begin
     try
      setowneractive(factive);
     except
-     application.handleexception(fowner);
+     if assigned(ondesignexception) then begin
+      ondesignexception(fowner);
+     end
+     else begin
+      application.handleexception(fowner);
+     end;
     end;
    end
    else begin

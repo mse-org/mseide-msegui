@@ -33,7 +33,9 @@ const
   '&Tidak',         //mr_no
   '&Semua',       //mr_all
   'Tid&ak Semua',    //mr_noall
-  '&Abaikan'     //mr_ignore
+  '&Abaikan',     //mr_ignore
+  '&Skip',    //mr_skip
+  'Skip &all' //mr_skipall
   );
 
  id_modalresulttextnoshortcut: defaultmodalresulttextty =
@@ -51,7 +53,9 @@ const
   'Tidak',         //mr_no
   'Semua',       //mr_all
   'Tidak Semua',    //mr_noall
-  'Abaikan'     //mr_ignore
+  'Abaikan',     //mr_ignore
+  'Skip',    //mr_skip
+  'Skip all' //mr_skipall
   );
 
  id_stockcaption: stockcaptionaty = (

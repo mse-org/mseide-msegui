@@ -32,7 +32,9 @@ const
   '&Nein',       //mr_no
   'A&lle',       //mr_all
   'N&ein alle',  //mr_noall
-  '&Ignorieren'  //mr_ignore
+  '&Ignorieren',  //mr_ignore
+  #220'bers&pringen',    //mr_skip
+  '&Alles '#252'berspringen' //mr_skipall
   );
 
  de_modalresulttextnoshortcut: defaultmodalresulttextty =
@@ -50,7 +52,9 @@ const
   'Nein',       //mr_no
   'Alle',       //mr_all
   'Nein alle',  //mr_noall
-  'Ignorieren'  //mr_ignore
+  'Ignorieren',  //mr_ignore
+  #220'berspringen',    //mr_skip
+  'Alles '#252'berspringen' //mr_skipall
   );
 
  de_stockcaption: stockcaptionaty = (
