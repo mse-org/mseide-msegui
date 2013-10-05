@@ -351,7 +351,7 @@ type
   dochi: boolean;
  end;
 
- designerstatety = (des_pasting,des_inheritednewmodule);
+ designerstatety = (des_pasting,des_inheritednewmodule,des_skipall);
  designerstatesty = set of designerstatety;
   
  tdesigner = class(tactcomponent,idesigner)
@@ -379,6 +379,7 @@ type
    fcreatecomponenttag: integer; //incremented by createcoponent
    ffindcompclasstag: integer;       //stamp of createcomponenttag
    fcheckfixups: moduleinfopoarty;
+   fskipall: integer;
    function formfiletoname(const filename: msestring): msestring;
   {$ifdef mse_nomethodswap}
    procedure setmethodproperty(reader: treader;
@@ -540,6 +541,8 @@ type
                       out methodinfo: pmethodinfoty);
    function getmodules: tmodulelist;
 
+   procedure beginskipall;
+   procedure endskipall;
    function loadformfile(filename: msestring;
                                 const skipexisting: boolean): pmoduleinfoty;
    function saveformfile(const modulepo: pmoduleinfoty;
@@ -3480,10 +3483,27 @@ begin
  end;
 end;
 
+procedure tdesigner.beginskipall;
+begin
+ if fskipall = 0 then begin
+  exclude(fstate,des_skipall);
+ end;
+ inc(fskipall);
+end;
+
+procedure tdesigner.endskipall;
+begin
+ dec(fskipall);
+ if fskipall = 0 then begin
+  exclude(fstate,des_skipall);
+ end;
+end;
+
 procedure tdesigner.handledesignexception(const sender: tobject);
 var
  exceptobj: tobject;
  mstr1: msestring;
+ res1: modalresultsty;
 begin
  exceptobj:= exceptobject;
  if exceptobj is exception then begin
@@ -3492,14 +3512,22 @@ begin
     application.showasyncexception(exception(exceptobj));
    end
    else begin
-    mstr1:= exception(exceptobj).message;
-    case showmessage(mstr1,'Exception'{$ifdef FPC},
-       [mr_skip,mr_skipall,mr_cancel],mr_skip,[],0,lineend+
-              getexceptiontext(exceptobj,
-                   exceptaddr,exceptframecount,exceptframes){$endif}) of
-     mr_skipall: begin
+    if not (des_skipall in fstate) then begin
+     mstr1:= exception(exceptobj).message;
+     res1:= [mr_skip,mr_cancel];
+     if fskipall > 0 then begin
+      include(res1,mr_skipall);
      end;
-     mr_cancel: begin
+     case showmessage(mstr1,'Exception'{$ifdef FPC},
+        [mr_skip,mr_skipall,mr_cancel],mr_skip,[],0,lineend+
+               getexceptiontext(exceptobj,
+                    exceptaddr,exceptframecount,exceptframes){$endif}) of
+      mr_skipall: begin
+       include(fstate,des_skipall);
+      end;
+      mr_cancel: begin
+       abort;
+      end;
      end;
     end;
    end;
@@ -4488,6 +4516,7 @@ begin //loadformfile
   designmoduleclassname:= '';
   rootnames:= tstringlist.create;
   rootinstancenames:= tstringlist.create;
+  beginskipall;
   try
    stream2:= tmemorystream.Create;
    try
@@ -4716,6 +4745,7 @@ begin //loadformfile
    rootnames.free;
    rootinstancenames.free;
    stream1.Free;
+   endskipall;
   end;
  end;
  (*

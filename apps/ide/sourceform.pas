@@ -611,6 +611,7 @@ begin
     mainfo.errorformfilename:= '';
     setlength(ar2,length(modulenames));
     setlength(moduleoptions,length(modulenames));
+    designer.beginskipall;
     for int1:= 0 to high(modulenames) do begin
      try
       if int1 > high(ar1) then begin
@@ -639,6 +640,7 @@ begin
       end;
      end;
     end;
+    designer.endskipall;
     tabwidget.activepageindex:= -1; //do not load source
 //    updatestat(istatfile(tabwidget));
    finally

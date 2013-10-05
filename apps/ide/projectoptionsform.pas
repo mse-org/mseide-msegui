@@ -1053,7 +1053,7 @@ begin
  result:= false;
  if exceptobject is exception then begin
   if showmessage(exception(exceptobject).Message,
-            actionsmo.c[ord(ac_error)],[mr_ok,mr_cancel]) <> mr_ok then begin
+      actionsmo.c[ord(ac_error)],[mr_skip,mr_cancel]) <> mr_skip then begin
    result:= true;
   end;
  end
