@@ -1634,8 +1634,9 @@ end;
 procedure tgraphdataedit.initnewwidget(const ascale: real);
 begin
  if fgridintf <> nil then begin
-  fgridintf.getcol.options:= fgridintf.getcol.grid.datacols.options;
-               //restore default options
+  fgridintf.getcol.options:= 
+                fgridintf.getcol.grid.datacols.options + [co_drawfocus];
+                          //restore default options
  end;
  inherited;
 end;
