@@ -1639,28 +1639,33 @@ begin //opensourceactonexecute
   page:= nil;
   po1:= nil;
   unitnode:= nil; //compilerwarning
-  with openfile.controller do begin
-   for int1:= 0 to high(filenames) do begin
-    if checkfileext(filenames[int1],[formfileext]) then begin
-     page:= sourcefo.findsourcepage(filenames[int1]);
-     if page = nil then begin
-      po1:= openformfile(filenames[int1],true,false,false,true,false);
-     end;
-    end
-    else begin
-     page:= sourcefo.openfile(filenames[int1]);
-     if addtoproject then begin
-      unitnode:= projecttree.units.addfile(currentnode,filenames[int1]);
-     end;
-     str1:= designer.sourcenametoformname(filenames[int1]);
-     if findfile(str1) then begin
-      po1:= openformfile(str1,true,false,false,true,false);
+  designer.beginskipall;
+  try
+   with openfile.controller do begin
+    for int1:= 0 to high(filenames) do begin
+     if checkfileext(filenames[int1],[formfileext]) then begin
+      page:= sourcefo.findsourcepage(filenames[int1]);
+      if page = nil then begin
+       po1:= openformfile(filenames[int1],true,false,false,true,false);
+      end;
+     end
+     else begin
+      page:= sourcefo.openfile(filenames[int1]);
       if addtoproject then begin
-       unitnode.setformfile(str1);
+       unitnode:= projecttree.units.addfile(currentnode,filenames[int1]);
+      end;
+      str1:= designer.sourcenametoformname(filenames[int1]);
+      if findfile(str1) then begin
+       po1:= openformfile(str1,true,false,false,true,false);
+       if addtoproject then begin
+        unitnode.setformfile(str1);
+       end;
       end;
      end;
     end;
    end;
+  finally
+   designer.endskipall;
   end;
   if aactivate then begin
    if page <> nil then begin
