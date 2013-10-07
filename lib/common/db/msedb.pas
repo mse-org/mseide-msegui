@@ -218,8 +218,8 @@ type
    fproviderflags1: providerflags1ty;
    fstate: fieldstatesty;
 //   flookupinfo: lookupfieldinfoty;
-   function getasmsestring: msestring;
-   procedure setasmsestring(const avalue: msestring);
+//   function getasmsestring: msestring;
+//   procedure setasmsestring(const avalue: msestring);
     //imsefield
    function getproviderflags1: providerflags1ty;
 //   function getlookupinfo: plookupfieldinfoty;
@@ -227,8 +227,8 @@ type
    procedure readlookup(reader: treader); 
          //workaround for breaking fix of FPC Mantis 12809
    procedure defineproperties(filer: tfiler); override;
-   function getaswidestring: widestring; override;
-   procedure setaswidestring(const avalue: widestring); override;
+//   function getaswidestring: widestring; override;
+//   procedure setaswidestring(const avalue: widestring); override;
    procedure change; override;
    procedure SetDataset(AValue : TDataset); override;
   public
@@ -236,7 +236,7 @@ type
    procedure Clear; override;
    function assql: string;
    function asoldsql: string;
-   property asmsestring: msestring read getasmsestring write setasmsestring;
+//   property asmsestring: msestring read getasmsestring write setasmsestring;
    property tagpo: pointer read ftagpo write ftagpo;
   published
    property providerflags1: providerflags1ty read fproviderflags1 
@@ -271,8 +271,6 @@ type
                   //synchronize with TField.DefaultExpression
    fproviderflags1: providerflags1ty;
 //   flookupinfo: lookupfieldinfoty;
-   function getasmsestring: msestring;
-   procedure setasmsestring(const avalue: msestring);
   //ifieldcomponent
    procedure setdsintf(const avalue: idsfieldcontroller);
    function getinstance: tfield;
@@ -286,6 +284,8 @@ type
    procedure readlookup(reader: treader);
          //workaround for breaking fix of FPC Mantis 12809
    procedure defineproperties(filer: tfiler); override;
+   function getasunicodestring: unicodestring; override;
+   procedure setasunicodestring(const avalue: unicodestring); override;
    function getaswidestring: widestring; override;
    procedure setaswidestring(const avalue: widestring); override;
    procedure setismsestring(const getter: getmsestringdataty;
@@ -305,15 +305,15 @@ type
    procedure Clear; override;
    function assql: string;
    function asoldsql: string;
-   property asmsestring: msestring read getasmsestring write setasmsestring;
-   property asnullmsestring: msestring read getasmsestring 
+//   property asmsestring: msestring read getasmsestring write setasmsestring;
+   property asnullmsestring: msestring read getasunicodestring 
                                           write setasnullmsestring;
                         //'' -> NULL
    function oldmsestring(out aisnull: boolean): msestring; overload;
    function oldmsestring: msestring; overload;
    function curmsestring(out aisnull: boolean): msestring; overload;
    function curmsestring: msestring; overload;
-   property value: msestring read getasmsestring write setasmsestring;
+//   property value: msestring read getasmsestring write setasmsestring;
    property characterlength: integer read fcharacterlength;
    property tagpo: pointer read ftagpo write ftagpo;
    property isftwidestring: boolean read fisftwidestring;
@@ -357,8 +357,8 @@ type
    ftagpo: pointer;
    fproviderflags1: providerflags1ty;
 //   flookupinfo: lookupfieldinfoty;
-   function getasmsestring: msestring;
-   procedure setasmsestring(const avalue: msestring);
+//   function getasmsestring: msestring;
+//   procedure setasmsestring(const avalue: msestring);
     //imsefield
    function getproviderflags1: providerflags1ty;
 //   function getlookupinfo: plookupfieldinfoty;
@@ -375,7 +375,7 @@ type
    procedure Clear; override;
    function assql: string;
    function asoldsql: string;
-   property asmsestring: msestring read getasmsestring write setasmsestring;
+//   property asmsestring: msestring read getasmsestring write setasmsestring;
    property tagpo: pointer read ftagpo write ftagpo;
   published
    property providerflags1: providerflags1ty read fproviderflags1 
@@ -394,8 +394,8 @@ type
    ftagpo: pointer;
    fproviderflags1: providerflags1ty;
 //   flookupinfo: lookupfieldinfoty;
-   function getasmsestring: msestring;
-   procedure setasmsestring(const avalue: msestring);
+//   function getasmsestring: msestring;
+//   procedure setasmsestring(const avalue: msestring);
    procedure setasenum(const avalue: integer);
     //imsefield
    function getproviderflags1: providerflags1ty;
@@ -423,7 +423,7 @@ type
    function asoldsql: string;
    function asoldid: integer;
    function sum: integer;
-   property asmsestring: msestring read getasmsestring write setasmsestring;
+//   property asmsestring: msestring read getasmsestring write setasmsestring;
    property asid: integer read getasid write setasid; //-1 -> NULL
    property asenum: integer read getaslongint write setasenum;
    property tagpo: pointer read ftagpo write ftagpo;
@@ -445,8 +445,8 @@ type
    ftagpo: pointer;
    fproviderflags1: providerflags1ty;
 //   flookupinfo: lookupfieldinfoty;
-   function getasmsestring: msestring;
-   procedure setasmsestring(const avalue: msestring);
+//   function getasmsestring: msestring;
+//   procedure setasmsestring(const avalue: msestring);
     //imsefield
    function getproviderflags1: providerflags1ty;
 //   function getlookupinfo: plookupfieldinfoty;
@@ -470,7 +470,7 @@ type
    function asoldsql: string;
    function asoldid: int64;
    function sum: int64;
-   property asmsestring: msestring read getasmsestring write setasmsestring;
+//   property asmsestring: msestring read getasmsestring write setasmsestring;
    property asid: int64 read getasid write setasid; //-1 -> NULL
    property Value: Largeint read GetAsLargeint write SetAsLargeint;
    property tagpo: pointer read ftagpo write ftagpo;
@@ -492,8 +492,8 @@ type
    ftagpo: pointer;
    fproviderflags1: providerflags1ty;
 //   flookupinfo: lookupfieldinfoty;
-   function getasmsestring: msestring;
-   procedure setasmsestring(const avalue: msestring);
+//   function getasmsestring: msestring;
+//   procedure setasmsestring(const avalue: msestring);
     //imsefield
    function getproviderflags1: providerflags1ty;
 //   function getlookupinfo: plookupfieldinfoty;
@@ -514,7 +514,7 @@ type
    procedure Clear; override;
    function assql: string;
    function asoldsql: string;
-   property asmsestring: msestring read getasmsestring write setasmsestring;
+//   property asmsestring: msestring read getasmsestring write setasmsestring;
    property tagpo: pointer read ftagpo write ftagpo;
   published
    property providerflags1: providerflags1ty read fproviderflags1 
@@ -534,8 +534,8 @@ type
    ftagpo: pointer;
    fproviderflags1: providerflags1ty;
 //   flookupinfo: lookupfieldinfoty;
-   function getasmsestring: msestring;
-   procedure setasmsestring(const avalue: msestring);
+//   function getasmsestring: msestring;
+//   procedure setasmsestring(const avalue: msestring);
     //imsefield
    function getproviderflags1: providerflags1ty;
 //   function getlookupinfo: plookupfieldinfoty;
@@ -556,7 +556,7 @@ type
    procedure Clear; override;
    function assql: string;
    function asoldsql: string;
-   property asmsestring: msestring read getasmsestring write setasmsestring;
+//   property asmsestring: msestring read getasmsestring write setasmsestring;
    property tagpo: pointer read ftagpo write ftagpo;
   published
    property providerflags1: providerflags1ty read fproviderflags1 
@@ -576,8 +576,8 @@ type
    ftagpo: pointer;
    fproviderflags1: providerflags1ty;
 //   flookupinfo: lookupfieldinfoty;
-   function getasmsestring: msestring;
-   procedure setasmsestring(const avalue: msestring);
+//   function getasmsestring: msestring;
+//   procedure setasmsestring(const avalue: msestring);
     //imsefield
    function getproviderflags1: providerflags1ty;
 //   function getlookupinfo: plookupfieldinfoty;
@@ -594,7 +594,7 @@ type
    procedure Clear; override;
    function assql: string;
    function asoldsql: string;
-   property asmsestring: msestring read getasmsestring write setasmsestring;
+//   property asmsestring: msestring read getasmsestring write setasmsestring;
    property tagpo: pointer read ftagpo write ftagpo;
   published
    property providerflags1: providerflags1ty read fproviderflags1 
@@ -614,8 +614,8 @@ type
    ftagpo: pointer;
    fproviderflags1: providerflags1ty;
 //   flookupinfo: lookupfieldinfoty;
-   function getasmsestring: msestring;
-   procedure setasmsestring(const avalue: msestring);
+//   function getasmsestring: msestring;
+//   procedure setasmsestring(const avalue: msestring);
     //imsefield
    function getproviderflags1: providerflags1ty;
 //   function getlookupinfo: plookupfieldinfoty;
@@ -639,7 +639,7 @@ type
    function assql: string;
    function asoldsql: string;
    function sum: double;
-   property asmsestring: msestring read getasmsestring write setasmsestring;
+//   property asmsestring: msestring read getasmsestring write setasmsestring;
    property tagpo: pointer read ftagpo write ftagpo;
   published
    property providerflags1: providerflags1ty read fproviderflags1 
@@ -665,8 +665,6 @@ type
    fproviderflags1: providerflags1ty;
 //   flookupinfo: lookupfieldinfoty;
    procedure setdisplayvalues(const avalue: msestring);
-   function getasmsestring: msestring;
-   procedure setasmsestring(const avalue: msestring);
     //imsefield
    function getproviderflags1: providerflags1ty;
 //   function getlookupinfo: plookupfieldinfoty;
@@ -677,6 +675,8 @@ type
    procedure defineproperties(filer: tfiler); override;
    function getaswidestring: widestring; override;
    procedure setaswidestring(const avalue: widestring); override;
+   function getasunicodestring: unicodestring; override;
+   procedure setasunicodestring(const avalue: unicodestring); override;
    function GetDataSize: integer; override;
    function GetAsBoolean: Boolean; override;
    procedure SetAsBoolean(AValue: Boolean); override;
@@ -695,7 +695,7 @@ type
    function assql: string;
    function asoldsql: string;
    function sum: integer; //counts true values
-   property asmsestring: msestring read getasmsestring write setasmsestring;
+//   property asmsestring: msestring read getasmsestring write setasmsestring;
    property tagpo: pointer read ftagpo write ftagpo;
   published
    property providerflags1: providerflags1ty read fproviderflags1 
@@ -722,8 +722,8 @@ type
    ftagpo: pointer;
    fproviderflags1: providerflags1ty;
 //   flookupinfo: lookupfieldinfoty;
-   function getasmsestring: msestring;
-   procedure setasmsestring(const avalue: msestring);
+//   function getasmsestring: msestring;
+//   procedure setasmsestring(const avalue: msestring);
    procedure setoptions(const avalue: datetimefieldoptionsty);
     //imsefield
    function getproviderflags1: providerflags1ty;
@@ -746,7 +746,7 @@ type
    procedure Clear; override;
    function assql: string;
    function asoldsql: string;
-   property asmsestring: msestring read getasmsestring write setasmsestring;
+//   property asmsestring: msestring read getasmsestring write setasmsestring;
    property tagpo: pointer read ftagpo write ftagpo;
   published
    property providerflags1: providerflags1ty read fproviderflags1 
@@ -776,8 +776,6 @@ type
    ftagpo: pointer;
    fproviderflags1: providerflags1ty;
 //   flookupinfo: lookupfieldinfoty;
-   function getasmsestring: msestring;
-   procedure setasmsestring(const avalue: msestring);
     //imsefield
    function getproviderflags1: providerflags1ty;
 //   function getlookupinfo: plookupfieldinfoty;
@@ -787,6 +785,8 @@ type
    procedure defineproperties(filer: tfiler); override;
    function getaswidestring: widestring; override;
    procedure setaswidestring(const avalue: widestring); override;
+   function getasunicodestring: unicodestring; override;
+   procedure setasunicodestring(const avalue: unicodestring); override;
    procedure change; override;
    procedure SetDataset(AValue : TDataset); override;
   public
@@ -794,7 +794,7 @@ type
    procedure Clear; override;
    function assql: string;
    function asoldsql: string;
-   property asmsestring: msestring read getasmsestring write setasmsestring;
+//   property asmsestring: msestring read getasmsestring write setasmsestring;
    property tagpo: pointer read ftagpo write ftagpo;
   published
    property providerflags1: providerflags1ty read fproviderflags1 
@@ -813,8 +813,6 @@ type
    ftagpo: pointer;
    fproviderflags1: providerflags1ty;
 //   flookupinfo: lookupfieldinfoty;
-   function getasmsestring: msestring;
-   procedure setasmsestring(const avalue: msestring);
     //imsefield
    function getproviderflags1: providerflags1ty;
 //   function getlookupinfo: plookupfieldinfoty;
@@ -824,6 +822,8 @@ type
    procedure defineproperties(filer: tfiler); override;
    function getaswidestring: widestring; override;
    procedure setaswidestring(const avalue: widestring); override;
+   function getasunicodestring: unicodestring; override;
+   procedure setasunicodestring(const avalue: unicodestring); override;
    function getasvariant: variant; override;
    function getasstring: string; override;
    procedure setasstring(const avalue: string); override;
@@ -834,7 +834,7 @@ type
    procedure Clear; override;
    function assql: string;
    function asoldsql: string;
-   property asmsestring: msestring read getasmsestring write setasmsestring;
+//   property asmsestring: msestring read getasmsestring write setasmsestring;
    property tagpo: pointer read ftagpo write ftagpo;
   published
    property providerflags1: providerflags1ty read fproviderflags1 
@@ -853,8 +853,6 @@ type
    ftagpo: pointer;
    fproviderflags1: providerflags1ty;
 //   flookupinfo: lookupfieldinfoty;
-   function getasmsestring: msestring;
-   procedure setasmsestring(const avalue: msestring);
     //imsefield
    function getproviderflags1: providerflags1ty;
 //   function getlookupinfo: plookupfieldinfoty;
@@ -862,8 +860,10 @@ type
    procedure readlookup(reader: treader);
          //workaround for breaking fix of FPC Mantis 12809
    procedure defineproperties(filer: tfiler); override;
-   function getaswidestring: widestring; override;
-   procedure setaswidestring(const avalue: widestring); override;
+//   function getaswidestring: widestring; override;
+//   procedure setaswidestring(const avalue: widestring); override;
+//   function getasunicodestring: unicodestring; override;
+//   procedure setasunicodestring(const avalue: unicodestring); override;
    function getasvariant: variant; override;
    procedure setasstring(const avalue: string); override;
    function getasstring: string; override;
@@ -874,7 +874,7 @@ type
    procedure Clear; override;
    function assql: string;
    function asoldsql: string;
-   property asmsestring: msestring read getasmsestring write setasmsestring;
+//   property asmsestring: msestring read getasmsestring write setasmsestring;
    property tagpo: pointer read ftagpo write ftagpo;
   published
    property providerflags1: providerflags1ty read fproviderflags1 
@@ -893,8 +893,8 @@ type
    ftagpo: pointer;
    fproviderflags1: providerflags1ty;
 //   flookupinfo: lookupfieldinfoty;
-   function getasmsestring: msestring;
-   procedure setasmsestring(const avalue: msestring);
+//   function getasmsestring: msestring;
+//   procedure setasmsestring(const avalue: msestring);
     //imsefield
    function getproviderflags1: providerflags1ty;
 //   function getlookupinfo: plookupfieldinfoty;
@@ -916,7 +916,7 @@ type
    function assql: string;
    function asoldsql: string;
    function sum: currency;
-   property asmsestring: msestring read getasmsestring write setasmsestring;
+//   property asmsestring: msestring read getasmsestring write setasmsestring;
    property Value: Currency read GetAsCurrency write SetAsCurrency;
   published
    property providerflags1: providerflags1ty read fproviderflags1 
@@ -973,8 +973,8 @@ type
 //   function getlookupinfo: plookupfieldinfoty;
   protected
    fgetblobid: getblobidfuncty;
-   function getasmsestring: msestring; virtual;
-   procedure setasmsestring(const avalue: msestring); virtual;
+//   function getasmsestring: msestring; virtual;
+//   procedure setasmsestring(const avalue: msestring); virtual;
    procedure readlookup(reader: treader);
          //workaround for breaking fix of FPC Mantis 12809
    procedure defineproperties(filer: tfiler); override;
@@ -983,8 +983,8 @@ type
    function getasvariant: variant; override;
    function getasstring: string; override;
    procedure setasstring(const avalue: string); override;
-   function getaswidestring: widestring; override;
-   procedure setaswidestring(const avalue: widestring); override;
+//   function getaswidestring: widestring; override;
+//   procedure setaswidestring(const avalue: widestring); override;
    procedure gettext(var atext: string; adisplaytext: boolean); override;
    procedure SetDataset(AValue : TDataset); override;
   public
@@ -994,7 +994,7 @@ type
    procedure clearcache; virtual;
    function assql: string;
    function asoldsql: string;
-   property asmsestring: msestring read getasmsestring write setasmsestring;
+//   property asmsestring: msestring read getasmsestring write setasmsestring;
    procedure LoadFromStream(Stream: TStream);
    procedure LoadFromFile(const FileName: filenamety);
    procedure SaveToFile(const FileName: filenamety);
@@ -1019,8 +1019,10 @@ type
    procedure setdsintf(const avalue: idsfieldcontroller);
    function getinstance: tfield;
   protected
-   function getasmsestring: msestring; override;
-   procedure setasmsestring(const avalue: msestring); override;
+   function getaswidestring: widestring; override;
+   procedure setaswidestring(const avalue: widestring); override;
+   function getasunicodestring: msestring; override;
+   procedure setasunicodestring(const avalue: msestring); override;
    function getasvariant: variant; override;
    procedure setvarvalue(const avalue: variant); override;
    procedure gettext(var thetext: string; adisplaytext: boolean); override;
@@ -1028,7 +1030,7 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    procedure Clear; override;
-   property asmsestring: msestring read getasmsestring write setasmsestring;
+//   property asmsestring: msestring read getasmsestring write setasmsestring;
    function oldmsestring(out aisnull: boolean): msestring;
    function assql: string;
    function asoldsql: string;
@@ -1052,8 +1054,6 @@ type
   private
    fproviderflags1: providerflags1ty;
 //   flookupinfo: lookupfieldinfoty;
-   function getasmsestring: msestring;
-   procedure setasmsestring(const avalue: msestring);
     //imsefield
    function getproviderflags1: providerflags1ty;
 //   function getlookupinfo: plookupfieldinfoty;
@@ -1068,8 +1068,11 @@ type
    function getasinteger: integer; override;
    function getasdatetime: tdatetime; override;
    function getasfloat: double; override;
-   function getasstring: string; override;
-   function getaswidestring: widestring; override;
+//   function getasstring: string; override;
+//   function getaswidestring: widestring; override;
+//   function getasunicodestring: unicodestring; override;
+//   function getasmsestring: msestring;
+//   procedure setasmsestring(const avalue: msestring);
 
    function getaslongint: longint; override;
    procedure setaslongint(avalue: longint); override;
@@ -1081,7 +1084,7 @@ type
   public
    function assql: string;
    function asoldsql: string;
-   property asmsestring: msestring read getasmsestring write setasmsestring;
+//   property asmsestring: msestring read getasmsestring write setasmsestring;
   published
    property providerflags1: providerflags1ty read fproviderflags1 
                         write fproviderflags1 default [];
@@ -1593,8 +1596,8 @@ type
    procedure setasvariant(const avalue: variant);
    function getasid: int64;
    procedure setasid(const avalue: int64);
-   function getasmsestring: msestring;
-   procedure setasmsestring(const avalue: msestring);
+//   function getasmsestring: msestring;
+//   procedure setasmsestring(const avalue: msestring);
    function getdatasource: tdatasource;
    procedure setdatasource(const avalue: tdatasource);
    function getfieldname: string;
@@ -1609,7 +1612,7 @@ type
    constructor Create(ACollection: TCollection); overload; override;
    destructor destroy; override;
    property asid: int64 read getasid write setasid; //-1 -> null
-   property asmsestring: msestring read getasmsestring write setasmsestring;
+//   property asmsestring: msestring read getasmsestring write setasmsestring;
   published
    property connector: tparamconnector read fconnector write setconnector;
    property datasource: tdatasource read getdatasource write setdatasource;
@@ -3450,8 +3453,8 @@ function tmsefield.HasParent: Boolean;
 begin
  result:= dataset <> nil;
 end;
-
-procedure tmsefield.setasmsestring(const avalue: msestring);
+{
+procedure tmsefield.setmsestring(const avalue: msestring);
 begin
  asstring:= avalue;
 end;
@@ -3460,7 +3463,7 @@ function tmsefield.getasmsestring: msestring;
 begin
  result:= asstring;
 end;
-
+}
 procedure tmsefield.Clear;
 begin
  setdata(nil);
@@ -3476,7 +3479,7 @@ function tmsefield.asoldsql: string;
 begin
  result:= fieldtooldsql(self);
 end;
-
+{
 function tmsefield.getaswidestring: widestring;
 begin
  result:= asmsestring;
@@ -3486,7 +3489,7 @@ procedure tmsefield.setaswidestring(const avalue: widestring);
 begin
  asmsestring:= avalue;
 end;
-
+}
 procedure tmsefield.readlookup(reader: treader);
 begin
  reader.readboolean;
@@ -3550,7 +3553,7 @@ begin
  result:= fieldtosql(self);
 end;
 
-function tmsestringfield.getasmsestring: msestring;
+function tmsestringfield.getasunicodestring: unicodestring;
 begin
  if assigned(fgetmsestringdata) then begin
   fgetmsestringdata(self,result);
@@ -3566,11 +3569,11 @@ begin
   clear;
  end
  else begin
-  setasmsestring(avalue);
+  setasunicodestring(avalue);
  end;
 end;
 
-procedure tmsestringfield.setasmsestring(const avalue: msestring);
+procedure tmsestringfield.setasunicodestring(const avalue: msestring);
 begin
  if assigned(fsetmsestringdata) then begin
   fsetmsestringdata(self,avalue);
@@ -3622,7 +3625,7 @@ var
 begin
  statebefore:= tdataset1(dataset).settempstate(dsoldvalue);
  aisnull:= not getdata(nil);
- result:= getasmsestring;
+ result:= getasunicodestring;
  tdataset1(dataset).restorestate(statebefore);
 end;
 
@@ -3639,7 +3642,7 @@ var
 begin
  statebefore:= tdataset1(dataset).settempstate(dscurvalue);
  aisnull:= not getdata(nil);
- result:= getasmsestring;
+ result:= getasunicodestring;
  tdataset1(dataset).restorestate(statebefore);
 end;
 
@@ -3675,7 +3678,7 @@ end;
 function tmsestringfield.GetAsString: string;
 begin
  if assigned(fgetmsestringdata) then begin
-  result:= getasmsestring;
+  result:= getasunicodestring;
  end
  else begin
   result:= inherited getasstring;
@@ -3798,12 +3801,22 @@ begin
  result:= fieldtosql(self);
 end;
 
-function tmsememofield.getasmsestring: msestring;
+function tmsememofield.getasunicodestring: msestring;
 begin
  result:= fieldgetmsestring(self,fdsintf);
 end;
 
-procedure tmsememofield.setasmsestring(const avalue: msestring);
+procedure tmsememofield.setasunicodestring(const avalue: msestring);
+begin
+ fieldsetmsestring(avalue,self,fdsintf);
+end;
+
+function tmsememofield.getaswidestring: widestring;
+begin
+ result:= fieldgetmsestring(self,fdsintf);
+end;
+
+procedure tmsememofield.setaswidestring(const avalue: widestring);
 begin
  fieldsetmsestring(avalue,self,fdsintf);
 end;
@@ -3834,13 +3847,13 @@ begin
   result:= NULL;
  end
  else begin
-  result:= getasmsestring;
+  result:= getasunicodestring;
  end;
 end;
 
 procedure tmsememofield.setvarvalue(const avalue: variant);
 begin
- setasmsestring(avalue);
+ setasunicodestring(avalue);
 end;
 
 function tmsememofield.oldmsestring(out aisnull: boolean): msestring;
@@ -3849,7 +3862,7 @@ var
 begin
  statebefore:= tdataset1(dataset).settempstate(dsoldvalue);
  aisnull:= getdata(nil);
- result:= getasmsestring;
+ result:= getasunicodestring;
  tdataset1(dataset).restorestate(statebefore);
 end;
 
@@ -3943,7 +3956,7 @@ function tmsenumericfield.assql: string;
 begin
  result:= fieldtosql(self);
 end;
-
+{
 procedure tmsenumericfield.setasmsestring(const avalue: msestring);
 begin
  asstring:= value;
@@ -3953,7 +3966,7 @@ function tmsenumericfield.getasmsestring: msestring;
 begin
  result:= asstring;
 end;
-
+}
 procedure tmsenumericfield.readlookup(reader: treader);
 begin
  reader.readboolean;
@@ -4033,7 +4046,7 @@ function tmselongintfield.assql: string;
 begin
  result:= fieldtosql(self);
 end;
-
+{
 procedure tmselongintfield.setasmsestring(const avalue: msestring);
 begin
  asstring:= avalue;
@@ -4043,7 +4056,7 @@ function tmselongintfield.getasmsestring: msestring;
 begin
  result:= asstring;
 end;
-
+}
 procedure tmselongintfield.readlookup(reader: treader);
 begin
  reader.readboolean;
@@ -4233,7 +4246,7 @@ function tmselargeintfield.assql: string;
 begin
  result:= fieldtosql(self);
 end;
-
+{
 procedure tmselargeintfield.setasmsestring(const avalue: msestring);
 begin
  asstring:= avalue;
@@ -4243,7 +4256,7 @@ function tmselargeintfield.getasmsestring: msestring;
 begin
  result:= asstring;
 end;
-
+}
 procedure tmselargeintfield.readlookup(reader: treader);
 begin
  reader.readboolean;
@@ -4410,7 +4423,7 @@ function tmsesmallintfield.assql: string;
 begin
  result:= fieldtosql(self);
 end;
-
+{
 procedure tmsesmallintfield.setasmsestring(const avalue: msestring);
 begin
  asstring:= avalue;
@@ -4420,7 +4433,7 @@ function tmsesmallintfield.getasmsestring: msestring;
 begin
  result:= asstring;
 end;
-
+}
 procedure tmsesmallintfield.readlookup(reader: treader);
 begin
  reader.readboolean;
@@ -4528,7 +4541,7 @@ function tmsewordfield.assql: string;
 begin
  result:= fieldtosql(self);
 end;
-
+{
 procedure tmsewordfield.setasmsestring(const avalue: msestring);
 begin
  asstring:= avalue;
@@ -4538,7 +4551,7 @@ function tmsewordfield.getasmsestring: msestring;
 begin
  result:= asstring;
 end;
-
+}
 procedure tmsewordfield.readlookup(reader: treader);
 begin
  reader.readboolean;
@@ -4646,7 +4659,7 @@ function tmseautoincfield.assql: string;
 begin
  result:= fieldtosql(self);
 end;
-
+{
 procedure tmseautoincfield.setasmsestring(const avalue: msestring);
 begin
  asstring:= avalue;
@@ -4656,7 +4669,7 @@ function tmseautoincfield.getasmsestring: msestring;
 begin
  result:= asstring;
 end;
-
+}
 procedure tmseautoincfield.readlookup(reader: treader);
 begin
  reader.readboolean;
@@ -4736,7 +4749,7 @@ function tmsefloatfield.assql: string;
 begin
  result:= fieldtosql(self);
 end;
-
+{
 procedure tmsefloatfield.setasmsestring(const avalue: msestring);
 begin
  asstring:= avalue;
@@ -4746,7 +4759,7 @@ function tmsefloatfield.getasmsestring: msestring;
 begin
  result:= asstring;
 end;
-
+}
 procedure tmsefloatfield.readlookup(reader: treader);
 begin
  reader.readboolean;
@@ -4918,7 +4931,7 @@ begin
  result:= fieldtosql(self);
 end;
 
-procedure tmsebooleanfield.setasmsestring(const avalue: msestring);
+procedure tmsebooleanfield.setasunicodestring(const avalue: msestring);
 var
  mstr1: msestring;
 begin
@@ -4941,7 +4954,7 @@ begin
  end;
 end;
 
-function tmsebooleanfield.getasmsestring: msestring;
+function tmsebooleanfield.getasunicodestring: unicodestring;
 var 
  int1: integer;
 begin
@@ -5001,12 +5014,12 @@ end;
 
 function tmsebooleanfield.getasstring: string;
 begin
- result:= getasmsestring;
+ result:= getasunicodestring;
 end;
 
 procedure tmsebooleanfield.setasstring(const avalue: string);
 begin
- setasmsestring(avalue);
+ setasunicodestring(avalue);
 end;
 
 function tmsebooleanfield.GetDefaultWidth: Longint;
@@ -5170,7 +5183,7 @@ function tmsedatetimefield.assql: string;
 begin
  result:= fieldtosql(self);
 end;
-
+{
 procedure tmsedatetimefield.setasmsestring(const avalue: msestring);
 begin
  asstring:= avalue;
@@ -5180,7 +5193,7 @@ function tmsedatetimefield.getasmsestring: msestring;
 begin
  result:= asstring;
 end;
-
+}
 procedure tmsedatetimefield.readlookup(reader: treader);
 begin
  reader.readboolean;
@@ -5354,12 +5367,12 @@ begin
  result:= fieldtosql(self);
 end;
 
-procedure tmsebinaryfield.setasmsestring(const avalue: msestring);
+procedure tmsebinaryfield.setasunicodestring(const avalue: msestring);
 begin
  asstring:= avalue;
 end;
 
-function tmsebinaryfield.getasmsestring: msestring;
+function tmsebinaryfield.getasunicodestring: msestring;
 begin
  result:= asstring;
 end;
@@ -5444,14 +5457,14 @@ begin
  result:= fieldtosql(self);
 end;
 
-procedure tmsebytesfield.setasmsestring(const avalue: msestring);
+procedure tmsebytesfield.setasunicodestring(const avalue: unicodestring);
 begin
  asstring:= avalue;
 end;
 
-function tmsebytesfield.getasmsestring: msestring;
+function tmsebytesfield.getasunicodestring: msestring;
 begin
- result:= asstring;
+ result:= asunicodestring;
 end;
 
 procedure tmsebytesfield.readlookup(reader: treader);
@@ -5569,17 +5582,17 @@ function tmsevarbytesfield.assql: string;
 begin
  result:= fieldtosql(self);
 end;
-
-procedure tmsevarbytesfield.setasmsestring(const avalue: msestring);
+{
+procedure tmsevarbytesfield.setasunicodestring(const avalue: unicodestring);
 begin
  asstring:= avalue;
 end;
 
-function tmsevarbytesfield.getasmsestring: msestring;
+function tmsevarbytesfield.getasunicodestring: unicodestring;
 begin
  result:= asstring;
 end;
-
+}
 procedure tmsevarbytesfield.readlookup(reader: treader);
 begin
  reader.readboolean;
@@ -5590,7 +5603,7 @@ begin
  inherited;
  filer.defineproperty('Lookup',{$ifdef FPC}@{$endif}readlookup,nil,false);
 end;
-
+{
 function tmsevarbytesfield.getaswidestring: widestring;
 begin
  result:= asmsestring;
@@ -5600,7 +5613,7 @@ procedure tmsevarbytesfield.setaswidestring(const avalue: widestring);
 begin
  asmsestring:= avalue;
 end;
-
+}
 procedure tmsevarbytesfield.Clear;
 begin
  setdata(nil);
@@ -5700,7 +5713,7 @@ function tmsebcdfield.assql: string;
 begin
  result:= fieldtosql(self);
 end;
-
+{
 procedure tmsebcdfield.setasmsestring(const avalue: msestring);
 begin
  asstring:= avalue;
@@ -5710,7 +5723,7 @@ function tmsebcdfield.getasmsestring: msestring;
 begin
  result:= asstring;
 end;
-
+}
 procedure tmsebcdfield.readlookup(reader: treader);
 begin
  reader.readboolean;
@@ -5857,7 +5870,7 @@ function tmseblobfield.assql: string;
 begin
  result:= fieldtosql(self);
 end;
-
+{
 procedure tmseblobfield.setasmsestring(const avalue: msestring);
 begin
  asstring:= avalue;
@@ -5867,7 +5880,7 @@ function tmseblobfield.getasmsestring: msestring;
 begin
  result:= asstring;
 end;
-
+}
 procedure tmseblobfield.LoadFromStream(Stream: TStream);
 begin
  removecache;
@@ -6031,7 +6044,7 @@ begin
   atext:= '(BLOB)';
  end;
 end;
-
+{
 function tmseblobfield.getaswidestring: widestring;
 begin
  result:= getasmsestring;
@@ -6041,7 +6054,7 @@ procedure tmseblobfield.setaswidestring(const avalue: widestring);
 begin
  setasmsestring(avalue);
 end;
-
+}
 function tmseblobfield.getproviderflags1: providerflags1ty;
 begin
  result:= fproviderflags1;
@@ -6091,21 +6104,6 @@ begin
  end;
 end;
 
-procedure tmsevariantfield.setasmsestring(const avalue: msestring);
-begin
- setvarvalue(avalue);
-end;
-
-function tmsevariantfield.getasmsestring: msestring;
-begin
- if isnull then begin
-  result:= '';
- end
- else begin
-  result:= getasvariant;
- end;
-end;
-
 function tmsevariantfield.getasboolean: boolean;
 begin
  if isnull then begin
@@ -6145,7 +6143,7 @@ begin
   result:= getasvariant;
  end;
 end;
-
+{
 function tmsevariantfield.getasstring: string;
 begin
  if isnull then begin
@@ -6165,7 +6163,7 @@ begin
   result:= getasvariant;
  end;
 end;
-
+}
 function tmsevariantfield.getaslongint: longint;
 begin
  if isnull then begin
@@ -8941,7 +8939,7 @@ function tmseparam.isparamstored: boolean;
 begin
  result:= bound;
 end;
-
+{
 function tmseparam.getasmsestring: msestring;
 begin
  result:= getaswidestring;
@@ -8951,7 +8949,7 @@ procedure tmseparam.setasmsestring(const avalue: msestring);
 begin
  setaswidestring(avalue);
 end;
-
+}
 { tparamconnector }
 
 destructor tparamconnector.destroy;

@@ -22,7 +22,8 @@ unit mdb;
 interface
 
 uses
- classes,mclasses,sysutils,variants,fmtbcd,maskutils,msetypes,mseifiglob
+ classes,mclasses,sysutils,variants,fmtbcd,maskutils,msetypes,mseifiglob,
+ msestrings
    {$ifndef FPC},classes_del{$endif};
 
 const
@@ -338,6 +339,8 @@ type
     function GetOldValue: variant; virtual;
     function GetAsString: string; virtual;
     function GetAsWideString: WideString; virtual;
+    function getasunicodestring: unicodestring; virtual;
+    procedure setasunicodestring(const avalue: unicodestring); virtual;
     function GetCanModify: Boolean; virtual;
     function GetClassDesc: String; virtual;
     function GetDataSize: Integer; virtual;
@@ -401,6 +404,10 @@ type
     property AsInteger: Integer read GetAsInteger write SetAsInteger;
     property AsString: string read GetAsString write SetAsString;
     property AsWideString: WideString read GetAsWideString write SetAsWideString;
+    property asunicodestring: unicodestring read getasunicodestring 
+                                                     write setasunicodestring;
+    property asmsestring: msestring read getasunicodestring 
+                                                     write setasunicodestring;
     property AsVariant: variant read GetAsVariant write SetAsVariant;
     property AttributeSet: string read FAttributeSet write FAttributeSet;
     property Calculated: Boolean read FCalculated write FCalculated;
@@ -498,6 +505,8 @@ type
 
     function GetAsString: string; override;
     procedure SetAsString(const aValue: string); override;
+    function getasunicodestring: unicodestring; override;
+    procedure setasunicodestring(const avalue: unicodestring); override;
 
     function GetAsVariant: Variant; override;
     procedure SetVarValue(const aValue: Variant); override;
@@ -949,6 +958,8 @@ type
 
     function GetAsWideString: WideString; override;
     procedure SetAsWideString(const aValue: WideString); override;
+    function getasunicodestring: unicodestring; override;
+    procedure setasunicodestring(const avalue: unicodestring); override;
 
     function GetAsVariant: Variant; override;
     procedure SetVarValue(const aValue: Variant); override;
@@ -1166,6 +1177,8 @@ type
     Procedure SetText(const AValue: string);
     function GetAsWideString: WideString;
     procedure SetAsWideString(const aValue: WideString);
+    function getasunicodestring: unicodestring;
+    procedure setasunicodestring(const avalue: unicodestring);
   public
     constructor Create(ACollection: TCollection); overload; override;
     constructor Create(AParams: TParams; AParamType: TParamType); reintroduce; overload;
@@ -1202,6 +1215,10 @@ type
     Property Text : string read GetAsString write SetText;
     Property Value : Variant read GetAsVariant write SetAsVariant stored IsParamStored;
     property AsWideString: WideString read GetAsWideString write SetAsWideString;
+    property asunicodestring: unicodestring read getasunicodestring 
+                                                       write setasunicodestring;
+    property asmsestring: msestring read getasunicodestring 
+                                                  write setasunicodestring;
   published
     Property DataType : TFieldType read FDataType write SetDataType;
     Property Name : string read FName write FName;
@@ -6016,6 +6033,16 @@ begin
     end;
 end;
 
+function TField.getasunicodestring: unicodestring;
+begin
+ result:= getasstring;
+end;
+
+procedure TField.setasunicodestring(const avalue: unicodestring);
+begin
+ setasstring(avalue);
+end;
+
 { ---------------------------------------------------------------------
     TStringField
   ---------------------------------------------------------------------}
@@ -6267,6 +6294,16 @@ end;
 procedure TWideStringField.SetAsString(const aValue: string);
 begin
   SetAsWideString(aValue);
+end;
+
+function twidestringfield.getasunicodestring: unicodestring;
+begin
+  result:= getaswidestring;
+end;
+
+procedure twidestringfield.setasunicodestring(const avalue: unicodestring);
+begin
+  setaswidestring(avalue);
 end;
 
 function TWideStringField.GetAsVariant: Variant;
@@ -8091,6 +8128,25 @@ function TVariantField.GetAsWideString: WideString;
 begin
   Result := VarToWideStr(GetAsVariant);
 end;
+
+procedure tvariantfield.setasunicodestring(const avalue: unicodestring);
+begin
+ setvarvalue(avalue);
+end;
+
+function tvariantfield.getasunicodestring: unicodestring;
+begin
+ Result := VarTounicodeStr(GetAsVariant);
+ {
+ if isnull then begin
+  result:= '';
+ end
+ else begin
+  result:= getasvariant;
+ end;
+ }
+end;
+
 
 function TVariantField.GetAsVariant: Variant;
 begin
@@ -10293,6 +10349,20 @@ begin
   Value := aValue;
 end;
 
+function TParam.getasunicodestring: unicodestring;
+begin
+  if IsNull then
+    Result := ''
+  else
+    Result := FValue;
+end;
+
+procedure TParam.setasunicodestring(const avalue: unicodestring);
+begin
+  if FDataType <> ftFixedWideChar then
+    FDataType := ftWideString;
+  Value := aValue;
+end;
 
 Procedure TParam.SetAsTime(const AValue: TDateTime);
 begin
@@ -10700,7 +10770,6 @@ begin
     DatabaseErrorFmt(SBadParamFieldType,[Name],DataSet);
   end;
 end;
-
 
 Procedure TParams.CopyParamValuesFromDataset(ADataset : TDataset; CopyBound : Boolean);
 
