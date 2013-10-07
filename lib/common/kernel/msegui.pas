@@ -17013,7 +17013,7 @@ begin
  end
  else begin
   mstr1:= leadingtext + e.Message;
-  showmessage(mstr1,'Exception'{$ifdef FPC},0,lineend+
+  showmessage(mstr1,sc(sc_exception){$ifdef FPC},0,lineend+
               getexceptiontext(exceptobject,
                             exceptaddr,exceptframecount,exceptframes){$endif});
  end;
