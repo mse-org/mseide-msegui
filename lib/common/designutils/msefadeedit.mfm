@@ -561,4 +561,13 @@ object fadeeditfo: tfadeeditfo
     left = 200
     top = 200
   end
+  object c: tstringcontainer
+    strings.data = (
+      'Do you want to synchronize opacity gradient'
+      'with color gradient?'
+      'Do you want to remove opacity gradient?'
+    )
+    left = 88
+    top = 344
+  end
 end

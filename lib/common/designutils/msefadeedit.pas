@@ -23,7 +23,8 @@ uses
  msepointer,msewidgets,msedataedits,mseedit,msegrids,msestrings,msewidgetgrid,
  msecolordialog,mseeditglob,msesimplewidgets,msepropertyeditors,msestatfile,
  msegraphedits,msebitmap,msedatanodes,msefiledialog,mselistbrowser,msesys,
- msegridsglob,mseobjectpicker,mseifiglob,msearrayprops,msesplitter;
+ msegridsglob,mseobjectpicker,mseifiglob,msearrayprops,msesplitter,
+ msestringcontainer;
 
 type
  nodeinfoty = record
@@ -69,6 +70,7 @@ type
    fadevert: tsimplewidget;
    opaedit: tpickwidget;
    opadisp: tsimplewidget;
+   c: tstringcontainer;
    procedure mouseev(const sender: twidget; var info: mouseeventinfoty);
    procedure pospaintev(const sender: twidget; const canvas: tcanvas);
    procedure createev(const sender: TObject);
@@ -182,7 +184,13 @@ uses
  msefadeedit_mfm,msedatalist,msearrayutils;
 type
  tpropertyeditor1 = class(tpropertyeditor);
-
+type
+ stringconsts = (
+  sc_syncopa,            //0
+  sc_withcolor,          //1
+  sc_removeopacity       //2
+ );
+  
 function editfade(var fadedirection: graphicdirectionty; const opa: boolean;
                const fadepos,fadeopapos: trealarrayprop;
                const fadecolor,fadeopacolor: tcolorarrayprop): modalresultty;
@@ -1005,9 +1013,7 @@ function tfadeeditfo.syncexe: boolean;
 var
  int1,int2: integer;
 begin
- result:= askyesno(
-  'Do you want to synchronize opacity gradient'+lineend+
-                      'with color gradient?','Confirmation');
+ result:= askconfirmation(c[ord(sc_syncopa)]+lineend+c[ord(sc_withcolor)]);
  if result then begin
   grid.beginupdate;
   try
@@ -1080,8 +1086,7 @@ end;
 
 procedure tfadeeditfo.clearopaexe(const sender: TObject);
 begin
- if askyesno(
-  'Do you want to remove opacity gradient?','Confirmation') then begin
+ if askconfirmation(c[ord(sc_removeopacity)]) then begin
   fopacitycleared:= true;
   opasynced:= true;  
   grid.datacols[3].visible:= false;
