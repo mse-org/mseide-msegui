@@ -2068,15 +2068,20 @@ end;
 function tcustomscalingwidget.getminshrinksize: sizety;
 var
  size1: sizety;
+ box,boy: boolean;
 begin
  result:= inherited getminshrinksize;
- if foptionsscale * [osc_expandx,osc_expandy] <> [] then begin
+ box:= fanchors * [an_left,an_right] = [an_left,an_right];
+ boy:= fanchors * [an_top,an_bottom] = [an_top,an_bottom]; 
+ if (foptionsscale * [osc_expandx,osc_expandy] <> []) or box or boy then begin
   size1:= minscrollsize;
   addsize1(size1,framewidth);
-  if (osc_expandx in foptionsscale) and (result.cx < size1.cx) then begin
+  if (result.cx < size1.cx) and 
+                          (box or (osc_expandx in foptionsscale)) then begin
    result.cx:= size1.cx;
   end;
-  if (osc_expandy in foptionsscale) and (result.cy < size1.cy) then begin
+  if (result.cy < size1.cy) and 
+                           (boy or (osc_expandy in foptionsscale)) then begin
    result.cy:= size1.cy;
   end;
  end;
