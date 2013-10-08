@@ -31,7 +31,7 @@ uses
  msegraphutils,regkernel_bmp,msegraphics,msestrings,msepostscriptprinter,
  mseprinter,msetypes,msedatalist,msedatamodules,mseclasses,formdesigner,
  mseapplication,mseglob,mseguiglob,mseskin,msedesigner,
- mseguithreadcomp,mseprocmonitorcomp,msefadeedit,
+ mseguithreadcomp,mseprocmonitorcomp,msefadepropedit,
  msearrayprops,msesumlist,mserttistat,msestockobjects,regglob,msearrayutils,
  msecryptohandler,msestringcontainer;
 

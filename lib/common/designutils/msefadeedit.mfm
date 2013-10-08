@@ -3,14 +3,13 @@ object fadeeditfo: tfadeeditfo
   visible = False
   bounds_x = 150
   bounds_y = 221
-  bounds_cx = 485
+  bounds_cx = 519
   bounds_cy = 443
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets]
-  container.frame.clientwidth = 408
   container.bounds = (
     0
     0
-    485
+    519
     443
   )
   options = [fo_closeonesc, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
@@ -18,108 +17,18 @@ object fadeeditfo: tfadeeditfo
   caption = 'Fade Edit'
   oncreate = createev
   moduleclassname = 'tmseform'
-  object tbutton1: tbutton
-    taborder = 4
-    bounds_x = 356
-    bounds_y = 411
-    bounds_cx = 58
-    bounds_cy = 28
-    anchors = [an_right, an_bottom]
-    state = [as_default, as_localdefault, as_localcaption]
-    caption = '&OK'
-    modalresult = mr_ok
-  end
-  object tbutton2: tbutton
-    taborder = 5
-    bounds_x = 421
-    bounds_y = 411
-    bounds_cx = 58
-    bounds_cy = 28
-    anchors = [an_right, an_bottom]
-    state = [as_localcaption]
-    caption = 'Cancel'
-    modalresult = mr_canclose
-  end
-  object reverse: tbooleanedit
-    frame.caption = '&reverse'
-    frame.dummy = 0
-    frame.outerframe = (
-      0
-      1
-      44
-      2
-    )
-    bounds_x = 8
-    bounds_y = 415
-    bounds_cx = 57
-    bounds_cy = 16
-    anchors = [an_left, an_bottom]
-    ondataentered = reverseenteredev
-  end
-  object tbutton3: tbutton
-    taborder = 3
-    bounds_x = 285
-    bounds_y = 411
-    bounds_cx = 58
-    bounds_cy = 28
-    anchors = [an_right, an_bottom]
-    state = [as_localcaption, as_localonexecute]
-    caption = '&Save'
-    onexecute = saveex
-  end
-  object tbutton4: tbutton
-    taborder = 2
-    bounds_x = 221
-    bounds_y = 411
-    bounds_cx = 58
-    bounds_cy = 28
-    anchors = [an_right, an_bottom]
-    state = [as_localcaption, as_localonexecute]
-    caption = '&Load'
-    onexecute = loadex
-  end
-  object clearbu: tbutton
-    taborder = 1
-    hint = 'Clear opacity gradient'
-    bounds_x = 157
-    bounds_y = 411
-    bounds_cx = 58
-    bounds_cy = 28
-    anchors = [an_right, an_bottom]
-    state = [as_disabled, as_localdisabled, as_localcaption, as_localhint, as_localonexecute]
-    caption = 'ClearOpa'
-    onexecute = clearopaexe
-  end
-  object splitopa: tbooleanedit
-    frame.caption = 'Separate'#10'Opacity'
-    frame.dummy = 0
-    frame.outerframe = (
-      0
-      8
-      53
-      9
-    )
-    taborder = 6
-    bounds_x = 72
-    bounds_y = 408
-    bounds_cx = 66
-    bounds_cy = 30
-    anchors = [an_left, an_bottom]
-    onsetvalue = sepopaset
-  end
   object cont2: tsimplewidget
-    taborder = 7
     visible = True
     bounds_x = 0
     bounds_y = 0
-    bounds_cx = 485
+    bounds_cx = 519
     bounds_cy = 402
     anchors = [an_top, an_bottom]
     object cont1: tsimplewidget
       visible = True
       bounds_x = 0
       bounds_y = 73
-      bounds_cx = 485
+      bounds_cx = 519
       bounds_cy = 330
       anchors = [an_top, an_bottom]
       object tsimplewidget7: tsimplewidget
@@ -130,16 +39,16 @@ object fadeeditfo: tfadeeditfo
         face.dummy = 0
         taborder = 5
         visible = True
-        bounds_x = 410
+        bounds_x = 444
         bounds_y = 56
         bounds_cx = 66
         bounds_cy = 273
         anchors = [an_top, an_right, an_bottom]
       end
-      object layouter: tlayouter
+      object gridlayout: tlayouter
         bounds_x = 8
         bounds_y = 56
-        bounds_cx = 397
+        bounds_cx = 431
         bounds_cy = 274
         bounds_cymin = 90
         anchors = [an_left, an_top, an_right, an_bottom]
@@ -154,7 +63,7 @@ object fadeeditfo: tfadeeditfo
           )
           bounds_x = 0
           bounds_y = 147
-          bounds_cx = 399
+          bounds_cx = 433
           bounds_cy = 126
           anchors = [an_left, an_right, an_bottom]
           optionsgrid = [og_colsizing, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autoappend, og_sorted, og_colchangeontabkey, og_wrapcol, og_autopopup, og_mousescrollcol]
@@ -174,14 +83,14 @@ object fadeeditfo: tfadeeditfo
               options = [co_nofocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_mousescrollrow]
             end          
             item[opaposed]
-              width = 81
+              width = 89
               options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savevalue, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
               name = 'opapos'
               widgetname = 'opaposed'
               dataclass = tgridrealdatalist
             end          
             item[opacolored]
-              width = 264
+              width = 290
               options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savevalue, co_savestate, co_nosort, co_cancopy, co_canpaste, co_mousescrollrow]
               widthmin = 63
               name = 'opacolor'
@@ -205,7 +114,7 @@ object fadeeditfo: tfadeeditfo
             visible = False
             bounds_x = 25
             bounds_y = 0
-            bounds_cx = 81
+            bounds_cx = 89
             bounds_cy = 16
             ondataentered = dataenteterev
             value = -Inf
@@ -228,9 +137,9 @@ object fadeeditfo: tfadeeditfo
             frame.buttonellipse.imagenr = 17
             taborder = 2
             visible = False
-            bounds_x = 107
+            bounds_x = 115
             bounds_y = 0
-            bounds_cx = 264
+            bounds_cx = 290
             bounds_cy = 16
             ondataentered = dataenteterev
             valuedefault = -1610612731
@@ -242,7 +151,7 @@ object fadeeditfo: tfadeeditfo
           taborder = 1
           bounds_x = 0
           bounds_y = 0
-          bounds_cx = 399
+          bounds_cx = 433
           bounds_cy = 144
           anchors = [an_left, an_top, an_right, an_bottom]
           optionsgrid = [og_colsizing, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autoappend, og_sorted, og_colchangeontabkey, og_wrapcol, og_autopopup, og_mousescrollcol]
@@ -280,20 +189,20 @@ object fadeeditfo: tfadeeditfo
               options = [co_nofocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_mousescrollrow]
             end          
             item[posed]
-              width = 81
+              width = 89
               options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savevalue, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
               widgetname = 'posed'
               dataclass = tgridrealdatalist
             end          
             item[colored]
-              width = 137
+              width = 151
               options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savevalue, co_savestate, co_nosort, co_cancopy, co_canpaste, co_mousescrollrow]
               widthmin = 63
               widgetname = 'colored'
               dataclass = tgridenumdatalist
             end          
             item[opaed]
-              width = 126
+              width = 138
               options = [co_invisible, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savevalue, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
               widgetname = 'opaed'
               dataclass = tgridenumdatalist
@@ -315,7 +224,7 @@ object fadeeditfo: tfadeeditfo
             visible = False
             bounds_x = 25
             bounds_y = 0
-            bounds_cx = 81
+            bounds_cx = 89
             bounds_cy = 16
             ondataentered = dataenteterev
             value = -Inf
@@ -338,9 +247,9 @@ object fadeeditfo: tfadeeditfo
             frame.buttonellipse.imagenr = 17
             taborder = 2
             visible = False
-            bounds_x = 107
+            bounds_x = 115
             bounds_y = 0
-            bounds_cx = 137
+            bounds_cx = 151
             bounds_cy = 16
             ondataentered = dataenteterev
             valuedefault = -1610612731
@@ -358,9 +267,9 @@ object fadeeditfo: tfadeeditfo
             frame.buttonellipse.imagenr = 17
             taborder = 3
             visible = False
-            bounds_x = 245
+            bounds_x = 267
             bounds_y = 0
-            bounds_cx = 126
+            bounds_cx = 138
             bounds_cy = 16
             ondataentered = dataenteterev
             valuedefault = -1610612730
@@ -373,7 +282,7 @@ object fadeeditfo: tfadeeditfo
           taborder = 2
           bounds_x = 0
           bounds_y = 144
-          bounds_cx = 397
+          bounds_cx = 431
           bounds_cy = 3
           anchors = [an_top]
           options = [spo_vmove, spo_vprop, spo_dockleft, spo_docktop, spo_dockright, spo_dockbottom]
@@ -391,7 +300,7 @@ object fadeeditfo: tfadeeditfo
         taborder = 2
         bounds_x = 8
         bounds_y = 0
-        bounds_cx = 470
+        bounds_cx = 504
         bounds_cy = 50
         anchors = [an_left, an_top, an_right]
         onclientmouseevent = mouseev
@@ -410,7 +319,7 @@ object fadeeditfo: tfadeeditfo
           visible = True
           bounds_x = 1
           bounds_y = 1
-          bounds_cx = 468
+          bounds_cx = 502
           bounds_cy = 40
           anchors = [an_top]
         end
@@ -421,7 +330,7 @@ object fadeeditfo: tfadeeditfo
           visible = True
           bounds_x = 1
           bounds_y = 0
-          bounds_cx = 468
+          bounds_cx = 502
           bounds_cy = 13
           anchors = [an_top]
         end
@@ -432,7 +341,7 @@ object fadeeditfo: tfadeeditfo
           visible = True
           bounds_x = 1
           bounds_y = 27
-          bounds_cx = 468
+          bounds_cx = 502
           bounds_cy = 13
           anchors = [an_top]
         end
@@ -443,7 +352,7 @@ object fadeeditfo: tfadeeditfo
           visible = True
           bounds_x = 1
           bounds_y = 0
-          bounds_cx = 468
+          bounds_cx = 502
           bounds_cy = 40
           anchors = [an_top]
         end
@@ -453,7 +362,7 @@ object fadeeditfo: tfadeeditfo
         color = -1610612734
         taborder = 3
         visible = True
-        bounds_x = 411
+        bounds_x = 445
         bounds_y = 56
         bounds_cx = 23
         bounds_cy = 273
@@ -464,7 +373,7 @@ object fadeeditfo: tfadeeditfo
         color = -1610612730
         taborder = 4
         visible = True
-        bounds_x = 455
+        bounds_x = 489
         bounds_y = 56
         bounds_cx = 22
         bounds_cy = 273
@@ -481,7 +390,7 @@ object fadeeditfo: tfadeeditfo
         face.dummy = 0
         taborder = 1
         visible = True
-        bounds_x = 410
+        bounds_x = 444
         bounds_y = 56
         bounds_cx = 68
         bounds_cy = 273
@@ -505,7 +414,7 @@ object fadeeditfo: tfadeeditfo
       taborder = 1
       bounds_x = 8
       bounds_y = 0
-      bounds_cx = 470
+      bounds_cx = 504
       bounds_cy = 67
       bounds_cxmin = 461
       anchors = [an_left, an_top, an_right]
@@ -524,11 +433,155 @@ object fadeeditfo: tfadeeditfo
         visible = True
         bounds_x = 1
         bounds_y = 17
-        bounds_cx = 468
+        bounds_cx = 502
         bounds_cy = 40
         anchors = [an_top]
       end
     end
+  end
+  object bottomlayout: tlayouter
+    taborder = 1
+    bounds_x = 8
+    bounds_y = 407
+    bounds_cx = 506
+    bounds_cy = 31
+    anchors = [an_left, an_right, an_bottom]
+    optionsscale = [osc_expandx, osc_expandy, osc_shrinky]
+    linktop = cont2
+    dist_top = 5
+    options = [spao_gluebottom]
+    optionslayout = [lao_placex, lao_aligny]
+    align_glue = wam_center
+    place_mindist = 5
+    object switchlayout: tlayouter
+      bounds_x = 0
+      bounds_y = 0
+      bounds_cx = 128
+      bounds_cy = 30
+      optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
+      optionslayout = [lao_placex, lao_aligny]
+      align_glue = wam_center
+      place_mindist = 5
+      object splitopa: tbooleanedit
+        frame.caption = 'Separate'#10'Opacity'
+        frame.dummy = 0
+        frame.outerframe = (
+          0
+          8
+          53
+          9
+        )
+        bounds_x = 62
+        bounds_y = 0
+        bounds_cx = 66
+        bounds_cy = 30
+        onsetvalue = sepopaset
+      end
+      object reverse: tbooleanedit
+        frame.caption = '&reverse'
+        frame.dummy = 0
+        frame.outerframe = (
+          0
+          1
+          44
+          2
+        )
+        taborder = 1
+        bounds_x = 0
+        bounds_y = 7
+        bounds_cx = 57
+        bounds_cy = 16
+        ondataentered = reverseenteredev
+      end
+    end
+    object buttonlayout: tlayouter
+      taborder = 1
+      bounds_x = 182
+      bounds_y = 0
+      bounds_cx = 324
+      bounds_cy = 31
+      optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
+      optionslayout = [lao_placex]
+      place_mindist = 5
+      object tbutton2: tbutton
+        optionswidget1 = [ow1_autoscale, ow1_autowidth]
+        bounds_x = 266
+        bounds_y = 0
+        bounds_cx = 58
+        bounds_cy = 31
+        bounds_cxmin = 58
+        state = [as_localcaption]
+        caption = 'Cancel'
+        modalresult = mr_canclose
+      end
+      object tbutton1: tbutton
+        optionswidget1 = [ow1_autoscale, ow1_autowidth]
+        taborder = 1
+        bounds_x = 203
+        bounds_y = 0
+        bounds_cx = 58
+        bounds_cy = 31
+        bounds_cxmin = 58
+        state = [as_default, as_localdefault, as_localcaption]
+        caption = '&OK'
+        modalresult = mr_ok
+      end
+      object tsimplewidget1: tsimplewidget
+        taborder = 2
+        bounds_x = 194
+        bounds_y = 8
+        bounds_cx = 4
+        bounds_cy = 18
+      end
+      object tbutton3: tbutton
+        optionswidget1 = [ow1_autoscale, ow1_autowidth]
+        taborder = 3
+        bounds_x = 131
+        bounds_y = 0
+        bounds_cx = 58
+        bounds_cy = 31
+        bounds_cxmin = 58
+        state = [as_localcaption, as_localonexecute]
+        caption = '&Save'
+        onexecute = saveex
+      end
+      object tbutton4: tbutton
+        optionswidget1 = [ow1_autoscale, ow1_autowidth]
+        taborder = 4
+        bounds_x = 68
+        bounds_y = 0
+        bounds_cx = 58
+        bounds_cy = 31
+        bounds_cxmin = 58
+        state = [as_localcaption, as_localonexecute]
+        caption = '&Load'
+        onexecute = loadex
+      end
+      object clearbu: tbutton
+        optionswidget1 = [ow1_autoscale, ow1_autowidth]
+        taborder = 5
+        hint = 'Clear opacity gradient'
+        bounds_x = 0
+        bounds_y = 0
+        bounds_cx = 63
+        bounds_cy = 31
+        bounds_cxmin = 58
+        state = [as_disabled, as_localdisabled, as_localcaption, as_localhint, as_localonexecute]
+        caption = 'ClearOpa'
+        onexecute = clearopaexe
+      end
+    end
+  end
+  object tsplitter1: tsplitter
+    color = -1879048189
+    taborder = 2
+    visible = False
+    bounds_x = 514
+    bounds_y = 412
+    bounds_cx = 3
+    bounds_cy = 18
+    anchors = [an_top, an_right]
+    linkleft = bottomlayout
   end
   object formstatfile: tstatfile
     filename = 'fadeeditor.sta'
