@@ -2046,10 +2046,10 @@ begin
       end;
      end;
      rect1.pos:= fwidgetrect.pos;
-     if fanchors*[an_right,an_left] = [an_right]{an_right in fanchors} then begin
+     if fanchors*[an_right,an_left] = [an_right] then begin
       dec(rect1.x,rect1.cx);
      end;
-     if fanchors*[an_bottom,an_top] = [an_bottom]{an_bottom in fanchors} then begin
+     if fanchors*[an_bottom,an_top] = [an_bottom] then begin
       dec(rect1.y,rect1.cy);
      end;
      addsize1(rect1.size,fwidgetrect.size);
@@ -2071,17 +2071,17 @@ var
  box,boy: boolean;
 begin
  result:= inherited getminshrinksize;
- box:= fanchors * [an_left,an_right] = [an_left,an_right];
- boy:= fanchors * [an_top,an_bottom] = [an_top,an_bottom]; 
- if (foptionsscale * [osc_expandx,osc_expandy] <> []) or box or boy then begin
+ box:= (fanchors * [an_left,an_right] = [an_left,an_right]) or 
+                                            (osc_expandx in foptionsscale);
+ boy:= (fanchors * [an_top,an_bottom] = [an_top,an_bottom]) or 
+                                            (osc_expandy in foptionsscale); 
+ if box or boy then begin
   size1:= minscrollsize;
   addsize1(size1,framewidth);
-  if (result.cx < size1.cx) and 
-                          (box or (osc_expandx in foptionsscale)) then begin
+  if box and (result.cx < size1.cx) then begin
    result.cx:= size1.cx;
   end;
-  if (result.cy < size1.cy) and 
-                           (boy or (osc_expandy in foptionsscale)) then begin
+  if boy and (result.cy < size1.cy) then begin
    result.cy:= size1.cy;
   end;
  end;
