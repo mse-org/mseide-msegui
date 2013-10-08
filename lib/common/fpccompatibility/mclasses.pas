@@ -1044,6 +1044,8 @@ Function FindNestedComponent(Root : TComponent; APath : String; CStyle : Boolean
 procedure BeginGlobalLoading;
 procedure NotifyGlobalLoading;
 procedure EndGlobalLoading;
+procedure beginsuspendgloballoading;
+procedure endsuspendgloballoading;
 
 function CollectionsEqual(C1, C2: TCollection): Boolean; overload;
 function CollectionsEqual(C1, C2: TCollection; Owner1,
@@ -5449,8 +5451,44 @@ begin
     end;
 end;
 
+type
+ tglobloadlist = class(tfplist)
+  protected
+   fsuspended: integer;
+  public
+   procedure beginsuspend;
+   procedure endsuspend;
+ end;
+ 
 threadvar
-  GlobalLoaded, GlobalLists: TFpList;
+  GlobalLoaded: tglobloadlist;
+  GlobalLists: TFpList;
+
+{ tglobloadlist }
+
+procedure tglobloadlist.beginsuspend;
+begin
+ inc(fsuspended);
+end;
+
+procedure tglobloadlist.endsuspend;
+begin
+ dec(fsuspended);
+end;
+
+procedure beginsuspendgloballoading;
+begin
+ if globalloaded <> nil then begin
+  globalloaded.beginsuspend;
+ end;
+end;
+
+procedure endsuspendgloballoading;
+begin
+ if globalloaded <> nil then begin
+  globalloaded.endsuspend;
+ end;
+end;
 
 procedure BeginGlobalLoading;
 
@@ -5458,7 +5496,7 @@ begin
   if not Assigned(GlobalLists) then
     GlobalLists := TFpList.Create;
   GlobalLists.Add(GlobalLoaded);
-  GlobalLoaded := TFpList.Create;
+  GlobalLoaded := tglobloadlist.Create;
 end;
 
 procedure NotifyGlobalLoading;
@@ -5473,7 +5511,7 @@ procedure EndGlobalLoading;
 begin
   { Free the memory occupied by BeginGlobalLoading }
   GlobalLoaded.Free;
-  GlobalLoaded := TFpList(GlobalLists.Last);
+  GlobalLoaded := tglobloadlist(GlobalLists.Last);
   GlobalLists.Delete(GlobalLists.Count - 1);
   if GlobalLists.Count = 0 then
   begin
@@ -6458,6 +6496,7 @@ var
   Dummy, i: Integer;
   Flags: TFilerFlags;
   CompClassName, CompName, ResultName: String;
+  localloaded: boolean;
 begin
   FDriver.BeginRootComponent;
   Result := nil;
@@ -6495,27 +6534,34 @@ begin
 
       FRoot := Result;
       FLookupRoot := Result;
-      if Assigned(GlobalLoaded) then
-        FLoaded := GlobalLoaded
-      else
-        FLoaded := TFpList.Create;
-
+      localloaded:= not (Assigned(GlobalLoaded) and 
+                                      (globalloaded.fsuspended <= 0));
+      if localloaded then begin
+       FLoaded:= TFpList.Create;
+      end
+      else begin
+       FLoaded:= GlobalLoaded;
+      end;
       try
-        if FLoaded.IndexOf(FRoot) < 0 then
-          FLoaded.Add(FRoot);
+        if FLoaded.IndexOf(FRoot) < 0 then begin
+         FLoaded.Add(FRoot);
+        end;
         FOwner := FRoot;
         FRoot.FComponentState := FRoot.FComponentState + [csLoading, csReading];
         FRoot.ReadState(Self);
         Exclude(FRoot.FComponentState, csReading);
 
-        if not Assigned(GlobalLoaded) then
-          for i := 0 to FLoaded.Count - 1 do
-            TComponent(FLoaded[i]).Loaded;
+        if localloaded then begin
+         for i := 0 to FLoaded.Count - 1 do begin
+          TComponent(FLoaded[i]).Loaded;
+         end;
+        end;
 
       finally
-        if not Assigned(GlobalLoaded) then
-          FLoaded.Free;
-        FLoaded := nil;
+       if localloaded then begin
+        FLoaded.Free;
+       end;
+       FLoaded := nil;
       end;
       GlobalFixupReferences;
     except

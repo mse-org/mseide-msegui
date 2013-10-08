@@ -919,7 +919,12 @@ begin
  if not (cs_inheritedloading in msecomponentstate) then begin
   include(factstate,acs_dooncreatecalled);
   if assigned(foncreate) then begin        //csloading possibly set
-   foncreate(self);
+   beginsuspendgloballoading;
+   try
+    foncreate(self);
+   finally
+    endsuspendgloballoading;
+   end;
   end;
  end;
 end;
