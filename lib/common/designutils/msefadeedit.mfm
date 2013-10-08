@@ -400,6 +400,7 @@ object fadeeditfo: tfadeeditfo
     object opaedit: tpickwidget
       Tag = 1
       optionswidget = [ow_destroywidgets]
+      frame.options = [cfo_fixtop]
       frame.leveli = -1
       frame.framei_bottom = 2
       frame.caption = 'Opacity'
@@ -446,7 +447,7 @@ object fadeeditfo: tfadeeditfo
     bounds_cx = 506
     bounds_cy = 31
     anchors = [an_left, an_right, an_bottom]
-    optionsscale = [osc_expandx, osc_expandy, osc_shrinky]
+    optionsscale = [osc_expandy, osc_shrinky]
     linktop = cont2
     dist_top = 5
     options = [spao_gluebottom]
@@ -571,17 +572,6 @@ object fadeeditfo: tfadeeditfo
         onexecute = clearopaexe
       end
     end
-  end
-  object tsplitter1: tsplitter
-    color = -1879048189
-    taborder = 2
-    visible = False
-    bounds_x = 514
-    bounds_y = 412
-    bounds_cx = 3
-    bounds_cy = 18
-    anchors = [an_top, an_right]
-    linkleft = bottomlayout
   end
   object formstatfile: tstatfile
     filename = 'fadeeditor.sta'

@@ -59,7 +59,6 @@ type
    tbutton3: tbutton;
    tbutton4: tbutton;
    clearbu: tbutton;
-   tsplitter1: tsplitter;
    procedure mouseev(const sender: twidget; var info: mouseeventinfoty);
    procedure pospaintev(const sender: twidget; const canvas: tcanvas);
    procedure createev(const sender: TObject);
