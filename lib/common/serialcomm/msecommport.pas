@@ -92,7 +92,8 @@ const
               ' 9    canceled';
 
 type
- commnrty = (cnr_1,cnr_2,cnr_3,cnr_4,cnr_5,cnr_6,cnr_7,cnr_8,cnr_9);
+ commnrty = (cnr_invalid=-1,
+                cnr_1,cnr_2,cnr_3,cnr_4,cnr_5,cnr_6,cnr_7,cnr_8,cnr_9);
  commbaudratety = (cbr_50,cbr_75,cbr_110,cbr_134,cbr_150,cbr_200,cbr_300,cbr_600,
                    cbr_1200,cbr_1800,cbr_2400,cbr_4800,cbr_9600,cbr_19200,
                    cbr_38400,cbr_57600,cbr_115200);
@@ -103,7 +104,7 @@ type
 const
  {$ifdef UNIX}
 
- commname: array[commnrty] of string = ('ttyS0','ttyS1','ttyS3','ttyS4','ttyS5',
+ commname: array[commnrty] of string = ('','ttyS0','ttyS1','ttyS3','ttyS4','ttyS5',
                                         'ttyS6','ttyS7','ttyS8','ttyS9');
  {
  commname: array[commnrty] of string = ('ttys0','ttys1','ttys3','ttys4','ttys5',
@@ -119,7 +120,7 @@ const
                       B38400,B57600,B115200);
  commdatabitflags: array[commdatabitsty] of integer = (cs5,cs6,cs7,cs8);
  {$else}
- commname: array[commnrty] of string = ('COM1','COM2','COM3','COM4','COM5',
+ commname: array[commnrty] of string = ('','COM1','COM2','COM3','COM4','COM5',
                                         'COM6','COM7','COM8','COM9');  
  invalidfilehandle = INVALID_HANDLE_VALUE;
  infinitemse = INFINITE;
@@ -154,6 +155,7 @@ type
    commtimeouts: tcommtimeouts;
    {$endif}
    fdatabits: commdatabitsty;
+   fcommname: filenamety;
    procedure updatebyteinfo;
    procedure Setbaud(const Value: commbaudratety);
    procedure Setcommnr(const Value: commnrty);
@@ -169,6 +171,7 @@ type
    {$endif}
    procedure setdatabits(const avalue: commdatabitsty);
    procedure setactive(const avalue: boolean);
+   procedure setcommname(const avalue: filenamety);
   protected
    fvmin: char;
    function canevent(const aevent: tmethod): boolean;
@@ -200,6 +203,8 @@ type
    property active: boolean read opened write setactive;
    property handle: ptruint read fhandle;
    property commnr: commnrty read Fcommnr write Setcommnr default cnr_1;
+   property commname: filenamety read fcommname write setcommname;
+                         //overrides commnr
    property baud: commbaudratety read Fbaud write Setbaud default cbr_9600;
    property databits: commdatabitsty read fdatabits write setdatabits default cdb_8;
    property stopbit: commstopbitty read Fstopbit write Setstopbit default csb_1;
@@ -296,6 +301,8 @@ type
 //   procedure setpriority(const Value: tthreadprioritymse);
    function getdatabits: commdatabitsty;
    procedure setdatabits(const avalue: commdatabitsty);
+   function getportname: filenamety;
+   procedure setportname(const avalue: filenamety);
   protected
    ftimeout: integer;
    fthread: tcommthread;
@@ -339,6 +346,8 @@ type
         write fonconnectedchange;
    property sendretries: integer read getsendretries write setsendretries default 0;
    property port: commnrty read getport write setport default cnr_1;
+   property portname: filenamety read getportname write setportname;
+                        //overrides port
    property baudrate: commbaudratety read getbaudrate write Setbaudrate default cbr_9600;
    property stopbit: commstopbitty read getstopbit write Setstopbit default csb_1;
    property parity: commparityty read getparity write Setparity default cpa_none;
@@ -440,7 +449,7 @@ implementation
 uses
 // {$ifdef UNIX} {kernelioctl,}msesysbindings, {$endif}
  sysutils,mseapplication,msesysintf1,msesysintf,msesys,msesysutils,
- msepipestream;
+ msepipestream,msefileutils;
 
 const
  asciipufferlaenge = 255;
@@ -675,6 +684,7 @@ end;
 constructor tcustomrs232.create(const aowner: tmsecomponent; const
                       aoncheckabort: checkeventty = nil);
 begin
+ fcommnr:= cnr_1;
  fowner:= aowner;
  fhandle:= invalidfilehandle;
  fbaud:= cbr_9600;
@@ -728,13 +738,21 @@ end;
 
 procedure tcustomrs232.Setcommnr(const Value: commnrty);
 begin
- if (value < low(commnrty)) or (value > high(commnrty)) then begin
+ if (value < cnr_1) or (value > high(commnrty)) then begin
   raise exception.Create('Invalid commnr: '+inttostr(integer(value))+'.');
  end;
  if fcommnr <> value then begin
   Fcommnr := Value;
   updatebyteinfo;
  end;
+end;
+
+procedure tcustomrs232.setcommname(const avalue: filenamety);
+begin
+ if fcommname <> avalue then begin
+  fcommname:= avalue;
+  updatebyteinfo;
+ end; 
 end;
 
 procedure tcustomrs232.Setparity(const Value: commparityty);
@@ -896,12 +914,23 @@ const           // fuer tdcb.flags
   close;
   syserror(syelasterror,'trs232: Can not set port mode.');
  end;
-
+var
+ str1: string;
+ 
 begin       //open
  close;
+ if fcommname <> '' then begin
+  str1:= tosysfilepath(fcommname);
+ end
+ else begin
+ {$ifdef MSWINDOWS}
+  str1:= msecommport.commname[fcommnr];
+ {$else}
+  str1:= '/dev/'+msecommport.commname[fcommnr];
+ {$endif}
+ end;
  {$ifdef UNIX}
- fhandle:= mselibc.open(PChar('/dev/'+commname[fcommnr]), o_rdwr or o_nonblock
-             {,FileAccessRights});
+ fhandle:= mselibc.open(PChar(str1)),o_rdwr or o_nonblock{,FileAccessRights});
  if integer(fhandle) >= 0 then begin
   msetcgetattr(fhandle,info);
   info.c_iflag:= info.c_iflag and not(iflagoff) or iflagon;
@@ -933,9 +962,9 @@ begin       //open
  int1:= 0;
  fillchar(overlapped,sizeof(overlapped),0);
  overlapped.hevent:= createevent(nil,true,false,nil);
+ 
  repeat
-  fhandle:= createfile(pchar(commname[fcommnr]),
-                             GENERIC_READ or GENERIC_WRITE, 0, nil,
+  fhandle:= createfile(pchar(str1),GENERIC_READ or GENERIC_WRITE, 0, nil,
                OPEN_EXISTING,FILE_FLAG_OVERLAPPED,0);
   if fhandle = invalidfilehandle then begin
    sleep(100);
@@ -1882,11 +1911,21 @@ end;
 
 procedure tcommport.setport(const Value: commnrty);
 begin
-// if (value >= low(commnrty)) and (value <= high(commnrty)) then begin
-  fthread.fport.commnr:= value;
-  portchanged;
-// end;
+ fthread.fport.commnr:= value;
+ portchanged;
 end;
+
+function tcommport.getportname: filenamety;
+begin
+ result:= fthread.fport.commname;
+end;
+
+procedure tcommport.setportname(const avalue: filenamety);
+begin
+ fthread.fport.commname:= avalue;
+ portchanged;
+end;
+
 
 function tcommport.getrtstimenach: integer;
 begin
