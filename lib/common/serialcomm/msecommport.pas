@@ -168,6 +168,7 @@ type
    function setreadnonblocked(const anonblocked: boolean): boolean;
    {$endif}
    procedure setdatabits(const avalue: commdatabitsty);
+   procedure setactive(const avalue: boolean);
   protected
    fvmin: char;
    function canevent(const aevent: tmethod): boolean;
@@ -196,6 +197,7 @@ type
                        timeout: longword = infinitemse): boolean;
             //list daten, true wenn gelungen, timeout in us 0 -> 2*uebertragungszeit
    function transmissiontime(const acount: integer): longword; //bringt uebertragungszeit in us
+   property active: boolean read opened write setactive;
    property handle: ptruint read fhandle;
    property commnr: commnrty read Fcommnr write Setcommnr default cnr_1;
    property baud: commbaudratety read Fbaud write Setbaud default cbr_9600;
@@ -1434,6 +1436,16 @@ begin
 {$else}
  result:= sys_write(fhandle,@buffer,count);
 {$endif}
+end;
+
+procedure tcustomrs232.setactive(const avalue: boolean);
+begin
+ if avalue then begin
+  open;
+ end
+ else begin
+  close;
+ end;
 end;
 
 { tcommthread }
