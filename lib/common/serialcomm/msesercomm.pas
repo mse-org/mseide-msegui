@@ -242,6 +242,9 @@ type
    procedure closepipes(const sender: tcustomcommpipes); override;
    procedure doasyncevent(var atag: integer); override;
    function gethalfduplex: boolean; override;
+  protected
+   procedure doportopen;
+   procedure doportclose;
  public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -282,6 +285,7 @@ type
    ftimer: tsimpletimer;
    ftimeoutus: integer;
    fsem: semty;
+   feor: string;
    procedure setsercomm(const avalue: tcustomcommcomp);
    procedure dotimer(const sender: tobject);
   protected
@@ -309,14 +313,22 @@ type
                       //0 -> timeoutus property,
                       //-1 -> timeoutus + guessed transmission time,
                       //-2 unlimited
+   function transmiteor(const adata: string; const aresponselength: integer = 0;
+            const atimeoutus: integer = -1): syserrorty; virtual; overload; 
+                  //use EOR, async
    function transmit(const adata: string; const aresponselength: integer;
                                                        out aresult: string;
       const atimeoutus: integer = -1): commresponseflagsty; virtual; overload;
                         //synchronous, threadsafe
+   function transmiteor(const adata: string; out aresult: string;
+      const aresponselength: integer = 0; 
+      const atimeoutus: integer = -1): commresponseflagsty; virtual; overload;
+                        //use EOR, synchronous, threadsafe
    property sercomm: tcustomcommcomp read fsercomm write setsercomm;
    property timeoutus: integer read ftimeoutus write ftimeoutus default 0;
                         //0 -> unlimited,
    property onresponse: commresponseeventty read fonresponse write fonresponse;
+   property eor: string read feor write feor; //end of record, default $0a
  end;
 
  tsercommchannel = class(tcustomsercommchannel)
@@ -368,7 +380,7 @@ procedure connectcryptoio(const acryptoio: tcryptoio; const tx: tcommwriter;
  
 implementation
 uses
- msesys,msestream,msearrayutils,sysutils,msebits,msesysintf1;
+ msesys,msestream,msearrayutils,sysutils,msebits,msesysintf1,msestrings;
  
 procedure setcomcomp(const alink: icommclient;
                const acommcomp: tcustomcommcomp; var dest: tcustomcommcomp);
@@ -421,6 +433,8 @@ begin
   fpipes:= tsercommpipes.create(self,cyk_none); //todo: cyk_sercomm
  end;
  fport:= tasyncserport.create(self);
+ fport.fonopen:= @doportopen;
+ fport.fonclose:= @doportclose;
  inherited;
 end;
 
@@ -496,6 +510,16 @@ function tcustomsercommcomp.calctransmissiontime(
                                          const alength: integer): integer;
 begin
  result:= fport.transmissiontime(alength);
+end;
+
+procedure tcustomsercommcomp.doportopen;
+begin
+ factive:= true;
+end;
+
+procedure tcustomsercommcomp.doportclose;
+begin
+ factive:= false;
 end;
 
 { tsercommpipes }
@@ -977,6 +1001,7 @@ end;
 
 constructor tcustomsercommchannel.create(aowner: tcomponent);
 begin
+ feor:= c_linefeed;
  sys_semcreate(fsem,0);
  ftimer:= tsimpletimer.create(0,{$ifdef FPC}@{$endif}dotimer,false,[to_single]);
  inherited;
@@ -1136,6 +1161,18 @@ begin
  ftimer.enabled:= false;
  fdata:= '';
  fstate:= fstate-[sccs_pending];
+end;
+
+function tcustomsercommchannel.transmiteor(const adata: string;
+               const aresponselength: integer = 0;
+               const atimeoutus: integer = -1): syserrorty;
+begin
+end;
+
+function tcustomsercommchannel.transmiteor(const adata: string;
+               out aresult: string; const aresponselength: integer = 0;
+               const atimeoutus: integer = -1): commresponseflagsty;
+begin
 end;
 
 { tsercommreader }

@@ -17,7 +17,7 @@ uses {$ifdef mswindows} windows,{$ifndef FPC} mmsystem,{$endif}
      {$else} mselibc,
      {$endif}
      classes,mclasses,msethread,mseguiglob,msecommtimer,mseevent,mseclasses,
-     msesystypes,msestrings,msestat,msestatfile,msetypes;
+     msesystypes,msestrings,msestat,msestatfile,msetypes,mseglob;
 
 type
  commstatety = (
@@ -174,6 +174,8 @@ type
    procedure setcommname(const avalue: filenamety);
   protected
    fvmin: char;
+   fonopen: proceventty;
+   fonclose: proceventty;
    function canevent(const aevent: tmethod): boolean;
    function piperead(var buf; const acount: integer; out readcount: integer;
                     const nonblocked: boolean): boolean;
@@ -838,6 +840,9 @@ begin
  {$endif}
  end;
  fhandle:= invalidfilehandle;
+ if assigned(fonclose) then begin
+  fonclose;
+ end;
 end;
 
 function tcustomrs232.opened: boolean;
@@ -1001,6 +1006,9 @@ begin       //open
  end;
  {$endif}
  result:= opened;
+ if result and assigned(fonopen) then begin
+  fonopen;
+ end;
 end;
 
 procedure tcustomrs232.setrts(active: boolean);
