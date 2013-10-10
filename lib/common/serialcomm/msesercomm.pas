@@ -335,6 +335,7 @@ type
   published
    property sercomm;
    property timeoutus;
+   property eor;
    property onresponse;
  end;
 
@@ -365,6 +366,7 @@ type
    property sercomm: tcustomsercommcomp read getsercomm write setsercomm;
    property onsetupcomm: setupcommeventty read fonsetupcomm write fonsetupcomm;
    property timeoutus;
+   property eor;
    property onresponse;
    property connected: boolean read fconnected write setconnected
                                                            default false;
@@ -1036,6 +1038,9 @@ begin
 end;
 
 procedure tcustomsercommchannel.dorxchange(const areader: tcommreader);
+var
+ bo1: boolean;
+ int1: integer;
 begin
  if sccs_pending in fstate then begin
   fdata:= fdata + areader.readdatastring;
@@ -1043,7 +1048,17 @@ begin
   if areader.eof then begin
    include(fflags,crf_eof);
   end;
-  if (fflags <> []) or (length(fdata) >= fexpected) then begin
+  if sccs_eor in fstate then begin
+   int1:= pos(feor,fdata);
+   bo1:= int1 > 0;
+   if bo1 then begin
+    setlength(fdata,int1-1);
+   end;
+  end
+  else begin
+   bo1:= length(fdata) >= fexpected;
+  end;
+  if (fflags <> []) or bo1 then begin
    exclude(fstate,sccs_pending);
    if fsercomm.gethalfduplex then begin
     fdata:= copy(fdata,fsent+1,bigint);
@@ -1083,6 +1098,9 @@ begin
  try
   clear;
   checksercomm;
+  if aeor and (feor = '') then begin
+   componentexception(self,'No end of record marker');
+  end;
   fsent:= length(adata);
   fexpected:= aresponselength;
   if fsercomm.gethalfduplex then begin
@@ -1169,14 +1187,25 @@ function tcustomsercommchannel.transmiteor(const adata: string;
                const aresponselength: integer = 0;
                const atimeoutus: integer = -1): syserrorty;
 begin
- result:= sye_notimplemented;
+ result:= internaltransmit(adata+feor,aresponselength,atimeoutus,false,true);
 end;
 
 function tcustomsercommchannel.transmiteor(const adata: string;
                out aresult: string; const aresponselength: integer = 0;
                const atimeoutus: integer = -1): commresponseflagsty;
 begin
- result:= [];
+ case internaltransmit(adata+feor,aresponselength,atimeoutus,true,true) of
+  sye_ok: begin
+   result:= fflags;
+  end;
+  sye_write: begin
+   result:= [crf_writeerror];
+  end;
+  else begin  
+   result:= [crf_timeout];
+  end;
+ end;
+ aresult:= fdata;
 end;
 
 { tsercommreader }
