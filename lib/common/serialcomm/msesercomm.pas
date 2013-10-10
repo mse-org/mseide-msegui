@@ -274,7 +274,7 @@ type
  tcustomsercommchannel = class;
  commresponseeventty = procedure(const sender: tcustomsercommchannel;
                 var adata: string; var aflags: commresponseflagsty) of object;
- sercommchannelstatety = (sccs_pending,sccs_sync);
+ sercommchannelstatety = (sccs_pending,sccs_sync,sccs_eor);
  sercommchannelstatesty = set of sercommchannelstatety;
  
  tcustomsercommchannel = class(tmsecomponent,icommclient)
@@ -296,7 +296,7 @@ type
    fflags: commresponseflagsty;
    function internaltransmit(const adata: string;
            const aresponselength: integer; const atimeoutus: integer;
-                                const sync: boolean): syserrorty;
+                     const sync: boolean; const aeor: boolean): syserrorty;
    procedure checksercomm;
    procedure doresponse; virtual;
     //icommclient
@@ -1074,7 +1074,7 @@ end;
 
 function tcustomsercommchannel.internaltransmit(const adata: string;
                const aresponselength: integer; const atimeoutus: integer;
-               const sync: boolean): syserrorty;
+               const sync: boolean; const aeor: boolean): syserrorty;
 var
  int1: integer;
 begin
@@ -1098,7 +1098,9 @@ begin
   if int1 = -1 then begin
    int1:= 2*fsercomm.calctransmissiontime(fexpected+fsent)+ftimeoutus;
   end;
-  updatebit({$ifdef FPC}longword{$else}byte{$endif}(fstate),ord(sccs_sync),sync);
+  updatebit({$ifdef FPC}longword{$else}byte{$endif}(fstate),
+                                                          ord(sccs_sync),sync);
+  updatebit({$ifdef FPC}longword{$else}byte{$endif}(fstate),ord(sccs_eor),aeor);
   include(fstate, sccs_pending);
   result:= fsercomm.trywritedata(adata);
   if result = sye_ok then begin
@@ -1123,7 +1125,7 @@ function tcustomsercommchannel.transmit(const adata: string;
                   const aresponselength: integer; 
                   const atimeoutus: integer = -1): syserrorty;
 begin
- result:= internaltransmit(adata,aresponselength,atimeoutus,false);
+ result:= internaltransmit(adata,aresponselength,atimeoutus,false,false);
 end;
 
 function tcustomsercommchannel.transmit(const adata: string;
@@ -1132,7 +1134,7 @@ function tcustomsercommchannel.transmit(const adata: string;
                       const atimeoutus: integer = -1): commresponseflagsty;
                                                        //synchronous
 begin
- case internaltransmit(adata,aresponselength,atimeoutus,true) of
+ case internaltransmit(adata,aresponselength,atimeoutus,true,false) of
   sye_ok: begin
    result:= fflags;
   end;
