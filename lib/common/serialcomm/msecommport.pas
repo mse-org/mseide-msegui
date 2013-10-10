@@ -930,7 +930,7 @@ begin       //open
  {$endif}
  end;
  {$ifdef UNIX}
- fhandle:= mselibc.open(PChar(str1)),o_rdwr or o_nonblock{,FileAccessRights});
+ fhandle:= mselibc.open(PChar(str1),o_rdwr or o_nonblock{,FileAccessRights});
  if integer(fhandle) >= 0 then begin
   msetcgetattr(fhandle,info);
   info.c_iflag:= info.c_iflag and not(iflagoff) or iflagon;
