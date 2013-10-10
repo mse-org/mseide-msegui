@@ -1167,12 +1167,14 @@ function tcustomsercommchannel.transmiteor(const adata: string;
                const aresponselength: integer = 0;
                const atimeoutus: integer = -1): syserrorty;
 begin
+ result:= sye_notimplemented;
 end;
 
 function tcustomsercommchannel.transmiteor(const adata: string;
                out aresult: string; const aresponselength: integer = 0;
                const atimeoutus: integer = -1): commresponseflagsty;
 begin
+ result:= [];
 end;
 
 { tsercommreader }
