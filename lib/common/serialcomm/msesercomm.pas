@@ -216,6 +216,7 @@ type
   public
    constructor create(const aowner: tmsecomponent;  //aowner can be nil
                                   const aoncheckabort: checkeventty = nil);
+   procedure close; override;
   published
    property commnr;
    property baud;
@@ -452,6 +453,21 @@ begin
  fpipes.assign(avalue);
 end;
 
+procedure tcustomsercommcomp.doportopen;
+begin
+ if (fpipes.handle = invalidfilehandle) and 
+               not (sco_nopipe in foptions) then begin
+  fpipes.handle:= fport.handle;
+ end;
+ factive:= true;
+end;
+
+procedure tcustomsercommcomp.doportclose;
+begin
+ fpipes.handle:= msesystypes.invalidfilehandle;
+ factive:= false;
+end;
+
 procedure tcustomsercommcomp.internalconnect;
 begin
  if not (csdesigning in componentstate) then begin
@@ -461,9 +477,9 @@ begin
   {$ifdef unix}
   setfilenonblock(fport.handle,sco_nopipe in foptions);
   {$endif};
-  if not (sco_nopipe in foptions) then begin
-   fpipes.handle:= fport.handle;
-  end;
+//  if not (sco_nopipe in foptions) then begin
+//   fpipes.handle:= fport.handle;
+//  end;
  end;
  factive:= true;
  doafterconnect(fpipes);
@@ -514,16 +530,6 @@ begin
  result:= fport.transmissiontime(alength);
 end;
 
-procedure tcustomsercommcomp.doportopen;
-begin
- factive:= true;
-end;
-
-procedure tcustomsercommcomp.doportclose;
-begin
- factive:= false;
-end;
-
 { tsercommpipes }
 
 procedure tsercommpipes.createpipes;
@@ -539,6 +545,11 @@ constructor tasyncserport.create(const aowner: tmsecomponent;
 begin
  inherited create(aowner,aoncheckabort);
  fvmin:= #1; //blocking until first byte
+end;
+
+procedure tasyncserport.close;
+begin
+ internalclose(false);
 end;
 
 { tcustomcommpipes }

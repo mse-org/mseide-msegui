@@ -150,7 +150,8 @@ type
    fbyteus: integer;
    foncheckabort: checkeventty;
    {$ifdef mswindows}
-   overlapped: toverlapped;
+   overlappedrx: toverlapped;
+   overlappedtx: toverlapped;
    timer: tmmtimermse;
    commtimeouts: tcommtimeouts;
    {$endif}
@@ -186,7 +187,7 @@ type
                       const aoncheckabort: checkeventty = nil);
    destructor destroy; override;
    function open: boolean;
-   procedure close;
+   procedure close; virtual;
    function opened: boolean;
    procedure reset;
    procedure resetinput;
@@ -823,28 +824,34 @@ end;
 procedure tcustomrs232.internalclose(const aclosehandle: boolean);
 begin
  if opened then begin
+  if assigned(fonclose) then begin
+   fonclose;
+  end;
  {$ifdef UNIX}
-  __close(fhandle);
+  if aclosehandle then begin
+   __close(fhandle);
+  end;
  {$else}
   if aclosehandle then begin
    closehandle(fhandle);
   end;
-  if overlapped.hevent <> 0 then begin
-   closehandle(overlapped.hevent);
-   overlapped.hEvent:= 0;
+  if overlappedrx.hevent <> 0 then begin
+   closehandle(overlappedrx.hevent);
+   overlappedrx.hEvent:= 0;
+  end;
+  if overlappedtx.hevent <> 0 then begin
+   closehandle(overlappedtx.hevent);
+   overlappedtx.hEvent:= 0;
   end;
   freeandnil(timer);
  {$endif}
  end;
  fhandle:= invalidfilehandle;
- if assigned(fonclose) then begin
-  fonclose;
- end;
 end;
 
 procedure tcustomrs232.close;
 begin
- internalclose(false);
+ internalclose(true);
 end;
 
 function tcustomrs232.opened: boolean;
@@ -967,8 +974,10 @@ begin       //open
  end;
  {$else}
  int1:= 0;
- fillchar(overlapped,sizeof(overlapped),0);
- overlapped.hevent:= createevent(nil,true,false,nil);
+ fillchar(overlappedrx,sizeof(overlappedrx),0);
+ fillchar(overlappedtx,sizeof(overlappedtx),0);
+ overlappedrx.hevent:= createevent(nil,true,false,nil);
+ overlappedtx.hevent:= createevent(nil,true,false,nil);
  
  repeat
   fhandle:= createfile(pchar(str1),GENERIC_READ or GENERIC_WRITE, 0, nil,
@@ -1082,8 +1091,9 @@ begin
  if ca1 <> ev_txempty then begin
   raise exception.Create('trs232.waitfortx falsche commmask');
  end;
- waitcommevent(fhandle,ca1,@overlapped);
- result:= waitforsingleobject(overlapped.hevent,timeout div 1000) = wait_object_0;
+ waitcommevent(fhandle,ca1,@overlappedtx);
+ result:= waitforsingleobject(overlappedtx.hevent,timeout div 1000) =
+                                                               wait_object_0;
  if not result then begin
   setcommmask(fhandle,0); //overlapped puffer freigeben
  end;
@@ -1160,9 +1170,10 @@ begin
   defaulttimeout(timeout,len,timeout);
   setcommmask(fhandle,0);
   setcommmask(fhandle,ev_txempty); //funktioniert nicht fuer w2k, waitcommevent kehrt sofort zurueck!
-  if not writefile(fhandle,dat[1],len,ca1,@overlapped) then begin
+  if not writefile(fhandle,dat[1],len,ca1,@overlappedtx) then begin
    if getlasterror = ERROR_IO_PENDING then begin
-    result:= waitforsingleobject(overlapped.hevent,timeout div 1000+1) = WAIT_OBJECT_0;
+    result:= waitforsingleobject(overlappedtx.hevent,timeout div 1000+1) =
+                                                               WAIT_OBJECT_0;
    end;
   end
   else begin
@@ -1224,7 +1235,7 @@ begin
    timed:= defaulttimeout(timeout,anzahl,timeout);
    time:= timestep(timeout);
   {$ifdef mswindows}
-   bo1:= windows.readfile(fhandle,po^,anzahl,longword(int1),@overlapped);
+   bo1:= windows.readfile(fhandle,po^,anzahl,longword(int1),@overlappedrx);
   {$else}
    if timed then begin
     fillchar(pollinfo,sizeof(pollinfo),0);
@@ -1253,14 +1264,14 @@ begin
    {$else}
     if not bo1 then begin
      if not getoverlappedresult(fhandle,
-                                   overlapped,longword(int1),false) then begin
+                                   overlappedrx,longword(int1),false) then begin
       bo1:= windows.getlasterror = error_io_incomplete;
       if bo1 then begin
        bo1:= waitforsingleobject(
-                        overlapped.hevent,timeout div 1000 + 1) = WAIT_OBJECT_0;
+                        overlappedrx.hevent,timeout div 1000 + 1) = WAIT_OBJECT_0;
        if bo1 then begin
         bo1:= getoverlappedresult(fhandle,
-                                   overlapped,longword(int1),false);
+                                   overlappedrx,longword(int1),false);
        end;
       end;
       if not bo1 then begin
@@ -1417,23 +1428,23 @@ begin
  bo1:= setreadnonblocked(nonblocked);
  if bo1 then begin
   if nonblocked then begin
-   bo1:= windows.readfile(fhandle,buf,acount,w1,@overlapped);
+   bo1:= windows.readfile(fhandle,buf,acount,w1,@overlappedrx);
   end
   else begin
    if acount > 0 then begin
-    bo1:= windows.readfile(fhandle,buf,1,w1,@overlapped);
+    bo1:= windows.readfile(fhandle,buf,1,w1,@overlappedrx);
    end
    else begin
-    bo1:= windows.readfile(fhandle,buf,0,w1,@overlapped);
+    bo1:= windows.readfile(fhandle,buf,0,w1,@overlappedrx);
    end;
    if not bo1 and (getlasterror = ERROR_IO_PENDING) then begin
-    bo1:= getoverlappedresult(fhandle,overlapped,w1,true);
+    bo1:= getoverlappedresult(fhandle,overlappedrx,w1,true);
    end;
    if bo1 and (acount > 1) then begin
     bo1:= setreadnonblocked(true) and 
-        windows.readfile(fhandle,(pchar(@buf)+1)^,acount-1,w1,@overlapped);
+        windows.readfile(fhandle,(pchar(@buf)+1)^,acount-1,w1,@overlappedrx);
     if not bo1 and (getlasterror = ERROR_IO_PENDING) then begin
-     bo1:= getoverlappedresult(fhandle,overlapped,w1,true);
+     bo1:= getoverlappedresult(fhandle,overlappedrx,w1,true);
     end;
     if bo1 then begin
      w1:= w1 + 1;
@@ -1462,9 +1473,9 @@ var
 {$endif}
 begin
 {$ifdef mswindows}
- bo1:= windows.writefile(fhandle,buffer,count,w1,@overlapped);
+ bo1:= windows.writefile(fhandle,buffer,count,w1,@overlappedtx);
  if not bo1 and (getlasterror = ERROR_IO_PENDING) then begin
-  bo1:= getoverlappedresult(fhandle,overlapped,w1,true);
+  bo1:= getoverlappedresult(fhandle,overlappedtx,w1,true);
  end;
  if bo1 then begin
   result:= w1;
