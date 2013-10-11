@@ -203,6 +203,9 @@ type
    function readstring(anzahl: integer; out dat: string;
                        timeout: longword = infinitemse): boolean;
             //list daten, true wenn gelungen, timeout in us 0 -> 2*uebertragungszeit
+   function readavailbuffer(const maxcount: integer; out dat): integer;
+   function readavailstring(const maxcount: integer): string;
+
    function transmissiontime(const acount: integer): longword; //bringt uebertragungszeit in us
    property active: boolean read opened write setactive;
    property handle: ptruint read fhandle;
@@ -1384,6 +1387,20 @@ begin
   setlength(dat,int1);
   result:= int1 = anzahl;
  end;
+end;
+
+function tcustomrs232.readavailbuffer(const maxcount: integer; out dat): integer;
+begin
+ result:= 0;
+ if maxcount > 0 then begin
+  piperead(dat,maxcount,result,true);
+ end;
+end;
+
+function tcustomrs232.readavailstring(const maxcount: integer): string;
+begin
+ setlength(result,maxcount);
+ setlength(result,readavailbuffer(maxcount,pointer(result)^));
 end;
 
 {$ifdef mswindows}
