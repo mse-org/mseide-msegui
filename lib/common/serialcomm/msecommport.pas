@@ -175,19 +175,19 @@ type
    procedure setcommname(const avalue: filenamety);
   protected
    fvmin: char;
+   fnoclosehandle: boolean;
    fonopen: proceventty;
    fonclose: proceventty;
    function canevent(const aevent: tmethod): boolean;
    function piperead(var buf; const acount: integer; out readcount: integer;
                     const nonblocked: boolean): boolean;
    function pipewrite(const buffer; count: longint): longint;
-   procedure internalclose(const aclosehandle: boolean);
   public
    constructor create(const aowner: tmsecomponent;  //aowner can be nil
                       const aoncheckabort: checkeventty = nil);
    destructor destroy; override;
    function open: boolean;
-   procedure close; virtual;
+   procedure close;
    function opened: boolean;
    procedure reset;
    procedure resetinput;
@@ -821,18 +821,18 @@ begin
  end;
 end;
 
-procedure tcustomrs232.internalclose(const aclosehandle: boolean);
+procedure tcustomrs232.close;
 begin
  if opened then begin
   if assigned(fonclose) then begin
    fonclose;
   end;
  {$ifdef UNIX}
-  if aclosehandle then begin
+  if not fnoclosehandle then begin
    __close(fhandle);
   end;
  {$else}
-  if aclosehandle then begin
+  if not fnoclosehandle then begin
    closehandle(fhandle);
   end;
   if overlappedrx.hevent <> 0 then begin
@@ -847,11 +847,6 @@ begin
  {$endif}
  end;
  fhandle:= invalidfilehandle;
-end;
-
-procedure tcustomrs232.close;
-begin
- internalclose(true);
 end;
 
 function tcustomrs232.opened: boolean;

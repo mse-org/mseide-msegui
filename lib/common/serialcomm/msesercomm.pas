@@ -213,10 +213,11 @@ type
  end;
 
  tasyncserport = class(tcustomrs232)
+  protected
+   
   public
    constructor create(const aowner: tmsecomponent;  //aowner can be nil
                                   const aoncheckabort: checkeventty = nil);
-   procedure close; override;
   published
    property commnr;
    property baud;
@@ -233,6 +234,7 @@ type
    foptions: sercommoptionsty;
    procedure setpipes(const avalue: tsercommpipes);
    procedure setport(const avalue: tasyncserport);
+   procedure setoptions(const avalue: sercommoptionsty);
   protected
    fpipes: tsercommpipes;
    fport: tasyncserport;
@@ -253,7 +255,7 @@ type
    property pipes: tsercommpipes read fpipes write setpipes;
    property port: tasyncserport read fport write setport;
    property options: sercommoptionsty read foptions
-                                        write foptions default [];
+                                        write setoptions default [];
  end;
  
  tsercommcomp = class(tcustomsercommcomp)
@@ -436,6 +438,7 @@ begin
   fpipes:= tsercommpipes.create(self,cyk_none); //todo: cyk_sercomm
  end;
  fport:= tasyncserport.create(self);
+ fport.fnoclosehandle:= true;
  fport.fonopen:= @doportopen;
  fport.fonclose:= @doportclose;
  inherited;
@@ -443,8 +446,8 @@ end;
 
 destructor tcustomsercommcomp.destroy;
 begin
- fpipes.free;
  fport.free;
+ fpipes.free;
  inherited;
 end;
 
@@ -489,7 +492,7 @@ procedure tcustomsercommcomp.internaldisconnect;
 begin
  fpipes.handle:= msesystypes.invalidfilehandle;
  inherited;
- fport.internalclose(false);
+ fport.close;
 end;
 
 procedure tcustomsercommcomp.closepipes(const sender: tcustomcommpipes);
@@ -530,6 +533,12 @@ begin
  result:= fport.transmissiontime(alength);
 end;
 
+procedure tcustomsercommcomp.setoptions(const avalue: sercommoptionsty);
+begin
+ foptions:= avalue;
+ fport.fnoclosehandle:= not (sco_nopipe in foptions);
+end;
+
 { tsercommpipes }
 
 procedure tsercommpipes.createpipes;
@@ -545,11 +554,6 @@ constructor tasyncserport.create(const aowner: tmsecomponent;
 begin
  inherited create(aowner,aoncheckabort);
  fvmin:= #1; //blocking until first byte
-end;
-
-procedure tasyncserport.close;
-begin
- internalclose(false);
 end;
 
 { tcustomcommpipes }
