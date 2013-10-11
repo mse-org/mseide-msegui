@@ -180,6 +180,7 @@ type
    function piperead(var buf; const acount: integer; out readcount: integer;
                     const nonblocked: boolean): boolean;
    function pipewrite(const buffer; count: longint): longint;
+   procedure internalclose(const aclosehandle: boolean);
   public
    constructor create(const aowner: tmsecomponent;  //aowner can be nil
                       const aoncheckabort: checkeventty = nil);
@@ -819,30 +820,31 @@ begin
  end;
 end;
 
-procedure tcustomrs232.close;
+procedure tcustomrs232.internalclose(const aclosehandle: boolean);
 begin
  if opened then begin
  {$ifdef UNIX}
   __close(fhandle);
  {$else}
- closehandle(fhandle);
- if overlapped.hevent <> 0 then begin
-  closehandle(overlapped.hevent);
-  overlapped.hEvent:= 0;
- end;
- freeandnil(timer);
- {
- if txemptoverlapped.hevent <> 0 then begin
-  closehandle(txemptoverlapped.hevent);
-  txemptoverlapped.hEvent:= 0;
- end;
- }
+  if aclosehandle then begin
+   closehandle(fhandle);
+  end;
+  if overlapped.hevent <> 0 then begin
+   closehandle(overlapped.hevent);
+   overlapped.hEvent:= 0;
+  end;
+  freeandnil(timer);
  {$endif}
  end;
  fhandle:= invalidfilehandle;
  if assigned(fonclose) then begin
   fonclose;
  end;
+end;
+
+procedure tcustomrs232.close;
+begin
+ internalclose(false);
 end;
 
 function tcustomrs232.opened: boolean;

@@ -442,8 +442,8 @@ end;
 
 destructor tcustomsercommcomp.destroy;
 begin
- fport.free;
  fpipes.free;
+ fport.free;
  inherited;
 end;
 
@@ -473,7 +473,7 @@ procedure tcustomsercommcomp.internaldisconnect;
 begin
  fpipes.handle:= msesystypes.invalidfilehandle;
  inherited;
- fport.close;
+ fport.internalclose(false);
 end;
 
 procedure tcustomsercommcomp.closepipes(const sender: tcustomcommpipes);
