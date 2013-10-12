@@ -20,7 +20,7 @@ uses
  msewidgets,msemenus,msegraphics,mseapplication,msegui,msegraphutils,mseevent,
  msetypes,msestrings,mseglob,mseguiglob,mseguiintf,msedragglob,
  msemenuwidgets,msestat,msestatfile,mseclasses,classes,mclasses,msedock,
- msesimplewidgets,msebitmap,typinfo
+ msesimplewidgets,msebitmap,typinfo,msesplitter
  {$ifdef mse_with_ifi},mseifiglob,mseificompglob,mseificomp{$endif};
 
 {$if defined(FPC) and (fpc_fullversion >= 020403)}
@@ -542,7 +542,7 @@ type
    constructor create(aowner: tcustomdockform); reintroduce;
  end;
 
- tsubform = class(tpublishedwidget)
+ tsubform = class(tlayouter)
   protected
    class function getmoduleclassname: string; override;
    class function hasresource: boolean; override;
@@ -551,6 +551,8 @@ type
    constructor create(aowner: tcomponent); overload; override;
    constructor create(aowner: tcomponent; load: boolean); 
                                      reintroduce; overload; virtual;
+  published
+   property onloaded;
  end;
 
  subformclassty = class of tsubform;
