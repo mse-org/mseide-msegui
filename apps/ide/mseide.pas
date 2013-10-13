@@ -33,7 +33,7 @@ uses
   messageform,watchform,objectinspector,breakpointsform,watchpointsform,
   stackform,projecttreeform,findinfileform,cpuform,disassform,memoryform,
   threadsform,mseguiglob,symbolform,
-  targetconsole,main,mseguiintf,msestockobjects,regunitgroups,guitemplates,
+  targetconsole,main,mseguiintf,{msestockobjects,}regunitgroups,guitemplates,
   msegraphutils,msefont,stringconsts;
 begin
  registerfontalias('mseide_source',gui_getdefaultfontnames[stf_courier],

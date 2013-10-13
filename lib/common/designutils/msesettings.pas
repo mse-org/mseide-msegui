@@ -114,7 +114,7 @@ function editsettings(const acaption: msestring = '';
  
 implementation
 uses
- msesettings_mfm,classes,msesysintf,msefileutils,mseshortcutdialog;
+ msesettings_mfm,classes,mclasses,msesysintf,msefileutils,mseshortcutdialog;
  
 function getsettingsmacros1(var amacros: settingsmacrosty): macroinfoarty;
 var
