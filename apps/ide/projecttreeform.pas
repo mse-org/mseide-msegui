@@ -455,11 +455,11 @@ begin
  inherited create(pnk_form);
  include(fstate,ns_nosubnodestat);
 // filename:= afilename;
- add(trecordfielditem.create(irecordfield(self),0,'classtype',-1,
+ add(trecordfielditem.create(irecordfield(self),0,'classtype',true,-1,
                                  projecttreefo.dummyimage));
- add(trecordfielditem.create(irecordfield(self),1,'name',-1,
+ add(trecordfielditem.create(irecordfield(self),1,'name',true,-1,
                                  projecttreefo.dummyimage));
- add(trecordfielditem.create(irecordfield(self),2,'instancevarname',-1,
+ add(trecordfielditem.create(irecordfield(self),2,'instancevarname',true,-1,
                                  projecttreefo.dummyimage));
 end;
 

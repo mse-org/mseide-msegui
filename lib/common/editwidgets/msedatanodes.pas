@@ -39,7 +39,7 @@ type
  nodestate1ty = (ns1_statechanged,ns1_rootchange,ns1_candrag,
                  ns1_destroying,ns1_updating,ns1_noowner,ns1_captionclipped,
                  ns1_childchecked,ns1_checkboxclicked,ns1_customsort,
-                 ns1_nofreeroot,ns1_top
+                 ns1_nofreeroot,ns1_top,ns1_fixedcaption
                 );
  nodestates1ty = set of nodestate1ty;
  
@@ -361,6 +361,7 @@ type
   public
    constructor create(const intf: irecordfield; const afieldindex: integer;
                       const acaption: msestring;
+                      const fixedcaption: boolean = false;
                       const aimagenr: integer = 0;
                       const aimagelist: timagelist = nil); reintroduce;
    function getvaluetext: msestring; override;
@@ -3224,7 +3225,8 @@ end;
 { trecordfielditem }
 
 constructor trecordfielditem.create(const intf: irecordfield;
-               const afieldindex: integer; const acaption: msestring;
+               const afieldindex: integer;
+               const acaption: msestring; const fixedcaption: boolean;
                                     const aimagenr: integer = 0;
                                     const aimagelist: timagelist = nil);
 begin
@@ -3250,10 +3252,12 @@ procedure trecordfielditem.setvaluetext(var avalue: msestring);
 begin
  if fintf <> nil then begin
   fintf.setfieldtext(ffieldindex,avalue);
+ end
+ else begin
+  if not (ns1_fixedcaption in fstate1) then begin
+   inherited;
+  end;
  end;
-// else begin
- inherited;
-// end;
 end;
 
 { ttreenode }

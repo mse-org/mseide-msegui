@@ -14,7 +14,7 @@ unit msecommutils;
 interface
 uses
  msedataedits,msecommport,msetypes,msedatalist,
- classes,mclasses,mseclasses,msedropdownlist,
+ classes,mclasses,mseclasses,msedropdownlist,msestat,
  msemenus,mseevent,msestrings,msegui,mseguiglob,mseedit;
 type
  setcommnreventty =  procedure(const sender: tobject; var avalue: commnrty;
@@ -25,18 +25,25 @@ type
  tcommselector = class(tcustomselector)
   private
    fongetactivecommnr: getcommnreventty;
+   fvaluename: filenamety;
    function getvalue: commnrty;
    procedure setvalue(const aValue: commnrty);
    function readonsetvalue: setcommnreventty;
    procedure writeonsetvalue(const aValue: setcommnreventty);
+   procedure setvaluename(const avalue: filenamety);
   protected
    procedure getdropdowninfo(var aenums: integerarty;
          const names: tdropdowncols); override;
    function createdropdowncontroller: tcustomdropdowncontroller; override;
+   procedure texttovalue(var accept: boolean; const quiet: boolean); override;
+   function internaldatatotext(const data): msestring; override;
+   procedure readstatvalue(const reader: tstatreader); override;
+   procedure writestatvalue(const writer: tstatwriter); override;
   public
    constructor create(aowner: tcomponent); override;
   published
    property value: commnrty read getvalue write setvalue default cnr_1;
+   property valuename: filenamety read fvaluename write setvaluename;
 {$ifdef mse_with_ifi}
    property ifilink;
 {$endif}
@@ -49,10 +56,12 @@ type
  end;
 
 implementation
-
+uses
+ mseeditglob;
+  
 type
  comminforecty = record anzeigetext, dropdowntext: string; commnr: commnrty end;
- comminfoty = array[commnrty] of comminforecty;
+ comminfoty = array[cnr_1..cnr_9] of comminforecty;
 const
 
  {$ifdef mswindows}
@@ -101,7 +110,7 @@ var
 begin
  inherited;
  inherited value:= integer(cnr_1);
- for comm:= low(commnrty) to high(commnrty) do begin
+ for comm:= low(comminfo) to high(comminfo) do begin
   tdropdownlistcontroller(fdropdown).cols[0].add(comminfo[comm].anzeigetext);
  end;
 end;
@@ -113,14 +122,14 @@ var
  int1: integer;
  activecomm: commnrty;
 begin
- setlength(aenums,integer(high(commnrty))+1);
+ setlength(aenums,integer(high(commnrty)));
  names[0].clear;
  activecomm:= commnrty(-1);
  if canevent(tmethod(fongetactivecommnr)) then begin
   fongetactivecommnr(self,activecomm);
  end;
  int1:= 0;
- for comm:= low(commnrty) to high(commnrty) do begin
+ for comm:= low(comminfo) to high(comminfo) do begin
   if (comm = activecomm) or checkcommport(comm) then begin
    aenums[int1]:= integer(comm);
    names[0].add(comminfo[comm].dropdowntext);
@@ -153,6 +162,48 @@ end;
 function tcommselector.createdropdowncontroller: tcustomdropdowncontroller;
 begin
  result:= tnocolsenumdropdowncontroller.create(idropdownlist(self));
+end;
+
+procedure tcommselector.setvaluename(const avalue: filenamety);
+begin
+ if avalue <> fvaluename then begin
+  fvaluename:= avalue;
+  changed;
+ end;
+end;
+
+procedure tcommselector.texttovalue(var accept: boolean; const quiet: boolean);
+var
+ mstr1: msestring;
+begin
+ mstr1:= fvaluename;
+ if not (des_statreading in fstate) then begin
+  fvaluename:= text;
+ end;
+ inherited;
+ if not accept then begin
+  fvaluename:= mstr1;
+ end;
+end;
+
+function tcommselector.internaldatatotext(const data): msestring;
+begin
+ result:= inherited internaldatatotext(data);
+ if (@data = nil) and (value = cnr_invalid) then begin
+  result:= fvaluename;
+ end;
+end;
+
+procedure tcommselector.readstatvalue(const reader: tstatreader);
+begin
+ inherited;
+ valuename:= reader.readmsestring(valuevarname+'_name',fvaluename);
+end;
+
+procedure tcommselector.writestatvalue(const writer: tstatwriter);
+begin
+ inherited;
+ writer.writemsestring(valuevarname+'_name',fvaluename);
 end;
 
 end.

@@ -381,9 +381,6 @@ filename=
 windowlayout=392
  [mainfo.openfile]
  filenames=0
- filehistory=2
-  /home/mse/proj/msegui/testcase/jean-pierre/Demo/main.pas
-  /D:/MSE/Livre/DemoMSE/Demo.pas
  filefilterindex=0
  filecolwidth=174
  [mainfo.basedock]
@@ -673,16 +670,10 @@ windowlayout=392
  width2=160
  sortdescent2=0
  [componentstorefo.storefiledialog]
- filenames=1
-  /home/mse/test/msegui/apps/ide/compstore/
- lastdir=/home/mse/test/msegui/apps/ide/compstore/
  filehistory=0
  filefilterindex=0
  filecolwidth=0
  [componentstorefo.groupfiledialog]
- filenames=1
-  /home/mse/test/msegui/apps/ide/compstore/
- lastdir=/home/mse/test/msegui/apps/ide/compstore/
  filehistory=0
  filefilterindex=0
  filecolwidth=0

@@ -25,7 +25,8 @@ type
  statfileoptionty = (sfo_memory,sfo_deletememorydata, //delete after read
                      sfo_createpath,
                      sfo_transaction, //use intermedate file and rename
-                     sfo_savedata,sfo_activatorread,sfo_activatorwrite,
+                     sfo_savedata,sfo_autoreadstat,sfo_autowritestat,
+                     sfo_activatorread,sfo_activatorwrite,
                      sfo_nodata,sfo_nostate,sfo_nooptions);
  statfileoptionsty = set of statfileoptionty;
 const
@@ -68,10 +69,12 @@ type
    procedure setstatfile(const Value: tstatfile);
    procedure setfilename(const avalue: filenamety);
    procedure setfiledir(const avalue: filenamety);
-   procedure setoptions(avalue: statfileoptionsty);
+//   procedure setoptions(avalue: statfileoptionsty);
    procedure setcryptohandler(const avalue: tcustomcryptohandler);
    function getmode: statfilemodety;
    procedure setnext(const avalue: tstatfile);
+   procedure internalreadstat;
+   procedure internalwritestat;
   protected
    procedure objectevent(const sender: tobject;
                           const event: objecteventty); override;
@@ -102,7 +105,7 @@ type
    property filedir: filenamety read ffiledir write setfiledir;
    property encoding: charencodingty read fencoding write fencoding
                                                            default ce_utf8n;
-   property options: statfileoptionsty read foptions write setoptions 
+   property options: statfileoptionsty read foptions write foptions 
                               default defaultstatfileoptions;
    property statfile: tstatfile read fstatfile write setstatfile;
             //filename is stored in linked statfile, dostatread and dostatwrite are
@@ -181,12 +184,24 @@ var
  ar3: msestringarty;
  stream1: ttextstream;
  int1: integer;
+ reader1: tstatreader;
 begin
  ar1:= nil; //compiler warning
  ar2:= nil; //compiler warning
  if reader <> areader then begin
   if not (sfo_memory in foptions) then begin
-   filename:= reader.readmsestring('filename',ffilename);
+   if sfo_savedata in foptions then begin
+    reader1:= areader;
+    areader:= reader;
+    try
+     internalreadstat;
+    finally;
+     areader:= reader1;
+    end;
+   end
+   else begin
+    filename:= reader.readmsestring('filename',ffilename);
+   end;
   end
   else begin
    if sfo_savedata in foptions then begin
@@ -203,9 +218,12 @@ begin
     finally
      stream1.free;
     end;
+    if sfo_autoreadstat in foptions then begin
+     readstat;
+    end;
    end;
   end;
-  statread;
+//  statread;
  end
  else begin
   if fsavedmemoryfiles <> '' then begin
@@ -229,14 +247,29 @@ var
  ar3: msestringarty;
  stream1: ttextstream;
  int1: integer;
+ writer1: tstatwriter;
 begin
  ar1:= nil;  //compiler warning
  if (writer <> awriter) then begin
   if not (sfo_memory in foptions) then begin
-   writer.writemsestring('filename',ffilename);
+   if sfo_savedata in foptions then begin
+    writer1:= awriter;
+    awriter:= writer;
+    try
+     internalwritestat;
+    finally;
+     awriter:= writer1;
+    end;
+   end
+   else begin
+    writer.writemsestring('filename',ffilename);
+   end;
   end
   else begin
    if sfo_savedata in foptions then begin
+    if sfo_autowritestat in foptions then begin
+     writestat;
+    end;
     stream1:= memorystatstreams.open(ffilename,fm_read);
     try
      ar1:= stream1.readstrings;     
@@ -314,6 +347,28 @@ begin
  end;
 end;
 
+procedure tstatfile.internalreadstat;
+begin
+ if assigned(fonstatread) or assigned(fonstatupdate) or
+                                  (fsavedmemoryfiles <> '') then begin
+  areader.readstat(istatfile(self));
+ end;
+ if fobjectlinker <> nil then begin
+  fobjectlinker.forall({$ifdef FPC}@{$endif}dolinkstatreading,
+                                                     typeinfo(istatfile));
+  try
+   fobjectlinker.forall({$ifdef FPC}@{$endif}dolinkstatread,
+                                                     typeinfo(istatfile));
+  finally
+   fobjectlinker.forall({$ifdef FPC}@{$endif}dolinkstatreaded,
+                                                     typeinfo(istatfile));
+  end;
+//    if assigned(fonstatafterread) then begin
+//     fonstatafterread(self);
+//    end;
+ end;
+end;
+
 procedure tstatfile.readstat(const stream: ttextstream = nil);
 var
  stream1: ttextstream;
@@ -358,24 +413,7 @@ begin
   areader:= tstatreader.create(stream1,fencoding);
   updateoptions(areader);
   try
-   if assigned(fonstatread) or assigned(fonstatupdate) or
-                                    (fsavedmemoryfiles <> '') then begin
-    areader.readstat(istatfile(self));
-   end;
-   if fobjectlinker <> nil then begin
-    fobjectlinker.forall({$ifdef FPC}@{$endif}dolinkstatreading,
-                                                       typeinfo(istatfile));
-    try
-     fobjectlinker.forall({$ifdef FPC}@{$endif}dolinkstatread,
-                                                       typeinfo(istatfile));
-    finally
-     fobjectlinker.forall({$ifdef FPC}@{$endif}dolinkstatreaded,
-                                                       typeinfo(istatfile));
-    end;
-//    if assigned(fonstatafterread) then begin
-//     fonstatafterread(self);
-//    end;
-   end;
+   internalreadstat;
   finally
    freeandnil(areader);
 //   areader.free;
@@ -450,6 +488,17 @@ begin
  awriter.writestat(istatfile(info.dest));
 end;
 
+procedure tstatfile.internalwritestat;
+begin
+ if assigned(fonstatwrite) or assigned(fonstatupdate) or 
+                                  (fsavedmemoryfiles <> '') then begin
+  awriter.writestat(istatfile(self));
+ end;
+ if fobjectlinker <> nil then begin
+  fobjectlinker.forall({$ifdef FPC}@{$endif}dolinkstatwrite,typeinfo(istatfile));
+ end;
+end;
+
 procedure tstatfile.writestat(const stream: ttextstream = nil);
 var
  stream1: ttextstream;
@@ -508,13 +557,7 @@ begin
     bo1:= true;
     stream1.usewritebuffer:= true;
    end;
-   if assigned(fonstatwrite) or assigned(fonstatupdate) or 
-                                    (fsavedmemoryfiles <> '') then begin
-    awriter.writestat(istatfile(self));
-   end;
-   if fobjectlinker <> nil then begin
-    fobjectlinker.forall({$ifdef FPC}@{$endif}dolinkstatwrite,typeinfo(istatfile));
-   end;
+   internalwritestat;
 //   if assigned(fonstatafterwrite) then begin
 //    fonstatafterwrite(self);
 //   end;
@@ -568,7 +611,7 @@ begin
  floadedfile:= '';
  ffiledir:= avalue;
 end;
-
+{
 procedure tstatfile.setoptions(avalue: statfileoptionsty);
 begin
  if not (sfo_memory in avalue) then begin
@@ -576,7 +619,7 @@ begin
  end;
  foptions:= avalue;
 end;
-
+}
 procedure tstatfile.objectevent(const sender: tobject;
                const event: objecteventty);
 begin
