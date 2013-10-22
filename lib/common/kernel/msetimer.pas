@@ -36,7 +36,7 @@ type
    function getsingleshot: boolean;
    procedure setsingleshot(const avalue: boolean);
   protected
-   procedure dotimer;
+   procedure dotimer; virtual;
   public
    constructor create(const interval: longword = 0; 
                 const ontimer: notifyeventty = nil;
