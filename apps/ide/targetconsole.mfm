@@ -95,7 +95,7 @@ object targetconsolefo: ttargetconsolefo
         options = [mao_separator, mao_shortcutcaption]
       end    
       item
-        caption = 'Clear'
+        caption = '&Clear'
         state = [as_localcaption, as_localonexecute]
         onexecute = clearexe
       end>
