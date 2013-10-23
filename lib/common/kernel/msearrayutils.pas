@@ -203,6 +203,10 @@ procedure mergesortarray(var asortlist; const asize,alength: integer;
                             //asortlist = array of type
 procedure mergesort(var adata: pointerarty; const acount: integer;
                                 const compare: pointercomparemethodty); overload;
+
+procedure mergesort(var adata: pointer; const asize,acount: integer;
+                            const acompare: sortcomparemethodty); overload;
+                      //reallocates adata memory
 procedure mergesort(const adata: pointer; const asize,acount: integer;
                             const acompare: sortcomparemethodty;
                             out aindexlist: integerarty); overload;
@@ -2100,6 +2104,25 @@ begin
  moved:= bo1;
 end;
 
+procedure mergesort(var adata: pointer; const asize,acount: integer;
+                            const acompare: sortcomparemethodty);
+var
+ ar1: integerarty;
+ ps,pd,po1: pointer;
+ int1: integer;
+begin
+ mergesort(adata,asize,acount,acompare,ar1);
+ pd:= getmem(asize*acount);
+ po1:= pd;
+ ps:= adata;
+ for int1:= 0 to high(ar1) do begin
+  move((ps+ar1[int1])^,po1^,asize);
+  inc(po1,asize);
+ end;
+ freemem(ps);
+ adata:= pd;
+end;
+
 procedure mergesort(const adata: pointer; const asize,acount: integer;
                         const acompare: sortcomparemethodty;
                         out aindexlist: integerarty;
@@ -2343,88 +2366,6 @@ endstep:
   adata:= ar1;
  end;
 end;
-(*
-procedure doquicksortarray(var info: sortinfoty; l, r: Integer);
-var
-  i, j: Integer;
-  p: integer;
-  int1: integer;
-begin
- with info do begin
-  repeat
-   i := l;
-   j := r;
-   p := (l + r) shr 1;
-   repeat
-    repeat
-     int1:= compare((sortlist + indexlist[i] *size)^,(sortlist + indexlist[p] *size)^);
-     if int1 = 0 then begin
-      int1:= indexlist[i]-indexlist[p];
-     end;
-     if int1 >= 0 then break;
-     inc(i);
-    until false;
-    repeat
-     int1:= compare((sortlist + indexlist[j] *size)^,(sortlist + indexlist[p] *size)^);
-     if int1 = 0 then begin
-      int1:= indexlist[j]-indexlist[p];
-     end;
-     if int1 <= 0 then break;
-     dec(j);
-    until false;
-    if i <= j then  begin
-     int1:= indexlist[i];
-     indexlist[i]:= indexlist[j];
-     indexlist[j]:= int1;
-     if p = i then begin
-      p := j
-     end
-     else begin
-      if p = j then begin
-       p := i;
-      end;
-     end;
-     Inc(i);
-     Dec(j);
-    end;
-   until i > j;
-   if l < j then begin
-    doquickSortarray(info,l, j);
-   end;
-   l := i;
-  until i >= r;
- end;
-end;
-*)
-(*
-procedure quicksortarray(var asortlist; const acompare: arraysortcomparety;
-                            const asize,alength: integer; const order: boolean;
-                            out aindexlist: integerarty);
-                            //asortlist = array of type
-var
- info: sortinfoty;
- int1: integer;
- 
-begin
- if alength > 0 then begin
-  setlength(aindexlist,alength);
-  dec(alength);
-  for int1:= 0 to alength do begin
-   aindexlist[int1]:= int1;
-  end;
-  with info do begin
-   indexlist:= aindexlist;
-   sortlist:= pointer(asortlist);
-   compare:= acompare;
-   size:= asize;
-  end;
-  doquicksortarray(info,0,alength);
-  if order then begin
-   orderarray(aindexlist,asortlist,asize);
-  end;
- end;
-end;
-*)
 
 const
  adsize = 2*sizeof(sizeint);
