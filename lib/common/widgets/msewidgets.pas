@@ -1642,7 +1642,7 @@ var
  widget1: twidget; //dummy parent to get invisible canvas
  but: array[0..integer(high(modalresultty))] of tmessagebutton;
  int1,int2: integer;
- rect1,rect2: rectty;
+ rect1{,rect2}: rectty;
  acanvas: tcanvas;
  textoffset: integer;
  transientfor: twindow;
@@ -1716,12 +1716,15 @@ begin
      widget.window.windowpos:= wp_screencentered;
     end
     else begin
-     rect2:= placementrect^;
+//     rect2:= placementrect^;
+     {
      if placement = cp_bottomleft then begin
       dec(rect2.y,8);
       inc(rect2.cy,28); //for windowdecoration
      end;
-     widget.widgetrect:= placepopuprect(transientfor,rect2,placement,widget.size);
+     }
+     widget.widgetrect:= placepopuprect(transientfor,
+                                       placementrect^,placement,widget.size);
     end;
   
     with widget.info.dest do begin
@@ -1756,6 +1759,11 @@ begin
     inc(widget.info.dest.x,textoffset div 2);
     dec(widget.info.dest.cx,textoffset);
     widget.updateskin(true);
+    if placementrect <> nil then begin
+     widget.visible:= true;
+     widget.window.decoratedwidgetrect:= placepopuprect(transientfor,
+                        placementrect^,placement,widget.window.decoratedsize);
+    end;
     result:= widget.show(true,transientfor);
    finally
     widget1.free;
