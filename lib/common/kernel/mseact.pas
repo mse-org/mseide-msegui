@@ -367,13 +367,28 @@ begin
      exit;
     end;
    end;
-   if not nocheckbox and (mao_checkbox in info.options) then begin
-    if action <> nil then begin
-     action.checked:= not action.checked;
+   if not nocheckbox then begin
+    if (mao_checkbox in info.options) then begin
+     if action <> nil then begin
+      action.checked:= not action.checked;
+     end
+     else begin
+      togglebit1(longword(info.state),ord(as_checked));
+      changed:= true;
+     end;
     end
     else begin
-     togglebit1(longword(info.state),ord(as_checked));
-     changed:= true;
+     if mao_radiobutton in info.options then begin
+      if action <> nil then begin
+       action.checked:= true;
+      end
+      else begin
+       if not checkbit(longword(info.state),ord(as_checked)) then begin
+        setbit1(longword(info.state),ord(as_checked));
+        changed:= true;
+       end;
+      end;       
+     end;
     end;
    end;
    if assigned(beforeexecute) then begin

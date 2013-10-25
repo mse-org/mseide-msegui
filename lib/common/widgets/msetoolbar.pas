@@ -583,7 +583,8 @@ begin
  end;
 end;
 
-procedure tcustomtoolbutton.doexecute(const tag: integer; const info: mouseeventinfoty);
+procedure tcustomtoolbutton.doexecute(const tag: integer;
+                                                const info: mouseeventinfoty);
 begin
  if doactionexecute(self,finfo,false,
       tbs_nocandefocus in ttoolbuttons(prop).fbuttonstate) then begin
