@@ -2523,12 +2523,7 @@ begin
      flag:= bfcurrent;
     end;
     move(fcurrentbuf^.header,header,frecordsize);
-    state1:= settempstate(dscalcfields);
-    try
-     getcalcfields(buffer); //get lookup fields
-    finally
-     restorestate(state1);
-    end;
+    getcalcfields(buffer); //get lookup fields
     if filtered then begin
      state1:= settempstate(tdatasetstate(dscheckfilter));
      try
@@ -8375,9 +8370,11 @@ var
  i: Integer;
  field1: tfield;
  bm1: bookmarkdataty;
+ state1: tdatasetstate;
 begin
- FCalcBuffer1 := Buffer;  
+ FCalcBuffer1:= Buffer;  
  if not IsUniDirectional and (State <> dsInternalCalc) then begin
+  state1:= settempstate(dscalcfields);
   try
    ClearCalcFields(FCalcBuffer1);
    for i := 0 to Fields.Count - 1 do begin
@@ -8401,8 +8398,9 @@ begin
      end;
     end;
    end;
-  finally
    DoOnCalcFields;
+  finally
+   restorestate(state1);
   end;
  end;
 end;
