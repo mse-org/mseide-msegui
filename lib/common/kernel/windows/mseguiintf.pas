@@ -1861,9 +1861,9 @@ begin
   rect2.cy:= 100000;
  end;
  {$ifdef FPC}
- winscrollwindowex(id,dist.x,dist.y,@rect1,@rect2,0,nil,0{sw_invalidate});
+ winscrollwindowex(id,dist.x,dist.y,@rect1,@rect2,0,nil,sw_invalidate);
  {$else}
- scrollwindowex(id,dist.x,dist.y,@rect1,@rect2,0,nil,0{sw_invalidate});
+ scrollwindowex(id,dist.x,dist.y,@rect1,@rect2,0,nil,sw_invalidate);
  {$endif}
  result:= gue_ok;
 end;
