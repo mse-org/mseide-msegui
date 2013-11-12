@@ -2521,7 +2521,7 @@ begin
  if not gdb.attached then begin
   if (not gdb.started or not fnoremakecheck) and not fcurrent then begin
    if (projectoptions.defaultmake <= maxdefaultmake) and 
-            (not gdb.started or askyesno(c[ord(str_sourcechanged)])) then begin
+      (not gdb.started or askconfirmation(c[ord(str_sourcechanged)])) then begin
     result:= false;
     watchpointsfo.clear;
     domake(projectoptions.defaultmake);

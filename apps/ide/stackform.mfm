@@ -9,8 +9,6 @@ object stackfo: tstackfo
   bounds_y = 349
   bounds_cx = 254
   bounds_cy = 180
-  container.frame.zoomwidthstep = 1
-  container.frame.zoomheightstep = 1
   container.frame.framei_right = 0
   container.frame.localprops = [frl_firight]
   container.onlayout = formonchildscaled
@@ -108,7 +106,6 @@ object stackfo: tstackfo
     color = -1879048187
     frame.localprops = [frl_levelo, frl_colorclient]
     taborder = 2
-    popupmenu = tpopupmenu1
     bounds_x = 0
     bounds_y = 20
     bounds_cx = 244
