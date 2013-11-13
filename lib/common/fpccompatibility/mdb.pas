@@ -332,6 +332,8 @@ type
     function GetAsCurrency: Currency; virtual;
     function GetAsLargeInt: LargeInt; virtual;
     function GetAsDateTime: TDateTime; virtual;
+    function getasdate: tdatetime; virtual;
+    function getastime: tdatetime; virtual;
     function GetAsFloat: Double; virtual;
     function GetAsLongint: Longint; virtual;
     function GetAsInteger: Longint; virtual;
@@ -358,6 +360,8 @@ type
     procedure SetAsBytes(const AValue: TBytes); virtual;
     procedure SetAsCurrency(AValue: Currency); virtual;
     procedure SetAsDateTime(AValue: TDateTime); virtual;
+    procedure setasdate(avalue: tdatetime); virtual;
+    procedure setastime(avalue: tdatetime); virtual;
     procedure SetAsFloat(AValue: Double); virtual;
     procedure SetAsLongint(AValue: Longint); virtual;
     procedure SetAsInteger(AValue: Integer); virtual;
@@ -397,6 +401,8 @@ type
     property AsBytes: TBytes read GetAsBytes write SetAsBytes;
     property AsCurrency: Currency read GetAsCurrency write SetAsCurrency;
     property AsDateTime: TDateTime read GetAsDateTime write SetAsDateTime;
+    property asdate: tdatetime read getasdate write setasdate;
+    property astime: tdatetime read getastime write setastime;
     property AsFloat: Double read GetAsFloat write SetAsFloat;
     property asguid: tguid read getasguid write setasguid;
     property AsLongint: Longint read GetAsLongint write SetAsLongint;
@@ -712,12 +718,16 @@ type
     procedure SetDisplayFormat(const AValue: string);
   protected
     function GetAsDateTime: TDateTime; override;
+    function getasdate: tdatetime; override;
+    function getastime: tdatetime; override;
     function GetAsFloat: Double; override;
     function GetAsString: string; override;
     function GetAsVariant: variant; override;
     function GetDataSize: Integer; override;
     procedure GetText(var theText: string; ADisplayText: Boolean); override;
     procedure SetAsDateTime(AValue: TDateTime); override;
+    procedure setasdate(avalue: tdatetime); override;
+    procedure setastime(avalue: tdatetime); override;
     procedure SetAsFloat(AValue: Double); override;
     procedure SetAsString(const AValue: string); override;
     procedure SetVarValue(const AValue: Variant); override;
@@ -2148,7 +2158,10 @@ implementation
 
 uses
  {$ifdef FPC}dbconst{$else}dbconst_del{$endif},typinfo;
-
+resourcestring
+ sassigndate = 'Can not assign a date value to field "%s"';
+ sassigntime = 'Can not assign a time value to field "%s"';
+ 
 { ---------------------------------------------------------------------
     Auxiliary functions
   ---------------------------------------------------------------------}
@@ -5796,6 +5809,28 @@ begin
   Raise AccessError(SDateTime);
 end;
 
+function TField.getasdate: tdatetime;
+begin
+ raise accesserror(sdatetime);
+ result:= 0; //compiler warning
+end;
+
+function TField.getastime: tdatetime;
+begin
+ raise accesserror(sdatetime);
+ result:= 0; //compiler warning
+end;
+
+procedure TField.setasdate(avalue: tdatetime);
+begin
+ raise accesserror(sdatetime);
+end;
+
+procedure TField.setastime(avalue: tdatetime);
+begin
+ raise accesserror(sdatetime);
+end;
+
 procedure TField.SetAsFloat(AValue: Double);
 
 begin
@@ -7204,6 +7239,32 @@ constructor TDateTimeField.Create(AOwner: TComponent);
 begin
   Inherited Create(AOwner);
   SetDataType(ftDateTime);
+end;
+
+function TDateTimeField.getasdate: tdatetime;
+begin
+ result:= int(getasdatetime);
+end;
+
+function TDateTimeField.getastime: tdatetime;
+begin
+ result:= frac(getasdatetime);
+end;
+
+procedure TDateTimeField.setasdate(avalue: tdatetime);
+begin
+ if datatype = fttime then begin
+  databaseerrorfmt(sassigndate,[fieldname],dataset);
+ end;
+ setasdatetime(avalue);
+end;
+
+procedure TDateTimeField.setastime(avalue: tdatetime);
+begin
+ if datatype = ftdate then begin
+  databaseerrorfmt(sassigntime,[fieldname],dataset);
+ end;
+ setasdatetime(avalue);
 end;
 
 
