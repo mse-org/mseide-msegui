@@ -10812,7 +10812,8 @@ begin
   end
   else begin
    exclude(fwidgetstate,ws_enabled);
-   if window.focusedwidget = self then begin
+//   if window.focusedwidget = self then begin
+   if checkdescendent(window.focusedwidget) then begin
     nextfocus;
    end;
   end;
