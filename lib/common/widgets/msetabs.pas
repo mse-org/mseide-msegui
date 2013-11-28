@@ -745,7 +745,7 @@ type
    fupdating: integer;
    fpopuptab: integer;
    factivepageindexdesign: integer;
-   procedure defineproperties(filer: tfiler); override;
+   procedure defineproperties(filer: tfiler) override;
    procedure internaladd(const page: itabpage; aindex: integer);
    procedure internalremove(const page: itabpage);
    procedure registerchildwidget(const child: twidget); override;

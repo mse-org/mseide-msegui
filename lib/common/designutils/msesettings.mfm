@@ -7,8 +7,6 @@ object settingsfo: tsettingsfo
   bounds_cy = 570
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets]
   container.frame.clientwidthmin = 340
-  container.frame.sbhorz.pagesize = 0.99444444444444
-  container.frame.sbvert.pagesize = 0.9965034965035
   container.bounds = (
     0
     0
@@ -390,8 +388,7 @@ object settingsfo: tsettingsfo
       reffontheight = 14
     end
   end
-  object macrogrid: tstringgrid
-    frame.sbhorz.pagesize = 0.99694189602447
+  object macrogrid: twidgetgrid
     frame.caption = 'Global Macros'
     frame.outerframe = (
       0
@@ -407,21 +404,6 @@ object settingsfo: tsettingsfo
     bounds_cymin = 80
     anchors = [an_left, an_top, an_right, an_bottom]
     optionsgrid = [og_colsizing, og_rowmoving, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_noinsertempty, og_colchangeontabkey, og_wrapcol, og_autopopup, og_mousescrollcol]
-    datacols.count = 2
-    datacols.options = [co_savevalue, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
-    datacols.items = <    
-      item
-        width = 152
-        options = [co_proportional, co_savevalue, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
-        valuefalse = '0'
-        valuetrue = '1'
-      end    
-      item
-        width = 144
-        options = [co_fill, co_savevalue, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
-        valuefalse = '0'
-        valuetrue = '1'
-      end>
     fixcols.count = 1
     fixcols.items = <    
       item
@@ -433,17 +415,63 @@ object settingsfo: tsettingsfo
     fixrows.items = <    
       item
         height = 16
-        captions.count = 2
+        captions.count = 4
         captions.items = <        
           item
             caption = 'Name'
           end        
           item
             caption = 'Value'
+          end        
+          item
+          end        
+          item
           end>
+      end>
+    datacols.count = 2
+    datacols.options = [co_savevalue, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
+    datacols.items = <    
+      item[macroname]
+        width = 152
+        options = [co_proportional, co_savevalue, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
+        widgetname = 'macroname'
+        dataclass = tgridmsestringdatalist
+      end    
+      item[macrovalue]
+        width = 144
+        options = [co_fill, co_savevalue, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
+        widgetname = 'macrovalue'
+        dataclass = tgridmsestringdatalist
       end>
     datarowheight = 16
     reffontheight = 14
+    object macroname: tstringedit
+      optionswidget1 = [ow1_fontglyphheight]
+      optionsskin = [osk_framebuttononly]
+      taborder = 1
+      visible = False
+      bounds_x = 0
+      bounds_y = 0
+      bounds_cx = 152
+      bounds_cy = 16
+      reffontheight = 14
+    end
+    object macrovalue: tmemodialogedit
+      optionswidget1 = [ow1_fontglyphheight]
+      optionsskin = [osk_framebuttononly]
+      frame.levelo = 0
+      frame.colorclient = -2147483645
+      frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
+      frame.button.color = -1879048187
+      frame.button.imagenr = 17
+      taborder = 2
+      visible = False
+      bounds_x = 153
+      bounds_y = 0
+      bounds_cx = 144
+      bounds_cy = 16
+      reffontheight = 14
+    end
   end
   object tstatfile1: tstatfile
     filename = 'settingsfo.sta'

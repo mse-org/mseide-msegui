@@ -21,7 +21,8 @@ uses
  mseglob,mseguiglob,msegui,mseclasses,mseforms,msestat,msestatfile,
  msesimplewidgets,msefiledialog,msestrings,msemacros,msedataedits,msebitmap,
  msedatanodes,mseedit,mseevent,msegraphutils,msegrids,mselistbrowser,msemenus,
- msesys,msetypes,msegraphics,msewidgets,mseactions,mseifiglob,msesplitter;
+ msesys,msetypes,msegraphics,msewidgets,mseactions,mseifiglob,msesplitter,
+ mseificomp,mseificompglob,msememodialog,msewidgetgrid;
 
 type
  settingsmacroty = (sma_fpcdir,sma_fpclibdir,sma_msedir,sma_mselibdir,
@@ -87,7 +88,9 @@ type
    tbutton2: tbutton;
    tbutton1: tbutton;
    shortcutbu: tbutton;
-   macrogrid: tstringgrid;
+   macrogrid: twidgetgrid;
+   macroname: tstringedit;
+   macrovalue: tmemodialogedit;
    procedure epandfilenamemacro(const sender: TObject; var avalue: msestring;
                      var accept: Boolean);
    procedure formoncreate(const sender: TObject);
@@ -227,8 +230,8 @@ begin
   target.value:= macros[sma_target];
   targetosdir.value:= macros[sma_targetosdir];
   printcomm.value:= printcommand;
-  macrogrid[0].datalist.asarray:= globmacronames;
-  macrogrid[1].datalist.asarray:= globmacrovalues;
+  macroname.gridvalues:= globmacronames;
+  macrovalue.gridvalues:= globmacrovalues;
  end;
 end;
 
@@ -247,8 +250,8 @@ begin
   macros[sma_exeext]:= exeext.value;
   macros[sma_target]:= target.value;
   macros[sma_targetosdir]:= targetosdir.value;
-  globmacronames:= macrogrid[0].datalist.asarray;
-  globmacrovalues:= macrogrid[1].datalist.asarray;
+  globmacronames:= macroname.gridvalues;
+  globmacrovalues:= macrovalue.gridvalues;
  end;
 end;
 

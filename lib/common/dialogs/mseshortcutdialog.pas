@@ -14,7 +14,8 @@ uses
  mseglob,mseguiglob,mseapplication,msestat,msemenus,msegui,msegraphics,
  msegraphutils,mseevent,mseclasses,mseforms,msedataedits,mseedit,msegrids,
  msestrings,msetypes,msewidgetgrid,msedatanodes,mselistbrowser,mseactions,
- msesimplewidgets,msewidgets,msegridsglob,msetimer;
+ msesimplewidgets,msewidgets,msegridsglob,msetimer,msesplitter,mseificomp,
+ mseificompglob,mseifiglob;
  
 type
  tmseshortcutdialogfo = class(tmseform)
@@ -24,11 +25,13 @@ type
    sc1di: tstringedit;
    tbutton1: tbutton;
    tbutton2: tbutton;
-   sc1ed: tstringedit;
-   sced: tstringedit;
    defaultbu: tbutton;
    tpopupmenu1: tpopupmenu;
    timer: ttimer;
+   tsimplewidget1: tsimplewidget;
+   sc1ed: tstringedit;
+   tsplitter1: tsplitter;
+   sced: tstringedit;
    procedure updaterowvalues(const sender: TObject; const aindex: Integer;
                    const aitem: tlistitem);
    procedure scdikey(const sender: twidget; var info: keyeventinfoty);
