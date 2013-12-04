@@ -38,19 +38,21 @@ type
    fcapacity: ptruint;
    flast: ptruint;
    fdeleted: ptruint;
-   fdata: pointer; //dummy item at 0
    fcount: integer;
    function getcapacity: integer;
    procedure setcapacity(const avalue: integer);
   protected
+   fdata: pointer; //dummy item at 0
+   fheadersize: integer;
    fitemsize: integer;
    function getheadersize: integer; virtual;
    procedure grow;
-   function add: pointer;
+   function add(out aoffset: ptruint): pointer;
    procedure delete(const aoffset: ptruint);
   public
    constructor create(const adatasize: integer);
    destructor destroy; override;
+   procedure clear;
    property count: integer read fcount;
    property capacity: integer read getcapacity write setcapacity;
                     //grow only
@@ -74,14 +76,13 @@ implementation
 
 constructor tlinklist.create(const adatasize: integer);
 begin
- fitemsize:= adatasize + getheadersize;
+ fheadersize:= getheadersize;
+ fitemsize:= adatasize + fheadersize;
 end;
 
 destructor tlinklist.destroy;
 begin
- if fdata <> nil then begin
-  freemem(fdata);
- end;
+ clear;
  inherited;
 end;
 
@@ -111,20 +112,21 @@ begin
  capacity:= 2*count+256;
 end;
 
-function tlinklist.add: pointer;
+function tlinklist.add(out aoffset: ptruint): pointer;
 begin
  if fdeleted = 0 then begin
   flast:= flast+fitemsize;
   if flast >= fcapacity then begin
    grow;
   end;
-  result:= fdata+flast;
+  aoffset:= flast;
  end
  else begin
-  result:= fdata + fdeleted;
-  fdeleted:= plinkheaderty(result)^.next;
+  aoffset:= fdeleted;
+  fdeleted:= plinkheaderty(fdata + fdeleted)^.next;
  end;
  inc(fcount);
+ result:= fdata+aoffset;
 end;
 
 procedure tlinklist.delete(const aoffset: ptruint);
@@ -132,6 +134,17 @@ begin
  plinkheaderty(fdata+aoffset)^.next:= fdeleted;
  fdeleted:= aoffset;
  dec(fcount);
+end;
+
+procedure tlinklist.clear;
+begin
+ if fdata <> nil then begin
+  freemem(fdata);
+  fdata:= nil;
+ end;
+ fcount:= 0;
+ fdeleted:= 0;
+ fcapacity:= 0;
 end;
 
 { tsinglelinklist }
