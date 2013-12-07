@@ -1478,6 +1478,8 @@ procedure tpopupmenuwidget.dokeydown(var info: keyeventinfoty);
   end;
  end;
 
+var
+ int1: integer;
 begin
  with info,flayout do begin
   if (shiftstate*shiftstatesmask = []) then begin
@@ -1501,7 +1503,7 @@ begin
       fnextpopup.activatemenu(true,false,false);
      end
      else begin
-      exclude(options,mlo_keymode);
+//      exclude(options,mlo_keymode);
       if not isup(factposition) then begin
        deactivatemenu;
        if (fprevpopup <> nil) and 
@@ -1516,7 +1518,11 @@ begin
          if mlo_main in flayout.options then begin
           exclude(eventstate,es_processed);
           swapkeys;
+          int1:= activeitem;
           dokeydown1(info);
+          if activeitem = int1 then begin
+           self.capturekeyboard; //ignore the key
+          end;
           swapkeys;
           include(eventstate,es_processed);
          end;
