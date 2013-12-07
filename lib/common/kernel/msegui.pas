@@ -10041,8 +10041,10 @@ begin
     window.settransientfor(nil,false);
    end;
   finally
-   setlinkedvar(nil,tlinkedobject(info.transientfor));
-   setlinkedvar(nil,tmsecomponent(info.widget));
+   if info.widget <> nil then begin //else self is destroyed
+    setlinkedvar(nil,tlinkedobject(info.transientfor));
+    setlinkedvar(nil,tmsecomponent(info.widget));
+   end;
   end;
  end
  else begin
