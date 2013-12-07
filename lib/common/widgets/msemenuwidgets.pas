@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -1503,7 +1503,7 @@ begin
       fnextpopup.activatemenu(true,false,false);
      end
      else begin
-//      exclude(options,mlo_keymode);
+      exclude(options,mlo_keymode);
       if not isup(factposition) then begin
        deactivatemenu;
        if (fprevpopup <> nil) and 
@@ -1521,6 +1521,7 @@ begin
           int1:= activeitem;
           dokeydown1(info);
           if activeitem = int1 then begin
+           include(options,mlo_keymode);
            self.capturekeyboard; //ignore the key
           end;
           swapkeys;
