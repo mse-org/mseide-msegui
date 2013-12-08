@@ -1872,7 +1872,11 @@ begin
  try
   while not timeout(timestamp) do begin
    if not (gs_syncack in fstate) then begin
-    fgdbfrom.waitforresponse(100000,true);
+    if not fgdbfrom.waitforresponse(100000,true) then begin
+     if not fgdbfrom.active then begin
+      break;
+     end;
+    end;
    end
    else begin
     if fsynceventkind = gek_error then begin

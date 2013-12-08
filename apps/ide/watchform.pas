@@ -55,7 +55,7 @@ type
    gdb: tgdbmi;
    procedure clear(const all: boolean = false);
    procedure refresh;
-   procedure refreshitem(const index: integer);
+   function refreshitem(const index: integer): boolean; //true if no timeout
    procedure addwatch(aexpression: msestring);
  end;
 
@@ -120,7 +120,7 @@ begin
  end;
 end;
 
-procedure twatchfo.refreshitem(const index: integer);
+function twatchfo.refreshitem(const index: integer): boolean;
 var
  mstr1: msestring;
  fc: numformatty;
@@ -128,9 +128,10 @@ var
  int641: int64;
  int2: integer;
 begin
+ result:= true;
  if (index >= 0) and gdb.cancommand then begin
   if watcheson.value and watchon[index] then begin
-   gdb.readpascalvariable(expression[index],mstr1);
+   result:= gdb.readpascalvariable(expression[index],mstr1) <> gdb_timeout;
    fc:= numformatty(formatcode[index]);
    if fc <> nf_default then begin
     if trystrtointvalue64(mstr1,qword(int641)) then begin
@@ -195,9 +196,14 @@ end;
 procedure twatchfo.refresh;
 var
  int1: integer;
+ bo1: boolean;
 begin
+ bo1:= true;
  for int1:= 0 to grid.rowcount -1 do begin
-  refreshitem(int1);
+  bo1:= bo1 and refreshitem(int1);
+  if not bo1 then begin
+   expresult[int1]:= '';
+  end;
  end;
  memoryfo.refresh;
 end;
