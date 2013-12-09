@@ -2297,6 +2297,41 @@ function readdir64_r(__dirp:PDIR; __entry:Pdirent64;
 function localtime_r(__timer:Ptime_t; __tp:Ptm):Ptm;cdecl;
             external clib name 'localtime_r';
 
+const
+//* Protections are chosen from these bits, OR'd together.  The
+//   implementation does not necessarily support PROT_EXEC or PROT_WRITE
+//   without PROT_READ.  The only guarantees are that no writing will be
+//   allowed without PROT_WRITE and no access will be allowed for PROT_NONE. */
+ PROT_READ = $1;  //* Page can be read.  */
+ PROT_WRITE = $2; //* Page can be written.  */
+ PROT_EXEC = $4;  //* Page can be executed.  */
+ PROT_NONE = $0;  //* Page can not be accessed.  */
+ PROT_GROWSDOWN = $01000000; //* Extend change to start of
+                       //growsdown vma (mprotect only).  */
+ PROT_GROWSUP = $02000000; //* Extend change to start of
+					   //growsup vma (mprotect only).  */
+
+//* Sharing types (must choose one and only one of these).  */
+ MAP_SHARED = $01;  //* Share changes.  */
+ MAP_PRIVATE = $02; //* Changes are private.  */
+ MAP_TYPE = $0f;      //* Mask for type of mapping.  */
+
+//* Other flags.  */
+ MAP_FIXED = $10; //* Interpret addr exactly.  */
+ MAP_FILE = 0;
+ MAP_ANONYMOUS = $20; //* Don't use a file.  */
+//* When MAP_HUGETLB is set bits [26:31] encode the log2 of the huge page size.  */
+ MAP_HUGE_SHIFT = 26;
+ MAP_HUGE_MASK = $3f;
+
+ MAP_FAILED = pointer(ptrint(-1));
+
+function mmap(addr: pointer; lengthint: size_t; prot: cint; flags: cint;
+                               fd: cint; offset: off_t): pointer; cdecl;
+                                               external clib name 'mmap';
+function munmap(addr: pointer; length: size_t): cint; cdecl;
+                                               external clib name 'munmap';
+
 implementation
 uses
  msedynload{,msesys};

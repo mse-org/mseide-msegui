@@ -400,7 +400,7 @@ begin
  end;
 end;
 
-function sys_openfile(const path: msestring; const openmode: fileopenmodety;
+function sys_openfile(const path: filenamety; const openmode: fileopenmodety;
           const accessmode: fileaccessmodesty;
           const rights: filerightsty; out handle: integer): syserrorty;
 var
