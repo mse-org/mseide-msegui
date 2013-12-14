@@ -1439,13 +1439,20 @@ end;
 const
  radianttograd = -360.0/(2.0*pi);
 
-procedure adjustgparc(var drawinfo: drawinfoty);
+type
+ gparcinfoty = record
+  rect: rectty;
+  startang,extentang: real;
+ end;
+ 
+procedure adjustgparc(const drawinfo: drawinfoty; out ainfo: gparcinfoty);
 begin
  with drawinfo,arc,rect^ do begin
-  x:= x + origin.x - cx div 2;
-  y:= y + origin.y - cy div 2;
-  startang:= startang*radianttograd;
-  extentang:= extentang*radianttograd;
+  ainfo.rect.x:= x + origin.x - cx div 2;
+  ainfo.rect.y:= y + origin.y - cy div 2;
+  ainfo.rect.size:= size;
+  ainfo.startang:= startang*radianttograd;
+  ainfo.extentang:= extentang*radianttograd;
   {
   if extentang < 0 then begin
    startang:= startang+extentang;
@@ -1462,12 +1469,13 @@ procedure gdi_drawarc(var drawinfo: drawinfoty);
 var                         //todo: optimize
  bo1: boolean;
  xstart,ystart,xend,yend: integer;
+ arcinfo: gparcinfoty;
 begin
  if gcf_smooth in win32gcty(drawinfo.gc.platformdata).d.flags then begin
   checkgpgc(drawinfo.gc,gplineflags);
-  adjustgparc(drawinfo);
-  with drawinfo,arc,win32gcty(gc.platformdata).d do begin
-   gdipdrawarci(gpgraphic,gppen,rect^.x,rect^.y,rect^.cx,rect^.cy,
+  adjustgparc(drawinfo,arcinfo);
+  with drawinfo,arcinfo,win32gcty(gc.platformdata).d do begin
+   gdipdrawarci(gpgraphic,gppen,rect.x,rect.y,rect.cx,rect.cy,
                                                     startang,extentang);
   end;
  end
@@ -1880,18 +1888,19 @@ end;
 procedure gdi_fillarc(var drawinfo: drawinfoty);
 var
  pa1: pGpPath;
+ arc1: gparcinfoty;
 begin
  if gcf_smooth in win32gcty(drawinfo.gc.platformdata).d.flags then begin
   checkgpgc(drawinfo.gc,gpfillflags);
-  adjustgparc(drawinfo);
-  with drawinfo,arc,win32gcty(gc.platformdata).d do begin
-   if pieslice then begin
+  adjustgparc(drawinfo,arc1);
+  with drawinfo,arc1,win32gcty(gc.platformdata).d do begin
+   if arc.pieslice then begin
     gdipfillpiei(gpgraphic,gpbrush,
-           rect^.x,rect^.y,rect^.cx,rect^.cy,startang,extentang);
+           rect.x,rect.y,rect.cx,rect.cy,startang,extentang);
    end
    else begin
     gdipcreatepath(fillmodealternate,@pa1);
-    gdipaddpatharc(pa1,rect^.x,rect^.y,rect^.cx,rect^.cy,startang,extentang);
+    gdipaddpatharc(pa1,rect.x,rect.y,rect.cx,rect.cy,startang,extentang);
     gdipfillpath(gpgraphic,gpbrush,pa1);
     gdipdeletepath(pa1);
    end;
