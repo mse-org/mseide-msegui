@@ -595,7 +595,8 @@ end;
 procedure tmseprocess.listen;
 begin
  application.lock;
- if not (prs_listening in fstate) and (fprochandle <> invalidprochandle) then begin
+ if not (prs_listening in fstate) and 
+                      (fprochandle <> invalidprochandle) then begin
   pro_listentoprocess(fprochandle,iprocmonitor(self),pointer(flistenid));
   include(fstate,prs_listening);
  end;
