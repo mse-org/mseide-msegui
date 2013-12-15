@@ -528,9 +528,13 @@ type
  end;
 
  optionscalety = (osc_expandx,osc_shrinkx,osc_expandy,osc_shrinky,
-                  osc_invisishrinkx,osc_invisishrinky);
+                  osc_invisishrinkx,osc_invisishrinky,
+                  osc_expandshrinkx,osc_expandshrinky); 
+                   //expand minshrinksize to minscrollsize
  optionsscalety = set of optionscalety;
- 
+const
+ defaultoptionsscale = [osc_expandshrinkx,osc_expandshrinky];
+type 
  tcustomscalingwidget = class(tpublishedwidget)
   private
    fonfontheightdelta: fontheightdeltaeventty;
@@ -556,13 +560,14 @@ type
    function getminshrinksize: sizety; override;
    procedure defineproperties(filer: tfiler); override;
   public
+   constructor create(aowner: tcomponent); override;
    procedure writestate(writer: twriter); override;
    procedure dolayout(const sender: twidget); override;
    property onresize: notifyeventty read fonresize write fonresize;
    property onmove: notifyeventty read fonmove write fonmove;
   published
    property optionsscale: optionsscalety read foptionsscale write setoptionsscale
-                  default [];
+                  default defaultoptionsscale;
    property onfontheightdelta: fontheightdeltaeventty read fonfontheightdelta
                      write fonfontheightdelta;
    property onlayout: notifyeventty read fonlayout write fonlayout;
@@ -599,6 +604,10 @@ type
                      read fonfocusedwidgetchanged write fonfocusedwidgetchanged;
  end;
 
+const
+ defaultscrollboxoptionsscale =
+        defaultoptionsscale - [osc_expandshrinkx,osc_expandshrinky];
+type
  tscrollbox = class(tscalingwidget)
   private
    fonscroll: pointeventty;
@@ -620,6 +629,7 @@ type
    property frame: tscrollboxframe read getframe write setframe;
    property onscroll: pointeventty read fonscroll write fonscroll;
    property optionswidget default defaultoptionswidgetmousewheel;
+   property optionsscale default defaultscrollboxoptionsscale;
  end;
 
  tstepboxframe = class(tcustomstepframe)
@@ -1934,6 +1944,12 @@ end;
 
 { tcustomscalingwidget }
 
+constructor tcustomscalingwidget.create(aowner: tcomponent);
+begin
+ inherited;
+ foptionsscale:= defaultoptionsscale;
+end;
+
 procedure tcustomscalingwidget.dolayout(const sender: twidget);
 begin
  if canevent(tmethod(fonlayout)) then begin
@@ -2071,9 +2087,11 @@ var
  box,boy: boolean;
 begin
  result:= inherited getminshrinksize;
- box:= (fanchors * [an_left,an_right] = [an_left,an_right]) or 
+ box:= (fanchors * [an_left,an_right] = [an_left,an_right]) and 
+            (osc_expandshrinkx in foptionsscale) or 
                                             (osc_expandx in foptionsscale);
- boy:= (fanchors * [an_top,an_bottom] = [an_top,an_bottom]) or 
+ boy:= (fanchors * [an_top,an_bottom] = [an_top,an_bottom]) and 
+            (osc_expandshrinky in foptionsscale) or 
                                             (osc_expandy in foptionsscale); 
  if box or boy then begin
   size1:= minscrollsize;
@@ -2211,6 +2229,7 @@ constructor tscrollbox.create(aowner: tcomponent);
 begin
  inherited;
  foptionswidget:= defaultoptionswidgetmousewheel;
+ foptionsscale:= defaultscrollboxoptionsscale;
  internalcreateframe;
 end;
 
