@@ -4208,6 +4208,7 @@ begin
  if cs_inactive in fstate then exit;
  fillarc(def,startang,extentang,acolor,false);
  if (linecolor <> cl_none) then begin
+  fdrawinfo.arc.rect:= @def; //necessary for 64 bit
   getarcinfo(startpo,endpo);
   drawline(startpo,endpo,linecolor);
   drawarc(def,startang,extentang,linecolor);
