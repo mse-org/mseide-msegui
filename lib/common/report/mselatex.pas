@@ -37,7 +37,7 @@ var
  end;
  
 const
- maxitemlen = 100; //maxlen of escape code + format code
+ maxitemlen = 200; //maxlen of escape code + format code
 var
  s,e,dend: pmsechar;
  mch1: msechar;
@@ -57,7 +57,7 @@ begin
   dend:= d + length(result) - maxitemlen;
   s:= pointer(source.text);
   formatindex:= 0;
-  add('{');
+  add('{\noindent\fontseries{l}\fontshape{n}\selectfont{}');
 //prichstringty(@source)^.format:= nil;
   repeat
    if formatindex > high(source.format) then begin
@@ -85,6 +85,9 @@ begin
        end;
        '~': begin
         add('\textasciitilde{}');
+       end;
+       ' ': begin
+        add('\hphantom{n}');
        end;
        c_return: begin
         inc(d);  //ignore
@@ -141,20 +144,23 @@ begin
       end;
      end;
      if fs_bold in styles1 then begin
-      add('\bfseries{}');
+      add('\fontseries{b}');
      end
      else begin
       if ni_bold in newinfos then begin
-       add('\normalfont{}');
+       add('\fontseries{l}');
       end;
      end;
      if fs_italic in styles1 then begin
-      add('\itshape{}');
+      add('\fontshape{it}');
      end
      else begin
       if ni_italic in newinfos then begin
-       add('\upshape{}');
+       add('\fontshape{n}');
       end;
+     end;
+     if newinfos*[ni_bold,ni_italic] <> [] then begin
+      add('\selectfont{}');
      end;
     end;
    end;
