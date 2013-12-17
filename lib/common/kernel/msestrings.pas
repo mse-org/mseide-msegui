@@ -221,7 +221,7 @@ function lstringtostring(const value: pchar;
 procedure stringtolstring(const value: string; var{out} res: lstringty); overload;  //todo!!!!! fpbug 3221
 procedure stringtolstring(const value: msestring; var{out} res: lmsestringty); overload;
 function stringtolstring(const value: string): lstringty; overload;
-function stringtolstring(const value: msestring): lstringty; overload;
+function stringtolstring(const value: msestring): lmsestringty; overload;
 function lstringartostringar(const value: lstringarty): stringarty;
 
 procedure nextword(const value: msestring; out res: lmsestringty); overload;
@@ -2555,7 +2555,7 @@ begin
  result.len:= length(value);
 end;
 
-function stringtolstring(const value: msestring): lstringty;
+function stringtolstring(const value: msestring): lmsestringty;
 begin
  result.po:= pointer(value);
  result.len:= length(value);
