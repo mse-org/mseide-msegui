@@ -341,7 +341,7 @@ object sourcefo: tsourcefo
         action = actionsmo.copy
       end    
       item
-        action = actionsmo.copylatex
+        action = actionsmo.copylatexact
       end    
       item
         action = actionsmo.paste

@@ -784,62 +784,67 @@ var
  startindex,endindex: integer;
  res: richstringty;
 begin
- res.text:= copy(source.text,index,count);
- res.format:= nil;
- if length(source.format) > 0 then begin
-  startindex:= -1;
-  endindex:= -1;
-  for int1:= 0 to high(source.format) do begin
-   if source.format[int1].index >= index then begin
-    startindex:= int1;
-    break;
-   end;
-  end;
-  if startindex < 0 then begin
-   int1:= 0;
-  end
-  else begin
-   int1:= startindex;
-  end;
-  for int1:= int1 to high(source.format) do begin
-   if source.format[int1].index >= index + count then begin
-    endindex:= int1;
-    break;
-   end;
-  end;
-  if startindex > 0 then begin
-   dec(startindex);
-  end
-  else begin
-   startindex:= 0;
-  end;
-  if endindex >= 0 then begin
-   res.format:= copy(source.format,startindex,endindex-startindex);
-  end
-  else begin
-   res.format:= copy(source.format,startindex,bigint);
-  end;
-  if length(res.format) > 0 then begin
-   with res.format[0] do begin
-    newinfos:= [];
-    if style.fontcolor <> 0 then include(newinfos,ni_fontcolor);
-    if style.colorbackground <> 0 then include(newinfos,ni_colorbackground);
-    if fs_bold in style.fontstyle then include(newinfos,ni_bold);
-    if fs_italic in style.fontstyle then include(newinfos,ni_italic);
-    if fs_underline in style.fontstyle then include(newinfos,ni_underline);
-    if fs_strikeout in style.fontstyle then include(newinfos,ni_strikeout);
-    if fs_selected in style.fontstyle then include(newinfos,ni_selected);
-   end;
-   for int1:= 0 to high(res.format) do begin
-    int2:= res.format[int1].index - index + 1;
-    if int2 < 0 then begin
-     int2:= 0;
+ if count = 0 then begin
+  result:= emptyrichstring;
+ end
+ else begin
+  res.text:= copy(source.text,index,count);
+  res.format:= nil;
+  if length(source.format) > 0 then begin
+   startindex:= -1;
+   endindex:= -1;
+   for int1:= 0 to high(source.format) do begin
+    if source.format[int1].index >= index then begin
+     startindex:= int1;
+     break;
     end;
-    res.format[int1].index:= int2;
+   end;
+   if startindex < 0 then begin
+    int1:= 0;
+   end
+   else begin
+    int1:= startindex;
+   end;
+   for int1:= int1 to high(source.format) do begin
+    if source.format[int1].index >= index + count then begin
+     endindex:= int1;
+     break;
+    end;
+   end;
+   if startindex > 0 then begin
+    dec(startindex);
+   end
+   else begin
+    startindex:= 0;
+   end;
+   if endindex >= 0 then begin
+    res.format:= copy(source.format,startindex,endindex-startindex);
+   end
+   else begin
+    res.format:= copy(source.format,startindex,bigint);
+   end;
+   if length(res.format) > 0 then begin
+    with res.format[0] do begin
+     newinfos:= [];
+     if style.fontcolor <> 0 then include(newinfos,ni_fontcolor);
+     if style.colorbackground <> 0 then include(newinfos,ni_colorbackground);
+     if fs_bold in style.fontstyle then include(newinfos,ni_bold);
+     if fs_italic in style.fontstyle then include(newinfos,ni_italic);
+     if fs_underline in style.fontstyle then include(newinfos,ni_underline);
+     if fs_strikeout in style.fontstyle then include(newinfos,ni_strikeout);
+     if fs_selected in style.fontstyle then include(newinfos,ni_selected);
+    end;
+    for int1:= 0 to high(res.format) do begin
+     int2:= res.format[int1].index - index + 1;
+     if int2 < 0 then begin
+      int2:= 0;
+     end;
+     res.format[int1].index:= int2;
+    end;
    end;
   end;
+  result:= res;
  end;
- result:= res;
 end;
 
 function richconcat(const a,b: richstringty): richstringty;
