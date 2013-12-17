@@ -229,6 +229,7 @@ type
 
    function hasselection: boolean; override;
    function selectedtext: msestring;
+   function selectedrichtext: richstringty;
 
    property optionsedit default defaulttexteditoptions;
    procedure setfontstyle(const start,stop: gridcoordty;
@@ -254,6 +255,7 @@ type
    function gettext(const start, stop: gridcoordty): msestring; overload;
    function gettext: msestring; overload;
    procedure settext(const atext: msestring);
+   function getrichtext(const start, stop: gridcoordty): richstringty;
    
    function linecount: integer;
    property gridvalue[const index: integer]: msestring 
@@ -1967,6 +1969,36 @@ begin
  end;
 end;
 
+function tcustomtextedit.getrichtext(const start,
+                                         stop: gridcoordty): richstringty;
+var
+ po1,po2: gridcoordty;
+ int1: integer;
+begin
+ normalizetextrect(start,stop,po1,po2);
+ if po1.row = po2.row then begin
+  result:= richcopy(flines.richitems[po1.row],po1.col+1,po2.col-po1.col);
+ end
+ else begin
+  result:= richcopy(flines.richitems[po1.row],po1.col+1,bigint);
+  for int1:= po1.row + 1 to po2.row - 1 do begin
+   if flines.noparagraphs[int1] then begin
+    result:= richconcat(result,flines.richitems[int1]);
+   end
+   else begin
+    result:= richconcat(result,richlineend);
+    result:= richconcat(result,flines.richitems[int1]);
+   end;
+  end;
+  if po2.row < flines.count then begin
+   if not flines.noparagraphs[po2.row] then begin
+    result:= richconcat(result,richlineend); //paragraph
+   end;
+   result:= richconcat(result,richcopy(flines.richitems[po2.row],1,po2.col));
+  end;
+ end;
+end;
+
 function tcustomtextedit.gettext: msestring;
 begin
  result:= flines.gettext;
@@ -1990,6 +2022,16 @@ begin
  end
  else begin
   result:= '';
+ end;
+end;
+
+function tcustomtextedit.selectedrichtext: richstringty;
+begin
+ if hasselection then begin
+  result:= getrichtext(fselectstart,fselectend);
+ end
+ else begin
+  result:= emptyrichstring;
  end;
 end;
 

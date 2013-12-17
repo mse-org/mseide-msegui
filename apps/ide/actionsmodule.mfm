@@ -1369,7 +1369,7 @@ object actionsmo: tactionsmo
     top = 136
   end
   object shortcuts: tshortcutcontroller
-    actions.count = 81
+    actions.count = 82
     actions.items = <    
       item
         dispname = 'File'
@@ -1474,6 +1474,14 @@ object actionsmo: tactionsmo
         sc = (
           1
           16457
+        )
+      end    
+      item
+        action = copylatexact
+        dispname = 'Copy LaTeX'
+        sc = (
+          1
+          16460
         )
       end    
       item
@@ -2196,7 +2204,7 @@ object actionsmo: tactionsmo
   object instemplate: taction
     onexecute = instemplateactonexecute
     left = 360
-    top = 64
+    top = 80
     sc = (
       1
       16468
@@ -2326,5 +2334,16 @@ object actionsmo: tactionsmo
     )
     left = 288
     top = 392
+  end
+  object copylatexact: taction
+    caption = 'Copy &LaTeX'
+    onexecute = copylatexactonexecute
+    left = 360
+    top = 56
+    sc = (
+      2
+      16459
+      76
+    )
   end
 end

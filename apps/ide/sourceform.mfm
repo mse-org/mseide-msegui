@@ -11,8 +11,6 @@ object sourcefo: tsourcefo
   bounds_cx = 433
   bounds_cy = 327
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets]
-  container.frame.zoomwidthstep = 1
-  container.frame.zoomheightstep = 1
   container.frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
   container.frame.sbhorz.options = [sbo_moveauto, sbo_showauto]
   container.frame.sbvert.options = [sbo_moveauto, sbo_showauto]
@@ -300,7 +298,7 @@ object sourcefo: tsourcefo
   end
   object formpopup: tpopupmenu
     onupdate = popupmonupdate
-    menu.submenu.count = 30
+    menu.submenu.count = 31
     menu.submenu.items = <    
       item
         action = actionsmo.selecteditpage
@@ -341,6 +339,9 @@ object sourcefo: tsourcefo
       end    
       item
         action = actionsmo.copy
+      end    
+      item
+        action = actionsmo.copylatex
       end    
       item
         action = actionsmo.paste

@@ -22,8 +22,8 @@ interface
 uses
  mseclasses,mseact,mseactions,msebitmap,msestrings,msegui,msedatamodules,
  mseglob,msestat,mseifiglob,msegraphics,msegraphutils,mseguiglob,msemenus,
- msesimplewidgets,msewidgets,projecttreeform,msestringcontainer,
- targetconsole;
+ msesimplewidgets,msewidgets,projecttreeform,msestringcontainer,targetconsole,
+ mseificomp,mseificompglob;
  
 type
  stringconsts = (
@@ -204,6 +204,7 @@ type
    projectsaveact: taction;
    projectcloseact: taction;
    c: tstringcontainer;
+   copylatexact: taction;
    procedure findinfileonexecute(const sender: tobject);
 
    //file
@@ -272,6 +273,7 @@ type
    procedure projectcloeseexe(const sender: TObject);
    procedure creadstateexe(const sender: TObject);
    procedure findupdateexe(const sender: tcustomaction);
+   procedure copylatexactonexecute(const sender: TObject);
  end;
 
 var
@@ -435,6 +437,11 @@ end;
 procedure tactionsmo.copyactonexecute(const sender: tobject);
 begin
  sourcefo.activepage.edit.copyselection;
+end;
+
+procedure tactionsmo.copylatexactonexecute(const sender: TObject);
+begin
+ sourcefo.activepage.copylatex;
 end;
 
 procedure tactionsmo.cutactonexecute(const sender: tobject);

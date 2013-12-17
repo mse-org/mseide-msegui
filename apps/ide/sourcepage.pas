@@ -135,6 +135,7 @@ type
    procedure doundo;
    procedure doredo;
    procedure inserttemplate;
+   procedure copylatex;
    function canchangenotify(const info: filechangeinfoty): boolean;
    function getbreakpointstate(arow: integer = -1): bkptstatety;
                      //-1 -> actual row
@@ -169,7 +170,8 @@ uses
  sourceupdate,msefiledialog,mseintegerenter,msedesigner,
  msesys,make,actionsmodule,msegraphics,sourcehintform,
  mseedit,msedrawtext,msebits,msearrayutils,msestream,msedesignintf,
- msesysutils,msedesignparser,msesyntaxpainter,msemacros,msecodetemplates;
+ msesysutils,msedesignparser,msesyntaxpainter,msemacros,msecodetemplates,
+ mselatex;
 
 const
  pascaldelims = msestring(' :;+-*/(){},=<>' + c_linefeed + c_return + c_tab);
@@ -1608,6 +1610,11 @@ begin
    mac1.free;
   end;
  end;
+end;
+
+procedure tsourcepage.copylatex;
+begin
+ copytoclipboard(richstringtolatex(edit.selectedrichtext));
 end;
 
 end.

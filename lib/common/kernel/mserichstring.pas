@@ -135,6 +135,7 @@ type
 
 const
  emptyrichstring: richstringty = (text: ''; format: nil; flags: []);
+ richlineend: richstringty = (text: lineend; format: nil; flags: []);
  
 function setfontcolor1(var formats: formatinfoarty; aindex: integer; 
                        len: halfinteger; color: colorty): boolean;

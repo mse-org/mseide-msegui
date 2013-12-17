@@ -1443,6 +1443,7 @@ begin
     undo.enabled:= edit.canundo;
     redo.enabled:= edit.canredo;
     copy.enabled:= edit.hasselection;
+    copylatexact.enabled:= edit.hasselection;
     cut.enabled:= edit.hasselection;
     paste.enabled:= edit.canpaste;
     delete.enabled:= edit.hasselection;
@@ -1486,6 +1487,7 @@ begin
    undo.enabled:= false;
    redo.enabled:= false;
    copy.enabled:= false;
+   copylatexact.enabled:= false;
    cut.enabled:= false;
    paste.enabled:= false;
    delete.enabled:= false;

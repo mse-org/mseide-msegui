@@ -216,7 +216,7 @@ object mainfo: tmainfo
         state = [as_localcaption]
       end    
       item
-        submenu.count = 12
+        submenu.count = 13
         submenu.items = <        
           item
             action = actionsmo.selecteditpage
@@ -235,6 +235,9 @@ object mainfo: tmainfo
           end        
           item
             action = actionsmo.copy
+          end        
+          item
+            action = actionsmo.copylatex
           end        
           item
             action = actionsmo.cut
