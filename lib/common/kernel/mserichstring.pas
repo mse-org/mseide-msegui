@@ -849,18 +849,19 @@ end;
 
 function richconcat(const a,b: richstringty): richstringty;
 var
- int1,int2: integer;
+ i1,i2,i3: integer;
  res: richstringty;
 begin
  res.format:= a.format;
  res.text:= a.text + b.text;
- int2:= length(res.format);
- setlength(res.format,int2 + length(b.format));
- for int1:= 0 to high(b.format) do begin
-  with res.format[int1+int2] do begin
-   index:= b.format[int1].index + length(a.text);
-   newinfos:= b.format[int1].newinfos;
-   style:= b.format[int1].style;
+ i2:= length(res.format);
+ i3:= length(a.text);
+ setlength(res.format,i2 + length(b.format));
+ for i1:= 0 to high(b.format) do begin
+  with res.format[i1+i2] do begin
+   index:= b.format[i1].index + i3;
+   newinfos:= b.format[i1].newinfos;
+   style:= b.format[i1].style;
   end;
  end;
  result:= res;
