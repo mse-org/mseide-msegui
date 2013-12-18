@@ -2443,7 +2443,9 @@ begin
    if gs_interrupted in fstate then begin
     exclude(fstate,gs_interrupted);
     include(fstate,gs_restarted);
-    continue;
+    exclude(fstate,gs_stopped);
+    internalcommand('-exec-continue');
+//    continue;
    end;
   end;
  end;
