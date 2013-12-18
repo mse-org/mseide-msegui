@@ -1278,7 +1278,7 @@ var
     int2:= astop.col - astart.col;
    end
    else begin
-    int2:= length(po1^.text);
+    int2:= length(po1^.text)-astart.col;
    end;
    if int2 > 0 then begin
     updatefontstyle1(po1^.format,
