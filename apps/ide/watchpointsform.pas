@@ -200,7 +200,7 @@ var
  int1: integer;
 begin
  for int1:= aindex to aindex + acount - 1 do begin
-  if wptno.value <> 0 then begin
+  if wptno[int1] <> 0 then begin
    gdb.breakdelete(wptno[int1]);
   end;
  end;
