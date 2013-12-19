@@ -534,6 +534,10 @@ type
    class function defaultstep(width: integer): integer; virtual;
    function step(getscrollable: boolean = true): integer; override;
    function scrollable: boolean; override;
+   procedure dobeforedrawcell(const acanvas: tcanvas; 
+                          var processed: boolean); virtual;
+   procedure doafterdrawcell(const acanvas: tcanvas); virtual;
+
    procedure drawcell(const acanvas: tcanvas); virtual;
    procedure drawfocusedcell(const acanvas: tcanvas); virtual;
    procedure rowcountchanged(const newcount: integer); virtual;
@@ -3530,6 +3534,17 @@ begin
  end;
 end;
 
+procedure tcol.dobeforedrawcell(const acanvas: tcanvas; 
+                                       var processed: boolean);
+begin
+ fonbeforedrawcell(self,acanvas,fcellinfo,processed);
+end;
+
+procedure tcol.doafterdrawcell(const acanvas: tcanvas);
+begin
+ fonafterdrawcell(self,acanvas,fcellinfo);
+end;
+
 procedure tcol.paint(var info: colpaintinfoty);
 var
  int1,int2,int3: integer;
@@ -3654,7 +3669,8 @@ begin
       canvas.intersectcliprect(mr(nullpoint,fcellrect.size));
       bo2:= false;
       if canbeforedrawcell then begin
-       fonbeforedrawcell(self,canvas,fcellinfo,bo2);
+       dobeforedrawcell(canvas,bo2);
+//       fonbeforedrawcell(self,canvas,fcellinfo,bo2);
       end;
       if not bo2 then begin
        if isfocusedcell then begin
@@ -3665,7 +3681,8 @@ begin
        end;
       end;
       if canafterdrawcell then begin
-       fonafterdrawcell(self,canvas,fcellinfo);
+       doafterdrawcell(canvas);
+//       fonafterdrawcell(self,canvas,fcellinfo);
       end;
       canvas.restore(saveindex);
       if calcautocellsize then begin

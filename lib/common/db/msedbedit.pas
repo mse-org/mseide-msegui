@@ -1647,6 +1647,9 @@ type
 
  tdbwidgetcol = class(twidgetcol)
   protected
+   procedure dobeforedrawcell(const acanvas: tcanvas; 
+                          var processed: boolean); override;
+   procedure doafterdrawcell(const acanvas: tcanvas); override;
    procedure setwidget(const awidget: twidget); override;
  end;
  
@@ -1666,6 +1669,7 @@ type
    procedure setfixcols(const avalue: tdbwidgetfixcols);
   protected
    function createdatacols: tdatacols; override;
+   procedure createdatacol(const index: integer; out item: tdatacol); override;
    function canautoappend: boolean; override;
    function getgriddatalink: pointer; override;
    procedure setoptionsgrid(const avalue: optionsgridty); override;
@@ -1802,6 +1806,9 @@ type
    function getitems(aindex: integer): msestring; override;
    procedure setitems(aindex: integer; const Value: msestring); override;
    procedure modified; override;
+   procedure dobeforedrawcell(const acanvas: tcanvas; 
+                          var processed: boolean); override;
+   procedure doafterdrawcell(const acanvas: tcanvas); override;
    function getrowtext(const arow: integer): msestring; override;
    function createdatalist: tdatalist; override;
 //   procedure docellevent(var info: celleventinfoty); override;
@@ -8987,6 +8994,12 @@ function tcustomdbwidgetgrid.candeleterow: boolean;
 begin
  result:= inherited candeleterow and fdatalink.candelete;
 end;
+
+procedure tcustomdbwidgetgrid.createdatacol(const index: integer;
+               out item: tdatacol);
+begin
+ item:= tdbwidgetcol.create(self,fdatacols);
+end;
 {
 procedure tcustomdbwidgetgrid.doenter;
 begin
@@ -9274,6 +9287,34 @@ begin
   fdatalink.statechanged(iificlient(self),state1);
  end;
 end;
+
+procedure tdbstringcol.dobeforedrawcell(const acanvas: tcanvas;
+               var processed: boolean);
+var
+ info: gridrowinfoty;
+begin
+ tcustomdbstringgrid(grid).fdatalink.begingridrow(
+                                   fcellinfo.cell.row,info);
+ try
+  inherited;
+ finally
+  tcustomdbstringgrid(grid).fdatalink.endgridrow(info);
+ end;
+end;
+
+procedure tdbstringcol.doafterdrawcell(const acanvas: tcanvas);
+var
+ info: gridrowinfoty;
+begin
+ tcustomdbstringgrid(grid).fdatalink.begingridrow(
+                                   fcellinfo.cell.row,info);
+ try
+  inherited;
+ finally
+  tcustomdbstringgrid(grid).fdatalink.endgridrow(info);
+ end;
+end;
+
 {
 procedure tdbstringcol.docellevent(var info: celleventinfoty);
 begin
@@ -11722,6 +11763,33 @@ begin
   if link1 <> nil then begin
    link1.navigator:= tdbwidgetgrid(fcellinfo.grid).fdatalink.navigator;
   end;
+ end;
+end;
+
+procedure tdbwidgetcol.dobeforedrawcell(const acanvas: tcanvas;
+               var processed: boolean);
+var
+ info: gridrowinfoty;
+begin
+ tcustomdbwidgetgrid(grid).fdatalink.begingridrow(
+                                   fcellinfo.cell.row,info);
+ try
+  inherited;
+ finally
+  tcustomdbwidgetgrid(grid).fdatalink.endgridrow(info);
+ end;
+end;
+
+procedure tdbwidgetcol.doafterdrawcell(const acanvas: tcanvas);
+var
+ info: gridrowinfoty;
+begin
+ tcustomdbwidgetgrid(grid).fdatalink.begingridrow(
+                                   fcellinfo.cell.row,info);
+ try
+  inherited;
+ finally
+  tcustomdbwidgetgrid(grid).fdatalink.endgridrow(info);
  end;
 end;
 
