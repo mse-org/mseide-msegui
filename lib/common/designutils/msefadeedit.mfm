@@ -447,7 +447,7 @@ object fadeeditfo: tfadeeditfo
     bounds_cx = 506
     bounds_cy = 31
     anchors = [an_left, an_right, an_bottom]
-    optionsscale = [osc_expandy, osc_shrinky]
+    optionsscale = [osc_expandy, osc_shrinky, osc_expandshrinkx, osc_expandshrinky]
     linktop = cont2
     dist_top = 5
     options = [spao_gluebottom]
