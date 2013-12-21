@@ -42,7 +42,7 @@ object colordialogfo: tcolordialogfo
       -1610612729
     )
     scrollbar.face.fade_direction = gd_up
-    scrollbar.face.localprops = [fal_fadirection, fal_fatransparency]
+    scrollbar.face.localprops = [fal_fadirection, fal_faopacity]
     scrollbar.face.dummy = 0
     onsetvalue = redonsetvalue
     direction = gd_up
@@ -75,7 +75,7 @@ object colordialogfo: tcolordialogfo
       -1610612728
     )
     scrollbar.face.fade_direction = gd_up
-    scrollbar.face.localprops = [fal_fadirection, fal_fatransparency]
+    scrollbar.face.localprops = [fal_fadirection, fal_faopacity]
     scrollbar.face.dummy = 0
     onsetvalue = greenonsetvalue
     direction = gd_up
@@ -108,14 +108,14 @@ object colordialogfo: tcolordialogfo
       -1610612727
     )
     scrollbar.face.fade_direction = gd_up
-    scrollbar.face.localprops = [fal_fadirection, fal_fatransparency]
+    scrollbar.face.localprops = [fal_fadirection, fal_faopacity]
     scrollbar.face.dummy = 0
     onsetvalue = blueonsetvalue
     direction = gd_up
   end
   object red: tintegeredit
     color = -2147483645
-    frame.caption = 'red'
+    frame.caption = '&red'
     frame.captionpos = cp_top
     frame.dummy = 0
     frame.outerframe = (
@@ -136,7 +136,7 @@ object colordialogfo: tcolordialogfo
   end
   object green: tintegeredit
     color = -2147483645
-    frame.caption = 'green'
+    frame.caption = '&green'
     frame.captionpos = cp_top
     frame.dummy = 0
     frame.outerframe = (
@@ -157,7 +157,7 @@ object colordialogfo: tcolordialogfo
   end
   object blue: tintegeredit
     color = -2147483645
-    frame.caption = 'blue'
+    frame.caption = '&blue'
     frame.captionpos = cp_top
     frame.dummy = 0
     frame.outerframe = (
@@ -214,7 +214,7 @@ object colordialogfo: tcolordialogfo
       -1610612729
     )
     scrollbar.face.fade_direction = gd_up
-    scrollbar.face.localprops = [fal_fadirection, fal_fatransparency]
+    scrollbar.face.localprops = [fal_fadirection, fal_faopacity]
     scrollbar.face.dummy = 0
     onsetvalue = hueonsetvalue
     direction = gd_up
@@ -247,7 +247,7 @@ object colordialogfo: tcolordialogfo
       -1610612730
     )
     scrollbar.face.fade_direction = gd_up
-    scrollbar.face.localprops = [fal_fadirection, fal_fatransparency]
+    scrollbar.face.localprops = [fal_fadirection, fal_faopacity]
     scrollbar.face.dummy = 0
     onsetvalue = satonsetvalue
     direction = gd_up
@@ -280,14 +280,14 @@ object colordialogfo: tcolordialogfo
       -1610612730
     )
     scrollbar.face.fade_direction = gd_up
-    scrollbar.face.localprops = [fal_fadirection, fal_fatransparency]
+    scrollbar.face.localprops = [fal_fadirection, fal_faopacity]
     scrollbar.face.dummy = 0
     onsetvalue = brightonsetvalue
     direction = gd_up
   end
   object hue: tintegeredit
     color = -2147483645
-    frame.caption = 'HUE'
+    frame.caption = '&HUE'
     frame.captionpos = cp_top
     frame.dummy = 0
     frame.outerframe = (
@@ -308,7 +308,7 @@ object colordialogfo: tcolordialogfo
   end
   object sat: tintegeredit
     color = -2147483645
-    frame.caption = 'SAT'
+    frame.caption = '&SAT'
     frame.captionpos = cp_top
     frame.dummy = 0
     frame.outerframe = (
@@ -329,7 +329,7 @@ object colordialogfo: tcolordialogfo
   end
   object bright: tintegeredit
     color = -2147483645
-    frame.caption = 'BRI'
+    frame.caption = '&BRI'
     frame.captionpos = cp_top
     frame.dummy = 0
     frame.outerframe = (
@@ -376,7 +376,7 @@ object colordialogfo: tcolordialogfo
     bounds_cy = 21
     anchors = [an_left, an_bottom]
     state = [as_default, as_localdefault, as_localcaption]
-    caption = 'Ok'
+    caption = '&OK'
     modalresult = mr_ok
   end
   object cancel: tbutton
@@ -387,7 +387,7 @@ object colordialogfo: tcolordialogfo
     bounds_cy = 21
     anchors = [an_left, an_bottom]
     state = [as_localcaption]
-    caption = 'Cancel'
+    caption = '&Cancel'
     modalresult = mr_cancel
   end
   object colorareabefore: tpaintbox

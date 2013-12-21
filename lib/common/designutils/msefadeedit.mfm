@@ -512,7 +512,7 @@ object fadeeditfo: tfadeeditfo
         bounds_cy = 31
         bounds_cxmin = 58
         state = [as_localcaption]
-        caption = 'Cancel'
+        caption = '&Cancel'
         modalresult = mr_canclose
       end
       object tbutton1: tbutton
