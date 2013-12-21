@@ -41,6 +41,23 @@ type
   longwordset = longword;
 {$endif}
 
+ card8 = byte;
+ pcard8 = ^card8;
+ card16 = word;
+ pcard16 = ^card16;
+ card32 = longword;
+ pcard32 = ^card32;
+ card64 = qword;
+ pcard64 = ^card64;
+ int8 = shortint;
+ pint8 = ^int8;
+ int16 = smallint;
+ pint16 = ^int16;
+ int32 = integer;
+ pint32 = ^int32;
+// int64 = int64;
+// pint64 = ^int64;
+
  uint8 = byte;
  puint8 = ^uint8;
  uint16 = word;
