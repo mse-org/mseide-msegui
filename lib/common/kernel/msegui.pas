@@ -7940,6 +7940,7 @@ begin
   if face1 <> nil then begin
    if not (fao_overlay in face1.options) then begin
     if fframe <> nil then begin
+     fframe.checkstate();
      canvas.remove(fframe.fclientrect.pos);
      face1.paint(canvas,makerect(nullpoint,fframe.fpaintrect.size));
      canvas.move(fframe.fclientrect.pos);
