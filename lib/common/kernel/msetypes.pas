@@ -41,6 +41,7 @@ type
   longwordset = longword;
 {$endif}
 
+  //MSElang types
  card8 = byte;
  pcard8 = ^card8;
  card16 = word;
@@ -57,7 +58,13 @@ type
  pint32 = ^int32;
 // int64 = int64;
 // pint64 = ^int64;
-
+ float32 = single;
+ pflot32 = ^float32;
+ float64 = double;
+ pfloat64 = ^float64;
+ float = float64;
+ pfloat = ^float;
+ 
  uint8 = byte;
  puint8 = ^uint8;
  uint16 = word;
