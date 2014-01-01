@@ -308,7 +308,6 @@ type
  tcustomedit = class;
  texteditedeventty = procedure(const sender: tcustomedit;
                                       var atext: msestring) of object;
-                      
  
  tcustomedit = class(tpublishedwidget,iedit)
   private
@@ -319,6 +318,7 @@ type
    foncopytoclipboard: updatestringeventty;
    fonpastefromclipboard: updatestringeventty;
    fcursorreadonly: cursorshapety;
+   fonpaintimage: painteventty;
    function getmaxlength: integer;
    function getpasswordchar: msechar;
    procedure setpasswordchar(const Value: msechar);
@@ -427,6 +427,7 @@ type
                   write foncopytoclipboard;
    property onpastefromclipboard: updatestringeventty read fonpastefromclipboard 
                   write fonpastefromclipboard;
+   property onpaintimage: painteventty read fonpaintimage write fonpaintimage;
   published
    property optionswidget1 default defaulteditwidgetoptions1; //first!
    property optionswidget default defaulteditwidgetoptions;   //first!
@@ -1687,7 +1688,9 @@ end;
 
 procedure tcustomedit.paintimage(const canvas: tcanvas);
 begin
- //dummy
+ if canevent(tmethod(fonpaintimage)) then begin
+  fonpaintimage(self,canvas);
+ end;
 end;
 
 function tcustomedit.navigrect: rectty;

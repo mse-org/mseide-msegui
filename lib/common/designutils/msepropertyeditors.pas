@@ -111,27 +111,32 @@ type
    function instance(const index: integer = 0): tobject;
    function typedata: ptypedata;
 
-   function getordvalue(const index: integer = 0): integer;
-   procedure setordvalue(const value: longword); overload;
-   procedure setordvalue(const index: integer; const value: longword); overload;
-   function getint64value(const index: integer = 0): int64;
-   procedure setint64value(const value: int64); overload;
-   procedure setint64value(const index: integer; const value: int64); overload;
-   function getpointervalue(const index: integer = 0): pointer;
-   procedure setpointervalue(const value: pointer); overload;
-   procedure setpointervalue(const index: integer; const value: pointer); overload;
+   function gettypinfo: ptypeinfo; virtual;
+   function getordvalue(const index: integer = 0): integer; virtual;
+   procedure setordvalue(const value: longword); virtual; overload;
+   procedure setordvalue(const index: integer; const value: longword);
+                                                   virtual; overload;
+   function getint64value(const index: integer = 0): int64; virtual;
+   procedure setint64value(const value: int64); virtual; overload;
+   procedure setint64value(const index: integer; const value: int64);
+                                                 virtual; overload;
+   function getpointervalue(const index: integer = 0): pointer; virtual;
+   procedure setpointervalue(const value: pointer); overload; virtual;
+   procedure setpointervalue(const index: integer; const value: pointer);
+                                                     virtual; overload;
 
    procedure setbitvalue(const value: boolean; const bitindex: integer);
-   function getfloatvalue(const index: integer = 0): extended;
-   procedure setfloatvalue(const value: extended);
-   function getcurrencyvalue(const index: integer = 0): currency;
-   procedure setcurrencyvalue(const value: currency);
-   function getstringvalue(const index: integer = 0): string;
-   procedure setstringvalue(const value: string);
-   function getmsestringvalue(const index: integer = 0): msestring;
-   procedure setmsestringvalue(const value: msestring);
-   function getvariantvalue(const index: integer = 0): variant;
-   procedure setvariantvalue(const value: variant);
+                                                                   virtual;
+   function getfloatvalue(const index: integer = 0): extended; virtual;
+   procedure setfloatvalue(const value: extended); virtual;
+   function getcurrencyvalue(const index: integer = 0): currency; virtual;
+   procedure setcurrencyvalue(const value: currency); virtual;
+   function getstringvalue(const index: integer = 0): string; virtual;
+   procedure setstringvalue(const value: string); virtual;
+   function getmsestringvalue(const index: integer = 0): msestring; virtual;
+   procedure setmsestringvalue(const value: msestring); virtual;
+   function getvariantvalue(const index: integer = 0): variant; virtual;
+   procedure setvariantvalue(const value: variant); virtual;
    
    function decodemsestring(const avalue: msestring): msestring;
    function encodemsestring(const avalue: msestring): msestring;
@@ -177,6 +182,7 @@ type
    procedure dopopup(var amenu: tpopupmenu;  const atransientfor: twidget;
                 var mouseinfo: mouseeventinfoty); virtual;
    procedure edit; virtual;
+   property typinfo: ptypeinfo read gettypinfo;
    property count: integer read getcount;
    property expanded: boolean read getexpanded write setexpanded;
    property selected: boolean read getselected write setselected;
@@ -621,27 +627,34 @@ type
    feditor: tpropertyeditor;
   protected
    findex: integer;
+   function gettypinfo: ptypeinfo; override;
+   
    procedure doinsert(const sender: tobject);
    procedure doappend(const sender: tobject);
    procedure dodelete(const sender: tobject);
 
-   function getordvalue(const index: integer = 0): integer;
-   procedure setordvalue(const value: longword); overload;
-   procedure setordvalue(const index: integer; const value: longword); overload;
-   function getint64value(const index: integer = 0): int64;
-   procedure setint64value(const value: int64); overload;
-   procedure setint64value(const index: integer; const value: int64); overload;
-   function getpointervalue(const index: integer = 0): pointer;
-   procedure setpointervalue(const value: pointer); overload;
-   procedure setpointervalue(const index: integer; const value: pointer); overload;
+   function getordvalue(const index: integer = 0): integer; override;
+   procedure setordvalue(const value: longword); override; overload;
+   procedure setordvalue(const index: integer; const value: longword);
+                                                           override; overload;
+   function getint64value(const index: integer = 0): int64; override;
+   procedure setint64value(const value: int64); override; overload;
+   procedure setint64value(const index: integer; const value: int64);
+                                                            override; overload;
+   function getpointervalue(const index: integer = 0): pointer; override;
+   procedure setpointervalue(const value: pointer); override; overload;
+   procedure setpointervalue(const index: integer; const value: pointer);
+                                                     override; overload;
 
    procedure setbitvalue(const value: boolean; const bitindex: integer);
-   function getfloatvalue(const index: integer = 0): extended;
-   procedure setfloatvalue(const value: extended);
-   function getstringvalue(const index: integer = 0): string;
-   procedure setstringvalue(const value: string);
-   function getmsestringvalue(const index: integer = 0): msestring;
-   procedure setmsestringvalue(const value: msestring);
+                                                            override;
+   function getfloatvalue(const index: integer = 0): extended; override;
+   procedure setfloatvalue(const value: extended); override;
+   function getstringvalue(const index: integer = 0): string; override;
+   procedure setstringvalue(const value: string); override;
+   function getmsestringvalue(const index: integer = 0): msestring; override;
+   procedure setmsestringvalue(const value: msestring); override;
+   
    function getselectedpropinstances: objectarty; virtual;
 
    function getdefaultstate: propertystatesty; override;
@@ -681,6 +694,7 @@ type
    function geteditorclass: propertyeditorclassty; virtual;
    function getelementeditorclass: elementeditorclassty; virtual;
    procedure itemmoved(const source,dest: integer); virtual;
+   function getitemtypeinfo: ptypeinfo; virtual;
   public
    function itemprefix: msestring; virtual;
    procedure move(const curindex,newindex: integer); virtual;
@@ -728,9 +742,10 @@ type
 //   function getordvalue(const index: integer = 0): integer;
 //   procedure setordvalue(const value: longword); overload;
 //   procedure setordvalue(const index: integer; const value: longword); overload;
-   function getpointervalue(const index: integer = 0): pointer;
-   procedure setpointervalue(const value: pointer); overload;
-   procedure setpointervalue(const index: integer; const value: pointer); overload;
+   function getpointervalue(const index: integer = 0): pointer; override;
+   procedure setpointervalue(const value: pointer); override; overload;
+   procedure setpointervalue(const index: integer; const value: pointer);
+                                                    override; overload;
    procedure doinsert(const sender: tobject);
    procedure doappend(const sender: tobject);
    procedure dodelete(const sender: tobject);
@@ -842,6 +857,7 @@ type
  tcolorarraypropertyeditor = class(tarraypropertyeditor)
   protected
    function geteditorclass: propertyeditorclassty; override;
+   function getitemtypeinfo: ptypeinfo; override;
  end;
 
  tstringarraypropertyeditor = class(tarraypropertyeditor)
@@ -2181,6 +2197,11 @@ begin
  result:= nil;
 end;
 
+function tpropertyeditor.gettypinfo: ptypeinfo;
+begin
+ result:= ftypeinfo;
+end;
+
 { tordinalpropertyeditor }
 
 function tordinalpropertyeditor.allequal: boolean;
@@ -3325,7 +3346,7 @@ begin
   setlength(fsubprops,prop.count);
   for int1:= 0 to high(fsubprops) do begin
    fsubprops[int1]:= getelementeditorclass.create(int1,self,geteditorclass,
-          fdesigner,fobjectinspector,fprops,ftypeinfo);
+          fdesigner,fobjectinspector,fprops,getitemtypeinfo);
   end;
   stackarray(pointerarty(fsubprops),pointerarty(result));
  end
@@ -3371,6 +3392,11 @@ end;
 function tarraypropertyeditor.itemprefix: msestring;
 begin
  result:= 'Item ';
+end;
+
+function tarraypropertyeditor.getitemtypeinfo: ptypeinfo;
+begin
+ result:= ftypeinfo; //default
 end;
 
 { tarrayelementeditor }
@@ -3733,6 +3759,11 @@ begin
  result:= feditor.getlinksource;
 end;
 
+function tarrayelementeditor.gettypinfo: ptypeinfo;
+begin
+ result:= getvalueeditor.typinfo;
+end;
+
 { tpersistentarraypropertyeditor }
 
 function tpersistentarraypropertyeditor.geteditorclass: propertyeditorclassty;
@@ -3859,6 +3890,11 @@ end;
 function tcolorarraypropertyeditor.geteditorclass: propertyeditorclassty;
 begin
  result:= tcolorpropertyeditor;
+end;
+
+function tcolorarraypropertyeditor.getitemtypeinfo: ptypeinfo;
+begin
+ result:= typeinfo(colorty);
 end;
 
 { tstringarraypropertyeditor }

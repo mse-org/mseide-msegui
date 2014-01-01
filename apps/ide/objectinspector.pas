@@ -124,6 +124,9 @@ type
    procedure valuescellevent(const sender: TObject; var info: celleventinfoty);
    procedure valuesenterexe(const sender: TObject);
    procedure asyncexe(const sender: TObject; var atag: Integer);
+   procedure paintimageexe(const sender: twidget; const acanvas: tcanvas);
+   procedure extendimageexe(const sender: twidget;
+                      const cellinfopo: pcellinfoty; var aextend: sizety);
   private
    factmodule: tmsecomponent;
    factcomp: tcomponent;
@@ -232,7 +235,7 @@ implementation
 uses
  objectinspector_mfm,sysutils,msearrayprops,actionsmodule,
  msebitmap,msedrag,mseeditglob,msestockobjects,msedropdownlist,
- sourceupdate,sourceform,msekeyboard,main,msedatalist;
+ sourceupdate,sourceform,msekeyboard,main,msedatalist,msecolordialog;
 
 const
  ado_rereadprops = 1;  //asyncevent codes
@@ -943,8 +946,8 @@ begin
  end;
  grid.rowcount:= 0;
  if high(comp) >= 0 then begin
-  props.itemlist.Assign(listitemarty(editorstoprops(getproperties(objectarty(comp),
-               module,comp[0]))));
+  props.itemlist.Assign(listitemarty(editorstoprops(
+                         getproperties(objectarty(comp),module,comp[0]))));
   po1:= fcomponentinfos.getitempo(fcomponentinfos.find(comp[0]));
   if (po1 = nil) and (flastcomp <> nil) then begin
    po1:= fcomponentinfos.getitempo(fcomponentinfos.find(flastcomp));
@@ -971,7 +974,8 @@ begin
  readprops(module,ar1);
 end;
 
-function tobjectinspectorfo.editorstoprops(const editors: propertyeditorarty): treelistitemarty;
+function tobjectinspectorfo.editorstoprops(
+                         const editors: propertyeditorarty): treelistitemarty;
 var
  int1: integer;
 begin
@@ -1079,7 +1083,8 @@ begin
   else begin
 //  designer.begincomponentmodify;
 //  try
-   if (props.item <> nil) and (tpropertyvalue(values.item).feditor = sender) then begin
+   if (props.item <> nil) and 
+                    (tpropertyvalue(values.item).feditor = sender) then begin
     po1:= tpropertyvalue(values.item);
    end
    else begin
@@ -1222,13 +1227,13 @@ begin
 end;
 
 procedure tobjectinspectorfo.compselectoronsetvalue(const sender: tobject;
-  var avalue: msestring; var accept: boolean);
+                                   var avalue: msestring; var accept: boolean);
 begin
  asyncevent(ado_compselection);
 end;
 
 procedure tobjectinspectorfo.SelectionChanged(const ADesigner: IDesigner;
-  const ASelection: IDesignerSelections);
+                                      const ASelection: IDesignerSelections);
 begin
  saveproppath;
  with aselection do begin
@@ -1842,6 +1847,46 @@ begin
   ado_compselection: begin
    updatecompselection;
   end;
+ end;
+end;
+
+var
+ wascolorprop: boolean;
+ propcolor: colorty;
+ 
+function iscolorprop(const sender: twidget; const cellinfopo: pcellinfoty;
+                                              out acolor: colorty): boolean;
+
+var
+ propval: tpropertyvalue;
+begin
+ if cellinfopo = nil then begin
+  propval:= tpropertyvalue(titemedit(sender).item);
+ end
+ else begin
+  pointer(propval):= ppointer(cellinfopo^.datapo)^;
+ end;
+ result:= (propval.feditor.typinfo = typeinfo(colorty)) and 
+                                      propval.feditor.allequal;
+ if result then begin
+  acolor:= tpropertyeditor1(propval.feditor).getordvalue;
+ end;
+end;
+
+procedure tobjectinspectorfo.paintimageexe(const sender: twidget;
+               const acanvas: tcanvas);
+begin
+ if wascolorprop then begin
+  paintcolorimage(sender,acanvas,propcolor);
+ end;
+end;
+
+procedure tobjectinspectorfo.extendimageexe(const sender: twidget;
+               const cellinfopo: pcellinfoty; var aextend: sizety);
+begin
+ wascolorprop:= iscolorprop(sender,cellinfopo,propcolor);
+ if wascolorprop then begin
+  aextend.cx:= aextend.cx+sender.clientheight;
  end;
 end;
 

@@ -753,6 +753,11 @@ begin
      end;
     end;
    end;
+  end
+  else begin
+   if fowner.captionpos in imageextendcaptionpos then begin 
+    imageextend.cx:= imageextra.cx-imagerect.cx;
+   end;
   end;
  end;
 end;
@@ -766,24 +771,10 @@ begin
  with alayoutinfo do begin
   ainfo.dest.cx:= ainfo.dest.cx - treelevelshift;
   ainfo.clip.cx:= ainfo.clip.cx - treelevelshift;
-  if fimagelist <> nil then begin
-   if fowner.captionpos in imageextendcaptionpos then begin
-    int1:= imageextend.cx;
-    with ainfo.dest do begin
-     x:= x+int1;
-     cx:= cx-int1;
-    end;
-    with ainfo.clip do begin
-     x:= x+int1;
-     cx:= cx-int1;
-    end;
-   end;
-  end;
- end;
-{
- if fimagelist <> nil then begin
-  with alayoutinfo do begin
-   int1:= fimagelist.width - imagerect.cx;
+//  if fimagelist <> nil then begin
+  if (imageextend.cx <> 0) and 
+            (fowner.captionpos in imageextendcaptionpos) then begin
+   int1:= imageextend.cx;
    with ainfo.dest do begin
     x:= x+int1;
     cx:= cx-int1;
@@ -793,8 +784,8 @@ begin
     cx:= cx-int1;
    end;
   end;
+//  end;
  end;
-}
 end;
 
 procedure tlistitem.drawcell(const acanvas: tcanvas);

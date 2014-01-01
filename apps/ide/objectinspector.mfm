@@ -8,12 +8,6 @@ object objectinspectorfo: tobjectinspectorfo
   bounds_y = 439
   bounds_cx = 254
   bounds_cy = 248
-  container.frame.zoomwidthstep = 1
-  container.frame.zoomheightstep = 1
-  container.frame.sbhorz.stepctrlfact = 0
-  container.frame.sbhorz.wheelsensitivity = 1
-  container.frame.sbvert.stepctrlfact = 0
-  container.frame.sbvert.wheelsensitivity = 1
   container.onlayout = objectinspectoronchildscaled
   container.bounds = (
     0
@@ -117,10 +111,6 @@ object objectinspectorfo: tobjectinspectorfo
     reffontheight = 14
   end
   object grid: twidgetgrid
-    frame.sbvert.stepctrlfact = 0
-    frame.sbvert.wheelsensitivity = 1
-    frame.sbhorz.stepctrlfact = 0
-    frame.sbhorz.wheelsensitivity = 1
     frame.localprops = [frl_levelo, frl_colorclient]
     taborder = 1
     popupmenu = tpopupmenu1
@@ -264,6 +254,8 @@ object objectinspectorfo: tobjectinspectorfo
       onkeydown = valueskeydown
       onsetvalue = valuessetvalue
       onclientmouseevent = valuesonmouseevent
+      onpaintimage = paintimageexe
+      onextendimage = extendimageexe
       onbuttonaction = valuesbuttonaction
       onupdaterowvalues = valueupdaterowvalue
       dropdown.options = [deo_autodropdown, deo_keydropdown, deo_cliphint]

@@ -127,6 +127,8 @@ type
  
 function colordialog(var acolor: colorty): modalresultty;
 //threadsafe
+procedure paintcolorimage(const sender: twidget; const canvas: tcanvas;
+                                                    const acolor: colorty);
 
 implementation
 uses
@@ -434,26 +436,41 @@ begin
  result.bottom:= 0;
 end;
 
-procedure tcustomcoloredit.paintimage(const canvas: tcanvas);
+procedure paintcolorimage(const sender: twidget; const canvas: tcanvas;
+                                                      const acolor: colorty);
 var
  rect1: rectty;
+begin
+ with sender do begin
+  if canvas.drawinfopo <> nil then begin
+   with cellinfoty(canvas.drawinfopo^) do begin
+    rect1:= innerrect;
+   end;
+  end
+  else begin
+   rect1:= innerclientrect;
+  end;
+  rect1.x:= 1;
+  dec(rect1.cy);
+  rect1.cx:= rect1.cy;
+  canvas.fillrect(rect1,colorty(colortorgb(acolor)));
+  canvas.drawrect(rect1,cl_black);
+ end;
+end;
+
+procedure tcustomcoloredit.paintimage(const canvas: tcanvas);
+var
  co1: colorty;
 begin
  if canvas.drawinfopo <> nil then begin
   with cellinfoty(canvas.drawinfopo^) do begin
-   rect1:= innerrect;
    co1:= pcolorty(datapo)^;
   end;
  end
  else begin
-  rect1:= innerclientrect;
   co1:= value;
  end;
- rect1.x:= 1;
- dec(rect1.cy);
- rect1.cx:= rect1.cy;
- canvas.fillrect(rect1,colorty(colortorgb(co1)));
- canvas.drawrect(rect1,cl_black);
+ paintcolorimage(self,canvas,co1);
 end;
 
 procedure tcustomcoloredit.dochange;

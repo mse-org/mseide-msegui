@@ -3758,6 +3758,7 @@ begin
               deflaterect(clientrect,fimageframe),[al_ycentered]);
   end;
  end;
+ inherited;
 end;
 
 procedure tcustomdropdownlistedit.dochange;

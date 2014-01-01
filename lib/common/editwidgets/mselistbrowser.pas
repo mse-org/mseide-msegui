@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2014 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -480,6 +480,9 @@ type
  itemcanediteventty = procedure(const sender: tobject;
                   const aitem: tlistitem; var canedit: boolean) of object;
 
+ extendimageeventty = procedure(const sender: twidget;
+                           const cellinfopo: pcellinfoty; //nil for non cell call
+                    var aextend: sizety) of object;
  titemedit = class(tdataedit,iitemlist,ibutton)
   private
    fitemlist: tcustomitemeditlist;
@@ -491,6 +494,8 @@ type
    factiverow: integer;
    fcalcsize: sizety;
    foncheckcanedit: itemcanediteventty;
+   fonextendimage: extendimageeventty;
+                      
    function getitemlist: titemeditlist;
    procedure setitemlist(const Value: titemeditlist);
    function getitems(const index: integer): tlistitem;
@@ -507,6 +512,8 @@ type
    fvalue: tlistitem;
 
    function fieldcanedit: boolean;
+   procedure doextendimage(const cellinfopo: pcellinfoty; 
+                                        var aextend: sizety); virtual;
    procedure getautopaintsize(var asize: sizety); override;
    procedure getautocellsize(const acanvas: tcanvas;
                                       var asize: sizety); override;
@@ -605,6 +612,13 @@ type
    property textflags default defaultitemedittextflags;
    property textflagsactive default defaultitemedittextflagsactive;
    property onchange;
+   property onbeforepaint;
+   property onpaintbackground;
+   property onpaint;
+   property onpaintimage;
+   property onextendimage: extendimageeventty read fonextendimage 
+                                                     write fonextendimage;
+   property onafterpaint;
    property onbuttonaction: buttoneventty read fonbuttonaction 
                                                    write fonbuttonaction;
    property onupdaterowvalues: itemindexeventty read fonupdaterowvalues 
@@ -2670,10 +2684,12 @@ end;
 procedure titemedit.drawcell(const canvas: tcanvas);
 begin
  with cellinfoty(canvas.drawinfopo^) do begin
+  doextendimage(canvas.drawinfopo,flayoutinfocell.imageextra);
   flayoutinfocell.rowindex:= cell.row;
   flayoutinfocell.textflags:= textflags;
   tlistitem(datapo^).drawcell(canvas);
  end;
+ paintimage(canvas);
 end;
 
 function titemedit.internaldatatotext(const data): msestring;
@@ -2837,6 +2853,7 @@ begin
   else begin
    bo1:= des_updatelayout in fstate;
    include(fstate,des_updatelayout);
+   doextendimage(nil,flayoutinfofocused.imageextra);
    fvalue.setupeditor(feditor,geteditfont,true);
    if not bo1 then begin
     exclude(fstate,des_updatelayout);
@@ -2847,6 +2864,9 @@ end;
 
 procedure titemedit.dopaintforeground(const acanvas: tcanvas);
 begin
+ if fvalue <> nil then begin
+  doextendimage(acanvas.drawinfopo,flayoutinfofocused.imageextra);
+ end;
  inherited;
  if fvalue <> nil then begin
   if fgridintf <> nil then begin
@@ -3165,6 +3185,15 @@ begin
   foncheckcanedit(self,fvalue,result);
  end;
 end;
+procedure titemedit.doextendimage(const cellinfopo: pcellinfoty; 
+                                                     var aextend: sizety); 
+begin
+ if canevent(tmethod(fonextendimage)) then begin
+  aextend:= nullsize;
+  fonextendimage(self,cellinfopo,aextend);
+ end;
+end;                                                                      
+
 
 procedure titemedit.getautopaintsize(var asize: sizety);
 begin
@@ -3173,7 +3202,7 @@ begin
   fvalue.drawimage(flayoutinfofocused,nil);
  end;
  with flayoutinfofocused do begin
-  asize.cx:= asize.cx + imagerect.cx + imageextend.cx + imageextra.cx +
+  asize.cx:= asize.cx + imagerect.cx + imageextend.cx + {imageextra.cx +}
                      treelevelshift; //???
   if asize.cy < minsize.cy then begin
    asize.cy:= minsize.cy;
