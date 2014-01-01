@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2014 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -59,7 +59,7 @@ type
 // int64 = int64;
 // pint64 = ^int64;
  float32 = single;
- pflot32 = ^float32;
+ pfloat32 = ^float32;
  float64 = double;
  pfloat64 = ^float64;
  float = float64;
