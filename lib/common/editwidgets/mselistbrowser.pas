@@ -612,13 +612,13 @@ type
    property textflags default defaultitemedittextflags;
    property textflagsactive default defaultitemedittextflagsactive;
    property onchange;
-   property onbeforepaint;
-   property onpaintbackground;
-   property onpaint;
+//   property onbeforepaint;
+//   property onpaintbackground;
+//   property onpaint;
    property onpaintimage;
    property onextendimage: extendimageeventty read fonextendimage 
                                                      write fonextendimage;
-   property onafterpaint;
+//   property onafterpaint;
    property onbuttonaction: buttoneventty read fonbuttonaction 
                                                    write fonbuttonaction;
    property onupdaterowvalues: itemindexeventty read fonupdaterowvalues 
