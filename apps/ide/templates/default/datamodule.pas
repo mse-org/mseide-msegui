@@ -2,7 +2,7 @@ unit ${%UNITNAME%};
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- mseglob,mseapplication,mseclasses,msedatamodules;
+ msetypes,mseglob,mseapplication,mseclasses,msedatamodules;
 
 type
  t${%FORMNAME%} = class(tmsedatamodule)

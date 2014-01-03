@@ -440,6 +440,7 @@ procedure paintcolorimage(const sender: twidget; const canvas: tcanvas;
                                                       const acolor: colorty);
 var
  rect1: rectty;
+ co1: colorty;
 begin
  with sender do begin
   if canvas.drawinfopo <> nil then begin
@@ -454,7 +455,11 @@ begin
   dec(rect1.cy);
   rect1.cx:= rect1.cy;
   canvas.fillrect(rect1,colorty(colortorgb(acolor)));
-  canvas.drawrect(rect1,cl_black);
+  co1:= cl_black;
+  if acolor and speccolormask = cl_functional then begin
+   co1:= cl_gray;
+  end;
+  canvas.drawrect(rect1,co1);
  end;
 end;
 
