@@ -809,6 +809,7 @@ begin
     str1:= replacefileext(page1.filepath,formfileext);
     po1:= designer.modules.findmodule(str1);
     if po1 <> nil then begin
+     createmodulemenuitem(po1);
      po1^.designform.activate(true);
      page1:= nil;
     end
@@ -817,6 +818,7 @@ begin
      if page1 = nil then begin //mfm not loaded in editor
       po1:= designer.loadformfile(str1,false);      
       if po1 <> nil then begin
+       createmodulemenuitem(po1);
        po1^.designform.activate(true);
       end;
      end;
