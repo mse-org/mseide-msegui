@@ -1990,7 +1990,7 @@ end;
 
 procedure tskincontroller.setdataedit_face(const avalue: tfacecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(fdataedit.svwidget.svframe));
+ setlinkedvar(avalue,tmsecomponent(fdataedit.svwidget.svface));
 end;
 
 procedure tskincontroller.setdataedit_frame(const avalue: tframecomp);
