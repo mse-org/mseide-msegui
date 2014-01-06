@@ -3,7 +3,7 @@ unit ${%UNITNAME%};
 interface
 uses
  msetypes,mseglob,mseguiglob,mseapplication,msestat,msemenus,msegui,
- msegraphics,msegraphutils,mseevent,mseclasses,mseforms,
+ msegraphics,msegraphutils,mseevent,mseclasses,msewidgets,mseforms,
  msereport;
 
 type

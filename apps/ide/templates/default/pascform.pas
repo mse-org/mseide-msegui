@@ -3,7 +3,8 @@ unit ${%UNITNAME%};
 interface
 uses
  msetypes,mseglob,mseguiglob,mseguiintf,mseapplication,msestat,msemenus,msegui,
- msegraphics,msegraphutils,mseevent,mseclasses,mseforms,msepascalscript;
+ msegraphics,msegraphutils,mseevent,mseclasses,msewidgets,mseforms,
+ msepascalscript;
 type
  t${%FORMNAME%} = class(tpascform)
  end;
