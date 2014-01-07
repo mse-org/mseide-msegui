@@ -2624,7 +2624,11 @@ begin
  with awindow,win32windowty(awindow.platformdata).d,options do begin
   ownerwindow:= applicationwindow;
   windowstyleex:= 0;
-//  if wo_popup in options then begin
+ {
+  if wo_popup in options then begin //does not work in win2000
+   windowstyleex:= windowstyleex or ws_ex_noactivate;
+  end;
+ }
   if wo_notaskbar in options then begin
    showwindow(applicationwindow,sw_hide);
   end;    

@@ -106,7 +106,7 @@ type
                    wo_popupmenu,wo_tooltip,wo_notification,wo_combo,
                    wo_dnd,
                    wo_noframe, //uses motif hints on linux
-                   wo_overrideredirect,
+                   wo_noactivate,wo_overrideredirect,
                    wo_embedded,
                    wo_buttonendmodal,wo_groupleader,
                    wo_taskbar,    //win32 only

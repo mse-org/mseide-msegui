@@ -12889,7 +12889,15 @@ begin
      exit;
     end;
     if activewindowbefore <> nil then begin
-     activewindowbefore.deactivate;
+     bo1:= tws_activating in activewindowbefore.fstate;
+     include(fstate,tws_activating);
+     try
+      activewindowbefore.deactivate;
+     finally
+      if not bo1 and (activewindowbefore <> nil) then begin
+       exclude(activewindowbefore.fstate,tws_activating);
+      end;
+     end;
     end;
     if appinst.factivewindow = nil then begin
      if not (ws_active in fownerwidget.fwidgetstate) then begin
@@ -12998,14 +13006,18 @@ begin
   if appinst.factivewindow = self then begin
    inc(factivecount);
    activecountbefore:= factivecount;
-   appinst.fonwindowactivechangelist.dowindowchange(appinst.factivewindow,nil);
+   if not (tws_activating in fstate) then begin
+    appinst.fonwindowactivechangelist.dowindowchange(appinst.factivewindow,nil);
+   end;
    if factivecount = activecountbefore then begin
     widget1:= nil;
     if appinst.factivewindow <> nil then begin
      widget1:= appinst.factivewindow.focusedwidget;
     end;
     try
-     appinst.fonwidgetactivechangelist.dowidgetchange(widget1,nil);
+     if not (tws_activating in fstate) then begin
+      appinst.fonwidgetactivechangelist.dowidgetchange(widget1,nil);
+     end;
     finally
      if factivecount = activecountbefore then begin
       appinst.factivewindow:= nil;
@@ -15554,7 +15566,19 @@ begin
    debugwriteln('setwindowfocus '+window.fownerwidget.name+' '+hextostr(winid,8));
 {$endif}
    if (fmodalwindow = nil) or (fmodalwindow = window) then begin
-    window.activated;
+    if wo_noactivate in window.options then begin
+     if window.transientfor <> nil then begin
+      gui_setwindowfocus(window.transientfor.winid);
+     end
+     else begin
+      if activewindow <> nil then begin
+       gui_setwindowfocus(activewindow.winid);
+      end;
+     end;
+    end
+    else begin
+     window.activated;
+    end;
    end
    else begin
     if fmodalwindow.fwindow.id <> 0 then begin
