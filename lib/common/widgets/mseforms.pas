@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2014 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -122,7 +122,8 @@ type
    fonstatupdate: statupdateeventty;
    fstatvarname: msestring;
    fonstatwrite: statwriteeventty;
-   fonwindowactivechanged: activechangeeventty;
+   fonwidgetactivechanged: widgetchangeeventty;
+   fonwindowactivechanged: windowchangeeventty;
    fonwindowdestroyed: windoweventty;
    fonapplicationactivechanged: booleaneventty;
    fonfontheightdelta: fontheightdeltaeventty;
@@ -188,6 +189,7 @@ type
    procedure doterminated(const sender: tobject); virtual;
    procedure doterminatequery(var terminate: boolean); virtual;
    procedure doidle(var again: boolean); virtual;
+   procedure dowidgetactivechanged(const oldwidget,newwidget: twidget); virtual;
    procedure dowindowactivechanged(const oldwindow,newwindow: twindow); virtual;
    procedure dowindowdestroyed(const awindow: twindow); virtual;
    procedure doapplicationactivechanged(const avalue: boolean); virtual;
@@ -299,7 +301,10 @@ type
    property onstatafterwrite: notifyeventty read fonstatafterwrite 
                                                write fonstatafterwrite;
 
-   property onwindowactivechanged: activechangeeventty read fonwindowactivechanged write fonwindowactivechanged;
+   property onwidgetactivechanged: widgetchangeeventty 
+                     read fonwidgetactivechanged write fonwidgetactivechanged;
+   property onwindowactivechanged: windowchangeeventty 
+                      read fonwindowactivechanged write fonwindowactivechanged;
    property onwindowdestroyed: windoweventty read fonwindowdestroyed write fonwindowdestroyed;
    property onapplicationactivechanged: booleaneventty 
                    read fonapplicationactivechanged write fonapplicationactivechanged;
@@ -346,6 +351,7 @@ type
    property onclosequery;
    property onclose;
    property onidle;
+   property onwidgetactivechanged;
    property onwindowactivechanged;
    property onwindowdestroyed;
    property onapplicationactivechanged;
@@ -478,6 +484,7 @@ type
    property onclosequery;
    property onclose;
    property onidle;
+   property onwidgetactivechanged;
    property onwindowactivechanged;
    property onwindowdestroyed;
    property onapplicationactivechanged;
@@ -895,7 +902,9 @@ begin
  application.unregisteronterminated({$ifdef FPC}@{$endif}doterminated);
  application.unregisteronterminate({$ifdef FPC}@{$endif}doterminatequery);
  application.unregisteronidle({$ifdef FPC}@{$endif}doidle);
- application.unregisteronactivechanged({$ifdef FPC}@{$endif}dowindowactivechanged);
+ application.unregisteronwidgetactivechanged(
+                            {$ifdef FPC}@{$endif}dowidgetactivechanged);
+ application.unregisteronwindowactivechanged({$ifdef FPC}@{$endif}dowindowactivechanged);
  application.unregisteronwindowdestroyed({$ifdef FPC}@{$endif}dowindowdestroyed);
  application.unregisteronapplicationactivechanged(
        {$ifdef FPC}@{$endif}doapplicationactivechanged);
@@ -910,7 +919,8 @@ begin
  application.registeronterminated({$ifdef FPC}@{$endif}doterminated);
  application.registeronterminate({$ifdef FPC}@{$endif}doterminatequery);
  application.registeronidle({$ifdef FPC}@{$endif}doidle);
- application.registeronactivechanged({$ifdef FPC}@{$endif}dowindowactivechanged);
+ application.registeronwidgetactivechanged({$ifdef FPC}@{$endif}dowidgetactivechanged);
+ application.registeronwindowactivechanged({$ifdef FPC}@{$endif}dowindowactivechanged);
  application.registeronwindowdestroyed({$ifdef FPC}@{$endif}dowindowdestroyed);
  application.registeronapplicationactivechanged(
        {$ifdef FPC}@{$endif}doapplicationactivechanged);
@@ -1146,7 +1156,16 @@ begin
  end;
 end;
 
-procedure tcustommseform.dowindowactivechanged(const oldwindow,newwindow: twindow);
+procedure tcustommseform.dowidgetactivechanged(const oldwidget,
+                                                      newwidget: twidget);
+begin
+ if canevent(tmethod(fonwidgetactivechanged)) then begin
+  fonwidgetactivechanged(oldwidget,newwidget);
+ end;
+end;
+
+procedure tcustommseform.dowindowactivechanged(const oldwindow,
+                                                      newwindow: twindow);
 begin
  if canevent(tmethod(fonwindowactivechanged)) then begin
   fonwindowactivechanged(oldwindow,newwindow);

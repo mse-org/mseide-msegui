@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2014 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -2173,8 +2173,8 @@ type
  windowaty = array[0..0] of twindow;
  pwindowaty = ^windowaty;
 
- activechangeeventty = procedure(const oldwindow,newwindow: twindow) of object;
- focuschangeeventty = procedure(const oldwidget,newwidget: twidget) of object;
+ windowchangeeventty = procedure(const oldwindow,newwindow: twindow) of object;
+ widgetchangeeventty = procedure(const oldwidget,newwidget: twidget) of object;
  windoweventty = procedure(const awindow: twindow) of object;
  winideventty = procedure(const awinid: winidty) of object;
  booleaneventty = procedure(const avalue: boolean) of object;
@@ -2438,8 +2438,10 @@ type
    procedure unregisteronkeypress(const method: keyeventty);
    procedure registeronshortcut(const method: keyeventty);
    procedure unregisteronshortcut(const method: keyeventty);
-   procedure registeronactivechanged(const method: activechangeeventty);
-   procedure unregisteronactivechanged(const method: activechangeeventty);
+   procedure registeronwidgetactivechanged(const method: widgetchangeeventty);
+   procedure unregisteronwidgetactivechanged(const method: widgetchangeeventty);
+   procedure registeronwindowactivechanged(const method: windowchangeeventty);
+   procedure unregisteronwindowactivechanged(const method: windowchangeeventty);
    procedure registeronwindowdestroyed(const method: windoweventty);
    procedure unregisteronwindowdestroyed(const method: windoweventty);
    procedure registeronwiniddestroyed(const method: winideventty);
@@ -2731,9 +2733,14 @@ type
    procedure dokeyevent(const sender: twidget; var info: keyeventinfoty);
  end;
 
- tonactivechangelist = class(tmethodlist)
+ tonwidgetchangelist = class(tmethodlist)
   protected
-   procedure doactivechange(const oldwindow,newwindow: twindow);
+   procedure dowidgetchange(const oldwidget,newwidget: twidget);
+ end;
+
+ tonwindowchangelist = class(tmethodlist)
+  protected
+   procedure dowindowchange(const oldwindow,newwindow: twindow);
  end;
 
  tonwindoweventlist = class(tmethodlist)
@@ -2778,7 +2785,8 @@ type
   private
    fonkeypresslist: tonkeyeventlist;
    fonshortcutlist: tonkeyeventlist;
-   fonactivechangelist: tonactivechangelist;
+   fonwidgetactivechangelist: tonwidgetchangelist;
+   fonwindowactivechangelist: tonwindowchangelist;
    fonwindowdestroyedlist: tonwindoweventlist;
    fonwiniddestroyedlist: tonwinideventlist;
    fonapplicationactivechangedlist: tonapplicationactivechangedlist;
@@ -12840,6 +12848,7 @@ var
  int1: integer;
  bo1: boolean;
  window1: twindow;
+ widget1: twidget;
  
 begin
 {$ifdef mse_debugwindowfocus}
@@ -12857,7 +12866,8 @@ begin
   if appinst.finactivewindow = self then begin
    appinst.finactivewindow:= nil;
   end;
-  activewindowbefore:= appinst.factivewindow;
+  activewindowbefore:= nil;
+  setlinkedvar(appinst.factivewindow,tlinkedobject(activewindowbefore));
   show(windowevent);
   widgetar:= nil; //compilerwarning
   if activewindowbefore <> self then begin
@@ -12867,9 +12877,6 @@ begin
     if hastransientfor then begin
      window1:= topmodaltransientfor;
      if window1 <> nil then begin
-//      if not window1.fowner.visible then begin
-//       window1.fowner.internalshow(ml_none,nil,false,true);
-//      end;
       window1.internalactivate(false,force);
       exit;
      end;
@@ -12900,7 +12907,6 @@ begin
         end;
        end;
       end;
-//      appinst.factivewindow:= self;
       gui_setimefocus(fwindow);
       if not windowevent then begin
        setwinfoc;
@@ -12918,7 +12924,17 @@ begin
       end;
      end;
     end;
-    appinst.fonactivechangelist.doactivechange(activewindowbefore,self);
+    appinst.fonwindowactivechangelist.dowindowchange(activewindowbefore,self);
+    if activecountbefore = factivecount then begin
+     if activewindowbefore = nil then begin
+      widget1:= nil;
+     end
+     else begin
+      widget1:= activewindowbefore.focusedwidget;
+     end;
+     appinst.fonwidgetactivechangelist.dowidgetchange(widget1,
+                                                           self.focusedwidget);
+    end;
    end
    else begin
     appinst.fwantedactivewindow:= self;
@@ -12929,6 +12945,7 @@ begin
   end;
  finally
   dec(factivating);
+  setlinkedvar(nil,tlinkedobject(activewindowbefore));
  end;
 {$ifdef mse_debugwindowfocus}
  debugwindow('-internalactivate ',fwindow.id);
@@ -12971,6 +12988,7 @@ end;
 procedure twindow.deactivate;
 var
  activecountbefore: longword;
+ widget1: twidget;
 begin
  if appinst.ffocuslockwindow = self then begin
   appinst.ffocuslockwindow:= nil;
@@ -12980,10 +12998,20 @@ begin
   if appinst.factivewindow = self then begin
    inc(factivecount);
    activecountbefore:= factivecount;
-   appinst.fonactivechangelist.doactivechange(appinst.factivewindow,nil);
+   appinst.fonwindowactivechangelist.dowindowchange(appinst.factivewindow,nil);
    if factivecount = activecountbefore then begin
-    appinst.factivewindow:= nil;
-    gui_unsetimefocus(fwindow);
+    widget1:= nil;
+    if appinst.factivewindow <> nil then begin
+     widget1:= appinst.factivewindow.focusedwidget;
+    end;
+    try
+     appinst.fonwidgetactivechangelist.dowidgetchange(widget1,nil);
+    finally
+     if factivecount = activecountbefore then begin
+      appinst.factivewindow:= nil;
+      gui_unsetimefocus(fwindow);
+     end;
+    end;
    end;
   end;
  end
@@ -13680,7 +13708,8 @@ begin
   try
    inc(ffocuscount);
    focuscountbefore:= ffocuscount;
-   focusedwidgetbefore:= ffocusedwidget;
+   focusedwidgetbefore:= nil;
+   setlinkedvar(ffocusedwidget,tmsecomponent(focusedwidgetbefore));
    widget1:= ffocusedwidget;
    if widget1 <> nil then begin
     if not (csdestroying in widget1.componentstate) then begin
@@ -13753,10 +13782,16 @@ begin
     fenteredwidget:= nil;
    end;
    fownerwidget.dofocuschanged(focusedwidgetbefore,ffocusedwidget);
+   if (appinst.factivewindow = self) and 
+                              (focuscount = focuscountbefore) then begin
+    appinst.fonwidgetactivechangelist.dowidgetchange(
+                                focusedwidgetbefore,ffocusedwidget);
+   end;
   finally
    if widget <> nil then begin
     dec(ffocusing);
    end;
+   setlinkedvar(nil,tmsecomponent(focusedwidgetbefore));
   end;
  end;
 end;
@@ -14749,13 +14784,24 @@ begin
  end;
 end;
 
-{ tonactivechangelist}
+{ tonwidgetchangelist}
 
-procedure tonactivechangelist.doactivechange(const oldwindow,newwindow: twindow);
+procedure tonwidgetchangelist.dowidgetchange(const oldwidget,newwidget: twidget);
 begin
  factitem:= 0;
  while factitem < fcount do begin
-  activechangeeventty(getitempo(factitem)^)(oldwindow,newwindow);
+  widgetchangeeventty(getitempo(factitem)^)(oldwidget,newwidget);
+  inc(factitem);
+ end;
+end;
+
+{ tonwindowchangelist}
+
+procedure tonwindowchangelist.dowindowchange(const oldwindow,newwindow: twindow);
+begin
+ factitem:= 0;
+ while factitem < fcount do begin
+  windowchangeeventty(getitempo(factitem)^)(oldwindow,newwindow);
   inc(factitem);
  end;
 end;
@@ -14908,7 +14954,8 @@ begin
 // inherited;
  fonkeypresslist:= tonkeyeventlist.create;
  fonshortcutlist:= tonkeyeventlist.create;
- fonactivechangelist:= tonactivechangelist.create;
+ fonwidgetactivechangelist:= tonwidgetchangelist.create;
+ fonwindowactivechangelist:= tonwindowchangelist.create;
  fonwindowdestroyedlist:= tonwindoweventlist.create;
  fonwiniddestroyedlist:= tonwinideventlist.create;
  fonapplicationactivechangedlist:= tonapplicationactivechangedlist.create;
@@ -14938,7 +14985,8 @@ begin
 // fwindows.free;
  fonkeypresslist.free;
  fonshortcutlist.free;
- fonactivechangelist.free;
+ fonwidgetactivechangelist.free;
+ fonwindowactivechangelist.free;
  fonwindowdestroyedlist.free;
  fonwiniddestroyedlist.free;
  fonapplicationactivechangedlist.free;
@@ -17517,16 +17565,28 @@ begin
  tinternalapplication(self).fonshortcutlist.remove(tmethod(method));
 end;
 
-procedure tguiapplication.registeronactivechanged(
-                                           const method: activechangeeventty);
+procedure tguiapplication.registeronwidgetactivechanged(
+                                           const method: widgetchangeeventty);
 begin
- tinternalapplication(self).fonactivechangelist.add(tmethod(method));
+ tinternalapplication(self).fonwidgetactivechangelist.add(tmethod(method));
 end;
 
-procedure tguiapplication.unregisteronactivechanged(
-                                            const method: activechangeeventty);
+procedure tguiapplication.unregisteronwidgetactivechanged(
+                                            const method: widgetchangeeventty);
 begin
- tinternalapplication(self).fonactivechangelist.remove(tmethod(method));
+ tinternalapplication(self).fonwidgetactivechangelist.remove(tmethod(method));
+end;
+
+procedure tguiapplication.registeronwindowactivechanged(
+                                           const method: windowchangeeventty);
+begin
+ tinternalapplication(self).fonwindowactivechangelist.add(tmethod(method));
+end;
+
+procedure tguiapplication.unregisteronwindowactivechanged(
+                                            const method: windowchangeeventty);
+begin
+ tinternalapplication(self).fonwindowactivechangelist.remove(tmethod(method));
 end;
 
 procedure tguiapplication.registeronwindowdestroyed(

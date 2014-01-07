@@ -698,7 +698,7 @@ type
    fonclosequery: queryeventty;
    fonevent: eventeventty;
    fonasyncevent: asynceventeventty;
-   fonfocusedwidgetchanged: focuschangeeventty;
+   fonfocusedwidgetchanged: widgetchangeeventty;
    fonpaintbackground: painteventty;
 
    procedure setpopupmenu(const Value: tpopupmenu);
@@ -764,7 +764,7 @@ type
    property onactivate: notifyeventty read fonactivate write fonactivate;
    property ondeactivate: notifyeventty read fondeactivate write fondeactivate;
 
-   property onfocusedwidgetchanged: focuschangeeventty 
+   property onfocusedwidgetchanged: widgetchangeeventty
                      read fonfocusedwidgetchanged write fonfocusedwidgetchanged;
 
    property onmouseevent: mouseeventty read fonmouseevent write fonmouseevent;

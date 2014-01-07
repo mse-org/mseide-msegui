@@ -591,7 +591,7 @@ const
 type
  tgroupbox = class(tscalingwidget)
   private
-   fonfocusedwidgetchanged: focuschangeeventty;
+   fonfocusedwidgetchanged: widgetchangeeventty;
   protected
    procedure internalcreateframe; override;
    procedure dofocuschanged(const oldwidget,newwidget: twidget); override;
@@ -601,7 +601,7 @@ type
    procedure initnewcomponent(const ascale: real); override;
   published
    property optionswidget default defaultgroupboxoptionswidget;
-   property onfocusedwidgetchanged: focuschangeeventty 
+   property onfocusedwidgetchanged: widgetchangeeventty 
                      read fonfocusedwidgetchanged write fonfocusedwidgetchanged;
  end;
 

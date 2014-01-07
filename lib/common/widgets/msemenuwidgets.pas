@@ -70,7 +70,8 @@ type
   protected
    flayout: menulayoutinfoty;
    flocalframeandface: boolean;
-   procedure objectevent(const sender: tobject; const event: objecteventty); override;
+   procedure objectevent(const sender: tobject; 
+                        const event: objecteventty); override;
    function transientforwindoworwindow: twindow;
    function translatetoscreen(const value: pointty): pointty; virtual;
    procedure updatelayout; virtual;
