@@ -549,8 +549,7 @@ begin
    end;
    size:= sourcefo.hintsize;
    formonresize(nil);
-   widgetrect:= placepopuprect(self.window,rect1,
-       cp_bottomleft,size);
+   widgetrect:= placepopuprect(self.window,rect1,cp_bottomleft,size);
    show(false,self.window);
   end;
  end

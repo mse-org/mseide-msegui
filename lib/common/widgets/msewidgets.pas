@@ -1277,8 +1277,12 @@ function placepopuprect(const awindow: twindow; const adest: rectty; //screenori
                  const placement: captionposty; const asize: sizety): rectty; overload;
  //placement actually only cp_bottomleft and cp_center
  //todo
-function placepopuprect(const awidget: twidget; const adest: rectty; //clientorig
-                 const placement: captionposty; const asize: sizety): rectty; overload;
+function placepopuprect(const awidget: twidget;
+           const adest: rectty; //widgetorig
+         const placement: captionposty; const asize: sizety): rectty; overload;
+function placeclientpopuprect(const awidget: twidget;
+           const adest: rectty; //clientorig
+         const placement: captionposty; const asize: sizety): rectty; overload;
 procedure getwindowicon(const abitmap: tmaskedbitmap; out aicon,amask: pixmapty;
                         const anodefault: boolean = false);
 
@@ -1555,6 +1559,14 @@ begin
 end;
 
 function placepopuprect(const awidget: twidget; const adest: rectty; //widgetorig
+                 const placement: captionposty; const asize: sizety): rectty;
+begin
+ result:= placepopuprect(awidget.window,moverect(adest,
+               translatewidgetpoint(nullpoint,awidget,nil)),placement,asize);
+end;
+
+function placeclientpopuprect(const awidget: twidget;
+                 const adest: rectty; //clientorig
                  const placement: captionposty; const asize: sizety): rectty;
 begin
  result:= placepopuprect(awidget.window,moverect(adest,
