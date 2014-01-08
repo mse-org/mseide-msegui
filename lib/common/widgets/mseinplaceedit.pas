@@ -1491,6 +1491,19 @@ begin
        subpoint1(po1,textindextomousepos(int1));
       end;
       subpoint1(pos,po1);
+      if pos.x < ftextrect.x then begin
+       pos.x:= ftextrect.x;
+      end;
+      if pos.x > ftextrect.x + ftextrect.cx then begin
+       pos.x:= ftextrect.x + ftextrect.cx;
+      end;
+      if pos.y < ftextrect.y then begin
+       pos.y:= ftextrect.y;
+      end;
+      if pos.y > ftextrect.y + ftextrect.cy then begin
+       pos.y:= ftextrect.y + ftextrect.cy;
+      end;
+      {
       po1:= subpoint(ftextrect.pos,pos);
       if (po1.x > 0) or (po1.y > 0) then begin //shift cursor in textrect
        if po1.x < 0 then begin
@@ -1509,9 +1522,9 @@ begin
        if (po1.x <> 0) or (po1.y <> 0) then begin
         addpoint1(finfo.dest.pos,po1);
         fowner.scrollcaret(po1);
-        internalupdatecaret(true);
        end;
       end;
+      }
      end;
     end;
     ek_buttonrelease,ek_mousecaptureend: begin
