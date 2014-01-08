@@ -1506,8 +1506,11 @@ begin
        if po1.y > ftextrect.y - finfo.dest.pos.y then begin
         po1.y:= ftextrect.y - finfo.dest.pos.y;
        end;
-       addpoint1(finfo.dest.pos,po1);
-       fowner.scrollcaret(po1);
+       if (po1.x <> 0) or (po1.y <> 0) then begin
+        addpoint1(finfo.dest.pos,po1);
+        fowner.scrollcaret(po1);
+        internalupdatecaret(true);
+       end;
       end;
      end;
     end;
