@@ -526,6 +526,8 @@ type
                                        const info: mouseeventinfoty); virtual;
    function needsactiveinvalidate: boolean;
    function needsmouseinvalidate: boolean;
+   function needsclickinvalidate: boolean;
+   function needsmouseenterinvalidate: boolean;
    procedure activechanged; virtual;
    function needsfocuspaint: boolean; virtual;
    procedure checkminscrollsize(var asize: sizety); virtual;
@@ -3713,6 +3715,34 @@ begin
  end;
 end;
 
+function tcustomframe.needsclickinvalidate: boolean;
+begin
+ with fi do begin
+  result:= (frameimage_list <> nil) and 
+           ((frameimage_offsets.clicked <> 0) or 
+            (frameimage_offsets.activeclicked <> 
+                                   frameimage_offsets.active)) or
+          (frameface_list <> nil) and 
+           ((frameface_offsets.clicked <> 0) or 
+            (frameface_offsets.activeclicked <> 
+                                   frameface_offsets.active));
+ end;
+end;
+
+function tcustomframe.needsmouseenterinvalidate: boolean;
+begin
+ with fi do begin
+  result:= ((frameimage_list <> nil) and 
+             ((frameimage_offsets.mouse <> 0) or 
+              (frameimage_offsets.activemouse <> 
+                            frameimage_offsets.active))) or
+            ((frameface_list <> nil) and 
+               ((frameface_offsets.mouse <> 0) or 
+                (frameface_offsets.activemouse <> 
+                            frameface_offsets.active)));
+ end;
+end;
+      
 procedure tcustomframe.activechanged;
 begin
  if needsactiveinvalidate then begin
@@ -9144,17 +9174,8 @@ begin
      end;
     end;
     ek_clientmouseleave: begin
-     if (fframe <> nil) then begin
-      with fframe.fi do begin
-       if ((frameimage_list <> nil) and 
-               ((frameimage_offsets.mouse <> 0) or 
-                (frameimage_offsets.activemouse <> 0))) or 
-          ((frameface_list <> nil) and 
-               ((frameface_offsets.mouse <> 0) or 
-                (frameface_offsets.activemouse <> 0))) then begin
-        invalidatewidget;
-       end;
-      end;
+     if (fframe <> nil) and frame.needsmouseenterinvalidate() then begin
+      invalidatewidget;
      end;
      if appinst.fmousewidget = self then begin
       if fparentwidget <> nil then begin
@@ -9168,17 +9189,8 @@ begin
      doclientmouseevent;
     end;
     ek_clientmouseenter: begin
-     if (fframe <> nil) then begin
-      with fframe.fi do begin
-       if ((frameimage_list <> nil) and 
-               ((frameimage_offsets.mouse <> 0) or 
-                (frameimage_offsets.activemouse <> 0))) or
-          ((frameface_list <> nil) and 
-               ((frameface_offsets.mouse <> 0) or 
-                (frameface_offsets.activemouse <> 0))) then begin
-        invalidatewidget;
-       end;
-      end;
+     if (fframe <> nil) and fframe.needsmouseenterinvalidate() then begin
+      invalidatewidget;
      end;
      updatecursorshape(info.pos){(true)};
      doclientmouseevent;
@@ -9186,17 +9198,8 @@ begin
     ek_buttonpress: begin
      if button = mb_left then begin
       include(fwidgetstate,ws_lclicked);
-      if (fframe <> nil) then begin
-       with fframe.fi do begin
-        if ((frameimage_list <> nil) and 
-                ((frameimage_offsets.clicked <> 0) or 
-                 (frameimage_offsets.activeclicked <> 0)) or
-           (frameface_list <> nil) and 
-                ((frameface_offsets.clicked <> 0) or 
-                 (frameface_offsets.activeclicked <> 0))) then begin
-         invalidatewidget;
-        end;
-       end;
+      if (fframe <> nil) and fframe.needsclickinvalidate() then begin
+       invalidatewidget;
       end;
      end;
      if button = mb_middle then begin
@@ -9219,17 +9222,9 @@ begin
      end;
     end;
     ek_buttonrelease: begin
-     if (button = mb_left) and (fframe <> nil) then begin
-      with fframe.fi do begin
-       if (frameimage_list <> nil) and 
-               ((frameimage_offsets.clicked <> 0) or 
-                (frameimage_offsets.activeclicked <> 0)) or
-          (frameface_list <> nil) and 
-               ((frameface_offsets.clicked <> 0) or 
-                (frameface_offsets.activeclicked <> 0)) then begin
-        invalidatewidget;
-       end;
-      end;
+     if (button = mb_left) and (fframe <> nil) and 
+                                fframe.needsclickinvalidate() then begin
+      invalidatewidget;
      end;
      if isclientmouseevent(info) then begin
       doclientmouseevent;
