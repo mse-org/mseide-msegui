@@ -3680,10 +3680,17 @@ end;
 function tcustomframe.needsactiveinvalidate: boolean;
 begin
  with fi do begin
-  result:= (frameimage_list <> nil) and 
+  result:=
+   (frameimage_list <> nil) and 
     ((frameimage_offsetactive <> 0) or 
-    (frameimage_offsetactivemouse <> frameimage_offsetmouse) or
-    (frameimage_offsetactiveclicked <> frameimage_offsetclicked));
+     (frameimage_offsetactivemouse <> frameimage_offsetmouse) or
+     (frameimage_offsetactiveclicked <> frameimage_offsetclicked)
+    ) or
+   (frameface_list <> nil) and 
+    ((frameface_offsetactive <> 0) or 
+    (frameface_offsetactivemouse <> frameface_offsetmouse) or
+    (frameface_offsetactiveclicked <> frameface_offsetclicked)
+    );
  end;
 end;
 
@@ -3692,10 +3699,16 @@ begin
  with fi do begin
   result:= (fs_needsmouseinvalidate in fstate) or
     (frameimage_list <> nil) and 
-    ((frameimage_offsetmouse <> 0) or 
-     (frameimage_offsetactivemouse <> 0) or
-     (frameimage_offsetactiveclicked <> 0) or
-     (frameimage_offsetclicked <> 0)
+     ((frameimage_offsetmouse <> 0) or 
+      (frameimage_offsetactivemouse <> 0) or
+      (frameimage_offsetactiveclicked <> 0) or
+      (frameimage_offsetclicked <> 0)
+     ) or
+    (frameface_list <> nil) and 
+     ((frameface_offsetmouse <> 0) or 
+      (frameface_offsetactivemouse <> 0) or
+      (frameface_offsetactiveclicked <> 0) or
+      (frameface_offsetclicked <> 0)
      );
  end;
 end;
