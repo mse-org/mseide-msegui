@@ -1971,7 +1971,6 @@ type
    fnormalwindowrect: rectty;
    fcaption: msestring;
    fscrollnotifylist: tnotifylist;
-//   fdestroyevent: pointer; //tdestroywindowevent
    fsyscontainer: syswindowty;
    fmodalwidget: twidget;
    fmodallevel: integer;
@@ -2111,9 +2110,12 @@ type
    procedure stackover(const predecessor: twindow);
        //stacking is performed in mainloop idle, nil means bottom
    function stackedunder(const avisible: boolean = false): twindow; //nil if top
-   function stackedover(const avisible: boolean = false): twindow;  //nil if bottom
+   function stackedover(const avisible: boolean = false): twindow; 
+                                                               //nil if bottom
    function hastransientfor: boolean;
-//   procedure removefocuslock;
+   function istransientfor(const base: twindow): boolean;
+                                //base can be nil
+   function defaulttransientfor: twindow;
 
    function capturemouse: boolean; //true for new grab
    procedure releasemouse;
@@ -2131,7 +2133,6 @@ type
    function normalwindowrect: rectty;
    property updateregion: regionty read fupdateregion.region;
    function updaterect: rectty;
-   function defaulttransientfor: twindow;
 
    procedure registermovenotification(sender: iobjectlink);
    procedure unregistermovenotification(sender: iobjectlink);
@@ -14061,17 +14062,24 @@ function twindow.hastransientfor: boolean;
 begin
  result:= ftransientforcount > 0;
 end;
-{
-procedure twindow.removefocuslock;
+
+function twindow.istransientfor(const base: twindow): boolean;
+var 
+ w1: twindow;
 begin
- with appinst do begin
-  if ffocuslockwindow = self then begin
-   ffocuslockwindow:= nil;
-   ffocuslocktransientfor:= nil;
+ result:= ftransientfor <> nil;
+ if result and (base <> nil) then begin
+  w1:= ftransientfor;
+  while w1 <> nil do begin
+   if w1 = base then begin
+    exit;
+   end;
+   w1:= w1.ftransientfor;
   end;
+  result:= false;
  end;
 end;
-}
+
 function twindow.capturemouse: boolean;
 begin
  result:= not (tws_grab in fstate);
@@ -14121,7 +14129,6 @@ begin
    if ftransientfor <> nil then begin
     inc(ftransientfor.ftransientforcount);
    end;
-//   getobjectlinker.setlinkedvar(iobjectlink(self),value,tlinkedobject(ftransientfor));
    if fwindow.id <> 0 then begin
     if value <> nil then begin
      gui_settransientfor(fwindow,value.winid);
@@ -15224,7 +15231,8 @@ begin
      abspos:= addpoint(window.fownerwidget.fwidgetrect.pos,pos);
     end;
     
-    if (fmodalwindow <> nil) and (window <> fmodalwindow) then begin
+    if (fmodalwindow <> nil) and (window <> fmodalwindow) and 
+                          not window.istransientfor(fmodalwindow) then begin
      addpoint1(info.mouse.pos,subpoint(window.fownerwidget.fwidgetrect.pos,
          fmodalwindow.fownerwidget.fwidgetrect.pos));
      window:= fmodalwindow;
