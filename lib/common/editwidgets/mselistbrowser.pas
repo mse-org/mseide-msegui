@@ -3198,7 +3198,7 @@ end;
 procedure titemedit.getautopaintsize(var asize: sizety);
 begin
  inherited;
- if fvalue <> nil then begin
+ if (fvalue <> nil) and (fvalue.owner <> nil) then begin
   fvalue.drawimage(flayoutinfofocused,nil);
  end;
  with flayoutinfofocused do begin
