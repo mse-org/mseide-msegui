@@ -4406,15 +4406,21 @@ end;
 
 function tcustomscrollboxframe.isdragstart(const sender: twidget;
                              const info: mouseeventinfoty): boolean;
+var
+ ss1: shiftstatesty;
 begin
  with info do begin
+  ss1:= (shiftstate*buttonshiftstatesmask)*fdragbuttons;
   result:= (oscr_drag in foptionsscroll) and 
-            (eventkind = ek_buttonpress) and 
-            ((shiftstate*buttonshiftstatesmask)*fdragbuttons <> []) and
+            (eventkind = ek_buttonpress) and (ss1 <> []) and
              pointinrect(translatewidgetpoint(pos,sender,fowner),fpaintrect) and 
                ((fclientrect.cx <> fpaintrect.cx) or 
                      (fclientrect.cy <> fpaintrect.cy));
- end;                    
+ end;
+ if result and not ((ss1 = [ss_middle]) or (sender = fowner)) then begin
+  twidget1(sender).updatemousestate(info);
+  result:= not (ws_wantmousebutton in twidget1(sender).fwidgetstate);
+ end;
 end;
 
 procedure tcustomscrollboxframe.checkminscrollsize(var asize: sizety);
