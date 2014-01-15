@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2014 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -198,14 +198,17 @@ type
 
 const
  defaultoptionsscroll = [oscr_mousewheel];
+ defaultdragbuttons = [ss_middle];
  
 type
  tcustomscrollframe = class(tcustomcaptionframe)
   private
+   fdragbuttons: shiftstatesty;
    procedure setsbhorz(const Value: tcustomscrollbar);
    function getsbhorz: tcustomscrollbar;
    procedure setsbvert(const Value: tcustomscrollbar);
    function getsbvert: tcustomscrollbar;
+   procedure setdragbuttons(const avalue: shiftstatesty);
   protected
    fhorz,fvert: tcustomscrollbar;
    foptionsscroll: optionsscrollty;
@@ -228,6 +231,8 @@ type
                                    const pagingreversed: boolean); virtual;
    property optionsscroll: optionsscrollty read foptionsscroll 
                              write foptionsscroll default defaultoptionsscroll;
+   property dragbuttons: shiftstatesty read fdragbuttons write setdragbuttons 
+                                       default defaultdragbuttons;
    property state: framestatesty read fstate;
    property sbhorz: tcustomscrollbar read getsbhorz write setsbhorz;
    property sbvert: tcustomscrollbar read getsbvert write setsbvert;
@@ -417,6 +422,7 @@ type
  tscrollboxframe = class(tcustomscrollboxframe)
   published
    property optionsscroll;
+   property dragbuttons;
    property clientwidth;
    property clientheight;
    property clientwidthmin;
@@ -2918,6 +2924,7 @@ constructor tcustomscrollframe.create(const intf: iscrollframe;
 begin
  intf.setstaticframe(true);
  foptionsscroll:= defaultoptionsscroll;
+ fdragbuttons:= defaultdragbuttons;
  inherited create(intf);
  fhorz:= getscrollbarclass(false).create(scrollintf,org_widget,
              {$ifdef FPC}@{$endif}updatestate);
@@ -3212,6 +3219,11 @@ end;
 procedure tcustomscrollframe.setsbvert(const Value: tcustomscrollbar);
 begin
  fvert.assign(Value);
+end;
+
+procedure tcustomscrollframe.setdragbuttons(const avalue: shiftstatesty);
+begin
+ fdragbuttons:= avalue * buttonshiftstatesmask;
 end;
 
 procedure tcustomscrollframe.activechanged;
@@ -4392,14 +4404,13 @@ begin
  end;
 end;
 
-
 function tcustomscrollboxframe.isdragstart(const sender: twidget;
                              const info: mouseeventinfoty): boolean;
 begin
  with info do begin
   result:= (oscr_drag in foptionsscroll) and 
             (eventkind = ek_buttonpress) and 
-            (shiftstate*buttonshiftstatesmask = [ss_middle]) and
+            ((shiftstate*buttonshiftstatesmask)*fdragbuttons <> []) and
              pointinrect(translatewidgetpoint(pos,sender,fowner),fpaintrect) and 
                ((fclientrect.cx <> fpaintrect.cx) or 
                      (fclientrect.cy <> fpaintrect.cy));

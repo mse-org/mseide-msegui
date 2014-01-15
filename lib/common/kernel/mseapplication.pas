@@ -408,6 +408,8 @@ var
  onfreedesigncomponent: componenteventty;
  ondesignvalidaterename: validaterenameeventty;
  ondesignexception: notifyeventty;
+
+procedure releaseandnil(var acomponent: tactcomponent);
  
 implementation
 uses
@@ -461,6 +463,15 @@ var
 
 threadvar
  exceptionactive: integer;
+
+procedure releaseandnil(var acomponent: tactcomponent);
+begin
+ if acomponent <> nil then begin
+  acomponent.release;
+  acomponent:= nil;
+ end;
+end;
+
  
 procedure designchanged(const acomponent: tcomponent); //for designer notify
 begin
