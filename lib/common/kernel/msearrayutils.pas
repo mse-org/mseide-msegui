@@ -68,6 +68,8 @@ procedure additem(var dest: lmsestringarty; const value: lmsestringty;
                              var count: integer); overload;
 procedure additem(var dest: integerarty; const value: integer;
                              var count: integer); overload;
+procedure additem(var dest: longwordarty; const value: longword;
+                             var count: integer); overload;
 procedure additem(var dest: realarty; const value: real;
                              var count: integer); overload;
 procedure additem(var dest: pointerarty; const value: pointer;
@@ -84,6 +86,7 @@ procedure additem(var dest: msestringarty; const value: msestring); overload;
 procedure additem(var dest: msestringararty; 
                              const value: msestringarty); overload;
 procedure additem(var dest: integerarty; const value: integer); overload;
+procedure additem(var dest: longwordarty; const value: longword); overload;
 procedure additem(var dest: longboolarty; const value: longbool); overload;
 procedure additem(var dest: booleanarty; const value: boolean); overload;
 procedure additem(var dest: realarty; const value: real); overload;
@@ -97,11 +100,16 @@ procedure deleteitem(var dest: realarty; index: integer); overload;
 procedure deleteitem(var dest: complexarty; index: integer); overload;
 procedure deleteitem(var dest: pointerarty; index: integer); overload;
 procedure deleteitem(var dest: winidarty; index: integer); overload;
-procedure insertitem(var dest: integerarty; index: integer; value: integer); overload;
-procedure insertitem(var dest: realarty; index: integer; value: realty); overload;
+procedure insertitem(var dest: integerarty; index: integer; 
+                                              value: integer); overload;
+procedure insertitem(var dest: longwordarty; index: integer;
+                                              value: longword); overload;
+procedure insertitem(var dest: realarty; index: integer;
+                                              value: realty); overload;
 procedure insertitem(var dest: complexarty; index: integer;
                                                 value: complexty); overload;
-procedure insertitem(var dest: pointerarty; index: integer; value: pointer); overload;
+procedure insertitem(var dest: pointerarty; index: integer;
+                                                  value: pointer); overload;
 procedure insertitem(var dest: winidarty; index: integer; value: winidty); overload;
 procedure insertitem(var dest: stringarty; index: integer; value: string); overload;
 procedure insertitem(var dest: msestringarty; index: integer; value: msestring); overload;
@@ -159,6 +167,7 @@ function stackarfunc(const ar1,ar2: integerarty): integerarty;
 procedure stackarray(const source: stringarty; var dest: stringarty); overload;
 procedure stackarray(const source: msestringarty; var dest: msestringarty); overload;
 procedure stackarray(const source: integerarty; var dest: integerarty); overload;
+procedure stackarray(const source: longwordarty; var dest: longwordarty); overload;
 procedure stackarray(const source: pointerarty; var dest: pointerarty); overload;
 procedure stackarray(const source: winidarty; var dest: winidarty); overload;
 procedure stackarray(const source: realarty; var dest: realarty); overload;
@@ -615,6 +624,16 @@ begin
  inc(count);
 end;
 
+procedure additem(var dest: longwordarty; const value: longword;
+                             var count: integer);
+begin
+ if length(dest) <= count then begin
+  setlength(dest,count+arrayminlenghtstep+2*length(dest));
+ end;
+ dest[count]:= value;
+ inc(count);
+end;
+
 procedure additem(var dest: realarty; const value: real;
                              var count: integer);
 begin
@@ -677,6 +696,12 @@ begin
 end;
 
 procedure additem(var dest: integerarty; const value: integer);
+begin
+ setlength(dest,high(dest)+2);
+ dest[high(dest)]:= value;
+end;
+
+procedure additem(var dest: longwordarty; const value: longword);
 begin
  setlength(dest,high(dest)+2);
  dest[high(dest)]:= value;
@@ -789,6 +814,13 @@ begin
 end;
 
 procedure insertitem(var dest: integerarty; index: integer; value: integer);
+begin
+ setlength(dest,high(dest) + 2);
+ move(dest[index],dest[index+1],(high(dest)-index) * sizeof(dest[0]));
+ dest[index]:= value;
+end;
+
+procedure insertitem(var dest: longwordarty; index: integer; value: longword);
 begin
  setlength(dest,high(dest) + 2);
  move(dest[index],dest[index+1],(high(dest)-index) * sizeof(dest[0]));
@@ -1125,6 +1157,15 @@ begin
 end;
 
 procedure stackarray(const source: integerarty; var dest: integerarty);
+var
+ laengevorher: integer;
+begin
+ laengevorher:= length(dest);
+ setlength(dest,laengevorher+length(source));
+ move(source[0],dest[laengevorher],length(source)*sizeof(source[0]));
+end;
+
+procedure stackarray(const source: longwordarty; var dest: longwordarty);
 var
  laengevorher: integer;
 begin
