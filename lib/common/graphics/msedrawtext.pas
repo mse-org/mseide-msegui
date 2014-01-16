@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2014 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -193,7 +193,7 @@ function textrect(const canvas: tcanvas; const text: msestring;
 function textclipped(const canvas: tcanvas; var info: drawtextinfoty): boolean;
 
 function postotextindex(const canvas: tcanvas; var info: drawtextinfoty;
-                                 const pos: pointty; out aindex: integer): boolean;
+                             const pos: pointty; out aindex: integer): boolean;
     //false if out of text
 function textindextopos(const canvas: tcanvas; var info: drawtextinfoty;
                                  aindex: integer): pointty;
@@ -819,16 +819,63 @@ begin
  end;
 end;
 
+procedure adjustellipse(const acanvas: tcanvas; const info: drawtextinfoty;
+                           const layoutinfo: layoutinfoty;
+                           const line: integer; var startx: integer;
+                           out startindex: integer; out endindex: integer);
+var
+ ellipsewidth,ellipsewidthsum: integer;
+ int1: integer;
+begin
+ with info,layoutinfo,lineinfos[line] do begin
+  startindex:= liindex;
+  endindex:= liindex + licount - 1;
+  if (liwidth > dest.cx) and (flags * ellipsemask <> []) then begin
+   ellipsewidth:= acanvas.getstringwidth(textellipse);
+   ellipsewidthsum:= liwidth + ellipsewidth;
+   if tf_ellipseleft in flags then begin
+    startindex:= licount;
+    for int1:= liindex-1 to liindex+licount-2 do begin
+     dec(ellipsewidthsum,charwidths[int1]);
+     if ellipsewidthsum < dest.cx then begin
+      startindex:= int1+2;
+      break;
+     end;
+    end;
+    startx:= startx + ellipsewidth;
+   end
+   else begin
+    for int1:= liindex+licount-2 downto liindex-1 do begin
+     dec(ellipsewidthsum,charwidths[int1]);
+     if ellipsewidthsum < dest.cx then begin
+      endindex:= int1;
+      break;
+     end;
+    end;
+   end;
+   if tf_right in flags then begin
+    startx:= startx + (liwidth-ellipsewidthsum);
+   end
+   else begin
+    if tf_xcentered in flags then begin
+     startx:= startx + (liwidth-ellipsewidthsum) div 2;
+    end;
+   end; 
+  end;
+ end;
+end;
+
 function postotextindex(const canvas: tcanvas; var info: drawtextinfoty;
-                                const pos: pointty; out aindex: integer): boolean;
+                           const pos: pointty; out aindex: integer): boolean;
     //false if out of text
 var
  layoutinfo: layoutinfoty;
- int1,int2,int3: integer;
+ int1,int2: integer;
+ startindex,endindex: integer;
 begin
  result:= true;
  with info,canvas,layoutinfo do begin
-  if length(text.text) = 0 then begin
+  if text.text = '' then begin
    result:= false;
    aindex:= 0;
    exit;
@@ -850,10 +897,12 @@ begin
     end;
     with lineinfos[int1] do begin
      int2:= listartx;
-     int3:= liindex + licount - 1;
-     aindex:= int3;
+     adjustellipse(canvas,info,layoutinfo,int1,int2,startindex,endindex);
+//     int3:= liindex + licount - 1;
+     aindex:= endindex;
      result:= false;
-     for int1:= liindex-1 to liindex+licount-2 do begin
+//     for int1:= liindex-1 to liindex+licount-2 do begin
+     for int1:= startindex-1 to endindex-1 do begin
       inc(int2,charwidths[int1]);
       if int2 >= pos.x then begin
        aindex:= int1;
@@ -861,7 +910,7 @@ begin
        break;
       end;
      end;
-     if aindex < int3 then begin
+     if aindex < endindex then begin
       if int2 - pos.x < charwidths[aindex] div 2 then begin
        inc(aindex);
       end;
@@ -873,10 +922,11 @@ begin
 end;
 
 function textindextopos(const canvas: tcanvas; var info: drawtextinfoty;
-                                aindex: integer): pointty;
+                                                    aindex: integer): pointty;
 var
  layoutinfo: layoutinfoty;
  int1,int2,int3: integer;
+ startindex,endindex: integer;
 begin
  with info,layoutinfo do begin
   layouttext(canvas,info,layoutinfo);
@@ -900,7 +950,9 @@ begin
   result.y:= starty + int3 * lineheight;
   with lineinfos[int3] do begin
    int2:= listartx;
-   for int1:= liindex-1 to aindex-1 do begin
+   adjustellipse(canvas,info,layoutinfo,int3,int2,startindex,endindex);
+//   for int1:= liindex-1 to aindex-1 do begin
+   for int1:= startindex-1 to aindex-1 do begin
     inc(int2,charwidths[int1]);
    end;
    result.x:= int2;
