@@ -665,7 +665,7 @@ var
  wmprotocolsatom,wmstateatom,wmnameatom,wmclassatom: atom;
  wmtransientforatom,wmclientleaderatom: atom;
  wmprotocols: array[wmprotocolty] of atom;
- clipboardatom: atom;
+// clipboardatom: atom;
  cardinalatom,windowatom,stringatom,utf8_stringatom,compound_textatom,
  textatom,textplainatom: atom;
  timestampatom: atom;
@@ -783,7 +783,16 @@ const
   'XdndActionCopy','XdndActionMove','XdndActionLink','XdndActionAsk',
   'XdndActionPrivate'
  );
- 
+
+type
+ clipboardinfoty = record
+  name: atom;
+  buffer: msestring;
+  timestamp: ttime; 
+ end;
+const
+ clipboardnames: array[clipboardbufferty] of string = ('CLIPBOARD','PRIMARY');
+   
 var
  netatoms: array[netatomty] of atom;
  xdndatoms: array[xdndatomty] of atom;
@@ -811,8 +820,7 @@ var
  errorhandlerbefore: xerrorhandler;
  lasteventtime: ttime;
 // lastshiftstate: shiftstatesty;
- clipboard: msestring;
- clipboardtimestamp: ttime; 
+ clipboardbuffers: array[clipboardbufferty] of clipboardinfoty;
  fidnum: integer;
 
 procedure deleteitemat(var dest: atomarty; index: integer); overload;
@@ -1175,11 +1183,13 @@ function gui_copytoclipboard(const value: msestring;
                               const buffer: clipboardbufferty): guierrorty;
 begin
  gdi_lock;
- clipboard:= value;
- clipboardtimestamp:= lasteventtime;
-// clipboardtimestamp:= clipboardtimestamp; //no "not used" compiler message
- xsetselectionowner(appdisp,clipboardatom,appid,lasteventtime);
- result:= gue_ok;
+ with clipboardbuffers[buffer] do begin
+  buffer:= value;
+  timestamp:= lasteventtime;
+ // clipboardtimestamp:= clipboardtimestamp; //no "not used" compiler message
+  xsetselectionowner(appdisp,name,appid,lasteventtime);
+  result:= gue_ok;
+ end;
  gdi_unlock;
 end;
 
@@ -1377,48 +1387,54 @@ var
  prop1: xtextproperty;
  int1: integer;
 begin
- result:= pastefromclipboard(value1,clipboardatom,lasteventtime,
-         [utf8_stringatom,compound_textatom,textatom,textplainatom,stringatom],
-         acttype,actformat,nitems1);
- if result = gue_ok then begin
-  if acttype = 0 then begin
-   value:= clipboard;
-  end
-  else begin
-   if acttype = utf8_stringatom then begin
-     value:= utf8tostring(value1);
+ gdi_lock();
+ with clipboardbuffers[buffer] do begin
+  result:= pastefromclipboard(value1,name,lasteventtime,
+          [utf8_stringatom,compound_textatom,textatom,textplainatom,stringatom],
+          acttype,actformat,nitems1);
+  if result = gue_ok then begin
+   if acttype = 0 then begin
+    value:= buffer;
    end
    else begin
-    if (acttype = textatom) or (acttype = textplainatom) then begin
-     value:= value1; //current locale
+    if acttype = utf8_stringatom then begin
+      value:= utf8tostring(value1);
     end
     else begin
-     if acttype = compound_textatom then begin
-      with prop1 do begin
-       value:= pointer(value1);
-       encoding:= acttype;
-       format:= actformat;
-       nitems:= nitems1;
-      end;
-      xutf8textpropertytotextlist(appdisp,@prop1,@po2,@int1);
-      if int1 >= 1 then begin
-       value:= utf8tostring(string(po2^));
-      end;
-      xfreestringlist(po2);
+     if (acttype = textatom) or (acttype = textplainatom) then begin
+      value:= value1; //current locale
      end
      else begin
-      value:= latin1tostring(value1);
+      if acttype = compound_textatom then begin
+       with prop1 do begin
+        value:= pointer(value1);
+        encoding:= acttype;
+        format:= actformat;
+        nitems:= nitems1;
+       end;
+       xutf8textpropertytotextlist(appdisp,@prop1,@po2,@int1);
+       if int1 >= 1 then begin
+        value:= utf8tostring(string(po2^));
+       end;
+       xfreestringlist(po2);
+      end
+      else begin
+       value:= latin1tostring(value1);
+      end;
      end;
     end;
    end;
   end;
  end;
+ gdi_unlock();
 end;
 
 function gui_canpastefromclipboard(const buffer: clipboardbufferty): boolean;
 begin
  gdi_lock;
- result:= xgetselectionowner(appdisp,clipboardatom) <> none;
+ with clipboardbuffers[buffer] do begin
+  result:= xgetselectionowner(appdisp,name) <> none;
+ end;
  gdi_unlock;
 end;
 
@@ -4806,13 +4822,14 @@ begin
 end;
 
 function getclipboarddata(var aevent: xselectionrequestevent;
+                   const buffer: clipboardbufferty;
                    var adata: string; var aproperty: atom): boolean; 
                                         //false if no data
 var
  atomar: array[0..7] of atom;
  textprop: xtextproperty;
 begin
- with aevent do begin
+ with aevent,clipboardbuffers[buffer] do begin
   result:= false;
   if target = targetsatom then begin
    atomar[0]:= textplainatom;
@@ -4828,27 +4845,27 @@ begin
   end
   else begin
    if target = timestampatom then begin
-    atomar[0]:= clipboardtimestamp;
+    atomar[0]:= timestamp;
     xchangeproperty(appdisp,requestor,aproperty,target,32,
                propmodereplace,@atomar[0],1);
    end
    else begin
     result:= true;
     if target = utf8_stringatom then begin
-     adata:= stringtoutf8(clipboard);
+     adata:= stringtoutf8(buffer);
     end
     else begin
      if target = stringatom then begin
-      adata:= stringtolatin1(clipboard);
+      adata:= stringtolatin1(buffer);
      end
      else begin
       if (target = textatom) or (target = textplainatom) then begin
-       adata:= clipboard; //current locale
+       adata:= buffer; //current locale
       end
       else begin
        result:= false;
        if target = compound_textatom then begin
-        if stringtotextproperty(clipboard,xcompoundtextstyle,
+        if stringtotextproperty(buffer,xcompoundtextstyle,
                                                textprop) then begin
          with textprop do begin
           xchangeproperty(appdisp,requestor,
@@ -4872,11 +4889,28 @@ begin
  end;
 end;
 
+function isclipboard(const aselection: atom;
+                    out buffer: clipboardbufferty): boolean;
+var
+ buf1: clipboardbufferty;
+begin
+ result:= false;
+ for buf1:= low(clipboardbufferty) to high(clipboardbufferty) do begin
+  if clipboardbuffers[buf1].name = aselection then begin
+   buffer:= buf1;
+   result:= true;
+   break;
+  end;
+ end;
+end;//isclipboard
+
 procedure handleselectionrequest(var aevent: xselectionrequestevent);
 var
  event1: xselectionevent;
  str1: string;
  bo1: boolean;
+ buffer: clipboardbufferty;
+
 begin
  with aevent do begin
   event1.xtype:= selectionnotify;
@@ -4890,8 +4924,8 @@ begin
                            {$ifdef FPC}_property{$else}xproperty{$endif};
   event1.time:= time;
   bo1:= false;  
-  if selection = clipboardatom then begin
-   bo1:= getclipboarddata(aevent,str1,
+  if isclipboard(selection,buffer) then begin
+   bo1:= getclipboarddata(aevent,buffer,str1,
               event1.{$ifdef FPC}_property{$else}xproperty{$endif});
   end
   else begin
@@ -4941,6 +4975,7 @@ var
  pt1: pointty;
  aic: xic;
  window1: twindow;
+ buf1: clipboardbufferty;
 
 label
  eventrestart;
@@ -5055,8 +5090,8 @@ eventrestart:
  end;
  if xev.xany.xwindow = appid then begin
   if (xev.xtype = selectionclear) then begin
-   if xev.xselectionclear.selection = clipboardatom then begin
-    clipboard:= '';
+   if isclipboard(xev.xselectionclear.selection,buf1) then begin
+    clipboardbuffers[buf1].buffer:= '';
     exit;
    end;
    if (xev.xselectionclear.selection = xdndatoms[xdnd_selection]) and
@@ -5521,6 +5556,7 @@ var
  po2: pkeycode;
  modmap: pxmodifierkeymap;
  numlockcode: cuint;
+ buf1: clipboardbufferty;
  
 begin
  gdi_lock;
@@ -5724,8 +5760,10 @@ begin
             {$ifdef xboolean}false{$else}0{$endif});
   wmclientleaderatom:= xinternatom(appdisp,'WM_CLIENT_LEADER',
             {$ifdef xboolean}false{$else}0{$endif});
-  clipboardatom:= xinternatom(appdisp,'CLIPBOARD',
-            {$ifdef xboolean}false{$else}0{$endif});
+  for buf1:= low(clipboardbuffers) to high(clipboardbuffers) do begin
+   clipboardbuffers[buf1].name:= xinternatom(appdisp,
+           pchar(clipboardnames[buf1]),{$ifdef xboolean}false{$else}0{$endif});
+  end;
   cardinalatom:= xinternatom(appdisp,'CARDINAL',
             {$ifdef xboolean}false{$else}0{$endif});
   windowatom:= xinternatom(appdisp,'WINDOW',
@@ -5832,12 +5870,16 @@ begin
 end;
 
 function gui_deinit: guierrorty;
+var
+ buf1: clipboardbufferty;
 begin
  gdi_lock;
  try
   freeandnil(sysdndreader);
   freeandnil(sysdndwriter);
-  clipboard:= '';
+  for buf1:= low(clipboardbuffers) to high(clipboardbuffers) do begin
+   clipboardbuffers[buf1].buffer:= '';
+  end;
   result:= gue_ok;
   settimer1(0); //kill timer
   terminated:= true;

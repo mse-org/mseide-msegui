@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2014 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -268,23 +268,27 @@ function isactioncaptionstored(const info: actioninfoty): boolean;
 
 procedure setactionimagenr(const sender: iactionlink; const value: integer);
 function isactionimagenrstored(const info: actioninfoty): boolean;
-procedure setactionimagenrdisabled(const sender: iactionlink; const value: integer);
+procedure setactionimagenrdisabled(const sender: iactionlink;
+                                                        const value: integer);
 function isactionimagenrdisabledstored(const info: actioninfoty): boolean;
 procedure setactioncolorglyph(const sender: iactionlink; const value: colorty);
 function isactioncolorglyphstored(const info: actioninfoty): boolean;
 procedure setactioncolor(const sender: iactionlink; const value: colorty);
 function isactioncolorstored(const info: actioninfoty): boolean;
-procedure setactionimagecheckedoffset(const sender: iactionlink; const value: integer);
+procedure setactionimagecheckedoffset(const sender: iactionlink;
+                                                         const value: integer);
 function isactionimagecheckedoffsetstored(const info: actioninfoty): boolean;
 procedure setactionhint(const sender: iactionlink; const value: msestring);
 function isactionhintstored(const info: actioninfoty): boolean;
 procedure setactiontag(const sender: iactionlink; const value: integer);
 function isactiontagstored(const info: actioninfoty): boolean;
 
-procedure setactionstate(const sender: iactionlink; const value: actionstatesty);
+procedure setactionstate(const sender: iactionlink;
+                                                 const value: actionstatesty);
 function isactionstatestored(const info: actioninfoty): boolean;
 
-procedure setactionoptions(const sender: iactionlink; const value: menuactionoptionsty);
+procedure setactionoptions(const sender: iactionlink;
+                                             const value: menuactionoptionsty);
 
 procedure setactiongroup(const sender: iactionlink; const value: integer);
 function isactiongroupstored(const info: actioninfoty): boolean;
@@ -298,11 +302,6 @@ function isactiononbeforeexecutestored(const info: actioninfoty): boolean;
 procedure actionbeginload(const sender: iactionlink);
 procedure actionendload(const sender: iactionlink);
 
-//procedure actiondoidle(const info: actioninfoty);
-//procedure getshortcutlist(out keys: integerarty; out names: msestringarty);
-//function checkshortcutcode(const shortcut: shortcutty; const info: keyeventinfoty): boolean;
-//function doactionshortcut(const sender: tobject; var info: actioninfoty;
-//                        var keyinfo: keyeventinfoty): boolean; //true if done
 function doactionexecute(const sender: tobject; var info: actioninfoty;
                                const nocheckbox: boolean = false;
                                const nocandefocus: boolean = false;
@@ -315,10 +314,13 @@ function doactionexecute1(const sender: tobject; var info: actioninfoty;
                          const beforeexecute: proceventty = nil): boolean;
           //true if not canceled
 
-procedure initactioninfo(var info: actioninfoty; aoptions: menuactionoptionsty = []);
-procedure actionstatestoshapestates(const source: actioninfoty; var dest: shapestatesty);
+procedure initactioninfo(var info: actioninfoty;
+                                           aoptions: menuactionoptionsty = []);
+procedure actionstatestoshapestates(const source: actioninfoty;
+                                                      var dest: shapestatesty);
 procedure shapestatestoactionstates(source: shapestatesty;
-              var dest: actionstatesty; const mask: actionstatesty = actionshapestatesconst);
+                var dest: actionstatesty;
+                        const mask: actionstatesty = actionshapestatesconst);
 function translateshortcut(const akey: shortcutty): shortcutty;
 procedure translateshortcut1(var akey: shortcutty); 
            //update for new modifier layout

@@ -133,6 +133,9 @@ type
    procedure onpaste(const sender: tobject);
    procedure redo; virtual;
    function canredo: boolean; virtual;
+   function pastefromclipboard(
+               const buffer: clipboardbufferty): boolean; virtual;
+                                                      //true if pasted
   public
    constructor create(aowner: twidget; editintf: iedit;
                                          istextedit: boolean = false);
@@ -181,7 +184,7 @@ type
    procedure inserttext(const text: msestring; nooverwrite: boolean = true);
    function copytoclipboard: boolean;           //true if copied
    function cuttoclipboard: boolean; virtual;   //true if cut
-   function pastefromclipboard: boolean; virtual;        //true if pasted
+   function pastefromclipboard: boolean;        //true if pasted
    procedure deleteselection;
    procedure clearundo;
    procedure undo; virtual;
@@ -304,6 +307,8 @@ type
    procedure deleteback; override;
    procedure internaldelete(start,len,startindex: integer; selected: boolean); override;
    procedure enterchars(const chars: msestring); override;
+   function pastefromclipboard(
+                     const buffer: clipboardbufferty): boolean; override;
   public
    constructor create(aowner: twidget; editintf: iedit; undointf: iundo;
                       istextedit: boolean);
@@ -317,7 +322,6 @@ type
    procedure moveindex(newindex: integer; shift: boolean = false;
             donotify: boolean = true); override;
    function cuttoclipboard: boolean; override;
-   function pastefromclipboard: boolean; override;
                      
    property undolist: ttextundolist read fundolist;
  end;
@@ -1449,82 +1453,78 @@ begin
                (opt1 * [oe_locate,oe_readonly] <> [oe_locate,oe_readonly]);
    case eventkind of
     ek_buttonpress: begin
-     if (minfo.button = mb_left) and pointinrect(pos,finfo.clip) then begin
-      if not fowner.focused and fowner.canfocus and
-                 (ow_mousefocus in fowner.optionswidget) then begin
-       include(fstate,ies_firstclick);
-       include(minfo.eventstate,es_processed);
-       int1:= mousepostotextindex(pos);
-       moveindex(int1,false);
-       internalupdatecaret(true);
-       po1:= fcaretpos;
-       include(eventstate,es_nofocus);
-       if not fowner.setfocus then begin
-        exclude(fstate,ies_firstclick);
-        exit;
-       end;
-       if autoselect1 then begin
-        selectall;
-        subpoint1(po1,textindextomousepos(int1));
-       end
-       else begin
+     if pointinrect(pos,finfo.clip) and 
+      (minfo.button = mb_left) or (minfo.button = mb_middle) and 
+                                    not (oe_readonly in opt1) then begin
+      if not ((minfo.button = mb_middle) and 
+                (minfo.shiftstate * shiftstatesmask <> [ss_middle])) then begin
+       if not fowner.focused and fowner.canfocus and
+                  (ow_mousefocus in fowner.optionswidget) then begin
+        if minfo.button = mb_left then begin
+         include(fstate,ies_firstclick);
+        end;
+        include(minfo.eventstate,es_processed);
+        int1:= mousepostotextindex(pos);
         moveindex(int1,false);
-        subpoint1(po1,fcaretpos);
-       end;
-      end
-      else begin
-       int1:= mousepostotextindex(pos);
-       po1:= textindextomousepos(int1);
-       if (ies_firstclick in fstate) then begin
-        finfo.flags:= ftextflagsactive;
-        if autoselect1 then begin
+        internalupdatecaret(true);
+        po1:= fcaretpos;
+        include(eventstate,es_nofocus);
+        if not fowner.setfocus then begin
+         exclude(fstate,ies_firstclick);
+         exit;
+        end;
+        if autoselect1 and (minfo.button = mb_left) then begin
          selectall;
+         subpoint1(po1,textindextomousepos(int1));
         end
         else begin
-         initfocus;
          moveindex(int1,false);
+         subpoint1(po1,fcaretpos);
         end;
        end
        else begin
-        moveindex(int1,ss_shift in shiftstate);
+        int1:= mousepostotextindex(pos);
+        po1:= textindextomousepos(int1);
+        if minfo.button = mb_left then begin
+         if (ies_firstclick in fstate) then begin
+          finfo.flags:= ftextflagsactive;
+          if autoselect1 then begin
+           selectall;
+          end
+          else begin
+           initfocus;
+           moveindex(int1,false);
+          end;
+         end
+         else begin
+          moveindex(int1,ss_shift in shiftstate);
+         end;
+        end
+        else begin
+         moveindex(int1,false);
+        end;
+        subpoint1(po1,textindextomousepos(int1));
        end;
-       subpoint1(po1,textindextomousepos(int1));
-      end;
-      subpoint1(pos,po1);
-      if pos.x < ftextrect.x then begin
-       pos.x:= ftextrect.x;
-      end;
-      if pos.x > ftextrect.x + ftextrect.cx then begin
-       pos.x:= ftextrect.x + ftextrect.cx;
-      end;
-      if pos.y < ftextrect.y then begin
-       pos.y:= ftextrect.y;
-      end;
-      if pos.y > ftextrect.y + ftextrect.cy then begin
-       pos.y:= ftextrect.y + ftextrect.cy;
-      end;
-      {
-      po1:= subpoint(ftextrect.pos,pos);
-      if (po1.x > 0) or (po1.y > 0) then begin //shift cursor in textrect
-       if po1.x < 0 then begin
-        po1.x:= 0;
+       if minfo.button = mb_middle then begin
+        addpoint1(po1,textindextomousepos(int1));
+        clearselection;
+        pastefromclipboard(cbb_primary);
+        subpoint1(po1,textindextomousepos(int1));
        end;
-       if po1.y < 0 then begin
-        po1.y:= 0;
+       subpoint1(pos,po1);
+       if pos.x < ftextrect.x then begin
+        pos.x:= ftextrect.x;
        end;
-       addpoint1(pos,po1);
-       if po1.x > ftextrect.x - finfo.dest.pos.x then begin
-        po1.x:= ftextrect.x - finfo.dest.pos.x;
+       if pos.x > ftextrect.x + ftextrect.cx then begin
+        pos.x:= ftextrect.x + ftextrect.cx;
        end;
-       if po1.y > ftextrect.y - finfo.dest.pos.y then begin
-        po1.y:= ftextrect.y - finfo.dest.pos.y;
+       if pos.y < ftextrect.y then begin
+        pos.y:= ftextrect.y;
        end;
-       if (po1.x <> 0) or (po1.y <> 0) then begin
-        addpoint1(finfo.dest.pos,po1);
-        fowner.scrollcaret(po1);
+       if pos.y > ftextrect.y + ftextrect.cy then begin
+        pos.y:= ftextrect.y + ftextrect.cy;
        end;
       end;
-      }
      end;
     end;
     ek_buttonrelease,ek_mousecaptureend: begin
@@ -1535,9 +1535,6 @@ begin
      if fowner.clicked and
        not ((ies_firstclick in fstate) and autoselect1) then begin
       fmousemovepos:= minfo.pos;
-//      if ies_istextedit in fstate then begin
-//       fmousemovepos.y:= ftextrect.y + ftextrect.cy div 2;
-//      end;
       if not pointinrect(pos,ftextrect) then begin
        if frepeater = nil then begin
         movemouseindex(nil);
@@ -1559,6 +1556,7 @@ end;
 procedure tinplaceedit.movemouseindex(const sender: tobject);
 begin
  moveindex(mousepostotextindex(fmousemovepos),true);
+ msewidgets.copytoclipboard(selectedtext,cbb_primary);
 end;
 
 function tinplaceedit.invalidatepos: integer;
@@ -1726,7 +1724,8 @@ begin
  deleteselection;
 end;
 
-function tinplaceedit.pastefromclipboard: boolean;
+function tinplaceedit.pastefromclipboard(
+                     const buffer: clipboardbufferty): boolean;
 var
  int1: integer;
  info: editnotificationinfoty;
@@ -1735,7 +1734,7 @@ begin
  info:= initactioninfo(ea_pasteselection);
  result:= true;
  if checkaction(info) then begin
-  if msewidgets.pastefromclipboard(wstr1) then begin
+  if msewidgets.pastefromclipboard(wstr1,buffer) then begin
    fintf.updatepastefromclipboard(wstr1);
    deleteselection;
    int1:= fcurindex;
@@ -1748,6 +1747,11 @@ begin
    result:= false;
   end;
  end;
+end;
+
+function tinplaceedit.pastefromclipboard: boolean;
+begin
+ result:= pastefromclipboard(cbb_primary);
 end;
 
 function tinplaceedit.internaldeleteselection(textinput: boolean): boolean;
@@ -2604,11 +2608,12 @@ begin
  end;
 end;
 
-function tundoinplaceedit.pastefromclipboard: boolean;
+function tundoinplaceedit.pastefromclipboard(
+                     const buffer: clipboardbufferty): boolean;
 begin
  fundolist.beginlink(ut_none,true);
  try
-  result:= inherited pastefromclipboard;
+  result:= inherited pastefromclipboard(buffer);
  finally
   fundolist.endlink(true);
  end;
