@@ -215,7 +215,8 @@ type
                         write foptionsedit1 default defaultoptionsedit1;
    property textflags: textflagsty read ftextflags write settextflags;
    property textflagsactive: textflagsty read ftextflagsactive write settextflagsactive;
-   property passwordchar: msechar read fpasswordchar write setpasswordchar default #0;
+   property passwordchar: msechar read fpasswordchar
+                                         write setpasswordchar default #0;
    property maxlength: integer read fmaxlength write setmaxlength default -1;
                 //<0-> no limit
    property caretwidth: integer read fcaretwidth write setcaretwidth default defaultcaretwidth;
@@ -439,7 +440,7 @@ begin
  else begin
   states[undoindex]:= [as_disabled];
  end;
- bo1:= cancopy or hasselection;
+ bo1:= (cancopy or hasselection) and (passwordchar = #0);
  if bo1 {or cangridcopy} then begin
   states[copyindex]:= []; //copy
   if bo1 and canedit then begin
@@ -1138,7 +1139,12 @@ begin
   end
   else begin
    if issysshortcut(sho_copy,kinfo) then begin
-    finished:= copytoclipboard(cbb_clipboard);;
+    if passwordchar = #0 then begin
+     finished:= copytoclipboard(cbb_clipboard);;
+    end
+    else begin
+     finished:= false;
+    end; 
    end
    else begin
     if issysshortcut(sho_paste,kinfo) then begin
@@ -1151,7 +1157,7 @@ begin
     end
     else begin
      if issysshortcut(sho_cut,kinfo) then begin
-      if canedit then begin
+      if canedit and (passwordchar = #0) then begin
        finished:= cuttoclipboard(cbb_clipboard);
       end
       else begin
@@ -1558,7 +1564,9 @@ end;
 procedure tinplaceedit.movemouseindex(const sender: tobject);
 begin
  moveindex(mousepostotextindex(fmousemovepos),true);
- copytoclipboard(cbb_primary);
+ if passwordchar = #0 then begin
+  copytoclipboard(cbb_primary);
+ end;
 // msewidgets.copytoclipboard(selectedtext,cbb_primary);
 end;
 
