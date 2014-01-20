@@ -37,7 +37,8 @@ const
 type
  listviewoptionty = ( //matched with coloptionty
           lvo_readonly,lvo_mousemoving,lvo_keymoving,lvo_horz,
-          lvo_drawfocus,lvo_mousemovefocus,lvo_leftbuttonfocusonly,
+          lvo_drawfocus,lvo_mousemovefocus,
+          lvo_leftbuttonfocusonly,lvo_middlebuttonfocus,
           lvo_noctrlmousefocus,
           lvo_focusselect,lvo_mouseselect,lvo_keyselect,
           lvo_multiselect,lvo_resetselectonexit,{lvo_noresetselect,}
@@ -60,6 +61,7 @@ const
  coloptionsmask: listviewoptionsty =
                     [lvo_readonly,{lvo_mousemoving,lvo_keymoving,lvo_horz,}
                      lvo_drawfocus,lvo_mousemovefocus,lvo_leftbuttonfocusonly,
+                     lvo_middlebuttonfocus,
                      lvo_noctrlmousefocus,
                      lvo_focusselect,lvo_mouseselect,lvo_keyselect,
                      lvo_multiselect,lvo_resetselectonexit{,lvo_noresetselect}];

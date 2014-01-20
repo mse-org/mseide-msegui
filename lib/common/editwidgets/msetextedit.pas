@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2014 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -1517,11 +1517,14 @@ begin
      action:= ea_none;
     end;
     ea_copyselection: begin
-     copyselection;
+//     copyselection;
+     if hasselection then begin
+      msewidgets.copytoclipboard(selectedtext,bufferkind);
+     end;
      action:= ea_none;
     end;
     ea_pasteselection: begin
-     if msewidgets.pastefromclipboard(str1) then begin
+     if msewidgets.pastefromclipboard(str1,bufferkind) then begin
       beginupdate;
       feditor.begingroup;
       try

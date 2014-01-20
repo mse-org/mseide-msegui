@@ -32,6 +32,8 @@ type
  coloptionty = (co_readonly, co_nofocus,     co_invisible, co_disabled,
          //     lvo_drawfocus,lvo_mousemovefocus,lvo_leftbuttonfocusonly,
                 co_drawfocus,co_mousemovefocus,co_leftbuttonfocusonly,
+         //     lvo_middlebuttonfocus,
+                co_middlebuttonfocus,
          //     lvo_noctrlmousefocus,
                 co_noctrlmousefocus,
          //     lvo_focusselect,lvo_mouseselect,lvo_keyselect,
@@ -43,8 +45,8 @@ type
                 co_fixwidth,co_fixpos,co_fill,co_proportional,co_nohscroll,
 //                co_autorowheight,
                 co_savevalue,co_savestate,
-                co_rowfont,co_rowcolor,co_zebracolor, //deprecated -> co1_
-                co_rowcoloractive,                    //deprecated -> co1_
+//                co_rowfont,co_rowcolor,co_zebracolor, //deprecated -> co1_
+//                co_rowcoloractive,                    //deprecated -> co1_
 
                 co_nosort,co_sortdescend,co_norearange,
                 co_cancopy,co_canpaste,co_mousescrollrow,co_rowdatachange
@@ -60,10 +62,10 @@ type
  coloptions1ty = set of coloption1ty;
 
 const
- deprecatedcoloptions = [co_rowfont,co_rowcolor,co_zebracolor,
-                         co_rowcoloractive];
- invisiblecoloptions  = [ord(co_rowfont),ord(co_rowcolor),ord(co_zebracolor),
-                         ord(co_rowcoloractive)];
+ deprecatedcoloptions = [{co_rowfont,co_rowcolor,co_zebracolor,
+                         co_rowcoloractive}];
+ invisiblecoloptions  = [{ord(co_rowfont),ord(co_rowcolor),ord(co_zebracolor),
+                         ord(co_rowcoloractive)}];
 // deprecatedcoloptions1 = [co1_active];
 
 type
@@ -2840,6 +2842,7 @@ end;
 procedure transferdeprecatedcoloptions(const source: coloptionsty;
                                 var dest: coloptions1ty);
 begin
+{
  if co_rowfont in source then begin
   include(dest,co1_rowfont);
  end;
@@ -2852,6 +2855,7 @@ begin
  if co_rowcoloractive in source then begin
   include(dest,co1_rowcoloractive);
  end;
+}
 end;
 
 { tcellframe }
@@ -6286,7 +6290,8 @@ function tdatacol.canfocus(const abutton: mousebuttonty;
                                      out canrowfocus: boolean): boolean;
 begin
  canrowfocus:= ((abutton = mb_left) or (abutton = mb_none) or
-                     not (co_leftbuttonfocusonly in foptions)) and
+                     not (co_leftbuttonfocusonly in foptions) or
+          (abutton = mb_middle) and (co_middlebuttonfocus in foptions)) and
                ((ashiftstate*[ss_ctrl] = []) or 
                             not (co_noctrlmousefocus in foptions));
  result:= (foptions * [co_invisible,co_disabled,co_nofocus] = []) and

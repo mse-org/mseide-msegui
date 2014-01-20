@@ -136,6 +136,8 @@ type
    function pastefromclipboard(
                const buffer: clipboardbufferty): boolean; virtual;
                                                       //true if pasted
+   function copytoclipboard(const buffer: clipboardbufferty): boolean;           //true if copied
+   function cuttoclipboard(const buffer: clipboardbufferty): boolean; virtual;   //true if cut
   public
    constructor create(aowner: twidget; editintf: iedit;
                                          istextedit: boolean = false);
@@ -183,7 +185,7 @@ type
                                    donotify: boolean = true); virtual;
    procedure inserttext(const text: msestring; nooverwrite: boolean = true);
    function copytoclipboard: boolean;           //true if copied
-   function cuttoclipboard: boolean; virtual;   //true if cut
+   function cuttoclipboard: boolean;            //true if cut
    function pastefromclipboard: boolean;        //true if pasted
    procedure deleteselection;
    procedure clearundo;
@@ -309,6 +311,7 @@ type
    procedure enterchars(const chars: msestring); override;
    function pastefromclipboard(
                      const buffer: clipboardbufferty): boolean; override;
+   function cuttoclipboard(const buffer: clipboardbufferty): boolean; override;
   public
    constructor create(aowner: twidget; editintf: iedit; undointf: iundo;
                       istextedit: boolean);
@@ -321,7 +324,6 @@ type
    procedure redo; override;
    procedure moveindex(newindex: integer; shift: boolean = false;
             donotify: boolean = true); override;
-   function cuttoclipboard: boolean; override;
                      
    property undolist: ttextundolist read fundolist;
  end;
@@ -1136,12 +1138,12 @@ begin
   end
   else begin
    if issysshortcut(sho_copy,kinfo) then begin
-    finished:= copytoclipboard;
+    finished:= copytoclipboard(cbb_clipboard);;
    end
    else begin
     if issysshortcut(sho_paste,kinfo) then begin
      if canedit then begin
-      finished:= pastefromclipboard;
+      finished:= pastefromclipboard(cbb_clipboard);
      end
      else begin
       finished:= false;
@@ -1150,7 +1152,7 @@ begin
     else begin
      if issysshortcut(sho_cut,kinfo) then begin
       if canedit then begin
-       finished:= cuttoclipboard;
+       finished:= cuttoclipboard(cbb_clipboard);
       end
       else begin
        finished:= false;
@@ -1556,7 +1558,8 @@ end;
 procedure tinplaceedit.movemouseindex(const sender: tobject);
 begin
  moveindex(mousepostotextindex(fmousemovepos),true);
- msewidgets.copytoclipboard(selectedtext,cbb_primary);
+ copytoclipboard(cbb_primary);
+// msewidgets.copytoclipboard(selectedtext,cbb_primary);
 end;
 
 function tinplaceedit.invalidatepos: integer;
@@ -1701,16 +1704,19 @@ begin
  end;
 end;
 
-function tinplaceedit.copytoclipboard: boolean;
+function tinplaceedit.copytoclipboard(const buffer: clipboardbufferty): boolean;
 var
  mstr1: msestring;
+ info: editnotificationinfoty;
 begin
+ info:= initactioninfo(ea_copyselection);
+ info.bufferkind:= buffer;
  result:= true;
- if checkaction(ea_copyselection) then begin
+ if checkaction(info) then begin
   if fsellength > 0 then begin
    mstr1:= selectedtext;
    fintf.updatecopytoclipboard(mstr1);
-   msewidgets.copytoclipboard(mstr1);
+   msewidgets.copytoclipboard(mstr1,info.bufferkind);
   end
   else begin
    result:= false;
@@ -1718,10 +1724,20 @@ begin
  end;
 end;
 
+function tinplaceedit.copytoclipboard: boolean;
+begin
+ result:= copytoclipboard(cbb_clipboard);
+end;
+
+function tinplaceedit.cuttoclipboard(const buffer: clipboardbufferty): boolean;
+begin
+ result:= copytoclipboard(buffer);
+ deleteselection;
+end;
+
 function tinplaceedit.cuttoclipboard: boolean;
 begin
- result:= copytoclipboard;
- deleteselection;
+ result:= cuttoclipboard(cbb_clipboard);
 end;
 
 function tinplaceedit.pastefromclipboard(
@@ -1732,9 +1748,10 @@ var
  wstr1: msestring;
 begin
  info:= initactioninfo(ea_pasteselection);
+ info.bufferkind:= buffer;
  result:= true;
  if checkaction(info) then begin
-  if msewidgets.pastefromclipboard(wstr1,buffer) then begin
+  if msewidgets.pastefromclipboard(wstr1,info.bufferkind) then begin
    fintf.updatepastefromclipboard(wstr1);
    deleteselection;
    int1:= fcurindex;
@@ -1751,7 +1768,7 @@ end;
 
 function tinplaceedit.pastefromclipboard: boolean;
 begin
- result:= pastefromclipboard(cbb_primary);
+ result:= pastefromclipboard(cbb_clipboard);
 end;
 
 function tinplaceedit.internaldeleteselection(textinput: boolean): boolean;
@@ -2598,11 +2615,12 @@ begin
  fundolist.setpos(makegridcoord(fcurindex,frow),shift);
 end;
 
-function tundoinplaceedit.cuttoclipboard: boolean;
+function tundoinplaceedit.cuttoclipboard(
+                   const buffer: clipboardbufferty): boolean;
 begin
  fundolist.beginlink(ut_none,true);
  try
-  result:= inherited cuttoclipboard;
+  result:= inherited cuttoclipboard(buffer);
  finally
   fundolist.endlink(true);
  end;

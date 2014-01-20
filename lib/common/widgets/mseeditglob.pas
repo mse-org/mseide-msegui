@@ -98,7 +98,10 @@ type
    ea_textsizechanged:(
     sizebefore: sizety;
     newsize: sizety;
-   )
+   );
+   ea_pasteselection,ea_copyselection:(
+    bufferkind: clipboardbufferty;
+   );
  end;
 
  idataeditcontroller = interface (inullinterface)

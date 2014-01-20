@@ -1169,11 +1169,12 @@ begin
                              [ss_double,ss_shift,ss_left]) then begin
       if ss_triple in info.mouseeventinfopo^.shiftstate then begin
        edit.setselection(makegridcoord(0,edit.row),
-                            makegridcoord(bigint,edit.row),true)
+                            makegridcoord(bigint,edit.row),true);
       end
       else begin
        edit.selectword(info.pos,pascaldelims+'.[]');
       end;
+      copytoclipboard(edit.selectedtext,cbb_primary);
       include(info.mouseeventinfopo^.eventstate,es_processed);
      end;
     end;
