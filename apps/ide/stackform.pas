@@ -52,7 +52,7 @@ implementation
 
 uses
  sysutils,stackform_mfm,sourceform,msefileutils,mseformatstr,main,mseguiglob,
- msegraphutils,msestrings,projectoptionsform;
+ msegraphutils,msestrings,projectoptionsform,msewidgets;
 
 { tstackfo }
 
@@ -193,7 +193,7 @@ begin
           filename(grid[2][int1])+':'+
                 grid[3][int1]+' '+grid[1][int1]+lineend;
  end;
- gui_copytoclipboard(mstr1);
+ msewidgets.copytoclipboard(mstr1);
 end;
 
 end.

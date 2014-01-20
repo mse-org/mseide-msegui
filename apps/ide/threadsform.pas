@@ -48,7 +48,7 @@ var
 implementation
 uses
  threadsform_mfm,sysutils,sourceform,msefileutils,main,stackform,mseguiintf,
- sourcepage;
+ sourcepage,msewidgets;
 type
  stringconsts = (
   active,     //0 *active*
@@ -142,7 +142,7 @@ begin
   mstr1:= mstr1 + '#'+inttostr(int1)+'  '+grid[0][int1]+' '+
           grid[1][int1]+' '+grid[2][int1]+lineend;
  end;
- gui_copytoclipboard(mstr1);
+ msewidgets.copytoclipboard(mstr1);
 end;
 
 end.

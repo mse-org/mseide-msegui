@@ -505,7 +505,7 @@ begin
  end;
 end;
 
-function gui_canpastefromclipboard(;
+function gui_canpastefromclipboard(
                              const buffer: clipboardbufferty): boolean;
 begin
  result:= isclipboardformatavailable(cf_text);
