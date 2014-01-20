@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2014 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -454,7 +454,8 @@ begin
  canshutdown:= 0;
 end;
 
-function gui_copytoclipboard(const value: msestring): guierrorty;
+function gui_copytoclipboard(const value: msestring;
+                             const buffer: clipboardbufferty): guierrorty;
          //todo: copy msechars to clipboard, win95?
 var
  mem: thandle;
@@ -504,7 +505,8 @@ begin
  end;
 end;
 
-function gui_canpastefromclipboard: boolean;
+function gui_canpastefromclipboard(;
+                             const buffer: clipboardbufferty): boolean;
 begin
  result:= isclipboardformatavailable(cf_text);
 end;
@@ -528,7 +530,8 @@ begin
  result:= sysdndreadtext(atext,typeindex);
 end;
 
-function gui_pastefromclipboard(out value: msestring): guierrorty;
+function gui_pastefromclipboard(out value: msestring;
+                             const buffer: clipboardbufferty): guierrorty;
 var               //todo: get msechars from clipboard, win95?
  data: thandle;
  po1: pointer;

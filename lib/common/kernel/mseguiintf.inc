@@ -146,9 +146,11 @@ procedure gui_freeimagemem(data: plongwordaty);
 //procedure gui_copyarea(var drawinfo: drawinfoty);
 
 procedure gui_beep;
-function gui_copytoclipboard(const value: msestring): guierrorty;
-function gui_pastefromclipboard(out value: msestring): guierrorty;
-function gui_canpastefromclipboard: boolean;
+function gui_copytoclipboard(const value: msestring;
+                             const buffer: clipboardbufferty): guierrorty;
+function gui_pastefromclipboard(out value: msestring;
+                             const buffer: clipboardbufferty): guierrorty;
+function gui_canpastefromclipboard(const buffer: clipboardbufferty): boolean;
 
 function gui_sysdnd(const action: sysdndactionty;
                      const aintf: isysdnd; const arect: rectty;

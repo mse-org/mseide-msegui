@@ -47,7 +47,7 @@ type
                  ss_repeat,    //repeat keydown
                  ss_second);   //right modifier keys, numpad
  shiftstatesty = set of shiftstatety;
-
+ clipboardbufferty = (cbb_clipboard,cbb_primary);
 const
  keyshiftstatesmask: shiftstatesty = [ss_shift,ss_alt,ss_ctrl];
  buttonshiftstatesmask: shiftstatesty = 

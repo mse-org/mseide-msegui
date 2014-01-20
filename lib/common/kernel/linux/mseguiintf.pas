@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2014 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -1171,7 +1171,8 @@ begin
  result:= not norestackwindow or not noreconfigurewmwindow;
 end;
 
-function gui_copytoclipboard(const value: msestring): guierrorty;
+function gui_copytoclipboard(const value: msestring;
+                              const buffer: clipboardbufferty): guierrorty;
 begin
  gdi_lock;
  clipboard:= value;
@@ -1365,7 +1366,8 @@ begin
  gdi_unlock;
 end;
 
-function gui_pastefromclipboard(out value: msestring): guierrorty;
+function gui_pastefromclipboard(out value: msestring;
+                             const buffer: clipboardbufferty): guierrorty;
 var
  value1: string;
  acttype: atom;
@@ -1413,7 +1415,7 @@ begin
  end;
 end;
 
-function gui_canpastefromclipboard: boolean;
+function gui_canpastefromclipboard(const buffer: clipboardbufferty): boolean;
 begin
  gdi_lock;
  result:= xgetselectionowner(appdisp,clipboardatom) <> none;

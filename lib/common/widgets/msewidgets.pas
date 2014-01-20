@@ -1275,9 +1275,12 @@ function confirmsavechangedfile(const filename: filenamety;
                out modalresult: modalresultty; multiple: boolean = false): boolean;
 //end threadsave routines
 
-procedure copytoclipboard(const value: msestring);
-function canpastefromclipboard: boolean;
-function pastefromclipboard(out value: msestring): boolean;
+procedure copytoclipboard(const value: msestring;
+                            const buffer: clipboardbufferty = cbb_clipboard);
+function canpastefromclipboard(
+                   const buffer: clipboardbufferty = cbb_clipboard): boolean;
+function pastefromclipboard(out value: msestring;
+                   const buffer: clipboardbufferty = cbb_clipboard): boolean;
             //false if empty
 function placepopuprect(const awindow: twindow; const adest: rectty; //screenorig
                  const placement: captionposty; const asize: sizety): rectty; overload;
@@ -1422,19 +1425,22 @@ begin
  end;
 end;
 
-procedure copytoclipboard(const value: msestring);
+procedure copytoclipboard(const value: msestring;
+          const buffer: clipboardbufferty = cbb_clipboard);
 begin
- gui_copytoclipboard(value);
+ gui_copytoclipboard(value,buffer);
 end;
 
-function canpastefromclipboard: boolean;
+function canpastefromclipboard(
+             const buffer: clipboardbufferty = cbb_clipboard): boolean;
 begin
- result:= gui_canpastefromclipboard;
+ result:= gui_canpastefromclipboard(buffer);
 end;
 
-function pastefromclipboard(out value: msestring): boolean;
+function pastefromclipboard(out value: msestring;
+          const buffer: clipboardbufferty = cbb_clipboard): boolean;
 begin
- result:= gui_pastefromclipboard(value) = gue_ok;
+ result:= gui_pastefromclipboard(value,buffer) = gue_ok;
 end;
 
 function confirmsavechangedfile(const filename: filenamety;
