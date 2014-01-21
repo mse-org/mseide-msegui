@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2014 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -129,6 +129,8 @@ function colordialog(var acolor: colorty): modalresultty;
 //threadsafe
 procedure paintcolorimage(const sender: twidget; const canvas: tcanvas;
                                                     const acolor: colorty);
+procedure paintcolorrect(const canvas: tcanvas; const arect: rectty;
+                                   const acolor: colorty);
 
 implementation
 uses
@@ -217,10 +219,9 @@ procedure tcolorfixcol.drawcell(const canvas: tcanvas);
 begin
  inherited;
  with cellinfoty(canvas.drawinfopo^) do begin
-  canvas.fillrect(ficonrect,
-           tcolordropdowncontroller(fcontroller).fcolorvalues[cell.row]);
+  paintcolorrect(canvas,ficonrect,
+          tcolordropdowncontroller(fcontroller).fcolorvalues[cell.row]);
  end;
- canvas.drawrect(ficonrect,cl_black);
 end;
 
 { tcolordropdowncontroller }
@@ -232,9 +233,11 @@ begin
  inherited;
  valuelist.asarray:= getcolornames;
  fcolorvalues:= getcolorvalues;
+ {
  for int1:= 0 to high(fcolorvalues) do begin
   fcolorvalues[int1]:= colorty(colortorgb(fcolorvalues[int1]));
  end;
+ }
  options:= [deo_autodropdown,deo_keydropdown];
 end;
 
@@ -436,11 +439,23 @@ begin
  result.bottom:= 0;
 end;
 
+procedure paintcolorrect(const canvas: tcanvas; const arect: rectty;
+                                   const acolor: colorty);
+var
+ co1: colorty;
+begin
+ canvas.fillrect(arect,colorty(colortorgb(acolor)));
+ co1:= cl_black;
+ if acolor and speccolormask = cl_functional then begin
+  co1:= cl_gray;
+ end;
+ canvas.drawrect(arect,co1);
+end;
+
 procedure paintcolorimage(const sender: twidget; const canvas: tcanvas;
                                                       const acolor: colorty);
 var
  rect1: rectty;
- co1: colorty;
 begin
  with sender do begin
   if canvas.drawinfopo <> nil then begin
@@ -454,12 +469,15 @@ begin
   rect1.x:= 1;
   dec(rect1.cy);
   rect1.cx:= rect1.cy;
+  paintcolorrect(canvas,rect1,acolor);
+  {
   canvas.fillrect(rect1,colorty(colortorgb(acolor)));
   co1:= cl_black;
   if acolor and speccolormask = cl_functional then begin
    co1:= cl_gray;
   end;
   canvas.drawrect(rect1,co1);
+  }
  end;
 end;
 
