@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2014 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -50,7 +50,7 @@ type
     //igridwidget
    procedure initgridwidget; virtual;
    function getoptionsedit: optionseditty;
-   procedure setfirstclick;
+   procedure setfirstclick(var ainfo: mouseeventinfoty);
    procedure setreadonly(const avalue: boolean);
    function createdatalist(const sender: twidgetcol): tdatalist; virtual;
    procedure datalistdestroyed;
@@ -170,12 +170,13 @@ end;
 procedure tcustomdataimage.changed;
 begin
  inherited;
- if not (ws_loadedproc in fwidgetstate) and canevent(tmethod(fonchange)) then begin
+ if not (ws_loadedproc in fwidgetstate) and
+                            canevent(tmethod(fonchange)) then begin
   fonchange(self);
  end;
 end;
 
-procedure tcustomdataimage.setfirstclick;
+procedure tcustomdataimage.setfirstclick(var ainfo: mouseeventinfoty);
 begin
  //dummy
 end;

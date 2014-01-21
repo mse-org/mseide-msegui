@@ -141,7 +141,7 @@ type
    function getinnerframe: framety; override;
 
     //igridwidget
-   procedure setfirstclick;
+   procedure setfirstclick(var ainfo: mouseeventinfoty);
    function createdatalist(const sender: twidgetcol): tdatalist; virtual;
    procedure datalistdestroyed;
    function getdatatype: datalistclassty; virtual;
@@ -623,7 +623,7 @@ begin
  result:= nil;
 end;
 
-procedure tcustomtextedit.setfirstclick;
+procedure tcustomtextedit.setfirstclick(var ainfo: mouseeventinfoty);
 begin
  //dummy
 end;

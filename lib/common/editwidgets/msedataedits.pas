@@ -161,7 +161,7 @@ type
    function getkeystring(const aindex: integer): msestring; override; //locate text
                    
     //igridwidget
-   procedure setfirstclick;
+   procedure setfirstclick(var ainfo: mouseeventinfoty);
    function createdatalist(const sender: twidgetcol): tdatalist; virtual; abstract;
    procedure datalistdestroyed; virtual;
    function getdatatype: datalistclassty; virtual; abstract;
@@ -2081,9 +2081,9 @@ begin
  updateedittext(true);  //change to textempty
 end;
 
-procedure tcustomdataedit.setfirstclick;
+procedure tcustomdataedit.setfirstclick(var ainfo: mouseeventinfoty);
 begin
- feditor.setfirstclick;
+ feditor.setfirstclick(ainfo);
 end;
 
 function tcustomdataedit.getdefaultvalue: pointer;

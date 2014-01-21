@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2014 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -1990,7 +1990,7 @@ type
    procedure setscrollrect(const rect: rectty);
    function scrollcaret(const vertical: boolean): boolean; virtual;
    procedure firstcellclick(const cell: gridcoordty;
-                                const info: mouseeventinfoty); virtual;
+                                var info: mouseeventinfoty); virtual;
    function getzebrastart: integer; virtual;
    function getnumoffset: integer; virtual;
 
@@ -2517,7 +2517,8 @@ type
    procedure checkcellvalue(var accept: boolean); override;
    procedure rootchanged(const awidgetregionivalid: boolean); override;
    procedure updatelayout; override;
-   procedure firstcellclick(const cell: gridcoordty; const info: mouseeventinfoty); override;
+   procedure firstcellclick(const cell: gridcoordty; 
+                      var info: mouseeventinfoty); override;
    function createdatacols: tdatacols; override;
    procedure docellevent(var info: celleventinfoty); override;
    procedure drawfocusedcell(const canvas: tcanvas); override;
@@ -10454,7 +10455,7 @@ begin
 end;
 
 procedure tcustomgrid.firstcellclick(const cell: gridcoordty;
-                                              const info: mouseeventinfoty);
+                                              var info: mouseeventinfoty);
 begin
  //dummy
 end;
@@ -16025,10 +16026,10 @@ begin
 end;
 
 procedure tcustomstringgrid.firstcellclick(const cell: gridcoordty;
-                                           const info: mouseeventinfoty);
+                                           var info: mouseeventinfoty);
 begin
  inherited;
- feditor.setfirstclick;
+ feditor.setfirstclick(info);
 end;
 
 procedure tcustomstringgrid.clientmouseevent(var info: mouseeventinfoty);

@@ -173,7 +173,7 @@ type
    procedure updatedatalist; virtual;
    
     //igridwidget
-   procedure setfirstclick;
+   procedure setfirstclick(var ainfo: mouseeventinfoty);
    function createdatalist(const sender: twidgetcol): tdatalist; virtual; abstract;
    procedure datalistdestroyed; virtual;
    function getdatatype: datalistclassty; virtual; abstract;
@@ -1710,7 +1710,7 @@ begin
  end;
 end;
 
-procedure tgraphdataedit.setfirstclick;
+procedure tgraphdataedit.setfirstclick(var ainfo: mouseeventinfoty);
 begin
  //dummy
 end;

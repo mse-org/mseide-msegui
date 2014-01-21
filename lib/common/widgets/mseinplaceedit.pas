@@ -170,7 +170,7 @@ type
    procedure updatepopupmenu(var amenu: tpopupmenu; const popupmenu: tpopupmenu;
                      var mouseinfo: mouseeventinfoty; 
                      const hasselection: boolean);
-   procedure setfirstclick;
+   procedure setfirstclick(var ainfo: mouseeventinfoty);
    procedure doactivate;
    procedure dodeactivate;
    procedure dofocus;
@@ -1437,11 +1437,11 @@ begin
  end;
 end;
 
-procedure tinplaceedit.setfirstclick;
+procedure tinplaceedit.setfirstclick(var ainfo: mouseeventinfoty);
 begin
  include(fstate,ies_firstclick);
  resetoffset;
- finfo.flags:= ftextflags;
+ finfo.flags:= ftextflags;    //restore flags before activate
 end;
 
 procedure tinplaceedit.mouseevent(var minfo: mouseeventinfoty);
@@ -1493,23 +1493,18 @@ begin
        else begin
         int1:= mousepostotextindex(pos);
         po1:= textindextomousepos(int1);
-        if minfo.button = mb_left then begin
-         if (ies_firstclick in fstate) then begin
-          finfo.flags:= ftextflagsactive;
-          if autoselect1 then begin
-           selectall;
-          end
-          else begin
-           initfocus;
-           moveindex(int1,false);
-          end;
+        if (ies_firstclick in fstate) then begin
+         finfo.flags:= ftextflagsactive;
+         if autoselect1 and (minfo.button = mb_left) then begin
+          selectall;
          end
          else begin
-          moveindex(int1,ss_shift in shiftstate);
+          initfocus;
+          moveindex(int1,false);
          end;
         end
         else begin
-         moveindex(int1,false);
+         moveindex(int1,ss_shift in shiftstate);
         end;
         subpoint1(po1,textindextomousepos(int1));
        end;

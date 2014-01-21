@@ -59,7 +59,7 @@ type
  end;
 
  igridwidget = interface(inullinterface) ['{CB4BC9B0-A6C2-4929-9E5F-92406B6617B4}']
-  procedure setfirstclick;
+  procedure setfirstclick(var ainfo: mouseeventinfoty);
   function getwidget: twidget;
   procedure getautocellsize(const acanvas: tcanvas; var asize: sizety);
   procedure updatepopupmenu(var amenu: tpopupmenu; 
@@ -3476,8 +3476,8 @@ begin
   end;
   if ffocusedcell.col >= 0 then begin
    with twidgetcols(fdatacols)[ffocusedcell.col] do begin
-    if fintf <> nil then begin
-     fintf.setfirstclick;
+    if (fintf <> nil) then begin
+     fintf.setfirstclick(info);
     end;
    end;
   end;
