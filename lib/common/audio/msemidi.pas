@@ -664,7 +664,7 @@ begin
        mmk_noteoff,mmk_noteon,mmk_notepressure,
        mmk_controller,mmk_programchange,mmk_channelpressure,
        mmk_pitchbend: begin
-        int3:= additem(ftrackbuffer[int1],typeinfo(trackbufferarty),int2);
+        int3:= additemindex(ftrackbuffer[int1],typeinfo(trackbufferarty),int2);
         ftrackbuffer[int1][int3]:= trackdata;
         include(channels,midichannelty(trackdata.event.channel and $0f));
        end;

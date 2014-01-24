@@ -227,8 +227,8 @@ end;
 { tcolordropdowncontroller }
 
 constructor tcolordropdowncontroller.create(const intf: idropdownlist);
-var
- int1: integer;
+//var
+// int1: integer;
 begin
  inherited;
  valuelist.asarray:= getcolornames;
