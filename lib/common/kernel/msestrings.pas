@@ -978,11 +978,11 @@ function psubstr(const start,stop: pchar): string;
 var
  int1: integer;
 begin
- if (start = nil) or (stop = nil) then begin
+ int1:= stop-start;
+ if (int1 < 0) or (start = nil) or (stop = nil) then begin
   result:= '';
  end
  else begin
-  int1:= stop-start;
   setlength(result,int1);
   move(start^,result[1],int1);
  end;
@@ -992,11 +992,11 @@ function psubstr(const start,stop: pmsechar): msestring;
 var
  int1: integer;
 begin
- if (start = nil) or (stop = nil) then begin
+ int1:= stop-start;
+ if (int1 < 0) or (start = nil) or (stop = nil) then begin
   result:= '';
  end
  else begin
-  int1:= stop-start;
   setlength(result,int1);
   move(start^,result[1],int1*sizeof(msechar));
  end;
