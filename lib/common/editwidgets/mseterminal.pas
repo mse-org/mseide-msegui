@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2014 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -21,12 +21,13 @@ type
  sendtexteventty = procedure(const sender: tobject; 
                        var atext: msestring; var donotsend: boolean) of object;
  receivetexteventty = procedure(const sender: tobject; 
-                       var atext: ansistring; const errorinput: boolean) of object;
- terminaloptionty = (teo_readonly,teo_bufferchunks,teo_stripescsequence,teo_utf8);
+                  var atext: ansistring; const errorinput: boolean) of object;
+ terminaloptionty = (teo_readonly,teo_bufferchunks,teo_stripescsequence,
+                                                                      teo_utf8);
  terminaloptionsty = set of terminaloptionty;
 const
  defaultterminaleditoptions = (defaulttexteditoptions + [oe_caretonreadonly])-
-                            [oe_linebreak];
+                                                                [oe_linebreak];
  defaultterminaloptions = [{teo_tty}];
  defaultoptionsprocess = [pro_output,pro_errorouttoout,pro_input,
                         pro_winpipewritehandles,pro_inactive,pro_tty,pro_ctrlc];
@@ -187,7 +188,8 @@ begin
  inherited;
 end;
 
-procedure tterminal.docellevent(const ownedcol: boolean; var info: celleventinfoty);
+procedure tterminal.docellevent(const ownedcol: boolean; 
+                                           var info: celleventinfoty);
 begin
  case info.eventkind of
   cek_enter: begin
@@ -340,17 +342,21 @@ begin
      end;
     end;
     ea_pasteselection: begin
-     if msewidgets.pastefromclipboard(mstr1) then begin
+     if msewidgets.pastefromclipboard(mstr1,info.bufferkind) then begin
       clearselection;
       ar1:= breaklines(mstr1);
       if high(ar1) >= 0 then begin
-       datalist[rowhigh]:= datalist[rowhigh] + ar1[0];
+//       datalist[rowhigh]:= datalist[rowhigh] + ar1[0];
+       editor.inserttext(ar1[0],false);
        for int1:= 1 to high(ar1) do begin
         tinplaceedit1(editor).checkaction(ea_textentered);
         datalist[rowhigh]:= ar1[int1];
        end;
+       if high(ar1) > 0 then begin
+        editpos:= makegridcoord(length(datalist[rowhigh]),rowhigh);
+       end;
       end;
-      editpos:= makegridcoord(length(datalist[rowhigh]),rowhigh);
+//      editpos:= makegridcoord(length(datalist[rowhigh]),rowhigh);
      end;
      info.action:= ea_none;
     end;

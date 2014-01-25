@@ -199,7 +199,8 @@ type
    function canundo: boolean; virtual;
    function cancopy: boolean;
    function canpaste: boolean;
-   function getinsertcaretwidth(const canvas: tcanvas; const afont: tfont): integer;
+   function getinsertcaretwidth(const canvas: tcanvas;
+                                              const afont: tfont): integer;
    property insertstate: boolean read getinsertstate write setinsertstate;
    property selstart: integer read fselstart write setselstart;
    property sellength: halfinteger read fsellength write setsellength;
@@ -214,12 +215,14 @@ type
    property optionsedit1: optionsedit1ty read foptionsedit1 
                         write foptionsedit1 default defaultoptionsedit1;
    property textflags: textflagsty read ftextflags write settextflags;
-   property textflagsactive: textflagsty read ftextflagsactive write settextflagsactive;
+   property textflagsactive: textflagsty read ftextflagsactive 
+                                                 write settextflagsactive;
    property passwordchar: msechar read fpasswordchar
                                          write setpasswordchar default #0;
    property maxlength: integer read fmaxlength write setmaxlength default -1;
                 //<0-> no limit
-   property caretwidth: integer read fcaretwidth write setcaretwidth default defaultcaretwidth;
+   property caretwidth: integer read fcaretwidth write setcaretwidth
+                                                   default defaultcaretwidth;
                 //<0-> proportional to width of char 'o', -1024 -> 100%
    property text: msestring read finfo.text.text write settext;
    property oldtext: msestring read foldtext write foldtext;
@@ -1508,7 +1511,9 @@ begin
         end;
         subpoint1(po1,textindextomousepos(int1));
        end;
-       if minfo.button = mb_middle then begin
+       if (minfo.button = mb_middle) and 
+               not (oe_readonly in fintf.getoptionsedit) then begin
+                         //cold be changed by moveindex
         addpoint1(po1,textindextomousepos(int1));
         clearselection;
         pastefromclipboard(cbb_primary);
