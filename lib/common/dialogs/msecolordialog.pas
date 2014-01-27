@@ -14,44 +14,15 @@ unit msecolordialog;
 interface
 uses
  msegui,mseclasses,mseforms,msegraphedits,msewidgets,msesimplewidgets,
- msedataedits,msegraphics,mseglob,mseguiglob,msedialog,
- classes,mclasses,msetypes,msedropdownlist,msegrids,
- msestrings,mseedit,msestat,msestatfile,msegraphutils,msemenus,mseevent;
+ msedataedits,msegraphics,mseglob,mseguiglob,msedialog,classes,mclasses,
+ msetypes,msedropdownlist,msegrids,msestrings,mseedit,msestat,msestatfile,
+ msegraphutils,msemenus,mseevent,mseificomp,mseificompglob,
+ mseifiglob,msesplitter,msedispwidgets,mserichstring,msescrollbar;
 
 const
  colordialogstatname = 'colordialog.sta';
  
 type
- tcolordialogfo = class(tmseform)
-   cancel: tbutton;
-   ok: tbutton;
-   sliderred: tslider;
-   slidergreen: tslider;
-   sliderblue: tslider;
-   red: tintegeredit;
-   green: tintegeredit;
-   blue: tintegeredit;
-   colorarea: tpaintbox;
-   sliderhue: tslider;
-   slidersat: tslider;
-   sliderbright: tslider;
-   hue: tintegeredit;
-   sat: tintegeredit;
-   bright: tintegeredit;
-   colorareabefore: tpaintbox;
-   tgroupbox1: tgroupbox;
-   tstatfile1: tstatfile;
-   procedure hueonsetvalue(const sender: TObject; var avalue: realty; var accept: Boolean);
-   procedure satonsetvalue(const sender: TObject; var avalue: realty; var accept: Boolean);
-   procedure brightonsetvalue(const sender: TObject; var avalue: realty; var accept: Boolean);
-   procedure hsbchange(const sender: TObject);
-   procedure redonsetvalue(const sender: TObject; var avalue: realty; var accept: Boolean);
-   procedure greenonsetvalue(const sender: TObject; var avalue: realty; var accept: Boolean);
-   procedure blueonsetvalue(const sender: TObject; var avalue: realty; var accept: Boolean);
-   procedure rgbchange(const sender: TObject);
-  private
-   fupdating: boolean;
- end;
  
  setcoloreventty = procedure(const sender: tobject; var avalue: colorty;
                           var accept: boolean) of object;               
@@ -116,6 +87,48 @@ type
    property frame;
  end;
   
+ tcolordialogfo = class(tmseform)
+   tstatfile1: tstatfile;
+   tlayouter1: tlayouter;
+   blue: tintegeredit;
+   green: tintegeredit;
+   red: tintegeredit;
+   bright: tintegeredit;
+   sat: tintegeredit;
+   hue: tintegeredit;
+   tlayouter2: tlayouter;
+   cancel: tbutton;
+   ok: tbutton;
+   colored: tcoloredit;
+   rgbed: tintegeredit;
+   tlayouter3: tlayouter;
+   sliderblue: tslider;
+   slidergreen: tslider;
+   sliderred: tslider;
+   sliderbright: tslider;
+   slidersat: tslider;
+   sliderhue: tslider;
+   gb: tgroupbox;
+   colorareabefore: tpaintbox;
+   colorarea: tpaintbox;
+   procedure hueonsetvalue(const sender: TObject; var avalue: realty; var accept: Boolean);
+   procedure satonsetvalue(const sender: TObject; var avalue: realty; var accept: Boolean);
+   procedure brightonsetvalue(const sender: TObject; var avalue: realty; var accept: Boolean);
+   procedure hsbchange(const sender: TObject);
+   procedure redonsetvalue(const sender: TObject; var avalue: realty; var accept: Boolean);
+   procedure greenonsetvalue(const sender: TObject; var avalue: realty; var accept: Boolean);
+   procedure blueonsetvalue(const sender: TObject; var avalue: realty; var accept: Boolean);
+   procedure rgbchange(const sender: TObject);
+   procedure componentsdataentered(const sender: TObject);
+   procedure layoutexe(const sender: TObject);
+   procedure rgbeddataentered(const sender: TObject);
+   procedure coloreddataentered(const sender: TObject);
+   procedure loadedexe(const sender: TObject);
+  private
+   fupdating: boolean;
+   procedure updatecomponents;
+ end;
+
  tcolordropdowncontroller = class(tnocolsdropdownlistcontroller)
   protected
    fcolorvalues: colorarty;
@@ -159,16 +172,20 @@ begin
   try
    try
     col1:= colortorgb(acolor);
+    fo.colored.value:= acolor;
    except
     fillchar(col1,sizeof(col1),0);
+    fo.colored.value:= 0;
    end;
+   fo.rgbed.value:= integer(col1);
    fo.colorareabefore.frame.colorclient:= colorty(col1);
    fo.red.value:= col1.red;
    fo.green.value:= col1.green;
    fo.blue.value:= col1.blue;
    result:= fo.show(true);
    if result = mr_ok then begin
-    acolor:= rgbtocolor(fo.red.value,fo.green.value,fo.blue.value);
+    acolor:= fo.colored.value;
+//    acolor:= rgbtocolor(fo.red.value,fo.green.value,fo.blue.value);
    end;
   finally
    fo.free;
@@ -697,6 +714,51 @@ begin
   end;
   fupdating:= false;
  end;
+end;
+
+procedure tcolordialogfo.updatecomponents;
+var
+ rgb1: rgbtriplety;
+begin
+ if not fupdating then begin
+  fupdating:= true;
+  rgb1:= rgbtriplety(rgbed.value);
+  red.value:= rgb1.red;
+  green.value:= rgb1.green;
+  blue.value:= rgb1.blue;
+  fupdating:= false;
+  rgbchange(nil);
+ end;
+end;
+
+procedure tcolordialogfo.componentsdataentered(const sender: TObject);
+begin
+ rgbed.value:= integer(rgbtocolor(red.value,green.value,blue.value));
+ colored.value:= rgbed.value;
+end;
+
+procedure tcolordialogfo.layoutexe(const sender: TObject);
+begin
+ gb.height:= sliderhue.height;
+ colorareabefore.frameheight:= gb.height;
+ colorarea.frameheight:= gb.height;
+end;
+
+procedure tcolordialogfo.rgbeddataentered(const sender: TObject);
+begin
+ colored.value:= colorty(rgbed.value);
+ updatecomponents;
+end;
+
+procedure tcolordialogfo.coloreddataentered(const sender: TObject);
+begin
+ rgbed.value:= integer(colortorgb(colored.value));
+ updatecomponents;
+end;
+
+procedure tcolordialogfo.loadedexe(const sender: TObject);
+begin
+ colored.activate;
 end;
 
 end.
