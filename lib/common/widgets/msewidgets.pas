@@ -5738,8 +5738,9 @@ begin
  rect2:= deflaterect(application.workarea(transientfor),fframe.innerframe);
  rect1:= textrect(getcanvas,info.caption,rect2,[tf_wordbreak],
                                             stockobjects.fonts[stf_hint]);
- inc(rect1.cx,fframe.innerframewidth.cx);
- inc(rect1.cy,fframe.innerframewidth.cy);
+ addsize1(rect1.size,fframe.innerframedim);
+// inc(rect1.cx,fframe.innerframedim.cx);
+// inc(rect1.cy,fframe.innerframedim.cy);
  widgetrect:= placepopuprect(transientfor,info.posrect,info.placement,rect1.size);
 end;
 

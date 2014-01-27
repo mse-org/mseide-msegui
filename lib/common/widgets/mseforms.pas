@@ -1956,7 +1956,7 @@ var
 begin
  with fscrollbox do begin
   asize:= calcminscrollsize;
-  size1:= frame.paintframewidth;
+  size1:= frame.paintframedim;
   subpoint1(pointty(size1),self.paintpos);
   asize.cx:= asize.cx + fscrollbox.bounds_x + size1.cx;
   asize.cy:= asize.cy + fscrollbox.bounds_y + size1.cy;

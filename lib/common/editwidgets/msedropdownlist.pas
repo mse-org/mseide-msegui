@@ -1493,7 +1493,7 @@ begin
     end;
    end;
   end;
-  result:= result + fdropdownlist.framewidth.cx;
+  result:= result + fdropdownlist.framedim.cx;
  end;
 end;
 
@@ -2127,7 +2127,7 @@ begin
    result:= result+ height + linewidth;
   end;
  end;
- result:= result + fframe.paintframewidth.cy;
+ result:= result + fframe.paintframedim.cy;
 end;
 
 procedure tdropdownlist.show(awidth: integer; const arowcount: integer;

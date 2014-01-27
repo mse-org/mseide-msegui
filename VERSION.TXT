@@ -1,5 +1,9 @@
 MSEide+MSEgui breaking changes version history
 
+2014-01-27
+ tcustomframe.*framewidth() -> *framedim().
+ twidget.framewidth() -> framedim().
+
 Version 3.0
 2013-09-27
 2013-07-14

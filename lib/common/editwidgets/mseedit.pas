@@ -988,7 +988,7 @@ begin
  for int1:= 0 to fbuttons.count-1 do begin
   with fbuttons[int1],finfo,fframerect do begin
    if not (shs_invisible in state) then begin
-    cy:= fintf.getwidgetrect.cy - frameframewidth.cy;
+    cy:= fintf.getwidgetrect.cy - frameframedim.cy;
     if fbuttonwidth = 0 then begin
      cx:= cy;
     end

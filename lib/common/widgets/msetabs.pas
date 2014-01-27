@@ -2476,7 +2476,7 @@ begin
  if not (tabo_vertical in options) then begin
   size1:= paintsize;
   getautopaintsize(size1);
-  size1:= addsize(size1,fframe.paintframewidth);
+  size1:= addsize(size1,fframe.paintframedim);
   bounds_cy:= size1.cy;
  end;
 end;

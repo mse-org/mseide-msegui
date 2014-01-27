@@ -940,7 +940,7 @@ begin
   else begin
 {$warnings off}
    tlistitem.calcitemlayout(subsize(makesize(cellwidth,cellheight),
-                                       fcellframe.paintframewidth),
+                                       fcellframe.paintframedim),
                            tframe1(fcellframe).fi.innerframe,self,flayoutinfo);
 {$warnings on}
   end;
@@ -2017,7 +2017,7 @@ begin
   int1:= font.glyphheight + 2;
  end
  else begin
-  int1:= font.glyphheight + cellframe.innerframewidth.cy;
+  int1:= font.glyphheight + cellframe.innerframedim.cy;
  end;
  if (itemlist.imagelist <> nil) then begin
   if itemlist.captionpos in [cp_left,cp_center,cp_right] then begin

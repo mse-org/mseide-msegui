@@ -1622,7 +1622,7 @@ begin
        addsize1(sum,size);
       end
       else begin
-       addsize1(sum,framewidth);
+       addsize1(sum,framedim);
       end;
      end
      else begin

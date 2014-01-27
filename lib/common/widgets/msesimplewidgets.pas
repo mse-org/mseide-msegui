@@ -2096,7 +2096,7 @@ begin
                                             (osc_expandy in foptionsscale); 
  if box or boy then begin
   size1:= minscrollsize;
-  addsize1(size1,framewidth);
+  addsize1(size1,framedim);
   if box and (result.cx < size1.cx) then begin
    result.cx:= size1.cx;
   end;

@@ -548,10 +548,10 @@ type
              const arect: rectty; const clipandmove: boolean); virtual;
    procedure paintoverlay(const canvas: tcanvas; const arect: rectty); virtual;
 
-   function outerframewidth: sizety; //widgetsize - framesize
-   function frameframewidth: sizety; //widgetsize - (paintsize + paintframe)
-   function paintframewidth: sizety; //widgetsize - paintsize
-   function innerframewidth: sizety; //widgetsize - innersize
+   function outerframedim: sizety; //widgetsize - framesize
+   function frameframedim: sizety; //widgetsize - (paintsize + paintframe)
+   function paintframedim: sizety; //widgetsize - paintsize
+   function innerframedim: sizety; //widgetsize - innersize
    function outerframe: framety;
    function paintframe: framety;     
    function innerframe: framety;     
@@ -1260,6 +1260,7 @@ type
    foptionsskin: optionsskinty;
    fskingroup: integer;
    fonnavigrequest: navigrequesteventty;
+   geframewidth: integer;
    procedure invalidateparentminclientsize;
    function minclientsize: sizety;
    function getwidgets(const index: integer): twidget;
@@ -1325,6 +1326,15 @@ type
    procedure setoptionsskin(const avalue: optionsskinty);
    function getpaintsize: sizety;
    procedure setpaintsize(const avalue: sizety);
+   function getframesize: sizety;
+   procedure setframesize(const avalue: sizety);
+   procedure setframewidth(const avalue: integer);
+   function getframeheight: integer;
+   procedure setframeheight(const avalue: integer);
+   function getpaintwidth: integer;
+   procedure setpaintwidth(const avalue: integer);
+   function getpaintheight: integer;
+   procedure setpaintheight(const avalue: integer);
   protected
    fwidgets: widgetarty;
    fnoinvalidate: integer;
@@ -1801,18 +1811,24 @@ type
    property anchors: anchorsty read fanchors write setanchors default defaultanchors;
    property defaultfocuschild: twidget read getdefaultfocuschild write setdefaultfocuschild;
 
-   function framewidth: sizety;              //widgetrect.size - paintrect.size
+   function framedim: sizety;                //widgetrect.size - paintrect.size
    function clientframewidth: sizety;        //widgetrect.size - clientrect.size
    function innerclientframewidth: sizety;   //widgetrect.size - innerclientrect.size
    function innerframewidth: sizety;         //clientrect.size - innerclientrect.size  
    function framerect: rectty;               //origin = pos
    function framepos: pointty;               //origin = pos
-   function framesize: sizety;
+   property framesize: sizety read getframesize write setframesize;    
+                                            //widget size - outer frame
+   property framewidth: integer read geframewidth write setframewidth;
+   property frameheight: integer read getframeheight write setframeheight;
    function frameinnerrect: rectty;          //origin = pos
+
    function paintrect: rectty;               //origin = pos
    function paintclientrect: rectty;         //origin = clientrect
    function paintpos: pointty;               //origin = pos
    property paintsize: sizety read getpaintsize write setpaintsize;
+   property paintwidth: integer read getpaintwidth write setpaintwidth;
+   property paintheight: integer read getpaintheight write setpaintheight;
    function clippedpaintrect: rectty;        //origin = pos, 
                                              //clipped by all parentpaintrects
    function innerpaintrect: rectty;          //origin = pos
@@ -4733,28 +4749,28 @@ begin
  //dummy
 end;
 
-function tcustomframe.outerframewidth: sizety;
+function tcustomframe.outerframedim: sizety;
 begin
  checkstate;
  result.cx:= fouterframe.left + fouterframe.right;
  result.cy:= fouterframe.top + fouterframe.bottom;
 end;
 
-function tcustomframe.frameframewidth: sizety;
+function tcustomframe.frameframedim: sizety;
 begin
  checkstate;
  result.cx:= fouterframe.left + fwidth.left + fwidth.right + fouterframe.right;
  result.cy:= fouterframe.top + fwidth.top + fwidth.bottom + fouterframe.bottom;
 end;
 
-function tcustomframe.paintframewidth: sizety;
+function tcustomframe.paintframedim: sizety;
 begin
  checkstate;
  result.cx:= fpaintframe.left + fpaintframe.right;
  result.cy:= fpaintframe.top + fpaintframe.bottom;
 end;
 
-function tcustomframe.innerframewidth: sizety;
+function tcustomframe.innerframedim: sizety;
 begin
  checkstate;
  result.cx:= finnerframe.left + finnerframe.right;
@@ -7143,11 +7159,11 @@ begin
   end;
   size1:= value.size;
   if fframe <> nil then begin
-   subsize1(size1,fframe.paintframewidth);
+   subsize1(size1,fframe.paintframedim);
   end;
   getautopaintsize(size1);
   if fframe <> nil then begin
-   addsize1(size1,fframe.paintframewidth);
+   addsize1(size1,fframe.paintframedim);
   end;
   subsize1(size1,value.size);
   size2:= value.size;
@@ -7241,7 +7257,7 @@ begin
     orderarray(ar3,pointerarty(ar1));
     size1:= value.size;
     if fframe <> nil then begin
-     subsize1(size1,fframe.paintframewidth);
+     subsize1(size1,fframe.paintframedim);
     end;
     if fframe <> nil then begin
      fframe.checkminscrollsize(size1);
@@ -8477,7 +8493,7 @@ begin
  end;
 end;
 
-function twidget.framewidth: sizety;    
+function twidget.framedim: sizety;    
                              //widgetrect.size - paintrect.size
 begin
  {$ifdef FPC} {$checkpointer off} {$endif}
@@ -8534,20 +8550,6 @@ begin
  end
  else begin
   result:= nullpoint;
- end;
-end;
-
-function twidget.framesize: sizety;
-begin
- if fframe <> nil then begin
-  fframe.checkstate;
-  with fframe.fouterframe do begin
-   result.cx:= fwidgetrect.cx - left - right;
-   result.cy:= fwidgetrect.cy - top - bottom;
-  end;
- end
- else begin
-  result:= fwidgetrect.size;
  end;
 end;
 
@@ -9399,7 +9401,71 @@ end;
 
 procedure twidget.setpaintsize(const avalue: sizety);
 begin
- setanchordwidgetsize(addsize(avalue,framewidth));
+ setanchordwidgetsize(addsize(avalue,framedim));
+end;
+
+function twidget.getframesize: sizety;
+begin
+ if fframe <> nil then begin
+  fframe.checkstate;
+  with fframe.fouterframe do begin
+   result.cx:= fwidgetrect.cx - left - right;
+   result.cy:= fwidgetrect.cy - top - bottom;
+  end;
+ end
+ else begin
+  result:= fwidgetrect.size;
+ end;
+end;
+
+procedure twidget.setframesize(const avalue: sizety);
+var
+ si1: sizety;
+begin
+ si1:= avalue;
+ if fframe <> nil then begin
+//  fframe.checkstate;
+  with fframe.fouterframe do begin
+   si1.cx:= si1.cx + left + right;
+   si1.cy:= si1.cy + top + bottom;
+  end;
+ end;
+ setanchordwidgetsize(si1);
+end;
+
+procedure twidget.setframewidth(const avalue: integer);
+begin
+ setframesize(ms(avalue,getframesize.cy));
+end;
+
+procedure twidget.setframeheight(const avalue: integer);
+begin
+ setframesize(ms(getframesize.cx,avalue));
+end;
+
+procedure twidget.setpaintwidth(const avalue: integer);
+begin
+ setpaintsize(ms(avalue,getpaintsize.cy));
+end;
+
+procedure twidget.setpaintheight(const avalue: integer);
+begin
+ setpaintsize(ms(getpaintsize.cx,avalue));
+end;
+
+function twidget.getframeheight: integer;
+begin
+ result:= getframesize.cy;
+end;
+
+function twidget.getpaintwidth: integer;
+begin
+ result:= getpaintsize.cx;
+end;
+
+function twidget.getpaintheight: integer;
+begin
+ result:= getpaintsize.cy;
 end;
 
 function twidget.clientwidgetrect: rectty;        //origin = pos
