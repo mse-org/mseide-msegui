@@ -292,7 +292,6 @@ object colordialogfo: tcolordialogfo
       anchors = [an_left, an_top, an_bottom]
       ondataentered = componentsdataentered
       value = 0
-      scrollbar.options = [sbo_moveauto]
       scrollbar.color = -2147483645
       scrollbar.colorpattern = -2147483642
       scrollbar.face.image.transparentcolor = -2147483648
@@ -326,7 +325,6 @@ object colordialogfo: tcolordialogfo
       anchors = [an_left, an_top, an_bottom]
       ondataentered = componentsdataentered
       value = 0
-      scrollbar.options = [sbo_moveauto]
       scrollbar.color = -2147483645
       scrollbar.colorpattern = -2147483642
       scrollbar.face.image.transparentcolor = -2147483648
@@ -360,7 +358,6 @@ object colordialogfo: tcolordialogfo
       anchors = [an_left, an_top, an_bottom]
       ondataentered = componentsdataentered
       value = 0
-      scrollbar.options = [sbo_moveauto]
       scrollbar.color = -2147483645
       scrollbar.colorpattern = -2147483642
       scrollbar.face.image.transparentcolor = -2147483648
@@ -394,7 +391,6 @@ object colordialogfo: tcolordialogfo
       anchors = [an_left, an_top, an_bottom]
       ondataentered = componentsdataentered
       value = 0
-      scrollbar.options = [sbo_moveauto]
       scrollbar.color = -2147483645
       scrollbar.colorpattern = -2147483642
       scrollbar.face.image.transparentcolor = -2147483648
@@ -428,7 +424,6 @@ object colordialogfo: tcolordialogfo
       anchors = [an_left, an_top, an_bottom]
       ondataentered = componentsdataentered
       value = 0
-      scrollbar.options = [sbo_moveauto]
       scrollbar.color = -2147483645
       scrollbar.colorpattern = -2147483642
       scrollbar.face.image.transparentcolor = -2147483648
@@ -461,7 +456,6 @@ object colordialogfo: tcolordialogfo
       anchors = [an_left, an_top, an_bottom]
       ondataentered = componentsdataentered
       value = 0
-      scrollbar.options = [sbo_moveauto]
       scrollbar.color = -2147483645
       scrollbar.colorpattern = -2147483642
       scrollbar.face.image.transparentcolor = -2147483648
