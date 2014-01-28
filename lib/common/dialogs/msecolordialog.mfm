@@ -192,7 +192,7 @@ object colordialogfo: tcolordialogfo
       bounds_cy = 37
       onchange = hsbchange
       ondataentered = componentsdataentered
-      max = 359
+      max = 360
       reffontheight = 14
     end
   end
