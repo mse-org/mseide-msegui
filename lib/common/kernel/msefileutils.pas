@@ -1639,10 +1639,9 @@ var
  str1: filenamety;
  int1: integer;
 begin
- str1:= path;
- tomsefilepath1(str1);
- int1:= findlastchar(path,dotchar);
- if (int1 > 1) and (findlastchar(path,slashchar) < int1) then begin
+ str1:= tomsefilepath(path);
+ int1:= findlastchar(str1,dotchar);
+ if (int1 > 1) and (findlastchar(str1,slashchar) < int1) then begin
   result:= copy(str1,1,int1-1);
  end
  else begin
