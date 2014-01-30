@@ -1,7 +1,7 @@
 MSEide+MSEgui Pascal Cross Platform GUI Development System.
 
-2013-10-03 Version 3.1
-Copyright (c) 1999-2013 by Martin Schreiber
+2014-01-30 Version 3.2
+Copyright (c) 1999-2014 by Martin Schreiber
 
 * 2.8.6 -> 3.0:
 * MSEgui now has own implementations for "classes" and "db" units.
@@ -10,8 +10,8 @@ Copyright (c) 1999-2013 by Martin Schreiber
 * Please change "db" to "mdb" in uses and add 
 * "mclasses" after "classes" in uses in your units
 
-- Compiles with FPC 2.6.0 or 2.6.2
-- Tested on i386-linux SuSE 12.3, x84_64-linux SuSE 12.2 and
+- Compiles with FPC 2.6.0, 2.6.2 or 2.6.4
+- Tested on i386-linux SuSE 13.1, x84_64-linux SuSE 12.2 and
   i386-win32 2000, XP and Vista.
 - Links to xlib and gdi32, no external widget library needed.
 - Internal character encoding is UCS2.
