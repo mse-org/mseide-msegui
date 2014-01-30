@@ -1613,14 +1613,16 @@ begin
  if po3 <> nil then begin
   with po3^ do begin
    name:= newname;
-   if not isemptysourcepos(po3^.impheaderstartpos) then begin
+   if not isemptysourcepos(impheaderstartpos) then begin
     replacetext(po1,impheaderstartpos,impheaderendpos,
      limitlinelength(composeprocedureheader(po3,po2,false),fmaxlinelength,';',
                          14,impheaderstartpos.pos.col));
    end;
-   replacetext(po1,intstartpos,intendpos,
+   if not isemptysourcepos(intstartpos) then begin
+    replacetext(po1,intstartpos,intendpos,
      limitlinelength(composeproceduretext(po3,false),fmaxlinelength,';',
                          18,intstartpos.pos.col));
+   end;
   end;
  end;
 end;
