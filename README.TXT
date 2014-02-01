@@ -166,7 +166,7 @@ Option "EXAPixmaps" "off"
 to 
 Section "Device"
 of xorg.conf, see
-https://bugzilla.novell.com/show_bug.cgi?id=690766
+https://bugs.freedesktop.org/show_bug.cgi?id=69543
 
 Flashing taskbar widgets in IceWM
 *********************************
