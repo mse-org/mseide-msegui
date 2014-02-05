@@ -150,7 +150,8 @@ type
                    ws1_isstreamed,     //used by ttabwidget
                    ws1_scaled,         //used in tcustomscalingwidget
                    ws1_forceclose,
-                   ws1_noclipchildren,ws1_tryshrink,ws1_noframewidgetshift,
+                   ws1_noclipchildren,ws1_tryshrink,
+                   ws1_noframewidgetshift,ws1_framemouse,
                    ws1_nodesignvisible,ws1_nodesignframe,ws1_nodesignhandles,
                    ws1_nodesigndelete,ws1_designactive,
                    ws1_fakevisible,ws1_nominsize,
@@ -162,7 +163,8 @@ type
  framestatety = (fs_sbhorzon,fs_sbverton,fs_sbhorzfix,fs_sbvertfix,
                  fs_sbhorztop,fs_sbvertleft,
                  fs_sbleft,fs_sbtop,fs_sbright,fs_sbbottom,
-                 fs_nowidget,fs_nosetinstance,fs_disabled,fs_creating,
+                 fs_nowidget,fs_nosetinstance,fs_framemouse,
+                 fs_disabled,fs_creating,
                  fs_cancaptionsyncx,fs_cancaptionsyncy,
                  fs_drawfocusrect,fs_paintrectfocus,
                  fs_captionfocus,fs_captionhint,fs_rectsvalid,
@@ -3665,6 +3667,9 @@ begin
  if ws1_noframewidgetshift in ws1 then begin
   include(fstate,fs_nowidget);
  end;
+ if ws1_framemouse in ws1 then begin
+  include(fstate,fs_framemouse);
+ end;
  if not (fs_nosetinstance in fstate) then begin
   fintf.setframeinstance(self);
  end;
@@ -3684,14 +3689,19 @@ procedure tcustomframe.updatemousestate(const sender: twidget;
 begin
  checkstate;
  with sender do begin
-  if not (ow_mousetransparent in foptionswidget) and
-                       pointinrect(info.pos,fpaintrect) then begin
-   fwidgetstate:= fwidgetstate + [ws_mouseinclient,ws_wantmousemove,
+  fwidgetstate:= fwidgetstate - [ws_mouseinclient,ws_wantmousemove,
                            ws_wantmousebutton,ws_wantmousefocus];
-  end
-  else begin
-   fwidgetstate:= fwidgetstate - [ws_mouseinclient,ws_wantmousemove,
-                           ws_wantmousebutton,ws_wantmousefocus];
+  if not (ow_mousetransparent in foptionswidget) then begin
+   if pointinrect(info.pos,fpaintrect) then begin
+    fwidgetstate:= fwidgetstate + [ws_mouseinclient,ws_wantmousemove,
+                                       ws_wantmousebutton,ws_wantmousefocus];
+   end
+   else begin
+    if (fs_framemouse in fstate) and 
+       pointinrect(info.pos,mr(nullpoint,fintf.getwidgetrect.size)) then begin
+     fwidgetstate:= fwidgetstate + [ws_wantmousemove,ws_wantmousebutton];
+    end;
+   end;
   end;
  end;
 end;
