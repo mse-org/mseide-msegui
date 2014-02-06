@@ -882,6 +882,7 @@ begin
  ficon.free;
  fscrollbox.free;
  fmainmenuwidget.free;
+ statfile:= nil; //unlink client connection
  inherited; //csdesigningflag is removed
  if not bo1 and candestroyevent(tmethod(fondestroyed)) then begin
   fondestroyed(self);
