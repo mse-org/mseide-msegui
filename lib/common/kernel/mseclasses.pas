@@ -793,6 +793,7 @@ procedure unregisterobjectdata(const objectclassname: string; const name: string
                  //language overrides
 procedure resetchangedmodules;
 procedure reloadchangedmodules;
+procedure reloadmodules;
 
 procedure msebegingloballoading; //recursive
 procedure mseendgloballoading;   //calls notifygloballoading in level 0
@@ -984,6 +985,7 @@ type
   protected
    procedure finalizerecord(var item); override;
    procedure copyrecord(var item); override;
+   procedure reload(const all: boolean);
   public
    constructor create;
    function itempo(const index: integer): pobjectdatainfoty;
@@ -992,6 +994,7 @@ type
    function find(aclassname: string; aname: string): pobjectdatainfoty; overload;
    procedure resetchanged;
    procedure reloadchanged;
+   procedure reloadall;
  end;
  
  tloadedlist = class(tcomponent)
@@ -3144,7 +3147,7 @@ begin
  end;
 end;
 
-procedure tobjectdatainfolist.reloadchanged;
+procedure tobjectdatainfolist.reload(const all: boolean);
 var
  int1: integer;
  int2: integer;
@@ -3154,7 +3157,7 @@ begin
  if fmodules <> nil then begin
   po1:= pobjectdatainfoty(fdata);
   for int1:= 0 to count - 1 do begin
-   if po1^.changed then begin
+   if all or po1^.changed then begin
     for int2:= 0 to fmodules.count - 1 do begin
      comp1:= fmodules[int2];
      with comp1 do begin
@@ -3170,6 +3173,16 @@ begin
    inc(po1);
   end;
  end;
+end;
+
+procedure tobjectdatainfolist.reloadchanged;
+begin
+ reload(false);
+end;
+
+procedure tobjectdatainfolist.reloadall;
+begin
+ reload(true);
 end;
 
 procedure registerobjectdata(datapo: pobjectdataty; 
@@ -3226,6 +3239,13 @@ procedure reloadchangedmodules;
 begin
  if objectdatalist <> nil then begin
   objectdatalist.reloadchanged;
+ end;
+end;
+
+procedure reloadmodules;
+begin
+ if objectdatalist <> nil then begin
+  objectdatalist.reloadall;
  end;
 end;
 
