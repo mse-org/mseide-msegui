@@ -143,6 +143,7 @@ type
    fonexecuteaction: actioneventty;
 {$ifdef mse_with_ifi}
    fifilink: tifiactionlinkcomp;
+   fstatpriority: integer;
    function getifilinkkind: ptypeinfo;
    procedure setifilink(const avalue: tifiactionlinkcomp); overload;
 {$endif}
@@ -189,6 +190,7 @@ type
    procedure statreading;
    procedure statread;
    function getstatvarname: msestring;
+   function getstatpriority: integer;
 
   //iimagelistinfo
 //   function getimagelist: timagelist;
@@ -218,6 +220,8 @@ type
                                                 default defaultactionoptions;
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read getstatvarname write fstatvarname;
+   property statpriority: integer read fstatpriority 
+                                       write fstatpriority default 0;
 {$ifdef mse_with_ifi}
    property ifilink: tifiactionlinkcomp read fifilink write setifilink;
 {$endif}
@@ -248,6 +252,7 @@ type
 //   property shortcut;
    property statfile;
    property statvarname;
+   property statpriority;
    property options;
    property onexecute;
    property onbeforeexecute;
@@ -1326,6 +1331,11 @@ begin
  else begin
   state:= state + [as_invisible];
  end;
+end;
+
+function tcustomaction.getstatpriority: integer;
+begin
+ result:= fstatpriority;
 end;
 
 end.

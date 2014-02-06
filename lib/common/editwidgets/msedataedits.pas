@@ -69,6 +69,7 @@ type
    fempty_fontstyle: fontstylesty;
    fempty_color: colorty;
    fempty_options: emptyoptionsty;
+   fstatpriority: integer;
    procedure emptychanged;
    
    procedure setstatfile(const Value: tstatfile);
@@ -208,6 +209,7 @@ type
    procedure statreading;
    procedure statread;
    function getstatvarname: msestring;
+   function getstatpriority: integer;
 
    procedure readstatvalue(const reader: tstatreader); virtual;
    procedure readstatstate(const reader: tstatreader); virtual;
@@ -252,6 +254,8 @@ type
    property dataeditstate: dataeditstatesty read fstate;   
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read getstatvarname write fstatvarname;
+   property statpriority: integer read fstatpriority 
+                                       write fstatpriority default 0;
    property empty_options: emptyoptionsty read fempty_options 
                                            write fempty_options default [];
    property empty_color: colorty read fempty_color write setempty_color 
@@ -281,6 +285,7 @@ type
   published
    property statfile;
    property statvarname;
+   property statpriority;
    property empty_color;
    property empty_font;
    property empty_fontstyle;
@@ -2821,6 +2826,11 @@ end;
 function tcustomdataedit.isnull: boolean;
 begin
  result:= false; //dummy
+end;
+
+function tcustomdataedit.getstatpriority: integer;
+begin
+ result:= fstatpriority;
 end;
 
 { tcustomstringedit }

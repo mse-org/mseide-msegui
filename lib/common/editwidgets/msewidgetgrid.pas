@@ -373,6 +373,7 @@ type
 
    property statfile;
    property statvarname;
+   property statpriority;
 
    property oncopyselection;
    property onpasteselection;

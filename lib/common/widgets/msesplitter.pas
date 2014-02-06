@@ -62,6 +62,7 @@ type
    frefrect: rectty;
    fshrinkpriority: integer;
    fpropoffsetrecursion: integer;
+   fstatpriority: integer;
    procedure setstatfile(const avalue: tstatfile);
    procedure setlinkbottom(const avalue: twidget);
    procedure setlinkleft(const avalue: twidget);
@@ -100,6 +101,7 @@ type
    procedure statreading;
    procedure statread;
    function getstatvarname: msestring;
+   function getstatpriority: integer;
 
     //iobjectpicker
    function getcursorshape(const sender: tobjectpicker;
@@ -132,6 +134,8 @@ type
                                                default defaultsplittercolorgrip;
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read getstatvarname write fstatvarname;
+   property statpriority: integer read fstatpriority 
+                                       write fstatpriority default 0;
    property onupdatelayout: notifyeventty read fonupdatelayout
                                                write fonupdatelayout;
   published
@@ -153,6 +157,7 @@ type
    property colorgrip;
    property statfile;
    property statvarname;
+   property statpriority;
    property onupdatelayout;
  end;
  
@@ -340,6 +345,7 @@ begin
  frefrect.y:= -bigint;
  frefrect.cx:= -bigint;
  frefrect.cy:= -bigint;
+ include(fwidgetstate1,ws1_framemouse);
  inherited;
  color:= defaultsplittercolor;
  optionswidget:= defaultoptionswidgetnofocus;
@@ -1044,6 +1050,11 @@ end;
 function tcustomsplitter.getshrinkpriority: integer;
 begin
  result:= fshrinkpriority;
+end;
+
+function tcustomsplitter.getstatpriority: integer;
+begin
+ result:= fstatpriority;
 end;
 
 { tspacer }

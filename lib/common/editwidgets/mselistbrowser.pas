@@ -403,6 +403,7 @@ type
    property cellheightmin;
    property cellheightmax;
    property statvarname;
+   property statpriority;
    property statfile;
    property onselectionchanged;
    property oncopyselection;

@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2014 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -39,6 +39,16 @@ type
                   var astream: ttextstream; var aretry: boolean) of object;
  statfilemodety = (sfm_inactive,sfm_reading,sfm_writing);
  
+ statclientinfoty = record
+  intf: istatfile;
+  priority: integer;
+ end;
+ pstatclientinfoty = ^statclientinfoty;
+ statclientarty = array of statclientinfoty;
+
+ statfilestatety = (stfs_reading);
+ statfilestatesty = set of statfilestatety;
+  
  tstatfile = class(tactcomponent,istatfile)
   private
    ffilename: filenamety;
@@ -55,6 +65,8 @@ type
    fonstatafterwrite: notifyeventty;
    areader: tstatreader;
    awriter: tstatwriter;
+   aclients: statclientarty;
+   aclientcount: integer;
    foptions: statfileoptionsty;
    fencoding: charencodingty;
    fstatfile: tstatfile;
@@ -62,6 +74,7 @@ type
    fonfilemissing: statfilemissingeventty;
    fcryptohandler: tcustomcryptohandler;
    fnext: tstatfile;
+   fstatpriority: integer;
    procedure dolinkstatread(const info: linkinfoty);
    procedure dolinkstatreading(const info: linkinfoty);
    procedure dolinkstatreaded(const info: linkinfoty);
@@ -76,6 +89,9 @@ type
    procedure internalreadstat;
    procedure internalwritestat;
   protected
+   fstate: statfilestatesty;
+   procedure objevent(const sender: iobjectlink;
+                                 const event: objecteventty); override;
    procedure objectevent(const sender: tobject;
                           const event: objecteventty); override;
    procedure updateoptions(const afiler: tstatfiler);
@@ -87,6 +103,7 @@ type
    procedure statreading;
    procedure statread;
    function getstatvarname: msestring;
+   function getstatpriority: integer;
   public
    constructor create(aowner: tcomponent); override;
    procedure initnewcomponent(const ascale: real); override;
@@ -115,6 +132,8 @@ type
             //use quotes for several filenames '"file1.sta" "file2.sta*"', 
             //'*' and '?' wildcards supported.
    property statvarname: msestring read getstatvarname write fstatvarname;
+   property statpriority: integer read fstatpriority 
+                                       write fstatpriority default 0;
    property cryptohandler: tcustomcryptohandler read fcryptohandler
                                      write setcryptohandler;
    property activator;
@@ -155,11 +174,28 @@ procedure setstatfilevar(const sender: istatfile; const source: tstatfile;
               var instance: tstatfile);
 implementation
 uses
- msesystypes,msesys,msefileutils,sysutils;
+ msesystypes,msesys,msefileutils,sysutils,msearrayutils;
  
 procedure setstatfilevar(const sender: istatfile; const source: tstatfile;
               var instance: tstatfile);
+var
+ int1: integer;
 begin
+ if source <> instance then begin
+  if (instance <> nil) and (stfs_reading in instance.fstate) then begin
+   for int1:= 0 to high(instance.aclients) do begin
+    with instance.aclients[int1] do begin
+     if intf = sender then begin
+      intf:= nil;
+     end;
+    end;
+   end;
+  end;
+  if (source <> nil) and (stfs_reading in source.fstate) then begin
+   setlength(source.aclients,high(source.aclients)+2);
+   source.aclients[high(source.aclients)].intf:= sender;
+  end;
+ end;
  setlinkedcomponent(sender,source,tmsecomponent(instance),typeinfo(istatfile));
 end;
 
@@ -312,7 +348,27 @@ end;
 
 procedure tstatfile.dolinkstatreading(const info: linkinfoty);
 begin
+ with pstatclientinfoty(additempo(aclients,typeinfo(statclientarty),
+                                                   aclientcount))^ do begin
+  intf:= istatfile(info.dest);
+  priority:= intf.getstatpriority;
+ end;
  istatfile(info.dest).statreading;
+end;
+
+procedure tstatfile.objevent(const sender: iobjectlink;
+                                       const event: objecteventty);
+var
+ int1: integer;
+begin
+ if event = oe_destroyed then begin
+  for int1:= 0 to high(aclients) do begin
+   if aclients[int1].intf = sender then begin
+    aclients[int1].intf:= nil;
+   end;
+  end;
+ end;
+ inherited;
 end;
 
 procedure tstatfile.dolinkstatreaded(const info: linkinfoty);
@@ -347,19 +403,42 @@ begin
  end;
 end;
 
+function cmpclients(const l,r): integer;
+begin
+ result:= statclientinfoty(l).priority - statclientinfoty(l).priority;
+end;
+
 procedure tstatfile.internalreadstat;
+var
+ int1: integer;
 begin
  if assigned(fonstatread) or assigned(fonstatupdate) or
                                   (fsavedmemoryfiles <> '') then begin
   areader.readstat(istatfile(self));
  end;
  if fobjectlinker <> nil then begin
+  aclients:= nil;
+  aclientcount:= 0;
   fobjectlinker.forall({$ifdef FPC}@{$endif}dolinkstatreading,
                                                      typeinfo(istatfile));
+  setlength(aclients,aclientcount);
+  sortarray(aclients,sizeof(statclientinfoty),@cmpclients);
+  include(fstate,stfs_reading);
   try
-   fobjectlinker.forall({$ifdef FPC}@{$endif}dolinkstatread,
-                                                     typeinfo(istatfile));
+   int1:= 0;
+   while int1 <= high(aclients) do begin
+    with aclients[int1] do begin
+     if intf <> nil then begin
+      areader.readstat(intf);
+     end;
+    end;
+    inc(int1);
+   end;
+//   fobjectlinker.forall({$ifdef FPC}@{$endif}dolinkstatread,
+//                                                     typeinfo(istatfile));
   finally
+   exclude(fstate,stfs_reading);
+   aclients:= nil;
    fobjectlinker.forall({$ifdef FPC}@{$endif}dolinkstatreaded,
                                                      typeinfo(istatfile));
   end;
@@ -375,6 +454,9 @@ var
  ar1: filenamearty;
  by1: boolean;
 begin
+ if stfs_reading in fstate then begin
+  exit;
+ end;
  if assigned(fonstatbeforeread) then begin
   fonstatbeforeread(self);
  end;
@@ -721,6 +803,11 @@ begin
   end;
   setlinkedvar(avalue,tmsecomponent(fnext));
  end;
+end;
+
+function tstatfile.getstatpriority: integer;
+begin
+ result:= fstatpriority;
 end;
 
 { tstatfileitem }

@@ -240,6 +240,7 @@ type
    fstatfile: tstatfile;
    fdialogkind: filedialogkindty;
    foptionsedit: optionseditty;
+   fstatpriority: integer;
    procedure setcontroller(const value: tfiledialogcontroller);
    procedure setstatfile(const Value: tstatfile);
   protected
@@ -249,6 +250,7 @@ type
    procedure statreading;
    procedure statread;
    function getstatvarname: msestring;
+   function getstatpriority: integer;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -262,6 +264,8 @@ type
   published
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read getstatvarname write fstatvarname;
+   property statpriority: integer read fstatpriority 
+                                       write fstatpriority default 0;
    property controller: tfiledialogcontroller read fcontroller write setcontroller;
    property dialogkind: filedialogkindty read fdialogkind write fdialogkind
                                                            default fdk_none;
@@ -1996,6 +2000,11 @@ procedure tfiledialog.componentevent(const event: tcomponentevent);
 begin
  fcontroller.componentevent(event);
  inherited;
+end;
+
+function tfiledialog.getstatpriority: integer;
+begin
+ result:= fstatpriority;
 end;
 
 { tfilenameeditcontroller }

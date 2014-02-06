@@ -283,6 +283,7 @@ type
    factive: boolean;
    fstatfile: tstatfile;
    fstatvarname: msestring;
+   fstatpriority: integer;
    function getport: commnrty;
    procedure setport(const Value: commnrty);
    function getopened: boolean;
@@ -328,6 +329,7 @@ type
    procedure statreading;
    procedure statread;
    function getstatvarname: msestring;
+   function getstatpriority: integer;
    procedure doafteropen; virtual;
   public
    constructor create(aowner: tcomponent); override;
@@ -366,6 +368,8 @@ type
    property active: boolean read factive write setactive default false;
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read getstatvarname write fstatvarname;
+   property statpriority: integer read fstatpriority 
+                                       write fstatpriority default 0;
  end;
 
  tasciicommevent = class(tcommevent)
@@ -2083,6 +2087,11 @@ end;
 procedure tcommport.doafteropen;
 begin
  //dummy;
+end;
+
+function tcommport.getstatpriority: integer;
+begin
+ result:= fstatpriority;
 end;
 
 { tasciicommport }

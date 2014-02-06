@@ -114,6 +114,7 @@ type
    fvalueread: boolean;
 {$ifdef mse_with_ifi}
    fifilink: tifivaluelinkcomp;
+   fstatpriority: integer;
    procedure ifisetvalue(var avalue; var accept: boolean);
    function getifilinkkind: ptypeinfo;
    procedure setifilink(const avalue: tifilinkcomp);
@@ -210,6 +211,7 @@ type
    procedure statreading;
    procedure statread;
    function getstatvarname: msestring;
+   function getstatpriority: integer;
 
    procedure readstatvalue(const reader: tstatreader); virtual;
    procedure writestatvalue(const writer: tstatwriter); virtual;
@@ -245,6 +247,8 @@ type
   published
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read getstatvarname write fstatvarname;
+   property statpriority: integer read fstatpriority 
+                                       write fstatpriority default 0;
    property optionsedit: optionseditty read getoptionsedit write setoptionsedit
                               default defaultoptionsedit;
    property onchange: notifyeventty read fonchange write fonchange;
@@ -2127,6 +2131,11 @@ end;
 procedure tgraphdataedit.updatedatalist;
 begin
  //dummy
+end;
+
+function tgraphdataedit.getstatpriority: integer;
+begin
+ result:= fstatpriority;
 end;
 
 

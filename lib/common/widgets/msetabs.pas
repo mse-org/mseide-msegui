@@ -359,6 +359,7 @@ type
   private
    fstatfile: tstatfile;
    fstatvarname: msestring;
+   fstatpriority: integer;
    procedure setstatfile(const Value: tstatfile);
    procedure setdragcontroller(const Value: tdragcontroller);
   protected
@@ -368,9 +369,12 @@ type
    procedure statreading;
    procedure statread;
    function getstatvarname: msestring;
+   function getstatpriority: integer;
   published
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read getstatvarname write fstatvarname;
+   property statpriority: integer read fstatpriority 
+                                       write fstatpriority default 0;
    property onstep;
    property tabs;
    property firsttab;
@@ -671,6 +675,7 @@ type
    fstatfile: tstatfile;
    fstatvarname: msestring;
    fvisiblepage: integer;
+   fstatpriority: integer;
    procedure setstatfile(const value: tstatfile);
    function getitems(const index: integer): twidget;
    function getitemsintf(const index: integer): itabpage;
@@ -774,6 +779,7 @@ type
    procedure statreading;
    procedure statread;
    function getstatvarname: msestring;
+   function getstatpriority: integer;
 
    function checkpickoffset(const aoffset: pointty): pointty;
     //iobjectpicker
@@ -867,6 +873,8 @@ type
                  write settab_optionswidget1 default defaultoptionswidget1tab;
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read getstatvarname write fstatvarname;
+   property statpriority: integer read fstatpriority 
+                                       write fstatpriority default 0;
  end;
 
  ttabwidget = class(tcustomtabwidget)
@@ -932,6 +940,7 @@ type
    property tab_optionswidget1;
    property statfile;
    property statvarname;
+   property statpriority;
  end;
 
 function createtabform(const aclass: tclass; 
@@ -2820,6 +2829,11 @@ end;
 procedure ttabbar.statread;
 begin
  //dummy
+end;
+
+function ttabbar.getstatpriority: integer;
+begin
+ result:= fstatpriority;
 end;
 
 { ttabpagefonttab }
@@ -5037,6 +5051,11 @@ end;
 procedure tcustomtabwidget.clearorder;
 begin
  ftabs.tabs.clearorder;
+end;
+
+function tcustomtabwidget.getstatpriority: integer;
+begin
+ result:= fstatpriority;
 end;
 
 { tpagetab }

@@ -116,6 +116,7 @@ type
    fpa_orientation: pageorientationty;
    foptions: printeroptionsty;
    fonerror: exceptioneventty;
+   fstatpriority: integer;
    procedure settabulators(const avalue: tprintertabulators);
 //   procedure setppmm(const avalue: real);
    procedure setpa_frameleft(const avalue: real);
@@ -155,6 +156,7 @@ type
    procedure statreading;
    procedure statread;
    function getstatvarname: msestring;
+   function getstatpriority: integer;
 
    property onerror: exceptioneventty read fonerror write fonerror;
                         //call abort for quiet cancel
@@ -189,6 +191,8 @@ type
 //   property colorspace: colorspacety read getcolorspace write setcolorspace;
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read fstatvarname write fstatvarname;
+   property statpriority: integer read fstatpriority 
+                                       write fstatpriority default 0;
    property options: printeroptionsty read foptions write foptions 
                                              default defaultprinteroptions;
  end;
@@ -212,6 +216,7 @@ type
 //   property colorspace: colorspacety read getcolorspace write setcolorspace;
    property statfile;
    property statvarname;
+   property statpriority;
  end;
 
  tstreamprinter = class;
@@ -823,6 +828,11 @@ begin
  finally
   fcanvas.afterread;
  end;
+end;
+
+function tcustomprinter.getstatpriority: integer;
+begin
+ result:= fstatpriority;
 end;
 
 { tcustomprintercanvas }

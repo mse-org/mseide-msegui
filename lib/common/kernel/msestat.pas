@@ -28,6 +28,7 @@ type
   procedure statreading;
   procedure statread;
   function getstatvarname: msestring;
+  function getstatpriority: integer;
  end;
 
  istatupdatevalue = interface(inullinterface)

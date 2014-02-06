@@ -208,6 +208,7 @@ type
    property fitframe_bottom;
    property statfile;
    property statvarname;
+   property statpriority;
    property onbeforepaint;
    property onpaintbackground;
    property onpaint;
@@ -251,6 +252,7 @@ type
    property fitframe_bottom;
    property statfile;
    property statvarname;
+   property statpriority;
    property onbeforepaint;
    property onpaintbackground;
    property onpaint;
@@ -312,6 +314,7 @@ type
    property fitframe_bottom;
    property statfile;
    property statvarname;
+   property statpriority;
    property onbeforepaint;
    property onpaintbackground;
    property onpaint;

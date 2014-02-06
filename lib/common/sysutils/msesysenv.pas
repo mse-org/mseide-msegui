@@ -137,6 +137,7 @@ type
    fhelpheader: msestring;
    fhelpfooter: msestring;
    fonafterinit: sysenvmanagereventty;
+   fstatpriority: integer;
    procedure setoninit(const Value: sysenvmanagereventty);
    procedure doinit;
    procedure errorme(nr: sysenverrornrty; value: string);
@@ -174,6 +175,7 @@ type
    procedure statreading;
    procedure statread;
    function getstatvarname: msestring;
+   function getstatpriority: integer;
   public
    constructor create(aowner: tcomponent); override;
    procedure init(const arguments: array of argumentdefty);
@@ -209,6 +211,8 @@ type
                                                    default defaulterrorcode;
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read getstatvarname write fstatvarname;
+   property statpriority: integer read fstatpriority 
+                                       write fstatpriority default 0;
    property helpheader: msestring read fhelpheader write fhelpheader; 
    property helpfooter: msestring read fhelpfooter write fhelpfooter;
 
@@ -1238,6 +1242,11 @@ begin
                          (seo_appterminateonexception in avalue) then begin
   application.options:= application.options + [apo_terminateonexception];
  end;
+end;
+
+function tsysenvmanager.getstatpriority: integer;
+begin
+ result:= fstatpriority;
 end;
 
 end.

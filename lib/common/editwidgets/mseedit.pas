@@ -441,6 +441,7 @@ type
    fontextediteddelayed: texteditedeventty;
    fstatfile: tstatfile;
    fstatvarname: msestring;
+   fstatpriority: integer;
    procedure dotimer(const sender: tobject); virtual;
    function getdelay: integer;
    procedure setdelay(const avalue: integer);
@@ -455,12 +456,15 @@ type
    procedure statreading;
    procedure statread;
    function getstatvarname: msestring;
+   function getstatpriority: integer;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
   published
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read getstatvarname write fstatvarname;
+   property statpriority: integer read fstatpriority 
+                                       write fstatpriority default 0;
    property delay: integer read getdelay write setdelay default 0; //ms
    property ontextediteddelayed: texteditedeventty read fontextediteddelayed 
                                                    write fontextediteddelayed;
@@ -1774,6 +1778,11 @@ end;
 function tedit.getstatvarname: msestring;
 begin
  result:= fstatvarname;
+end;
+
+function tedit.getstatpriority: integer;
+begin
+ result:= fstatpriority;
 end;
 
 end.

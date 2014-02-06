@@ -66,6 +66,7 @@ type
    fcommandline: string;
    fcommandline1: string;
    fpipewaitus: integer;
+   fstatpriority: integer;
    procedure setoutput(const avalue: tpipereaderpers);
    procedure seterroroutput(const avalue: tpipereaderpers);
    function getactive: boolean;
@@ -92,6 +93,7 @@ type
    procedure statreading;
    procedure statread;
    function getstatvarname: msestring;
+   function getstatpriority: integer;
    procedure postprocessdied;
     //iprocmonitor
    procedure processdied(const aprochandle: prochandlety;
@@ -121,6 +123,8 @@ type
                                                  default defaultpipewaitus;
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read getstatvarname write fstatvarname;
+   property statpriority: integer read fstatpriority 
+                                       write fstatpriority default 0;
    property output: tpipereaderpers read foutput write setoutput;
    property erroroutput: tpipereaderpers read ferroroutput write seterroroutput;
    property onprocfinished: notifyeventty read fonprocfinished 
@@ -805,6 +809,11 @@ begin
  if foptions * [pro_nowaitforpipeeof,pro_nopipeterminate] = [] then begin
   exclude(foptions,pro_usepipewritehandles);
  end;
+end;
+
+function tmseprocess.getstatpriority: integer;
+begin
+ result:= fstatpriority;
 end;
 
 { tstringprocess }

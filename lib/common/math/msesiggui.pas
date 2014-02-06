@@ -359,6 +359,7 @@ type
    fupdating: integer;
    factivetrace: integer;
    fmenustart: integer;
+   fstatpriority: integer;
    procedure setenvelope(const avalue: tsigenvelope);
    procedure setattack(const avalue: tenvelopechartedit);
    procedure setdecay(const avalue: tenvelopechartedit);
@@ -372,6 +373,7 @@ type
    procedure statreading; virtual;
    procedure statread; virtual;
    function getstatvarname: msestring;
+   function getstatpriority: integer;
    procedure setactivetrace(avalue: integer);
   protected
    procedure updatelayout;
@@ -396,6 +398,8 @@ type
    property splitter2: tenvelopesplitter read fsplitter2 write setsplitter2;
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read getstatvarname write fstatvarname;
+   property statpriority: integer read fstatpriority 
+                                       write fstatpriority default 0;
    property envelope: tsigenvelope read fenvelope write setenvelope;
    property optionswidget default defaultoptionswidgetmousewheel;
    property activetrace: integer read factivetrace 
@@ -1847,6 +1851,11 @@ begin
  else begin
   activetrace:= 1;
  end;
+end;
+
+function tenvelopeedit.getstatpriority: integer;
+begin
+ result:= fstatpriority;
 end;
 
 { tenvelopechartedit }

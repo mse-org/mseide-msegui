@@ -77,6 +77,7 @@ type
    property hint;
    property statfile;
    property statvarname;
+   property statpriority;
    property options;
    property onexecute;
    property onbeforeexecute;
@@ -195,6 +196,7 @@ type
    fsysshortcuts: tsysshortcuts;
    fsysshortcuts1: tsysshortcuts;
    fonafterupdate: shortcutcontrollereventty;
+   fstatpriority: integer;
    procedure setactions(const avalue: tshortcutactions);
    procedure setstatfile(const avalue: tstatfile);
    function getactionrecord(const index: integer): msestring;
@@ -210,6 +212,7 @@ type
    procedure statreading;
    procedure statread;
    function getstatvarname: msestring;
+   function getstatpriority: integer;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -220,6 +223,8 @@ type
    property sysshortcuts1: tsysshortcuts read fsysshortcuts1 write setsysshortcuts1;
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read getstatvarname write fstatvarname;
+   property statpriority: integer read fstatpriority 
+                                       write fstatpriority default 0;
    property onafterupdate: shortcutcontrollereventty read fonafterupdate 
                                 write fonafterupdate;
  end;
@@ -1537,6 +1542,11 @@ end;
 procedure tshortcutcontroller.setsysshortcuts1(const avalue: tsysshortcuts);
 begin
  fsysshortcuts1.assign(avalue);
+end;
+
+function tshortcutcontroller.getstatpriority: integer;
+begin
+ result:= fstatpriority;
 end;
 
 { tshortcutaction }

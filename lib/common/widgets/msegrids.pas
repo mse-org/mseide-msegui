@@ -1829,6 +1829,7 @@ type
    fonrowsmodified: notifyeventty;
 {$ifdef mse_with_ifi}
    fifilink: tifigridlinkcomp;
+   fstatpriority: integer;
    procedure ifirowchange;
    function getifilinkkind: ptypeinfo;
    procedure setifilink(const avalue: tifigridlinkcomp);
@@ -2119,6 +2120,7 @@ type
    procedure statreading;
    procedure statread;
    function getstatvarname: msestring;
+   function getstatpriority: integer;
    
    procedure beginnullchecking;
    procedure endnullchecking;
@@ -2368,6 +2370,8 @@ type
 
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read getstatvarname write fstatvarname;
+   property statpriority: integer read fstatpriority 
+                                       write fstatpriority default 0;
 
    property onbeforeupdatelayout: gridnotifyeventty 
                 read fonbeforeupdatelayout write fonbeforeupdatelayout;
@@ -2473,6 +2477,7 @@ type
 
    property statfile;
    property statvarname;
+   property statpriority;
 
    property oncopyselection;
    property onpasteselection;
@@ -2609,6 +2614,7 @@ type
 
    property statfile;
    property statvarname;
+   property statpriority;
 
    property oncopyselection;
    property onpasteselection;
@@ -15795,6 +15801,11 @@ begin
  if userinput and canevent(tmethod(fonrowsmodified)) then begin
   fonrowsmodified(self);
  end;
+end;
+
+function tcustomgrid.getstatpriority: integer;
+begin
+ result:= fstatpriority;
 end;
 
 { tdrawgrid }

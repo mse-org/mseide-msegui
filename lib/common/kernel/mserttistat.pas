@@ -66,6 +66,7 @@ type
   {$ifdef mse_with_ifi}   
    ftargets: tpointeransistringhashdatalist;
   {$endif}
+   fstatpriority: integer;
    procedure setstatfile(const avalue: tstatfile);
   protected
    function getobj(out aobj: objectinfoarty): boolean;
@@ -79,6 +80,7 @@ type
    procedure statreading;
    procedure statread;
    function getstatvarname: msestring;
+   function getstatpriority: integer;
   public
    procedure readstat(const areader: tstatreader);
    procedure writestat(const awriter: tstatwriter);
@@ -92,6 +94,8 @@ type
   {$endif}   
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read fstatvarname write fstatvarname;
+   property statpriority: integer read fstatpriority 
+                                       write fstatpriority default 0;
    property ongetobject: getobjecteventty read fongetobject write fongetobject;
    property ongetobjects: getobjectseventty read fongetobjects 
                                                         write fongetobjects;
@@ -112,6 +116,7 @@ type
   published
    property statfile;
    property statvarname;
+   property statpriority;
    property ongetobject;
    property ongetobjects;
    property onstatupdate;
@@ -1074,6 +1079,11 @@ begin
    freeandnil(ftargets);
   end;
  end;
+end;
+
+function tcustomrttistat.getstatpriority: integer;
+begin
+ result:= fstatpriority;
 end;
 
 {$endif}

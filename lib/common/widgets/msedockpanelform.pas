@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2014 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -30,6 +30,7 @@ const
  defaultdockpaneloptionswidget =
                 (defaultformwidgetoptions - [ow_destroywidgets]) + 
                 [ow_mousefocus,ow_arrowfocusin,ow_arrowfocusout];
+ defaultdockstatprio = 256;
 type
  tdockpanelformcontroller = class;
  tdockpanelform = class;
@@ -101,9 +102,10 @@ type
    foptionsgrip: gripoptionsty;
    fcaption: msestring;
    fstatfileclients: tstatfilearrayprop;
+   fstatpriority: integer;
    procedure updatestat(const filer: tstatfiler);
    procedure setmenu(const avalue: tcustommenu);
-   procedure checkstatfile(const avalue: tstatfile; const ref: tstatfile);
+//   procedure checkstatfile(const avalue: tstatfile; const ref: tstatfile);
    procedure setstatfile(const avalue: tstatfile);
    procedure setstatfileclient(const avalue: tstatfile);
    procedure setstatfileclients(const avalue: tstatfilearrayprop);
@@ -114,6 +116,7 @@ type
    procedure statreading;
    procedure statread;
    function getstatvarname: msestring;
+   function getstatpriority: integer;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -124,6 +127,8 @@ type
    property menu: tcustommenu read fmenu write setmenu;
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read getstatvarname write fstatvarname;
+   property statpriority: integer read fstatpriority 
+               write fstatpriority default defaultdockstatprio;
    property statfileclients: tstatfilearrayprop read fstatfileclients
                    write setstatfileclients; //called before statfileclient
    property statfileclient: tstatfile read fstatfileclient 
@@ -181,6 +186,7 @@ end;
 
 constructor tdockpanelformcontroller.create(aowner: tcomponent);
 begin
+ fstatpriority:= defaultdockstatprio;
  foptionsdock:= defaultdockpaneloptionsdock;
  foptionsgrip:= defaultdockpanelgripoptions;
 // fcaption:= 'Panel';
@@ -223,13 +229,13 @@ begin
  with fstatfileclients do begin
   for int1:= 0 to count - 1 do begin
    with items[int1] do begin
-    if statfile <> nil then begin
+    if (statfile <> nil) and (statfile <> fstatfile) then begin
      statfile.updatestat('client_'+inttostr(int1),filer);
     end;
    end;
   end;
  end;
- if fstatfileclient <> nil then begin
+ if (fstatfileclient <> nil) and (fstatfile <> fstatfileclient) then begin
   fstatfileclient.updatestat('clients',filer);
  end;
 end;
@@ -310,7 +316,7 @@ procedure tdockpanelformcontroller.setmenu(const avalue: tcustommenu);
 begin
  setlinkedvar(avalue,tmsecomponent(fmenu));
 end;
-
+{
 procedure tdockpanelformcontroller.checkstatfile(
              const avalue: tstatfile; const ref: tstatfile);
 begin
@@ -318,10 +324,10 @@ begin
   raise exception.create(self.name+':Invalid statfile '+avalue.name+'.');
  end;
 end;
-
+}
 procedure tdockpanelformcontroller.setstatfile(const avalue: tstatfile);
 begin
- checkstatfile(avalue,fstatfileclient);
+// checkstatfile(avalue,fstatfileclient);
  setstatfilevar(istatfile(self),avalue,fstatfile);
 end;
 
@@ -352,7 +358,7 @@ end;
 
 procedure tdockpanelformcontroller.setstatfileclient(const avalue: tstatfile);
 begin
- checkstatfile(avalue,fstatfile);
+// checkstatfile(avalue,fstatfile);
  setlinkedvar(avalue,tmsecomponent(fstatfileclient));
 end;
 
@@ -380,6 +386,11 @@ begin
  while fpanellist.count > 0 do begin
   tobject(fpanellist.items[fpanellist.count-1]).free;
  end; 
+end;
+
+function tdockpanelformcontroller.getstatpriority: integer;
+begin
+ result:= fstatpriority;
 end;
 
 { tdockpanelformmenuitem }

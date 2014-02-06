@@ -81,6 +81,7 @@ type
    ftabulators: ttabulators;
    fencoding: charencodingty;
    fxpos: integer;
+   fstatpriority: integer;
    procedure setstatfile(const Value: tstatfile);
    function geteditpos: gridcoordty;
    procedure seteditpos1(const value: gridcoordty);
@@ -184,6 +185,7 @@ type
    procedure statreading;
    procedure statread;
    function getstatvarname: msestring;
+   function getstatpriority: integer;
    procedure checkgrid;
 
    procedure setedpos(const Value: gridcoordty; const select: boolean;
@@ -287,6 +289,8 @@ type
    property textflags default defaulttextflags - [tf_noselect];
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read getstatvarname write fstatvarname;
+   property statpriority: integer read fstatpriority 
+                                       write fstatpriority default 0;
    property tabulators: ttabulators read gettabulators write settabulators;
    property marginlinepos: integer read fmarginlinepos 
                                              write setmarginlinepos default 0;
@@ -318,6 +322,7 @@ type
 
    property statfile;   
    property statvarname;
+   property statpriority;
    property encoding;
    property marginlinepos;
                      //offset to innerclientrect.x
@@ -2325,6 +2330,11 @@ end;
 procedure tcustomtextedit.datalistdestroyed;
 begin
  flines:= nil;
+end;
+
+function tcustomtextedit.getstatpriority: integer;
+begin
+ result:= fstatpriority;
 end;
 
 { tundotextedit }

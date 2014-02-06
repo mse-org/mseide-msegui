@@ -596,6 +596,7 @@ type
    fstatvarname: msestring;
    foptionschart: optionschartty;
    ffitframe: framety;
+   fstatpriority: integer;
    procedure setxdials(const avalue: tchartdialshorz);
    procedure setydials(const avalue: tchartdialsvert);
    procedure setcolorchart(const avalue: colorty);
@@ -653,6 +654,7 @@ type
    procedure statreading; virtual;
    procedure statread; virtual;
    function getstatvarname: msestring;
+   function getstatpriority: integer;
    procedure initscrollstate;
    procedure extendfit(const asides: rectsidesty; var aext: rectextty); virtual;
   public
@@ -680,6 +682,8 @@ type
    property ydials: tchartdialsvert read fydials write setydials;
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read getstatvarname write fstatvarname;
+   property statpriority: integer read fstatpriority 
+                                       write fstatpriority default 0;
    property fitframe: framety read ffitframe write setfitframe;
    property fitframe_left: integer read ffitframe.left
                           write setfitframe_left default 0;
@@ -748,6 +752,7 @@ type
    property fitframe_bottom;
    property statfile;
    property statvarname;
+   property statpriority;
    property onbeforepaint;
    property onpaintbackground;
    property onpaint;
@@ -823,6 +828,7 @@ type
    property fitframe_bottom;
    property statfile;
    property statvarname;
+   property statpriority;
    property onbeforepaint;
    property onpaintbackground;
    property onpaint;
@@ -3853,6 +3859,11 @@ begin
  if fframechart <> nil then begin
   addframe1(result,fframechart.innerframe);
  end; 
+end;
+
+function tcuchart.getstatpriority: integer;
+begin
+ result:= fstatpriority;
 end;
 
 { tcustomchart }

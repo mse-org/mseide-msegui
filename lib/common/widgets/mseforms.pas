@@ -134,6 +134,7 @@ type
 {$ifdef mse_with_ifi}
    fifilink: tififormlinkcomp;
    factivatortarget: tactivator;
+   fstatpriority: integer;
    function getifilinkkind: ptypeinfo;
    procedure setifilink(const avalue: tififormlinkcomp);
 {$endif}
@@ -216,6 +217,7 @@ type
    procedure statreading; virtual;
    procedure statread; virtual;
    function getstatvarname: msestring;
+   function getstatpriority: integer;
    function getwindowcaption: msestring; virtual;
    //idockcontroller
    function checkdock(var info: draginfoty): boolean;
@@ -265,6 +267,8 @@ type
 
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read getstatvarname write fstatvarname;
+   property statpriority: integer read fstatpriority 
+                                       write fstatpriority default 0;
 
    property caption: msestring read getcaption write setcaption;
    property icon: tmaskedbitmap read ficon write seticon;
@@ -338,6 +342,7 @@ type
    property options;
    property statfile;
    property statvarname;
+   property statpriority;
    property caption;
    property icon;
 
@@ -471,6 +476,7 @@ type
    property options;
    property statfile;
    property statvarname;
+   property statpriority;
    property caption;
    property icon;
 
@@ -790,7 +796,8 @@ end;
 procedure tdockformscrollbox.widgetregionchanged(const sender: twidget);
 begin
  inherited;
- if not (ws_loadlock in fwidgetstate) then begin
+ if not (ws_loadlock in fwidgetstate) and 
+               not (ws1_updateopaque in twidget1(sender).fwidgetstate1) then begin
   tcustomdockform(owner).fdragdock.widgetregionchanged(sender);
  end;
 end;
@@ -1966,6 +1973,11 @@ end;
 procedure tcustommseform.setactivatortarget(const avalue: tactivator);
 begin
  setlinkedvar(avalue,tmsecomponent(factivatortarget));
+end;
+
+function tcustommseform.getstatpriority: integer;
+begin
+ result:= fstatpriority;
 end;
 
 { tmseform }

@@ -56,6 +56,7 @@ type
    fonclientmodalresult: ificlientmodalresulteventty;
    fstatfile: tstatfile;
    fstatvarname: msestring;
+   fstatpriority: integer;
    function getintegerpro(const aname: string): integer;
    procedure setintegerpro(const aname: string; const avalue: integer);
    function getmsestringpro(const aname: string): msestring;
@@ -154,6 +155,7 @@ type
    procedure statreading;
    procedure statread;
    function getstatvarname: msestring;
+   function getstatpriority: integer;
   public
    constructor create(const aowner: tmsecomponent; const akind: ttypekind);
                               reintroduce; overload;
@@ -172,6 +174,8 @@ type
                                                        write setdatetimepro;
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read fstatvarname write fstatvarname;
+   property statpriority: integer read fstatpriority 
+                                       write fstatpriority default 0;
    property onclientvaluechanged: ificlienteventty read fonclientvaluechanged 
                                                     write fonclientvaluechanged;
    property onclientstatechanged: ificlientstateeventty 
@@ -188,6 +192,7 @@ type
   published
    property statfile;
    property statvarname;
+   property statpriority;
    property onclientvaluechanged;
    property onclientstatechanged;
    property onclientmodalresult;
@@ -1868,6 +1873,11 @@ end;
 procedure tcustomificlientcontroller.updateoptionsedit(var avalue: optionseditty);
 begin
  //dummy
+end;
+
+function tcustomificlientcontroller.getstatpriority: integer;
+begin
+ result:= fstatpriority;
 end;
 
 { tifilinkcomp }

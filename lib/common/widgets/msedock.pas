@@ -543,6 +543,7 @@ type
    fstatfile: tstatfile;
    fstatvarname: string;
    ficon: tmaskedbitmap;
+   fstatpriority: integer;
    procedure setdragdock(const Value: tnochildrendockcontroller);
    function getframe: tgripframe;
    procedure setframe(const Value: tgripframe);
@@ -577,6 +578,7 @@ type
    procedure statreading;
    procedure statread;
    function getstatvarname: msestring;
+   function getstatpriority: integer;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -590,6 +592,8 @@ type
    property frame: tgripframe read getframe write setframe;
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: string read fstatvarname write fstatvarname;
+   property statpriority: integer read fstatpriority 
+                                       write fstatpriority default 0;
    property icon: tmaskedbitmap read ficon write seticon;
  end;
 
@@ -5067,6 +5071,11 @@ end;
 procedure tdockpanel.dodockcaptionchanged(const sender: tdockcontroller);
 begin
  //dummy
+end;
+
+function tdockpanel.getstatpriority: integer;
+begin
+ result:= fstatpriority;
 end;
 
 { tchildorderevent }

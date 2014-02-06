@@ -276,6 +276,7 @@ type
    ffirstbutton: integer;
    fstatfile: tstatfile;
    fstatvarname: msestring;
+   fstatpriority: integer;
    procedure setbuttons(const Value: ttoolbuttons);
    procedure setoptions(const Value: toolbaroptionsty);
    function gethintpos(const aindex: integer): rectty;
@@ -305,6 +306,7 @@ type
    procedure statreading;
    procedure statread;
    function getstatvarname: msestring;
+   function getstatpriority: integer;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -318,6 +320,8 @@ type
    property options: toolbaroptionsty read foptions write setoptions default [];
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read getstatvarname write fstatvarname;
+   property statpriority: integer read fstatpriority 
+                                       write fstatpriority default 0;
 
    property onbuttonchanged: toolbuttoneventty read fonbuttonchanged write fonbuttonchanged;
    property drag: tdragcontroller read fdragcontroller write setdragcontroller;
@@ -335,6 +339,7 @@ type
    property options;
    property statfile;
    property statvarname;
+   property statpriority;
    property onbuttonchanged;
    property drag;
   end;
@@ -1539,6 +1544,11 @@ procedure tcustomtoolbar.objectchanged(const sender: tobject);
 begin
  inherited;
  flayout.buttons.objectchanged(sender);
+end;
+
+function tcustomtoolbar.getstatpriority: integer;
+begin
+ result:= fstatpriority;
 end;
 
 { tdocktoolbar }

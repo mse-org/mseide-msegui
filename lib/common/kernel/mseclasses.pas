@@ -457,7 +457,8 @@ type
    procedure link(const source,dest: iobjectlink; valuepo: pointer = nil;
                ainterfacetype: pointer = nil; once: boolean = false);
    procedure unlink(const source,dest: iobjectlink; valuepo: pointer = nil); virtual;
-   procedure objevent(const sender: iobjectlink; const event: objecteventty); virtual;
+   procedure objevent(const sender: iobjectlink;
+                                 const event: objecteventty); virtual;
    function getinstance: tobject;
    function getcomponent: tcomponent;
      //ievent
