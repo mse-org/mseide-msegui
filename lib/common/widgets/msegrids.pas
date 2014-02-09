@@ -1925,14 +1925,11 @@ type
    frowcount: integer;
    frowcountmax: integer;
    fscrollrect: rectty;
-   {finnerdatarect,}fdatarect,fdatarectx,fdatarecty: rectty;
+   fdatarect,fdatarectx,fdatarecty: rectty;
           //origin = clientrect.pos
    frootbrushorigin: pointty;
    fbrushorigin: pointty;
-          //origin windowpos
-//   ffirstnohscroll: integer;
-//   ftotnohscroll: integer;
-   
+          //origin windowpos   
    fdragcontroller: tdragcontroller;
    fobjectpicker: tobjectpicker;
    fpickkind: pickobjectkindty;

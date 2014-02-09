@@ -273,7 +273,6 @@ type
    property useroptions: optionsdockty read fuseroptions write setuseroptions
                      default defaultoptionsdock;
 
-//   procedure invalidategripsize;
    function nogrip: boolean;
    function canfloat: boolean;
    procedure refused(const apos: pointty);
@@ -1277,13 +1276,10 @@ var
  
  procedure updateplacement;
  var
-//  rect1: rectty;
   widget1: twidget;
   int1: integer;
  begin
   widget1:= fintf.getwidget;
-//  rect1.pos:= fplacementrect.pos;
-//  rect1.size:= nullsize;         //update placementrect
   int1:= minsize1 - fr^.size(fplacementrect);
   if (int1 > 0) then begin       //extend placementrect
    if not scalefixedalso and 
@@ -1311,7 +1307,6 @@ var
 var
  int1,int2: integer;
  widget1: twidget;
-// rea2: real;
  widget2: twidget;
  
 begin
@@ -2982,7 +2977,7 @@ var
   int1,int2,int4: integer;
   movestart: integer;
   rect1: rectty;
-  bandindex{,first,last}: integer;
+  bandindex: integer;
  begin
   ar1:= checksplit(propsize,fixsize,prop,fix,false);
   if fsizeindex <= high(ar1) then begin
@@ -3122,13 +3117,15 @@ var
    canvas1.drawxorframe(fsizingrect,-2,stockobjects.bitmaps[stb_dens50]);
   end
   else begin
-   if fsplitdir = sd_vert then begin
-    rect1:= moverect(fsizingrect,makepoint(fsizeoffset,0));
-   end
-   else begin
-    rect1:= moverect(fsizingrect,makepoint(0,fsizeoffset));
+   if not (od_thumbtrack in foptionsdock) then begin
+    if fsplitdir = sd_vert then begin
+     rect1:= moverect(fsizingrect,makepoint(fsizeoffset,0));
+    end
+    else begin
+     rect1:= moverect(fsizingrect,makepoint(0,fsizeoffset));
+    end;
+    canvas1.fillxorrect(rect1,stockobjects.bitmaps[stb_dens50]);
    end;
-   canvas1.fillxorrect(rect1,stockobjects.bitmaps[stb_dens50]);
   end;
   if ashow then begin
    include(fdockstate,dos_xorpic);
@@ -3138,6 +3135,15 @@ var
   end;
  end;
 
+ procedure dosize;
+ begin
+  checksizeoffset;
+  if high(ar1) > 0 then begin
+   calcdelta;
+   sizechanged(true);
+  end;
+ end;
+ 
 const
  resetmousedockstate =
         [dos_closebuttonclicked,dos_maximizebuttonclicked,
@@ -3173,17 +3179,34 @@ begin
                          (od_nosplitsize in foptionsdock));
      end
      else begin
-      if fsplitdir = sd_vert then begin
-       drawxorpic(false);   //remove pic
-       fsizeoffset:= pos.x - fpickpos.x;
-       checksizeoffset;
-       drawxorpic(true);   //draw pic
-      end;
-      if fsplitdir = sd_horz then begin
-       drawxorpic(false);  //remove pic
-       fsizeoffset:= pos.y - fpickpos.y;
-       checksizeoffset;
-       drawxorpic(true);  //draw pic
+      if od_thumbtrack in optionsdock then begin
+       if fsplitdir = sd_vert then begin
+        fsizeoffset:= pos.x - fpickpos.x;
+       end;
+       if fsplitdir = sd_horz then begin
+        fsizeoffset:= pos.y - fpickpos.y;
+       end;
+       dosize;
+       if fsplitdir = sd_vert then begin
+        fpickpos.x:= fpickpos.x+fsizeoffset;
+       end;
+       if fsplitdir = sd_horz then begin
+        fpickpos.y:= fpickpos.y+fsizeoffset;
+       end;
+      end
+      else begin
+       if fsplitdir = sd_vert then begin
+        drawxorpic(false);   //remove pic
+        fsizeoffset:= pos.x - fpickpos.x;
+        checksizeoffset;
+        drawxorpic(true);   //draw pic
+       end;
+       if fsplitdir = sd_horz then begin
+        drawxorpic(false);  //remove pic
+        fsizeoffset:= pos.y - fpickpos.y;
+        checksizeoffset;
+        drawxorpic(true);  //draw pic
+       end;
       end;
      end;
     end;
@@ -3223,11 +3246,7 @@ begin
       drawxorpic(false); //remove pic
      end;
      if fsizeindex >= 0 then begin
-      checksizeoffset;
-      if high(ar1) > 0 then begin
-       calcdelta;
-       sizechanged(true);
-      end;
+      dosize;
       fsizeindex:= -1;
       fintf.getwidget.invalidate;
       checksizing((dos_moving in fdockstate) or 
@@ -4575,7 +4594,6 @@ begin
   result:= adjustsizingrect(widgetrect,akind,offset,
                    cxmin,bounds_cxmax,cymin,bounds_cymax);
   if parentwidget <> nil then begin
-//   intersectrect(result,parentwidget.clientwidgetrect,result);
    with parentwidget do begin
     intersectrect(result,makerect(clientwidgetpos,maxclientsize),result);   
    end;
@@ -4716,7 +4734,6 @@ procedure tdockhandle.dopaintforeground(const canvas: tcanvas);
 var
  rect1: rectty;
  int1,int2,x,y: integer;
-// po1: pointty;
 begin
  inherited;
  rect1:= innerclientrect;
@@ -4730,8 +4747,6 @@ begin
  else begin
   case fgrip_pos of
    cp_bottomright: begin
- //   po1.x:= rect1.x + rect1.cx;
- //   po1.y:= rect1.y + rect1.cy;
     x:= rect1.x + rect1.cx - 1;
     y:= rect1.y + rect1.cy - 1;
     if rect1.cy < rect1.cx then begin
@@ -4776,31 +4791,9 @@ function tdockpanel.checkdock(var info: draginfoty): boolean;
 begin
  result:= true;
 end;
-(*
-procedure tdockpanel.mouseevent(var info: mouseeventinfoty);
-var
- bo1: boolean;
-begin
- bo1:= info.eventkind = ek_buttonrelease;
- if not (es_processed in info.eventstate) and bo1 then begin
-  fdragdock.mouseevent(info);
- end; 
- inherited;
- if not (es_processed in info.eventstate) and not bo1 then begin
-  fdragdock.mouseevent(info);
- end;
- {
- inherited;
- if not (es_processed in info.eventstate) then begin
-  fdragdock.mouseevent(info);
- end;
- }
-end;
-*)
+
 procedure tdockpanel.childmouseevent(const sender: twidget;
                var info: mouseeventinfoty);
-//var
-// pt1,pt2: pointty;
 begin
  if not (es_processed in info.eventstate) then begin  
   fdragdock.childormouseevent(sender,info);
@@ -4808,24 +4801,6 @@ begin
    inherited;
   end;
  end;
-{
- pt2:= pos;
- fdragdock.checkmouseactivate(self,info);
- application.delayedmouseshift(subpoint(pos,pt2)); //follow shift in view
- if (frame <> nil) and fdragdock.ismdi and 
-                       not (csdesigning in componentstate) then begin
-  pt1:= info.pos;
-  translatewidgetpoint1(info.pos,sender,self);
-  frame.mouseevent(info);
-  info.pos:= pt1;
- end;
- if not (es_processed in info.eventstate) then begin  
-  fdragdock.childormouseevent(sender,info);
-  if not (es_processed in info.eventstate) then begin
-   inherited;
-  end;
- end;
-}
 end;
 
 procedure tdockpanel.internalcreateframe;
