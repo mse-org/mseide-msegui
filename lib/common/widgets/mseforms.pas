@@ -64,7 +64,6 @@ type
    procedure readbounds(reader: treader);
    procedure writebounds(writer: twriter);
   protected
-//   fowner: tcustommseform;
    fboundsread: boolean;
    procedure setoptionswidget(const avalue: optionswidgetty); override;
    procedure defineproperties(filer: tfiler); override;
@@ -200,8 +199,6 @@ type
    procedure receiveevent(const event: tobjectevent); override;
    procedure dokeydown(var info: keyeventinfoty); override;
    procedure doshortcut(var info: keyeventinfoty; const sender: twidget); override;
-//   function getframe: tgripframe;
-//   procedure setframe(const Value: tgripframe);
    procedure windowcreated; override;
    procedure dofontheightdelta(var delta: integer); override;
    procedure widgetregionchanged(const sender: twidget); override;
@@ -234,7 +231,6 @@ type
    procedure executeificommand(var acommand: ificommandcodety); override;
    {$endif}
    
-//   constructor docreate(aowner: tcomponent); virtual;
    procedure docreate(aowner: tcomponent); virtual;
   public
    constructor create(aowner: tcomponent); overload; override;
@@ -258,7 +254,6 @@ type
    property optionswindow: windowoptionsty read foptionswindow 
                                           write setoptionswindow default [];
    property mainmenu: tmainmenu read fmainmenu write setmainmenu;
-//   property color default cl_background;
    property font: twidgetfont read getfont write setfont stored isfontstored;
    property fontempty: twidgetfontempty read getfontempty 
                   write setfontempty stored isfontemptystored;
@@ -443,7 +438,6 @@ type
    procedure statread; override;
    procedure dostatread1(const reader: tstatreader); override;
    procedure dostatwrite1(const writer: tstatwriter); override;
-//   procedure mouseevent(var info: mouseeventinfoty); override;
    procedure childmouseevent(const sender: twidget;
                           var info: mouseeventinfoty); override;
    procedure statechanged; override;
@@ -2160,8 +2154,6 @@ end;
 *)
 procedure tcustomdockform.childmouseevent(const sender: twidget;
                var info: mouseeventinfoty);
-//var
-// pt1,pt2: pointty;
 begin
  if not (es_processed in info.eventstate) then begin  
   fdragdock.childormouseevent(sender,info);
@@ -2169,24 +2161,6 @@ begin
    inherited;
   end;
  end;
-{
- pt2:= pos;
- fdragdock.checkmouseactivate(self,info);
- application.delayedmouseshift(subpoint(pos,pt2)); //follow shift in view
- if (frame <> nil) and fdragdock.ismdi and 
-                       not (csdesigning in componentstate) then begin
-  pt1:= info.pos;
-  translatewidgetpoint1(info.pos,sender,self);
-  frame.mouseevent(info);
-  info.pos:= pt1;
- end;
- if not (es_processed in info.eventstate) then begin  
-  fdragdock.childmouseevent(sender,info);
-  if not (es_processed in info.eventstate) then begin
-   inherited;
-  end;
- end;
-}
 end;
 
 procedure tcustomdockform.doactivate;

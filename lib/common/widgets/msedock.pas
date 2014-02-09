@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2014 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -36,7 +36,7 @@ type
             od_propsize,od_fixsize,od_top,od_background,
             od_alignbegin,od_aligncenter,od_alignend,
             od_nofit,od_banded,od_nosplitsize,od_nosplitmove,
-            od_lock);
+            od_lock,od_thumbtrack);
  optionsdockty = set of optiondockty;
 
  dockbuttonrectty = (dbr_none,dbr_handle,dbr_close,dbr_maximize,dbr_normalize,
@@ -2950,9 +2950,6 @@ var
    end;
   end;
   
-// var
-//  int1,int2: integer;
-  
  begin
   ar1:= nil; //compilerwarning
   result:= -1;
@@ -3457,66 +3454,6 @@ begin
  end;
 end;
 
-{
-procedure tdockcontroller.maximize;
-begin
- if ismdi then begin
-  with fintf.getwidget do begin  
-   if fmdistate = mds_normal then begin
-    fnormalrect:= widgetrect;
-   end;
-   fmdistate:= mds_maximized;
-   anchors:= [];
-   widgetrect:= placementrect;
-  end;
- end; 
-end;
-
-procedure tdockcontroller.normalize;
-begin
- if ismdi and (fmdistate <> mds_normal) then begin
-  fmdistate:= mds_normal;
-  with fintf.getwidget do begin
-   anchors:= [an_left,an_top];
-   widgetrect:= fnormalrect;
-  end;
- end; 
-end;
-
-procedure tdockcontroller.minimize;
-var
- rect1: rectty;
- pos1: captionposty;
-begin
- if ismdi then begin
-  with fintf.getwidget do begin
-   if fmdistate = mds_normal then begin
-    fnormalrect:= widgetrect;
-   end;
-   if canclose(nil) then begin
-    fmdistate:= mds_minimized;
-    nextfocus;
-    with rect1 do begin
-     pos:= fnormalrect.pos;
-     size:= idockcontroller(fintf).getminimizedsize(pos1);
-     if cx = 0 then begin
-      cx:= fnormalrect.cx;
-     end;
-     if cy = 0 then begin
-      cy:= fnormalrect.cy;
-     end;
-     case pos1 of
-      cp_right: inc(x,fnormalrect.cx - cx);
-      cp_bottom: inc(y,fnormalrect.cy - cy);
-     end;
-    end;
-    anchors:= [an_left,an_top];
-    widgetrect:= rect1;
-   end; 
-  end;
- end;
-end;
-}
 procedure tdockcontroller.setmdistate(const avalue: mdistatety);
 var
  statebefore: mdistatety;
