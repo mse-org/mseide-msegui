@@ -473,7 +473,9 @@ end;
 
 procedure tobjectpicker.dopaint(const acanvas: tcanvas);
 begin
- fintf.paintxorpic(self,acanvas);
+ if not (opo_thumbtrack in foptions) then begin
+  fintf.paintxorpic(self,acanvas);
+ end;
  if ops_rectselecting in fstate then begin
   acanvas.dashes:= #3#3;
   acanvas.drawrect(fpickrect);

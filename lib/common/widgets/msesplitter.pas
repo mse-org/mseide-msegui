@@ -23,7 +23,8 @@ type
                      spo_vmove,spo_vprop,spo_vsizeprop,
                      spo_dockleft,spo_docktop,spo_dockright,spo_dockbottom,
                      spo_hshrinkzero,spo_vshrinkzero,
-                     spo_hrefstart,spo_vrefstart);
+                     spo_hrefstart,spo_vrefstart,
+                     spo_thumbtrack);
  splitteroptionsty = set of splitteroptionty;
 
 const
@@ -63,6 +64,7 @@ type
    fshrinkpriority: integer;
    fpropoffsetrecursion: integer;
    fstatpriority: integer;
+   fwidgetrectbefore: rectty;
    procedure setstatfile(const avalue: tstatfile);
    procedure setlinkbottom(const avalue: twidget);
    procedure setlinkleft(const avalue: twidget);
@@ -366,16 +368,6 @@ begin
  end;
 end;
 
-procedure tcustomsplitter.beginpickmove(const sender: tobjectpicker);
-begin
- //dummy
-end;
-
-procedure tcustomsplitter.pickthumbtrack(const sender: tobjectpicker);
-begin
- //dummy
-end;
-
 function tcustomsplitter.getcursorshape(const sender: tobjectpicker; var shape: cursorshapety): boolean;
 begin
  result:= canmouseinteract and
@@ -571,7 +563,17 @@ end;
 
 procedure tcustomsplitter.cancelpickmove(const sender: tobjectpicker);
 begin
- //dummy
+ widgetrect:= fwidgetrectbefore;
+end;
+
+procedure tcustomsplitter.beginpickmove(const sender: tobjectpicker);
+begin
+ fwidgetrectbefore:= fwidgetrect;
+end;
+
+procedure tcustomsplitter.pickthumbtrack(const sender: tobjectpicker);
+begin
+ setpickoffset(sender.pickoffset);
 end;
 
 procedure tcustomsplitter.setstatfile(const avalue: tstatfile);
@@ -1042,6 +1044,12 @@ begin
   end
   else begin
    exclude(fwidgetstate1,ws1_tryshrink);
+  end;
+  if spo_thumbtrack in avalue then begin
+   fobjectpicker.options:= fobjectpicker.options + [opo_thumbtrack];
+  end
+  else begin
+   fobjectpicker.options:= fobjectpicker.options - [opo_thumbtrack];
   end;
   updatedock;
  end;
