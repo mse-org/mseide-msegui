@@ -1357,8 +1357,9 @@ end;
 
 procedure tcustommseform.updateoptions;
 begin
- if componentstate * [csloading,csdestroying,csdesigning] = [] then begin
-  window.globalshortcuts:= fo_globalshortcuts in foptions;
+ if (componentstate * [csloading,csdestroying,csdesigning] = []) and 
+                                             (window.owner = self)  then begin
+  fwindow.globalshortcuts:= fo_globalshortcuts in foptions;
   fwindow.localshortcuts:= fo_localshortcuts in foptions;
   if (fo_main in foptions) and not (csdesigning in componentstate) then begin
    application.mainwindow:= fwindow;
