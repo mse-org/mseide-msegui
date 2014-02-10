@@ -8,8 +8,6 @@ object watchpointsfo: twatchpointsfo
   bounds_y = 368
   bounds_cx = 483
   bounds_cy = 210
-  container.frame.zoomwidthstep = 1
-  container.frame.zoomheightstep = 1
   container.frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
   container.bounds = (
     0
@@ -131,7 +129,7 @@ object watchpointsfo: twatchpointsfo
     datacols.items = <    
       item[wpton]
         width = 16
-        options = [co_drawfocus, co_savestate]
+        options = [co_drawfocus, co_fixwidth, co_savestate]
         widgetname = 'wpton'
         dataclass = tgridintegerdatalist
       end    
@@ -206,10 +204,6 @@ object watchpointsfo: twatchpointsfo
       bounds_cy = 16
       textflags = [tf_xcentered, tf_ycentered, tf_noselect]
       ondataentered = wptondataentered
-      value = 0
-      valuedefault = 0
-      min = 0
-      max = 2
       dropdown.cols.count = 1
       dropdown.cols.items = <      
         item
@@ -219,6 +213,10 @@ object watchpointsfo: twatchpointsfo
             'R'
           )
         end>
+      value = 0
+      valuedefault = 0
+      min = 0
+      max = 2
       reffontheight = 14
     end
     object wptexpression: tstringedit

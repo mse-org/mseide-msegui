@@ -11,8 +11,6 @@ object watchfo: twatchfo
   bounds_cy = 245
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets]
   container.color = -2147483645
-  container.frame.zoomwidthstep = 1
-  container.frame.zoomheightstep = 1
   container.frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
   container.bounds = (
     0
@@ -113,7 +111,7 @@ object watchfo: twatchfo
     datacols.items = <    
       item[watchon]
         width = 13
-        options = [co_drawfocus, co_savevalue, co_savestate]
+        options = [co_drawfocus, co_fixwidth, co_savevalue, co_savestate]
         widgetname = 'watchon'
         dataclass = tgridintegerdatalist
       end    
