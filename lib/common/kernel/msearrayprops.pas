@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2014 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -1617,6 +1617,7 @@ begin
     if ancestorbefore <> nil then begin 
      int2:= int1;
      if (str1 <> '') then begin
+      int2:= bigint; //needs ancestor name
       for int3:= 0 to ancestorbefore.count-1 do begin
        if ancestorbefore.getcollectionname(int3) = str1 then begin
         int2:= int3;
