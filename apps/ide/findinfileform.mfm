@@ -99,7 +99,7 @@ object findinfilefo: tfindinfilefo
     bounds_cx = 359
     bounds_cy = 198
     anchors = []
-    tab_options = [tabo_opposite]
+    tab_options = [tabo_dragsource, tabo_dragdest, tabo_opposite, tabo_dblclickedtabfirst, tabo_hintclippedtext]
     tab_frame.buttonslast = True
     tab_size = 18
   end
