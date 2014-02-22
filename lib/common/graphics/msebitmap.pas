@@ -2061,14 +2061,17 @@ procedure tmaskedbitmap.readimagedata(stream: tstream);
 var
  lint1: int64;
  str1: string;
+ optionsbefore: bitmapoptionsty;
 begin
  stream.readbuffer(lint1,sizeof(lint1));
 {$ifdef FPC}
  lint1:= leton(lint1);
 {$endif}
  setlength(str1,lint1);
+ optionsbefore:= options;
  stream.readbuffer(pchar(pointer(str1))^,lint1);
  origformatdata:= str1;
+ options:= optionsbefore; // restore mask options
 end;
 
 procedure tmaskedbitmap.writeimagedata(stream: tstream);
