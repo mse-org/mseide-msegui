@@ -809,8 +809,6 @@ end;
 
 procedure tbitmap.allocimagemem;
 var
-// int1: integer;
-// po1: plongword;
  step: integer;
 begin
  if fimage.monochrome then begin
@@ -823,15 +821,6 @@ begin
  end;
  if fimage.length > 0 then begin
   fimage.pixels:= gui_allocimagemem(fimage.length);
-  {
-  if fimage.monochrome then begin
-   po1:= @fimage.pixels[step-1];
-   for int1:= fsize.cy - 1 downto 0 do begin
-    po1^:= 0;   //init padding
-    inc(po1);
-   end; 
-  end;
-  }
  end
  else begin
   fimage.pixels:= nil;
