@@ -10,17 +10,21 @@
 unit msemagickstream;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
+uses
+ msestrings;
+ 
+procedure registerformats(const labels: array of string;
+                           const filternames: array of msestring;
+                           const filemasks: array of msestringarty);
 
 implementation
 uses
  msegraphicstream,msestream,mclasses,msebitmap,msestockobjects,
  msegraphicsmagick,msegraphics,msegraphutils;
-const
- pnglabel = 'png';
 var
  inited: boolean;
  qdepth: quantumdepthty; 
- 
+
 procedure checkinit;
 begin
  if not inited then begin
@@ -104,9 +108,20 @@ begin
  end;
 end;
 
+procedure registerformats(const labels: array of string;
+                           const filternames: array of msestring;
+                           const filemasks: array of msestringarty);
+var
+ int1: integer;
+begin
+ for int1:= 0 to high(labels) do begin
+  registergraphicformat(labels[int1],@readgraphic,nil,
+                           filternames[int1],filemasks[int1]);
+ end;
+end;
+
+
 initialization
- registergraphicformat(pnglabel,{$ifdef FPC}@{$endif}readgraphic,nil,
-         stockobjects.captions[sc_PNG_Image],['*.png']);
 finalization
  if inited then begin
   releasegraphicsmagick();
