@@ -23,7 +23,7 @@ uses
 //       -add parameter
 //
 procedure writegraphic(const dest: tstream;
-                               const source: tobject;
+                               const source: tobject; const format: string;
                                const params: array of const);
                  //no params up to now
 var

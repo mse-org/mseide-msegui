@@ -39,7 +39,7 @@ type
  readgraphicprocty = function(const source: tstream; const index: integer; 
                          const dest: tobject; var format: string): boolean;
  writegraphicprocty = procedure(const dest: tstream;
-                               const source: tobject;
+                               const source: tobject; const format: string;
                                const params: array of const);
 
 function readgraphic(const source: tstream; const dest: tbitmap;
@@ -323,10 +323,11 @@ begin
   end;
  end;
  if int2 < 0 then begin
-  formaterror(stockobjects.captions[sc_graphic_format_not_supported],aformatlabel);
+  formaterror(stockobjects.captions[sc_graphic_format_not_supported],
+                                                               aformatlabel);
  end;
  with formats[int2] do begin
-  writeproc(dest,asource,params);
+  writeproc(dest,asource,aformatlabel,params);
  end;
 end;
 

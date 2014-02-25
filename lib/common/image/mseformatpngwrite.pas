@@ -19,7 +19,7 @@ uses
  fpimage;
 
 procedure writegraphic(const dest: tstream;
-                               const source: tobject;
+                               const source: tobject; const format: string;
                                const params: array of const);
                                //[grayscale      (default false),
                                // indexed        (default false),

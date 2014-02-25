@@ -19,7 +19,7 @@ uses
  msestockobjects,msestream,fpwritejpeg,sysutils,typinfo;
 
 procedure writegraphic(const dest: tstream;
-                               const source: tobject;
+                               const source: tobject; const format: string;
                                const params: array of const);
                             //[compressionquality: integer] 0..100, default 75
 var
