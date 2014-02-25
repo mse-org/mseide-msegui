@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2006-2012 by Martin Schreiber
+{ MSEgui Copyright (c) 2006-2014 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -25,7 +25,7 @@ type
  end;
  
 function readgraphic(const source: tstream; const index: integer; 
-                const dest: tobject): boolean;
+                const dest: tobject; var format: string): boolean;
 begin
  if dest is tbitmap then begin
   result:= readfpgraphic(source,tmsefpreadertarga,tbitmap(dest));

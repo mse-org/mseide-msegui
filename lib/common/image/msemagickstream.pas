@@ -35,7 +35,7 @@ begin
 end;
  
 function readgraphic(const source: tstream; const index: integer; 
-                const dest: tobject): boolean;
+                const dest: tobject; var format: string): boolean;
 var
  imageinfo: pointer;
  exceptinf: exceptioninfo;
@@ -60,19 +60,31 @@ begin
     qd_8: begin
      with pimage8(image)^ do begin
       bo1:= a.matte = magicktrue;
-      si1:= ms(a.rows,a.columns);
+      si1:= ms(a.columns,a.rows);
+      format:= lowercase(c.magick);
+      if format = '' then begin
+       format:= lowercase(c.magick_filename);
+      end;
      end;
     end;
     qd_16: begin
      with pimage16(image)^ do begin
       bo1:= a.matte = magicktrue;
-      si1:= ms(a.rows,a.columns);
+      si1:= ms(a.columns,a.rows);
+      format:= lowercase(c.magick);
+      if format = '' then begin
+       format:= lowercase(c.magick_filename);
+      end;
      end;
     end;
     else begin
      with pimage32(image)^ do begin
       bo1:= a.matte = magicktrue;
-      si1:= ms(a.rows,a.columns);
+      si1:= ms(a.columns,a.rows);
+      format:= lowercase(c.magick);
+      if format = '' then begin
+       format:= lowercase(c.magick_filename);
+      end;
      end;
     end;
    end;

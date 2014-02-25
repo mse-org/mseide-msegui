@@ -37,7 +37,7 @@ type
  end;  
 
  readgraphicprocty = function(const source: tstream; const index: integer; 
-                               const dest: tobject): boolean;
+                         const dest: tobject; var format: string): boolean;
  writegraphicprocty = procedure(const dest: tstream;
                                const source: tobject;
                                const params: array of const);
@@ -258,6 +258,7 @@ var
  int1,int3: integer;
  ar1: stringarty;
  found: boolean;
+ str1: string;
 begin
  result:= '';
  ar1:= nil; //compiler warning
@@ -266,8 +267,9 @@ begin
   for int1:= 0 to high(formats) do begin
    with formats[int1] do begin
     if assigned(readproc) then begin
-     if readproc(source,index,adest) then begin
-      result:= formats[int1].formatlabel;
+     str1:= formats[int1].formatlabel;
+     if readproc(source,index,adest,str1) then begin
+      result:= str1;
       exit;
      end;
      source.position:= 0;
@@ -284,8 +286,9 @@ begin
      if (formatlabel = ar1[int3]) then begin
       found:= true;
       if assigned(readproc) then begin
-       if readproc(source,index,adest) then begin
-        result:= formats[int1].formatlabel;
+       str1:= formats[int1].formatlabel;
+       if readproc(source,index,adest,str1) then begin
+        result:= str1;
         exit;
        end;
       end;

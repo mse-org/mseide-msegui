@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2006-2012 by Martin Schreiber
+{ MSEgui Copyright (c) 2006-2014 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -11,7 +11,7 @@ unit mseformatjpgwrite;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 const
- jpglabel = 'jpg';
+ jpglabel = 'jpeg';
  
 implementation
 uses

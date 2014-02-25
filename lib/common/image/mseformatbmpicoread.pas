@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2006-2013 by Martin Schreiber
+{ MSEgui Copyright (c) 2006-2014 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -395,7 +395,7 @@ begin
 end;
 
 function readgraphicbmp(const asource: tstream; const index: integer; 
-                                      const dest: tobject): boolean;
+                             const dest: tobject; var format: string): boolean;
 begin
  result:= false;
  if dest is tbitmap then begin
@@ -418,7 +418,7 @@ begin
 end;
 
 function readgraphicico(const asource: tstream; const index: integer; 
-                const dest: tobject): boolean;
+                const dest: tobject; var format: string): boolean;
 var
  int1: integer;
 begin

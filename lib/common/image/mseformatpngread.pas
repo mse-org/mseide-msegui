@@ -25,7 +25,7 @@ type
  end;
  
 function readgraphic(const source: tstream; const index: integer; 
-                const dest: tobject): boolean;
+                const dest: tobject; var format: string): boolean;
 begin
  if dest is tbitmap then begin
   result:= readfpgraphic(source,tmsefpreaderpng,tbitmap(dest));
