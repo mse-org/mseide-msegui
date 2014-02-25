@@ -880,6 +880,9 @@ TStringsEnumerator = class
     function tryreadbuffer(var buffer; count: longint): syserrorty;
     procedure WriteBuffer(const Buffer; Count: Longint);
     function trywritebuffer(const buffer; count: longint): syserrorty;
+    function readdatastring: string; virtual;
+             //read available data
+    procedure writedatastring(const value: string); virtual;
     function CopyFrom(Source: TStream; Count: Int64): Int64;
     function ReadComponent(Instance: TComponent): TComponent;
     function ReadComponentRes(Instance: TComponent): TComponent;
@@ -3666,6 +3669,19 @@ end;
        end;
 
     end;
+
+function TStream.readdatastring: string;
+begin
+ setlength(result,size-position);
+ setlength(result,read(pointer(result)^,length(result)));
+end;
+
+procedure TStream.writedatastring(const value: string);
+begin
+ if value <> '' then begin
+  writebuffer(pointer(value)^,length(value));
+ end;
+end;
 
   function TStream.ReadComponent(Instance: TComponent): TComponent;
 

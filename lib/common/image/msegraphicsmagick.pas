@@ -1,3 +1,12 @@
+{ MSEgui Copyright (c) 2014 by Martin Schreiber
+
+    See the file COPYING.MSE, included in this distribution,
+    for details about the copyright.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+}
 unit msegraphicsmagick;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
@@ -844,37 +853,20 @@ var
  DestroyMagickWand: procedure(wand: pMagickWand);
                               {$ifdef wincall}stdcall{$else}cdecl{$endif};
 
- CloneImageInfo8: function(image_info: pImageInfo8): pImageInfo8;
-                              {$ifdef wincall}stdcall{$else}cdecl{$endif};
- CloneImageInfo16: function(image_info: pImageInfo16): pImageInfo16;
-                              {$ifdef wincall}stdcall{$else}cdecl{$endif};
- CloneImageInfo32: function(image_info: pImageInfo32): pImageInfo32;
+ CloneImageInfo: function(image_info: pointer{pImageInfo}): pointer{pImageInfo};
                               {$ifdef wincall}stdcall{$else}cdecl{$endif};
  
- ReadImage8: function(image_info: pImageInfo8; 
-                                        exception: pExceptionInfo): pImage8;
+ ReadImage: function(image_info: pointer{pImageInfo}; 
+                           exception: pExceptionInfo): pointer{pImage};
                              {$ifdef wincall}stdcall{$else}cdecl{$endif};
- ReadImage16: function(image_info: pImageInfo16;
-                                        exception: pExceptionInfo): pImage16;
+ BlobToImage: function(image_info: pointer{pImageInfo}; blob: pointer;
+                    length: size_t; exception: pExceptionInfo): pointer{pImage};
                              {$ifdef wincall}stdcall{$else}cdecl{$endif};
- ReadImage32: function(image_info: pImageInfo32;
-                                        exception: pExceptionInfo): pImage32;
+
+ DestroyImage: procedure(image: pointer{pImage});
                              {$ifdef wincall}stdcall{$else}cdecl{$endif};
- DestroyImage8: procedure(image: pImage8);
-                             {$ifdef wincall}stdcall{$else}cdecl{$endif};
- DestroyImage16: procedure(image: pImage16);
-                             {$ifdef wincall}stdcall{$else}cdecl{$endif};
- DestroyImage32: procedure(image: pImage32);
-                             {$ifdef wincall}stdcall{$else}cdecl{$endif};
- DispatchImage8: function(image: pImage8; x_offset: clong; y_offset: clong;
-               columns: culong; rows: culong; map: pcchar; _type: StorageType;
-                  pixels: pointer; exception: pExceptionInfo): MagickPassFail;
-                             {$ifdef wincall}stdcall{$else}cdecl{$endif};
- DispatchImage16: function(image: pImage16; x_offset: clong; y_offset: clong;
-               columns: culong; rows: culong; map: pcchar; _type: StorageType;
-                  pixels: pointer; exception: pExceptionInfo): MagickPassFail;
-                             {$ifdef wincall}stdcall{$else}cdecl{$endif};
- DispatchImage32: function(image: pImage32; x_offset: clong; y_offset: clong;
+ DispatchImage: function(image: pointer{pImage8};
+                      x_offset: clong; y_offset: clong;
                columns: culong; rows: culong; map: pcchar; _type: StorageType;
                   pixels: pointer; exception: pExceptionInfo): MagickPassFail;
                              {$ifdef wincall}stdcall{$else}cdecl{$endif};
@@ -887,17 +879,8 @@ var
  MagickReadImageFile: function(wand: pMagickWand; _file: pFILE): cuint;
                               {$ifdef wincall}stdcall{$else}cdecl{$endif};
 
- ExportImagePixelArea8: function(image: pImage8; quantum_type: QuantumType;
-                 quantum_size: cuint; destination: pcuchar;
-                 options: pExportPixelAreaOptions;
-                 export_info: pExportPixelAreaInfo): MagickPassFail;
-                              {$ifdef wincall}stdcall{$else}cdecl{$endif};
- ExportImagePixelArea16: function(image: pImage16; quantum_type: QuantumType;
-                 quantum_size: cuint; destination: pcuchar;
-                 options: pExportPixelAreaOptions;
-                 export_info: pExportPixelAreaInfo): MagickPassFail;
-                              {$ifdef wincall}stdcall{$else}cdecl{$endif};
- ExportImagePixelArea32: function(image32: pImage32; quantum_type: QuantumType;
+ ExportImagePixelArea: function(image: pointer{pImage};
+                 quantum_type: QuantumType;
                  quantum_size: cuint; destination: pcuchar;
                  options: pExportPixelAreaOptions;
                  export_info: pExportPixelAreaInfo): MagickPassFail;
@@ -922,26 +905,33 @@ begin
 end;
   
 procedure init;
+var
+ l1: culong;
 begin
  initializemagick(pcchar(application.applicationname));
+ magickgetquantumdepth(@l1);
+ case l1 of
+  8: begin
+   qdepth:= qd_8;
+  end;
+  16: begin
+   qdepth:= qd_16;
+  end
+  else begin
+   qdepth:= qd_32;
+  end;
+ end;
 end;
 
 procedure deinit;
 begin
  destroymagick();
 end;
-var
- readimage: pointer;
- cloneimageinfo: pointer;
- destroyimage: pointer;
- dispatchimage: pointer;
- exportimagepixelarea: pointer;
 
 procedure initializegraphicsmagick(const sonames: array of filenamety);
-                       //[] = default
- 
+                       //[] = default 
 const
- funcs: array[0..17] of funcinfoty = (
+ funcs: array[0..18] of funcinfoty = (
 //    (n: ''; d: {$ifndef FPC}@{$endif}@)
     (n: 'InitializeMagick'; d: {$ifndef FPC}@{$endif}@InitializeMagick),
     (n: 'DestroyMagick'; d: {$ifndef FPC}@{$endif}@DestroyMagick),
@@ -960,61 +950,14 @@ const
     (n: 'GetExceptionInfo'; d: {$ifndef FPC}@{$endif}@GetExceptionInfo),
     (n: 'DestroyExceptionInfo'; d: {$ifndef FPC}@{$endif}@DestroyExceptionInfo),
     (n: 'DestroyImage'; d: {$ifndef FPC}@{$endif}@DestroyImage),
-    (n: 'DispatchImage'; d: {$ifndef FPC}@{$endif}@DispatchImage)
+    (n: 'DispatchImage'; d: {$ifndef FPC}@{$endif}@DispatchImage),
+    (n: 'BlobToImage'; d: {$ifndef FPC}@{$endif}@BlobToImage)
  );
  errormessage = 'Can not load GraphicsMagic library. ';
 
-var
- l1: culong; 
 begin
- readimage8:= nil;
- readimage16:= nil;
- readimage32:= nil;
- cloneimageinfo8:= nil;
- cloneimageinfo16:= nil;
- cloneimageinfo32:= nil;
- destroyimage8:= nil;
- destroyimage16:= nil;
- destroyimage32:= nil;
- dispatchimage8:= nil;
- dispatchimage16:= nil;
- dispatchimage32:= nil;
- exportimagepixelarea8:= nil;
- exportimagepixelarea16:= nil;
- exportimagepixelarea32:= nil;
-
- if initializedynlib(libinfo,sonames,graphicsmagicwandlib,funcs,
-   {$ifdef mswindows}funcsopt{$else}[]{$endif},errormessage,@init) then begin
-
-  magickgetquantumdepth(@l1);
-  qdepth:= qd_8;
-  case l1 of
-   8: begin
-    qdepth:= qd_8;
-    pointer(readimage8):= readimage;
-    pointer(cloneimageinfo8):= cloneimageinfo;
-    pointer(destroyimage8):= destroyimage;
-    pointer(dispatchimage8):= dispatchimage;
-    pointer(exportimagepixelarea8):= exportimagepixelarea;
-   end;
-   16: begin
-    qdepth:= qd_16;
-    pointer(readimage16):= readimage;
-    pointer(cloneimageinfo16):= cloneimageinfo;
-    pointer(destroyimage16):= destroyimage;
-    pointer(dispatchimage16):= dispatchimage;
-    pointer(exportimagepixelarea16):= exportimagepixelarea;
-   end;
-   32: begin
-    qdepth:= qd_32;
-    pointer(readimage32):= readimage;
-    pointer(cloneimageinfo32):= cloneimageinfo;
-    pointer(destroyimage32):= destroyimage;
-    pointer(dispatchimage32):= dispatchimage;
-    pointer(exportimagepixelarea32):= exportimagepixelarea;
-   end;
-  end;
- end;
+ initializedynlib(libinfo,sonames,graphicsmagicwandlib,funcs,
+   {$ifdef mswindows}funcsopt{$else}[]{$endif},errormessage,@init);
 end;
 
 procedure releasegraphicsmagick;

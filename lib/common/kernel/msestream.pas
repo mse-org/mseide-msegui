@@ -157,8 +157,9 @@ type
    function read(var buffer; count: longint): longint; override;
    function write(const buffer; count: longint): longint; override;
    function seek(const offset: int64; origin: tseekorigin): int64; override;
-   function readdatastring: string; virtual; //bringt ab filepointer alle zeichen
-   procedure writedatastring(const value: string);
+   function readdatastring: string; override;
+             //read available data
+   procedure writedatastring(const value: string); override;
    function isopen: boolean;
    property filename: filenamety read ffilename;
    property openmode: fileopenmodety read fopenmode;
@@ -402,6 +403,7 @@ type
   public
    constructor create(const adata: string);
    destructor destroy; override;
+   function readdatastring: string; override;
    function write(const Buffer; Count: Longint): Longint; override;
  end;
 
@@ -1232,8 +1234,12 @@ var
  lint1,lint2: int64;
 begin
  if fcryptohandler = nil then begin
-  setlength(result,size-position);
-  setlength(result,read(pointer(result)^,length(result)));
+  if fmemorystream <> nil then begin
+   result:= fmemorystream.readdatastring;
+  end
+  else begin
+   result:= inherited readdatastring;
+  end;
  end
  else begin
   if fmemorystream <> nil then begin
@@ -2493,6 +2499,16 @@ end;
 function tstringcopystream.write(const Buffer; Count: Longint): Longint;
 begin
  result:= 0;
+end;
+
+function tstringcopystream.readdatastring: string;
+begin
+ if position = 0 then begin
+  result:= fdata;
+ end
+ else begin
+  result:= inherited readdatastring;
+ end;
 end;
 
 { ttextstringcopystream }
