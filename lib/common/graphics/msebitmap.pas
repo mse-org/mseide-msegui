@@ -59,17 +59,17 @@ type
   protected
    procedure getcanvasimage(const bgr: boolean;
                             var aimage: maskedimagety); override;
-//   function createcanvas: tcanvas; override;
    procedure setsize(const Value: sizety); override;
    function getasize: sizety; virtual;
    procedure destroyhandle; override;
    procedure createhandle(copyfrom: pixmapty); override;
-//   function getimagepo: pimagety; override;
    function getsource: tbitmapcomp; virtual;
    procedure assign1(const source: tsimplebitmap; const docopy: boolean); override; 
                     //calls change
    procedure dochange; virtual;
    procedure defineproperties(filer: tfiler); override;
+   function getimageref(out aimage: imagety): boolean; 
+                                  //true if buffer must be destroyed
   public
    constructor create(const amonochrome: boolean;
                               const agdifuncs: pgdifunctionaty = nil);
@@ -125,7 +125,9 @@ type
    property pixel[const index: pointty]: colorty read getpixel write setpixel;
    property pixels[const x,y: integer]: colorty read getpixels write setpixels;
    property scanline[index: integer]: pointer read getscanline;
-   function scanhigh: integer; //max index in scanline[0]
+   property scanhigh: integer read fscanhigh; 
+                          //max index in scanline[0] ???
+   property scanlinestep: integer read fscanlinestep; //bytes
    property colorforeground: colorty read fcolorforeground write setcolorforeground default cl_black;
                  //used for monochrome -> color conversion
    property colorbackground: colorty read fcolorbackground write setcolorbackground default cl_white;
@@ -233,25 +235,25 @@ type
                                [al_stretchx,al_stretchy,al_intpol]); overload;
    procedure remask; //recalc mask
    procedure automask; //transparentcolor is bottomright pixel
-   function loadfromstring(const avalue: string; const format: string = '';
-                               const index: integer = -1): string;
+   function loadfromstring(const avalue: string; const format: string;
+                                                         //'' = any
+                                        const params: array of const): string;
                                          //returns format
-   function loadfromstream(const stream: tstream; const format: string = '';
-                               const index: integer = -1): string;
-                                         //index in ico
-   function loadfromfile(const filename: filenamety; const format: string = '';
-                               const index: integer = -1): string;
+   function loadfromstream(const stream: tstream; const format: string;
+                                                         //'' = any
+                                       const params: array of const): string;
+   function loadfromfile(const filename: filenamety; const format: string; 
+                                                         //'' = any
+                                       const params: array of const): string;
                                                           //index in ico
    procedure writetostring(out avalue: string; const format: string;
                                   const params: array of const); overload;
    function writetostring(const format: string;
                            const params: array of const): string; overload;
    procedure writetostream(const stream: tstream; const format: string;
-                               const params: array of const); //index in ico
+                               const params: array of const);
    procedure writetofile(const filename: filenamety; const format: string;
-                               const params: array of const); //index in ico
-//   procedure loadfromresourcename(instance: longword; const resname: string);
-//   procedure readimagefile(const filename: filenamety); //calls change
+                               const params: array of const);
    property mask: tbitmap read getmask1 write setmask;
    property masked: boolean read getmasked write setmasked default false;
    property colormask: boolean read getcolormask write setcolormask default false;
@@ -1331,6 +1333,18 @@ begin
  end;
 end;
 
+function tbitmap.getimageref(out aimage: imagety): boolean; 
+                                  //true if buffer must be destroyed
+begin
+ result:= fimage.pixels = nil;
+ if result then begin
+  savetoimage(aimage);
+ end
+ else begin
+  aimage:= fimage;
+ end;
+end;
+
 procedure tbitmap.loadfromimage(const aimage: imagety);
 begin
  if aimage.pixels = nil then begin
@@ -1350,16 +1364,6 @@ begin
  end;
 end;
 
-function tbitmap.scanhigh: integer;
-begin
- result:= fsize.cx * fsize.cy - 1;
-end;
-{
-function tbitmap.createcanvas: tcanvas;
-begin
- result:= tbitmapcanvas.create(self);
-end;
-}
 procedure tbitmap.getcanvasimage(const bgr: boolean; var aimage: maskedimagety);
 begin
  checkimage(bgr);
@@ -1580,11 +1584,9 @@ end;
 procedure tmaskedbitmap.setmonochrome(const avalue: boolean);
 begin
  inherited;
- if avalue then begin
-  include(foptions,bmo_monochrome);
- end
- else begin
-  exclude(foptions,bmo_monochrome);
+ if avalue xor (bmo_monochrome in foptions) then begin
+  updatebit1(longword(foptions),ord(bmo_monochrome),avalue);
+  change;
  end;
 end;
 
@@ -2077,12 +2079,12 @@ begin
 end;
 
 function tmaskedbitmap.loadfromstream(const stream: tstream;
-           const format: string = ''; const index: integer = -1): string;
+           const format: string; const params: array of const): string;
 var
  int1,int2: integer;
 begin
  int1:= stream.position;
- result:= readgraphic(stream,self,format,index);
+ result:= readgraphic(stream,self,format,params);
  int2:= stream.position;
  if bmo_storeorigformat in options then begin
   forigformat:= result;
@@ -2094,20 +2096,20 @@ begin
 end;
 
 function tmaskedbitmap.loadfromfile(const filename: filenamety;
-             const format: string = ''; const index: integer = -1): string;
+             const format: string; const params: array of const): string;
 var
  stream: tmsefilestream;
 begin
  stream:= tmsefilestream.create(filename,fm_read);
  try
-  result:= loadfromstream(stream,format,index);
+  result:= loadfromstream(stream,format,params);
  finally
   stream.free;
  end;
 end;
 
 function tmaskedbitmap.loadfromstring(const avalue: string;
-               const format: string = ''; const index: integer = -1): string;
+               const format: string; const params: array of const): string;
 var
  stream1: tstringcopystream;
 begin
@@ -2118,7 +2120,7 @@ begin
  else begin
   stream1:= tstringcopystream.create(avalue);
   try
-   result:= loadfromstream(stream1,format);
+   result:= loadfromstream(stream1,format,params);
   finally
    stream1.free;
   end;
@@ -2221,7 +2223,7 @@ procedure tmaskedbitmap.setorigformatdata(const avalue: string);
 begin
  forigformatdata:= avalue;
  if avalue <> '' then begin
-  loadfromstring(avalue,forigformat);
+  loadfromstring(avalue,forigformat,[]);
  end;
 end;
 

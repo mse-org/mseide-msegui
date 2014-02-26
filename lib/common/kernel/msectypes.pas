@@ -101,6 +101,11 @@ type
   clock_t = culong;
   time_t = clong;
 {$endif}
- 
+ psize_t = ^size_t;
+ poff_t = ^off_t;
+ pssize_t = ^ssize_t;
+ pclock_t = ^clock_t;
+ ptime_t = ^time_t;
+  
 implementation
 end.

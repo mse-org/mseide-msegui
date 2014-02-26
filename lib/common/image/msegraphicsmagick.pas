@@ -705,22 +705,6 @@ type
  end;
  pImage32 = ^Image32;
  
- ExportPixelAreaOptions = record  
-  sample_type: QuantumSampleType; //* Quantum sample type */
-  double_minvalue: cdouble;      
-     //* Minimum value (default 0.0) for linear floating point samples */
-  double_maxvalue: cdouble;      
-     //* Maximum value (default 1.0) for linear floating point samples */
-  grayscale_miniswhite: MagickBool; 
-     //* Grayscale minimum value is white rather than black */
-  pad_bytes: culong;            
-     //* Number of pad bytes to output after pixel data */
-  pad_value: cuchar;            
-     //* Value to use when padding end of pixel data */
-  endian: EndianType;               
-     //* Endian orientation for 16/32/64 bit types (default MSBEndian) */
-  signature: culong;
- end;
 
  ImageInfoa = record
   compression: CompressionType; //* Image compression to use while decoding */
@@ -817,13 +801,50 @@ type
  end;
  pImageInfo32 = ^ImageInfo32;
 
+// pExportPixelAreaOptions = ^ExportPixelAreaOptions;
+
+ ExportPixelAreaOptions = record  
+  sample_type: QuantumSampleType; //* Quantum sample type */
+  double_minvalue: cdouble;      
+     //* Minimum value (default 0.0) for linear floating point samples */
+  double_maxvalue: cdouble;      
+     //* Maximum value (default 1.0) for linear floating point samples */
+  grayscale_miniswhite: MagickBool; 
+     //* Grayscale minimum value is white rather than black */
+  pad_bytes: culong;            
+     //* Number of pad bytes to output after pixel data */
+  pad_value: cuchar;            
+     //* Value to use when padding end of pixel data */
+  endian: EndianType;               
+     //* Endian orientation for 16/32/64 bit types (default MSBEndian) */
+  signature: culong;
+ end;
  pExportPixelAreaOptions = ^ExportPixelAreaOptions;
+
+ ImportPixelAreaOptions = record
+  sample_type: QuantumSampleType; //* Quantum sample type */
+  double_minvalue: cdouble;      
+  //* Minimum value (default 0.0) for linear floating point samples */
+  double_maxvalue: cdouble;      
+          //* Maximum value (default 1.0) for linear floating point samples */
+  grayscale_miniswhite: MagickBool; 
+               //* Grayscale minimum value is white rather than black */
+  endian: EndianType;    //* Endian orientation for 16/32/64 bit types 
+                         //(default MSBEndian) */
+  signature: culong;
+ end;
+ pImportPixelAreaOptions = ^ImportPixelAreaOptions;
 
  ExportPixelAreaInfo = record
   bytes_exported: size_t;       //* Number of bytes which were exported */
  end;
  pExportPixelAreaInfo = ^ExportPixelAreaInfo;
  
+ ImportPixelAreaInfo = record
+  bytes_imported: size_t;       //* Number of bytes which were imported */
+ end;
+ pImportPixelAreaInfo = ^ImportPixelAreaInfo;
+
  MagickWand = record
  end;
  pMagickWand = ^MagickWand;
@@ -848,43 +869,83 @@ var
  DestroyExceptionInfo: procedure(exception: pExceptionInfo);
                               {$ifdef wincall}stdcall{$else}cdecl{$endif};
 
- NewMagickWand: function(): pMagickWand;
-                              {$ifdef wincall}stdcall{$else}cdecl{$endif};
- DestroyMagickWand: procedure(wand: pMagickWand);
-                              {$ifdef wincall}stdcall{$else}cdecl{$endif};
-
  CloneImageInfo: function(image_info: pointer{pImageInfo}): pointer{pImageInfo};
                               {$ifdef wincall}stdcall{$else}cdecl{$endif};
- 
+ DestroyImageInfo: procedure(image_info: pointer{pImageInfo});
+                              {$ifdef wincall}stdcall{$else}cdecl{$endif};
+
+ AllocateImage: function(image_info: pointer{pImageInfo}): pointer{pImage}; 
+                              {$ifdef wincall}stdcall{$else}cdecl{$endif};
  ReadImage: function(image_info: pointer{pImageInfo}; 
                            exception: pExceptionInfo): pointer{pImage};
                              {$ifdef wincall}stdcall{$else}cdecl{$endif};
  BlobToImage: function(image_info: pointer{pImageInfo}; blob: pointer;
                     length: size_t; exception: pExceptionInfo): pointer{pImage};
                              {$ifdef wincall}stdcall{$else}cdecl{$endif};
-
+ WriteImage: function(image_info: pointer{pImageInfo};
+                                          image: pointer{pImage}): cuint;
+                             {$ifdef wincall}stdcall{$else}cdecl{$endif};
+ ImageToBlob: function(image_info: pointer{pImageInfo};
+                             image: pointer{pImage}; length: psize_t;
+                            exception: pExceptionInfo): pointer;
+                             {$ifdef wincall}stdcall{$else}cdecl{$endif};
  DestroyImage: procedure(image: pointer{pImage});
                              {$ifdef wincall}stdcall{$else}cdecl{$endif};
+
  DispatchImage: function(image: pointer{pImage8};
                       x_offset: clong; y_offset: clong;
                columns: culong; rows: culong; map: pcchar; _type: StorageType;
                   pixels: pointer; exception: pExceptionInfo): MagickPassFail;
                              {$ifdef wincall}stdcall{$else}cdecl{$endif};
-                              
- MagickReadImage: function(wand: pMagickWand; filename: pcchar): cuint;
-                              {$ifdef wincall}stdcall{$else}cdecl{$endif};
- MagickReadImageBlob: function(wand: pMagickWand; blob: pcuchar;
-                                                       length: size_t): cuint;
-                              {$ifdef wincall}stdcall{$else}cdecl{$endif};
- MagickReadImageFile: function(wand: pMagickWand; _file: pFILE): cuint;
-                              {$ifdef wincall}stdcall{$else}cdecl{$endif};
+ ConstituteImage: function(width: cuint; height: cuint;
+                        map: pcchar; _type: StorageType; pixels: pointer;
+                        exception: pExceptionInfo): pointer{pImage};
+                             {$ifdef wincall}stdcall{$else}cdecl{$endif};
 
  ExportImagePixelArea: function(image: pointer{pImage};
                  quantum_type: QuantumType;
                  quantum_size: cuint; destination: pcuchar;
                  options: pExportPixelAreaOptions;
                  export_info: pExportPixelAreaInfo): MagickPassFail;
+                             {$ifdef wincall}stdcall{$else}cdecl{$endif};
+ ImportImagePixelArea: function(image: pointer{pImage};
+                    quantum_type: QuantumType;
+                    quantum_size: cuint; source: pcuchar;
+                    options: pImportPixelAreaOptions;
+                    import_info: pImportPixelAreaInfo): MagickPassFail;
+                             {$ifdef wincall}stdcall{$else}cdecl{$endif};
+ ImportPixelAreaOptionsInit: procedure(options: pImportPixelAreaOptions);
+                             {$ifdef wincall}stdcall{$else}cdecl{$endif};
+ ExportPixelAreaOptionsInit: procedure(options: pExportPixelAreaOptions); 
+ SetImagePixels: function(image: pointer{pImage}; x: clong; const y: clong;
+                       columns: culong; rows: culong): pointer{pPixelPacket};
+                             {$ifdef wincall}stdcall{$else}cdecl{$endif};
+ SyncImagePixels: function(image: pointer{pImage}): MagickPassFail;
+                             {$ifdef wincall}stdcall{$else}cdecl{$endif};
+ AllocateImageColormap: function(image: pointer{pImage}; colors: culong): cuint;
+                             {$ifdef wincall}stdcall{$else}cdecl{$endif};
+ 
+ NewMagickWand: function(): pMagickWand;
                               {$ifdef wincall}stdcall{$else}cdecl{$endif};
+ DestroyMagickWand: procedure(wand: pMagickWand);
+                              {$ifdef wincall}stdcall{$else}cdecl{$endif};
+                              
+ MagickReadImage: function(wand: pMagickWand; filename: pcchar): cuint;
+                             {$ifdef wincall}stdcall{$else}cdecl{$endif};
+ MagickReadImageBlob: function(wand: pMagickWand; blob: pcuchar;
+                                                       length: size_t): cuint;
+                             {$ifdef wincall}stdcall{$else}cdecl{$endif};
+ MagickReadImageFile: function(wand: pMagickWand; _file: pFILE): cuint;
+                             {$ifdef wincall}stdcall{$else}cdecl{$endif};
+
+ MagickWriteImage: function(wand: pMagickWand; filename: pcchar): cuint;
+                             {$ifdef wincall}stdcall{$else}cdecl{$endif};
+ MagickWriteImageFile: function(wand: pMagickWand; _file: pFILE): cuint;
+                             {$ifdef wincall}stdcall{$else}cdecl{$endif};
+ MagickWriteImageBlob: function(wand: pMagickWand; length: psize_t): cuchar;
+                             {$ifdef wincall}stdcall{$else}cdecl{$endif};
+ MagickSetFormat: function(wand: pMagickWand; format: pcchar): cuint;
+                             {$ifdef wincall}stdcall{$else}cdecl{$endif};
 
 procedure initializegraphicsmagick(const sonames: array of filenamety);
                        //[] = default
@@ -931,7 +992,7 @@ end;
 procedure initializegraphicsmagick(const sonames: array of filenamety);
                        //[] = default 
 const
- funcs: array[0..18] of funcinfoty = (
+ funcs: array[0..33] of funcinfoty = (
 //    (n: ''; d: {$ifndef FPC}@{$endif}@)
     (n: 'InitializeMagick'; d: {$ifndef FPC}@{$endif}@InitializeMagick),
     (n: 'DestroyMagick'; d: {$ifndef FPC}@{$endif}@DestroyMagick),
@@ -939,7 +1000,8 @@ const
     (n: 'DestroyMagickWand'; d: {$ifndef FPC}@{$endif}@DestroyMagickWand),
     (n: 'MagickQueryFormats'; d: {$ifndef FPC}@{$endif}@MagickQueryFormats),
     (n: 'MagickGetVersion'; d: {$ifndef FPC}@{$endif}@MagickGetVersion),
-    (n: 'MagickGetQuantumDepth'; d: {$ifndef FPC}@{$endif}@MagickGetQuantumDepth),
+    (n: 'MagickGetQuantumDepth';
+                     d: {$ifndef FPC}@{$endif}@MagickGetQuantumDepth),
     (n: 'MagickReadImage'; d: {$ifndef FPC}@{$endif}@MagickReadImage),
     (n: 'MagickReadImageBlob'; d: {$ifndef FPC}@{$endif}@MagickReadImageBlob),
     (n: 'MagickReadImageFile'; d: {$ifndef FPC}@{$endif}@MagickReadImageFile),
@@ -951,7 +1013,25 @@ const
     (n: 'DestroyExceptionInfo'; d: {$ifndef FPC}@{$endif}@DestroyExceptionInfo),
     (n: 'DestroyImage'; d: {$ifndef FPC}@{$endif}@DestroyImage),
     (n: 'DispatchImage'; d: {$ifndef FPC}@{$endif}@DispatchImage),
-    (n: 'BlobToImage'; d: {$ifndef FPC}@{$endif}@BlobToImage)
+    (n: 'BlobToImage'; d: {$ifndef FPC}@{$endif}@BlobToImage),
+    (n: 'ConstituteImage'; d: {$ifndef FPC}@{$endif}@ConstituteImage),
+    (n: 'ImportImagePixelArea'; d: {$ifndef FPC}@{$endif}@ImportImagePixelArea),
+    (n: 'ImportPixelAreaOptionsInit';
+                d: {$ifndef FPC}@{$endif}@ImportPixelAreaOptionsInit),
+    (n: 'ExportPixelAreaOptionsInit';
+                d: {$ifndef FPC}@{$endif}@ExportPixelAreaOptionsInit),
+    (n: 'AllocateImage'; d: {$ifndef FPC}@{$endif}@AllocateImage),
+    (n: 'SetImagePixels'; d: {$ifndef FPC}@{$endif}@SetImagePixels),
+    (n: 'DestroyImageInfo'; d: {$ifndef FPC}@{$endif}@DestroyImageInfo),
+    (n: 'MagickWriteImage'; d: {$ifndef FPC}@{$endif}@MagickWriteImage),
+    (n: 'MagickWriteImageFile'; d: {$ifndef FPC}@{$endif}@MagickWriteImageFile),
+    (n: 'MagickWriteImageBlob'; d: {$ifndef FPC}@{$endif}@MagickWriteImageBlob),
+    (n: 'MagickSetFormat'; d: {$ifndef FPC}@{$endif}@MagickSetFormat),
+    (n: 'WriteImage'; d: {$ifndef FPC}@{$endif}@WriteImage),
+    (n: 'ImageToBlob'; d: {$ifndef FPC}@{$endif}@ImageToBlob),
+    (n: 'SyncImagePixels'; d: {$ifndef FPC}@{$endif}@SyncImagePixels),
+    (n: 'AllocateImageColormap';
+                            d: {$ifndef FPC}@{$endif}@AllocateImageColormap)
  );
  errormessage = 'Can not load GraphicsMagic library. ';
 

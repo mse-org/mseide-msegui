@@ -395,8 +395,9 @@ begin
  end;
 end;
 
-function readgraphicbmp(const asource: tstream; const index: integer; 
-                             const dest: tobject; var format: string): boolean;
+function readgraphicbmp(const asource: tstream;
+                             const dest: tobject; var format: string;
+                const params: array of const): boolean;
 begin
  result:= false;
  if dest is tbitmap then begin
@@ -418,15 +419,23 @@ begin
  end;
 end;
 
-function readgraphicico(const asource: tstream; const index: integer; 
-                const dest: tobject; var format: string): boolean;
+function readgraphicico(const asource: tstream;
+                const dest: tobject; var format: string;
+                const params: array of const): boolean;
 var
  int1: integer;
 begin
  result:= false;
  if dest is tmaskedbitmap then begin
   with tmaskedbitmap(dest) do begin
-   int1:= index;
+   int1:= -1;
+   if (high(params) >= 0) then begin
+    with tvarrec(params[0]) do begin
+     if vtype = vtinteger then begin
+      int1:= vinteger;
+     end;
+    end;
+   end;
    if int1 < 0 then begin
     int1:= 0;
    end;

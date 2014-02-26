@@ -44,8 +44,9 @@ begin
  end;
 end;
  
-function readgraphic(const source: tstream; const index: integer; 
-                const dest: tobject; var format: string): boolean;
+function readgraphic(const source: tstream; 
+                const dest: tobject; var format: string;
+                const params: array of const): boolean;
 begin
  if dest is tbitmap then begin
   result:= readfpgraphic(source,tmsefpreaderpnm,tbitmap(dest));

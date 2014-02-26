@@ -1,5 +1,8 @@
 MSEide+MSEgui breaking changes version history
 
+2014-02-26
+ params parameter for tmaskedbitmap.loadfrom*().
+ 
 Version 3.2
 2014-01-30
 2014-01-27

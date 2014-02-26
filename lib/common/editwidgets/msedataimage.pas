@@ -136,7 +136,7 @@ begin
   end;
  end;
  try
-  fcurformat:= bitmap.loadfromstring(avalue,fformat);
+  fcurformat:= bitmap.loadfromstring(avalue,fformat,[]);
  except
   fcurformat:= '';
   bitmap.clear;
@@ -243,7 +243,7 @@ procedure tcustomdataimage.loadcellbmp(const acanvas: tcanvas;
                                             const abmp: tmaskedbitmap);
 begin
  with cellinfoty(acanvas.drawinfopo^) do begin
-  abmp.loadfromstring(string(datapo^),fformat);
+  abmp.loadfromstring(string(datapo^),fformat,[]);
  end;
 end;
 

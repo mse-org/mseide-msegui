@@ -94,7 +94,7 @@ begin
    for int1:= 0 to high(ar1) do begin
     bmp.transparentcolor:= cl_none;
     bmp.loadfromfile(ar1[int1],
-               graphicformatlabels[filedialog.controller.filterindex]);
+               graphicformatlabels[filedialog.controller.filterindex],[]);
     if not bmp.masked then begin
      bmp.transparentcolor:= transparentcolor.value;
     end;

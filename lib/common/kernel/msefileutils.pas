@@ -39,7 +39,6 @@ type
 
  tcustomfiledatalist = class(tdynamicdatalist)
   private
-//   fdirectoryname: filenamety;
    foptions: filelistoptionsty;
    fsortfunc: filesortfuncty;
    function getitems(index: integer): fileinfoty;

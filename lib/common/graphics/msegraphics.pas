@@ -1031,12 +1031,15 @@ type
    procedure switchtomonochrome;
    procedure setwidth(const avalue: integer);
    procedure setheight(const avalue: integer);
+   procedure updatescanline();
   protected
    fgdifuncs: pgdifunctionaty;
    fcanvasclass: canvasclassty;
    fcanvas: tcanvas;
    fhandle: pixmapty;
    fsize: sizety;
+   fscanlinestep: integer;
+   fscanhigh: integer;
    fstate: pixmapstatesty;
    fcolorbackground: colorty;
    fcolorforeground: colorty;
@@ -1050,13 +1053,6 @@ type
    procedure setmonochrome(const avalue: boolean); virtual;
    function getconverttomonochromecolorbackground: colorty; virtual;
    function getmask: tsimplebitmap; virtual;
-//   function getmaskhandle(var gchandle: ptruint): pixmapty; virtual;
-                  //gc handle is invalid if result = 0,
-                  //gc handle can be 0
-//   function getimagepo: pimagety; virtual;
-//   procedure initimage(alloc: boolean; out aimage: imagety);
-                  //sets inf in aimage acording to self,
-                  //allocates memory if alloc = true, no clear
    procedure setsize(const avalue: sizety); virtual;
    function normalizeinitcolor(const acolor: colorty): colorty;
    procedure assign1(const source: tsimplebitmap; const docopy: boolean); virtual;
@@ -1959,6 +1955,7 @@ procedure tsimplebitmap.setsize(const avalue: sizety);
 begin
  destroyhandle;
  fsize:= avalue;
+ updatescanline();
 end;
 
 function tsimplebitmap.isempty: boolean;
@@ -1998,6 +1995,7 @@ begin
    else begin
     exclude(fstate,pms_monochrome);
    end;
+   updatescanline();
   end;
  end;
 end;
@@ -2287,6 +2285,17 @@ end;
 procedure tsimplebitmap.setheight(const avalue: integer);
 begin
  size:= ms(width,avalue);
+end;
+
+procedure tsimplebitmap.updatescanline();
+begin
+ if monochrome then begin
+  fscanlinestep:= ((fsize.cx + 31) div 32) * 4;
+ end
+ else begin
+  fscanlinestep:= fsize.cx * 4;
+ end;
+ fscanhigh:=  fsize.cx * fsize.cy - 1;
 end;
 
 { tfont }

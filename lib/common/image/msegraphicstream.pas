@@ -36,24 +36,22 @@ type
    property monoalpha: boolean read fmonoalpha;
  end;  
 
- readgraphicprocty = function(const source: tstream; const index: integer; 
-                         const dest: tobject; var format: string): boolean;
+ readgraphicprocty = function(const source: tstream;
+                         const dest: tobject; var format: string;
+                         const params: array of const): boolean;
  writegraphicprocty = procedure(const dest: tstream;
                                const source: tobject; const format: string;
                                const params: array of const);
 
 function readgraphic(const source: tstream; const dest: tbitmap;
                            const aformatname: string = '';
-                           const index: integer = -1): string; overload;
+                           const params: array of const): string; overload;
                            //returns formatname
-                           //index = select image in ico format
 function readgraphic(const source: tstream; const dest: tmaskedbitmap;
                            const aformatname: string = '';
-                           const index: integer = -1): string; overload;
-                           //index = select image in ico format
+                           const params: array of const): string; overload;
 function readgraphic(const source: tstream;
                                  const dest: timagelist): string; overload;
-                           //only for ico format
                            
 procedure writegraphic(const dest: tstream; const source: tbitmap;
                            const aformatname: string;
@@ -251,8 +249,9 @@ begin
  end;
 end;
 
-function readgraphic1(const source: tstream; const index: integer;
-                const adest: tobject; const aformatlabel: string): string;
+function readgraphic1(const source: tstream;
+                const adest: tobject; const aformatlabel: string;
+                const params: array of const): string;
                 //index = select image in ico format
 var
  int1,int3: integer;
@@ -268,7 +267,7 @@ begin
    with formats[int1] do begin
     if assigned(readproc) then begin
      str1:= formats[int1].formatlabel;
-     if readproc(source,index,adest,str1) then begin
+     if readproc(source,adest,str1,params) then begin
       result:= str1;
       exit;
      end;
@@ -287,7 +286,7 @@ begin
       found:= true;
       if assigned(readproc) then begin
        str1:= formats[int1].formatlabel;
-       if readproc(source,index,adest,str1) then begin
+       if readproc(source,adest,str1,params) then begin
         result:= str1;
         exit;
        end;
@@ -333,25 +332,23 @@ end;
 
 function readgraphic(const source: tstream; const dest: tbitmap;
                            const aformatname: string = '';
-                           const index: integer = -1): string; overload;
-                           //index = select image in ico format
+                           const params: array of const): string; overload;
 begin
- result:= readgraphic1(source,index,dest,aformatname);
+ result:= readgraphic1(source,dest,aformatname,params);
 end;
 
 function readgraphic(const source: tstream; const dest: tmaskedbitmap;
                            const aformatname: string = '';
-                           const index: integer = -1): string; overload;
+                           const params: array of const): string; overload;
                            //index = select image in ico format
 begin
- result:= readgraphic1(source,index,dest,aformatname);
+ result:= readgraphic1(source,dest,aformatname,params);
 end;
 
 function readgraphic(const source: tstream;
                             const dest: timagelist): string; overload;
-                           //index = select image in ico format
 begin
- result:= readgraphic1(source,-1,dest,'ico');
+ result:= readgraphic1(source,dest,'ico',[-1]);
 end;
                            
 procedure writegraphic(const dest: tstream; const source: tbitmap;
@@ -451,7 +448,7 @@ begin
    col3.alpha:= 0;
    if monochrome then begin                //mono
     usepalette:= true;
-    self.setsize(size.cx,size.cy);
+    self.setsize(width,height);
     if masked1 then begin
      if colormask1 then begin              //mono colormask
       for int1:= 0 to height - 1 do begin
@@ -483,7 +480,6 @@ begin
       for int1:= 0 to height - 1 do begin
        po3:= tmaskedbitmap(source).mask.scanline[int1];
        po1:= scanline[int1];
-       int2:= 0;
        lwo1:= $00000001;
        for int2:= 0 to width-1 do begin
         if po1^ and lwo1 <> 0 then begin
@@ -493,7 +489,7 @@ begin
          else begin
           col1.alpha:= $0000;
          end;
-         colors[int1,int2]:= col1;
+         colors[int2,int1]:= col1;
         end
         else begin
          if po3^ and lwo1 <> 0 then begin

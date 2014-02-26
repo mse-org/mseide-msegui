@@ -239,7 +239,7 @@ begin
   else begin
    abmp.loadfromstring(
    string(tgriddatalink(fgriddatalink).getansistringbuffer(
-                                  fdatalink.field,cell.row)^),format);
+                                  fdatalink.field,cell.row)^),format,[]);
   end;
  end;
 end;
@@ -328,7 +328,7 @@ begin
     end;
     stream1:= tstringcopystream.create(str1);
     try
-     result:= adest.loadfromstream(stream1,aformat);
+     result:= adest.loadfromstream(stream1,aformat,[]);
     except
      result:= '';
      adest.clear;
@@ -453,7 +453,7 @@ begin
   else begin
    stream1:= tstringcopystream.create(str1);
    try
-    result:= adest.loadfromstream(stream1,aformat);
+    result:= adest.loadfromstream(stream1,aformat,[]);
    except
     result:= '';
     adest.clear;
