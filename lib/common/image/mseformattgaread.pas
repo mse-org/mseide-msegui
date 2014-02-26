@@ -12,12 +12,13 @@ unit mseformattgaread;
 interface
 const
  tgalabel = 'tga';
+procedure registerformat;
  
 implementation
 uses
  classes,mclasses,msegraphics,msebitmap,fpreadtga,msegraphicstream,
  msestockobjects;
- 
+
 type
  tmsefpreadertarga = class(tfpreadertarga)
   protected
@@ -58,7 +59,12 @@ begin
  end;
 end;
 
-initialization
+procedure registerformat;
+begin
  registergraphicformat(tgalabel,{$ifdef FPC}@{$endif}readgraphic,nil,
          stockobjects.captions[sc_TARGA_Image],['*.tga']);
+end;
+ 
+initialization
+ registerformat();
 end.

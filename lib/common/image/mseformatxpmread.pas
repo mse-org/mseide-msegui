@@ -12,6 +12,7 @@ unit mseformatxpmread;
 interface
 const
  xpmlabel = 'xpm';
+procedure registerformat;
  
 implementation
 uses
@@ -46,7 +47,12 @@ begin
  inherited;
 end;
 
-initialization
+procedure registerformat;
+begin
  registergraphicformat(xpmlabel,{$ifdef FPC}@{$endif}readgraphic,nil,
          stockobjects.captions[sc_XPM_Image],['*.xpm']);
+end;
+
+initialization
+ registerformat();
 end.

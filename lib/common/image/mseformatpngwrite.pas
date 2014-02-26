@@ -12,6 +12,7 @@ unit mseformatpngwrite;
 interface
 const
  pnglabel = 'png';
+procedure registerformat;
  
 implementation
 uses
@@ -75,7 +76,12 @@ begin
  end;
 end;
   
-initialization
+procedure registerformat;
+begin
  registergraphicformat(pnglabel,nil,{$ifdef FPC}@{$endif}writegraphic,
          stockobjects.captions[sc_PNG_Image],['*.png']);
+end;
+
+initialization
+ registerformat();
 end.

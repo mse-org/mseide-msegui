@@ -12,6 +12,7 @@ unit mseformatjpgread;
 interface
 const
  jpglabel = 'jpeg';
+procedure registerformat;
  
 implementation
 uses
@@ -57,8 +58,12 @@ begin
  end;
 end;
 
-initialization
+procedure registerformat;
+begin
  registergraphicformat(jpglabel,{$ifdef FPC}@{$endif}readgraphic,nil,
          stockobjects.captions[sc_JPEG_Image],['*.jpg','*.jpeg']);
+end;
 
+initialization
+ registerformat();
 end.

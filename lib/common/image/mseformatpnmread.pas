@@ -12,6 +12,7 @@ unit mseformatpnmread;
 interface
 const
  pnmlabel = 'pnm';
+procedure registerformat;
  
 implementation
 uses
@@ -57,7 +58,12 @@ begin
  end;
 end;
 
-initialization
+procedure registerformat;
+begin
  registergraphicformat(pnmlabel,{$ifdef FPC}@{$endif}readgraphic,nil,
          stockobjects.captions[sc_PNM_Image],['*.pnm','*.pgm','*.pbm']);
+end;
+
+initialization
+ registerformat();
 end.

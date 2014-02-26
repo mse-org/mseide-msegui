@@ -13,6 +13,7 @@ interface
 const
  bmplabel = 'bmp';
  icolabel = 'ico';
+procedure registerformat;
  
 implementation
 uses
@@ -445,9 +446,14 @@ begin
  end;
 end;
 
-initialization
+procedure registerformat;
+begin
  registergraphicformat(bmplabel,{$ifdef FPC}@{$endif}readgraphicbmp,nil,
                         stockobjects.captions[sc_MS_Bitmap],['*.bmp']);
  registergraphicformat(icolabel,{$ifdef FPC}@{$endif}readgraphicico,nil,
                         stockobjects.captions[sc_MS_Icon],['*.ico']);
+end;
+
+initialization
+ registerformat();
 end.

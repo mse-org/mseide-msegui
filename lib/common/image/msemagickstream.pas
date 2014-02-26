@@ -132,7 +132,6 @@ begin
  end;
 end;
 
-
 initialization
 finalization
  if inited then begin

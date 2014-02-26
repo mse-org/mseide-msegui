@@ -12,6 +12,7 @@ unit mseformatpngread;
 interface
 const
  pnglabel = 'png';
+procedure registerformat;
  
 implementation
 uses
@@ -57,7 +58,12 @@ begin
  end;
 end;
 }
-initialization
+procedure registerformat;
+begin
  registergraphicformat(pnglabel,{$ifdef FPC}@{$endif}readgraphic,nil,
          stockobjects.captions[sc_PNG_Image],['*.png']);
+end;
+
+initialization
+ registerformat();
 end.

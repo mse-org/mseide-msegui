@@ -12,6 +12,7 @@ unit mseformattiffwrite;
 interface
 const
  tifflabel = 'tif';
+procedure registerformat;
  
 implementation
 uses
@@ -40,7 +41,12 @@ begin
  end;
 end;
   
-initialization
+procedure registerformat;
+begin
  registergraphicformat(tifflabel,nil,{$ifdef FPC}@{$endif}writegraphic,
          stockobjects.captions[sc_TIFF_Image],['*.tif','*.tiff']);
+end;
+
+initialization
+ registerformat();
 end.
