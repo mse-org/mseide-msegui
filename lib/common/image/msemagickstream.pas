@@ -24,7 +24,7 @@ procedure registerformats(const labels: array of string;
 implementation
 uses
  msegraphicstream,msestream,mclasses,msebitmap,msestockobjects,
- msegraphics,msegraphutils,msetypes,msectypes;
+ msegraphics,msegraphutils,msetypes,msectypes,msebits;
 
 type
  tbitmap1 = class(tbitmap);
@@ -42,6 +42,41 @@ begin
  end;
 end;
 
+procedure setcolor(const acolor: colorty; const dest: pointer;
+                                            const index: integer = 0);
+var
+ rgb: rgbtriplety;
+begin
+ rgb:= colortorgb(acolor);
+ case qdepth of 
+  qd_8: begin
+   with ppixelpacket8(dest)[index] do begin
+    red:= rgb.red;
+    green:= rgb.green;
+    blue:= rgb.blue;
+    opacity:= 0;
+   end;
+  end;
+  qd_16: begin
+   with ppixelpacket16(dest)[index] do begin
+    red:= rgb.red + (rgb.red shl 8);
+    green:= rgb.green + (rgb.green shl 8);
+    blue:= rgb.blue + (rgb.blue shl 8);
+    opacity:= 0;
+   end;
+  end;
+  qd_32: begin
+   with ppixelpacket32(dest)[index] do begin
+    red:= rgb.red + (rgb.red shl 8)+ (rgb.red shl 16)+ (rgb.red shl 24);
+    green:= rgb.green + (rgb.green shl 8) + (rgb.green shl 16) +
+                                                         (rgb.green shl 24);
+    blue:= rgb.blue + (rgb.blue shl 8) + (rgb.blue shl 16) + (rgb.blue shl 24);
+    opacity:= 0;
+   end;
+  end;
+ end;
+end;
+
 procedure writegraphic(const dest: tstream;
                                const source: tobject; const format: string;
                                const params: array of const);
@@ -53,7 +88,7 @@ var
  end;
 
 var
- bo1,bo2,hasmask: boolean;
+ bo1,bo2,hasmask,monomask: boolean;
  imagebuffer: imagebufferinfoty;
  imageinfo: pointer;
  image: pointer;
@@ -61,10 +96,10 @@ var
  blob: pointer;
  int1: integer;
  po1: pointer;
- pp8: pixelpacket8;
- pp16: pixelpacket16;
- pp32: pixelpacket32;
- 
+ s,d,e,e1: prgbtriplety;
+ s1,s2: plongword;
+ lwo1: longword;
+ monostep: integer;
 begin
  if source is tbitmap then begin
   with tbitmap1(source) do begin
@@ -76,6 +111,12 @@ begin
     blob:= nil;
     try
      hasmask:= (source is tmaskedbitmap) and (tmaskedbitmap(source).masked);
+     if hasmask then begin
+      with tmaskedbitmap(source).mask do begin
+       monomask:= monochrome;
+       monostep:= scanlinestep;
+      end;
+     end;
      bo1:= getimageref(imagebuffer.image);
      bo2:= false;
      if hasmask then begin
@@ -91,9 +132,8 @@ begin
          a.columns:= imagebuffer.image.size.cx;
          a.rows:= imagebuffer.image.size.cy;
          a.depth:= 1;
-         pp8:= ppixelpacket8(b.colormap)[0]; //swap black and white
-         ppixelpacket8(b.colormap)[0]:= ppixelpacket8(b.colormap)[1];
-         ppixelpacket8(b.colormap)[1]:= pp8;
+         setcolor(colorbackground,b.colormap,0);
+         setcolor(colorforeground,b.colormap,1);
         end;
        end;
        qd_16: begin
@@ -101,6 +141,8 @@ begin
          a.columns:= imagebuffer.image.size.cx;
          a.rows:= imagebuffer.image.size.cy;
          a.depth:= 1;
+         setcolor(colorbackground,b.colormap,0);
+         setcolor(colorforeground,b.colormap,1);
         end;
        end;
        else begin
@@ -108,29 +150,93 @@ begin
          a.columns:= imagebuffer.image.size.cx;
          a.rows:= imagebuffer.image.size.cy;
          a.depth:= 1;
+         setcolor(colorbackground,b.colormap,0);
+         setcolor(colorforeground,b.colormap,1);
         end;
        end;
       end;
-      po1:= imagebuffer.image.pixels;
-      for int1:= 0 to imagebuffer.image.size.cy-1 do begin
-       if setimagepixels(image,0,int1,
-                            imagebuffer.image.size.cx,1) = nil then begin
-        error();
+      with imagebuffer.image do begin
+       po1:= pixels;
+       for int1:= 0 to length*4-1 do begin
+        pbyte(po1)^:= bitreverse[pbyte(po1)^];
+        inc(po1);
        end;
-       if importimagepixelarea(image,indexquantum,1,po1,
-                                            nil,nil) = magickfail then begin
-        error();
+       po1:= pixels;
+       for int1:= 0 to imagebuffer.image.size.cy-1 do begin
+        if setimagepixels(image,0,int1,
+                             imagebuffer.image.size.cx,1) = nil then begin
+         error();
+        end;
+        if importimagepixelarea(image,indexquantum,1,po1,
+                                             nil,nil) = magickfail then begin
+         error();
+        end;
+        if SyncImagePixels(image) = 0 then begin
+         error();
+        end;
+        inc(po1,scanlinestep);
        end;
-       if SyncImagePixels(image) = 0 then begin
-        error();
+       if not bo1 then begin //restore pixel order
+        po1:= pixels;
+        for int1:= 0 to length*4-1 do begin
+         pbyte(po1)^:= bitreverse[pbyte(po1)^];
+         inc(po1);
+        end;
        end;
-       inc(po1,scanlinestep);
       end;
      end
-     else begin
-      image:= constituteimage(imagebuffer.image.size.cx,
+     else begin //color
+      if hasmask then begin
+       d:= pointer(imagebuffer.image.pixels);
+       e:= d + imagebuffer.image.length;
+       if monomask then begin
+        s1:= pointer(imagebuffer.mask.pixels);
+        repeat
+         lwo1:= $00000001;
+         s2:= s1;
+         e1:= d + width;
+         repeat
+          if s2^ and lwo1 <> 0 then begin
+           d^.res:= $ff;
+          end
+          else begin
+           d^.res:= 0;
+          end;
+          lwo1:= lwo1 shl 1;
+          if lwo1 = 0 then begin
+           inc(s2);
+           lwo1:= $00000001;
+          end;
+          inc(d);
+         until d = e1;
+         s1:= pointer(s1) + monostep;
+        until d = e;
+       end
+       else begin
+        s:= pointer(imagebuffer.mask.pixels);
+        repeat
+         d^.res:= (s^.red + s^.green + s^.blue) div 3;
+         inc(s);
+         inc(d);
+        until d = e;
+       end;
+       image:= constituteimage(imagebuffer.image.size.cx,
+                imagebuffer.image.size.cy,'BGRA',charpixel,
+                                imagebuffer.image.pixels,@exceptinf);
+       if not bo1 then begin //restore res byte
+        s:= pointer(imagebuffer.mask.pixels);
+        d:= pointer(imagebuffer.image.pixels);
+        repeat
+         d^.res:= 0;
+         inc(d);
+        until d = e;
+       end;
+      end
+      else begin
+       image:= constituteimage(imagebuffer.image.size.cx,
                 imagebuffer.image.size.cy,'BGRP',charpixel,
                                 imagebuffer.image.pixels,@exceptinf);
+      end;
       if image = nil then begin
        raise tmagickexception.create(exceptinf);
       end;
@@ -274,6 +380,7 @@ procedure registerformats(const labels: array of string;
 var
  int1: integer;
 begin
+ checkinit();
  for int1:= 0 to high(labels) do begin
   registergraphicformat(labels[int1],@readgraphic,@writegraphic,
                            filternames[int1],filemasks[int1]);

@@ -417,8 +417,18 @@ begin
 end;
 
 procedure tmsefpmemoryimage.assign(source: tpersistent);
+ function to16(const acolor: colorty): tfpcolor;
+ var
+  rgb1: rgbtriplety;
+ begin
+  rgb1:= colortorgb(acolor);
+  result.red:= rgb1.red + (rgb1.red shl 8);
+  result.green:= rgb1.green + (rgb1.green shl 8);
+  result.blue:= rgb1.blue + (rgb1.blue shl 8);
+  result.alpha:= 0;
+ end;
 var
- col1,col2,col3: tfpcolor;
+ col1,col0,col3: tfpcolor;
  po1,po3: plongword;
  po2,po4: prgbtriplety;
  int1,int2{,int3}: integer;
@@ -437,16 +447,10 @@ begin
   end;
   fhasalpha:= masked1;
   with tbitmap(source) do begin
-   col1.red:= 0;
-   col1.green:= 0;
-   col1.blue:= 0;
-   col1.alpha:= 0;
-   col2.red:= $ffff;
-   col2.green:= $ffff;
-   col2.blue:= $ffff;
-   col2.alpha:= 0;
    col3.alpha:= 0;
    if monochrome then begin                //mono
+    col0:= to16(colorbackground);
+    col1:= to16(colorforeground);
     usepalette:= true;
     self.setsize(width,height);
     if masked1 then begin
@@ -463,9 +467,9 @@ begin
          colors[int1,int2]:= col1;
         end
         else begin
-         col2.alpha:= (word(po4^.red)+word(po4^.green)+word(po4^.blue)) div 3;
-         col2.alpha:= col1.alpha + col1.alpha shl 8;
-         colors[int2,int1]:= col2;
+         col0.alpha:= (word(po4^.red)+word(po4^.green)+word(po4^.blue)) div 3;
+         col0.alpha:= col1.alpha + col1.alpha shl 8;
+         colors[int2,int1]:= col0;
         end;
         lwo1:= lwo1 shl 1;
         if lwo1 = 0 then begin
@@ -493,12 +497,12 @@ begin
         end
         else begin
          if po3^ and lwo1 <> 0 then begin
-          col2.alpha:= $ffff;
+          col0.alpha:= $ffff;
          end
          else begin
-          col2.alpha:= $0000;
+          col0.alpha:= $0000;
          end;
-         colors[int2,int1]:= col2;
+         colors[int2,int1]:= col0;
         end;
         lwo1:= lwo1 shl 1;
         if lwo1 = 0 then begin
@@ -517,10 +521,10 @@ begin
       lwo1:= $00000001;
       for int2:= 0 to width-1 do begin
        if po1^ and lwo1 <> 0 then begin
-        colors[int1,int2]:= col1;
+        colors[int2,int1]:= col1;
        end
        else begin
-        colors[int2,int1]:= col2;
+        colors[int2,int1]:= col0;
        end;
        lwo1:= lwo1 shl 1;
        if lwo1 = 0 then begin
