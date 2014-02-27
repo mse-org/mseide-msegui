@@ -15,7 +15,8 @@ uses
  
 const
 {$ifdef mswindows}
- graphicsmagicwandlib: array[0..0] of filenamety = ('GraphicsMagickWand.dll');  
+ graphicsmagiclib: array[0..0] of filenamety = ('CORE_RL_magick_.dll');  
+ graphicsmagicwandlib: array[0..0] of filenamety = ('CORE_RL_wand_.dll');  
 {$else}
  graphicsmagicwandlib: array[0..1] of filenamety = 
            ('libGraphicsMagickWand.so.2','libGraphicsMagickWand.so'); 
@@ -947,13 +948,16 @@ var
  MagickSetFormat: function(wand: pMagickWand; format: pcchar): cuint;
                              {$ifdef wincall}stdcall{$else}cdecl{$endif};
 
-procedure initializegraphicsmagick(const sonames: array of filenamety);
-                       //[] = default
+procedure initializegraphicsmagick(const sonames,
+                          sonameswand: array of filenamety);
+                                                    //[] = default
 procedure releasegraphicsmagick;
 function quantumdepth: quantumdepthty;
 
 procedure reggminit(const initproc: dynlibprocty);
 procedure reggmdeinit(const deinitproc: dynlibprocty);
+procedure reggmwandinit(const initproc: dynlibprocty);
+procedure reggmwanddeinit(const deinitproc: dynlibprocty);
 
 implementation
 uses
@@ -961,6 +965,7 @@ uses
  
 var
  libinfo: dynlibinfoty;                              
+ libinfowand: dynlibinfoty;                              
  qdepth: quantumdepthty;
 
 procedure reggminit(const initproc: dynlibprocty);
@@ -971,6 +976,16 @@ end;
 procedure reggmdeinit(const deinitproc: dynlibprocty);
 begin
  regdynlibdeinit(libinfo,deinitproc);
+end;
+
+procedure reggmwandinit(const initproc: dynlibprocty);
+begin
+ regdynlibinit(libinfowand,initproc);
+end;
+
+procedure reggmwanddeinit(const deinitproc: dynlibprocty);
+begin
+ regdynlibdeinit(libinfowand,deinitproc);
 end;
  
 function quantumdepth: quantumdepthty;
@@ -1002,22 +1017,14 @@ begin
  destroymagick();
 end;
 
-procedure initializegraphicsmagick(const sonames: array of filenamety);
-                       //[] = default 
+procedure initializegraphicsmagick(const sonames,
+                         sonameswand: array of filenamety);
+                                                 //[] = default 
 const
- funcs: array[0..33] of funcinfoty = (
+ funcs: array[0..21] of funcinfoty = (
 //    (n: ''; d: {$ifndef FPC}@{$endif}@)
     (n: 'InitializeMagick'; d: {$ifndef FPC}@{$endif}@InitializeMagick),
     (n: 'DestroyMagick'; d: {$ifndef FPC}@{$endif}@DestroyMagick),
-    (n: 'NewMagickWand'; d: {$ifndef FPC}@{$endif}@NewMagickWand),
-    (n: 'DestroyMagickWand'; d: {$ifndef FPC}@{$endif}@DestroyMagickWand),
-    (n: 'MagickQueryFormats'; d: {$ifndef FPC}@{$endif}@MagickQueryFormats),
-    (n: 'MagickGetVersion'; d: {$ifndef FPC}@{$endif}@MagickGetVersion),
-    (n: 'MagickGetQuantumDepth';
-                     d: {$ifndef FPC}@{$endif}@MagickGetQuantumDepth),
-    (n: 'MagickReadImage'; d: {$ifndef FPC}@{$endif}@MagickReadImage),
-    (n: 'MagickReadImageBlob'; d: {$ifndef FPC}@{$endif}@MagickReadImageBlob),
-    (n: 'MagickReadImageFile'; d: {$ifndef FPC}@{$endif}@MagickReadImageFile),
     (n: 'MagickFree'; d: {$ifndef FPC}@{$endif}@MagickFree),
     (n: 'ExportImagePixelArea'; d: {$ifndef FPC}@{$endif}@ExportImagePixelArea),
     (n: 'ReadImage'; d: {$ifndef FPC}@{$endif}@ReadImage),
@@ -1036,30 +1043,47 @@ const
     (n: 'AllocateImage'; d: {$ifndef FPC}@{$endif}@AllocateImage),
     (n: 'SetImagePixels'; d: {$ifndef FPC}@{$endif}@SetImagePixels),
     (n: 'DestroyImageInfo'; d: {$ifndef FPC}@{$endif}@DestroyImageInfo),
-    (n: 'MagickWriteImage'; d: {$ifndef FPC}@{$endif}@MagickWriteImage),
-    (n: 'MagickWriteImageFile'; d: {$ifndef FPC}@{$endif}@MagickWriteImageFile),
-    (n: 'MagickWriteImageBlob'; d: {$ifndef FPC}@{$endif}@MagickWriteImageBlob),
-    (n: 'MagickSetFormat'; d: {$ifndef FPC}@{$endif}@MagickSetFormat),
     (n: 'WriteImage'; d: {$ifndef FPC}@{$endif}@WriteImage),
     (n: 'ImageToBlob'; d: {$ifndef FPC}@{$endif}@ImageToBlob),
     (n: 'SyncImagePixels'; d: {$ifndef FPC}@{$endif}@SyncImagePixels),
     (n: 'AllocateImageColormap';
                             d: {$ifndef FPC}@{$endif}@AllocateImageColormap)
  );
- errormessage = 'Can not load GraphicsMagic library. ';
+ errormessage = 'Can not load GraphicsMagick library. ';
 
+ funcswand: array[0..11] of funcinfoty = (
+    (n: 'NewMagickWand'; d: {$ifndef FPC}@{$endif}@NewMagickWand),
+    (n: 'DestroyMagickWand'; d: {$ifndef FPC}@{$endif}@DestroyMagickWand),
+    (n: 'MagickGetVersion'; d: {$ifndef FPC}@{$endif}@MagickGetVersion),
+    (n: 'MagickGetQuantumDepth';
+                     d: {$ifndef FPC}@{$endif}@MagickGetQuantumDepth),
+    (n: 'MagickQueryFormats'; d: {$ifndef FPC}@{$endif}@MagickQueryFormats),
+    (n: 'MagickReadImage'; d: {$ifndef FPC}@{$endif}@MagickReadImage),
+    (n: 'MagickReadImageBlob'; d: {$ifndef FPC}@{$endif}@MagickReadImageBlob),
+    (n: 'MagickReadImageFile'; d: {$ifndef FPC}@{$endif}@MagickReadImageFile),
+    (n: 'MagickWriteImage'; d: {$ifndef FPC}@{$endif}@MagickWriteImage),
+    (n: 'MagickWriteImageFile'; d: {$ifndef FPC}@{$endif}@MagickWriteImageFile),
+    (n: 'MagickWriteImageBlob'; d: {$ifndef FPC}@{$endif}@MagickWriteImageBlob),
+    (n: 'MagickSetFormat'; d: {$ifndef FPC}@{$endif}@MagickSetFormat)
+ );
+ errormessagewand = 'Can not load GraphicsMagickWand library. ';
+ 
 begin
- initializedynlib(libinfo,sonames,graphicsmagicwandlib,funcs,[],errormessage,
-                                                                         @init);
+ initializedynlib(libinfo,sonames,graphicsmagiclib,funcs,[],errormessage,nil);
+ initializedynlib(libinfowand,sonameswand,graphicsmagicwandlib,funcswand,
+                                                     [],errormessagewand,@init);
 end;
 
 procedure releasegraphicsmagick;
 begin
+ releasedynlib(libinfowand,@deinit);
  releasedynlib(libinfo,@deinit);
 end;
 
 initialization
  initializelibinfo(libinfo);
+ initializelibinfo(libinfowand);
 finalization
  finalizelibinfo(libinfo);
+ finalizelibinfo(libinfowand);
 end.
