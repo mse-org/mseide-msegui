@@ -11,7 +11,7 @@ unit msegraphicsmagick;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- msestrings,msectypes;
+ msestrings,msectypes,msedynload;
  
 const
 {$ifdef mswindows}
@@ -952,14 +952,27 @@ procedure initializegraphicsmagick(const sonames: array of filenamety);
 procedure releasegraphicsmagick;
 function quantumdepth: quantumdepthty;
 
+procedure reggminit(const initproc: dynlibprocty);
+procedure reggmdeinit(const deinitproc: dynlibprocty);
+
 implementation
 uses
- msedynload,mseapplication;
+ mseapplication;
  
 var
  libinfo: dynlibinfoty;                              
  qdepth: quantumdepthty;
 
+procedure reggminit(const initproc: dynlibprocty);
+begin
+ regdynlibinit(libinfo,initproc);
+end;
+
+procedure reggmdeinit(const deinitproc: dynlibprocty);
+begin
+ regdynlibdeinit(libinfo,deinitproc);
+end;
+ 
 function quantumdepth: quantumdepthty;
 begin
  result:= qdepth;

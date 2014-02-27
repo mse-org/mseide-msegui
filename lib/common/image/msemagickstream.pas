@@ -21,6 +21,9 @@ type
 procedure registerformats(const labels: array of string;
                            const filternames: array of msestring;
                            const filemasks: array of msestringarty);
+//writegraphic parameters:
+  //[compressionquality: integer] 0..100, default 75
+
 implementation
 uses
  msegraphicstream,msestream,mclasses,msebitmap,msestockobjects,
@@ -116,6 +119,7 @@ var
  monostep: integer;
  buf: pointer;
  bd,be,be1: pbyte;
+ compressionquality: integer;
 // ispng: boolean;
 begin
  if source is tbitmap then begin
@@ -337,23 +341,38 @@ begin
       end;
       imageinfo:= cloneimageinfo(nil);
      end;
+     compressionquality:= 75;
+     if (length(params) > 0) and 
+                       (tvarrec(params[0]).vtype = vtinteger) then begin
+      compressionquality:= tvarrec(params[0]).vinteger;
+     end;
      case qdepth of
       qd_8: begin
        with pimage8(image)^ do begin
         c.magick:= uppercase(format);
+       end;
+       with pimageinfo8(imageinfo)^ do begin
+        a.quality:= compressionquality;
        end;
       end;
       qd_16: begin
        with pimage16(image)^ do begin
         c.magick:= uppercase(format);
        end;
+       with pimageinfo16(imageinfo)^ do begin
+        a.quality:= compressionquality;
+       end;
       end;
       else begin
        with pimage32(image)^ do begin
         c.magick:= uppercase(format);
        end;
+       with pimageinfo32(imageinfo)^ do begin
+        a.quality:= compressionquality;
+       end;
       end;
      end;
+     
      blob:= imagetoblob(imageinfo,image,@si,@exceptinf);
      if blob = nil then begin
       error();
@@ -406,6 +425,15 @@ begin
   getexceptioninfo(@exceptinf);
   bo2:= dest is tmaskedbitmap;
   imageinfo:= cloneimageinfo(nil);
+{
+  case qdepth of
+   qd_8: begin
+    with pimageinfo8(imageinfo)^ do begin
+     a.size:= '20x40';
+    end;
+   end;
+  end;
+}
   image:= blobtoimage(imageinfo,pointer(str1),length(str1),@exceptinf);
   if image <> nil then begin
    case qdepth of
