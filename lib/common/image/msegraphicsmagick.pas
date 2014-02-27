@@ -20,6 +20,8 @@ const
 {$else}
  graphicsmagicwandlib: array[0..1] of filenamety = 
            ('libGraphicsMagickWand.so.2','libGraphicsMagickWand.so'); 
+ graphicsmagiclib: array[0..1] of filenamety = 
+           ('libGraphicsMagick.so.3','libGraphicsMagick.so'); 
 {$endif}
 
 {$packrecords c}
