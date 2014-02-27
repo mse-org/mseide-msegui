@@ -77,6 +77,20 @@ begin
  end;
 end;
 
+procedure swapbits(var aimage: imagety);
+var
+ po1,e: pbyte;
+begin
+ with aimage do begin
+  po1:= pointer(pixels);
+  e:= po1 + length*4-1;
+  repeat
+   po1^:= bitreverse[po1^];
+   inc(po1);
+  until po1 = e;
+ end;
+end;
+
 procedure writegraphic(const dest: tstream;
                                const source: tobject; const format: string;
                                const params: array of const);
@@ -95,21 +109,27 @@ var
  si: size_t;
  blob: pointer;
  int1: integer;
- po1: pointer;
+ po1,po2: pointer;
  s,d,e,e1: prgbtriplety;
  s1,s2: plongword;
  lwo1: longword;
  monostep: integer;
+ buf: pointer;
+ bd,be,be1: pbyte;
+// ispng: boolean;
 begin
  if source is tbitmap then begin
   with tbitmap1(source) do begin
    if hasimage then begin
+//    ispng:= pos('PNG',uppercase(format)) = 1;
     checkinit;
     getexceptioninfo(@exceptinf);
     imageinfo:= nil;
     image:= nil;
     blob:= nil;
+    buf:= nil;
     try
+     monomask:= false;
      hasmask:= (source is tmaskedbitmap) and (tmaskedbitmap(source).masked);
      if hasmask then begin
       with tmaskedbitmap(source).mask do begin
@@ -132,6 +152,9 @@ begin
          a.columns:= imagebuffer.image.size.cx;
          a.rows:= imagebuffer.image.size.cy;
          a.depth:= 1;
+         if hasmask then begin
+          a.matte:= magicktrue;
+         end;
          setcolor(colorbackground,b.colormap,0);
          setcolor(colorforeground,b.colormap,1);
         end;
@@ -141,6 +164,9 @@ begin
          a.columns:= imagebuffer.image.size.cx;
          a.rows:= imagebuffer.image.size.cy;
          a.depth:= 1;
+         if hasmask then begin
+          a.matte:= magicktrue;
+         end;
          setcolor(colorbackground,b.colormap,0);
          setcolor(colorforeground,b.colormap,1);
         end;
@@ -150,18 +176,55 @@ begin
          a.columns:= imagebuffer.image.size.cx;
          a.rows:= imagebuffer.image.size.cy;
          a.depth:= 1;
+         if hasmask then begin
+          a.matte:= magicktrue;
+         end;
          setcolor(colorbackground,b.colormap,0);
          setcolor(colorforeground,b.colormap,1);
         end;
        end;
       end;
       with imagebuffer.image do begin
-       po1:= pixels;
-       for int1:= 0 to length*4-1 do begin
-        pbyte(po1)^:= bitreverse[pbyte(po1)^];
-        inc(po1);
+       swapbits(imagebuffer.image);
+       if hasmask then begin
+        int1:= scanhigh+1;
+        getmem(buf,int1);
+        bd:= buf;
+        be:= buf + int1;
+        if monomask then begin
+         s1:= pointer(imagebuffer.mask.pixels);
+         repeat
+          lwo1:= $00000001;
+          s2:= s1;
+          be1:= bd + width;
+          repeat
+           if s2^ and lwo1 <> 0 then begin
+            bd^:= $ff;
+           end
+           else begin
+            bd^:= 0;
+           end;
+           lwo1:= lwo1 shl 1;
+           if lwo1 = 0 then begin
+            inc(s2);
+            lwo1:= $00000001;
+           end;
+           inc(bd);
+          until bd = be1;
+          s1:= pointer(s1) + monostep;
+         until bd = be;
+        end
+        else begin
+         s:= pointer(imagebuffer.mask.pixels);
+         repeat
+          bd^:= (s^.red + s^.green + s^.blue) div 3;
+          inc(s);
+          inc(bd);
+         until bd = be;
+        end;
        end;
        po1:= pixels;
+       po2:= buf;
        for int1:= 0 to imagebuffer.image.size.cy-1 do begin
         if setimagepixels(image,0,int1,
                              imagebuffer.image.size.cx,1) = nil then begin
@@ -171,16 +234,48 @@ begin
                                              nil,nil) = magickfail then begin
          error();
         end;
+        if hasmask then begin
+         if importimagepixelarea(image,alphaquantum,8,po2,
+                                             nil,nil) = magickfail then begin
+          error();
+         end;
+         inc(po2,width);
+        end;
         if SyncImagePixels(image) = 0 then begin
          error();
         end;
         inc(po1,scanlinestep);
        end;
        if not bo1 then begin //restore pixel order
-        po1:= pixels;
-        for int1:= 0 to length*4-1 do begin
-         pbyte(po1)^:= bitreverse[pbyte(po1)^];
-         inc(po1);
+        swapbits(imagebuffer.image);
+       end;
+       if {ispng and} hasmask then begin //GraphicMagick removes 
+                                       //alpha channel for palette images
+        case qdepth of
+         qd_8: begin
+          with pimage8(image)^ do begin
+           a.colors:= 0;
+           magickfree(b.colormap);
+           b.colormap:= nil;
+           a.storage_class:= directclass;
+          end;
+         end;
+         qd_16: begin
+          with pimage16(image)^ do begin
+           a.colors:= 0;
+           magickfree(b.colormap);
+           b.colormap:= nil;
+           a.storage_class:= directclass;
+          end;
+         end;
+         qd_32: begin
+          with pimage32(image)^ do begin
+           a.colors:= 0;
+           magickfree(b.colormap);
+           b.colormap:= nil;
+           a.storage_class:= directclass;
+          end;
+         end;
         end;
        end;
       end;
@@ -265,6 +360,9 @@ begin
      end;
      dest.writebuffer(blob^,si);
     finally
+     if buf <> nil then begin
+      freemem(buf);
+     end;
      if blob <> nil then begin
       magickfree(blob);
      end;
