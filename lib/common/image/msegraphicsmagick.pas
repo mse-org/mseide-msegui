@@ -15,7 +15,7 @@ uses
  
 const
 {$ifdef mswindows}
- graphicsmagicwandlib: array[0..0] of filenamety = ('todo.dll');  
+ graphicsmagicwandlib: array[0..0] of filenamety = ('GraphicsMagickWand.dll');  
 {$else}
  graphicsmagicwandlib: array[0..1] of filenamety = 
            ('libGraphicsMagickWand.so.2','libGraphicsMagickWand.so'); 
@@ -1049,8 +1049,8 @@ const
  errormessage = 'Can not load GraphicsMagic library. ';
 
 begin
- initializedynlib(libinfo,sonames,graphicsmagicwandlib,funcs,
-   {$ifdef mswindows}funcsopt{$else}[]{$endif},errormessage,@init);
+ initializedynlib(libinfo,sonames,graphicsmagicwandlib,funcs,[],errormessage,
+                                                                         @init);
 end;
 
 procedure releasegraphicsmagick;

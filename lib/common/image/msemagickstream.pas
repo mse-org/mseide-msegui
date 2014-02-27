@@ -39,9 +39,9 @@ var
 procedure checkinit;
 begin
  if not inited then begin
-  inited:= true;
   initializegraphicsmagick([]);
   qdepth:= quantumdepth();
+  inited:= true;
  end;
 end;
 
