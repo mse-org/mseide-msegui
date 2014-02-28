@@ -23,9 +23,6 @@ type
   depth: integer;
  end;
  
-const
- defaultquality = 75;
-   
 procedure registerformats(const labels: array of string;
                            const filternames: array of msestring;
                            const filemasks: array of msestringarty);
@@ -33,36 +30,39 @@ procedure registerformats(const labels: array of string;
   //[index: integer, width: integer, height: integer, rotation: real,
      //sequence nr      0 = default     0 = default   0..2pi CCW
      // -1 = default
-  // backgroundcolor: colorty]
-  //  default = cl_transparent
+  // backgroundcolor: colorty, pixelpermm: real]
+  //  default = cl_transparent  0 = default
            
 //writegraphic parameters:
   //[compressionquality: integer, width: integer, height: integer,
-      // 0..100, default 75        0 = default      0 = default
-  //     rotation: real,            backgroundcolor: colorty]
-  //       0..2pi CCW default 0       default = cl_transparent
+      // 0..100, -1 = default        0 = default      0 = default
+  //     rotation: real,        backgroundcolor: colorty, pixelpermm: real]
+  //       0..2pi CCW default 0 default = cl_transparent     0 = default
 
 function readgmgraphic(const source: tstream; const dest: tbitmap;
        const aindex: integer = -1; const awidth: integer = 0;
         const aheight: integer = 0; const rotation: real = 0;
-         const backgroundcolor: colorty = cl_transparent): string;
+         const backgroundcolor: colorty = cl_transparent;
+         const pixelpermm: real = 0): string;
               //returns label
 procedure writegmgraphic(const dest: tstream; const source: tbitmap;
-           const format: string; const aquality: integer = defaultquality;
+           const format: string; const aquality: integer = -1;
              const awidth: integer = 0; const aheight: integer = 0;
              const rotation: real = 0;
-              const backgroundcolor: colorty = cl_transparent);
+              const backgroundcolor: colorty = cl_transparent;
+              const pixelpermm: real = 0);
 function pinggmgraphic(const source: tstream; 
                       out ainfo: gminfoty): boolean;
 
 implementation
 uses
  msegraphics,msegraphicstream,msestream,msestockobjects,
- msetypes,msectypes,msebits,mseclasses;
+ msetypes,msectypes,msebits,mseclasses,mseformatstr;
 
 type
  tbitmap1 = class(tbitmap);
- 
+const
+ ppmmtoppi = 25.4; 
 var
  inited: boolean;
  qdepth: quantumdepthty; 
@@ -183,10 +183,11 @@ begin
 end;
 
 procedure writegmgraphic(const dest: tstream; const source: tbitmap;
-            const format: string; const aquality: integer = defaultquality;
+            const format: string; const aquality: integer = -1;
             const awidth: integer = 0; const aheight: integer = 0;
             const rotation: real = 0;
-            const backgroundcolor: colorty = cl_transparent);
+            const backgroundcolor: colorty = cl_transparent;
+            const pixelpermm: real = 0);
 var
  exceptinf: exceptioninfo;
  procedure error;
@@ -430,7 +431,9 @@ begin
       imageinfo:= cloneimageinfo(nil);
      end;
      with pimageinfo8(imageinfo)^ do begin
-      a.quality:= aquality;
+      if aquality >= 0 then begin
+       a.quality:= aquality;
+      end;
      end;
      case qdepth of
       qd_8: begin
@@ -467,6 +470,12 @@ begin
       end;
       destroyimage(image);
       image:= image2;
+     end;
+     if pixelpermm > 0 then begin
+      with pimageinfo8(imageinfo)^ do begin
+       a.units:= pixelsperinchresolution;
+       a.density:= gmstring(formatfloatmse(pixelpermm*ppmmtoppi,'',true));
+      end;
      end;
 
      blob:= imagetoblob(imageinfo,image,@si,@exceptinf);
@@ -555,8 +564,9 @@ end;
 function readgmgraphic(const source: tstream; const dest: tbitmap;
        const aindex: integer = -1;
        const awidth: integer = 0; const aheight: integer = 0;
-     const rotation: real = 0;
-      const backgroundcolor: colorty = cl_transparent): string;
+       const rotation: real = 0;
+       const backgroundcolor: colorty = cl_transparent;
+       const pixelpermm: real = 0): string;
               //returns label
 var
  imageinfo: pointer;
@@ -586,6 +596,10 @@ begin
  imageinfo:= cloneimageinfo(nil);
  try
   with pimageinfo8(imageinfo)^ do begin //a identical for all dephts
+   if pixelpermm > 0 then begin
+    a.units:= pixelsperinchresolution;
+    a.density:= gmstring(formatfloatmse(pixelpermm*ppmmtoppi,'',true));
+   end;
    if aindex >= 0 then begin
     a.subimage:= aindex;
    end;
@@ -703,13 +717,14 @@ var
  height: integer = 0;
  rotation: extended = 0;
  backgroundcolor: colorty = cl_transparent;
+ density: extended = 0;
 begin
  result:= false;
  if dest is tbitmap then begin
-  matchparams(params,[index,width,height,rotation,backgroundcolor],
-                 [@index,@width,@height,@rotation,@backgroundcolor]);
+  matchparams(params,[index,width,height,rotation,backgroundcolor,density],
+                 [@index,@width,@height,@rotation,@backgroundcolor,@density]);
   format:= readgmgraphic(source,tbitmap(dest),index,width,height,rotation,
-                                                            backgroundcolor);
+                                                      backgroundcolor,density);
   result:= format <> '';
  end;
 end;
@@ -717,17 +732,18 @@ end;
 procedure writegraphic(const dest: tstream; const source: tobject;
                  const format: string; const params: array of const);
 var
- quality: integer = defaultquality;
+ quality: integer = -1;
  width: integer = 0;
  height: integer = 0;
  rotation: extended = 0;
  backgroundcolor: colorty = cl_transparent;
+ density: extended = 0;
 begin
  if source is tbitmap then begin
-  matchparams(params,[quality,width,height,rotation,backgroundcolor],
-             [@quality,@width,@height,@rotation,@backgroundcolor]);
+  matchparams(params,[quality,width,height,rotation,backgroundcolor,density],
+             [@quality,@width,@height,@rotation,@backgroundcolor,@density]);
   writegmgraphic(dest,tbitmap(source),format,quality,width,height,
-                                                   rotation,backgroundcolor);
+                                            rotation,backgroundcolor,density);
  end;
 end;
 
