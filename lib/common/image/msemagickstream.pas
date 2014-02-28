@@ -415,6 +415,7 @@ var
  str1: string; //todo: use tstream -> c-stream adaptor
  bo1,bo2: boolean;
  si1: sizety;
+ datapo: pointer;
 begin
  result:= false;
  if dest is tbitmap then begin

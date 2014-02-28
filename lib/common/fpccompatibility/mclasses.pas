@@ -866,6 +866,7 @@ TStringsEnumerator = class
     procedure SetSize(const NewSize: Int64); overload; virtual;
     procedure ReadNotImplemented;
     procedure WriteNotImplemented;
+    function getmemory: pointer; virtual;
   public
     function Read(var Buffer; Count: Longint): Longint; virtual; overload;
     function Write(const Buffer; Count: Longint): Longint; virtual; overload;
@@ -905,6 +906,7 @@ TStringsEnumerator = class
     Procedure WriteAnsiString (const S : String);
     property Position: Int64 read GetPosition write SetPosition;
     property Size: Int64 read GetSize write SetSize64;
+    property memory: pointer read getmemory; //nil if not suported
   end;
 
   THandleStream = class(TStream)
@@ -940,12 +942,13 @@ TStringsEnumerator = class
     Function GetSize : Int64; Override;
     function GetPosition: Int64; Override;
     procedure SetPointer(Ptr: Pointer; ASize: PtrInt);
+    function getmemory: pointer; override;
   public
     function Read(var Buffer; Count: LongInt): LongInt; override;
     function Seek(const Offset: Int64; Origin: TSeekOrigin): Int64; override;
     procedure SaveToStream(Stream: TStream);
     procedure SaveToFile(const FileName: string);
-    property Memory: Pointer read FMemory;
+//    property Memory: Pointer read FMemory;
   end;
 
   TMemoryStream = class(TCustomMemoryStream)
@@ -972,6 +975,7 @@ TStringsEnumerator = class
     Function GetSize : Int64; Override;
     function GetPosition: Int64; Override;
     procedure SetSize(NewSize: Longint); override;
+    function getmemory: pointer; override;
   public
     constructor Create(const AString: string);
     function Read(var Buffer; Count: Longint): Longint; override;
@@ -3922,6 +3926,11 @@ end;
       WriteBuffer(q,8);
     end;
 
+function TStream.getmemory: pointer;
+begin
+ result:= nil;
+end;
+
 
 {****************************************************************************}
 {*                             TCustomMemoryStream                          *}
@@ -3995,6 +4004,11 @@ begin
   finally
     S.free;
   end;
+end;
+
+function TCustomMemoryStream.getmemory: pointer;
+begin
+ result:= fmemory;
 end;
 
 {****************************************************************************}
@@ -8337,6 +8351,12 @@ procedure TStringStream.WriteString(const AString: string);
 begin
   Write (PChar(Astring)[0],Length(AString));
 end;
+
+function TStringStream.getmemory: pointer;
+begin
+ result:= pointer(fdatastring);
+end;
+
 {$ifdef FPC}
 {****************************************************************************}
 {*                             TResourceStream                              *}

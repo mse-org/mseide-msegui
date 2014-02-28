@@ -116,7 +116,7 @@ type
    fcryptohandler: tcustomcryptohandler;
    fendhandler: tcustomcryptohandler;
    fendindex: integer;
-   function getmemory: pointer;
+//   function getmemory: pointer;
    procedure checkmemorystream;
    procedure setcryptohandler(const avalue: tcustomcryptohandler);
   protected
@@ -134,6 +134,7 @@ type
    function inheritedwrite(const buffer; count: longint): longint;
    function inheritedseek(const offset: int64;
                                        origin: tseekorigin): int64;
+   function getmemory: pointer; override;
   public
    constructor create(const afilename: filenamety; 
                       const aopenmode: fileopenmodety = fm_read;
@@ -171,7 +172,7 @@ type
 
    procedure setsize(const newsize: int64); override;
    procedure clear; virtual;        //only for memorystream
-   property memory: pointer read getmemory;     //only for memorystream
+//   property memory: pointer read getmemory;     //only for memorystream
    property cryptohandler: tcustomcryptohandler read fcryptohandler 
                                                    write setcryptohandler;
  end;
@@ -400,6 +401,7 @@ type
   private
    fdata: string;
   protected
+   function getmemory: pointer; override;
   public
    constructor create(const adata: string);
    destructor destroy; override;
@@ -411,6 +413,7 @@ type
   private
    fdata: string;
   protected
+   function getmemory: pointer; override;
   public
    constructor create(const adata: string);
    destructor destroy; override;
@@ -1288,12 +1291,12 @@ begin
   inherited;
  end;
 end;
-
+{
 function tmsefilestream.getmemory: pointer;
 begin
  result:= fmemorystream.memory;
 end;
-
+}
 procedure tmsefilestream.checkmemorystream;
 begin
  if fmemorystream = nil then begin
@@ -1371,6 +1374,16 @@ end;
 function tmsefilestream.inheritedgetsize: int64;
 begin
  result:= inherited getsize;
+end;
+
+function tmsefilestream.getmemory: pointer;
+begin
+ if fmemorystream <> nil then begin
+  result:= fmemorystream.memory;
+ end
+ else begin
+  result:= inherited getmemory;
+ end;
 end;
 
 { tresourcefilestream}
@@ -2511,6 +2524,11 @@ begin
  end;
 end;
 
+function tstringcopystream.getmemory: pointer;
+begin
+ result:= pointer(fdata);
+end;
+
 { ttextstringcopystream }
 
 constructor ttextstringcopystream.create(const adata: string);
@@ -2531,6 +2549,11 @@ end;
 function ttextstringcopystream.write(const Buffer; Count: Longint): Longint;
 begin
  result:= 0;
+end;
+
+function ttextstringcopystream.getmemory: pointer;
+begin
+ result:= pointer(fdata);
 end;
 
 { tmemorycopystream }
