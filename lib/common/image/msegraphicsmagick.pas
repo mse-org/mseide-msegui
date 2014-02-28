@@ -881,8 +881,14 @@ var
 
  AllocateImage: function(image_info: pointer{pImageInfo}): pointer{pImage}; 
                               {$ifdef wincall}stdcall{$else}cdecl{$endif};
+ PingImage: function(image_info: pointer{pImageInfo};
+                            exception: pExceptionInfo):pointer{pImage};
+                              {$ifdef wincall}stdcall{$else}cdecl{$endif};
  ReadImage: function(image_info: pointer{pImageInfo}; 
                            exception: pExceptionInfo): pointer{pImage};
+                             {$ifdef wincall}stdcall{$else}cdecl{$endif};
+ PingBlob: function(imageinfo: pointer{pImageInfo}; blob: pointer;
+                   length: size_t; exception: pExceptionInfo): pointer{pImage};
                              {$ifdef wincall}stdcall{$else}cdecl{$endif};
  BlobToImage: function(image_info: pointer{pImageInfo}; blob: pointer;
                     length: size_t; exception: pExceptionInfo): pointer{pImage};
@@ -1036,19 +1042,21 @@ procedure initializegraphicsmagick(const sonames,
                          sonameswand: array of filenamety);
                                                  //[] = default 
 const
- funcs: array[0..25] of funcinfoty = (
-//    (n: ''; d: {$ifndef FPC}@{$endif}@)
+ funcs: array[0..27] of funcinfoty = (
+//    (n: ''; d: {$ifndef FPC}@{$endif}@),
     (n: 'InitializeMagick'; d: {$ifndef FPC}@{$endif}@InitializeMagick),
     (n: 'DestroyMagick'; d: {$ifndef FPC}@{$endif}@DestroyMagick),
     (n: 'MagickMalloc'; d: {$ifndef FPC}@{$endif}@MagickMalloc),
     (n: 'MagickFree'; d: {$ifndef FPC}@{$endif}@MagickFree),
     (n: 'ExportImagePixelArea'; d: {$ifndef FPC}@{$endif}@ExportImagePixelArea),
+    (n: 'PingImage'; d: {$ifndef FPC}@{$endif}@PingImage),
     (n: 'ReadImage'; d: {$ifndef FPC}@{$endif}@ReadImage),
     (n: 'CloneImageInfo'; d: {$ifndef FPC}@{$endif}@CloneImageInfo),
     (n: 'GetExceptionInfo'; d: {$ifndef FPC}@{$endif}@GetExceptionInfo),
     (n: 'DestroyExceptionInfo'; d: {$ifndef FPC}@{$endif}@DestroyExceptionInfo),
     (n: 'DestroyImage'; d: {$ifndef FPC}@{$endif}@DestroyImage),
     (n: 'DispatchImage'; d: {$ifndef FPC}@{$endif}@DispatchImage),
+    (n: 'PingBlob'; d: {$ifndef FPC}@{$endif}@PingBlob),
     (n: 'BlobToImage'; d: {$ifndef FPC}@{$endif}@BlobToImage),
     (n: 'ConstituteImage'; d: {$ifndef FPC}@{$endif}@ConstituteImage),
     (n: 'ImportImagePixelArea'; d: {$ifndef FPC}@{$endif}@ImportImagePixelArea),

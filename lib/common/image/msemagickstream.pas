@@ -17,7 +17,12 @@ type
   public
    constructor create(const ainfo: exceptioninfo);
  end;
-
+ gminfoty = record
+  formatlabel: string;
+  size: sizety;
+  depth: integer;
+ end;
+ 
 const
  defaultquality = 75;
    
@@ -40,6 +45,8 @@ function readgmgraphic(const source: tstream; const dest: tbitmap;
 procedure writegmgraphic(const dest: tstream; const source: tbitmap;
                  const format: string; const aquality: integer = defaultquality;
                  const awidth: integer = 0; const aheight: integer = 0);
+function pinggmgraphic(const source: tstream; 
+                      out ainfo: gminfoty): boolean;
 
 implementation
 uses
@@ -446,6 +453,58 @@ begin
  end;
 end;
 
+function pinggmgraphic(const source: tstream; 
+                      out ainfo: gminfoty): boolean;
+var
+ imageinfo: pointer;
+ exceptinf: exceptioninfo;
+ image: pointer;
+ str1: string;
+ datapo: pointer;
+ datalen: card32;
+begin
+ result:= false;
+ checkinit;
+ datapo:= source.memory;
+ datalen:= source.size;
+ if datapo = nil then begin
+  str1:= source.readdatastring;
+  datapo:= pointer(str1);
+  datalen:= length(str1);
+ end;
+ getexceptioninfo(@exceptinf);
+ imageinfo:= cloneimageinfo(nil);
+ image:= pingblob(imageinfo,datapo,datalen,@exceptinf);
+ if image <> nil then begin
+  with pimage8(image)^ do begin
+   ainfo.size.cx:= a.columns;
+   ainfo.size.cy:= a.rows;
+   ainfo.depth:= a.depth;
+  end;
+  case qdepth of
+   qd_8: begin
+    with pimage8(image)^ do begin
+     ainfo.formatlabel:= lowercase(c.magick);
+    end;
+   end;
+   qd_16: begin
+    with pimage16(image)^ do begin
+     ainfo.formatlabel:= lowercase(c.magick);
+    end;
+   end;
+   else begin
+    with pimage32(image)^ do begin
+     ainfo.formatlabel:= lowercase(c.magick);
+    end;
+   end;
+  end;
+  result:= true;
+  destroyimage(image);
+ end;
+ destroyimageinfo(imageinfo);
+ destroyexceptioninfo(@exceptinf);
+end;
+
 function readgmgraphic(const source: tstream; const dest: tbitmap;
        const aindex: integer = -1;
        const awidth: integer = 0; const aheight: integer = 0): string;
@@ -487,10 +546,16 @@ begin
   end;
   case qdepth of
    qd_8: begin
+    with pimage8(image)^ do begin
+    end;
    end;
    qd_16: begin
+    with pimage16(image)^ do begin
+    end;
    end;
    else begin
+    with pimage32(image)^ do begin
+    end;
    end;
   end;
  
