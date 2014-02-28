@@ -17,17 +17,29 @@ type
   public
    constructor create(const ainfo: exceptioninfo);
  end;
-  
+
+const
+ defaultquality = 75;
+   
 procedure registerformats(const labels: array of string;
                            const filternames: array of msestring;
                            const filemasks: array of msestringarty);
+//readgraphic parameters:
+  //[index: integer, width: integer, height: integer]
+     //sequence nr      0 = default     0 = default
+     // -1 = default
+           
 //writegraphic parameters:
-  //[compressionquality: integer] 0..100, default 75
+  //[compressionquality: integer, width: integer, height: integer]
+      // 0..100, default 75        0 = default      0 = default
 
 function readgmgraphic(const source: tstream; const dest: tbitmap;
-       const index: integer = -1;
-       const width: integer = 0; const height: integer = 0): string;
+       const aindex: integer = -1;
+       const awidth: integer = 0; const aheight: integer = 0): string;
               //returns label
+procedure writegmgraphic(const dest: tstream; const source: tbitmap;
+                 const format: string; const aquality: integer = defaultquality;
+                 const awidth: integer = 0; const aheight: integer = 0);
 
 implementation
 uses
@@ -99,9 +111,38 @@ begin
  end;
 end;
 
-procedure writegraphic(const dest: tstream;
-                               const source: tobject; const format: string;
-                               const params: array of const);
+function gmstring(const avalue: string): pcchar;
+begin
+ result:= magickmalloc(length(avalue)+1);
+ move(pchar(avalue)^,result^,length(avalue)+1);
+end;
+
+function fitscale(const width: integer; const height: integer;
+                          const current: sizety; out dest: sizety): boolean;
+                          //true if scaling necessary
+begin
+ dest:= current;
+ if width <> 0 then begin
+  dest.cx:= width;
+ end;
+ if height <> 0 then begin
+  dest.cy:= height;
+ end;
+ result:= (current.cx > 0) and (current.cy > 0);
+ if result then begin
+  if dest.cx*current.cy > dest.cy*current.cx then begin
+   dest.cx:= (current.cx*dest.cy) div current.cy;
+  end
+  else begin
+   dest.cy:= (current.cy*dest.cx) div current.cx;
+  end;
+  result:= (current.cx <> dest.cx) or (current.cy <> dest.cy);
+ end;
+end;
+
+procedure writegmgraphic(const dest: tstream; const source: tbitmap;
+                 const format: string; const aquality: integer = defaultquality;
+                 const awidth: integer = 0; const aheight: integer = 0);
 var
  exceptinf: exceptioninfo;
  procedure error;
@@ -113,7 +154,7 @@ var
  bo1,bo2,hasmask,monomask: boolean;
  imagebuffer: imagebufferinfoty;
  imageinfo: pointer;
- image: pointer;
+ image,image2: pointer;
  si: size_t;
  blob: pointer;
  int1: integer;
@@ -124,7 +165,7 @@ var
  monostep: integer;
  buf: pointer;
  bd,be,be1: pbyte;
- compressionquality: integer;
+ si2: sizety;
 begin
  if source is tbitmap then begin
   with tbitmap1(source) do begin
@@ -344,38 +385,36 @@ begin
       end;
       imageinfo:= cloneimageinfo(nil);
      end;
-     compressionquality:= 75;
-     if (length(params) > 0) and 
-                       (tvarrec(params[0]).vtype = vtinteger) then begin
-      compressionquality:= tvarrec(params[0]).vinteger;
+     with pimageinfo8(imageinfo)^ do begin
+      a.quality:= aquality;
      end;
      case qdepth of
       qd_8: begin
        with pimage8(image)^ do begin
         c.magick:= uppercase(format);
        end;
-       with pimageinfo8(imageinfo)^ do begin
-        a.quality:= compressionquality;
-       end;
       end;
       qd_16: begin
        with pimage16(image)^ do begin
         c.magick:= uppercase(format);
-       end;
-       with pimageinfo16(imageinfo)^ do begin
-        a.quality:= compressionquality;
        end;
       end;
       else begin
        with pimage32(image)^ do begin
         c.magick:= uppercase(format);
        end;
-       with pimageinfo32(imageinfo)^ do begin
-        a.quality:= compressionquality;
-       end;
       end;
      end;
      
+     if fitscale(awidth,aheight,imagebuffer.image.size,si2) then begin
+      image2:= scaleimage(image,si2.cx,si2.cy,@exceptinf);
+      if image2 = nil then begin
+       exit;
+      end;
+      destroyimage(image);
+      image:= image2;
+     end;
+
      blob:= imagetoblob(imageinfo,image,@si,@exceptinf);
      if blob = nil then begin
       error();
@@ -407,15 +446,9 @@ begin
  end;
 end;
 
-function gmstring(const avalue: string): pcchar;
-begin
- result:= magickmalloc(length(avalue)+1);
- move(pchar(avalue)^,result^,length(avalue)+1);
-end;
-
 function readgmgraphic(const source: tstream; const dest: tbitmap;
-       const index: integer = -1;
-       const width: integer = 0; const height: integer = 0): string;
+       const aindex: integer = -1;
+       const awidth: integer = 0; const aheight: integer = 0): string;
               //returns label
 var
  imageinfo: pointer;
@@ -445,11 +478,11 @@ begin
  imageinfo:= cloneimageinfo(nil);
  try
   with pimageinfo8(imageinfo)^ do begin //a identical for all dephts
-   if index >= 0 then begin
-    a.subimage:= index;
+   if aindex >= 0 then begin
+    a.subimage:= aindex;
    end;
-   if (width <> 0) and (height <> 0) then begin
-    a.size:= gmstring(inttostr(width)+'x'+inttostr(height));
+   if (awidth <> 0) and (aheight <> 0) then begin
+    a.size:= gmstring(inttostr(awidth)+'x'+inttostr(aheight));
    end;
   end;
   case qdepth of
@@ -467,14 +500,7 @@ begin
     bo1:= a.matte = magicktrue;
     si1:= ms(a.columns,a.rows);
    end;
-   if (height <> 0) and (width <> 0) then begin
-    si2:= ms(width,height);
-    if width*si1.cy > height*si1.cx then begin
-     si2.cx:= (si1.cx*si2.cy) div si1.cy;
-    end
-    else begin
-     si2.cy:= (si1.cy*si2.cx) div si1.cx;
-    end;
+   if fitscale(awidth,aheight,si1,si2) then begin
     image2:= scaleimage(image,si2.cx,si2.cy,@exceptinf);
     if image2 = nil then begin
      exit;
@@ -560,16 +586,38 @@ begin
  end;
 end;
 
+procedure writegraphic(const dest: tstream; const source: tobject;
+                 const format: string; const params: array of const);
+var
+ quality: integer = defaultquality;
+ width: integer = 0;
+ height: integer = 0;
+begin
+ if source is tbitmap then begin
+  matchparams(params,[quality,width,height],[@quality,@width,@height]);
+  writegmgraphic(dest,tbitmap(source),format,quality,width,height);
+ end;
+end;
+
 procedure registerformats(const labels: array of string;
                            const filternames: array of msestring;
                            const filemasks: array of msestringarty);
 var
  int1: integer;
+ fname: msestring;
+ fmask: msestringarty;
 begin
  checkinit();
  for int1:= 0 to high(labels) do begin
-  registergraphicformat(labels[int1],@readgraphic,@writegraphic,
-                           filternames[int1],filemasks[int1]);
+  fname:= '';
+  fmask:= nil;
+  if int1 <= high(filternames) then begin
+   fname:= filternames[int1];
+  end;
+  if int1 <= high(filemasks) then begin
+   fmask:= filemasks[int1];
+  end;
+  registergraphicformat(labels[int1],@readgraphic,@writegraphic,fname,fmask);
  end;
 end;
 
