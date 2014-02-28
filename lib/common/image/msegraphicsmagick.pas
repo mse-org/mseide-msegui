@@ -857,6 +857,8 @@ var
                                {$ifdef wincall}stdcall{$else}cdecl{$endif};
  DestroyMagick: procedure();
                                {$ifdef wincall}stdcall{$else}cdecl{$endif};
+ MagickMalloc: function(size: size_t): pointer;
+                               {$ifdef wincall}stdcall{$else}cdecl{$endif};
  MagickFree: procedure(memory: pointer);
                                {$ifdef wincall}stdcall{$else}cdecl{$endif};
  
@@ -927,7 +929,18 @@ var
                              {$ifdef wincall}stdcall{$else}cdecl{$endif};
  AllocateImageColormap: function(image: pointer{pImage}; colors: culong): cuint;
                              {$ifdef wincall}stdcall{$else}cdecl{$endif};
- 
+
+ ResizeImage: function(image: pointer{pImage}; columns: culong; rows: culong;
+                    filter: FilterTypes; blur: cdouble;
+                    exception: pExceptionInfo): pointer{pImage};
+                             {$ifdef wincall}stdcall{$else}cdecl{$endif};
+ SampleImage: function(image: pointer{pImage}; columns: culong;
+                rows: culong; exception: pExceptionInfo): pointer{pImage}; 
+                             {$ifdef wincall}stdcall{$else}cdecl{$endif};
+ ScaleImage: function(image: pointer{pImage}; columns: culong;
+                   rows: culong; exception: pExceptionInfo): pointer{pImage}; 
+                             {$ifdef wincall}stdcall{$else}cdecl{$endif};
+
  NewMagickWand: function(): pMagickWand;
                               {$ifdef wincall}stdcall{$else}cdecl{$endif};
  DestroyMagickWand: procedure(wand: pMagickWand);
@@ -1023,10 +1036,11 @@ procedure initializegraphicsmagick(const sonames,
                          sonameswand: array of filenamety);
                                                  //[] = default 
 const
- funcs: array[0..21] of funcinfoty = (
+ funcs: array[0..25] of funcinfoty = (
 //    (n: ''; d: {$ifndef FPC}@{$endif}@)
     (n: 'InitializeMagick'; d: {$ifndef FPC}@{$endif}@InitializeMagick),
     (n: 'DestroyMagick'; d: {$ifndef FPC}@{$endif}@DestroyMagick),
+    (n: 'MagickMalloc'; d: {$ifndef FPC}@{$endif}@MagickMalloc),
     (n: 'MagickFree'; d: {$ifndef FPC}@{$endif}@MagickFree),
     (n: 'ExportImagePixelArea'; d: {$ifndef FPC}@{$endif}@ExportImagePixelArea),
     (n: 'ReadImage'; d: {$ifndef FPC}@{$endif}@ReadImage),
@@ -1049,7 +1063,10 @@ const
     (n: 'ImageToBlob'; d: {$ifndef FPC}@{$endif}@ImageToBlob),
     (n: 'SyncImagePixels'; d: {$ifndef FPC}@{$endif}@SyncImagePixels),
     (n: 'AllocateImageColormap';
-                            d: {$ifndef FPC}@{$endif}@AllocateImageColormap)
+                            d: {$ifndef FPC}@{$endif}@AllocateImageColormap),
+    (n: 'ResizeImage'; d: {$ifndef FPC}@{$endif}@ResizeImage),
+    (n: 'SampleImage'; d: {$ifndef FPC}@{$endif}@SampleImage),
+    (n: 'ScaleImage'; d: {$ifndef FPC}@{$endif}@ScaleImage)
  );
  errormessage = 'Can not load GraphicsMagick library. ';
 

@@ -11,7 +11,7 @@ unit msemagickstream;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- msestrings,msegraphicsmagick,sysutils;
+ msestrings,msegraphicsmagick,sysutils,mclasses,msebitmap,msegraphutils;
 type
  tmagickexception = class(exception)
   public
@@ -24,10 +24,15 @@ procedure registerformats(const labels: array of string;
 //writegraphic parameters:
   //[compressionquality: integer] 0..100, default 75
 
+function readgmgraphic(const source: tstream; const dest: tbitmap;
+       const index: integer = -1;
+       const width: integer = 0; const height: integer = 0): string;
+              //returns label
+
 implementation
 uses
- msegraphicstream,msestream,mclasses,msebitmap,msestockobjects,
- msegraphics,msegraphutils,msetypes,msectypes,msebits;
+ msegraphics,msegraphicstream,msestream,msestockobjects,
+ msetypes,msectypes,msebits,mseclasses;
 
 type
  tbitmap1 = class(tbitmap);
@@ -120,12 +125,10 @@ var
  buf: pointer;
  bd,be,be1: pbyte;
  compressionquality: integer;
-// ispng: boolean;
 begin
  if source is tbitmap then begin
   with tbitmap1(source) do begin
    if hasimage then begin
-//    ispng:= pos('PNG',uppercase(format)) = 1;
     checkinit;
     getexceptioninfo(@exceptinf);
     imageinfo:= nil;
@@ -403,68 +406,105 @@ begin
   end;
  end;
 end;
- 
-function readgraphic(const source: tstream;
-                const dest: tobject; var format: string;
-                const params: array of const): boolean;
+
+function gmstring(const avalue: string): pcchar;
+begin
+ result:= magickmalloc(length(avalue)+1);
+ move(pchar(avalue)^,result^,length(avalue)+1);
+end;
+
+function readgmgraphic(const source: tstream; const dest: tbitmap;
+       const index: integer = -1;
+       const width: integer = 0; const height: integer = 0): string;
+              //returns label
 var
  imageinfo: pointer;
  exceptinf: exceptioninfo;
- image: pointer;
+ image,image2: pointer;
  imagebuffer: imagebufferinfoty;
  str1: string; //todo: use tstream -> c-stream adaptor
  bo1,bo2: boolean;
- si1: sizety;
+ si1,si2: sizety;
  datapo: pointer;
+ datalen: card32;
 begin
- result:= false;
- if dest is tbitmap then begin
-  imagebuffer.image.pixels:= nil;
-  imagebuffer.mask.pixels:= nil;
-  checkinit;
+ result:= '';
+ imagebuffer.image.pixels:= nil;
+ imagebuffer.mask.pixels:= nil;
+ checkinit;
+ datapo:= source.memory;
+ datalen:= source.size;
+ if datapo = nil then begin
   str1:= source.readdatastring;
-  getexceptioninfo(@exceptinf);
-  bo2:= dest is tmaskedbitmap;
-  imageinfo:= cloneimageinfo(nil);
-{
-  case qdepth of
-   qd_8: begin
-    with pimageinfo8(imageinfo)^ do begin
-     a.size:= '20x40';
-    end;
+  datapo:= pointer(str1);
+  datalen:= length(str1);
+ end;
+ getexceptioninfo(@exceptinf);
+ bo2:= dest is tmaskedbitmap;
+ image:= nil;
+ imageinfo:= cloneimageinfo(nil);
+ try
+  with pimageinfo8(imageinfo)^ do begin //a identical for all dephts
+   if index >= 0 then begin
+    a.subimage:= index;
+   end;
+   if (width <> 0) and (height <> 0) then begin
+    a.size:= gmstring(inttostr(width)+'x'+inttostr(height));
    end;
   end;
-}
-  image:= blobtoimage(imageinfo,pointer(str1),length(str1),@exceptinf);
+  case qdepth of
+   qd_8: begin
+   end;
+   qd_16: begin
+   end;
+   else begin
+   end;
+  end;
+ 
+  image:= blobtoimage(imageinfo,datapo,datalen,@exceptinf);
   if image <> nil then begin
+   with pimage8(image)^ do begin //a is identical for all depths
+    bo1:= a.matte = magicktrue;
+    si1:= ms(a.columns,a.rows);
+   end;
+   if (height <> 0) and (width <> 0) then begin
+    si2:= ms(width,height);
+    if width*si1.cy > height*si1.cx then begin
+     si2.cx:= (si1.cx*si2.cy) div si1.cy;
+    end
+    else begin
+     si2.cy:= (si1.cy*si2.cx) div si1.cx;
+    end;
+    image2:= scaleimage(image,si2.cx,si2.cy,@exceptinf);
+    if image2 = nil then begin
+     exit;
+    end;
+    destroyimage(image);
+    image:= image2;
+    si1:= ms(pimage8(image)^.a.columns,pimage8(image)^.a.rows);
+   end;
    case qdepth of
     qd_8: begin
      with pimage8(image)^ do begin
-      bo1:= a.matte = magicktrue;
-      si1:= ms(a.columns,a.rows);
-      format:= lowercase(c.magick);
-      if format = '' then begin
-       format:= lowercase(c.magick_filename);
+      result:= lowercase(c.magick);
+      if result = '' then begin
+       result:= lowercase(c.magick_filename);
       end;
      end;
     end;
     qd_16: begin
      with pimage16(image)^ do begin
-      bo1:= a.matte = magicktrue;
-      si1:= ms(a.columns,a.rows);
-      format:= lowercase(c.magick);
-      if format = '' then begin
-       format:= lowercase(c.magick_filename);
+      result:= lowercase(c.magick);
+      if result = '' then begin
+       result:= lowercase(c.magick_filename);
       end;
      end;
     end;
     else begin
      with pimage32(image)^ do begin
-      bo1:= a.matte = magicktrue;
-      si1:= ms(a.columns,a.rows);
-      format:= lowercase(c.magick);
-      if format = '' then begin
-       format:= lowercase(c.magick_filename);
+      result:= lowercase(c.magick);
+      if result = '' then begin
+       result:= lowercase(c.magick_filename);
       end;
      end;
     end;
@@ -474,30 +514,49 @@ begin
             imagebuffer.image.pixels,@exceptinf) = magickpass then begin
     if bo1 and bo2 then begin
      allocimage(imagebuffer.mask,si1,false);
-     if dispatchimage(image,0,0,si1.cx,si1.cy,'AAAP',charpixel,
+     if not dispatchimage(image,0,0,si1.cx,si1.cy,'AAAP',charpixel,
             imagebuffer.mask.pixels,@exceptinf) = magickpass then begin
-      result:= true;
+      result:= '';
      end;
-    end
-    else begin
-     result:= true;
     end;
-   end;
-   destroyimage(image);
-  end;
-  destroyimageinfo(imageinfo);
-  destroyexceptioninfo(@exceptinf);
-  if result then begin
-   if bo2 then begin
-    tmaskedbitmap(dest).loadfromimagebuffer(imagebuffer);
    end
    else begin
-    tbitmap(dest).loadfromimage(imagebuffer.image);
+    result:= '';
    end;
-   tbitmap(dest).change;
   end;
-  freeimage(imagebuffer.image);
-  freeimage(imagebuffer.mask);
+ finally
+  destroyimageinfo(imageinfo);
+  destroyexceptioninfo(@exceptinf);
+  if image <> nil then begin
+   destroyimage(image);
+  end;
+ end;
+ if result <> '' then begin
+  if bo2 then begin
+   tmaskedbitmap(dest).loadfromimagebuffer(imagebuffer);
+  end
+  else begin
+   tbitmap(dest).loadfromimage(imagebuffer.image);
+  end;
+  tbitmap(dest).change;
+ end;
+ freeimage(imagebuffer.image);
+ freeimage(imagebuffer.mask);
+end;
+
+function readgraphic(const source: tstream;
+                const dest: tobject; var format: string;
+                const params: array of const): boolean;
+var
+ index: integer = -1;
+ width: integer = 0;
+ height: integer = 0;
+begin
+ result:= false;
+ if dest is tbitmap then begin
+  matchparams(params,[index,width,height],[@index,@width,@height]);
+  format:= readgmgraphic(source,tbitmap(dest),index,width,height);
+  result:= format <> '';
  end;
 end;
 

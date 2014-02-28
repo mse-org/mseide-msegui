@@ -14,7 +14,9 @@ const
  bmplabel = 'bmp';
  icolabel = 'ico';
 procedure registerformat;
- 
+
+//param for ico: [index: integer]
+
 implementation
 uses
  classes,mclasses,msebitmap,msebits,msegraphutils,mseguiintf,msegraphicstream,

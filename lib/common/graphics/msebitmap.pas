@@ -245,7 +245,6 @@ type
    function loadfromfile(const filename: filenamety; const format: string; 
                                                          //'' = any
                                        const params: array of const): string;
-                                                          //index in ico
    procedure writetostring(out avalue: string; const format: string;
                                   const params: array of const); overload;
    function writetostring(const format: string;

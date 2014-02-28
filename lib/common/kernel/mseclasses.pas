@@ -924,6 +924,11 @@ procedure addpastedcomponentname(const acomp: tcomponent);
 function findpastedcomponent(const origname: string): tcomponent;
 function findpastedcomponentname(const comp: tcomponent): string;
 
+procedure copyvarrec(const source: tvarrec; const dest: pointer);
+procedure matchparams(const aparam: array of const;
+          const defaults: array of const; const dest: array of pointer);
+
+
 {$ifdef mse_debug}
 procedure dumptextstream(const stream: tstream; const atext: string);
 procedure dumpcomponent(const acomp: tcomponent; const atext: string = '');
@@ -1165,6 +1170,93 @@ begin
 end;
 
 {$endif}
+
+procedure copyvarrec(const source: tvarrec; const dest: pointer);
+begin
+ with source do begin
+  case vtype of
+   vtInteger: begin
+    pinteger(dest)^:= vinteger;
+   end;
+   vtBoolean: begin
+    pboolean(dest)^:= vboolean;
+   end;
+   vtChar: begin
+    pchar(dest)^:= vchar;
+   end;
+   vtExtended: begin
+    pextended(dest)^:= vextended^;
+   end;
+   vtString: begin
+    pshortstring(dest)^:= vstring^;
+   end;
+   vtPointer: begin
+    ppointer(dest)^:= vpointer;
+   end;
+   vtPChar: begin
+    ppchar(dest)^:= vpchar;
+   end;
+   vtObject: begin
+    pobject(dest)^:= vobject;
+   end;
+   vtClass: begin
+    pclass(dest)^:= vclass;
+   end;
+   vtWideChar: begin
+    pwidechar(dest)^:= vwidechar;
+   end;
+   vtPWideChar: begin
+    ppwidechar(dest)^:= vpwidechar;
+   end;
+   vtAnsiString: begin
+    pansistring(dest)^:= ansistring(vansistring);
+   end;
+   vtCurrency: begin
+    pcurrency(dest)^:= vcurrency^;
+   end;
+   vtVariant: begin
+    pvariant(dest)^:= vvariant^;
+   end;
+   vtInterface: begin
+    ppointer(dest)^:= vinterface; //reference counting?
+   end;
+   vtWideString: begin
+    pwidestring(dest)^:= widestring(vwidestring);
+   end;
+   vtInt64: begin
+    pint64(dest)^:= vint64^;
+   end;
+   vtQWord: begin
+    pqword(dest)^:= vqword^;
+   end;
+   vtUnicodeString: begin
+    punicodestring(dest)^:= unicodestring(vunicodestring);
+   end;
+  end;
+ end;
+end;
+
+procedure matchparams(const aparam: array of const;
+          const defaults: array of const; const dest: array of pointer);
+var
+ int1: integer;
+begin
+ int1:= high(aparam);
+ if int1 > high(defaults) then begin
+  int1:= high(defaults);
+ end;
+ if int1 > high(dest) then begin
+  int1:= high(dest);
+ end;
+ for int1:= 0 to int1 do begin
+  if tvarrec(aparam[int1]).vtype = tvarrec(defaults[int1]).vtype then begin
+   copyvarrec(aparam[int1],dest[int1]);
+  end
+  else begin
+   copyvarrec(defaults[int1],dest[int1]);
+  end;
+ end;
+end;
 
 function alive(const acomponent: tcomponent): boolean; 
                                                 {$ifdef FPC}inline;{$endif}
