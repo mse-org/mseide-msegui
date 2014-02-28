@@ -1179,7 +1179,7 @@ begin
     pinteger(dest)^:= vinteger;
    end;
    vtBoolean: begin
-    pboolean(dest)^:= vboolean;
+    system.pboolean(dest)^:= vboolean;
    end;
    vtChar: begin
     pchar(dest)^:= vchar;
