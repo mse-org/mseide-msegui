@@ -28,12 +28,12 @@ interface
 
 uses
   classes,mclasses, sysutils,fpimage,
-   {$ifdef FPC}
-    jpeglib, jdapimin,jdatasrc, jdapistd, jmorecfg
-   {$else}
+//   {$ifdef FPC}
+//    jpeglib, jdapimin,jdatasrc, jdapistd, jmorecfg
+//   {$else}
     jpeglib_del, jdapimin_del,jdatasrc_del, jdapistd_del, jmorecfg_del
-   {$endif};
-
+//   {$endif};
+;
 type
   { TFPReaderJPEG }
   { This is a FPImage reader for jpeg images. }

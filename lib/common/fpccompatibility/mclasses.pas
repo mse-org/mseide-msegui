@@ -948,7 +948,7 @@ TStringsEnumerator = class
     function Seek(const Offset: Int64; Origin: TSeekOrigin): Int64; override;
     procedure SaveToStream(Stream: TStream);
     procedure SaveToFile(const FileName: string);
-//    property Memory: Pointer read FMemory;
+    property Memory: Pointer read FMemory;
   end;
 
   TMemoryStream = class(TCustomMemoryStream)

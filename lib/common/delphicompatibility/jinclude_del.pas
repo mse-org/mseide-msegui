@@ -19,7 +19,7 @@ interface
 
 uses
 {$ifdef Delphi_Stream}
-  classes,
+  classes, mclasses,
 {$endif}
   jmorecfg_del;
 

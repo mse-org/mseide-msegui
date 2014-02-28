@@ -21,8 +21,8 @@ unit FPWriteJPEG;
 interface
 
 uses
-  Classes, mclasses,SysUtils, FPImage, JPEGLib, FPReadJPEG, JcAPIstd, JcAPImin,
-  JDataDst,JcParam, JError;
+  Classes, mclasses,SysUtils, FPImage, JPEGLib_del, FPReadJPEG,
+  JcAPIstd, JcAPImin, JDataDst, JcParam_del, JError_del;
 
 type
   { TFPWriterJPEG }
@@ -104,7 +104,7 @@ var
   begin
     FillChar(FInfo, sizeof(FInfo), 0);
     FError := jpeg_std_error;
-    FInfo.err := jerror.jpeg_std_error(FError);
+    FInfo.err := jerror_del.jpeg_std_error(FError);
 
     jpeg_create_compress(@FInfo);
     FProgressMgr.pub.progress_monitor := @ProgressCallback;

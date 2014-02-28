@@ -25,7 +25,7 @@ unit zstream;
                                     interface
 {***************************************************************************}
 
-uses    classes,zbase,gzio;
+uses    classes,mclasses,zbase,gzio;
 
 type
         Tcompressionlevel=(

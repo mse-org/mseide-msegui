@@ -1,4 +1,4 @@
-Unit JcParam;
+Unit JcParam_del;
 
 { This file contains optional default-setting code for the JPEG compressor.
   Applications do not have to use this file, but those that don't use it
@@ -8,15 +8,15 @@ Unit JcParam;
 
 interface
 
-{$I jconfig.inc}
+{$I jconfig_del.inc}
 
 uses
-  jmorecfg,
-  jinclude,
-  jdeferr,
-  jerror,
-  jcomapi,
-  jpeglib;
+  jmorecfg_del,
+  jinclude_del,
+  jdeferr_del,
+  jerror_del,
+  jcomapi_del,
+  jpeglib_del;
 
 { Quantization table setup routines }
 

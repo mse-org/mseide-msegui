@@ -5,7 +5,7 @@ unit PasJPeg;
 interface
 
 uses
-  Classes, SysUtils;
+  Classes,mclasses, SysUtils;
 
 type
   EJPEG = class(Exception);
