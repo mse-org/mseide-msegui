@@ -30,21 +30,28 @@ procedure registerformats(const labels: array of string;
                            const filternames: array of msestring;
                            const filemasks: array of msestringarty);
 //readgraphic parameters:
-  //[index: integer, width: integer, height: integer]
-     //sequence nr      0 = default     0 = default
+  //[index: integer, width: integer, height: integer, rotation: real,
+     //sequence nr      0 = default     0 = default   0..2pi CCW
      // -1 = default
+  // backgroundcolor: colorty]
+  //  default = cl_transparent
            
 //writegraphic parameters:
-  //[compressionquality: integer, width: integer, height: integer]
+  //[compressionquality: integer, width: integer, height: integer,
       // 0..100, default 75        0 = default      0 = default
+  //     rotation: real,            backgroundcolor: colorty]
+  //       0..2pi CCW default 0       default = cl_transparent
 
 function readgmgraphic(const source: tstream; const dest: tbitmap;
-       const aindex: integer = -1;
-       const awidth: integer = 0; const aheight: integer = 0): string;
+       const aindex: integer = -1; const awidth: integer = 0;
+        const aheight: integer = 0; const rotation: real = 0;
+         const backgroundcolor: colorty = cl_transparent): string;
               //returns label
 procedure writegmgraphic(const dest: tstream; const source: tbitmap;
-                 const format: string; const aquality: integer = defaultquality;
-                 const awidth: integer = 0; const aheight: integer = 0);
+           const format: string; const aquality: integer = defaultquality;
+             const awidth: integer = 0; const aheight: integer = 0;
+             const rotation: real = 0;
+              const backgroundcolor: colorty = cl_transparent);
 function pinggmgraphic(const source: tstream; 
                       out ainfo: gminfoty): boolean;
 
@@ -73,7 +80,14 @@ procedure setcolor(const acolor: colorty; const dest: pointer;
                                             const index: integer = 0);
 var
  rgb: rgbtriplety;
+ opac: card32;
 begin
+ if acolor = cl_transparent then begin
+  opac:= $ffffffff;
+ end
+ else begin
+  opac:= 0;
+ end;
  rgb:= colortorgb(acolor);
  case qdepth of 
   qd_8: begin
@@ -81,7 +95,7 @@ begin
     red:= rgb.red;
     green:= rgb.green;
     blue:= rgb.blue;
-    opacity:= 0;
+    opacity:= opac;
    end;
   end;
   qd_16: begin
@@ -89,7 +103,7 @@ begin
     red:= rgb.red + (rgb.red shl 8);
     green:= rgb.green + (rgb.green shl 8);
     blue:= rgb.blue + (rgb.blue shl 8);
-    opacity:= 0;
+    opacity:= opac;
    end;
   end;
   qd_32: begin
@@ -98,7 +112,28 @@ begin
     green:= rgb.green + (rgb.green shl 8) + (rgb.green shl 16) +
                                                          (rgb.green shl 24);
     blue:= rgb.blue + (rgb.blue shl 8) + (rgb.blue shl 16) + (rgb.blue shl 24);
-    opacity:= 0;
+    opacity:= opac;
+   end;
+  end;
+ end;
+end;
+
+procedure setimagebackgroundcolor(const image: pointer; color: colorty);
+begin
+ case qdepth of
+  qd_8: begin
+   with pimage8(image)^ do begin
+    setcolor(color,@b.background_color);
+   end;
+  end;
+  qd_16: begin
+   with pimage16(image)^ do begin
+    setcolor(color,@b.background_color);
+   end;
+  end;
+  else begin
+   with pimage32(image)^ do begin
+    setcolor(color,@b.background_color);
    end;
   end;
  end;
@@ -148,8 +183,10 @@ begin
 end;
 
 procedure writegmgraphic(const dest: tstream; const source: tbitmap;
-                 const format: string; const aquality: integer = defaultquality;
-                 const awidth: integer = 0; const aheight: integer = 0);
+            const format: string; const aquality: integer = defaultquality;
+            const awidth: integer = 0; const aheight: integer = 0;
+            const rotation: real = 0;
+            const backgroundcolor: colorty = cl_transparent);
 var
  exceptinf: exceptioninfo;
  procedure error;
@@ -172,7 +209,7 @@ var
  monostep: integer;
  buf: pointer;
  bd,be,be1: pbyte;
- si2: sizety;
+ si1,si2: sizety;
 begin
  if source is tbitmap then begin
   with tbitmap1(source) do begin
@@ -412,8 +449,18 @@ begin
        end;
       end;
      end;
-     
-     if fitscale(awidth,aheight,imagebuffer.image.size,si2) then begin
+     si1:= imagebuffer.image.size;
+     if rotation <> 0 then begin
+      image2:= rotateimage(image,rotation*(-180/pi),@exceptinf);
+      if image2 = nil then begin
+       exit;
+      end;
+      destroyimage(image);
+      image:= image2;
+      si1:= ms(pimage8(image)^.a.columns,pimage8(image)^.a.rows);
+     end;
+
+     if fitscale(awidth,aheight,si1,si2) then begin
       image2:= scaleimage(image,si2.cx,si2.cy,@exceptinf);
       if image2 = nil then begin
        exit;
@@ -507,7 +554,9 @@ end;
 
 function readgmgraphic(const source: tstream; const dest: tbitmap;
        const aindex: integer = -1;
-       const awidth: integer = 0; const aheight: integer = 0): string;
+       const awidth: integer = 0; const aheight: integer = 0;
+     const rotation: real = 0;
+      const backgroundcolor: colorty = cl_transparent): string;
               //returns label
 var
  imageinfo: pointer;
@@ -546,15 +595,15 @@ begin
   end;
   case qdepth of
    qd_8: begin
-    with pimage8(image)^ do begin
+    with pimageinfo8(imageinfo)^ do begin
     end;
    end;
    qd_16: begin
-    with pimage16(image)^ do begin
+    with pimageinfo16(imageinfo)^ do begin
     end;
    end;
    else begin
-    with pimage32(image)^ do begin
+    with pimageinfo32(imageinfo)^ do begin
     end;
    end;
   end;
@@ -564,6 +613,16 @@ begin
    with pimage8(image)^ do begin //a is identical for all depths
     bo1:= a.matte = magicktrue;
     si1:= ms(a.columns,a.rows);
+   end;
+   if rotation <> 0 then begin
+    setimagebackgroundcolor(image,backgroundcolor);
+    image2:= rotateimage(image,rotation*(-180/pi),@exceptinf);
+    if image2 = nil then begin
+     exit;
+    end;
+    destroyimage(image);
+    image:= image2;
+    si1:= ms(pimage8(image)^.a.columns,pimage8(image)^.a.rows);
    end;
    if fitscale(awidth,aheight,si1,si2) then begin
     image2:= scaleimage(image,si2.cx,si2.cy,@exceptinf);
@@ -642,11 +701,15 @@ var
  index: integer = -1;
  width: integer = 0;
  height: integer = 0;
+ rotation: extended = 0;
+ backgroundcolor: colorty = cl_transparent;
 begin
  result:= false;
  if dest is tbitmap then begin
-  matchparams(params,[index,width,height],[@index,@width,@height]);
-  format:= readgmgraphic(source,tbitmap(dest),index,width,height);
+  matchparams(params,[index,width,height,rotation,backgroundcolor],
+                 [@index,@width,@height,@rotation,@backgroundcolor]);
+  format:= readgmgraphic(source,tbitmap(dest),index,width,height,rotation,
+                                                            backgroundcolor);
   result:= format <> '';
  end;
 end;
@@ -657,10 +720,14 @@ var
  quality: integer = defaultquality;
  width: integer = 0;
  height: integer = 0;
+ rotation: extended = 0;
+ backgroundcolor: colorty = cl_transparent;
 begin
  if source is tbitmap then begin
-  matchparams(params,[quality,width,height],[@quality,@width,@height]);
-  writegmgraphic(dest,tbitmap(source),format,quality,width,height);
+  matchparams(params,[quality,width,height,rotation,backgroundcolor],
+             [@quality,@width,@height,@rotation,@backgroundcolor]);
+  writegmgraphic(dest,tbitmap(source),format,quality,width,height,
+                                                   rotation,backgroundcolor);
  end;
 end;
 

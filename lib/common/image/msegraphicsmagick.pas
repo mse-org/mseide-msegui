@@ -946,7 +946,9 @@ var
  ScaleImage: function(image: pointer{pImage}; columns: culong;
                    rows: culong; exception: pExceptionInfo): pointer{pImage}; 
                              {$ifdef wincall}stdcall{$else}cdecl{$endif};
-
+ RotateImage: function(image: pointer{pImage}; degrees: cdouble;
+                            exception: pExceptionInfo): pointer{pImage};
+                             {$ifdef wincall}stdcall{$else}cdecl{$endif};
  NewMagickWand: function(): pMagickWand;
                               {$ifdef wincall}stdcall{$else}cdecl{$endif};
  DestroyMagickWand: procedure(wand: pMagickWand);
@@ -1042,7 +1044,7 @@ procedure initializegraphicsmagick(const sonames,
                          sonameswand: array of filenamety);
                                                  //[] = default 
 const
- funcs: array[0..27] of funcinfoty = (
+ funcs: array[0..28] of funcinfoty = (
 //    (n: ''; d: {$ifndef FPC}@{$endif}@),
     (n: 'InitializeMagick'; d: {$ifndef FPC}@{$endif}@InitializeMagick),
     (n: 'DestroyMagick'; d: {$ifndef FPC}@{$endif}@DestroyMagick),
@@ -1074,7 +1076,8 @@ const
                             d: {$ifndef FPC}@{$endif}@AllocateImageColormap),
     (n: 'ResizeImage'; d: {$ifndef FPC}@{$endif}@ResizeImage),
     (n: 'SampleImage'; d: {$ifndef FPC}@{$endif}@SampleImage),
-    (n: 'ScaleImage'; d: {$ifndef FPC}@{$endif}@ScaleImage)
+    (n: 'ScaleImage'; d: {$ifndef FPC}@{$endif}@ScaleImage),
+    (n: 'RotateImage'; d: {$ifndef FPC}@{$endif}@RotateImage)
  );
  errormessage = 'Can not load GraphicsMagick library. ';
 
