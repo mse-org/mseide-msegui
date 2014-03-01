@@ -41,7 +41,7 @@ type
    procedure checkimage(const bgr: boolean);
    procedure getimage;
    procedure putimage;
-   procedure allocimagemem;
+//   procedure allocimagemem;
    function getpixel(const index: pointty): colorty;
    procedure setpixel(const index: pointty; const value: colorty);
    function getpixels(const x,y: integer): colorty;
@@ -502,13 +502,13 @@ begin
    if (fimage.pixels <> nil) or bo1 then begin
     self.clear;
     if bo1 then begin
-//     self.fimage:= tcanvas1(canvas).getcanvasimage;
      savetoimage(self.fimage);
     end
     else begin
      self.fimage:= fimage;
      self.fimage.pixels:= gui_allocimagemem(fimage.length);
      move(fimage.pixels^,self.fimage.pixels^,fimage.length*sizeof(longword));
+                         //get a copy
     end;
     self.fsize:= self.fimage.size;
     if monochrome then begin
@@ -543,13 +543,15 @@ begin
  destroyhandle;
  fsize:= asize;
  if (asize.cx > 0) and (asize.cy > 0) then begin
+  allocimage(fimage,size,true);
   with fimage do begin
-   monochrome:= true;
-   size:= asize;
-   rowstep:= (size.cx+31) div 32; //words
-   length:= size.cy * rowstep;
-   rowstep:= rowstep*4;           //bytes
-   pixels:= gui_allocimagemem(length);
+//   monochrome:= true;
+//   size:= asize;
+//   rowstep:= (size.cx+31) div 32; //words
+//   length:= size.cy * rowstep;
+//   rowstep:= rowstep*4;           //bytes
+   rowstep:= linebytes;
+//   pixels:= gui_allocimagemem(length);
    if dwordaligned then begin
     sourcerowstep:= rowstep;
    end
@@ -807,7 +809,7 @@ begin
   end;
  end;
 end;
-
+{
 procedure tbitmap.allocimagemem;
 var
  step: integer;
@@ -827,7 +829,7 @@ begin
   fimage.pixels:= nil;
  end;
 end;
-
+}
 procedure tbitmap.getimage;
 var
  info1: drawinfoty;
@@ -862,9 +864,9 @@ begin
   }
  end
  else begin
-  fimage.size:= fsize;
-  fimage.monochrome:= monochrome;
-  allocimagemem;
+//  fimage.size:= fsize;
+//  fimage.monochrome:= monochrome;
+  allocimage(fimage,fsize,monochrome);
  end;
 end;
 
@@ -1250,10 +1252,9 @@ var
 begin
  clear;
  fsize:= asize;
- fimage.size:= fsize;
- fimage.monochrome:= monochrome;
- {$ifdef FPC}{$checkpointer off}{$endif} //not on heap in win32
- allocimagemem;
+// fimage.size:= fsize;
+// fimage.monochrome:= monochrome;
+ allocimage(fimage,fsize,monochrome);
  if monochrome then begin
   move(adata[0],fimage.pixels^,fimage.Length*sizeof(longword));
  end
@@ -1322,7 +1323,8 @@ begin
   end
   else begin
    aimage:= fimage;
-   allocimagemem;
+   fimage.pixels:= gui_allocimagemem(fimage.length);
+//   allocimagemem;
    move(aimage.pixels^,fimage.pixels^,fimage.length * sizeof(longword));
                //get a copy
   end;

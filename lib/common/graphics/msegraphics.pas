@@ -183,7 +183,9 @@ type
   monochrome: boolean;
   bgr: boolean;
   size: sizety;
-  length: integer;  //number of longword
+  length: integer;     //number of longword
+  linelength: integer; //number of longword in row
+  linebytes: integer;  //number of bytes in row
   pixels: plongwordaty;
  end;
  pimagety = ^imagety;
@@ -1290,13 +1292,18 @@ begin
   pixels:= nil;
   size:= asize;
   length:= 0;
+  linelength:= 0;
+  linebytes:= 0;
   if (size.cx <> 0) and (size.cy <> 0) then begin
    if monochrome then begin
-    length:= size.cy * ((size.cx+31) div 32);
+    linelength:= (size.cx+31) div 32;
+    length:= size.cy * linelength;
    end
    else begin
+    linelength:= size.cx;
     length:= size.cy * size.cx;
    end;
+   linebytes:= linelength * 4;
    pixels:= gui_allocimagemem(length);
   end;
  end;
@@ -1309,6 +1316,8 @@ begin
    gui_freeimagemem(pixels);
    pixels:= nil;
    length:= 0;
+   linelength:= 0;
+   linebytes:= 0;
    size:= nullsize;
   end;
  end;

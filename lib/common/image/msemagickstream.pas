@@ -22,6 +22,8 @@ type
   size: sizety;
   depth: integer;
  end;
+ readgmoptionty = (rgmo_rotmonomask);
+ readgmoptionsty = set of readgmoptionty;
  
 procedure registerformats(const labels: array of string;
                            const filternames: array of msestring;
@@ -30,8 +32,8 @@ procedure registerformats(const labels: array of string;
   //[index: integer, width: integer, height: integer, rotation: real,
      //sequence nr      0 = default     0 = default   0..2pi CCW
      // -1 = default
-  // backgroundcolor: colorty, pixelpermm: real]
-  //  default = cl_transparent  0 = default
+  // backgroundcolor: colorty, pixelpermm: real, options: readgmoptionsty]
+  //  default = cl_transparent  0 = default        default = []
            
 //writegraphic parameters:
   //[compressionquality: integer, width: integer, height: integer,
@@ -41,9 +43,10 @@ procedure registerformats(const labels: array of string;
 
 function readgmgraphic(const source: tstream; const dest: tbitmap;
        const aindex: integer = -1; const awidth: integer = 0;
-        const aheight: integer = 0; const rotation: real = 0;
-         const backgroundcolor: colorty = cl_transparent;
-         const pixelpermm: real = 0): string;
+        const aheight: integer = 0; const arotation: real = 0;
+         const abackgroundcolor: colorty = cl_transparent;
+         const apixelpermm: real = 0;
+         const aoptions: readgmoptionsty = []): string;
               //returns label
 procedure writegmgraphic(const dest: tstream; const source: tbitmap;
            const format: string; const aquality: integer = -1;
@@ -207,7 +210,6 @@ var
  s,d,e,e1: prgbtriplety;
  s1,s2: plongword;
  lwo1: longword;
- monostep: integer;
  buf: pointer;
  bd,be,be1: pbyte;
  si1,si2: sizety;
@@ -227,7 +229,6 @@ begin
      if hasmask then begin
       with tmaskedbitmap(source).mask do begin
        monomask:= monochrome;
-       monostep:= scanlinestep;
       end;
      end;
      bo1:= getimageref(imagebuffer.image);
@@ -304,7 +305,7 @@ begin
            end;
            inc(bd);
           until bd = be1;
-          s1:= pointer(s1) + monostep;
+          s1:= pointer(s1) + imagebuffer.mask.linebytes;
          until bd = be;
         end
         else begin
@@ -397,7 +398,7 @@ begin
           end;
           inc(d);
          until d = e1;
-         s1:= pointer(s1) + monostep;
+         s1:= pointer(s1) + imagebuffer.mask.linebytes;
         until d = e;
        end
        else begin
@@ -564,9 +565,10 @@ end;
 function readgmgraphic(const source: tstream; const dest: tbitmap;
        const aindex: integer = -1;
        const awidth: integer = 0; const aheight: integer = 0;
-       const rotation: real = 0;
-       const backgroundcolor: colorty = cl_transparent;
-       const pixelpermm: real = 0): string;
+       const arotation: real = 0;
+       const abackgroundcolor: colorty = cl_transparent;
+       const apixelpermm: real = 0;
+       const aoptions: readgmoptionsty = []): string;
               //returns label
 var
  imageinfo: pointer;
@@ -574,12 +576,19 @@ var
  image,image2: pointer;
  imagebuffer: imagebufferinfoty;
  str1: string; //todo: use tstream -> c-stream adaptor
- bo1,bo2: boolean;
+ hasmask,monomask,rotmask: boolean;
+ bo2: boolean;
  si1,si2: sizety;
  datapo: pointer;
  datalen: card32;
+ po1: pointer;
+ int1: integer;
 begin
  result:= '';
+ monomask:= false;
+ bo2:= dest is tmaskedbitmap;
+ rotmask:= bo2 and (abackgroundcolor = cl_transparent) and 
+                                (abs(frac(arotation / (pi/2.0))) > 0.0000001);
  imagebuffer.image.pixels:= nil;
  imagebuffer.mask.pixels:= nil;
  checkinit;
@@ -591,14 +600,13 @@ begin
   datalen:= length(str1);
  end;
  getexceptioninfo(@exceptinf);
- bo2:= dest is tmaskedbitmap;
  image:= nil;
  imageinfo:= cloneimageinfo(nil);
  try
   with pimageinfo8(imageinfo)^ do begin //a identical for all dephts
-   if pixelpermm > 0 then begin
+   if apixelpermm > 0 then begin
     a.units:= pixelsperinchresolution;
-    a.density:= gmstring(formatfloatmse(pixelpermm*ppmmtoppi,'',true));
+    a.density:= gmstring(formatfloatmse(apixelpermm*ppmmtoppi,'',true));
    end;
    if aindex >= 0 then begin
     a.subimage:= aindex;
@@ -625,17 +633,22 @@ begin
   image:= blobtoimage(imageinfo,datapo,datalen,@exceptinf);
   if image <> nil then begin
    with pimage8(image)^ do begin //a is identical for all depths
-    bo1:= a.matte = magicktrue;
+    hasmask:= a.matte = magicktrue;
     si1:= ms(a.columns,a.rows);
    end;
-   if rotation <> 0 then begin
-    setimagebackgroundcolor(image,backgroundcolor);
-    image2:= rotateimage(image,rotation*(-180/pi),@exceptinf);
+   if arotation <> 0 then begin
+    setimagebackgroundcolor(image,abackgroundcolor);
+    image2:= rotateimage(image,arotation*(-180/pi),@exceptinf);
     if image2 = nil then begin
      exit;
     end;
     destroyimage(image);
     image:= image2;
+    if rotmask then begin
+     pimage8(image)^.a.matte:= magicktrue;
+     monomask:= not hasmask and (rgmo_rotmonomask in aoptions);
+     hasmask:= true;
+    end;
     si1:= ms(pimage8(image)^.a.columns,pimage8(image)^.a.rows);
    end;
    if fitscale(awidth,aheight,si1,si2) then begin
@@ -676,11 +689,34 @@ begin
    allocimage(imagebuffer.image,si1,false);
    if dispatchimage(image,0,0,si1.cx,si1.cy,'BGRP',charpixel,
             imagebuffer.image.pixels,@exceptinf) = magickpass then begin
-    if bo1 and bo2 then begin
-     allocimage(imagebuffer.mask,si1,false);
-     if not dispatchimage(image,0,0,si1.cx,si1.cy,'AAAP',charpixel,
-            imagebuffer.mask.pixels,@exceptinf) = magickpass then begin
-      result:= '';
+    if hasmask and bo2 then begin
+     if monomask then begin
+      allocimage(imagebuffer.mask,si1,true);
+      po1:= imagebuffer.mask.pixels;
+      for int1:= 0 to si1.cy-1 do begin
+       if setimagepixels(image,0,int1,si1.cx,1) = nil then begin
+        result:= '';
+        break;
+       end;
+       if exportimagepixelarea(image,alphaquantum,1,po1,
+                                            nil,nil) = magickfail then begin
+        result:= '';
+        break;
+       end;
+       if SyncImagePixels(image) = 0 then begin
+        result:= '';
+        break;
+       end;
+       inc(po1,imagebuffer.mask.linebytes);
+      end;
+      swapbits(imagebuffer.mask);
+     end
+     else begin
+      allocimage(imagebuffer.mask,si1,false);
+      if not dispatchimage(image,0,0,si1.cx,si1.cy,'AAAP',charpixel,
+             imagebuffer.mask.pixels,@exceptinf) = magickpass then begin
+       result:= '';
+      end;
      end;
     end;
    end
@@ -688,24 +724,24 @@ begin
     result:= '';
    end;
   end;
+  if result <> '' then begin
+   if bo2 then begin
+    tmaskedbitmap(dest).loadfromimagebuffer(imagebuffer);
+   end
+   else begin
+    tbitmap(dest).loadfromimage(imagebuffer.image);
+   end;
+   tbitmap(dest).change;
+  end;
  finally
+  freeimage(imagebuffer.image);
+  freeimage(imagebuffer.mask);
   destroyimageinfo(imageinfo);
   destroyexceptioninfo(@exceptinf);
   if image <> nil then begin
    destroyimage(image);
   end;
  end;
- if result <> '' then begin
-  if bo2 then begin
-   tmaskedbitmap(dest).loadfromimagebuffer(imagebuffer);
-  end
-  else begin
-   tbitmap(dest).loadfromimage(imagebuffer.image);
-  end;
-  tbitmap(dest).change;
- end;
- freeimage(imagebuffer.image);
- freeimage(imagebuffer.mask);
 end;
 
 function readgraphic(const source: tstream;
@@ -718,13 +754,16 @@ var
  rotation: extended = 0;
  backgroundcolor: colorty = cl_transparent;
  density: extended = 0;
+ options: readgmoptionsty = [];
 begin
  result:= false;
  if dest is tbitmap then begin
-  matchparams(params,[index,width,height,rotation,backgroundcolor,density],
-                 [@index,@width,@height,@rotation,@backgroundcolor,@density]);
+  matchparams(params,[index,width,height,rotation,backgroundcolor,density,
+                      longword(options)],
+                 [@index,@width,@height,@rotation,@backgroundcolor,@density,
+                  @options]);
   format:= readgmgraphic(source,tbitmap(dest),index,width,height,rotation,
-                                                      backgroundcolor,density);
+                                      backgroundcolor,density,options);
   result:= format <> '';
  end;
 end;
