@@ -822,6 +822,9 @@ begin
     dcy:= size.cy;
     scx:= source.image.size.cx;
     scy:= source.image.size.cy;    
+    allocimage(dest,source.image.size,source.image.monochrome);
+    scxw:= dest.linelength;
+    {
     if source.image.monochrome then begin
      scxw:= ((dcx+31) div 32);
      dest.pixels:= gui_allocimagemem(scxw*dcy);
@@ -829,6 +832,7 @@ begin
     else begin
      dest.pixels:= gui_allocimagemem(dcx*dcy);
     end;
+    }
     ps:= pointer(source.image.pixels);
     pd:= pointer(dest.pixels);
     yintp:= dcy;

@@ -5737,11 +5737,12 @@ begin
    image.image.bgr:= abgr;
    int1:= gc.paintdevicesize.cx * gc.paintdevicesize.cy;
    if int1 > 0 then begin
+    allocimage(image.image,gc.paintdevicesize,false);
     with image.image do begin
-     pixels:= gui_allocimagemem(int1);
+//     pixels:= gui_allocimagemem(int1);
      if pixels <> nil then begin
-      size:= gc.paintdevicesize;
-      length:= int1;
+//      size:= gc.paintdevicesize;
+//      length:= int1;
       error:= gde_notimplemented;
       gdi(gdf_getimage);
      end;

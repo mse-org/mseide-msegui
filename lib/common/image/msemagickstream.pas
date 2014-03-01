@@ -42,18 +42,18 @@ procedure registerformats(const labels: array of string;
   //       0..2pi CCW default 0 default = cl_transparent     0 = default
 
 function readgmgraphic(const source: tstream; const dest: tbitmap;
-       const aindex: integer = -1; const awidth: integer = 0;
-        const aheight: integer = 0; const arotation: real = 0;
-         const abackgroundcolor: colorty = cl_transparent;
-         const apixelpermm: real = 0;
-         const aoptions: readgmoptionsty = []): string;
+             const aindex: integer = -1; const awidth: integer = 0;
+             const aheight: integer = 0; const arotation: real = 0;
+             const abackgroundcolor: colorty = cl_transparent;
+             const apixelpermm: real = 0;
+             const aoptions: readgmoptionsty = []): string;
               //returns label
 procedure writegmgraphic(const dest: tstream; const source: tbitmap;
-           const format: string; const aquality: integer = -1;
+             const format: string; const aquality: integer = -1;
              const awidth: integer = 0; const aheight: integer = 0;
-             const rotation: real = 0;
-              const backgroundcolor: colorty = cl_transparent;
-              const pixelpermm: real = 0);
+             const arotation: real = 0;
+             const abackgroundcolor: colorty = cl_transparent;
+             const apixelpermm: real = 0);
 function pinggmgraphic(const source: tstream; 
                       out ainfo: gminfoty): boolean;
 
@@ -188,9 +188,9 @@ end;
 procedure writegmgraphic(const dest: tstream; const source: tbitmap;
             const format: string; const aquality: integer = -1;
             const awidth: integer = 0; const aheight: integer = 0;
-            const rotation: real = 0;
-            const backgroundcolor: colorty = cl_transparent;
-            const pixelpermm: real = 0);
+            const arotation: real = 0;
+            const abackgroundcolor: colorty = cl_transparent;
+            const apixelpermm: real = 0);
 var
  exceptinf: exceptioninfo;
  procedure error;
@@ -453,9 +453,10 @@ begin
        end;
       end;
      end;
+     setimagebackgroundcolor(image,abackgroundcolor);
      si1:= imagebuffer.image.size;
-     if rotation <> 0 then begin
-      image2:= rotateimage(image,rotation*(-180/pi),@exceptinf);
+     if arotation <> 0 then begin
+      image2:= rotateimage(image,arotation*(-180/pi),@exceptinf);
       if image2 = nil then begin
        exit;
       end;
@@ -472,10 +473,10 @@ begin
       destroyimage(image);
       image:= image2;
      end;
-     if pixelpermm > 0 then begin
+     if apixelpermm > 0 then begin
       with pimageinfo8(imageinfo)^ do begin
        a.units:= pixelsperinchresolution;
-       a.density:= gmstring(formatfloatmse(pixelpermm*ppmmtoppi,'',true));
+       a.density:= gmstring(formatfloatmse(apixelpermm*ppmmtoppi,'',true));
       end;
      end;
 

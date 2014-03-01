@@ -2324,9 +2324,11 @@ begin
    end;
  {$ifdef FPC} {$checkpointer off} {$endif}
    with ximage1^ do begin
-    wordmax:= (image.size.cx + 31) div 32;
-    image.length:= wordmax * image.size.cy;
-    image.pixels:= gui_allocimagemem(image.length);
+//    wordmax:= (image.size.cx + 31) div 32;
+//    image.length:= wordmax * image.size.cy;
+//    image.pixels:= gui_allocimagemem(image.length);
+    allocimage(image,image.size,image.monochrome);
+    wordmax:= image.linelength;
     po1:= @image.pixels^[0];
     po2:= pbyte(data);
     if bitmap_pad = 32 then begin
@@ -2372,7 +2374,8 @@ begin
     gdi_unlock;
     exit;
    end;
-   image.pixels:= gui_allocimagemem(image.length);
+   allocimage(image,image.size,image.monochrome);
+//   image.pixels:= gui_allocimagemem(image.length);
 
  //todo: optimize
 

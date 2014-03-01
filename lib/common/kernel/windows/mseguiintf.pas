@@ -997,7 +997,8 @@ begin
    initbitmapinfo(false,false,info.size,bitmapinfo);
    image.length:= info.size.cx * info.size.cy;
   end;
-  image.pixels:= gui_allocimagemem(image.length);
+  allocimage(image,image.size,image.monochrome);
+//  image.pixels:= gui_allocimagemem(image.length);
          //getdibits does not work with normal heap
   dc:= getdc(0);
   int1:= getdibits(dc,pixmap,0,info.size.cy,image.pixels,
