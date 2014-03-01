@@ -61,7 +61,11 @@ type
    property onmousewheelevent;
    property onkeydown;
    property onkeyup;
- end;
+   property onbeforepaint;
+   property onpaintbackground;
+   property onpaint;
+   property onafterpaint;
+end;
 
 implementation
 uses

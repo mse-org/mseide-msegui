@@ -103,6 +103,10 @@ type
   published
    property value;
    property format;
+   property onbeforepaint;
+   property onpaintbackground;
+   property onpaint;
+   property onafterpaint;
  end;
    
 implementation
