@@ -1182,7 +1182,7 @@ procedure drawdottedlinesegments(const acanvas: tcanvas; const lines: segmentart
              const colorline: colorty);
 
 procedure allocimage(out image: imagety; const asize: sizety;
-                                             const amonochrome: boolean);
+                                             const akind: bitmapkindty);
 procedure freeimage(var image: imagety);
 procedure checkimagebgr(var aimage: imagety; const bgr: boolean);
 procedure movealignment(const source: alignmentsty; var dest: alignmentsty);
@@ -1290,10 +1290,11 @@ begin
 end;
 
 procedure allocimage(out image: imagety; const asize: sizety;
-                                                   const amonochrome: boolean);
+                                          const akind: bitmapkindty);
 begin
  with image do begin
-  monochrome:= amonochrome;
+//  monochrome:= amonochrome;
+  kind:= akind;
   bgr:= false;
   pixels:= nil;
   size:= asize;
@@ -1301,14 +1302,19 @@ begin
   linelength:= 0;
   linebytes:= 0;
   if (size.cx <> 0) and (size.cy <> 0) then begin
-   if monochrome then begin
-    linelength:= (size.cx+31) div 32;
-    length:= size.cy * linelength;
-   end
-   else begin
-    linelength:= size.cx;
-    length:= size.cy * size.cx;
+   case kind of
+    bmk_mono: begin
+     linelength:= (size.cx+31) div 32;
+    end;
+    bmk_gray: begin
+     linelength:= (size.cx+3) div 4;
+    end;
+    else begin
+     linelength:= size.cx;
+     length:= size.cy * size.cx;
+    end;
    end;
+   length:= size.cy * linelength;
    linebytes:= linelength * 4;
    pixels:= gui_allocimagemem(length);
   end;

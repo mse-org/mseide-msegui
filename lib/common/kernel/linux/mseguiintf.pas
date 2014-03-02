@@ -2314,78 +2314,103 @@ begin
  if result = gde_ok then begin
   image.size:= info.size;
   image.pixels:= nil;
-  if info.depth = 1 then begin //monochrome
-   image.monochrome:= true;
-   ximage1:= xgetimage(appdisp,pixmap,0,0,info.size.cx,info.size.cy,1,xypixmap);
-   if ximage1 = nil then begin
-    result:= gde_image;
-    gdi_unlock;
-    exit;
-   end;
- {$ifdef FPC} {$checkpointer off} {$endif}
-   with ximage1^ do begin
-//    wordmax:= (image.size.cx + 31) div 32;
-//    image.length:= wordmax * image.size.cy;
-//    image.pixels:= gui_allocimagemem(image.length);
-    allocimage(image,image.size,image.monochrome);
-    wordmax:= image.linelength;
-    po1:= @image.pixels^[0];
-    po2:= pbyte(data);
-    if bitmap_pad = 32 then begin
-     move(po2^,po1^,image.size.cy * bytes_per_line);
-    end
-    else begin
-     for int1:= 0 to image.size.cy - 1 do begin
-      move(po2^,po1^,bytes_per_line);
-      inc(po2,bytes_per_line);
-      inc(po1,wordmax);
-     end;
+  case info.depth of
+   1: begin //monochrome
+ //   image.kind:= bmk_mono;
+    ximage1:= xgetimage(appdisp,pixmap,0,0,info.size.cx,info.size.cy,1,xypixmap);
+    if ximage1 = nil then begin
+     result:= gde_image;
+     gdi_unlock;
+     exit;
     end;
-    if byte_order <> lsbfirst then begin
-     case bitmap_unit of
-      32: begin
-       for int1:= 0 to image.length - 1 do begin
-        swapbytes1(image.pixels^[int1]);
-       end;
-      end;
-      16: begin
-       for int1:= 0 to image.length*2-1 do begin
-        swapbytes1(pwordaty(image.pixels)^[int1]);
-       end;
+  {$ifdef FPC} {$checkpointer off} {$endif}
+    with ximage1^ do begin
+ //    wordmax:= (image.size.cx + 31) div 32;
+ //    image.length:= wordmax * image.size.cy;
+ //    image.pixels:= gui_allocimagemem(image.length);
+     allocimage(image,info.size,bmk_mono);
+     wordmax:= image.linelength;
+     po1:= @image.pixels^[0];
+     po2:= pbyte(data);
+     if bitmap_pad = 32 then begin
+      move(po2^,po1^,image.size.cy * bytes_per_line);
+     end
+     else begin
+      for int1:= 0 to image.size.cy - 1 do begin
+       move(po2^,po1^,bytes_per_line);
+       inc(po2,bytes_per_line);
+       inc(po1,wordmax);
       end;
      end;
+     if byte_order <> lsbfirst then begin
+      case bitmap_unit of
+       32: begin
+        for int1:= 0 to image.length - 1 do begin
+         swapbytes1(image.pixels^[int1]);
+        end;
+       end;
+       16: begin
+        for int1:= 0 to image.length*2-1 do begin
+         swapbytes1(pwordaty(image.pixels)^[int1]);
+        end;
+       end;
+      end;
+     end;
+     if bitmap_bit_order <> lsbfirst then begin
+      po2:= @image.pixels^[0];
+      for int1:= 0 to image.length*4-1 do begin
+       po2^:= bitreverse[po2^];
+       inc(po2);
+      end;
+     end;
     end;
-    if bitmap_bit_order <> lsbfirst then begin
-     po2:= @image.pixels^[0];
-     for int1:= 0 to image.length*4-1 do begin
-      po2^:= bitreverse[po2^];
-      inc(po2);
+  {$ifdef FPC} {$checkpointer default} {$endif}
+   end;
+   8: begin //gray //what about indexed pixmap????
+    ximage1:= xgetimage(appdisp,pixmap,0,0,info.size.cx,info.size.cy,$ff,zpixmap);
+    if ximage1 = nil then begin
+     result:= gde_image;
+     gdi_unlock;
+     exit;
+    end;
+    allocimage(image,info.size,bmk_gray);
+    with ximage1^ do begin
+     po1:= @image.pixels^[0];
+     po2:= pbyte(data);
+     if bitmap_pad = 32 then begin
+      move(po2^,po1^,image.size.cy * bytes_per_line);
+     end
+     else begin
+      wordmax:= image.linelength;
+      for int1:= 0 to image.size.cy - 1 do begin
+       move(po2^,po1^,bytes_per_line);
+       inc(po2,bytes_per_line);
+       inc(po1,wordmax);
+      end;
      end;
     end;
    end;
- {$ifdef FPC} {$checkpointer default} {$endif}
-  end
-  else begin
-   image.monochrome:= false;
-   image.length:= image.size.cx * image.size.cy;
-   ximage1:= xgetimage(appdisp,pixmap,0,0,info.size.cx,info.size.cy,$ffffffff,zpixmap);
-   if ximage1 = nil then begin
-    result:= gde_image;
-    gdi_unlock;
-    exit;
-   end;
-   allocimage(image,image.size,image.monochrome);
-//   image.pixels:= gui_allocimagemem(image.length);
-
- //todo: optimize
-
-   po1:= @image.pixels[0];
-   for int1:= 0 to info.size.cy - 1 do begin
-    for int2:= 0 to info.size.cx - 1 do begin
- {$ifdef FPC} {$checkpointer off} {$endif}
-     po1^:= gui_pixeltorgb(ximage1^.f.get_pixel(ximage1,int2,int1));
- {$ifdef FPC} {$checkpointer default} {$endif}
-     inc(po1);
+   else begin
+ //   image.monochrome:= false;
+ //   image.length:= image.size.cx * image.size.cy;
+    ximage1:= xgetimage(appdisp,pixmap,0,0,info.size.cx,info.size.cy,
+                                                         $ffffffff,zpixmap);
+    if ximage1 = nil then begin
+     result:= gde_image;
+     gdi_unlock;
+     exit;
+    end;
+    allocimage(image,info.size,bmk_rgb);
+ //   image.pixels:= gui_allocimagemem(image.length);
+ 
+  //todo: optimize
+ 
+    po1:= @image.pixels[0];
+    for int1:= 0 to info.size.cy - 1 do begin
+     for int2:= 0 to info.size.cx - 1 do begin
+      po1^:= gui_pixeltorgb(ximage1^.f.get_pixel(ximage1,int2,int1));
+      inc(po1);
+     end;
     end;
    end;
   end;
@@ -2579,7 +2604,8 @@ var
 begin
  gdi_lock;
  with info do begin
-  if xgetgeometry(appdisp,handle,@ca1,@ca1,@ca1,@size.cx,@size.cy,@ca1,@depth) = 0 then begin
+  if xgetgeometry(appdisp,handle,@ca1,@ca1,@ca1,@size.cx,@size.cy,@ca1,
+                                                         @depth) = 0 then begin
    result:= gde_pixmap;
   end
   else begin
