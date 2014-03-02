@@ -2431,53 +2431,68 @@ begin
  gdi_lock;
  result:= gde_ok;
  po2:= nil;
- if image.monochrome then begin
-  ximage:= XCreateImage(appdisp,nil,1,xypixmap,0,nil,
-                                 image.size.cx,image.size.cy,32,0);
-  if ximage = nil then begin
-   result:= gde_image;
-   gdi_unlock;
-   exit;
-  end;
-{$ifdef FPC} {$checkpointer off} {$endif}
-  with ximage^ do begin
-   bitmap_bit_order:= LSBFirst;
-   byte_order:= lsbfirst;
-   bitmap_unit:= 32;
-   data:= @image.pixels[0];
-  end;
-{$ifdef FPC} {$checkpointer default} {$endif}
- end
- else begin
-  ximage:= XCreateImage(appdisp,defvisual,defdepth,zpixmap,0,nil,
-                 image.size.cx,image.size.cy,32,0);
-  if ximage = nil then begin
-   result:= gde_image;
-   gdi_unlock;
-   exit;
-  end;
-{$ifdef FPC} {$checkpointer off} {$endif}
-  with ximage^ do begin
-  {
-   bitmap_bit_order:= LSBFirst;
-   byte_order:= lsbfirst;
-   bitmap_unit:= 32;
-   red_mask:= redmask;
-   green_mask:= greenmask;
-   blue_mask:= bluemask;
-   data:= @image.pixels[0];
-   }
-   getmem(po2,image.size.cy * bytes_per_line);
-   data:= po2;
-   po1:= @image.pixels^[0];
-   for int1:= 0 to image.size.cy - 1 do begin
-    for int2:= 0 to image.size.cx - 1 do begin
-     f.put_pixel(ximage,int2,int1,gui_rgbtopixel(longword(po1^)));
-     inc(po1);
-    end;
+ case image.kind of
+  bmk_mono: begin
+   ximage:= XCreateImage(appdisp,nil,1,xypixmap,0,nil,
+                                  image.size.cx,image.size.cy,32,0);
+   if ximage = nil then begin
+    result:= gde_image;
+    gdi_unlock;
+    exit;
+   end;
+   with ximage^ do begin
+    bitmap_bit_order:= LSBFirst;
+    byte_order:= lsbfirst;
+    bitmap_unit:= 32;
+    data:= @image.pixels[0];
    end;
   end;
-{$ifdef FPC} {$checkpointer default} {$endif}
+  bm_gray: begin
+   ximage:= XCreateImage(appdisp,nil,1,xypixmap,0,nil,
+                                  image.size.cx,image.size.cy,32,0);
+   if ximage = nil then begin
+    result:= gde_image;
+    gdi_unlock;
+    exit;
+   end;
+   with ximage^ do begin
+    bitmap_bit_order:= LSBFirst;
+    byte_order:= lsbfirst;
+    bitmap_unit:= 32;
+    data:= @image.pixels[0];
+   end;
+  end;
+  else begin
+   ximage:= XCreateImage(appdisp,defvisual,defdepth,zpixmap,0,nil,
+                  image.size.cx,image.size.cy,32,0);
+   if ximage = nil then begin
+    result:= gde_image;
+    gdi_unlock;
+    exit;
+   end;
+ {$ifdef FPC} {$checkpointer off} {$endif}
+   with ximage^ do begin
+   {
+    bitmap_bit_order:= LSBFirst;
+    byte_order:= lsbfirst;
+    bitmap_unit:= 32;
+    red_mask:= redmask;
+    green_mask:= greenmask;
+    blue_mask:= bluemask;
+    data:= @image.pixels[0];
+    }
+    getmem(po2,image.size.cy * bytes_per_line);
+    data:= po2;
+    po1:= @image.pixels^[0];
+    for int1:= 0 to image.size.cy - 1 do begin
+     for int2:= 0 to image.size.cx - 1 do begin
+      f.put_pixel(ximage,int2,int1,gui_rgbtopixel(longword(po1^)));
+      inc(po1);
+     end;
+    end;
+   end;
+ {$ifdef FPC} {$checkpointer default} {$endif}
+  end;
  end;
  pixmap:= gui_createpixmap(image.size,0,image.monochrome);
  gc:= xcreategc(appdisp,pixmap,0,nil);
