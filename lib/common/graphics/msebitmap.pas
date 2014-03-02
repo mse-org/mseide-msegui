@@ -2097,15 +2097,15 @@ begin
  try
   clear;
   stream.readbuffer(header,sizeof(header));
-  fkind:= pmk_rgb;
+  fkind:= bmk_rgb;
   with header do begin
    if checkbit(info,ord(iminf_monochrome)) then begin
-    fkind:= pmk_mono;
+    fkind:= bmk_mono;
 //    include(fstate,pms_monochrome);
    end
    else begin
     if checkbit(info,ord(iminf_gray)) then begin
-     fkind:= pmk_gray;
+     fkind:= bmk_gray;
     end;
 //    exclude(fstate,pms_monochrome);
    end;
