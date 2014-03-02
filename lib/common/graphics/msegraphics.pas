@@ -179,8 +179,10 @@ type
  end;
  pfontinfoty = ^fontinfoty;
 
+ bitmapkindty = (bmk_mono,bmk_gray,bmk_rgb);
+ 
  imagety = record
-  monochrome: boolean;
+  kind: bitmapkindty;
   bgr: boolean;
   size: sizety;
   length: integer;     //number of longword
@@ -1015,7 +1017,7 @@ type
                  //incremented by drawing operations
  end;
  
- pixmapstatety = (pms_monochrome,pms_ownshandle,pms_maskvalid,pms_nosave,
+ pixmapstatety = ({pms_monochrome,}pms_ownshandle,pms_maskvalid,pms_nosave,
                   pms_staticcanvas);
  pixmapstatesty = set of pixmapstatety;
 
@@ -1034,6 +1036,7 @@ type
    procedure setwidth(const avalue: integer);
    procedure setheight(const avalue: integer);
    procedure updatescanline();
+   procedure setkind(const avalue: bitmapkindty);
   protected
    fgdifuncs: pgdifunctionaty;
    fcanvasclass: canvasclassty;
@@ -1042,6 +1045,7 @@ type
    fsize: sizety;
    fscanlinestep: integer;
    fscanhigh: integer;
+   fkind: bitmapkindty;
    fstate: pixmapstatesty;
    fcolorbackground: colorty;
    fcolorforeground: colorty;
@@ -1065,11 +1069,13 @@ type
    procedure getcanvasimage(const bgr: boolean;
                                     var aimage: maskedimagety); virtual;
   public
-   constructor create(const monochrome: boolean;
+   constructor create(const akind: bitmapkindty;
                     const agdifuncs: pgdifunctionaty = nil); reintroduce;
                                   //nil -> default
    destructor destroy; override;
 
+   property kind: bitmapkindty read fkind write setkind;
+   
    procedure copyhandle;
    procedure releasehandle; virtual;
    procedure acquirehandle; virtual;
@@ -2305,6 +2311,11 @@ begin
   fscanlinestep:= fsize.cx * 4;
  end;
  fscanhigh:=  fsize.cx * fsize.cy - 1;
+end;
+
+procedure tsimplebitmap.setkind(const avalue: pixmapkindty);
+begin
+ raise exception.create('not implemented');
 end;
 
 { tfont }

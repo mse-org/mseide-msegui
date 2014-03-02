@@ -5596,7 +5596,7 @@ end;
 
 procedure tcustomface.internalcreate;
 begin
- fi.image:= tmaskedbitmap.create(false);
+ fi.image:= tmaskedbitmap.create(bmk_rgb);
  fi.image.onchange:= {$ifdef fpc}@{$endif}imagechanged;
  fi.fade_pos:= trealarrayprop.create;
  fi.fade_color:= tfadecolorarrayprop.create;
@@ -5732,7 +5732,7 @@ var
  procedure createalphabuffer(const amasked: boolean);
  begin
   if falphabuffer = nil then begin
-   falphabuffer:= tmaskedbitmap.create(false);
+   falphabuffer:= tmaskedbitmap.create(bmk_rgb);
   end;
   if amasked then begin
    falphabuffer.options:= [bmo_masked,bmo_colormask];
@@ -5937,7 +5937,7 @@ begin
       pixcount:= rect1.cx;
      end;
     end;
-    bmp:= tmaskedbitmap.create(false);
+    bmp:= tmaskedbitmap.create(bmk_rgb);
     if vert then begin
      bmp.size:= makesize(1,rect1.cy);
     end
@@ -6212,7 +6212,7 @@ end;
 
 procedure tfacetemplate.internalcreate;
 begin
- fi.image:= tmaskedbitmap.create(false);
+ fi.image:= tmaskedbitmap.create(bmk_rgb);
  fi.fade_pos:= trealarrayprop.Create;
  fi.fade_color:= tfadecolorarrayprop.Create;
  fi.fade_pos.link([fi.fade_color,fi.fade_pos]);
@@ -13630,7 +13630,7 @@ begin
    end;
   end
   else begin
-   bmp:= tbitmap.create(false,fgdi);
+   bmp:= tbitmap.create(bmk_rgb,fgdi);
    try
     if intersectrect(fcanvas.clipbox,
             makerect(nullpoint,fownerwidget.widgetrect.size),rect1) then begin

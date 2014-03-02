@@ -342,7 +342,7 @@ end;
 function tstockobjects.getbitmaps(index: stockbitmapty): tbitmap;
 begin
   if fbitmaps[index] = nil then begin
-  fbitmaps[index]:= tbitmap.create(true);
+  fbitmaps[index]:= tbitmap.create(bmk_mono);
   {$ifdef mswindows}
   if iswin98 then begin
    case index of             //must be >= 8*8 for win98
