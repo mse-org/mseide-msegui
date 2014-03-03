@@ -321,6 +321,15 @@ type
  fpointaty = array[0..0] of fpointty;
  pfpointaty = ^fpointaty;
 
+ dpointty = record
+             x,y: double;
+            end;
+ pdpointty = ^dpointty;
+ dpointarty = array of dpointty;
+ pdpointarty = ^dpointarty;
+ dpointaty = array[0..0] of dpointty;
+ pdpointaty = ^dpointaty;
+
  segmentty = record a,b: pointty end;
  psegmentty = ^segmentty;
  segmentarty = array of segmentty;
