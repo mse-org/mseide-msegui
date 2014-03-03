@@ -544,7 +544,7 @@ end;
 procedure gdi_createpixmap(var drawinfo: drawinfoty); //gdifunc
 begin
  with drawinfo.createpixmap do begin
-  pixmap:= gui_createpixmap(size,0,monochrome,copyfrom);
+  pixmap:= gui_createpixmap(size,0,kind,copyfrom);
  end;
 end;
 
@@ -1966,7 +1966,7 @@ begin
      bitmapgc2:= nil;
      bitmap:= 0;
      if (mask <> nil) and mask.monochrome then begin
-      bitmap:= gui_createpixmap(size,0,true);
+      bitmap:= gui_createpixmap(size,0,bmk_mono);
       if bitmap <> 0 then begin
        bitmapgc2:= xcreategc(appdisp,bitmap,0,@xvalues);
        if bitmapgc2 <> nil then begin
@@ -2077,7 +2077,7 @@ endlab2:
    if mask <> nil then begin
     amask:= tsimplebitmap1(mask).handle;
     if gcclipregion <> 0 then begin
-     pixmap2:= gui_createpixmap(size,0,true);
+     pixmap2:= gui_createpixmap(size,0,bmk_mono);
      maskgc.handle:= ptruint(xcreategc(appdisp,pixmap2,0,@xvalues));
 //xsetforeground(appdisp,tgc(maskgc.handle),$1);
 //xfillrectangle(appdisp,mask,tgc(maskgc.handle),0,0,100,100);
@@ -2125,7 +2125,7 @@ endlab2:
       xvalues.xfunction:= integer(rop_xor);
       xchangegc(appdisp,pixmapgc,gcforeground or gcfunction,@xvalues);
       xfillrectangle(appdisp,pixmap,pixmapgc,0,0,cx,cy);
-      bitmap:= gui_createpixmap(size,0,true);
+      bitmap:= gui_createpixmap(size,0,bmk_mono);
       if bitmap <> 0 then begin
        xvalues.foreground:= pixel0;
        bitmapgc:= xcreategc(appdisp,bitmap,

@@ -2447,8 +2447,8 @@ begin
     data:= @image.pixels[0];
    end;
   end;
-  bm_gray: begin
-   ximage:= XCreateImage(appdisp,nil,1,xypixmap,0,nil,
+  bmk_gray: begin
+   ximage:= XCreateImage(appdisp,nil,8,zpixmap,0,nil,
                                   image.size.cx,image.size.cy,32,0);
    if ximage = nil then begin
     result:= gde_image;
@@ -2470,7 +2470,6 @@ begin
     gdi_unlock;
     exit;
    end;
- {$ifdef FPC} {$checkpointer off} {$endif}
    with ximage^ do begin
    {
     bitmap_bit_order:= LSBFirst;
@@ -2491,17 +2490,14 @@ begin
      end;
     end;
    end;
- {$ifdef FPC} {$checkpointer default} {$endif}
   end;
  end;
- pixmap:= gui_createpixmap(image.size,0,image.monochrome);
+ pixmap:= gui_createpixmap(image.size,0,image.kind);
  gc:= xcreategc(appdisp,pixmap,0,nil);
  xsetgraphicsexposures(appdisp,gc,{$ifdef xboolean}false{$else}0{$endif});
  xputimage(appdisp,pixmap,gc,ximage,0,0,0,0,image.size.cx,image.size.cy);
  xfreegc(appdisp,gc);
-{$ifdef FPC} {$checkpointer off} {$endif}
  ximage^.data:= nil;
-{$ifdef FPC} {$checkpointer default} {$endif}
  xdestroyimage(ximage);
  if po2 <> nil then begin
   freemem(po2);
@@ -2510,7 +2506,7 @@ begin
 end;
 
 function gui_createpixmap(const size: sizety; winid: winidty = 0;
-           monochrome: boolean = false; copyfrom: pixmapty = 0): pixmapty;
+                kind: bitmapkindty = bmk_rgb; copyfrom: pixmapty = 0): pixmapty;
 var
  gc: tgc;
 begin
@@ -2519,11 +2515,16 @@ begin
  if winid = 0 then begin
   winid:= rootid;
  end;
- if monochrome then begin
-  result:= xcreatepixmap(appdisp,winid,size.cx,size.cy,1);
- end
- else begin
-  result:= xcreatepixmap(appdisp,winid,size.cx,size.cy,defdepth);
+ case kind of 
+  bmk_mono: begin
+   result:= xcreatepixmap(appdisp,winid,size.cx,size.cy,1);
+  end;
+  bmk_gray: begin
+   result:= xcreatepixmap(appdisp,winid,size.cx,size.cy,8);
+  end;
+  else begin
+   result:= xcreatepixmap(appdisp,winid,size.cx,size.cy,defdepth);
+  end;
  end;
  if copyfrom <> 0 then begin
   gc:= xcreategc(appdisp,result,0,nil);

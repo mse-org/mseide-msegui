@@ -324,7 +324,7 @@ type
 
  createpixmapinfoty = record
   size: sizety;
-  monochrome: boolean;
+  kind: bitmapkindty;
   copyfrom: pixmapty;
   pixmap: pixmapty;
  end;

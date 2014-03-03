@@ -317,8 +317,8 @@ constructor tcaret.create{(out intf: pointer)};
 begin
 // intf:= pointer(icaret(self));
  ftimer:= tsimpletimer.create(0,{$ifdef FPC}@{$endif}timerevent,false,[]);
- fbackup:= tbitmap.create(false); //getcanvasimage possibly used by opengl window
- fcaret:= tbitmap.create(false);  //getcanvasimage possibly used by opengl window
+ fbackup:= tbitmap.create(bmk_rgb); //getcanvasimage possibly used by opengl window
+ fcaret:= tbitmap.create(bmk_rgb);  //getcanvasimage possibly used by opengl window
  periodetime:= defaultcaretblinkperiodetime;
 end;
 

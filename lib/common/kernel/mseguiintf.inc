@@ -128,7 +128,7 @@ function gui_regiontorects(const aregion: regionty): rectarty;
 function gui_getdefaultfontnames: defaultfontnamesty;
 
 function gui_createpixmap(const size: sizety; winid: winidty = 0;
-      monochrome: boolean = false; copyfrom: pixmapty = 0): pixmapty; overload;
+      kind:  bitmapkindty = bmk_rgb; copyfrom: pixmapty = 0): pixmapty; overload;
 function gui_freepixmap(pixmap: pixmapty): gdierrorty;
 function gui_getpixmapinfo(var info: pixmapinfoty): gdierrorty;
 function gui_createbitmapfromdata(const size: sizety; datapo: pbyte;
