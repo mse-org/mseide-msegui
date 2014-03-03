@@ -834,7 +834,7 @@ end;
 constructor tcustommseform.create(aowner: tcomponent; load: boolean);
 
 begin
- ficon:= tmaskedbitmap.create(false);
+ ficon:= tmaskedbitmap.create(bmk_rgb);
  ficon.onchange:= {$ifdef FPC}@{$endif}iconchanged;
  fwidgetrect.x:= 100;
  fwidgetrect.y:= 100;

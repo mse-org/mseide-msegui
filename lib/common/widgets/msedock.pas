@@ -4771,7 +4771,7 @@ end;
 
 constructor tdockpanel.create(aowner: tcomponent);
 begin
- ficon:= tmaskedbitmap.create(false);
+ ficon:= tmaskedbitmap.create(bmk_rgb);
  ficon.onchange:= {$ifdef FPC}@{$endif}iconchanged;
  if fdragdock = nil then begin
   fdragdock:= tnochildrendockcontroller.create(idockcontroller(self));

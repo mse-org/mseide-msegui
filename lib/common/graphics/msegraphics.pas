@@ -1341,7 +1341,7 @@ var
  int1: integer;
  po1: prgbtriplety;
 begin
- if not aimage.monochrome and (aimage.bgr xor bgr) then begin
+ if (aimage.kind = bmk_rgb) and (aimage.bgr xor bgr) then begin
   po1:= prgbtriplety(aimage.pixels);
   for int1:= aimage.length-1 downto 0 do begin
    by1:= po1^.red;
@@ -1759,17 +1759,18 @@ end;
 
  { tsimplebitmap }
 
-constructor tsimplebitmap.create(const monochrome: boolean;
-                                const agdifuncs: pgdifunctionaty = nil);
+constructor tsimplebitmap.create(const akind: bitmapkindty;
+                                           const agdifuncs: pgdifunctionaty = nil);
 begin
  fgdifuncs:= agdifuncs;
  if fgdifuncs = nil then begin
   fgdifuncs:= getdefaultgdifuncs;
  end;
  fcanvasclass:= getgdicanvasclass(fgdifuncs,monochrome);
- if monochrome then begin
-  include(fstate,pms_monochrome);
- end;
+ fkind:= akind;
+// if monochrome then begin
+//  include(fstate,pms_monochrome);
+// end;
  fcolorbackground:= cl_white;
  fcolorforeground:= cl_black;
 end;
@@ -1805,7 +1806,8 @@ end;
 
 function tsimplebitmap.getmonochrome: boolean;
 begin
- result:= pms_monochrome in fstate;
+ result:= fkind = bmk_mono;
+// result:= pms_monochrome in fstate;
 end;
 
 function tsimplebitmap.getconverttomonochromecolorbackground: colorty;
@@ -1820,22 +1822,25 @@ var
 begin
  if avalue <> getmonochrome then begin
   if isempty then begin
+   fkind:= bmk_mono;
+  {
    if avalue then begin
     include(fstate,pms_monochrome);
    end
    else begin
     exclude(fstate,pms_monochrome);
    end
+  }
   end
   else begin
    if avalue then begin
-    bmp:= tsimplebitmap.create(true,fgdifuncs);
+    bmp:= tsimplebitmap.create(bmk_mono,fgdifuncs);
     bmp.size:= fsize;
     bmp.canvas.copyarea(canvas,makerect(nullpoint,fsize),nullpoint,rop_copy,
        getconverttomonochromecolorbackground);
    end
    else begin
-    bmp:= tsimplebitmap.create(false,fgdifuncs);
+    bmp:= tsimplebitmap.create(bmk_rgb,fgdifuncs);
     bmp.size:= fsize;
     bmp.canvas.colorbackground:= fcolorbackground;
     bmp.canvas.color:= fcolorforeground;
@@ -1852,7 +1857,8 @@ end;
 
 procedure tsimplebitmap.switchtomonochrome;
 begin
- include(fstate,pms_monochrome);
+// include(fstate,pms_monochrome);
+ fkind:= bmk_mono;
  if fcanvas <> nil then begin
   fcanvas.init;
  end;
@@ -1867,7 +1873,8 @@ begin
   fillchar(gc,sizeof(gcty),0);
   gc.drawingflags:= [df_canvasispixmap];
   gc.paintdevicesize:= fsize;
-  if pms_monochrome in fstate then begin
+//  if pms_monochrome in fstate then begin
+  if fkind = bmk_mono then begin
    include(gc.drawingflags,df_canvasismonochrome);
   end;
   gdi_lock;
@@ -1900,7 +1907,8 @@ begin
   if fhandle = 0 then begin
    with info.createpixmap do begin
     size:= fsize;
-    monochrome:= (pms_monochrome in fstate);
+//    monochrome:= (pms_monochrome in fstate);
+    kind:= fkind;
     copyfrom:= acopyfrom;
     handle:= 0;
     gdi_call(gdf_createpixmap,info,getgdiintf);
@@ -2010,12 +2018,25 @@ begin
   fhandle:= value;
   with info do begin
    fsize:= size;
+   case depth of
+    1: begin
+     fkind:= bmk_mono;
+    end;
+    8: begin
+     fkind:= bmk_gray;
+    end;
+    else begin
+     fkind:= bmk_rgb;
+    end;
+   end;
+  {
    if depth = 1 then begin
     include(fstate,pms_monochrome);
    end
    else begin
     exclude(fstate,pms_monochrome);
    end;
+  }
    updatescanline();
   end;
  end;
@@ -2319,7 +2340,7 @@ begin
  fscanhigh:=  fsize.cx * fsize.cy - 1;
 end;
 
-procedure tsimplebitmap.setkind(const avalue: pixmapkindty);
+procedure tsimplebitmap.setkind(const avalue: bitmapkindty);
 begin
  raise exception.create('not implemented');
 end;
@@ -5754,7 +5775,7 @@ begin
    image.image.bgr:= abgr;
    int1:= gc.paintdevicesize.cx * gc.paintdevicesize.cy;
    if int1 > 0 then begin
-    allocimage(image.image,gc.paintdevicesize,false);
+    allocimage(image.image,gc.paintdevicesize,bmk_rgb);
     with image.image do begin
 //     pixels:= gui_allocimagemem(int1);
      if pixels <> nil then begin
