@@ -936,15 +936,15 @@ var
  AllocateImageColormap: function(image: pointer{pImage}; colors: culong): cuint;
                              {$ifdef wincall}stdcall{$else}cdecl{$endif};
 
- ResizeImage: function(image: pointer{pImage}; columns: culong; rows: culong;
-                    filter: FilterTypes; blur: cdouble;
-                    exception: pExceptionInfo): pointer{pImage};
-                             {$ifdef wincall}stdcall{$else}cdecl{$endif};
  SampleImage: function(image: pointer{pImage}; columns: culong;
                 rows: culong; exception: pExceptionInfo): pointer{pImage}; 
                              {$ifdef wincall}stdcall{$else}cdecl{$endif};
  ScaleImage: function(image: pointer{pImage}; columns: culong;
                    rows: culong; exception: pExceptionInfo): pointer{pImage}; 
+                             {$ifdef wincall}stdcall{$else}cdecl{$endif};
+ ResizeImage: function(image: pointer{pImage}; columns: culong; rows: culong;
+                    filter: FilterTypes; blur: cdouble;
+                    exception: pExceptionInfo): pointer{pImage};
                              {$ifdef wincall}stdcall{$else}cdecl{$endif};
  RotateImage: function(image: pointer{pImage}; degrees: cdouble;
                             exception: pExceptionInfo): pointer{pImage};

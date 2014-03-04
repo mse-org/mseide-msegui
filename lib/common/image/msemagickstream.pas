@@ -12,6 +12,8 @@ unit msemagickstream;
 interface
 uses
  msestrings,msegraphicsmagick,sysutils,mclasses,msebitmap,msegraphutils;
+const
+ defaultblur = 1.0;
 type
  tmagickexception = class(exception)
   public
@@ -22,8 +24,14 @@ type
   size: sizety;
   depth: integer;
  end;
- readgmoptionty = (rgmo_rotmonomask);
- readgmoptionsty = set of readgmoptionty;
+ gmoptionty = (
+  rgmo_rotmonomask,
+  rgmo_rotbeforescale, //rotate before scaling
+  rgmo_rotafterscale, //rotate after scaling
+  rgmo_sample, //use SampleImage() instead of ScaleImage()
+  rgmo_resize  //use ResizeImage() with filtertype instead of ScaleImage()
+ ); 
+ gmoptionsty = set of gmoptionty;
  
 procedure registerformats(const labels: array of string;
                            const filternames: array of msestring;
@@ -32,35 +40,44 @@ procedure registerformats(const labels: array of string;
   //[index: integer, width: integer, height: integer, rotation: real,
      //sequence nr      0 = default     0 = default   0..2pi CCW
      // -1 = default
-  // backgroundcolor: colorty, pixelpermm: real, options: readgmoptionsty]
+  // backgroundcolor: colorty, pixelpermm: real, options: gmoptionsty,
   //  default = cl_transparent  0 = default        default = []
+  // filter: filtertypes,       blur: real]
+  // default = UndefinedFilter  default = 1
            
 //writegraphic parameters:
   //[compressionquality: integer, width: integer, height: integer,
       // 0..100, -1 = default        0 = default      0 = default
-  //     rotation: real,        backgroundcolor: colorty, pixelpermm: real]
+  //     rotation: real,        backgroundcolor: colorty, pixelpermm: real,
   //       0..2pi CCW default 0 default = cl_transparent     0 = default
+  //  options: gmoptionsty filter: filtertypes,      blur: real]
+  //    default = []      default = UndefinedFilter  default = 1
 
 function readgmgraphic(const source: tstream; const dest: tbitmap;
              const aindex: integer = -1; const awidth: integer = 0;
              const aheight: integer = 0; const arotation: real = 0;
              const abackgroundcolor: colorty = cl_transparent;
              const apixelpermm: real = 0;
-             const aoptions: readgmoptionsty = []): string;
+             const aoptions: gmoptionsty = [];
+             const afilter: filtertypes = undefinedfilter;
+             const ablur: real = defaultblur): string;
               //returns label
 procedure writegmgraphic(const dest: tstream; const source: tbitmap;
              const format: string; const aquality: integer = -1;
              const awidth: integer = 0; const aheight: integer = 0;
              const arotation: real = 0;
              const abackgroundcolor: colorty = cl_transparent;
-             const apixelpermm: real = 0);
+             const apixelpermm: real = 0;
+             const aoptions: gmoptionsty = [];
+             const afilter: filtertypes = undefinedfilter;
+             const ablur: real = defaultblur);
 function pinggmgraphic(const source: tstream; 
                       out ainfo: gminfoty): boolean;
 
 implementation
 uses
  msegraphics,msegraphicstream,msestream,msestockobjects,
- msetypes,msectypes,msebits,mseclasses,mseformatstr;
+ msetypes,msectypes,msebits,mseclasses,mseformatstr,math;
 
 type
  tbitmap1 = class(tbitmap);
@@ -76,6 +93,19 @@ begin
   initializegraphicsmagick([],[]);
   qdepth:= quantumdepth();
   inited:= true;
+ end;
+end;
+
+function checksnap90(const arotation: double): boolean;
+begin
+ result:= (abs(frac(arotation / (pi/2.0))) < 0.0000001);
+end;
+
+function snap90(const arotation: double): double;
+begin
+ result:= arotation*(-180/pi);
+ if checksnap90(arotation) then begin
+  result:= round(result);
  end;
 end;
 
@@ -163,25 +193,110 @@ begin
 end;
 
 function fitscale(const width: integer; const height: integer;
-                          const current: sizety; out dest: sizety): boolean;
+               const current: sizety; out dest: sizety;
+               const rotation: real; const rotafter: boolean): boolean;
                           //true if scaling necessary
+var
+ si1,co1: double;
+ minx: double = 0;
+ maxx: double = 0;
+ miny: double = 0;
+ maxy: double = 0;
+ sca1: double;
+ procedure rot(var p: dpointty);
+ var
+  x,y: double;
+ begin
+  x:= p.x * co1 + p.y * si1;
+  y:= -p.x * si1 + p.y * co1;
+  p.x:= x;
+  p.y:= y;
+ end;
+ procedure checkmax(var p: dpointty);
+ begin
+  if p.x < minx then begin
+   minx:= p.x;
+  end;
+  if p.y < miny then begin
+   miny:= p.y;
+  end;
+  if p.x > maxx then begin
+   maxx:= p.x;
+  end;
+  if p.y > maxy then begin
+   maxy:= p.y;
+  end;
+ end;
+var
+ points: array[0..2] of dpointty;
+ int1: integer;
+ rotcurrent,rotdest: dpointty;
 begin
  dest:= current;
- if width <> 0 then begin
-  dest.cx:= width;
- end;
- if height <> 0 then begin
-  dest.cy:= height;
- end;
  result:= (current.cx > 0) and (current.cy > 0);
  if result then begin
-  if dest.cx*current.cy > dest.cy*current.cx then begin
-   dest.cx:= (current.cx*dest.cy) div current.cy;
+  if rotafter and (rotation <> 0) then begin
+   si1:= sin(rotation); //todo: simplify
+   co1:= cos(rotation);
+   fillchar(points,sizeof(points),0);
+   points[0].x:= current.cx;
+   points[1].y:= current.cy;
+   points[2].x:= current.cx;
+   points[2].y:= current.cy;
+   for int1:= 0 to high(points) do begin
+    rot(points[int1]);
+   end;
+   for int1:= 0 to high(points) do begin
+    checkmax(points[int1]);
+   end;
+   rotcurrent.x:= maxx-minx;
+   rotcurrent.y:= maxy-miny;
+   rotdest:= rotcurrent;
+   if width <> 0 then begin
+    rotdest.x:= width;
+   end;
+   if height <> 0 then begin
+    rotdest.y:= height;
+   end;
+   if rotdest.x*rotcurrent.y > rotdest.y*rotcurrent.x then begin
+    rotdest.x:= (rotcurrent.x*rotdest.y) / rotcurrent.y;
+    sca1:= rotdest.x/rotcurrent.x;
+   end
+   else begin
+    rotdest.y:= (rotcurrent.y*rotdest.x) / rotcurrent.x;
+    sca1:= rotdest.y/rotcurrent.y;
+   end;
+   dest.cx:= round(current.cx*sca1);
+   dest.cy:= round(current.cy*sca1);
   end
   else begin
-   dest.cy:= (current.cy*dest.cx) div current.cx;
+   if width <> 0 then begin
+    dest.cx:= width;
+   end;
+   if height <> 0 then begin
+    dest.cy:= height;
+   end;
+   if dest.cx*current.cy > dest.cy*current.cx then begin
+    dest.cx:= (current.cx*dest.cy) div current.cy;
+   end
+   else begin
+    dest.cy:= (current.cy*dest.cx) div current.cx;
+   end;
   end;
   result:= (current.cx <> dest.cx) or (current.cy <> dest.cy);
+ end;
+end;
+
+function checkrotafter(const asize: sizety; const awidth: integer;
+                const aheight: integer; const aoptions: gmoptionsty): boolean;
+begin
+ result:= (awidth <> 0) and (awidth < asize.cx) or
+                    (aheight <> 0) and (aheight < asize.cy);
+ if rgmo_rotbeforescale in aoptions then begin
+  result:= false;
+ end;
+ if rgmo_rotafterscale in aoptions then begin
+  result:= true;
  end;
 end;
 
@@ -190,7 +305,10 @@ procedure writegmgraphic(const dest: tstream; const source: tbitmap;
             const awidth: integer = 0; const aheight: integer = 0;
             const arotation: real = 0;
             const abackgroundcolor: colorty = cl_transparent;
-            const apixelpermm: real = 0);
+            const apixelpermm: real = 0;
+            const aoptions: gmoptionsty = [];
+            const afilter: filtertypes = undefinedfilter;
+            const ablur: real = defaultblur);
 var
  exceptinf: exceptioninfo;
  procedure error;
@@ -199,7 +317,7 @@ var
  end;
 
 var
- bo1,bo2,hasmask,monomask: boolean;
+ bo1,bo2,hasmask,monomask,rotmask: boolean;
  imagebuffer: imagebufferinfoty;
  imageinfo: pointer;
  image,image2: pointer;
@@ -213,6 +331,48 @@ var
  buf: pointer;
  bd,be,be1: pbyte;
  si1,si2: sizety;
+
+ procedure dorotate();
+ begin
+  if arotation <> 0 then begin
+   image2:= rotateimage(image,snap90(arotation),@exceptinf);
+   if image2 = nil then begin
+    exit;
+   end;
+   destroyimage(image);
+   image:= image2;
+   if rotmask then begin
+    pimage8(image)^.a.matte:= magicktrue;
+    monomask:= not hasmask and (rgmo_rotmonomask in aoptions);
+    hasmask:= true;
+   end;
+   si1:= ms(pimage8(image)^.a.columns,pimage8(image)^.a.rows);
+  end;
+ end; //dorotate
+ 
+ procedure doscale(const rotafter: boolean);
+ begin
+  if fitscale(awidth,aheight,si1,si2,arotation,rotafter) then begin
+   if rgmo_sample in aoptions then begin
+    image2:= sampleimage(image,si2.cx,si2.cy,@exceptinf);
+   end
+   else begin
+    if rgmo_resize in aoptions then begin
+     image2:= resizeimage(image,si2.cx,si2.cy,afilter,ablur,@exceptinf);
+    end
+    else begin
+     image2:= scaleimage(image,si2.cx,si2.cy,@exceptinf);
+    end;
+   end;
+   if image2 = nil then begin
+    exit;
+   end;
+   destroyimage(image);
+   image:= image2;
+   si1:= ms(pimage8(image)^.a.columns,pimage8(image)^.a.rows);
+  end;
+ end; //doscale
+
 begin
  if source is tbitmap then begin
   with tbitmap1(source) do begin
@@ -224,6 +384,8 @@ begin
     blob:= nil;
     buf:= nil;
     try
+     rotmask:= (abackgroundcolor = cl_transparent) and 
+                                       not checksnap90(arotation);                           
      monomask:= false;
      hasmask:= (source is tmaskedbitmap) and (tmaskedbitmap(source).masked);
      if hasmask then begin
@@ -455,23 +617,13 @@ begin
      end;
      setimagebackgroundcolor(image,abackgroundcolor);
      si1:= imagebuffer.image.size;
-     if arotation <> 0 then begin
-      image2:= rotateimage(image,arotation*(-180/pi),@exceptinf);
-      if image2 = nil then begin
-       exit;
-      end;
-      destroyimage(image);
-      image:= image2;
-      si1:= ms(pimage8(image)^.a.columns,pimage8(image)^.a.rows);
-     end;
-
-     if fitscale(awidth,aheight,si1,si2) then begin
-      image2:= scaleimage(image,si2.cx,si2.cy,@exceptinf);
-      if image2 = nil then begin
-       exit;
-      end;
-      destroyimage(image);
-      image:= image2;
+     if checkrotafter(si1,awidth,aheight,aoptions) then begin
+      doscale(true);
+      dorotate();
+     end
+     else begin
+      dorotate();
+      doscale(false);
      end;
      if apixelpermm > 0 then begin
       with pimageinfo8(imageinfo)^ do begin
@@ -569,7 +721,9 @@ function readgmgraphic(const source: tstream; const dest: tbitmap;
        const arotation: real = 0;
        const abackgroundcolor: colorty = cl_transparent;
        const apixelpermm: real = 0;
-       const aoptions: readgmoptionsty = []): string;
+       const aoptions: gmoptionsty = [];
+       const afilter: filtertypes = undefinedfilter;
+       const ablur: real = defaultblur): string;
               //returns label
 var
  imageinfo: pointer;
@@ -584,6 +738,50 @@ var
  datalen: card32;
  po1: pointer;
  int1: integer;
+
+ procedure dorotate();
+ begin
+  if arotation <> 0 then begin
+   setimagebackgroundcolor(image,abackgroundcolor);
+   image2:= rotateimage(image,snap90(arotation),@exceptinf);
+   if image2 = nil then begin
+    exit;
+   end;
+   destroyimage(image);
+   image:= image2;
+   if rotmask then begin
+    pimage8(image)^.a.matte:= magicktrue;
+    monomask:= not hasmask and (rgmo_rotmonomask in aoptions);
+    hasmask:= true;
+   end;
+   si1:= ms(pimage8(image)^.a.columns,pimage8(image)^.a.rows);
+  end;
+ end; //dorotate
+
+ procedure doscale(const rotafter: boolean);
+ begin
+  if fitscale(awidth,aheight,si1,si2,arotation,rotafter) then begin
+   if rgmo_sample in aoptions then begin
+    image2:= sampleimage(image,si2.cx,si2.cy,@exceptinf);
+   end
+   else begin
+    if rgmo_resize in aoptions then begin
+     image2:= resizeimage(image,si2.cx,si2.cy,afilter,ablur,@exceptinf);
+    end
+    else begin
+     image2:= scaleimage(image,si2.cx,si2.cy,@exceptinf);
+    end;
+   end;
+//    image2:= scaleimage(image,si2.cx,si2.cy,@exceptinf);
+   if image2 = nil then begin
+    exit;
+   end;
+   destroyimage(image);
+   image:= image2;
+   si1:= ms(pimage8(image)^.a.columns,pimage8(image)^.a.rows);
+  end;
+ end; //doscale
+
 begin
  result:= '';
  monomask:= false;
@@ -612,9 +810,16 @@ begin
    if aindex >= 0 then begin
     a.subimage:= aindex;
    end;
-   if (awidth <> 0) and (aheight <> 0) then begin
+   image:= pingblob(imageinfo,datapo,datalen,@exceptinf);
+   if image = nil then begin
+    exit;
+   end;
+   if (awidth <> 0) and (pimage8(image)^.a.columns > awidth) or 
+              (aheight <> 0) and (pimage8(image)^.a.rows > aheight) then begin
     a.size:= gmstring(inttostr(awidth)+'x'+inttostr(aheight));
    end;
+   destroyimage(image);
+   image:= nil;
   end;
   case qdepth of
    qd_8: begin
@@ -637,29 +842,13 @@ begin
     hasmask:= a.matte = magicktrue;
     si1:= ms(a.columns,a.rows);
    end;
-   if arotation <> 0 then begin
-    setimagebackgroundcolor(image,abackgroundcolor);
-    image2:= rotateimage(image,arotation*(-180/pi),@exceptinf);
-    if image2 = nil then begin
-     exit;
-    end;
-    destroyimage(image);
-    image:= image2;
-    if rotmask then begin
-     pimage8(image)^.a.matte:= magicktrue;
-     monomask:= not hasmask and (rgmo_rotmonomask in aoptions);
-     hasmask:= true;
-    end;
-    si1:= ms(pimage8(image)^.a.columns,pimage8(image)^.a.rows);
-   end;
-   if fitscale(awidth,aheight,si1,si2) then begin
-    image2:= scaleimage(image,si2.cx,si2.cy,@exceptinf);
-    if image2 = nil then begin
-     exit;
-    end;
-    destroyimage(image);
-    image:= image2;
-    si1:= ms(pimage8(image)^.a.columns,pimage8(image)^.a.rows);
+   if checkrotafter(si1,awidth,aheight,aoptions) then begin
+    doscale(true);
+    dorotate();
+   end
+   else begin
+    dorotate();
+    doscale(false);
    end;
    case qdepth of
     qd_8: begin
@@ -755,16 +944,19 @@ var
  rotation: extended = 0;
  backgroundcolor: colorty = cl_transparent;
  density: extended = 0;
- options: readgmoptionsty = [];
+ options: gmoptionsty = [];
+ filter: filtertypes = undefinedfilter;
+ blur: extended = defaultblur;
 begin
  result:= false;
  if dest is tbitmap then begin
-  matchparams(params,[index,width,height,rotation,backgroundcolor,density,
-                      longword(options)],
-                 [@index,@width,@height,@rotation,@backgroundcolor,@density,
-                  @options]);
+  matchparams(params,
+  [index,width,height,rotation,backgroundcolor,density,longword(options),
+                                                                  filter,blur],
+  [@index,@width,@height,@rotation,@backgroundcolor,@density,@options,
+                                                                @filter,@blur]);
   format:= readgmgraphic(source,tbitmap(dest),index,width,height,rotation,
-                                      backgroundcolor,density,options);
+                                   backgroundcolor,density,options,filter,blur);
   result:= format <> '';
  end;
 end;
@@ -778,12 +970,17 @@ var
  rotation: extended = 0;
  backgroundcolor: colorty = cl_transparent;
  density: extended = 0;
+ options: gmoptionsty = [];
+ filter: filtertypes = undefinedfilter;
+ blur: extended = defaultblur;
 begin
  if source is tbitmap then begin
-  matchparams(params,[quality,width,height,rotation,backgroundcolor,density],
-             [@quality,@width,@height,@rotation,@backgroundcolor,@density]);
+  matchparams(params,
+   [quality,width,height,rotation,backgroundcolor,density,
+                                       longword(options),filter,blur],
+   [@quality,@width,@height,@rotation,@backgroundcolor,@density,@filter,@blur]);
   writegmgraphic(dest,tbitmap(source),format,quality,width,height,
-                                            rotation,backgroundcolor,density);
+                          rotation,backgroundcolor,density,options,filter,blur);
  end;
 end;
 
