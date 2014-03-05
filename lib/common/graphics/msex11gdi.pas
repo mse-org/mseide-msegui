@@ -1911,8 +1911,7 @@ label
  end;
 
 var
- colormask1: boolean;
- graymask: boolean;
+ monomask: boolean;
  spd: paintdevicety;
  skind,dkind: bitmapkindty;
  x1,y1: integer;
@@ -1932,14 +1931,14 @@ begin
             ((destrect^.cx <> sourcerect^.cx) or
             (destrect^.cy <> sourcerect^.cy)) and
             (destrect^.cx > 0) and (destrect^.cy > 0);
-  graymask:= false;
-  colormask1:= (mask <> nil) and (mask.kind = bmk_rgb);
-  if not colormask1 then begin
-   graymask:= (mask <> nil) and ((mask.kind <> bmk_mono) or needstransform);
-  end;
+  monomask:= (mask = nil) or (mask.kind = bmk_mono);
+//  colormask1:= (mask <> nil) and (mask.kind = bmk_rgb);
+//  if not colormask1 then begin
+//   graymask:= (mask <> nil) and ((mask.kind <> bmk_mono) or needstransform);
+//  end;
 //  colormask:= (mask <> nil) and (not mask.monochrome or needstransform);
   if hasxrender and (needstransform or (longword(opacity) <> maxopacity) or
-                                             colormask1 or graymask) then begin
+                             not monomask{colormask1 or graymask)}) then begin
    if needstransform then begin
 //    pictop:= pictopover;
     pictop:= pictopsrc;
@@ -1952,20 +1951,21 @@ begin
     ax:= x;
     ay:= y;
    end;
-   if (longword(opacity) <> maxopacity) and 
-                              not (colormask1 or graymask) then begin
+   if (longword(opacity) <> maxopacity) and monomask
+                              {not (colormask1 or graymask)} then begin
     maskpic:= createmaskpicture(opacity);
     pictop:= pictopover;
    end
    else begin
-    if colormask1 or graymask then begin
+    if not monomask {colormask1 or graymask} then begin
      maskpic:= createmaskpicture(mask);
      updatetransform(maskpic);
      pictop:= pictopover;
     end
     else begin
      maskpic:= 0;
-     if (df_canvasismonochrome in gc.drawingflags) and (mask = nil) then begin
+     if (gc.kind = bmk_mono){(df_canvasismonochrome in gc.drawingflags)}
+                                                and (mask = nil) then begin
       pictop:= pictopsrc; 
      end
      else begin
@@ -1979,7 +1979,7 @@ begin
    with sattributes do begin
     clip_x_origin:= 0;
     clip_y_origin:= 0;
-    if (mask <> nil) and not (colormask1 or graymask) then begin
+    if (mask <> nil) and monomask{not (colormask1 or graymask)} then begin
      clip_mask:= tsimplebitmap1(mask).handle;
     end
     else begin
