@@ -1154,6 +1154,7 @@ procedure gdierrorlocked(error: gdierrorty; sender: tobject;
 
 function colortorgb(color: colorty): rgbtriplety;
 function colortopixel(color: colorty): pixelty;
+function graytopixel(color: colorty): pixelty;
 function rgbtocolor(const red,green,blue: integer): colorty;
 function blendcolor(const weight: real; const a,b: colorty): colorty;
                        //0..1
@@ -1610,6 +1611,16 @@ begin
   end;
   result:= colormaps[map][longword(color)];
  end;
+end;
+
+function graytopixel(color: colorty): pixelty;
+var
+ co1: rgbtriplety;
+ by1: byte;
+begin
+ pixelty(co1):= colortopixel(color);
+ by1:= (integer(co1.red)+integer(co1.green)+integer(co1.blue)) div 3;
+ result:= by1 or (by1 shl 8) or (by1 shl 16);
 end;
 
 function rgbtocolor(const red,green,blue: integer): colorty;
@@ -3517,7 +3528,6 @@ begin
    if (df_brush in drawingflags) and not (cs_brushorigin in fstate) then begin
     include(fstate,cs_brushorigin);
     include(values.mask,gvm_brushorigin);
-//    values.brushorigin:= addpoint(fvaluepo^.brushorigin,fvaluepo^.origin);
     values.brushorigin:= fvaluepo^.brushorigin;
    end;
    if acolorforeground <> gccolorforeground then begin
@@ -3549,7 +3559,12 @@ begin
    if acolorforeground <> gccolorforeground then begin
     if drawingflags * [df_brush,df_monochrome] <> [df_brush] then begin
      include(values.mask,gvm_colorforeground);
-     values.colorforeground:= colortopixel(acolorforeground);
+     if kind = bmk_gray then begin
+      values.colorforeground:= graytopixel(acolorforeground);
+     end
+     else begin
+      values.colorforeground:= colortopixel(acolorforeground);
+     end;
     end;
     gccolorforeground:= acolorforeground;
     include(fstate,cs_acolorforeground);
@@ -3557,7 +3572,12 @@ begin
   end;
   if (cs_acolorbackground in state) and (acolorbackground <> gccolorbackground) then begin
    include(values.mask,gvm_colorbackground);
-   values.colorbackground:= colortopixel(acolorbackground);
+   if kind = bmk_gray then begin
+    values.colorbackground:= graytopixel(acolorbackground);
+   end
+   else begin
+    values.colorbackground:= colortopixel(acolorbackground);
+   end;
    gccolorbackground:= acolorbackground;
   end;
   if ispaintcolor(gccolorbackground) then begin
@@ -3597,7 +3617,6 @@ begin
    if cs_dashes in state then include(values.mask,gvm_dashes);
    if cs_capstyle in state then include(values.mask,gvm_capstyle);
    if cs_joinstyle in state then include(values.mask,gvm_joinstyle);
-//   if cs_lineoptions in state then include(values.mask,gvm_options);
    fstate:= fstate + state;
   end;
   if values.mask <> [] then begin

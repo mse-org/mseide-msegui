@@ -171,6 +171,16 @@ const
  bmomaskkindoptions = [bmo_graymask,bmo_colormask];
 
 type
+ townedbitmap = class(tbitmap)
+  private
+   fowner: tbitmap;
+  protected
+   procedure dochange; override;
+  public
+   constructor create(const aowner: tbitmap; const akind: bitmapkindty;
+                              const agdifuncs: pgdifunctionaty = nil);
+ end;
+ 
  tmaskedbitmap = class(tbitmap,iobjectlink)
   private
    ftransparentcolor: colorty;
@@ -200,6 +210,8 @@ type
    procedure setorigformatdata(const avalue: string);
    function getmaskkind: bitmapkindty;
    procedure setmaskkind(const avalue: bitmapkindty);
+   function getgraymask: boolean;
+   procedure setgraymask(const avalue: boolean);
   protected
    fmask: tbitmap;
    procedure setmonochrome(const avalue: boolean); override;
@@ -267,6 +279,7 @@ type
    property maskkind: bitmapkindty read getmaskkind 
                                  write setmaskkind default bmk_mono;
    property masked: boolean read getmasked write setmasked default false;
+   property graymask: boolean read getgraymask write setgraymask default false;
    property colormask: boolean read getcolormask write setcolormask default false;
    property maskcolorforeground: colorty read fmaskcolorforeground 
                     write fmaskcolorforeground default $ffffff;
@@ -1487,7 +1500,7 @@ end;
 procedure tmaskedbitmap.createmask(const akind: bitmapkindty);
 begin
  if fmask = nil then begin
-  fmask:= tbitmap.create(akind,fgdifuncs);
+  fmask:= townedbitmap.create(self,akind,fgdifuncs);
   with fmask do begin
    fcolorforeground:= fmaskcolorforeground;
    fcolorbackground:= fmaskcolorbackground;
@@ -1667,6 +1680,21 @@ begin
  end;
 end;
 
+function tmaskedbitmap.getgraymask: boolean;
+begin
+ result:= bmo_graymask in foptions;
+end;
+
+procedure tmaskedbitmap.setgraymask(const avalue: boolean);
+begin
+ if avalue then begin
+  options:= foptions + [bmo_graymask];
+ end
+ else begin
+  options:= foptions - [bmo_graymask];
+ end;
+end;
+
 function tmaskedbitmap.getoptions: bitmapoptionsty;
 begin
  result:= foptions;
@@ -1684,9 +1712,9 @@ var
  ki1: bitmapkindty;
 begin
  optbefore:= foptions;
- setsinglebit(longword(avalue),longword(foptions),
+ foptions:= bitmapoptionsty(setsinglebit(longword(avalue),longword(foptions),
                [longword([bmo_monochrome,bmo_gray]),
-                longword([bmo_colormask,bmo_graymask])]);
+                longword([bmo_colormask,bmo_graymask])]));
  opt2:= foptions >< optbefore;
  if opt2 <> [] then begin
   beginupdate();
@@ -3004,4 +3032,19 @@ begin
  end;
 end;
 }
+{ townedbitmap }
+
+constructor townedbitmap.create(const aowner: tbitmap;
+            const akind: bitmapkindty; const agdifuncs: pgdifunctionaty = nil);
+begin
+ fowner:= aowner;
+ inherited create(akind,agdifuncs);
+end;
+
+procedure townedbitmap.dochange;
+begin
+ inherited;
+ fowner.change();
+end;
+
 end.

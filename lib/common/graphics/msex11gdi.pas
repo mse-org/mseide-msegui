@@ -729,6 +729,20 @@ begin
  end;
 end;
 
+function graytorendercolor(const avalue: rgbtriplety): txrendercolor; overload;
+var
+ wo1: word;
+begin
+ with result do begin
+  wo1:= (integer(avalue.red)+integer(avalue.red)+integer(avalue.red)) div 3;
+  wo1:= wo1 or (wo1 shl 8);
+  red:= wo1;
+  green:= wo1;
+  blue:= wo1;
+  alpha:= $ffff;
+ end;
+end;
+
 function colortorendercolor(const avalue: colorty): txrendercolor; overload;
 begin
  result:= colortorendercolor(colortorgb(avalue));
@@ -2193,7 +2207,7 @@ endlab2:
             pbyte(pd1)^:= pbyte(ps1)^;
             inc(pd1);
             pbyte(pd1)^:= pbyte(ps1)^;
-            inc(pd1);
+            inc(pd1,2);
             inc(ps1);
            until ps1 = pse;
            ps:= ps+simage^.bytes_per_line;
