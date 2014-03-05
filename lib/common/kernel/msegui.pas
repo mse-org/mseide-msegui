@@ -12778,6 +12778,7 @@ begin
   fstate:= fstate - [tws_posvalid,tws_sizevalid];
   fillchar(gc,sizeof(gcty),0);
   gc.paintdevicesize:= fownerwidget.fwidgetrect.size;
+  gc.kind:= bmk_rgb; //todo: what about depht 8?
   gdierror(fcanvas.creategc(fwindow.id,gck_screen,gc),self);
   gc.paintdevicesize:= fownerwidget.fwidgetrect.size;
   fcanvas.linktopaintdevice(fwindow.id,gc{,fowner.fwidgetrect.size},nullpoint);

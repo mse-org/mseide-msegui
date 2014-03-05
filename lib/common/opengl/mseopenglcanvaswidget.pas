@@ -218,6 +218,7 @@ var
 begin
  fillchar(gc1,sizeof(gc1),0);
  fillchar(info,sizeof(info),0);
+ gc1.kind:= bmk_rgb;
  with info.creategc do begin
   gcpo:= @gc1;
   contextinfopo:= @fcontextinfo;

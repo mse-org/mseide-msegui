@@ -2471,6 +2471,7 @@ begin
  end;
  with tpostscriptcanvas(sender) do begin
   fillchar(gc1,sizeof(gc1),0);
+  gc1.kind:= bmk_rgb;
   gc1.handle:= invalidgchandle;
   gc1.drawingflags:= [df_highresfont];
   gc1.paintdevicesize:= getwindowsize;

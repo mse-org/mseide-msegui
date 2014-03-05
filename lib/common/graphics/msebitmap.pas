@@ -837,21 +837,29 @@ begin
  end
  else begin
   rgb:= colortopixel(normalizeinitcolor(acolor));
-  if monochrome then begin
-   if odd(rgb) then begin
-    by1:= $ff;
-   end
-   else begin
-    by1:= $00;
+  case fkind of
+   bmk_mono: begin
+    if odd(rgb) then begin
+     by1:= $ff;
+    end
+    else begin
+     by1:= $00;
+    end;
+    fillchar(fimage.pixels^,fimage.length*sizeof(longword),by1);
    end;
-   fillchar(fimage.pixels^,fimage.length*sizeof(longword),by1);
-  end
-  else begin
-   for int1:= 0 to fimage.length-1 do begin
-    fimage.pixels^[int1]:= rgb;
+   bmk_gray: begin
+    by1:= (integer(rgbtriplety(rgb).red)+integer(rgbtriplety(rgb).green)+
+                integer(rgbtriplety(rgb).blue)) div 3;
+    fillchar(fimage.pixels^,fimage.length*sizeof(longword),by1);
+   end;
+   else begin
+    for int1:= 0 to fimage.length-1 do begin
+     fimage.pixels^[int1]:= rgb;
+    end;
    end;
   end;
  end;
+ change;
 end;
 {
 procedure tbitmap.allocimagemem;

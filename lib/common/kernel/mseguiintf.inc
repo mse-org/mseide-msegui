@@ -118,6 +118,8 @@ function gui_ungrabpointer: guierrorty;
 
 function gui_rgbtopixel(rgb: longword): pixelty;
 function gui_pixeltorgb(pixel: pixelty): longword;
+function gui_graytopixel(gray: byte): pixelty;
+function gui_pixeltogray(pixel: pixelty): byte;
 //function gui_rgbtocolormappixel(rgb: longword): pixelty;
               //neutralizes color in 8bit coler depth
 function gui_initcolormap: guierrorty;

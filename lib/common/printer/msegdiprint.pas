@@ -302,6 +302,7 @@ begin
   exclude(fstate,cs_pagestarted);
   fillchar(gc1,sizeof(gc1),0);
   gc1.paintdevicesize:= getwindowsize;
+  gc1.kind:= bmk_rgb;
   gc1.ppmm:= ppmm; 
   include(gc1.drawingflags,df_highresfont);
   self.creategc(gc1,mstr1);

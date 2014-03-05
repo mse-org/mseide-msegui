@@ -1892,12 +1892,20 @@ label
 
 var
  spd: paintdevicety;
+ skind,dkind: bitmapkindty;
  x1,y1: integer;
+ dimage,simage: pximage;
+ ps,ps1,pse,pd,pd1,pde: pointer;
+ int2: integer;
+ putpixelfunc: function (para1:PXImage; para2:cint;
+                                para3:cint; para4:culong):cint;cdecl; 
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
 {$endif} 
  with drawinfo,copyarea,sourcerect^,gc,x11gcty(platformdata).d do begin
+  dkind:= kind;
+  skind:= tcanvas1(source).fdrawinfo.gc.kind;
   needstransform:= (alignment * [al_stretchx,al_stretchy] <> []) and
             ((destrect^.cx <> sourcerect^.cx) or
             (destrect^.cy <> sourcerect^.cy)) and
@@ -1941,8 +1949,6 @@ begin
     end;
    end;
    with sattributes do begin
-//    clip_x_origin:= ax;
-//    clip_y_origin:= ay;
     clip_x_origin:= 0;
     clip_y_origin:= 0;
     if (mask <> nil) and not colormask then begin
@@ -2053,15 +2059,8 @@ endlab2:
      setregion(gc,region(gcclipregion),dpic);
     end;
     updatetransform(spic);
-    {
-    if needstransform then begin
-     xrendersetpicturetransform(appdisp,spic,@transform);
-    end;
-    }
     xrendercomposite(appdisp,pictop,spic,maskpic,dpic,ax,ay,ax,ay,destrect^.x,destrect^.y,
                        destrect^.cx,destrect^.cy);
-//    xrendercomposite(appdisp,pictop,spic,maskpic,dpic,ax,ay,0,0,destrect^.x,destrect^.y,
-//                       destrect^.cx,destrect^.cy);
    end;
    xrenderfreepicture(appdisp,spic);
    xrenderfreepicture(appdisp,dpic);
@@ -2079,30 +2078,18 @@ endlab2:
     if gcclipregion <> 0 then begin
      pixmap2:= gui_createpixmap(size,0,bmk_mono);
      maskgc.handle:= ptruint(xcreategc(appdisp,pixmap2,0,@xvalues));
-//xsetforeground(appdisp,tgc(maskgc.handle),$1);
-//xfillrectangle(appdisp,mask,tgc(maskgc.handle),0,0,100,100);
- //    pixmapgc:= xcreategc(appdisp,pixmap2,0,@xvalues);
      xfillrectangle(appdisp,pixmap2,tgc(maskgc.handle),0,0,cx,cy);
      maskgc.cliporigin:= subpoint(cliporigin,destrect^.pos);
      setregion(maskgc,region(gcclipregion));
- //    xsetregion(appdisp,pixmapgc,region(gcclipregion));    //??? cliporigin gc?
- //    xvalues.clip_x_origin:= -dest^.x+;
- //    xvalues.clip_y_origin:= -dest^.y;
- //    xchangegc(appdisp,pixmapgc,gcclipxorigin or gcclipyorigin,@xvalues);
      xcopyarea(appdisp,amask,pixmap2,tgc(maskgc.handle),x,y,cx,cy,0,0);
-//     xsetclipmask(appdisp,tgc(gc.handle),pixmap2);
      xvalues.clip_x_origin:= destrect^.x;
      xvalues.clip_y_origin:= destrect^.y;
      xvalues.clip_mask:= pixmap2;
      xchangegc(appdisp,tgc(gc.handle),gcclipxorigin or gcclipyorigin or
                   gcclipmask,@xvalues);
      xfreegc(appdisp,tgc(maskgc.handle));
-//     xflushgc(appdisp,tgc(gc.handle)); //aquire pixmap
-//     xfreepixmap(appdisp,pixmap2);
-         //xlib assertion error!
     end
     else begin
-//     xsetclipmask(appdisp,tgc(gc.handle),mask);
      xvalues.clip_mask:= amask;
      xvalues.clip_x_origin:= destrect^.x - x;
      xvalues.clip_y_origin:= destrect^.y - y;
@@ -2176,8 +2163,67 @@ endlab2:
     end;
    end
    else begin
-    xcopyarea(appdisp,tcanvas1(source).fdrawinfo.paintdevice,paintdevice,
+    if skind = dkind then begin     
+     xcopyarea(appdisp,tcanvas1(source).fdrawinfo.paintdevice,paintdevice,
                     tgc(gc.handle),x,y,cx,cy,destrect^.x,destrect^.y);
+    end
+    else begin
+     if (skind = bmk_gray) and (dkind = bmk_rgb) then begin
+      simage:= xgetimage(appdisp,tcanvas1(source).fdrawinfo.paintdevice,
+                x,y,cx,cy,$ff,zpixmap);
+      if simage <> nil then begin
+       dimage:= xcreateimage(appdisp,defvisual,defdepth,zpixmap,0,nil,
+                                                                  cx,cy,32,0);
+                               
+       if dimage <> nil then begin
+        try
+         int1:= cy*dimage^.bytes_per_line;
+         getmem(dimage^.data,int1);
+         ps:= simage^.data;
+         pd:= dimage^.data;
+         pde:= pd+int1;
+         if dimage^.bits_per_pixel = 32 then begin
+          repeat
+           ps1:= ps;
+           pse:= ps+simage^.bytes_per_line;
+           pd1:= pd;
+           repeat
+            pbyte(pd1)^:= pbyte(ps1)^;
+            inc(pd1);
+            pbyte(pd1)^:= pbyte(ps1)^;
+            inc(pd1);
+            pbyte(pd1)^:= pbyte(ps1)^;
+            inc(pd1);
+            inc(ps1);
+           until ps1 = pse;
+           ps:= ps+simage^.bytes_per_line;
+           pd:= pd+dimage^.bytes_per_line;
+          until pd = pde;
+         end
+         else begin
+          putpixelfunc:= dimage^.f.put_pixel;
+          for int1:= 0 to cy - 1 do begin
+           ps1:= ps;
+           for int2:= 0 to cx - 1 do begin
+            putpixelfunc(dimage,int2,int1,gui_graytopixel(pbyte(ps1)[int2]));
+           end;
+           ps:= ps+simage^.bytes_per_line;
+          end;
+         end;
+        except
+        end;
+        xputimage(appdisp,paintdevice,tgc(gc.handle),dimage,0,0,
+                                      destrect^.x,destrect^.y,cx,cy);
+        if dimage^.data <> nil then begin
+         freemem(dimage^.data);       
+         dimage^.data:= nil;
+        end;
+        xdestroyimage(dimage);
+       end;
+       xdestroyimage(simage);
+      end;
+     end;
+    end;
    end;
    if mask <> nil then begin
     xvalues.clip_x_origin:= 0;

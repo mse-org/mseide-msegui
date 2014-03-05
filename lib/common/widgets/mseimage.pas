@@ -77,7 +77,7 @@ constructor timage.create(aowner: tcomponent);
 begin
  fcolorforeground:= cl_black;
  fcolorbackground:= cl_white;
- fbitmap:= tmaskedbitmap.create(false);
+ fbitmap:= tmaskedbitmap.create(bmk_rgb);
  fbitmap.onchange:= {$ifdef FPC}@{$endif}bitmapchanged;
  inherited;
  optionswidget:= defaultimageoptionswidget;

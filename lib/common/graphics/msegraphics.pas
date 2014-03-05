@@ -213,6 +213,7 @@ type
   gdifuncs: pgdifunctionaty;
   fontgdifuncs: pgdifunctionaty;
   drawingflags: drawingflagsty;
+  kind: bitmapkindty;
   cliporigin: pointty;
   paintdevicesize: sizety;
   ppmm: real;
@@ -264,27 +265,12 @@ type
   basefont: fontty;
   ok: boolean;
  end;
- {
- gettextwidthinfoty = record
-  text: pchar;
-  count: integer;
-  datapo: pfontdataty;
- end;
- }
  gettext16widthinfoty = record
   text: pmsechar;
   count: integer;
   fontdata: pfontdataty;
   result: integer;
  end;
- {
- getcharwidthsinfoty = record
-  text: pchar;
-  count: integer;
-  datapo: pfontdataty;
-  resultpo: pinteger;
- end;
- }
  getchar16widthsinfoty = record
   text: pmsechar;
   count: integer;
@@ -1822,7 +1808,12 @@ var
 begin
  if avalue <> getmonochrome then begin
   if isempty then begin
-   fkind:= bmk_mono;
+   if avalue then begin
+    fkind:= bmk_mono;
+   end
+   else begin
+    fkind:= bmk_rgb;
+   end;
   {
    if avalue then begin
     include(fstate,pms_monochrome);
@@ -1877,6 +1868,7 @@ begin
   if fkind = bmk_mono then begin
    include(gc.drawingflags,df_canvasismonochrome);
   end;
+  gc.kind:= fkind;
   gdi_lock;
   err:= fcanvas.creategc(fhandle,gck_pixmap,gc);
   gdi_unlock;
@@ -2331,18 +2323,51 @@ end;
 
 procedure tsimplebitmap.updatescanline();
 begin
- if monochrome then begin
-  fscanlinestep:= ((fsize.cx + 31) div 32) * 4;
- end
- else begin
-  fscanlinestep:= fsize.cx * 4;
+ case fkind of
+  bmk_mono: begin
+   fscanlinestep:= ((fsize.cx + 31) div 32) * 4;
+  end;
+  bmk_gray: begin
+   fscanlinestep:= ((fsize.cx + 3) div 4) * 4;
+  end;
+  else begin
+   fscanlinestep:= fsize.cx * 4;
+  end;
  end;
  fscanhigh:=  fsize.cx * fsize.cy - 1;
 end;
 
 procedure tsimplebitmap.setkind(const avalue: bitmapkindty);
+var
+ bmp: tsimplebitmap;
+ ahandle: pixmapty;
 begin
- raise exception.create('not implemented');
+ if fkind <> avalue then begin
+  fkind:= avalue;
+  if isempty then begin
+   destroyhandle();
+  end
+  else begin
+   bmp:= tsimplebitmap.create(fkind,fgdifuncs);
+   bmp.size:= fsize;
+   case fkind of
+    bmk_mono: begin
+     bmp.canvas.copyarea(canvas,makerect(nullpoint,fsize),nullpoint,rop_copy,
+                                         getconverttomonochromecolorbackground);
+    end;
+    else begin
+     bmp.canvas.colorbackground:= fcolorbackground;
+     bmp.canvas.color:= fcolorforeground;
+     bmp.canvas.copyarea(canvas,makerect(nullpoint,fsize),nullpoint);
+    end;
+   end;
+   ahandle:= bmp.fhandle;
+   bmp.releasehandle;
+   bmp.Free;
+   handle:= ahandle;
+   acquirehandle;
+  end;
+ end;
 end;
 
 { tfont }
@@ -2907,6 +2932,7 @@ var
  err: gdierrorty;
 begin
  fillchar(gc,sizeof(gcty),0);
+ gc.kind:= bmk_rgb; //default
 // gdi_lock;
  err:= sender.creategc(0,gck_screen,gc);
 // gdi_unlock;

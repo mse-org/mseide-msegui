@@ -654,6 +654,7 @@ var
  is8bitcolor: boolean;
  xredmask,xgreenmask,xbluemask: longword;
  xredshift,xgreenshift,xblueshift: integer;
+ xredshiftbase,xgreenshiftbase,xblueshiftbase: integer;
  xredshiftleft,xgreenshiftleft,xblueshiftleft: boolean;
  defcolormap: colormap;
  hassm: boolean;
@@ -2915,28 +2916,38 @@ begin
 end;
 
 function gui_rgbtopixel(rgb: longword): pixelty;
+var
+ lwo1: longword;
 begin                                           //todo: speedup
-// if istruecolor then begin
-  if xredshiftleft then begin
-   result:= ((rgb and redmask) shl xredshift) and xredmask;
-  end
-  else begin
-   result:= ((rgb and redmask) shr xredshift) and xredmask;
-  end;
-  if xgreenshiftleft then begin
-   result:= result or (((rgb and greenmask) shl xgreenshift) and xgreenmask);
-  end
-  else begin
-   result:= result or (((rgb and greenmask) shr xgreenshift) and xgreenmask);
-  end;
-  if xblueshiftleft then begin
-   result:= result or (((rgb and bluemask) shl xblueshift) and xbluemask);
-  end
-  else begin
-   result:= result or (((rgb and bluemask) shr xblueshift) and xbluemask);
-  end;
-// end;
+ if xredshiftleft then begin
+  lwo1:= ((rgb and redmask) shl xredshift) and xredmask;
+ end
+ else begin
+  lwo1:= ((rgb and redmask) shr xredshift) and xredmask;
+ end;
+ if xgreenshiftleft then begin
+  lwo1:= lwo1 or (((rgb and greenmask) shl xgreenshift) and xgreenmask);
+ end
+ else begin
+  lwo1:= lwo1 or (((rgb and greenmask) shr xgreenshift) and xgreenmask);
+ end;
+ if xblueshiftleft then begin
+  result:= lwo1 or (((rgb and bluemask) shl xblueshift) and xbluemask);
+ end
+ else begin
+  result:= lwo1 or (((rgb and bluemask) shr xblueshift) and xbluemask);
+ end;
 end;
+
+function gui_graytopixel(gray: byte): pixelty;
+var
+ lwo1: longword;
+begin                                           //todo: speedup
+ lwo1:= ((gray) shl xredshiftbase) and xredmask;
+ lwo1:= lwo1 or ((gray) shl xgreenshiftbase) and xgreenmask;
+ result:= lwo1 or ((gray) shl xblueshiftbase) and xbluemask;
+end;
+
 {
 function gui_rgbtocolormappixel(rgb: longword): pixelty;
 begin
@@ -2972,6 +2983,17 @@ begin
   end;
 // end;
 end;
+
+function gui_pixeltogray(pixel: pixelty): byte;
+var
+ int1: integer;
+begin
+ int1:= (pixel and xredmask) shr xredshiftbase;
+ int1:= int1 + ((pixel and xgreenmask) shr xgreenshiftbase);
+ int1:= int1 + ((pixel and xbluemask) shr xblueshiftbase);
+ result:= int1 div 3;
+end;
+
 
 function xtomousebutton(button: longword): mousebuttonty;
 begin
@@ -5458,6 +5480,9 @@ var
 begin
  msecolormap:= xcreatecolormap(appdisp,rootid,pointer(defvisual),allocall);
  if msecolormap <> 0 then begin
+  xredshiftbase:= reds;
+  xgreenshiftbase:= greens;
+  xblueshiftbase:= blues;
   xredshiftleft:= false;
   xredshift:= 16 + reds;
   xredmask:= redm;
@@ -5726,7 +5751,6 @@ begin
    result:= gue_inputcontext;
    goto error;
   end;  
-  {$ifdef FPC} {$checkpointer off} {$endif}
   {$ifdef FPC}
   is8bitcolor:= defaultdepthofscreen(defscreen) = 8;
   {$else}
@@ -5742,14 +5766,14 @@ begin
   end
   else begin
    istruecolor:= (defvisual^._class = truecolor) or (defvisual^._class = directcolor);
-  {$ifdef FPC} {$checkpointer default} {$endif}
    if istruecolor then begin
-   {$ifdef FPC} {$checkpointer off} {$endif}
     xredmask:= defvisual^.red_mask;
     xgreenmask:= defvisual^.green_mask;
     xbluemask:= defvisual^.blue_mask;
-   {$ifdef FPC} {$checkpointer default} {$endif}
-    xredshift:= highestbit(xredmask)-(redshift+7);
+    xredshiftbase:= highestbit(xredmask)-7;
+    xgreenshiftbase:= highestbit(xgreenmask)-7;
+    xblueshiftbase:= highestbit(xbluemask)-7;
+    xredshift:= xredshiftbase - redshift;
     if xredshift < 0 then begin
      xredshiftleft:= false;
      xredshift:= -xredshift;
@@ -5757,7 +5781,7 @@ begin
     else begin
      xredshiftleft:= true;
     end;
-    xgreenshift:= highestbit(xgreenmask)-(greenshift+7);
+    xgreenshift:= xgreenshiftbase - greenshift;
     if xgreenshift < 0 then begin
      xgreenshiftleft:= false;
      xgreenshift:= -xgreenshift;
@@ -5765,7 +5789,7 @@ begin
     else begin
      xgreenshiftleft:= true;
     end;
-    xblueshift:= highestbit(xbluemask)-(blueshift+7);
+    xblueshift:= xblueshiftbase - blueshift;
     if xblueshift < 0 then begin
      xblueshiftleft:= false;
      xblueshift:= -xblueshift;
