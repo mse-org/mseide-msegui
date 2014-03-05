@@ -938,15 +938,22 @@ begin
  if amask <> nil then begin
   handle1:= tsimplebitmap1(amask).handle;
   if handle1 <> 0 then begin
-   if amask.monochrome then begin
-    attributes.component_alpha:= 1;
-    result:= xrendercreatepicture(appdisp,tsimplebitmap1(amask).handle,
-                         bitmaprenderpictformat,cpcomponentalpha,@attributes);
-   end
-   else begin
-    attributes.component_alpha:= 1;
-    result:= xrendercreatepicture(appdisp,tsimplebitmap1(amask).handle,
-                         screenrenderpictformat,cpcomponentalpha,@attributes);
+   case amask.kind of
+    bmk_mono: begin
+     attributes.component_alpha:= 1;
+     result:= xrendercreatepicture(appdisp,tsimplebitmap1(amask).handle,
+                          bitmaprenderpictformat,cpcomponentalpha,@attributes);
+    end;
+    bmk_gray: begin
+     attributes.component_alpha:= 1;
+     result:= xrendercreatepicture(appdisp,tsimplebitmap1(amask).handle,
+                          alpharenderpictformat,cpcomponentalpha,@attributes);
+    end;
+    else begin
+     attributes.component_alpha:= 1;
+     result:= xrendercreatepicture(appdisp,tsimplebitmap1(amask).handle,
+                          screenrenderpictformat,cpcomponentalpha,@attributes);
+    end;
    end;
   end;
  end;
@@ -1865,7 +1872,6 @@ var
 // arect: xrectangle;
  needstransform: boolean;
  pictop: integer;
- colormask: boolean;
 // bo1: boolean;
 label
  endlab,endlab2;
@@ -1905,6 +1911,8 @@ label
  end;
 
 var
+ colormask1: boolean;
+ graymask: boolean;
  spd: paintdevicety;
  skind,dkind: bitmapkindty;
  x1,y1: integer;
@@ -1924,9 +1932,14 @@ begin
             ((destrect^.cx <> sourcerect^.cx) or
             (destrect^.cy <> sourcerect^.cy)) and
             (destrect^.cx > 0) and (destrect^.cy > 0);
-  colormask:= (mask <> nil) and (not mask.monochrome or needstransform);
+  graymask:= false;
+  colormask1:= (mask <> nil) and (mask.kind = bmk_rgb);
+  if not colormask1 then begin
+   graymask:= (mask <> nil) and ((mask.kind <> bmk_mono) or needstransform);
+  end;
+//  colormask:= (mask <> nil) and (not mask.monochrome or needstransform);
   if hasxrender and (needstransform or (longword(opacity) <> maxopacity) or
-                                                           colormask) then begin
+                                             colormask1 or graymask) then begin
    if needstransform then begin
 //    pictop:= pictopover;
     pictop:= pictopsrc;
@@ -1939,12 +1952,13 @@ begin
     ax:= x;
     ay:= y;
    end;
-   if (longword(opacity) <> maxopacity) and not colormask then begin
+   if (longword(opacity) <> maxopacity) and 
+                              not (colormask1 or graymask) then begin
     maskpic:= createmaskpicture(opacity);
     pictop:= pictopover;
    end
    else begin
-    if colormask then begin
+    if colormask1 or graymask then begin
      maskpic:= createmaskpicture(mask);
      updatetransform(maskpic);
      pictop:= pictopover;
@@ -1965,7 +1979,7 @@ begin
    with sattributes do begin
     clip_x_origin:= 0;
     clip_y_origin:= 0;
-    if (mask <> nil) and not colormask then begin
+    if (mask <> nil) and not (colormask1 or graymask) then begin
      clip_mask:= tsimplebitmap1(mask).handle;
     end
     else begin
