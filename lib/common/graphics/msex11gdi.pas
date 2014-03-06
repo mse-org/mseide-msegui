@@ -1997,110 +1997,106 @@ begin
     graphics_exposures:= 0;
    end;
    if (dkind <> skind) and ((dkind = bmk_mono) or (skind = bmk_mono)) then begin
-    if dkind = bmk_mono then begin
+    if dkind = bmk_mono then begin //color to mono
      if maskpic <> 0 then begin
       xrenderfreepicture(appdisp,maskpic);
      end;
      exit; //not supported;         //todo !!!
     end
     else begin //monochrome -> color
-     if skind = bmk_mono then begin
-      bitmapgc2:= nil;
-      bitmap:= 0;
-      if (mask <> nil) and mask.monochrome then begin
-       bitmap:= gui_createpixmap(size,0,bmk_mono);
-       if bitmap <> 0 then begin
-        bitmapgc2:= xcreategc(appdisp,bitmap,0,@xvalues);
-        if bitmapgc2 <> nil then begin
-         xcopyarea(appdisp,tcanvas1(source).fdrawinfo.paintdevice,
-                           bitmap,bitmapgc2,x,y,cx,cy,0,0);
-         xvalues.xfunction:= gxand;
-         xchangegc(appdisp,bitmapgc2,gcfunction,@xvalues);
-         xcopyarea(appdisp,mask.handle,bitmap,bitmapgc2,x,y,cx,cy,0,0);
-         ax:= 0;
-         ay:= 0;
-         x1:= 0;
-         y1:= 0;
-         with sattributes do begin
-          clip_x_origin:= 0;
-          clip_y_origin:= 0;
-         end;
-        end
-        else begin
-         goto endlab2;
+     bitmapgc2:= nil;
+     bitmap:= 0;
+     if (mask <> nil) and mask.monochrome then begin
+      bitmap:= gui_createpixmap(size,0,bmk_mono);
+      if bitmap <> 0 then begin
+       bitmapgc2:= xcreategc(appdisp,bitmap,0,@xvalues);
+       if bitmapgc2 <> nil then begin
+        xcopyarea(appdisp,tcanvas1(source).fdrawinfo.paintdevice,
+                          bitmap,bitmapgc2,x,y,cx,cy,0,0);
+        xvalues.xfunction:= gxand;
+        xchangegc(appdisp,bitmapgc2,gcfunction,@xvalues);
+        xcopyarea(appdisp,mask.handle,bitmap,bitmapgc2,x,y,cx,cy,0,0);
+        ax:= 0;
+        ay:= 0;
+        x1:= 0;
+        y1:= 0;
+        with sattributes do begin
+         clip_x_origin:= 0;
+         clip_y_origin:= 0;
         end;
        end
        else begin
         goto endlab2;
        end;
-       spd:= bitmap;
       end
       else begin
-       spd:= tcanvas1(source).fdrawinfo.paintdevice;
-       x1:= x;
-       y1:= y;
+       goto endlab2;
       end;
-      spic:= xrendercreatepicture(appdisp,spd,bitmaprenderpictformat,
-                       sourceformats,@sattributes);
-      format1:= screenrenderpictformat;
-      if dkind = bmk_gray then begin
-       format1:= alpharenderpictformat;
-      end;
-      dpic:= xrendercreatepicture(appdisp,paintdevice,format1,
-                       destformats,@dattributes);
-      cpic:= createcolorpicture(acolorforeground);
-      if gcclipregion <> 0 then begin
-       setregion(gc,region(gcclipregion),dpic);
-      end;
-      updatetransform(spic);
-      if acolorforeground <> cl_transparent then begin
-       xrendercomposite(appdisp,pictop,cpic,spic,dpic,0,0,ax,ay,
-                            destrect^.x,destrect^.y,destrect^.cx,destrect^.cy);
-      end;
-      xrenderfreepicture(appdisp,cpic);
-      if df_opaque in gc.drawingflags then begin
-       if bitmap <> 0 then begin
-        xvalues.xfunction:= gxorinverted;
-        xchangegc(appdisp,bitmapgc2,gcfunction,@xvalues);
-        xcopyarea(appdisp,mask.handle,bitmap,bitmapgc2,x,y,cx,cy,0,0);
-       end;
-       xvalues.xfunction:= gxxor;
-       xvalues.foreground:= $ffffffff;
-       bitmapgc:= xcreategc(appdisp,spd,gcforeground or gcfunction,@xvalues);
-       xfillrectangle(appdisp,spd,bitmapgc,x1,y1,cx,cy);
-       cpic:= createcolorpicture(acolorbackground);
-       xrendercomposite(appdisp,pictop,cpic,spic,dpic,0,0,ax,ay,destrect^.x,destrect^.y,
-                          destrect^.cx,destrect^.cy);
-       xrenderfreepicture(appdisp,cpic);
-       xfillrectangle(appdisp,spd,bitmapgc,x1,y1,cx,cy);
-       xfreegc(appdisp,bitmapgc);
-      end;
-endlab2:
-      if bitmapgc2 <> nil then begin 
-       xfreegc(appdisp,bitmapgc2);
-      end;
-      if bitmap <> 0 then begin
-       xfreepixmap(appdisp,bitmap);
-      end;
+      spd:= bitmap;
      end
-     else begin 
+     else begin
+      spd:= tcanvas1(source).fdrawinfo.paintdevice;
+      x1:= x;
+      y1:= y;
+     end;
+     spic:= xrendercreatepicture(appdisp,spd,bitmaprenderpictformat,
+                      sourceformats,@sattributes);
+     format1:= screenrenderpictformat;
+     if dkind = bmk_gray then begin
+      format1:= alpharenderpictformat;
+     end;
+     dpic:= xrendercreatepicture(appdisp,paintdevice,format1,
+                      destformats,@dattributes);
+     cpic:= createcolorpicture(acolorforeground);
+     if gcclipregion <> 0 then begin
+      setregion(gc,region(gcclipregion),dpic);
+     end;
+     updatetransform(spic);
+     if acolorforeground <> cl_transparent then begin
+      xrendercomposite(appdisp,pictop,cpic,spic,dpic,0,0,ax,ay,
+                           destrect^.x,destrect^.y,destrect^.cx,destrect^.cy);
+     end;
+     xrenderfreepicture(appdisp,cpic);
+     if df_opaque in gc.drawingflags then begin
+      if bitmap <> 0 then begin
+       xvalues.xfunction:= gxorinverted;
+       xchangegc(appdisp,bitmapgc2,gcfunction,@xvalues);
+       xcopyarea(appdisp,mask.handle,bitmap,bitmapgc2,x,y,cx,cy,0,0);
+      end;
+      xvalues.xfunction:= gxxor;
+      xvalues.foreground:= $ffffffff;
+      bitmapgc:= xcreategc(appdisp,spd,gcforeground or gcfunction,@xvalues);
+      xfillrectangle(appdisp,spd,bitmapgc,x1,y1,cx,cy);
+      cpic:= createcolorpicture(acolorbackground);
+      xrendercomposite(appdisp,pictop,cpic,spic,dpic,0,0,ax,ay,destrect^.x,destrect^.y,
+                         destrect^.cx,destrect^.cy);
+      xrenderfreepicture(appdisp,cpic);
+      xfillrectangle(appdisp,spd,bitmapgc,x1,y1,cx,cy);
+      xfreegc(appdisp,bitmapgc);
+     end;
+endlab2:
+     if bitmapgc2 <> nil then begin 
+      xfreegc(appdisp,bitmapgc2);
+     end;
+     if bitmap <> 0 then begin
+      xfreepixmap(appdisp,bitmap);
      end;
     end;
    end
-   else begin //bmk_rgb <> bmk_gray
+   else begin //bmk_rgb <-> bmk_gray
    {
-    case dkindgc.kind of 
-     bmk_mono: begin
-      aformat:= bitmaprenderpictformat;
-     end;
+    if dkind = bmk_gray then begin
+    end
+    else begin
+    end;
+    case dkind of 
      bmk_gray: begin
-      aformat:= alpharenderpictformat;
+      format1:= alpharenderpictformat;
      end
      else begin
-      aformat:= screenrenderpictformat;
+      format1:= screenrenderpictformat;
      end;
     end;
-    }
     dpic:= xrendercreatepicture(appdisp,paintdevice,pictformats[dkind],
                                                     destformats,@dattributes);
     spic:= xrendercreatepicture(appdisp,tcanvas1(source).paintdevice,
@@ -2114,8 +2110,10 @@ endlab2:
    end;
    xrenderfreepicture(appdisp,spic);
    xrenderfreepicture(appdisp,dpic);
-   if maskpic <> 0 then begin
-    xrenderfreepicture(appdisp,maskpic);
+   }
+    if maskpic <> 0 then begin
+     xrenderfreepicture(appdisp,maskpic);
+    end;
    end;
   end
   else begin
