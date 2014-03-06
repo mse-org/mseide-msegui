@@ -1559,14 +1559,12 @@ begin
   freemask;
  end;
  ki1:= bmk_mono;
- if ftransparentcolor = cl_none then begin 
-  if bmo_colormask in foptions then begin
-   ki1:= bmk_rgb;
-  end
-  else begin
-   if bmo_graymask in foptions then begin
-    ki1:= bmk_gray;
-   end;
+ if bmo_colormask in foptions then begin
+  ki1:= bmk_rgb;
+ end
+ else begin
+  if bmo_graymask in foptions then begin
+   ki1:= bmk_gray;
   end;
  end;
  if fmask = nil then begin
@@ -1580,7 +1578,12 @@ begin
   fmask.size:= fsize;
   if ftransparentcolor = cl_default then begin
    col1:= pixel[makepoint(0,fsize.cy-1)];
-   if monochrome then begin
+  end
+  else begin
+   col1:= ftransparentcolor;
+  end;
+  if col1 <> cl_none then begin
+   if kind = bmk_mono then begin
     if col1 = cl_0 then begin
      fmask.canvas.copyarea(canvas,makerect(nullpoint,fsize),nullpoint,rop_copy);
     end
@@ -1594,29 +1597,12 @@ begin
    end;
   end
   else begin
-   if ftransparentcolor <> cl_none then begin
-    if monochrome then begin
-     if ftransparentcolor = cl_0 then begin
-      fmask.canvas.copyarea(canvas,makerect(nullpoint,fsize),
-                                                       nullpoint,rop_copy);
-     end
-     else begin
-      fmask.canvas.copyarea(canvas,makerect(nullpoint,fsize),
-                                                     nullpoint,rop_notcopy);
-     end
-    end
-    else begin
-     fmask.canvas.copyarea(canvas,makerect(nullpoint,fsize),
-                                        nullpoint,rop_copy,ftransparentcolor);
-    end;
-   end
-   else begin
-    initmask;
-   end;
+   initmask;
   end;
   include(fstate,pms_maskvalid);
  end;
- fmask.monochrome:= not (bmo_colormask in foptions);
+// fmask.kind:= ki1;
+// fmask.monochrome:= not (bmo_colormask in foptions);
 end;
 
 function tmaskedbitmap.getmask1: tbitmap;

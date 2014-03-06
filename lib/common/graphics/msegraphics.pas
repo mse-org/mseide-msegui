@@ -3779,22 +3779,22 @@ begin
    opacity:= colortorgb(aopacity);
   end;
 
-  if drawingflagsty((longword(gc.drawingflags) xor 
-                   longword(source.fdrawinfo.gc.drawingflags))) *
-          [df_canvasismonochrome] <> [] then begin //different colorformat
+  if gc.kind <> source.fdrawinfo.gc.kind then begin //different colorformat
    include(gc.drawingflags,df_colorconvert);
    with fdrawinfo,gc do begin
     acolorforeground:= fvaluepo^.color;
-    if not (df_canvasismonochrome in gc.drawingflags) then begin //monochrome to color
+    if source.fdrawinfo.gc.kind = bmk_mono then begin //monochrome to color or gray
      acolorbackground:= fvaluepo^.colorbackground;
      checkgcstate([cs_acolorforeground,cs_acolorbackground]);
     end
     else begin
-     if atransparentcolor = cl_default then begin                //color to monochrome
-      transparentcolor:= colortopixel(fvaluepo^.colorbackground);
-     end
-     else begin
-      transparentcolor:= colortopixel(atransparentcolor);
+     if gc.kind = bmk_mono then begin
+      if atransparentcolor = cl_default then begin       //color to monochrome
+       transparentcolor:= colortopixel(fvaluepo^.colorbackground);
+      end
+      else begin
+       transparentcolor:= colortopixel(atransparentcolor);
+      end;
      end;
     end;
    end;
