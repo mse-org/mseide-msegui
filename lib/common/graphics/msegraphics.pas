@@ -1022,7 +1022,6 @@ type
    procedure setwidth(const avalue: integer);
    procedure setheight(const avalue: integer);
    procedure updatescanline();
-   procedure setkind(const avalue: bitmapkindty);
   protected
    fgdifuncs: pgdifunctionaty;
    fcanvasclass: canvasclassty;
@@ -1054,6 +1053,7 @@ type
    function getsize: sizety;
    procedure getcanvasimage(const bgr: boolean;
                                     var aimage: maskedimagety); virtual;
+   procedure setkind(const avalue: bitmapkindty); virtual;
   public
    constructor create(const akind: bitmapkindty;
                     const agdifuncs: pgdifunctionaty = nil); reintroduce;
@@ -2354,12 +2354,12 @@ var
  ahandle: pixmapty;
 begin
  if fkind <> avalue then begin
-  fkind:= avalue;
   if isempty then begin
    destroyhandle();
+   fkind:= avalue;
   end
   else begin
-   bmp:= tsimplebitmap.create(fkind,fgdifuncs);
+   bmp:= tsimplebitmap.create(avalue,fgdifuncs);
    bmp.size:= fsize;
    case fkind of
     bmk_mono: begin
@@ -2375,6 +2375,7 @@ begin
    ahandle:= bmp.fhandle;
    bmp.releasehandle;
    bmp.Free;
+   fkind:= avalue;
    handle:= ahandle;
    acquirehandle;
   end;
@@ -3788,9 +3789,12 @@ begin
      checkgcstate([cs_acolorforeground,cs_acolorbackground]);
     end
     else begin
-     if gc.kind = bmk_mono then begin
-      if atransparentcolor = cl_default then begin       //color to monochrome
-       transparentcolor:= colortopixel(fvaluepo^.colorbackground);
+     if gc.kind = bmk_mono then begin //color or gray to monochrome
+      if atransparentcolor = cl_default then begin 
+       atransparentcolor:= fvaluepo^.colorbackground;
+      end;
+      if source.fdrawinfo.gc.kind = bmk_gray then begin
+       transparentcolor:= graytopixel(atransparentcolor);
       end
       else begin
        transparentcolor:= colortopixel(atransparentcolor);

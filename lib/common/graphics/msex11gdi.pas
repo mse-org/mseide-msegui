@@ -1918,8 +1918,13 @@ var
  dimage,simage: pximage;
  ps,ps1,pse,pd,pd1,pde: pointer;
  int2: integer;
+ wo1: word;
+ lwo1: longword;
  putpixelfunc: function (para1:PXImage; para2:cint;
                                 para3:cint; para4:culong):cint;cdecl; 
+ getpixelfunc: function (para1:PXImage;
+                                para2:cint; para3:cint):culong;cdecl;
+   
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
@@ -2073,11 +2078,16 @@ endlab2:
     end;
    end
    else begin
-    if df_canvasismonochrome in gc.drawingflags then begin
-     aformat:= bitmaprenderpictformat;
-    end
-    else begin
-     aformat:= screenrenderpictformat;
+    case gc.kind of
+     bmk_mono: begin
+      aformat:= bitmaprenderpictformat;
+     end;
+     bmk_gray: begin
+      aformat:= alpharenderpictformat;
+     end
+     else begin
+      aformat:= screenrenderpictformat;
+     end;
     end;
     dpic:= xrendercreatepicture(appdisp,paintdevice,aformat,destformats,
                @dattributes);
@@ -2125,84 +2135,72 @@ endlab2:
                       gcclipmask,@xvalues);
     end;
    end;
-   if df_colorconvert in gc.drawingflags then begin
-    xvalues.graphics_exposures:= {$ifdef xboolean}false{$else}0{$endif};
-    if df_canvasismonochrome in gc.drawingflags then begin
-                        //convert to monochrome
-     pixmap:= gui_createpixmap(size);
-     if pixmap = 0 then begin
-      goto endlab;
-     end;
-     pixmapgc:= xcreategc(appdisp,pixmap,gcgraphicsexposures,@xvalues);
-     if pixmapgc <> nil then begin
-      xcopyarea(appdisp,tcanvas1(source).fdrawinfo.paintdevice,pixmap,pixmapgc,x,y,cx,cy,0,0);
-      xvalues.foreground:= transparentcolor;
-      xvalues.xfunction:= integer(rop_xor);
-      xchangegc(appdisp,pixmapgc,gcforeground or gcfunction,@xvalues);
-      xfillrectangle(appdisp,pixmap,pixmapgc,0,0,cx,cy);
-      bitmap:= gui_createpixmap(size,0,bmk_mono);
-      if bitmap <> 0 then begin
-       xvalues.foreground:= pixel0;
-       bitmapgc:= xcreategc(appdisp,bitmap,
-                         gcforeground or gcgraphicsexposures,@xvalues);
-       if bitmapgc <> nil then begin
-        xfillrectangle(appdisp,bitmap,bitmapgc,0,0,cx,cy);
-        xvalues.xfunction:= integer(rop_or);
-        xvalues.background:= pixel0;
-        xvalues.foreground:= pixel1;
-        xchangegc(appdisp,bitmapgc,gcfunction or gcforeground or
-                gcbackground,@xvalues);
-        for int1:= 0 to defdepth - 1 do begin
-         xcopyplane(appdisp,pixmap,bitmap,bitmapgc,0,0,cx,cy,
-                        0,0,1 shl int1);
-        end;
-        xcopyarea(appdisp,bitmap,paintdevice,tgc(gc.handle),0,0,cx,cy,destrect^.x,destrect^.y);
-        xfreegc(appdisp,bitmapgc);
-       end;
-       xfreepixmap(appdisp,bitmap)
-      end;
-      xfreegc(appdisp,pixmapgc);
-     end;
-     xfreepixmap(appdisp,pixmap);
-    end
-    else begin
-            //convert from monochrome
-     pixmapgc:= xcreategc(appdisp,paintdevice,0,nil);
-     if pixmapgc <> nil then begin
-      xcopygc(appdisp,tgc(gc.handle),gcfunction or gcplanemask or gcsubwindowmode or
-                gcgraphicsexposures or gcclipxorigin or
-                gcclipyorigin or gcclipmask or gcforeground or gcbackground,pixmapgc);
-      with xvalues do begin
-       stipple:= tcanvas1(source).fdrawinfo.paintdevice;
-       ts_x_origin:= destrect^.x-x;
-       ts_y_origin:= destrect^.y-y;
-       if df_opaque in gc.drawingflags then begin
-        fill_style:= fillopaquestippled;
-       end
-       else begin
-        fill_style:= fillstippled;
-       end;
-      end;
-      xchangegc(appdisp,pixmapgc,gcfillstyle or gcstipple or
-                       gctilestipxorigin or gctilestipyorigin,@xvalues);
-      xfillrectangle(appdisp,paintdevice,pixmapgc,destrect^.x,destrect^.y,cx,cy);
-      xfreegc(appdisp,pixmapgc);
-     end;
-    end;
+   if skind = dkind then begin     
+    xcopyarea(appdisp,tcanvas1(source).fdrawinfo.paintdevice,paintdevice,
+                   tgc(gc.handle),x,y,cx,cy,destrect^.x,destrect^.y);
    end
    else begin
-    if skind = dkind then begin     
-     xcopyarea(appdisp,tcanvas1(source).fdrawinfo.paintdevice,paintdevice,
-                    tgc(gc.handle),x,y,cx,cy,destrect^.x,destrect^.y);
+    xvalues.graphics_exposures:= {$ifdef xboolean}false{$else}0{$endif};
+    if (skind = bmk_gray) and (dkind = bmk_rgb) then begin
+     simage:= xgetimage(appdisp,tcanvas1(source).fdrawinfo.paintdevice,
+               x,y,cx,cy,$ff,zpixmap);
+     if simage <> nil then begin
+      dimage:= xcreateimage(appdisp,defvisual,defdepth,zpixmap,0,nil,
+                                                                 cx,cy,32,0);                              
+      if dimage <> nil then begin
+       try
+        int1:= cy*dimage^.bytes_per_line;
+        getmem(dimage^.data,int1);
+        ps:= simage^.data;
+        pd:= dimage^.data;
+        pde:= pd+int1;
+        if dimage^.bits_per_pixel = 32 then begin
+         repeat
+          ps1:= ps;
+          pse:= ps+simage^.bytes_per_line;
+          pd1:= pd;
+          repeat
+           pbyte(pd1)^:= pbyte(ps1)^;
+           inc(pd1);
+           pbyte(pd1)^:= pbyte(ps1)^;
+           inc(pd1);
+           pbyte(pd1)^:= pbyte(ps1)^;
+           inc(pd1,2);
+           inc(ps1);
+          until ps1 = pse;
+          ps:= ps+simage^.bytes_per_line;
+          pd:= pd+dimage^.bytes_per_line;
+         until pd = pde;
+        end
+        else begin
+         putpixelfunc:= dimage^.f.put_pixel;
+         for int1:= 0 to cy - 1 do begin
+          ps1:= ps;
+          for int2:= 0 to cx - 1 do begin
+           putpixelfunc(dimage,int2,int1,gui_graytopixel(pbyte(ps1)[int2]));
+          end;
+          ps:= ps+simage^.bytes_per_line;
+         end;
+        end;
+       except
+       end;
+       xputimage(appdisp,paintdevice,tgc(gc.handle),dimage,0,0,
+                                     destrect^.x,destrect^.y,cx,cy);
+       if dimage^.data <> nil then begin
+        freemem(dimage^.data);       
+        dimage^.data:= nil;
+       end;
+       xdestroyimage(dimage);
+      end;
+      xdestroyimage(simage);
+     end;
     end
     else begin
-     if (skind = bmk_gray) and (dkind = bmk_rgb) then begin
+     if (skind = bmk_rgb) and (dkind = bmk_gray) then begin
       simage:= xgetimage(appdisp,tcanvas1(source).fdrawinfo.paintdevice,
-                x,y,cx,cy,$ff,zpixmap);
+                                                   x,y,cx,cy,$ffffff,zpixmap);
       if simage <> nil then begin
-       dimage:= xcreateimage(appdisp,defvisual,defdepth,zpixmap,0,nil,
-                                                                  cx,cy,32,0);
-                               
+       dimage:= xcreateimage(appdisp,defvisual,8,zpixmap,0,nil,cx,cy,32,0);                              
        if dimage <> nil then begin
         try
          int1:= cy*dimage^.bytes_per_line;
@@ -2210,32 +2208,35 @@ endlab2:
          ps:= simage^.data;
          pd:= dimage^.data;
          pde:= pd+int1;
-         if dimage^.bits_per_pixel = 32 then begin
+         if simage^.bits_per_pixel = 32 then begin
           repeat
            ps1:= ps;
            pse:= ps+simage^.bytes_per_line;
            pd1:= pd;
            repeat
-            pbyte(pd1)^:= pbyte(ps1)^;
-            inc(pd1);
-            pbyte(pd1)^:= pbyte(ps1)^;
-            inc(pd1);
-            pbyte(pd1)^:= pbyte(ps1)^;
-            inc(pd1,2);
+            wo1:= pbyte(ps1)^;
             inc(ps1);
+            wo1:= wo1 + pbyte(ps1)^;
+            inc(ps1);
+            pbyte(pd1)^:= (wo1 + pbyte(ps1)^) div 3;
+            inc(ps1,2);
+            inc(pd1);
            until ps1 = pse;
            ps:= ps+simage^.bytes_per_line;
            pd:= pd+dimage^.bytes_per_line;
           until pd = pde;
          end
          else begin
-          putpixelfunc:= dimage^.f.put_pixel;
+          getpixelfunc:= simage^.f.get_pixel;
           for int1:= 0 to cy - 1 do begin
-           ps1:= ps;
+           pd1:= pd;
            for int2:= 0 to cx - 1 do begin
-            putpixelfunc(dimage,int2,int1,gui_graytopixel(pbyte(ps1)[int2]));
+            lwo1:= getpixelfunc(simage,int2,int1);
+            pbyte(pd1)[int2]:= (lwo1 and $ff + ((lwo1 and $ff00) shr 8) +
+                                           ((lwo1 and $ff0000) shr 16)) div 3;
+
            end;
-           ps:= ps+simage^.bytes_per_line;
+           pd:= pd+dimage^.bytes_per_line;
           end;
          end;
         except
@@ -2249,6 +2250,77 @@ endlab2:
         xdestroyimage(dimage);
        end;
        xdestroyimage(simage);
+      end;
+     end
+     else begin  
+      if dkind = bmk_mono then begin //convert to monochrome
+       pixmap:= gui_createpixmap(size,0,skind);
+       if pixmap = 0 then begin
+        goto endlab;
+       end;
+       pixmapgc:= xcreategc(appdisp,pixmap,gcgraphicsexposures,@xvalues);
+       if pixmapgc <> nil then begin
+        xcopyarea(appdisp,tcanvas1(source).fdrawinfo.paintdevice,pixmap,
+                                                        pixmapgc,x,y,cx,cy,0,0);
+        xvalues.foreground:= transparentcolor;
+        xvalues.xfunction:= integer(rop_xor);
+        xchangegc(appdisp,pixmapgc,gcforeground or gcfunction,@xvalues);
+        xfillrectangle(appdisp,pixmap,pixmapgc,0,0,cx,cy);
+        bitmap:= gui_createpixmap(size,0,bmk_mono);
+        if bitmap <> 0 then begin
+         xvalues.foreground:= pixel0;
+         bitmapgc:= xcreategc(appdisp,bitmap,
+                           gcforeground or gcgraphicsexposures,@xvalues);
+         if bitmapgc <> nil then begin
+          xfillrectangle(appdisp,bitmap,bitmapgc,0,0,cx,cy);
+          xvalues.xfunction:= integer(rop_or);
+          xvalues.background:= pixel0;
+          xvalues.foreground:= pixel1;
+          xchangegc(appdisp,bitmapgc,gcfunction or gcforeground or
+                  gcbackground,@xvalues);
+          if skind = bmk_gray then begin
+           int2:= 8;
+          end
+          else begin
+           int2:= defdepth;
+          end;
+          for int1:= 0 to int2-1 do begin
+           xcopyplane(appdisp,pixmap,bitmap,bitmapgc,0,0,cx,cy,
+                          0,0,1 shl int1);
+          end;
+          xcopyarea(appdisp,bitmap,paintdevice,tgc(gc.handle),0,0,cx,cy,
+                                                       destrect^.x,destrect^.y);
+          xfreegc(appdisp,bitmapgc);
+         end;
+         xfreepixmap(appdisp,bitmap)
+        end;
+        xfreegc(appdisp,pixmapgc);
+       end;
+       xfreepixmap(appdisp,pixmap);
+      end
+      else begin
+              //convert from monochrome
+       pixmapgc:= xcreategc(appdisp,paintdevice,0,nil);
+       if pixmapgc <> nil then begin
+        xcopygc(appdisp,tgc(gc.handle),gcfunction or gcplanemask or
+           gcsubwindowmode or gcgraphicsexposures or gcclipxorigin or
+           gcclipyorigin or gcclipmask or gcforeground or gcbackground,pixmapgc);
+        with xvalues do begin
+         stipple:= tcanvas1(source).fdrawinfo.paintdevice;
+         ts_x_origin:= destrect^.x-x;
+         ts_y_origin:= destrect^.y-y;
+         if df_opaque in gc.drawingflags then begin
+          fill_style:= fillopaquestippled;
+         end
+         else begin
+          fill_style:= fillstippled;
+         end;
+        end;
+        xchangegc(appdisp,pixmapgc,gcfillstyle or gcstipple or
+                         gctilestipxorigin or gctilestipyorigin,@xvalues);
+        xfillrectangle(appdisp,paintdevice,pixmapgc,destrect^.x,destrect^.y,cx,cy);
+        xfreegc(appdisp,pixmapgc);
+       end;
       end;
      end;
     end;
