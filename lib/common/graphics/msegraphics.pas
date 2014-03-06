@@ -1042,6 +1042,7 @@ type
    procedure createhandle(acopyfrom: pixmapty); virtual;
    function getmonochrome: boolean;
    procedure setmonochrome(const avalue: boolean); virtual;
+   procedure setkind(const avalue: bitmapkindty); virtual;
    function getconverttomonochromecolorbackground: colorty; virtual;
    function getmask: tsimplebitmap; virtual;
    procedure setsize(const avalue: sizety); virtual;
@@ -1053,7 +1054,6 @@ type
    function getsize: sizety;
    procedure getcanvasimage(const bgr: boolean;
                                     var aimage: maskedimagety); virtual;
-   procedure setkind(const avalue: bitmapkindty); virtual;
   public
    constructor create(const akind: bitmapkindty;
                     const agdifuncs: pgdifunctionaty = nil); reintroduce;
@@ -1857,6 +1857,41 @@ begin
  end;
 end;
 
+procedure tsimplebitmap.setkind(const avalue: bitmapkindty);
+var
+ bmp: tsimplebitmap;
+ ahandle: pixmapty;
+begin
+ if fkind <> avalue then begin
+  if isempty then begin
+   destroyhandle();
+   fkind:= avalue;
+  end
+  else begin
+   bmp:= tsimplebitmap.create(avalue,fgdifuncs);
+   bmp.size:= fsize;
+   case avalue of
+    bmk_mono: begin
+     bmp.canvas.copyarea(canvas,makerect(nullpoint,fsize),nullpoint,rop_copy,
+                                         getconverttomonochromecolorbackground);
+    end;
+    else begin
+     bmp.canvas.colorbackground:= fcolorbackground;
+     bmp.canvas.color:= fcolorforeground;
+     bmp.canvas.copyarea(canvas,makerect(nullpoint,fsize),nullpoint);
+    end;
+   end;
+   ahandle:= bmp.fhandle;
+   bmp.releasehandle;
+   bmp.Free;
+   fkind:= avalue;
+   handle:= ahandle;
+   acquirehandle;
+  end;
+ end;
+end;
+
+
 procedure tsimplebitmap.switchtomonochrome;
 begin
 // include(fstate,pms_monochrome);
@@ -2346,40 +2381,6 @@ begin
   end;
  end;
  fscanhigh:=  fsize.cx * fsize.cy - 1;
-end;
-
-procedure tsimplebitmap.setkind(const avalue: bitmapkindty);
-var
- bmp: tsimplebitmap;
- ahandle: pixmapty;
-begin
- if fkind <> avalue then begin
-  if isempty then begin
-   destroyhandle();
-   fkind:= avalue;
-  end
-  else begin
-   bmp:= tsimplebitmap.create(avalue,fgdifuncs);
-   bmp.size:= fsize;
-   case fkind of
-    bmk_mono: begin
-     bmp.canvas.copyarea(canvas,makerect(nullpoint,fsize),nullpoint,rop_copy,
-                                         getconverttomonochromecolorbackground);
-    end;
-    else begin
-     bmp.canvas.colorbackground:= fcolorbackground;
-     bmp.canvas.color:= fcolorforeground;
-     bmp.canvas.copyarea(canvas,makerect(nullpoint,fsize),nullpoint);
-    end;
-   end;
-   ahandle:= bmp.fhandle;
-   bmp.releasehandle;
-   bmp.Free;
-   fkind:= avalue;
-   handle:= ahandle;
-   acquirehandle;
-  end;
- end;
 end;
 
 { tfont }
