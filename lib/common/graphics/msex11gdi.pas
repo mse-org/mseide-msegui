@@ -35,9 +35,9 @@ type
  createcolorpicturefuncty = function(const acolor: colorty): tpicture;
 var 
  createcolorpicture: createcolorpicturefuncty;
- pictformats: array[bitmapkindty] of pxrenderpictformat;
-// screenrenderpictformat,bitmaprenderpictformat,
-//                   alpharenderpictformat,
+// pictformats: array[bitmapkindty] of pxrenderpictformat;
+ screenrenderpictformat,bitmaprenderpictformat,
+                   alpharenderpictformat,
  rgbrenderpictformat,argbrenderpictformat: pxrenderpictformat;
 
 function createalphapicture(const size: sizety;
@@ -375,12 +375,12 @@ begin
  hasxrender:= hasxrender and 
                   (xrenderqueryextension(msedisplay,@int1,@int2) <> 0);
  if hasxrender then begin
-  pictformats[bmk_mono]:= xrenderfindstandardformat(appdisp,pictstandarda1);
-  pictformats[bmk_gray]:= xrenderfindstandardformat(appdisp,pictstandarda8);
-  pictformats[bmk_rgb]:= xrenderfindvisualformat(appdisp,pvisual(defvisual));
-//  screenrenderpictformat:= xrenderfindvisualformat(appdisp,pvisual(defvisual));
-//  bitmaprenderpictformat:= xrenderfindstandardformat(appdisp,pictstandarda1);
-//  alpharenderpictformat:= xrenderfindstandardformat(appdisp,pictstandarda8);
+//  pictformats[bmk_mono]:= xrenderfindstandardformat(appdisp,pictstandarda1);
+//  pictformats[bmk_gray]:= xrenderfindstandardformat(appdisp,pictstandarda8);  
+//  pictformats[bmk_rgb]:= xrenderfindvisualformat(appdisp,pvisual(defvisual));
+  screenrenderpictformat:= xrenderfindvisualformat(appdisp,pvisual(defvisual));
+  bitmaprenderpictformat:= xrenderfindstandardformat(appdisp,pictstandarda1);
+  alpharenderpictformat:= xrenderfindstandardformat(appdisp,pictstandarda8);
   rgbrenderpictformat:= xrenderfindstandardformat(appdisp,pictstandardrgb24);
   argbrenderpictformat:= xrenderfindstandardformat(appdisp,pictstandardargb32);
  end;
@@ -855,7 +855,7 @@ begin
   int1:= cprepeat;
  end;
  result:= xrendercreatepicture(appdisp,pixmap,
-                pictformats[bmk_gray]{alpharenderpictformat},int1,@attributes);
+                alpharenderpictformat,int1,@attributes);
  xfreepixmap(appdisp,pixmap);
 end;
 
@@ -893,8 +893,7 @@ begin
                    makesize(xrendercolorsourcesize,xrendercolorsourcesize));
  attributes._repeat:= repeatnormal;
  result:= xrendercreatepicture(appdisp,pixmap,
-           pictformats[bmk_rgb]{screenrenderpictformat},
-                                                       cprepeat,@attributes);
+                               screenrenderpictformat,cprepeat,@attributes);
  col:= colortorendercolor(acolor);
  xrenderfillrectangle(appdisp,pictopsrc,result,@col,0,0,
                         xrendercolorsourcesize,xrendercolorsourcesize);
@@ -924,9 +923,8 @@ begin
  pixmap:= gui_createpixmap(makesize(1,1));
  attributes._repeat:= repeatnormal;
  attributes.component_alpha:= 1;
- result:= xrendercreatepicture(appdisp,pixmap,
-             pictformats[bmk_rgb]{screenrenderpictformat},
-       cprepeat or cpcomponentalpha,@attributes);
+ result:= xrendercreatepicture(appdisp,pixmap,screenrenderpictformat,
+                                    cprepeat or cpcomponentalpha,@attributes);
  col:= colortorendercolor(acolor);
  xrenderfillrectangle(appdisp,pictopsrc,result,@col,0,0,1,1);
  gui_freepixmap(pixmap);
@@ -936,6 +934,7 @@ function createmaskpicture(const amask: tsimplebitmap): tpicture; overload;
 var
  attributes: txrenderpictureattributes;
  handle1: pixmapty;
+ format1: pxrenderpictformat;
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
@@ -944,28 +943,20 @@ begin
  if amask <> nil then begin
   handle1:= tsimplebitmap1(amask).handle;
   if handle1 <> 0 then begin
-   attributes.component_alpha:= 1;
-   result:= xrendercreatepicture(appdisp,tsimplebitmap1(amask).handle,
-                          pictformats[amask.kind],cpcomponentalpha,@attributes);
-{
    case amask.kind of
     bmk_mono: begin
-     attributes.component_alpha:= 1;
-     result:= xrendercreatepicture(appdisp,tsimplebitmap1(amask).handle,
-                          bitmaprenderpictformat,cpcomponentalpha,@attributes);
+     format1:= bitmaprenderpictformat;
     end;
     bmk_gray: begin
-     attributes.component_alpha:= 1;
-     result:= xrendercreatepicture(appdisp,tsimplebitmap1(amask).handle,
-                          alpharenderpictformat,cpcomponentalpha,@attributes);
+     format1:= alpharenderpictformat;
     end;
     else begin
-     attributes.component_alpha:= 1;
-     result:= xrendercreatepicture(appdisp,tsimplebitmap1(amask).handle,
-                          screenrenderpictformat,cpcomponentalpha,@attributes);
+     format1:= screenrenderpictformat;
     end;
+    attributes.component_alpha:= 1;
+    result:= xrendercreatepicture(appdisp,tsimplebitmap1(amask).handle,
+                                          format1,cpcomponentalpha,@attributes);
    end;
-}
   end;
  end;
 end;
@@ -1043,15 +1034,13 @@ begin
       attributes._repeat:= repeatnormal;
       if xfts_monobrush in xftstate then begin
        xftbrushalphapic:= xrendercreatepicture(appdisp,xftbrush,
-               pictformats[bmk_mono]
-                            {bitmaprenderpictformat},cprepeat,@attributes);
+                            bitmaprenderpictformat,cprepeat,@attributes);
        xftbrushpic:= createargbpicture(xftbrushsize,true);
        updatemonocolor;
       end
       else begin
        xftbrushpic:= xrendercreatepicture(appdisp,xftbrush,
-                pictformats[bmk_mono]
-                            {screenrenderpictformat},cprepeat,@attributes);
+                            screenrenderpictformat,cprepeat,@attributes);
       end;
      end
      else begin
@@ -1078,7 +1067,7 @@ begin
  checkxftstate(drawinfo,[xfts_foregroundvalid]);
  with x11gcty(drawinfo.gc.platformdata).d do begin
   xrendercompositetriangles(appdisp,xrenderop,xftforegroundpic,
-           xftdrawpic,pictformats[bmk_gray]{alpharenderpictformat},
+           xftdrawpic,alpharenderpictformat,
            xftbrushorigin.x+(ppointty(triangles)^.x+posroundval) div 65536,
            xftbrushorigin.y+(ppointty(triangles)^.y+posroundval) div 65536,
            pxtriangle(triangles),trianglecount);
@@ -1091,7 +1080,7 @@ begin
  checkxftstate(drawinfo,[xfts_foregroundvalid]);
  with x11gcty(drawinfo.gc.platformdata).d do begin
   xrendercompositetristrip(appdisp,xrenderop,xftforegroundpic,
-        xftdrawpic,pictformats[bmk_gray]{alpharenderpictformat},
+        xftdrawpic,alpharenderpictformat,
         xftbrushorigin.x+(points^.x+posroundval) div 65536,
         xftbrushorigin.y+(points^.y+posroundval) div 65536,
         pxpointfixed(points),pointcount);
@@ -1104,7 +1093,7 @@ begin
  checkxftstate(drawinfo,[xfts_foregroundvalid]);
  with x11gcty(drawinfo.gc.platformdata).d do begin
   xrendercompositetrifan(appdisp,xrenderop,xftforegroundpic,
-        xftdrawpic,pictformats[bmk_gray]{alpharenderpictformat},
+        xftdrawpic,alpharenderpictformat,
         xftbrushorigin.x+(points^.x+posroundval) div 65536,
         xftbrushorigin.y+(points^.y+posroundval) div 65536,
         pxpointfixed(points),pointcount);
@@ -1937,7 +1926,7 @@ var
                                 para3:cint; para4:culong):cint;cdecl; 
  getpixelfunc: function (para1:PXImage;
                                 para2:cint; para3:cint):culong;cdecl;
-   
+ format1: pxrenderpictformat;
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
@@ -2007,7 +1996,7 @@ begin
    with dattributes do begin
     graphics_exposures:= 0;
    end;
-   if (dkind <> skind) and (dkind = bmk_mono) or (skind = bmk_mono) then begin
+   if (dkind <> skind) and ((dkind = bmk_mono) or (skind = bmk_mono)) then begin
     if dkind = bmk_mono then begin
      if maskpic <> 0 then begin
       xrenderfreepicture(appdisp,maskpic);
@@ -2051,11 +2040,13 @@ begin
        x1:= x;
        y1:= y;
       end;
-      spic:= xrendercreatepicture(appdisp,spd,pictformats[bmk_mono]
-                      {bitmaprenderpictformat},
+      spic:= xrendercreatepicture(appdisp,spd,bitmaprenderpictformat,
                        sourceformats,@sattributes);
-      dpic:= xrendercreatepicture(appdisp,paintdevice,
-                        pictformats[dkind]{screenrenderpictformat},
+      format1:= screenrenderpictformat;
+      if dkind = bmk_gray then begin
+       format1:= alpharenderpictformat;
+      end;
+      dpic:= xrendercreatepicture(appdisp,paintdevice,format1,
                        destformats,@dattributes);
       cpic:= createcolorpicture(acolorforeground);
       if gcclipregion <> 0 then begin
@@ -2092,11 +2083,11 @@ endlab2:
        xfreepixmap(appdisp,bitmap);
       end;
      end
-     else begin //bmk_rgb <> bmk_gray
+     else begin 
      end;
     end;
    end
-   else begin
+   else begin //bmk_rgb <> bmk_gray
    {
     case dkindgc.kind of 
      bmk_mono: begin
