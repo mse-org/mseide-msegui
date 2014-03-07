@@ -2081,15 +2081,12 @@ begin
             (destrect^.cy <> sourcerect^.cy)) and
             (destrect^.cx > 0) and (destrect^.cy > 0);
   monomask:= (mask = nil) or (mask.kind = bmk_mono);
-//  colormask1:= (mask <> nil) and (mask.kind = bmk_rgb);
-//  if not colormask1 then begin
-//   graymask:= (mask <> nil) and ((mask.kind <> bmk_mono) or needstransform);
-//  end;
-//  colormask:= (mask <> nil) and (not mask.monochrome or needstransform);
   if hasxrender and (needstransform or (longword(opacity) <> maxopacity) or
-                             not monomask{colormask1 or graymask)}) then begin
+                                                      not monomask) then begin
    if needstransform then begin
-    monomask:= false;     //xrender ignors clip_mask for transformations
+    if mask <> nil then begin
+     monomask:= false;     //xrender ignors clip_mask for transformations
+    end;
     transform:= unitytransform;
     transform[0,0]:= getscale(cx,destrect^.cx,x,ax);
     transform[1,1]:= getscale(cy,destrect^.cy,y,ay);
@@ -2100,33 +2097,15 @@ begin
    end;
    pictop:= pictopsrc;
    maskpic:= 0;
-   if (longword(opacity) <> maxopacity) and monomask
-                              {not (colormask1 or graymask)} then begin
+   if (longword(opacity) <> maxopacity) and monomask then begin
     maskpic:= createmaskpicture(opacity);
     pictop:= pictopover;
    end
    else begin
-    if not monomask {colormask1 or graymask} then begin
+    if not monomask then begin
      maskpic:= createmaskpicture(mask);
      updatetransform(maskpic);
      pictop:= pictopover;
-    end
-    else begin
-     if mask <> nil then begin
-//      pictop:= pictopover; //pictopsrc is unreliable!?
-     end;
-    (*
-     if (gc.kind = bmk_mono){(df_canvasismonochrome in gc.drawingflags)}
-                                                and (mask = nil) then begin
-      pictop:= pictopsrc; 
-     end
-     else begin
-      if mask <> nil then begin
-       maskpic:= createmaskpicture(mask);
-      end;
-      pictop:= pictopover; //pictopsrc is unreliable!?
-     end;
-    *)
     end;
    end;
    with sattributes do begin
