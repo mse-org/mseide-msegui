@@ -733,6 +733,11 @@ begin
  end;
 end;
 
+function colortorendercolor(const avalue: colorty): txrendercolor; overload;
+begin
+ result:= colortorendercolor(colortorgb(avalue));
+end;
+
 function graytorendercolor(const avalue: rgbtriplety): txrendercolor; overload;
 var
  wo1: word;
@@ -747,9 +752,9 @@ begin
  end;
 end;
 
-function colortorendercolor(const avalue: colorty): txrendercolor; overload;
+function graytorendercolor(const avalue: colorty): txrendercolor; overload;
 begin
- result:= colortorendercolor(colortorgb(avalue));
+ result:= graytorendercolor(colortorgb(avalue));
 end;
 
 procedure setregion(var gc: gcty; const aregion: region;
@@ -911,12 +916,12 @@ begin
  result:= xrendercreatesolidfill(appdisp,@acolor);
 end;
 
-function createcolorpicture(const acolor: rgbtriplety): tpicture;
+function createcolorpicture(const acolor: colorty): tpicture;
 begin
  result:= createcolorpic(colortorendercolor(acolor));
 end;
 
-function creategraypicture(const acolor: rgbtriplety): tpicture;
+function creategraypicture(const acolor: colorty): tpicture;
 begin
  result:= createcolorpic(graytorendercolor(acolor));
 end;
@@ -2185,10 +2190,10 @@ begin
      pictop:= pictopover;
      if dkind = bmk_gray then begin
       pictop:= pictopsrc; //-> incorrect color, todo
-      cpic:= creategraypicture(colortorgb(acolorforeground));
+      cpic:= creategraypicture(acolorforeground);
      end
      else begin
-      cpic:= createcolorpicture(colortorgb(acolorforeground));
+      cpic:= createcolorpicture(acolorforeground);
      end;
      if gcclipregion <> 0 then begin
       setregion(gc,region(gcclipregion),dpic);
@@ -2210,10 +2215,10 @@ begin
       bitmapgc:= xcreategc(appdisp,spd,gcforeground or gcfunction,@xvalues);
       xfillrectangle(appdisp,spd,bitmapgc,x1,y1,cx,cy);
       if dkind = bmk_gray then begin
-       cpic:= creategraypicture(colortorgb(acolorbackground));
+       cpic:= creategraypicture(acolorbackground);
       end
       else begin
-       cpic:= createcolorpicture(colortorgb(acolorbackground));
+       cpic:= createcolorpicture(acolorbackground);
       end;
 //      cpic:= createcolorpicture(acolorbackground);
       xrendercomposite(appdisp,pictop,cpic,spic,dpic,0,0,ax,ay,
