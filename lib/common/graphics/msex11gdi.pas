@@ -953,10 +953,10 @@ begin
     else begin
      format1:= screenrenderpictformat;
     end;
-    attributes.component_alpha:= 1;
-    result:= xrendercreatepicture(appdisp,tsimplebitmap1(amask).handle,
-                                          format1,cpcomponentalpha,@attributes);
    end;
+   attributes.component_alpha:= 1;
+   result:= xrendercreatepicture(appdisp,tsimplebitmap1(amask).handle,
+                                          format1,cpcomponentalpha,@attributes);
   end;
  end;
 end;
@@ -1847,6 +1847,155 @@ end;
 const
  rgbwhite: rgbtriplety = (blue: $ff; green: $ff; red: $ff; res: $00);
 }
+procedure graytorgb(const sdev: paintdevicety; const srect: rectty;
+               const ddev: paintdevicety; const dpos: pointty; const gc: pgcty);
+var
+ putpixelfunc: function (para1:PXImage; para2:cint;
+                                para3:cint; para4:culong):cint; cdecl; 
+ dimage,simage: pximage;
+ ps,ps1,pse,pd,pd1,pde: pointer;
+ int1,int2: integer;
+ gc1: tgc;
+begin
+ with srect do begin
+  simage:= xgetimage(appdisp,sdev,x,y,cx,cy,$ff,zpixmap);
+  if simage <> nil then begin
+   dimage:= xcreateimage(appdisp,defvisual,defdepth,zpixmap,0,nil,
+                                                              cx,cy,32,0);                              
+   if dimage <> nil then begin
+    try
+     int1:= cy*dimage^.bytes_per_line;
+     getmem(dimage^.data,int1);
+     ps:= simage^.data;
+     pd:= dimage^.data;
+     pde:= pd+int1;
+     if dimage^.bits_per_pixel = 32 then begin
+      repeat
+       ps1:= ps;
+       pse:= ps+cx;
+       pd1:= pd;
+       repeat
+        pbyte(pd1)^:= pbyte(ps1)^;
+        inc(pd1);
+        pbyte(pd1)^:= pbyte(ps1)^;
+        inc(pd1);
+        pbyte(pd1)^:= pbyte(ps1)^;
+        inc(pd1,2);
+        inc(ps1);
+       until ps1 = pse;
+       ps:= ps+simage^.bytes_per_line;
+       pd:= pd+dimage^.bytes_per_line;
+      until pd = pde;
+     end
+     else begin
+      putpixelfunc:= dimage^.f.put_pixel;
+      for int1:= 0 to cy - 1 do begin
+       ps1:= ps;
+       for int2:= 0 to cx - 1 do begin
+        putpixelfunc(dimage,int2,int1,gui_graytopixel(pbyte(ps1)[int2]));
+       end;
+       ps:= ps+simage^.bytes_per_line;
+      end;
+     end;
+    except
+    end;
+    if gc <> nil then begin
+     gc1:= tgc(gc^.handle);
+    end
+    else begin
+     gc1:= xcreategc(appdisp,ddev,0,nil);
+    end;     
+    xputimage(appdisp,ddev,gc1,dimage,0,0,dpos.x,dpos.y,cx,cy);
+    if gc = nil then begin
+     xfreegc(appdisp,gc1);
+    end;
+    if dimage^.data <> nil then begin
+     freemem(dimage^.data);       
+     dimage^.data:= nil;
+    end;
+    xdestroyimage(dimage);
+   end;
+   xdestroyimage(simage);
+  end;
+ end;
+end;
+
+procedure rgbtogray(const sdev: paintdevicety; const srect: rectty;
+               const ddev: paintdevicety; const dpos: pointty; const gc: pgcty);
+var
+ getpixelfunc: function (para1:PXImage; para2:cint; para3:cint):culong; cdecl;
+ dimage,simage: pximage;
+ ps,ps1,pse,pd,pd1,pde: pointer;
+ int1,int2: integer;
+ wo1: word;
+ lwo1: word;
+ gc1: tgc;
+begin
+ with srect do begin
+  simage:= xgetimage(appdisp,sdev,x,y,cx,cy,$ffffff,zpixmap);
+  if simage <> nil then begin
+   dimage:= xcreateimage(appdisp,defvisual,8,zpixmap,0,nil,cx,cy,32,0);                              
+   if dimage <> nil then begin
+    try
+     int1:= cy*dimage^.bytes_per_line;
+     getmem(dimage^.data,int1);
+     ps:= simage^.data;
+     pd:= dimage^.data;
+     pde:= pd+int1;
+     if simage^.bits_per_pixel = 32 then begin
+      repeat
+       ps1:= ps;
+       pse:= ps+cx*4;
+       pd1:= pd;
+       repeat
+        wo1:= pbyte(ps1)^;
+        inc(ps1);
+        wo1:= wo1 + pbyte(ps1)^;
+        inc(ps1);
+        pbyte(pd1)^:= (wo1 + pbyte(ps1)^) div 3;
+        inc(ps1,2);
+        inc(pd1);
+       until ps1 = pse;
+       ps:= ps+simage^.bytes_per_line;
+       pd:= pd+dimage^.bytes_per_line;
+      until pd = pde;
+     end
+     else begin
+      getpixelfunc:= simage^.f.get_pixel;
+      for int1:= 0 to cy - 1 do begin
+       pd1:= pd;
+       for int2:= 0 to cx - 1 do begin
+        lwo1:= getpixelfunc(simage,int2,int1);
+        pbyte(pd1)[int2]:= (lwo1 and $ff + ((lwo1 and $ff00) shr 8) +
+                                       ((lwo1 and $ff0000) shr 16)) div 3;
+ 
+       end;
+       pd:= pd+dimage^.bytes_per_line;
+      end;
+     end;
+    except
+    end;
+    if gc <> nil then begin
+     gc1:= tgc(gc^.handle);
+    end
+    else begin
+     gc1:= xcreategc(appdisp,ddev,0,nil);
+    end;     
+    xputimage(appdisp,ddev,gc1,dimage,0,0,dpos.x,dpos.y,cx,cy);
+    if gc = nil then begin
+     xfreegc(appdisp,gc1);
+    end;
+    if dimage^.data <> nil then begin
+     freemem(dimage^.data);       
+     dimage^.data:= nil;
+    end;
+    xdestroyimage(dimage);
+   end;
+   xdestroyimage(simage);
+  end;
+ end;
+end;
+
 procedure gdi_copyarea(var drawinfo: drawinfoty); //gdifunc
 
 const
@@ -1866,7 +2015,7 @@ var
  sattributes: txrenderpictureattributes;
  dattributes: txrenderpictureattributes;
  transform: txtransform;
- ax,ay: integer;
+ ax,ay,sx,sy: integer;
 // aformat: pxrenderpictformat;
 // color1: txrendercolor;
  {pixmap1,}pixmap2: pixmapty;
@@ -1917,16 +2066,9 @@ var
  spd: paintdevicety;
  skind,dkind: bitmapkindty;
  x1,y1: integer;
- dimage,simage: pximage;
- ps,ps1,pse,pd,pd1,pde: pointer;
  int2: integer;
- wo1: word;
- lwo1: longword;
- putpixelfunc: function (para1:PXImage; para2:cint;
-                                para3:cint; para4:culong):cint;cdecl; 
- getpixelfunc: function (para1:PXImage;
-                                para2:cint; para3:cint):culong;cdecl;
  format1: pxrenderpictformat;
+ sdev: paintdevicety;
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
@@ -1947,17 +2089,17 @@ begin
   if hasxrender and (needstransform or (longword(opacity) <> maxopacity) or
                              not monomask{colormask1 or graymask)}) then begin
    if needstransform then begin
-//    pictop:= pictopover;
-    pictop:= pictopsrc;
+    monomask:= false;     //xrender ignors clip_mask for transformations
     transform:= unitytransform;
     transform[0,0]:= getscale(cx,destrect^.cx,x,ax);
     transform[1,1]:= getscale(cy,destrect^.cy,y,ay);
    end
    else begin
-    pictop:= pictopsrc;
     ax:= x;
     ay:= y;
    end;
+   pictop:= pictopsrc;
+   maskpic:= 0;
    if (longword(opacity) <> maxopacity) and monomask
                               {not (colormask1 or graymask)} then begin
     maskpic:= createmaskpicture(opacity);
@@ -1970,7 +2112,10 @@ begin
      pictop:= pictopover;
     end
     else begin
-     maskpic:= 0;
+     if mask <> nil then begin
+//      pictop:= pictopover; //pictopsrc is unreliable!?
+     end;
+    (*
      if (gc.kind = bmk_mono){(df_canvasismonochrome in gc.drawingflags)}
                                                 and (mask = nil) then begin
       pictop:= pictopsrc; 
@@ -1981,6 +2126,7 @@ begin
       end;
       pictop:= pictopover; //pictopsrc is unreliable!?
      end;
+    *)
     end;
    end;
    with sattributes do begin
@@ -2083,40 +2229,47 @@ endlab2:
      end;
     end;
    end
-   else begin //bmk_rgb <-> bmk_gray
-   {
+   else begin 
+    sx:= ax;
+    sy:= ay;
+    format1:= screenrenderpictformat;
+    sdev:= tcanvas1(source).paintdevice;
     if dkind = bmk_gray then begin
-    end
-    else begin
+     format1:= alpharenderpictformat;
     end;
-    case dkind of 
-     bmk_gray: begin
-      format1:= alpharenderpictformat;
+    if dkind <> skind then begin //bmk_rgb <-> bmk_gray
+     sx:= 0;
+     sy:= 0;
+     if dkind = bmk_gray then begin
+      sdev:= gui_createpixmap(sourcerect^.size,0,bmk_gray);
+      rgbtogray(tcanvas1(source).paintdevice,sourcerect^,sdev,nullpoint,nil);
      end
      else begin
-      format1:= screenrenderpictformat;
+      sdev:= gui_createpixmap(sourcerect^.size,0,bmk_rgb);
+      graytorgb(tcanvas1(source).paintdevice,sourcerect^,sdev,nullpoint,nil);
      end;
     end;
-    dpic:= xrendercreatepicture(appdisp,paintdevice,pictformats[dkind],
-                                                    destformats,@dattributes);
-    spic:= xrendercreatepicture(appdisp,tcanvas1(source).paintdevice,
-                               pictformats[skind],sourceformats,@sattributes);
+    spic:= xrendercreatepicture(appdisp,sdev,format1,
+                                            sourceformats,@sattributes);
+    dpic:= xrendercreatepicture(appdisp,paintdevice,format1,
+                                              destformats,@dattributes);
     if gcclipregion <> 0 then begin
      setregion(gc,region(gcclipregion),dpic);
     end;
     updatetransform(spic);
-    xrendercomposite(appdisp,pictop,spic,maskpic,dpic,ax,ay,ax,ay,
+    xrendercomposite(appdisp,pictop,spic,maskpic,dpic,sx,sy,ax,ay,
                          destrect^.x,destrect^.y,destrect^.cx,destrect^.cy);
-   end;
-   xrenderfreepicture(appdisp,spic);
-   xrenderfreepicture(appdisp,dpic);
-   }
+    xrenderfreepicture(appdisp,spic);
+    xrenderfreepicture(appdisp,dpic);
+    if sdev <> tcanvas1(source).paintdevice then begin
+     xfreepixmap(appdisp,sdev);
+    end;
     if maskpic <> 0 then begin
      xrenderfreepicture(appdisp,maskpic);
     end;
    end;
   end
-  else begin
+  else begin //direct x11
    pixmap2:= 0;
    if copymode <> gcrasterop then begin
     xsetfunction(appdisp,tgc(gc.handle),integer(copymode));
@@ -2152,115 +2305,13 @@ endlab2:
    else begin
     xvalues.graphics_exposures:= {$ifdef xboolean}false{$else}0{$endif};
     if (skind = bmk_gray) and (dkind = bmk_rgb) then begin
-     simage:= xgetimage(appdisp,tcanvas1(source).fdrawinfo.paintdevice,
-               x,y,cx,cy,$ff,zpixmap);
-     if simage <> nil then begin
-      dimage:= xcreateimage(appdisp,defvisual,defdepth,zpixmap,0,nil,
-                                                                 cx,cy,32,0);                              
-      if dimage <> nil then begin
-       try
-        int1:= cy*dimage^.bytes_per_line;
-        getmem(dimage^.data,int1);
-        ps:= simage^.data;
-        pd:= dimage^.data;
-        pde:= pd+int1;
-        if dimage^.bits_per_pixel = 32 then begin
-         repeat
-          ps1:= ps;
-          pse:= ps+simage^.bytes_per_line;
-          pd1:= pd;
-          repeat
-           pbyte(pd1)^:= pbyte(ps1)^;
-           inc(pd1);
-           pbyte(pd1)^:= pbyte(ps1)^;
-           inc(pd1);
-           pbyte(pd1)^:= pbyte(ps1)^;
-           inc(pd1,2);
-           inc(ps1);
-          until ps1 = pse;
-          ps:= ps+simage^.bytes_per_line;
-          pd:= pd+dimage^.bytes_per_line;
-         until pd = pde;
-        end
-        else begin
-         putpixelfunc:= dimage^.f.put_pixel;
-         for int1:= 0 to cy - 1 do begin
-          ps1:= ps;
-          for int2:= 0 to cx - 1 do begin
-           putpixelfunc(dimage,int2,int1,gui_graytopixel(pbyte(ps1)[int2]));
-          end;
-          ps:= ps+simage^.bytes_per_line;
-         end;
-        end;
-       except
-       end;
-       xputimage(appdisp,paintdevice,tgc(gc.handle),dimage,0,0,
-                                     destrect^.x,destrect^.y,cx,cy);
-       if dimage^.data <> nil then begin
-        freemem(dimage^.data);       
-        dimage^.data:= nil;
-       end;
-       xdestroyimage(dimage);
-      end;
-      xdestroyimage(simage);
-     end;
+     graytorgb(tcanvas1(source).fdrawinfo.paintdevice,sourcerect^,
+               paintdevice,destrect^.pos,@gc);
     end
     else begin
      if (skind = bmk_rgb) and (dkind = bmk_gray) then begin
-      simage:= xgetimage(appdisp,tcanvas1(source).fdrawinfo.paintdevice,
-                                                   x,y,cx,cy,$ffffff,zpixmap);
-      if simage <> nil then begin
-       dimage:= xcreateimage(appdisp,defvisual,8,zpixmap,0,nil,cx,cy,32,0);                              
-       if dimage <> nil then begin
-        try
-         int1:= cy*dimage^.bytes_per_line;
-         getmem(dimage^.data,int1);
-         ps:= simage^.data;
-         pd:= dimage^.data;
-         pde:= pd+int1;
-         if simage^.bits_per_pixel = 32 then begin
-          repeat
-           ps1:= ps;
-           pse:= ps+simage^.bytes_per_line;
-           pd1:= pd;
-           repeat
-            wo1:= pbyte(ps1)^;
-            inc(ps1);
-            wo1:= wo1 + pbyte(ps1)^;
-            inc(ps1);
-            pbyte(pd1)^:= (wo1 + pbyte(ps1)^) div 3;
-            inc(ps1,2);
-            inc(pd1);
-           until ps1 = pse;
-           ps:= ps+simage^.bytes_per_line;
-           pd:= pd+dimage^.bytes_per_line;
-          until pd = pde;
-         end
-         else begin
-          getpixelfunc:= simage^.f.get_pixel;
-          for int1:= 0 to cy - 1 do begin
-           pd1:= pd;
-           for int2:= 0 to cx - 1 do begin
-            lwo1:= getpixelfunc(simage,int2,int1);
-            pbyte(pd1)[int2]:= (lwo1 and $ff + ((lwo1 and $ff00) shr 8) +
-                                           ((lwo1 and $ff0000) shr 16)) div 3;
-
-           end;
-           pd:= pd+dimage^.bytes_per_line;
-          end;
-         end;
-        except
-        end;
-        xputimage(appdisp,paintdevice,tgc(gc.handle),dimage,0,0,
-                                      destrect^.x,destrect^.y,cx,cy);
-        if dimage^.data <> nil then begin
-         freemem(dimage^.data);       
-         dimage^.data:= nil;
-        end;
-        xdestroyimage(dimage);
-       end;
-       xdestroyimage(simage);
-      end;
+      rgbtogray(tcanvas1(source).fdrawinfo.paintdevice,sourcerect^,
+               paintdevice,destrect^.pos,@gc);
      end
      else begin  
       if dkind = bmk_mono then begin //convert to monochrome
