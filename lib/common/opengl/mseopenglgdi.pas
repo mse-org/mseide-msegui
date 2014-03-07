@@ -520,7 +520,7 @@ begin
   pixmap:= createdibitmap(dc,info.bmiheader,0,nil,info,dib_rgb_colors);
   releasedc(0,dc);
  {$else}
-  pixmap:= gui_createpixmap(size,0,false,copyfrom); 
+  pixmap:= gui_createpixmap(size,0,bmk_rgb{false},copyfrom); 
          //depht 1 not supported by glx ???
   {$endif}
  end;
@@ -814,7 +814,7 @@ begin
   with dest do begin
    size.cx:= nextpowerof2(source.image.size.cx);
    size.cy:= nextpowerof2(source.image.size.cy);
-   result:= (source.mask.pixels <> nil) and not source.mask.monochrome
+   result:= (source.mask.pixels <> nil) and (source.mask.kind <> bmk_mono)
                     or (size.cx <> source.image.size.cx) or 
                                        (size.cy <> source.image.size.cy);
    if result then begin
@@ -822,7 +822,7 @@ begin
     dcy:= size.cy;
     scx:= source.image.size.cx;
     scy:= source.image.size.cy;    
-    allocimage(dest,source.image.size,source.image.monochrome);
+    allocimage(dest,source.image.size,source.image.kind);
     scxw:= dest.linelength;
     {
     if source.image.monochrome then begin
@@ -836,7 +836,7 @@ begin
     ps:= pointer(source.image.pixels);
     pd:= pointer(dest.pixels);
     yintp:= dcy;
-    if (source.mask.pixels <> nil) and not source.mask.monochrome then begin
+    if (source.mask.pixels <> nil) and (source.mask.kind <> bmk_mono) then begin
      //color mask
      pm:= pointer(source.mask.pixels);
      for int1:= dcy-1 downto 0 do begin
@@ -863,7 +863,8 @@ begin
      end;
     end
     else begin
-     if source.image.monochrome then begin  //mask in monochrome not supported
+     if source.image.kind = bmk_mono then begin  
+                             //mask in monochrome not supported
       for int1:= dcy-1 downto 0 do begin
        xintp:= dcx;
        pd^:= 0;
@@ -959,7 +960,7 @@ begin
   end;
   glpushclientattrib(gl_client_pixel_store_bit);
   glpushattrib(gl_pixel_mode_bit);
-  if im2.monochrome then begin
+  if im2.kind = bmk_mono then begin
    map[0]:= glcolorbackground.red/255;
    map[1]:= glcolorforeground.red/255;
    glpixelmapfv(gl_pixel_map_i_to_r,2,@map);
@@ -1585,7 +1586,7 @@ begin
     end;
     setrasterpos(drawinfo.gc,destrect^.pos);
     glpixelstorei(gl_unpack_lsb_first,1);
-    if im1.mask.monochrome and (im1.mask.pixels <> nil) then begin
+    if (im1.mask.kind = bmk_mono) and (im1.mask.pixels <> nil) then begin
      glstencilmask(2);
      glpixeltransferi(gl_index_shift,1);
      with sourcerect^ do begin
@@ -1601,7 +1602,7 @@ begin
      end;
      glstencilfunc(gl_equal,int1,int1);
     end;
-    if im1.image.monochrome then begin
+    if im1.image.kind = bmk_mono then begin
      datatype:= gl_bitmap;
      mode:= gl_color_index;
      map[0]:= glcolorbackground.red/255;
@@ -1629,7 +1630,7 @@ begin
      glpixelmapfv(gl_pixel_map_i_to_a,2,@map);
     end
     else begin
-     if (im1.mask.pixels <> nil) and not im1.mask.monochrome then begin
+     if (im1.mask.pixels <> nil) and (im1.mask.kind <> bmk_mono) then begin
      {
       if im1.mask.monochrome then begin
        pd2:= prgbtriplety(im1.image.pixels);
@@ -1699,7 +1700,7 @@ var
 begin
  with drawinfo,oglgcty(drawinfo.gc.platformdata).d do begin
   with image do begin
-   if monochrome then begin
+   if kind = bmk_mono then begin
     datatype:= gl_unsigned_byte;
     mode:= gl_luminance;
     getmem(po1,size.cx*size.cy);
@@ -1778,8 +1779,7 @@ procedure gdi_pixmaptoimage(var drawinfo: drawinfoty); //gdifunc
 begin
  with drawinfo.pixmapimage do begin
   if drawinfo.gc.handle <> 0 then begin
-   allocimage(image,drawinfo.gc.paintdevicesize,
-                        df_canvasismonochrome in drawinfo.gc.drawingflags);
+   allocimage(image,drawinfo.gc.paintdevicesize,drawinfo.gc.kind);
    getimage(drawinfo,image);
   end
   else begin
@@ -1796,9 +1796,9 @@ var
  lwo1: longword;
 begin
  with drawinfo.pixmapimage do begin
-  if image.monochrome then begin
+  if image.kind = bmk_mono then begin
    with image do begin
-    allocimage(im1,size,false);
+    allocimage(im1,size,bmk_rgb);
     ps1:= pointer(pixels);
 //    pd1:= plongword(im1.pixels)+(size.cy-1)*size.cx; //top row
     pd1:= pointer(im1.pixels);

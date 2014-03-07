@@ -258,7 +258,7 @@ var
 begin
  with cellinfoty(canvas.drawinfopo^) do begin
   if (datapo <> nil) and (string(datapo^) <> '') then begin
-   bmp:= tmaskedbitmap.create(bitmap.monochrome);
+   bmp:= tmaskedbitmap.create(bitmap.kind);
    try
     with bitmap do begin
      bmp.alignment:= alignment;

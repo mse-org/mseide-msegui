@@ -322,7 +322,7 @@ begin
   colorlinegap:= cl_transparent;
   joinstyle:= js_miter;
   edgeradiusvertexcount:= 2;
-  brush:= tmaskedbitmap.create(false);
+  brush:= tmaskedbitmap.create(bmk_rgb{false});
   brush.onchange:= {$ifdef FPC}@{$endif}bitmapchanged;
  end;
  inherited;

@@ -66,7 +66,7 @@ uses
 constructor ttraywidget.create(aowner: tcomponent);
 begin
  fimagenum:= -1;
- ficon:= tcenteredbitmap.create(false);
+ ficon:= tcenteredbitmap.create(bmk_rgb{false});
  ficon.onchange:= {$ifdef FPC}@{$endif}iconchanged;
  inherited;
 end;
@@ -147,7 +147,7 @@ begin
  if not (csloading in componentstate) then begin
   if ficonchanging = 0 then begin
    inc(ficonchanging);
-   bmp1:= tmaskedbitmap.create(false);
+   bmp1:= tmaskedbitmap.create(bmk_rgb{false});
    try
     if (fimagelist = nil) or (fimagenum < 0) then begin
      bmp1.assign(ficon);

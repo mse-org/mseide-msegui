@@ -20,7 +20,7 @@ procedure registerformat;
 implementation
 uses
  classes,mclasses,msebitmap,msebits,msegraphutils,mseguiintf,msegraphicstream,
-     msestockobjects;
+     msestockobjects,msegraphics;
 
 type
  tbitmap1 = class(tbitmap);
@@ -351,7 +351,12 @@ begin
       masked:= true;
       count:= idcount;
      end;
-     buffer:= tmaskedbitmap.create(mono);
+     if mono then begin
+      buffer:= tmaskedbitmap.create(bmk_mono);
+     end
+     else begin
+      buffer:= tmaskedbitmap.create(bmk_rgb);
+     end;
      try
       for int1:= 0 to idcount - 1 do begin
        readicobmp(int1,buffer);

@@ -352,6 +352,8 @@ type
    procedure setkind(const avalue: bitmapkindty);
    procedure setmaskkind(const avalue: bitmapkindty);
    function getmaskkind: bitmapkindty;
+   function getgraymask: boolean;
+   procedure setgraymask(const avalue: boolean);
   protected
    function indextoorg(index: integer): pointty;
    procedure change;
@@ -409,6 +411,7 @@ type
    property height: integer read fsize.cy
                    write setheight default defaultimagelistheight;
    property masked: boolean read getmasked write setmasked default true;
+   property graymask: boolean read getgraymask write setgraymask default false;
    property colormask: boolean read getcolormask write setcolormask default false;
    property transparentcolor: colorty read gettransparentcolor
                          write settransparentcolor default cl_none;
@@ -2565,6 +2568,16 @@ end;
 function timagelist.getmonochrome: boolean;
 begin
  result:= fbitmap.monochrome;
+end;
+
+function timagelist.getgraymask: boolean;
+begin
+ result:= fbitmap.graymask;
+end;
+
+procedure timagelist.setgraymask(const avalue: boolean);
+begin
+ fbitmap.graymask:= avalue;
 end;
 
 function timagelist.getcolormask: boolean;

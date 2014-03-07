@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2007-2013 by Martin Schreiber
+{ MSEgui Copyright (c) 2007-2014 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -1597,9 +1597,9 @@ begin
    end;
    if not acanvas.highresdevice and 
                (imagealignment * [al_stretchx,al_stretchy] <> []) then begin
-    bmp1:= tmaskedbitmap.create(fimli1.monochrome);
+    bmp1:= tmaskedbitmap.create(fimli1.kind{fimli1.monochrome});
     fbmp2.free; //in case of previous exception
-    fbmp2:= tmaskedbitmap.create(false);
+    fbmp2:= tmaskedbitmap.create(bmk_rgb{false});
     try
      bmp1.masked:= fimli1.masked;
      fimli1.getimage(finfo.imagenr,bmp1);
@@ -4193,7 +4193,7 @@ end;
 constructor tchartrecorder.create(aowner: tcomponent);
 begin
  fsamplecount:= 100;
- fchart:= tmaskedbitmap.create(false);
+ fchart:= tmaskedbitmap.create(bmk_rgb{false});
  ftraces:= trecordertraces.create;
  inherited;
  include(fstate,chs_nocolorchart);

@@ -1711,7 +1711,8 @@ var
  by1: byte;
 begin
  convertmono(sourcerect,image,ar1,rowb);
- image.monochrome:= false;
+// image.monochrome:= false;
+ image.kind:= bmk_rgb;
  with colortorgb(colorforeground) do begin
   grf:= (red + green + blue) div 3;
  end;
@@ -1755,7 +1756,8 @@ var
  po3: prgbtriplety;
 begin
  convertmono(sourcerect,image,ar1,rowb);
- image.monochrome:= false;
+// image.monochrome:= false;
+ image.kind:= bmk_rgb;
  rgbf:= colortorgb(colorforeground);
  rgbb:= colortorgb(colorbackground);
  with sourcerect do begin
@@ -1952,7 +1954,7 @@ begin
               (acolorbackground = cl_transparent));
   maskbefore:= mask; //compiler warning
   if maskcopy then begin
-   mask:= tsimplebitmap.create(true);
+   mask:= tsimplebitmap.create(bmk_mono{true});
    mask.size:= sourcerect^.size;
    mask.canvas.copyarea(maskbefore.canvas,sourcerect^,nullpoint);
    if acolorbackground = cl_transparent then begin

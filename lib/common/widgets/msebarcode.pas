@@ -187,8 +187,8 @@ begin
  fcolorspace:= cl_transparent;
  ffontbar:= tbarcodefont.create(self);
  inherited;
- fbitmap1:= tbitmap.create(true);
- fbitmap2:= tbitmap.create(true);
+ fbitmap1:= tbitmap.create(bmk_mono{true});
+ fbitmap2:= tbitmap.create(bmk_mono{true});
 end;
 
 destructor tcustombarcode.destroy;

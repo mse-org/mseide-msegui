@@ -4321,7 +4321,7 @@ var
  format1: string;
 begin
  if imagefilepropedit(mstr1,format1) = mr_ok then begin
-  bmp:= tmaskedbitmap.create(false);
+  bmp:= tmaskedbitmap.create(bmk_rgb);
   try
    bmp.options:= bmp.options + [bmo_storeorigformat];
    bmp.loadfromfile(mstr1,format1,[]);

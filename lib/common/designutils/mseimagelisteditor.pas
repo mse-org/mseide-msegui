@@ -89,7 +89,7 @@ begin
  filedialog.controller.filterlist.asarrayb:= graphicfilefiltermasks;
  if filedialog.execute = mr_ok then begin
   unquotefilename(filedialog.controller.filename,ar1);
-  bmp:= tmaskedbitmap.create(false);
+  bmp:= tmaskedbitmap.create(bmk_rgb);
   try
    for int1:= 0 to high(ar1) do begin
     bmp.transparentcolor:= cl_none;
@@ -99,8 +99,15 @@ begin
      bmp.transparentcolor:= transparentcolor.value;
     end;
     bmp.masked:= masked.value;
-    if bmp.masked and bmp.colormask then begin
-     imagelist.colormask:= true;
+    if bmp.masked then begin
+     if bmp.colormask then begin
+      imagelist.colormask:= true;
+     end
+     else begin
+      if bmp.graymask and not imagelist.colormask then begin
+       imagelist.graymask:= true;
+      end;
+     end;
     end;
     if stretch.value then begin
      imagelist.addimage(bmp,[al_stretchx,al_stretchy,al_intpol]);
