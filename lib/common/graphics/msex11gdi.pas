@@ -32,9 +32,9 @@ function x11regiontorects(const aregion: regionty): rectarty;
 function x11getdefaultfontnames: defaultfontnamesty;
 
 type
- createcolorpicturefuncty = function(const acolor: colorty): tpicture;
+ createcolorpicfuncty = function(const acolor: txrendercolor): tpicture;
 var 
- createcolorpicture: createcolorpicturefuncty;
+ createcolorpic: createcolorpicfuncty;
 // pictformats: array[bitmapkindty] of pxrenderpictformat;
  screenrenderpictformat,bitmaprenderpictformat,
                    alpharenderpictformat,
@@ -738,12 +738,12 @@ var
  wo1: word;
 begin
  with result do begin
-  wo1:= (integer(avalue.red)+integer(avalue.red)+integer(avalue.red)) div 3;
+  wo1:= (integer(avalue.red)+integer(avalue.green)+integer(avalue.blue)) div 3;
   wo1:= wo1 or (wo1 shl 8);
-  red:= wo1;
-  green:= wo1;
-  blue:= wo1;
-  alpha:= $ffff;
+  red:= 0;
+  green:= 0;
+  blue:= 0;
+  alpha:= wo1;
  end;
 end;
 
@@ -880,10 +880,10 @@ begin
  xfreepixmap(appdisp,pixmap);
 end;
 
-function createcolorpicture1(const acolor: colorty): tpicture;
+function createcolorpic1(const acolor: txrendercolor): tpicture;
 var
  attributes: txrenderpictureattributes;
- col: txrendercolor;
+// col: txrendercolor;
  pixmap: pixmapty;
 begin
 {$ifdef mse_debuggdisync}
@@ -894,23 +894,33 @@ begin
  attributes._repeat:= repeatnormal;
  result:= xrendercreatepicture(appdisp,pixmap,
                                screenrenderpictformat,cprepeat,@attributes);
- col:= colortorendercolor(acolor);
- xrenderfillrectangle(appdisp,pictopsrc,result,@col,0,0,
+// col:= colortorendercolor(acolor);
+ xrenderfillrectangle(appdisp,pictopsrc,result,@acolor,0,0,
                         xrendercolorsourcesize,xrendercolorsourcesize);
  xfreepixmap(appdisp,pixmap);
 end;
 
-function createcolorpicture2(const acolor: colorty): tpicture;
-var
- col: txrendercolor;
+function createcolorpic2(const acolor: txrendercolor): tpicture;
+//var
+// col: txrendercolor;
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
 {$endif} 
- col:= colortorendercolor(acolor);
- result:= xrendercreatesolidfill(appdisp,@col);
+// col:= colortorendercolor(acolor);
+ result:= xrendercreatesolidfill(appdisp,@acolor);
 end;
- 
+
+function createcolorpicture(const acolor: rgbtriplety): tpicture;
+begin
+ result:= createcolorpic(colortorendercolor(acolor));
+end;
+
+function creategraypicture(const acolor: rgbtriplety): tpicture;
+begin
+ result:= createcolorpic(graytorendercolor(acolor));
+end;
+
 function createmaskpicture(const acolor: rgbtriplety): tpicture; overload;
 var
  attributes: txrenderpictureattributes;
@@ -2172,7 +2182,14 @@ begin
      end;
      dpic:= xrendercreatepicture(appdisp,paintdevice,format1,
                       destformats,@dattributes);
-     cpic:= createcolorpicture(acolorforeground);
+     pictop:= pictopover;
+     if dkind = bmk_gray then begin
+      pictop:= pictopsrc; //-> incorrect color, todo
+      cpic:= creategraypicture(colortorgb(acolorforeground));
+     end
+     else begin
+      cpic:= createcolorpicture(colortorgb(acolorforeground));
+     end;
      if gcclipregion <> 0 then begin
       setregion(gc,region(gcclipregion),dpic);
      end;
@@ -2192,9 +2209,15 @@ begin
       xvalues.foreground:= $ffffffff;
       bitmapgc:= xcreategc(appdisp,spd,gcforeground or gcfunction,@xvalues);
       xfillrectangle(appdisp,spd,bitmapgc,x1,y1,cx,cy);
-      cpic:= createcolorpicture(acolorbackground);
-      xrendercomposite(appdisp,pictop,cpic,spic,dpic,0,0,ax,ay,destrect^.x,destrect^.y,
-                         destrect^.cx,destrect^.cy);
+      if dkind = bmk_gray then begin
+       cpic:= creategraypicture(colortorgb(acolorbackground));
+      end
+      else begin
+       cpic:= createcolorpicture(colortorgb(acolorbackground));
+      end;
+//      cpic:= createcolorpicture(acolorbackground);
+      xrendercomposite(appdisp,pictop,cpic,spic,dpic,0,0,ax,ay,
+                          destrect^.x,destrect^.y,destrect^.cx,destrect^.cy);
       xrenderfreepicture(appdisp,cpic);
       xfillrectangle(appdisp,spd,bitmapgc,x1,y1,cx,cy);
       xfreegc(appdisp,bitmapgc);
@@ -2998,10 +3021,10 @@ begin
  if result then begin
   getprocaddresses(handle,funcsopt,true);
   if xrendercreatesolidfill <> nil then begin
-   createcolorpicture:= @createcolorpicture2;
+   createcolorpic:= @createcolorpic2;
   end
   else begin
-   createcolorpicture:= @createcolorpicture1;
+   createcolorpic:= @createcolorpic1;
   end;
  end;
 end;
