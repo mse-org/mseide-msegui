@@ -1998,10 +1998,6 @@ end;
 
 procedure gdi_copyarea(var drawinfo: drawinfoty); //gdifunc
 
-const
- sourceformats = cpclipmask or cpclipxorigin or cpclipyorigin;
- destformats = cpgraphicsexposure;
-
 var
  amask: pixmapty;
  xvalues: xgcvalues;
@@ -2062,6 +2058,8 @@ label
  end;
 
 var
+ sourceformats: culong  = cpclipmask or cpclipxorigin or cpclipyorigin;
+ destformats: culong = cpgraphicsexposure;
  monomask: boolean;
  spd: paintdevicety;
  skind,dkind: bitmapkindty;
@@ -2085,7 +2083,7 @@ begin
                                                       not monomask) then begin
    if needstransform then begin
     if mask <> nil then begin
-     monomask:= false;     //xrender ignors clip_mask for transformations
+     monomask:= false;     //xrender ignores clip_mask for transformations
     end;
     transform:= unitytransform;
     transform[0,0]:= getscale(cx,destrect^.cx,x,ax);
@@ -2111,7 +2109,7 @@ begin
    with sattributes do begin
     clip_x_origin:= 0;
     clip_y_origin:= 0;
-    if (mask <> nil) and monomask{not (colormask1 or graymask)} then begin
+    if (mask <> nil) and monomask then begin
      clip_mask:= tsimplebitmap1(mask).handle;
     end
     else begin
@@ -2120,6 +2118,7 @@ begin
    end;
    with dattributes do begin
     graphics_exposures:= 0;
+//    clip_mask:= sattributes.clip_mask;
    end;
    if (dkind <> skind) and ((dkind = bmk_mono) or (skind = bmk_mono)) then begin
     if dkind = bmk_mono then begin //color to mono
