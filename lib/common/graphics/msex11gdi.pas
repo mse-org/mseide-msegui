@@ -2096,7 +2096,8 @@ begin
    pictop:= pictopsrc;
    maskpic:= 0;
    if (longword(opacity) <> maxopacity) and monomask then begin
-    maskpic:= createmaskpicture(opacity);
+    maskpic:= createmaskpicture(opacity); 
+              //clip_mask ignored by xrender
     pictop:= pictopover;
    end
    else begin
