@@ -1272,25 +1272,27 @@ var
 begin
  checkimage(false);
  allocuninitedarray(fimage.length,sizeof(longword),result); //max
- if monochrome then begin
-  move(fimage.pixels^,result[0],fimage.length*sizeof(longword));
- end
- else begin
-  po1:=  @fimage.pixels^[0];
-  int2:= 0;                          //msb = run length
-  int1:= fimage.length;
-  while int1 > 0 do begin
-   ca1:= po1^ and $ffffff;
-   int3:= 0;
-   repeat
-    inc(po1);
-    inc(int3);
-    dec(int1);
-   until (po1^ and $ffffff <> ca1) or (int3 = 255) or (int1 = 0);
-   result[int2]:= ca1 or longword(int3 shl 24);
-   inc(int2);
+ case fkind of
+  bmk_mono,bmk_gray: begin
+   move(fimage.pixels^,result[0],fimage.length*sizeof(longword));
   end;
-  setlength(result,int2);
+  else begin
+   po1:=  @fimage.pixels^[0];
+   int2:= 0;                          //msb = run length
+   int1:= fimage.length;
+   while int1 > 0 do begin
+    ca1:= po1^ and $ffffff;
+    int3:= 0;
+    repeat
+     inc(po1);
+     inc(int3);
+     dec(int1);
+    until (po1^ and $ffffff <> ca1) or (int3 = 255) or (int1 = 0);
+    result[int2]:= ca1 or longword(int3 shl 24);
+    inc(int2);
+   end;
+   setlength(result,int2);
+  end;
  end;
 end;
 
@@ -2084,9 +2086,8 @@ function tmaskedbitmap.writedata(const ancestor: tmaskedbitmap): boolean;
 begin
  result:= (fsource = nil) and not isempty and not (pms_nosave in fstate);
  if result and (ancestor <> nil) then begin
-  result:= (masked <> ancestor.masked) or
-           (colormask <> ancestor.colormask) or
-           (monochrome <> ancestor.monochrome) or
+  result:= ((options >< ancestor.options)*
+            (bmokindoptions+bmomaskkindoptions+[bmo_masked]) <> []) or
            (size.cx <> ancestor.size.cx) or
            (size.cy <> ancestor.size.cy) or
            (bmo_storeorigformat in options) and 
@@ -2140,13 +2141,23 @@ begin
  with header do begin
   width:= fsize.cx;
   height:= fsize.cy;
-  if monochrome then begin
-   setbit1(info,ord(iminf_monochrome));
+  case fkind of
+   bmk_mono: begin
+    setbit1(info,ord(iminf_monochrome));
+   end;
+   bmk_gray: begin
+    setbit1(info,ord(iminf_gray));
+   end;
   end;
   if masked then begin
    setbit1(info,ord(iminf_masked));
-   if not fmask.monochrome then begin
-    setbit1(info,ord(iminf_colormask));
+   case fmask.fkind of
+    bmk_gray: begin
+     setbit1(info,ord(iminf_graymask));
+    end;
+    bmk_rgb: begin
+     setbit1(info,ord(iminf_colormask));
+    end;
    end;
   end;
   ar1:= compressdata;
@@ -2190,7 +2201,7 @@ begin
 //    exclude(fstate,pms_monochrome);
    end;
    if checkbit(info,ord(iminf_masked)) then begin
-    ftransparentcolor:= cl_none;
+//    ftransparentcolor:= cl_none;
     ki1:= bmk_mono;
     if checkbit(info,ord(iminf_colormask)) then begin
      ki1:= bmk_rgb;
