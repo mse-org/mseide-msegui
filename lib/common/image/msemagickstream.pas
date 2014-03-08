@@ -398,7 +398,7 @@ begin
      if hasmask then begin
       bo2:= tbitmap1(tmaskedbitmap(source).mask).getimageref(imagebuffer.mask);
      end;
-     if imagebuffer.image.monochrome then begin
+     if imagebuffer.image.kind = bmk_mono then begin
       imageinfo:= cloneimageinfo(nil);
       image:= allocateimage(imageinfo);
       allocateimagecolormap(image,2);

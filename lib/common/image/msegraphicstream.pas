@@ -81,6 +81,8 @@ uses
  msestockobjects,msegraphutils,msearrayutils;
  
 type
+ tmaskedbitmap1 = class(tmaskedbitmap);
+ 
  graphicformatinfoty = record
   formatlabel: string;
   readproc: readgraphicprocty;
@@ -429,168 +431,344 @@ procedure tmsefpmemoryimage.assign(source: tpersistent);
  end;
 var
  col1,col0,col3: tfpcolor;
- po1,po3: plongword;
- po2,po4: prgbtriplety;
- int1,int2{,int3}: integer;
+ int1,int2: integer;
+ wo1: word;
  lwo1: longword;
  masked1: boolean;
- colormask1: boolean;
+ maskkind1: bitmapkindty;
+ pimageline,pmaskline: pointer;
+ pi,pm: pointer;
+ imagestep,maskstep: integer;
 begin
  if source is tbitmap then begin
+  setsize(0,0); //clear
   masked1:= source is tmaskedbitmap;
   if masked1 then begin
    with tmaskedbitmap(source) do begin
     masked1:= masked;
-    colormask1:= colormask;
-    fmonoalpha:= not colormask1;
+    if masked1 then begin
+     with mask do begin
+      maskkind1:= mask.kind;
+      fmonoalpha:= maskkind1 = bmk_mono;
+      pmaskline:= scanline[0];
+      maskstep:= scanlinestep;
+     end;
+    end;
    end;
   end;
   fhasalpha:= masked1;
   with tbitmap(source) do begin
+   pimageline:= scanline[0];
+   imagestep:= scanlinestep;
+   self.setsize(width,height);
+   usepalette:= false;
    col3.alpha:= 0;
-   if monochrome then begin                //mono
-    col0:= to16(colorbackground);
-    col1:= to16(colorforeground);
-    usepalette:= true;
-    self.setsize(width,height);
-    if masked1 then begin
-     if colormask1 then begin              //mono colormask
-      for int1:= 0 to height - 1 do begin
-       po1:= scanline[int1];
-       po4:= tmaskedbitmap(source).mask.scanline[int1];
-       int2:= 0;
-       lwo1:= $00000001;
-       for int2:= 0 to width-1 do begin
-        if po1^ and lwo1 <> 0 then begin
-         col1.alpha:= (word(po4^.red)+word(po4^.green)+word(po4^.blue)) div 3;
-         col1.alpha:= col1.alpha + col1.alpha shl 8;
-         colors[int1,int2]:= col1;
-        end
-        else begin
-         col0.alpha:= (word(po4^.red)+word(po4^.green)+word(po4^.blue)) div 3;
-         col0.alpha:= col1.alpha + col1.alpha shl 8;
-         colors[int2,int1]:= col0;
-        end;
-        lwo1:= lwo1 shl 1;
-        if lwo1 = 0 then begin
-         inc(po1);
+   case kind of
+    bmk_mono: begin                //mono
+     col0:= to16(colorbackground);
+     col1:= to16(colorforeground);
+     usepalette:= true;
+     if masked1 then begin
+      case maskkind1 of
+       bmk_mono: begin             //mono monmask
+        for int1:= 0 to height - 1 do begin
+         pi:= pimageline;
+         pm:= pmaskline;
          lwo1:= $00000001;
+         for int2:= 0 to width-1 do begin
+          if plongword(pi)^ and lwo1 <> 0 then begin
+           if plongword(pm)^ and lwo1 <> 0 then begin
+            col1.alpha:= $ffff;
+           end
+           else begin
+            col1.alpha:= $0000;
+           end;
+           colors[int2,int1]:= col1;
+          end
+          else begin
+           if plongword(pm)^ and lwo1 <> 0 then begin
+            col0.alpha:= $ffff;
+           end
+           else begin
+            col0.alpha:= $0000;
+           end;
+           colors[int2,int1]:= col0;
+          end;
+          lwo1:= lwo1 shl 1;
+          if lwo1 = 0 then begin
+           inc(plongword(pi));
+           inc(plongword(pm));
+           lwo1:= $00000001;
+          end;
+         end;
+         inc(pimageline,imagestep);
+         inc(pmaskline,maskstep);
         end;
-        inc(po4);
+       end;
+       bmk_gray: begin                     //mono graymask
+        for int1:= 0 to height - 1 do begin
+         pi:= pimageline;
+         pm:= pmaskline;
+         lwo1:= $00000001;
+         for int2:= 0 to width-1 do begin
+          if plongword(pi)^ and lwo1 <> 0 then begin
+           wo1:= pbyte(pm)^;
+           col1.alpha:= wo1 or (wo1 shl 8);
+           colors[int2,int1]:= col1;
+          end
+          else begin
+           wo1:= pbyte(pm)^;
+           col1.alpha:= wo1 or (wo1 shl 8);
+           colors[int2,int1]:= col0;
+          end;
+          lwo1:= lwo1 shl 1;
+          inc(pbyte(pm));
+          if lwo1 = 0 then begin
+           inc(plongword(pi));
+           lwo1:= $00000001;
+          end;
+         end;
+         inc(pimageline,imagestep);
+         inc(pmaskline,maskstep);
+        end;
+       end;
+       else begin                          //mono rgbmask        
+        for int1:= 0 to height - 1 do begin
+         pi:= pimageline;
+         pm:= pmaskline;
+         lwo1:= $00000001;
+         for int2:= 0 to width-1 do begin
+          if plongword(pi)^ and lwo1 <> 0 then begin
+           wo1:= (word(prgbtriplety(pm)^.red)+
+                         word(prgbtriplety(pm)^.green)+
+                         word(prgbtriplety(pm)^.blue)) div 3;
+           col1.alpha:= wo1 or (wo1 shl 8);
+           colors[int1,int2]:= col1;
+          end
+          else begin
+           wo1:= (word(prgbtriplety(pm)^.red)+
+                         word(prgbtriplety(pm)^.green)+
+                         word(prgbtriplety(pm)^.blue)) div 3;
+           col0.alpha:= wo1 or (wo1 shl 8);
+           colors[int2,int1]:= col0;
+          end;
+          lwo1:= lwo1 shl 1;
+          if lwo1 = 0 then begin
+           inc(plongword(pi));
+           lwo1:= $00000001;
+          end;
+          inc(plongword(pm));
+         end;
+         inc(pimageline,imagestep);
+         inc(pmaskline,maskstep);
+        end;        
        end;
       end;
      end
-     else begin                          //mono monomask
+     else begin                        //mono unmasked
       for int1:= 0 to height - 1 do begin
-       po3:= tmaskedbitmap(source).mask.scanline[int1];
-       po1:= scanline[int1];
+       pi:= pimageline;
        lwo1:= $00000001;
        for int2:= 0 to width-1 do begin
-        if po1^ and lwo1 <> 0 then begin
-         if po3^ and lwo1 <> 0 then begin
-          col1.alpha:= $ffff;
-         end
-         else begin
-          col1.alpha:= $0000;
-         end;
+        if plongword(pi)^ and lwo1 <> 0 then begin
          colors[int2,int1]:= col1;
         end
         else begin
-         if po3^ and lwo1 <> 0 then begin
-          col0.alpha:= $ffff;
-         end
-         else begin
-          col0.alpha:= $0000;
-         end;
          colors[int2,int1]:= col0;
         end;
         lwo1:= lwo1 shl 1;
         if lwo1 = 0 then begin
-         inc(po1);
-         inc(po3);
+         inc(plongword(pm));
          lwo1:= $00000001;
         end;
        end;
-      end;
-     end;
-    end
-    else begin                        //mono unmasked
-     for int1:= 0 to height - 1 do begin
-      po1:= scanline[int1];
-      int2:= 0;
-      lwo1:= $00000001;
-      for int2:= 0 to width-1 do begin
-       if po1^ and lwo1 <> 0 then begin
-        colors[int2,int1]:= col1;
-       end
-       else begin
-        colors[int2,int1]:= col0;
-       end;
-       lwo1:= lwo1 shl 1;
-       if lwo1 = 0 then begin
-        inc(po1);
-        lwo1:= $00000001;
-       end;
+       inc(pimageline,imagestep);
       end;
      end;
     end;
-   end
-   else begin                       //color
-    usepalette:= false;
-    self.setsize(size.cx,size.cy);
-    if masked1 then begin
-     if colormask1 then begin       //color colormask
-      for int1:= 0 to height - 1 do begin
-       po4:= tmaskedbitmap(source).mask.scanline[int1];
-       po2:= scanline[int1];
-       for int2:= 0 to width - 1 do begin
-        col3.red:= word(po2^.red)+(word(po2^.red) shl word(8));
-        col3.green:= word(po2^.green)+(word(po2^.green) shl word(8));
-        col3.blue:= word(po2^.blue)+(word(po2^.blue) shl word(8));
-        col3.alpha:= (word(po4^.red)+word(po4^.green)+word(po4^.blue)) div 3;
-        col3.alpha:= col3.alpha + col3.alpha shl 8;
-        colors[int2,int1]:= col3;
-        inc(po2);
-        inc(po4);
-       end;
-      end
-     end
-     else begin                  //color monomask
-      for int1:= 0 to height - 1 do begin
-       po1:= tmaskedbitmap(source).mask.scanline[int1];
-       int2:= 0;
-       lwo1:= $00000001;
-       po2:= scanline[int1];
-       for int2:= 0 to width - 1 do begin
-        col3.red:= word(po2^.red)+(word(po2^.red) shl word(8));
-        col3.green:= word(po2^.green)+(word(po2^.green) shl word(8));
-        col3.blue:= word(po2^.blue)+(word(po2^.blue) shl word(8));
-        if po1^ and lwo1 <> 0 then begin
-         col3.alpha:= $ffff;
-        end
-        else begin
-         col3.alpha:= $0000;
-        end;
-        colors[int2,int1]:= col3;
-        inc(po2);
-        lwo1:= lwo1 shl 1;
-        if lwo1 = 0 then begin
-         inc(po1);
+    bmk_gray: begin
+     if masked1 then begin
+      case maskkind1 of
+       bmk_mono: begin                 //gray monomask
+        for int1:= 0 to height - 1 do begin
+         pi:= pimageline;
+         pm:= pmaskline;
          lwo1:= $00000001;
+         for int2:= 0 to width - 1 do begin
+          wo1:= pbyte(pi)^;
+          wo1:= wo1 shl 8;
+          col3.red:= wo1;
+          col3.green:= wo1;
+          col3.blue:= wo1;
+          if plongword(pm)^ and lwo1 <> 0 then begin
+           col3.alpha:= $ffff;
+          end
+          else begin
+           col3.alpha:= $0000;
+          end;
+          colors[int2,int1]:= col3;
+          inc(pbyte(pi));
+          lwo1:= lwo1 shl 1;
+          if lwo1 = 0 then begin
+           inc(plongword(pm));
+           lwo1:= $00000001;
+          end;
+         end;
+         inc(pimageline,imagestep);
+         inc(pmaskline,maskstep);
+        end;      
+       end;
+       bmk_gray: begin            //gray graymask
+        for int1:= 0 to height - 1 do begin
+         pi:= pimageline;
+         pm:= pmaskline;
+         for int2:= 0 to width - 1 do begin
+          wo1:= pbyte(pi)^;
+          wo1:= wo1 shl 8;
+          col3.red:= wo1;
+          col3.green:= wo1;
+          col3.blue:= wo1;
+          wo1:= pbyte(pm)^;
+          col3.alpha:= wo1 or (wo1 shl 8);
+          colors[int2,int1]:= col3;
+          inc(pbyte(pi));
+          inc(pbyte(pm));
+         end;
+         inc(pimageline,imagestep);
+         inc(pmaskline,maskstep);
+        end;
+       end;
+       else begin                //gray colormask
+        for int1:= 0 to height - 1 do begin
+         pi:= pimageline;
+         pm:= pmaskline;
+         for int2:= 0 to width - 1 do begin
+          wo1:= pbyte(pi)^;
+          wo1:= wo1 shl 8;
+          col3.red:= wo1;
+          col3.green:= wo1;
+          col3.blue:= wo1;
+          wo1:= (prgbtriplety(pm)^.red + prgbtriplety(pm)^.green + 
+                                prgbtriplety(pm)^.blue) div 3;
+          col3.alpha:= wo1 or (wo1 shl 8);
+          colors[int2,int1]:= col3;
+          inc(pbyte(pi));
+          inc(prgbtriplety(pm));
+         end;
+         inc(pimageline,imagestep);
+         inc(pmaskline,maskstep);
         end;
        end;
       end;
+     end
+     else begin                 //gray unmasked
+      for int1:= 0 to height - 1 do begin
+       pi:= pimageline;
+       for int2:= 0 to width - 1 do begin
+        wo1:= pbyte(pi)^;
+        wo1:= wo1 shl 8;
+        col3.red:= wo1;
+        col3.green:= wo1;
+        col3.blue:= wo1;
+        colors[int2,int1]:= col3;
+        inc(pbyte(pi));
+       end;
+       inc(pimageline,imagestep);
+      end;
      end;
-    end
-    else begin                 //color unmasked
-     for int1:= 0 to height - 1 do begin
-      po2:= scanline[int1];
-      for int2:= 0 to width - 1 do begin
-       col3.red:= word(po2^.red)+(word(po2^.red) shl word(8));
-       col3.green:= word(po2^.green)+(word(po2^.green) shl word(8));
-       col3.blue:= word(po2^.blue)+(word(po2^.blue) shl word(8));
-       colors[int2,int1]:= col3;
-       inc(po2);
+    end;
+    else begin                       //bmk_rgb
+     if masked1 then begin
+      case maskkind1 of
+       bmk_mono: begin                 //color monomask
+        for int1:= 0 to height - 1 do begin
+         pi:= pimageline;
+         pm:= pmaskline;
+         lwo1:= $00000001;
+         for int2:= 0 to width - 1 do begin
+          wo1:= prgbtriplety(pi)^.red;
+          col3.red:= wo1 or wo1 shl 8;
+          wo1:= prgbtriplety(pi)^.green;
+          col3.green:= wo1 or wo1 shl 8;
+          wo1:= prgbtriplety(pi)^.blue;
+          col3.blue:= wo1 or wo1 shl 8;
+          if plongword(pm)^ and lwo1 <> 0 then begin
+           col3.alpha:= $ffff;
+          end
+          else begin
+           col3.alpha:= $0000;
+          end;
+          colors[int2,int1]:= col3;
+          inc(plongword(pi));
+          lwo1:= lwo1 shl 1;
+          if lwo1 = 0 then begin
+           inc(plongword(pm));
+           lwo1:= $00000001;
+          end;
+         end;
+         inc(pimageline,imagestep);
+         inc(pmaskline,maskstep);
+        end;      
+       end;
+       bmk_gray: begin            //color graymask
+        for int1:= 0 to height - 1 do begin
+         pi:= pimageline;
+         pm:= pmaskline;
+         for int2:= 0 to width - 1 do begin
+          wo1:= (prgbtriplety(pi)^.red);
+          col3.red:= wo1 or (wo1 shl 8);
+          wo1:= (prgbtriplety(pi)^.green);
+          col3.green:= wo1 or (wo1 shl 8);
+          wo1:= (prgbtriplety(pi)^.blue);
+          col3.blue:= wo1 or (wo1 shl 8);
+          wo1:= pbyte(pm)^;
+          col3.alpha:= wo1 or (wo1 shl 8);
+          colors[int2,int1]:= col3;
+          inc(prgbtriplety(pi));
+          inc(pbyte(pm));
+         end;
+         inc(pimageline,imagestep);
+         inc(pmaskline,maskstep);
+        end;
+       end;
+       else begin       //color colormask
+        for int1:= 0 to height - 1 do begin
+         pi:= pimageline;
+         pm:= pmaskline;
+         for int2:= 0 to width - 1 do begin
+          wo1:= (prgbtriplety(pi)^.red);
+          col3.red:= wo1 or (wo1 shl 8);
+          wo1:= (prgbtriplety(pi)^.green);
+          col3.green:= wo1 or (wo1 shl 8);
+          wo1:= (prgbtriplety(pi)^.blue);
+          col3.blue:= wo1 or (wo1 shl 8);
+          wo1:= (prgbtriplety(pm)^.red + prgbtriplety(pm)^.green + 
+                                prgbtriplety(pm)^.blue) div 3;
+          col3.alpha:= wo1 or (wo1 shl 8);
+          colors[int2,int1]:= col3;
+          inc(prgbtriplety(pi));
+          inc(prgbtriplety(pm));
+         end;
+         inc(pimageline,imagestep);
+         inc(pmaskline,maskstep);
+        end;
+       end;
+      end;
+     end
+     else begin                 //color unmasked
+      for int1:= 0 to height - 1 do begin
+       pi:= pimageline;
+       for int2:= 0 to width - 1 do begin
+        wo1:= (prgbtriplety(pi)^.red);
+        col3.red:= wo1 or (wo1 shl 8);
+        wo1:= (prgbtriplety(pi)^.green);
+        col3.green:= wo1 or (wo1 shl 8);
+        wo1:= (prgbtriplety(pi)^.blue);
+        col3.blue:= wo1 or (wo1 shl 8);
+        colors[int2,int1]:= col3;
+        inc(prgbtriplety(pi));
+       end;
+       inc(pimageline,imagestep);
       end;
      end;
     end;
@@ -605,87 +783,103 @@ end;
 procedure tmsefpmemoryimage.assignto(dest: tpersistent);
 
 var
- coloralpha1: boolean;
+ grayalpha1: boolean;
  
- function getmask(ashift: word): boolean;
+ function getmaskdata(ashift: word): boolean;
  var
-  int1,int2: integer;
+  int1,int2,int3: integer;
   bo1,bo2: boolean;
-  po1: prgbtripleaty;
+//  po1: prgbtripleaty;
+  po1: pbyte;
   by1: byte;
  begin
   bo1:= false;
   bo2:= false;
   with tmaskedbitmap(dest) do begin
+   with mask do begin
+    po1:= scanline[0];
+    int3:= scanlinestep;
+   end;
    for int1:= 0 to height - 1 do begin
-    po1:= mask.scanline[int1];
     for int2:= 0 to width - 1 do begin
      by1:= colors[int2,int1].alpha shr ashift;
      bo1:= bo1 or ((by1 < 255) and (by1 > 0));
      bo2:= bo2 and (by1 <> 0);
+     po1[int2]:= by1;
+    {
      with po1^[int2] do begin
       red:= by1;      
       green:= by1;      
       blue:= by1;      
       res:= 0;
      end;
+    }
     end;
+    inc(po1,int3);
    end;
   end;
-  coloralpha1:= bo1;
+  grayalpha1:= bo1;
   result:= bo2;
  end;
   
 var
- int1,int2: integer;
+ int1,int2,int3: integer;
  po1: prgbtripleaty;
  col1: tfpcolor;
-// by1: byte;
  col2: colorty;
  bo1: boolean;
+ ismaskedbitmap: boolean;
 begin
  if dest is tbitmap then begin
-  with tbitmap(dest) do begin
-   size:= makesize(self.width,self.height);
-   bo1:= false;
-{$ifdef FPC}{$checkpointer off}{$endif} 
-//scanline is not in heap on win32
-   for int1:= 0 to height - 1 do begin
-    po1:= scanline[int1];
-    for int2:= 0 to width - 1 do begin
-     col1:= colors[int2,int1];
-     with po1^[int2] do begin
-      red:= col1.red shr 8;      
-      green:= col1.green shr 8;      
-      blue:= col1.blue shr 8;      
-      res:= 0;
-      bo1:= bo1 or (col1.alpha < $ff00);
-     end;
+  ismaskedbitmap:= dest is tmaskedbitmap;
+  try
+   with tbitmap(dest) do begin
+    beginupdate();
+    if ismaskedbitmap then begin
+     tmaskedbitmap(dest).masked:= false;
     end;
-   end;
-   fhasalpha:= bo1;
-   fmonoalpha:= false;
-   if dest is tmaskedbitmap then begin
-    with tmaskedbitmap(dest) do begin
-     if hasalpha then begin
-      masked:= true;
-      colormask:= true;
-      if not getmask(8) then begin
-       getmask(0); //try 8 bit
+    clear();
+    kind:= bmk_rgb;
+    size:= makesize(self.width,self.height);
+    bo1:= false;
+    po1:= scanline[0];
+    int3:= scanlinestep;
+    for int1:= 0 to height - 1 do begin
+     for int2:= 0 to width - 1 do begin
+      col1:= colors[int2,int1];
+      with po1^[int2] do begin
+       red:= col1.red shr 8;      
+       green:= col1.green shr 8;      
+       blue:= col1.blue shr 8;      
+       res:= 0;
+       bo1:= bo1 or (col1.alpha < $ff00);
       end;
-      col2:= maskcolorbackground;
-      maskcolorbackground:= 0;
-      colormask:= coloralpha1;
-      fmonoalpha:= not coloralpha1;
-      maskcolorbackground:= col2;
-     end
-     else begin
-      masked:= false;
+     end;
+     inc(pointer(po1),int3);
+    end;
+    fhasalpha:= bo1;
+    fmonoalpha:= false;
+    if ismaskedbitmap then begin
+     with tmaskedbitmap1(dest) do begin
+      if self.hasalpha then begin
+       graymask:= true;
+       createmask(bmk_gray);
+       mask.size:= size;
+       if not getmaskdata(8) then begin
+        getmaskdata(0); //try 8 bit
+       end;
+       col2:= maskcolorbackground;
+       maskcolorbackground:= 0;
+       graymask:= grayalpha1;
+       fmonoalpha:= not grayalpha1;
+       maskcolorbackground:= col2;
+      end;
      end;
     end;
+    change;
    end;
-{$ifdef FPC}{$checkpointer default}{$endif}
-   change;
+  finally
+   tmaskedbitmap(dest).endupdate();
   end;
  end;
 end;

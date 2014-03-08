@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2014 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -215,28 +215,28 @@ type
    procedure setgraymask(const avalue: boolean);
   protected
    fmask: tbitmap;
+   procedure setkind(const avalue: bitmapkindty); override;
    function gettranspcolor(): colorty;
    procedure setmonochrome(const avalue: boolean); override;
    function getasize: sizety; override;
    procedure createmask(const akind: bitmapkindty); virtual;
-//   procedure createmask(const acolormask: boolean); virtual;
    function getconverttomonochromecolorbackground: colorty; override;
    procedure destroyhandle; override;
    procedure setsize(const Value: sizety); override;
    function writedata(const ancestor: tmaskedbitmap): boolean;
    procedure defineproperties(filer: tfiler); override;
    procedure objectevent(const sender: tobject; const event: objecteventty);
+   function getmask: tsimplebitmap; override;
+   function getsource: tbitmapcomp; override;
+   procedure assign1(const source: tsimplebitmap; const docopy: boolean); override;
+   procedure getcanvasimage(const bgr: boolean;
+                            var aimage: maskedimagety); override;
     //iobjectlink
    procedure link(const source,dest: iobjectlink; valuepo: pointer = nil;
                       ainterfacetype: pointer = nil; once: boolean = false);
    procedure unlink(const source,dest: iobjectlink; valuepo: pointer = nil);
    procedure objevent(const sender: iobjectlink; const event: objecteventty);
    function getinstance: tobject;
-   function getmask: tsimplebitmap; override;
-   function getsource: tbitmapcomp; override;
-   procedure assign1(const source: tsimplebitmap; const docopy: boolean); override;
-   procedure getcanvasimage(const bgr: boolean;
-                            var aimage: maskedimagety); override;
   public
    constructor create(const akind: bitmapkindty;
                      const agdifuncs: pgdifunctionaty = nil);
@@ -333,7 +333,7 @@ type
    fcount: integer;
    fupdating: integer;
    fonchange: notifyeventty;
-   fkind: bitmapkindty;
+//   fkind: bitmapkindty;
    procedure setsize(const avalue: sizety);
    function getmonochrome: boolean;
    procedure setmonochrome(const Value: boolean);
@@ -977,11 +977,17 @@ begin
      (index.x >= fsize.cx) or (index.y >= fsize.cy) then begin
   gdierror(gde_invalidindex,self);
  end;
- if monochrome then begin
-  result:= index.y * ((fimage.size.cx + 31) div 32) + index.x div 32;
- end
- else begin
-  result:= index.y*fimage.size.cx + index.x;
+ result:= index.y*fscanlinewords;
+ case fkind of
+  bmk_mono: begin
+   result:= result + index.x div 32;
+  end;
+  bmk_gray: begin
+   result:= result + index.x div 8;
+  end;
+  else begin
+   result:= result + index.x;
+  end;
  end;
 end;
 
@@ -991,11 +997,17 @@ begin
      (x >= fsize.cx) or (y >= fsize.cy) then begin
   gdierror(gde_invalidindex,self);
  end;
- if monochrome then begin
-  result:= y * ((fimage.size.cx + 31) div 32) + x div 32;
- end
- else begin
-  result:= y * fimage.size.cx + x;
+ result:= y*fscanlinewords;
+ case fkind of
+  bmk_mono: begin
+   result:= result + x div 32;
+  end;
+  bmk_gray: begin
+   result:= result + x div 8;
+  end;
+  else begin
+   result:= result + x;
+  end;
  end;
 end;
 
@@ -1886,6 +1898,8 @@ begin
     else begin
      inherited;
      self.freemask;
+     replacebits1(longword(self.foptions),longword(foptions),
+                            longword(bmomaskkindoptions+bmokindoptions));
      if fmask <> nil then begin
       self.fmask:= tbitmap.create(fmask.kind,self.fgdifuncs);
       with self,fmask do begin
@@ -1897,12 +1911,6 @@ begin
 {$warnings on}
       include(self.fstate,pms_maskvalid);
       include(self.foptions,bmo_masked);
-      if fmask.monochrome then begin
-       exclude(self.foptions,bmo_colormask);
-      end
-      else begin
-       include(self.foptions,bmo_colormask);
-      end;
      end
      else begin
       if masked then begin
@@ -1911,12 +1919,6 @@ begin
       end
       else begin
        exclude(self.foptions,bmo_masked);
-      end;
-      if colormask then begin
-       include(self.foptions,bmo_colormask);
-      end
-      else begin
-       exclude(self.foptions,bmo_colormask);
       end;
      end;
      self.ftransparentcolor:= ftransparentcolor;
@@ -2415,6 +2417,20 @@ begin
  if avalue <> '' then begin
   loadfromstring(avalue,forigformat,[]);
  end;
+end;
+
+procedure tmaskedbitmap.setkind(const avalue: bitmapkindty);
+begin
+ foptions:= foptions - bmokindoptions;
+ case avalue of
+  bmk_gray: begin
+   include(foptions,bmo_gray);
+  end;
+  bmk_mono: begin
+   include(foptions,bmo_monochrome);
+  end;
+ end;
+ inherited;
 end;
 
 {

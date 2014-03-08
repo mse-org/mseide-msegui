@@ -1028,7 +1028,8 @@ type
    fcanvas: tcanvas;
    fhandle: pixmapty;
    fsize: sizety;
-   fscanlinestep: integer;
+   fscanlinestep: integer; //bytes
+   fscanlinewords: integer;
    fscanhigh: integer;
    fkind: bitmapkindty;
    fstate: pixmapstatesty;
@@ -2371,15 +2372,16 @@ procedure tsimplebitmap.updatescanline();
 begin
  case fkind of
   bmk_mono: begin
-   fscanlinestep:= ((fsize.cx + 31) div 32) * 4;
+   fscanlinewords:= ((fsize.cx + 31) div 32);
   end;
   bmk_gray: begin
-   fscanlinestep:= ((fsize.cx + 3) div 4) * 4;
+   fscanlinewords:= ((fsize.cx + 3) div 4);
   end;
   else begin
-   fscanlinestep:= fsize.cx * 4;
+   fscanlinewords:= fsize.cx;
   end;
  end;
+ fscanlinestep:= fscanlinewords * 4;
  fscanhigh:=  fsize.cx * fsize.cy - 1;
 end;
 
