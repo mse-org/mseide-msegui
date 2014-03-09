@@ -1061,8 +1061,6 @@ type
                                   //nil -> default
    destructor destroy; override;
 
-   property kind: bitmapkindty read fkind write setkind;
-   
    procedure copyhandle;
    procedure releasehandle; virtual;
    procedure acquirehandle; virtual;
@@ -1078,9 +1076,11 @@ type
    procedure copyarea(const asource: tsimplebitmap; const asourcerect: rectty;
               const adestpoint: pointty; const acopymode: rasteropty = rop_copy;
               const masked: boolean = true;
-              const acolorforeground: colorty = cl_default; //cl_default -> asource.colorforeground
+              const acolorforeground: colorty = cl_default; 
+                    //cl_default -> asource.colorforeground
                     //used for monochrome -> color conversion
-              const acolorbackground: colorty = cl_default;//cl_default -> asource.colorbackground
+              const acolorbackground: colorty = cl_default;
+                    //cl_default -> asource.colorbackground
                     //used for monochrome -> color conversion or
                     //colorbackground for color -> monochrome conversion
               const aopacity: colorty = cl_none); overload;
@@ -1088,20 +1088,23 @@ type
               const adestrect: rectty; const aalignment: alignmentsty = [];
               const acopymode: rasteropty = rop_copy;
               const masked: boolean = true;
-              const acolorforeground: colorty = cl_default; //cl_default -> asource.colorforeground
+              const acolorforeground: colorty = cl_default; 
+                    //cl_default -> asource.colorforeground
                     //used for monochrome -> color conversion
-              const acolorbackground: colorty = cl_default;//cl_default -> asource.colorbackground
+              const acolorbackground: colorty = cl_default;
+                    //cl_default -> asource.colorbackground
                     //used for monochrome -> color conversion or
                     //colorbackground for color -> monochrome conversion
               const aopacity: colorty = cl_none); overload;
 
+   property kind: bitmapkindty read fkind write setkind;   
+   property monochrome: boolean read getmonochrome write setmonochrome;
    property canvas: tcanvas read getcanvas;
    property size: sizety read fsize write setsize;
-         //pixels are not inited
+         //pixels are not initialized
    property width: integer read fsize.cx write setwidth;
    property height: integer read fsize.cy write setheight;
    function isempty: boolean;
-   property monochrome: boolean read getmonochrome write setmonochrome;
  end;
 
 const

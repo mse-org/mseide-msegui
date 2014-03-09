@@ -5958,7 +5958,7 @@ begin
     else begin
      createalphabuffer(true);
      bmp.paint(falphabuffer.mask.canvas,makerect(nullpoint,rect1.size),
-      makerect(nullpoint,bmp.size),[al_stretchx,al_stretchy]);
+                     makerect(nullpoint,bmp.size),[al_stretchx,al_stretchy]);
     end;
     bmp.Free;
    end

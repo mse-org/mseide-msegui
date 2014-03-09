@@ -354,6 +354,11 @@ type
    function getmaskkind: bitmapkindty;
    function getgraymask: boolean;
    procedure setgraymask(const avalue: boolean);
+   procedure readmasked(reader: treader);
+   procedure readcolormask(reader: treader);
+   procedure readmonochrome(reader: treader);
+   function getoptions: bitmapoptionsty;
+   procedure setoptions(const avalue: bitmapoptionsty);
   protected
    function indextoorg(index: integer): pointty;
    procedure change;
@@ -400,19 +405,22 @@ type
    property size: sizety read fsize write setsize;
    property bitmap: tmaskedbitmap read fbitmap write setbitmap;
 
-  published
    property kind: bitmapkindty read getkind write setkind default bmk_rgb;
    property maskkind: bitmapkindty read getmaskkind 
                                     write setmaskkind default bmk_mono;
    property monochrome: boolean read getmonochrome
                 write setmonochrome default false;
+   property masked: boolean read getmasked write setmasked default true;
+   property graymask: boolean read getgraymask write setgraymask default false;
+   property colormask: boolean read getcolormask 
+                                              write setcolormask default false;
+  published
    property width: integer read fsize.cx
                  write setwidth default defaultimagelistwidth;
    property height: integer read fsize.cy
                    write setheight default defaultimagelistheight;
-   property masked: boolean read getmasked write setmasked default true;
-   property graymask: boolean read getgraymask write setgraymask default false;
-   property colormask: boolean read getcolormask write setcolormask default false;
+   property options: bitmapoptionsty read getoptions 
+                                      write setoptions default [bmo_masked];
    property transparentcolor: colorty read gettransparentcolor
                          write settransparentcolor default cl_none;
    property count: integer read fcount write setcount default 0;
@@ -2996,11 +3004,29 @@ begin
  end;
 end;
 
+procedure timagelist.readmasked(reader: treader);
+begin
+ masked:= reader.readboolean;
+end;
+
+procedure timagelist.readcolormask(reader: treader);
+begin
+ colormask:= reader.readboolean;
+end;
+
+procedure timagelist.readmonochrome(reader: treader);
+begin
+ monochrome:= reader.readboolean;
+end;
+
 procedure timagelist.defineproperties(filer: tfiler);
 var
  ancestorbefore: tpersistent;
 begin
  inherited;
+ filer.defineproperty('monochrome',@readmonochrome,nil,false);
+ filer.defineproperty('masked',@readmasked,nil,false);
+ filer.defineproperty('colormask',@readcolormask,nil,false);
  ancestorbefore:= filer.ancestor;
  if ancestorbefore <> nil then begin
   filer.ancestor:= timagelist(ancestorbefore).fbitmap;
@@ -3045,6 +3071,16 @@ end;
 procedure timagelist.setmaskkind(const avalue: bitmapkindty);
 begin
  fbitmap.maskkind:= avalue; 
+end;
+
+function timagelist.getoptions: bitmapoptionsty;
+begin
+ result:= fbitmap.options;
+end;
+
+procedure timagelist.setoptions(const avalue: bitmapoptionsty);
+begin
+ fbitmap.options:= avalue;
 end;
 
 { tcenteredbitmap }
