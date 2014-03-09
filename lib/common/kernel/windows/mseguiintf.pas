@@ -744,20 +744,25 @@ begin
 end;
 
 function gui_createpixmap(const size: sizety; winid: winidty = 0;
-                          monochrome: boolean = false;
+                          kind: bitmapkindty = bmk_rgb;
                           copyfrom: pixmapty = 0): pixmapty;
              //copyfrom does not work if selected in dc!
 var
  dc,dc1: hdc;
 
 begin
- if monochrome then begin
-  result:= createbitmap(size.cx,size.cy,1,1,nil);
- end
- else begin
-  dc:= getdc(winid);
-  result:= createcompatiblebitmap(dc,size.cx,size.cy);
-  releasedc(winid,dc);
+ case kind of
+  bmk_mono: begin
+   result:= createbitmap(size.cx,size.cy,1,1,nil);
+  end;
+  bmk_gray: begin
+   result:= createbitmap(size.cx,size.cy,1,8,nil);
+  end
+  else begin
+   dc:= getdc(winid);
+   result:= createcompatiblebitmap(dc,size.cx,size.cy);
+   releasedc(winid,dc);
+  end;
  end;
 {$ifdef mse_debuggdi}
  if result <> 0 then begin
@@ -800,8 +805,8 @@ begin
  end;
 end;
 
-procedure initbitmapinfo(monochrome: boolean; bottomup: boolean; const size: sizety;
-         out bitmapinfo: monochromebitmapinfoty);
+procedure initbitmapinfo(kind: bitmapkindty; bottomup: boolean;
+              const size: sizety; out bitmapinfo: monochromebitmapinfoty);
 begin
  fillchar(bitmapinfo,sizeof(bitmapinfo),0);
  with bitmapinfo.bmiHeader do begin
@@ -814,15 +819,20 @@ begin
    biheight:= -size.cy;
   end;
   biplanes:= 1;
-  if monochrome then begin
-   bibitcount:= 1;
-   bitmapinfo.bmicolors[0]:= col0;
-   bitmapinfo.bmicolors[1]:= col1;
-//   bitmapinfo.bmicolors[0]:= col0;
-//   bitmapinfo.bmicolors[1]:= col1;
-  end
-  else begin
-   bibitcount:= 32;
+  case kind of
+   bmk_mono: begin
+    bibitcount:= 1;
+    bitmapinfo.bmicolors[0]:= col0;
+    bitmapinfo.bmicolors[1]:= col1;
+ //   bitmapinfo.bmicolors[0]:= col0;
+ //   bitmapinfo.bmicolors[1]:= col1;
+   end;
+   bmk_gray: begin
+    bibitcount:= 8;
+   end;
+   else begin
+    bibitcount:= 32;
+   end;
   end;
  end;
 end;
@@ -862,16 +872,7 @@ begin
    inc(po2);
   end;
  end;
-{setdibits reverses image?!?!}
-{
- int1:= int3 div 4 -1;      //delphi: without this lines bits will be inverted
- po3:= pointer(po1);        //by setdibits!?!?!
- for int1:= 0 to int1 do begin
-  po3^:= not po3^;          //1-> background
-  inc(po3);
- end;
-}
- initbitmapinfo(true,bottomup,size,bitmapinfo);
+ initbitmapinfo(bmk_mono,bottomup,size,bitmapinfo);
  result:= createbitmap(size.cx,size.cy,1,1,nil);
  dc:= getdc(0);
  setdibits(dc,result,0,size.cy,po1,windows.bitmapinfo(pointer(@bitmapinfo)^),dib_rgb_colors);
@@ -916,7 +917,8 @@ var
  int1: integer;
 begin
  {$ifdef FPC}{$checkpointer off}{$endif}
- if image.monochrome then begin
+// if image.monochrome then begin
+ if image.kind = bmk_mono then begin
   po1:= pointer(image.pixels);
   if inverse then begin
    for int1:= 0 to image.length*4-1 do begin
@@ -965,13 +967,15 @@ begin
  localfree(longword(data));
 end;
 
-function gui_pixmaptoimage(pixmap: pixmapty; out image: imagety; gchandle: longword): gdierrorty;
+function gui_pixmaptoimage(pixmap: pixmapty; out image: imagety;
+                                              gchandle: longword): gdierrorty;
 var
  info: pixmapinfoty;
  bitmapinfo: monochromebitmapinfoty;
  dc: hdc;
  int1: integer;
  bmp1: hbitmap;
+ kind1: bitmapkindty;
 
 begin
  if gchandle <> 0 then begin
@@ -984,22 +988,20 @@ begin
  info.handle:= pixmap;
  result:= gui_getpixmapinfo(info);
  if result = gde_ok then begin
-  image.size:= info.size;
   result:= gde_image;
-  image.pixels:= nil;
-  if info.depth = 1 then begin
-   image.length:= ((info.size.cx + 31) div 32) * info.size.cy;
-   initbitmapinfo(true,false,info.size,bitmapinfo);
-   image.monochrome:= true;
-  end
-  else begin
-   image.monochrome:= false;
-   initbitmapinfo(false,false,info.size,bitmapinfo);
-   image.length:= info.size.cx * info.size.cy;
+  case info.depth of  
+   1: begin
+    kind1:= bmk_mono;
+   end;
+   8: begin
+    kind1:= bmk_gray;
+   end;
+   else begin
+    kind1:= bmk_rgb;
+   end;
   end;
-  allocimage(image,image.size,image.monochrome);
-//  image.pixels:= gui_allocimagemem(image.length);
-         //getdibits does not work with normal heap
+  initbitmapinfo(kind1,false,info.size,bitmapinfo);
+  allocimage(image,info.size,kind1);
   dc:= getdc(0);
   int1:= getdibits(dc,pixmap,0,info.size.cy,image.pixels,
                  pbitmapinfo(@bitmapinfo)^,dib_rgb_colors);
@@ -1029,10 +1031,10 @@ begin
   bmp1:= createcompatiblebitmap(gchandle,0,0);
   selectobject(gchandle,bmp1);
  end;
- pixmap:= gui_createpixmap(image.size,0,image.monochrome);
+ pixmap:= gui_createpixmap(image.size,0,image.kind);
  if pixmap <> 0 then begin
   transformimageformat(image,false); //setdibits reverses image!?!?!
-  initbitmapinfo(image.monochrome,false,image.size,bitmapinfo);
+  initbitmapinfo(image.kind,false,image.size,bitmapinfo);
   dc:= getdc(0);
   int1:= setdibits(dc,pixmap,0,image.size.cy,image.pixels,
               tbitmapinfo(pbitmapinfo(@bitmapinfo)^),dib_rgb_colors);
@@ -1578,6 +1580,20 @@ end;
 function gui_pixeltorgb(pixel: pixelty): longword;
 begin
  result:= swaprgb(pixel);
+end;
+
+function gui_graytopixel(gray: byte): pixelty;
+var
+ lwo1: longword;
+begin
+ lwo1:= gray;
+ result:= lwo1 or (lwo1 shl 8) or (lwo1 shl 16);
+end;
+
+function gui_pixeltogray(pixel: pixelty): byte;
+begin
+ result:= ((pixel and $ff) + ((pixel and $ff00) shr 8) +
+          ((pixel and $ff0000) shr 16)) div 3;
 end;
 
 function winmousekeyflagstoshiftstate(keys: longword): shiftstatesty;

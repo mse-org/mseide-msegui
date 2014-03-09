@@ -252,7 +252,7 @@ end;
 procedure gdi_createpixmap(var drawinfo: drawinfoty); //gdifunc
 begin
  with drawinfo.createpixmap do begin
-  pixmap:= gui_createpixmap(size,0,monochrome,copyfrom);
+  pixmap:= gui_createpixmap(size,0,kind,copyfrom);
  end;
 end;
 
@@ -1772,7 +1772,8 @@ begin
       winrecttorect(rect2);
      end;
      if msegraphutils.intersectrect(rect1,rect2,rect1) then begin
-      bmp:= gui_createpixmap(rect1.size,0,df_canvasismonochrome in drawingflags);
+//      bmp:= gui_createpixmap(rect1.size,0,df_canvasismonochrome in drawingflags);
+      bmp:= gui_createpixmap(rect1.size,0,gc.kind);
       if bmp <> 0 then begin
        dc1:= createcompatibledc(0);
        if dc1 <> 0 then begin
@@ -1780,19 +1781,13 @@ begin
         setwindoworgex(dc1,rect1.x,rect1.y,nil);
         bitblt(dc1,rect1.x,rect1.y,rect1.cx,rect1.cy,handle,rect1.x,rect1.y,srccopy); //get copy
         setbrushorgex(dc1,brushorg.x-rect1.x,brushorg.y-rect1.y,nil);
-//        setbkcolor(dc1,foregroundcol);
         settextcolor(dc1,foregroundcol);
-//        settextcolor(dc1,backgroundcol);
         setbkcolor(dc1,backgroundcol);
         fill1(dc1,rop);                //draw pattern
-//        setbkcolor(dc1,$00000000);
         settextcolor(dc1,$00000000);
-//        settextcolor(dc1,$00ffffff);
         setbkcolor(dc1,$00ffffff);
         fill1(dc1,rop_notand);         //erase background
-//        setbkcolor(handle,$00000000);
         settextcolor(handle,$00000000);
-//        settextcolor(handle,$00ffffff);
         setbkcolor(handle,$00ffffff);
         fill1(handle,rop_and);         //erase pattern
         bitblt(handle,rect1.x,rect1.y,rect1.cx,rect1.cy,dc1,rect1.x,rect1.y,
@@ -1800,7 +1795,6 @@ begin
         deletedc(dc1);
        end;
        gui_freepixmap(bmp);
-//       deleteobject(bmp);
       end;
      end;
     end;
@@ -1972,7 +1966,8 @@ var
    if mask <> nil then begin
     tcanvas1(mask.canvas).checkgcstate([cs_gc]);
     smaskdc:= tcanvas1(mask.canvas).fdrawinfo.gc.handle;
-    maskbmp:= gui_createpixmap(rect1.size,0,true);
+    maskbmp:= gui_createpixmap(rect1.size,0,bmk_mono);
+//    maskbmp:= gui_createpixmap(rect1.size,0,true);
    end
    else begin
     maskbmp:= 0;

@@ -2942,10 +2942,11 @@ end;
 function gui_graytopixel(gray: byte): pixelty;
 var
  lwo1: longword;
-begin                                           //todo: speedup
- lwo1:= ((gray) shl xredshiftbase) and xredmask;
- lwo1:= lwo1 or ((gray) shl xgreenshiftbase) and xgreenmask;
- result:= lwo1 or ((gray) shl xblueshiftbase) and xbluemask;
+begin           
+ lwo1:= gray;                                //todo: speedup
+ result:= (lwo1 shl xredshiftbase) and xredmask or
+          (lwo1 shl xgreenshiftbase) and xgreenmask or
+          (lwo1 shl xblueshiftbase) and xbluemask;
 end;
 
 {
