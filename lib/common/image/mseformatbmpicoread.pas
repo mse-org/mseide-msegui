@@ -140,7 +140,12 @@ begin
   paddingcount:= rowbytelength - paddingcount;
   setlength(pixdata,rowbytelength*biheight);
   dest.clear;
-  dest.monochrome:= bibitcount = 1;
+  if bibitcount = 1 then begin
+   dest.kind:= bmk_mono;
+  end
+  else begin
+   dest.kind:= bmk_rgb;
+  end;
   dest.size:= makesize(biwidth,biheight);
   int1:= start;
   po1:= @pixdata[0];
@@ -265,7 +270,8 @@ begin
   if dest is tmaskedbitmap then begin
    tmaskedbitmap(dest).masked:= false;
   end;
-  dest.monochrome:= false;
+  dest.kind:= bmk_rgb;
+//  dest.monochrome:= false;
   readbmp(stream,fileheader.bfoffbits,dest);
  finally
   stream.free;
@@ -288,7 +294,8 @@ var
   int1,int3,int4: integer;
  begin
   dest.clear;
-  dest.monochrome:= false;
+//  dest.monochrome:= false;
+  dest.kind:= bmk_rgb;
   with icondir[index] do begin
    stream.Pos:= dwimageoffset;
    bo1:= readbmp(stream,0,dest,true);
@@ -347,7 +354,13 @@ begin
      end;
      with dest2 do begin
       size:= size1;
-      monochrome:= mono;
+      if mono then begin
+       kind:= bmk_mono;
+      end
+      else begin
+       kind:= bmk_rgb;
+      end;
+//      monochrome:= mono;
       masked:= true;
       count:= idcount;
      end;

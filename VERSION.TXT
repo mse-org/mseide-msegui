@@ -2,6 +2,7 @@ MSEide+MSEgui breaking changes version history
 
 2014-03-09
  Parameter monochrome -> kind for t*bitmap.create().
+ t*bitmap.monochrome removed, use t*bitmap.kind instead.
 2014-02-26
  params parameter for tmaskedbitmap.loadfrom*().
  

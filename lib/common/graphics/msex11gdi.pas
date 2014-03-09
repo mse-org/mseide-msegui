@@ -2146,7 +2146,7 @@ begin
     else begin //monochrome -> color
      bitmapgc2:= nil;
      bitmap:= 0;
-     if (mask <> nil) and mask.monochrome then begin
+     if (mask <> nil) and (mask.kind = bmk_mono) then begin
       bitmap:= gui_createpixmap(size,0,bmk_mono);
       if bitmap <> 0 then begin
        bitmapgc2:= xcreategc(appdisp,bitmap,0,@xvalues);

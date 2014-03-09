@@ -57,7 +57,8 @@ type
    procedure initdevicecaps(const agc: gcty); virtual;
    //icanvas
    procedure gcneeded(const sender: tcanvas);
-   function getmonochrome: boolean;
+//   function getmonochrome: boolean;
+   function getkind: bitmapkindty;
    procedure getcanvasimage(const bgr: boolean; var aimage: maskedimagety);
   public
    constructor create(aowner: tcomponent); override;
@@ -255,10 +256,15 @@ begin
  inherited;
  fcanvas.ppmm:= defaultgdiprintppmm;
 end;
-
+{
 function tcustomgdiprinter.getmonochrome: boolean;
 begin
  result:= false;
+end;
+}
+function tcustomgdiprinter.getkind: bitmapkindty;
+begin
+ result:= bmk_rgb;
 end;
 
 {$ifdef mswindows}

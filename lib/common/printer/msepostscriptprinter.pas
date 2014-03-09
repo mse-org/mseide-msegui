@@ -41,7 +41,7 @@ type
    function getcanvas: tpostscriptcanvas;
    //icanvas
    procedure gcneeded(const sender: tcanvas);
-   function getmonochrome: boolean;
+   function getkind: bitmapkindty;
    procedure getcanvasimage(const bgr: boolean; var aimage: maskedimagety);
   public
    constructor create(aowner: tcomponent); override;
@@ -1624,23 +1624,39 @@ procedure convertrgb(const sourcerect: rectty; const image: imagety;
                      out data: bytearty; out rowbytes: integer);
 var
  po1: prgbtriplety;
- po2: pbyte;
+ po2,po3: pbyte;
  int1,int2: integer;
 begin
  with sourcerect do begin
   rowbytes:= cx*3;
   setlength(data,rowbytes*cy);
   po2:= pointer(data);
-  for int1:= y to y + cy - 1 do begin
-   po1:= @image.pixels^[int1*image.size.cx+x];
-   for int2:= x to x + cx - 1 do begin
-    po2^:= po1^.red;
-    inc(po2);
-    po2^:= po1^.green;
-    inc(po2);
-    po2^:= po1^.blue;
-    inc(po2);
-    inc(po1);
+  if image.kind = bmk_rgb then begin
+   for int1:= y to y + cy - 1 do begin
+    po1:= @image.pixels^[int1*image.size.cx+x];
+    for int2:= x to x + cx - 1 do begin
+     po2^:= po1^.red;
+     inc(po2);
+     po2^:= po1^.green;
+     inc(po2);
+     po2^:= po1^.blue;
+     inc(po2);
+     inc(po1);
+    end;
+   end;
+  end
+  else begin //bmk_gray
+   for int1:= y to y + cy - 1 do begin
+    po3:= pointer(image.pixels)+ int1*image.linebytes + x;
+    for int2:= x to x + cx - 1 do begin
+     po2^:= po3^;
+     inc(po2);
+     po2^:= po3^;
+     inc(po2);
+     po2^:= po3^;
+     inc(po2);
+     inc(po3);
+    end;
    end;
   end;
  end;
@@ -1650,19 +1666,31 @@ procedure convertgray(const sourcerect: rectty; const image: imagety;
                      out data: bytearty; out rowbytes: integer);
 var
  po1: prgbtriplety;
- po2: pbyte;
+ po2,po3: pbyte;
  int1,int2: integer;
 begin
  with sourcerect do begin
   rowbytes:= cx;
   setlength(data,rowbytes*cy);
   po2:= pointer(data);
-  for int1:= y to y + cy - 1 do begin
-   po1:= @image.pixels^[int1*image.size.cx+x];
-   for int2:= x to x + cx - 1 do begin
-    po2^:= (po1^.red + po1^.green + po1^.blue) div 3;
-    inc(po2);
-    inc(po1);
+  if image.kind = bmk_rgb then begin
+   for int1:= y to y + cy - 1 do begin
+    po1:= @image.pixels^[int1*image.size.cx+x];
+    for int2:= x to x + cx - 1 do begin
+     po2^:= (po1^.red + po1^.green + po1^.blue) div 3;
+     inc(po2);
+     inc(po1);
+    end;
+   end;
+  end
+  else begin //bmk_gray
+   for int1:= y to y + cy - 1 do begin
+    po3:= pointer(image.pixels) + int1*image.linebytes + x;
+    for int2:= x to x + cx - 1 do begin
+     po2^:= po3^;
+     inc(po2);
+     inc(po3);
+    end;
    end;
   end;
  end;
@@ -1814,7 +1842,7 @@ begin
    exit;
   end;
 //  components:= 1;
-  if acanvas.monochrome then begin
+  if acanvas.kind = bmk_mono then begin
    convertmono(sourcerect,image,ar1,rowbytes);
   end
   else begin
@@ -1846,7 +1874,7 @@ begin
  str1:= str1+'gsave '+rectscalestring(destrect)+nl+
 '<< /PatternType 1 /PaintType 1 /TilingType 1 /BBox [0 0 1 1] /XStep 1 /YStep 1'+nl+ 
 '/PaintProc {' + nl;
- if acanvas.monochrome then begin
+ if acanvas.kind = bmk_mono then begin
   if acolorbackground <> cl_transparent then begin
    str1:= str1 + unityrectpath + nl + 
          setcolorstring(acolorbackground) + ' fill ';   
@@ -1855,14 +1883,14 @@ begin
  end;
  str1:= str1 +
       inttostr(sourcerect.size.cx) + ' ' + inttostr(sourcerect.size.cy);
- if acanvas.monochrome then begin
+ if acanvas.kind = bmk_mono then begin
   str1:= str1 + ' true ';
  end
  else begin
   str1:= str1 + ' 8';
  end;
  str1:= str1 + imagematrixstring(sourcerect.size)+ ' '+patname+' ';
- if acanvas.monochrome then begin
+ if acanvas.kind = bmk_mono then begin
   str1:= str1 + 'imagemask';
  end
  else begin
@@ -1947,9 +1975,9 @@ begin
   if not (df_canvasispixmap in tcanvas1(source).fdrawinfo.gc.drawingflags) then begin
    exit;
   end;
-  mono:= source.monochrome;
+  mono:= source.kind = bmk_mono;
   subpoint1(destrect^.pos,origin); //map to pd origin
-  maskcopy:= mono and (mask <> nil) and mask.monochrome and
+  maskcopy:= mono and (mask <> nil) and (mask.kind = bmk_mono) and
              ((acolorforeground = cl_transparent) or
               (acolorbackground = cl_transparent));
   maskbefore:= mask; //compiler warning
@@ -1966,7 +1994,7 @@ begin
   end;
   try
    checkcolorspace;
-   masked:= (mask <> nil) and (mask.monochrome {or (fpslevel >= psl_3)});
+   masked:= (mask <> nil) and ((mask.kind = bmk_mono) {or (fpslevel >= psl_3)});
                                 //color masks not implemented in postscript
    if masked then begin
     if (fpslevel >= psl_3) then begin
@@ -1979,7 +2007,7 @@ begin
         goto endlab;   
        end;
        gdi_unlock;
-       if mask.monochrome then begin
+       if mask.kind = bmk_mono then begin
         convertmono(sourcerect^,image,ar2,maskrowbytes);
        end
        else begin
@@ -2042,7 +2070,7 @@ begin
      with sourcerect^ do begin
       str1:= str1 + '/madict  << /ImageType 1 /Width '+inttostr(size.cx)+
       ' /Height '+inttostr(size.cy)+' /ImageMatrix '+imagematrixstring(size)+nl;
-      if mask.monochrome then begin
+      if mask.kind = bmk_mono then begin
        str1:= str1 + '/BitsPerComponent 1 /Decode [1 0] ';
       end
       else begin
@@ -2480,12 +2508,16 @@ begin
   linktopaintdevice(ptrint(self),gc1,{getwindowsize,}nullpoint);
  end;
 end;
-
+{
 function tpostscriptprinter.getmonochrome: boolean;
 begin
  result:= false;
 end;
-
+}
+function tpostscriptprinter.getkind: bitmapkindty;
+begin
+ result:= bmk_rgb;
+end;
 procedure tpostscriptprinter.getcanvasimage(const bgr: boolean;
                var aimage: maskedimagety);
 begin

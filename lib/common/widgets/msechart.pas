@@ -1605,7 +1605,8 @@ begin
      fimli1.getimage(finfo.imagenr,bmp1);
      bmp1.colorforeground:= fco1;
      bmp1.colorbackground:= tcuchart(fowner).colorchart;
-     bmp1.monochrome:= false;
+//     bmp1.monochrome:= false;
+     bmp1.kind:= bmk_rgb;
      bmp1.colormask:= true;
      fbmp2.size:= imagesize;
      bmp1.stretch(fbmp2);

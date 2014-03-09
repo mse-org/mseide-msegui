@@ -70,7 +70,8 @@ type
    procedure updateviewport(const arect: rectty); override;
      //icanvas
    procedure gcneeded(const sender: tcanvas);
-   function getmonochrome: boolean;
+//   function getmonochrome: boolean;
+   function getkind: bitmapkindty;
    function getsize: sizety;
    procedure getcanvasimage(const bgr: boolean; var aimage: maskedimagety);
   public
@@ -140,10 +141,15 @@ procedure topenglcanvaswidget.gcneeded(const sender: tcanvas);
 begin
  checkclientwinid;
 end;
-
+{
 function topenglcanvaswidget.getmonochrome: boolean;
 begin
  result:= false;
+end;
+}
+function topenglcanvaswidget.getkind: bitmapkindty;
+begin
+ result:= bmk_rgb;
 end;
 
 function topenglcanvaswidget.getsize: sizety;
