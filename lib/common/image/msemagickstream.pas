@@ -311,26 +311,18 @@ procedure writegmgraphic(const dest: tstream; const source: tbitmap;
             const ablur: real = defaultblur);
 var
  exceptinf: exceptioninfo;
+ image,image2: pointer;
+ hasmask,monomask,rotmask: boolean;
+ si1,si2: sizety;
+ imagebuffer: imagebufferinfoty;
+ buf: pointer;
+ maskscanstep: integer;
+ maskscanpo: pointer;
+ 
  procedure error;
  begin
   raise tmagickexception.create(exceptinf);
  end;
-
-var
- bo1,bo2,hasmask,monomask,rotmask: boolean;
- imagebuffer: imagebufferinfoty;
- imageinfo: pointer;
- image,image2: pointer;
- si: size_t;
- blob: pointer;
- int1: integer;
- po1,po2: pointer;
- s,d,e,e1: prgbtriplety;
- s1,s2: plongword;
- lwo1: longword;
- buf: pointer;
- bd,be,be1: pbyte;
- si1,si2: sizety;
 
  procedure dorotate();
  begin
@@ -343,8 +335,6 @@ var
    image:= image2;
    if rotmask then begin
     pimage8(image)^.a.matte:= magicktrue;
-    monomask:= not hasmask and (rgmo_rotmonomask in aoptions);
-    hasmask:= true;
    end;
    si1:= ms(pimage8(image)^.a.columns,pimage8(image)^.a.rows);
   end;
@@ -373,6 +363,47 @@ var
   end;
  end; //doscale
 
+ procedure checkcolormask();
+ var
+  d,e: pbyte;
+  s: prgbtriplety;
+ begin
+  with imagebuffer.mask do begin
+   if kind = bmk_rgb then begin
+    getmem(buf,length);
+    d:= buf;
+    e:= buf + length;
+    s:= pointer(imagebuffer.mask.pixels);
+    maskscanpo:= buf;
+    maskscanstep:= imagebuffer.mask.size.cx;
+    repeat
+     d^:= (word(s^.red) + word(s^.green) + word(s^.blue)) div 3;
+     inc(s);
+     inc(d);
+    until d = e;
+   end
+   else begin
+    maskscanpo:= imagebuffer.mask.pixels;
+    maskscanstep:= imagebuffer.mask.linebytes;
+   end;
+  end;
+  if monomask then begin
+   swapbits(imagebuffer.mask);
+  end;
+ end;
+
+var
+ bo1,bo2: boolean;
+ imageinfo: pointer;
+ si: size_t;
+ blob: pointer;
+ int1: integer;
+ po1,po2: pointer;
+ s,d,e,e1: prgbtriplety;
+ sw1,sw2: plongword;
+ sb1: pbyte;
+ lwo1: longword;
+
 begin
  if source is tbitmap then begin
   with tbitmap1(source) do begin
@@ -388,211 +419,233 @@ begin
                                        not checksnap90(arotation);                           
      monomask:= false;
      hasmask:= (source is tmaskedbitmap) and (tmaskedbitmap(source).masked);
-     if hasmask then begin
-      with tmaskedbitmap(source).mask do begin
-       monomask:= monochrome;
-      end;
-     end;
      bo1:= getimageref(imagebuffer.image);
      bo2:= false;
      if hasmask then begin
       bo2:= tbitmap1(tmaskedbitmap(source).mask).getimageref(imagebuffer.mask);
+      monomask:= imagebuffer.mask.kind = bmk_mono;
      end;
-     if imagebuffer.image.kind = bmk_mono then begin
-      imageinfo:= cloneimageinfo(nil);
-      image:= allocateimage(imageinfo);
-      allocateimagecolormap(image,2);
-      case qdepth of
-       qd_8: begin
-        with pimage8(image)^ do begin
-         a.columns:= imagebuffer.image.size.cx;
-         a.rows:= imagebuffer.image.size.cy;
-         a.depth:= 1;
-         if hasmask then begin
-          a.matte:= magicktrue;
-         end;
-         setcolor(colorbackground,b.colormap,0);
-         setcolor(colorforeground,b.colormap,1);
-        end;
-       end;
-       qd_16: begin
-        with pimage16(image)^ do begin
-         a.columns:= imagebuffer.image.size.cx;
-         a.rows:= imagebuffer.image.size.cy;
-         a.depth:= 1;
-         if hasmask then begin
-          a.matte:= magicktrue;
-         end;
-         setcolor(colorbackground,b.colormap,0);
-         setcolor(colorforeground,b.colormap,1);
-        end;
-       end;
-       else begin
-        with pimage32(image)^ do begin
-         a.columns:= imagebuffer.image.size.cx;
-         a.rows:= imagebuffer.image.size.cy;
-         a.depth:= 1;
-         if hasmask then begin
-          a.matte:= magicktrue;
-         end;
-         setcolor(colorbackground,b.colormap,0);
-         setcolor(colorforeground,b.colormap,1);
-        end;
-       end;
-      end;
-      with imagebuffer.image do begin
-       swapbits(imagebuffer.image);
-       if hasmask then begin
-        int1:= scanhigh+1;
-        getmem(buf,int1);
-        bd:= buf;
-        be:= buf + int1;
-        if monomask then begin
-         s1:= pointer(imagebuffer.mask.pixels);
-         repeat
-          lwo1:= $00000001;
-          s2:= s1;
-          be1:= bd + width;
-          repeat
-           if s2^ and lwo1 <> 0 then begin
-            bd^:= $ff;
-           end
-           else begin
-            bd^:= 0;
-           end;
-           lwo1:= lwo1 shl 1;
-           if lwo1 = 0 then begin
-            inc(s2);
-            lwo1:= $00000001;
-           end;
-           inc(bd);
-          until bd = be1;
-          s1:= pointer(s1) + imagebuffer.mask.linebytes;
-         until bd = be;
-        end
-        else begin
-         s:= pointer(imagebuffer.mask.pixels);
-         repeat
-          bd^:= (s^.red + s^.green + s^.blue) div 3;
-          inc(s);
-          inc(bd);
-         until bd = be;
-        end;
-       end;
-       po1:= pixels;
-       po2:= buf;
-       for int1:= 0 to imagebuffer.image.size.cy-1 do begin
-        if setimagepixels(image,0,int1,
-                             imagebuffer.image.size.cx,1) = nil then begin
-         error();
-        end;
-        if importimagepixelarea(image,indexquantum,1,po1,
-                                             nil,nil) = magickfail then begin
-         error();
-        end;
+     case imagebuffer.image.kind of
+      bmk_mono: begin                      //mono
+       imageinfo:= cloneimageinfo(nil);
+       image:= allocateimage(imageinfo);
+       allocateimagecolormap(image,2);
+       with pimage8(image)^ do begin
+        a.storage_class:= pseudoclass;
+        a.columns:= imagebuffer.image.size.cx;
+        a.rows:= imagebuffer.image.size.cy;
+        a.depth:= 1;
         if hasmask then begin
-         if importimagepixelarea(image,alphaquantum,8,po2,
-                                             nil,nil) = magickfail then begin
+         a.matte:= magicktrue;
+         checkcolormask();
+        end;
+       end;
+       case qdepth of
+        qd_8: begin
+         with pimage8(image)^ do begin
+          setcolor(colorbackground,b.colormap,0);
+          setcolor(colorforeground,b.colormap,1);
+         end;
+        end;
+        qd_16: begin
+         with pimage16(image)^ do begin
+          setcolor(colorbackground,b.colormap,0);
+          setcolor(colorforeground,b.colormap,1);
+         end;
+        end;
+        else begin
+         with pimage32(image)^ do begin
+          setcolor(colorbackground,b.colormap,0);
+          setcolor(colorforeground,b.colormap,1);
+         end;
+        end;
+       end;
+       with imagebuffer.image do begin
+        swapbits(imagebuffer.image);
+        po1:= pixels;
+        po2:= maskscanpo;
+        for int1:= 0 to imagebuffer.image.size.cy-1 do begin
+         if (setimagepixels(image,0,int1,
+                              imagebuffer.image.size.cx,1) = nil) or
+             (importimagepixelarea(image,indexquantum,1,po1,
+                                              nil,nil) = magickfail) then begin
           error();
          end;
-         inc(po2,width);
-        end;
-        if SyncImagePixels(image) = 0 then begin
-         error();
-        end;
-        inc(po1,scanlinestep);
-       end;
-       if not bo1 then begin //restore pixel order
-        swapbits(imagebuffer.image);
-       end;
-       if {ispng and} hasmask then begin //GraphicMagick removes 
-                                       //alpha channel for palette images
-        case qdepth of
-         qd_8: begin
-          with pimage8(image)^ do begin
-           a.colors:= 0;
-           magickfree(b.colormap);
-           b.colormap:= nil;
-           a.storage_class:= directclass;
-          end;
-         end;
-         qd_16: begin
-          with pimage16(image)^ do begin
-           a.colors:= 0;
-           magickfree(b.colormap);
-           b.colormap:= nil;
-           a.storage_class:= directclass;
-          end;
-         end;
-         qd_32: begin
-          with pimage32(image)^ do begin
-           a.colors:= 0;
-           magickfree(b.colormap);
-           b.colormap:= nil;
-           a.storage_class:= directclass;
-          end;
-         end;
-        end;
-       end;
-      end;
-     end
-     else begin //color
-      if hasmask then begin
-       d:= pointer(imagebuffer.image.pixels);
-       e:= d + imagebuffer.image.length;
-       if monomask then begin
-        s1:= pointer(imagebuffer.mask.pixels);
-        repeat
-         lwo1:= $00000001;
-         s2:= s1;
-         e1:= d + width;
-         repeat
-          if s2^ and lwo1 <> 0 then begin
-           d^.res:= $ff;
+         if hasmask then begin
+          if monomask then begin
+           if importimagepixelarea(image,alphaquantum,1,po2,
+                                               nil,nil) = magickfail then begin
+            error();
+           end;
           end
           else begin
-           d^.res:= 0;
+           if importimagepixelarea(image,alphaquantum,8,po2,
+                                               nil,nil) = magickfail then begin
+            error();
+           end;
           end;
-          lwo1:= lwo1 shl 1;
-          if lwo1 = 0 then begin
-           inc(s2);
+          inc(po2,maskscanstep);
+         end;
+         if SyncImagePixels(image) = 0 then begin
+          error();
+         end;
+         inc(po1,scanlinestep);
+        end;
+        if not bo1 then begin          //restore bit order
+         swapbits(imagebuffer.image);
+        end;
+        if hasmask then begin 
+         if monomask and not bo2 then begin
+          swapbits(imagebuffer.mask);  //restore bit order
+         end;
+         with pimage8(image)^ do begin
+          a.colors:= 0;
+          a.storage_class:= directclass;
+         end;
+         case qdepth of                  //GraphicMagick removes 
+          qd_8: begin                    //alpha channel for palette images
+           with pimage8(image)^ do begin
+            magickfree(b.colormap);
+            b.colormap:= nil;
+           end;
+          end;
+          qd_16: begin
+           with pimage16(image)^ do begin
+            magickfree(b.colormap);
+            b.colormap:= nil;
+           end;
+          end;
+          qd_32: begin
+           with pimage32(image)^ do begin
+            magickfree(b.colormap);
+            b.colormap:= nil;
+           end;
+          end;
+         end;
+        end;
+       end;
+      end;
+      bmk_gray: begin        //gray
+       imageinfo:= cloneimageinfo(nil);
+       image:= allocateimage(imageinfo);
+       with pimage8(image)^ do begin
+        a.storage_class:= directclass;
+        a.columns:= imagebuffer.image.size.cx;
+        a.rows:= imagebuffer.image.size.cy;
+        a.depth:= 8;
+        if hasmask then begin
+         a.matte:= magicktrue;
+         checkcolormask();
+        end;
+       end;
+       with imagebuffer.image do begin
+        po1:= pixels;
+        po2:= maskscanpo;
+        for int1:= 0 to imagebuffer.image.size.cy-1 do begin
+         if (setimagepixels(image,0,int1,
+                              imagebuffer.image.size.cx,1) = nil) or
+            (importimagepixelarea(image,redquantum,8,po1,
+                                              nil,nil) = magickfail) or
+            (importimagepixelarea(image,greenquantum,8,po1,
+                                              nil,nil) = magickfail) or
+            (importimagepixelarea(image,bluequantum,8,po1,
+                                              nil,nil) = magickfail)
+                                              then begin
+          error();
+         end;
+         if hasmask then begin
+          if monomask then begin
+           if importimagepixelarea(image,alphaquantum,1,po2,
+                                               nil,nil) = magickfail then begin
+            error();
+           end;
+          end
+          else begin
+           if importimagepixelarea(image,alphaquantum,8,po2,
+                                               nil,nil) = magickfail then begin
+            error();
+           end;
+          end;
+          inc(po2,maskscanstep);
+         end;
+         if SyncImagePixels(image) = 0 then begin
+          error();
+         end;
+         inc(po1,scanlinestep);
+        end;
+       end;
+       if monomask and not bo2 then begin
+        swapbits(imagebuffer.mask);  //restore bit order
+       end;
+      end;
+      bmk_rgb: begin         //color
+       if hasmask then begin
+        d:= pointer(imagebuffer.image.pixels);
+        e:= d + imagebuffer.image.length;
+        case imagebuffer.mask.kind of
+         bmk_mono: begin
+          sw1:= pointer(imagebuffer.mask.pixels);
+          repeat
            lwo1:= $00000001;
-          end;
+           sw2:= sw1;
+           e1:= d + width;
+           repeat
+            if sw2^ and lwo1 <> 0 then begin
+             d^.res:= $ff;
+            end
+            else begin
+             d^.res:= 0;
+            end;
+            lwo1:= lwo1 shl 1;
+            if lwo1 = 0 then begin
+             inc(sw2);
+             lwo1:= $00000001;
+            end;
+            inc(d);
+           until d = e1;
+           sw1:= pointer(sw1) + imagebuffer.mask.linebytes;
+          until d = e;
+         end;
+         bmk_gray: begin
+          sb1:= pointer(imagebuffer.mask.pixels);
+          repeat
+           d^.res:= sb1^;
+           inc(sb1);
+           inc(d);
+          until d = e;
+         end;
+         else begin
+          s:= pointer(imagebuffer.mask.pixels);
+          repeat
+           d^.res:= (word(s^.red) + word(s^.green) + word(s^.blue)) div 3;
+           inc(s);
+           inc(d);
+          until d = e;
+         end;
+        end;
+        image:= constituteimage(imagebuffer.image.size.cx,
+                 imagebuffer.image.size.cy,'BGRA',charpixel,
+                                 imagebuffer.image.pixels,@exceptinf);
+        if not bo1 then begin //restore res byte
+         s:= pointer(imagebuffer.mask.pixels);
+         d:= pointer(imagebuffer.image.pixels);
+         repeat
+          d^.res:= 0;
           inc(d);
-         until d = e1;
-         s1:= pointer(s1) + imagebuffer.mask.linebytes;
-        until d = e;
+         until d = e;
+        end;
        end
        else begin
-        s:= pointer(imagebuffer.mask.pixels);
-        repeat
-         d^.res:= (s^.red + s^.green + s^.blue) div 3;
-         inc(s);
-         inc(d);
-        until d = e;
+        image:= constituteimage(imagebuffer.image.size.cx,
+                 imagebuffer.image.size.cy,'BGRP',charpixel,
+                                 imagebuffer.image.pixels,@exceptinf);
        end;
-       image:= constituteimage(imagebuffer.image.size.cx,
-                imagebuffer.image.size.cy,'BGRA',charpixel,
-                                imagebuffer.image.pixels,@exceptinf);
-       if not bo1 then begin //restore res byte
-        s:= pointer(imagebuffer.mask.pixels);
-        d:= pointer(imagebuffer.image.pixels);
-        repeat
-         d^.res:= 0;
-         inc(d);
-        until d = e;
-       end;
-      end
-      else begin
-       image:= constituteimage(imagebuffer.image.size.cx,
-                imagebuffer.image.size.cy,'BGRP',charpixel,
-                                imagebuffer.image.pixels,@exceptinf);
       end;
-      if image = nil then begin
-       raise tmagickexception.create(exceptinf);
-      end;
-      imageinfo:= cloneimageinfo(nil);
      end;
+     if image = nil then begin
+      raise tmagickexception.create(exceptinf);
+     end;
+     imageinfo:= cloneimageinfo(nil);
      with pimageinfo8(imageinfo)^ do begin
       if aquality >= 0 then begin
        a.quality:= aquality;
@@ -726,18 +779,10 @@ function readgmgraphic(const source: tstream; const dest: tbitmap;
        const ablur: real = defaultblur): string;
               //returns label
 var
- imageinfo: pointer;
  exceptinf: exceptioninfo;
  image,image2: pointer;
- imagebuffer: imagebufferinfoty;
- str1: string; //todo: use tstream -> c-stream adaptor
  hasmask,monomask,rotmask: boolean;
- bo2: boolean;
  si1,si2: sizety;
- datapo: pointer;
- datalen: card32;
- po1: pointer;
- int1: integer;
 
  procedure dorotate();
  begin
@@ -781,6 +826,16 @@ var
    si1:= ms(pimage8(image)^.a.columns,pimage8(image)^.a.rows);
   end;
  end; //doscale
+
+var
+ imageinfo: pointer;
+ imagebuffer: imagebufferinfoty;
+ str1: string; //todo: use tstream -> c-stream adaptor
+ bo2: boolean;
+ datapo: pointer;
+ datalen: card32;
+ po1: pointer;
+ int1: integer;
 
 begin
  result:= '';
@@ -876,15 +931,15 @@ begin
      end;
     end;
    end;
-   allocimage(imagebuffer.image,si1,false);
+   allocimage(imagebuffer.image,si1,bmk_rgb);
    if dispatchimage(image,0,0,si1.cx,si1.cy,'BGRP',charpixel,
             imagebuffer.image.pixels,@exceptinf) = magickpass then begin
     if hasmask and bo2 then begin
      if monomask then begin
-      allocimage(imagebuffer.mask,si1,true);
+      allocimage(imagebuffer.mask,si1,bmk_mono);
       po1:= imagebuffer.mask.pixels;
       for int1:= 0 to si1.cy-1 do begin
-       if setimagepixels(image,0,int1,si1.cx,1) = nil then begin
+       if getimagepixels(image,0,int1,si1.cx,1) = nil then begin
         result:= '';
         break;
        end;
@@ -893,19 +948,24 @@ begin
         result:= '';
         break;
        end;
-       if SyncImagePixels(image) = 0 then begin
-        result:= '';
-        break;
-       end;
        inc(po1,imagebuffer.mask.linebytes);
       end;
       swapbits(imagebuffer.mask);
      end
      else begin
-      allocimage(imagebuffer.mask,si1,false);
-      if not dispatchimage(image,0,0,si1.cx,si1.cy,'AAAP',charpixel,
-             imagebuffer.mask.pixels,@exceptinf) = magickpass then begin
-       result:= '';
+      allocimage(imagebuffer.mask,si1,bmk_gray);
+      po1:= imagebuffer.mask.pixels;
+      for int1:= 0 to si1.cy-1 do begin
+       if getimagepixels(image,0,int1,si1.cx,1) = nil then begin
+        result:= '';
+        break;
+       end;
+       if exportimagepixelarea(image,alphaquantum,8,po1,
+                                            nil,nil) = magickfail then begin
+        result:= '';
+        break;
+       end;
+       inc(po1,imagebuffer.mask.linebytes);
       end;
      end;
     end;

@@ -928,6 +928,10 @@ var
  ImportPixelAreaOptionsInit: procedure(options: pImportPixelAreaOptions);
                              {$ifdef wincall}stdcall{$else}cdecl{$endif};
  ExportPixelAreaOptionsInit: procedure(options: pExportPixelAreaOptions); 
+                             {$ifdef wincall}stdcall{$else}cdecl{$endif};
+ GetImagePixels: function(image: pointer{pImage}; x: clong; y: clong;
+                       columns: culong; rows: culong): pointer{pPixelPacket};
+                             {$ifdef wincall}stdcall{$else}cdecl{$endif};
  SetImagePixels: function(image: pointer{pImage}; x: clong; const y: clong;
                        columns: culong; rows: culong): pointer{pPixelPacket};
                              {$ifdef wincall}stdcall{$else}cdecl{$endif};
@@ -1044,7 +1048,7 @@ procedure initializegraphicsmagick(const sonames,
                          sonameswand: array of filenamety);
                                                  //[] = default 
 const
- funcs: array[0..28] of funcinfoty = (
+ funcs: array[0..29] of funcinfoty = (
 //    (n: ''; d: {$ifndef FPC}@{$endif}@),
     (n: 'InitializeMagick'; d: {$ifndef FPC}@{$endif}@InitializeMagick),
     (n: 'DestroyMagick'; d: {$ifndef FPC}@{$endif}@DestroyMagick),
@@ -1067,6 +1071,7 @@ const
     (n: 'ExportPixelAreaOptionsInit';
                 d: {$ifndef FPC}@{$endif}@ExportPixelAreaOptionsInit),
     (n: 'AllocateImage'; d: {$ifndef FPC}@{$endif}@AllocateImage),
+    (n: 'GetImagePixels'; d: {$ifndef FPC}@{$endif}@GetImagePixels),
     (n: 'SetImagePixels'; d: {$ifndef FPC}@{$endif}@SetImagePixels),
     (n: 'DestroyImageInfo'; d: {$ifndef FPC}@{$endif}@DestroyImageInfo),
     (n: 'WriteImage'; d: {$ifndef FPC}@{$endif}@WriteImage),
