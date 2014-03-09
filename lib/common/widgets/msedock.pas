@@ -486,7 +486,7 @@ type
    function getcomponentstate: tcomponentstate;
    procedure widgetregioninvalid;
    procedure drawgripbutton(const acanvas: tcanvas;
-                    const kind: dockbuttonrectty; const arect: rectty; 
+                    const akind: dockbuttonrectty; const arect: rectty; 
                              const acolorglyph,acolorbutton: colorty); virtual;
     //iobjectpicker
    function getwidget: twidget;
@@ -3884,7 +3884,7 @@ begin
 end;
 
 procedure tgripframe.drawgripbutton(const acanvas: tcanvas;
-               const kind: dockbuttonrectty; const arect: rectty;
+               const akind: dockbuttonrectty; const arect: rectty;
                const acolorglyph: colorty; const acolorbutton: colorty);
                
  function calclevel(const aoption: optiondockty): integer;
@@ -3903,7 +3903,7 @@ var
 begin
  with acanvas,arect do begin
   fillrect(arect,acolorbutton);
-  case kind of
+  case akind of
    dbr_close: begin
     if factgripsize >= 8 then begin
      draw3dframe(acanvas,arect,1,defaultframecolors,[]);

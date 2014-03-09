@@ -46,6 +46,8 @@ type
    procedure setpixels(const x,y: integer; const value: colorty);
    function checkindex(const index: pointty): integer; overload;
    function checkindex(const x,y: integer): integer; overload;
+                 //returns index in imagety pixels for bmk_mono and bmk_rgb,
+                 //byte offset for bmk_gray
    procedure setalignment(const Value: alignmentsty);
    procedure setopacity(avalue: colorty);
    procedure updatealignment(const dest,source: rectty;
@@ -217,7 +219,7 @@ type
    fmask: tbitmap;
    procedure setkind(const avalue: bitmapkindty); override;
    function gettranspcolor(): colorty;
-   procedure setmonochrome(const avalue: boolean); override;
+//   procedure setmonochrome(const avalue: boolean); override;
    function getasize: sizety; override;
    procedure createmask(const akind: bitmapkindty); virtual;
    function getconverttomonochromecolorbackground: colorty; override;
@@ -335,8 +337,8 @@ type
    fonchange: notifyeventty;
 //   fkind: bitmapkindty;
    procedure setsize(const avalue: sizety);
-   function getmonochrome: boolean;
-   procedure setmonochrome(const Value: boolean);
+//   function getmonochrome: boolean;
+//   procedure setmonochrome(const Value: boolean);
    procedure setcount(const Value: integer);
    function getmasked: boolean;
    procedure setmasked(const Value: boolean);
@@ -408,8 +410,10 @@ type
    property kind: bitmapkindty read getkind write setkind default bmk_rgb;
    property maskkind: bitmapkindty read getmaskkind 
                                     write setmaskkind default bmk_mono;
+{
    property monochrome: boolean read getmonochrome
                 write setmonochrome default false;
+}
    property masked: boolean read getmasked write setmasked default true;
    property graymask: boolean read getgraymask write setgraymask default false;
    property colormask: boolean read getcolormask 
@@ -607,7 +611,7 @@ var
  ps,pd: pbyteaty;
  int1,int2,int3: integer;
 begin
- if not monochrome then begin
+ if fkind <> bmk_mono then begin
   gdierror(gde_notmonochrome,self);
  end;
  destroyhandle;
@@ -720,8 +724,9 @@ begin
    updatealignment(dest,asource,aalignment,rect1,rect2,po1);
    amask:= getmask;
 //   maskpx:= getmaskhandle(maskgchandle);
-   if (al_grayed in aalignment) and ((amask <> nil) or monochrome) then begin
-    if (amask <> nil) and not amask.monochrome then begin
+   if (al_grayed in aalignment) and ((amask <> nil) or 
+                                           (fkind = bmk_mono)) then begin
+    if (amask <> nil) and not (amask.kind = bmk_mono) then begin
                      //reduced contrast grayscale
      bmp1:= tmaskedbitmap.create(bmk_rgb);
      bmp1.colormask:= true;
@@ -743,7 +748,7 @@ begin
      bmp1.free;     
     end
     else begin //shaddowed mask
-     if monochrome then begin
+     if kind = bmk_mono then begin
       canvas2:= canvas;
      end
      else begin
@@ -777,7 +782,7 @@ begin
     end;
    end
    else begin
-    if monochrome then begin
+    if kind = bmk_mono then begin
      col1:= acanvas.color;
      col2:= acanvas.colorbackground;
      if acolorforeground <> cl_default then begin
@@ -991,7 +996,7 @@ begin
    result:= result + index.x div 32;
   end;
   bmk_gray: begin
-   result:= result + index.x div 8;
+   result:= result*4 + index.x;
   end;
   else begin
    result:= result + index.x;
@@ -1011,7 +1016,7 @@ begin
    result:= result + x div 32;
   end;
   bmk_gray: begin
-   result:= result + x div 8;
+   result:= result*4 + x;
   end;
   else begin
    result:= result + x;
@@ -1028,21 +1033,26 @@ end;
 function tbitmap.getpixel(const index: pointty): colorty;
 var
  int1: integer;
+ lwo1: longword;
 begin
  int1:= checkindex(index);
  checkimage(false);
- if monochrome then begin
-  if fimage.pixels^[int1] and bits[index.x and $1f] <> 0 then begin
-   result:= cl_1;
-  end
-  else begin
-   result:= cl_0;
+ case fkind of
+  bmk_mono: begin
+   if fimage.pixels^[int1] and bits[index.x and $1f] <> 0 then begin
+    result:= cl_1;
+   end
+   else begin
+    result:= cl_0;
+   end;
   end;
- end
- else begin
- {$ifdef FPC}{$checkpointer off}{$endif} //not on heap in win32
-  result:= fimage.pixels^[int1] and $ffffff;
- {$ifdef FPC}{$checkpointer default}{$endif}
+  bmk_gray: begin
+   lwo1:= pbyte(fimage.pixels)[int1];
+   result:= lwo1 or (lwo1 shl 8) or (lwo1 shl 16);
+  end;
+  else begin
+   result:= fimage.pixels^[int1] and $ffffff;
+  end;
  end;
 end;
 
@@ -1052,37 +1062,49 @@ var
 begin
  int1:= checkindex(index);
  checkimage(false);
- if monochrome then begin
-  if value = 0 then begin
-   fimage.pixels^[int1]:= fimage.pixels^[int1] and not bits[index.x and $1f];
-  end
-  else begin
-   fimage.pixels^[int1]:= fimage.pixels^[int1] or bits[index.x and $1f];
+ case kind of
+  bmk_mono: begin
+   if value = 0 then begin
+    fimage.pixels^[int1]:= fimage.pixels^[int1] and not bits[index.x and $1f];
+   end
+   else begin
+    fimage.pixels^[int1]:= fimage.pixels^[int1] or bits[index.x and $1f];
+   end;
   end;
- end
- else begin
-  fimage.pixels^[int1]:= value;
+  bmk_gray: begin
+   with rgbtriplety(value) do begin
+    pbyte(fimage.pixels)[int1]:= (word(red)+word(green)+word(blue)) div 3;
+   end;
+  end;
+  else begin
+   fimage.pixels^[int1]:= value and $ffffff;
+  end;
  end;
 end;
 
 function tbitmap.getpixels(const x,y: integer): colorty;
 var
  int1: integer;
+ lwo1: longword;
 begin
  int1:= checkindex(x,y);
  checkimage(false);
- if monochrome then begin
-  if fimage.pixels^[int1] and bits[x and $1f] <> 0 then begin
-   result:= cl_1;
-  end
-  else begin
-   result:= cl_0;
+ case fkind of
+  bmk_mono: begin
+   if fimage.pixels^[int1] and bits[x and $1f] <> 0 then begin
+    result:= cl_1;
+   end
+   else begin
+    result:= cl_0;
+   end;
   end;
- end
- else begin
- {$ifdef FPC}{$checkpointer off}{$endif} //not on heap in win32
-  result:= fimage.pixels^[int1];
- {$ifdef FPC}{$checkpointer default}{$endif}
+  bmk_gray: begin
+   lwo1:= pbyte(fimage.pixels)[int1];
+   result:= lwo1 or (lwo1 shl 8) or (lwo1 shl 16);
+  end;
+  else begin
+   result:= fimage.pixels^[int1] and $ffffff;
+  end;
  end;
 end;
 
@@ -1092,16 +1114,23 @@ var
 begin
  int1:= checkindex(x,y);
  checkimage(false);
- if monochrome then begin
-  if value = 0 then begin
-   fimage.pixels^[int1]:= fimage.pixels^[int1] and not bits[x and $1f];
-  end
-  else begin
-   fimage.pixels^[int1]:= fimage.pixels^[int1] or bits[x and $1f];
+ case kind of
+  bmk_mono: begin
+   if value = 0 then begin
+    fimage.pixels^[int1]:= fimage.pixels^[int1] and not bits[x and $1f];
+   end
+   else begin
+    fimage.pixels^[int1]:= fimage.pixels^[int1] or bits[x and $1f];
+   end;
   end;
- end
- else begin
-  fimage.pixels^[int1]:= value;
+  bmk_gray: begin
+   with rgbtriplety(value) do begin
+    pbyte(fimage.pixels)[int1]:= (word(red)+word(green)+word(blue)) div 3;
+   end;
+  end;
+  else begin
+   fimage.pixels^[int1]:= value and $ffffff;
+  end;
  end;
 end;
 
@@ -1558,7 +1587,7 @@ begin
   bo1:= fmask.fcanvas = nil;
   fmask.size:= fsize;
   if not isnullsize(fsize) then begin
-   if fmask.monochrome then begin
+   if fmask.kind = bmk_mono then begin
     fmask.init(cl_1);
    end
    else begin
@@ -1683,7 +1712,7 @@ begin
   change;
  end;
 end;
-
+{
 procedure tmaskedbitmap.setmonochrome(const avalue: boolean);
 begin
  inherited;
@@ -1692,7 +1721,7 @@ begin
   change;
  end;
 end;
-
+}
 function tmaskedbitmap.getcolormask: boolean;
 begin
  result:= bmo_colormask in foptions;
@@ -1726,10 +1755,12 @@ end;
 function tmaskedbitmap.getoptions: bitmapoptionsty;
 begin
  result:= foptions;
+ (*
  updatebit({$ifdef FPC}longword{$else}byte{$endif}(result),ord(bmo_monochrome),
                    monochrome);
  updatebit({$ifdef FPC}longword{$else}byte{$endif}(result),ord(bmo_masked),
                    masked);
+ *)
 end;
 
 procedure tmaskedbitmap.setoptions(const avalue: bitmapoptionsty);
@@ -2046,6 +2077,8 @@ procedure tmaskedbitmap.stretch(const source: rectty;
                              const dest: tmaskedbitmap;
                            const aalignment: alignmentsty = 
                                 [al_stretchx,al_stretchy,al_intpol]);
+const
+ tfo = bmokindoptions+bmomaskkindoptions+[bmo_masked];
 var
  size1: sizety;
  bo1: boolean;
@@ -2055,9 +2088,12 @@ begin
  try
   size1:= dest.size;
   dest.clear;
+  dest.options:= (dest.options - tfo) + (options*tfo);
+  {
   dest.monochrome:= monochrome;
   dest.colormask:= colormask;
   dest.masked:= masked;
+  }
   dest.size:= size1;
   bo1:= (aalignment * [al_stretchx,al_stretchy] <> 
                                    [al_stretchx,al_stretchy]) and
@@ -2177,7 +2213,7 @@ begin
   checkmask;
   ar1:= fmask.compressdata;
   int1:= length(ar1)*4;
-  if not fmask.monochrome then begin
+  if fmask.kind <> bmk_mono then begin
    stream.WriteBuffer(int1,4);
   end;
   stream.WriteBuffer(ar1[0],int1);
@@ -2230,7 +2266,7 @@ begin
    stream.ReadBuffer(ar1[0],length(ar1)*4);
    decompressdata(makesize(width,height),ar1);
    if masked then begin
-    if fmask.monochrome then begin
+    if fmask.kind = bmk_mono then begin
      int1:= ((fsize.cx + 31) div 32) * fsize.cy;
     end
     else begin
@@ -2599,12 +2635,12 @@ procedure timagelist.setmasked(const Value: boolean);
 begin
  fbitmap.masked:= value;
 end;
-
+{
 function timagelist.getmonochrome: boolean;
 begin
  result:= fbitmap.monochrome;
 end;
-
+}
 function timagelist.getgraymask: boolean;
 begin
  result:= fbitmap.graymask;
@@ -2624,7 +2660,7 @@ procedure timagelist.setcolormask(const avalue: boolean);
 begin
  fbitmap.colormask:= avalue;
 end;
-
+{
 procedure timagelist.setmonochrome(const Value: boolean);
 begin
  if fbitmap.monochrome <> value then begin
@@ -2632,7 +2668,7 @@ begin
   change;
  end;
 end;
-
+}
 procedure timagelist.paint(const acanvas: tcanvas; const index: integer; 
          const dest: rectty;  const alignment: alignmentsty = [];
          const acolor: colorty = cl_default;
@@ -2725,7 +2761,7 @@ begin
    fbitmap.copyarea(ima1,rect1,rect2,aalignment,rop_copy,false);
    if ima1.masked then begin
     if bo1 then begin
-     if fbitmap.mask.monochrome then begin
+     if fbitmap.mask.kind = bmk_mono then begin
       fbitmap.mask.canvas.fillrect(rect2,cl_0);
      end
      else begin
@@ -2737,7 +2773,7 @@ begin
    end
    else begin
     if bo1 then begin
-     if fbitmap.mask.monochrome then begin
+     if fbitmap.mask.kind = bmk_mono then begin
       fbitmap.mask.canvas.fillrect(rect2,cl_0);
      end
      else begin
@@ -2746,7 +2782,7 @@ begin
     end;
 //    subpoint1(rect2.pos,rect1.pos);
 //    addpoint1(pointty(rect1.size),rect1.pos);
-    if fbitmap.mask.monochrome then begin
+    if fbitmap.mask.kind = bmk_mono then begin
      fbitmap.mask.canvas.fillrect(destrect,cl_1);
     end
     else begin
@@ -2756,7 +2792,7 @@ begin
   end
   else begin
    if bo1 then begin
-    if monochrome then begin
+    if kind = bmk_mono then begin
      fbitmap.canvas.fillrect(rect2,cl_0);
     end
     else begin
@@ -2791,7 +2827,7 @@ begin
                dest.fmaskcolorforeground,dest.fmaskcolorbackground);
   end;
   if dest.masked and not masked then begin
-   if dest.mask.monochrome then begin
+   if dest.mask.kind = bmk_mono then begin
     dest.mask.init(cl_1);
    end
    else begin
@@ -3016,7 +3052,9 @@ end;
 
 procedure timagelist.readmonochrome(reader: treader);
 begin
- monochrome:= reader.readboolean;
+ if reader.readboolean then begin
+  kind:= bmk_mono;
+ end;
 end;
 
 procedure timagelist.defineproperties(filer: tfiler);

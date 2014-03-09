@@ -199,7 +199,7 @@ type
  
  icanvas = interface(inullinterface)
   procedure gcneeded(const sender: tcanvas);
-  function getmonochrome: boolean;
+  function getkind: bitmapkindty;
   function getsize: sizety;
   procedure getcanvasimage(const bgr: boolean; var aimage: maskedimagety);
  end;
@@ -340,7 +340,7 @@ type
  
  getcanvasclassinfoty = record
   canvasclass: canvasclassty;
-  monochrome: boolean;
+  kind: bitmapkindty;//monochrome: boolean;
  end;
  
  moverectinfoty = record
@@ -480,7 +480,8 @@ type
 
     //icanvas
    procedure gcneeded(const sender: tcanvas);
-   function getmonochrome: boolean;
+//   function getmonochrome: boolean;
+   function getkind: bitmapkindty;
    function getsize: sizety;
    procedure getcanvasimage(const bgr: boolean; var aimage: maskedimagety);
   protected
@@ -691,7 +692,8 @@ type
    procedure updatecliporigin(const Value: pointty);
    function getlinewidthmm: real;
    procedure setlinewidthmm(const avalue: real);
-   function getmonochrome: boolean;
+   function getkind: bitmapkindty;
+//   function getmonochrome: boolean;
    procedure readlineoptions(reader: treader);
    function getsmooth: boolean;
    procedure setsmooth(const avalue: boolean);
@@ -969,7 +971,8 @@ type
    property clipregion: regionty {read getclipregion} write setclipregion;
                   //canvas owns the region!
 
-   property monochrome: boolean read getmonochrome;
+//   property monochrome: boolean read getmonochrome;
+   property kind: bitmapkindty read getkind;
    property color: colorty read getcolor write setcolor default cl_black;
    property colorbackground: colorty read getcolorbackground
               write setcolorbackground default cl_transparent;
@@ -1022,6 +1025,12 @@ type
    procedure setwidth(const avalue: integer);
    procedure setheight(const avalue: integer);
    procedure updatescanline();
+   {
+   function getgrayscale: boolean;
+   procedure setgrayscale(const avalue: boolean);
+   function getmonochrome: boolean;
+   procedure setmonochrome(const avalue: boolean);
+   }
   protected
    fgdifuncs: pgdifunctionaty;
    fcanvasclass: canvasclassty;
@@ -1041,8 +1050,6 @@ type
    procedure internaldestroyhandle;
    procedure destroyhandle; virtual;
    procedure createhandle(acopyfrom: pixmapty); virtual;
-   function getmonochrome: boolean;
-   procedure setmonochrome(const avalue: boolean); virtual;
    procedure setkind(const avalue: bitmapkindty); virtual;
    function getconverttomonochromecolorbackground: colorty; virtual;
    function getmask: tsimplebitmap; virtual;
@@ -1053,6 +1060,7 @@ type
     //icanvas
    procedure gcneeded(const sender: tcanvas);
    function getsize: sizety;
+   function getkind: bitmapkindty;
    procedure getcanvasimage(const bgr: boolean;
                                     var aimage: maskedimagety); virtual;
   public
@@ -1098,7 +1106,10 @@ type
               const aopacity: colorty = cl_none); overload;
 
    property kind: bitmapkindty read fkind write setkind;   
+   {
    property monochrome: boolean read getmonochrome write setmonochrome;
+   property grayscale: boolean read getgrayscale write setgrayscale;
+   }
    property canvas: tcanvas read getcanvas;
    property size: sizety read fsize write setsize;
          //pixels are not initialized
@@ -1139,9 +1150,9 @@ function getdefaultgdifuncs: pgdifunctionaty;{$ifdef FPC}inline;{$endif}
 function registergdi(const agdifuncs: pgdifunctionaty): integer;
                                             //returns unique number
 function getgdicanvasclass(const agdi: pgdifunctionaty;
-                              const amonochrome: boolean): canvasclassty;
+                              const akind: bitmapkindty): canvasclassty;
 function creategdicanvas(const agdi: pgdifunctionaty;
-                            const amonochrome: boolean;
+                            const akind: bitmapkindty;
                             const user: tobject; const intf: icanvas): tcanvas;
 
 procedure freefontdata(var drawinfo: drawinfoty);
@@ -1707,12 +1718,12 @@ begin
 end;
 
 function getgdicanvasclass(const agdi: pgdifunctionaty;
-                                  const amonochrome: boolean): canvasclassty;
+                                  const akind: bitmapkindty): canvasclassty;
 var
  info1: drawinfoty;
 begin
  with info1.getcanvasclass do begin
-  monochrome:= amonochrome;
+  kind:= akind;
   canvasclass:= tcanvas; //default
   agdi^[gdf_getcanvasclass](info1);
   result:= canvasclass;
@@ -1720,10 +1731,10 @@ begin
 end;
 
 function creategdicanvas(const agdi: pgdifunctionaty;
-                  const amonochrome: boolean; const user: tobject;
+                  const akind: bitmapkindty; const user: tobject;
                                            const intf: icanvas): tcanvas;
 begin
- result:= getgdicanvasclass(agdi,amonochrome).create(user,intf);
+ result:= getgdicanvasclass(agdi,akind).create(user,intf);
 end;
 
 procedure freefontdata(var drawinfo: drawinfoty);
@@ -1767,7 +1778,7 @@ begin
  if fgdifuncs = nil then begin
   fgdifuncs:= getdefaultgdifuncs;
  end;
- fcanvasclass:= getgdicanvasclass(fgdifuncs,monochrome);
+ fcanvasclass:= getgdicanvasclass(fgdifuncs,kind);
  fkind:= akind;
 // if monochrome then begin
 //  include(fstate,pms_monochrome);
@@ -1804,18 +1815,33 @@ procedure tsimplebitmap.clear;
 begin
  size:= nullsize;
 end;
-
+{
 function tsimplebitmap.getmonochrome: boolean;
 begin
  result:= fkind = bmk_mono;
 // result:= pms_monochrome in fstate;
 end;
 
+procedure tsimplebitmap.setmonochrome(const avalue: boolean);
+begin
+ kind:= bmk_mono;
+end;
+
+function tsimplebitmap.getgrayscale: boolean;
+begin
+ result:= fkind = bmk_gray;
+end;
+
+procedure tsimplebitmap.setgrayscale(const avalue: boolean);
+begin
+ kind:= bmk_gray;
+end;
+}
 function tsimplebitmap.getconverttomonochromecolorbackground: colorty;
 begin
  result:= fcolorbackground;
 end;
-
+(*
 procedure tsimplebitmap.setmonochrome(const avalue: boolean);
 var
  bmp: tsimplebitmap;
@@ -1860,7 +1886,7 @@ begin
   end;
  end;
 end;
-
+*)
 procedure tsimplebitmap.setkind(const avalue: bitmapkindty);
 var
  bmp: tsimplebitmap;
@@ -2029,12 +2055,17 @@ begin
  updatescanline();
 end;
 
-function tsimplebitmap.isempty: boolean;
+function tsimplebitmap.getkind(): bitmapkindty;
+begin
+ result:= fkind;
+end;
+
+function tsimplebitmap.isempty(): boolean;
 begin
  result:= (fsize.cx = 0) or (fsize.cy = 0);
 end;
 
-function tsimplebitmap.gethandle: pixmapty;
+function tsimplebitmap.gethandle(): pixmapty;
 begin
  if fhandle = 0 then begin
   createhandle(0);
@@ -2103,7 +2134,7 @@ end;
 function tsimplebitmap.normalizeinitcolor(const acolor: colorty): colorty;
 begin
  if acolor = cl_transparent then begin
-  if getmonochrome then begin
+  if kind = bmk_mono then begin
    result:= cl_0;
   end
   else begin
@@ -2130,7 +2161,8 @@ begin
    if docopy then begin
  //   self.handle:= handle; //windows problem: copy handle does not work with bmp selected in dc
  //   self.copyhandle;
-    self.monochrome:= monochrome;
+    self.clear;
+    self.kind:= kind;
     self.size:= size;
     self.copyarea(source,makerect(nullpoint,fsize),nullpoint,rop_copy,false);
    end
@@ -2157,7 +2189,7 @@ procedure tsimplebitmap.assignnegative(source: tsimplebitmap);
                        //gets negative copy
 begin
  clear;
- monochrome:= source.monochrome;
+ kind:= source.kind;
  if not source.isempty then begin
   size:= source.size;
   copyarea(source,makerect(nullpoint,fsize),nullpoint,rop_notcopy);
@@ -2479,7 +2511,7 @@ var
  canvas: tcanvas;
 begin
  if fhandlepo^ = 0 then begin
-  canvas:= creategdicanvas(getdefaultgdifuncs,false,self,icanvas(self));
+  canvas:= creategdicanvas(getdefaultgdifuncs,bmk_rgb,self,icanvas(self));
 //  canvas:= tcanvas.create(self,icanvas(self));
   try
    createhandle(canvas);
@@ -2957,10 +2989,15 @@ begin
  gdierror(err,self);
  sender.linktopaintdevice(0,gc,{nullsize,}nullpoint);
 end;
-
+{
 function tfont.getmonochrome: boolean;
 begin
  result:= false;
+end;
+}
+function tfont.getkind: bitmapkindty;
+begin
+ result:= bmk_rgb;
 end;
 
 function tfont.getsize: sizety;
@@ -3311,7 +3348,7 @@ procedure tcanvas.init;
  procedure initvalues(var values: canvasvaluesty);
  begin
   with values do begin
-   if icanvas(fintf).getmonochrome then begin
+   if icanvas(fintf).getkind = bmk_mono then begin
     color:= cl_1;
     colorbackground:= cl_0;
     font.color:= cl_1;
@@ -3544,7 +3581,7 @@ begin
        include(values.mask,gvm_brush);
        values.brush:= fvaluepo^.brush;
       end;
-      if getmonochrome then begin
+      if getkind = bmk_mono then begin
        include(drawingflags,df_monochrome);
        include(state,cs_acolorbackground);
        if bo1 then begin //use canvas colors
@@ -5809,9 +5846,9 @@ begin
  result:= cs_highresdevice in fstate;
 end;
 
-function tcanvas.getmonochrome: boolean;
+function tcanvas.getkind: bitmapkindty;
 begin
- result:= icanvas(fintf).getmonochrome;
+ result:= icanvas(fintf).getkind;
 end;
 
 function tcanvas.getcontextinfopo: pointer;

@@ -2112,7 +2112,7 @@ begin
   winrecttorect(rect1);
   intersectrect(destrect^,rect1,rect1);
   maskbefore:= mask;
-  if (mask <> nil) and not mask.monochrome then begin
+  if (mask <> nil) and (mask.kind <> bmk_mono) then begin
    colormask:= tsimplebitmap1(mask);
    mask:= nil;
   end

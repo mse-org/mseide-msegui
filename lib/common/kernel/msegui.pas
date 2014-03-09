@@ -2010,7 +2010,8 @@ type
    function canactivate: boolean;
      //icanvas
    procedure gcneeded(const sender: tcanvas);
-   function getmonochrome: boolean;
+//   function getmonochrome: boolean;
+   function getkind: bitmapkindty;
    function getsize: sizety;
    procedure getcanvasimage(const bgr: boolean; var aimage: maskedimagety);
 
@@ -12653,8 +12654,8 @@ begin
  end;
  fownerwidget:= aowner;
  fownerwidget.fwindow:= self;
- fcanvas:= creategdicanvas(fgdi,false,self,icanvas(self));
- fasynccanvas:= creategdicanvas(fgdi,false,self,icanvas(self));
+ fcanvas:= creategdicanvas(fgdi,bmk_rgb,self,icanvas(self));
+ fasynccanvas:= creategdicanvas(fgdi,bmk_rgb,self,icanvas(self));
  fscrollnotifylist:= tnotifylist.create;
  inherited create;
  fownerwidget.rootchanged(false); //nil all references
@@ -13952,10 +13953,15 @@ procedure twindow.gcneeded(const sender: tcanvas);
 begin
  createwindow;
 end;
-
+{
 function twindow.getmonochrome: boolean;
 begin
  result:= false;
+end;
+}
+function twindow.getkind: bitmapkindty;
+begin
+ result:= bmk_rgb;
 end;
 
 procedure twindow.update;
