@@ -164,7 +164,6 @@ end;
 
 destructor tcustomwindowwidget.destroy;
 begin
- ftimer.free;
  if fwindow <> nil then begin
   fwindow.unregisteronscroll({$ifdef FPC}@{$endif}windowscrolled);
  end;
@@ -174,6 +173,7 @@ begin
  application.unregisteronwiniddestroyed({$ifdef FPC}@{$endif}winiddestroyed);
  destroyclientwindow;
  inherited;
+ ftimer.free;
 end;
 
 function tcustomwindowwidget.getclientwinid: winidty;
