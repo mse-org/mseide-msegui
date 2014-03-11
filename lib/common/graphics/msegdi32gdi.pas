@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2014 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -171,6 +171,18 @@ type
   val1: ARGB;
  end;
 
+ graypalettety = record
+  Flags: UINT;
+  Count: UINT;
+  values: array[byte] of ARGB;
+ end;
+ gdigraypalettety = record
+  palVersion: WORD;
+  palNumEntries: WORD;
+  values: array[byte] of PALETTEENTRY;
+ end;
+ pgdigraypalettety = ^gdigraypalettety;
+
  win32gcdty = record
   flags: gcflagsty;
   gpflags: gcflagsty;
@@ -188,6 +200,7 @@ type
   selectedpen: hpen;
   selectedbrush: hbrush;
   secondpen: hpen;
+//  graypal: hpalette;
   gpgraphic: pgpgraphics;
   gpregion: pgpregion;
   gpsolidfill: pgpsolidfill;
@@ -217,11 +230,52 @@ type
 type
  tsimplebitmap1 = class(tsimplebitmap);
  tcanvas1 = class(tcanvas);
- 
+
+{
+const
+ graypalette: graypalettety = (
+  flags: 0;
+  count: 256;
+  values: (
+$00000000,$00010101,$00020202,$00030303,$00040404,$00050505,$00060606,$00070707,
+$00080808,$00090909,$000a0a0a,$000b0b0b,$000c0c0c,$000d0d0d,$000e0e0e,$000f0f0f,
+$00101010,$00111111,$00121212,$00131313,$00141414,$00151515,$00161616,$00171717,
+$00181818,$00191919,$001a1a1a,$001b1b1b,$001c1c1c,$001d1d1d,$001e1e1e,$001f1f1f,
+$00202020,$00212121,$00222222,$00232323,$00242424,$00252525,$00262626,$00272727,
+$00282828,$00292929,$002a2a2a,$002b2b2b,$002c2c2c,$002d2d2d,$002e2e2e,$002f2f2f,
+$00303030,$00313131,$00323232,$00333333,$00343434,$00353535,$00363636,$00373737,
+$00383838,$00393939,$003a3a3a,$003b3b3b,$003c3c3c,$003d3d3d,$003e3e3e,$003f3f3f,
+$00404040,$00414141,$00424242,$00434343,$00444444,$00454545,$00464646,$00474747,
+$00484848,$00494949,$004a4a4a,$004b4b4b,$004c4c4c,$004d4d4d,$004e4e4e,$004f4f4f,
+$00505050,$00515151,$00525252,$00535353,$00545454,$00555555,$00565656,$00575757,
+$00585858,$00595959,$005a5a5a,$005b5b5b,$005c5c5c,$005d5d5d,$005e5e5e,$005f5f5f,
+$00606060,$00616161,$00626262,$00636363,$00646464,$00656565,$00666666,$00676767,
+$00686868,$00696969,$006a6a6a,$006b6b6b,$006c6c6c,$006d6d6d,$006e6e6e,$006f6f6f,
+$00707070,$00717171,$00727272,$00737373,$00747474,$00757575,$00767676,$00777777,
+$00787878,$00797979,$007a7a7a,$007b7b7b,$007c7c7c,$007d7d7d,$007e7e7e,$007f7f7f,
+$00808080,$00818181,$00828282,$00838383,$00848484,$00858585,$00868686,$00878787,
+$00888888,$00898989,$008a8a8a,$008b8b8b,$008c8c8c,$008d8d8d,$008e8e8e,$008f8f8f,
+$00909090,$00919191,$00929292,$00939393,$00949494,$00959595,$00969696,$00979797,
+$00989898,$00999999,$009a9a9a,$009b9b9b,$009c9c9c,$009d9d9d,$009e9e9e,$009f9f9f,
+$00a0a0a0,$00a1a1a1,$00a2a2a2,$00a3a3a3,$00a4a4a4,$00a5a5a5,$00a6a6a6,$00a7a7a7,
+$00a8a8a8,$00a9a9a9,$00aaaaaa,$00ababab,$00acacac,$00adadad,$00aeaeae,$00afafaf,
+$00b0b0b0,$00b1b1b1,$00b2b2b2,$00b3b3b3,$00b4b4b4,$00b5b5b5,$00b6b6b6,$00b7b7b7,
+$00b8b8b8,$00b9b9b9,$00bababa,$00bbbbbb,$00bcbcbc,$00bdbdbd,$00bebebe,$00bfbfbf,
+$00c0c0c0,$00c1c1c1,$00c2c2c2,$00c3c3c3,$00c4c4c4,$00c5c5c5,$00c6c6c6,$00c7c7c7,
+$00c8c8c8,$00c9c9c9,$00cacaca,$00cbcbcb,$00cccccc,$00cdcdcd,$00cecece,$00cfcfcf,
+$00d0d0d0,$00d1d1d1,$00d2d2d2,$00d3d3d3,$00d4d4d4,$00d5d5d5,$00d6d6d6,$00d7d7d7,
+$00d8d8d8,$00d9d9d9,$00dadada,$00dbdbdb,$00dcdcdc,$00dddddd,$00dedede,$00dfdfdf,
+$00e0e0e0,$00e1e1e1,$00e2e2e2,$00e3e3e3,$00e4e4e4,$00e5e5e5,$00e6e6e6,$00e7e7e7,
+$00e8e8e8,$00e9e9e9,$00eaeaea,$00ebebeb,$00ececec,$00ededed,$00eeeeee,$00efefef,
+$00f0f0f0,$00f1f1f1,$00f2f2f2,$00f3f3f3,$00f4f4f4,$00f5f5f5,$00f6f6f6,$00f7f7f7,
+$00f8f8f8,$00f9f9f9,$00fafafa,$00fbfbfb,$00fcfcfc,$00fdfdfd,$00fefefe,$00ffffff
+    );
+ );
+}
 var
  nullpen: hpen;
  nullbrush: hbrush;
-
+ graypalette: hpalette;
 
  capstyles: array[capstylety] of longword =
        (ps_endcap_flat,ps_endcap_round,ps_endcap_square);
@@ -269,22 +323,54 @@ begin
   error:= gui_imagetopixmap(image,pixmap,drawinfo.gc.handle);
  end;
 end;
-
+var testvar2: hpalette; testvar3: longword;
 //function gdi32creategc(paintdevice: paintdevicety; const akind: gckindty; 
 //              var gc: gcty; const aprintername: msestring): guierrorty;
 procedure gdi_creategc(var drawinfo: drawinfoty);
 var
  wrect1: trect;
+ palpo: pgdigraypalettety;
+ by1: byte;
 begin
- with drawinfo.creategc do begin
+ with drawinfo,creategc do begin
   gcpo^.gdifuncs:= gui_getgdifuncs;
+  with win32gcty(gcpo^.platformdata) do begin
+   d.kind:= kind;
+//   d.graypal:= 0;
+  end;
   case kind of
    gck_pixmap: begin
     error:= gde_creategc;
     gcpo^.handle:= createcompatibledc(0);
     if gcpo^.handle <> 0 then begin
-     selectobject(gcpo^.handle,paintdevice);
-     win32gcty(gcpo^.platformdata).d.kind:= kind;
+testvar3:= getlasterror;
+testvar3:=     selectobject(gcpo^.handle,paintdevice);
+if testvar3 = 0 then begin
+ inc(testvar3);
+end;
+testvar3:= getlasterror;
+     if gcpo^.kind = bmk_gray then begin
+      if graypalette = 0 then begin
+       palpo:= pointer(gui_allocimagemem((sizeof(gdigraypalettety)+3) div 4));
+       with palpo^ do begin
+        palversion:= $0300;
+        palnumentries:= length(values);
+        for by1:= 0 to high(values) do begin
+         with values[by1] do begin
+          pered:= by1;
+          pegreen:= by1;
+          peblue:= by1;
+          peflags:= 0;
+         end;
+        end;
+       end;
+       graypalette:= createpalette(logpalette(pointer(palpo)^));
+       gui_freeimagemem(pointer(palpo));
+      end;
+      with win32gcty(gcpo^.platformdata) do begin
+       testvar2:= selectpalette(gcpo^.handle,graypalette,false);
+      end;
+     end;
     end;
    end;
    gck_printer: begin
@@ -316,7 +402,6 @@ begin
  {$ifdef mse_debuggdi}
    inc(gccount);
  {$endif}
-   win32gcty(gcpo^.platformdata).d.kind:= kind;
    settextalign(gcpo^.handle,ta_left or ta_baseline or ta_noupdatecp);
    setbkmode(gcpo^.handle,transparent);
    setmapmode(gcpo^.handle,mm_text);
@@ -1107,7 +1192,7 @@ begin
  //   bmp1:= createcompatiblebitmap(handle,0,0);
  //   bmp2:= selectobject(handle,bmp1); //select actual bitmap out of dc
                                       //really needed?
-    deletedc(handle);
+     deletedc(handle);
  //   deleteobject(bmp1);
     end;
     gck_metafile: begin
@@ -1921,6 +2006,7 @@ begin
  end;
 end;
 
+var testvar: boolean; testvar1: longword;
 procedure gdi_copyarea(var drawinfo: drawinfoty);
 
 var
@@ -2005,9 +2091,10 @@ var
   with drawinfo,copyarea,sourcerect^,gc,win32gcty(platformdata).d do begin
    if alignment * [al_stretchx,al_stretchy] = [] then begin
     if mask = nil then begin
-     bitblt(handle,destrect^.x,destrect^.y,cx,cy,
+testvar:=     bitblt(handle,destrect^.x,destrect^.y,cx,cy,
                     tcanvas1(source).fdrawinfo.gc.handle,
                     x,y,rasterops3[copymode]);
+testvar1:= getlasterror();
      if double then begin
       setbkcolor(handle,$000000);
       settextcolor(handle,foregroundcol);
@@ -2102,7 +2189,16 @@ var
  colormask: tsimplebitmap1;
  bufferbmpback: hbitmap;
 // point1: tpoint;
- maskbefore: tsimplebitmap; 
+ maskbefore: tsimplebitmap;
+ sbmp,dbmp: hbitmap;
+ sdc,ddcbefore,ddc: hdc;
+ sourceposbefore: pointty;
+ ps,pd,pe,po1: pointer;
+ scanstep: integer;
+ wo1: word;
+ lwo1: longword;
+po3: pbyte;
+ima1: imagety;
 begin
  with drawinfo,copyarea,gc,win32gcty(platformdata).d do begin
   
@@ -2144,30 +2240,93 @@ begin
     transfer;
    end
    else begin
-               //convert from monochrome
-    if not (df_opaque in drawingflags) then begin
-     if copymode = rop_xor then begin
-      setbkcolor(handle,$000000);
-      settextcolor(handle,foregroundcol);
-      transfer;
+    if df_canvasismonochrome in 
+          tcanvas1(source).fdrawinfo.gc.drawingflags
+                               {source.kind = bmk_mono} then begin
+                //convert from monochrome
+     if not (df_opaque in drawingflags) then begin
+      if copymode = rop_xor then begin
+       setbkcolor(handle,$000000);
+       settextcolor(handle,foregroundcol);
+       transfer;
+      end
+      else begin
+       ropbefore:= copymode;
+       setbkcolor(handle,$ffffff);
+       settextcolor(handle,$000000);
+       copymode:= rop_and;
+       transfer(true);
+       copymode:= ropbefore;
+      end;
      end
      else begin
-      ropbefore:= copymode;
-      setbkcolor(handle,$ffffff);
-      settextcolor(handle,$000000);
-      copymode:= rop_and;
-      transfer(true);
-      copymode:= ropbefore;
+      setbkcolor(handle,backgroundcol);
+      settextcolor(handle,foregroundcol);
+      transfer;
      end;
-//      fill(drawinfo,fs_copyarea);
     end
     else begin
-//     settextcolor (handle,backgroundcol);
-     setbkcolor(handle,backgroundcol);
-//     setbkcolor(handle,foregroundcol);
-     settextcolor(handle,foregroundcol);
-//     settextcolor(handle,$00ffffff);
-     transfer;
+testvar1:= getlasterror;
+     sbmp:= createbitmapdata(sourcerect^.size,source.kind,ps);
+     sdc:= createcompatibledc(0);
+testvar1:=     selectobject(sdc,sbmp);
+testvar:=     bitblt(sdc,0,0,sourcerect^.cx,sourcerect^.cy,source.gchandle,
+               sourcerect^.x,sourcerect^.y,srccopy);
+     dbmp:= createbitmapdata(sourcerect^.size,gc.kind,pd);
+     ddc:= createcompatibledc(0);
+testvar1:=     selectobject(ddc,dbmp);
+     scanstep:= ((sourcerect^.cx+3) div 4) * 4;
+     if source.kind = bmk_gray then begin
+                //gray to color
+      for int1:= 0 to sourcerect^.cy - 1 do begin
+       po1:= ps;
+       pe:= po1 + sourcerect^.cx;
+       repeat
+        wo1:= pbyte(po1)^;
+// wo1:= $ff;
+        plongword(pd)^:= wo1 or (wo1 shl 8) or (wo1 shl 16);
+        inc(po1);
+        inc(plongword(pd));
+       until po1 = pe;
+       ps:= ps + scanstep;
+      end;      
+     end
+     else begin //color to gray
+po3:= pd;
+      for int1:= 0 to sourcerect^.cy - 1 do begin
+       po1:= pd;
+       pe:= po1 + sourcerect^.cx;
+       repeat
+        lwo1:= plongword(ps)^;
+//  lwo1:= $ffffff;
+        pbyte(po1)^:= ((lwo1 and $ff) + ((lwo1 and $ff00) shr 8) + 
+                                        ((lwo1 and $ff0000) shr 16)) div 3;
+        inc(po1);
+        inc(plongword(ps));
+       until po1 = pe;
+       pd:= pd + scanstep;
+      end;      
+     end;
+     ddcbefore:= tcanvas1(source).fdrawinfo.gc.handle;
+     tcanvas1(source).fdrawinfo.gc.handle:= ddc;
+     sourceposbefore:= sourcerect^.pos;
+     sourcerect^.pos:= nullpoint;
+
+     transfer; //gray <-> color
+     tcanvas1(source).fdrawinfo.gc.handle:= ddcbefore;
+     sourcerect^.pos:= sourceposbefore;
+
+if gc.kind = bmk_gray then begin
+//po3^:= 123;
+//testvar:= bitblt(ddc,0,0,sourcerect^.cx,sourcerect^.cy,gc.handle,destrect^.x,
+//                                                        destrect^.y,srccopy);
+ gui_pixmaptoimage(paintdevice,ima1,gc.handle);
+end;
+
+     deletedc(sdc);
+     deletedc(ddc);
+     deleteobject(sbmp);
+     deleteobject(dbmp);
     end;
    end;
   end
@@ -2175,8 +2334,6 @@ begin
    if df_canvasismonochrome in drawingflags then begin
     setbkcolor(handle,$ffffff);
     settextcolor(handle,$000000);
-//    setbkcolor(handle,backgroundcol);
-//    settextcolor(handle,foregroundcol);
    end;
    transfer;
   end;
@@ -2893,6 +3050,10 @@ begin
  nullpen:= 0;
  deleteobject(nullbrush);
  nullbrush:= 0;
+ if graypalette <> 0 then begin
+  deleteobject(graypalette);
+  graypalette:= 0;
+ end;
  if fhasgdiplus then begin
   releasegdiplus;
  end;

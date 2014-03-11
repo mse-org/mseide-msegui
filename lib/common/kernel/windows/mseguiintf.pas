@@ -44,6 +44,8 @@ procedure recttowinrect(po: prectty; count: integer); overload;
 procedure winrecttorect(const rect: rectty); overload;
 procedure winrecttorect(po: prectty; count: integer); overload;
 function mrect(aleft,atop,aright,abottom: integer): trect;
+function createbitmapdata(const size: sizety; const kind: bitmapkindty;
+                                                 out data: pointer): hbitmap;
 
 procedure beginsdndwrite(const athread: threadty);
 procedure endsdndwrite;
@@ -220,10 +222,15 @@ type
  tapplication1 = class(tguiapplication);
  tsimplebitmap1 = class(tsimplebitmap);
  tcanvas1 = class(tcanvas);
-
- monochromebitmapinfoty = packed record
+{
+ gdimonochromebitmapinfoty = packed record
   bmiheader: tbitmapinfoheader;
   bmicolors: array[0..1] of trgbquad;
+ end;
+}
+ gdibitmapinfoty = packed record
+  bmiheader: tbitmapinfoheader;
+  bmicolors: array[0..255] of trgbquad; //maximum size
  end;
 
  bitmapinfoty = packed record
@@ -749,14 +756,16 @@ function gui_createpixmap(const size: sizety; winid: winidty = 0;
              //copyfrom does not work if selected in dc!
 var
  dc,dc1: hdc;
-
+ po1: pointer;
 begin
+ po1:= nil;
  case kind of
   bmk_mono: begin
    result:= createbitmap(size.cx,size.cy,1,1,nil);
   end;
   bmk_gray: begin
-   result:= createbitmap(size.cx,size.cy,1,8,nil);
+   result:= createbitmapdata(size,kind,po1);
+//   result:= createbitmap(size.cx,size.cy,1,8,nil);
   end
   else begin
    dc:= getdc(winid);
@@ -806,7 +815,7 @@ begin
 end;
 
 procedure initbitmapinfo(kind: bitmapkindty; bottomup: boolean;
-              const size: sizety; out bitmapinfo: monochromebitmapinfoty);
+              const size: sizety; out bitmapinfo: gdibitmapinfoty);
 begin
  fillchar(bitmapinfo,sizeof(bitmapinfo),0);
  with bitmapinfo.bmiHeader do begin
@@ -837,6 +846,15 @@ begin
  end;
 end;
 
+function createbitmapdata(const size: sizety; const kind: bitmapkindty;
+                                                 out data: pointer): hbitmap;
+var
+ info: gdibitmapinfoty;
+begin
+ initbitmapinfo(kind,false,size,info);
+ result:= createdibsection(0,bitmapinfo((@info)^),dib_rgb_colors,data,0,0);
+end;
+
 function gui_createbitmapfromdata(const size: sizety; datapo: pbyte;
              msbitfirst: boolean = false; dwordaligned: boolean = false;
              bottomup: boolean = false): pixmapty;
@@ -844,7 +862,7 @@ var
  po1,po2: pbyte;
  bytesperline: integer;
  int1,int2,int3: integer;
- bitmapinfo: monochromebitmapinfoty;
+ bitmapinfo: gdibitmapinfoty;
  dc: hdc;
 
 begin
@@ -966,12 +984,12 @@ begin
  dec(imagememalloc);
  localfree(longword(data));
 end;
-
+var testvar: longword;
 function gui_pixmaptoimage(pixmap: pixmapty; out image: imagety;
                                               gchandle: longword): gdierrorty;
 var
  info: pixmapinfoty;
- bitmapinfo: monochromebitmapinfoty;
+ bitmapinfo: gdibitmapinfoty;
  dc: hdc;
  int1: integer;
  bmp1: hbitmap;
@@ -1021,7 +1039,7 @@ function gui_imagetopixmap(const image: imagety; out pixmap: pixmapty;
                            gchandle: longword): gdierrorty;
 var
  int1: integer;
- bitmapinfo: monochromebitmapinfoty;
+ bitmapinfo: gdibitmapinfoty;
  dc: hdc;
  bmp1: hbitmap;
 begin
