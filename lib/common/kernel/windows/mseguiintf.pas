@@ -816,6 +816,8 @@ end;
 
 procedure initbitmapinfo(kind: bitmapkindty; bottomup: boolean;
               const size: sizety; out bitmapinfo: gdibitmapinfoty);
+var
+ lwo1: longword;
 begin
  fillchar(bitmapinfo,sizeof(bitmapinfo),0);
  with bitmapinfo.bmiHeader do begin
@@ -838,6 +840,10 @@ begin
    end;
    bmk_gray: begin
     bibitcount:= 8;
+    for lwo1:= 0 to high(bitmapinfo.bmicolors) do begin
+     bitmapinfo.bmicolors[lwo1]:= 
+                 rgbquad(lwo1 or (lwo1 shl 8) or (lwo1 shl 16));
+    end;
    end;
    else begin
     bibitcount:= 32;
@@ -984,7 +990,7 @@ begin
  dec(imagememalloc);
  localfree(longword(data));
 end;
-var testvar: longword;
+
 function gui_pixmaptoimage(pixmap: pixmapty; out image: imagety;
                                               gchandle: longword): gdierrorty;
 var

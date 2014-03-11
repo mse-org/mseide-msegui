@@ -275,7 +275,7 @@ $00f8f8f8,$00f9f9f9,$00fafafa,$00fbfbfb,$00fcfcfc,$00fdfdfd,$00fefefe,$00ffffff
 var
  nullpen: hpen;
  nullbrush: hbrush;
- graypalette: hpalette;
+// graypalette: hpalette;
 
  capstyles: array[capstylety] of longword =
        (ps_endcap_flat,ps_endcap_round,ps_endcap_square);
@@ -323,14 +323,14 @@ begin
   error:= gui_imagetopixmap(image,pixmap,drawinfo.gc.handle);
  end;
 end;
-var testvar2: hpalette; testvar3: longword;
+
 //function gdi32creategc(paintdevice: paintdevicety; const akind: gckindty; 
 //              var gc: gcty; const aprintername: msestring): guierrorty;
 procedure gdi_creategc(var drawinfo: drawinfoty);
 var
  wrect1: trect;
- palpo: pgdigraypalettety;
- by1: byte;
+// palpo: pgdigraypalettety;
+// by1: byte;
 begin
  with drawinfo,creategc do begin
   gcpo^.gdifuncs:= gui_getgdifuncs;
@@ -343,12 +343,8 @@ begin
     error:= gde_creategc;
     gcpo^.handle:= createcompatibledc(0);
     if gcpo^.handle <> 0 then begin
-testvar3:= getlasterror;
-testvar3:=     selectobject(gcpo^.handle,paintdevice);
-if testvar3 = 0 then begin
- inc(testvar3);
-end;
-testvar3:= getlasterror;
+     selectobject(gcpo^.handle,paintdevice);
+    {
      if gcpo^.kind = bmk_gray then begin
       if graypalette = 0 then begin
        palpo:= pointer(gui_allocimagemem((sizeof(gdigraypalettety)+3) div 4));
@@ -367,10 +363,8 @@ testvar3:= getlasterror;
        graypalette:= createpalette(logpalette(pointer(palpo)^));
        gui_freeimagemem(pointer(palpo));
       end;
-      with win32gcty(gcpo^.platformdata) do begin
-       testvar2:= selectpalette(gcpo^.handle,graypalette,false);
-      end;
      end;
+    }
     end;
    end;
    gck_printer: begin
@@ -2006,7 +2000,6 @@ begin
  end;
 end;
 
-var testvar: boolean; testvar1: longword;
 procedure gdi_copyarea(var drawinfo: drawinfoty);
 
 var
@@ -2091,10 +2084,9 @@ var
   with drawinfo,copyarea,sourcerect^,gc,win32gcty(platformdata).d do begin
    if alignment * [al_stretchx,al_stretchy] = [] then begin
     if mask = nil then begin
-testvar:=     bitblt(handle,destrect^.x,destrect^.y,cx,cy,
+     bitblt(handle,destrect^.x,destrect^.y,cx,cy,
                     tcanvas1(source).fdrawinfo.gc.handle,
                     x,y,rasterops3[copymode]);
-testvar1:= getlasterror();
      if double then begin
       setbkcolor(handle,$000000);
       settextcolor(handle,foregroundcol);
@@ -2197,8 +2189,6 @@ var
  scanstep: integer;
  wo1: word;
  lwo1: longword;
-po3: pbyte;
-ima1: imagety;
 begin
  with drawinfo,copyarea,gc,win32gcty(platformdata).d do begin
   
@@ -2266,15 +2256,14 @@ begin
      end;
     end
     else begin
-testvar1:= getlasterror;
      sbmp:= createbitmapdata(sourcerect^.size,source.kind,ps);
      sdc:= createcompatibledc(0);
-testvar1:=     selectobject(sdc,sbmp);
-testvar:=     bitblt(sdc,0,0,sourcerect^.cx,sourcerect^.cy,source.gchandle,
+     selectobject(sdc,sbmp);
+     bitblt(sdc,0,0,sourcerect^.cx,sourcerect^.cy,source.gchandle,
                sourcerect^.x,sourcerect^.y,srccopy);
      dbmp:= createbitmapdata(sourcerect^.size,gc.kind,pd);
      ddc:= createcompatibledc(0);
-testvar1:=     selectobject(ddc,dbmp);
+     selectobject(ddc,dbmp);
      scanstep:= ((sourcerect^.cx+3) div 4) * 4;
      if source.kind = bmk_gray then begin
                 //gray to color
@@ -2283,7 +2272,6 @@ testvar1:=     selectobject(ddc,dbmp);
        pe:= po1 + sourcerect^.cx;
        repeat
         wo1:= pbyte(po1)^;
-// wo1:= $ff;
         plongword(pd)^:= wo1 or (wo1 shl 8) or (wo1 shl 16);
         inc(po1);
         inc(plongword(pd));
@@ -2292,13 +2280,11 @@ testvar1:=     selectobject(ddc,dbmp);
       end;      
      end
      else begin //color to gray
-po3:= pd;
       for int1:= 0 to sourcerect^.cy - 1 do begin
        po1:= pd;
        pe:= po1 + sourcerect^.cx;
        repeat
         lwo1:= plongword(ps)^;
-//  lwo1:= $ffffff;
         pbyte(po1)^:= ((lwo1 and $ff) + ((lwo1 and $ff00) shr 8) + 
                                         ((lwo1 and $ff0000) shr 16)) div 3;
         inc(po1);
@@ -2315,13 +2301,6 @@ po3:= pd;
      transfer; //gray <-> color
      tcanvas1(source).fdrawinfo.gc.handle:= ddcbefore;
      sourcerect^.pos:= sourceposbefore;
-
-if gc.kind = bmk_gray then begin
-//po3^:= 123;
-//testvar:= bitblt(ddc,0,0,sourcerect^.cx,sourcerect^.cy,gc.handle,destrect^.x,
-//                                                        destrect^.y,srccopy);
- gui_pixmaptoimage(paintdevice,ima1,gc.handle);
-end;
 
      deletedc(sdc);
      deletedc(ddc);
@@ -3050,10 +3029,12 @@ begin
  nullpen:= 0;
  deleteobject(nullbrush);
  nullbrush:= 0;
+{
  if graypalette <> 0 then begin
   deleteobject(graypalette);
   graypalette:= 0;
  end;
+}
  if fhasgdiplus then begin
   releasegdiplus;
  end;
