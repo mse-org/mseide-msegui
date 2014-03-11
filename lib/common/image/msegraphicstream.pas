@@ -873,6 +873,7 @@ begin
        graymask:= grayalpha1;
        fmonoalpha:= not grayalpha1;
        maskcolorbackground:= col2;
+       include(foptions,bmo_masked);
       end;
      end;
     end;

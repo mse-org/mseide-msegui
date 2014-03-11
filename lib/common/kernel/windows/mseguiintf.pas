@@ -815,7 +815,8 @@ begin
 end;
 
 procedure initbitmapinfo(kind: bitmapkindty; bottomup: boolean;
-              const size: sizety; out bitmapinfo: gdibitmapinfoty);
+              const size: sizety; const setpalette: boolean;
+              out bitmapinfo: gdibitmapinfoty);
 var
  lwo1: longword;
 begin
@@ -840,9 +841,15 @@ begin
    end;
    bmk_gray: begin
     bibitcount:= 8;
-    for lwo1:= 0 to high(bitmapinfo.bmicolors) do begin
-     bitmapinfo.bmicolors[lwo1]:= 
-                 rgbquad(lwo1 or (lwo1 shl 8) or (lwo1 shl 16));
+    if setpalette then begin
+     for lwo1:= 0 to high(bitmapinfo.bmicolors) do begin
+      bitmapinfo.bmicolors[lwo1]:= 
+                  rgbquad(lwo1 or (lwo1 shl 8) or (lwo1 shl 16));
+     end;
+    end
+    else begin
+     biclrused:= 1;
+     bitmapinfo.bmicolors[0]:= col0;;
     end;
    end;
    else begin
@@ -857,7 +864,7 @@ function createbitmapdata(const size: sizety; const kind: bitmapkindty;
 var
  info: gdibitmapinfoty;
 begin
- initbitmapinfo(kind,false,size,info);
+ initbitmapinfo(kind,false,size,true,info);
  result:= createdibsection(0,bitmapinfo((@info)^),dib_rgb_colors,data,0,0);
 end;
 
@@ -896,7 +903,7 @@ begin
    inc(po2);
   end;
  end;
- initbitmapinfo(bmk_mono,bottomup,size,bitmapinfo);
+ initbitmapinfo(bmk_mono,bottomup,size,true,bitmapinfo);
  result:= createbitmap(size.cx,size.cy,1,1,nil);
  dc:= getdc(0);
  setdibits(dc,result,0,size.cy,po1,windows.bitmapinfo(pointer(@bitmapinfo)^),dib_rgb_colors);
@@ -1024,7 +1031,7 @@ begin
     kind1:= bmk_rgb;
    end;
   end;
-  initbitmapinfo(kind1,false,info.size,bitmapinfo);
+  initbitmapinfo(kind1,false,info.size,false,bitmapinfo);
   allocimage(image,info.size,kind1);
   dc:= getdc(0);
   int1:= getdibits(dc,pixmap,0,info.size.cy,image.pixels,
@@ -1058,7 +1065,7 @@ begin
  pixmap:= gui_createpixmap(image.size,0,image.kind);
  if pixmap <> 0 then begin
   transformimageformat(image,false); //setdibits reverses image!?!?!
-  initbitmapinfo(image.kind,false,image.size,bitmapinfo);
+  initbitmapinfo(image.kind,false,image.size,true,bitmapinfo);
   dc:= getdc(0);
   int1:= setdibits(dc,pixmap,0,image.size.cy,image.pixels,
               tbitmapinfo(pbitmapinfo(@bitmapinfo)^),dib_rgb_colors);

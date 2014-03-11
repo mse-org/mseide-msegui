@@ -189,7 +189,6 @@ type
    ftransparentcolor: colorty;
    fsource: tbitmapcomp;
    fobjectlinker: tobjectlinker;
-   foptions: bitmapoptionsty;
    fmaskcolorforeground,fmaskcolorbackground: colorty;
    forigformat: string;
    forigformatdata: string;
@@ -216,6 +215,7 @@ type
    function getgraymask(): boolean;
    procedure setgraymask(const avalue: boolean);
   protected
+   foptions: bitmapoptionsty;
    fmask: tbitmap;
    procedure setkind(const avalue: bitmapkindty); override;
    function gettranspcolor(): colorty;
