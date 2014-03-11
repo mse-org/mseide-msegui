@@ -2185,8 +2185,9 @@ var
  sbmp,dbmp: hbitmap;
  sdc,ddcbefore,ddc: hdc;
  sourceposbefore: pointty;
- ps,pd,pe,po1: pointer;
+ pm,ps,pd,pe,po1: pointer;
  scanstep: integer;
+ by1,by2: byte;
  wo1: word;
  lwo1: longword;
 begin
@@ -2341,28 +2342,56 @@ begin
     end;
    end
    else begin
-    colormaskbmp:= createcompatiblebitmap(handle,rect1.cx,rect1.cy);
+//    colormaskbmp:= createcompatiblebitmap(handle,rect1.cx,rect1.cy);
+    tcanvas1(colormask.canvas).checkgcstate([cs_gc]);
+    colormaskbmp:= gui_createpixmap(rect1.size,0,
+                      tcanvas1(colormask.canvas).fdrawinfo.gc.kind);
     colormaskdc:= createcompatibledc(0);
     setintpolmode(colormaskdc);
     selectobject(colormaskdc,colormaskbmp);
-    tcanvas1(colormask.canvas).checkgcstate([cs_gc]);
     with sourcerect^ do begin
      stretchblt(colormaskdc,destrect^.x,destrect^.y,destrect^.cx,destrect^.cy,
       tcanvas1(colormask.canvas).fdrawinfo.gc.handle,x,y,cx,cy,
                                   rasterops3[rop_copy]);
     end;
     gui_pixmaptoimage(colormaskbmp,colormaskimage,colormaskdc);
-    for int1:= 0 to destimage.length - 1 do begin
-     with rgbtriplety(destimage.pixels[int1]) do begin
-      red:=   (byte(255 - rgbtriplety(colormaskimage.pixels^[int1]).red) * red +
-               rgbtriplety(colormaskimage.pixels^[int1]).red *
-                rgbtriplety(sourceimage.pixels^[int1]).red) div byte(255);
-      green:= (byte(255 - rgbtriplety(colormaskimage.pixels^[int1]).green) * green +
-               rgbtriplety(colormaskimage.pixels^[int1]).green *
-                rgbtriplety(sourceimage.pixels^[int1]).green) div byte(255);
-      blue:=  (byte(255 - rgbtriplety(colormaskimage.pixels^[int1]).blue) * blue +
-               rgbtriplety(colormaskimage.pixels^[int1]).blue *
-                rgbtriplety(sourceimage.pixels^[int1]).blue) div byte(255);
+    case colormaskimage.kind of
+     bmk_gray: begin
+      pm:= colormaskimage.pixels;
+      ps:= sourceimage.pixels;
+      pd:= destimage.pixels;
+      for int1:= 0 to destimage.size.cy - 1 do begin
+       po1:= pm;
+       pe:= po1 + colormaskimage.linebytes;
+       repeat
+        by1:= pbyte(po1)^;
+        by2:= 255-by1;
+        with prgbtriplety(pd)^ do begin
+         red:=   (by2 * red + by1*prgbtriplety(ps)^.red) div byte(255);
+         green:=   (by2 * green + by1*prgbtriplety(ps)^.green) div byte(255);
+         blue:=   (by2 * blue + by1*prgbtriplety(ps)^.blue) div byte(255);
+        end;
+        inc(po1);
+        inc(ps,4);
+        inc(pd,4);
+       until po1 = pe;
+       pm:= pm + colormaskimage.linebytes;
+      end;
+     end;
+     else begin
+      for int1:= 0 to destimage.length - 1 do begin
+       with rgbtriplety(destimage.pixels[int1]) do begin
+        red:=   (byte(255 - rgbtriplety(colormaskimage.pixels^[int1]).red) * red +
+                 rgbtriplety(colormaskimage.pixels^[int1]).red *
+                  rgbtriplety(sourceimage.pixels^[int1]).red) div byte(255);
+        green:= (byte(255 - rgbtriplety(colormaskimage.pixels^[int1]).green) * green +
+                 rgbtriplety(colormaskimage.pixels^[int1]).green *
+                  rgbtriplety(sourceimage.pixels^[int1]).green) div byte(255);
+        blue:=  (byte(255 - rgbtriplety(colormaskimage.pixels^[int1]).blue) * blue +
+                 rgbtriplety(colormaskimage.pixels^[int1]).blue *
+                  rgbtriplety(sourceimage.pixels^[int1]).blue) div byte(255);
+       end;
+      end;
      end;
     end;
     gui_freeimagemem(colormaskimage.pixels);
