@@ -1005,16 +1005,24 @@ var
  bitmapinfo: gdibitmapinfoty;
  dc: hdc;
  int1: integer;
- bmp1: hbitmap;
+// bmp1,bmpbefore: hbitmap;
  kind1: bitmapkindty;
 
 begin
+{
  if gchandle <> 0 then begin
   bmp1:= createcompatiblebitmap(gchandle,0,0);
-  selectobject(gchandle,bmp1);
+  bmpbefore:= selectobject(gchandle,bmp1);
  end
  else begin
   bmp1:= 0; //compiler warning
+ end;
+}
+ if gchandle <> 0 then begin
+  dc:= gchandle;
+ end
+ else begin
+  dc:= getdc(0);
  end;
  info.handle:= pixmap;
  result:= gui_getpixmapinfo(info);
@@ -1033,19 +1041,25 @@ begin
   end;
   initbitmapinfo(kind1,false,info.size,false,bitmapinfo);
   allocimage(image,info.size,kind1);
-  dc:= getdc(0);
+//  dc:= getdc(0);
   int1:= getdibits(dc,pixmap,0,info.size.cy,image.pixels,
                  pbitmapinfo(@bitmapinfo)^,dib_rgb_colors);
-  releasedc(0,dc);
+//  releasedc(0,dc);
   if int1 <> 0 then begin
    transformimageformat(image);
    result:= gde_ok;
   end;
  end;
+ if gchandle = 0 then begin
+  releasedc(0,dc);
+ end;
+ {
  if gchandle <> 0 then begin
-  selectobject(gchandle,pixmap);
+  selectobject(gchandle,bmpbefore);
+//  selectobject(gchandle,pixmap);
   deleteobject(bmp1);
  end;
+ }
 end;
 
 function gui_imagetopixmap(const image: imagety; out pixmap: pixmapty;
@@ -1054,30 +1068,47 @@ var
  int1: integer;
  bitmapinfo: gdibitmapinfoty;
  dc: hdc;
- bmp1: hbitmap;
+// bmp1,bmpbefore: hbitmap;
 begin
- bmp1:= 0; //compiler warning
+// bmp1:= 0; //compiler warning
  result:= gde_pixmap;
  if gchandle <> 0 then begin
-  bmp1:= createcompatiblebitmap(gchandle,0,0);
-  selectobject(gchandle,bmp1);
+  dc:= gchandle;
+ end
+ else begin
+  dc:= getdc(0);
  end;
+ {
+ if gchandle <> 0 then begin
+  bmp1:= createcompatiblebitmap(gchandle,0,0);
+  bmpbefore:= selectobject(gchandle,bmp1);
+ end;
+ }
  pixmap:= gui_createpixmap(image.size,0,image.kind);
  if pixmap <> 0 then begin
   transformimageformat(image,false); //setdibits reverses image!?!?!
   initbitmapinfo(image.kind,false,image.size,true,bitmapinfo);
-  dc:= getdc(0);
+//  dc:= getdc(0);
   int1:= setdibits(dc,pixmap,0,image.size.cy,image.pixels,
               tbitmapinfo(pbitmapinfo(@bitmapinfo)^),dib_rgb_colors);
-  releasedc(0,dc);
+//  releasedc(0,dc);
   if int1 <> 0 then begin
    result:= gde_ok;
   end;
  end;
  if gchandle <> 0 then begin
+  deleteobject(selectobject(gchandle,pixmap));
+ end
+ else begin
+  releasedc(0,dc);
+ end;
+{
+ if gchandle <> 0 then begin
+//  selectobject(gchandle,bmpbefore);
   selectobject(gchandle,pixmap);
   deleteobject(bmp1);
  end;
+}
 end;
 
 function gui_setwindowfocus(id: winidty): guierrorty;

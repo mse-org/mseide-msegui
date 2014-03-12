@@ -343,7 +343,7 @@ begin
     error:= gde_creategc;
     gcpo^.handle:= createcompatibledc(0);
     if gcpo^.handle <> 0 then begin
-     selectobject(gcpo^.handle,paintdevice);
+     deleteobject(selectobject(gcpo^.handle,paintdevice));
     {
      if gcpo^.kind = bmk_gray then begin
       if graypalette = 0 then begin
@@ -2276,7 +2276,7 @@ begin
         plongword(pd)^:= wo1 or (wo1 shl 8) or (wo1 shl 16);
         inc(po1);
         inc(plongword(pd));
-       until po1 = pe;
+       until po1 >= pe;
        ps:= ps + scanstep;
       end;      
      end
@@ -2290,7 +2290,7 @@ begin
                                         ((lwo1 and $ff0000) shr 16)) div 3;
         inc(po1);
         inc(plongword(ps));
-       until po1 = pe;
+       until po1 >= pe;
        pd:= pd + scanstep;
       end;      
      end;
@@ -2348,7 +2348,7 @@ begin
                       tcanvas1(colormask.canvas).fdrawinfo.gc.kind);
     colormaskdc:= createcompatibledc(0);
     setintpolmode(colormaskdc);
-    selectobject(colormaskdc,colormaskbmp);
+    deleteobject(selectobject(colormaskdc,colormaskbmp));
     with sourcerect^ do begin
      stretchblt(colormaskdc,destrect^.x,destrect^.y,destrect^.cx,destrect^.cy,
       tcanvas1(colormask.canvas).fdrawinfo.gc.handle,x,y,cx,cy,
@@ -2362,9 +2362,10 @@ begin
       pd:= destimage.pixels;
       for int1:= 0 to destimage.size.cy - 1 do begin
        po1:= pm;
-       pe:= po1 + colormaskimage.linebytes;
+       pe:= po1 + colormaskimage.size.cx;
        repeat
         by1:= pbyte(po1)^;
+//        by1:= $80;
         by2:= 255-by1;
         with prgbtriplety(pd)^ do begin
          red:=   (by2 * red + by1*prgbtriplety(ps)^.red) div byte(255);
@@ -2374,7 +2375,7 @@ begin
         inc(po1);
         inc(ps,4);
         inc(pd,4);
-       until po1 = pe;
+       until po1 >= pe;
        pm:= pm + colormaskimage.linebytes;
       end;
      end;
