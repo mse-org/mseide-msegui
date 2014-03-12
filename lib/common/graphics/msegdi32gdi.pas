@@ -2190,14 +2190,17 @@ var
  by1,by2: byte;
  wo1: word;
  lwo1: longword;
+ pint1: ptrint;
 begin
  with drawinfo,copyarea,gc,win32gcty(platformdata).d do begin
+  getclipbox(handle,trect(rect1));
+  winrecttorect(rect1);
+  if not intersectrect(destrect^,rect1,rect1) then begin
+   exit;
+  end;
   
   nomaskblt:= iswin95 or (kind = gck_printer);
   setintpolmode(handle);
-  getclipbox(handle,trect(rect1));
-  winrecttorect(rect1);
-  intersectrect(destrect^,rect1,rect1);
   maskbefore:= mask;
   if (mask <> nil) and (mask.kind <> bmk_mono) then begin
    colormask:= tsimplebitmap1(mask);
@@ -2326,6 +2329,9 @@ begin
    bitblt(destbmpdc,0,0,rect1.cx,rect1.cy,destdcbefore,rect1.x,rect1.y,srccopy);
    gui_pixmaptoimage(destbmp,destimage,destbmpdc);
    gui_pixmaptoimage(bufferbmp,sourceimage,handle);
+   ps:= sourceimage.pixels;
+   pd:= destimage.pixels;
+   pint1:= ps-pd;
    if colormask = nil then begin
     rs:= (opacity.red*256 + 128) div 255;
     gs:= (opacity.green*256 + 128) div 255;
@@ -2333,16 +2339,34 @@ begin
     rd:= 256-rs;
     gd:= 256-gs;
     bd:= 256-bs;
-    for int1:= 0 to destimage.length - 1 do begin
-     with rgbtriplety(destimage.pixels^[int1]) do begin
-      red:= (rd*red + rs*rgbtriplety(sourceimage.pixels^[int1]).red) shr 8;
-      green:= (gd*green + gs*rgbtriplety(sourceimage.pixels^[int1]).green) shr 8;
-      blue:= (bd*blue + bs*rgbtriplety(sourceimage.pixels^[int1]).blue) shr 8;
+    case destimage.kind of
+     bmk_gray: begin
+      gs:= (word(rs)+word(gs)+word(bs)) div 3;
+      gd:= 256-gs;
+      for int1:= 0 to destimage.size.cy - 1 do begin
+       po1:= pd;
+       ps:= po1+pint1;
+       pe:= po1 + destimage.size.cx;
+       repeat
+        pbyte(po1)^:= (rd*pbyte(po1)^ + rs*pbyte(ps)^) shr 8;
+        inc(po1);
+        inc(ps);
+       until po1 >= pe;
+       pd:= pd + destimage.linebytes;
+      end;
+     end;
+     else begin
+      for int1:= 0 to destimage.length - 1 do begin
+       with rgbtriplety(destimage.pixels^[int1]) do begin
+        red:= (rd*red + rs*rgbtriplety(sourceimage.pixels^[int1]).red) shr 8;
+        green:= (gd*green + gs*rgbtriplety(sourceimage.pixels^[int1]).green) shr 8;
+        blue:= (bd*blue + bs*rgbtriplety(sourceimage.pixels^[int1]).blue) shr 8;
+       end;
+      end;
      end;
     end;
    end
    else begin
-//    colormaskbmp:= createcompatiblebitmap(handle,rect1.cx,rect1.cy);
     tcanvas1(colormask.canvas).checkgcstate([cs_gc]);
     colormaskbmp:= gui_createpixmap(rect1.size,0,
                       tcanvas1(colormask.canvas).fdrawinfo.gc.kind);
@@ -2355,42 +2379,84 @@ begin
                                   rasterops3[rop_copy]);
     end;
     gui_pixmaptoimage(colormaskbmp,colormaskimage,colormaskdc);
+    pm:= colormaskimage.pixels;
     case colormaskimage.kind of
      bmk_gray: begin
-      pm:= colormaskimage.pixels;
-      ps:= sourceimage.pixels;
-      pd:= destimage.pixels;
-      for int1:= 0 to destimage.size.cy - 1 do begin
-       po1:= pm;
-       pe:= po1 + colormaskimage.size.cx;
-       repeat
-        by1:= pbyte(po1)^;
-//        by1:= $80;
-        by2:= 255-by1;
-        with prgbtriplety(pd)^ do begin
-         red:=   (by2 * red + by1*prgbtriplety(ps)^.red) div byte(255);
-         green:=   (by2 * green + by1*prgbtriplety(ps)^.green) div byte(255);
-         blue:=   (by2 * blue + by1*prgbtriplety(ps)^.blue) div byte(255);
+      case destimage.kind of
+       bmk_gray: begin
+        for int1:= 0 to destimage.size.cy - 1 do begin
+         po1:= pd;
+         ps:= po1 + pint1;
+         pe:= po1 + destimage.size.cx;
+         repeat
+          by1:= pbyte(pm)^;
+          by2:= 255-by1;
+          pbyte(po1)^:= (pbyte(po1)^*by2 + pbyte(ps)^*by1) div byte(255);
+          inc(po1);
+          inc(ps);
+          inc(pm);
+         until po1 >= pe;
+         pd:= pd + destimage.linebytes;
         end;
-        inc(po1);
-        inc(ps,4);
-        inc(pd,4);
-       until po1 >= pe;
-       pm:= pm + colormaskimage.linebytes;
+       end;
+       else begin
+        for int1:= 0 to destimage.size.cy - 1 do begin
+         po1:= pm;
+         pe:= po1 + colormaskimage.size.cx;
+         repeat
+          by1:= pbyte(po1)^;
+          by2:= 255-by1;
+          with prgbtriplety(pd)^ do begin
+           red:=   (by2 * red + by1*prgbtriplety(ps)^.red) div byte(255);
+           green:=   (by2 * green + by1*prgbtriplety(ps)^.green) div byte(255);
+           blue:=   (by2 * blue + by1*prgbtriplety(ps)^.blue) div byte(255);
+          end;
+          inc(po1);
+          inc(ps,4);
+          inc(pd,4);
+         until po1 >= pe;
+         pm:= pm + colormaskimage.linebytes;
+        end;
+       end;
       end;
      end;
-     else begin
-      for int1:= 0 to destimage.length - 1 do begin
-       with rgbtriplety(destimage.pixels[int1]) do begin
-        red:=   (byte(255 - rgbtriplety(colormaskimage.pixels^[int1]).red) * red +
-                 rgbtriplety(colormaskimage.pixels^[int1]).red *
-                  rgbtriplety(sourceimage.pixels^[int1]).red) div byte(255);
-        green:= (byte(255 - rgbtriplety(colormaskimage.pixels^[int1]).green) * green +
-                 rgbtriplety(colormaskimage.pixels^[int1]).green *
-                  rgbtriplety(sourceimage.pixels^[int1]).green) div byte(255);
-        blue:=  (byte(255 - rgbtriplety(colormaskimage.pixels^[int1]).blue) * blue +
-                 rgbtriplety(colormaskimage.pixels^[int1]).blue *
-                  rgbtriplety(sourceimage.pixels^[int1]).blue) div byte(255);
+     else begin //bmk_rgb
+      case destimage.kind of
+       bmk_gray: begin
+        for int1:= 0 to destimage.size.cy - 1 do begin
+         po1:= pd;
+         ps:= po1 + pint1;
+         pe:= po1 + destimage.size.cx;
+         repeat
+          with prgbtriplety(pm)^ do begin
+           by1:= (word(red)+word(green)+word(blue)) div 3;
+          end;
+          by2:= 255-by1;
+          pbyte(po1)^:= (pbyte(po1)^*by2 + pbyte(ps)^*by1) div byte(255);
+          inc(po1);
+          inc(ps);
+          inc(pm,4);
+         until po1 >= pe;
+         pd:= pd + destimage.linebytes;
+        end;
+       end;
+       else begin   //bmk_rgb
+        for int1:= 0 to destimage.length - 1 do begin
+         with rgbtriplety(destimage.pixels[int1]) do begin
+          red:=   (byte(255 - 
+                   rgbtriplety(colormaskimage.pixels^[int1]).red) * red +
+                   rgbtriplety(colormaskimage.pixels^[int1]).red *
+                   rgbtriplety(sourceimage.pixels^[int1]).red) div byte(255);
+          green:= (byte(255 - 
+                   rgbtriplety(colormaskimage.pixels^[int1]).green) * green +
+                   rgbtriplety(colormaskimage.pixels^[int1]).green *
+                   rgbtriplety(sourceimage.pixels^[int1]).green) div byte(255);
+          blue:=  (byte(255 - 
+                   rgbtriplety(colormaskimage.pixels^[int1]).blue) * blue +
+                   rgbtriplety(colormaskimage.pixels^[int1]).blue *
+                   rgbtriplety(sourceimage.pixels^[int1]).blue) div byte(255);
+         end;
+        end;
        end;
       end;
      end;
