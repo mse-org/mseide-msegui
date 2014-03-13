@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2014 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -1934,7 +1934,7 @@ begin
   end;
  end;
 end;
-
+var testvar1: pixmapinfoty;
 procedure rgbtogray(const sdev: paintdevicety; const srect: rectty;
                const ddev: paintdevicety; const dpos: pointty; const gc: pgcty);
 var
@@ -1995,7 +1995,9 @@ begin
     end
     else begin
      gc1:= xcreategc(appdisp,ddev,0,nil);
-    end;     
+    end;
+testvar1.handle:= ddev;
+gui_getpixmapinfo(testvar1);
     xputimage(appdisp,ddev,gc1,dimage,0,0,dpos.x,dpos.y,cx,cy);
     if gc = nil then begin
      xfreegc(appdisp,gc1);
@@ -2012,31 +2014,9 @@ begin
 end;
 
 procedure gdi_copyarea(var drawinfo: drawinfoty); //gdifunc
-
 var
- amask: pixmapty;
- xvalues: xgcvalues;
- pixmap: pixmapty;
- pixmapgc: tgc;
- maskgc: gcty;
- bitmap: pixmapty;
- bitmapgc,bitmapgc2: tgc;
- int1: integer;
- spic,dpic,cpic,maskpic: tpicture;
- sattributes: txrenderpictureattributes;
- dattributes: txrenderpictureattributes;
- transform: txtransform;
- ax,ay,sx,sy: integer;
-// aformat: pxrenderpictformat;
-// color1: txrendercolor;
- {pixmap1,}pixmap2: pixmapty;
-// areg: region;
-// arect: xrectangle;
  needstransform: boolean;
- pictop: integer;
-// bo1: boolean;
-label
- endlab,endlab2;
+ transform: txtransform;
   
  procedure updatetransform(const apic: tpicture);
  begin
@@ -2073,6 +2053,19 @@ label
  end;
 
 var
+ amask: pixmapty;
+ xvalues: xgcvalues;
+ pixmap: pixmapty;
+ pixmapgc: tgc;
+ maskgc: gcty;
+ bitmap: pixmapty;
+ bitmapgc,bitmapgc2: tgc;
+ int1: integer;
+ spic,dpic,cpic,maskpic: tpicture;
+ sattributes: txrenderpictureattributes;
+ dattributes: txrenderpictureattributes;
+ pixmap2: pixmapty;
+ pictop: integer;
  sourceformats: culong  = cpclipmask or cpclipxorigin or cpclipyorigin;
  destformats: culong = cpgraphicsexposure;
  monomask: boolean;
@@ -2081,7 +2074,12 @@ var
  x1,y1: integer;
  int2: integer;
  format1: pxrenderpictformat;
+ ax,ay,sx,sy,dx,dy: integer;
  sdev: paintdevicety;
+ ddev: paintdevicety;
+
+label
+ endlab,endlab2;
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
@@ -2110,7 +2108,7 @@ begin
    end;
    pictop:= pictopsrc;
    maskpic:= 0;
-   if (longword(opacity) <> maxopacity) and monomask then begin
+   if (longword(opacity) <> maxopacity) and (mask = nil){monomask} then begin
     maskpic:= createmaskpicture(opacity); 
               //clip_mask ignored by xrender
     pictop:= pictopover;
@@ -2239,37 +2237,46 @@ endlab2:
    else begin 
     sx:= ax;
     sy:= ay;
+    dx:= destrect^.x;
+    dy:= destrect^.y;
     format1:= screenrenderpictformat;
     sdev:= tcanvas1(source).paintdevice;
-    if dkind = bmk_gray then begin
-     format1:= alpharenderpictformat;
-    end;
-    if dkind <> skind then begin //bmk_rgb <-> bmk_gray
+    ddev:= paintdevice;
+    if skind = bmk_gray then begin
      sx:= 0;
      sy:= 0;
-     if dkind = bmk_gray then begin
-      sdev:= gui_createpixmap(sourcerect^.size,0,bmk_gray);
-      rgbtogray(tcanvas1(source).paintdevice,sourcerect^,sdev,nullpoint,nil);
-     end
-     else begin
-      sdev:= gui_createpixmap(sourcerect^.size,0,bmk_rgb);
-      graytorgb(tcanvas1(source).paintdevice,sourcerect^,sdev,nullpoint,nil);
-     end;
+     sdev:= gui_createpixmap(sourcerect^.size,0,bmk_rgb);
+     graytorgb(tcanvas1(source).paintdevice,sourcerect^,sdev,nullpoint,nil);
+    end;
+    if dkind = bmk_gray then begin
+     dx:= 0;
+     dy:= 0;
+     ddev:= gui_createpixmap(destrect^.size,0,bmk_rgb);
+     graytorgb(paintdevice,destrect^,ddev,nullpoint,nil);
     end;
     spic:= xrendercreatepicture(appdisp,sdev,format1,
                                             sourceformats,@sattributes);
-    dpic:= xrendercreatepicture(appdisp,paintdevice,format1,
+    dpic:= xrendercreatepicture(appdisp,ddev,format1,
                                               destformats,@dattributes);
-    if gcclipregion <> 0 then begin
+    if (gcclipregion <> 0) and (dpic = paintdevice) then begin
      setregion(gc,region(gcclipregion),dpic);
     end;
     updatetransform(spic);
     xrendercomposite(appdisp,pictop,spic,maskpic,dpic,sx,sy,ax,ay,
-                         destrect^.x,destrect^.y,destrect^.cx,destrect^.cy);
+                         dx,dy,destrect^.cx,destrect^.cy);
     xrenderfreepicture(appdisp,spic);
     xrenderfreepicture(appdisp,dpic);
     if sdev <> tcanvas1(source).paintdevice then begin
      xfreepixmap(appdisp,sdev);
+    end;
+    if ddev <> paintdevice then begin
+     sdev:= gui_createpixmap(destrect^.size,0,bmk_gray);
+     rgbtogray(ddev,mr(nullpoint,destrect^.size),sdev,nullpoint,nil);
+     with destrect^ do begin
+      xcopyarea(appdisp,sdev,paintdevice,tgc(gc.handle),0,0,cx,cy,x,y);
+     end;
+     xfreepixmap(appdisp,sdev);
+     xfreepixmap(appdisp,ddev);
     end;
     if maskpic <> 0 then begin
      xrenderfreepicture(appdisp,maskpic);
