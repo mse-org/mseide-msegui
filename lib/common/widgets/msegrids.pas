@@ -1720,11 +1720,15 @@ type
  trowfontarrayprop = class(tpersistentarrayprop)
   private
    fgrid: tcustomgrid;
+   procedure setitems(const index: integer; const avalue: tfont);
   protected
+   function getitems(const index: integer): tfont;
    procedure createitem(const index: integer; var item: tpersistent); override;
   public
    constructor create(const aowner: tcustomgrid);
    class function getitemclasstype: persistentclassty; override;
+   property items[const index: integer]: tfont read getitems 
+                                                   write setitems; default;
  end;
 
  cellinnerlevelty = (cil_all,cil_noline,cil_paint,cil_inner);
@@ -16546,6 +16550,21 @@ procedure trowfontarrayprop.createitem(const index: integer;
 begin
  item:= tfont.create;
  item.Assign(stockobjects.fonts[stf_default]);
+end;
+
+procedure trowfontarrayprop.setitems(const index: integer; const avalue: tfont);
+var
+ fo1: tfont;
+begin
+ checkindex(index);
+ if fitems[index] <> nil then begin
+  fitems[index].assign(avalue);
+ end;
+end;
+
+function trowfontarrayprop.getitems(const index: integer): tfont;
+begin
+ result:= tfont(inherited getitems(index));
 end;
 
 { trowstatelist }
