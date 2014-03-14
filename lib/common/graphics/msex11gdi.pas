@@ -738,7 +738,7 @@ begin
  result:= colortorendercolor(colortorgb(avalue));
 end;
 
-function graytorendercolor(const avalue: rgbtriplety): txrendercolor; overload;
+function alphatorendercolor(const avalue: rgbtriplety): txrendercolor; overload;
 var
  wo1: word;
 begin
@@ -749,6 +749,25 @@ begin
   green:= 0;
   blue:= 0;
   alpha:= wo1;
+ end;
+end;
+
+function alphatorendercolor(const avalue: colorty): txrendercolor; overload;
+begin
+ result:= alphatorendercolor(colortorgb(avalue));
+end;
+
+function graytorendercolor(const avalue: rgbtriplety): txrendercolor; overload;
+var
+ wo1: word;
+begin
+ with result do begin
+  wo1:= (integer(avalue.red)+integer(avalue.green)+integer(avalue.blue)) div 3;
+  wo1:= wo1 or (wo1 shl 8);
+  red:= wo1;
+  green:= wo1;
+  blue:= wo1;
+  alpha:= $ffff;
  end;
 end;
 
@@ -885,7 +904,8 @@ begin
  xfreepixmap(appdisp,pixmap);
 end;
 
-function createcolorpic1(const acolor: txrendercolor): tpicture;
+function createcolorpi(const acolor: txrendercolor;
+                              const aformat: pxrenderpictformat): tpicture;
 var
  attributes: txrenderpictureattributes;
 // col: txrendercolor;
@@ -905,6 +925,11 @@ begin
  xfreepixmap(appdisp,pixmap);
 end;
 
+function createcolorpic1(const acolor: txrendercolor): tpicture;
+begin
+ result:= createcolorpi(acolor,screenrenderpictformat);
+end;
+
 function createcolorpic2(const acolor: txrendercolor): tpicture;
 //var
 // col: txrendercolor;
@@ -921,11 +946,16 @@ begin
  result:= createcolorpic(colortorendercolor(acolor));
 end;
 
-function creategraypicture(const acolor: colorty): tpicture;
+function creategraycolorpicture(const acolor: colorty): tpicture;
 begin
  result:= createcolorpic(graytorendercolor(acolor));
 end;
-
+{
+function creategraypicture(const acolor: colorty): tpicture;
+begin
+ result:= createcolorpi(alphatorendercolor(acolor),alpharenderpictformat);
+end;
+}
 function createmaskpicture(const acolor: rgbtriplety): tpicture; overload;
 var
  attributes: txrenderpictureattributes;
@@ -2078,6 +2108,21 @@ var
  sdev: paintdevicety;
  ddev: paintdevicety;
 
+ procedure checkddevcopy();
+ begin
+  with drawinfo,copyarea do begin
+   if ddev <> paintdevice then begin
+    sdev:= gui_createpixmap(destrect^.size,0,bmk_gray);
+    rgbtogray(ddev,mr(nullpoint,destrect^.size),sdev,nullpoint,nil);
+    with destrect^ do begin
+     xcopyarea(appdisp,sdev,paintdevice,tgc(gc.handle),0,0,cx,cy,x,y);
+    end;
+    xfreepixmap(appdisp,sdev);
+    xfreepixmap(appdisp,ddev);
+   end;
+  end;
+ end;
+
 label
  endlab,endlab2;
 begin
@@ -2154,6 +2199,7 @@ begin
         xvalues.xfunction:= gxand;
         xchangegc(appdisp,bitmapgc2,gcfunction,@xvalues);
         xcopyarea(appdisp,mask.handle,bitmap,bitmapgc2,x,y,cx,cy,0,0);
+                       //new source = source and mask
         ax:= 0;
         ay:= 0;
         x1:= 0;
@@ -2180,26 +2226,31 @@ begin
      spic:= xrendercreatepicture(appdisp,spd,bitmaprenderpictformat,
                       sourceformats,@sattributes);
      format1:= screenrenderpictformat;
+     dx:= destrect^.x;
+     dy:= destrect^.y;
+     ddev:= paintdevice;
      if dkind = bmk_gray then begin
-      format1:= alpharenderpictformat;
+      dx:= 0;
+      dy:= 0;
+      ddev:= gui_createpixmap(destrect^.size,0,bmk_rgb);
+      graytorgb(paintdevice,destrect^,ddev,nullpoint,nil);
      end;
-     dpic:= xrendercreatepicture(appdisp,paintdevice,format1,
+     dpic:= xrendercreatepicture(appdisp,ddev,format1,
                       destformats,@dattributes);
      pictop:= pictopover;
      if dkind = bmk_gray then begin
-      pictop:= pictopsrc; //-> incorrect color, todo
-      cpic:= creategraypicture(acolorforeground);
+      cpic:= creategraycolorpicture(acolorforeground);
      end
      else begin
       cpic:= createcolorpicture(acolorforeground);
      end;
-     if gcclipregion <> 0 then begin
+     if (gcclipregion <> 0) and (dpic = paintdevice) then begin
       setregion(gc,region(gcclipregion),dpic);
      end;
      updatetransform(spic);
      if acolorforeground <> cl_transparent then begin
       xrendercomposite(appdisp,pictop,cpic,spic,dpic,0,0,ax,ay,
-                           destrect^.x,destrect^.y,destrect^.cx,destrect^.cy);
+                           dx,dy,destrect^.cx,destrect^.cy);
      end;
      xrenderfreepicture(appdisp,cpic);
      if df_opaque in gc.drawingflags then begin
@@ -2213,18 +2264,18 @@ begin
       bitmapgc:= xcreategc(appdisp,spd,gcforeground or gcfunction,@xvalues);
       xfillrectangle(appdisp,spd,bitmapgc,x1,y1,cx,cy);
       if dkind = bmk_gray then begin
-       cpic:= creategraypicture(acolorbackground);
+       cpic:= creategraycolorpicture(acolorbackground);
       end
       else begin
        cpic:= createcolorpicture(acolorbackground);
       end;
-//      cpic:= createcolorpicture(acolorbackground);
       xrendercomposite(appdisp,pictop,cpic,spic,dpic,0,0,ax,ay,
-                          destrect^.x,destrect^.y,destrect^.cx,destrect^.cy);
+                          dx,dy,destrect^.cx,destrect^.cy);
       xrenderfreepicture(appdisp,cpic);
       xfillrectangle(appdisp,spd,bitmapgc,x1,y1,cx,cy);
       xfreegc(appdisp,bitmapgc);
      end;
+     checkddevcopy();
 endlab2:
      if bitmapgc2 <> nil then begin 
       xfreegc(appdisp,bitmapgc2);
@@ -2269,15 +2320,7 @@ endlab2:
     if sdev <> tcanvas1(source).paintdevice then begin
      xfreepixmap(appdisp,sdev);
     end;
-    if ddev <> paintdevice then begin
-     sdev:= gui_createpixmap(destrect^.size,0,bmk_gray);
-     rgbtogray(ddev,mr(nullpoint,destrect^.size),sdev,nullpoint,nil);
-     with destrect^ do begin
-      xcopyarea(appdisp,sdev,paintdevice,tgc(gc.handle),0,0,cx,cy,x,y);
-     end;
-     xfreepixmap(appdisp,sdev);
-     xfreepixmap(appdisp,ddev);
-    end;
+    checkddevcopy();
     if maskpic <> 0 then begin
      xrenderfreepicture(appdisp,maskpic);
     end;

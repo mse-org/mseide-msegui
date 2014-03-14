@@ -16553,8 +16553,6 @@ begin
 end;
 
 procedure trowfontarrayprop.setitems(const index: integer; const avalue: tfont);
-var
- fo1: tfont;
 begin
  checkindex(index);
  if fitems[index] <> nil then begin
