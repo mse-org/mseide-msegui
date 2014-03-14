@@ -940,6 +940,7 @@ type
    procedure addclipregion(const region: regionty);
    procedure subclipregion(const region: regionty);
    procedure intersectclipregion(const region: regionty);
+   procedure resetclipregion;
 
    function copyclipregion: regionty;
                   //returns a copy of the current clipregion
@@ -5111,6 +5112,11 @@ procedure tcanvas.intersectclipregion(const region: regionty);
 begin
  checkregionstate;
  regintersectregion(fvaluepo^.clipregion,region);
+end;
+
+procedure tcanvas.resetclipregion;
+begin
+ clipregion:= 0;
 end;
 
 function tcanvas.copyclipregion: regionty;

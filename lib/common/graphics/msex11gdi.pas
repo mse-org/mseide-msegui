@@ -2244,7 +2244,7 @@ begin
      else begin
       cpic:= createcolorpicture(acolorforeground);
      end;
-     if (gcclipregion <> 0) and (dpic = paintdevice) then begin
+     if (gcclipregion <> 0) and (ddev = paintdevice) then begin
       setregion(gc,region(gcclipregion),dpic);
      end;
      updatetransform(spic);
@@ -2309,7 +2309,7 @@ endlab2:
                                             sourceformats,@sattributes);
     dpic:= xrendercreatepicture(appdisp,ddev,format1,
                                               destformats,@dattributes);
-    if (gcclipregion <> 0) and (dpic = paintdevice) then begin
+    if (gcclipregion <> 0) and (ddev = paintdevice) then begin
      setregion(gc,region(gcclipregion),dpic);
     end;
     updatetransform(spic);
