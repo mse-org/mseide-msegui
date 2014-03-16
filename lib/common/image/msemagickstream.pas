@@ -192,17 +192,16 @@ begin
  move(pchar(avalue)^,result^,length(avalue)+1);
 end;
 
-function fitscale(const width: integer; const height: integer;
-               const current: sizety; out dest: sizety;
-               const rotation: real; const rotafter: boolean): boolean;
-                          //true if scaling necessary
+function rotrect(const avalue: sizety; const rotation: real): dpointty;
+                     //calculate rotated dimensions
+                     //todo: simplify
 var
  si1,co1: double;
  minx: double = 0;
  maxx: double = 0;
  miny: double = 0;
  maxy: double = 0;
- sca1: double;
+
  procedure rot(var p: dpointty);
  var
   x,y: double;
@@ -211,7 +210,8 @@ var
   y:= -p.x * si1 + p.y * co1;
   p.x:= x;
   p.y:= y;
- end;
+ end; //rot
+
  procedure checkmax(var p: dpointty);
  begin
   if p.x < minx then begin
@@ -226,16 +226,50 @@ var
   if p.y > maxy then begin
    maxy:= p.y;
   end;
- end;
+ end; //checkmax
+
 var
  points: array[0..2] of dpointty;
  int1: integer;
- rotcurrent,rotdest: dpointty;
+
+begin
+ if rotation <> 0.0 then begin
+  si1:= sin(rotation); //todo: simplify
+  co1:= cos(rotation);
+  fillchar(points,sizeof(points),0);
+  points[0].x:= avalue.cx;
+  points[1].y:= avalue.cy;
+  points[2].x:= avalue.cx;
+  points[2].y:= avalue.cy;
+  for int1:= 0 to high(points) do begin
+   rot(points[int1]);
+  end;
+  for int1:= 0 to high(points) do begin
+   checkmax(points[int1]);
+  end;
+  result.x:= maxx-minx;
+  result.y:= maxy-miny;
+ end
+ else begin
+  result.x:= avalue.cx;
+  result.y:= avalue.cy;
+ end;
+end;
+
+function fitscale(const width: integer; const height: integer;
+               const current: sizety; out dest: sizety;
+               const rotation: real; const rotafter: boolean;
+               const rotcurrent: dpointty): boolean;
+                          //true if scaling necessary
+var
+ {rotcurrent,}rotdest: dpointty;
+ sca1: double;
 begin
  dest:= current;
  result:= (current.cx > 0) and (current.cy > 0);
  if result then begin
   if rotafter and (rotation <> 0) then begin
+  {
    si1:= sin(rotation); //todo: simplify
    co1:= cos(rotation);
    fillchar(points,sizeof(points),0);
@@ -251,6 +285,7 @@ begin
    end;
    rotcurrent.x:= maxx-minx;
    rotcurrent.y:= maxy-miny;
+   }
    rotdest:= rotcurrent;
    if width <> 0 then begin
     rotdest.x:= width;
@@ -269,7 +304,7 @@ begin
    dest.cx:= round(current.cx*sca1);
    dest.cy:= round(current.cy*sca1);
   end
-  else begin
+  else begin //scale to fit in destrect
    if width <> 0 then begin
     dest.cx:= width;
    end;
@@ -288,15 +323,29 @@ begin
 end;
 
 function checkrotafter(const asize: sizety; const awidth: integer;
-                const aheight: integer; const aoptions: gmoptionsty): boolean;
+                const aheight: integer; const aoptions: gmoptionsty;
+                const rotation: real; out rotcurrent: dpointty): boolean;
+var
+ si1: sizety;
 begin
- result:= (awidth <> 0) and (awidth < asize.cx) or
-                    (aheight <> 0) and (aheight < asize.cy);
+ rotcurrent:= rotrect(asize,rotation);
  if rgmo_rotbeforescale in aoptions then begin
   result:= false;
- end;
- if rgmo_rotafterscale in aoptions then begin
-  result:= true;
+ end
+ else begin
+  if rgmo_rotafterscale in aoptions then begin
+   result:= true;
+  end
+  else begin
+   si1:= asize;
+   if awidth <> 0 then begin
+    si1.cx:= awidth;
+   end;
+   if aheight <> 0 then begin
+    si1.cy:= aheight;
+   end;
+   result:= (si1.cx < rotcurrent.x) or (si1.cy < rotcurrent.y);
+  end;
  end;
 end;
 
@@ -318,6 +367,7 @@ var
  buf: pointer;
  maskscanstep: integer;
  maskscanpo: pointer;
+ rotcurrent: dpointty;
  
  procedure error;
  begin
@@ -342,7 +392,7 @@ var
  
  procedure doscale(const rotafter: boolean);
  begin
-  if fitscale(awidth,aheight,si1,si2,arotation,rotafter) then begin
+  if fitscale(awidth,aheight,si1,si2,arotation,rotafter,rotcurrent) then begin
    if rgmo_sample in aoptions then begin
     image2:= sampleimage(image,si2.cx,si2.cy,@exceptinf);
    end
@@ -670,7 +720,7 @@ begin
      end;
      setimagebackgroundcolor(image,abackgroundcolor);
      si1:= imagebuffer.image.size;
-     if checkrotafter(si1,awidth,aheight,aoptions) then begin
+     if checkrotafter(si1,awidth,aheight,aoptions,arotation,rotcurrent) then begin
       doscale(true);
       dorotate();
      end
@@ -783,6 +833,7 @@ var
  image,image2: pointer;
  hasmask,monomask,rotmask: boolean;
  si1,si2: sizety;
+ rotcurrent: dpointty;
 
  procedure dorotate();
  begin
@@ -805,7 +856,7 @@ var
 
  procedure doscale(const rotafter: boolean);
  begin
-  if fitscale(awidth,aheight,si1,si2,arotation,rotafter) then begin
+  if fitscale(awidth,aheight,si1,si2,arotation,rotafter,rotcurrent) then begin
    if rgmo_sample in aoptions then begin
     image2:= sampleimage(image,si2.cx,si2.cy,@exceptinf);
    end
@@ -836,7 +887,8 @@ var
  datalen: card32;
  po1: pointer;
  int1: integer;
-
+ cx1,cy1: integer;
+ 
 begin
  result:= '';
  monomask:= false;
@@ -869,9 +921,20 @@ begin
    if image = nil then begin
     exit;
    end;
-   if (awidth <> 0) and (pimage8(image)^.a.columns > awidth) or 
-              (aheight <> 0) and (pimage8(image)^.a.rows > aheight) then begin
-    a.size:= gmstring(inttostr(awidth)+'x'+inttostr(aheight));
+   if (pimage8(image)^.a.columns > 0) and (pimage8(image)^.a.rows > 0) then begin
+               //limit to necessary size
+    if (awidth <> 0) and (pimage8(image)^.a.columns > awidth) or 
+               (aheight <> 0) and (pimage8(image)^.a.rows > aheight) then begin
+     cx1:= awidth;
+     if cx1 = 0 then begin
+      cx1:= (pimage8(image)^.a.columns * aheight) div pimage8(image)^.a.rows;
+     end;
+     cy1:= aheight;
+     if cy1 = 0 then begin
+      cy1:= (pimage8(image)^.a.rows * awidth) div pimage8(image)^.a.columns;
+     end;
+     a.size:= gmstring(inttostr(cx1)+'x'+inttostr(cy1));
+    end;
    end;
    destroyimage(image);
    image:= nil;
@@ -897,7 +960,7 @@ begin
     hasmask:= a.matte = magicktrue;
     si1:= ms(a.columns,a.rows);
    end;
-   if checkrotafter(si1,awidth,aheight,aoptions) then begin
+   if checkrotafter(si1,awidth,aheight,aoptions,arotation,rotcurrent) then begin
     doscale(true);
     dorotate();
    end

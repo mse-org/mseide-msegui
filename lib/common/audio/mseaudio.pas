@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2010-2013 by Martin Schreiber
+{ MSEgui Copyright (c) 2010-2014 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -114,7 +114,6 @@ type
    fthread: toutstreamthread;
    fstacksizekb: integer;
    fonsend: sendeventty;
-//   fmutex: mutexty;
    fonerror: erroreventty;
    fserver: msestring;
    fdev: msestring;
