@@ -3878,9 +3878,10 @@ begin
     updatepagesize(page);
    end
    else begin
-    bo1:= not (csdesigning in componentstate) and 
+    bo1:= (tabo_notabsdesign in ftabs.options) or
+             not (csdesigning in componentstate) and 
              ((tabo_multitabsonly in ftabs.options) and (count < 2) or 
-                                             (tabo_notabs in ftabs.options));
+                                       (tabo_notabs in ftabs.options));
     if bo1 then begin
      include(ftabs.fstate,tbs_shrinktozero);
     end
@@ -4621,7 +4622,7 @@ begin
  ftabs.options:= avalue;
  if (optionsbefore >< ftabs.options) *
     [tabo_vertical,tabo_opposite,
-               tabo_multitabsonly,tabo_notabs] <> [] then begin
+           tabo_multitabsonly,tabo_notabs,tabo_notabsdesign] <> [] then begin
   if tabo_vertical in avalue then begin
    ftabs.anchors:= [an_left,an_top,an_bottom];
   end
