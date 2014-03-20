@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2014 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -933,9 +933,9 @@ type
    property tab_frametab;
    property tab_facetab;
    property tab_faceactivetab;
-   property tab_size;
    property tab_sizemin;
    property tab_sizemax;
+   property tab_size;
    property tab_optionswidget;
    property tab_optionswidget1;
    property statfile;
@@ -2569,8 +2569,7 @@ begin
  if avalue <> foptions then begin
   optionsbefore:= foptions;
   foptions:= avalue;
-  delta:= tabbaroptionsty({$ifdef FPC}longword{$else}word{$endif}(avalue) xor
-                 {$ifdef FPC}longword{$else}word{$endif}(optionsbefore));
+  delta:= avalue >< optionsbefore;
   if not (csloading in componentstate) then begin
    if (csdesigning in componentstate) and 
                                  (delta * [tabo_vertical] <> []) then begin
@@ -3879,7 +3878,9 @@ begin
     updatepagesize(page);
    end
    else begin
-    bo1:= (tabo_multitabsonly in ftabs.options) and (count < 2);
+    bo1:= not (csdesigning in componentstate) and 
+             ((tabo_multitabsonly in ftabs.options) and (count < 2) or 
+                                             (tabo_notabs in ftabs.options));
     if bo1 then begin
      include(ftabs.fstate,tbs_shrinktozero);
     end
@@ -4618,9 +4619,9 @@ var
 begin
  optionsbefore:= ftabs.options;
  ftabs.options:= avalue;
- if (tabbaroptionsty({$ifdef FPC}longword{$else}word{$endif}(optionsbefore) xor
-            {$ifdef FPC}longword{$else}word{$endif}(ftabs.options)) *
-    [tabo_vertical,tabo_opposite,tabo_multitabsonly] <> []) then begin
+ if (optionsbefore >< ftabs.options) *
+    [tabo_vertical,tabo_opposite,
+               tabo_multitabsonly,tabo_notabs] <> [] then begin
   if tabo_vertical in avalue then begin
    ftabs.anchors:= [an_left,an_top,an_bottom];
   end
