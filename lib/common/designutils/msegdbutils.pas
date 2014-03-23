@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2014 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -2004,6 +2004,7 @@ begin
 //  if getprocid(fprocid) and (fprocid = procid) then begin
                //win32 gdb 7.1 crashes with "info program"
    fprocid:= procid;
+   include(self.fstate,gs_canstop);
    result:= stacklistframes(frames1,0,1);
    if (result = gdb_ok) or (result = gdb_message) then begin
     if result = gdb_message then begin
