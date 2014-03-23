@@ -1182,7 +1182,7 @@ begin
     bo1:= (tcustomwidgetgrid(fcellinfo.grid).fmouseinfopo <> nil) and 
               tcustomwidgetgrid(fcellinfo.grid).wantmousefocus(fmouseinfopo^);
     if fcellinfo.grid.entered or 
-               not (gs_cellexiting in tcustomwidgetgrid(fcellinfo.grid).fstate) and 
+      not (gs_cellexiting in tcustomwidgetgrid(fcellinfo.grid).fstate) and 
                                                                 bo1 then begin
      widget1:= fintf.getwidget;
      with widget1 do begin

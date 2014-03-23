@@ -9129,9 +9129,13 @@ end;
 
 function twidget.wantmousefocus(const info: mouseeventinfoty): boolean;
 begin
- result:= not (es_nofocus in info.eventstate) and not focused and
+ result:= not (es_nofocus in info.eventstate) and {not focused and}
                       (ws_wantmousefocus in fwidgetstate)and
-       (ow_mousefocus in foptionswidget) and canfocus
+       (ow_mousefocus in foptionswidget) and canfocus;
+ if result and focused then begin
+  activate;
+  result:= false;
+ end;
 end;
        
 procedure twidget.mouseevent(var info: mouseeventinfoty);
