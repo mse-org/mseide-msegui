@@ -194,19 +194,29 @@ begin
        end;
       end
       else begin      
-       int2:= posex(' depends on ',str1,int1); //FPC 2.6
-       if int2 > 0 then begin
+       int2:= posex(' Load from ',str1,int1);
+       if int2 >= int1+1 then begin
         info1.name:= name1;
-        info1.depend:= copy(str1,int2+12,bigint);
-        add(info1);
+        info1.depend:= copy(str1,findlastchar(str1,' ')+1,bigint);
+        if stringicomp(info1.name,info1.depend) <> 0 then begin 
+         add(info1);
+        end;
        end
        else begin
-        int2:= posex(' Add dependency of ',str1,int1); //FPC 2.4
+        int2:= posex(' depends on ',str1,int1); //FPC 2.6
         if int2 > 0 then begin
          info1.name:= name1;
-         info1.depend:= copy(str1,findlastchar(str1,' ')+1,bigint);
+         info1.depend:= copy(str1,int2+12,bigint);
          add(info1);
         end
+        else begin
+         int2:= posex(' Add dependency of ',str1,int1); //FPC 2.4
+         if int2 > 0 then begin
+          info1.name:= name1;
+          info1.depend:= copy(str1,findlastchar(str1,' ')+1,bigint);
+          add(info1);
+         end
+        end;
        end;
       end;
 //      }
