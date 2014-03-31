@@ -225,6 +225,7 @@ object projectoptionsfo: tprojectoptionsfo
                 0
               )
               taborder = 3
+              hint = 'Extra space between lines'
               bounds_x = 263
               bounds_y = 0
               bounds_cx = 50
