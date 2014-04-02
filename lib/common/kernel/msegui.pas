@@ -2074,7 +2074,7 @@ type
    procedure setwindowsize(const value: windowsizety);
    function getwindowpos: windowposty;
    procedure setwindowpos(const Value: windowposty);
-   procedure invalidaterect(const rect: rectty; const sender: twidget = nil);
+   procedure invalidaterect(const arect: rectty; const sender: twidget = nil);
                        //clipped by paintrect of sender.parentwidget
    procedure mouseparked;
    procedure movewindowrect(const dist: pointty; const rect: rectty); virtual;
@@ -8166,7 +8166,8 @@ begin
   actcolor:= actualcolor;
   saveindex:= canvas.save;
   dobeforepaint(canvas);
-  if (high(fwidgets) >= 0) and not (ws1_noclipchildren in fwidgetstate1) then begin
+  if (high(fwidgets) >= 0) and 
+                        not (ws1_noclipchildren in fwidgetstate1) then begin
    updatewidgetregion;
    canvas.subclipregion(fwidgetregion.region);
   end;
@@ -13899,22 +13900,22 @@ begin
  end;
 end;
 
-procedure twindow.invalidaterect(const rect: rectty;
+procedure twindow.invalidaterect(const arect: rectty;
                                          const sender: twidget = nil);
 var
- arect: rectty;
+ rect1: rectty;
 begin
- if (rect.cx > 0) or (rect.cy > 0) then begin
-  arect:= intersectrect(rect,makerect(nullpoint,fownerwidget.fwidgetrect.size));
+ if (arect.cx > 0) or (arect.cy > 0) then begin
+  rect1:= intersectrect(arect,mr(nullpoint,fownerwidget.fwidgetrect.size));
   if (sender <> nil) and (sender.fparentwidget <> nil) then begin
-   arect:= intersectrect(arect,moverect(sender.fparentwidget.paintrect,
+   rect1:= intersectrect(rect1,moverect(sender.fparentwidget.paintrect,
                                         sender.fparentwidget.rootpos));
   end;
   if fupdateregion.region = 0 then begin
-   fupdateregion:= createregion(arect,fgdi);
+   fupdateregion:= createregion(rect1,fgdi);
   end
   else begin
-   regaddrect(fupdateregion,arect);
+   regaddrect(fupdateregion,rect1);
   end;
   if appinst <> nil then begin
    appinst.invalidated;
