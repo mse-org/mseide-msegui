@@ -68,6 +68,8 @@ function timeout(time: longword): boolean;
 
 function createguidstring: string;
 
+procedure reallocmemandinit(var p: pointer; const newsize: sizeint);
+
 implementation
 uses
 {$ifdef mswindows}
@@ -366,6 +368,18 @@ var
 begin
  int1:= sys_getlasterror;
  result:= inttostr(int1) + ': ' + sys_geterrortext(int1);
+end;
+
+procedure reallocmemandinit(var p: pointer; const newsize: sizeint);
+var
+ oldsize: ptrint;
+begin
+ oldsize:= 0;
+ if p <> nil then begin
+  oldsize:= memsize(p);
+ end;
+ reallocmem(p,newsize);
+ fillchar((p+oldsize)^,newsize-oldsize,0);
 end;
 
 end.
