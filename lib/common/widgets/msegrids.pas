@@ -1831,9 +1831,9 @@ type
    foncolmoving: gridblockmovingeventty;
    fonrowsmoving: gridblockmovingeventty;
    fonrowsmodified: notifyeventty;
+   fstatpriority: integer;
 {$ifdef mse_with_ifi}
    fifilink: tifigridlinkcomp;
-   fstatpriority: integer;
    procedure ifirowchange;
    function getifilinkkind: ptypeinfo;
    procedure setifilink(const avalue: tifigridlinkcomp);

@@ -141,9 +141,9 @@ type
    fonchange: notifyeventty;
    fonasyncevent: asynceventty;
    fonexecuteaction: actioneventty;
+   fstatpriority: integer;
 {$ifdef mse_with_ifi}
    fifilink: tifiactionlinkcomp;
-   fstatpriority: integer;
    function getifilinkkind: ptypeinfo;
    procedure setifilink(const avalue: tifiactionlinkcomp); overload;
 {$endif}

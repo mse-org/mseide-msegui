@@ -112,9 +112,9 @@ type
    foptionsedit: optionseditty;
    fedited: boolean;
    fvalueread: boolean;
+   fstatpriority: integer;
 {$ifdef mse_with_ifi}
    fifilink: tifivaluelinkcomp;
-   fstatpriority: integer;
    procedure ifisetvalue(var avalue; var accept: boolean);
    function getifilinkkind: ptypeinfo;
    procedure setifilink(const avalue: tifilinkcomp);
@@ -285,6 +285,7 @@ type
    property gridvalue[const index: integer]: pointer
         read getgridvalue write setgridvalue; default;
    property gridvalues: pointerarty read getgridvalues write setgridvalues;
+   function griddata: tgridpointerdatalist;
   published
    property visible;
    property enabled;
@@ -364,6 +365,7 @@ type
    property gridvalue[const index: integer]: realty
         read getgridvalue write setgridvalue; default;
    property gridvalues: realarty read getgridvalues write setgridvalues;
+   function griddata: tgridrealdatalist;
    property value: realty read fvalue write setvalue;
    property onsetvalue: setrealeventty read fonsetvalue write fonsetvalue;
    property direction: graphicdirectionty read fdirection write setdirection default gd_right;
@@ -628,6 +630,7 @@ type
    property gridvalues: longboolarty read getgridvalues write setgridvalues;
    property gridbooleanvalues: booleanarty read getgridbooleanvalues 
                                                  write setgridbooleanvalues;
+   function griddata: tgridintegerdatalist;
    function groupmembers: booleaneditarty;
    function tagitem(const atag: integer): tcustombooleanedit; //nil if none
 
@@ -731,6 +734,7 @@ type
    property gridvalue[const index: integer]: integer
         read getgridvalue write setgridvalue; default;
    property gridvalues: integerarty read getgridvalues write setgridvalues;
+   function griddata: tgridintegerdatalist;
    property datalist: tintegerdatalist read getdatalist; 
    property onsetvalue: setintegereventty read fonsetvalue write fonsetvalue;
    property value: integer read fvalue write setvalue default 0;
@@ -1284,7 +1288,13 @@ procedure tcustomrealgraphdataedit.setifilink(const avalue: tifireallinkcomp);
 begin
  inherited setifilink(avalue);
 end;
+
 {$endif}
+
+function tcustomrealgraphdataedit.griddata: tgridrealdatalist;
+begin
+ result:= tgridrealdatalist(inherited griddata);
+end;
 
 { tcustomslider }
 
@@ -2699,6 +2709,11 @@ begin
  result:= gridvalue[aindex];
 end;
 
+function tcustombooleanedit.griddata: tgridintegerdatalist;
+begin
+ result:= tgridintegerdatalist(inherited griddata);
+end;
+
 { tcustombooleaneditradio }
 
 function tcustombooleaneditradio.getglyph: stockglyphty;
@@ -3064,6 +3079,11 @@ end;
 function tcustomintegergraphdataedit.getdatalist: tintegerdatalist;
 begin
  result:= tintegerdatalist(checkgriddata);
+end;
+
+function tcustomintegergraphdataedit.griddata: tgridintegerdatalist;
+begin
+ result:= tgridintegerdatalist(inherited griddata);
 end;
 
 
@@ -4043,6 +4063,11 @@ end;
 procedure tpointeredit.valuetogrid(arow: integer);
 begin
  fgridintf.setdata(arow,fvalue);
+end;
+
+function tpointeredit.griddata: tgridpointerdatalist;
+begin
+ result:= tgridpointerdatalist(inherited griddata);
 end;
 
 { tbarface }

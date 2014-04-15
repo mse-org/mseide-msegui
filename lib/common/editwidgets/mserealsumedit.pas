@@ -118,7 +118,8 @@ end;
 
 function trealsumedit.griddata: tgridrealsumlist;
 begin
- result:= tgridrealsumlist(inherited griddata);
+ checkgrid();
+ result:= tgridrealsumlist(fdatalist);
 end;
 
 function trealsumedit.getoptionsedit: optionseditty;

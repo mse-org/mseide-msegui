@@ -359,6 +359,7 @@ type
    property gridvalue[const index: integer]: msestring
         read getgridvalue write setgridvalue; default;
    property gridvalues: msestringarty read getgridvalues write setgridvalues;
+   function griddata: tgridmsestringdatalist;
 {$ifdef mse_with_ifi}
    property ifilink: tifistringlinkcomp read getifilink write setifilink;
 {$endif}
@@ -459,6 +460,7 @@ type
    property gridvalue[const index: integer]: ansistring
         read getgridvalue write setgridvalue; default;
    property gridvalues: stringarty read getgridvalues write setgridvalues;
+   function griddata: tgridansistringdatalist;
   published
    property value: ansistring read fvalue write setvalue;
    property onsetvalue: setansistringeventty read fonsetvalue write fonsetvalue;
@@ -706,6 +708,7 @@ type
    property gridvalue[const index: integer]: integer
         read getgridvalue write setgridvalue; default;
    property gridvalues: integerarty read getgridvalues write setgridvalues;
+   function griddata: tgridintegerdatalist;
 {$ifdef mse_with_ifi}
    property ifilink: tifiintegerlinkcomp read getifilink write setifilink;
 {$endif}
@@ -773,6 +776,7 @@ type
    property gridvalue[const index: integer]: int64
         read getgridvalue write setgridvalue; default;
    property gridvalues: int64arty read getgridvalues write setgridvalues;
+   function griddata: tgridint64datalist;
  end;
 
  tint64edit = class(tcustomint64edit)
@@ -933,6 +937,7 @@ type
    property gridvalue[const index: integer]: integer
         read getgridvalue write setgridvalue; default;
    property gridvalues: integerarty read getgridvalues write setgridvalues;
+   function griddata: tgridenumdatalist;
    property dropdown: tenumdropdowncontroller read getdropdown
                                                         write setdropdown;
    property onsetvalue: setintegereventty read fonsetvalue1 write fonsetvalue1;
@@ -1107,7 +1112,7 @@ type
    function getdefaultvalue: pointer; override;
   public
    constructor create(aowner: tcomponent); override;
-   function griddata: trealdatalist;
+//   function griddata: trealdatalist;
    procedure fillcol(const value: realty);
    procedure assigncol(const value: trealdatalist);
    function isnull: boolean; override;
@@ -1136,6 +1141,7 @@ type
    property gridvalues: realarty read getgridvalues write setgridvalues;
    property gridintvalues: integerarty read getgridintvalues 
                                                  write setgridintvalues;
+   function griddata: tgridrealdatalist;
 {$ifdef mse_with_ifi}
    property ifilink: tifireallinkcomp read getifilink write setifilink;
 {$endif}
@@ -1341,7 +1347,6 @@ type
    procedure updatedatalist; override;
   public
    constructor create(aowner: tcomponent); override;
-   function griddata: trealdatalist;
    procedure fillcol(const value: tdatetime);
    procedure assigncol(const value: trealdatalist);
    function isnull: boolean; override;
@@ -1361,6 +1366,7 @@ type
    property gridvalue[const index: integer]: tdatetime 
                  read getgridvalue write setgridvalue; default;
    property gridvalues: datetimearty read getgridvalues write setgridvalues;
+   function griddata: tgridrealdatalist;
 {$ifdef mse_with_ifi}
    property ifilink: tifidatetimelinkcomp read getifilink write setifilink;
 {$endif}
@@ -3060,6 +3066,11 @@ begin
  result:= value = '';
 end;
 
+function tcustomstringedit.griddata: tgridmsestringdatalist;
+begin
+ result:= tgridmsestringdatalist(inherited griddata);
+end;
+
 { tstringedit }
 
 { tcustommemoedit }
@@ -3453,6 +3464,11 @@ procedure thexstringedit.setvalue(const Value: string);
 begin
  fvalue := Value;
  valuechanged;
+end;
+
+function thexstringedit.griddata: tgridansistringdatalist;
+begin
+ result:= tgridansistringdatalist(inherited griddata);
 end;
 
 { tcustomdropdownedit }
@@ -4182,6 +4198,11 @@ begin
  end;
 end;
 
+function tcustomintegeredit.griddata: tgridintegerdatalist;
+begin
+ result:= tgridintegerdatalist(inherited griddata);
+end;
+
 { tcustomint64edit }
 
 constructor tcustomint64edit.create(aowner: tcomponent);
@@ -4384,6 +4405,11 @@ end;
 function tcustomint64edit.getdefaultvalue: pointer;
 begin
  result:= @fvaluedefault;
+end;
+
+function tcustomint64edit.griddata: tgridint64datalist;
+begin
+ result:= tgridint64datalist(inherited griddata);
 end;
 {
 procedure tcustomint64edit.setmin(const avalue: int64);
@@ -4969,6 +4995,12 @@ begin
  fdropdown.assign(avalue);
 end;
 
+function tcustomenuedit.griddata: tgridenumdatalist;
+begin
+ checkgrid();
+ result:= tgridenumdatalist(fdatalist);
+end;
+
 { tnocolsenumdropdowncontroller }
 
 constructor tnocolsenumdropdowncontroller.create(const intf: idropdownlist);
@@ -5119,13 +5151,13 @@ begin
  inherited;
  include(foptionswidget,ow_mousewheel);
 end;
-
+{
 function tcustomrealedit.griddata: trealdatalist;
 begin
  checkgrid;
  result:= trealdatalist(fdatalist);
 end;
-
+}
 procedure tcustomrealedit.setformatdisp(const Value: msestring);
 begin
  fformatdisp := Value;
@@ -5521,6 +5553,11 @@ end;
 procedure tcustomrealedit.setintvalue(const avalue: integer);
 begin
  value:= avalue;
+end;
+
+function tcustomrealedit.griddata: tgridrealdatalist;
+begin
+ result:= tgridrealdatalist(inherited griddata);
 end;
 
 { tspineditframe }
@@ -5983,12 +6020,12 @@ function tcustomdatetimeedit.isnull: boolean;
 begin
  result:= value = emptydatetime;
 end;
-
+{
 function tcustomdatetimeedit.griddata: trealdatalist;
 begin
  result:= trealdatalist(fdatalist);
 end;
-
+}
 {$ifdef mse_with_ifi}
 function tcustomdatetimeedit.getifilink: tifidatetimelinkcomp;
 begin
@@ -6087,6 +6124,11 @@ begin
  else begin
   options:= options - [dteo_showutc];
  end;
+end;
+
+function tcustomdatetimeedit.griddata: tgridrealdatalist;
+begin
+ result:= tgridrealdatalist(inherited griddata);
 end;
 
 end.

@@ -130,10 +130,10 @@ type
    ficonchanging: integer;
    fonsysevent: syseventeventty;
    fonsyswindowevent: syseventeventty;
-{$ifdef mse_with_ifi}
-   fifilink: tififormlinkcomp;
    factivatortarget: tactivator;
    fstatpriority: integer;
+{$ifdef mse_with_ifi}
+   fifilink: tififormlinkcomp;
    function getifilinkkind: ptypeinfo;
    procedure setifilink(const avalue: tififormlinkcomp);
 {$endif}
