@@ -1252,7 +1252,7 @@ function showmessage(const atext: msestring; const caption: msestring = '';
                      const exttext: msestring = ''): modalresultty; overload;
 procedure showmessage1(const atext: msestring; const caption: msestring);
             //for ps
-procedure showerror(const atext: msestring; const caption: msestring = 'ERROR';
+procedure showerror(const atext: msestring; caption: msestring = 'ERROR';
                      const minwidth: integer = 0;
                      const exttext: msestring = ''); 
                             //no wait if not in main thread                     
@@ -1937,10 +1937,13 @@ begin
  showmessage(ftext,fcaption,fminwidth,fexttext);
 end;
 
-procedure showerror(const atext: msestring; const caption: msestring = 'ERROR';
+procedure showerror(const atext: msestring; caption: msestring = 'ERROR';
                     const minwidth: integer = 0;
                     const exttext: msestring = '');
 begin
+ if caption = 'ERROR' then begin
+  caption:= sc(sc_errorupper);
+ end;
  if not application.ismainthread then begin
   tshowerrormessageevent.create(atext,caption,minwidth,exttext);
  end

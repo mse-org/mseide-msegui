@@ -109,7 +109,8 @@ type
                     sc_MS_Bitmap,sc_MS_Icon,sc_JPEG_Image,sc_PNG_Image,
                     sc_XPM_Image,sc_PNM_Image,sc_TARGA_image,sc_TIFF_image,
                     sc_All,
-                    sc_Confirmation,sc_Delete_record_question,sc_Copy_record_question,
+                    sc_Confirmation,sc_Delete_record_question,
+                    sc_Copy_record_question,
                     sc_close_page,
 {
  dbnavigbuttonty = (dbnb_first,dbnb_prior,dbnb_next,dbnb_last,dbnb_insert,
