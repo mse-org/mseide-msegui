@@ -308,13 +308,13 @@ object mainfo: tmainfo
     frame.outerframe = (
       0
       1
-      19
+      23
       2
     )
     taborder = 1
     bounds_x = 9
     bounds_y = 5
-    bounds_cx = 32
+    bounds_cx = 36
     bounds_cy = 16
     statfile = projectfo.projectstat
     optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_savevalue, oe_savestate, oe_checkvaluepaststatread, oe_autopopupmenu, oe_keyexecute]
@@ -327,13 +327,13 @@ object mainfo: tmainfo
     frame.outerframe = (
       0
       1
-      59
+      68
       2
     )
     taborder = 2
     bounds_x = 57
     bounds_y = 5
-    bounds_cx = 72
+    bounds_cx = 81
     bounds_cy = 16
     statfile = projectfo.projectstat
     ondataentered = formatchanged
@@ -345,13 +345,13 @@ object mainfo: tmainfo
     frame.outerframe = (
       0
       1
-      36
+      39
       2
     )
     taborder = 3
     bounds_x = 153
     bounds_y = 5
-    bounds_cx = 49
+    bounds_cx = 52
     bounds_cy = 16
     statfile = projectfo.projectstat
     ondataentered = formatchanged
@@ -364,13 +364,13 @@ object mainfo: tmainfo
     frame.outerframe = (
       0
       1
-      44
+      48
       2
     )
     taborder = 4
     bounds_x = 233
     bounds_y = 5
-    bounds_cx = 57
+    bounds_cx = 61
     bounds_cy = 16
     statfile = projectfo.projectstat
     ondataentered = formatchanged
@@ -383,13 +383,13 @@ object mainfo: tmainfo
     frame.outerframe = (
       0
       1
-      67
+      72
       2
     )
     taborder = 6
     bounds_x = 321
     bounds_y = 5
-    bounds_cx = 80
+    bounds_cx = 85
     bounds_cy = 16
     statfile = projectfo.projectstat
     ondataentered = showcolordataentered
@@ -592,7 +592,7 @@ object mainfo: tmainfo
       'Data has changed'
       'Do you wish to save'
       'CONFIRMATION'
-      ''
+      'Close error:'
       ''
     )
     left = 64

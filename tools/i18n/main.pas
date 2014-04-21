@@ -139,7 +139,7 @@ var
 implementation
 uses
  main_mfm,msefileutils,msesystypes,msesys,sysutils,mselist,project,
- rtlconsts,mseprocutils,
+ rtlconsts,mseprocutils,msestockobjects,
  msewidgets,mseparser,mseformdatatools,mseresourcetools,
  msearrayutils,msesettings,messagesform,mseclasses,mseeditglob;
 type
@@ -160,7 +160,8 @@ type
   sc_configuremsei18n,   //13
   sc_datahaschanged,     //14
   sc_doyouwishtosave,    //15
-  sc_confirmation        //16
+  sc_confirmation,       //16
+  sc_closeerror          //17
   );
 const
  translateext = 'trans';
@@ -1116,7 +1117,16 @@ begin
   amodalresult:= mr_none;
  end
  else begin
-  mainstatfile.writestat;
+  try
+   mainstatfile.writestat;
+  except
+   on e: exception do begin
+    if showmessage(c[ord(sc_closeerror)]+lineend+e.message,c[ord(sc_error)],
+                      [mr_ignore,mr_cancel]) <> mr_ignore then begin
+     amodalresult:= mr_none;
+    end;
+   end;
+  end;
  end;
 end;
 

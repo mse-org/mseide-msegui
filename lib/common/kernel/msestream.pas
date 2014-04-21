@@ -1022,7 +1022,8 @@ end;
 constructor tmsefilestream.create(const afilename: filenamety;
             const aopenmode: fileopenmodety = fm_read;
             const accessmode: fileaccessmodesty = [];
-            const Rights: filerightsty = defaultfilerights);   //!!!!todo linux lock
+            const Rights: filerightsty = defaultfilerights);  
+            //!!!!todo linux lock
 var
  mstr1: msestring;
  error: syserrorty;
