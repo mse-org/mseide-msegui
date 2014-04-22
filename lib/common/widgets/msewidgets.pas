@@ -1600,14 +1600,10 @@ begin
    bmp:= abitmap;
   end;
   if not bmp.isempty then begin
-{$warnings off}
-   aicon:= tbitmap1(bmp).handle;
-{$warnings on}
    if bmp.masked then begin
-{$warnings off}
-    amask:= tbitmap1(bmp.mask).handle;
-{$warnings on}
+    amask:= bmp.mask.handle; //first because it possibly destroys bmp.handle
    end;
+   aicon:= bmp.handle;
   end;
  end;
  if (aicon = 0) and not anodefault then begin

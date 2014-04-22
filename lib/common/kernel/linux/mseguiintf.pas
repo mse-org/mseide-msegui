@@ -724,6 +724,7 @@ type
        net_wm_window_type_combo,
        net_wm_window_type_dnd,
        net_wm_window_type_normal,
+       net_wm_icon,
 
        net_frame_extents,
        net_request_frame_extents,
@@ -760,6 +761,7 @@ const
        '_NET_WM_WINDOW_TYPE_COMBO',
        '_NET_WM_WINDOW_TYPE_DND',
        '_NET_WM_WINDOW_TYPE_NORMAL',
+       '_NET_WM_ICON',
 
        '_NET_FRAME_EXTENTS', 
        '_NET_REQUEST_FRAME_EXTENTS',
@@ -1725,11 +1727,18 @@ end;
 function gui_setwindowicon(id: winidty; const icon,mask: pixmapty): guierrorty;
 var
  hints: pxwmhints;
+ ima,maskima: imagety;
+ ps,pe,ps1: pbyte;
+ pd,pde: prgbtriplety;
+ ar1: longwordarty;
+ int1: integer;
+ bmask,lwo1: longword;
+ rgb1: rgbtriplety;
+ npixels: integer;
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
 {$endif} 
-{$ifdef FPC}{$checkpointer off}{$endif}
  hints:= pxwmhints(xgetwmhints(appdisp,id));
  if hints = nil then begin
   hints:= pxwmhints(xallocwmhints);
@@ -1752,7 +1761,142 @@ begin
  end;
  xsetwmhints(appdisp,id,hints);
  xfree(hints);
-{$ifdef FPC}{$checkpointer default}{$endif}
+ if netatoms[net_wm_icon] <> 0 then begin
+  ima.pixels:= nil;
+  maskima.pixels:= nil;
+  if icon <> 0 then begin
+   if gui_pixmaptoimage(icon,ima,0) <> gde_ok then begin
+    ima.pixels:= nil;
+   end;
+  end;
+  if mask <> 0 then begin
+   if gui_pixmaptoimage(mask,maskima,0) <> gde_ok then begin
+    maskima.pixels:= nil;
+   end;
+  end;
+  if ima.pixels <> nil then begin
+   npixels:= ima.size.cx*ima.size.cy;
+   setlength(ar1,2+npixels);
+   ar1[0]:= ima.size.cx;
+   ar1[1]:= ima.size.cy;
+   pd:= @ar1[2];
+   ps:= pointer(ima.pixels);
+   case ima.kind of
+    bmk_rgb: begin
+     move(ps^,pd^,npixels*sizeof(longword));
+    end;
+    bmk_gray: begin
+     for int1:= 0 to ima.size.cy-1 do begin
+      ps1:= ps;
+      pe:= ps+ima.size.cx;
+      repeat
+       pd^.red:= ps1^;
+       pd^.green:= ps1^;
+       pd^.blue:= ps1^;
+       inc(ps1);
+       inc(pd);
+      until ps1 >= pe;
+      ps:= ps+ima.linebytes;
+     end;
+    end;
+    bmk_mono: begin
+     for int1:= 0 to ima.size.cy-1 do begin
+      pde:= pd+ima.size.cx;
+      ps1:= ps;
+      bmask:= 1;
+      lwo1:= plongword(ps1)^;
+      repeat
+       if lwo1 and bmask = 0 then begin
+        longword(pd^):= $ffffffff; //ar1 is nulled
+       end;
+       bmask:= bmask shl 1;
+       if bmask = 0 then begin
+        bmask:= 1;
+        inc(plongword(ps1));
+        lwo1:= plongword(ps1)^;
+       end;
+       inc(pd);
+      until pd >= pde;
+      pd:= pde;
+      ps:= ps+ima.linebytes;
+     end;
+    end;
+    else begin
+     ar1:= nil; //not supported
+    end; 
+   end;
+   if maskima.pixels <> nil then begin
+    pd:= @ar1[2];
+    ps:= pointer(maskima.pixels);
+    case maskima.kind of
+     bmk_rgb: begin
+      pde:= pd+npixels;
+      repeat
+       rgb1:= prgbtriplety(ps)^;
+       pd^.res:= (word(rgb1.red)+word(rgb1.green)+word(rgb1.blue)) div 3;
+       inc(pd);
+       inc(prgbtriplety(ps));
+      until pd >= pde;
+     end;
+     bmk_gray: begin
+      for int1:= 0 to ima.size.cx-1 do begin
+       ps1:= ps;
+       pe:= ps+ima.size.cx;
+       repeat
+        pd^.res:= ps1^;
+        inc(pd);
+        inc(ps1);
+       until ps1 >= pe;
+       ps:= ps+maskima.linebytes; 
+      end;
+     end;
+     bmk_mono: begin
+      for int1:= 0 to ima.size.cy-1 do begin
+       pde:= pd+ima.size.cx;
+       ps1:= ps;
+       bmask:= 1;
+       lwo1:= plongword(ps1)^;
+       repeat
+        if lwo1 and bmask <> 0 then begin
+         pd^.res:= $ff;
+        end
+        else begin
+         pd^.res:= $00;
+        end;
+        bmask:= bmask shl 1;
+        if bmask = 0 then begin
+         bmask:= 1;
+         inc(plongword(ps1));
+         lwo1:= plongword(ps1)^;
+        end;
+        inc(pd);
+       until pd >= pde;
+       pd:= pde;
+       ps:= ps+maskima.linebytes;
+      end;
+     end;
+     else begin
+      ar1:= nil;  //not supported
+     end;
+    end;
+   end
+   else begin
+    pd:= @ar1[2];
+    pde:= pd+npixels;
+    repeat
+     pd^.res:= $ff;
+     inc(pd);
+    until pd >= pde;
+   end;
+   gui_freeimagemem(ima.pixels);
+   if ar1 <> nil then begin
+    setlongproperty(id,netatoms[net_wm_icon],ar1,cardinalatom);
+   end;
+  end;
+  if maskima.pixels <> nil then begin
+   gui_freeimagemem(maskima.pixels);
+  end;
+ end;
  result:= gue_ok;
 end;
 
@@ -5806,6 +5950,7 @@ begin
   end;
   
   defcolormap:= xdefaultcolormapofscreen(defscreen);
+  
   atomatom:= xinternatom(appdisp,'ATOM',
            {$ifdef xboolean}true{$else}1{$endif});
   mseclientmessageatom:= xinternatom(appdisp,'mseclientmessage',

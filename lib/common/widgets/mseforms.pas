@@ -1851,7 +1851,7 @@ var
 begin
  if ficonchanging = 0 then begin
   inc(ficonchanging);
-  ficon.colormask:= false;
+//  ficon.colormask:= false;
   dec(ficonchanging); 
   if ownswindow then begin
    getwindowicon(ficon,icon1,mask1);
