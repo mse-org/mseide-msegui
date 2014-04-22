@@ -1731,6 +1731,9 @@ var
  ps,pe,ps1: pbyte;
  pd,pde: prgbtriplety;
  ar1: longwordarty;
+ {$ifdef cpu64}
+ ar2: qwordarty;
+ {$endif}
  int1: integer;
  bmask,lwo1: longword;
  rgb1: rgbtriplety;
@@ -1890,7 +1893,15 @@ begin
    end;
    gui_freeimagemem(ima.pixels);
    if ar1 <> nil then begin
+   {$ifdef cpu64}
+    setlength(ar2,length(ar1));
+    for int1:= 0 to high(ar2) do begin
+     ar2[int1]:= ar1[int1];
+    end;
+    setlongproperty(id,netatoms[net_wm_icon],ar2,cardinalatom);
+   {$else}
     setlongproperty(id,netatoms[net_wm_icon],ar1,cardinalatom);
+   {$endif}
    end;
   end;
   if maskima.pixels <> nil then begin
