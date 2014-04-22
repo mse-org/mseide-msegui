@@ -35,7 +35,7 @@ IDE:
 - Integrated report designer.
 
 License:
-IDE is under GPL, library under modified LGPL like FPC-RTL.
+IDE and tools are under GPL, library under modified LGPL like FPC-RTL.
 
 Installation:
 *************
