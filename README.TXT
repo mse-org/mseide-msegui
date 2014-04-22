@@ -36,6 +36,8 @@ IDE:
 
 License:
 IDE and tools are under GPL, library under modified LGPL like FPC-RTL.
+Package maintainers may delete the files "apps/ide/COPYING.GPL", 
+"lib/common/COPYING.LGPL" and "lib/common/COPYING.MSE".
 
 Installation:
 *************
