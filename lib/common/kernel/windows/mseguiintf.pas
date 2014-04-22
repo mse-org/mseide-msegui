@@ -9,7 +9,7 @@
 }
 unit mseguiintf; //i386-win32
 
-{$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+{$ifdef FPC}{$mode objfpc}{$h+}{$goto on}{$endif}
 
 interface
 uses
@@ -63,7 +63,7 @@ implementation
 //todo: 19.10.03 rasterops for textout
 uses
  sysutils,mselist,msekeyboard,msebits,msearrayutils,msesysutils,msegui,
- msesystimer,msegdi32gdi,msesysintf1,msedynload,msewindnd;
+ msesystimer,msegdi32gdi,msesysintf1,msedynload,msewindnd,msebitmap;
 
 type
 
@@ -1513,9 +1513,30 @@ var
  bmpinfo: bitmapinfo;
  bru1: hbrush;
  rect1: trect;
+ info: pixmapinfoty;
+ mask1: pixmapty;
+ bmp1: tbitmap;
+label
+ endlab;
 begin
  result:= 0;
  if icon <> 0 then begin
+  mask1:= mask;
+  if mask1 <> 0 then begin
+   info.handle:= mask1;
+   if (gui_getpixmapinfo(info) = gde_ok) and (info.depth <> 1) then begin
+    bmp1:= tbitmap.create(bmk_mono);
+    try
+     bmp1.handle:= mask1;
+     bmp1.colorbackground:= cl_black;
+     bmp1.kind:= bmk_mono;
+     mask1:= bmp1.handle;
+     bmp1.releasehandle;
+    finally
+     bmp1.free;
+    end;
+   end;
+  end;
   fillchar(bmpinfo,sizeof(bmpinfo),0);
   with bmpinfo.bmiHeader do begin
    bisize:= sizeof(bmpinfo.bmiheader);
@@ -1524,7 +1545,7 @@ begin
     dc2:= createcompatibledc(0);
     maskbmp:= createbitmap(biwidth,biheight,1,1,nil);
     selectobject(dc1,maskbmp);
-    if mask = 0 then begin
+    if mask1 = 0 then begin
      bru1:= createsolidbrush(0);
      rect1.Left:= 0;
      rect1.top:= 0;
@@ -1534,7 +1555,7 @@ begin
      deleteobject(bru1);
     end
     else begin
-     selectobject(dc2,mask); //should not be selected in another dc
+     selectobject(dc2,mask1); //should not be selected in another dc
      bitblt(dc1,0,0,biwidth,biheight,dc2,0,0,rasterops3[rop_copy]);
      deletedc(dc2);
      dc2:= createcompatibledc(0);
@@ -1542,7 +1563,7 @@ begin
    end
    else begin
     deletedc(dc1);
-    exit;
+    goto endlab;
    end;
    dc3:= createcompatibledc(0);
    selectobject(dc3,icon); //should not be selected in another dc
@@ -1551,7 +1572,7 @@ begin
    bitblt(dc2,0,0,biwidth,biheight,dc3,0,0,rasterops3[rop_copy]);
    deletedc(dc3);
    bitblt(dc2,0,0,biwidth,biheight,dc1,0,0,rasterops3[rop_notand]);
-               //icon out of mask -> 0;
+               //icon out of mask1 -> 0;
    deletedc(dc1);
    deletedc(dc2);
    with iconinfo1 do begin
@@ -1564,6 +1585,10 @@ begin
    result:= createiconindirect(iconinfo1);
    deleteobject(maskbmp);
    deleteobject(iconbmp);
+  end;
+endlab:
+  if (mask1 <> mask) and (mask1 <> 0) then begin
+   deleteobject(mask1);
   end;
  end
  else begin
