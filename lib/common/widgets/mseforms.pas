@@ -152,7 +152,6 @@ type
    procedure setonbeforepaint(const Value: painteventty);
    procedure setonpaint(const Value: painteventty);
    procedure seticon(const avalue: tmaskedbitmap);
-   procedure iconchanged(const sender: tobject);
    procedure registerhandlers;
    procedure unregisterhandlers;
    procedure setsyseventty(const avalue: syseventeventty);
@@ -162,6 +161,7 @@ type
   protected
    fscrollbox: tformscrollbox;
     //needed to distinguish between scrolled and unscrolled (mainmenu...) widgets
+   procedure iconchanged(const sender: tobject);
    procedure aftercreate; virtual;
    function createmainmenuwidget: tframemenuwidget; virtual;
    procedure updateoptions; virtual;

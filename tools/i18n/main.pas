@@ -24,7 +24,7 @@ uses
  msedatanodes,msegraphedits,msestream,mseglob,msemenus,classes,mclasses,
  msetypes,msestrings,msethreadcomp,mseguiglob,msegui,mseresourceparser,
  msedialog,msememodialog,mseobjecttext,mseifiglob,msesysenv,msemacros,
- msestringcontainer;
+ msestringcontainer,mseclasses,mseskin,msebitmap;
 
 const
  msei18nversiontext = mseguiversiontext;
@@ -44,7 +44,6 @@ type
    ntonly: tbooleanedit;
    grid: twidgetgrid;
    convexx: tfacecomp;
-   menuitemframe: tframecomp;
    convexy: tfacecomp;
    concavex: tfacecomp;
    concavey: tfacecomp;
@@ -61,6 +60,9 @@ type
    coloron: tbooleanedit;
    sysenv: tsysenvmanager;
    c: tstringcontainer;
+   tskincontroller1: tskincontroller;
+   iconbmp: tbitmapcomp;
+   menuitemframe: tframecomp;
    procedure onprojectopen(const sender: tobject);
    procedure onprojectsave(const sender: tobject);
    procedure onprojectedit(const sender: tobject);
@@ -104,6 +106,7 @@ type
    procedure beforelangdrawcell(const sender: tcol; const canvas: tcanvas;
                    var cellinfo: cellinfoty; var processed: Boolean);
    procedure showcolordataentered(const sender: TObject);
+   procedure loadedexe(const sender: TObject);
   private
    datastream: ttextdatastream;
 //   alang: integer;
@@ -141,7 +144,7 @@ uses
  main_mfm,msefileutils,msesystypes,msesys,sysutils,mselist,project,
  rtlconsts,mseprocutils,msestockobjects,
  msewidgets,mseparser,mseformdatatools,mseresourcetools,
- msearrayutils,msesettings,messagesform,mseclasses,mseeditglob;
+ msearrayutils,msesettings,messagesform,mseeditglob;
 type
  strinconsts = (
   sc_name,               //0
@@ -192,6 +195,9 @@ procedure tmainfo.tmainfooncreate(const sender: tobject);
 var
  wstr1: msestring;
 begin
+ stockobjects.mseicon.assign(iconbmp.bitmap);
+ iconchanged(nil);
+// iconbmp.free;
  sysenv.init(sysenvvalues);
  wstr1:= filepath(statdirname);
  if not finddir(wstr1) then begin
@@ -1177,6 +1183,11 @@ end;
 procedure tmainfo.showcolordataentered(const sender: TObject);
 begin
  grid.invalidate;
+end;
+
+procedure tmainfo.loadedexe(const sender: TObject);
+begin
+ iconbmp.free;
 end;
 
 end.
