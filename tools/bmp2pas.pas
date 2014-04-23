@@ -82,7 +82,7 @@ begin
       writestdout(
       'Converting file "'+ar2[0]+'" componentname "'+bmps[int1].name+'".',true);
       with bmps[int1].bitmap do begin
-       loadfromfile(ar2[0]);
+       loadfromfile(ar2[0],'',[]);
        if fileext(ar2[0]) = 'png' then begin
         transparentcolor:= cl_none;
         colormask:= true;
