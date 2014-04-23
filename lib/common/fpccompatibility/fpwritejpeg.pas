@@ -14,6 +14,9 @@
   along with this library; if not, write to the Free Software Foundation,
   Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 }
+
+//modified 2013 by Martin Schreiber
+
 unit FPWriteJPEG;
 
 {$mode objfpc}{$H+}
@@ -22,7 +25,7 @@ interface
 
 uses
   Classes, mclasses,SysUtils, FPImage, JPEGLib_del, FPReadJPEG,
-  JcAPIstd, JcAPImin, JDataDst, JcParam_del, JError_del;
+  JcAPIstd_del, JcAPImin_del, JDataDst_del, JcParam_del, JError_del;
 
 type
   { TFPWriterJPEG }
