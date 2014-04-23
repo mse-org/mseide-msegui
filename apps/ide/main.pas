@@ -1292,7 +1292,7 @@ begin
  if gdb.active then begin
   gdb.fileexec('');   //unload exec
  end;
- setstattext('');
+ resetdebugdisp;
  checkbluedots;
 end;
 
