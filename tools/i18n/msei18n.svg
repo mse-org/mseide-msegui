@@ -18,9 +18,9 @@
    sodipodi:docname="msei18n.svg"
    inkscape:output_extension="org.inkscape.output.svg.inkscape"
    version="1.0"
-   inkscape:export-filename="/home/mse/packs/standard/git/mseide-msegui/tools/i18n/msei18n_32.png"
-   inkscape:export-xdpi="60"
-   inkscape:export-ydpi="60">
+   inkscape:export-filename="/home/mse/packs/standard/git/mseide-msegui/tools/i18n/msei18n_64.png"
+   inkscape:export-xdpi="120"
+   inkscape:export-ydpi="120">
   <defs
      id="defs4">
     <linearGradient
@@ -147,9 +147,9 @@
      inkscape:pageshadow="2"
      inkscape:zoom="11.2"
      inkscape:cx="26.046493"
-     inkscape:cy="18.871488"
+     inkscape:cy="22.442917"
      inkscape:document-units="px"
-     inkscape:current-layer="layer2"
+     inkscape:current-layer="layer3"
      showgrid="true"
      gridtolerance="3">
     <inkscape:grid
@@ -177,7 +177,7 @@
      inkscape:groupmode="layer"
      id="layer3"
      inkscape:label="background"
-     style="display:inline">
+     style="display:none">
     <rect
        style="fill:url(#radialGradient3193);fill-opacity:1;fill-rule:nonzero;stroke:#1400c2;stroke-width:0;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
        id="rect3185"
@@ -199,7 +199,7 @@
      inkscape:label="back2"
      style="display:inline">
     <rect
-       style="fill:url(#radialGradient3973);fill-opacity:1.0;fill-rule:nonzero;stroke:#1400c2;stroke-width:0;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       style="fill:url(#radialGradient3973);fill-opacity:1;fill-rule:nonzero;stroke:#1400c2;stroke-width:0;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
        id="rect3185-9"
        width="48"
        height="48"
