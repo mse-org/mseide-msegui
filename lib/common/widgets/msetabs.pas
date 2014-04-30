@@ -1314,7 +1314,8 @@ begin
    pagelast:= length(cells)-pagelast-firsttab;
   end;
   inc(lasttab);
-  if lasttab > high(cells) then begin
+  notfull:= lasttab > high(cells);
+  if notfull then begin
    lasttab:= high(cells);
   end;
  end;
@@ -2090,7 +2091,7 @@ end;
 
 procedure tcustomtabbar.updatelayout;
 var
- int1,int2,int3,int4: integer;
+ int1,int2,int3: integer;
 begin
  with flayoutinfo do begin
   options:= [];
@@ -2126,7 +2127,7 @@ begin
      end;
     end;
    end;
-
+{
    if shs_vert in options then begin
     int4:= dim.size.cy - totsize.cy + tcustomstepframe1(fframe).fdim.cy;
    end
@@ -2134,6 +2135,7 @@ begin
     int4:= dim.size.cx - totsize.cx + tcustomstepframe1(fframe).fdim.cx;
    end;
    notfull:= int4 >= 0;
+}
    if (firsttab = 0) and notfull then begin
     int2:= 0;
    end;
@@ -2827,7 +2829,7 @@ end;
 procedure tcustomtabbar.repeatproc(const sender: tobject);
 begin
  if tbs_repeatup in fstate then begin
-  if flayoutinfo.lasttab >= high(flayoutinfo.cells) then begin
+  if flayoutinfo.notfull then begin
    killrepeater;
   end
   else begin
