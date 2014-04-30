@@ -20,7 +20,7 @@ unit mdb;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 
 interface
-
+ 
 uses
  classes,mclasses,sysutils,variants,fmtbcd,maskutils,msetypes,mseifiglob,
  msestrings

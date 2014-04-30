@@ -996,8 +996,8 @@ end;
 function tsysdndhandler.dragleave: hresult; stdcall;
 begin
  if fdragwinid <> 0 then begin
-  application.postevent(tsysdndevent.create(dek_leave,fdragwinid,nullpoint,
-                                                      [],false,nil,nil,[]));
+  application.postevent(tsysdndevent.create(dek_leavesysdnd,fdragwinid,
+                                               nullpoint,[],false,nil,nil,[]));
   fdataobject:= nil;
   fdragwinid:= 0;
   clearformats;

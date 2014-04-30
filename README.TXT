@@ -179,6 +179,13 @@ ru_RU.UTF-8/XLC_LOCALE ru_RU.UTF-8
 by
 en_US.UTF-8/XLC_LOCALE ru_RU.UTF-8
 
+Wrong window positions for Ubuntu 14.04
+***************************************
+Window positions in Unity are wrong because the Ubuntu windowmanager
+does not support static_gravity:
+http://askubuntu.com/questions/451903/wingravity-static-gravity-not-suppo
+https://bugs.launchpad.net/ubuntu/+bug/1312044
+
 How to add custom components to MSEide
 **************************************
 There is a project 'apps/myide/mymseide.prj' as a demo.

@@ -47,7 +47,7 @@ type
    property actions: dndactionsty read factions write factions;
  end;
 
- drageventkindty = (dek_begin,dek_check,dek_drop,dek_leave);
+ drageventkindty = (dek_begin,dek_check,dek_drop,dek_leavesysdnd);
 
  draginfoty = record
   eventkind: drageventkindty;

@@ -14827,7 +14827,7 @@ var
 begin
  if wo_sysdnd in foptions then begin
   with tsysdndevent(event) do begin
-   if fdndkind = dek_leave then begin
+   if fdndkind = dek_leavesysdnd then begin
     freeandnil(fsysdragobject);
    end
    else begin
