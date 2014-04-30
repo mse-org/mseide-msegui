@@ -268,6 +268,7 @@ type
   cells: shapeinfoarty;
   firsttab: integer;
   lasttab: integer;
+  notfull: boolean;
   stepinfo: framestepinfoty;
   options: shapestatesty;
  end;
@@ -2132,7 +2133,8 @@ begin
    else begin
     int4:= dim.size.cx - totsize.cx + tcustomstepframe1(fframe).fdim.cx;
    end;
-   if (firsttab = 0) and (int4 >= 0) then begin
+   notfull:= int4 >= 0;
+   if (firsttab = 0) and notfull then begin
     int2:= 0;
    end;
    frame.updatebuttonstate(firsttab,stepinfo.pageup,int2);

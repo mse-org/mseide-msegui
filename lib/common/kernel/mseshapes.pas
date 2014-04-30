@@ -388,47 +388,47 @@ begin
       if button = mb_left then begin
        updateshapemoveclick(infoarpo,false);
        exclude(state,shs_moveclick);
-       if state * [shs_clicked,shs_checkbox,shs_radiobutton] = 
-                                     [shs_clicked,shs_checkbox] then begin
-        setchecked(info,not (shs_checked in state),widget);
-       end;
-       if state * [shs_clicked,shs_radiobutton] = 
-                              [shs_clicked,shs_radiobutton] then begin
-        if [shs_checked,shs_checkbox] * state = 
-                              [shs_checked,shs_checkbox] then begin
-         setchecked(info,false,widget);
-        end
-        else begin
-         if (infoarpo <> nil) then begin
-          for int1:= 0 to high(infoarpo^) do begin
-           po1:= @infoarpo^[int1];
-           if (po1 <> @info) and (po1^.group = info.group) and
-                          (shs_radiobutton in po1^.state) then begin
-            setchecked(po1^,false,widget);
-           end;
-          end;
-          setchecked(info,true,widget);
-         end;
+       if not (shs_disabled in state) then begin
+        if state * [shs_clicked,shs_checkbox,shs_radiobutton] = 
+                                      [shs_clicked,shs_checkbox] then begin
+         setchecked(info,not (shs_checked in state),widget);
         end;
-       end;
-       if (eventkind = ek_buttonrelease) and (shs_clicked in state) and
-            assigned(doexecute) then begin
-        state:= state - [shs_clicked];
-        result:= true;              //state can be invalid after execute
-        if widget <> nil then begin //info can be invalid after execute
-         if (aframe <> nil) and tframe1(aframe).needsmouseinvalidate then begin
-          widget.invalidaterect(inflaterect(ca.dim,aframe.innerframe));
+        if state * [shs_clicked,shs_radiobutton] = 
+                               [shs_clicked,shs_radiobutton] then begin
+         if [shs_checked,shs_checkbox] * state = 
+                               [shs_checked,shs_checkbox] then begin
+          setchecked(info,false,widget);
          end
          else begin
-          widget.invalidaterect(ca.dim);
+          if (infoarpo <> nil) then begin
+           for int1:= 0 to high(infoarpo^) do begin
+            po1:= @infoarpo^[int1];
+            if (po1 <> @info) and (po1^.group = info.group) and
+                           (shs_radiobutton in po1^.state) then begin
+             setchecked(po1^,false,widget);
+            end;
+           end;
+           setchecked(info,true,widget);
+          end;
          end;
         end;
-        doexecute(tag,mouseevent);
-        exit;
-       end
-       else begin
-        state:= state - [shs_clicked];
+        if (eventkind = ek_buttonrelease) and (shs_clicked in state) and
+             assigned(doexecute) then begin
+         state:= state - [shs_clicked];
+         result:= true;              //state can be invalid after execute
+         if widget <> nil then begin //info can be invalid after execute
+          if (aframe <> nil) and tframe1(aframe).needsmouseinvalidate then begin
+           widget.invalidaterect(inflaterect(ca.dim,aframe.innerframe));
+          end
+          else begin
+           widget.invalidaterect(ca.dim);
+          end;
+         end;
+         doexecute(tag,mouseevent);
+         exit;
+        end;
        end;
+       state:= state - [shs_clicked];
       end;
      end;
      ek_buttonpress: begin

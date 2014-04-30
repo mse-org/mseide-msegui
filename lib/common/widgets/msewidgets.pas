@@ -556,7 +556,7 @@ type
    procedure execute(const tag: integer; const info: mouseeventinfoty);
    property neededbuttons: stepkindsty read fneededbuttons 
                                                      write setneededbuttons;
-   //iframe
+    //iframe
    procedure setframeinstance(instance: tcustomframe);
    procedure setstaticframe(value: boolean);
    function getstaticframe: boolean;
@@ -3376,6 +3376,10 @@ begin
  if first+delta >= count then begin
   include(disabled,sk_right);
   include(disabled,sk_down);
+  if (frepeatedbutton >= 0) and 
+            (stepkindty(frepeatedbutton) in [sk_right,sk_down]) then begin
+   killrepeater();
+  end;
  end;
  disabledbuttons:= disabled;
  if (first+delta >= count) and (first <= 0) then begin
