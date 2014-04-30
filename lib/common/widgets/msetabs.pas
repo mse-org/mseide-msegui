@@ -2524,6 +2524,7 @@ end;
 function tcustomtabbar.tabatpos(const apos: pointty; const enabledonly: boolean = false): integer;
 begin
  begin
+  checklayout;
   if enabledonly then begin
    result:= findshapeatpos(flayoutinfo.cells,apos,[shs_invisible,shs_disabled]);
   end
@@ -2829,6 +2830,7 @@ end;
 procedure tcustomtabbar.repeatproc(const sender: tobject);
 begin
  if tbs_repeatup in fstate then begin
+  checklayout();
   if flayoutinfo.notfull then begin
    killrepeater;
   end
