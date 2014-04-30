@@ -18,7 +18,7 @@ uses
  mseglob,mseguiglob,msegui,msebitmap,msedragglob,
  mseforms,rtlconsts,msesimplewidgets,msedrag,mseact,
  mseobjectpicker,msepointer,msestat,msestatfile,msestrings,msemenus,
- msedrawtext;
+ msedrawtext,msetimer;
 
 const
  defaulttaboptionswidget = defaultoptionswidget + 
@@ -279,7 +279,7 @@ type
  tabschangedeventty = procedure(const synctabindex: boolean) of object;
 
  tabbarstatety = (tbs_layoutvalid,tbs_designdrag,tbs_shrinktozero,
-                  tbs_updatesizing);
+                  tbs_updatesizing,tbs_repeatup);
  tabbarstatesty = set of tabbarstatety;
  
  tcustomtabbar = class(tcustomstepbox)
@@ -292,6 +292,7 @@ type
    fontabmoving: movingeventty;
    fontabmoved: movedeventty;
    fonclientmouseevent: mouseeventty;
+   frepeater: tsimpletimer;
    procedure settabs(const Value: ttabs);
    procedure layoutchanged;
    procedure checklayout;
@@ -303,6 +304,9 @@ type
    procedure setoptions(const avalue: tabbaroptionsty);
    function gethintpos(const aindex: integer): rectty;
    function getbuttonhint(const aindex: integer): msestring;
+   procedure repeatproc(const sender: tobject);
+   procedure startrepeater(const up: boolean);
+   procedure killrepeater();
   protected
    fstate: tabbarstatesty;
    foptions: tabbaroptionsty;
@@ -948,7 +952,7 @@ function createtabform(const aclass: tclass;
  
 implementation
 uses
- sysutils,msearrayutils,msekeyboard,msestockobjects;
+ sysutils,msearrayutils,msekeyboard,msestockobjects,msebits;
 
 type
  twidget1 = class(twidget);
@@ -2073,7 +2077,8 @@ end;
 
 destructor tcustomtabbar.destroy;
 begin
- flayoutinfo.tabs.Free;
+ killrepeater();
+ flayoutinfo.tabs.free();
  inherited;
 end;
 
@@ -2268,10 +2273,12 @@ begin
  end;
 end;
 
-procedure tcustomtabbar.tabclicked(const sender: ttab; const info: mouseeventinfoty);
+procedure tcustomtabbar.tabclicked(const sender: ttab;
+                                             const info: mouseeventinfoty);
 begin
  if (tabo_clickedtabfirst in foptions) or 
-    (tabo_dblclickedtabfirst in foptions) and (ss_double in info.shiftstate) then begin
+    (tabo_dblclickedtabfirst in foptions) and 
+                          (ss_double in info.shiftstate) then begin
   movetab(sender.findex,0);
  end;
  sender.active:= true;
@@ -2640,14 +2647,30 @@ begin
      end;
     end;
     dek_check: begin
+     int1:= tabatpos(pos,false);
+     with flayoutinfo do begin
+      if (int1 < 0) or not ((int1 = firsttab) or (int1 = lasttab)) then begin
+       killrepeater;
+      end
+      else begin
+       if (frepeater = nil) or 
+                  ((int1 = firsttab) xor (tbs_repeatup in fstate)) then begin
+        startrepeater(int1 <> firsttab);
+       end;
+      end;
+     end;
      if candest then begin
       accept:= true;
      end;
     end;
     dek_drop: begin
+     killrepeater();
      if candest then begin
       movetab(ttagdragobject(dragobjectpo^).tag,int1);
      end;
+    end;
+    dek_leavewidget: begin
+     killrepeater();
     end;
    end;
   end;
@@ -2784,6 +2807,33 @@ begin
   else begin
    inherited;
   end;
+ end;
+end;
+
+procedure tcustomtabbar.startrepeater(const up: boolean);
+begin
+ killrepeater;
+ updatebit(longword(fstate),ord(tbs_repeatup),up);
+ frepeater:= tsimpletimer.create(100000,@repeatproc,true,[]);
+end;
+
+procedure tcustomtabbar.killrepeater;
+begin
+ freeandnil(frepeater);
+end;
+
+procedure tcustomtabbar.repeatproc(const sender: tobject);
+begin
+ if tbs_repeatup in fstate then begin
+  if flayoutinfo.lasttab >= high(flayoutinfo.cells) then begin
+   killrepeater;
+  end
+  else begin
+   firsttab:= firsttab + 1;
+  end;
+ end
+ else begin
+  firsttab:= firsttab - 1;
  end;
 end;
 

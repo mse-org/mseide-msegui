@@ -554,7 +554,8 @@ type
    procedure getpaintframe(var frame: framety); override;
    procedure updatelayout;
    procedure execute(const tag: integer; const info: mouseeventinfoty);
-   property neededbuttons: stepkindsty read fneededbuttons write setneededbuttons;
+   property neededbuttons: stepkindsty read fneededbuttons 
+                                                     write setneededbuttons;
    //iframe
    procedure setframeinstance(instance: tcustomframe);
    procedure setstaticframe(value: boolean);
@@ -566,8 +567,8 @@ type
    procedure clientrectchanged;
    procedure invalidate;
    procedure invalidatewidget;
-   procedure invalidaterect(const rect: rectty; const org: originty = org_client;
-                               const noclip: boolean = false);
+   procedure invalidaterect(const rect: rectty; 
+               const org: originty = org_client; const noclip: boolean = false);
    function getwidget: twidget;
    function getframestateflags: framestateflagsty; virtual;
   public
@@ -3372,7 +3373,7 @@ begin
   include(disabled,sk_up);
   include(disabled,sk_first);
  end;
- if first >= count - 1 then begin
+ if first+delta >= count then begin
   include(disabled,sk_right);
   include(disabled,sk_down);
  end;
@@ -3388,7 +3389,7 @@ begin
 end;
 
 function tcustomstepframe.executestepevent(const event: stepkindty;
-                 const stepinfo: framestepinfoty; const aindex: integer): integer;
+           const stepinfo: framestepinfoty; const aindex: integer): integer;
 var
  steps: array[stepkindty] of integer;
 begin

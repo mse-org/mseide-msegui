@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2014 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -91,6 +91,7 @@ type
    fstate: dragstatesty;
    fintf: idragcontroller;
    fsysdndobjects: array[0..3] of sysdndinfoty;
+   flastwidget: twidget;
    procedure doexpiresdnd(const sender: tobject);
    function checkclickstate(const info: mouseeventinfoty): boolean; virtual;
    function checksysdnd(const aaction: sysdndactionty;
@@ -257,6 +258,14 @@ begin
   sysdndpending:= false;
   result:= window.owner.widgetatpos(translatewidgetpoint(pt1,nil,window.owner),
           [ws_visible,ws_enabled]);
+  if (flastwidget <> result) then begin
+   if (flastwidget <> nil) then begin
+    initdraginfo(info,dek_leavewidget,
+                          translateclientpoint(pt1,nil,flastwidget));
+    flastwidget.dragevent(info);
+   end;
+   setlinkedvar(result,tmsecomponent(flastwidget));
+  end;
   if result <> nil then begin
    initdraginfo(info,dek_check,translateclientpoint(pt1,nil,result));
    result.dragevent(info);
@@ -322,6 +331,12 @@ begin
        include(tdragobject1(fdragobject).fstate,dos_sysdroppending);
       end;
       checksysdnd(sdnda_drop,nullrect);
+     end;
+     if flastwidget <> nil then begin
+      initdraginfo(draginfo,dek_leavewidget,
+                            translateclientpoint(info.pos,owner,flastwidget));
+      flastwidget.dragevent(draginfo);
+      setlinkedvar(nil,tmsecomponent(flastwidget));
      end;
     end;
    finally
