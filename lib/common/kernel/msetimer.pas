@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2014 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -59,6 +59,16 @@ type
              //last!
  end;
 
+ trepeater = class(tsimpletimer)
+  private
+   finterval2: longword;
+  protected
+   procedure dotimer; override;
+  public
+   constructor create(const adelay: longword; const ainterval: longword;
+                      const aontimer: notifyeventty);
+ end;
+ 
  ttimer = class(tmsecomponent)
   private
    ftimer: tsimpletimer;
@@ -661,6 +671,23 @@ begin
  if canevent(tmethod(fontimer)) then begin
   fontimer(self);
  end;
+end;
+
+{ trepeater }
+
+constructor trepeater.create(const adelay: longword; const ainterval: longword;
+                             const aontimer: notifyeventty);
+begin
+ finterval2:= ainterval;
+ inherited create(adelay,aontimer,true,[]);
+end;
+
+procedure trepeater.dotimer;
+begin
+ if finterval <> finterval2 then begin
+  interval:= finterval2;
+ end;
+ inherited;
 end;
 
 initialization

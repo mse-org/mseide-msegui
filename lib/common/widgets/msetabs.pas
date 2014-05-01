@@ -293,7 +293,7 @@ type
    fontabmoving: movingeventty;
    fontabmoved: movedeventty;
    fonclientmouseevent: mouseeventty;
-   frepeater: tsimpletimer;
+   frepeater: trepeater;
    procedure settabs(const Value: ttabs);
    procedure layoutchanged;
    procedure checklayout;
@@ -2659,7 +2659,7 @@ begin
       end
       else begin
        if (frepeater = nil) or 
-                  ((int1 = firsttab) xor (tbs_repeatup in fstate)) then begin
+                  (not(int1 = firsttab) xor (tbs_repeatup in fstate)) then begin
         startrepeater(int1 <> firsttab);
        end;
       end;
@@ -2819,7 +2819,7 @@ procedure tcustomtabbar.startrepeater(const up: boolean);
 begin
  killrepeater;
  updatebit(longword(fstate),ord(tbs_repeatup),up);
- frepeater:= tsimpletimer.create(100000,@repeatproc,true,[]);
+ frepeater:= trepeater.create(500000,200000,@repeatproc);
 end;
 
 procedure tcustomtabbar.killrepeater;
