@@ -114,6 +114,7 @@ type
   PPtrUInt = ^PtrUInt;
  {$endif}
 
+ ppppointer = ^pppointer;
  preal = ^real;
  realty = type double;
  prealty = ^realty;
