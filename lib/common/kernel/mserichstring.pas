@@ -701,19 +701,20 @@ end;
 procedure richdelete(var value: richstringty; aindex,count: integer);
 var
  int1: integer;
- needspack: boolean;
+ needspack,all: boolean;
 begin
  if (aindex > 0) then begin
   delete(value.text,aindex,count);
   if length(value.format) > 0 then begin
    setlength(value.format,length(value.format)); //unique
    needspack:= false;
+   all:= count >= bigint;
    dec(aindex);
    for int1:= 0 to high(value.format) do begin
     with value.format[int1] do begin
      if index >= aindex then begin
       index:= index - count;
-      if index < aindex then begin
+      if all or (index < aindex) then begin
        needspack:= true;
        newinfos:= [ni_delete];
       end;
