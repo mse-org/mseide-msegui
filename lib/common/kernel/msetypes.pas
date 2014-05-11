@@ -79,7 +79,14 @@ type
  psint32 = ^sint32;
  sint64 = int64;
  psint64 = ^sint64;
- 
+
+ char8 = char;
+ pchar8 = ^char8;
+ char16 = unicodechar;
+ pchar16 = ^char16;
+ char32 = ucs4char;
+ pchar32 = ^char32;
+  
 {$ifndef FPC} //delphi
  {$ifndef mswindows}
   uint64 = type int64; //kylix
