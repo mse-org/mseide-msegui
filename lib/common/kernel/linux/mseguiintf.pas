@@ -5783,6 +5783,12 @@ var
  modmap: pxmodifierkeymap;
  numlockcode: cuint;
  buf1: clipboardbufferty;
+
+ procedure deleteitem();
+ begin
+  deletecommandlineargument(int1-int2);
+  inc(int2);
+ end;
  
 begin
  gdi_lock;
@@ -5792,49 +5798,57 @@ begin
   xinitthreads;
   {$endif}
   ar1:= getcommandlinearguments;
+  int2:= 0;
   for int1:= 1 to high(ar1) do begin
    if ar1[int1] = '--TOPLEVELRAISE' then begin
     toplevelraise:= true;
-    deletecommandlineargument(int1);
+    deleteitem();
     noreconfigurewmwindow:= true;
     norestackwindow:= true;
     continue;
    end;
    if ar1[int1] = '--NOZORDERHANDLING' then begin
     nozorderhandling:= true;
-    deletecommandlineargument(int1);
+    deleteitem();
     continue;
    end;
    if ar1[int1] = '--NORESTACKWINDOW' then begin
     norestackwindow:= true;
-    deletecommandlineargument(int1);
+    deleteitem();
     continue;
    end;
    if ar1[int1] = '--RESTACKWINDOW' then begin
     norestackwindow:= false;
-    deletecommandlineargument(int1);
+    deleteitem();
     continue;
    end;
    if ar1[int1] = '--NORECONFIGUREWMWINDOW' then begin
     noreconfigurewmwindow:= true;
-    deletecommandlineargument(int1);
+    deleteitem();
     continue;
    end;
    if ar1[int1] = '--RECONFIGUREWMWINDOW' then begin
     noreconfigurewmwindow:= false;
-    deletecommandlineargument(int1);
+    deleteitem();
     continue;
    end;
    if ar1[int1] = '--STACKMODEBELOWWORKAROUND' then begin
     stackmodebelowworkaround:= true;
-    deletecommandlineargument(int1);
+    deleteitem();
     continue;
    end;
    if ar1[int1] = '--NOSTACKMODEBELOWWORKAROUND' then begin
     stackmodebelowworkaround:= false;
-    deletecommandlineargument(int1);
+    deleteitem();
     continue;
    end;
+   {
+   if ar1[int1] = '--NOUSPOSITION' then begin
+    nousposition:= true;
+    deleteitem();
+    continue;
+   end;
+   }
   end;
   {$ifdef with_sm} 
   if hassm then begin
