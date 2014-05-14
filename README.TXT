@@ -168,6 +168,16 @@ Flashing taskbar widgets in IceWM
 Newer revisions of IceWM let the taskbar icons of MSEgui applications flash.
 Start the MSEgui application with the option '--TOPLEVELRAISE'.
 
+Problems with JWM
+*****************
+JWM can not maximize/minimize MSEgui windows correctly:
+https://github.com/joewing/jwm/issues/115
+There are more issues with Z-order handling:
+https://github.com/joewing/jwm/issues/116
+https://github.com/joewing/jwm/issues/117
+https://github.com/joewing/jwm/issues/118
+Starting the MSEgui applications with the option '--TOPLEVELRAISE' may help.
+
 Invalid inputmanager for Ubuntu
 *******************************
 The utf-8 setup in Ubuntu seems to be incomplete. If you get the exception
@@ -185,6 +195,7 @@ Window positions in Unity are wrong because the Ubuntu windowmanager
 does not support static_gravity:
 http://askubuntu.com/questions/451903/wingravity-static-gravity-not-suppo
 https://bugs.launchpad.net/ubuntu/+bug/1312044
+http://askubuntu.com/questions/457456/wingravity-static-gravity-not-supported-in-14-04
 
 How to add custom components to MSEide
 **************************************
