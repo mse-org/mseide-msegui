@@ -661,6 +661,7 @@ var
 
  numlockstate: cuint;
  rootid: winidty;
+ lastfocuswindow: winidty;
  atomatom: atom;
  mseclientmessageatom,{timeratom,wakeupatom,}
  wmprotocolsatom,wmstateatom,wmnameatom,wmclassatom: atom;
@@ -706,7 +707,7 @@ type
        net_wm_window_type,
        net_wm_state_fullscreen,
        net_wm_state_skip_taskbar,
-       net_restack_window,net_close_window,
+       net_restack_window,net_close_window,net_active_window,
        //not supports checked below
        net_wm_pid,net_wm_desktop,
 
@@ -735,7 +736,7 @@ type
 const
  needednetatom = net_wm_state_maximized_horz;
  firstcheckedatom = net_workarea;
- lastcheckedatom = net_close_window;
+ lastcheckedatom = net_active_window;
  netatomnames: array[netatomty] of string = 
       ('_NET_SUPPORTED','_NET_WORKAREA',
        '_NET_WM_STATE',
@@ -744,7 +745,7 @@ const
        '_NET_WM_WINDOW_TYPE',
        '_NET_WM_STATE_FULLSCREEN',
        '_NET_WM_STATE_SKIP_TASKBAR',
-       '_NET_RESTACK_WINDOW','_NET_CLOSE_WINDOW',
+       '_NET_RESTACK_WINDOW','_NET_CLOSE_WINDOW','_NET_ACTIVE_WINDOW',
        '_NET_WM_PID','_NET_WM_DESKTOP',
 
        '_NET_WM_WINDOW_TYPE_DESKTOP',
@@ -2894,6 +2895,10 @@ begin
 
 // xseticfocus(getic(id));
  waitfordecoration(id);
+ if netatoms[net_active_window] <> 0 then begin
+  sendnetrootcardinalmessage(netatoms[net_active_window],id,
+                                           [1,lasteventtime,lastfocuswindow]);
+ end;
  xsetinputfocus(appdisp,id,reverttoparent,currenttime);
  xsync(appdisp,0);
 // xflush(appdisp);
@@ -3912,7 +3917,7 @@ begin
   sizehints:= xallocsizehints;
   xgetwmnormalhints(appdisp,id,sizehints,@int1);
   with sizehints^ do begin
-   flags:= flags or pposition or psize or usposition or ussize 
+   flags:= flags or pposition or psize or usposition or ussize
                {or pbasesize} or pwingravity;
    x:= changes.x;
    y:= changes.y;
@@ -5496,9 +5501,11 @@ eventrestart:
    with xev.xfocus do begin
     if xtype = focusin then begin
      eventkind:= ek_focusin;
+     lastfocuswindow:= window;
     end
     else begin
      eventkind:= ek_focusout;
+     lastfocuswindow:= 0;
     end;
     if mode <> notifypointer then begin
      result:= twindowevent.create(eventkind,window);
