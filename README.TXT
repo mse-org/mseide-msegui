@@ -85,7 +85,7 @@ MSEgui command line parameters
 --RECONFIGUREWMWINDOW
  Use xreconfigurewmwindow() for window stacking operation.
 --STACKMODEBELOWWORKAROUND
- Necessarry for windowmanagers with buggy xreconfigurewmwindow() handling.
+ Necessary for windowmanagers with buggy xreconfigurewmwindow() handling.
 --NOSTACKMODEBELOWWORKAROUND
  No workaround.
 --TOPLEVELRAISE
@@ -94,6 +94,10 @@ MSEgui command line parameters
  --NORECONFIGUREWMWINDOW.
 --NOSTATICGRAVITY
  Simulates staticgravity for buggy window managers.
+--NOCREATESTATICGRAVITY
+ Does not set static gravity in xcreatewindow() call.
+--CREATESTATICGRAVITY
+ Does set static gravity in xcreatewindow() call.
  
 MSEide command line parameters
 ******************************
@@ -172,9 +176,7 @@ Start the MSEgui application with the option '--TOPLEVELRAISE'.
 
 Problems with JWM
 *****************
-JWM can not maximize/minimize MSEgui windows correctly:
-https://github.com/joewing/jwm/issues/115
-There are more issues with Z-order handling:
+There are issues with Z-order handling:
 https://github.com/joewing/jwm/issues/116
 https://github.com/joewing/jwm/issues/117
 https://github.com/joewing/jwm/issues/118

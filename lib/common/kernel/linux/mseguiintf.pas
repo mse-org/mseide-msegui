@@ -3714,7 +3714,12 @@ begin
    if visual = nil then begin
     visual:= pvisual(copyfromparent);
    end;
-   attributes.win_gravity:= staticgravity;
+   if nocreatestaticgravity then begin
+    attributes.win_gravity:= northwestgravity;
+   end
+   else begin
+    attributes.win_gravity:= staticgravity;
+   end;
    attributes.bit_gravity:= northwestgravity;
    valuemask:= valuemask or cwwingravity or cwbitgravity;
    
@@ -3995,8 +4000,25 @@ begin
 end;
 
 function gui_setembeddedwindowrect(id: winidty; const rect: rectty): guierrorty;
+var
+ changes: xwindowchanges;
 begin
- result:= gui_reposwindow(id,rect);
+ gdi_lock;
+ fillchar(changes,sizeof(changes),0);
+ with changes do begin
+  x:= rect.x;
+  y:= rect.y;
+  width:= rect.cx;
+  height:= rect.cy;
+  if width <= 0 then begin
+   width:= 1;
+  end;
+  if height <= 0 then begin
+   height:= 1;
+  end;
+ end;
+ xconfigurewindow(appdisp,id,cwx or cwy or cwwidth or cwheight,@changes);
+ gdi_unlock();
 end;
 
 function gui_setsizeconstraints(id: winidty; const min,max: sizety): guierrorty;
@@ -6192,6 +6214,7 @@ initialization
  norestackwindow:= true;
  noreconfigurewmwindow:= true;
  stackmodebelowworkaround:= false;
+// nocreatestaticgravity:= true;
  hassm:= geticelib and getsmlib;
 end.
 

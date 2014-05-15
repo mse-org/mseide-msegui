@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2014 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -292,6 +292,7 @@ var
  noreconfigurewmwindow: boolean;
  toplevelraise: boolean;
  nostaticgravity: boolean;
+ nocreatestaticgravity: boolean;
 
 procedure guierror(error: guierrorty; text: string = ''); overload;
 procedure guierror(error: guierrorty; sender: tobject;
