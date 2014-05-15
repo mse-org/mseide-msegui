@@ -16962,13 +16962,79 @@ begin
  inherited;
 end;
 
+procedure getmseguiarguments();
+var
+ ar1: stringarty;
+ int1,int2: integer;
+
+ procedure deleteitem();
+ begin
+  deletecommandlineargument(int1-int2);
+  inc(int2);
+ end; //deleteitem
+ 
+begin
+ ar1:= getcommandlinearguments;
+ int2:= 0;
+ for int1:= 1 to high(ar1) do begin
+  if ar1[int1] = '--TOPLEVELRAISE' then begin
+   toplevelraise:= true;
+   deleteitem();
+   noreconfigurewmwindow:= true;
+   norestackwindow:= true;
+   continue;
+  end;
+  if ar1[int1] = '--NOZORDERHANDLING' then begin
+   nozorderhandling:= true;
+   deleteitem();
+   continue;
+  end;
+  if ar1[int1] = '--NORESTACKWINDOW' then begin
+   norestackwindow:= true;
+   deleteitem();
+   continue;
+  end;
+  if ar1[int1] = '--RESTACKWINDOW' then begin
+   norestackwindow:= false;
+   deleteitem();
+   continue;
+  end;
+  if ar1[int1] = '--NORECONFIGUREWMWINDOW' then begin
+   noreconfigurewmwindow:= true;
+   deleteitem();
+   continue;
+  end;
+  if ar1[int1] = '--RECONFIGUREWMWINDOW' then begin
+   noreconfigurewmwindow:= false;
+   deleteitem();
+   continue;
+  end;
+  if ar1[int1] = '--STACKMODEBELOWWORKAROUND' then begin
+   stackmodebelowworkaround:= true;
+   deleteitem();
+   continue;
+  end;
+  if ar1[int1] = '--NOSTACKMODEBELOWWORKAROUND' then begin
+   stackmodebelowworkaround:= false;
+   deleteitem();
+   continue;
+  end;
+  if ar1[int1] = '--NOSTATICGRAVITY' then begin
+   nostaticgravity:= true;
+   deleteitem();
+   continue;
+  end;
+ end;
+end;
+
 procedure tguiapplication.internalinitialize;
 begin
  with tinternalapplication(self) do begin
   fdesigning:= false;
+  getmseguiarguments();
   guierror(gui_init,self);
-  msetimer.init;
-  msegraphics.init;
+  msetimer.init();
+  msegraphics.init();
  end;
 end;
 
@@ -16978,15 +17044,15 @@ begin
   if fcaret <> nil then begin
    fcaret.link(nil,nullpoint,nullrect);
   end;
-  msegraphics.deinit;
-  lock;
-  gui_flushgdi;
-  flusheventbuffer;
-  getevents;
-  eventlist.clear;
-  unlock;
-  gui_deinit;
-  msetimer.deinit;
+  msegraphics.deinit();
+  lock();
+  gui_flushgdi();
+  flusheventbuffer();
+  getevents();
+  eventlist.clear();
+  unlock();
+  gui_deinit();
+  msetimer.deinit();
  end;
  inherited;
 end;

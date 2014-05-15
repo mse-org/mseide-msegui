@@ -5776,7 +5776,6 @@ var
  attrib: xsetwindowattributes;
  netnum: netatomty;
  int1,int2: integer;
- ar1: stringarty;
  po1: pchar;
  atom1: atom;
  atomar: atomarty;
@@ -5792,12 +5791,6 @@ var
  numlockcode: cuint;
  buf1: clipboardbufferty;
 
- procedure deleteitem();
- begin
-  deletecommandlineargument(int1-int2);
-  inc(int2);
- end;
- 
 begin
  gdi_lock;
  try
@@ -5805,57 +5798,6 @@ begin
   {$ifdef mse_flushgdi}
   xinitthreads;
   {$endif}
-  ar1:= getcommandlinearguments;
-  int2:= 0;
-  for int1:= 1 to high(ar1) do begin
-   if ar1[int1] = '--TOPLEVELRAISE' then begin
-    toplevelraise:= true;
-    deleteitem();
-    noreconfigurewmwindow:= true;
-    norestackwindow:= true;
-    continue;
-   end;
-   if ar1[int1] = '--NOZORDERHANDLING' then begin
-    nozorderhandling:= true;
-    deleteitem();
-    continue;
-   end;
-   if ar1[int1] = '--NORESTACKWINDOW' then begin
-    norestackwindow:= true;
-    deleteitem();
-    continue;
-   end;
-   if ar1[int1] = '--RESTACKWINDOW' then begin
-    norestackwindow:= false;
-    deleteitem();
-    continue;
-   end;
-   if ar1[int1] = '--NORECONFIGUREWMWINDOW' then begin
-    noreconfigurewmwindow:= true;
-    deleteitem();
-    continue;
-   end;
-   if ar1[int1] = '--RECONFIGUREWMWINDOW' then begin
-    noreconfigurewmwindow:= false;
-    deleteitem();
-    continue;
-   end;
-   if ar1[int1] = '--STACKMODEBELOWWORKAROUND' then begin
-    stackmodebelowworkaround:= true;
-    deleteitem();
-    continue;
-   end;
-   if ar1[int1] = '--NOSTACKMODEBELOWWORKAROUND' then begin
-    stackmodebelowworkaround:= false;
-    deleteitem();
-    continue;
-   end;
-   if ar1[int1] = '--NOSTATICGRAVITY' then begin
-    nostaticgravity:= true;
-    deleteitem();
-    continue;
-   end;
-  end;
   {$ifdef with_sm} 
   if hassm then begin
     //todo: error handling
