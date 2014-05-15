@@ -4019,6 +4019,7 @@ begin
  end;
  xconfigurewindow(appdisp,id,cwx or cwy or cwwidth or cwheight,@changes);
  gdi_unlock();
+ result:= gue_ok;
 end;
 
 function gui_setsizeconstraints(id: winidty; const min,max: sizety): guierrorty;
@@ -6214,7 +6215,7 @@ initialization
  norestackwindow:= true;
  noreconfigurewmwindow:= true;
  stackmodebelowworkaround:= false;
-// nocreatestaticgravity:= true;
+ nocreatestaticgravity:= true;
  hassm:= geticelib and getsmlib;
 end.
 
