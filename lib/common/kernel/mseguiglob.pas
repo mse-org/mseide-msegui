@@ -291,6 +291,7 @@ var
  stackmodebelowworkaround: boolean;
  noreconfigurewmwindow: boolean;
  toplevelraise: boolean;
+ nostaticgravity: boolean;
 
 procedure guierror(error: guierrorty; text: string = ''); overload;
 procedure guierror(error: guierrorty; sender: tobject;

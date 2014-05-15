@@ -3883,20 +3883,20 @@ begin
  end;
  gdi_unlock;
 end;
-{
+
 procedure wmwait;
 begin
  xsync(appdisp,false);
  sys_schedyield;
  xsync(appdisp,false);
 end;
-}
+
 function gui_reposwindow(id: winidty; const rect: rectty): guierrorty;
 var
  changes: xwindowchanges;
  sizehints: pxsizehints;
  int1: clong;
-// rect1: rectty;
+ rect1: rectty;
 begin
  gdi_lock;
  fillchar(changes,sizeof(changes),0);
@@ -3925,7 +3925,12 @@ begin
    height:= changes.height;
 //   base_width:= width;   //openbox does not allow size smaller than this?
 //   base_height:= height;
-   win_gravity:= staticgravity;
+   if nostaticgravity then begin
+    win_gravity:= northwestgravity;
+   end
+   else begin
+    win_gravity:= staticgravity;
+   end;
   end;
   xsetwmnormalhints(appdisp,id,sizehints);
   xfree(sizehints);
@@ -3937,17 +3942,13 @@ begin
   end;
  {$endif}
  xconfigurewindow(appdisp,id,cwx or cwy or cwwidth or cwheight,@changes);
-{
- if gui_windowvisible(id) and (gui_getwindowrect(id,rect1) = gue_ok) and 
-                  not rectisequal(rect1,rect) then begin
-    //try to fix kwin staticgravity bug
-  wmwait;                
-  xconfigurewindow(appdisp,id,cwx or cwy or cwwidth or cwheight,@changes);
-              //again, maybe a staticgravity WM decoration bug
+ if nostaticgravity and gui_windowvisible(id) and 
+               (gui_getwindowrect(id,rect1) = gue_ok) and 
+                not rectisequal(rect1,rect) then begin
+                                        //simulate staticgravity
   wmwait;                
   if (gui_getwindowrect(id,rect1) = gue_ok) and 
                        not rectisequal(rect1,rect) then begin 
-          //again, brute force
    with changes do begin
     x:= x + rect.x-rect1.x;
     y:= y + rect.y-rect1.y;
@@ -3957,7 +3958,7 @@ begin
    xconfigurewindow(appdisp,id,cwx or cwy or cwwidth or cwheight,@changes);
   end;
  end;
-}
+
  {$ifdef FPC} {$checkpointer default} {$endif}
  result:= gue_ok;
 // xflush(appdisp);
@@ -5849,13 +5850,11 @@ begin
     deleteitem();
     continue;
    end;
-   {
-   if ar1[int1] = '--NOUSPOSITION' then begin
-    nousposition:= true;
+   if ar1[int1] = '--NOSTATICGRAVITY' then begin
+    nostaticgravity:= true;
     deleteitem();
     continue;
    end;
-   }
   end;
   {$ifdef with_sm} 
   if hassm then begin
@@ -5942,7 +5941,8 @@ begin
    end;
   end
   else begin
-   istruecolor:= (defvisual^._class = truecolor) or (defvisual^._class = directcolor);
+   istruecolor:= (defvisual^._class = truecolor) or 
+                                            (defvisual^._class = directcolor);
    if istruecolor then begin
     xredmask:= defvisual^.red_mask;
     xgreenmask:= defvisual^.green_mask;

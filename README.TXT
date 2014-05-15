@@ -1,6 +1,6 @@
 MSEide+MSEgui Pascal Cross Platform GUI Development System.
 
-2014-01-30 Version 3.2
+2014-04-15 Version 3.3
 Copyright (c) 1999-2014 by Martin Schreiber
 
 * 2.8.6 -> 3.0:
@@ -92,6 +92,8 @@ MSEgui command line parameters
  Use the top level frame window id instead of the application client window id
  for window raise operation. Implies --NORESTACKWINDOW and
  --NORECONFIGUREWMWINDOW.
+--NOSTATICGRAVITY
+ Simulates staticgravity for buggy window managers.
  
 MSEide command line parameters
 ******************************
