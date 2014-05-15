@@ -3901,13 +3901,28 @@ var
  changes: xwindowchanges;
  sizehints: pxsizehints;
  int1: clong;
- rect1: rectty;
+// rect1: rectty;
+ frame1: framety;
+ bo1: boolean;
 begin
  gdi_lock;
  fillchar(changes,sizeof(changes),0);
+ bo1:= hasoverrideredirect(id);
  with changes do begin
-  x:= rect.x;
-  y:= rect.y;
+  if not bo1 and nostaticgravity then begin
+   wmwait();
+   frame1:= getwindowframe(id);
+ {$ifdef mse_debugconfigure}
+   debugwindow('*reposw.framekorr'+' '+inttostr(frame1.left)+' '+
+                                       inttostr(frame1.top)+' ',id);
+ {$endif}
+   x:= rect.x-frame1.left;
+   y:= rect.y-frame1.top;
+  end
+  else begin
+   x:= rect.x;
+   y:= rect.y;
+  end;
   width:= rect.cx;
   height:= rect.cy;
   if width <= 0 then begin
@@ -3917,7 +3932,7 @@ begin
    height:= 1;
   end;
  end;
- if not hasoverrideredirect(id) then begin
+ if not bo1 then begin
   {$ifdef FPC} {$checkpointer off} {$endif}
   sizehints:= xallocsizehints;
   xgetwmnormalhints(appdisp,id,sizehints,@int1);
@@ -3947,23 +3962,28 @@ begin
   end;
  {$endif}
  xconfigurewindow(appdisp,id,cwx or cwy or cwwidth or cwheight,@changes);
- if nostaticgravity and gui_windowvisible(id) and 
-               (gui_getwindowrect(id,rect1) = gue_ok) and 
+(*
+ if nostaticgravity and gui_windowvisible(id) then begin
+  wmwait;
+  if (gui_getwindowrect(id,rect1) = gue_ok) and 
                 not rectisequal(rect1,rect) then begin
                                         //simulate staticgravity
-  wmwait;                
-  if (gui_getwindowrect(id,rect1) = gue_ok) and 
-                       not rectisequal(rect1,rect) then begin 
    with changes do begin
     x:= x + rect.x-rect1.x;
     y:= y + rect.y-rect1.y;
     width:= width + rect.cx-rect1.cx;
     height:= height + rect.cy-rect1.cy;
    end;
+  {$ifdef mse_debugconfigure}
+   with changes do begin
+    debugwindow('*reposwindow2    '+' '+inttostr(x)+' '+inttostr(y)+
+                    ' '+inttostr(width)+' '+inttostr(height)+' ',id);
+   end;
+  {$endif}
    xconfigurewindow(appdisp,id,cwx or cwy or cwwidth or cwheight,@changes);
   end;
  end;
-
+*)
  {$ifdef FPC} {$checkpointer default} {$endif}
  result:= gue_ok;
 // xflush(appdisp);
