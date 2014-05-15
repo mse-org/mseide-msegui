@@ -94,10 +94,6 @@ MSEgui command line parameters
  --NORECONFIGUREWMWINDOW.
 --NOSTATICGRAVITY
  Simulates staticgravity for buggy window managers.
---NOCREATESTATICGRAVITY
- Does not set static gravity in xcreatewindow() call.
---CREATESTATICGRAVITY
- Does set static gravity in xcreatewindow() call.
  
 MSEide command line parameters
 ******************************
