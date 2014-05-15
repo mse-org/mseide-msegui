@@ -292,7 +292,7 @@ var
  noreconfigurewmwindow: boolean;
  toplevelraise: boolean;
  nostaticgravity: boolean;
- nocreatestaticgravity: boolean;
+// nocreatestaticgravity: boolean;
 
 procedure guierror(error: guierrorty; text: string = ''); overload;
 procedure guierror(error: guierrorty; sender: tobject;

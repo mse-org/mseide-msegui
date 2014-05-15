@@ -25,6 +25,8 @@ type
                        const awidgetrect: rectty; var aid: winidty) of object;
  destroywinideventty = procedure(const sender: tcustomwindowwidget;
                        const aid: winidty) of object;
+ clientwindowoptionty = (cwo_trackboundsimmediate);
+ clientwindowoptionsty = set of clientwindowoptionty;
                         
  tcustomwindowwidget = class(teventwidget)
   private
@@ -48,6 +50,7 @@ type
 //   ftimerrendercount: longword;
    ftimer: tsimpletimer;
    ffpsmax: real;
+   foptionsclient: clientwindowoptionsty;
    function getclientwinid: winidty;
    procedure windowscrolled(const sender: tobject);
    function getchildrect: rectty;
@@ -60,8 +63,7 @@ type
    procedure checkwindowrect;
    procedure checkclientwinid;
    procedure checkclientvisible;
-   procedure destroyclientwindow;
- //  procedure clientrectchanged; override;
+   procedure clientrectchanged; override;
 //   procedure poschanged; override;
    procedure visiblechanged; override;
    procedure winiddestroyed(const awinid: winidty);
@@ -90,12 +92,14 @@ type
    function hasclientwinid: boolean;
    procedure invalidateviewpointrect(arect: rectty);
    property clientwinid: winidty read getclientwinid;
+   procedure destroyclientwindow;
    property childrect: rectty read getchildrect;
    property viewport: rectty read getviewport;
    property aspect: real read faspect;
    property fpsmax: real read ffpsmax write setfpsmax; //default -1 -> none
                                               //0 -> as fast as possible
-   
+   property optionsclient: clientwindowoptionsty read foptionsclient 
+                                        write foptionsclient default [];
    property oncreatewinid: createwinideventty read foncreatewinid 
                                      write foncreatewinid;
    property ondestroywinid: destroywinideventty read fondestroywinid 
@@ -137,6 +141,7 @@ type
    property enabled;
    property visible;
    property fpsmax;
+   property optionsclient;
    property oncreatewinid;
    property ondestroywinid;
    property onclientpaint;
@@ -264,16 +269,20 @@ begin
   end;
  end;
 end;
-{
+
 procedure tcustomwindowwidget.clientrectchanged;
 begin
  inherited;
-// checkwindowrect;
+ if cwo_trackboundsimmediate in foptionsclient then begin
+  checkwindowrect;
+ end;
+ {
  if canevent(tmethod(fonclientrectchanged)) then begin
   fonclientrectchanged(self);
  end;
+ }
 end;
-
+{
 procedure tcustomwindowwidget.poschanged;
 begin
 // checkwindowrect;

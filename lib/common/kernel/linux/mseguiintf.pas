@@ -3714,12 +3714,12 @@ begin
    if visual = nil then begin
     visual:= pvisual(copyfromparent);
    end;
-   if nocreatestaticgravity then begin
+//   if nocreatestaticgravity then begin
     attributes.win_gravity:= northwestgravity;
-   end
-   else begin
-    attributes.win_gravity:= staticgravity;
-   end;
+//   end
+//   else begin
+//    attributes.win_gravity:= staticgravity;
+//   end;
    attributes.bit_gravity:= northwestgravity;
    valuemask:= valuemask or cwwingravity or cwbitgravity;
    
@@ -6215,7 +6215,7 @@ initialization
  norestackwindow:= true;
  noreconfigurewmwindow:= true;
  stackmodebelowworkaround:= false;
- nocreatestaticgravity:= true;
+// nocreatestaticgravity:= true;
  hassm:= geticelib and getsmlib;
 end.
 

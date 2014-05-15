@@ -17024,6 +17024,7 @@ begin
    deleteitem();
    continue;
   end;
+ {
   if ar1[int1] = '--NOCREATESTATICGRAVITY' then begin
    nocreatestaticgravity:= true;
    deleteitem();
@@ -17034,6 +17035,7 @@ begin
    deleteitem();
    continue;
   end;
+ }
  end;
 end;
 
