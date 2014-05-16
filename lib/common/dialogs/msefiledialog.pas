@@ -1350,7 +1350,7 @@ var
  int1: integer;
  str1: filenamety;
 begin
- if filename.checkvalue then begin
+// if filename.checkvalue then begin
   if (filename.value <> '') or (fdo_acceptempty in dialogoptions) then begin
    if fdo_directory in dialogoptions then begin
     str1:= quotefilename(listview.directory);
@@ -1406,7 +1406,7 @@ begin
   else begin
    filename.setfocus;
   end;
- end;
+// end;
 end;
 
 procedure tfiledialogfo.foonchildscaled(const sender: TObject);
