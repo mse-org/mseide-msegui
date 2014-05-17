@@ -170,14 +170,6 @@ Flashing taskbar widgets in IceWM
 Newer revisions of IceWM let the taskbar icons of MSEgui applications flash.
 Start the MSEgui application with the option '--TOPLEVELRAISE'.
 
-Problems with JWM
-*****************
-There are issues with Z-order handling:
-https://github.com/joewing/jwm/issues/116
-https://github.com/joewing/jwm/issues/117
-https://github.com/joewing/jwm/issues/118
-Starting the MSEgui applications with the option '--TOPLEVELRAISE' may help.
-
 Invalid inputmanager for Ubuntu
 *******************************
 The utf-8 setup in Ubuntu seems to be incomplete. If you get the exception
