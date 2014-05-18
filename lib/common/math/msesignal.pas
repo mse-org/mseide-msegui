@@ -4598,11 +4598,16 @@ var
  do1: double;
 begin
  if not frunning and fstarted then begin
-  if fnegtrig then begin
-   do1:= ftriggerlevel.value-ftrigger.value;
+  if sso_autorun in foptions then begin
+   do1:= 1;
   end
   else begin
-   do1:= ftrigger.value-ftriggerlevel.value;
+   if fnegtrig then begin
+    do1:= ftriggerlevel.value-ftrigger.value;
+   end
+   else begin
+    do1:= ftrigger.value-ftriggerlevel.value;
+   end;
   end;
   if do1 >{=} 0 then begin
 //   if do1 = 0 then begin
@@ -4669,6 +4674,7 @@ begin
  for int1:= 0 to high(fsigbuffer) do begin
   setlength(fsigbuffer[int1],fbufferlength);
  end;
+ checkautostart();
 end;
 
 procedure tsigsampler.settrigger(const avalue: tchangedoubleinputconn);
