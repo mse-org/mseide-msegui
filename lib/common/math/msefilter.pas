@@ -533,6 +533,9 @@ begin
  int3:= 0;
  for int1:= 0 to fsections.count -1 do begin
   for int2:= 0 to fsections[int1]-1 do begin
+   if int3 >= coeff.count then begin
+    exit;
+   end;
    if coeff[int3].im = 0 then begin
     inc(result);
     inc(int3);
@@ -577,14 +580,14 @@ begin
   if int1 <> 0 then begin
    beginupdate;
    try
-    if int1 > 0 then begin
+    if int1 > 0 then begin            //add
      if fitems = nil then begin
       setlength(fitems,1);
      end;
      fitems[high(fitems)]:= fitems[high(fitems)] + int1;
     end
     else begin
-     while int1 < 0 do begin
+     while int1 < 0 do begin          //remove
       fitems[high(fitems)]:= fitems[high(fitems)] + int1;
       if fitems[high(fitems)] > 0 then begin
        break;
