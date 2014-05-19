@@ -27,7 +27,7 @@ type
    fowner: tdoublefiltercomp;
    function calccoeffcount: integer;
    procedure dochange(const aindex: integer); override;
-   procedure updatecoeffcount;
+//   procedure updatecoeffcount;
   public
    constructor create(const aowner: tdoublefiltercomp);
  end;
@@ -39,10 +39,12 @@ type
    procedure setsections(const avalue: tsections);
   protected
    fcoeff: tdatalist;
+   fcoeffchecking: boolean;
    procedure coeffchanged(const sender: tdatalist;
                                  const aindex: integer); override;
    procedure createcoeff; virtual; abstract;
    procedure zcountchanged; override;
+   procedure checkcoeffs; virtual;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -63,7 +65,7 @@ type
    procedure createcoeff; override;
 //   procedure processinout(const acount: integer;
 //                    var ainp,aoutp: pdouble); override;
-   function getzcount: integer; override;
+//   function getzcount: integer; override;
     //isigclient
    function gethandler: sighandlerprocty; override;
    procedure sighandler(const ainfo: psighandlerinfoty);
@@ -82,9 +84,10 @@ type
    procedure setcoeff(const avalue: tcomplexcoeff);
   protected
    procedure createcoeff; override;
+   procedure checkcoeffs; override;
 //   procedure processinout(const acount: integer;
 //                    var ainp,aoutp: pdouble); override;
-   function getzcount: integer; override;
+//   function getzcount: integer; override;
     //isigclient
    function gethandler: sighandlerprocty; override;
    procedure sighandler(const ainfo: psighandlerinfoty);
@@ -274,15 +277,27 @@ end;
 procedure tdoublefiltercomp.coeffchanged(const sender: tdatalist;
                const aindex: integer);
 begin
- if aindex < 0 then begin
-  setzcount(sender.count);
-  fsections.updatecoeffcount;
+ if not fcoeffchecking and (aindex < 0) then begin
+  fcoeffchecking:= true;
+  try
+   sender.count:= fzcount;
+   checkcoeffs;
+  finally
+   fcoeffchecking:= false;
+  end;
+//  setzcount(sender.count);
+//  fsections.updatecoeffcount;
  end;
 end;
 
 procedure tdoublefiltercomp.setsections(const avalue: tsections);
 begin
  fsections.assign(avalue);
+end;
+
+procedure tdoublefiltercomp.checkcoeffs;
+begin
+ //dummy
 end;
 
 { tsigfir }
@@ -379,7 +394,7 @@ var                             //todo: optimize
 begin
  po1:= fcoeff.datapo;
  i:= finput.value;
- startindex1:= fzindex;
+ startindex1:= fzindex; //ringbuffer
  for int3:= 0 to high(fsections.fitems) do begin
   endindex1:= startindex1 + fsections.fitems[int3] - 1;
   if endindex1 > fzhigh then begin
@@ -412,7 +427,7 @@ begin
   fzindex:= fzhigh;
  end;
 end;
-
+{
 function tsigfir.getzcount: integer;
 var
  int1,int2,int3: integer;
@@ -421,6 +436,9 @@ begin
  int3:= 0;
  for int1:= 0 to fsections.count -1 do begin
   for int2:= 0 to fsections[int1]-1 do begin
+   if int3 >= coeff.count then begin
+    exit;
+   end;
    if coeff[int3] = 0 then begin
     inc(result);
     inc(int3);
@@ -432,7 +450,7 @@ begin
   end;
  end;
 end;
-
+}
 { tsigiir }
 
 procedure tsigiir.createcoeff;
@@ -525,6 +543,19 @@ begin
  foutputpo^:= o;
 end;
 
+procedure tsigiir.checkcoeffs;
+var
+ int1,int2: integer;
+ po1: pcomplexty;
+begin
+ int2:= 0;
+ po1:= fcoeff.datapo;
+ for int1:= 0 to fsections.count-1 do begin
+  po1[int2].im:= 1.0;
+  int2:= int2 + fsections.fitems[int1];
+ end;
+end;
+{
 function tsigiir.getzcount: integer;
 var
  int1,int2,int3: integer;
@@ -547,7 +578,7 @@ begin
   end;
  end;
 end;
-
+}
 { tsections }
 
 constructor tsections.create(const aowner: tdoublefiltercomp);
@@ -570,7 +601,7 @@ procedure tsections.dochange(const aindex: integer);
 begin
  fowner.setzcount(calccoeffcount);
 end;
-
+{
 procedure tsections.updatecoeffcount;
 var
  int1: integer;
@@ -602,7 +633,7 @@ begin
   end;
  end;
 end;
-
+}
 { tsigfilter }
 
 constructor tsigfilter.create(aowner: tcomponent);

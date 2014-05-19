@@ -443,6 +443,7 @@ type
    function getinputar: inputconnarty; override;
    function getoutputar: outputconnarty; override;
    procedure setzcount(const avalue: integer);
+   function getzcount: integer; override;
    procedure zcountchanged; virtual;
    procedure initmodel; override;
   public
@@ -1655,6 +1656,11 @@ procedure tdoublezcomp.initmodel;
 begin
  inherited;
  foutputpo:= @foutput.fvalue;
+end;
+
+function tdoublezcomp.getzcount: integer;
+begin
+ result:= fzcount;
 end;
 
 { tsigout }
