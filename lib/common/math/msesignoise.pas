@@ -15,7 +15,7 @@ uses
  msesignal,classes,mclasses;
  
 type
- noisekindty = (nk_white,nk_pink);
+ noisekindty = (nk_white,nk_pink,nk_brown);
  
  tsignoise = class(tdoublesigoutcomp)
   private
@@ -30,6 +30,7 @@ type
    fkind: noisekindty;
    fcutofffrequ: real;
    fsum: real;
+   fb0,fb1,fb2,fb3,fb4,fb5,fb6: double;
    fsumfact: real;
    procedure setamplitude(const avalue: tdoubleinputconn);
    procedure setoffset(const avalue: tdoubleinputconn);
@@ -37,6 +38,8 @@ type
    procedure setkind(const avalue: noisekindty);
    procedure setcutofffrequ(const avalue: real);
   protected
+   procedure sighandlerbrown1(const ainfo: psighandlerinfoty);
+   procedure sighandlerbrownn(const ainfo: psighandlerinfoty);
    procedure sighandlerpink1(const ainfo: psighandlerinfoty);
    procedure sighandlerpinkn(const ainfo: psighandlerinfoty);
    procedure sighandler1(const ainfo: psighandlerinfoty);
@@ -83,6 +86,13 @@ begin
  fz:= random($ffffffff)+1;
  fw:= random($ffffffff)+1;
  fsum:= 0;
+ fb0:= 0;
+ fb1:= 0;
+ fb2:= 0;
+ fb3:= 0;
+ fb4:= 0;
+ fb5:= 0;
+ fb6:= 0;
  inherited;
 end;
 
@@ -92,7 +102,10 @@ begin
   case fkind of
    nk_pink: begin
     result:= {$ifdef FPC}@{$endif}sighandlerpink1;
-   end
+   end;
+   nk_brown: begin
+    result:= {$ifdef FPC}@{$endif}sighandlerbrown1;
+   end;
    else begin //nk_white
     result:= {$ifdef FPC}@{$endif}sighandler1;
    end;
@@ -102,7 +115,10 @@ begin
   case fkind of
    nk_pink: begin
     result:= {$ifdef FPC}@{$endif}sighandlerpinkn;
-   end
+   end;
+   nk_brown: begin
+    result:= {$ifdef FPC}@{$endif}sighandlerbrownn;
+   end;
    else begin //nk_white
     result:= {$ifdef FPC}@{$endif}sighandlern;
    end;
@@ -117,8 +133,15 @@ begin
  do1:= fcutofffrequ*2*pi;
  fsamplehigh:= fsamplecount - 1;
  fscale:= maxint * sqrt(fsamplecount);
- if (fkind = nk_pink) and (do1 > 0) then begin
-  fscale:= fscale/sqrt(do1);
+ if do1 > 0 then begin
+  case fkind of
+   nk_pink: begin
+    fscale:= fscale*4;
+   end;
+   nk_brown: begin
+    fscale:= fscale/sqrt(do1);
+   end;
+  end;
  end;
  fsumfact:= exp(-do1);
  famplitudepo:= @tdoubleinputconn1(famplitude).fv;
@@ -138,6 +161,14 @@ begin
  result:= 1;
 end;
 
+procedure tsignoise.sighandler1(const ainfo: psighandlerinfoty);
+begin
+ fz:= 36969 * (fz and $ffff) + (fz shr 16);
+ fw:= 18000 * (fw and $ffff) + (fw shr 16);
+ foutputpo^:= (integer((fz shl 16) + fw)/fscale)*famplitudepo^.value+
+                                                          foffsetpo^.value;
+end;
+
 procedure tsignoise.sighandlern(const ainfo: psighandlerinfoty);
 var
  int1: integer;
@@ -147,20 +178,64 @@ begin
  for int1:= 0 to fsamplehigh do begin //mwc by george marsaglia
   fz:= 36969 * (fz and $ffff) + (fz shr 16);
   fw:= 18000 * (fw and $ffff) + (fw shr 16);
-  do1:= do1 + integer((fz shl 16) + fw)/fscale;
+  do1:= do1 + integer((fz shl 16) + fw);
  end;
- foutputpo^:= do1*famplitudepo^.value+foffsetpo^.value;
+ foutputpo^:= (do1*famplitudepo^.value)/fscale+foffsetpo^.value;
 end;
 
-procedure tsignoise.sighandler1(const ainfo: psighandlerinfoty);
+procedure tsignoise.sighandlerpink1(const ainfo: psighandlerinfoty);
+//filter after Paul Kellet
+var
+ white: double;
 begin
  fz:= 36969 * (fz and $ffff) + (fz shr 16);
  fw:= 18000 * (fw and $ffff) + (fw shr 16);
- foutputpo^:= (integer((fz shl 16) + fw)/fscale)*famplitudepo^.value+
-                                                          foffsetpo^.value;
+ white:= (integer((fz shl 16) + fw)/fscale);
+ 
+ fb0:= 0.99886 * fb0 + white * 0.0555179; 
+ fb1:= 0.99332 * fb1 + white * 0.0750759; 
+ fb2:= 0.96900 * fb2 + white * 0.1538520; 
+ fb3:= 0.86650 * fb3 + white * 0.3104856; 
+ fb4:= 0.55000 * fb4 + white * 0.5329522; 
+ fb5:= -0.7616 * fb5 - white * 0.0168980; 
+ foutputpo^:= (fb0+fb1+fb2+fb3+fb4+fb5+fb6+white*0.5362) *
+                             famplitudepo^.value + foffsetpo^.value; 
+ fb6:= white * 0.115926;
 end;
 
 procedure tsignoise.sighandlerpinkn(const ainfo: psighandlerinfoty);
+var
+ int1: integer;
+ white: double;
+begin
+ white:= 0;
+ for int1:= 0 to fsamplehigh do begin //mwc by george marsaglia
+  fz:= 36969 * (fz and $ffff) + (fz shr 16);
+  fw:= 18000 * (fw and $ffff) + (fw shr 16);
+  white:= white + integer((fz shl 16) + fw);
+ end;
+//filter after Paul Kellet
+ 
+ fb0:= 0.99886 * fb0 + white * 0.0555179; 
+ fb1:= 0.99332 * fb1 + white * 0.0750759; 
+ fb2:= 0.96900 * fb2 + white * 0.1538520; 
+ fb3:= 0.86650 * fb3 + white * 0.3104856; 
+ fb4:= 0.55000 * fb4 + white * 0.5329522; 
+ fb5:= -0.7616 * fb5 - white * 0.0168980; 
+ foutputpo^:= ((fb0+fb1+fb2+fb3+fb4+fb5+fb6+white*0.5362) *
+                             famplitudepo^.value)/fscale + foffsetpo^.value; 
+ fb6:= white * 0.115926;
+end;
+
+procedure tsignoise.sighandlerbrown1(const ainfo: psighandlerinfoty);
+begin
+ fz:= 36969 * (fz and $ffff) + (fz shr 16);
+ fw:= 18000 * (fw and $ffff) + (fw shr 16);
+ fsum:= fsum*fsumfact + integer((fz shl 16) + fw)/fscale;
+ foutputpo^:= fsum*famplitudepo^.value+foffsetpo^.value;
+end;
+
+procedure tsignoise.sighandlerbrownn(const ainfo: psighandlerinfoty);
 var
  int1: integer;
  do1: double;
@@ -169,18 +244,10 @@ begin
  for int1:= 0 to fsamplehigh do begin //mwc by george marsaglia
   fz:= 36969 * (fz and $ffff) + (fz shr 16);
   fw:= 18000 * (fw and $ffff) + (fw shr 16);
-  do1:= do1 + integer((fz shl 16) + fw)/fscale;
+  do1:= do1 + integer((fz shl 16) + fw);
  end;
  fsum:= fsum*fsumfact+do1;
- foutputpo^:= fsum*famplitudepo^.value+foffsetpo^.value;
-end;
-
-procedure tsignoise.sighandlerpink1(const ainfo: psighandlerinfoty);
-begin
- fz:= 36969 * (fz and $ffff) + (fz shr 16);
- fw:= 18000 * (fw and $ffff) + (fw shr 16);
- fsum:= fsum*fsumfact + integer((fz shl 16) + fw)/fscale;
- foutputpo^:= fsum*famplitudepo^.value+foffsetpo^.value;
+ foutputpo^:= (fsum*famplitudepo^.value)/fscale+foffsetpo^.value;
 end;
 
 procedure tsignoise.setamplitude(const avalue: tdoubleinputconn);
