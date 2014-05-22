@@ -1,0 +1,99 @@
+object fircoeffeditorfo: tfircoeffeditorfo
+  bounds_x = 72
+  bounds_y = 206
+  bounds_cx = 229
+  bounds_cy = 263
+  container.bounds = (
+    0
+    0
+    229
+    263
+  )
+  statfile = tstatfile1
+  caption = 'IIR Filter Coefficients'
+  moduleclassname = 'tmseform'
+  object grid: twidgetgrid
+    bounds_x = 0
+    bounds_y = 0
+    bounds_cx = 228
+    bounds_cy = 221
+    anchors = [an_left, an_top, an_right, an_bottom]
+    optionsgrid = [og_focuscellonenter, og_rowheight, og_colchangeontabkey, og_wrapcol, og_autopopup, og_mousescrollcol]
+    fixcols.count = 1
+    fixcols.items = <    
+      item
+        width = 62
+      end>
+    fixrows.count = 1
+    fixrows.items = <    
+      item
+        height = 16
+        captions.count = 1
+        captions.items = <        
+          item
+            caption = 'Coefficient'
+          end>
+        captionsfix.count = 1
+        captionsfix.items = <        
+          item
+            caption = 'sect:z^n'
+          end>
+      end>
+    datacols.count = 1
+    datacols.options = [co_proportional, co_savevalue, co_savestate, co_mousescrollrow]
+    datacols.items = <    
+      item[coeffed]
+        width = 160
+        options = [co_mouseselect, co_keyselect, co_multiselect, co_fill, co_savevalue, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
+        widgetname = 'coeffed'
+        dataclass = tgridrealdatalist
+      end>
+    datarowheight = 16
+    reffontheight = 14
+    object coeffed: trealedit
+      optionswidget1 = [ow1_fontglyphheight]
+      optionsskin = [osk_framebuttononly]
+      taborder = 1
+      visible = False
+      bounds_x = 0
+      bounds_y = 0
+      bounds_cx = 160
+      bounds_cy = 16
+      value = 0
+      valuedefault = 0
+      valuerange = 1
+      valuestart = 0
+      min = -1E+038
+      max = 1E+038
+      reffontheight = 14
+    end
+  end
+  object ok: tbutton
+    taborder = 1
+    bounds_x = 102
+    bounds_y = 232
+    bounds_cx = 50
+    bounds_cy = 20
+    anchors = [an_right, an_bottom]
+    state = [as_default, as_localdefault, as_localcaption]
+    caption = '&OK'
+    modalresult = mr_ok
+  end
+  object cancel: tbutton
+    taborder = 2
+    bounds_x = 166
+    bounds_y = 232
+    bounds_cx = 50
+    bounds_cy = 20
+    anchors = [an_right, an_bottom]
+    state = [as_localcaption]
+    caption = '&Cancel'
+    modalresult = mr_cancel
+  end
+  object tstatfile1: tstatfile
+    filename = 'fircoeffeditor.sta'
+    options = [sfo_memory]
+    left = 56
+    top = 48
+  end
+end

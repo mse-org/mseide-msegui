@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2010-2013 by Martin Schreiber
+{ MSEgui Copyright (c) 2010-2014 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -255,7 +255,7 @@ uses
  sysutils,math,msearrayutils;
 type
  tdoubleinputconn1 = class(tdoubleinputconn);
- tdatalist1 = class(tdatalist);
+ tcomplexdatalist1 = class(tcomplexdatalist);
 
 { tdoublefiltercomp }
 
@@ -526,7 +526,7 @@ end;
 procedure tsigiir.defineproperties(filer: tfiler);
 begin
  inherited;
- tdatalist1(forigcoeff).defineproperties('origcoeff',filer);
+ tcomplexdatalist1(forigcoeff).defineproperties('origcoeff',filer);
 end;
 
 (*

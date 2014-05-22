@@ -413,17 +413,17 @@ type
  trealcoeff = class(trealdatalist)
   protected
    fowner: tcustomsigcomp;
+   procedure doitemchange(const aindex: integer); override;
   public
    constructor create(const aowner: tcustomsigcomp); reintroduce;
-   procedure change(const aindex: integer); override;
  end; 
 
  tcomplexcoeff = class(tcomplexdatalist)
   protected
    fowner: tcustomsigcomp;
+   procedure doitemchange(const aindex: integer); override;
   public
    constructor create(const aowner: tcustomsigcomp); reintroduce;
-   procedure doitemchange(const aindex: integer); override;
  end; 
 
  tdoublezcomp = class(tdoublesigcomp) //single input, single output
@@ -1147,7 +1147,7 @@ begin
  inherited create;
 end;
 
-procedure trealcoeff.change(const aindex: integer);
+procedure trealcoeff.doitemchange(const aindex: integer);
 begin
  fowner.coeffchanged(self,aindex);
  inherited;

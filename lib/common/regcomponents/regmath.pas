@@ -24,8 +24,8 @@ implementation
 uses
  classes,mclasses,msefft,msedesignintf,msesignal,msefilter,
  msepropertyeditors,msestrings,msedesigner,msesigfft,regmath_bmp,
- msesiggui,msesigfftgui,msesignoise,msesigmidi,msedatalist,mseiircoeffeditor,
- msegui,sysutils,mseglob;
+ msesiggui,msesigfftgui,msesignoise,msesigmidi,msedatalist,
+ mseiircoeffeditor,msefircoeffeditor,msegui,sysutils,mseglob;
 
 type
  tinputconnpropertyeditor = class(tsubcomponentpropertyeditor)
@@ -46,6 +46,11 @@ type
  end;
  
  tiircoeffpropertyeditor = class(tdatalistpropertyeditor)
+  public
+   procedure edit; override;
+ end;
+
+ tfircoeffpropertyeditor = class(tdatalistpropertyeditor)
   public
    procedure edit; override;
  end;
@@ -78,6 +83,8 @@ begin
                                      tinputconnarraypropertyeditor);
  registerpropertyeditor(typeinfo(tcomplexdatalist),tsigiir,'coeff',
                                      tiircoeffpropertyeditor);
+ registerpropertyeditor(typeinfo(trealdatalist),tsigfir,'coeff',
+                                     tfircoeffpropertyeditor);
 end;
 
 { tinputconnpropertyeditor }
@@ -149,6 +156,37 @@ begin
    inst.coeff.asarrayim:= numdi.gridvalues;
    inst.origcoeff.asarrayre:= dened.gridvalues;
    inst.origcoeff.asarrayim:= numed.gridvalues;
+   self.modified();
+  end;
+  free;
+ end; 
+end;
+
+{ tfircoeffpropertyeditor }
+
+procedure tfircoeffpropertyeditor.edit;
+var
+ inst: tsigfir;
+ int1,int2,int3: integer;
+begin
+ with tfircoeffeditorfo.create(nil) do begin
+  inst:= tsigfir(component);
+  coeffed.gridvalues:= inst.coeff.asarray;
+  int3:= 0;
+  with grid.fixcols[-1] do begin
+   captions.count:= grid.rowcount;
+   for int1:= 0 to inst.sections.count - 1 do begin
+    if int1 <> 0 then begin
+     grid.rowlinewidth[int3-1]:= 3;
+    end;
+    for int2:= 0 to inst.sections[int1] - 1 do begin
+     captions[int3]:= 's'+inttostr(int1)+':'+inttostr(-int2);
+     inc(int3);
+    end;
+   end;
+  end;
+  if show(ml_application) = mr_ok then begin
+   inst.coeff.asarray:= coeffed.gridvalues;
    self.modified();
   end;
   free;
