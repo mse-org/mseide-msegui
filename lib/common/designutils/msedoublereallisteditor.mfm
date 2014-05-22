@@ -10,6 +10,7 @@ object doublereallisteditor: tdoublereallisteditor
     211
   )
   options = [fo_closeonesc, fo_autoreadstat, fo_autowritestat]
+  statfile = tstatfile1
   caption = 'Doublereallisteditor'
   moduleclassname = 'tmseform'
   object ok: tbutton
@@ -138,5 +139,11 @@ object doublereallisteditor: tdoublereallisteditor
     anchors = [an_left, an_bottom]
     onsetvalue = rowcountonsetvalue
     reffontheight = 14
+  end
+  object tstatfile1: tstatfile
+    filename = 'doublestringlisteditor.sta'
+    options = [sfo_memory]
+    left = 40
+    top = 88
   end
 end

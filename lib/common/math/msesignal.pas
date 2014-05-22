@@ -423,7 +423,7 @@ type
    fowner: tcustomsigcomp;
   public
    constructor create(const aowner: tcustomsigcomp); reintroduce;
-   procedure change(const aindex: integer); override;
+   procedure doitemchange(const aindex: integer); override;
  end; 
 
  tdoublezcomp = class(tdoublesigcomp) //single input, single output
@@ -1161,7 +1161,7 @@ begin
  inherited create;
 end;
 
-procedure tcomplexcoeff.change(const aindex: integer);
+procedure tcomplexcoeff.doitemchange(const aindex: integer);
 begin
  fowner.coeffchanged(self,aindex);
  inherited;

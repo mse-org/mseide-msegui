@@ -10,6 +10,7 @@ object msestringintlisteditor: tmsestringintlisteditor
     194
   )
   options = [fo_closeonesc, fo_autoreadstat, fo_autowritestat]
+  statfile = tstatfile1
   caption = 'Stringlisteditor'
   moduleclassname = 'tmseform'
   object ok: tbutton
@@ -120,5 +121,11 @@ object msestringintlisteditor: tmsestringintlisteditor
     bounds_cx = 108
     onsetvalue = rowcountonsetvalue
     reffontheight = 14
+  end
+  object tstatfile1: tstatfile
+    filename = 'doublestringlisteditor.sta'
+    options = [sfo_memory]
+    left = 40
+    top = 88
   end
 end

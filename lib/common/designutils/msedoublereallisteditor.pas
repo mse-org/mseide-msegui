@@ -13,7 +13,8 @@ unit msedoublereallisteditor;
 
 interface
 uses
- mseforms,msedataedits,msesimplewidgets,msewidgetgrid,msegrids;
+ mseforms,msedataedits,msesimplewidgets,msewidgetgrid,msegrids,msestat,
+ msestatfile;
 type
  tdoublereallisteditor = class(tmseform)
    cancel: tbutton;
@@ -22,6 +23,7 @@ type
    vala: trealedit;
    valb: trealedit;
    rowcount: tintegeredit;
+   tstatfile1: tstatfile;
    procedure rowcountonsetvalue(const sender: tobject; var avalue: integer;
                 var accept: boolean);
    procedure gridonrowcountchanged(const sender: tcustomgrid);

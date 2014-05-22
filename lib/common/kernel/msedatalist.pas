@@ -169,6 +169,8 @@ type
    procedure internalinsertdata(index: integer; const quelle;
                       const docopy: boolean);
    procedure insertdata(const index: integer; const quelle);
+   procedure defineproperties(const propname: string;
+                                   const filer: tfiler);
    procedure defineproperties(filer: tfiler); override;
    procedure freedata(var data); virtual;      //gibt daten frei
    procedure beforecopy(var data); virtual;
@@ -521,6 +523,10 @@ type
    procedure Setitems(const index: integer; const Value: complexty);
    procedure setasarray(const data: complexarty);
    function getasarray: complexarty;
+   function getasarrayre: realarty;
+   procedure setasarrayre(const avalue: realarty);
+   function getasarrayim: realarty;
+   procedure setasarrayim(const avalue: realarty);
   protected
    function checkassigncompatibility(
                             const source: tpersistent): boolean; override;
@@ -547,8 +553,11 @@ type
    procedure fill(const defaultvalue: complexty); overload;
 
    property asarray: complexarty read getasarray write setasarray;
+   property asarrayre: realarty read getasarrayre write setasarrayre;
+   property asarrayim: realarty read getasarrayim write setasarrayim;
    property items[const index: integer]: complexty read Getitems write Setitems; default;
-   property defaultzero: boolean read fdefaultzero write fdefaultzero default false;
+   property defaultzero: boolean read fdefaultzero 
+                                               write fdefaultzero default false;
  end;
 
  realintty = record
@@ -2486,14 +2495,19 @@ begin
  end;
 end;
 
-procedure tdatalist.defineproperties(filer: tfiler);
+procedure tdatalist.defineproperties(const propname: string;
+                                           const filer: tfiler);
 begin
- inherited;
- filer.defineproperty('data',
+ filer.defineproperty(propname,
   {$ifdef FPC}@{$endif}readdata,{$ifdef FPC}@{$endif}writedata,
            not (dls_nostreaming in fstate) and checkwritedata(filer));
 end;
 
+procedure tdatalist.defineproperties(filer: tfiler);
+begin
+ inherited;
+ defineproperties('data',filer);
+end;
 procedure tdatalist.freedata(var data);
 begin
  //dummy
@@ -4052,6 +4066,63 @@ procedure tcomplexdatalist.setasarray(const data: complexarty);
 begin
  internalsetasarray(pointer(data),sizeof(complexty),length(data));
 end;
+
+function tcomplexdatalist.getasarrayre: realarty;
+var
+ int1: integer;
+ po1: pcomplexty;
+begin
+ setlength(result,count);
+ po1:= datapo;
+ for int1:= 0 to high(result) do begin
+  result[int1]:= po1^.re;
+  inc(po1);
+ end;
+end;
+
+procedure tcomplexdatalist.setasarrayre(const avalue: realarty);
+var
+ int1: integer;
+ po1: pcomplexty;
+begin
+ beginupdate;
+ count:= length(avalue);
+ po1:= datapo;
+ for int1:= 0 to high(avalue) do begin
+  po1^.re:= avalue[int1];
+  inc(po1);
+ end;
+ endupdate;
+end;
+
+function tcomplexdatalist.getasarrayim: realarty;
+var
+ int1: integer;
+ po1: pcomplexty;
+begin
+ setlength(result,count);
+ po1:= datapo;
+ for int1:= 0 to high(result) do begin
+  result[int1]:= po1^.im;
+  inc(po1);
+ end;
+end;
+
+procedure tcomplexdatalist.setasarrayim(const avalue: realarty);
+var
+ int1: integer;
+ po1: pcomplexty;
+begin
+ beginupdate;
+ count:= length(avalue);
+ po1:= datapo;
+ for int1:= 0 to high(avalue) do begin
+  po1^.im:= avalue[int1];
+  inc(po1);
+ end;
+ endupdate;
+end;
+
 
 procedure tcomplexdatalist.fill(const acount: integer;
   const defaultvalue: complexty);

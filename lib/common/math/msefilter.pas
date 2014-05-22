@@ -80,17 +80,26 @@ type
 //
  tsigiir = class(tdoublefiltercomp)
   private
+   fcoeffsetting: boolean;
+   forigcoeff: tcomplexdatalist;
    function getcoeff: tcomplexcoeff;
    procedure setcoeff(const avalue: tcomplexcoeff);
+   procedure origcoeffchanged(const sender: tobject);
+   procedure setorigcoeff(const avalue: tcomplexdatalist);
   protected
    procedure createcoeff; override;
    procedure checkcoeffs; override;
+   procedure defineproperties(filer: tfiler); override;
 //   procedure processinout(const acount: integer;
 //                    var ainp,aoutp: pdouble); override;
 //   function getzcount: integer; override;
     //isigclient
    function gethandler: sighandlerprocty; override;
    procedure sighandler(const ainfo: psighandlerinfoty);
+  public
+   constructor create(aowner: tcomponent); override;
+   destructor destroy(); override;
+   property origcoeff: tcomplexdatalist read forigcoeff write setorigcoeff;
   published
    property coeff: tcomplexcoeff read getcoeff write setcoeff;
  end;
@@ -246,6 +255,7 @@ uses
  sysutils,math,msearrayutils;
 type
  tdoubleinputconn1 = class(tdoubleinputconn);
+ tdatalist1 = class(tdatalist);
 
 { tdoublefiltercomp }
 
@@ -453,6 +463,19 @@ end;
 }
 { tsigiir }
 
+constructor tsigiir.create(aowner: tcomponent);
+begin
+ forigcoeff:= tcomplexdatalist.create;
+ forigcoeff.onchange:= @origcoeffchanged;
+ inherited;
+end;
+
+destructor tsigiir.destroy;
+begin
+ inherited;
+ forigcoeff.free;
+end;
+
 procedure tsigiir.createcoeff;
 begin
  fcoeff:= tcomplexcoeff.create(self);
@@ -469,6 +492,43 @@ procedure tsigiir.setcoeff(const avalue: tcomplexcoeff);
 begin
  inherited setcoeff(avalue);
 end;
+
+procedure tsigiir.origcoeffchanged(const sender: tobject);
+var
+ int1,int2: integer;
+ norm: double;
+ ps,pd: pcomplexty;
+begin
+ if not fcoeffsetting then begin
+  ps:= forigcoeff.datapo;
+  pd:= fcoeff.datapo;
+  for int1:= 0 to fsections.count-1 do begin
+   norm:= ps^.re;
+   if norm = 0 then begin
+    ps^.re:= 1.0;
+    norm:= 1.0;
+   end;
+   for int2:= 0 to fsections.fitems[int1]-1 do begin
+    pd^.re:= ps^.re/norm;
+    pd^.im:= ps^.im/norm;
+    inc(ps);
+    inc(pd);
+   end;
+  end;
+ end;
+end;
+
+procedure tsigiir.setorigcoeff(const avalue: tcomplexdatalist);
+begin
+ forigcoeff.assign(avalue);
+end;
+
+procedure tsigiir.defineproperties(filer: tfiler);
+begin
+ inherited;
+ tdatalist1(forigcoeff).defineproperties('origcoeff',filer);
+end;
+
 (*
 procedure tsigiir.processinout(const acount: integer; var ainp: pdouble;
                var aoutp: pdouble);
@@ -554,7 +614,16 @@ begin
   po1[int2].re:= 1.0;
   int2:= int2 + fsections.fitems[int1];
  end;
+ if not fcoeffsetting then begin
+  fcoeffsetting:= true;
+  try
+   forigcoeff.assign(fcoeff);
+  finally
+   fcoeffsetting:= false;
+  end;
+ end;
 end;
+
 {
 function tsigiir.getzcount: integer;
 var

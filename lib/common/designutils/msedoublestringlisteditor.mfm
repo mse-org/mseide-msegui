@@ -5,8 +5,6 @@ object doublestringlisteditor: tdoublestringlisteditor
   bounds_cx = 338
   bounds_cy = 194
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets]
-  container.frame.zoomwidthstep = 1
-  container.frame.zoomheightstep = 1
   container.bounds = (
     0
     0
@@ -14,6 +12,7 @@ object doublestringlisteditor: tdoublestringlisteditor
     194
   )
   options = [fo_closeonesc, fo_autoreadstat, fo_autowritestat]
+  statfile = tstatfile1
   caption = 'Stringlisteditor'
   moduleclassname = 'tmseform'
   object ok: tbutton
@@ -74,13 +73,13 @@ object doublestringlisteditor: tdoublestringlisteditor
       end>
     datacols.count = 2
     datacols.items = <    
-      item
+      item[texta]
         width = 137
         options = [co_proportional, co_savevalue, co_savestate, co_mousescrollrow]
         widgetname = 'texta'
         dataclass = tgridmsestringdatalist
       end    
-      item
+      item[textb]
         width = 145
         options = [co_fill, co_savevalue, co_savestate, co_mousescrollrow]
         widgetname = 'textb'
@@ -89,7 +88,7 @@ object doublestringlisteditor: tdoublestringlisteditor
     datarowheight = 16
     onrowcountchanged = gridonrowcountchanged
     reffontheight = 14
-    object textb: tmemodialogedit
+    object texta: tmemodialogedit
       optionswidget1 = [ow1_fontglyphheight]
       optionsskin = [osk_framebuttononly]
       frame.levelo = 0
@@ -99,15 +98,15 @@ object doublestringlisteditor: tdoublestringlisteditor
       frame.button.imagenr = 17
       taborder = 1
       visible = False
-      bounds_x = 138
+      bounds_x = 0
       bounds_y = 0
-      bounds_cx = 145
+      bounds_cx = 137
       bounds_cy = 16
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_hintclippedtext, oe_savevalue, oe_savestate, oe_checkvaluepaststatread]
       textflags = [tf_noselect]
       reffontheight = 14
     end
-    object texta: tmemodialogedit
+    object textb: tmemodialogedit
       optionswidget1 = [ow1_fontglyphheight]
       optionsskin = [osk_framebuttononly]
       frame.levelo = 0
@@ -117,9 +116,9 @@ object doublestringlisteditor: tdoublestringlisteditor
       frame.button.imagenr = 17
       taborder = 2
       visible = False
-      bounds_x = 0
+      bounds_x = 138
       bounds_y = 0
-      bounds_cx = 137
+      bounds_cx = 145
       bounds_cy = 16
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_hintclippedtext, oe_savevalue, oe_savestate, oe_checkvaluepaststatread]
       textflags = [tf_noselect]
@@ -144,5 +143,11 @@ object doublestringlisteditor: tdoublestringlisteditor
     anchors = [an_left, an_bottom]
     onsetvalue = rowcountonsetvalue
     reffontheight = 14
+  end
+  object tstatfile1: tstatfile
+    filename = 'doublestringlisteditor.sta'
+    options = [sfo_memory]
+    left = 40
+    top = 88
   end
 end

@@ -24,7 +24,8 @@ implementation
 uses
  classes,mclasses,msefft,msedesignintf,msesignal,msefilter,
  msepropertyeditors,msestrings,msedesigner,msesigfft,regmath_bmp,
- msesiggui,msesigfftgui,msesignoise,msesigmidi;
+ msesiggui,msesigfftgui,msesignoise,msesigmidi,msedatalist,mseiircoeffeditor,
+ msegui,sysutils,mseglob;
 
 type
  tinputconnpropertyeditor = class(tsubcomponentpropertyeditor)
@@ -43,6 +44,11 @@ type
   protected
    function filtercomponent(const acomponent: tcomponent): boolean; override;
  end;
+ 
+ tiircoeffpropertyeditor = class(tdatalistpropertyeditor)
+  public
+   procedure edit; override;
+ end;
   
 procedure register;
 begin
@@ -59,8 +65,7 @@ begin
                             twavetableedit,tfuncttableedit,tffttableedit,tenvelopeedit
                             ]);
  registercomponenttabhints(['Math'],
- ['Experimental mathematical and signal processing components.'+lineend+
-  'Needs FPC 2.4.4 or writer.inc from "patch_fpc_2_4_2".']);
+ ['Experimental mathematical and signal processing components.']);
  registerpropertyeditor(typeinfo(tdoubleconn),tdoublezcomp,'',
                                                    tsubcomponentpropertyeditor);
 // registerpropertyeditor(typeinfo(tdoubleconn),tdoubleinpconnitem,'',
@@ -71,6 +76,8 @@ begin
                                                    toutputconnpropertyeditor);
  registerpropertyeditor(typeinfo(tdoubleinpconnarrayprop),nil,'',
                                      tinputconnarraypropertyeditor);
+ registerpropertyeditor(typeinfo(tcomplexdatalist),tsigiir,'coeff',
+                                     tiircoeffpropertyeditor);
 end;
 
 { tinputconnpropertyeditor }
@@ -109,6 +116,43 @@ var
 begin
  cont1:= tdoubleinputconn(instance).controller;
  result:= (cont1 <> nil) and (tdoubleoutputconn(acomponent).controller = cont1);
+end;
+
+{ tiircoeffpropertyeditor }
+
+procedure tiircoeffpropertyeditor.edit;
+var
+ inst: tsigiir;
+ int1,int2,int3: integer;
+begin
+ with tiircoeffeditorfo.create(nil) do begin
+  inst:= tsigiir(component);
+  numed.gridvalues:= inst.origcoeff.asarrayim;
+  dened.gridvalues:= inst.origcoeff.asarrayre;
+  numdi.gridvalues:= inst.coeff.asarrayim;
+  dendi.gridvalues:= inst.coeff.asarrayre;
+  int3:= 0;
+  with grid.fixcols[-1] do begin
+   captions.count:= grid.rowcount;
+   for int1:= 0 to inst.sections.count - 1 do begin
+    if int1 <> 0 then begin
+     grid.rowlinewidth[int3-1]:= 3;
+    end;
+    for int2:= 0 to inst.sections[int1] - 1 do begin
+     captions[int3]:= 's'+inttostr(int1)+':'+inttostr(-int2);
+     inc(int3);
+    end;
+   end;
+  end;
+  if show(ml_application) = mr_ok then begin
+   inst.coeff.asarrayre:= dendi.gridvalues;
+   inst.coeff.asarrayim:= numdi.gridvalues;
+   inst.origcoeff.asarrayre:= dened.gridvalues;
+   inst.origcoeff.asarrayim:= numed.gridvalues;
+   self.modified();
+  end;
+  free;
+ end; 
 end;
 
 initialization

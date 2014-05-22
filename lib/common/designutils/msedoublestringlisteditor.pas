@@ -15,7 +15,7 @@ interface
 uses
  mseforms,msedataedits,msesimplewidgets,msewidgetgrid,msegrids,mseedit,mseglob,
  msegui,mseguiglob,mseifiglob,msememodialog,msemenus,msestrings,msetypes,
- msedialog;
+ msedialog,msestat,msestatfile;
 type
  tdoublestringlisteditor = class(tmseform)
    cancel: tbutton;
@@ -24,6 +24,7 @@ type
    rowcount: tintegeredit;
    textb: tmemodialogedit;
    texta: tmemodialogedit;
+   tstatfile1: tstatfile;
    procedure rowcountonsetvalue(const sender: tobject; var avalue: integer;
                 var accept: boolean);
    procedure gridonrowcountchanged(const sender: tcustomgrid);

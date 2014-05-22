@@ -1,7 +1,185 @@
-object mseiircoeffeditorfo: tmseiircoeffeditorfo
-  bounds_x = 337
-  bounds_y = 266
-  bounds_cx = 100
-  bounds_cy = 100
+object iircoeffeditorfo: tiircoeffeditorfo
+  bounds_x = 72
+  bounds_y = 206
+  bounds_cx = 522
+  bounds_cy = 263
+  container.bounds = (
+    0
+    0
+    522
+    263
+  )
+  statfile = tstatfile1
+  caption = 'IIR Filter Coefficients'
   moduleclassname = 'tmseform'
+  object grid: twidgetgrid
+    bounds_x = 0
+    bounds_y = 0
+    bounds_cx = 521
+    bounds_cy = 221
+    anchors = [an_left, an_top, an_right, an_bottom]
+    optionsgrid = [og_focuscellonenter, og_rowheight, og_colchangeontabkey, og_wrapcol, og_autopopup, og_mousescrollcol]
+    fixcols.count = 1
+    fixcols.items = <    
+      item
+        width = 62
+      end>
+    fixrows.count = 1
+    fixrows.items = <    
+      item
+        height = 16
+        captions.count = 4
+        captions.items = <        
+          item
+            caption = 'Numerator'
+          end        
+          item
+            caption = 'Denominator'
+          end        
+          item
+            caption = 'Internal Num.'
+          end        
+          item
+            caption = 'Internal Den.'
+          end>
+        captionsfix.count = 1
+        captionsfix.items = <        
+          item
+            caption = 'sect:z^n'
+          end>
+      end>
+    datacols.count = 4
+    datacols.options = [co_proportional, co_savevalue, co_savestate, co_mousescrollrow]
+    datacols.items = <    
+      item[numed]
+        width = 113
+        options = [co_proportional, co_savevalue, co_savestate, co_mousescrollrow]
+        widgetname = 'numed'
+        dataclass = tgridrealdatalist
+      end    
+      item[dened]
+        width = 106
+        options = [co_proportional, co_savevalue, co_savestate, co_mousescrollrow]
+        widgetname = 'dened'
+        dataclass = tgridrealdatalist
+      end    
+      item[numdi]
+        color = -1879048185
+        width = 114
+        options = [co_readonly, co_proportional, co_savevalue, co_savestate, co_mousescrollrow]
+        widgetname = 'numdi'
+        dataclass = tgridrealdatalist
+      end    
+      item[dendi]
+        color = -1879048185
+        width = 117
+        options = [co_readonly, co_fill, co_savevalue, co_savestate, co_mousescrollrow]
+        widgetname = 'dendi'
+        dataclass = tgridrealdatalist
+      end>
+    datarowheight = 16
+    reffontheight = 14
+    object numed: trealedit
+      optionswidget1 = [ow1_fontglyphheight]
+      optionsskin = [osk_framebuttononly]
+      taborder = 1
+      visible = False
+      bounds_x = 0
+      bounds_y = 0
+      bounds_cx = 113
+      bounds_cy = 16
+      ondataentered = datentexe
+      value = 0
+      valuedefault = 0
+      valuerange = 1
+      valuestart = 0
+      min = -1E+038
+      max = 1E+038
+      reffontheight = 14
+    end
+    object dened: trealedit
+      optionswidget1 = [ow1_fontglyphheight]
+      optionsskin = [osk_framebuttononly]
+      taborder = 2
+      visible = False
+      bounds_x = 114
+      bounds_y = 0
+      bounds_cx = 106
+      bounds_cy = 16
+      ondataentered = datentexe
+      value = 0
+      valuedefault = 0
+      valuerange = 1
+      valuestart = 0
+      min = -1E+038
+      max = 1E+038
+      reffontheight = 14
+    end
+    object numdi: trealedit
+      optionswidget1 = [ow1_fontglyphheight]
+      optionsskin = [osk_framebuttononly]
+      taborder = 3
+      visible = False
+      bounds_x = 221
+      bounds_y = 0
+      bounds_cx = 114
+      bounds_cy = 16
+      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_savevalue, oe_savestate, oe_checkvaluepaststatread]
+      textflagsactive = [tf_right, tf_ycentered]
+      value = -Inf
+      valuedefault = -Inf
+      valuerange = 1
+      valuestart = 0
+      min = -Inf
+      max = 1E+038
+      reffontheight = 14
+    end
+    object dendi: trealedit
+      optionswidget1 = [ow1_fontglyphheight]
+      optionsskin = [osk_framebuttononly]
+      taborder = 4
+      visible = False
+      bounds_x = 336
+      bounds_y = 0
+      bounds_cx = 117
+      bounds_cy = 16
+      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_savevalue, oe_savestate, oe_checkvaluepaststatread]
+      textflagsactive = [tf_right, tf_ycentered]
+      value = -Inf
+      valuedefault = -Inf
+      valuerange = 1
+      valuestart = 0
+      min = -Inf
+      max = 1E+038
+      reffontheight = 14
+    end
+  end
+  object ok: tbutton
+    taborder = 1
+    bounds_x = 395
+    bounds_y = 232
+    bounds_cx = 50
+    bounds_cy = 20
+    anchors = [an_right, an_bottom]
+    state = [as_default, as_localdefault, as_localcaption]
+    caption = '&OK'
+    modalresult = mr_ok
+  end
+  object cancel: tbutton
+    taborder = 2
+    bounds_x = 459
+    bounds_y = 232
+    bounds_cx = 50
+    bounds_cy = 20
+    anchors = [an_right, an_bottom]
+    state = [as_localcaption]
+    caption = '&Cancel'
+    modalresult = mr_cancel
+  end
+  object tstatfile1: tstatfile
+    filename = 'iircoeffeditor.sta'
+    options = [sfo_memory]
+    left = 56
+    top = 48
+  end
 end
