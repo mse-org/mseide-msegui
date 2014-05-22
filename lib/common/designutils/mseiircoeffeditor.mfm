@@ -53,13 +53,13 @@ object iircoeffeditorfo: tiircoeffeditorfo
     datacols.items = <    
       item[numed]
         width = 113
-        options = [co_proportional, co_savevalue, co_savestate, co_mousescrollrow]
+        options = [co_mouseselect, co_keyselect, co_multiselect, co_proportional, co_savevalue, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
         widgetname = 'numed'
         dataclass = tgridrealdatalist
       end    
       item[dened]
         width = 106
-        options = [co_proportional, co_savevalue, co_savestate, co_mousescrollrow]
+        options = [co_mouseselect, co_keyselect, co_multiselect, co_proportional, co_savevalue, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
         widgetname = 'dened'
         dataclass = tgridrealdatalist
       end    
