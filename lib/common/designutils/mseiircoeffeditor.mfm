@@ -1,0 +1,7 @@
+object mseiircoeffeditorfo: tmseiircoeffeditorfo
+  bounds_x = 337
+  bounds_y = 266
+  bounds_cx = 100
+  bounds_cy = 100
+  moduleclassname = 'tmseform'
+end
