@@ -346,6 +346,9 @@ begin
       callback();
      end;
     end;
+   end
+   else begin
+    inc(refcount);
    end;
   finally
    sys_mutexunlock(lock);

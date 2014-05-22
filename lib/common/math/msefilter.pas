@@ -551,7 +551,7 @@ begin
  int2:= 0;
  po1:= fcoeff.datapo;
  for int1:= 0 to fsections.count-1 do begin
-  po1[int2].im:= 1.0;
+  po1[int2].re:= 1.0;
   int2:= int2 + fsections.fitems[int1];
  end;
 end;
