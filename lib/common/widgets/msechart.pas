@@ -583,7 +583,11 @@ type
    property framei_bottom default 1;
    property colorclient default cl_foreground;
  end;
-
+ 
+const
+ defaultchartoptionswidget = defaultscrollboxoptionswidget - 
+                          [ow_mousefocus,ow_tabfocus,ow_arrowfocus];
+type
  tcuchart = class(tscrollbox,ichartdialcontroller,istatfile,iframe)
   private
    fxdials: tchartdialshorz;
@@ -693,6 +697,8 @@ type
                           write setfitframe_right default 0;
    property fitframe_bottom: integer read ffitframe.bottom
                           write setfitframe_bottom default 0;
+  published
+   property optionswidget default defaultchartoptionswidget;
  end;
 
  tcustomchart = class(tcuchart)
@@ -3365,6 +3371,7 @@ begin
  end;
 }
  inherited;
+ optionswidget:= defaultchartoptionswidget;
 end;
 
 destructor tcuchart.destroy;

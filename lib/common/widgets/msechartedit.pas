@@ -19,7 +19,9 @@ uses
 const
  defaultsnapdist = 4;
  markersnapdist = 2;
- defaultchartoptionsedit = [oe_checkvaluepaststatread,oe_savevalue,oe_savestate];
+ defaultchartoptionsedit = [oe_checkvaluepaststatread,oe_savevalue,
+                                                             oe_savestate];
+ defaultcharteditoptionswidget = defaultchartoptionswidget + [ow_mousefocus]; 
  
 type
  setcomplexareventty = procedure(const sender: tobject;
@@ -159,6 +161,8 @@ type
    property ontracehint: tracehinteventty read fontracehint write fontracehint;
    property onmarkerhint: markerhinteventty read fonmarkerhint 
                                                          write fonmarkerhint;
+  published
+   property optionswidget default defaultcharteditoptionswidget;
  end;
 
  tcustomxychartedit = class(tcustomchartedit)
@@ -354,6 +358,7 @@ begin
  foptionsedit:= defaultchartoptionsedit;
  resetnodehint;
  inherited;
+ optionswidget:= defaultcharteditoptionswidget;
  traces.count:= 1;
  fobjectpicker:= tobjectpicker.create(iobjectpicker(self));
  fobjectpicker.options:= [opo_mousemoveobjectquery,opo_rectselect,
