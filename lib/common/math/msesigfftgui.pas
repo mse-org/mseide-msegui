@@ -104,6 +104,7 @@ procedure tscopesamplerfft.dobufferfull;
  var
   buf1: samplerbufferty;
   int1: integer;
+  int2: integer;
  begin
   with asampler do begin
    if sso_fftmag in options then begin
@@ -112,9 +113,13 @@ procedure tscopesamplerfft.dobufferfull;
       buf1:= afft;
      end
      else begin
+      int2:= ffftcount;
+      if int2 = 0 then begin
+       int2:= bigint;
+      end;
       setlength(buf1,length(afft));
       for int1:= 0 to high(buf1) do begin
-       buf1[int1]:= copy(afft[int1],fftfirst,ffftcount);
+       buf1[int1]:= copy(afft[int1],fftfirst,int2);
       end;
      end;
     end;
