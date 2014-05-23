@@ -163,7 +163,7 @@ end;
 
 procedure tsignoise.sighandler1(const ainfo: psighandlerinfoty);
 begin
- fz:= 36969 * (fz and $ffff) + (fz shr 16);
+ fz:= 36969 * (fz and $ffff) + (fz shr 16); //mwc by George Marsaglia
  fw:= 18000 * (fw and $ffff) + (fw shr 16);
  foutputpo^:= (integer((fz shl 16) + fw)/fscale)*famplitudepo^.value+
                                                           foffsetpo^.value;
@@ -175,7 +175,7 @@ var
  do1: double;
 begin
  do1:= 0;
- for int1:= 0 to fsamplehigh do begin //mwc by george marsaglia
+ for int1:= 0 to fsamplehigh do begin //mwc by George Marsaglia
   fz:= 36969 * (fz and $ffff) + (fz shr 16);
   fw:= 18000 * (fw and $ffff) + (fw shr 16);
   do1:= do1 + integer((fz shl 16) + fw);
@@ -184,15 +184,14 @@ begin
 end;
 
 procedure tsignoise.sighandlerpink1(const ainfo: psighandlerinfoty);
-//filter after Paul Kellet
 var
  white: double;
 begin
- fz:= 36969 * (fz and $ffff) + (fz shr 16);
+ fz:= 36969 * (fz and $ffff) + (fz shr 16); //mwc by George Marsaglia
  fw:= 18000 * (fw and $ffff) + (fw shr 16);
  white:= (integer((fz shl 16) + fw)/fscale);
  
- fb0:= 0.99886 * fb0 + white * 0.0555179; 
+ fb0:= 0.99886 * fb0 + white * 0.0555179;   //filter by Paul Kellet
  fb1:= 0.99332 * fb1 + white * 0.0750759; 
  fb2:= 0.96900 * fb2 + white * 0.1538520; 
  fb3:= 0.86650 * fb3 + white * 0.3104856; 
@@ -214,7 +213,7 @@ begin
   fw:= 18000 * (fw and $ffff) + (fw shr 16);
   white:= white + integer((fz shl 16) + fw);
  end;
-//filter after Paul Kellet
+//filter by Paul Kellet
  
  fb0:= 0.99886 * fb0 + white * 0.0555179; 
  fb1:= 0.99332 * fb1 + white * 0.0750759; 
@@ -229,7 +228,7 @@ end;
 
 procedure tsignoise.sighandlerbrown1(const ainfo: psighandlerinfoty);
 begin
- fz:= 36969 * (fz and $ffff) + (fz shr 16);
+ fz:= 36969 * (fz and $ffff) + (fz shr 16); //mwc by George Marsaglia
  fw:= 18000 * (fw and $ffff) + (fw shr 16);
  fsum:= fsum*fsumfact + integer((fz shl 16) + fw)/fscale;
  foutputpo^:= fsum*famplitudepo^.value+foffsetpo^.value;
@@ -241,7 +240,7 @@ var
  do1: double;
 begin
  do1:= 0;
- for int1:= 0 to fsamplehigh do begin //mwc by george marsaglia
+ for int1:= 0 to fsamplehigh do begin //mwc by George Marsaglia
   fz:= 36969 * (fz and $ffff) + (fz shr 16);
   fw:= 18000 * (fw and $ffff) + (fw shr 16);
   do1:= do1 + integer((fz shl 16) + fw);
