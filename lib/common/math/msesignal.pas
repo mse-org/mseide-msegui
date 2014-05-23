@@ -22,6 +22,7 @@ uses
  
 const
  defaultsamplefrequ = 44100; //Hz
+ defaultstepcount = 4096;
  defaultenvelopesubsampling = 8;
  defaulttickdiv = 200;
  defaultsamplecount = 4096;
@@ -963,10 +964,11 @@ type
                         var acount: integer; var handled: boolean) of object;
  afterstepeventty = procedure(const sender: tsigcontroller;
                                const acount: integer) of object;
+ sigcontrolleroptionty = (sico_freerun,sico_autorun);
+ sigcontrolleroptionsty = set of sigcontrolleroptionty;
  
  tsigcontroller = class(tmsecomponent)
   private
-{$ifdef FPC}{$notes off}{$endif}
    finphash: tsiginfohash;
    foutphash: tsiginfohash;
 //   fvaluedummy: double;
@@ -982,10 +984,19 @@ type
    fonafterupdatemodel: notifyeventty;
    fonafterstep: afterstepeventty;
    fsamplefrequ: real;
-{$ifdef FPC}{$notes on}{$endif}
+   foptions: sigcontrolleroptionsty;
+   fstepcount: integer;
+   ftimer: tsimpletimer;
    procedure settickdiv(const avalue: integer);
    procedure setonbeforetick(const avalue: notifyeventty);
    procedure setonaftertick(const avalue: notifyeventty);
+   procedure setoptions(const avalue: sigcontrolleroptionsty);
+   procedure setsamplefrequ(const avalue: real);
+   function getfreerun: boolean;
+   procedure setfreerun(const avalue: boolean);
+   function getautorun: boolean;
+   procedure setautorun(const avalue: boolean);
+   procedure setstepcount(const avalue: integer);
   protected
    fstate: sigcontrollerstatesty;
    fclients: sigclientintfarty;
@@ -1013,6 +1024,10 @@ type
    procedure checktick;
    procedure dotick;
    function getnodenamepath(const aintf: isigclient): string;
+   procedure checkoptions();
+   procedure stopautorun;
+   procedure doidle(var again: boolean);
+   procedure doautotick(const sender: tobject);
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -1025,8 +1040,14 @@ type
    procedure clear;
    procedure lock;
    procedure unlock;
+   property freerun: boolean read getfreerun write setfreerun;
+   property autorun: boolean read getautorun write setautorun;
   published
-   property samplefrequ: real read fsamplefrequ write fsamplefrequ;
+   property options: sigcontrolleroptionsty read foptions 
+                                           write setoptions default [];
+   property stepcount: integer read fstepcount 
+                                write setstepcount default defaultstepcount;
+   property samplefrequ: real read fsamplefrequ write setsamplefrequ;
                                 //default 44100
    property tickdiv: integer read ftickdiv write settickdiv 
                                             default defaulttickdiv;
@@ -1060,7 +1081,8 @@ function scalevalue(const ainfo: doublescaleinfoty): double;
 implementation
 uses
  sysutils,mseformatstr,msesysutils,msesysintf1,mseapplication,msearrayutils,
- msesys;
+ msesys,msebits;
+ 
 type
  tmsecomponent1 = class(tmsecomponent);
 
@@ -2458,6 +2480,7 @@ end;
 constructor tsigcontroller.create(aowner: tcomponent);
 begin
  fsamplefrequ:= defaultsamplefrequ;
+ fstepcount:= defaultstepcount;
  ftickdiv:= defaulttickdiv;
  syserror(sys_mutexcreate(fmutex),self);
  finphash:= tsiginfohash.create;
@@ -2467,6 +2490,7 @@ end;
 
 destructor tsigcontroller.destroy;
 begin
+ stopautorun();
  inherited;
  finphash.free;
  foutphash.free;
@@ -3203,7 +3227,8 @@ end;
 procedure tsigcontroller.loaded;
 begin
  inherited;
- modelchange;
+ modelchange();
+ checkoptions();
 end;
 
 procedure tsigcontroller.clear;
@@ -3372,6 +3397,99 @@ end;
 function tsigcontroller.getnodenamepath(const aintf: isigclient): string;
 begin
  result:= ownernamepath(aintf.getcomponent);
+end;
+
+procedure tsigcontroller.setoptions(const avalue: sigcontrolleroptionsty);
+begin
+ if foptions <> avalue then begin
+  foptions:= sigcontrolleroptionsty(setsinglebit(longword(avalue),
+                 longword(foptions),longword([sico_freerun,sico_autorun])));
+  if not (csloading in componentstate) then begin
+   checkoptions();
+  end;
+ end;
+end;
+
+procedure tsigcontroller.setsamplefrequ(const avalue: real);
+begin
+ if fsamplefrequ <> avalue then begin
+  fsamplefrequ:= avalue;
+ end;
+end;
+
+procedure tsigcontroller.checkoptions;
+begin
+ stopautorun();
+ if not (csdesigning in componentstate) then begin
+  if (fstepcount > 0) and (fsamplefrequ > 0) then begin
+   if sico_freerun in foptions then begin
+    application.registeronidle(@doidle);
+   end
+   else begin
+    if sico_autorun in foptions then begin
+     ftimer:= tsimpletimer.create(round(1000000.0*fstepcount/fsamplefrequ),
+                                                     @doautotick,true,[to_leak]);
+    end;
+   end;
+  end;
+ end;
+end;
+
+function tsigcontroller.getfreerun: boolean;
+begin
+ result:= sico_freerun in options;
+end;
+
+procedure tsigcontroller.setfreerun(const avalue: boolean);
+begin
+ if avalue then begin
+  options:= options + [sico_freerun];
+ end
+ else begin
+  options:= options - [sico_freerun];
+ end;
+end;
+
+procedure tsigcontroller.stopautorun;
+begin
+ application.unregisteronidle(@doidle);
+ freeandnil(ftimer);
+end;
+
+function tsigcontroller.getautorun: boolean;
+begin
+ result:= sico_autorun in options;
+end;
+
+procedure tsigcontroller.setautorun(const avalue: boolean);
+begin
+ if avalue then begin
+  options:= options + [sico_autorun];
+ end
+ else begin
+  options:= options - [sico_autorun];
+ end;
+end;
+
+procedure tsigcontroller.setstepcount(const avalue: integer);
+begin
+ if fstepcount <> avalue then begin
+  fstepcount:= avalue;
+  if not (csloading in componentstate) then begin
+   checkoptions();
+  end;
+ end;
+end;
+
+procedure tsigcontroller.doautotick(const sender: tobject);
+begin
+ step(fstepcount); 
+end;
+
+procedure tsigcontroller.doidle(var again: boolean);
+begin
+ step(fstepcount);
+ again:= true;
 end;
 
 { tsigwavetable }
