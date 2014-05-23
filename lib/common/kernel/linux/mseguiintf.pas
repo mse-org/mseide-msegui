@@ -3213,7 +3213,7 @@ end;
 function gui_hasevent: boolean;
 begin
  gdi_lock;
- result:= xpending(appdisp) > 0;
+ result:= (xpending(appdisp) > 0) or timerevent;
  gdi_unlock;
 end;
 
