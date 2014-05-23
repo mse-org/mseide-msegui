@@ -608,6 +608,8 @@ type
 const
  defaultscrollboxoptionsscale =
         defaultoptionsscale - [osc_expandshrinkx,osc_expandshrinky];
+ defaultscrollboxoptionswidget = defaultoptionswidgetmousewheel + [ow_subfocus];
+ 
 type
  tscrollbox = class(tscalingwidget)
   private
@@ -629,7 +631,7 @@ type
   published
    property frame: tscrollboxframe read getframe write setframe;
    property onscroll: pointeventty read fonscroll write fonscroll;
-   property optionswidget default defaultoptionswidgetmousewheel;
+   property optionswidget default defaultscrollboxoptionswidget;
    property optionsscale default defaultscrollboxoptionsscale;
  end;
 
