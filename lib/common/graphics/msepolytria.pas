@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2013 by Martin Schreiber
+{ MSEgui Copyright (c) 2013-2014 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -1546,8 +1546,8 @@ var
  noisestate: mwcinfoty;   
  pt1,pt2: ppointty;
 begin
- noisestate.fw:= $a91b43f5; //"random" seed
- noisestate.fz:= $730c9a26; //"random" seed
+ noisestate.fw:= defaultmwcseedw; //"random" seed
+ noisestate.fz:= defaultmwcseedz; //"random" seed
  npoints:= drawinfo.points.count;
  if npoints < 3 then begin
   atriangles:= nil;

@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2013 by Martin Schreiber
+{ MSEgui Copyright (c) 2013-2014 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -12,10 +12,12 @@ unit msenoise;
 interface
 uses
  msetypes;
- 
+const
+ defaultmwcseedw = 521288629;
+ defaultmwcseedz = 362436069;
 type
  mwcinfoty = record
-  fw,fz: card32; //not 0
+  fw,fz: card32; //call checkmwcseed() after init
  end;
  
  tmwcnoisegen = class
@@ -31,23 +33,46 @@ type
 function mwcnoise(var state: mwcinfoty): card32; overload;
 function mwcnoise: card32; overload;
 procedure mwcnoiseinit(const w: card32 = 0; const z: card32 = 0);
+procedure checkmwcseed(var w: card32; var z: card32);
+                   //0 -> use random
+procedure checkmwcseed(var state: mwcinfoty);
  
 implementation
 
 var
- fw: card32 = $a91b43f5; //"random" seed
- fz: card32 = $730c9a26; //"random" seed
+ fw: card32 = defaultmwcseedw; //"random" seed
+ fz: card32 = defaultmwcseedz; //"random" seed
+
+procedure checkmwcseed(var w: card32; var z: card32);
+begin
+ if w = 0 then begin
+  w:= random($9068fffe)+1;
+ end
+ else begin
+  if w mod $9068ffff = 0 then begin
+   w:= (w xor $ffffffff) mod $9068ffff;
+  end;
+ end;
+ if z = 0 then begin
+  z:= random($464ffffe)+1;
+ end
+ else begin
+  if z mod $464fffff = 0 then begin
+   z:= (z xor $ffffffff) mod $464fffff;
+  end;
+ end;
+end;
+
+procedure checkmwcseed(var state: mwcinfoty);
+begin
+ checkmwcseed(state.fw,state.fz);
+end;
 
 procedure mwcnoiseinit(const w: card32 = 0; const z: card32 = 0);
 begin
  fw:= w;
- if fw = 0 then begin
-  fw:= random($ffffffff)+1;
- end;
  fz:= z;
- if fz = 0 then begin
-  fz:= random($ffffffff)+1;
- end;
+ checkmwcseed(fw,fz);
 end;
 
 function mwcnoise: card32;
@@ -76,13 +101,8 @@ end;
 procedure tmwcnoisegen.init(const w: card32 = 0; const z: card32 = 0);
 begin
  fw:= w;
- if fw = 0 then begin
-  fw:= random($ffffffff)+1;
- end;
  fz:= z;
- if fz = 0 then begin
-  fz:= random($ffffffff)+1;
- end;
+ checkmwcseed(fw,fz);
 end;
 
 function tmwcnoisegen.next: card32;

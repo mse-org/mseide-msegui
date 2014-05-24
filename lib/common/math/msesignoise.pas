@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2010-2013 by Martin Schreiber
+{ MSEgui Copyright (c) 2010-2014 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -64,6 +64,9 @@ type
  end;
  
 implementation
+uses
+ msenoise;
+ 
 type
  tdoubleinputconn1 = class(tdoubleinputconn);
 
@@ -83,8 +86,9 @@ end;
 
 procedure tsignoise.clear;
 begin
- fz:= random($ffffffff)+1;
- fw:= random($ffffffff)+1;
+ fz:= 0;
+ fw:= 0;
+ checkmwcseed(fz,fw);
  fsum:= 0;
  fb0:= 0;
  fb1:= 0;
