@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2014 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -124,8 +124,6 @@ type
    procedure setindentstart(const avalue: integer);
    procedure setindentend(const avalue: integer);
    function getstepsize: real;
-//   function isstepsizestored: Boolean;
-//   function ispagesizestored: Boolean;
    procedure dodimchanged;
    function clickedareaisvalid: boolean;
    procedure setcolorpattern(const avalue: colorty);
@@ -140,26 +138,6 @@ type
    procedure setframeendbutton1(const avalue: tframe);
    function getframeendbutton2: tframe;
    procedure setframeendbutton2(const avalue: tframe);
-   //iframe
-  procedure setframeinstance(instance: tcustomframe);
-  procedure setstaticframe(value: boolean);
-  function getstaticframe: boolean;
-  procedure scrollwidgets(const dist: pointty);
-  procedure clientrectchanged;
-  function getcomponentstate: tcomponentstate;
-  function getmsecomponentstate: msecomponentstatesty;
-  procedure invalidatewidget;
-  procedure invalidaterect(const rect: rectty; 
-            const org: originty = org_client; const noclip: boolean = false);
-  function getwidget: twidget;
-  function getwidgetrect: rectty;
-  function getframestateflags: framestateflagsty;
-  {
-  function getframedisabled: boolean;
-  function getframeclicked: boolean;
-  function getframemouse: boolean;
-  function getframeactive: boolean;
-  }
    procedure readstepsize(reader: treader);
    procedure writestepsize(writer: twriter);
    procedure readstepctrlfact(reader: treader);
@@ -170,6 +148,20 @@ type
    procedure writepagesize(writer: twriter);
    procedure readwheelsensitivity(reader: treader);
    procedure writewheelsensitivity(writer: twriter);
+    //iframe
+   procedure setframeinstance(instance: tcustomframe);
+   procedure setstaticframe(value: boolean);
+   function getstaticframe: boolean;
+   procedure scrollwidgets(const dist: pointty);
+   procedure clientrectchanged;
+   function getcomponentstate: tcomponentstate;
+   function getmsecomponentstate: msecomponentstatesty;
+   procedure invalidatewidget;
+   procedure invalidaterect(const rect: rectty; 
+             const org: originty = org_client; const noclip: boolean = false);
+   function getwidget: twidget;
+   function getwidgetrect: rectty;
+   function getframestateflags: framestateflagsty;
   protected
    fstate: scrollbarstatesty;
    fintf: iscrollbar;
@@ -573,12 +565,6 @@ begin
    end;
   end;
   frameskinoptionstoshapestate(fframeendbutton2,areas[sbbu_up]);
-  {
-  for bu1:= firstbutton to lastbutton do begin
-   updatebit(longword(areas[bu1].state),ord(ss_flat),sbo_flat in foptions);
-   updatebit(longword(areas[bu1].state),ord(ss_noanimation),sbo_noanim in foptions);
-  end;
-  }
  end;
 end;
 
@@ -588,7 +574,6 @@ var
 begin
  result:= scrollbarareaty(-1);
  for ar1:= low(scrollbarareaty) to high(scrollbarareaty) do begin
-//  if pointinrect(point,fdrawinfo.areas[ar1].ca.dim) then begin
   if pointinshape(point,fdrawinfo.areas[ar1]) then begin
    result:= ar1;
    break;
@@ -712,12 +697,7 @@ begin
   invalidate;
  end;
 end;
-{
-procedure tcustomscrollbar.excludeopaque(const canvas: tcanvas);
-begin
- canvas.subcliprect(fdrawinfo.scrollrect); //!!!!todo transparent colors
-end;
-}
+
 procedure tcustomscrollbar.paint(const canvas: tcanvas; 
                                            const acolor: colorty = cl_none);
 var
@@ -742,23 +722,17 @@ begin
    case fpaintedbutton of
     sbbu_down: begin
      if fframeendbutton1 <> nil then begin
-//      canvas.save;
       fframeendbutton1.paintbackground(canvas,buttonareas[bbu_down],false);
-//      canvas.restore;
      end;
     end;
     sbbu_move: begin
      if fframebutton <> nil then begin
-//      canvas.save;
       fframebutton.paintbackground(canvas,buttonareas[bbu_move],false);
-//      canvas.restore;
      end;
     end;
     sbbu_up: begin
      if fframeendbutton2 <> nil then begin
-//      canvas.save;
       fframeendbutton2.paintbackground(canvas,buttonareas[bbu_up],false);
-//      canvas.restore;
      end;
     end;
    end;    
@@ -867,12 +841,7 @@ begin
   dodimchanged;
  end;
 end;
-{
-function tcustomscrollbar.ispagesizestored: Boolean;
-begin
- result:= fpagesize <> defaultpagesize;
-end;
-}
+
 function tcustomscrollbar.getstepsize: real;
 begin
  if fstepsize = 0 then begin
@@ -882,12 +851,7 @@ begin
   result:= fstepsize;
  end;
 end;
-{
-function tcustomscrollbar.isstepsizestored: Boolean;
-begin
- result:= fstepsize <> 0;
-end;
-}
+
 function tcustomscrollbar.dobuttoncommand: boolean;
 begin
  result:= true;
