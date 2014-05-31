@@ -91,7 +91,8 @@ type
                           const nobkpton: boolean);
    procedure listtoinfo(const index: integer; var info: breakpointinfoty);
    procedure changed;
-   procedure insertbkpt(index: integer; withcondition,witherrormessage: boolean);
+   procedure insertbkpt(index: integer;
+                               withcondition,witherrormessage: boolean);
   public
    gdb: tgdbmi;
    
@@ -112,11 +113,14 @@ type
    function updatebreakpointon(var info: breakpointinfoty): boolean;
                  //true if gdb ok
    function getbreakpointlines(const filepath: filenamety): bkptlineinfoarty;
-   procedure sourcelinesinserted(const filepath: filenamety; const aindex,acount: integer);
-   procedure sourcelinesdeleted(const filepath: filenamety; const aindex,acount: integer);
+   procedure sourcelinesinserted(const filepath: filenamety;
+                                               const aindex,acount: integer);
+   procedure sourcelinesdeleted(const filepath: filenamety; 
+                                               const aindex,acount: integer);
 
    procedure updatebreakpoints; //transfer breakpoints to gdb
-   procedure showbreakpoint(const filepath: filenamety; const aline: integer; focus: boolean);
+   procedure showbreakpoint(const filepath: filenamety;
+                                       const aline: integer; focus: boolean);
    function checkbreakpointcontinue(const stopinfo: stopinfoty): boolean;
                                 //set condition
    function isactivebreakpoint(const addr: qword): boolean;
@@ -210,7 +214,8 @@ begin
  sourcefo.updatebreakpointicon(info.path,lineinfo);
 end;
 
-procedure tbreakpointsfo.listtoinfo(const index: integer; var info: breakpointinfoty);
+procedure tbreakpointsfo.listtoinfo(const index: integer;
+                                                  var info: breakpointinfoty);
 begin
  info.addressbreakpoint:= addressbkpt[index];
  info.path:= path[index];
@@ -254,7 +259,8 @@ begin
  refresh;
 end;
 
-procedure tbreakpointsfo.gridoncellevent(const sender: TObject; var info: celleventinfoty);
+procedure tbreakpointsfo.gridoncellevent(const sender: TObject;
+                                                    var info: celleventinfoty);
 begin
  if iscellclick(info,[ccr_dblclick]) then begin
   sourcefo.showsourceline(path[info.cell.row],line[info.cell.row]-1,0,true);
@@ -303,7 +309,8 @@ begin
  end;
 end;
 
-function tbreakpointsfo.infotolineinfo(const info: breakpointinfoty): bkptlineinfoty;
+function tbreakpointsfo.infotolineinfo(
+                                 const info: breakpointinfoty): bkptlineinfoty;
 begin
  result.line:= info.line;
  if info.bkpton then begin
@@ -319,7 +326,8 @@ begin
  end;
 end;
 
-function tbreakpointsfo.getbreakpointlines(const filepath: filenamety): bkptlineinfoarty;
+function tbreakpointsfo.getbreakpointlines(
+                                const filepath: filenamety): bkptlineinfoarty;
 var
  int1,int2: integer;
  wstr1: filenamety;
@@ -404,7 +412,8 @@ begin
   result:= true;
  end;
  if result then begin
-  if (grid.rowcount = 0) or not grid.datacols.rowempty(grid.rowcount - 1) then begin
+  if (grid.rowcount = 0) or 
+                     not grid.datacols.rowempty(grid.rowcount - 1) then begin
    int1:= grid.appendrow;
   end
   else begin
@@ -447,7 +456,8 @@ begin
  end;
 end;
 
-function tbreakpointsfo.checkbreakpointcontinue(const stopinfo: stopinfoty): boolean;
+function tbreakpointsfo.checkbreakpointcontinue(
+                                const stopinfo: stopinfoty): boolean;
                           //set condition
 var
  int1: integer;
@@ -463,14 +473,16 @@ begin
    if (condition[int1] <> '') and (flags[int1] = 0) then begin
     flags[int1]:= 1;
     str1:= condition[int1];
-    if breakpointerror(gdb.breakcondition(stopinfo.bkptno,str1),mstr1) then begin
+    if breakpointerror(gdb.breakcondition(stopinfo.bkptno,str1),
+                                                          mstr1) then begin
      conderr[int1]:= 0;
      errormessage[int1]:= mstr1;
     end
     else begin
      conderr[int1]:= -1;
      gdb.evaluateexpression(str1,str2);
-     if not (str2 = 'true') or trystrtoptruint(str2,ptrint1) and (ptrint1 <> 0) then begin
+     if not (str2 = 'true') or trystrtoptruint(str2,ptrint1) and 
+                                                   (ptrint1 <> 0) then begin
       flags[int1]:= 2; //count has to be decremented
       result:= true;
      end;
@@ -536,7 +548,8 @@ begin
   if (line[int1] = info.line) and (filename[int1] = wstr1) then begin
    bkpton[int1]:= info.bkpton;
    if gdb.execloaded then begin
-    result:= gdb.breakenable(bkptno[int1],info.bkpton and bkptson.value) = gdb_ok;
+    result:= gdb.breakenable(bkptno[int1],info.bkpton and 
+                                                bkptson.value) = gdb_ok;
    end;
    if conderr[int1] >= 0 then begin
     info.conditionmessage:= ' ';
@@ -553,15 +566,16 @@ begin
  changed;
 end;
 
-procedure tbreakpointsfo.ononsetvalue(const sender: TObject; var avalue: Boolean;
-                                        var accept: Boolean);
+procedure tbreakpointsfo.ononsetvalue(const sender: TObject;
+                             var avalue: Boolean; var accept: Boolean);
 begin
  if gdb.execloaded then begin
   gdb.breakenable(bkptno.value,avalue and bkptson.value)
  end;
 end;
 
-procedure tbreakpointsfo.ignoreonsetvalue(const sender: TObject; var avalue: Integer; var accept: Boolean);
+procedure tbreakpointsfo.ignoreonsetvalue(const sender: TObject;
+                                     var avalue: Integer; var accept: Boolean);
 begin
  if gdb.execloaded then begin
   gdb.breakafter(bkptno.value,avalue)
@@ -626,7 +640,8 @@ begin
  gridonrowsdeleting(nil,int1,int2);
 end;
 
-procedure tbreakpointsfo.lineonsetvalue(const sender: TObject; var avalue: Integer; var accept: Boolean);
+procedure tbreakpointsfo.lineonsetvalue(const sender: TObject;
+                                     var avalue: Integer; var accept: Boolean);
 begin
  removeactbreakpoint;
 end;

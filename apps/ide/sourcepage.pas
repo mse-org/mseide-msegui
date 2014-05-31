@@ -74,8 +74,6 @@ type
    ffileloading: integer;
    ffileloaderror: boolean;
    frelpath: filenamety;
-//   fbracketsetting: integer;
-//   fbracketchecking: integer;
    fshowsourcepos: sourceposty;
    procedure setactiverow(const Value: integer);
    procedure setgdb(agdb: tgdbmi);
@@ -83,13 +81,11 @@ type
    function getfilename: filenamety;
    function getfilepath: filenamety;
    function getrelpath: filenamety;
-//   procedure find;
    procedure replace(all: boolean);
    procedure showprocheaders(const apos: gridcoordty);
    procedure showsourceitems(const apos: gridcoordty);
    procedure showlink(const apos: gridcoordty);
    procedure showsourcehint(const apos: gridcoordty; const values: stringarty);
-//   procedure textnotfound;
    procedure setsyntaxdef(const value: filenamety);
    procedure updatelinedisp;
   protected
@@ -99,9 +95,6 @@ type
    fbracket1,fbracket2: gridcoordty;
    procedure doasyncevent(var atag: integer); override;
    procedure removebookmark(const bookmarknum: integer);
-//   procedure callcheckbrackets;
-//   procedure checkbrackets;
-//   procedure clearbrackets;
    procedure beginupdate;
    procedure endupdate;
    function checkfilechanged: boolean;
@@ -1210,12 +1203,21 @@ procedure tsourcepage.gridonrowsdeleted(const sender: tcustomgrid;
   const index, count: integer);
 begin
  breakpointsfo.sourcelinesdeleted(filepath,index+1,count);
+ if (factiverow >= 0) and (index <= factiverow) then begin
+  factiverow:= factiverow - count;
+  if factiverow < index then begin
+   activerow:= -1; //removed
+  end;
+ end;
 end;
 
 procedure tsourcepage.gridonrowsinserted(const sender: tcustomgrid;
   const index, count: integer);
 begin
  breakpointsfo.sourcelinesinserted(filepath,index+1,count);
+ if (factiverow >= 0) and (index <= factiverow) then begin
+  factiverow:= factiverow + count;
+ end;
 end;
 
 procedure tsourcepage.sourcefoonshow(const sender: TObject);

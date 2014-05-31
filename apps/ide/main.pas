@@ -350,35 +350,35 @@ type
   gdbserverstarterror,//20 gdb server start error
   gdbservercanceled,  //21 gdb server start canceled.
   cannotrunstartgdb,  //22 Can not run start gdb command.
-  str_uploadcommand,      //23 Uploadcommand "
+  str_uploadcommand,  //23 Uploadcommand "
   downloaderror,      //24 Download ***ERROR***
   downloadfinished,   //25 Download finished.
   downloadcanceled,   //26 Download canceled.
-  str_file,          //27 File "
-  notfound2,         //28 " not found.
-  exists,            //29 " exists.
-  str_new,           //30 New
-  selectancestor,    //31 Select ancestor
-  newform,           //32 New form
-  pascalfiles,       //33 Pascal Files
-  new2,              //34 new
-  cannotloadproj,    //35 Can not load Project "
+  str_file,           //27 File "
+  notfound2,          //28 " not found.
+  exists,             //29 " exists.
+  str_new,            //30 New
+  selectancestor,     //31 Select ancestor
+  newform,            //32 New form
+  pascalfiles,        //33 Pascal Files
+  new2,               //34 new
+  cannotloadproj,     //35 Can not load Project "
   selecttemplate,     //36 Select project template
-  projectfiles,      //37 Project files
-  str_allfiles,      //38 All files
-  selectprogramfile, //39 Select program file
-  pascalprogfiles,   //40 Pascal program files
-  cfiles,            //41 C program files
-  str_newproject,    //42 New Project
-  cannotstartprocess,//43 Can not start process
-  process,           //44 Process
-  running3,          //45 running.
-  processterminated, //46 Process terminated
-  proctermnormally,  //47 Process terminated normally.
-  makeerror,         //48 Make ***ERROR***
-  makeok,            //49 Make OK.
-  str_sourcechanged, //50 Source has changed, do you wish to remake project?
-  loadwindowlayout   //51 Load Window Layout
+  projectfiles,       //37 Project files
+  str_allfiles,       //38 All files
+  selectprogramfile,  //39 Select program file
+  pascalprogfiles,    //40 Pascal program files
+  cfiles,             //41 C program files
+  str_newproject,     //42 New Project
+  cannotstartprocess, //43 Can not start process
+  process,            //44 Process
+  running3,           //45 running.
+  processterminated,  //46 Process terminated
+  proctermnormally,   //47 Process terminated normally.
+  makeerror,          //48 Make ***ERROR***
+  makeok,             //49 Make OK.
+  str_sourcechanged,  //50 Source has changed, do you wish to remake project?
+  loadwindowlayout    //51 Load Window Layout
  );
  
 procedure handleerror(const e: exception; const text: string);
