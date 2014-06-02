@@ -126,7 +126,7 @@ type
                     scoe_undoonesc,scoe_forcereturncheckvalue,scoe_eatreturn,
 //                    scoe_autorowheight,
 
-                    //same layout as editoptionty
+                     //same layout as editoptionty
                     scoe_exitoncursor,
                     scoe_nofirstarrownavig,
                     scoe_endonenter,
@@ -134,6 +134,7 @@ type
                     scoe_autoselect, //selectall bei enter
                     scoe_autoselectonfirstclick,
                     scoe_caretonreadonly,
+                    scoe_focusrectonreadonly,
                     scoe_trimright,
                     scoe_trimleft,
                     scoe_uppercase,
@@ -141,6 +142,7 @@ type
                     scoe_hintclippedtext,                    
                     scoe_locate,
                     scoe_casesensitive,
+                    
                     scoe_checkbox
                           );
 
@@ -155,6 +157,7 @@ const
                     oe_autoselect, //selectall bei enter
                     oe_autoselectonfirstclick,
                     oe_caretonreadonly,
+                    oe_focusrectonreadonly,
                     oe_trimright,
                     oe_trimleft,
                     oe_uppercase,
@@ -193,7 +196,8 @@ const
                            co1_rowcoloractive,co1_rowcolorfocused,co1_rowreadonly];
  defaultfixcoltextflags = [tf_ycentered,tf_xcentered];
  defaultstringcoleditoptions = [scoe_exitoncursor,scoe_undoonesc,scoe_autoselect,
-                                  scoe_autoselectonfirstclick,scoe_eatreturn];
+                                scoe_autoselectonfirstclick,scoe_eatreturn,
+                                scoe_focusrectonreadonly];
 // defaultcolheadertextflags = [tf_ycentered,tf_xcentered];
 
 
@@ -530,6 +534,7 @@ type
    function checkfocusedcolor(const aindex: integer): boolean;
          //true if colorfocus and fontfocusnum active
    function isopaque: boolean; virtual;
+   function needsfocusrect: boolean; virtual;
    function getdatapo(const arow: integer): pointer; virtual;
    procedure clean(const start,stop: integer); virtual;
    procedure paint(var info: colpaintinfoty); virtual;
@@ -787,6 +792,7 @@ type
    function geteditstate: dataeditstatesty;
    procedure seteditstate(const avalue: dataeditstatesty);
 
+   function needsfocusrect: boolean; override;
    function getoptionsedit: optionseditty; virtual;
    function getitems(aindex: integer): msestring; virtual;
    procedure setitems(aindex: integer; const Value: msestring); virtual;
@@ -3557,6 +3563,11 @@ begin
  fonafterdrawcell(self,acanvas,fcellinfo);
 end;
 
+function tcol.needsfocusrect: boolean;
+begin
+ result:= co_drawfocus in foptions;
+end;
+
 procedure tcol.paint(var info: colpaintinfoty);
 var
  int1,int2,int3: integer;
@@ -3704,7 +3715,7 @@ begin
        drawcelloverlay(canvas,fframe);
       end;
       if isfocusedcol and (row1 = fcellinfo.grid.ffocusedcell.row) and 
-                (co_drawfocus in foptions) and
+                needsfocusrect and
               fcellinfo.grid.cellhasfocus and fcellinfo.grid.active then begin
        if fframe <> nil then begin
         canvas.move(fframe.fpaintrect.pos);
@@ -6943,6 +6954,13 @@ function tcustomstringcol.getoptionsedit: optionseditty;
 begin
  result:= [];
  stringcoltooptionsedit(foptionsedit,result);
+end;
+
+function tcustomstringcol.needsfocusrect: boolean;
+begin
+ result:= inherited needsfocusrect or 
+             (scoe_focusrectonreadonly in foptionsedit) and 
+                ((co_readonly in foptions) or (oe_readonly in getoptionsedit));
 end;
 
 procedure tcustomstringcol.docellevent(var info: celleventinfoty);
