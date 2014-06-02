@@ -787,7 +787,7 @@ type
    function geteditstate: dataeditstatesty;
    procedure seteditstate(const avalue: dataeditstatesty);
 
-   function getoptionsedit: optionseditty;
+   function getoptionsedit: optionseditty; virtual;
    function getitems(aindex: integer): msestring; virtual;
    procedure setitems(aindex: integer; const Value: msestring); virtual;
    function createdatalist: tdatalist; override;
@@ -16300,7 +16300,8 @@ begin
   if (ffocusedcell.col < 0) or isreadonly{(co_readonly in foptions)} then begin
    include(result,oe_readonly);
   end;
-  stringcoltooptionsedit(foptionsedit,result);
+  result:= result + getoptionsedit;
+//  stringcoltooptionsedit(foptionsedit,result);
  end;
 end;
 

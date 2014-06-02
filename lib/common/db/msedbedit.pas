@@ -271,6 +271,8 @@ type
 //  procedure setisdb;
   procedure setmaxlength(const avalue: integer);
   function getfieldlink: tcustomeditwidgetdatalink;
+   //iificlient
+  procedure setifiserverintf(const aintf: iifiserver);
  end;
 
  tgriddatalink = class;
@@ -1807,6 +1809,7 @@ type
    function getnullsymbol: msestring;
    procedure setnullsymbol(const avalue: msestring);
   protected
+   function getoptionsedit: optionseditty; override;
    function getitems(aindex: integer): msestring; override;
    procedure setitems(aindex: integer; const Value: msestring); override;
    procedure modified; override;
@@ -3111,9 +3114,10 @@ var
 begin
  foptions:= defaulteditwidgetdatalinkoptions;
  fintf:= intf;
- if getcorbainterface(intf.getwidget,typeinfo(iificlient),intf1) then begin
-  intf1.setifiserverintf(iifiserver(self));
- end;
+ fintf.setifiserverintf(iifiserver(self));
+// if getcorbainterface(intf.getwidget,typeinfo(iificlient),intf1) then begin
+//  intf1.setifiserverintf(iifiserver(self));
+// end;
  inherited Create;
  visualcontrol:= true;
  fintf.seteditstate(fintf.geteditstate+[des_isdb]);
@@ -9328,6 +9332,14 @@ begin
   inherited;
  finally
   tcustomdbstringgrid(grid).fdatalink.endgridrow(info);
+ end;
+end;
+
+function tdbstringcol.getoptionsedit: optionseditty;
+begin
+ result:= inherited getoptionsedit;
+ if fifiserverintf <> nil then begin
+  fifiserverintf.updateoptionsedit(result);
  end;
 end;
 
