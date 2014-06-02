@@ -235,6 +235,7 @@ type
    function getfiltereditkind: filtereditkindty;
    procedure beginfilteredit(const akind: filtereditkindty);
    procedure endfilteredit;
+   procedure clearfilter;
    procedure doidleapplyupdates;
    
    procedure setificountroller(const avalue: tifidscontroller);
@@ -2627,6 +2628,11 @@ end;
 procedure tifidataset.endfilteredit;
 begin
  //dummy
+end;
+
+procedure tifidataset.clearfilter;
+begin
+ //dumm
 end;
 
 procedure tifidataset.beginupdate;

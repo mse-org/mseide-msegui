@@ -127,6 +127,7 @@ const
   'Filter bearbeiten',        //sc_filter_filter
   'Filter Minimum bearbeiten',//sc_edit_filter_min
   'Filter Maximum bearbeiten',//sc_filter_edit_max
+  'Filter r'#252'ckstellen',  //sc_reset_filter
   'Filter ein',               //sc_filter_on
   'Suchen',                   //sc_search
   'Automatisch bearbeiten',   //sc_auto_edit

@@ -42,6 +42,7 @@ type
    function getfiltereditkind: filtereditkindty;
    procedure beginfilteredit(const akind: filtereditkindty);
    procedure endfilteredit;
+   procedure clearfilter;
    procedure doidleapplyupdates;
    function getrestorerecno: boolean;
    procedure setrestorerecno(const avalue: boolean);
@@ -298,6 +299,11 @@ begin
 end;
 
 procedure tmsedbf.endfilteredit;
+begin
+ //dummy
+end;
+
+procedure tmsedbf.clearfilter;
 begin
  //dummy
 end;

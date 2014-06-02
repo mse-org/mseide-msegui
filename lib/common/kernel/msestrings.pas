@@ -277,7 +277,9 @@ function mseCompareTextlen(const S1, S2: msestring): Integer;
 function mseCompareTextlenupper(const S1, S2: msestring): Integer;
                 //case insensitiv, checks length s1 only, s1 must be uppercase
 function msepartialcomparetext(const s1,s2: msestring): integer;
+                //case insensitive, checks s1 lenght only
 function msepartialcomparestr(const s1,s2: msestring): integer;
+                //case sensitive, checks s1 lenght only
 
 function mseissamestrlen(const apartstring,astring: msestring): boolean;
 function mseissametextlen(const apartstring,astring: msestring): boolean;

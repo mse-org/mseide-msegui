@@ -1129,10 +1129,15 @@ type
    procedure stringtoparam(const source: msestring; const dest: tparam);
                   //takes care about utf8 conversion
    procedure clearrecord;
+   procedure clearfilter;
+   property filtereditkind: filtereditkindty read ffiltereditkind 
+                                                    write ffiltereditkind;
    procedure beginfilteredit(const akind: filtereditkindty);
    procedure endfilteredit;
-   function fieldfiltervalue(const afield: tfield): variant;
-   function fieldfiltervalueisnull(const afield: tfield): boolean;
+   function fieldfiltervalue(const afield: tfield;
+                     const akind: filtereditkindty = fek_filter): variant;
+   function fieldfiltervalueisnull(const afield: tfield;
+                     const akind: filtereditkindty = fek_filter): boolean;
    procedure filterchanged;
    function locate(const afields: array of tfield;
        const akeys: array of const; const aisnull: array of boolean;
@@ -1171,7 +1176,6 @@ type
    
    property bookmarkdata: bookmarkdataty read getbookmarkdata1
                                              write setbookmarkdata1;
-   property filtereditkind: filtereditkindty read ffiltereditkind write ffiltereditkind;
 
    procedure currentbeginupdate; virtual;
    procedure currentendupdate; virtual;
@@ -5502,21 +5506,31 @@ begin
  end;
 end;
 
-function tmsebufdataset.fieldfiltervalue(const afield: tfield): variant;
+function tmsebufdataset.fieldfiltervalue(const afield: tfield;
+                           const akind: filtereditkindty = fek_filter): variant;
 var
  statebefore: tdatasetstate;
+ kindbefore: filtereditkindty;
 begin
  statebefore:= settempstate(dsfilter);
+ kindbefore:= ffiltereditkind;
+ ffiltereditkind:= akind;
  result:= afield.asvariant;
+ ffiltereditkind:= kindbefore;
  restorestate(statebefore);
 end;
 
-function tmsebufdataset.fieldfiltervalueisnull(const afield: tfield): boolean;
+function tmsebufdataset.fieldfiltervalueisnull(const afield: tfield;
+                           const akind: filtereditkindty = fek_filter): boolean;
 var
  statebefore: tdatasetstate;
+ kindbefore: filtereditkindty;
 begin
  statebefore:= settempstate(dsfilter);
+ kindbefore:= ffiltereditkind;
+ ffiltereditkind:= akind;
  result:= afield.isnull;
+ ffiltereditkind:= kindbefore;
  restorestate(statebefore);
 end;
 
@@ -5563,6 +5577,42 @@ begin
    end;
   end;
  finally
+  enablecontrols;
+ end;
+end;
+
+procedure tmsebufdataset.clearfilter;
+var
+ int1: integer;
+ statebefore: tdatasetstate;
+ kindbefore,kind1: filtereditkindty;
+begin
+ checkactive;
+ try
+  disablecontrols;
+  statebefore:= settempstate(dsfilter);
+  kindbefore:= filtereditkind;
+  for kind1:= low(filtereditkindty) to high(filtereditkindty) do begin
+   filtereditkind:= kind1;
+   for int1:= 0 to fields.count - 1 do begin
+    with fields[int1] do begin
+     if not isblob then begin
+      clear;
+     end;
+    end;
+   end;
+  end;
+  if (statebefore <> dsfilter) then begin
+   for kind1:= low(filtereditkindty) to high(filtereditkindty) do begin
+    if checkcanevent(self,tmethod(fbeforeendfilteredit)) then begin
+     fbeforeendfilteredit(self,kind1);
+    end;
+   end;
+   resync([]);
+  end;
+ finally
+  filtereditkind:= kindbefore;
+  restorestate(statebefore);
   enablecontrols;
  end;
 end;

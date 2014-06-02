@@ -135,6 +135,7 @@ const
   'Edit filter',        //sc_filter_filter
   'Edit filter minimum',//sc_edit_filter_min
   'Edit filter maximum',//sc_filter_edit_max
+  'Reset filter',       //sc_reset_filter
   'Filter on',          //sc_filter_on
   'Search',             //sc_search
   'Auto edit',          //sc_autoedit

@@ -39,6 +39,7 @@ type
    function getfiltereditkind: filtereditkindty;
    procedure beginfilteredit(const akind: filtereditkindty);
    procedure endfilteredit;
+   procedure clearfilter;
    procedure doidleapplyupdates;
    function getrestorerecno: boolean;
    procedure setrestorerecno(const avalue: boolean);
@@ -112,6 +113,7 @@ type
    function getfiltereditkind: filtereditkindty;
    procedure beginfilteredit(const akind: filtereditkindty);
    procedure endfilteredit;
+   procedure clearfilter;
    procedure doidleapplyupdates;
    function getrestorerecno: boolean;
    procedure setrestorerecno(const avalue: boolean);
@@ -374,6 +376,11 @@ begin
  //dummy
 end;
 
+procedure tmsefixedformatdataset.clearfilter;
+begin
+ //dummy
+end;
+
 procedure tmsefixedformatdataset.doidleapplyupdates;
 begin
  //dummy
@@ -626,6 +633,11 @@ begin
 end;
 
 procedure tmsesdfdataset.endfilteredit;
+begin
+ //dummy
+end;
+
+procedure tmsesdfdataset.clearfilter;
 begin
  //dummy
 end;

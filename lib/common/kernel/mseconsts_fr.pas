@@ -168,6 +168,7 @@ const
   #201'dition Filtre',                    //sc_filter_filter
   #201'dition Filtre Minimum',            //sc_edit_filter_min
   #201'dition Filtre Maximum',            //sc_filter_edit_max
+  'Reset filter',       //sc_reset_filter
   'Filtre actif',                         //sc_filter_on
   'Rechercher',                           //sc_search
   #201'dition automatique',               //sc_autoedit

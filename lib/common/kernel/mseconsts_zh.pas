@@ -131,6 +131,7 @@ const
   #32534#36753#22120#36807#28388,      //sc_filter_filter
   'Edit filter minimum',               //sc_edit_filter_min
   'Edit filter maximum',               //sc_filter_edit_max
+  'Reset filter',       //sc_reset_filter
   #36807#28388#24320#21551,            //sc_filter_on
   #26597#25214,                        //sc_search
   'Auto edit',          //sc_autoedit

@@ -1303,6 +1303,7 @@ type
   function getfiltereditkind: filtereditkindty;
   procedure beginfilteredit(const akind:filtereditkindty);
   procedure endfilteredit;
+  procedure clearfilter;
   procedure begindisplaydata;
   procedure enddisplaydata;
   procedure doidleapplyupdates;
@@ -1417,6 +1418,7 @@ type
                                                      //[] -> all
    procedure getfieldclass(const fieldtype: tfieldtype; out result: tfieldclass);
    procedure beginfilteredit(const akind: filtereditkindty);
+   procedure clearfilter();
    procedure endfilteredit;
    procedure begindisplaydata; {$ifdef FPC}inline;{$endif}
    procedure enddisplaydata; {$ifdef FPC}inline;{$endif}
@@ -7863,6 +7865,11 @@ end;
 procedure tdscontroller.beginfilteredit(const akind: filtereditkindty);
 begin
  idscontroller(fintf).beginfilteredit(akind);
+end;
+
+procedure tdscontroller.clearfilter;
+begin
+ idscontroller(fintf).clearfilter;
 end;
 
 procedure tdscontroller.endfilteredit;

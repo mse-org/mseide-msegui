@@ -34,9 +34,11 @@ type
            dbnb_delete,dbnb_copyrecord,dbnb_edit,
  //             8          9          10
            dbnb_post,dbnb_cancel,dbnb_refresh,
- //            11           12             13              14             15
-           dbnb_filter,dbnb_filtermin,dbnb_filtermax,dbnb_filteronoff,dbnb_find,
- //            16           17
+ //            11           12             13              14   
+           dbnb_filter,dbnb_filtermin,dbnb_filtermax,dbnb_filterclear,
+ //          15             16
+           dbnb_filteronoff,dbnb_find,
+ //            17           18
            dbnb_autoedit,dbnb_dialog);
 
  dbnavigbuttonsty = set of dbnavigbuttonty;
@@ -49,7 +51,8 @@ const
  defaultvisibledbnavigbuttons =
           [dbnb_first,dbnb_prior,dbnb_next,dbnb_last,dbnb_insert,
            dbnb_delete,dbnb_edit,dbnb_post,dbnb_cancel,dbnb_refresh];
- filterdbnavigbuttons = [dbnb_filter,dbnb_filtermin,dbnb_filtermax,dbnb_find];
+ filterdbnavigbuttons = [dbnb_filter,dbnb_filtermin,dbnb_filtermax,
+                         dbnb_filterclear,dbnb_find];
  defaultdbnavigatorheight = 24;
  defaultdbnavigatorwidth = (ord(dbnb_refresh))*defaultdbnavigatorheight;
 
@@ -2598,6 +2601,7 @@ begin
      fek_filtermax: bu1:= [dbnb_filtermax];
      fek_find: bu1:= [dbnb_find];
     end;
+    bu1:= bu1+[dbnb_filterclear];
    end;
    dsedit,dsinsert: begin
     bu1:= bu1 + [dbnb_post,dbnb_cancel,dbnb_refresh,dbnb_insert,dbnb_delete];
@@ -2739,13 +2743,19 @@ begin
    end;
    if fdscontroller <> nil then begin
     if state = dsfilter then begin
-     fdscontroller.endfilteredit;
+     case abutton of
+      dbnb_filterclear: fdscontroller.clearfilter();
+      else begin
+       fdscontroller.endfilteredit;
+      end;
+     end;
     end
     else begin
      case abutton of
       dbnb_filter: fdscontroller.beginfilteredit(fek_filter);
       dbnb_filtermin: fdscontroller.beginfilteredit(fek_filtermin);
       dbnb_filtermax: fdscontroller.beginfilteredit(fek_filtermax);
+      dbnb_filterclear: fdscontroller.clearfilter();
       dbnb_find: fdscontroller.beginfilteredit(fek_find);
      end;
     end;
@@ -2769,8 +2779,10 @@ const
    stg_dbdelete,stg_doublesquare,stg_dbedit,
 // dbnb_post,dbnb_cancel,dbnb_refresh,
    stg_dbpost,stg_dbcancel,stg_dbrefresh,
-// dbnb_filter,dbnb_filtermin,dbnb_filtermax,dbnb_filteronoff,dbnb_find,
-   stg_dbfilter,stg_dbfiltermin,stg_dbfiltermax,stg_dbfilteron,stg_dbfind,
+// dbnb_filter,dbnb_filtermin,dbnb_filtermax,dbnb_filterclear,dbnb_filteronoff,
+   stg_dbfilter,stg_dbfiltermin,stg_dbfiltermax,stg_dbfilterclear,stg_dbfilteron,
+// dbnb_find,
+   stg_dbfind,
 // dbnb_autoedit,dbnb_dialog
    stg_triabig,stg_ellipsesmall
 );
@@ -2783,8 +2795,10 @@ const
    sc_delete,sc_copy,sc_edit,
 // dbnb_post,dbnb_cancel,dbnb_refresh,
    sc_post,sc_cancel,sc_refresh,
-// dbnb_filter,dbnb_filtermin,dbnb_filtermax,dbnb_filteronoff,dbnb_find,
-   sc_edit_filter,sc_edit_filter_min,sc_edit_filter_max,sc_filter_on,sc_search,
+// dbnb_filter,dbnb_filtermin,       dbnb_filtermax,    dbnb_filterclear,
+   sc_edit_filter,sc_edit_filter_min,sc_edit_filter_max,sc_reset_filter,
+// dbnb_filteronoff,dbnb_find,
+   sc_filter_on,sc_search,
 // dbnb_autoedit,dbnb_dialog
    sc_auto_edit,sc_dialog
 );

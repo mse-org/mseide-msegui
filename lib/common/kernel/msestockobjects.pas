@@ -83,8 +83,8 @@ type
   stg_sound, stg_soundoff,
  //    74             75           76        77         78          79  
   stg_fullscreen, stg_settings, stg_save, stg_rename, stg_list, stg_listbold,
- //    80
-  stg_doublesquare
+ //    80          81
+  stg_doublesquare,stg_dbfilterclear
                  );
 
 const
@@ -122,6 +122,7 @@ type
                     sc_first,sc_prior,sc_next,sc_last,
                     sc_append,sc_delete,sc_edit,sc_post,sc_cancel,sc_refresh,
                     sc_edit_filter,sc_edit_filter_min,sc_edit_filter_max,
+                    sc_reset_filter,
                     sc_filter_on,sc_search,sc_auto_edit,sc_copy_record,
                     sc_dialog,
                     sc_insert,sc_copy,sc_paste,

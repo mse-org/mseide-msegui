@@ -126,6 +126,7 @@ const
   'Rubah filter',         //sc_filter_filter
   'Rubah filter minimum', //sc_edit_filter_min
   'Rubah filter maximum', //sc_filter_edit_max
+  'Reset filter',       //sc_reset_filter
   'Filter hidup',         //sc_filter_on
   'Cari',                 //sc_search
   'Rubah Otomatis',          //sc_autoedit

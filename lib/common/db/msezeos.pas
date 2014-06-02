@@ -35,6 +35,7 @@ type
    function getfiltereditkind: filtereditkindty;
    procedure beginfilteredit(const akind: filtereditkindty);
    procedure endfilteredit;
+   procedure clearfilter();
    procedure doidleapplyupdates;
    function getrestorerecno: boolean;
    procedure setrestorerecno(const avalue: boolean);
@@ -104,6 +105,7 @@ type
    function getfiltereditkind: filtereditkindty;
    procedure beginfilteredit(const akind: filtereditkindty);
    procedure endfilteredit;
+   procedure clearfilter;
    procedure doidleapplyupdates;
    function getrestorerecno: boolean;
    procedure setrestorerecno(const avalue: boolean);
@@ -172,6 +174,7 @@ type
    function getfiltereditkind: filtereditkindty;
    procedure beginfilteredit(const akind: filtereditkindty);
    procedure endfilteredit;
+   procedure clearfilter;
    procedure doidleapplyupdates;
    function getrestorerecno: boolean;
    procedure setrestorerecno(const avalue: boolean);
@@ -240,6 +243,7 @@ type
    function getfiltereditkind: filtereditkindty;
    procedure beginfilteredit(const akind: filtereditkindty);
    procedure endfilteredit;
+   procedure clearfilter;
    procedure doidleapplyupdates;
    function getrestorerecno: boolean;
    procedure setrestorerecno(const avalue: boolean);
@@ -480,6 +484,11 @@ begin
 end;
 
 procedure tmsezreadonlyquery.endfilteredit;
+begin
+ //dummy
+end;
+
+procedure tmsezreadonlyquery.clearfilter;
 begin
  //dummy
 end;
@@ -733,6 +742,11 @@ begin
  //dummy
 end;
 
+procedure tmsezquery.clearfilter;
+begin
+ //dummy
+end;
+
 procedure tmsezquery.doidleapplyupdates;
 begin
  //dummy
@@ -977,6 +991,11 @@ begin
  //dummy
 end;
 
+procedure tmseztable.clearfilter;
+begin
+ //dummy
+end;
+
 procedure tmseztable.doidleapplyupdates;
 begin
  //dummy
@@ -1217,6 +1236,11 @@ begin
 end;
 
 procedure tmsezstoredproc.endfilteredit;
+begin
+//dummy
+end;
+
+procedure tmsezstoredproc.clearfilter;
 begin
 //dummy
 end;

@@ -130,6 +130,7 @@ const
   'Filtro edici'#243'n',               //sc_filter_filter
   'Filtro edici'#243'n m'#237'nimo',   //sc_edit_filter_min
   'Filtro edici'#243'n m'#225'ximo',   //sc_filter_edit_max
+  'Reset filter',       //sc_reset_filter
   'Filtro activo',                     //sc_filter_on
   'Buscar',                            //sc_search
   'Edici'#243'n autom'#225'tica',      //sc_autoedit
