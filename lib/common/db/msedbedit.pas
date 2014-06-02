@@ -1297,7 +1297,8 @@ type
    function checkvalue: boolean;
    procedure updatelayout;
    procedure updaterowcount;
-   function begingridrow(const arow: integer; out ainfo: gridrowinfoty): boolean;
+   function begingridrow(const arow: integer;
+                                   out ainfo: gridrowinfoty): boolean;
                  //false if row invalid
    procedure endgridrow(const ainfo: gridrowinfoty);
    function getfirstrecord: integer; virtual;
@@ -3109,8 +3110,8 @@ end;
 { tcustomeditwidgetdatalink }
 
 constructor tcustomeditwidgetdatalink.create(const intf: idbeditfieldlink);
-var
- intf1: iificlient;
+//var
+// intf1: iificlient;
 begin
  foptions:= defaulteditwidgetdatalinkoptions;
  fintf:= intf;
@@ -8569,7 +8570,7 @@ begin
    exit;
   end;
   }
-  if fdscontroller <> nil then begin
+  if (fdscontroller <> nil) and (datasource.state <> dsfilter) then begin
    fdscontroller.begindisplaydata;
   end;
   activerecord:= int1;
@@ -8578,7 +8579,7 @@ end;
 
 procedure tgriddatalink.endgridrow(const ainfo: gridrowinfoty);
 begin
- if fdscontroller <> nil then begin
+ if (fdscontroller <> nil) and (datasource.state <> dsfilter) then begin
   fdscontroller.enddisplaydata;
  end;
  activerecord:= ainfo.row;
