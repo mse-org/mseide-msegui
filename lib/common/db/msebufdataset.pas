@@ -5585,14 +5585,22 @@ procedure tmsebufdataset.clearfilter;
 var
  int1: integer;
  statebefore: tdatasetstate;
- kindbefore,kind1: filtereditkindty;
+ kindbefore,kind1,firstki,lastki: filtereditkindty;
 begin
  checkactive;
  try
   disablecontrols;
   statebefore:= settempstate(dsfilter);
   kindbefore:= filtereditkind;
-  for kind1:= low(filtereditkindty) to high(filtereditkindty) do begin
+  if statebefore = dsfilter then begin
+   firstki:= filtereditkind;
+   lastki:= firstki;
+  end
+  else begin
+   firstki:= low(filtereditkindty);
+   lastki:= high(filtereditkindty);
+  end;
+  for kind1:= firstki to lastki do begin
    filtereditkind:= kind1;
    for int1:= 0 to fields.count - 1 do begin
     with fields[int1] do begin
