@@ -2531,6 +2531,7 @@ begin
     if filtered then begin
      state1:= settempstate(tdatasetstate(dscheckfilter));
      try
+      acceptable:= true;
       dofilterrecord(acceptable);
      finally
       restorestate(state1);
