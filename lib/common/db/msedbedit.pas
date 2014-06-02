@@ -1303,6 +1303,7 @@ type
    procedure endgridrow(const ainfo: gridrowinfoty);
    function getfirstrecord: integer; virtual;
    procedure checkactiverecord; virtual;
+   function  getrecordcount: integer; override;
    procedure datasetscrolled(distance: integer); override;
    procedure fieldchanged; override;
    procedure activechanged; override;
@@ -8594,6 +8595,14 @@ begin
   getobjectlinker.setlinkedvar(iobjectlink(self),tmsecomponent(avalue),
                   tmsecomponent(fnavigator));
   fintf.setnavigator(avalue);
+ end;
+end;
+
+function tgriddatalink.getrecordcount: integer;
+begin
+ result:= 1;
+ if dataset.state <> dsfilter then begin
+  result:= inherited getrecordcount;
  end;
 end;
 
