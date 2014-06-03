@@ -127,6 +127,7 @@ type
    frearanged: boolean; //set by rearange
    fgridsortdescend: boolean; //set by tdatacols before sorting
    function checkassigncompatibility(const source: tpersistent): boolean; virtual;
+   procedure checkindex1(const index: integer); 
    function assigndata(const source: tpersistent): boolean;
                        //false if not possible
    procedure assigntodata(const dest: tdatalist);
@@ -1548,6 +1549,13 @@ begin
  end;
 end;
 
+procedure tdatalist.checkindex1(const index: integer);
+begin
+ if (Index < 0) or (Index >= FCount) then begin
+  tlist.Error(SListIndexError, Index);
+ end;
+end;
+
 function tdatalist.internaladddata(const quelle; docopy: boolean): integer;
 var
  int1: integer;
@@ -2299,12 +2307,23 @@ var
  po1: pointer;
 begin
  if fromindex <> toindex then begin
+  normalizering;
+  checkindex1(toindex);
   beginupdate;
   getmem(po1,fsize);
   try
    internalgetdata(fromindex,po1^);
-   internaldeletedata(fromindex,false);
-   internalinsertdata(toindex,po1^,false);
+   if fromindex > toindex then begin
+    move((fdatapo+toindex*fsize)^,(fdatapo+toindex*fsize+fsize)^,
+                                                (fromindex-toindex)*fsize);
+   end
+   else begin
+    move((fdatapo+fromindex*fsize+fsize)^,(fdatapo+fromindex*fsize)^,
+                                                (toindex-fromindex)*fsize);
+   end;
+   move(po1^,(fdatapo+toindex*fsize)^,fsize);
+//   internaldeletedata(fromindex,false);
+//   internalinsertdata(toindex,po1^,false);
    datamoved(fromindex,toindex,1);
   finally
    freemem(po1);
