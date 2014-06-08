@@ -13,7 +13,7 @@
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-  Rewritten 2006-2013 by Martin Schreiber
+  Rewritten 2006-2014 by Martin Schreiber
 
  **********************************************************************}
 

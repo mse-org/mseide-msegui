@@ -1505,7 +1505,7 @@ begin
    if (pf1_refreshupdate in flags1) and update or 
       (pf1_refreshinsert in flags1) and not update then begin
     if int2 = 0 then begin
-     result:= 'returning ';
+     result:= ' returning ';
     end;
     result:= result + field1.fieldname + ',';
     inc(int2);
@@ -1576,9 +1576,7 @@ begin
  setlength(sql_set,length(sql_set)-1);
  setlength(sql_where,length(sql_where)-5);
  result := 'update ' + FTableName + ' set ' + sql_set + ' where ' + sql_where;
-// if refreshfieldvalues then begin
-  result:= result + refreshrecquery(true);
-// end;
+ result:= result + refreshrecquery(true);
 end;
 
 
@@ -1596,7 +1594,7 @@ begin
  for x := 0 to Fields.Count -1 do begin
   with fields[x] do begin
    if (fieldkind = fkdata) {and not IsNull} and 
-                          (pfInUpdate in ProviderFlags) then begin 
+                          (pfInInsert in ProviderFlags) then begin 
     sql_fields:= sql_fields + quotechar+FieldName+quotechar+ ',';
     sql_values:= sql_values + ':' + FieldName + ',';
    end;
@@ -1609,9 +1607,7 @@ begin
  setlength(sql_values,length(sql_values)-1);
  result := 'insert into ' + FTableName + ' (' + sql_fields + ') values (' +
                      sql_values + ')';
-// if refreshfieldvalues then begin
-  result:= result + ' '+refreshrecquery(false);
-// end;
+ result:= result + refreshrecquery(false);
 end;
 
 function tsqlquery.deleterecquery : msestring;

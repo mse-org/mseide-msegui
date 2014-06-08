@@ -13,7 +13,7 @@
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
- Modified 2013 by Martin Schreiber
+ Modified 2013-2014 by Martin Schreiber
 
  **********************************************************************}
 unit mdb;
@@ -63,7 +63,7 @@ type
   TUpdateMode = (upWhereAll, upWhereChanged, upWhereKeyOnly);
   TResolverResponse = (rrSkip, rrAbort, rrMerge, rrApply, rrIgnore);
 
-  TProviderFlag = (pfInUpdate, pfInWhere, pfInKey, pfHidden);
+  TProviderFlag = (pfInInsert, pfInUpdate, pfInWhere, pfInKey, pfHidden);
   TProviderFlags = set of TProviderFlag;
 
 { Forward declarations }
@@ -456,7 +456,8 @@ type
     property LookupKeyFields: string read FLookupKeyFields write FLookupKeyFields;
     property LookupResultField: string read FLookupResultField write FLookupResultField;
     property Origin: string read FOrigin write FOrigin;
-    property ProviderFlags : TProviderFlags read FProviderFlags write FProviderFlags;
+    property ProviderFlags : TProviderFlags read FProviderFlags 
+                                                 write FProviderFlags;
     property ReadOnly: Boolean read FReadOnly write SetReadOnly;
     property Required: Boolean read FRequired write FRequired;
     property Visible: Boolean read FVisible write SetVisible default True;
@@ -5325,7 +5326,7 @@ begin
   FVisible:=True;
   FValidChars:=[#0..#255];
 
-  FProviderFlags := [pfInUpdate,pfInWhere];
+  FProviderFlags := [pfInInsert,pfInUpdate,pfInWhere];
 end;
 
 destructor TField.Destroy;

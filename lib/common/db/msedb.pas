@@ -74,7 +74,7 @@ const
                 realfields + datetimefields;
  widestringfields = [ftwidestring,ftfixedwidechar,ftwidememo];
  blobfields = [ftblob,ftmemo,ftgraphic{,ftstring}];
- defaultproviderflags = [pfInUpdate,pfInWhere];
+ defaultproviderflags = [pfInInsert,pfInUpdate,pfInWhere];
 
  varsizefields = [ftstring,ftfixedchar,ftwidestring,ftfixedwidechar,
                   ftbytes,ftvarbytes,ftbcd,ftfmtbcd];
