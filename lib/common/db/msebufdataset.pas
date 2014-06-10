@@ -3346,29 +3346,31 @@ begin
  po1:= fcurrentbuf;
  recnobefore:= frecno;
  deleterecord(frecno);
- if not getrecordupdatebuffer then begin
-  getnewupdatebuffer;
-  with fupdatebuffer[fcurrentupdatebuffer] do begin
-   info.bookmark.recno:= recnobefore;
-   info.bookmark.recordpo:= po1;
-   oldvalues:= info.bookmark.recordpo;
-  end;
- end
- else begin
-  with fupdatebuffer[fcurrentupdatebuffer] do begin
-   intfreerecord(info.bookmark.recordpo);
-   if info.updatekind = ukmodify then begin
-    info.bookmark.recordpo:= oldvalues;
-   end
-   else begin //ukinsert
-    info.bookmark.recordpo := nil;  //this 'disables' the updatebuffer
+ if not (dso_noapply in fcontroller.options) then begin
+  if not getrecordupdatebuffer then begin
+   getnewupdatebuffer;
+   with fupdatebuffer[fcurrentupdatebuffer] do begin
+    info.bookmark.recno:= recnobefore;
+    info.bookmark.recordpo:= po1;
+    oldvalues:= info.bookmark.recordpo;
+   end;
+  end
+  else begin
+   with fupdatebuffer[fcurrentupdatebuffer] do begin
+    intfreerecord(info.bookmark.recordpo);
+    if info.updatekind = ukmodify then begin
+     info.bookmark.recordpo:= oldvalues;
+    end
+    else begin //ukinsert
+     info.bookmark.recordpo := nil;  //this 'disables' the updatebuffer
+    end;
    end;
   end;
- end;
- fupdatebuffer[fcurrentupdatebuffer].info.updatekind := ukdelete;
- if flogger <> nil then begin
-  logupdatebuffer(flogger,fupdatebuffer[fcurrentupdatebuffer],po1,true,lf_update);
-  flogger.flushbuffer;
+  fupdatebuffer[fcurrentupdatebuffer].info.updatekind := ukdelete;
+  if flogger <> nil then begin
+   logupdatebuffer(flogger,fupdatebuffer[fcurrentupdatebuffer],po1,true,lf_update);
+   flogger.flushbuffer;
+  end;
  end;
 end;
 
@@ -3924,61 +3926,55 @@ var
  bo1: boolean;
  ar1,ar2,ar3: integerarty;
  newupdatebuffer: boolean;
+ canapply: boolean;
  
 begin
  checkindex(false); //needed for first append
  with pdsrecordty(activebuffer)^ do begin
   bo1:= false;
- {
-  with header do begin
-   for int1:= high(blobinfo) downto 0 do begin
-    if blobinfo[int1].new then begin
-     blobinfo[int1].new:= false;
-     bo1:= true;
-    end;
-   end;
-  end;
- }
   if state = dsinsert then begin
    fcurrentbuf:= intallocrecord;
   end;
-  newupdatebuffer:= not getrecordupdatebuffer;
-  if newupdatebuffer then begin
-   getnewupdatebuffer;
-   with fupdatebuffer[fcurrentupdatebuffer] do begin
-    info.bookmark.recordpo:= fcurrentbuf;
-    info.bookmark.recno:= frecno;
-    if state = dsedit then begin
-     oldvalues:= intallocrecord;
-     move(info.bookmark.recordpo^,oldvalues^,frecordsize+intheadersize);
-     addrefvalues(oldvalues^.header);
-     po1:= getintblobpo;
-     if po1^ <> nil then begin
-      po2:= @oldvalues^.header.blobinfo;
-      pointer(po2^):= nil;
-      setlength(po2^,length(po1^));
-      for int1:= high(po1^) downto 0 do begin //copy blobs
-       po2^[int1]:= po1^[int1];
-       with po2^[int1] do begin
-        if datalength > 0 then begin
-         getmem(po3,datalength);
-         move(data^,po3^,datalength);
-         data:= po3;
-        end
-        else begin
-         data:= nil;
+  canapply:= not (dso_noapply in fcontroller.options);
+  if canapply then begin
+   newupdatebuffer:= not getrecordupdatebuffer;
+   if newupdatebuffer then begin
+    getnewupdatebuffer;
+    with fupdatebuffer[fcurrentupdatebuffer] do begin
+     info.bookmark.recordpo:= fcurrentbuf;
+     info.bookmark.recno:= frecno;
+     if state = dsedit then begin
+      oldvalues:= intallocrecord;
+      move(info.bookmark.recordpo^,oldvalues^,frecordsize+intheadersize);
+      addrefvalues(oldvalues^.header);
+      po1:= getintblobpo;
+      if po1^ <> nil then begin
+       po2:= @oldvalues^.header.blobinfo;
+       pointer(po2^):= nil;
+       setlength(po2^,length(po1^));
+       for int1:= high(po1^) downto 0 do begin //copy blobs
+        po2^[int1]:= po1^[int1];
+        with po2^[int1] do begin
+         if datalength > 0 then begin
+          getmem(po3,datalength);
+          move(data^,po3^,datalength);
+          data:= po3;
+         end
+         else begin
+          data:= nil;
+         end;
         end;
        end;
       end;
+      info.updatekind := ukmodify;
+     end
+     else begin
+      info.updatekind := ukinsert;
      end;
-     info.updatekind := ukmodify;
-    end
-    else begin
-     info.updatekind := ukinsert;
     end;
    end;
   end;
-
+  
   with header do begin
    for int1:= high(blobinfo) downto 0 do begin
     with blobinfo[int1] do begin
@@ -4000,7 +3996,8 @@ begin
   end;
   finalizevalues(fcurrentbuf^.header);
   move(header,fcurrentbuf^.header,frecordsize); //get new field values
-  if flogger <> nil then begin
+
+  if (flogger <> nil) and canapply then begin
    logrecbuffer(flogger,fupdatebuffer[fcurrentupdatebuffer].info.updatekind,
                      fcurrentbuf);
    if newupdatebuffer then begin
@@ -4009,6 +4006,7 @@ begin
    end;
    flogger.flushbuffer;
   end;
+  
   if state = dsinsert then begin
    with dsheader.bookmark do  begin
     frecno:= insertrecord(frecno,fcurrentbuf);

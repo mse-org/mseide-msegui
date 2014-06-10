@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2004-2013 by Martin Schreiber
+{ MSEgui Copyright (c) 2004-2014 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -1262,12 +1262,15 @@ type
  datasetoptionty = (dso_utf8,dso_stringmemo,dso_numboolean,
                          dso_waitcursor,
                          dso_initinternalcalc,
+
+                            //flags below probably will be moved to 
+                            //tsqlquery.options
                          dso_postsavepoint,
                          dso_cancelupdateonerror,dso_cancelupdatesonerror,
                          dso_cancelupdateondeleteerror,
                          dso_editonapplyerror,
                          dso_restoreupdateonsavepointrollback,
-                         dso_autoapply,
+                         dso_noapply,dso_autoapply,
                          dso_autocommitret,dso_autocommit,
                          dso_refreshafterapply,dso_recnoapplyrefresh,
                          dso_refreshtransaction,dso_refreshwaitcursor,
@@ -1276,6 +1279,7 @@ type
                          dso_cacheblobs,
                          dso_offline, //disconnect database after open
                          dso_local,   //do not connect database on open
+                        
                          dso_noedit,dso_noinsert,dso_noappend,dso_noupdate,
                          dso_nodelete,
                          dso_canceloncheckbrowsemode

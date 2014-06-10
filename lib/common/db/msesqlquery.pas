@@ -1907,7 +1907,8 @@ begin
  else begin
   if (fcursor <> nil) and 
                      (FCursor.FStatementType in datareturningtypes) then begin
-   Result:= Active and  FUpdateable and (not FReadOnly)
+   Result:= Active and 
+        (FUpdateable or (dso_noapply in fcontroller.options)) and (not FReadOnly)
   end
   else begin
    Result:= False;
