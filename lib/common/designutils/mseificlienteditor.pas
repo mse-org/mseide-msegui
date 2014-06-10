@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2014 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -14,7 +14,7 @@ uses
  mseglob,mseguiglob,mseguiintf,mseapplication,msestat,msemenus,msegui,
  msegraphics,msegraphutils,mseevent,mseclasses,mseforms,mseificomp,msedataedits,
  mseedit,msegrids,msestrings,msetypes,msewidgetgrid,msesimplewidgets,msewidgets,
- msegraphedits,msedatanodes,mselistbrowser,classes,mclasses;
+ msegraphedits,msedatanodes,mselistbrowser,classes,mclasses,msestatfile;
 
 type
  tmseificlienteditorfo = class(tmseform)
@@ -23,6 +23,7 @@ type
    tbutton2: tbutton;
    po: tpointeredit;
    na: tdropdownlistedit;
+   tstatfile1: tstatfile;
    procedure befdrop(const sender: TObject);
    procedure setval(const sender: TObject; var avalue: msestring;
                    var accept: Boolean);

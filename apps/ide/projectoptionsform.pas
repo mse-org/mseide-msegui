@@ -851,7 +851,8 @@ uses
  componentpaletteform,mserichstring,msesettings,formdesigner,actionsmodule,
  msestringlisteditor,msetexteditor,msepropertyeditors,mseshapes,mseactions,
  componentstore,cpuform,msesysutils,msecomptree,msefont,typinfo
- {$ifndef mse_no_db}{$ifdef FPC},msedbfieldeditor{$endif}{$endif};
+ {$ifndef mse_no_db}{$ifdef FPC},msedbfieldeditor{$endif}{$endif}
+ {$ifndef mse_no_ifi}{$ifdef FPC},mseificomponenteditors{$endif}{$endif};
 
 var
  projectoptionsfo: tprojectoptionsfo;
@@ -1356,6 +1357,9 @@ begin
    {$ifndef mse_no_db}{$ifdef FPC}
    deletememorystatstream(dbfieldeditorstatname);
    {$endif}{$endif}
+   {$ifndef mse_no_ifi}{$ifdef FPC}
+   deletememorystatstream(ificlienteditorstatname);
+   {$endif}{$endif}
    modified:= false;
    savechecked:= false;
    findreplaceinfo.find.options:= [so_caseinsensitive];
@@ -1682,6 +1686,9 @@ begin
   updatememorystatstream('codetemplateedit',codetemplateeditstatname);
 {$ifndef mse_no_db}{$ifdef FPC}
   updatememorystatstream('dbfieldeditor',dbfieldeditorstatname);
+{$endif}{$endif}
+{$ifndef mse_no_ifi}{$ifdef FPC}
+  updatememorystatstream('ificlienteditor',ificlienteditorstatname);
 {$endif}{$endif}
 
   updateprojectsettings(statfiler);

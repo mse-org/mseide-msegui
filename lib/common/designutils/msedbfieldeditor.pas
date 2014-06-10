@@ -24,7 +24,6 @@ uses
 
 const
  dbfieldeditorstatname =  'dbfieldeditor.sta';
- 
 type
  tmsedbfieldeditorfo = class(tmseform)
    tbutton1: tbutton;

@@ -158,6 +158,7 @@ begin
  end;
 // internalloaddatalists(acols);
  internalloaddatalists(ar1);
+ active:= false;
 end;
 
 end.

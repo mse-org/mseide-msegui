@@ -12,6 +12,9 @@ unit mseificomponenteditors;
 interface
 uses
  msecomponenteditors,msedesignintf,classes,mclasses,mseificlienteditor;
+
+const
+ ificlienteditorstatname = 'ificlienteditor.sta';
  
 type
  tifilinkcompeditor = class(tcomponenteditor)

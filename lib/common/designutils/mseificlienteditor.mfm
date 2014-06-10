@@ -4,8 +4,15 @@ object mseificlienteditorfo: tmseificlienteditorfo
   bounds_y = 263
   bounds_cx = 284
   bounds_cy = 253
+  container.bounds = (
+    0
+    0
+    284
+    253
+  )
   options = [fo_closeonesc, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savezorder, fo_savestate]
-  caption = 'IFI Client Editor'
+  statfile = tstatfile1
+  caption = 'IfI Client Editor'
   moduleclassname = 'tmseform'
   object grid: twidgetgrid
     bounds_x = 0
@@ -21,29 +28,31 @@ object mseificlienteditorfo: tmseificlienteditorfo
         numstep = 1
       end>
     datacols.count = 2
+    datacols.options = [co_savestate, co_mousescrollrow]
     datacols.items = <    
-      item
-        options = [co_invisible, co_drawfocus, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+      item[po]
+        options = [co_invisible, co_drawfocus, co_savestate, co_mousescrollrow]
         widgetname = 'po'
         dataclass = tgridpointerdatalist
       end    
-      item
+      item[na]
         width = 203
-        options = [co_fill, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+        options = [co_fill, co_savestate, co_mousescrollrow]
         oncellevent = celle
         widgetname = 'na'
         dataclass = tgridmsestringdatalist
       end>
     datarowheight = 16
+    statfile = tstatfile1
     reffontheight = 14
     object po: tpointeredit
-      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets]
       optionsskin = [osk_framebuttononly]
       taborder = 1
       bounds_x = 0
       bounds_y = 0
       bounds_cx = 50
       bounds_cy = 16
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_savestate, oe_checkvaluepaststatread]
       visible = False
     end
     object na: tdropdownlistedit
@@ -58,6 +67,7 @@ object mseificlienteditorfo: tmseificlienteditorfo
       bounds_y = 0
       bounds_cx = 203
       bounds_cy = 16
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_savestate, oe_checkvaluepaststatread]
       onsetvalue = setval
       dropdown.options = [deo_selectonly, deo_autodropdown, deo_keydropdown]
       dropdown.cols.count = 1
@@ -89,5 +99,11 @@ object mseificlienteditorfo: tmseificlienteditorfo
     state = [as_localdefault, as_localcaption]
     caption = '&Cancel'
     modalresult = mr_cancel
+  end
+  object tstatfile1: tstatfile
+    filename = 'ificlienteditor.sta'
+    options = [sfo_memory]
+    left = 40
+    top = 88
   end
 end
