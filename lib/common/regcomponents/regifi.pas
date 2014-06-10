@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2011 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2014 by Martin Schreiber
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -58,12 +58,23 @@ type
   protected
    function getdefaultstate: propertystatesty; override;
   public
+   procedure setvalue(const value: msestring); override;
    function getvalues: msestringarty; override;
  end;
 
  tifidataconnectionpropertyeditor = class(tcomponentinterfacepropertyeditor)
   protected
    function getintfinfo: ptypeinfo; override;
+ end;
+
+ tificonnectedfieldselementeditor = class(tclasselementeditor)
+  protected
+   function dispname: msestring; override;
+ end;
+ 
+ tificonnectedfieldspropertyeditor = class(tpersistentarraypropertyeditor)
+  protected
+   function geteditorclass: propertyeditorclassty; override;
  end;
  
 procedure register;
@@ -96,6 +107,8 @@ begin
                                           tififieldnamepropertyeditor);
  registerpropertyeditor(typeinfo(ifisourcefieldnamety),nil,'',
                                           tifisourcefieldnamepropertyeditor);
+ registerpropertyeditor(typeinfo(tificonnectedfields),nil,'',
+                                          tificonnectedfieldspropertyeditor);
  registerpropertyeditor(typeinfo(tmsecomponent),tifidatasource,'connection',
                                  tifidataconnectionpropertyeditor);
 end;
@@ -169,7 +182,7 @@ end;
 
 function tifisourcefieldnamepropertyeditor.getdefaultstate: propertystatesty;
 begin
- result:= inherited getdefaultstate + [ps_valuelist,ps_sortlist];
+ result:= inherited getdefaultstate + [ps_valuelist,ps_sortlist,ps_volatile];
 end;
 
 function tifisourcefieldnamepropertyeditor.getvalues: msestringarty;
@@ -183,11 +196,38 @@ begin
  end;
 end;
 
+procedure tifisourcefieldnamepropertyeditor.setvalue(const value: msestring);
+var
+ intf1: iififieldlinksource;
+begin
+ inherited;
+ if getcorbainterface(fprops[0].instance,
+                                typeinfo(iififieldlinksource),intf1) then begin
+  intf1.setdesignsourcefieldname(value);
+ end;
+end;
+
 { tifidataconnectionpropertyeditor }
 
 function tifidataconnectionpropertyeditor.getintfinfo: ptypeinfo;
 begin
  result:= typeinfo(iifidataconnection);
+end;
+
+{ tificonnectedfieldselementeditor }
+
+function tificonnectedfieldselementeditor.dispname: msestring;
+begin
+ with tififieldlink(getordvalue) do begin
+  result:= '<'+sourcefieldname+'><'+fieldname+'>';
+ end;
+end;
+
+{ tificonnectedfieldspropertyeditor }
+
+function tificonnectedfieldspropertyeditor.geteditorclass: propertyeditorclassty;
+begin
+ result:= tificonnectedfieldselementeditor;
 end;
 
 initialization

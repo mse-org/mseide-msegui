@@ -1007,6 +1007,7 @@ type
  iififieldlinksource = interface(inullinterface)
                        ['{05C4CF92-10B8-40B0-85F4-6885EBF42FF5}']
   function getfieldnames(const apropname: ifisourcefieldnamety): msestringarty;
+  procedure setdesignsourcefieldname(const aname: ifisourcefieldnamety);
  end;
   
  tififield = class(tvirtualpersistent)
@@ -1038,8 +1039,10 @@ type
    fsourcefieldname: ifisourcefieldnamety;
   protected
    fowner: tififieldlinks;
+    //iififieldlinksource
    function getfieldnames(
                   const appropname: ifisourcefieldnamety): msestringarty;
+   procedure setdesignsourcefieldname(const aname: ifisourcefieldnamety);
   {$ifndef FPC}
    function _addref: integer; stdcall;
    function _release: integer; stdcall;
@@ -1048,7 +1051,7 @@ type
   public
   published
    property sourcefieldname: ifisourcefieldnamety read fsourcefieldname
-                         write fsourcefieldname;
+                                                     write fsourcefieldname;
  end;
  ififieldlinkclassty = class of tififieldlink;
  
@@ -1134,6 +1137,7 @@ end;
    fconnectionintf: iifidataconnection;
    function getfieldnames(const adatatype: listdatatypety): msestringarty;
    procedure open; override;
+   procedure close; override;
    procedure checkconnection;
   public
    constructor create(aowner: tcomponent); override;
@@ -3725,9 +3729,17 @@ end;
 
 { tififieldlink }
 
-function tififieldlink.getfieldnames(const appropname: ifisourcefieldnamety): msestringarty;
+function tififieldlink.getfieldnames(
+                  const appropname: ifisourcefieldnamety): msestringarty;
 begin
  result:= fowner.getfieldnames(datatype);
+end;
+
+procedure tififieldlink.setdesignsourcefieldname(const aname: ifisourcefieldnamety);
+begin
+ if ffieldname = '' then begin
+  ffieldname:= aname;
+ end;
 end;
 
 {$ifndef FPC}
@@ -3837,6 +3849,18 @@ begin
  ar2:= destdatalists;
  fconnectionintf.fetchdata(tificonnectedfields(ffields).sourcefieldnames,ar2);
  afteropen;
+end;
+
+procedure tconnectedifidatasource.close;
+var
+ ar1: datalistarty;
+ int1: integer;
+begin
+ ar1:= destdatalists;
+ for int1:= 0 to high(ar1) do begin
+  ar1[int1].clear;
+ end;
+ inherited;
 end;
 
 procedure tconnectedifidatasource.checkconnection;
