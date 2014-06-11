@@ -1,0 +1,326 @@
+object mseififieldeditorfo: tmseififieldeditorfo
+  optionswidget = [ow_arrowfocus, ow_subfocus, ow_destroywidgets, ow_hinton]
+  visible = False
+  bounds_x = 29
+  bounds_y = 248
+  bounds_cx = 601
+  bounds_cy = 216
+  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets]
+  container.frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
+  container.frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
+  container.bounds = (
+    0
+    0
+    601
+    216
+  )
+  options = [fo_closeonesc, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
+  statfile = tstatfile1
+  oneventloopstart = formloaded
+  moduleclassname = 'tmseform'
+  object tbutton1: tbutton
+    taborder = 3
+    bounds_x = 472
+    bounds_y = 184
+    bounds_cx = 50
+    bounds_cy = 22
+    anchors = [an_right, an_bottom]
+    state = [as_default, as_localdefault, as_localcaption]
+    caption = 'OK'
+    modalresult = mr_ok
+  end
+  object tbutton2: tbutton
+    bounds_x = 536
+    bounds_y = 184
+    bounds_cx = 50
+    bounds_cy = 22
+    anchors = [an_right, an_bottom]
+    state = [as_localcaption]
+    caption = 'Cancel'
+    modalresult = mr_cancel
+  end
+  object fielddefli: tstringgrid
+    frame.caption = 'Fielddefs'
+    frame.captionpos = cp_top
+    frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
+    frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
+    frame.outerframe = (
+      0
+      17
+      0
+      0
+    )
+    taborder = 1
+    bounds_x = 336
+    bounds_y = 7
+    bounds_cx = 258
+    bounds_cy = 171
+    bounds_cxmin = 50
+    anchors = [an_left, an_top, an_right, an_bottom]
+    optionsgrid = [og_colsizing, og_focuscellonenter, og_colchangeontabkey, og_wrapcol, og_autopopup]
+    datacols.count = 2
+    datacols.options = [co_readonly, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate]
+    datacols.items = <    
+      item
+        width = 123
+        options = [co_readonly, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savestate]
+        optionsedit = [scoe_eatreturn]
+        valuefalse = '0'
+        valuetrue = '1'
+      end    
+      item
+        width = 129
+        options = [co_readonly, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savestate]
+        optionsedit = [scoe_eatreturn]
+        valuefalse = '0'
+        valuetrue = '1'
+      end>
+    fixrows.count = 1
+    fixrows.items = <    
+      item
+        height = 16
+        captions.count = 2
+        captions.items = <        
+          item
+            caption = 'Name'
+          end        
+          item
+            caption = 'Type'
+          end>
+      end>
+    rowfonts.count = 1
+    rowfonts.items = <    
+      item
+        color = -1610612732
+        name = 'stf_default'
+        xscale = 1
+        dummy = 0
+      end>
+    datarowheight = 16
+    oncellevent = defscellevent
+    onselectionchanged = defsselectioncha
+    reffontheight = 14
+  end
+  object fields: twidgetgrid
+    frame.caption = 'Fields'
+    frame.captionpos = cp_top
+    frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
+    frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
+    frame.outerframe = (
+      0
+      17
+      0
+      0
+    )
+    taborder = 2
+    bounds_x = 8
+    bounds_y = 7
+    bounds_cx = 323
+    bounds_cy = 171
+    anchors = [an_left, an_top, an_bottom]
+    optionsgrid = [og_colsizing, og_rowmoving, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_sorted, og_colchangeontabkey, og_wrapcol, og_autopopup]
+    fixcols.count = 1
+    fixcols.items = <    
+      item
+        width = 15
+        numstep = 1
+      end>
+    fixrows.count = 1
+    fixrows.items = <    
+      item
+        height = 16
+        captions.count = 5
+        captions.items = <        
+          item
+          end        
+          item
+          end        
+          item
+            caption = 'Name'
+          end        
+          item
+            caption = 'Class type'
+          end        
+          item
+            caption = 'Field kind'
+          end>
+      end>
+    rowfonts.count = 1
+    rowfonts.items = <    
+      item
+        color = -1610612732
+        name = 'stf_default'
+        xscale = 1
+        dummy = 0
+      end>
+    datacols.count = 5
+    datacols.options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate]
+    datacols.items = <    
+      item[index]
+        width = 13
+        options = [co_invisible, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savevalue, co_savestate]
+        widgetname = 'index'
+        dataclass = tgridintegerdatalist
+      end    
+      item[fieldpo]
+        width = 12
+        options = [co_invisible, co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate]
+        widgetname = 'fieldpo'
+        dataclass = tgridpointerdatalist
+      end    
+      item[fieldname]
+        width = 97
+        options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savevalue, co_savestate]
+        widgetname = 'fieldname'
+        dataclass = tgridmsestringdatalist
+      end    
+      item[classty]
+        width = 92
+        options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savevalue, co_savestate]
+        widgetname = 'classty'
+        dataclass = tgridenumdatalist
+      end    
+      item[fieldkind]
+        width = 84
+        options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savevalue, co_savestate]
+        widgetname = 'fieldkind'
+        dataclass = tgridenumdatalist
+      end>
+    datarowheight = 16
+    onrowsdeleting = fieldrowsdeleting
+    onrowsdeleted = fieldsrowdel
+    oncellevent = fieldcellevent
+    onselectionchanged = fieldselectioncha
+    onsort = fieldsort
+    reffontheight = 14
+    object index: tintegeredit
+      optionswidget1 = [ow1_fontglyphheight]
+      optionsskin = [osk_noskin]
+      taborder = 1
+      visible = False
+      bounds_x = 0
+      bounds_y = 0
+      bounds_cx = 13
+      bounds_cy = 16
+      reffontheight = 14
+    end
+    object fieldpo: tpointeredit
+      optionsskin = [osk_noskin]
+      taborder = 2
+      bounds_x = 14
+      bounds_y = 0
+      bounds_cx = 12
+      bounds_cy = 16
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_savestate, oe_autopopupmenu, oe_keyexecute]
+      visible = False
+    end
+    object fieldname: tstringedit
+      optionsskin = [osk_framebuttononly]
+      taborder = 3
+      visible = False
+      bounds_x = 27
+      bounds_y = 0
+      bounds_cx = 97
+      bounds_cy = 16
+      ondataentered = fieldsdataentered
+      onsetvalue = fieldnamesetvalue
+      reffontheight = 14
+    end
+    object classty: tenumtypeedit
+      optionswidget1 = [ow1_fontglyphheight]
+      optionsskin = [osk_framebuttononly]
+      frame.levelo = 0
+      frame.colorclient = -2147483646
+      frame.localprops = [frl_levelo, frl_colorclient]
+      frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
+      frame.button.color = -1879048187
+      taborder = 4
+      visible = False
+      bounds_x = 125
+      bounds_y = 0
+      bounds_cx = 92
+      bounds_cy = 16
+      valuedefault = 0
+      min = 0
+      dropdown.cols.count = 1
+      dropdown.cols.items = <      
+        item
+        end>
+      oninit = initcla
+      reffontheight = 14
+    end
+    object fieldkind: tenumtypeedit
+      optionswidget1 = [ow1_fontglyphheight]
+      optionsskin = [osk_framebuttononly]
+      frame.levelo = 0
+      frame.colorclient = -2147483646
+      frame.localprops = [frl_levelo, frl_colorclient]
+      frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
+      frame.button.width = 15
+      frame.button.color = -1879048187
+      taborder = 5
+      visible = False
+      bounds_x = 218
+      bounds_y = 0
+      bounds_cx = 84
+      bounds_cy = 16
+      valuedefault = 0
+      min = 0
+      dropdown.cols.count = 1
+      dropdown.cols.items = <      
+        item
+        end>
+      oninit = initfieldkind
+      reffontheight = 14
+    end
+  end
+  object splitter: tsplitter
+    color = -1879048189
+    taborder = 6
+    bounds_x = 331
+    bounds_y = 24
+    bounds_cx = 5
+    bounds_cy = 154
+    anchors = [an_left, an_top, an_bottom]
+    options = [spo_hmove, spo_hprop]
+    linkleft = fields
+    linkright = fielddefli
+    statfile = tstatfile1
+    onupdatelayout = splitterupda
+  end
+  object deftofield: tstockglyphbutton
+    optionswidget = [ow_destroywidgets]
+    taborder = 5
+    bounds_x = 338
+    bounds_y = 5
+    bounds_cx = 28
+    bounds_cy = 15
+    state = [as_disabled, as_localdisabled, as_localimagelist, as_localimagenr, as_localonexecute]
+    glyph = stg_arrowleft
+    onexecute = transferfields
+  end
+  object fieldtodef: tstockglyphbutton
+    optionswidget = [ow_destroywidgets]
+    taborder = 4
+    bounds_x = 303
+    bounds_y = 5
+    bounds_cx = 28
+    bounds_cy = 15
+    state = [as_disabled, as_localdisabled, as_localimagelist, as_localimagenr, as_localonexecute]
+    glyph = stg_arrowright
+    onexecute = deletefields
+  end
+  object tstatfile1: tstatfile
+    filename = 'ififieldeditor.sta'
+    options = [sfo_memory]
+    left = 24
+    top = 152
+  end
+  object c: tstringcontainer
+    strings.data = (
+      'Connection'
+    )
+    left = 152
+    top = 152
+  end
+end

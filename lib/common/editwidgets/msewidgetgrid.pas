@@ -3642,12 +3642,12 @@ begin
      widget1:= fintf.getwidget;
      if widget1 <> nil then begin
       translateclientpoint1(mouseinfo.pos,self,widget1);
-      mouseinfo.eventstate:= mouseinfo.eventstate + [es_parent,es_child];
+      mouseinfo.eventstate:= mouseinfo.eventstate + [es_parent{,es_child}];
       try
        fintf.updatepopupmenu(amenu,mouseinfo);
       finally    
        translateclientpoint1(mouseinfo.pos,widget1,self);
-       mouseinfo.eventstate:= mouseinfo.eventstate - [es_parent,es_child];
+       mouseinfo.eventstate:= mouseinfo.eventstate - [es_parent{,es_child}];
       end;
      end;
     end;

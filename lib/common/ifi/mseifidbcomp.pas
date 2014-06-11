@@ -40,12 +40,25 @@ type
    property source: tsqlresult read fsource write setsource;
  end;
 }
- tifisqlresult = class(tsqlresult,iifidataconnection)
+ dbfieldinfoty = record
+  name: msestring;
+  datatype: tfieldtype;
+ end;
+ dbfieldinfoarty = array of dbfieldinfoty;
+ 
+ iifidbdataconnection = interface(iifidataconnection)
+                    ['{B051E0C1-31DB-490C-9A95-CA07516B1E7F}']
+  function getfieldinfos: dbfieldinfoarty;
+ end;
+ 
+ tifisqlresult = class(tsqlresult,iifidataconnection,iifidbdataconnection)
   protected
     //iifidataconnection
    procedure fetchdata(const acolnames: array of string; 
                                                   acols: array of tdatalist);
    function getfieldnames(const adatatype: listdatatypety): msestringarty;
+    //iifidbdataconnection
+   function getfieldinfos: dbfieldinfoarty;
   public
  end;
   
@@ -76,7 +89,8 @@ begin
   setlength(result,afielddefs.count);
   for int1:= 0 to afielddefs.count-1 do begin
    with afielddefs[int1] do begin
-    if datatype in listtypecompatibledbtypes[atype] then begin
+    if (atype = dl_none) or 
+              (datatype in listtypecompatibledbtypes[atype]) then begin
      result[int2]:= name;
      inc(int2);
     end;
@@ -159,6 +173,21 @@ begin
 // internalloaddatalists(acols);
  internalloaddatalists(ar1);
  active:= false;
+end;
+
+function tifisqlresult.getfieldinfos: dbfieldinfoarty;
+var
+ int1: integer;
+ def1: tfielddef;
+begin
+ setlength(result,fielddefs.count);
+ for int1:= 0 to high(result) do begin
+  def1:= fielddefs[int1];
+  with result[int1] do begin
+   name:= def1.name;
+   datatype:= def1.datatype;
+  end;
+ end;
 end;
 
 end.

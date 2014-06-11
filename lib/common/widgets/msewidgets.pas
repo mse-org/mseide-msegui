@@ -4781,7 +4781,8 @@ end;
 procedure tactionwidget.updatepopupmenu(var amenu: tpopupmenu;
                                         var mouseinfo: mouseeventinfoty);
 begin
- if (fpopupmenu <> nil) then begin
+ if (fpopupmenu <> nil) and not ((es_child in mouseinfo.eventstate) and
+                              (mo_noinsert in fpopupmenu.options)) then begin
   tpopupmenu.additems(amenu,self,mouseinfo,fpopupmenu);
  end;
 end;

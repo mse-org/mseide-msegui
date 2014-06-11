@@ -852,7 +852,8 @@ uses
  msestringlisteditor,msetexteditor,msepropertyeditors,mseshapes,mseactions,
  componentstore,cpuform,msesysutils,msecomptree,msefont,typinfo
  {$ifndef mse_no_db}{$ifdef FPC},msedbfieldeditor{$endif}{$endif}
- {$ifndef mse_no_ifi}{$ifdef FPC},mseificomponenteditors{$endif}{$endif};
+ {$ifndef mse_no_ifi}{$ifdef FPC},mseificomponenteditors,
+ mseififieldeditor{$endif}{$endif};
 
 var
  projectoptionsfo: tprojectoptionsfo;
@@ -1359,6 +1360,7 @@ begin
    {$endif}{$endif}
    {$ifndef mse_no_ifi}{$ifdef FPC}
    deletememorystatstream(ificlienteditorstatname);
+   deletememorystatstream(ififieldeditorstatname);
    {$endif}{$endif}
    modified:= false;
    savechecked:= false;
@@ -1689,6 +1691,7 @@ begin
 {$endif}{$endif}
 {$ifndef mse_no_ifi}{$ifdef FPC}
   updatememorystatstream('ificlienteditor',ificlienteditorstatname);
+  updatememorystatstream('ififieldeditor',ififieldeditorstatname);
 {$endif}{$endif}
 
   updateprojectsettings(statfiler);

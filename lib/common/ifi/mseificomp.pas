@@ -1122,7 +1122,8 @@ end;
  tificonnectedfields = class(tififieldlinks)
   protected
    fowner: tconnectedifidatasource;
-   function getfieldnames(const adatatype: listdatatypety): msestringarty; override;
+   function getfieldnames(
+                     const adatatype: listdatatypety): msestringarty; override;
   public
    constructor create(const aowner: tconnectedifidatasource);
  end;
@@ -3832,7 +3833,8 @@ begin
  inherited setfields(avalue);
 end;
 
-function tconnectedifidatasource.getfieldnames(const adatatype: listdatatypety): msestringarty;
+function tconnectedifidatasource.getfieldnames(
+                   const adatatype: listdatatypety): msestringarty;
 begin
  if fconnectionintf <> nil then begin
   result:= fconnectionintf.getfieldnames(adatatype);

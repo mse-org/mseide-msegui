@@ -1964,7 +1964,7 @@ begin
   end;
  end;
 end;
-var testvar1: pixmapinfoty;
+
 procedure rgbtogray(const sdev: paintdevicety; const srect: rectty;
                const ddev: paintdevicety; const dpos: pointty; const gc: pgcty);
 var
@@ -2026,8 +2026,6 @@ begin
     else begin
      gc1:= xcreategc(appdisp,ddev,0,nil);
     end;
-testvar1.handle:= ddev;
-gui_getpixmapinfo(testvar1);
     xputimage(appdisp,ddev,gc1,dimage,0,0,dpos.x,dpos.y,cx,cy);
     if gc = nil then begin
      xfreegc(appdisp,gc1);

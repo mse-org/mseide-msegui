@@ -18,7 +18,8 @@ uses
  msetypes,msestrings,classes,mclasses,msekeyboard,msebitmap;
 
 type
- menuoptionty = (mo_insertfirst,mo_noseparator,mo_singleregion,mo_shortcutright,mo_commonwidth,
+ menuoptionty = (mo_noinsert,mo_insertfirst,mo_noseparator,
+                 mo_singleregion,mo_shortcutright,mo_commonwidth,
                  mo_activate,{mo_noanim,}mo_mainarrow,mo_updateonidle);
  menuoptionsty = set of menuoptionty;
 const

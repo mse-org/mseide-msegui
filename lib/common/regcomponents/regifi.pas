@@ -23,9 +23,10 @@ uses
  msecomponenteditors,mseificomponenteditors,msestrings,msedatalist,
  {$ifndef mse_no_db}{$ifdef FPC}mseifidbcomp,{$endif}{$endif}
  mseifidialogcomp,mseifigui,mseifiendpoint,
- typinfo; 
+ typinfo,mseififieldeditor;
     
 type
+ tificonnectedfields1 = class(tificonnectedfields);
 {
  tifiwidgeteditor = class(tcomponentpropertyeditor)
   protected
@@ -75,6 +76,9 @@ type
  tificonnectedfieldspropertyeditor = class(tpersistentarraypropertyeditor)
   protected
    function geteditorclass: propertyeditorclassty; override;
+   function getdefaultstate: propertystatesty; override;
+  public
+   procedure edit; override;
  end;
  
 procedure register;
@@ -228,6 +232,24 @@ end;
 function tificonnectedfieldspropertyeditor.geteditorclass: propertyeditorclassty;
 begin
  result:= tificonnectedfieldselementeditor;
+end;
+
+function tificonnectedfieldspropertyeditor.getdefaultstate: propertystatesty;
+var
+ po1: pointer;
+begin
+ result:= inherited getdefaultstate();
+ if mseclasses.getcorbainterface(
+             tificonnectedfields1(getordvalue).fowner.connection,
+                       typeinfo(iifidbdataconnection),po1) then begin
+
+  result:= result + [ps_dialog];
+ end;
+end;
+
+procedure tificonnectedfieldspropertyeditor.edit;
+begin
+ editififields(tificonnectedfields(getordvalue));
 end;
 
 initialization
