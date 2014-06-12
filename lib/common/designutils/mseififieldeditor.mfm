@@ -267,7 +267,6 @@ object mseififieldeditorfo: tmseififieldeditorfo
       bounds_cy = 16
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_notnull, oe_savevalue, oe_savestate, oe_checkvaluepaststatread]
       valuedefault = 0
-      valueempty = 0
       min = 0
       dropdown.cols.count = 1
       dropdown.cols.items = <      
