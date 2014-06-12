@@ -57,6 +57,8 @@ type
    procedure fetchdata(const acolnames: array of string; 
                                                   acols: array of tdatalist);
    function getfieldnames(const adatatype: listdatatypety): msestringarty;
+   function getdatatype(const aname: ansistring): listdatatypety;
+                           //dl_none if not found
     //iifidbdataconnection
    function getfieldinfos: dbfieldinfoarty;
   public
@@ -78,6 +80,27 @@ const
 //dl_complex,dl_rowstate,dl_custom
    [],        [],         []);       
 
+ listtypes: array[tfieldtype] of listdatatypety = (
+  //ftUnknown,ftString,     ftSmallint,ftInteger, ftWord,
+    dl_none,  dl_msestring,dl_integer,dl_integer,dl_integer,
+  //  ftBoolean,ftFloat,ftCurrency,ftBCD, 
+    dl_integer, dl_real,dl_real,   dl_currency,
+  //ftDate,     ftTime,     ftDateTime,
+    dl_datetime,dl_datetime,dl_datetime,
+  //ftBytes,      ftVarBytes,   ftAutoInc, ftBlob,       ftMemo,
+    dl_ansistring,dl_ansistring,dl_integer,dl_ansistring,dl_msestring,
+  //ftGraphic,    ftFmtMemo,
+    dl_ansistring,dl_msestring,
+  //ftParadoxOle,ftDBaseOle,ftTypedBinary,ftCursor,ftFixedChar,
+    dl_none,     dl_none,   dl_none,      dl_none, dl_msestring,
+  //ftWideString,ftLargeint,ftADT,  ftArray,ftReference,
+    dl_msestring,dl_int64,  dl_none,dl_none,dl_none,
+  //ftDataSet,ftOraBlob,ftOraClob,ftVariant,ftInterface,
+    dl_none,  dl_none,  dl_none,  dl_none,  dl_none,
+  //ftIDispatch,ftGuid, ftTimeStamp,ftFMTBcd,ftFixedWideChar,ftWideMemo);
+    dl_none,    dl_none,dl_datetime,dl_real, dl_msestring,   dl_msestring
+ );
+ 
 function matchfielddatatypes(const afielddefs: tfielddefs;
                           const atype: listdatatypety): msestringarty;
 var
@@ -99,6 +122,23 @@ begin
   setlength(result,int2);
  end;
 end;
+
+function fielddefstodatatype(const afielddefs: tfielddefs;
+                                  const aname: ansistring): listdatatypety;
+var
+ int1: integer;
+begin
+ result:= dl_none;
+ for int1:= 0 to afielddefs.count - 1 do begin
+  with afielddefs[int1] do begin
+   if name = aname then begin
+    result:= listtypes[datatype];
+    break;
+   end;
+  end;
+ end;
+end;
+
 (*
 { tifisqlfieldlinks }
 
@@ -149,9 +189,16 @@ end;
 *)
 { tifisqlresult }
 
-function tifisqlresult.getfieldnames(const adatatype: listdatatypety): msestringarty;
+function tifisqlresult.getfieldnames(
+                     const adatatype: listdatatypety): msestringarty;
 begin
  result:= matchfielddatatypes(fielddefs,adatatype);
+end;
+
+function tifisqlresult.getdatatype(const aname: ansistring): listdatatypety;
+                           //dl_none if not found
+begin
+ result:= fielddefstodatatype(fielddefs,aname);
 end;
 
 procedure tifisqlresult.fetchdata(const acolnames: array of string;

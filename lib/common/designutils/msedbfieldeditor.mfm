@@ -6,8 +6,6 @@ object msedbfieldeditorfo: tmsedbfieldeditorfo
   bounds_cx = 601
   bounds_cy = 216
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets]
-  container.frame.zoomwidthstep = 1
-  container.frame.zoomheightstep = 1
   container.frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
   container.frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
   container.bounds = (
@@ -242,6 +240,7 @@ object msedbfieldeditorfo: tmsedbfieldeditorfo
       bounds_y = 0
       bounds_cx = 92
       bounds_cy = 16
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_notnull, oe_savevalue, oe_savestate, oe_checkvaluepaststatread]
       valuedefault = 0
       min = 0
       dropdown.cols.count = 1
@@ -266,6 +265,7 @@ object msedbfieldeditorfo: tmsedbfieldeditorfo
       bounds_y = 0
       bounds_cx = 84
       bounds_cy = 16
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_notnull, oe_savevalue, oe_savestate, oe_checkvaluepaststatread]
       valuedefault = 0
       min = 0
       dropdown.cols.count = 1

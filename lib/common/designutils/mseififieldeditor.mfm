@@ -136,13 +136,13 @@ object mseififieldeditorfo: tmseififieldeditorfo
           item
           end        
           item
-            caption = 'Name'
+            caption = 'fieldname'
           end        
           item
-            caption = 'Class type'
+            caption = 'sourcefieldname'
           end        
           item
-            caption = 'Field kind'
+            caption = 'datatype'
           end>
       end>
     rowfonts.count = 1
@@ -169,21 +169,21 @@ object mseififieldeditorfo: tmseififieldeditorfo
         dataclass = tgridpointerdatalist
       end    
       item[fieldname]
-        width = 97
-        options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savevalue, co_savestate]
+        width = 92
+        options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savestate]
         widgetname = 'fieldname'
         dataclass = tgridmsestringdatalist
       end    
-      item[classty]
-        width = 92
-        options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savevalue, co_savestate]
-        widgetname = 'classty'
-        dataclass = tgridenumdatalist
+      item[sourcefieldname]
+        width = 119
+        options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savestate]
+        widgetname = 'sourcefieldname'
+        dataclass = tgridmsestringdatalist
       end    
-      item[fieldkind]
-        width = 84
+      item[datatype]
+        width = 62
         options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savevalue, co_savestate]
-        widgetname = 'fieldkind'
+        widgetname = 'datatype'
         dataclass = tgridenumdatalist
       end>
     datarowheight = 16
@@ -220,36 +220,37 @@ object mseififieldeditorfo: tmseififieldeditorfo
       visible = False
       bounds_x = 27
       bounds_y = 0
-      bounds_cx = 97
+      bounds_cx = 92
       bounds_cy = 16
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_notnull, oe_savestate, oe_checkvaluepaststatread]
       ondataentered = fieldsdataentered
       onsetvalue = fieldnamesetvalue
       reffontheight = 14
     end
-    object classty: tenumtypeedit
+    object sourcefieldname: tdropdownlistedit
       optionswidget1 = [ow1_fontglyphheight]
       optionsskin = [osk_framebuttononly]
       frame.levelo = 0
-      frame.colorclient = -2147483646
-      frame.localprops = [frl_levelo, frl_colorclient]
-      frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
+      frame.colorclient = -2147483645
+      frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
       frame.button.color = -1879048187
       taborder = 4
       visible = False
-      bounds_x = 125
+      bounds_x = 120
       bounds_y = 0
-      bounds_cx = 92
+      bounds_cx = 119
       bounds_cy = 16
-      valuedefault = 0
-      min = 0
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_notnull, oe_savestate, oe_checkvaluepaststatread]
+      onsetvalue = sourcefieldsetexe
+      dropdown.options = [deo_autodropdown, deo_keydropdown]
       dropdown.cols.count = 1
       dropdown.cols.items = <      
         item
         end>
-      oninit = initcla
+      onbeforedropdown = sourcebefdropexe
       reffontheight = 14
     end
-    object fieldkind: tenumtypeedit
+    object datatype: tenumtypeedit
       optionswidget1 = [ow1_fontglyphheight]
       optionsskin = [osk_framebuttononly]
       frame.levelo = 0
@@ -260,11 +261,13 @@ object mseififieldeditorfo: tmseififieldeditorfo
       frame.button.color = -1879048187
       taborder = 5
       visible = False
-      bounds_x = 218
+      bounds_x = 240
       bounds_y = 0
-      bounds_cx = 84
+      bounds_cx = 62
       bounds_cy = 16
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_notnull, oe_savevalue, oe_savestate, oe_checkvaluepaststatread]
       valuedefault = 0
+      valueempty = 0
       min = 0
       dropdown.cols.count = 1
       dropdown.cols.items = <      

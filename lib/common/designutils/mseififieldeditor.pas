@@ -20,7 +20,8 @@ interface
 uses
  mdb,msegui,mseclasses,mseforms,msedb,msestat,msestatfile,msesimplewidgets,
  msegrids,msewidgetgrid,msesplitter,msedataedits,msestrings,mseeditglob,
- msegraphedits,mseglob,msegridsglob,msestringcontainer,mseificomp,mseifidbcomp;
+ msegraphedits,mseglob,msegridsglob,msestringcontainer,mseificomp,mseifidbcomp,
+ mseedit,mseguiglob,mseificompglob,mseifiglob,msemenus,msetypes,msedatalist;
 
 const
  ififieldeditorstatname =  'ififieldeditor.sta';
@@ -29,10 +30,9 @@ type
    tbutton1: tbutton;
    tbutton2: tbutton;
    index: tintegeredit;
-   fieldkind: tenumtypeedit;
+   datatype: tenumtypeedit;
    splitter: tsplitter;
    fieldpo: tpointeredit;
-   classty: tenumtypeedit;
    tstatfile1: tstatfile;
    fielddefli: tstringgrid;
    fields: twidgetgrid;
@@ -40,6 +40,7 @@ type
    deftofield: tstockglyphbutton;
    fieldtodef: tstockglyphbutton;
    c: tstringcontainer;
+   sourcefieldname: tdropdownlistedit;
    procedure formloaded(const sender: TObject);
    procedure initcla(const sender: tenumtypeedit);
    procedure splitterupda(const sender: TObject);
@@ -59,11 +60,16 @@ type
    procedure deletefields(const sender: TObject);
    procedure fieldsort(const sender: tcustomgrid; const index1: Integer;
                    const index2: Integer; var aresult: Integer);
+   procedure sourcebefdropexe(const sender: TObject);
+   procedure sourcefieldsetexe(const sender: TObject; var avalue: msestring;
+                   var accept: Boolean);
   private
    ffields: tificonnectedfields;
    ffieldintf: iifidbdataconnection;
    procedure checkfielddefs;
    function findfielddef(aname: msestring): integer;
+   function typeok(const aname: msestring; 
+                            const atype: listdatatypety): boolean;
   public
    constructor create(const afields: tificonnectedfields); reintroduce;
  end;
@@ -72,7 +78,7 @@ function editififields(const instance: tificonnectedfields): boolean;
 
 implementation
 uses
- mseguiglob,mseififieldeditor_mfm,typinfo,msetypes,msewidgets,msedatalist;
+ mseififieldeditor_mfm,typinfo,msewidgets;
  
 type
  tificonnectedfields1 = class(tificonnectedfields);
@@ -197,6 +203,7 @@ var
  ar1: dbfieldinfoarty;
  ar2: msestringarty;
  ar3: datalistarty;
+ f1: tififieldlink;
 begin
  if ffieldintf <> nil then begin
   caption:= c[ord(str_connection)]+': '+
@@ -209,10 +216,16 @@ begin
     fielddefli[1][int1]:= getenumname(typeinfo(tfieldtype),ord(datatype));   
    end;
   end;
-  with tconnectedifidatasource1(tificonnectedfields1(ffields).fowner) do begin
-   ar3:= destdatalists();
+  fields.rowcount:= ffields.count;
+  for int1:= 0 to fields.rowhigh do begin
+   f1:= tififieldlink(ffields[int1]);
+   fieldname[int1]:= f1.fieldname;
+   sourcefieldname[int1]:= f1.sourcefieldname;
+   datatype[int1]:= ord(f1.datatype);
   end;
+  sourcefieldname.dropdown.cols[0].asarray:= fielddefli[0].datalist.asarray;
  end;
+
 {
  with ffields.fowner do begin
   caption:= c[ord(str_dataset)]+': '+name;
@@ -245,6 +258,29 @@ begin
 }
 end;
 
+procedure tmseififieldeditorfo.sourcebefdropexe(const sender: TObject);
+begin
+ sourcefieldname.dropdown.cols[0].asarray:= 
+                  ffieldintf.getfieldnames(listdatatypety(datatype.value));
+end;
+
+function tmseififieldeditorfo.typeok(const aname: msestring;
+                                 const atype: listdatatypety): boolean;
+begin
+ result:= false;
+end;
+
+procedure tmseififieldeditorfo.sourcefieldsetexe(const sender: TObject;
+               var avalue: msestring; var accept: Boolean);
+var
+ ar1: msestringarty;
+begin
+ if (avalue <> '') and 
+             not typeok(avalue,listdatatypety(datatype.value)) then begin
+  datatype.value:= ord(ffieldintf.getdatatype(avalue));
+ end;
+end;
+
 procedure tmseififieldeditorfo.initcla(const sender: tenumtypeedit);
 begin
  sender.typeinfopo:= typeinfo(fieldclasstypety);
@@ -252,7 +288,7 @@ end;
 
 procedure tmseififieldeditorfo.initfieldkind(const sender: tenumtypeedit);
 begin
- sender.typeinfopo:= typeinfo(tfieldkind);
+ sender.typeinfopo:= typeinfo(listdatatypety);
 end;
 
 procedure tmseififieldeditorfo.splitterupda(const sender: TObject);

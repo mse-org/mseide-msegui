@@ -1070,6 +1070,8 @@ end;
   procedure fetchdata(const acolnames: array of string; 
                                                   acols: array of tdatalist);
   function getfieldnames(const adatatype: listdatatypety): msestringarty;
+  function getdatatype(const aname: ansistring): listdatatypety;
+                           //dl_none if not found
  end;
  
 //{$define usedelegation} not working in FPC 2.4
@@ -3724,7 +3726,7 @@ begin
  int2:= 0;
  for int1:= 0 to count - 1 do begin
   with tififield(fitems[int1]) do begin
-   if datatype in atypes then begin
+   if (atypes = []) or (datatype in atypes) then begin
     result[int2]:= fieldname;
     inc(int2);
    end;
@@ -3811,7 +3813,8 @@ begin
  fowner:= aowner;
 end;
 
-function tificonnectedfields.getfieldnames(const adatatype: listdatatypety): msestringarty;
+function tificonnectedfields.getfieldnames(
+                            const adatatype: listdatatypety): msestringarty;
 begin
  result:= fowner.getfieldnames(adatatype);
 end;
