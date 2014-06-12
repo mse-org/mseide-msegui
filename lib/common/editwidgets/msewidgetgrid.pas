@@ -3636,7 +3636,7 @@ begin
  if not (es_child in mouseinfo.eventstate) then begin
   cell1:= cellatpos(mouseinfo.pos);
   if (cell1.col >= 0) and 
-                   ((cell1.row >= 0) or (cell1.row = invalidaxis)) then begin
+                   ((cell1.row >= 0) {or (cell1.row = invalidaxis)}) then begin
    with datacols[cell1.col] do begin
     if fintf <> nil then begin
      widget1:= fintf.getwidget;
