@@ -6,7 +6,7 @@ interface
 
 {$IFDEF LinkDynamically}
 uses
- {$ifdef FPC}Dynlibs,{$else}msetypes,{$endif} sysutils, msestrings;
+ {$ifdef FPC}Dynlibs,{$else}msetypes,{$endif} sysutils, msestrings,msectypes;
 
 const
  {$define cvcall}
@@ -1662,6 +1662,19 @@ type
      isc_blob_dbase_ole = 23;
      isc_blob_typed_binary = 24;
 
+//****************************************/
+//* Shutdown reasons, used by engine     */
+//* Users should provide positive values */
+//****************************************/
+
+ fb_shutrsn_svc_stopped = -1;
+ fb_shutrsn_no_connection = -2;
+ fb_shutrsn_app_stopped = -3;
+ fb_shutrsn_device_removed = -4;
+ fb_shutrsn_signal = -5;
+ fb_shutrsn_services = -6;
+ fb_shutrsn_exit_called = -7;
+
 {$IFNDEF LinkDynamically}
 
   {                          }
@@ -2502,7 +2515,8 @@ var
   isc_suspend_window : function (_para1:PISC_STATUS; _para2:Pisc_win_handle):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
 {$ENDIF}
 
-//var IBaseLibraryHandle : TLibHandle;
+  fb_shutdown: function(timeout: cuint; reason: cint): cint;
+                           {$ifdef wincall}stdcall{$else}cdecl{$endif};
 
 {$ENDIF}
 
@@ -2513,7 +2527,7 @@ var
 
 implementation
 uses
- msesys,msesonames,msedynload;
+ msesys,msesonames,msedynload,msesysintf;
 
 function XSQLDA_LENGTH(n: Integer): Integer;
 begin
@@ -2918,7 +2932,7 @@ end;
 
 Procedure InitializeIBase60(const sonames: array of filenamety);
 const
- funcs: array[0..{$ifdef unix}163{$else}143{$endif}] of funcinfoty = (
+ funcs: array[0..{$ifdef unix}164{$else}144{$endif}] of funcinfoty = (
   (n: 'isc_attach_database'; d: {$ifndef FPC}@{$endif}@isc_attach_database),
   (n: 'isc_array_gen_sdl'; d: {$ifndef FPC}@{$endif}@isc_array_gen_sdl),
   (n: 'isc_array_get_slice'; d: {$ifndef FPC}@{$endif}@isc_array_get_slice),
@@ -3087,29 +3101,46 @@ const
   (n: 'isc_reset_form'; d: {$ifndef FPC}@{$endif}@isc_reset_form),
   (n: 'isc_suspend_window'; d: {$ifndef FPC}@{$endif}@isc_suspend_window)
 {$ENDIF} 
+  ,
+  (n: 'fb_shutdown'; d: @fb_shutdown)
   );
+
  errormessage = 'Can not load Firebird library. ';
 begin
- if length(sonames) = 0 then begin
+// if length(sonames) = 0 then begin
   if useembeddedfirebird then begin
-   initializedynlib(libinfo,fbembedlib,[],[],funcs,errormessage);
+   initializedynlib(libinfo,sonames,fbembedlib,[],funcs,errormessage);
                                        //accept missing entries
   end
   else begin
-   initializedynlib(libinfo,fbcgdslib,[],[],funcs,errormessage);
+   initializedynlib(libinfo,sonames,fbcgdslib,[],funcs,errormessage);
                                       //accept missing entries
   end;
- end
- else begin
-  initializedynlib(libinfo,sonames,[],[],funcs,errormessage);
+// end
+// else begin
+//  initializedynlib(libinfo,sonames,[],[],funcs,errormessage);
                                       //accept missing entries
+// end;
+end;
+
+procedure shutdown();
+begin
+ //FB-embedded crash on Linux exit, probably atexit() call in FB-lib,
+ //fb_shutdown() call does not help
+ //workarond: call 
+ //  initializeibase60(fbembedlib);
+ //at program start in order to prevent unloading of FB-lib 
+{
+ if fb_shutdown <> nil then begin
+  fb_shutdown(100,-fb_shutrsn_app_stopped);
  end;
+}
 end;
 
 Procedure ReleaseIBase60;
 
 begin
- releasedynlib(libinfo);
+ releasedynlib(libinfo,@shutdown);
 end;
 
 initialization
