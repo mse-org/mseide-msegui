@@ -358,7 +358,8 @@ type
    procedure setsqltransactionwrite(const avalue: tsqltransaction);
    procedure checkbrowsemode;
    procedure refreshtransaction;
-   procedure internalloaddatalists(const datalists: array of tdatalist);
+   procedure internalloaddatalists(const acols: integerarty;
+                                        const datalists: array of tdatalist);
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -1285,7 +1286,7 @@ var
 begin
  setlength(result,high(anames)+1);
  for int1:= 0 to high(result) do begin
-  result[int1]:= FINDCOLINDEX(anames[int1]);
+  result[int1]:= findcolindex(anames[int1]);
   if result[int1] < 0 then begin
    raise edatabaseerror.create(fgetname()+': col "'+anames[int1]+'" not found.');
   end;
@@ -1774,7 +1775,8 @@ begin
  end;
 end;
 
-procedure tsqlresult.internalloaddatalists(const datalists: array of tdatalist);
+procedure tsqlresult.internalloaddatalists(const acols: integerarty;
+                                        const datalists: array of tdatalist);
             //todo: optimize, use rowsreturned and internal list grow
 var
  int1,int2,int3: integer;
@@ -1782,13 +1784,12 @@ var
  col1: dbcolarty;
 begin
 // refresh;
- int2:= cols.count;
- if int2 > length(datalists) then begin
-  int2:= length(datalists);
- end;
+ int2:= length(acols);
+ setlength(col1,int2);
  setlength(proc1,int2);
  dec(int2);
  for int1:= 0 to int2 do begin
+  col1[int1]:= tdbcol(fcols.fitems[acols[int1]]);
   if datalists[int1] <> nil then begin
    case datalists[int1].datatype of
     dl_integer: begin
@@ -1813,7 +1814,8 @@ begin
      proc1[int1]:= @getmsestringdata;
     end;
     else begin
-     raise exception.create('tsqlresult.loaddatalists(): Invalid datalist.');
+     raise exception.create(name+
+                           ' tsqlresult.loaddatalists(): Invalid datalist.');
     end;
    end;
   end;
@@ -1828,7 +1830,6 @@ begin
  end;
  try
   int3:= 0;
-  col1:= dbcolarty(fcols.fitems);
   while not eof do begin
    for int1:= 0 to int2 do begin
     if datalists[int1] <> nil then begin
@@ -1857,9 +1858,19 @@ begin
 end;
 
 procedure tsqlresult.loaddatalists(const datalists: array of tdatalist);
+var
+ int1: integer;
+ ar1: integerarty;
 begin
- refresh;
- internalloaddatalists(datalists);
+ refresh();
+ if length(datalists) > cols.count then begin
+  componentexception(self,'Too many datalists.');
+ end;
+ setlength(ar1,length(datalists));
+ for int1:= 0 to high(ar1) do begin
+  ar1[int1]:= int1;
+ end;
+ internalloaddatalists(ar1,datalists);
 end;
 
 function tsqlresult.rowsreturned: integer;

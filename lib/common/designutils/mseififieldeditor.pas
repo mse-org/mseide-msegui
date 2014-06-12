@@ -76,6 +76,7 @@ uses
  
 type
  tificonnectedfields1 = class(tificonnectedfields);
+ tconnectedifidatasource1 = class(tconnectedifidatasource);
  stringconststy = (
   str_connection            //0 Connection
  );
@@ -194,16 +195,22 @@ var
  int1: integer;
  field1: tfield;
  ar1: dbfieldinfoarty;
+ ar2: msestringarty;
+ ar3: datalistarty;
 begin
  if ffieldintf <> nil then begin
+  caption:= c[ord(str_connection)]+': '+
+                                 tificonnectedfields1(ffields).fowner.name;
   ar1:= ffieldintf.getfieldinfos();
-  caption:= c[ord(str_connection)]+': '+tificonnectedfields1(ffields).fowner.name;
   fielddefli.rowcount:= length(ar1);
   for int1:= 0 to high(ar1) do begin
    with ar1[int1] do begin
     fielddefli[0][int1]:= name;
     fielddefli[1][int1]:= getenumname(typeinfo(tfieldtype),ord(datatype));   
    end;
+  end;
+  with tconnectedifidatasource1(tificonnectedfields1(ffields).fowner) do begin
+   ar3:= destdatalists();
   end;
  end;
 {

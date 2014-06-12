@@ -156,22 +156,30 @@ end;
 
 procedure tifisqlresult.fetchdata(const acolnames: array of string;
                acols: array of tdatalist);
-var
- ar1: datalistarty;
- ar2: integerarty;
- int1: integer;
+//var
+// ar1: datalistarty;
+// ar2: integerarty;
+// int1: integer;
 begin
  refresh;
+ if high(acols) <> high(acolnames) then begin
+  componentexception(self,'fetchdata() item count mismatch.');
+ end;
+ internalloaddatalists(cols.colsindexbyname(acolnames),acols);
+{
  ar2:= cols.colsindexbyname(acolnames);
  if high(ar2) > high(acols) then begin
   setlength(ar2,length(acols));
  end;
+}
+ {
  setlength(ar1,cols.count);
  for int1:= 0 to high(ar2) do begin
   ar1[ar2[int1]]:= acols[int1];
  end;
 // internalloaddatalists(acols);
- internalloaddatalists(ar1);
+ }
+// internalloaddatalists(ar1,ar2);
  active:= false;
 end;
 

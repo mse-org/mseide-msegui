@@ -1059,7 +1059,8 @@ type
   protected
    function getififieldclass: ififieldlinkclassty; reintroduce; virtual;
    procedure createitem(const index: integer; var item: tpersistent); override;
-   function getfieldnames(const adatatype: listdatatypety): msestringarty; virtual;
+   function getfieldnames(
+           const adatatype: listdatatypety): msestringarty; virtual;
   public
    function sourcefieldnames: stringarty;
 end;
@@ -1101,7 +1102,7 @@ end;
    procedure loaded; override;
    procedure doactivated; override;
    procedure dodeactivated; override;
-   function destdatalists: datalistarty;
+   procedure destdatalists(out names: stringarty; out lists: datalistarty);
 {$ifndef usedelegation}
     //iififieldsource
    function getfieldnames(const atypes: listdatatypesty): msestringarty;
@@ -3663,29 +3664,38 @@ begin
  inc(findex);
 end;
 
-function tifidatasource.destdatalists: datalistarty;
+procedure tifidatasource.destdatalists(out names: stringarty; 
+                                                 out lists: datalistarty);
 var
- int1,int2: integer;
+ int1,int2,int3: integer;
 begin
  with getobjectlinker do begin
   setlength(fnamear,count);
   setlength(flistar,count);
+  setlength(names,count);
+  setlength(lists,count);
   findex:= 0;
   forall({$ifdef FPC}@{$endif}getbindinginfo,typeinfo(iifidatasourceclient));
  end;
+ int3:= 0;
  with ffields do begin 
-  result:= nil;
-  setlength(result,count);
-  for int1:= 0 to high(result) do begin
-   for int2:= 0 to high(fitems) do begin
-    if (fnamear[int1] <> '') and (fnamear[int1] = 
-                              tififield(fitems[int2]).ffieldname) then begin
-     result[int2]:= flistar[int1];
-     break;
+//  result:= nil;
+//  setlength(result,count);
+  for int1:= 0 to high(fnamear) do begin
+   if fnamear[int1] <> '' then begin
+    for int2:= 0 to high(fitems) do begin
+     if (fnamear[int1] = tififield(fitems[int2]).ffieldname) then begin
+      names[int3]:= fnamear[int1];
+      lists[int3]:= flistar[int1];
+      inc(int3);
+      break;
+     end;
     end;
    end;
   end;
  end;
+ setlength(lists,int3);
+ setlength(names,int3);
  fnamear:= nil;
  flistar:= nil;
 // for int1:= 0 to high(result) do begin
@@ -3777,7 +3787,8 @@ begin
  tififieldlink(item).fowner:= self;
 end;
 
-function tififieldlinks.getfieldnames(const adatatype: listdatatypety): msestringarty;
+function tififieldlinks.getfieldnames(
+                        const adatatype: listdatatypety): msestringarty;
 begin
  result:= nil;
 end;
@@ -3843,22 +3854,23 @@ end;
 
 procedure tconnectedifidatasource.open;
 var
-// ar1: stringarty;
+ ar1: stringarty;
  ar2: datalistarty;
 begin
  inherited;
  checkconnection;
- ar2:= destdatalists;
- fconnectionintf.fetchdata(tificonnectedfields(ffields).sourcefieldnames,ar2);
+ destdatalists(ar1,ar2);
+ fconnectionintf.fetchdata(ar1,ar2);
  afteropen;
 end;
 
 procedure tconnectedifidatasource.close;
 var
  ar1: datalistarty;
+ ar2: stringarty;
  int1: integer;
 begin
- ar1:= destdatalists;
+ destdatalists(ar2,ar1);
  for int1:= 0 to high(ar1) do begin
   ar1[int1].clear;
  end;
