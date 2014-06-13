@@ -15,7 +15,7 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 }
 unit mseififieldeditor;
-{$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+{$ifdef FPC}{$mode objfpc}{$h+}{$goto on}{$endif}
 interface
 uses
  mdb,msegui,mseclasses,mseforms,msedb,msestat,msestatfile,msesimplewidgets,
@@ -78,7 +78,7 @@ function editififields(const instance: tificonnectedfields): boolean;
 
 implementation
 uses
- mseififieldeditor_mfm,typinfo,msewidgets;
+ mseififieldeditor_mfm,typinfo,msewidgets,sysutils;
  
 type
  tificonnectedfields1 = class(tificonnectedfields);
@@ -100,15 +100,20 @@ begin
  try
   with fo do begin
    if ffieldintf <> nil then begin
-//   activebefore:= dataset.active;
-//   dataset.active:= false;
-//   for int1:= 0 to count - 1 do begin
-//    items[int1].dataset:= nil;
-//   end;
    try
     if show(true) = mr_ok then begin
      fo.window.nofocus; //remove empty last line
      result:= true;
+     instance.beginupdate();
+     instance.count:= fields.rowcount;
+     for int1:= 0 to fields.rowhigh() do begin
+      with tififieldlink(instance[int1]) do begin
+       sourcefieldname:= fo.sourcefieldname[int1];
+       fieldname:= fo.fieldname[int1];
+       datatype:= listdatatypety(fo.datatype[int1]);
+      end; 
+     end;
+     instance.endupdate();
     (*
      setlength(ar1,fields.rowcount-dataset.fields.count);
      for int1:= 0 to high(ar1) do begin
@@ -206,7 +211,7 @@ var
  f1: tififieldlink;
 begin
  if ffieldintf <> nil then begin
-  caption:= c[ord(str_connection)]+': '+
+  caption:= 'ifi '+c[ord(str_connection)]+': '+
                                  tificonnectedfields1(ffields).fowner.name;
   ar1:= ffieldintf.getfieldinfos();
   fielddefli.rowcount:= length(ar1);
@@ -223,7 +228,7 @@ begin
    sourcefieldname[int1]:= f1.sourcefieldname;
    datatype[int1]:= ord(f1.datatype);
   end;
-  sourcefieldname.dropdown.cols[0].asarray:= fielddefli[0].datalist.asarray;
+  checkfielddefs();
  end;
 
 {
@@ -274,10 +279,18 @@ procedure tmseififieldeditorfo.sourcefieldsetexe(const sender: TObject;
                var avalue: msestring; var accept: Boolean);
 var
  ar1: msestringarty;
+ dl1: listdatatypety;
 begin
- if (avalue <> '') and 
-             not typeok(avalue,listdatatypety(datatype.value)) then begin
-  datatype.value:= ord(ffieldintf.getdatatype(avalue));
+ if (avalue <> '') then begin
+  if not typeok(avalue,listdatatypety(datatype.value)) then begin
+   dl1:= ffieldintf.getdatatype(avalue);
+   if dl1 <> dl_none then begin
+    datatype.value:= ord(dl1);
+   end;
+  end;
+  if fieldname.value = '' then begin
+   fieldname.value:= avalue;
+  end;
  end;
 end;
 
@@ -338,7 +351,7 @@ var
 begin
  setlength(ar1,fields.rowcount);
  for int1:= 0 to high(ar1) do begin
-  ar1[int1]:= mseuppercase(fieldname[int1]);
+  ar1[int1]:= mseuppercase(sourcefieldname[int1]);
  end;
  for int1:= 0 to fielddefli.rowcount - 1 do begin
   mstr1:= mseuppercase(fielddefli[0][int1]);
@@ -365,11 +378,41 @@ begin
 end;
 
 procedure tmseififieldeditorfo.transferfields(const sender: TObject);
+
+ function uniquefieldname(const aname: msestring): msestring;
+ var
+  ar1: msestringarty;
+  int1: integer;
+  mstr1,mstr2: msestring;
+  int2: integer;
+ label
+  startlab;
+ begin
+  ar1:= fieldname.gridvalues;
+  for int1:= 0 to high(ar1) do begin
+   ar1[int1]:= mseuppercase(ar1[int1]);
+  end;
+  mstr1:= mseuppercase(aname);
+  int2:= 0;
+startlab:
+  mstr2:= mstr1;
+  if int2 <> 0 then begin
+   mstr2:= mstr2+inttostr(int2);
+  end;
+  for int1:= 0 to high(ar1) do begin
+   if ar1[int1] = mstr2 then begin
+    inc(int2);
+    goto startlab;
+   end;
+  end;
+  result:= mstr2;
+ end;
+ 
 var
  int1,int2: integer;
  ar1,ar2: integerarty;
+ mstr1: msestring;
 begin
-{
  ar1:= fielddefli.datacols.selectedrows;
  if high(ar1) >= 0 then begin
   setlength(ar2,length(ar1));
@@ -379,13 +422,15 @@ begin
    fields.appendrow(true);
    try
     fields.row:= fields.rowhigh;
-    fieldpo[fields.rowhigh]:= 
-               ffields.dataset.fielddefs[ar1[int1]].createfield(nil);
-    tfield(fieldpo[fields.rowhigh]).dataset:= nil;
-    fieldname[fields.rowhigh]:= fielddefli[0][ar1[int1]];
-    classty[fields.rowhigh]:= ord(fieldclasstoclasstyp(
-             ffields.dataset.fielddefs[ar1[int1]].fieldclass));
-    fieldkind[fields.rowhigh]:= ord(tfield(fieldpo[fields.rowhigh]).fieldkind);
+//    fieldpo[fields.rowhigh]:= 
+//               ffields.dataset.fielddefs[ar1[int1]].createfield(nil);
+//    tfield(fieldpo[fields.rowhigh]).dataset:= nil;
+    mstr1:= fielddefli[0][ar1[int1]];
+    sourcefieldname[fields.rowhigh]:= mstr1;
+    fieldname[fields.rowhigh]:= uniquefieldname(mstr1);
+//    classty[fields.rowhigh]:= ord(fieldclasstoclasstyp(
+///             ffields.dataset.fielddefs[ar1[int1]].fieldclass));
+    datatype[fields.rowhigh]:= ord(ffieldintf.getdatatype(mstr1));
     ar2[int2]:= fields.rowhigh;
     inc(int2);
    except
@@ -412,7 +457,6 @@ begin
    end;
   end;
  end;
-}
 end;
 
 procedure tmseififieldeditorfo.fieldrowsdeleting(const sender: tcustomgrid;

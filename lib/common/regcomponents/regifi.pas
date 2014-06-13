@@ -249,7 +249,9 @@ end;
 
 procedure tificonnectedfieldspropertyeditor.edit;
 begin
- editififields(tificonnectedfields(getordvalue));
+ if editififields(tificonnectedfields(getordvalue)) then begin
+  modified;
+ end;
 end;
 
 initialization

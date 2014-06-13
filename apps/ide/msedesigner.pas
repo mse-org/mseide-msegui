@@ -5203,7 +5203,8 @@ var
  bo1: boolean;
 // str1: string;
 begin
- if floadingmodulepo <> nil then begin
+ result:= nil;
+ if (aname <> '') and (floadingmodulepo <> nil) then begin
   splitstring(aname,ar2,':');
   result:= floadingmodulepo^.components.getcomponent(ar2[0]);
   if result = nil then begin
@@ -5244,9 +5245,6 @@ begin
     end;
    end;
   end;
- end
- else begin
-  result:= nil;
  end;
 end;
 

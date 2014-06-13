@@ -64,8 +64,6 @@ type
   public
  end;
   
-implementation
-
 const
  listtypecompatibledbtypes: array[listdatatypety] of fieldtypesty =
   (
@@ -80,7 +78,7 @@ const
 //dl_complex,dl_rowstate,dl_custom
    [],        [],         []);       
 
- listtypes: array[tfieldtype] of listdatatypety = (
+ compatiblelisttypes: array[tfieldtype] of listdatatypety = (
   //ftUnknown,ftString,     ftSmallint,ftInteger, ftWord,
     dl_none,  dl_msestring,dl_integer,dl_integer,dl_integer,
   //  ftBoolean,ftFloat,ftCurrency,ftBCD, 
@@ -101,6 +99,8 @@ const
     dl_none,    dl_none,dl_datetime,dl_real, dl_msestring,   dl_msestring
  );
  
+implementation
+
 function matchfielddatatypes(const afielddefs: tfielddefs;
                           const atype: listdatatypety): msestringarty;
 var
@@ -132,7 +132,7 @@ begin
  for int1:= 0 to afielddefs.count - 1 do begin
   with afielddefs[int1] do begin
    if name = aname then begin
-    result:= listtypes[datatype];
+    result:= compatiblelisttypes[datatype];
     break;
    end;
   end;

@@ -12,7 +12,7 @@ object mseificlienteditorfo: tmseificlienteditorfo
   )
   options = [fo_closeonesc, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savezorder, fo_savestate]
   statfile = tstatfile1
-  caption = 'IfI Client Editor'
+  caption = 'ifi Client Editor'
   moduleclassname = 'tmseform'
   object grid: twidgetgrid
     bounds_x = 0
