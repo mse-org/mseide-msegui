@@ -1493,7 +1493,8 @@ function tcustomificlientcontroller.canconnect(const acomponent: tcomponent): bo
 var
  po1: pointer;
 begin
- result:= getcorbainterface(acomponent,typeinfo(iifilink),po1);
+// result:= getcorbainterface(acomponent,typeinfo(iifilink),po1);
+ result:= getcorbainterface(acomponent,getifilinkkind(),po1);
 end;
 
 function tcustomificlientcontroller.errorname(const ainstance: tobject): string;

@@ -70,6 +70,7 @@ type
    function findfielddef(aname: msestring): integer;
    function typeok(const aname: msestring; 
                             const atype: listdatatypety): boolean;
+   function uniquefieldname(const aname: msestring): msestring;
   public
    constructor create(const afields: tificonnectedfields); reintroduce;
  end;
@@ -90,10 +91,10 @@ type
 function editififields(const instance: tificonnectedfields): boolean;
 var
  fo: tmseififieldeditorfo;
- int1,int2: integer;
- ct1: fieldclassty;
- ar1: fieldarty;
- activebefore: boolean;
+ int1{,int2}: integer;
+// ct1: fieldclassty;
+// ar1: fieldarty;
+// activebefore: boolean;
 begin
  result:= false;
  fo:= tmseififieldeditorfo.create(instance);
@@ -204,10 +205,10 @@ end;
 procedure tmseififieldeditorfo.formloaded(const sender: TObject);
 var
  int1: integer;
- field1: tfield;
+// field1: tfield;
  ar1: dbfieldinfoarty;
- ar2: msestringarty;
- ar3: datalistarty;
+// ar2: msestringarty;
+// ar3: datalistarty;
  f1: tififieldlink;
 begin
  if ffieldintf <> nil then begin
@@ -275,10 +276,40 @@ begin
  result:= false;
 end;
 
+function tmseififieldeditorfo.uniquefieldname(
+                                    const aname: msestring): msestring;
+var
+ ar1: msestringarty;
+ int1: integer;
+ mstr1,mstr2: msestring;
+ int2: integer;
+label
+ startlab;
+begin
+ ar1:= fieldname.gridvalues;
+ for int1:= 0 to high(ar1) do begin
+  ar1[int1]:= mseuppercase(ar1[int1]);
+ end;
+ mstr1:= mseuppercase(aname);
+ int2:= 0;
+startlab:
+ mstr2:= mstr1;
+ if int2 <> 0 then begin
+  mstr2:= mstr2+inttostr(int2);
+ end;
+ for int1:= 0 to high(ar1) do begin
+  if ar1[int1] = mstr2 then begin
+   inc(int2);
+   goto startlab;
+  end;
+ end;
+ result:= mstr2;
+end;
+
 procedure tmseififieldeditorfo.sourcefieldsetexe(const sender: TObject;
                var avalue: msestring; var accept: Boolean);
 var
- ar1: msestringarty;
+// ar1: msestringarty;
  dl1: listdatatypety;
 begin
  if (avalue <> '') then begin
@@ -289,7 +320,7 @@ begin
    end;
   end;
   if fieldname.value = '' then begin
-   fieldname.value:= avalue;
+   fieldname.value:= uniquefieldname(avalue);
   end;
  end;
 end;
@@ -377,37 +408,7 @@ begin
  checkfielddefs;
 end;
 
-procedure tmseififieldeditorfo.transferfields(const sender: TObject);
-
- function uniquefieldname(const aname: msestring): msestring;
- var
-  ar1: msestringarty;
-  int1: integer;
-  mstr1,mstr2: msestring;
-  int2: integer;
- label
-  startlab;
- begin
-  ar1:= fieldname.gridvalues;
-  for int1:= 0 to high(ar1) do begin
-   ar1[int1]:= mseuppercase(ar1[int1]);
-  end;
-  mstr1:= mseuppercase(aname);
-  int2:= 0;
-startlab:
-  mstr2:= mstr1;
-  if int2 <> 0 then begin
-   mstr2:= mstr2+inttostr(int2);
-  end;
-  for int1:= 0 to high(ar1) do begin
-   if ar1[int1] = mstr2 then begin
-    inc(int2);
-    goto startlab;
-   end;
-  end;
-  result:= mstr2;
- end;
- 
+procedure tmseififieldeditorfo.transferfields(const sender: TObject); 
 var
  int1,int2: integer;
  ar1,ar2: integerarty;
