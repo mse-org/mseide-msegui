@@ -1343,7 +1343,7 @@ begin
   include(fstate,ivs_valuesetting);
   try
    clienttovalues(pointer(sender));
-   if not (vco_nosync in foptionsvalue) then begin
+   if foptionsvalue*[vco_nosync,vco_datalist] = [] then begin
     fchangedclient:= pointer(sender);
     tmsecomponent1(fowner).getobjectlinker.forall(
                            {$ifdef FPC}@{$endif}valuestootherclient,self);
