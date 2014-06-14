@@ -412,6 +412,7 @@ type
    fcolorerror: colorty;
    fcolorwarning: colorty;
    fcolornote: colorty;
+   fuid: integer;
   protected
    function gett: tobject; override;
    function gettexp: tobject; override;
@@ -483,7 +484,7 @@ type
                                                  write floadprojectfile;
    property newinheritedforms: longboolarty read fnewinheritedforms
                                               write fnewinheritedforms;
-   
+   property uid: integer read fuid write fuid;   
  end;
 {$M-}
  

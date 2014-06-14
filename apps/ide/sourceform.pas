@@ -97,6 +97,7 @@ type
    procedure findbmexec(const sender: TObject);
    procedure insguiexec(const sender: TObject);
    procedure convpasex(const sender: TObject);
+   procedure insuidexec(const sender: TObject);
   private
    fasking: boolean;
    fgdbpage: tsourcepage;
@@ -194,7 +195,7 @@ uses
  sourceform_mfm,msefileutils,sysutils,mseformatstr,
  projectoptionsform,main,mseeditglob,watchform,msesys,msewidgets,msedesigner,
  selecteditpageform,sourceupdate,pascaldesignparser,mseclasses,msearrayutils,
- msebits,msesysutils;
+ msebits,msesysutils,mseintegerenter;
 
 type
  tsourcepage1 = class(tsourcepage);
@@ -1243,6 +1244,7 @@ begin
  sender.menu.itembyname('setbm').enabled:= 
         (activepage <> nil) and (popuprow >= 0);
  sender.menu.itembyname('insgui').enabled:= (activepage <> nil);
+ sender.menu.itembyname('insuid').enabled:= (activepage <> nil);
  sender.menu.itembyname('convpas').enabled:= (activepage <> nil) and 
                                                   activepage.edit.hasselection;
  sender.menu.itembyname('addwatch').enabled:= (activepage <> nil) and  
@@ -1330,6 +1332,39 @@ procedure tsourcefo.insguiexec(const sender: TObject);
 begin
  with activepage.edit do begin
   inserttext(editpos,'['''+createguidstring+''']');
+ end;
+end;
+
+procedure tsourcefo.insuidexec(const sender: TObject);
+var
+ id1,int1: integer;
+ str1: string[4];
+ str2: string;
+begin
+ id1:= projectoptions.o.uid;
+ if integerenter(id1,minint,maxint,'ID','Enter ID') = mr_ok then begin
+  for int1:= 0 to 3 do begin
+   str1[int1+1]:= char(bitreverse[byte(id1 and ($ff shl (int1*8)))]);
+  end;
+  str1[0]:= #1;
+  for int1:= 4 downto 1 do begin
+   if str1[int1] <> #0 then begin
+    str1[0]:= char(int1);
+    break;
+   end;
+  end;
+  str2:= encodebase64(str1);
+  for int1:= length(str2) downto 1 do begin
+   if str2[int1] <> '=' then begin
+    setlength(str2,int1);
+    break;
+   end;
+  end;
+  
+  with activepage.edit do begin
+   inserttext(editpos,'['''+str2+''']{'+inttostr(id1)+'}');
+  end;
+  projectoptions.o.uid:= id1+1;
  end;
 end;
 

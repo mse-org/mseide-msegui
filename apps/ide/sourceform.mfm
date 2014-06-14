@@ -109,8 +109,8 @@ object sourcefo: tsourcefo
     tab_frame.buttonsvisible = [sk_right, sk_up, sk_left, sk_down, sk_first, sk_last]
     tab_frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
     tab_textflags = [tf_ycentered]
-    tab_size = 60
     tab_sizemin = 60
+    tab_size = 60
     tab_optionswidget1 = []
     object tstockglyphbutton1: tstockglyphbutton
       optionswidget = [ow_destroywidgets, ow_disabledhint, ow_timedhint]
@@ -298,7 +298,7 @@ object sourcefo: tsourcefo
   end
   object formpopup: tpopupmenu
     onupdate = popupmonupdate
-    menu.submenu.count = 31
+    menu.submenu.count = 32
     menu.submenu.items = <    
       item
         action = actionsmo.selecteditpage
@@ -476,6 +476,12 @@ object sourcefo: tsourcefo
         name = 'insgui'
         state = [as_localcaption, as_localonexecute]
         onexecute = insguiexec
+      end    
+      item
+        caption = 'Insert UID'
+        name = 'insuid'
+        state = [as_localcaption, as_localonexecute]
+        onexecute = insuidexec
       end    
       item
         action = actionsmo.instemplate
