@@ -77,6 +77,7 @@ object mseificlienteditorfo: tmseificlienteditorfo
       bounds_cx = 203
       bounds_cy = 16
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_savestate, oe_checkvaluepaststatread]
+      onkeydown = keydownexe
       onsetvalue = setval
       dropdown.options = [deo_selectonly, deo_autodropdown, deo_keydropdown]
       dropdown.cols.count = 1
@@ -94,7 +95,7 @@ object mseificlienteditorfo: tmseificlienteditorfo
     bounds_cx = 50
     bounds_cy = 20
     anchors = [an_right, an_bottom]
-    state = [as_default, as_localdefault, as_localcaption]
+    state = [as_localdefault, as_localcaption]
     caption = '&OK'
     modalresult = mr_ok
   end

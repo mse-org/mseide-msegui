@@ -30,6 +30,7 @@ type
    procedure celle(const sender: TObject; var info: celleventinfoty);
    procedure editexe(const sender: TObject);
    procedure statexe(const sender: TObject; const filer: tstatfiler);
+   procedure keydownexe(const sender: twidget; var ainfo: keyeventinfoty);
   private
    fcomp: tifilinkcomp;
    finstances: ppointeraty;
@@ -182,6 +183,16 @@ procedure tmseificlienteditorfo.statexe(const sender: TObject;
                const filer: tstatfiler);
 begin
  filer.updatevalue('path',fpath);
+end;
+
+procedure tmseificlienteditorfo.keydownexe(const sender: twidget;
+               var ainfo: keyeventinfoty);
+begin
+ if isenterkey(nil,ainfo.key) and (ainfo.shiftstate = []) and
+                            not na.edited then begin
+  include(ainfo.eventstate,es_processed);
+  editexe(nil);  
+ end;
 end;
 
 end.
