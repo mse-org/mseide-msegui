@@ -1,20 +1,20 @@
 Interface UID's for MSEide+MSEgui 2014-06-14
 
-iformdesigner      ['AA.mse']{0}
-idbeditfieldlink   ['gA.mse']{1}
-idbevent           ['QA.mse']{2}
-isqlpropertyeditor ['wA.mse']{3}
-imasterlink        ['IA.mse']{4}
-imselocate         ['oA.mse']{5}
-idbdata               ['YA.mse']{6}
-idbeditinfo           ['4A.mse']{7}
-ireccontrol           ['EA.mse']{8}
-ipersistentfieldsinfo ['kA.mse']{9}
-idatasetsum           ['UA.mse']{10}
-ifieldcomponent       ['0A.mse']{11}
-imsefield             ['MA.mse']{12}
-igetdscontroller      ['sA.mse']{13}
-idbcontroller         ['cA.mse']{14}
+iformdesigner          ['AA.mse']{0}
+idbeditfieldlink       ['gA.mse']{1}
+idbevent               ['QA.mse']{2}
+isqlpropertyeditor     ['wA.mse']{3}
+imasterlink            ['IA.mse']{4}
+imselocate             ['oA.mse']{5}
+idbdata                ['YA.mse']{6}
+idbeditinfo            ['4A.mse']{7}
+ireccontrol            ['EA.mse']{8}
+ipersistentfieldsinfo  ['kA.mse']{9}
+idatasetsum            ['UA.mse']{10}
+ifieldcomponent        ['0A.mse']{11}
+imsefield              ['MA.mse']{12}
+igetdscontroller       ['sA.mse']{13}
+idbcontroller          ['cA.mse']{14}
 ilookupbufferfieldinfo ['8A.mse']{15}
 idbparaminfo           ['CA.mse']{16}
 idbcolinfo             ['iA.mse']{17}

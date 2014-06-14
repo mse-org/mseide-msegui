@@ -69,7 +69,7 @@ type
  end;
 
  tificonnectedfieldselementeditor = class(tclasselementeditor)
-  protected
+  public
    function getvalue: msestring; override;
  end;
  
