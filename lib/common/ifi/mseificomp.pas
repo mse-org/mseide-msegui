@@ -240,18 +240,20 @@ type
   function ififieldname: string;
  end;
  
- indexeventty = procedure(const sender: tcustomificlientcontroller; const aclient: iificlient;
-                            const aindex: integer) of object;
+ indexeventty = procedure(const sender: tcustomificlientcontroller;
+                    const aclient: iificlient; const aindex: integer) of object;
 
  setbooleanclienteventty =
-                 procedure(const sender: tcustomificlientcontroller; const aclient: iificlient;
-                          var avalue: boolean;
+                 procedure(const sender: tcustomificlientcontroller;
+                     const aclient: iificlient; var avalue: boolean;
                           var accept: boolean; const aindex: integer) of object;
  setstringclienteventty = 
-                 procedure(const sender: tcustomificlientcontroller; const aclient: iificlient;
-                          var avalue: msestring;
+                 procedure(const sender: tcustomificlientcontroller;
+                  const aclient: iificlient; var avalue: msestring;
                           var accept: boolean; const aindex: integer) of object;
- setansistringclienteventty = procedure(const sender: tcustomificlientcontroller; var avalue: ansistring;
+ setansistringclienteventty = procedure(
+                          const sender: tcustomificlientcontroller;
+                          var avalue: ansistring;
                           var accept: boolean; const aindex: integer) of object;
  setintegerclienteventty = 
                  procedure(const sender: tobject; const aclient: iificlient;
@@ -259,16 +261,16 @@ type
                           var accept: boolean; const aindex: integer) of object; 
                           //equal parameters as setcoloreventty for tcoloredit!
  setint64clienteventty = 
-                 procedure(const sender: tcustomificlientcontroller; const aclient: iificlient;
-                          var avalue: int64;
+                 procedure(const sender: tcustomificlientcontroller;
+                          const aclient: iificlient; var avalue: int64;
                           var accept: boolean; const aindex: integer) of object; 
  setrealclienteventty = 
-                 procedure(const sender: tcustomificlientcontroller; const aclient: iificlient;
-                          var avalue: realty;
+                 procedure(const sender: tcustomificlientcontroller;
+                          const aclient: iificlient; var avalue: realty;
                           var accept: boolean; const aindex: integer) of object;
  setdatetimeclienteventty = 
-                 procedure(const sender: tcustomificlientcontroller; const aclient: iificlient;
-                          var avalue: tdatetime;
+                 procedure(const sender: tcustomificlientcontroller;
+                          const aclient: iificlient; var avalue: tdatetime;
                           var accept: boolean; const aindex: integer) of object;
 
  tvalueclientcontroller = class(tificlientcontroller,
@@ -289,14 +291,6 @@ type
    fdatalist: tdatalist;
    procedure updateoptionsedit(var avalue: optionseditty); override;
    procedure linkset(const alink: iificlient); override;
-    //iifidatasourceclient
-   procedure bindingchanged;
-   function ifigriddata: tdatalist;
-   function ififieldname: string;
-    //iififieldinfo
-   procedure getfieldinfo(const apropname: ififieldnamety; 
-                         var adatasource: tifidatasource;
-                         var atypes: listdatatypesty);
 
    function getifilinkkind: ptypeinfo; override;
    procedure setvalue(const sender: iificlient; var avalue;
@@ -316,6 +310,14 @@ type
    function getlistdatatypes: listdatatypesty; virtual; abstract;
    procedure statreadlist(const alink: pointer);
    procedure statwritelist(const alink: pointer; var handled: boolean);
+    //iifidatasourceclient
+   procedure bindingchanged;
+   function ifigriddata: tdatalist;
+   function ififieldname: string;
+    //iififieldinfo
+   procedure getfieldinfo(const apropname: ififieldnamety; 
+                         var adatasource: tifidatasource;
+                         var atypes: listdatatypesty);
   public
    destructor destroy; override;
    function canconnect(const acomponent: tcomponent): boolean; override;
@@ -540,6 +542,7 @@ type
    procedure setvalue(const sender: iificlient;
             var avalue; var accept: boolean; const arow: integer); override;
    function createdatalist: tdatalist; override;
+   function getlistdatatypes: listdatatypesty; override;
     //istatfile
    procedure statreadvalue(const reader: tstatreader); override;
    procedure statwritevalue(const writer: tstatwriter); override;
@@ -2407,7 +2410,7 @@ function tvalueclientcontroller.ifigriddata: tdatalist;
 begin
  result:= fdatalist;
  if result = nil then begin
-  raise exception.create('No datalist, activate optionsvalue vco_datalist.');
+  componentexception(fowner,'No datalist, activate optionsvalue vco_datalist.');
  end;
 end;
 
@@ -2863,6 +2866,11 @@ end;
 procedure tbooleanclientcontroller.setvaluedefault(const avalue: boolean);
 begin
  fvaluedefault:= avalue;
+end;
+
+function tbooleanclientcontroller.getlistdatatypes: listdatatypesty;
+begin
+ result:= [dl_integer];
 end;
 
 { trealclientcontroller }

@@ -48,14 +48,14 @@ type
   function showdialog(out adialog: tactcomponent): modalresultty;
  end;
    
- iifidatalink = interface(iifilink) ['{FC6BF316-8347-4CAC-ABB7-FB171E14F52B}']
+ iifidatalink = interface(iifilink)['{FC6BF316-8347-4CAC-ABB7-FB171E14F52B}']
   procedure updateifigriddata(const sender: tobject; const alist: tdatalist);
   function getgriddata: tdatalist;
   function getvalueprop: ppropinfo;
   procedure updatereadonlystate;
  end;
  
- iifigridlink = interface(iifilink)
+ iifigridlink = interface(iifilink)['{3E65ACFE-5643-454F-A05B-2DD2D3D7097C}']
   function appendrow(const checkautoappend: boolean = false): integer;
   function getrowstate: tcustomrowstatelist;
   procedure rowchanged(const arow: integer);

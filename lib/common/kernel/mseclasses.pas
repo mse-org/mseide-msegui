@@ -1268,7 +1268,8 @@ end;
 procedure componentexception(const acomponent: tcomponent;
                                       const atext: msestring);
 begin
- raise exception.create(acomponent.classname+','+acomponent.name+': '+atext);
+ raise exception.create(acomponent.name+':'+acomponent.classname+':'+ lineend +
+                        atext);
 end;
 
 function getfproppath(const writer:twriter): string;
