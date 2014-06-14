@@ -295,7 +295,8 @@ type
                        const aexpand: boolean = false): ttreelistitem; overload;
    function finditembycaption(const acaptions: msestringarty;
             const acasesensitive: boolean = false;
-            const aexpand: boolean = false): ttreelistitem; overload;
+            const aexpand: boolean = false;
+            const apartial: boolean = false): ttreelistitem; overload;
    function rootnode: ttreelistitem;
    function rootpath: treelistitemarty;
              //top-down
@@ -2946,20 +2947,28 @@ end;
 
 function ttreelistitem.finditembycaption(const acaptions: msestringarty;
          const acasesensitive: boolean = false;
-         const aexpand: boolean = false): ttreelistitem;
+         const aexpand: boolean = false;
+         const apartial: boolean = false): ttreelistitem;
 var
  int1: integer;
+ it1,it2: ttreelistitem;
 begin
- result:= self;
+ it1:= self;
+ it2:= it1;
  for int1:= 0 to high(acaptions) do begin
-  result:= result.finditembycaption(acaptions[int1],acasesensitive);
-  if result = nil then begin
+  it1:= it1.finditembycaption(acaptions[int1],acasesensitive);
+  if it1 = nil then begin
+   if apartial then begin
+    it1:= it2;
+   end;
    break;
+   it2:= it1;
   end;
  end;
- if aexpand and (result <> nil) then begin
-  result.rootexpanded:= true;
+ if aexpand and (it1 <> nil) then begin
+  it1.rootexpanded:= true;
  end;
+ result:= it1;
 end;
 
 function ttreelistitem.isroot: boolean;

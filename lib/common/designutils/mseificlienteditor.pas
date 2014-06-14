@@ -22,15 +22,18 @@ type
    tbutton1: tbutton;
    tbutton2: tbutton;
    po: tpointeredit;
-   na: tdropdownlistedit;
+   na: tmbdropdownitemedit;
    tstatfile1: tstatfile;
    procedure befdrop(const sender: TObject);
    procedure setval(const sender: TObject; var avalue: msestring;
                    var accept: Boolean);
    procedure celle(const sender: TObject; var info: celleventinfoty);
+   procedure editexe(const sender: TObject);
+   procedure statexe(const sender: TObject; const filer: tstatfiler);
   private
    fcomp: tifilinkcomp;
    finstances: ppointeraty;
+   fpath: msestring;
    function filtercomponent(const acomponent: tcomponent): boolean;
  end;
  
@@ -39,7 +42,7 @@ function editificlient(const acomponent: tifilinkcomp): modalresultty;
 implementation
 uses
  mseificlienteditor_mfm,msepropertyeditors,msedesignintf,msedesigner,
- objectinspector,typinfo,msearrayutils;
+ objectinspector,typinfo,msearrayutils,msecomptree;
 type
  tmsecomponent1 = class(tmsecomponent);
 
@@ -69,7 +72,7 @@ begin
   edfo.po.gridvalues:= pointerarty(ar1);
   edfo.fcomp:= acomponent;
   for int1:= 0 to high(ar1) do begin
-   edfo.na.gridvalue[int1]:= getdispname(ar1[int1]);
+   edfo.na[int1].caption:= getdispname(ar1[int1]);
   end;
   edfo.caption:= edfo.caption + ' ('+acomponent.name+')';
   result:= edfo.show(true);
@@ -118,7 +121,7 @@ end;
 procedure tmseificlienteditorfo.befdrop(const sender: TObject);
 begin
  finstances:= po.griddata.datapo;
- with tdropdownlistedit(sender) do begin
+ with tmbdropdownitemedit(sender) do begin
   dropdown.cols[0].asarray:= designer.getcomponentnamelist(
         tcomponent,false,nil,{$ifdef FPC}@{$endif}filtercomponent);
  end;
@@ -126,8 +129,20 @@ end;
 
 procedure tmseificlienteditorfo.setval(const sender: TObject;
                var avalue: msestring; var accept: Boolean);
+var
+ comp1: tcomponent;
+ int1: integer;
 begin
- po.value:= designer.getcomponent(avalue,fcomp.owner);
+ comp1:= designer.getcomponent(avalue,fcomp.owner);
+ po.value:= comp1;
+ if comp1 <> nil then begin
+  avalue:= getdispname(tcomponent(po.value));
+  fpath:= ownernamepath(comp1);
+  int1:= findlastchar(fpath,'.');
+  if int1 > 0 then begin
+   setlength(fpath,int1-1);
+  end;
+ end;
 end;
 
 procedure tmseificlienteditorfo.celle(const sender: TObject;
@@ -140,6 +155,33 @@ begin
   window.modalresult:= mr_ok;
 //  objectinspectorfo.activate;
  end;
+end;
+
+procedure tmseificlienteditorfo.editexe(const sender: TObject);
+var
+ tree1: tcompnameitem;
+ mstr1: msestring;
+ bo1: boolean;
+begin
+ finstances:= po.griddata.datapo;
+ tree1:= designer.getcomponentnametree(tcomponent,true{false},nil,
+                                      {$ifdef FPC}@{$endif}filtercomponent);
+ mstr1:= ownernamepath(tcomponent(po.value));
+ if mstr1 = '' then begin
+  mstr1:= fpath;
+ end;
+ if compnamedialog(tree1,mstr1) = mr_ok then begin
+  bo1:= true;
+  setval(nil,mstr1,bo1);
+  na.item.caption:= mstr1;
+ end;
+
+end;
+
+procedure tmseificlienteditorfo.statexe(const sender: TObject;
+               const filer: tstatfiler);
+begin
+ filer.updatevalue('path',fpath);
 end;
 
 end.

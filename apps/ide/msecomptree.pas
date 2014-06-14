@@ -72,9 +72,10 @@ begin
  fo1:= tcompnametreefo.create(nil);
  try
   ar1:= splitstring(avalue,msechar('.'));
-  item1:= avalues.finditembycaption(ar1);
+  item1:= avalues.finditembycaption(ar1,false,false,true);
   if item1 <> nil then begin
-   item1.expandtoroot;
+   item1.expandtoroot();
+   item1.expanded:= true;
   end;
   fo1.treeitem.itemlist.assign(avalues);
   if item1 <> nil then begin

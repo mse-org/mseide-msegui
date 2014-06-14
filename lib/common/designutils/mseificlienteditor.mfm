@@ -40,7 +40,7 @@ object mseificlienteditorfo: tmseificlienteditorfo
         options = [co_fill, co_savestate, co_mousescrollrow]
         oncellevent = celle
         widgetname = 'na'
-        dataclass = tgridmsestringdatalist
+        dataclass = titemeditlist
       end>
     datarowheight = 16
     statfile = tstatfile1
@@ -55,12 +55,21 @@ object mseificlienteditorfo: tmseificlienteditorfo
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_savestate, oe_checkvaluepaststatread]
       visible = False
     end
-    object na: tdropdownlistedit
+    object na: tmbdropdownitemedit
       optionsskin = [osk_framebuttononly]
       frame.levelo = 0
       frame.colorclient = -2147483645
       frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
       frame.button.color = -1879048187
+      frame.buttons.count = 2
+      frame.buttons.items = <      
+        item
+          color = -1879048187
+        end      
+        item
+          imagenr = 17
+          onexecute = editexe
+        end>
       taborder = 2
       visible = False
       bounds_x = 51
@@ -103,6 +112,7 @@ object mseificlienteditorfo: tmseificlienteditorfo
   object tstatfile1: tstatfile
     filename = 'ificlienteditor.sta'
     options = [sfo_memory]
+    onstatupdate = statexe
     left = 40
     top = 88
   end

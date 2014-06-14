@@ -2865,6 +2865,9 @@ begin
  end;
 end;
 
+var
+ fcomppath: msestring;
+ 
 procedure tcomponentpropertyeditor.edit;
 var
  tree1: tcompnameitem;
@@ -2882,12 +2885,16 @@ begin
                 {$ifdef FPC}@{$endif}filtercomponent);
  co1:= tcomponent(getpointervalue);
  if co1 = nil then begin
-  mstr1:= fmodule.name;
+  mstr1:= fcomppath;
+  if mstr1 = '' then begin
+   mstr1:= fmodule.name;
+  end;
  end
  else begin
   mstr1:= ownernamepath(co1);
  end;
  if compnamedialog(tree1,mstr1) = mr_ok then begin
+  fcomppath:= mstr1;
   setvalue(mstr1);
  end;
 end;

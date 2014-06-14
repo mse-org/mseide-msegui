@@ -1489,7 +1489,8 @@ begin
  //dummy
 end;
 
-function tcustomificlientcontroller.canconnect(const acomponent: tcomponent): boolean;
+function tcustomificlientcontroller.canconnect(
+                                       const acomponent: tcomponent): boolean;
 var
  po1: pointer;
 begin
