@@ -250,8 +250,7 @@ type
  
  tcustomeditwidgetdatalink = class;
  
- idbeditfieldlink = interface(inullinterface)
-                       ['{7EED89A6-32B3-4C8F-9F59-E91A0E95ADDB}']
+ idbeditfieldlink = interface(inullinterface)['gA.mse']{1}
   function getwidget: twidget;
   function getenabled: boolean;
   procedure setenabled(const avalue: boolean);

@@ -173,7 +173,7 @@ type
                //must be writable because it was streamed in FPC 2.0.4
  end;
 
- idbparaminfo = interface(inullinterface)['{D0EDEE1E-A4CC-DA11-9F9B-00C0CA1308FF}']
+ idbparaminfo = interface(inullinterface)['CA.mse']{16}
   function getdestdataset: tsqlquery;
  end;
  

@@ -31,31 +31,30 @@ type
     (keyeventinfopo: pkeyeventinfoty);
  end;
 
- iifilink = interface(iificlient)
-                        ['{29DE5F47-87D3-408A-8BAB-1DDE945938F1}']
+ iifilink = interface(iificlient)['aA.mse']{22}
   function getifilinkkind: ptypeinfo;
   function getobjectlinker: tobjectlinker;
  end;
 
- iifiexeclink = interface(iifilink) ['{6B4FDC33-D151-46A4-B72B-083D55A18A67}']
+ iifiexeclink = interface(iifilink)['6A.mse']{23}
   procedure execute;
  end;
 
- iififormlink = interface(iifilink)['{32BE765F-CB4E-4C87-BE4C-639F08114B11}']
+ iififormlink = interface(iifilink)['GA.mse']{24}
  end;
 
- iifidialoglink = interface(iifilink)['{50751EAB-C5E1-467F-B3F7-50F5EAEEA53C}']
+ iifidialoglink = interface(iifilink)['mA.mse']{25}
   function showdialog(out adialog: tactcomponent): modalresultty;
  end;
    
- iifidatalink = interface(iifilink)['{FC6BF316-8347-4CAC-ABB7-FB171E14F52B}']
+ iifidatalink = interface(iifilink)['WA.mse']{26}
   procedure updateifigriddata(const sender: tobject; const alist: tdatalist);
   function getgriddata: tdatalist;
   function getvalueprop: ppropinfo;
   procedure updatereadonlystate;
  end;
  
- iifigridlink = interface(iifilink)['{3E65ACFE-5643-454F-A05B-2DD2D3D7097C}']
+ iifigridlink = interface(iifilink)['2A.mse']{27}
   function appendrow(const checkautoappend: boolean = false): integer;
   function getrowstate: tcustomrowstatelist;
   procedure rowchanged(const arow: integer);

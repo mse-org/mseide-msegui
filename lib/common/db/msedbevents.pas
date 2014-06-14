@@ -19,7 +19,7 @@ const
  defaultdbeventinterval = 1000000; //us 
 type
  tdbevent = class;
- idbevent = interface(inullinterface)['{D55470C5-8625-4789-8511-ED6E11917C85}']
+ idbevent = interface(inullinterface)['QA.mse']{2}
   procedure listen(const sender: tdbevent);  
   procedure unlisten(const sender: tdbevent);  
   procedure fire(const sender: tdbevent);

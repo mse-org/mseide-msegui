@@ -84,8 +84,7 @@ type
                //sender = item, avalue = tx tag
  end;
 
- iifitxaction = interface(inullinterface)
-                          ['{70ECD758-7388-4205-BA70-7DC95B660C5F}']
+ iifitxaction = interface(inullinterface)['xA.mse']{35}
   procedure txactionfired(var adata: ansistring; var adatapo: pchar);
  end; 
 
@@ -335,8 +334,7 @@ type
    property items[const index: integer]: tvaluecomponentlink read getitems; default;   
  end;
 
- iifimodulelink = interface(inullinterface)
-                          ['{90279F1E-E80F-4657-9531-3C3A2CF151BD}']
+ iifimodulelink = interface(inullinterface)['JA.mse']{36}
   procedure connectmodule(const sender: tcustommodulelink);
  end;
  

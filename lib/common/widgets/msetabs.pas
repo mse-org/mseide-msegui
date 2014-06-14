@@ -394,7 +394,7 @@ type
 
  tcustomtabwidget = class;
 
- itabpage = interface(inullinterface) ['{AB1D0204-1DCB-4560-99A3-C0D6020B2EA7}']
+ itabpage = interface(inullinterface)['VA.mse']{42}
   procedure settabwidget(const value: tcustomtabwidget);
   function gettabwidget: tcustomtabwidget;
   function getwidget: twidget;

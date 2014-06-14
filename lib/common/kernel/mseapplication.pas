@@ -42,8 +42,7 @@ const
 type
  iactivator = interface(inullinterface)
  end;
- iactivatorclient = interface(inullinterface)
-               ['{DD72357B-4570-493A-B73E-660F07B0C97B}']
+ iactivatorclient = interface(inullinterface)['ZA.mse']{38}
   procedure setactive(const avalue: boolean);
  end;
 

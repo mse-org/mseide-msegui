@@ -414,7 +414,7 @@ type
    property optionsdock default defaultoptionsdocknochildren;
  end;
  
- idocktarget = interface(inullinterface)['{1A50A4E4-5B46-4C7C-A992-51EFEA1202B8}']
+ idocktarget = interface(inullinterface)['lA.mse']{41}
   function getdockcontroller: tdockcontroller;
  end;
 

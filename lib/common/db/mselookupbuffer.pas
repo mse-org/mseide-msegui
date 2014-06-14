@@ -24,8 +24,7 @@ type
  lookupbufferfieldnoty = type integer;
  lbdatakindty = (lbdk_none,lbdk_integer,lbdk_int64,lbdk_float,lbdk_text);
 
- ilookupbufferfieldinfo = interface(inullinterface)
-                             ['{7F51DC33-BFF6-4577-97FA-248486892C19}']
+ ilookupbufferfieldinfo = interface(inullinterface)['8A.mse']{15}
   function getlbdatakind(const apropname: string): lbdatakindty;
   function getlookupbuffer: tcustomlookupbuffer;
  end; 

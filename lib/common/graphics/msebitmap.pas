@@ -432,8 +432,7 @@ type
    property onchange: notifyeventty read fonchange write fonchange;
  end;
 
- iimagelistinfo = interface(inullinterface)
-                  ['{CEF535C2-D1DC-438C-92FB-CAF2D6D69B02}']
+ iimagelistinfo = interface(inullinterface)['qA.mse']{21}
   function getimagelist: timagelist;
  end; 
 

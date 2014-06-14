@@ -82,8 +82,7 @@ const
  converrorstring = '?';
  
 type
- isqlpropertyeditor = interface(inullinterface)
-                            ['{001C24B7-548C-4A4D-A42D-6FBAFBAA7A57}']
+ isqlpropertyeditor = interface(inullinterface)['wA.mse']{3}
   procedure setactive(avalue: boolean);
   function getactive: boolean;
   function isutf8: boolean;
@@ -106,12 +105,11 @@ type
                        mdlo_inserttoupdate,mdlo_norefresh); 
  optionsmasterlinkty = set of optionmasterlinkty;
 
- imasterlink = interface(inullinterface)
-                      ['{2EC83B53-AF9E-4420-925A-C6CCD543D3C3}']
+ imasterlink = interface(inullinterface)['IA.mse']{4}
   function refreshing: boolean;
  end;
  
- imselocate = interface(inullinterface)['{2680958F-F954-DA11-9015-00C0CA1308FF}']
+ imselocate = interface(inullinterface)['oA.mse']{5}
    function locate(const afields: array of tfield; 
                    const akeys: array of const; const aisnull: array of boolean;
                    const akeyoptions: array of locatekeyoptionsty;
@@ -119,7 +117,7 @@ type
  end;
 
  tmsestringfield = class;
- idbdata = interface(inullinterface)['{636BE3DB-D558-48ED-8B62-89CC94FEAC0E}']
+ idbdata = interface(inullinterface)['YA.mse']{6}
   function getindex(const afield: tfield): integer; //-1 if none
   function gettextindex(const afield: tfield;
                  const acaseinsensitive: boolean): integer; //-1 if none
@@ -142,23 +140,22 @@ type
                            const afield: tfield): int64;
  end;
    
- idbeditinfo = interface(inullinterface)['{E63A9950-BFAE-DA11-83DF-00C0CA1308FF}']
+ idbeditinfo = interface(inullinterface)['4A.mse']{7}
   function getdataset(const aindex: integer): tdataset;
   procedure getfieldtypes(out apropertynames: stringarty;
                           out afieldtypes: fieldtypesarty);
     //propertynames = nil -> propertyname = 'datafield'
  end;
 
- ireccontrol = interface(inullinterface)['{E24D8F6A-0A01-4BAB-B778-300775A15CF6}']
+ ireccontrol = interface(inullinterface)['EA.mse']{8}
   procedure recchanged;
  end;
  
- ipersistentfieldsinfo = interface(inullinterface)
-                   ['{A8493C65-34BB-DA11-9DCA-00C0CA1308FF}'] 
+ ipersistentfieldsinfo = interface(inullinterface)['kA.mse']{9}
   function getfieldnames: stringarty;
  end;
  
- idatasetsum = interface(inullinterface)['{125A1501-400E-4CAC-905C-DF730E41EFA7}']
+ idatasetsum = interface(inullinterface)['UA.mse']{10}
   procedure sumfield(const afield: tfield; out asum: integer); overload;
   procedure sumfield(const afield: tfield; out asum: int64); overload;
   procedure sumfield(const afield: tfield; out asum: currency); overload;
@@ -195,8 +192,7 @@ type
  end;
  plookupfieldinfoty = ^lookupfieldinfoty;
 }
- ifieldcomponent = interface(inullinterface)
-                               ['{81BB6312-74BA-4B50-963D-F1DB908F7FB7}']
+ ifieldcomponent = interface(inullinterface)['0A.mse']{11}
   procedure setdsintf(const avalue: idsfieldcontroller);
   function getinstance: tfield;
  end;
@@ -204,7 +200,7 @@ type
  providerflag1ty = (pf1_refreshinsert,pf1_refreshupdate,pf1_nocopyrecord);
  providerflags1ty = set of providerflag1ty;
  
- imsefield = interface(inullinterface)['{259AB385-E638-49D6-8C0E-688BE164D130}']
+ imsefield = interface(inullinterface)['MA.mse']{12}
   function getproviderflags1: providerflags1ty;
 //  function getlookupinfo: plookupfieldinfoty;
  end;
@@ -1320,8 +1316,7 @@ type
   function updatesortfield(const afield: tfield; const adescend: boolean): boolean;
  end;
 
- igetdscontroller = interface(inullinterface)
-             ['{0BF9F81D-D420-44FB-AE1C-0343C823CB95}']
+ igetdscontroller = interface(inullinterface)['sA.mse']{13}
   function getcontroller: tdscontroller;
  end;
 
@@ -1506,8 +1501,7 @@ type
                                                      write fonaftercopyrecord;
  end;
  
- idbcontroller = interface(iactivatorclient)
-          ['{B26D004A-7FEE-44F2-9919-3B8612BDD598}']
+ idbcontroller = interface(iactivatorclient)['cA.mse']{14}
   procedure setinheritedconnected(const avalue: boolean);
   function readsequence(const sequencename: string): string;
   function sequencecurrvalue(const sequencename: string): string;

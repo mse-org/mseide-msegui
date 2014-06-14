@@ -46,8 +46,7 @@ type
  end;
  dbfieldinfoarty = array of dbfieldinfoty;
  
- iifidbdataconnection = interface(iifidataconnection)
-                    ['{B051E0C1-31DB-490C-9A95-CA07516B1E7F}']
+ iifidbdataconnection = interface(iifidataconnection)['BA.mse']{32}
   function getfieldinfos: dbfieldinfoarty;
  end;
  

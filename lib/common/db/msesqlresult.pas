@@ -409,8 +409,7 @@ type
    property onerror;
  end;
  
- idbcolinfo = interface(inullinterface)
-                         ['{E246B738-6E4D-4A7D-A5BB-A1A14769C25D}']
+ idbcolinfo = interface(inullinterface)['iA.mse']{17}
   function getsqlresult(const aindex: integer): tsqlresult;
   procedure getfieldtypes(out apropertynames: stringarty;
                           out afieldtypes: fieldtypesarty);

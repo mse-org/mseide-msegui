@@ -4456,7 +4456,8 @@ begin
 end;
 
 //function tmsecomponent.getcorbainterface(const aintf: tguid; out obj) : boolean;
-function tmsecomponent.getcorbainterface(const aintf: ptypeinfo; out obj) : boolean;
+function tmsecomponent.getcorbainterface(const aintf: ptypeinfo;
+                                                       out obj) : boolean;
 begin
  result:= mseclasses.getcorbainterface(self,aintf,obj);
 end;

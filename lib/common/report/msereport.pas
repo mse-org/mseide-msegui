@@ -536,8 +536,7 @@ type
  end;
  ireportclientarty = array of ireportclient;
  
- ibandparent = interface(inullinterface)
-                        ['{B02EE732-4686-4E0C-8C18-419D7D020386}']
+ ibandparent = interface(inullinterface)['FA.mse']{40}
   procedure registerclient(const aclient: ireportclient);
   procedure unregisterclient(const aclient: ireportclient);
   function beginband(const acanvas: tcanvas;

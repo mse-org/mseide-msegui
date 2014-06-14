@@ -22,7 +22,7 @@ type
  tstatreader = class;
  tstatwriter = class;
 
- istatfile = interface(iobjectlink)['{447AC132-A833-4532-82AB-244C0F5EE25E}']
+ istatfile = interface(iobjectlink)['5A.mse']{39}
   procedure dostatread(const reader: tstatreader);
   procedure dostatwrite(const writer: tstatwriter);
   procedure statreading;

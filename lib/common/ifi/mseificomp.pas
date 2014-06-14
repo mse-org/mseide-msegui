@@ -226,8 +226,7 @@ type
  ififieldnamety = type ansistring;       //type for property editor
  ifisourcefieldnamety = type ansistring; //type for property editor
  
- iififieldinfo = interface(inullinterface)
-                        ['{28CC1F64-BFD1-44E9-862E-1BD5A1F1D654}']
+ iififieldinfo = interface(inullinterface)['OA.mse']{28}
   procedure getfieldinfo(const apropname: ififieldnamety; 
                          var adatasource: tifidatasource;
                          var atypes: listdatatypesty);
@@ -1002,13 +1001,11 @@ type
                                                          write setcontroller;
  end;
  
- iififieldsource = interface(inullinterface)
-                       ['{EB7DB698-8CE7-42A4-9D46-C6C70A101692}']
+ iififieldsource = interface(inullinterface)['uA.mse']{29}
   function getfieldnames(const atypes: listdatatypesty): msestringarty;
  end;
 
- iififieldlinksource = interface(inullinterface)
-                       ['{05C4CF92-10B8-40B0-85F4-6885EBF42FF5}']
+ iififieldlinksource = interface(inullinterface)['eA.mse']{30}
   function getfieldnames(const apropname: ifisourcefieldnamety): msestringarty;
   procedure setdesignsourcefieldname(const aname: ifisourcefieldnamety);
  end;
@@ -1068,8 +1065,7 @@ type
    function sourcefieldnames: stringarty;
 end;
 
- iifidataconnection = interface(inullinterface)
-                             ['{E7E71EEA-C3F7-4677-A3C0-9E27D02717F9}']
+ iifidataconnection = interface(inullinterface)['+A.mse']{31}
   procedure fetchdata(const acolnames: array of string; 
                                                   acols: array of tdatalist);
   function getfieldnames(const adatatype: listdatatypety): msestringarty;

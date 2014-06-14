@@ -663,8 +663,7 @@ type
 const
  blobidsize = sizeof(integer);
 type
- iblobconnection = interface(inullinterface)
-                ['{947B58E1-0CA4-436D-A06F-2174D8CA676F}']
+ iblobconnection = interface(inullinterface)['SA.mse']{18}
   procedure writeblobdata(const atransaction: tsqltransaction;
               const tablename: string; const acursor: tsqlcursor;
               const adata: pointer; const alength: integer;

@@ -58,7 +58,7 @@ type
  {$endif}
  end;
 
- igridwidget = interface(inullinterface) ['{CB4BC9B0-A6C2-4929-9E5F-92406B6617B4}']
+ igridwidget = interface(inullinterface)['yA.mse']{19}
   procedure setfirstclick(var ainfo: mouseeventinfoty);
   function getwidget: twidget;
   procedure getautocellsize(const acanvas: tcanvas; var asize: sizety);

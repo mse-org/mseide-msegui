@@ -118,7 +118,7 @@ type
  end;
  pactioninfoty = ^actioninfoty;
 
- iactionlink = interface(iobjectlink)['{987D28B5-4245-4672-AF6D-7E8B5D671982}']
+ iactionlink = interface(iobjectlink)['pA.mse']{37}
   function getactioninfopo: pactioninfoty;
   procedure actionchanged;
   function loading: boolean;

@@ -41,8 +41,7 @@ type
  moduleoptionty = (mo_hidewidgets,mo_hidecomp);
  moduleoptionsty = set of moduleoptionty;
 
- iformdesigner = interface(inullinterface)
-                           ['{0207E291-638A-4A1B-BA9F-4FB0F6A0EA29}']
+ iformdesigner = interface(inullinterface)['AA.mse']{0}
   function clickedcomponent: tcomponent;
   function getmoduleoptions: moduleoptionsty;
   procedure setmoduleoptions(const aoptions: moduleoptionsty);

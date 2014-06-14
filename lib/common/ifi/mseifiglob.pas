@@ -42,13 +42,12 @@ type
   procedure updateoptionsedit(var avalue: optionseditty);
  end;
  
- iificlient = interface(iobjectlink)['{E3523E5B-604C-46CE-88D4-55C9970BCF9A}']
+ iificlient = interface(iobjectlink)['hA.mse']{33}
   procedure setifiserverintf(const aintf: iifiserver);
 //  function getifiserverintf: iifiserver;
  end;
  ificommandcodety = (icc_none,icc_close,icc_release);
- iificommand = interface(inullinterface)
-                         ['{693DEACE-508E-465F-826A-801C3979C39E}'] 
+ iificommand = interface(inullinterface)['RA.mse']{34}
   procedure executeificommand(var acommand: ificommandcodety);
  end;
 implementation
