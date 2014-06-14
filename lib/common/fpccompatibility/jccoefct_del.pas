@@ -72,14 +72,14 @@ type
 { Forward declarations }
 {METHODDEF}
 function compress_data(cinfo : j_compress_ptr;
-                       input_buf : JSAMPIMAGE) : boolean; far; forward;
+                       input_buf : JSAMPIMAGE) : boolean;  forward;
 {$ifdef FULL_COEF_BUFFER_SUPPORTED
 {METHODDEF}
 function compress_first_pass(cinfo : j_compress_ptr;
-                             input_buf : JSAMPIMAGE) : boolean;  far; forward;
+                             input_buf : JSAMPIMAGE) : boolean;   forward;
 {METHODDEF}
 function compress_output(cinfo : j_compress_ptr;
-                         input_buf : JSAMPIMAGE) : boolean;  far; forward;
+                         input_buf : JSAMPIMAGE) : boolean;   forward;
 {$endif}
 
 
@@ -115,7 +115,7 @@ end;
 
 {METHODDEF}
 procedure start_pass_coef (cinfo : j_compress_ptr;
-                           pass_mode : J_BUF_MODE); far;
+                           pass_mode : J_BUF_MODE); 
 var
   coef : my_coef_ptr;
 begin

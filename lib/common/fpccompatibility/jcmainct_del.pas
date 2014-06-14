@@ -70,14 +70,14 @@ type
 procedure process_data_simple_main(cinfo : j_compress_ptr;
                                    input_buf : JSAMPARRAY;
                                    var in_row_ctr: JDIMENSION;
-                                   in_rows_avail : JDIMENSION); far; forward;
+                                   in_rows_avail : JDIMENSION);  forward;
 
 {$ifdef FULL_MAIN_BUFFER_SUPPORTED}
 {METHODDEF}
 procedure process_data_buffer_main(cinfo : j_compress_ptr;
                                    input_buf : JSAMPARRAY;
                                    var in_row_ctr : JDIMENSION;
-                                   in_rows_avail : JDIMENSION); far; forward;
+                                   in_rows_avail : JDIMENSION);  forward;
 {$endif}
 
 
@@ -85,7 +85,7 @@ procedure process_data_buffer_main(cinfo : j_compress_ptr;
 
 {METHODDEF}
 procedure start_pass_main (cinfo : j_compress_ptr;
-                           pass_mode : J_BUF_MODE); far;
+                           pass_mode : J_BUF_MODE); 
 var
   main : my_main_ptr;
 begin

@@ -157,7 +157,7 @@ procedure ycc_rgb_convert (cinfo : j_decompress_ptr;
                            input_buf : JSAMPIMAGE;
                            input_row : JDIMENSION;
                            output_buf : JSAMPARRAY;
-                           num_rows : int); far;
+                           num_rows : int); 
 var
   cconvert : my_cconvert_ptr;
   {register} y, cb, cr : int;
@@ -223,7 +223,7 @@ procedure null_convert (cinfo : j_decompress_ptr;
                         input_buf : JSAMPIMAGE;
                         input_row : JDIMENSION;
                         output_buf : JSAMPARRAY;
-                        num_rows : int); far;
+                        num_rows : int); 
 var
   {register} inptr,
              outptr : JSAMPLE_PTR;
@@ -265,7 +265,7 @@ procedure grayscale_convert (cinfo : j_decompress_ptr;
                              input_buf : JSAMPIMAGE;
                              input_row : JDIMENSION;
                              output_buf : JSAMPARRAY;
-                             num_rows : int); far;
+                             num_rows : int); 
 begin
   jcopy_sample_rows(input_buf^[0], int(input_row), output_buf, 0,
                     num_rows, cinfo^.output_width);
@@ -280,7 +280,7 @@ procedure gray_rgb_convert (cinfo : j_decompress_ptr;
                             input_buf : JSAMPIMAGE;
                             input_row : JDIMENSION;
                             output_buf : JSAMPARRAY;
-                            num_rows : int); far;
+                            num_rows : int); 
 var
   {register} inptr, outptr : JSAMPLE_PTR;
   {register} col : JDIMENSION;
@@ -317,7 +317,7 @@ procedure ycck_cmyk_convert (cinfo : j_decompress_ptr;
                              input_buf : JSAMPIMAGE;
                              input_row : JDIMENSION;
                              output_buf : JSAMPARRAY;
-                             num_rows : int); far;
+                             num_rows : int); 
 var
   cconvert : my_cconvert_ptr;
   {register} y, cb, cr : int;
@@ -380,7 +380,7 @@ end;
 { Empty method for start_pass. }
 
 {METHODDEF}
-procedure start_pass_dcolor (cinfo : j_decompress_ptr); far;
+procedure start_pass_dcolor (cinfo : j_decompress_ptr); 
 begin
   { no work needed }
 end;

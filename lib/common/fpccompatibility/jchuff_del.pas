@@ -129,18 +129,18 @@ type
 { Forward declarations }
 {METHODDEF}
 function encode_mcu_huff (cinfo : j_compress_ptr;
-                          const MCU_data : array of JBLOCKROW) : boolean; far;
+                          const MCU_data : array of JBLOCKROW) : boolean; 
                           forward;
 {METHODDEF}
-procedure finish_pass_huff (cinfo : j_compress_ptr); far; forward;
+procedure finish_pass_huff (cinfo : j_compress_ptr);  forward;
 {$ifdef ENTROPY_OPT_SUPPORTED}
 {METHODDEF}
 function encode_mcu_gather (cinfo : j_compress_ptr;
                             const MCU_data: array of JBLOCKROW) : boolean;
-                            far; forward;
+                             forward;
 
 {METHODDEF}
-procedure finish_pass_gather (cinfo : j_compress_ptr); far; forward;
+procedure finish_pass_gather (cinfo : j_compress_ptr);  forward;
 {$endif}
 
 
@@ -150,7 +150,7 @@ procedure finish_pass_gather (cinfo : j_compress_ptr); far; forward;
 
 {METHODDEF}
 procedure start_pass_huff (cinfo : j_compress_ptr;
-                           gather_statistics : boolean); far;
+                           gather_statistics : boolean); 
 var
   entropy : huff_entropy_ptr;
   ci, dctbl, actbl : int;

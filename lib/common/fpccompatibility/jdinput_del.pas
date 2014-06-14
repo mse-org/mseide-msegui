@@ -44,7 +44,7 @@ type
 
 { Forward declarations }
 {METHODDEF}
-function consume_markers (cinfo : j_decompress_ptr) : int; far; forward;
+function consume_markers (cinfo : j_decompress_ptr) : int;  forward;
 
 
 { Routines to calculate various quantities related to the size of the image. }
@@ -280,7 +280,7 @@ end;
   Subsequent calls come from consume_markers, below. }
 
 {METHODDEF}
-procedure start_input_pass (cinfo : j_decompress_ptr); far;
+procedure start_input_pass (cinfo : j_decompress_ptr); 
 begin
   per_scan_setup(cinfo);
   latch_quant_tables(cinfo);
@@ -295,7 +295,7 @@ end;
   the expected data of the scan. }
 
 {METHODDEF}
-procedure finish_input_pass (cinfo : j_decompress_ptr); far;
+procedure finish_input_pass (cinfo : j_decompress_ptr); 
 begin
   cinfo^.inputctl^.consume_input := consume_markers;
 end;
@@ -370,7 +370,7 @@ end;
 { Reset state to begin a fresh datastream. }
 
 {METHODDEF}
-procedure reset_input_controller (cinfo : j_decompress_ptr); far;
+procedure reset_input_controller (cinfo : j_decompress_ptr); 
 var
   inputctl : my_inputctl_ptr;
 begin

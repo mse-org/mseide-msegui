@@ -134,7 +134,7 @@ procedure jpeg_set_marker_processor (cinfo : j_decompress_ptr;
                                      marker_code : int;
                                      routine : jpeg_marker_parser_method);
 Var
-  on_unknown_marker : function (cinfo : j_decompress_ptr) : int; far;
+  on_unknown_marker : function (cinfo : j_decompress_ptr) : int; 
   
 implementation
 
@@ -769,7 +769,7 @@ end;  { get_sos }
 
 
 {METHODDEF}
-function skip_variable (cinfo : j_decompress_ptr) : boolean; far;
+function skip_variable (cinfo : j_decompress_ptr) : boolean; 
 { Skip over an unknown or uninteresting variable-length marker }
 var
   length : INT32;
@@ -1629,7 +1629,7 @@ end;
 
 
 {METHODDEF}
-function get_interesting_appn (cinfo : j_decompress_ptr) : boolean; far;
+function get_interesting_appn (cinfo : j_decompress_ptr) : boolean; 
 { Process an APP0 or APP14 marker without saving it }
 var
   length : INT32;
@@ -1750,7 +1750,7 @@ end;
 {$ifdef SAVE_MARKERS_SUPPORTED}
 
 {METHODDEF}
-function save_marker (cinfo : j_decompress_ptr) : boolean; far;
+function save_marker (cinfo : j_decompress_ptr) : boolean; 
 { Save an APPn or COM marker into the marker list }
 var
   marker : my_marker_ptr;
@@ -2150,7 +2150,7 @@ end;  { first_marker }
   JPEG_SUSPENDED, JPEG_REACHED_SOS, or JPEG_REACHED_EOI.   }
 
 {METHODDEF}
-function read_markers (cinfo : j_decompress_ptr) : int; far;
+function read_markers (cinfo : j_decompress_ptr) : int; 
 begin
   { Outer loop repeats once for each marker. }
   repeat
@@ -2361,7 +2361,7 @@ end;  { read_markers }
   it holds a marker which the decoder will be unable to read past. }
 
 {METHODDEF}
-function read_restart_marker (cinfo : j_decompress_ptr) :boolean; far;
+function read_restart_marker (cinfo : j_decompress_ptr) :boolean; 
 begin
   { Obtain a marker unless we already did. }
   { Note that next_marker will complain if it skips any data. }
@@ -2519,7 +2519,7 @@ end;  { jpeg_resync_to_restart }
 { Reset marker processing state to begin a fresh datastream. }
 
 {METHODDEF}
-procedure reset_marker_reader (cinfo : j_decompress_ptr); far;
+procedure reset_marker_reader (cinfo : j_decompress_ptr); 
 var
   marker : my_marker_ptr;
 begin

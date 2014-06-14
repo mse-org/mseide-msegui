@@ -269,7 +269,7 @@ const
 {METHODDEF}
 function alloc_small (cinfo : j_common_ptr;
                       pool_id : int;
-                      sizeofobject : size_t) : pointer; far;
+                      sizeofobject : size_t) : pointer; 
 type
   byteptr = ^byte;
 { Allocate a "small" object }
@@ -362,7 +362,7 @@ end;
 {METHODDEF}
 function alloc_large (cinfo : j_common_ptr;
                       pool_id : int;
-                      sizeofobject : size_t) : pointer; FAR;
+                      sizeofobject : size_t) : pointer; 
 { Allocate a "large" object }
 var
   mem : my_mem_ptr;
@@ -423,7 +423,7 @@ end;
 function alloc_sarray (cinfo : j_common_ptr;
                        pool_id : int;
                        samplesperrow : JDIMENSION;
-                       numrows : JDIMENSION) : JSAMPARRAY; far;
+                       numrows : JDIMENSION) : JSAMPARRAY; 
 { Allocate a 2-D sample array }
 var
   mem : my_mem_ptr;
@@ -479,7 +479,7 @@ end;
 function alloc_barray (cinfo : j_common_ptr;
                        pool_id : int;
                        blocksperrow : JDIMENSION;
-                       numrows : JDIMENSION) : JBLOCKARRAY; far;
+                       numrows : JDIMENSION) : JBLOCKARRAY; 
 { Allocate a 2-D coefficient-block array }
 var
   mem : my_mem_ptr;
@@ -569,7 +569,7 @@ function request_virt_sarray (cinfo : j_common_ptr;
                               pre_zero : boolean;
                               samplesperrow : JDIMENSION;
                               numrows : JDIMENSION;
-                              maxaccess : JDIMENSION) : jvirt_sarray_ptr; far;
+                              maxaccess : JDIMENSION) : jvirt_sarray_ptr; 
 { Request a virtual 2-D sample array }
 var
   mem : my_mem_ptr;
@@ -604,7 +604,7 @@ function request_virt_barray (cinfo : j_common_ptr;
                               pre_zero : boolean;
                               blocksperrow : JDIMENSION;
                               numrows : JDIMENSION;
-                              maxaccess : JDIMENSION) : jvirt_barray_ptr; far;
+                              maxaccess : JDIMENSION) : jvirt_barray_ptr; 
 { Request a virtual 2-D coefficient-block array }
 var
   mem : my_mem_ptr;
@@ -634,7 +634,7 @@ end;
 
 
 {METHODDEF}
-procedure realize_virt_arrays (cinfo : j_common_ptr); far;
+procedure realize_virt_arrays (cinfo : j_common_ptr); 
 { Allocate the in-memory buffers for any unrealized virtual arrays }
 var
   mem : my_mem_ptr;
@@ -868,7 +868,7 @@ function access_virt_sarray (cinfo : j_common_ptr;
                              ptr : jvirt_sarray_ptr;
                              start_row : JDIMENSION;
                              num_rows : JDIMENSION;
-                             writable : boolean ) : JSAMPARRAY; far;
+                             writable : boolean ) : JSAMPARRAY; 
 { Access the part of a virtual sample array starting at start_row }
 { and extending for num_rows rows.  writable is true if  }
 { caller intends to modify the accessed area. }
@@ -971,7 +971,7 @@ function access_virt_barray (cinfo : j_common_ptr;
                              ptr : jvirt_barray_ptr;
                              start_row : JDIMENSION;
                              num_rows : JDIMENSION;
-                             writable : boolean) : JBLOCKARRAY; far;
+                             writable : boolean) : JBLOCKARRAY; 
 { Access the part of a virtual block array starting at start_row }
 { and extending for num_rows rows.  writable is true if  }
 { caller intends to modify the accessed area. }
@@ -1073,7 +1073,7 @@ end;
 { Release all objects belonging to a specified pool. }
 
 {METHODDEF}
-procedure free_pool (cinfo : j_common_ptr; pool_id : int); far;
+procedure free_pool (cinfo : j_common_ptr; pool_id : int); 
 var
   mem : my_mem_ptr;
   shdr_ptr : small_pool_ptr;
@@ -1159,7 +1159,7 @@ end;
   Note that this cannot be called unless cinfo^.mem is non-NIL. }
 
 {METHODDEF}
-procedure self_destruct (cinfo : j_common_ptr); far;
+procedure self_destruct (cinfo : j_common_ptr); 
 var
   pool : int;
 begin
@@ -1204,8 +1204,10 @@ begin
     The test is a little tricky: for X>0, X and X-1 have no one-bits
     in common if and only if X is a power of 2, ie has only one one-bit.
     Some compilers may give an "unreachable code" warning here; ignore it. }
+ {$push}{$warnings off}
   if ((SIZEOF(ALIGN_TYPE) and (SIZEOF(ALIGN_TYPE)-1)) <> 0) then
     ERREXIT(cinfo, JERR_BAD_ALIGN_TYPE);
+ {$pop}
   { MAX_ALLOC_CHUNK must be representable as type size_t, and must be
     a multiple of SIZEOF(ALIGN_TYPE).
     Again, an "unreachable code" warning may be ignored here.

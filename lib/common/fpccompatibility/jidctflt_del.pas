@@ -1,6 +1,6 @@
 unit jidctflt_del;
 
-{$N+}
+//{$N+}
 { This file contains a floating-point implementation of the
   inverse DCT (Discrete Cosine Transform).  In the IJG code, this routine
   must also perform dequantization of the input coefficients.

@@ -69,24 +69,24 @@ type
 {METHODDEF}
 function decode_mcu_DC_first (cinfo : j_decompress_ptr;
                               var MCU_data : array of JBLOCKROW) : boolean;
-                              far; forward;
+                               forward;
 {METHODDEF}
 function decode_mcu_AC_first (cinfo : j_decompress_ptr;
                               var MCU_data : array of JBLOCKROW) : boolean;
-                              far; forward;
+                               forward;
 {METHODDEF}
 function decode_mcu_DC_refine (cinfo : j_decompress_ptr;
                                var MCU_data : array of JBLOCKROW) : boolean;
-                               far; forward;
+                                forward;
 {METHODDEF}
 function decode_mcu_AC_refine (cinfo : j_decompress_ptr;
                                var MCU_data : array of JBLOCKROW) : boolean;
-                               far; forward;
+                                forward;
 
 { Initialize for a Huffman-compressed scan. }
 
 {METHODDEF}
-procedure start_pass_phuff_decoder (cinfo : j_decompress_ptr); far;
+procedure start_pass_phuff_decoder (cinfo : j_decompress_ptr); 
 var
   entropy : phuff_entropy_ptr;
   is_DC_band, bad : boolean;

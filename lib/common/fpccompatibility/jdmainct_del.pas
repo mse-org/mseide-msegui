@@ -163,19 +163,19 @@ const
 procedure process_data_simple_main(cinfo : j_decompress_ptr;
                                    output_buf : JSAMPARRAY;
                                    var out_row_ctr : JDIMENSION;
-                                   out_rows_avail : JDIMENSION); far; forward;
+                                   out_rows_avail : JDIMENSION);  forward;
 {METHODDEF}
 procedure process_data_context_main (cinfo : j_decompress_ptr;
                                      output_buf : JSAMPARRAY;
                                      var out_row_ctr : JDIMENSION;
-                                     out_rows_avail : JDIMENSION); far; forward;
+                                     out_rows_avail : JDIMENSION);  forward;
 
 {$ifdef QUANT_2PASS_SUPPORTED}
 {METHODDEF}
 procedure process_data_crank_post (cinfo : j_decompress_ptr;
                                      output_buf : JSAMPARRAY;
                                      var out_row_ctr : JDIMENSION;
-                                     out_rows_avail : JDIMENSION); far; forward;
+                                     out_rows_avail : JDIMENSION);  forward;
 {$endif}
 
 
@@ -369,7 +369,7 @@ end;
 
 {METHODDEF}
 procedure start_pass_main (cinfo : j_decompress_ptr;
-                           pass_mode : J_BUF_MODE); far;
+                           pass_mode : J_BUF_MODE); 
 var
   main : my_main_ptr;
 begin

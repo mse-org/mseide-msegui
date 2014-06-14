@@ -85,11 +85,11 @@ type
 { Forward declarations }
 {METHODDEF}
 function decompress_onepass (cinfo : j_decompress_ptr;
-                             output_buf : JSAMPIMAGE) : int; far; forward;
+                             output_buf : JSAMPIMAGE) : int;  forward;
 {$ifdef D_MULTISCAN_FILES_SUPPORTED}
 {METHODDEF}
 function decompress_data (cinfo : j_decompress_ptr;
-                          output_buf : JSAMPIMAGE) : int; far; forward;
+                          output_buf : JSAMPIMAGE) : int;  forward;
 {$endif}
 {$ifdef BLOCK_SMOOTHING_SUPPORTED}
 {LOCAL}
@@ -97,7 +97,7 @@ function smoothing_ok (cinfo : j_decompress_ptr) : boolean; forward;
 
 {METHODDEF}
 function decompress_smooth_data (cinfo : j_decompress_ptr;
-                                 output_buf : JSAMPIMAGE) : int; far; forward;
+                                 output_buf : JSAMPIMAGE) : int;  forward;
 {$endif}
 
 
@@ -133,7 +133,7 @@ end;
 { Initialize for an input processing pass. }
 
 {METHODDEF}
-procedure start_input_pass (cinfo : j_decompress_ptr); far;
+procedure start_input_pass (cinfo : j_decompress_ptr); 
 begin
   cinfo^.input_iMCU_row := 0;
   start_iMCU_row(cinfo);
@@ -143,7 +143,7 @@ end;
 { Initialize for an output processing pass. }
 
 {METHODDEF}
-procedure start_output_pass (cinfo : j_decompress_ptr); far;
+procedure start_output_pass (cinfo : j_decompress_ptr); 
 var
   coef : my_coef_ptr;
 begin
@@ -269,7 +269,7 @@ end;
 { Dummy consume-input routine for single-pass operation. }
 
 {METHODDEF}
-function dummy_consume_data (cinfo : j_decompress_ptr) : int; far;
+function dummy_consume_data (cinfo : j_decompress_ptr) : int; 
 begin
   dummy_consume_data := JPEG_SUSPENDED; { Always indicate nothing was done }
 end;
@@ -283,7 +283,7 @@ end;
   Return value is JPEG_ROW_COMPLETED, JPEG_SCAN_COMPLETED, or JPEG_SUSPENDED.}
 
 {METHODDEF}
-function consume_data (cinfo : j_decompress_ptr) : int; far;
+function consume_data (cinfo : j_decompress_ptr) : int; 
 var
   coef : my_coef_ptr;
   MCU_col_num : JDIMENSION;     { index of current MCU within row }
