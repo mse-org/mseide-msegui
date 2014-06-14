@@ -70,7 +70,7 @@ type
 
  tificonnectedfieldselementeditor = class(tclasselementeditor)
   protected
-   function dispname: msestring; override;
+   function getvalue: msestring; override;
  end;
  
  tificonnectedfieldspropertyeditor = class(tpersistentarraypropertyeditor)
@@ -220,7 +220,7 @@ end;
 
 { tificonnectedfieldselementeditor }
 
-function tificonnectedfieldselementeditor.dispname: msestring;
+function tificonnectedfieldselementeditor.getvalue: msestring;
 begin
  with tififieldlink(getordvalue) do begin
   result:= '<'+sourcefieldname+'><'+fieldname+'>';
