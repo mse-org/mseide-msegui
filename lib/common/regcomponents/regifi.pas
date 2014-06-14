@@ -83,7 +83,7 @@ type
  
 procedure register;
 begin
- registercomponents('Ifi',[tifiintegerendpoint,tifiint64endpoint,
+ registercomponents('ifi',[tifiintegerendpoint,tifiint64endpoint,
        tifibooleanendpoint,tifirealendpoint,tifidatetimeendpoint,
        tifistringendpoint,
        tifiintegerlinkcomp,tifiint64linkcomp,
@@ -95,7 +95,7 @@ begin
        tifigridlinkcomp,
        tconnectedifidatasource{,tifisqldatasource,}
        {$ifndef mse_no_db}{$ifdef FPC},tifisqlresult{$endif}{$endif}]);
- registercomponenttabhints(['Ifi'],
+ registercomponenttabhints(['ifi'],
    ['MSEifi components.'+lineend+
    'Compile MSEide with -dmse_with_ifirem '+
    'in order to install the experimental MSEifi remote components.'+lineend+
