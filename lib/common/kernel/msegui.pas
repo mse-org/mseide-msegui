@@ -9133,10 +9133,12 @@ begin
  result:= not (es_nofocus in info.eventstate) and {not focused and}
                       (ws_wantmousefocus in fwidgetstate)and
        (ow_mousefocus in foptionswidget) and canfocus;
+{
  if result and focused then begin
   activate;
   result:= false;
  end;
+}
 end;
        
 procedure twidget.mouseevent(var info: mouseeventinfoty);
@@ -9153,6 +9155,7 @@ procedure twidget.mouseevent(var info: mouseeventinfoty);
  
 var
  clientoffset: pointty;
+ wi1: twidget;
 begin
  exclude(fwidgetstate,ws_newmousecapture);
  if info.eventstate * [es_child,es_processed] = [] then begin
@@ -9236,9 +9239,21 @@ begin
       doclientmouseevent;
       clientoffset:= getclientoffset;
      end;
-     if wantmousefocus(info) then begin
-      setfocus;
-     end;
+     wi1:= self;
+     repeat
+      with wi1 do begin
+       if wantmousefocus(info) then begin
+        if focused then begin
+         activate;
+        end
+        else begin
+         setfocus;
+        end;
+        break;
+       end;
+      end;
+      wi1:= wi1.parentwidget;
+     until wi1 = nil;
     end;
     ek_buttonrelease: begin
      if (button = mb_left) and (fframe <> nil) and 

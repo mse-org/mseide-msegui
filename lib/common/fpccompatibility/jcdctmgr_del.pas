@@ -14,7 +14,7 @@ Unit jcdctmgr_del;
 
 interface
 
-{$N+}
+//{$N+}
 {$I jconfig_del.inc}
 
 uses
