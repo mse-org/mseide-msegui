@@ -131,9 +131,9 @@ type
    procedure copylatex;
    function canchangenotify(const info: filechangeinfoty): boolean;
    function getbreakpointstate(arow: integer = -1): bkptstatety;
-                     //-1 -> actual row
+                     //-1 -> current row
    procedure setbreakpointstate(astate: bkptstatety; arow: integer = -1);
-                     //-1 -> actual row
+                     //-1 -> acurrent row
    function findbookmark(const bookmarknum: integer): integer;
                      //returns row, -1 if not found
    procedure setbookmark(arow: integer; const bookmarknum: integer);

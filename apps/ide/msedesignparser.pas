@@ -1476,11 +1476,24 @@ begin
  end;
 end;
 
+function isinrange(const apos: sourceposty; const start: sourceposty;
+                   const stop: sourceposty): boolean;
+begin
+ result:= not((apos.pos.row < start.pos.row) or 
+              (apos.pos.row > stop.pos.row) or
+              (apos.pos.row = start.pos.row) and 
+                (apos.pos.col < start.pos.col) or
+              (apos.pos.row = stop.pos.row) and 
+                (apos.pos.col > stop.pos.col)
+             );
+end;
+
 function tdeflist.internalfinditem(const apos: sourceposty; 
          const firstidentuse,last: boolean; out scope: tdeflist): pdefinfoty;
 var
- int1,int2: integer;
+ int1,int2,lastmatching: integer;
 begin
+ lastmatching:= -1;
  if firstidentuse and last then begin
   int2:= -1;
   for int1:= 0 to finfocount - 1 do begin
@@ -1498,6 +1511,9 @@ begin
   for int1:= 0 to finfocount - 1 do begin
    with finfos[int1] do begin
     if (kind > syk_deleted) then begin
+     if isinrange(apos,pos,stop1) then begin
+      lastmatching:= int1;
+     end;
      if (pos.line > apos.line) or
        ((pos.line = apos.line) and (pos.pos.col > apos.pos.col)) then begin
       int2:= int1;
@@ -1524,7 +1540,7 @@ begin
     syk_vardef,syk_constdef: begin
      if (stop1.line < apos.line) or (stop1.line = apos.line) and
                  (stop1.pos.col <= apos.pos.col) then begin
-      int2:= -1;
+      int2:= lastmatching;
      end;
     end;
     syk_identuse: begin
@@ -1532,14 +1548,14 @@ begin
               ((stop1.line < apos.line) or
                  (stop1.line = apos.line) and
                  (stop1.pos.col <= apos.pos.col)) then begin
-      int2:= -1;
+      int2:= lastmatching;
      end;
     end;
     else begin
      if (deflist <> nil) and
       ((deflist.fstop.line < apos.line) or (deflist.fstop.line = apos.line) and
                  (deflist.fstop.pos.col <= apos.pos.col)) then begin
-      int2:= -1;
+      int2:= lastmatching;
      end;
     end;
    end;
