@@ -4487,7 +4487,7 @@ begin
 end;
 
 procedure tgripframe.updatemousestate(const sender: twidget;
-               const info: mouseeventinfoty);
+                                        const info: mouseeventinfoty);
 begin
  inherited;
  if pointinrect(info.pos,fgriprect) or (fcontroller.canmdisize) then begin

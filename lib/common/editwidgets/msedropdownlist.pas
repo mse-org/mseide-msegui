@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2014 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -334,7 +334,8 @@ type
    function isloading: boolean;
    procedure resetselection; virtual;
     //ibutton
-   procedure buttonaction(var action: buttonactionty; const buttonindex: integer);
+   procedure buttonaction(var action: buttonactionty;
+                                                const buttonindex: integer);
    
     //idataeditcontroller
    procedure mouseevent(var info: mouseeventinfoty);

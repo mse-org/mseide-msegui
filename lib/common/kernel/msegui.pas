@@ -3690,18 +3690,15 @@ procedure tcustomframe.updatemousestate(const sender: twidget;
 begin
  checkstate;
  with sender do begin
-  fwidgetstate:= fwidgetstate - [ws_mouseinclient,ws_wantmousemove,
-                           ws_wantmousebutton,ws_wantmousefocus];
-  if not (ow_mousetransparent in foptionswidget) then begin
-   if pointinrect(info.pos,fpaintrect) then begin
-    fwidgetstate:= fwidgetstate + [ws_mouseinclient,ws_wantmousemove,
-                                       ws_wantmousebutton,ws_wantmousefocus];
-   end
-   else begin
-    if (fs_framemouse in fstate) and 
-       pointinrect(info.pos,mr(nullpoint,fintf.getwidgetrect.size)) then begin
-     fwidgetstate:= fwidgetstate + [ws_wantmousemove,ws_wantmousebutton];
-    end;
+  if pointinrect(info.pos,fpaintrect) then begin
+   fwidgetstate:= fwidgetstate + [ws_mouseinclient,ws_wantmousemove,
+                                      ws_wantmousebutton,ws_wantmousefocus];
+  end
+  else begin
+   if (fs_framemouse in fstate) and 
+      pointinrect(info.pos,mr(nullpoint,fintf.getwidgetrect.size)) then begin
+    fwidgetstate:= fwidgetstate + [ws_wantmousemove,ws_wantmousebutton];
+
    end;
   end;
  end;
@@ -9071,19 +9068,18 @@ end;
 
 procedure twidget.updatemousestate(const info: mouseeventinfoty);
 begin
- if fframe <> nil then begin
-  fframe.updatemousestate(self,info);
- end
- else begin
-  if (info.pos.x >= 0) and (info.pos.x < fwidgetrect.cx) and
-           (info.pos.y >= 0) and (info.pos.y < fwidgetrect.cy) and
-            not (ow_mousetransparent in foptionswidget) then begin
-   fwidgetstate:= fwidgetstate +
+ fwidgetstate:= fwidgetstate -
       [ws_mouseinclient,ws_wantmousebutton,ws_wantmousemove,ws_wantmousefocus];
+ if not (ow_mousetransparent in foptionswidget) then begin
+  if fframe <> nil then begin
+   fframe.updatemousestate(self,info);
   end
   else begin
-   fwidgetstate:= fwidgetstate -
-      [ws_mouseinclient,ws_wantmousebutton,ws_wantmousemove,ws_wantmousefocus];
+   if (info.pos.x >= 0) and (info.pos.x < fwidgetrect.cx) and
+            (info.pos.y >= 0) and (info.pos.y < fwidgetrect.cy) then begin
+    fwidgetstate:= fwidgetstate +
+       [ws_mouseinclient,ws_wantmousebutton,ws_wantmousemove,ws_wantmousefocus];
+   end;
   end;
  end;
 end;

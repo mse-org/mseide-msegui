@@ -1092,7 +1092,8 @@ begin
  inherited;
  if fbuttons.wantmouseevent(info.pos) then begin
   with twidget1(sender) do begin
-   fwidgetstate:= fwidgetstate + [ws_wantmousebutton,ws_wantmousemove];
+   fwidgetstate:= fwidgetstate + [ws_wantmousebutton,ws_wantmousemove,
+                                                        ws_wantmousefocus];
   end;
  end;
 end;
