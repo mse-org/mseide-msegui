@@ -1334,7 +1334,7 @@ begin
   inserttext(editpos,'['''+createguidstring+''']');
  end;
 end;
-
+var testvar: longword;
 procedure tsourcefo.insuidexec(const sender: TObject);
 var
  id1,int1: integer;
@@ -1344,7 +1344,9 @@ begin
  id1:= projectoptions.o.uid;
  if integerenter(id1,minint,maxint,'ID','Enter ID') = mr_ok then begin
   for int1:= 0 to 3 do begin
-   str1[int1+1]:= char(bitreverse[byte(id1 and ($ff shl (int1*8)))]);
+testvar:= (longword($ff) shl (int1*8));
+   str1[int1+1]:= char(bitreverse[byte(
+                           (id1 and ($ff shl (int1*8))shr(int1*8)))]);
   end;
   str1[0]:= #1;
   for int1:= 4 downto 1 do begin
