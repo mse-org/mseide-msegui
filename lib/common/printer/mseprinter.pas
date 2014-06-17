@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2014 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -233,8 +233,10 @@ type
    procedure doupdateprintcommand(const adata: pointer);
   public
    constructor create(aowner: tcomponent); override;
-   procedure beginprint(command: string = ''; const apreamble: string = ''); overload;
-   procedure beginprint(const astream: ttextstream; const apreamble: string = ''); overload;
+   procedure beginprint(command: string = ''; 
+                    const apreamble: string = ''); overload;
+   procedure beginprint(const astream: ttextstream; 
+                    const apreamble: string = ''); overload;
     //printer owns the stream, nil -> dummy mode
    procedure endprint; override;
   published
