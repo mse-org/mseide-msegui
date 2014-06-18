@@ -162,8 +162,8 @@ type
                                   read fonapplyrecupdate2
                                   write setonapplyrecupdate2;
              //called after inherited
-   property afterapplyrecupdate: afterapplyrecupdateeventty read fafterapplyrecupdate 
-                                  write fafterapplyrecupdate;
+   property afterapplyrecupdate: afterapplyrecupdateeventty 
+                          read fafterapplyrecupdate write fafterapplyrecupdate;
    property UpdateMode default upWhereKeyOnly;
    property UsePrimaryKeyAsKey default true;
    property IndexDefs : TIndexDefs read getindexdefs write setindexdefs;
