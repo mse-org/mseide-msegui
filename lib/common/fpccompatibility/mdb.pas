@@ -63,7 +63,8 @@ type
   TUpdateMode = (upWhereAll, upWhereChanged, upWhereKeyOnly);
   TResolverResponse = (rrSkip, rrAbort, rrMerge, rrApply, rrIgnore);
 
-  TProviderFlag = (pfInInsert, pfInUpdate, pfInWhere, pfInKey, pfHidden);
+  TProviderFlag = (pfInInsert, pfInUpdate, pfInWhere, pfInKey, pfHidden,
+                   pfInitInsert);
   TProviderFlags = set of TProviderFlag;
 
 { Forward declarations }
@@ -3015,8 +3016,19 @@ begin
 end;
 
 Procedure TDataset.DoOnNewRecord;
-
+var
+ int1: integer;
+ po1: ppointer;
 begin
+ po1:= pointer(fields.ffieldlist.list);
+ for int1:= 0 to fields.count -1 do begin
+  with tfield(po1^) do begin
+   if pfinitinsert in providerflags then begin
+    asstring:= defaultexpression;
+   end;
+  end;
+  inc(po1);
+ end;
  If assigned(FOnNewRecord) then
    FOnNewRecord(Self);
 end;
