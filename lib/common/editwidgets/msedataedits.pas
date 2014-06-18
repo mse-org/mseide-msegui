@@ -220,6 +220,7 @@ type
 
    function cangridcopy: boolean; override;
    function isempty (const atext: msestring): boolean; virtual;
+   procedure nullvalueset;
    procedure setnullvalue; virtual; //for dbedits
    function nullcheckneeded(const newfocus: twidget): boolean; virtual;
    function textcellcopy: boolean; virtual;
@@ -2081,15 +2082,20 @@ begin
  //dummy
 end;
 
-procedure tcustomdataedit.setnullvalue; //for dbedits
+procedure tcustomdataedit.nullvalueset();
+begin
+ include(fstate,des_dbnull);
+ updateedittext(true);  //change to textempty
+end;
+
+procedure tcustomdataedit.setnullvalue(); //for dbedits
 var
  bo1: boolean;
 begin
  text:= getnulltext;
  bo1:= true;
- texttovalue(bo1,true); //sevalue call
- include(fstate,des_dbnull);
- updateedittext(true);  //change to textempty
+ texttovalue(bo1,true); //setvalue call
+ nullvalueset();
 end;
 
 procedure tcustomdataedit.setfirstclick(var ainfo: mouseeventinfoty);
@@ -4090,8 +4096,8 @@ end;
 procedure tcustomintegeredit.setnullvalue;
 begin
  value:= 0;
- text:= '';
  fisnull:= true;
+ nullvalueset();
 end;
 
 procedure tcustomintegeredit.setbase(const Value: numbasety);
