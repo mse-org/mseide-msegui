@@ -1175,6 +1175,8 @@ type
    constructor create(aowner: tcomponent); override;
    function cellwidthmm: real;
    function cellheightmm: real;
+   function cellsize: sizety;
+   function cellrect: rectty;
    
    property colcount: integer read fcolcount write setcolcount default 2;
    property rowcount: integer read frowcount write setrowcount default 2;
@@ -7598,6 +7600,19 @@ end;
 function tcustomtilearea.cellheightmm: real;
 begin
  result:= innerclientsize.cy / (getppmm * frowcount);
+end;
+
+function tcustomtilearea.cellsize: sizety;
+begin
+ result:= innerclientsize;
+ result.cx:= (result.cx + fcolcount div 2) div fcolcount;
+ result.cy:= (result.cy + frowcount div 2) div frowcount;
+end;
+
+function tcustomtilearea.cellrect: rectty;
+begin
+ result.pos:= innerclientpos;
+ result.size:= cellsize;
 end;
 
 function tcustomtilearea.render(const acanvas: tcanvas): boolean;

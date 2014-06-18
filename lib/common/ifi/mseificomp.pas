@@ -447,8 +447,7 @@ type
    procedure setvalue(const sender: iificlient;
                var avalue; var accept: boolean; const arow: integer); override;
    function createdatalist: tdatalist; override;
-   function getlistdatatypes: listdatatypesty; override;
-   
+   function getlistdatatypes: listdatatypesty; override;   
     //istatfile
    procedure statreadvalue(const reader: tstatreader); override;
    procedure statwritevalue(const writer: tstatwriter); override;
@@ -484,8 +483,7 @@ type
    procedure setvalue(const sender: iificlient;
                var avalue; var accept: boolean; const arow: integer); override;
    function createdatalist: tdatalist; override;
-   function getlistdatatypes: listdatatypesty; override;
-   
+   function getlistdatatypes: listdatatypesty; override;   
     //istatfile
    procedure statreadvalue(const reader: tstatreader); override;
    procedure statwritevalue(const writer: tstatwriter); override;
@@ -583,6 +581,7 @@ type
                var avalue; var accept: boolean; const arow: integer); override;
    function createdatalist: tdatalist; override;
    procedure defineproperties(filer: tfiler); override;
+   function getlistdatatypes: listdatatypesty; override;
     //istatfile
    procedure statreadvalue(const reader: tstatreader); override;
    procedure statwritevalue(const writer: tstatwriter); override;
@@ -626,6 +625,7 @@ type
               var avalue; var accept: boolean; const arow: integer); override;
    function createdatalist: tdatalist; override;
    procedure defineproperties(filer: tfiler); override;
+   function getlistdatatypes: listdatatypesty; override;
     //istatfile
    procedure statreadvalue(const reader: tstatreader); override;
    procedure statwritevalue(const writer: tstatwriter); override;
@@ -2974,6 +2974,11 @@ begin
  writer.writereal(valuevarname,value);
 end;
 
+function trealclientcontroller.getlistdatatypes: listdatatypesty;
+begin
+ result:= [dl_real];
+end;
+
 { tdatetimeclientcontroller }
 
 constructor tdatetimeclientcontroller.create(const aowner: tmsecomponent);
@@ -3120,6 +3125,11 @@ procedure tdatetimeclientcontroller.statwritevalue(const writer: tstatwriter);
 begin
  inherited;
  writer.writereal(valuevarname,value);
+end;
+
+function tdatetimeclientcontroller.getlistdatatypes: listdatatypesty;
+begin
+ result:= [dl_real];
 end;
 
 { tifistringlinkcomp }

@@ -789,7 +789,7 @@ begin
   result:= emptydatetime;
  end
  else begin
-  result:= asdatetime;
+  result:= getasdatetime;
  end;
 end;
 
@@ -799,7 +799,7 @@ begin
   result:= emptyreal;
  end
  else begin
-  result:= asfloat;
+  result:= getasfloat;
  end;
 end;
 

@@ -772,6 +772,7 @@ type
          //calls reset, resets cliporigin, canvas owns the gc!
    procedure fitppmm(const asize: sizety);
                      //for printercanvas
+   function size: sizety;
 
    function highresdevice: boolean;
    procedure initflags(const dest: tcanvas); virtual;
@@ -5980,6 +5981,11 @@ begin
    options:= fvaluepo^.options - [cao_smooth];
   end;
  end;
+end;
+
+function tcanvas.size: sizety;
+begin
+ result:= getfitrect().size;
 end;
 
 initialization

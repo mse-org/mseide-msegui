@@ -155,7 +155,7 @@ type
    procedure fontchanged; override;
    procedure setcolor(const avalue: colorty); override;
    procedure doidle(var again: boolean);
-   //iactionlink
+    //iactionlink
    function getactioninfopo: pactioninfoty;
    function shortcutseparator: msechar;
    procedure calccaptiontext(var ainfo: actioninfoty);
