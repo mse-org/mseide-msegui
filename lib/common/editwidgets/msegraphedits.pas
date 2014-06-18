@@ -1531,7 +1531,7 @@ begin
   end;
 {$ifdef mse_with_ifi}
   if fifiserverintf <> nil then begin
-   fifiserverintf.valuechanged(iificlient(self));
+   fifiserverintf.valuechanged(iifidatalink(self));
   end;
 {$endif}
  end;

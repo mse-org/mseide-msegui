@@ -548,7 +548,7 @@ begin
 {$ifdef mse_with_ifi}
  if not (ws_loadedproc in fwidgetstate) then begin
   if fifiserverintf <> nil then begin
-   fifiserverintf.valuechanged(iificlient(self));
+   fifiserverintf.valuechanged(iifidatalink(self));
   end;
  end;
 {$endif}
