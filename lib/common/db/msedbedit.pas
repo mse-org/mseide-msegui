@@ -664,7 +664,7 @@ type
 //   procedure doexit; override;
    function internaldatatotext(const data): msestring; override;
    procedure texttovalue(var accept: boolean; const quiet: boolean); override;
-   procedure setnullvalue; override;
+//   procedure setnullvalue; override;
    function getrowdatapo(const arow: integer): pointer; override;
     //idbeditfieldlink
    procedure valuetofield;
@@ -4310,12 +4310,13 @@ begin
  fdatalink.updateoptionsedit(result);
 end;
 }
+{
 procedure tdbintegeredit.setnullvalue;
 begin
  inherited;
  fisnull:= true;
 end;
-
+}
 function tdbintegeredit.internaldatatotext(const data): msestring;
 begin
  if (@data = nil) and fisnull then begin

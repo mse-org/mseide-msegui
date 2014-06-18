@@ -1111,6 +1111,7 @@ type
    procedure readstatvalue(const reader: tstatreader); override;
    procedure writestatvalue(const writer: tstatwriter); override;
    function getdefaultvalue: pointer; override;
+   procedure setnullvalue(); override;
   public
    constructor create(aowner: tcomponent); override;
 //   function griddata: trealdatalist;
@@ -1345,6 +1346,7 @@ type
    procedure writestatvalue(const writer: tstatwriter); override;
    function isempty (const atext: msestring): boolean; override;
    function getdefaultvalue: pointer; override;
+   procedure setnullvalue(); override;
    procedure updatedatalist; override;
   public
    constructor create(aowner: tcomponent); override;
@@ -4345,8 +4347,9 @@ end;
 procedure tcustomint64edit.setnullvalue;
 begin
  value:= 0;
- text:= '';
+// text:= '';
  fisnull:= true;
+ nullvalueset();
 end;
 
 procedure tcustomint64edit.setbase(const Value: numbasety);
@@ -5566,6 +5569,12 @@ begin
  result:= tgridrealdatalist(inherited griddata);
 end;
 
+procedure tcustomrealedit.setnullvalue;
+begin
+ value:= emptyreal;
+ nullvalueset();
+end;
+
 { tspineditframe }
 
 constructor tspineditframe.create(const intf: icaptionframe;
@@ -6135,6 +6144,12 @@ end;
 function tcustomdatetimeedit.griddata: tgridrealdatalist;
 begin
  result:= tgridrealdatalist(inherited griddata);
+end;
+
+procedure tcustomdatetimeedit.setnullvalue;
+begin
+ value:= emptydatetime;
+ nullvalueset();
 end;
 
 end.
