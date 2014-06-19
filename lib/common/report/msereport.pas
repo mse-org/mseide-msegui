@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2014 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -109,7 +109,7 @@ type
                  );
  bandoptionsty = set of bandoptionty;
 
- const
+const
  visibilitymask = [bos_showfirstpage,bos_hidefirstpage,
                    bos_shownormalpage,bos_hidenormalpage,
                    bos_showevenpage,bos_hideevenpage,
@@ -1451,7 +1451,12 @@ type
    procedure resetzebra;
    
    property pagewidth: real read fpagewidth write setpagewidth;
+                    //mm, 0 -> use report value
    property pageheight: real read fpageheight write setpageheight;
+                    //mm, 0 -> use report value
+   function getpagewidth: real; //actual value
+   function getpageheight: real; //actual value
+      
    property font: trepwidgetfont read getfont write setfont stored isfontstored;
    property nextpage: tcustomreportpage read fnextpage write setnextpage;
    property nextpageifempty: tcustomreportpage read fnextpageifempty write 
@@ -1558,6 +1563,8 @@ type
    fonpagebeforerender: beforerenderpageeventty;
    fonpageafterpaint: reportpagepainteventty;
    fonpagepaint: reportpagepainteventty;
+   fpagewidth: real;
+   fpageheight: real;
    procedure setppmm(const avalue: real);
    function getreppages(index: integer): tcustomreportpage;
    procedure setreppages(index: integer; const avalue: tcustomreportpage);
@@ -1576,11 +1583,14 @@ type
    procedure setactivepage(const avalue: integer);
    procedure doexec(const sender: tobject);
    procedure docancel(const sender: tobject);
+   procedure setpagewidth(const avalue: real);
+   procedure setpageheight(const avalue: real);
   protected
    frepdesigninfo: repdesigninfoty;
    freppages: reportpagearty;
    fdefaultprintorientation: pageorientationty;
    class function hasresource: boolean; override;
+   procedure updatepagesize;
    procedure dopagebeforerender(const sender: tcustomreportpage;
                                           var empty: boolean);
    procedure dopagepaint(const sender: tcustomreportpage;
@@ -1623,6 +1633,11 @@ type
      //calls recordchanged of active page
    
    property ppmm: real read fppmm write setppmm; //pixel per mm
+   property pagewidth: real read fpagewidth write setpagewidth; 
+                   //mm, default 190 
+   property pageheight: real read fpageheight write setpageheight;
+                   //mm, default 270
+
    function reppagecount: integer;
    property reppages[index: integer]: tcustomreportpage read getreppages 
                                                 write setreppages; default;
@@ -1694,6 +1709,8 @@ type
    property statfile: tstatfile read fstatfile write setstatfile;
    property color;
    property ppmm;
+   property pagewidth;
+   property pageheight;
    property font;
 //   property fontempty;
    property grid_show;
@@ -5272,8 +5289,8 @@ begin
  inherited;
  fwidgetstate1:= fwidgetstate1 + [ws1_nodesignvisible,ws1_nodesignhandles,
                                        ws1_nodesigndelete];
- fpagewidth:= defaultreppagewidth;
- fpageheight:= defaultreppageheight; 
+// fpagewidth:= defaultreppagewidth;
+// fpageheight:= defaultreppageheight; 
  fppmm:= defaultrepppmm;
  with fwidgetrect do begin
   cx:= round(defaultreppagewidth*defaultrepppmm);
@@ -5326,6 +5343,7 @@ procedure tcustomreportpage.setparentwidget(const avalue: twidget);
 begin
  if avalue is tcustomreport then begin
   freport:= tcustomreport(avalue);
+  updatepagesize;
  end
  else begin
   freport:= nil;
@@ -5713,7 +5731,7 @@ end;
 
 procedure tcustomreportpage.updatepagesize;
 begin
- size:= makesize(round(fpagewidth*fppmm),round(fpageheight*fppmm));
+ size:= makesize(round(getpagewidth*fppmm),round(getpageheight*fppmm));
 end;
 
 procedure tcustomreportpage.setppmm(const avalue: real);
@@ -5976,12 +5994,40 @@ begin
  result:= fppmm;
 end;
 
+function tcustomreportpage.getpagewidth: real;
+begin
+ result:= fpagewidth;
+ if result = 0 then begin
+  if freport = nil then begin
+   result:= defaultpagewidth;
+  end
+  else begin
+   result:= freport.fpagewidth;
+  end;
+ end;
+end;
+
+function tcustomreportpage.getpageheight: real;
+begin
+ result:= fpageheight;
+ if result = 0 then begin
+  if freport = nil then begin
+   result:= defaultpageheight;
+  end
+  else begin
+   result:= freport.fpageheight;
+  end;
+ end;
+end;
+
  {tcustomreport}
  
 constructor tcustomreport.create(aowner: tcomponent);
 begin
  fprintstarttime:= nowlocal;
  fppmm:= defaultrepppmm;
+ fpagewidth:= defaultreppagewidth;
+ fpageheight:= defaultreppageheight; 
  foptions:= defaultreportoptions;
  with frepdesigninfo do begin
   widgetrect:= makerect(50,50,50,50);
@@ -6708,6 +6754,37 @@ begin
    fonpagepaint(sender,acanvas);
   finally
    application.unlock;
+  end;
+ end;
+end;
+
+procedure tcustomreport.setpagewidth(const avalue: real);
+begin
+ if fpagewidth <> avalue then begin
+  fpagewidth:= avalue;
+  updatepagesize;
+ end;
+end;
+
+procedure tcustomreport.setpageheight(const avalue: real);
+begin
+ if fpageheight <> avalue then begin
+  fpageheight:= avalue;
+  updatepagesize;
+ end;
+end;
+
+procedure tcustomreport.updatepagesize;
+var
+ int1: integer;
+begin
+ if not (csloading in componentstate) then begin
+  for int1:= 0 to high(freppages) do begin
+   with freppages[int1] do begin
+    if (fpagewidth = 0) or (fpageheight = 0) then begin
+     updatepagesize();
+    end;
+   end;
   end;
  end;
 end;

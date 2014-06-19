@@ -78,10 +78,9 @@ inherited reportdesignerfo: treportdesignerfo
     reffontheight = 14
   end
   object reportcontainer: tscrollbox[2]
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_mousewheel, ow_destroywidgets]
     color = -1879048187
     frame.optionsscroll = [oscr_drag, oscr_key]
-    frame.zoomwidthstep = 1
-    frame.zoomheightstep = 1
     frame.colorclient = -1610612730
     frame.localprops = [frl_colorclient]
     taborder = 1
@@ -273,12 +272,14 @@ inherited reportdesignerfo: treportdesignerfo
       item
         caption = 'Add Report Page'
         name = 'addpage'
-        state = [as_localcaption]
+        state = [as_localcaption, as_localonexecute]
+        onexecute = addpage
       end    
       item
         caption = 'Delete Report Page'
         name = 'delpage'
-        state = [as_localcaption]
+        state = [as_localcaption, as_localonexecute]
+        onexecute = deletepage
       end>
   end
   inherited hidecompact: taction[11]
