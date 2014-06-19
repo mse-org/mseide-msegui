@@ -51,10 +51,12 @@ type
    procedure setchecked(const Value: boolean);
    procedure sethint(const Value: msestring);
    function ishintstored: Boolean;
-   procedure setonexecute(const Value: notifyeventty);
+   procedure setonexecute(const avalue: notifyeventty);
    function isonexecutestored: Boolean;
    procedure setonbeforeexecute(const avalue: accepteventty);
    function isonbeforeexecutestored: Boolean;
+   procedure setonafterexecute(const avalue: notifyeventty);
+   function isonafterexecutestored: Boolean;
    procedure setoptions(const Value: menuactionoptionsty);
    procedure setshortcut(const value: shortcutty);
    function isshortcutstored: boolean;
@@ -122,13 +124,16 @@ type
    property shortcut1: shortcutty read getshortcut1 write setshortcut1
                         stored isshortcut1stored default 0;
    property tag: integer read ftag write ftag default 0;
-   property options: menuactionoptionsty read finfo.options write setoptions default [];
+   property options: menuactionoptionsty read finfo.options 
+                                                  write setoptions default [];
    property group: integer read finfo.group write setgroup
                              stored isgroupstored default 0;
    property onexecute: notifyeventty read finfo.onexecute write setonexecute
                                stored isonexecutestored;
    property onbeforeexecute: accepteventty read finfo.onbeforeexecute
                    write setonbeforeexecute stored isonbeforeexecutestored;
+   property onafterexecute: notifyeventty read finfo.onafterexecute
+                   write setonafterexecute  stored isonafterexecutestored;
 //   property onupdate: actioneventty read fonupdate write fonupdate;
  end;
  
@@ -150,6 +155,7 @@ type
    property group;
    property onexecute;
    property onbeforeexecute;
+   property onafterexecute;
  end;
  ptoolbutton = ^ttoolbutton;
 
@@ -180,6 +186,7 @@ type
    property group;
    property onexecute;
    property onbeforeexecute; 
+   property onafterexecute;
  end;
   
  toolbuttonsstatety = (tbs_nocandefocus);
@@ -533,9 +540,10 @@ begin
  result:= isactionhintstored(finfo);
 end;
 
-procedure tcustomtoolbutton.setonexecute(const Value: notifyeventty);
+procedure tcustomtoolbutton.setonexecute(const avalue: notifyeventty);
 begin
- setactiononexecute(iactionlink(self),value,csloading in toolbar.componentstate);
+ setactiononexecute(iactionlink(self),avalue,
+                                       csloading in toolbar.componentstate);
 end;
 
 function tcustomtoolbutton.isonexecutestored: Boolean;
@@ -545,12 +553,24 @@ end;
 
 procedure tcustomtoolbutton.setonbeforeexecute(const avalue: accepteventty);
 begin
- setactiononbeforeexecute(iactionlink(self),avalue,csloading in toolbar.componentstate);
+ setactiononbeforeexecute(iactionlink(self),avalue,
+                                         csloading in toolbar.componentstate);
 end;
 
 function tcustomtoolbutton.isonbeforeexecutestored: Boolean;
 begin
  result:= isactiononbeforeexecutestored(finfo);
+end;
+
+procedure tcustomtoolbutton.setonafterexecute(const avalue: notifyeventty);
+begin
+ setactiononafterexecute(iactionlink(self),avalue,
+                                       csloading in toolbar.componentstate);
+end;
+
+function tcustomtoolbutton.isonafterexecutestored: Boolean;
+begin
+ result:= isactiononafterexecutestored(finfo);
 end;
 
 procedure tcustomtoolbutton.setgroup(const Value: integer);

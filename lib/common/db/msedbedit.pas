@@ -809,6 +809,7 @@ type
    property onupdate;
    property onexecute;
    property onbeforeexecute;
+   property onafterexecute;
    property imageoffset;
    property imageoffsetdisabled;
    property imageoffsetmouse;

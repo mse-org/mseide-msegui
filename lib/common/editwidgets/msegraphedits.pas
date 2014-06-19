@@ -805,6 +805,8 @@ type
    function isonexecutestored: boolean;
    procedure setonbeforeexecute(const avalue: accepteventty);
    function isonbeforeexecutestored: boolean;
+   procedure setonafterexecute(const avalue: notifyeventty);
+   function isonafterexecutestored: boolean;
    procedure setstate(const avalue: actionstatesty);
    function isstatestored: boolean;
 
@@ -902,15 +904,20 @@ type
                             stored false default 0;
    property shortcut1: shortcutty read getshortcut1 write setshortcut1
                             stored false default 0;
-   property shortcuts: shortcutarty read factioninfo.shortcut write setshortcuts;
-   property shortcuts1: shortcutarty read factioninfo.shortcut1 write setshortcuts1;
+   property shortcuts: shortcutarty read factioninfo.shortcut 
+                                              write setshortcuts;
+   property shortcuts1: shortcutarty read factioninfo.shortcut1 
+                                                       write setshortcuts1;
    property onupdate: databuttoneventty read fonupdate write fonupdate;
    property onexecute: notifyeventty read factioninfo.onexecute
                             write setonexecute stored isonexecutestored;
    property onbeforeexecute: accepteventty read factioninfo.onbeforeexecute
                    write setonbeforeexecute stored isonbeforeexecutestored;
+   property onafterexecute: notifyeventty read factioninfo.onafterexecute
+                         write setonafterexecute stored isonafterexecutestored;
 
-   property imageoffset: integer read fimageoffset write setimageoffset default 0;
+   property imageoffset: integer read fimageoffset 
+                                              write setimageoffset default 0;
    property imageoffsetdisabled: integer read fimageoffsetdisabled
                                  write setimageoffsetdisabled default 0;
    property imageoffsetmouse: integer read fimageoffsetmouse 
@@ -920,8 +927,8 @@ type
    property imagenums: tintegerarrayprop read fimagenums write setimagenums;
 
    property options;
-   property focusrectdist: integer read finfo.focusrectdist write finfo.focusrectdist 
-                   default defaultshapefocusrectdist;
+   property focusrectdist: integer read finfo.focusrectdist
+            write finfo.focusrectdist default defaultshapefocusrectdist;
    property onsetvalue;
    property value default -1;
    property valuedefault default -1;
@@ -959,6 +966,7 @@ type
    property onupdate;
    property onexecute;
    property onbeforeexecute;
+   property onafterexecute;
 
    property imageoffset;
    property imageoffsetdisabled;
@@ -997,6 +1005,7 @@ type
    property onupdate;
    property onexecute;
    property onbeforeexecute;
+   property onafterexecute;
    property onsetvalue;
    property value;
    property valuedefault;
@@ -3633,6 +3642,16 @@ end;
 function tcustomdatabutton.isonbeforeexecutestored: boolean;
 begin
  result:= isactiononbeforeexecutestored(factioninfo);
+end;
+
+procedure tcustomdatabutton.setonafterexecute(const avalue: notifyeventty);
+begin
+ setactiononafterexecute(iactionlink(self),avalue,csloading in componentstate);
+end;
+
+function tcustomdatabutton.isonafterexecutestored: boolean;
+begin
+ result:= isactiononafterexecutestored(factioninfo);
 end;
 
 procedure tcustomdatabutton.setimagedist(const avalue: integer);

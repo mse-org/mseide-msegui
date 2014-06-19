@@ -115,6 +115,8 @@ type
    function isonexecutestored: boolean;
    procedure setonbeforeexecute(const avalue: accepteventty);
    function isonbeforeexecutestored: boolean;
+   procedure setonafterexecute(const value: notifyeventty);
+   function isonafterexecutestored: boolean;
    procedure setaction(const value: tcustomaction); virtual;
    function iscaptionstored: boolean;
    function getstate: actionstatesty;
@@ -223,6 +225,8 @@ type
               write setonexecute stored isonexecutestored;
    property onbeforeexecute: accepteventty read factioninfo.onbeforeexecute 
               write setonbeforeexecute stored isonbeforeexecutestored;
+   property onafterexecute: notifyeventty read factioninfo.onafterexecute
+              write setonafterexecute stored isonafterexecutestored;
    property autosize_cx: integer read fautosize_cx write setautosize_cx default 0;
    property autosize_cy: integer read fautosize_cy write setautosize_cy default 0;
   published
@@ -255,6 +259,7 @@ type
    property onupdate;
    property onexecute;
    property onbeforeexecute;
+   property onafterexecute;
  end;
 
  tstockglyphbutton = class(tcustombutton)
@@ -285,6 +290,7 @@ type
    property onupdate;
    property onexecute;
    property onbeforeexecute;
+   property onafterexecute;
  end;
 
  tcustomrichbutton = class(tcustombutton)
@@ -367,6 +373,7 @@ type
    property onupdate;
    property onexecute;
    property onbeforeexecute;
+   property onafterexecute;
  end;
 
  trichstockglyphbutton = class(tcustomrichbutton)
@@ -407,6 +414,7 @@ type
    property onupdate;
    property onexecute;
    property onbeforeexecute;
+   property onafterexecute;
  end;
    
  labeloptionty = (lao_nogray,lao_nounderline);
@@ -1037,6 +1045,16 @@ end;
 function tcustombutton.isonbeforeexecutestored: boolean;
 begin
  result:= isactiononbeforeexecutestored(factioninfo);
+end;
+
+procedure tcustombutton.setonafterexecute(const value: notifyeventty);
+begin
+ setactiononafterexecute(iactionlink(self),value,csloading in componentstate);
+end;
+
+function tcustombutton.isonafterexecutestored: boolean;
+begin
+ result:= isactiononafterexecutestored(factioninfo);
 end;
 
 function tcustombutton.getcaption: captionty;

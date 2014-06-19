@@ -81,6 +81,7 @@ type
    property options;
    property onexecute;
    property onbeforeexecute;
+   property onafterexecute;
    property onexecuteaction;
    property onupdate;
    property onchange;
