@@ -140,6 +140,8 @@ type
    procedure pagesizechanged;
    procedure setpa_orientation(const avalue: pageorientationty);
    procedure setcanvas(const avalue: tprintercanvas);
+   function getclientwidth: real;
+   function getclientheight: real;
   protected
    fcanvas: tprintercanvas;
    fcanceled: boolean;
@@ -178,14 +180,17 @@ type
    property pa_orientation: pageorientationty read fpa_orientation 
                               write setpa_orientation default pao_portrait;
   
-   property pa_frameleft: real read fpa_frameleft write setpa_frameleft stored false;
-                                     //mm, default 10
-   property pa_frametop: real read fpa_frametop write setpa_frametop stored false;
-                                     //mm, default 10
-   property pa_frameright: real read fpa_frameright write setpa_frameright stored false;
-                                     //mm, default 10
-   property pa_framebottom: real read fpa_framebottom write setpa_framebottom 
-                                      stored false; //mm, default 10
+   property pa_frameleft: real read fpa_frameleft 
+                        write setpa_frameleft stored false;   //mm, default 10
+   property pa_frametop: real read fpa_frametop 
+                        write setpa_frametop stored false;    //mm, default 10
+   property pa_frameright: real read fpa_frameright 
+                        write setpa_frameright stored false;  //mm, default 10
+   property pa_framebottom: real read fpa_framebottom 
+                        write setpa_framebottom stored false; //mm, default 10
+   property clientwidth: real read getclientwidth;            //mm
+   property clientheight: real read getclientheight;          //mm
+
    property tabulators: tprintertabulators read ftabulators write settabulators;
 //   property ppmm: real read fppmm write setppmm; //pixel per mm, default 10
 //   property colorspace: colorspacety read getcolorspace write setcolorspace;
@@ -673,6 +678,18 @@ begin
  fpa_framebottom:= avalue;
  fcanvas.updateframe;
 end;
+
+function tcustomprinter.getclientwidth: real;
+begin
+ result:= fpa_width - fpa_frameleft - fpa_frameright;
+end;
+
+function tcustomprinter.getclientheight: real;
+begin
+ result:= fpa_height - fpa_frametop - fpa_framebottom;
+end;
+
+
 {
 function tcustomprinter.getcolorspace: colorspacety;
 begin
