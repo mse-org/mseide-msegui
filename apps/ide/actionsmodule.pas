@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2012 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2014 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -205,6 +205,7 @@ type
    projectcloseact: taction;
    c: tstringcontainer;
    copylatexact: taction;
+   findcompact: taction;
    procedure findinfileonexecute(const sender: tobject);
 
    //file
@@ -274,6 +275,7 @@ type
    procedure creadstateexe(const sender: TObject);
    procedure findupdateexe(const sender: tcustomaction);
    procedure copylatexactonexecute(const sender: TObject);
+   procedure findcompexe(const sender: TObject);
  end;
 
 var
@@ -311,6 +313,8 @@ begin
  cut.shortcut1:= sysshortcuts1[sho_cut];
  paste.shortcut:= sysshortcuts[sho_paste];
  paste.shortcut1:= sysshortcuts1[sho_paste];
+ findcompact.shortcut:= find.shortcut;
+ findcompact.shortcut1:= find.shortcut1;
 end;
 
 //common
@@ -753,6 +757,13 @@ begin
         sourcefo.activepage.activeentered;
   repeatfind.enabled:= find.enabled and 
            (projectoptions.findreplaceinfo.find.text <> '');
+ end;
+end;
+
+procedure tactionsmo.findcompexe(const sender: TObject);
+begin
+ if mainfo.factivedesignmodule <> nil then begin
+  mainfo.factivedesignmodule^.designformintf.findcompdialog();
  end;
 end;
 

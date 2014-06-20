@@ -110,7 +110,6 @@ type
    togglehideact: taction;
    showallact: taction;
    c: tstringcontainer;
-   findcompact: taction;
    procedure doshowobjectinspector(const sender: tobject);
    procedure doshowcomponentpalette(const sender: tobject);
    procedure doshowastext(const sender: tobject);
@@ -139,7 +138,6 @@ type
    procedure togglehideexe(const sender: TObject);
    procedure showallexe(const sender: TObject);
    procedure touchallexe(const sender: TObject);
-   procedure findcompexe(const sender: TObject);
   private
    fdesigner: tdesigner;
    fform: twidget;
@@ -209,6 +207,7 @@ type
    procedure endplacement;
    procedure beginstreaming; virtual;
    procedure endstreaming; virtual;
+   procedure findcompdialog();
 
    property module: tmsecomponent read fmodule write setmodule;
    property form: twidget read fform;
@@ -3625,10 +3624,12 @@ end;
 function tformdesignerfo.filterfindcomp(
                                  const acomponent: tcomponent): boolean;
 begin
- result:= not (cssubcomponent in acomponent.componentstyle);
+ result:= not (cssubcomponent in acomponent.componentstyle) and
+          (not (acomponent is twidget) or 
+                (ws_iswidget in twidget(acomponent).widgetstate));
 end;
 
-procedure tformdesignerfo.findcompexe(const sender: TObject);
+procedure tformdesignerfo.findcompdialog;
 var
  name1: msestring;
 begin
@@ -3637,11 +3638,17 @@ begin
   if fselections.count > 0 then begin
    name1:= ownernamepath(fselections[0]);
   end;
-  if compnamedialog(designer.getcomponentnametree(nil,true,fmodule,
-                                @filterfindcomp),name1) = mr_ok then begin
-   designer.selectcomponent(
+  if compnamedialog(designer.getcomponentnametree(nil,true,nil,
+                      @filterfindcomp,fmodule),name1,true) = mr_ok then begin
+   if name1 = fmodule.name then begin
+    designer.selectcomponent(fmodule);
+   end
+   else begin
+    replacechar1(name1,':','.');
+    designer.selectcomponent(
       designer.modules.findmodule(fmodule)^.components.getcomponent(name1,
                                                                         true));
+   end;
   end;
  end;
 end;

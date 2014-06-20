@@ -305,7 +305,7 @@ object actionsmo: tactionsmo
   object buttonicons: timagelist
     width = 24
     height = 24
-    colormask = True
+    options = [bmo_masked, bmo_colormask]
     count = 24
     left = 352
     top = 32
@@ -1480,8 +1480,9 @@ object actionsmo: tactionsmo
         action = copylatexact
         dispname = 'Copy LaTeX'
         sc = (
-          1
-          16460
+          2
+          16459
+          76
         )
       end    
       item
@@ -2344,6 +2345,15 @@ object actionsmo: tactionsmo
       2
       16459
       76
+    )
+  end
+  object findcompact: taction
+    onexecute = findcompexe
+    left = 152
+    top = 128
+    sc = (
+      1
+      16454
     )
   end
 end

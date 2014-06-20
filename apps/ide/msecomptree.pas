@@ -44,6 +44,7 @@ type
    procedure treeitemoncellevent(const sender: tobject;
                  var info: celleventinfoty); virtual;
   private
+   fselectparent: boolean;
   public
  end;
 {
@@ -55,15 +56,16 @@ type
 // dirtreefo: tdirtreefo;
 
 function compnamedialog(const avalues: tcompnameitem; //will be freed
-                                var avalue: msestring): modalresultty;
+                         var avalue: msestring;
+                         const selectparent: boolean): modalresultty;
 
 implementation
 uses
  msecomptree_mfm,msesysintf,mseeditglob,msefiledialog,msebitmap,mseevent,
  mseguiglob;
 
-function compnamedialog(const avalues: tcompnameitem;
-                                var avalue: msestring): modalresultty;
+function compnamedialog(const avalues: tcompnameitem; var avalue: msestring;
+                         const selectparent: boolean): modalresultty;
 var
  fo1: tcompnametreefo;
  ar1: msestringarty;
@@ -71,6 +73,7 @@ var
 begin
  fo1:= tcompnametreefo.create(nil);
  try
+  fo1.fselectparent:= selectparent;
   ar1:= splitstring(avalue,msechar('.'));
   item1:= avalues.finditembycaption(ar1,false,false,true);
   if item1 <> nil then begin
@@ -127,7 +130,7 @@ end;
 
 procedure tcompnametreefo.treeitemondataentered(const sender: tobject);
 begin
- if tcompnameitem(treeitem.item).isvalue then begin
+ if fselectparent or tcompnameitem(treeitem.item).isvalue then begin
   window.modalresult:= mr_ok;
  end;
 end;

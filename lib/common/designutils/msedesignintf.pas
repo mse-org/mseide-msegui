@@ -150,7 +150,8 @@ type
   function getcomponentnametree(const acomponentclass: tcomponentclass;
                           const includeinherited: boolean;
                           const aowner: tcomponent = nil;
-                          const filter: compfilterfuncty = nil): tcompnameitem;
+                          const filter: compfilterfuncty = nil;
+                          const amodule: tcomponent = nil): tcompnameitem;
   procedure setactivemodule(const adesignform: tmseform);
   procedure setmodulex(const amodule: tmsecomponent; avalue: integer);
   procedure setmoduley(const amodule: tmsecomponent; avalue: integer);

@@ -171,7 +171,7 @@ begin
  if mstr1 = '' then begin
   mstr1:= fpath;
  end;
- if compnamedialog(tree1,mstr1) = mr_ok then begin
+ if compnamedialog(tree1,mstr1,false) = mr_ok then begin
   bo1:= true;
   setval(nil,mstr1,bo1);
   na.item.caption:= mstr1;

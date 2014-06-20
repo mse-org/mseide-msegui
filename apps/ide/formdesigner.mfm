@@ -177,7 +177,7 @@ object formdesignerfo: tformdesignerfo
         options = [mao_separator, mao_shortcutcaption]
       end    
       item
-        action = findcompact
+        action = actionsmo.findcompact
         caption = 'Find Component'
         state = [as_localcaption]
       end    
@@ -301,14 +301,5 @@ object formdesignerfo: tformdesignerfo
     )
     left = 64
     top = 136
-  end
-  object findcompact: taction
-    onexecute = findcompexe
-    left = 144
-    top = 104
-    sc = (
-      1
-      16454
-    )
   end
 end

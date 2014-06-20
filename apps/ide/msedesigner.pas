@@ -47,7 +47,8 @@ type
   procedure setmoduleoptions(const aoptions: moduleoptionsty);
   property moduleoptions: moduleoptionsty read getmoduleoptions
                                                  write setmoduleoptions;
-  procedure updatecaption;
+  procedure updatecaption();
+  procedure findcompdialog();
  end;
  
  methodinfoty = record
@@ -522,7 +523,8 @@ type
    function getcomponentnametree(const acomponentclass: tcomponentclass;
                                  const includeinherited: boolean;
                                  const aowner: tcomponent = nil;
-                          const filter: compfilterfuncty = nil): tcompnameitem;
+                          const filter: compfilterfuncty = nil;
+                          const amodule: tcomponent = nil): tcompnameitem;
    function getancestorclassinfo(const ainstance: tcomponent;
                  const interfaceonly: boolean): classinfopoarty;
                                                   overload;
@@ -5457,7 +5459,8 @@ end;
 function tdesigner.getcomponentnametree(const acomponentclass: tcomponentclass;
                          const includeinherited: boolean;
                          const aowner: tcomponent = nil;
-                         const filter: compfilterfuncty = nil): tcompnameitem;
+                         const filter: compfilterfuncty = nil;
+                         const amodule: tcomponent = nil): tcompnameitem;
 
  procedure check(const acomp: tcomponent);
  var
@@ -5494,7 +5497,7 @@ function tdesigner.getcomponentnametree(const acomponentclass: tcomponentclass;
   end;
   for int3:= 0 to acomp.componentcount - 1  do begin
    comp2:= acomp.components[int3];
-   if (cssubcomponent in comp2.componentstyle){ and 
+   if (cssubcomponent in comp2.componentstyle) xor (amodule <> nil){ and 
                                     not isnosubcomp(comp2)} then begin
 //    node1:= anode.findcomp(comp2);
 //    if node1 = nil then begin
@@ -5511,12 +5514,17 @@ var
  po1: pmoduleinfoty;
 begin
  result:= tdesigncompnameitem.create(nil,false);
- for int1:= 0 to fmodules.count - 1 do begin
-  po1:= fmodules[int1];
-  with po1^.components do begin
-   for int2:= 0 to count - 1 do begin
-    comp1:= next^.instance;
-    check(comp1);
+ if amodule <> nil then begin
+  check(amodule);
+ end
+ else begin
+  for int1:= 0 to fmodules.count - 1 do begin
+   po1:= fmodules[int1];
+   with po1^.components do begin
+    for int2:= 0 to count - 1 do begin
+     comp1:= next^.instance;
+     check(comp1);
+    end;
    end;
   end;
  end;

@@ -1413,10 +1413,12 @@ begin
   make3act.enabled:= not making;
   make4act.enabled:= not making;
   abortmakeact.enabled:= making;
-  saveall.enabled:= sourcefo.modified or designer.modified or projectoptions.modified;
+  saveall.enabled:= sourcefo.modified or designer.modified or
+                                                  projectoptions.modified;
   actionsmo.toggleformunit.enabled:= (flastform <> nil) or
                                             (designer.modules.count > 0);
-  if (sourcefo.activepage <> nil) and sourcefo.activepage.activeentered then begin
+  if (sourcefo.activepage <> nil) and 
+                                sourcefo.activepage.activeentered then begin
    setbm0.enabled:= true;
    setbm1.enabled:= true;
    setbm2.enabled:= true;
@@ -1511,7 +1513,8 @@ begin
   end;
   closeall.enabled:= (sourcefo.count > 0) or (designer.modules.count > 0);
   saveas.enabled:= (factivedesignmodule <> nil) or (sourcefo.activepage <> nil);
-  mainmenu1.menu.itembyname('project').itembyname('close').enabled:= fprojectloaded;
+  mainmenu1.menu.itembyname('project').itembyname('close').enabled:= 
+                                                               fprojectloaded;
  end;
 end;
 

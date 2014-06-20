@@ -2910,7 +2910,7 @@ begin
  else begin
   mstr1:= ownernamepath(co1);
  end;
- if compnamedialog(tree1,mstr1) = mr_ok then begin
+ if compnamedialog(tree1,mstr1,false) = mr_ok then begin
   fcomppath:= mstr1;
   setvalue(mstr1);
  end;

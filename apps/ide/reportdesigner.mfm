@@ -457,6 +457,4 @@ inherited reportdesignerfo: treportdesignerfo
     left = 64
     top = 208
   end
-  inherited findcompact: taction[18]
-  end
 end
