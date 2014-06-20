@@ -5377,7 +5377,7 @@ function findcomponentbynamepath(const namepath: string;
                                 const root: tcomponent): tcomponent;
 var
  po1,po2: pchar;
- comp1: tcomponent;
+// comp1: tcomponent;
 begin
  result:= nil;
  if (root <> nil) and (namepath <> '') then begin

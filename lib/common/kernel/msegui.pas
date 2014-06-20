@@ -1800,10 +1800,10 @@ type
 
    property left: integer read fwidgetrect.x write setbounds_x;
    property right: integer read getright write setright;
-                //widgetrect.x + widgetrect.cx, sets cx;
+                //widgetrect.x + widgetrect.cx, sets cx if an_left is set
    property top: integer read fwidgetrect.y write setbounds_y;
    property bottom: integer read getbottom write setbottom;
-                //widgetrect.y + widgetrect.cy, sets cy;
+                //widgetrect.y + widgetrect.cy, sets cy if an_top is set
    property width: integer read fwidgetrect.cx write setbounds_cx;
    property height: integer read fwidgetrect.cy write setbounds_cy;
 
@@ -7349,7 +7349,12 @@ end;
 
 procedure twidget.setright(const avalue: integer);
 begin
- bounds_cx:= avalue - fwidgetrect.x;
+ if an_left in fanchors then begin
+  bounds_cx:= avalue - fwidgetrect.x;
+ end
+ else begin
+  bounds_x:= avalue - bounds_cx; 
+ end;
 end;
 
 function twidget.getbottom: integer;
@@ -7359,7 +7364,12 @@ end;
 
 procedure twidget.setbottom(const avalue: integer);
 begin
- bounds_cy:= avalue - fwidgetrect.y;
+ if an_top in fanchors then begin
+  bounds_cy:= avalue - fwidgetrect.y;
+ end
+ else begin
+  bounds_y:= avalue - bounds_cy; 
+ end;
 end;
 
 procedure twidget.setsize(const Value: sizety);
