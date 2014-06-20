@@ -160,6 +160,7 @@ uses
 type
  tpropertyeditor1 = class(tpropertyeditor);
  tlbdropdowncol1 = class(tlbdropdowncol);
+ tarrayelementeditor1 = class(tarrayelementeditor);
  
  tnolistdropdowncolpropertyeditor = class(tarraypropertyeditor)
   protected
@@ -269,17 +270,30 @@ type
   protected
    function geteditorclass: propertyeditorclassty; override;
  end;
-
+{
  tslaveparampropertyeditor = class(tclasselementeditor)
   protected
    function getdefaultstate: propertystatesty; override;
   public
    function getvalue: msestring; override;
  end;
-
+}
  tslaveparamspropertyeditor = class(tpersistentarraypropertyeditor)
   protected
-   function geteditorclass: propertyeditorclassty; override;
+   function itemgetdefaultstate(
+          const sender: tarrayelementeditor): propertystatesty; override;
+   function itemgetvalue(
+          const sender: tarrayelementeditor): msestring; override;
+ //  function geteditorclass: propertyeditorclassty; override;
+ end;
+
+ tslavefieldspropertyeditor = class(tpersistentarraypropertyeditor)
+  protected
+   function itemgetdefaultstate(
+          const sender: tarrayelementeditor): propertystatesty; override;
+   function itemgetvalue(
+          const sender: tarrayelementeditor): msestring; override;
+ //  function geteditorclass: propertyeditorclassty; override;
  end;
 
  tlookupbufferfieldnopropertyeditor = class(tordinalpropertyeditor)
@@ -451,6 +465,8 @@ begin
         tdbparamnamepropertyeditor);
  registerpropertyeditor(typeinfo(tdestparams),nil,'',
         tslaveparamspropertyeditor);
+ registerpropertyeditor(typeinfo(tdestfields),nil,'',
+        tslavefieldspropertyeditor);
  registerpropertyeditor(typeinfo(tstrings),nil,'SQL',
         tsqlpropertyeditor);
  registerpropertyeditor(typeinfo(tsqlstringlist),nil,'',
@@ -1524,7 +1540,7 @@ begin
 end;
 
 { tslaveparampropertyeditor }
-
+{
 function tslaveparampropertyeditor.getdefaultstate: propertystatesty;
 begin
  result:= inherited getdefaultstate+[ps_refresh];
@@ -1540,12 +1556,50 @@ begin
   result:= result+'.'+fieldname+'>'+'<'+paramname+'>';
  end;
 end;
-
+}
 { tslaveparamspropertyeditor }
-
+{
 function tslaveparamspropertyeditor.geteditorclass: propertyeditorclassty;
 begin
  result:= tslaveparampropertyeditor;
+end;
+}
+function tslaveparamspropertyeditor.itemgetvalue(
+                        const sender: tarrayelementeditor): msestring;
+begin
+ with tdestparam(tarrayelementeditor1(sender).getpointervalue) do begin
+  result:= '<';
+  if datasource <> nil then begin
+   result:= result + datasource.name;
+  end;
+  result:= result+'.'+fieldname+'>'+'<'+paramname+'>';
+ end;
+end;
+
+function tslaveparamspropertyeditor.itemgetdefaultstate(
+                     const sender: tarrayelementeditor): propertystatesty;
+begin
+ result:= inherited itemgetdefaultstate(sender)+[ps_refresh];
+end;
+
+{ tslavefieldspropertyeditor }
+
+function tslavefieldspropertyeditor.itemgetdefaultstate(
+                const sender: tarrayelementeditor): propertystatesty;
+begin
+ result:= inherited itemgetdefaultstate(sender)+[ps_refresh];
+end;
+
+function tslavefieldspropertyeditor.itemgetvalue(
+                                const sender: tarrayelementeditor): msestring;
+begin
+ with tdestfield(tarrayelementeditor1(sender).getpointervalue) do begin
+  result:= '<';
+  if datasource <> nil then begin
+   result:= result + datasource.name;
+  end;
+  result:= result+'.'+fieldname+'>'+'<'+destfieldname+'>';
+ end;
 end;
 
 { tsqlmacroitemeditor }

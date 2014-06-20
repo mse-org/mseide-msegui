@@ -241,6 +241,13 @@ type
    property paramname: string read fparamname write fparamname;
  end;
 
+ tdestparams = class(townedpersistentarrayprop)
+  public
+   constructor create(const aowner: tfieldparamlink); reintroduce;
+   class function getitemclasstype: persistentclassty; override;
+               //used in dumpunitgroups
+ end;
+
  destfieldoptionty = (dfo_onlyifnull,dfo_notifunmodifiedinsert);
  destfieldoptionsty = set of destfieldoptionty;
  
@@ -258,13 +265,6 @@ type
    property options: destfieldoptionsty read foptions write foptions default [];
  end;
   
- tdestparams = class(townedpersistentarrayprop)
-  public
-   constructor create(const aowner: tfieldparamlink); reintroduce;
-   class function getitemclasstype: persistentclassty; override;
-               //used in dumpunitgroups
- end;
-
  tdestfields = class(townedpersistentarrayprop)
   public
    constructor create(const aowner: tfieldparamlink); reintroduce;
