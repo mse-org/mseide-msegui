@@ -695,6 +695,23 @@ type
    function getelementeditorclass: elementeditorclassty; virtual;
    procedure itemmoved(const source,dest: integer); virtual;
    function getitemtypeinfo: ptypeinfo; virtual;
+
+   function itemgetdefaultstate(
+         const sender: tarrayelementeditor): propertystatesty; virtual;
+   function itemgetlinksource(
+            const sender: tarrayelementeditor): tcomponent; virtual;
+   procedure itemsetvalue(const sender: tarrayelementeditor;
+                                           const value: msestring); virtual;
+   function itemgetvalue(const sender: tarrayelementeditor): msestring;
+                                                                    virtual;
+   function itemgetvalues(
+           const sender: tarrayelementeditor): msestringarty; virtual;
+   procedure itemedit(const sender: tarrayelementeditor); virtual;
+   function itemname(
+              const sender: tarrayelementeditor): msestring; virtual;
+   function itemsubproperties(
+      const sender: tarrayelementeditor): propertyeditorarty; virtual;
+
   public
    function itemprefix: msestring; virtual;
    procedure move(const curindex,newindex: integer); virtual;
@@ -3406,10 +3423,60 @@ begin
  result:= ftypeinfo; //default
 end;
 
+function tarraypropertyeditor.itemgetdefaultstate(
+          const sender: tarrayelementeditor): propertystatesty;
+begin
+ result:= sender.feditor.getdefaultstate();
+end;
+
+function tarraypropertyeditor.itemgetlinksource(
+                 const sender: tarrayelementeditor): tcomponent;
+begin
+ result:= sender.feditor.getlinksource();
+end;
+
+procedure tarraypropertyeditor.itemsetvalue(
+               const sender: tarrayelementeditor;
+               const value: msestring);
+begin
+ sender.feditor.setvalue(value);
+end;
+
+function tarraypropertyeditor.itemgetvalue(
+                      const sender: tarrayelementeditor): msestring;
+begin
+ result:= sender.feditor.getvalue();
+end;
+
+function tarraypropertyeditor.itemgetvalues(
+                     const sender: tarrayelementeditor): msestringarty;
+begin
+ result:= sender.feditor.getvalues();
+end;
+
+procedure tarraypropertyeditor.itemedit(
+                                    const sender: tarrayelementeditor);
+begin
+ sender.feditor.edit();
+end;
+
+function tarraypropertyeditor.itemname(
+                const sender: tarrayelementeditor): msestring;
+begin
+ result:= itemprefix + inttostr(sender.findex);
+end;
+
+function tarraypropertyeditor.itemsubproperties(
+               const sender: tarrayelementeditor): propertyeditorarty;
+begin
+ result:= sender.feditor.subproperties();
+end;
+
 { tarrayelementeditor }
 
 constructor tarrayelementeditor.create(aindex: integer;
-            aparenteditor: tarraypropertyeditor; aeditorclass: propertyeditorclassty;
+            aparenteditor: tarraypropertyeditor;
+            aeditorclass: propertyeditorclassty;
             const adesigner: idesigner;
             const aobjectinspector: iobjectinspector;
             const aprops: propinstancearty; atypinfo: ptypeinfo);
@@ -3594,16 +3661,6 @@ begin
  end;
 end;
 }
-function tarrayelementeditor.name: msestring;
-begin
- result:= tarraypropertyeditor(fparenteditor).itemprefix + inttostr(findex);
-end;
-
-function tarrayelementeditor.subproperties: propertyeditorarty;
-begin
- result:= feditor.subproperties;
-end;
-
 procedure tarrayelementeditor.dragbegin(var accept: boolean);
 begin
  accept:= true;
@@ -3664,6 +3721,79 @@ begin
  inherited;
 end;
 
+function tarrayelementeditor.name: msestring;
+begin
+ result:= tarraypropertyeditor(fparenteditor).itemname(self);
+// result:= tarraypropertyeditor(fparenteditor).itemprefix + inttostr(findex);
+end;
+
+function tarrayelementeditor.subproperties: propertyeditorarty;
+begin
+ result:= tarraypropertyeditor(fparenteditor).itemsubproperties(self);
+end;
+
+procedure tarrayelementeditor.edit;
+begin
+ tarraypropertyeditor(fparenteditor).itemedit(self);
+end;
+
+function tarrayelementeditor.getdefaultstate: propertystatesty;
+begin
+ result:= tarraypropertyeditor(fparenteditor).itemgetdefaultstate(self);
+end;
+
+function tarrayelementeditor.getvalue: msestring;
+begin
+ result:= tarraypropertyeditor(fparenteditor).itemgetvalue(self);
+end;
+
+function tarrayelementeditor.getvalues: msestringarty;
+begin
+ result:= tarraypropertyeditor(fparenteditor).itemgetvalues(self);
+end;
+
+procedure tarrayelementeditor.setvalue(const value: msestring);
+begin
+ tarraypropertyeditor(fparenteditor).itemsetvalue(self,value);
+end;
+
+function tarrayelementeditor.canrevert: boolean;
+begin
+ result:= false;
+end;
+
+function tarrayelementeditor.getselectedpropinstances: objectarty;
+var
+ int1,int2: integer;
+begin
+ with tarraypropertyeditor(fparenteditor) do begin
+  setlength(result,length(fsubprops));
+  int2:= 0;
+  for int1:= 0 to high(fsubprops) do begin
+   if fsubprops[int1].selected then begin
+    result[int2]:= tobject(fsubprops[int1].feditor.getpointervalue);
+    inc(int2);
+   end;
+  end;
+  setlength(result,int2);
+ end;
+end;
+
+function tarrayelementeditor.getvalueeditor: tpropertyeditor;
+begin
+ result:= feditor;
+end;
+
+function tarrayelementeditor.getlinksource: tcomponent;
+begin
+ result:= tarraypropertyeditor(fparenteditor).itemgetlinksource(self);
+end;
+
+function tarrayelementeditor.gettypinfo: ptypeinfo;
+begin
+ result:= getvalueeditor.typinfo;
+end;
+
 { tconstarraypropertyeditor }
 
 function tconstarraypropertyeditor.getdefaultstate: propertystatesty;
@@ -3709,68 +3839,6 @@ begin
  result:= fobjectinspector.getproperties(tobject(getclassvalue));
 end;
 }
-procedure tarrayelementeditor.edit;
-begin
- feditor.edit;
-end;
-
-function tarrayelementeditor.getdefaultstate: propertystatesty;
-begin
- result:= feditor.getdefaultstate{ + [ps_volatile]};
-end;
-
-function tarrayelementeditor.getvalue: msestring;
-begin
- result:= feditor.getvalue;
-end;
-
-function tarrayelementeditor.getvalues: msestringarty;
-begin
- result:= feditor.getvalues;
-end;
-
-procedure tarrayelementeditor.setvalue(const value: msestring);
-begin
- feditor.setvalue(value);
-end;
-
-function tarrayelementeditor.canrevert: boolean;
-begin
- result:= false;
-end;
-
-function tarrayelementeditor.getselectedpropinstances: objectarty;
-var
- int1,int2: integer;
-begin
- with tarraypropertyeditor(fparenteditor) do begin
-  setlength(result,length(fsubprops));
-  int2:= 0;
-  for int1:= 0 to high(fsubprops) do begin
-   if fsubprops[int1].selected then begin
-    result[int2]:= tobject(fsubprops[int1].feditor.getpointervalue);
-    inc(int2);
-   end;
-  end;
-  setlength(result,int2);
- end;
-end;
-
-function tarrayelementeditor.getvalueeditor: tpropertyeditor;
-begin
- result:= feditor;
-end;
-
-function tarrayelementeditor.getlinksource: tcomponent;
-begin
- result:= feditor.getlinksource;
-end;
-
-function tarrayelementeditor.gettypinfo: ptypeinfo;
-begin
- result:= getvalueeditor.typinfo;
-end;
-
 { tpersistentarraypropertyeditor }
 
 function tpersistentarraypropertyeditor.geteditorclass: propertyeditorclassty;
