@@ -426,30 +426,50 @@ type
    property ifilink;
 {$endif}
    property dropdown;
+   property ondataentered;
    property printer: tcustomprinter read fprinter write setprinter;
  end;
  
+ pagesizeeventty = procedure(const sender: tobject;
+                 var avalue: stdpagesizety; var accept: boolean) of object;
+                         
  tpagesizeselector = class(tprintervalueselector)
   private
+   fpagewidth: real;
+   fpageheight: real;
    function getvalue: stdpagesizety;
    procedure setvalue(const avalue: stdpagesizety);
    procedure printerchanged; override;
+   procedure setpagewidth(const avalue: real);
+   procedure setpageheight(const avalue: real);
+   function getonsetvalue: pagesizeeventty;
+   procedure setongetvalue(const avalue: pagesizeeventty);
   protected
    procedure getdropdowninfo(var aenums: integerarty;
          const names: tdropdowncols); override;
    procedure dochange; override;
+   procedure checkpagedim;
   public
    constructor create(aowner: tcomponent); override;
    function pagesizename: msestring;
+   property pagewidth: real read fpagewidth write setpagewidth;
+   property pageheight: real read fpageheight write setpageheight;
   published
    property value: stdpagesizety read getvalue write setvalue default sps_a4;
+   property onsetvalue: pagesizeeventty read getonsetvalue
+                                                 write setongetvalue;
  end;
+
+ pageorientationeventty = procedure(const sender: tobject;
+                 var avalue: pageorientationty; var accept: boolean) of object;
 
  tpageorientationselector = class(tprintervalueselector)
   private
    function getvalue: pageorientationty;
    procedure setvalue(const avalue: pageorientationty);
    procedure printerchanged; override;
+   function getonsetvalue: pageorientationeventty;
+   procedure setongetvalue(const avalue: pageorientationeventty);
   protected
    procedure getdropdowninfo(var aenums: integerarty;
          const names: tdropdowncols); override;
@@ -459,6 +479,8 @@ type
   published
    property value: pageorientationty read getvalue 
                    write setvalue default pao_portrait;
+   property onsetvalue: pageorientationeventty read getonsetvalue
+                                                    write setongetvalue;
  end;
  
 function stringtopages(const avalue: msestring): pagerangearty;
@@ -1548,6 +1570,12 @@ begin
  if fprinter <> nil then begin
   fprinter.pa_size:= value;
  end;
+ if value <> sps_user then begin
+  with stdpagesizes[value] do begin
+   fpagewidth:= width;
+   fpageheight:= height;
+  end;
+ end;
  inherited;
 end;
 
@@ -1573,6 +1601,50 @@ end;
 function tpagesizeselector.pagesizename: msestring;
 begin
  result:= stdpagesizes[value].name;
+end;
+
+procedure tpagesizeselector.setpagewidth(const avalue: real);
+begin
+ if fpagewidth <> avalue then begin
+  fpagewidth:= avalue;
+  checkpagedim;
+ end;
+end;
+
+procedure tpagesizeselector.setpageheight(const avalue: real);
+begin
+ if fpageheight <> avalue then begin
+  fpageheight:= avalue;
+  checkpagedim;
+ end;
+end;
+
+procedure tpagesizeselector.checkpagedim;
+var
+ wi1,he1: currency;
+ pa1: stdpagesizety;
+begin
+ wi1:= fpagewidth;
+ he1:= fpageheight;
+ for pa1:= stdpagesizety(1) to high(stdpagesizety) do begin
+  with stdpagesizes[pa1] do begin
+   if (currency(width) = wi1) and (currency(height) = he1) then begin
+    value:= pa1;
+    exit;
+   end;
+  end;
+ end;
+ value:= sps_user;
+end;
+
+function tpagesizeselector.getonsetvalue: pagesizeeventty;
+begin
+ result:= pagesizeeventty(fonsetvalue1);
+end;
+
+procedure tpagesizeselector.setongetvalue(const avalue: pagesizeeventty);
+begin
+ pagesizeeventty(fonsetvalue1):= avalue;
 end;
 
 { tpageorientationselector }
@@ -1617,6 +1689,16 @@ begin
   fprinter.pa_orientation:= value;
  end;
  inherited;
+end;
+
+function tpageorientationselector.getonsetvalue: pageorientationeventty;
+begin
+ result:= pageorientationeventty(fonsetvalue1);
+end;
+
+procedure tpageorientationselector.setongetvalue(const avalue: pageorientationeventty);
+begin
+ pageorientationeventty(fonsetvalue1):= avalue;
 end;
 
 { tstreamprinter }
