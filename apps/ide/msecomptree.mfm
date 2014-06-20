@@ -18,7 +18,6 @@ object compnametreefo: tcompnametreefo
   moduleclassname = 'tmseform'
   object grid: twidgetgrid
     frame.levelo = 0
-    frame.framewidth = 1
     frame.colorframe = -1610612734
     frame.localprops = [frl_levelo, frl_framewidth, frl_colorframe]
     bounds_x = 0
@@ -29,7 +28,7 @@ object compnametreefo: tcompnametreefo
     datacols.count = 1
     datacols.items = <    
       item[treeitem]
-        width = 297
+        width = 299
         options = [co_readonly, co_fill, co_savevalue]
         widgetname = 'treeitem'
         dataclass = ttreeitemeditlist
@@ -55,7 +54,7 @@ object compnametreefo: tcompnametreefo
       visible = False
       bounds_x = 0
       bounds_y = 0
-      bounds_cx = 297
+      bounds_cx = 299
       bounds_cy = 16
       optionsedit = [oe_readonly, oe_undoonesc, oe_checkmrcancel, oe_forcereturncheckvalue, oe_locate, oe_savevalue, oe_savestate]
       ondataentered = treeitemondataentered

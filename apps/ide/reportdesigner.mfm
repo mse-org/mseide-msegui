@@ -272,7 +272,6 @@ inherited reportdesignerfo: treportdesignerfo
       item
         caption = 'Add Report Page'
         name = 'addpage'
-        state = [as_localcaption, as_localonexecute]
         onexecute = addpage
       end    
       item
@@ -457,5 +456,7 @@ inherited reportdesignerfo: treportdesignerfo
     )
     left = 64
     top = 208
+  end
+  inherited findcompact: taction[18]
   end
 end

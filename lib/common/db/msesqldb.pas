@@ -275,7 +275,6 @@ type
  tfieldparamlink = class(tmsecomponent,idbeditinfo,idbparaminfo)
   private
    fsourcedatalink: tparamsourcedatalink;
-//   fdestdatasource: tlinkdatasource;
    fdestdataset: tsqlquery;
    fdestdatasource: tdatasource;
    fdestdatalink: tparamdestdatalink;
@@ -307,11 +306,10 @@ type
   protected
    procedure loaded; override;
    procedure defineproperties(filer: tfiler); override;
-  //idbeditinfo
+    //idbeditinfo
    function getdataset(const aindex: integer): tdataset; overload;
    procedure getfieldtypes(out propertynames: stringarty;
                           out fieldtypes: fieldtypesarty);
-//   procedure dotimer(const sender: tobject);
    procedure notification(acomponent: tcomponent;
                                 operation: toperation); override;
    function truedelayus: integer;

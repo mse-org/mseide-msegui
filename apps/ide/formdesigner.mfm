@@ -87,7 +87,7 @@ object formdesignerfo: tformdesignerfo
   top = 180
   moduleclassname = 'tmseform'
   object popupme: tpopupmenu
-    menu.submenu.count = 30
+    menu.submenu.count = 31
     menu.submenu.items = <    
       item
         caption = 'Show objectinspector'
@@ -175,6 +175,11 @@ object formdesignerfo: tformdesignerfo
       end    
       item
         options = [mao_separator, mao_shortcutcaption]
+      end    
+      item
+        action = findcompact
+        caption = 'Find Component'
+        state = [as_localcaption]
       end    
       item
         caption = 'Select Childwidget'
@@ -296,5 +301,14 @@ object formdesignerfo: tformdesignerfo
     )
     left = 64
     top = 136
+  end
+  object findcompact: taction
+    onexecute = findcompexe
+    left = 144
+    top = 104
+    sc = (
+      1
+      16454
+    )
   end
 end

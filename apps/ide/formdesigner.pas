@@ -24,7 +24,7 @@ uses
  msedesignintf,mseclasses,msemenuwidgets,msemenus,msefiledialog,msedesigner,
  typinfo,componentpaletteform,msestrings,msewidgets,
  mseglob{$ifndef mse_no_db}{$ifdef FPC},msereport{$endif}{$endif},msetimer,
- mseact,mseactions,mseifiglob,msestringcontainer;
+ mseact,mseactions,mseifiglob,msestringcontainer,mseificomp,mseificompglob;
 
 type
  areaty = (ar_none,ar_component,ar_componentmove,ar_selectrect,ht_topleft,
@@ -110,6 +110,7 @@ type
    togglehideact: taction;
    showallact: taction;
    c: tstringcontainer;
+   findcompact: taction;
    procedure doshowobjectinspector(const sender: tobject);
    procedure doshowcomponentpalette(const sender: tobject);
    procedure doshowastext(const sender: tobject);
@@ -138,6 +139,7 @@ type
    procedure togglehideexe(const sender: TObject);
    procedure showallexe(const sender: TObject);
    procedure touchallexe(const sender: TObject);
+   procedure findcompexe(const sender: TObject);
   private
    fdesigner: tdesigner;
    fform: twidget;
@@ -149,6 +151,7 @@ type
    fsizeerrorcount: integer;
    procedure setmodule(const value: tmsecomponent);
    function getselections: tformdesignerselections;
+   function filterfindcomp(const acomponent: tcomponent): boolean;
   protected
    ffostate: formdesignerstatesty;
    property selections: tformdesignerselections read getselections;
@@ -370,7 +373,7 @@ uses
  formdesigner_mfm,mselist,msekeyboard,msepointer,msebits,sysutils,
  msestockobjects,msedrawtext,selectsubmoduledialogform,mseshapes,settaborderform,
  msedatalist,objectinspector,projectoptionsform,main,msedatamodules,msetypes,
- setcreateorderform,componentstore,msearrayutils,actionsmodule
+ setcreateorderform,componentstore,msearrayutils,actionsmodule,msecomptree
  {$ifndef FPC},classes_del{$endif};
 
 type
@@ -3617,6 +3620,30 @@ end;
 procedure tformdesignerfo.showallexe(const sender: TObject);
 begin
  moduleoptions:= moduleoptions - [mo_hidewidgets,mo_hidecomp];
+end;
+
+function tformdesignerfo.filterfindcomp(
+                                 const acomponent: tcomponent): boolean;
+begin
+ result:= not (cssubcomponent in acomponent.componentstyle);
+end;
+
+procedure tformdesignerfo.findcompexe(const sender: TObject);
+var
+ name1: msestring;
+begin
+ name1:= '';
+ with tdesignwindow(fwindow) do begin
+  if fselections.count > 0 then begin
+   name1:= ownernamepath(fselections[0]);
+  end;
+  if compnamedialog(designer.getcomponentnametree(nil,true,fmodule,
+                                @filterfindcomp),name1) = mr_ok then begin
+   designer.selectcomponent(
+      designer.modules.findmodule(fmodule)^.components.getcomponent(name1,
+                                                                        true));
+  end;
+ end;
 end;
 
 initialization

@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2014 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -238,6 +238,7 @@ type
                   write fshortcuts[dbnb_autoedit] default ord(key_none);
 //   property shortcut_dialog: shortcutty read fshortcuts[dbnb_dialog]
 //                  write fshortcuts[dbnb_dialog] default ord(key_f3);
+              //use dialogbutton property!
    property options: dbnavigatoroptionsty read foptions write setoptions 
                   default defaultdbnavigatoroptions;
    property autoedit: boolean read getautoedit write setautoedit default false;
@@ -3020,6 +3021,9 @@ procedure tdbnavigator.doexecute(const sender: tobject);
 begin
  with ttoolbutton(sender) do begin
   fdatalink.execbutton(dbnavigbuttonty(tag));
+  if action <> nil then begin
+   action.execute();
+  end;
  end;
 end;
 

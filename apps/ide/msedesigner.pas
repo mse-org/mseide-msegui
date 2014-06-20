@@ -159,7 +159,8 @@ type
    function next: pcomponentinfoty;
    function getcomponents: componentarty;
    function getdispnames: componentnamearty;
-   function getcomponent(const aname: string): tcomponent;
+   function getcomponent(const aname: string;
+            const children: boolean = false): tcomponent;
    procedure namechanged(const acomponent: tcomponent; const newname: string);
  end;
 
@@ -2218,7 +2219,8 @@ begin
  result:= @pcomponentsdataty(inherited next)^.data;
 end;
 
-function tcomponents.getcomponent(const aname: string): tcomponent;
+function tcomponents.getcomponent(const aname: string;
+                          const children: boolean = false): tcomponent;
 var
  int1,int2: integer;
  po1: pcomponentinfoty;
@@ -2228,7 +2230,16 @@ begin
  result:= nil;
  str1:= uppercase(aname);
  if aname <> '' then begin
-  ar1:= splitstring(str1,subcomponentsplitchar);
+  if children then begin
+   ar1:= splitstring(str1,'.');
+   deleteitem(ar1,0);
+   if ar1 = nil then begin
+    exit;
+   end;
+  end
+  else begin
+   ar1:= splitstring(str1,subcomponentsplitchar);
+  end;
   for int1:= 0 to count - 1 do begin
    po1:= next;
    if uppercase(po1^.name) = ar1[0] then begin
@@ -5455,8 +5466,8 @@ function tdesigner.getcomponentnametree(const acomponentclass: tcomponentclass;
   node1,node2,node3: tdesigncompnameitem;
   ar1: componentarty;
  begin
-  if acomp.InheritsFrom(acomponentclass) and 
-          (({$ifndef FPC}@{$endif}filter = nil) or filter(acomp)) then begin
+  if ((acomponentclass = nil) or acomp.InheritsFrom(acomponentclass)) and 
+          ((@filter = nil) or filter(acomp)) then begin
    if ((aowner = nil) or (aowner = acomp.owner)) and 
             (includeinherited or 
             (acomp.componentstate * [csinline,csancestor] = [])) then begin
