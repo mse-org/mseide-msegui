@@ -419,8 +419,6 @@ type
    procedure checkident(const aname: string);
    procedure beginstreaming(const amodule: pmoduleinfoty);
    procedure endstreaming(const amodule: pmoduleinfoty);
-   property selections: tdesignerselections read fselections;
-                 //do not modify!
   {$ifndef mse_nomethodswap}
    procedure internaldoswapmethodpointers(const aroot: tcomponent;
                       const ainstance: tobject; const ainit: boolean);
@@ -507,6 +505,8 @@ type
    function getcomponent(const aname: string; 
                                const aroot: tcomponent): tcomponent;
                    //handles qualified names for foreign forms
+   function getcomponent(const apath: string;
+                            out amodule: pmoduleinfoty): tcomponent;
    function componentcanedit: boolean;
    function getcomponenteditor: icomponenteditor;
    function editcomponent(const aowner: tcomponent = nil): boolean; //false if no editor available
@@ -522,6 +522,7 @@ type
            const filter: compfilterfuncty = nil): msestringarty; overload;
    function getcomponentnametree(const acomponentclass: tcomponentclass;
                                  const includeinherited: boolean;
+                                 const findmode: boolean;
                                  const aowner: tcomponent = nil;
                           const filter: compfilterfuncty = nil;
                           const amodule: tcomponent = nil): tcompnameitem;
@@ -574,6 +575,8 @@ type
    property modules: tmodulelist read getmodules;
    property descendentinstancelist: tdescendentinstancelist read 
                                                   fdescendentinstancelist;
+   property selections: tdesignerselections read fselections;
+                 //do not modify!
 
    property objformat: objformatty read fobjformat write fobjformat default of_default;
    property designfiles: tindexedfilenamelist read fdesignfiles;
@@ -4132,8 +4135,10 @@ end;
 
 procedure tdesigner.showformdesigner(const amodule: pmoduleinfoty);
 begin
- amodule^.designform.activate;
- mainfo.createmodulemenuitem(amodule);
+ if amodule <> nil then begin
+  amodule^.designform.activate;
+  mainfo.createmodulemenuitem(amodule);
+ end;
 end;
 
 procedure tdesigner.showastext(const amodule: pmoduleinfoty);
@@ -5059,7 +5064,7 @@ begin
   if instance <> nil then begin
    list.Add(instance);
    fcomponenteditor:= componenteditors.geteditorclass(
-                componentclassty(instance.classtype)).create(idesigner(self),instance);
+        componentclassty(instance.classtype)).create(idesigner(self),instance);
   end;
   setselections(idesignerselections(list));
  finally
@@ -5069,7 +5074,8 @@ end;
 
 procedure tdesigner.selectionchanged;
 begin
- designnotifications.SelectionChanged(idesigner(self),idesignerselections(fselections));
+ designnotifications.SelectionChanged(
+                  idesigner(self),idesignerselections(fselections));
 end;
 
 procedure tdesigner.SetSelections(const List: IDesignerSelections);
@@ -5256,6 +5262,22 @@ begin
      break;
     end;
    end;
+  end;
+ end;
+end;
+
+function tdesigner.getcomponent(const apath: string;
+                               out amodule: pmoduleinfoty): tcomponent;
+var
+ ar1: stringarty;
+begin
+ result:= nil;
+ amodule:= nil;
+ ar1:= splitstring(apath,'.');
+ if ar1 <> nil then begin
+  amodule:= fmodules.findmodulebyname(ar1[0]);
+  if amodule <> nil then begin
+   result:= findcomponentbynamepath(apath,amodule^.instance);
   end;
  end;
 end;
@@ -5458,6 +5480,7 @@ end;
  
 function tdesigner.getcomponentnametree(const acomponentclass: tcomponentclass;
                          const includeinherited: boolean;
+                         const findmode: boolean;
                          const aowner: tcomponent = nil;
                          const filter: compfilterfuncty = nil;
                          const amodule: tcomponent = nil): tcompnameitem;
@@ -5497,7 +5520,7 @@ function tdesigner.getcomponentnametree(const acomponentclass: tcomponentclass;
   end;
   for int3:= 0 to acomp.componentcount - 1  do begin
    comp2:= acomp.components[int3];
-   if (cssubcomponent in comp2.componentstyle) xor (amodule <> nil){ and 
+   if (cssubcomponent in comp2.componentstyle) xor findmode{ and 
                                     not isnosubcomp(comp2)} then begin
 //    node1:= anode.findcomp(comp2);
 //    if node1 = nil then begin
@@ -5520,10 +5543,15 @@ begin
  else begin
   for int1:= 0 to fmodules.count - 1 do begin
    po1:= fmodules[int1];
-   with po1^.components do begin
-    for int2:= 0 to count - 1 do begin
-     comp1:= next^.instance;
-     check(comp1);
+   if findmode then begin
+    check(po1^.instance);
+   end
+   else begin
+    with po1^.components do begin
+     for int2:= 0 to count - 1 do begin
+      comp1:= next^.instance;
+      check(comp1);
+     end;
     end;
    end;
   end;

@@ -849,6 +849,8 @@ function fixupsetchildorder(const sender: tcomponent;
                      const child: tcomponent; const order: integer): boolean;
                                  //true if handled
 function findcomponentbynamepath(const namepath: string): tcomponent;
+function findcomponentbynamepath(const namepath: string;
+                                const root: tcomponent): tcomponent;
 function getlinkedcomponents(const acomponent: tcomponent): componentarty;
                  //returns items of free notify list
 
@@ -5367,6 +5369,36 @@ begin
     break;
    end;
    result:= result.FindComponent(ar1[int1]);
+  end;
+ end;
+end;
+
+function findcomponentbynamepath(const namepath: string;
+                                const root: tcomponent): tcomponent;
+var
+ po1,po2: pchar;
+ comp1: tcomponent;
+begin
+ result:= nil;
+ if (root <> nil) and (namepath <> '') then begin
+  po1:= pchar(namepath);
+  po2:= po1;
+  while (po2^ <> '.') and (po2^ <> #0) do begin
+   inc(po2);
+  end;
+  if stringicomp(root.name,psubstr(po1,po2)) = 0 then begin
+   result:= root;
+   while po2^ <> #0 do begin
+    inc(po2);
+    po1:= po2;
+    while (po2^ <> '.') and (po2^ <> #0) do begin
+     inc(po2);
+    end;
+    result:= result.findcomponent(psubstr(po1,po2));
+    if result = nil then begin
+     break;
+    end;
+   end;
   end;
  end;
 end;

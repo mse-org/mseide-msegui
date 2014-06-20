@@ -22,10 +22,10 @@ interface
 
 uses
  mseforms,msewidgets,msegrids,msewidgetgrid,classes,mclasses,mseclasses,
- msepropertyeditors,mseglob,mseguiglob,msearrayutils,msedragglob,
- msegui,mseedit,msedataedits,mselistbrowser,msedatanodes,
- msedesignintf,typinfo,msecomponenteditors,msesimplewidgets,msegraphutils,
- msemenus,mseevent,msedesigner,msetypes,msestrings,mselist,msegraphics;
+ msepropertyeditors,mseglob,mseguiglob,msearrayutils,msedragglob,msegui,mseedit,
+ msedataedits,mselistbrowser,msedatanodes,msedesignintf,typinfo,
+ msecomponenteditors,msesimplewidgets,msegraphutils,msemenus,mseevent,
+ msedesigner,msetypes,msestrings,mselist,msegraphics;
 
 type
  tobjectinspectorfo = class;
@@ -77,9 +77,11 @@ type
    compselector: tdropdownlistedit;
    grid: twidgetgrid;
    props: ttreeitemedit;
-   tpopupmenu1: tpopupmenu;
+   gridpopup: tpopupmenu;
    values: tmbdropdownitemedit;
    compedit: trichbutton;
+   findbu: tstockglyphbutton;
+   mainpopup: tpopupmenu;
    procedure propsoncheckrowmove(const curindex: Integer; 
                   const newindex: Integer; var accept: Boolean);
    procedure createexe(const sender: TObject);
@@ -1632,7 +1634,8 @@ begin
  grid.height:= height-grid.top;
 // compedit.width:= compedit.height+6;
 // compedit.left:= compedit.right - compedit.height-;
- compselector.right:= compedit.left - 1;
+ findbu.right:= compedit.left;
+ compselector.right:= findbu.left - 1;
 // with values.frame.buttons[0] do begin
 //  imagelist:= stockobjects.glyphs;
 //  imagenr:= ord(stg_ellipsesmall);
@@ -1692,7 +1695,7 @@ end;
 procedure tobjectinspectorfo.objectinspectoronchildscaled(const sender: TObject);
 begin
  placeyorder(0,[2],[compselector,grid]);
- aligny(wam_center,[compselector,compedit]);
+ aligny(wam_center,[compselector,findbu,compedit]);
 end;
 
 procedure tobjectinspectorfo.col0onshowhint(const sender: tdatacol;

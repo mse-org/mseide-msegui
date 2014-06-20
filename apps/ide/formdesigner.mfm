@@ -177,7 +177,7 @@ object formdesignerfo: tformdesignerfo
         options = [mao_separator, mao_shortcutcaption]
       end    
       item
-        action = actionsmo.findcompact
+        action = actionsmo.findcompallact
         caption = 'Find Component'
         state = [as_localcaption]
       end    

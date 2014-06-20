@@ -194,7 +194,7 @@ object mainfo: tmainfo
         state = [as_localcaption]
       end    
       item
-        submenu.count = 5
+        submenu.count = 6
         submenu.items = <        
           item
             action = actionsmo.line
@@ -210,6 +210,11 @@ object mainfo: tmainfo
           end        
           item
             action = actionsmo.findinfile
+          end        
+          item
+            action = actionsmo.findcompallact
+            caption = 'Find &Component'
+            state = [as_localcaption, as_localshortcut, as_localshortcut1]
           end>
         caption = '&Search'
         name = 'search'
@@ -696,7 +701,7 @@ object mainfo: tmainfo
   object vievmenuicons: timagelist
     width = 18
     height = 18
-    colormask = True
+    options = [bmo_masked, bmo_colormask]
     count = 19
     left = 309
     top = 88

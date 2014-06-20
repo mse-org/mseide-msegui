@@ -2356,4 +2356,10 @@ object actionsmo: tactionsmo
       16454
     )
   end
+  object findcompallact: taction
+    caption = '&Find Component'
+    onexecute = findcompallexe
+    left = 152
+    top = 144
+  end
 end

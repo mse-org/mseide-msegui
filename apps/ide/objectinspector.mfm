@@ -3,9 +3,10 @@ object objectinspectorfo: tobjectinspectorfo
   frame.grip_size = 10
   frame.grip_options = [go_closebutton, go_fixsizebutton, go_topbutton, go_backgroundbutton]
   frame.dummy = 0
+  popupmenu = mainpopup
   visible = False
-  bounds_x = 362
-  bounds_y = 439
+  bounds_x = 185
+  bounds_y = 360
   bounds_cx = 254
   bounds_cy = 248
   container.onlayout = objectinspectoronchildscaled
@@ -99,7 +100,7 @@ object objectinspectorfo: tobjectinspectorfo
     taborder = 2
     bounds_x = 0
     bounds_y = 1
-    bounds_cx = 219
+    bounds_cx = 171
     anchors = [an_left, an_top, an_right]
     onsetvalue = compselectoronsetvalue
     dropdown.options = [deo_selectonly, deo_autodropdown, deo_keydropdown]
@@ -113,7 +114,7 @@ object objectinspectorfo: tobjectinspectorfo
   object grid: twidgetgrid
     frame.localprops = [frl_levelo, frl_colorclient]
     taborder = 1
-    popupmenu = tpopupmenu1
+    popupmenu = gridpopup
     bounds_x = 0
     bounds_y = 24
     bounds_cx = 244
@@ -298,7 +299,20 @@ object objectinspectorfo: tobjectinspectorfo
     onexecute = compeditonexecute
     reffontheight = 14
   end
-  object tpopupmenu1: tpopupmenu
+  object findbu: tstockglyphbutton
+    optionswidget1 = [ow1_fontglyphheight, ow1_autoscale]
+    taborder = 3
+    bounds_x = 197
+    bounds_y = 2
+    bounds_cx = 18
+    bounds_cy = 18
+    anchors = [an_top, an_right]
+    state = [as_localcaption, as_localimagelist, as_localimagenr]
+    glyph = stg_ellipsesmall
+    action = actionsmo.findcompallact
+    reffontheight = 14
+  end
+  object gridpopup: tpopupmenu
     onupdate = popupupdate
     menu.submenu.count = 3
     menu.submenu.items = <    
@@ -321,5 +335,15 @@ object objectinspectorfo: tobjectinspectorfo
       end>
     left = 112
     top = 80
+  end
+  object mainpopup: tpopupmenu
+    options = [mo_insertfirst, mo_shortcutright]
+    menu.submenu.count = 1
+    menu.submenu.items = <    
+      item
+        action = actionsmo.findcompallact
+      end>
+    left = 56
+    top = 56
   end
 end

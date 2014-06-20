@@ -165,7 +165,7 @@ var
  bo1: boolean;
 begin
  finstances:= po.griddata.datapo;
- tree1:= designer.getcomponentnametree(tcomponent,true{false},nil,
+ tree1:= designer.getcomponentnametree(tcomponent,true,false,nil,
                                       {$ifdef FPC}@{$endif}filtercomponent);
  mstr1:= ownernamepath(tcomponent(po.value));
  if mstr1 = '' then begin

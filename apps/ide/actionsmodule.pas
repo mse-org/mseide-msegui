@@ -20,10 +20,10 @@ unit actionsmodule;
 
 interface
 uses
- mseclasses,mseact,mseactions,msebitmap,msestrings,msegui,msedatamodules,
- mseglob,msestat,mseifiglob,msegraphics,msegraphutils,mseguiglob,msemenus,
- msesimplewidgets,msewidgets,projecttreeform,msestringcontainer,targetconsole,
- mseificomp,mseificompglob;
+ classes,mseclasses,mseact,mseactions,msebitmap,msestrings,msegui,
+ msedatamodules,mseglob,msestat,mseifiglob,msegraphics,msegraphutils,mseguiglob,
+ msemenus,msesimplewidgets,msewidgets,projecttreeform,msestringcontainer,
+ targetconsole,mseificomp,mseificompglob,mclasses;
  
 type
  stringconsts = (
@@ -206,6 +206,7 @@ type
    c: tstringcontainer;
    copylatexact: taction;
    findcompact: taction;
+   findcompallact: taction;
    procedure findinfileonexecute(const sender: tobject);
 
    //file
@@ -276,6 +277,9 @@ type
    procedure findupdateexe(const sender: tcustomaction);
    procedure copylatexactonexecute(const sender: TObject);
    procedure findcompexe(const sender: TObject);
+   procedure findcompallexe(const sender: TObject);
+  private
+   function filterfindcomp(const acomponent: tcomponent): boolean;
  end;
 
 var
@@ -288,7 +292,7 @@ uses
  main,make,actionsmodule_mfm,sourceform,msedesigner,msetypes,msefiledialog,
  projectoptionsform,findinfileform,breakpointsform,watchform,selecteditpageform,
  disassform,printform,msegdbutils,mseintegerenter,msesettings,
- componentstore,cpuform,sysutils;
+ componentstore,cpuform,sysutils,msecomptree;
  
 procedure configureide;
 begin
@@ -315,6 +319,8 @@ begin
  paste.shortcut1:= sysshortcuts1[sho_paste];
  findcompact.shortcut:= find.shortcut;
  findcompact.shortcut1:= find.shortcut1;
+ findcompallact.shortcut:= find.shortcut;
+ findcompallact.shortcut1:= find.shortcut1;
 end;
 
 //common
@@ -764,6 +770,35 @@ procedure tactionsmo.findcompexe(const sender: TObject);
 begin
  if mainfo.factivedesignmodule <> nil then begin
   mainfo.factivedesignmodule^.designformintf.findcompdialog();
+ end;
+end;
+
+function tactionsmo.filterfindcomp(
+                                 const acomponent: tcomponent): boolean;
+begin
+ result:= not (cssubcomponent in acomponent.componentstyle) and
+          (not (acomponent is twidget) or 
+                (ws_iswidget in twidget(acomponent).widgetstate));
+end;
+
+procedure tactionsmo.findcompallexe(const sender: TObject);
+var
+ name1: msestring;
+ comp1: tcomponent;
+ po1: pmoduleinfoty;
+begin
+ name1:= '';
+ with designer do begin
+  if selections.count > 0 then begin
+   name1:= ownernamepath(selections[0]);
+  end;
+  if compnamedialog(designer.getcomponentnametree(nil,true,true,nil,
+                      @filterfindcomp,nil),name1,true) = mr_ok then begin
+   replacechar1(name1,':','.');
+   comp1:= designer.getcomponent(name1,po1);
+   designer.showformdesigner(po1);
+   designer.selectcomponent(comp1);
+  end;
  end;
 end;
 

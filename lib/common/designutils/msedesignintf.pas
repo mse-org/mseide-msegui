@@ -149,6 +149,7 @@ type
             const filter: compfilterfuncty = nil): msestringarty; overload;
   function getcomponentnametree(const acomponentclass: tcomponentclass;
                           const includeinherited: boolean;
+                          const findmode: boolean;
                           const aowner: tcomponent = nil;
                           const filter: compfilterfuncty = nil;
                           const amodule: tcomponent = nil): tcompnameitem;

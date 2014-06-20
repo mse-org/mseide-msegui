@@ -3638,7 +3638,7 @@ begin
   if fselections.count > 0 then begin
    name1:= ownernamepath(fselections[0]);
   end;
-  if compnamedialog(designer.getcomponentnametree(nil,true,nil,
+  if compnamedialog(designer.getcomponentnametree(nil,true,true,nil,
                       @filterfindcomp,fmodule),name1,true) = mr_ok then begin
    if name1 = fmodule.name then begin
     designer.selectcomponent(fmodule);

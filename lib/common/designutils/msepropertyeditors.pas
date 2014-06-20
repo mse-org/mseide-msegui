@@ -2898,7 +2898,7 @@ begin
   co1:= nil;
  end;
  tree1:= fdesigner.getcomponentnametree(
-                tcomponentclass(typedata^.classtype),true{false},co1,
+                tcomponentclass(typedata^.classtype),true,false,co1,
                 {$ifdef FPC}@{$endif}filtercomponent);
  co1:= tcomponent(getpointervalue);
  if co1 = nil then begin
