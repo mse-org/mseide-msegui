@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2013 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2014 by Martin Schreiber
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -115,35 +115,41 @@ type
   protected
    function nocheck: boolean; override;
  end;
-
+{
  tlbdropdowncolitemeditor = class(tclasselementeditor)
   public
    function getvalue: msestring; override;
  end;
- 
+} 
  tlbdropdowncolseditor = class(tpersistentarraypropertyeditor)
   protected
-   function geteditorclass: propertyeditorclassty; override;
+   function itemgetvalue(const sender: tarrayelementeditor): msestring; 
+                                                                  override;
+//   function geteditorclass: propertyeditorclassty; override;
  end;
-
+{
  tdbdropdowncolitemeditor = class(tclasselementeditor)
   public
    function getvalue: msestring; override;
  end;
- 
+}
  tdbdropdowncolseditor = class(tpersistentarraypropertyeditor)
   protected
-   function geteditorclass: propertyeditorclassty; override;
+   function itemgetvalue(const sender: tarrayelementeditor): msestring; 
+                                                                  override;
+//   function geteditorclass: propertyeditorclassty; override;
  end;
-
+{
  tsqlmacroitemeditor = class(tclasselementeditor)
   public
    function getvalue: msestring; override;
  end;
-
+}
  tsqlmacroseditor = class(tpersistentarraypropertyeditor)
   protected
-   function geteditorclass: propertyeditorclassty; override;
+//   function geteditorclass: propertyeditorclassty; override;
+   function itemgetvalue(const sender: tarrayelementeditor): msestring; 
+                                                                  override;
  end;
 
 implementation
@@ -1469,7 +1475,7 @@ begin
 end;
 
 { tlbdropdowncolitemeditor }
-
+{
 function tlbdropdowncolitemeditor.getvalue: msestring;
 var
  lb1: tcustomlookupbuffer;
@@ -1486,26 +1492,51 @@ begin
   end;
  end;
 end;
-
+}
 { tlbdropdowncolseditor }
-
+{
 function tlbdropdowncolseditor.geteditorclass: propertyeditorclassty;
 begin    
  result:= tlbdropdowncolitemeditor;
 end;
+}
+function tlbdropdowncolseditor.itemgetvalue(
+                          const sender: tarrayelementeditor): msestring;
+var
+ lb1: tcustomlookupbuffer;
+ ar1: stringarty;
+begin
+ result:= '<>';
+ with tlbdropdowncol1(tarrayelementeditor1(sender).getpointervalue) do begin
+  lb1:= getlookupbuffer;
+  if lb1 <> nil then begin
+   ar1:= lb1.fieldnamestext;
+   if (fieldno >= 0) and (fieldno <= high(ar1)) then begin
+    result:= '<'+ar1[fieldno]+'>';
+   end;
+  end;
+ end;
+end;
 
 { tdbdropdowncolitemeditor }
-
+{
 function tdbdropdowncolitemeditor.getvalue: msestring;
 begin
  result:= '<'+tdbdropdowncol(getpointervalue).datafield+'>';
 end;
-
+}
 { tdbdropdowncolseditor }
-
+{
 function tdbdropdowncolseditor.geteditorclass: propertyeditorclassty;
 begin
  result:= tdbdropdowncolitemeditor;
+end;
+}
+function tdbdropdowncolseditor.itemgetvalue(
+                     const sender: tarrayelementeditor): msestring;
+begin
+ result:= '<'+tdbdropdowncol(
+             tarrayelementeditor1(sender).getpointervalue).datafield+'>';
 end;
 
 { tparamvaluepropertyeditor }
@@ -1603,21 +1634,30 @@ begin
 end;
 
 { tsqlmacroitemeditor }
-
+{
 function tsqlmacroitemeditor.getvalue: msestring;
 begin
  with tsqlmacroitem(getpointervalue) do begin
   result:= '<'+name+'>';
  end;
 end;
-
+}
 { tsqlmacroseditor }
 
+function tsqlmacroseditor.itemgetvalue(
+                     const sender: tarrayelementeditor): msestring;
+begin
+ with tsqlmacroitem(tarrayelementeditor1(sender).getpointervalue) do begin
+  result:= '<'+name+'>';
+ end;
+end;
+
+{
 function tsqlmacroseditor.geteditorclass: propertyeditorclassty;
 begin
  result:= tsqlmacroitemeditor;
 end;
-
+}
 { tlookupfieldnamepropertyeditor }
 
 function tlookupfieldnamepropertyeditor.getdefaultstate: propertystatesty;
