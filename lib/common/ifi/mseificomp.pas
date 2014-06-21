@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2009-2013 by Martin Schreiber
+{ MSEgui Copyright (c) 2009-2014 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -23,7 +23,8 @@ unit mseificomp;
 
 interface
 uses
- classes,mclasses,mseclasses,{msegui,}mseifiglob,mseglob,typinfo,msestrings,msetypes,
+ classes,mclasses,mseclasses,{msegui,}mseifiglob,mseglob,typinfo,msestrings,
+ msetypes,
  mseificompglob,msearrayprops,msedatalist,msestat,msestatfile,mseapplication,
  mseeditglob;
 
@@ -31,16 +32,18 @@ type
  tifilinkcomp = class;
  tifivaluelinkcomp = class;
  tcustomificlientcontroller = class;
- 
+
+ ifieventty = procedure(const sender: tcustomificlientcontroller) of object;
  ificlienteventty = procedure(const sender: tcustomificlientcontroller;
                               const aclient: iificlient) of object;
  ificlientstateeventty = procedure(const sender: tcustomificlientcontroller;
                            const aclient: iificlient;
                            const astate: ifiwidgetstatesty;
                            const achangedstate: ifiwidgetstatesty) of object;
- ificlientmodalresulteventty = procedure(const sender: tcustomificlientcontroller;
-                                   const aclient: iificlient; 
-                                   const amodalresult: modalresultty) of object;
+ ificlientmodalresulteventty = 
+             procedure(const sender: tcustomificlientcontroller;
+                       const aclient: iificlient; 
+                       const amodalresult: modalresultty) of object;
 
  ifivaluelinkstatety = (ivs_linking,ivs_valuesetting,ivs_loadedproc);
  ifivaluelinkstatesty = set of ifivaluelinkstatety;
@@ -57,6 +60,8 @@ type
    fstatfile: tstatfile;
    fstatvarname: msestring;
    fstatpriority: integer;
+   fonchangebefore: ifieventty;
+   fonchangeafter: ifieventty;
    function getintegerpro(const aname: string): integer;
    procedure setintegerpro(const aname: string; const avalue: integer);
    function getmsestringpro(const aname: string): msestring;
@@ -99,6 +104,7 @@ type
    procedure valuestoclient(const alink: pointer); virtual; 
    procedure clienttovalues(const alink: pointer); virtual;
    procedure change(const alink: iificlient = nil);
+//   procedure change();
    procedure linkset(const alink: iificlient); virtual;
    
    function setmsestringval(const alink: iificlient; const aname: string;
@@ -137,7 +143,8 @@ type
    function getdatetimeval(const alink: iificlient; const aname: string;
                                  var avalue: tdatetime): boolean;
                                     //true if found
-   procedure dovaluechanged(const sender: iificlient; const isexecute: boolean); virtual;
+   procedure distribute(const sender: iificlient;
+                            const local: boolean; const exec: boolean); virtual;
     //iifiserver
    procedure execute(const sender: iificlient); virtual;
    procedure valuechanged(const sender: iificlient);
@@ -176,6 +183,11 @@ type
    property statvarname: msestring read fstatvarname write fstatvarname;
    property statpriority: integer read fstatpriority 
                                        write fstatpriority default 0;
+   property onchangebefore: ifieventty read fonchangebefore 
+                                                     write fonchangebefore;
+                  //for data change and execute
+   property onchangeafter: ifieventty read fonchangeafter write fonchangeafter;
+                  //for data change and execute
    property onclientvaluechanged: ificlienteventty read fonclientvaluechanged 
                                                     write fonclientvaluechanged;
    property onclientstatechanged: ificlientstateeventty 
@@ -193,6 +205,8 @@ type
    property statfile;
    property statvarname;
    property statpriority;
+   property onchangebefore;
+   property onchangeafter;
    property onclientvaluechanged;
    property onclientstatechanged;
    property onclientmodalresult;
@@ -203,11 +217,11 @@ type
   private
   protected
    procedure valuestoclient(const alink: pointer); override;
-   procedure execute(const sender: iificlient); overload; override;
+//   procedure execute(const sender: iificlient); overload; override;
    procedure linkset(const alink: iificlient); override;
   public
    function canconnect(const acomponent: tcomponent): boolean; override;
-   procedure execute; overload;
+   procedure execute; reintroduce;
   published
    property optionsvalue: valueclientoptionsty read foptionsvalue
                                            write foptionsvalue default [];
@@ -1324,39 +1338,104 @@ begin
  end;
 end;
 }
-procedure tcustomificlientcontroller.execute(const sender: iificlient);
+procedure tcustomificlientcontroller.distribute(const sender: iificlient;
+                            const local: boolean; const exec: boolean);
 begin
- if fowner.canevent(tmethod(fonclientexecute)) then begin
-  fonclientexecute(self,sender);
- end;
-end;
-
-procedure tcustomificlientcontroller.dovaluechanged(const sender: iificlient;
-                            const isexecute: boolean);
-begin
- if {(fvalueproperty <> nil) and} not (ivs_valuesetting in fstate) and 
+ if not (ivs_valuesetting in fstate) and 
                not(csloading in fowner.componentstate) then begin
   include(fstate,ivs_valuesetting);
   try
-   clienttovalues(pointer(sender));
-   if foptionsvalue*[vco_nosync,vco_datalist] = [] then begin
-    fchangedclient:= pointer(sender);
-    tmsecomponent1(fowner).getobjectlinker.forall(
-                           {$ifdef FPC}@{$endif}valuestootherclient,self);
+   if assigned(fonchangebefore) then begin
+    fonchangebefore(self);
+   end;
+   if local then begin
+    if not (vco_novaluetoclient in foptionsvalue) then begin
+     if sender <> nil then begin
+      valuestoclient(pointer(sender));
+     end
+     else begin
+      tmsecomponent1(fowner).getobjectlinker.forall(
+                            {$ifdef FPC}@{$endif}valuestoclient,self);
+     end;
+    end;
+   end
+   else begin
+    clienttovalues(pointer(sender));
+    if foptionsvalue*[vco_nosync,vco_datalist] = [] then begin
+     fchangedclient:= pointer(sender);
+     tmsecomponent1(fowner).getobjectlinker.forall(
+                            {$ifdef FPC}@{$endif}valuestootherclient,self);
+    end;
+   end;
+   if assigned(fonchangeafter) then begin
+    fonchangeafter(self);
+   end;
+   if not local then begin
+    if exec then begin
+     if assigned(fonclientexecute) then begin
+      fonclientexecute(self,sender);
+     end;
+    end
+    else begin
+     if assigned(fonclientvaluechanged) then begin
+      fonclientvaluechanged(self,sender);
+     end;
+    end;
    end;
   finally
    exclude(fstate,ivs_valuesetting);
   end;
  end;
- if not isexecute and fowner.canevent(tmethod(fonclientvaluechanged)) then begin
-  fonclientvaluechanged(self,sender);
- end;
 end;
 
+procedure tcustomificlientcontroller.change(const alink: iificlient);
+begin
+ distribute(alink,true,false);
+end;
+(*
+procedure tcustomificlientcontroller.change(const alink: iificlient);
+begin
+ if {(fvalueproperty <> nil) and} not (ivs_valuesetting in fstate) and 
+            not (csloading in fowner.componentstate) then begin
+  include(fstate,ivs_valuesetting);
+  try
+   if assigned(fonchangebefore) then begin
+    fonchangebefore(self);
+   end;
+   if not (vco_novaluetoclient in foptionsvalue) then begin
+    if alink <> nil then begin
+     valuestoclient(pointer(alink));
+    end
+    else begin
+     tmsecomponent1(fowner).getobjectlinker.forall(
+                           {$ifdef FPC}@{$endif}valuestoclient,self);
+    end;
+   end;
+   if assigned(fonchangeafter) then begin
+    fonchangeafter(self);
+   end;
+  finally
+   exclude(fstate,ivs_valuesetting);
+  end;
+ end;
+end;
+*)
 procedure tcustomificlientcontroller.valuechanged(const sender: iificlient);
 begin
- dovaluechanged(sender,false);
+ distribute(sender,false,false);
+// dovaluechanged(sender,false);
 end;
+
+procedure tcustomificlientcontroller.execute(const sender: iificlient);
+begin
+ distribute(sender,false,true);
+{
+ if fowner.canevent(tmethod(fonclientexecute)) then begin
+  fonclientexecute(self,sender);
+ end;
+}
+end;
+
 
 procedure tcustomificlientcontroller.statechanged(const sender: iificlient;
                const astate: ifiwidgetstatesty);
@@ -1437,27 +1516,6 @@ begin
  setcomponent(avalue,intf1);
 end;
 }
-procedure tcustomificlientcontroller.change(const alink: iificlient);
-begin
- if {(fvalueproperty <> nil) and} not (ivs_valuesetting in fstate) and 
-            not (csloading in fowner.componentstate) and 
-            not  (vco_novaluetoclient in foptionsvalue) then begin
-  include(fstate,ivs_valuesetting);
-  try
-   if alink <> nil then begin
-    valuestoclient(pointer(alink));
-   end
-   else begin
-    tmsecomponent1(fowner).getobjectlinker.forall(
-                          {$ifdef FPC}@{$endif}valuestoclient,self);
-   end;
-//   valuetowidget;
-  finally
-   exclude(fstate,ivs_valuesetting);
-  end;
- end;
-end;
-
 procedure tcustomificlientcontroller.linkset(const alink: iificlient);
 begin
  fwidgetstatebefore:= [];
@@ -1703,7 +1761,6 @@ begin
   avalue:= getfloatprop(inst,prop);
  end; 
 end;
-
 
 procedure tcustomificlientcontroller.loaded;
 begin
@@ -3320,16 +3377,17 @@ begin
   iifiexeclink(alink).execute;
  end;
 end;
-
+{
 procedure texecclientcontroller.execute(const sender: iificlient);
 begin
  dovaluechanged(sender,true); //distribute event
  inherited;
 end;
-
+}
 procedure texecclientcontroller.execute;
 begin
- execute(nil);
+ distribute(nil,true,true);
+// dovaluechanged(nil,true); //distribute event
 end;
 
 procedure texecclientcontroller.linkset(const alink: iificlient);
