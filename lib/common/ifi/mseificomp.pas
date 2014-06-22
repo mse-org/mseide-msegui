@@ -216,6 +216,7 @@ type
  texecclientcontroller = class(tificlientcontroller)
   private
   protected
+   function getifilinkkind: ptypeinfo; override;
    procedure valuestoclient(const alink: pointer); override;
 //   procedure execute(const sender: iificlient); overload; override;
    procedure linkset(const alink: iificlient); override;
@@ -3362,7 +3363,7 @@ var
 // prop1: ppropinfo;
 begin
 // result:= inherited canconnect(acomponent);
- result:= getcorbainterface(acomponent,typeinfo(iifilink),po1);
+ result:= getcorbainterface(acomponent,typeinfo(iifiexeclink),po1);
  {
  if result then begin
   prop1:= getpropinfo(acomponent,'onexecute');
@@ -3393,6 +3394,11 @@ end;
 procedure texecclientcontroller.linkset(const alink: iificlient);
 begin
  //do nothing
+end;
+
+function texecclientcontroller.getifilinkkind: ptypeinfo;
+begin
+ result:= typeinfo(iifiexeclink);
 end;
 
 { tifigridlinkcomp }

@@ -345,7 +345,7 @@ end;
 
 function tifiactionendpoint.getifilinkkind: ptypeinfo;
 begin
- result:= typeinfo(iifidatalink);
+ result:= typeinfo(iifiexeclink);
 end;
 
 end.
