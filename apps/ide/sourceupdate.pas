@@ -24,8 +24,9 @@ uses
  msetypes,msestrings,pascaldesignparser,cdesignparser,mseglob,
  msestream,mseparser,msesyntaxedit,mselist,msehash,msedesignparser;
 
-type 
- 
+const
+ procheaderbreakchars = '(;';
+type  
  unitinfoaty = array[0..0] of tunitinfo;
  punitinfoaty = ^unitinfoaty;
 // unitinfopoarty = array of punitinfoty;
@@ -1291,7 +1292,7 @@ begin
  end;
  str1:= str1 + limitlinelength(
           composeprocedureheader(classinfopo^.name+'.'+aname,atype,false,false),
-                                      fmaxlinelength,';',14) + lineend;
+                             fmaxlinelength,procheaderbreakchars,14) + lineend;
  str1:= str1 + 'begin' + lineend + 'end;' + lineend;
  if bo1 then begin
   str1:= str1 + lineend;
@@ -1344,7 +1345,7 @@ var
  
   function breakline(const atext: msestring): msestring;
   begin
-   result:= limitlinelength(atext,fmaxlinelength,';',18);
+   result:= limitlinelength(atext,fmaxlinelength,procheaderbreakchars,18);
   end;
   
  var
@@ -1354,7 +1355,8 @@ var
    if issetter then begin
     if scope.finddef(setter,syk_nopars,scope1) = nil then begin
      if indextext <> '' then begin
-      insertprivate(false,breakline('procedure '+setter+'('+indextext+'; const avalue: '+
+      insertprivate(false,breakline('procedure '+setter+'('+
+       indextext+'; const avalue: '+
        concatstrings(typetext,'.')+');'));
      end
      else begin
@@ -1509,7 +1511,7 @@ begin                        //completeclass
                  not (mef_abstract in params.flags) then begin
        str1:= lineend + 
            limitlinelength(composeprocedureheader(ppo,cpo,true),
-                                       fmaxlinelength,';',14) + lineend +
+                          fmaxlinelength,procheaderbreakchars,14) + lineend +
                  'begin'+lineend+
                  'end;'+lineend;
        if newimp and (int1 = procedurelist.count - 1) then begin
@@ -1577,7 +1579,7 @@ begin
    createmethodbody(po1,po2,aname,atype,posindex);
    str1:= composeprocedureheader(aname,atype,false,false);
    replacetext(po1,pos1,pos1,limitlinelength(
-             '   ' + str1,fmaxlinelength,';',18)+lineend);
+             '   ' + str1,fmaxlinelength,procheaderbreakchars,18)+lineend);
   end;
  end;
 //end;
@@ -1615,13 +1617,13 @@ begin
    name:= newname;
    if not isemptysourcepos(impheaderstartpos) then begin
     replacetext(po1,impheaderstartpos,impheaderendpos,
-     limitlinelength(composeprocedureheader(po3,po2,false),fmaxlinelength,';',
-                         14,impheaderstartpos.pos.col));
+     limitlinelength(composeprocedureheader(po3,po2,false),fmaxlinelength,
+                          procheaderbreakchars,14,impheaderstartpos.pos.col));
    end;
    if not isemptysourcepos(intstartpos) then begin
     replacetext(po1,intstartpos,intendpos,
-     limitlinelength(composeproceduretext(po3,false),fmaxlinelength,';',
-                         18,intstartpos.pos.col));
+     limitlinelength(composeproceduretext(po3,false),fmaxlinelength,
+             procheaderbreakchars,18,intstartpos.pos.col));
    end;
   end;
  end;
