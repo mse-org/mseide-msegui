@@ -885,7 +885,8 @@ begin
    pid_type: begin
    end;
    else begin
-    if (ident1 = pid_invalid) and getorigname(lstr1) and checkoperator('=') then begin
+    if (ident1 = pid_invalid) and getorigname(lstr1) and
+                                            checkoperator('=') then begin
      ident1:= pascalidentty(getident);
      case ident1 of
       pid_interface: begin
@@ -923,7 +924,14 @@ begin
                   getsourcepos(statementstart),sourcepos);
       end;
       pid_procedure,pid_function: begin
-       skipprocedureparams(ident1);
+       if skipprocedureparams(ident1) then begin
+        if checkident(ord(pid_of)) then begin
+         checkident(ord(pid_object));
+        end;
+        checkoperator(';');
+        funitinfopo^.deflist.add(lstringtostring(lstr1),syk_typedef,
+                   getsourcepos(statementstart),sourcepos);
+       end;
       end;
       else begin
        while not eof and not checkoperator(';') do begin

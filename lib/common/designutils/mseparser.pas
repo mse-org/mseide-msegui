@@ -233,7 +233,7 @@ type
    function getfirstident: integer; //-1 if none or not first token in line
    function checkident(const ident: integer): boolean; overload;//true if ok
    function checkident(const ident: array of integer): integer; overload;
-                                  //returns fond ident, -1 if none
+                                  //returns found ident, -1 if none
    function testident(const ident: integer): boolean;
                        //skips whitespace, true if ident found
    function checknamenoident: boolean;
