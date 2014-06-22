@@ -122,6 +122,18 @@ type
                                                       write fondatachange;
  end;
 
+ tifiactionendpoint = class(tifiendpoint)
+  private
+   fonexecute: notifyeventty;
+   function getifilink: tifiactionlinkcomp;
+   procedure setifilink(const avalue: tifiactionlinkcomp);
+  public
+  published
+   property ifilink: tifiactionlinkcomp read getifilink write setifilink;
+   procedure execute;
+   property onexecute: notifyeventty read fonexecute write fonexecute;
+ end;
+
 implementation
 
 { tifiendpoint }
@@ -166,6 +178,9 @@ procedure tifiendpoint.change;
 begin
  if canevent(tmethod(fonchange)) then begin
   fonchange(self);
+ end;
+ if fifiserverintf <> nil then begin
+  fifiserverintf.valuechanged(iifidatalink(self));
  end;
 end;
 
@@ -305,6 +320,22 @@ begin
   fondatachange(self,fvalue);
  end;
  change;
+end;
+
+{ tifiactionendpoint }
+
+function tifiactionendpoint.getifilink: tifiactionlinkcomp;
+begin
+ result:= tifiactionlinkcomp(fifilink);
+end;
+
+procedure tifiactionendpoint.setifilink(const avalue: tifiactionlinkcomp);
+begin
+ inherited setifilink(avalue);
+end;
+
+procedure tifiactionendpoint.execute;
+begin
 end;
 
 end.
