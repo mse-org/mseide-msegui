@@ -15,7 +15,7 @@ uses
  msetypes;
  
 type
- tifiendpoint = class(tmsecomponent,iifidatalink)
+ tifidataendpoint = class(tmsecomponent,iifidatalink)
   private
    fonchange: notifyeventty;
   protected
@@ -33,7 +33,7 @@ type
    property onchange: notifyeventty read fonchange write fonchange;
  end;
 
- tifiintegerendpoint = class(tifiendpoint)
+ tifiintegerendpoint = class(tifidataendpoint)
   private
    fvalue: integer;
    fondatachange: updateintegereventty;
@@ -47,7 +47,7 @@ type
                                                       write fondatachange;
  end;
  
- tifiint64endpoint = class(tifiendpoint)
+ tifiint64endpoint = class(tifidataendpoint)
   private
    fvalue: int64;
    fondatachange: updateint64eventty;
@@ -61,7 +61,7 @@ type
                                                       write fondatachange;
  end;
  
- tifibooleanendpoint = class(tifiendpoint)
+ tifibooleanendpoint = class(tifidataendpoint)
   private
    fvalue: boolean;
    fondatachange: updatebooleaneventty;
@@ -75,7 +75,7 @@ type
                                                       write fondatachange;
  end;
 
- tifirealendpoint = class(tifiendpoint)
+ tifirealendpoint = class(tifidataendpoint)
   private
    fvalue: real;
    fondatachange: updaterealeventty;
@@ -91,7 +91,7 @@ type
                                                       write fondatachange;
  end;
  
- tifidatetimeendpoint = class(tifiendpoint)
+ tifidatetimeendpoint = class(tifidataendpoint)
   private
    fvalue: tdatetime;
    fondatachange: updatedatetimeeventty;
@@ -107,7 +107,7 @@ type
                                                       write fondatachange;
  end;
 
- tifistringendpoint = class(tifiendpoint)
+ tifistringendpoint = class(tifidataendpoint)
   private
    fvalue: msestring;
    fondatachange: updatestringeventty;
@@ -122,59 +122,63 @@ type
                                                       write fondatachange;
  end;
 
- tifiactionendpoint = class(tifiendpoint)
+ tifiactionendpoint = class(tmsecomponent,iifiexeclink)
   private
    fonexecute: notifyeventty;
-   function getifilink: tifiactionlinkcomp;
    procedure setifilink(const avalue: tifiactionlinkcomp);
+    //iifilink
+   function getifilinkkind: ptypeinfo;
+  protected
+   fifilink: tifiactionlinkcomp;
   public
-  published
-   property ifilink: tifiactionlinkcomp read getifilink write setifilink;
+    //iifiexeclink
    procedure execute;
+  published
+   property ifilink: tifiactionlinkcomp read fifilink write setifilink;
    property onexecute: notifyeventty read fonexecute write fonexecute;
  end;
 
 implementation
 
-{ tifiendpoint }
+{ tifidataendpoint }
 
-function tifiendpoint.getifilinkkind: ptypeinfo;
+function tifidataendpoint.getifilinkkind: ptypeinfo;
 begin
  result:= typeinfo(iifidatalink);
 end;
 
-procedure tifiendpoint.setifilink(const avalue: tifilinkcomp);
+procedure tifidataendpoint.setifilink(const avalue: tifilinkcomp);
 begin
  mseificomp.setifilinkcomp(iifidatalink(self),avalue,fifilink);
 end;
 
-function tifiendpoint.ifigriddata: tdatalist;
+function tifidataendpoint.ifigriddata: tdatalist;
 begin
  result:= nil;
 end;
 
-procedure tifiendpoint.updateifigriddata(const sender: tobject; 
+procedure tifidataendpoint.updateifigriddata(const sender: tobject; 
                                                 const alist: tdatalist);
 begin
  //dummy
 end;
 
-function tifiendpoint.getgriddata: tdatalist;
+function tifidataendpoint.getgriddata: tdatalist;
 begin
  result:= nil;
 end;
 
-function tifiendpoint.getvalueprop: ppropinfo;
+function tifidataendpoint.getvalueprop: ppropinfo;
 begin
  result:= nil;
 end;
 
-procedure tifiendpoint.updatereadonlystate;
+procedure tifidataendpoint.updatereadonlystate;
 begin
  //dummy
 end;
 
-procedure tifiendpoint.change;
+procedure tifidataendpoint.change;
 begin
  if canevent(tmethod(fonchange)) then begin
   fonchange(self);
@@ -324,18 +328,24 @@ end;
 
 { tifiactionendpoint }
 
-function tifiactionendpoint.getifilink: tifiactionlinkcomp;
-begin
- result:= tifiactionlinkcomp(fifilink);
-end;
-
 procedure tifiactionendpoint.setifilink(const avalue: tifiactionlinkcomp);
 begin
- inherited setifilink(avalue);
+ mseificomp.setifilinkcomp(iifiexeclink(self),avalue,tifilinkcomp(fifilink));
 end;
 
 procedure tifiactionendpoint.execute;
 begin
+ if canevent(tmethod(fonexecute)) then begin
+  fonexecute(self);
+ end;
+ if fifiserverintf <> nil then begin
+  fifiserverintf.execute(iifiexeclink(self));
+ end;
+end;
+
+function tifiactionendpoint.getifilinkkind: ptypeinfo;
+begin
+ result:= typeinfo(iifidatalink);
 end;
 
 end.
