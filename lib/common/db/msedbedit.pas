@@ -2318,6 +2318,7 @@ type
    function getdefaultvalue: pointer; override;
    procedure texttovalue(var accept: boolean; const quiet: boolean); override;
    procedure texttodata(const atext: msestring; var data); override;
+   procedure setnullvalue; override; //for dbedits
    procedure valuetogrid(arow: integer); override;
    procedure gridtovalue(arow: integer); override;
    procedure readstatvalue(const reader: tstatreader); override;
@@ -10413,8 +10414,14 @@ function tcustomenum64edit.getifilinkkind: ptypeinfo;
 begin
  result:= typeinfo(iifidatalink);
 end;
+
 {$endif mse_with_ifi}
 
+procedure tcustomenum64edit.setnullvalue;
+begin
+ dropdown.itemindex:= -1;
+ nullvalueset();
+end;
  { tcustomenum64editlb }
  
 function tcustomenum64editlb.getdropdown: tlbdropdownlistcontroller;

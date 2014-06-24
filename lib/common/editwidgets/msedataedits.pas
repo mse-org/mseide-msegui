@@ -897,6 +897,7 @@ type
    fvaluedefault1: integer;
    fvalueempty: integer;
    procedure setvalue(const avalue: integer);
+   procedure setnullvalue; override; //for dbedits
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    function getdatatype: datalistclassty; override;
    function getdefaultvalue: pointer; override;
@@ -4549,6 +4550,7 @@ end;
 procedure tcustomkeystringedit.setnullvalue;
 begin
  dropdown.itemindex:= -1;
+ nullvalueset();
 end;
 
 function tcustomkeystringedit.internaldatatotext(const data): msestring;
@@ -5008,6 +5010,12 @@ function tcustomenuedit.griddata: tgridenumdatalist;
 begin
  checkgrid();
  result:= tgridenumdatalist(fdatalist);
+end;
+
+procedure tcustomenuedit.setnullvalue;
+begin
+ dropdown.itemindex:= -1;
+ nullvalueset();
 end;
 
 { tnocolsenumdropdowncontroller }
