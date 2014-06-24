@@ -1107,7 +1107,7 @@ begin
       end;
      end;
   
-     cells:= nil; //finalize
+//     cells:= nil; //finalize
      setlength(cells,buttons.count); //max
      if vert then begin
       endxy:= rect2.y + rect2.cy;
