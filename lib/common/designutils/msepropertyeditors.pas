@@ -5048,8 +5048,9 @@ begin
      end;
     end;
    end;
-   show(true,nil);
-   modified;
+   if show(true,nil) = mr_ok then begin
+    modified;
+   end;
   end;
  finally
   editform.Free;
