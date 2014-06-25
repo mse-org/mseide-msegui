@@ -2690,8 +2690,8 @@ var
  options1: dbnavigatoroptionsty;
 begin
  if (datasource <> nil) and (datasource.State <> dsinactive) then begin
-  if not (abutton in [dbnb_cancel,dbnb_delete]) then begin
-   widget1:= fintf.getwidget;
+  widget1:= fintf.getwidget;
+  if not (abutton in [dbnb_cancel,dbnb_delete,dbnb_autoedit]) then begin
    if (widget1.parentwidget <> nil) and
            not widget1.parentwidget.canparentclose then begin
     exit;
