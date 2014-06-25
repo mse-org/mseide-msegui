@@ -863,6 +863,7 @@ begin
      with tmaskedbitmap1(dest) do begin
       if self.hasalpha then begin
        graymask:= true;
+       include(foptions,bmo_masked);
        createmask(bmk_gray);
        mask.size:= size;
        if not getmaskdata(8) then begin

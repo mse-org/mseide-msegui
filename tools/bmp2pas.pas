@@ -27,6 +27,7 @@ program bmp2pas;
 
 uses
   {$ifdef FPC}{$ifdef unix}cthreads,{$endif}{$endif}
+  mseguiinifini,
   SysUtils,
   msetypes,
   msesysenv,
@@ -56,7 +57,6 @@ var
  str1,str2: msestring;
 
 begin
- gui_init; //pixmap needed
  try
   sysenv:= tsysenvmanager.create(nil);
   sysenv.init(arguments);
@@ -102,10 +102,11 @@ begin
    end;
   except
    on e: exception do begin
+    sysenv.destroy();
     errorhalt(e.message);
    end;
   end;
  finally
-//  gui_deinit; stockdata finalize needs GDI
+  sysenv.destroy();
  end;
 end.
