@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2014 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -282,6 +282,7 @@ type
    function getgriddatalink: pointer; virtual;
    procedure setoptionswidget(const avalue: optionswidgetty); override;
    procedure setoptionsgrid(const avalue: optionsgridty); override;
+   function checksubfocus(const aactivate: boolean): boolean; override;
    procedure dofocus; override;
    procedure dochildfocused(const sender: twidget); override;
    procedure unregisterchildwidget(const child: twidget); override;
@@ -2975,15 +2976,32 @@ begin
  end; 
 end;
 }
+function tcustomwidgetgrid.checksubfocus(const aactivate: boolean): boolean;
+begin
+ result:= false;
+ if (factivewidget <> nil) and (factivewidget <> fwidgetdummy) then begin
+  factivewidget.visible:= true;
+  if factivewidget.canfocus then begin
+   factivewidget.setfocus(aactivate);
+   result:= true;
+  end;
+ end;
+ if not result then begin
+  result:= inherited checksubfocus(aactivate);
+ end;
+end;
+
 procedure tcustomwidgetgrid.dofocus;
 begin
  inherited;
+{
  if (factivewidget <> nil) and (factivewidget <> fwidgetdummy) then begin
   factivewidget.visible:= true;
   if factivewidget.canfocus then begin
    factivewidget.setfocus(false);
   end;
  end;
+}
 end;
 
 procedure tcustomwidgetgrid.unregisterchildwidget(const child: twidget);
