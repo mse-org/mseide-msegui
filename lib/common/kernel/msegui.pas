@@ -2453,8 +2453,8 @@ type
       //lowest visible window in stackorder, calls sortzorder
    function topwindow: twindow;
       //highest visible window in stackorder, calls sortzorder
-   function candefocus: boolean; override;
-      //checks candefocus of all windows
+   function candefocus(const caller: tobject = nil): boolean; override;
+      //checks candefocus of all windows expect caller
 
    procedure registeronkeypress(const method: keyeventty);
    procedure unregisteronkeypress(const method: keyeventty);
@@ -17976,13 +17976,13 @@ begin
  invalidate;
 end;
 
-function tguiapplication.candefocus: boolean;
+function tguiapplication.candefocus(const caller: tobject = nil): boolean;
 var
  int1: integer;
 begin
  result:= true;
  for int1:= 0 to high(fwindows) do begin
-  if not fwindows[int1].candefocus then begin
+  if (fwindows[int1] <> caller) and not fwindows[int1].candefocus then begin
    result:= false;
    break;
   end;

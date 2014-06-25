@@ -367,7 +367,7 @@ type
    function waitescaped: boolean; virtual;
    procedure idlesleep(const asleepus: integer);
                        //calls unlockall-relockall
-   function candefocus: boolean; virtual;
+   function candefocus(const caller: tobject=nil): boolean; virtual;
    property terminated: boolean read getterminated write setterminated;
                       //thread safe
    property mainthread: threadty read fthread;
@@ -1712,7 +1712,7 @@ begin
                                                        (feventlist.count = 0);
 end;
 
-function tcustomapplication.candefocus: boolean;
+function tcustomapplication.candefocus(const caller: tobject = nil): boolean;
 begin
  result:= true; //dummy
 end;
