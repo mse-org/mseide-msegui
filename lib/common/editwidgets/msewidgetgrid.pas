@@ -283,7 +283,7 @@ type
    procedure setoptionswidget(const avalue: optionswidgetty); override;
    procedure setoptionsgrid(const avalue: optionsgridty); override;
    function checksubfocus(const aactivate: boolean): boolean; override;
-   procedure dofocus; override;
+//   procedure dofocus; override;
    procedure dochildfocused(const sender: twidget); override;
    procedure unregisterchildwidget(const child: twidget); override;
    procedure widgetregionchanged(const sender: twidget); override;
@@ -2990,20 +2990,18 @@ begin
   result:= inherited checksubfocus(aactivate);
  end;
 end;
-
+{
 procedure tcustomwidgetgrid.dofocus;
 begin
  inherited;
-{
  if (factivewidget <> nil) and (factivewidget <> fwidgetdummy) then begin
   factivewidget.visible:= true;
   if factivewidget.canfocus then begin
    factivewidget.setfocus(false);
   end;
  end;
-}
 end;
-
+}
 procedure tcustomwidgetgrid.unregisterchildwidget(const child: twidget);
 begin
  twidgetfixrows(ffixrows).unregisterchildwidget(child);
