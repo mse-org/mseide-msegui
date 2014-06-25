@@ -10892,7 +10892,12 @@ begin
                                         (avalue <> getvisible) then begin
   if avalue then begin
    if parentisvisible then begin
-    show(false,window.ftransientfor);
+    if window.modalfor then begin
+     show(ml_window,fwindow.ftransientfor);
+    end
+    else begin
+     show(ml_none,fwindow.ftransientfor);
+    end;
    end
    else begin
     include(fwidgetstate,ws_visible);
