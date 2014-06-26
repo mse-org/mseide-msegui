@@ -339,6 +339,9 @@ type
    function getVisible: Boolean;
    procedure readproviderflags(reader: treader);
    procedure readproviderflags1(reader: treader);
+   procedure readrequired(reader: treader);
+   procedure readvisible(reader: treader);
+   procedure readreadonly(reader: treader);
    procedure setoptionsfield(const avalue: optionsfieldty);
   protected
     FValidating : Boolean;
@@ -6226,9 +6229,27 @@ begin
  end;
 end;
 
+procedure TField.readrequired(reader: treader);
+begin
+ required:= reader.readboolean();
+end;
+
+procedure TField.readvisible(reader: treader);
+begin
+ visible:= reader.readboolean();
+end;
+
+procedure TField.readreadonly(reader: treader);
+begin
+ readonly:= reader.readboolean();
+end;
+
 procedure TField.defineproperties(filer: tfiler);
 begin
  inherited;
+ filer.defineproperty('Required',@readrequired,nil,false);
+ filer.defineproperty('Visible',@readvisible,nil,false);
+ filer.defineproperty('ReadOnly',@readreadonly,nil,false);
  filer.defineproperty('ProviderFlags',@readproviderflags,nil,false);
  filer.defineproperty('providerflags1',@readproviderflags1,nil,false);
 end;
