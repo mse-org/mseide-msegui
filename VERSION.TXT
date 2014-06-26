@@ -1,5 +1,9 @@
 MSEide+MSEgui breaking changes version history
 
+2014-06-26
+ TField.ProviderFlags pfInInsert removed.
+ Combine TField.Visible, ReadOnly, Required, ProviderFlags and
+ providerflags1 into TField.optionsfield property.
 2014-06-08
  Separate TField.ProviderFlags pfInInsert, pfInUpdate.
 2014-03-09

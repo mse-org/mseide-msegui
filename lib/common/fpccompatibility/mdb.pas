@@ -6117,13 +6117,14 @@ end;
 
 const
  allproviderflags = [pfInUpdate, pfInWhere, pfInKey, pfHidden];
- allprovideroptions = [of_InUpdate, of_InWhere, of_InKey, of_Hidden];
+ allprovideroptions = [of_ininsert,of_InUpdate, of_InWhere, of_InKey,
+                       of_Hidden];
  providerflagsshift = ord(of_inupdate);
 
 function TField.getProviderFlags: TProviderFlags;
 begin
 {$push}{$warnings off}
- result:= tproviderflags(integer(foptionsfield) shl providerflagsshift) * 
+ result:= tproviderflags(integer(foptionsfield) shr providerflagsshift) * 
                                                              allproviderflags;
 {$pop}
 end;
@@ -6142,7 +6143,7 @@ end;
 procedure TField.setProviderFlags(const avalue: TProviderFlags);
 begin
  foptionsfield:= (foptionsfield - allprovideroptions) + 
-            optionsfieldty(integer(avalue) shr providerflagsshift);
+            optionsfieldty(integer(avalue) shl providerflagsshift);
  if pfinupdate in avalue then begin
   include(foptionsfield,of_ininsert);
  end
