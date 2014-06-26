@@ -6228,6 +6228,7 @@ end;
 
 procedure TField.defineproperties(filer: tfiler);
 begin
+ inherited;
  filer.defineproperty('ProviderFlags',@readproviderflags,nil,false);
  filer.defineproperty('providerflags1',@readproviderflags1,nil,false);
 end;
