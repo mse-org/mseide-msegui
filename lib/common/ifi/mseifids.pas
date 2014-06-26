@@ -1323,7 +1323,7 @@ begin
   with ar1[int1].ext do begin
    if field <> nil then begin
     with field do begin
-     if not (pfhidden in providerflags) {and (recno >= 0)} then begin
+     if not (of_hidden in optionsfield) {and (recno >= 0)} then begin
       ftxbindings[int2]:= int1;
       inc(int2);
      end;
