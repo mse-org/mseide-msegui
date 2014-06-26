@@ -74,7 +74,7 @@ const
                 realfields + datetimefields;
  widestringfields = [ftwidestring,ftfixedwidechar,ftwidememo];
  blobfields = [ftblob,ftmemo,ftgraphic{,ftstring}];
- defaultproviderflags = [pfInInsert,pfInUpdate,pfInWhere];
+// defaultproviderflags = [pfInInsert,pfInUpdate,pfInWhere];
 
  varsizefields = [ftstring,ftfixedchar,ftwidestring,ftfixedwidechar,
                   ftbytes,ftvarbytes,ftbcd,ftfmtbcd];
@@ -197,11 +197,11 @@ type
   function getinstance: tfield;
  end;
 
- providerflag1ty = (pf1_refreshinsert,pf1_refreshupdate,pf1_nocopyrecord);
- providerflags1ty = set of providerflag1ty;
+// providerflag1ty = (pf1_refreshinsert,pf1_refreshupdate,pf1_nocopyrecord);
+// providerflags1ty = set of providerflag1ty;
  
  imsefield = interface(inullinterface)[miid_imsefield]
-  function getproviderflags1: providerflags1ty;
+//  function getproviderflags1: providerflags1ty;
 //  function getlookupinfo: plookupfieldinfoty;
  end;
 
@@ -211,13 +211,13 @@ type
  tmsefield = class(tfield,imsefield)
   private
    ftagpo: pointer;
-   fproviderflags1: providerflags1ty;
+//   fproviderflags1: providerflags1ty;
    fstate: fieldstatesty;
 //   flookupinfo: lookupfieldinfoty;
 //   function getasmsestring: msestring;
 //   procedure setasmsestring(const avalue: msestring);
     //imsefield
-   function getproviderflags1: providerflags1ty;
+//m   function getproviderflags1: providerflags1ty;
 //   function getlookupinfo: plookupfieldinfoty;
   protected
    procedure readlookup(reader: treader); 
@@ -235,15 +235,15 @@ type
 //   property asmsestring: msestring read getasmsestring write setasmsestring;
    property tagpo: pointer read ftagpo write ftagpo;
   published
-   property providerflags1: providerflags1ty read fproviderflags1 
-                        write fproviderflags1 default [];
+//   property providerflags1: providerflags1ty read fproviderflags1 
+//                        write fproviderflags1 default [];
    property DataSet stored false;
-   property ProviderFlags default defaultproviderflags;
+//   property ProviderFlags default defaultproviderflags;
    property FieldKind default fkData;
    property HasConstraints default false;
    property LookupCache default false;
-   property ReadOnly default false;
-   property Required default false; 
+//   property ReadOnly default false;
+//   property Required default false; 
  end;
  
  getmsestringdataty = function(const sender: tmsestringfield;
@@ -265,7 +265,7 @@ type
    fdefaultexpressionstr: msestring;
    fdefaultexpressionbefore: string; 
                   //synchronize with TField.DefaultExpression
-   fproviderflags1: providerflags1ty;
+//   fproviderflags1: providerflags1ty;
 //   flookupinfo: lookupfieldinfoty;
   //ifieldcomponent
    procedure setdsintf(const avalue: idsfieldcontroller);
@@ -273,7 +273,7 @@ type
    function getdefaultexpression: msestring;
    procedure setdefaultexpression(const avalue: msestring);
     //imsefield
-   function getproviderflags1: providerflags1ty;
+//   function getproviderflags1: providerflags1ty;
 //   function getlookupinfo: plookupfieldinfoty;
    procedure setasnullmsestring(const avalue: msestring);
   protected
@@ -316,15 +316,15 @@ type
   published
    property defaultexpression: msestring read getdefaultexpression 
                                                 write setdefaultexpression;
-   property providerflags1: providerflags1ty read fproviderflags1 
-                        write fproviderflags1 default [];
+//   property providerflags1: providerflags1ty read fproviderflags1 
+//                        write fproviderflags1 default [];
    property DataSet stored false;
-   property ProviderFlags default defaultproviderflags;
+//   property ProviderFlags default defaultproviderflags;
    property FieldKind default fkData;
    property HasConstraints default false;
    property LookupCache default false;
-   property ReadOnly default false;
-   property Required default false;
+//   property ReadOnly default false;
+//   property Required default false;
    property Transliterate default false;
  end;
 
@@ -351,12 +351,12 @@ type
   private
    fstate: fieldstatesty;
    ftagpo: pointer;
-   fproviderflags1: providerflags1ty;
+//   fproviderflags1: providerflags1ty;
 //   flookupinfo: lookupfieldinfoty;
 //   function getasmsestring: msestring;
 //   procedure setasmsestring(const avalue: msestring);
     //imsefield
-   function getproviderflags1: providerflags1ty;
+//   function getproviderflags1: providerflags1ty;
 //   function getlookupinfo: plookupfieldinfoty;
   protected
    procedure readlookup(reader: treader);
@@ -374,27 +374,27 @@ type
 //   property asmsestring: msestring read getasmsestring write setasmsestring;
    property tagpo: pointer read ftagpo write ftagpo;
   published
-   property providerflags1: providerflags1ty read fproviderflags1 
-                        write fproviderflags1 default [];
+//   property providerflags1: providerflags1ty read fproviderflags1 
+//                        write fproviderflags1 default [];
    property DataSet stored false;
-   property ProviderFlags default defaultproviderflags;
+//   property ProviderFlags default defaultproviderflags;
    property FieldKind default fkData;
    property HasConstraints default false;
    property LookupCache default false;
-   property ReadOnly default false;
-   property Required default false;
+//   property ReadOnly default false;
+//   property Required default false;
  end;
  tmselongintfield = class(tlongintfield,imsefield)
   private
    fstate: fieldstatesty;
    ftagpo: pointer;
-   fproviderflags1: providerflags1ty;
+//   fproviderflags1: providerflags1ty;
 //   flookupinfo: lookupfieldinfoty;
 //   function getasmsestring: msestring;
 //   procedure setasmsestring(const avalue: msestring);
    procedure setasenum(const avalue: integer);
     //imsefield
-   function getproviderflags1: providerflags1ty;
+//   function getproviderflags1: providerflags1ty;
 //   function getlookupinfo: plookupfieldinfoty;
 
    function getasid: integer;
@@ -424,27 +424,27 @@ type
    property asenum: integer read getaslongint write setasenum;
    property tagpo: pointer read ftagpo write ftagpo;
   published
-   property providerflags1: providerflags1ty read fproviderflags1 
-                        write fproviderflags1 default [];
+//   property providerflags1: providerflags1ty read fproviderflags1 
+//                        write fproviderflags1 default [];
    property DataSet stored false;
-   property ProviderFlags default defaultproviderflags;
+//   property ProviderFlags default defaultproviderflags;
    property FieldKind default fkData;
    property HasConstraints default false;
    property LookupCache default false;
-   property ReadOnly default false;
-   property Required default false;
+//   property ReadOnly default false;
+//   property Required default false;
    property DisplayWidth default 10;
  end;
  tmselargeintfield = class(tlargeintfield,imsefield)
   private
    fstate: fieldstatesty;
    ftagpo: pointer;
-   fproviderflags1: providerflags1ty;
+//   fproviderflags1: providerflags1ty;
 //   flookupinfo: lookupfieldinfoty;
 //   function getasmsestring: msestring;
 //   procedure setasmsestring(const avalue: msestring);
     //imsefield
-   function getproviderflags1: providerflags1ty;
+//   function getproviderflags1: providerflags1ty;
 //   function getlookupinfo: plookupfieldinfoty;
    function getasid: int64;
    procedure setasid(const avalue: int64);
@@ -471,27 +471,27 @@ type
    property Value: Largeint read GetAsLargeint write SetAsLargeint;
    property tagpo: pointer read ftagpo write ftagpo;
   published
-   property providerflags1: providerflags1ty read fproviderflags1 
-                        write fproviderflags1 default [];
+//   property providerflags1: providerflags1ty read fproviderflags1 
+//                        write fproviderflags1 default [];
    property DataSet stored false;
-   property ProviderFlags default defaultproviderflags;
+//   property ProviderFlags default defaultproviderflags;
    property FieldKind default fkData;
    property HasConstraints default false;
    property LookupCache default false;
-   property ReadOnly default false;
-   property Required default false;
+//   property ReadOnly default false;
+//   property Required default false;
    property DisplayWidth default 10;
  end;
  tmsesmallintfield = class(tsmallintfield,imsefield)
   private
    fstate: fieldstatesty;
    ftagpo: pointer;
-   fproviderflags1: providerflags1ty;
+//   fproviderflags1: providerflags1ty;
 //   flookupinfo: lookupfieldinfoty;
 //   function getasmsestring: msestring;
 //   procedure setasmsestring(const avalue: msestring);
     //imsefield
-   function getproviderflags1: providerflags1ty;
+//   function getproviderflags1: providerflags1ty;
 //   function getlookupinfo: plookupfieldinfoty;
   protected
    procedure readlookup(reader: treader);
@@ -513,27 +513,27 @@ type
 //   property asmsestring: msestring read getasmsestring write setasmsestring;
    property tagpo: pointer read ftagpo write ftagpo;
   published
-   property providerflags1: providerflags1ty read fproviderflags1 
-                        write fproviderflags1 default [];
+//   property providerflags1: providerflags1ty read fproviderflags1 
+//                        write fproviderflags1 default [];
    property DataSet stored false;
-   property ProviderFlags default defaultproviderflags;
+//   property ProviderFlags default defaultproviderflags;
    property FieldKind default fkData;
    property HasConstraints default false;
    property LookupCache default false;
-   property ReadOnly default false;
-   property Required default false;
+//   property ReadOnly default false;
+//   property Required default false;
    property DisplayWidth default 10;
  end;
  tmsewordfield = class(twordfield,imsefield)
   private
    fstate: fieldstatesty;
    ftagpo: pointer;
-   fproviderflags1: providerflags1ty;
+//   fproviderflags1: providerflags1ty;
 //   flookupinfo: lookupfieldinfoty;
 //   function getasmsestring: msestring;
 //   procedure setasmsestring(const avalue: msestring);
     //imsefield
-   function getproviderflags1: providerflags1ty;
+//   function getproviderflags1: providerflags1ty;
 //   function getlookupinfo: plookupfieldinfoty;
   protected
    procedure readlookup(reader: treader);
@@ -555,27 +555,27 @@ type
 //   property asmsestring: msestring read getasmsestring write setasmsestring;
    property tagpo: pointer read ftagpo write ftagpo;
   published
-   property providerflags1: providerflags1ty read fproviderflags1 
-                        write fproviderflags1 default [];
+//   property providerflags1: providerflags1ty read fproviderflags1 
+//                        write fproviderflags1 default [];
    property DataSet stored false;
-   property ProviderFlags default defaultproviderflags;
+//   property ProviderFlags default defaultproviderflags;
    property FieldKind default fkData;
    property HasConstraints default false;
    property LookupCache default false;
-   property ReadOnly default false;
-   property Required default false;
+//   property ReadOnly default false;
+//   property Required default false;
    property DisplayWidth default 10;
  end;
  tmseautoincfield = class(tautoincfield,imsefield)
   private
    fstate: fieldstatesty;
    ftagpo: pointer;
-   fproviderflags1: providerflags1ty;
+//   fproviderflags1: providerflags1ty;
 //   flookupinfo: lookupfieldinfoty;
 //   function getasmsestring: msestring;
 //   procedure setasmsestring(const avalue: msestring);
     //imsefield
-   function getproviderflags1: providerflags1ty;
+//   function getproviderflags1: providerflags1ty;
 //   function getlookupinfo: plookupfieldinfoty;
   protected
    procedure readlookup(reader: treader);
@@ -593,27 +593,27 @@ type
 //   property asmsestring: msestring read getasmsestring write setasmsestring;
    property tagpo: pointer read ftagpo write ftagpo;
   published
-   property providerflags1: providerflags1ty read fproviderflags1 
-                        write fproviderflags1 default [];
+//   property providerflags1: providerflags1ty read fproviderflags1 
+//                        write fproviderflags1 default [];
    property DataSet stored false;
-   property ProviderFlags default defaultproviderflags;
+//   property ProviderFlags default defaultproviderflags;
    property FieldKind default fkData;
    property HasConstraints default false;
    property LookupCache default false;
-   property ReadOnly default false;
-   property Required default false;
+//   property ReadOnly default false;
+//   property Required default false;
    property DisplayWidth default 10;
  end;
  tmsefloatfield = class(tfloatfield,imsefield)
   private
    fstate: fieldstatesty;
    ftagpo: pointer;
-   fproviderflags1: providerflags1ty;
+//   fproviderflags1: providerflags1ty;
 //   flookupinfo: lookupfieldinfoty;
 //   function getasmsestring: msestring;
 //   procedure setasmsestring(const avalue: msestring);
     //imsefield
-   function getproviderflags1: providerflags1ty;
+//   function getproviderflags1: providerflags1ty;
 //   function getlookupinfo: plookupfieldinfoty;
   protected
    procedure readlookup(reader: treader);
@@ -638,15 +638,15 @@ type
 //   property asmsestring: msestring read getasmsestring write setasmsestring;
    property tagpo: pointer read ftagpo write ftagpo;
   published
-   property providerflags1: providerflags1ty read fproviderflags1 
-                        write fproviderflags1 default [];
+//   property providerflags1: providerflags1ty read fproviderflags1 
+//                        write fproviderflags1 default [];
    property DataSet stored false;
-   property ProviderFlags default defaultproviderflags;
+//   property ProviderFlags default defaultproviderflags;
    property FieldKind default fkData;
    property HasConstraints default false;
    property LookupCache default false;
-   property ReadOnly default false;
-   property Required default false;
+//   property ReadOnly default false;
+//   property Required default false;
    property DisplayWidth default 10;
  end;
  tmsecurrencyfield = class(tmsefloatfield)
@@ -658,11 +658,11 @@ type
    fstate: fieldstatesty;
    fdisplayvalues: msestring;
    ftagpo: pointer;
-   fproviderflags1: providerflags1ty;
+//   fproviderflags1: providerflags1ty;
 //   flookupinfo: lookupfieldinfoty;
    procedure setdisplayvalues(const avalue: msestring);
     //imsefield
-   function getproviderflags1: providerflags1ty;
+//   function getproviderflags1: providerflags1ty;
 //   function getlookupinfo: plookupfieldinfoty;
   protected
    fdisplays : array[boolean,boolean] of msestring;
@@ -694,17 +694,17 @@ type
 //   property asmsestring: msestring read getasmsestring write setasmsestring;
    property tagpo: pointer read ftagpo write ftagpo;
   published
-   property providerflags1: providerflags1ty read fproviderflags1 
-                        write fproviderflags1 default [];
+//   property providerflags1: providerflags1ty read fproviderflags1 
+//                        write fproviderflags1 default [];
    property DataSet stored false;
-   property ProviderFlags default defaultproviderflags;
+//   property ProviderFlags default defaultproviderflags;
    property displayvalues: msestring read fdisplayvalues write setdisplayvalues;
    property FieldKind default fkData;
    property HasConstraints default false;
 //   property Lookup default false;
    property LookupCache default false;
-   property ReadOnly default false;
-   property Required default false;
+//   property ReadOnly default false;
+//   property Required default false;
 //   property DisplayWidth default 5; variable!
  end;
  
@@ -716,13 +716,13 @@ type
    fstate: fieldstatesty;
    foptions: datetimefieldoptionsty;
    ftagpo: pointer;
-   fproviderflags1: providerflags1ty;
+//   fproviderflags1: providerflags1ty;
 //   flookupinfo: lookupfieldinfoty;
 //   function getasmsestring: msestring;
 //   procedure setasmsestring(const avalue: msestring);
    procedure setoptions(const avalue: datetimefieldoptionsty);
     //imsefield
-   function getproviderflags1: providerflags1ty;
+//   function getproviderflags1: providerflags1ty;
 //   function getlookupinfo: plookupfieldinfoty;
   protected
    procedure readlookup(reader: treader);
@@ -745,16 +745,17 @@ type
 //   property asmsestring: msestring read getasmsestring write setasmsestring;
    property tagpo: pointer read ftagpo write ftagpo;
   published
-   property providerflags1: providerflags1ty read fproviderflags1 
-                        write fproviderflags1 default [];
+//   property providerflags1: providerflags1ty read fproviderflags1 
+//                        write fproviderflags1 default [];
    property DataSet stored false;
-   property ProviderFlags default defaultproviderflags;
-   property options: datetimefieldoptionsty read foptions write setoptions default [];
+//   property ProviderFlags default defaultproviderflags;
+   property options: datetimefieldoptionsty read foptions 
+                                           write setoptions default [];
    property FieldKind default fkData;
    property HasConstraints default false;
    property LookupCache default false;
-   property ReadOnly default false;
-   property Required default false;
+//   property ReadOnly default false;
+//   property Required default false;
    property DisplayWidth default 10;
  end; 
  tmsedatefield = class(tmsedatetimefield)
@@ -770,10 +771,10 @@ type
   private
    fstate: fieldstatesty;
    ftagpo: pointer;
-   fproviderflags1: providerflags1ty;
+//   fproviderflags1: providerflags1ty;
 //   flookupinfo: lookupfieldinfoty;
     //imsefield
-   function getproviderflags1: providerflags1ty;
+//   function getproviderflags1: providerflags1ty;
 //   function getlookupinfo: plookupfieldinfoty;
   protected
    procedure readlookup(reader: treader);
@@ -793,24 +794,24 @@ type
 //   property asmsestring: msestring read getasmsestring write setasmsestring;
    property tagpo: pointer read ftagpo write ftagpo;
   published
-   property providerflags1: providerflags1ty read fproviderflags1 
-                        write fproviderflags1 default [];
+//   property providerflags1: providerflags1ty read fproviderflags1 
+//                        write fproviderflags1 default [];
    property DataSet stored false;
-   property ProviderFlags default defaultproviderflags;
+//   property ProviderFlags default defaultproviderflags;
    property FieldKind default fkData;
    property HasConstraints default false;
    property LookupCache default false;
-   property ReadOnly default false;
-   property Required default false;
+//   property ReadOnly default false;
+//   property Required default false;
  end;
  tmsebytesfield = class(tbytesfield,imsefield)
   private
    fstate: fieldstatesty;
    ftagpo: pointer;
-   fproviderflags1: providerflags1ty;
+//   fproviderflags1: providerflags1ty;
 //   flookupinfo: lookupfieldinfoty;
     //imsefield
-   function getproviderflags1: providerflags1ty;
+//   function getproviderflags1: providerflags1ty;
 //   function getlookupinfo: plookupfieldinfoty;
   protected
    procedure readlookup(reader: treader);
@@ -833,24 +834,24 @@ type
 //   property asmsestring: msestring read getasmsestring write setasmsestring;
    property tagpo: pointer read ftagpo write ftagpo;
   published
-   property providerflags1: providerflags1ty read fproviderflags1 
-                        write fproviderflags1 default [];
+//   property providerflags1: providerflags1ty read fproviderflags1 
+//                        write fproviderflags1 default [];
    property DataSet stored false;
-   property ProviderFlags default defaultproviderflags;
+//   property ProviderFlags default defaultproviderflags;
    property FieldKind default fkData;
    property HasConstraints default false;
    property LookupCache default false;
-   property ReadOnly default false;
-   property Required default false;
+//   property ReadOnly default false;
+//   property Required default false;
  end;
  tmsevarbytesfield = class(tvarbytesfield,imsefield)
   private
    fstate: fieldstatesty;
    ftagpo: pointer;
-   fproviderflags1: providerflags1ty;
+//   fproviderflags1: providerflags1ty;
 //   flookupinfo: lookupfieldinfoty;
     //imsefield
-   function getproviderflags1: providerflags1ty;
+//   function getproviderflags1: providerflags1ty;
 //   function getlookupinfo: plookupfieldinfoty;
   protected
    procedure readlookup(reader: treader);
@@ -873,26 +874,26 @@ type
 //   property asmsestring: msestring read getasmsestring write setasmsestring;
    property tagpo: pointer read ftagpo write ftagpo;
   published
-   property providerflags1: providerflags1ty read fproviderflags1 
-                        write fproviderflags1 default [];
+//   property providerflags1: providerflags1ty read fproviderflags1 
+//                        write fproviderflags1 default [];
    property DataSet stored false;
-   property ProviderFlags default defaultproviderflags;
+//   property ProviderFlags default defaultproviderflags;
    property FieldKind default fkData;
    property HasConstraints default false;
    property LookupCache default false;
-   property ReadOnly default false;
-   property Required default false;
+//   property ReadOnly default false;
+//   property Required default false;
  end;
  tmsebcdfield = class(tbcdfield,imsefield)
   private
    fstate: fieldstatesty;
    ftagpo: pointer;
-   fproviderflags1: providerflags1ty;
+//   fproviderflags1: providerflags1ty;
 //   flookupinfo: lookupfieldinfoty;
 //   function getasmsestring: msestring;
 //   procedure setasmsestring(const avalue: msestring);
     //imsefield
-   function getproviderflags1: providerflags1ty;
+//   function getproviderflags1: providerflags1ty;
 //   function getlookupinfo: plookupfieldinfoty;
   protected
    procedure readlookup(reader: treader);
@@ -915,15 +916,15 @@ type
 //   property asmsestring: msestring read getasmsestring write setasmsestring;
    property Value: Currency read GetAsCurrency write SetAsCurrency;
   published
-   property providerflags1: providerflags1ty read fproviderflags1 
-                        write fproviderflags1 default [];
+//   property providerflags1: providerflags1ty read fproviderflags1 
+//                        write fproviderflags1 default [];
    property DataSet stored false;
-   property ProviderFlags default defaultproviderflags;
+//   property ProviderFlags default defaultproviderflags;
    property FieldKind default fkData;
    property HasConstraints default false;
    property LookupCache default false;
-   property ReadOnly default false;
-   property Required default false;
+//   property ReadOnly default false;
+//   property Required default false;
    property precision default 15;
 //   property displaywidth default 15; variable!
    property currency default false;
@@ -960,12 +961,12 @@ type
   private
    fcache: tblobcache;
    ftagpo: pointer;
-   fproviderflags1: providerflags1ty;
+//   fproviderflags1: providerflags1ty;
 //   flookupinfo: lookupfieldinfoty;
    procedure setcachekb(const avalue: integer);
    function getcachekb: integer;
     //imsefield
-   function getproviderflags1: providerflags1ty;
+//   function getproviderflags1: providerflags1ty;
 //   function getlookupinfo: plookupfieldinfoty;
   protected
    fgetblobid: getblobidfuncty;
@@ -996,17 +997,17 @@ type
    procedure SaveToFile(const FileName: filenamety);
    property tagpo: pointer read ftagpo write ftagpo;
   published
-   property providerflags1: providerflags1ty read fproviderflags1 
-                        write fproviderflags1 default [];
+//   property providerflags1: providerflags1ty read fproviderflags1 
+//                        write fproviderflags1 default [];
    property DataSet stored false;
-   property ProviderFlags default defaultproviderflags;
+//   property ProviderFlags default defaultproviderflags;
    property cachekb: integer read getcachekb write setcachekb default 0;
                 //cachesize in kilo bytes, 0 -> no cache
    property FieldKind default fkData;
    property HasConstraints default false;
    property LookupCache default false;
-   property ReadOnly default false;
-   property Required default false;
+//   property ReadOnly default false;
+//   property Required default false;
  end;
  tmsememofield = class(tmseblobfield,ifieldcomponent)
   private
@@ -1033,12 +1034,12 @@ type
   published
    property Transliterate default True;
    property DataSet stored false;
-   property ProviderFlags default defaultproviderflags;
+//   property ProviderFlags default defaultproviderflags;
    property FieldKind default fkData;
    property HasConstraints default false;
    property LookupCache default false;
-   property ReadOnly default false;
-   property Required default false;
+//   property ReadOnly default false;
+//   property Required default false;
  end;
 
  tmsevariantfield = class;
@@ -1048,10 +1049,10 @@ type
                           out avalue: variant): boolean of object;
  tmsevariantfield = class(tvariantfield,imsefield)
   private
-   fproviderflags1: providerflags1ty;
+//   fproviderflags1: providerflags1ty;
 //   flookupinfo: lookupfieldinfoty;
     //imsefield
-   function getproviderflags1: providerflags1ty;
+//m   function getproviderflags1: providerflags1ty;
 //   function getlookupinfo: plookupfieldinfoty;
   protected
    fgetvardata: getvardataty;
@@ -1082,15 +1083,15 @@ type
    function asoldsql: string;
 //   property asmsestring: msestring read getasmsestring write setasmsestring;
   published
-   property providerflags1: providerflags1ty read fproviderflags1 
-                        write fproviderflags1 default [];
+//   property providerflags1: providerflags1ty read fproviderflags1 
+//                        write fproviderflags1 default [];
    property DataSet stored false;
-   property ProviderFlags default defaultproviderflags;
+//   property ProviderFlags default defaultproviderflags;
    property FieldKind default fkData;
    property HasConstraints default false;
    property LookupCache default false;
-   property ReadOnly default false;
-   property Required default false;
+//   property ReadOnly default false;
+//   property Required default false;
    property DisplayWidth default 15;
  end;
 
@@ -1316,7 +1317,7 @@ type
   function updatesortfield(const afield: tfield; const adescend: boolean): boolean;
  end;
 
- igetdscontroller = interface(inullinterface)['sA.mse']{13}
+ igetdscontroller = interface(inullinterface)[miid_igetdscontroller]
   function getcontroller: tdscontroller;
  end;
 
@@ -1501,7 +1502,7 @@ type
                                                      write fonaftercopyrecord;
  end;
  
- idbcontroller = interface(iactivatorclient)['cA.mse']{14}
+ idbcontroller = interface(iactivatorclient)[miid_idbcontroller]
   procedure setinheritedconnected(const avalue: boolean);
   function readsequence(const sequencename: string): string;
   function sequencecurrvalue(const sequencename: string): string;
@@ -3500,12 +3501,12 @@ begin
  inherited;
  filer.defineproperty('Lookup',{$ifdef FPC}@{$endif}readlookup,nil,false);
 end;
-
+{
 function tmsefield.getproviderflags1: providerflags1ty;
 begin
  result:= fproviderflags1;
 end;
-
+}
 procedure tmsefield.change;
 begin
  if not (fis_changing in fstate) then begin
@@ -3747,12 +3748,12 @@ begin
   inherited defaultexpression:= '';
  end;
 end;
-
+{
 function tmsestringfield.getproviderflags1: providerflags1ty;
 begin
  result:= fproviderflags1;
 end;
-
+}
 procedure tmsestringfield.change;
 begin
  if not (fis_changing in fstate) then begin
@@ -3997,12 +3998,12 @@ function tmsenumericfield.asoldsql: string;
 begin
  result:= fieldtooldsql(self);
 end;
-
+{
 function tmsenumericfield.getproviderflags1: providerflags1ty;
 begin
  result:= fproviderflags1;
 end;
-
+}
 procedure tmsenumericfield.change;
 begin
  if not (fis_changing in fstate) then begin
@@ -4168,12 +4169,12 @@ begin
   thetext:= getnumdisplaytext(self,int1,adisplaytext,false);
  end;
 end;
-
+{
 function tmselongintfield.getproviderflags1: providerflags1ty;
 begin
  result:= fproviderflags1;
 end;
-
+}
 function tmselongintfield.getasid: integer;
 begin
  if isnull then begin
@@ -4354,12 +4355,12 @@ begin
   end;
  end;
 end;
-
+{
 function tmselargeintfield.getproviderflags1: providerflags1ty;
 begin
  result:= fproviderflags1;
 end;
-
+}
 function tmselargeintfield.getasid: int64;
 begin
  if isnull then begin
@@ -4492,12 +4493,12 @@ function tmsesmallintfield.asoldsql: string;
 begin
  result:= fieldtooldsql(self);
 end;
-
+{
 function tmsesmallintfield.getproviderflags1: providerflags1ty;
 begin
  result:= fproviderflags1;
 end;
-
+}
 procedure tmsesmallintfield.change;
 begin
  if not (fis_changing in fstate) then begin
@@ -4610,12 +4611,12 @@ function tmsewordfield.asoldsql: string;
 begin
  result:= fieldtooldsql(self);
 end;
-
+{
 function tmsewordfield.getproviderflags1: providerflags1ty;
 begin
  result:= fproviderflags1;
 end;
-
+}
 procedure tmsewordfield.change;
 begin
  if not (fis_changing in fstate) then begin
@@ -4700,12 +4701,12 @@ function tmseautoincfield.asoldsql: string;
 begin
  result:= fieldtooldsql(self);
 end;
-
+{
 function tmseautoincfield.getproviderflags1: providerflags1ty;
 begin
  result:= fproviderflags1;
 end;
-
+}
 procedure tmseautoincfield.change;
 begin
  if not (fis_changing in fstate) then begin
@@ -4866,12 +4867,12 @@ begin
   end;
  end;
 end;
-
+{
 function tmsefloatfield.getproviderflags1: providerflags1ty;
 begin
  result:= fproviderflags1;
 end;
-
+}
 procedure tmsefloatfield.change;
 begin
  if not (fis_changing in fstate) then begin
@@ -5134,12 +5135,12 @@ begin
   end;
  end;
 end;
-
+{
 function tmsebooleanfield.getproviderflags1: providerflags1ty;
 begin
  result:= fproviderflags1;
 end;
-
+}
 procedure tmsebooleanfield.change;
 begin
  if not (fis_changing in fstate) then begin
@@ -5301,12 +5302,12 @@ begin
   thetext:= gettext1(getasdatetime,adisplaytext);
  end;
 end;
-
+{
 function tmsedatetimefield.getproviderflags1: providerflags1ty;
 begin
  result:= fproviderflags1;
 end;
-
+}
 procedure tmsedatetimefield.change;
 begin
  if not (fis_changing in fstate) then begin
@@ -5407,12 +5408,12 @@ function tmsebinaryfield.asoldsql: string;
 begin
  result:= fieldtooldsql(self);
 end;
-
+{
 function tmsebinaryfield.getproviderflags1: providerflags1ty;
 begin
  result:= fproviderflags1;
 end;
-
+}
 procedure tmsebinaryfield.change;
 begin
  if not (fis_changing in fstate) then begin
@@ -5533,12 +5534,12 @@ begin
   result:= '';
  end;
 end;
-
+{
 function tmsebytesfield.getproviderflags1: providerflags1ty;
 begin
  result:= fproviderflags1;
 end;
-
+}
 procedure tmsebytesfield.change;
 begin
  if not (fis_changing in fstate) then begin
@@ -5664,12 +5665,12 @@ begin
   setlength(result,wo1);
  end
 end;
-
+{
 function tmsevarbytesfield.getproviderflags1: providerflags1ty;
 begin
  result:= fproviderflags1;
 end;
-
+}
 procedure tmsevarbytesfield.change;
 begin
  if not (fis_changing in fstate) then begin
@@ -5814,12 +5815,12 @@ begin
   end;
  end;
 end;
-
+{
 function tmsebcdfield.getproviderflags1: providerflags1ty;
 begin
  result:= fproviderflags1;
 end;
-
+}
 procedure tmsebcdfield.change;
 begin
  if not (fis_changing in fstate) then begin
@@ -6055,11 +6056,12 @@ begin
  setasmsestring(avalue);
 end;
 }
+{
 function tmseblobfield.getproviderflags1: providerflags1ty;
 begin
  result:= fproviderflags1;
 end;
-
+}
 procedure tmseblobfield.SetDataset(AValue: TDataset);
 begin
  if fieldname = '' then begin
@@ -6218,12 +6220,12 @@ function tmsevariantfield.asoldsql: string;
 begin
  result:= fieldtooldsql(self);
 end;
-
+{
 function tmsevariantfield.getproviderflags1: providerflags1ty;
 begin
  result:= fproviderflags1;
 end;
-
+}
 procedure tmsevariantfield.SetDataset(AValue: TDataset);
 begin
  if fieldname = '' then begin
@@ -8179,7 +8181,7 @@ var
  ar1: variantarty;
  ar2: booleanarty;
  field1: tfield;
- intf1: imsefield;
+// intf1: imsefield;
  int1: integer;
  bo1: boolean;
 begin
@@ -8192,8 +8194,9 @@ begin
   for int1:= 0 to high(ar1) do begin
    field1:= fields[int1];
    bo1:= (field1.fieldkind in [fkdata,fkinternalcalc]) and
-               (not getcorbainterface(field1,typeinfo(imsefield),intf1) or
-               not (pf1_nocopyrecord in intf1.getproviderflags1));
+//               (not getcorbainterface(field1,typeinfo(imsefield),intf1) or
+               not (of_nocopyrecord in field1.optionsfield);
+//               not (pf1_nocopyrecord in intf1.getproviderflags1));
    if bo1 then begin
     ar2[int1]:= true;
     ar1[int1]:= field1.value;

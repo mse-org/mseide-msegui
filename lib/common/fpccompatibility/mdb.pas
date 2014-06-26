@@ -63,9 +63,9 @@ type
   TUpdateMode = (upWhereAll, upWhereChanged, upWhereKeyOnly);
   TResolverResponse = (rrSkip, rrAbort, rrMerge, rrApply, rrIgnore);
 
-  TProviderFlag = (pfInInsert, pfInUpdate, pfInWhere, pfInKey, pfHidden,
-                   pfInitInsert);
-  TProviderFlags = set of TProviderFlag;
+// providerflag1ty = (pf1_refreshinsert,pf1_refreshupdate,pf1_nocopyrecord);
+// providerflags1ty = set of providerflag1ty;
+// defaultproviderflags = [pfInInsert,pfInUpdate,pfInWhere];
 
 { Forward declarations }
 
@@ -233,6 +233,20 @@ type
   TFieldKind = (fkData, fkCalculated, fkLookup, fkInternalCalc);
   TFieldKinds = Set of TFieldKind;
 
+  TProviderFlag = (pfInUpdate, pfInWhere, pfInKey, pfHidden) deprecated;
+{$push}{$warnings off}
+  TProviderFlags = set of TProviderFlag deprecated;
+{$pop}  
+
+  optionfieldty = (of_readonly,of_required,of_visible,
+                 of_initinsert,of_nocopyrecord,
+                 of_ininsert,of_inupdate,of_inwhere,of_inkey,of_hidden,
+                 of_refreshinsert,of_refreshupdate);
+  optionsfieldty = set of optionfieldty;
+const
+ defaultoptionsfield = [of_visible,of_ininsert,of_inupdate,of_inwhere];
+
+type
   TFieldNotifyEvent = procedure(Sender: TField) of object;
   TFieldGetTextEvent = procedure(Sender: TField; var aText: string;
     DisplayText: Boolean) of object;
@@ -294,12 +308,13 @@ type
     FOnSetText: TFieldSetTextEvent;
     FOnValidate: TFieldNotifyEvent;
     FOrigin : String;
-    FReadOnly : Boolean;
-    FRequired : Boolean;
+//    FReadOnly : Boolean;
+//    FRequired : Boolean;
     FSize : integer;
     FValidChars : TFieldChars;
-    FVisible : Boolean;
-    FProviderFlags : TProviderFlags;
+//    FVisible : Boolean;
+//    FProviderFlags : TProviderFlags;
+   foptionsfield: optionsfieldty;
     function GetIndex : longint;
     function GetLookup: Boolean;
     procedure SetAlignment(const AValue: TAlignMent);
@@ -316,6 +331,15 @@ type
     function IsDisplayStored : Boolean;
     function GetLookupList: TLookupList;
     procedure CalcLookupValue;
+   function getProviderFlags: TProviderFlags;
+   procedure setProviderFlags(const avalue: TProviderFlags);
+   function getReadOnly: Boolean;
+   function getRequired: Boolean;
+   procedure setRequired(const avalue: Boolean);
+   function getVisible: Boolean;
+   procedure readproviderflags(reader: treader);
+   procedure readproviderflags1(reader: treader);
+   procedure setoptionsfield(const avalue: optionsfieldty);
   protected
     FValidating : Boolean;
     FValueBuffer : Pointer;
@@ -353,7 +377,8 @@ type
     function GetNewValue: Variant; virtual;
     function GetIsNull: Boolean; virtual;
     procedure GetText(var AText: string; ADisplayText: Boolean); virtual;
-    procedure Notification(AComponent: TComponent; Operation: TOperation); override;
+    procedure Notification(AComponent: TComponent;
+                                            Operation: TOperation); override;
     procedure PropertyChanged(LayoutAffected: Boolean);
     procedure ReadState(Reader: TReader); override;
     procedure SetAsBCD(const AValue: TBCD); virtual;
@@ -379,6 +404,7 @@ type
     procedure SetVarValue(const AValue: Variant); virtual;
     function getasguid: tguid; virtual;
     procedure setasguid(const avalue: tguid); virtual;
+    procedure defineproperties(filer: tfiler); override;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -389,7 +415,8 @@ type
     procedure Clear; virtual;
     procedure FocusControl;
     function GetData(Buffer: Pointer): Boolean; overload;
-    function GetData(Buffer: Pointer; NativeFormat : Boolean): Boolean; overload;
+    function GetData(Buffer: Pointer;
+                                  NativeFormat : Boolean): Boolean; overload;
     class function IsBlob: Boolean; virtual;
     function IsValidChar(InputChar: Char): Boolean; virtual;
     procedure RefreshLookupList;
@@ -410,7 +437,8 @@ type
     property AsLargeInt: LargeInt read GetAsLargeInt write SetAsLargeInt;
     property AsInteger: Integer read GetAsInteger write SetAsInteger;
     property AsString: string read GetAsString write SetAsString;
-    property AsWideString: WideString read GetAsWideString write SetAsWideString;
+    property AsWideString: WideString read GetAsWideString 
+                                                        write SetAsWideString;
     property asunicodestring: unicodestring read getasunicodestring 
                                                      write setasunicodestring;
     property asmsestring: msestring read getasunicodestring 
@@ -439,29 +467,42 @@ type
     property Value: variant read GetAsVariant write SetAsVariant;
     property OldValue: variant read GetOldValue;
     property LookupList: TLookupList read GetLookupList;
+{$push}{$warnings off}
+    property ProviderFlags : TProviderFlags read getProviderFlags 
+                                    write setProviderFlags; deprecated;
+{$pop}
+    property ReadOnly: Boolean read getReadOnly write SetReadOnly;
+    property Required: Boolean read getRequired write setRequired;
+    property Visible: Boolean read getVisible write SetVisible default True;
   published
-    property Alignment : TAlignment read FAlignment write SetAlignment default taLeftJustify;
-    property CustomConstraint: string read FCustomConstraint write FCustomConstraint;
-    property ConstraintErrorMessage: string read FConstraintErrorMessage write FConstraintErrorMessage;
-    property DefaultExpression: string read FDefaultExpression write FDefaultExpression;
-    property DisplayLabel : string read GetDisplayName write SetDisplayLabel stored IsDisplayStored;
+    property Alignment : TAlignment read FAlignment write SetAlignment 
+                                                         default taLeftJustify;
+    property CustomConstraint: string read FCustomConstraint 
+                                                       write FCustomConstraint;
+    property ConstraintErrorMessage: string read FConstraintErrorMessage 
+                                                 write FConstraintErrorMessage;
+    property DefaultExpression: string read FDefaultExpression 
+                                                      write FDefaultExpression;
+    property DisplayLabel : string read GetDisplayName 
+                                  write SetDisplayLabel stored IsDisplayStored;
     property DisplayWidth: Longint read GetDisplayWidth write SetDisplayWidth;
     property FieldKind: TFieldKind read FFieldKind write FFieldKind;
     property FieldName: string read FFieldName write FFieldName;
     property HasConstraints: Boolean read FHasConstraints;
     property Index: Longint read GetIndex write SetIndex;
-    property ImportedConstraint: string read FImportedConstraint write FImportedConstraint;
+    property ImportedConstraint: string read FImportedConstraint 
+                                                   write FImportedConstraint;
     property KeyFields: string read FKeyFields write FKeyFields;
     property LookupCache: Boolean read FLookupCache write FLookupCache;
     property LookupDataSet: TDataSet read FLookupDataSet write FLookupDataSet;
-    property LookupKeyFields: string read FLookupKeyFields write FLookupKeyFields;
-    property LookupResultField: string read FLookupResultField write FLookupResultField;
+    property LookupKeyFields: string read FLookupKeyFields 
+                                                    write FLookupKeyFields;
+    property LookupResultField: string read FLookupResultField 
+                                                  write FLookupResultField;
     property Origin: string read FOrigin write FOrigin;
-    property ProviderFlags : TProviderFlags read FProviderFlags 
-                                                 write FProviderFlags;
-    property ReadOnly: Boolean read FReadOnly write SetReadOnly;
-    property Required: Boolean read FRequired write FRequired;
-    property Visible: Boolean read FVisible write SetVisible default True;
+    property optionsfield: optionsfieldty read foptionsfield 
+                         write setoptionsfield default defaultoptionsfield;
+    
     property OnChange: TFieldNotifyEvent read FOnChange write FOnChange;
     property OnGetText: TFieldGetTextEvent read FOnGetText write FOnGetText;
     property OnSetText: TFieldSetTextEvent read FOnSetText write FOnSetText;
@@ -3023,7 +3064,7 @@ begin
  po1:= pointer(fields.ffieldlist.list);
  for int1:= 0 to fields.count -1 do begin
   with tfield(po1^) do begin
-   if pfinitinsert in providerflags then begin
+   if of_initinsert in foptionsfield then begin
     asstring:= defaultexpression;
    end;
   end;
@@ -5136,7 +5177,7 @@ begin
     Result.FDisplayLabel:=DisplayName;
     Result.FFieldNo:=Self.FieldNo;
     Result.SetFieldType(DataType);
-    Result.FReadOnly:= (faReadOnly in Attributes);
+    Result.ReadOnly:= (faReadOnly in Attributes);
 {$ifdef dsdebug}
     Writeln ('TFieldDef.CReateField : Trying to set dataset');
 {$endif dsdebug}
@@ -5335,10 +5376,11 @@ constructor TField.Create(AOwner: TComponent);
 
 begin
   Inherited Create(AOwner);
-  FVisible:=True;
+  foptionsfield:= defaultoptionsfield;
+//  FVisible:=True;
   FValidChars:=[#0..#255];
 
-  FProviderFlags := [pfInInsert,pfInUpdate,pfInWhere];
+//  FProviderFlags := [pfInInsert,pfInUpdate,pfInWhere];
 end;
 
 destructor TField.Destroy;
@@ -6063,24 +6105,6 @@ begin
   FieldKind := ValueToLookupMap[AValue];
 end;
 
-procedure TField.SetReadOnly(const AValue: Boolean);
-begin
-  if (FReadOnly<>Avalue) then
-    begin
-    FReadOnly:=AValue;
-    PropertyChanged(True);
-    end;
-end;
-
-procedure TField.SetVisible(const AValue: Boolean);
-begin
-  if FVisible<>Avalue then
-    begin
-    FVisible:=AValue;
-    PropertyChanged(True);
-    end;
-end;
-
 function TField.getasunicodestring: unicodestring;
 begin
  result:= getasstring;
@@ -6089,6 +6113,122 @@ end;
 procedure TField.setasunicodestring(const avalue: unicodestring);
 begin
  setasstring(avalue);
+end;
+
+const
+ allproviderflags = [pfInUpdate, pfInWhere, pfInKey, pfHidden];
+ allprovideroptions = [of_InUpdate, of_InWhere, of_InKey, of_Hidden];
+ providerflagsshift = ord(of_inupdate);
+
+function TField.getProviderFlags: TProviderFlags;
+begin
+{$push}{$warnings off}
+ result:= tproviderflags(integer(foptionsfield) shl providerflagsshift) * 
+                                                             allproviderflags;
+{$pop}
+end;
+
+procedure TField.setoptionsfield(const avalue: optionsfieldty);
+var
+ optcha: optionsfieldty;
+begin
+ optcha:= (foptionsfield >< avalue) * [of_readonly,of_visible];
+ foptionsfield:= avalue;
+ if optcha <> [] then begin
+  PropertyChanged(True);
+ end;
+end;
+
+procedure TField.setProviderFlags(const avalue: TProviderFlags);
+begin
+ foptionsfield:= (foptionsfield - allprovideroptions) + 
+            optionsfieldty(integer(avalue) shr providerflagsshift);
+ if pfinupdate in avalue then begin
+  include(foptionsfield,of_ininsert);
+ end
+ else begin
+  exclude(foptionsfield,of_ininsert);
+ end;
+end;
+
+function TField.getReadOnly: Boolean;
+begin
+ result:= of_readonly in foptionsfield;
+end;
+
+procedure TField.SetReadOnly(const AValue: Boolean);
+begin
+ if avalue then begin
+  optionsfield:= optionsfield + [of_readonly];
+ end
+ else begin
+  optionsfield:= optionsfield - [of_readonly];
+ end;
+end;
+
+function TField.getRequired: Boolean;
+begin
+ result:= of_required in foptionsfield;
+end;
+
+procedure TField.setRequired(const avalue: Boolean);
+begin
+ if avalue then begin
+  include(foptionsfield,of_required);
+ end
+ else begin
+  exclude(foptionsfield,of_required);
+ end;
+end;
+
+function TField.getVisible: Boolean;
+begin
+ result:= of_visible in foptionsfield;
+end;
+
+procedure TField.SetVisible(const AValue: Boolean);
+begin
+ if avalue then begin
+  optionsfield:= optionsfield + [of_visible];
+ end
+ else begin
+  optionsfield:= optionsfield - [of_visible];
+ end;
+end;
+
+procedure TField.readproviderflags(reader: treader);
+begin
+{$push}{$warnings off}
+ providerflags:= tproviderflags(reader.readset(typeinfo(tproviderflags))); 
+{$pop}
+end;
+
+type
+ providerflag1ty = (pf1_refreshinsert,pf1_refreshupdate,pf1_nocopyrecord);
+ providerflags1ty = set of providerflag1ty;
+
+procedure TField.readproviderflags1(reader: treader);
+var
+ flags: providerflags1ty;
+begin
+ flags:= providerflags1ty(reader.readset(typeinfo(providerflags1ty)));
+ foptionsfield:= foptionsfield - 
+             [of_refreshinsert,of_refreshupdate,of_nocopyrecord];
+ if pf1_refreshinsert in flags then begin
+  include(foptionsfield,of_refreshinsert);
+ end;
+ if pf1_refreshupdate in flags then begin
+  include(foptionsfield,of_refreshupdate);
+ end;
+ if pf1_nocopyrecord in flags then begin
+  include(foptionsfield,of_nocopyrecord);
+ end;
+end;
+
+procedure TField.defineproperties(filer: tfiler);
+begin
+ filer.defineproperty('ProviderFlags',@readproviderflags,nil,false);
+ filer.defineproperty('providerflags1',@readproviderflags1,nil,false);
 end;
 
 { ---------------------------------------------------------------------
@@ -6848,8 +6988,9 @@ constructor TAutoIncField.Create(AOwner: TComponent);
 begin
   Inherited Create(AOWner);
   SetDataType(ftAutoInc);
-  FReadOnly:=True;
-  FProviderFlags:=FProviderFlags-[pfInUpdate];
+  foptionsfield:= (foptionsfield + [of_readonly]) - [of_ininsert,of_inupdate];
+//  FReadOnly:=True;
+//  FProviderFlags:=FProviderFlags-[pfInUpdate];
 end;
 
 Procedure TAutoIncField.SetAsLongint(AValue : Longint);

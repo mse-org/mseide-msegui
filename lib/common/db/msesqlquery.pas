@@ -1275,7 +1275,7 @@ begin
      for int1:= 0 to high(indexfields) do begin
       F := Findfield(IndexFields[int1]);
       if F <> nil then begin
-       F.ProviderFlags := F.ProviderFlags + [pfInKey];
+       F.optionsfield:= F.optionsfield + [of_InKey];
       end;
      end;
      if (database <> nil) and (ftablename <> '') then begin
@@ -1477,10 +1477,10 @@ begin
   quotechar:= '"';
  end;
  with afield do begin
-  if (pfInKey in ProviderFlags) or
-    ((FUpdateMode = upWhereAll) and (pfInWhere in ProviderFlags)) or
+  if (of_InKey in optionsfield) or
+    ((FUpdateMode = upWhereAll) and (of_InWhere in optionsfield)) or
     ((FUpdateMode = UpWhereChanged) and 
-    (pfInWhere in ProviderFlags) and 
+    (of_InWhere in optionsfield) and 
     (value <> oldvalue)) then begin
    sql_where := sql_where + '(' + quotechar+FieldName+quotechar+ 
              '= :OLD_' + FieldName + ') and ';
@@ -1491,19 +1491,19 @@ end;
 function tsqlquery.refreshrecquery(const update: boolean): msestring;
 var
  int1,int2: integer;
- intf1: imsefield;
+// intf1: imsefield;
  field1: tfield;
- flags1: providerflags1ty;
+// flags1: providerflags1ty;
 begin
  result:= '';
  int2:= 0;
  for int1:= 0 to fields.count - 1 do begin
   field1:= fields[int1];
-  if (field1.fieldkind = fkdata) and 
-    getcorbainterface(field1,typeinfo(imsefield),intf1) then begin
-   flags1:= intf1.getproviderflags1;
-   if (pf1_refreshupdate in flags1) and update or 
-      (pf1_refreshinsert in flags1) and not update then begin
+  if (field1.fieldkind = fkdata) {and 
+    getcorbainterface(field1,typeinfo(imsefield),intf1)} then begin
+//   flags1:= intf1.getproviderflags1;
+   if (of_refreshupdate in field1.optionsfield) and update or 
+      (of_refreshinsert in field1.optionsfield) and not update then begin
     if int2 = 0 then begin
      result:= ' returning ';
     end;
@@ -1561,7 +1561,7 @@ begin
   with field1 do begin
    if fieldkind = fkdata then begin
     UpdateWherePart(sql_where,field1);
-    if (pfInUpdate in ProviderFlags) then begin
+    if (of_InUpdate in optionsfield) then begin
      sql_set:= sql_set + quotechar+FieldName+quotechar + '=:' + FieldName + ',';
     end;
    end;
@@ -1594,7 +1594,7 @@ begin
  for x := 0 to Fields.Count -1 do begin
   with fields[x] do begin
    if (fieldkind = fkdata) {and not IsNull} and 
-                          (pfInInsert in ProviderFlags) then begin 
+                          (of_InInsert in optionsfield) then begin 
     sql_fields:= sql_fields + quotechar+FieldName+quotechar+ ',';
     sql_values:= sql_values + ':' + FieldName + ',';
    end;
