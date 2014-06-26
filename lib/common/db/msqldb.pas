@@ -24,7 +24,7 @@ interface
 
 uses 
  sysutils,classes,mclasses,mdb,msebufdataset,msetypes,msedb,mseclasses,
- msedatabase,msestrings,msearrayutils,msedatalist,
+ msedatabase,msestrings,msearrayutils,msedatalist,mseinterfaces,
  mseapplication,mseglob,msetimer,msearrayprops,msemacros;
 
 type
@@ -663,7 +663,7 @@ type
 const
  blobidsize = sizeof(integer);
 type
- iblobconnection = interface(inullinterface)['SA.mse']{18}
+ iblobconnection = interface(inullinterface)[miid_iblobconnection]
   procedure writeblobdata(const atransaction: tsqltransaction;
               const tablename: string; const acursor: tsqlcursor;
               const adata: pointer; const alength: integer;

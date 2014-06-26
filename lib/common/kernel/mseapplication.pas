@@ -24,7 +24,7 @@ unit mseapplication;
 interface
 uses
  classes,mclasses,mseclasses,mseevent,mseglob,sysutils,msetypes,mselist,
-     msethread,msesystypes,msesys,{msethreadcomp,}msestrings
+     msethread,msesystypes,msesys,{msethreadcomp,}msestrings,mseinterfaces
      {$ifdef mse_with_ifi},mseifiglob{$endif};
  
 type
@@ -42,7 +42,7 @@ const
 type
  iactivator = interface(inullinterface)
  end;
- iactivatorclient = interface(inullinterface)['ZA.mse']{38}
+ iactivatorclient = interface(inullinterface)[miid_iactivatorclient]
   procedure setactive(const avalue: boolean);
  end;
 

@@ -14,7 +14,7 @@ interface
 {$ifdef VER2_2} {$define mse_FPC_2_2} {$endif}
 uses
  classes,mclasses,mdb,msqldb,mseclasses,msedb,msedatabase,msearrayprops,
- msestrings,msereal,
+ msestrings,msereal,mseinterfaces,
  msetypes,mselookupbuffer,mseglob,msedatalist,msevariants,mseevent;
  
 type
@@ -409,7 +409,7 @@ type
    property onerror;
  end;
  
- idbcolinfo = interface(inullinterface)['iA.mse']{17}
+ idbcolinfo = interface(inullinterface)[miid_idbcolinfo]
   function getsqlresult(const aindex: integer): tsqlresult;
   procedure getfieldtypes(out apropertynames: stringarty;
                           out afieldtypes: fieldtypesarty);

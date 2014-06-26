@@ -13,7 +13,7 @@ interface
 uses
  classes,mclasses,mdb,msebufdataset,msqldb,msedb,mseclasses,msetypes,mseglob,
  msedatabase,sysutils,msetimer,msestrings,msearrayprops,mseapplication,
- msesqlquery;
+ msesqlquery,mseinterfaces;
 
 type
  fieldparamlinkoptionty = (
@@ -173,7 +173,7 @@ type
                //must be writable because it was streamed in FPC 2.0.4
  end;
 
- idbparaminfo = interface(inullinterface)['CA.mse']{16}
+ idbparaminfo = interface(inullinterface)[miid_idbparaminfo]
   function getdestdataset: tsqlquery;
  end;
  

@@ -11,7 +11,7 @@ unit mseifiglob;
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
 interface
 uses
- mseglob,mseeditglob,typinfo;
+ mseglob,mseeditglob,typinfo,mseinterfaces;
 const
  ifiwidgetstatename = '#widgetstate#';
  ifiwidgetmodalresultname = '#modalres#';
@@ -42,12 +42,12 @@ type
   procedure updateoptionsedit(var avalue: optionseditty);
  end;
  
- iificlient = interface(iobjectlink)['hA.mse']{33}
+ iificlient = interface(iobjectlink)[miid_iificlient]
   procedure setifiserverintf(const aintf: iifiserver);
 //  function getifiserverintf: iifiserver;
  end;
  ificommandcodety = (icc_none,icc_close,icc_release);
- iificommand = interface(inullinterface)['RA.mse']{34}
+ iificommand = interface(inullinterface)[miid_iificommand]
   procedure executeificommand(var acommand: ificommandcodety);
  end;
 implementation

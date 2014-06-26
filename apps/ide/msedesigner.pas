@@ -23,7 +23,8 @@ uses
  classes,mclasses,msegraphutils,mseglob,mseguiglob,msedesignintf,
  mseforms,mselist,msearrayutils,msebitmap,msetypes,sysutils,msehash,mseclasses,
  mseformdatatools,typinfo,msepropertyeditors,msecomponenteditors,msegraphics,
- mseapplication,msegui,msestrings,msedesignparser,msecomptree,mseevent;
+ mseapplication,msegui,msestrings,msedesignparser,msecomptree,mseevent,
+ mseinterfaces;
 
 {$ifndef mse_methodswap}
  {$define mse_nomethodswap}
@@ -41,7 +42,7 @@ type
  moduleoptionty = (mo_hidewidgets,mo_hidecomp);
  moduleoptionsty = set of moduleoptionty;
 
- iformdesigner = interface(inullinterface)['AA.mse']{0}
+ iformdesigner = interface(inullinterface)[miid_iformdesigner]
   function clickedcomponent: tcomponent;
   function getmoduleoptions: moduleoptionsty;
   procedure setmoduleoptions(const aoptions: moduleoptionsty);

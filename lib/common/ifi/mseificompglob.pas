@@ -12,7 +12,7 @@ unit mseificompglob;
 interface
 uses
  mseglob,mseifiglob,mseclasses,msetypes,msegridsglob,mseguiglob,msegraphutils,
- typinfo,msedatalist,mseapplication;
+ typinfo,msedatalist,mseapplication,mseinterfaces;
 
 type
  ificelleventinfoty = record //same layout as celleventinfoty
@@ -31,30 +31,30 @@ type
     (keyeventinfopo: pkeyeventinfoty);
  end;
 
- iifilink = interface(iificlient)['aA.mse']{22}
+ iifilink = interface(iificlient)[miid_iifilink]
   function getifilinkkind: ptypeinfo;
   function getobjectlinker: tobjectlinker;
  end;
 
- iifiexeclink = interface(iifilink)['6A.mse']{23}
+ iifiexeclink = interface(iifilink)[miid_iifiexeclink]
   procedure execute;
  end;
 
- iififormlink = interface(iifilink)['GA.mse']{24}
+ iififormlink = interface(iifilink)[miid_iififormlink]
  end;
 
- iifidialoglink = interface(iifilink)['mA.mse']{25}
+ iifidialoglink = interface(iifilink)[miid_iifidialoglink]
   function showdialog(out adialog: tactcomponent): modalresultty;
  end;
    
- iifidatalink = interface(iifilink)['WA.mse']{26}
+ iifidatalink = interface(iifilink)[miid_iifidatalink]
   procedure updateifigriddata(const sender: tobject; const alist: tdatalist);
   function getgriddata: tdatalist;
   function getvalueprop: ppropinfo;
   procedure updatereadonlystate;
  end;
  
- iifigridlink = interface(iifilink)['2A.mse']{27}
+ iifigridlink = interface(iifilink)[miid_iifigridlink]
   function appendrow(const checkautoappend: boolean = false): integer;
   function getrowstate: tcustomrowstatelist;
   procedure rowchanged(const arow: integer);

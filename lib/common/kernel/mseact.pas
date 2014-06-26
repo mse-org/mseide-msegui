@@ -21,7 +21,7 @@ interface
 uses
  classes,mclasses,mseclasses,mserichstring,
  msetypes,mseglob,mseapplication, mseevent,msestat,msestatfile,msestrings,
- typinfo,msegraphutils
+ typinfo,msegraphutils,mseinterfaces
  {$ifdef mse_with_ifi},mseifiglob,mseificomp,mseificompglob{$endif};
 
 const
@@ -121,7 +121,7 @@ type
  end;
  pactioninfoty = ^actioninfoty;
 
- iactionlink = interface(iobjectlink)['pA.mse']{37}
+ iactionlink = interface(iobjectlink)[miid_iactionlink]
   function getactioninfopo: pactioninfoty;
   procedure actionchanged;
   function loading: boolean;

@@ -19,7 +19,7 @@ unit msewidgetgrid;
 interface
 uses
  mseclasses,msegrids,msegui,msegraphutils,mseglob,mseguiglob,mseeditglob,
- classes,mclasses,msemenus,msearrayutils,msedragglob,
+ classes,mclasses,msemenus,msearrayutils,msedragglob,mseinterfaces,
  msegraphics,mseevent,msedatalist,msetypes,msepointer,msestrings,
  msegridsglob{$ifdef mse_with_ifi},mseificomp{$endif};
 
@@ -58,7 +58,7 @@ type
  {$endif}
  end;
 
- igridwidget = interface(inullinterface)['yA.mse']{19}
+ igridwidget = interface(inullinterface)[miid_igridwidget]
   procedure setfirstclick(var ainfo: mouseeventinfoty);
   function getwidget: twidget;
   procedure getautocellsize(const acanvas: tcanvas; var asize: sizety);

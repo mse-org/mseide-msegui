@@ -13,13 +13,13 @@ unit msedbevents;
 interface
 uses
  classes,mclasses,msearrayprops,mseclasses,msqldb,mdb,mseglob,msetimer,
- msedatabase;
+ msedatabase,mseinterfaces;
 
 const
  defaultdbeventinterval = 1000000; //us 
 type
  tdbevent = class;
- idbevent = interface(inullinterface)['QA.mse']{2}
+ idbevent = interface(inullinterface)[miid_idbevent]
   procedure listen(const sender: tdbevent);  
   procedure unlisten(const sender: tdbevent);  
   procedure fire(const sender: tdbevent);

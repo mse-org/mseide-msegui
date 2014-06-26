@@ -12,7 +12,7 @@ unit msereport;
 interface
 uses
  classes,mclasses,mseapplication,msegui,msegraphics,msetypes,msewidgets,
- msegraphutils,mseclasses,
+ msegraphutils,mseclasses,mseinterfaces,
  msetabs,mseprinter,msestream,msearrayprops,mseguiglob,msesimplewidgets,
  msedrawtext,msestrings,mserichstring,msedb,mdb,msethread,mseobjectpicker,
  msepointer,mseevent,msesplitter,msestatfile,mselookupbuffer,mseformatstr,
@@ -536,7 +536,7 @@ type
  end;
  ireportclientarty = array of ireportclient;
  
- ibandparent = interface(inullinterface)['FA.mse']{40}
+ ibandparent = interface(inullinterface)[miid_ibandparent]
   procedure registerclient(const aclient: ireportclient);
   procedure unregisterclient(const aclient: ireportclient);
   function beginband(const acanvas: tcanvas;

@@ -21,7 +21,7 @@ interface
 
 uses
  classes,mclasses,mdb,mseclasses,mseglob,msestrings,msetypes,msearrayprops,
- mseapplication,
+ mseapplication,mseinterfaces,
  sysutils,msebintree,mseact,msetimer,maskutils,mseifiglob,mseeditglob,
  msevariants{$ifndef FPC},classes_del{$endif};
 
@@ -82,7 +82,7 @@ const
  converrorstring = '?';
  
 type
- isqlpropertyeditor = interface(inullinterface)['wA.mse']{3}
+ isqlpropertyeditor = interface(inullinterface)[miid_isqlpropertyeditor]
   procedure setactive(avalue: boolean);
   function getactive: boolean;
   function isutf8: boolean;
@@ -105,11 +105,11 @@ type
                        mdlo_inserttoupdate,mdlo_norefresh); 
  optionsmasterlinkty = set of optionmasterlinkty;
 
- imasterlink = interface(inullinterface)['IA.mse']{4}
+ imasterlink = interface(inullinterface)[miid_imasterlink]
   function refreshing: boolean;
  end;
  
- imselocate = interface(inullinterface)['oA.mse']{5}
+ imselocate = interface(inullinterface)[miid_imselocate]
    function locate(const afields: array of tfield; 
                    const akeys: array of const; const aisnull: array of boolean;
                    const akeyoptions: array of locatekeyoptionsty;
@@ -117,7 +117,7 @@ type
  end;
 
  tmsestringfield = class;
- idbdata = interface(inullinterface)['YA.mse']{6}
+ idbdata = interface(inullinterface)[miid_idbdata]
   function getindex(const afield: tfield): integer; //-1 if none
   function gettextindex(const afield: tfield;
                  const acaseinsensitive: boolean): integer; //-1 if none
@@ -140,22 +140,22 @@ type
                            const afield: tfield): int64;
  end;
    
- idbeditinfo = interface(inullinterface)['4A.mse']{7}
+ idbeditinfo = interface(inullinterface)[miid_idbeditinfo]
   function getdataset(const aindex: integer): tdataset;
   procedure getfieldtypes(out apropertynames: stringarty;
                           out afieldtypes: fieldtypesarty);
     //propertynames = nil -> propertyname = 'datafield'
  end;
 
- ireccontrol = interface(inullinterface)['EA.mse']{8}
+ ireccontrol = interface(inullinterface)[miid_ireccontrol]
   procedure recchanged;
  end;
  
- ipersistentfieldsinfo = interface(inullinterface)['kA.mse']{9}
+ ipersistentfieldsinfo = interface(inullinterface)[miid_ipersistentfieldsinfo]
   function getfieldnames: stringarty;
  end;
  
- idatasetsum = interface(inullinterface)['UA.mse']{10}
+ idatasetsum = interface(inullinterface)[miid_idatasetsum]
   procedure sumfield(const afield: tfield; out asum: integer); overload;
   procedure sumfield(const afield: tfield; out asum: int64); overload;
   procedure sumfield(const afield: tfield; out asum: currency); overload;
@@ -192,7 +192,7 @@ type
  end;
  plookupfieldinfoty = ^lookupfieldinfoty;
 }
- ifieldcomponent = interface(inullinterface)['0A.mse']{11}
+ ifieldcomponent = interface(inullinterface)[miid_ifieldcomponent]
   procedure setdsintf(const avalue: idsfieldcontroller);
   function getinstance: tfield;
  end;
@@ -200,7 +200,7 @@ type
  providerflag1ty = (pf1_refreshinsert,pf1_refreshupdate,pf1_nocopyrecord);
  providerflags1ty = set of providerflag1ty;
  
- imsefield = interface(inullinterface)['MA.mse']{12}
+ imsefield = interface(inullinterface)[miid_imsefield]
   function getproviderflags1: providerflags1ty;
 //  function getlookupinfo: plookupfieldinfoty;
  end;

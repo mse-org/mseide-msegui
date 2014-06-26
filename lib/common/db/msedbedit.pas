@@ -20,7 +20,7 @@ unit msedbedit;
 interface
 uses
  mdb,classes,mclasses,mseguiglob,mseclasses,msegui,msetoolbar,mseeditglob,
- mseglob,msewidgetgrid,msearrayutils,msedatalist,
+ mseglob,msewidgetgrid,msearrayutils,msedatalist,mseinterfaces,
  msetypes,msegrids,msegraphics,mseevent,msekeyboard,
  msegraphedits,msestrings,msegraphutils,mselist,msedropdownlist,
  msescrollbar,msedataedits,msewidgets,msearrayprops,msedb,mselookupbuffer,
@@ -251,7 +251,7 @@ type
  
  tcustomeditwidgetdatalink = class;
  
- idbeditfieldlink = interface(inullinterface)['gA.mse']{1}
+ idbeditfieldlink = interface(inullinterface)[miid_idbeditfieldlink]
   function getwidget: twidget;
   function getenabled: boolean;
   procedure setenabled(const avalue: boolean);

@@ -13,7 +13,8 @@ unit msestat;
 
 interface
 uses
- classes,mclasses,mseclasses,mselist,msestream,mseglob,msereal,msetypes,msestrings,
+ classes,mclasses,mseclasses,mselist,msestream,mseglob,msereal,msetypes,
+ msestrings,mseinterfaces,
  msehash,msedatalist,msesys,mseeditglob;
 
 const
@@ -22,7 +23,7 @@ type
  tstatreader = class;
  tstatwriter = class;
 
- istatfile = interface(iobjectlink)['5A.mse']{39}
+ istatfile = interface(iobjectlink)[miid_istatfile]
   procedure dostatread(const reader: tstatreader);
   procedure dostatwrite(const writer: tstatwriter);
   procedure statreading;

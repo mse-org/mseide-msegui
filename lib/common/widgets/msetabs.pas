@@ -14,7 +14,7 @@ unit msetabs;
 interface
 uses
  msetabsglob,msewidgets,mseclasses,msearrayprops,classes,mclasses,mseshapes,
- mserichstring,msetypes,msegraphics,msegraphutils,mseevent,
+ mserichstring,msetypes,msegraphics,msegraphutils,mseevent,mseinterfaces,
  mseglob,mseguiglob,msegui,msebitmap,msedragglob,
  mseforms,rtlconsts,msesimplewidgets,msedrag,mseact,
  mseobjectpicker,msepointer,msestat,msestatfile,msestrings,msemenus,
@@ -394,7 +394,7 @@ type
 
  tcustomtabwidget = class;
 
- itabpage = interface(inullinterface)['VA.mse']{42}
+ itabpage = interface(inullinterface)[miid_itabpage]
   procedure settabwidget(const value: tcustomtabwidget);
   function gettabwidget: tcustomtabwidget;
   function getwidget: twidget;

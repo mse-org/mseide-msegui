@@ -13,7 +13,7 @@ interface
 
 uses
  classes,mclasses,mdb,msedb,msetypes,msestrings,mseclasses,msearrayprops,mselist,
- msearrayutils,mseapplication,mseglob;
+ msearrayutils,mseapplication,mseglob,mseinterfaces;
 
 const
  changeeventtag = 85839;
@@ -24,7 +24,7 @@ type
  lookupbufferfieldnoty = type integer;
  lbdatakindty = (lbdk_none,lbdk_integer,lbdk_int64,lbdk_float,lbdk_text);
 
- ilookupbufferfieldinfo = interface(inullinterface)['8A.mse']{15}
+ ilookupbufferfieldinfo = interface(inullinterface)[miid_ilookupbufferfieldinfo]
   function getlbdatakind(const apropname: string): lbdatakindty;
   function getlookupbuffer: tcustomlookupbuffer;
  end; 

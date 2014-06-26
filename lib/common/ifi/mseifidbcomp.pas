@@ -15,7 +15,7 @@ unit mseifidbcomp;
 interface
 uses
  mseificomp,msesqlresult,msqldb,mseclasses,classes,msedatalist,msestrings,mdb,
- msedb,msetypes;
+ msedb,msetypes,mseinterfaces;
 type
 { 
  tifisqldatasource = class;
@@ -46,7 +46,7 @@ type
  end;
  dbfieldinfoarty = array of dbfieldinfoty;
  
- iifidbdataconnection = interface(iifidataconnection)['BA.mse']{32}
+ iifidbdataconnection = interface(iifidataconnection)[miid_iifidbdataconnection]
   function getfieldinfos: dbfieldinfoarty;
  end;
  

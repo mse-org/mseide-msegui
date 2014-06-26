@@ -24,7 +24,7 @@ unit mseificomp;
 interface
 uses
  classes,mclasses,mseclasses,{msegui,}mseifiglob,mseglob,typinfo,msestrings,
- msetypes,
+ msetypes,mseinterfaces,
  mseificompglob,msearrayprops,msedatalist,msestat,msestatfile,mseapplication,
  mseeditglob;
 
@@ -241,7 +241,7 @@ type
  ififieldnamety = type ansistring;       //type for property editor
  ifisourcefieldnamety = type ansistring; //type for property editor
  
- iififieldinfo = interface(inullinterface)['OA.mse']{28}
+ iififieldinfo = interface(inullinterface)[miid_iififieldinfo]
   procedure getfieldinfo(const apropname: ififieldnamety; 
                          var adatasource: tifidatasource;
                          var atypes: listdatatypesty);
@@ -1016,11 +1016,11 @@ type
                                                          write setcontroller;
  end;
  
- iififieldsource = interface(inullinterface)['uA.mse']{29}
+ iififieldsource = interface(inullinterface)[miid_iififieldsource]
   function getfieldnames(const atypes: listdatatypesty): msestringarty;
  end;
 
- iififieldlinksource = interface(inullinterface)['eA.mse']{30}
+ iififieldlinksource = interface(inullinterface)[miid_iififieldlinksource]
   function getfieldnames(const apropname: ifisourcefieldnamety): msestringarty;
   procedure setdesignsourcefieldname(const aname: ifisourcefieldnamety);
  end;
@@ -1080,7 +1080,7 @@ type
    function sourcefieldnames: stringarty;
 end;
 
- iifidataconnection = interface(inullinterface)['+A.mse']{31}
+ iifidataconnection = interface(inullinterface)[miid_iifidataconnection]
   procedure fetchdata(const acolnames: array of string; 
                                                   acols: array of tdatalist);
   function getfieldnames(const adatatype: listdatatypety): msestringarty;

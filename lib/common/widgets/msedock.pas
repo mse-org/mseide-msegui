@@ -16,7 +16,7 @@ uses
  msewidgets,classes,mclasses,msedrag,msegui,msegraphutils,mseevent,mseclasses,
  msegraphics,msestockobjects,mseglob,mseguiglob,msestat,msestatfile,msepointer,
  msesplitter,msesimplewidgets,msetypes,msestrings,msebitmap,mseobjectpicker,
- msetabsglob,msemenus,msedrawtext,mseshapes,msedragglob;
+ msetabsglob,msemenus,msedrawtext,mseshapes,msedragglob,mseinterfaces;
  
 //todo: optimize
 
@@ -414,7 +414,7 @@ type
    property optionsdock default defaultoptionsdocknochildren;
  end;
  
- idocktarget = interface(inullinterface)['lA.mse']{41}
+ idocktarget = interface(inullinterface)[miid_idocktarget]
   function getdockcontroller: tdockcontroller;
  end;
 

@@ -12,7 +12,7 @@ unit mseifilink;
 interface
 uses
  classes,mclasses,mseclasses,mseifiglob,mseifi,msearrayprops,mseapplication,
- mseact,
+ mseact,mseinterfaces,
  mseevent,mseglob,msestrings,msetypes,msedatalist,msegraphutils,typinfo,
  mseeditglob;
 
@@ -84,7 +84,7 @@ type
                //sender = item, avalue = tx tag
  end;
 
- iifitxaction = interface(inullinterface)['xA.mse']{35}
+ iifitxaction = interface(inullinterface)[miid_iifitxaction]
   procedure txactionfired(var adata: ansistring; var adatapo: pchar);
  end; 
 
@@ -334,7 +334,7 @@ type
    property items[const index: integer]: tvaluecomponentlink read getitems; default;   
  end;
 
- iifimodulelink = interface(inullinterface)['JA.mse']{36}
+ iifimodulelink = interface(inullinterface)[miid_iifimodulelink]
   procedure connectmodule(const sender: tcustommodulelink);
  end;
  

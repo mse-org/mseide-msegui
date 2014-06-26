@@ -13,7 +13,7 @@ unit msebitmap;
 
 interface
 uses
- classes,mclasses,msegraphics,msetypes,msestrings,
+ classes,mclasses,msegraphics,msetypes,msestrings,mseinterfaces,
  msegraphutils,mseclasses,mseglob,sysutils,mseguiglob;
 
 const
@@ -432,7 +432,7 @@ type
    property onchange: notifyeventty read fonchange write fonchange;
  end;
 
- iimagelistinfo = interface(inullinterface)['qA.mse']{21}
+ iimagelistinfo = interface(inullinterface)[miid_iimagelistinfo]
   function getimagelist: timagelist;
  end; 
 
