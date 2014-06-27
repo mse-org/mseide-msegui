@@ -1107,7 +1107,6 @@ begin
 //                 not (csdesigning in componentstate) then begin
 //    fstatfile.writestat;
 //   end;
-   }
  {$ifdef mse_with_ifi}
    if fifiserverintf <> nil then begin
     fifiserverintf.sendmodalresult(iificlient(self),window.modalresult);

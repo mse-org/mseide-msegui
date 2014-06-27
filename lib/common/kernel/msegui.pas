@@ -1558,7 +1558,6 @@ type
    function checksubfocus(const aactivate: boolean): boolean; virtual;
    function getnextfocus: twidget;
    function cantabfocus: boolean;
-   function checksubfocus(const aactivate: boolean): boolean; virtual;
    function getdisprect: rectty; virtual; 
                 //origin pos, clamped in view by activate
 
