@@ -3002,6 +3002,21 @@ begin
  end;
 end;
 }
+function tcustomwidgetgrid.checksubfocus(const aactivate: boolean): boolean;
+begin
+ result:= false;
+ if (factivewidget <> nil) and (factivewidget <> fwidgetdummy) then begin
+  factivewidget.visible:= true;
+  if factivewidget.canfocus then begin
+   factivewidget.setfocus(aactivate);
+   result:= true;
+  end;
+ end;
+ if not result then begin
+  result:= inherited checksubfocus(aactivate);
+ end;
+end;
+}
 procedure tcustomwidgetgrid.unregisterchildwidget(const child: twidget);
 begin
  twidgetfixrows(ffixrows).unregisterchildwidget(child);

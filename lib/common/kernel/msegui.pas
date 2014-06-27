@@ -1555,6 +1555,7 @@ type
            const transientfor: pwindow; //follow linkedvar state
            const windowevent,nomodalforreset: boolean): modalresultty; virtual;
    procedure internalhide(const windowevent: boolean);
+   function checksubfocus(const aactivate: boolean): boolean; virtual;
    function getnextfocus: twidget;
    function cantabfocus: boolean;
    function checksubfocus(const aactivate: boolean): boolean; virtual;
