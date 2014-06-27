@@ -1298,7 +1298,6 @@ type
    procedure internaldoactivate;
    procedure internaldodeactivate;
    procedure internalkeydown(var info: keyeventinfoty);
-   function checksubfocus(const aactivate: boolean): boolean;
 
    function clipcaret: rectty; //origin = pos
    procedure reclipcaret;
@@ -1556,6 +1555,7 @@ type
            const transientfor: pwindow; //follow linkedvar state
            const windowevent,nomodalforreset: boolean): modalresultty; virtual;
    procedure internalhide(const windowevent: boolean);
+   function checksubfocus(const aactivate: boolean): boolean; virtual;
    function getnextfocus: twidget;
    function cantabfocus: boolean;
    function getdisprect: rectty; virtual; 
