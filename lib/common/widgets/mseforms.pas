@@ -1103,11 +1103,10 @@ begin
   if result and ((twindow1(window).fmodalresult <> mr_none) or 
     (application.terminating) or (ws1_forceclose in fwidgetstate1)) then begin
    doonclose;
-   {
-   if (fstatfile <> nil) and (fo_autowritestat in foptions) and
-                 not (csdesigning in componentstate) then begin
-    fstatfile.writestat;
-   end;
+//   if (fstatfile <> nil) and (fo_autowritestat in foptions) and
+//                 not (csdesigning in componentstate) then begin
+//    fstatfile.writestat;
+//   end;
    }
  {$ifdef mse_with_ifi}
    if fifiserverintf <> nil then begin
@@ -1118,8 +1117,8 @@ begin
                   not (csdesigning in componentstate) then begin
     result:= application.terminate(window);
    end;
-   if (fstatfile <> nil) and (fo_autowritestat in foptions) and
-                 not (csdesigning in componentstate) then begin
+   if result and (fstatfile <> nil) and (fo_autowritestat in foptions) and
+                               not (csdesigning in componentstate) then begin
     fstatfile.writestat;
    end;
    if result and (fo_freeonclose in foptions) and 
