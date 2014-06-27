@@ -1111,6 +1111,7 @@ type
    procedure DataEvent(Event: TDataEvent; Info: Ptrint); override;
    procedure disabledstatechange; virtual;
    function canedit: boolean;
+   procedure setbuffercount(value: integer); override;
   public
    destructor destroy; override;
    function moveby(distance: integer): integer; override;
@@ -6444,6 +6445,14 @@ begin
  inherited;
  if (ds1 <> nil) and (ds1.buffercount < int1) then begin
   ds1.dataevent(dedatasetchange,0);
+ end;
+end;
+
+procedure tmsedatalink.setbuffercount(value: integer);
+begin
+ inherited;
+ if active then begin
+  dataset.updatecursorpos();
  end;
 end;
 

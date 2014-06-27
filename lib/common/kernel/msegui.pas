@@ -1298,7 +1298,6 @@ type
    procedure internaldoactivate;
    procedure internaldodeactivate;
    procedure internalkeydown(var info: keyeventinfoty);
-   function checksubfocus(const aactivate: boolean): boolean;
 
    function clipcaret: rectty; //origin = pos
    procedure reclipcaret;
@@ -1558,6 +1557,7 @@ type
    procedure internalhide(const windowevent: boolean);
    function getnextfocus: twidget;
    function cantabfocus: boolean;
+   function checksubfocus(const aactivate: boolean): boolean; virtual;
    function getdisprect: rectty; virtual; 
                 //origin pos, clamped in view by activate
 
@@ -2453,8 +2453,8 @@ type
       //lowest visible window in stackorder, calls sortzorder
    function topwindow: twindow;
       //highest visible window in stackorder, calls sortzorder
-   function candefocus: boolean; override;
-      //checks candefocus of all windows
+   function candefocus(const caller: tobject = nil): boolean; override;
+      //checks candefocus of all windows expect caller
 
    procedure registeronkeypress(const method: keyeventty);
    procedure unregisteronkeypress(const method: keyeventty);
@@ -10892,7 +10892,12 @@ begin
                                         (avalue <> getvisible) then begin
   if avalue then begin
    if parentisvisible then begin
-    show(false,window.ftransientfor);
+    if window.modalfor then begin
+     show(ml_window,fwindow.ftransientfor);
+    end
+    else begin
+     show(ml_none,fwindow.ftransientfor);
+    end;
    end
    else begin
     include(fwidgetstate,ws_visible);
@@ -17971,13 +17976,13 @@ begin
  invalidate;
 end;
 
-function tguiapplication.candefocus: boolean;
+function tguiapplication.candefocus(const caller: tobject = nil): boolean;
 var
  int1: integer;
 begin
  result:= true;
  for int1:= 0 to high(fwindows) do begin
-  if not fwindows[int1].candefocus then begin
+  if (fwindows[int1] <> caller) and not fwindows[int1].candefocus then begin
    result:= false;
    break;
   end;

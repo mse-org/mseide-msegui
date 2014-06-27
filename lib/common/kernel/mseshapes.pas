@@ -412,7 +412,7 @@ begin
           end;
          end;
         end;
-        if (eventkind = ek_buttonrelease) and (shs_clicked in state) and
+        if {(eventkind = ek_buttonrelease) and} (shs_clicked in state) and
              assigned(doexecute) then begin
          state:= state - [shs_clicked];
          result:= true;              //state can be invalid after execute
