@@ -1833,10 +1833,7 @@ var
  comp1: tcomponent;
 begin
  if iscellclick(info,[ccr_dblclick,ccr_nokeyreturn]) then begin
-  comp1:= tpropertyitem(props.item).feditor.linksource;
-  while (comp1 <> nil) and (cssubcomponent in comp1.componentstyle) do begin
-   comp1:= comp1.owner;
-  end;
+  comp1:= tpropertyitem(props.item).feditor.linkcomponent;
   if comp1 <> nil then begin
    designer.showformdesigner(designer.modules.findmodulebycomponent(comp1));
    designer.selectcomponent(comp1);

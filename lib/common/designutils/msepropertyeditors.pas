@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2014 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -94,6 +94,7 @@ type
    function getcount: integer;
    function getselected: boolean;
    procedure setselected(const avalue: boolean);
+   function getlinkcomponent: tcomponent;
   protected
    fsortlevel: integer;
    ftypeinfo: ptypeinfo;
@@ -190,6 +191,7 @@ type
    property component: tcomponent read fcomponent;
    property valueeditor: tpropertyeditor read getvalueeditor;
    property linksource: tcomponent read getlinksource;
+   property linkcomponent: tcomponent read getlinkcomponent;
   end;
 
  propertyeditorclassty = class of tpropertyeditor;
@@ -2214,6 +2216,14 @@ begin
  result:= nil;
 end;
 
+function tpropertyeditor.getlinkcomponent: tcomponent;
+begin
+ result:= linksource;
+ while (result <> nil) and (cssubcomponent in result.componentstyle) do begin
+  result:= result.owner;
+ end;
+end;
+
 function tpropertyeditor.gettypinfo: ptypeinfo;
 begin
  result:= ftypeinfo;
@@ -2663,13 +2673,19 @@ function tclasspropertyeditor.subproperties: propertyeditorarty;
 var
  ar1: objectarty;
  int1: integer;
+ comp1: tcomponent;
 // prop1: tpropertyeditor;
 begin
  setlength(ar1,count);
  for int1:= 0 to high(fprops) do begin
   ar1[int1]:= tobject(getpointervalue(int1));
  end;
- result:= fobjectinspector.getproperties(ar1,fmodule,fcomponent);
+ comp1:= linkcomponent;
+ if comp1 = nil then begin
+  comp1:= fcomponent;
+ end;
+ result:= fobjectinspector.getproperties(ar1,fmodule,comp1);
+// result:= fobjectinspector.getproperties(ar1,fmodule,fcomponent);
  for int1:= 0 to high(result) do begin
   result[int1].fparenteditor:= self;
  end;
