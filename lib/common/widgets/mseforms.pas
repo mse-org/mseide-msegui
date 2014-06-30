@@ -906,8 +906,10 @@ begin
  application.unregisteronidle({$ifdef FPC}@{$endif}doidle);
  application.unregisteronwidgetactivechanged(
                             {$ifdef FPC}@{$endif}dowidgetactivechanged);
- application.unregisteronwindowactivechanged({$ifdef FPC}@{$endif}dowindowactivechanged);
- application.unregisteronwindowdestroyed({$ifdef FPC}@{$endif}dowindowdestroyed);
+ application.unregisteronwindowactivechanged(
+                                   {$ifdef FPC}@{$endif}dowindowactivechanged);
+ application.unregisteronwindowdestroyed(
+                                       {$ifdef FPC}@{$endif}dowindowdestroyed);
  application.unregisteronapplicationactivechanged(
        {$ifdef FPC}@{$endif}doapplicationactivechanged);
  if not (csdesigning in componentstate) and 
@@ -921,8 +923,10 @@ begin
  application.registeronterminated({$ifdef FPC}@{$endif}doterminated);
  application.registeronterminate({$ifdef FPC}@{$endif}doterminatequery);
  application.registeronidle({$ifdef FPC}@{$endif}doidle);
- application.registeronwidgetactivechanged({$ifdef FPC}@{$endif}dowidgetactivechanged);
- application.registeronwindowactivechanged({$ifdef FPC}@{$endif}dowindowactivechanged);
+ application.registeronwidgetactivechanged(
+                                   {$ifdef FPC}@{$endif}dowidgetactivechanged);
+ application.registeronwindowactivechanged(
+                                    {$ifdef FPC}@{$endif}dowindowactivechanged);
  application.registeronwindowdestroyed({$ifdef FPC}@{$endif}dowindowdestroyed);
  application.registeronapplicationactivechanged(
        {$ifdef FPC}@{$endif}doapplicationactivechanged);
@@ -954,8 +958,9 @@ end;
 
 procedure tcustommseform.loaded;
 begin
- if (factivatortarget <> nil)  and not (csdesigning in componentstate) then begin
-  factivatortarget.activaterecursive;
+ if (factivatortarget <> nil)  and 
+                                not (csdesigning in componentstate) then begin
+  factivatortarget.activaterecursive();
  end;
  exclude(fscrollbox.fwidgetstate,ws_loadlock);
  if not (csdesigning in componentstate) then begin
@@ -978,7 +983,8 @@ end;
 
 procedure tcustommseform.freeinstance;
 begin
- if (factivatortarget <> nil)  and not (csdesigning in componentstate) then begin
+ if (factivatortarget <> nil)  and 
+                                not (csdesigning in componentstate) then begin
   try
    factivatortarget.deactivaterecursive;
   finally

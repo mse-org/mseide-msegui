@@ -371,13 +371,12 @@ type
    function rowsaffected: integer; //-1 if not supported
    function rowsreturned: integer; //-1 if not supported
 //   procedure asvariant(out avalue: variant); overload; //internal compiler error
-   function asvariant: variant; 
-          //value of first field of first row, empty variant returned for null fields
-//   procedure asvariant(out avalue: variantarty); overload; 
-   function asvariantar: variantarty;
+   function asvariant(const aclose: boolean = false): variant; 
+          //value of first field of first row, 
+          //empty variant returned for null fields
+   function asvariantar(const aclose: boolean = false): variantarty;
           //first row, empty variant returned for null fields
-//   procedure asvariant(out avalue: variantararty); overload; 
-   function asvariantarar: variantararty;
+   function asvariantarar(const aclose: boolean = false): variantararty;
           //whole resultset, empty variant returned for null fields
    procedure loaddatalists(const datalists: array of tdatalist);
    property cols: tdbcols read fcols;
@@ -1659,7 +1658,7 @@ begin
 end;
 }
 
-function tsqlresult.asvariant: variant;
+function tsqlresult.asvariant(const aclose: boolean = false): variant;
 begin
  refresh;
  if eof or (cols.count = 0) then begin
@@ -1668,12 +1667,17 @@ begin
  else begin
   result:= cols[0].asvariant;
  end;
- while not eof do begin
-  next; //eat the rest;
+ if aclose then begin
+  active:= false;
+ end
+ else begin
+  while not eof do begin
+   next; //eat the rest;
+  end;
  end;
 end;
 
-function tsqlresult.asvariantar: variantarty;
+function tsqlresult.asvariantar(const aclose: boolean = false): variantarty;
 var
  int1: integer;
 begin
@@ -1687,12 +1691,17 @@ begin
    result[int1]:= cols[int1].asvariant;
   end;
  end;
- while not eof do begin
-  next; //eat the rest;
+ if aclose then begin
+  active:= false;
+ end
+ else begin
+  while not eof do begin
+   next; //eat the rest;
+  end;
  end;
 end;
 
-function tsqlresult.asvariantarar: variantararty;
+function tsqlresult.asvariantarar(const aclose: boolean = false): variantararty;
 var
  int1,int2: integer;
 begin
@@ -1718,6 +1727,9 @@ begin
    next;
   end;
   setlength(result,int2);
+ end;
+ if aclose then begin
+  active:= false;
  end;
 end;
 

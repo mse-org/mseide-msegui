@@ -669,8 +669,8 @@ begin
       fstatend:= fstream.position;
       exit;
      end;
-     if fsectioncount <= length(fsections) then begin
-      setlength(fsections,length(fsections)+16);
+     if fsectioncount >= length(fsections) then begin
+      setlength(fsections,length(fsections)*2+16);
      end;
      inc(fsectioncount);
      fsectionlist.add(copy(str1,2,int1-2),pointer(ptruint(fsectioncount)));
