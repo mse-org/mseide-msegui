@@ -263,14 +263,9 @@ type
    fcontainer3: twidget;
    flastfocusedfixwidget: twidget;
    fwidgetdummy: tdummywidget;
-//   fmousefocusedcell: gridcoordty;
-//   fmouseactivewidget: twidget;
-//   fmousefocusedwidget: twidget;
    fmouseinfopo: pmouseeventinfoty;
    function getdatacols: twidgetcols;
    procedure setdatacols(const avalue: twidgetcols);
-//   function checkreflectmouseevent(var info: mouseeventinfoty;
-//                     iscellcall: boolean): boolean;
    procedure initcopyars(out dataedits: widgetarty; out datalists: datalistarty);
    procedure dowidgetcellevent(var info: celleventinfoty);
    function getfixrows: twidgetfixrows;
@@ -284,7 +279,6 @@ type
    procedure setoptionswidget(const avalue: optionswidgetty); override;
    procedure setoptionsgrid(const avalue: optionsgridty); override;
    function checksubfocus(const aactivate: boolean): boolean; override;
-//   procedure dofocus; override;
    procedure dochildfocused(const sender: twidget); override;
    procedure unregisterchildwidget(const child: twidget); override;
    procedure widgetregionchanged(const sender: twidget); override;
@@ -1189,7 +1183,7 @@ begin
      widget1:= fintf.getwidget;
      with widget1 do begin
       if not visible then begin
-/////////////       twidgetgrid(fcellinfo.grid).fmouseactivewidget:= nil;
+//       twidgetgrid(fcellinfo.grid).fmouseactivewidget:= nil;
        visible:= true;
       end;
       if (fwindow <> nil) and 
@@ -3181,48 +3175,17 @@ begin
  finally
   exclude(fstate,gs_layoutupdating);
   dec(tgridcontainer(fcontainer2).flayoutupdating);
-//  fwidgetcolorder:= nil;
  end;
  inherited;
 end;
-{
-procedure tcustomwidgetgrid.widgetremoved(const child: twidget);
-begin
- twidgetcols(fdatacols).unregisterchildwidget(child);
-end;
-}
+
 function tcustomwidgetgrid.scrollcaret(const vertical: boolean): boolean;
 begin
  result:= (factivewidget <> nil) and 
             ((factivewidget.parentwidget = fcontainer2) or vertical) and
                                  twidget1(factivewidget).hascaret;
 end;
-(*
-function tcustomwidgetgrid.checkreflectmouseevent(var info: mouseeventinfoty;
-            iscellcall: boolean): boolean;
-var
- po1: pointty;
-begin
- if {(fmousefocusedcell.col < 0) or }(es_child in info.eventstate) then begin
-  result:= false;
- end
- else begin
-  if iscellcall then begin
-   po1:= cellrect(ffocusedcell).pos;
-   addpoint1(po1,clientwidgetpos);
-   addpoint1(info.pos,po1);
-  end;
-  result:= (factivewidget <> nil) and
-     ((fmouseactivewidget <> factivewidget) or
-      {(ffocusedcell.col <> fmousefocusedcell.col) or}
-      (ffocusedcell.row <> fmousefocusedcell.row)) and
-       (mouseeventwidget(info) = factivewidget);
-  if iscellcall then begin
-   subpoint1(info.pos,po1);
-  end;
- end;
-end;
-*)
+
 procedure tcustomwidgetgrid.childmouseevent(const sender: twidget; 
                         var info: mouseeventinfoty);
 var
@@ -3473,37 +3436,6 @@ begin
 end;
 
 procedure tcustomwidgetgrid.mouseevent(var info: mouseeventinfoty);
-(*
- function checkreflectmouseevent(var info: mouseeventinfoty{;
-             iscellcall: boolean}): boolean;
-// var
-//  po1: pointty;
- begin
-  if {(fmousefocusedcell.col < 0) or }(es_child in info.eventstate) then begin
-   result:= false;
-  end
-  else begin
-  {
-   if iscellcall then begin
-    po1:= cellrect(ffocusedcell).pos;
-    addpoint1(po1,clientwidgetpos);
-    addpoint1(info.pos,po1);
-   end;
-   }
-   result:= (factivewidget <> nil) and
-      ((fmouseactivewidget <> factivewidget) or
-       {(ffocusedcell.col <> fmousefocusedcell.col) or}
-       ((ffocusedcell.row <> fmousefocusedcell.row)) or 
-        (fmousefocusedwidget <> window.focusedwidget)) and
-                          (mouseeventwidget(info) = factivewidget);
-{
-   if iscellcall then begin
-    subpoint1(info.pos,po1);
-   end;
-}
-  end;
- end;
-*)
 var
  bo1: boolean;
  fmousefocusedcell: gridcoordty;
@@ -3521,7 +3453,6 @@ begin
      ((ffocusedcell.row <> fmousefocusedcell.row)) or 
       (fmousefocusedwidget <> window.focusedwidget)) and
                         (mouseeventwidget(info) = factivewidget) then begin
-//  fmousefocusedcell.col:= -1;
   bo1:= gs1_mousecaptureendlock in fstate1;
   include(fstate1,gs1_mousecaptureendlock);
   try
@@ -3540,7 +3471,6 @@ begin
   end;
   reflectmouseevent(info);
  end;
-// fmousefocusedcell.col:= -1;
 end;
 
 procedure tcustomwidgetgrid.dowidgetcellevent(var info: celleventinfoty);
@@ -3591,10 +3521,7 @@ begin
    end;
   end;
  end;
-// if not ((info.eventkind in mousecellevents) and
-//       checkreflectmouseevent(info.mouseeventinfopo^,true)) then begin
-  dowidgetcellevent(info);
-// end;
+ dowidgetcellevent(info);
  inherited;
 end;
 
