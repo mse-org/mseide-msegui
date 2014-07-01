@@ -265,12 +265,18 @@ type
                                                          //'' = any
                                         const params: array of const): string;
                                          //returns format
+   function loadfromstring(const avalue: string): string;  //returns format
    function loadfromstream(const stream: tstream; const format: string;
                                                          //'' = any
                                        const params: array of const): string;
+                                         //returns format
+   function loadfromstream(const stream: tstream): string; //returns format
    function loadfromfile(const filename: filenamety; const format: string; 
                                                          //'' = any
                                        const params: array of const): string;
+                                         //returns format
+   function loadfromfile(const filename: filenamety): string; //returns format
+   
    procedure writetostring(out avalue: string; const format: string;
                                   const params: array of const); overload;
    function writetostring(const format: string;
@@ -2360,6 +2366,21 @@ begin
    stream1.free;
   end;
  end;
+end;
+
+function tmaskedbitmap.loadfromstring(const avalue: string): string;
+begin
+ result:= loadfromstring(avalue,'',[]);
+end;
+
+function tmaskedbitmap.loadfromstream(const stream: tstream): string;
+begin
+ result:= loadfromstream(stream,'',[]);
+end;
+
+function tmaskedbitmap.loadfromfile(const filename: filenamety): string;
+begin
+ result:= loadfromfile(filename,'',[]);
 end;
 
 procedure tmaskedbitmap.writetostring(out avalue: string; const format: string;
