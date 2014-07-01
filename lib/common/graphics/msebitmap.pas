@@ -239,6 +239,15 @@ type
    procedure unlink(const source,dest: iobjectlink; valuepo: pointer = nil);
    procedure objevent(const sender: iobjectlink; const event: objecteventty);
    function getinstance: tobject;
+   function doloadfromstream(const atry: boolean;
+           const stream: tstream;
+           const format: string; const params: array of const): string;
+   function doloadfromfile(const atry: boolean;
+             const filename: filenamety;
+             const format: string; const params: array of const): string;
+   function doloadfromstring(const atry: boolean;
+               const avalue: string;
+               const format: string; const params: array of const): string;
   public
    constructor create(const akind: bitmapkindty;
                      const agdifuncs: pgdifunctionaty = nil);
@@ -261,6 +270,7 @@ type
                                [al_stretchx,al_stretchy,al_intpol]); overload;
    procedure remask; //recalc mask
    procedure automask; //transparentcolor is bottomright pixel
+
    function loadfromstring(const avalue: string; const format: string;
                                                          //'' = any
                                         const params: array of const): string;
@@ -269,13 +279,32 @@ type
    function loadfromstream(const stream: tstream; const format: string;
                                                          //'' = any
                                        const params: array of const): string;
-                                         //returns format
+                         //returns format
    function loadfromstream(const stream: tstream): string; //returns format
+
    function loadfromfile(const filename: filenamety; const format: string; 
                                                          //'' = any
                                        const params: array of const): string;
-                                         //returns format
-   function loadfromfile(const filename: filenamety): string; //returns format
+                         //returns format
+   function loadfromfile(const filename: filenamety): string; 
+                         //returns format
+
+   function tryloadfromstring(const avalue: string; const format: string;
+                                                         //'' = any
+                                        const params: array of const): string;
+                        //returns format, '' = error
+   function tryloadfromstring(const avalue: string): string;  //returns format
+   function tryloadfromstream(const stream: tstream; const format: string;
+                                                         //'' = any
+                                       const params: array of const): string;
+                        //returns format, '' = error
+   function tryloadfromstream(const stream: tstream): string; //returns format
+   function tryloadfromfile(const filename: filenamety; const format: string; 
+                                                         //'' = any
+                                       const params: array of const): string;
+                        //returns format, '' = error
+   function tryloadfromfile(const filename: filenamety): string; 
+                        //returns format, '' = error
    
    procedure writetostring(out avalue: string; const format: string;
                                   const params: array of const); overload;
@@ -2319,13 +2348,19 @@ begin
  stream.writebuffer(pchar(pointer(forigformatdata))^,lint1);
 end;
 
-function tmaskedbitmap.loadfromstream(const stream: tstream;
+function tmaskedbitmap.doloadfromstream(const atry: boolean;
+           const stream: tstream;
            const format: string; const params: array of const): string;
 var
  int1,int2: integer;
 begin
  int1:= stream.position;
- result:= readgraphic(stream,self,format,params);
+ if atry then begin
+  result:= tryreadgraphic(stream,self,format,params);
+ end
+ else begin
+  result:= readgraphic(stream,self,format,params);
+ end;
  int2:= stream.position;
  if bmo_storeorigformat in options then begin
   forigformat:= result;
@@ -2336,20 +2371,22 @@ begin
  end;
 end;
 
-function tmaskedbitmap.loadfromfile(const filename: filenamety;
+function tmaskedbitmap.doloadfromfile(const atry: boolean;
+             const filename: filenamety;
              const format: string; const params: array of const): string;
 var
  stream: tmsefilestream;
 begin
  stream:= tmsefilestream.create(filename,fm_read);
  try
-  result:= loadfromstream(stream,format,params);
+  result:= doloadfromstream(atry,stream,format,params);
  finally
   stream.free;
  end;
 end;
 
-function tmaskedbitmap.loadfromstring(const avalue: string;
+function tmaskedbitmap.doloadfromstring(const atry: boolean;
+               const avalue: string;
                const format: string; const params: array of const): string;
 var
  stream1: tstringcopystream;
@@ -2361,11 +2398,48 @@ begin
  else begin
   stream1:= tstringcopystream.create(avalue);
   try
-   result:= loadfromstream(stream1,format,params);
+   result:= doloadfromstream(atry,stream1,format,params);
   finally
    stream1.free;
   end;
  end;
+end;
+
+function tmaskedbitmap.tryloadfromstream(const stream: tstream;
+           const format: string; const params: array of const): string;
+begin
+ result:= doloadfromstream(true,stream,format,params);
+end;
+
+function tmaskedbitmap.loadfromstream(const stream: tstream;
+           const format: string; const params: array of const): string;
+begin
+ result:= doloadfromstream(false,stream,format,params);
+end;
+
+
+function tmaskedbitmap.loadfromfile(const filename: filenamety;
+             const format: string; const params: array of const): string;
+begin
+ result:= doloadfromfile(false,filename,format,params);
+end;
+
+function tmaskedbitmap.tryloadfromfile(const filename: filenamety;
+             const format: string; const params: array of const): string;
+begin
+ result:= doloadfromfile(true,filename,format,params);
+end;
+
+function tmaskedbitmap.loadfromstring(const avalue: string;
+               const format: string; const params: array of const): string;
+begin
+ result:= doloadfromstring(false,avalue,format,params);
+end;
+
+function tmaskedbitmap.tryloadfromstring(const avalue: string;
+               const format: string; const params: array of const): string;
+begin
+ result:= doloadfromstring(true,avalue,format,params);
 end;
 
 function tmaskedbitmap.loadfromstring(const avalue: string): string;
@@ -2381,6 +2455,21 @@ end;
 function tmaskedbitmap.loadfromfile(const filename: filenamety): string;
 begin
  result:= loadfromfile(filename,'',[]);
+end;
+
+function tmaskedbitmap.tryloadfromstring(const avalue: string): string;
+begin
+ result:= tryloadfromstring(avalue,'',[]);
+end;
+
+function tmaskedbitmap.tryloadfromstream(const stream: tstream): string;
+begin
+ result:= tryloadfromstream(stream,'',[]);
+end;
+
+function tmaskedbitmap.tryloadfromfile(const filename: filenamety): string;
+begin
+ result:= tryloadfromfile(filename,'',[]);
 end;
 
 procedure tmaskedbitmap.writetostring(out avalue: string; const format: string;

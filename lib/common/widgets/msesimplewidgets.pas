@@ -307,10 +307,6 @@ type
    procedure setfacemouse(const avalue: tcustomface);
    function getfaceclicked: tcustomface;
    procedure setfaceclicked(const avalue: tcustomface);
-   procedure createfaceactive;
-   procedure createfacedisabled;
-   procedure createfacemouse;
-   procedure createfaceclicked;
    function getfacedisabled: tcustomface;
    procedure setfacedisabled(const avalue: tcustomface);
    procedure setimagenrmouse(const avalue: imagenrty);
@@ -322,6 +318,10 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   procedure createfaceactive;
+   procedure createfacedisabled;
+   procedure createfacemouse;
+   procedure createfaceclicked;
    property faceactive: tcustomface read getfaceactive write setfaceactive;
    property facemouse: tcustomface read getfacemouse write setfacemouse;
    property faceclicked: tcustomface read getfaceclicked write setfaceclicked;
