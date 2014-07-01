@@ -832,8 +832,8 @@ var
  begin
   bo1:= false;
   bo2:= false;
-  with tmaskedbitmap(dest) do begin
-   with mask do begin
+  with tmaskedbitmap1(dest) do begin
+   with fmask do begin
     po1:= scanline[0];
     int3:= scanlinestep;
    end;
@@ -902,7 +902,8 @@ begin
        graymask:= true;
        include(foptions,bmo_masked);
        createmask(bmk_gray);
-       mask.size:= size;
+       fmask.size:= size;
+       include(fstate,pms_maskvalid);
        if not getmaskdata(8) then begin
         getmaskdata(0); //try 8 bit
        end;

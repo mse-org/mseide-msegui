@@ -1668,10 +1668,11 @@ begin
   end;
  end;
  ki2:= ki1;
- col1:= gettranspcolor();
- if (col1 <> cl_none) and not(pms_maskvalid in fstate) and 
-                                              not isempty() then begin
-  ki2:= bmk_mono; //create a stencil mask from transpatent color
+ if not(pms_maskvalid in fstate) and  not isempty() then begin
+  col1:= gettranspcolor();
+  if (col1 <> cl_none) then begin
+   ki2:= bmk_mono; //create a stencil mask from transparent color
+  end;
  end;
  if fmask = nil then begin
   createmask(ki2);
