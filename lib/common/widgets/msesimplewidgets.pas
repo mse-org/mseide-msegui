@@ -1556,14 +1556,12 @@ begin
    end;
   end
   else begin
-   if (ws_lclicked in fwidgetstate) and (ffaceclicked <> nil) then begin
+   if (shs_clicked in finfo.state) and (ffaceclicked <> nil) then begin
     result:= ffaceclicked;
    end
    else begin
-    if application.clientmousewidget = self then begin
-     if ffacemouse <> nil then begin
-      result:= ffacemouse;
-     end;    
+    if (shs_mouse in finfo.state) and (ffacemouse <> nil) then begin
+     result:= ffacemouse;
     end;
    end;
   end;
