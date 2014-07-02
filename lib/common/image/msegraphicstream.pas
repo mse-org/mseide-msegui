@@ -57,14 +57,17 @@ function readgraphic(const source: tstream;
 function tryreadgraphic(const source: tstream; const dest: tbitmap;
                            const aformatname: string = '';
                            const params: array of const): string; overload;
-                           //returns formatname, '' = error
+           //returns format name, '' = unknown/not supported
+           //exception in case of read error
 function tryreadgraphic(const source: tstream; const dest: tmaskedbitmap;
                            const aformatname: string = '';
                            const params: array of const): string; overload;
-                           //returns formatname, '' = error
+           //returns format name, '' = unknown/not supported
+           //exception in case of read error
 function tryreadgraphic(const source: tstream;
                                  const dest: timagelist): string; overload;
-                           //returns formatname, '' = error
+           //returns format name, '' = unknown/not supported
+           //exception in case of read error
                            
 procedure writegraphic(const dest: tstream; const source: tbitmap;
                            const aformatname: string;
