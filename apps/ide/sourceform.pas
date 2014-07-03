@@ -59,7 +59,8 @@ type
    procedure updateshowpos(const acellpos: cellpositionty = cep_rowcenteredif);
   public
    constructor create;
-   procedure showsource(const apos: sourceposty; const asetfocus: boolean = false);
+   procedure showsource(const apos: sourceposty; 
+                               const asetfocus: boolean = false);
    function back: boolean;
    function forward: boolean;
  end;
@@ -170,13 +171,15 @@ type
    procedure setbookmark(const apage: tsourcepage; const arow: integer;
                             const bookmarknum: integer);
 
-   function gettextstream(const filename: filenamety; forwrite: boolean): ttextstream;
+   function gettextstream(const filename: filenamety;
+                                           forwrite: boolean): ttextstream;
    function getfiletext(const filename: filenamety;
                    const startpos,endpos: gridcoordty): string;
    procedure replacefiletext(const filename: filenamety;
                    const startpos,endpos: gridcoordty; const newtext: string);
    property sourcepos: sourceposty read getsourcepos;
-   property sourcehintwidget: twidget read fsourcehintwidget write setsourcehintwidget;
+   property sourcehintwidget: twidget read fsourcehintwidget 
+                                                    write setsourcehintwidget;
  end;
 
   errorlevelty = (el_none,el_all,el_hint,el_note,el_warning,el_error);

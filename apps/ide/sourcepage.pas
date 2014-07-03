@@ -50,10 +50,14 @@ type
    procedure sourcefoondestroy(const sender: tobject);
    procedure editoncellevent(const sender: TObject; var info: celleventinfoty);
    procedure editonmodifiedchanged(const sender: tobject; const value: boolean);
-   procedure editontextmouseevent(const sender: tobject; var info: textmouseeventinfoty);
-   procedure editoneditnotification(const sender: tobject; var info: editnotificationinfoty);
-   procedure gridonrowsdeleted(const sender: tcustomgrid; const index,count: integer);
-   procedure gridonrowsinserted(const sender: tcustomgrid; const index,count: integer);
+   procedure editontextmouseevent(const sender: tobject; 
+                                              var info: textmouseeventinfoty);
+   procedure editoneditnotification(const sender: tobject; 
+                                              var info: editnotificationinfoty);
+   procedure gridonrowsdeleted(const sender: tcustomgrid; 
+                                              const index,count: integer);
+   procedure gridonrowsinserted(const sender: tcustomgrid;
+                                              const index,count: integer);
    procedure sourcefoonloaded(const sender: TObject);
    procedure textchanged(const sender: tdatacol; const aindex: integer);
    procedure sourcefoonshow(const sender: TObject);
