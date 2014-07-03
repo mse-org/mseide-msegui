@@ -1258,6 +1258,7 @@ type
                                       const quiet: boolean): realty; override;
    procedure internalcreateframe; override;
    procedure mouseevent(var info: mouseeventinfoty); override;
+   procedure dokeydown(var info: keyeventinfoty); override;
    procedure domousewheelevent(var info: mousewheeleventinfoty); override;
    procedure updatebuttonstate();
    procedure updatereadonlystate; override;
@@ -5757,6 +5758,34 @@ procedure tcustomrealspinedit.enabledchanged;
 begin
  inherited;
  updatebuttonstate();
+end;
+
+procedure tcustomrealspinedit.dokeydown(var info: keyeventinfoty);
+var
+ shiftstate1: shiftstatesty;
+begin
+ with info do begin
+  if ((shiftstate * keyshiftstatesmask) - [ss_shift,ss_alt,ss_ctrl] = []) and 
+        (ss_alt in shiftstate) and not readonly and
+                                   not (es_processed in eventstate) then begin
+   include(eventstate,es_processed);
+   shiftstate1:= shiftstate - [ss_alt];
+   case key of
+    key_up: begin
+     dostep(sk_up,0,shiftstate1);
+    end;
+    key_down: begin
+     dostep(sk_down,0,shiftstate1);
+    end;
+    else begin
+     exclude(eventstate,es_processed);
+    end;
+   end;
+  end;
+  if not (es_processed in eventstate) then begin
+   inherited;
+  end;
+ end;
 end;
 
 { tcustomdatetimeedit }
