@@ -3271,7 +3271,7 @@ procedure tcustomstepframe.execute(const tag: integer;
                                       const info: mouseeventinfoty);
 begin
  if @info = nil then begin
-  fstepintf.dostep(stepkindty(tag),0,[]);
+  fstepintf.dostep(stepkindty(tag),0,application.lastshiftstate);
  end
  else begin
   fstepintf.dostep(stepkindty(tag),0,info.shiftstate);

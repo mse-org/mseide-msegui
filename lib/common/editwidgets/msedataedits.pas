@@ -1259,7 +1259,9 @@ type
    procedure internalcreateframe; override;
    procedure mouseevent(var info: mouseeventinfoty); override;
    procedure domousewheelevent(var info: mousewheeleventinfoty); override;
+   procedure updatebuttonstate();
    procedure updatereadonlystate; override;
+   procedure enabledchanged(); override;
     //istepbar
    function dostep(const event: stepkindty; const adelta: real;
                    ashiftstate: shiftstatesty): boolean;
@@ -5733,17 +5735,28 @@ begin
  inherited;
 end;
 
-procedure tcustomrealspinedit.updatereadonlystate;
+procedure tcustomrealspinedit.updatebuttonstate();
 begin
- inherited;
  if fframe <> nil then begin
-  if readonly then begin
+  if readonly or not isenabled then begin
    frame.disabledbuttons:= allstepkinds;
   end
   else begin
    frame.disabledbuttons:= [];
   end;
  end;
+end;
+
+procedure tcustomrealspinedit.updatereadonlystate;
+begin
+ inherited;
+ updatebuttonstate();
+end;
+
+procedure tcustomrealspinedit.enabledchanged;
+begin
+ inherited;
+ updatebuttonstate();
 end;
 
 { tcustomdatetimeedit }
