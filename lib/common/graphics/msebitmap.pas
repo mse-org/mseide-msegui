@@ -239,6 +239,15 @@ type
    procedure unlink(const source,dest: iobjectlink; valuepo: pointer = nil);
    procedure objevent(const sender: iobjectlink; const event: objecteventty);
    function getinstance: tobject;
+   function doloadfromstream(const atry: boolean;
+           const stream: tstream;
+           const format: string; const params: array of const): string;
+   function doloadfromfile(const atry: boolean;
+             const filename: filenamety;
+             const format: string; const params: array of const): string;
+   function doloadfromstring(const atry: boolean;
+               const avalue: string;
+               const format: string; const params: array of const): string;
   public
    constructor create(const akind: bitmapkindty;
                      const agdifuncs: pgdifunctionaty = nil);
@@ -261,16 +270,52 @@ type
                                [al_stretchx,al_stretchy,al_intpol]); overload;
    procedure remask; //recalc mask
    procedure automask; //transparentcolor is bottomright pixel
+
    function loadfromstring(const avalue: string; const format: string;
                                                          //'' = any
                                         const params: array of const): string;
-                                         //returns format
+                                         //returns format name
+   function loadfromstring(const avalue: string): string;  
+                                         //returns format name
    function loadfromstream(const stream: tstream; const format: string;
                                                          //'' = any
                                        const params: array of const): string;
+                                         //returns format name
+   function loadfromstream(const stream: tstream): string; 
+                                         //returns format name
+
    function loadfromfile(const filename: filenamety; const format: string; 
                                                          //'' = any
                                        const params: array of const): string;
+                                         //returns format name
+   function loadfromfile(const filename: filenamety): string; 
+                                         //returns format name
+
+   function tryloadfromstring(const avalue: string; const format: string;
+                                                         //'' = any
+                                        const params: array of const): string;
+           //returns format name, '' = unknown/not supported
+           //exception in case of read error
+   function tryloadfromstring(const avalue: string): string;
+           //returns format name, '' = unknown/not supported
+           //exception in case of read error
+   function tryloadfromstream(const stream: tstream; const format: string;
+                                                         //'' = any
+                                       const params: array of const): string;
+           //returns format name, '' = unknown/not supported
+           //exception in case of read error
+   function tryloadfromstream(const stream: tstream): string;
+           //returns format name, '' = unknown/not supported
+           //exception in case of read error
+   function tryloadfromfile(const filename: filenamety; const format: string; 
+                                                         //'' = any
+                                       const params: array of const): string;
+           //returns format name, '' = unknown/not supported
+           //exception in case of read error
+   function tryloadfromfile(const filename: filenamety): string; 
+           //returns format name, '' = unknown/not supported
+           //exception in case of read error
+   
    procedure writetostring(out avalue: string; const format: string;
                                   const params: array of const); overload;
    function writetostring(const format: string;
@@ -378,10 +423,11 @@ type
    procedure setimage(index: integer; image: tmaskedbitmap;
          const source: rectty; 
          const aalignment: alignmentsty = []); overload;
-   procedure setimage(index: integer; image: tmaskedbitmap;
+   procedure setimage(index: integer; image: tmaskedbitmap; 
+                                      //nil -> empty item
                      const aalignment: alignmentsty = []); overload;
    procedure getimage(const index: integer; const dest: tmaskedbitmap);
-   function addimage(const image: tmaskedbitmap; 
+   function addimage(const image: tmaskedbitmap; //nil -> empty item
                               const aalignment: alignmentsty = []): integer;
 
    procedure paint(const acanvas: tcanvas; const index: integer;
@@ -1633,10 +1679,11 @@ begin
   end;
  end;
  ki2:= ki1;
- col1:= gettranspcolor();
- if (col1 <> cl_none) and not(pms_maskvalid in fstate) and 
-                                              not isempty() then begin
-  ki2:= bmk_mono; //create a stencil mask from transpatent color
+ if not(pms_maskvalid in fstate) and  not isempty() then begin
+  col1:= gettranspcolor();
+  if (col1 <> cl_none) then begin
+   ki2:= bmk_mono; //create a stencil mask from transparent color
+  end;
  end;
  if fmask = nil then begin
   createmask(ki2);
@@ -2313,13 +2360,19 @@ begin
  stream.writebuffer(pchar(pointer(forigformatdata))^,lint1);
 end;
 
-function tmaskedbitmap.loadfromstream(const stream: tstream;
+function tmaskedbitmap.doloadfromstream(const atry: boolean;
+           const stream: tstream;
            const format: string; const params: array of const): string;
 var
  int1,int2: integer;
 begin
  int1:= stream.position;
- result:= readgraphic(stream,self,format,params);
+ if atry then begin
+  result:= tryreadgraphic(stream,self,format,params);
+ end
+ else begin
+  result:= readgraphic(stream,self,format,params);
+ end;
  int2:= stream.position;
  if bmo_storeorigformat in options then begin
   forigformat:= result;
@@ -2330,20 +2383,22 @@ begin
  end;
 end;
 
-function tmaskedbitmap.loadfromfile(const filename: filenamety;
+function tmaskedbitmap.doloadfromfile(const atry: boolean;
+             const filename: filenamety;
              const format: string; const params: array of const): string;
 var
  stream: tmsefilestream;
 begin
  stream:= tmsefilestream.create(filename,fm_read);
  try
-  result:= loadfromstream(stream,format,params);
+  result:= doloadfromstream(atry,stream,format,params);
  finally
   stream.free;
  end;
 end;
 
-function tmaskedbitmap.loadfromstring(const avalue: string;
+function tmaskedbitmap.doloadfromstring(const atry: boolean;
+               const avalue: string;
                const format: string; const params: array of const): string;
 var
  stream1: tstringcopystream;
@@ -2355,11 +2410,78 @@ begin
  else begin
   stream1:= tstringcopystream.create(avalue);
   try
-   result:= loadfromstream(stream1,format,params);
+   result:= doloadfromstream(atry,stream1,format,params);
   finally
    stream1.free;
   end;
  end;
+end;
+
+function tmaskedbitmap.tryloadfromstream(const stream: tstream;
+           const format: string; const params: array of const): string;
+begin
+ result:= doloadfromstream(true,stream,format,params);
+end;
+
+function tmaskedbitmap.loadfromstream(const stream: tstream;
+           const format: string; const params: array of const): string;
+begin
+ result:= doloadfromstream(false,stream,format,params);
+end;
+
+
+function tmaskedbitmap.loadfromfile(const filename: filenamety;
+             const format: string; const params: array of const): string;
+begin
+ result:= doloadfromfile(false,filename,format,params);
+end;
+
+function tmaskedbitmap.tryloadfromfile(const filename: filenamety;
+             const format: string; const params: array of const): string;
+begin
+ result:= doloadfromfile(true,filename,format,params);
+end;
+
+function tmaskedbitmap.loadfromstring(const avalue: string;
+               const format: string; const params: array of const): string;
+begin
+ result:= doloadfromstring(false,avalue,format,params);
+end;
+
+function tmaskedbitmap.tryloadfromstring(const avalue: string;
+               const format: string; const params: array of const): string;
+begin
+ result:= doloadfromstring(true,avalue,format,params);
+end;
+
+function tmaskedbitmap.loadfromstring(const avalue: string): string;
+begin
+ result:= loadfromstring(avalue,'',[]);
+end;
+
+function tmaskedbitmap.loadfromstream(const stream: tstream): string;
+begin
+ result:= loadfromstream(stream,'',[]);
+end;
+
+function tmaskedbitmap.loadfromfile(const filename: filenamety): string;
+begin
+ result:= loadfromfile(filename,'',[]);
+end;
+
+function tmaskedbitmap.tryloadfromstring(const avalue: string): string;
+begin
+ result:= tryloadfromstring(avalue,'',[]);
+end;
+
+function tmaskedbitmap.tryloadfromstream(const stream: tstream): string;
+begin
+ result:= tryloadfromstream(stream,'',[]);
+end;
+
+function tmaskedbitmap.tryloadfromfile(const filename: filenamety): string;
+begin
+ result:= tryloadfromfile(filename,'',[]);
 end;
 
 procedure tmaskedbitmap.writetostring(out avalue: string; const format: string;
@@ -2721,25 +2843,26 @@ procedure timagelist.setimage(index: integer; image: tmaskedbitmap;
                       const source: rectty;
                       const aalignment: alignmentsty = []);
 var
-// po1: pointty;
  rect1,rect2,destrect: rectty;
  bo1: boolean;
-// bmp1: tmaskedbitmap = nil;
  ima1: tmaskedbitmap;
 begin
-// try
+ rect2.pos:= indextoorg(index);
+ rect2.size:= fsize;
+ if image = nil then begin
+  fbitmap.canvas.fillrect(rect2,fbitmap.colorbackground);
+  if masked then begin
+   if fbitmap.mask.kind = bmk_mono then begin
+    fbitmap.mask.canvas.fillrect(rect2,cl_0);
+   end
+   else begin
+    fbitmap.mask.canvas.fillrect(rect2,fbitmap.fmaskcolorbackground);
+   end;
+  end;
+ end
+ else begin
   rect1:= source;
   ima1:= image;
-  {
-  if stretch and not sizeisequal(source.size,size) then begin
-   bmp1:= tmaskedbitmap.create(image.monochrome);
-   bmp1.size:= fsize;
-   image.stretch(source,bmp1);
-   ima1:= bmp1;
-  end;
-  }
-  rect2.pos:= indextoorg(index);
-  rect2.size:= fsize;
   destrect:= calcrectalignment(rect2,source,aalignment);
   with rect1 do begin
    bo1:= (al_fit in aalignment) or 
@@ -2779,8 +2902,6 @@ begin
       fbitmap.mask.canvas.fillrect(rect2,fbitmap.fmaskcolorbackground);
      end;
     end;
-//    subpoint1(rect2.pos,rect1.pos);
-//    addpoint1(pointty(rect1.size),rect1.pos);
     if fbitmap.mask.kind = bmk_mono then begin
      fbitmap.mask.canvas.fillrect(destrect,cl_1);
     end
@@ -2800,10 +2921,8 @@ begin
    end;
    fbitmap.copyarea(ima1,rect1,rect2,aalignment,rop_copy,false);
   end;
-  change;
-// finally
-//  bmp1.free;
-// end;
+ end;
+ change;
 end;
 
 procedure timagelist.getimage(const index: integer; const dest: tmaskedbitmap);
@@ -2839,7 +2958,12 @@ end;
 procedure timagelist.setimage(index: integer; image: tmaskedbitmap;
                                      const aalignment: alignmentsty = []);
 begin
- setimage(index,image,makerect(nullpoint,image.fsize),aalignment);
+ if image = nil then begin
+  setimage(index,nil,makerect(nullpoint,fsize),[]);
+ end
+ else begin
+  setimage(index,image,makerect(nullpoint,image.fsize),aalignment);
+ end;
 end;
 
 procedure timagelist.copyimages(const image: tmaskedbitmap; 
@@ -2926,35 +3050,44 @@ var
  newcolcount,newrowcount,newcount: integer;
  bmp1: tmaskedbitmap;
 begin
- if not image.isempty then begin
+ result:= -1;
+ if image = nil then begin
   result:= fcount;
-  beginupdate;
-  try
-   if (fsize.cx = 0) or (fsize.cy = 0) then begin
-    fsize:= image.fsize;
-   end;
-   if aalignment <> [] then begin
-    bmp1:= tmaskedbitmap.create(image.kind);
-    bmp1.size:= fsize;
-    image.stretch(bmp1,aalignment);
-   end
-   else begin
-    bmp1:= image;
-   end;     
-   newcolcount:= (bmp1.size.cx + fsize.cx-1) div fsize.cx;
-   newrowcount:= (bmp1.size.cy + fsize.cy-1) div fsize.cy;
-   newcount:= newcolcount * newrowcount;
-   count:= fcount + newcount;
-   copyimages(bmp1,result);
-  finally
-   if aalignment <> [] then begin
-    bmp1.free;
-   end;
-   endupdate;
-  end;
+  count:= fcount+1;
+  setimage(result,nil);
  end
  else begin
-  result:= -1;
+  if not image.isempty then begin
+   result:= fcount;
+   beginupdate;
+   bmp1:= nil;
+   try
+    if (fsize.cx = 0) or (fsize.cy = 0) then begin
+     if image = nil then begin
+      exit;
+     end;
+     fsize:= image.fsize;
+    end;
+    if aalignment <> [] then begin
+     bmp1:= tmaskedbitmap.create(image.kind);
+     bmp1.size:= fsize;
+     image.stretch(bmp1,aalignment);
+    end
+    else begin
+     bmp1:= image;
+    end;     
+    newcolcount:= (bmp1.size.cx + fsize.cx-1) div fsize.cx;
+    newrowcount:= (bmp1.size.cy + fsize.cy-1) div fsize.cy;
+    newcount:= newcolcount * newrowcount;
+    count:= fcount + newcount;
+    copyimages(bmp1,result);
+   finally
+    if bmp1 <> image then begin
+     bmp1.free;
+    end;
+    endupdate;
+   end;
+  end;
  end;
 end;
 

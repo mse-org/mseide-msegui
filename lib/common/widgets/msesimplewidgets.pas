@@ -307,10 +307,6 @@ type
    procedure setfacemouse(const avalue: tcustomface);
    function getfaceclicked: tcustomface;
    procedure setfaceclicked(const avalue: tcustomface);
-   procedure createfaceactive;
-   procedure createfacedisabled;
-   procedure createfacemouse;
-   procedure createfaceclicked;
    function getfacedisabled: tcustomface;
    procedure setfacedisabled(const avalue: tcustomface);
    procedure setimagenrmouse(const avalue: imagenrty);
@@ -322,6 +318,10 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   procedure createfaceactive;
+   procedure createfacedisabled;
+   procedure createfacemouse;
+   procedure createfaceclicked;
    property faceactive: tcustomface read getfaceactive write setfaceactive;
    property facemouse: tcustomface read getfacemouse write setfacemouse;
    property faceclicked: tcustomface read getfaceclicked write setfaceclicked;
@@ -1556,14 +1556,12 @@ begin
    end;
   end
   else begin
-   if (ws_lclicked in fwidgetstate) and (ffaceclicked <> nil) then begin
+   if (shs_clicked in finfo.state) and (ffaceclicked <> nil) then begin
     result:= ffaceclicked;
    end
    else begin
-    if application.clientmousewidget = self then begin
-     if ffacemouse <> nil then begin
-      result:= ffacemouse;
-     end;    
+    if (shs_mouse in finfo.state) and (ffacemouse <> nil) then begin
+     result:= ffacemouse;
     end;
    end;
   end;

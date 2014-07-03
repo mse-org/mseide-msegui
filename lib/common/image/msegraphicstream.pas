@@ -50,8 +50,24 @@ function readgraphic(const source: tstream; const dest: tbitmap;
 function readgraphic(const source: tstream; const dest: tmaskedbitmap;
                            const aformatname: string = '';
                            const params: array of const): string; overload;
+                           //returns formatname
 function readgraphic(const source: tstream;
                                  const dest: timagelist): string; overload;
+                           //returns formatname
+function tryreadgraphic(const source: tstream; const dest: tbitmap;
+                           const aformatname: string = '';
+                           const params: array of const): string; overload;
+           //returns format name, '' = unknown/not supported
+           //exception in case of read error
+function tryreadgraphic(const source: tstream; const dest: tmaskedbitmap;
+                           const aformatname: string = '';
+                           const params: array of const): string; overload;
+           //returns format name, '' = unknown/not supported
+           //exception in case of read error
+function tryreadgraphic(const source: tstream;
+                                 const dest: timagelist): string; overload;
+           //returns format name, '' = unknown/not supported
+           //exception in case of read error
                            
 procedure writegraphic(const dest: tstream; const source: tbitmap;
                            const aformatname: string;
@@ -251,7 +267,7 @@ begin
  end;
 end;
 
-function readgraphic1(const source: tstream;
+function readgraphic1(const atry: boolean; const source: tstream;
                 const adest: tobject; const aformatlabel: string;
                 const params: array of const): string;
                 //index = select image in ico format
@@ -299,11 +315,14 @@ begin
    end;
   end;
  end;
- if not found then begin
-  formaterror(stockobjects.captions[sc_graphic_format_not_supported],aformatlabel);
- end
- else begin
-  formaterror(stockobjects.captions[sc_graphic_format_error],aformatlabel);
+ if not atry then begin
+  if not found then begin
+   formaterror(stockobjects.captions[sc_graphic_format_not_supported],
+                                                              aformatlabel);
+  end
+  else begin
+   formaterror(stockobjects.captions[sc_graphic_format_error],aformatlabel);
+  end;
  end;
 end;
 
@@ -336,7 +355,7 @@ function readgraphic(const source: tstream; const dest: tbitmap;
                            const aformatname: string = '';
                            const params: array of const): string; overload;
 begin
- result:= readgraphic1(source,dest,aformatname,params);
+ result:= readgraphic1(false,source,dest,aformatname,params);
 end;
 
 function readgraphic(const source: tstream; const dest: tmaskedbitmap;
@@ -344,13 +363,34 @@ function readgraphic(const source: tstream; const dest: tmaskedbitmap;
                            const params: array of const): string; overload;
                            //index = select image in ico format
 begin
- result:= readgraphic1(source,dest,aformatname,params);
+ result:= readgraphic1(false,source,dest,aformatname,params);
 end;
 
 function readgraphic(const source: tstream;
                             const dest: timagelist): string; overload;
 begin
- result:= readgraphic1(source,dest,'ico',[-1]);
+ result:= readgraphic1(false,source,dest,'ico',[-1]);
+end;
+
+function tryreadgraphic(const source: tstream; const dest: tbitmap;
+                           const aformatname: string = '';
+                           const params: array of const): string; overload;
+begin
+ result:= readgraphic1(true,source,dest,aformatname,params);
+end;
+
+function tryreadgraphic(const source: tstream; const dest: tmaskedbitmap;
+                           const aformatname: string = '';
+                           const params: array of const): string; overload;
+                           //index = select image in ico format
+begin
+ result:= readgraphic1(true,source,dest,aformatname,params);
+end;
+
+function tryreadgraphic(const source: tstream;
+                            const dest: timagelist): string; overload;
+begin
+ result:= readgraphic1(true,source,dest,'ico',[-1]);
 end;
                            
 procedure writegraphic(const dest: tstream; const source: tbitmap;
@@ -795,8 +835,8 @@ var
  begin
   bo1:= false;
   bo2:= false;
-  with tmaskedbitmap(dest) do begin
-   with mask do begin
+  with tmaskedbitmap1(dest) do begin
+   with fmask do begin
     po1:= scanline[0];
     int3:= scanlinestep;
    end;
@@ -865,7 +905,8 @@ begin
        graymask:= true;
        include(foptions,bmo_masked);
        createmask(bmk_gray);
-       mask.size:= size;
+       fmask.size:= size;
+       include(fstate,pms_maskvalid);
        if not getmaskdata(8) then begin
         getmaskdata(0); //try 8 bit
        end;
