@@ -13728,6 +13728,7 @@ var
  mousecapturewidgetbefore: twidget;
  int1: integer;
  po1: peventaty;
+ self1: tlinkedobject;
 begin
  if info.mouse.eventkind = ek_mousewheel then begin
   capture:= fownerwidget.mouseeventwidget(info.mouse);
@@ -13749,6 +13750,8 @@ begin
    endmodal;
   end
   else begin
+   self1:= nil;
+   setlinkedvar(self,self1); //for destroy check
    with capture do begin
     absposbefore:= info.mouse.pos;
     subpoint1(info.mouse.pos,rootpos);
@@ -13760,10 +13763,16 @@ begin
     end
     else begin
      mouseevent(info.mouse);
+     if self1 = nil then begin
+      exit;
+     end;
      if (info.mouse.eventkind = ek_buttonpress) and ispopup and
       (ow_mousefocus in self.fownerwidget.foptionswidget) then begin
       activate; //possibly not done by windowmanager
      end;
+    end;
+    if self1 = nil then begin
+     exit;
     end;
     posbefore:= subpoint(info.mouse.pos,posbefore);
     addpoint1(posbefore,appinst.fdelayedmouseshift);
@@ -13791,6 +13800,10 @@ begin
      dispatchmouseevent(info,nil);  //immediate mouseenter
     end;
    end;
+   if self1 = nil then begin
+    exit;
+   end;
+   setlinkedvar(nil,self1);
   end;
   {
  end
