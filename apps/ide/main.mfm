@@ -81,6 +81,7 @@ object mainfo: tmainfo
     filedir = '"^/.mseide"'
     options = [sfo_createpath, sfo_transaction, sfo_activatorread, sfo_activatorwrite]
     onstatupdate = mainstatfileonupdatestat
+    onstatbeforewrite = mainstatbeforewriteexe
     top = 24
   end
   object mainmenu1: tmainmenu

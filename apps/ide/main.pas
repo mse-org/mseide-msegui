@@ -139,6 +139,7 @@ type
    procedure loadwindowlayoutexe(const sender: TObject);
    procedure getstatobjs(const sender: TObject; var aobjects: objectinfoarty);
    procedure targetpipeinput(const sender: tpipereader);
+   procedure mainstatbeforewriteexe(const sender: TObject);
   private
    fstartcommand: startcommandty;
    fnoremakecheck: boolean;
@@ -2849,6 +2850,11 @@ begin
   caption:= idecaption;
   fprojectloaded:= false;
  end;
+end;
+
+procedure tmainfo.mainstatbeforewriteexe(const sender: TObject);
+begin
+ disassfo.resetshortcuts();
 end;
 
 end.
