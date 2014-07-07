@@ -1895,7 +1895,8 @@ begin
  end;
 end;
 
-function datetostring(const avalue: tdatetime; const format: msestring = 'c'): msestring;
+function datetostring(const avalue: tdatetime; 
+                                  const format: msestring = 'c'): msestring;
 begin
  if avalue = emptydatetime then begin
   result:= '';

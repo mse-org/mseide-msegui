@@ -120,7 +120,8 @@ type
 
    procedure updatebreakpoints; //transfer breakpoints to gdb
    procedure showbreakpoint(const filepath: filenamety;
-                                       const aline: integer; focus: boolean);
+                                 const aline: integer; const focus: boolean);
+   procedure showbreakpoint(const aaddress: int64; focus: boolean);
    function checkbreakpointcontinue(const stopinfo: stopinfoty): boolean;
                                 //set condition
    function isactivebreakpoint(const addr: qword): boolean;
@@ -727,7 +728,7 @@ begin
 end;
 
 procedure tbreakpointsfo.showbreakpoint(const filepath: filenamety;
-                          const aline: integer; focus: boolean);
+                          const aline: integer; const focus: boolean);
 var
  int1: integer;
 begin
@@ -738,6 +739,22 @@ begin
    if focus then begin
     grid.setfocus;
     window.bringtofront;
+   end;
+  end;
+ end;
+end;
+
+procedure tbreakpointsfo.showbreakpoint(const aaddress: int64; focus: boolean);
+var
+ int1: integer;
+begin
+ for int1:= 0 to grid.rowhigh do begin
+  if address[int1] = aaddress then begin
+   grid.row:= int1;
+   show();
+   if focus then begin
+    grid.setfocus();
+    window.bringtofront();
    end;
   end;
  end;

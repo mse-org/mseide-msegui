@@ -20,12 +20,13 @@ unit disassform;
 
 interface
 uses
- msegui,mseclasses,mseforms,msegdbutils,msegrids,msetypes,msestrings,
- mseevent,msegraphics,mseguiglob;
+ msegui,mseclasses,mseforms,msegdbutils,msegrids,msetypes,msestrings,mseevent,
+ msegraphics,mseguiglob,msemenus;
 
 type
  tdisassfo = class(tdockform)
    grid: tstringgrid;
+   popupmen: tpopupmenu;
    procedure disassfoonshow(const sender: TObject);
    procedure keydo(const sender: twidget; var info: keyeventinfoty);
    procedure deact(const sender: TObject);
@@ -34,6 +35,9 @@ type
                    var cellinfo: cellinfoty; var processed: Boolean);
    procedure addrcellevent(const sender: TObject; var info: celleventinfoty);
    procedure scrollrows(const sender: tcustomgrid; var step: Integer);
+   procedure celleventexe(const sender: TObject; var info: celleventinfoty);
+   procedure popupupdate(const sender: tcustommenu);
+   procedure showbreakexe(const sender: TObject);
   private
    faddress: qword;
    ffirstaddress: qword;
@@ -105,9 +109,11 @@ begin
     if aline > 0 then begin
      apage:= sourcefo.openfile(fname1);
      grid.rowcount:= int2 + 1 + length(ar1);
+     grid[3][int2]:= inttostr(aline-1);
      if (apage <> nil) and (aline > 0) and 
                               (aline <= apage.grid.rowcount) then begin
       grid[1][int2]:= apage.edit[aline-1];
+      grid[2][int2]:= fname1;
      end
      else begin
       grid[1][int2]:= '<line ' + inttostr(aline)+'>';
@@ -272,7 +278,8 @@ procedure tdisassfo.befdrawcell(const sender: tcol; const canvas: tcanvas;
 begin
  with cellinfo do begin
   if pmsestring(datapo)^ <> '' then begin
-   if breakpointsfo.isactivebreakpoint(strtohex(pmsestring(datapo)^)) then begin
+   if breakpointsfo.isactivebreakpoint(
+                             strtohex64(pmsestring(datapo)^)) then begin
     color:= cl_ltred;
    end;
   end;
@@ -282,12 +289,48 @@ end;
 procedure tdisassfo.addrcellevent(const sender: TObject;
                var info: celleventinfoty);
 begin
- if iscellclick(info,[ccr_buttonpress]) then begin
-  with info do begin
-   breakpointsfo.toggleaddrbreakpoint(strtohex(self.grid[cell.col][cell.row]));
+ with info do begin
+  if iscellclick(info,[ccr_buttonpress]) then begin
+   breakpointsfo.toggleaddrbreakpoint(
+                    strtohex64(self.grid[cell.col][cell.row]));
    grid.invalidatecell(cell);
   end;
  end;
+end;
+
+procedure tdisassfo.celleventexe(const sender: TObject;
+               var info: celleventinfoty);
+var
+ int1: integer;
+begin
+ if (info.cell.col = 1) and iscellclick(info,[ccr_dblclick]) then begin
+  int1:= info.cell.row;
+  while (int1 >= 0) and (grid[2][int1] = '') do begin
+   dec(int1);
+  end;
+  if int1 < 0 then begin
+   int1:= info.cell.row;
+   while (int1 < grid.rowcount) and (grid[2][int1] = '') do begin
+    inc(int1);
+   end;
+  end;
+  if (int1 >= 0) and (int1 < grid.rowcount) then begin
+   sourcefo.showsourceline(grid[2][int1],strtoint(grid[3][int1]),0,true);
+  end;
+ end;
+end;
+
+procedure tdisassfo.popupupdate(const sender: tcustommenu);
+begin
+ popupmen.menu.itembyname('showbreak').enabled:= grid.focusedcellvalid and
+    (grid[0][grid.row] <> '') and
+    breakpointsfo.isactivebreakpoint(strtohex64(grid[0][grid.row]));          
+end;
+
+procedure tdisassfo.showbreakexe(const sender: TObject);
+begin
+ breakpointsfo.showbreakpoint(
+                    strtohex64(self.grid[0][grid.row]),true);
 end;
 
 end.
