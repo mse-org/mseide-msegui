@@ -162,7 +162,7 @@ type
    procedure checklink;
    procedure setlastdir(const avalue: filenamety);
    procedure setimagelist(const avalue: timagelist);
-   function getsyscommandline: filenamety;
+   function getsysfilename: filenamety;
   protected
    flastdir: filenamety;
    fdefaultext: filenamety;
@@ -197,7 +197,8 @@ type
    procedure componentevent(const event: tcomponentevent);
    property history: msestringarty read fhistory write fhistory;
    property filenames: filenamearty read ffilenames write ffilenames;
-   property syscommandline: filenamety read getsyscommandline;
+   property syscommandline: filenamety read getsysfilename; deprecated;
+   property sysfilename: filenamety read getsysfilename;
    property params: msestring read fparams;
   published
    property filename: filenamety read getfilename write setfilename;
@@ -1902,7 +1903,7 @@ begin
  setlinkedvar(avalue,tmsecomponent(fimagelist));
 end;
 
-function tfiledialogcontroller.getsyscommandline: filenamety;
+function tfiledialogcontroller.getsysfilename: filenamety;
 var
  bo1: boolean;
 begin
