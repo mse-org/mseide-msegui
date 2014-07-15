@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2013 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2014 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -93,7 +93,7 @@ var
  
 begin
  with messages do begin
-  int1:= datacols[0].readpipe(atext,true,120);
+  int1:= datacols[0].readpipe(atext,[aco_processeditchars],120);
   rowhigh1:= rowhigh;
   int2:= rowhigh1-int1;
   if int2 < 0 then begin

@@ -438,8 +438,8 @@ begin
  sourceupdate.deinit(designer);
 end;
 
-procedure tmainfo.dofindmodulebyname(const amodule: pmoduleinfoty; const aname: string;
-                    var action: modalresultty);
+procedure tmainfo.dofindmodulebyname(const amodule: pmoduleinfoty;
+                        const aname: string; var action: modalresultty);
 var
  wstr2: msestring;
 

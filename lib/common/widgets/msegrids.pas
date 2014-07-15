@@ -814,11 +814,13 @@ type
    destructor destroy; override;
    function edited: boolean;
    function readpipe(const pipe: tpipereader; 
-                      const processeditchars: boolean = false;
+                  const aoptions: addcharoptionsty = [aco_processeditchars];
+//                      const processeditchars: boolean = false;
                       const maxchars: integer = 0): integer; overload;
       //returns added rowcount
    function readpipe(const text: string; 
-                      const processeditchars: boolean = false;
+                  const aoptions: addcharoptionsty = [aco_processeditchars];
+//                      const processeditchars: boolean = false;
                       const maxchars: integer = 0): integer; overload;
       //returns added rowcount
    procedure fillcol(const value: msestring);
@@ -6913,17 +6915,19 @@ begin
 end;
 
 function tcustomstringcol.readpipe(const text: string;
-              const processeditchars: boolean = false;
+//              const processeditchars: boolean = false;
+              const aoptions: addcharoptionsty = [aco_processeditchars];
               const maxchars: integer = 0): integer;
 var
  mstr1: msestring;
 begin
  mstr1:= text;
- result:= datalist.addchars(mstr1,processeditchars,maxchars);
+ result:= datalist.addchars(mstr1,aoptions,maxchars);
 end;
 
 function tcustomstringcol.readpipe(const pipe: tpipereader;
-                            const processeditchars: boolean = false;
+                  const aoptions: addcharoptionsty = [aco_processeditchars];
+//                            const processeditchars: boolean = false;
                             const maxchars: integer = 0): integer;
 var
  str1: string;
@@ -6932,7 +6936,7 @@ begin
   str1:= pipe.readdatastring;
  except
  end;
- result:= readpipe(str1,processeditchars,maxchars);
+ result:= readpipe(str1,aoptions,maxchars);
 end;
 
 function tcustomstringcol.geteditstate: dataeditstatesty;

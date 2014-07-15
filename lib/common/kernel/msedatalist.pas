@@ -688,6 +688,9 @@ type
 
  tmsestringdatalist = class;
 
+ addcharoptionty = (aco_processeditchars,aco_stripescsequence);
+ addcharoptionsty = set of addcharoptionty;
+ 
  tpoorstringdatalist = class(tdynamicpointerdatalist)
   private
    feditcharindex: integer;
@@ -724,8 +727,8 @@ type
    function add(const avalue: msestring; const anoparagraph: boolean): integer; 
                                                               overload; virtual;
    function addchars(const value: msestring; 
-                            const processeditchars: boolean = true;
-                            const maxchars: integer = 0): integer;
+                  const aoptions: addcharoptionsty = [aco_processeditchars];
+                  const maxchars: integer = 0): integer;
           //adds characters to last row, returns index
           //maxchars = 0 -> no limitation, inserts line breaks otherwise
    function getastext(const index: integer): msestring; override;
@@ -4686,7 +4689,8 @@ begin
 end;                                                              
 
 function tpoorstringdatalist.addchars(const value: msestring;
-                    const processeditchars: boolean = true;
+                  const aoptions: addcharoptionsty = [aco_processeditchars];
+//                    const processeditchars: boolean = true;
                     const maxchars: integer = 0): integer;		
 var
  int1,int2,int3,int4: integer;
@@ -4698,7 +4702,12 @@ begin
  result:= 0;
  ar1:= nil; //compilerwarning
  if value <> '' then begin
-  ar1:= breaklines(value);
+  if aco_stripescsequence in aoptions then begin
+   ar1:= breaklines(stripescapesequences(value));
+  end
+  else begin
+   ar1:= breaklines(value);
+  end;
   if fcount = 0 then begin
    count:= 1;
    inc(result);
@@ -4707,7 +4716,8 @@ begin
   int2:= int1;
   checkindex(int1);
   first:= pmsestring(fdatapo+int1*fsize);
-  if processeditchars then begin
+//  if processeditchars then begin
+  if aco_processeditchars in aoptions then begin
    mstr1:= first^;
    addeditchars(ar1[0],mstr1,feditcharindex);
    ar1[0]:= mstr1;

@@ -82,7 +82,7 @@ type
    procedure docellevent(const ownedcol: boolean; 
                                      var info: celleventinfoty); override;
    procedure updateeditpos;
-   function stripescapesequences(avalue: msestring): msestring;
+//   function stripescapesequences(avalue: msestring): msestring;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -155,7 +155,7 @@ implementation
 uses
  msesysutils,mseprocutils,msewidgets,msetypes,mseprocmonitor,
  msekeyboard,sysutils,msesysintf,rtlconsts,msegraphutils,msearrayutils,
- msesysintf1,mserichstring
+ msesysintf1,mserichstring,msedatalist
  {$ifdef unix},mselibc{$endif};
 type
  tinplaceedit1 = class(tinplaceedit);
@@ -557,7 +557,7 @@ begin
   else begin
    mstr1:= avalue;
   end;
-  datalist.addchars(mstr1,true,fmaxchars);
+  datalist.addchars(mstr1,[aco_processeditchars],fmaxchars);
   updateeditpos;
  end;
 end;
@@ -752,64 +752,6 @@ end;
 procedure tterminal.setpipewaitus(const avalue: integer);
 begin
  fprocess.pipewaitus:= avalue;
-end;
-
-function tterminal.stripescapesequences(avalue: msestring): msestring;
-label
- lab1;
-var
- s,d,e: pmsechar;
-begin
- if avalue <> '' then begin
-  setlength(result,length(avalue));
-  s:= pointer(avalue);
-  d:= pointer(result);
-  e:= s+length(avalue);
-  while s < e do begin
-   if s^ = c_esc then begin
-    inc(s);
-    case s^ of 
-     '[': begin
-      inc(s);
-      if (s^ >= '0') and (s^ <= '9') then begin
-       inc(s);
-lab1:
-       while (s^ >= '0') and (s^ <= '9') do begin
-        inc(s);
-       end;
-       if s^ = ';' then begin
-        inc(s);
-        goto lab1; //multiple attributes
-       end;
-       if not (char(word(s^)) in ['n','h','l','H','A','B','C','D',
-                 'f','r','g','K','J','i','m']) then begin
-        dec(s);
-       end;
-      end
-      else begin
-       if not (char(word(s^)) in ['c','s','u','r','g','K','J','i']) then begin
-        dec(s);
-       end;
-      end;
-     end;
-     else begin
-      if not (char(word(s^)) in ['c','(',')','7','8','D','M','H']) then begin
-       dec(s);
-      end;
-     end;
-    end;
-   end
-   else begin
-    d^:= s^;
-    inc(d);
-   end;
-   inc(s);
-  end;
-  setlength(result,d-pmsechar(pointer(result)));
- end
- else begin
-  result:= '';
- end;
 end;
 
 procedure tterminal.setreadonly(const avalue: boolean);

@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2014 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -25,7 +25,7 @@ unit msestrings;
  {$endif}
 {$endif}
 
-{$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
+{$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$goto on}{$endif}
 
 interface
 uses
@@ -429,6 +429,7 @@ function mseremspace(const s: msestring): msestring;
 function removelinebreaks(const s: msestring): msestring;
     //replaces linebreaks with space
 procedure removetabterminator(var s: msestring);
+function stripescapesequences(avalue: msestring): msestring;
 
 procedure msestrtotvarrec(const value: ansistring; out varrec: tvarrec); overload;
 procedure msestrtotvarrec(const value: msestring; out varrec: tvarrec); overload;
@@ -5312,6 +5313,65 @@ begin
   setlength(s,int1-1);
  end;
 end;
+
+function stripescapesequences(avalue: msestring): msestring;
+label
+ lab1;
+var
+ s,d,e: pmsechar;
+begin
+ if avalue <> '' then begin
+  setlength(result,length(avalue));
+  s:= pointer(avalue);
+  d:= pointer(result);
+  e:= s+length(avalue);
+  while s < e do begin
+   if s^ = c_esc then begin
+    inc(s);
+    case s^ of 
+     '[': begin
+      inc(s);
+      if (s^ >= '0') and (s^ <= '9') then begin
+       inc(s);
+lab1:
+       while (s^ >= '0') and (s^ <= '9') do begin
+        inc(s);
+       end;
+       if s^ = ';' then begin
+        inc(s);
+        goto lab1; //multiple attributes
+       end;
+       if not (char(word(s^)) in ['n','h','l','H','A','B','C','D',
+                 'f','r','g','K','J','i','m']) then begin
+        dec(s);
+       end;
+      end
+      else begin
+       if not (char(word(s^)) in ['c','s','u','r','g','K','J','i']) then begin
+        dec(s);
+       end;
+      end;
+     end;
+     else begin
+      if not (char(word(s^)) in ['c','(',')','7','8','D','M','H']) then begin
+       dec(s);
+      end;
+     end;
+    end;
+   end
+   else begin
+    d^:= s^;
+    inc(d);
+   end;
+   inc(s);
+  end;
+  setlength(result,d-pmsechar(pointer(result)));
+ end
+ else begin
+  result:= '';
+ end;
+end;
+
 
 { tmemorystringstream }
 
