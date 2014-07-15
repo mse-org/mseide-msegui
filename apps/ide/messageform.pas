@@ -90,10 +90,17 @@ var
    end;
   end;
  end; //setrowcolor
- 
+
+var
+ opt1: addcharoptionsty;
+  
 begin
  with messages do begin
-  int1:= datacols[0].readpipe(atext,[aco_processeditchars],120);
+  opt1:= [aco_processeditchars];
+  if projectoptions.o.stripmessageesc then begin
+   include(opt1,aco_stripescsequence);
+  end;
+  int1:= datacols[0].readpipe(atext,opt1,120);
   rowhigh1:= rowhigh;
   int2:= rowhigh1-int1;
   if int2 < 0 then begin

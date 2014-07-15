@@ -367,6 +367,7 @@ type
    ft: ttextprojectoptions;
    ftexp: ttextprojectoptions;
    
+   fstripmessageesc: boolean;
    fcopymessages: boolean;
    fcheckmethods: boolean;
    fclosemessages: boolean;
@@ -422,6 +423,8 @@ type
   published
    property t: ttextprojectoptions read ft;
 
+   property stripmessageesc: boolean read fstripmessageesc 
+                                             write fstripmessageesc;
    property copymessages: boolean read fcopymessages write fcopymessages;
    property closemessages: boolean read fclosemessages write fclosemessages;
    property checkmethods: boolean read fcheckmethods write fcheckmethods;
@@ -768,6 +771,8 @@ type
    tlayouter14: tlayouter;
    rightmarginon: tbooleanedit;
    linenumberson: tbooleanedit;
+   tspacer4: tspacer;
+   stripmessageesc: tbooleanedit;
    procedure acttiveselectondataentered(const sender: TObject);
    procedure colonshowhint(const sender: tdatacol; const arow: Integer; 
                       var info: hintinfoty);
@@ -2187,7 +2192,14 @@ begin
                     defaultmake,makegroupbox],0);
  aligny(wam_center,[mainfile,targetfile,targpref]);
  aligny(wam_center,[makecommand,makedir,messageoutputfile]);
- aligny(wam_center,[colorerror,colorwarning,colornote,copymessages]);
+ int1:= aligny(wam_center,[colorerror,colorwarning,colornote,copymessages]);
+ with stripmessageesc do begin
+  bounds_y:= int1 - bounds_cy - 2;
+ end;
+ with copymessages do begin
+  pos:= makepoint(stripmessageesc.bounds_x,int1);
+ end;
+ 
  placexorder(defaultmake.bounds_x,[10-defaultmake.frame.outerframe.right,10],
              [defaultmake,showcommandline,checkmethods]);
  int1:= aligny(wam_center,[defaultmake,showcommandline]);
