@@ -1401,7 +1401,7 @@ type
       
   public
    constructor create(const aowner: tdataset; const aintf: idscontroller;
-                      const arecnooffset: integer = 0;
+                      const arecnooffset: integer = -1;
                       const acancelresync: boolean = true);
    destructor destroy; override;
    function isutf8: boolean;
@@ -7002,7 +7002,7 @@ end;
 { tdscontroller }
 
 constructor tdscontroller.create(const aowner: tdataset; const aintf: idscontroller;
-                                   const arecnooffset: integer = 0;
+                                   const arecnooffset: integer = -1;
                                    const acancelresync: boolean = true);
 begin
  ffields:= tpersistentfields.create(aowner); 

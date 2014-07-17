@@ -1052,7 +1052,7 @@ end;
 constructor tmsezstoredproc.create(aowner: tcomponent);
 begin
  inherited;
- fcontroller:= tdscontroller.create(self,idscontroller(self));
+ fcontroller:= tdscontroller.create(self,idscontroller(self),-1);
 end;
 
 destructor tmsezstoredproc.destroy;

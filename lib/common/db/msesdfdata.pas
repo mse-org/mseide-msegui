@@ -171,7 +171,7 @@ uses
 constructor tmsefixedformatdataset.create(aowner: tcomponent);
 begin
  inherited;
- fcontroller:= tdscontroller.create(self,idscontroller(self));
+ fcontroller:= tdscontroller.create(self,idscontroller(self),-1);
 end;
 
 destructor tmsefixedformatdataset.destroy;
@@ -432,7 +432,7 @@ end;
 constructor tmsesdfdataset.create(aowner: tcomponent);
 begin
  inherited;
- fcontroller:= tdscontroller.create(self,idscontroller(self));
+ fcontroller:= tdscontroller.create(self,idscontroller(self),-1);
 end;
 
 destructor tmsesdfdataset.destroy;
