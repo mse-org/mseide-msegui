@@ -7409,7 +7409,7 @@ end;
 
 function tgriddatalink.hasdata: boolean;
 begin
- result:= active and (recordcount > 0);
+ result:= active and datasource.enabled and (recordcount > 0);
 end;
 
 procedure tgriddatalink.readdatasource(reader: treader);

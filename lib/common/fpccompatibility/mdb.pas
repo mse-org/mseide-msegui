@@ -1761,6 +1761,8 @@ type
     procedure SetActive(AActive: Boolean);
     procedure SetDataSource(Value: TDataSource);
     Procedure SetReadOnly(Value : Boolean);
+   function getreadonly: Boolean;
+   function getactive: Boolean;
   protected
     procedure ActiveChanged; virtual;
     procedure CheckBrowseMode; virtual;
@@ -1791,7 +1793,7 @@ type
     procedure UpdateRecord;
     function ExecuteAction(Action: TBasicAction): Boolean; virtual;
     function UpdateAction(Action: TBasicAction): Boolean; virtual;
-    property Active: Boolean read FActive;
+    property Active: Boolean read getactive;
     property ActiveRecord: Integer read GetActiveRecord write SetActiveRecord;
     property BOF: Boolean read GetBOF;
     property BufferCount: Integer read GetBufferCount write SetBufferCount;
@@ -1800,7 +1802,7 @@ type
     property DataSourceFixed: Boolean read FDataSourceFixed write FDataSourceFixed;
     property Editing: Boolean read FEditing;
     property Eof: Boolean read GetEOF;
-    property ReadOnly: Boolean read FReadOnly write SetReadOnly;
+    property ReadOnly: Boolean read getreadonly write SetReadOnly;
     property RecordCount: Integer read GetRecordCount;
   end;
 
@@ -1847,6 +1849,7 @@ type
   ifistatechangedeventty = procedure(const sender: tdatasource;
                    const alink: tdatalink; const aclient: iificlient;
                    const astate: ifiwidgetstatesty) of object;
+
   TDataSource = class(TComponent)
   private
     FDataSet: TDataSet;
@@ -1860,15 +1863,21 @@ type
 //    fonenter: datasourcelinkobjecteventty;
 //    fonexit: datasourcelinkobjecteventty;
    fonifistatechanged: ifistatechangedeventty;
+   freadonly: boolean;
+   fonenabledchange: tnotifyevent;
     procedure DistributeEvent(Event: TDataEvent; Info: Ptrint);
     procedure RegisterDataLink(DataLink: TDataLink);
     Procedure ProcessEvent(Event : TDataEvent; Info : Ptrint);
     procedure SetDataSet(ADataSet: TDataSet);
     procedure SetEnabled(Value: Boolean);
     procedure UnregisterDataLink(DataLink: TDataLink);
+   procedure setreadonly(const avalue: boolean);
+   function getactive: boolean;
   protected
+   function caneventdistribute: boolean;
     Procedure DoDataChange (Info : Pointer);virtual;
     Procedure DoStateChange; virtual;
+    procedure doenabledchange; virtual;
     Procedure DoUpdateData;
     property DataLinks: TList read FDataLinks;
     procedure ifistatechanged(const sender: tdatalink;
@@ -1882,12 +1891,18 @@ type
     procedure Edit;
     function IsLinkedTo(ADataSet: TDataSet): Boolean;
     property State: TDataSetState read FState;
+    property active: boolean read getactive;
   published
     property AutoEdit: Boolean read FAutoEdit write FAutoEdit default True;
     property DataSet: TDataSet read FDataSet write SetDataSet;
     property Enabled: Boolean read FEnabled write SetEnabled default True;
-    property OnStateChange: TNotifyEvent read FOnStateChange write FOnStateChange;
-    property OnDataChange: TDataChangeEvent read FOnDataChange write FOnDataChange;
+    property readonly: boolean read freadonly write setreadonly default false;
+    property OnStateChange: TNotifyEvent read FOnStateChange 
+                                                      write FOnStateChange;
+    property onenabledchange: tnotifyevent read fonenabledchange 
+                                                      write fonenabledchange;
+    property OnDataChange: TDataChangeEvent read FOnDataChange
+                                                          write FOnDataChange;
     property OnUpdateData: TNotifyEvent read FOnUpdateData write FOnUpdateData;
     property onifistatechanged: ifistatechangedeventty 
                            read fonifistatechanged write fonifistatechanged;
@@ -8962,6 +8977,16 @@ begin
  end
  else Result := False;
 end;
+
+function TDataLink.getreadonly: Boolean;
+begin
+ result:= freadonly or (fdatasource <> nil) and (fdatasource.readonly);
+end;
+
+function TDataLink.getactive: Boolean;
+begin
+ result:= factive and (fdatasource <> nil) and (fdatasource.enabled);
+end;
 {
 procedure TDataLink.doenter(const aobject: tobject);
 begin
@@ -9258,7 +9283,12 @@ end;
 procedure TDatasource.SetEnabled(Value: Boolean);
 
 begin
+ if fenabled <> value then begin
   FEnabled:=Value;
+  if caneventdistribute() then begin
+   processevent(dedisabledstatechange,0);
+  end;
+ end;
 end;
 
 
@@ -9274,6 +9304,14 @@ Procedure TDatasource.DoStateChange;
 begin
   If Assigned(OnStateChange) Then
     OnStateChange(Self);
+end;
+
+procedure tdatasource.doenabledchange();
+
+begin
+ if assigned(fonenabledchange) then begin
+  onenabledchange(self);
+ end;
 end;
 
 
@@ -9299,13 +9337,15 @@ procedure TDataSource.ProcessEvent(Event : TDataEvent; Info : Ptrint);
 
 Const
     OnDataChangeEvents = [deRecordChange, deDataSetChange, deDataSetScroll,
-                          deLayoutChange,deUpdateState];
+                          deLayoutChange,deUpdateState,dedisabledstatechange];
 
 Var
   NeedDataChange : Boolean;
   FLastState : TdataSetState;
 
 begin
+ if enabled or (event = dedisabledstatechange) then begin
+
   // Special UpdateState handling.
   If Event=deUpdateState then
     begin
@@ -9322,9 +9362,15 @@ begin
   else
     NeedDataChange:=True;
   DistributeEvent(Event,Info);
+  if event = dedisabledstatechange then begin
+   distributeevent(dedatasetchange,0);
+  end;
   // Extra handlers
   If Not (csDestroying in ComponentState) then
     begin
+    if event = dedisabledstatechange then begin
+     doenabledchange();
+    end;
     If (Event=deUpdateState) then
       DoStateChange;
     If (Event in OnDataChangeEvents) and
@@ -9336,6 +9382,7 @@ begin
       DoUpdateData;
     end;
  end;
+end;
 
 procedure TDataSource.ifistatechanged(const sender: tdatalink;
                const aclient: iificlient; const astate: ifiwidgetstatesty);
@@ -9345,6 +9392,27 @@ begin
   fonifistatechanged(self,sender,aclient,astate);
  end;
 end;
+
+procedure TDataSource.setreadonly(const avalue: boolean);
+begin
+ if freadonly <> avalue then begin
+  freadonly:= avalue;
+  if caneventdistribute and active then begin
+   processevent(dedisabledstatechange,0);
+  end;
+ end;
+end;
+
+function TDataSource.getactive: boolean;
+begin
+ result:= (fdataset <> nil) and (fdataset.active);
+end;
+
+function TDataSource.caneventdistribute: boolean;
+begin
+ result:= componentstate * [csloading,csreading,csdestroying] = [];
+end;
+
 {
 procedure TDataSource.doenter(const alink: tdatalink; const aobject: tobject);
 begin
