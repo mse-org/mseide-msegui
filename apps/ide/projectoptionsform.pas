@@ -2719,6 +2719,7 @@ begin
 
  valuehints:= true;
  activateonbreak:= true;
+ raiseonbreak:= true;
  settty:= true;
  additem(fexceptclassnames,'EconvertError');
  additem(fexceptignore,false);
