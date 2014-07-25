@@ -87,6 +87,7 @@ type
 
    property colorclient;
    property caption;
+   property captiontextflags;
    property captionpos;
    property captiondist;
 //   property captiondistouter;

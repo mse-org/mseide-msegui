@@ -59,6 +59,7 @@ type
    procedure readcaptionnoclip(reader: treader);
    procedure readcaptiondistouter(reader: treader);
    procedure setoptions(const avalue: captionframeoptionsty);
+   procedure setcaptiontextflags(const avalue: textflagsty);
   protected
    ffont: tframefont;
    finfo: drawtextinfoty;
@@ -92,6 +93,8 @@ type
    property options: captionframeoptionsty read foptions 
                      write setoptions default defaultcaptionframeoptions;
    property caption: msestring read getcaption write setcaption;
+   property captiontextflags: textflagsty read finfo.flags write
+                                           setcaptiontextflags default [];
    property captionpos: captionposty read fcaptionpos
              write setcaptionpos default cp_topleft;
    property captiondist: integer read fcaptiondist write setcaptiondist 
@@ -150,6 +153,7 @@ type
 
    property colorclient;
    property caption;
+   property captiontextflags;
    property captionpos;
    property captiondist;
    property captionoffset;
@@ -296,6 +300,7 @@ type
    property sbvert: tscrollbar read getsbvert write setsbvert;
    property colorclient;
    property caption;
+   property captiontextflags;
    property captionpos;
    property captiondist;
    property captionoffset;
@@ -477,6 +482,7 @@ type
    property optionsskin;
 
    property caption;
+   property captiontextflags;
    property captionpos;
    property captiondist;
    property captionoffset;
@@ -656,6 +662,7 @@ type
    property optionsskin;
  
    property caption;
+   property captiontextflags;
    property captionpos;
    property font;
    property localprops; //before template
@@ -2310,7 +2317,7 @@ begin
 end;
 
 procedure tcustomcaptionframe.paintoverlay(const canvas: tcanvas;
-                                  const arect: rectty);
+                                                   const arect: rectty);
 var
  reg1: regionty;
 begin
@@ -2415,9 +2422,11 @@ begin
               (fs_disabled in fstate) and not (cfo_captionnogray in foptions));
   canvas:= icaptionframe(fintf).getcanvas;
   canvas.font:= getfont;
-  finfo.dest:= textrect(canvas,finfo.text);
-  rect1:= deflaterect(makerect(nullpoint,
-              icaptionframe(fintf).getwidgetrect.size),fouterframe);
+  finfo.dest.size:= icaptionframe(fintf).getwidgetrect.size;
+  rect1:= deflaterect(makerect(nullpoint,finfo.dest.size),fouterframe);
+  textrect(canvas,finfo);
+  finfo.dest:= finfo.res;
+//  finfo.dest:= textrect(canvas,finfo.text);
   bo1:= cfo_captiondistouter in foptions;
   bo2:= cfo_captionframecentered in foptions;
   rect2:= inflaterect(finfo.dest,captionmargin);
@@ -2644,10 +2653,19 @@ procedure tcustomcaptionframe.setcaptionoffset(const Value: integer);
 begin
  include(flocalprops1,frl1_captionoffset);
  if fcaptionoffset <> value then begin
-  fcaptionoffset := Value;
-  internalupdatestate;
+  fcaptionoffset:= Value;
+  internalupdatestate();
  end;
 end;
+
+procedure tcustomcaptionframe.setcaptiontextflags(const avalue: textflagsty);
+begin
+ if finfo.flags <> avalue then begin
+  finfo.flags:= avalue;
+  internalupdatestate();
+ end;
+end;
+
 
 function tcustomcaptionframe.iscaptionoffsetstored: boolean;
 begin

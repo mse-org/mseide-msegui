@@ -86,6 +86,7 @@ type
 
    property colorclient default cl_foreground;
    property caption;
+   property captiontextflags;
    property captionpos;
    property captiondist;
    property captionoffset;
@@ -119,6 +120,7 @@ type
    property sbvert;
    property colorclient default cl_foreground;
    property caption;
+   property captiontextflags;
    property captionpos;
    property captiondist;
    property captionoffset;
@@ -152,6 +154,7 @@ type
    property sbvert;
    property colorclient default cl_foreground;
    property caption;
+   property captiontextflags;
    property captionpos;
    property captiondist;
    property captionoffset;

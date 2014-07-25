@@ -691,6 +691,7 @@ type
    property optionsskin;
 
    property caption;
+   property captiontextflags;
    property captionpos;
    property captiondist;
    property captionoffset;

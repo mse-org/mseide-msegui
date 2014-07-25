@@ -1716,6 +1716,7 @@ type
    property sbvert;
    property sbhorz;
    property caption;
+   property captiontextflags;
    property captionpos;
    property captiondist;
    property captionoffset;
