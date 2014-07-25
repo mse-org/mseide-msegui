@@ -4854,7 +4854,8 @@ end;
 
 procedure tcustomframe.setdisabled(const value: boolean);
 begin
- updatebit({$ifdef FPC}longword{$else}longword{$endif}(fstate),ord(fs_disabled),value);
+ updatebit({$ifdef FPC}longword{$else}longword{$endif}(fstate),
+                                                 ord(fs_disabled),value);
  with fi do begin
   if (frameimage_list <> nil) and (frameimage_offsetdisabled <> 0) or
      (frameface_list <> nil) and (frameface_offsetdisabled <> 0) then begin

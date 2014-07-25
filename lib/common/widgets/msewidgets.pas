@@ -71,10 +71,12 @@ type
    procedure fontcanvaschanged; override;
    procedure visiblechanged; override;
 
+   procedure updatetextflags;
    procedure updaterects; override;
    procedure defineproperties(filer: tfiler); override;
    procedure setdisabled(const value: boolean); override;
-   procedure dopaintfocusrect(const canvas: tcanvas; const rect: rectty); override;
+   procedure dopaintfocusrect(const canvas: tcanvas;
+                                              const rect: rectty); override;
    function checkshortcut(var info: keyeventinfoty): boolean; override;
    function needsfocuspaint: boolean; override;
    procedure updatemousestate(const sender: twidget;
@@ -2320,6 +2322,7 @@ procedure tcustomcaptionframe.paintoverlay(const canvas: tcanvas;
                                                    const arect: rectty);
 var
  reg1: regionty;
+ flagsbefore: textflagsty;
 begin
  reg1:= 0;
  if not (cfo_captionnoclip in foptions) and (finfo.text.text <> '') then begin
@@ -2332,7 +2335,10 @@ begin
   canvas.clipregion:= reg1;
  end;
  if finfo.text.text <> '' then begin
+  flagsbefore:= finfo.flags;
+  updatetextflags();
   drawtext(canvas,finfo);
+  finfo.flags:= flagsbefore;
  end;
 end;
 {
@@ -2404,6 +2410,13 @@ begin
  end;
 end;
 
+procedure tcustomcaptionframe.updatetextflags;
+begin
+ if (fs_disabled in fstate) and not (cfo_captionnogray in foptions) then begin
+  include(finfo.flags,tf_grayed);
+ end;
+end;
+
 procedure tcustomcaptionframe.updaterects;
 var
  canvas: tcanvas;
@@ -2411,22 +2424,21 @@ var
  rect1,rect2: rectty;
  bo1,bo2: boolean;
  widget1: twidget1;
+ flagsbefore: textflagsty;
 begin
  inherited;
  fra1:= fouterframe;
  fstate:= fstate - [fs_cancaptionsyncx,fs_cancaptionsyncy];
- if (finfo.text.text <> '') {and 
-             twidget1(icaptionframe(fintf).getwidget).isvisible} then begin
-  updatebit({$ifdef FPC}longword{$else}longword{$endif}(finfo.flags),
-              ord(tf_grayed),
-              (fs_disabled in fstate) and not (cfo_captionnogray in foptions));
+ if finfo.text.text <> '' then begin
+  flagsbefore:= finfo.flags;
+  updatetextflags();
   canvas:= icaptionframe(fintf).getcanvas;
   canvas.font:= getfont;
   finfo.dest.size:= icaptionframe(fintf).getwidgetrect.size;
   rect1:= deflaterect(makerect(nullpoint,finfo.dest.size),fouterframe);
   textrect(canvas,finfo);
+  finfo.flags:= flagsbefore;
   finfo.dest:= finfo.res;
-//  finfo.dest:= textrect(canvas,finfo.text);
   bo1:= cfo_captiondistouter in foptions;
   bo2:= cfo_captionframecentered in foptions;
   rect2:= inflaterect(finfo.dest,captionmargin);
@@ -2661,7 +2673,7 @@ end;
 procedure tcustomcaptionframe.setcaptiontextflags(const avalue: textflagsty);
 begin
  if finfo.flags <> avalue then begin
-  finfo.flags:= avalue;
+  finfo.flags:= checktextflags(finfo.flags,avalue);
   internalupdatestate();
  end;
 end;
@@ -2863,16 +2875,11 @@ begin
 end;
 
 procedure tcustomcaptionframe.setdisabled(const value: boolean);
-var
- flags1: textflagsty;
 begin
- inherited;
- flags1:= finfo.flags;
- updatebit({$ifdef FPC}longword{$else}longword{$endif}(finfo.flags),
-                 ord(tf_grayed),value and not (cfo_captionnogray in foptions));
- if finfo.flags <> flags1 then begin
+ if (finfo.text.text <> '') and ((fs_disabled in fstate) xor value) then begin
   fintf.invalidatewidget;
  end;
+ inherited;
 end;
 
 function tcustomcaptionframe.pointincaption(const point: pointty): boolean;
