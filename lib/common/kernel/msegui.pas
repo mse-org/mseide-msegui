@@ -2356,6 +2356,7 @@ type
    procedure internaldeinitialize;  override;
    procedure objecteventdestroyed(const sender: tobjectevent); override;
    procedure dragstarted; //calls dragstarted of all known widgets
+   procedure internalpackwindowzorder(); virtual;
   public
    constructor create(aowner: tcomponent); override;
    procedure destroyforms;
@@ -2442,9 +2443,11 @@ type
    function windowatpos(const pos: pointty): twindow;
    function findwidget(const namepath: string; out awidget: twidget): boolean;
              //false if invalid namepath, '' -> nil and true
-   procedure sortzorder;
+   procedure sortzorder();
              //window list is ordered by z, bottom first, top last,
              //invisibles first
+   procedure packwindowzorder();
+   
    function windowar: windowarty;
    function winidar: winidarty;
    function windowcount: integer;
@@ -2872,6 +2875,7 @@ type
    procedure removewindowevents(const awindow: winidty; 
                                               const aeventkind: eventkindty);
   protected
+   procedure internalpackwindowzorder(); override;
    function getevents: integer; override;
     //application must be locked
     //returns count of queued events
@@ -16935,6 +16939,27 @@ begin
  end;
 end;
 
+procedure tinternalapplication.internalpackwindowzorder();
+var
+ int1: integer;
+begin
+ updatewindowstack(); //handle pending;
+ sortzorder();
+ if high(fwindows) > 1 then begin
+  setlength(fwindowstack,length(fwindows));
+  for int1:= 0 to high(fwindowstack) - 1 do begin
+   with fwindowstack[int1] do begin
+    lower:= fwindows[int1];
+    upper:= fwindows[int1+1];
+   end;
+  end;
+  with fwindowstack[high(fwindowstack)] do begin
+   lower:= fwindows[high(fwindowstack)];
+   upper:= nil;
+  end;
+ end;
+end;
+
 procedure tinternalapplication.widgetdestroyed(const widget: twidget);
 begin
  if fmousecapturewidget = widget then begin
@@ -16999,7 +17024,6 @@ procedure tinternalapplication.doeventloop(const once: boolean);
 begin
  eventloop(once);
 end;
-
 
 { tguiapplication }
 
@@ -17518,7 +17542,7 @@ begin
  end;
 end;
 
-procedure tguiapplication.sortzorder; //top is last, invisibles first
+procedure tguiapplication.sortzorder(); //top is last, invisibles first
 var
  ar1: winidarty;
  ar2,ar3: integerarty;
@@ -17535,6 +17559,12 @@ begin
   include(fstate,aps_zordervalid);
  end;
 end;
+
+procedure tguiapplication.packwindowzorder();
+begin
+ internalpackwindowzorder();
+end;
+
 
 function tguiapplication.bottomwindow: twindow;
     //lowest visible window in stackorder, calls sortzorder
@@ -18371,6 +18401,11 @@ end;
 procedure tguiapplication.endnoignorewaitevents;
 begin
  interlockeddecrement(fnoignorewaitevents);
+end;
+
+procedure tguiapplication.internalpackwindowzorder;
+begin
+ //dummy
 end;
 
 { tasyncmessageevent }

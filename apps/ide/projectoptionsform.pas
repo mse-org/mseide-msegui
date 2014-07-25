@@ -327,7 +327,8 @@ type
    fnodebugbeginend: boolean;
    fsettty: boolean;
    fgdbserverstartonce: boolean;
- protected
+   fraiseonbreak: boolean;
+  protected
    function gett: tobject; override;
    function gettexp: tobject; override;
   public
@@ -339,6 +340,7 @@ type
    property stoponexception: boolean read fstoponexception write fstoponexception;
    property valuehints: boolean read fvaluehints write fvaluehints;
    property activateonbreak: boolean read factivateonbreak write factivateonbreak;
+   property raiseonbreak: boolean read fraiseonbreak write fraiseonbreak;
    property showconsole: boolean read fshowconsole write fshowconsole;
    property externalconsole: boolean read fexternalconsole write fexternalconsole;
    property settty: boolean read fsettty write fsettty;
@@ -773,6 +775,7 @@ type
    linenumberson: tbooleanedit;
    tspacer4: tspacer;
    stripmessageesc: tbooleanedit;
+   raiseonbreak: tbooleanedit;
    procedure acttiveselectondataentered(const sender: TObject);
    procedure colonshowhint(const sender: tdatacol; const arow: Integer; 
                       var info: hintinfoty);
@@ -812,6 +815,8 @@ type
    procedure loadexe(const sender: TObject);
    procedure extconschangeexe(const sender: TObject);
    procedure setxtermcommandexe(const sender: TObject; var avalue: msestring;
+                   var accept: Boolean);
+   procedure activateonbreakset(const sender: TObject; var avalue: Boolean;
                    var accept: Boolean);
   private
    procedure activegroupchanged;
@@ -2591,6 +2596,12 @@ begin
  if avalue = '' then begin
   avalue:= defaultxtermcommand;
  end;
+end;
+
+procedure tprojectoptionsfo.activateonbreakset(const sender: TObject;
+               var avalue: Boolean; var accept: Boolean);
+begin
+ raiseonbreak.enabled:= avalue;
 end;
 
 { tprojectoptions }

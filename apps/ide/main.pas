@@ -936,11 +936,14 @@ begin
   end;
   if projectoptions.d.activateonbreak then begin
    if flastform <> nil then begin
-    flastform.activate;
+    flastform.activate();
    end
    else begin
-    sourcefo.activate;
+    sourcefo.activate();
    end;
+  end;
+  if projectoptions.d.raiseonbreak then begin
+   application.packwindowzorder();
   end;
  end;
 end;
