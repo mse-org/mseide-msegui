@@ -27,6 +27,8 @@ type
  end;
 
  captionframeoptionty = (cfo_fixleft,cfo_fixright,cfo_fixtop,cfo_fixbottom,
+                         cfo_autowidth,cfo_autoheight, 
+                               //paint area as big as possible
                          cfo_captionnogray,
                          cfo_captiondistouter,cfo_captionframecentered,
                          cfo_captionnoclip,cfo_nofocusrect,
@@ -2414,8 +2416,8 @@ begin
   canvas:= icaptionframe(fintf).getcanvas;
   canvas.font:= getfont;
   finfo.dest:= textrect(canvas,finfo.text);
-  rect1:= deflaterect(makerect(nullpoint,icaptionframe(fintf).getwidgetrect.size),
-                                 fouterframe);
+  rect1:= deflaterect(makerect(nullpoint,
+              icaptionframe(fintf).getwidgetrect.size),fouterframe);
   bo1:= cfo_captiondistouter in foptions;
   bo2:= cfo_captionframecentered in foptions;
   rect2:= inflaterect(finfo.dest,captionmargin);
@@ -2521,6 +2523,28 @@ begin
   finfo.dest:= nullrect;
  end;
  subframe1(fra1,fouterframe);
+
+ if cfo_autowidth in foptions then begin
+  if fcaptionpos in [cp_topleft,cp_bottomleft,
+                          cp_top,cp_bottom,cp_center] then begin
+   fouterframe.right:= 0;
+  end;
+  if fcaptionpos in [cp_topright,cp_bottomright,
+                         cp_top,cp_bottom,cp_center] then begin
+   fouterframe.left:= 0;
+  end;
+ end;
+ if cfo_autoheight in foptions then begin
+  if fcaptionpos in [cp_lefttop,cp_righttop,
+                          cp_left,cp_right,cp_center] then begin
+   fouterframe.bottom:= 0;
+  end;
+  if fcaptionpos in [cp_leftbottom,cp_rightbottom,
+                         cp_left,cp_right,cp_center] then begin
+   fouterframe.top:= 0;
+  end;
+ end;
+
  if not isnullframe(fra1) then begin
   subpoint1(finfo.dest.pos,pointty(fra1.topleft));
   if fupdating < 16 then begin
@@ -2550,7 +2574,8 @@ begin
       rect2.y:= rect1.y+rect1.cy-rect2.cy;
      end;
     end;
-    if (fupdating = 1) and rectisequal(icaptionframe(fintf).getwidgetrect,rect2) then begin
+    if (fupdating = 1) and 
+          rectisequal(icaptionframe(fintf).getwidgetrect,rect2) then begin
      widget1:= twidget1(icaptionframe(fintf).getwidget);
      if widget1.fparentwidget <> nil then begin
       twidget1(widget1.fparentwidget).childautosizechanged(widget1);

@@ -6,8 +6,8 @@ object mainfo: tmainfo
   visible = False
   bounds_x = 45
   bounds_y = 165
-  bounds_cx = 437
-  bounds_cy = 138
+  bounds_cx = 459
+  bounds_cy = 149
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets]
   container.frame.framei_left = 0
   container.frame.framei_top = 0
@@ -20,8 +20,8 @@ object mainfo: tmainfo
   container.bounds = (
     0
     16
-    427
-    122
+    449
+    133
   )
   dragdock.optionsdock = [od_savepos, od_savezorder, od_canmove, od_cansize, od_canfloat, od_candock]
   optionswindow = [wo_taskbar]
@@ -43,8 +43,8 @@ object mainfo: tmainfo
     optionswidget = [ow_background, ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_destroywidgets]
     bounds_x = 0
     bounds_y = 21
-    bounds_cx = 427
-    bounds_cy = 164
+    bounds_cx = 449
+    bounds_cy = 180
     anchors = [an_top, an_bottom]
     dragdock.optionsdock = [od_acceptsdock, od_splitvert, od_splithorz, od_tabed, od_proportional, od_background]
     statfile = projectstatfile
@@ -56,7 +56,7 @@ object mainfo: tmainfo
     taborder = 1
     bounds_x = 0
     bounds_y = 1
-    bounds_cx = 427
+    bounds_cx = 449
     bounds_cy = 18
     anchors = [an_top]
     font.name = 'stf_default'
