@@ -1163,7 +1163,7 @@ object projectoptionsfo: tprojectoptionsfo
           optionswidget1 = [ow1_fontglyphheight]
           bounds_x = 0
           bounds_y = 204
-          bounds_cx = 1795
+          bounds_cx = 757
           bounds_cy = 314
           anchors = [an_left, an_top, an_right, an_bottom]
           taborder = 3
@@ -1185,7 +1185,7 @@ object projectoptionsfo: tprojectoptionsfo
             taborder = 4
             bounds_x = 0
             bounds_y = 18
-            bounds_cx = 1795
+            bounds_cx = 757
             bounds_cy = 296
             anchors = [an_left, an_top, an_right, an_bottom]
             caption = 'Source &directories'
@@ -1198,7 +1198,7 @@ object projectoptionsfo: tprojectoptionsfo
               frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
               bounds_x = 0
               bounds_y = 0
-              bounds_cx = 1795
+              bounds_cx = 757
               bounds_cy = 296
               bounds_cymin = 40
               anchors = []
@@ -1208,7 +1208,7 @@ object projectoptionsfo: tprojectoptionsfo
               datacols.items = <              
                 item[sourcedirs]
                   linecolorfix = -1610612733
-                  width = 1790
+                  width = 752
                   options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savevalue, co_cancopy, co_canpaste, co_mousescrollrow]
                   onshowhint = colonshowhint
                   widgetname = 'sourcedirs'
@@ -1230,7 +1230,7 @@ object projectoptionsfo: tprojectoptionsfo
                 visible = False
                 bounds_x = 0
                 bounds_y = 0
-                bounds_cx = 1790
+                bounds_cx = 752
                 bounds_cy = 16
                 optionsedit1 = [oe1_autopopupmenu]
                 optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_savevalue, oe_savestate]
@@ -1252,7 +1252,7 @@ object projectoptionsfo: tprojectoptionsfo
             taborder = 1
             bounds_x = 0
             bounds_y = 18
-            bounds_cx = 1795
+            bounds_cx = 757
             bounds_cy = 296
             anchors = [an_left, an_top, an_right, an_bottom]
             caption = 'Defi&nes'
@@ -1263,7 +1263,7 @@ object projectoptionsfo: tprojectoptionsfo
               frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
               bounds_x = 0
               bounds_y = 0
-              bounds_cx = 1795
+              bounds_cx = 757
               bounds_cy = 296
               anchors = []
               optionsgrid = [og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_colchangeontabkey, og_wrapcol, og_autopopup]
@@ -1290,7 +1290,7 @@ object projectoptionsfo: tprojectoptionsfo
                   dataclass = tgridintegerdatalist
                 end              
                 item[defines]
-                  width = 1767
+                  width = 729
                   options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
                   onshowhint = colonshowhint
                   widgetname = 'defines'
@@ -1327,7 +1327,7 @@ object projectoptionsfo: tprojectoptionsfo
                 visible = False
                 bounds_x = 23
                 bounds_y = 0
-                bounds_cx = 1767
+                bounds_cx = 729
                 bounds_cy = 16
                 optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_savestate, oe_checkvaluepaststatread]
                 reffontheight = 14
@@ -1343,7 +1343,7 @@ object projectoptionsfo: tprojectoptionsfo
             taborder = 3
             bounds_x = 0
             bounds_y = 18
-            bounds_cx = 1795
+            bounds_cx = 757
             bounds_cy = 296
             anchors = [an_left, an_top, an_right, an_bottom]
             caption = '&Signals'
@@ -1356,7 +1356,7 @@ object projectoptionsfo: tprojectoptionsfo
               frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
               bounds_x = 0
               bounds_y = 0
-              bounds_cx = 1795
+              bounds_cx = 757
               bounds_cy = 296
               bounds_cymin = 40
               anchors = []
@@ -1411,7 +1411,7 @@ object projectoptionsfo: tprojectoptionsfo
                   dataclass = tgridintegerdatalist
                 end              
                 item[signame]
-                  width = 1622
+                  width = 584
                   options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savevalue, co_savestate, co_nosort, co_cancopy, co_canpaste, co_mousescrollrow]
                   widgetname = 'signame'
                   dataclass = tgridenumdatalist
@@ -1478,7 +1478,7 @@ object projectoptionsfo: tprojectoptionsfo
                 visible = False
                 bounds_x = 168
                 bounds_y = 0
-                bounds_cx = 1622
+                bounds_cx = 584
                 bounds_cy = 16
                 dropdownitems.count = 2
                 dropdownitems.items = <                
@@ -1505,7 +1505,7 @@ object projectoptionsfo: tprojectoptionsfo
             taborder = 2
             bounds_x = 0
             bounds_y = 18
-            bounds_cx = 1795
+            bounds_cx = 757
             bounds_cy = 296
             anchors = [an_left, an_top, an_right, an_bottom]
             caption = '&Exceptions'
@@ -1516,7 +1516,7 @@ object projectoptionsfo: tprojectoptionsfo
               frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
               bounds_x = 0
               bounds_y = 0
-              bounds_cx = 1795
+              bounds_cx = 757
               bounds_cy = 296
               anchors = []
               optionsgrid = [og_colsizing, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_colchangeontabkey, og_wrapcol, og_autopopup]
@@ -1543,7 +1543,7 @@ object projectoptionsfo: tprojectoptionsfo
                   dataclass = tgridintegerdatalist
                 end              
                 item[exceptclassnames]
-                  width = 1742
+                  width = 704
                   options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savestate, co_cancopy, co_canpaste]
                   widgetname = 'exceptclassnames'
                   dataclass = tgridmsestringdatalist
@@ -1577,7 +1577,7 @@ object projectoptionsfo: tprojectoptionsfo
                 visible = False
                 bounds_x = 48
                 bounds_y = 0
-                bounds_cx = 1742
+                bounds_cx = 704
                 bounds_cy = 16
                 optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_trimright, oe_trimleft, oe_savestate]
                 reffontheight = 14
@@ -1593,7 +1593,7 @@ object projectoptionsfo: tprojectoptionsfo
             taborder = 5
             bounds_x = 0
             bounds_y = 18
-            bounds_cx = 1795
+            bounds_cx = 757
             bounds_cy = 296
             anchors = [an_left, an_top, an_right, an_bottom]
             caption = '&Target'
@@ -1606,7 +1606,7 @@ object projectoptionsfo: tprojectoptionsfo
               taborder = 2
               bounds_x = 0
               bounds_y = 74
-              bounds_cx = 1795
+              bounds_cx = 757
               bounds_cy = 37
               anchors = [an_top]
               optionsscale = [osc_expandy, osc_shrinky]
@@ -1633,7 +1633,7 @@ object projectoptionsfo: tprojectoptionsfo
                 onshowhint = hintexpandedmacros
                 bounds_x = 0
                 bounds_y = 0
-                bounds_cx = 1567
+                bounds_cx = 529
                 bounds_cy = 37
                 anchors = [an_left, an_top, an_right]
                 textflags = [tf_ycentered, tf_noselect, tf_ellipseleft]
@@ -1651,7 +1651,7 @@ object projectoptionsfo: tprojectoptionsfo
                   2
                 )
                 taborder = 1
-                bounds_x = 1569
+                bounds_x = 531
                 bounds_y = 20
                 bounds_cx = 108
                 bounds_cy = 16
@@ -1667,7 +1667,7 @@ object projectoptionsfo: tprojectoptionsfo
                   2
                 )
                 taborder = 2
-                bounds_x = 1679
+                bounds_x = 641
                 bounds_y = 20
                 bounds_cx = 37
                 bounds_cy = 16
@@ -1690,7 +1690,7 @@ object projectoptionsfo: tprojectoptionsfo
               onshowhint = hintexpandedmacros
               bounds_x = 1
               bounds_y = 111
-              bounds_cx = 1793
+              bounds_cx = 755
               bounds_cy = 37
               anchors = [an_left, an_top, an_right]
               reffontheight = 14
@@ -1703,7 +1703,7 @@ object projectoptionsfo: tprojectoptionsfo
               taborder = 5
               bounds_x = 0
               bounds_y = 188
-              bounds_cx = 1795
+              bounds_cx = 757
               bounds_cy = 37
               anchors = [an_top]
               optionsscale = [osc_expandy, osc_shrinky]
@@ -1806,7 +1806,7 @@ object projectoptionsfo: tprojectoptionsfo
                 onshowhint = hintexpandedmacros
                 bounds_x = 442
                 bounds_y = 0
-                bounds_cx = 1352
+                bounds_cx = 314
                 bounds_cy = 37
                 anchors = [an_left, an_top, an_right]
                 textflags = [tf_ycentered, tf_noselect, tf_ellipseleft]
@@ -1828,7 +1828,7 @@ object projectoptionsfo: tprojectoptionsfo
               taborder = 6
               bounds_x = 0
               bounds_y = 225
-              bounds_cx = 1795
+              bounds_cx = 757
               bounds_cy = 37
               anchors = [an_top]
               optionsscale = [osc_expandy, osc_shrinky]
@@ -1922,7 +1922,7 @@ object projectoptionsfo: tprojectoptionsfo
               taborder = 1
               bounds_x = 0
               bounds_y = 37
-              bounds_cx = 1795
+              bounds_cx = 757
               bounds_cy = 37
               anchors = [an_top]
               optionsscale = [osc_expandy, osc_shrinky]
@@ -2020,7 +2020,7 @@ object projectoptionsfo: tprojectoptionsfo
               onshowhint = hintexpandedmacros
               bounds_x = 1
               bounds_y = 0
-              bounds_cx = 1793
+              bounds_cx = 755
               bounds_cy = 37
               anchors = [an_left, an_top, an_right]
               textflags = [tf_ycentered, tf_noselect, tf_ellipseleft]
