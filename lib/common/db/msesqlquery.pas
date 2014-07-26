@@ -1738,14 +1738,11 @@ begin
     try
      statementtype:= stselect;
      refresh;
-//     active:= true;
      if not eof then begin
-      for int1:= 0 to {qry.}cols.count - 1 do begin
+      for int1:= 0 to cols.count - 1 do begin
        with cols[int1] do begin
         fld1:= self.fields.fieldbyname(fieldname);
-//        if not(fld is tblobfield) then begin
         fld1.value:= asvariant;
-//        end;
        end;
       end;
      end;
@@ -1761,10 +1758,17 @@ begin
    end;
 
    if not (bs_refreshinsert in fbstate) and (updatekind = ukinsert) and 
-                                        (self.fprimarykeyfield <> nil) then begin
+                                      (self.fprimarykeyfield <> nil) then begin
     tcustomsqlconnection1(database).updateprimarykeyfield(
-                   self.fprimarykeyfield,{qry.}transaction);
+                   self.fprimarykeyfield,transaction);
    end;
+   if (self.fupdaterowsaffected < 0) or (rowsaffected1 < 0) then begin
+    self.fupdaterowsaffected:= rowsaffected1;
+   end
+   else begin
+    self.fupdaterowsaffected:= self.fupdaterowsaffected + rowsaffected1;
+   end;
+   {
    if self.fupdaterowsaffected >= 0 then begin
     if self.fcursor.frowsaffected < 0 then begin
      self.fupdaterowsaffected:= -1;
@@ -1773,6 +1777,7 @@ begin
      inc(self.fupdaterowsaffected,rowsaffected1);
     end;
    end;
+   }
   finally
    for int1:= high(freeblobar) downto 0 do begin
     deleteblob(blobspo^,tfield(freeblobar[int1]),true);
@@ -2263,7 +2268,7 @@ end;
 
 function TSQLQuery.rowsreturned: integer;
 begin
- if active then begin
+ if active and (fcursor <> nil) then begin
   result:= fcursor.frowsreturned;
  end
  else begin
@@ -2273,7 +2278,7 @@ end;
 
 function TSQLQuery.rowsaffected: integer;
 begin
- if active then begin
+ if active and (fcursor <> nil) then begin
   result:= fcursor.frowsaffected;
  end
  else begin
