@@ -397,7 +397,8 @@ type
  
   TCommitRollbackAction = (caNone, caCommit, caCommitRetaining, caRollback,
     caRollbackRetaining);
-  transactionoptionty = (tao_fake,tao_catcherror,tao_refreshdatasets);
+  transactionoptionty = (tao_fake,tao_fakeretaining,tao_catcherror,
+                                                        tao_refreshdatasets);
   transactionoptionsty = set of transactionoptionty;
   sqltransactioneventty = procedure(const sender: tsqltransaction) of object;
   commiterroreventty = procedure(const sender: tsqltransaction;
@@ -2058,18 +2059,18 @@ function tsqltransaction.docommit(const retaining: boolean): boolean;
 
  procedure dofinish;
  begin
-  if not retaining then begin
-   closetrans;
-   closedatasets;
-  end
-  else begin
-   if //(fcloselock = 0) and //refresh will not be performed later
-       ((tao_refreshdatasets in foptions) {or 
-      (sco_emulateretaining in 
-              tcustomsqlconnection(database).connoptions)} ) then begin
-              //no refresh for emulateretaining 2009-06-16 mse
+  if retaining then begin
+   if tao_fakeretaining in foptions then begin
+    closetrans();
+    starttransaction();
+   end;
+   if (tao_refreshdatasets in foptions) then begin
     refreshdatasets(true,true);
    end;
+  end
+  else begin
+   closetrans;
+   closedatasets;
   end;
  end;
  
@@ -2079,7 +2080,7 @@ begin
  result:= false;
  if not (tao_fake in foptions) then begin
   try
-   if retaining then begin
+   if retaining and not (tao_fakeretaining in foptions) then begin
     tcustomsqlconnection(database).commitretaining(FTrans);
    end
    else begin
@@ -2114,8 +2115,6 @@ begin
 end;
 
 function TSQLTransaction.Commit(const checksavepoint: boolean = true): boolean;
-//var
-// bo1: boolean;
 begin
  result:= true;
  if active then begin
@@ -2186,19 +2185,20 @@ begin
   end;
   try
    if not (tao_fake in foptions) then begin
-    tcustomsqlconnection(database).RollBackRetaining(FTrans);
+    if tao_fakeretaining in foptions then begin
+     tcustomsqlconnection(database).rollback(ftrans);
+     closetrans();
+     starttransaction();
+    end
+    else begin
+     tcustomsqlconnection(database).rollbackretaining(ftrans);
+    end;
    end;
    savepointevent(spek_rollbacktrans,0);
   finally
    fsavepointlevel:= -1;
   end;
-//  if (tao_refreshdatasets in foptions) or
-//       (sco_emulateretaining in 
-//             tcustomsqlconnection(database).connoptions) then begin
-//  if fcloselock = 0 then begin //refresh will not be performed later
-   refreshdatasets;
-//  end;
-//  end;
+  refreshdatasets();
   if checkcanevent(self,tmethod(fonafterrollbackretaining)) then begin
    fonafterrollback(self);
   end;
