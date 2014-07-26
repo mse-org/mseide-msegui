@@ -16953,10 +16953,12 @@ begin
     upper:= fwindows[int1+1];
    end;
   end;
+ {
   with fwindowstack[high(fwindowstack)] do begin
    lower:= fwindows[high(fwindowstack)];
    upper:= nil;
   end;
+ }
  end;
 end;
 
