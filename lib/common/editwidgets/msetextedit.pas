@@ -210,10 +210,13 @@ type
                                         const resetmodified: boolean);
    procedure savetofile(const afilename: filenamety = '');
                        //afilename = '' -> current filename
+   property filename: filenamety read ffilename;
+   property filerights: filerightsty read ffilerights write ffilerights;
+
    procedure beginupdate; virtual;
    procedure endupdate;  virtual;
    procedure clear; virtual;
-   function filename: filenamety;
+//   function filename: filenamety;
 
    procedure seteditpos(const Value: gridcoordty; const select: boolean = false;
                         const ashowcell: cellpositionty = cep_nearest);
@@ -443,6 +446,7 @@ end;
 
 constructor tcustomtextedit.create(aowner: tcomponent);
 begin
+ ffilerights:= defaultfilerights;
  fmousetextpos:= invalidcell;
  fmarginlinecolor:= cl_none;
  if feditor = nil then begin
@@ -914,6 +918,7 @@ procedure tcustomtextedit.savetostream(const stream: ttextstream;
                                 const resetmodified: boolean);
 begin
  stream.encoding:= fencoding;
+ stream.filerights:= ffilerights;
  flines.savetostream(stream);
  if resetmodified then begin
   modified:= false;
@@ -932,7 +937,7 @@ begin
  else begin
   str1:= afilename;
  end;
- stream:= ttextstream.createtransaction(str1);
+ stream:= ttextstream.createtransaction(str1,ffilerights);
  try
   savetostream(stream,true);
   setfilename(str1);
@@ -1003,12 +1008,12 @@ begin
  end;
  }
 end;
-
+{
 function tcustomtextedit.filename: filenamety;
 begin
  result:= ffilename;
 end;
-
+}
 procedure tcustomtextedit.dostatread(const reader: tstatreader);
 begin
  if (fgridintf = nil) and canstatvalue(foptionsedit,reader) then begin
