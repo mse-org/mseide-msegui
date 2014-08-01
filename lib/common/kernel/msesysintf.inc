@@ -55,8 +55,9 @@ function sys_truncatefile(const handle: integer; const size: int64): syserrorty;
 function sys_setfilerights(const path: filenamety;
                               const rights: filerightsty): syserrorty;
 function sys_setfdrights(const fd: longint;
-                              const rights: filerightsty): syserrorty;
-
+                      const rights: filerightsty;
+                      const filename: filenamety = ''): syserrorty;
+                            //filename necessary on windows
 function sys_read(fd: longint; buf: pointer; nbytes: longword): integer;
 function sys_write(fd: longint; buf: pointer; nbytes: longword): integer;
 function sys_errorout(const atext: string): syserrorty;

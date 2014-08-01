@@ -1030,7 +1030,8 @@ begin
 end;
 
 function sys_setfdrights(const fd: longint;
-                               const rights: filerightsty): syserrorty;
+                         const rights: filerightsty;
+                         const filename: filenamety = ''): syserrorty;
 begin
  if fchmod(fd,getmodebits(fileattributesty(rights))) = 0 then begin
   result:= sye_ok;

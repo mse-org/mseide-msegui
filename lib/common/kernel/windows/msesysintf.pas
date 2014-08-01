@@ -128,6 +128,9 @@ function Process32First(hSnapshot: thandle; lppe: PPROCESSENTRY32): BOOL;
               stdcall; external kernel32 name 'Process32First';
 function Process32Next(hSnapshot: thandle; lppe: PPROCESSENTRY32): BOOL;
               stdcall; external kernel32 name 'Process32Next';
+function GetFileInformationByHandle(hFile: THandle; 
+                    var lpFileInformation: By_Handle_File_Information): BOOL; 
+              stdcall; external 'kernel32' name 'GetFileInformationByHandle';
 
 var
  GetLongPathNameW: function(lpszShortPath: LPCWSTR; lpszLongPath: LPCWSTR;
@@ -1005,10 +1008,16 @@ begin
  end;
 end;
 
-procedure winfileinfotofileinfo(const winfo: winfileinfoty; const wsize: winfilesizety;
-                         var info: fileinfoty);
+procedure winfileinfotofileinfo(const winfo: winfileinfoty;
+                     const wsize: winfilesizety; var info: fileinfoty);
 begin
  with winfo,info,extinfo1 do begin
+  if file_attribute_directory and dwfileattributes <> 0 then begin
+   info.extinfo1.filetype:= ft_dir;
+  end
+  else begin
+   info.extinfo1.filetype:= ft_reg;
+  end;
   state:= state + [fis_typevalid,fis_extinfo1valid];
   if filetype = ft_dir then begin
    attributes:= [fa_dir];
@@ -1370,13 +1379,14 @@ begin
        else begin
         info.name:= cfilename;
        end;
-
+{
        if file_attribute_directory and dwfileattributes <> 0 then begin
         info.extinfo1.filetype:= ft_dir;
        end
        else begin
         info.extinfo1.filetype:= ft_reg;
        end;
+}
        winfileinfotofileinfo(winfo,wsize,info);
        if infolevel = fil_ext2 then begin
         //read security level
@@ -1442,12 +1452,14 @@ begin
  end;
  if cardinal(handle) <> invalid_handle_value then begin
   with win32_find_dataw(finddata) do begin
+{
    if winfo.dwfileattributes and file_attribute_directory <> 0 then begin
     info.extinfo1.filetype:= ft_dir;
    end
    else begin
     info.extinfo1.filetype:= ft_reg;
    end;
+}
    winfileinfotofileinfo(winfo,wsize,info);
    if iswin95 then begin
     info.name:= pwinfilenameaty(@cfilename)^;
@@ -1482,32 +1494,132 @@ begin
 end;
 
 function sys_getfdinfo(const fd: longint; var info: fileinfoty): boolean;
+var
+ info1: by_handle_file_information;
 begin
- result:= false; //todo
-end;
-
-function sys_setfilerights(const rights: filerightsty;
-                                       const path: filenamety): syserrorty;
-begin
- result:= sye_ok; //dummy
+ clearfileinfo(info);
+ result:= getfileinformationbyhandle(fd,info1);
+ if result then begin
+  winfileinfotofileinfo(info1.winfo,info1.wsize,info);
+ end;
 end;
 
 function sys_setfdrights(const fd: longint; 
-                                       const rights: filerightsty): syserrorty;
+                         const rights: filerightsty;
+                         const filename: filenamety = ''): syserrorty;
+var                           //todo: use security attributes
+ info1: by_handle_file_information;
+ fname: filenamety;
+ bo1: boolean;
+ {
+ fmap: thandle;
+ pmem: pointer;
+ abuf: array[0..max_path] of char;
+ wbuf: array[0..max_path] of widechar;
+ dwo1: dword; 
+ }
 begin
- result:= sye_ok; //dummy
+ if getfileinformationbyhandle(fd,info1) then begin
+  if s_iwusr in rights then begin
+   info1.winfo.dwfileattributes:= info1.winfo.dwfileattributes and 
+                                                not file_attribute_readonly;
+  end
+  else begin
+   info1.winfo.dwfileattributes:= info1.winfo.dwfileattributes or
+                                                    file_attribute_readonly;
+  end;
+  {
+  fmap:= createfilemapping(fd,nil,page_readonly,0,1,nil);
+  if fmap = 0 then begin
+   result:= syelasterror();
+  end
+  else begin
+   pmem:= mapviewoffile(fmap,file_map_read,0,0,1);
+   if pmem = nil then begin
+    result:= syelasterror();
+   end
+   else begin
+    if iswin95 then begin
+     dwo1:= getmappedfilenamea(getcurrentprocess(),pmem,@abuf,max_path);
+    end
+    else begin
+     dwo1:= getmappedfilenamew(getcurrentprocess(),pmem,@wbuf,max_path);
+    end;
+    if dwo1 = 0 then begin
+     result:= syelasterror();
+    end
+    else begin
+     
+    end;
+    unmapviewoffile(pmem);
+   end;
+   closehandle(fmap);
+  end;
+  //how to set file attributes from handle on pre XP?
+  }
+  fname:= tosysfilepath(filename);
+  if iswin95 then begin
+   bo1:= setfileattributesa(pchar(string(fname)),info1.winfo.dwfileattributes);
+  end
+  else begin
+   bo1:= setfileattributesw(pwidechar(fname),info1.winfo.dwfileattributes);
+  end;
+  if not bo1 then begin
+   result:= syelasterror();
+  end
+  else begin
+   result:= sye_ok;
+  end;
+ end
+ else begin
+  result:= syelasterror();
+ end;
 end;
 
 function sys_setfilerights(const path: filenamety;
                                        const rights: filerightsty): syserrorty;
+var
+ fname: filenamety;
+ dwo1: dword;
+ bo1: boolean;
 begin
+ fname:= tosysfilepath(path);
+ if iswin95 then begin
+  dwo1:= getfileattributesa(pchar(string(fname)));
+ end
+ else begin
+  dwo1:= getfileattributesw(pwidechar(fname));
+ end;
+ if dwo1 = 0 then begin 
+  result:= syelasterror();
+ end
+ else begin
+  if s_iwusr in rights then begin
+   dwo1:= dwo1 and not file_attribute_readonly;
+  end
+  else begin
+   dwo1:= dwo1 or file_attribute_readonly;
+  end;
+  if iswin95 then begin
+   bo1:= setfileattributesa(pchar(string(fname)),dwo1);
+  end
+  else begin
+   bo1:= setfileattributesw(pwidechar(fname),dwo1);
+  end;
+  if not bo1 then begin
+   result:= syelasterror();
+  end
+  else begin
+   result:= sye_ok;
+  end;
+ end;
 end;
-
+{
 function sys_setfdrights(const rights: filerightsty;
                                        const fd: longint): syserrorty;
 begin
 end;
-
+}
 function sys_getcurrentdir: msestring;
 var
  ca1: cardinal;

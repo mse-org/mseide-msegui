@@ -918,7 +918,7 @@ procedure tcustomtextedit.savetostream(const stream: ttextstream;
                                 const resetmodified: boolean);
 begin
  stream.encoding:= fencoding;
- stream.filerights:= ffilerights;
+// stream.filerights:= ffilerights;
  flines.savetostream(stream);
  if resetmodified then begin
   modified:= false;

@@ -1408,7 +1408,7 @@ procedure tmsefilestream.setfilerights(const avalue: filerightsty);
 begin
  ffilerights:= avalue;
  if fhandle <> invalidfilehandle then begin
-  sys_setfdrights(fhandle,avalue);
+  sys_setfdrights(fhandle,avalue,ffilename);
  end;
 end;
 
