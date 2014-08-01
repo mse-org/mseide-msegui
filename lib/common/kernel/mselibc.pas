@@ -1480,6 +1480,12 @@ function __read(Handle: cint; var Buffer; Count: size_t): ssize_t;
                                            cdecl; external clib name 'read';
 function __write(Handle: cint; const Buffer; Count: size_t): ssize_t;
                                            cdecl; external clib name 'write';
+
+function chmod(__file: pchar;__mode: __mode_t): cint;
+                                           cdecl; external clib name 'chmod';
+function fchmod(__fd: cint;__mode: __mode_t): cint;
+                                           cdecl; external clib name 'fchmod';
+
 function sem_init(__sem:Psem_t; __pshared: cint; __value: cuint): cint;
                   cdecl; external threadslib name 'sem_init'; overload;
 function sem_init(var __sem: sem_t; __pshared: cint; __value: cuint): cint;
@@ -1571,7 +1577,7 @@ function lstat64(__file:Pchar; __buf:Pstat64):longint; cdecl;
 
 function S_ISDIR(mode : __mode_t) : boolean;
 
-function fchmod(__fd: longint; __mode:__mode_t):longint;cdecl;external clib name 'fchmod';
+//function fchmod(__fd: longint; __mode:__mode_t):longint;cdecl;external clib name 'fchmod';
 function __rename(__old: Pchar; __new:Pchar):longint;cdecl;external clib name 'rename';
 function unlink(__name: Pchar): longint;cdecl;external clib name 'unlink';
 function getcwd(__buf: Pchar; __size:size_t):Pchar;cdecl;external clib name 'getcwd';

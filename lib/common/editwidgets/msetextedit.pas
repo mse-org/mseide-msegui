@@ -19,7 +19,7 @@ unit msetextedit;
 interface
 uses
  mseeditglob,mseedit,msewidgetgrid,classes,mclasses,msedatalist,
- msegraphics,msestream,msedragglob,
+ msegraphics,msestream,msedragglob,msesys,
  msetypes,mserichstring,msestat,msestatfile,mseclasses,mseinplaceedit,msegrids,
  mseevent,mseguiglob,msegui,msegraphutils,msestrings,msedrawtext,msearrayprops,
  msemenus,msepointer,msegridsglob{$ifdef mse_with_ifi},mseificomp{$endif},
@@ -114,6 +114,7 @@ type
    fupdating: integer;
    fnotificationchangelock: integer;
    ffilename: filenamety;
+   ffilerights: filerightsty;
    flines: tgridrichstringdatalist;
    procedure setoptionsedit(const avalue: optionseditty); override;
 
@@ -379,7 +380,7 @@ procedure normalizetextrect(const po1,po2: gridcoordty; out start,stop: gridcoor
 
 implementation
 uses
- msefileutils,sysutils,msesysutils,msesys,msewidgets,
+ msefileutils,sysutils,msesysutils,msewidgets,
  msekeyboard,mseactions;
 
 const
@@ -874,6 +875,7 @@ var
  statsave: texteditstatety;
 begin
  checkgrid;
+ ffilerights:= stream.filerights;
  if restorestate then begin
   getstate(statsave);
  end;

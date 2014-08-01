@@ -1481,6 +1481,33 @@ begin
  end;
 end;
 
+function sys_getfdinfo(const fd: longint; var info: fileinfoty): boolean;
+begin
+ result:= false; //todo
+end;
+
+function sys_setfilerights(const rights: filerightsty;
+                                       const path: filenamety): syserrorty;
+begin
+ result:= sye_ok; //dummy
+end;
+
+function sys_setfdrights(const fd: longint; 
+                                       const rights: filerightsty): syserrorty;
+begin
+ result:= sye_ok; //dummy
+end;
+
+function sys_setfilerights(const path: filenamety;
+                                       const rights: filerightsty): syserrorty;
+begin
+end;
+
+function sys_setfdrights(const rights: filerightsty;
+                                       const fd: longint): syserrorty;
+begin
+end;
+
 function sys_getcurrentdir: msestring;
 var
  ca1: cardinal;

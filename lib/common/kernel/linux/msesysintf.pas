@@ -187,7 +187,7 @@ var
  stream: ttextstream;
  str1: string;
 begin
- filelist:= tfiledatalist.create;
+ filelist:= tfiledatalist.create();
  filelist.adddirectory('/proc',fil_name,nil,[fa_dir]);
  setlength(result,filelist.count);
  int2:= 0;
@@ -753,6 +753,29 @@ begin
 
 end;
 
+function getmodebits(value: fileattributesty): __mode_t;
+begin
+ result:= 0;
+
+ if fa_rusr in value then result:= result or s_irusr;
+ if fa_wusr in value then result:= result or s_iwusr;
+ if fa_xusr in value then result:= result or s_ixusr;
+
+ if fa_rgrp in value then result:= result or s_irgrp;
+ if fa_wgrp in value then result:= result or s_iwgrp;
+ if fa_xgrp in value then result:= result or s_ixgrp;
+
+ if fa_roth in value then result:= result or s_iroth;
+ if fa_woth in value then result:= result or s_iwoth;
+ if fa_xoth in value then result:= result or s_ixoth;
+
+ if fa_suid in value then result:= result or s_isuid;
+ if fa_sgid in value then result:= result or s_isgid;
+ if fa_svtx in value then result:= result or s_isvtx;
+
+end;
+
+
 function filetimetodatetime(sec: time_t; nsec: longword): tdatetime;
 begin
 {$ifdef FPC}
@@ -976,6 +999,44 @@ begin
  if result then begin
   stattofileinfo(statbuffer,info);
   splitfilepath(filepath(path),str1,info.name);
+ end;
+end;
+
+function sys_getfdinfo(const fd: longint; var info: fileinfoty): boolean;
+var
+ statbuffer: _stat64;
+begin
+ clearfileinfo(info);
+ fillchar(statbuffer,sizeof(statbuffer),0);
+ result:= fstat64(fd,@statbuffer) = 0;
+ if result then begin
+  stattofileinfo(statbuffer,info);
+ end;
+end;
+
+function sys_setfilerights(const path: filenamety;
+                                      const rights: filerightsty): syserrorty;
+var
+ str1: filenamety;
+begin
+ str1:= tosysfilepath(path);
+ if chmod(pchar(string(str1)),
+               getmodebits(fileattributesty(rights))) = 0 then begin
+  result:= sye_ok;
+ end
+ else begin
+  result:= syelasterror();
+ end;
+end;
+
+function sys_setfdrights(const fd: longint;
+                               const rights: filerightsty): syserrorty;
+begin
+ if fchmod(fd,getmodebits(fileattributesty(rights))) = 0 then begin
+  result:= sye_ok;
+ end
+ else begin
+  result:= syelasterror();
  end;
 end;
 

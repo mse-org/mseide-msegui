@@ -112,6 +112,7 @@ type
   private
    ffilename: filenamety;
    fopenmode: fileopenmodety;
+   ffilerights: filerightsty;
    ftransactionname: filenamety;
    fcryptohandler: tcustomcryptohandler;
    fendhandler: tcustomcryptohandler;
@@ -119,6 +120,8 @@ type
 //   function getmemory: pointer;
    procedure checkmemorystream;
    procedure setcryptohandler(const avalue: tcustomcryptohandler);
+   function getfilerights: filerightsty;
+   procedure setfilerights(const avalue: filerightsty);
   protected
    fmemorystream: tmemorystream;
    procedure sethandle(value: integer); virtual;
@@ -173,6 +176,7 @@ type
    procedure setsize(const newsize: int64); override;
    procedure clear; virtual;        //only for memorystream
 //   property memory: pointer read getmemory;     //only for memorystream
+   property filerights: filerightsty read getfilerights write setfilerights;
    property cryptohandler: tcustomcryptohandler read fcryptohandler 
                                                    write setcryptohandler;
  end;
@@ -945,6 +949,7 @@ end;
 
 constructor tmsefilestream.create(ahandle: integer); //allways called
 begin
+ ffilerights:= defaultfilerights;
  inherited create(ahandle);
 end;
 
@@ -1384,6 +1389,26 @@ begin
  end
  else begin
   result:= inherited getmemory;
+ end;
+end;
+
+function tmsefilestream.getfilerights: filerightsty;
+var
+ stat1: fileinfoty;
+begin
+ if (fhandle <> invalidfilehandle) and sys_getfdinfo(fhandle,stat1) then begin
+  result:= fileattributestofilerights(stat1.extinfo1.attributes);
+ end
+ else begin
+  result:= ffilerights;
+ end;
+end;
+
+procedure tmsefilestream.setfilerights(const avalue: filerightsty);
+begin
+ ffilerights:= avalue;
+ if fhandle <> invalidfilehandle then begin
+  sys_setfdrights(fhandle,avalue);
  end;
 end;
 

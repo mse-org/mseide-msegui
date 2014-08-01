@@ -68,7 +68,11 @@ type
                     fa_all);
 
  fileattributesty = set of fileattributety;
-  
+const
+ filerightattributes = [fa_rusr,fa_wusr,fa_xusr,
+                        fa_rgrp,fa_wgrp,fa_xgrp,
+                        fa_roth,fa_woth,fa_xoth,
+                        fa_suid,fa_sgid,fa_svtx];
 type
  ext1fileinfoty = record
   filetype: filetypety;
@@ -134,6 +138,9 @@ type
 var
  defaultprintcommand: string;
  
+function fileattributestofilerights(
+                   const attributes: fileattributesty): filerightsty;
+
 procedure checkdirstreamdata(var adata: dirstreamty);
  
 procedure syserror(const error: syserrorty; const text: string = ''); overload;
@@ -173,6 +180,12 @@ Procedure CatchUnhandledException (Obj : TObject; Addr: Pointer;
  //[public,alias:'FPC_BREAK_UNHANDLED_EXCEPTION'];
  {$endif}
 {$endif}
+
+function fileattributestofilerights(
+                   const attributes: fileattributesty): filerightsty;
+begin
+ result:= filerightsty(attributes*filerightattributes);
+end;
 
 procedure checkdirstreamdata(var adata: dirstreamty);
 var

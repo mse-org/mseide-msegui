@@ -52,6 +52,11 @@ function sys_flushfile(const handle: integer): syserrorty;
 function sys_dup(const source: integer; out dest: integer): syserrorty;
 function sys_truncatefile(const handle: integer; const size: int64): syserrorty;
 
+function sys_setfilerights(const path: filenamety;
+                              const rights: filerightsty): syserrorty;
+function sys_setfdrights(const fd: longint;
+                              const rights: filerightsty): syserrorty;
+
 function sys_read(fd: longint; buf: pointer; nbytes: longword): integer;
 function sys_write(fd: longint; buf: pointer; nbytes: longword): integer;
 function sys_errorout(const atext: string): syserrorty;
@@ -60,9 +65,11 @@ function sys_stdout: integer;
 function sys_stderr: integer;
 
 function sys_getfileinfo(const path: filenamety; var info: fileinfoty): boolean;
+function sys_getfdinfo(const fd: longint; var info: fileinfoty): boolean;
 function sys_opendirstream(var stream: dirstreamty): syserrorty;
 function sys_closedirstream(var stream: dirstreamty): syserrorty;
-function sys_readdirstream(var stream: dirstreamty; var info: fileinfoty): boolean;
+function sys_readdirstream(var stream: dirstreamty;
+                                        var info: fileinfoty): boolean;
  //true if valid
 
 procedure sys_usleep(const us: longword);
