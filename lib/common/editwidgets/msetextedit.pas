@@ -982,6 +982,7 @@ begin
  fselectstart:= nullcoord;
  fselectend:= nullcoord;
  ffilename:= '';
+ ffilerights:= defaultfilerights;
  if flines <> nil then begin
   flines.clear;
 //  fgridintf.getcol.grid.rowcount:= 0;
