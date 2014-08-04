@@ -222,7 +222,7 @@ end;
 
 function tificonnectedfieldselementeditor.getvalue: msestring;
 begin
- with tififieldlink(getordvalue) do begin
+ with tififieldlink(getpointervalue) do begin
   result:= '<'+sourcefieldname+'><'+fieldname+'>';
  end;
 end;
@@ -240,7 +240,7 @@ var
 begin
  result:= inherited getdefaultstate();
  if mseclasses.getcorbainterface(
-             tificonnectedfields1(getordvalue).fowner.connection,
+             tificonnectedfields1(getpointervalue).fowner.connection,
                        typeinfo(iifidbdataconnection),po1) then begin
 
   result:= result + [ps_dialog];
@@ -249,7 +249,7 @@ end;
 
 procedure tificonnectedfieldspropertyeditor.edit;
 begin
- if editififields(tificonnectedfields(getordvalue)) then begin
+ if editififields(tificonnectedfields(getpointervalue)) then begin
   modified;
  end;
 end;
