@@ -776,15 +776,10 @@ begin
 end;
 
 
-function filetimetodatetime(sec: time_t; nsec: longword): tdatetime;
+function filetimetodatetime(const value: timespec): tdatetime;
 begin
-{$ifdef FPC}
- result:= sec / (double(24.0)*60.0*60.0) + 
-          nsec / (double(24.0)*60.0*60.0*1e9) - unidatetimeoffset;
-{$else}
- result:= sec / (24.0*60.0*60.0) + 
-          nsec / (24.0*60.0*60.0*1e9) - unidatetimeoffset;
-{$endif}
+ result:= value.tv_sec / (double(24.0)*60.0*60.0) + 
+          value.tv_nsec / (double(24.0)*60.0*60.0*1e9) - unidatetimeoffset;
 end;
 
 function sys_getcurrentdir: msestring;
@@ -942,9 +937,9 @@ begin
           if d.needsstat then begin
            state:= state + [fis_typevalid,fis_extinfo1valid,fis_extinfo2valid];
            size:= st_size;
-           modtime:= filetimetodatetime(st_mtime,st_mtime_nsec);
-           accesstime:= filetimetodatetime(st_atime,st_atime_nsec);
-           ctime:= filetimetodatetime(st_ctime,st_ctime_nsec);
+           modtime:= filetimetodatetime(st_mtime);
+           accesstime:= filetimetodatetime(st_atime);
+           ctime:= filetimetodatetime(st_ctime);
            id:= st_ino;
            owner:= st_uid;
            group:= st_gid;
@@ -978,9 +973,9 @@ begin
   end;
   state:= state + [fis_typevalid,fis_extinfo1valid,fis_extinfo2valid];
   size:= st_size;
-  modtime:= filetimetodatetime(st_mtime,st_mtime_nsec);
-  accesstime:= filetimetodatetime(st_atime,st_atime_nsec);
-  ctime:= filetimetodatetime(st_ctime,st_ctime_nsec);
+  modtime:= filetimetodatetime(st_mtime);
+  accesstime:= filetimetodatetime(st_atime);
+  ctime:= filetimetodatetime(st_ctime);
   id:= st_ino;
   owner:= st_uid;
   group:= st_gid;

@@ -15,11 +15,17 @@ const
  threadslib = 'libpthread.so.0';
 {$endif}
 
+{$packrecords c}
+ 
 type
  
 //from bits/typesizes.h
 
+{$ifdef linux}
  __dev_t = __UQUAD_TYPE;
+{$else}
+ __dev_t = cuint32;
+{$endif}
  __uid_t = __U32_TYPE;
  __gid_t = __U32_TYPE;
  __ino_t = __ULONGWORD_TYPE;
@@ -134,6 +140,7 @@ const
    TIOCSER_TEMT = $01;
 
 const
+ {$ifdef linux}
    EPERM = 1;
    ENOENT = 2;
    ESRCH = 3;
@@ -259,6 +266,150 @@ const
    ENOMEDIUM = 123;
    EMEDIUMTYPE = 124;
 
+   {$else}
+   
+   EPERM =          1;               //* Operation not permitted */
+   ENOENT =         2;               //* No such file or directory */
+   ESRCH =          3;               //* No such process */
+   EINTR =          4;               //* Interrupted system call */
+   EIO =            5;               //* Input/output error */
+   ENXIO =          6;               //* Device not configured */
+   E2BIG =          7;               //* Argument list too long */
+   ENOEXEC =        8;               //* Exec format error */
+   EBADF =          9;               //* Bad file descriptor */
+   ECHILD =         10;              //* No child processes */
+   EDEADLK =        11;              //* Resource deadlock avoided */
+                                        //* 11 was EAGAIN */
+   ENOMEM =         12;              //* Cannot allocate memory */
+   EACCES =         13;              //* Permission denied */
+   EFAULT =         14;              //* Bad address */
+{$ifndef _POSIX_SOURCE}
+   ENOTBLK =        15;              //* Block device required */
+{$endif}
+   EBUSY =          16;              //* Device busy */
+   EEXIST =         17;              //* File exists */
+   EXDEV =          18;              //* Cross-device link */
+   ENODEV =         19;              //* Operation not supported by device */
+   ENOTDIR =        20;              //* Not a directory */
+   EISDIR =         21;              //* Is a directory */
+   EINVAL =         22;              //* Invalid argument */
+   ENFILE =         23;              //* Too many open files in system */
+   EMFILE =         24;              //* Too many open files */
+   ENOTTY =         25;              //* Inappropriate ioctl for device */
+{$ifndef _POSIX_SOURCE}
+   ETXTBSY =        26;              //* Text file busy */
+{$endif}
+   EFBIG =          27;              //* File too large */
+   ENOSPC =         28;              //* No space left on device */
+   ESPIPE =         29;              //* Illegal seek */
+   EROFS =          30;              //* Read-only filesystem */
+   EMLINK =         31;              //* Too many links */
+   EPIPE =          32;              //* Broken pipe */
+
+//* math software */
+   EDOM =           33;              //* Numerical argument out of domain */
+   ERANGE =         34;              //* Result too large */
+
+//* non-blocking and interrupt i/o */
+   EAGAIN =         35;              //* Resource temporarily unavailable */
+{$ifndef _POSIX_SOURCE}
+   EWOULDBLOCK =    EAGAIN;          //* Operation would block */
+   EINPROGRESS =    36;              //* Operation now in progress */
+   EALREADY =       37;              //* Operation already in progress */
+
+//* ipc/network software -- argument errors */
+   ENOTSOCK =       38;              //* Socket operation on non-socket */
+   EDESTADDRREQ =   39;              //* Destination address required */
+   EMSGSIZE =       40;              //* Message too long */
+   EPROTOTYPE =     41;              //* Protocol wrong type for socket */
+   ENOPROTOOPT =    42;              //* Protocol not available */
+   EPROTONOSUPPORT = 43;              //* Protocol not supported */
+   ESOCKTNOSUPPORT = 44;              //* Socket type not supported */
+   EOPNOTSUPP =     45;              //* Operation not supported */
+   ENOTSUP =        EOPNOTSUPP;      //* Operation not supported */
+   EPFNOSUPPORT =   46;              //* Protocol family not supported */
+   EAFNOSUPPORT =   47;              //* Address family not supported by protocol family */
+   EADDRINUSE =     48;              //* Address already in use */
+   EADDRNOTAVAIL =  49;              //* Can't assign requested address */
+
+//* ipc/network software -- operational errors */
+   ENETDOWN =       50;              //* Network is down */
+   ENETUNREACH =    51;              //* Network is unreachable */
+   ENETRESET =      52;              //* Network dropped connection on reset */
+   ECONNABORTED =   53;              //* Software caused connection abort */
+   ECONNRESET =     54;              //* Connection reset by peer */
+   ENOBUFS =        55;              //* No buffer space available */
+   EISCONN =        56;              //* Socket is already connected */
+   ENOTCONN =       57;              //* Socket is not connected */
+   ESHUTDOWN =      58;              //* Can't send after socket shutdown */
+   ETOOMANYREFS =   59;              //* Too many references: can't splice */
+   ETIMEDOUT =      60;              //* Operation timed out */
+   ECONNREFUSED =   61;              //* Connection refused */
+
+   ELOOP =          62;              //* Too many levels of symbolic links */
+{$endif /* _POSIX_SOURCE */}
+   ENAMETOOLONG =   63;              //* File name too long */
+
+//* should be rearranged */
+{$ifndef _POSIX_SOURCE}
+   EHOSTDOWN =      64;              //* Host is down */
+   EHOSTUNREACH =   65;              //* No route to host */
+{$endif /* _POSIX_SOURCE */}
+   ENOTEMPTY =      66;              //* Directory not empty */
+
+//* quotas & mush */
+{$ifndef _POSIX_SOURCE}
+   EPROCLIM =       67;              //* Too many processes */
+   EUSERS =         68;              //* Too many users */
+   EDQUOT =         69;              //* Disc quota exceeded */
+
+//* Network File System */
+   ESTALE =         70;              //* Stale NFS file handle */
+   EREMOTE =        71;              //* Too many levels of remote in path */
+   EBADRPC =        72;              //* RPC struct is bad */
+   ERPCMISMATCH =   73;              //* RPC version wrong */
+   EPROGUNAVAIL =   74;              //* RPC prog. not avail */
+   EPROGMISMATCH =  75;              //* Program version wrong */
+   EPROCUNAVAIL =   76;              //* Bad procedure for program */
+{$endif /* _POSIX_SOURCE */}
+
+   ENOLCK =         77;              //* No locks available */
+   ENOSYS =         78;              //* Function not implemented */
+
+{$ifndef _POSIX_SOURCE}
+   EFTYPE =         79;              //* Inappropriate file type or format */
+   EAUTH =          80;              //* Authentication error */
+   ENEEDAUTH =      81;              //* Need authenticator */
+   EIDRM =          82;              //* Identifier removed */
+   ENOMSG =         83;              //* No message of desired type */
+   EOVERFLOW =      84;              //* Value too large to be stored in data type */
+   ECANCELED =      85;              //* Operation canceled */
+   EILSEQ =         86;              //* Illegal byte sequence */
+   ENOATTR =        87;              //* Attribute not found */
+
+   EDOOFUS =        88;              //* Programming error */
+{$endif /* _POSIX_SOURCE */}
+
+   EBADMSG =        89;              //* Bad message */
+   EMULTIHOP =      90;              //* Multihop attempted */
+   ENOLINK =        91;              //* Link has been severed */
+   EPROTO =         92;              //* Protocol error */
+
+{$ifndef _POSIX_SOURCE}
+   ENOTCAPABLE =    93;              //* Capabilities insufficient */
+   ECAPMODE =       94;              //* Not permitted in capability mode */
+   ENOTRECOVERABLE = 95;              //* State not recoverable */
+   EOWNERDEAD =     96;              //* Previous owner died */
+{$endif /* _POSIX_SOURCE */}
+
+{$ifndef _POSIX_SOURCE}
+   ELAST =          96;              //* Must be equal largest errno */
+{$endif /* _POSIX_SOURCE */}
+
+{$endif}
+
+
+   
    O_ACCMODE  = $00003;
    O_RDONLY   = $00000;
    O_WRONLY   = $00001;
@@ -474,10 +625,19 @@ type
   __socklen_t = dword;
   TFileDescriptor = integer;
 
+  timespec = record
+   tv_sec: __time_t;
+   tv_nsec: clong;
+  end;
+
+  TTimeSpec = timespec;
+  PTimeSpec = ^TTimeSpec;
+
 {$ifdef CPU64}
  P_stat = ^_stat;
  PStat = ^_stat;
 
+ {$ifdef linux}
  _stat = packed record
   st_dev: culong;
   st_ino: culong;
@@ -492,14 +652,64 @@ type
   st_blksize: clong;
   st_blocks: clong;	///* Number 512-byte blocks allocated. */
   
-  st_atime: culong;
-  st_atime_nsec: culong;
-  st_mtime: culong;
-  st_mtime_nsec: culong;
-  st_ctime: culong;
-  st_ctime_nsec: culong;
+  st_atime: timespec;
+//  st_atime_nsec: culong;
+  st_mtime: timespec;
+//  st_mtime_nsec: culong;
+  st_ctime: timespec;
+//  st_ctime_nsec: culong;
   __unused: array[0..2] of clong;
  end;
+
+ {$else}
+ ino_t = cuint32;
+ mode_t = cuint16;
+ n_link_t = cuint16;
+ uid_t = cuint32;
+ gid_t = cuint32;
+ off_t = cint64;
+ blkcnt_t = cint64;
+ blksize_t = cuint32;
+ fflags_t = cuint32;
+ 
+ _stat = packed record
+  st_dev: __dev_t;          //* inode's device */
+  st_ino: ino_t;            //* inode's number */
+  st_mode: mode_t;          //* inode protection mode */
+  st_nlink: n_link_t;       //* number of hard links */
+  st_uid: uid_t;            //* user ID of the file's owner */
+  st_gid: gid_t;            //* group ID of the file's group */
+  st_rdev: __dev_t;         //* device type */
+  st_atime: timespec;        //* time of last access */
+  st_mtime: timespec;        //* time of last data modification */
+  st_ctime:  timespec;       //* time of last file status change */
+  st_size: off_t;           //* file size, in bytes */
+  st_blocks: blkcnt_t;      //* blocks allocated for file */
+  st_blksize: blksize_t;    //* optimal blocksize for I/O */
+  st_flags: fflags_t;       //* user defined flags for file */
+  st_gen: cuint32;          //* file generation number */
+  st_lspare: cint32;
+  st_birthtim: timespec;    //* time of file creation */
+ {$ifndef cpu64}
+  pad: array[0..15-sizeof(timespec)] of byte;
+ {$endif}
+  (*
+        /*
+         * Explicitly pad st_birthtim to 16 bytes so that the size of
+         * struct stat is backwards compatible.  We use bitfields instead
+         * of an array of chars so that this doesn't require a C99 compiler
+         * to compile if the size of the padding is 0.  We use 2 bitfields
+         * to cover up to 64 bits on 32-bit machines.  We assume that
+         * CHAR_BIT is 8...
+         */
+        unsigned int :(8 / 2) * (16 - (int)sizeof(struct timespec));
+        unsigned int :(8 / 2) * (16 - (int)sizeof(struct timespec));
+  *)
+ end;
+{$endif}
+
+
+ 
  P_stat64 = ^_stat64;
  Pstat64 = ^_stat64;
  _stat64 = _stat; 
@@ -531,7 +741,7 @@ type
    __unused4 : dword;
    __unused5 : dword;
  end;
-
+ 
    P_stat64 = ^_stat64;
    Pstat64 = ^_stat64;
 
@@ -557,7 +767,8 @@ type
 	st_ino: culonglong;                 //88
 	                                    //96
 	
-   end;
+  end;
+   
 {$endif}
 
   __fd_set = record
@@ -583,14 +794,18 @@ Type
   u_quad_t = __u_quad_t;
   fsid_t = __fsid_t;
   loff_t = __loff_t;
-  ino_t = __ino_t;
   ino64_t = __ino64_t;
   dev_t = __dev_t;
+ {$ifdef linux}
+  ino_t = __ino_t;
   gid_t = __gid_t;
   mode_t = __mode_t;
-  nlink_t = __nlink_t;
   uid_t = __uid_t;
   off_t = __off_t;
+  blksize_t = __blksize_t;
+  blkcnt_t = __blkcnt_t;
+ {$endif}
+  nlink_t = __nlink_t;
   off64_t = __off64_t;
   pid_t = __pid_t;
   id_t = __id_t;
@@ -610,8 +825,6 @@ Type
   u_int16_t = word;
   u_int32_t = dword;
   register_t = longint;
-  blksize_t = __blksize_t;
-  blkcnt_t = __blkcnt_t;
   fsblkcnt_t = __fsblkcnt_t;
   fsfilcnt_t = __fsfilcnt_t;
   blkcnt64_t = __blkcnt64_t;
@@ -1155,9 +1368,12 @@ type
     __spinlock : longint;
   end;
   Ppthread_mutexattr_t = ^pthread_mutexattr_t;
+  
   pthread_mutexattr_t = record
-       __mutexkind : longint;
-    end;
+   case integer of
+    0:( __mutexkind : longint);
+    1:(buffer: pointer);
+  end;
 
   Ppthread_t = ^pthread_t;
   pthread_t = culong;
@@ -1380,7 +1596,11 @@ function getpid:__pid_t;cdecl;external clib name 'getpid';
 function sscanf(__s:Pchar; __format:Pchar; args:array of const):longint;cdecl;external clib name 'sscanf';
 function sched_yield:longint;cdecl;external clib name 'sched_yield';
 function usleep(__useconds:__useconds_t):longint;cdecl;external clib name 'usleep';
+{$ifdef linux}
 function __errno_location: PInteger; cdecl;external clib name '__errno_location';
+{$else}
+function __errno_location: PInteger; cdecl;external clib name '__error';
+{$endif}
 function strerror_r(__errnum:longint; __buf:Pchar; __buflen:size_t):Pchar;cdecl;external clib name 'strerror_r';
 
 //termios
@@ -1407,14 +1627,7 @@ type
         c_ispeed : speed_t;
         c_ospeed : speed_t;
      end;
-type
-  timespec = record
-    tv_sec: __time_t;
-    tv_nsec: clong;
-  end;
 
-  TTimeSpec = timespec;
-  PTimeSpec = ^TTimeSpec;
 const
  DT_UNKNOWN = 0;
  DT_FIFO = 1;
@@ -1426,15 +1639,26 @@ const
  DT_SOCK = 12;
  DT_WHT = 14;
 type
-   Pdirent64 = ^dirent64;
+ Pdirent64 = ^dirent64;
+{$ifdef linux}
    dirent64 = record
         d_ino : __ino64_t;
         d_off : __off64_t;
         d_reclen : word;
         d_type : byte;
         d_name : array[0..255] of char;
-     end;
-  PPDirEnt64 = ^PDirEnt64;
+       end;
+{$else}
+ dirent64 = record
+        d_fileno: cuint32;            //* file number of entry */
+        d_reclen: cuint16;            //* length of this record */
+        d_type: cuint8;               //* file type, see below */
+        d_namlen: cuint8;             //* length of string in d_name */
+        d_name: array[0..255] of char;        //* name must be no longer than this */
+ end;
+{$endif}
+
+ PPDirEnt64 = ^PDirEnt64;
   
    time_t = __time_t;
    Ptime_t = ^time_t;
@@ -1471,8 +1695,14 @@ function open(__file:Pchar; __oflag: cint; args:array of const): cint;
 function open(__file:Pchar; __oflag: cint): cint;
                     cdecl; varargs; external clib name 'open'; overload;
 function __close(Handle: cint): cint; cdecl;external clib name 'close';
+{$ifdef linux}
 function ftruncate64(handle: cint; size: cint64): cint; cdecl; 
-                                           external clib name 'ftruncate64';
+                                     external clib name 'ftruncate64';
+{$else}
+function ftruncate64(handle: cint; size: cint64): cint; cdecl; 
+                                     external clib name 'ftruncate';
+{$endif}
+
 function fsync(__fd: cint): cint; cdecl; external clib name 'fsync';
 function dup(__fd: cint): cint; cdecl; external clib name 'dup';
 function dup2(__fd: cint; __fd2: cint):longint; cdecl; external clib name 'dup2';
@@ -1511,7 +1741,11 @@ Const
   PTHREAD_BARRIER_SERIAL_THREAD = -1;
 
   NONRECURSIVE  = 0;
+ {$ifdef linux}
   RECURSIVE     = 1;
+ {$else}
+  RECURSIVE     = 2;
+ {$endif} 
 
 function pthread_setcanceltype(__type:longint; var __oldtype:longint):longint;
                           cdecl; external threadslib; overload;
@@ -1560,19 +1794,17 @@ function lstat(__file:Pchar; __buf:Pstat):longint;
 function lstat64(__file:Pchar; __buf:Pstat64):longint;
 {$else}
 function stat(__file:Pchar; __buf:Pstat):longint; cdecl;
-                                   external clib name '__stat';
+                                   external clib name 'stat';
 function fstat(__fd:longint; __buf:Pstat):longint; cdecl;
-                                   external clib name '__fstat';
-
+                                   external clib name 'fstat';
 function stat64(__file:Pchar; __buf:Pstat64):longint; cdecl;
-                                   external clib name '__stat64';
+                                   external clib name 'stat';
 function fstat64(__fd:longint; __buf:Pstat64):longint; cdecl;
-                                   external clib name '__fstat64';
-
+                                   external clib name 'fstat';
 function lstat(__file:Pchar; __buf:Pstat):longint; cdecl;
-                                   external clib name '__lstat';
+                                   external clib name 'lstat';
 function lstat64(__file:Pchar; __buf:Pstat64):longint; cdecl;
-                                   external clib name '__lstat';
+                                   external clib name 'lstat';
 {$endif}
 
 function S_ISDIR(mode : __mode_t) : boolean;
@@ -1737,10 +1969,20 @@ function sigprocmask(__how:longint; var SigSet : TSigSet; var oldset: Tsigset):l
 function pthread_sigmask(__how:longint; var __newmask:__sigset_t; var __oldmask:__sigset_t):longint;cdecl; external threadslib;
 
 function kill(__pid:__pid_t; __sig:longint):longint;cdecl;external clib name 'kill';
+{$ifdef linux}
 function getpt:longint;cdecl;external clib name 'getpt';
+{$else}
+function posix_openpt(oflag: cint):longint; cdecl; external clib name 'posix_openpt';
+function getpt(): longint;
+{$endif}
 function grantpt(__fd:longint):longint;cdecl;external clib name 'grantpt';
 function unlockpt(__fd:longint):longint;cdecl;external clib name 'unlockpt';
+{$ifdef linux}
 function ptsname_r(__fd:longint; __buf:Pchar; __buflen:size_t):longint;cdecl;external clib name 'ptsname_r';
+{$else}
+function ptsname(fildes: cint): pchar; cdecl; external clib name 'ptsname';
+function ptsname_r(__fd:longint; __buf:Pchar; __buflen:size_t):longint;
+{$endif}
 
 const
    VINTR = 0;
@@ -1897,9 +2139,13 @@ const
   TCSANOW = 0;
   TCSADRAIN = 1;
   TCSAFLUSH = 2;
-
+  {$ifdef bsd}
+  SIGRTMIN = 65;
+  SIGRTMAX = 126;
+  {$else}
 function SIGRTMIN(): cint; cdecl; external clib name '__libc_current_sigrtmin';
 function SIGRTMAX(): cint; cdecl; external clib name '__libc_current_sigrtmax';
+ {$endif}
 function ioctl(__fd: cint; __request:dword; args: array of const): cint;
                                cdecl;external clib name 'ioctl'; overload;
 function ioctl(__fd: cint; __request: cuint; args: pointer): cint;
@@ -2019,6 +2265,7 @@ type
   end;
   TInAddr = in_addr;
   PInAddr = ^TInAddr;
+  {$ifdef linux}
   sockaddr = {packed} record
     case Integer of
       0: (sa_family: sa_family_t;
@@ -2028,6 +2275,19 @@ type
           sin_addr: TInAddr;
           sin_zero: packed array[0..7] of Byte);
   end;
+  {$else}
+  sockaddr = record
+   sa_len: byte;                          //* total length */
+   case integer of
+    0: (sa_family: sa_family_t;                //* address family */
+        sa_data: packed array[0..13] of Byte); //* actually longer; address value */
+    1: (sin_family: sa_family_t;
+        sin_port: u_short;
+        sin_addr: TInAddr;
+        sin_zero: packed array[0..7] of Byte);
+  end;
+  {$endif}
+  
   TSockAddr = sockaddr;
   PSockAddr = ^TSockAddr;
 
@@ -2215,10 +2475,14 @@ function shutdown(__fd:longint; __how:longint):longint;cdecl;external clib name 
 function connect(__fd:longint; const __addr: sockaddr;
  __len:socklen_t):longint;cdecl;external clib name 'connect'; overload;
 function connect(__fd:longint; __addr:Psockaddr;
-       __len:socklen_t):longint;cdecl;external clib name 'connect'; overload;
+                 __len:socklen_t):longint;cdecl;external clib name 'connect'; overload;
+{$ifdef linux}
 function __libc_sa_len(__af: sa_family_t): Integer; cdecl;external clib name '__libc_sa_len';
+{$else}
+  //use len field of FreeBSD struct
+{$endif}
 function bind(__fd:longint; __addr:Psockaddr; __len:socklen_t):longint;cdecl;external clib name 'bind';
-function SA_LEN(const buf): longword; // Untyped buffer; this is *unsafe*.
+//function SA_LEN(const buf): longword; // Untyped buffer; this is *unsafe*.
 function listen(__fd:longint; __n:longint):longint;cdecl;external clib name 'listen';
 function accept(__fd:longint; __addr:Psockaddr; __addr_len:Psocklen_t):longint;cdecl;external clib name 'accept';
 function isfdtype(__fd:longint; __fdtype:longint):longint;cdecl;external clib name 'isfdtype';
@@ -2286,8 +2550,8 @@ function sem_timedwait(var __sem: TSemaphore; __abstime: ptimespec): Integer; cd
             external threadslib name 'sem_timedwait';
 
 
-function pthread_mutex_init(__mutex:Ppthread_mutex_t;
-               __mutex_attr:Ppthread_mutexattr_t):longint;cdecl;
+function pthread_mutex_init(__mutex: Ppthread_mutex_t;
+               __mutex_attr: Ppthread_mutexattr_t): longint; cdecl;
             external threadslib name 'pthread_mutex_init';
 function pthread_mutex_destroy(var Mutex: pthread_mutex_t): Integer; cdecl;
             external threadslib name 'pthread_mutex_destroy';
@@ -2298,8 +2562,13 @@ function pthread_mutex_trylock(var Mutex: pthread_mutex_t): Integer; cdecl;
 function pthread_mutex_unlock(var Mutex: pthread_mutex_t): Integer; cdecl;
             external threadslib name 'pthread_mutex_unlock';
 
+{$ifdef linux}
 function readdir64_r(__dirp:PDIR; __entry:Pdirent64;
           __result:PPdirent64):longint;cdecl;external clib name 'readdir64_r';
+{$else}
+function readdir64_r(__dirp:PDIR; __entry:Pdirent64;
+          __result:PPdirent64):longint;cdecl;external clib name 'readdir_r';
+{$endif}
 function localtime_r(__timer:Ptime_t; __tp:Ptm):Ptm;cdecl;
             external clib name 'localtime_r';
 
@@ -2341,7 +2610,45 @@ function munmap(addr: pointer; length: size_t): cint; cdecl;
 implementation
 uses
  msedynload{,msesys};
- 
+{$ifndef linux}
+function getpt(): longint;
+begin
+ result:= posix_openpt(O_RDWR);
+end;
+
+function ptsname_r(__fd:longint; __buf:Pchar; __buflen:size_t):longint;
+var
+ ps,pd,pend: pcchar;
+begin
+ result:= -1;
+ if __buf = nil then begin
+  __errno_location()^:= EINVAL;
+ end
+ else begin
+  PS:= PTSNAME(__FD);
+  IF PS <> NIL THEN BEGIN
+   PD:= __BUF;
+   PEND:= PD + __BUFLEN;
+   WHILE pd < PEND do begin
+    pd^:= ps^;
+    if ps^ = #0 then begin
+     break;
+    end;
+    inc(pd);
+    inc(ps);
+   end;
+   if (pd >= pend) then begin
+    __errno_location()^:= ERANGE;
+   end
+   else begin
+    result:= 0;
+   end;
+  end;
+ end;
+end;
+
+{$endif}
+
 Function WEXITSTATUS(Status: longint): longint;
 begin
   Result:=(Status and $FF00) shr 8;
@@ -2351,13 +2658,13 @@ function errno : error_t;
 begin
   Result:=__errno_location()^;
 end;
-
+{
 function SA_LEN(const Buf): longword; // Untyped buffer; this is *unsafe*.
 
 begin
   Result:=__libc_sa_len(PSockAddr(@Buf)^.sa_family);
 end;
-
+}
 function S_ISDIR(mode: __mode_t) : boolean;
 begin
  result:= mode and __S_IFDIR = __S_IFDIR;

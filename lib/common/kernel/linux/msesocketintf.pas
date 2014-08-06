@@ -154,7 +154,11 @@ begin
   end
   else begin
    with linuxsockaddrty(platformdata) do begin
+   {$ifdef linux}
     int1:= __libc_sa_len(ad.addr.sa_family);
+   {$else}
+    int1:= ad.addr.sa_len;
+   {$endif}
     po1:= @ad.addr;
     {$ifdef FPC}
     if connect(handle,pointer(po1),int1) <> 0 then begin
@@ -251,7 +255,11 @@ begin
   end
   else begin
    with linuxsockaddrty(platformdata) do begin
+   {$ifdef linux}
     if bind(handle,@ad,sa_len(ad.addr.sa_family)) <> 0 then begin
+   {$else}
+    if bind(handle,@ad,ad.addr.sa_len) <> 0 then begin
+   {$endif}
      result:= syelasterror;
     end;
    end;
