@@ -256,7 +256,7 @@ begin
   else begin
    with linuxsockaddrty(platformdata) do begin
    {$ifdef linux}
-    if bind(handle,@ad,sa_len(ad.addr.sa_family)) <> 0 then begin
+    if bind(handle,@ad,__libc_sa_len(ad.addr.sa_family)) <> 0 then begin
    {$else}
     if bind(handle,@ad,ad.addr.sa_len) <> 0 then begin
    {$endif}

@@ -652,11 +652,11 @@ type
   st_blksize: clong;
   st_blocks: clong;	///* Number 512-byte blocks allocated. */
   
-  st_atime: timespec;
+  st_atim: timespec;
 //  st_atime_nsec: culong;
-  st_mtime: timespec;
+  st_mtim: timespec;
 //  st_mtime_nsec: culong;
-  st_ctime: timespec;
+  st_ctim: timespec;
 //  st_ctime_nsec: culong;
   __unused: array[0..2] of clong;
  end;
@@ -680,9 +680,9 @@ type
   st_uid: uid_t;            //* user ID of the file's owner */
   st_gid: gid_t;            //* group ID of the file's group */
   st_rdev: __dev_t;         //* device type */
-  st_atime: timespec;        //* time of last access */
-  st_mtime: timespec;        //* time of last data modification */
-  st_ctime:  timespec;       //* time of last file status change */
+  st_atim: timespec;        //* time of last access */
+  st_mtim: timespec;        //* time of last data modification */
+  st_ctim: timespec;       //* time of last file status change */
   st_size: off_t;           //* file size, in bytes */
   st_blocks: blkcnt_t;      //* blocks allocated for file */
   st_blksize: blksize_t;    //* optimal blocksize for I/O */
@@ -732,12 +732,12 @@ type
    st_size : __off_t;
    st_blksize : __blksize_t;
    st_blocks : __blkcnt_t;
-   st_atime : __time_t;
-   st_atime_nsec : longword;
-   st_mtime : __time_t;
-   st_mtime_nsec: longword;
-   st_ctime : __time_t;
-   st_ctime_nsec: longword;
+   st_atim: timespec;// __time_t;
+//   st_atime_nsec : longword;
+   st_mtim: timespec;// __time_t;
+//   st_mtime_nsec: longword;
+   st_ctim: timespec;// __time_t;
+//   st_ctime_nsec: longword;
    __unused4 : dword;
    __unused5 : dword;
  end;
@@ -746,27 +746,27 @@ type
    Pstat64 = ^_stat64;
 
    _stat64 = packed record
-	st_dev: culonglong;                 // 0
-	__pad0: array[0..3] of byte;        // 8
-	__st_ino: culong;                   //12
-	st_mode: cuint;                     //16
-	st_nlink: cuint;                    //20
-	st_uid: culong;                     //24
-	st_gid: culong;                     //28
-	st_rdev: culonglong;                //32
-	__pad3: array[0..3] of byte;        //40
-	st_size: clonglong;                 //44
-	st_blksize: culong;                 //52
-	st_blocks: culonglong;              //56
-	st_atime: culong;                   //64
-	st_atime_nsec: culong;              //68
-	st_mtime: culong;                   //72
-	st_mtime_nsec: cuint;               //76
-	st_ctime: culong;                   //80
-	st_ctime_nsec: culong;              //84
-	st_ino: culonglong;                 //88
-	                                    //96
-	
+    st_dev: culonglong;                 // 0
+    __pad0: array[0..3] of byte;        // 8
+    __st_ino: culong;                   //12
+    st_mode: cuint;                     //16
+    st_nlink: cuint;                    //20
+    st_uid: culong;                     //24
+    st_gid: culong;                     //28
+    st_rdev: culonglong;                //32
+    __pad3: array[0..3] of byte;        //40
+    st_size: clonglong;                 //44
+    st_blksize: culong;                 //52
+    st_blocks: culonglong;              //56
+    st_atim: timespec;//culong;         //64
+//  st_atime_nsec: culong;              //68
+    st_mtim: timespec; //culong;        //72
+//  st_mtime_nsec: cuint;               //76
+    st_ctim: timespec; //culong;        //80
+///    st_ctime_nsec: culong;           //84
+    st_ino: culonglong;                 //88
+                                        //96
+
   end;
    
 {$endif}

@@ -937,9 +937,9 @@ begin
           if d.needsstat then begin
            state:= state + [fis_typevalid,fis_extinfo1valid,fis_extinfo2valid];
            size:= st_size;
-           modtime:= filetimetodatetime(st_mtime);
-           accesstime:= filetimetodatetime(st_atime);
-           ctime:= filetimetodatetime(st_ctime);
+           modtime:= filetimetodatetime(st_mtim);
+           accesstime:= filetimetodatetime(st_atim);
+           ctime:= filetimetodatetime(st_ctim);
            id:= st_ino;
            owner:= st_uid;
            group:= st_gid;
@@ -973,9 +973,9 @@ begin
   end;
   state:= state + [fis_typevalid,fis_extinfo1valid,fis_extinfo2valid];
   size:= st_size;
-  modtime:= filetimetodatetime(st_mtime);
-  accesstime:= filetimetodatetime(st_atime);
-  ctime:= filetimetodatetime(st_ctime);
+  modtime:= filetimetodatetime(st_mtim);
+  accesstime:= filetimetodatetime(st_atim);
+  ctime:= filetimetodatetime(st_ctim);
   id:= st_ino;
   owner:= st_uid;
   group:= st_gid;
