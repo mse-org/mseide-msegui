@@ -291,6 +291,7 @@ type
    fstoponexception: boolean;
    ferrormessage: string;
    fprocid: int64;
+   fcurrentprocid: int64;
    {$ifdef mswindows}
    finterruptthreadid: longword;
    {$endif}
@@ -832,6 +833,7 @@ begin
  {$endif}
  finterruptcount:= 0;
  fprocid:= 0;
+ fcurrentprocid:= 0;
  flastbreakpoint:= 0;
  ftargetdebugbegin:= 0;
  ftargetdebugend:= 0;
@@ -1054,6 +1056,11 @@ var
  int1: integer;
  str1: string;
 begin
+ if fcurrentprocid <> 0 then begin
+  aprocid:= fcurrentprocid;
+  result:= true;
+  exit;
+ end;
  result:= false;
  ar2:= nil;
  if getcliresult('info program',ar1) = gdb_ok then begin
@@ -1657,6 +1664,9 @@ begin
        if not getintegervalue(resultar,'id',fcurrthreadid) then begin
         fcurrthreadid:= -1;
        end;
+      end;
+      rec_threadgroupstarted: begin
+       getinteger64value(resultar,'pid',fcurrentprocid);
       end;
      end;
     end
