@@ -120,12 +120,12 @@ function iconv_close(__cd:iconv_t):cint;cdecl;external libiconvname name 'libico
 {$endif}
 
 var
-  iconv_ansi2ucs4,
-  iconv_ucs42ansi,
+//  iconv_ansi2ucs4,
+//  iconv_ucs42ansi,
   iconv_ansi2wide,
   iconv_wide2ansi : iconv_t;
   
-  lock_ansi2ucs4 : integer = -1;
+//  lock_ansi2ucs4 : integer = -1;
 //  lock_ucs42ansi : integer = -1;
   lock_ansi2wide : integer = -1;
   lock_wide2ansi : integer = -1;
@@ -280,8 +280,7 @@ function UpperWideString(const s : WideString) : WideString;
     for i:=1 to length(s) do
       result[i]:=WideChar(towupper(wint_t(s[i])));
   end;
-
-
+(* not used
 procedure Ansi2UCS4Move(source:pchar;var dest:UCS4String;len:SizeInt);
   var
     outlength,
@@ -291,10 +290,16 @@ procedure Ansi2UCS4Move(source:pchar;var dest:UCS4String;len:SizeInt);
     destpos: pchar;
 //    mynil : pchar;
 //    my0 : size_t;
+   ustr1: unicodestring;
   begin
 //    mynil:=nil;
 //    my0:=0;
     // extra space
+   if iconv_ansi2ucs4 = nil then begin
+    ansi2widemove(source,dest);
+    UnicodeStringToUCS4String(ustr1,dest);
+   end
+   else begin
     outlength:=len+1;
     setlength(dest,outlength);
     outlength:=len+1;
@@ -327,8 +332,9 @@ procedure Ansi2UCS4Move(source:pchar;var dest:UCS4String;len:SizeInt);
     unlockiconv(lock_ansi2ucs4);
     // truncate string
     setlength(dest,length(dest)-outleft div 4);
+   end;
   end;
-
+*)
 const
  colllen = 3;     //max len of collation element
  bufferhigh = 2*colllen-1;
@@ -573,13 +579,19 @@ initialization
   { init conversion tables }
  iconv_wide2ansi:=iconv_open(nl_langinfo(CODESET),unicode_encoding);
  iconv_ansi2wide:=iconv_open(unicode_encoding,nl_langinfo(CODESET));
- iconv_ucs42ansi:=iconv_open(nl_langinfo(CODESET),'UCS4');
- iconv_ansi2ucs4:=iconv_open('UCS4',nl_langinfo(CODESET));
+// iconv_ucs42ansi:=iconv_open(nl_langinfo(CODESET),'UCS4');
+// iconv_ansi2ucs4:=iconv_open('UCS4',nl_langinfo(CODESET));
  SetCWideStringManager;
 finalization
- iconv_close(iconv_wide2ansi);
- iconv_close(iconv_ansi2wide);
- iconv_close(iconv_ucs42ansi);
- iconv_close(iconv_ansi2ucs4);
+ if iconv_wide2ansi <> nil then begin
+  iconv_close(iconv_wide2ansi);
+ end;
+ if iconv_ansi2wide <> nil then begin
+  iconv_close(iconv_ansi2wide);
+ end;
+// iconv_close(iconv_ucs42ansi);
+// if iconv_ansi2ucs4 <> nil then begin
+//  iconv_close(iconv_ansi2ucs4);
+// end;
 {$endif}
 end.

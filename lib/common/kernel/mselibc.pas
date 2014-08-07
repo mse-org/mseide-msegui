@@ -45,7 +45,11 @@ type
  __fsfilcnt64_t = __UQUAD_TYPE;
  __id_t = __U32_TYPE;
  __clock_t = __SLONGWORD_TYPE;
+{$ifdef linux}
  __time_t = __SLONGWORD_TYPE;
+{$else}
+ __time_t = cint64;
+{$endif}
  __useconds_t = __U32_TYPE;
  __suseconds_t = __SLONGWORD_TYPE;
  __daddr_t = __S32_TYPE;
@@ -409,7 +413,7 @@ const
 {$endif}
 
 
-   
+{$ifdef linux}   
    O_ACCMODE  = $00003;
    O_RDONLY   = $00000;
    O_WRONLY   = $00001;
@@ -433,6 +437,41 @@ const
    O_RSYNC = O_SYNC;
 
    O_LARGEFILE = $08000;//&0100000;
+
+{$else}
+   O_RDONLY = $0000;   //* open for reading only */
+   O_WRONLY = $0001;   //* open for writing only */
+   O_RDWR = $0002;     //* open for reading and writing */
+   O_ACCMODE = $0003;  //* mask for above modes */
+
+   O_NONBLOCK = $0004; //* no delay */
+   O_APPEND = $0008;   //* set append mode */
+   O_SHLOCK = $0010;   //* open with shared file lock */
+   O_EXLOCK = $0020;   //* open with exclusive file lock */
+   O_ASYNC = $0040;    //* signal pgrp when data ready */
+   O_FSYNC = $0080;    //* synchronous writes */
+   O_SYNC = $0080;     //* POSIX synonym for O_FSYNC */
+   O_NOFOLLOW = $0100; //* don't follow symlinks */
+   O_CREAT = $0200;    //* create if nonexistent */
+   O_TRUNC = $0400;    //* truncate to zero length */
+   O_EXCL = $0800;     //* error if already exists */
+
+//* Defined by POSIX 1003.1; BSD default, but must be distinct from O_RDONLY. */
+   O_NOCTTY = $8000;   //* don't assign controlling terminal */
+
+//* Attempt to bypass buffer cache */
+   O_DIRECT = $00010000;
+
+//* Defined by POSIX Extended API Set Part 2 */
+   O_DIRECTORY = $00020000; //* Fail if not directory */
+   O_EXEC = $00040000; //* Open for execute only */
+
+//* Defined by POSIX 1003.1-2008; BSD default, but reserve for future use. */
+   O_TTY_INIT = $00080000; //* Restore default termios attributes */
+
+   O_CLOEXEC = $00100000;
+
+{$endif}
 
    F_DUPFD   = 0;
    F_GETFD   = 1;
@@ -1838,10 +1877,27 @@ var
  clock_gettime: function(clk_id: cint; tp: ptimespec): cint; cdecl;
  
 const
+{$ifdef linux}
    CLOCK_REALTIME = 0;
    CLOCK_MONOTONIC = 1;
    CLOCK_PROCESS_CPUTIME_ID = 2;
    CLOCK_THREAD_CPUTIME_ID = 3;
+{$else}
+   CLOCK_REALTIME = 0;
+   CLOCK_VIRTUAL = 1;
+   CLOCK_PROF = 2;
+   CLOCK_MONOTONIC = 4;
+   CLOCK_UPTIME = 5;             //* FreeBSD-specific. */
+   CLOCK_UPTIME_PRECISE = 7;     //* FreeBSD-specific. */
+   CLOCK_UPTIME_FAST = 8;        //* FreeBSD-specific. */
+   CLOCK_REALTIME_PRECISE = 9;   //* FreeBSD-specific. */
+   CLOCK_REALTIME_FAST = 10;     //* FreeBSD-specific. */
+   CLOCK_MONOTONIC_PRECISE = 11; //* FreeBSD-specific. */
+   CLOCK_MONOTONIC_FAST = 12;    //* FreeBSD-specific. */
+   CLOCK_SECOND = 13;            //* FreeBSD-specific. */
+   CLOCK_THREAD_CPUTIME_ID = 14;
+   CLOCK_PROCESS_CPUTIME_ID = 15;
+{$endif}
    TIMER_ABSTIME = 1;
 
    SA_ONSTACK = $08000000;
@@ -2221,6 +2277,7 @@ function pipe(var __pipedes: TPipes):longint;
 function pipe(var PipeDes: TPipeDescriptors): Integer; cdecl;
                                external clib name 'pipe'; overload;
 function vfork: __pid_t; cdecl; external clib name 'vfork';
+function fork: __pid_t; cdecl; external clib name 'fork';
 function setsid: __pid_t; cdecl; external clib name 'setsid';
 function getsid(pid: __pid_t): __pid_t; cdecl; external clib name 'getsid';
 function setpgid(__pid:__pid_t; __pgid:__pid_t):longint; cdecl;
