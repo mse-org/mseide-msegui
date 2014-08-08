@@ -102,7 +102,7 @@ procedure fpc_threaderror; [external name 'FPC_THREADERROR'];
      THREAD_PRIORITY_ABOVE_NORMAL       = 70;
      THREAD_PRIORITY_HIGHEST            = 80;
      THREAD_PRIORITY_TIME_CRITICAL      = 99;
-     PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP : array [0..5]of Integer = (0, 0, 0, 1, 0, 0);
+//     PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP : array [0..5]of Integer = (0, 0, 0, 1, 0, 0);
 
 Type
    psem_t = ^sem_t;
@@ -118,14 +118,14 @@ Type
 {$endif not FPC_USE_LIBC}
 
      TThreadPriority = (tpIdle, tpLowest, tpLower, tpNormal, tpHigher, tpHighest, tpTimeCritical);
-
+{
   const
      Priorities: array [TThreadPriority] of Integer = (
        THREAD_PRIORITY_IDLE, THREAD_PRIORITY_LOWEST, THREAD_PRIORITY_BELOW_NORMAL,
        THREAD_PRIORITY_NORMAL, THREAD_PRIORITY_ABOVE_NORMAL,
        THREAD_PRIORITY_HIGHEST, THREAD_PRIORITY_TIME_CRITICAL
      );
-
+}
   const
      _POSIX_THREAD_THREADS_MAX = 64;
      PTHREAD_THREADS_MAX = 512;
@@ -1223,11 +1223,11 @@ begin
 {$ifdef DEBUG_MT}
   Writeln('Entering InitThreads.');
 {$endif}
-{$ifndef dynpthreads}
+//{$ifndef dynpthreads}
   Result:=True;
-{$else}
-  Result:=LoadPthreads;
-{$endif}
+//{$else}
+//  Result:=LoadPthreads;
+//{$endif}
   ThreadID := TThreadID (pthread_self());
 {$ifdef DEBUG_MT}
   Writeln('InitThreads : ',Result);
@@ -1237,11 +1237,11 @@ end;
 Function CDoneThreads : Boolean;
 
 begin
-{$ifndef dynpthreads}
+//{$ifndef dynpthreads}
   Result:=True;
-{$else}
-  Result:=UnloadPthreads;
-{$endif}
+//{$else}
+//  Result:=UnloadPthreads;
+//{$endif}
 end;
 
 
