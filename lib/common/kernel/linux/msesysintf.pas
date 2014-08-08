@@ -117,7 +117,7 @@ var
 begin
  sigemptyset(set1);
  sigaddset(set1,signum);
- pthread_sigmask(sig_unblock,set1,set2);
+ pthread_sigmask(sig_unblock,@set1,@set2);
  result:= sigismember(set2,signum) <> 0;
 end;
 
@@ -128,7 +128,7 @@ var
 begin
  sigemptyset(set1);
  sigaddset(set1,signum);
- pthread_sigmask(sig_block,set1,set2);
+ pthread_sigmask(sig_block,@set1,@set2);
  result:= sigismember(set2,signum) <> 0;
 end;
 
@@ -565,7 +565,7 @@ function sys_issamethread(const a,b: threadty): boolean;
 begin
  result:= pthread_equal(a,b) <> 0;
 end;
- 
+
 function sys_threadcreate(var info: threadinfoty): syserrorty;
 var
 {$ifndef FPC}
@@ -573,11 +573,15 @@ var
 {$else}
  id1: threadty;
 {$endif}
+ sigs1,sigs2,sigs3: __sigset_t;
 begin
  {$ifdef FPC}
  with info do begin
+  sigfillset(sigs1); //block all
+  pthread_sigmask(sig_block,@sigs1,@sigs2);
   id:= 0;
   id:= threadty(beginthread(@threadexec,@info,tthreadid(id1),info.stacksize));
+  pthread_sigmask(sig_setmask,@sigs2,nil); //restore
   if id = 0 then begin
    result:= sye_thread;
   end

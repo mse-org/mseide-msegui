@@ -1499,8 +1499,8 @@ type
    si_uid: __uid_t;
    si_sigval: sigval_t;
  end;
- Psiginfo = ^siginfo;
- siginfo = record
+ Psiginfo = ^_siginfo;
+ _siginfo = record
       si_signo : cint;
       si_errno : cint;
       si_code : cint;
@@ -1513,7 +1513,7 @@ type
         5: (_sigfault: _si_sigfault);
         6: (_sigpoll: _si_sigpoll);
    end;
- siginfo_t = siginfo;
+ siginfo_t = _siginfo;
  Psiginfo_t = ^siginfo_t;
  Tsiginfo_t = siginfo_t;
 
@@ -1914,8 +1914,12 @@ const
   SIG_ERR  = (-1);
   SIG_DFL  = (0);
   SIG_IGN  = (1);
+ {$ifdef linux}
   SIG_HOLD = (2);
-
+ {$else}
+  SIG_HOLD = (3);
+ {$endif}
+ {$ifdef linux}
    SIGHUP = 1;
    SIGINT = 2;
    SIGQUIT = 3;
@@ -1952,7 +1956,43 @@ const
    SIGSYS = 31;
    SIGUNUSED = 31;
    _NSIG = 64;
-
+{$else}
+   SIGHUP = 1;        //* hangup */
+   SIGINT = 2;        //* interrupt */
+   SIGQUIT = 3;       //* quit */
+   SIGILL = 4;        //* illegal instr. (not reset when caught) */
+   SIGTRAP = 5;       //* trace trap (not reset when caught) */
+   SIGABRT = 6;       //* abort() */
+   SIGIOT = SIGABRT;  //* compatibility */
+   SIGEMT = 7;        //* EMT instruction */
+   SIGFPE = 8;        //* floating point exception */
+   SIGKILL = 9;       //* kill (cannot be caught or ignored) */
+   SIGBUS = 10;       //* bus error */
+   SIGSEGV = 11;      //* segmentation violation */
+   SIGSYS = 12;       //* non-existent system call invoked */
+   SIGPIPE = 13;      //* write on a pipe with no one to read it */
+   SIGALRM = 14;      //* alarm clock */
+   SIGTERM = 15;      //* software termination signal from kill */
+   SIGURG = 16;       //* urgent condition on IO channel */
+   SIGSTOP = 17;      //* sendable stop signal not from tty */
+   SIGTSTP = 18;      //* stop signal from tty */
+   SIGCONT = 19;      //* continue a stopped process */
+   SIGCHLD = 20;      //* to parent on child stop or exit */
+   SIGTTIN = 21;      //* to readers pgrp upon background tty read */
+   SIGTTOU = 22;      //* like TTIN if (tp->t_local&LTOSTOP) */
+   SIGIO = 23;        //* input/output possible signal */
+   SIGXCPU = 24;      //* exceeded CPU time limit */
+   SIGXFSZ = 25;      //* exceeded file size limit */
+   SIGVTALRM = 26;    //* virtual time alarm */
+   SIGPROF = 27;      //* profiling time alarm */
+   SIGWINCH = 28;     //* window size changes */
+   SIGINFO = 29;      //* information request */
+   SIGUSR1 = 30;      //* user defined signal 1 */
+   SIGUSR2 = 31;      //* user defined signal 2 */
+   SIGTHR = 32;       //* reserved by thread library. */
+   SIGLWP = SIGTHR;
+   SIGLIBRT = 33;     //* reserved by real-time library. */
+{$endif}
 type
    Psighandler_t = ^sighandler_t;
    sighandler_t = __sighandler_t;
@@ -1972,7 +2012,8 @@ type
   P__itimer_which_t = ^__itimer_which_t;
   __itimer_which_t = __itimer_which;
 
-function setitimer(__which:__itimer_which_t; __new:Pitimerval; __old:Pitimerval):longint;cdecl;external clib name 'setitimer';
+function setitimer(__which: __itimer_which_t; __new:Pitimerval;
+             __old:Pitimerval):longint;cdecl;external clib name 'setitimer';
 type
   wint_t = longword;
   __mbstate_t = record
@@ -2013,22 +2054,40 @@ type
    end;
 function poll(__fds: Ppollfd; __nfds:nfds_t; __timeout:longint):longint;cdecl;external clib name 'poll';
 const
+{$ifdef linux}
    SIG_BLOCK = 0;
    SIG_UNBLOCK = 1;
    SIG_SETMASK = 2;
+{$else}
+   SIG_BLOCK = 1;          //* block specified signal set */
+   SIG_UNBLOCK = 2;        //* unblock specified signal set */
+   SIG_SETMASK =3;         //* set specified signal set */
+{$endif}
 
-function signal(__sig:longint; __handler:__sighandler_t):__sighandler_t;cdecl;external clib name 'signal';
-function sigemptyset(var SigSet : TSigSet):longint;cdecl;external clib name 'sigemptyset';
-function sigaddset(var SigSet : TSigSet; SigNum : Longint):longint;cdecl;external clib name 'sigaddset';
-function sigismember(var SigSet : TSigSet; SigNum : Longint):longint;cdecl;external clib name 'sigismember';
-function sigprocmask(__how:longint; var SigSet : TSigSet; var oldset: Tsigset):longint;cdecl;external clib name 'sigprocmask';
-function pthread_sigmask(__how:longint; var __newmask:__sigset_t; var __oldmask:__sigset_t):longint;cdecl; external threadslib;
+function signal(__sig:longint; __handler:__sighandler_t):__sighandler_t;
+                            cdecl; external clib name 'signal';
+function sigemptyset(var SigSet : TSigSet):longint;
+                            cdecl; external clib name 'sigemptyset';
+function sigfillset(var SigSet : TSigSet):longint;
+                            cdecl; external clib name 'sigfillset';
+function sigaddset(var SigSet : TSigSet; SigNum : Longint):longint;
+                            cdecl; external clib name 'sigaddset';
+function sigismember(var SigSet : TSigSet; SigNum : Longint):longint;
+                            cdecl; external clib name 'sigismember';
+function sigprocmask(__how: cint; sigset: p__sigset_t;
+                                    oldset: p__sigset_t):longint;
+                            cdecl; external clib name 'sigprocmask';
+function pthread_sigmask(__how: cint; __newmask: p__sigset_t;
+                                     __oldmask: p__sigset_t):longint; cdecl;
+                                external threadslib name 'pthread_sigmask';
 
-function kill(__pid:__pid_t; __sig:longint):longint;cdecl;external clib name 'kill';
+function kill(__pid:__pid_t; __sig:longint):longint;cdecl;
+                                          external clib name 'kill';
 {$ifdef linux}
 function getpt:longint;cdecl;external clib name 'getpt';
 {$else}
-function posix_openpt(oflag: cint):longint; cdecl; external clib name 'posix_openpt';
+function posix_openpt(oflag: cint):longint; cdecl;
+                                     external clib name 'posix_openpt';
 function getpt(): longint;
 {$endif}
 function grantpt(__fd:longint):longint;cdecl;external clib name 'grantpt';
@@ -2641,7 +2700,7 @@ const
  PROT_GROWSDOWN = $01000000; //* Extend change to start of
                        //growsdown vma (mprotect only).  */
  PROT_GROWSUP = $02000000; //* Extend change to start of
-					   //growsup vma (mprotect only).  */
+                           //growsup vma (mprotect only).  */
 
 //* Sharing types (must choose one and only one of these).  */
  MAP_SHARED = $01;  //* Share changes.  */
