@@ -573,7 +573,7 @@ var
 {$else}
  id1: threadty;
 {$endif}
- sigs1,sigs2,sigs3: __sigset_t;
+ sigs1,sigs2: __sigset_t;
 begin
  {$ifdef FPC}
  with info do begin
