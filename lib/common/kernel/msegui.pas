@@ -14081,7 +14081,7 @@ begin
  gui_raisewindow(winid);
  include(appinst.fstate,aps_needsupdatewindowstack);
 {$ifdef mse_debugzorder}
- debugwriteln('****bringtofront**** "'+fowner.name+'"');
+ debugwriteln('****bringtofront**** "'+fownerwidget.name+'"');
 {$endif}
 end;
 
@@ -14090,7 +14090,7 @@ begin
  gui_lowerwindow(winid);
  include(appinst.fstate,aps_needsupdatewindowstack);
 {$ifdef mse_debugzorder}
- debugwriteln('****sendtoback**** "'+fowner.name+'"');
+ debugwriteln('****sendtoback**** "'+fownerwidget.name+'"');
 {$endif}
 end;
 
@@ -14100,7 +14100,7 @@ begin
  exclude(fstate,tws_lower);
  include(appinst.fstate,aps_needsupdatewindowstack);
 {$ifdef mse_debugzorder}
- debugwriteln('****bringtofrontlocal**** "'+fowner.name+'"');
+ debugwriteln('****bringtofrontlocal**** "'+fownerwidget.name+'"');
 {$endif}
 end;
 
@@ -14110,7 +14110,7 @@ begin
  exclude(fstate,tws_raise);
  include(appinst.fstate,aps_needsupdatewindowstack);
 {$ifdef mse_debugzorder}
- debugwriteln('****sendtobacklocal**** "'+fowner.name+'"');
+ debugwriteln('****sendtobacklocal**** "'+fownerwidget.name+'"');
 {$endif}
 end;
 
@@ -16645,7 +16645,7 @@ begin
   result:= 'nil';
  end
  else begin
-  result:= '"'+awindow.fowner.name+'"';
+  result:= '"'+awindow.fownerwidget.name+'"';
  end;
 end;
 
@@ -16654,7 +16654,7 @@ var
  int1: integer;
 begin
  for int1:= 0 to high(ar3) do begin
-  if ar3[int1].fowner.visible then begin
+  if ar3[int1].fownerwidget.visible then begin
    debugwrite('+ ');
   end
   else begin
