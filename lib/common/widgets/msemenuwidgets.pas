@@ -1817,6 +1817,10 @@ begin
       ar1[1]:= fwindow.winid;
       gui_getzorder(ar1,ar2);
       if ar2[1] > ar2[0] then begin
+      {$ifdef mse_debugzorder}
+       debugwindow('**mainmenuwidget.restorefocus',fwindow.winid);
+       debugwindow('  before',fstackedunderbefore.winid);
+      {$endif}
        gui_stackunderwindow(fwindow.winid,fstackedunderbefore.winid);
       end;
      end;

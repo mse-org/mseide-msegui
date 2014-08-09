@@ -2130,7 +2130,17 @@ begin
  checkgdilock;
 {$endif} 
 {$ifdef mse_debugzorder}
- debugwindow('*stackwindow '+inttostr(stackmode)+' ',id);
+ if stackmode = above then begin
+  debugwindow('*stackwindow above'+' ',id);
+ end
+ else begin
+  if stackmode = below then begin
+   debugwindow('*stackwindow below'+' ',id);
+  end
+  else begin
+   debugwindow('*stackwindow '+inttostr(stackmode)+' ',id);
+  end;
+ end;
  debugwindow(' predecessor ',predecessor);
 {$endif}
  if predecessor = 0 then begin
@@ -2158,8 +2168,14 @@ begin
      if bo1 then begin
       sendnetrootcardinalmessage(netatoms[net_restack_window],predecessor,
                                     [2,id,above]);
+     {$ifdef mse_debugzorder}
+      debugwriteln('  net_restack_window workaround');
+     {$endif}
      end
      else begin
+     {$ifdef mse_debugzorder}
+      debugwriteln('  reconfigurewmwindow workaround');
+     {$endif}
       changes.stack_mode:= above;
       changes.sibling:= id;
       xreconfigurewmwindow(appdisp,predecessor,msedefaultscreenno,
@@ -2184,10 +2200,16 @@ begin
     end
     else begin
      if bo1 then begin
+     {$ifdef mse_debugzorder}
+      debugwriteln('  net_restack_window');
+     {$endif}
       sendnetrootcardinalmessage(netatoms[net_restack_window],id,
                                     [2,predecessor,stackmode]);
      end
      else begin
+     {$ifdef mse_debugzorder}
+      debugwriteln('  reconfigurewmwindow');
+     {$endif}
       changes.sibling:= predecessor;
       changes.stack_mode:= stackmode;
       xreconfigurewmwindow(appdisp,id,msedefaultscreenno,
@@ -6233,7 +6255,6 @@ end;
 
 initialization
  norestackwindow:= true;
-// norestackwindow:= false;
  noreconfigurewmwindow:= true;
  stackmodebelowworkaround:= false;
 // nocreatestaticgravity:= true;
