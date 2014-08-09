@@ -10,8 +10,8 @@ Copyright (c) 1999-2014 by Martin Schreiber
 * Please change "db" to "mdb" in uses and add 
 * "mclasses" after "classes" in uses in your units
 
-- Compiles with FPC 2.6.0, 2.6.2 or 2.6.4
-- Tested on i386-linux SuSE 13.1, x84_64-linux SuSE 12.2 and
+- Compiles with FPC 2.6.2 or 2.6.4
+- Tested on i386-linux SuSE 13.1, x84_64-linux SuSE 13.1, x84_64-freebsd,
   i386-win32 2000, XP and Vista.
 - Links to xlib and gdi32, no external widget library needed.
 - Internal character encoding is UCS2.
@@ -58,7 +58,7 @@ If you wish to to compile the IDE:
 1. In 'Project'-'Open' select 'yourdirectory/msegui/apps/ide/mseide.prj'.
 2. 'Target'-'Continue'.
 
-Compiling MSEide from commandline on Linux:
+Compiling MSEide from commandline on Linux and FreeBSD:
 fpc -Fulib/common/* -Fulib/common/kernel/linux -Filib/common/kernel apps/ide/mseide.pas
 On Windows:
 ppc386.exe -Fulib\common\* -Fulib\common\kernel\windows -Filib\common\kernel apps\ide\mseide.pas
