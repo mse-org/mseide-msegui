@@ -1769,6 +1769,16 @@ type
    //origin = paintrect.pos
    function isleftbuttondown(const info: mouseeventinfoty;
                       const akeyshiftstate: shiftstatesty): boolean; overload;
+{
+   function eatwidgetclick(var info: mouseeventinfoty;
+                                     const caption: boolean = false): boolean;
+   function eatclick(var info: mouseeventinfoty): boolean;
+   function eatdblclick(var info: mouseeventinfoty): boolean;
+   function eatdblclicked(var info: mouseeventinfoty): boolean;
+   function eatleftbuttondown(var info: mouseeventinfoty): boolean; overload;
+   function eatleftbuttondown(var info: mouseeventinfoty;
+                      const akeyshiftstate: shiftstatesty): boolean; overload;
+}
    function widgetmousepos(const ainfo: mouseeventinfoty): pointty; //transaltes to widgetpos if necessary
 
    function rootpos: pointty;
@@ -2667,6 +2677,8 @@ function mousebuttontoshiftstate(button: mousebuttonty): shiftstatesty;
 function isenterkey(const awidget: twidget; const key: keyty): boolean;
 function isdblclick(const ainfo: mouseeventinfoty;
                            const abutton: mousebuttonty  = mb_left): boolean;
+function eatdblclick(var ainfo: mouseeventinfoty;
+                           const abutton: mousebuttonty  = mb_left): boolean;
 
 procedure beep;
 procedure guibeep;
@@ -3506,6 +3518,15 @@ begin
  with ainfo do begin
   result:= (button = abutton) and (eventkind = ek_buttonpress) and 
                                                 (ss_double in shiftstate);
+ end;
+end;
+
+function eatdblclick(var ainfo: mouseeventinfoty;
+                          const abutton: mousebuttonty = mb_left): boolean;
+begin
+ result:= isdblclick(ainfo,abutton);
+ if result then begin
+  include(ainfo.eventstate,es_processed);
  end;
 end;
 
@@ -10701,7 +10722,57 @@ begin
               shiftstate*keyshiftstatesmask = akeyshiftstate);
  end;
 end;
+{
+function twidget.eatwidgetclick(var info: mouseeventinfoty;
+                                  const caption: boolean = false): boolean;
+begin
+ result:= iswidgetclick(info,caption);
+ if result then begin
+  include(info.eventstate,es_processed);
+ end;
+end;
 
+function twidget.eatclick(var info: mouseeventinfoty): boolean;
+begin
+ result:= isclick(info);
+ if result then begin
+  include(info.eventstate,es_processed);
+ end;
+end;
+
+function twidget.eatdblclick(var info: mouseeventinfoty): boolean;
+begin
+ result:= isdblclick(info);
+ if result then begin
+  include(info.eventstate,es_processed);
+ end;
+end;
+
+function twidget.eatdblclicked(var info: mouseeventinfoty): boolean;
+begin
+ result:= isdblclicked(info);
+ if result then begin
+  include(info.eventstate,es_processed);
+ end;
+end;
+
+function twidget.eatleftbuttondown(var info: mouseeventinfoty): boolean;
+begin
+ result:= isleftbuttondown(info);
+ if result then begin
+  include(info.eventstate,es_processed);
+ end;
+end;
+
+function twidget.eatleftbuttondown(var info: mouseeventinfoty;
+                   const akeyshiftstate: shiftstatesty): boolean;
+begin
+ result:= isleftbuttondown(info,akeyshiftstate);
+ if result then begin
+  include(info.eventstate,es_processed);
+ end;
+end;
+}
 function twidget.widgetmousepos(const ainfo: mouseeventinfoty): pointty;
                                   //transaltes to widgetpos if necessary
 begin
