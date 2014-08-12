@@ -125,7 +125,7 @@ type
    procedure dokeydown(var info: keyeventinfoty); override;
    procedure getstate(out state: texteditstatety); virtual;
    procedure setstate(const state: texteditstatety); virtual;
-   procedure setfilename(const value: filenamety);
+   procedure setfilename(value: filenamety); //no const!
    procedure insertlinebreak; virtual;
    procedure editnotification(var info: editnotificationinfoty); override;
    procedure updateindex(select: boolean);
@@ -990,7 +990,7 @@ begin
  modified:= false;
 end;
 
-procedure tcustomtextedit.setfilename(const value: filenamety);
+procedure tcustomtextedit.setfilename(value: filenamety);
 begin
  ffilename:= filepath(value);
 {
