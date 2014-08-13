@@ -204,7 +204,7 @@ type
    procedure reloadfile(restorestate: boolean = true);
    procedure loadfromstream(const stream: ttextstream; 
                                   restorestate: boolean = false);
-   procedure loadfromfile(const afilename: filenamety;
+   procedure loadfromfile(afilename: filenamety; //no const!
                                   restorestate: boolean = false); virtual;
    procedure savetostream(const stream: ttextstream;
                                         const resetmodified: boolean);
@@ -897,7 +897,7 @@ begin
  modified:= false;
 end;
 
-procedure tcustomtextedit.loadfromfile(const afilename: filenamety;
+procedure tcustomtextedit.loadfromfile(afilename: filenamety;
                                  restorestate: boolean = false);
 var
  stream: ttextstream;
