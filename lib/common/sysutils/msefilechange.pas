@@ -156,7 +156,8 @@ end;
 const
  notifyflags = DN_MODIFY or DN_CREATE or DN_DELETE or DN_RENAME or DN_ATTRIB;
  
-function adddir(const sender: tdirchangethread; const name: filenamety): integer;
+function adddir(const sender: tdirchangethread; 
+                               const name: filenamety): integer;
 var
  flags: longword;
  action: tsigactionex;
@@ -165,6 +166,7 @@ begin
  str1:= name;
  result:= mselibc.open(PChar(str1),o_rdonly);
 // if sys_openfile(name,fm_read,[],[],result) = sye_ok then begin
+{$ifdef linux}
  if result >= 0 then begin
   FillChar(action, SizeOf(action), 0);
   with action do begin
@@ -181,6 +183,7 @@ begin
   end;
   unblocksignal(dirinfosig);
  end;
+{$endif}
 end;
 
 {$ENDIF unix}
@@ -247,9 +250,11 @@ var
  str1: string;
  aevent: tfilechangeevent;
 begin
- {$ifdef UNIX}
+{$ifdef UNIX}
+ {$ifdef linux}
  fcntl(fdirhandle,F_NOTIFY,[notifyflags]);
  {$endif}
+{$endif}
  for int1:= 0 to length(ffileinfos) - 1 do begin
   with ffileinfos[int1] do begin
    if isroot then begin
@@ -367,11 +372,18 @@ begin
  end;
  lock;
  try
-  for int1:= 0 to high(fdirs) do begin
-   if fdirs[int1].fdirhandle = afd then begin
-            //ev. unzuverlaessig bei wiederverwendetem fd?
-    fdirs[int1].changed;
-    break;
+  if afd = -1 then begin
+   for int1:= 0 to high(fdirs) do begin
+    fdirs[int1].changed;    
+   end;
+  end
+  else begin
+   for int1:= 0 to high(fdirs) do begin
+    if (fdirs[int1].fdirhandle = afd) then begin
+             //ev. unzuverlaessig bei wiederverwendetem fd?
+     fdirs[int1].changed;    
+     break;
+    end;
    end;
   end;
  finally
@@ -410,6 +422,7 @@ var
  int1: integer;
 begin
  while not terminated  do begin
+ {$ifdef linux}
   semwait;
   while not terminated and not (application.terminated) and
                                      (fsiginpo <> fsigoutpo) do begin
@@ -417,6 +430,12 @@ begin
    interlockedexchange(fsigoutpo,(fsigoutpo + 1) and sigpuffermask);
    dochange(fsigqueue[int1]);
   end;
+ {$else}
+  semwait(500000); //freebsd needs polling
+  if not terminated and not (application.terminated) then begin
+   dochange(-1);
+  end;
+ {$endif}
   if not terminated then begin
    sleep(500);
   end;

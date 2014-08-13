@@ -71,6 +71,107 @@ type
  __ipc_pid_t = word;
  {$endif}
  __caddr_t = ^char;
+
+type
+  __ptr_t = Pointer;
+  P__ptr_t = ^__ptr_t;
+  ptrdiff_t = Integer;
+  __long_double_t = Extended;
+  P__long_double_t = ^__long_double_t;
+//  size_t = longword;
+  Psize_t = ^size_t;
+//  UInt64 = 0..High(Int64); // Must be unsigned.
+  wchar_t = widechar;
+  Pwchar_t = ^wchar_t;
+  PPwchar_t = ^Pwchar_t;
+  PPByte = ^PByte;
+  PPPChar = ^PPChar;
+
+   __u_char = byte;
+   __u_short = word;
+   __u_int = dword;
+   __u_long = dword;
+   __u_quad_t = qword;
+   __quad_t = int64;
+
+   __int8_t = char;
+   __uint8_t = byte;
+   __int16_t = smallint;
+   __uint16_t = word;
+   __int32_t = longint;
+   __uint32_t = dword;
+   __int64_t = Int64;
+   __uint64_t = Qword;
+
+   __qaddr_t = __quad_t;
+//   __dev_t = __u_quad_t;
+//   __uid_t = __u_int;
+//   __gid_t = __u_int;
+//   __ino_t = __u_long;
+//   __mode_t = __u_int;
+//   __nlink_t = __u_int;
+//   __off_t = longint;
+   __loff_t = __quad_t;
+//   __pid_t = longint;
+//   __ssize_t = longint;
+//   __rlim_t = __u_long;
+//   __rlim64_t = __u_quad_t;
+//   __id_t = __u_int;
+//   __fsid_t = record
+//        __val : array[0..1] of longint;
+//     end;
+
+{
+   __daddr_t = longint;
+   __caddr_t = char;
+   __time_t = longint;
+   __useconds_t = dword;
+   __suseconds_t = longint;
+   __swblk_t = longint;
+   __clock_t = longint;
+   __clockid_t = longint;
+   __timer_t = longint;
+   __fd_mask = dWord;
+}
+  int64_t = Int64;
+  uint8_t = byte;
+
+  uint16_t = word;
+  uint32_t = dword;
+  uint64_t = qword;
+  int_least8_t = char;
+  int_least16_t = smallint;
+  int_least32_t = longint;
+  int_least64_t = int64;
+  uint_least8_t = byte;
+  uint_least16_t = word;
+  uint_least32_t = dword;
+  uint_least64_t = qword;
+
+  int_fast8_t = shortint;
+  int_fast16_t = longint;
+  int_fast32_t = longint;
+  int_fast64_t = int64;
+  uint_fast8_t = byte;
+
+  uint_fast16_t = dword;
+  uint_fast32_t = dword;
+  uint_fast64_t = qword;
+
+//  intptr_t = longint;
+//  uintptr_t = dword;
+  intptr_t = ptrint;
+  uintptr_t = ptruint;
+  intmax_t = Int64;
+  uintmax_t = QWord;
+
+ timespec = record
+  tv_sec: __time_t;
+  tv_nsec: clong;
+ end;
+
+ TTimeSpec = timespec;
+ PTimeSpec = ^TTimeSpec;
  
 //ioctrl
 const
@@ -473,6 +574,7 @@ const
 
 {$endif}
 
+{$ifdef linux}
    F_DUPFD   = 0;
    F_GETFD   = 1;
    F_SETFD   = 2;
@@ -503,6 +605,129 @@ const
    F_UNLCK = 2;
    F_EXLCK = 4;
    F_SHLCK = 8;
+
+{$else}
+
+   F_DUPFD = 0;           //* duplicate file descriptor */
+   F_GETFD = 1;           //* get file descriptor flags */
+   F_SETFD = 2;           //* set file descriptor flags */
+   F_GETFL = 3;           //* get file status flags */
+   F_SETFL = 4;           //* set file status flags */
+   F_GETOWN = 5;          //* get SIGIO/SIGURG proc/pgrp */
+   F_SETOWN = 6;          //* set SIGIO/SIGURG proc/pgrp */
+   F_OGETLK = 7;          //* get record locking information */
+   F_OSETLK = 8;          //* set record locking information */
+   F_OSETLKW = 9;         //* F_SETLK; wait if blocked */
+   F_DUP2FD = 10;         //* duplicate file descriptor to arg */
+   F_GETLK = 11;          //* get record locking information */
+   F_SETLK = 12;          //* set record locking information */
+   F_SETLKW = 13;         //* F_SETLK; wait if blocked */
+   F_SETLK_REMOTE = 14;   //* debugging support for remote locks */
+   F_READAHEAD = 15;      //* read ahead */
+   F_RDAHEAD = 16;        //* Darwin compatible read ahead */
+   F_DUPFD_CLOEXEC = 17;  //* Like F_DUPFD, but FD_CLOEXEC is set */
+   F_DUP2FD_CLOEXEC = 18; //* Like F_DUP2FD, but FD_CLOEXEC is set */
+
+//* file descriptor flags (F_GETFD, F_SETFD) */
+   FD_CLOEXEC = 1;        //* close-on-exec flag */
+
+//* record locking flags (F_GETLK, F_SETLK, F_SETLKW) */
+   F_RDLCK = 1;           //* shared or read lock */
+   F_UNLCK = 2;           //* unlock */
+   F_WRLCK = 3;           //* exclusive or write lock */
+   F_UNLCKSYS = 4;        //* purge locks for a given system ID */ 
+   F_CANCEL = 5;          //* cancel an async lock request */
+   F_WAIT = $010;        //* Wait until lock is granted */
+   F_FLOCK = $020;       //* Use flock(2) semantics for lock */
+   F_POSIX = $040;       //* Use POSIX semantics for lock */
+   F_REMOTE = $080;      //* Lock owner is remote NFS client */
+   F_NOINTR = $100;      //* Ignore signals when waiting */
+{$endif}
+
+{$ifndef linux}
+   EVFILT_READ = (-1);
+   EVFILT_WRITE = (-2);
+   EVFILT_AIO = (-3); //* attached to aio requests */
+   EVFILT_VNODE = (-4); //* attached to vnodes */
+   EVFILT_PROC = (-5); //* attached to struct proc */
+   EVFILT_SIGNAL = (-6); //* attached to struct proc */
+   EVFILT_TIMER = (-7); //* timers */
+//*	EVFILT_NETDEV = (-8); /   no longer supported */
+   EVFILT_FS = (-9); //* filesystem events */
+   EVFILT_LIO = (-10); //* attached to lio requests */
+   EVFILT_USER = (-11); //* User events */
+   EVFILT_SYSCOUNT = 11;
+
+   EV_ADD = $0001;      //* add event to kq (implies enable) */
+   EV_DELETE = $0002;   //* delete event from kq */
+   EV_ENABLE = $0004;   //* enable event */
+   EV_DISABLE = $0008;  //* disable event (not reported) */
+
+//* flags */
+   EV_ONESHOT = $0010;  //* only report one occurrence */
+   EV_CLEAR = $0020;    //* clear event state after reporting */
+   EV_RECEIPT = $0040;  //* force EV_ERROR on success, data=0 */
+   EV_DISPATCH = $0080; //* disable event after reporting */
+
+   EV_SYSFLAGS = $F000; //* reserved by system */
+   EV_DROP = $1000;     //* note should be dropped */
+   EV_FLAG1 = $2000;    //* filter-specific flag */
+
+//* returned values */
+   EV_EOF = $8000;      //* EOF detected */
+   EV_ERROR = $4000;    //* error, data contains errno */
+
+   NOTE_FFNOP = $00000000;      //* ignore input fflags */
+   NOTE_FFAND = $40000000;      //* AND fflags */
+   NOTE_FFOR = $80000000;       //* OR fflags */
+   NOTE_FFCOPY = $c0000000;     //* copy fflags */
+   NOTE_FFCTRLMASK = $c0000000; //* masks for operations */
+   NOTE_FFLAGSMASK = $00ffffff;
+
+   NOTE_TRIGGER = $01000000;  //* Cause the event to be triggered for output. */
+
+//* data/hint flags for EVFILT_{READ|WRITE}, shared with userspace
+   NOTE_LOWAT = $0001;          //* low water mark */
+
+//* data/hint flags for EVFILT_VNODE, shared with userspace
+   NOTE_DELETE = $0001;         //* vnode was removed */
+   NOTE_WRITE = $0002;          //* data contents changed */
+   NOTE_EXTEND = $0004;         //* size increased */
+   NOTE_ATTRIB = $0008;         //* attributes changed */
+   NOTE_LINK = $0010;           //* link count changed */
+   NOTE_RENAME = $0020;         //* vnode was renamed */
+   NOTE_REVOKE = $0040;         //* vnode access was revoked */
+
+
+//* data/hint flags for EVFILT_PROC, shared with userspace
+   NOTE_EXIT = $80000000;       //* process exited */
+   NOTE_FORK = $40000000;       //* process forked */
+   NOTE_EXEC = $20000000;       //* process exec'd */
+   NOTE_PCTRLMASK = $f0000000;  //* mask for hint bits */
+   NOTE_PDATAMASK = $000fffff;  //* mask for pid */
+
+//* additional flags for EVFILT_PROC */
+   NOTE_TRACK = $00000001;      //* follow across forks */
+   NOTE_TRACKERR = $00000002;   //* could not track child */
+   NOTE_CHILD = $00000004;      //* am a child process */
+
+type
+ kevent_t = record
+  ident: uintptr_t;  //* identifier for this event */
+  filter: cshort;    //* filter for event */
+  flags: cushort;
+  fflags: cuint;
+  data: intptr_t;
+  udata: pointer;    //* opaque user data identifier */
+ end;
+ pkevent_t = ^kevent_t;
+   
+   function kqueue(): cint; cdecl; external clib name 'kqueue';
+   function kevent(kq: cint; changelist: pkevent_t; nchanges: cint;
+              eventlist: pkevent_t; nevents: cint; timeout: ptimespec): cint; 
+                                           cdecl; external clib name 'kevent';
+ const
+{$endif}
 
    LOCK_SH = 1;
    LOCK_EX = 2;
@@ -551,96 +776,6 @@ const
   S_IXOTH = S_IXGRP shr 3;
   S_IRWXO = S_IRWXG shr 3;
 
-type
-  __ptr_t = Pointer;
-  P__ptr_t = ^__ptr_t;
-  ptrdiff_t = Integer;
-  __long_double_t = Extended;
-  P__long_double_t = ^__long_double_t;
-//  size_t = longword;
-  Psize_t = ^size_t;
-//  UInt64 = 0..High(Int64); // Must be unsigned.
-  wchar_t = widechar;
-  Pwchar_t = ^wchar_t;
-  PPwchar_t = ^Pwchar_t;
-  PPByte = ^PByte;
-  PPPChar = ^PPChar;
-
-   __u_char = byte;
-   __u_short = word;
-   __u_int = dword;
-   __u_long = dword;
-   __u_quad_t = qword;
-   __quad_t = int64;
-
-   __int8_t = char;
-   __uint8_t = byte;
-   __int16_t = smallint;
-   __uint16_t = word;
-   __int32_t = longint;
-   __uint32_t = dword;
-   __int64_t = Int64;
-   __uint64_t = Qword;
-
-   __qaddr_t = __quad_t;
-//   __dev_t = __u_quad_t;
-//   __uid_t = __u_int;
-//   __gid_t = __u_int;
-//   __ino_t = __u_long;
-//   __mode_t = __u_int;
-//   __nlink_t = __u_int;
-//   __off_t = longint;
-   __loff_t = __quad_t;
-//   __pid_t = longint;
-//   __ssize_t = longint;
-//   __rlim_t = __u_long;
-//   __rlim64_t = __u_quad_t;
-//   __id_t = __u_int;
-//   __fsid_t = record
-//        __val : array[0..1] of longint;
-//     end;
-
-{
-   __daddr_t = longint;
-   __caddr_t = char;
-   __time_t = longint;
-   __useconds_t = dword;
-   __suseconds_t = longint;
-   __swblk_t = longint;
-   __clock_t = longint;
-   __clockid_t = longint;
-   __timer_t = longint;
-   __fd_mask = dWord;
-}
-  int64_t = Int64;
-  uint8_t = byte;
-
-  uint16_t = word;
-  uint32_t = dword;
-  uint64_t = qword;
-  int_least8_t = char;
-  int_least16_t = smallint;
-  int_least32_t = longint;
-  int_least64_t = int64;
-  uint_least8_t = byte;
-  uint_least16_t = word;
-  uint_least32_t = dword;
-  uint_least64_t = qword;
-
-  int_fast8_t = shortint;
-  int_fast16_t = longint;
-  int_fast32_t = longint;
-  int_fast64_t = int64;
-  uint_fast8_t = byte;
-
-  uint_fast16_t = dword;
-  uint_fast32_t = dword;
-  uint_fast64_t = qword;
-
-  intptr_t = longint;
-  uintptr_t = dword;
-  intmax_t = Int64;
-  uintmax_t = QWord;
 
 const
   __FD_SETSIZE = 1024;
@@ -664,14 +799,6 @@ type
   __socklen_t = dword;
   TFileDescriptor = integer;
 
-  timespec = record
-   tv_sec: __time_t;
-   tv_nsec: clong;
-  end;
-
-  TTimeSpec = timespec;
-  PTimeSpec = ^TTimeSpec;
-
 {$ifdef CPU64}
  P_stat = ^_stat;
  PStat = ^_stat;
@@ -689,7 +816,7 @@ type
   st_rdev: culong;
   st_size: clong;
   st_blksize: clong;
-  st_blocks: clong;	///* Number 512-byte blocks allocated. */
+  st_blocks: clong; //* Number 512-byte blocks allocated. */
   
   st_atim: timespec;
 //  st_atime_nsec: culong;
@@ -1527,9 +1654,28 @@ type
 Const
   _SIGSET_NWORDS = 1024 div (8 * (sizeof(dword)));
 const
+{$ifdef linux}
    SA_NOCLDSTOP = 1;
    SA_NOCLDWAIT = 2;
    SA_SIGINFO = 4;
+   SA_ONSTACK = $08000000;
+   SA_RESTART = $10000000;
+   SA_NODEFER = $40000000;
+   SA_RESETHAND = $80000000;
+
+   SA_INTERRUPT = $20000000;
+   SA_NOMASK = SA_NODEFER;
+   SA_ONESHOT = SA_RESETHAND;
+   SA_STACK = SA_ONSTACK;
+{$else}
+   SA_ONSTACK = $0001;   //* take signal on signal stack */
+   SA_RESTART = $0002;   //* restart system call on signal return */
+   SA_RESETHAND = $0004; //* reset to SIG_DFL when taking signal */
+   SA_NODEFER = $0010;   //* don't mask the signal we're delivering */
+   SA_NOCLDWAIT = $0020; //* don't keep zombies around */
+   SA_SIGINFO = $0040;   //* signal handler with SA_SIGINFO args */
+{$endif}
+
 type
    P__sigset_t = ^__sigset_t;
    __sigset_t = record
@@ -1716,7 +1862,7 @@ type
         case boolean of 
          false : (tm_gmtoff : longint;tm_zone : Pchar);
          true  : (__tm_gmtoff : longint;__tm_zone : Pchar);
-	end;
+   end;
   TMutexAttribute = pthread_mutexattr_t;
   PMutexAttribute = ^TMutexAttribute;
 
@@ -1899,16 +2045,6 @@ const
    CLOCK_PROCESS_CPUTIME_ID = 15;
 {$endif}
    TIMER_ABSTIME = 1;
-
-   SA_ONSTACK = $08000000;
-   SA_RESTART = $10000000;
-   SA_NODEFER = $40000000;
-   SA_RESETHAND = $80000000;
-
-   SA_INTERRUPT = $20000000;
-   SA_NOMASK = SA_NODEFER;
-   SA_ONESHOT = SA_RESETHAND;
-   SA_STACK = SA_ONSTACK;
 
 const
   SIG_ERR  = (-1);
