@@ -107,7 +107,7 @@ type
    ismoduletext: boolean;
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   procedure loadfile(const value: filenamety); overload;
+   procedure loadfile(value: filenamety); overload; //no const!
    procedure loadfile; overload; //loads if needed
    function fileloaded: boolean;
    procedure setbackupcreated;
@@ -325,7 +325,7 @@ begin
  end;
 end;
 
-procedure tsourcepage.loadfile(const value: filenamety);
+procedure tsourcepage.loadfile(value: filenamety);
 begin
  inc(ffileloading);
  try
