@@ -1,10 +1,12 @@
 MSEide+MSEgui breaking changes version history
 
+Version 3.4
+2014-08-15
 2014-07-15
  tpoorstringdatalist.addchars() processeditchars: boolean -> 
- aoptions: addcharoptionsty.
+  aoptions: addcharoptionsty.
  tcustomstringcol.addchars() processeditchars: boolean -> 
- aoptions: addcharoptionsty.
+  aoptions: addcharoptionsty.
 2014-06-26
  TField.ProviderFlags pfInInsert and pfInitInsert removed.
  TField.Visible, ReadOnly, Required, ProviderFlags and
@@ -34,9 +36,9 @@ Version 3.0
 Version 3.0beta1
 2013-06-29
 2013-05-02
- sender parameter of IfI clientevents is tcustomificlientcontroller.
+ sender parameter of ifi clientevents is tcustomificlientcontroller.
 2013-04-30
- onsetvalue of IfI t*clientcontroller have a iificlient parameter.
+ onsetvalue of ifi t*clientcontroller have a iificlient parameter.
 2013-04-14
  transparency properties -> opacity.
 2013-03-28
