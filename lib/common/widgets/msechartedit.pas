@@ -1223,7 +1223,7 @@ begin
   aindex:= aitems[0];
   isy:= odd(aindex);
   adial:= (not aindex and $7f000000) shr 24;
-  aindex:= -((aindex or $7f000000) and $fffffffe) div 2 - 1;
+  aindex:= integer(-((aindex or $7f000000) and $fffffffe)) div 2 - 1;
 // end
 // else begin
 //  aindex:= -1;
