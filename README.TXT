@@ -41,11 +41,11 @@ Package maintainers may delete the files "apps/ide/COPYING.GPL",
 
 Installation:
 *************
-1. Download and install FPC 2.6.2, you can get it from 
+1. Download and install FPC 2.6.4, you can get it from 
    http://www.freepascal.org/download.var
-2. Download mseide_msegui_src_3_0.zip and mseide_i386_win32_3_0.zip or
-   mseide_i386_linux_3_0.tar.gz or mseide_x84_64_linux_3_0.tar.gz
-   http://sourceforge.net/projects/mseide-msegui/files/mseide-msegui/3.0/
+2. Download mseide_msegui_src_3_4.zip and mseide_i386_win32_3_4.zip or
+   mseide_i386_linux_3_4.tar.gz or mseide_x84_64_linux_3_4.tar.gz
+   http://sourceforge.net/projects/mseide-msegui/files/mseide-msegui/3.4/
 3. Extract them to a directory of your choice ('yourdirectory') .
 4. Run 'yourdirectory/bin/mseide' on linux or 
    'yourdirectory\bin\mseide.exe' on windows.
