@@ -415,17 +415,17 @@ object breakpointsfo: tbreakpointsfo
     end
   end
   object bkptson: tbooleanedit
-    frame.caption = 'Breakpoints on'
+    frame.caption = 'Breakpoints &on'
     frame.dummy = 0
     frame.outerframe = (
       0
       1
-      86
+      98
       2
     )
     bounds_x = 8
     bounds_y = 4
-    bounds_cx = 99
+    bounds_cx = 111
     bounds_cy = 16
     statfile = mainfo.projectstatfile
     optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_savevalue, oe_savestate, oe_checkvaluepaststatread, oe_autopopupmenu]

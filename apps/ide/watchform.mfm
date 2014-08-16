@@ -229,18 +229,18 @@ object watchfo: twatchfo
     end
   end
   object watcheson: tbooleanedit
-    frame.caption = 'Watches on'
+    frame.caption = 'Watches &on'
     frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
     frame.dummy = 0
     frame.outerframe = (
       0
       1
-      68
+      77
       2
     )
     bounds_x = 8
     bounds_y = 4
-    bounds_cx = 81
+    bounds_cx = 90
     bounds_cy = 16
     statfile = mainfo.projectstatfile
     optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_savevalue, oe_savestate, oe_checkvaluepaststatread, oe_autopopupmenu]

@@ -8,8 +8,6 @@ object memoryfo: tmemoryfo
   bounds_y = 100
   bounds_cx = 453
   bounds_cy = 354
-  container.frame.zoomwidthstep = 1
-  container.frame.zoomheightstep = 1
   container.bounds = (
     0
     0
@@ -386,7 +384,7 @@ object memoryfo: tmemoryfo
     taborder = 1
     bounds_x = 0
     bounds_y = 0
-    bounds_cx = 396
+    bounds_cx = 413
     bounds_cy = 29
     optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
     linkbottom = grid
@@ -401,13 +399,13 @@ object memoryfo: tmemoryfo
       frame.outerframe = (
         0
         0
-        24
+        27
         0
       )
       taborder = 3
       bounds_x = 5
       bounds_y = 9
-      bounds_cx = 108
+      bounds_cx = 111
       statfile = mainfo.projectstatfile
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_forcereturncheckvalue, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_savevalue, oe_savestate, oe_checkvaluepaststatread]
       ondataentered = adent
@@ -416,17 +414,17 @@ object memoryfo: tmemoryfo
       reffontheight = 14
     end
     object memon: tbooleanedit
-      frame.caption = 'Memory on'
+      frame.caption = 'Memory &on'
       frame.dummy = 0
       frame.outerframe = (
         0
         1
-        63
+        71
         2
       )
-      bounds_x = 320
+      bounds_x = 329
       bounds_y = 12
-      bounds_cx = 76
+      bounds_cx = 84
       bounds_cy = 16
       statfile = mainfo.projectstatfile
       ondataentered = adent
@@ -438,17 +436,16 @@ object memoryfo: tmemoryfo
       frame.outerframe = (
         0
         0
-        34
+        38
         0
       )
       taborder = 1
-      bounds_x = 229
+      bounds_x = 234
       bounds_y = 9
-      bounds_cx = 86
+      bounds_cx = 90
       statfile = mainfo.projectstatfile
       textflags = [tf_xcentered, tf_ycentered, tf_noselect]
       ondataentered = updatelayoutexe
-      value = 0
       dropdown.cols.count = 1
       dropdown.cols.items = <      
         item
@@ -458,6 +455,7 @@ object memoryfo: tmemoryfo
             '32'
           )
         end>
+      value = 0
       reffontheight = 14
     end
     object cnt: tintegeredit
@@ -467,13 +465,13 @@ object memoryfo: tmemoryfo
       frame.outerframe = (
         0
         0
-        22
+        24
         0
       )
       taborder = 2
-      bounds_x = 118
+      bounds_x = 121
       bounds_y = 9
-      bounds_cx = 106
+      bounds_cx = 108
       statfile = mainfo.projectstatfile
       ondataentered = adent
       base = nb_hex

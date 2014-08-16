@@ -8,8 +8,6 @@ object cpufo: tcpufo
   bounds_y = 451
   bounds_cx = 387
   bounds_cy = 207
-  container.frame.zoomwidthstep = 1
-  container.frame.zoomheightstep = 1
   container.bounds = (
     0
     0
@@ -65,17 +63,17 @@ object cpufo: tcpufo
   moduleclassname = 'tdockform'
   object on: tbooleanedit
     Tag = -1
-    frame.caption = 'CPU on'
+    frame.caption = 'CPU &on'
     frame.dummy = 0
     frame.outerframe = (
       0
       1
-      46
+      48
       2
     )
     bounds_x = 7
     bounds_y = 9
-    bounds_cx = 59
+    bounds_cx = 61
     bounds_cy = 16
     onchange = ononchange
     value = True
