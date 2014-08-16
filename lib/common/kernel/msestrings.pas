@@ -2045,7 +2045,7 @@ begin
  result:= source;
  replacechar1(result,a,b);
 end;
-
+{
 procedure replacechar1(var dest: string; a,b: char);
   //replaces a by b
 var
@@ -2058,6 +2058,22 @@ begin
   end;
  end;
 end;
+}
+procedure replacechar1(var dest: string; a,b: char);
+  //replaces a by b
+var
+ pd,pe: pchar;
+begin
+ uniquestring(dest);
+ pd:= pointer(dest);
+ pe:= pd + length(dest);
+ while pd < pe do begin
+  if pd^ = a then begin
+   pd^:= b;
+  end;
+  inc(pd);
+ end;
+end;
 
 function replacechar(const source: msestring; a,b: msechar): msestring;
   //replaces a by b
@@ -2065,7 +2081,7 @@ begin
  result:= source;
  replacechar1(result,a,b);
 end;
-
+{
 procedure replacechar1(var dest: msestring; a,b: msechar);
   //replaces a by b
 var
@@ -2076,6 +2092,23 @@ begin
   if pmsecharaty(dest)^[int1] = a then begin
    pmsecharaty(dest)^[int1]:= b;
   end;
+ end;
+end;
+}
+
+procedure replacechar1(var dest: msestring; a,b: msechar);
+  //replaces a by b
+var
+ pd,pe: pmsechar;
+begin
+ uniquestring(dest);
+ pd:= pointer(dest);
+ pe:= pd + length(dest);
+ while pd < pe do begin
+  if pd^ = a then begin
+   pd^:= b;
+  end;
+  inc(pd);
  end;
 end;
 
