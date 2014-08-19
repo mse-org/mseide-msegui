@@ -1201,6 +1201,7 @@ begin
        int2:= rect2.cx;
       end;
       for int1:= ffirstbutton - 1 downto 0 do begin
+       include(cells[int1].state,shs_invisible);
        if not (as_invisible in buttons[int1].state)then begin
         if mao_separator in buttons[int1].options then begin
          dec(int2,separatorwidth);
@@ -1221,6 +1222,9 @@ begin
          break;
         end;
        end;
+      end;
+      for int1:= pagelast+1 to high(cells) do begin
+       include(cells[int1].state,shs_invisible);      
       end;
       pagelast:= pagelast - ffirstbutton;
       pageup:= pageup - ffirstbutton;

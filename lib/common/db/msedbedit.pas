@@ -174,6 +174,8 @@ type
    procedure settoolbutton(const avalue: tdbnavigbutton);
    function getautoedit: boolean;
    procedure setautoedit(const avalue: boolean);
+   function getbuttonwidth: integer;
+   procedure setbuttonwidth(const avalue: integer);
   protected
    procedure inithints;
    procedure doexecute(const sender: tobject);
@@ -198,8 +200,11 @@ type
    property datasource: tdatasource read getdatasource write setdatasource;
    property visiblebuttons: dbnavigbuttonsty read fvisiblebuttons 
                  write setvisiblebuttons default defaultvisibledbnavigbuttons;
-   property colorglyph: colorty read getcolorglyph write setcolorglyph default cl_glyph;
+   property colorglyph: colorty read getcolorglyph write setcolorglyph
+                                                             default cl_glyph;
    property buttonface: tface read getbuttonface write setbuttonface;
+   property buttonwidth: integer read getbuttonwidth write setbuttonwidth
+                                                                     default 0;
    property bounds_cx default defaultdbnavigatorwidth;
    property bounds_cy default defaultdbnavigatorheight;
    property shortcut_first: shortcutty read fshortcuts[dbnb_first] 
@@ -3112,6 +3117,16 @@ begin
   fdatalink.dataset.checkbrowsemode;
  end;
  result:= inherited canclose(newfocus);
+end;
+
+function tdbnavigator.getbuttonwidth: integer;
+begin
+ result:= flayout.buttons.width;
+end;
+
+procedure tdbnavigator.setbuttonwidth(const avalue: integer);
+begin
+ flayout.buttons.width:= avalue;
 end;
 
 { tcustomeditwidgetdatalink }
