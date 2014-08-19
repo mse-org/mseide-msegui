@@ -240,8 +240,8 @@ begin
  end;
 end;
 
-procedure actioninfotoshapeinfo(const sender: twidget; var actioninfo: actioninfoty;
-                                    var shapeinfo: shapeinfoty);
+procedure actioninfotoshapeinfo(const sender: twidget;
+                  var actioninfo: actioninfoty; var shapeinfo: shapeinfoty);
 var
  statebefore: actionstatesty;
 begin

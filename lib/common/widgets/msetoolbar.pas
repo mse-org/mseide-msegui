@@ -1041,14 +1041,34 @@ begin
 end;
 
 procedure tcustomtoolbar.updatelayout;
+
+var
+ buttonsizecxy: integer;
+ 
+ function step(const index: integer): integer;
+ begin
+  result:= 0;
+  with flayout,buttons[index] do begin
+   if not (as_invisible in state)then begin
+    if mao_separator in options then begin
+     result:= separatorwidth;
+    end
+    else begin
+     result:= buttonsizecxy;
+    end;
+   end;
+  end;
+ end;
+
 var
  int1,int2,int3: integer;
  rect1,rect2: rectty;
  endxy: integer;
- buttonsizecxy: integer;
 // bu1: stepbuttonposty;
  loopcount: integer;
  size1: sizety; 
+ pageend: integer;
+ bo1: boolean;
 begin
  if fupdating <> 0 then begin
   flayoutok:= false;
@@ -1107,8 +1127,7 @@ begin
       end;
      end;
   
-//     cells:= nil; //finalize
-     setlength(cells,buttons.count); //max
+     setlength(cells,buttons.count);
      if vert then begin
       endxy:= rect2.y + rect2.cy;
      end
@@ -1122,14 +1141,17 @@ begin
       buttonsizecxy:= rect1.cx;
      end;
      int3:= lines - 1;
+//     for int1:= 0 to high(cells) do begin
+//      actioninfotoshapeinfo(buttons[int1].finfo,cells[int1]);
+//     end;
      with stepinfo do begin
-      pagelast:= buttons.count;
-      pageup:= stepinfo.pagelast;
+      pageend:= buttons.count;
+      pageup:= pageend;
       up:= 0;
-      if ffirstbutton >= pagelast then begin
+      if ffirstbutton >= pageend then begin
        ffirstbutton:= 0; //count changed
       end;
-      for int1:= ffirstbutton to pagelast - 1 do begin
+      for int1:= ffirstbutton to pageend - 1 do begin
        with cells[int1] do begin
         color:= cl_parent;
         actioninfotoshapeinfo(buttons[int1].finfo,cells[int1]);
@@ -1139,21 +1161,13 @@ begin
         end;
         doexecute:= {$ifdef FPC}@{$endif}buttons[int1].doexecute;
         if not (as_invisible in buttons[int1].state) then begin
-         if mao_separator in buttons[int1].options then begin
-          if vert then begin
-           rect1.cy:= separatorwidth;
-          end
-          else begin
-           rect1.cx:= separatorwidth;
-          end;
+         if vert then begin
+          rect1.cy:= step(int1);
          end
          else begin
-          if vert then begin
-           rect1.cy:= buttonsizecxy;
-          end
-          else begin
-           rect1.cx:= buttonsizecxy;
-          end;
+          rect1.cx:= step(int1);
+         end;
+         if not (mao_separator in buttons[int1].options) then begin
           if up = 0 then begin
            up:= int1 - ffirstbutton;
           end;
@@ -1175,7 +1189,7 @@ begin
            end;
           end
           else begin
-           pagelast:= int1;
+           pageend:= int1;
            break;
           end;
          end;
@@ -1208,7 +1222,7 @@ begin
         end
         else begin
          if vert then begin
-          dec(int2,buttons.height);
+          dec(int2,buttons.fheight);
          end
          else begin
           dec(int2,buttons.fwidth);
@@ -1223,8 +1237,43 @@ begin
         end;
        end;
       end;
-      for int1:= pagelast+1 to high(cells) do begin
-       include(cells[int1].state,shs_invisible);      
+      for int1:= pageend to high(cells) do begin
+       include(cells[int1].state,shs_invisible);
+      end;
+      pagelast:= 0;
+      int3:= lines;
+      if vert then begin
+       int2:= rect2.cy;
+      end
+      else begin
+       int2:= rect2.cx;
+      end;
+      bo1:= false;
+      for int1:= high(cells) downto 0 do begin  //calc pagelast
+       dec(int2,step(int1));
+       if int2 < 0 then begin
+        dec(int3);
+        if int3 = 0 then begin
+         pagelast:= int1+1;
+         break;
+        end;
+        if vert then begin
+         int2:= rect2.cy;
+        end
+        else begin
+         int2:= rect2.cx;
+        end;
+        if bo1 then begin      //at least one button
+         dec(int2,step(int1)); //move button on next line
+         bo1:= false;
+        end;
+       end
+       else begin
+        bo1:= true;
+       end;
+       if pagelast > high(cells) then begin
+        pagelast:= high(cells);
+       end;
       end;
       pagelast:= pagelast - ffirstbutton;
       pageup:= pageup - ffirstbutton;
@@ -1235,7 +1284,8 @@ begin
       if down = 0 then begin
        down:= -1;
       end;
-      frame.updatebuttonstate(ffirstbutton,pagelast,buttons.count);
+      frame.updatebuttonstate(ffirstbutton,buttons.count-pagelast,
+                                                           buttons.count);
      end;
      if flayoutok then begin
       size1:= self.size;

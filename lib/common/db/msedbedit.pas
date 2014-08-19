@@ -176,6 +176,8 @@ type
    procedure setautoedit(const avalue: boolean);
    function getbuttonwidth: integer;
    procedure setbuttonwidth(const avalue: integer);
+   function getbuttonheight: integer;
+   procedure setbuttonheight(const avalue: integer);
   protected
    procedure inithints;
    procedure doexecute(const sender: tobject);
@@ -204,6 +206,8 @@ type
                                                              default cl_glyph;
    property buttonface: tface read getbuttonface write setbuttonface;
    property buttonwidth: integer read getbuttonwidth write setbuttonwidth
+                                                                     default 0;
+   property buttonheight: integer read getbuttonheight write setbuttonheight
                                                                      default 0;
    property bounds_cx default defaultdbnavigatorwidth;
    property bounds_cy default defaultdbnavigatorheight;
@@ -3127,6 +3131,16 @@ end;
 procedure tdbnavigator.setbuttonwidth(const avalue: integer);
 begin
  flayout.buttons.width:= avalue;
+end;
+
+function tdbnavigator.getbuttonheight: integer;
+begin
+ result:= flayout.buttons.height;
+end;
+
+procedure tdbnavigator.setbuttonheight(const avalue: integer);
+begin
+ flayout.buttons.height:= avalue;
 end;
 
 { tcustomeditwidgetdatalink }
