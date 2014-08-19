@@ -1284,8 +1284,7 @@ begin
       if down = 0 then begin
        down:= -1;
       end;
-      frame.updatebuttonstate(ffirstbutton,buttons.count-pagelast,
-                                                           buttons.count);
+      frame.updatebuttonstate(ffirstbutton,pageend-ffirstbutton,buttons.count);
      end;
      if flayoutok then begin
       size1:= self.size;
