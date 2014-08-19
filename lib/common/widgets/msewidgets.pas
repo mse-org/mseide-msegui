@@ -3425,10 +3425,12 @@ begin
  if first+delta >= count then begin
   include(disabled,sk_right);
   include(disabled,sk_down);
+  {
   if (frepeatedbutton >= 0) and 
             (stepkindty(frepeatedbutton) in [sk_right,sk_down]) then begin
    killrepeater();
   end;
+  }
  end;
  disabledbuttons:= disabled;
  if (first+delta >= count) and (first <= 0) then begin
@@ -3451,22 +3453,40 @@ begin
   steps[sk_last]:= pagelast;
   case fbuttonpos of
    sbp_right,sbp_left: begin
-    steps[sk_right]:= up;
+    steps[sk_right]:= 0;
+    if not (sk_right in disabledbuttons) then begin
+     steps[sk_right]:= up;
+    end;    
     steps[sk_left]:= down;
     steps[sk_up]:= pagedown;
-    steps[sk_down]:= pageup;
+    steps[sk_down]:= 0;
+    if not (sk_down in disabledbuttons) then begin
+     steps[sk_down]:= pageup;
+    end;
    end;
    sbp_top: begin
-    steps[sk_right]:= pageup;
+    steps[sk_right]:= 0;
+    if not (sk_down in disabledbuttons) then begin
+     steps[sk_right]:= pageup;
+    end;
     steps[sk_left]:= pagedown;
     steps[sk_up]:= down;
-    steps[sk_down]:= up;
+    steps[sk_down]:= 0;
+    if not (sk_right in disabledbuttons) then begin
+     steps[sk_down]:= up;
+    end;
    end;
    else begin //sbp_bottom
-    steps[sk_right]:= pageup;
+    steps[sk_right]:= 0;
+    if not (sk_down in disabledbuttons) then begin
+     steps[sk_right]:= pageup;
+    end;
     steps[sk_left]:= pagedown;
     steps[sk_up]:= down;
-    steps[sk_down]:= up;
+    steps[sk_down]:= 0;
+    if not (sk_right in disabledbuttons) then begin
+     steps[sk_down]:= up;
+    end;
    end;
   end;
  end;
