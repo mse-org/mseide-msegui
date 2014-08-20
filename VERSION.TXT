@@ -1,5 +1,7 @@
 MSEide+MSEgui breaking changes version history
 
+Version 3.4a
+2014-08-20
 Version 3.4
 2014-08-15
 2014-07-15
