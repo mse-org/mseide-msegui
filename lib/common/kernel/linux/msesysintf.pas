@@ -546,6 +546,7 @@ begin
  threadinfoty(infopo^).id:= threadty(getcurrentthreadid);
  pthread_setcanceltype(pthread_cancel_asynchronous,nil);
  pthread_setcancelstate(pthread_cancel_enable,nil);
+ unblocksignal(sigio);
  result:= threadinfoty(infopo^).threadproc();
 end;
 

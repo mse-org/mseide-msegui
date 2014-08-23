@@ -2208,6 +2208,8 @@ function sigfillset(var SigSet : TSigSet):longint;
                             cdecl; external clib name 'sigfillset';
 function sigaddset(var SigSet : TSigSet; SigNum : Longint):longint;
                             cdecl; external clib name 'sigaddset';
+function sigdelset(var SigSet : TSigSet; SigNum : Longint):longint;
+                            cdecl; external clib name 'sigdelset';
 function sigismember(var SigSet : TSigSet; SigNum : Longint):longint;
                             cdecl; external clib name 'sigismember';
 function sigprocmask(__how: cint; sigset: p__sigset_t;
