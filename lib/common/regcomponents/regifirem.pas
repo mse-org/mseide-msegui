@@ -126,7 +126,7 @@ function tmodulelinkitemeditor.getvalue: msestring;
 //var
 // mstr1: msestring;
 begin
- with tmodulelinkprop(getordvalue) do begin
+ with tmodulelinkprop(getpointervalue) do begin
   result:= '<'+name+'>';
  end;
 end;
@@ -138,7 +138,7 @@ var
  mstr1: msestring;
 begin
  result:= inherited getvalue;
- with tlinkaction(getordvalue) do begin
+ with tlinkaction(getpointervalue) do begin
   if action = nil then begin
    result:= result+'<>';
   end
@@ -187,7 +187,7 @@ var
  mstr1: msestring;
 begin
  result:= inherited getvalue;
- with tvaluewidgetlink(getordvalue) do begin
+ with tvaluewidgetlink(getpointervalue) do begin
   if widget = nil then begin
    result:= result+'<>';
   end
@@ -269,7 +269,7 @@ end;
 
 function tifidatacolsitemeditor.getvalue: msestring;
 begin
- with tifidatacol(getordvalue) do begin
+ with tifidatacol(getpointervalue) do begin
   result:= '<'+name+'>';
  end;
 end;
