@@ -199,7 +199,9 @@ end;
 procedure tpipewriter.connect(const ahandle: integer);
 begin
  handle:= ahandle;
- fconnected:= true;
+ if ahandle <> invalidfilehandle then begin
+  fconnected:= true;
+ end;
 end;
 
 procedure tpipewriter.sethandle(value: integer);
