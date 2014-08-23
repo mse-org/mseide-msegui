@@ -4715,6 +4715,7 @@ end;
 
 procedure trecordfieldedit.storevalue(var avalue: msestring);
 begin
+ inherited;
  if fitemedit <> nil then begin
   fitemedit.setvaluetext(avalue);
  end;

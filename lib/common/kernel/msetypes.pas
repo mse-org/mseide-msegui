@@ -71,6 +71,8 @@ type
  puint16 = ^uint16;
  uint32 = longword;
  puint32 = ^uint32;
+ uint64 = qword;
+ puint64 = ^uint64;
  sint8 = shortint;
  psint8 = ^sint8;
  sint16 = smallint;
