@@ -1081,12 +1081,13 @@ begin
  end;
 end;
 
+{$endif}
+
 function tcustomrttistat.getstatpriority: integer;
 begin
  result:= fstatpriority;
 end;
 
-{$endif}
 
 { trttistat }
 

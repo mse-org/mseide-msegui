@@ -112,8 +112,13 @@ type
    ftextflags: textflagsty;
    ftextrectvalid: boolean;
    fonchange: notifyeventty;
+   procedure updatetextflags;
+   procedure settextflags(const value: textflagsty);
+   procedure settext(const avalue: msestring);
+  protected
 {$ifdef mse_with_ifi}
    fifilink: tifilinkcomp;
+   function getdefaultifilink: iifilink; override;
     //iifidatalink
    function getifilinkkind: ptypeinfo;
    procedure setifilink(const avalue: tifilinkcomp);
@@ -123,10 +128,6 @@ type
    function getvalueprop: ppropinfo;
    procedure updatereadonlystate;
 {$endif}
-   procedure updatetextflags;
-   procedure settextflags(const value: textflagsty);
-   procedure settext(const avalue: msestring);
-  protected
    procedure invalidatetext;
    procedure setoptions(const avalue: dispwidgetoptionsty); virtual;
    procedure valuechanged; virtual;
@@ -671,6 +672,11 @@ begin
 end;
 
 {$ifdef mse_with_ifi}
+
+function tdispwidget.getdefaultifilink: iifilink;
+begin
+ result:= iifidatalink(self);
+end;
 
 function tbasestringdisp.getifilink: tifistringlinkcomp;
 begin

@@ -694,6 +694,7 @@ type
                                             const aindex: integer);
     //iifidatalink
    procedure setifiserverintf(const aintf: iifiserver);
+   function getdefaultifilink: iificlient; virtual;
    procedure ifisetvalue(var avalue; var accept: boolean);
    function getifilinkkind: ptypeinfo;
    procedure updateifigriddata(const sender: tobject; const alist: tdatalist);
@@ -4150,6 +4151,11 @@ end;
 procedure trowstatehandler.updatereadonlystate;
 begin
  //dummy
+end;
+
+function trowstatehandler.getdefaultifilink: iificlient;
+begin
+ result:= iifidatalink(self);
 end;
 
 { trowstateintegerhandler }

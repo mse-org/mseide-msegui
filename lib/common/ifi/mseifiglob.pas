@@ -44,7 +44,7 @@ type
  
  iificlient = interface(iobjectlink)[miid_iificlient]
   procedure setifiserverintf(const aintf: iifiserver);
-//  function getifiserverintf: iifiserver;
+  function getdefaultifilink: iificlient;
  end;
  ificommandcodety = (icc_none,icc_close,icc_release);
  iificommand = interface(inullinterface)[miid_iificommand]

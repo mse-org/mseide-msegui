@@ -113,17 +113,6 @@ type
    fedited: boolean;
    fvalueread: boolean;
    fstatpriority: integer;
-{$ifdef mse_with_ifi}
-   fifilink: tifivaluelinkcomp;
-   procedure ifisetvalue(var avalue; var accept: boolean);
-   function getifilinkkind: ptypeinfo;
-   procedure setifilink(const avalue: tifilinkcomp);
-   function getifilink: tifilinkcomp;
-//   function ifigriddata: tdatalist;
-   procedure updateifigriddata(const sender: tobject; const alist: tdatalist);
-   function getgriddata: tdatalist;
-   function getvalueprop: ppropinfo;
-{$endif}
    procedure setcolorglyph(const Value: colorty);
    procedure setstatfile(const Value: tstatfile);
    procedure setoptionsedit(const avalue: optionseditty);
@@ -135,9 +124,18 @@ type
    fgridintf: iwidgetgrid;
    fgriddatalink: pointer;
    fstate: dataeditstatesty;
-//   fisdb: boolean;
-
-//   procedure setisdb;
+{$ifdef mse_with_ifi}
+   fifilink: tifivaluelinkcomp;
+   function getdefaultifilink: iifilink; override;
+   procedure ifisetvalue(var avalue; var accept: boolean);
+   function getifilinkkind: ptypeinfo;
+   procedure setifilink(const avalue: tifilinkcomp);
+   function getifilink: tifilinkcomp;
+//   function ifigriddata: tdatalist;
+   procedure updateifigriddata(const sender: tobject; const alist: tdatalist);
+   function getgriddata: tdatalist;
+   function getvalueprop: ppropinfo;
+{$endif}
    function getedited: boolean; virtual;
    function geteditstate: dataeditstatesty;
    procedure seteditstate(const avalue: dataeditstatesty);
@@ -2135,6 +2133,11 @@ function tgraphdataedit.getvalueprop: ppropinfo;
 begin
   result:= getpropinfo(self,'value');
 end;
+
+function tgraphdataedit.getdefaultifilink: iifilink;
+begin
+ result:= iifidatalink(self);
+end;
 {$endif mse_with_ifi}
 
 function tgraphdataedit.getedited: boolean;
@@ -2156,7 +2159,6 @@ function tgraphdataedit.getstatpriority: integer;
 begin
  result:= fstatpriority;
 end;
-
 
 { ttogglegraphdataedit}
 

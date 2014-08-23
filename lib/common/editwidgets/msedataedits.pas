@@ -89,6 +89,7 @@ type
    fcontrollerintf: idataeditcontroller;
 {$ifdef mse_with_ifi}
    fifilink: tifivaluelinkcomp;
+   function getdefaultifilink: iificlient; override;
    function getifidatalinkintf: iifidatalink; virtual;
    function getoptionsedit: optionseditty; override;
    procedure dochange; override;
@@ -2789,6 +2790,11 @@ end;
 function tcustomdataedit.getifidatalinkintf: iifidatalink;
 begin
  result:= iifidatalink(self);
+end;
+
+function tcustomdataedit.getdefaultifilink: iificlient;
+begin
+ result:= getifidatalinkintf;
 end;
 
 function tcustomdataedit.getoptionsedit: optionseditty;

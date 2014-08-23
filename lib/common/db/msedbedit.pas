@@ -1813,6 +1813,8 @@ type
    procedure setdatafield(const avalue: string);
     //iificlient
    procedure setifiserverintf(const aintf: iifiserver);
+   function getdefaultifilink: iificlient; virtual;
+
     //idbeditinfo
    procedure getfieldtypes(out propertynames: stringarty;
                           out fieldtypes: fieldtypesarty); overload;
@@ -9390,6 +9392,11 @@ begin
  if fifiserverintf <> nil then begin
   fifiserverintf.updateoptionsedit(result);
  end;
+end;
+
+function tdbstringcol.getdefaultifilink: iificlient;
+begin
+ result:= iificlient(self);
 end;
 
 {

@@ -1340,6 +1340,8 @@ type
    function getifilinkkind: ptypeinfo;
     //iificlient
    procedure setifiserverintf(const aintf: iifiserver);
+   function getdefaultifilink: iificlient; virtual;
+
     //iifidatalink
    procedure updateifigriddata(const sender: tobject; const alist: tdatalist);
    procedure ifisetvalue(var avalue; var accept: boolean);   
@@ -18353,6 +18355,11 @@ end;
 procedure trowstatelist.updatereadonlystate;
 begin
  //dummy
+end;
+
+function trowstatelist.getdefaultifilink: iificlient;
+begin
+ result:= iifidatalink(self);
 end;
 
 {$endif}

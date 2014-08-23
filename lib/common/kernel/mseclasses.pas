@@ -425,6 +425,7 @@ type
    fifiserverintf: iifiserver;
     //iificlient
    procedure setifiserverintf(const aintf: iifiserver);
+   function getdefaultifilink: iificlient; virtual;
     //iificommand
    procedure executeificommand(var acommand: ificommandcodety); virtual;
 {$endif}   
@@ -4978,6 +4979,11 @@ end;
 procedure tmsecomponent.executeificommand(var acommand: ificommandcodety);
 begin
  //dummy
+end;
+
+function tmsecomponent.getdefaultifilink: iificlient;
+begin
+ result:= iificlient(self);
 end;
 
 {$endif}

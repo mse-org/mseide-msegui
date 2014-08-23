@@ -185,6 +185,7 @@ begin
  end;
  fintf:= intf1;
  if fintf <> nil then begin
+  fintf:= fintf.getdefaultifilink();
   fintf.setifiserverintf(iifiserver(tcustommodulelink(fowner)));
  end;
  inherited component:= avalue;
