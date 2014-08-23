@@ -1312,7 +1312,8 @@ function tcustomiochannel.checkconnection: boolean;
 begin
  result:= commio;
  if not result and not (csloading in componentstate) then begin
-  disconnect;
+  internaldisconnect();
+  factive:= false;
   if canconnect then begin
    connect;
    result:= commio;
