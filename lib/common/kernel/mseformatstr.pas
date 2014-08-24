@@ -161,6 +161,11 @@ function formatfloatmse(value: double; format: msestring;
 
 function formatfloatmse(const value: double; const format: msestring; 
                          const dot: boolean = false): msestring; overload;
+function realtostrmse(const value: double;
+                                const dot: boolean = false): msestring;
+function realtytostrmse(const value: double;
+                                const dot: boolean = false): msestring;
+
 function inttostrmse(const value: integer): msestring; overload;
 function inttostrmse(const value: longword): msestring; overload;
 function inttostrmse(const value: int64): msestring; overload;
@@ -276,6 +281,7 @@ function strtohex64(const inp: string): qword;
 
 function trystrtointmse(const text: msestring;
                                    out value: integer): boolean; overload;
+function strtointmse(const text: msestring): integer;
 function trystrtointmse(const text: msestring;
                                    out value: longword): boolean; overload;
 function trystrtoint64mse(const text: msestring; out value: int64): boolean;
@@ -3113,6 +3119,29 @@ begin
  result:= formatfloatmse(value,format,defaultformatsettingsmse,dot);
 end;
 
+function realtostrmse(const value: double;
+                                const dot: boolean = false): msestring;
+var
+ sep: msechar;
+begin
+ sep:= '.';
+ if not dot then begin
+  sep:= defaultformatsettingsmse.decimalseparator;
+ end;
+ result:= doubletostring(value,0,fsm_default,sep);
+end;
+
+function realtytostrmse(const value: double;
+                                const dot: boolean = false): msestring;
+begin
+ if value = emptyreal then begin
+  result:= '';
+ end
+ else begin
+  result:= realtostrmse(value,dot);
+ end;
+end;
+
 function inttostrmse(const value: integer): msestring;
 var
  buffer: array[0..22] of msechar;
@@ -3240,6 +3269,9 @@ var
  exp: integer;
 begin
  result:= false;
+ if s.len = 0 then begin
+  exit;
+ end;
  pend:= s.po+s.len;
  po1:= s.po;
  while ((po1^ = ' ') or (po1^ = c_tab)) do begin
@@ -3349,6 +3381,9 @@ var
  exp: integer;
 begin
  result:= false;
+ if s.len = 0 then begin
+  exit;
+ end;
  pend:= s.po+s.len;
  po1:= s.po;
  while ((po1^ = ' ') or (po1^ = c_tab)) do begin
@@ -4190,6 +4225,13 @@ begin
   end;
  end;
  result:= true;
+end;
+
+function strtointmse(const text: msestring): integer;
+begin
+ if not trystrtointmse(text,result) then begin
+  raise EConvertError.CreateFmt(SInvalidInteger,[string(text)]);
+ end;
 end;
 
 function trystrtointmse(const text: msestring; out value: longword): boolean;

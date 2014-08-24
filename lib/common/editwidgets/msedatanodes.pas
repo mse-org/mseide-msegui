@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2014 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -81,7 +81,8 @@ type
  end;
  plistitemlayoutinfoty = ^listitemlayoutinfoty;
 
- nodeactionty = (na_none,na_change,na_expand,na_collapse,na_countchange,
+ nodeactionty = (na_none,na_change,na_valuechange,
+                 na_expand,na_collapse,na_countchange,
                  na_destroying,na_aftersort);
  nodeactioninfoty = record
   case action: nodeactionty of
@@ -134,6 +135,8 @@ type
    procedure setowner(const aowner: tcustomitemlist); virtual;
    function compare(const r: tlistitem;
                           const acasesensitive: boolean): integer; virtual;
+   function cancaptionedit: boolean; virtual;
+   function canvalueedit: boolean; virtual;
   public
    tag: integer;
    tagpointer: pointer;
@@ -367,6 +370,7 @@ type
                       const aimagelist: timagelist = nil); reintroduce;
    function getvaluetext: msestring; override;
    procedure setvaluetext(var avalue: msestring); override;
+   procedure valuechange();
    property fieldindex: integer read ffieldindex;
 //   property valuetext: msestring read getvaluetext write setvaluetext;
  end;
@@ -1788,6 +1792,16 @@ begin
  else begin
   exclude(fstate1,ns1_top);
  end;
+end;
+
+function tlistitem.cancaptionedit: boolean;
+begin
+ result:= not (ns_readonly in fstate) and not (ns1_fixedcaption in fstate1);
+end;
+
+function tlistitem.canvalueedit: boolean;
+begin
+ result:= not (ns_readonly in fstate);
 end;
 
 { ttreelistitem }
@@ -3236,6 +3250,9 @@ begin
  fcaption:= acaption;
  fimagenr:= aimagenr;
  imagelist:= aimagelist;
+ if fixedcaption then begin
+  fstate1:= fstate1 + [ns1_fixedcaption];
+ end;
 end;
 
 function trecordfielditem.getvaluetext: msestring;
@@ -3257,6 +3274,16 @@ begin
   if not (ns1_fixedcaption in fstate1) then begin
    inherited;
   end;
+ end;
+end;
+
+procedure trecordfielditem.valuechange;
+var
+ action: nodeactioninfoty;
+begin
+ if fowner <> nil then begin
+  action.action:= na_valuechange;
+  fowner.nodenotification(self,action);
  end;
 end;
 

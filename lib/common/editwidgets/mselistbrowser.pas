@@ -123,7 +123,8 @@ type
    procedure activate;
  end;
  
- trecordtreelistedititem = class(ttreelistedititem,irecordfield)   //does not statsave subitems
+ trecordtreelistedititem = class(ttreelistedititem,irecordfield)   
+                                          //does not statsave subitems
   protected
    function getfieldtext(const fieldindex: integer): msestring;
    procedure setfieldtext(const fieldindex: integer; var avalue: msestring);
@@ -514,7 +515,7 @@ type
    flayoutinfocell: listitemlayoutinfoty;
    fvalue: tlistitem;
 
-   function fieldcanedit: boolean;
+   function valuecanedit: boolean;
    procedure doextendimage(const cellinfopo: pcellinfoty; 
                                         var aextend: sizety); virtual;
    procedure getautopaintsize(var asize: sizety); override;
@@ -2146,7 +2147,7 @@ begin
    if not (es_processed in info.eventstate) then begin
     if (shiftstate = []) and isenterkey(nil,key) then begin
      if not editing then begin
-      editing:= (focuseditem <> nil) and not (ns_readonly in focuseditem.state);
+      editing:= (focuseditem <> nil) and tlistitem1(focuseditem).cancaptionedit();
       if editing then begin
        include(eventstate,es_processed);
       end;
@@ -2917,8 +2918,10 @@ begin
    if (oe_locate in foptionsedit) and isenterkey(nil,key) and 
                        (shiftstate = []) then begin
     if not editing then begin
-     editing:= fieldcanedit{(item <> nil) and not (ns_readonly in item.state)} and 
-                  not (oe_readonly in foptionsedit);
+     editing:= not (oe_readonly in foptionsedit) and valuecanedit() and
+                     ((fvalue = nil) or tlistitem1(fvalue).cancaptionedit());
+
+                  ;
      if editing then begin
       include(eventstate,es_processed);
      end;
@@ -3181,13 +3184,14 @@ begin
  editing:= false;
 end;
 
-function titemedit.fieldcanedit: boolean;
+function titemedit.valuecanedit: boolean;
 begin
- result:= (fvalue <> nil) and not (ns_readonly in fvalue.state);
+ result:= (fvalue <> nil) and tlistitem1(fvalue).canvalueedit();
  if (fvalue <> nil) and canevent(tmethod(foncheckcanedit)) then begin
   foncheckcanedit(self,fvalue,result);
  end;
 end;
+
 procedure titemedit.doextendimage(const cellinfopo: pcellinfoty; 
                                                      var aextend: sizety); 
 begin
@@ -4162,6 +4166,12 @@ begin
   end;
   inherited;
   case ainfo.action of
+   na_valuechange: begin
+    if not updating and (ttreeitemedit(fowner).fieldedit <> nil) then begin
+     int1:= sender.index;
+     ttreeitemedit(fowner).ffieldedit[int1].valuetext:= fowner[int1].valuetext;
+    end;
+   end;
    na_countchange: begin
     if not updating then begin
      with ttreelistitem1(sender) do begin
@@ -4708,7 +4718,7 @@ function trecordfieldedit.getoptionsedit: optionseditty;
 begin
  result:= inherited getoptionsedit;
  if not (csdesigning in componentstate) and (fitemedit <> nil) and
-                 not fitemedit.fieldcanedit then begin
+                 not fitemedit.valuecanedit then begin
   include(result,oe_readonly);
  end;
 end;
