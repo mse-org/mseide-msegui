@@ -16257,7 +16257,8 @@ begin       //eventloop
       if terminated then begin
        break;
       end;
-      if (aps_needsupdatewindowstack in fstate) then begin
+      if (aps_needsupdatewindowstack in fstate) and 
+                                  application.active then begin
        updatewindowstack;
        exclude(fstate,aps_needsupdatewindowstack);
       end
