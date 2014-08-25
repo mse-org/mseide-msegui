@@ -2362,4 +2362,10 @@ object actionsmo: tactionsmo
     left = 152
     top = 144
   end
+  object forcezorderact: taction
+    caption = 'Force &Z-Order'
+    onchange = forcezorderexe
+    left = 136
+    top = 400
+  end
 end

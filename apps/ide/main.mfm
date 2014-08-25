@@ -365,7 +365,7 @@ object mainfo: tmainfo
         state = [as_localcaption]
       end    
       item
-        submenu.count = 27
+        submenu.count = 28
         submenu.items = <        
           item
             submenu.count = 2
@@ -383,6 +383,12 @@ object mainfo: tmainfo
             state = [as_localcaption, as_localimagelist, as_localimagenr]
             imagelist = vievmenuicons
             imagenr = 0
+          end        
+          item
+            action = actionsmo.forcezorderact
+            state = [as_localimagelist]
+            options = [mao_checkbox, mao_shortcutcaption]
+            imagelist = vievmenuicons
           end        
           item
             caption = 'Load Wi&ndow Layout'

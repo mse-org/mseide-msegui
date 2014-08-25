@@ -2355,6 +2355,8 @@ type
    procedure dothreadterminated(const sender: tthreadcomp);
    procedure dowaitidle(var again: boolean);
    procedure dowaitidle1(var again: boolean);
+   function getforcezorder: boolean;
+   procedure setforcezorder(const avalue: boolean);
   protected  
    foptionsgui: guiappoptionsty;
    procedure sysevent(const awindow: winidty; var aevent: syseventty;
@@ -2376,7 +2378,7 @@ type
    procedure destroyforms;
    property optionsgui: guiappoptionsty read foptionsgui 
                                                 write foptionsgui default [];
-   
+   property forcezorder: boolean read getforcezorder write setforcezorder;   
    procedure langchanged; override;
    procedure settimer(const us: integer); override;
    function findwindow(aid: winidty; out window: twindow): boolean;
@@ -15892,7 +15894,8 @@ begin
  end;
  if findwindow(winid,window) then begin
 {$ifdef mse_debugwindowfocus}
-  debugwriteln('unsetwindowfocus '+window.fownerwidget.name+' '+hextostr(winid,8));
+  debugwriteln('unsetwindowfocus '+window.fownerwidget.name+' '+
+                                                            hextostr(winid,8));
 {$endif}
   if (ffocuslockwindow <> nil) and (factivewindow <> nil) and 
          (window = ffocuslocktransientfor) then begin
@@ -15909,6 +15912,9 @@ procedure tinternalapplication.zorderinvalid();
 begin
  exclude(fstate,aps_zordervalid);
  if gao_forcezorder in foptionsgui then begin
+ {$ifdef mse_debugzorder}
+  debugwriteln('*needsupdatewindowstack');
+ {$endif}
   include(fstate,aps_needsupdatewindowstack);
  end;
 end;
@@ -18527,6 +18533,21 @@ end;
 procedure tguiapplication.internalpackwindowzorder;
 begin
  //dummy
+end;
+
+function tguiapplication.getforcezorder: boolean;
+begin
+ result:= gao_forcezorder in foptionsgui;
+end;
+
+procedure tguiapplication.setforcezorder(const avalue: boolean);
+begin
+ if avalue then begin
+  optionsgui:= optionsgui + [gao_forcezorder];
+ end
+ else begin
+  optionsgui:= optionsgui - [gao_forcezorder];
+ end;
 end;
 
 { tasyncmessageevent }

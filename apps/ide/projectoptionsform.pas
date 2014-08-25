@@ -32,7 +32,7 @@ uses
  mseformatstr,mseinplaceedit,msedatanodes,mselistbrowser,msebitmap,
  msecolordialog,msedrawtext,msewidgets,msepointer,mseguiglob,msepipestream,
  msemenus,sysutils,mseglob,mseedit,msedialog,msescrollbar,msememodialog,
- msecodetemplates,mseifiglob,mseapplication,msestream,msestringcontainer,
+ msecodetemplates,mseifiglob,msestream,msestringcontainer,
  mserttistat,mseificomp,mseificompglob;
 
 const
@@ -416,6 +416,8 @@ type
    fcolorwarning: colorty;
    fcolornote: colorty;
    fuid: integer;
+   fforcezorder: boolean;
+   procedure setforcezorder(const avalue: boolean);
   protected
    function gett: tobject; override;
    function gettexp: tobject; override;
@@ -425,6 +427,7 @@ type
   published
    property t: ttextprojectoptions read ft;
 
+   property forcezorder: boolean read fforcezorder write setforcezorder;
    property stripmessageesc: boolean read fstripmessageesc 
                                              write fstripmessageesc;
    property copymessages: boolean read fcopymessages write fcopymessages;
@@ -2634,6 +2637,12 @@ end;
 function tprojectoptions.gettexp: tobject;
 begin
  result:= ftexp;
+end;
+
+procedure tprojectoptions.setforcezorder(const avalue: boolean);
+begin
+ fforcezorder:= avalue;
+ application.forcezorder:= avalue;
 end;
 
 { ttextprojectoptions }

@@ -207,6 +207,7 @@ type
    copylatexact: taction;
    findcompact: taction;
    findcompallact: taction;
+   forcezorderact: taction;
    procedure findinfileonexecute(const sender: tobject);
 
    //file
@@ -278,6 +279,7 @@ type
    procedure copylatexactonexecute(const sender: TObject);
    procedure findcompexe(const sender: TObject);
    procedure findcompallexe(const sender: TObject);
+   procedure forcezorderexe(const sender: TObject);
   private
    function filterfindcomp(const acomponent: tcomponent): boolean;
  end;
@@ -799,6 +801,13 @@ begin
    designer.showformdesigner(po1);
    designer.selectcomponent(comp1);
   end;
+ end;
+end;
+
+procedure tactionsmo.forcezorderexe(const sender: TObject);
+begin
+ if projectoptions.o <> nil then begin
+  projectoptions.o.forcezorder:= taction(sender).checked;
  end;
 end;
 
