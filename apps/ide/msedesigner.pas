@@ -2676,7 +2676,7 @@ begin
      end;
      if (info.designform <> nil) and (fdesigner.fcomponentmodifying > 0) then begin
       idesignnotification(
-           tdesignwindow(info.designform.window)).itemsmodified(nil,comp);
+           tformdesignerfo(info.designform)).itemsmodified(nil,comp);
      end;
      fdesigner.fdescendentinstancelist.modulemodified(@info);
      break;

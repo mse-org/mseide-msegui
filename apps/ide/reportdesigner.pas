@@ -75,10 +75,10 @@ type
    function gridrect: rectty; override;
    function insertoffset: pointty; override;
    function widgetrefpoint: pointty; override;
-   function gridsizex: integer; override;
-   function gridsizey: integer; override;
-   function showgrid: boolean; override;
-   function snaptogrid: boolean; override;
+   function getgridsizex: integer; override;
+   function getgridsizey: integer; override;
+   function getshowgrid: boolean; override;
+   function getsnaptogrid: boolean; override;
    procedure checktabs;
    procedure updatetabs;
    procedure validaterename(acomponent: tcomponent;
@@ -322,7 +322,7 @@ begin
  end;
 end;
 
-function treportdesignerfo.gridsizex: integer;
+function treportdesignerfo.getgridsizex: integer;
 begin
  with tcustomreport1(form) do begin
   result:= round(frepdesigninfo.gridsize * ppmm);
@@ -332,17 +332,17 @@ begin
  end;
 end;
 
-function treportdesignerfo.gridsizey: integer;
+function treportdesignerfo.getgridsizey: integer;
 begin
  result:= gridsizex;
 end;
 
-function treportdesignerfo.showgrid: boolean;
+function treportdesignerfo.getshowgrid: boolean;
 begin
  result:= tcustomreport1(form).frepdesigninfo.showgrid;
 end;
 
-function treportdesignerfo.snaptogrid: boolean;
+function treportdesignerfo.getsnaptogrid: boolean;
 begin
  result:= tcustomreport1(form).frepdesigninfo.snaptogrid;
 end;

@@ -1,7 +1,7 @@
 object watchpointsfo: twatchpointsfo
   frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
   frame.grip_size = 10
-  frame.grip_options = [go_closebutton, go_fixsizebutton, go_topbutton]
+  frame.grip_options = [go_closebutton, go_fixsizebutton, go_floatbutton, go_topbutton, go_backgroundbutton]
   frame.dummy = 0
   visible = False
   bounds_x = 120
@@ -312,7 +312,7 @@ object watchpointsfo: twatchpointsfo
     optionswidget1 = [ow1_autoscale, ow1_autowidth, ow1_autoheight]
     bounds_x = 0
     bounds_y = 0
-    bounds_cx = 345
+    bounds_cx = 399
     bounds_cy = 14
     anchors = [an_top]
     caption = 'Hint: ''Count'', ''Ignore'' and ''Condition'' don''t work with win32 GDB.'

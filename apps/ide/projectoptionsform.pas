@@ -1972,7 +1972,7 @@ begin
  createcpufo;
  sourceupdater.unitchanged;
  for int1:= 0 to designer.modules.count - 1 do begin
-  tdesignwindow(designer.modules[int1]^.designform.window).updateprojectoptions;
+  tformdesignerfo(designer.modules[int1]^.designform).updateprojectoptions();
  end;
  messagefo.updateprojectoptions;
 end;
