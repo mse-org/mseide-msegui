@@ -2278,6 +2278,9 @@ type
   keynomod: keyty;
   shiftstate: shiftstatesty;
  end;
+
+ guiappoptionty = (gao_forcezorder);
+ guiappoptionsty = set of guiappoptionty;
  
  keyinfoarty = array of keyinfoty; 
  tguiapplication = class(tcustomapplication)
@@ -2353,6 +2356,7 @@ type
    procedure dowaitidle(var again: boolean);
    procedure dowaitidle1(var again: boolean);
   protected  
+   foptionsgui: guiappoptionsty;
    procedure sysevent(const awindow: winidty; var aevent: syseventty;
                                                     var handled: boolean);
    procedure sethighrestimer(const avalue: boolean); override;
@@ -2370,6 +2374,9 @@ type
   public
    constructor create(aowner: tcomponent); override;
    procedure destroyforms;
+   property optionsgui: guiappoptionsty read foptionsgui 
+                                                write foptionsgui default [];
+   
    procedure langchanged; override;
    procedure settimer(const us: integer); override;
    function findwindow(aid: winidty; out window: twindow): boolean;
@@ -2855,6 +2862,7 @@ type
    procedure registerwindow(window: twindow);
    procedure unregisterwindow(window: twindow);
    procedure widgetdestroyed(const widget: twidget);
+   procedure zorderinvalid();
 
    procedure processexposeevent(event: twindowrectevent);
    procedure processconfigureevent(event: twindowrectevent);
@@ -15897,6 +15905,14 @@ begin
  end;
 end;
 
+procedure tinternalapplication.zorderinvalid();
+begin
+ exclude(fstate,aps_zordervalid);
+ if gao_forcezorder in foptionsgui then begin
+  include(fstate,aps_needsupdatewindowstack);
+ end;
+end;
+
 procedure tinternalapplication.registerwindow(window: twindow);
 begin
  lock;
@@ -15905,7 +15921,7 @@ begin
    guierror(gue_alreadyregistered,window.fownerwidget.name);
   end;
   additem(pointerarty(fwindows),window);
-  exclude(fstate,aps_zordervalid);
+  zorderinvalid();
  finally
   unlock;
  end;
@@ -16417,11 +16433,11 @@ begin       //eventloop
          end;
         end;
         ek_expose: begin
-         exclude(fstate,aps_zordervalid);
+         zorderinvalid();
          processexposeevent(twindowrectevent(event));
         end;
         ek_configure: begin
-         exclude(fstate,aps_zordervalid);
+         zorderinvalid();
          id1:= twindowrectevent(event).fwinid;
          getevents;
          po1:= pointer(eventlist.datapo);
@@ -16848,7 +16864,7 @@ begin
       end;
      end;
     end;
-    exclude(fstate,aps_zordervalid);
+    zorderinvalid();
    end;
    fwindowstack:= nil;
   finally
