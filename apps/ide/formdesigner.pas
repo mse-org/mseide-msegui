@@ -208,6 +208,8 @@ type
    function getgridsizey: integer; virtual;
  
    procedure poschanged; override;
+   procedure designmouseevent(var info: moeventinfoty;
+                                             capture: twidget); override;
 
    function getcomponentrect(const component: tcomponent; 
                             const shiftoffset: boolean): rectty;
@@ -400,6 +402,7 @@ type
  tmseform1 = class(tmseform);
  tframe1 = class(tframe);
  tscrollingwidget1 = class(tscrollingwidget);
+ twindow1 = class(twindow);
 
  designerfoeventty = (fde_none,fde_syncsize,fde_updatecaption,fde_scrolled,
                       fde_showastext);
@@ -2840,7 +2843,7 @@ begin
   fcompoffsbefore:= offs;
   fselections.finfovalid:= false;
  end;
- gridrect1:= gridrect1;
+ gridrect1:= gridrect();
  if fmodule <> nil then begin
   canvas.intersectcliprect(gridrect1);
   if not hidecompact.checked then begin
@@ -3689,6 +3692,441 @@ end;
 function tformdesignerfo.getgridsizey: integer;
 begin
  result:= fgridsizey;
+end;
+
+procedure tformdesignerfo.designmouseevent(var info: moeventinfoty;
+                                                         capture: twidget);
+ function griddelta: pointty;
+ begin
+  result:= snaptogriddelta(subpoint(info.mouse.pos,fpickpos));
+ end;
+
+ procedure updatesizerect;
+ var
+  pos1,posbefore: pointty;
+ begin
+  pos1:= griddelta;
+  posbefore:= pos1;
+  with fsizerect,pos1 do begin
+   case factarea of
+    ht_topleft,ht_left,ht_bottomleft: begin
+     if x > size.cx then begin
+      x:= size.cx
+     end;
+     factsizerect.pos.x:= pos.x + x;
+     factsizerect.size.cx:= size.cx - x;
+    end;
+    ht_topright,ht_right,ht_bottomright: begin
+     if x < -size.cx then begin
+      x:= -size.cx;
+     end;
+     factsizerect.size.cx:= size.cx + x;
+    end;
+   end;
+   case factarea of
+    ht_topleft,ht_top,ht_topright: begin
+     if y > size.cy then begin
+      y:= size.cy
+     end;
+     factsizerect.pos.y:= pos.y + y;
+     factsizerect.size.cy:= size.cy - y;
+    end;
+    ht_bottomleft,ht_bottom,ht_bottomright: begin
+     if y < -size.cy then begin
+      y:= -size.cy;
+     end;
+     factsizerect.size.cy:= size.cy + y;
+    end;
+   end;
+  end;
+  case factarea of
+   ht_top,ht_bottom: begin
+    info.mouse.pos.x:= fpickpos.x;
+   end;
+   ht_left,ht_right: begin
+    info.mouse.pos.y:= fpickpos.y;
+   end;
+  end;
+  application.mouse.move(subpoint(pos1,posbefore));
+ end;
+
+ procedure updatecursorshape(area: areaty);
+ var
+  shape: cursorshapety;
+ begin
+  case area of
+   ht_topleft: shape:= cr_topleftcorner;
+   ht_bottomright: shape:= cr_bottomrightcorner;
+   ht_topright: shape:= cr_toprightcorner;
+   ht_bottomleft: shape:= cr_bottomleftcorner;
+   ht_top,ht_bottom: shape:= cr_sizever;
+   ht_left,ht_right: shape:= cr_sizehor;
+   else shape:= cr_arrow;
+  end;
+  application.widgetcursorshape:= shape;
+ end;
+
+
+var
+ component: tcomponent;
+ int1: integer;
+ bo1,bo2: boolean;
+ posbefore: pointty;
+ widget1: twidget;
+ rect1: rectty;
+ selectmode: selectmodety;
+ area1: areaty;
+ isinpaintrect: boolean;
+ ss1: shiftstatesty;
+ po1: pformselectedinfoty;
+ pt1: pointty; 
+label
+ 1;
+begin
+ if module = nil then begin
+  exit;
+ end;
+ if info.mouse.eventkind in [ek_mouseleave,ek_mouseenter] then begin
+  fclickedcompbefore:= nil;
+  include(info.mouse.eventstate,es_processed);
+  exit;
+ end;
+ twindow1(window).checkmousewidget(info.mouse,capture);
+ with info.mouse do begin
+  ss1:= shiftstate * shiftstatesmask;
+  isinpaintrect:= pointinrect(pos,gridrect);
+  posbefore:= pos;
+  if eventkind in [ek_buttonpress,ek_buttonrelease] then begin
+   fmousepos:= pos;
+  end;
+  component:= nil;
+  if not (es_processed in eventstate) then begin
+   bo1:= false;
+   if (eventkind = ek_buttonpress) and (button = mb_left) then begin
+    fpickpos:= pos;
+    if (ss1 = [ss_left]) or (ss1 = [ss_left,ss_ctrl]) or 
+                (ss1 = [ss_left,ss_ctrl,ss_shift]) or
+                (ss1 = [ss_left,ss_double]) then begin
+     factarea:= fselections.getareainfo(pos,factcompindex);
+     if factcompindex >= 0 then begin
+      fsizerect:= fselections.itempo(factcompindex)^.rect;
+      factsizerect:= fsizerect;
+     end;
+     if (factarea in [ar_component,ar_none]) and 
+                                     not (ss_shift in ss1) then begin
+      if isinpaintrect then begin
+       component:= componentatpos(pos);
+       if (component = nil) then begin
+        if (form <> nil) and 
+                 not hidewidgetact.checked then begin
+         component:= widgetatpos(pos,true);
+        end
+        else begin
+         component:= module;
+        end;
+       end;
+      end;
+      if component <> nil then begin
+       if (factcompindex < 0) or 
+                       (component <> fselections[factcompindex]) then begin
+        factarea:= ar_none;
+       end;
+       bo1:= true;
+       if ss_ctrl in ss1 then begin
+        selectcomponent(component,sm_flip);
+       end
+       else begin
+        bo2:= fselections.indexof(component) < 0;
+        if (component = form) and (fselections.count > 1) or bo2 then begin
+         selectcomponent(component,sm_select);
+         if projectoptions.e.moveonfirstclick then begin
+          factarea:= ar_component;
+         end;
+        end
+        else begin
+         if not bo2 then begin
+          updateclickedcomponent;
+         end;
+        end;
+        {
+        if ss_double in shiftstate then begin
+         designer.showobjectinspector;
+        end;
+        }
+       end;
+      end
+      else begin
+       factarea:= ar_none;
+      end;
+      fclickedcompbefore:= component;
+     end
+     else begin
+      capturemouse;
+      include(eventstate,es_processed);
+     end;
+    end
+   end;
+   if (eventkind = ek_buttonrelease) and (button = mb_right) and
+           not (es_processed in eventstate) then begin
+    dopopup(info.mouse);
+   end;
+   if not (es_processed in eventstate) then begin
+    area1:= fselections.getareainfo(pos,int1);
+    if ((area1 < firsthandle) or (area1 > lasthandle)) and
+       ((factarea < firsthandle) or (factarea > lasthandle)) and 
+       not ((fdesigner.hascurrentcomponent or componentstorefo.hasselection) and 
+                     (eventkind = ek_buttonpress) and 
+       (button = mb_left) and (ss1 = [ss_left])) and 
+       not ((area1 = ar_component) and 
+           not((fselections[int1] is twidget) or 
+               isdatasubmodule(fselections[int1]))) and 
+       (factarea <> ar_componentmove) then begin
+     exit;
+    end;
+    pos:= posbefore;
+    if bo1 then begin
+     if not (es_processed in eventstate) then begin
+      if (capture = nil) or not 
+             (ws1_designactive in twidget1(capture).fwidgetstate1) then begin
+       capturemouse; //capture mouse
+      end;
+      updatecursorshape(factarea);
+     end
+     else begin
+      factarea:= ar_none;
+     end;
+    end;
+   end;
+   if not (es_processed in eventstate) then begin
+    if (eventkind = ek_buttonpress) and (button = mb_left) then begin
+     if ss1 = [ss_left] then begin
+      if isinpaintrect then begin
+       component:= fdesigner.createcurrentcomponent(module);
+       if (component = nil) and componentstorefo.hasselection then begin
+        dopaste(true,componentstorefo.copyselected);
+       end;
+      end;
+      if component <> nil then begin
+       placecomponent(component,pos);
+      end;
+     end
+     else begin
+      if (ss1 = [ss_left,ss_shift]) and isinpaintrect then begin
+       factarea:= ar_selectrect;
+       fxorpicoffset:= pos;
+       if form <> nil then begin
+        fpickwidget:= widgetatpos(pos,false);
+       end
+       else begin
+        fpickwidget:= self;
+       end;
+      end;
+     end;
+    end;
+    if (eventkind = ek_buttonrelease) and (button = mb_left) then begin
+     hidexorpic(container.getcanvas(org_widget));
+     fxorpicactive:= false;
+     case factarea of
+      firsthandle..lasthandle: begin
+       if (factcompindex >= 0) and (factcompindex < fselections.count) then begin
+        component:= tcomponent(
+                     fselections.itempo(factcompindex)^.selectedinfo.instance);
+        if (component is twidget) and (form <> nil) then begin
+         with twidget(component) do begin
+          subpoint1(factsizerect.pos,parentwidget.rootpos);
+          widgetrect:= factsizerect;
+         end;
+         fselections.componentschanged;
+        end
+        else begin
+         if component is tmsedatamodule then begin
+          rect1:= getcomponentrect1(component);          
+          with tmsedatamodule(component) do begin
+           subpoint1(factsizerect.pos,rect1.pos);
+//////           subpoint1(factsizerect.pos,parentwidget.rootpos);
+           setcomponentpos(component,
+                addpoint(getcomponentpos(component),factsizerect.pos));
+           size:= factsizerect.size;
+          end;
+          fselections.componentschanged;
+         end;
+        end;
+       end;
+       invalidate();
+      end;
+      ar_componentmove: begin
+       if fselections.move(griddelta) then begin
+        invalidate(); //redraw handles
+        clientsizechanged;
+       end;
+      end;
+      ar_component: begin
+       if ss_double in shiftstate then begin
+        designer.showobjectinspector;
+       end;
+      end;
+      ar_selectrect: begin
+       if fpickwidget <> nil then begin
+        rect1.pos:= fpickpos;
+        rect1.cx:= pos.x - fpickpos.x;
+        rect1.cy:= pos.y - fpickpos.y;
+        if (rect1.cx < 0) or (rect1.cy < 0) then begin
+         selectmode:= sm_remove;
+        end
+        else begin
+         selectmode:= sm_add;
+        end;
+        beginselect;
+        try
+         if (selectmode = sm_add) and (fselections.count = 1) and
+               (fselections[0] = module) then begin
+          fselections.clear; //remove underlaying form
+         end;
+         for int1:= 0 to module.componentcount - 1 do begin
+          component:= module.Components[int1];
+          if (form = nil) or (not (component is twidget)) then begin
+           if rectinrect(getcomponentrect1(component),rect1) then begin
+            selectcomponent(component,selectmode);
+           end;
+          end;
+         end;
+         if fpickwidget <> self then begin
+          rect1.pos:= subpoint(fpickpos,fpickwidget.rootpos);
+          for int1:= 0 to fpickwidget.widgetcount -1 do begin
+           widget1:= fpickwidget[int1];
+           if rectinrect(widget1.widgetrect,rect1) then begin
+            selectcomponent(widget1,selectmode);
+           end;
+          end;
+         end;
+        finally
+         endselect;
+        end;
+       end;
+      end;
+     end;
+     fpickwidget:= nil;
+     factarea:= ar_none;
+     if factcompindex >= 0 then begin
+      factcompindex:= -1;
+      updateclickedcomponent; //update objectionspector componentname
+     end;
+     releasemouse();
+    end;
+ 
+    if not (es_processed in eventstate) then begin
+     if (eventkind = ek_mousemove) or (eventkind = ek_mousepark) then begin
+      hidexorpic(getcanvas(org_widget));
+      bo1:= true;
+      case factarea of
+       firsthandle..lasthandle: begin
+        updatesizerect;
+       end;
+       ar_component: begin
+        if distance(fpickpos,pos) > movethreshold then begin
+         fxorpicoffset:= griddelta;
+         factarea:= ar_componentmove;
+        end
+        else begin
+         bo1:= false;
+        end;
+       end;
+       ar_componentmove: begin
+        fxorpicoffset:= griddelta;
+       end;
+       ar_selectrect: begin
+        fxorpicoffset:= pos;
+       end;
+       else begin
+        bo1:= false;
+        updatecursorshape(fselections.getareainfo(pos,int1));
+       end;
+      end;
+      if bo1 then begin
+       fxorpicactive:= true;
+       if factarea <> ar_component then begin
+        fselections.beforepaintmoving; //resets canvas
+       end;
+       showxorpic(container.getcanvas(org_widget));
+      end;
+     end;
+    end;
+   end;
+  end;
+1:
+  if (eventkind in mouseposevents) and (fselections.count = 1) then begin
+   fselections.updateinfos;
+   po1:= fselections.itempo(0);
+   if po1^.selectedinfo.instance <> fmodule then begin
+    bo1:= true;
+    case factarea of
+     ar_component: begin
+      if (eventkind = ek_buttonpress) and (button = mb_left) then begin
+       pt1:= rectcenter(po1^.handles[ht_topleft]);
+      end
+      else begin
+       bo1:= false;
+      end;
+     end;
+     ht_topleft: begin
+      pt1:= factsizerect.pos;
+     end;
+     ht_left: begin
+      with factsizerect do begin
+       pt1.x:= x;
+       pt1.y:= y + cy div 2;
+      end;
+     end;
+     ht_bottomleft: begin
+      with factsizerect do begin
+       pt1.x:= x;
+       pt1.y:= y + cy;
+      end;
+     end;
+     ht_bottom: begin
+      with factsizerect do begin
+       pt1.x:= x + cx div 2;
+       pt1.y:= y + cy ;
+      end;
+     end;
+     ht_bottomright: begin
+      with factsizerect do begin
+       pt1.x:= x + cx;
+       pt1.y:= y + cy;
+      end;
+     end;
+     ht_right: begin
+      with factsizerect do begin
+       pt1.x:= x + cx;
+       pt1.y:= y + cy div 2;
+      end;
+     end;
+     ht_topright: begin
+      with factsizerect do begin
+       pt1.x:= x + cx;
+       pt1.y:= y;
+      end;
+     end;
+     ht_top: begin
+      with factsizerect do begin
+       pt1.x:= x + cx div 2;
+       pt1.y:= y;
+      end;
+     end;
+     ar_componentmove: begin
+      pt1:= addpoint(rectcenter(po1^.handles[ht_topleft]),fxorpicoffset);
+     end;
+     else begin
+      bo1:= false;
+     end;
+    end;
+    if bo1 then begin
+     componentmoving(pt1);
+    end;
+   end;
+  end;
+ end;
+ include(info.mouse.eventstate,es_processed);
 end;
 
 initialization

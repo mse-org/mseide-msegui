@@ -1357,6 +1357,8 @@ type
    fhint: msestring;
    fdefaultfocuschild: twidget;
 
+   procedure designmouseevent(var info: moeventinfoty;
+                                             capture: twidget); virtual;
    procedure defineproperties(filer: tfiler); override;
    function gethelpcontext: msestring; override;
    class function classskininfo: skininfoty; override;
@@ -2089,8 +2091,10 @@ type
    procedure mouseparked;
    procedure movewindowrect(const dist: pointty; const rect: rectty); virtual;
    procedure checkmousewidget(const info: mouseeventinfoty; var capture: twidget);
-   procedure dispatchmouseevent(var info: moeventinfoty; capture: twidget); virtual;
-   procedure dispatchkeyevent(const eventkind: eventkindty; var info: keyeventinfoty); virtual;
+   procedure dispatchmouseevent(var info: moeventinfoty;
+                                                capture: twidget); virtual;
+   procedure dispatchkeyevent(const eventkind: eventkindty;
+                                            var info: keyeventinfoty); virtual;
    procedure sizechanged; virtual;
    procedure poschanged; virtual;
    procedure internalactivate(const windowevent: boolean;
@@ -12763,6 +12767,13 @@ begin
  result:= innerclientframe;
 end;
 
+procedure twidget.designmouseevent(var info: moeventinfoty; capture: twidget);
+begin
+ if fparentwidget <> nil then begin
+  fparentwidget.designmouseevent(info,capture);
+ end;
+end;
+
 { twindow }
 
 constructor twindow.create(const aowner: twidget; const agdi: pgdifunctionaty);
@@ -13832,6 +13843,12 @@ begin
   checkmousewidget(info.mouse,capture);
  end;
  if capture <> nil then begin
+  if csdesigning in capture.componentstate then begin
+   capture.designmouseevent(info,capture);
+   if es_processed in info.mouse.eventstate then begin
+    exit;
+   end;
+  end;
   mousecapturewidgetbefore:= appinst.fmousecapturewidget;
   if (info.mouse.eventkind = ek_buttonpress) and 
          (tws_buttonendmodal in fstate) and (fmodalwidget = capture) then begin
