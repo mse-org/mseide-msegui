@@ -1357,8 +1357,12 @@ type
    fhint: msestring;
    fdefaultfocuschild: twidget;
 
+   function isdesignwidget(): boolean; virtual;
    procedure designmouseevent(var info: moeventinfoty;
                                              capture: twidget); virtual;
+   procedure designkeyevent(const eventkind: eventkindty;
+                                            var info: keyeventinfoty); virtual;
+
    procedure defineproperties(filer: tfiler); override;
    function gethelpcontext: msestring; override;
    class function classskininfo: skininfoty; override;
@@ -12774,6 +12778,19 @@ begin
  end;
 end;
 
+procedure twidget.designkeyevent(const eventkind: eventkindty;
+               var info: keyeventinfoty);
+begin
+ if fparentwidget <> nil then begin
+  fparentwidget.designkeyevent(eventkind,info);
+ end;
+end;
+
+function twidget.isdesignwidget: boolean;
+begin
+ result:= csdesigning in componentstate;
+end;
+
 { twindow }
 
 constructor twindow.create(const aowner: twidget; const agdi: pgdifunctionaty);
@@ -13843,7 +13860,7 @@ begin
   checkmousewidget(info.mouse,capture);
  end;
  if capture <> nil then begin
-  if csdesigning in capture.componentstate then begin
+  if capture.isdesignwidget then begin
    capture.designmouseevent(info,capture);
    if es_processed in info.mouse.eventstate then begin
     exit;
@@ -13934,6 +13951,12 @@ begin
   widget1:= ffocusedwidget;
  end;
  if widget1 <> nil then begin
+  if widget1.isdesignwidget() then begin
+   widget1.designkeyevent(eventkind,info);
+   if es_processed in info.eventstate then begin
+    exit;
+   end;
+  end;
   case eventkind of
    ek_keypress: widget1.internalkeydown(info);
    ek_keyrelease: widget1.dokeyup(info);

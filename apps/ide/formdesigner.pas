@@ -94,6 +94,7 @@ type
   private
    fdesignfo: tformdesignerfo;
   protected
+   function isdesignwidget(): boolean; override;
    procedure widgetregionchanged(const sender: twidget); override;
   public
    constructor create(const aowner: tformdesignerfo);
@@ -201,6 +202,8 @@ type
    function filterfindcomp(const acomponent: tcomponent): boolean;
   protected
    ffostate: formdesignerstatesty;
+
+   function isdesignwidget(): boolean; override;
  
    function getsnaptogrid: boolean; virtual;
    function getshowgrid: boolean; virtual;
@@ -210,6 +213,8 @@ type
    procedure poschanged; override;
    procedure designmouseevent(var info: moeventinfoty;
                                              capture: twidget); override;
+   procedure designkeyevent(const eventkind: eventkindty;
+                                          var info: keyeventinfoty); override;
 
    function getcomponentrect(const component: tcomponent; 
                             const shiftoffset: boolean): rectty;
@@ -1640,6 +1645,11 @@ begin
    size:= fform.size; //syc with modulesize
   end;
  end;
+end;
+
+function tformcontainer.isdesignwidget: boolean;
+begin
+ result:= true;
 end;
 
 { tformdesignerfo }
@@ -4127,6 +4137,146 @@ begin
   end;
  end;
  include(info.mouse.eventstate,es_processed);
+end;
+
+procedure tformdesignerfo.designkeyevent(const eventkind: eventkindty;
+               var info: keyeventinfoty);
+var
+ po1: pointty;
+ comp1: tcomponent;
+ shiftstate1: shiftstatesty;
+ actareabefore: areaty;
+begin
+ if module = nil then begin
+  exit;
+ end;
+ shiftstate1:= info.shiftstate * keyshiftstatesmask;
+ if eventkind = ek_keypress then begin
+  with info do begin
+   if shiftstate1 = [] then begin
+    include(eventstate,es_processed);
+    case key of
+     key_return: begin
+      if not designer.editcomponent(module) then begin
+       exclude(eventstate,es_processed);
+      end;
+     end;
+     key_escape: begin
+      if not (factarea in [ar_none,ar_component]) then begin
+       hidexorpic(container.getcanvas(org_widget));
+       fxorpicactive:= false;
+       factarea:= ar_none;
+      end
+      else begin      
+       if (fselections.count > 1) and (factarea <> ar_component) then begin
+        selectcomponent(module);
+       end
+       else begin
+        if fselections.count > 0 then begin
+         if factarea = ar_component then begin
+          comp1:= fselections[factcompindex];
+         end
+         else begin
+          comp1:= fselections[0];
+         end;
+         if iswidgetcomp(comp1) then begin
+          repeat
+           comp1:= twidget(comp1).parentwidget;
+          until (comp1 = nil) or (ws_iswidget in twidget(comp1).widgetstate);
+          actareabefore:= factarea;
+          if (comp1 <> nil) and (comp1 <> self) then begin
+           if fselections.count > 1 then begin
+            selectparentwidget(twidget(comp1));
+           end
+           else begin
+            selectcomponent(comp1);
+           end;
+          end
+          else begin
+           selectcomponent(module);
+          end;
+          factarea:= actareabefore;
+         end
+         else begin
+//          if isdatasubmodule(comp1.owner) then begin
+           selectcomponent(comp1.owner);
+//          end
+//          else begin
+//           selectcomponent(module);
+//          end;
+         end;
+        end;
+       end;
+      end;
+     end;
+     key_delete: begin
+      if fselections.candelete then begin
+       dodelete;
+      end;
+     end;
+     else begin
+      exclude(eventstate,es_processed);
+     end;
+    end;
+   end
+   else begin
+    if (shiftstate1 = [ss_ctrl]) or (shiftstate1 = [ss_shift]) then begin
+     include(eventstate,es_processed);
+     po1:= nullpoint;
+     case key of
+      key_right: po1.x:= 1;
+      key_up: po1.y:= -1;
+      key_left: po1.x:= -1;
+      key_down: po1.y:= 1;
+      else exclude(eventstate,es_processed);
+     end;
+     if (es_processed in eventstate) then begin
+      if shiftstate1 = [ss_ctrl] then begin
+       fselections.move(po1);
+       if fselections.count > 0 then begin
+        fselections.updateinfos;
+        componentmoving(rectcenter(fselections.itempo(0)^.handles[ht_topleft]));
+       end;
+      end
+      else begin
+       fselections.resize(po1);
+       if fselections.count > 0 then begin
+        fselections.updateinfos;
+        with fselections.itempo(0)^.handles[ht_bottomright] do begin
+         componentmoving(makepoint(x+cx div 2 + 1,y+cy div 2 +1));
+        end;
+       end;
+      end;
+      invalidate();
+      clientsizechanged();
+     end;
+    end;
+   end;
+   if not (es_processed in eventstate) then begin
+    if issysshortcut(sho_copy,info) then begin
+     docopy(false);
+     include(eventstate,es_processed);
+    end
+    else begin
+     if issysshortcut(sho_cut,info) then begin
+      docut;
+      include(eventstate,es_processed);
+     end
+     else begin
+      if issysshortcut(sho_paste,info) then begin
+       dopaste(false,'');
+       include(eventstate,es_processed);
+      end;
+     end;
+    end;
+   end;
+  end;
+ end;
+end;
+
+function tformdesignerfo.isdesignwidget: boolean;
+begin
+ result:= true;
 end;
 
 initialization
