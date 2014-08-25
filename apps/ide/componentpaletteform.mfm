@@ -1,7 +1,7 @@
 object componentpalettefo: tcomponentpalettefo
   optionswidget = [ow_arrowfocus, ow_subfocus, ow_destroywidgets, ow_hinton]
   frame.grip_size = 10
-  frame.grip_options = [go_closebutton, go_fixsizebutton, go_topbutton]
+  frame.grip_options = [go_closebutton, go_fixsizebutton, go_floatbutton, go_topbutton, go_backgroundbutton]
   frame.dummy = 0
   visible = False
   bounds_x = 131
@@ -9,8 +9,6 @@ object componentpalettefo: tcomponentpalettefo
   bounds_cx = 738
   bounds_cy = 69
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets]
-  container.frame.zoomwidthstep = 1
-  container.frame.zoomheightstep = 1
   container.onlayout = componentgrouponchildscaled
   container.bounds = (
     0

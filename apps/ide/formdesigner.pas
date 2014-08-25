@@ -103,7 +103,7 @@ type
  formdesignerstatety = (fds_sizesyncing);
  formdesignerstatesty = set of formdesignerstatety;
   
- tformdesignerfo = class(tmseform,iformdesigner)
+ tformdesignerfo = class(tdockform,iformdesigner)
    popupme: tpopupmenu;
    hidecompact: taction;
    hidewidgetact: taction;

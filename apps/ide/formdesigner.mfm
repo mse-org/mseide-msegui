@@ -1,6 +1,9 @@
 object formdesignerfo: tformdesignerfo
   optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_hinton]
   optionsskin = [osk_noskin]
+  frame.grip_size = 10
+  frame.grip_options = [go_closebutton, go_fixsizebutton, go_floatbutton, go_topbutton, go_backgroundbutton]
+  frame.dummy = 0
   popupmenu = popupme
   visible = False
   bounds_x = 111
@@ -12,9 +15,10 @@ object formdesignerfo: tformdesignerfo
   container.bounds = (
     0
     0
-    287
+    277
     300
   )
+  dragdock.optionsdock = [od_savepos, od_savezorder, od_canmove, od_cansize, od_canfloat, od_candock]
   optionswindow = [wo_notaskbar]
   icon.transparentcolor = -2147483642
   icon.image = {
@@ -85,7 +89,7 @@ object formdesignerfo: tformdesignerfo
   onclose = formdeonclose
   left = 239
   top = 180
-  moduleclassname = 'tmseform'
+  moduleclassname = 'tdockform'
   object popupme: tpopupmenu
     menu.submenu.count = 31
     menu.submenu.items = <    

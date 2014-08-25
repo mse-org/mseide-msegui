@@ -153,7 +153,7 @@ type
                           const aowner: tcomponent = nil;
                           const filter: compfilterfuncty = nil;
                           const amodule: tcomponent = nil): tcompnameitem;
-  procedure setactivemodule(const adesignform: tmseform);
+  procedure setactivemodule(const adesignform: tcustommseform);
   procedure setmodulex(const amodule: tmsecomponent; avalue: integer);
   procedure setmoduley(const amodule: tmsecomponent; avalue: integer);
   procedure modulesizechanged(const amodule: tmsecomponent);

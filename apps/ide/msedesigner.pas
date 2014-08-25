@@ -129,7 +129,7 @@ type
   hasmenuitem: boolean;
 //  options: moduleoptionsty;
   components: tcomponents;
-  designform: tmseform;
+  designform: tcustommseform;
   designformintf: iformdesigner;
   referencedmodules: stringarty;
   loadingstream: tstream;
@@ -189,7 +189,7 @@ type
    function findmethodbyname(const name: string; const atype: ptypeinfo;
                                const amodule: tmsecomponent): tmethod;
    function findmethodname(const method: tmethod; const comp: tcomponent): string;
-   function findform(aform: tmseform): pmoduleinfoty;
+   function findform(aform: tcustommseform): pmoduleinfoty;
    function removemoduleinfo(po: pmoduleinfoty): integer;
    procedure componentmodified(const acomponent: tobject);
    procedure freeloadingstreams;
@@ -197,7 +197,7 @@ type
   public
    constructor create(adesigner: tdesigner); reintroduce;
    destructor destroy; override;
-   procedure designformdestroyed(const sender: tmseform);
+   procedure designformdestroyed(const sender: tcustommseform);
    function delete(index: integer): pointer; override;
    function findmodule(const filename: msestring): pmoduleinfoty; overload;
    function findmodule(const amodule: tmsecomponent): pmoduleinfoty; overload;
@@ -554,7 +554,7 @@ type
                         //false if canceled
    function saveall(noconfirm,createdatafile: boolean): modalresultty;
    procedure savecanceled; //resets fallsaved
-   procedure setactivemodule(const adesignform: tmseform);
+   procedure setactivemodule(const adesignform: tcustommseform);
    function sourcenametoformname(const aname: filenamety): filenamety;
 
    function closemodule(const amodule: pmoduleinfoty;
@@ -2330,7 +2330,7 @@ begin
  fmethodnames:= tmethodnames.create;
 end;
 
-procedure tmodulelist.designformdestroyed(const sender: tmseform);
+procedure tmodulelist.designformdestroyed(const sender: tcustommseform);
 var
  po1: pmoduleinfoty;
 begin
@@ -2626,7 +2626,7 @@ begin
  delete(result);
 end;
 
-function tmodulelist.findform(aform: tmseform): pmoduleinfoty;
+function tmodulelist.findform(aform: tcustommseform): pmoduleinfoty;
 var
  int1: integer;
  po1: ppointeraty;
@@ -4078,7 +4078,7 @@ begin
  end;
 end;
 
-procedure tdesigner.setactivemodule(const adesignform: tmseform);
+procedure tdesigner.setactivemodule(const adesignform: tcustommseform);
 var
  po1: pmoduleinfoty;
 begin
@@ -4483,7 +4483,7 @@ var
  procedure dodelete;
  var
   int1: integer;
-  desfo: tmseform;
+  desfo: tcustommseform;
  begin
   removefixupreferences(module,'');
   for int1:= high(floadedsubmodules) downto loadedsubmodulesindex+1 do begin
