@@ -703,6 +703,7 @@ object mainfo: tmainfo
   object projectstatfile: tstatfile
     filename = 'status.sta'
     onstatbeforeread = statbefread
+    onstatafterread = statafterread
     top = 56
   end
   object vievmenuicons: timagelist

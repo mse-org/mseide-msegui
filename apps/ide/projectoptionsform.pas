@@ -416,8 +416,8 @@ type
    fcolorwarning: colorty;
    fcolornote: colorty;
    fuid: integer;
-   fforcezorder: boolean;
-   procedure setforcezorder(const avalue: boolean);
+   fforcezorder: longbool;
+   procedure setforcezorder(const avalue: longbool);
   protected
    function gett: tobject; override;
    function gettexp: tobject; override;
@@ -427,7 +427,7 @@ type
   published
    property t: ttextprojectoptions read ft;
 
-   property forcezorder: boolean read fforcezorder write setforcezorder;
+   property forcezorder: longbool read fforcezorder write setforcezorder;
    property stripmessageesc: boolean read fstripmessageesc 
                                              write fstripmessageesc;
    property copymessages: boolean read fcopymessages write fcopymessages;
@@ -2639,7 +2639,7 @@ begin
  result:= ftexp;
 end;
 
-procedure tprojectoptions.setforcezorder(const avalue: boolean);
+procedure tprojectoptions.setforcezorder(const avalue: longbool);
 begin
  fforcezorder:= avalue;
  application.forcezorder:= avalue;

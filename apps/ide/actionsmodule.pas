@@ -808,6 +808,7 @@ procedure tactionsmo.forcezorderexe(const sender: TObject);
 begin
  if projectoptions.o <> nil then begin
   projectoptions.o.forcezorder:= taction(sender).checked;
+  projectoptionsmodified();
  end;
 end;
 

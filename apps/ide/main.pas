@@ -140,6 +140,7 @@ type
    procedure getstatobjs(const sender: TObject; var aobjects: objectinfoarty);
    procedure targetpipeinput(const sender: tpipereader);
    procedure mainstatbeforewriteexe(const sender: TObject);
+   procedure statafterread(const sender: TObject);
   private
    fstartcommand: startcommandty;
    fnoremakecheck: boolean;
@@ -2858,6 +2859,11 @@ end;
 procedure tmainfo.mainstatbeforewriteexe(const sender: TObject);
 begin
  disassfo.resetshortcuts();
+end;
+
+procedure tmainfo.statafterread(const sender: TObject);
+begin
+ actionsmo.forcezorderact.checked:= projectoptions.o.forcezorder;
 end;
 
 end.
