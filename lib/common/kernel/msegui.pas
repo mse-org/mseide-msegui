@@ -14333,7 +14333,8 @@ begin
  end;
 end;
 
-procedure twindow.settransientfor(const Value: twindow; const windowevent: boolean);
+procedure twindow.settransientfor(const Value: twindow;
+                                                 const windowevent: boolean);
 begin
  if not windowevent then begin
   if value = nil then begin
@@ -14348,6 +14349,7 @@ begin
    if ftransientfor <> nil then begin
     inc(ftransientfor.ftransientforcount);
    end;
+   include(appinst.fstate,aps_needsupdatewindowstack);
    if fwindow.id <> 0 then begin
     if value <> nil then begin
      gui_settransientfor(fwindow,value.winid);
@@ -14935,12 +14937,14 @@ var
 begin
  result:= false;
  window1:= appinst.activewindow;
- while window1 <> nil do begin
-  if window1 = self then begin
-   result:= true;
-   break;
+ if (window1 <> nil) and (window1.ftransientfor <> nil) then begin 
+  while window1 <> nil do begin
+   if window1 = self then begin
+    result:= true;
+    break;
+   end;
+   window1:= window1.ftransientfor;
   end;
-  window1:= window1.ftransientfor;
  end;
 end;
 
@@ -16864,10 +16868,14 @@ const
  transientforcountweight =  1 shl 6;
  transientfornotnilweight = 1 shl 7;
  transientforweight =       1 shl 8;
- invisibleweight =          1 shl 9;
- popupweight =              1 shl 10;
+ transientforactiveweight = 1 shl 9;
+ invisibleweight =          1 shl 10;
+ popupweight =              1 shl 11;
 var
  window1: twindow;
+{$ifdef mse_debugzorder}
+ ch1: char;
+{$endif}
 begin
  result:= 0;
  if (tws_windowvisible in twindow(l).fstate) then begin
@@ -16920,21 +16928,27 @@ begin
   dec(result,modalweight);
  end;
  if twindow(l).transientforstackactive then begin
+  inc(result,transientforactiveweight);
+ end;
+ if twindow(r).transientforstackactive then begin
+  dec(result,transientforactiveweight);
+ end;
+// if twindow(l).transientforstackactive then begin
   if twindow(l).ftransientfor <> nil then begin
    inc(result,transientfornotnilweight);
   end;
   if twindow(l).ftransientforcount > 0 then begin
    inc(result,transientforcountweight);
   end;
- end; 
- if twindow(r).transientforstackactive then begin
+// end; 
+// if twindow(r).transientforstackactive then begin
   if twindow(r).ftransientfor <> nil then begin
    dec(result,transientfornotnilweight);
   end;
   if twindow(r).ftransientforcount > 0 then begin
    dec(result,transientforcountweight);
   end;
- end;
+// end;
  window1:= twindow(l);
  while window1.ftransientfor <> nil do begin
   if window1.ftransientfor = twindow(r) then begin
@@ -16951,6 +16965,21 @@ begin
   end;
   window1:= window1.ftransientfor;
  end;  
+{$ifdef mse_debugzorder}
+ if result < 0 then begin
+  ch1:= '-';
+ end
+ else begin
+  ch1:= ' ';
+ end;
+ debugwindow('.'+ch1+hextostr(longword(abs(result)),4)+
+  ' tract:'+bintostr(ord(twindow(l).transientforstackactive),1)+':'+
+              bintostr(ord(twindow(r).transientforstackactive),1)+
+  ' trforco:'+inttostr(twindow(l).ftransientforcount)+':'+
+                inttostr(twindow(r).ftransientforcount)+
+ ' l:',twindow(l).winid,
+                                                     twindow(r).winid);
+{$endif}
 end;
 
 procedure tinternalapplication.updatewindowstack;

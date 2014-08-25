@@ -5608,6 +5608,13 @@ eventrestart:
       end;
       rect1.cx:= width;
       rect1.cy:= height;
+    {$ifdef mse_debugconfigure}
+      debugwindow('*conf winrect:'+
+                      inttostr(pt1.x)+' '+inttostr(pt1.y)+'|'+
+                 inttostr(rect1.x)+' '+inttostr(rect1.y)+
+                 ' '+inttostr(rect1.cx)+' '+inttostr(rect1.cy)+
+                 ' above:',above,w);
+    {$endif}
       result:= twindowrectevent.create(ek_configure,w,rect1,pt1);
      end; 
 
