@@ -3795,11 +3795,11 @@ label
  1;
 begin
  if module = nil then begin
-  exit;
+  exit; //continue nornal handling
  end;
  if info.mouse.eventkind in [ek_mouseleave,ek_mouseenter] then begin
   fclickedcompbefore:= nil;
-//  include(info.mouse.eventstate,es_processed);
+  include(info.mouse.eventstate,es_processed);
   exit;
  end;
  twindow1(window).checkmousewidget(info.mouse,capture);
@@ -3892,7 +3892,7 @@ begin
            not((fselections[int1] is twidget) or 
                isdatasubmodule(fselections[int1]))) and 
        (factarea <> ar_componentmove) then begin
-     exit;
+     twindow1(window).dispatchmouseevent(info,capture,true); //"inherited"
     end;
     pos:= posbefore;
     if bo1 then begin

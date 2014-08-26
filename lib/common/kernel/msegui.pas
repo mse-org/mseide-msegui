@@ -2095,8 +2095,8 @@ type
    procedure mouseparked;
    procedure movewindowrect(const dist: pointty; const rect: rectty); virtual;
    procedure checkmousewidget(const info: mouseeventinfoty; var capture: twidget);
-   procedure dispatchmouseevent(var info: moeventinfoty;
-                                                capture: twidget); virtual;
+   procedure dispatchmouseevent(var info: moeventinfoty; capture: twidget;
+                                    const designcall: boolean = false); virtual;
    procedure dispatchkeyevent(const eventkind: eventkindty;
                                             var info: keyeventinfoty); virtual;
    procedure sizechanged; virtual;
@@ -13840,7 +13840,7 @@ begin
 end;
 
 procedure twindow.dispatchmouseevent(var info: moeventinfoty;
-                           capture: twidget);
+                   capture: twidget; const designcall: boolean = false);
 var
  posbefore,absposbefore: pointty;
  mousecapturewidgetbefore: twidget;
@@ -13848,21 +13848,23 @@ var
  po1: peventaty;
  self1: tlinkedobject;
 begin
- if info.mouse.eventkind = ek_mousewheel then begin
-  capture:= fownerwidget.mouseeventwidget(info.mouse);
-  if (capture = nil) and (ftransientfor <> nil) then begin
-   include(info.mouse.eventstate,es_transientfor);
-   subpoint1(info.mouse.pos,subpoint(
-                            ftransientfor.fownerwidget.pos,fownerwidget.pos));
-   ftransientfor.dispatchmouseevent(info,capture);
-   exit;
+ if not designcall then begin //"inherited" call from designmouseevent
+  if info.mouse.eventkind = ek_mousewheel then begin
+   capture:= fownerwidget.mouseeventwidget(info.mouse);
+   if (capture = nil) and (ftransientfor <> nil) then begin
+    include(info.mouse.eventstate,es_transientfor);
+    subpoint1(info.mouse.pos,subpoint(
+                             ftransientfor.fownerwidget.pos,fownerwidget.pos));
+    ftransientfor.dispatchmouseevent(info,capture);
+    exit;
+   end;
+  end
+  else begin
+   checkmousewidget(info.mouse,capture);
   end;
- end
- else begin
-  checkmousewidget(info.mouse,capture);
  end;
  if capture <> nil then begin
-  if capture.isdesignwidget then begin
+  if not designcall and capture.isdesignwidget() then begin
    capture.designmouseevent(info,capture);
    if es_processed in info.mouse.eventstate then begin
     exit;
