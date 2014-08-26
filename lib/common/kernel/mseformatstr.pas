@@ -166,12 +166,15 @@ function realtostrmse(const value: double;
 function realtytostrmse(const value: double;
                                 const dot: boolean = false): msestring;
 
+function inttostr(const value: integer): string;
+function inttostr(const value: longword): string;
+function inttostr(const value: int64): string;
+function inttostr(const value: qword): string;
+
 function inttostrmse(const value: integer): msestring; overload;
 function inttostrmse(const value: longword): msestring; overload;
 function inttostrmse(const value: int64): msestring; overload;
-{$ifdef hasqword}
 function inttostrmse(const value: qword): msestring; overload;
-{$endif}
 
 function trystrtodouble(const s: lstringty; out value: double; 
                              const decimalseparator: char): boolean; overload;
@@ -278,6 +281,9 @@ function strtodec64(const inp: string): qword;
 function trystrtohex64(const inp: string; out value: qword): boolean;
 function strtohex64(const inp: string): qword;
 
+
+function trystrtoint(const text: string; out value: integer): boolean;
+function trystrtoint(const text: string; out value: longword): boolean;
 
 function trystrtointmse(const text: msestring;
                                    out value: integer): boolean; overload;
@@ -3142,6 +3148,33 @@ begin
  end;
 end;
 
+function inttostr(const value: integer): string;
+var
+ buffer: array[0..22] of char;
+ int1,int2: integer;
+ lwo1,lwo2: longword;
+begin
+ lwo1:= abs(value);
+ if lwo1 = 0 then begin
+  result:= '0';
+  exit;
+ end;
+ int1:= high(buffer);
+ while lwo1 > 0 do begin
+  lwo2:= lwo1 div 10;
+  buffer[int1]:= char(lwo1 - lwo2 * 10 + ord('0'));
+  lwo1:= lwo2;
+  dec(int1);
+ end;
+ if value < 0 then begin
+  buffer[int1]:= char('-');
+  dec(int1);
+ end;
+ int2:= (high(buffer))-int1;
+ setlength(result,int2);
+ move(buffer[int1+1],pointer(result)^,int2*sizeof(char));
+end;
+
 function inttostrmse(const value: integer): msestring;
 var
  buffer: array[0..22] of msechar;
@@ -3169,6 +3202,29 @@ begin
  move(buffer[int1+1],pointer(result)^,int2*sizeof(msechar));
 end;
 
+function inttostr(const value: longword): string;
+var
+ buffer: array[0..22] of char;
+ int1,int2: integer;
+ lwo1,lwo2: longword;
+begin
+ lwo1:= value;
+ if lwo1 = 0 then begin
+  result:= '0';
+  exit;
+ end;
+ int1:= high(buffer);
+ while lwo1 > 0 do begin
+  lwo2:= lwo1 div 10;
+  buffer[int1]:= char(lwo1 - lwo2 * 10 + ord('0'));
+  lwo1:= lwo2;
+  dec(int1);
+ end;
+ int2:= (high(buffer))-int1;
+ setlength(result,int2);
+ move(buffer[int1+1],pointer(result)^,int2*sizeof(char));
+end;
+
 function inttostrmse(const value: longword): msestring;
 var
  buffer: array[0..22] of msechar;
@@ -3190,6 +3246,33 @@ begin
  int2:= (high(buffer))-int1;
  setlength(result,int2);
  move(buffer[int1+1],pointer(result)^,int2*sizeof(msechar));
+end;
+
+function inttostr(const value: int64): string;
+var
+ buffer: array[0..22] of char;
+ int1,int2: integer;
+ lwo1,lwo2: qword;
+begin
+ lwo1:= abs(value);
+ if lwo1 = 0 then begin
+  result:= '0';
+  exit;
+ end;
+ int1:= high(buffer);
+ while lwo1 > 0 do begin
+  lwo2:= lwo1 div 10;
+  buffer[int1]:= char(lwo1 - lwo2 * 10 + ord('0'));
+  lwo1:= lwo2;
+  dec(int1);
+ end;
+ if value < 0 then begin
+  buffer[int1]:= char('-');
+  dec(int1);
+ end;
+ int2:= (high(buffer))-int1;
+ setlength(result,int2);
+ move(buffer[int1+1],pointer(result)^,int2*sizeof(char));
 end;
 
 function inttostrmse(const value: int64): msestring;
@@ -3219,7 +3302,29 @@ begin
  move(buffer[int1+1],pointer(result)^,int2*sizeof(msechar));
 end;
 
-{$ifdef hasqword}
+function inttostr(const value: qword): string;
+var
+ buffer: array[0..22] of char;
+ int1,int2: integer;
+ lwo1,lwo2: qword;
+begin
+ lwo1:= value;
+ if lwo1 = 0 then begin
+  result:= '0';
+  exit;
+ end;
+ int1:= high(buffer);
+ while lwo1 > 0 do begin
+  lwo2:= lwo1 div 10;
+  buffer[int1]:= char(lwo1 - lwo2 * 10 + ord('0'));
+  lwo1:= lwo2;
+  dec(int1);
+ end;
+ int2:= (high(buffer))-int1;
+ setlength(result,int2);
+ move(buffer[int1+1],pointer(result)^,int2*sizeof(char));
+end;
+
 function inttostrmse(const value: qword): msestring;
 var
  buffer: array[0..22] of msechar;
@@ -3242,7 +3347,6 @@ begin
  setlength(result,int2);
  move(buffer[int1+1],pointer(result)^,int2*sizeof(msechar));
 end;
-{$endif}
 {
 function formatfloatmse(const value: double; const format: msestring;
                                  const dot: boolean = false): msestring;
@@ -4173,6 +4277,60 @@ begin
  end;
 end;
 
+function trystrtoint(const text: string; out value: integer): boolean;
+const
+ max = maxint div 10;
+var
+ po1: pchar;
+ neg: boolean;
+begin
+ result:= false;
+ value:= 0;
+ if text <> '' then begin
+  po1:= pointer(text);
+  while (po1^ = ' ') or (po1^ = c_tab) do begin
+   inc(po1);
+  end;
+  neg:= po1^ = char('-');
+  if not neg then begin
+   if po1^ = '+' then begin
+    inc(po1);
+   end;
+  end
+  else begin
+   inc(po1);
+  end;
+  if po1^ = #0 then begin
+   exit;
+  end;
+  while po1^ <> #0 do begin
+   if (po1^ < '0') or (po1^ > '9')  then begin
+    exit;
+   end;
+   if value < 0 then begin
+    exit;
+   end;
+   if value > max then begin
+    exit;
+   end;
+   value:= value * 10 + (byte(po1^) - byte('0'));
+   inc(po1);
+  end;
+ end;
+ if neg then begin
+  if (value < 0) and (value <> minint) then begin
+   exit;
+  end;  
+  value:= -value;
+ end
+ else begin
+  if value < 0 then begin
+   exit;
+  end;
+ end;
+ result:= true;
+end;
+
 function trystrtointmse(const text: msestring; out value: integer): boolean;
 const
  max = maxint div 10;
@@ -4209,7 +4367,7 @@ begin
    if value > max then begin
     exit;
    end;
-   value:= value * 10 + (ord(po1^) - ord('0'));
+   value:= value * 10 + (word(po1^) - word('0'));
    inc(po1);
   end;
  end;
@@ -4232,6 +4390,39 @@ begin
  if not trystrtointmse(text,result) then begin
   raise EConvertError.CreateFmt(SInvalidInteger,[string(text)]);
  end;
+end;
+
+function trystrtoint(const text: string; out value: longword): boolean;
+const
+ max = $ffffffff div 10;
+var
+ po1: pchar;
+begin
+ result:= false;
+ value:= 0;
+ if text <> '' then begin
+  po1:= pointer(text);
+  while (po1^ = ' ') or (po1^ = c_tab) do begin
+   inc(po1);
+  end;
+  if po1^ = '+' then begin
+   inc(po1);
+  end;
+  if po1^ = #0 then begin
+   exit;
+  end;
+  while po1^ <> #0 do begin
+   if (po1^ < '0') or (po1^ > '9')  then begin
+    exit;
+   end;
+   if value > max then begin
+    exit;
+   end;
+   value:= value * longword(10) + longword(byte(po1^) - byte('0'));
+   inc(po1);
+  end;
+ end;
+ result:= true;
 end;
 
 function trystrtointmse(const text: msestring; out value: longword): boolean;

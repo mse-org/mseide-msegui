@@ -2128,7 +2128,8 @@ type
    function active: boolean;
    function deactivateintermediate: boolean; 
          //true if ok, sets app.finactivewindow
-   procedure reactivate(const force: boolean = false); //clears app.finactivewindow
+   procedure reactivate(const force: boolean = false); 
+                                       //clears app.finactivewindow
    procedure update;
    function candefocus: boolean;
    procedure nofocus;
@@ -13290,6 +13291,7 @@ procedure twindow.reactivate(const force: boolean = false); //clears appinst.fin
 begin
  appinst.finactivewindow:= nil;
  activate(force);
+ include(appinst.fstate,aps_needsupdatewindowstack);
 end;
 
 procedure twindow.hide(windowevent: boolean);

@@ -1587,7 +1587,9 @@ begin
   inc(po2);
  end;
  if po2 <> po1 then begin
-  token:= strtoint(psubstr(po1,po2));
+  if not trystrtoint(psubstr(po1,po2),token) then begin
+   token:= 0;
+  end;
  end
  else begin
   token:= 0;

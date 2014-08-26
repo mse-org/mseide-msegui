@@ -1,5 +1,5 @@
 Unit jcapimin_del;
-{$N+}
+//{$N+}
 {  This file contains application interface code for the compression half
   of the JPEG library.  These are the "minimum" API routines that may be
   needed in either the normal full-compression case or the transcoding-only
@@ -145,7 +145,7 @@ var
   i : int;
 var
   err : jpeg_error_mgr_ptr;
-  client_data : voidp;
+//  client_data : voidp;
 begin
 
   { Guard against version mismatches between library and caller. }
@@ -163,7 +163,7 @@ begin
     complain here. }
 
   err := cinfo^.err;
-  client_data := cinfo^.client_data; { ignore Purify complaint here }
+//  client_data := cinfo^.client_data; { ignore Purify complaint here }
   MEMZERO(cinfo, SIZEOF(jpeg_compress_struct));
   cinfo^.err := err;
   cinfo^.is_decompressor := FALSE;

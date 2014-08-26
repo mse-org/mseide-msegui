@@ -1849,7 +1849,7 @@ begin
   if application.active and not ((fmenucomp = nil) or 
                  (csdesigning in fmenucomp.componentstate)) and 
        (factivewindowbefore <> nil) and factivewindowbefore.visible then begin
-   factivewindowbefore.reactivate;
+   factivewindowbefore.reactivate();
   end;
   setlinkedvar(nil,tlinkedobject(factivewindowbefore));
   setlinkedvar(nil,tlinkedobject(fstackedunderbefore));
@@ -1881,8 +1881,8 @@ begin
   twindow1(window).lockactivate;
   capturekeyboard;
  end;
- if factivewindowbefore <> nil then begin
-  factivewindowbefore.deactivateintermediate;
+ if (factivewindowbefore <> nil) then begin
+  factivewindowbefore.deactivateintermediate();
  end;
 end;
 
@@ -1891,7 +1891,7 @@ procedure tcustommainmenuwidget.internalsetactiveitem(const Value: integer;
            const nochildreninactive: boolean);
 begin
  if (value >= 0) and not (csdesigning in componentstate) then begin
-  checkactivate(false,false);
+  checkactivate(false,ow_background in window.owner.optionswidget);
  end;
  inherited;
  if value = -1 then begin
