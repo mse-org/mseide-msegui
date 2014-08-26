@@ -1891,7 +1891,7 @@ procedure tcustommainmenuwidget.internalsetactiveitem(const Value: integer;
            const nochildreninactive: boolean);
 begin
  if (value >= 0) and not (csdesigning in componentstate) then begin
-  checkactivate(false,false);
+  checkactivate(false,ow_background in window.owner.optionswidget);
  end;
  inherited;
  if value = -1 then begin
