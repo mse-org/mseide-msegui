@@ -248,7 +248,7 @@ type
    procedure domodified;
 
    procedure selectchildexec(const sender: tobject);
-   procedure dopopup(var info: mouseeventinfoty);
+   procedure dopopup(var info: mouseeventinfoty); reintroduce;
 
    property selections: tformdesignerselections read getselections;
    procedure formcontainerscrolled;
@@ -3774,6 +3774,7 @@ procedure tformdesignerfo.designmouseevent(var info: moeventinfoty;
    else shape:= cr_arrow;
   end;
   application.widgetcursorshape:= shape;
+writeln(shape);
  end;
 
 
@@ -3798,7 +3799,7 @@ begin
  end;
  if info.mouse.eventkind in [ek_mouseleave,ek_mouseenter] then begin
   fclickedcompbefore:= nil;
-  include(info.mouse.eventstate,es_processed);
+//  include(info.mouse.eventstate,es_processed);
   exit;
  end;
  twindow1(window).checkmousewidget(info.mouse,capture);
