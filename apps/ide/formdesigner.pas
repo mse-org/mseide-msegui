@@ -3786,7 +3786,6 @@ procedure tformdesignerfo.designmouseevent(var info: moeventinfoty;
    else shape:= cr_arrow;
   end;
   application.widgetcursorshape:= shape;
-writeln(shape);
  end;
 
 
@@ -3794,7 +3793,7 @@ var
  component: tcomponent;
  int1: integer;
  bo1,bo2: boolean;
- posbefore: pointty;
+// posbefore: pointty;
  widget1: twidget;
  rect1: rectty;
  selectmode: selectmodety;
@@ -3803,6 +3802,7 @@ var
  ss1: shiftstatesty;
  po1: pformselectedinfoty;
  pt1: pointty; 
+ mousepos1: pointty;
 label
  1;
 begin
@@ -3816,21 +3816,22 @@ begin
  end;
  twindow1(window).checkmousewidget(info.mouse,capture);
  with info.mouse do begin
+  mousepos1:= translatewidgetpoint(pos,window.owner,self);
   ss1:= shiftstate * shiftstatesmask;
-  isinpaintrect:= pointinrect(pos,gridrect);
-  posbefore:= pos;
+  isinpaintrect:= pointinrect(mousepos1,gridrect);
+//  posbefore:= pos;
   if eventkind in [ek_buttonpress,ek_buttonrelease] then begin
-   fmousepos:= pos;
+   fmousepos:= mousepos1;
   end;
   component:= nil;
   if not (es_processed in eventstate) then begin
    bo1:= false;
    if (eventkind = ek_buttonpress) and (button = mb_left) then begin
-    fpickpos:= pos;
+    fpickpos:= mousepos1;
     if (ss1 = [ss_left]) or (ss1 = [ss_left,ss_ctrl]) or 
                 (ss1 = [ss_left,ss_ctrl,ss_shift]) or
                 (ss1 = [ss_left,ss_double]) then begin
-     factarea:= fselections.getareainfo(pos,factcompindex);
+     factarea:= fselections.getareainfo(mousepos1,factcompindex);
      if factcompindex >= 0 then begin
       fsizerect:= fselections.itempo(factcompindex)^.rect;
       factsizerect:= fsizerect;
@@ -3838,11 +3839,11 @@ begin
      if (factarea in [ar_component,ar_none]) and 
                                      not (ss_shift in ss1) then begin
       if isinpaintrect then begin
-       component:= componentatpos(pos);
+       component:= componentatpos(mousepos1);
        if (component = nil) then begin
         if (form <> nil) and 
                  not hidewidgetact.checked then begin
-         component:= widgetatpos(pos,true);
+         component:= widgetatpos(mousepos1,true);
         end
         else begin
          component:= module;
@@ -3894,7 +3895,7 @@ begin
     dopopup(info.mouse);
    end;
    if not (es_processed in eventstate) then begin
-    area1:= fselections.getareainfo(pos,int1);
+    area1:= fselections.getareainfo(mousepos1,int1);
     if ((area1 < firsthandle) or (area1 > lasthandle)) and
        ((factarea < firsthandle) or (factarea > lasthandle)) and 
        not ((fdesigner.hascurrentcomponent or componentstorefo.hasselection) and 
@@ -3906,7 +3907,7 @@ begin
        (factarea <> ar_componentmove) then begin
      twindow1(window).dispatchmouseevent(info,capture,true); //"inherited"
     end;
-    pos:= posbefore;
+//    pos:= posbefore;
     if bo1 then begin
      if not (es_processed in eventstate) then begin
       if (capture = nil) or not 
@@ -3930,15 +3931,15 @@ begin
        end;
       end;
       if component <> nil then begin
-       placecomponent(component,pos);
+       placecomponent(component,mousepos1);
       end;
      end
      else begin
       if (ss1 = [ss_left,ss_shift]) and isinpaintrect then begin
        factarea:= ar_selectrect;
-       fxorpicoffset:= pos;
+       fxorpicoffset:= mousepos1;
        if form <> nil then begin
-        fpickwidget:= widgetatpos(pos,false);
+        fpickwidget:= widgetatpos(mousepos1,false);
        end
        else begin
         fpickwidget:= self;
@@ -3956,7 +3957,8 @@ begin
                      fselections.itempo(factcompindex)^.selectedinfo.instance);
         if (component is twidget) and (form <> nil) then begin
          with twidget(component) do begin
-          subpoint1(factsizerect.pos,parentwidget.rootpos);
+          translatewidgetpoint1(factsizerect.pos,self,parentwidget);
+//          subpoint1(factsizerect.pos,parentwidget.rootpos);
           widgetrect:= factsizerect;
          end;
          fselections.componentschanged;
@@ -4014,7 +4016,9 @@ begin
           end;
          end;
          if fpickwidget <> self then begin
-          rect1.pos:= subpoint(fpickpos,fpickwidget.rootpos);
+          rect1.pos:= translatewidgetpoint(fpickpos,self,
+                                        fpickwidget.parentwidget);
+//          rect1.pos:= subpoint(fpickpos,fpickwidget.rootpos);
           for int1:= 0 to fpickwidget.widgetcount -1 do begin
            widget1:= fpickwidget[int1];
            if rectinrect(widget1.widgetrect,rect1) then begin
@@ -4046,7 +4050,7 @@ begin
         updatesizerect;
        end;
        ar_component: begin
-        if distance(fpickpos,pos) > movethreshold then begin
+        if distance(fpickpos,mousepos1) > movethreshold then begin
          fxorpicoffset:= griddelta;
          factarea:= ar_componentmove;
         end
@@ -4058,11 +4062,11 @@ begin
         fxorpicoffset:= griddelta;
        end;
        ar_selectrect: begin
-        fxorpicoffset:= pos;
+        fxorpicoffset:= mousepos1;
        end;
        else begin
         bo1:= false;
-        updatecursorshape(fselections.getareainfo(pos,int1));
+        updatecursorshape(fselections.getareainfo(mousepos1,int1));
        end;
       end;
       if bo1 then begin
