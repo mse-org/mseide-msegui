@@ -420,6 +420,7 @@ begin
       inc(i);
     end;
     i:=0;
+    even:= true; //20140826 mse, compiler warning
     while (i<Width) do
     begin
       { let's see how nibbles are disposed, so that we can choose the best way to compress }
