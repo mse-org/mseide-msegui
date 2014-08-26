@@ -20,6 +20,7 @@ object formdesignerfo: tformdesignerfo
   )
   dragdock.optionsdock = [od_savepos, od_savezorder, od_canmove, od_cansize, od_canfloat, od_candock]
   optionswindow = [wo_notaskbar]
+  statfile = mainfo.projectstatfile
   icon.transparentcolor = -2147483642
   icon.image = {
     00000000000000001800000018000000A4070000000000000000000000000000

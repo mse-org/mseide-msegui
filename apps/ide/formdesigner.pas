@@ -637,7 +637,7 @@ begin
      with twidget1(instance) do begin
       nohandles:= ws1_nodesignhandles in fwidgetstate1;
       fcandelete:= fcandelete and not (ws1_nodesigndelete in fwidgetstate1);
-      rect:= makerect(rootpos,size);
+      rect:= makerect(translatewidgetpoint(pos,parentwidget,fowner),size);
      end;
     end
     else begin
@@ -1642,7 +1642,7 @@ begin
          not(ws1_anchorsizing in fform.widgetstate1) and 
          not (csdestroying in fform.componentstate) and
          not (csdestroying in componentstate) then begin
-   size:= fform.size; //syc with modulesize
+   paintsize:= fform.size; //syc with modulesize
   end;
  end;
 end;
@@ -2893,6 +2893,7 @@ end;
 procedure tformdesignerfo.doasyncevent(var atag: integer);
 var
  mstr1: msestring;
+ rect1: rectty;
 begin
  case designerfoeventty(atag) of
   fde_updatecaption: begin
@@ -2909,16 +2910,17 @@ begin
   end;
   fde_syncsize: begin
    if not fixformsize then begin
+    rect1:= paintrect;
     if form <> nil then begin
-     form.widgetrect:= makerect(nullpoint,size);
-     if sizeisequal(form.size,size) then begin
+     form.widgetrect:= rect1;
+     if sizeisequal(form.size,rect1.size) then begin
       fsizeerrorcount:= 0;
      end;
      if fsizeerrorcount < 4 then begin
       inc(fsizeerrorcount);
       include(ffostate,fds_sizesyncing);
       try
-       size:= form.size;
+       paintsize:= form.size;
       finally
        exclude(ffostate,fds_sizesyncing);
       end;
@@ -2926,7 +2928,7 @@ begin
     end
     else begin
      if module is tmsedatamodule then begin
-      tmsedatamodule(module).size:= size; 
+      tmsedatamodule(module).size:= rect1.size; 
      end;
     end;
     domodified();
@@ -2994,12 +2996,15 @@ var
  asize: sizety;
  po1: pointty;
  int1: integer;
+ rect1: rectty;
 begin
  beginplacement;
  try
+  name:= '_'+fmodule.name;
   if fmodule is twidget then begin
    setlinkedvar(fmodule,tmsecomponent(fform));
-   widgetrect:= getdesignrect;
+   rect1:= getdesignrect;
+   widgetrect:= inflaterect(rect1,frame.paintframe);
    twidget(fmodule).parentwidget:= getmoduleparent;
    twidget(fmodule).pos:= nullpoint;
    twidget(fmodule).taborder:= 0;
@@ -3023,7 +3028,8 @@ begin
     inc(asize.cx,80);
     inc(asize.cy,30); //todo: correct size, scrollbox
    end;
-   widgetrect:= makerect(getcomponentpos(fmodule),asize);
+   widgetrect:= inflaterect(makerect(getcomponentpos(fmodule),asize),
+                                                          frame.paintframe);
   end;
  finally
   endplacement;
@@ -3441,17 +3447,19 @@ begin
  end
  else begin
   result:= form.container.paintrect;
-  addpoint1(result.pos,form.container.rootpos);
+  translatewidgetpoint1(result.pos,form.container,self);
+//  addpoint1(result.pos,form.container.rootpos);
  end;
 end;
 
 function tformdesignerfo.widgetrefpoint: pointty;
 begin
  if form = nil then begin
-  result:= nullpoint;
+  result:= paintpos;
  end
  else begin
-  result:= form.container.rootpos;
+  result:= translatewidgetpoint(form.container.pos,form.container,self);
+//  result:= form.container.rootpos;
  end;
 end;
 
@@ -3462,7 +3470,8 @@ begin
  end
  else begin
   result:= form.container.clientwidgetrect;
-  addpoint1(result.pos,form.container.rootpos);
+  translatewidgetpoint1(result.pos,form.container,self);
+//  addpoint1(result.pos,form.container.rootpos);
  end;
 end;
 
@@ -3479,12 +3488,15 @@ begin
 end;
 
 procedure tformdesignerfo.beginstreaming;
+var
+ pt1: pointty;
 begin
+ pt1:= translatewidgetpoint(modulerect.pos,self,nil); //screen pos
  if fmodule is twidget then begin
-  twidget1(fmodule).fwidgetrect.pos:= modulerect.pos;
+  twidget1(fmodule).fwidgetrect.pos:= pt1;
  end
  else begin
-  setcomponentpos(fmodule,modulerect.pos);
+  setcomponentpos(fmodule,pt1);
  end;
  if fform is tcustommseform then begin
   tcustommseform(fform).container.frame.scrollpos:= nullpoint;
@@ -3495,7 +3507,7 @@ procedure tformdesignerfo.endstreaming;
 begin
  if fmodule is twidget then begin
   with twidget1(fmodule) do begin
-   fwidgetrect.pos:= nullpoint;
+   fwidgetrect.pos:= paintpos;
    rootchanged(true);
   end;
  end;
