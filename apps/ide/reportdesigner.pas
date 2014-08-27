@@ -19,10 +19,9 @@ unit reportdesigner;
 interface
 uses
  classes,mclasses,msegui,mseclasses,mseforms,formdesigner,msesimplewidgets,
- msetabs,
- msesplitter,msegraphutils,msedesigner,msedesignintf,msereport,msetypes,
+ msetabs,msesplitter,msegraphutils,msedesigner,msedesignintf,msereport,msetypes,
  mseevent,mseglob,mseguiglob,msemenus,msedial,msedispwidgets,mseact,
- msestringcontainer,msestrings;
+ msestringcontainer,msestrings,mseactions,mseificomp,mseificompglob,mseifiglob;
 
 const
  updatetabtag = 83684;
@@ -47,8 +46,8 @@ type
    tspacer1: tspacer;
    tspacer2: tspacer;
    tspacer3: tspacer;
-   tpopupmenu2: tpopupmenu;
    sc: tstringcontainer;
+   tpopupmenu3: tpopupmenu;
    procedure repchildscaled(const sender: TObject);
    procedure tabcha(const sender: TObject);
    procedure tabmo(const sender: TObject; var curindex: Integer;
