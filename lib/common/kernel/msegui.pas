@@ -2094,9 +2094,10 @@ type
                        //clipped by paintrect of sender.parentwidget
    procedure mouseparked;
    procedure movewindowrect(const dist: pointty; const rect: rectty); virtual;
-   procedure checkmousewidget(const info: mouseeventinfoty; var capture: twidget);
-   procedure dispatchmouseevent(var info: moeventinfoty; capture: twidget;
-                                    const designcall: boolean = false); virtual;
+   procedure checkmousewidget(const info: mouseeventinfoty;
+                                                    var capture: twidget);
+   procedure dispatchmouseevent(var info: moeventinfoty;
+                                               capture: twidget); virtual;
    procedure dispatchkeyevent(const eventkind: eventkindty;
                                             var info: keyeventinfoty); virtual;
    procedure sizechanged; virtual;
@@ -13840,7 +13841,7 @@ begin
 end;
 
 procedure twindow.dispatchmouseevent(var info: moeventinfoty;
-                   capture: twidget; const designcall: boolean = false);
+                   capture: twidget);
 var
  posbefore,absposbefore: pointty;
  mousecapturewidgetbefore: twidget;
@@ -13848,7 +13849,8 @@ var
  po1: peventaty;
  self1: tlinkedobject;
 begin
- if not designcall then begin //"inherited" call from designmouseevent
+ if not (es_designcall in info.mouse.eventstate) then begin 
+                       //no "inherited" call from designmouseevent
   if info.mouse.eventkind = ek_mousewheel then begin
    capture:= fownerwidget.mouseeventwidget(info.mouse);
    if (capture = nil) and (ftransientfor <> nil) then begin
@@ -13864,8 +13866,11 @@ begin
   end;
  end;
  if capture <> nil then begin
-  if not designcall and capture.isdesignwidget() then begin
+  if not (es_designcall in info.mouse.eventstate) and 
+                                    capture.isdesignwidget() then begin
+   include(info.mouse.eventstate,es_designcall);
    capture.designmouseevent(info,capture);
+   exclude(info.mouse.eventstate,es_designcall);
    if es_processed in info.mouse.eventstate then begin
     exit;
    end;

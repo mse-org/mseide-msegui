@@ -3906,7 +3906,7 @@ begin
            not((fselections[int1] is twidget) or 
                isdatasubmodule(fselections[int1]))) and 
        (factarea <> ar_componentmove) then begin
-     twindow1(window).dispatchmouseevent(info,capture,true); //"inherited"
+     twindow1(window).dispatchmouseevent(info,capture); //"inherited"
     end;
 //    pos:= posbefore;
     if bo1 then begin
