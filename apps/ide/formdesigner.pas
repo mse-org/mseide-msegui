@@ -3719,9 +3719,12 @@ end;
 
 procedure tformdesignerfo.designmouseevent(var info: moeventinfoty;
                                                          capture: twidget);
+var
+ mousepos1: pointty;
+
  function griddelta: pointty;
  begin
-  result:= snaptogriddelta(subpoint(info.mouse.pos,fpickpos));
+  result:= snaptogriddelta(subpoint(mousepos1,fpickpos));
  end;
 
  procedure updatesizerect;
@@ -3764,10 +3767,12 @@ procedure tformdesignerfo.designmouseevent(var info: moeventinfoty;
   end;
   case factarea of
    ht_top,ht_bottom: begin
-    info.mouse.pos.x:= fpickpos.x;
+    mousepos1.x:= fpickpos.x;
+//    info.mouse.pos.x:= fpickpos.x;
    end;
    ht_left,ht_right: begin
-    info.mouse.pos.y:= fpickpos.y;
+    mousepos1.y:= fpickpos.y;
+  //  info.mouse.pos.y:= fpickpos.y;
    end;
   end;
   application.mouse.move(subpoint(pos1,posbefore));
@@ -3803,7 +3808,6 @@ var
  ss1: shiftstatesty;
  po1: pformselectedinfoty;
  pt1: pointty; 
- mousepos1: pointty;
 label
  1;
 begin
