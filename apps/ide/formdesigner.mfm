@@ -212,13 +212,13 @@ object formdesignerfo: tformdesignerfo
         onexecute = dosendtoback
       end    
       item
-        caption = 'Iconify'
+        caption = '&Iconify'
         name = 'iconify'
         state = [as_localcaption, as_localonexecute]
         onexecute = doiconify
       end    
       item
-        caption = 'Deiconify'
+        caption = '&Deiconify'
         name = 'deiconify'
         state = [as_localcaption, as_localonexecute]
         onexecute = dodeiconify

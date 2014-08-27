@@ -10,7 +10,7 @@ inherited reportdesignerfo: treportdesignerfo
   container.bounds = (
     0
     0
-    205
+    195
     459
   )
   onclose = nil
@@ -218,8 +218,10 @@ inherited reportdesignerfo: treportdesignerfo
       item
       end    
       item
+        state = [as_disabled, as_invisible]
       end    
       item
+        state = [as_disabled, as_invisible]
       end    
       item
       end    
@@ -291,6 +293,7 @@ inherited reportdesignerfo: treportdesignerfo
     state = [as_disabled, as_invisible]
   end
   inherited togglehideact: taction[13]
+    state = [as_disabled, as_invisible]
   end
   inherited showallact: taction[14]
   end
@@ -325,6 +328,7 @@ inherited reportdesignerfo: treportdesignerfo
       end    
       item
         action = togglehideact
+        state = [as_disabled, as_invisible]
       end    
       item
         action = showallact
