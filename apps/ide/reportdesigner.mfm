@@ -205,7 +205,7 @@ inherited reportdesignerfo: treportdesignerfo
     dist_bottom = -5
   end
   inherited popupme: tpopupmenu[10]
-    menu.submenu.count = 32
+    menu.submenu.count = 34
     menu.submenu.items = <    
       item
       end    
@@ -218,7 +218,10 @@ inherited reportdesignerfo: treportdesignerfo
       item
       end    
       item
-        state = [as_disabled, as_invisible]
+      end    
+      item
+      end    
+      item
       end    
       item
       end    
@@ -270,12 +273,13 @@ inherited reportdesignerfo: treportdesignerfo
         options = [mao_separator, mao_shortcutcaption]
       end    
       item
-        caption = 'Add Report Page'
+        caption = 'Add report page'
         name = 'addpage'
+        state = [as_localcaption, as_localonexecute]
         onexecute = addpage
       end    
       item
-        caption = 'Delete Report Page'
+        caption = 'Delete report page'
         name = 'delpage'
         state = [as_localcaption, as_localonexecute]
         onexecute = deletepage
@@ -290,7 +294,7 @@ inherited reportdesignerfo: treportdesignerfo
   end
   inherited showallact: taction[14]
   end
-  object tpopupmenu2: tpopupmenu[15]
+  object tpopupmenu3: tpopupmenu[15]
     menu.submenu.count = 29
     menu.submenu.items = <    
       item
@@ -436,13 +440,11 @@ inherited reportdesignerfo: treportdesignerfo
         caption = 'Add report page'
         name = 'addpage'
         state = [as_localcaption, as_localonexecute]
-        onexecute = addpage
       end    
       item
         caption = 'Delete report page'
         name = 'delpage'
         state = [as_localcaption, as_localonexecute]
-        onexecute = deletepage
       end>
     left = 16
     top = 160
