@@ -2258,7 +2258,8 @@ begin
  if pointinrect(apos,gridrect) then begin
   fillchar(widgetinfo,sizeof(widgetinfo),0);
   with widgetinfo do begin
-   pos:= subpoint(apos,form.rootpos);
+   pos:= translatewidgetpoint(apos,self,form);
+//   pos:= subpoint(apos,form.rootpos);
    if onlywidgets then begin
     childstate:= [ws_iswidget,ws_isvisible];
    end
