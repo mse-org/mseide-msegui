@@ -261,7 +261,7 @@ type
    procedure setmdistate(const avalue: mdistatety); virtual;
    procedure domdistatechanged(const oldstate,newstate: mdistatety); virtual;
    function dofloat(const adist: pointty): boolean; virtual;
-   function dodock: boolean; virtual;
+   function dodock(const oldparent: tdockcontroller): boolean; virtual;
    procedure dochilddock(const awidget: twidget); virtual;
    procedure dochildfloat(const awidget: twidget); virtual;
    function docheckdock(const info: draginfoty): boolean; virtual;
@@ -1721,7 +1721,8 @@ begin
  end;
 end;
 
-function tdockcontroller.getparentcontroller(out acontroller: tdockcontroller): boolean;
+function tdockcontroller.getparentcontroller(
+                                 out acontroller: tdockcontroller): boolean;
 var
  widget1: twidget;
  intf1: idocktarget;
@@ -1998,10 +1999,13 @@ begin
 end;
 
 function tdockcontroller.dockdrag(const dragobj: tdockdragobject): boolean;
-begin
+var
+ parentbefore: tdockcontroller;
+begin 
+ dragobj.fdock.getparentcontroller(parentbefore);
  calclayout(tdockdragobject(dragobj),false);
  updaterefsize;
- result:= dragobj.fdock.dodock;
+ result:= dragobj.fdock.dodock(self);
 end;
 
 function tdockcontroller.beforedragevent(var info: draginfoty): boolean;
@@ -2279,13 +2283,12 @@ begin
  end;
 end;
 
-function tdockcontroller.dodock: boolean;
+function tdockcontroller.dodock(const oldparent: tdockcontroller): boolean;
 var
  widget1: twidget1;
  int1: integer;
  controller1: tdockcontroller;
 begin
- fmdistate:= mds_normal;
  widget1:= twidget1(fintf.getwidget);
  inc(floatdockcount);
  int1:= floatdockcount;
@@ -2294,6 +2297,9 @@ begin
  end;
  if floatdockcount = int1 then begin
   if getparentcontroller(controller1) then begin
+   if (fmdistate <> mds_minimized) or (oldparent <> controller1) then begin
+    fmdistate:= mds_normal;
+   end;
    controller1.dochilddock(widget1);
   end;
  end;
