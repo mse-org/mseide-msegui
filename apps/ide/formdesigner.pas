@@ -256,7 +256,7 @@ type
    procedure doasyncevent(var atag: integer); override;
    procedure dobeforepaint(const canvas: tcanvas); override;
    procedure doafterpaint(const canvas: tcanvas); override;
-   procedure createwindow; override;
+//   procedure createwindow; override;
    procedure doactivate; override;
    procedure validaterename(acomponent: tcomponent;
                                       const curname, newname: string); override;
@@ -278,7 +278,7 @@ type
 //   function snaptogrid: boolean; virtual;
    procedure recalcclientsize;
    procedure setcomponentscrollsize(const avalue: sizety); virtual;
-   class function fixformsize: boolean; virtual;
+   function fixformsize: boolean; virtual;
    function getdesignrect: rectty; virtual;
    procedure setdesignrect(const arect: rectty); virtual;
 //   procedure deletecomponent(const comp: tcomponent);
@@ -361,7 +361,7 @@ type
  end;
 
  designformclassty = class of tformdesignerfo;
-
+{
  tdesignwindow = class(twindow)
   private
   protected
@@ -375,7 +375,7 @@ type
                                      const adesigner: tdesigner);
    destructor destroy; override;
  end;
-
+}
 procedure registerdesignmoduleclass(const aclass: tcomponentclass;
                                const aintf: pdesignmoduleintfty;
                                const adesignformclass: designformclassty = nil);
@@ -1006,7 +1006,7 @@ begin
  updateinfos;
  result:= fcandelete;
 end;
-
+(*
 { tdesignwindow }
 
 constructor tdesignwindow.create(const aowner: tformdesignerfo; 
@@ -1031,7 +1031,7 @@ begin
  inherited;
 // fselections.free;
 end;
-
+*)
 (*
 procedure tdesignwindow.dispatchkeyevent(const eventkind: eventkindty;
   var info: keyeventinfoty);
@@ -1702,12 +1702,12 @@ begin
  end;
  inherited;
 end;
-
+{
 procedure tformdesignerfo.createwindow;
 begin
  tdesignwindow.create(self,fdesigner)
 end;
-
+}
 function tformdesignerfo.designnotification: idesignnotification;
 begin
  result:= idesignnotification(self);
@@ -2886,7 +2886,7 @@ begin
  inherited;
 end;
 
-class function tformdesignerfo.fixformsize: boolean;
+function tformdesignerfo.fixformsize: boolean;
 begin
  result:= false;
 end;
@@ -3124,11 +3124,11 @@ var
  bo1: boolean;
  comp1: tcomponent;
 begin
- with tdesignwindow(window) do begin
+// with tdesignwindow(window) do begin
   try
    rea1:= 1.0;
    if component is tmsecomponent then begin
-    with tformdesignerfo(fownerwidget).fmoduleintf^ do begin
+    with fmoduleintf^ do begin
      if assigned(getscale) then begin
       rea1:= getscale(module);
      end;
@@ -3183,7 +3183,7 @@ begin
   end;
   selectcomponent(component);
   recalcclientsize;
- end;
+// end;
 end;
 
 procedure tformdesignerfo.doinsertsubmodule(const sender: tobject);
@@ -3197,10 +3197,10 @@ begin
   initinline(comp);
   comp.name:= po1^.instance.name;
   fdesigner.addancestorinfo(comp,po1^.instance);
-  with tdesignwindow(window) do begin
+//  with tdesignwindow(window) do begin
    doaddcomponent(comp);
    placecomponent(comp,fmousepos,fselections[0]);
-  end;
+//  end;
  end;
 end;
 
@@ -3209,9 +3209,9 @@ var
  comp1: tcomponent;
 begin
  comp1:= fdesigner.createcurrentcomponent(module);
- with tdesignwindow(window) do begin
+// with tdesignwindow(window) do begin
   placecomponent(comp1,fmousepos,fselections[0]);
- end;  
+// end;  
 end;
 
 procedure tformdesignerfo.dotouch(const sender: TObject);
@@ -3229,58 +3229,58 @@ end;
 
 procedure tformdesignerfo.dobringtofront(const sender: tobject);
 begin
- with tdesignwindow(window) do begin
+// with tdesignwindow(window) do begin
   twidget(fselections[0]).bringtofront;
   domodified;
- end;
+// end;
 end;
 
 procedure tformdesignerfo.dosendtoback(const sender: tobject);
 begin
- with tdesignwindow(window) do begin
+// with tdesignwindow(window) do begin
   twidget(fselections[0]).sendtoback;
   domodified;
- end;
+// end;
 end;
 
 procedure tformdesignerfo.doiconify(const sender: TObject);
 var
  int1: integer;
 begin
- with tdesignwindow(window) do begin
+// with tdesignwindow(window) do begin
   for int1:= 0 to fselections.count - 1 do begin
    with tmsedatamodule(fselections[int1]) do begin
     options:= options + [dmo_iconic];
    end;
   end;
- end;
+// end;
 end;
 
 procedure tformdesignerfo.dodeiconify(const sender: TObject);
 var
  int1: integer;
 begin
- with tdesignwindow(window) do begin
+// with tdesignwindow(window) do begin
   for int1:= 0 to fselections.count - 1 do begin
    with tmsedatamodule(fselections[int1]) do begin
     options:= options - [dmo_iconic];
    end;
   end;
- end;
+// end;
 end;
 
 procedure tformdesignerfo.dosettaborder(const sender: tobject);
 var
  fo: tsettaborderfo;
 begin
- with tdesignwindow(window) do begin
+// with tdesignwindow(window) do begin
   fo:= tsettaborderfo.create(twidget(fselections.items[0]),fdesigner);
   try
    fo.show(true,window);
   finally
    fo.Free;
   end;
- end;
+// end;
 end;
 
 procedure tformdesignerfo.dosetcreationorder(const sender: TObject);
@@ -3289,7 +3289,7 @@ var
  str1: string;
  comp1: tcomponent;
 begin
- with tdesignwindow(window) do begin
+// with tdesignwindow(window) do begin
   comp1:= nil;
   str1:= '';
   if (fselections.count = 1) then begin
@@ -3301,7 +3301,7 @@ begin
   else begin
    str1:= fselections[0].name;
   end;
- end;
+// end;
  fo:= tsetcreateorderfo.create(comp1,str1);
  try
   fo.show(true,window);
@@ -3315,7 +3315,7 @@ var
  int1: integer;
  comp1: tcomponent;
 begin
- with tdesignwindow(window) do begin
+// with tdesignwindow(window) do begin
   for int1:= 0 to fselections.count - 1 do begin
    comp1:= fselections[int1];
    if comp1 is twidget then begin
@@ -3323,7 +3323,7 @@ begin
     fdesigner.componentmodified(comp1);
    end;
   end;
- end;
+// end;
 end;
 
 procedure tformdesignerfo.copyexe(const sender: TObject);
@@ -3403,7 +3403,7 @@ var
  int1: integer;
  bo1: boolean;
 begin
- with tdesignwindow(window),fselections do begin
+ with {tdesignwindow(window),}fselections do begin
   bo1:= false;
   for int1:= count - 1 downto 0 do begin
    if (items[int1] = fmodule) or (items[int1].owner = fmodule) then begin
@@ -3561,11 +3561,11 @@ end;
 function tformdesignerfo.clickedcomponent: tcomponent;
 begin
  result:= nil;
- with tdesignwindow(fwindow) do begin
+// with tdesignwindow(fwindow) do begin
   if (factcompindex >= 0) and (factcompindex < fselections.count) then begin
    result:= fselections[factcompindex];
   end;
- end;
+// end;
 end;
 
 procedure tformdesignerfo.setmoduleoptions(const aoptions: moduleoptionsty);
@@ -3678,7 +3678,7 @@ var
  name1: msestring;
 begin
  name1:= '';
- with tdesignwindow(fwindow) do begin
+// with tdesignwindow(fwindow) do begin
   if fselections.count > 0 then begin
    name1:= ownernamepath(fselections[0]);
   end;
@@ -3694,7 +3694,7 @@ begin
                                                                         true));
    end;
   end;
- end;
+// end;
 end;
 
 function tformdesignerfo.getsnaptogrid: boolean;

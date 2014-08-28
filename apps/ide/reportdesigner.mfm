@@ -86,7 +86,7 @@ inherited reportdesignerfo: treportdesignerfo
     taborder = 1
     bounds_x = 7
     bounds_y = 25
-    bounds_cx = 197
+    bounds_cx = 188
     bounds_cy = 434
     anchors = [an_left, an_top, an_right, an_bottom]
     onlayout = repcomtainerchildscaled

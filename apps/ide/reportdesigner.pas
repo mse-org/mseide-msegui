@@ -83,8 +83,9 @@ type
    procedure validaterename(acomponent: tcomponent;
                                       const curname, newname: string); override;
    procedure doasyncevent(var atag: integer); override;
-   procedure componentselected(const aselections: tformdesignerselections); override;
-   class function fixformsize: boolean; override;
+   procedure componentselected(const aselections: tformdesignerselections);
+                                                                      override;
+   function fixformsize: boolean; override;
    function candelete(const acomponent: tcomponent): boolean; override;
    procedure componentmoving(const apos: pointty); override;
    procedure updatedials;
@@ -129,7 +130,7 @@ begin
  inherited;
 end;
 
-class function treportdesignerfo.fixformsize: boolean;
+function treportdesignerfo.fixformsize: boolean;
 begin
  result:= true;
 end;
@@ -154,7 +155,8 @@ end;
 
 function treportdesignerfo.widgetrefpoint: pointty;
 begin
- result:= reportcontainer.rootpos;
+ result:= translatewidgetpoint(reportcontainer.pos,
+                                     reportcontainer.parentwidget,self);
  addpoint1(result,reportcontainer.clientpos);
 end;
 
@@ -266,7 +268,8 @@ end;
 
 procedure treportdesignerfo.beginstreaming;
 begin
- tcustomreport1(form).frepdesigninfo.widgetrect:= widgetrect;
+// tcustomreport1(form).frepdesigninfo.widgetrect:= widgetrect;
+ tcustomreport1(form).frepdesigninfo.widgetrect:= paintrect;
 end;
 
 procedure treportdesignerfo.endstreaming;
@@ -304,7 +307,8 @@ var
  comp1: tcomponent;
 begin
  comp1:= designer.createnewcomponent(report,treportpage);
- placecomponent(comp1,reportcontainer.rootpos,report);
+ placecomponent(comp1,translatewidgetpoint(reportcontainer.pos,
+                                    reportcontainer.parentwidget,self),report);
  updatetabs;
 end;
 

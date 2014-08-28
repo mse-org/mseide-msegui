@@ -1760,10 +1760,12 @@ type
                     //widget can be child
 
    function iswidgetclick(const info: mouseeventinfoty; const caption: boolean = false): boolean;
-   //true if eventtype = et_butonrelease, button is mb_left, clicked and pos in clientrect
-   //or in frame.caption if caption = true, origin = pos
+   //true if eventtype = et_butonrelease, button is mb_left,
+   // clicked and pos in clientrect or in frame.caption if caption = true,
+   // origin = pos
    function isclick(const info: mouseeventinfoty): boolean;
-   //true if eventtype = et_butonrelease, button is mb_left, clicked and pos in clientrect
+   //true if eventtype = et_butonrelease, button is mb_left,
+   // clicked and pos in clientrect
    function isdblclick(const info: mouseeventinfoty): boolean;
    //true if eventtype = et_butonpress, button is mb_left, pos in clientrect
    // and timedlay to last buttonpress is short
@@ -1785,7 +1787,8 @@ type
    function eatleftbuttondown(var info: mouseeventinfoty;
                       const akeyshiftstate: shiftstatesty): boolean; overload;
 }
-   function widgetmousepos(const ainfo: mouseeventinfoty): pointty; //transaltes to widgetpos if necessary
+   function widgetmousepos(const ainfo: mouseeventinfoty): pointty; 
+                                    //translates to widgetpos if necessary
 
    function rootpos: pointty;
    property screenpos: pointty read getscreenpos write setscreenpos;
@@ -1809,10 +1812,14 @@ type
                   {default defaultwidgetwidth} stored true;
    property bounds_cy: integer read fwidgetrect.cy write setbounds_cy
                   {default defaultwidgetheight} stored true;
-   property bounds_cxmin: integer read fminsize.cx write setbounds_cxmin default 0;
-   property bounds_cymin: integer read fminsize.cy write setbounds_cymin default 0;
-   property bounds_cxmax: integer read fmaxsize.cx write setbounds_cxmax default 0;
-   property bounds_cymax: integer read fmaxsize.cy write setbounds_cymax default 0;
+   property bounds_cxmin: integer read fminsize.cx 
+                                      write setbounds_cxmin default 0;
+   property bounds_cymin: integer read fminsize.cy 
+                                      write setbounds_cymin default 0;
+   property bounds_cxmax: integer read fmaxsize.cx 
+                                      write setbounds_cxmax default 0;
+   property bounds_cymax: integer read fmaxsize.cy 
+                                      write setbounds_cymax default 0;
 
    property left: integer read fwidgetrect.x write setbounds_x;
    property right: integer read getright write setright;
@@ -1826,13 +1833,17 @@ type
    procedure setclippedwidgetrect(arect: rectty);
                 //clips into parentwidget or workarea if no parentwidget
    
-   property anchors: anchorsty read fanchors write setanchors default defaultanchors;
-   property defaultfocuschild: twidget read getdefaultfocuschild write setdefaultfocuschild;
+   property anchors: anchorsty read fanchors write setanchors 
+                                                      default defaultanchors;
+   property defaultfocuschild: twidget read getdefaultfocuschild 
+                                                write setdefaultfocuschild;
 
    function framedim: sizety;                //widgetrect.size - paintrect.size
    function clientframewidth: sizety;        //widgetrect.size - clientrect.size
-   function innerclientframewidth: sizety;   //widgetrect.size - innerclientrect.size
-   function innerframewidth: sizety;         //clientrect.size - innerclientrect.size  
+   function innerclientframewidth: sizety;   
+                          //widgetrect.size - innerclientrect.size
+   function innerframewidth: sizety;         
+                          //clientrect.size - innerclientrect.size  
    function framerect: rectty;               //origin = pos
    function framepos: pointty;               //origin = pos
    property framesize: sizety read getframesize write setframesize;    
