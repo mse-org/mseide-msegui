@@ -2320,9 +2320,14 @@ begin
  with widget1 do begin
   pt1:= pos;
   parentwidget:= nil;
-  widgetrect:= mr(bounds_x-pt1.x+fnormalrect.x+adist.x,
+  if fmdistate <> mds_normal then begin
+   widgetrect:= mr(bounds_x-pt1.x+fnormalrect.x+adist.x,
                   bounds_y-pt1.y+fnormalrect.y+adist.y,
                   fnormalrect.cx,fnormalrect.cy);
+  end
+  else begin
+   pos:= addpoint(pos,adist);
+  end;
   if fmdistate = mds_maximized then begin
    anchors:= [an_left,an_top];
   end;
