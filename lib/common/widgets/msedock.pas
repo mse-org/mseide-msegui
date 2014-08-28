@@ -2312,13 +2312,23 @@ var
  wstr1: msestring;
  int1: integer;
  controller1: tdockcontroller;
+ pt1: pointty;
 begin
  result:= false;
  widget1:= twidget1(fintf.getwidget);
- fmdistate:= mds_floating;
  getparentcontroller(controller1);
- widget1.parentwidget:= nil;
- widget1.pos:= addpoint(widget1.pos,adist);
+ with widget1 do begin
+  pt1:= pos;
+  parentwidget:= nil;
+  widgetrect:= mr(bounds_x-pt1.x+fnormalrect.x+adist.x,
+                  bounds_y-pt1.y+fnormalrect.y+adist.y,
+                  fnormalrect.cx,fnormalrect.cy);
+  if fmdistate = mds_maximized then begin
+   anchors:= [an_left,an_top];
+  end;
+ end;
+ fmdistate:= mds_floating;
+// widget1.pos:= addpoint(widget1.pos,adist);
  wstr1:= getfloatcaption;
  if wstr1 <> '' then begin
   widget1.window.caption:= wstr1;
