@@ -204,100 +204,17 @@ inherited reportdesignerfo: treportdesignerfo
     linkbottom = dialv
     dist_bottom = -5
   end
-  inherited popupme: tpopupmenu[10]
-    menu.submenu.count = 34
-    menu.submenu.items = <    
-      item
-      end    
-      item
-      end    
-      item
-      end    
-      item
-      end    
-      item
-      end    
-      item
-        state = [as_disabled, as_invisible]
-      end    
-      item
-        state = [as_disabled, as_invisible]
-      end    
-      item
-      end    
-      item
-      end    
-      item
-      end    
-      item
-      end    
-      item
-      end    
-      item
-      end    
-      item
-      end    
-      item
-      end    
-      item
-      end    
-      item
-      end    
-      item
-      end    
-      item
-      end    
-      item
-      end    
-      item
-      end    
-      item
-      end    
-      item
-      end    
-      item
-      end    
-      item
-      end    
-      item
-      end    
-      item
-      end    
-      item
-      end    
-      item
-      end    
-      item
-      end    
-      item
-      end    
-      item
-        options = [mao_separator, mao_shortcutcaption]
-      end    
-      item
-        caption = 'Add report page'
-        name = 'addpage'
-        state = [as_localcaption, as_localonexecute]
-        onexecute = addpage
-      end    
-      item
-        caption = 'Delete report page'
-        name = 'delpage'
-        state = [as_localcaption, as_localonexecute]
-        onexecute = deletepage
-      end>
+  inherited hidecompact: taction[10]
   end
-  inherited hidecompact: taction[11]
-  end
-  inherited hidewidgetact: taction[12]
+  inherited hidewidgetact: taction[11]
     state = [as_disabled, as_invisible]
   end
-  inherited togglehideact: taction[13]
+  inherited togglehideact: taction[12]
     state = [as_disabled, as_invisible]
   end
-  inherited showallact: taction[14]
+  inherited showallact: taction[13]
   end
-  object tpopupmenu3: tpopupmenu[15]
+  object tpopupmenu3: tpopupmenu[14]
     menu.submenu.count = 29
     menu.submenu.items = <    
       item
@@ -453,14 +370,97 @@ inherited reportdesignerfo: treportdesignerfo
     left = 16
     top = 160
   end
-  inherited c: tstringcontainer[16]
+  inherited c: tstringcontainer[15]
   end
-  object sc: tstringcontainer[17]
+  object sc: tstringcontainer[16]
     strings.data = (
       'Do you wish to delete'
       'WARNING'
     )
     left = 64
     top = 208
+  end
+  inherited popupme: tpopupmenu[17]
+    menu.submenu.count = 34
+    menu.submenu.items = <    
+      item
+      end    
+      item
+      end    
+      item
+      end    
+      item
+      end    
+      item
+      end    
+      item
+        state = [as_disabled, as_invisible]
+      end    
+      item
+        state = [as_disabled, as_invisible]
+      end    
+      item
+      end    
+      item
+      end    
+      item
+      end    
+      item
+      end    
+      item
+      end    
+      item
+      end    
+      item
+      end    
+      item
+      end    
+      item
+      end    
+      item
+      end    
+      item
+      end    
+      item
+      end    
+      item
+      end    
+      item
+      end    
+      item
+      end    
+      item
+      end    
+      item
+      end    
+      item
+      end    
+      item
+      end    
+      item
+      end    
+      item
+      end    
+      item
+      end    
+      item
+      end    
+      item
+      end    
+      item
+        options = [mao_separator, mao_shortcutcaption]
+      end    
+      item
+        caption = 'Add report page'
+        name = 'addpage'
+        state = [as_localcaption, as_localonexecute]
+        onexecute = addpage
+      end    
+      item
+        caption = 'Delete report page'
+        name = 'delpage'
+        state = [as_localcaption, as_localonexecute]
+        onexecute = deletepage
+      end>
   end
 end

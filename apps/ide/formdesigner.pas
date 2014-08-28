@@ -24,7 +24,8 @@ uses
  msedesignintf,mseclasses,msemenuwidgets,msemenus,msefiledialog,msedesigner,
  typinfo,componentpaletteform,msestrings,msewidgets,
  mseglob{$ifndef mse_no_db}{$ifdef FPC},msereport{$endif}{$endif},msetimer,
- mseact,mseactions,mseifiglob,msestringcontainer,mseificomp,mseificompglob;
+ mseact,mseactions,mseifiglob,msestringcontainer,mseificomp,mseificompglob,
+ msesimplewidgets;
 
 type
  areaty = (ar_none,ar_component,ar_componentmove,ar_selectrect,ht_topleft,
@@ -2888,7 +2889,7 @@ end;
 
 function tformdesignerfo.fixformsize: boolean;
 begin
- result:= false;
+ result:= parentwidget <> nil; //docked
 end;
 
 procedure tformdesignerfo.doasyncevent(var atag: integer);
