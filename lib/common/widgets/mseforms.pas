@@ -744,15 +744,19 @@ end;
 
 procedure tformscrollbox.dolayout(const sender: twidget);
 begin
- tcustommseform(owner).updatelayout(sender);
+ if owner <> nil then begin
+  tcustommseform(owner).updatelayout(sender);
+ end;
  inherited;
 end;
 
 procedure tformscrollbox.docheckautosize;
 begin
- with tcustommseform(owner) do begin 
-  if optionswidget1 * [ow1_autowidth,ow1_autoheight] <> [] then begin
-   checkautosize;
+ if owner <> nil then begin
+  with tcustommseform(owner) do begin 
+   if optionswidget1 * [ow1_autowidth,ow1_autoheight] <> [] then begin
+    checkautosize;
+   end;
   end;
  end;
 end;

@@ -7077,8 +7077,6 @@ begin
    end;
  
    if fparentwidget <> nil then begin
-//    subpoint1(newpos,clearparentwidget.clientwidgetpos);
-//    subpoint1(newpos,clearparentwidget.clientpos);
     clearparentwidget;
    end;
    if fparentwidget <> nil then begin
@@ -7105,12 +7103,6 @@ begin
     colorchanged;
     enabledchanged; //-> statechanged
     parentchanged;
-    {
-    if (fparentwidget <> nil) and fparentwidget.focused and 
-            (ow_subfocus in fparentwidget.foptionswidget) and canfocus then begin
-     setfocus(fparentwidget.active);
-    end;
-    }
    end;
   finally
    if not updatingbefore then begin

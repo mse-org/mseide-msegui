@@ -5378,7 +5378,7 @@ begin
  if ((sender = nil) or 
          not (ws1_anchorsizing in twidget1(sender).fwidgetstate1)) and
            not (ws_destroying in fwidgetstate) and
-                                 not (csloading in componentstate) then begin
+                      (componentstate*[csloading,csdestroying] = []) then begin
   tcustomscrollboxframe(fframe).updateclientrect;
  end;
 // else begin

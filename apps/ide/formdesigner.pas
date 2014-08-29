@@ -91,7 +91,7 @@ type
  
  selectmodety = (sm_select,sm_add,sm_flip,sm_remove);
 
- tformcontainer = class(twidget)
+ tformcontainer = class(tformscrollbox)
   private
    fdesignfo: tformdesignerfo;
   protected
@@ -252,8 +252,11 @@ type
    procedure dopopup(var info: mouseeventinfoty); reintroduce;
 
    property selections: tformdesignerselections read getselections;
-   procedure formcontainerscrolled;
-   procedure sizechanged; override;
+   procedure formcontainerscrolled();
+   procedure formcontainerwidgetregionchanged(const sender: twidget);
+   procedure updateminsize();
+   procedure clientrectchanged(); override;
+   procedure parentchanged(); override;
    procedure doasyncevent(var atag: integer); override;
    procedure dobeforepaint(const canvas: tcanvas); override;
    procedure doafterpaint(const canvas: tcanvas); override;
@@ -409,6 +412,7 @@ type
  tframe1 = class(tframe);
  tscrollingwidget1 = class(tscrollingwidget);
  twindow1 = class(twindow);
+ tcustomframe1 = class(tcustomframe);
 
  designerfoeventty = (fde_none,fde_syncsize,fde_updatecaption,fde_scrolled,
                       fde_showastext);
@@ -1632,20 +1636,19 @@ constructor tformcontainer.create(const aowner: tformdesignerfo);
 begin
  fdesignfo:= aowner;
  inherited create(nil,aowner,false);
- anchors:= [];
+ with tcustomframe1(fframe),fi.innerframe do begin
+  left:= 0;
+  top:= 0;
+  right:= 0;
+  bottom:= 0;
+  internalupdatestate();
+ end;
 end;
 
 procedure tformcontainer.widgetregionchanged(const sender: twidget);
 begin
  inherited;
- with fdesignfo do begin
-  if (fform <> nil) and (sender = fform) and 
-         not(ws1_anchorsizing in fform.widgetstate1) and 
-         not (csdestroying in fform.componentstate) and
-         not (csdestroying in componentstate) then begin
-   paintsize:= fform.size; //syc with modulesize
-  end;
- end;
+ fdesignfo.formcontainerwidgetregionchanged(sender);
 end;
 
 function tformcontainer.isdesignwidget: boolean;
@@ -1661,7 +1664,6 @@ constructor tformdesignerfo.create(const aowner: tcomponent;
 begin
  fdesigner:= adesigner;
  fmoduleintf:= aintf;
- fformcont:= tformcontainer.create(self);
 
  fshowgrid:= true;
  fsnaptogrid:= true;
@@ -1671,6 +1673,7 @@ begin
 
 // createwindow;
  inherited create(aowner);
+ fformcont:= tformcontainer.create(self);
  updateprojectoptions;
  designnotifications.registernotification(idesignnotification(self));
 end;
@@ -2950,13 +2953,58 @@ begin
  asyncevent(ord(fde_scrolled));
 end;
 
-procedure tformdesignerfo.sizechanged;
+procedure tformdesignerfo.formcontainerwidgetregionchanged(
+                                                   const sender: twidget);
+begin 
+ if (fform <> nil) and (sender = fform) and 
+        not(ws1_anchorsizing in fform.widgetstate1) and 
+        not (csdestroying in fform.componentstate) and
+        not (csdestroying in componentstate) then begin
+  if parentwidget = nil then begin //not docked
+   fformcont.paintsize:= fform.size;
+   paintsize:= fform.size; //syc with modulesize
+  end;
+ end;
+end;
+
+procedure tformdesignerfo.updateminsize();
+var
+ si1: sizety;
+
+ function updatesi(const source: sizety): sizety;
+ begin
+  result:= source;
+  if result.cx <> 0 then begin
+   inc(result.cx,si1.cx);
+  end;
+  if result.cy <> 0 then begin
+   inc(result.cy,si1.cy);
+  end;
+ end; //updatesi
+
+begin
+ if (fparentwidget = nil) and (form <> nil) then begin
+  si1:= framedim;
+  minsize:= updatesi(form.minsize);
+  maxsize:= updatesi(form.maxsize);
+ end
+ else begin
+  minsize:= nullsize;
+  maxsize:= nullsize;
+ end;
+end;
+
+procedure tformdesignerfo.parentchanged();
 begin
  inherited;
- if form <> nil then begin
-  minsize:= form.minsize;
-  maxsize:= form.maxsize;
- end;
+ updateminsize();
+end;
+
+procedure tformdesignerfo.clientrectchanged();
+ 
+begin
+ inherited;
+ updateminsize();
  if not (ws_loadedproc in widgetstate) and (fmodulesetting = 0) and
                                     not (fds_sizesyncing in ffostate) then begin
   asyncevent(ord(fde_syncsize));
@@ -4297,7 +4345,7 @@ begin
  end;
 end;
 
-function tformdesignerfo.isdesignwidget: boolean;
+function tformdesignerfo.isdesignwidget(): boolean;
 begin
  result:= true;
 end;
