@@ -2288,6 +2288,9 @@ procedure tformdesignerfo.poschanged();
 begin
  inherited;
  if fmodulesetting = 0 then begin
+  if parentwidget = nil then begin //not docked
+   fmodulepos:= translatewidgetpoint(paintpos,self,nil);
+  end;
   doModified;
  end;
 end;
@@ -3009,6 +3012,7 @@ begin
  inherited;
  updateformcont();
  if (fform <> nil) and (parentwidget = nil) then begin
+  pos:= translatewidgetpoint(fmodulepos,fform,nil);
   formcontainerwidgetregionchanged(fform); //sync self size
  end;
 end;
