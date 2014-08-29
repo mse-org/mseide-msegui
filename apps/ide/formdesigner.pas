@@ -2441,7 +2441,9 @@ end;
 procedure tformdesignerfo.domodified;
 begin
  invalidate;
- fdesigner.componentmodified(fmodule);
+ if fds_loaded in ffostate then begin
+  fdesigner.componentmodified(fmodule);
+ end;
 end;
 
 procedure tformdesignerfo.methodcreated(const adesigner: idesigner;
