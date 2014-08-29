@@ -3556,7 +3556,7 @@ procedure tformdesignerfo.beginstreaming;
 var
  pt1: pointty;
 begin
- pt1:= translatewidgetpoint(modulerect.pos,self,nil); //screen pos
+ pt1:= modulerect.pos; //screen pos
  if fmodule is twidget then begin
   twidget1(fmodule).fwidgetrect.pos:= pt1;
  end
