@@ -101,7 +101,7 @@ type
    constructor create(const aowner: tformdesignerfo);
  end;
 
- formdesignerstatety = (fds_sizesyncing);
+ formdesignerstatety = (fds_loaded,fds_sizesyncing);
  formdesignerstatesty = set of formdesignerstatety;
   
  tformdesignerfo = class(tdockform,iformdesigner,idesignnotification)
@@ -1678,6 +1678,7 @@ begin
  inherited create(aowner);
  updateprojectoptions;
  designnotifications.registernotification(idesignnotification(self));
+ include(ffostate,fds_loaded);
 end;
 
 destructor tformdesignerfo.destroy;
@@ -3016,7 +3017,7 @@ begin
  inherited;
  updateformcont();
  if not (ws_loadedproc in widgetstate) and (fmodulesetting = 0) and
-                                    not (fds_sizesyncing in ffostate) then begin
+            (ffostate * [fds_sizesyncing,fds_loaded] = [fds_loaded]) then begin
   asyncevent(ord(fde_syncsize));
  end;
 end;
@@ -4392,8 +4393,8 @@ begin
    end;
    inc(asize.cx,80);
    inc(asize.cy,30); //todo: correct size, scrollbox
+   result.size:= asize;
   end;
-  result.size:= asize;
  end;
 end;
 
