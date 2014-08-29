@@ -148,6 +148,7 @@ type
    fformcont: tformcontainer;
    fmoduleoptions: moduleoptionsty;
    fsizeerrorcount: integer;
+   fmodulepos: pointty;
 
 
    fpickpos: pointty;
@@ -201,6 +202,7 @@ type
    procedure setmodule(const value: tmsecomponent);
    function getselections: tformdesignerselections;
    function filterfindcomp(const acomponent: tcomponent): boolean;
+   function getmodulerect: rectty;
   protected
    ffostate: formdesignerstatesty;
 
@@ -254,7 +256,7 @@ type
    property selections: tformdesignerselections read getselections;
    procedure formcontainerscrolled();
    procedure formcontainerwidgetregionchanged(const sender: twidget);
-   procedure updateminsize();
+   procedure updateformcont();
    procedure clientrectchanged(); override;
    procedure parentchanged(); override;
    procedure doasyncevent(var atag: integer); override;
@@ -343,7 +345,7 @@ type
    property moduleoptions: moduleoptionsty read getmoduleoptions 
                                                    write setmoduleoptions;
    function clickedcomponent: tcomponent;
-   property modulerect: rectty read fwidgetrect;
+   property modulerect: rectty read getmodulerect;
    procedure updatecaption;
    procedure placemodule;
    procedure beginplacement;
@@ -1670,10 +1672,10 @@ begin
  fgridsizex:= defaultgridsizex;
  fgridsizey:= defaultgridsizey;
  fselections:= tformdesignerselections.create(self);
+ fformcont:= tformcontainer.create(self);
 
 // createwindow;
  inherited create(aowner);
- fformcont:= tformcontainer.create(self);
  updateprojectoptions;
  designnotifications.registernotification(idesignnotification(self));
 end;
@@ -2911,6 +2913,7 @@ begin
      mstr1:= '*'+mstr1;
     end;
     caption:= mstr1;
+    dragdock.caption:= mstr1;
    end;
   end;
   fde_syncsize: begin
@@ -2935,6 +2938,9 @@ begin
      if module is tmsedatamodule then begin
       tmsedatamodule(module).size:= rect1.size; 
      end;
+    end;
+    if parentwidget = nil then begin //not docked
+     fmodulepos:= translatewidgetpoint(rect1.pos,self,nil);
     end;
     domodified();
    end;
@@ -2967,7 +2973,7 @@ begin
  end;
 end;
 
-procedure tformdesignerfo.updateminsize();
+procedure tformdesignerfo.updateformcont();
 var
  si1: sizety;
 
@@ -2992,19 +2998,23 @@ begin
   minsize:= nullsize;
   maxsize:= nullsize;
  end;
+ fformcont.widgetrect:= paintrect;
 end;
 
 procedure tformdesignerfo.parentchanged();
 begin
  inherited;
- updateminsize();
+ updateformcont();
+ if (fform <> nil) and (parentwidget = nil) then begin
+  formcontainerwidgetregionchanged(fform); //sync self size
+ end;
 end;
 
 procedure tformdesignerfo.clientrectchanged();
  
 begin
  inherited;
- updateminsize();
+ updateformcont();
  if not (ws_loadedproc in widgetstate) and (fmodulesetting = 0) and
                                     not (fds_sizesyncing in ffostate) then begin
   asyncevent(ord(fde_syncsize));
@@ -3052,6 +3062,7 @@ begin
  try
   name:= '_'+fmodule.name;
   if fmodule is twidget then begin
+   fmodulepos:= twidget(fmodule).pos;
    setlinkedvar(fmodule,tmsecomponent(fform));
    rect1:= getdesignrect;
    widgetrect:= inflaterect(rect1,frame.paintframe);
@@ -3061,6 +3072,8 @@ begin
   end
   else begin
    fform:= nil;
+   fmodulepos:= getcomponentpos(fmodule);
+   {
    if fmodule is tmsedatamodule then begin
     asize:= tmsedatamodule(fmodule).size;
    end
@@ -3078,8 +3091,10 @@ begin
     inc(asize.cx,80);
     inc(asize.cy,30); //todo: correct size, scrollbox
    end;
-   widgetrect:= inflaterect(makerect(getcomponentpos(fmodule),asize),
-                                                          frame.paintframe);
+   }
+   widgetrect:= inflaterect(modulerect,frame.paintframe);
+//   widgetrect:= inflaterect(makerect(getcomponentpos(fmodule),asize),
+//                                                          frame.paintframe);
   end;
  finally
   endplacement;
@@ -4348,6 +4363,38 @@ end;
 function tformdesignerfo.isdesignwidget(): boolean;
 begin
  result:= true;
+end;
+
+function tformdesignerfo.getmodulerect: rectty;
+var
+ asize: sizety;
+ int1: integer;
+ pt1: pointty;
+begin
+ result.pos:= fmodulepos;
+ if fform <> nil then begin
+  result.size:= fform.size;
+ end
+ else begin
+  if fmodule is tmsedatamodule then begin
+   result.size:= tmsedatamodule(fmodule).size;
+  end
+  else begin
+   asize:= nullsize;
+   for int1:= 0 to fmodule.ComponentCount - 1 do begin
+    pt1:= getcomponentpos(fmodule.Components[int1]);
+    if pt1.x > asize.cx then begin
+     asize.cx:= pt1.x;
+    end;
+    if pt1.y > asize.cy then begin
+     asize.cy:= pt1.y;
+    end;
+   end;
+   inc(asize.cx,80);
+   inc(asize.cy,30); //todo: correct size, scrollbox
+  end;
+  result.size:= asize;
+ end;
 end;
 
 initialization

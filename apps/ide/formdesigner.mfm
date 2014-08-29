@@ -4,11 +4,20 @@ object formdesignerfo: tformdesignerfo
   color = -1879048187
   frame.grip_size = 10
   frame.grip_options = [go_closebutton, go_fixsizebutton, go_floatbutton, go_topbutton, go_backgroundbutton]
+  frame.grip_face.fade_pos.count = 1
+  frame.grip_face.fade_pos.items = (
+    0
+  )
+  frame.grip_face.fade_color.count = 1
+  frame.grip_face.fade_color.items = (
+    -1610612717
+  )
+  frame.grip_face.dummy = 0
   frame.dummy = 0
   popupmenu = popupme
   visible = False
-  bounds_x = 111
-  bounds_y = 256
+  bounds_x = 222
+  bounds_y = 512
   bounds_cx = 287
   bounds_cy = 300
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent]
