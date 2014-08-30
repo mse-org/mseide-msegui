@@ -142,6 +142,8 @@ type
                                         const achildren: widgetarty) of object;
  mdistatechangedeventty = procedure(const sender: twidget;
                              const oldvalue,newvalue: mdistatety) of object;
+ dockpointeventty = procedure(const sender: twidget;
+                                          var apoint: pointty) of object;
 
  bandinfoty = record
   first: integer;
@@ -211,6 +213,7 @@ type
    fdefaultsplitdir: splitdirty;
    fchildren: stringarty;
    ffocusedchild: integer;
+   fonbeforefloat: dockpointeventty;
    procedure updaterefsize;
    procedure setdockhandle(const avalue: tdockhandle);
    function checksplit(const awidgets: widgetarty;
@@ -260,7 +263,7 @@ type
    function doclose(const awidget: twidget): boolean;
    procedure setmdistate(const avalue: mdistatety); virtual;
    procedure domdistatechanged(const oldstate,newstate: mdistatety); virtual;
-   function dofloat(const adist: pointty): boolean; virtual;
+   function dofloat(adist: pointty): boolean; virtual;
    function dodock(const oldparent: tdockcontroller): boolean; virtual;
    procedure dochilddock(const awidget: twidget); virtual;
    procedure dochildfloat(const awidget: twidget); virtual;
@@ -398,6 +401,8 @@ type
                                                        write fonlayoutchanged;
    property onboundschanged: dockcontrollereventty read fonboundschanged 
                                                        write fonboundschanged;
+   property onbeforefloat: dockpointeventty read fonbeforefloat 
+                                                     write fonbeforefloat;
    property onfloat: notifyeventty read fonfloat write fonfloat;
    property ondock: notifyeventty read fondock write fondock;
    property onchilddock: widgeteventty read fonchilddock write fonchilddock;
@@ -2306,7 +2311,7 @@ begin
  result:= floatdockcount = int1;
 end;
 
-function tdockcontroller.dofloat(const adist: pointty): boolean;
+function tdockcontroller.dofloat(adist: pointty): boolean;
 var
  widget1: twidget1;
  wstr1: msestring;
@@ -2316,6 +2321,9 @@ var
 begin
  result:= false;
  widget1:= twidget1(fintf.getwidget);
+ if widget1.canevent(tmethod(fonbeforefloat)) then begin
+  fonbeforefloat(widget1,adist);
+ end;
  getparentcontroller(controller1);
  with widget1 do begin
   pt1:= pos;
