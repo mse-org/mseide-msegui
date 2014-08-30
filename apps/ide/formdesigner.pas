@@ -139,6 +139,7 @@ type
    procedure togglehideexe(const sender: TObject);
    procedure showallexe(const sender: TObject);
    procedure touchallexe(const sender: TObject);
+   procedure floatexe(const sender: TObject);
   private
    fdesigner: tdesigner;
    fform: twidget;
@@ -3011,8 +3012,12 @@ procedure tformdesignerfo.parentchanged();
 begin
  inherited;
  updateformcont();
- if (fform <> nil) and (parentwidget = nil) then begin
-  pos:= translatewidgetpoint(fmodulepos,fform,nil);
+end;
+
+procedure tformdesignerfo.floatexe(const sender: TObject);
+begin
+ if (fform <> nil) then begin
+  pos:= translatewidgetpoint(fmodulepos,fform.parentwidget,self);
   formcontainerwidgetregionchanged(fform); //sync self size
  end;
 end;
