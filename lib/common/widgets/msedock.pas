@@ -142,8 +142,8 @@ type
                                         const achildren: widgetarty) of object;
  mdistatechangedeventty = procedure(const sender: twidget;
                              const oldvalue,newvalue: mdistatety) of object;
- dockpointeventty = procedure(const sender: twidget;
-                                          var apoint: pointty) of object;
+ dockrecteventty = procedure(const sender: twidget;
+                                          var arect: rectty) of object;
 
  bandinfoty = record
   first: integer;
@@ -213,7 +213,7 @@ type
    fdefaultsplitdir: splitdirty;
    fchildren: stringarty;
    ffocusedchild: integer;
-   fonbeforefloat: dockpointeventty;
+   fonbeforefloat: dockrecteventty;
    procedure updaterefsize;
    procedure setdockhandle(const avalue: tdockhandle);
    function checksplit(const awidgets: widgetarty;
@@ -263,7 +263,7 @@ type
    function doclose(const awidget: twidget): boolean;
    procedure setmdistate(const avalue: mdistatety); virtual;
    procedure domdistatechanged(const oldstate,newstate: mdistatety); virtual;
-   function dofloat(adist: pointty): boolean; virtual;
+   function dofloat(const adist: pointty): boolean; virtual;
    function dodock(const oldparent: tdockcontroller): boolean; virtual;
    procedure dochilddock(const awidget: twidget); virtual;
    procedure dochildfloat(const awidget: twidget); virtual;
@@ -401,7 +401,7 @@ type
                                                        write fonlayoutchanged;
    property onboundschanged: dockcontrollereventty read fonboundschanged 
                                                        write fonboundschanged;
-   property onbeforefloat: dockpointeventty read fonbeforefloat 
+   property onbeforefloat: dockrecteventty read fonbeforefloat 
                                                      write fonbeforefloat;
    property onfloat: notifyeventty read fonfloat write fonfloat;
    property ondock: notifyeventty read fondock write fondock;
@@ -2311,31 +2311,32 @@ begin
  result:= floatdockcount = int1;
 end;
 
-function tdockcontroller.dofloat(adist: pointty): boolean;
+function tdockcontroller.dofloat(const adist: pointty): boolean;
 var
  widget1: twidget1;
  wstr1: msestring;
  int1: integer;
  controller1: tdockcontroller;
- pt1: pointty;
+ rect1: rectty;
 begin
  result:= false;
  widget1:= twidget1(fintf.getwidget);
- if widget1.canevent(tmethod(fonbeforefloat)) then begin
-  fonbeforefloat(widget1,adist);
- end;
  getparentcontroller(controller1);
  with widget1 do begin
-  pt1:= pos;
-  parentwidget:= nil;
   if fmdistate <> mds_normal then begin
-   widgetrect:= mr(bounds_x-pt1.x+fnormalrect.x+adist.x,
-                  bounds_y-pt1.y+fnormalrect.y+adist.y,
-                  fnormalrect.cx,fnormalrect.cy);
+   rect1.pos:= translatewidgetpoint(fnormalrect.pos,parentwidget,nil);
+   rect1.size:= fnormalrect.size;
   end
   else begin
-   pos:= addpoint(pos,adist);
+   rect1.pos:= screenpos;
+   rect1.size:= size;
   end;
+  addpoint1(rect1.pos,adist);
+  if canevent(tmethod(fonbeforefloat)) then begin
+   fonbeforefloat(widget1,rect1);
+  end;
+  parentwidget:= nil;
+  widgetrect:= rect1;
   if fmdistate = mds_maximized then begin
    anchors:= [an_left,an_top];
   end;
