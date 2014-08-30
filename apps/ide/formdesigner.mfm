@@ -30,6 +30,7 @@ object formdesignerfo: tformdesignerfo
   )
   dragdock.optionsdock = [od_savepos, od_savezorder, od_canmove, od_cansize, od_canfloat, od_candock]
   dragdock.onbeforefloat = beffloatexe
+  dragdock.onfloat = floatexe
   optionswindow = [wo_notaskbar]
   options = [fo_savepos, fo_savezorder, fo_savestate]
   statfile = mainfo.projectstatfile

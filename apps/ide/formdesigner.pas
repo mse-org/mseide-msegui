@@ -139,7 +139,8 @@ type
    procedure togglehideexe(const sender: TObject);
    procedure showallexe(const sender: TObject);
    procedure touchallexe(const sender: TObject);
-   procedure beffloatexe(const sender: twidget; var apoint: pointty);
+   procedure beffloatexe(const sender: twidget; var arect: rectty);
+   procedure floatexe(const sender: TObject);
   private
    fdesigner: tdesigner;
    fform: twidget;
@@ -2971,7 +2972,7 @@ procedure tformdesignerfo.checksynctoformsize();
 begin
  if (fparentwidget = nil) and (fds_loaded in ffostate) then begin
   fformcont.paintsize:= fform.size;   //not docked
-  paintsize:= fform.size;
+  paintsize:= fformcont.size;
  end;
 end;
 
@@ -3017,17 +3018,28 @@ end;
 procedure tformdesignerfo.parentchanged();
 begin
  inherited;
- checksynctoformsize();
+// checksynctoformsize();
  updateformcont();
 end;
 
 procedure tformdesignerfo.beffloatexe(const sender: twidget;
-               var apoint: pointty);
+               var arect: rectty);
 begin
- if (fform <> nil) then begin
-  apoint:= subpoint(translatewidgetpoint(fmodulepos,self,fform.parentwidget),
-                                                                     screenpos);
+ inc(fmodulesetting);
+ visible:= false;
+end;
+
+procedure tformdesignerfo.floatexe(const sender: TObject);
+begin
+ checksynctoformsize();
+ if fform <> nil then begin
+  pos:= translatewidgetpoint(fmodulepos,fform.parentwidget,self);
+ end
+ else begin
+  pos:= translatewidgetpoint(fmodulepos,fscrollbox,self);
  end;
+ visible:= true;
+ dec(fmodulesetting);
 end;
 
 procedure tformdesignerfo.clientrectchanged();
