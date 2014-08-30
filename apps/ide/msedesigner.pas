@@ -50,6 +50,10 @@ type
                                                  write setmoduleoptions;
   procedure updatecaption();
   procedure findcompdialog();
+  function getmodulepos_x(): integer;
+  function getmodulepos_y(): integer;
+  procedure setmodulepos_x(const avalue: integer);
+  procedure setmodulepos_y(const avalue: integer);
  end;
  
  methodinfoty = record
@@ -535,7 +539,9 @@ type
                                  out aunits: unitinfopoarty): classinfopoarty;
                                                   overload;
                                                           
+   function getmodulex(const amodule: tmsecomponent): integer;
    procedure setmodulex(const amodule: tmsecomponent; avalue: integer);
+   function getmoduley(const amodule: tmsecomponent): integer;
    procedure setmoduley(const amodule: tmsecomponent; avalue: integer);
    procedure modulesizechanged(const amodule: tmsecomponent);
 
@@ -3412,13 +3418,40 @@ begin
  inherited;
 end;
 
+function tdesigner.getmodulex(const amodule: tmsecomponent): integer;
+var
+ po1: pmoduleinfoty;
+begin
+ po1:= fmodules.findmodule(tmsecomponent(amodule));
+ if po1 <> nil then begin
+  result:= po1^.designformintf.getmodulepos_x();
+ end
+ else begin
+  result:= 0;
+ end;
+end;
+
+function tdesigner.getmoduley(const amodule: tmsecomponent): integer;
+var
+ po1: pmoduleinfoty;
+begin
+ po1:= fmodules.findmodule(tmsecomponent(amodule));
+ if po1 <> nil then begin
+  result:= po1^.designformintf.getmodulepos_y();
+ end
+ else begin
+  result:= 0;
+ end;
+end;
+
 procedure tdesigner.setmodulex(const amodule: tmsecomponent; avalue: integer);
 var
  po1: pmoduleinfoty;
 begin
  po1:= fmodules.findmodule(tmsecomponent(amodule));
  if po1 <> nil then begin
-  po1^.designform.bounds_x:= avalue;
+  po1^.designformintf.setmodulepos_x(avalue);
+//  po1^.designform.bounds_x:= avalue;
  end;
 end;
 
@@ -3428,7 +3461,7 @@ var
 begin
  po1:= fmodules.findmodule(tmsecomponent(amodule));
  if po1 <> nil then begin
-  po1^.designform.bounds_y:= avalue;
+  po1^.designformintf.setmodulepos_y(avalue);
  end;
 end;
 
@@ -5700,6 +5733,7 @@ begin
   result:= factmodulepo^.designformintf.clickedcomponent;
  end;
 end;
+
 {
 procedure tdesigner.doasyncevent(var atag: integer);
 begin

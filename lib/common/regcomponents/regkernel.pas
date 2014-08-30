@@ -270,7 +270,8 @@ end;
 function tbounds_xeditor.getvalue: msestring;
 begin
  if fprops[0].instance = fmodule then begin
-  result:= inttostr(twidget(fprops[0].instance).screenpos.x);
+  result:= inttostr(fdesigner.getmodulex(fmodule));
+//  result:= inttostr(twidget(fprops[0].instance).screenpos.x);
  end
  else begin
   result:= inherited getvalue;
@@ -292,7 +293,8 @@ end;
 function tbounds_yeditor.getvalue: msestring;
 begin
  if fprops[0].instance = fmodule then begin
-  result:= inttostr(twidget(fprops[0].instance).screenpos.y);
+  result:= inttostr(fdesigner.getmoduley(fmodule));
+//  result:= inttostr(twidget(fprops[0].instance).screenpos.y);
  end
  else begin
   result:= inherited getvalue;

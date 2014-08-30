@@ -209,6 +209,11 @@ type
   protected
    ffostate: formdesignerstatesty;
 
+   function getmodulepos_x(): integer;
+   function getmodulepos_y(): integer;
+   procedure setmodulepos_x(const avalue: integer);
+   procedure setmodulepos_y(const avalue: integer);
+
    function isdesignwidget(): boolean; override;
  
    function getsnaptogrid: boolean; virtual;
@@ -260,6 +265,7 @@ type
    procedure formcontainerscrolled();
    procedure updateformcont();
    procedure checksynctoformsize();
+   procedure checksynctomodulepos();
    procedure formcontainerwidgetregionchanged(const sender: twidget);
    procedure clientrectchanged(); override;
    procedure parentchanged(); override;
@@ -2986,6 +2992,18 @@ begin
  end;
 end;
 
+procedure tformdesignerfo.checksynctomodulepos();
+begin
+ if (fparentwidget = nil) and (fds_loaded in ffostate) then begin
+  if fform <> nil then begin
+   pos:= translatewidgetpoint(fmodulepos,fform.parentwidget,self);
+  end
+  else begin
+   pos:= translatewidgetpoint(fmodulepos,fscrollbox,self);
+  end;
+ end;
+end;
+
 procedure tformdesignerfo.updateformcont();
 var
  si1: sizety;
@@ -3115,28 +3133,7 @@ begin
   else begin
    fform:= nil;
    fmodulepos:= getcomponentpos(fmodule);
-   {
-   if fmodule is tmsedatamodule then begin
-    asize:= tmsedatamodule(fmodule).size;
-   end
-   else begin
-    asize:= nullsize;
-    for int1:= 0 to fmodule.ComponentCount - 1 do begin
-     po1:= getcomponentpos(fmodule.Components[int1]);
-     if po1.x > asize.cx then begin
-      asize.cx:= po1.x;
-     end;
-     if po1.y > asize.cy then begin
-      asize.cy:= po1.y;
-     end;
-    end;
-    inc(asize.cx,80);
-    inc(asize.cy,30); //todo: correct size, scrollbox
-   end;
-   }
    widgetrect:= inflaterect(modulerect,frame.paintframe);
-//   widgetrect:= inflaterect(makerect(getcomponentpos(fmodule),asize),
-//                                                          frame.paintframe);
   end;
  finally
   endplacement;
@@ -3609,6 +3606,7 @@ begin
  if fform is tcustommseform then begin
   tcustommseform(fform).container.frame.scrollpos:= nullpoint;
  end;
+ fformcont.frame.scrollpos:= nullpoint;
 end;
 
 procedure tformdesignerfo.endstreaming;
@@ -4443,6 +4441,32 @@ function tformdesignerfo.getmodulerect: rectty;
 begin
  result.pos:= fmodulepos;
  result.size:= getmodulesize();
+end;
+
+function tformdesignerfo.getmodulepos_x: integer;
+begin
+ result:= fmodulepos.x;
+end;
+
+function tformdesignerfo.getmodulepos_y: integer;
+begin
+ result:= fmodulepos.y;
+end;
+
+procedure tformdesignerfo.setmodulepos_x(const avalue: integer);
+begin
+ if fmodulepos.x <> avalue then begin
+  fmodulepos.x:= avalue;
+  checksynctomodulepos();
+ end;
+end;
+
+procedure tformdesignerfo.setmodulepos_y(const avalue: integer);
+begin
+ if fmodulepos.y <> avalue then begin
+  fmodulepos.y:= avalue;
+  checksynctomodulepos();
+ end;
 end;
 
 initialization
