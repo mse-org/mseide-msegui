@@ -139,7 +139,7 @@ type
    procedure togglehideexe(const sender: TObject);
    procedure showallexe(const sender: TObject);
    procedure touchallexe(const sender: TObject);
-   procedure floatexe(const sender: TObject);
+   procedure beffloatexe(const sender: twidget; var apoint: pointty);
   private
    fdesigner: tdesigner;
    fform: twidget;
@@ -256,8 +256,9 @@ type
 
    property selections: tformdesignerselections read getselections;
    procedure formcontainerscrolled();
-   procedure formcontainerwidgetregionchanged(const sender: twidget);
    procedure updateformcont();
+   procedure checksynctoformsize();
+   procedure formcontainerwidgetregionchanged(const sender: twidget);
    procedure clientrectchanged(); override;
    procedure parentchanged(); override;
    procedure doasyncevent(var atag: integer); override;
@@ -2966,17 +2967,11 @@ begin
  asyncevent(ord(fde_scrolled));
 end;
 
-procedure tformdesignerfo.formcontainerwidgetregionchanged(
-                                                   const sender: twidget);
-begin 
- if (fform <> nil) and (sender = fform) and 
-        not(ws1_anchorsizing in fform.widgetstate1) and 
-        not (csdestroying in fform.componentstate) and
-        not (csdestroying in componentstate) then begin
-  if parentwidget = nil then begin //not docked
-   fformcont.paintsize:= fform.size;
-   paintsize:= fform.size; //syc with modulesize
-  end;
+procedure tformdesignerfo.checksynctoformsize();
+begin
+ if (fparentwidget = nil) and (fds_loaded in ffostate) then begin
+  fformcont.paintsize:= fform.size;   //not docked
+  paintsize:= fform.size;
  end;
 end;
 
@@ -3008,17 +3003,30 @@ begin
  fformcont.widgetrect:= paintrect;
 end;
 
+procedure tformdesignerfo.formcontainerwidgetregionchanged(
+                                                   const sender: twidget);
+begin 
+ if (fform <> nil) and (sender = fform) and 
+        not(ws1_anchorsizing in fform.widgetstate1) and 
+        not (csdestroying in fform.componentstate) and
+        not (csdestroying in componentstate) then begin
+  checksynctoformsize();
+ end;
+end;
+
 procedure tformdesignerfo.parentchanged();
 begin
  inherited;
+ checksynctoformsize();
  updateformcont();
 end;
 
-procedure tformdesignerfo.floatexe(const sender: TObject);
+procedure tformdesignerfo.beffloatexe(const sender: twidget;
+               var apoint: pointty);
 begin
  if (fform <> nil) then begin
-  pos:= translatewidgetpoint(fmodulepos,fform.parentwidget,self);
-  formcontainerwidgetregionchanged(fform); //sync self size
+  apoint:= subpoint(translatewidgetpoint(fmodulepos,self,fform.parentwidget),
+                                                                     screenpos);
  end;
 end;
 
