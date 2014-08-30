@@ -2983,7 +2983,7 @@ procedure tformdesignerfo.checksynctoformsize();
 begin
  if (fparentwidget = nil) and (fds_loaded in ffostate) then begin
   if fform <> nil then begin
-   fformcont.paintsize:= fform.size;   //not docked
+   fformcont.size:= fform.size;   //not docked
    paintsize:= fformcont.size;
   end
   else begin
