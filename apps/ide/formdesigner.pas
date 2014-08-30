@@ -204,6 +204,7 @@ type
    procedure setmodule(const value: tmsecomponent);
    function getselections: tformdesignerselections;
    function filterfindcomp(const acomponent: tcomponent): boolean;
+   function getmodulesize: sizety;
    function getmodulerect: rectty;
   protected
    ffostate: formdesignerstatesty;
@@ -1648,6 +1649,12 @@ begin
   bottom:= 0;
   internalupdatestate();
  end;
+ createface();
+ face.image.source:= mainfo.formbg;
+ face.image.alignment:= [al_tiled];
+ color:= cl_background;
+ optionsskin:= [osk_framebuttononly];
+ updateskin();
 end;
 
 procedure tformcontainer.widgetregionchanged(const sender: twidget);
@@ -2290,10 +2297,8 @@ end;
 procedure tformdesignerfo.poschanged();
 begin
  inherited;
- if fmodulesetting = 0 then begin
-  if parentwidget = nil then begin //not docked
-   fmodulepos:= translatewidgetpoint(paintpos,self,nil);
-  end;
+ if (fmodulesetting = 0) and (fparentwidget = nil) then begin //not docked
+  fmodulepos:= translatewidgetpoint(paintpos,self,nil);
   doModified;
  end;
 end;
@@ -2971,8 +2976,13 @@ end;
 procedure tformdesignerfo.checksynctoformsize();
 begin
  if (fparentwidget = nil) and (fds_loaded in ffostate) then begin
-  fformcont.paintsize:= fform.size;   //not docked
-  paintsize:= fformcont.size;
+  if fform <> nil then begin
+   fformcont.paintsize:= fform.size;   //not docked
+   paintsize:= fformcont.size;
+  end
+  else begin
+   paintsize:= getmodulesize();
+  end;
  end;
 end;
 
@@ -3529,6 +3539,7 @@ begin
  else begin
   result:= translateclientpoint(nullpoint,form.container,form);
   addpoint1(result,form.paintpos);
+  addpoint1(result,fformcont.clientpos);
  end;
 end;
 
@@ -3545,7 +3556,7 @@ begin
  else begin
   result:= form.container.paintrect;
   translatewidgetpoint1(result.pos,form.container,self);
-//  addpoint1(result.pos,form.container.rootpos);
+//  subpoint1(result.pos,fformcont.clientpos);
  end;
 end;
 
@@ -4397,19 +4408,18 @@ begin
  result:= true;
 end;
 
-function tformdesignerfo.getmodulerect: rectty;
+function tformdesignerfo.getmodulesize: sizety;
 var
  asize: sizety;
  int1: integer;
  pt1: pointty;
 begin
- result.pos:= fmodulepos;
  if fform <> nil then begin
-  result.size:= fform.size;
+  result:= fform.size;
  end
  else begin
   if fmodule is tmsedatamodule then begin
-   result.size:= tmsedatamodule(fmodule).size;
+   result:= tmsedatamodule(fmodule).size;
   end
   else begin
    asize:= nullsize;
@@ -4424,9 +4434,15 @@ begin
    end;
    inc(asize.cx,80);
    inc(asize.cy,30); //todo: correct size, scrollbox
-   result.size:= asize;
+   result:= asize;
   end;
  end;
+end;
+
+function tformdesignerfo.getmodulerect: rectty;
+begin
+ result.pos:= fmodulepos;
+ result.size:= getmodulesize();
 end;
 
 initialization

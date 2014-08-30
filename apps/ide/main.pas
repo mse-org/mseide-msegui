@@ -33,10 +33,9 @@ uses
  msedispwidgets,msedataedits,msestat,msestatfile,msemenus,msebitmap,msetoolbar,
  msegrids,msefiledialog,msetypes,sourcepage,msetabs,msedesignintf,msedesigner,
  classes,mclasses,mseclasses,msegraphutils,typinfo,msedock,sysutils,msesysenv,
- msemacros,
- msestrings,msepostscriptprinter,msegraphics,mseglob,mseprocmonitorcomp,
- msesystypes,mserttistat,msedatanodes,mseedit,mseifiglob,mselistbrowser,
- projecttreeform,msepipestream,msestringcontainer,msesys;
+ msemacros,msestrings,msepostscriptprinter,msegraphics,mseglob,
+ mseprocmonitorcomp,msesystypes,mserttistat,msedatanodes,mseedit,mseifiglob,
+ mselistbrowser,projecttreeform,msepipestream,msestringcontainer,msesys;
 const
  versiontext = '3.5';
  idecaption = 'MSEide';
@@ -77,6 +76,7 @@ type
    targetpipe: tpipereadercomp;
    c: tstringcontainer;
    openform: tfiledialog;
+   formbg: tbitmapcomp;
    procedure newfileonexecute(const sender: tobject);
    procedure newformonexecute(const sender: TObject);
 

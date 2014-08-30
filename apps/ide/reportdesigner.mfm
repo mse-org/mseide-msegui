@@ -204,17 +204,15 @@ inherited reportdesignerfo: treportdesignerfo
     linkbottom = dialv
     dist_bottom = -5
   end
-  inherited hidecompact: taction[10]
-  end
-  inherited hidewidgetact: taction[11]
+  inherited hidewidgetact: taction[10]
     state = [as_disabled, as_invisible]
   end
-  inherited togglehideact: taction[12]
+  inherited togglehideact: taction[11]
     state = [as_disabled, as_invisible]
   end
-  inherited showallact: taction[13]
+  inherited showallact: taction[12]
   end
-  object tpopupmenu3: tpopupmenu[14]
+  object tpopupmenu3: tpopupmenu[13]
     menu.submenu.count = 29
     menu.submenu.items = <    
       item
@@ -370,9 +368,9 @@ inherited reportdesignerfo: treportdesignerfo
     left = 16
     top = 160
   end
-  inherited c: tstringcontainer[15]
+  inherited c: tstringcontainer[14]
   end
-  object sc: tstringcontainer[16]
+  object sc: tstringcontainer[15]
     strings.data = (
       'Do you wish to delete'
       'WARNING'
@@ -380,7 +378,7 @@ inherited reportdesignerfo: treportdesignerfo
     left = 64
     top = 208
   end
-  inherited popupme: tpopupmenu[17]
+  inherited popupme: tpopupmenu[16]
     menu.submenu.count = 34
     menu.submenu.items = <    
       item
@@ -462,5 +460,7 @@ inherited reportdesignerfo: treportdesignerfo
         state = [as_localcaption, as_localonexecute]
         onexecute = deletepage
       end>
+  end
+  inherited hidecompact: taction[17]
   end
 end

@@ -1,6 +1,6 @@
 object formdesignerfo: tformdesignerfo
   optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_hinton]
-  optionsskin = [osk_noskin]
+  optionsskin = [osk_framebuttononly]
   color = -1879048187
   frame.grip_size = 10
   frame.grip_options = [go_closebutton, go_fixsizebutton, go_floatbutton, go_topbutton, go_backgroundbutton]
@@ -317,7 +317,7 @@ object formdesignerfo: tformdesignerfo
       'the selected component?'
       'Do you want to touch all loaded forms?'
     )
-    left = 64
-    top = 136
+    left = 48
+    top = 72
   end
 end
