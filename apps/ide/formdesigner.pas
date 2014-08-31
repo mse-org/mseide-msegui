@@ -31,6 +31,7 @@ type
  areaty = (ar_none,ar_component,ar_componentmove,ar_selectrect,ht_topleft,
              ht_top,ht_topright,ht_right,
              ht_bottomright,ht_bottom,ht_bottomleft,ht_left);
+ areasty = set of areaty;
  markerty = (mt_topleft,mt_topright,mt_bottomright,mt_bottomleft);
 
 const
@@ -57,6 +58,8 @@ type
 
  tformdesignerfo = class;
 
+ markerkindty = (mak_none,mak_module,mak_all);
+
  tformdesignerselections = class(tdesignerselections)
   private
    fowner: tformdesignerfo;
@@ -74,6 +77,7 @@ type
    function getcandelete: boolean;
    procedure updateinfos;
   protected
+   function checkmarker(const ainfo: formselectedinfoty): markerkindty;
    function getrecordsize: integer; override;
    procedure externalcomponentchanged(const acomponent: tobject);
    procedure removeforeign; //removes form and components in other modules
@@ -731,28 +735,28 @@ begin
  end;
 end;
 
-procedure tformdesignerselections.paint(const canvas: tcanvas);
-type
- markerkindty = (mak_none,mak_module,mak_all);
-
- function checkmarker(const ainfo: formselectedinfoty): markerkindty;
- begin
-  result:= mak_none;
-  with ainfo do begin
-   if not nohandles then begin
-    if fowner.module.checkowned(selectedinfo.instance) then begin
-     if (selectedinfo.instance <> fowner.module) then begin
-      result:= mak_all;
-     end
-     else begin
-      if fowner.parentwidget <> nil then begin //docked
-       result:= mak_module;
-      end;
+function tformdesignerselections.checkmarker(
+                                const ainfo: formselectedinfoty): markerkindty;
+begin
+ result:= mak_none;
+ with ainfo do begin
+  if not nohandles then begin
+   if fowner.module.checkowned(selectedinfo.instance) then begin
+    if (selectedinfo.instance <> fowner.module) then begin
+     result:= mak_all;
+    end
+    else begin
+     if (fowner.parentwidget <> nil) and (fowner.fform <> nil) and
+                 (fowner.fformcont.visible) then begin //docked
+      result:= mak_module;
      end;
-    end;             
-   end;
+    end;
+   end;             
   end;
- end; //checkmarker
+ end;
+end;
+
+procedure tformdesignerselections.paint(const canvas: tcanvas);
  
 var
  int1: integer;
@@ -948,17 +952,27 @@ begin
  end;
 end;
 
+const
+ validhandles: array[markerkindty] of areasty = (
+                 [],     //mak_none
+                 [ht_right,ht_bottomright,ht_bottom],     //mak_module
+                 [ht_topleft,ht_top,ht_topright,ht_right,
+                  ht_bottomright,ht_bottom,ht_bottomleft,ht_left] //mak_all
+                );
+                 
 function tformdesignerselections.getareainfo(const pos: pointty;
                 out index: integer): areaty;
 var
  handle: areaty;
  int1: integer;
+ po1: pformselectedinfoty;
 begin
  updateinfos;
  result:= ar_none;
  index:= -1;
+ po1:= datapo;
  if count = 1 then begin
-  with itempo(0)^,selectedinfo do begin
+  with po1^,selectedinfo do begin
    if not nohandles then begin
     if instance is tcomponent then begin
      if isdatasubmodule(instance) or fowner.iswidgetcomp(instance) and 
@@ -966,9 +980,11 @@ begin
                           twidget1(instance).fmsecomponentstate) then begin
       for handle:= firsthandle to lasthandle do begin
        if pointinrect(pos,handles[handle]) then begin
-        result:= handle;
-        index:= 0;
-        exit;
+        if handle in validhandles[checkmarker(po1^)] then begin
+         result:= handle;
+         index:= 0;
+         exit;
+        end;
        end;
       end;
      end;
@@ -983,7 +999,7 @@ begin
  end
  else begin
   for int1:= 0 to count - 1 do begin
-   with itempo(int1)^,selectedinfo do begin
+   with po1^,selectedinfo do begin
     if not nohandles then begin
      if pointinrect(pos,rect) and (instance is tcomponent) then begin
       result:= ar_component;
@@ -992,6 +1008,7 @@ begin
      end;
     end;
    end;
+   inc(po1);
   end;
  end;
 end;
