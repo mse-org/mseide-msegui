@@ -3568,6 +3568,9 @@ begin
  else begin
   result:= form.container.paintrect;
   translatewidgetpoint1(result.pos,form.container,self);
+  intersectrect1(result,
+      mr(translatewidgetpoint(fformcont.paintpos,fformcont,self),
+                                                fformcont.paintsize));
 //  subpoint1(result.pos,fformcont.clientpos);
  end;
 end;
