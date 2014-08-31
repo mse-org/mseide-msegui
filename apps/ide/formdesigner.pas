@@ -4142,7 +4142,8 @@ begin
      fxorpicactive:= false;
      case factarea of
       firsthandle..lasthandle: begin
-       if (factcompindex >= 0) and (factcompindex < fselections.count) then begin
+       if (factcompindex >= 0) and 
+                    (factcompindex < fselections.count) then begin
         component:= tcomponent(
                      fselections.itempo(factcompindex)^.selectedinfo.instance);
         if (component is twidget) and (form <> nil) then begin
@@ -4261,7 +4262,7 @@ begin
       end;
       if bo1 then begin
        fxorpicactive:= true;
-       if factarea <> ar_component then begin
+       if not (factarea in [ar_component,firsthandle..lasthandle]) then begin
         fselections.beforepaintmoving; //resets canvas
        end;
        showxorpic(container.getcanvas(org_widget));
