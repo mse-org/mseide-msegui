@@ -289,6 +289,7 @@ type
    function insertoffset: pointty; virtual;
    function gridoffset: pointty; virtual;
    function gridrect: rectty; virtual;
+   function markerrect: rectty; virtual;
    function widgetrefpoint: pointty; virtual;
    function compplacementrect: rectty; virtual;
 //   function gridsizex: integer; virtual;
@@ -731,35 +732,67 @@ begin
 end;
 
 procedure tformdesignerselections.paint(const canvas: tcanvas);
+type
+ markerkindty = (mak_none,mak_module,mak_all);
+
+ function checkmarker(const ainfo: formselectedinfoty): markerkindty;
+ begin
+  result:= mak_none;
+  with ainfo do begin
+   if not nohandles then begin
+    if fowner.module.checkowned(selectedinfo.instance) then begin
+     if (selectedinfo.instance <> fowner.module) then begin
+      result:= mak_all;
+     end
+     else begin
+      if fowner.parentwidget <> nil then begin //docked
+       result:= mak_module;
+      end;
+     end;
+    end;             
+   end;
+  end;
+ end; //checkmarker
+ 
 var
  int1: integer;
  handle: areaty;
  marker: markerty;
+ po1: pformselectedinfoty;
 begin
- updateinfos;
+ updateinfos();
+ po1:= datapo;
  with canvas do begin
   if count > 1 then begin
    for int1:= 0 to count - 1 do begin
-    with itempo(int1)^,selectedinfo do begin
-     if not nohandles and (instance <> fowner.module) and 
-                            fowner.module.checkowned(instance) then begin
+    case checkmarker(po1^) of
+     mak_all: begin
       for marker:= low(markerty) to high(markerty) do begin
-       fillrect(markers[marker],cl_dkgray);
+       fillrect(po1^.markers[marker],cl_dkgray);
       end;
      end;
+     mak_module: begin
+      fillrect(po1^.markers[mt_bottomright],cl_dkgray);
+     end;
     end;
+    inc(po1);
    end;
   end
   else begin
    for int1:= 0 to count - 1 do begin
-    with itempo(int1)^,selectedinfo do begin
-     if not nohandles and (instance <> fowner.module) and 
-                               fowner.module.checkowned(instance) then begin
+    case checkmarker(po1^) of
+     mak_all: begin
       for handle:= firsthandle to lasthandle do begin
-       fillrect(handles[handle],cl_black);
+       fillrect(po1^.handles[handle],cl_black);
       end;
      end;
+     mak_module: begin
+      fillrect(po1^.handles[ht_right],cl_black);
+      fillrect(po1^.handles[ht_bottomright],cl_black);
+      fillrect(po1^.handles[ht_bottom],cl_black);
+     end;
     end;
+    inc(po1);
    end;
   end;
  end;
@@ -2896,6 +2929,7 @@ begin
  end;
  gridrect1:= gridrect();
  if fmodule <> nil then begin
+  canvas.save();
   canvas.intersectcliprect(gridrect1);
   if not hidecompact.checked then begin
    level:= 0;
@@ -2904,6 +2938,8 @@ begin
   if form <> nil then begin
    drawgrid(canvas);
   end;
+  canvas.restore();
+  canvas.intersectcliprect(markerrect);
   fselections.paint(canvas);
   showxorpic(canvas);
  end;
@@ -3571,7 +3607,16 @@ begin
   intersectrect1(result,
       mr(translatewidgetpoint(fformcont.paintpos,fformcont,self),
                                                 fformcont.paintsize));
-//  subpoint1(result.pos,fformcont.clientpos);
+ end;
+end;
+
+function tformdesignerfo.markerrect: rectty;
+begin
+ if (form = nil) or hidewidgetact.checked then begin
+  result:= container.paintrect;
+ end
+ else begin
+  result:= fformcont.paintrect;
  end;
 end;
 
@@ -3947,7 +3992,7 @@ begin
   mousepos1:= translatewidgetpoint(pos,window.owner,self);
   ss1:= shiftstate * shiftstatesmask;
   isinpaintrect:= pointinrect(mousepos1,gridrect);
-//  posbefore:= pos;
+//  isinpaintrect:= pointinrect(mousepos1,markerrect);
   if eventkind in [ek_buttonpress,ek_buttonrelease] then begin
    fmousepos:= mousepos1;
   end;
