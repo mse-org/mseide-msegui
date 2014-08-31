@@ -25,7 +25,7 @@ uses
  typinfo,componentpaletteform,msestrings,msewidgets,
  mseglob{$ifndef mse_no_db}{$ifdef FPC},msereport{$endif}{$endif},msetimer,
  mseact,mseactions,mseifiglob,msestringcontainer,mseificomp,mseificompglob,
- msesimplewidgets;
+ msesimplewidgets,msestat,msedock;
 
 type
  areaty = (ar_none,ar_component,ar_componentmove,ar_selectrect,ht_topleft,
@@ -208,12 +208,13 @@ type
    function getmodulerect: rectty;
   protected
    ffostate: formdesignerstatesty;
-
+   fmoduleinfo: pmoduleinfoty;
+    //iformdesigner
    function getmodulepos_x(): integer;
    function getmodulepos_y(): integer;
    procedure setmodulepos_x(const avalue: integer);
    procedure setmodulepos_y(const avalue: integer);
-
+   function getdockcontroller(): tdockcontroller;
    function isdesignwidget(): boolean; override;
  
    function getsnaptogrid: boolean; virtual;
@@ -221,7 +222,6 @@ type
    function getgridsizex: integer; virtual;
    function getgridsizey: integer; virtual;
  
-   procedure poschanged; override;
    procedure designmouseevent(var info: moeventinfoty;
                                              capture: twidget); override;
    procedure designkeyevent(const eventkind: eventkindty;
@@ -263,12 +263,15 @@ type
 
    property selections: tformdesignerselections read getselections;
    procedure formcontainerscrolled();
+   procedure updatedockinfo();
    procedure updateformcont();
    procedure checksynctoformsize();
    procedure checksynctomodulepos();
    procedure formcontainerwidgetregionchanged(const sender: twidget);
-   procedure clientrectchanged(); override;
    procedure parentchanged(); override;
+   procedure poschanged; override;
+   procedure sizechanged; override;
+   procedure clientrectchanged(); override;
    procedure doasyncevent(var atag: integer); override;
    procedure dobeforepaint(const canvas: tcanvas); override;
    procedure doafterpaint(const canvas: tcanvas); override;
@@ -345,7 +348,8 @@ type
 
   public
    constructor create(const aowner: tcomponent; const adesigner: tdesigner;
-                      const aintf: pdesignmoduleintfty); reintroduce; virtual;
+                      const aintf: pdesignmoduleintfty;
+                      const amoduleinfo: pmoduleinfoty); reintroduce; virtual;
                         
    destructor destroy(); override;
    procedure updateprojectoptions();
@@ -512,7 +516,8 @@ begin
   if designformclass = nil then begin
    designformclass:= tformdesignerfo;
   end;
-  result:= designformclassty(designformclass).create(nil,aowner,moduleintf);
+  result:= designformclassty(designformclass).create(nil,aowner,
+                                                       moduleintf,amodule);
   result.module:= instance;
  end;
 end;
@@ -1678,10 +1683,12 @@ end;
 
 constructor tformdesignerfo.create(const aowner: tcomponent; 
                                    const adesigner: tdesigner;
-                                   const aintf: pdesignmoduleintfty);
+                                   const aintf: pdesignmoduleintfty;
+                                   const amoduleinfo: pmoduleinfoty);
 begin
  fdesigner:= adesigner;
  fmoduleintf:= aintf;
+ fmoduleinfo:= amoduleinfo;
 
  fshowgrid:= true;
  fsnaptogrid:= true;
@@ -2307,6 +2314,13 @@ begin
   fmodulepos:= translatewidgetpoint(paintpos,self,nil);
   doModified;
  end;
+ updatedockinfo();
+end;
+
+procedure tformdesignerfo.sizechanged();
+begin
+ inherited;
+ updatedockinfo();
 end;
 
 procedure tformdesignerfo.drawgrid(const canvas: tcanvas);
@@ -3048,6 +3062,7 @@ begin
  inherited;
 // checksynctoformsize();
  updateformcont();
+ updatedockinfo();
 end;
 
 procedure tformdesignerfo.beffloatexe(const sender: twidget;
@@ -4466,6 +4481,19 @@ begin
  if fmodulepos.y <> avalue then begin
   fmodulepos.y:= avalue;
   checksynctomodulepos();
+ end;
+end;
+
+function tformdesignerfo.getdockcontroller(): tdockcontroller;
+begin
+ result:= dragdock;
+end;
+
+procedure tformdesignerfo.updatedockinfo();
+begin
+ with fmoduleinfo^.dockinfo do begin
+  panelname:= dragdock.dockparentname();
+  rect:= widgetrect;
  end;
 end;
 

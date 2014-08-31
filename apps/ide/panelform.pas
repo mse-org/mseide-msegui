@@ -21,7 +21,7 @@ unit panelform;
 interface
 uses
  classes,mclasses,msegui,mseclasses,mseforms,msemenus,msestat,msestrings,
- msedock;
+ msedock,msegraphutils;
 
 type
 
@@ -42,6 +42,9 @@ type
 
 function newpanel(aname: string = ''): tpanelfo;
 procedure updatestat(const filer: tstatfiler);
+function docktopanel(const controller: tdockcontroller;
+                const panelname: string; const arect: rectty): boolean;
+                                                      //true if ok
 
 implementation
 
@@ -73,6 +76,23 @@ begin
    try
     newpanel(ar1[int1]);
    except
+   end;
+  end;
+ end;
+end;
+
+function docktopanel(const controller: tdockcontroller;
+                   const panelname: string; const arect: rectty): boolean;
+                                                      //true if ok
+var
+ int1: integer;
+begin
+ result:= false;
+ for int1:= 0 to panellist.count-1 do begin
+  with tpanelfo(panellist[int1]) do begin
+   if name = panelname then begin
+    result:= controller.dock(dragdock,arect);
+    break;
    end;
   end;
  end;

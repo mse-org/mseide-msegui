@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2013 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2014 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -460,7 +460,6 @@ type
    property modulenames: msestringarty read fmodulenames write fmodulenames;
    property moduletypes: msestringarty read fmoduletypes write fmoduletypes;
    property modulefiles: filenamearty read fmodulefiles write fmodulefiles;
-//   property moduleoptions: integerarty read fmoduleoptions write fmoduleoptions;
 
    property befcommandon: integerarty read fbefcommandon write fbefcommandon;
    property makeoptionson: integerarty read fmakeoptionson write fmakeoptionson;
@@ -1652,6 +1651,7 @@ var
  modulenames1: msestringarty;
  moduletypes1: msestringarty;
  modulefiles1: filenamearty;
+ moduledock1: msestringarty;
 begin
  with statfiler,projectoptions do begin
   if iswriter then begin
@@ -1662,6 +1662,7 @@ begin
     setlength(modulenames1,int2);
     setlength(moduletypes1,int2);
     setlength(modulefiles1,int2);
+    setlength(moduledock1,int2);
     for int1:= 0 to high(modulenames1) do begin
      with pmoduleinfoty(submenu[int1+int3].tagpointer)^ do begin
       modulenames1[int1]:= struppercase(instance.name);
@@ -1729,6 +1730,7 @@ begin
   end;
 
   setsection('layout');       
+//  sourcefo.updatestat(statfiler);   //needs actual fontalias
   mainfo.projectstatfile.updatestat('windowlayout',statfiler);
   sourcefo.updatestat(statfiler);   //needs actual fontalias
   setsection('targetconsole');

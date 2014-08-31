@@ -68,6 +68,7 @@ type
    procedure updatebinaryvalue(const name: msestring; var value: string);
    procedure updatevalue(const name: msestring; var value: msestring); overload;
    procedure updatevalue(const name: msestring; var value: tdatalist); overload;
+   procedure updatevalue(const name: msestring; var value: stringarty); overload;
    procedure updatevalue(const name: msestring; var value: msestringarty); overload;
    procedure updatevalue(const name: msestring; var value: longboolarty); overload;
    procedure updatevalue(const name: msestring; var value: integerarty); overload;
@@ -493,6 +494,16 @@ begin
 end;
 
 procedure tstatfiler.updatevalue(const name: msestring; var value: complexarty);
+begin
+ if fiswriter then begin
+  tstatwriter(self).writearray(name,value);
+ end
+ else begin
+  value:= tstatreader(self).readarray(name,value);
+ end;
+end;
+
+procedure tstatfiler.updatevalue(const name: msestring; var value: stringarty);
 begin
  if fiswriter then begin
   tstatwriter(self).writearray(name,value);

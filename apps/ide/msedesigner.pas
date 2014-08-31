@@ -24,7 +24,7 @@ uses
  mseforms,mselist,msearrayutils,msebitmap,msetypes,sysutils,msehash,mseclasses,
  mseformdatatools,typinfo,msepropertyeditors,msecomponenteditors,msegraphics,
  mseapplication,msegui,msestrings,msedesignparser,msecomptree,mseevent,
- mseinterfaces;
+ mseinterfaces,msedock;
 
 {$ifndef mse_methodswap}
  {$define mse_nomethodswap}
@@ -54,6 +54,7 @@ type
   function getmodulepos_y(): integer;
   procedure setmodulepos_x(const avalue: integer);
   procedure setmodulepos_y(const avalue: integer);
+  function getdockcontroller(): tdockcontroller;
  end;
  
  methodinfoty = record
@@ -115,6 +116,11 @@ type
  end;
  componentnamearty = array of componentnamety;
 
+ moduledockinfoty = record
+  panelname: string;
+  rect: rectty;
+ end;
+ 
  moduleinfoty = record
   filename: msestring;
   moduleclassname: string[80]; //can not be ansistring!
@@ -135,6 +141,7 @@ type
   components: tcomponents;
   designform: tcustommseform;
   designformintf: iformdesigner;
+  dockinfo: moduledockinfoty;
   referencedmodules: stringarty;
   loadingstream: tstream;
  end;

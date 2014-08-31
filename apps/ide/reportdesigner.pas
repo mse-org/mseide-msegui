@@ -92,7 +92,8 @@ type
    procedure setmousemarkers(const avalue: pointty; const source: twidget);
   public
    constructor create(const aowner: tcomponent; const adesigner: tdesigner;
-                        const aintf: pdesignmoduleintfty); override;
+                      const aintf: pdesignmoduleintfty;
+                      const amoduleinfo: pmoduleinfoty); override;
    procedure beginstreaming; override;
    procedure endstreaming; override;
  end;
@@ -125,7 +126,8 @@ end;
 { treportdesignerfo }
 
 constructor treportdesignerfo.create(const aowner: tcomponent;
-        const adesigner: tdesigner; const aintf: pdesignmoduleintfty);
+        const adesigner: tdesigner; const aintf: pdesignmoduleintfty;
+        const amoduleinfo: pmoduleinfoty);
 begin
  inherited;
 end;

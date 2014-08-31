@@ -344,31 +344,36 @@ type
    function getitems: widgetarty; //reference count = 1
    function getwidget: twidget;
    function activewidget: twidget; //focused child or active tab
+   function dockparentname(): string; //'' if none
 
    property mdistate: mdistatety read fmdistate write setmdistate;
    property currentsplitdir: splitdirty read fsplitdir;
    function close: boolean; //simulates mr_windowclosed for owner
    function closeactivewidget: boolean;
                    //simulates mr_windowclosed for active widget, true if ok
-   function float: boolean; //false if canceled
+   function float(): boolean; //false if canceled
    function dock(const dest: tdockcontroller; const apos: pointty): boolean;
+   function dock(const dest: tdockcontroller; const arect: rectty): boolean;
 
   published
    property dockhandle: tdockhandle read fdockhandle write setdockhandle;
-   property splitter_size: integer read fsplitter_size write setsplitter_size default defaultsplittersize;
+   property splitter_size: integer read fsplitter_size 
+                            write setsplitter_size default defaultsplittersize;
    property splitter_grip: stockbitmapty read fsplitter_grip
                         write setsplitter_setgrip default defaultsplittergrip;
    property splitter_color: colorty read fsplitter_color
                         write setsplitter_color default defaultsplittercolor;
    property splitter_colorgrip: colorty read fsplitter_colorgrip
-                        write setsplitter_colorgrip default defaultsplittercolorgrip;
+                  write setsplitter_colorgrip default defaultsplittercolorgrip;
    property tab_options: tabbaroptionsty read ftab_options write settab_options 
                                    default defaulttaboptions;
    property tab_textflags: textflagsty read ftab_textflags write
                           settab_textflags default defaultcaptiontextflags;
    property tab_width: integer read ftab_width write settab_width default 0;
-   property tab_widthmin: integer read ftab_widthmin write settab_widthmin default 0;
-   property tab_widthmax: integer read ftab_widthmax write settab_widthmax default 0;
+   property tab_widthmin: integer read ftab_widthmin 
+                                               write settab_widthmin default 0;
+   property tab_widthmax: integer read ftab_widthmax 
+                                               write settab_widthmax default 0;
 
    property tab_frame: tframecomp read ftab_frame write settab_frame;
    property tab_face: tfacecomp read ftab_face write settab_face;
@@ -2361,14 +2366,14 @@ begin
  result:= floatdockcount = int1;
 end;
 
-function tdockcontroller.float: boolean; 
+function tdockcontroller.float(): boolean; 
                                   //false if canceled
 begin
  result:= dofloat(nullpoint);
 end;
 
 function tdockcontroller.dock(const dest: tdockcontroller;
-                                        const apos: pointty): boolean;
+                                        const arect: rectty): boolean;
 var
  dragobj: tdockdragobject;
  widget1: twidget;
@@ -2378,9 +2383,9 @@ begin
  dragobj:= tdockdragobject.create(self,widget1,tdragobject(dragobj),nullpoint);
  try
   with dragobj.fxorrect do begin
-   size:= widget1.size;
+   size:= arect.size;
    widget1:= dest.fintf.getwidget.container;
-   pos:= translatewidgetpoint(apos,widget1,nil);
+   pos:= translatewidgetpoint(arect.pos,widget1,nil);
    addpoint1(pos,widget1.clientwidgetpos);
 //  addpoint1(dragobj.fxorrect.pos,dest.fplacementrect.pos);
    result:= dest.dockdrag(dragobj);
@@ -2388,6 +2393,12 @@ begin
  finally
   dragobj.free;
  end;
+end;
+
+function tdockcontroller.dock(const dest: tdockcontroller;
+                                        const apos: pointty): boolean;
+begin
+ result:= dock(dest,mr(apos,fintf.getwidget().size));
 end;
 
 function tdockcontroller.canfloat: boolean;
@@ -3814,6 +3825,16 @@ begin
  end
  else begin
   result:= fintf.getwidget.focusedchild;
+ end;
+end;
+
+function tdockcontroller.dockparentname(): string;
+var
+ parent: tdockcontroller;
+begin
+ result:= '';
+ if getparentcontroller(parent) then begin
+  result:= parent.getwidget.name;
  end;
 end;
 
