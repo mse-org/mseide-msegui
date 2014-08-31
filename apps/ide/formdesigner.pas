@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2013 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2014 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -235,8 +235,6 @@ type
                             const shiftoffset: boolean): rectty;
                                          //embedded
 
-   procedure movewindowrect(const dist: pointty; const rect: rectty);
-                                 //todo!
    function dosnaptogrid(const apos: pointty): pointty;
    function snaptogriddelta(const apos: pointty): pointty;
 
@@ -390,15 +388,10 @@ type
  tdesignwindow = class(twindow)
   private
   protected
-//   procedure dispatchmouseevent(var info: moeventinfoty;
-//                                            capture: twidget); override;
-//   procedure dispatchkeyevent(const eventkind: eventkindty;
-//                                            var info: keyeventinfoty); override;
-
+   procedure movewindowrect(const dist: pointty; const rect: rectty); override;
   public
-   constructor create(const aowner: tformdesignerfo;
-                                     const adesigner: tdesigner);
-   destructor destroy; override;
+   constructor create(const aowner: tformdesignerfo);
+//   destructor destroy; override;
  end;
 }
 procedure registerdesignmoduleclass(const aclass: tcomponentclass;
@@ -776,7 +769,10 @@ begin
       end;
      end;
      mak_module: begin
+      canvas.save();
+      canvas.addcliprect(fowner.markerrect);
       fillrect(po1^.markers[mt_bottomright],cl_dkgray);
+      canvas.restore;
      end;
     end;
     inc(po1);
@@ -791,9 +787,12 @@ begin
       end;
      end;
      mak_module: begin
+      canvas.save();
+      canvas.addcliprect(fowner.markerrect);
       fillrect(po1^.handles[ht_right],cl_black);
       fillrect(po1^.handles[ht_bottomright],cl_black);
       fillrect(po1^.handles[ht_bottom],cl_black);
+      canvas.restore();
      end;
     end;
     inc(po1);
@@ -966,49 +965,58 @@ var
  handle: areaty;
  int1: integer;
  po1: pformselectedinfoty;
+ markerkind1: markerkindty;
+ bo1: boolean;
 begin
  updateinfos;
  result:= ar_none;
  index:= -1;
- po1:= datapo;
- if count = 1 then begin
-  with po1^,selectedinfo do begin
-   if not nohandles then begin
-    if instance is tcomponent then begin
-     if isdatasubmodule(instance) or fowner.iswidgetcomp(instance) and 
-                    not (cs_parentwidgetrect in 
-                          twidget1(instance).fmsecomponentstate) then begin
-      for handle:= firsthandle to lasthandle do begin
-       if pointinrect(pos,handles[handle]) then begin
-        if handle in validhandles[checkmarker(po1^)] then begin
-         result:= handle;
-         index:= 0;
-         exit;
+ if pointinrect(pos,fowner.markerrect) then begin
+  bo1:= pointinrect(pos,fowner.gridrect);
+  po1:= datapo;
+  if count = 1 then begin
+   markerkind1:= checkmarker(po1^);
+   if (markerkind1 = mak_module) or bo1 then begin
+    with po1^,selectedinfo do begin
+     if not nohandles then begin
+      if instance is tcomponent then begin
+       if isdatasubmodule(instance) or fowner.iswidgetcomp(instance) and 
+                      not (cs_parentwidgetrect in 
+                            twidget1(instance).fmsecomponentstate) then begin
+        for handle:= firsthandle to lasthandle do begin
+         if pointinrect(pos,handles[handle]) then begin
+          if handle in validhandles[markerkind1] then begin
+           result:= handle;
+           index:= 0;
+           exit;
+          end;
+         end;
         end;
+       end;
+       if pointinrect(pos,rect) then begin
+        result:= ar_component;
+        index:= 0;
+        exit;
        end;
       end;
      end;
-     if pointinrect(pos,rect) then begin
-      result:= ar_component;
-      index:= 0;
-      exit;
-     end;
     end;
    end;
-  end;
- end
- else begin
-  for int1:= 0 to count - 1 do begin
-   with po1^,selectedinfo do begin
-    if not nohandles then begin
-     if pointinrect(pos,rect) and (instance is tcomponent) then begin
-      result:= ar_component;
-      index:= int1;
-      break;
+  end
+  else begin
+   for int1:= 0 to count - 1 do begin
+    with po1^,selectedinfo do begin
+     if not nohandles then begin
+      if pointinrect(pos,rect) and (instance is tcomponent) and 
+                        (bo1 or (checkmarker(po1^) = mak_module)) then begin
+       result:= ar_component;
+       index:= int1;
+       break;
+      end;
      end;
     end;
+    inc(po1);
    end;
-   inc(po1);
   end;
  end;
 end;
@@ -1081,29 +1089,37 @@ end;
 (*
 { tdesignwindow }
 
-constructor tdesignwindow.create(const aowner: tformdesignerfo; 
-                                   const adesigner: tdesigner);
+constructor tdesignwindow.create(const aowner: tformdesignerfo);
 begin
-// fdesigner:= adesigner;
-{
- fshowgrid:= true;
- fsnaptogrid:= true;
- fgridsizex:= defaultgridsizex;
- fgridsizey:= defaultgridsizey;
- fselections:= tformdesignerselections.create(self);
-}
  inherited create(aowner);
-// updateprojectoptions;
-// designnotifications.registernotification(idesignnotification(self));
 end;
-
+{
 destructor tdesignwindow.destroy;
 begin
 // designnotifications.unregisternotification(idesignnotification(self));
  inherited;
 // fselections.free;
 end;
+}
+procedure tdesignwindow.movewindowrect(const dist: pointty;
+                                               const rect: rectty);
+var
+ canvas: tcanvas;
+begin
+ if isnullpoint(dist) then begin
+  exit;
+ end;
+ with tformdesignerfo(fownerwidget) do begin
+  canvas:= fownerwidget.getcanvas(org_widget);
+  hidexorpic(canvas);
+  fxorpicactive:= false;
+  fselections.change();
+ end;
+ inherited;
+// invalidaterect(moverect(rect,dist)); //redraw grid
+end;
 *)
+
 (*
 procedure tdesignwindow.dispatchkeyevent(const eventkind: eventkindty;
   var info: keyeventinfoty);
@@ -1747,7 +1763,7 @@ begin
  fselections:= tformdesignerselections.create(self);
  fformcont:= tformcontainer.create(self);
 
-// createwindow;
+ createwindow();
  inherited create(aowner);
  updateprojectoptions;
  designnotifications.registernotification(idesignnotification(self));
@@ -1785,7 +1801,7 @@ end;
 {
 procedure tformdesignerfo.createwindow;
 begin
- tdesignwindow.create(self,fdesigner)
+ tdesignwindow.create(self);
 end;
 }
 function tformdesignerfo.designnotification: idesignnotification;
@@ -1869,24 +1885,6 @@ begin
   paintxorpic(canvas);
   fxorpicshowed:= true;
  end;
-end;
-
-procedure tformdesignerfo.movewindowrect(const dist: pointty;
-                                               const rect: rectty);
-var
- canvas: tcanvas;
-begin
-{         todo!
- if isnullpoint(dist) then begin
-  exit;
- end;
- canvas:= fownerwidget.getcanvas(org_widget);
- hidexorpic(canvas);
- fxorpicactive:= false;
- fselections.change;
- inherited;
- invalidaterect(moverect(rect,dist)); //redraw grid
-}
 end;
 
 procedure tformdesignerfo.adjustchildcomponentpos(var apos: pointty);
@@ -2944,7 +2942,7 @@ begin
  end;
  gridrect1:= gridrect();
  if fmodule <> nil then begin
-  canvas.save();
+//  canvas.save();
   canvas.intersectcliprect(gridrect1);
   if not hidecompact.checked then begin
    level:= 0;
@@ -2953,8 +2951,8 @@ begin
   if form <> nil then begin
    drawgrid(canvas);
   end;
-  canvas.restore();
-  canvas.intersectcliprect(markerrect);
+//  canvas.restore();
+//  canvas.intersectcliprect(markerrect);
   fselections.paint(canvas);
   showxorpic(canvas);
  end;
