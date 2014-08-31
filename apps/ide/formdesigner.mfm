@@ -21,6 +21,7 @@ object formdesignerfo: tformdesignerfo
   bounds_cx = 287
   bounds_cy = 300
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent]
+  container.color = -1879048187
   container.oncalcminscrollsize = calcscrollsize
   container.bounds = (
     0
@@ -33,7 +34,6 @@ object formdesignerfo: tformdesignerfo
   dragdock.onfloat = floatexe
   optionswindow = [wo_notaskbar]
   options = [fo_savepos, fo_savezorder, fo_savestate]
-  statfile = mainfo.projectstatfile
   icon.transparentcolor = -2147483642
   icon.image = {
     00000000000000001800000018000000A4070000000000000000000000000000
