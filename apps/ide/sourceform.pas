@@ -504,7 +504,7 @@ begin
   fgdbpage:= nil;
  end;
 end;
-
+{
 function encodemoduledock(const ainfo: moduledockinfoty): string;
 begin
  with ainfo do begin
@@ -530,13 +530,13 @@ begin
   end;
  end;
 end;
-
+}
 procedure tsourcefo.updatestat(const statfiler: tstatfiler);
 var
  int1: integer;
  filenames,relpaths,modulenames: filenamearty;
  moduleoptions: integerarty;
- moduledock: stringarty;
+// moduledock: stringarty;
  ismod: longboolarty;
  ar1,ar2: longboolarty;
  page1: tsourcepage1;
@@ -572,7 +572,7 @@ begin
    end;
    setlength(modulenames,designer.modules.count);
    setlength(moduleoptions,length(modulenames));
-   setlength(moduledock,length(modulenames));
+//   setlength(moduledock,length(modulenames));
    setlength(ar1,length(modulenames));
    setlength(ar2,length(modulenames));
    for int1:= 0 to designer.modules.count - 1 do begin
@@ -582,7 +582,7 @@ begin
          {$ifdef FPC}longword{$else}byte{$endif}(designformintf.moduleoptions);
      ar1[int1]:= designform.visible;
      ar2[int1]:= not hasmenuitem;
-     moduledock[int1]:= encodemoduledock(dockinfo);
+//     moduledock[int1]:= encodemoduledock(dockinfo);
     end;
    end;
    tstatwriter(statfiler).writerecordarray('editpos',length(feditposar),
@@ -611,7 +611,7 @@ begin
   updatevalue('ismoduletexts',ismod);
   updatevalue('modules',modulenames);
   updatevalue('moduleoptions',moduleoptions);
-  updatevalue('moduledock',moduledock);
+//  updatevalue('moduledock',moduledock);
   updatevalue('visiblemodules',ar1);
   updatevalue('nomenumodules',ar2);
   if not iswriter then begin
@@ -647,7 +647,7 @@ begin
     mainfo.errorformfilename:= '';
     setlength(ar2,length(modulenames));
     setlength(moduleoptions,length(modulenames));
-    setlength(moduledock,length(modulenames));
+//    setlength(moduledock,length(modulenames));
     designer.beginskipall;
     for int1:= 0 to high(modulenames) do begin
      try
@@ -671,10 +671,10 @@ begin
         designformintf.moduleoptions:= 
              moduleoptionsty({$ifdef FPC}longword{$else}byte{$endif}
                          (moduleoptions[int1])) * [mo_hidewidgets,mo_hidecomp];
-        if decodemoduledock(moduledock[int1],dockinfo) then begin
-         docktopanel(designformintf.getdockcontroller(),dockinfo.panelname,
-                                                     dockinfo.rect);
-        end;
+//        if decodemoduledock(moduledock[int1],dockinfo) then begin
+//         docktopanel(designformintf.getdockcontroller(),dockinfo.panelname,
+//                                                     dockinfo.rect);
+//        end;
        end;
       end;
      except

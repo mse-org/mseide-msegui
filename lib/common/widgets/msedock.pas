@@ -311,7 +311,7 @@ type
    procedure receiveevent(const aevent: tobjectevent); override;
    function canbegindrag: boolean; override;
    procedure dostatplace(const aparent: twidget;
-                              const avisible: boolean; arect: rectty);
+                              const avisible: boolean; arect: rectty); virtual;
   public
    constructor create(aintf: idockcontroller);
    destructor destroy; override;

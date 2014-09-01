@@ -115,12 +115,12 @@ type
   dispname: string;
  end;
  componentnamearty = array of componentnamety;
-
+{
  moduledockinfoty = record
   panelname: string;
   rect: rectty;
  end;
- 
+}
  moduleinfoty = record
   filename: msestring;
   moduleclassname: string[80]; //can not be ansistring!
@@ -141,7 +141,7 @@ type
   components: tcomponents;
   designform: tcustommseform;
   designformintf: iformdesigner;
-  dockinfo: moduledockinfoty;
+//  dockinfo: moduledockinfoty;
   referencedmodules: stringarty;
   loadingstream: tstream;
  end;

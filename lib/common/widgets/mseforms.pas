@@ -91,7 +91,10 @@ type
 
  syseventeventty = procedure(const sender: tcustommseform;
                     var aevent: syseventty; var handled: boolean) of object;
-                             
+
+ formstatety = (fos_statreading);
+ formstatesty = set of formstatety;
+                              
  tcustommseform = class(tcustomeventwidget,istatfile,idockcontroller
                                  {$ifdef mse_with_ifi},iififormlink{$endif})
   private
@@ -159,8 +162,9 @@ type
    procedure readonchildscaled(reader: treader);
    procedure setactivatortarget(const avalue: tactivator);
   protected
-   fscrollbox: tformscrollbox;
-    //needed to distinguish between scrolled and unscrolled (mainmenu...) widgets
+   fformstate: formstatesty;
+   fscrollbox: tformscrollbox; //needed to distinguish between scrolled and
+                               //unscrolled  (mainmenu...) widgets
    procedure iconchanged(const sender: tobject);
    procedure aftercreate; virtual;
    function createmainmenuwidget: tframemenuwidget; virtual;
@@ -206,11 +210,12 @@ type
    function getcontainer: twidget; override;
    function getchildwidgets(const index: integer): twidget; override;
    procedure getautopaintsize(var asize: sizety); override;
+
+   procedure dostatread1(const reader: tstatreader); virtual;
+   procedure dostatwrite1(const writer: tstatwriter); virtual;
     //istatfile
    procedure dostatread(const reader: tstatreader); virtual;
-   procedure dostatread1(const reader: tstatreader); virtual;
    procedure dostatwrite(const writer: tstatwriter); virtual;
-   procedure dostatwrite1(const writer: tstatwriter); virtual;
    procedure statreading; virtual;
    procedure statread; virtual;
    function getstatvarname: msestring;
@@ -1506,6 +1511,7 @@ end;
 
 procedure tcustommseform.statreading;
 begin
+ include(fformstate,fos_statreading);
  if canevent(tmethod(fonstatbeforeread)) then begin
   fonstatbeforeread(self);
  end;
@@ -1513,6 +1519,7 @@ end;
 
 procedure tcustommseform.statread;
 begin
+ exclude(fformstate,fos_statreading);
  if canevent(tmethod(fonstatafterread)) then begin
   fonstatafterread(self);
  end;

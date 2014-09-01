@@ -107,7 +107,13 @@ type
 
  formdesignerstatety = (fds_loaded,fds_sizesyncing);
  formdesignerstatesty = set of formdesignerstatety;
-  
+
+ tformdesignerdockcontroller = class(tformdockcontroller)
+  protected
+   procedure dostatplace(const aparent: twidget;
+                         const avisible: boolean; arect: rectty); override;
+ end;
+ 
  tformdesignerfo = class(tdockform,iformdesigner,idesignnotification)
    popupme: tpopupmenu;
    hidecompact: taction;
@@ -1762,6 +1768,7 @@ begin
  fgridsizey:= defaultgridsizey;
  fselections:= tformdesignerselections.create(self);
  fformcont:= tformcontainer.create(self);
+ fdragdock:= tformdesignerdockcontroller.create(idockcontroller(self));
 
  createwindow();
  inherited create(aowner);
@@ -2356,7 +2363,8 @@ end;
 procedure tformdesignerfo.poschanged();
 begin
  inherited;
- if (fmodulesetting = 0) and (fparentwidget = nil) then begin //not docked
+ if not (fos_statreading in fformstate) and (fmodulesetting = 0) and 
+                             (fparentwidget = nil) then begin //not docked
   fmodulepos:= translatewidgetpoint(paintpos,self,nil);
   doModified;
  end;
@@ -4553,9 +4561,21 @@ end;
 
 procedure tformdesignerfo.updatedockinfo();
 begin
+{
  with fmoduleinfo^.dockinfo do begin
   panelname:= dragdock.dockparentname();
   rect:= widgetrect;
+ end;
+}
+end;
+
+{ tformdesignerdockcontroller }
+
+procedure tformdesignerdockcontroller.dostatplace(const aparent: twidget;
+               const avisible: boolean; arect: rectty);
+begin
+ if (aparent <> nil) then begin //do not change undocked position
+  inherited;
  end;
 end;
 

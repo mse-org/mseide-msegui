@@ -1729,12 +1729,13 @@ begin
    projecttree.updatelist;
   end;
 
-  setsection('layout');
+//  formdesigner.updatestat(statfiler,false);
   beginpanelplacement();
   try
-//  sourcefo.updatestat(statfiler);   //needs actual fontalias
-   mainfo.projectstatfile.updatestat('windowlayout',statfiler);
    sourcefo.updatestat(statfiler);   //needs actual fontalias
+   setsection('layout');
+   mainfo.projectstatfile.updatestat('windowlayout',statfiler);
+ //  sourcefo.updatestat(statfiler);   //needs actual fontalias
   finally
    endpanelplacement();
   end;
