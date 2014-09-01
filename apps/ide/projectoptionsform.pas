@@ -1729,10 +1729,15 @@ begin
    projecttree.updatelist;
   end;
 
-  setsection('layout');       
+  setsection('layout');
+  beginpanelplacement();
+  try
 //  sourcefo.updatestat(statfiler);   //needs actual fontalias
-  mainfo.projectstatfile.updatestat('windowlayout',statfiler);
-  sourcefo.updatestat(statfiler);   //needs actual fontalias
+   mainfo.projectstatfile.updatestat('windowlayout',statfiler);
+   sourcefo.updatestat(statfiler);   //needs actual fontalias
+  finally
+   endpanelplacement();
+  end;
   setsection('targetconsole');
   targetconsole.updatestat(statfiler);
 

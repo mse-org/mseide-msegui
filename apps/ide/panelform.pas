@@ -44,6 +44,8 @@ function newpanel(aname: string = ''): tpanelfo;
 procedure updatestat(const filer: tstatfiler);
 procedure docktopanel(const controller: tdockcontroller;
                 const panelname: string; const arect: rectty);
+procedure beginpanelplacement();
+procedure endpanelplacement();
 
 implementation
 
@@ -90,6 +92,32 @@ begin
    if name = panelname then begin
     dragdock.dock(controller,arect);
     break;
+   end;
+  end;
+ end;
+end;
+
+procedure beginpanelplacement();
+var
+ int1: integer;
+begin
+ for int1:= 0 to panellist.count-1 do begin
+  with tpanelfo(panellist[int1]) do begin
+   dragdock.beginplacement();
+  end;
+ end;
+end;
+
+procedure endpanelplacement();
+var
+ int1: integer;
+begin
+ for int1:= 0 to panellist.count-1 do begin
+  with tpanelfo(panellist[int1]) do begin
+   try
+    dragdock.endplacement();
+   except
+    application.handleexception();
    end;
   end;
  end;

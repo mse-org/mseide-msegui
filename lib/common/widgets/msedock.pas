@@ -2715,9 +2715,6 @@ begin
  child1:= source.getwidget();
  parent1:= getwidget().container;
  source.dostatplace(parent1,child1.visible,arect);
- if fplacing = 0 then begin
-//  calclayout(nil,false);
- end;
 end;
 
 function tdockcontroller.writechild(const index: integer): msestring;
