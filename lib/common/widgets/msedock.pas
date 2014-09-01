@@ -2505,11 +2505,36 @@ begin
 end;
 
 procedure tdockcontroller.endplacement();
+var
+ int1,int2,int3: integer;
+ str1: string;
+ widget1: twidget;
 begin
  dec(fplacing);
  if fplacing = 0 then begin
   exclude(fdockstate,dos_updating4);
+  sizechanged(true);
   calclayout(nil,true);
+  if (ftaborder <> nil) then begin
+   if (fsplitdir = sd_tabed) and (ftabwidget <> nil) then begin
+    int3:= 0;
+    for int1:= 0 to high(ftaborder) do begin
+     str1:= ftaborder[int1];
+     for int2:= int3 to tdocktabwidget(ftabwidget).count - 1 do begin
+      widget1:= tdocktabpage(tdocktabwidget(ftabwidget)[int2]).ftarget;
+      if (widget1 <> nil) and (widget1.Name = str1) then begin
+       tdocktabwidget(ftabwidget).movepage(int2,int3);
+       inc(int3);
+       break;
+      end;
+     end;
+    end;
+    if factivetab < tdocktabwidget(ftabwidget).count then begin
+     tdocktabwidget(ftabwidget).activepageindex:= factivetab;
+    end;
+   end;
+   ftaborder:= nil;
+  end;
  end;
 end;
 
@@ -2521,34 +2546,11 @@ begin
 end;
 
 procedure tdockcontroller.statread;
-var
- int1,int2,int3: integer;
- str1: string;
- widget1: twidget;
 begin
  fsize:= idockcontroller(fintf).getplacementrect.size;
  endplacement();
 // exclude(fdockstate,dos_updating4);
 // calclayout(nil,true);
- if (fsplitdir = sd_tabed) and (ftabwidget <> nil) then begin
-  int3:= 0;
-  for int1:= 0 to high(ftaborder) do begin
-   str1:= ftaborder[int1];
-   for int2:= int3 to tdocktabwidget(ftabwidget).count - 1 do begin
-    widget1:= tdocktabpage(tdocktabwidget(ftabwidget)[int2]).ftarget;
-    if (widget1 <> nil) and (widget1.Name = str1) then begin
-     tdocktabwidget(ftabwidget).movepage(int2,int3);
-     inc(int3);
-     break;
-    end;
-   end;
-  end;
-  if factivetab < tdocktabwidget(ftabwidget).count then begin
-   tdocktabwidget(ftabwidget).activepageindex:= factivetab;
-  end;
- end;
- ftaborder:= nil;
- sizechanged(true);
 end;
 
 function tdockcontroller.getdockcaption: msestring;
