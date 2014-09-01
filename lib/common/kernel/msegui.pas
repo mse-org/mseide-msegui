@@ -17641,7 +17641,8 @@ begin
  end;
 end;
 
-function tguiapplication.findwidget(const namepath: string; out awidget: twidget): boolean;
+function tguiapplication.findwidget(const namepath: string;
+                                               out awidget: twidget): boolean;
                 //false if invalid namepath, '' -> nil and true
                 //last name = '' -> widget.container
 var

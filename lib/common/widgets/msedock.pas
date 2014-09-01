@@ -255,6 +255,7 @@ type
    foptionsdock: optionsdockty;
    fr: prectaccessty;
    fw: pwidgetaccessty;
+   fplacing: integer;
    procedure checkdirection;
    procedure objectevent(const sender: tobject;
                                       const event: objecteventty); override;
@@ -309,7 +310,8 @@ type
    procedure readchild(const index: integer; const avalue: msestring);
    procedure receiveevent(const aevent: tobjectevent); override;
    function canbegindrag: boolean; override;
-
+   procedure dostatplace(const aparent: twidget;
+                              const avisible: boolean; arect: rectty);
   public
    constructor create(aintf: idockcontroller);
    destructor destroy; override;
@@ -332,6 +334,8 @@ type
    procedure widgetregionchanged(const sender: twidget);
    procedure beginclientrectchanged;
    procedure endclientrectchanged;
+   procedure beginplacement();
+   procedure endplacement();
    procedure layoutchanged; //force layout calcualation
       //istatfile
    procedure dostatread(const reader: tstatreader);
@@ -352,8 +356,9 @@ type
    function closeactivewidget: boolean;
                    //simulates mr_windowclosed for active widget, true if ok
    function float(): boolean; //false if canceled
-   function dock(const dest: tdockcontroller; const apos: pointty): boolean;
-   function dock(const dest: tdockcontroller; const arect: rectty): boolean;
+   function dockto(const dest: tdockcontroller; const apos: pointty): boolean;
+   procedure dock(const source: tdockcontroller; const arect: rectty);
+        //simulates dostatread, use in beginplacement()/endplacement()
 
   published
    property dockhandle: tdockhandle read fdockhandle write setdockhandle;
@@ -2372,8 +2377,8 @@ begin
  result:= dofloat(nullpoint);
 end;
 
-function tdockcontroller.dock(const dest: tdockcontroller;
-                                        const arect: rectty): boolean;
+function tdockcontroller.dockto(const dest: tdockcontroller;
+                                        const apos: pointty): boolean;
 var
  dragobj: tdockdragobject;
  widget1: twidget;
@@ -2383,9 +2388,9 @@ begin
  dragobj:= tdockdragobject.create(self,widget1,tdragobject(dragobj),nullpoint);
  try
   with dragobj.fxorrect do begin
-   size:= arect.size;
+   size:= widget1.size;
    widget1:= dest.fintf.getwidget.container;
-   pos:= translatewidgetpoint(arect.pos,widget1,nil);
+   pos:= translatewidgetpoint(apos,widget1,nil);
    addpoint1(pos,widget1.clientwidgetpos);
 //  addpoint1(dragobj.fxorrect.pos,dest.fplacementrect.pos);
    result:= dest.dockdrag(dragobj);
@@ -2393,12 +2398,6 @@ begin
  finally
   dragobj.free;
  end;
-end;
-
-function tdockcontroller.dock(const dest: tdockcontroller;
-                                        const apos: pointty): boolean;
-begin
- result:= dock(dest,mr(apos,fintf.getwidget().size));
 end;
 
 function tdockcontroller.canfloat: boolean;
@@ -2497,10 +2496,28 @@ begin
  inherited;
 end;
 
+procedure tdockcontroller.beginplacement();
+begin
+ if fplacing = 0 then begin
+  include(fdockstate,dos_updating4);
+ end;
+ inc(fplacing);
+end;
+
+procedure tdockcontroller.endplacement();
+begin
+ dec(fplacing);
+ if fplacing = 0 then begin
+  exclude(fdockstate,dos_updating4);
+  calclayout(nil,true);
+ end;
+end;
+
    //istatfile
 procedure tdockcontroller.statreading;
 begin
- include(fdockstate,dos_updating4);
+ beginplacement();
+// include(fdockstate,dos_updating4);
 end;
 
 procedure tdockcontroller.statread;
@@ -2510,8 +2527,9 @@ var
  widget1: twidget;
 begin
  fsize:= idockcontroller(fintf).getplacementrect.size;
- exclude(fdockstate,dos_updating4);
- calclayout(nil,true);
+ endplacement();
+// exclude(fdockstate,dos_updating4);
+// calclayout(nil,true);
  if (fsplitdir = sd_tabed) and (ftabwidget <> nil) then begin
   int3:= 0;
   for int1:= 0 to high(ftaborder) do begin
@@ -2576,13 +2594,46 @@ begin
  end;
 end;
 
+procedure tdockcontroller.dostatplace(const aparent: twidget;
+                        const avisible: boolean; arect: rectty);
+var
+ intf1: idocktarget;
+ widget0: twidget;
+begin
+ widget0:= fintf.getwidget();
+ with widget0 do begin
+  if not avisible then begin
+   visible:= false;
+  end;
+  if (aparent <> nil) and 
+               aparent.getcorbainterface(typeinfo(idocktarget),
+                                                          intf1) then begin
+   intf1.getdockcontroller.frefsize:= 0; //invalid
+  end;
+  parentwidget:= aparent;
+  if (parentwidget <> nil) then begin
+   if not parentwidget.getcorbainterface(typeinfo(idocktarget),
+                                                           intf1) then begin
+    arect:= clipinrect(arect,parentwidget.paintrect); //shift into widget
+   end;
+   widgetrect:= arect;
+  end
+  else begin
+   arect:= clipinrect(arect,application.screenrect); //shift into screen
+   widgetrect:= arect;
+   application.postevent(tobjectevent.create(ek_checkscreenrange,
+                                                            ievent(widget0)));
+  end;
+  visible:= avisible;
+ end;
+end;
+
 procedure tdockcontroller.dostatread(const reader: tstatreader);
 var
  rect1: rectty;
  widget0,widget1: twidget;
  str1: string;
  bo1: boolean;
- intf1: idocktarget;
 begin
  if not (od_banded in foptionsdock) then begin
   fsplitdir:= splitdirty(reader.readinteger('splitdir',ord(fsplitdir),
@@ -2624,31 +2675,8 @@ begin
    end;
    bo1:= visible;
    bo1:= reader.readboolean('visible',bo1);
-   if application.findwidget(str1,widget1) then begin
-    if not bo1 then begin
-     visible:= false;
-    end;
-    if (widget1 <> nil) and 
-                 widget1.getcorbainterface(typeinfo(idocktarget),
-                                                            intf1) then begin
-     intf1.getdockcontroller.frefsize:= 0; //invalid
-    end;
-    parentwidget:= widget1;
-   end;
-   if (parentwidget <> nil) then begin
-    if not parentwidget.getcorbainterface(typeinfo(idocktarget),
-                                                            intf1) then begin
-     rect1:= clipinrect(rect1,parentwidget.paintrect); //shift into widget
-    end;
-    widgetrect:= rect1;
-   end
-   else begin
-    rect1:= clipinrect(rect1,application.screenrect); //shift into screen
-    widgetrect:= rect1;
-    application.postevent(tobjectevent.create(ek_checkscreenrange,
-                                                             ievent(widget0)));
-   end;
-   visible:= bo1;
+   application.findwidget(str1,widget1);
+   dostatplace(widget1,bo1,rect1);
   end;
   if od_savechildren in foptionsdock then begin
    ffocusedchild:= reader.readinteger('focusedchild',-1);
@@ -2674,6 +2702,21 @@ begin
    end;
    window.caption:= getfloatcaption;
   end;
+ end;
+end;
+
+procedure tdockcontroller.dock(const source: tdockcontroller;
+                                                   const arect: rectty);
+var
+ child1,parent1: twidget;
+begin
+ fhiddensizeref:= arect.size;
+ fnormalrect:= arect;
+ child1:= source.getwidget();
+ parent1:= getwidget().container;
+ source.dostatplace(parent1,child1.visible,arect);
+ if fplacing = 0 then begin
+//  calclayout(nil,false);
  end;
 end;
 
