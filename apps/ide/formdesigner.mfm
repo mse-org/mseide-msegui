@@ -2,7 +2,7 @@ object formdesignerfo: tformdesignerfo
   optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_hinton]
   optionsskin = [osk_framebuttononly]
   color = -1879048187
-  frame.grip_size = 10
+  frame.grip_size = 0
   frame.grip_options = [go_closebutton, go_fixsizebutton, go_floatbutton, go_topbutton, go_backgroundbutton]
   frame.grip_face.fade_pos.count = 1
   frame.grip_face.fade_pos.items = (
@@ -26,7 +26,7 @@ object formdesignerfo: tformdesignerfo
   container.bounds = (
     0
     0
-    277
+    287
     300
   )
   dragdock.optionsdock = [od_savepos, od_savezorder, od_canmove, od_cansize, od_canfloat, od_candock]

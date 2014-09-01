@@ -10,7 +10,7 @@ inherited reportdesignerfo: treportdesignerfo
   container.bounds = (
     0
     0
-    195
+    205
     459
   )
   onclose = nil

@@ -1095,6 +1095,23 @@ object projectoptionsfo: tprojectoptionsfo
             end
           end
         end
+        object formdesignerdocking: tbooleanedit
+          frame.caption = 'Docking'
+          frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
+          frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
+          frame.dummy = 0
+          frame.outerframe = (
+            0
+            1
+            53
+            2
+          )
+          taborder = 8
+          bounds_x = 520
+          bounds_y = 53
+          bounds_cx = 66
+          bounds_cy = 16
+        end
       end
       object debuggerpage: ttabpage
         optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets]
