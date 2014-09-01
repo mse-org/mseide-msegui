@@ -1848,7 +1848,7 @@ procedure tformdesignerfo.paintxorpic(const canvas: tcanvas);
 begin
  if fxorpicactive then begin
   canvas.save;
-  canvas.intersectcliprect(markerrect);
+  canvas.setcliprect(markerrect);
   case factarea of
    firsthandle..lasthandle: begin
     with canvas do begin
