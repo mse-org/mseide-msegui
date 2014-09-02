@@ -148,8 +148,8 @@ type
      var node: tlistedititem);
    procedure propnotification(const sender: tlistitem; var action: nodeactionty);
 
-   procedure readprops(const module: tmsecomponent; const comp: componentarty); overload;
-   procedure readprops(const module: tmsecomponent; const comp: tcomponent); overload;
+   procedure readprops(const module: tmsecomponent; const comp: componentarty);
+   procedure readprops(const module: tmsecomponent; const comp: tcomponent);
    function editorstoprops(const editors: propertyeditorarty): treelistitemarty;
    function candragsource(const apos: pointty; var row: integer): boolean;
    function candragdest(const apos: pointty; var row: integer): boolean;

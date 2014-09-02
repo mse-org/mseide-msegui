@@ -4045,7 +4045,6 @@ begin
   mousepos1:= translatewidgetpoint(pos,window.owner,self);
   ss1:= shiftstate * shiftstatesmask;
   isinpaintrect:= pointinrect(mousepos1,gridrect);
-//  isinpaintrect:= pointinrect(mousepos1,markerrect);
   if eventkind in [ek_buttonpress,ek_buttonrelease] then begin
    fmousepos:= mousepos1;
   end;
@@ -4082,6 +4081,7 @@ begin
         factarea:= ar_none;
        end;
        bo1:= true;
+       {
        if ss_ctrl in ss1 then begin
         selectcomponent(component,sm_flip);
        end
@@ -4098,12 +4098,8 @@ begin
           updateclickedcomponent;
          end;
         end;
-        {
-        if ss_double in shiftstate then begin
-         designer.showobjectinspector;
-        end;
-        }
        end;
+       }
       end
       else begin
        factarea:= ar_none;
@@ -4133,8 +4129,24 @@ begin
        (factarea <> ar_componentmove) then begin
      twindow1(window).dispatchmouseevent(info,capture); //"inherited"
     end;
-//    pos:= posbefore;
     if bo1 then begin
+     if ss_ctrl in ss1 then begin
+      selectcomponent(component,sm_flip);
+     end
+     else begin
+      bo2:= fselections.indexof(component) < 0;
+      if (component = form) and (fselections.count > 1) or bo2 then begin
+       selectcomponent(component,sm_select);
+       if projectoptions.e.moveonfirstclick then begin
+        factarea:= ar_component;
+       end;
+      end
+      else begin
+       if not bo2 then begin
+        updateclickedcomponent;
+       end;
+      end;
+     end;
      if not (es_processed in eventstate) then begin
       if (capture = nil) or not 
              (ws1_designactive in twidget1(capture).fwidgetstate1) then begin
