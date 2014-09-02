@@ -4028,6 +4028,7 @@ var
  ss1: shiftstatesty;
  po1: pformselectedinfoty;
  pt1: pointty; 
+ canvas1: tcanvas;
 label
  1;
 begin
@@ -4269,7 +4270,8 @@ begin
  
     if not (es_processed in eventstate) then begin
      if (eventkind = ek_mousemove) or (eventkind = ek_mousepark) then begin
-      hidexorpic(getcanvas(org_widget));
+      canvas1:= getcanvas(org_widget);
+      hidexorpic(canvas1);
       bo1:= true;
       case factarea of
        firsthandle..lasthandle: begin
@@ -4300,7 +4302,7 @@ begin
        if not (factarea in [ar_component,firsthandle..lasthandle]) then begin
         fselections.beforepaintmoving; //resets canvas
        end;
-       showxorpic(container.getcanvas(org_widget));
+       showxorpic(canvas1);
       end;
      end;
     end;
