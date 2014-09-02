@@ -271,6 +271,8 @@ type
 
    property selections: tformdesignerselections read getselections;
    procedure formcontainerscrolled();
+   procedure updatemodulename();
+   procedure doupdatecaption();
    procedure updatedockinfo();
    procedure updateformcont();
    procedure checksynctoformsize();
@@ -1772,7 +1774,7 @@ begin
 
  createwindow();
  inherited create(aowner);
- updateprojectoptions;
+ updateprojectoptions();
  designnotifications.registernotification(idesignnotification(self));
  include(ffostate,fds_loaded);
 end;
@@ -2615,8 +2617,11 @@ procedure tformdesignerfo.componentnamechanging(const adesigner: idesigner;
                      const amodule: tmsecomponent; const aitem: tcomponent;
                      const newname: string);
 begin
- if (amodule = fmodule) and not (aitem is twidget) then begin
-  fclientsizevalid:= false;
+ if (amodule = fmodule) then begin
+  if not (aitem is twidget) then begin
+   fclientsizevalid:= false;
+  end;
+  updatemodulename();
  end;
 end;
 
@@ -2658,10 +2663,24 @@ end;
 
 procedure tformdesignerfo.updateprojectoptions();
 begin
- showgrid:= projectoptions.e.showgrid;
- snaptogrid:= projectoptions.e.snaptogrid;
- gridsizex:= projectoptions.e.gridsizex;
- gridsizey:= projectoptions.e.gridsizey;
+ with projectoptions do begin
+  showgrid:= e.showgrid;
+  snaptogrid:= e.snaptogrid;
+  gridsizex:= e.gridsizex;
+  gridsizey:= e.gridsizey;
+  if e.formdesignerdocking xor (frame.grip_size <> 0) then begin
+   beginplacement();
+   if e.formdesignerdocking then begin
+    frame.grip_size:= 10;
+   end
+   else begin
+    frame.grip_size:= 0;
+    dragdock.float();
+   end;
+   checksynctoformsize();
+   endplacement();
+  end;
+ end;
  invalidate();
 end;
 
@@ -2988,24 +3007,30 @@ begin
  result:= parentwidget <> nil; //docked
 end;
 
-procedure tformdesignerfo.doasyncevent(var atag: integer);
+procedure tformdesignerfo.doupdatecaption();
 var
  mstr1: msestring;
+begin
+ if fmodule <> nil then begin
+  mstr1:= fmodule.name;
+  if fmoduleoptions <> [] then begin
+   mstr1:= '-'+mstr1;
+  end;
+  if fdesigner.modules.findmodule(fmodule)^.modified then begin
+   mstr1:= '*'+mstr1;
+  end;
+  caption:= mstr1;
+  dragdock.caption:= mstr1;
+ end;
+end;
+
+procedure tformdesignerfo.doasyncevent(var atag: integer);
+var
  rect1: rectty;
 begin
  case designerfoeventty(atag) of
   fde_updatecaption: begin
-   if fmodule <> nil then begin
-    mstr1:= fmodule.name;
-    if fmoduleoptions <> [] then begin
-     mstr1:= '-'+mstr1;
-    end;
-    if fdesigner.modules.findmodule(fmodule)^.modified then begin
-     mstr1:= '*'+mstr1;
-    end;
-    caption:= mstr1;
-    dragdock.caption:= mstr1;
-   end;
+   doupdatecaption();
   end;
   fde_syncsize: begin
    if not fixformsize then begin
@@ -3044,6 +3069,11 @@ begin
   end;
  end;
 end;  
+
+procedure tformdesignerfo.updatecaption;
+begin
+ asyncevent(integer(fde_updatecaption));
+end;
 
 procedure tformdesignerfo.formcontainerscrolled;
 begin
@@ -3153,11 +3183,6 @@ begin
  end;
 end;
 
-procedure tformdesignerfo.updatecaption;
-begin
- asyncevent(integer(fde_updatecaption));
-end;
-
 procedure tformdesignerfo.doshow;
 begin
  inherited;
@@ -3182,6 +3207,11 @@ end;
 procedure tformdesignerfo.setdesignrect(const arect: rectty);
 begin
 end;
+procedure tformdesignerfo.updatemodulename;
+begin
+ name:= '_mse_'+fmodule.name+'_mse_';
+ updatecaption();
+end;
 
 procedure tformdesignerfo.placemodule;
 var
@@ -3192,7 +3222,7 @@ var
 begin
  beginplacement;
  try
-  name:= '_'+fmodule.name;
+  updatemodulename();
   if fmodule is twidget then begin
    fmodulepos:= twidget(fmodule).pos;
    setlinkedvar(fmodule,tmsecomponent(fform));
@@ -3207,6 +3237,7 @@ begin
    fmodulepos:= getcomponentpos(fmodule);
    widgetrect:= inflaterect(modulerect,frame.paintframe);
   end;
+  doupdatecaption();
  finally
   endplacement;
  end;
