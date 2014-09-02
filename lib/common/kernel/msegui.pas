@@ -1391,7 +1391,8 @@ type
    function isvisible: boolean;      //checks designing
    function parentisvisible: boolean;//checks isvisible flags of ancestors
    function parentvisible: boolean;  //checks visible flags of ancestors
-   function updateopaque(const children: boolean): boolean;
+   function updateopaque(const children: boolean; 
+                               const widgetregioncall: boolean): boolean;
                    //true if widgetregionchanged called
    procedure dragstarted; virtual; //called by tapplication.dragstarted
     //iscrollframe
@@ -6991,7 +6992,7 @@ begin
  child.rootchanged(true);
 // child.updateopaque(true); //for cl_parent
  if not isloading then begin
-  child.updateopaque(true); //for cl_parent
+  child.updateopaque(true,false); //for cl_parent
   child.ftaborder:= high(fwidgets);
   sortzorder;
   updatetaborder(child);
@@ -7630,7 +7631,8 @@ begin
  end;
 end;
 
-function twidget.updateopaque(const children: boolean): boolean;
+function twidget.updateopaque(const children: boolean;
+                                  const widgetregioncall: boolean): boolean;
                      //true if widgetregionchanged called
 var
  bo1,bo2: boolean;
@@ -7653,20 +7655,25 @@ begin
  end;
  if (bo1 <> (ws_opaque in fwidgetstate)) and (fparentwidget <> nil) 
                        and not fparentwidget.isloading then begin
-  bo2:= ws1_updateopaque in fwidgetstate1;
-  include(fwidgetstate1,ws1_updateopaque);
-  try
+  if widgetregioncall then begin
    fparentwidget.widgetregionchanged(self);
-  finally
-   if not bo2 then begin
-    exclude(fwidgetstate1,ws1_updateopaque);
+  end
+  else begin
+   bo2:= ws1_updateopaque in fwidgetstate1;
+   include(fwidgetstate1,ws1_updateopaque);
+   try
+    fparentwidget.widgetregionchanged(self);
+   finally
+    if not bo2 then begin
+     exclude(fwidgetstate1,ws1_updateopaque);
+    end;
    end;
   end;
   result:= true;
  end;
  if children then begin
   for int1:= 0 to high(fwidgets) do begin
-   fwidgets[int1].updateopaque(children);
+   fwidgets[int1].updateopaque(children,false);
   end;
  end;
 end;
@@ -7675,7 +7682,7 @@ procedure twidget.colorchanged;
 var
  int1: integer;
 begin
- updateopaque(true);
+ updateopaque(true,false);
  invalidatewidget;
  for int1:= 0 to widgetcount - 1 do begin
   with widgets[int1] do begin
@@ -7779,7 +7786,7 @@ end;
 
 procedure twidget.visiblechanged;
 begin
- updateopaque(false);
+ updateopaque(false,false);
  statechanged;
 end;
 
@@ -8446,7 +8453,7 @@ var
  int1: integer;
 begin
  if not (ws_loadedproc in fwidgetstate) then begin
-  updateopaque(false);
+  updateopaque(false,false);
   parentfontchanged;
   for int1:= 0 to high(fwidgets) do begin
    with fwidgets[int1] do begin
@@ -10134,7 +10141,7 @@ begin
  end
  else begin
   exclude(fwidgetstate,ws_visible);
-  bo2:= updateopaque(false);
+  bo2:= updateopaque(false,true);
  end;
  if ws_visible in fwidgetstate then begin
   exit; //show called
@@ -10234,7 +10241,7 @@ begin
   end;
   include(fwidgetstate,ws_visible);
   if bo1 then begin
-   if not updateopaque(false) and (fparentwidget <> nil) then begin
+   if not updateopaque(false,true) and (fparentwidget <> nil) then begin
     fparentwidget.widgetregionchanged(self);
    end;
   end;
@@ -11008,7 +11015,7 @@ begin
    hide;
   end;
   if (ws1_fakevisible in fwidgetstate1) then begin
-   if not updateopaque(false) and (fparentwidget <> nil) then begin
+   if not updateopaque(false,true) and (fparentwidget <> nil) then begin
     fparentwidget.widgetregionchanged(self);
    end;
   end;

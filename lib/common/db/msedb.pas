@@ -1413,8 +1413,10 @@ type
                    const akeys: array of const; const aisnull: array of boolean;
                    const akeyoptions: array of locatekeyoptionsty;
                    const aoptions: locaterecordoptionsty = []): locateresultty;
-   procedure appendrecord(const values: array of const); overload;
-   procedure appendrecord(const values: variantarty); overload;
+   procedure appendrecord(const values: array of const);
+   procedure appendrecord(const values: array of const;
+                                       const afields: array of tfield);
+   procedure appendrecord(const values: variantarty);
    procedure appenddata(const adata: variantararty; const afields: array of tfield);
                                                      //[] -> all
    procedure getfieldclass(const fieldtype: tfieldtype; out result: tfieldclass);
@@ -7075,15 +7077,21 @@ begin
  result:= locaterecord(tdataset(fowner),dso_utf8 in foptions,key,field,options);
 end;
 }
-procedure tdscontroller.appendrecord(const values: array of const);
+procedure tdscontroller.appendrecord(const values: array of const;
+                                       const afields: array of tfield);
+
 var
- int1: integer;
+ int1,int2: integer;
  field1: tfield;
 begin
  with tdataset(fowner) do begin
   append;
-  for int1:= 0 to high(values) do begin
-   field1:= fields[int1];
+  int2:= high(values);
+  if int2 > high(afields) then begin
+   int2:= high(afields);
+  end;
+  for int1:= 0 to int2 do begin
+   field1:= afields[int1];
    with values[int1] do begin
     case vtype of
      vtInteger:    field1.asinteger:= VInteger;
@@ -7136,6 +7144,20 @@ begin
    end;
   end; 
  end;
+end;
+
+procedure tdscontroller.appendrecord(const values: array of const);
+var
+ ar1: fieldarty;
+ int1: integer;
+begin
+ with tdataset(fowner) do begin
+  setlength(ar1,fields.count);
+  for int1:= 0 to high(ar1) do begin
+   ar1[int1]:= fields[int1];
+  end;
+ end;
+ appendrecord(values,ar1);
 end;
 
 procedure tdscontroller.appendrecord(const values: variantarty);
