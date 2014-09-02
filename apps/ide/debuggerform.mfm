@@ -1,14 +1,12 @@
 object debuggerfo: tdebuggerfo
   frame.grip_size = 10
-  frame.grip_options = [go_closebutton, go_fixsizebutton]
+  frame.grip_options = [go_closebutton, go_fixsizebutton, go_floatbutton, go_topbutton, go_backgroundbutton]
   frame.dummy = 0
   visible = False
   bounds_x = 116
   bounds_y = 131
   bounds_cx = 441
   bounds_cy = 100
-  container.frame.zoomwidthstep = 1
-  container.frame.zoomheightstep = 1
   container.bounds = (
     0
     0
