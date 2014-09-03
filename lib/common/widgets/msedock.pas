@@ -1005,8 +1005,8 @@ begin
  setlength(result,int2);
  setlength(isprop,int2);
  setlength(isfix,int2);
- if (awidgets = nil) and not banded and (fsplitdir in [sd_vert,sd_horz]) and (high(result) > 0) and 
-       (fw^.pos(result[0]) = fw^.pos(result[1])) and 
+ if (awidgets = nil) and not banded and (fsplitdir in [sd_vert,sd_horz]) and 
+       (high(result) > 0) and (fw^.pos(result[0]) = fw^.pos(result[1])) and 
        (finditem(pointerarty(fwidgetsbefore),pointer(result[1])) < 0) then begin
   widget1:= result[0];        //probably revisible
   result[0]:= result[1];
