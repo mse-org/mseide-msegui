@@ -330,6 +330,7 @@ type
    procedure poschanged;
    procedure statechanged(const astate: widgetstatesty);
    procedure widgetregionchanged(const sender: twidget);
+   procedure updateminscrollsize(var asize: sizety);
    procedure beginclientrectchanged;
    procedure endclientrectchanged;
    procedure layoutchanged; //force layout calcualation
@@ -568,6 +569,7 @@ type
    procedure statechanged; override;
    procedure poschanged; override;
    procedure parentchanged; override;
+   function calcminscrollsize: sizety; override;
    //idockcontroller
    function checkdock(var info: draginfoty): boolean;
    function getbuttonrects(const index: dockbuttonrectty): rectty;
@@ -576,7 +578,7 @@ type
    function getcaption: msestring;
    procedure dolayoutchanged(const sender: tdockcontroller); virtual;
    procedure dodockcaptionchanged(const sender: tdockcontroller); virtual;
-   //istatfile
+    //istatfile
    procedure dostatread(const reader: tstatreader);
    procedure dostatwrite(const writer: tstatwriter);
    procedure statreading;
@@ -1996,6 +1998,89 @@ endlab:
   foncalclayout(widget1,ar1);
  end;
  dolayoutchanged;
+end;
+
+procedure tdockcontroller.updateminscrollsize(var asize: sizety);
+var
+ rect1: rectty;
+ ar1: widgetarty;
+ int1,int2: integer;
+ bandlength,bandsize: integer;
+ placementlength,placementsize: integer;
+ maxlength,maxsize: integer;
+ bo1: boolean;
+ firstband: boolean;
+begin
+ if (od_banded in optionsdock) and nofit then begin
+  if (fsplitdir = sd_vert) then begin
+   ar1:= fintf.getwidget.getsortxchildren(true);
+  end
+  else begin
+   ar1:= fintf.getwidget.getsortychildren(true);
+  end;
+  rect1:= idockcontroller(fintf).getplacementrect();
+  placementlength:= fr^.size(rect1);
+  placementsize:= fr^.osize(rect1);
+  bandlength:= 0;
+  bandsize:= 0;
+  maxlength:= 0;
+  maxsize:= 0;
+  bo1:= true;
+  firstband:= true;
+  for int1:= 0 to high(ar1) do begin
+   int2:= fw^.size(ar1[int1])+fsplitter_size;
+   bandlength:= bandlength+int2;
+   if bandlength >= placementlength then begin //next band
+    if not bo1 then begin //shift to next band
+     bandlength:= bandlength - int2;
+     if bandlength > maxlength then begin
+      maxlength:= bandlength;
+     end;
+     bandlength:= int2;
+     bandsize:= bandsize+maxsize;
+     if not firstband then begin
+      bandsize:= bandsize + fbandgap;
+     end;
+     maxsize:= fw^.osize(ar1[int1]);
+    end
+    else begin            //at least one widget
+     if bandlength > maxlength then begin  
+      maxlength:= bandlength;
+     end;
+     bandsize:= bandsize + fw^.osize(ar1[int1]);
+     if not firstband and (int1 < high(ar1)) then begin
+      bandsize:= bandsize + fbandgap;
+     end;
+     bandlength:= 0;
+     maxsize:= 0;
+     bo1:= true; //first widget of band
+    end;
+    firstband:= false;
+   end
+   else begin
+    bo1:= false; //not first widget of band
+    if bandlength > maxlength then begin
+     maxlength:= bandlength;
+    end;
+    int2:= fw^.osize(ar1[int1]);
+    if int2 > maxsize then begin
+     maxsize:= int2;
+    end;
+   end;
+  end;
+  bandsize:= bandsize+maxsize;
+  if not firstband then begin
+   bandsize:= bandsize + fbandgap;
+  end;
+  fr^.setsize(rect1,maxlength);
+  fr^.setosize(rect1,bandsize);
+  if rect1.cx > asize.cx then begin
+   asize.cx:= rect1.cx;
+  end;
+  if rect1.cy > asize.cy then begin
+   asize.cy:= rect1.cy;
+  end;
+ end;
 end;
 
 function tdockcontroller.nofit: boolean;
@@ -5018,6 +5103,14 @@ end;
 function tdockpanel.getstatpriority: integer;
 begin
  result:= fstatpriority;
+end;
+
+function tdockpanel.calcminscrollsize: sizety;
+begin
+ result:= inherited calcminscrollsize();
+ if not (csdesigning in componentstate) then begin
+  fdragdock.updateminscrollsize(result);
+ end;
 end;
 
 { tchildorderevent }
