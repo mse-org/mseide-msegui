@@ -159,7 +159,6 @@ type
    fmodule: tmsecomponent;
    fmoduleintf: pdesignmoduleintfty;
    fmodulesetting: integer;
-   fformcont: tformcontainer;
    fmoduleoptions: moduleoptionsty;
    fsizeerrorcount: integer;
 
@@ -215,6 +214,7 @@ type
    function getmodulerect: rectty;
   protected
    fselections: tformdesignerselections;
+   fformcont: tformcontainer;
    ffostate: formdesignerstatesty;
    fmoduleinfo: pmoduleinfoty;
    fmodulepos: pointty;

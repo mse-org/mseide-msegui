@@ -65,7 +65,10 @@ type
                    var info: mouseeventinfoty);
    procedure reportcontainerscroll(const sender: twidget; const point: pointty);
    procedure repcomtainerchildscaled(const sender: TObject);
-   procedure updatewidgethideexe(const sender: tcustomaction); override;
+//   procedure updatewidgethideexe(const sender: tcustomaction); override;
+//   procedure repshowallexe(const sender: TObject);
+//   procedure reptoglehideexe(const sender: TObject);
+//   procedure rephidewidgetexe(const sender: TObject);
   private
 //   freportcontainer: treportcontainer;
    fstate: reportdesignerstatesty;
@@ -162,23 +165,44 @@ end;
 
 function treportdesignerfo.gridrect: rectty;
 begin
- with reportcontainer do begin
-  result:= intersectrect(inherited gridrect,
-      makerect(translatewidgetpoint(paintpos,reportcontainer,self),paintsize));
+ if reportcontainer.visible then begin
+  with reportcontainer do begin
+   result:= intersectrect(inherited gridrect,
+       makerect(translatewidgetpoint(paintpos,reportcontainer,self),paintsize));
+  end;
+ end
+ else begin
+  with reportcontainer do begin
+   result:= intersectrect(inherited gridrect,
+       makerect(translatewidgetpoint(pos,reportcontainer.parentwidget,self),
+                                                                        size));
+  end;
  end;
 end;
 
 function treportdesignerfo.insertoffset: pointty;
 begin
 // result:= translateclientpoint(nullpoint,reportcontainer,self);
- result:= translatewidgetpoint(nullpoint,reportcontainer,self);
+ if fformcont.visible then begin
+  result:= translatewidgetpoint(reportcontainer.clientwidgetpos,
+                                                 reportcontainer,self);
+//  result:= translatewidgetpoint(nullpoint,reportcontainer,self);
+ end
+ else begin
+  result:= inherited insertoffset;
+ end;
 end;
 
 function treportdesignerfo.widgetrefpoint: pointty;
 begin
- result:= translatewidgetpoint(reportcontainer.pos,
-                                     reportcontainer.parentwidget,self);
- addpoint1(result,reportcontainer.clientpos);
+ if fformcont.visible then begin
+  result:= translatewidgetpoint(reportcontainer.pos,
+                                      reportcontainer.parentwidget,self);
+  addpoint1(result,reportcontainer.clientpos);
+ end
+ else begin
+  result:= inherited widgetrefpoint();
+ end;
 end;
 
 procedure treportdesignerfo.repchildscaled(const sender: TObject);
@@ -534,14 +558,40 @@ end;
 
 procedure treportdesignerfo.setmoduleoptions(const aoptions: moduleoptionsty);
 begin
- inherited setmoduleoptions(aoptions-[mo_hidewidgets]);
+ inherited;
+ if mo_hidewidgets in aoptions then begin
+  reportcontainer.visible:= false;
+ end
+ else begin
+  reportcontainer.visible:= true;
+  fscrollbox.visible:= true;
+  fscrollbox.bringtofront();
+ end;
 end;
-
+{
 procedure treportdesignerfo.updatewidgethideexe(const sender: tcustomaction);
 begin
  //dummy
 end;
 
+procedure treportdesignerfo.rephidewidgetexe(const sender: TObject);
+begin
+ hidewidgetexe(sender);
+ reportcontainer.visible:= fformcont.visible;
+end;
+
+procedure treportdesignerfo.reptoglehideexe(const sender: TObject);
+begin
+ togglehideexe(sender);
+ reportcontainer.visible:= fformcont.visible;
+end;
+
+procedure treportdesignerfo.repshowallexe(const sender: TObject);
+begin
+ showallexe(sender);
+ reportcontainer.visible:= fformcont.visible;
+end;
+}
 {
 procedure treportdesignerfo.poschanged;
 begin

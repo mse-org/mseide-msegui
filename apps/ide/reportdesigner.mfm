@@ -216,13 +216,16 @@ inherited reportdesignerfo: treportdesignerfo
       item
       end    
       item
+        state = [as_localonexecute]
       end    
       item
-        state = [as_disabled, as_invisible]
+        state = [as_localdisabled, as_localinvisible, as_localonexecute]
       end    
       item
+        state = [as_localinvisible, as_localonexecute]
       end    
       item
+        state = [as_localinvisible, as_localonexecute]
       end    
       item
       end    
