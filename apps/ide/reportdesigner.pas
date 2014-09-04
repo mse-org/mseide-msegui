@@ -156,7 +156,8 @@ end;
 
 function treportdesignerfo.insertoffset: pointty;
 begin
- result:= translateclientpoint(nullpoint,reportcontainer,self);
+// result:= translateclientpoint(nullpoint,reportcontainer,self);
+ result:= translatewidgetpoint(nullpoint,reportcontainer,self);
 end;
 
 function treportdesignerfo.widgetrefpoint: pointty;

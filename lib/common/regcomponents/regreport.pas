@@ -44,7 +44,7 @@ procedure Register;
 begin
  registerclass(treport);
  registerclass(treportpage);
- registercomponents('Rep',[{treportpage,}tbandarea,ttilearea,tbandgroup,
+ registercomponents('Rep',[treportpage,tbandarea,ttilearea,tbandgroup,
                     trecordband,
                     trepvaluedisp,treppagenumdisp,trepprintdatedisp,
                     {trepstringdisplb,trepintegerdisplb,treprealdisplb,
