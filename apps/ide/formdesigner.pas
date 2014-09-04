@@ -371,12 +371,12 @@ type
                                                    write setmoduleoptions;
    function clickedcomponent: tcomponent;
    property modulerect: rectty read getmodulerect;
-   procedure updatecaption;
-   procedure placemodule;
-   procedure beginplacement;
-   procedure endplacement;
-   procedure beginstreaming; virtual;
-   procedure endstreaming; virtual;
+   procedure updatecaption();
+   procedure placemodule(); virtual;
+   procedure beginplacement();
+   procedure endplacement();
+   procedure beginstreaming(); virtual;
+   procedure endstreaming(); virtual;
    procedure findcompdialog();
 
    property module: tmsecomponent read fmodule write setmodule;
@@ -2677,7 +2677,9 @@ begin
     frame.grip_size:= 0;
     dragdock.float();
    end;
-   checksynctoformsize();
+   if not fixformsize then begin
+    checksynctoformsize();
+   end;
    endplacement();
   end;
  end;
@@ -3058,11 +3060,11 @@ begin
     if parentwidget = nil then begin //not docked
      fmodulepos:= translatewidgetpoint(rect1.pos,self,nil);
     end;
-    domodified();
    end
    else begin
     fmodulesize:= paintsize;
    end;
+   domodified();
   end;
   fde_scrolled: begin
    fselections.change();

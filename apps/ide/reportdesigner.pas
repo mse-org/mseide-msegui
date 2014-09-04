@@ -96,8 +96,9 @@ type
    constructor create(const aowner: tcomponent; const adesigner: tdesigner;
                       const aintf: pdesignmoduleintfty;
                       const amoduleinfo: pmoduleinfoty); override;
-   procedure beginstreaming; override;
-   procedure endstreaming; override;
+   procedure placemodule(); override;
+   procedure beginstreaming(); override;
+   procedure endstreaming(); override;
  end;
 
 var
@@ -267,6 +268,15 @@ begin
   if (eventkind = ek_buttonpress) and (button = mb_left) then begin
    designer.selectcomponent(report);
   end;
+ end;
+end;
+
+procedure treportdesignerfo.placemodule();
+begin
+ inherited;
+ with tcustomreport1(form).frepdesigninfo.widgetrect do begin
+  fmodulepos:= pos;
+  fmodulesize:= size;
  end;
 end;
 
