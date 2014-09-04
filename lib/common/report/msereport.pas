@@ -1315,7 +1315,8 @@ type
    property onafterpaint;
  end;
  
- reportpagestatety = (rpps_inited,rpps_rendering,rpps_backgroundrendered,
+ reportpagestatety = (rpps_inited,rpps_sizesetting,rpps_rendering,
+                      rpps_backgroundrendered,
                       rpps_restart,
                       rpps_showed,rpps_finish,rpps_notfirstrecord,rpps_lastrecord,
                       rpps_nextrecordpending);
@@ -1347,6 +1348,7 @@ type
    fonafterrender: reportpageeventty;
    fonpaint: reportpagepainteventty;
    fonafterpaint: reportpagepainteventty;
+   fpagedim: sizety;
    fpagewidth: real;
    fpageheight: real;
    fppmm: real;
@@ -5735,7 +5737,31 @@ end;
 
 procedure tcustomreportpage.updatepagesize;
 begin
- size:= makesize(round(getpagewidth*fppmm),round(getpageheight*fppmm));
+ if not (rpps_sizesetting in fstate) then begin
+  include(fstate,rpps_sizesetting);
+  size:= makesize(round(getpagewidth*fppmm),round(getpageheight*fppmm));
+  fpagedim:= size;
+  exclude(fstate,rpps_sizesetting);
+ end;
+end;
+
+procedure tcustomreportpage.sizechanged;
+begin
+ if (freport <> nil) and visible then begin
+  freport.size:= size;
+ end;
+ inherited;
+ if (csdesigning in componentstate) and
+                  not (rpps_sizesetting in fstate) then begin
+  if width <> fpagedim.cx then begin
+   fpagedim.cx:= width;
+   fpagewidth:= fpagedim.cx / fppmm;
+  end;
+  if height <> fpagedim.cy then begin
+   fpagedim.cy:= height;
+   fpageheight:= fpagedim.cy / fppmm;
+  end;
+ end;
 end;
 
 procedure tcustomreportpage.setppmm(const avalue: real);
@@ -5768,14 +5794,6 @@ begin
  else begin
   inherited;
  end;  
-end;
-
-procedure tcustomreportpage.sizechanged;
-begin
- if (freport <> nil) and visible then begin
-  freport.size:= size;
- end;
- inherited;
 end;
 
 procedure tcustomreportpage.dofirstpage;

@@ -15,7 +15,7 @@ object componentstorefo: tcomponentstorefo
     354
   )
   dragdock.caption = 'Component Store'
-  dragdock.optionsdock = [od_savepos, od_savezorder, od_canfloat, od_candock, od_proportional, od_propsize]
+  dragdock.optionsdock = [od_savepos, od_savezorder, od_canmove, od_cansize, od_canfloat, od_candock, od_proportional, od_propsize]
   options = [fo_savepos, fo_savezorder, fo_savestate]
   statfile = mainfo.projectstatfile
   icon.transparentcolor = -2147483642

@@ -80,7 +80,8 @@ type
    function checkmarker(const ainfo: formselectedinfoty): markerkindty;
    function getrecordsize: integer; override;
    procedure externalcomponentchanged(const acomponent: tobject);
-   procedure removeforeign; //removes form and components in other modules
+   procedure removeforeign(const checkmove: boolean);
+                       //removes form and components in other modules
    property candelete: boolean read getcandelete;
   public
    constructor create(const owner: tformdesignerfo);
@@ -711,7 +712,7 @@ end;
 procedure tformdesignerselections.beforepaintmoving;
 begin
  if not fmovingchecked then begin
-  removeforeign;
+  removeforeign(true);
   fmovingchecked:= true;
  end;
  updateinfos;
@@ -1063,7 +1064,7 @@ begin
  result:= inherited remove(ainstance);
 end;
 
-procedure tformdesignerselections.removeforeign; 
+procedure tformdesignerselections.removeforeign(const checkmove: boolean); 
     //removes form and components in other modules
 var
  int1: integer;
@@ -1072,7 +1073,9 @@ begin
  beginupdate;
  for int1:= count - 1 downto 0 do begin
   co1:= items[int1];
-  if (co1 = fowner.module) or not fowner.module.checkowned(co1) then begin
+  if (co1 = fowner.module) or not fowner.module.checkowned(co1) or
+            (checkmove and (co1 is twidget) and 
+              (ws1_nodesignmove in twidget1(co1).fwidgetstate1)) then begin
    delete(int1);
   end;
  end;
@@ -2195,7 +2198,7 @@ begin
      end;             
     end;
    end;
-   removeforeign;
+   removeforeign(false);
    fdelobjs:= fselections.getobjinfoar;
    deletecomponents;
   end;
