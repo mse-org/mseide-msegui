@@ -135,7 +135,8 @@ type
    procedure deleteexe(const sender: TObject);
    procedure undeleteexe(const sender: TObject);
    procedure cutexe(const sender: TObject);
-   procedure calcscrollsize(const sender: tscrollingwidgetnwr; var asize: sizety);
+   procedure calcscrollsize(const sender: tscrollingwidgetnwr;
+                                                        var asize: sizety);
    procedure formdeonclose(const sender: TObject);
    procedure revertexe(const sender: TObject);
    procedure doinsertcomponent(const sender: TObject);
@@ -171,7 +172,6 @@ type
    factarea: areaty;
    factcompindex: integer;
    fselecting: integer;
-   fselections: tformdesignerselections;
    fgridsizex: integer;
    fgridsizey: integer;
    fsnaptogrid: boolean;
@@ -200,7 +200,6 @@ type
    procedure setgridsizex(const avalue: integer);
    procedure setgridsizey(const avalue: integer);
    procedure doundelete;
-   procedure dodelete;
    procedure dopaste(const usemousepos: boolean; const adata: string);
    procedure docopy(const noclear: boolean);
    procedure docut;
@@ -214,6 +213,7 @@ type
    function filterfindcomp(const acomponent: tcomponent): boolean;
    function getmodulerect: rectty;
   protected
+   fselections: tformdesignerselections;
    ffostate: formdesignerstatesty;
    fmoduleinfo: pmoduleinfoty;
    fmodulepos: pointty;
@@ -312,10 +312,12 @@ type
    function getdesignrect: rectty; virtual;
    procedure setdesignrect(const arect: rectty); virtual;
 //   procedure deletecomponent(const comp: tcomponent);
-   function candelete(const acomponent: tcomponent): boolean; virtual;
+//   function candelete(const acomponent: tcomponent): boolean; virtual;
+   function checkdelete(): boolean; virtual;
+   function dodelete: boolean; //true if ok
    procedure componentmoving(const apos: pointty); virtual;
    procedure placecomponent(const component: tcomponent; const apos: pointty;
-                                 aparent: tcomponent = nil);
+                                 aparent: tcomponent = nil); virtual;
    function getmoduleoptions: moduleoptionsty;
    procedure setmoduleoptions(const aoptions: moduleoptionsty); virtual;
 
@@ -1030,25 +1032,7 @@ begin
 end;
 
 procedure tformdesignerselections.deletecomponents;
-{
-var
- int1: integer;
- int2: integer;
-}
 begin
-{
- int2:= count;
- beginupdate;
- for int1:= count-1 downto 0 do begin
-  if isembedded(items[int1]) then begin
-   delete(int1);
-  end;
- end;
- endupdate;
- if count <> int2 then begin
-  fowner.updateselections;
- end;
-}
  fowner.fDesigner.DeleteSelection;
 end;
 
@@ -2188,26 +2172,30 @@ begin
  end;
 end;
 
-procedure tformdesignerfo.dodelete;
+function tformdesignerfo.dodelete(): boolean;
 var
  int1: integer;
 begin
- with fselections do begin  
-  for int1:= 0 to count - 1 do begin
-   with items[int1] do begin
-    if componentstate * [csancestor,csinline] = [csancestor] then begin
-     showmessage(actionsmo.c[ord(ac_inheritedcomp)]+name+
-                     actionsmo.c[ord(ac_cannotdel)],actionsmo.c[ord(ac_error)]);
-     exit;
-    end;             
+ result:= false;
+ if checkdelete() then begin
+  with fselections do begin  
+   for int1:= 0 to count - 1 do begin
+    with items[int1] do begin
+     if componentstate * [csancestor,csinline] = [csancestor] then begin
+      showmessage(actionsmo.c[ord(ac_inheritedcomp)]+name+
+                      actionsmo.c[ord(ac_cannotdel)],actionsmo.c[ord(ac_error)]);
+      exit;
+     end;             
+    end;
    end;
+   removeforeign;
+   fdelobjs:= fselections.getobjinfoar;
+   deletecomponents;
   end;
-  removeforeign;
-  fdelobjs:= fselections.getobjinfoar;
-  deletecomponents;
+ // domodified;
+  clientsizechanged;
+  result:= true;
  end;
-// domodified;
- clientsizechanged;
 end;
 
 
@@ -3743,11 +3731,12 @@ begin
   end;
  end;
 end;
-
+{
 function tformdesignerfo.candelete(const acomponent: tcomponent): boolean;
 begin
  result:= true;
 end;
+}
 {
 function tformdesignerfo.gridsizex: integer;
 begin
@@ -4622,6 +4611,11 @@ begin
   rect:= widgetrect;
  end;
 }
+end;
+
+function tformdesignerfo.checkdelete: boolean;
+begin
+ result:= true;
 end;
 
 { tformdesignerdockcontroller }

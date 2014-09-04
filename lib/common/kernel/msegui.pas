@@ -153,7 +153,7 @@ type
                    ws1_noclipchildren,ws1_tryshrink,
                    ws1_noframewidgetshift,ws1_framemouse,
                    ws1_nodesignvisible,ws1_nodesignframe,ws1_nodesignhandles,
-                   ws1_nodesigndelete,ws1_designactive,
+                   ws1_nodesigndelete,ws1_designactive,ws1_designwidget,
                    ws1_fakevisible,ws1_nominsize,
                          //used for report size calculations
                    ws1_onkeydowncalled
@@ -12800,7 +12800,8 @@ end;
 
 function twidget.isdesignwidget: boolean;
 begin
- result:= csdesigning in componentstate;
+ result:= (csdesigning in componentstate) or 
+                                    (ws1_designwidget in fwidgetstate1);
 end;
 
 { twindow }

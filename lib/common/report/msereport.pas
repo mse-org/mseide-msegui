@@ -1646,14 +1646,17 @@ type
    property lastpagecount: integer read flastpagecount write flastpagecount;
    property activepage: integer read factivepage write setactivepage;
    procedure finish;
-   property printstarttime: tdatetime read fprintstarttime write fprintstarttime;
+   property printstarttime: tdatetime read fprintstarttime 
+                                                    write fprintstarttime;
    property nilstream: boolean read fnilstream;
                            //true if reder called with nil stream
 
    property font: trepfont read getfont write setfont;
    property color default cl_transparent;
-   property grid_show: boolean read frepdesigninfo.showgrid write setgrid_show default true;
-   property grid_snap: boolean read frepdesigninfo.snaptogrid write setgrid_snap default true;
+   property grid_show: boolean read frepdesigninfo.showgrid 
+                                             write setgrid_show default true;
+   property grid_snap: boolean read frepdesigninfo.snaptogrid 
+                                             write setgrid_snap default true;
    property grid_size: real read frepdesigninfo.gridsize write setgrid_size;   
    property canceled: boolean read getcanceled write setcanceled;
    property running: boolean read getrunning;
@@ -1663,7 +1666,8 @@ type
    property dialogcaption: msestring read fdialogcaption write fdialogcaption;
 
    property onpreamble: preambleeventty read fonpreamble write fonpreamble;
-   property onreportstart: reporteventty read fonreportstart write fonreportstart;
+   property onreportstart: reporteventty read fonreportstart 
+                                                         write fonreportstart;
    property onbeforerender: reporteventty read fonbeforerender
                                write fonbeforerender;
    property onafterrender: reporteventty read fonafterrender
@@ -1671,8 +1675,8 @@ type
    property onreportfinished: notifyeventty read fonreportfinished 
                                                      write fonreportfinished;
         //executed in main thread context
-   property onpagebeforerender: beforerenderpageeventty read fonpagebeforerender
-                               write fonpagebeforerender;
+   property onpagebeforerender: beforerenderpageeventty 
+                    read fonpagebeforerender write fonpagebeforerender;
    property onpagepaint: reportpagepainteventty read fonpagepaint 
                         write fonpagepaint;
    property onpageafterpaint: reportpagepainteventty read fonpageafterpaint 

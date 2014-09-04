@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2013 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2014 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -28,10 +28,14 @@ const
  
 type
  treportdesignerfo = class;
+ {
  treportcontainer = class(tscrollbox)
+  protected
+   function isdesignwidget(): boolean; override;
   public
    constructor create(aowner: tcomponent); override;
  end;
+ }
  reportdesignerstatety = (rds_tabupdating,rds_mouseinclient);
  reportdesignerstatesty = set of reportdesignerstatety;
  
@@ -88,8 +92,11 @@ type
    procedure doasyncevent(var atag: integer); override;
    procedure componentselected(const aselections: tformdesignerselections);
                                                                       override;
+   procedure placecomponent(const component: tcomponent; const apos: pointty;
+                                 aparent: tcomponent = nil); override;
    function fixformsize: boolean; override;
-   function candelete(const acomponent: tcomponent): boolean; override;
+//   function candelete(const acomponent: tcomponent): boolean; override;
+   function checkdelete(): boolean; override;
    procedure componentmoving(const apos: pointty); override;
    procedure updatedials;
    procedure setmousemarkers(const avalue: pointty; const source: twidget);
@@ -110,15 +117,16 @@ implementation
 uses
  reportdesigner_mfm,msearrayutils,msegraphics,msewidgets,msereal;
 type
+ tcustomreport1 = class(tcustomreport);
+ twidget1 = class(twidget);
+ 
  stringconsts = (
   sc_wishdelete,     //0 Do you wish to delete
   sc_warning         //1 WARNING
  );
  
- tcustomreport1 = class(tcustomreport);
- 
 { treportcontainer }
-
+{
 constructor treportcontainer.create(aowner: tcomponent);
 begin
  inherited;
@@ -127,6 +135,11 @@ begin
  anchors:= [an_top,an_bottom];
 end;
 
+function treportcontainer.isdesignwidget: boolean;
+begin
+ result:= true;
+end;
+}
 { treportdesignerfo }
 
 constructor treportdesignerfo.create(const aowner: tcomponent;
@@ -134,6 +147,7 @@ constructor treportdesignerfo.create(const aowner: tcomponent;
         const amoduleinfo: pmoduleinfoty);
 begin
  inherited;
+ include(twidget1(pointer(reportcontainer)).fwidgetstate1,ws1_designwidget);
 end;
 
 function treportdesignerfo.fixformsize: boolean;
@@ -236,7 +250,8 @@ begin
  end;
 end;
 
-procedure treportdesignerfo.componentselected(const aselections: tformdesignerselections);
+procedure treportdesignerfo.componentselected(
+                          const aselections: tformdesignerselections);
 var
  int1,int2: integer;
  widget1: twidget;
@@ -310,7 +325,7 @@ procedure treportdesignerfo.popupupda(const sender: tcustommenu);
 begin
  popupme.menu.itembyname('delpage').enabled:= tabbar.activetab >= 0;
 end;
-
+{
 function treportdesignerfo.candelete(const acomponent: tcomponent): boolean;
 var
  int1: integer;
@@ -325,6 +340,39 @@ begin
   end;
  end;
 end;
+}
+
+function treportdesignerfo.checkdelete(): boolean;
+var
+ int1,int2: integer;
+ comp1: tcomponent;
+ pages: reportpagearty;
+ bo1: boolean;
+begin
+ result:= false;
+ if inherited checkdelete() then begin
+  pages:= tcustomreport1(report).freppages;
+  bo1:= false;
+  with fselections do begin  
+   for int1:= 0 to count - 1 do begin
+    comp1:= items[int1];
+    for int2:= 0 to high(pages) do begin
+     if pages[int1] = comp1 then begin
+      bo1:= true;
+      if not askyesno('Do you want to delete reportpage "'+
+                                      comp1.name+'"?') then begin
+       exit;
+      end;
+     end;
+    end;
+   end;
+  end;
+  if bo1 then begin
+   updatetabs;
+  end;
+  result:= true;
+ end;
+end;
 
 procedure treportdesignerfo.addpage(const sender: TObject);
 var
@@ -334,6 +382,19 @@ begin
  placecomponent(comp1,translatewidgetpoint(reportcontainer.pos,
                                     reportcontainer.parentwidget,self),report);
  updatetabs;
+end;
+
+procedure treportdesignerfo.placecomponent(const component: tcomponent;
+               const apos: pointty; aparent: tcomponent = nil);
+begin
+ if component is tcustomreportpage then begin
+  inherited placecomponent(component,
+                     translatewidgetpoint(reportcontainer.pos,
+                                    reportcontainer.parentwidget,self),report);
+ end
+ else begin
+  inherited;
+ end;
 end;
 
 procedure treportdesignerfo.deletepage(const sender: TObject);
@@ -480,6 +541,7 @@ procedure treportdesignerfo.updatewidgethideexe(const sender: tcustomaction);
 begin
  //dummy
 end;
+
 {
 procedure treportdesignerfo.poschanged;
 begin
