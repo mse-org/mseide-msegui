@@ -217,6 +217,10 @@ var
  int1: integer;
 begin
  if report <> nil then begin
+  if report.reppagecount = 0 then begin
+   addpage(nil);
+   exit;
+  end;
   tabbar.tabs.count:= report.reppagecount;
   for int1:= 0 to tabbar.tabs.count - 1 do begin
    tabbar.tabs[int1].caption:= report[int1].name;
@@ -381,7 +385,7 @@ begin
    for int1:= 0 to count - 1 do begin
     comp1:= items[int1];
     for int2:= 0 to high(pages) do begin
-     if pages[int1] = comp1 then begin
+     if pages[int2] = comp1 then begin
       bo1:= true;
       if not askyesno('Do you want to delete reportpage "'+
                                       comp1.name+'"?') then begin
