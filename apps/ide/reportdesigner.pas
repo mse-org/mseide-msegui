@@ -71,6 +71,7 @@ type
    function report: tcustomreport;
    function getmoduleparent: twidget; override;
    function getdesignrect: rectty; override;
+   function getmodulesize: sizety; override;
    function gridrect: rectty; override;
    function insertoffset: pointty; override;
    function widgetrefpoint: pointty; override;
@@ -297,6 +298,11 @@ end;
 function treportdesignerfo.getdesignrect: rectty;
 begin
  result:= tcustomreport1(form).frepdesigninfo.widgetrect;
+end;
+
+function treportdesignerfo.getmodulesize: sizety;
+begin
+ result:= tcustomreport1(form).frepdesigninfo.widgetrect.size;
 end;
 
 procedure treportdesignerfo.popupupda(const sender: tcustommenu);

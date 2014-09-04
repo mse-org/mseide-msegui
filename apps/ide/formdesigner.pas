@@ -212,7 +212,6 @@ type
    procedure setmodule(const value: tmsecomponent);
    function getselections: tformdesignerselections;
    function filterfindcomp(const acomponent: tcomponent): boolean;
-   function getmodulesize: sizety;
    function getmodulerect: rectty;
   protected
    ffostate: formdesignerstatesty;
@@ -296,6 +295,7 @@ type
    procedure componentselected(
                        const aselections: tformdesignerselections); virtual;
    function getmoduleparent: twidget; virtual;
+   function getmodulesize: sizety; virtual;
    function insertoffset: pointty; virtual;
    function gridoffset: pointty; virtual;
    function gridrect: rectty; virtual;
@@ -3060,11 +3060,14 @@ begin
     if parentwidget = nil then begin //not docked
      fmodulepos:= translatewidgetpoint(rect1.pos,self,nil);
     end;
+    domodified();
    end
    else begin
-    fmodulesize:= paintsize;
+    if parentwidget = nil then begin //not docked
+     fmodulesize:= paintsize;
+     domodified();
+    end;
    end;
-   domodified();
   end;
   fde_scrolled: begin
    fselections.change();
@@ -3088,7 +3091,7 @@ end;
 procedure tformdesignerfo.checksynctoformsize();
 begin
  if (fparentwidget = nil) and (fds_loaded in ffostate) then begin
-  if fform <> nil then begin
+  if (fform <> nil) and not fixformsize then begin
    fformcont.size:= fform.size;   //not docked
    paintsize:= fformcont.size;
   end
