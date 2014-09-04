@@ -150,7 +150,7 @@ function treportdesignerfo.gridrect: rectty;
 begin
  with reportcontainer do begin
   result:= intersectrect(inherited gridrect,
-                 makerect(addpoint(paintpos,pos),paintsize));
+      makerect(translatewidgetpoint(paintpos,reportcontainer,self),paintsize));
  end;
 end;
 
