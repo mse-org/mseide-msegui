@@ -746,7 +746,14 @@ begin
   if not nohandles then begin
    if fowner.module.checkowned(selectedinfo.instance) then begin
     if (selectedinfo.instance <> fowner.module) then begin
-     result:= mak_all;
+     if (selectedinfo.instance is twidget) and 
+        (ws1_nodesignmove in 
+           twidget1(selectedinfo.instance).fwidgetstate1) then begin
+      result:= mak_module;
+     end
+     else begin
+      result:= mak_all;
+     end;
     end
     else begin
      if (fowner.parentwidget <> nil) and (fowner.fform <> nil) and
