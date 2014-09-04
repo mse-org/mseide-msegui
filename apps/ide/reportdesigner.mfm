@@ -1,7 +1,7 @@
 inherited reportdesignerfo: treportdesignerfo
   bounds_x = 336
   bounds_y = 137
-  bounds_cx = 205
+  bounds_cx = 338
   bounds_cy = 459
   container.color = -1879048185
   container.onlayout = repchildscaled
@@ -10,7 +10,7 @@ inherited reportdesignerfo: treportdesignerfo
   container.bounds = (
     0
     0
-    205
+    338
     459
   )
   onclose = nil
@@ -24,7 +24,7 @@ inherited reportdesignerfo: treportdesignerfo
     taborder = 4
     bounds_x = 7
     bounds_y = 18
-    bounds_cx = 199
+    bounds_cx = 331
     bounds_cy = 7
     anchors = [an_left, an_top, an_right]
     dial.options = []
@@ -68,7 +68,7 @@ inherited reportdesignerfo: treportdesignerfo
     color = -1879048187
     bounds_x = 120
     bounds_y = 0
-    bounds_cx = 0
+    bounds_cx = 218
     bounds_cy = 18
     anchors = [an_left, an_top, an_right]
     onactivetabchange = tabcha
@@ -86,8 +86,8 @@ inherited reportdesignerfo: treportdesignerfo
     taborder = 1
     bounds_x = 7
     bounds_y = 25
-    bounds_cx = 188
-    bounds_cy = 434
+    bounds_cx = 330
+    bounds_cy = 449
     anchors = [an_left, an_top, an_right, an_bottom]
     onlayout = repcomtainerchildscaled
     onscroll = reportcontainerscroll
@@ -108,7 +108,7 @@ inherited reportdesignerfo: treportdesignerfo
     bounds_x = 0
     bounds_y = 25
     bounds_cx = 7
-    bounds_cy = 590
+    bounds_cy = 605
     anchors = [an_left, an_top, an_bottom]
     dial.widthmm = 0.3
     dial.direction = gd_down

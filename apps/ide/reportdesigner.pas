@@ -78,6 +78,8 @@ type
    function getgridsizey: integer; override;
    function getshowgrid: boolean; override;
    function getsnaptogrid: boolean; override;
+//   procedure poschanged(); override;
+//   procedure sizechanged(); override;
    procedure checktabs;
    procedure updatetabs;
    procedure validaterename(acomponent: tcomponent;
@@ -271,7 +273,10 @@ end;
 procedure treportdesignerfo.beginstreaming;
 begin
 // tcustomreport1(form).frepdesigninfo.widgetrect:= widgetrect;
- tcustomreport1(form).frepdesigninfo.widgetrect:= paintrect;
+ with tcustomreport1(form).frepdesigninfo.widgetrect do begin
+  pos:= fmodulepos;
+  size:= fmodulesize;
+ end;
 end;
 
 procedure treportdesignerfo.endstreaming;
@@ -458,6 +463,22 @@ procedure treportdesignerfo.updatewidgethideexe(const sender: tcustomaction);
 begin
  //dummy
 end;
+{
+procedure treportdesignerfo.poschanged;
+begin
+ inherited;
+ if parentwidget = nil then begin //not docked
+  tcustomreport1(form).frepdesigninfo.widgetrect:= widgetrect;
+ end;
+end;
 
+procedure treportdesignerfo.sizechanged;
+begin
+ inherited;
+ if parentwidget = nil then begin //not docked
+  tcustomreport1(form).frepdesigninfo.widgetrect:= widgetrect;
+ end;
+end;
+}
 end.
 

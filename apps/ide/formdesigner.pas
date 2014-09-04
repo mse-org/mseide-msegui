@@ -160,8 +160,6 @@ type
    fformcont: tformcontainer;
    fmoduleoptions: moduleoptionsty;
    fsizeerrorcount: integer;
-   fmodulepos: pointty;
-
 
    fpickpos: pointty;
    fmousepos: pointty;
@@ -219,6 +217,8 @@ type
   protected
    ffostate: formdesignerstatesty;
    fmoduleinfo: pmoduleinfoty;
+   fmodulepos: pointty;
+   fmodulesize: sizety;
     //iformdesigner
    function getmodulepos_x(): integer;
    function getmodulepos_y(): integer;
@@ -3059,6 +3059,9 @@ begin
      fmodulepos:= translatewidgetpoint(rect1.pos,self,nil);
     end;
     domodified();
+   end
+   else begin
+    fmodulesize:= paintsize;
    end;
   end;
   fde_scrolled: begin
@@ -3225,6 +3228,7 @@ begin
   updatemodulename();
   if fmodule is twidget then begin
    fmodulepos:= twidget(fmodule).pos;
+   fmodulesize:= twidget(fmodule).size;
    setlinkedvar(fmodule,tmsecomponent(fform));
    rect1:= getdesignrect;
    widgetrect:= inflaterect(rect1,frame.paintframe);
@@ -3235,7 +3239,8 @@ begin
   else begin
    fform:= nil;
    fmodulepos:= getcomponentpos(fmodule);
-   widgetrect:= inflaterect(modulerect,frame.paintframe);
+   fmodulesize:= getmodulesize();
+   widgetrect:= inflaterect(mr(fmodulepos,fmodulesize),frame.paintframe);
   end;
   doupdatecaption();
  finally
