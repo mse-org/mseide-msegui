@@ -29,7 +29,7 @@ object formdesignerfo: tformdesignerfo
     287
     300
   )
-  dragdock.optionsdock = [od_savepos, od_savezorder, od_canmove, od_cansize, od_canfloat, od_candock]
+  dragdock.optionsdock = [od_savepos, od_savezorder, od_canmove, od_cansize, od_canfloat, od_candock, od_propsize]
   dragdock.onbeforefloat = beffloatexe
   dragdock.onfloat = floatexe
   optionswindow = [wo_notaskbar]
