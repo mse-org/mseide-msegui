@@ -1489,8 +1489,8 @@ begin
     if iswidgetcomp(comp1) then begin
      bo1:= form.checkdescendent(twidget(comp1));
      if usemousepos then begin
-      finitcompsoffset:= subpoint(dosnaptogrid(fmousepos),
-                                          twidget(comp1).rootpos);
+      finitcompsoffset:= 
+             translatewidgetpoint(finitcompsoffset,self,twidget(comp1));
      end;
     end;
    end;
@@ -2754,9 +2754,10 @@ begin
       until bo1;
       component.name:= str2;
      end;
-     po1:= subpoint(dosnaptogrid(apos),form.rootpos);
+//     po1:= subpoint(dosnaptogrid(apos),form.rootpos);
+     po1:= dosnaptogrid(apos);
      twidget(aparent).insertwidget(twidget(component),
-             translatewidgetpoint(po1,form,twidget(aparent)));
+             translatewidgetpoint(po1,self,twidget(aparent)));
      twidget(component).initnewwidget(rea1);
     end;
    end
@@ -3488,7 +3489,7 @@ begin
     dopopup(info.mouse);
    end;
    if not (es_processed in eventstate) then begin
-testvar:= ss_double in shiftstate;
+//   (*
     area1:= fselections.getareainfo(mousepos1,int1);
     bo2:= not ((eventkind = ek_buttonpress) and (button = mb_left) and 
                      (ss1 = [ss_left]));
@@ -3507,9 +3508,12 @@ testvar:= ss_double in shiftstate;
          ) and 
        ((factarea < firsthandle) or (factarea > lasthandle)) and 
        (factarea <> ar_componentmove) then begin
+//     pt1:= pos;
      twindow1(window).dispatchmouseevent(info,capture); //"inherited"
-//     exclude(eventstate,es_processed);
+//     pos:= pt1; //restore
+     exclude(eventstate,es_processed);
     end;
+//    *)
     if bo1 then begin
      if ss_ctrl in ss1 then begin
       selectcomponent(component,sm_flip);
@@ -3611,8 +3615,8 @@ testvar:= ss_double in shiftstate;
       ar_selectrect: begin
        if fpickwidget <> nil then begin
         rect1.pos:= fpickpos;
-        rect1.cx:= pos.x - fpickpos.x;
-        rect1.cy:= pos.y - fpickpos.y;
+        rect1.cx:= mousepos1.x - fpickpos.x;
+        rect1.cy:= mousepos1.y - fpickpos.y;
         if (rect1.cx < 0) or (rect1.cy < 0) then begin
          selectmode:= sm_remove;
         end
@@ -3634,8 +3638,7 @@ testvar:= ss_double in shiftstate;
           end;
          end;
          if fpickwidget <> self then begin
-          rect1.pos:= translatewidgetpoint(fpickpos,self,
-                                        fpickwidget.parentwidget);
+          rect1.pos:= translatewidgetpoint(fpickpos,self,fpickwidget);
           for int1:= 0 to fpickwidget.widgetcount -1 do begin
            widget1:= fpickwidget[int1];
            if rectinrect(widget1.widgetrect,rect1) then begin
