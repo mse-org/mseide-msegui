@@ -3408,7 +3408,7 @@ var
 
 
 var
- component: tcomponent;
+ component,comp1: tcomponent;
  int1: integer;
  bo1,bo2: boolean;
  widget1: twidget;
@@ -3440,8 +3440,8 @@ begin
   end;
   component:= nil;
   if not (es_processed in eventstate) then begin
+   comp1:= fclickedcompbefore;
    bo1:= false;
-
    if (eventkind = ek_buttonpress) and (button = mb_left) then begin
     fpickpos:= mousepos1;
     if (ss1 = [ss_left]) or (ss1 = [ss_left,ss_ctrl]) or 
@@ -3492,20 +3492,23 @@ testvar:= ss_double in shiftstate;
     area1:= fselections.getareainfo(mousepos1,int1);
     bo2:= not ((eventkind = ek_buttonpress) and (button = mb_left) and 
                      (ss1 = [ss_left]));
-    if not ((ss_double in shiftstate) and (eventkind = ek_buttonpress)) and 
+    if not ((ss_double in shiftstate) and (eventkind = ek_buttonpress)
+                 or (ss1 = [ss_left,ss_shift])) and 
          (bo2 or 
-         ((area1 < firsthandle) or (area1 > lasthandle)) and
-         (not (fdesigner.hascurrentcomponent or 
+          ((area1 < firsthandle) or (area1 > lasthandle)) and
+          (not (fdesigner.hascurrentcomponent or 
                                       componentstorefo.hasselection)) and 
-         ((area1 <> ar_component) or (fselections[int1] = fmodule) or
-          isdatasubmodule(fselections[int1]))
+          (area1 <> ar_component)
+         {(fselections[int1] = fmodule) or
+          isdatasubmodule(fselections[int1]))}
          { and 
            not((fselections[int1] is twidget) or 
                isdatasubmodule(fselections[int1]))}
-       ) and 
+         ) and 
        ((factarea < firsthandle) or (factarea > lasthandle)) and 
        (factarea <> ar_componentmove) then begin
      twindow1(window).dispatchmouseevent(info,capture); //"inherited"
+//     exclude(eventstate,es_processed);
     end;
     if bo1 then begin
      if ss_ctrl in ss1 then begin
@@ -3794,7 +3797,7 @@ begin
      end;
      key_escape: begin
       if not (factarea in [ar_none,ar_component]) then begin
-       hidexorpic(container.getcanvas(org_widget));
+       hidexorpic(getcanvas(org_widget));
        fxorpicactive:= false;
        factarea:= ar_none;
       end
