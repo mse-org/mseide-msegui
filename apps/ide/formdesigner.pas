@@ -3671,13 +3671,17 @@ begin
 end;
 
 function tformdesignerfo.markerrect: rectty;
+var
+ widget1: twidget;
 begin
  if (form = nil) or hidewidgetact.checked then begin
-  result:= container.paintrect;
+  widget1:= container;
  end
  else begin
-  result:= fformcont.paintrect;
+  widget1:= fformcont;
  end;
+ result:= mr(translatewidgetpoint(widget1.paintpos,widget1,self),
+                                                      widget1.paintsize); 
 end;
 
 function tformdesignerfo.widgetrefpoint: pointty;
@@ -3997,11 +4001,9 @@ var
   case factarea of
    ht_top,ht_bottom: begin
     mousepos1.x:= fpickpos.x;
-//    info.mouse.pos.x:= fpickpos.x;
    end;
    ht_left,ht_right: begin
     mousepos1.y:= fpickpos.y;
-  //  info.mouse.pos.y:= fpickpos.y;
    end;
   end;
   application.mouse.move(subpoint(pos1,posbefore));
@@ -4041,7 +4043,7 @@ label
  1;
 begin
  if module = nil then begin
-  exit; //continue nornal handling
+  exit; //continue normal handling
  end;
  if info.mouse.eventkind in [ek_mouseleave,ek_mouseenter] then begin
   fclickedcompbefore:= nil;
@@ -4189,7 +4191,6 @@ begin
         if (component is twidget) and (form <> nil) then begin
          with twidget(component) do begin
           translatewidgetpoint1(factsizerect.pos,self,parentwidget);
-//          subpoint1(factsizerect.pos,parentwidget.rootpos);
           widgetrect:= factsizerect;
          end;
          fselections.componentschanged;
@@ -4199,7 +4200,6 @@ begin
           rect1:= getcomponentrect1(component);          
           with tmsedatamodule(component) do begin
            subpoint1(factsizerect.pos,rect1.pos);
-//////           subpoint1(factsizerect.pos,parentwidget.rootpos);
            setcomponentpos(component,
                 addpoint(getcomponentpos(component),factsizerect.pos));
            size:= factsizerect.size;
@@ -4249,7 +4249,6 @@ begin
          if fpickwidget <> self then begin
           rect1.pos:= translatewidgetpoint(fpickpos,self,
                                         fpickwidget.parentwidget);
-//          rect1.pos:= subpoint(fpickpos,fpickwidget.rootpos);
           for int1:= 0 to fpickwidget.widgetcount -1 do begin
            widget1:= fpickwidget[int1];
            if rectinrect(widget1.widgetrect,rect1) then begin
