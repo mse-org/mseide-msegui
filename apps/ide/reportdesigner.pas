@@ -77,19 +77,20 @@ type
    procedure setmoduleoptions(const aoptions: moduleoptionsty); override;
    function report: tcustomreport;
    function getmoduleparent: twidget; override;
-   function getdesignrect: rectty; override;
-   function getmodulesize: sizety; override;
-   function gridrect: rectty; override;
-   function insertoffset: pointty; override;
-   function widgetrefpoint: pointty; override;
-   function getgridsizex: integer; override;
-   function getgridsizey: integer; override;
-   function getshowgrid: boolean; override;
-   function getsnaptogrid: boolean; override;
+   function markerrect(): rectty; override;
+   function getdesignrect(): rectty; override;
+   function getmodulesize(): sizety; override;
+   function gridrect(): rectty; override;
+   function insertoffset(): pointty; override;
+   function widgetrefpoint(): pointty; override;
+   function getgridsizex(): integer; override;
+   function getgridsizey(): integer; override;
+   function getshowgrid(): boolean; override;
+   function getsnaptogrid(): boolean; override;
 //   procedure poschanged(); override;
 //   procedure sizechanged(); override;
-   procedure checktabs;
-   procedure updatetabs;
+   procedure checktabs();
+   procedure updatetabs();
    procedure validaterename(acomponent: tcomponent;
                                       const curname, newname: string); override;
    procedure doasyncevent(var atag: integer); override;
@@ -577,46 +578,14 @@ begin
   fscrollbox.bringtofront();
  end;
 end;
-{
-procedure treportdesignerfo.updatewidgethideexe(const sender: tcustomaction);
+
+function treportdesignerfo.markerrect(): rectty;
 begin
- //dummy
+ result:= inherited markerrect();
+ intersectrect1(result,mr(
+   translatewidgetpoint(reportcontainer.paintpos,reportcontainer,self),
+   reportcontainer.paintsize));
 end;
 
-procedure treportdesignerfo.rephidewidgetexe(const sender: TObject);
-begin
- hidewidgetexe(sender);
- reportcontainer.visible:= fformcont.visible;
-end;
-
-procedure treportdesignerfo.reptoglehideexe(const sender: TObject);
-begin
- togglehideexe(sender);
- reportcontainer.visible:= fformcont.visible;
-end;
-
-procedure treportdesignerfo.repshowallexe(const sender: TObject);
-begin
- showallexe(sender);
- reportcontainer.visible:= fformcont.visible;
-end;
-}
-{
-procedure treportdesignerfo.poschanged;
-begin
- inherited;
- if parentwidget = nil then begin //not docked
-  tcustomreport1(form).frepdesigninfo.widgetrect:= widgetrect;
- end;
-end;
-
-procedure treportdesignerfo.sizechanged;
-begin
- inherited;
- if parentwidget = nil then begin //not docked
-  tcustomreport1(form).frepdesigninfo.widgetrect:= widgetrect;
- end;
-end;
-}
 end.
 
