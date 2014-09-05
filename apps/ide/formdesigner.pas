@@ -3331,7 +3331,7 @@ function tformdesignerfo.getgridsizey: integer;
 begin
  result:= fgridsizey;
 end;
-var testvar: boolean;
+
 procedure tformdesignerfo.designmouseevent(var info: moeventinfoty;
                                                          capture: twidget);
 var
@@ -3409,7 +3409,7 @@ var
 
 
 var
- component,comp1: tcomponent;
+ component: tcomponent;
  int1: integer;
  bo1,bo2: boolean;
  widget1: twidget;
@@ -3441,7 +3441,6 @@ begin
   end;
   component:= nil;
   if not (es_processed in eventstate) then begin
-   comp1:= fclickedcompbefore;
    bo1:= false;
    if (eventkind = ek_buttonpress) and (button = mb_left) then begin
     fpickpos:= mousepos1;
