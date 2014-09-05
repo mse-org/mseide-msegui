@@ -3021,7 +3021,12 @@ begin
   widget1:= container;
  end
  else begin
-  widget1:= fformcont;
+  if form <> nil then begin
+   widget1:= form.container;
+  end
+  else begin
+   widget1:= fformcont;
+  end;
  end;
  result:= translatewidgetpoint(widget1.clientwidgetpos,widget1,self);
 end;
@@ -3325,7 +3330,7 @@ function tformdesignerfo.getgridsizey: integer;
 begin
  result:= fgridsizey;
 end;
-
+var testvar: boolean;
 procedure tformdesignerfo.designmouseevent(var info: moeventinfoty;
                                                          capture: twidget);
 var
@@ -3428,7 +3433,7 @@ begin
  twindow1(window).checkmousewidget(info.mouse,capture);
  with info.mouse do begin
   mousepos1:= translatewidgetpoint(pos,window.owner,self);
-  ss1:= shiftstate * shiftstatesmask;
+  ss1:= shiftstate * (shiftstatesmask);
   isinpaintrect:= pointinrect(mousepos1,gridrect);
   if eventkind in [ek_buttonpress,ek_buttonrelease] then begin
    fmousepos:= mousepos1;
@@ -3436,11 +3441,11 @@ begin
   component:= nil;
   if not (es_processed in eventstate) then begin
    bo1:= false;
+
    if (eventkind = ek_buttonpress) and (button = mb_left) then begin
     fpickpos:= mousepos1;
     if (ss1 = [ss_left]) or (ss1 = [ss_left,ss_ctrl]) or 
-                (ss1 = [ss_left,ss_ctrl,ss_shift]) or
-                (ss1 = [ss_left,ss_double]) then begin
+                (ss1 = [ss_left,ss_ctrl,ss_shift]) then begin
      factarea:= fselections.getareainfo(mousepos1,factcompindex);
      if factcompindex >= 0 then begin
       fsizerect:= fselections.itempo(factcompindex)^.rect;
@@ -3483,14 +3488,17 @@ begin
     dopopup(info.mouse);
    end;
    if not (es_processed in eventstate) then begin
+testvar:= ss_double in shiftstate;
     area1:= fselections.getareainfo(mousepos1,int1);
     bo2:= not ((eventkind = ek_buttonpress) and (button = mb_left) and 
-                                                       (ss1 = [ss_left]));
-    if (bo2 or 
+                     (ss1 = [ss_left]));
+    if not (ss_double in shiftstate) and (bo2 or 
          ((area1 < firsthandle) or (area1 > lasthandle)) and
          (not (fdesigner.hascurrentcomponent or 
                                       componentstorefo.hasselection)) and 
-         (area1 <> ar_component){ and 
+         ((area1 <> ar_component) or (fselections[int1] = fmodule) or
+          isdatasubmodule(fselections[int1]))
+         { and 
            not((fselections[int1] is twidget) or 
                isdatasubmodule(fselections[int1]))}
        ) and 
