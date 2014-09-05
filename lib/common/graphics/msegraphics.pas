@@ -931,6 +931,7 @@ type
 
                    //all boundaries of regionrects are clipped to
                    // -$8000..$7fff in device space
+   procedure resetclipregion;
    procedure setcliprect(const rect: rectty);
    procedure addcliprect(const rect: rectty);
    procedure addclipframe(const frame: rectty; inflate: integer);
@@ -942,7 +943,6 @@ type
    procedure addclipregion(const region: regionty);
    procedure subclipregion(const region: regionty);
    procedure intersectclipregion(const region: regionty);
-   procedure resetclipregion;
 
    function copyclipregion: regionty;
                   //returns a copy of the current clipregion
@@ -5080,7 +5080,7 @@ end;
 
 procedure tcanvas.setcliprect(const rect: rectty);
 begin
- clipregion:= createregion(rect);
+ clipregion:= createregion(removerect(rect,fcliporigin));
 end;
 
 procedure tcanvas.addclipframe(const frame: rectty; inflate: integer);

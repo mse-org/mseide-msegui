@@ -724,7 +724,7 @@ var
  int1: integer;
  po1: pformselectedinfoty;
 begin
- beforepaintmoving;
+// beforepaintmoving;
  with canvas do begin
   save;
   move(pos);
@@ -2361,8 +2361,8 @@ end;
 
 procedure tformdesignerfo.dobeforepaint(const canvas: tcanvas);
 begin
- inherited;
  hidexorpic(canvas);
+ inherited;
  if not fclientsizevalid then begin
   recalcclientsize();
   fclientsizevalid:= true;
@@ -3492,7 +3492,8 @@ testvar:= ss_double in shiftstate;
     area1:= fselections.getareainfo(mousepos1,int1);
     bo2:= not ((eventkind = ek_buttonpress) and (button = mb_left) and 
                      (ss1 = [ss_left]));
-    if not (ss_double in shiftstate) and (bo2 or 
+    if not ((ss_double in shiftstate) and (eventkind = ek_buttonpress)) and 
+         (bo2 or 
          ((area1 < firsthandle) or (area1 > lasthandle)) and
          (not (fdesigner.hascurrentcomponent or 
                                       componentstorefo.hasselection)) and 
