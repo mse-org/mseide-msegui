@@ -225,8 +225,13 @@ begin
   for int1:= 0 to tabbar.tabs.count - 1 do begin
    tabbar.tabs[int1].caption:= report[int1].name;
   end;
-  if (report.reppagecount > 0) and (tabbar.activetab < 0) then begin
-   tabbar.activetab:= 0;
+  if (report.reppagecount > 0) then begin
+   if tabbar.activetab < 0 then begin
+    tabbar.activetab:= 0;
+   end
+   else begin
+    tabcha(nil); //possibly deleted page
+   end;
   end;
  end;
 end;
@@ -387,7 +392,7 @@ begin
     for int2:= 0 to high(pages) do begin
      if pages[int2] = comp1 then begin
       bo1:= true;
-      if not askyesno('Do you want to delete reportpage "'+
+      if not askconfirmation('Do you want to delete reportpage "'+
                                       comp1.name+'"?') then begin
        exit;
       end;
