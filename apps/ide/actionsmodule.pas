@@ -298,10 +298,11 @@ uses
  
 procedure configureide;
 begin
- disassfo.resetshortcuts;
+ disassfo.resetshortcuts();
  if editsettings(actionsmo.c[ord(ac_configuremseide)],
                                       actionsmo.shortcuts) then begin
-  expandprojectmacros;
+  mainfo.mainstatfile.writestat();
+  expandprojectmacros();
  end;
 end;
 

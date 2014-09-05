@@ -22,7 +22,7 @@ uses
  Classes,mclasses,msedesignintf,ZDataset,ZConnection,ZSqlUpdate,
  ZStoredProcedure,ZSqlMetadata,
  ZSqlProcessor,ZSqlMonitor,ZSequence,msezeos,regzeoslib_bmp,regdb,
- msepropertyeditors,ZSqlStrings,ZAbstractRODataset,mseglob,msegui,msedb,
+ msepropertyeditors,ZSqlStrings,ZAbstractRODataset,mseglob,msegui,mdb,msedb,
  msestrings;
  
 type
