@@ -11568,7 +11568,7 @@ begin
    save;
   end;
   font:= getfont;
-  origin:= frootpos;
+  origin:= rootpos;
   case aorigin of
    org_widget,org_screen: begin
     clipregion:= createregion(makerect(nullpoint,fwidgetrect.size));
