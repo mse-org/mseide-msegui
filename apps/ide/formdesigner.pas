@@ -4028,7 +4028,6 @@ var
  component: tcomponent;
  int1: integer;
  bo1,bo2: boolean;
-// posbefore: pointty;
  widget1: twidget;
  rect1: rectty;
  selectmode: selectmodety;
@@ -4090,25 +4089,6 @@ begin
         factarea:= ar_none;
        end;
        bo1:= true;
-       {
-       if ss_ctrl in ss1 then begin
-        selectcomponent(component,sm_flip);
-       end
-       else begin
-        bo2:= fselections.indexof(component) < 0;
-        if (component = form) and (fselections.count > 1) or bo2 then begin
-         selectcomponent(component,sm_select);
-         if projectoptions.e.moveonfirstclick then begin
-          factarea:= ar_component;
-         end;
-        end
-        else begin
-         if not bo2 then begin
-          updateclickedcomponent;
-         end;
-        end;
-       end;
-       }
       end
       else begin
        factarea:= ar_none;
@@ -4127,14 +4107,17 @@ begin
    end;
    if not (es_processed in eventstate) then begin
     area1:= fselections.getareainfo(mousepos1,int1);
-    if ((area1 < firsthandle) or (area1 > lasthandle)) and
-       ((factarea < firsthandle) or (factarea > lasthandle)) and 
-       not ((fdesigner.hascurrentcomponent or componentstorefo.hasselection) and 
-                     (eventkind = ek_buttonpress) and 
-       (button = mb_left) and (ss1 = [ss_left])) and 
-       not ((area1 = ar_component) and 
+    bo2:= not ((eventkind = ek_buttonpress) and (button = mb_left) and 
+                                                       (ss1 = [ss_left]));
+    if (bo2 or 
+         ((area1 < firsthandle) or (area1 > lasthandle)) and
+         (not (fdesigner.hascurrentcomponent or 
+                                      componentstorefo.hasselection)) and 
+         (area1 <> ar_component){ and 
            not((fselections[int1] is twidget) or 
-               isdatasubmodule(fselections[int1]))) and 
+               isdatasubmodule(fselections[int1]))}
+       ) and 
+       ((factarea < firsthandle) or (factarea > lasthandle)) and 
        (factarea <> ar_componentmove) then begin
      twindow1(window).dispatchmouseevent(info,capture); //"inherited"
     end;
