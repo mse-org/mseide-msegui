@@ -3423,7 +3423,7 @@ var
 label
  1;
 begin
- if module = nil then begin
+ if (module = nil) or (info.mouse.eventkind = ek_mousewheel) then begin
   exit; //continue normal handling
  end;
  if info.mouse.eventkind in [ek_mouseleave,ek_mouseenter] then begin

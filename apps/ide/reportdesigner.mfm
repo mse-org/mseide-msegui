@@ -80,7 +80,7 @@ inherited reportdesignerfo: treportdesignerfo
   object reportcontainer: tscrollbox[2]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_mousewheel, ow_destroywidgets]
     color = -1879048187
-    frame.optionsscroll = [oscr_drag, oscr_key]
+    frame.optionsscroll = [oscr_drag, oscr_key, oscr_mousewheel]
     frame.colorclient = -1610612730
     frame.localprops = [frl_colorclient]
     taborder = 1
