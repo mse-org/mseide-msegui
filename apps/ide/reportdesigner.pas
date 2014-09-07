@@ -393,8 +393,8 @@ begin
     for int2:= 0 to high(pages) do begin
      if pages[int2] = comp1 then begin
       bo1:= true;
-      if not askconfirmation('Do you want to delete reportpage "'+
-                                      comp1.name+'"?') then begin
+      if not askok(sc[ord(sc_wishdelete)]+' '''+
+               comp1.name+'''?',sc[ord(sc_warning)],mr_cancel) then begin
        exit;
       end;
      end;

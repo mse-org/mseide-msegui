@@ -205,7 +205,6 @@ inherited reportdesignerfo: treportdesignerfo
     dist_bottom = -5
   end
   inherited popupme: tpopupmenu[10]
-    menu.submenu.count = 34
     menu.submenu.items = <    
       item
       end    
@@ -272,21 +271,6 @@ inherited reportdesignerfo: treportdesignerfo
       item
       end    
       item
-      end    
-      item
-        options = [mao_separator, mao_shortcutcaption]
-      end    
-      item
-        caption = 'Add report page'
-        name = 'addpage'
-        state = [as_localcaption, as_localonexecute]
-        onexecute = addpage
-      end    
-      item
-        caption = 'Delete report page'
-        name = 'delpage'
-        state = [as_localcaption, as_localonexecute]
-        onexecute = deletepage
       end>
   end
   inherited hidecompact: taction[11]
