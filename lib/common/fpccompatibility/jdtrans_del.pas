@@ -8,7 +8,7 @@ Unit JdTrans;
 
 interface
 
-{$I jconfig.inc}
+{$I jconfig_del.inc}
 
 uses
   jmorecfg,

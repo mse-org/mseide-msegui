@@ -55,7 +55,7 @@ Unit JIDctAsm;
 
 interface
 
-{$I jconfig.inc}
+{$I jconfig_del.inc}
 
 uses
   jmorecfg,

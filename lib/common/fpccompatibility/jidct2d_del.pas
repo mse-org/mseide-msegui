@@ -29,7 +29,7 @@ uses
   jpeglib,
   jdct;                 { Private declarations for DCT subsystem }
 
-{$I jconfig.inc}
+{$I jconfig_del.inc}
 
 { Perform dequantization and inverse DCT on one block of coefficients. }
 
