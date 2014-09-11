@@ -13,7 +13,7 @@ interface
 uses
  msesystypes,mseglob;
 {$ifdef FPC}
- {$include ../mseprocmonitor.inc}
+ {$include ..\mseprocmonitor.inc}
 {$else}
  {$include mseprocmonitor.inc}
 {$endif}

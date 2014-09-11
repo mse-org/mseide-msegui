@@ -39,7 +39,7 @@ type
  end;
 
 {$ifdef FPC}
- {$include ..\msesysintf1.inc}
+ {$include ../msesysintf1.inc}
 {$else}
  {$include msesysintf1.inc}
 {$endif}

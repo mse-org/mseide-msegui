@@ -544,8 +544,8 @@ var
  mstr1: filenamety;
  bo1: boolean;
  po1: pmoduleinfoty;
- ar3: msestringarty;
- pt1: pointty;
+// ar3: msestringarty;
+// pt1: pointty;
  
 begin
  with statfiler do begin

@@ -2016,7 +2016,7 @@ var
  ar1: widgetarty;
  int1,int2: integer;
  bandlength,bandsize: integer;
- placementlength,placementsize: integer;
+ placementlength{,placementsize}: integer;
  maxlength,maxsize: integer;
  bo1: boolean;
  firstband: boolean;
@@ -2030,7 +2030,7 @@ begin
   end;
   rect1:= idockcontroller(fintf).getplacementrect();
   placementlength:= fr^.size(rect1);
-  placementsize:= fr^.osize(rect1);
+//  placementsize:= fr^.osize(rect1);
   bandlength:= 0;
   bandsize:= 0;
   maxlength:= 0;

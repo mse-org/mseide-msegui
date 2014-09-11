@@ -14,7 +14,7 @@ interface
 uses
  msesystypes;
  
-{$include ../msenoguiintf.inc}
+{$include ..\msenoguiintf.inc}
 
 implementation
 uses

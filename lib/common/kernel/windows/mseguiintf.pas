@@ -33,7 +33,7 @@ const
  pixel1 = $000000;   //select colorforeground
 
 {$ifdef FPC}
-{$include ../mseguiintf.inc}
+{$include ..\mseguiintf.inc}
 {$else}
 {$include mseguiintf.inc}
 {$endif}

@@ -13,7 +13,7 @@ interface
 uses
  msegraphics;
  
-{$include ../mseuniintf.inc}
+{$include ..\mseuniintf.inc}
 
 implementation
 uses

@@ -14,7 +14,7 @@ interface
 uses
  msesystypes,msesys;
 {$ifdef FPC}
- {$include ..\msesocketintf.inc}
+ {$include ../msesocketintf.inc}
 {$else}
  {$include msesocketintf.inc}
 {$endif}
