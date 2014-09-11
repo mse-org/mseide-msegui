@@ -1401,13 +1401,13 @@ begin
   fmakeoptionson[3]:= bits[5]; //make 4
   defaultmake:= 1; //make
   additem(funitdirs,'${MSELIBDIR}*/');
-  additem(funitdirs,'${MSELIBDIR}kernel/');
+//  additem(funitdirs,'${MSELIBDIR}kernel/');
   additem(funitdirs,'${MSELIBDIR}kernel/$TARGETOSDIR/');
   setlength(funitdirson,length(unitdirs));
   for int1:= 0 to high(funitdirson) do begin
    funitdirson[int1]:= unitson;
   end;
-  funitdirson[1]:= unitson + $20000; //kernel include
+//  funitdirson[1]:= unitson + $20000; //kernel include
   unitdirs:= reversearray(unitdirs);
   unitdirson:= reversearray(unitdirson);
   unitpref:= '-Fu';
@@ -1845,7 +1845,7 @@ begin
    fo.aftmake4on.gridupdatetagvalue(int1,o.aftcommandon[int1]);
   end;
 
-  fo.unitdirs.gridvalues:= reversearray(fo.unitdirs.gridvalues);
+  fo.unitdirs.gridvalues:= reversearray(o.t.unitdirs);
   int2:= high(o.t.unitdirs);
   for int1:= 0 to int2 do begin
    if int1 > high(o.unitdirson) then begin
