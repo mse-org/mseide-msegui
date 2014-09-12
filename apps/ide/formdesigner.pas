@@ -3496,22 +3496,19 @@ begin
                      (ss1 = [ss_left]));
     if not ((ss_double in shiftstate) and (eventkind = ek_buttonpress)
                  or (ss1 = [ss_left,ss_shift])) and 
-         (bo2 or 
-          ((area1 < firsthandle) or (area1 > lasthandle)) and
-          (not (fdesigner.hascurrentcomponent or 
-                                      componentstorefo.hasselection)){ and 
-          (area1 <> ar_component)}
-         {(fselections[int1] = fmodule) or
-          isdatasubmodule(fselections[int1]))}
-         { and 
-           not((fselections[int1] is twidget) or 
-               isdatasubmodule(fselections[int1]))}
-         ) and 
+       (bo2 or 
+        ((area1 < firsthandle) or (area1 > lasthandle)) and
+        (not (fdesigner.hascurrentcomponent or 
+                                    componentstorefo.hasselection))
+       ) and 
        ((factarea < firsthandle) or (factarea > lasthandle)) and 
        (factarea <> ar_componentmove) then begin
      twindow1(window).dispatchmouseevent(info,capture); //"inherited"
      if not designactive then begin
       exclude(eventstate,es_processed);
+     end;
+     if es_processed in eventstate then begin
+      releasemouse();
      end;
     end;
     if bo1 then begin
@@ -3672,6 +3669,7 @@ begin
         if (distance(fpickpos,mousepos1) > movethreshold) then begin
          fxorpicoffset:= griddelta;
          factarea:= ar_componentmove;
+         capturemouse();
         end
         else begin
          bo1:= false;
