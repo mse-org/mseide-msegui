@@ -199,15 +199,13 @@ sourcedirs=4
  ./
 defines=0
 defineson=0
-unitdirs=4
+unitdirs=3
  ${MSEDIR}lib/addon/*/
  ${MSELIBDIR}kernel/$TARGETOSDIR/
- ${MSELIBDIR}kernel/
  ${MSELIBDIR}*/
-unitdirson=4
+unitdirson=3
  196671
  65599
- 196671
  65599
 unitpref=-Fu
 incpref=-Fi

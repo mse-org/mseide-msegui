@@ -194,19 +194,17 @@ sourcedirs=6
  ./
 defines=0
 defineson=0
-unitdirs=6
+unitdirs=5
  ${MSEDIR}lib/addon/*/
  ${zeosdir}src/*/
  ${zeosdir}src/
  ${MSELIBDIR}kernel/$TARGETOSDIR/
- ${MSELIBDIR}kernel/
  ${MSELIBDIR}*/
-unitdirson=6
+unitdirson=5
  196671
  983103
  983103
  65599
- 196671
  65599
 unitpref=-Fu
 incpref=-Fi
