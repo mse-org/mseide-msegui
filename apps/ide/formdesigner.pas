@@ -3431,7 +3431,7 @@ begin
   include(info.mouse.eventstate,es_processed);
   exit;
  end;
- twindow1(window).checkmousewidget(info.mouse,capture);
+// twindow1(window).checkmousewidget(info.mouse,capture);
  with info.mouse do begin
   mousepos1:= translatewidgetpoint(pos,window.owner,self);
   ss1:= shiftstate * (shiftstatesmask);
@@ -3497,8 +3497,8 @@ begin
          (bo2 or 
           ((area1 < firsthandle) or (area1 > lasthandle)) and
           (not (fdesigner.hascurrentcomponent or 
-                                      componentstorefo.hasselection)) and 
-          (area1 <> ar_component)
+                                      componentstorefo.hasselection)){ and 
+          (area1 <> ar_component)}
          {(fselections[int1] = fmodule) or
           isdatasubmodule(fselections[int1]))}
          { and 
