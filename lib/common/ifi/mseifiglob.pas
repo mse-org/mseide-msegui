@@ -12,6 +12,9 @@ unit mseifiglob;
 interface
 uses
  mseglob,mseeditglob,typinfo,mseinterfaces;
+{$ifdef mse_no_ifi}
+ {$error 'MSEifi support required, please do not compile with "-dmse_no_ifi"'}
+{$endif}
 const
  ifiwidgetstatename = '#widgetstate#';
  ifiwidgetmodalresultname = '#modalres#';
