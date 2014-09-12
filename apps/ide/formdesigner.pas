@@ -3417,6 +3417,7 @@ var
  selectmode: selectmodety;
  area1: areaty;
  isinpaintrect: boolean;
+ designactive: boolean;
  ss1: shiftstatesty;
  po1: pformselectedinfoty;
  pt1: pointty; 
@@ -3433,6 +3434,8 @@ begin
  end;
 // twindow1(window).checkmousewidget(info.mouse,capture);
  with info.mouse do begin
+  designactive:= (capture <> nil) and 
+                (ws1_designactive in twidget1(capture).fwidgetstate1);
   mousepos1:= translatewidgetpoint(pos,window.owner,self);
   ss1:= shiftstate * (shiftstatesmask);
   isinpaintrect:= pointinrect(mousepos1,gridrect);
@@ -3488,7 +3491,6 @@ begin
     dopopup(info.mouse);
    end;
    if not (es_processed in eventstate) then begin
-//   (*
     area1:= fselections.getareainfo(mousepos1,int1);
     bo2:= not ((eventkind = ek_buttonpress) and (button = mb_left) and 
                      (ss1 = [ss_left]));
@@ -3507,12 +3509,11 @@ begin
          ) and 
        ((factarea < firsthandle) or (factarea > lasthandle)) and 
        (factarea <> ar_componentmove) then begin
-//     pt1:= pos;
      twindow1(window).dispatchmouseevent(info,capture); //"inherited"
-//     pos:= pt1; //restore
-     exclude(eventstate,es_processed);
+     if not designactive then begin
+      exclude(eventstate,es_processed);
+     end;
     end;
-//    *)
     if bo1 then begin
      if ss_ctrl in ss1 then begin
       selectcomponent(component,sm_flip);
@@ -3532,8 +3533,7 @@ begin
       end;
      end;
      if not (es_processed in eventstate) then begin
-      if (capture = nil) or not 
-             (ws1_designactive in twidget1(capture).fwidgetstate1) then begin
+      if not designactive then begin
        capturemouse; //capture mouse
       end;
       updatecursorshape(factarea);
@@ -3669,7 +3669,7 @@ begin
         updatesizerect;
        end;
        ar_component: begin
-        if distance(fpickpos,mousepos1) > movethreshold then begin
+        if (distance(fpickpos,mousepos1) > movethreshold) then begin
          fxorpicoffset:= griddelta;
          factarea:= ar_componentmove;
         end
