@@ -16,7 +16,6 @@ uses
  classes,mclasses,mdb,msqldb,mseclasses,msedb,msedatabase,msearrayprops,
  msestrings,msereal,mseinterfaces,
  msetypes,mselookupbuffer,mseglob,msedatalist,msevariants,mseevent;
- 
 type
  tsqlresult = class;
  
@@ -336,7 +335,7 @@ type
 //   function isprepared: boolean;
    procedure open;
    procedure close;
-   procedure doclear;
+   procedure doclear(const isclose: boolean);
    procedure prepare; override;
    procedure checkautocommit; override;
 //   procedure execute;
@@ -1424,9 +1423,9 @@ begin
  end;
 end;
 
-procedure tsqlresult.doclear;
+procedure tsqlresult.doclear(const isclose: boolean);
 begin
- if fcursor <> nil then begin
+ if not isclose and (fcursor <> nil) then begin
   fcursor.close;
  end;
  feof:= true;
@@ -1436,7 +1435,7 @@ end;
 
 procedure tsqlresult.clear;
 begin
- doclear;
+ doclear(false);
  changed;
 end;
 
@@ -1445,7 +1444,7 @@ begin
  factive:= false;
 // feof:= true;
 // fbof:= true;
- doclear;
+ doclear(true);
  sendchangeevent(oe_releasefields);
  freefldbuffers;
  inherited setactive(false);
@@ -1574,7 +1573,7 @@ begin
   active:= true;
  end
  else begin
-  doclear;
+  doclear(false);
   feof:= false;
   execute; 
   next;
