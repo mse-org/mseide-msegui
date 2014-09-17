@@ -17017,6 +17017,7 @@ begin
  if twindow(r).transientforstackactive then begin
   dec(result,transientforactiveweight);
  end;
+ {
 // if twindow(l).transientforstackactive then begin
   if twindow(l).ftransientfor <> nil then begin
    inc(result,transientfornotnilweight);
@@ -17033,6 +17034,7 @@ begin
    dec(result,transientforcountweight);
   end;
 // end;
+}
  window1:= twindow(l);
  while window1.ftransientfor <> nil do begin
   if window1.ftransientfor = twindow(r) then begin
