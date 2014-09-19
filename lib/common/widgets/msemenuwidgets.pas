@@ -65,6 +65,7 @@ type
    procedure internalsetactiveitem(const avalue: integer;
            const aclicked: boolean; const force: boolean;
            const nochildreninactive: boolean); virtual;
+   function getactiveitem: integer;
    procedure setactiveitem(const value: integer);
    procedure applicationactivechanged(const avalue: boolean);
   protected
@@ -110,7 +111,7 @@ type
    function showmenu(const aposrect: rectty; aposition: graphicdirectionty;
                               aactivate: boolean): tmenuitem;
                     //returns selected item, nil if none
-   property activeitem: integer read flayout.activeitem write setactiveitem;
+   property activeitem: integer read getactiveitem write setactiveitem;
   published
    property optionswidget default defaultpopupmenuwidgetoptions;
  end;
@@ -1329,6 +1330,16 @@ begin
    include(options,mlo_childreninactive);
    releasemouse;
   end;
+ end;
+end;
+
+function tpopupmenuwidget.getactiveitem: integer;
+begin
+ with flayout do begin
+  if menu = nil then begin
+   activeitem:= -1;
+  end;
+  result:= activeitem;
  end;
 end;
 
