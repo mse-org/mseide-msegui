@@ -46,7 +46,7 @@ type
  nodeoptionty = (no_drawemptybox,no_checkbox,
                  no_updatechildchecked, //track ns1_childchecked state, slow!
                  no_cellitemselect,     //copy cell select state to item select
-                 no_nofreeitems
+                 no_nofreeitems         //do not free items for removed rows
                  );
  nodeoptionsty = set of nodeoptionty;
 
