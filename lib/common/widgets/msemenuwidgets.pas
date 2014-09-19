@@ -1277,7 +1277,8 @@ begin
   end; 
   if (activeitem <> value1) or force then begin
    fclickeditem:= -1;
-   if (activeitem >= 0) and (activeitem < menu.submenu.count) then begin
+   if (menu <> nil) and (activeitem >= 0) and 
+                    (activeitem < menu.submenu.count) then begin
     if (fnextpopup <> nil) then begin
      fnextpopup.release(true);
     end;
