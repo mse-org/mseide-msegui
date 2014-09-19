@@ -9131,6 +9131,7 @@ begin
  fzebra_step:= 2;
 
  inherited;
+ include(fwidgetstate1,ws1_designactive);
  internalcreateframe;
  fobjectpicker:= tobjectpicker.create(iobjectpicker(self));
 // fobjectpicker.options:= fobjectpicker.options + [opo_candoubleclick];
