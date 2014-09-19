@@ -542,7 +542,8 @@ type
    function getgrid: tcustomgrid;
    function getlayoutinfo(const acellinfo: pcellinfoty): plistitemlayoutinfoty;
    procedure itemcountchanged;
-   procedure updateitemvalues(const index: integer; const count: integer); virtual;
+   procedure updateitemvalues(const index: integer;
+                                       const count: integer); virtual;
    function getcolorglyph: colorty;
 
     //igridwidget
@@ -654,8 +655,10 @@ type
    destructor destroy; override;
   published
    property frame: tdropdownbuttonframe read getframe write setframe;
-   property dropdown: tcustomdropdownlistcontroller read fdropdown write setdropdown;
-   property onbeforedropdown: notifyeventty read fonbeforedropdown write fonbeforedropdown;
+   property dropdown: tcustomdropdownlistcontroller read fdropdown 
+                                                    write setdropdown;
+   property onbeforedropdown: notifyeventty read fonbeforedropdown 
+                                                    write fonbeforedropdown;
    property onafterclosedropdown: notifyeventty read fonafterclosedropdown
                   write fonafterclosedropdown;
  end;
@@ -674,7 +677,8 @@ type
   protected
    function listitemclass: treelistitemclassty; override;
   public
-   function converttotreelistitem(flat: boolean = false; withrootnode: boolean =  false;
+   function converttotreelistitem(flat: boolean = false; 
+                withrootnode: boolean =  false;
                 filterfunc: treenodefilterfuncty = nil): ttreelistedititem;
  end;
 
@@ -699,7 +703,8 @@ type
             var processed: boolean) of object;
  treeitemdragdropeventty = procedure(const sender: ttreeitemedit;
             const source,dest: ttreelistitem;
-            var dragobject: ttreeitemdragobject; var processed: boolean) of object;
+            var dragobject: ttreeitemdragobject; 
+                                          var processed: boolean) of object;
 
  expandedinfoty = record
   path: msestringarty;
@@ -716,6 +721,7 @@ type
    fondragover: treeitemdragovereventty;
    fondragdrop: treeitemdragdropeventty;
    frootnode: ttreelistedititem;
+   finsertparent: ttreelistedititem;
    procedure setoncreateitem(const value: createtreelistitemeventty);
    function getoncreateitem: createtreelistitemeventty;
    procedure setcolorline(const value: colorty);
@@ -760,10 +766,12 @@ type
    procedure assign(const aitems: treelistedititemarty); reintroduce; overload;
    procedure add(const anode: ttreelistedititem;
                                  const freeroot: boolean = true); overload;
+
+   procedure insertitems(index,acount: integer); override;
                  //adds toplevel node
    procedure add(const anodes: treelistedititemarty); overload;
    procedure add(const acount: integer; 
-                             aitemclass: treelistedititemclassty = nil); overload;
+                          aitemclass: treelistedititemclassty = nil); overload;
    procedure addchildren(const anode: ttreelistedititem);
                  //adds children as toplevel nodes
    procedure readnode(const aname: msestring; const reader: tstatreader;
@@ -794,6 +802,10 @@ type
                        //address by caption
    property rootnode: ttreelistedititem read frootnode write setrootnode;
                            //clears list and adds children
+   property insertparent: ttreelistedititem read finsertparent;
+                                  //valid in oncreateitem
+   property insertindex: integer read finsertindex;
+                                  //valid in oncreateitem
   published
    property imnr_base;
    property imnr_expanded;
@@ -3710,6 +3722,10 @@ procedure ttreeitemeditlist.docreateobject(var instance: tobject);
 begin
  if fchangingnode = nil then begin
   inherited;
+  if (finsertparent <> nil) and 
+          (ttreelistitem1(instance).parent = finsertparent) then begin
+   inc(finsertindex);
+  end;
  end
  else begin
   instance:= fchangingnode[finsertindex];
@@ -4723,11 +4739,38 @@ begin
   clear();
   frootnode:= avalue;
   if frootnode <> nil then begin
+   frootnode.ftreelevel:= -1;
    addchildren(frootnode);
   end;
  finally
   endupdate();
  end;
+end;
+
+procedure ttreeitemeditlist.insertitems(index: integer; acount: integer);
+var
+ int1: integer;
+begin
+ int1:= index;
+ if int1 >= count then begin
+  int1:= count - 1;
+ end;
+ if int1 >= 0 then begin
+  with items[int1] do begin
+   finsertparent:= ttreelistedititem(parent);
+   finsertindex:= parentindex;
+  end;
+ end
+ else begin
+  finsertparent:= rootnode;
+  finsertindex:= 0;
+ end;
+ try
+  inherited;
+ finally
+  finsertparent:= nil;
+  finsertindex:= -1;
+ end; 
 end;
 
 { trecordfieldedit }

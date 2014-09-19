@@ -279,7 +279,7 @@ type
    procedure blockcopydata(const fromindex,toindex,count: integer);
    procedure deletedata(const index: integer);
    procedure deleteitems(index,acount: integer);
-   procedure insertitems(index,acount: integer);
+   procedure insertitems(index,acount: integer); virtual;
    function empty(const index: integer): boolean; virtual;         //true wenn leer
 
    function sort(const comparefunc: sortcomparemethodty; 
@@ -1667,13 +1667,6 @@ begin
   initdata1(false,index,acount);
   datainserted(index,acount);
   change(-1);
- {
-  capacity:= fcount + acount;
-  fcount:= fcount + acount;
-  blockcopymovedata(index,index+acount,fcount-index-acount,bcm_none);
-  initdata1(false,index,acount);
-  change(-1);
-  }
  end;
 end;
 
