@@ -1867,7 +1867,9 @@ begin
  value.fparentindex:= aindex;
  value.fparent:= self;
  value.settreelevel(ftreelevel+1);
- value.setowner(fowner);
+ if fowner <> nil then begin
+  value.setowner(fowner);
+ end;
 end;
 
 procedure ttreelistitem.setitems(const aindex: integer; const value: ttreelistitem);

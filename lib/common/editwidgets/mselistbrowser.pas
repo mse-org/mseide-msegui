@@ -715,6 +715,7 @@ type
    fondragbegin: treeitemdragbegineventty;
    fondragover: treeitemdragovereventty;
    fondragdrop: treeitemdragdropeventty;
+   frootnode: ttreelistedititem;
    procedure setoncreateitem(const value: createtreelistitemeventty);
    function getoncreateitem: createtreelistitemeventty;
    procedure setcolorline(const value: colorty);
@@ -728,6 +729,7 @@ type
    procedure setexpandedstate(const avalue: expandedinfoarty);
    function getonstatwriteitem: statwritetreeitemeventty;
    procedure setonstatwriteitem(const avalue: statwritetreeitemeventty);
+   procedure setrootnode(const avalue: ttreelistedititem);
   protected
    procedure freedata(var data); override;
    procedure docreateobject(var instance: tobject); override;
@@ -790,6 +792,8 @@ type
    property expandedstate: expandedinfoarty read getexpandedstate 
                                                 write setexpandedstate;
                        //address by caption
+   property rootnode: ttreelistedititem read frootnode write setrootnode;
+                           //clears list and adds children
   published
    property imnr_base;
    property imnr_expanded;
@@ -4709,6 +4713,20 @@ begin
     end;     
    end;
   end;
+ end;
+end;
+
+procedure ttreeitemeditlist.setrootnode(const avalue: ttreelistedititem);
+begin
+ beginupdate();
+ try
+  clear();
+  frootnode:= avalue;
+  if frootnode <> nil then begin
+   addchildren(frootnode);
+  end;
+ finally
+  endupdate();
  end;
 end;
 
