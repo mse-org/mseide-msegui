@@ -2047,6 +2047,7 @@ begin
    end
    else begin
     frame.grip_size:= 0;
+    dragdock.optionsdock:= dragdock.optionsdock - [od_top,od_background];
     dragdock.float();
    end;
    if not fixformsize then begin
