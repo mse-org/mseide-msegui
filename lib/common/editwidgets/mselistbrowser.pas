@@ -722,6 +722,7 @@ type
    fondragdrop: treeitemdragdropeventty;
    frootnode: ttreelistedititem;
    finsertparent: ttreelistedititem;
+   finsertparentindex: integer;
    procedure setoncreateitem(const value: createtreelistitemeventty);
    function getoncreateitem: createtreelistitemeventty;
    procedure setcolorline(const value: colorty);
@@ -804,7 +805,7 @@ type
                            //clears list and adds children
    property insertparent: ttreelistedititem read finsertparent;
                                   //valid in oncreateitem
-   property insertindex: integer read finsertindex;
+   property insertparentindex: integer read finsertparentindex;
                                   //valid in oncreateitem
   published
    property imnr_base;
@@ -3724,7 +3725,7 @@ begin
   inherited;
   if (finsertparent <> nil) and 
           (ttreelistitem1(instance).parent = finsertparent) then begin
-   inc(finsertindex);
+   inc(finsertparentindex);
   end;
  end
  else begin
@@ -4758,18 +4759,18 @@ begin
  if int1 >= 0 then begin
   with items[int1] do begin
    finsertparent:= ttreelistedititem(parent);
-   finsertindex:= parentindex;
+   finsertparentindex:= parentindex;
   end;
  end
  else begin
   finsertparent:= rootnode;
-  finsertindex:= 0;
+  finsertparentindex:= 0;
  end;
  try
   inherited;
  finally
   finsertparent:= nil;
-  finsertindex:= -1;
+  finsertparentindex:= -1;
  end; 
 end;
 
