@@ -710,7 +710,7 @@ type
   path: msestringarty;
  end;
  expandedinfoarty = array of expandedinfoty;
- 
+
  ttreeitemeditlist = class(tcustomitemeditlist)
   private
    fchangingnode: ttreelistitem;
@@ -768,7 +768,9 @@ type
    procedure add(const anode: ttreelistedititem;
                                  const freeroot: boolean = true); overload;
 
+   procedure deleteitems(index,acount: integer); override;
    procedure insertitems(index,acount: integer); override;
+
                  //adds toplevel node
    procedure add(const anodes: treelistedititemarty); overload;
    procedure add(const acount: integer; 
@@ -3793,7 +3795,9 @@ begin
      if (fparent <> nil) and 
            ((ttreelistitem1(fparent).fowner = self) or 
                                 (fparent = frootnode)) then begin
-//      inherited; 
+      if dls_rowdeleting in self.fstate then begin
+       inherited; 
+      end;
       //free node,
       //does not work, there will be interferences with row deleting
      end
@@ -4749,6 +4753,21 @@ begin
   end;
  finally
   endupdate();
+ end;
+end;
+
+procedure ttreeitemeditlist.deleteitems(index: integer; acount: integer);
+var
+ bo1: boolean;
+begin
+ bo1:= dls_rowdeleting in fstate;
+ include(fstate,dls_rowdeleting);
+ try
+  inherited;
+ finally
+  if not bo1 then begin
+   exclude(fstate,dls_rowdeleting);
+  end;
  end;
 end;
 
