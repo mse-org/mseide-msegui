@@ -3767,19 +3767,18 @@ begin
 end;
 
 procedure ttreeitemeditlist.freedata(var data);
-//var
-// int1,int2: integer;
-// po1: ptreelistitem;
+var
+ int1,int2: integer;
+ po1: ptreelistitem;
 begin
  if not (ils_freelock in fitemstate) then begin
   if pointer(data) <> nil then begin
    with ttreelistitem1(data) do begin
-//    int2:= findex+1;
+    int2:= findex+1;
     if fowner <> nil then begin
      setowner(nil);
     end;
     if not (ils_subnodecountupdating in self.fitemstate) then begin
-    {
      int1:= int2;
      while int1 < self.fcount do begin
       po1:= ptreelistitem(getitempo(int1));
@@ -3789,17 +3788,14 @@ begin
       po1^:= nil;
       inc(int1);
      end;
-    }
      self.fitemstate:= self.fitemstate + [ils_subnodecountupdating,
                                             ils_subnodedeleting];
      if (fparent <> nil) and 
            ((ttreelistitem1(fparent).fowner = self) or 
                                 (fparent = frootnode)) then begin
       if dls_rowdeleting in self.fstate then begin
-       inherited; 
+       inherited; //destroy node
       end;
-      //free node,
-      //does not work, there will be interferences with row deleting
      end
      else begin
     {
