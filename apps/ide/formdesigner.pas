@@ -186,6 +186,7 @@ type
    fselectcomp: tcomponent;
    fclientsizevalid: boolean;
    fcompoffsbefore: pointty;
+   fsizebefore: sizety;
    procedure drawgrid(const canvas: tcanvas);
    procedure hidexorpic(const canvas: tcanvas);
    procedure showxorpic(const canvas: tcanvas);
@@ -2412,15 +2413,11 @@ begin
     rect1:= paintrect;
     if form <> nil then begin
      form.widgetrect:= rect1;
-     if ow1_autowidth in form.optionswidget1 then begin
-      rect1.cx:= form.width;
-     end;
-     if ow1_autoheight in form.optionswidget1 then begin
-      rect1.cy:= form.height;
-     end;
-     if sizeisequal(form.size,rect1.size) then begin
+     if sizeisequal(form.size,rect1.size) or 
+                not sizeisequal(rect1.size,fsizebefore) then begin
       fsizeerrorcount:= 0;
      end;
+     fsizebefore:= rect1.size;
      if fsizeerrorcount < 4 then begin
       inc(fsizeerrorcount);
       include(ffostate,fds_sizesyncing);
