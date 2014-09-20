@@ -2412,6 +2412,12 @@ begin
     rect1:= paintrect;
     if form <> nil then begin
      form.widgetrect:= rect1;
+     if ow1_autowidth in form.optionswidget1 then begin
+      rect1.cx:= form.width;
+     end;
+     if ow1_autoheight in form.optionswidget1 then begin
+      rect1.cy:= form.height;
+     end;
      if sizeisequal(form.size,rect1.size) then begin
       fsizeerrorcount:= 0;
      end;
