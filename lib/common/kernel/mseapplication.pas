@@ -219,7 +219,7 @@ type
    procedure finalizeitem(var item: pointer); override;
  end;
 
- applicationoptionty = (apo_terminateonexception);
+ applicationoptionty = (apo_terminateonexception,apo_noautodestroymodules);
  applicationoptionsty = set of applicationoptionty;
  
  tcustomapplication = class(tmsecomponent)
@@ -240,13 +240,13 @@ type
    fonexception: exceptioneventty;
    finiting: integer;
    fhighrestimercount: integer;
-   foptions: applicationoptionsty;
    function dolock: boolean;
    function internalunlock(count: integer): boolean;
    function getterminated: boolean;
    procedure setterminated(const Value: boolean);
    function gethighrestimer: boolean;
   protected
+   foptions: applicationoptionsty;
    fthread: threadty;
    fstate: applicationstatesty;
    fwaitcount: integer;

@@ -32,6 +32,7 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   procedure destroymodules();
    function modallevel: integer; override;
    procedure showexception(e: exception; const leadingtext: msestring = '');
                                   override;
@@ -68,6 +69,7 @@ end;
 
 destructor tnoguiapplication.destroy;
 begin
+ destroymodules();
  inherited;
 // deinitialize;
  sys_semdestroy(feventsem);
@@ -177,10 +179,17 @@ begin
  nogui_deinit; 
 end;
 
-procedure tnoguiapplication.doafterrun;
+procedure tnoguiapplicatoin.destroymodules();
 begin
  while componentcount > 0 do begin
-  components[0].free;  //destroy loaded modules
+  components[componentcount-1].free;  //destroy loaded modules
+ end;
+end;
+
+procedure tnoguiapplication.doafterrun;
+begin
+ if not (apo_noautodestroymodules in foptions) then begin
+  destroymodules(false);
  end;
 end;
 

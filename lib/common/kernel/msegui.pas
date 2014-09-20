@@ -18540,8 +18540,10 @@ end;
 
 procedure tguiapplication.doafterrun;
 begin
- destroyforms; //zeos lib unloads libraries -> 
+ if not (apo_noautodestroymodules in foptions) then begin
+  destroyforms(); //zeos lib unloads libraries -> 
                //forms must be destroyed before unit finalization
+ end;
 end;
 
 function tguiapplication.idle: boolean;
