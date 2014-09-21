@@ -322,7 +322,9 @@ type
    procedure add(const acount: integer;
                             const itemclass: treelistitemclassty = nil;
                             const defaultstate: nodestatesty = []); overload;
-   procedure insert(const aitem: ttreelistitem; aindex: integer);
+   procedure insert(aindex: integer; const aitem: ttreelistitem);
+   procedure insert(const aitem: ttreelistitem; aindex: integer); deprecated;
+                               //use insert(aindex,aitem) above instead
    procedure move(const source,dest: integer);
    procedure clear; virtual;
 
@@ -1926,8 +1928,7 @@ begin
  checksort;
 end;
 
-procedure ttreelistitem.insert(const aitem: ttreelistitem;
-                                                  aindex: integer);
+procedure ttreelistitem.insert(aindex: integer; const aitem: ttreelistitem);
 var
  int1,int2: integer;
 begin
@@ -1959,6 +1960,12 @@ begin
   countchange(int2,true);
   checksort;
  end;
+end;
+
+procedure ttreelistitem.insert(const aitem: ttreelistitem;
+                                                  aindex: integer);
+begin
+ insert(aindex,aitem);
 end;
 
 procedure ttreelistitem.move(const source: integer; const dest: integer);

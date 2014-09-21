@@ -122,7 +122,8 @@ type
    function editwidget: ttreeitemedit;
    procedure activate;
  end;
- 
+ ptreelistedititem = ^ttreelistedititem;
+  
  trecordtreelistedititem = class(ttreelistedititem,irecordfield)   
                                           //does not statsave subitems
   protected
@@ -436,6 +437,7 @@ type
    constructor create(const intf: iitemlist;
                                  const owner: titemedit); reintroduce; overload;
    procedure assign(const aitems: listitemarty); reintroduce; overload;
+   procedure insert(const aindex: integer; const anode: tlistitem);
    procedure add(const anode: tlistitem);
    procedure refreshitemvalues(aindex: integer = 0; //-1 = current grid row
                                acount: integer = -1); //-1 = all
@@ -762,14 +764,14 @@ type
    procedure beginupdate; override;
    procedure endupdate; override;
    procedure change(const index: integer); override;
+   procedure deleteitems(index,acount: integer); override;
+   procedure insertitems(index,acount: integer); override;
+
    procedure assign(const root: ttreelistedititem;
                       const freeroot: boolean = true); reintroduce; overload;
    procedure assign(const aitems: treelistedititemarty); reintroduce; overload;
    procedure add(const anode: ttreelistedititem;
                                  const freeroot: boolean = true); overload;
-
-   procedure deleteitems(index,acount: integer); override;
-   procedure insertitems(index,acount: integer); override;
 
                  //adds toplevel node
    procedure add(const anodes: treelistedititemarty); overload;
@@ -777,12 +779,16 @@ type
                           aitemclass: treelistedititemclassty = nil); overload;
    procedure addchildren(const anode: ttreelistedititem);
                  //adds children as toplevel nodes
+   procedure insert(const aindex: integer;const anode: ttreelistedititem;
+                                             const freeroot: boolean = true);
+                //inserts in parent of items[aindex]
    procedure readnode(const aname: msestring; const reader: tstatreader;
                                             const anode: ttreelistitem);
    procedure writenode(const aname: msestring; const writer: tstatwriter;
                                             const anode: ttreelistitem);
    procedure updatenode(const aname: msestring; const filer: tstatfiler;
                                             const anode: ttreelistitem);
+
    function toplevelnodes: treelistedititemarty;
    function getnodes(const must: nodestatesty; const mustnot: nodestatesty;
                  const amode: getnodemodety = gno_matching): treelistitemarty;
@@ -802,7 +808,7 @@ type
                                           write setitems; default;
    property expandedstate: expandedinfoarty read getexpandedstate 
                                                 write setexpandedstate;
-                       //address by caption
+
    property rootnode: ttreelistedititem read frootnode write setrootnode;
                            //clears list and adds children
    property insertparent: ttreelistedititem read finsertparent;
@@ -2416,6 +2422,22 @@ begin
 // adddata(anode);
 end;
 
+procedure tcustomitemeditlist.insert(const aindex: integer; 
+                                               const anode: tlistitem);
+begin
+ checkitemclass(anode);
+ beginupdate;
+ try
+  internalinsertdata(aindex,anode,false);
+  tlistitem1(anode).setowner(self);
+  tlistitem1(anode).findex:= aindex;
+  fintf.itemcountchanged;
+  fintf.updateitemvalues(aindex,1);
+ finally
+  endupdate;
+ end;
+end;
+
 procedure tcustomitemeditlist.refreshitemvalues(aindex: integer = 0;
                                                         acount: integer = -1);
 begin
@@ -4012,6 +4034,64 @@ begin
  anode.expanded:= bo1;
 end;
 
+procedure ttreeitemeditlist.insert(const aindex: integer;
+                                    const anode: ttreelistedititem;
+                                            const freeroot: boolean = true);
+var
+ int1: integer;
+ n1,n2: ttreelistitem;
+// po1: ptreelistitem;
+ bo1: boolean;
+begin
+// beginupdate();
+ if freeroot then begin
+  exclude(anode.fstate1,ns1_nofreeroot);
+ end
+ else begin
+  include(anode.fstate1,ns1_nofreeroot);
+ end;
+ int1:= aindex;
+ n1:= nil;
+ if int1 >= count then begin
+  int1:= count;
+  if int1 > 0 then begin
+   n1:= items[int1-1];
+   n2:= n1.parent;
+  end;
+ end
+ else begin
+  if int1 < 0 then begin
+   int1:= 0;
+  end;
+  if int1 < count then begin
+   n1:= items[int1];
+  end;
+ end;
+ n2:= nil;
+ int1:= 0;
+ if n1 <> nil then begin
+  int1:= n1.parentindex;
+  n2:= n1.parent;
+ end;
+ if n2 = nil then begin
+  n2:= frootnode;
+ end;
+ bo1:= anode.expanded;
+ anode.expanded:= false;
+ if n2 <> nil then begin
+  n2.insert(int1,anode);
+  if n2.owner <> self then begin
+   inherited insert(aindex,anode); //top level node
+  end;  
+ end
+ else begin
+  inherited insert(aindex,anode); //top level node
+ end;
+ anode.expanded:= bo1;
+// endupdate();
+end;
+
+
 procedure ttreeitemeditlist.add(const anodes: treelistedititemarty);
 var
  int1: integer;
@@ -5303,7 +5383,7 @@ begin
     bo1:= (item.owner = fitemlist) and 
                    not (ils_subnodecountinvalid in fitemlist.fitemstate);
     sourcer:= item.index;
-    pa.insert(item,de.parentindex);
+    pa.insert(de.parentindex,item);
     if bo1 then begin
      destr:= destrow;
      if destr > sourcer then begin

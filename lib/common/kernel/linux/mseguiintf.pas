@@ -6118,9 +6118,9 @@ begin
   end;
  
   result:= gue_ok;
-  {$ifdef mse_flushgdi}
+ {$ifdef mse_flushgdi}
   xsynchronize(appdisp,1);
-  {$endif}
+ {$endif}
   errorhandlerbefore:= xseterrorhandler({$ifdef FPC}@{$endif}errorhandler);
   exit;
  error:
