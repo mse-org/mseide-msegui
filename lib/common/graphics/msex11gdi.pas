@@ -2455,6 +2455,8 @@ endlab:
    end;
   end;
  end;
+//xflush(appdisp);
+//sleep(10);
 end;
 
 procedure gdi_getimage(var drawinfo: drawinfoty); //gdifunc
