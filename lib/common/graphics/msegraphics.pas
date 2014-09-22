@@ -4163,7 +4163,8 @@ begin
  drawlinesegments([segment(startpoint,endpoint)],acolor);
 end;
 
-procedure tcanvas.drawvect(const startpoint: pointty; const direction: graphicdirectionty;
+procedure tcanvas.drawvect(const startpoint: pointty;
+                      const direction: graphicdirectionty;
                       const length: integer; out endpoint: pointty;
                       const acolor: colorty = cl_default);
 var
@@ -4185,8 +4186,9 @@ begin
  endpoint:= endpoint1;
 end;
 
-procedure tcanvas.drawvect(const startpoint: pointty; const direction: graphicdirectionty;
-                      const length: integer; const acolor: colorty = cl_default);
+procedure tcanvas.drawvect(const startpoint: pointty;
+                     const direction: graphicdirectionty;
+                     const length: integer; const acolor: colorty = cl_default);
 var
  po1: pointty;
 begin
@@ -4194,7 +4196,8 @@ begin
  drawvect(startpoint,direction,length,po1,acolor);
 end;
 
-procedure tcanvas.drawellipse(const def: rectty; const acolor: colorty = cl_default);
+procedure tcanvas.drawellipse(const def: rectty;
+                                      const acolor: colorty = cl_default);
                              //def.pos = center, def.cx = width, def.cy = height
 begin
  if cs_inactive in fstate then exit;
@@ -4205,7 +4208,7 @@ begin
 end;
 
 procedure tcanvas.drawcircle(const center: pointty; const radius: integer;
-                                               const acolor: colorty = cl_default);
+                                          const acolor: colorty = cl_default);
 var
  rect1: rectty;
 begin
@@ -4215,8 +4218,9 @@ begin
  drawellipse(rect1,acolor);
 end;
 
-procedure tcanvas.drawellipse1(const def: rectty; const acolor: colorty = cl_default);
-                             //def.pos = topleft, def.cx = width, def.cy = height
+procedure tcanvas.drawellipse1(const def: rectty; 
+                                         const acolor: colorty = cl_default);
+                          //def.pos = topleft, def.cx = width, def.cy = height
 begin
  drawellipse(recenterrect(def),acolor);
 end;
@@ -4251,7 +4255,8 @@ begin
  drawarc(recenterrect(def),startang,extentang,acolor);
 end;
 
-procedure tcanvas.fillrect(const arect: rectty; const acolor: colorty = cl_default;
+procedure tcanvas.fillrect(const arect: rectty; 
+                           const acolor: colorty = cl_default;
                            const linecolor: colorty = cl_none);
 var
  rect1: rectty;
@@ -4290,7 +4295,8 @@ begin
  end;
 end;
 
-procedure tcanvas.fillellipse(const def: rectty; const acolor: colorty = cl_default;
+procedure tcanvas.fillellipse(const def: rectty;
+                              const acolor: colorty = cl_default;
                               const linecolor: colorty = cl_none);
 begin
  if (cs_inactive in fstate) or (def.cx = 0) or (def.cy = 0) then exit;
@@ -4317,7 +4323,8 @@ begin
  fillellipse(rect1,acolor,linecolor);
 end;
 
-procedure tcanvas.fillellipse1(const def: rectty; const acolor: colorty = cl_default;
+procedure tcanvas.fillellipse1(const def: rectty;
+                              const acolor: colorty = cl_default;
                               const linecolor: colorty = cl_none);
 begin
  fillellipse(recenterrect(def),acolor,linecolor);

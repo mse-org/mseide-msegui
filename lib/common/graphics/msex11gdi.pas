@@ -2458,7 +2458,7 @@ endlab:
    end;
   end;
  end;
- if stipplemask and synccopyarea then begin
+ if stipplemask and exabug then begin
   xsync(appdisp,0); //workaround for radeon EXA pixmp bug, slow!
  end;
 end;
@@ -2529,6 +2529,9 @@ begin
   else begin
    transformpoints(drawinfo,false);
    xdrawsegments(appdisp,paintdevice,tgc(gc.handle),buffer.buffer,count div 2);
+   if exabug then begin //workaround for radeon EXA pixmp bug, slow!
+    xsync(appdisp,0);
+   end;
   end;
  end;
 end;

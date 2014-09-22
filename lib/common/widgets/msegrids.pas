@@ -9835,7 +9835,6 @@ begin
   end;
 //  acanvas.drawframe(innerclientrect,fgridframewidth,fgridframecolor);
 // end;
- 
 end;
  
 procedure tcustomgrid.setstatfile(const Value: tstatfile);
