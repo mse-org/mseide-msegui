@@ -17292,6 +17292,12 @@ begin
    deleteitem();
    continue;
   end;
+  if ar1[int1] = '--SYNCCOPYAREA' then begin 
+            //workaround for radeon EXA pixmap bug, slows down drawing!
+   synccopyarea:= true;
+   deleteitem();
+   continue;
+  end;
  {
   if ar1[int1] = '--NOCREATESTATICGRAVITY' then begin
    nocreatestaticgravity:= true;
