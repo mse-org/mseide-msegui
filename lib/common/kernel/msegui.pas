@@ -17298,12 +17298,14 @@ begin
    deleteitem();
    continue;
   end;
+ {
   if ar1[int1] = '--EXABUG' then begin 
             //workaround for radeon EXA pixmap bug, slows down drawing!
    exabug:= true;
    deleteitem();
    continue;
   end;
+ }
  {
   if ar1[int1] = '--NOCREATESTATICGRAVITY' then begin
    nocreatestaticgravity:= true;

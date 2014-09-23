@@ -3228,7 +3228,7 @@ begin
  if lock then begin
   try
    fdrawinfo.gc.gdifuncs^[func](fdrawinfo);
-   if flushgdi or exabug then begin
+   if flushgdi then begin
     doflush();
    end;
   finally
@@ -3238,7 +3238,7 @@ begin
  else begin
   fdrawinfo.gc.gdifuncs^[func](fdrawinfo);
   if flushgdi then begin
-   doflush;
+   doflush();
   end;
  end;
 end;

@@ -2097,7 +2097,7 @@ var
  sourceformats: culong  = cpclipmask or cpclipxorigin or cpclipyorigin;
  destformats: culong = cpgraphicsexposure;
  monomask: boolean;
- stipplemask: boolean;
+// stipplemask: boolean;
  spd: paintdevicety;
  skind,dkind: bitmapkindty;
  x1,y1: integer;
@@ -2136,7 +2136,7 @@ begin
             (destrect^.cy <> sourcerect^.cy)) and
             (destrect^.cx > 0) and (destrect^.cy > 0);
   monomask:= (mask = nil) or (mask.kind = bmk_mono);
-  stipplemask:= false;
+//  stipplemask:= false;
   if hasxrender and (needstransform or (longword(opacity) <> maxopacity) or
                                                       not monomask) then begin
    if needstransform then begin
@@ -2418,7 +2418,7 @@ endlab2:
       end
       else begin
               //convert from monochrome
-       stipplemask:= true;
+//       stipplemask:= true;
        pixmapgc:= xcreategc(appdisp,paintdevice,0,nil);
        if pixmapgc <> nil then begin
         xcopygc(appdisp,tgc(gc.handle),gcfunction or gcplanemask or
@@ -2457,9 +2457,6 @@ endlab:
     xfreepixmap(appdisp,pixmap2);
    end;
   end;
- end;
- if stipplemask and exabug then begin
-  xsync(appdisp,0); //workaround for radeon EXA pixmp bug, slow!
  end;
 end;
 
@@ -2529,9 +2526,6 @@ begin
   else begin
    transformpoints(drawinfo,false);
    xdrawsegments(appdisp,paintdevice,tgc(gc.handle),buffer.buffer,count div 2);
-   if exabug then begin //workaround for radeon EXA pixmp bug, slow!
-    xsync(appdisp,0);
-   end;
   end;
  end;
 end;
