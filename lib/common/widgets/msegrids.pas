@@ -9671,17 +9671,9 @@ begin
      if endrow >= startrow then begin
       canvas:= acanvas;
       ffixcols.paint(colinfo);
-{      
-      acanvas.intersectcliprect(mr(fdatarect.x-fdatacols.ffirstsize,0,
-                                  fdatarect.cx+fdatacols.ftotsize,bigint));
-      fdatacols.paint(colinfo,false);     //draw fix datacols
-      adatarect.x:= adatarect.x - fdatacols.ffirstsize;
-      adatarect.cx:= adatarect.cx - fdatacols.ffirstsize;
-}
       dataclip:= makerect(
         fdatarect.x-tframe1(fframe).fi.innerframe.left-fdatacols.ffirstsize,
-        -fscrollrect.y,fdatarecty.cx-ffixcols.ftotsize
-        {fdatarect.cx+ftotnohscroll},fdatarect.cy);
+        -fscrollrect.y,fdatarecty.cx-ffixcols.ftotsize,fdatarect.cy);
       if dataclip.cx < 0 then begin
        dataclip.cx:= 0;
       end;
@@ -9806,15 +9798,9 @@ begin
         end;
        end;
        if fdatacols.fscrollsize > 0 then begin
-//        acanvas.intersectcliprect(fdatarect);
         acanvas.intersectcliprect(
              mr(fdatacols.ffirstsize+ffixcols.ffirstsize,-fscrollrect.y,
-             fdatarect.cx
-             {fscrollrect.size.cx-ftotnohscroll-ffirstnohscroll},
-                                                        fscrollrect.size.cy));
-//        acanvas.intersectcliprect(
-//             makerect(ffirstnohscroll+ffixcols.ffirstsize,-fscrollrect.y,
-//                fscrollrect.size.cx,fscrollrect.size.cy));
+             fdatarect.cx,fscrollrect.size.cy));
        end;
        acanvas.move(mp(fdatacols.ffirstsize+ffixcols.ffirstsize+
                                                        fscrollrect.x,0));
@@ -9828,13 +9814,10 @@ begin
   end; //rect1 not empty
  end; //if cliprect not empty
 
-// if saveindex >= 0 then begin
-  acanvas.restore(saveindex);
-  with tgridframe(fframe).fi do begin
-   acanvas.drawframe(clientrect,innerframe,fgridframecolor);
-  end;
-//  acanvas.drawframe(innerclientrect,fgridframewidth,fgridframecolor);
-// end;
+ acanvas.restore(saveindex);
+ with tgridframe(fframe).fi do begin
+  acanvas.drawframe(clientrect,innerframe,fgridframecolor);
+ end;
 end;
  
 procedure tcustomgrid.setstatfile(const Value: tstatfile);
