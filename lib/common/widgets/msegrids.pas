@@ -3596,8 +3596,7 @@ var
 
 begin
  if (not (co_invisible in foptions) or 
-         (csdesigning in fcellinfo.grid.componentstate)) {and
-    (not info.calcautocellsize or (co1_autorowheight in foptions1))} then begin
+         (csdesigning in fcellinfo.grid.componentstate)) then begin
   if not info.calcautocellsize and checkautocolwidth then begin
    exit;
   end;
@@ -3645,10 +3644,6 @@ begin
      if hasrowheight then begin
       with fcellinfo do begin
        heightextend:= rowstatelist.internalheight(row1) - fcellinfo.grid.fdatarowheight;//rect.cy;
-//       int2:= rowstatelist.linewidth[row1];
-//       if int2 > 0 then begin
-//        heightextend:= heightextend - int2 + fcellinfo.grid.fdatarowlinewidth;
-//       end;
        inc(fcellrect.cy,heightextend);      
        inc(rect.cy,heightextend);      
        inc(innerrect.cy,heightextend);      
@@ -3698,7 +3693,6 @@ begin
       bo2:= false;
       if canbeforedrawcell then begin
        dobeforedrawcell(canvas,bo2);
-//       fonbeforedrawcell(self,canvas,fcellinfo,bo2);
       end;
       if not bo2 then begin
        if isfocusedcell then begin
@@ -3710,7 +3704,6 @@ begin
       end;
       if canafterdrawcell then begin
        doafterdrawcell(canvas);
-//       fonafterdrawcell(self,canvas,fcellinfo);
       end;
       canvas.restore(saveindex);
       if calcautocellsize then begin
@@ -9781,6 +9774,7 @@ begin
          with lines[int1] do begin
           a.x:= int3;
           b.x:= int2;
+//b.y:= b.y -3;
          end;
         end;
         if rowheight1 then begin
