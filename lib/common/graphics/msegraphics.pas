@@ -3228,9 +3228,8 @@ begin
  if lock then begin
   try
    fdrawinfo.gc.gdifuncs^[func](fdrawinfo);
-   if flushgdi then begin
-    fdrawinfo.gc.gdifuncs^[gdf_flush](fdrawinfo);
-    gui_flushgdi;
+   if flushgdi or exabug then begin
+    doflush();
    end;
   finally
    unlock;
@@ -4727,20 +4726,28 @@ begin
      rect1.pos:= pos;
      rect1.cx:= cx;
      rect1.cy:= awidth.top;
-     gdi(gdf_fillrect); //top
+     if (rect1.cx > 0) and (rect1.cy > 0) then begin
+      gdi(gdf_fillrect); //top
+     end;
      rect1.pos.y:= y + cy - awidth.bottom;
      rect1.cy:= awidth.bottom;
-     gdi(gdf_fillrect); //bottom
+     if (rect1.cx > 0) and (rect1.cy > 0) then begin
+      gdi(gdf_fillrect); //bottom
+     end;
      rect1.pos.y:= y;
      rect1.cy:= cy;
      inc(rect1.pos.y,awidth.top);
      dec(rect1.cy,awidth.top);
      dec(rect1.cy,awidth.bottom);
      rect1.cx:= awidth.left;
-     gdi(gdf_fillrect); //left
+     if (rect1.cx > 0) and (rect1.cy > 0) then begin
+      gdi(gdf_fillrect); //left
+     end;
      rect1.pos.x:= x + cx - awidth.right;
      rect1.cx:= awidth.right;
-     gdi(gdf_fillrect); //right
+     if (rect1.cx > 0) and (rect1.cy > 0) then begin
+      gdi(gdf_fillrect); //right
+     end;
     end;
    end;
   end;

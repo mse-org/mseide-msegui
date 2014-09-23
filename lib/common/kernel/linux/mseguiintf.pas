@@ -5794,7 +5794,10 @@ begin
    setlocale(lc_all,'en_US.utf8');
    if xsupportslocale() = 0 then begin  
     setlocale(lc_all,'POSIX');
-    xsupportslocale();
+    if xsupportslocale() = 0 then begin  
+     setlocale(lc_all,'C');
+     xsupportslocale();
+    end;
    end;
   end;
  end;
