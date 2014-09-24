@@ -797,6 +797,7 @@ type
    function getcheckednodes(const amode: getnodemodety = 
                                               gno_matching): treelistitemarty;
    procedure updatechildcheckedtree; //slow!
+   procedure updateparentnotcheckedtree; //slow!
    
    procedure expandall;
    procedure collapseall;
@@ -3779,11 +3780,17 @@ end;
 
 procedure ttreeitemeditlist.change(const index: integer);
 begin
- if (index < 0) and (no_updatechildchecked in foptions) and 
-                                         (nochange = 0) then begin
+ if (index < 0) and (nochange = 0) and 
+  ((no_updatechildchecked in foptions) or 
+        (no_updateparentnotchecked in foptions)) then begin
   inherited beginupdate; //no ils_subnodecountupdating
   try
-   updatechildcheckedtree;
+   if (no_updatechildchecked in foptions) then begin
+    updatechildcheckedtree();
+   end;
+   if (no_updateparentnotchecked in foptions) then begin
+    updateparentnotcheckedtree();
+   end;
   finally
    decupdate;
   end;
@@ -4429,6 +4436,26 @@ begin
    with po1^[int1] do begin
     if ftreelevel = 0 then begin
      updatechildcheckedtree;
+    end;
+   end;
+  end;
+ finally
+  endupdate;
+ end;
+end;
+
+procedure ttreeitemeditlist.updateparentnotcheckedtree;
+var
+ int1: integer;
+ po1: ptreelistedititematy;
+begin
+ beginupdate;
+ try
+  po1:= datapo;
+  for int1:= 0 to count - 1 do begin
+   with po1^[int1] do begin
+    if ftreelevel = 0 then begin
+     updateparentnotcheckedtree;
     end;
    end;
   end;

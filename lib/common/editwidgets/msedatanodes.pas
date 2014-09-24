@@ -45,7 +45,10 @@ type
  nodestates1ty = set of nodestate1ty;
  
  nodeoptionty = (no_drawemptybox,no_checkbox,
-                 no_updatechildchecked, //track ns1_childchecked state, slow!
+                 no_updatechildchecked, 
+                         //track ns1_childchecked state, slow!
+                 no_updateparentnotchecked, 
+                         //track ns1_parentnotchecked state, slow!
                  no_cellitemselect,     //copy cell select state to item select
                  no_nofreeitems         //do not free items for removed rows
                  );
@@ -271,8 +274,8 @@ type
 
    procedure updatechildcheckedstate();   //updates ancestors
    procedure updatechildcheckedtree();    //updates self and descendents
-   procedure updateparentcheckedstate(); //updates affected descendents
-   procedure updateparentcheckedtree(); //updates all descendents
+   procedure updateparentnotcheckedstate(); //updates affected descendents
+   procedure updateparentnotcheckedtree(); //updates all descendents
    property parent: ttreelistitem read fparent;
    function parentorself: ttreelistitem;
    function parentindex: integer;
@@ -2574,7 +2577,7 @@ begin
  end;
 end;
 
-procedure ttreelistitem.updateparentcheckedstate();
+procedure ttreelistitem.updateparentnotcheckedstate();
 
  procedure doset(const anode: ttreelistitem);
  var
@@ -2622,7 +2625,7 @@ begin
  end;
 end;
 
-procedure ttreelistitem.updateparentcheckedtree();
+procedure ttreelistitem.updateparentnotcheckedtree();
 
  procedure doupdate(const anode: ttreelistitem; avalue: boolean);
  var
@@ -2657,8 +2660,13 @@ procedure ttreelistitem.setchecked(const avalue: boolean);
 begin
  if avalue xor (ns_checked in fstate) then begin
   inherited;
-  if (fowner <> nil) and (no_updatechildchecked in fowner.foptions) then begin
-   updatechildcheckedstate;
+  if (fowner <> nil) then begin
+   if (no_updatechildchecked in fowner.foptions) then begin
+    updatechildcheckedstate();
+   end;
+   if (no_updateparentnotchecked in fowner.foptions) then begin
+    updateparentnotcheckedstate();
+   end;
   end;
  end;
 end;
