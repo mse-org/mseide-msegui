@@ -4103,6 +4103,9 @@ begin
     anode.doupdateparentnotcheckedstate(true);
    end;
   end;
+  if ns_showchildchecked in n2.state then begin
+   anode.updatechildcheckedstate();
+  end;
  end
  else begin
   inherited insert(aindex,anode); //top level node

@@ -2532,7 +2532,7 @@ var
 begin
  node1:= fparent;
  if ns_checked in fstate then begin
-  while (node1 <> nil) and (ns_showchildchecked in node1.fstate) and
+  while (node1 <> nil) and {(ns_showchildchecked in node1.fstate) and}
                                not (ns1_childchecked in node1.fstate1) do begin
    include(node1.fstate1,ns1_childchecked);
    node1.change;
@@ -2540,7 +2540,7 @@ begin
   end;
  end
  else begin
-  if not (ns_showchildchecked in fstate) or
+  if {not (ns_showchildchecked in fstate) or}
                      not (ns1_childchecked in fstate1) then begin
    while (node1 <> nil) and (ns_showchildchecked in node1.fstate) and
                                  (ns1_childchecked in node1.fstate1) do begin
@@ -2548,7 +2548,7 @@ begin
      for int1:= 0 to fcount-1 do begin
       with fitems[int1] do begin
        if (ns_checked in fstate) or
-                         (ns_showchildchecked in fstate) and
+                         {(ns_showchildchecked in fstate) and}
                          (ns1_childchecked in fstate1) then begin
         exit;
        end;
