@@ -4092,7 +4092,17 @@ begin
   n2.insert(int1,anode);
   if n2.owner <> self then begin
    inherited insert(aindex,anode); //top level node
-  end;  
+  end;
+  if ns_showparentnotchecked in anode.fstate then begin
+   if n2.checked and not (ns1_parentnotchecked in n2.state1) then begin
+    exclude(anode.fstate1,ns1_parentnotchecked);
+    anode.doupdateparentnotcheckedstate(false);
+   end
+   else begin
+    include(anode.fstate1,ns1_parentnotchecked);
+    anode.doupdateparentnotcheckedstate(true);
+   end;
+  end;
  end
  else begin
   inherited insert(aindex,anode); //top level node
@@ -4100,7 +4110,6 @@ begin
  anode.expanded:= bo1;
 // endupdate();
 end;
-
 
 procedure ttreeitemeditlist.add(const anodes: treelistedititemarty);
 var

@@ -259,6 +259,7 @@ type
                                        const r: ttreelistitem): integer;
    function comparecaseinsens(const l: ttreelistitem;
                                        const r: ttreelistitem): integer;
+   procedure doupdateparentnotcheckedstate(const aset: boolean);
   public
    constructor create(const aowner: tcustomitemlist = nil;
               const aparent: ttreelistitem = nil); reintroduce; virtual;
@@ -2577,7 +2578,7 @@ begin
  end;
 end;
 
-procedure ttreelistitem.updateparentnotcheckedstate();
+procedure ttreelistitem.doupdateparentnotcheckedstate(const aset: boolean);
 
  procedure doset(const anode: ttreelistitem);
  var
@@ -2613,16 +2614,22 @@ var
  int1: integer;
  
 begin
- if ns_checked in fstate then begin
+ if aset then begin
   for int1:= 0 to fcount-1 do begin
-   doclear(fitems[int1]);
+   doset(fitems[int1]);
   end;
  end
  else begin
   for int1:= 0 to fcount-1 do begin
-   doset(fitems[int1]);
+   doclear(fitems[int1]);
   end;
  end;
+end;
+
+procedure ttreelistitem.updateparentnotcheckedstate();
+begin
+ doupdateparentnotcheckedstate(not (ns_checked in fstate) or 
+                                     (ns1_parentnotchecked in fstate1));
 end;
 
 procedure ttreelistitem.updateparentnotcheckedtree();
