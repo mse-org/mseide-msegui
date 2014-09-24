@@ -90,7 +90,8 @@ type
                     dls_sorted,dls_sortio,
                     dls_forcenew, //used in tundolist
                     dls_remote,   //used in ificomp datalist
-                    dls_remotelock
+                    dls_remotelock,
+                    dls_rowdeleting //used in treeitemeditlist
                     );
  dataliststatesty = set of dataliststatety;
 
@@ -278,8 +279,8 @@ type
    procedure blockmovedata(const fromindex,toindex,count: integer);
    procedure blockcopydata(const fromindex,toindex,count: integer);
    procedure deletedata(const index: integer);
-   procedure deleteitems(index,acount: integer);
-   procedure insertitems(index,acount: integer);
+   procedure deleteitems(index,acount: integer); virtual;
+   procedure insertitems(index,acount: integer); virtual;
    function empty(const index: integer): boolean; virtual;         //true wenn leer
 
    function sort(const comparefunc: sortcomparemethodty; 
@@ -1667,13 +1668,6 @@ begin
   initdata1(false,index,acount);
   datainserted(index,acount);
   change(-1);
- {
-  capacity:= fcount + acount;
-  fcount:= fcount + acount;
-  blockcopymovedata(index,index+acount,fcount-index-acount,bcm_none);
-  initdata1(false,index,acount);
-  change(-1);
-  }
  end;
 end;
 

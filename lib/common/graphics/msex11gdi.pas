@@ -2097,6 +2097,7 @@ var
  sourceformats: culong  = cpclipmask or cpclipxorigin or cpclipyorigin;
  destformats: culong = cpgraphicsexposure;
  monomask: boolean;
+// stipplemask: boolean;
  spd: paintdevicety;
  skind,dkind: bitmapkindty;
  x1,y1: integer;
@@ -2135,6 +2136,7 @@ begin
             (destrect^.cy <> sourcerect^.cy)) and
             (destrect^.cx > 0) and (destrect^.cy > 0);
   monomask:= (mask = nil) or (mask.kind = bmk_mono);
+//  stipplemask:= false;
   if hasxrender and (needstransform or (longword(opacity) <> maxopacity) or
                                                       not monomask) then begin
    if needstransform then begin
@@ -2416,6 +2418,7 @@ endlab2:
       end
       else begin
               //convert from monochrome
+//       stipplemask:= true;
        pixmapgc:= xcreategc(appdisp,paintdevice,0,nil);
        if pixmapgc <> nil then begin
         xcopygc(appdisp,tgc(gc.handle),gcfunction or gcplanemask or

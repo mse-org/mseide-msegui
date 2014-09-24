@@ -623,7 +623,7 @@ begin
    ind1:= count;   
   end;
   result:= createnode;   
-  n1.insert(result,ind1);
+  n1.insert(ind1,result);
   result.filename:= afilename;
   fhashlist.add(result.fpath,result);
   inc(fchangedcount);
@@ -1161,14 +1161,14 @@ begin
  result.filename:= relativepath(aname,gettreedir);
  n2:= tprojectnode(projectedit.item);
  if (n2.fkind = pnk_dir) or (n2.parent = nil) then begin
-  n2.insert(result,0);
+  n2.insert(0,result);
  end
  else begin
   while (n2.treelevel > 1) and
                      (tprojectnode(n2.parent).fkind <> pnk_dir) do begin
    n2:= tprojectnode(n2.parent);
   end;
-  n2.parent.insert(result,n2.parentindex);
+  n2.parent.insert(n2.parentindex,result);
  end;
  tfilesnode(n2.rootnode).loadlist;
 end;

@@ -3596,8 +3596,7 @@ var
 
 begin
  if (not (co_invisible in foptions) or 
-         (csdesigning in fcellinfo.grid.componentstate)) {and
-    (not info.calcautocellsize or (co1_autorowheight in foptions1))} then begin
+         (csdesigning in fcellinfo.grid.componentstate)) then begin
   if not info.calcautocellsize and checkautocolwidth then begin
    exit;
   end;
@@ -3645,10 +3644,6 @@ begin
      if hasrowheight then begin
       with fcellinfo do begin
        heightextend:= rowstatelist.internalheight(row1) - fcellinfo.grid.fdatarowheight;//rect.cy;
-//       int2:= rowstatelist.linewidth[row1];
-//       if int2 > 0 then begin
-//        heightextend:= heightextend - int2 + fcellinfo.grid.fdatarowlinewidth;
-//       end;
        inc(fcellrect.cy,heightextend);      
        inc(rect.cy,heightextend);      
        inc(innerrect.cy,heightextend);      
@@ -3698,7 +3693,6 @@ begin
       bo2:= false;
       if canbeforedrawcell then begin
        dobeforedrawcell(canvas,bo2);
-//       fonbeforedrawcell(self,canvas,fcellinfo,bo2);
       end;
       if not bo2 then begin
        if isfocusedcell then begin
@@ -3710,7 +3704,6 @@ begin
       end;
       if canafterdrawcell then begin
        doafterdrawcell(canvas);
-//       fonafterdrawcell(self,canvas,fcellinfo);
       end;
       canvas.restore(saveindex);
       if calcautocellsize then begin
@@ -9131,6 +9124,7 @@ begin
  fzebra_step:= 2;
 
  inherited;
+ include(fwidgetstate1,ws1_designactive);
  internalcreateframe;
  fobjectpicker:= tobjectpicker.create(iobjectpicker(self));
 // fobjectpicker.options:= fobjectpicker.options + [opo_candoubleclick];
@@ -9670,17 +9664,9 @@ begin
      if endrow >= startrow then begin
       canvas:= acanvas;
       ffixcols.paint(colinfo);
-{      
-      acanvas.intersectcliprect(mr(fdatarect.x-fdatacols.ffirstsize,0,
-                                  fdatarect.cx+fdatacols.ftotsize,bigint));
-      fdatacols.paint(colinfo,false);     //draw fix datacols
-      adatarect.x:= adatarect.x - fdatacols.ffirstsize;
-      adatarect.cx:= adatarect.cx - fdatacols.ffirstsize;
-}
       dataclip:= makerect(
         fdatarect.x-tframe1(fframe).fi.innerframe.left-fdatacols.ffirstsize,
-        -fscrollrect.y,fdatarecty.cx-ffixcols.ftotsize
-        {fdatarect.cx+ftotnohscroll},fdatarect.cy);
+        -fscrollrect.y,fdatarecty.cx-ffixcols.ftotsize,fdatarect.cy);
       if dataclip.cx < 0 then begin
        dataclip.cx:= 0;
       end;
@@ -9788,6 +9774,7 @@ begin
          with lines[int1] do begin
           a.x:= int3;
           b.x:= int2;
+//b.y:= b.y -3;
          end;
         end;
         if rowheight1 then begin
@@ -9805,15 +9792,9 @@ begin
         end;
        end;
        if fdatacols.fscrollsize > 0 then begin
-//        acanvas.intersectcliprect(fdatarect);
         acanvas.intersectcliprect(
              mr(fdatacols.ffirstsize+ffixcols.ffirstsize,-fscrollrect.y,
-             fdatarect.cx
-             {fscrollrect.size.cx-ftotnohscroll-ffirstnohscroll},
-                                                        fscrollrect.size.cy));
-//        acanvas.intersectcliprect(
-//             makerect(ffirstnohscroll+ffixcols.ffirstsize,-fscrollrect.y,
-//                fscrollrect.size.cx,fscrollrect.size.cy));
+             fdatarect.cx,fscrollrect.size.cy));
        end;
        acanvas.move(mp(fdatacols.ffirstsize+ffixcols.ffirstsize+
                                                        fscrollrect.x,0));
@@ -9827,14 +9808,10 @@ begin
   end; //rect1 not empty
  end; //if cliprect not empty
 
-// if saveindex >= 0 then begin
-  acanvas.restore(saveindex);
-  with tgridframe(fframe).fi do begin
-   acanvas.drawframe(clientrect,innerframe,fgridframecolor);
-  end;
-//  acanvas.drawframe(innerclientrect,fgridframewidth,fgridframecolor);
-// end;
- 
+ acanvas.restore(saveindex);
+ with tgridframe(fframe).fi do begin
+  acanvas.drawframe(clientrect,innerframe,fgridframecolor);
+ end;
 end;
  
 procedure tcustomgrid.setstatfile(const Value: tstatfile);

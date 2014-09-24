@@ -1194,12 +1194,18 @@ type
    property template: tfacetemplate read gettemplate write settemplate;
  end;
 
- mouseeventty = procedure (const sender: twidget; var ainfo: mouseeventinfoty) of object;
- mousewheeleventty = procedure (const sender: twidget; var ainfo: mousewheeleventinfoty) of object;
- keyeventty = procedure (const sender: twidget; var ainfo: keyeventinfoty) of object;
- painteventty = procedure (const sender: twidget; const acanvas: tcanvas) of object;
- pointeventty = procedure(const sender: twidget; const apoint: pointty) of object;
- widgeteventty = procedure(const sender: tobject; const awidget: twidget) of object;
+ mouseeventty = procedure (const sender: twidget; 
+                                   var ainfo: mouseeventinfoty) of object;
+ mousewheeleventty = procedure (const sender: twidget; 
+                                   var ainfo: mousewheeleventinfoty) of object;
+ keyeventty = procedure (const sender: twidget; 
+                                   var ainfo: keyeventinfoty) of object;
+ painteventty = procedure (const sender: twidget; 
+                                   const acanvas: tcanvas) of object;
+ pointeventty = procedure(const sender: twidget;
+                                   const apoint: pointty) of object;
+ widgeteventty = procedure(const sender: tobject;
+                                   const awidget: twidget) of object;
 
  widgetarty = array of twidget;
 
@@ -17017,6 +17023,7 @@ begin
  if twindow(r).transientforstackactive then begin
   dec(result,transientforactiveweight);
  end;
+ {
 // if twindow(l).transientforstackactive then begin
   if twindow(l).ftransientfor <> nil then begin
    inc(result,transientfornotnilweight);
@@ -17033,6 +17040,7 @@ begin
    dec(result,transientforcountweight);
   end;
 // end;
+}
  window1:= twindow(l);
  while window1.ftransientfor <> nil do begin
   if window1.ftransientfor = twindow(r) then begin
@@ -17290,6 +17298,14 @@ begin
    deleteitem();
    continue;
   end;
+ {
+  if ar1[int1] = '--EXABUG' then begin 
+            //workaround for radeon EXA pixmap bug, slows down drawing!
+   exabug:= true;
+   deleteitem();
+   continue;
+  end;
+ }
  {
   if ar1[int1] = '--NOCREATESTATICGRAVITY' then begin
    nocreatestaticgravity:= true;
@@ -18538,8 +18554,10 @@ end;
 
 procedure tguiapplication.doafterrun;
 begin
- destroyforms; //zeos lib unloads libraries -> 
+ if not (apo_noautodestroymodules in foptions) then begin
+  destroyforms(); //zeos lib unloads libraries -> 
                //forms must be destroyed before unit finalization
+ end;
 end;
 
 function tguiapplication.idle: boolean;

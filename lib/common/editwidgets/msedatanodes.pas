@@ -46,7 +46,7 @@ type
  nodeoptionty = (no_drawemptybox,no_checkbox,
                  no_updatechildchecked, //track ns1_childchecked state, slow!
                  no_cellitemselect,     //copy cell select state to item select
-                 no_nofreeitems
+                 no_nofreeitems         //do not free items for removed rows
                  );
  nodeoptionsty = set of nodeoptionty;
 
@@ -322,7 +322,9 @@ type
    procedure add(const acount: integer;
                             const itemclass: treelistitemclassty = nil;
                             const defaultstate: nodestatesty = []); overload;
-   procedure insert(const aitem: ttreelistitem; aindex: integer);
+   procedure insert(aindex: integer; const aitem: ttreelistitem);
+   procedure insert(const aitem: ttreelistitem; aindex: integer); deprecated;
+                               //use insert(aindex,aitem) above instead
    procedure move(const source,dest: integer);
    procedure clear; virtual;
 
@@ -1867,7 +1869,9 @@ begin
  value.fparentindex:= aindex;
  value.fparent:= self;
  value.settreelevel(ftreelevel+1);
- value.setowner(fowner);
+ if fowner <> nil then begin
+  value.setowner(fowner);
+ end;
 end;
 
 procedure ttreelistitem.setitems(const aindex: integer; const value: ttreelistitem);
@@ -1924,8 +1928,7 @@ begin
  checksort;
 end;
 
-procedure ttreelistitem.insert(const aitem: ttreelistitem;
-                                                  aindex: integer);
+procedure ttreelistitem.insert(aindex: integer; const aitem: ttreelistitem);
 var
  int1,int2: integer;
 begin
@@ -1957,6 +1960,12 @@ begin
   countchange(int2,true);
   checksort;
  end;
+end;
+
+procedure ttreelistitem.insert(const aitem: ttreelistitem;
+                                                  aindex: integer);
+begin
+ insert(aindex,aitem);
 end;
 
 procedure ttreelistitem.move(const source: integer; const dest: integer);

@@ -5794,7 +5794,10 @@ begin
    setlocale(lc_all,'en_US.utf8');
    if xsupportslocale() = 0 then begin  
     setlocale(lc_all,'POSIX');
-    xsupportslocale();
+    if xsupportslocale() = 0 then begin  
+     setlocale(lc_all,'C');
+     xsupportslocale();
+    end;
    end;
   end;
  end;
@@ -6118,9 +6121,9 @@ begin
   end;
  
   result:= gue_ok;
-  {$ifdef mse_flushgdi}
+ {$ifdef mse_flushgdi}
   xsynchronize(appdisp,1);
-  {$endif}
+ {$endif}
   errorhandlerbefore:= xseterrorhandler({$ifdef FPC}@{$endif}errorhandler);
   exit;
  error:

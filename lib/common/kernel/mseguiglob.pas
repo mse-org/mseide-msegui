@@ -292,6 +292,7 @@ var
  noreconfigurewmwindow: boolean;
  toplevelraise: boolean;
  nostaticgravity: boolean;
+// exabug: boolean;
 // nocreatestaticgravity: boolean;
 
 procedure guierror(error: guierrorty; text: string = ''); overload;

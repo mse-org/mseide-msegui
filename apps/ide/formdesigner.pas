@@ -186,6 +186,7 @@ type
    fselectcomp: tcomponent;
    fclientsizevalid: boolean;
    fcompoffsbefore: pointty;
+   fsizebefore: sizety;
    procedure drawgrid(const canvas: tcanvas);
    procedure hidexorpic(const canvas: tcanvas);
    procedure showxorpic(const canvas: tcanvas);
@@ -2047,6 +2048,7 @@ begin
    end
    else begin
     frame.grip_size:= 0;
+    dragdock.optionsdock:= dragdock.optionsdock - [od_top,od_background];
     dragdock.float();
    end;
    if not fixformsize then begin
@@ -2411,9 +2413,11 @@ begin
     rect1:= paintrect;
     if form <> nil then begin
      form.widgetrect:= rect1;
-     if sizeisequal(form.size,rect1.size) then begin
+     if sizeisequal(form.size,rect1.size) or 
+                not sizeisequal(rect1.size,fsizebefore) then begin
       fsizeerrorcount:= 0;
      end;
+     fsizebefore:= rect1.size;
      if fsizeerrorcount < 4 then begin
       inc(fsizeerrorcount);
       include(ffostate,fds_sizesyncing);
