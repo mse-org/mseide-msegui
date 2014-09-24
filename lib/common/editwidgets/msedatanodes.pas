@@ -55,6 +55,7 @@ const
                      ns_subitems,ns_drawemptybox,ns_checkbox,
                      ns_useri0..ns_useri7];
  invalidateallstates = [ns_expanded];
+ valuechangestates = [ns_checked];
  statstates: nodestatesty = [ns_expanded,ns_selected,ns_checked,{ns_checkbox,}
                ns_useri0..ns_useri3,ns_user0..ns_user3];
  defaultlevelstep = 10;
@@ -154,7 +155,8 @@ type
    procedure releaseowner; virtual;
 
    function empty: boolean; virtual;
-   procedure change;
+   procedure change();
+   procedure valuechange();
    procedure updatecellzone(const pos: pointty; var zone: cellzonety); virtual;
    procedure drawimage(var alayoutinfo: listitemlayoutinfoty;
                                 const acanvas: tcanvas); virtual;
@@ -372,7 +374,6 @@ type
                       const aimagelist: timagelist = nil); reintroduce;
    function getvaluetext: msestring; override;
    procedure setvaluetext(var avalue: msestring); override;
-   procedure valuechange();
    property fieldindex: integer read ffieldindex;
 //   property valuetext: msestring read getvaluetext write setvaluetext;
  end;
@@ -916,7 +917,7 @@ begin
  end;
 end;
 
-procedure tlistitem.change;
+procedure tlistitem.change();
 var
  action: nodeactioninfoty;
 begin
@@ -926,10 +927,21 @@ begin
  end;
 end;
 
+procedure tlistitem.valuechange();
+var
+ action: nodeactioninfoty;
+begin
+ if fowner <> nil then begin
+  action.action:= na_valuechange;
+  fowner.nodenotification(self,action);
+ end;
+end;
+
 procedure tlistitem.setcaption(const avalue: msestring);
 begin
  fcaption:= avalue;
- change;
+ change();
+ valuechange();
 end;
 
 procedure tlistitem.setstate(const Value: nodestatesty);
@@ -940,6 +952,9 @@ begin
  fstate := Value;
  if stat1 * invalidatestates <> [] then begin
   change;
+ end;
+ if stat1 * valuechangestates <> [] then begin
+  valuechange();
  end;
 end;
 
@@ -3283,16 +3298,6 @@ begin
   if not (ns1_fixedcaption in fstate1) then begin
    inherited;
   end;
- end;
-end;
-
-procedure trecordfielditem.valuechange;
-var
- action: nodeactioninfoty;
-begin
- if fowner <> nil then begin
-  action.action:= na_valuechange;
-  fowner.nodenotification(self,action);
  end;
 end;
 

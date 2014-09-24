@@ -101,8 +101,6 @@ type
    Fcapacity: integer;
    fonchange: notifyeventty;
    fonitemchange: indexeventty;
-   fnochange: integer;
-   fdeleting: integer;
    fmaxcount: integer;
    fringpointer: integer;
    fcheckeditem: integer;
@@ -118,6 +116,8 @@ type
    procedure remoteitemchange(const alink: pointer);
    procedure setcheckeditem(const avalue: integer);
   protected
+   fnochange: integer;
+   fdeleting: integer;
    fdatapo: pchar;
    fsize: integer;
    fcount: integer;

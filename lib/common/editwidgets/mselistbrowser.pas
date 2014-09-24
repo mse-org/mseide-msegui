@@ -2483,8 +2483,11 @@ begin
   end;
  end
  else begin
-  if fowner.canevent(tmethod(fonitemnotification)) then begin
-   fonitemnotification(sender,ainfo.action);
+  if not (ainfo.action in [na_change,na_valuechange]) or 
+                                              (fnochange = 0) then begin
+   if fowner.canevent(tmethod(fonitemnotification)) then begin
+    fonitemnotification(sender,ainfo.action);
+   end;
   end;
   inherited;
   if ainfo.action in [na_expand,na_collapse] then begin
