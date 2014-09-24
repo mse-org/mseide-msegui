@@ -99,6 +99,7 @@ type
   private
    fbytelength: integer;   //pufferlaenge
    Fcapacity: integer;
+   fnochange: integer;
    fonchange: notifyeventty;
    fonitemchange: indexeventty;
    fmaxcount: integer;
@@ -116,7 +117,6 @@ type
    procedure remoteitemchange(const alink: pointer);
    procedure setcheckeditem(const avalue: integer);
   protected
-   fnochange: integer;
    fdeleting: integer;
    fdatapo: pchar;
    fsize: integer;

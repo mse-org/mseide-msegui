@@ -22,7 +22,7 @@ type
  nodestatty = (ns_expanded,ns_selected,ns_readonly,ns_checked,
                ns_subitems,ns_drawemptybox,ns_imagenrfix,
 //               ns_destroying,ns_updating,ns_noowner,
-               ns_checkbox,ns_showchildchecked,ns_res9,
+               ns_checkbox,ns_showchildchecked,ns_showparentnotchecked,
                ns_nosubnodestat,
                ns_casesensitive,ns_sorted,ns_res13,//ns_captionclipped,
                    ns_res14,ns_res15,
@@ -38,7 +38,8 @@ type
  nodestatesty = set of nodestatty;
  nodestate1ty = (ns1_statechanged,ns1_rootchange,ns1_candrag,
                  ns1_destroying,ns1_updating,ns1_noowner,ns1_captionclipped,
-                 ns1_childchecked,ns1_checkboxclicked,ns1_customsort,
+                 ns1_childchecked,ns1_parentnotchecked,
+                 ns1_checkboxclicked,ns1_customsort,
                  ns1_nofreeroot,ns1_top,ns1_fixedcaption
                 );
  nodestates1ty = set of nodestate1ty;
@@ -155,8 +156,8 @@ type
    procedure releaseowner; virtual;
 
    function empty: boolean; virtual;
-   procedure change();
-   procedure valuechange();
+   procedure change(); virtual;
+   procedure valuechange(); virtual;
    procedure updatecellzone(const pos: pointty; var zone: cellzonety); virtual;
    procedure drawimage(var alayoutinfo: listitemlayoutinfoty;
                                 const acanvas: tcanvas); virtual;
@@ -259,17 +260,19 @@ type
    constructor create(const aowner: tcustomitemlist = nil;
               const aparent: ttreelistitem = nil); reintroduce; virtual;
    destructor destroy; override;
-   class procedure calcitemlayout(const asize: sizety; const ainnerframe: framety;
-                           const list: tcustomitemlist;
-                              var info: listitemlayoutinfoty); override;
+   class procedure calcitemlayout(const asize: sizety;
+                const ainnerframe: framety; const list: tcustomitemlist; 
+                                     var info: listitemlayoutinfoty); override;
 
    procedure releaseowner; override;
 
    procedure dostatread(const reader: tstatreader); override;
    procedure dostatwrite(const writer: tstatwriter); override;
 
-   procedure updatechildcheckedstate; //updates ancestors
-   procedure updatechildcheckedtree;  //updates self and descendents
+   procedure updatechildcheckedstate();   //updates ancestors
+   procedure updatechildcheckedtree();    //updates self and descendents
+   procedure updateparentcheckedstate(); //updates affected descendents
+   procedure updateparentcheckedtree(); //updates all descendents
    property parent: ttreelistitem read fparent;
    function parentorself: ttreelistitem;
    function parentindex: integer;
@@ -736,6 +739,10 @@ begin
     glyphno:= stg_checkbox;
     if ns_checked in self.fstate then begin
      glyphno:= stg_checkboxchecked;
+     if (ns_showparentnotchecked in self.fstate) and 
+                       (ns1_parentnotchecked in self.fstate1) then begin
+      glyphno:= stg_checkboxparentnotchecked;
+     end;
     end
     else begin
      if (ns_showchildchecked in self.fstate) and 
@@ -941,7 +948,9 @@ procedure tlistitem.setcaption(const avalue: msestring);
 begin
  fcaption:= avalue;
  change();
- valuechange();
+ if not (ns1_fixedcaption in fstate1) then begin
+  valuechange();
+ end;
 end;
 
 procedure tlistitem.setstate(const Value: nodestatesty);
@@ -2564,6 +2573,85 @@ begin
   end;
  end;
 end;
+
+procedure ttreelistitem.updateparentcheckedstate();
+
+ procedure doset(const anode: ttreelistitem);
+ var
+  int1: integer;
+ begin
+  with anode do begin
+   if not (ns1_parentnotchecked in fstate1) then begin
+    include(fstate1,ns1_parentnotchecked);
+    for int1:= 0 to fcount-1 do begin
+     doset(fitems[int1]);
+    end;
+    change();
+   end;
+  end;
+ end;
+
+ procedure doclear(const anode: ttreelistitem);
+ var
+  int1: integer;
+ begin
+  with anode do begin
+   exclude(fstate1,ns1_parentnotchecked);
+   for int1:= 0 to fcount-1 do begin
+    if ns_checked in fstate then begin
+     doclear(fitems[int1]);
+    end;
+   end;   
+   change();
+  end;
+ end;
+ 
+var
+ int1: integer;
+ 
+begin
+ if ns_checked in fstate then begin
+  for int1:= 0 to fcount-1 do begin
+   doclear(fitems[int1]);
+  end;
+ end
+ else begin
+  for int1:= 0 to fcount-1 do begin
+   doset(fitems[int1]);
+  end;
+ end;
+end;
+
+procedure ttreelistitem.updateparentcheckedtree();
+
+ procedure doupdate(const anode: ttreelistitem; avalue: boolean);
+ var
+  int1: integer;
+ begin
+  with anode do begin
+   if avalue then begin
+    include(fstate1,ns1_parentnotchecked);
+   end
+   else begin
+    exclude(fstate1,ns1_parentnotchecked);
+   end;
+   avalue:= avalue or not checked;
+   for int1:= 0 to fcount-1 do begin
+    doupdate(fitems[int1],avalue);
+   end;   
+  end;
+ end;
+
+var
+ int1: integer;
+ bo1: boolean; 
+begin
+ bo1:= not (ns_checked in fstate);
+ for int1:= 0 to fcount-1 do begin
+  doupdate(fitems[int1],bo1);
+ end;
+end;
+
 
 procedure ttreelistitem.setchecked(const avalue: boolean);
 begin

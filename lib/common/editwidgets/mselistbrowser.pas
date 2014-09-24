@@ -2484,7 +2484,7 @@ begin
  end
  else begin
   if not (ainfo.action in [na_change,na_valuechange]) or 
-                                              (fnochange = 0) then begin
+                                              (nochange = 0) then begin
    if fowner.canevent(tmethod(fonitemnotification)) then begin
     fonitemnotification(sender,ainfo.action);
    end;

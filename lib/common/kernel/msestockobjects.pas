@@ -83,8 +83,8 @@ type
   stg_sound, stg_soundoff,
  //    74             75           76        77         78          79  
   stg_fullscreen, stg_settings, stg_save, stg_rename, stg_list, stg_listbold,
- //    80          81
-  stg_doublesquare,stg_dbfilterclear
+ //    80          81                82
+  stg_doublesquare,stg_dbfilterclear,stg_checkboxparentnotchecked
                  );
 
 const
