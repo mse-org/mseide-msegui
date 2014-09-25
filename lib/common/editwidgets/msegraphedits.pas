@@ -836,7 +836,7 @@ type
                        var info: celleventinfoty); override;
    
    procedure setcolor(const avalue: colorty); override;
-   //iactionlink
+    //iactionlink
    function getactioninfopo: pactioninfoty;
    function shortcutseparator: msechar;
    procedure calccaptiontext(var ainfo: actioninfoty);
@@ -847,6 +847,7 @@ type
    procedure domousewheelevent(var info: mousewheeleventinfoty); override;
    procedure togglevalue(const areadonly: boolean;
                                  const down: boolean); override;
+   procedure togglegridvalue(const index: integer); override;
    procedure statechanged; override;
    procedure mouseevent(var info: mouseeventinfoty); override;
    procedure dokeydown(var info: keyeventinfoty); override;
@@ -2950,7 +2951,7 @@ procedure tcustomintegergraphdataedit.togglevalue(const areadonly: boolean;
 var
  int1: integer;
 begin
- if not areadonly then begin
+ if not areadonly and (fmin <> fmax) then begin
   int1:= fvalue;
   doinc(int1,down);
   docheckvalue(int1);
@@ -2961,9 +2962,11 @@ procedure tcustomintegergraphdataedit.togglegridvalue(const index: integer);
 var
  int1: integer;
 begin
- int1:= gridvalue[index];
- doinc(int1,false);
- gridvalue[index]:= int1;
+ if fmin <> fmax then begin
+  int1:= gridvalue[index];
+  doinc(int1,false);
+  gridvalue[index]:= int1;
+ end;
 end;
 
 procedure tcustomintegergraphdataedit.fillcol(const avalue: integer);
@@ -3559,6 +3562,12 @@ end;
 
 procedure tcustomdatabutton.togglevalue(const areadonly: boolean;
                                                      const down: boolean);
+begin
+ inherited;
+ internalexecute;
+end;
+
+procedure tcustomdatabutton.togglegridvalue(const index: integer);
 begin
  inherited;
  internalexecute;
