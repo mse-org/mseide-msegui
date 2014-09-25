@@ -360,6 +360,7 @@ type
                           const font: tfont; const notext: boolean); override;
    property rootexpanded: boolean read getrootexpanded write setrootexpanded;
    property expanded: boolean read getexpanded write setexpanded;
+   function treechecked: boolean; //true if checked and not parentnotchecked
    property items[const aindex: integer]: ttreelistitem read getitems; default;
  end;
 
@@ -3361,6 +3362,11 @@ begin
    n1:= n1.fparent;
   end;
 // end;
+end;
+
+function ttreelistitem.treechecked: boolean;
+begin
+ result:= (ns_checked in fstate) and not (ns1_parentnotchecked in fstate1);
 end;
 
 { trecordfielditem }

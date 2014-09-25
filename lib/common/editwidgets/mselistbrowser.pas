@@ -544,8 +544,6 @@ type
    function getgrid: tcustomgrid;
    function getlayoutinfo(const acellinfo: pcellinfoty): plistitemlayoutinfoty;
    procedure itemcountchanged;
-   procedure updateitemvalues(const index: integer;
-                                       const count: integer); virtual;
    function getcolorglyph: colorty;
 
     //igridwidget
@@ -601,6 +599,8 @@ type
 
    procedure beginedit;
    procedure endedit;
+   procedure updateitemvalues(const index: integer;
+                                       const count: integer); virtual;
    property activerow: integer read factiverow;
   published
    property itemlist: titemeditlist read getitemlist 
@@ -886,7 +886,6 @@ type
    procedure dokeydown(var info: keyeventinfoty); override;
    procedure docellevent(const ownedcol: boolean; var info: celleventinfoty); override;
    function checkrowmove(const curindex,newindex: integer): boolean;
-   procedure updateitemvalues(const index: integer; const count: integer); override;
    procedure beforecelldragevent(var ainfo: draginfoty; const arow: integer;
                                var processed: boolean); override;
    procedure aftercelldragevent(var ainfo: draginfoty; const arow: integer;
@@ -903,6 +902,8 @@ type
    function candragsource(const apos: pointty): boolean;
    procedure dragdrop(const adragobject: ttreeitemdragobject);
    procedure comparerow(const lindex,rindex: integer; var aresult: integer);
+   procedure updateitemvalues(const index: integer; const count: integer); override;
+   procedure updateparentvalues(const index: integer);
   published
    property itemlist: ttreeitemeditlist read getitemlist 
                                         write setitemlist stored false;
@@ -5267,6 +5268,17 @@ begin
   end;
  end;
  inherited;
+end;
+
+procedure ttreeitemedit.updateparentvalues(const index: integer);
+var
+ n1: ttreelistitem;
+begin
+ n1:= ttreelistitem(fitemlist.items[index]).parent;
+ while (n1 <> nil) and (n1.owner = fitemlist) do begin
+  updateitemvalues(n1.index,1);
+  n1:= n1.parent;
+ end;
 end;
 
 procedure ttreeitemedit.dokeydown(var info: keyeventinfoty);
