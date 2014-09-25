@@ -2495,6 +2495,9 @@ begin
   if ainfo.action in [na_expand,na_collapse] then begin
    change(sender);
   end;
+  if (nochange = 0) and (ainfo.action = na_valuechange) then begin
+   fintf.updateitemvalues(sender.index,1);
+  end;
  end;
 end;
 
