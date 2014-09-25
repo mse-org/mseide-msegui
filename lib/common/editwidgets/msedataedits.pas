@@ -2931,15 +2931,17 @@ begin
 end;
 
 function tcustomstringedit.checkvalue(const quiet: boolean = false): boolean;
-var
- mstr1: msestring;
+//var
+// mstr1: msestring;
 begin
+{
  if optionsedit * 
          [oe_trimleft,oe_trimright,oe_uppercase,oe_lowercase] <> [] then begin
   mstr1:= getvaluetext;
   updateflagtext(mstr1);
   text:= mstr1;
  end;
+}
  result:= inherited checkvalue(quiet);
 end;
 
