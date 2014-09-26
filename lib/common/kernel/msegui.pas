@@ -15010,10 +15010,11 @@ end;
 
 function twindow.transientforstackactive: boolean;
 var
- window1: twindow;
+ window1,window2: twindow;
 begin
  result:= false;
  window1:= appinst.activewindow;
+ window2:= window1;
  if (window1 <> nil) and (window1.ftransientfor <> nil) then begin 
   while window1 <> nil do begin
    if window1 = self then begin
@@ -15022,6 +15023,14 @@ begin
    end;
    window1:= window1.ftransientfor;
   end;
+ end;
+ window1:= self;
+ while window1 <> nil do begin
+  if window1 = window2 then begin
+   result:= true;
+   break;
+  end;
+  window1:= window1.ftransientfor;
  end;
 end;
 
@@ -16955,8 +16964,8 @@ const
  topweight =                1 shl 2;
 // popupweight =              1 shl 4;
  modalweight =              1 shl 5;
- transientforcountweight =  1 shl 6;
- transientfornotnilweight = 1 shl 7;
+// transientforcountweight =  1 shl 6;
+// transientfornotnilweight = 1 shl 7;
  transientforweight =       1 shl 8;
  transientforactiveweight = 1 shl 9;
  invisibleweight =          1 shl 10;
@@ -17817,7 +17826,7 @@ begin
  {$ifdef mse_debugzorder}
   debugwriteln('** showhint '+tinternalapplication(self).fhintinfo.caption);
  {$endif}
-  fhintwidget.show;
+  fhintwidget.show(ml_none,window1);
   if showtime <> 0 then begin
    fhinttimer.interval:= showtime;
    fhinttimer.enabled:= true;
