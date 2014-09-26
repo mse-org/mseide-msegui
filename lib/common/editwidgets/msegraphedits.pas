@@ -836,6 +836,7 @@ type
 
    procedure docellevent(const ownedcol: boolean; 
                        var info: celleventinfoty); override;
+   procedure gridtovalue(arow: integer); override;
    
    procedure setcolor(const avalue: colorty); override;
 
@@ -854,7 +855,6 @@ type
    function valueenabledstate(const avalue: integer): boolean;
    procedure checkdisabled();
    procedure valuechanged(); override;
-   procedure gridtovalue(arow: integer); override;
 
    procedure mouseevent(var info: mouseeventinfoty); override;
    procedure dokeydown(var info: keyeventinfoty); override;
@@ -881,12 +881,14 @@ type
    procedure initnewcomponent(const ascale: real); override;
    procedure togglegridvalue(const index: integer); override;
    property optionswidget default defaultoptionswidget - [ow_mousefocus];
-   property valuefaces: tvaluefacearrayprop read fvaluefaces write setvaluefaces;
+   property valuefaces: tvaluefacearrayprop read fvaluefaces 
+                                                     write setvaluefaces;
    property valuecaptions: tmsestringarrayprop read fvaluecaptions
                                                   write setvaluecaptions;
    property font: twidgetfont read getfont write setfont stored isfontstored;
    property action: tcustomaction read factioninfo.action write setaction;
-   property caption: captionty read factioninfo.captiontext write setcaption stored iscaptionstored;
+   property caption: captionty read factioninfo.captiontext write setcaption 
+                                                        stored iscaptionstored;
    property textflags: textflagsty read finfo.ca.textflags 
                          write settextflags default defaultcaptiontextflags;
    property imagepos: imageposty read finfo.ca.imagepos write setimagepos
@@ -2035,7 +2037,8 @@ end;
 procedure tgraphdataedit.setenabled(const avalue: boolean);
 begin
  inherited;
- if (fgridintf <> nil) and not (csloading in componentstate) then begin
+ if (fgridintf <> nil) and not (csloading in componentstate){ and 
+                                 not (des_noenablesync in fstate)} then begin
   fgridintf.getcol.enabled:= avalue;
  end;
 end;
@@ -2222,7 +2225,7 @@ begin
  bo1:= not (csdesigning in componentstate) and 
           iswidgetclick(info,fcheckcaption) and (bo_executeonclick in foptions);
  inherited;
- if bo1 then begin
+ if bo1 and not (des_disabled in fstate) then begin
          //twidgetgrid needs childmouseevent
   togglevalue(oe_readonly in getoptionsedit,false);
  end;
@@ -3277,7 +3280,8 @@ end;
 procedure tcustomdatabutton.dokeydown(var info: keyeventinfoty);
 begin
  inherited;
- if (info.shiftstate = []) and (bo_executeonkey in foptions) then begin
+ if (info.shiftstate = []) and (bo_executeonkey in foptions) and 
+                                    not (des_disabled in fstate) then begin
   if (info.key = key_space) then begin
    include(finfo.state,shs_clicked);
    invalidaterect(finfo.ca.dim);
@@ -3345,6 +3349,9 @@ procedure tcustomdatabutton.statechanged;
 begin
  inherited;
  updatewidgetshapestate(finfo,self);
+ if (fgridintf <> nil) and (fvaluedisabled <> -2) then begin
+  checkdisabled();
+ end;
 end;
 
 procedure tcustomdatabutton.setcolorglyph(const avalue: colorty);
@@ -3584,8 +3591,10 @@ end;
 procedure tcustomdatabutton.togglevalue(const areadonly: boolean;
                                                      const down: boolean);
 begin
- inherited;
- internalexecute;
+ if not (des_disabled in fstate) then begin
+  inherited;
+  internalexecute;
+ end;
 end;
 
 procedure tcustomdatabutton.togglegridvalue(const index: integer);
@@ -3940,7 +3949,15 @@ procedure tcustomdatabutton.setvaluedisabled(const avalue: integer);
 begin
  if fvaluedisabled <> avalue then begin
   fvaluedisabled:= avalue;
-  checkdisabled();
+  {
+  if fvaluedisabled = -2 then begin
+   exclude(fstate,des_noenablesync);
+  end
+  else begin
+   include(fstate,des_noenablesync);
+   checkdisabled();
+  end;
+  }
  end;
 end;
 
@@ -3954,7 +3971,20 @@ end;
 
 procedure tcustomdatabutton.checkdisabled();
 begin
- enabled:= valueenabledstate(fvalue);
+ if (fgridintf = nil) then begin
+                  //no check if inactive gridrow
+  enabled:= valueenabledstate(fvalue);
+ end
+ else begin
+  if valueenabledstate(fvalue) then begin
+   exclude(finfo.state,shs_disabled);
+   exclude(fstate,des_disabled);
+  end
+  else begin
+   include(finfo.state,shs_disabled);
+   include(fstate,des_disabled);
+  end;
+ end;
 end;
 
 procedure tcustomdatabutton.valuechanged;
