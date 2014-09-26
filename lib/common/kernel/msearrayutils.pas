@@ -2909,15 +2909,78 @@ begin
  result:= msecomparetext(msestring(l),msestring(r));
 // {$endif}
 end;
-
+{
 function compareasciistring(const l,r): integer;
 begin
- result:= comparestr(ansistring(l),ansistring(r));
+ result:= stringcomp(string(l),string(r));
+// result:= comparestr(ansistring(l),ansistring(r));
 end;
 
 function compareiasciistring(const l,r): integer;
 begin
- result:= comparetext(ansistring(l),ansistring(r));
+ result:= stringicomp(string(l),string(r));
+// result:= comparetext(ansistring(l),ansistring(r));
+end;
+}
+
+function compareasciistring(const l,r): integer;
+var
+ by1: byte;
+ po1,po2: pchar;
+begin
+ po1:= pointer(string(l));
+ po2:= pointer(string(r));
+ if po1 = nil then begin
+  if po2 = nil then begin
+   result:= 0;
+   exit;
+  end;
+  result:= -1;
+  exit;
+ end;
+ if po2 = nil then begin
+  result:= 1;
+  exit;
+ end;
+ while true do begin
+  by1:= byte(po1^)-byte(po2^);
+  if (by1 <> 0) or (po1^ = #0) or (po2^=#0) then begin
+   break;
+  end;
+  inc(po1);
+  inc(po2);
+ end;
+ result:= shortint(by1);
+end;
+
+function compareiasciistring(const l,r): integer;
+var
+ by1: byte;
+ po1,po2: pchar;
+begin
+ po1:= pointer(string(l));
+ po2:= pointer(string(r));
+ if po1 = nil then begin
+  if po2 = nil then begin
+   result:= 0;
+   exit;
+  end;
+  result:= -1;
+  exit;
+ end;
+ if po2 = nil then begin
+  result:= 1;
+  exit;
+ end;
+ while true do begin
+  by1:= byte(upperchars[po1^])-byte(upperchars[po2^]);
+  if (by1 <> 0) or (po1^ = #0) or (po2^=#0) then begin
+   break;
+  end;
+  inc(po1);
+  inc(po2);
+ end;
+ result:= shortint(by1);
 end;
 
 function compareansistring(const l,r): integer;
@@ -2983,6 +3046,8 @@ begin
 //   sms_upi: mergesortarray(ziel,0,length(ziel)-1,compareistringansi,sizeof(string));
   sms_upascii: sortarray(dest,sizeof(string),
                         {$ifdef FPC}@{$endif}compareasciistring,indexlist);
+  sms_upiascii: sortarray(dest,sizeof(string),
+                        {$ifdef FPC}@{$endif}compareiasciistring,indexlist);
 //   sms_upiascii: mergesortarray(ziel,0,length(ziel)-1,compareistringascii,sizeof(string));
  end;
 end;

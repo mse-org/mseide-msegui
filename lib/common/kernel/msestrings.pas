@@ -4804,6 +4804,7 @@ begin
  end;
 end;
 
+{
 function stringcomp(const a,b: string): integer;
 var
  int1: integer;
@@ -4849,6 +4850,67 @@ begin
  else begin
   result:= shortint(by1);
  end;
+end;
+}
+
+function stringcomp(const a,b: string): integer;
+var
+ by1: byte;
+ po1,po2: pchar;
+begin
+ po1:= pointer(a);
+ po2:= pointer(b);
+ if po1 = nil then begin
+  if po2 = nil then begin
+   result:= 0;
+   exit;
+  end;
+  result:= -1;
+  exit;
+ end;
+ if po2 = nil then begin
+  result:= 1;
+  exit;
+ end;
+ while true do begin
+  by1:= byte(po1^)-byte(po2^);
+  if (by1 <> 0) or (po1^ = #0) or (po2^=#0) then begin
+   break;
+  end;
+  inc(po1);
+  inc(po2);
+ end;
+ result:= shortint(by1);
+end;
+
+function stringicomp(const a,b: string): integer;
+var
+ by1: byte;
+ po1,po2: pchar;
+begin
+ po1:= pointer(a);
+ po2:= pointer(b);
+ if po1 = nil then begin
+  if po2 = nil then begin
+   result:= 0;
+   exit;
+  end;
+  result:= -1;
+  exit;
+ end;
+ if po2 = nil then begin
+  result:= 1;
+  exit;
+ end;
+ while true do begin
+  by1:= byte(upperchars[po1^])-byte(upperchars[po2^]);
+  if (by1 <> 0) or (po1^ = #0) or (po2^=#0) then begin
+   break;
+  end;
+  inc(po1);
+  inc(po2);
+ end;
+ result:= shortint(by1);
 end;
 
 function stringicompupper(const a,upstr: string): integer;
