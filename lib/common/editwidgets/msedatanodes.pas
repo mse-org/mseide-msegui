@@ -388,7 +388,7 @@ type
 
  ptreelistitem = ^ttreelistitem;
 
- itemliststatety = (ils_destroying,
+ itemliststatety = (ils_destroying,ils_updateitemvalues,
                     ils_subnodecountinvalid,ils_subnodecountupdating,
                     ils_subnodedeleting,
                     ils_freelock);

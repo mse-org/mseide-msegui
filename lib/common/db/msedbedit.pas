@@ -829,7 +829,7 @@ type
    property valuedefault;
    property min; 
    property max;
-
+   property valuedisabled;
  end;
 
  tdbbooleaneditradio = class(tcustombooleaneditradio,idbeditfieldlink,ireccontrol)

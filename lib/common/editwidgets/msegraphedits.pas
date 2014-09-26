@@ -154,7 +154,7 @@ type
    procedure internalsetgridvalue(index: integer; const avalue);
    procedure dochange; virtual;
    function docheckvalue(var avalue): boolean; virtual;
-   procedure valuechanged;
+   procedure valuechanged; virtual;
    procedure modified; virtual; //for dbwidgets
    procedure formatchanged;
    procedure dopaintforeground(const canvas: tcanvas); override;
@@ -774,6 +774,7 @@ type
    fimageoffsetclicked: integer;
    fvaluecaptions: tmsestringarrayprop;
    fonupdate: databuttoneventty;
+   fvaluedisabled: integer;
    procedure setcolorglyph(const avalue: colorty);
    function iscolorglyphstored: boolean;
    procedure setvaluefaces(const avalue: tvaluefacearrayprop);
@@ -821,6 +822,7 @@ type
    procedure writesc1(writer: twriter);
    procedure setimageoffsetmouse(const avalue: integer);
    procedure setimageoffsetclicked(const avalue: integer);
+   procedure setvaluedisabled(const avalue: integer);
   protected
    finfo: shapeinfoty;
    factioninfo: actioninfoty;
@@ -836,6 +838,7 @@ type
                        var info: celleventinfoty); override;
    
    procedure setcolor(const avalue: colorty); override;
+
     //iactionlink
    function getactioninfopo: pactioninfoty;
    function shortcutseparator: msechar;
@@ -847,8 +850,11 @@ type
    procedure domousewheelevent(var info: mousewheeleventinfoty); override;
    procedure togglevalue(const areadonly: boolean;
                                  const down: boolean); override;
-   procedure togglegridvalue(const index: integer); override;
    procedure statechanged; override;
+   function valueenabledstate(const avalue: integer): boolean;
+   procedure checkdisabled();
+   procedure valuechanged(); override;
+
    procedure mouseevent(var info: mouseeventinfoty); override;
    procedure dokeydown(var info: keyeventinfoty); override;
    procedure dokeyup(var info: keyeventinfoty); override;
@@ -872,6 +878,7 @@ type
    procedure synctofontheight; override;
    procedure initgridwidget; override;
    procedure initnewcomponent(const ascale: real); override;
+   procedure togglegridvalue(const index: integer); override;
    property optionswidget default defaultoptionswidget - [ow_mousefocus];
    property valuefaces: tvaluefacearrayprop read fvaluefaces write setvaluefaces;
    property valuecaptions: tmsestringarrayprop read fvaluecaptions
@@ -931,6 +938,10 @@ type
    property onsetvalue;
    property value default -1;
    property valuedefault default -1;
+   property valuedisabled: integer read fvaluedisabled 
+                                      write setvaluedisabled default -2; 
+                  //button.enabled:= value <> valuedisabled
+                  //-2 -> not checked
    property min default -1; 
    property max default 0;
   published
@@ -977,6 +988,7 @@ type
    property valuedefault;
    property min; 
    property max;
+   property valuedisabled;
  end;
 
  tstockglyphdatabutton = class(tcustomdatabutton)
@@ -1010,6 +1022,7 @@ type
    property valuedefault;
    property min; 
    property max;
+   property valuedisabled;
  end; 
  
  tcustomdataicon = class(tcustomintegergraphdataedit)
@@ -1934,7 +1947,7 @@ begin
  //dummy
 end;
 
-procedure tgraphdataedit.valuechanged;
+procedure tgraphdataedit.valuechanged();
 begin
  if not (csloading in componentstate) then begin
   if (fgridintf <> nil) and not (csdesigning in componentstate) then begin
@@ -1947,7 +1960,7 @@ begin
  end;
 end;
 
-procedure tgraphdataedit.formatchanged;
+procedure tgraphdataedit.formatchanged();
 begin
  if not (csloading in componentstate) then begin
   if fgridintf <> nil then begin
@@ -1957,7 +1970,7 @@ begin
  end;
 end;
 
-procedure tgraphdataedit.loaded;
+procedure tgraphdataedit.loaded();
 begin
  inherited;
  include(fwidgetstate,ws_loadedproc);
@@ -3131,6 +3144,7 @@ constructor tcustomdatabutton.create(aowner: tcomponent);
 begin
  foptions:= defaultbuttonoptions;
  initactioninfo(factioninfo);
+ fvaluedisabled:= -2;
  inherited;
  fimagenums:= tintegerarrayprop.create;
  fimagenr:= -1;
@@ -3415,6 +3429,9 @@ begin
   dimbefore:= finfo.ca.dim;
   finfo.ca.dim:= arect;
   finfo.state:= finfo.state - [shs_focused,shs_clicked,shs_mouse];
+  if not valueenabledstate(integer(avalue)) then begin
+   include(finfo.state,shs_disabled);
+  end;
   with pcellinfoty(canvas.drawinfopo)^ do begin
    if ismousecell and (bo_executeonclick in foptions) and 
                                    enabled and not readonly then begin
@@ -3913,6 +3930,33 @@ begin
  else begin
   inherited;
  end;
+end;
+
+procedure tcustomdatabutton.setvaluedisabled(const avalue: integer);
+begin
+ if fvaluedisabled <> avalue then begin
+  fvaluedisabled:= avalue;
+  checkdisabled();
+ end;
+end;
+
+function tcustomdatabutton.valueenabledstate(const avalue: integer): boolean;
+begin
+ result:= enabled;
+ if (fvaluedisabled <> -2) then begin
+  result:= avalue = fvaluedisabled;
+ end;
+end;
+
+procedure tcustomdatabutton.checkdisabled();
+begin
+ enabled:= valueenabledstate(fvalue);
+end;
+
+procedure tcustomdatabutton.valuechanged;
+begin
+ checkdisabled();
+ inherited;
 end;
 
 { tstockglyphdatabutton }
