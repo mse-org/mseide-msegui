@@ -16,7 +16,7 @@ const
  arrayminlenghtstep = 32;
  
 type
- stringsortmodety = (sms_none,sms_upascii,sms_up,sms_upi);
+ stringsortmodety = (sms_none,sms_upascii,sms_upiascii,sms_up,sms_upi);
  pointercomparemethodty = function(l,r:pointer): integer of object; 
 
  arraysortcomparety = function (const l,r): integer;
@@ -2965,6 +2965,8 @@ begin
 //   sms_upi: mergesortarray(ziel,0,length(ziel)-1,compareistringansi,sizeof(string));
   sms_upascii: sortarray(dest,sizeof(string),
                               {$ifdef FPC}@{$endif}compareasciistring);
+  sms_upiascii: sortarray(dest,sizeof(string),
+                              {$ifdef FPC}@{$endif}compareiasciistring);
 //   sms_upiascii: mergesortarray(ziel,0,length(ziel)-1,compareistringascii,sizeof(string));
  end;
 end;
