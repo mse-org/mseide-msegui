@@ -134,7 +134,11 @@ procedure setmsestringar(const aobj: tobject; const aprop: ppropinfo;
                                                  const avalue: msestringarty);
 procedure addobjectinfoitem(var dest: objectinfoarty; const aobj: tobject;
                                             const aprefix: string = '');
-                     
+
+{$ifdef mse_with_ifi}
+procedure objecttovalues(const source: tobject; const dest: tmsecomponent);
+procedure valuestoobject(const source: tmsecomponent; const dest: tobject);
+{$endif}                     
 implementation
 uses
  {$ifdef mse_with_ifi}mseificompglob,{$endif}msedatalist,sysutils,msearrayutils;
@@ -864,6 +868,50 @@ begin
     end;
    end;
   end;
+ end;
+end;
+
+type
+ tfindtarg = class
+  private
+   fowner: tmsecomponent;
+   function findcomponenttarget(const aname: string): tobject;
+  end;
+  
+function tfindtarg.findcomponenttarget(const aname: string): tobject;
+begin
+ result:= fowner.findcomponent(aname);
+end;
+
+procedure valuestoobject(const source: tmsecomponent; const dest: tobject);
+var
+ findtarg: tfindtarg;
+ objinfo: objectinfoty;
+begin
+ objinfo.obj:= dest;
+ objinfo.prefix:= '';
+ findtarg:= tfindtarg.create();
+ try
+  findtarg.fowner:= source;
+  valuestoobject(objinfo,@findtarg.findcomponenttarget);
+ finally
+  findtarg.destroy();
+ end;
+end;
+
+procedure objecttovalues(const source: tobject; const dest: tmsecomponent);
+var
+ findtarg: tfindtarg;
+ objinfo: objectinfoty;
+begin
+ objinfo.obj:= source;
+ objinfo.prefix:= '';
+ findtarg:= tfindtarg.create();
+ try
+  findtarg.fowner:= dest;
+  objecttovalues(objinfo,@findtarg.findcomponenttarget);
+ finally
+  findtarg.destroy();
  end;
 end;
 
