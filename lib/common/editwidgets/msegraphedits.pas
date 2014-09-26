@@ -2252,7 +2252,7 @@ begin
     if (bo_executeonclick in foptions) and
        (info.mouseeventinfopo^.shiftstate*keyshiftstatesmask = []) and
        (info.mouseeventinfopo^.button = mb_left) and
-                       enabled and not readonly then begin
+           enabled and not (des_disabled in fstate) and not readonly then begin
      fclickedrow:= info.cell.row;
     end;
    end;
