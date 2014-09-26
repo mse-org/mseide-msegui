@@ -2495,8 +2495,14 @@ begin
   if ainfo.action in [na_expand,na_collapse] then begin
    change(sender);
   end;
-  if (nochange = 0) and (ainfo.action = na_valuechange) then begin
-   fintf.updateitemvalues(sender.index,1);
+  if (nochange = 0) and (ainfo.action = na_valuechange) and 
+            not (ils_updateitemvalues in fitemstate) then begin
+   include(fitemstate,ils_updateitemvalues);
+   try
+    fintf.updateitemvalues(sender.index,1);
+   finally
+    exclude(fitemstate,ils_updateitemvalues);
+   end;
   end;
  end;
 end;
