@@ -1411,26 +1411,33 @@ end;
 
 procedure gdi_call(const func: gdifuncty; var drawinfo: drawinfoty;
                                  gdi: pgdifunctionaty = nil);
+
+procedure doflush();
+begin
+ gdi^[gdf_flush](drawinfo);
+ gui_flushgdi();
+end;
+
 begin
  with application do begin
   if gdi = nil then begin
    gdi:= gdifuncs[0];//gui_getgdifuncs;
   end;
   if not locked then begin
-   lock;
+   lock();
    try
     gdi^[func](drawinfo);
     if flushgdi then begin
-     gui_flushgdi;
+     doflush()
     end;
    finally
-    unlock;
+    unlock();
    end;
   end
   else begin
    gdi^[func](drawinfo);
    if flushgdi then begin
-    gui_flushgdi;
+    doflush();
    end;
   end;
  end;
