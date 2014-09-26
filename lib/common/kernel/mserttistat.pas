@@ -136,8 +136,10 @@ procedure addobjectinfoitem(var dest: objectinfoarty; const aobj: tobject;
                                             const aprefix: string = '');
 
 {$ifdef mse_with_ifi}
-procedure objecttovalues(const source: tobject; const dest: tmsecomponent);
-procedure valuestoobject(const source: tmsecomponent; const dest: tobject);
+procedure objecttovalues(const source: tobject; const dest: tmsecomponent;
+                                                   const prefix: string = '');
+procedure valuestoobject(const source: tmsecomponent; const dest: tobject;
+                                                   const prefix: string = '');
 {$endif}                     
 implementation
 uses
@@ -883,13 +885,14 @@ begin
  result:= fowner.findcomponent(aname);
 end;
 
-procedure valuestoobject(const source: tmsecomponent; const dest: tobject);
+procedure valuestoobject(const source: tmsecomponent; const dest: tobject;
+                                                    const prefix: string = '');
 var
  findtarg: tfindtarg;
  objinfo: objectinfoty;
 begin
  objinfo.obj:= dest;
- objinfo.prefix:= '';
+ objinfo.prefix:= prefix;
  findtarg:= tfindtarg.create();
  try
   findtarg.fowner:= source;
@@ -899,13 +902,14 @@ begin
  end;
 end;
 
-procedure objecttovalues(const source: tobject; const dest: tmsecomponent);
+procedure objecttovalues(const source: tobject; const dest: tmsecomponent;
+                                                    const prefix: string = '');
 var
  findtarg: tfindtarg;
  objinfo: objectinfoty;
 begin
  objinfo.obj:= source;
- objinfo.prefix:= '';
+ objinfo.prefix:= prefix;
  findtarg:= tfindtarg.create();
  try
   findtarg.fowner:= dest;
