@@ -854,6 +854,7 @@ type
    function valueenabledstate(const avalue: integer): boolean;
    procedure checkdisabled();
    procedure valuechanged(); override;
+   procedure gridtovalue(arow: integer); override;
 
    procedure mouseevent(var info: mouseeventinfoty); override;
    procedure dokeydown(var info: keyeventinfoty); override;
@@ -3431,10 +3432,13 @@ begin
   finfo.state:= finfo.state - [shs_focused,shs_clicked,shs_mouse];
   if not valueenabledstate(integer(avalue)) then begin
    include(finfo.state,shs_disabled);
+  end
+  else begin
+   exclude(finfo.state,shs_disabled);
   end;
   with pcellinfoty(canvas.drawinfopo)^ do begin
    if ismousecell and (bo_executeonclick in foptions) and 
-                                   enabled and not readonly then begin
+                 not(shs_disabled in finfo.state) and not readonly then begin
     include(finfo.state,shs_mouse);
    end;
    if cell.row = fclickedrow then begin
@@ -3944,7 +3948,7 @@ function tcustomdatabutton.valueenabledstate(const avalue: integer): boolean;
 begin
  result:= enabled;
  if (fvaluedisabled <> -2) then begin
-  result:= avalue = fvaluedisabled;
+  result:= avalue <> fvaluedisabled;
  end;
 end;
 
@@ -3957,6 +3961,12 @@ procedure tcustomdatabutton.valuechanged;
 begin
  checkdisabled();
  inherited;
+end;
+
+procedure tcustomdatabutton.gridtovalue(arow: integer);
+begin
+ inherited;
+ checkdisabled();
 end;
 
 { tstockglyphdatabutton }
