@@ -1711,6 +1711,20 @@ begin
  end;
 end;
 
+function tcustomdataedit.getdisptext: msestring;
+var
+ mstr1: msestring;
+begin
+ {$ifdef FPC} {$checkpointer off} {$endif}
+ mstr1:= datatotext(nil^);
+ {$ifdef FPC} {$checkpointer default} {$endif}
+ if (not(des_isdb in fstate) and (mstr1 = '') or 
+                                   (des_dbnull in fstate)) then begin
+  mstr1:= fempty_text;
+ end;
+ result:= mstr1;
+end;
+
 procedure tcustomdataedit.dopaintbackground(const canvas: tcanvas);
 begin
  inherited;
@@ -2857,11 +2871,6 @@ end;
 function tcustomdataedit.getstatpriority: integer;
 begin
  result:= fstatpriority;
-end;
-
-function tcustomdataedit.getdisptext: msestring;
-begin
- result:= text;
 end;
 
 { tcustomstringedit }
