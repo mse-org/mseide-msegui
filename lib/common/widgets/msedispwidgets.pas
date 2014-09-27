@@ -151,6 +151,7 @@ type
   published
    property text: msestring read ftext write settext;
                 //overrides valuetext
+   property disptext: msestring read finfo.text.text;
    property bounds_cx default defaultdispwidgetwidth;
    property bounds_cy default defaultdispwidgetheight;
    property font: twidgetfont read getfont write setfont stored isfontstored;

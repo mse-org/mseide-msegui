@@ -81,6 +81,7 @@ type
    procedure setempty_color(const avalue: colorty);
    function getgridrow: integer;
    procedure setgridrow(const avalue: integer);
+   function getdisptext: msestring;
   protected
    fstate: dataeditstatesty;
    fgridintf: iwidgetgrid;
@@ -253,6 +254,7 @@ type
    function seteditfocus: boolean;
    function isnull: boolean; virtual;
 
+   property disptext: msestring read getdisptext;
    property dataeditstate: dataeditstatesty read fstate;   
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read getstatvarname write fstatvarname;
@@ -2855,6 +2857,11 @@ end;
 function tcustomdataedit.getstatpriority: integer;
 begin
  result:= fstatpriority;
+end;
+
+function tcustomdataedit.getdisptext: msestring;
+begin
+ result:= text;
 end;
 
 { tcustomstringedit }
