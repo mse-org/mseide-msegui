@@ -2998,9 +2998,9 @@ procedure sortarray(var dest: msestringarty;
 begin
  setlength(dest,length(dest)); //refcount1
  case sortmode of
-  sms_up: sortarray(dest,sizeof(msestring),
+  sms_up: sortarray(pointerarty(dest),
                                   {$ifdef FPC}@{$endif}comparemsestring);
-  sms_upi: sortarray(dest,sizeof(msestring),
+  sms_upi: sortarray(pointerarty(dest),
                                   {$ifdef FPC}@{$endif}compareimsestring);
  end;
 end;
@@ -3010,11 +3010,10 @@ procedure sortarray(var dest: msestringarty; const sortmode: stringsortmodety;
 begin
  setlength(dest,length(dest)); //refcount1
  case sortmode of
-  sms_up: sortarray(dest,sizeof(msestring),
+  sms_up: sortarray(pointerarty(dest),
                           {$ifdef FPC}@{$endif}comparemsestring,indexlist);
-  sms_upi: sortarray(dest,sizeof(msestring),
+  sms_upi: sortarray(pointerarty(dest),
                           {$ifdef FPC}@{$endif}compareimsestring,indexlist);
-//   sms_upi: mergesortarray(ziel,0,length(ziel)-1,compareimsestring,sizeof(msestring));
  end;
 end;
 
@@ -3023,14 +3022,12 @@ procedure sortarray(var dest: stringarty;
 begin
  setlength(dest,length(dest)); //refcount1
  case sortmode of
-  sms_up: sortarray(dest,sizeof(string),{$ifdef FPC}@{$endif}compareansistring);
-  sms_upi: sortarray(dest,sizeof(string),{$ifdef FPC}@{$endif}compareiansistring);
-//   sms_upi: mergesortarray(ziel,0,length(ziel)-1,compareistringansi,sizeof(string));
-  sms_upascii: sortarray(dest,sizeof(string),
+  sms_up: sortarray(pointerarty(dest),{$ifdef FPC}@{$endif}compareansistring);
+  sms_upi: sortarray(pointerarty(dest),{$ifdef FPC}@{$endif}compareiansistring);
+  sms_upascii: sortarray(pointerarty(dest),
                               {$ifdef FPC}@{$endif}compareasciistring);
-  sms_upiascii: sortarray(dest,sizeof(string),
+  sms_upiascii: sortarray(pointerarty(dest),
                               {$ifdef FPC}@{$endif}compareiasciistring);
-//   sms_upiascii: mergesortarray(ziel,0,length(ziel)-1,compareistringascii,sizeof(string));
  end;
 end;
 
@@ -3039,16 +3036,14 @@ procedure sortarray(var dest: stringarty; const sortmode: stringsortmodety;
 begin
  setlength(dest,length(dest)); //refcount1
  case sortmode of
-  sms_up: sortarray(dest,sizeof(string),
+  sms_up: sortarray(pointerarty(dest),
                {$ifdef FPC}@{$endif}compareansistring,indexlist);
-  sms_upi: sortarray(dest,sizeof(string),
+  sms_upi: sortarray(pointerarty(dest),
                {$ifdef FPC}@{$endif}compareiansistring,indexlist);
-//   sms_upi: mergesortarray(ziel,0,length(ziel)-1,compareistringansi,sizeof(string));
-  sms_upascii: sortarray(dest,sizeof(string),
+  sms_upascii: sortarray(pointerarty(dest),
                         {$ifdef FPC}@{$endif}compareasciistring,indexlist);
-  sms_upiascii: sortarray(dest,sizeof(string),
+  sms_upiascii: sortarray(pointerarty(dest),
                         {$ifdef FPC}@{$endif}compareiasciistring,indexlist);
-//   sms_upiascii: mergesortarray(ziel,0,length(ziel)-1,compareistringascii,sizeof(string));
  end;
 end;
 
