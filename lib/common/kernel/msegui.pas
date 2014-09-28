@@ -15024,13 +15024,15 @@ begin
    window1:= window1.ftransientfor;
   end;
  end;
- window1:= self;
- while window1 <> nil do begin
-  if window1 = window2 then begin
-   result:= true;
-   break;
+ if ftransientfor <> nil then begin
+  window1:= self;
+  while window1 <> nil do begin
+   if window1 = window2 then begin
+    result:= true;
+    break;
+   end;
+   window1:= window1.ftransientfor;
   end;
-  window1:= window1.ftransientfor;
  end;
 end;
 
