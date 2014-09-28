@@ -1993,6 +1993,9 @@ function askyesnocancel(const atext: msestring; const caption: msestring = '';
 begin
  result:= showmessage(atext,caption,[mr_yes,mr_no,mr_cancel],defaultbutton,[],
                           minwidth);
+ if not (result in [mr_yes,mr_no]) then begin
+  result:= mr_cancel;
+ end;
 end;
 
 { tframefont}
