@@ -626,6 +626,9 @@ begin
   showhidden.value:= not (fa_hidden in excludeattrib);
   show(true);
   result:= window.modalresult;
+  if result <> mr_ok then begin
+   result:= mr_cancel;
+  end;
   if (colwidth <> nil) then begin
    colwidth^:= listview.cellwidth;
   end;
