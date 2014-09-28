@@ -601,6 +601,8 @@ type
    procedure endedit;
    procedure updateitemvalues(const index: integer;
                                        const count: integer); virtual;
+   procedure updateitemvalues;
+              //calls updateitemvalues for current grid row
    property activerow: integer read factiverow;
   published
    property itemlist: titemeditlist read getitemlist 
@@ -902,7 +904,9 @@ type
    function candragsource(const apos: pointty): boolean;
    procedure dragdrop(const adragobject: ttreeitemdragobject);
    procedure comparerow(const lindex,rindex: integer; var aresult: integer);
-   procedure updateitemvalues(const index: integer; const count: integer); override;
+   procedure updateitemvalues(const index: integer;
+                                    const count: integer); override;
+   procedure updateitemvalues();
    procedure updateparentvalues(const index: integer);
   published
    property itemlist: ttreeitemeditlist read getitemlist 
@@ -2674,6 +2678,19 @@ begin
 //   if not fitemlist.updating then begin
 //    checksort;
 //   end;
+  end;
+ end;
+end;
+
+procedure titemedit.updateitemvalues(); 
+        //calls updateitemvalues for current grid row
+var
+ int1: integer;
+begin
+ if fgridintf <> nil then begin
+  int1:= fgridintf.getrow;
+  if int1 >= 0 then begin
+   updateitemvalues(int1,1);
   end;
  end;
 end;
@@ -5279,6 +5296,11 @@ begin
  inherited;
 end;
 
+procedure ttreeitemedit.updateitemvalues();
+begin
+ inherited;
+end;
+
 procedure ttreeitemedit.updateparentvalues(const index: integer);
 var
  n1: ttreelistitem;
@@ -5550,7 +5572,12 @@ begin
   end;
  end;
 end;
-
+{
+procedure ttreeitemedit.updateitemvalues;
+begin
+ inherited;
+end;
+}
 {
 procedure ttreeitemedit.drawcell(const canvas: tcanvas);
 begin
