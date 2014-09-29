@@ -1937,12 +1937,20 @@ type
                 const endmargin: integer = minint);
                //origin = clientpos, endmargin by size adjust of widgets 
                //with [an_top,an_bottom], minint -> no change
-   function aligny(const mode: widgetalignmodety;
-                        const awidgets: array of twidget): integer;
-                        //returns reference point
    function alignx(const mode: widgetalignmodety;
                         const awidgets: array of twidget): integer;
                         //returns reference point
+   function alignx(const mode: widgetalignmodety;
+                     const awidgets: array of twidget;
+                               const margin: integer): integer;
+                        //shifts to client border, returns reference point
+   function aligny(const mode: widgetalignmodety;
+                        const awidgets: array of twidget): integer;
+                        //returns reference point
+   function aligny(const mode: widgetalignmodety;
+                        const awidgets: array of twidget;
+                               const margin: integer): integer;
+                        //shifts to client border, returns reference point
 
    property optionswidget: optionswidgetty read foptionswidget 
                  write setoptionswidget default defaultoptionswidget;
@@ -6965,6 +6973,120 @@ begin
  end
  else begin
   result:= 0;
+ end;
+end;
+
+function twidget.alignx(const mode: widgetalignmodety;
+            const awidgets: array of twidget; const margin: integer): integer;
+var
+ shift: integer;
+ int1,int2,int3: integer;
+ ref: integer;
+begin
+ beginupdate();
+ try
+  result:= alignx(mode,awidgets);
+  shift:= 0;
+  ref:= screenpos.x;
+  case mode of
+   wam_start: begin
+    int2:= bigint;
+    for int1:= 0 to high(awidgets) do begin
+     int3:= awidgets[int1].screenpos.x-ref;
+     if int3 < int2 then begin
+      int2:= int3;
+     end;
+    end;
+    shift:= margin+clientwidgetpos.x-int2;
+   end;
+   wam_end: begin
+    int2:= -bigint;
+    for int1:= 0 to high(awidgets) do begin
+     with awidgets[int1] do begin
+      int3:= screenpos.x+fwidgetrect.cx-ref;
+     end;
+     if int3 > int2 then begin
+      int2:= int3;
+     end;
+    end;
+    shift:= clientwidgetpos.x+clientwidth - margin - int2;
+   end;
+   else begin
+    if length(awidgets) > 0 then begin
+     with awidgets[0] do begin
+      shift:= margin + screenpos.x + framepos.x + framesize.cx div 2 - ref;
+     end;
+     shift:= clientwidgetpos.x + clientwidth div 2 - shift;
+    end;
+   end;
+  end;
+  if shift <> 0 then begin
+   result:= result+shift;
+   for int1:= 0 to high(awidgets) do begin
+    with awidgets[int1] do begin
+     bounds_x:= bounds_x + shift;
+    end;
+   end;
+  end;
+ finally
+  endupdate;
+ end;
+end;
+
+function twidget.aligny(const mode: widgetalignmodety;
+            const awidgets: array of twidget; const margin: integer): integer;
+var
+ shift: integer;
+ int1,int2,int3: integer;
+ ref: integer;
+begin
+ beginupdate();
+ try
+  result:= aligny(mode,awidgets);
+  shift:= 0;
+  ref:= screenpos.y;
+  case mode of
+   wam_start: begin
+    int2:= bigint;
+    for int1:= 0 to high(awidgets) do begin
+     int3:= awidgets[int1].screenpos.y-ref;
+     if int3 < int2 then begin
+      int2:= int3;
+     end;
+    end;
+    shift:= margin+clientwidgetpos.y-int2;
+   end;
+   wam_end: begin
+    int2:= -bigint;
+    for int1:= 0 to high(awidgets) do begin
+     with awidgets[int1] do begin
+      int3:= screenpos.y+fwidgetrect.cy-ref;
+     end;
+     if int3 > int2 then begin
+      int2:= int3;
+     end;
+    end;
+    shift:= clientwidgetpos.y+clientheight - margin - int2;
+   end;
+   else begin
+    if length(awidgets) > 0 then begin
+     with awidgets[0] do begin
+      shift:= margin + screenpos.y + framepos.y + framesize.cy div 2 - ref;
+     end;
+     shift:= clientwidgetpos.y + clientheight div 2 - shift;
+    end;
+   end;
+  end;
+  if shift <> 0 then begin
+   result:= result+shift;
+   for int1:= 0 to high(awidgets) do begin
+    with awidgets[int1] do begin
+     bounds_y:= bounds_y + shift;
+    end;
+   end;
+  end;
+ finally
+  endupdate;
  end;
 end;
 

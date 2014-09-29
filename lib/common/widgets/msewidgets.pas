@@ -1221,10 +1221,10 @@ type
 
 function readcaptiontoimagepos(const reader: treader): imageposty;
 
-procedure synccaptiondistx(const awidgets: widgetarty);
+procedure synccaptiondistx(const awidgets: array of twidget);
                 //adjusts captiondist for equal distouter
                 //don't set cfo_captiondistouter!
-procedure synccaptiondisty(const awidgets: widgetarty);
+procedure synccaptiondisty(const awidgets: array of twidget);
                 //adjusts captiondist for equal distouter
                 //don't set cfo_captiondistouter!
                 
@@ -1369,7 +1369,7 @@ begin
                               readenum(reader,typeinfo(captionposty)))];
 end;
 
-procedure synccaptiondistx(const awidgets: widgetarty);
+procedure synccaptiondistx(const awidgets: array of twidget);
                 //adjusts captiondist for equal distouter
                 //don't set cfo_captiondistouter
 var
@@ -1403,7 +1403,7 @@ begin
  end;
 end;
 
-procedure synccaptiondisty(const awidgets: widgetarty);
+procedure synccaptiondisty(const awidgets: array of twidget);
                 //adjusts captiondist for equal distouter
                 //don't set cfo_captiondistouter
 var
