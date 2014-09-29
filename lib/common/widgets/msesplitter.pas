@@ -1298,7 +1298,8 @@ begin
  for int1:= 0 to high(fwidgets) do begin
   with twidget1(fwidgets[int1]) do begin
    if (not(plo_noinvisible in fplace_options) or isvisible) and 
-                                     (fwidgetrect.x < result) then begin
+                                   (fwidgetrect.x < result) and 
+                            not (ow1_noalignx in foptionswidget1) then begin
     result:= fwidgetrect.x;
    end;
   end;
@@ -1318,7 +1319,8 @@ begin
   with twidget1(fwidgets[int1]) do begin
    int2:= fwidgetrect.x + fwidgetrect.cx;
    if (not(plo_noinvisible in fplace_options) or isvisible) and
-                                     (int2 > result) then begin
+                                     (int2 > result) and 
+                            not (ow1_noalignx in foptionswidget1) then begin
     result:= int2;
    end;
   end;
@@ -1336,7 +1338,8 @@ begin
  for int1:= 0 to high(fwidgets) do begin
   with twidget1(fwidgets[int1]) do begin
    if (not(plo_noinvisible in fplace_options) or isvisible) and
-                                     (fwidgetrect.y < result) then begin
+                                     (fwidgetrect.y < result) and 
+                            not (ow1_noaligny in foptionswidget1) then begin
     result:= fwidgetrect.y;
    end;
   end;
@@ -1356,7 +1359,8 @@ begin
   with twidget1(fwidgets[int1]) do begin
    int2:= fwidgetrect.y + fwidgetrect.cy;
    if (not (plo_noinvisible in fplace_options) or isvisible) and
-                                     (int2 > result) then begin
+                                     (int2 > result) and 
+                            not (ow1_noaligny in foptionswidget1) then begin
     result:= int2;
    end;
   end;
@@ -1494,10 +1498,13 @@ begin
       end;
       for int1:= 0 to high(ar1) do begin
        if fwidgets[int1] <> falign_leader then begin
-        ar1[int2]:= fwidgets[int1];
-        inc(int2);
+        if not (ow1_noalignx in fwidgets[int1].optionswidget1) then begin
+         ar1[int2]:= fwidgets[int1];
+         inc(int2);
+        end;
        end;
       end;
+      setlength(ar1,int2);
       alignx(align_mode,ar1);
      end;
      int2:= 0;
@@ -1516,7 +1523,9 @@ begin
      if int2 <> 0 then begin
       for int1:= 0 to high(fwidgets) do begin
        with fwidgets[int1] do begin
-        bounds_x:= bounds_x + int2;
+        if not (ow1_noalignx in foptionswidget1) then begin
+         bounds_x:= bounds_x + int2;
+        end;
        end;
       end;
      end;
@@ -1531,10 +1540,13 @@ begin
       end;
       for int1:= 0 to high(ar1) do begin
        if fwidgets[int1] <> falign_leader then begin
-        ar1[int2]:= fwidgets[int1];
-        inc(int2);
+        if not (ow1_noaligny in fwidgets[int1].optionswidget1) then begin
+         ar1[int2]:= fwidgets[int1];
+         inc(int2);
+        end;
        end;
       end;
+      setlength(ar1,int2);
       aligny(align_mode,ar1);
      end;
      int2:= 0;
@@ -1553,7 +1565,9 @@ begin
      if int2 <> 0 then begin
       for int1:= 0 to high(fwidgets) do begin
        with fwidgets[int1] do begin
-        bounds_y:= bounds_y + int2;
+        if not (ow1_noaligny in foptionswidget1) then begin
+         bounds_y:= bounds_y + int2;
+        end;
        end;
       end;
      end;

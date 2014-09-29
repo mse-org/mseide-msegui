@@ -96,7 +96,8 @@ type
                     ow1_nocancloseifhidden,
                     ow1_modalcallonactivate,ow1_modalcallondeactivate,
                                //used in tactionwidget
-                    ow1_noautosizing //used in tdockcontroller
+                    ow1_noautosizing, //used in tdockcontroller
+                    ow1_noalignx,ow1_noaligny //used in tlayouter
                     );
                                          
 const
