@@ -6982,6 +6982,7 @@ var
  shift: integer;
  int1,int2,int3: integer;
  ref: integer;
+ rect1: rectty;
 begin
  beginupdate();
  try
@@ -7024,7 +7025,17 @@ begin
    result:= result+shift;
    for int1:= 0 to high(awidgets) do begin
     with awidgets[int1] do begin
-     bounds_x:= bounds_x + shift;
+     rect1:= widgetrect;
+     if (mode = wam_end) and (an_left in anchors) then begin
+      rect1.cx:= rect1.cx + shift;
+     end
+     else begin
+      rect1.x:= rect1.x + shift;
+      if (mode = wam_start) and (an_right in anchors) then begin
+       rect1.cx:= rect1.cx - shift;
+      end;
+     end;
+     widgetrect:= rect1;
     end;
    end;
   end;
@@ -7039,6 +7050,7 @@ var
  shift: integer;
  int1,int2,int3: integer;
  ref: integer;
+ rect1: rectty;
 begin
  beginupdate();
  try
@@ -7081,7 +7093,17 @@ begin
    result:= result+shift;
    for int1:= 0 to high(awidgets) do begin
     with awidgets[int1] do begin
-     bounds_y:= bounds_y + shift;
+     rect1:= widgetrect;
+     if (mode = wam_end) and (an_top in anchors) then begin
+      rect1.cy:= rect1.cy + shift;
+     end
+     else begin
+      rect1.y:= rect1.y + shift;
+      if (mode = wam_start) and (an_bottom in anchors) then begin
+       rect1.cy:= rect1.cy - shift;
+      end;
+     end;
+     widgetrect:= rect1;
     end;
    end;
   end;
