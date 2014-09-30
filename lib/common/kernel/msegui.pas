@@ -6920,7 +6920,12 @@ begin
    end;
    setlength(ar1,length(awidgets));
    for int1:= 0 to high(ar1) do begin
-    ar1[int1]:= awidgets[int1].widgetrect;
+    with awidgets[int1] do begin
+     ar1[int1]:= widgetrect;
+     if parentwidget <> self then begin
+      translatewidgetpoint1(ar1[int1].pos,parentwidget,self);
+     end;
+    end;
    end;
    if (mode <> wam_none) and (high(awidgets) > 0) then begin
     for int1:= 1 to high(awidgets) do begin
@@ -6972,7 +6977,12 @@ begin
     end;
    end;
    for int1:= 0 to high(awidgets) do begin
-    awidgets[int1].widgetrect:= ar1[int1];
+    with awidgets[int1] do begin
+     if parentwidget <> self then begin
+      translatewidgetpoint1(ar1[int1].pos,self,parentwidget);
+     end;
+     widgetrect:= ar1[int1];
+    end;
    end;
   finally
    endupdate();
