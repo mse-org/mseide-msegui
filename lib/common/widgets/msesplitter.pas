@@ -1528,30 +1528,6 @@ begin
       end;
       alignx(align_mode,ar1,align_glue,int2);
      end;
-     {
-     int2:= 0;
-     case falign_glue of
-      wam_start: begin
-       int2:= innerclientwidgetpos.x - childrenleft;
-      end;
-      wam_center: begin
-       int2:= innerclientwidgetpos.x + 
-              (innerclientsize.cx - childrenleft - childrenright) div 2;
-      end;
-      wam_end: begin
-       int2:= innerclientwidgetpos.x + innerclientsize.cx - childrenright;
-      end;
-     end;
-     if int2 <> 0 then begin
-      for int1:= 0 to high(fwidgets) do begin
-       with fwidgets[int1] do begin
-        if not (ow1_noalignx in foptionswidget1) then begin
-         bounds_x:= bounds_x + int2;
-        end;
-       end;
-      end;
-     end;
-    }
     end;
     if lao_aligny in foptionslayout then begin
      if (align_mode <> wam_none) or (align_glue <> wam_none) then begin
@@ -1571,48 +1547,6 @@ begin
       end;
       aligny(align_mode,ar1,align_glue,int2);
      end;
-     {
-     if align_mode <> wam_none then begin
-      setlength(ar1,widgetcount);
-      int2:= 0;
-      if (falign_leader <> nil) and (falign_leader.parentwidget = self) then begin
-       ar1[0]:= falign_leader;
-       int2:= 1;
-      end;
-      for int1:= 0 to high(ar1) do begin
-       if fwidgets[int1] <> falign_leader then begin
-        if not (ow1_noaligny in fwidgets[int1].optionswidget1) then begin
-         ar1[int2]:= fwidgets[int1];
-         inc(int2);
-        end;
-       end;
-      end;
-      setlength(ar1,int2);
-      aligny(align_mode,ar1);
-     end;
-     int2:= 0;
-     case falign_glue of
-      wam_start: begin
-       int2:= innerclientwidgetpos.y - childrentop;
-      end;
-      wam_center: begin
-       int2:= innerclientwidgetpos.y + 
-              (innerclientsize.cy - childrentop - childrenbottom) div 2;
-      end;
-      wam_end: begin
-       int2:= innerclientwidgetpos.y + innerclientsize.cy - childrenbottom;
-      end;
-     end;
-     if int2 <> 0 then begin
-      for int1:= 0 to high(fwidgets) do begin
-       with fwidgets[int1] do begin
-        if not (ow1_noaligny in foptionswidget1) then begin
-         bounds_y:= bounds_y + int2;
-        end;
-       end;
-      end;
-     end;
-     }
     end;
     if (fplace_mode <> wam_none) and 
             (foptionslayout * [lao_placex,lao_placey] <> []) then begin
