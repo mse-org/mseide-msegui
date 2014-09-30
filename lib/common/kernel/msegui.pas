@@ -1382,6 +1382,10 @@ type
    procedure navigrequest(var info: naviginfoty); virtual;
    function navigdistance(var info: naviginfoty): integer; virtual;
 
+   function getwidgetrects(const awidgets: array of twidget): rectarty;
+   procedure setwidgetrects(const awidgets: array of twidget;
+                                                 const arects: rectarty);
+
    procedure updateroot;
    procedure setcolor(const avalue: colorty); virtual;
    function gethint: msestring; virtual;
@@ -6861,6 +6865,38 @@ begin
  end;
 end;
 
+function twidget.getwidgetrects(const awidgets: array of twidget): rectarty;
+var
+ int1: integer;
+begin
+ setlength(result,length(awidgets));
+ for int1:= 0 to high(result) do begin
+  with awidgets[int1] do begin
+   result[int1]:= widgetrect;
+   if parentwidget <> self then begin
+    translatewidgetpoint1(result[int1].pos,parentwidget,self);
+   end;
+  end;
+ end;
+end;
+
+procedure twidget.setwidgetrects(const awidgets: array of twidget;
+                                             const arects: rectarty);
+var
+ int1: integer;
+ rect1: rectty;
+begin
+ for int1:= 0 to high(awidgets) do begin
+  with awidgets[int1] do begin
+   rect1:= arects[int1];
+   if parentwidget <> self then begin
+    translatewidgetpoint1(rect1.pos,self,parentwidget);
+   end;
+   widgetrect:= rect1;
+  end;
+ end;
+end;
+
 function twidget.alignx(const mode: widgetalignmodety;
             const awidgets: array of twidget;
             const glue: widgetalignmodety = wam_none;
@@ -6901,7 +6937,7 @@ function twidget.alignx(const mode: widgetalignmodety;
  end; //doshift
 
 var
- ref,screenref,shift,int1,int2,int3: integer;
+ ref,shift,int1,int2,int3: integer;
  ar1: rectarty;
 
 begin
@@ -6918,15 +6954,7 @@ begin
      result:= ref;
     end;
    end;
-   setlength(ar1,length(awidgets));
-   for int1:= 0 to high(ar1) do begin
-    with awidgets[int1] do begin
-     ar1[int1]:= widgetrect;
-     if parentwidget <> self then begin
-      translatewidgetpoint1(ar1[int1].pos,parentwidget,self);
-     end;
-    end;
-   end;
+   ar1:= getwidgetrects(awidgets);
    if (mode <> wam_none) and (high(awidgets) > 0) then begin
     for int1:= 1 to high(awidgets) do begin
      int3:= ref - getrefpoint(awidgets[int1]);
@@ -6935,12 +6963,11 @@ begin
    end;
    if (glue <> wam_none) then begin
     shift:= 0;
-    screenref:= screenpos.x;
     case glue of
      wam_start: begin
       int2:= bigint;
       for int1:= 0 to high(awidgets) do begin
-       int3:= awidgets[int1].screenpos.x-screenref;
+       int3:= ar1[int1].x;
        if int3 < int2 then begin
         int2:= int3;
        end;
@@ -6950,8 +6977,8 @@ begin
      wam_end: begin
       int2:= -bigint;
       for int1:= 0 to high(awidgets) do begin
-       with awidgets[int1] do begin
-        int3:= screenpos.x+fwidgetrect.cx-screenref;
+       with ar1[int1] do begin
+        int3:= x+cx;
        end;
        if int3 > int2 then begin
         int2:= int3;
@@ -6962,8 +6989,7 @@ begin
      else begin //wam_center
       if length(awidgets) > 0 then begin
        with awidgets[0] do begin
-        shift:= margin + screenpos.x + framepos.x + framesize.cx div 2 -
-                                                                  screenref;
+        shift:= margin + ar1[0].x + framepos.x + framesize.cx div 2;
        end;
        shift:= clientwidgetpos.x + clientwidth div 2 - shift;
       end;
@@ -6976,14 +7002,7 @@ begin
      end;
     end;
    end;
-   for int1:= 0 to high(awidgets) do begin
-    with awidgets[int1] do begin
-     if parentwidget <> self then begin
-      translatewidgetpoint1(ar1[int1].pos,self,parentwidget);
-     end;
-     widgetrect:= ar1[int1];
-    end;
-   end;
+   setwidgetrects(awidgets,ar1);
   finally
    endupdate();
   end;
@@ -7030,7 +7049,7 @@ function twidget.aligny(const mode: widgetalignmodety;
  end; //doshift
 
 var
- ref,screenref,shift,int1,int2,int3: integer;
+ ref,shift,int1,int2,int3: integer;
  ar1: rectarty;
 
 begin
@@ -7047,10 +7066,7 @@ begin
      result:= ref;
     end;
    end;
-   setlength(ar1,length(awidgets));
-   for int1:= 0 to high(ar1) do begin
-    ar1[int1]:= awidgets[int1].widgetrect;
-   end;
+   ar1:= getwidgetrects(awidgets);
    if (mode <> wam_none) and (high(awidgets) > 0) then begin
     for int1:= 1 to high(awidgets) do begin
      int3:= ref - getrefpoint(awidgets[int1]);
@@ -7059,12 +7075,11 @@ begin
    end;
    if (glue <> wam_none) then begin
     shift:= 0;
-    screenref:= screenpos.y;
     case glue of
      wam_start: begin
       int2:= bigint;
       for int1:= 0 to high(awidgets) do begin
-       int3:= awidgets[int1].screenpos.y-screenref;
+       int3:= ar1[int1].y;
        if int3 < int2 then begin
         int2:= int3;
        end;
@@ -7074,8 +7089,8 @@ begin
      wam_end: begin
       int2:= -bigint;
       for int1:= 0 to high(awidgets) do begin
-       with awidgets[int1] do begin
-        int3:= screenpos.y+fwidgetrect.cy-screenref;
+       with ar1[int1] do begin
+        int3:= y+cy;
        end;
        if int3 > int2 then begin
         int2:= int3;
@@ -7086,8 +7101,7 @@ begin
      else begin //wam_center
       if length(awidgets) > 0 then begin
        with awidgets[0] do begin
-        shift:= margin + screenpos.y + framepos.y + framesize.cy div 2 -
-                                                                  screenref;
+        shift:= margin + ar1[0].y + framepos.y + framesize.cy div 2;
        end;
        shift:= clientwidgetpos.y + clientheight div 2 - shift;
       end;
@@ -7100,9 +7114,7 @@ begin
      end;
     end;
    end;
-   for int1:= 0 to high(awidgets) do begin
-    awidgets[int1].widgetrect:= ar1[int1];
-   end;
+   setwidgetrects(awidgets,ar1);
   finally
    endupdate();
   end;
