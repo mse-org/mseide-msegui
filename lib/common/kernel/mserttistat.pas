@@ -39,6 +39,7 @@ type
   protected
    function gett: tobject; virtual;
    function gettexp: tobject; virtual;
+   procedure dostatupdate(const filer: tstatfiler); virtual;
    procedure dostatread(const reader: tstatreader); virtual;
    procedure dostatwrite(const writer: tstatwriter); virtual;
   public
@@ -1160,6 +1161,16 @@ end;
 procedure toptions.dostatwrite(const writer: tstatwriter);
 begin
  //dummy
+end;
+
+procedure toptions.dostatupdate(const filer: tstatfiler);
+begin
+ if filer.iswriter then begin
+  dostatwrite(tstatwriter(filer));
+ end
+ else begin
+  dostatread(tstatreader(filer));
+ end;
 end;
 
 procedure toptions.expandmacros(const amacrolist: tmacrolist);
