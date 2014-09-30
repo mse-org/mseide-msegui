@@ -717,7 +717,7 @@ var
    if fkind in filenodes then begin
     mstr1:= filename;
     if fkind = pnk_dir then begin
-     li.expandmacros(mstr1);    
+     li.expandmacros1(mstr1);    
     end;
     fpath:= filepath(apath,mstr1);
     case fkind of

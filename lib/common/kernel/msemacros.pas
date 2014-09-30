@@ -51,9 +51,10 @@ type
    procedure resetexpandlevel;
    function getvalue(const aname: msestring;
                                       var aexpandlevel: integer): msestring;
-   procedure expandmacros(var avalue: msestring); overload;
-   procedure expandmacros(var avalue: msestring; var refindex: integerarty); overload;
-   procedure expandmacros(var avalues: msestringarty); overload;
+   procedure expandmacros1(var avalue: msestring); overload;
+   procedure expandmacros1(var avalue: msestring;
+                            var refindex: integerarty); overload;
+   procedure expandmacros1(var avalues: msestringarty); overload;
    function asarray: macroinfoarty;
    procedure asarray(out names,values: msestringarty);
    procedure setasarray(const avalue: macroinfoarty);
@@ -128,7 +129,7 @@ begin
  try
   list.add(macros);
   result:= value;
-  list.expandmacros(result);
+  list.expandmacros1(result);
  finally
   list.free;
  end;
@@ -392,26 +393,27 @@ begin
  end;
 end;
 
-procedure tmacrolist.expandmacros(var avalue: msestring; var refindex: integerarty);
+procedure tmacrolist.expandmacros1(var avalue: msestring;
+                                   var refindex: integerarty);
 begin
  internalexpandmacros(avalue,0,refindex);
 end;
 
-procedure tmacrolist.expandmacros(var avalue: msestring);
+procedure tmacrolist.expandmacros1(var avalue: msestring);
 var
  ar1: integerarty;
 begin
  ar1:= nil;
- expandmacros(avalue,ar1);
+ expandmacros1(avalue,ar1);
 end;
 
-procedure tmacrolist.expandmacros(var avalues: msestringarty);
+procedure tmacrolist.expandmacros1(var avalues: msestringarty);
 var
  int1: integer;
 begin
  setlength(avalues,length(avalues));
  for int1:= 0 to high(avalues) do begin
-  expandmacros(avalues[int1]);
+  expandmacros1(avalues[int1]);
  end;
 end;
 

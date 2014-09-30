@@ -1130,7 +1130,7 @@ var
  li: tmacrolist;
 begin
  li:= getmacros;
- li.expandmacros(atext);
+ li.expandmacros1(atext);
  li.Free;
 end;
 

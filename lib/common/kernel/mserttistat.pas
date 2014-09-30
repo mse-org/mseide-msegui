@@ -1192,7 +1192,7 @@ begin
    {$ifdef FPC}
     tkustring: begin
      mstr1:= getunicodestrprop(t,ar1[int1]);
-     amacrolist.expandmacros(mstr1);
+     amacrolist.expandmacros1(mstr1);
      setunicodestrprop(texp,ar1[int1],mstr1);
    {$else}
     tkwstring: begin
@@ -1210,7 +1210,7 @@ begin
     {$endif}
       ar2:= copy(getmsestringar(t,ar1[int1]));
       for int2:= 0 to high(ar2) do begin
-       amacrolist.expandmacros(ar2[int2]);
+       amacrolist.expandmacros1(ar2[int2]);
       end;
       setmsestringar(texp,ar1[int1],ar2);
      end;

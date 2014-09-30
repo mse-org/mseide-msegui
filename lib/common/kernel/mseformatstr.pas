@@ -528,7 +528,7 @@ end;
 procedure checkformatmacros(var format: msestring);
 begin
  if (fformatmacros <> nil) and (findchar(format,'{') > 0) then begin
-  fformatmacros.expandmacros(format);
+  fformatmacros.expandmacros1(format);
  end;
 end;
 

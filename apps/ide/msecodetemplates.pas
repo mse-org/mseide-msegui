@@ -304,7 +304,7 @@ begin
      setlength(ar2,1);
      ar2[0]:= int2;
      templatetext:= concatstrings(ar1,lineend);
-     mac1.expandmacros(templatetext,ar2);
+     mac1.expandmacros1(templatetext,ar2);
      ar1:= breaklines(templatetext);
      int2:= ar2[0];
      for int1:= 0 to high(ar1) do begin
@@ -318,7 +318,7 @@ begin
     end
     else begin
      templatetext:= template;
-     mac1.expandmacros(templatetext);
+     mac1.expandmacros1(templatetext);
     end;
    end;
   end;

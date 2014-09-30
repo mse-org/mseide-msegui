@@ -1883,7 +1883,7 @@ begin
    instream:= ttextstream.create(path1);
    try
     text:= instream.readmsestrings;
-    macrolist.expandmacros(text);
+    macrolist.expandmacros1(text);
     outstream:= ttextstream.create(path2,fm_create);
     try
      outstream.writemsestrings(text);
@@ -2276,7 +2276,7 @@ begin
           dest:= '';
          end;
          if dest <> '' then begin
-          macrolist.expandmacros(dest);
+          macrolist.expandmacros1(dest);
           if source = '' then begin
            createdirpath(dest);
           end
@@ -2783,7 +2783,7 @@ begin
                     [cursourcefile,curmodulefile,
                      cursselection,cursword,cursdefinition,
                      curcomponentclass,curproperty]);
-     macrolist.expandmacros(mstr1);
+     macrolist.expandmacros1(mstr1);
      macrolist.free;
      str1:= str1 + ' ' + mstr1;
     end;
