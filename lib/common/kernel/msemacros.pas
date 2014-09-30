@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2014 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -54,8 +54,10 @@ type
    procedure expandmacros(var avalue: msestring); overload;
    procedure expandmacros(var avalue: msestring; var refindex: integerarty); overload;
    procedure expandmacros(var avalues: msestringarty); overload;
-   function asarray: macroinfoarty; overload;
-   procedure asarray(out names,values: msestringarty); overload;
+   function asarray: macroinfoarty;
+   procedure asarray(out names,values: msestringarty);
+   procedure setasarray(const avalue: macroinfoarty);
+   procedure setasarray(const names,values: msestringarty);
    property options: macrooptionsty read foptions write foptions;
  end;
  
@@ -201,7 +203,7 @@ end;
 
 procedure tmacrolist.add(const avalue: tmacrolist);
 begin
- add(asarray);
+ add(avalue.asarray);
 end;
 
 procedure tmacrolist.add(const names,values: array of msestring);
@@ -465,6 +467,19 @@ begin
   names[int1]:= po1^[int1].name;
   values[int1]:= po1^[int1].value;
  end;
+end;
+
+procedure tmacrolist.setasarray(const avalue: macroinfoarty);
+begin
+ clear();
+ add(avalue);
+end;
+
+procedure tmacrolist.setasarray(const names: msestringarty;
+               const values: msestringarty);
+begin
+ clear();
+ add(names,values);
 end;
 
 end.
