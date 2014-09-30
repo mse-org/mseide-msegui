@@ -1299,7 +1299,7 @@ begin
   with twidget1(fwidgets[int1]) do begin
    if (not(plo_noinvisible in fplace_options) or isvisible) and 
                                    (fwidgetrect.x < result) and 
-                            not (ow1_noalignx in foptionswidget1) then begin
+                            not (osk_noalignx in optionsskin) then begin
     result:= fwidgetrect.x;
    end;
   end;
@@ -1320,7 +1320,7 @@ begin
    int2:= fwidgetrect.x + fwidgetrect.cx;
    if (not(plo_noinvisible in fplace_options) or isvisible) and
                                      (int2 > result) and 
-                            not (ow1_noalignx in foptionswidget1) then begin
+                            not (osk_noalignx in optionsskin) then begin
     result:= int2;
    end;
   end;
@@ -1339,7 +1339,7 @@ begin
   with twidget1(fwidgets[int1]) do begin
    if (not(plo_noinvisible in fplace_options) or isvisible) and
                                      (fwidgetrect.y < result) and 
-                            not (ow1_noaligny in foptionswidget1) then begin
+                            not (osk_noaligny in optionsskin) then begin
     result:= fwidgetrect.y;
    end;
   end;
@@ -1360,7 +1360,7 @@ begin
    int2:= fwidgetrect.y + fwidgetrect.cy;
    if (not (plo_noinvisible in fplace_options) or isvisible) and
                                      (int2 > result) and 
-                            not (ow1_noaligny in foptionswidget1) then begin
+                            not (osk_noaligny in optionsskin) then begin
     result:= int2;
    end;
   end;
@@ -1422,7 +1422,7 @@ var
   end;
  end; //calcarray
 
- function getalignwidgets: widgetarty;
+ function getalignwidgets(const isx: boolean): widgetarty;
  var
   int1,int2: integer;
  begin
@@ -1435,7 +1435,8 @@ var
   end;
   for int1:= 0 to high(result) do begin
    if fwidgets[int1] <> falign_leader then begin
-    if not (ow1_noalignx in fwidgets[int1].optionswidget1) then begin
+    if isx and not (osk_noalignx in fwidgets[int1].optionsskin) or
+       not isx and not (osk_noaligny in fwidgets[int1].optionsskin) then begin
      result[int2]:= fwidgets[int1];
      inc(int2);
     end;
@@ -1512,7 +1513,7 @@ begin
     end;
     if lao_alignx in foptionslayout then begin
      if (align_mode <> wam_none) or (align_glue <> wam_none) then begin
-      ar1:= getalignwidgets();
+      ar1:= getalignwidgets(true);
       int2:= 0;
       case falign_glue of
        wam_start: begin
@@ -1531,7 +1532,7 @@ begin
     end;
     if lao_aligny in foptionslayout then begin
      if (align_mode <> wam_none) or (align_glue <> wam_none) then begin
-      ar1:= getalignwidgets();
+      ar1:= getalignwidgets(false);
       int2:= 0;
       case falign_glue of
        wam_start: begin

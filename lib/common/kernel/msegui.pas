@@ -96,8 +96,7 @@ type
                     ow1_nocancloseifhidden,
                     ow1_modalcallonactivate,ow1_modalcallondeactivate,
                                //used in tactionwidget
-                    ow1_noautosizing, //used in tdockcontroller
-                    ow1_noalignx,ow1_noaligny //used in tlayouter
+                    ow1_noautosizing //used in tdockcontroller
                     );
                                          
 const
@@ -117,6 +116,7 @@ type
                  osk_nopropleft,osk_noproptop,     //used by tlayouter
                  osk_nopropwidth,osk_nopropheight, //used by tlayouter
                  osk_nopropfont,                   //used by tlayouter
+                 osk_noalignx,osk_noaligny,        //used by tlayouter
                  osk_nolayoutcx,osk_nolayoutcy     //used by syncmaxaoutsize()
                  );
  optionsskinty = set of optionskinty;
