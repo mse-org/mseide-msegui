@@ -1420,7 +1420,29 @@ var
     end;
    end;
   end;
- end;
+ end; //calcarray
+
+ function getalignwidgets: widgetarty;
+ var
+  int1,int2: integer;
+ begin
+  setlength(result,widgetcount);
+  int2:= 0;
+  if (falign_leader <> nil) and 
+              (falign_leader.parentwidget = self) then begin
+   result[0]:= falign_leader;
+   int2:= 1;
+  end;
+  for int1:= 0 to high(result) do begin
+   if fwidgets[int1] <> falign_leader then begin
+    if not (ow1_noalignx in fwidgets[int1].optionswidget1) then begin
+     result[int2]:= fwidgets[int1];
+     inc(int2);
+    end;
+   end;
+  end;
+  setlength(result,int2);
+ end; //getalignwidgets
  
 var
  int1,int2,int3,int4: integer;
@@ -1489,24 +1511,24 @@ begin
      synccaptiondisty(fwidgets);
     end;
     if lao_alignx in foptionslayout then begin
-     if align_mode <> wam_none then begin
-      setlength(ar1,widgetcount);
+     if (align_mode <> wam_none) or (align_glue <> wam_none) then begin
+      ar1:= getalignwidgets();
       int2:= 0;
-      if (falign_leader <> nil) and (falign_leader.parentwidget = self) then begin
-       ar1[0]:= falign_leader;
-       int2:= 1;
-      end;
-      for int1:= 0 to high(ar1) do begin
-       if fwidgets[int1] <> falign_leader then begin
-        if not (ow1_noalignx in fwidgets[int1].optionswidget1) then begin
-         ar1[int2]:= fwidgets[int1];
-         inc(int2);
-        end;
+      case falign_glue of
+       wam_start: begin
+        int2:= innerclientwidgetpos.x;
+       end;
+       wam_end: begin
+        int2:= fwidgetrect.cx - (innerclientwidgetpos.x + innerclientsize.cx);
+       end;
+       else begin //wam_center
+        int2:= (fwidgetrect.cx - 2*innerclientwidgetpos.x -
+                                             innerclientsize.cx) div 2;
        end;
       end;
-      setlength(ar1,int2);
-      alignx(align_mode,ar1);
+      alignx(align_mode,ar1,align_glue,int2);
      end;
+     {
      int2:= 0;
      case falign_glue of
       wam_start: begin
@@ -1529,8 +1551,27 @@ begin
        end;
       end;
      end;
+    }
     end;
     if lao_aligny in foptionslayout then begin
+     if (align_mode <> wam_none) or (align_glue <> wam_none) then begin
+      ar1:= getalignwidgets();
+      int2:= 0;
+      case falign_glue of
+       wam_start: begin
+        int2:= innerclientwidgetpos.y;
+       end;
+       wam_end: begin
+        int2:= fwidgetrect.cy - (innerclientwidgetpos.y + innerclientsize.cy);
+       end;
+       else begin //wam_center
+        int2:= (fwidgetrect.cy - 2*innerclientwidgetpos.y -
+                                             innerclientsize.cy) div 2;
+       end;
+      end;
+      aligny(align_mode,ar1,align_glue,int2);
+     end;
+     {
      if align_mode <> wam_none then begin
       setlength(ar1,widgetcount);
       int2:= 0;
@@ -1571,6 +1612,7 @@ begin
        end;
       end;
      end;
+     }
     end;
     if (fplace_mode <> wam_none) and 
             (foptionslayout * [lao_placex,lao_placey] <> []) then begin

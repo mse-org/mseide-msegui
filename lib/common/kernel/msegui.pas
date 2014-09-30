@@ -1938,12 +1938,21 @@ type
                //origin = clientpos, endmargin by size adjust of widgets 
                //with [an_top,an_bottom], minint -> no change
    function alignx(const mode: widgetalignmodety;
-                        const awidgets: array of twidget): integer;
+                        const awidgets: array of twidget;
+                        const glue: widgetalignmodety = wam_none;
+                        const margin: integer = 0): integer;
                         //returns reference point
+   function aligny(const mode: widgetalignmodety;
+                        const awidgets: array of twidget;
+                        const glue: widgetalignmodety = wam_none;
+                        const margin: integer = 0): integer;
+                        //returns reference point
+{
    function alignx(const mode: widgetalignmodety;
                      const awidgets: array of twidget;
                                const margin: integer): integer;
                         //shifts to client border, returns reference point
+
    function aligny(const mode: widgetalignmodety;
                         const awidgets: array of twidget): integer;
                         //returns reference point
@@ -1951,7 +1960,7 @@ type
                         const awidgets: array of twidget;
                                const margin: integer): integer;
                         //shifts to client border, returns reference point
-
+}
    property optionswidget: optionswidgetty read foptionswidget 
                  write setoptionswidget default defaultoptionswidget;
    property optionswidget1: optionswidget1ty read foptionswidget1 
@@ -6862,65 +6871,10 @@ begin
  end;
 end;
 
-function twidget.aligny(const mode: widgetalignmodety;
-                const awidgets: array of twidget): integer;
-
- function getrefpoint(const awidget: twidget): integer;
- begin
-  with awidget do begin
-   updateroot;
-   case mode of
-    wam_start: begin
-     result:= frootpos.y + framepos.y;
-    end;
-    wam_center: begin
-     result:= frootpos.y + framepos.y + framesize.cy div 2;
-    end;
-    else begin //wam_end
-     result:= frootpos.y + framepos.y + awidget.framesize.cy;
-    end;
-   end;
-  end;
- end;
-
-var
- ref,int1,int3: integer;
-
-begin
- if (mode <> wam_none) and (high(awidgets) >= 0) then begin
-  ref:= getrefpoint(awidgets[0]);
-  with awidgets[0] do begin
-   if fparentwidget <> nil then begin
-    result:= ref - fparentwidget.frootpos.y
-   end
-   else begin
-    result:= ref;
-   end;
-  end;
-  if high(awidgets) > 0 then begin
-   for int1:= 1 to high(awidgets) do begin
-    int3:= ref - getrefpoint(awidgets[int1]);
-    with awidgets[int1] do begin
-     if (mode = wam_start) and (an_bottom in anchors) then begin
-      bounds_cy:= bounds_cy - int3;
-     end;
-     if (mode = wam_end) and (an_top in anchors) then begin
-      bounds_cy:= bounds_cy + int3;
-     end
-     else begin
-      bounds_y:= bounds_y + int3;
-     end;
-    end; 
-   end;
-  end;
- end
- else begin
-  result:= 0;
- end;
-end;
-
 function twidget.alignx(const mode: widgetalignmodety;
-            const awidgets: array of twidget): integer;
+            const awidgets: array of twidget;
+            const glue: widgetalignmodety = wam_none;
+                        const margin: integer = 0): integer;
 
  function getrefpoint(const awidget: twidget): integer;
  begin
@@ -6938,44 +6892,226 @@ function twidget.alignx(const mode: widgetalignmodety;
     end;
    end;
   end;
- end;
+ end; //getrefpoint
 
-var
- ref,int1,int3: integer;
-
-begin
- if (mode <> wam_none) and (high(awidgets) >= 0) then begin
-  ref:= getrefpoint(awidgets[0]);
-  with awidgets[0] do begin
-   if fparentwidget <> nil then begin
-    result:= ref - fparentwidget.frootpos.x
+ procedure doshift(const awidget: twidget; const amode: widgetalignmodety;
+                         const ashift: integer; var arect: rectty);
+ begin
+  with awidget do begin
+   if (amode = wam_start) and (an_right in anchors) then begin
+    arect.cx:= arect.cx - ashift;
+   end;
+   if (amode = wam_end) and (an_left in anchors) then begin
+    arect.cx:= arect.cx + ashift;
    end
    else begin
-    result:= ref;
+    arect.x:= arect.x + ashift;
    end;
   end;
-  if high(awidgets) > 0 then begin
-   for int1:= 1 to high(awidgets) do begin
-    int3:= ref - getrefpoint(awidgets[int1]);
-    with awidgets[int1] do begin
-     if (mode = wam_start) and (an_right in anchors) then begin
-      bounds_cx:= bounds_cx - int3;
+ end; //doshift
+
+var
+ ref,screenref,shift,int1,int2,int3: integer;
+ ar1: rectarty;
+
+begin
+ result:= 0;
+ if (high(awidgets) >= 0) then begin
+  beginupdate();
+  try
+   ref:= getrefpoint(awidgets[0]);
+   with awidgets[0] do begin
+    if fparentwidget <> nil then begin
+     result:= ref - fparentwidget.frootpos.x
+    end
+    else begin
+     result:= ref;
+    end;
+   end;
+   setlength(ar1,length(awidgets));
+   for int1:= 0 to high(ar1) do begin
+    ar1[int1]:= awidgets[int1].widgetrect;
+   end;
+   if (mode <> wam_none) and (high(awidgets) > 0) then begin
+    for int1:= 1 to high(awidgets) do begin
+     int3:= ref - getrefpoint(awidgets[int1]);
+     doshift(awidgets[int1],mode,int3,ar1[int1]);
+    end;
+   end;
+   if (glue <> wam_none) then begin
+    shift:= 0;
+    screenref:= screenpos.x;
+    case glue of
+     wam_start: begin
+      int2:= bigint;
+      for int1:= 0 to high(awidgets) do begin
+       int3:= awidgets[int1].screenpos.x-screenref;
+       if int3 < int2 then begin
+        int2:= int3;
+       end;
+      end;
+      shift:= margin+clientwidgetpos.x-int2;
      end;
-     if (mode = wam_end) and (an_left in anchors) then begin
-      bounds_cx:= bounds_cx + int3;
-     end
-     else begin
-      bounds_x:= bounds_x + int3;
+     wam_end: begin
+      int2:= -bigint;
+      for int1:= 0 to high(awidgets) do begin
+       with awidgets[int1] do begin
+        int3:= screenpos.x+fwidgetrect.cx-screenref;
+       end;
+       if int3 > int2 then begin
+        int2:= int3;
+       end;
+      end;
+      shift:= clientwidgetpos.x+clientwidth - margin - int2;
+     end;
+     else begin //wam_center
+      if length(awidgets) > 0 then begin
+       with awidgets[0] do begin
+        shift:= margin + screenpos.x + framepos.x + framesize.cx div 2 -
+                                                                  screenref;
+       end;
+       shift:= clientwidgetpos.x + clientwidth div 2 - shift;
+      end;
+     end;
+    end;
+    if shift <> 0 then begin
+     result:= result+shift;
+     for int1:= 0 to high(awidgets) do begin
+      doshift(awidgets[int1],glue,shift,ar1[int1]);
      end;
     end;
    end;
+   for int1:= 0 to high(awidgets) do begin
+    awidgets[int1].widgetrect:= ar1[int1];
+   end;
+  finally
+   endupdate();
   end;
- end
- else begin
-  result:= 0;
  end;
 end;
 
+function twidget.aligny(const mode: widgetalignmodety;
+            const awidgets: array of twidget;
+            const glue: widgetalignmodety = wam_none;
+                        const margin: integer = 0): integer;
+
+ function getrefpoint(const awidget: twidget): integer;
+ begin
+  with awidget do begin
+   updateroot;
+   case mode of
+    wam_start: begin
+     result:= frootpos.y + framepos.y;
+    end;
+    wam_center: begin
+     result:= frootpos.y + framepos.y + framesize.cy div 2;
+    end;
+    else begin //wam_end
+     result:= frootpos.y + framepos.y + awidget.framesize.cy;
+    end;
+   end;
+  end;
+ end; //getrefpoint
+
+ procedure doshift(const awidget: twidget; const amode: widgetalignmodety;
+                         const ashift: integer; var arect: rectty);
+ begin
+  with awidget do begin
+   if (amode = wam_start) and (an_bottom in anchors) then begin
+    arect.cy:= arect.cy - ashift;
+   end;
+   if (amode = wam_end) and (an_top in anchors) then begin
+    arect.cy:= arect.cy + ashift;
+   end
+   else begin
+    arect.y:= arect.y + ashift;
+   end;
+  end;
+ end; //doshift
+
+var
+ ref,screenref,shift,int1,int2,int3: integer;
+ ar1: rectarty;
+
+begin
+ result:= 0;
+ if (high(awidgets) >= 0) then begin
+  beginupdate();
+  try
+   ref:= getrefpoint(awidgets[0]);
+   with awidgets[0] do begin
+    if fparentwidget <> nil then begin
+     result:= ref - fparentwidget.frootpos.y
+    end
+    else begin
+     result:= ref;
+    end;
+   end;
+   setlength(ar1,length(awidgets));
+   for int1:= 0 to high(ar1) do begin
+    ar1[int1]:= awidgets[int1].widgetrect;
+   end;
+   if (mode <> wam_none) and (high(awidgets) > 0) then begin
+    for int1:= 1 to high(awidgets) do begin
+     int3:= ref - getrefpoint(awidgets[int1]);
+     doshift(awidgets[int1],mode,int3,ar1[int1]);
+    end;
+   end;
+   if (glue <> wam_none) then begin
+    shift:= 0;
+    screenref:= screenpos.y;
+    case glue of
+     wam_start: begin
+      int2:= bigint;
+      for int1:= 0 to high(awidgets) do begin
+       int3:= awidgets[int1].screenpos.y-screenref;
+       if int3 < int2 then begin
+        int2:= int3;
+       end;
+      end;
+      shift:= margin+clientwidgetpos.y-int2;
+     end;
+     wam_end: begin
+      int2:= -bigint;
+      for int1:= 0 to high(awidgets) do begin
+       with awidgets[int1] do begin
+        int3:= screenpos.y+fwidgetrect.cy-screenref;
+       end;
+       if int3 > int2 then begin
+        int2:= int3;
+       end;
+      end;
+      shift:= clientwidgetpos.y+clientheight - margin - int2;
+     end;
+     else begin //wam_center
+      if length(awidgets) > 0 then begin
+       with awidgets[0] do begin
+        shift:= margin + screenpos.y + framepos.y + framesize.cy div 2 -
+                                                                  screenref;
+       end;
+       shift:= clientwidgetpos.y + clientheight div 2 - shift;
+      end;
+     end;
+    end;
+    if shift <> 0 then begin
+     result:= result+shift;
+     for int1:= 0 to high(awidgets) do begin
+      doshift(awidgets[int1],glue,shift,ar1[int1]);
+     end;
+    end;
+   end;
+   for int1:= 0 to high(awidgets) do begin
+    awidgets[int1].widgetrect:= ar1[int1];
+   end;
+  finally
+   endupdate();
+  end;
+ end;
+end;
+
+
+
+(*
 function twidget.alignx(const mode: widgetalignmodety;
             const awidgets: array of twidget; const margin: integer): integer;
 var
@@ -6987,6 +7123,7 @@ begin
  beginupdate();
  try
   result:= alignx(mode,awidgets);
+
   shift:= 0;
   ref:= screenpos.x;
   case mode of
@@ -7111,7 +7248,63 @@ begin
   endupdate;
  end;
 end;
+function twidget.aligny(const mode: widgetalignmodety;
+                const awidgets: array of twidget): integer;
 
+ function getrefpoint(const awidget: twidget): integer;
+ begin
+  with awidget do begin
+   updateroot;
+   case mode of
+    wam_start: begin
+     result:= frootpos.y + framepos.y;
+    end;
+    wam_center: begin
+     result:= frootpos.y + framepos.y + framesize.cy div 2;
+    end;
+    else begin //wam_end
+     result:= frootpos.y + framepos.y + awidget.framesize.cy;
+    end;
+   end;
+  end;
+ end;
+
+var
+ ref,int1,int3: integer;
+
+begin
+ if (mode <> wam_none) and (high(awidgets) >= 0) then begin
+  ref:= getrefpoint(awidgets[0]);
+  with awidgets[0] do begin
+   if fparentwidget <> nil then begin
+    result:= ref - fparentwidget.frootpos.y
+   end
+   else begin
+    result:= ref;
+   end;
+  end;
+  if high(awidgets) > 0 then begin
+   for int1:= 1 to high(awidgets) do begin
+    int3:= ref - getrefpoint(awidgets[int1]);
+    with awidgets[int1] do begin
+     if (mode = wam_start) and (an_bottom in anchors) then begin
+      bounds_cy:= bounds_cy - int3;
+     end;
+     if (mode = wam_end) and (an_top in anchors) then begin
+      bounds_cy:= bounds_cy + int3;
+     end
+     else begin
+      bounds_y:= bounds_y + int3;
+     end;
+    end; 
+   end;
+  end;
+ end
+ else begin
+  result:= 0;
+ end;
+end;
+*)
 function twidget.getchildwidgets(const index: integer): twidget;
 begin
  result:= getwidgets(index);
