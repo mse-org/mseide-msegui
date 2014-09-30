@@ -51,10 +51,11 @@ type
    procedure resetexpandlevel;
    function getvalue(const aname: msestring;
                                       var aexpandlevel: integer): msestring;
-   procedure expandmacros1(var avalue: msestring); overload;
+   procedure expandmacros1(var avalue: msestring);
+   function expandmacros(const avalue: msestring): msestring;
    procedure expandmacros1(var avalue: msestring;
-                            var refindex: integerarty); overload;
-   procedure expandmacros1(var avalues: msestringarty); overload;
+                            var refindex: integerarty);
+   procedure expandmacros1(var avalues: msestringarty);
    function asarray: macroinfoarty;
    procedure asarray(out names,values: msestringarty);
    procedure setasarray(const avalue: macroinfoarty);
@@ -405,6 +406,12 @@ var
 begin
  ar1:= nil;
  expandmacros1(avalue,ar1);
+end;
+
+function tmacrolist.expandmacros(const avalue: msestring): msestring;
+begin
+ result:= avalue;
+ expandmacros1(result);
 end;
 
 procedure tmacrolist.expandmacros1(var avalues: msestringarty);
