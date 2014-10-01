@@ -28,6 +28,10 @@ type
                  cp_lefttop,cp_left,cp_leftcenter,cp_leftbottom,
                  cp_bottomleft,cp_bottom,cp_bottomcenter,cp_bottomright
                  );
+const
+ rightcaptionpos = [cp_rightbottom,cp_right,cp_rightcenter,cp_righttop];
+ bottomcaptionpos = [cp_bottomleft,cp_bottom,cp_bottomcenter,cp_bottomright];
+type
  imageposty = (ip_center,ip_rightbottom,ip_right,ip_rightcenter,ip_righttop,
                  ip_topright,ip_top,ip_topcenter,ip_topleft,
                  ip_lefttop,ip_left,ip_leftcenter,ip_leftbottom,

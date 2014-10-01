@@ -1370,22 +1370,31 @@ begin
 end;
 
 procedure synccaptiondistx(const awidgets: array of twidget);
-                //adjusts captiondist for equal distouter
+                //adjusts captiondist for equal distouter to paintrect
                 //don't set cfo_captiondistouter
 var
- int1,int2,int3: integer;
+ int1,int2,int3,int4: integer;
 begin
  int2:= bigint;
  int3:= 0;
  for int1:= 0 to high(awidgets) do begin
   with twidget1(awidgets[int1]) do begin
-   if (fframe <> nil) and (fs_cancaptionsyncx in tcustomframe1(fframe).fstate) then begin
+   if (fframe <> nil) and 
+              (fs_cancaptionsyncx in tcustomframe1(fframe).fstate) then begin
     with tcustomcaptionframe(fframe) do begin
+     checkstate();
      if fcaptiondist < int2 then begin
       int2:= fcaptiondist;
      end;
-     if finfo.dest.cx > int3 then begin
-      int3:= finfo.dest.cx;
+     int4:= finfo.dest.cx;
+     if fcaptionpos in rightcaptionpos then begin
+      int4:= int4 + fwidth.right;
+     end
+     else begin
+      int4:= int4 + fwidth.left;
+     end;
+     if int4 > int3 then begin
+      int3:= int4;
      end;
     end;
    end;
@@ -1394,9 +1403,15 @@ begin
  int3:= int3 + int2; //max outer dist
  for int1:= 0 to high(awidgets) do begin
   with twidget1(awidgets[int1]) do begin
-   if (fframe <> nil) and (fs_cancaptionsyncx in tcustomframe1(fframe).fstate) then begin
+   if (fframe <> nil) and 
+              (fs_cancaptionsyncx in tcustomframe1(fframe).fstate) then begin
     with tcustomcaptionframe(fframe) do begin
-     captiondist:= int3 - finfo.dest.cx;
+     if fcaptionpos in rightcaptionpos then begin
+      captiondist:= int3 - finfo.dest.cx - fwidth.right;
+     end
+     else begin
+      captiondist:= int3 - finfo.dest.cx - fwidth.left;
+     end;
     end;
    end;
   end;
@@ -1407,19 +1422,28 @@ procedure synccaptiondisty(const awidgets: array of twidget);
                 //adjusts captiondist for equal distouter
                 //don't set cfo_captiondistouter
 var
- int1,int2,int3: integer;
+ int1,int2,int3,int4: integer;
 begin
  int2:= bigint;
  int3:= 0;
  for int1:= 0 to high(awidgets) do begin
   with twidget1(awidgets[int1]) do begin
-   if (fframe <> nil) and (fs_cancaptionsyncy in tcustomframe1(fframe).fstate) then begin
+   if (fframe <> nil) and 
+              (fs_cancaptionsyncy in tcustomframe1(fframe).fstate) then begin
     with tcustomcaptionframe(fframe) do begin
+     checkstate();
      if fcaptiondist < int2 then begin
       int2:= fcaptiondist;
      end;
-     if finfo.dest.cy > int3 then begin
-      int3:= finfo.dest.cy;
+     int4:= finfo.dest.cy;
+     if fcaptionpos in bottomcaptionpos then begin
+      int4:= int4 + fwidth.bottom;
+     end
+     else begin
+      int4:= int4 + fwidth.top;
+     end;
+     if  int4 > int3 then begin
+      int3:= int4;
      end;
     end;
    end;
@@ -1428,9 +1452,15 @@ begin
  int3:= int3 + int2; //max outer dist
  for int1:= 0 to high(awidgets) do begin
   with twidget1(awidgets[int1]) do begin
-   if (fframe <> nil) and (fs_cancaptionsyncy in tcustomframe1(fframe).fstate) then begin
+   if (fframe <> nil) and 
+            (fs_cancaptionsyncy in tcustomframe1(fframe).fstate) then begin
     with tcustomcaptionframe(fframe) do begin
-     captiondist:= int3 - finfo.dest.cy;
+     if fcaptionpos in bottomcaptionpos then begin
+      captiondist:= int3 - finfo.dest.cy - fwidth.bottom;
+     end
+     else begin
+      captiondist:= int3 - finfo.dest.cy - fwidth.top;
+     end;
     end;
    end;
   end;

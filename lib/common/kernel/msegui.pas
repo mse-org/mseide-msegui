@@ -6909,12 +6909,24 @@ function twidget.alignx(const mode: widgetalignmodety;
    case mode of
     wam_start: begin
      result:= frootpos.x + framepos.x;
+     if fframe <> nil then begin
+      with fframe do begin
+       checkstate();
+       result:= result + fwidth.left;
+      end;
+     end;
     end;
     wam_center: begin
      result:= frootpos.x + framepos.x + framesize.cx div 2;
     end;
     else begin //wam_end
      result:= frootpos.x + framepos.x + awidget.framesize.cx;
+     if fframe <> nil then begin
+      with fframe do begin
+       checkstate();
+       result:= result - fwidth.right;
+      end;
+     end;
     end;
    end;
   end;
@@ -7021,12 +7033,24 @@ function twidget.aligny(const mode: widgetalignmodety;
    case mode of
     wam_start: begin
      result:= frootpos.y + framepos.y;
+     if fframe <> nil then begin
+      with fframe do begin
+       checkstate();
+       result:= result + fwidth.top;
+      end;
+     end;
     end;
     wam_center: begin
      result:= frootpos.y + framepos.y + framesize.cy div 2;
     end;
     else begin //wam_end
      result:= frootpos.y + framepos.y + awidget.framesize.cy;
+     if fframe <> nil then begin
+      with fframe do begin
+       checkstate();
+       result:= result - fwidth.bottom;
+      end;
+     end;
     end;
    end;
   end;
