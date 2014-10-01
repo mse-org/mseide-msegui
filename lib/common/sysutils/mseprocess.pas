@@ -121,6 +121,7 @@ type
                                                 default defaultprocessoptions;
    property pipewaitus: integer read fpipewaitus write fpipewaitus 
                                                  default defaultpipewaitus;
+                                                //0 -> no wait
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read getstatvarname write fstatvarname;
    property statpriority: integer read fstatpriority 
@@ -647,9 +648,10 @@ begin
   foutput.pipereader.overloadsleepus:= 0;
   ferroroutput.pipereader.overloadsleepus:= 0;
   lwo1:= timestep(fpipewaitus);
-  sleepus(0); //shed_yield
+//  sleepus(0); //shed_yield
+  sys_schedyield();
   while not (foutput.pipereader.eof and ferroroutput.pipereader.eof) and 
-                      not ((fpipewaitus <> 0) and timeout(lwo1)) do begin
+                            (fpipewaitus <> 0) and not timeout(lwo1) do begin
    sleepus(10000); //wait for last chars
   end;
   application.relockall(int1);
