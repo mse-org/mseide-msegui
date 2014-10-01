@@ -652,7 +652,7 @@ begin
   sys_schedyield();
   while not (foutput.pipereader.eof and ferroroutput.pipereader.eof) and 
                             (fpipewaitus <> 0) and not timeout(lwo1) do begin
-   sleepus(10000); //wait for last chars
+   sleepus(1000); //wait for last chars
   end;
   application.relockall(int1);
   if (foutput.pipereader.eof and ferroroutput.pipereader.eof) then begin
