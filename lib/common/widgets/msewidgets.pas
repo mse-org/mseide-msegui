@@ -13,7 +13,8 @@ unit msewidgets;
 
 interface
 uses
- classes,mclasses,msegui,mseguiglob,msetypes,msestrings,msegraphutils,msegraphics,
+ classes,mclasses,msegui,mseguiglob,msetypes,msestrings,msegraphutils,
+ msegraphics,
  mseevent,msescrollbar,msemenus,mserichstring,msedrawtext,mseglob,mseact,
  mseshapes,mseclasses,msebitmap,msetimer;
 

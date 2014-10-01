@@ -563,8 +563,10 @@ end;
 procedure tframebutton.setoptions(const Value: framebuttonoptionsty);
 var
  statebefore: shapestatesty;
+ optionsbefore: framebuttonoptionsty;
 begin
  statebefore:= finfo.state;
+ optionsbefore:= foptions;
  foptions:= Value;
  updatebit(longword(finfo.state),ord(shs_invisible),fbo_invisible in value);
  updatebit(longword(finfo.state),ord(shs_disabled),fbo_disabled in value);
@@ -576,8 +578,9 @@ begin
                                                   fbo_noclickanim in value);
  updatebit(longword(finfo.state),ord(shs_nofocusanimation),
                                                   fbo_nofocusanim in value);
- if statebefore <> finfo.state then begin
-  changed;
+ if (statebefore <> finfo.state) or 
+       ((optionsbefore >< foptions) * [fbo_left,fbo_invisible] <> []) then begin
+  changed();
  end;
 end;
 
