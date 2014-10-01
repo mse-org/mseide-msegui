@@ -130,6 +130,8 @@ end;
    procedure setoverloadsleepus(const avalue: integer);
    function getopions: pipereaderoptionsty;
    procedure setoptions(const avalue: pipereaderoptionsty);
+   function getencoding: charencodingty;
+   procedure setencoding(const avalue: charencodingty);
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -137,6 +139,8 @@ end;
   published
    property options: pipereaderoptionsty read getopions 
                                         write setoptions default [];
+   property encoding: charencodingty read getencoding write setencoding 
+                                                         default ce_locale;
    property overloadsleepus: integer read getoverloadsleepus 
                   write setoverloadsleepus default -1;
             //checks application.checkoverload before calling oninputavaliable
@@ -154,11 +158,19 @@ end;
    procedure setonpipebroken(const Value: pipereadereventty);
    function getoverloadsleepus: integer;
    procedure setoverloadsleepus(const avalue: integer);
+   function getopions: pipereaderoptionsty;
+   procedure setoptions(const avalue: pipereaderoptionsty);
+   function getencoding: charencodingty;
+   procedure setencoding(const avalue: charencodingty);
   public
    constructor create(const aowner: tmsecomponent);
    destructor destroy; override;
    property pipereader: tpipereader read fpipereader;
   published
+   property options: pipereaderoptionsty read getopions 
+                                        write setoptions default [];
+   property encoding: charencodingty read getencoding write setencoding 
+                                                         default ce_locale;
    property overloadsleepus: integer read getoverloadsleepus 
                   write setoverloadsleepus default -1;
             //checks application.checkoverload before calling oninputavaliable
@@ -167,6 +179,20 @@ end;
    property onpipebroken: pipereadereventty read getonpipebroken write setonpipebroken;
  end;
 
+ tpipewriterpers = class(tpersistent)
+  private
+   fpipewriter: tpipewriter;
+   function getencoding: charencodingty;
+   procedure setencoding(const avalue: charencodingty);
+  public
+   constructor create(const aowner: tmsecomponent);
+   destructor destroy; override;
+   property pipewriter: tpipewriter read fpipewriter;
+  published
+   property encoding: charencodingty read getencoding write setencoding 
+                                                         default ce_locale;
+ end;
+ 
 {$ifdef UNIX}
 function readfilenonblock(const handle: thandle; var buf; const acount: integer;
                      const nonblocked: boolean): integer; //-1 on error
@@ -722,6 +748,16 @@ begin
  fpipereader.options:= avalue;
 end;
 
+function tpipereadercomp.getencoding: charencodingty;
+begin
+ result:= fpipereader.encoding;
+end;
+
+procedure tpipereadercomp.setencoding(const avalue: charencodingty);
+begin
+ fpipereader.encoding:= avalue;
+end;
+
 { tpipereaderpers }
 
 constructor tpipereaderpers.create(const aowner: tmsecomponent);
@@ -768,6 +804,50 @@ begin
  fpipereader.overloadsleepus:= avalue;
 end;
 
+function tpipereaderpers.getopions: pipereaderoptionsty;
+begin
+ result:= fpipereader.options;
+end;
+
+procedure tpipereaderpers.setoptions(const avalue: pipereaderoptionsty);
+begin
+ fpipereader.options:= avalue;
+end;
+
+function tpipereaderpers.getencoding: charencodingty;
+begin
+ result:= fpipereader.encoding;
+end;
+
+procedure tpipereaderpers.setencoding(const avalue: charencodingty);
+begin
+ fpipereader.encoding:= avalue;
+end;
+
+{ tpipewriterpers }
+
+constructor tpipewriterpers.create(const aowner: tmsecomponent);
+begin
+ fpipewriter:= tpipewriter.create;
+ inherited create;
+end;
+
+destructor tpipewriterpers.destroy;
+begin
+ fpipewriter.free;
+ inherited;
+end;
+
+function tpipewriterpers.getencoding: charencodingty;
+begin
+ result:= fpipewriter.encoding;
+end;
+
+procedure tpipewriterpers.setencoding(const avalue: charencodingty);
+begin
+ fpipewriter.encoding:= avalue;
+end;
+
 {$ifdef UNIX}
 var
  sigpipebefore: tsignalhandler;
@@ -776,5 +856,6 @@ initialization
 finalization
  signal(sigpipe,sigpipebefore);
 {$endif}
+
 end.
 

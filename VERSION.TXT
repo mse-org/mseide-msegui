@@ -1,5 +1,7 @@
 MSEide+MSEgui breaking changes version history
 
+2014-10-01
+ tprocess.input tpipewriter -> tpipewriterpers, use tprocess.input.pipewriter.
 2014-09-30
  Inplace tmacrolist.expandmacros() -> expandmacros1().
 

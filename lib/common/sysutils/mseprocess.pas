@@ -49,7 +49,7 @@ type
  
  tmseprocess = class(tactcomponent,istatfile,iprocmonitor)
   private
-   finput: tpipewriter;
+   finput: tpipewriterpers;
    foutput: tpipereaderpers;
    ferroroutput: tpipereaderpers;
    ffilename: filenamety;
@@ -76,6 +76,7 @@ type
    procedure setcommandline(const avalue: string);
    procedure procend;
    procedure setoptions(const avalue: processoptionsty);
+   procedure setinput(const avalue: tpipewriterpers);
   protected
    fstate: processstatesty;
    procedure setactive(const avalue: boolean); override;
@@ -107,7 +108,6 @@ type
    function waitforprocess: integer; overload; //returns exitcode
    function waitforprocess(const atimeoutus: integer): boolean; overload;
                                               //true if process finished
-   property input: tpipewriter read finput;
    property commandline: string read getcommandline write setcommandline;
                  //overrides filename and parameter
    property prochandle: prochandlety read fprochandle;
@@ -126,6 +126,7 @@ type
    property statvarname: msestring read getstatvarname write fstatvarname;
    property statpriority: integer read fstatpriority 
                                        write fstatpriority default 0;
+   property input: tpipewriterpers read finput write setinput;
    property output: tpipereaderpers read foutput write setoutput;
    property erroroutput: tpipereaderpers read ferroroutput write seterroroutput;
    property onprocfinished: notifyeventty read fonprocfinished 
@@ -201,10 +202,10 @@ begin
    end;
    if todata <> '' then begin
     try
-     input.write(todata);
+     input.pipewriter.write(todata);
     except
     end;
-    input.close;
+    input.pipewriter.close;
    end;
    if atimeout < 0 then begin
     result:= waitforprocess;
@@ -311,7 +312,7 @@ constructor tmseprocess.create(aowner: tcomponent);
 begin
  foptions:= defaultprocessoptions;
  fprochandle:= invalidprochandle;
- finput:= tpipewriter.create;
+ finput:= tpipewriterpers.create(self);
  foutput:= tpipereaderpers.create(self);
  ferroroutput:= tpipereaderpers.create(self);
  fpipewaitus:= defaultpipewaitus;
@@ -418,7 +419,7 @@ begin
       end;
      end;
      if pro_input in foptions then begin
-      inp:= finput;
+      inp:= finput.pipewriter;
      end;
      if pro_group in foptions then begin
       group:= 0;
@@ -624,7 +625,7 @@ end;
 
 procedure tmseprocess.finalizeexec;
 begin
- finput.close;
+ finput.pipewriter.close;
  foutput.pipereader.terminateandwait;
  ferroroutput.pipereader.terminateandwait;
  application.lock;
@@ -777,7 +778,7 @@ begin
  application.lock;
  try
   if running then begin
-   finput.close;
+   finput.pipewriter.close;
    syserror(sys_killprocess(fprochandle));
    foutput.pipereader.terminate;
    ferroroutput.pipereader.terminate;
@@ -816,6 +817,11 @@ end;
 function tmseprocess.getstatpriority: integer;
 begin
  result:= fstatpriority;
+end;
+
+procedure tmseprocess.setinput(const avalue: tpipewriterpers);
+begin
+ finput.assign(avalue);
 end;
 
 { tstringprocess }

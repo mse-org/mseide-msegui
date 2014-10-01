@@ -321,10 +321,10 @@ begin
        bo2:= echooff(bo3);
        try
         if teo_utf8 in foptions then begin
-         fprocess.input.writeln(stringtoutf8(mstr1));
+         fprocess.input.pipewriter.writeln(stringtoutf8(mstr1));
         end
         else begin
-         fprocess.input.writeln(mstr1);
+         fprocess.input.pipewriter.writeln(mstr1);
         end;
         if not bo3 then begin
          datalist.add('');
@@ -648,12 +648,12 @@ end;
 
 function tterminal.getoutputfd: integer;
 begin
- result:= fprocess.input.handle;
+ result:= fprocess.input.pipewriter.handle;
 end;
 
 procedure tterminal.setoutputfd(const avalue: integer);
 begin
- fprocess.input.handle:= avalue;
+ fprocess.input.pipewriter.handle:= avalue;
 end;
 
 function tterminal.geterrorfd: integer;

@@ -335,17 +335,21 @@ type
    procedure resetsearch;
    function searchnext: boolean; //true wenn gefunden
    property nativesearchtext: string read fsearchtext write setsearchtext;
-   property msesearchtext: msestring read getmsesearchtext write setmsesearchtext;
-   property searchoptions: searchoptionsty read fsearchoptions write setsearchoptions;
+   property msesearchtext: msestring read getmsesearchtext 
+                                                     write setmsesearchtext;
+   property searchoptions: searchoptionsty read fsearchoptions 
+                                                      write setsearchoptions;
    property searchpos: longword read fsearchpos write fsearchpos;
    property searchfoundpos: longword read fsearchfoundpos;
-   property searchlinestartpos: longword read fsearchlinestartpos write fsearchlinestartpos;
-   property searchlinenumber: longword read fsearchlinenumber write fsearchlinenumber;
+   property searchlinestartpos: longword read fsearchlinestartpos 
+                                                    write fsearchlinestartpos;
+   property searchlinenumber: longword read fsearchlinenumber 
+                                                     write fsearchlinenumber;
    property searchabortpo: pboolean read fsearchabortpo write fsearchabortpo;
 
    property notopen: boolean read getnotopen;
-   property encoding: charencodingty read fencoding write fencoding default ce_locale;
-
+   property encoding: charencodingty read fencoding write fencoding 
+                                                         default ce_locale;
  end;
 
  ttextdatastream = class(ttextstream)
