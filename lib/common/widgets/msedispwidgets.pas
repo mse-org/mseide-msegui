@@ -589,7 +589,7 @@ end;
 
 function tdispwidget.getvalueprop: ppropinfo;
 begin
- result:= nil;
+ result:= getpropinfo(self,'value');
 end;
 
 procedure tdispwidget.updatereadonlystate;
