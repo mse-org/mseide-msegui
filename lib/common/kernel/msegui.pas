@@ -11115,9 +11115,10 @@ end;
 
 function twidget.isvisible: boolean;
 begin
- result:= (ws_visible in fwidgetstate) or
-         ((csdesigning in componentstate) and 
-                    not (ws1_nodesignvisible in fwidgetstate1));
+ result:= ((ws_visible in fwidgetstate) or
+           ((csdesigning in componentstate) and 
+                    not (ws1_nodesignvisible in fwidgetstate1))) and 
+          not (csdestroying in componentstate);
 end;
 
 function twidget.parentisvisible: boolean; //checks visible flags of ancestors

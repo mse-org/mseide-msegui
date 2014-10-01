@@ -34,7 +34,7 @@ type
                fo_modal,fo_createmodal,
                fo_minimized,fo_maximized,fo_fullscreen,fo_fullscreenvirt,
                fo_closeonesc,fo_cancelonesc,fo_closeonenter,fo_closeonf10,
-               fo_keycloseifwinonly,
+               fo_keycloseifwinonly,fo_nowindowclose,
                fo_globalshortcuts,fo_localshortcuts,
                fo_autoreadstat,fo_delayedreadstat,fo_autowritestat,
                fo_savepos,fo_savezorder,fo_savestate);
@@ -1104,8 +1104,12 @@ var
 begin
  result:= inherited canclose(newfocus);
  if result and (newfocus = nil) then begin
+  modres:= twindow1(window).fmodalresult;
+  if (modres = mr_windowclosed) and (fo_nowindowclose in foptions) then begin
+   result:= false;
+   exit;
+  end;
   if canevent(tmethod(fonclosequery)) then begin
-   modres:= twindow1(window).fmodalresult;
    if modres = mr_none then begin
     modres:= mr_canclose;
    end;
