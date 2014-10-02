@@ -179,7 +179,7 @@ begin
  nogui_deinit; 
 end;
 
-procedure tnoguiapplicatoin.destroymodules();
+procedure tnoguiapplication.destroymodules();
 begin
  while componentcount > 0 do begin
   components[componentcount-1].free;  //destroy loaded modules
@@ -189,7 +189,7 @@ end;
 procedure tnoguiapplication.doafterrun;
 begin
  if not (apo_noautodestroymodules in foptions) then begin
-  destroymodules(false);
+  destroymodules();
  end;
 end;
 
