@@ -1907,6 +1907,7 @@ type
    function innerclientsize: sizety;
    function innerclientpos: pointty;         //origin = clientpos
    function innerclientframe: framety;
+   function innerclientpaintpos: pointty;    //origin = paintpos
    function innerclientwidgetpos: pointty;   //origin = pos
    procedure innertopaintsize(var asize: sizety);
    procedure painttowidgetsize(var asize: sizety);
@@ -9785,6 +9786,19 @@ begin
    checkstate;
    result:= addpoint(fpaintrect.pos,fclientrect.pos);
   end
+ end
+ else begin
+  result:= nullpoint;
+ end;
+end;
+
+function twidget.innerclientpaintpos: pointty;    //origin = paintpos
+begin
+ if fframe <> nil then begin
+  with frame do begin
+   checkstate;
+   result:= fframe.finnerclientrect.pos;
+  end;
  end
  else begin
   result:= nullpoint;
