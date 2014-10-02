@@ -57,6 +57,8 @@ type
                             var refindex: integerarty);
    procedure expandmacros1(var avalues: msestringarty);
    function asarray: macroinfoarty;
+   function asarray(const addnames: array of msestring;
+                         const addvalues: array of msestring): macroinfoarty;
    procedure asarray(out names,values: msestringarty);
    procedure setasarray(const avalue: macroinfoarty);
    procedure setasarray(const names,values: msestringarty);
@@ -461,6 +463,26 @@ begin
  po1:= datapo;
  for int1:= 0 to count - 1 do begin
   result[int1]:= po1^[int1];
+ end;
+end;
+
+function tmacrolist.asarray(const addnames: array of msestring;
+                         const addvalues: array of msestring): macroinfoarty;
+var
+ int1,int2,int3: integer;
+begin
+ result:= asarray();
+ int1:= length(addnames);
+ if int1 > length(addvalues) then begin
+  int1:= length(addvalues);
+ end;
+ int2:= high(result);
+ setlength(result,length(result)+int1);
+ int3:= 0;
+ for int1:= int2 to high(result) do begin
+  result[int1].name:= addnames[int3];
+  result[int1].value:= addvalues[int3];
+  inc(int3);
  end;
 end;
 
