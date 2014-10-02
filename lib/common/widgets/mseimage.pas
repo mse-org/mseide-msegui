@@ -153,10 +153,10 @@ begin
  if not (al_fit in fbitmap.alignment) then begin
   size1:= result;
   if not (al_stretchx in fbitmap.alignment) then begin
-   size1.cx:= fbitmap.width+innerframewidth.cx;
+   size1.cx:= fbitmap.bitmap.width+innerframewidth.cx;
   end;
   if not (al_stretchy in fbitmap.alignment) then begin
-   size1.cy:= fbitmap.height+innerframewidth.cy;
+   size1.cy:= fbitmap.bitmap.height+innerframewidth.cy;
   end;
   if (result.cx < size1.cx) then begin
    result.cx:= size1.cx;
