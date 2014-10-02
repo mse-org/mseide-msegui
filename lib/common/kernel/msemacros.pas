@@ -476,8 +476,8 @@ begin
  if int1 > length(addvalues) then begin
   int1:= length(addvalues);
  end;
- int2:= high(result);
- setlength(result,length(result)+int1);
+ int2:= length(result);
+ setlength(result,int2+int1);
  int3:= 0;
  for int1:= int2 to high(result) do begin
   result[int1].name:= addnames[int3];

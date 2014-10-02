@@ -3465,7 +3465,12 @@ begin
  else begin
   str1:= ansistring(data);
  end;
- result:= bytestrtostr(str1,nb_hex,true);
+ if length(str1) > 256 then begin
+  result:= bytestrtostr(copy(str1,1,256),nb_hex,true)+'...';
+ end
+ else begin
+  result:= bytestrtostr(str1,nb_hex,true);
+ end;
 end;
 
 procedure thexstringedit.valuetogrid(arow: integer);
