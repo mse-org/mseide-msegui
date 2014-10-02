@@ -2410,13 +2410,13 @@ procedure tcustomcaptionframe.setfont(const Value: tframefont);
 begin
  if value <> ffont then begin
   setoptionalobject(fintf.getcomponentstate,value,ffont,{$ifdef FPC}@{$endif}createfont);
-  internalupdatestate;
   if ffont <> nil then begin
    finfo.font:= ffont;
   end
   else begin
    finfo.font:= icaptionframe(fintf).getframefont;
   end;
+  internalupdatestate();
  end;
 end;
 
