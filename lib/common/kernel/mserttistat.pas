@@ -658,16 +658,15 @@ begin
         end;
        {$endif}
        end;
-       {$ifdef FPC}tkastring,{$endif}tklstring,tkstring: begin
-       {$ifdef FPC}
+       tkastring,tklstring,tkstring: begin
         if po4^.proptype^.kind = tkustring then begin
          setstrprop(dest.obj,po1,getunicodestrprop(comp1,po4));
+        end
+        else begin
+         if po4^.proptype^.kind in [tkastring,tklstring,tkstring] then begin
+          setstrprop(dest.obj,po1,getstrprop(comp1,po4));
+         end;
         end;
-       {$else}
-        if po4^.proptype^.kind = tkwstring then begin
-         setstrprop(dest.obj,po1,getwidestrprop(comp1,po4));
-        end;
-       {$endif}
        end;
        tkclass: begin
         list1:= intf1.getgriddata;
@@ -805,16 +804,15 @@ begin
         end;
        {$endif}
        end;
-       {$ifdef FPC}tkastring,{$endif}tklstring,tkstring: begin
-      {$ifdef FPC}
+       tkastring,tklstring,tkstring: begin
         if po4^.proptype^.kind = tkustring then begin
          setunicodestrprop(comp1,po4,getstrprop(source.obj,po1));
+        end
+        else begin
+         if po4^.proptype^.kind in [tkastring,tklstring,tkstring] then begin
+          setstrprop(comp1,po4,getstrprop(source.obj,po1));
+         end;
         end;
-       {$else}
-        if po4^.proptype^.kind = tkwstring then begin
-         setwidestrprop(comp1,po4,getstrprop(source.obj,po1));
-        end;
-       {$endif}
        end;
        tkdynarray: begin
         list1:= intf1.getgriddata;
