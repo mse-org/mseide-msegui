@@ -764,7 +764,12 @@ end;
 
 function tbytestringdisp.getvaluetext: msestring;
 begin
- result:= bytestrtostr(fvalue,fbase,true);
+ if length(fvalue) > 256 then begin
+  result:= bytestrtostr(copy(fvalue,1,256),fbase,true)+'...';
+ end
+ else begin
+  result:= bytestrtostr(fvalue,fbase,true);
+ end;
 end;
 
 procedure tbytestringdisp.setbase(const Value: numbasety);
