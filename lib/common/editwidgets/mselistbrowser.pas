@@ -4076,69 +4076,88 @@ procedure ttreeitemeditlist.insert(const aindex: integer;
                                             const freeroot: boolean = true);
 var
  int1: integer;
+ rowbefore: integer;
  n1,n2: ttreelistitem;
 // po1: ptreelistitem;
  bo1: boolean;
+ grid1: tcustomgrid;
 begin
 // beginupdate();
- if freeroot then begin
-  exclude(anode.fstate1,ns1_nofreeroot);
- end
- else begin
-  include(anode.fstate1,ns1_nofreeroot);
- end;
- int1:= aindex;
- n1:= nil;
- if int1 >= count then begin
-  int1:= count;
-  if int1 > 0 then begin
-   n1:= items[int1-1];
-   n2:= n1.parent;
+// try
+  if freeroot then begin
+   exclude(anode.fstate1,ns1_nofreeroot);
+  end
+  else begin
+   include(anode.fstate1,ns1_nofreeroot);
   end;
- end
- else begin
-  if int1 < 0 then begin
-   int1:= 0;
-  end;
-  if int1 < count then begin
-   n1:= items[int1];
-  end;
- end;
- n2:= nil;
- int1:= 0;
- if n1 <> nil then begin
-  int1:= n1.parentindex;
-  n2:= n1.parent;
- end;
- if n2 = nil then begin
-  n2:= frootnode;
- end;
- bo1:= anode.expanded;
- anode.expanded:= false;
- if n2 <> nil then begin
-  n2.insert(int1,anode);
-  if n2.owner <> self then begin
-   inherited insert(aindex,anode); //top level node
-  end;
-  if ns_showparentnotchecked in anode.fstate then begin
-   if n2.checked and not (ns1_parentnotchecked in n2.state1) then begin
-    exclude(anode.fstate1,ns1_parentnotchecked);
-    anode.doupdateparentnotcheckedstate(false);
-   end
-   else begin
-    include(anode.fstate1,ns1_parentnotchecked);
-    anode.doupdateparentnotcheckedstate(true);
+  int1:= aindex;
+  n1:= nil;
+  if int1 >= count then begin
+   int1:= count;
+   if int1 > 0 then begin
+    n1:= items[int1-1];
+    n2:= n1.parent;
+   end;
+  end
+  else begin
+   if int1 < 0 then begin
+    int1:= 0;
+   end;
+   if int1 < count then begin
+    n1:= items[int1];
    end;
   end;
-  if ns_showchildchecked in n2.state then begin
-   anode.updatechildcheckedstate();
+  n2:= nil;
+  int1:= 0;
+  if n1 <> nil then begin
+   int1:= n1.parentindex;
+   n2:= n1.parent;
   end;
- end
- else begin
-  inherited insert(aindex,anode); //top level node
- end;
- anode.expanded:= bo1;
-// endupdate();
+  if n2 = nil then begin
+   n2:= frootnode;
+  end;
+  bo1:= anode.expanded;
+  grid1:= nil;
+  grid1:= fintf.getgrid();
+  rowbefore:= -1;
+  if grid1 <> nil then begin
+   rowbefore:= grid1.row;
+   if rowbefore <= aindex then begin
+    grid1.row:= invalidaxis;
+   end;
+  end;
+  anode.expanded:= false;
+  if n2 <> nil then begin
+   n2.insert(int1,anode);
+   if n2.owner <> self then begin
+    inherited insert(aindex,anode); //top level node
+   end;
+   if ns_showparentnotchecked in anode.fstate then begin
+    if n2.checked and not (ns1_parentnotchecked in n2.state1) then begin
+     exclude(anode.fstate1,ns1_parentnotchecked);
+     anode.doupdateparentnotcheckedstate(false);
+    end
+    else begin
+     include(anode.fstate1,ns1_parentnotchecked);
+     anode.doupdateparentnotcheckedstate(true);
+    end;
+   end;
+   if ns_showchildchecked in n2.state then begin
+    anode.updatechildcheckedstate();
+   end;
+  end
+  else begin
+   inherited insert(aindex,anode); //top level node
+  end;
+  anode.expanded:= bo1;
+  if grid1 <> nil then begin
+   if (rowbefore <= aindex) and (rowbefore >= 0) then begin
+    grid1.row:= rowbefore+anode.rowheight;
+   end;
+  end;
+// finally
+//  endupdate();
+// end;
 end;
 
 procedure ttreeitemeditlist.add(const anodes: treelistedititemarty);
