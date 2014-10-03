@@ -2215,7 +2215,7 @@ type
    procedure setlookupbuffer(const avalue: tcustomlookupbuffer);
   protected
    procedure dofilter(var recno: integer; var accept: boolean); override;
-   procedure reloadlist; override;
+   function reloadlist: integer; override;
    function createdropdownlist: tdropdownlist; override;
    function candropdown: boolean; override;
    procedure itemselected(const index: integer; const akey: keyty); override;
@@ -11636,7 +11636,7 @@ begin
  fonfilter(flookupbuffer,flookupbuffer.textindex(fsortfieldno,recno,true),accept);
 end;
 
-procedure tcustomlbdropdownlistcontroller.reloadlist;
+function tcustomlbdropdownlistcontroller.reloadlist: integer;
 var
  int1,int2,int3,int4: integer;
  sortfieldno: integer;
@@ -11644,6 +11644,7 @@ var
  po1: pmsestringaty;
  ar1: msestringarty;
 begin
+ result:= 0;
  if assigned(fonbeforefilter) then begin
   fonbeforefilter(tcustomdataedit(fintf.getwidget));
  end;

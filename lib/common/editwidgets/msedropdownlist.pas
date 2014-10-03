@@ -243,6 +243,8 @@ type
    procedure docellevent(var info: celleventinfoty); override;
    function getkeystring(const aindex: integer): msestring;
    function locate(const filter: msestring): boolean; virtual;
+   function updatevisiblerows(): integer; virtual;
+                          //returns first visible row
    procedure dorepeat(const sender: tobject);
    procedure initcols(const acols: tdropdowncols); virtual;
    procedure updatelayout; override;
@@ -427,7 +429,8 @@ type
    function getdropdowncolsclass: dropdowncolsclassty; virtual;
    procedure selectnone(const akey: keyty); override;
    procedure resetselection; override; //sets fcols.fitemindex to -1, no events
-   procedure reloadlist; virtual;
+   function reloadlist: integer; virtual;
+                            //returns first visible row
    function getremoterowcount: integer; virtual;
    procedure dobeforedropdown; override;
    procedure doafterclosedropdown; override;
@@ -1733,9 +1736,9 @@ begin
  fcols.fitemindex:= -1;
 end;
 
-procedure tcustomdropdownlistcontroller.reloadlist;
+function tcustomdropdownlistcontroller.reloadlist: integer;
 begin
- //dummy
+ result:= fdropdownlist.updatevisiblerows();
 end;
 
 function tcustomdropdownlistcontroller.getremoterowcount: integer;
@@ -2135,6 +2138,7 @@ procedure tdropdownlist.show(awidth: integer; const arowcount: integer;
                  var aitemindex: integer; afiltertext: msestring);
 var
  rect1: rectty;
+ int1: integer;
 begin
  fstate:= fstate * [gs_isdb];
  bounds_cx:= awidth;
@@ -2145,7 +2149,13 @@ begin
  fcontroller.updatedropdownpos(rect1);
  ffiltertext:= afiltertext;
  if deo_livefilter in fcontroller.foptions then begin
-  setactiveitem(0);
+  int1:= updatevisiblerows();
+  if afiltertext <> '' then begin
+   setactiveitem(int1);
+  end
+  else begin
+   setactiveitem(aitemindex);
+  end;
  end
  else begin
   if (aitemindex = -1) and (ffiltertext <> '') then begin
@@ -2289,14 +2299,56 @@ begin
  end;
 end;
 
+function tdropdownlist.updatevisiblerows(): integer;
+var
+ int1,int2,int3,count1: integer;
+ opt1: locatestringoptionsty;
+ bo1: boolean;
+begin
+ result:= invalidaxis;
+ if (rowcount > 0) and (fdatacols.count > 0) then begin
+  beginupdate;
+  folded:= true;
+  int1:= 0;
+  opt1:= [lso_nodown];
+  if dlo_casesensitive in foptions1 then begin
+   include(opt1,lso_casesensitive);
+  end;
+  if dlo_posinsensitive in foptions1 then begin
+   include(opt1,lso_posinsensitive);
+  end;
+  count1:= fdatacols[0].datalist.count;
+  repeat
+   int2:= int1;
+   bo1:= locatestring(ffiltertext,{$ifdef FPC}@{$endif}getkeystring,opt1,
+                                                                  count1,int1);
+   if not bo1 then begin
+    int1:= fdatacols[0].datalist.count;
+   end;
+   for int3:= int2 to int1 - 1 do begin
+    rowhidden[int3]:= true;
+   end;
+   if bo1 then begin
+    rowhidden[int1]:= false;
+    if result = invalidaxis then begin
+     result:= int1;
+    end;
+    inc(int1);
+   end;
+  until not bo1 or (int1 >= count1);
+  endupdate;
+ end;
+end;
+
 procedure tdropdownlist.setfiltertext(const Value: msestring);
 var
  li1: tdatalist;
  rect1: rectty;
+ int1: integer;
 begin
  ffiltertext:= Value;
  if dlo_livefilter in foptions1 then begin
-  fcontroller.reloadlist;
+  int1:= fcontroller.reloadlist();
   if (fdatacols.count > 0) then begin
    li1:= tdropdownstringcol(fdatacols[0]).fdata;
    if li1 <> nil then begin
@@ -2307,7 +2359,7 @@ begin
   rect1.cy:= dropdownheight;
   fcontroller.updatedropdownpos(rect1);
   invalidate;
-  row:= 0;
+  row:= int1;
   setupeditor(ffocusedcell,true);
  end
  else begin
