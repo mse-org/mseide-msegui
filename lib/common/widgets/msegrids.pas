@@ -17265,7 +17265,12 @@ begin                  //todo: optimize
  end;
  rowstat1:= prowstatety(pchar(datapo)+int2*fsize);
  visirow1:= @pintegeraty(fvisiblerowmap.datapo)^[int2];
- int1:= fdirtyvisible-1; //visible row index
+ if fdirtyvisible < 0 then begin
+  int1:= -1;
+ end
+ else begin
+  int1:= fdirtyvisible-1; //visible row index
+ end;
  while int1 < visibleindex do begin
   while (rowstat1^.fold and foldhiddenmask <> 0) and (int2 <= arow) do begin
    rowstat1^.fold:= rowstat1^.fold or currentfoldhiddenmask;
