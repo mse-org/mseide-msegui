@@ -282,7 +282,8 @@ type
    constructor create(const intf: icaptionframe;
                                          const buttonintf: ibutton); override;                                                  
    procedure updatedropdownoptions(const avalue: dropdowneditoptionsty);
-   property activebutton: integer read factivebutton write setactivebutton default 0;
+   property activebutton: integer read factivebutton write setactivebutton 
+                                                                    default 0;
    property readonly: boolean read freadonly write setreadonly default false;
    property button: tdropdownbutton read getbutton write setbutton;
  end;
@@ -328,8 +329,9 @@ type
    procedure dobeforedropdown; virtual;
    procedure doafterclosedropdown; virtual;
    procedure internaldropdown; virtual;
-   function setdropdowntext(const avalue: msestring; const docheckvalue: boolean;
-                         const canceled: boolean; const akey: keyty): boolean;
+   function setdropdowntext(const avalue: msestring;
+                         const docheckvalue: boolean; const canceled: boolean;
+                                                   const akey: keyty): boolean;
              //true if selected
    function candropdown: boolean; virtual;
    procedure selectnone(const akey: keyty); virtual;
@@ -390,7 +392,8 @@ type
 
  end;
 
- tcustomdropdownlistcontroller = class(tcustomdropdowncontroller,idropdownlistcontroller)
+ tcustomdropdownlistcontroller = class(tcustomdropdowncontroller,
+                                                      idropdownlistcontroller)
   private
    procedure setcols(const Value: tdropdowncols);
    function getitemindex: integer;
@@ -635,7 +638,8 @@ begin
  result:= tdropdowncol(inherited getitems(index));
 end;
 
-procedure tdropdowncols.itemchanged(const sender: tdatalist; const index: integer);
+procedure tdropdowncols.itemchanged(const sender: tdatalist;
+                                                     const index: integer);
 begin
  if (fupdating1 = 0 ) and assigned(fonitemchange) then begin
   fonitemchange(sender,index);
@@ -2146,8 +2150,8 @@ begin
  rect1:= widgetrect;
  rect1.cx:= awidth;
  fdropdownrowcount:= arowcount;
- rect1.cy:= dropdownheight;
- fcontroller.updatedropdownpos(rect1);
+// rect1.cy:= dropdownheight;
+// fcontroller.updatedropdownpos(rect1);
  ffiltertext:= afiltertext;
  if deo_livefilter in fcontroller.foptions then begin
   int1:= updatevisiblerows();
@@ -2171,6 +2175,8 @@ begin
    setactiveitem(aitemindex);
   end;
  end;
+ rect1.cy:= dropdownheight;
+ fcontroller.updatedropdownpos(rect1);
  if inherited show(true,fcontroller.getwidget.window) = mr_ok then begin
   aitemindex:= fselectedindex;
  end
@@ -2308,8 +2314,8 @@ var
 begin
  result:= invalidaxis;
  if (rowcount > 0) and (fdatacols.count > 0) then begin
-  beginupdate;
   folded:= true;
+  beginupdate;
   int1:= 0;
   opt1:= [lso_nodown];
   if dlo_casesensitive in foptions1 then begin
