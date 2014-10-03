@@ -13975,53 +13975,55 @@ begin
   bo1:= setuserinput(auserinput);
   try
    dorowsinserting(aindex,acount);
-   rowbefore:= ffocusedcell.row;
-   beginupdate;
-   try
-    if aindex >= 0 then begin //datarows
-     if not (gs_changelock in fstate) then begin
-      include(fstate,gs_changelock);
-      fdatacols.beginchangelock;
-     end;
-     if not fdatacols.roworderinvalid then begin
-      exit;
-     end;
-     fdatacols.insertrow(aindex,acount);
-     ffixcols.insertrow(aindex,acount);
-     if (ffocusedcell.row >= 0) then begin
-      if (ffocusedcell.row >= aindex) then begin
-       inc(ffocusedcell.row,acount);
-       if (factiverow >= 0) then begin
-        factiverow:= ffocusedcell.row;
-       end;
+   if acount > 0 then begin
+    rowbefore:= ffocusedcell.row;
+    beginupdate;
+    try
+     if aindex >= 0 then begin //datarows
+      if not (gs_changelock in fstate) then begin
+       include(fstate,gs_changelock);
+       fdatacols.beginchangelock;
       end;
-     end;
-     inc(frowcount,acount);
-     if frowcount > frowcountmax then begin
-      frowcount:= frowcountmax;
-     end;
-     if of_insertsamelevel in foptionsfold then begin
-      with fdatacols.frowstate do begin
-       if folded then begin
-        if (gs_appending in self.fstate) or (aindex+acount >= frowcount) then begin
-         if (aindex > 0) then begin
-          fillfoldlevel(aindex,acount,foldlevel[aindex-1]);
-         end;
-        end
-        else begin
-         fillfoldlevel(aindex,acount,foldlevel[aindex+acount]);
+      if not fdatacols.roworderinvalid then begin
+       exit;
+      end;
+      fdatacols.insertrow(aindex,acount);
+      ffixcols.insertrow(aindex,acount);
+      if (ffocusedcell.row >= 0) then begin
+       if (ffocusedcell.row >= aindex) then begin
+        inc(ffocusedcell.row,acount);
+        if (factiverow >= 0) then begin
+         factiverow:= ffocusedcell.row;
         end;
        end;
       end;
+      inc(frowcount,acount);
+      if frowcount > frowcountmax then begin
+       frowcount:= frowcountmax;
+      end;
+      if of_insertsamelevel in foptionsfold then begin
+       with fdatacols.frowstate do begin
+        if folded then begin
+         if (gs_appending in self.fstate) or (aindex+acount >= frowcount) then begin
+          if (aindex > 0) then begin
+           fillfoldlevel(aindex,acount,foldlevel[aindex-1]);
+          end;
+         end
+         else begin
+          fillfoldlevel(aindex,acount,foldlevel[aindex+acount]);
+         end;
+        end;
+       end;
+      end;
+      dorowcountchanged(frowcount-acount,frowcount);
      end;
-     dorowcountchanged(frowcount-acount,frowcount);
+    finally
+     endupdate;
     end;
-   finally
-    endupdate;
-   end;
-   dorowsinserted(aindex,acount);
-   if rowbefore <> ffocusedcell.row then begin
-    dofocusedcellposchanged;
+    dorowsinserted(aindex,acount);
+    if rowbefore <> ffocusedcell.row then begin
+     dofocusedcellposchanged;
+    end;
    end;
   finally
    resetuserinput(bo1);
@@ -15440,6 +15442,9 @@ begin
   try
    int2:= 1;
    internalinsertrow(aindex,int2,auserinput);
+   if int2 = 0 then begin
+    exit;
+   end;
    if fdatacols.fnewrowcol < 0 then begin
     int1:= ffocusedcell.col;
    end
