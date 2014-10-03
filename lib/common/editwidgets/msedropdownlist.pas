@@ -248,7 +248,7 @@ type
    procedure dorepeat(const sender: tobject);
    procedure initcols(const acols: tdropdowncols); virtual;
    procedure updatelayout; override;
-   function dropdownheight: integer;
+   function dropdownheight: integer; virtual;
    procedure setactiveitem(const aitemindex: integer); virtual;
   public
    constructor create(const acontroller: tcustomdropdownlistcontroller;
