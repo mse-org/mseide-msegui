@@ -16610,7 +16610,7 @@ begin
   po2:= datapo;
   inc(pchar(po2),arow*fsize);
   for int1:= arow downto 0 do begin
-   by1:= po2^.fold;
+   by1:= po2^.fold and not currentfoldhiddenmask;
    if by1 = 0 then begin
     result:= true;
     break;
