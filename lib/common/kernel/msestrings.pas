@@ -579,7 +579,8 @@ type
                            //false if no value
  getkeystringfuncty = function (const index: integer): msestring of object;
 
- locatestringoptionty = (lso_casesensitive,lso_posinsensitive,lso_exact);
+ locatestringoptionty = (lso_casesensitive,lso_posinsensitive,lso_exact,
+                         lso_nodown,lso_noup);
  locatestringoptionsty = set of locatestringoptionty;
 
 function locatestring(const afilter: msestring;
@@ -673,6 +674,7 @@ var
    end;
   end; //checkexactpos
 
+
  begin
   str1:= getkeystringfunc(index1);
   with locateinfo do begin
@@ -726,7 +728,14 @@ begin
  if afilter = '' then begin
   result:= count > 0;
   if result then begin
-   aindex:= 0;
+   if not (lso_nodown in options) then begin
+    aindex:= 0;
+   end
+   else begin
+    if aindex >= count then begin
+     aindex:= count-1;
+    end;
+   end;
   end;
  end
  else begin
@@ -741,36 +750,42 @@ begin
    end;
    result:= false;
    int1:= aindex;
-   if int1 < 0 then begin
-    int1:= 0;
+   if not (lso_noup in options) then begin
+    if int1 < 0 then begin
+     int1:= 0;
+    end;
    end;
-   if int1 >= count then begin
-    int1:= count - 1;
+   if not (lso_nodown in options) then begin
+    if int1 >= count then begin
+     int1:= count - 1;
+    end;
    end;
    if int1 >= 0 then begin
     exact:= true;
     for int2:= int1 to count - 1 do begin
      check(int2);
-     if result then begin
+     if result or (lso_noup in options) then begin
       break;
      end;
     end;
     if not result then begin
-     for int2:= int1-1 downto 0 do begin
-      check(int2);
-      if result then begin
-       break;
+     if not (lso_nodown in options) then begin
+      for int2:= int1-1 downto 0 do begin
+       check(int2);
+       if result then begin
+        break;
+       end;
       end;
      end;
      if not result and not (lso_exact in options) then begin
       exact:= false;
       for int2:= int1 to count - 1 do begin
        check(int2);
-       if result then begin
+       if result  or (lso_noup in options) then begin
         break;
        end;
       end;
-      if not result then begin
+      if not result and not (lso_nodown in options) then begin
        for int2:= int1 - 1 downto 0 do begin
         check(int2);
         if result then begin
