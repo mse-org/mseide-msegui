@@ -2108,17 +2108,18 @@ end;
 
 function tdropdownlist.dropdownheight: integer;
 var
- int1: integer;
+ int1,int2: integer;
 begin
+ int2:= fdatacols.rowstate.visiblerowcount;
  if fdropdownrowcount = 0 then begin
-  int1:= frowcount;
+  int1:= int2;
  end
  else begin
   int1:= fdropdownrowcount;
  end;
- if (int1 > frowcount){ and not 
+ if (int1 > int2){ and not 
                       (deo_livefilter in fcontroller.foptions)} then begin
-  int1:= frowcount;
+  int1:= int2;
  end;
  if int1 = 0 then begin
   result:= ystep div 2;
