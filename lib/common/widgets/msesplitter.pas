@@ -39,6 +39,13 @@ const
 type
  splitterstatety = (sps_propnotified);
  splitterstatesty = set of splitterstatety;
+
+ texpandingwidget = class(tscalingwidget)
+  public
+   constructor create(aowner: tcomponent); override;
+  published
+   property optionswidget default defaultgroupboxoptionswidget;
+ end;
  
  tcustomsplitter = class(tscalingwidget,iobjectpicker,istatfile)
   private
@@ -2086,6 +2093,14 @@ begin
    end;
   end;
  end;
+end;
+
+{ texpandingwidget }
+
+constructor texpandingwidget.create(aowner: tcomponent);
+begin
+ inherited;
+ foptionswidget:= defaultgroupboxoptionswidget;
 end;
 
 end.

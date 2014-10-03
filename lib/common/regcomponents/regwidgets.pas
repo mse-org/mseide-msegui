@@ -173,7 +173,7 @@ begin
   tsimplewidget,teventwidget,
   tgroupbox,tscrollbox,tstepbox,tdockpanel,tdockhandle,tmseformwidget,
   tdockformwidget,
-  tscalingwidget,tsplitter,tspacer,tlayouter,
+  texpandingwidget,tsplitter,tspacer,tlayouter,
   tmainmenuwidget,
   ttoolbar,
   ttabbar,ttabwidget,ttabpage,
