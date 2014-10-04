@@ -21,7 +21,7 @@ unit panelform;
 interface
 uses
  classes,mclasses,msegui,mseclasses,mseforms,msemenus,msestat,msestrings,
- msedock,msegraphutils;
+ msedock,msegraphutils,msegraphics,mseguiglob,msesimplewidgets,msewidgets;
 
 type
 

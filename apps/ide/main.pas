@@ -35,7 +35,8 @@ uses
  classes,mclasses,mseclasses,msegraphutils,typinfo,msedock,sysutils,msesysenv,
  msemacros,msestrings,msepostscriptprinter,msegraphics,mseglob,
  mseprocmonitorcomp,msesystypes,mserttistat,msedatanodes,mseedit,mseifiglob,
- mselistbrowser,projecttreeform,msepipestream,msestringcontainer,msesys;
+ mselistbrowser,projecttreeform,msepipestream,msestringcontainer,msesys,
+ msewidgets;
 const
  versiontext = '3.5';
  idecaption = 'MSEide';
@@ -315,7 +316,7 @@ uses
 
  mseparser,msesysintf,memoryform,
  main_mfm,sourceform,watchform,breakpointsform,stackform,
- guitemplates,projectoptionsform,make,msewidgets,msepropertyeditors,
+ guitemplates,projectoptionsform,make,msepropertyeditors,
  skeletons,msedatamodules,mseact,
  mseformdatatools,mseshapes,msefileutils,mseeditglob,
  findinfileform,formdesigner,sourceupdate,actionsmodule,programparametersform,

@@ -1,5 +1,6 @@
 object panelfo: tpanelfo
   optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_hinton]
+  frame.options = [cfo_captionbackground]
   frame.grip_size = 10
   frame.grip_options = [go_closebutton, go_fixsizebutton, go_floatbutton, go_topbutton, go_backgroundbutton, go_lockbutton]
   frame.dummy = 0
@@ -13,6 +14,12 @@ object panelfo: tpanelfo
   container.frame.framei_top = 0
   container.frame.framei_right = 0
   container.frame.framei_bottom = 0
+  container.frame.caption = 'Docking Area'
+  container.frame.captionpos = cp_center
+  container.frame.font.height = 20
+  container.frame.font.name = 'stf_default'
+  container.frame.font.xscale = 1
+  container.frame.font.dummy = 0
   container.frame.localprops = [frl_fileft, frl_fitop, frl_firight, frl_fibottom]
   container.bounds = (
     0
