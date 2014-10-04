@@ -33,7 +33,7 @@ type
                          cfo_captionnogray,
                          cfo_captiondistouter,cfo_captionframecentered,
                          cfo_captionnoclip,cfo_nofocusrect,
-                         cfo_captionfocus);
+                         cfo_captionfocus,cfo_captionbackground);
  captionframeoptionsty = set of captionframeoptionty;
 
 const
@@ -82,6 +82,8 @@ type
    function needsfocuspaint: boolean; override;
    procedure updatemousestate(const sender: twidget;
                                const info: mouseeventinfoty); override;
+   procedure paintcaption(const canvas: tcanvas);
+   procedure paintbackground1(const canvas: tcanvas); override;
   public
    constructor create(const intf: icaptionframe);
    destructor destroy; override;
@@ -2352,27 +2354,44 @@ begin
  end;
 end;
 
-procedure tcustomcaptionframe.paintoverlay(const canvas: tcanvas;
-                                                   const arect: rectty);
+procedure tcustomcaptionframe.paintcaption(const canvas: tcanvas);
 var
- reg1: regionty;
  flagsbefore: textflagsty;
 begin
- reg1:= 0;
- if not (cfo_captionnoclip in foptions) and (finfo.text.text <> '') then begin
-  reg1:= canvas.copyclipregion;
-//  drawtext(canvas,finfo);
-  canvas.subcliprect(inflaterect(finfo.dest,captionmargin));
- end;
- inherited;
- if reg1 <> 0 then begin
-  canvas.clipregion:= reg1;
- end;
  if finfo.text.text <> '' then begin
   flagsbefore:= finfo.flags;
   updatetextflags();
   drawtext(canvas,finfo);
   finfo.flags:= flagsbefore;
+ end;
+end;
+
+procedure tcustomcaptionframe.paintbackground1(const canvas: tcanvas);
+begin
+ if cfo_captionbackground in foptions then begin
+  paintcaption(canvas);
+ end;
+end;
+
+procedure tcustomcaptionframe.paintoverlay(const canvas: tcanvas;
+                                                   const arect: rectty);
+var
+ reg1: regionty;
+begin
+ if cfo_captionbackground in foptions then begin
+  inherited;
+ end
+ else begin
+  reg1:= 0;
+  if not (cfo_captionnoclip in foptions) and (finfo.text.text <> '') then begin
+   reg1:= canvas.copyclipregion;
+   canvas.subcliprect(inflaterect(finfo.dest,captionmargin));
+  end;
+  inherited;
+  if reg1 <> 0 then begin
+   canvas.clipregion:= reg1;
+  end;
+  paintcaption(canvas);
  end;
 end;
 {

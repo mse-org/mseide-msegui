@@ -539,6 +539,7 @@ type
    class procedure drawframe(const canvas: tcanvas; const rect2: rectty; 
            const afi: baseframeinfoty; const astate: framestateflagsty
            {const disabled,active,clicked,mouse: boolean});
+   procedure paintbackground1(const canvas: tcanvas); virtual;
   public
    constructor create(const intf: iframe); reintroduce;
    destructor destroy; override;
@@ -3908,6 +3909,11 @@ begin
  end;
 end;
 
+procedure tcustomframe.paintbackground1(const canvas: tcanvas);
+begin
+ //dummy
+end;
+
 procedure tcustomframe.paintbackground(const canvas: tcanvas;
                             const arect: rectty; const clipandmove: boolean);
 var
@@ -3925,6 +3931,7 @@ begin
    fi.frameface_list.list[faceoffs].paint(canvas,rect1);
   end;
  end;
+ paintbackground1(canvas);
  if clipandmove then begin
   canvas.intersectcliprect(rect1);
   canvas.move(addpoint(fpaintrect.pos,fclientrect.pos));
