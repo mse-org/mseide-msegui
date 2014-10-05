@@ -1031,8 +1031,8 @@ procedure tmainfo.terminategdbserver(const force: boolean);
 var
  int1: integer;
 begin
- if (not projectoptions.d.gdbserverstartonce or force) and 
-          (fgdbserverprocid <> invalidprochandle) then begin
+ if (fgdbserverprocid <> invalidprochandle) and 
+        (not projectoptions.d.gdbserverstartonce or force) then begin
   try
    if not getprocessexitcode(fgdbserverprocid,int1) then begin
     killprocesstree(fgdbserverprocid);
