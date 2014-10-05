@@ -3,6 +3,7 @@ object panelfo: tpanelfo
   frame.grip_size = 10
   frame.grip_options = [go_closebutton, go_fixsizebutton, go_floatbutton, go_topbutton, go_backgroundbutton, go_lockbutton]
   frame.dummy = 0
+  onpaint = paintexe
   visible = False
   bounds_x = 157
   bounds_y = 493
@@ -14,6 +15,7 @@ object panelfo: tpanelfo
   container.frame.framei_right = 0
   container.frame.framei_bottom = 0
   container.frame.localprops = [frl_fileft, frl_fitop, frl_firight, frl_fibottom]
+  container.onpaint = paintexe
   container.bounds = (
     0
     0

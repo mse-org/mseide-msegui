@@ -41,6 +41,7 @@ object mainfo: tmainfo
   moduleclassname = 'tdockform'
   object basedock: tdockpanel
     optionswidget = [ow_background, ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_destroywidgets]
+    onpaint = basedockpaintexe
     bounds_x = 0
     bounds_y = 19
     bounds_cx = 449
@@ -1525,6 +1526,7 @@ object mainfo: tmainfo
       'Make OK.'
       'Source has changed, do you wish to remake project?'
       'Load Window Layout'
+      'Docking Area'
     )
     left = 232
     top = 56

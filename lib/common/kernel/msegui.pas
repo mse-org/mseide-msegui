@@ -1865,6 +1865,8 @@ type
    property frameheight: integer read getframeheight write setframeheight;
    function frameinnerrect: rectty;          //origin = pos
 
+   function widgetclientrect: rectty;        //origin = clientrect.pos
+
    function paintrect: rectty;               //origin = pos
    function paintclientrect: rectty;         //origin = clientrect
    function paintpos: pointty;               //origin = pos
@@ -1881,6 +1883,7 @@ type
    function paintsizerect: rectty;           //pos = nullpoint
    function clientsizerect: rectty;          //pos = nullpoint
    function containerclientsizerect: rectty; //pos = nullpoint
+
    property clientrect: rectty read getclientrect; //origin = paintrect.pos
    procedure changeclientsize(const delta: sizety); //asynchronous
    property clientsize: sizety read getclientsize write setclientsize;
@@ -1890,7 +1893,6 @@ type
    function clientwidgetrect: rectty;        //origin = pos
    function clientwidgetpos: pointty;        //origin = pos
    function clientparentpos: pointty;        //origin = parentwidget.pos
-   function widgetclientrect: rectty;        //origin = clientrect.pos
    property parentclientpos: pointty read getparentclientpos write setparentclientpos;
                                              //origin = parentwidget.clientpos
    function paintparentpos: pointty;         //origin = parentwidget.pos
@@ -8844,7 +8846,8 @@ function twidget.paintclientrect: rectty;         //origin = clientrect
 begin
  if fframe <> nil then begin
   fframe.checkstate;
-  result.pos:= fframe.fclientrect.pos;
+  result.x:= -fframe.fclientrect.x;
+  result.y:= -fframe.fclientrect.y;
   result.size:= fframe.fpaintrect.size;
  end
  else begin

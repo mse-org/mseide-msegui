@@ -21,13 +21,15 @@ unit panelform;
 interface
 uses
  classes,mclasses,msegui,mseclasses,mseforms,msemenus,msestat,msestrings,
- msedock,msegraphutils,msegraphics,mseguiglob,msesimplewidgets,msewidgets;
+ msedock,msegraphutils,msegraphics,mseguiglob,msesimplewidgets,msewidgets,
+ msestringcontainer;
 
 type
 
  tpanelfo = class(tdockform)
    procedure onclo(const sender: TObject);
    procedure panellayoutchanged(const sender: tdockcontroller);
+   procedure paintexe(const sender: twidget; const acanvas: tcanvas);
   private
    fmenuitem: tmenuitem;
    fnameindex: integer; //0 for unnumbered
@@ -277,6 +279,11 @@ begin
   end;
  end;
  updatecaption(copy(mstr1,1,length(mstr1)-1)); //remove last comma
+end;
+
+procedure tpanelfo.paintexe(const sender: twidget; const acanvas: tcanvas);
+begin
+ dockareacaption(acanvas,sender);
 end;
 
 initialization

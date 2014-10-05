@@ -142,6 +142,7 @@ type
    procedure targetpipeinput(const sender: tpipereader);
    procedure mainstatbeforewriteexe(const sender: TObject);
    procedure statafterread(const sender: TObject);
+   procedure basedockpaintexe(const sender: twidget; const acanvas: tcanvas);
   private
    fstartcommand: startcommandty;
    fnoremakecheck: boolean;
@@ -286,6 +287,7 @@ var
  mainfo: tmainfo;
 
 procedure handleerror(const e: exception; const text: string);
+procedure dockareacaption(const canvas: tcanvas; const sender: twidget);
 
 implementation
 uses
@@ -314,7 +316,7 @@ uses
   {$include regcomponents.inc}
  {$endif}
 
- mseparser,msesysintf,memoryform,
+ mseparser,msesysintf,memoryform,msedrawtext,
  main_mfm,sourceform,watchform,breakpointsform,stackform,
  guitemplates,projectoptionsform,make,msepropertyeditors,
  skeletons,msedatamodules,mseact,
@@ -381,7 +383,8 @@ type
   makeerror,          //48 Make ***ERROR***
   makeok,             //49 Make OK.
   str_sourcechanged,  //50 Source has changed, do you wish to remake project?
-  loadwindowlayout    //51 Load Window Layout
+  loadwindowlayout,   //51 Load Window Layout
+  dockingarea         //52 Docking Area
  );
  
 procedure handleerror(const e: exception; const text: string);
@@ -392,6 +395,15 @@ begin
  else begin
   writestderr(e.message,true);
  end;
+end;
+
+procedure dockareacaption(const canvas: tcanvas; const sender: twidget);
+begin
+ canvas.save;
+ canvas.font.height:= 20;
+ drawtext(canvas,mainfo.c[ord(dockingarea)],sender.paintclientrect(),
+                                      [tf_xcentered,tf_ycentered,tf_grayed]);
+ canvas.restore;
 end;
 
 { tmainfo }
@@ -2865,6 +2877,12 @@ end;
 procedure tmainfo.statafterread(const sender: TObject);
 begin
  actionsmo.forcezorderact.checked:= projectoptions.o.forcezorder;
+end;
+
+procedure tmainfo.basedockpaintexe(const sender: twidget;
+               const acanvas: tcanvas);
+begin
+ dockareacaption(acanvas,sender);
 end;
 
 end.
