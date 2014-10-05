@@ -41,15 +41,6 @@ object mainfo: tmainfo
   moduleclassname = 'tdockform'
   object basedock: tdockpanel
     optionswidget = [ow_background, ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_destroywidgets]
-    frame.options = [cfo_captionbackground]
-    frame.caption = 'Docking Area'
-    frame.captionpos = cp_center
-    frame.font.height = 20
-    frame.font.name = 'stf_default'
-    frame.font.xscale = 1
-    frame.font.dummy = 0
-    frame.grip_size = 0
-    frame.dummy = 0
     bounds_x = 0
     bounds_y = 19
     bounds_cx = 449
