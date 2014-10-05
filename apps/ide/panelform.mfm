@@ -27,7 +27,7 @@ object panelfo: tpanelfo
   dragdock.tab_widthmax = 100
   dragdock.optionsdock = [od_savepos, od_savezorder, od_canmove, od_canfloat, od_candock, od_acceptsdock, od_dockparent, od_splitvert, od_splithorz, od_tabed, od_proportional, od_propsize]
   dragdock.onlayoutchanged = panellayoutchanged
-  options = [fo_globalshortcuts, fo_savepos, fo_savezorder, fo_savestate]
+  options = [fo_savepos, fo_savezorder, fo_savestate]
   statfile = mainfo.projectstatfile
   onclose = onclo
   moduleclassname = 'tdockform'
