@@ -2863,17 +2863,8 @@ begin
 end;
 
 procedure tformdesignerfo.dosettaborder(const sender: tobject);
-var
- fo: tsettaborderfo;
 begin
-// with tdesignwindow(window) do begin
-  fo:= tsettaborderfo.create(twidget(fselections.items[0]),fdesigner);
-  try
-   fo.show(true,window);
-  finally
-   fo.Free;
-  end;
-// end;
+ settaborderdialog(twidget(fselections.items[0]));
 end;
 
 procedure tformdesignerfo.dosetcreationorder(const sender: TObject);

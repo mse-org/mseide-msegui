@@ -428,6 +428,7 @@ function mseremspace(const s: msestring): msestring;
     //entfernt alle space und steuerzeichen
 function removelinebreaks(const s: msestring): msestring;
     //replaces linebreaks with space
+function removelineterminator(const s: msestring): msestring;
 procedure removetabterminator(var s: msestring);
 function stripescapesequences(avalue: msestring): msestring;
 
@@ -5412,6 +5413,22 @@ function removelinebreaks(const s: msestring): msestring;
     //replaces linebreaks with space
 begin
  result:= concatstrings(breaklines(s),' ');
+end;
+
+function removelineterminator(const s: msestring): msestring;
+var
+ int1: integer;
+begin
+ int1:= length(s);
+ if int1 > 0 then begin
+  if s[int1] = c_linefeed then begin
+   dec(int1);
+  end;
+  if (int1 > 0) and (s[int1] = c_return) then begin
+   dec(int1);
+  end;
+ end;
+ result:= copy(s,1,int1);
 end;
 
 procedure removetabterminator(var s: msestring);

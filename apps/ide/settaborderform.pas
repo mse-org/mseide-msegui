@@ -55,10 +55,26 @@ type
    constructor create(awidget: twidget; adesigner: tdesigner);
  end;
 
+procedure settaborderdialog(const awidget: twidget);
+
 implementation
 uses
  settaborderform_mfm,msegraphutils;
 
+procedure settaborderdialog(const awidget: twidget);
+var
+ fo: tsettaborderfo;
+begin
+ fo:= tsettaborderfo.create(awidget,designer);
+ try
+  fo.show(true);
+ finally
+  fo.Free;
+ end;
+end;
+
+ {tsettaborderfo}
+ 
 constructor tsettaborderfo.create(awidget: twidget; adesigner: tdesigner);
 begin
  fwidget:= awidget;
@@ -153,10 +169,21 @@ begin
  window.releasemouse;
 end;
 
-procedure tsettaborderfo.gridoncellevent(const sender: TObject; var info: celleventinfoty);
+procedure tsettaborderfo.gridoncellevent(const sender: TObject; 
+                                                 var info: celleventinfoty);
+var
+ w1: twidget;
 begin
  if info.eventkind = cek_enter then begin
   mousetaborder.value:= info.newcell.row;
+ end
+ else begin
+  if start.enabled and iscellclick(info,[ccr_dblclick]) then begin
+   w1:= fchildren[windex[info.cell.row]];
+   if w1.childrencount > 0 then begin
+    settaborderdialog(w1[0]);
+   end;
+  end;
  end;
 end;
 
