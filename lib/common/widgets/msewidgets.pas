@@ -433,6 +433,7 @@ type
 
  tscrollboxframe = class(tcustomscrollboxframe)
   published
+   property options;
    property optionsscroll;
    property dragbuttons;
    property clientwidth;
