@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2014 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -148,10 +148,10 @@ type
    procedure initnewcomponent(const ascale: real); override;
    procedure synctofontheight; override;
    procedure clear; virtual;
+   property disptext: msestring read finfo.text.text;
   published
    property text: msestring read ftext write settext;
                 //overrides valuetext
-   property disptext: msestring read finfo.text.text;
    property bounds_cx default defaultdispwidgetwidth;
    property bounds_cy default defaultdispwidgetheight;
    property font: twidgetfont read getfont write setfont stored isfontstored;
