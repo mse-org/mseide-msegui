@@ -87,7 +87,7 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    function prochandle: integer;
-   function execprog(const acommandline: string): integer;
+   function execprog(const acommandline: msestring): integer;
      //returns prochandle
    procedure terminateprocess;
    procedure killprocess;
@@ -595,7 +595,7 @@ begin
  end;
 end;
 
-function tterminal.execprog(const acommandline: string): integer;
+function tterminal.execprog(const acommandline: msestring): integer;
 begin
  with fprocess do begin
   active:= false;
