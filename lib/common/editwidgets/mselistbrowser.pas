@@ -3003,6 +3003,16 @@ begin
      editing:= false;
      include(eventstate,es_processed);
     end;
+   end
+   else begin
+    if (key = key_space) and 
+       (shiftstate * singlekeyshiftstatesmask = []) and 
+       not (es_processed in eventstate) and 
+       (not editing)  and valuecanedit() and 
+                  (ns_checkbox in fvalue.state) and
+                  (editor.filtertext = '') then begin
+     fvalue.checked:= not fvalue.checked;
+    end;
    end;
   end;
  end;
