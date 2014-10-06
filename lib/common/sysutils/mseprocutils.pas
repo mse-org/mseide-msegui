@@ -176,7 +176,7 @@ type
 
 implementation
 uses 
- msesysintf1,msesysintf,msestrings,mseprocmonitor,msearrayutils;
+ msesysintf1,msesysintf,msestrings,mseprocmonitor,msearrayutils,mseapplication;
 
 procedure killprocesstree(handle: prochandlety);
 var
@@ -1296,8 +1296,8 @@ begin
   errwritep:= nil;
  end;
  result:= execmse1(commandline,topp,frompp,errpp,{sessionleader,}groupid,
-                          options,
-                          {inactive,}fromwritep,errwritep{,tty,nostdhandle});
+                         options,
+                         {inactive,}fromwritep,errwritep{,tty,nostdhandle});
  if topp <> nil then begin
   topipe.Handle:= topp^;
  end;

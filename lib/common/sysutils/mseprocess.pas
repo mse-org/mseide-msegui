@@ -63,8 +63,8 @@ type
    fonprocfinished: notifyeventty;
    flistenid: ptruint;
    fexitcode: integer;
-   fcommandline: string;
-   fcommandline1: string;
+   fcommandline: msestring;
+   fcommandline1: msestring;
    fpipewaitus: integer;
    fstatpriority: integer;
    procedure setoutput(const avalue: tpipereaderpers);
@@ -72,8 +72,8 @@ type
    function getactive: boolean;
    procedure setstatfile(const avalue: tstatfile);
    procedure updatecommandline;
-   function getcommandline: string;
-   procedure setcommandline(const avalue: string);
+   function getcommandline: msestring;
+   procedure setcommandline(const avalue: msestring);
    procedure procend;
    procedure setoptions(const avalue: processoptionsty);
    procedure setinput(const avalue: tpipewriterpers);
@@ -87,6 +87,7 @@ type
    procedure receiveevent(const event: tobjectevent); override;
    procedure waitforpipeeof;
    procedure doprocfinished;
+   procedure postprocessdied;
 
     //istatfile
    procedure dostatread(const reader: tstatreader);
@@ -95,7 +96,6 @@ type
    procedure statread;
    function getstatvarname: msestring;
    function getstatpriority: integer;
-   procedure postprocessdied;
     //iprocmonitor
    procedure processdied(const aprochandle: prochandlety;
                  const aexecresult: integer; const adata: pointer);
@@ -108,7 +108,7 @@ type
    function waitforprocess: integer; overload; //returns exitcode
    function waitforprocess(const atimeoutus: integer): boolean; overload;
                                               //true if process finished
-   property commandline: string read getcommandline write setcommandline;
+   property commandline: msestring read getcommandline write setcommandline;
                  //overrides filename and parameter
    property prochandle: prochandlety read fprochandle;
    property lastprochandle: prochandlety read flastprochandle;
@@ -687,13 +687,13 @@ begin
  end;
 end;
 
-function tmseprocess.getcommandline: string;
+function tmseprocess.getcommandline: msestring;
 begin
  updatecommandline;
  result:= fcommandline1;
 end;
 
-procedure tmseprocess.setcommandline(const avalue: string);
+procedure tmseprocess.setcommandline(const avalue: msestring);
 begin
  fcommandline:= avalue;
 end;
