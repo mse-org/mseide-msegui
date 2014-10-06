@@ -5370,7 +5370,7 @@ begin
          dec(cellbefore.col);//no processed reset
         end
         else begin
-         if fparent <> nil then begin
+         if (fparent <> nil) and (fparent.owner = fitemlist) then begin
           row:= fparent.index;
          end;
 //         int1:= fitemlist.indexof(parent);
