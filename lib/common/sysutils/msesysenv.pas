@@ -42,7 +42,7 @@ type
  sysenverrornrty = (ern_io,ern_user,ern_invalidparameter,ern_missedargument,ern_invalidargument,
               ern_ambiguousparameter,ern_invalidinteger,ern_mandatoryparameter);
 const
- errtexte: array[sysenverrornrty] of string = ('','',
+ errtexte: array[sysenverrornrty] of msestring = ('','',
   'Invalid parameter','Missed argument','Invalid argument','Ambiguous parameter',
   'Invalid integer','Parameter mandatory');
 type
@@ -140,8 +140,7 @@ type
    fstatpriority: integer;
    procedure setoninit(const Value: sysenvmanagereventty);
    procedure doinit;
-   procedure errorme(nr: sysenverrornrty; value: string);
-   procedure printmessage(value: string);
+   procedure errorme(nr: sysenverrornrty; value: msestring);
    procedure checkindex(index: integer);
    function getdefined(index: integer): boolean;
    function getvalue(index: integer): msestring;
@@ -180,28 +179,34 @@ type
    constructor create(aowner: tcomponent); override;
    procedure init(const arguments: array of argumentdefty);
    procedure processinfo(index: integer; value: string);
-   procedure errormessage(const mess: string);
+   procedure errormessage(const mess: msestring);
+   procedure printmessage(value: msestring);
    procedure printhelp;
-   function getcommandlinemacros(
-           const macrodef: integer;
-           const firstenvvarmacro: integer = -1; const lastenvvarmacro: integer = -1;
-           prepend: macroinfoarty = nil): macroinfoarty;
+   function getcommandlinemacros(const macrodef: integer; 
+            const firstenvvarmacro: integer = -1;
+            const lastenvvarmacro: integer = -1;
+                              prepend: macroinfoarty = nil): macroinfoarty;
 
-   property defined[index: integer]: boolean read getdefined write setdefined; default;
-   property objectlinker: tobjectlinker read getobjectlinker {$ifdef msehasimplements}
-                                implements istatfile{$endif};
-   property values[index: integer]: msestringarty read getvalues write setvalues;
+   property defined[index: integer]: boolean read getdefined
+                                                  write setdefined; default;
+   property objectlinker: tobjectlinker read getobjectlinker 
+                     {$ifdef msehasimplements}implements istatfile{$endif};
+   property values[index: integer]: msestringarty 
+                                              read getvalues write setvalues;
    property value[index: integer]: msestring read getvalue write setvalue;
                //bringt letzten string in array
    property integervalue[index: integer]: integer read getintegervalue1
                         write setintegervalue;
                //bringt letzten string in array als integer
    function getintegervalue(var avalue: integer; const index: integer;
-                   const min: integer = minint; const max: integer = maxint): boolean;
+                   const min: integer = minint; 
+                                        const max: integer = maxint): boolean;
                              //false if not defined or not in range
-   function findfirstfile(filename: filenamety; searchinvars: array of integer): filenamety;
+   function findfirstfile(filename: filenamety; 
+                                   searchinvars: array of integer): filenamety;
                  //bringt erstes filevorkommen
-   function findlastfile(filename: filenamety; searchinvars: array of integer): filenamety;
+   function findlastfile(filename: filenamety; 
+                                   searchinvars: array of integer): filenamety;
                  //bringt letztes filevorkommen
    property defs: sysenvdefarty read fdefs write setdefs;
   published
@@ -414,7 +419,7 @@ begin
  end;
 end;
 
-procedure tsysenvmanager.errorme(nr: sysenverrornrty; value: string);
+procedure tsysenvmanager.errorme(nr: sysenverrornrty; value: msestring);
 var
  str1: string;
 begin
@@ -445,7 +450,7 @@ begin
  end;
 end;
 
-procedure tsysenvmanager.errormessage(const mess: string);
+procedure tsysenvmanager.errormessage(const mess: msestring);
 begin
  errorme(ern_user,mess);
 end;
@@ -577,8 +582,7 @@ begin
  end;
 end;
 
-
-procedure tsysenvmanager.printmessage(value: string);
+procedure tsysenvmanager.printmessage(value: msestring);
 begin
  if seo_tooutput in foptions then begin
   value:= value+lineend;
