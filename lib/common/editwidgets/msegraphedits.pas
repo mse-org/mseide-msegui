@@ -330,10 +330,18 @@ type
    property face: tface read fface write setface;
  end;
 
+ tcustomrealgraphdataedit = class;
+ 
+ paintrealglypheventty = procedure(
+                    const sender: tcustomrealgraphdataedit;
+                    const acanvas: tcanvas; const avalue: real;
+                                      const arow: integer) of object;
+
  tcustomrealgraphdataedit = class(tgraphdataedit)
   private
    fonsetvalue: setrealeventty;
    fdirection: graphicdirectionty;
+   fonpaintglyph: paintrealglypheventty;
    procedure setvalue(const avalue: realty);
    function getgridvalue(const index: integer): realty;
    procedure setgridvalue(const index: integer; const avalue: realty);
@@ -341,6 +349,8 @@ type
    procedure setgridvalues(const avalue: realarty);
   protected
    fvalue: realty;
+   procedure paintglyph(const canvas: tcanvas; const acolorglyph: colorty;
+                        const avalue; const arect: rectty); override;
    procedure setdirection(const avalue: graphicdirectionty); virtual;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    function getdatatype: datalistclassty; override;
@@ -365,8 +375,11 @@ type
    property gridvalues: realarty read getgridvalues write setgridvalues;
    function griddata: tgridrealdatalist;
    property value: realty read fvalue write setvalue;
+   property direction: graphicdirectionty read fdirection write setdirection 
+                                                               default gd_right;
    property onsetvalue: setrealeventty read fonsetvalue write fonsetvalue;
-   property direction: graphicdirectionty read fdirection write setdirection default gd_right;
+   property onpaintglyph: paintrealglypheventty read fonpaintglyph 
+                                                         write fonpaintglyph;
   published
    property visible;
    property enabled;
@@ -382,6 +395,7 @@ type
    property value;
    property onsetvalue;
    property direction;
+   property onpaintglyph;
  end;
  
 const
@@ -423,6 +437,7 @@ type
    property scrollbar;
    property onsetvalue;
    property direction;
+   property onpaintglyph;
  end;
  
 const
@@ -512,6 +527,7 @@ type
  tprogressbar = class(tcustomprogressbar)
   published
    property value;
+   property onpaintglyph;
  end;
   
  ttogglegraphdataedit = class(tgraphdataedit)
@@ -687,6 +703,13 @@ type
    property group;
  end;
 
+ tcustomintegergraphdataedit = class;
+ 
+ paintintegerglypheventty = procedure(
+                    const sender: tcustomintegergraphdataedit;
+                    const acanvas: tcanvas; const avalue: integer;
+                                      const arow: integer) of object;
+
  tcustomintegergraphdataedit = class(ttogglegraphdataedit)
   private
    fvalue: integer;
@@ -695,6 +718,7 @@ type
    fmin: integer;
    fmax: integer;
 //   fdatalist: tintegerdatalist;
+   fonpaintglyph: paintintegerglypheventty;
    procedure setvalue(const Value: integer);
    function getgridvalue(const index: integer): integer;
    procedure setgridvalue(const index, Value: integer);
@@ -723,6 +747,8 @@ type
    procedure togglevalue(const areadonly: boolean;
                                    const down: boolean); override;
    procedure doinc(var avalue: integer; const down: boolean);
+   procedure paintglyph(const canvas: tcanvas; const acolorglyph: colorty;
+                const avalue; const arect: rectty); override;
    procedure datalistdestroyed; override;
    procedure updatedatalist; override;
   public
@@ -739,6 +765,8 @@ type
    property valuedefault: integer read fvaluedefault write fvaluedefault default 0;
    property min: integer read fmin write setmin default 0; //checked by togglevalue
    property max: integer read fmax write setmax default 0; //checked by togglevalue
+   property onpaintglyph: paintintegerglypheventty read fonpaintglyph 
+                                                         write fonpaintglyph;
   published
   {$ifdef mse_with_ifi}
    property ifilink: tifiintegerlinkcomp  read getifilink write setifilink;
@@ -987,6 +1015,7 @@ type
    property imageoffsetclicked;
    property imagenums;
    property onsetvalue;
+   property onpaintglyph;
    property value;
    property valuedefault;
    property min; 
@@ -1021,6 +1050,7 @@ type
    property onbeforeexecute;
    property onafterexecute;
    property onsetvalue;
+   property onpaintglyph;
    property value;
    property valuedefault;
    property min; 
@@ -1062,6 +1092,7 @@ type
  tdataicon = class(tcustomdataicon)
   published
    property onsetvalue;
+   property onpaintglyph;
    property value default -1;
    property valuedefault default -1;
    property min; 
@@ -1320,6 +1351,25 @@ begin
  result:= tgridrealdatalist(inherited griddata);
 end;
 
+procedure tcustomrealgraphdataedit.paintglyph(const canvas: tcanvas;
+               const acolorglyph: colorty; const avalue; const arect: rectty);
+var
+ int1: integer;
+ val1: real;
+begin
+ if canevent(tmethod(fonpaintglyph)) then begin
+  if @avalue = nil then begin
+   val1:= fvalue;
+   int1:= gridrow;
+  end
+  else begin
+   val1:= integer(avalue);
+   int1:= pcellinfoty(canvas.drawinfopo)^.cell.row;
+  end;
+  fonpaintglyph(self,canvas,val1,int1);
+ end;
+end;
+
 { tcustomslider }
 
 constructor tcustomslider.create(aowner: tcomponent);
@@ -1364,6 +1414,7 @@ begin
   canvas.remove(cellinfoty(canvas.drawinfopo^).innerrect.pos);
  end;
  dec(fupdating);
+ inherited;
 end;
 
 procedure tcustomslider.setdirection(const avalue: graphicdirectionty);
@@ -2428,6 +2479,7 @@ begin
  if bo1 xor (bo_reversed in foptions) then begin
   stockobjects.paintglyph(canvas,getglyph,arect,not isenabled,co1);
  end;
+// inherited;
 end;
 
 procedure tcustombooleanedit.setvalue(const Value: boolean);
@@ -2963,6 +3015,26 @@ begin
  end;
 end;
 
+procedure tcustomintegergraphdataedit.paintglyph(const canvas: tcanvas; 
+                        const acolorglyph: colorty;
+                        const avalue; const arect: rectty);
+var
+ int1,val1: integer;
+begin
+ if canevent(tmethod(fonpaintglyph)) then begin
+  if @avalue = nil then begin
+   val1:= fvalue;
+   int1:= gridrow;
+  end
+  else begin
+   val1:= integer(avalue);
+   int1:= pcellinfoty(canvas.drawinfopo)^.cell.row;
+  end;
+  fonpaintglyph(self,canvas,val1,int1);
+ end;
+// inherited;
+end;
+
 procedure tcustomintegergraphdataedit.togglevalue(const areadonly: boolean;
                                                           const down: boolean);
 var
@@ -3463,6 +3535,7 @@ begin
   setactualimagenr(fvalue);
   drawbutton(canvas,finfo);
  end;
+ inherited;
 end;
 
 procedure tcustomdatabutton.internalcreateframe;
@@ -4078,6 +4151,7 @@ begin
    end;
   end;
  end;
+ inherited;
 end;
 
 procedure tcustomdataicon.setimagelist(const aValue: timagelist);
@@ -4166,6 +4240,7 @@ begin
   end;
   fonpaintglyph(self,canvas,po1,int1);
  end;
+// inherited;
 end;
 
 procedure tpointeredit.gridtovalue(arow: integer);
@@ -4350,6 +4425,7 @@ begin
                                          fformat),arect,ftextflags,ffont);
   end;
  end;
+ inherited;
 end;
 
 procedure tcustomprogressbar.internalcreateframe;

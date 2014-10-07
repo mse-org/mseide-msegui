@@ -761,6 +761,7 @@ type
   published
    property datalink: teditwidgetdatalink read fdatalink write setdatalink; 
    property onsetvalue;
+   property onpaintglyph;
    property min; 
    property max;
    property imagelist;
@@ -826,6 +827,7 @@ type
    property imageoffsetclicked;
    property imagenums;
    property onsetvalue;
+   property onpaintglyph;
    property valuedefault;
    property min; 
    property max;
@@ -982,6 +984,7 @@ type
    property scrollbar;
    property onsetvalue;
    property direction;
+   property onpaintglyph;
  end;
 
  tdbprogressbar = class(tcustomprogressbar,idbeditfieldlink,ireccontrol)
@@ -1008,6 +1011,7 @@ type
    destructor destroy; override;
   published
    property datalink: teditwidgetdatalink read fdatalink write setdatalink;
+   property onpaintglyph;
  end;
  
  tdbdatetimeedit = class(tcustomdatetimeedit,idbeditfieldlink,ireccontrol)
