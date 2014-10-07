@@ -474,7 +474,7 @@ begin
      if not findfile(ffilename,ar1,floadedfile) then begin
       floadedfile:= ffilename;
      end;
-     if not ttextstream.trycreate(stream1,floadedfile,fm_read) then begin
+     if ttextstream.trycreate(stream1,floadedfile,fm_read) <> sye_ok then begin
       floadedfile:= defaultfile(ar1);
       if assigned(fonfilemissing) then begin
        fonfilemissing(self,floadedfile,stream1,by1);

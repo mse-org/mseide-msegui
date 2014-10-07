@@ -157,7 +157,7 @@ type
              const afilename: filenamety;
              const aopenmode: fileopenmodety = fm_read;
              const accessmode: fileaccessmodesty = [];
-             const rights: filerightsty = defaultfilerights): boolean;
+             const rights: filerightsty = defaultfilerights): syserrorty;
    function read(var buffer; count: longint): longint; override;
    function write(const buffer; count: longint): longint; override;
    function seek(const offset: int64; origin: tseekorigin): int64; override;
@@ -265,7 +265,7 @@ type
              const afilename: filenamety;
              const aopenmode: fileopenmodety = fm_read;
              const accessmode: fileaccessmodesty = [];
-             const rights: filerightsty = defaultfilerights): boolean;
+             const rights: filerightsty = defaultfilerights): syserrorty;
    procedure return;    //setzt filepointer auf letzte readln position
    
    procedure writestr(const value: string); //no encoding
@@ -479,10 +479,10 @@ function readstreamdatastring(const astream: tstream): string;
                //reads from current pos to eof               
 function readfiledatastring(const afilename: filenamety): string;
 function tryreadfiledatastring(const afilename: filenamety;
-                                    out adata: string): boolean;
+                                    out adata: string): syserrorty;
 procedure writefiledatastring(const afilename: filenamety; const adata: string);
 function trywritefiledatastring(const afilename: filenamety;
-                                    const adata: string): boolean;
+                                    const adata: string): syserrorty;
 
 implementation
 
@@ -565,17 +565,17 @@ begin
 end;
 
 function tryreadfiledatastring(const afilename: filenamety;
-                                    out adata: string): boolean;
+                                    out adata: string): syserrorty;
 var
  stream1: tmsefilestream;
 begin
  adata:= '';
  result:= tmsefilestream.trycreate(stream1,afilename);
- if result then begin
+ if result = sye_ok then begin
   try
    adata:= stream1.readdatastring;
   except
-   result:= false;
+   result:= sye_read;
   end;
   stream1.free;
  end;
@@ -594,16 +594,16 @@ begin
 end;
 
 function trywritefiledatastring(const afilename: filenamety;
-                                    const adata: string): boolean;
+                                    const adata: string): syserrorty;
 var
  stream1: tmsefilestream;
 begin
  result:= tmsefilestream.trycreate(stream1,afilename,fm_create);
- if result then begin
+ if result = sye_ok then begin
   try
    stream1.writedatastring(adata);
   except
-   result:= false;
+   result:= sye_write;
   end;
   stream1.free;
  end;
@@ -1010,13 +1010,10 @@ class function tmsefilestream.trycreate(out ainstance: tmsefilestream;
                const afilename: filenamety;
                const aopenmode: fileopenmodety = fm_read;
                const accessmode: fileaccessmodesty = [];
-               const rights: filerightsty = defaultfilerights): boolean;
-var
- error: syserrorty;
+               const rights: filerightsty = defaultfilerights): syserrorty;
 begin
- ainstance:= internalcreate(afilename,aopenmode,accessmode,rights,error);
- result:= error = sye_ok;
- if not result then begin
+ ainstance:= internalcreate(afilename,aopenmode,accessmode,rights,result);
+ if result <> sye_ok then begin
   freeandnil(ainstance);
  (*
  {$ifdef FPC}
@@ -2283,7 +2280,7 @@ class function ttextstream.trycreate(out ainstance: ttextstream;
                const afilename: filenamety;
                const aopenmode: fileopenmodety = fm_read;
                const accessmode: fileaccessmodesty = [];
-               const rights: filerightsty = defaultfilerights): boolean;
+               const rights: filerightsty = defaultfilerights): syserrorty;
 begin
  result:= inherited trycreate(tmsefilestream(ainstance),afilename,aopenmode,
                                accessmode,rights);

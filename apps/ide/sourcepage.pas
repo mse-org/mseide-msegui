@@ -168,7 +168,7 @@ uses
  msesys,make,actionsmodule,msegraphics,sourcehintform,
  mseedit,msedrawtext,msebits,msearrayutils,msestream,msedesignintf,
  msesysutils,msedesignparser,msesyntaxpainter,msemacros,msecodetemplates,
- mselatex;
+ mselatex,msesystypes;
 
 const
  pascaldelims = msestring(' :;+-*/(){},=<>' + c_linefeed + c_return + c_tab);
@@ -469,7 +469,7 @@ begin
  result:= modified;
  if not result then begin
   result:= true;
-  if ttextstream.trycreate(stream1,edit.filename,fm_read) then begin
+  if ttextstream.trycreate(stream1,edit.filename,fm_read) = sye_ok then begin
                             //else locked or deleted
    try
     stream1.encoding:= edit.encoding;
