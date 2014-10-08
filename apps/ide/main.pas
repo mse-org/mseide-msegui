@@ -399,11 +399,13 @@ end;
 
 procedure dockareacaption(const canvas: tcanvas; const sender: twidget);
 begin
- canvas.save;
- canvas.font.height:= 20;
- drawtext(canvas,mainfo.c[ord(dockingarea)],sender.paintclientrect(),
-                                      [tf_xcentered,tf_ycentered,tf_grayed]);
- canvas.restore;
+ if sender.childrencount = 0 then begin
+  canvas.save;
+  canvas.font.height:= 20;
+  drawtext(canvas,mainfo.c[ord(dockingarea)],sender.paintclientrect(),
+                                       [tf_xcentered,tf_ycentered,tf_grayed]);
+  canvas.restore;
+ end;
 end;
 
 { tmainfo }
