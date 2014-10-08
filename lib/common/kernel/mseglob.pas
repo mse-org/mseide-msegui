@@ -31,10 +31,10 @@ type
   //no referencecount, only for fpc, not available in delphi
  end;
  
- {$ifdef FPC}
- tnullinterfacedobject = class(tobject) //not used
- end;
- {$else}
+// {$ifdef FPC}
+// tnullinterfacedobject = class(tobject) //not used
+// end;
+// {$else}
  tnullinterfacedobject = class(tobject,iunknown)
   protected
    function _addref: integer;
@@ -53,7 +53,7 @@ type
                    {$ifdef mswindows}stdcall{$else} cdecl{$endif};
                   {$else}stdcall;{$endif}
  end;
- {$endif}
+// {$endif}
  
  objecteventty = (oe_destroyed,oe_connect,oe_disconnect,
                   oe_changed,oe_designchanged,
@@ -128,7 +128,7 @@ end;
 
 { tnullinterfacedobject }
 
-{$ifndef fpc}
+//{$ifndef fpc}
 function tnullinterfacedobject._addref: integer;
                   {$ifdef FPC}
                        {$ifdef mswindows}stdcall{$else} cdecl{$endif};
@@ -159,7 +159,7 @@ begin
   result:= integer(e_nointerface);
  end;
 end;
-{$endif}
+//{$endif}
 
 { emse }
 
