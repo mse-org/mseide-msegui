@@ -14,7 +14,7 @@ unit msesysutils;
 
 interface
 uses
- classes,sysutils;
+ mclasses,sysutils,msesystypes;
 
 type
  eoserror = class(exception)
@@ -55,6 +55,9 @@ procedure internalerror(const text: string);
 
 function getlasterror: integer;
 function getlasterrortext: string;
+function syserrortext(const aerror: syserrorty): string;
+           //returns getlasterortext for sye_lasterror
+           
 function later(ref,act: longword): boolean;
  //true if act > ref, with overflowcorrection
 function laterorsame(ref,act: longword): boolean;
@@ -77,7 +80,8 @@ uses
 {$else}
  mselibc,
 {$endif}
- msesysintf1,msesysintf,msestrings,mseformatstr,msetypes,msesys,msesystypes;
+ msesysintf1,msesysintf,msestrings,mseformatstr,msetypes,msesys,
+ typinfo;
 
 function createguidstring: string;
 var
@@ -368,6 +372,19 @@ var
 begin
  int1:= sys_getlasterror;
  result:= inttostr(int1) + ': ' + sys_geterrortext(int1);
+end;
+
+function syserrortext(const aerror: syserrorty): string;
+           //returns getlasterortext for sye_lasterror
+begin
+ case aerror of
+  sye_lasterror: begin
+   result:= getlasterrortext();
+  end;
+  else begin
+   result:= getenumname(typeinfo(syserrorty),integer(aerror));
+  end;
+ end;
 end;
 
 procedure reallocmemandinit(var p: pointer; const newsize: sizeint);
