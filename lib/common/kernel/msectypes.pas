@@ -81,6 +81,9 @@ type
  cuint64 = __UQUAD_TYPE;
  pucint64 = ^cuint64;
 
+ cbool = cint;
+ pcbool = pcint;
+ 
  cfloat = single;
  pcfloat = ^cfloat;
  cdouble = double;

@@ -74,6 +74,8 @@ function getprocaddresses(const libnames: array of filenamety;
 function checkprocaddresses(const libnames: array of filenamety; 
                              const anames: array of string; 
                              const adest: array of ppointer): boolean;
+function checkprocaddresses(const libnames: array of filenamety; 
+                             const procedures: array of funcinfoty): boolean;
 function quotelibnames(const libnames: array of filenamety): msestring;
 
 implementation
@@ -223,6 +225,29 @@ begin
  end;
  for int1:= 0 to high(adest) do begin
   if adest[int1]^ = nil then begin
+   result:= false;
+   break;
+  end;
+ end;
+end;
+
+function checkprocaddresses(const libnames: array of filenamety; 
+                             const procedures: array of funcinfoty): boolean;
+var
+ int1: integer;
+begin
+ for int1:= 0 to high(procedures) do begin
+  procedures[int1].d^:= nil;
+ end;
+ result:= true;
+ try
+  getprocaddresses(libnames,procedures,true);
+ except
+  result:= false;
+  exit;
+ end;
+ for int1:= 0 to high(procedures) do begin
+  if procedures[int1].d^ = nil then begin
    result:= false;
    break;
   end;

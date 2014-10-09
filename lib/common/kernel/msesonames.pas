@@ -24,6 +24,7 @@ uses
 {$else}
 const
  xrendernames: array[0..1] of filenamety = ('libXrender.so.1','libXrender.so');
+ xrandrnames: array[0..1] of filenamety = ('libXrandr.so.2','libXrandr.so');
  xftnames: array[0..1] of filenamety = ('libXft.so.2','libXft.so');
  icenames: array[0..1] of filenamety = ('libICE.so.6','libICE.so');
  smnames: array[0..1] of filenamety = ('libSM.so.6','libSM.so');

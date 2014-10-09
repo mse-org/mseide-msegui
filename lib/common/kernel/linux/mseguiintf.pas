@@ -28,7 +28,7 @@ uses
  msegraphutils,mseevent,msepointer,mseguiglob,msesystypes,{msestockobjects,}
  msethread{$ifdef FPC},x,xutil,dynlibs{$endif},
  mselibc,msectypes,msesysintf,msegraphics,
- msestrings,mxft,mxrender;
+ msestrings,mxft,mxrender,mxrandr;
 
 {$ifdef FPC}
  {$define xbooleanresult}
@@ -502,7 +502,7 @@ uses
  msebits,msekeyboard,sysutils,msesysutils,msefileutils,msedatalist,msedragglob
  {$ifdef with_sm},sm,ice{$endif},msesonames,msegui,mseactions,msex11gdi,
  msearrayutils,msesys,msesysintf1,msesysdnd,classes,rtlconsts,mseclasses,
- mseglob,msetimer
+ mseglob,msetimer,mseprocess
  {$ifdef mse_debug},mseformatstr{$endif};
 
 const
@@ -658,6 +658,10 @@ var
  xredshiftleft,xgreenshiftleft,xblueshiftleft: boolean;
  defcolormap: colormap;
  hassm: boolean;
+ hasxrandrlib: boolean;
+ hasxrandr: boolean;
+ xrandreventbase: cint;
+ xrandrerrorbase: cint;
 
  numlockstate: cuint;
  rootid: winidty;
@@ -1976,7 +1980,7 @@ begin
  result:= 0;
  level:= 0;
  if (netatoms[net_wm_pid] <> 0) then begin
-  scanchildren(mserootwindow);
+  scanchildren(rootid);
  end;
  gdi_unlock;
 end;
@@ -2347,9 +2351,81 @@ begin
  gdi_unlock;
 end;
 
+var
+ screenrects: rectarty;
+ screenrectsvalid: boolean;
+
+procedure updatescreenrects();
+var
+ str1: string;
+ info: pxrrscreenresources;
+ int1,int2: integer;
+ rectnum: integer;
+ po1: prroutput;
+ po2: pxrroutputinfo;
+ po3: pxrrcrtcinfo;
+ crtcs: array of pxrrcrtcinfo;
+begin
+ if hasxrandr then begin
+  info:= xrrgetscreenresources(appdisp,rootid);
+  setlength(crtcs,info^.ncrtc);
+  for int1:= 0 to high(crtcs) do begin
+   crtcs[int1]:= xrrgetcrtcinfo(appdisp,info,info^.crtcs[int1]);
+  end;
+  setlength(screenrects,info^.noutput);
+  po1:= info^.outputs;
+  rectnum:= 0;
+  for int1:= 0 to high(screenrects) do begin
+   po2:= xrrgetoutputinfo(appdisp,info,po1^);
+   if po2 <> nil then begin
+    for int2:= 0 to high(crtcs) do begin
+     if po2^.crtc = info^.crtcs[int2] then begin
+      po3:= crtcs[int2];
+      if po3 <> nil then begin
+       with screenrects[rectnum] do begin
+        x:= po3^.x;
+        y:= po3^.y;
+        cx:= po3^.width;
+        cy:= po3^.height;
+        inc(rectnum);
+       end;
+      end;
+     end;
+    end;
+    xrrfreeoutputinfo(po2);
+   end;
+   inc(po1);
+  end;
+  xrrfreescreenresources(info);
+  setlength(screenrects,rectnum);
+  for int1:= 0 to high(crtcs) do begin
+   if crtcs[int1] <> nil then begin
+    xrrfreecrtcinfo(crtcs[int1]);
+   end;
+  end;
+ end
+ else begin
+  screenrects:= nil;
+ end;
+ screenrectsvalid:= true;
+end;
+
+procedure checkscreenrects();
+begin
+ if not screenrectsvalid then begin
+  updatescreenrects();
+ end;
+end;
+
 function gui_getworkarea(id: winidty): rectty;
 var
  bo1: boolean;
+ ar1: rectarty;
+ rect1: rectty;
+ pt1: pointty;
+ int1: integer;
+label
+ endlab;
 begin
  gdi_lock;
  bo1:= false;
@@ -2359,6 +2435,26 @@ begin
  if not bo1 then begin
   result:= gui_getscreenrect(id);
  end;
+ checkscreenrects();
+ if screenrects <> nil then begin
+  if gui_getdecoratedwindowrect(id,rect1) = gue_ok then begin
+   for int1:= 0 to high(screenrects) do begin
+    if rectinrect(rect1,screenrects[int1]) then begin
+     result:= intersectrect(result,screenrects[int1]);
+     goto endlab;
+    end;
+   end;
+   pt1.x:= rect1.x + rect1.cx div 2;
+   pt1.y:= rect1.y + rect1.cy div 2;
+   for int1:= 0 to high(screenrects) do begin
+    if pointinrect(pt1,screenrects[int1]) then begin
+     result:= intersectrect(result,screenrects[int1]);
+     goto endlab;
+    end;
+   end;
+  end;
+ end;
+endlab: 
  gdi_unlock;
 end;
 
@@ -2865,7 +2961,7 @@ begin
  bo1:= xgettransientforhint(appdisp,id,@transientfor) <> 0;
  if hasoverrideredirect(id) or bo1 then begin
   waitfordecoration(id);
-  if (transientfor = 0) or (transientfor = mserootwindow) then begin
+  if (transientfor = 0) or (transientfor = rootid) then begin
    gui_raisewindow(id);
   end
   else begin
@@ -3577,7 +3673,7 @@ begin
    xdeleteproperty(appdisp,id,wmtransientforatom);
   end
   else begin
-   xsettransientforhint(appdisp,id,mserootwindow);
+   xsettransientforhint(appdisp,id,rootid);
   end;
  end
  else begin
@@ -3611,10 +3707,10 @@ var
  id: winidty;
 begin
  gdi_lock;
- id:= mserootwindow;
+ id:= rootid;
  repeat
   result:= id;
-  if longint(xtranslatecoordinates(appdisp,mserootwindow,result,
+  if longint(xtranslatecoordinates(appdisp,rootid,result,
          pos.x,pos.y,@int1,@int1,@id)) = 0 then begin
    result:= 0;
    gdi_unlock;
@@ -3631,11 +3727,11 @@ var
  id,id1: winidty;
  int2: integer;
 begin
- id:= mserootwindow;
+ id:= rootid;
  int2:= 0;
  while true do begin
   id1:= id;
-  if (longint(xtranslatecoordinates(appdisp,mserootwindow,id1,
+  if (longint(xtranslatecoordinates(appdisp,rootid,id1,
          pos.x,pos.y,@int1,@int1,@id)) = 0) or (id = 0) then begin
    break;
   end;
@@ -5665,6 +5761,13 @@ eventrestart:
     result:= twindowevent.create(ek_destroy,xwindow);
    end;
   end;
+  else begin
+   if hasxrandr and (xev.xtype >= xrandreventbase) and
+            (xev.xtype <= xrandreventbase+rrlastnotify) then begin
+    screenrectsvalid:= false;
+    xrrupdateconfiguration(@xev);
+   end;
+  end;
  end;
 end;
 
@@ -5920,7 +6023,7 @@ begin
   if appdisp = nil then begin
    goto error;
   end;
-  
+
   if not createim then begin
    result:= gue_inputmanager;
    goto error;
@@ -5940,6 +6043,19 @@ begin
    result:= gue_createwindow;
    goto error;
   end;
+
+  if hasxrandrlib then begin
+   hasxrandr:= xrrqueryextension(
+                    appdisp,@xrandreventbase,@xrandrerrorbase) <> 0;
+   if hasxrandr then begin
+    xrrselectinput(appdisp,rootid, RRScreenChangeNotifyMask or
+                 RRCrtcChangeNotifyMask or RROutputChangeNotifyMask);
+   end;
+  end
+  else begin
+   hasxrandr:= false;
+  end;
+  
   if not createappic then begin
    result:= gue_inputcontext;
    goto error;
@@ -6210,6 +6326,8 @@ begin
   signal(sigterm,sigtermbefore);
   signal(sigchld,sigchldbefore);
   xseterrorhandler(errorhandlerbefore);
+  screenrects:= nil;
+  screenrectsvalid:= false;
  finally
   gdi_unlock;
  end;
@@ -6269,5 +6387,6 @@ initialization
  stackmodebelowworkaround:= false;
 // nocreatestaticgravity:= true;
  hassm:= geticelib and getsmlib;
+ hasxrandrlib:= getxrandrlib;
 end.
 
