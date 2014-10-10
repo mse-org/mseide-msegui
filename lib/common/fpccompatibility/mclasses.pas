@@ -205,6 +205,7 @@ type
     property Name: TComponentName read FName write SetName stored False;
     property Tag: PtrInt read FTag write FTag default 0;
   end;
+  pcomponent = ^tcomponent;
 
   TComponentClass = class of TComponent;
 
@@ -1440,17 +1441,28 @@ begin
 end;
 
 
-Procedure TComponent.ReadLeft(Reader: TReader);
+procedure tcomponent.readleft(reader: treader);
 
+var
+ int1: integer;
 begin
-  LongRec(FDesignInfo).Lo:=Reader.ReadInteger;
+ int1:= reader.readinteger;
+ if (int1 < 0) or (int1 > $7fff) then begin
+  int1:= 0;  //limit to positive values
+ end;
+ longrec(fdesigninfo).lo:= int1;
 end;
 
 
-Procedure TComponent.ReadTop(Reader: TReader);
-
+procedure tcomponent.readtop(reader: treader);
+var
+ int1: integer;
 begin
-  LongRec(FDesignInfo).Hi:=Reader.ReadInteger;
+ int1:= reader.readinteger;
+ if (int1 < 0) or (int1 > $7fff) then begin
+  int1:= 0;  //limit to positive values
+ end;
+ longrec(fdesigninfo).hi:= int1;
 end;
 
 
@@ -1525,14 +1537,14 @@ end;
 Procedure TComponent.WriteLeft(Writer: TWriter);
 
 begin
-  Writer.WriteInteger(LongRec(FDesignInfo).Lo);
+  Writer.WriteInteger(smallint(LongRec(FDesignInfo).Lo));
 end;
 
 
 Procedure TComponent.WriteTop(Writer: TWriter);
 
 begin
-  Writer.WriteInteger(LongRec(FDesignInfo).Hi);
+  Writer.WriteInteger(smallint(LongRec(FDesignInfo).Hi));
 end;
 
 
