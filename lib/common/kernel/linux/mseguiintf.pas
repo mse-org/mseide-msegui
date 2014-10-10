@@ -2357,7 +2357,6 @@ var
 
 procedure updatescreenrects();
 var
- str1: string;
  info: pxrrscreenresources;
  int1,int2: integer;
  rectnum: integer;
@@ -2377,7 +2376,7 @@ begin
   rectnum:= 0;
   for int1:= 0 to high(screenrects) do begin
    po2:= xrrgetoutputinfo(appdisp,info,po1^);
-   if po2 <> nil then begin
+   if (po2 <> nil) and (po2^.crtc <> 0) then begin
     for int2:= 0 to high(crtcs) do begin
      if po2^.crtc = info^.crtcs[int2] then begin
       po3:= crtcs[int2];
@@ -2420,10 +2419,9 @@ end;
 function gui_getworkarea(id: winidty): rectty;
 var
  bo1: boolean;
- ar1: rectarty;
  rect1: rectty;
  pt1: pointty;
- int1: integer;
+ int1,int2: integer;
 label
  endlab;
 begin
@@ -2438,9 +2436,10 @@ begin
  checkscreenrects();
  if screenrects <> nil then begin
   if gui_getdecoratedwindowrect(id,rect1) = gue_ok then begin
+   int2:= -1;
    for int1:= 0 to high(screenrects) do begin
     if rectinrect(rect1,screenrects[int1]) then begin
-     result:= intersectrect(result,screenrects[int1]);
+     int2:= int1;
      goto endlab;
     end;
    end;
@@ -2448,13 +2447,22 @@ begin
    pt1.y:= rect1.y + rect1.cy div 2;
    for int1:= 0 to high(screenrects) do begin
     if pointinrect(pt1,screenrects[int1]) then begin
-     result:= intersectrect(result,screenrects[int1]);
+     int2:= int1;
      goto endlab;
     end;
    end;
   end;
- end;
+  for int1:= 0 to high(screenrects) do begin
+   if testintersectrect(rect1,screenrects[int1]) then begin
+    int2:= int1;
+    goto endlab;
+   end;
+  end;
 endlab: 
+  if int2 >= 0 then begin
+   result:= intersectrect(result,screenrects[int1]);
+  end;
+ end;
  gdi_unlock;
 end;
 
