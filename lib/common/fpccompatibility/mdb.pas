@@ -4012,12 +4012,14 @@ begin
   if Self.Name = Value then Exit;
   old := Self.Name;
   inherited SetName(Value);
-  if (csDesigning in ComponentState) then
+  if (csDesigning in ComponentState) and (old <> '') then begin
     for i := 0 to Fields.Count - 1 do begin
       nm := old + Fields[i].FieldName;
-      if Copy(Fields[i].Name, 1, Length(nm)) = nm then
+      if Copy(Fields[i].Name, 1, Length(nm)) = nm then begin
         Fields[i].Name := CheckName(Value + Fields[i].FieldName);
+      end;
     end;
+  end;
 end;
 
 Procedure TDataset.SetOnFilterRecord(const Value: TFilterRecordEvent);

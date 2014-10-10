@@ -1082,6 +1082,48 @@ begin
  tcomponent1(child).getchildren({$ifdef FPC}@{$endif}addchildren,fpasteroot);
 end;
 
+type
+ tpasteroot = class(tcomponent)
+  private
+   fowner: tdesignerselections;
+  protected
+   procedure notification(acomponent: tcomponent; 
+                            operation: toperation); override;
+  public
+   constructor create(const aowner: tdesignerselections); reintroduce;
+ end;
+
+{ tpasteroot }
+
+constructor tpasteroot.create(const aowner: tdesignerselections);
+begin
+ fowner:= aowner;
+ inherited create(nil);
+end;
+
+procedure tpasteroot.notification(acomponent: tcomponent;
+               operation: toperation);
+var
+ int1: integer;
+begin
+ if (operation = opremove) then begin
+  if (csdestroying in acomponent.componentstate) then begin
+   for int1:= 0 to fowner.count-1 do begin
+    if fowner.items[int1] = acomponent then begin
+     fowner.items[int1]:= nil;
+    end;
+   end;
+   inherited;
+  end
+  else begin
+   acomponent.freenotification(self);
+  end;
+ end
+ else begin
+  inherited;
+ end;
+end;
+ 
 function tdesignerselections.pastefromobjecttext(const aobjecttext: string; 
    aowner,aparent: tcomponent; initproc: initcomponentprocty): componentarty;
                   //returns count of added components
@@ -1094,7 +1136,7 @@ var
  comp1,comp2: tcomponent;
  listend: tvaluetype;
  validaterenamebefore: validaterenameeventty;
- 
+  
 begin
  result:= nil;
  if aobjecttext = '' then begin
@@ -1111,7 +1153,7 @@ begin
   designer.beginpasting;
   fpasteowner:= aowner;
   textstream:= ttextstream.Create;
-  comp1:= tcomponent.create(nil);
+  comp1:= tpasteroot.create(self);
   fpasteroot:= comp1;
   tcomponent1(comp1).SetDesigning(true{$ifndef FPC},false{$endif});
   lockfindglobalcomponent;
@@ -1206,14 +1248,24 @@ begin
    unRegisterFindGlobalComponentProc({$ifdef FPC}@{$endif}getglobalcomponent);
    textstream.Free;
    clearcomponentlist(comp1);
-   comp1.Free;
   end;
+  comp1.destroy();
  except
-  for int1:= countbefore to count - 1 do begin
-   items[int1].Free;
+//  comp1:= tpasteroot.create(self);
+  try
+   for int1:= countbefore to count -1 do begin
+    if items[int1] <> nil then begin
+     items[int1].freenotification(comp1);
+    end;
+   end;
+   for int1:= countbefore to count -1 do begin
+    items[int1].Free;
+   end;
+   count:= countbefore;
+   application.handleexception;
+  finally
+   comp1.destroy();
   end;
-  count:= countbefore;
-  application.handleexception;
  end;
 // result:= count - countbefore;
 end;
