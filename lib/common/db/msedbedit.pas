@@ -196,7 +196,7 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy; override; 
    function canclose(const newfocus: twidget = nil): boolean; override;
-   procedure edit;
+   procedure edit();
   published
    property statfile;
    property datasource: tdatasource read getdatasource write setdatasource;
@@ -3058,7 +3058,7 @@ begin
  end;
 end;
 
-procedure tdbnavigator.dodialogexecute;
+procedure tdbnavigator.dodialogexecute();
 begin
  if canevent(tmethod(fondialogexecute)) then begin
   fondialogexecute(self);

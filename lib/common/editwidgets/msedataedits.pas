@@ -310,6 +310,9 @@ type
    property ontextchange;
    property onkeydown;
    property onkeyup;
+   property onmouseevent;
+   property onclientmouseevent;
+   property onmousewheelevent;
    property oncopytoclipboard;
    property onpastefromclipboard;
    
