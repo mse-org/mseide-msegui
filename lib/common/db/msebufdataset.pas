@@ -1128,8 +1128,9 @@ type
    procedure oldfieldtoparam(const source: tfield; const dest: tparam);
    procedure stringtoparam(const source: msestring; const dest: tparam);
                   //takes care about utf8 conversion
-   procedure clearrecord;
-   procedure clearfilter;
+   function isnull(): boolean; //all fields null
+   procedure clearrecord();
+   procedure clearfilter();
    property filtereditkind: filtereditkindty read ffiltereditkind 
                                                     write ffiltereditkind;
    procedure beginfilteredit(const akind: filtereditkindty);
@@ -3546,6 +3547,7 @@ procedure tmsebufdataset.internalapplyupdate(const maxerrors: integer;
                                          (rr_revert in response) then begin
     cancelrecupdate(po1^);
     po1^.info.bookmark.recordpo:= nil;
+    exclude(fbstate,bs_curvaluemodified);
    end;
   end;
  end; //checkrevert
@@ -5554,7 +5556,21 @@ begin
  end;
 end;
 
-procedure tmsebufdataset.clearrecord;
+function tmsebufdataset.isnull(): boolean; //all fields null
+var
+ int1: integer;
+begin
+ checkactive();
+ result:= true;
+ for int1:= 0 to fields.count - 1 do begin
+  if not fields[int1].isnull then begin
+   result:= false;
+   break;
+  end;
+ end;
+end;
+
+procedure tmsebufdataset.clearrecord();
 var
  int1: integer;
 begin
