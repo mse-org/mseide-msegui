@@ -825,14 +825,14 @@ type
               const afieldtype: tfieldtype; const abm: bookmarkdataty): pointer;
    function setcurrentpo(const afield: tfield;
               const afieldtype: tfieldtype; const arecord: precheaderty;
-              const isnull: boolean; out changed: boolean): pointer;
+              const aisnull: boolean; out changed: boolean): pointer;
    function beforecurrentset(const afield: tfield;
               const afieldtype: tfieldtype; var aindex: integer;
-              const isnull: boolean; out changed: boolean): pointer;
+              const aisnull: boolean; out changed: boolean): pointer;
    procedure aftercurrentset(const afield: tfield); virtual;
    function beforecurrentbmset(const afield: tfield;
               const afieldtype: tfieldtype; const abm: bookmarkdataty;
-              const isnull: boolean; out changed: boolean): pointer;
+              const aisnull: boolean; out changed: boolean): pointer;
    procedure getbminteger(const afield: tfield; const bm: bookmarkdataty;
                                           var adata: lookupdataty);
    procedure getbmlargeint(const afield: tfield; const bm: bookmarkdataty;
@@ -856,7 +856,7 @@ type
              out buffer: pointer; out datasize: integer): boolean; overload; 
              //read, true if not null
    function getfieldbuffer(const afield: tfield;
-             const isnull: boolean; out datasize: integer): pointer;
+             const aisnull: boolean; out datasize: integer): pointer;
                                                        overload; virtual;
              //write
    procedure fieldchanged(const field: tfield);
@@ -1128,7 +1128,7 @@ type
    procedure oldfieldtoparam(const source: tfield; const dest: tparam);
    procedure stringtoparam(const source: msestring; const dest: tparam);
                   //takes care about utf8 conversion
-   function isnull(): boolean; //all fields null
+   function recordisnull(): boolean; //all fields null
    procedure clearrecord();
    procedure clearfilter();
    property filtereditkind: filtereditkindty read ffiltereditkind 
@@ -3008,7 +3008,7 @@ begin
 end;
 
 function tmsebufdataset.getfieldbuffer(const afield: tfield;
-                        const isnull: boolean; out datasize: integer): pointer;
+                        const aisnull: boolean; out datasize: integer): pointer;
            //write buffer
 var
  int1: integer;
@@ -3063,7 +3063,7 @@ begin
   end;
  end;
  if int1 >= 0 then begin // data field
-  if isnull then begin
+  if aisnull then begin
    clearfieldflag(@precheaderty(result)^.fielddata.nullmask,int1);
   end
   else begin
@@ -3075,7 +3075,7 @@ begin
  else begin
   int1:= -2 - int1;
   if int1 >= 0 then begin //calc field
-   if isnull then begin
+   if aisnull then begin
     clearfieldflag(pbyte(pchar(result)+frecordsize),int1);
    end
    else begin
@@ -5556,7 +5556,7 @@ begin
  end;
 end;
 
-function tmsebufdataset.isnull(): boolean; //all fields null
+function tmsebufdataset.recordisnull(): boolean; //all fields null
 var
  int1: integer;
 begin
@@ -6801,7 +6801,7 @@ end;
 
 function tmsebufdataset.setcurrentpo(const afield: tfield;
               const afieldtype: tfieldtype; const arecord: precheaderty;
-              const isnull: boolean; out changed: boolean): pointer;
+              const aisnull: boolean; out changed: boolean): pointer;
 var
  po1: pbyte;
  int1: integer;
@@ -6814,9 +6814,9 @@ begin
            not (ext.basetype in fielddatacompatibility[afieldtype]) then begin
    raise ecurrentvalueaccess.create(self,afield,'Invalid fieldtype.');  
   end;   
-  changed:= not getfieldflag(po1,int1) xor isnull;
+  changed:= not getfieldflag(po1,int1) xor aisnull;
   if changed then begin
-   if isnull then begin
+   if aisnull then begin
     clearfieldflag(po1,int1);
    end
    else begin
@@ -6829,7 +6829,7 @@ end;
 
 function tmsebufdataset.beforecurrentset(const afield: tfield;
               const afieldtype: tfieldtype; var aindex: integer;
-              const isnull: boolean; out changed: boolean): pointer;
+              const aisnull: boolean; out changed: boolean): pointer;
 begin
  currentcheckbrowsemode;
  if afield.dataset <> self then begin
@@ -6848,12 +6848,12 @@ begin
  end; 
  flastcurrentindex:= aindex;
  result:= setcurrentpo(afield,afieldtype,factindexpo^.ind[aindex],
-                                                      isnull,changed);
+                                                      aisnull,changed);
 end;
 
 function tmsebufdataset.beforecurrentbmset(const afield: tfield;
               const afieldtype: tfieldtype; const abm: bookmarkdataty;
-              const isnull: boolean; out changed: boolean): pointer;
+              const aisnull: boolean; out changed: boolean): pointer;
 begin
  currentcheckbrowsemode;
  if afield.dataset <> self then begin
@@ -6863,7 +6863,7 @@ begin
   raise ecurrentvalueaccess.create(self,afield,'Field must be fkInternalCalc.');
  end;
  flastcurrentindex:= -1;
- result:= setcurrentpo(afield,afieldtype,@abm.recordpo^.header,isnull,changed);
+ result:= setcurrentpo(afield,afieldtype,@abm.recordpo^.header,aisnull,changed);
 end;
 
 procedure tmsebufdataset.aftercurrentset(const afield: tfield);

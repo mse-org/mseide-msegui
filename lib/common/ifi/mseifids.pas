@@ -426,7 +426,7 @@ type
    procedure internalclose; override;
    procedure InternalPost; override;
    function getfieldbuffer(const afield: tfield;
-             const isnull: boolean; out datasize: integer): pointer; override;
+             const aisnull: boolean; out datasize: integer): pointer; override;
    procedure iactivatorclient.setactive = setcontrolleractive;
    procedure iifidscontroller.setactive = setcontrolleractive;
   //iifids
@@ -2971,12 +2971,12 @@ begin
  inherited;
 end;
 
-function ttxsqlquery.getfieldbuffer(const afield: tfield; const isnull: boolean;
+function ttxsqlquery.getfieldbuffer(const afield: tfield; const aisnull: boolean;
                out datasize: integer): pointer;
 var
  int1: integer;
 begin
- result:= inherited getfieldbuffer(afield,isnull,datasize);
+ result:= inherited getfieldbuffer(afield,aisnull,datasize);
  int1:= afield.fieldno-1;
  if (int1 >= 0) and (state <> dscurvalue) and 
                  not (bs_fetching in fbstate) then begin //datafield
