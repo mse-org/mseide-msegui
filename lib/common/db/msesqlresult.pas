@@ -745,7 +745,7 @@ var
  int1: integer;
 begin
  int1:= 0;
- result:= not fsqlresult.active or 
+ result:= not fsqlresult.active or fsqlresult.eof or
             not fsqlresult.database.loadfield(fsqlresult.fcursor,
                                fdatatype,ffieldnum,nil,int1,false);
 end;
