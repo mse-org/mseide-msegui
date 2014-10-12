@@ -11,7 +11,7 @@ unit msevariants;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- msetypes;
+ msetypes,msestrings;
 type
  variantarty = array of variant;
  variantaty = array[0..0] of variant;
@@ -23,10 +23,19 @@ type
 function mseVarTypeIsValidArrayType(const aVarType: TVarType): Boolean;
 function mseVarArrayCreate(const Bounds: PVarArrayBoundArray; Dims : SizeInt;
                                                   aVarType: TVarType): Variant;
+function vartomsestring(const avalue: variant): msestring;
 
 implementation
 uses
  variants,varutils;
+
+function vartomsestring(const avalue: variant): msestring;
+begin
+ result:= '';
+ if not varisnull(avalue) then begin
+  result:= avalue;
+ end;
+end;
 
 //allow int64 arrays
 
