@@ -817,6 +817,7 @@ type
    procedure appendrow(const avalues: array of const;
                          const checkautoappend: boolean = false);
    function canclose: boolean;
+   function rowempty(const arow: integer): boolean;
    property rowstate: tcustomrowstatelist read getrowstate;
   published
    property rowcount: integer read frowcount write setrowcount default 0;
@@ -4602,6 +4603,23 @@ begin
        end;
       end;
      end;
+    end;
+   end;
+  end;
+ end;
+end;
+
+function tgridclientcontroller.rowempty(const arow: integer): boolean;
+var
+ int1: integer;
+begin
+ result:= true;
+ if arow >= 0 then begin
+  for int1:= 0 to high(datacols.fitems) do begin
+   with tificolitem(datacols.fitems[int1]).link.controller.datalist do begin
+    if (arow < count) and not empty(arow) then begin
+     result:= false;
+     break;
     end;
    end;
   end;
