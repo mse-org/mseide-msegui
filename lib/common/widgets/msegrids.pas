@@ -375,6 +375,7 @@ type
    function getinnerframe: framety; virtual;
    function step(getscrollable: boolean = true): integer; virtual; abstract;
    function scrollable: boolean; virtual; abstract;
+   function framedim: sizety;
 
   //iframe
    function getwidget: twidget;
@@ -408,8 +409,8 @@ type
                const aprop: tgridarrayprop); reintroduce; virtual;
    destructor destroy; override;
    procedure createfont;
-   procedure createframe;
-   procedure createface;
+   procedure createframe();
+   procedure createface();
    procedure drawcellbackground(const acanvas: tcanvas;
                  const aframe: tcustomframe; const aface: tcustomface);
    procedure drawcelloverlay(const acanvas: tcanvas; const aframe: tcustomframe);
@@ -3299,6 +3300,16 @@ begin
  //dummy
 end;
 
+function tgridprop.framedim: sizety;
+begin
+ if fframe = nil then begin
+  result:= nullsize;
+ end
+ else begin
+  result:= fframe.paintframedim;
+ end;
+end;
+
 { tcolselectfont }
 
 class function tcolselectfont.getinstancepo(owner: tobject): pfont;
@@ -3593,7 +3604,7 @@ var
  hasrowheight: boolean;
  rowstatelist: trowstatelist;
  endy: integer;
-
+ framedim1: sizety;
 begin
  if (not (co_invisible in foptions) or 
          (csdesigning in fcellinfo.grid.componentstate)) then begin
@@ -3606,7 +3617,8 @@ begin
   hiddenlines:= nil;
   with info do begin
    fcellinfo.calcautocellsize:= calcautocellsize;
-   fcellinfo.autocellsize:= autocellsize;
+   framedim1:= framedim;
+   fcellinfo.autocellsize:= subsize(autocellsize,framedim1);
    fcellinfo.grid.fbrushorigin.x:= fcellinfo.grid.frootbrushorigin.x;
    if not (co_nohscroll in foptions) then begin
     fcellinfo.grid.fbrushorigin.x:= 
@@ -3818,7 +3830,7 @@ begin
     end;
     canvas.linewidth:= linewidthbefore;
    end;
-   autocellsize:= fcellinfo.autocellsize;
+   autocellsize:= addsize(fcellinfo.autocellsize,framedim1);
   end;
  end;
 end;
@@ -4168,7 +4180,7 @@ procedure tcol.updatecolwidth(const acol,acount: integer;
                                             var acolwidth: integer);
 var
  int1,int2: integer;
- info: colpaintinfoty; 
+ info: colpaintinfoty;
 begin
  fillchar(info,sizeof(info),0);
  with info do begin
