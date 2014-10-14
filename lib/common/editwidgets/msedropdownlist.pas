@@ -73,12 +73,16 @@ type
    fpasswordchar: msechar;
    ffont: tdropdowncolfont;
    ffontselect: tdropdowncolfontselect;
+   fframetemplate: tframecomp;
+   ffacetemplate: tfacecomp;
    procedure setoptions(const avalue: coloptionsty);
    function getfont: tdropdowncolfont;
    procedure setfont(const avalue: tdropdowncolfont);
    function getfontselect: tdropdowncolfontselect;
    procedure setfontselect(const avalue: tdropdowncolfontselect);
    procedure readfontcolorselect(reader: treader);
+   procedure setframetemplate(const avalue: tframecomp);
+   procedure setfacetemplate(const avalue: tfacecomp);
   protected
    fowner: tobject;
    procedure defineproperties(filer: tfiler); override;
@@ -105,6 +109,10 @@ type
    property font: tdropdowncolfont read getfont write setfont;
    property fontselect: tdropdowncolfontselect read getfontselect 
                                                        write setfontselect;
+   property frametemplate: tframecomp read fframetemplate 
+                                                  write setframetemplate;
+   property facetemplate: tfacecomp read ffacetemplate 
+                                                  write setfacetemplate;
    property caption: msestring read fcaption write fcaption;
  end;
 
@@ -136,6 +144,8 @@ type
 //   ffontcolorselect: colorty;
    ffont: tdropdownfont;
    ffontselect: tdropdownfontselect;
+   fframetemplate: tframecomp;
+   ffacetemplate: tfacecomp;
    function getitems(const index: integer): tdropdowncol;
    procedure setrowcount(const avalue: integer);
    procedure setnostreaming(const avalue: boolean);
@@ -152,6 +162,8 @@ type
    function getfontselect: tdropdownfontselect;
    procedure setfontselect(const avalue: tdropdownfontselect);
    procedure readfontcolorselect(reader: treader);
+   procedure setframetemplate(const avalue: tframecomp);
+   procedure setfacetemplate(const avalue: tfacecomp);
   protected
    fitemindex: integer;
    fkeyvalue64: int64;
@@ -199,6 +211,10 @@ type
    property font: tdropdownfont read getfont write setfont;
    property fontselect: tdropdownfontselect read getfontselect 
                                                        write setfontselect;
+   property frametemplate: tframecomp read fframetemplate 
+                                                  write setframetemplate;
+   property facetemplate: tfacecomp read ffacetemplate 
+                                                  write setfacetemplate;
  end;
 
  dropdowncolsclassty = class of tdropdowncols;
@@ -355,6 +371,10 @@ type
  tcustomdropdowncontroller = class(teventpersistent,ibutton,ievent,
                                    idropdowncontroller,idataeditcontroller)
   private
+   fframetemplate: tframecomp;
+   ffacetemplate: tfacecomp;
+   procedure setframetemplate(const avalue: tframecomp);
+   procedure setfacetemplate(const avalue: tfacecomp);
   protected
    fowner: twidget;
    fdataselected: boolean;
@@ -412,6 +432,10 @@ type
    property color: colorty read fcolor write fcolor default cl_default;
    property colorclient: colorty read fcolorclient write fcolorclient
                                                        default cl_default;
+   property frametemplate: tframecomp read fframetemplate 
+                                                  write setframetemplate;
+   property facetemplate: tfacecomp read ffacetemplate 
+                                                  write setfacetemplate;
  end;
 
  tdropdowncontroller = class(tcustomdropdowncontroller)
@@ -575,7 +599,14 @@ implementation
 uses
  sysutils,msewidgets,mseguiintf,rtlconsts,msebits;
 
-type 
+type
+ tcustomframe1= class(tcustomframe);
+ tdatacols1 = class(tdatacols);
+ twidget1 = class(twidget);
+ tcustombuttonframe1 = class(tcustombuttonframe);
+ tstringcol1 = class(tstringcol);
+ tframebutton1 = class(tframebutton);
+ 
  timagefixcol = class(tdropdownfixcol)
   private
    fimagelist: timagelist;
@@ -587,11 +618,6 @@ type
              const acontroller: tcustomdropdownlistcontroller); override;
  end;
 
- twidget1 = class(twidget);
- tcustombuttonframe1 = class(tcustombuttonframe);
- tstringcol1 = class(tstringcol);
- tframebutton1 = class(tframebutton);
- tdatacols1 = class(tdatacols);
  
 const
  defaultdropdowncellinnerframe: framety = 
@@ -705,6 +731,16 @@ procedure tdropdowncol.defineproperties(filer: tfiler);
 begin
  inherited;
  filer.defineproperty('fontcolorselect',@readfontcolorselect,nil,false);
+end;
+
+procedure tdropdowncol.setframetemplate(const avalue: tframecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fframetemplate));
+end;
+
+procedure tdropdowncol.setfacetemplate(const avalue: tfacecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(ffacetemplate));
 end;
 
 { tdropdownfont }
@@ -1151,6 +1187,16 @@ begin
  filer.defineproperty('fontcolorselect',@readfontcolorselect,nil,false);
 end;
 
+procedure tdropdowncols.setframetemplate(const avalue: tframecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fframetemplate));
+end;
+
+procedure tdropdowncols.setfacetemplate(const avalue: tfacecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(ffacetemplate));
+end;
+
 {
 procedure tdropdowncols.setfontcolorselect(const avalue: colorty);
 var
@@ -1507,6 +1553,16 @@ end;
 function tcustomdropdowncontroller.componentstate: tcomponentstate;
 begin
  result:= fintf.getwidget.componentstate;
+end;
+
+procedure tcustomdropdowncontroller.setframetemplate(const avalue: tframecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fframetemplate));
+end;
+
+procedure tcustomdropdowncontroller.setfacetemplate(const avalue: tfacecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(ffacetemplate));
 end;
 
 { tdropdowncontroller }
@@ -2190,18 +2246,27 @@ begin
   else begin
    color:= fcontroller.color;
   end;
+  tcustomframe1(fframe).fi.levelo:= 0;
+  tcustomframe1(fframe).fi.framewidth:= 1;
+  tcustomframe1(fframe).fi.colorframe:= cl_black;
+  if fcontroller.fframetemplate <> nil then begin
+   fframe.template:= fcontroller.fframetemplate;
+  end;
   if (fcontroller.colorclient <> cl_default) and (fframe <> nil) then begin
    fframe.colorclient:= fcontroller.colorclient;
   end;
+  if fcontroller.ffacetemplate <> nil then begin
+   createface();
+   fface.template:= fcontroller.ffacetemplate;
+  end;
   fdatacols.options:= fdatacols.options + [co_focusselect,co_readonly];
   font:= twidget1(aparent).getfont;
-  frame.levelo:= 0;
-  fframe.framewidth:= 1;
-  fframe.colorframe:= cl_black;
   initcols(acols);
   if afixcolclass <> nil then begin
    ffixcols.add(afixcolclass.create(self,ffixcols,fcontroller));
   end;
+  tcustomframe1(fframe).updatestate();
+  synctofontheight();
   if acontroller.imagelist <> nil then begin
    ffixcols.add(timagefixcol.create(self,ffixcols,fcontroller));
    int1:= fcontroller.imagelist.height + fcontroller.fimageframe.top + 
@@ -2225,6 +2290,8 @@ procedure tdropdownlist.initcols(const acols: tdropdowncols);
 var
  int1,int2: integer;
  col1: tdropdowncol;
+ frata1: tframecomp;
+ fata1: tfacecomp;
 begin
  if acols.font <> nil then begin
   createfont();
@@ -2275,6 +2342,22 @@ begin
      createfontselect();
      fontselect.assign(col1.fontselect);
     end;
+    frata1:= col1.fframetemplate;
+    if frata1 = nil then begin
+     frata1:= acols.fframetemplate;
+    end;
+    if frata1 <> nil then begin
+     createframe();
+     fframe.template:= frata1;
+    end;
+    fata1:= col1.ffacetemplate;
+    if fata1 = nil then begin
+     fata1:= acols.ffacetemplate;
+    end;
+    if frata1 <> nil then begin
+     createface();
+     fface.template:= fata1;
+    end;
    end;
    if col1.caption <> '' then begin
     fixrows.count:= 1;
@@ -2284,7 +2367,6 @@ begin
     end;
    end;    
   end;
-  synctofontheight;
  end;
 end;
 

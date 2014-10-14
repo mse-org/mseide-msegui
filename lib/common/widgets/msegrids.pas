@@ -684,6 +684,7 @@ type
    function getdatastatname: msestring;
    procedure coloptionstoeditoptions(var dest: optionseditty);
    procedure clean(const start,stop: integer); override;
+   function defaultrowheight: integer; virtual;
   public
    constructor create(const agrid: tcustomgrid;
                                      const aowner: tgridarrayprop); override;
@@ -809,6 +810,7 @@ type
                         const actcellzone: cellzonety): cursorshapety; override;
    procedure modified; virtual;
    procedure checkcellvalue(var avalue: msestring; var accept: boolean);
+   function defaultrowheight(): integer; override;
   public
    constructor create(const agrid: tcustomgrid; 
                          const aowner: tgridarrayprop); override;
@@ -1556,6 +1558,7 @@ type
    procedure unmergecols(const arow: integer = invalidaxis);
                      //invalidaxis = all
    property rowstate: trowstatelist read frowstate;
+   function defaultrowheight: integer;
   published
    property sortcol: integer read fsortcol write setsortcol default -1;
                                       //-1 -> all
@@ -6578,6 +6581,11 @@ begin
  //dummy
 end;
 
+function tdatacol.defaultrowheight: integer;
+begin
+ result:= tcustomgrid(fowner).datarowheight;
+end;
+
 { tdrawcol }
 
 procedure tdrawcol.drawcell(const canvas: tcanvas);
@@ -6860,6 +6868,25 @@ begin
    end;
   end;
  end;
+end;
+
+function tcustomstringcol.defaultrowheight(): integer;
+var
+ int1: integer;
+ fra1: framety;
+begin
+ result:= actualfont.lineheight;
+ if ffontselect <> nil then begin
+  int1:= ffontselect.height;
+  if int1 > result then begin
+   result:= int1;
+  end;
+ end;
+ if (scoe_checkbox in foptionsedit) and (result < defaultboxsize) then begin
+  result:= defaultboxsize;
+ end;
+ fra1:= getinnerframe;
+ result:= result + fra1.top + fra1.bottom + framedim.cy;
 end;
 
 function tcustomstringcol.getitems(aindex: integer): msestring;
@@ -8674,6 +8701,25 @@ function tdatacols.updatedatastate: boolean;
 begin
  result:= true;
  updatedatastate(result);
+end;
+
+function tdatacols.defaultrowheight: integer;
+var
+ int1: integer;
+ int2: integer;
+begin
+ if fitems = nil then begin
+  result:= fgrid.datarowheight;
+ end
+ else begin
+  result:= 0;
+  for int1:= 0 to high(fitems) do begin
+   int2:= tdatacol(fitems[int1]).defaultrowheight;
+   if int2 > result then begin
+    result:= int2;
+   end;
+  end;
+ end;
 end;
 
 { tdrawcols }
@@ -16377,6 +16423,8 @@ end;
 procedure tcustomstringgrid.synctofontheight;
 begin
  inherited;
+ datarowheight:= datacols.defaultrowheight();
+ {
  if ow1_fontlineheight in optionswidget1 then begin
   datarowheight:= font.lineheight;
  end
@@ -16385,6 +16433,7 @@ begin
    datarowheight:= font.glyphheight + top + bottom;
   end;
  end;
+ }
 end;
 
 function tcustomstringgrid.textclipped(const acell: gridcoordty;
