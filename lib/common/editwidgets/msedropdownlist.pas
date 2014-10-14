@@ -49,6 +49,16 @@ const
 type
  tcustomdropdownlistcontroller = class;
 
+ tdropdowncolfont = class(tparentfont)
+  public
+   class function getinstancepo(owner: tobject): pfont; override;
+ end;
+ 
+ tdropdowncolfontselect = class(tparentfont)
+  public
+   class function getinstancepo(owner: tobject): pfont; override;
+ end;
+
  tdropdowncol = class(tmsestringdatalist)
   private
    fwidth: integer;
@@ -58,14 +68,25 @@ type
    ftextflags: textflagsty;
    fcolor: colorty;
    fcolorselect: colorty;
-   ffontcolorselect: colorty;
+//   ffontcolorselect: colorty;
    fcaption: msestring;
    fpasswordchar: msechar;
+   ffont: tdropdowncolfont;
+   ffontselect: tdropdowncolfontselect;
    procedure setoptions(const avalue: coloptionsty);
+   function getfont: tdropdowncolfont;
+   procedure setfont(const avalue: tdropdowncolfont);
+   function getfontselect: tdropdowncolfontselect;
+   procedure setfontselect(const avalue: tdropdowncolfontselect);
+   procedure readfontcolorselect(reader: treader);
   protected
    fowner: tobject;
+   procedure defineproperties(filer: tfiler); override;
   public
    constructor create(const aowner: tcustomdropdownlistcontroller); reintroduce;
+   destructor destroy(); override;
+   procedure createfont();
+   procedure createfontselect();
   published
    property width: integer read fwidth write fwidth default griddefaultcolwidth;
    property options: coloptionsty read foptions write setoptions
@@ -79,12 +100,25 @@ type
    property color: colorty read fcolor write fcolor default cl_default;
    property colorselect: colorty read fcolorselect write fcolorselect 
                                            default cl_default;
-   property fontcolorselect: colorty read ffontcolorselect 
-                                      write ffontcolorselect default cl_default;
+//   property fontcolorselect: colorty read ffontcolorselect 
+//                                      write ffontcolorselect default cl_default;
+   property font: tdropdowncolfont read getfont write setfont;
+   property fontselect: tdropdowncolfontselect read getfontselect 
+                                                       write setfontselect;
    property caption: msestring read fcaption write fcaption;
  end;
 
  dropdowncolclassty = class of tdropdowncol;
+
+ tdropdownfont = class(tparentfont)
+  public
+   class function getinstancepo(owner: tobject): pfont; override;
+ end;
+
+ tdropdownfontselect = class(tparentfont)
+  public
+   class function getinstancepo(owner: tobject): pfont; override;
+ end;
  
  tdropdowncols = class(townedpersistentarrayprop)
   private
@@ -99,7 +133,9 @@ type
    flinecolor: colorty;
    fcolor: colorty;
    fcolorselect: colorty;
-   ffontcolorselect: colorty;
+//   ffontcolorselect: colorty;
+   ffont: tdropdownfont;
+   ffontselect: tdropdownfontselect;
    function getitems(const index: integer): tdropdowncol;
    procedure setrowcount(const avalue: integer);
    procedure setnostreaming(const avalue: boolean);
@@ -110,7 +146,12 @@ type
    procedure setlinecolor(const avalue: colorty);
    procedure setcolor(const avalue: colorty);
    procedure setcolorselect(const avalue: colorty);
-   procedure setfontcolorselect(const avalue: colorty);
+//   procedure setfontcolorselect(const avalue: colorty);
+   function getfont: tdropdownfont;
+   procedure setfont(const avalue: tdropdownfont);
+   function getfontselect: tdropdownfontselect;
+   procedure setfontselect(const avalue: tdropdownfontselect);
+   procedure readfontcolorselect(reader: treader);
   protected
    fitemindex: integer;
    fkeyvalue64: int64;
@@ -123,9 +164,13 @@ type
    function minrowcount: integer;
    function getcolclass: dropdowncolclassty; virtual;
    procedure checkrowindex(const aindex: integer);
+   procedure defineproperties(filer: tfiler); override;
   public
    constructor create(const aowner: tcustomdropdownlistcontroller); reintroduce;
+   destructor destroy(); override;
    class function getitemclasstype: persistentclassty; override;
+   procedure createfont();
+   procedure createfontselect();
    procedure beginupdate;
    procedure endupdate;
    procedure clear;
@@ -149,8 +194,11 @@ type
    property color: colorty read fcolor write setcolor default cl_default;
    property colorselect: colorty read fcolorselect write setcolorselect 
                                            default cl_default;
-   property fontcolorselect: colorty read ffontcolorselect 
-                                      write setfontcolorselect default cl_default;
+//   property fontcolorselect: colorty read ffontcolorselect 
+//                           write setfontcolorselect default cl_default;
+   property font: tdropdownfont read getfont write setfont;
+   property fontselect: tdropdownfontselect read getfontselect 
+                                                       write setfontselect;
  end;
 
  dropdowncolsclassty = class of tdropdowncols;
@@ -338,6 +386,7 @@ type
    procedure selectnone(const akey: keyty); virtual;
    function isloading: boolean;
    procedure resetselection; virtual;
+   function componentstate: tcomponentstate;
     //ibutton
    procedure buttonaction(var action: buttonactionty;
                                                 const buttonindex: integer);
@@ -548,6 +597,20 @@ const
  defaultdropdowncellinnerframe: framety = 
                       (left: 1; top: 0; right: 1; bottom: 0);
  
+{ tdropdowncolfont }
+
+class function tdropdowncolfont.getinstancepo(owner: tobject): pfont;
+begin
+ result:= @tdropdowncol(owner).ffont;
+end;
+
+{ tdropdowncolfontselect }
+
+class function tdropdowncolfontselect.getinstancepo(owner: tobject): pfont;
+begin
+ result:= @tdropdowncol(owner).ffontselect;
+end;
+
 { tdropdowncol }
 
 constructor tdropdowncol.create(const aowner: tcustomdropdownlistcontroller);
@@ -559,13 +622,103 @@ begin
  ftextflags:= defaultdropdowncoltextflags;
  fcolor:= cl_default;
  fcolorselect:= cl_default;
- ffontcolorselect:= cl_default;
+// ffontcolorselect:= cl_default;
  inherited create;
+end;
+
+destructor tdropdowncol.destroy;
+begin
+ inherited;
+ ffont.free();
 end;
 
 procedure tdropdowncol.setoptions(const avalue: coloptionsty);
 begin
  foptions:= avalue + [co_focusselect];
+end;
+
+procedure tdropdowncol.createfont;
+begin
+ if ffont = nil then begin
+  ffont:= tdropdowncolfont.create();
+ end;
+end;
+
+procedure tdropdowncol.createfontselect;
+begin
+ if ffontselect = nil then begin
+  ffontselect:= tdropdowncolfontselect.create();
+ end;
+end;
+
+function tdropdowncol.getfont: tdropdowncolfont;
+begin
+ if fowner <> nil then begin
+  getoptionalobject(tcustomdropdownlistcontroller(fowner).componentstate,
+                                                          ffont,@createfont);
+ end;
+ result:= ffont;
+end;
+
+procedure tdropdowncol.setfont(const avalue: tdropdowncolfont);
+begin
+ if fowner <> nil then begin
+  if avalue <> ffont then begin
+   setoptionalobject(tcustomdropdownlistcontroller(fowner).componentstate,avalue,
+                                                             ffont,@createfont);
+  end;
+ end;
+end;
+
+function tdropdowncol.getfontselect: tdropdowncolfontselect;
+begin
+ if fowner <> nil then begin
+  getoptionalobject(tcustomdropdownlistcontroller(fowner).componentstate,
+                                                ffontselect,@createfontselect);
+ end;
+ result:= ffontselect;
+end;
+
+procedure tdropdowncol.setfontselect(const avalue: tdropdowncolfontselect);
+begin
+ if fowner <> nil then begin
+  if avalue <> ffontselect then begin
+   setoptionalobject(
+   tcustomdropdownlistcontroller(fowner).componentstate,avalue,
+                                                ffontselect,@createfontselect);
+  end;
+ end;
+end;
+
+procedure tdropdowncol.readfontcolorselect(reader: treader);
+var
+ co1: colorty;
+begin
+ co1:= reader.readinteger();
+ if co1 <> cl_default then begin
+  createfontselect();
+  ffontselect.color:= co1;
+ end;
+end;
+
+procedure tdropdowncol.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('fontcolorselect',@readfontcolorselect,nil,false);
+end;
+
+{ tdropdownfont }
+
+class function tdropdownfont.getinstancepo(owner: tobject): pfont;
+begin
+ result:= @tdropdowncols(owner).ffont;
+end;
+
+{ tdropdownfontselect }
+
+class function tdropdownfontselect.getinstancepo(owner: tobject): pfont;
+begin
+ result:= @tdropdowncols(owner).ffontselect;
 end;
 
 { tdropdowncols }
@@ -578,11 +731,18 @@ begin
  ftextflags:= defaultdropdowncoltextflags;
  fcolor:= cl_default;
  fcolorselect:= cl_default;
- ffontcolorselect:= cl_default;
+// ffontcolorselect:= cl_default;
 
  inherited create(aowner,nil);
  count:= 1;
 // items[0].options:= items[0].options + [co_fill];
+end;
+
+destructor tdropdowncols.destroy;
+begin
+ inherited;
+ ffont.free();
+ ffontselect.free();
 end;
 
 class function tdropdowncols.getitemclasstype: persistentclassty;
@@ -610,7 +770,61 @@ begin
   flinecolor:= self.flinecolor;
   fcolor:= self.fcolor;
   fcolorselect:= self.fcolorselect;
-  ffontcolorselect:= self.ffontcolorselect;
+//  ffontcolorselect:= self.ffontcolorselect;
+ end;
+end;
+
+procedure tdropdowncols.createfont();
+begin
+ if ffont = nil then begin
+  ffont:= tdropdownfont.create();
+ end;
+end;
+
+procedure tdropdowncols.createfontselect();
+begin
+ if ffontselect = nil then begin
+  ffontselect:= tdropdownfontselect.create();
+ end;
+end;
+
+function tdropdowncols.getfont: tdropdownfont;
+begin
+ if fowner <> nil then begin
+  getoptionalobject(tcustomdropdownlistcontroller(fowner).componentstate,
+                                                          ffont,@createfont);
+ end;
+ result:= ffont;
+end;
+
+procedure tdropdowncols.setfont(const avalue: tdropdownfont);
+begin
+ if fowner <> nil then begin
+  if avalue <> ffont then begin
+   setoptionalobject(
+           tcustomdropdownlistcontroller(fowner).componentstate,avalue,
+                                                           ffont,@createfont);
+  end;
+ end;
+end;
+
+function tdropdowncols.getfontselect: tdropdownfontselect;
+begin
+ if fowner <> nil then begin
+  getoptionalobject(tcustomdropdownlistcontroller(fowner).componentstate,
+                                              ffontselect,@createfontselect);
+ end;
+ result:= ffontselect;
+end;
+
+procedure tdropdowncols.setfontselect(const avalue: tdropdownfontselect);
+begin
+ if fowner <> nil then begin
+  if avalue <> ffontselect then begin
+   setoptionalobject(
+          tcustomdropdownlistcontroller(fowner).componentstate,avalue,
+                                             ffontselect,@createfontselect);
+  end;
  end;
 end;
 
@@ -920,6 +1134,24 @@ begin
  end;
 end;
 
+procedure tdropdowncols.readfontcolorselect(reader: treader);
+var
+ co1: colorty;
+begin
+ co1:= reader.readinteger();
+ if co1 <> cl_default then begin
+  createfontselect();
+  ffontselect.color:= co1;
+ end;
+end;
+
+procedure tdropdowncols.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('fontcolorselect',@readfontcolorselect,nil,false);
+end;
+
+{
 procedure tdropdowncols.setfontcolorselect(const avalue: colorty);
 var
  int1: integer;
@@ -933,7 +1165,7 @@ begin
   end;
  end;
 end;
-
+}
 { tcustomdropdownbuttonframe }
 
 constructor tcustomdropdownbuttonframe.create(const intf: icaptionframe;
@@ -1270,6 +1502,11 @@ end;
 procedure tcustomdropdowncontroller.resetselection;
 begin
  //dummy
+end;
+
+function tcustomdropdowncontroller.componentstate: tcomponentstate;
+begin
+ result:= fintf.getwidget.componentstate;
 end;
 
 { tdropdowncontroller }
@@ -1989,6 +2226,14 @@ var
  int1,int2: integer;
  col1: tdropdowncol;
 begin
+ if acols.font <> nil then begin
+  createfont();
+  font.assign(acols.font);
+ end;
+ if acols.fontselect <> nil then begin
+  fdatacols.createfontselect();
+  datacols.fontselect.assign(acols.fontselect);
+ end;
  if acols.count > 0 then begin
   if deo_colsizing in fcontroller.options then begin
    optionsgrid:= optionsgrid + [og_colsizing];
@@ -2015,10 +2260,20 @@ begin
     if col1.fcolorselect <> cl_default then begin
      colorselect:= col1.fcolorselect;
     end;
+    {
     if col1.ffontcolorselect <> cl_default then begin
      createfontselect;
      fontselect.assign(getfont);
      fontselect.color:= col1.ffontcolorselect;
+    end;
+    }
+    if col1.font <> nil then begin
+     createfont();
+     font.assign(col1.font);
+    end;
+    if col1.fontselect <> nil then begin
+     createfontselect();
+     fontselect.assign(col1.fontselect);
     end;
    end;
    if col1.caption <> '' then begin

@@ -1254,7 +1254,6 @@ type
    function getfontselect: tcolsfont;
    function isfontselectstored: Boolean;
    procedure setfontselect(const Value: tcolsfont);
-   procedure createfontselect;
    procedure fontselectchanged(const sender: tobject);
   protected
    fdataupdating: integer;
@@ -1281,6 +1280,7 @@ type
   public
    constructor create(aowner: tcustomgrid; aclasstype: gridpropclassty);
    destructor destroy; override;
+   procedure createfontselect();
    procedure move(const curindex,newindex: integer); override;
    function mergedwidth(const acol: integer; const amerged: longword): integer;
                     //returns additional width
