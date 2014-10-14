@@ -524,6 +524,7 @@ type
   published
    property datalink;
    property dropdown;
+   property ifilink;     //for dropdownlist
    property onsetvalue;
    property onbeforedropdown;
    property onafterclosedropdown;
@@ -1085,6 +1086,7 @@ type
    property valueoffset; //before value
    property datalink;
    property dropdown;
+   property ifilink;     //for dropdownlist
    property valuedefault;
    property valueempty;
    property base;
@@ -8604,6 +8606,7 @@ var
 begin
  int1:= arow - ffirstrecordshift;
  result:= (int1 >= 0) and (int1 < recordcount);
+ ainfo.row:= activerecord;
  if result then begin
   ainfo.row:= activerecord;
   {

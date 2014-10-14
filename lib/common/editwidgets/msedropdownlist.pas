@@ -303,6 +303,7 @@ type
 
  dropdowncontrollerstatety = (dcs_forcecaret,dcs_itemselecting,dcs_isstringkey);
  dropdowncontrollerstatesty = set of dropdowncontrollerstatety;
+
  tcustomdropdowncontroller = class(teventpersistent,ibutton,ievent,
                                    idropdowncontroller,idataeditcontroller)
   private
