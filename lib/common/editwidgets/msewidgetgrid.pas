@@ -495,6 +495,7 @@ type
  tdataedit1 = class(tdataedit);
  twriter1 = class(twriter);
  treader1 = class(treader);
+ tdatacol1 = class(tdatacol);
 
  tcontainer1 = class(twidget)
   protected
@@ -2495,6 +2496,7 @@ var
  int1,int2,int3,int4: integer;
  po1: pointty;
  rect1: rectty;
+ firstscroll,lastscroll: integer;
 begin
  if not (csdestroying in fgrid.componentstate) then begin
   inherited;
@@ -2537,8 +2539,52 @@ begin
       datarowheight:= int4;
       datacols[int3].width:= sender.bounds_cx;
       layoutchanged;
-      if int3 <> int2 then begin
-       movecol(int3,int2);
+      firstscroll:= bigint;
+      if int2 <> int3 then begin
+       for int1:= 0 to datacols.count-1 do begin
+        if tdatacol1(twidgetcols(fdatacols).fitems[int1]).scrollable() then begin
+         firstscroll:= int1;
+         break;
+        end;
+       end;
+       lastscroll:= -1;
+       for int1:= datacols.count-1 downto 0 do begin
+        if tdatacol1(twidgetcols(fdatacols).fitems[int1]).scrollable() then begin
+         lastscroll:= int1;
+         break;
+        end;
+       end;
+       if tdatacol1(twidgetcols(datacols).fitems[int3]).scrollable() then begin
+        if int2 > int3 then begin           //scrollable to right
+         if int2 > lastscroll then begin
+          int2:= lastscroll;
+         end;
+        end
+        else begin
+         if int2 <= firstscroll then begin //scrolable to left
+          int2:= firstscroll;
+         end;
+        end;
+       end
+       else begin
+        if int2 > int3 then begin          //fix to right
+         if int2 >= firstscroll then begin
+          if int2 < lastscroll then begin
+           int2:= lastscroll;
+          end;
+         end;
+        end
+        else begin                         //fix to left
+         if int2 <= lastscroll then begin
+          if int2 > firstscroll then begin
+           int2:= firstscroll;
+          end;
+         end;
+        end;
+       end;
+       if int3 <> int2 then begin
+        movecol(int3,int2);
+       end;
       end;
      finally
       dec(flayoutupdating);
