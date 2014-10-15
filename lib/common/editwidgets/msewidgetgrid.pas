@@ -257,16 +257,17 @@ type
 
  tcustomwidgetgrid = class(tcustomgrid)
   private
-   fcontainer0: twidget; //for nohascroll widgets
-   fcontainer1: twidget;
-   fcontainer2: twidget;
-   fcontainer3: twidget;
+   fcontainer0: twidget; //nohscroll
+   fcontainer1: twidget; //top
+   fcontainer2: twidget; //grid
+   fcontainer3: twidget; //bottom
    flastfocusedfixwidget: twidget;
    fwidgetdummy: tdummywidget;
    fmouseinfopo: pmouseeventinfoty;
    function getdatacols: twidgetcols;
    procedure setdatacols(const avalue: twidgetcols);
-   procedure initcopyars(out dataedits: widgetarty; out datalists: datalistarty);
+   procedure initcopyars(out dataedits: widgetarty;
+                                          out datalists: datalistarty);
    procedure dowidgetcellevent(var info: celleventinfoty);
    function getfixrows: twidgetfixrows;
    procedure setfixrows(const avalue: twidgetfixrows);
@@ -545,7 +546,7 @@ type
    procedure widgetregionchanged(const sender: twidget); override;
  end;
  
- tnoscrollgridcontainer = class(tgridcontainer)
+ tnoscrollgridcontainer = class(tscrollgridcontainer)
   public
 //   constructor create(aowner: tcustomwidgetgrid);
  end;
@@ -2737,6 +2738,7 @@ var
  po1: pointty;
  cell1,cell2: gridcoordty;
  intf: igridwidget;
+ leftnohscroll,rightnohscroll: boolean;
 begin
  if not (csloading in componentstate) then begin
   internalupdatelayout;
@@ -2773,6 +2775,24 @@ begin
       end;
      end;
      fdatacols.insertdefault(cell1.col);
+     leftnohscroll:= false;
+     rightnohscroll:= false;
+     if cell1.col > 0 then begin
+      leftnohscroll:= co_nohscroll in fdatacols[cell1.col-1].options;
+     end;
+     if cell1.col < datacols.count-1 then begin
+      rightnohscroll:= co_nohscroll in fdatacols[cell1.col+1].options;
+     end;
+     if cell1.col = 0 then begin
+      leftnohscroll:= rightnohscroll;
+     end;
+     if cell1.col = datacols.count-1 then begin
+      rightnohscroll:= leftnohscroll;
+     end;
+     if leftnohscroll and rightnohscroll then begin
+      fdatacols[cell1.col].options:= fdatacols[cell1.col].options + 
+                                                         [co_nohscroll];
+     end;
      awidget.parentwidget:= fcontainer2;
      datacols[cell1.col].setwidget(awidget);
      intf.initgridwidget;
