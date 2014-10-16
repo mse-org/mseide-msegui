@@ -182,6 +182,7 @@ type
    procedure dragdrop(const sender: tpropertyeditor); virtual;
    procedure dopopup(var amenu: tpopupmenu;  const atransientfor: twidget;
                 var mouseinfo: mouseeventinfoty); virtual;
+   procedure dokeydown(var ainfo: keyeventinfoty); virtual;
    procedure edit; virtual;
    property typinfo: ptypeinfo read gettypinfo;
    property count: integer read getcount;
@@ -682,6 +683,7 @@ type
    procedure dragdrop(const sender: tpropertyeditor); override;
    procedure dopopup(var amenu: tpopupmenu; const atransientfor: twidget;
                           var mouseinfo: mouseeventinfoty); override;
+   procedure dokeydown(var ainfo: keyeventinfoty); override;
  end;
 
  elementeditorclassty = class of tarrayelementeditor;
@@ -691,6 +693,7 @@ type
   private
    fsubprops: elementeditorarty;
    procedure doappend(const sender: tobject);
+   procedure doinsert(const sender: tobject);
   protected
    function getdefaultstate: propertystatesty; override;
    function geteditorclass: propertyeditorclassty; virtual;
@@ -724,6 +727,7 @@ type
    function name: msestring; override;
    procedure dopopup(var amenu: tpopupmenu; const atransientfor: twidget;
                           var mouseinfo: mouseeventinfoty); override;
+   procedure dokeydown(var ainfo: keyeventinfoty); override;
  end;
  
   tconstelementeditor = class(tarrayelementeditor)
@@ -2170,6 +2174,11 @@ begin
  //dummy
 end;
 
+procedure tpropertyeditor.dokeydown(var ainfo: keyeventinfoty);
+begin
+ //dummy
+end;
+
 procedure tpropertyeditor.updatedefaultvalue;
 begin
  if (fstate * [ps_isordprop,ps_candefault] = [ps_isordprop,ps_candefault]) and 
@@ -3405,15 +3414,39 @@ procedure tarraypropertyeditor.dopopup(var amenu: tpopupmenu;
 begin
  if not (ps_noadditems in fstate) then begin
   tpopupmenu.additems(amenu,atransientfor,mouseinfo,
-     ['Append Item'],[],[],[{$ifdef FPC}@{$endif}doappend]);
+     ['Insert Item','Append Item'],[],[],[@doinsert,@doappend]);
  end;
  inherited;
+end;
+
+procedure tarraypropertyeditor.dokeydown(var ainfo: keyeventinfoty);
+begin
+ if not (ps_noadditems in fparenteditor.fstate) then begin
+  if issysshortcut(sho_rowinsert,ainfo) then begin
+   doinsert(nil);
+   include(ainfo.eventstate,es_processed);
+  end
+  else begin
+   if issysshortcut(sho_rowappend,ainfo) then begin
+    doappend(nil);
+    include(ainfo.eventstate,es_processed);
+   end;
+  end;
+ end;
 end;
 
 procedure tarraypropertyeditor.doappend(const sender: tobject);
 begin
  with tarrayprop(getpointervalue) do begin
   insertdefault(count);
+ end;
+ modified;
+end;
+
+procedure tarraypropertyeditor.doinsert(const sender: tobject);
+begin
+ with tarrayprop(getpointervalue) do begin
+  insertdefault(0);
  end;
  modified;
 end;
@@ -3735,6 +3768,30 @@ begin
   end;
  end;
  inherited;
+end;
+
+procedure tarrayelementeditor.dokeydown(var ainfo: keyeventinfoty);
+begin
+ if issysshortcut(sho_rowdelete,ainfo) then begin
+  if not (ps_nodeleteitems in fparenteditor.fstate) then begin
+   dodelete(nil);
+   include(ainfo.eventstate,es_processed);
+  end;
+ end
+ else begin
+  if not (ps_noadditems in fparenteditor.fstate) then begin
+   if issysshortcut(sho_rowinsert,ainfo) then begin
+    doinsert(nil);
+    include(ainfo.eventstate,es_processed);
+   end
+   else begin
+    if issysshortcut(sho_rowappend,ainfo) then begin
+     doappend(nil);
+     include(ainfo.eventstate,es_processed);
+    end;
+   end;
+  end;
+ end;
 end;
 
 function tarrayelementeditor.name: msestring;

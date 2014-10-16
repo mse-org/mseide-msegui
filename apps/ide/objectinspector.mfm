@@ -216,6 +216,7 @@ object objectinspectorfo: tobjectinspectorfo
       bounds_cx = 90
       bounds_cy = 16
       optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_resetselectonexit, oe_exitoncursor, oe_hintclippedtext, oe_locate, oe_savestate]
+      onkeydown = propskeydownexe
       onupdaterowvalues = propupdaterowvalue
       options = [teo_treecolnavig, teo_keyrowmoving]
       oncheckrowmove = propsoncheckrowmove
@@ -253,8 +254,8 @@ object objectinspectorfo: tobjectinspectorfo
       font.xscale = 1
       font.dummy = 0
       onkeydown = valueskeydown
-      onsetvalue = valuessetvalue
       onclientmouseevent = valuesonmouseevent
+      onsetvalue = valuessetvalue
       onpaintimage = paintimageexe
       onextendimage = extendimageexe
       onbuttonaction = valuesbuttonaction

@@ -129,6 +129,7 @@ type
    procedure paintimageexe(const sender: twidget; const acanvas: tcanvas);
    procedure extendimageexe(const sender: twidget;
                       const cellinfopo: pcellinfoty; var aextend: sizety);
+   procedure propskeydownexe(const sender: twidget; var ainfo: keyeventinfoty);
   private
    factmodule: tmsecomponent;
    factcomp: tcomponent;
@@ -1626,6 +1627,12 @@ procedure tobjectinspectorfo.propsonpopup(const sender: tobject;
                var amenu: tpopupmenu; var mouseinfo: mouseeventinfoty);
 begin
  tpropertyitem(props.item).feditor.dopopup(amenu,props,mouseinfo);
+end;
+
+procedure tobjectinspectorfo.propskeydownexe(const sender: twidget;
+               var ainfo: keyeventinfoty);
+begin
+ tpropertyitem(props.item).feditor.dokeydown(ainfo);
 end;
 
 procedure tobjectinspectorfo.objectinspectorfoonloaded(const sender: tobject);
