@@ -61,6 +61,11 @@ type
   public
    function getvalue: msestring; override;
  end;
+
+ tmseparampropertyeditor = class(tclasspropertyeditor)
+  public
+   function getvalue: msestring; override;
+ end;
   
  tdbparamnamepropertyeditor = class(tstringpropertyeditor)
   protected
@@ -509,6 +514,7 @@ begin
                                          tdatasetactivepropertyeditor);                              
  registerpropertyeditor(typeinfo(tfielddef),nil,'',tfielddefpropertyeditor);
  registerpropertyeditor(typeinfo(tparam),nil,'',tdbparampropertyeditor);
+ registerpropertyeditor(typeinfo(tmseparam),nil,'',tmseparampropertyeditor);
  registerpropertyeditor(typeinfo(tdbstringcols),nil,'',tdbstringcolseditor);
  registerpropertyeditor(typeinfo(string),tindexfield,'fieldname',
                  tindexfieldnamepropertyeditor);
@@ -1263,6 +1269,19 @@ begin
  with tparam(fprops[0].instance) do begin
   result:= '<'+name+'><'+getenumname(typeinfo(tfieldtype),ord(datatype))+
       {'><'+getenumname(typeinfo(tparamtype),ord(paramtype))+}'>';
+ end;
+end;
+
+{ tmseparampropertyeditor }
+
+function tmseparampropertyeditor.getvalue: msestring;
+begin
+ with tmseparam(fprops[0].instance) do begin
+  result:= '<'+name+'><'+fieldname+'><';
+  if connector <> nil then begin
+   result:= result+connector.name;
+  end;
+  result:= result+'>';
  end;
 end;
 
