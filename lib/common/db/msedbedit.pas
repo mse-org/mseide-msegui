@@ -478,10 +478,21 @@ type
    property onexecute;
  end;
 }
- tcustomdbdropdownlistedit = class(tcustomdropdownlistedit,idbeditfieldlink,ireccontrol)
+ idbifidropdownlistdatalink = interface(iifidropdownlistdatalink)
+ end;
+ 
+ tcustomdbdropdownlistedit = class(tcustomdropdownlistedit,idbeditfieldlink,
+                                      ireccontrol,idbifidropdownlistdatalink)
   private
    fdatalink: tstringeditwidgetdatalink;
+   fdropdownifilink: tifidropdownlistlinkcomp;
+   fdropdownifiserverintf: iifiserver;
    procedure setdatalink(const avalue: tstringeditwidgetdatalink);
+   function getdropdownifilink: tifidropdownlistlinkcomp;
+   procedure setdropdownifilink(const avalue: tifidropdownlistlinkcomp);
+   procedure setdropdownifiserverintf(const aintf: iifiserver);
+   procedure idbifidropdownlistdatalink.setifiserverintf = 
+                                           setdropdownifiserverintf;
   protected   
    procedure defineproperties(filer: tfiler); override;
 
@@ -507,6 +518,8 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    property datalink: tstringeditwidgetdatalink read fdatalink write setdatalink;
+   property dropdownifilink: tifidropdownlistlinkcomp read getdropdownifilink 
+                               write setdropdownifilink;  //for dropdownlist
  end;
 
  idbdropdownlist = interface(idropdownlist)
@@ -524,7 +537,7 @@ type
   published
    property datalink;
    property dropdown;
-   property ifilink;     //for dropdownlist
+   property dropdownifilink;
    property onsetvalue;
    property onbeforedropdown;
    property onafterclosedropdown;
@@ -544,7 +557,8 @@ type
    function createdropdowncontroller: tcustomdropdowncontroller; override;
    procedure recordselected(const arecordnum: integer; const akey: keyty);
   published
-   property dropdown: tdropdownlistcontrollerdb read getdropdown write setdropdown;
+   property dropdown: tdropdownlistcontrollerdb read getdropdown 
+                                                        write setdropdown;
  end;
  
  tdbdropdownlisteditlb = class(tdbdropdownlistedit,ilbdropdownlist)
@@ -1052,10 +1066,18 @@ type
    property onsetvalue;
  end;
 
- tcustomdbenumedit = class(tcustomenumedit,idbeditfieldlink,ireccontrol)
+ tcustomdbenumedit = class(tcustomenumedit,idbeditfieldlink,ireccontrol,
+                                                 idbifidropdownlistdatalink)
   private
    fdatalink: tlookupeditdatalink;
+   fdropdownifilink: tifienumlinkcomp;
+   fdropdownifiserverintf: iifiserver;
    procedure setdatalink(const avalue: tlookupeditdatalink);
+   function getdropdownifilink: tifienumlinkcomp;
+   procedure setdropdownifilink(const avalue: tifienumlinkcomp);
+   procedure setdropdownifiserverintf(const aintf: iifiserver);
+   procedure idbifidropdownlistdatalink.setifiserverintf = 
+                                           setdropdownifiserverintf;
   protected   
    procedure defineproperties(filer: tfiler); override;
    function nullcheckneeded(const newfocus: twidget): boolean; override;
@@ -1079,6 +1101,8 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    property datalink: tlookupeditdatalink read fdatalink write setdatalink;
+   property dropdownifilink: tifienumlinkcomp read getdropdownifilink 
+                                 write setdropdownifilink;  //for dropdownlist
  end;
  
  tdbenumedit = class(tcustomdbenumedit)
@@ -1086,7 +1110,7 @@ type
    property valueoffset; //before value
    property datalink;
    property dropdown;
-   property ifilink;     //for dropdownlist
+   property dropdownifilink;
    property valuedefault;
    property valueempty;
    property base;
@@ -4066,6 +4090,24 @@ function tcustomdbdropdownlistedit.getfieldlink: tcustomeditwidgetdatalink;
 begin
  result:= fdatalink;
 end;
+
+function tcustomdbdropdownlistedit.getdropdownifilink: tifidropdownlistlinkcomp;
+begin
+ result:= fdropdownifilink;
+end;
+
+procedure tcustomdbdropdownlistedit.setdropdownifilink(
+                               const avalue: tifidropdownlistlinkcomp);
+begin
+ mseificomp.setifilinkcomp(idbifidropdownlistdatalink(self),avalue,
+                                      tifilinkcomp(fdropdownifilink));
+end;
+
+procedure tcustomdbdropdownlistedit.setdropdownifiserverintf(
+                                               const aintf: iifiserver);
+begin
+ fdropdownifiserverintf:= aintf;
+end;
 {
 procedure tcustomdbdropdownlistedit.doenter;
 begin
@@ -5679,6 +5721,22 @@ end;
 function tcustomdbenumedit.getfieldlink: tcustomeditwidgetdatalink;
 begin
  result:= fdatalink;
+end;
+
+function tcustomdbenumedit.getdropdownifilink: tifienumlinkcomp;
+begin
+ result:= fdropdownifilink;
+end;
+
+procedure tcustomdbenumedit.setdropdownifilink(const avalue: tifienumlinkcomp);
+begin
+ mseificomp.setifilinkcomp(idbifidropdownlistdatalink(self),avalue,
+                                            tifilinkcomp(fdropdownifilink));
+end;
+
+procedure tcustomdbenumedit.setdropdownifiserverintf(const aintf: iifiserver);
+begin
+ fdropdownifiserverintf:= aintf;
 end;
 {
 procedure tcustomdbenumedit.doenter;
