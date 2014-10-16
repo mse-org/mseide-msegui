@@ -1,5 +1,5 @@
 object formdesignerfo: tformdesignerfo
-  optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_hinton]
+  optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousewheel, ow_hinton]
   optionsskin = [osk_framebuttononly]
   color = -1879048187
   frame.grip_size = 0
@@ -20,7 +20,7 @@ object formdesignerfo: tformdesignerfo
   bounds_y = 239
   bounds_cx = 287
   bounds_cy = 300
-  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent]
+  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_mousewheel]
   container.color = -1879048187
   container.oncalcminscrollsize = calcscrollsize
   container.bounds = (
