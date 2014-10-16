@@ -490,9 +490,11 @@ type
    procedure setdatalink(const avalue: tstringeditwidgetdatalink);
    function getdropdownifilink: tifidropdownlistlinkcomp;
    procedure setdropdownifilink(const avalue: tifidropdownlistlinkcomp);
-   procedure setdropdownifiserverintf(const aintf: iifiserver);
+   procedure dropdownsetifiserverintf(const aintf: iifiserver);
    procedure idbifidropdownlistdatalink.setifiserverintf = 
-                                           setdropdownifiserverintf;
+                                           dropdownsetifiserverintf;
+   procedure dropdownifisetvalue(var avalue; var accept: boolean);
+   procedure idbifidropdownlistdatalink.ifisetvalue = dropdownifisetvalue;
   protected   
    procedure defineproperties(filer: tfiler); override;
 
@@ -1075,9 +1077,11 @@ type
    procedure setdatalink(const avalue: tlookupeditdatalink);
    function getdropdownifilink: tifienumlinkcomp;
    procedure setdropdownifilink(const avalue: tifienumlinkcomp);
-   procedure setdropdownifiserverintf(const aintf: iifiserver);
+   procedure dropdownsetifiserverintf(const aintf: iifiserver);
    procedure idbifidropdownlistdatalink.setifiserverintf = 
-                                           setdropdownifiserverintf;
+                                           dropdownsetifiserverintf;
+   procedure dropdownifisetvalue(var avalue; var accept: boolean);
+   procedure idbifidropdownlistdatalink.ifisetvalue = dropdownifisetvalue;
   protected   
    procedure defineproperties(filer: tfiler); override;
    function nullcheckneeded(const newfocus: twidget): boolean; override;
@@ -4103,10 +4107,16 @@ begin
                                       tifilinkcomp(fdropdownifilink));
 end;
 
-procedure tcustomdbdropdownlistedit.setdropdownifiserverintf(
+procedure tcustomdbdropdownlistedit.dropdownsetifiserverintf(
                                                const aintf: iifiserver);
 begin
  fdropdownifiserverintf:= aintf;
+end;
+
+procedure tcustomdbdropdownlistedit.dropdownifisetvalue(var avalue;
+               var accept: boolean);
+begin
+ //dummy
 end;
 {
 procedure tcustomdbdropdownlistedit.doenter;
@@ -5734,9 +5744,15 @@ begin
                                             tifilinkcomp(fdropdownifilink));
 end;
 
-procedure tcustomdbenumedit.setdropdownifiserverintf(const aintf: iifiserver);
+procedure tcustomdbenumedit.dropdownsetifiserverintf(const aintf: iifiserver);
 begin
  fdropdownifiserverintf:= aintf;
+end;
+
+procedure tcustomdbenumedit.dropdownifisetvalue(var avalue;
+               var accept: boolean);
+begin
+ //dummy
 end;
 {
 procedure tcustomdbenumedit.doenter;
