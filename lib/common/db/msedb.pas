@@ -1264,7 +1264,7 @@ type
 
                             //flags below probably will be moved to 
                             //tsqlquery.options
-                         dso_postsavepoint,
+                         dso_postsavepoint,dso_deletesavepoint,
                          dso_cancelupdateonerror,dso_cancelupdatesonerror,
                          dso_cancelupdateondeleteerror,
                          dso_editonapplyerror,
@@ -1293,8 +1293,8 @@ type
   procedure inheriteddataevent(const event: tdataevent; const info: ptrint);
   procedure inheritedcancel;
   procedure inheritedpost;
-  procedure inheriteddelete;
   procedure inheritedinsert;
+  procedure inheriteddelete;
   function inheritedmoveby(const distance: integer): integer;
   procedure inheritedinternalinsert;
   procedure inheritedinternalopen;
@@ -1460,7 +1460,7 @@ type
    function post(const aafterpost: afterdbopeventty = nil): boolean;
                            //calls post if in edit or insert state,
                            //returns true if ok
-   procedure insert(const aafterinsert: afterdbopeventty = nil);
+//   procedure insert(const aafterinsert: afterdbopeventty = nil);
    procedure delete(const aafterdelete: afterdbopeventty = nil);
    function posting: boolean; //true if in inner post procedure
    function posting1: boolean; //true if in outer post procedure
@@ -7717,7 +7717,17 @@ var
  bo1,bo2: boolean;
  int1: integer;
 begin
- bo1:= dso_postsavepoint in foptions;
+ case akind of
+  opk_post: begin
+   bo1:= dso_postsavepoint in foptions;
+  end;
+  opk_delete: begin
+   bo1:= dso_deletesavepoint in foptions;
+  end;
+  else begin
+   bo1:= false;
+  end;
+ end;
  try
   if bo1 then begin
    int1:= savepointbegin;
@@ -7819,12 +7829,12 @@ begin
   end;
  end;
 end;
-
+{
 procedure tdscontroller.insert(const aafterinsert: afterdbopeventty = nil);
 begin
  execoperation(opk_insert,aafterinsert);
 end;
-
+}
 procedure tdscontroller.delete(const aafterdelete: afterdbopeventty = nil);
 begin
  execoperation(opk_delete,aafterdelete);

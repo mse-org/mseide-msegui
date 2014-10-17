@@ -148,7 +148,7 @@ type
    procedure cancel; override;
    procedure post; override;
    procedure delete; override;
-   procedure insert; override;
+//   procedure insert; override;
    procedure applyupdates(const maxerrors: integer; 
                 const cancelonerror: boolean;
                 const cancelondeleteerror: boolean = false;
@@ -659,12 +659,12 @@ procedure tmsesqlquery.delete;
 begin
  fcontroller.delete();
 end;
-
+{
 procedure tmsesqlquery.insert;
 begin
  fcontroller.insert();
 end;
-
+}
 procedure tmsesqlquery.afterapply;
 begin
  if writetransaction <> nil then begin //can be nil in local mode
