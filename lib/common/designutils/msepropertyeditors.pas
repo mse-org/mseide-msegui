@@ -3421,7 +3421,8 @@ end;
 
 procedure tarraypropertyeditor.dokeydown(var ainfo: keyeventinfoty);
 begin
- if not (ps_noadditems in fparenteditor.fstate) then begin
+ if (fparenteditor <> nil) and 
+                not (ps_noadditems in fparenteditor.fstate) then begin
   if issysshortcut(sho_rowinsert,ainfo) then begin
    doinsert(nil);
    include(ainfo.eventstate,es_processed);
