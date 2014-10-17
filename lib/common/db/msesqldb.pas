@@ -124,6 +124,8 @@ type
    procedure inheriteddataevent(const event: tdataevent; const info: ptrint);
    procedure inheritedcancel;
    procedure inheritedpost;
+   procedure inheriteddelete();
+   procedure inheritedinsert();
    function inheritedmoveby(const distance: integer): integer;  
    procedure inheritedinternalinsert; virtual;
    procedure inheritedinternaldelete; virtual;
@@ -145,6 +147,8 @@ type
    function moveby(const distance: integer): integer;
    procedure cancel; override;
    procedure post; override;
+   procedure delete; override;
+   procedure insert; override;
    procedure applyupdates(const maxerrors: integer; 
                 const cancelonerror: boolean;
                 const cancelondeleteerror: boolean = false;
@@ -648,7 +652,17 @@ end;
 
 procedure tmsesqlquery.post;
 begin
- fcontroller.post({$ifdef FPC}@{$endif}afterpost);
+ fcontroller.post(@afterpost);
+end;
+
+procedure tmsesqlquery.delete;
+begin
+ fcontroller.delete();
+end;
+
+procedure tmsesqlquery.insert;
+begin
+ fcontroller.insert();
 end;
 
 procedure tmsesqlquery.afterapply;
@@ -905,6 +919,16 @@ end;
 procedure tmsesqlquery.setcontrolleractive(const avalue: boolean);
 begin
  setactive(avalue);
+end;
+
+procedure tmsesqlquery.inheriteddelete();
+begin
+ inherited delete();
+end;
+
+procedure tmsesqlquery.inheritedinsert();
+begin
+ inherited insert();
 end;
 
 {

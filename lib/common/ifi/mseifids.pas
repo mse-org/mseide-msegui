@@ -211,6 +211,8 @@ type
    procedure inheriteddataevent(const event: tdataevent; const info: ptrint);
    procedure inheritedcancel;
    procedure inheritedpost;
+   procedure inheriteddelete();
+   procedure inheritedinsert();
    function inheritedmoveby(const distance: integer): integer;
    procedure inheritedinternalinsert;
    procedure inheritedinternaldelete;
@@ -2735,6 +2737,16 @@ end;
 procedure tifidataset.enddisplaydata;
 begin
  //dummy
+end;
+
+procedure tifidataset.inheriteddelete;
+begin
+ inherited delete();
+end;
+
+procedure tifidataset.inheritedinsert;
+begin
+ inherited insert();
 end;
 
 { trxdataset }

@@ -27,6 +27,8 @@ type
    procedure inheriteddataevent(const event: tdataevent; const info: ptrint);
    procedure inheritedcancel;
    procedure inheritedpost;
+   procedure inheriteddelete();
+   procedure inheritedinsert();
    function inheritedmoveby(const distance: integer): integer;
    procedure inheritedinternalinsert;
    procedure inheritedinternaldelete;
@@ -101,6 +103,8 @@ type
    procedure inheriteddataevent(const event: tdataevent; const info: ptrint);
    procedure inheritedcancel;
    procedure inheritedpost;
+   procedure inheriteddelete();
+   procedure inheritedinsert();
    function inheritedmoveby(const distance: integer): integer;
    procedure inheritedinternalinsert;
    procedure inheritedinternaldelete;
@@ -427,6 +431,16 @@ begin
  //dummy
 end;
 
+procedure tmsefixedformatdataset.inheriteddelete;
+begin
+ inherited delete();
+end;
+
+procedure tmsefixedformatdataset.inheritedinsert;
+begin
+ inherited insert();
+end;
+
 { tmsesdfdataset }
 
 constructor tmsesdfdataset.create(aowner: tcomponent);
@@ -686,6 +700,16 @@ end;
 procedure tmsesdfdataset.enddisplaydata;
 begin
  //dummy
+end;
+
+procedure tmsesdfdataset.inheriteddelete;
+begin
+ inherited delete();
+end;
+
+procedure tmsesdfdataset.inheritedinsert;
+begin
+ inherited insert();
 end;
 
 end.

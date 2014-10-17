@@ -39,6 +39,8 @@ type
    procedure inheriteddataevent(const event: tdataevent; const info: ptrint);
    procedure inheritedcancel;
    procedure inheritedpost;
+   procedure inheriteddelete();
+   procedure inheritedinsert();
    function inheritedmoveby(const distance: integer): integer;
    procedure inheritedinternalinsert;
    procedure inheritedinternaldelete;
@@ -387,6 +389,16 @@ begin
    end;
   end;
  end;
+end;
+
+procedure tlocaldataset.inheriteddelete();
+begin
+ inherited delete();
+end;
+
+procedure tlocaldataset.inheritedinsert();
+begin
+ inherited insert();
 end;
 {
 procedure tlocaldataset.dscontrolleroptionschanged(const aoptions: datasetoptionsty);

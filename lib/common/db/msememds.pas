@@ -25,6 +25,8 @@ type
    procedure inheriteddataevent(const event: tdataevent; const info: ptrint);
    procedure inheritedcancel;
    procedure inheritedpost;
+   procedure inheriteddelete();
+   procedure inheritedinsert();
    function inheritedmoveby(const distance: integer): integer;
    procedure inheritedinternalinsert;
    procedure inheritedinternaldelete;
@@ -333,6 +335,16 @@ end;
 procedure tmsememdataset.enddisplaydata;
 begin
  //dummy
+end;
+
+procedure tmsememdataset.inheriteddelete;
+begin
+ inherited delete();
+end;
+
+procedure tmsememdataset.inheritedinsert;
+begin
+ inherited insert();
 end;
 
 end.

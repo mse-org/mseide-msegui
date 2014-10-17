@@ -1293,6 +1293,8 @@ type
   procedure inheriteddataevent(const event: tdataevent; const info: ptrint);
   procedure inheritedcancel;
   procedure inheritedpost;
+  procedure inheriteddelete;
+  procedure inheritedinsert;
   function inheritedmoveby(const distance: integer): integer;
   procedure inheritedinternalinsert;
   procedure inheritedinternalopen;
@@ -7724,7 +7726,17 @@ begin
   include(fstate,dscs_posting);
   try    
    try
-    idscontroller(fintf).inheritedpost;
+    case akind of
+     opk_post: begin
+      idscontroller(fintf).inheritedpost();
+     end;
+     opk_delete: begin
+      idscontroller(fintf).inheriteddelete();
+     end;
+     opk_insert: begin
+      idscontroller(fintf).inheritedinsert();
+     end;
+    end;
    except
     on epostcancel do begin
      if bo1 then begin
