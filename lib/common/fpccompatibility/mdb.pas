@@ -1655,7 +1655,7 @@ type
     function CreateBlobStream(Field: TField; Mode: TBlobStreamMode): TStream; virtual;
     procedure CursorPosChanged;
     procedure DataConvert(aField: TField; aSource, aDest: Pointer; aToNative: Boolean); virtual;
-    procedure Delete;
+    procedure Delete; virtual;
     procedure DisableControls;
     procedure Edit;
     procedure EnableControls;
@@ -1672,7 +1672,7 @@ type
     procedure GetFieldList(List: TList; const FieldNames: string);
     procedure GetFieldNames(List: TStrings);
     procedure GotoBookmark(ABookmark: TBookmark);
-    procedure Insert;
+    procedure Insert; virtual;
     procedure InsertRecord(const Values: array of const);
     function IsEmpty: Boolean;
     function IsLinkedTo(ADataSource: TDataSource): Boolean;

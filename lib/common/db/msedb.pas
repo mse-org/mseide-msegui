@@ -31,8 +31,9 @@ const
 
  de_modified = ord(high(tdataevent))+1;
  de_afterdelete = ord(high(tdataevent))+2;
- de_afterpost = ord(high(tdataevent))+3;
- de_hasactiveedit = ord(high(tdataevent))+4;
+ de_afterinsert = ord(high(tdataevent))+3;
+ de_afterpost = ord(high(tdataevent))+4;
+ de_hasactiveedit = ord(high(tdataevent))+5;
 
  defaultdscontrolleroptions = [{dso_cancelupdateondeleteerror}];
  allfieldkinds = [fkData,fkCalculated,fkLookup,fkInternalCalc];
@@ -1334,8 +1335,11 @@ type
                                  const master: tdataset) of object;
  slavedataseteventty = procedure(const sender: tdataset;
                                  const slave: tdataset) of object;
- afterposteventty = procedure(const sender: tdataset; var ok: boolean) of object;
+ afterdbopeventty = procedure(const sender: tdataset;
+                                         var ok: boolean) of object;
  epostcancel = class(eabort);
+
+ opkindty = (opk_post,opk_delete,opk_insert);
  
  tdscontroller = class(tactivatorcontroller,idsfieldcontroller)
   private
@@ -1361,7 +1365,7 @@ type
    fonupdatemasterinsert: masterdataseteventty;
    ftimer: tsimpletimer;
    fonbeforepost: tdatasetnotifyevent;
-   fonafterpost: afterposteventty;
+   fonafterpost: afterdbopeventty;
    fonbeforecopyrecord: tdatasetnotifyevent;
    fonaftercopyrecord: tdatasetnotifyevent;
    procedure setfields(const avalue: tpersistentfields);
@@ -1398,6 +1402,8 @@ type
    procedure savepointrollback(const aindex: integer = -1); virtual;
                            //-1 = toplevel
    procedure savepointrelease; virtual;
+   function execoperation(const akind: opkindty;
+                              const aafterop: afterdbopeventty): boolean;
       
   public
    constructor create(const aowner: tdataset; const aintf: idscontroller;
@@ -1449,9 +1455,11 @@ type
    procedure internalclose;
    procedure closequery(var amodalresult: modalresultty); overload;
    function closequery: boolean; overload; //true if ok
-   function post(const aafterpost: afterposteventty = nil): boolean;
+   function post(const aafterpost: afterdbopeventty = nil): boolean;
                            //calls post if in edit or insert state,
                            //returns true if ok
+   procedure insert(const aafterinsert: afterdbopeventty = nil);
+   procedure delete(const aafterdelete: afterdbopeventty = nil);
    function posting: boolean; //true if in inner post procedure
    function posting1: boolean; //true if in outer post procedure
    procedure postcancel; //can be called in BeforePost, calls cancel after abort
@@ -1497,7 +1505,7 @@ type
                      write fonupdatemasterinsert;
    property onbeforepost: tdatasetnotifyevent read fonbeforepost
                                                        write fonbeforepost;
-   property onafterpost: afterposteventty read fonafterpost write fonafterpost;
+   property onafterpost: afterdbopeventty read fonafterpost write fonafterpost;
                        //always called
    property onbeforecopyrecord: tdatasetnotifyevent read fonbeforecopyrecord
                                                      write fonbeforecopyrecord;
@@ -7701,10 +7709,77 @@ begin
  result:= modres1 = mr_canclose;
 end;
 
-function tdscontroller.post(const aafterpost: afterposteventty = nil): boolean;
+function tdscontroller.execoperation(const akind: opkindty;
+                          const aafterop: afterdbopeventty): boolean;
 var
- bo1,bo2,bo3: boolean;
+ bo1,bo2: boolean;
  int1: integer;
+begin
+ bo1:= dso_postsavepoint in foptions;
+ try
+  if bo1 then begin
+   int1:= savepointbegin;
+  end;
+  result:= true;
+  include(fstate,dscs_posting);
+  try    
+   try
+    idscontroller(fintf).inheritedpost;
+   except
+    on epostcancel do begin
+     if bo1 then begin
+      bo1:= false;
+      savepointrollback(int1);
+     end;     
+     result:= false;
+     tdataset(fowner).cancel;
+    end
+    else begin
+     if bo1 then begin
+      bo1:= false;
+      savepointrollback(int1);
+     end;     
+     raise;
+    end;
+   end;      
+  finally
+   exclude(fstate,dscs_posting);
+  end;
+  bo2:= result;
+  try
+   if result and assigned(aafterop) then begin
+    aafterop(tdataset(fowner),result);
+   end;
+   if result then begin
+    if akind = opk_post then begin
+     tdataset1(fowner).dataevent(tdataevent(de_afterpost),0);
+    end;
+   end;
+  finally
+   if bo2 then begin
+    self.modified;
+   end;
+  end;
+  if bo1 then begin
+   bo1:= false;
+   if result then begin
+    savepointrelease;
+   end
+   else begin
+    savepointrollback(int1);
+   end;
+  end;     
+ except
+  if bo1 then begin
+   savepointrollback(int1);
+  end;     
+  raise;
+ end;
+end;
+
+function tdscontroller.post(const aafterpost: afterdbopeventty = nil): boolean;
+var
+ bo3: boolean;
 begin
  with tdataset(fowner) do begin;
   if state in dseditmodes then begin
@@ -7715,64 +7790,7 @@ begin
      fonbeforepost(tdataset(fowner));
     end;
     try
-     bo1:= dso_postsavepoint in foptions;
-     try
-      if bo1 then begin
-       int1:= savepointbegin;
-      end;
-      result:= true;
-      include(fstate,dscs_posting);
-      try    
-       try
-        idscontroller(fintf).inheritedpost;
-       except
-        on epostcancel do begin
-         if bo1 then begin
-          bo1:= false;
-          savepointrollback(int1);
-         end;     
-         result:= false;
-         tdataset(fowner).cancel;
-        end
-        else begin
-         if bo1 then begin
-          bo1:= false;
-          savepointrollback(int1);
-         end;     
-         raise;
-        end;
-       end;      
-      finally
-       exclude(fstate,dscs_posting);
-      end;
-      bo2:= result;
-      try
-       if result and assigned(aafterpost) then begin
-        aafterpost(tdataset(fowner),result);
-       end;
-       if result then begin
-        tdataset1(fowner).dataevent(tdataevent(de_afterpost),0);
-       end;
-      finally
-       if bo2 then begin
-        self.modified;
-       end;
-      end;
-      if bo1 then begin
-       bo1:= false;
-       if result then begin
-        savepointrelease;
-       end
-       else begin
-        savepointrollback(int1);
-       end;
-      end;     
-     except
-      if bo1 then begin
-       savepointrollback(int1);
-      end;     
-      raise;
-     end;
+     result:= execoperation(opk_post,aafterpost);
     finally
      if checkcanevent(tdataset(fowner),tmethod(self.fonafterpost)) then begin
       fonafterpost(tdataset(fowner),result);
@@ -7788,6 +7806,16 @@ begin
    result:= false;
   end;
  end;
+end;
+
+procedure tdscontroller.insert(const aafterinsert: afterdbopeventty = nil);
+begin
+ execoperation(opk_insert,aafterinsert);
+end;
+
+procedure tdscontroller.delete(const aafterdelete: afterdbopeventty = nil);
+begin
+ execoperation(opk_delete,aafterdelete);
 end;
 
 procedure tdscontroller.postcancel;
