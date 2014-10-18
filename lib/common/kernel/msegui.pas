@@ -14423,42 +14423,60 @@ begin
  end;
 end;
 
-procedure twindow.bringtofront;
+procedure twindow.bringtofront();
+var
+ int1: integer;
 begin
- gui_raisewindow(winid);
- include(appinst.fstate,aps_needsupdatewindowstack);
 {$ifdef mse_debugzorder}
  debugwriteln('****bringtofront**** "'+fownerwidget.name+'"');
 {$endif}
+ with appinst do begin
+  for int1:= high(fwindowstack) downto 0 do begin
+   if fwindowstack[int1].lower = self then begin
+    deleteitem(fwindowstack,typeinfo(windowstackinfoarty),int1);
+   end;
+  end;
+  gui_raisewindow(winid);
+  include(fstate,aps_needsupdatewindowstack);
+ end;
 end;
 
-procedure twindow.sendtoback;
+procedure twindow.sendtoback();
+var
+ int1: integer;
 begin
- gui_lowerwindow(winid);
- include(appinst.fstate,aps_needsupdatewindowstack);
 {$ifdef mse_debugzorder}
  debugwriteln('****sendtoback**** "'+fownerwidget.name+'"');
 {$endif}
+ with appinst do begin
+  for int1:= high(fwindowstack) downto 0 do begin
+   if fwindowstack[int1].upper = self then begin
+    deleteitem(fwindowstack,typeinfo(windowstackinfoarty),int1);
+   end;
+  end;
+  gui_lowerwindow(winid);
+  include(fstate,aps_needsupdatewindowstack);
+ end;
 end;
 
 procedure twindow.bringtofrontlocal;
 begin
- include(fstate,tws_raise);
- exclude(fstate,tws_lower);
- include(appinst.fstate,aps_needsupdatewindowstack);
 {$ifdef mse_debugzorder}
  debugwriteln('****bringtofrontlocal**** "'+fownerwidget.name+'"');
 {$endif}
+ include(fstate,tws_raise);
+ exclude(fstate,tws_lower);
+ include(appinst.fstate,aps_needsupdatewindowstack);
 end;
 
 procedure twindow.sendtobacklocal;
 begin
- include(fstate,tws_lower);
- exclude(fstate,tws_raise);
- include(appinst.fstate,aps_needsupdatewindowstack);
 {$ifdef mse_debugzorder}
  debugwriteln('****sendtobacklocal**** "'+fownerwidget.name+'"');
 {$endif}
+ include(fstate,tws_lower);
+ exclude(fstate,tws_raise);
+ include(appinst.fstate,aps_needsupdatewindowstack);
 end;
 
 procedure twindow.stackunder(const predecessor: twindow);
@@ -16993,26 +17011,6 @@ begin
  end;
 end;
 
-procedure tinternalapplication.stackunder(const sender: twindow; 
-                                              const predecessor: twindow);
-begin
- setlength(fwindowstack,high(fwindowstack)+2);
- with fwindowstack[high(fwindowstack)] do begin
-  lower:= sender;
-  upper:= predecessor;
- end;
-end;
-
-procedure tinternalapplication.stackover(const sender: twindow;
-                                             const predecessor: twindow);
-begin
- setlength(fwindowstack,high(fwindowstack)+2);
- with fwindowstack[high(fwindowstack)] do begin
-  lower:= predecessor;
-  upper:= sender;
- end;
-end;
-
 {$ifdef mse_debugzorder}
 function debugwindowinfo(const awindow: twindow): string;
 begin
@@ -17051,6 +17049,34 @@ begin
 end;
 
 {$endif}
+
+procedure tinternalapplication.stackunder(const sender: twindow; 
+                                              const predecessor: twindow);
+begin
+{$ifdef mse_debugzorder}
+ debugwriteln('****stackunder**** '+debugwindowinfo(sender)+' '+
+                                          debugwindowinfo(predecessor));
+{$endif}
+ setlength(fwindowstack,high(fwindowstack)+2);
+ with fwindowstack[high(fwindowstack)] do begin
+  lower:= sender;
+  upper:= predecessor;
+ end;
+end;
+
+procedure tinternalapplication.stackover(const sender: twindow;
+                                             const predecessor: twindow);
+begin
+{$ifdef mse_debugzorder}
+ debugwriteln('****stackover**** '+debugwindowinfo(sender)+' '+
+                                          debugwindowinfo(predecessor));
+{$endif}
+ setlength(fwindowstack,high(fwindowstack)+2);
+ with fwindowstack[high(fwindowstack)] do begin
+  lower:= predecessor;
+  upper:= sender;
+ end;
+end;
 
 function cmpwindowstack(const l,r): integer;
 begin
