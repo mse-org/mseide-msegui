@@ -144,6 +144,8 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
   published
+   property textflags default defaulttextflagsnoycentered;
+   property textflagsactive default defaulttextflagsactivenoycentered;
    property frame: tellipsebuttonframe read getframe write setframe;
    property onexecute: stringdialogexeceventty read getonexecute write setonexecute;
  end;
@@ -619,6 +621,9 @@ end;
 constructor tdbdialogstringedit.create(aowner: tcomponent);
 begin
  inherited;
+ ftextflags:= defaulttextflagsnoycentered;
+ ftextflagsactive:= defaulttextflagsactivenoycentered;
+ updatetextflags();
  if fcontroller = nil then begin
   fcontroller:= createdialogcontroller;
  end;

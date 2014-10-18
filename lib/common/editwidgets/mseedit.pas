@@ -35,6 +35,8 @@ const
  defaulteditwidgetheight = 20;
  defaulttextflags = [tf_ycentered,tf_noselect];
  defaulttextflagsactive = [tf_ycentered];
+ defaulttextflagsnoycentered = defaulttextflags - [tf_ycentered];
+ defaulttextflagsactivenoycentered = defaulttextflagsactive - [tf_ycentered];
 
 type
 
@@ -316,8 +318,6 @@ type
   private
    fonchange: notifyeventty;
    fontextedited: texteditedeventty;
-   ftextflags: textflagsty;
-   ftextflagsactive: textflagsty;
    foncopytoclipboard: updatestringeventty;
    fonpastefromclipboard: updatestringeventty;
    fcursorreadonly: cursorshapety;
@@ -336,6 +336,8 @@ type
    function getoptionsedit1: optionsedit1ty;
    procedure setoptionsedit1(const avalue: optionsedit1ty);
   protected
+   ftextflags: textflagsty;
+   ftextflagsactive: textflagsty;
    feditor: tinplaceedit;
    foptionsedit: optionseditty;
    function getreadonly: boolean; virtual;

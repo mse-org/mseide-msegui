@@ -87,6 +87,9 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    property frame: tellipsebuttonframe read getframe write setframe;
+  published
+   property textflags default defaulttextflagsnoycentered;
+   property textflagsactive default defaulttextflagsactivenoycentered;
  end;
 
  tdialogstringed = class(tcustomdialogstringed)
@@ -378,6 +381,9 @@ end;
 constructor tcustomdialogstringed.create(aowner: tcomponent);
 begin
  inherited;
+ ftextflags:= defaulttextflagsnoycentered;
+ ftextflagsactive:= defaulttextflagsactivenoycentered;
+ updatetextflags();
  if fdialogcontroller = nil then begin
   fdialogcontroller:= createdialogcontroller;
  end;
