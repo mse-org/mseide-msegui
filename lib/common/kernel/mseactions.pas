@@ -266,13 +266,17 @@ procedure setsimpleshortcut(const avalue: shortcutty;
 procedure setsimpleshortcut1(const avalue: shortcutty; var adest: actioninfoty);
 function checkshortcutconflict(const a,b: shortcutarty): boolean;
 
-procedure setactionshortcuts(const sender: iactionlink; const value: shortcutarty);
-procedure setactionshortcuts1(const sender: iactionlink; const value: shortcutarty);
+procedure setactionshortcuts(const sender: iactionlink; 
+                                                   const value: shortcutarty);
+procedure setactionshortcuts1(const sender: iactionlink; 
+                                                   const value: shortcutarty);
 procedure setactionshortcut(const sender: iactionlink; const value: shortcutty);
-procedure setactionshortcut1(const sender: iactionlink; const value: shortcutty);
+procedure setactionshortcut1(const sender: iactionlink; 
+                                                   const value: shortcutty);
 function isactionshortcutstored(const info: actioninfoty): boolean;
 function isactionshortcut1stored(const info: actioninfoty): boolean;
-procedure setactionimagelist(const sender: iactionlink; const value: timagelist);
+procedure setactionimagelist(const sender: iactionlink;
+                                                   const value: timagelist);
 function isactionimageliststored(const info: actioninfoty): boolean;
  
 procedure getshortcutlist(out keys: integerarty; out names: msestringarty);

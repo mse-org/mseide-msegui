@@ -792,12 +792,14 @@ type
    procedure dragdrop(const sender: tpropertyeditor); override;
    procedure dopopup(var amenu: tpopupmenu; const atransientfor: twidget;
                           var mouseinfo: mouseeventinfoty); override;
+   procedure dokeydown(var ainfo: keyeventinfoty); override;
  end;
  
  collectionitemeditorclassty = class of tcollectionitemeditor;
   
  tcollectionpropertyeditor = class(tclasspropertyeditor)
   private
+   procedure doinsert(const sender: tobject);
    procedure doappend(const sender: tobject);
   protected
    function getdefaultstate: propertystatesty; override;
@@ -809,6 +811,7 @@ type
    function subproperties: propertyeditorarty; override;
    procedure dopopup(var amenu: tpopupmenu; const atransientfor: twidget;
                           var mouseinfo: mouseeventinfoty); override;
+   procedure dokeydown(var ainfo: keyeventinfoty); override;
  end;
  
  tpersistentarraypropertyeditor = class(tarraypropertyeditor)
@@ -3414,15 +3417,18 @@ procedure tarraypropertyeditor.dopopup(var amenu: tpopupmenu;
 begin
  if not (ps_noadditems in fstate) then begin
   tpopupmenu.additems(amenu,atransientfor,mouseinfo,
-     ['Insert Item','Append Item'],[],[],[@doinsert,@doappend]);
+     ['Insert Item'+c_tab+
+            '('+encodeshortcutname(sysshortcuts[sho_rowinsert])+')',
+     'Append Item'+c_tab+
+            '('+encodeshortcutname(sysshortcuts[sho_rowappend])+')'],
+     [],[],[@doinsert,@doappend]);
  end;
  inherited;
 end;
 
 procedure tarraypropertyeditor.dokeydown(var ainfo: keyeventinfoty);
 begin
- if (fparenteditor <> nil) and 
-                not (ps_noadditems in fparenteditor.fstate) then begin
+ if not (ps_noadditems in fstate) then begin
   if issysshortcut(sho_rowinsert,ainfo) then begin
    doinsert(nil);
    include(ainfo.eventstate,es_processed);
@@ -3757,7 +3763,12 @@ procedure tarrayelementeditor.dopopup(var amenu: tpopupmenu;
 begin
  if not (ps_noadditems in fparenteditor.fstate) then begin
   tpopupmenu.additems(amenu,atransientfor,mouseinfo,
-     ['Insert Item','Append Item','Delete Item'],[],[],
+     ['Insert Item'+c_tab+
+            '('+encodeshortcutname(sysshortcuts[sho_rowinsert])+')',
+     'Append Item'+c_tab+
+            '('+encodeshortcutname(sysshortcuts[sho_rowappend])+')',
+     'Delete Item'+c_tab+
+            '('+encodeshortcutname(sysshortcuts[sho_rowdelete])+')'],[],[],
      [{$ifdef FPC}@{$endif}doinsert,
      {$ifdef FPC}@{$endif}doappend,{$ifdef FPC}@{$endif}dodelete]);
  end
@@ -4207,8 +4218,10 @@ end;
 
 procedure tcollectionitemeditor.dodelete(const sender: tobject);
 begin
- tcollection(fparenteditor.getpointervalue).delete(findex);
- fparenteditor.modified;
+ if askyesno('Do you wish to delete '+getvalue+'?','CONFIRMATION') then begin
+  tcollection(fparenteditor.getpointervalue).delete(findex);
+  fparenteditor.modified;
+ end;
 end;
 
 function tcollectionitemeditor.getdefaultstate: propertystatesty;
@@ -4246,10 +4259,35 @@ procedure tcollectionitemeditor.dopopup(var amenu: tpopupmenu; const atransientf
                        var mouseinfo: mouseeventinfoty);
 begin
  tpopupmenu.additems(amenu,atransientfor,mouseinfo,
-    ['Insert Item','Append Item','Delete Item'],[],[],
+    ['Insert Item'+c_tab+
+            '('+encodeshortcutname(sysshortcuts[sho_rowinsert])+')',
+    'Append Item'+c_tab+
+            '('+encodeshortcutname(sysshortcuts[sho_rowappend])+')',
+    'Delete Item'+c_tab+
+            '('+encodeshortcutname(sysshortcuts[sho_rowdelete])+')'],[],[],
     [{$ifdef FPC}@{$endif}doinsert,
     {$ifdef FPC}@{$endif}doappend,{$ifdef FPC}@{$endif}dodelete]);
  inherited;
+end;
+
+procedure tcollectionitemeditor.dokeydown(var ainfo: keyeventinfoty);
+begin
+ if issysshortcut(sho_rowdelete,ainfo) then begin
+  dodelete(nil);
+  include(ainfo.eventstate,es_processed);
+ end
+ else begin
+  if issysshortcut(sho_rowinsert,ainfo) then begin
+   doinsert(nil);
+   include(ainfo.eventstate,es_processed);
+  end
+  else begin
+   if issysshortcut(sho_rowappend,ainfo) then begin
+    doappend(nil);
+    include(ainfo.eventstate,es_processed);
+   end;
+  end;
+ end;
 end;
 
 function tcollectionitemeditor.getselectedpropinstances: objectarty;
@@ -4351,15 +4389,43 @@ procedure tcollectionpropertyeditor.dopopup(var amenu: tpopupmenu;
 begin
  if not (ps_noadditems in fstate) then begin
   tpopupmenu.additems(amenu,atransientfor,mouseinfo,
-     ['Append Item'],[],[],[{$ifdef FPC}@{$endif}doappend]);
+     ['Insert Item'+c_tab+
+            '('+encodeshortcutname(sysshortcuts[sho_rowinsert])+')',
+            'Append Item'+c_tab+
+            '('+encodeshortcutname(sysshortcuts[sho_rowappend])+')'],
+            [],[],[@doinsert,@doappend]);
  end;
  inherited;
+end;
+
+procedure tcollectionpropertyeditor.dokeydown(var ainfo: keyeventinfoty);
+begin
+ if not (ps_noadditems in fstate) then begin
+  if issysshortcut(sho_rowinsert,ainfo) then begin
+   doinsert(nil);
+   include(ainfo.eventstate,es_processed);
+  end
+  else begin
+   if issysshortcut(sho_rowappend,ainfo) then begin
+    doappend(nil);
+    include(ainfo.eventstate,es_processed);
+   end;
+  end;
+ end;
 end;
 
 procedure tcollectionpropertyeditor.doappend(const sender: tobject);
 begin
  with tcollection(getpointervalue) do begin
   insert(count);
+ end;
+ modified;
+end;
+
+procedure tcollectionpropertyeditor.doinsert(const sender: tobject);
+begin
+ with tcollection(getpointervalue) do begin
+  insert(0);
  end;
  modified;
 end;
