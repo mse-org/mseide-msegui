@@ -34,6 +34,7 @@ function gui_createwindow(const rect: rectty;
                                var awindow: windowty): guierrorty;
 function gui_destroywindow(var awindow: windowty): guierrorty;
                       //id can be 0
+function gui_getrootwindow(id: winidty = 0): winidty;
 function gui_getparentwindow(const awindow: winidty): winidty;
 function gui_reparentwindow(const child: winidty; const parent: winidty;
                             const pos: pointty): guierrorty;

@@ -805,7 +805,7 @@ var
  px1: pixelty;
 begin
  if fcolorpicking and (ainfo.eventkind = ek_buttonpress) then begin
-  if gui_getpixel(mserootwindow,
+  if gui_getpixel(gui_getrootwindow(window.winid),
       translatewidgetpoint(ainfo.pos,self,nil),px1) = gue_ok then begin
    colored.value:= gui_pixeltorgb(px1);
   end;

@@ -1064,8 +1064,16 @@ end;
 
 function gui_getpixel(const id: winidty; const pos: pointty;
                                              out pixel: pixelty): guierrorty;
+var
+ dc: hdc;
 begin
- result:= gue_notimplemented;
+ result:= gue_error;
+ dc:= getdc(id);
+ pixel:= windows.getpixel(dc,pos.x,pos.y);
+ releasedc(id,dc);
+ if pixel <> clr_invalid then begin
+  result:= gue_ok;
+ end;
 end;
 
 function gui_imagetopixmap(const image: imagety; out pixmap: pixmapty;
@@ -2854,6 +2862,11 @@ begin
    regsysdndwindow(id);
   end;
  end;
+end;
+
+function gui_getrootwindow(id: winidty = 0): winidty;
+begin
+ result:= 0;
 end;
 
 function gui_getparentwindow(const awindow: winidty): winidty;

@@ -337,7 +337,7 @@ type
 
 function msedisplay: pdisplay;
 function msevisual: pvisual;
-function mserootwindow(id: winidty = 0): winidty;
+//function mserootwindow(id: winidty = 0): winidty;
 function msedefaultscreen: pscreen;
 function msedefaultscreenno: integer;
 
@@ -1493,7 +1493,7 @@ begin
  end;
 end;
 
-function mserootwindow(id: winidty = 0): winidty;
+function gui_rootwindow(id: winidty = 0): winidty;
 var
  x,y: cint;
  width,height,border,depth: cuint;
@@ -4259,6 +4259,7 @@ begin
  xsync(appdisp,0);
  gdi_unlock;
 end;
+
 
 function getsyswin(const akind: syswindowty): winidty;
 var
