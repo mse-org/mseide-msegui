@@ -2263,6 +2263,8 @@ begin
   font:= twidget1(aparent).getfont;
   initcols(acols);
   if afixcolclass <> nil then begin
+   tcustomframe1(fframe).updatestate();
+   synctofontheight(); 
    ffixcols.add(afixcolclass.create(self,ffixcols,fcontroller));
   end;
   tcustomframe1(fframe).updatestate();
