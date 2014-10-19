@@ -508,7 +508,8 @@ procedure gdierror(error: gdierrorty; const text: string = ''); overload;
 procedure gdierror(error: gdierrorty; sender: tobject;
                                             text: string = ''); overload;
  
-function stringtocolor(value: string): colorty;
+function stringtocolor(const text: string): colorty;
+function trystringtocolor(text: string; out value: colorty): boolean;
 function colortostring(value: colorty): string;
 function getcolornames: msestringarty;
 function getcolorvalues: colorarty;
@@ -813,43 +814,53 @@ begin
  end;
 end;
 
-function stringtocolor(value: string): colorty;
+function trystringtocolor(text: string; out value: colorty): boolean;
 var
  ca1: longword;
 begin
- result:= cl_none;
- if trystrtohex(value,longword(result)) then begin
+ value:= cl_none;
+ result:= true;
+ text:= trim(text);
+ if trystrtohex(text,longword(value)) then begin
   if longword(result) > $00ffffff then begin
-   gdierror(gde_invalidcolor);
+   result:= false;
+   exit;
   end;
  end
  else begin
-  value:= lowercase(value);
+  text:= lowercase(text);
   for ca1:= 0 to mapcolorcounts[cm_namedrgb] - 1 do begin
-   if defaultnamedrgb[ca1].name = value then begin
-    result:= colorty(ca1 + longword(cl_namedrgb));
+   if defaultnamedrgb[ca1].name = text then begin
+    value:= colorty(ca1 + longword(cl_namedrgb));
     exit;
    end;
   end;
   for ca1:= 0 to mapcolorcounts[cm_mapped] - 1 do begin
-   if defaultmapped[ca1].name = value then begin
-    result:= colorty(ca1 + longword(cl_mapped));
+   if defaultmapped[ca1].name = text then begin
+    value:= colorty(ca1 + longword(cl_mapped));
     exit;
    end;
   end;
   for ca1:= 0 to mapcolorcounts[cm_functional] - 1 do begin
-   if defaultfunctional[ca1].name = value then begin
-    result:= colorty(ca1 + longword(cl_functional));
+   if defaultfunctional[ca1].name = text then begin
+    value:= colorty(ca1 + longword(cl_functional));
     exit;
    end;
   end;
   for ca1:= 0 to mapcolorcounts[cm_user] - 1 do begin
-   if defaultuser[ca1].name = value then begin
-    result:= colorty(ca1 + longword(cl_user));
+   if defaultuser[ca1].name = text then begin
+    value:= colorty(ca1 + longword(cl_user));
     exit;
    end;
   end;
-  gdierror(gde_invalidcolor);
+  result:= false;
+ end;
+end;
+
+function stringtocolor(const text: string): colorty;
+begin
+ if not trystringtocolor(text,result) then begin
+  gdierror(gde_invalidcolor);  
  end;
 end;
 

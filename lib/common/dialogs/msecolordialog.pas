@@ -16,8 +16,8 @@ uses
  msegui,mseclasses,mseforms,msegraphedits,msewidgets,msesimplewidgets,
  msedataedits,msegraphics,mseglob,mseguiglob,msedialog,classes,mclasses,
  msetypes,msedropdownlist,msegrids,msestrings,mseedit,msestat,msestatfile,
- msegraphutils,msemenus,mseevent,mseificomp,mseificompglob,
- mseifiglob,msesplitter,msedispwidgets,mserichstring,msescrollbar;
+ msegraphutils,msemenus,mseevent,mseificomp,mseificompglob,mseifiglob,
+ msesplitter,msedispwidgets,mserichstring,msescrollbar;
 
 const
  colordialogstatname = 'colordialog.sta';
@@ -32,9 +32,11 @@ type
    function getbuttonellipse: tdropdownbutton;
    procedure setbuttonellipse(const avalue: tdropdownbutton);
   public
-   constructor create(const intf: icaptionframe; const buttonintf: ibutton); override;                                                  
+   constructor create(const intf: icaptionframe;
+                                     const buttonintf: ibutton); override;                                                  
   published
-   property buttonellipse: tdropdownbutton read getbuttonellipse write setbuttonellipse;
+   property buttonellipse: tdropdownbutton read getbuttonellipse 
+                                                    write setbuttonellipse;
  end;
                           
  tcustomcoloredit = class(tcustomenumedit)
@@ -111,13 +113,20 @@ type
    gb: tgroupbox;
    colorareabefore: tpaintbox;
    colorarea: tpaintbox;
-   procedure hueonsetvalue(const sender: TObject; var avalue: realty; var accept: Boolean);
-   procedure satonsetvalue(const sender: TObject; var avalue: realty; var accept: Boolean);
-   procedure brightonsetvalue(const sender: TObject; var avalue: realty; var accept: Boolean);
+   colorpibu: tbutton;
+   procedure hueonsetvalue(const sender: TObject; var avalue: realty;
+                                                         var accept: Boolean);
+   procedure satonsetvalue(const sender: TObject; var avalue: realty;
+                                                         var accept: Boolean);
+   procedure brightonsetvalue(const sender: TObject; var avalue: realty;
+                                                         var accept: Boolean);
    procedure hsbchange(const sender: TObject);
-   procedure redonsetvalue(const sender: TObject; var avalue: realty; var accept: Boolean);
-   procedure greenonsetvalue(const sender: TObject; var avalue: realty; var accept: Boolean);
-   procedure blueonsetvalue(const sender: TObject; var avalue: realty; var accept: Boolean);
+   procedure redonsetvalue(const sender: TObject; var avalue: realty;
+                                                         var accept: Boolean);
+   procedure greenonsetvalue(const sender: TObject; var avalue: realty;
+                                                         var accept: Boolean);
+   procedure blueonsetvalue(const sender: TObject; var avalue: realty; 
+                                                         var accept: Boolean);
    procedure rgbchange(const sender: TObject);
    procedure componentsdataentered(const sender: TObject);
    procedure layoutexe(const sender: TObject);
@@ -213,7 +222,8 @@ begin
  result:= tdropdownbutton(buttons[1]);
 end;
 
-procedure tellipsedropdownbuttonframe.setbuttonellipse(const avalue: tdropdownbutton);
+procedure tellipsedropdownbuttonframe.setbuttonellipse(
+                                              const avalue: tdropdownbutton);
 begin
  buttons[1].assign(avalue);
 end;
@@ -258,7 +268,8 @@ begin
  options:= [deo_autodropdown,deo_keydropdown];
 end;
 
-function tcolordropdowncontroller.getbuttonframeclass: dropdownbuttonframeclassty;
+function tcolordropdowncontroller.getbuttonframeclass():
+                                            dropdownbuttonframeclassty;
 begin
  result:= tellipsedropdownbuttonframe;
 end;
@@ -285,7 +296,8 @@ begin
  result:= tcolordropdowncontroller.create(idropdownlist(self));
 end;
 
-procedure tcustomcoloredit.texttovalue(var accept: boolean; const quiet: boolean);
+procedure tcustomcoloredit.texttovalue(var accept: boolean;
+                                                   const quiet: boolean);
 var
  co1: colorty;
  int1: integer;
@@ -300,14 +312,13 @@ begin
    co1:= enums[int1];
   end
   else begin
-   try
-    mstr1:= feditor.text;
-    checktext(mstr1,accept);
-    if not accept then begin
-     exit;
-    end;
-    co1:= strtointvalue(mstr1,base);
-   except
+   mstr1:= feditor.text;
+   checktext(mstr1,accept);
+   if not accept then begin
+    exit;
+   end;
+   
+   if not trystringtocolor(mstr1,co1) then begin
     accept:= false;
     formaterror(quiet);
    end;
@@ -742,6 +753,7 @@ begin
  gb.height:= sliderhue.height;
  colorareabefore.frameheight:= gb.height;
  colorarea.frameheight:= gb.height;
+ aligny(wam_center,[hue,colorpibu]);
 end;
 
 procedure tcolordialogfo.rgbeddataentered(const sender: TObject);

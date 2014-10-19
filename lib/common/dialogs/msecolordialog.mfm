@@ -17,8 +17,23 @@ object colordialogfo: tcolordialogfo
   onloaded = loadedexe
   onlayout = layoutexe
   moduleclassname = 'tmseform'
+  object colorpibu: tbutton
+    optionswidget1 = [ow1_fontglyphheight, ow1_autoscale, ow1_autowidth]
+    taborder = 6
+    bounds_x = 4
+    bounds_y = 237
+    bounds_cx = 97
+    bounds_cy = 18
+    bounds_cxmin = 97
+    anchors = [an_left, an_bottom]
+    state = [as_invisible, as_localinvisible, as_localcaption]
+    caption = 'Color &Picker'
+    reffontheight = 14
+  end
   object colorarea: tpaintbox
     optionswidget = [ow_destroywidgets]
+    color = -2147483645
+    frame.options = [cfo_captionnoclip]
     frame.colorframe = -1610612734
     frame.colorclient = -1879048174
     frame.caption = 'new'
@@ -40,6 +55,8 @@ object colordialogfo: tcolordialogfo
   end
   object colorareabefore: tpaintbox
     optionswidget = [ow_destroywidgets]
+    color = -2147483645
+    frame.options = [cfo_captionnoclip]
     frame.colorframe = -1610612734
     frame.colorclient = -1879048180
     frame.caption = 'old'
@@ -97,15 +114,15 @@ object colordialogfo: tcolordialogfo
       frame.captionpos = cp_top
       frame.dummy = 0
       frame.outerframe = (
-        0
+        1
         17
-        0
+        2
         0
       )
       taborder = 4
-      bounds_x = 148
+      bounds_x = 147
       bounds_y = 0
-      bounds_cx = 36
+      bounds_cx = 39
       bounds_cy = 37
       onchange = rgbchange
       ondataentered = componentsdataentered
@@ -199,7 +216,7 @@ object colordialogfo: tcolordialogfo
   object tlayouter2: tlayouter
     bounds_x = 11
     bounds_y = 256
-    bounds_cx = 322
+    bounds_cx = 324
     bounds_cy = 38
     anchors = [an_left, an_bottom]
     optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky, osc_expandshrinkx, osc_expandshrinky]
@@ -209,13 +226,14 @@ object colordialogfo: tcolordialogfo
     align_glue = wam_start
     object cancel: tbutton
       optionswidget1 = [ow1_fontglyphheight, ow1_autoscale, ow1_autowidth]
+      color = -2147483645
       taborder = 3
       bounds_x = 272
       bounds_y = 17
-      bounds_cx = 50
+      bounds_cx = 52
       bounds_cy = 21
       bounds_cxmin = 50
-      state = [as_localcaption]
+      state = [as_localcaption, as_localcolor]
       caption = '&Cancel'
       modalresult = mr_cancel
       reffontheight = 14
