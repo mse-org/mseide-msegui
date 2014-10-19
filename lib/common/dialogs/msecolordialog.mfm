@@ -15,6 +15,8 @@ object colordialogfo: tcolordialogfo
   statfile = tstatfile1
   caption = 'Select Color'
   onloaded = loadedexe
+  onmouseevent = mouseeventexe
+  onshortcut = shortcutexe
   onlayout = layoutexe
   moduleclassname = 'tmseform'
   object colorpibu: tbutton
@@ -26,8 +28,9 @@ object colordialogfo: tcolordialogfo
     bounds_cy = 18
     bounds_cxmin = 97
     anchors = [an_left, an_bottom]
-    state = [as_invisible, as_localinvisible, as_localcaption]
+    state = [as_localinvisible, as_localcaption, as_localonexecute]
     caption = 'Color &Picker'
+    onexecute = colorpickexe
     reffontheight = 14
   end
   object colorarea: tpaintbox

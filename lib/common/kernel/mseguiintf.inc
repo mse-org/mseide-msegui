@@ -116,6 +116,8 @@ function gui_movepointer(const dist: pointty): guierrorty;
 function gui_grabpointer(id: winidty): guierrorty;
 function gui_ungrabpointer: guierrorty;
 
+function gui_getpixel(const id: winidty; const pos: pointty;
+                                             out pixel: pixelty): guierrorty;
 function gui_rgbtopixel(rgb: longword): pixelty;
 function gui_pixeltorgb(pixel: pixelty): longword;
 function gui_graytopixel(gray: byte): pixelty;
@@ -136,12 +138,14 @@ function gui_getpixmapinfo(var info: pixmapinfoty): gdierrorty;
 function gui_createbitmapfromdata(const size: sizety; datapo: pbyte;
              msbitfirst: boolean = false; dwordaligned: boolean = false;
              bottomup: boolean = false): pixmapty;
-function gui_pixmaptoimage(pixmap: pixmapty; out image: imagety; gchandle: longword): gdierrorty;
-                    //gchandle is used on win32 to select bitmap out of devicecontext,
-                    //can be 0
-function gui_imagetopixmap(const image: imagety; out pixmap: pixmapty; gchandle: longword): gdierrorty;
-                    //gchandle is used on win32 to select bitmap out of devicecontext,
-                    //can be 0
+function gui_pixmaptoimage(pixmap: pixmapty; out image: imagety;
+                                    gchandle: longword): gdierrorty;
+            //gchandle is used on win32 to select bitmap out of devicecontext,
+            //can be 0
+function gui_imagetopixmap(const image: imagety; out pixmap: pixmapty;
+                                             gchandle: longword): gdierrorty;
+           //gchandle is used on win32 to select bitmap out of devicecontext,
+             //can be 0
 function gui_allocimagemem(length: integer): plongwordaty;
 procedure gui_freeimagemem(data: plongwordaty);
 

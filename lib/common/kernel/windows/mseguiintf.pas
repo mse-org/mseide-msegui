@@ -1062,6 +1062,12 @@ begin
  }
 end;
 
+function gui_getpixel(const id: winidty; const pos: pointty;
+                                             out pixel: pixelty): guierrorty;
+begin
+ result:= gue_notimplemented;
+end;
+
 function gui_imagetopixmap(const image: imagety; out pixmap: pixmapty;
                            gchandle: longword): gdierrorty;
 var

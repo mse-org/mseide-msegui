@@ -4017,7 +4017,8 @@ begin
  end;
 end;
 
-procedure tcanvas.drawpoint(const point: pointty; const acolor: colorty = cl_default);
+procedure tcanvas.drawpoint(const point: pointty; 
+                            const acolor: colorty = cl_default);
 begin
  if cs_inactive in fstate then exit;
  drawpoints(point,acolor,0,1);

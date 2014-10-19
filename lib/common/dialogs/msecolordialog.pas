@@ -133,9 +133,16 @@ type
    procedure rgbeddataentered(const sender: TObject);
    procedure coloreddataentered(const sender: TObject);
    procedure loadedexe(const sender: TObject);
+   procedure colorpickexe(const sender: TObject);
+   procedure mouseeventexe(const sender: twidget; var ainfo: mouseeventinfoty);
+   procedure shortcutexe(const sender: twidget; var ainfo: keyeventinfoty);
   private
    fupdating: boolean;
    procedure updatecomponents;
+  protected
+   fcolorpicking: boolean;
+   procedure begincolorpick();
+   procedure endcolorpick();
  end;
 
  tcolordropdowncontroller = class(tnocolsdropdownlistcontroller)
@@ -156,7 +163,8 @@ procedure paintcolorrect(const canvas: tcanvas; const arect: rectty;
 
 implementation
 uses
- msecolordialog_mfm,msestockobjects,mseformatstr,sysutils;
+ msecolordialog_mfm,msestockobjects,mseformatstr,sysutils,msepointer,
+ msekeyboard,mseguiintf;
 type
  twidget1 = class(twidget);
  
@@ -317,7 +325,6 @@ begin
    if not accept then begin
     exit;
    end;
-   
    if not trystringtocolor(mstr1,co1) then begin
     accept:= false;
     formaterror(quiet);
@@ -771,6 +778,50 @@ end;
 procedure tcolordialogfo.loadedexe(const sender: TObject);
 begin
  colored.activate;
+end;
+
+procedure tcolordialogfo.colorpickexe(const sender: TObject);
+begin
+ begincolorpick();
+end;
+
+procedure tcolordialogfo.begincolorpick();
+begin
+ capturemouse(true);
+ application.cursorshape:= cr_pointinghand;
+ fcolorpicking:= true; 
+end;
+
+procedure tcolordialogfo.endcolorpick();
+begin
+ releasemouse(true);
+ fcolorpicking:= false;
+ application.cursorshape:= cr_default;
+end;
+
+procedure tcolordialogfo.mouseeventexe(const sender: twidget;
+               var ainfo: mouseeventinfoty);
+var
+ px1: pixelty;
+begin
+ if fcolorpicking and (ainfo.eventkind = ek_buttonpress) then begin
+  if gui_getpixel(mserootwindow,
+      translatewidgetpoint(ainfo.pos,self,nil),px1) = gue_ok then begin
+   colored.value:= gui_pixeltorgb(px1);
+  end;
+  endcolorpick();
+ end;
+end;
+
+procedure tcolordialogfo.shortcutexe(const sender: twidget;
+               var ainfo: keyeventinfoty);
+begin
+ if fcolorpicking then begin
+  if ainfo.key = key_escape then begin
+   endcolorpick();
+  end;
+  include(ainfo.eventstate,es_processed);
+ end;
 end;
 
 end.
