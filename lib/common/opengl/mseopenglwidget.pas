@@ -303,7 +303,8 @@ begin
   raise exception.create('Could not find visual.');
  end;
  fcontext:= glxcreatecontext(fdpy,visinfo,nil,true);
- fcolormap:= xcreatecolormap(fdpy,mserootwindow,visinfo^.visual,allocnone);
+ fcolormap:= xcreatecolormap(fdpy,gui_getrootwindow(),
+                                       visinfo^.visual,allocnone);
  attributes.colormap:= fcolormap;
  with awidgetrect do begin
   aid:= xcreatewindow(fdpy,aparent,x,y,cx,cy,0,visinfo^.depth,

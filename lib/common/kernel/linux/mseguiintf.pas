@@ -1493,7 +1493,7 @@ begin
  end;
 end;
 
-function gui_rootwindow(id: winidty = 0): winidty;
+function gui_getrootwindow(id: winidty = 0): winidty;
 var
  x,y: cint;
  width,height,border,depth: cuint;
@@ -1502,7 +1502,8 @@ begin
  checkgdilock;
 {$endif} 
  if id <> 0 then begin
-  if xgetgeometry(appdisp,id,@result,@x,@y,@width,@height,@border,@depth) <> 0 then begin
+  if xgetgeometry(appdisp,id,@result,@x,@y,
+                            @width,@height,@border,@depth) <> 0 then begin
    exit;
   end;
  end;
@@ -1580,8 +1581,10 @@ begin
    data.l[0]:= ord(operation);
    data.l[1]:= netatoms[value1];
    data.l[2]:= netatoms[value2];
-   if xsendevent(appdisp,mserootwindow(id),{$ifdef xboolean}false{$else}0{$endif},
-            substructurenotifymask or substructureredirectmask,@xevent) <> 0 then begin
+   if xsendevent(appdisp,gui_getrootwindow(id),
+                        {$ifdef xboolean}false{$else}0{$endif},
+            substructurenotifymask or 
+                           substructureredirectmask,@xevent) <> 0 then begin
     result:= true;
    end;
   end;
@@ -2428,7 +2431,8 @@ begin
  gdi_lock;
  bo1:= false;
  if netsupported then begin
-  bo1:= readcardinalproperty(mserootwindow(id),netatoms[net_workarea],4,result);
+  bo1:= readcardinalproperty(gui_getrootwindow(id),
+                                         netatoms[net_workarea],4,result);
  end;
  if not bo1 then begin
   result:= gui_getscreenrect(id);

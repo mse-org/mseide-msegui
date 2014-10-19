@@ -575,7 +575,7 @@ begin
 //  gcpo^.gdifuncs:= getdefaultgdifuncs;
   gcpo^.gdifuncs:= x11getgdifuncs;
   if paintdevice = 0 then begin
-   paintdevice:= mserootwindow;
+   paintdevice:= gui_getrootwindow();
   end;
   gcpo^.handle:= ptruint(xcreategc(appdisp,paintdevice,0,nil));
   if gcpo^.handle = 0 then begin
@@ -847,7 +847,7 @@ begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
 {$endif} 
- pixmap:= xcreatepixmap(appdisp,mserootwindow,size.cx,size.cy,24);
+ pixmap:= xcreatepixmap(appdisp,gui_getrootwindow(),size.cx,size.cy,24);
  attributes._repeat:= repeatnormal;
  attributes.alpha_map:= alphamap;
  int1:= 0;
@@ -872,7 +872,7 @@ begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
 {$endif} 
- pixmap:= xcreatepixmap(appdisp,mserootwindow,size.cx,size.cy,8);
+ pixmap:= xcreatepixmap(appdisp,gui_getrootwindow(),size.cx,size.cy,8);
  attributes._repeat:= repeatnormal;
  int1:= cpcomponentalpha;
  if arepeat then begin
@@ -893,7 +893,7 @@ begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
 {$endif} 
- pixmap:= xcreatepixmap(appdisp,mserootwindow,size.cx,size.cy,32);
+ pixmap:= xcreatepixmap(appdisp,gui_getrootwindow(),size.cx,size.cy,32);
  attributes._repeat:= repeatnormal;
  int1:= 0;
  if arepeat then begin
