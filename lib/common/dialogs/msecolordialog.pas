@@ -141,6 +141,7 @@ type
    procedure updatecomponents;
   protected
    fcolorpicking: boolean;
+   fcolorbefore: colorty;
    procedure begincolorpick();
    procedure endcolorpick();
  end;
@@ -787,6 +788,7 @@ end;
 
 procedure tcolordialogfo.begincolorpick();
 begin
+ fcolorbefore:= colored.value;
  capturemouse(true);
  application.cursorshape:= cr_pointinghand;
  fcolorpicking:= true; 
@@ -831,6 +833,8 @@ begin
  if fcolorpicking then begin
   if ainfo.key = key_escape then begin
    endcolorpick();
+   colored.value:= fcolorbefore;
+   colored.checkvalue();
   end;
   include(ainfo.eventstate,es_processed);
  end;
