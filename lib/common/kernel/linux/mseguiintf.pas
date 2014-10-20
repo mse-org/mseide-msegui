@@ -2710,13 +2710,16 @@ function gui_getpixel(const id: winidty; const pos: pointty;
                                              out pixel: pixelty): guierrorty;
 var
  ximage1: pximage;
-begin result:= gue_error;
+begin 
+ gdi_lock();
+ result:= gue_error;
  ximage1:= xgetimage(appdisp,id,pos.x,pos.y,1,1,$ffffffff,zpixmap);
  if ximage1 <> nil then begin
   pixel:= ximage1^.f.get_pixel(ximage1,0,0);
   xdestroyimage(ximage1);
   result:= gue_ok;
  end;
+ gdi_unlock();
 end;
 
 function gui_imagetopixmap(const image: imagety; out pixmap: pixmapty;
