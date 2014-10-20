@@ -803,14 +803,25 @@ procedure tcolordialogfo.mouseeventexe(const sender: twidget;
                var ainfo: mouseeventinfoty);
 var
  px1: pixelty;
+ co1: colorty;
 begin
- if fcolorpicking and (ainfo.eventkind = ek_buttonpress) then begin
-  if gui_getpixel(gui_getrootwindow(window.winid),
-      translatewidgetpoint(ainfo.pos,self,nil),px1) = gue_ok then begin
-   colored.value:= gui_pixeltorgb(px1);
-   colored.checkvalue();
+ if fcolorpicking then begin
+  if (ainfo.eventkind in [ek_buttonpress,ek_mousemove]) and
+             (ainfo.shiftstate * buttonshiftstatesmask = [ss_left]) then begin
+   if gui_getpixel(gui_getrootwindow(window.winid),
+       translatewidgetpoint(ainfo.pos,self,nil),px1) = gue_ok then begin
+    co1:= gui_pixeltorgb(px1);
+    if colored.value <> co1 then begin
+     colored.value:= co1;
+     colored.checkvalue();
+    end;
+   end;
+  end
+  else begin
+   if (ainfo.eventkind = ek_buttonrelease) then begin
+    endcolorpick();
+   end;
   end;
-  endcolorpick();
  end;
 end;
 
