@@ -3484,7 +3484,13 @@ begin
    end;
    if (eventkind = ek_buttonrelease) and (button = mb_right) and
            not (es_processed in eventstate) then begin
-    dopopup(info.mouse);
+    pt1:= info.mouse.pos;
+    try
+     translatewidgetpoint1(info.mouse.pos,window.owner,self);
+     dopopup(info.mouse);
+    finally
+     info.mouse.pos:= pt1;
+    end;
    end;
    if not (es_processed in eventstate) then begin
     area1:= fselections.getareainfo(mousepos1,int1);
