@@ -827,7 +827,8 @@ type
    constructor create(const owner: tmsecomponent;
                   const onchange: notifyeventty); override;
    destructor destroy; override;
-   procedure paintbackground(const acanvas: tcanvas; const arect: rectty);
+   procedure paintbackground(const acanvas: tcanvas; arect: rectty;
+                                 const astate: framestateflagsty = []);
                                        //arect = paintrect
    procedure paintoverlay(const acanvas: tcanvas; const arect: rectty;
                         const astate: framestateflagsty);
@@ -3936,8 +3937,7 @@ end;
 
 class procedure tcustomframe.drawframe(const canvas: tcanvas; 
                          const rect2: rectty; const afi: baseframeinfoty; 
-                         const astate: framestateflagsty
-                                 {const disabled,active,clicked,mouse: boolean});
+                         const astate: framestateflagsty);
 var
  imageoffs: integer;
  rect1: rectty;
@@ -3947,10 +3947,10 @@ begin
  if afi.levelo <> 0 then begin
   draw3dframe(canvas,rect1,afi.levelo,afi.framecolors,afi.hiddenedges);
   updateedgerect(rect1,abs(afi.levelo),afi.hiddenedges);
-//  inflaterect1(rect1,-abs(afi.levelo));
  end;
  if afi.framewidth > 0 then begin
-  if (afi.colorframeactive = cl_default) or not (fsf_active in astate) then begin
+  if (afi.colorframeactive = cl_default) or 
+                                   not (fsf_active in astate) then begin
    col1:= afi.colorframe;
   end
   else begin
@@ -3961,13 +3961,11 @@ begin
   end;
   canvas.drawframe(rect1,-afi.framewidth,col1,afi.hiddenedges);
   updateedgerect(rect1,afi.framewidth,afi.hiddenedges);
-//  inflaterect1(rect1,-afi.framewidth);
  end;
  if afi.leveli <> 0 then begin
   draw3dframe(canvas,rect1,afi.leveli,afi.framecolors,afi.hiddenedges);
  end;
  if afi.frameimage_list <> nil then begin
-           //todo: implement hiddenedges
   imageoffs:= calcframestateoffs(astate,frameoffsetsty(afi.frameimage_offsets));
   if imageoffs >= 0 then begin
    if afi.hiddenedges * [edg_left,edg_top] = [] then begin
@@ -5588,15 +5586,25 @@ begin
 end;
 
 procedure tframetemplate.paintbackground(const acanvas: tcanvas;
-                       const arect: rectty);
+            arect: rectty; const astate: framestateflagsty = []);
+var
+ int1: integer;
+ 
 begin
+ inflaterect1(arect,tcustomframe.calcpaintframe(fi.ba));
  if fi.ba.colorclient <> cl_transparent then begin
   acanvas.fillrect(arect,fi.ba.colorclient);
  end;
+ if fi.ba.frameface_list <> nil then begin
+  int1:= calcframestateoffs(astate,frameoffsetsty(fi.ba.frameface_offsets));
+  if (int1 >= 0) and (int1 < fi.ba.frameface_list.list.count) then begin
+   fi.ba.frameface_list.list[int1].paint(acanvas,arect);
+  end;
+ end;
 end;
 
-procedure tframetemplate.paintoverlay(const acanvas: tcanvas; const arect: rectty;
-                         const astate: framestateflagsty);
+procedure tframetemplate.paintoverlay(const acanvas: tcanvas;
+                const arect: rectty; const astate: framestateflagsty = []);
 begin
  tcustomframe.drawframe(acanvas,
      inflaterect(arect,tcustomframe.calcpaintframe(fi.ba)),fi.ba,astate);

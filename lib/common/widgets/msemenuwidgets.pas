@@ -707,7 +707,9 @@ begin
    with cells[int1],buttoninfo do begin
     if int1 = activeitem then begin
      if itemframetemplateactive <> nil then begin
-      itemframetemplateactive.paintbackground(canvas,ca.dim);
+      itemframetemplateactive.paintbackground(canvas,ca.dim,
+         combineframestateflags(shs_disabled in state,false,
+                                               shs_clicked in state,false));
      end;
      face:= itemfaceactive;
      ca.font:= fontactive;
@@ -720,7 +722,9 @@ begin
     end
     else begin
      if itemframetemplate <> nil then begin
-      itemframetemplate.paintbackground(canvas,ca.dim);
+      itemframetemplate.paintbackground(canvas,ca.dim,
+               combineframestateflags(shs_disabled in state,false,
+                                              shs_clicked in state,false));
      end;
      face:= itemface;
      ca.font:= fontinactive;
