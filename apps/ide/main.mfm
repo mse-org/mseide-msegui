@@ -32,8 +32,6 @@ object mainfo: tmainfo
   oncreate = mainfooncreate
   oneventloopstart = mainonloaded
   ondestroy = mainfoondestroy
-  onwindowactivechanged = mainonactivewindowchanged
-  onwindowdestroyed = mainonwindowdestroyed
   onterminatequery = mainfoonterminate
   onlayout = onscale
   left = 8

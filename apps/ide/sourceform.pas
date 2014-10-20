@@ -89,7 +89,7 @@ type
    procedure tabwidgetpageremoved(const sender: TObject; const awidget: twidget);
    procedure tabwidgetonactivepagechanged(const sender: tobject);
    procedure addwatchactonexecute(const sender: tobject);
-   procedure sourcefoonactivate(const sender: tobject);
+   procedure enterexe(const sender: tobject);
    procedure editbreakpointexec(const sender: TObject);
    procedure popupmonupdate(const sender: tcustommenu);
    procedure completeclassexecute(const sender: TObject);
@@ -99,6 +99,7 @@ type
    procedure insguiexec(const sender: TObject);
    procedure convpasex(const sender: TObject);
    procedure insuidexec(const sender: TObject);
+   procedure destroyexe(const sender: TObject);
   private
    fasking: boolean;
    fgdbpage: tsourcepage;
@@ -1186,9 +1187,9 @@ begin
                       @fbookmarkar[factbookmark][index].bookmarknum],'ii');
 end;
 
-procedure tsourcefo.sourcefoonactivate(const sender: tobject);
+procedure tsourcefo.enterexe(const sender: tobject);
 begin
- mainfo.sourceformactivated;
+ mainfo.designformactivated(self);
 end;
 
 function tsourcefo.gettextstream(const filename: filenamety;
@@ -1486,6 +1487,11 @@ begin
    result:= getpascalvarname(edit,edit.editpos,gridcoord1);
   end;
  end;
+end;
+
+procedure tsourcefo.destroyexe(const sender: TObject);
+begin
+ mainfo.designformdestroyed(self);
 end;
 
 end.

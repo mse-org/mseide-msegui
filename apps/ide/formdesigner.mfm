@@ -15,6 +15,8 @@ object formdesignerfo: tformdesignerfo
   frame.grip_face.dummy = 0
   frame.dummy = 0
   popupmenu = popupme
+  onenter = enterexe
+  onactivate = enterexe
   visible = False
   bounds_x = 68
   bounds_y = 239
@@ -101,6 +103,7 @@ object formdesignerfo: tformdesignerfo
     DDDDDD01DCDCDC01DBDBDB01DADADA01D9D9D901D7D7D701D6D6D601D5D5D501
     D4D4D401D3D3D301D2D2D201D1D1D101D0D0D00180808019
   }
+  ondestroy = destroyexe
   onclose = formdeonclose
   left = 239
   top = 180

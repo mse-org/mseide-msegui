@@ -86,9 +86,6 @@ type
    procedure mainstatfileonupdatestat(const sender: tobject; const filer: tstatfiler);
    procedure mainfoonterminate(var terminate: Boolean);
    procedure mainonloaded(const sender: TObject);
-   procedure mainonactivewindowchanged(const oldwindow: twindow;
-                      const newwindow: twindow);
-   procedure mainonwindowdestroyed(const awindow: twindow);
 
    procedure mainmenuonupdate(const sender: tcustommenu);
    procedure onscale(const sender: TObject);
@@ -232,6 +229,8 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
 
+   procedure designformactivated(const sender: tcustommseform);
+   procedure designformdestroyed(const sender: tcustommseform);
    procedure startgdb(const killserver: boolean);
    function checkgdberror(aresult: gdbresultty): boolean;
    function startgdbconnection(const attach: boolean): boolean;
@@ -274,7 +273,6 @@ type
    procedure downloaded;
    procedure programfinished;
    procedure showfirsterror;
-   procedure sourceformactivated;
    procedure stackframechanged(const frameno: integer);
    procedure refreshframe;
    procedure toggleformunit;
@@ -667,12 +665,12 @@ procedure tmainfo.moduledeactivated(const adesigner: idesigner; const amodule: t
 begin
 // factivedesignmodule:= nil;
 end;
-
+{
 procedure tmainfo.sourceformactivated;
 begin
  factivedesignmodule:= nil;
 end;
-
+}
 function tmainfo.checksave: modalresultty;
 var
  str1: filenamety;
@@ -1707,31 +1705,32 @@ begin //opensourceactonexecute
  end;
 end;
 
-procedure tmainfo.mainonactivewindowchanged(const oldwindow: twindow; 
-                       const newwindow: twindow);
+procedure tmainfo.designformactivated(const sender: tcustommseform);
 begin
- if (newwindow <> nil) {and (newwindow <> self.window)} and
-    not (newwindow.transientfor <> nil) and (newwindow.owner is tcustommseform) then begin
-  flastform:= tcustommseform(newwindow.owner);
-  if sourcefo.checkancestor(flastform) then begin
+ flastform:= sender;
+ if sourcefo = flastform then begin
+  factivedesignmodule:= nil;
+  flastdesignform:= flastform;
+ end
+ else begin
+  if (designer.actmodulepo <> nil) and
+                (designer.actmodulepo^.designform = flastform) then begin
+   factivedesignmodule:= designer.actmodulepo;
    flastdesignform:= flastform;
-  end
-  else begin
-   if (designer.actmodulepo <> nil) and
-                 (designer.actmodulepo^.designform = flastform) then begin
-    factivedesignmodule:= designer.actmodulepo;
-    flastdesignform:= flastform;
-   end;
   end;
  end;
 end;
 
-procedure tmainfo.mainonwindowdestroyed(const awindow: twindow);
+procedure tmainfo.designformdestroyed(const sender: tcustommseform);
 begin
- if awindow.owner = flastform then begin
+ if flastform = sender then begin
   flastform:= nil;
  end;
- if awindow.owner = flastdesignform then begin
+ if flastdesignform = sender then begin
+  if (designer.actmodulepo <> nil) and
+                (designer.actmodulepo^.designform = sender) then begin
+   factivedesignmodule:= nil;
+  end;
   flastdesignform:= nil;
  end;
 end;

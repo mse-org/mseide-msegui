@@ -4,7 +4,8 @@ object sourcefo: tsourcefo
   frame.grip_size = 10
   frame.grip_options = [go_closebutton, go_fixsizebutton, go_floatbutton, go_topbutton, go_backgroundbutton]
   frame.dummy = 0
-  onactivate = sourcefoonactivate
+  onenter = enterexe
+  onactivate = enterexe
   visible = False
   bounds_x = 96
   bounds_y = 116
@@ -91,6 +92,7 @@ object sourcefo: tsourcefo
     FEFF7FBFFEFF7F08FEFF7F00FEFF7F02FEFF7F08FEFF7F00FEFF7F00FEFF7FBF
     FEFF7F0000000008
   }
+  ondestroy = destroyexe
   onclosequery = sourcefoonclosequery
   onidle = formonidle
   moduleclassname = 'tdockform'

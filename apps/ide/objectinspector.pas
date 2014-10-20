@@ -130,6 +130,8 @@ type
    procedure extendimageexe(const sender: twidget;
                       const cellinfopo: pcellinfoty; var aextend: sizety);
    procedure propskeydownexe(const sender: twidget; var ainfo: keyeventinfoty);
+   procedure enterexe(const sender: TObject);
+   procedure destroyexe(const sender: TObject);
   private
    factmodule: tmsecomponent;
    factcomp: tcomponent;
@@ -1895,6 +1897,16 @@ begin
  if wascolorprop then begin
   aextend.cx:= aextend.cx+sender.clientheight;
  end;
+end;
+
+procedure tobjectinspectorfo.enterexe(const sender: TObject);
+begin
+ mainfo.designformactivated(self);
+end;
+
+procedure tobjectinspectorfo.destroyexe(const sender: TObject);
+begin
+ mainfo.designformdestroyed(self);
 end;
 
 initialization

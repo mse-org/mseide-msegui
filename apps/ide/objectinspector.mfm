@@ -4,6 +4,8 @@ object objectinspectorfo: tobjectinspectorfo
   frame.grip_options = [go_closebutton, go_fixsizebutton, go_floatbutton, go_topbutton, go_backgroundbutton]
   frame.dummy = 0
   popupmenu = mainpopup
+  onenter = enterexe
+  onactivate = enterexe
   visible = False
   bounds_x = 185
   bounds_y = 360
@@ -89,6 +91,7 @@ object objectinspectorfo: tobjectinspectorfo
   }
   oncreate = createexe
   oneventloopstart = objectinspectorfoonloaded
+  ondestroy = destroyexe
   onasyncevent = asyncexe
   onlayout = objectinspectoronchildscaled
   left = 239
