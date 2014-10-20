@@ -154,7 +154,6 @@ type
    procedure beffloatexe(const sender: twidget; var arect: rectty);
    procedure floatexe(const sender: TObject);
    procedure enterexe(const sender: TObject);
-   procedure destroyexe(const sender: TObject);
   private
    fdesigner: tdesigner;
    fform: twidget;
@@ -3996,11 +3995,6 @@ end;
 procedure tformdesignerfo.enterexe(const sender: TObject);
 begin
  mainfo.designformactivated(self);
-end;
-
-procedure tformdesignerfo.destroyexe(const sender: TObject);
-begin
- mainfo.designformdestroyed(self);
 end;
 
 { tformdesignerdockcontroller }

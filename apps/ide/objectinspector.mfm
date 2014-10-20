@@ -91,7 +91,6 @@ object objectinspectorfo: tobjectinspectorfo
   }
   oncreate = createexe
   oneventloopstart = objectinspectorfoonloaded
-  ondestroy = destroyexe
   onasyncevent = asyncexe
   onlayout = objectinspectoronchildscaled
   left = 239

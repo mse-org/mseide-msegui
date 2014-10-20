@@ -99,7 +99,6 @@ type
    procedure insguiexec(const sender: TObject);
    procedure convpasex(const sender: TObject);
    procedure insuidexec(const sender: TObject);
-   procedure destroyexe(const sender: TObject);
   private
    fasking: boolean;
    fgdbpage: tsourcepage;
@@ -1487,11 +1486,6 @@ begin
    result:= getpascalvarname(edit,edit.editpos,gridcoord1);
   end;
  end;
-end;
-
-procedure tsourcefo.destroyexe(const sender: TObject);
-begin
- mainfo.designformdestroyed(self);
 end;
 
 end.

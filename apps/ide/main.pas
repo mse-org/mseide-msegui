@@ -230,7 +230,6 @@ type
    destructor destroy; override;
 
    procedure designformactivated(const sender: tcustommseform);
-   procedure designformdestroyed(const sender: tcustommseform);
    procedure startgdb(const killserver: boolean);
    function checkgdberror(aresult: gdbresultty): boolean;
    function startgdbconnection(const attach: boolean): boolean;
@@ -1707,31 +1706,17 @@ end;
 
 procedure tmainfo.designformactivated(const sender: tcustommseform);
 begin
- flastform:= sender;
+ setlinkedvar(sender,tmsecomponent(flastform));
  if sourcefo = flastform then begin
   factivedesignmodule:= nil;
-  flastdesignform:= flastform;
+  setlinkedvar(sender,tmsecomponent(flastdesignform));
  end
  else begin
   if (designer.actmodulepo <> nil) and
                 (designer.actmodulepo^.designform = flastform) then begin
    factivedesignmodule:= designer.actmodulepo;
-   flastdesignform:= flastform;
+   setlinkedvar(sender,tmsecomponent(flastdesignform));
   end;
- end;
-end;
-
-procedure tmainfo.designformdestroyed(const sender: tcustommseform);
-begin
- if flastform = sender then begin
-  flastform:= nil;
- end;
- if flastdesignform = sender then begin
-  if (designer.actmodulepo <> nil) and
-                (designer.actmodulepo^.designform = sender) then begin
-   factivedesignmodule:= nil;
-  end;
-  flastdesignform:= nil;
  end;
 end;
 

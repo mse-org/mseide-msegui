@@ -131,7 +131,6 @@ type
                       const cellinfopo: pcellinfoty; var aextend: sizety);
    procedure propskeydownexe(const sender: twidget; var ainfo: keyeventinfoty);
    procedure enterexe(const sender: TObject);
-   procedure destroyexe(const sender: TObject);
   private
    factmodule: tmsecomponent;
    factcomp: tcomponent;
@@ -1902,11 +1901,6 @@ end;
 procedure tobjectinspectorfo.enterexe(const sender: TObject);
 begin
  mainfo.designformactivated(self);
-end;
-
-procedure tobjectinspectorfo.destroyexe(const sender: TObject);
-begin
- mainfo.designformdestroyed(self);
 end;
 
 initialization
