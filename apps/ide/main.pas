@@ -657,7 +657,7 @@ end;
 procedure tmainfo.moduleactivated(const adesigner: idesigner; const amodule: tmsecomponent);
 begin
  factivedesignmodule:= designer.actmodulepo;
- flastdesignform:= factivedesignmodule^.designform;
+ setlinkedvar(factivedesignmodule^.designform,tmsecomponent(flastdesignform));
 end;
 
 procedure tmainfo.moduledeactivated(const adesigner: idesigner; const amodule: tmsecomponent);
