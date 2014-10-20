@@ -627,7 +627,8 @@ const
  standardcursors: array[cursorshapety] of longword = (
       defaultshape,defaultshape,defaultshape,
       xc_left_ptr,{xc_tcross}xc_crosshair,xc_watch,xc_xterm,
-      xc_sb_v_double_arrow,xc_sb_h_double_arrow,xc_top_right_corner,xc_bottom_right_corner,xc_fleur,
+      xc_sb_v_double_arrow,xc_sb_h_double_arrow,xc_top_right_corner,
+      xc_bottom_right_corner,xc_fleur,
       xc_sb_v_double_arrow,xc_sb_h_double_arrow,xc_hand2,xc_circle,xc_sailboat,
       xc_top_left_corner,xc_bottom_left_corner,
       xc_bottom_right_corner,xc_top_right_corner,
@@ -2033,12 +2034,17 @@ begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
 {$endif} 
- ar1:= getwindowstack(id);
- if high(ar1) > 0 then begin
-  result:= ar1[high(ar1)-1];
+ if id = rootid then begin
+  result:= rootid;
  end
  else begin
-  result:= 0;
+  ar1:= getwindowstack(id);
+  if high(ar1) > 0 then begin
+   result:= ar1[high(ar1)-1];
+  end
+  else begin
+   result:= 0;
+  end;
  end;
 end;
 
@@ -2439,6 +2445,9 @@ begin
  end;
  checkscreenrects();
  if screenrects <> nil then begin
+  if id = 0 then begin
+   id:= rootid;
+  end;
   if gui_getdecoratedwindowrect(id,rect1) = gue_ok then begin
    int2:= -1;
    for int1:= 0 to high(screenrects) do begin

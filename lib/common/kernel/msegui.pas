@@ -17840,11 +17840,11 @@ begin
  id:= 0;
  if awindow = nil then begin
   if factivewindow <> nil then begin
-   id:= factivewindow.fwindow.id;
+   id:= factivewindow.winid;   
   end;
  end
  else begin
-  id:= awindow.fwindow.id;
+  id:= awindow.winid;
  end;
  result:= gui_getworkarea(id);
 end;
