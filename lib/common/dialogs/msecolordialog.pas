@@ -808,6 +808,7 @@ begin
   if gui_getpixel(gui_getrootwindow(window.winid),
       translatewidgetpoint(ainfo.pos,self,nil),px1) = gue_ok then begin
    colored.value:= gui_pixeltorgb(px1);
+   colored.checkvalue();
   end;
   endcolorpick();
  end;
