@@ -113,7 +113,7 @@ type
    gb: tgroupbox;
    colorareabefore: tpaintbox;
    colorarea: tpaintbox;
-   colorpibu: tbutton;
+   colorpibu: tdatabutton;
    procedure hueonsetvalue(const sender: TObject; var avalue: realty;
                                                          var accept: Boolean);
    procedure satonsetvalue(const sender: TObject; var avalue: realty;
@@ -791,6 +791,12 @@ begin
  fcolorbefore:= colored.value;
  capturemouse(true);
  application.cursorshape:= cr_pointinghand;
+ colorpibu.value:= 0;
+ colorpibu.createfont;
+ with colorpibu.font do begin
+  color:= cl_red;
+  shadow_color:= cl_white;
+ end;
  fcolorpicking:= true; 
 end;
 
@@ -798,7 +804,9 @@ procedure tcolordialogfo.endcolorpick();
 begin
  releasemouse(true);
  fcolorpicking:= false;
+ colorpibu.value:= -1;
  application.cursorshape:= cr_default;
+ colorpibu.font:= nil;
 end;
 
 procedure tcolordialogfo.mouseeventexe(const sender: twidget;

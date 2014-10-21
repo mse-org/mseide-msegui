@@ -19,7 +19,7 @@ object colordialogfo: tcolordialogfo
   onshortcut = shortcutexe
   onlayout = layoutexe
   moduleclassname = 'tmseform'
-  object colorpibu: tbutton
+  object colorpibu: tdatabutton
     optionswidget1 = [ow1_fontglyphheight, ow1_autoscale, ow1_autowidth]
     taborder = 6
     bounds_x = 4
@@ -29,6 +29,25 @@ object colordialogfo: tcolordialogfo
     bounds_cxmin = 97
     anchors = [an_left, an_bottom]
     state = [as_localinvisible, as_localcaption, as_localonexecute]
+    valuefaces.count = 1
+    valuefaces.items = <    
+      item
+        fade_pos.count = 3
+        fade_pos.items = (
+          0
+          0.42629482071713
+          1
+        )
+        fade_color.count = 3
+        fade_color.items = (
+          16762880
+          16772001
+          15903324
+        )
+        fade_direction = gd_down
+        localprops = [fal_fadirection]
+        dummy = 0
+      end>
     caption = 'Color &Picker'
     onexecute = colorpickexe
     reffontheight = 14
