@@ -1962,8 +1962,8 @@ begin
  else begin
   beginupdate;
   try
-   internalsetcount(fcount+1,true);
    checkindex(index);
+   internalsetcount(fcount+1,true);
    po1:= fdatapo+index*fsize;
    move(po1^,(po1+fsize)^,(fcount-index-1)*fsize);
    if @quelle = nil then begin
