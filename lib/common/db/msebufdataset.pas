@@ -5284,23 +5284,26 @@ begin
     end; 
    end;
   end;
-  if bo1 then begin
-   if state = dsinsert then begin
-    checkbrowsemode;
+  if state in [dsedit,dsinsert,dsbrowse] then begin 
+            //stop recursion triggered by dscalcfields
+   if bo1 then begin
+    if state = dsinsert then begin
+     checkbrowsemode;
+    end
+    else begin
+     if bm1.recordpo <> nil then begin
+      bookmarkdata:= bm1;   
+     end;
+    end;
    end
    else begin
-    if bm1.recordpo <> nil then begin
-     bookmarkdata:= bm1;   
-    end;
+    checkbrowsemode;
+    resync([]);
    end;
-  end
-  else begin
-   checkbrowsemode;
-   resync([]);
-  end;
-  if int2 = fnotifylookupclientcount then begin
-                  //already called by post otherwise
-   notifylookupclients;
+   if int2 = fnotifylookupclientcount then begin
+                   //already called by post otherwise
+    notifylookupclients;
+   end;
   end;
  end;
 end;
