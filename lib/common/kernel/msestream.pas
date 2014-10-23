@@ -417,7 +417,7 @@ type
    function write(const Buffer; Count: Longint): Longint; override;
  end;
 
- ttextstringcopystream = class(ttextstream)
+ ttextstringcopystream = class(ttextdatastream)
   private
    fdata: string;
   protected
@@ -436,7 +436,27 @@ type
    destructor destroy; override;
    function write(const Buffer; Count: Longint): Longint; override;
  end;
- 
+
+ tstringbufferstream = class(tmemorystream)
+  private
+   fdata: string;
+   function getdata: string;
+  protected
+   function realloc(var newcapacity: ptrint): pointer; override;
+  public
+   constructor create(const adata: string);
+   property data: string read getdata;
+ end;
+
+ ttextstringbufferstream = class(ttextdatastream)
+  private
+   function getdata: string;
+  public
+   constructor create(const adata: string;
+                              const aopenmode: fileopenmodety = fm_create);
+   property data: string read getdata;
+ end;
+  
 function getnextbufferline(var data: pchar; len: integer): string;
                   //data = nil -> fertig
 function getbufferline(const data: pchar; linenr,len: integer): string;
@@ -2970,6 +2990,44 @@ begin
  if ccs_open in po1^.state then begin
   flush(po1^);
  end;
+end;
+
+{ tstringbufferstream }
+
+constructor tstringbufferstream.create(const adata: string);
+begin
+ inherited create();
+ fdata:= adata;
+ setpointer(pointer(fdata),length(fdata));
+end;
+
+function tstringbufferstream.getdata: string;
+begin
+ capacity:= size;
+ result:= fdata;
+end;
+
+function tstringbufferstream.realloc(var newcapacity: ptrint): pointer;
+begin
+ if newcapacity > length(fdata) then begin
+  newcapacity:= 2*newcapacity + 256;
+ end;
+ setlength(fdata,newcapacity);
+ result:= pointer(fdata);
+end;
+
+{ ttextstringbufferstream }
+
+constructor ttextstringbufferstream.create(const adata: string;
+                               const aopenmode: fileopenmodety = fm_create);
+begin
+ fmemorystream:= tstringbufferstream.create(adata);
+ inherited create(aopenmode);
+end;
+
+function ttextstringbufferstream.getdata: string;
+begin
+ result:= tstringbufferstream(fmemorystream).data;
 end;
 
 end.

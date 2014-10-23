@@ -784,6 +784,7 @@ type
    procedure insert(const aindex: integer;const anode: ttreelistedititem;
                                              const freeroot: boolean = true);
                 //inserts in parent of items[aindex]
+   procedure delete(const aindex: integer);
    procedure readnode(const aname: msestring; const reader: tstatreader;
                                             const anode: ttreelistitem);
    procedure writenode(const aname: msestring; const writer: tstatwriter;
@@ -4969,6 +4970,12 @@ begin
   finsertparent:= nil;
   finsertparentindex:= -1;
  end; 
+end;
+
+procedure ttreeitemeditlist.delete(const aindex: integer);
+begin
+ ttreelistedititem(items[aindex]).expanded:= false;
+ deleteitems(aindex,1);
 end;
 
 { trecordfieldedit }

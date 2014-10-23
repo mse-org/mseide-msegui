@@ -23,6 +23,9 @@ type
  tstatreader = class;
  tstatwriter = class;
 
+ statreadeventty = procedure (const reader: tstatreader) of object;
+ statwriteeventty = procedure (const writer: tstatwriter) of object;
+
  istatfile = interface(iobjectlink)[miid_istatfile]
   procedure dostatread(const reader: tstatreader);
   procedure dostatwrite(const writer: tstatwriter);
@@ -283,6 +286,10 @@ function canstatoptions(const editoptions: optionseditty;
 procedure readstringar(const reader: treader; out avalue: stringarty);
 procedure writestringar(const writer: twriter; const avalue: stringarty);
 
+function writestat(const asource: array of statwriteeventty;
+                                        const section: msestring): string;
+procedure readstat(const adest: array of statreadeventty;
+                              const atext: string; const section: msestring);
 implementation
 uses
  sysutils,mseformatstr,msefileutils,msearrayutils;
@@ -316,6 +323,47 @@ begin
   writer.writestring(avalue[int1]);
  end;
  writer.writelistend;
+end;
+
+function writestat(const asource: array of statwriteeventty; 
+                                         const section: msestring): string;
+var
+ stream1: ttextstringbufferstream;
+ writer1: tstatwriter = nil;
+ int1: integer;
+begin
+ stream1:= ttextstringbufferstream.create('');
+ try
+  writer1:= tstatwriter.create(stream1);
+  writer1.setsection(section);
+  for int1:= 0 to high(asource) do begin
+   asource[int1](writer1);
+  end;
+  result:= stream1.data;
+ finally
+  stream1.destroy();
+  writer1.free();
+ end;
+end;
+
+procedure readstat(const adest: array of statreadeventty;const atext: string;
+                                                   const section: msestring);
+var
+ stream1: ttextstringbufferstream;
+ reader1: tstatreader = nil;
+ int1: integer;
+begin
+ stream1:= ttextstringbufferstream.create(atext);
+ try
+  reader1:= tstatreader.create(stream1);
+  reader1.setsection(section);
+  for int1:= 0 to high(adest) do begin
+   adest[int1](reader1);
+  end;
+ finally
+  stream1.destroy();
+  reader1.free();
+ end;
 end;
 
 function canstatvalue(const editoptions: optionseditty;
