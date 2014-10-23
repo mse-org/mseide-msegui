@@ -6688,7 +6688,7 @@ end;
 
 procedure tmsebufdataset.currentcheckbrowsemode;
 begin
- if (state <> dsbrowse) or (fcurrentupdating = 0) then begin
+ if (state <> dsbrowse) and (fcurrentupdating = 0) then begin
   checkbrowsemode;
  end;
 end;
