@@ -1235,6 +1235,8 @@ type
     procedure SetAsWideString(const aValue: WideString);
     function getasunicodestring: unicodestring;
     procedure setasunicodestring(const avalue: unicodestring);
+   function getasid: int64;
+   procedure setasid(const avalue: int64);
   public
     constructor Create(ACollection: TCollection); overload; override;
     constructor Create(AParams: TParams; AParamType: TParamType); reintroduce; overload;
@@ -1275,6 +1277,7 @@ type
                                                        write setasunicodestring;
     property asmsestring: msestring read getasunicodestring 
                                                   write setasunicodestring;
+    property asid: int64 read getasid write setasid; //-1 -> null
   published
     Property DataType : TFieldType read FDataType write SetDataType;
     Property Name : string read FName write FName;
@@ -10671,6 +10674,27 @@ begin
     FDataType := ftWideString;
   Value := aValue;
 end;
+
+function tparam.getasid: int64;
+begin
+ if isnull then begin
+  result:= -1;
+ end
+ else begin
+  result:= aslargeint;
+ end;
+end;
+
+procedure tparam.setasid(const avalue: int64);
+begin
+ if avalue = -1 then begin
+  clear;
+ end
+ else begin
+  aslargeint:= avalue;
+ end;
+end;
+
 
 Procedure TParam.SetAsTime(const AValue: TDateTime);
 begin
