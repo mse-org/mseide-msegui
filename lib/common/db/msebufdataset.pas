@@ -521,7 +521,8 @@ type
                       );
  bufdatasetstatesty = set of bufdatasetstatety;
 
- bufdatasetstate1ty = (bs1_needsresync,bs1_lookupnotifying,bs1_posting,
+ bufdatasetstate1ty = (bs1_needsresync,
+     bs1_lookupnotifying,bs1_lookupnotifypending,bs1_posting,
                           bs1_deferdeleterecupdatebuffer,bs1_restoreupdate);
  bufdatasetstates1ty = set of bufdatasetstate1ty;
  
@@ -607,6 +608,7 @@ type
    flookupclients: bufdatasetarty;
    flookupmasters: bufdatasetarty;
    fnotifylookupclientcount: integer;
+   flookupupdate: integer;
    
    fbuffercountbefore: integer;
    fonupdateerror: updateerroreventty;
@@ -1036,6 +1038,9 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
 
+   procedure enablecontrols; override;
+   procedure beginlookupupdate(); //delays notifylookupclient calls
+   procedure endlookupupdate();
    procedure post; override;
    procedure gotobookmark(const abookmark: bookmarkdataty); overload;
    function findbookmark(const abookmark: bookmarkdataty): boolean;
@@ -2431,6 +2436,7 @@ begin
  fcalcfieldsizes:= nil;
  fcalcstringpositions:= nil;
  fcalcvarpositions:= nil;
+ flookupupdate:= 0;
  
  bindfields(false);
 end;
@@ -5284,23 +5290,26 @@ begin
     end; 
    end;
   end;
-  if bo1 then begin
-   if state = dsinsert then begin
-    checkbrowsemode;
+  if state in [dsedit,dsinsert,dsbrowse] then begin 
+            //stop recursion triggered by dscalcfields
+   if bo1 then begin
+    if state = dsinsert then begin
+     checkbrowsemode;
+    end
+    else begin
+     if bm1.recordpo <> nil then begin
+      bookmarkdata:= bm1;   
+     end;
+    end;
    end
    else begin
-    if bm1.recordpo <> nil then begin
-     bookmarkdata:= bm1;   
-    end;
+    checkbrowsemode;
+    resync([]);
    end;
-  end
-  else begin
-   checkbrowsemode;
-   resync([]);
-  end;
-  if int2 = fnotifylookupclientcount then begin
-                  //already called by post otherwise
-   notifylookupclients;
+   if int2 = fnotifylookupclientcount then begin
+                   //already called by post otherwise
+    notifylookupclients;
+   end;
   end;
  end;
 end;
@@ -5310,17 +5319,47 @@ var
  int1: integer;
 begin
  if not (bs1_lookupnotifying in fbstate1) then begin
-  inc(fnotifylookupclientcount);
-  include(fbstate1,bs1_lookupnotifying);
-  try
-   for int1:= 0 to high(flookupclients) do begin
-    flookupclients[int1].lookupdschanged(self);
+  if (fdisablecontrolscount > 0) or (flookupupdate > 0) then begin
+   include(fbstate1,bs1_lookupnotifypending);
+  end
+  else begin
+   inc(fnotifylookupclientcount);
+   include(fbstate1,bs1_lookupnotifying);
+   try
+    for int1:= 0 to high(flookupclients) do begin
+     flookupclients[int1].lookupdschanged(self);
+    end;
+    exclude(fbstate1,bs1_lookupnotifypending);
+   finally
+    exclude(fbstate1,bs1_lookupnotifying);
    end;
-  finally
-   exclude(fbstate1,bs1_lookupnotifying);
   end;
  end;
 end;
+
+procedure tmsebufdataset.beginlookupupdate();
+begin
+ inc(flookupupdate);
+end;
+
+procedure tmsebufdataset.endlookupupdate();
+begin
+ dec(flookupupdate);
+ if (flookupupdate = 0) and (bs1_lookupnotifypending in fbstate1) then begin
+  notifylookupclients();
+ end;
+end;
+
+
+procedure tmsebufdataset.enablecontrols();
+begin
+ inherited;
+ if (bs1_lookupnotifypending in fbstate1) and (fdisablecontrolscount = 0) and 
+                                                 (flookupupdate = 0) then begin
+  notifylookupclients();
+ end;
+end;
+
 
 procedure tmsebufdataset.dataevent(event: tdataevent; info: ptrint);
 var
@@ -6685,7 +6724,7 @@ end;
 
 procedure tmsebufdataset.currentcheckbrowsemode;
 begin
- if (state <> dsbrowse) or (fcurrentupdating = 0) then begin
+ if (state <> dsbrowse) and (fcurrentupdating = 0) then begin
   checkbrowsemode;
  end;
 end;

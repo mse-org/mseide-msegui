@@ -1069,13 +1069,16 @@ label
  endlab;
 var
  intf: igetdscontroller;
+ posted1: boolean;
 begin
  with fownerlink do begin
   if (destdataset <> nil) and destdataset.active then begin
    inc(frefreshlock);
    try
+    posted1:= false;
     if foptions * [fplo_syncmasteredit,fplo_syncmasterinsert] <> [] then begin
-     if mseclasses.getcorbainterface(dataset,typeinfo(igetdscontroller),intf) and
+     if mseclasses.getcorbainterface(dataset,
+                     typeinfo(igetdscontroller),intf) and
                                         intf.getcontroller.canceling then begin
       destdataset.cancel;
       exit;
@@ -1085,6 +1088,7 @@ begin
                            (fplo_syncmasterpost in foptions) then begin
        dataset.updaterecord;
        if dataset.modified then begin
+        posted1:= true;
         destdataset.post;
         goto endlab;
        end;
@@ -1092,6 +1096,7 @@ begin
      end;
     end;
     if (fplo_syncmasterpost in foptions) then begin
+     posted1:= true;
      destdataset.post;
 //     destdataset.checkbrowsemode;
     end
@@ -1103,7 +1108,8 @@ begin
     inherited;
    endlab:
     if (dataset.state in [dsedit,dsinsert]) and 
-      (foptions * [fplo_syncmasteredit,fplo_syncmasterinsert] <> []) then begin
+      (foptions * [fplo_syncmasteredit,fplo_syncmasterinsert] <> []) and 
+                                                            posted1 then begin
      dataset.updaterecord; //synchronize fields
     end;
     if (dataset.state = dsinsert) and assigned(onupdatemasterinsert) then begin

@@ -1615,8 +1615,8 @@ type
    fconnector: tparamconnector;
    fdatalink: tfielddatalink;
    procedure setasvariant(const avalue: variant);
-   function getasid: int64;
-   procedure setasid(const avalue: int64);
+//   function getasid: int64;
+//   procedure setasid(const avalue: int64);
 //   function getasmsestring: msestring;
 //   procedure setasmsestring(const avalue: msestring);
    function getdatasource: tdatasource;
@@ -1632,7 +1632,7 @@ type
   public
    constructor Create(ACollection: TCollection); overload; override;
    destructor destroy; override;
-   property asid: int64 read getasid write setasid; //-1 -> null
+//   property asid: int64 read getasid write setasid; //-1 -> null
 //   property asmsestring: msestring read getasmsestring write setasmsestring;
   published
    property connector: tparamconnector read fconnector write setconnector;
@@ -9014,7 +9014,7 @@ begin
 {$warnings on}
 end;
 //{$endif mse_withpublishedparamvalue}
-
+{
 function tmseparam.getasid: int64;
 begin
  if isnull then begin
@@ -9034,7 +9034,7 @@ begin
   aslargeint:= avalue;
  end;
 end;
-
+}
 function tmseparam.getdatasource: tdatasource;
 begin
  result:= fdatalink.datasource;
