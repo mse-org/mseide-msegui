@@ -48,7 +48,8 @@ type
 
  tformatmacrolist = class(tmacrolist)
   public
-   procedure addmac(const aname: msestring; const avalue: msestring);
+   procedure addmac(const aname: msestring; const avalue: msestring;
+                                      const ahandler: macrohandlerty = nil);
  end;
 
 var
@@ -5092,9 +5093,9 @@ end;
 { tformatmacrolist }
 
 procedure tformatmacrolist.addmac(const aname: msestring;
-               const avalue: msestring);
+               const avalue: msestring; const ahandler: macrohandlerty = nil);
 begin
- add([aname],[avalue]);
+ add([aname],[avalue],[ahandler]);
 end;
 
 procedure clearformatmacros;

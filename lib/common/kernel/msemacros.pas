@@ -14,9 +14,13 @@ uses
  msestrings,mselist,msearrayutils,msetypes,msestat;
  
 type
+ macrohandlerty = function(params: msestringarty): msestring;
+ macrohandlerarty = array of macrohandlerty;
+ 
  macroinfoty = record
   name,value: msestring;
   expandlevel: integer;
+  handler: macrohandlerty;
  end;
  pmacroinfoty = ^macroinfoty;
  macroinfoarty = array of macroinfoty;
@@ -47,10 +51,13 @@ type
    procedure add(const avalue: tmacrolist); overload;
    procedure add(const avalue: macroinfoty); overload;
    procedure add(const avalue: macroinfoarty); overload;
-   procedure add(const names,values: array of msestring); overload;
+   procedure add(const names,values: array of msestring;
+                            const handler: array of macrohandlerty); overload;
    procedure resetexpandlevel;
    function getvalue(const aname: msestring;
                                       var aexpandlevel: integer): msestring;
+   function callhandler(const aname: msestring;const aparams: msestringarty;
+                                        var aexpandlevel: integer): msestring;
    procedure expandmacros1(var avalue: msestring);
    function expandmacros(const avalue: msestring): msestring;
    procedure expandmacros1(var avalue: msestring;
@@ -59,33 +66,37 @@ type
    function asarray: macroinfoarty;
    function asarray(const addnames: array of msestring;
                          const addvalues: array of msestring): macroinfoarty;
-   procedure asarray(out names,values: msestringarty);
+   procedure asarray(out names,values: msestringarty;
+                              out handler: macrohandlerarty);
    procedure setasarray(const avalue: macroinfoarty);
-   procedure setasarray(const names,values: msestringarty);
+   procedure setasarray(const names,values: msestringarty;
+                          const handler: macrohandlerarty);
    property options: macrooptionsty read foptions write foptions;
  end;
  
 //function expandmacros(const value: msestring; const macros:macroinfoarty;
 //              const caseinsensitive: boolean = true): msestring; overload;
-function initmacros(const anames,avalues: array of msestring
-                                                ): macroinfoarty; overload;
-function initmacros(const anames,avalues: array of msestringarty
-                                                ): macroinfoarty; overload;
+function initmacros(const anames,avalues: array of msestring;
+                    const ahandler: array of macrohandlerty): macroinfoarty;
+function initmacros(const anames,avalues: array of msestringarty;
+                    const ahandler: array of macrohandlerarty): macroinfoarty;
 function expandmacros(const value: msestring; const macros: macroinfoarty;
-   const options: macrooptionsty = [mao_caseinsensitive]): msestring; overload;
+   const options: macrooptionsty = [mao_caseinsensitive]): msestring;
 function expandmacros(const value: msestring; 
                const anames,avalues: array of msestring;
-   const options: macrooptionsty = [mao_caseinsensitive]): msestring; overload;
-{$ifndef FPC}
-function expandmacrosstr(const value: msestring; 
-               const anames,avalues: array of msestring;
    const options: macrooptionsty = [mao_caseinsensitive]): msestring;
-{$endif}
+
+function expandmacros2(const value: msestring; 
+               const anames,avalues: array of msestring;
+               const ahandler: array of macrohandlerty;
+   const options: macrooptionsty = [mao_caseinsensitive]): msestring;
+
 implementation
 uses
  msestream;
  
-function initmacros(const anames,avalues: array of msestring): macroinfoarty;
+function initmacros(const anames,avalues: array of msestring;
+                    const ahandler: array of macrohandlerty): macroinfoarty;
 var
  int1: integer;
 begin
@@ -96,11 +107,16 @@ begin
    if int1 <= high(avalues) then begin
     value:= avalues[int1];
    end;
+   if int1 <= high(ahandler) then begin
+    handler:= ahandler[int1];
+   end;
   end;
  end;
 end;
 
-function initmacros(const anames,avalues: array of msestringarty): macroinfoarty;
+function initmacros(
+                 const anames,avalues: array of msestringarty;
+                 const ahandler: array of macrohandlerarty): macroinfoarty;
 var
  int1,int2,int3: integer;
 begin
@@ -116,6 +132,9 @@ begin
     name:= anames[int1,int2];
     if int2 <= high(avalues[int1]) then begin
      value:= avalues[int1,int2];
+    end;
+    if int2 <= high(ahandler[int1]) then begin
+     handler:= ahandler[int1,int2];
     end;
    end;
    inc(int3);
@@ -140,18 +159,27 @@ end;
 
 function expandmacros(const value: msestring; 
                const anames,avalues: array of msestring;
-   const options: macrooptionsty = [mao_caseinsensitive]): msestring; overload;
+   const options: macrooptionsty = [mao_caseinsensitive]): msestring;
 begin
- result:= expandmacros(value,initmacros(anames,avalues),options);
+ result:= expandmacros(value,initmacros(anames,avalues,[]),options);
 end;
 
+function expandmacros2(const value: msestring; 
+               const anames,avalues: array of msestring;
+               const ahandler: array of macrohandlerty;
+   const options: macrooptionsty = [mao_caseinsensitive]): msestring;
+begin
+ result:= expandmacros(value,initmacros(anames,avalues,ahandler),options);
+end;
+
+{
 function expandmacrosstr(const value: msestring; 
                const anames,avalues: array of msestring;
    const options: macrooptionsty = [mao_caseinsensitive]): msestring;
 begin
- result:= expandmacros(value,initmacros(anames,avalues),options);
+ result:= expandmacros(value,initmacros(anames,avalues,[]),options);
 end;
-
+}
 { 
 function expandmacros(const value: msestring; const macros:macroinfoarty;
                  const caseinsensitive: boolean = true): msestring;
@@ -188,6 +216,7 @@ begin
  if mao_caseinsensitive in foptions then begin
   info.name:= struppercase(avalue.name);
   info.value:= avalue.value;
+  info.handler:= avalue.handler;
   inherited add(info);
  end
  else begin
@@ -210,7 +239,8 @@ begin
  add(avalue.asarray);
 end;
 
-procedure tmacrolist.add(const names,values: array of msestring);
+procedure tmacrolist.add(const names,values: array of msestring;
+                                 const handler: array of macrohandlerty);
 var
  int1: integer;
  ar1: macroinfoarty;
@@ -220,6 +250,9 @@ begin
   ar1[int1].name:= names[int1];
   if int1 <= high(values) then begin
    ar1[int1].value:= values[int1];
+  end;
+  if int1 <= high(handler) then begin
+   ar1[int1].handler:= handler[int1];
   end;
  end;
  add(ar1);
@@ -249,6 +282,37 @@ begin
  if internalfind(info,int1) then begin
   with pmacroinfoaty(fdata)^[int1] do begin
    result:= value;
+   int1:= expandlevel;
+   expandlevel:= aexpandlevel;
+   aexpandlevel:= int1;
+  end;
+ end
+ else begin
+  result:= '';
+  aexpandlevel:= bigint+1;
+ end;
+end;
+
+function tmacrolist.callhandler(const aname: msestring; 
+           const aparams: msestringarty; var aexpandlevel: integer): msestring;
+var
+ info: macroinfoty;
+ int1: integer;
+begin
+ if mao_caseinsensitive in foptions then begin
+  info.name:= struppercase(aname);
+ end
+ else begin
+  info.name:= aname;
+ end;
+ if internalfind(info,int1) then begin
+  with pmacroinfoaty(fdata)^[int1] do begin
+   if handler <> nil then begin
+    result:= handler(aparams);
+   end
+   else begin
+    result:= value;
+   end;
    int1:= expandlevel;
    expandlevel:= aexpandlevel;
    aexpandlevel:= int1;
@@ -316,8 +380,9 @@ var
  
 var
  int1,int2,int3,int4: integer;
- po1,po2: pmsechar;
+ po1,po2,po3,po4,po5: pmsechar;
  str1,str2,str3: msestring;
+ ar1: msestringarty;
  
 begin
  if avalue <> '' then begin
@@ -335,7 +400,8 @@ begin
     if (po1+1)^ = '{' then begin
      po2:= msestrscan(po1,msechar('}'));
      if po2 <> nil then begin
-      str2:= stringsegment(po1+2,po2);
+      po3:= po1+2;
+      str2:= stringsegment(po3,po2);
       inc(po2)
      end
      else begin
@@ -352,12 +418,38 @@ begin
                (po2^ >= 'a') and (po2^ <= 'z') or
                (po2^ >= 'A') and (po2^ <= 'Z') or
                (po2^ >= '0') and (po2^ <= '9'));
-     str2:= stringsegment(po1+1,po2);
+     po3:= po1+1;
+     str2:= stringsegment(po3,po2);
     end;
     //po1 = macro def start, po2 = macro def end
     if str2 <> '' then begin //macro name
-     int1:= expandlevel+1;
-     str3:= getvalue(str2,int1);
+     po4:= po2-1;
+     if po4^ = '}' then begin
+      dec(po4);
+     end;
+     if (po4)^ = ')' then begin
+      po5:= po3;
+      while (po5 < po4) and (po5^ <> '(') do begin
+       inc(po5);
+      end;
+      if po5 < po4 then begin
+       setlength(str2,po5-po3);
+       str3:= stringsegment(po5+1,po4);
+       ar1:= splitstringquoted(str3,',','"');
+       for int2:= 0 to high(ar1) do begin
+        internalexpandmacros(ar1[int2],expandlevel+1,integerarty(nil^));
+       end;
+       int1:= expandlevel+1;
+       str3:= callhandler(str2,ar1,int1);
+      end
+      else begin
+       int1:= bigint+1; //not found
+      end;
+     end
+     else begin
+      int1:= expandlevel+1;
+      str3:= getvalue(str2,int1);
+     end;
      if int1 <= expandlevel then begin
       str3:= '***'+str2+'***';
      end
@@ -486,17 +578,20 @@ begin
  end;
 end;
 
-procedure tmacrolist.asarray(out names, values: msestringarty);
+procedure tmacrolist.asarray(out names, values: msestringarty;
+                                            out handler: macrohandlerarty);
 var
  po1: pmacroinfoaty;
  int1: integer;
 begin
  setlength(names,count);
  setlength(values,count);
+ setlength(handler,count);
  po1:= datapo;
  for int1:= 0 to count - 1 do begin
   names[int1]:= po1^[int1].name;
   values[int1]:= po1^[int1].value;
+  handler[int1]:= po1^[int1].handler;
  end;
 end;
 
@@ -507,10 +602,10 @@ begin
 end;
 
 procedure tmacrolist.setasarray(const names: msestringarty;
-               const values: msestringarty);
+               const values: msestringarty; const handler: macrohandlerarty);
 begin
  clear();
- add(names,values);
+ add(names,values,handler);
 end;
 
 end.

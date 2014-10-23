@@ -1237,7 +1237,7 @@ procedure toptions.expandmacros(const anames,avalues: array of msestring;
                       const options: macrooptionsty = 
                                [mao_caseinsensitive]);
 begin
- expandmacros(initmacros(anames,avalues),options);
+ expandmacros(initmacros(anames,avalues,[]),options);
 end;
 
 function toptions.gett: tobject;

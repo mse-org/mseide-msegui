@@ -1307,7 +1307,7 @@ begin
    if int1 > high(o.formatmacrovalues) then begin
     break;
    end;
-   formatmacros.add(o.formatmacronames[int1],o.formatmacrovalues[int1]);
+   formatmacros.add(o.formatmacronames[int1],o.formatmacrovalues[int1],[]);
   end;
   
   codetemplates.scan(o.texp.codetemplatedirs);

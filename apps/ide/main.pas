@@ -1877,8 +1877,8 @@ begin
   macrolist:= tmacrolist.create([mao_curlybraceonly]);
   try
    macrolist.add(['%FILEPATH%','%FILENAME%','%FILENAMEBASE%'],
-                                                   [path2,base+ext,base]);
-   macrolist.add(macronames,macrovalues);
+                                                   [path2,base+ext,base],[]);
+   macrolist.add(macronames,macrovalues,[]);
    instream:= ttextstream.create(path1);
    try
     text:= instream.readmsestrings;
@@ -2264,7 +2264,7 @@ begin
       setlength(copiedfiles,length(newprojectfiles));
       macrolist:= tmacrolist.create([mao_curlybraceonly]);
       try
-       macrolist.add(['%PROJECTNAME%','%PROJECTDIR%'],[mstr1,curdir]);
+       macrolist.add(['%PROJECTNAME%','%PROJECTDIR%'],[mstr1,curdir],[]);
        if runscript(scriptbeforecopy,true,false) then begin
         for int1:= 0 to high(newprojectfiles) do begin
          source:= filepath(newprojectfiles[int1]);
@@ -2781,7 +2781,7 @@ begin
                     'CURCOMPONENTCLASS','CURPROPERTY'],
                     [cursourcefile,curmodulefile,
                      cursselection,cursword,cursdefinition,
-                     curcomponentclass,curproperty]);
+                     curcomponentclass,curproperty],[]);
      macrolist.expandmacros1(mstr1);
      macrolist.free;
      str1:= str1 + ' ' + mstr1;

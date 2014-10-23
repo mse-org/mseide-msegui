@@ -283,7 +283,7 @@ begin
      fo.grid.row:= high(ar1);
      bo1:= fo.show(true) = mr_ok;
     end;
-    mac1.add(params,fo.macrovalue.gridvalues);         
+    mac1.add(params,fo.macrovalue.gridvalues,[]);         
    finally
     fo.free;
    end;
