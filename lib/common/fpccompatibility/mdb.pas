@@ -1661,7 +1661,7 @@ type
     procedure Delete; virtual;
     procedure DisableControls;
     procedure Edit;
-    procedure EnableControls;
+    procedure EnableControls; virtual;
     function FieldByName(const FieldName: string): TField;
     function FindField(const FieldName: string): TField;
     function FindFirst: Boolean; virtual;
