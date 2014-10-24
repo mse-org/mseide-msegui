@@ -53,6 +53,8 @@ type
                                                      var refindex: integerarty);
   public
    constructor create(const aoptions: macrooptionsty);
+   constructor create(const aoptions: macrooptionsty;
+                             const apredefined: array of macroinfoty);
    function itempo(const index: integer): pmacroinfoty;
    procedure add(const avalue: tmacrolist); overload;
    procedure add(const avalue: macroinfoty); overload;
@@ -218,6 +220,14 @@ constructor tmacrolist.create(const aoptions: macrooptionsty);
 begin
  foptions:= aoptions;
  inherited create(sizeof(macroinfoty),[rels_needsfinalize,rels_needscopy]);
+end;
+
+constructor tmacrolist.create(const aoptions: macrooptionsty;
+                                 const apredefined: array of macroinfoty);
+begin
+ create(aoptions);
+ predefined:= initmacros(apredefined);
+ add(fpredefined);
 end;
 
 function tmacrolist.itempo(const index: integer): pmacroinfoty;
@@ -541,14 +551,13 @@ procedure tmacrolist.statreadvalue(const aname: msestring;
   const reader: tstatreader);
 begin
  clear;
- reader.readrecordarray(aname,{$ifdef FPC}@{$endif}setcount,
-                 {$ifdef FPC}@{$endif}setrec);
+ reader.readrecordarray(aname,@setcount,@setrec);
 end;
 
 procedure tmacrolist.statwritevalue(const aname: msestring;
   const writer: tstatwriter);
 begin
- writer.writerecordarray(aname,count,{$ifdef FPC}@{$endif}getrec);
+ writer.writerecordarray(aname,count,@getrec);
 end;
 
 function tmacrolist.getrec(const index: integer): msestring;
@@ -561,6 +570,7 @@ end;
 procedure tmacrolist.setrec(const index: integer; const avalue: msestring);
 begin
  with itempo(index)^ do begin
+  handler:= nil;
   decoderecord(avalue,[@name,@value],'SS');
  end;
 end;
@@ -617,16 +627,16 @@ end;
 procedure tmacrolist.setasarray(const avalue: macroinfoarty);
 begin
  clear();
- add(avalue);
  add(fpredefined);
+ add(avalue);
 end;
 
 procedure tmacrolist.setasarray(const names: msestringarty;
                const values: msestringarty; const handler: macrohandlerarty);
 begin
  clear();
- add(names,values,handler);
  add(fpredefined);
+ add(names,values,handler);
 end;
 
 procedure tmacrolist.setpredefined(const avalue: array of macroinfoty);
