@@ -1109,10 +1109,11 @@ begin
 {$ifdef MSWINDOWS}
  try
   try
-   prochandle:= execmse1(commandline,nil,nil,nil,-1,options,workingdirecotry);
+   procid:= execmse1(commandline,nil,nil,nil,-1,options,nil,nil,
+                                                          workingdirectory);
   finally
-   if prochandle <> invalidprochandle then begin
-    closehandle(prochandle);
+   if procid <> invalidprochandle then begin
+    closehandle(procid);
    end;
   end;
   except
@@ -1120,7 +1121,8 @@ begin
  end;
 {$else}
  try
-  procid:= execmse1(commandline,nil,nil,nil,-1,[],nil,nil,workingdirectory);
+  procid:= execmse1(commandline,nil,nil,nil,-1,options,nil,nil,
+                                                     workingdirectory);
   pro_killzombie(procid);
  except
   result:= false;
