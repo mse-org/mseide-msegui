@@ -19,8 +19,8 @@ type
  
  macroinfoty = record
   name,value: msestring;
-  expandlevel: integer;
   handler: macrohandlerty;
+  expandlevel: integer;
  end;
  pmacroinfoty = ^macroinfoty;
  macroinfoarty = array of macroinfoty;
@@ -33,6 +33,7 @@ type
  tmacrolist = class(torderedrecordlist,istatupdatevalue)
   private
    foptions: macrooptionsty;
+   fpredefined: macroinfoarty;
   protected
    procedure finalizerecord(var item); override;
    procedure copyrecord(var item); override;
@@ -40,6 +41,11 @@ type
    function getcomparefunc: sortcomparemethodty; override;
    procedure setrec(const index: integer; const avalue: msestring);
    function getrec(const index: integer): msestring;
+   procedure resetexpandlevel;
+   function getvalue(const aname: msestring;
+                                      var aexpandlevel: integer): msestring;
+   function callhandler(const aname: msestring;const aparams: msestringarty;
+                                        var aexpandlevel: integer): msestring;
    //istatupdatevalue
    procedure statreadvalue(const aname: msestring; const reader: tstatreader);
    procedure statwritevalue(const aname: msestring; const writer: tstatwriter);
@@ -53,11 +59,7 @@ type
    procedure add(const avalue: macroinfoarty); overload;
    procedure add(const names,values: array of msestring;
                             const handler: array of macrohandlerty); overload;
-   procedure resetexpandlevel;
-   function getvalue(const aname: msestring;
-                                      var aexpandlevel: integer): msestring;
-   function callhandler(const aname: msestring;const aparams: msestringarty;
-                                        var aexpandlevel: integer): msestring;
+
    procedure expandmacros1(var avalue: msestring);
    function expandmacros(const avalue: msestring): msestring;
    procedure expandmacros1(var avalue: msestring;
@@ -72,10 +74,15 @@ type
    procedure setasarray(const names,values: msestringarty;
                           const handler: macrohandlerarty);
    property options: macrooptionsty read foptions write foptions;
+   
+   procedure setpredefined(const avalue: array of macroinfoty);
+   property predefined: macroinfoarty read fpredefined write fpredefined;
+                            //appended by setasarray procedures
  end;
  
 //function expandmacros(const value: msestring; const macros:macroinfoarty;
 //              const caseinsensitive: boolean = true): msestring; overload;
+function initmacros(const amacros: array of macroinfoty): macroinfoarty;
 function initmacros(const anames,avalues: array of msestring;
                     const ahandler: array of macrohandlerty): macroinfoarty;
 function initmacros(const anames,avalues: array of msestringarty;
@@ -94,6 +101,16 @@ function expandmacros2(const value: msestring;
 implementation
 uses
  msestream;
+
+function initmacros(const amacros: array of macroinfoty): macroinfoarty;
+var
+ int1: integer;
+begin
+ setlength(result,length(amacros));
+ for int1:= 0 to high(amacros) do begin
+  result[int1]:= amacros[int1];
+ end;
+end;
  
 function initmacros(const anames,avalues: array of msestring;
                     const ahandler: array of macrohandlerty): macroinfoarty;
@@ -114,8 +131,7 @@ begin
  end;
 end;
 
-function initmacros(
-                 const anames,avalues: array of msestringarty;
+function initmacros(const anames,avalues: array of msestringarty;
                  const ahandler: array of macrohandlerarty): macroinfoarty;
 var
  int1,int2,int3: integer;
@@ -423,31 +439,34 @@ begin
     end;
     //po1 = macro def start, po2 = macro def end
     if str2 <> '' then begin //macro name
+     int1:= expandlevel+1;
      po4:= po2-1;
      if po4^ = '}' then begin
       dec(po4);
-     end;
-     if (po4)^ = ')' then begin
-      po5:= po3;
-      while (po5 < po4) and (po5^ <> '(') do begin
-       inc(po5);
-      end;
-      if po5 < po4 then begin
-       setlength(str2,po5-po3);
-       str3:= stringsegment(po5+1,po4);
-       ar1:= splitstringquoted(str3,',','"');
-       for int2:= 0 to high(ar1) do begin
-        internalexpandmacros(ar1[int2],expandlevel+1,integerarty(nil^));
+      if (po4)^ = ')' then begin
+       po5:= po3;
+       while (po5 < po4) and (po5^ <> '(') do begin
+        inc(po5);
        end;
-       int1:= expandlevel+1;
-       str3:= callhandler(str2,ar1,int1);
+       if po5 < po4 then begin
+        setlength(str2,po5-po3);
+        str3:= stringsegment(po5+1,po4);
+        ar1:= splitstringquoted(str3,',','"');
+        for int2:= 0 to high(ar1) do begin
+         internalexpandmacros(ar1[int2],expandlevel+1,integerarty(nil^));
+        end;
+        int1:= expandlevel+1;
+        str3:= callhandler(str2,ar1,int1);
+       end
+       else begin
+        int1:= bigint+1; //not found
+       end;
       end
       else begin
-       int1:= bigint+1; //not found
+       str3:= getvalue(str2,int1);
       end;
      end
      else begin
-      int1:= expandlevel+1;
       str3:= getvalue(str2,int1);
      end;
      if int1 <= expandlevel then begin
@@ -599,6 +618,7 @@ procedure tmacrolist.setasarray(const avalue: macroinfoarty);
 begin
  clear();
  add(avalue);
+ add(fpredefined);
 end;
 
 procedure tmacrolist.setasarray(const names: msestringarty;
@@ -606,6 +626,12 @@ procedure tmacrolist.setasarray(const names: msestringarty;
 begin
  clear();
  add(names,values,handler);
+ add(fpredefined);
+end;
+
+procedure tmacrolist.setpredefined(const avalue: array of macroinfoty);
+begin
+ fpredefined:= initmacros(avalue);
 end;
 
 end.
