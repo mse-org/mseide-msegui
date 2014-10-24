@@ -423,9 +423,32 @@ begin
      resetexpandlevel;
     end;
     addstringsegment(avalue,po2,po1);
-    if (po1+1)^ = '{' then begin
-     po2:= msestrscan(po1,msechar('}'));
-     if po2 <> nil then begin
+    po2:= po1+1;
+    if (po2)^ = '{' then begin
+     inc(po2);
+     int1:= 0;
+     while po2^ <> #0 do begin
+      if po2^ = '"' then begin //skip quoted
+       inc(po2);
+       while po2^ <> #0 do begin
+        if po2^ = '"' then begin
+         break;
+        end;
+        inc(po2);
+       end;
+      end;
+      if po2^ = '{' then begin
+       inc(int1);
+      end;
+      if po2^ = '}' then begin
+       dec(int1);
+       if int1 < 0 then begin
+        break;
+       end;
+      end;
+      inc(po2);
+     end; 
+     if po2^ <> #0 then begin
       po3:= po1+2;
       str2:= stringsegment(po3,po2);
       inc(po2)
