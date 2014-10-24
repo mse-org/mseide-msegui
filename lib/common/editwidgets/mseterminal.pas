@@ -87,7 +87,8 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    function prochandle: integer;
-   function execprog(const acommandline: msestring): integer;
+   function execprog(const acommandline: msestring;
+                            const aworkingdirectory: filenamety = ''): integer;
      //returns prochandle
    procedure terminateprocess;
    procedure killprocess;
@@ -95,7 +96,7 @@ type
    function exitcode: integer;
    function running: boolean;
    procedure addchars(const avalue: msestring); virtual;
-   procedure addline(const avalue: msestring); //thread save
+   procedure addline(const avalue: msestring); //thread safe
    procedure writestr(const atext: string);
    procedure writestrln(const atext: string);
    property inputfd: integer read getinputfd write setinoutfd;
@@ -595,7 +596,8 @@ begin
  end;
 end;
 
-function tterminal.execprog(const acommandline: msestring): integer;
+function tterminal.execprog(const acommandline: msestring;
+                            const aworkingdirectory: filenamety = ''): integer;
 begin
  with fprocess do begin
   active:= false;
@@ -603,6 +605,7 @@ begin
 //   componentexception(self,'Process already active.');
 //  end;
   commandline:= acommandline;
+  workingdirectory:= aworkingdirectory;
   active:= true;
   result:= prochandle;
  end;

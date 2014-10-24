@@ -65,6 +65,7 @@ type
    fexitcode: integer;
    fcommandline: msestring;
    fcommandline1: msestring;
+   fworkingdirectory: filenamety;
    fpipewaitus: integer;
    fstatpriority: integer;
    procedure setoutput(const avalue: tpipereaderpers);
@@ -116,6 +117,8 @@ type
   published
    property filename: filenamety read ffilename write ffilename;
    property parameter: msestring read fparameter write fparameter;
+   property workingdirectory: filenamety read fworkingdirectory 
+                                                write fworkingdirectory;
    property active: boolean read getactive write setactive default false;
    property options: processoptionsty read foptions write setoptions 
                                                 default defaultprocessoptions;
@@ -391,6 +394,8 @@ var
  sessionleader: boolean;
  group: integer;
  opt1: execoptionsty;
+ str1: ansistring;
+ mstr1: msestring;
 begin
  sessionleader:= false;
  group:= -1;
@@ -474,10 +479,13 @@ begin
      if pro_winpipewritehandles in foptions then begin
       include(opt1,exo_winpipewritehandles);
      end;
+     if fworkingdirectory <> '' then begin
+      mstr1:= filepath(fworkingdirectory);
+      sys_tosysfilepath(mstr1);
+      str1:= mstr1;
+     end;
      fprochandle:= execmse2(syscommandline(fcommandline1),
-           inp,outp,erroroutp,{sessionleader,}group,opt1
-           {pro_inactive in foptions,false,
-                          pro_tty in foptions,pro_nostdhandle in foptions});
+                                    inp,outp,erroroutp,group,opt1,str1);
      flastprochandle:= fprochandle;
      if fprochandle = invalidprochandle then begin
       finalizeexec;
