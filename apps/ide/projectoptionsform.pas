@@ -863,7 +863,7 @@ uses
  objectinspector,msebits,msefileutils,msedesignintf,guitemplates,
  watchform,stackform,main,projecttreeform,findinfileform,
  selecteditpageform,programparametersform,sourceupdate,mseimagelisteditor,
- msesysenvmanagereditor,targetconsole,
+ msesysenvmanagereditor,targetconsole,msefilemacros,
  msedesigner,panelform,watchpointsform,commandlineform,messageform,
  componentpaletteform,mserichstring,msesettings,formdesigner,actionsmodule,
  msestringlisteditor,msetexteditor,msepropertyeditors,mseshapes,mseactions,
@@ -1029,6 +1029,7 @@ begin
    end;
   end;
  end;
+ result:= initmacros([result,filemacros]);
 end;
 
 procedure hintmacros(const sender: tcustomedit; var info: hintinfoty);

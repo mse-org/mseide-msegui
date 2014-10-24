@@ -126,11 +126,24 @@ Predefined project macros:
 PROJECTNAME, PROJECTDIR, MAINFILE, TARGETFILE, they can be overridden by 
 'Project'-'Options'-'Macros'.
 
+MSEide file macros
+******************
+Macro format is ${FILE_*(fileparameter)} or ${FILE_*("fileparameter")}.
+FILE_MSE    convert to MSE format.
+FILE_SYS    convert to sys format.
+FILE_PATH   absolute path.
+FILE_FILE   no trailing path delimiter.
+FILE_DIR    trailing path delimiter.
+FILE_NAME   no directory part.
+FILE_EXT    file name extension.
+FILE_NONAME directory part only.
+FILE_NOEXT  no file name extension.
+
 MSEide macros in 'Project'-'Options'-'Debugger'-'xterm Command'
 ***************************************************************
-${PTS} expands to tty pts path
-${PTSN} expands to tty pts number
-${PTSH} expands to tty pts handle
+${PTS} expands to tty pts path.
+${PTSN} expands to tty pts number.
+${PTSH} expands to tty pts handle.
 Entering an empty string restores the default.
 
 MSEide external tools parameters macros

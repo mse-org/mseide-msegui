@@ -89,6 +89,8 @@ function initmacros(const anames,avalues: array of msestring;
                     const ahandler: array of macrohandlerty): macroinfoarty;
 function initmacros(const anames,avalues: array of msestringarty;
                     const ahandler: array of macrohandlerarty): macroinfoarty;
+function initmacros(const amacros: array of macroinfoarty): macroinfoarty;
+
 function expandmacros(const value: msestring; const macros: macroinfoarty;
    const options: macrooptionsty = [mao_caseinsensitive]): msestring;
 function expandmacros(const value: msestring; 
@@ -156,6 +158,23 @@ begin
     end;
    end;
    inc(int3);
+  end;
+ end;
+end;
+
+function initmacros(const amacros: array of macroinfoarty): macroinfoarty;
+var
+ int1,int2,int3: integer;
+begin
+ int2:= 0;
+ for int1:= 0 to high(amacros) do begin
+  int2:= int2 + length(amacros[int1]);
+ end;
+ setlength(result,int2);
+ for int1:= high(amacros) downto 0 do begin
+  for int3:= high(amacros[int1]) downto 0 do begin
+   dec(int2);
+   result[int2]:= amacros[int1][int3];
   end;
  end;
 end;

@@ -106,9 +106,9 @@ const
   (name: 'FILE_MSE'; value: ''; handler: macrohandlerty(@file_mse);
                      expandlevel: 0), //convert to mse format
   (name: 'FILE_SYS'; value: ''; handler: macrohandlerty(@file_sys);
-                     expandlevel: 0), //convert to sys fromat
+                     expandlevel: 0), //convert to sys format
   (name: 'FILE_PATH'; value: ''; handler: macrohandlerty(@file_path);
-                     expandlevel: 0), //complete path
+                     expandlevel: 0), //absolute path
   (name: 'FILE_FILE'; value: ''; handler: macrohandlerty(@file_FILE);
                      expandlevel: 0), //no trailing path delimiter
   (name: 'FILE_DIR'; value: ''; handler: macrohandlerty(@file_dir);
