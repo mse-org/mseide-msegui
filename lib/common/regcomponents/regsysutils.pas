@@ -23,7 +23,8 @@ interface
 implementation
 uses
  msedesignintf,msesysenv,msefilechange,regsysutils_bmp,mseprocess,
- msecomponenteditors,mclasses,msesysenvmanagereditor,mseglob;
+ msecomponenteditors,
+ sysutils,mclasses,msesysenvmanagereditor,mseglob,msepropertyeditors;
 type
  tsysenvmanagereditor = class(tcomponenteditor)
   public
@@ -32,10 +33,17 @@ type
    procedure edit; override;
  end;
 
+ tprocessoptionseditor = class(tsetpropertyeditor)
+  protected
+   function getinvisibleitems: tintegerset; override;
+ end;
+
 procedure Register;
 begin
  registercomponents('NoGui',[tsysenvmanager,tfilechangenotifyer,tmseprocess]);
  registercomponenteditor(tsysenvmanager,tsysenvmanagereditor);
+ registerpropertyeditor(typeinfo(processoptionsty),nil,'',
+                                           tprocessoptionseditor);
 end;
 
 { tsysenvmanagereditor }
@@ -52,6 +60,13 @@ begin
  if editsysenvmanager(tsysenvmanager(fcomponent)) = mr_ok then begin
   fdesigner.componentmodified(fcomponent);
  end;
+end;
+
+{ tprocessoptionseditor }
+
+function tprocessoptionseditor.getinvisibleitems: tintegerset;
+begin
+ result:= [ord(pro_nopipeterminate)];
 end;
 
 initialization

@@ -28,7 +28,8 @@ type
                     pro_sessionleader,            //linux only
                     pro_settty,                   //linux only
                     pro_tty,pro_echo,pro_icanon,  //linux only
-                    pro_nowaitforpipeeof,pro_nopipeterminate,
+                    pro_nowaitforpipeeof,
+                    pro_nopipeterminate,  //not used
                     pro_usepipewritehandles,pro_winpipewritehandles,
                     pro_waitcursor,pro_checkescape,pro_processmessages,
                                //kill process if esc pressed
@@ -359,10 +360,12 @@ begin
  if canevent(tmethod(fonprocfinished)) then begin
   fonprocfinished(self);
  end;
+ {
  if not (pro_nopipeterminate in foptions) then begin
   foutput.pipereader.terminate;
   ferroroutput.pipereader.terminate;
  end;
+ }
 end;
 
 procedure tmseprocess.procend;
@@ -374,7 +377,8 @@ begin
  if prs_waitcursor in fstate then begin
   exclude(fstate,prs_waitcursor);
   application.endwait;
- end;  
+ end;
+ finalizeexec();
  doprocfinished;
 end;
 
@@ -633,9 +637,9 @@ end;
 
 procedure tmseprocess.finalizeexec;
 begin
- finput.pipewriter.close;
- foutput.pipereader.terminateandwait;
- ferroroutput.pipereader.terminateandwait;
+ finput.pipewriter.close();
+ foutput.pipereader.terminateandwait();
+ ferroroutput.pipereader.terminateandwait();
  application.lock;
  unlisten;
  if fprochandle <> invalidprochandle then begin
@@ -643,6 +647,8 @@ begin
   fprochandle:= invalidprochandle;
  end;
  application.unlock;
+ foutput.pipereader.close();
+ ferroroutput.pipereader.close();
 end;
 
 procedure tmseprocess.waitforpipeeof;
@@ -817,7 +823,8 @@ begin
                 longword(foptions),
                 [longword(mask1),longword(mask2),longword(mask3)]));
  {$endif}
- if foptions * [pro_nowaitforpipeeof,pro_nopipeterminate] = [] then begin
+ exclude(foptions,pro_nopipeterminate);
+ if foptions * [pro_nowaitforpipeeof{,pro_nopipeterminate}] = [] then begin
   exclude(foptions,pro_usepipewritehandles);
  end;
 end;
