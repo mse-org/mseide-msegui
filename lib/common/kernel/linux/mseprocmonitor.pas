@@ -67,7 +67,8 @@ begin
  application.lock;
  int1:= high(infos);
  while int1 >= 0 do begin
-  if waitpid(infos[int1].prochandle,@dwo1,wnohang) > 0 then begin
+  if (waitpid(infos[int1].prochandle,@dwo1,wnohang) > 0) and
+                       (wifexited(dwo1) or wifsignaled(dwo1)) then begin
    execresult:= wexitstatus(dwo1);
    for int2:= int1 downto 0 do begin
     with infos[int2] do begin
