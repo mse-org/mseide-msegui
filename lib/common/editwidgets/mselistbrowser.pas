@@ -3001,8 +3001,10 @@ begin
     end
     else begin
 //     inherited;
+     if not editing then begin
+      include(eventstate,es_processed); //trigger checkvalue otherwise
+     end;
      editing:= false;
-     include(eventstate,es_processed);
     end;
    end
    else begin
