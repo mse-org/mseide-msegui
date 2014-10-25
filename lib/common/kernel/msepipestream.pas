@@ -320,7 +320,7 @@ begin
     sys_write(fwritehandle,@by1,1); //wake up thread
    end
    else begin
-    inherited sethandle(invalidfilehandle);
+//    inherited sethandle(invalidfilehandle);
     {$ifdef unix}
     pthread_kill(fthread.id,sigio);
     {$endif}
@@ -328,6 +328,7 @@ begin
    writehandle:= invalidfilehandle;
   end;
  end;
+ inherited sethandle(invalidfilehandle);
  include(fstate,tss_notopen);
 end;
 
