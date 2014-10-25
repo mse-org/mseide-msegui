@@ -20,7 +20,7 @@ unit msesysintf; //i386-linux
 interface
 uses
  msesys,msesystypes,msesetlocale,{$ifdef FPC}cthreads,cwstring,{$endif}msetypes,
- mselibc,
+ mselibc,msectypes,
  msestrings,msestream;
  
 var
@@ -439,13 +439,17 @@ begin
 end;
 
 function sys_closefile(const handle: integer): syserrorty;
+var
+ int1: cint;
 begin
- if (handle = invalidfilehandle) or 
-   (mselibc.__close(handle) = 0) then begin
-  result:= sye_ok;
- end
- else begin
-  result:= syelasterror;
+ result:= sye_ok;
+ if (handle <> invalidfilehandle) then begin
+  repeat
+   int1:= mselibc.__close(handle);
+  until (int1 = 0) or (sys_getlasterror <> EINTR);
+  if int1 <> 0 then begin
+   result:= syelasterror;
+  end;
  end;
 end;
 
