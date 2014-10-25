@@ -736,6 +736,9 @@ var
      end;
     end;
    end;
+  end
+  else begin
+   pty:= dup(pty);
   end;
   if pty >= 0 then begin
    if ptsname_r(pty,@ptyname,buflen) < 0 then begin
@@ -822,7 +825,6 @@ begin
  procid:= mselibc.vfork;
 // procid:= mselibc.fork;
  if procid = -1 then execerr;
-
  if procid = 0 then begin   //child
 {$ifdef FPC}{$checkpointer off}{$endif}
   if workingdirectory <> '' then begin
@@ -886,9 +888,9 @@ begin
   if frompipe <> nil then begin
    __close(frompipehandles.writedes);
   end;
-  {$ifdef FPC}
+ {$ifdef FPC}
   mselibc.execl(shell,shell,['-c',pchar(commandline),nil]);
-  {$else}
+ {$else}
   params[0]:= shell;
   params[1]:= pchar('-c');
   params[2]:= pchar(commandline);
