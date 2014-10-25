@@ -607,7 +607,7 @@ begin
   commandline:= acommandline;
   workingdirectory:= aworkingdirectory;
   active:= true;
-  result:= prochandle;
+  result:= lastprochandle;
  end;
 end;
 
