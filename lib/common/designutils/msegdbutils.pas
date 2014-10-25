@@ -640,7 +640,8 @@ implementation
 
 uses
  sysutils,mseformatstr,mseprocutils,msesysutils,msefileutils,msemacros,
- msebits,msesysintf,mseguiintf,msearrayutils,msesys,msedate,actionsmodule
+ msebits,msesysintf,msesysintf1,mseguiintf,msearrayutils,msesys,msedate,
+ actionsmodule
         {$ifdef UNIX},mselibc{$else},windows{$endif};
 
 const                                      
@@ -4640,7 +4641,7 @@ procedure tpseudoterminal.closeinp;
 var
  ios: termios{ty};
 begin
- finput.terminate;
+ finput.terminate(true);
  if finput.active then begin
   msetcgetattr(foutput.handle,ios);
   ios.c_lflag:= (ios.c_lflag and not (icanon)) or echo;

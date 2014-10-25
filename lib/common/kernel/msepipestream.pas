@@ -96,8 +96,8 @@ type
            //bringt nur vollstaendige zeilen, sonst false
            //no decoding
    procedure clear; override;
-   procedure terminate;
-   procedure terminateandwait;
+   procedure terminate(const noclosehandle: boolean = false);
+   procedure terminateandwait(const noclosehandle: boolean = false);
    procedure waitfor;
    function waitforresponse(timeoutusec: integer = 0;
                       resetflag: boolean = true): boolean;
@@ -278,7 +278,7 @@ end;
 
 function tpipereader.releasehandle: integer;
 begin
- terminateandwait;
+ terminateandwait(true);
  freeandnil(fthread);
  writehandle:= invalidfilehandle;
  result:= inherited releasehandle;
@@ -307,7 +307,7 @@ begin
  fwritehandle := Value;
 end;
 
-procedure tpipereader.terminate;
+procedure tpipereader.terminate(const noclosehandle: boolean = false);
 var
  by1: byte;
 begin
@@ -328,14 +328,16 @@ begin
    writehandle:= invalidfilehandle;
   end;
  end;
- inherited sethandle(invalidfilehandle);
+ if not noclosehandle then begin
+  inherited sethandle(invalidfilehandle);
+ end;
  include(fstate,tss_notopen);
 end;
 
-procedure tpipereader.terminateandwait;
+procedure tpipereader.terminateandwait(const noclosehandle: boolean = false);
 begin
  if fthread <> nil then begin
-  terminate;
+  terminate(noclosehandle);
   application.waitforthread(fthread);
  end;
 end;
