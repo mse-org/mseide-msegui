@@ -2457,7 +2457,11 @@ function waitpid(__pid:__pid_t; __stat_loc:Plongint; __options:longint):__pid_t;
 function waitpid(__pid:__pid_t; var __stat_loc:longint;
                          __options:longint):__pid_t;
                              cdecl;external clib name 'waitpid'; overload;
-function WEXITSTATUS(Status: longint): longint;
+
+function WEXITSTATUS(status: cint): cint;
+function WIFEXITED(status: cint): boolean;
+function WIFSIGNALED(status: cint): boolean;
+
 function __system(__command:Pchar):longint;cdecl;external clib name 'system';
 type
   TPipeDescriptors = {packed} record
@@ -2903,14 +2907,24 @@ end;
 
 {$endif}
 
-Function WEXITSTATUS(Status: longint): longint;
+function WEXITSTATUS(status: cint): cint;
 begin
-  Result:=(Status and $FF00) shr 8;
+ result:=(status and $ff00) shr 8;
 end;
 
-function errno : error_t;
+function WIFEXITED(status: cint): boolean;
 begin
-  Result:=__errno_location()^;
+ result:= status and $7f = 0;
+end;
+
+function WIFSIGNALED(status: cint): boolean;
+begin
+ result:= (status and $7f <> $7f) and (status and $7f <> 0);
+end;
+
+function errno: error_t;
+begin
+ result:=__errno_location()^;
 end;
 {
 function SA_LEN(const Buf): longword; // Untyped buffer; this is *unsafe*.
