@@ -488,8 +488,16 @@ begin
       sys_tosysfilepath(mstr1);
       str1:= mstr1;
      end;
-     fprochandle:= execmse2(syscommandline(fcommandline1),
+     try
+      fprochandle:= execmse2(syscommandline(fcommandline1),
                                     inp,outp,erroroutp,group,opt1,str1);
+     except
+      fprochandle:= invalidprochandle;
+      flastprochandle:= invalidprochandle;
+      finalizeexec();
+      fexitcode:= -1;
+      raise;
+     end;
      flastprochandle:= fprochandle;
      if fprochandle = invalidprochandle then begin
       finalizeexec;
