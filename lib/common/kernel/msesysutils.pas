@@ -259,7 +259,7 @@ begin
   value:= value + lineend;
  end;
  {$ifdef UNIX}
-  __write(1,pointer(value)^,length(value));
+  sys_write(1,pointer(value),length(value));
  {$else}
   if getstdhandle(std_output_handle) <= 0 then begin
    allocconsole;
@@ -278,7 +278,7 @@ begin
   value:= value + lineend;
  end;
  {$ifdef UNIX}
-  __write(2,pointer(value)^,length(value));
+  sys_write(2,pointer(value),length(value));
  {$else}
   if getstdhandle(std_error_handle) <= 0 then begin
    allocconsole;

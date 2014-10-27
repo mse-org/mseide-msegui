@@ -803,7 +803,7 @@ begin
  if frompipe <> nil then begin
   if frompipe^ = invalidfilehandle then begin
    openpipe(frompipehandles);
-   setcloexec(topipehandles.readdes);
+   setcloexec(frompipehandles.readdes);
    frompipe^:= frompipehandles.readdes;
   end
   else begin
@@ -814,7 +814,7 @@ begin
   if errorpipe <> frompipe then begin
    if errorpipe^ = invalidfilehandle then begin
     openpipe(errorpipehandles);
-    setcloexec(topipehandles.readdes);
+    setcloexec(errorpipehandles.readdes);
     errorpipe^:= errorpipehandles.readdes;
    end
    else begin
