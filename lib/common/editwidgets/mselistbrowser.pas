@@ -4986,7 +4986,8 @@ end;
 procedure ttreeitemeditlist.delete(const aindex: integer);
 begin
  ttreelistedititem(items[aindex]).expanded:= false;
- deleteitems(aindex,1);
+ fintf.getgrid.deleterow(aindex);
+// deleteitems(aindex,1);
 end;
 
 { trecordfieldedit }
