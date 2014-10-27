@@ -1,5 +1,5 @@
 object formdesignerfo: tformdesignerfo
-  optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousewheel, ow_hinton]
+  optionswidget = [ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousewheel, ow_hinton]
   optionsskin = [osk_framebuttononly]
   color = -1879048187
   frame.grip_size = 0
