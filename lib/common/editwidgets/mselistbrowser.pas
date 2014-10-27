@@ -2433,6 +2433,14 @@ procedure tcustomitemeditlist.insert(const aindex: integer;
                                                const anode: tlistitem);
 begin
  checkitemclass(anode);
+ with fintf.getgrid do begin
+  insertrow(aindex);
+ end;
+ tlistitem1(anode).setowner(self);
+ tlistitem1(anode).findex:= aindex;
+ items[aindex]:= anode;
+ fintf.updateitemvalues(aindex,1);
+{
  beginupdate;
  try
   internalinsertdata(aindex,anode,false);
@@ -2443,6 +2451,7 @@ begin
  finally
   endupdate;
  end;
+}
 end;
 
 procedure tcustomitemeditlist.refreshitemvalues(aindex: integer = 0;
