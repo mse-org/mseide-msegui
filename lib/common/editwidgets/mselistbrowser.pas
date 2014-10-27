@@ -4118,7 +4118,10 @@ begin
    int1:= count;
    if int1 > 0 then begin
     n1:= items[int1-1];
-    n2:= n1.parent;
+    int1:= n1.parentindex+1;
+   end
+   else begin
+    int1:= 0;
    end;
   end
   else begin
@@ -4127,12 +4130,11 @@ begin
    end;
    if int1 < count then begin
     n1:= items[int1];
+    int1:= n1.parentindex;
    end;
   end;
   n2:= nil;
-  int1:= 0;
   if n1 <> nil then begin
-   int1:= n1.parentindex;
    n2:= n1.parent;
   end;
   if n2 = nil then begin
