@@ -299,7 +299,7 @@ object sourcefo: tsourcefo
   end
   object formpopup: tpopupmenu
     onupdate = popupmonupdate
-    menu.submenu.count = 32
+    menu.submenu.count = 33
     menu.submenu.items = <    
       item
         action = actionsmo.selecteditpage
@@ -322,6 +322,9 @@ object sourcefo: tsourcefo
         action = actionsmo.save
         caption = '&Save File'
         state = [as_localcaption]
+      end    
+      item
+        action = actionsmo.saveas
       end    
       item
         caption = 'Show as Form'
