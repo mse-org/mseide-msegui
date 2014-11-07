@@ -2422,8 +2422,6 @@ object projectoptionsfo: tprojectoptionsfo
           bounds_cx = 234
           bounds_cy = 37
           anchors = [an_top, an_right]
-          textflags = [tf_noselect]
-          textflagsactive = []
           onsetvalue = setxtermcommandexe
           reffontheight = 14
         end
@@ -3959,6 +3957,7 @@ object projectoptionsfo: tprojectoptionsfo
             item[macrovalues]
               width = 521
               options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
+              onshowhint = colonshowhint
               widgetname = 'macrovalues'
               dataclass = tgridmsestringdatalist
             end>
