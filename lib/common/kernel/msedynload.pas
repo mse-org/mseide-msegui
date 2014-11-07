@@ -3,7 +3,9 @@ unit msedynload;
 interface
 uses
  msesystypes,{$ifdef FPC}dynlibs,{$endif}msestrings,sysutils,msetypes,msesys;
- 
+
+{$ifndef cpuarm}{$define set8087cw}{$endif}
+
 type
  funcinfoty = record
                n: string;      //name
@@ -321,7 +323,9 @@ function initializedynlib(var info: dynlibinfoty;
                               //true if all funcsopt found
 var
  int1: integer;
+ {$ifdef set8087cw}
  wo1: word;
+ {$endif}
 begin
  with info do begin
   sys_mutexlock(lock);
@@ -329,7 +333,9 @@ begin
    result:= true;
    if refcount = 0 then begin
     if (high(libnames) >= 0) or (high(libnamesdefault) >= 0) then begin
+ {$ifdef set8087cw}
      wo1:= get8087cw;
+ {$endif}
      if (high(libnames) >= 0) then begin
       libhandle:= loadlib(libnames,libname,errormessage,noexception);
      end
@@ -337,8 +343,10 @@ begin
       libhandle:= loadlib(libnamesdefault,libname,errormessage,noexception);
      end;
      if libhandle <> nilhandle then begin
+ {$ifdef set8087cw}
       cw8087:= get8087cw;
       set8087cw(wo1);
+ {$endif}
       try
        result:= getprocaddresses(libhandle,funcs,noexception);
        if not result then begin
@@ -360,7 +368,9 @@ begin
      end;
     end
     else begin
+ {$ifdef set8087cw}
      cw8087:= get8087cw; //refresh
+ {$endif}
     end;
     if libhandle <> nilhandle then begin
      inc(refcount);
