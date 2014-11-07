@@ -35,7 +35,7 @@ uses
  classes,typinfo,sysutils,msetypes,msesystypes {$ifndef FPC},classes_del{$endif};
 
 type
-
+ ar8ty = array[0..7] of byte;
 {$ifndef FPC}
   TTextLineBreakStyle = (tlbsLF,tlbsCRLF,tlbsCR);
   TValueType = (vaNull, vaList, vaInt8, vaInt16, vaInt32, vaExtended,

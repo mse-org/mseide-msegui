@@ -505,7 +505,9 @@ var
  str1: string;
  cu1: currency;
  do1: double;
+{$ifndef CPUARM}
  wo1: word;
+{$endif}
  po1: pchar;
 begin
  with tsqlite3cursor(cursor) do begin
@@ -563,10 +565,14 @@ begin
     end;
    end;
   end;
+ {$ifndef CPUARM}
   wo1:= get8087cw;
   set8087cw(wo1 or $1f);             //mask exceptions, Sqlite3 has overflow
+ {$endif}
   fstate:= sqlite3_step(fstatement);
+ {$ifndef CPUARM}
   set8087cw(wo1);                    //restore
+ {$endif}
   if fstate = sqlite_row then begin
    fstate:= sqliteerrormax; //first row
    fopen:= true;

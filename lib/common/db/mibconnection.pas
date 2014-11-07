@@ -1131,11 +1131,15 @@ begin
       ftFloat,ftcurrency: begin
        with po1^ do begin
         if sqlscale < 0 then begin
-        {$ifdef FPC}
-         int64(cur1):= round(asfloat * intexp10(-SQLScale));
-        {$else}
+      {$ifdef FPC}
+       {$ifdef CPUARM}
          int64(ar8ty(cur1)):= round(asfloat * intexp10(-SQLScale));
-        {$endif}
+       {$else}
+         int64(cur1):= round(asfloat * intexp10(-SQLScale));
+       {$endif}
+      {$else}
+         int64(ar8ty(cur1)):= round(asfloat * intexp10(-SQLScale));
+      {$endif}
          move(cur1,sqldata^,po1^.sqllen);
         end
         else begin

@@ -185,7 +185,7 @@ type
   deletedrecord: pintrecordty;
  end;
  logbufferheaderty = record
-  case flag: logflagty of
+  case logflag: logflagty of
    lf_rec: (
     rec: reclogheaderty;
    );
@@ -1613,7 +1613,7 @@ var
  abuffer: logbufferheaderty;
 begin
  fillchar(abuffer,sizeof(abuffer),0);
- abuffer.flag:= lf_end;
+ abuffer.logflag:= lf_end;
  write(abuffer,sizeof(abuffer));
 end;
 
@@ -1795,7 +1795,7 @@ function tbufstreamreader.readlogbufferheader(
                       out aheader: logbufferheaderty): boolean;
 begin
  result:= (read(aheader,sizeof(aheader)) = sizeof(aheader)) and 
-          (aheader.flag <> lf_end);
+          (aheader.logflag <> lf_end);
 end;
 
 function tbufstreamreader.readpointer: pointer;
@@ -6025,7 +6025,7 @@ var
  datapo: precheaderty;
  int2: integer;
 begin
- header1.flag:= alogmode;
+ header1.logflag:= alogmode;
  with abuffer,header1.update do begin
   if (info.bookmark.recordpo <> nil) or (deletedrecord <> nil) then begin
    deletedrecord:= adeletedrecord;
@@ -6053,7 +6053,7 @@ var
  header1: logbufferheaderty;
  int1: integer;
 begin
- header1.flag:= lf_rec;
+ header1.logflag:= lf_rec;
  with header1.rec do begin
   kind:= akind;
   po:= abuffer;
@@ -6239,7 +6239,7 @@ begin
     setlength(ar2,header.recordcount);
     for int1:= 0 to high(ar2) do begin
      if not reader.readlogbufferheader(header1) or 
-                                   (header1.flag <> lf_rec) then begin
+                                   (header1.logflag <> lf_rec) then begin
       formaterror;
      end;
      ar2[int1]:= header1.rec.po;
@@ -6259,7 +6259,7 @@ begin
     end;
     int2:= 0;
     while reader.readlogbufferheader(header1) do begin
-     case header1.flag of
+     case header1.logflag of
       lf_rec: begin
        with header1.rec do begin
         if not findrec(po,po1,int1) then begin
