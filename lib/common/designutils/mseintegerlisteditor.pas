@@ -25,7 +25,7 @@ type
    ok: tbutton;
    grid: twidgetgrid;
    rowcount: tintegeredit;
-   valueedit: trealedit;
+   valueedit: tintegeredit;
    tstatfile1: tstatfile;
    procedure rowcountonsetvalue(const sender: tobject; var avalue: integer;
                 var accept: boolean);
