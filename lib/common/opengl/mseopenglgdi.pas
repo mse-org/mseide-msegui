@@ -313,7 +313,7 @@ begin
    result:= gde_novisual;
    exit;
   end;
-  fcolormap:= xcreatecolormap(fdpy,mserootwindow,fvisinfo^.visual,allocnone);
+  fcolormap:= xcreatecolormap(fdpy,gui_getrootwindow,fvisinfo^.visual,allocnone);
 {$else}
   with contextinfo.attrib do begin
    doublebuf:= doublebuffer;
@@ -579,7 +579,7 @@ begin
     if paintdevice = 0 then begin
      if createpaintdevice then begin
       with windowrect^ do begin
-       fcolormap:= xcreatecolormap(fdpy,mserootwindow,fvisinfo^.visual,
+       fcolormap:= xcreatecolormap(fdpy,gui_getrootwindow,fvisinfo^.visual,
                                                                  allocnone);
        attributes.colormap:= fcolormap;
        paintdevice:= xcreatewindow(fdpy,parent,x,y,cx,cy,0,fvisinfo^.depth,
@@ -594,7 +594,7 @@ begin
      end;
     end
     else begin
-     fcolormap:= xcreatecolormap(fdpy,mserootwindow,fvisinfo^.visual,allocnone);
+     fcolormap:= xcreatecolormap(fdpy,gui_getrootwindow,fvisinfo^.visual,allocnone);
      xsetwindowcolormap(fdpy,paintdevice,fcolormap);
     end;
     pd:= paintdevice;

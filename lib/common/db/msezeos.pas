@@ -23,6 +23,8 @@ type
    procedure inheriteddataevent(const event: tdataevent; const info: ptrint);
    procedure inheritedcancel;
    procedure inheritedpost;
+   procedure inheritedinsert();
+   procedure inheriteddelete();
    function inheritedmoveby(const distance: integer): integer;
    procedure inheritedinternalinsert;
    procedure inheritedinternaldelete;
@@ -93,6 +95,8 @@ type
    procedure inheriteddataevent(const event: tdataevent; const info: ptrint);
    procedure inheritedcancel;
    procedure inheritedpost;
+   procedure inheritedinsert();
+   procedure inheriteddelete();
    function inheritedmoveby(const distance: integer): integer;
    procedure inheritedinternalinsert;
    procedure inheritedinternaldelete;
@@ -162,6 +166,8 @@ type
    procedure inheriteddataevent(const event: tdataevent; const info: ptrint);
    procedure inheritedcancel;
    procedure inheritedpost;
+   procedure inheritedinsert();
+   procedure inheriteddelete();
    function inheritedmoveby(const distance: integer): integer;
    procedure inheritedinternalinsert;
    procedure inheritedinternaldelete;
@@ -231,6 +237,8 @@ type
    procedure inheriteddataevent(const event: tdataevent; const info: ptrint);
    procedure inheritedcancel;
    procedure inheritedpost;
+   procedure inheritedinsert();
+   procedure inheriteddelete();
    function inheritedmoveby(const distance: integer): integer;
    procedure inheritedinternalinsert;
    procedure inheritedinternaldelete;
@@ -544,6 +552,16 @@ begin
  //dummy
 end;
 
+procedure tmsezreadonlyquery.inheritedinsert;
+begin
+ inherited insert();
+end;
+
+procedure tmsezreadonlyquery.inheriteddelete;
+begin
+ inherited delete();
+end;
+
 { tmsezquery }
 
 constructor tmsezquery.create(aowner: tcomponent);
@@ -798,6 +816,16 @@ begin
  //dummy
 end;
 
+procedure tmsezquery.inheritedinsert;
+begin
+ inherited insert();
+end;
+
+procedure tmsezquery.inheriteddelete;
+begin
+ inherited delete();
+end;
+
 { tmseztable }
 
 constructor tmseztable.create(aowner: tcomponent);
@@ -1047,6 +1075,16 @@ begin
  //dummy
 end;
 
+procedure tmseztable.inheritedinsert;
+begin
+ inherited insert();
+end;
+
+procedure tmseztable.inheriteddelete;
+begin
+ inherited delete();
+end;
+
 { tmsezstoredproc }
 
 constructor tmsezstoredproc.create(aowner: tcomponent);
@@ -1294,6 +1332,16 @@ end;
 procedure tmsezstoredproc.enddisplaydata;
 begin
  //dummy
+end;
+
+procedure tmsezstoredproc.inheritedinsert;
+begin
+ inherited insert();
+end;
+
+procedure tmsezstoredproc.inheriteddelete;
+begin
+ inherited delete();
 end;
 
 { tmsezgraphicfield }
