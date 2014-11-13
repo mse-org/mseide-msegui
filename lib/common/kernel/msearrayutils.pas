@@ -349,6 +349,14 @@ begin
  end;
 end;
 
+function aligntoptr(p: pointer): pointer; inline;
+begin
+{$ifdef FPC_REQUIRES_PROPER_ALIGNMENT}
+ result:= align(p,sizeof(p));
+{$else FPC_REQUIRES_PROPER_ALIGNMENT}
+ result:=p;
+{$endif FPC_REQUIRES_PROPER_ALIGNMENT}
+end;
  
 function DynArraySize(a: Pointer): sizeint;
 {$ifdef FPC}
@@ -378,8 +386,11 @@ var
 begin
  ti:= typinfo;
 {$ifdef FPC}
- inc(pchar(ti),ord(ti^.namelen));
- result:= ti^.elesize;
+ inc(pointer(ti),ord(pdynarraytypeinfo(ti)^.namelen)+2);
+ ti:= aligntoptr(ti);
+ result:= psizeint(ti)^;
+// inc(pchar(ti),ord(ti^.namelen));
+// result:= ti^.elesize;
 {$else}
  inc(pchar(ti),length(ti^.name));
  result:= ti^.elsize;
