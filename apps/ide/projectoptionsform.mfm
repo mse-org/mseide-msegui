@@ -1965,7 +1965,7 @@ object projectoptionsfo: tprojectoptionsfo
                 onshowhint = hintexpandedmacros
                 bounds_x = 0
                 bounds_y = 0
-                bounds_cx = 1679
+                bounds_cx = 527
                 bounds_cy = 37
                 anchors = [an_left, an_top, an_right]
                 textflags = [tf_ycentered, tf_noselect, tf_ellipseleft]
@@ -1985,7 +1985,7 @@ object projectoptionsfo: tprojectoptionsfo
                   0
                 )
                 taborder = 1
-                bounds_x = 1681
+                bounds_x = 529
                 bounds_y = 0
                 bounds_cx = 129
                 bounds_cy = 37
@@ -2010,7 +2010,7 @@ object projectoptionsfo: tprojectoptionsfo
                   2
                 )
                 taborder = 2
-                bounds_x = 1812
+                bounds_x = 660
                 bounds_y = 20
                 bounds_cx = 82
                 bounds_cy = 16
