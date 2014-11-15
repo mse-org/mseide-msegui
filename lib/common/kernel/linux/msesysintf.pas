@@ -194,8 +194,8 @@ begin
  for int1:= 0 to filelist.count - 1 do begin
   with filelist[int1] do begin
    if (name[1] >= '0') and (name[1] <= '9') then begin
-    stream:= ttextstream.create('/proc/'+name+'/stat',fm_read);
-    try
+    if ttextstream.trycreate(stream,'/proc/'+name+'/stat',fm_read) =
+                                                           sye_ok then begin
      stream.readln(str1);
      with result[int2] do begin
       if mselibc.sscanf(pchar(str1),'%d (%*a[^)]) %*c %d',
@@ -204,7 +204,6 @@ begin
        inc(int2);
       end;
      end;
-    finally
      stream.free;
     end;
    end;
