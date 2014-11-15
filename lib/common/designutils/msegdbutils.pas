@@ -9,7 +9,7 @@
 }
 unit msegdbutils;
 
-{$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+{$ifdef FPC}{$mode objfpc}{$h+}{$goto on}{$endif}
 {$ifndef FPC}{$ifdef linux} {$define UNIX} {$endif}{$endif}
 
 interface
@@ -358,6 +358,7 @@ type
                        values: resultinfoarty);
    procedure postsyncerror;
    procedure checkpointersize;
+   procedure updateenvvars();
    procedure dorun;
    function internalcommand(acommand: string): boolean;
    function synccommand(const acommand: string; 
@@ -2150,6 +2151,22 @@ begin
  fpointerhexdigits:= 2*fpointersize;
 end;
 
+procedure tgdbmi.updateenvvars();
+var
+ int1: integer;
+begin
+ for int1:= 0 to high(fenvvars) do begin
+  with fenvvars[int1] do begin
+   if unset then begin
+    unsetenv(name);
+   end
+   else begin
+    setenv(name,value);
+   end;
+  end;
+ end;
+end;
+
 procedure tgdbmi.dorun;
 var
  int1: integer;
@@ -2158,6 +2175,8 @@ var
  str1: string;
  frames1: frameinfoarty;
  ev: tgdbstartupevent;
+label
+ endlab;
 begin
 {$ifdef unix}
  killtargetconsole;
@@ -2182,7 +2201,9 @@ begin
   fstartupbreakpoint:= breakinsert(fstartupbkpt);  
  end
  else begin
-  if (gs_remote in fstate) and (stacklistframes(frames1,0,1) = gdb_ok) then begin
+  if (gs_remote in fstate) and 
+          (stacklistframes(frames1,0,1) = gdb_ok) then begin
+                                       //already started by gdbserver
    ev:= tgdbstartupevent.create(ievent(self));
    with ev do begin
     stopinfo.reason:= sr_startup;
@@ -2196,7 +2217,7 @@ begin
    end;
    include(fstate,gs_started);
    application.postevent(ev);
-   exit;
+   goto endlab;
   end; 
   if getcliresult('info file',ar1) = gdb_ok then begin
    for int1:= 0 to high(ar1) do begin
@@ -2226,18 +2247,11 @@ begin
    fstartupbreakpoint:= breakinsert('main');
   end;
  end;
+endlab:
  synccommand('-exec-arguments '+ fprogparameters);
  synccommand('-environment-cd '+ tosysfilepath(filepath(fworkingdirectory)));
- for int1:= 0 to high(fenvvars) do begin
-  with fenvvars[int1] do begin
-   if unset then begin
-    unsetenv(name);
-   end
-   else begin
-    setenv(name,value);
-   end;
-  end;
- end;
+ updateenvvars();   
+        //for remote gdbserver too late, process has already been created
  {$ifdef mswindows}
  if fnewconsole then begin
   synccommand('-gdb-set new-console on');
