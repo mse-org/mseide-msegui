@@ -1785,16 +1785,16 @@ begin
    po3:= buildxftpat(drawinfo.getfont.fontdata^,fontinfo,false);
    po4:= xftfontmatch(appdisp,xdefaultscreen(appdisp),po3,@res1);
    if po4 <> nil then begin
-   {$ifdef mse_debugxft}
-    if fcpatterngetstring(po4,fc_file,0,@po5) = fcresultmatch then begin
-     writeln('Font found. Name: "'+h.name+'" Height: '+
-                                       inttostr(h.d.height)+' File:');
-     writeln('"'+string(po5)+'"');
-    end;     
-   {$endif}
     if fcpatterngetinteger(po4,fc_pixel_size,0,@int1) = fcresultmatch then begin
      realheight:= int1;
     end;
+   {$ifdef mse_debugxft}
+    if fcpatterngetstring(po4,fc_file,0,@po5) = fcresultmatch then begin
+     writeln('Font found. Name: "'+h.name+'" Height: '+
+       inttostr(h.d.height)+' Realheight: '+inttostr(int1)+' File:');
+     writeln('"'+string(po5)+'"');
+    end;     
+   {$endif}
     po2:= xftfontopenpattern(appdisp,po4); //font owns the pattern
     if po2 <> nil then begin
      drawinfo.getfont.ok:= true;
