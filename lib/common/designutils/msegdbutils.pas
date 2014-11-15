@@ -2175,8 +2175,6 @@ var
  str1: string;
  frames1: frameinfoarty;
  ev: tgdbstartupevent;
-label
- endlab;
 begin
 {$ifdef unix}
  killtargetconsole;
@@ -2217,7 +2215,7 @@ begin
    end;
    include(fstate,gs_started);
    application.postevent(ev);
-   goto endlab;
+   exit;
   end; 
   if getcliresult('info file',ar1) = gdb_ok then begin
    for int1:= 0 to high(ar1) do begin
@@ -2247,7 +2245,6 @@ begin
    fstartupbreakpoint:= breakinsert('main');
   end;
  end;
-endlab:
  synccommand('-exec-arguments '+ fprogparameters);
  synccommand('-environment-cd '+ tosysfilepath(filepath(fworkingdirectory)));
  updateenvvars();   
