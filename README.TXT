@@ -123,8 +123,9 @@ COMPSTOREDIR, COMPILER, DEBUGGER, EXEEXT, TARGET, TARGETOSDIR.
 MSEide project macros
 *********************
 Predefined project macros:
-PROJECTNAME, PROJECTDIR, MAINFILE, TARGETFILE, they can be overridden by 
-'Project'-'Options'-'Macros'.
+PROJECTNAME, PROJECTDIR, MAINFILE, TARGETFILE,
+TARGETENV (in format for "env" unix command), TARGETPARAMS,
+they can be overridden by 'Project'-'Options'-'Macros'.
 
 MSEide file macros
 ******************

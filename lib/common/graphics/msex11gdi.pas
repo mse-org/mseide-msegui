@@ -1787,7 +1787,8 @@ begin
    if po4 <> nil then begin
    {$ifdef mse_debugxft}
     if fcpatterngetstring(po4,fc_file,0,@po5) = fcresultmatch then begin
-     writeln('Font found. Name: "'+name+'" Height: '+inttostr(height)+' File:');
+     writeln('Font found. Name: "'+h.name+'" Height: '+
+                                       inttostr(h.d.height)+' File:');
      writeln('"'+string(po5)+'"');
     end;     
    {$endif}
