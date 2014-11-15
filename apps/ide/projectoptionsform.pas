@@ -999,8 +999,10 @@ begin
 end;
 
 function getprojectmacros: macroinfoarty;
+var
+ int1,int2: integer;
 begin
- setlength(result,4);
+ setlength(result,6);
  with projectoptions,o do begin
   with result[0] do begin
    name:= 'PROJECTNAME';
@@ -1027,6 +1029,28 @@ begin
    else begin
     value:= projectoptionsfo.targetfile.value;
    end;
+  end;
+  with result[4] do begin
+   name:= 'TARGETENV';
+   int2:= high(envvarons);
+   if int2 > high(d.t.envvarnames) then begin
+    int2:= high(d.t.envvarnames);
+   end;
+   if int2 > high(d.t.envvarvalues) then begin
+    int2:= high(d.t.envvarvalues);
+   end;
+   for int1:= 0 to int2 do begin
+    if envvarons[int1] then begin
+     value:= value+d.t.envvarnames[int1]+'='+d.t.envvarvalues[int1]+' ';
+    end
+    else begin
+     value:= value+'--unset='+d.t.envvarnames[int1]+' ';
+    end;
+   end;
+  end;
+  with result[5] do begin
+   name:= 'TARGETPARAMS';
+   value:= d.t.progparameters;
   end;
  end;
  result:= initmacros([result,filemacros]);
