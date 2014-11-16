@@ -2346,6 +2346,7 @@ type
    fwindowupdateindex: integer;
    fgroupzorder: windowarty;
    factivewindow: twindow;
+   flastactivewindow: twindow;
    fwantedactivewindow: twindow; //set by twindow.activate if modal
    finactivewindow: twindow;
    ffocuslockwindow: twindow;
@@ -2503,11 +2504,13 @@ type
                 //returns helpcontext of mouse widget, '' if none;
 
    function active: boolean;
+   procedure activate();
    function screenrect(const awindow: twindow = nil): rectty;
                           //nil -> virtualscreeen
    function workarea(const awindow: twindow = nil): rectty;
                           //nil -> current active window
    property activewindow: twindow read factivewindow;
+   property lastactivewindow: twindow read flastactivewindow;
    property inactivewindow: twindow read finactivewindow;
    function normalactivewindow: twindow; 
         //active window or active window after closing modal stack if defined
@@ -13364,6 +13367,7 @@ begin
       inc(factivecount);
       activecountbefore:= factivecount;
       appinst.factivewindow:= self;
+      appinst.flastactivewindow:= self;
       if not (tws_activatelocked in fstate) then begin
        if ffocusedwidget <> nil then begin
         widgetar:= ffocusedwidget.getrootwidgetpath;
@@ -15576,6 +15580,9 @@ begin
  end;
  if factivewindow = sender then begin
   factivewindow:= nil;
+ end;
+ if flastactivewindow = sender then begin
+  flastactivewindow:= nil;
  end;
  if finactivewindow = sender then begin
   finactivewindow:= nil;
@@ -17810,6 +17817,23 @@ end;
 function tguiapplication.active: boolean;
 begin
  result:= aps_active in fstate;
+end;
+
+procedure tguiapplication.activate();
+begin
+ if flastactivewindow <> nil then begin
+  flastactivewindow.activate();
+ end
+ else begin
+  if fmainwindow <> nil then begin
+   fmainwindow.activate();
+  end
+  else begin
+   if fwindows <> nil then begin
+    fwindows[0].activate();
+   end;
+  end;
+ end;
 end;
 
 function tguiapplication.findwindow(aid: winidty; out window: twindow): boolean;

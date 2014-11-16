@@ -948,12 +948,20 @@ begin
    programfinished;
   end;
   if projectoptions.d.activateonbreak then begin
-   if flastform <> nil then begin
-    flastform.activate();
+   application.activate();
+  {
+   if application.activewindow <> nil then begin
+    application.activewindow.activate;
    end
    else begin
-    sourcefo.activate();
+    if flastform <> nil then begin
+     flastform.activate();
+    end
+    else begin
+     sourcefo.activate();
+    end;
    end;
+  }
   end;
   if projectoptions.d.raiseonbreak then begin
    application.packwindowzorder();
