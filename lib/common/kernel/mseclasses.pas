@@ -1174,6 +1174,15 @@ end;
 
 {$endif}
 
+function aligntoptr(p: pointer): pointer; inline;
+begin
+{$ifdef FPC_REQUIRES_PROPER_ALIGNMENT}
+ result:= align(p,sizeof(p));
+{$else FPC_REQUIRES_PROPER_ALIGNMENT}
+ result:=p;
+{$endif FPC_REQUIRES_PROPER_ALIGNMENT}
+end;
+ 
 procedure copyvarrec(const source: tvarrec; const dest: pointer);
 begin
  with source do begin
@@ -4398,6 +4407,7 @@ begin
   typedata1:= gettypedata(aintf);
   po1:= pshortstring(
          ptruint(@typedata1^.rawintfunit)+length(typedata1^.rawintfunit)+1);
+  po1:= aligntoptr(pointer(po1));
   if po1^[0] <> #0 then begin
    result:= aobject.getinterfacebystr(po1^,obj); //works in FPC 2.4+
   end
