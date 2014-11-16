@@ -326,6 +326,7 @@ type
 {$endif}
    property activatortarget: tactivator read factivatortarget 
                                              write setactivatortarget;
+   property onshortcut;
  end;
 
  custommseformclassty = class of tcustommseform;

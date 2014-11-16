@@ -2449,6 +2449,7 @@ type
                     fwheelscrollheight default defaultwheelscrollheight;
    property optionswidget default defaultgridwidgetoptions;
    property optionswidget1 default defaultgridwidgetoptions1;
+   property onshortcut;
  end;
 
  tcellgrid = class(tcustomgrid)
