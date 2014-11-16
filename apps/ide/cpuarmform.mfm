@@ -32,7 +32,7 @@ inherited cpuarmfo: tcpuarmfo
       frame.dummy = 0
       bounds_x = 0
       bounds_y = 40
-      bounds_cx = 107
+      bounds_cx = 109
       bounds_cy = 180
       optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
       linkright = tlayouter2
@@ -50,12 +50,12 @@ inherited cpuarmfo: tcpuarmfo
         frame.outerframe = (
           0
           0
-          14
+          16
           0
         )
         bounds_x = 0
         bounds_y = 20
-        bounds_cx = 107
+        bounds_cx = 109
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
@@ -76,13 +76,13 @@ inherited cpuarmfo: tcpuarmfo
         frame.outerframe = (
           0
           0
-          14
+          16
           0
         )
         taborder = 1
         bounds_x = 0
         bounds_y = 0
-        bounds_cx = 107
+        bounds_cx = 109
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
@@ -103,13 +103,13 @@ inherited cpuarmfo: tcpuarmfo
         frame.outerframe = (
           0
           0
-          14
+          16
           0
         )
         taborder = 2
         bounds_x = 0
         bounds_y = 80
-        bounds_cx = 107
+        bounds_cx = 109
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
@@ -130,13 +130,13 @@ inherited cpuarmfo: tcpuarmfo
         frame.outerframe = (
           0
           0
-          14
+          16
           0
         )
         taborder = 3
         bounds_x = 0
         bounds_y = 60
-        bounds_cx = 107
+        bounds_cx = 109
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
@@ -157,13 +157,13 @@ inherited cpuarmfo: tcpuarmfo
         frame.outerframe = (
           0
           0
-          14
+          16
           0
         )
         taborder = 4
         bounds_x = 0
         bounds_y = 40
-        bounds_cx = 107
+        bounds_cx = 109
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
@@ -184,13 +184,13 @@ inherited cpuarmfo: tcpuarmfo
         frame.outerframe = (
           0
           0
-          14
+          16
           0
         )
         taborder = 5
         bounds_x = 0
         bounds_y = 100
-        bounds_cx = 107
+        bounds_cx = 109
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
@@ -211,13 +211,13 @@ inherited cpuarmfo: tcpuarmfo
         frame.outerframe = (
           0
           0
-          14
+          16
           0
         )
         taborder = 6
         bounds_x = 0
         bounds_y = 120
-        bounds_cx = 107
+        bounds_cx = 109
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
@@ -238,13 +238,13 @@ inherited cpuarmfo: tcpuarmfo
         frame.outerframe = (
           0
           0
-          14
+          16
           0
         )
         taborder = 7
         bounds_x = 0
         bounds_y = 140
-        bounds_cx = 107
+        bounds_cx = 109
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
@@ -265,13 +265,13 @@ inherited cpuarmfo: tcpuarmfo
         frame.outerframe = (
           0
           0
-          14
+          16
           0
         )
         taborder = 8
         bounds_x = 0
         bounds_y = 160
-        bounds_cx = 107
+        bounds_cx = 109
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
@@ -374,13 +374,13 @@ inherited cpuarmfo: tcpuarmfo
       frame.outerframe = (
         0
         17
-        0
+        1
         0
       )
       taborder = 5
       bounds_x = 193
       bounds_y = 8
-      bounds_cx = 11
+      bounds_cx = 12
       bounds_cy = 28
       onsetvalue = flagssetvalue
     end
@@ -703,9 +703,9 @@ inherited cpuarmfo: tcpuarmfo
     object tlayouter2: tlayouter
       frame.dummy = 0
       taborder = 21
-      bounds_x = 110
+      bounds_x = 112
       bounds_y = 40
-      bounds_cx = 120
+      bounds_cx = 123
       bounds_cy = 180
       optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
       dist_bottom = 3
@@ -722,12 +722,12 @@ inherited cpuarmfo: tcpuarmfo
         frame.outerframe = (
           0
           0
-          21
+          24
           0
         )
         bounds_x = 0
         bounds_y = 40
-        bounds_cx = 114
+        bounds_cx = 117
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
@@ -748,13 +748,13 @@ inherited cpuarmfo: tcpuarmfo
         frame.outerframe = (
           0
           0
-          21
+          24
           0
         )
         taborder = 1
         bounds_x = 0
         bounds_y = 20
-        bounds_cx = 114
+        bounds_cx = 117
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
@@ -775,13 +775,13 @@ inherited cpuarmfo: tcpuarmfo
         frame.outerframe = (
           0
           0
-          14
+          16
           0
         )
         taborder = 2
         bounds_x = 0
         bounds_y = 0
-        bounds_cx = 107
+        bounds_cx = 109
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
@@ -802,13 +802,13 @@ inherited cpuarmfo: tcpuarmfo
         frame.outerframe = (
           0
           0
-          20
+          22
           0
         )
         taborder = 3
         bounds_x = 0
         bounds_y = 140
-        bounds_cx = 113
+        bounds_cx = 115
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
@@ -829,13 +829,13 @@ inherited cpuarmfo: tcpuarmfo
         frame.outerframe = (
           0
           0
-          27
+          30
           0
         )
         taborder = 4
         bounds_x = 0
         bounds_y = 160
-        bounds_cx = 120
+        bounds_cx = 123
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
@@ -857,13 +857,13 @@ inherited cpuarmfo: tcpuarmfo
         frame.outerframe = (
           0
           0
-          21
+          24
           0
         )
         taborder = 5
         bounds_x = 0
         bounds_y = 60
-        bounds_cx = 114
+        bounds_cx = 117
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
@@ -884,13 +884,13 @@ inherited cpuarmfo: tcpuarmfo
         frame.outerframe = (
           0
           0
-          17
+          18
           0
         )
         taborder = 6
         bounds_x = 0
         bounds_y = 120
-        bounds_cx = 110
+        bounds_cx = 111
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
@@ -911,13 +911,13 @@ inherited cpuarmfo: tcpuarmfo
         frame.outerframe = (
           0
           0
-          10
+          11
           0
         )
         taborder = 7
         bounds_x = 0
         bounds_y = 100
-        bounds_cx = 103
+        bounds_cx = 104
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
@@ -938,13 +938,13 @@ inherited cpuarmfo: tcpuarmfo
         frame.outerframe = (
           0
           0
-          16
+          18
           0
         )
         taborder = 8
         bounds_x = 0
         bounds_y = 80
-        bounds_cx = 109
+        bounds_cx = 111
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1

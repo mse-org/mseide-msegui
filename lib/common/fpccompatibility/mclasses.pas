@@ -400,11 +400,15 @@ type
     FBufPos: Integer;
     FBufEnd: Integer;
 
-    function ReadWord : word; {$ifdef CLASSESINLINE}inline;{$endif CLASSESINLINE}
-    function ReadDWord : longword; {$ifdef CLASSESINLINE}inline;{$endif CLASSESINLINE}
-    function ReadQWord : qword; {$ifdef CLASSESINLINE}inline;{$endif CLASSESINLINE}
+    function ReadWord : word; 
+                         {$ifdef CLASSESINLINE}inline;{$endif CLASSESINLINE}
+    function ReadDWord : longword; 
+                         {$ifdef CLASSESINLINE}inline;{$endif CLASSESINLINE}
+    function ReadQWord : qword; 
+                         {$ifdef CLASSESINLINE}inline;{$endif CLASSESINLINE}
 {$ifndef FPUNONE}
-    function ReadExtended : extended; {$ifdef CLASSESINLINE}inline;{$endif CLASSESINLINE}
+    function ReadExtended : extended; 
+                         {$ifdef CLASSESINLINE}inline;{$endif CLASSESINLINE}
 {$endif}
     procedure SkipProperty;
     procedure SkipSetBody;
@@ -4155,28 +4159,36 @@ begin
   mant:=LEtoN(mant);
   exp:=LEtoN(word(exp));
   sign:=(exp and $8000)<>0;
-  if sign then exp:=exp and $7FFF;
+  if sign then begin 
+   exp:=exp and $7FFF;
+  end;
   case exp of
-        0 : mant:=0;  //if denormalized, value is too small for double,
+   0: begin
+    mant:= 0;  //if denormalized, value is too small for double,
                       //so it's always zero
-    $7FFF : exp:=2047 //either infinity or NaN
-    else
-    begin
-      dec(exp,16383-1023);
-      if (exp>=-51) and (exp<=0) then //can be denormalized
-      begin
-        mant:=mant shr (-exp);
-        exp:=0;
-      end
-      else
-      if (exp<-51) or (exp>2046) then //exponent too large.
-      begin
-        Result:=0;
-        exit;
-      end
-      else //normalized value
-        mant:=mant shl 1; //hide most significant bit
+   end;
+   $7FFF: begin
+    exp:=2047; //either infinity or NaN
+    if mant and $3fffffffffffffff = 0 then begin
+     mant:= 0;     //infinity
     end;
+   end
+   else begin
+    dec(exp,16383-1023);
+    if (exp>=-51) and (exp<=0) then begin //can be denormalized
+     mant:=mant shr (-exp);
+     exp:=0;
+    end
+    else begin
+     if (exp<-51) or (exp>2046) then begin //exponent too large.
+      Result:=0;
+      exit;
+     end
+     else begin //normalized value
+      mant:=mant shl 1; //hide most significant bit
+     end;
+    end;
+   end;
   end;
   d:=word(exp);
   d:=d shl 52;
@@ -4221,7 +4233,8 @@ end;
 {$ENDIF FPC_DOUBLE_HILO_SWAPPED}
 
 {$ifndef FPUNONE}
-function TBinaryObjectReader.ReadExtended : extended; {$ifdef CLASSESINLINE}inline;{$endif CLASSESINLINE}
+function TBinaryObjectReader.ReadExtended : extended;
+                           {$ifdef CLASSESINLINE}inline;{$endif CLASSESINLINE}
 {$IFNDEF FPC_HAS_TYPE_EXTENDED}
 var ext : array[0..9] of byte;
 {$ENDIF}
@@ -7616,28 +7629,28 @@ var mant : qword;
     exp : smallint;
     sign : boolean;
 begin
-  mant:=(qword(d) and $000FFFFFFFFFFFFF) shl 12;
-  exp :=(qword(d) shr 52) and $7FF;
-  sign:=(qword(d) and $8000000000000000)<>0;
+  mant:= (qword(d) and $000FFFFFFFFFFFFF) shl 12;
+  exp := (qword(d) shr 52) and $7FF;
+  sign:= (qword(d) and $8000000000000000) <> 0;
   case exp of
-       0 : begin
-             if mant<>0 then  //denormalized value: hidden bit is 0. normalize it
-             begin
-               exp:=16383-1022;
-               while (mant and $8000000000000000)=0 do
-               begin
-                 dec(exp);
-                 mant:=mant shl 1;
-               end;
-               dec(exp); //don't shift, most significant bit is not hidden in extended
-             end;
-           end;
-    2047 : exp:=$7FFF //either infinity or NaN
-    else
-    begin
-      inc(exp,16383-1023);
-      mant:=(mant shr 1) or $8000000000000000; //unhide hidden bit
+   0: begin
+    if mant <> 0 then begin //denormalized value: hidden bit is 0. normalize it
+     exp:=16383-1022;
+     while (mant and $8000000000000000) = 0 do begin
+      dec(exp);
+      mant:= mant shl 1;
+     end;
+     dec(exp); //don't shift, most significant bit is not hidden in extended
     end;
+   end;
+   2047: begin
+    exp:= $7FFF; //either infinity or NaN
+    mant:= qword(d) and $000FFFFFFFFFFFFF or $8000000000000000;
+   end;
+   else begin
+    inc(exp,16383-1023);
+    mant:= (mant shr 1) or $8000000000000000; //unhide hidden bit
+   end;
   end;
   if sign then exp:=exp or $8000;
   mant:=NtoLE(mant);
@@ -7648,7 +7661,8 @@ end;
 {$ENDIF}
 {$endif}
 
-procedure TBinaryObjectWriter.WriteWord(w : word); {$ifdef CLASSESINLINE}inline;{$endif CLASSESINLINE}
+procedure TBinaryObjectWriter.WriteWord(w : word); 
+                     {$ifdef CLASSESINLINE}inline;{$endif CLASSESINLINE}
 begin
   w:=NtoLE(w);
   Write(w,2);
