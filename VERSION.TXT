@@ -1,5 +1,8 @@
 MSEide+MSEgui breaking changes version history
 
+2014-11-16
+ Type of "onshortcut" is "shortcuteventty" with an additional "origin" 
+ parameter.
 2014-10-14
  Dropdowncols fontcoloractive -> fontacitve.
 2014-10-01

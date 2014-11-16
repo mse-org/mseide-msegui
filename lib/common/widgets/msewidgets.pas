@@ -707,7 +707,7 @@ type
    fonclientmouseevent: mouseeventty;
    fonkeyup: keyeventty;
    fonkeydown: keyeventty;
-   fonshortcut: keyeventty;
+   fonshortcut: shortcuteventty;
    fonpaint: painteventty;
    fonbeforepaint: painteventty;
    fonafterpaint: painteventty;
@@ -797,7 +797,7 @@ type
 
    property onkeydown: keyeventty read fonkeydown write fonkeydown;
    property onkeyup: keyeventty read fonkeyup write fonkeyup;
-   property onshortcut: keyeventty read fonshortcut write fonshortcut;
+   property onshortcut: shortcuteventty read fonshortcut write fonshortcut;
 
    property onloaded: notifyeventty read fonloaded write fonloaded;
 
@@ -5274,7 +5274,7 @@ procedure tactionwidget.doshortcut(var info: keyeventinfoty;
                const sender: twidget);
 begin
  if not (es_processed in info.eventstate) and canevent(tmethod(fonshortcut)) then begin
-  fonshortcut(self,info);
+  fonshortcut(self,info,sender);
  end;
  if (fpopupmenu <> nil) and (sender <> nil) //no broadcast
                           and not(csdesigning in componentstate) then begin
