@@ -1202,6 +1202,8 @@ type
                                    var ainfo: mousewheeleventinfoty) of object;
  keyeventty = procedure (const sender: twidget; 
                                    var ainfo: keyeventinfoty) of object;
+ shortcuteventty = procedure (const sender: twidget; var ainfo: keyeventinfoty;
+                                              const origin: twidget) of object;
  painteventty = procedure (const sender: twidget; 
                                    const acanvas: tcanvas) of object;
  pointeventty = procedure(const sender: twidget;
