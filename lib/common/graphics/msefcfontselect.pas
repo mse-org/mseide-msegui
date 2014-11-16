@@ -152,20 +152,17 @@ begin
    fcpatternaddinteger(result,fc_slant,fc_slant_italic);
   end;
   if fontinfo[fn_pixel_size] <> '*' then begin
-   try
-    rea1:= strtofloat(fontinfo[fn_pixel_size]);
+   if trystrtofloat(fontinfo[fn_pixel_size],rea1) then begin
     if highres then begin
      rea1:= rea1 * highresfontfakt;
     end;
     fcpatternadddouble(result,fc_pixel_size,rea1);
-   except
    end;
   end;
   if fontinfo[fn_average_width] <> '*' then begin
-   try
-    int1:= (strtoint(fontinfo[fn_average_width]) + 5) div 10;
+   if trystrtoint(fontinfo[fn_average_width],int1) then begin
+    int1:= (int1 + 5) div 10;
     fcpatternaddinteger(result,fc_char_width,int1);
-   except
    end;
   end;
   if foo_fixed in h.d.pitchoptions then begin
