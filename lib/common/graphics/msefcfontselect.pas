@@ -156,7 +156,9 @@ begin
     if highres then begin
      rea1:= rea1 * highresfontfakt;
     end;
-    fcpatternadddouble(result,fc_pixel_size,rea1);
+//    fcpatternadddouble(result,fc_pixel_size,rea1); 
+                              //double does not work on raspberry pi
+    fcpatternaddinteger(result,fc_pixel_size,round(rea1));
    end;
   end;
   if fontinfo[fn_average_width] <> '*' then begin
