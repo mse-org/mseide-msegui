@@ -818,12 +818,12 @@ type
   st_blksize: clong;
   st_blocks: clong; //* Number 512-byte blocks allocated. */
   
-  st_atim: timespec;
-//  st_atime_nsec: culong;
-  st_mtim: timespec;
-//  st_mtime_nsec: culong;
-  st_ctim: timespec;
-//  st_ctime_nsec: culong;
+  st_atime: culong;
+  st_atime_nsec: culong;
+  st_mtime: culong;
+  st_mtime_nsec: culong;
+  st_ctime: culong;
+  st_ctime_nsec: culong;
   __unused: array[0..2] of clong;
  end;
 
@@ -875,7 +875,7 @@ type
         unsigned int :(8 / 2) * (16 - (int)sizeof(struct timespec));
   *)
  end;
-{$endif} bsd
+{$endif} //bsd
 
 
  
