@@ -3713,6 +3713,9 @@ begin
       if not bo2 then begin
        if isfocusedcell then begin
         drawfocusedcell(canvas);
+        if calcautocellsize then begin
+         drawcell(canvas); //possibly bigger
+        end;
        end
        else begin
         drawcell(canvas);
