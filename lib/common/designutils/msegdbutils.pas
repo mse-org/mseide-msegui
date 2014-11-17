@@ -1238,6 +1238,13 @@ begin
  ainfo.time:= nowlocal;
 end;
 
+const
+ getexceptionname: array[processorty] of string = (
+//pro_i386,     pro_x86_64,   pro_arm,     pro_armm3,
+  '($eax^+12)^','($eax^+12)^','($r0^+12)^','($r0^+12)^',
+//pro_cpu32,pro_avr32,pro_rl78
+  '',       '',       '');
+ 
 procedure tgdbmi.receiveevent(const event: tobjectevent);
 var
  stopinfo: stopinfoty;
@@ -1321,12 +1328,14 @@ begin
       end;
       bo1:= getstopinfo(values,flastconsoleoutput,stopinfo);
       if not bo1 then begin
-       stopinfo.messagetext:= actionsmo.c[ord(ac_stoperror)]+': ' + stopinfo.messagetext;
+       stopinfo.messagetext:= actionsmo.c[ord(ac_stoperror)]+': ' +
+                                                      stopinfo.messagetext;
       end
       else begin
        if (stopinfo.reason = sr_breakpoint_hit) and 
         (stopinfo.bkptno = fexceptionbkpt) then begin
-        if getshortstring('($eax^+12)^',str1) then begin
+        if (getexceptionname[processor] <> '') and 
+                getshortstring(getexceptionname[processor],str1) then begin
          str2:= uppercase(str1);
          bo1:= false;
          for int1:= 0 to high(fignoreexceptionclasses) do begin
