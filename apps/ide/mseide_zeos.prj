@@ -142,7 +142,7 @@ targpref=-o
 befcommand=0
 aftcommand=0
 makeoptions=4
- -Fcutf8 -dmse_with_zeoslib -dMSEgui
+ -Xg -Fcutf8 -dmse_with_zeoslib -dMSEgui
  -gl
  -B
  -O2 -XX -Xs -CX

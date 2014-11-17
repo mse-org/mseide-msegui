@@ -212,7 +212,7 @@ afterload=
 beforerun=
 defaultmake=1
 makeoptions=4
- -l -Mobjfpc -Sh -Fcutf8 -FE../myide -FU. -dmorecomponents
+ -Xg -l -Mobjfpc -Sh -Fcutf8 -FE../myide -FU. -dmorecomponents
  -gl -O-
  -B
  -O2 -XX -Xs -CX

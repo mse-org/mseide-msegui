@@ -172,7 +172,7 @@ afterload=
 beforerun=
 defaultmake=1
 makeoptions=4
- -l -Mobjfpc -Sh -Fcutf8
+ -Xg -l -Mobjfpc -Sh -Fcutf8
  -gl -O-
  -B
  -O2 -XX -Xs -CX
