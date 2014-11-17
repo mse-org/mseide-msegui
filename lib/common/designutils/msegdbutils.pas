@@ -1241,7 +1241,7 @@ end;
 const
  getexceptionname: array[processorty] of string = (
 //pro_i386,     pro_x86_64,   pro_arm,     pro_armm3,
-  '($eax^+12)^','($eax^+12)^','($r0^+12)^','($r0^+12)^',
+  '($eax^+12)^','($rax^+24)^','($r0^+12)^','($r0^+12)^',
 //pro_cpu32,pro_avr32,pro_rl78
   '',       '',       '');
  
