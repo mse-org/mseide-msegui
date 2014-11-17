@@ -45,7 +45,11 @@ const
  {$ifdef CPU64}
   platformtext = 'x86_64-linux';
  {$else}
-  platformtext = 'i386-linux';
+  {$ifdef CPUARM}
+   platformtext = 'arm-linux';
+  {$else}
+   platformtext = 'i386-linux';
+  {$endif}
  {$endif}
 {$else}
  {$ifdef openbsd}
