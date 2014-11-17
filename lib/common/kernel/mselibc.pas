@@ -827,7 +827,7 @@ type
   __unused: array[0..2] of clong;
  end;
 
- {$else}
+ {$else} //bsd
  ino_t = cuint32;
  mode_t = cuint16;
  n_link_t = cuint16;
@@ -846,9 +846,12 @@ type
   st_uid: uid_t;            //* user ID of the file's owner */
   st_gid: gid_t;            //* group ID of the file's group */
   st_rdev: __dev_t;         //* device type */
-  st_atim: timespec;        //* time of last access */
-  st_mtim: timespec;        //* time of last data modification */
-  st_ctim: timespec;       //* time of last file status change */
+  st_atime: culong;         //* time of last access */
+  st_atime_nsec: culong;
+  st_mtime: culong;         //* time of last data modification */
+  st_mtime_nsec: culong;
+  st_ctime: culong;         //* time of last file status change */
+  st_ctime_nsec: culong;
   st_size: off_t;           //* file size, in bytes */
   st_blocks: blkcnt_t;      //* blocks allocated for file */
   st_blksize: blksize_t;    //* optimal blocksize for I/O */
@@ -872,14 +875,16 @@ type
         unsigned int :(8 / 2) * (16 - (int)sizeof(struct timespec));
   *)
  end;
-{$endif}
+{$endif} bsd
 
 
  
  P_stat64 = ^_stat64;
  Pstat64 = ^_stat64;
  _stat64 = _stat; 
-{$else}
+
+{$else} //cpu32
+
  P_stat = ^_stat;
  PStat = ^_stat;
 
@@ -910,7 +915,7 @@ type
  
    P_stat64 = ^_stat64;
    Pstat64 = ^_stat64;
-
+{$ifndef cpuarm}
    _stat64 = packed record
     st_dev: culonglong;                 // 0
     __pad0: array[0..3] of byte;        // 8
@@ -924,18 +929,40 @@ type
     st_size: clonglong;                 //44
     st_blksize: culong;                 //52
     st_blocks: culonglong;              //56
-    st_atim: timespec;//culong;         //64
-//  st_atime_nsec: culong;              //68
-    st_mtim: timespec; //culong;        //72
-//  st_mtime_nsec: cuint;               //76
-    st_ctim: timespec; //culong;        //80
-///    st_ctime_nsec: culong;           //84
+    st_atime: culong;                   //64
+    st_atime_nsec: culong;              //68
+    st_mtime: culong;                   //72
+    st_mtime_nsec: cuint;               //76
+    st_ctime: culong;                   //80
+    st_ctime_nsec: culong;              //84
     st_ino: culonglong;                 //88
                                         //96
-
   end;
-   
-{$endif}
+{$else}  //cpuarm for raspberry pi
+ _stat64 = packed record
+ st_dev: culonglong;     //* Device.  */
+ st_ino: culonglong;     //* File serial number.  */
+ st_mode: cuint;         //* File mode.  */
+ st_nlink: cuint;        //* Link count.  */
+ st_uid: cuint;          //* User ID of the file's owner.  */
+ st_gid: cuint;          //* Group ID of the file's group. */
+ st_rdev: culonglong;    //* Device number, if device.  */
+ __pad1: culonglong;
+ st_size: clonglong;     //* Size of file, in bytes.  */
+ st_blksize: cint;       //* Optimal block size for I/O.  */
+  __pad2: cint;
+ st_blocks: clonglong;   //* Number 512-byte blocks allocated. */
+ st_atime: cint;         //* Time of last access.  */
+ st_atime_nsec: cuint;
+ st_mtime: cint;         //* Time of last modification.  */
+ st_mtime_nsec: cuint;
+ st_ctime: cint;         //* Time of last status change.  */
+ st_ctime_nsec: cuint;
+ __unused4: cuint;
+ __unused5: cuint;
+ end;   
+{$endif} //cpuarm
+{$endif} //cpu32
 
   __fd_set = record
      fds_bits: packed array[0..(__FD_SETSIZE div __NFDBITS)-1] of __fd_mask;

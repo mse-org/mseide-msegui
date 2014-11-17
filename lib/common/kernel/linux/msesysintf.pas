@@ -790,6 +790,12 @@ begin
           value.tv_nsec / (double(24.0)*60.0*60.0*1e9) - unidatetimeoffset;
 end;
 
+function filetimetodatetime(const sec,nsec: culong): tdatetime;
+begin
+ result:= sec / (double(24.0)*60.0*60.0) + 
+          nsec / (double(24.0)*60.0*60.0*1e9) - unidatetimeoffset;
+end;
+
 function sys_getcurrentdir: msestring;
 var
  str1: string;
@@ -945,9 +951,9 @@ begin
           if d.needsstat then begin
            state:= state + [fis_typevalid,fis_extinfo1valid,fis_extinfo2valid];
            size:= st_size;
-           modtime:= filetimetodatetime(st_mtim);
-           accesstime:= filetimetodatetime(st_atim);
-           ctime:= filetimetodatetime(st_ctim);
+           modtime:= filetimetodatetime(st_mtime,st_mtime_nsec);
+           accesstime:= filetimetodatetime(st_atime,st_atime_nsec);
+           ctime:= filetimetodatetime(st_ctime,st_ctime_nsec);
            id:= st_ino;
            owner:= st_uid;
            group:= st_gid;
@@ -981,9 +987,9 @@ begin
   end;
   state:= state + [fis_typevalid,fis_extinfo1valid,fis_extinfo2valid];
   size:= st_size;
-  modtime:= filetimetodatetime(st_mtim);
-  accesstime:= filetimetodatetime(st_atim);
-  ctime:= filetimetodatetime(st_ctim);
+  modtime:= filetimetodatetime(st_mtime,st_mtime_nsec);
+  accesstime:= filetimetodatetime(st_atime,st_atime_nsec);
+  ctime:= filetimetodatetime(st_ctime,st_ctime_nsec);
   id:= st_ino;
   owner:= st_uid;
   group:= st_gid;
