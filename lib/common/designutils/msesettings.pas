@@ -47,10 +47,17 @@ const
                  '${MSEDIR}apps/ide/templates/','${MSEDIR}apps/ide/compstore/',
                  'ppcx64','gdb','','x86_64-linux','linux');
   {$else}
+   {$ifdef CPUARM}
+  defaultsettingmacros: array[settingsmacroty] of msestring = (
+                 '','','','${MSEDIR}lib/common/','${MSEDIR}apps/ide/syntaxdefs/',
+                 '${MSEDIR}apps/ide/templates/','${MSEDIR}apps/ide/compstore/',
+                 'ppcarm','gdb','','arm-linux','linux');
+   {$else}
   defaultsettingmacros: array[settingsmacroty] of msestring = (
                  '','','','${MSEDIR}lib/common/','${MSEDIR}apps/ide/syntaxdefs/',
                  '${MSEDIR}apps/ide/templates/','${MSEDIR}apps/ide/compstore/',
                  'ppc386','gdb','','i386-linux','linux');
+   {$endif}
   {$endif}
  {$endif}
                 
