@@ -38,6 +38,7 @@ object mainfo: tmainfo
   top = 80
   moduleclassname = 'tdockform'
   object basedock: tdockpanel
+    optionswidget1 = [ow1_autoscale, ow1_noparentheightextend]
     optionswidget = [ow_background, ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_destroywidgets]
     onpaint = basedockpaintexe
     bounds_x = 0
