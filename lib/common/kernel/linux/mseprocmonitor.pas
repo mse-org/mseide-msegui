@@ -11,12 +11,18 @@ unit mseprocmonitor;
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
 interface
 uses
- msesystypes,mseglob,msetypes;
+ msesystypes,mseglob,msetypes,mselibc;
  
  {$include ../mseprocmonitor.inc}
+
+procedure sigchildcallback;
+function timedwaitpid(__pid: __pid_t; __stat_loc: plongint;
+                                              const waitus: integer): __pid_t;
+                //waitus must be > 0
+
 implementation
 uses
- mseapplication,msedatalist,mselibc,msearrayutils;
+ mseapplication,msedatalist,msearrayutils,msesysintf1,msesysutils;
  
 type
  procinfoty = record
@@ -29,7 +35,7 @@ var
  infos: procinfoarty;
   
 function pro_listentoprocess(const aprochandle: prochandlety;
-                             const adest: iprocmonitor; const adata: pointer): boolean;
+                    const adest: iprocmonitor; const adata: pointer): boolean;
 begin
  application.lock;
  setlength(infos,high(infos)+2);
@@ -96,8 +102,82 @@ begin
  pro_listentoprocess(aprochandle,nil,nil);
 end;
 
+type
+ psemelety = ^semelety;
+ semelety = record
+  prev: psemelety;
+  next: psemelety;
+  sem: semty;
+ end;
+ 
+var
+ semaphorelock: mutexty;
+ semaphores: psemelety;
+  
+procedure sigchildcallback();
+var
+ po1: psemelety;
+begin
+ po1:= semaphores;
+ while po1 <> nil do begin
+  sys_sempost(po1^.sem);
+  po1:= po1^.next;
+ end; 
+end;
+
+function timedwaitpid(__pid: __pid_t; __stat_loc: plongint;
+                                             const waitus: integer): __pid_t;
+var
+ semele: semelety;
+ lwo1: longword;
+ int1: integer;
+begin
+ result:= -1;
+ if waitus > 0 then begin
+  lwo1:= timestep(waitus);
+  sys_semcreate(semele.sem,0);
+
+  sys_mutexlock(semaphorelock);
+  semele.prev:= semaphores;
+  semele.next:= nil;
+  if semaphores = nil then begin
+   interlockedexchange(semaphores,@semele);
+  end
+  else begin
+   interlockedexchange(semaphores^.next,@semele);
+  end;
+  sys_mutexunlock(semaphorelock);
+
+  while true do begin
+   result:= waitpid(__pid,__stat_loc,wnohang);
+   if (result = __pid) or 
+                   (result < 0) and (sys_getlasterror <> eintr) then begin
+    break;
+   end;
+   int1:= lwo1-timestamp;
+   if int1 > 0 then begin
+    sys_semwait(semele.sem,int1);
+   end;
+  end;
+  
+  sys_mutexlock(semaphorelock);
+  if semele.prev = nil then begin
+   interlockedexchange(semaphores,semele.next);
+  end
+  else begin
+   interlockedexchange(semele.prev^.next,semele.next);
+  end;
+  sys_mutexunlock(semaphorelock);
+
+  sys_semdestroy(semele.sem);
+ end;
+end;
+
 initialization
  onhandlesigchld:= @checkchildproc;
+ sys_mutexcreate(semaphorelock);
+ 
 finalization
  onhandlesigchld:= nil;
+ sys_mutexdestroy(semaphorelock);
 end.

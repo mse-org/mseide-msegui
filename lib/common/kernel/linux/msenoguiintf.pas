@@ -97,6 +97,7 @@ end;
 procedure sigchild(SigNum: Integer); cdecl;
 begin
  childevent:= true;
+ mseprocmonitor.sigchildcallback();
  sem_post(linuxsemty(sempo^).d.sema);
 end;
 

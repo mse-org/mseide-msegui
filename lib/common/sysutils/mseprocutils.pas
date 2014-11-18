@@ -549,9 +549,6 @@ var
   end;
  end;
 
-var
- ca1: longword;
-
 begin
  result:= false;
  cancel:= false;
@@ -565,17 +562,7 @@ begin
     until result or cancel;
    end
    else begin
-    ca1:= timestep(timeoutus);
-    while not result and not cancel and not timeout(ca1) do begin
-              //hopefully terminated by SIGCHLD
-     mselibc.usleep(10000); //todo: use better method
-     result:= check(waitpid(prochandle,@dwo1,wnohang));
-    {
-     sys_schedyield;
-     sleep(10);       //todo: use better method
-     result:= check(waitpid(prochandle,@dwo1,wnohang));
-    }
-    end;
+    result:= check(timedwaitpid(prochandle,@dwo1,timeoutus));
    end;
   end;
  end;

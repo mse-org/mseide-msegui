@@ -502,7 +502,7 @@ uses
  msebits,msekeyboard,sysutils,msesysutils,msefileutils,msedatalist,msedragglob
  {$ifdef with_sm},sm,ice{$endif},msesonames,msegui,mseactions,msex11gdi,
  msearrayutils,msesys,msesysintf1,msesysdnd,classes,rtlconsts,mseclasses,
- mseglob,msetimer,mseprocess
+ mseglob,msetimer,mseprocess,mseprocmonitor
  {$ifdef mse_debug},mseformatstr{$endif};
 
 const
@@ -3160,6 +3160,7 @@ end;
 procedure sigchild(SigNum: Integer); cdecl;
 begin
  childevent:= true;
+ mseprocmonitor.sigchildcallback();
 end;
 
 function getclientpointer(const event: xclientmessageevent): pointer;
