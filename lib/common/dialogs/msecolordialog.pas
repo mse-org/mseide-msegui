@@ -135,7 +135,8 @@ type
    procedure loadedexe(const sender: TObject);
    procedure colorpickexe(const sender: TObject);
    procedure mouseeventexe(const sender: twidget; var ainfo: mouseeventinfoty);
-   procedure shortcutexe(const sender: twidget; var ainfo: keyeventinfoty);
+   procedure shortcutexe(const sender: twidget; var ainfo: keyeventinfoty;
+                                                       const origin: twidget);
   private
    fupdating: boolean;
    procedure updatecomponents;
@@ -836,7 +837,7 @@ begin
 end;
 
 procedure tcolordialogfo.shortcutexe(const sender: twidget;
-               var ainfo: keyeventinfoty);
+               var ainfo: keyeventinfoty; const origin: twidget);
 begin
  if fcolorpicking then begin
   if ainfo.key = key_escape then begin
