@@ -721,6 +721,7 @@ type
                              const proc: tgetchildproc; const aroot: tcomponent);
    procedure WriteChildren(Component : TComponent);
    procedure WriteComponentData(Instance: TComponent);
+   function getclassname(const aobj: tobject): shortstring; override;
   public
    constructor create(const stream: tstream; const bufsize: integer;
                             const anoancestor: boolean = false;
@@ -4762,6 +4763,7 @@ begin
  result:= false;
 end;
 
+(*
 function setclassname(const instance: tobject;
                    const aclassname: pshortstring): pshortstring;
 var
@@ -4785,22 +4787,23 @@ begin
   {$endif}
  end;
 end;
+*)
 
 procedure tmsecomponent.writestate(writer: twriter);
-var
- classnamebefore: pshortstring;
+//var
+// classnamebefore: pshortstring;
 begin
- classnamebefore:= setclassname(self,factualclassname);
- try
+// classnamebefore:= setclassname(self,factualclassname);
+// try
   if writer is twritermse then begin
    twritermse(writer).writecomponentdata(self);
   end
   else begin
    inherited;
   end;
- finally
-  setclassname(self,classnamebefore);
- end;
+// finally
+//  setclassname(self,classnamebefore);
+// end;
 end;
 
 function tmsecomponent.gethelpcontext: msestring;
@@ -5753,6 +5756,16 @@ end;
 procedure twritermse.writerootcomponent(aroot: tcomponent);
 begin
  writedescendent(aroot,nil);
+end;
+
+function twritermse.getclassname(const aobj: tobject): shortstring;
+begin
+ if aobj is tmsecomponent then begin
+  result:= tmsecomponent(aobj).actualclassname;
+ end
+ else begin
+  result:= inherited getclassname(aobj);
+ end;
 end;
 
 initialization
