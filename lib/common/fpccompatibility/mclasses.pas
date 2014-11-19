@@ -557,6 +557,8 @@ type
   end;
 
   TAbstractObjectWriter = class
+  protected
+   fwriter: twriter;
   public
     { Begin/End markers. Those ones who don't have an end indicator, use
       "EndList", after the occurrence named in the comment. Note that this
@@ -665,7 +667,9 @@ type
     procedure WriteProperty(Instance: tpersistent; PropInfo: Pointer);
     procedure WriteProperties(Instance: tpersistent);
     procedure WriteChildren(Component: tcomponent);
-    function CreateDriver(Stream: TStream; BufSize: Integer): TAbstractObjectWriter; virtual;
+    function CreateDriver(Stream: TStream;
+                  BufSize: Integer): TAbstractObjectWriter; virtual;
+    function getclassname(const aobj: tobject): shortstring; virtual;
   public
     constructor Create(ADriver: TAbstractObjectWriter); overload;
     constructor Create(Stream: TStream; BufSize: Integer); overload;
@@ -6923,6 +6927,7 @@ begin
   If (Stream=Nil) then
     Raise EWriteError.Create(SEmptyStreamIllegalWriter);
   FDriver := CreateDriver(Stream, BufSize);
+  fdriver.fwriter:= self;
   FDestroyDriver := True;
 end;
 
@@ -7646,6 +7651,11 @@ begin
   Driver.WriteUnicodeString(Value);
 end;
 
+function twriter.getclassname(const aobj: tobject): shortstring;
+begin
+ result:= aobj.classname;
+end;
+
 {****************************************************************************}
 {*                         TBinaryObjectWriter                              *}
 {****************************************************************************}
@@ -7774,8 +7784,12 @@ begin
     if ffChildPos in Flags then
       WriteInteger(ChildPos);
   end;
-
-  WriteStr(Component.ClassName);
+  if fwriter <> nil then begin
+   WriteStr(fwriter.getclassname(Component));
+  end
+  else begin   
+   WriteStr(Component.ClassName);
+  end;
   WriteStr(Component.Name);
 end;
 
