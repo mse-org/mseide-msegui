@@ -4563,7 +4563,7 @@ var
   moduleinfo.free; //frees module by designform
   if desfo = nil then begin
    module.Free;
-  end;
+  end;           
   module:= nil;
   result:= nil;
  end;

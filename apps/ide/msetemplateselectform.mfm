@@ -152,7 +152,8 @@ object msetemplateselectfo: tmsetemplateselectfo
       bounds_y = 0
       bounds_cx = 60
       bounds_cy = 16
-      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_locate, oe_savestate, oe_checkvaluepaststatread]
+      optionsedit1 = []
+      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_locate]
       reffontheight = 14
     end
     object comment: tstringedit
@@ -164,7 +165,8 @@ object msetemplateselectfo: tmsetemplateselectfo
       bounds_y = 0
       bounds_cx = 252
       bounds_cy = 16
-      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_savestate, oe_checkvaluepaststatread]
+      optionsedit1 = []
+      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext]
       reffontheight = 14
     end
     object par1: tstringedit
@@ -177,7 +179,8 @@ object msetemplateselectfo: tmsetemplateselectfo
       bounds_y = 0
       bounds_cx = 51
       bounds_cy = 16
-      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_savestate, oe_checkvaluepaststatread]
+      optionsedit1 = []
+      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext]
       reffontheight = 14
     end
     object par2: tstringedit
@@ -190,7 +193,8 @@ object msetemplateselectfo: tmsetemplateselectfo
       bounds_y = 0
       bounds_cx = 51
       bounds_cy = 16
-      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_savestate, oe_checkvaluepaststatread]
+      optionsedit1 = []
+      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext]
       reffontheight = 14
     end
     object par3: tstringedit
@@ -203,7 +207,8 @@ object msetemplateselectfo: tmsetemplateselectfo
       bounds_y = 0
       bounds_cx = 51
       bounds_cy = 16
-      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_savestate, oe_checkvaluepaststatread]
+      optionsedit1 = []
+      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext]
       reffontheight = 14
     end
     object par4: tstringedit
@@ -216,7 +221,8 @@ object msetemplateselectfo: tmsetemplateselectfo
       bounds_y = 0
       bounds_cx = 51
       bounds_cy = 16
-      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_savestate, oe_checkvaluepaststatread]
+      optionsedit1 = []
+      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext]
       reffontheight = 14
     end
     object tstockglyphdatabutton1: tstockglyphdatabutton
@@ -226,7 +232,8 @@ object msetemplateselectfo: tmsetemplateselectfo
       bounds_y = 0
       bounds_cx = 16
       bounds_cy = 16
-      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_savestate, oe_checkvaluepaststatread, oe_autopopupmenu, oe_keyexecute]
+      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick]
+      optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savestate, oe1_checkvalueafterstatread]
       options = [bo_executeonclick, bo_executeonkey, bo_executeonshortcut, bo_executedefaultonenterkey, bo_asyncexecute]
       state = [as_invisible, as_localinvisible, as_localimagelist, as_localimagenr, as_localonexecute]
       glyph = stg_ellipsesmall

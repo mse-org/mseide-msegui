@@ -1630,6 +1630,9 @@ begin
     result^.designform.activate;
    end;
   end;
+  if result^.modified then begin
+   sourcechanged(nil);
+  end;
  end;
 end;
 
