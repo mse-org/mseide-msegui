@@ -1094,6 +1094,13 @@ function GetClass(const AClassName: string): TPersistentClass;
 
 function ExtractStrings(Separators, WhiteSpace: TSysCharSet; Content: PChar; Strings: TStrings): Integer;
 
+{$ifndef FPUNONE}
+{$IFNDEF FPC_HAS_TYPE_EXTENDED}
+function ExtendedToDouble(e : pointer) : double;
+procedure DoubleToExtended(d : double; e : pointer);
+{$endif}
+{$endif}
+
 {$ifndef FPC}
 resourcestring
   SStreamNoReading              = 'Reading from %s is not supported';

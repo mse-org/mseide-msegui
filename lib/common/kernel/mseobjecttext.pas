@@ -289,7 +289,7 @@ procedure ObjectBinaryToText1(Input, Output: TStream;
     input.ReadBuffer(result,sizeof(result));
    {$endif}
   end;
-
+(*
 {$ifndef FPUNONE}
   {$IFNDEF FPC_HAS_TYPE_EXTENDED}
   function ExtendedToDouble(e : pointer) : double;
@@ -340,7 +340,7 @@ procedure ObjectBinaryToText1(Input, Output: TStream;
   end;
   {$ENDIF}
 {$endif}
-
+*)
   function ReadInt(ValueType: TValueType): Int64; overload;
   begin
     case ValueType of
@@ -697,8 +697,8 @@ var
     output.WriteBuffer(qw,sizeof(qw));
    {$endif}
   end;
-
 {$ifndef FPUNONE}
+(*
   {$IFNDEF FPC_HAS_TYPE_EXTENDED}
   procedure DoubleToExtended(d : double; e : pointer);
   var mant : qword;
@@ -739,7 +739,7 @@ var
  {$endif}
   end;
   {$ENDIF}
-
+*)
   procedure WriteExtended(e : extended);
   {$IFNDEF FPC_HAS_TYPE_EXTENDED}
   var ext : array[0..9] of byte;
