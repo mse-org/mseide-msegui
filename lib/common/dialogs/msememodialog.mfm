@@ -4,8 +4,6 @@ object msememodialogfo: tmsememodialogfo
   bounds_y = 237
   bounds_cx = 386
   bounds_cy = 291
-  container.frame.zoomwidthstep = 1
-  container.frame.zoomheightstep = 1
   container.bounds = (
     0
     0
@@ -17,13 +15,16 @@ object msememodialogfo: tmsememodialogfo
   caption = 'Enter Memo Text'
   moduleclassname = 'tmseform'
   object memo: tmemoedit
+    frame.sbhorz.pagesize = 1
+    frame.sbvert.pagesize = 1
     frame.localprops = [frl_colorclient]
     bounds_x = 0
     bounds_y = 0
     bounds_cx = 386
     bounds_cy = 257
     anchors = [an_top, an_bottom]
-    optionsedit = [oe_closequery, oe_checkmrcancel, oe_linebreak, oe_shiftreturn, oe_resetselectonexit, oe_nofirstarrownavig, oe_caretonreadonly, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
+    optionsedit1 = [oe1_multiline, oe1_autopopupmenu, oe1_keyexecute, oe1_savevalue, oe1_savestate]
+    optionsedit = [oe_closequery, oe_checkmrcancel, oe_linebreak, oe_shiftreturn, oe_resetselectonexit, oe_nofirstarrownavig, oe_caretonreadonly]
     reffontheight = 14
   end
   object tbutton1: tbutton

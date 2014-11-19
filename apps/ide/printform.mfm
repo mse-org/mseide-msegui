@@ -6,8 +6,6 @@ object printfo: tprintfo
   bounds_cx = 392
   bounds_cy = 281
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets]
-  container.frame.zoomwidthstep = 1
-  container.frame.zoomheightstep = 1
   container.bounds = (
     0
     0
@@ -46,16 +44,16 @@ object printfo: tprintfo
     frame.outerframe = (
       0
       8
-      53
+      58
       9
     )
     taborder = 6
     bounds_x = 112
     bounds_y = 68
-    bounds_cx = 66
+    bounds_cx = 71
     bounds_cy = 30
     statfile = tstatfile1
-    optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_savevalue, oe_savestate, oe_checkvaluepaststatread, oe_autopopupmenu, oe_keyexecute]
+    optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick]
   end
   object fontsize: trealedit
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets]
@@ -64,16 +62,16 @@ object printfo: tprintfo
     frame.outerframe = (
       0
       17
-      5
+      16
       0
     )
     taborder = 5
     bounds_x = 16
     bounds_y = 55
-    bounds_cx = 73
+    bounds_cx = 84
     bounds_cy = 37
     statfile = tstatfile1
-    optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_savevalue, oe_savestate, oe_checkvaluepaststatread]
+    optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick]
     value = 35.2778
     valuedefault = -Inf
     formatedit = '0.0'
@@ -100,7 +98,7 @@ object printfo: tprintfo
     bounds_cy = 37
     anchors = [an_left, an_top, an_right]
     statfile = tstatfile1
-    optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_savevalue, oe_savestate, oe_checkvaluepaststatread]
+    optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick]
     value = 'Helvetica'
     onsetvalue = titlefosetvalue
     reffontheight = 14
@@ -121,7 +119,7 @@ object printfo: tprintfo
     bounds_cy = 37
     anchors = [an_left, an_top, an_right]
     statfile = tstatfile1
-    optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_savevalue, oe_savestate, oe_checkvaluepaststatread]
+    optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick]
     value = 'Courier'
     onsetvalue = sourcefosetvalue
     reffontheight = 14
@@ -132,16 +130,16 @@ object printfo: tprintfo
     frame.outerframe = (
       0
       1
-      33
+      35
       2
     )
     taborder = 7
     bounds_x = 192
     bounds_y = 75
-    bounds_cx = 46
+    bounds_cx = 48
     bounds_cy = 16
     statfile = tstatfile1
-    optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_savevalue, oe_savestate, oe_checkvaluepaststatread, oe_autopopupmenu, oe_keyexecute]
+    optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick]
   end
   object tpagesizeselector1: tpagesizeselector
     frame.caption = 'Paper size'
@@ -170,13 +168,13 @@ object printfo: tprintfo
     frame.outerframe = (
       0
       17
-      0
+      10
       0
     )
     taborder = 4
     bounds_x = 275
     bounds_y = 7
-    bounds_cx = 102
+    bounds_cx = 112
     bounds_cy = 37
     anchors = [an_top, an_right]
     dropdown.cols.count = 1
@@ -192,16 +190,16 @@ object printfo: tprintfo
     frame.outerframe = (
       0
       1
-      71
+      76
       2
     )
     taborder = 8
     bounds_x = 283
     bounds_y = 75
-    bounds_cx = 84
+    bounds_cx = 89
     bounds_cy = 16
     statfile = tstatfile1
-    optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_savevalue, oe_savestate, oe_checkvaluepaststatread, oe_autopopupmenu, oe_keyexecute]
+    optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick]
   end
   object pages: tstringedit
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_mousewheel, ow_destroywidgets]

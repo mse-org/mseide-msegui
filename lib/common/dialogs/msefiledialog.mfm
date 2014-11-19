@@ -169,7 +169,8 @@ object filedialogfo: Tfiledialogfo
     bounds_y = 259
     bounds_cx = 489
     anchors = [an_left, an_right, an_bottom]
-    optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_savevalue, oe_savestate]
+    optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savevalue, oe1_savestate]
+    optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick]
     oncopytoclipboard = copytolip
     onpastefromclipboard = pastefromclip
     onsetvalue = filenamesetvalue

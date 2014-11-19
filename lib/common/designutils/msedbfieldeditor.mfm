@@ -202,6 +202,7 @@ object msedbfieldeditorfo: tmsedbfieldeditorfo
       bounds_y = 0
       bounds_cx = 13
       bounds_cy = 16
+      optionsedit1 = [oe1_savevalue]
       reffontheight = 14
     end
     object fieldpo: tpointeredit
@@ -211,7 +212,8 @@ object msedbfieldeditorfo: tmsedbfieldeditorfo
       bounds_y = 0
       bounds_cx = 12
       bounds_cy = 16
-      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_savestate, oe_autopopupmenu, oe_keyexecute]
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick]
+      optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savestate]
       visible = False
     end
     object fieldname: tstringedit
@@ -222,6 +224,7 @@ object msedbfieldeditorfo: tmsedbfieldeditorfo
       bounds_y = 0
       bounds_cx = 97
       bounds_cy = 16
+      optionsedit1 = [oe1_savevalue]
       ondataentered = fieldsdataentered
       onsetvalue = fieldnamesetvalue
       reffontheight = 14
@@ -240,7 +243,8 @@ object msedbfieldeditorfo: tmsedbfieldeditorfo
       bounds_y = 0
       bounds_cx = 92
       bounds_cy = 16
-      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_notnull, oe_savevalue, oe_savestate, oe_checkvaluepaststatread]
+      optionsedit1 = [oe1_savevalue]
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_notnull]
       valuedefault = 0
       min = 0
       dropdown.cols.count = 1
@@ -265,7 +269,8 @@ object msedbfieldeditorfo: tmsedbfieldeditorfo
       bounds_y = 0
       bounds_cx = 84
       bounds_cy = 16
-      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_notnull, oe_savevalue, oe_savestate, oe_checkvaluepaststatread]
+      optionsedit1 = [oe1_savevalue]
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_notnull]
       valuedefault = 0
       min = 0
       dropdown.cols.count = 1
