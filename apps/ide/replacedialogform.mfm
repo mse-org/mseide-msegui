@@ -25,7 +25,7 @@ object replacedialogfo: treplacedialogfo
     )
     bounds_x = 8
     bounds_y = 7
-    bounds_cx = 404
+    bounds_cx = 407
     bounds_cy = 37
     anchors = [an_left, an_top, an_right]
     dropdown.cols.count = 1
@@ -46,7 +46,7 @@ object replacedialogfo: treplacedialogfo
     taborder = 1
     bounds_x = 8
     bounds_y = 47
-    bounds_cx = 404
+    bounds_cx = 407
     bounds_cy = 37
     anchors = [an_left, an_top, an_right]
     statfile = statfile1
@@ -62,13 +62,13 @@ object replacedialogfo: treplacedialogfo
     frame.outerframe = (
       0
       1
-      79
+      88
       2
     )
     taborder = 2
     bounds_x = 8
     bounds_y = 96
-    bounds_cx = 92
+    bounds_cx = 101
     bounds_cy = 16
   end
   object wholeword: tbooleanedit
@@ -77,13 +77,13 @@ object replacedialogfo: treplacedialogfo
     frame.outerframe = (
       0
       1
-      66
+      73
       2
     )
     taborder = 3
     bounds_x = 112
     bounds_y = 96
-    bounds_cx = 79
+    bounds_cx = 86
     bounds_cy = 16
   end
   object tintegerbutton1: tbutton
@@ -112,13 +112,13 @@ object replacedialogfo: treplacedialogfo
     frame.outerframe = (
       0
       1
-      75
+      86
       2
     )
     taborder = 4
     bounds_x = 208
     bounds_y = 96
-    bounds_cx = 88
+    bounds_cx = 99
     bounds_cy = 16
     statfile = statfile1
   end
@@ -138,13 +138,13 @@ object replacedialogfo: treplacedialogfo
     frame.outerframe = (
       0
       1
-      83
+      97
       2
     )
     taborder = 5
     bounds_x = 312
     bounds_y = 96
-    bounds_cx = 96
+    bounds_cx = 110
     bounds_cy = 16
     statfile = statfile1
     value = True

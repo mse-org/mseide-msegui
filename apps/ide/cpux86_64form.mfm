@@ -28,8 +28,8 @@ inherited cpuc86_64fo: tcpux86_64fo
     visible = True
     bounds_x = 0
     bounds_y = 18
-    bounds_cx = 338
-    bounds_cy = 250
+    bounds_cx = 341
+    bounds_cy = 249
     optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
     linktop = stoptime
     object r14: tint64edit
@@ -43,13 +43,12 @@ inherited cpuc86_64fo: tcpux86_64fo
       frame.outerframe = (
         0
         0
-        21
+        24
         0
       )
       bounds_x = 176
       bounds_y = 208
-      bounds_cx = 162
-      bounds_cy = 21
+      bounds_cx = 165
       font.height = 14
       font.name = 'stf_fixed'
       font.xscale = 1
@@ -57,7 +56,7 @@ inherited cpuc86_64fo: tcpux86_64fo
       onsetvalue = regsetvalue
       base = nb_hex
       max = -1
-      reffontheight = 17
+      reffontheight = 16
     end
     object r13: tint64edit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -70,14 +69,13 @@ inherited cpuc86_64fo: tcpux86_64fo
       frame.outerframe = (
         0
         0
-        21
+        24
         0
       )
       taborder = 1
       bounds_x = 176
       bounds_y = 187
-      bounds_cx = 162
-      bounds_cy = 21
+      bounds_cx = 165
       font.height = 14
       font.name = 'stf_fixed'
       font.xscale = 1
@@ -85,7 +83,7 @@ inherited cpuc86_64fo: tcpux86_64fo
       onsetvalue = regsetvalue
       base = nb_hex
       max = -1
-      reffontheight = 17
+      reffontheight = 16
     end
     object r12: tint64edit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -98,14 +96,13 @@ inherited cpuc86_64fo: tcpux86_64fo
       frame.outerframe = (
         0
         0
-        21
+        24
         0
       )
       taborder = 2
       bounds_x = 176
       bounds_y = 166
-      bounds_cx = 162
-      bounds_cy = 21
+      bounds_cx = 165
       font.height = 14
       font.name = 'stf_fixed'
       font.xscale = 1
@@ -113,7 +110,7 @@ inherited cpuc86_64fo: tcpux86_64fo
       onsetvalue = regsetvalue
       base = nb_hex
       max = -1
-      reffontheight = 17
+      reffontheight = 16
     end
     object r11: tint64edit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -126,14 +123,13 @@ inherited cpuc86_64fo: tcpux86_64fo
       frame.outerframe = (
         0
         0
-        21
+        24
         0
       )
       taborder = 3
       bounds_x = 176
       bounds_y = 145
-      bounds_cx = 162
-      bounds_cy = 21
+      bounds_cx = 165
       font.height = 14
       font.name = 'stf_fixed'
       font.xscale = 1
@@ -141,7 +137,7 @@ inherited cpuc86_64fo: tcpux86_64fo
       onsetvalue = regsetvalue
       base = nb_hex
       max = -1
-      reffontheight = 17
+      reffontheight = 16
     end
     object r10: tint64edit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -154,14 +150,13 @@ inherited cpuc86_64fo: tcpux86_64fo
       frame.outerframe = (
         0
         0
-        21
+        24
         0
       )
       taborder = 4
       bounds_x = 176
       bounds_y = 124
-      bounds_cx = 162
-      bounds_cy = 21
+      bounds_cx = 165
       font.height = 14
       font.name = 'stf_fixed'
       font.xscale = 1
@@ -169,7 +164,7 @@ inherited cpuc86_64fo: tcpux86_64fo
       onsetvalue = regsetvalue
       base = nb_hex
       max = -1
-      reffontheight = 17
+      reffontheight = 16
     end
     object r15: tint64edit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -182,14 +177,13 @@ inherited cpuc86_64fo: tcpux86_64fo
       frame.outerframe = (
         0
         0
-        21
+        24
         0
       )
       taborder = 5
       bounds_x = 176
       bounds_y = 229
-      bounds_cx = 162
-      bounds_cy = 21
+      bounds_cx = 165
       font.height = 14
       font.name = 'stf_fixed'
       font.xscale = 1
@@ -197,7 +191,7 @@ inherited cpuc86_64fo: tcpux86_64fo
       onsetvalue = regsetvalue
       base = nb_hex
       max = -1
-      reffontheight = 17
+      reffontheight = 16
     end
     object r9: tint64edit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -210,14 +204,13 @@ inherited cpuc86_64fo: tcpux86_64fo
       frame.outerframe = (
         0
         0
-        14
+        16
         0
       )
       taborder = 6
       bounds_x = 0
       bounds_y = 229
-      bounds_cx = 155
-      bounds_cy = 21
+      bounds_cx = 157
       font.height = 14
       font.name = 'stf_fixed'
       font.xscale = 1
@@ -225,7 +218,7 @@ inherited cpuc86_64fo: tcpux86_64fo
       onsetvalue = regsetvalue
       base = nb_hex
       max = -1
-      reffontheight = 17
+      reffontheight = 16
     end
     object r8: tint64edit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -238,14 +231,13 @@ inherited cpuc86_64fo: tcpux86_64fo
       frame.outerframe = (
         0
         0
-        14
+        16
         0
       )
       taborder = 7
       bounds_x = 0
       bounds_y = 208
-      bounds_cx = 155
-      bounds_cy = 21
+      bounds_cx = 157
       font.height = 14
       font.name = 'stf_fixed'
       font.xscale = 1
@@ -253,7 +245,7 @@ inherited cpuc86_64fo: tcpux86_64fo
       onsetvalue = regsetvalue
       base = nb_hex
       max = -1
-      reffontheight = 17
+      reffontheight = 16
     end
     object io: tbooleanedit
       Tag = 12
@@ -507,14 +499,13 @@ inherited cpuc86_64fo: tcpux86_64fo
       frame.outerframe = (
         0
         0
-        13
+        15
         0
       )
       taborder = 19
       bounds_x = 176
       bounds_y = 40
-      bounds_cx = 153
-      bounds_cy = 21
+      bounds_cx = 155
       font.height = 14
       font.name = 'stf_fixed'
       font.xscale = 1
@@ -523,7 +514,7 @@ inherited cpuc86_64fo: tcpux86_64fo
       onsetvalue = regsetvalue
       base = nb_hex
       max = -1
-      reffontheight = 17
+      reffontheight = 16
     end
     object rip: tint64edit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -536,14 +527,13 @@ inherited cpuc86_64fo: tcpux86_64fo
       frame.outerframe = (
         0
         0
-        17
+        19
         0
       )
       taborder = 20
       bounds_x = 176
       bounds_y = 82
-      bounds_cx = 157
-      bounds_cy = 21
+      bounds_cx = 159
       font.height = 14
       font.name = 'stf_fixed'
       font.xscale = 1
@@ -551,7 +541,7 @@ inherited cpuc86_64fo: tcpux86_64fo
       onsetvalue = regsetvalue
       base = nb_hex
       max = -1
-      reffontheight = 17
+      reffontheight = 16
     end
     object rsp: tint64edit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -564,14 +554,13 @@ inherited cpuc86_64fo: tcpux86_64fo
       frame.outerframe = (
         0
         0
-        21
+        23
         0
       )
       taborder = 21
       bounds_x = 176
       bounds_y = 61
-      bounds_cx = 161
-      bounds_cy = 21
+      bounds_cx = 163
       font.height = 14
       font.name = 'stf_fixed'
       font.xscale = 1
@@ -579,7 +568,7 @@ inherited cpuc86_64fo: tcpux86_64fo
       onsetvalue = regsetvalue
       base = nb_hex
       max = -1
-      reffontheight = 17
+      reffontheight = 16
     end
     object rbp: tint64edit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -592,14 +581,13 @@ inherited cpuc86_64fo: tcpux86_64fo
       frame.outerframe = (
         0
         0
-        21
+        24
         0
       )
       taborder = 22
       bounds_x = 0
       bounds_y = 124
-      bounds_cx = 162
-      bounds_cy = 21
+      bounds_cx = 165
       font.height = 14
       font.name = 'stf_fixed'
       font.xscale = 1
@@ -607,7 +595,7 @@ inherited cpuc86_64fo: tcpux86_64fo
       onsetvalue = regsetvalue
       base = nb_hex
       max = -1
-      reffontheight = 17
+      reffontheight = 16
     end
     object rdi: tint64edit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -620,14 +608,13 @@ inherited cpuc86_64fo: tcpux86_64fo
       frame.outerframe = (
         0
         0
-        17
+        19
         0
       )
       taborder = 23
       bounds_x = 0
       bounds_y = 166
-      bounds_cx = 158
-      bounds_cy = 21
+      bounds_cx = 160
       font.height = 14
       font.name = 'stf_fixed'
       font.xscale = 1
@@ -635,7 +622,7 @@ inherited cpuc86_64fo: tcpux86_64fo
       onsetvalue = regsetvalue
       base = nb_hex
       max = -1
-      reffontheight = 17
+      reffontheight = 16
     end
     object rsi: tint64edit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -648,14 +635,13 @@ inherited cpuc86_64fo: tcpux86_64fo
       frame.outerframe = (
         0
         0
-        17
+        18
         0
       )
       taborder = 24
       bounds_x = 0
       bounds_y = 145
-      bounds_cx = 158
-      bounds_cy = 21
+      bounds_cx = 159
       font.height = 14
       font.name = 'stf_fixed'
       font.xscale = 1
@@ -663,7 +649,7 @@ inherited cpuc86_64fo: tcpux86_64fo
       onsetvalue = regsetvalue
       base = nb_hex
       max = -1
-      reffontheight = 17
+      reffontheight = 16
     end
     object rdx: tint64edit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -676,14 +662,13 @@ inherited cpuc86_64fo: tcpux86_64fo
       frame.outerframe = (
         0
         0
-        19
+        22
         0
       )
       taborder = 25
       bounds_x = 0
       bounds_y = 103
-      bounds_cx = 160
-      bounds_cy = 21
+      bounds_cx = 163
       font.height = 14
       font.name = 'stf_fixed'
       font.xscale = 1
@@ -691,7 +676,7 @@ inherited cpuc86_64fo: tcpux86_64fo
       onsetvalue = regsetvalue
       base = nb_hex
       max = -1
-      reffontheight = 17
+      reffontheight = 16
     end
     object rcx: tint64edit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -704,14 +689,13 @@ inherited cpuc86_64fo: tcpux86_64fo
       frame.outerframe = (
         0
         0
-        18
+        21
         0
       )
       taborder = 26
       bounds_x = 0
       bounds_y = 82
-      bounds_cx = 159
-      bounds_cy = 21
+      bounds_cx = 162
       font.height = 14
       font.name = 'stf_fixed'
       font.xscale = 1
@@ -719,7 +703,7 @@ inherited cpuc86_64fo: tcpux86_64fo
       onsetvalue = regsetvalue
       base = nb_hex
       max = -1
-      reffontheight = 17
+      reffontheight = 16
     end
     object rbx: tint64edit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -732,14 +716,13 @@ inherited cpuc86_64fo: tcpux86_64fo
       frame.outerframe = (
         0
         0
-        19
+        22
         0
       )
       taborder = 27
       bounds_x = 0
       bounds_y = 61
-      bounds_cx = 160
-      bounds_cy = 21
+      bounds_cx = 163
       font.height = 14
       font.name = 'stf_fixed'
       font.xscale = 1
@@ -747,7 +730,7 @@ inherited cpuc86_64fo: tcpux86_64fo
       onsetvalue = regsetvalue
       base = nb_hex
       max = -1
-      reffontheight = 17
+      reffontheight = 16
     end
     object rax: tint64edit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -760,14 +743,13 @@ inherited cpuc86_64fo: tcpux86_64fo
       frame.outerframe = (
         0
         0
-        19
+        22
         0
       )
       taborder = 28
       bounds_x = 0
       bounds_y = 40
-      bounds_cx = 160
-      bounds_cy = 21
+      bounds_cx = 163
       font.height = 14
       font.name = 'stf_fixed'
       font.xscale = 1
@@ -775,7 +757,7 @@ inherited cpuc86_64fo: tcpux86_64fo
       onsetvalue = regsetvalue
       base = nb_hex
       max = -1
-      reffontheight = 17
+      reffontheight = 16
     end
     object r: tbooleanedit
       Tag = 16

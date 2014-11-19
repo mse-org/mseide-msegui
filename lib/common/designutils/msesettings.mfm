@@ -454,6 +454,7 @@ object settingsfo: tsettingsfo
       bounds_y = 0
       bounds_cx = 152
       bounds_cy = 16
+      optionsedit1 = [oe1_savevalue]
       reffontheight = 14
     end
     object macrovalue: tmemodialogedit
@@ -470,6 +471,7 @@ object settingsfo: tsettingsfo
       bounds_y = 0
       bounds_cx = 144
       bounds_cy = 16
+      optionsedit1 = [oe1_savevalue]
       reffontheight = 14
     end
   end

@@ -116,6 +116,7 @@ object fadeeditfo: tfadeeditfo
             bounds_y = 0
             bounds_cx = 89
             bounds_cy = 16
+            optionsedit1 = [oe1_savevalue]
             ondataentered = dataenteterev
             value = -Inf
             valuedefault = -Inf
@@ -141,6 +142,7 @@ object fadeeditfo: tfadeeditfo
             bounds_y = 0
             bounds_cx = 290
             bounds_cy = 16
+            optionsedit1 = [oe1_savevalue]
             ondataentered = dataenteterev
             valuedefault = -1610612731
             dropdown.options = [deo_autodropdown, deo_keydropdown]
@@ -226,6 +228,7 @@ object fadeeditfo: tfadeeditfo
             bounds_y = 0
             bounds_cx = 89
             bounds_cy = 16
+            optionsedit1 = [oe1_savevalue]
             ondataentered = dataenteterev
             value = -Inf
             valuedefault = -Inf
@@ -251,6 +254,7 @@ object fadeeditfo: tfadeeditfo
             bounds_y = 0
             bounds_cx = 151
             bounds_cy = 16
+            optionsedit1 = [oe1_savevalue]
             ondataentered = dataenteterev
             valuedefault = -1610612731
             dropdown.options = [deo_autodropdown, deo_keydropdown]
@@ -271,6 +275,7 @@ object fadeeditfo: tfadeeditfo
             bounds_y = 0
             bounds_cx = 138
             bounds_cy = 16
+            optionsedit1 = [oe1_savevalue]
             ondataentered = dataenteterev
             valuedefault = -1610612730
             dropdown.options = [deo_autodropdown, deo_keydropdown]
@@ -298,13 +303,13 @@ object fadeeditfo: tfadeeditfo
         frame.localprops = [frl_leveli, frl_fibottom]
         frame.dummy = 0
         taborder = 2
+        onpaint = pospaintev
         bounds_x = 8
         bounds_y = 0
         bounds_cx = 504
         bounds_cy = 50
         anchors = [an_left, an_top, an_right]
         onclientmouseevent = mouseev
-        onpaint = pospaintev
         onresize = resizeev
         options = []
         ongetcursorshape = getcursorshapeev
@@ -413,6 +418,7 @@ object fadeeditfo: tfadeeditfo
         0
       )
       taborder = 1
+      onpaint = pospaintev
       bounds_x = 8
       bounds_y = 0
       bounds_cx = 504
@@ -420,7 +426,6 @@ object fadeeditfo: tfadeeditfo
       bounds_cxmin = 461
       anchors = [an_left, an_top, an_right]
       onclientmouseevent = mouseev
-      onpaint = pospaintev
       onresize = resizeev
       options = []
       ongetcursorshape = getcursorshapeev
@@ -457,7 +462,7 @@ object fadeeditfo: tfadeeditfo
     object switchlayout: tlayouter
       bounds_x = 0
       bounds_y = 0
-      bounds_cx = 128
+      bounds_cx = 142
       bounds_cy = 30
       optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
       optionslayout = [lao_placex, lao_aligny]
@@ -469,12 +474,12 @@ object fadeeditfo: tfadeeditfo
         frame.outerframe = (
           0
           8
-          53
+          61
           9
         )
-        bounds_x = 62
-        bounds_y = 0
-        bounds_cx = 66
+        bounds_x = 68
+        bounds_y = 1
+        bounds_cx = 74
         bounds_cy = 30
         onsetvalue = sepopaset
       end
@@ -484,29 +489,29 @@ object fadeeditfo: tfadeeditfo
         frame.outerframe = (
           0
           1
-          44
+          50
           2
         )
         taborder = 1
         bounds_x = 0
-        bounds_y = 7
-        bounds_cx = 57
+        bounds_y = 8
+        bounds_cx = 63
         bounds_cy = 16
         ondataentered = reverseenteredev
       end
     end
     object buttonlayout: tlayouter
       taborder = 1
-      bounds_x = 182
+      bounds_x = 178
       bounds_y = 0
-      bounds_cx = 324
+      bounds_cx = 328
       bounds_cy = 31
       optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
       optionslayout = [lao_placex]
       place_mindist = 5
       object tbutton2: tbutton
         optionswidget1 = [ow1_autoscale, ow1_autowidth]
-        bounds_x = 266
+        bounds_x = 270
         bounds_y = 0
         bounds_cx = 58
         bounds_cy = 31
@@ -518,7 +523,7 @@ object fadeeditfo: tfadeeditfo
       object tbutton1: tbutton
         optionswidget1 = [ow1_autoscale, ow1_autowidth]
         taborder = 1
-        bounds_x = 203
+        bounds_x = 207
         bounds_y = 0
         bounds_cx = 58
         bounds_cy = 31
@@ -529,7 +534,7 @@ object fadeeditfo: tfadeeditfo
       end
       object tsimplewidget1: tsimplewidget
         taborder = 2
-        bounds_x = 194
+        bounds_x = 198
         bounds_y = 8
         bounds_cx = 4
         bounds_cy = 18
@@ -537,7 +542,7 @@ object fadeeditfo: tfadeeditfo
       object tbutton3: tbutton
         optionswidget1 = [ow1_autoscale, ow1_autowidth]
         taborder = 3
-        bounds_x = 131
+        bounds_x = 135
         bounds_y = 0
         bounds_cx = 58
         bounds_cy = 31
@@ -549,7 +554,7 @@ object fadeeditfo: tfadeeditfo
       object tbutton4: tbutton
         optionswidget1 = [ow1_autoscale, ow1_autowidth]
         taborder = 4
-        bounds_x = 68
+        bounds_x = 72
         bounds_y = 0
         bounds_cx = 58
         bounds_cy = 31
@@ -564,7 +569,7 @@ object fadeeditfo: tfadeeditfo
         hint = 'Clear opacity gradient'
         bounds_x = 0
         bounds_y = 0
-        bounds_cx = 63
+        bounds_cx = 67
         bounds_cy = 31
         bounds_cxmin = 58
         state = [as_disabled, as_localdisabled, as_localcaption, as_localhint, as_localonexecute]

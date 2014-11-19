@@ -102,8 +102,8 @@ object doublestringlisteditor: tdoublestringlisteditor
       bounds_y = 0
       bounds_cx = 137
       bounds_cy = 16
-      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_hintclippedtext, oe_savevalue, oe_savestate, oe_checkvaluepaststatread]
-      textflags = [tf_noselect]
+      optionsedit1 = [oe1_savevalue]
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_hintclippedtext]
       reffontheight = 14
     end
     object textb: tmemodialogedit
@@ -120,8 +120,8 @@ object doublestringlisteditor: tdoublestringlisteditor
       bounds_y = 0
       bounds_cx = 145
       bounds_cy = 16
-      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_hintclippedtext, oe_savevalue, oe_savestate, oe_checkvaluepaststatread]
-      textflags = [tf_noselect]
+      optionsedit1 = [oe1_savevalue]
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_hintclippedtext]
       reffontheight = 14
     end
   end
@@ -133,13 +133,13 @@ object doublestringlisteditor: tdoublestringlisteditor
     frame.outerframe = (
       0
       0
-      58
+      64
       0
     )
     taborder = 1
     bounds_x = 36
     bounds_y = 160
-    bounds_cx = 108
+    bounds_cx = 114
     anchors = [an_left, an_bottom]
     onsetvalue = rowcountonsetvalue
     reffontheight = 14

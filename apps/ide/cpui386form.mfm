@@ -26,8 +26,8 @@ inherited cpui386fo: tcpui386fo
     visible = True
     bounds_x = 0
     bounds_y = 18
-    bounds_cx = 252
-    bounds_cy = 183
+    bounds_cx = 254
+    bounds_cy = 182
     optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
     linktop = stoptime
     object c: tbooleanedit
@@ -332,7 +332,6 @@ inherited cpui386fo: tcpui386fo
       bounds_x = 187
       bounds_y = 162
       bounds_cx = 58
-      bounds_cy = 21
       font.height = 14
       font.name = 'stf_fixed'
       font.xscale = 1
@@ -341,7 +340,7 @@ inherited cpui386fo: tcpui386fo
       base = nb_hex
       bitcount = 16
       max = -1
-      reffontheight = 17
+      reffontheight = 16
     end
     object gs: tintegeredit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -354,14 +353,13 @@ inherited cpui386fo: tcpui386fo
       frame.outerframe = (
         0
         0
-        17
+        18
         0
       )
       taborder = 14
       bounds_x = 187
       bounds_y = 141
-      bounds_cx = 58
-      bounds_cy = 21
+      bounds_cx = 59
       font.height = 14
       font.name = 'stf_fixed'
       font.xscale = 1
@@ -370,7 +368,7 @@ inherited cpui386fo: tcpui386fo
       base = nb_hex
       bitcount = 16
       max = -1
-      reffontheight = 17
+      reffontheight = 16
     end
     object fs: tintegeredit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -383,14 +381,13 @@ inherited cpui386fo: tcpui386fo
       frame.outerframe = (
         0
         0
-        13
+        14
         0
       )
       taborder = 15
       bounds_x = 187
       bounds_y = 120
-      bounds_cx = 54
-      bounds_cy = 21
+      bounds_cx = 55
       font.height = 14
       font.name = 'stf_fixed'
       font.xscale = 1
@@ -399,7 +396,7 @@ inherited cpui386fo: tcpui386fo
       base = nb_hex
       bitcount = 16
       max = -1
-      reffontheight = 17
+      reffontheight = 16
     end
     object es: tintegeredit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -412,14 +409,13 @@ inherited cpui386fo: tcpui386fo
       frame.outerframe = (
         0
         0
-        17
+        18
         0
       )
       taborder = 16
       bounds_x = 128
       bounds_y = 162
-      bounds_cx = 58
-      bounds_cy = 21
+      bounds_cx = 59
       font.height = 14
       font.name = 'stf_fixed'
       font.xscale = 1
@@ -428,7 +424,7 @@ inherited cpui386fo: tcpui386fo
       base = nb_hex
       bitcount = 16
       max = -1
-      reffontheight = 17
+      reffontheight = 16
     end
     object ds: tintegeredit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -441,14 +437,13 @@ inherited cpui386fo: tcpui386fo
       frame.outerframe = (
         0
         0
-        17
+        18
         0
       )
       taborder = 17
       bounds_x = 128
       bounds_y = 141
-      bounds_cx = 58
-      bounds_cy = 21
+      bounds_cx = 59
       font.height = 14
       font.name = 'stf_fixed'
       font.xscale = 1
@@ -457,7 +452,7 @@ inherited cpui386fo: tcpui386fo
       base = nb_hex
       bitcount = 16
       max = -1
-      reffontheight = 17
+      reffontheight = 16
     end
     object cs: tintegeredit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -470,14 +465,13 @@ inherited cpui386fo: tcpui386fo
       frame.outerframe = (
         0
         0
-        16
+        17
         0
       )
       taborder = 18
       bounds_x = 128
       bounds_y = 120
-      bounds_cx = 57
-      bounds_cy = 21
+      bounds_cx = 58
       font.height = 14
       font.name = 'stf_fixed'
       font.xscale = 1
@@ -486,7 +480,7 @@ inherited cpui386fo: tcpui386fo
       base = nb_hex
       bitcount = 16
       max = -1
-      reffontheight = 17
+      reffontheight = 16
     end
     object eflags: tintegeredit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -499,14 +493,13 @@ inherited cpui386fo: tcpui386fo
       frame.outerframe = (
         0
         0
-        16
+        18
         0
       )
       taborder = 19
       bounds_x = 128
       bounds_y = 36
-      bounds_cx = 116
-      bounds_cy = 21
+      bounds_cx = 118
       font.height = 14
       font.name = 'stf_fixed'
       font.xscale = 1
@@ -515,7 +508,7 @@ inherited cpui386fo: tcpui386fo
       onsetvalue = regsetvalue
       base = nb_hex
       max = -1
-      reffontheight = 17
+      reffontheight = 16
     end
     object eip: tintegeredit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -528,14 +521,13 @@ inherited cpui386fo: tcpui386fo
       frame.outerframe = (
         0
         0
-        20
+        22
         0
       )
       taborder = 20
       bounds_x = 128
       bounds_y = 78
-      bounds_cx = 120
-      bounds_cy = 21
+      bounds_cx = 122
       font.height = 14
       font.name = 'stf_fixed'
       font.xscale = 1
@@ -543,7 +535,7 @@ inherited cpui386fo: tcpui386fo
       onsetvalue = regsetvalue
       base = nb_hex
       max = -1
-      reffontheight = 17
+      reffontheight = 16
     end
     object esp: tintegeredit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -556,14 +548,13 @@ inherited cpui386fo: tcpui386fo
       frame.outerframe = (
         0
         0
-        24
+        26
         0
       )
       taborder = 21
       bounds_x = 128
       bounds_y = 57
-      bounds_cx = 124
-      bounds_cy = 21
+      bounds_cx = 126
       font.height = 14
       font.name = 'stf_fixed'
       font.xscale = 1
@@ -571,7 +562,7 @@ inherited cpui386fo: tcpui386fo
       onsetvalue = regsetvalue
       base = nb_hex
       max = -1
-      reffontheight = 17
+      reffontheight = 16
     end
     object ebp: tintegeredit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -584,14 +575,13 @@ inherited cpui386fo: tcpui386fo
       frame.outerframe = (
         0
         0
-        24
+        27
         0
       )
       taborder = 22
       bounds_x = 0
       bounds_y = 162
-      bounds_cx = 117
-      bounds_cy = 21
+      bounds_cx = 120
       font.height = 14
       font.name = 'stf_fixed'
       font.xscale = 1
@@ -599,7 +589,7 @@ inherited cpui386fo: tcpui386fo
       onsetvalue = regsetvalue
       base = nb_hex
       max = -1
-      reffontheight = 17
+      reffontheight = 16
     end
     object edi: tintegeredit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -612,14 +602,13 @@ inherited cpui386fo: tcpui386fo
       frame.outerframe = (
         0
         0
-        20
+        22
         0
       )
       taborder = 23
       bounds_x = 0
       bounds_y = 141
-      bounds_cx = 113
-      bounds_cy = 21
+      bounds_cx = 115
       font.height = 14
       font.name = 'stf_fixed'
       font.xscale = 1
@@ -627,7 +616,7 @@ inherited cpui386fo: tcpui386fo
       onsetvalue = regsetvalue
       base = nb_hex
       max = -1
-      reffontheight = 17
+      reffontheight = 16
     end
     object esi: tintegeredit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -640,14 +629,13 @@ inherited cpui386fo: tcpui386fo
       frame.outerframe = (
         0
         0
-        20
+        21
         0
       )
       taborder = 24
       bounds_x = 0
       bounds_y = 120
-      bounds_cx = 113
-      bounds_cy = 21
+      bounds_cx = 114
       font.height = 14
       font.name = 'stf_fixed'
       font.xscale = 1
@@ -655,7 +643,7 @@ inherited cpui386fo: tcpui386fo
       onsetvalue = regsetvalue
       base = nb_hex
       max = -1
-      reffontheight = 17
+      reffontheight = 16
     end
     object edx: tintegeredit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -668,14 +656,13 @@ inherited cpui386fo: tcpui386fo
       frame.outerframe = (
         0
         0
-        22
+        25
         0
       )
       taborder = 25
       bounds_x = 0
       bounds_y = 99
-      bounds_cx = 115
-      bounds_cy = 21
+      bounds_cx = 118
       font.height = 14
       font.name = 'stf_fixed'
       font.xscale = 1
@@ -683,7 +670,7 @@ inherited cpui386fo: tcpui386fo
       onsetvalue = regsetvalue
       base = nb_hex
       max = -1
-      reffontheight = 17
+      reffontheight = 16
     end
     object ecx: tintegeredit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -696,14 +683,13 @@ inherited cpui386fo: tcpui386fo
       frame.outerframe = (
         0
         0
-        21
+        24
         0
       )
       taborder = 26
       bounds_x = 0
       bounds_y = 78
-      bounds_cx = 114
-      bounds_cy = 21
+      bounds_cx = 117
       font.height = 14
       font.name = 'stf_fixed'
       font.xscale = 1
@@ -711,7 +697,7 @@ inherited cpui386fo: tcpui386fo
       onsetvalue = regsetvalue
       base = nb_hex
       max = -1
-      reffontheight = 17
+      reffontheight = 16
     end
     object ebx: tintegeredit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -724,14 +710,13 @@ inherited cpui386fo: tcpui386fo
       frame.outerframe = (
         0
         0
-        22
+        25
         0
       )
       taborder = 27
       bounds_x = 0
       bounds_y = 57
-      bounds_cx = 115
-      bounds_cy = 21
+      bounds_cx = 118
       font.height = 14
       font.name = 'stf_fixed'
       font.xscale = 1
@@ -739,7 +724,7 @@ inherited cpui386fo: tcpui386fo
       onsetvalue = regsetvalue
       base = nb_hex
       max = -1
-      reffontheight = 17
+      reffontheight = 16
     end
     object eax: tintegeredit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -752,14 +737,13 @@ inherited cpui386fo: tcpui386fo
       frame.outerframe = (
         0
         0
-        22
+        25
         0
       )
       taborder = 28
       bounds_x = 0
       bounds_y = 36
-      bounds_cx = 115
-      bounds_cy = 21
+      bounds_cx = 118
       font.height = 14
       font.name = 'stf_fixed'
       font.xscale = 1
@@ -767,7 +751,7 @@ inherited cpui386fo: tcpui386fo
       onsetvalue = regsetvalue
       base = nb_hex
       max = -1
-      reffontheight = 17
+      reffontheight = 16
     end
   end
 end

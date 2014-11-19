@@ -5,8 +5,6 @@ object templateeditorfo: ttemplateeditorfo
   bounds_cx = 473
   bounds_cy = 399
   container.frame.clientwidthmin = 473
-  container.frame.zoomwidthstep = 1
-  container.frame.zoomheightstep = 1
   container.bounds = (
     0
     0
@@ -54,7 +52,7 @@ object templateeditorfo: ttemplateeditorfo
     bounds_y = 4
     bounds_cx = 109
     bounds_cy = 37
-    optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_notnull, oe_savevalue, oe_savestate, oe_checkvaluepaststatread]
+    optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_notnull]
     reffontheight = 14
   end
   object commented: tstringedit
@@ -289,15 +287,15 @@ object templateeditorfo: ttemplateeditorfo
     frame.localprops1 = [frl1_captiondist]
     frame.dummy = 0
     frame.outerframe = (
-      11
+      13
       20
-      11
+      14
       0
     )
     taborder = 8
-    bounds_x = 269
+    bounds_x = 267
     bounds_y = 359
-    bounds_cx = 35
+    bounds_cx = 40
     bounds_cy = 33
     anchors = [an_left, an_bottom]
   end
@@ -308,15 +306,15 @@ object templateeditorfo: ttemplateeditorfo
     frame.localprops1 = [frl1_captiondist]
     frame.dummy = 0
     frame.outerframe = (
-      11
+      14
       20
-      12
+      15
       0
     )
     taborder = 9
-    bounds_x = 309
+    bounds_x = 306
     bounds_y = 359
-    bounds_cx = 36
+    bounds_cx = 42
     bounds_cy = 33
     anchors = [an_left, an_bottom]
   end

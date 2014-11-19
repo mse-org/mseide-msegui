@@ -59,6 +59,7 @@ object fircoeffeditorfo: tfircoeffeditorfo
       bounds_y = 0
       bounds_cx = 160
       bounds_cy = 16
+      optionsedit1 = [oe1_savevalue]
       value = 0
       valuedefault = 0
       valuerange = 1

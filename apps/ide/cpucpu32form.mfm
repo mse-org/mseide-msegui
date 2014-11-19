@@ -53,7 +53,7 @@ inherited cpucpu32fo: tcpucpu32fo
     visible = True
     bounds_x = 0
     bounds_y = 18
-    bounds_cx = 232
+    bounds_cx = 237
     bounds_cy = 254
     optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
     linktop = stoptime
@@ -278,9 +278,9 @@ inherited cpucpu32fo: tcpucpu32fo
     end
     object tlayouter2: tlayouter
       taborder = 11
-      bounds_x = 115
+      bounds_x = 118
       bounds_y = 34
-      bounds_cx = 117
+      bounds_cx = 119
       bounds_cy = 220
       optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
       dist_right = 3
@@ -297,12 +297,12 @@ inherited cpucpu32fo: tcpucpu32fo
         frame.outerframe = (
           0
           0
-          17
+          19
           0
         )
         bounds_x = 0
         bounds_y = 20
-        bounds_cx = 110
+        bounds_cx = 112
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
@@ -323,13 +323,13 @@ inherited cpucpu32fo: tcpucpu32fo
         frame.outerframe = (
           0
           0
-          17
+          19
           0
         )
         taborder = 1
         bounds_x = 0
         bounds_y = 0
-        bounds_cx = 110
+        bounds_cx = 112
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
@@ -350,13 +350,13 @@ inherited cpucpu32fo: tcpucpu32fo
         frame.outerframe = (
           0
           0
-          17
+          19
           0
         )
         taborder = 2
         bounds_x = 0
         bounds_y = 80
-        bounds_cx = 110
+        bounds_cx = 112
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
@@ -377,13 +377,13 @@ inherited cpucpu32fo: tcpucpu32fo
         frame.outerframe = (
           0
           0
-          17
+          19
           0
         )
         taborder = 3
         bounds_x = 0
         bounds_y = 60
-        bounds_cx = 110
+        bounds_cx = 112
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
@@ -404,13 +404,13 @@ inherited cpucpu32fo: tcpucpu32fo
         frame.outerframe = (
           0
           0
-          17
+          19
           0
         )
         taborder = 4
         bounds_x = 0
         bounds_y = 40
-        bounds_cx = 110
+        bounds_cx = 112
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
@@ -431,13 +431,13 @@ inherited cpucpu32fo: tcpucpu32fo
         frame.outerframe = (
           0
           0
-          17
+          19
           0
         )
         taborder = 5
         bounds_x = 0
         bounds_y = 100
-        bounds_cx = 110
+        bounds_cx = 112
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
@@ -458,13 +458,13 @@ inherited cpucpu32fo: tcpucpu32fo
         frame.outerframe = (
           0
           0
-          13
+          15
           0
         )
         taborder = 6
         bounds_x = 0
         bounds_y = 120
-        bounds_cx = 106
+        bounds_cx = 108
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
@@ -485,13 +485,13 @@ inherited cpucpu32fo: tcpucpu32fo
         frame.outerframe = (
           0
           0
-          24
+          26
           0
         )
         taborder = 7
         bounds_x = 0
         bounds_y = 140
-        bounds_cx = 117
+        bounds_cx = 119
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
@@ -512,13 +512,13 @@ inherited cpucpu32fo: tcpucpu32fo
         frame.outerframe = (
           0
           0
-          16
+          18
           0
         )
         taborder = 8
         bounds_x = 0
         bounds_y = 160
-        bounds_cx = 109
+        bounds_cx = 111
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
@@ -539,13 +539,13 @@ inherited cpucpu32fo: tcpucpu32fo
         frame.outerframe = (
           0
           0
-          24
+          25
           0
         )
         taborder = 9
         bounds_x = 0
         bounds_y = 180
-        bounds_cx = 117
+        bounds_cx = 118
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
@@ -566,13 +566,13 @@ inherited cpucpu32fo: tcpucpu32fo
         frame.outerframe = (
           0
           0
-          19
+          22
           0
         )
         taborder = 10
         bounds_x = 0
         bounds_y = 200
-        bounds_cx = 112
+        bounds_cx = 115
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
@@ -587,7 +587,7 @@ inherited cpucpu32fo: tcpucpu32fo
       taborder = 12
       bounds_x = 0
       bounds_y = 34
-      bounds_cx = 112
+      bounds_cx = 115
       bounds_cy = 220
       optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
       linkright = tlayouter2
@@ -605,12 +605,12 @@ inherited cpucpu32fo: tcpucpu32fo
         frame.outerframe = (
           0
           0
-          17
+          19
           0
         )
         bounds_x = 0
         bounds_y = 20
-        bounds_cx = 110
+        bounds_cx = 112
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
@@ -631,13 +631,13 @@ inherited cpucpu32fo: tcpucpu32fo
         frame.outerframe = (
           0
           0
-          17
+          19
           0
         )
         taborder = 1
         bounds_x = 0
         bounds_y = 0
-        bounds_cx = 110
+        bounds_cx = 112
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
@@ -658,13 +658,13 @@ inherited cpucpu32fo: tcpucpu32fo
         frame.outerframe = (
           0
           0
-          17
+          19
           0
         )
         taborder = 2
         bounds_x = 0
         bounds_y = 80
-        bounds_cx = 110
+        bounds_cx = 112
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
@@ -685,13 +685,13 @@ inherited cpucpu32fo: tcpucpu32fo
         frame.outerframe = (
           0
           0
-          17
+          19
           0
         )
         taborder = 3
         bounds_x = 0
         bounds_y = 60
-        bounds_cx = 110
+        bounds_cx = 112
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
@@ -712,13 +712,13 @@ inherited cpucpu32fo: tcpucpu32fo
         frame.outerframe = (
           0
           0
-          17
+          19
           0
         )
         taborder = 4
         bounds_x = 0
         bounds_y = 40
-        bounds_cx = 110
+        bounds_cx = 112
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
@@ -739,13 +739,13 @@ inherited cpucpu32fo: tcpucpu32fo
         frame.outerframe = (
           0
           0
-          17
+          19
           0
         )
         taborder = 5
         bounds_x = 0
         bounds_y = 100
-        bounds_cx = 110
+        bounds_cx = 112
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
@@ -766,13 +766,13 @@ inherited cpucpu32fo: tcpucpu32fo
         frame.outerframe = (
           0
           0
-          17
+          19
           0
         )
         taborder = 6
         bounds_x = 0
         bounds_y = 120
-        bounds_cx = 110
+        bounds_cx = 112
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
@@ -793,13 +793,13 @@ inherited cpucpu32fo: tcpucpu32fo
         frame.outerframe = (
           0
           0
-          17
+          19
           0
         )
         taborder = 7
         bounds_x = 0
         bounds_y = 140
-        bounds_cx = 110
+        bounds_cx = 112
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
@@ -820,13 +820,13 @@ inherited cpucpu32fo: tcpucpu32fo
         frame.outerframe = (
           0
           0
-          17
+          18
           0
         )
         taborder = 8
         bounds_x = 0
         bounds_y = 160
-        bounds_cx = 110
+        bounds_cx = 111
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
@@ -848,13 +848,13 @@ inherited cpucpu32fo: tcpucpu32fo
         frame.outerframe = (
           0
           0
-          19
+          21
           0
         )
         taborder = 9
         bounds_x = 0
         bounds_y = 180
-        bounds_cx = 112
+        bounds_cx = 114
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
@@ -876,13 +876,13 @@ inherited cpucpu32fo: tcpucpu32fo
         frame.outerframe = (
           0
           0
-          19
+          22
           0
         )
         taborder = 10
         bounds_x = 0
         bounds_y = 200
-        bounds_cx = 112
+        bounds_cx = 115
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1

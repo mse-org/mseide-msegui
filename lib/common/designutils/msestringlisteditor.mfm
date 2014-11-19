@@ -6,8 +6,6 @@ object stringlisteditor: tstringlisteditor
   bounds_cx = 275
   bounds_cy = 237
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets]
-  container.frame.zoomwidthstep = 1
-  container.frame.zoomheightstep = 1
   container.bounds = (
     0
     0
@@ -81,8 +79,8 @@ object stringlisteditor: tstringlisteditor
       bounds_y = 0
       bounds_cx = 245
       bounds_cy = 16
-      optionsedit1 = [oe1_keyexecute]
-      optionsedit = [oe_closequery, oe_checkmrcancel, oe_linebreak, oe_shiftreturn, oe_eatreturn, oe_exitoncursor, oe_savestate]
+      optionsedit1 = [oe1_keyexecute, oe1_savestate]
+      optionsedit = [oe_closequery, oe_checkmrcancel, oe_linebreak, oe_shiftreturn, oe_eatreturn, oe_exitoncursor]
       reffontheight = 14
     end
   end
@@ -92,15 +90,15 @@ object stringlisteditor: tstringlisteditor
     frame.captionpos = cp_left
     frame.dummy = 0
     frame.outerframe = (
-      58
+      64
       0
       0
       0
     )
     taborder = 2
-    bounds_x = 22
+    bounds_x = 16
     bounds_y = 210
-    bounds_cx = 110
+    bounds_cx = 116
     anchors = [an_left, an_bottom]
     onsetvalue = rowcountonsetvalue
     reffontheight = 14

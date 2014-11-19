@@ -11,8 +11,6 @@ object msepopupcalendarfo: tpopupcalendarfo
   bounds_cy = 179
   anchors = [an_left, an_top, an_bottom]
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets]
-  container.frame.zoomwidthstep = 1
-  container.frame.zoomheightstep = 1
   container.frame.localprops = [frl_framewidth]
   container.frame.sbhorz.options = [sbo_thumbtrack, sbo_moveauto]
   container.frame.sbvert.options = [sbo_thumbtrack, sbo_moveauto]

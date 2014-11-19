@@ -6,12 +6,6 @@ object imagelisteditorfo: timagelisteditorfo
   bounds_cx = 301
   bounds_cy = 359
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets]
-  container.frame.zoomwidthstep = 1
-  container.frame.zoomheightstep = 1
-  container.frame.sbhorz.stepctrlfact = 0
-  container.frame.sbhorz.wheelsensitivity = 1
-  container.frame.sbvert.stepctrlfact = 0
-  container.frame.sbvert.wheelsensitivity = 1
   container.bounds = (
     0
     0
@@ -24,14 +18,10 @@ object imagelisteditorfo: timagelisteditorfo
   moduleclassname = 'tmseform'
   object disp: tlistview
     optionswidget1 = [ow1_fontglyphheight]
-    frame.sbvert.stepctrlfact = 0
-    frame.sbvert.wheelsensitivity = 1
-    frame.sbhorz.stepctrlfact = 0
-    frame.sbhorz.wheelsensitivity = 1
     bounds_x = 0
     bounds_y = 0
-    bounds_cx = 301
-    bounds_cy = 303
+    bounds_cx = 303
+    bounds_cy = 288
     anchors = [an_top, an_bottom]
     cellheight = 62
     optionsgrid = [og_colsizing, og_rowsizing, og_focuscellonenter, og_wraprow, og_wrapcol, og_autopopup]
@@ -51,8 +41,8 @@ object imagelisteditorfo: timagelisteditorfo
     frame.dummy = 0
     taborder = 1
     bounds_x = 0
-    bounds_y = 306
-    bounds_cx = 295
+    bounds_y = 291
+    bounds_cx = 301
     bounds_cy = 53
     anchors = [an_left, an_bottom]
     optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
@@ -63,7 +53,7 @@ object imagelisteditorfo: timagelisteditorfo
       taborder = 1
       bounds_x = 0
       bounds_y = 27
-      bounds_cx = 295
+      bounds_cx = 297
       bounds_cy = 21
       anchors = [an_top]
       optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
@@ -73,7 +63,7 @@ object imagelisteditorfo: timagelisteditorfo
         taborder = 1
         bounds_x = 80
         bounds_y = 0
-        bounds_cx = 215
+        bounds_cx = 217
         bounds_cy = 21
         optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
         dist_top = 3
@@ -98,7 +88,7 @@ object imagelisteditorfo: timagelisteditorfo
           taborder = 3
           bounds_x = 165
           bounds_y = 1
-          bounds_cx = 50
+          bounds_cx = 52
           bounds_cy = 20
           bounds_cxmin = 50
           state = [as_localcaption]
@@ -138,12 +128,12 @@ object imagelisteditorfo: timagelisteditorfo
         frame.outerframe = (
           0
           1
-          40
+          48
           2
         )
         bounds_x = 6
         bounds_y = 3
-        bounds_cx = 53
+        bounds_cx = 61
         bounds_cy = 16
         statfile = statfile1
         value = True
@@ -152,7 +142,7 @@ object imagelisteditorfo: timagelisteditorfo
     object la1: tlayouter
       bounds_x = 0
       bounds_y = 0
-      bounds_cx = 286
+      bounds_cx = 301
       bounds_cy = 24
       optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
       linkbottom = la2
@@ -169,13 +159,13 @@ object imagelisteditorfo: timagelisteditorfo
         frame.outerframe = (
           0
           0
-          100
+          115
           0
         )
         taborder = 1
         bounds_x = 80
         bounds_y = 4
-        bounds_cx = 206
+        bounds_cx = 221
         statfile = statfile1
         value = -2147483647
         dropdown.options = [deo_autodropdown, deo_keydropdown]
@@ -187,12 +177,12 @@ object imagelisteditorfo: timagelisteditorfo
         frame.outerframe = (
           0
           1
-          48
+          52
           2
         )
         bounds_x = 6
         bounds_y = 7
-        bounds_cx = 61
+        bounds_cx = 65
         bounds_cy = 16
         value = True
       end

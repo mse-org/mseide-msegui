@@ -56,7 +56,8 @@ object compnametreefo: tcompnametreefo
       bounds_y = 0
       bounds_cx = 299
       bounds_cy = 16
-      optionsedit = [oe_readonly, oe_undoonesc, oe_checkmrcancel, oe_forcereturncheckvalue, oe_locate, oe_savevalue, oe_savestate]
+      optionsedit1 = [oe1_savevalue]
+      optionsedit = [oe_readonly, oe_undoonesc, oe_checkmrcancel, oe_forcereturncheckvalue, oe_locate]
       ondataentered = treeitemondataentered
       oncellevent = treeitemoncellevent
       options = [teo_treecolnavig, teo_enteronimageclick]

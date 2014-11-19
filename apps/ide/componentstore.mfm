@@ -168,8 +168,8 @@ object componentstorefo: tcomponentstorefo
       bounds_y = 0
       bounds_cx = 111
       bounds_cy = 16
-      optionsedit1 = [oe1_keyexecute]
-      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_hintclippedtext, oe_locate, oe_savestate]
+      optionsedit1 = []
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_hintclippedtext, oe_locate]
       ondataentered = datent
       onsetvalue = compnamesetva
       onupdaterowvalues = doupdaterowvalues
@@ -182,7 +182,8 @@ object componentstorefo: tcomponentstorefo
       bounds_y = 0
       bounds_cx = 19
       bounds_cy = 16
-      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_savestate]
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick]
+      optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savestate]
       options = [bo_executeonclick, bo_executeonkey, bo_executeonshortcut, bo_executedefaultonenterkey, bo_radioitemcol, bo_resetcheckedonrowexit]
       state = [as_invisible, as_localinvisible]
       valuefaces.count = 1
@@ -217,7 +218,8 @@ object componentstorefo: tcomponentstorefo
       bounds_y = 0
       bounds_cx = 112
       bounds_cy = 16
-      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_savestate]
+      optionsedit1 = []
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext]
       ondataentered = datent
       onsetvalue = compdescsetva
       reffontheight = 14
@@ -235,7 +237,8 @@ object componentstorefo: tcomponentstorefo
       bounds_y = 0
       bounds_cx = 185
       bounds_cy = 16
-      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_savestate]
+      optionsedit1 = []
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext]
       textflags = [tf_ycentered, tf_noselect, tf_ellipseleft]
       ondataentered = datent
       onsetvalue = filenamesetva

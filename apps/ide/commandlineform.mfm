@@ -5,8 +5,6 @@ object commandlinefo: tcommandlinefo
   bounds_cx = 542
   bounds_cy = 100
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets]
-  container.frame.zoomwidthstep = 1
-  container.frame.zoomheightstep = 1
   container.bounds = (
     0
     0
@@ -21,13 +19,16 @@ object commandlinefo: tcommandlinefo
     frame.framei_top = 3
     frame.framei_right = 3
     frame.framei_bottom = 3
+    frame.sbhorz.pagesize = 1
+    frame.sbvert.pagesize = 1
     frame.localprops = [frl_colorclient]
     bounds_x = 0
     bounds_y = 0
     bounds_cx = 542
     bounds_cy = 100
     anchors = []
-    optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_linebreak, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_savevalue, oe_savestate]
+    optionsedit1 = [oe1_multiline, oe1_autopopupmenu, oe1_keyexecute, oe1_savevalue, oe1_savestate]
+    optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_linebreak, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick]
     reffontheight = 14
   end
   object c: tstringcontainer

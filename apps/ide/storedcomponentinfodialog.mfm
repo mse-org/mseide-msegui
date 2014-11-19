@@ -49,7 +49,8 @@ object storedcomponentinfodialogfo: tstoredcomponentinfodialogfo
     bounds_cx = 348
     bounds_cy = 37
     anchors = [an_left, an_right, an_bottom]
-    optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_notnull, oe_savevalue, oe_savestate]
+    optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savevalue, oe1_savestate]
+    optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_notnull]
     textflags = [tf_ycentered, tf_noselect, tf_ellipseleft]
     controller.filterlist.data = (
       (

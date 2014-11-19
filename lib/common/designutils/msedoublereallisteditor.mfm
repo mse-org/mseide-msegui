@@ -92,6 +92,7 @@ object doublereallisteditor: tdoublereallisteditor
       bounds_y = 0
       bounds_cx = 113
       bounds_cy = 16
+      optionsedit1 = [oe1_savevalue]
       value = -Inf
       valuedefault = -Inf
       valuerange = 1
@@ -113,6 +114,7 @@ object doublereallisteditor: tdoublereallisteditor
       bounds_y = 0
       bounds_cx = 110
       bounds_cy = 16
+      optionsedit1 = [oe1_savevalue]
       value = -Inf
       valuedefault = -Inf
       valuerange = 1
@@ -129,13 +131,13 @@ object doublereallisteditor: tdoublereallisteditor
     frame.outerframe = (
       0
       0
-      58
+      64
       0
     )
     taborder = 1
     bounds_x = 8
     bounds_y = 177
-    bounds_cx = 108
+    bounds_cx = 114
     anchors = [an_left, an_bottom]
     onsetvalue = rowcountonsetvalue
     reffontheight = 14

@@ -11,12 +11,12 @@ object colordialogfo: tcolordialogfo
     338
     298
   )
+  onshortcut = shortcutexe
   options = [fo_closeonesc, fo_localshortcuts, fo_autoreadstat, fo_autowritestat, fo_savepos]
   statfile = tstatfile1
   caption = 'Select Color'
   onloaded = loadedexe
   onmouseevent = mouseeventexe
-  onshortcut = shortcutexe
   onlayout = layoutexe
   moduleclassname = 'tmseform'
   object colorpibu: tdatabutton
@@ -288,7 +288,7 @@ object colordialogfo: tcolordialogfo
       bounds_y = 0
       bounds_cx = 108
       bounds_cy = 37
-      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_hintclippedtext, oe_savevalue, oe_savestate, oe_checkvaluepaststatread]
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_hintclippedtext]
       ondataentered = coloreddataentered
       dropdown.options = [deo_autodropdown, deo_keydropdown, deo_cliphint]
       reffontheight = 14

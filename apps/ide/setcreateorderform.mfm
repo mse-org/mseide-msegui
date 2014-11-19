@@ -3,8 +3,6 @@ object setcreateorderfo: tsetcreateorderfo
   bounds_y = 264
   bounds_cx = 381
   bounds_cy = 340
-  container.frame.zoomwidthstep = 1
-  container.frame.zoomheightstep = 1
   container.bounds = (
     0
     0

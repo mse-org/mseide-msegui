@@ -29,8 +29,8 @@ object realenterfo: trealenterfo
     bounds_x = 8
     bounds_y = 62
     anchors = [an_left, an_right, an_bottom]
-    optionsedit1 = [oe1_autopopupmenu]
-    optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_savevalue, oe_savestate]
+    optionsedit1 = [oe1_autopopupmenu, oe1_savevalue, oe1_savestate]
+    optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick]
     value = -Inf
     valuedefault = -Inf
     valuerange = 0

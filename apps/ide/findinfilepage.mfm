@@ -6,8 +6,6 @@ object findinfilepagefo: tfindinfilepagefo
   bounds_cx = 573
   bounds_cy = 310
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets]
-  container.frame.zoomwidthstep = 1
-  container.frame.zoomheightstep = 1
   container.onlayout = childscaled
   container.bounds = (
     0
@@ -64,8 +62,8 @@ object findinfilepagefo: tfindinfilepagefo
       bounds_y = 0
       bounds_cx = 1500
       bounds_cy = 16
-      optionsedit1 = [oe1_keyexecute]
-      optionsedit = [oe_readonly, oe_closequery, oe_checkmrcancel, oe_linebreak, oe_eatreturn, oe_exitoncursor, oe_savestate]
+      optionsedit1 = [oe1_keyexecute, oe1_savestate]
+      optionsedit = [oe_readonly, oe_closequery, oe_checkmrcancel, oe_linebreak, oe_eatreturn, oe_exitoncursor]
       oncellevent = foundlistoncellevent
       reffontheight = 14
     end

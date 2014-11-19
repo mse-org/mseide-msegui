@@ -21,7 +21,7 @@ object finddialogfo: tfinddialogfo
     taborder = 2
     bounds_x = 8
     bounds_y = 45
-    bounds_cx = 267
+    bounds_cx = 294
     bounds_cy = 40
     optionsscale = [osc_expandx, osc_shrinkx]
     optionslayout = [lao_placex]
@@ -33,12 +33,12 @@ object finddialogfo: tfinddialogfo
       frame.outerframe = (
         0
         1
-        75
+        86
         2
       )
-      bounds_x = 179
+      bounds_x = 195
       bounds_y = 11
-      bounds_cx = 88
+      bounds_cx = 99
       bounds_cy = 16
       statfile = statfile1
     end
@@ -48,13 +48,13 @@ object finddialogfo: tfinddialogfo
       frame.outerframe = (
         0
         1
-        66
+        73
         2
       )
       taborder = 1
-      bounds_x = 96
+      bounds_x = 105
       bounds_y = 11
-      bounds_cx = 79
+      bounds_cx = 86
       bounds_cy = 16
     end
     object casesensitive: tbooleanedit
@@ -63,13 +63,13 @@ object finddialogfo: tfinddialogfo
       frame.outerframe = (
         0
         1
-        79
+        88
         2
       )
       taborder = 2
       bounds_x = 0
       bounds_y = 11
-      bounds_cx = 92
+      bounds_cx = 101
       bounds_cy = 16
     end
   end
@@ -86,8 +86,8 @@ object finddialogfo: tfinddialogfo
     bounds_cx = 316
     bounds_cy = 37
     anchors = [an_left, an_top, an_right]
-    optionsedit1 = [oe1_autopopupmenu]
-    optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_savevalue, oe_savestate]
+    optionsedit1 = [oe1_autopopupmenu, oe1_savevalue, oe1_savestate]
+    optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick]
     dropdown.cols.count = 1
     dropdown.cols.items = <    
       item
@@ -97,9 +97,9 @@ object finddialogfo: tfinddialogfo
   object tlayouter1: tlayouter
     frame.dummy = 0
     taborder = 1
-    bounds_x = 219
+    bounds_x = 213
     bounds_y = 88
-    bounds_cx = 103
+    bounds_cx = 109
     bounds_cy = 20
     anchors = [an_top, an_right]
     optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
@@ -110,9 +110,9 @@ object finddialogfo: tfinddialogfo
     place_mode = wam_end
     place_options = [plo_syncmaxautosize]
     object cancel: tbutton
-      bounds_x = 54
+      bounds_x = 57
       bounds_y = 0
-      bounds_cx = 49
+      bounds_cx = 52
       bounds_cy = 20
       anchors = [an_top, an_right]
       state = [as_localcaption]
@@ -123,7 +123,7 @@ object finddialogfo: tfinddialogfo
       taborder = 1
       bounds_x = 0
       bounds_y = 0
-      bounds_cx = 49
+      bounds_cx = 52
       bounds_cy = 20
       anchors = [an_top, an_right]
       state = [as_default, as_localdefault, as_localcaption]

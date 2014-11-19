@@ -91,6 +91,7 @@ object msestringintlisteditor: tmsestringintlisteditor
       bounds_y = 0
       bounds_cx = 232
       bounds_cy = 16
+      optionsedit1 = [oe1_savevalue]
       reffontheight = 14
     end
     object textb: tintegeredit
@@ -102,6 +103,7 @@ object msestringintlisteditor: tmsestringintlisteditor
       bounds_y = 0
       bounds_cx = 50
       bounds_cy = 16
+      optionsedit1 = [oe1_savevalue]
       reffontheight = 14
     end
   end
@@ -112,13 +114,13 @@ object msestringintlisteditor: tmsestringintlisteditor
     frame.outerframe = (
       0
       0
-      58
+      64
       0
     )
     taborder = 1
     bounds_x = 36
     bounds_y = 160
-    bounds_cx = 108
+    bounds_cx = 114
     onsetvalue = rowcountonsetvalue
     reffontheight = 14
   end

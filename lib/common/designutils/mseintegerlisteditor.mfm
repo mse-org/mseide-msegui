@@ -74,6 +74,7 @@ object integerlisteditor: tintegerlisteditor
       bounds_y = 0
       bounds_cx = 103
       bounds_cy = 16
+      optionsedit1 = [oe1_savevalue]
       max = -1
       reffontheight = 14
     end

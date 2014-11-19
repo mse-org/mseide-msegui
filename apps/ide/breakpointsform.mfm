@@ -236,7 +236,8 @@ object breakpointsfo: tbreakpointsfo
       bounds_y = 0
       bounds_cx = 16
       bounds_cy = 16
-      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_savestate]
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick]
+      optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savestate]
       ondataentered = ondataentered
       visible = False
       onsetvalue = ononsetvalue
@@ -252,6 +253,7 @@ object breakpointsfo: tbreakpointsfo
       bounds_y = 0
       bounds_cx = 158
       bounds_cy = 16
+      optionsedit1 = [oe1_savevalue]
       ondataentered = ondataenterednewbkpt
       onsetvalue = filenameonsetvalue
       reffontheight = 14
@@ -265,6 +267,7 @@ object breakpointsfo: tbreakpointsfo
       bounds_y = 0
       bounds_cx = 50
       bounds_cy = 16
+      optionsedit1 = [oe1_savevalue]
       reffontheight = 14
     end
     object line: tintegeredit
@@ -277,6 +280,7 @@ object breakpointsfo: tbreakpointsfo
       bounds_y = 0
       bounds_cx = 50
       bounds_cy = 16
+      optionsedit1 = [oe1_savevalue]
       ondataentered = ondataenterednewbkpt
       onsetvalue = lineonsetvalue
       min = 1
@@ -295,6 +299,7 @@ object breakpointsfo: tbreakpointsfo
       bounds_y = 0
       bounds_cx = 61
       bounds_cy = 16
+      optionsedit1 = [oe1_savevalue]
       font.name = 'stf_fixed'
       font.xscale = 1
       font.dummy = 0
@@ -328,6 +333,7 @@ object breakpointsfo: tbreakpointsfo
       bounds_y = 0
       bounds_cx = 19
       bounds_cy = 16
+      optionsedit1 = [oe1_savevalue]
       reffontheight = 14
     end
     object count: tintegeredit
@@ -340,8 +346,8 @@ object breakpointsfo: tbreakpointsfo
       bounds_y = 0
       bounds_cx = 31
       bounds_cy = 16
-      optionsedit1 = [oe1_autopopupmenu]
-      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_savevalue, oe_savestate]
+      optionsedit1 = [oe1_savevalue]
+      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick]
       reffontheight = 14
     end
     object ignore: tintegeredit
@@ -354,7 +360,8 @@ object breakpointsfo: tbreakpointsfo
       bounds_y = 0
       bounds_cx = 30
       bounds_cy = 16
-      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_forcereturncheckvalue, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_savevalue, oe_savestate]
+      optionsedit1 = [oe1_savevalue]
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_forcereturncheckvalue, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick]
       ondataentered = ondataentered
       onsetvalue = ignoreonsetvalue
       reffontheight = 14
@@ -367,7 +374,8 @@ object breakpointsfo: tbreakpointsfo
       bounds_y = 0
       bounds_cx = 7
       bounds_cy = 16
-      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_savestate]
+      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick]
+      optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savestate]
       visible = False
       imagelist = actionsmo.buttonicons
       imageoffset = 10
@@ -383,8 +391,8 @@ object breakpointsfo: tbreakpointsfo
       bounds_y = 0
       bounds_cx = 145
       bounds_cy = 16
-      optionsedit1 = [oe1_autopopupmenu]
-      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_trimright, oe_trimleft, oe_savevalue, oe_savestate]
+      optionsedit1 = [oe1_savevalue]
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_trimright, oe_trimleft]
       ondataentered = ondataentered
       onsetvalue = conditiononsetvalue
       reffontheight = 14
@@ -398,7 +406,8 @@ object breakpointsfo: tbreakpointsfo
       bounds_y = 0
       bounds_cx = 19
       bounds_cy = 16
-      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_savestate, oe_checkvaluepaststatread]
+      optionsedit1 = []
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick]
       reffontheight = 14
     end
     object flags: tintegeredit
@@ -411,6 +420,7 @@ object breakpointsfo: tbreakpointsfo
       bounds_y = 0
       bounds_cx = 17
       bounds_cy = 16
+      optionsedit1 = [oe1_savevalue]
       reffontheight = 14
     end
   end
@@ -428,7 +438,7 @@ object breakpointsfo: tbreakpointsfo
     bounds_cx = 111
     bounds_cy = 16
     statfile = mainfo.projectstatfile
-    optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_savevalue, oe_savestate, oe_checkvaluepaststatread]
+    optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick]
     onchange = bkptsononchange
     onsetvalue = bkptsononsetvalue
     value = True

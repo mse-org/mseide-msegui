@@ -52,7 +52,7 @@ object mseificlienteditorfo: tmseificlienteditorfo
       bounds_y = 0
       bounds_cx = 50
       bounds_cy = 16
-      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_savestate, oe_checkvaluepaststatread]
+      optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savestate, oe1_checkvalueafterstatread]
       visible = False
     end
     object na: tmbdropdownitemedit
@@ -76,7 +76,7 @@ object mseificlienteditorfo: tmseificlienteditorfo
       bounds_y = 0
       bounds_cx = 203
       bounds_cy = 16
-      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_savestate, oe_checkvaluepaststatread]
+      optionsedit1 = []
       onkeydown = keydownexe
       onsetvalue = setval
       dropdown.options = [deo_selectonly, deo_autodropdown, deo_keydropdown]

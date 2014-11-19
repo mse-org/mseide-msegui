@@ -75,7 +75,7 @@ object targetconsolefo: ttargetconsolefo
       bounds_y = 0
       bounds_cx = 3000
       bounds_cy = 14
-      optionsedit = [oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_exitoncursor, oe_nofirstarrownavig, oe_caretonreadonly, oe_focusrectonreadonly, oe_savestate, oe_checkvaluepaststatread]
+      optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savestate, oe1_checkvalueafterstatread]
       maxchars = 120
       onsendtext = sendtext
       reffontheight = 14

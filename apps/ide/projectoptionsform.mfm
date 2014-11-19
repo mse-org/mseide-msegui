@@ -195,7 +195,8 @@ object projectoptionsfo: tprojectoptionsfo
               font.name = 'stf_default'
               font.xscale = 1
               font.dummy = 0
-              optionsedit = [oe_closequery, oe_checkmrcancel, oe_linebreak, oe_eatreturn, oe_exitoncursor, oe_nofirstarrownavig, oe_savestate]
+              optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savestate]
+              optionsedit = [oe_closequery, oe_checkmrcancel, oe_linebreak, oe_eatreturn, oe_exitoncursor, oe_nofirstarrownavig]
               reffontheight = 14
             end
           end
@@ -309,7 +310,8 @@ object projectoptionsfo: tprojectoptionsfo
               bounds_y = 0
               bounds_cx = 84
               bounds_cy = 37
-              optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_savevalue, oe_savestate]
+              optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savevalue, oe1_savestate]
+              optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext]
               ondataentered = fontondataentered
               value = -1879048183
               dropdown.options = [deo_autodropdown, deo_keydropdown]
@@ -331,7 +333,8 @@ object projectoptionsfo: tprojectoptionsfo
               bounds_y = 0
               bounds_cx = 84
               bounds_cy = 37
-              optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_savevalue, oe_savestate]
+              optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savevalue, oe1_savestate]
+              optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext]
               ondataentered = fontondataentered
               value = -1879048186
               dropdown.options = [deo_autodropdown, deo_keydropdown]
@@ -437,8 +440,8 @@ object projectoptionsfo: tprojectoptionsfo
               bounds_y = 0
               bounds_cx = 71
               bounds_cy = 37
-              optionsedit1 = [oe1_autopopupmenu]
-              optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_savevalue, oe_savestate]
+              optionsedit1 = [oe1_autopopupmenu, oe1_savevalue, oe1_savestate]
+              optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick]
               value = 80
               min = 1
               max = 100
@@ -478,7 +481,8 @@ object projectoptionsfo: tprojectoptionsfo
               bounds_y = 0
               bounds_cx = 84
               bounds_cy = 37
-              optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_savevalue, oe_savestate]
+              optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savevalue, oe1_savestate]
+              optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext]
               ondataentered = fontondataentered
               value = 14745599
               dropdown.options = [deo_autodropdown, deo_keydropdown]
@@ -593,8 +597,8 @@ object projectoptionsfo: tprojectoptionsfo
               bounds_y = 0
               bounds_cx = 79
               bounds_cy = 37
-              optionsedit1 = [oe1_autopopupmenu]
-              optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_savevalue, oe_savestate]
+              optionsedit1 = [oe1_autopopupmenu, oe1_savevalue, oe1_savestate]
+              optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick]
               value = 1
               min = 1
               max = 100
@@ -1084,8 +1088,8 @@ object projectoptionsfo: tprojectoptionsfo
                 bounds_y = 0
                 bounds_cx = 723
                 bounds_cy = 16
-                optionsedit1 = [oe1_autopopupmenu]
-                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_savevalue, oe_savestate]
+                optionsedit1 = [oe1_savevalue]
+                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick]
                 controller.options = [fdo_directory]
                 controller.historymaxcount = 0
                 controller.captionopen = 'Select unit directory'
@@ -1249,8 +1253,8 @@ object projectoptionsfo: tprojectoptionsfo
                 bounds_y = 0
                 bounds_cx = 752
                 bounds_cy = 16
-                optionsedit1 = [oe1_autopopupmenu]
-                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_savevalue, oe_savestate]
+                optionsedit1 = [oe1_savevalue]
+                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick]
                 controller.include = [fa_dir, fa_all]
                 controller.options = [fdo_directory]
                 controller.historymaxcount = 0
@@ -1328,7 +1332,8 @@ object projectoptionsfo: tprojectoptionsfo
                 bounds_y = 0
                 bounds_cx = 22
                 bounds_cy = 16
-                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_savestate, oe_checkvaluepaststatread]
+                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick]
+                optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savestate, oe1_checkvalueafterstatread]
                 visible = False
                 valuedefault = True
               end
@@ -1346,7 +1351,8 @@ object projectoptionsfo: tprojectoptionsfo
                 bounds_y = 0
                 bounds_cx = 729
                 bounds_cy = 16
-                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_savestate, oe_checkvaluepaststatread]
+                optionsedit1 = []
+                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick]
                 reffontheight = 14
               end
             end
@@ -1442,7 +1448,8 @@ object projectoptionsfo: tprojectoptionsfo
                 bounds_y = 0
                 bounds_cx = 32
                 bounds_cy = 16
-                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_savestate]
+                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick]
+                optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savestate]
                 visible = False
                 value = True
                 valuedefault = True
@@ -1454,7 +1461,8 @@ object projectoptionsfo: tprojectoptionsfo
                 bounds_y = 0
                 bounds_cx = 43
                 bounds_cy = 16
-                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_savestate]
+                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick]
+                optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savestate]
                 visible = False
               end
               object signum: tintegeredit
@@ -1466,6 +1474,7 @@ object projectoptionsfo: tprojectoptionsfo
                 bounds_y = 0
                 bounds_cx = 50
                 bounds_cy = 16
+                optionsedit1 = [oe1_savevalue]
                 onsetvalue = signumonsetvalue
                 max = 255
                 reffontheight = 14
@@ -1479,6 +1488,7 @@ object projectoptionsfo: tprojectoptionsfo
                 bounds_y = 0
                 bounds_cx = 39
                 bounds_cy = 16
+                optionsedit1 = [oe1_savevalue]
                 onsetvalue = signumtoonsetvalue
                 max = 255
                 reffontheight = 14
@@ -1497,6 +1507,7 @@ object projectoptionsfo: tprojectoptionsfo
                 bounds_y = 0
                 bounds_cx = 584
                 bounds_cy = 16
+                optionsedit1 = [oe1_savevalue]
                 dropdownitems.count = 2
                 dropdownitems.items = <                
                   item
@@ -1580,7 +1591,8 @@ object projectoptionsfo: tprojectoptionsfo
                 bounds_y = 0
                 bounds_cx = 47
                 bounds_cy = 16
-                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_savestate]
+                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick]
+                optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savestate]
                 visible = False
               end
               object exceptclassnames: tstringedit
@@ -1596,7 +1608,8 @@ object projectoptionsfo: tprojectoptionsfo
                 bounds_y = 0
                 bounds_cx = 704
                 bounds_cy = 16
-                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_trimright, oe_trimleft, oe_savestate]
+                optionsedit1 = []
+                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_trimright, oe_trimleft]
                 reffontheight = 14
               end
             end
@@ -2478,8 +2491,8 @@ object projectoptionsfo: tprojectoptionsfo
           bounds_y = 123
           bounds_cx = 110
           bounds_cy = 37
-          optionsedit1 = [oe1_autopopupmenu]
-          optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_savevalue, oe_savestate]
+          optionsedit1 = [oe1_autopopupmenu, oe1_savevalue, oe1_savestate]
+          optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick]
           textflags = [tf_xcentered, tf_ycentered, tf_noselect]
           dropdown.options = [deo_selectonly, deo_forceselect, deo_autodropdown]
           dropdown.cols.count = 1
@@ -2801,7 +2814,8 @@ object projectoptionsfo: tprojectoptionsfo
                 bounds_x = 0
                 bounds_y = 0
                 bounds_cy = 16
-                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_savestate]
+                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick]
+                optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savestate]
                 visible = False
                 valuedefault = True
               end
@@ -2812,7 +2826,8 @@ object projectoptionsfo: tprojectoptionsfo
                 bounds_x = 14
                 bounds_y = 0
                 bounds_cy = 16
-                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_savestate]
+                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick]
+                optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savestate]
                 visible = False
                 valuedefault = True
               end
@@ -2823,7 +2838,8 @@ object projectoptionsfo: tprojectoptionsfo
                 bounds_x = 28
                 bounds_y = 0
                 bounds_cy = 16
-                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_savestate]
+                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick]
+                optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savestate]
                 visible = False
                 valuedefault = True
               end
@@ -2834,7 +2850,8 @@ object projectoptionsfo: tprojectoptionsfo
                 bounds_x = 42
                 bounds_y = 0
                 bounds_cy = 16
-                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_savestate]
+                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick]
+                optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savestate]
                 visible = False
                 valuedefault = True
               end
@@ -2845,7 +2862,8 @@ object projectoptionsfo: tprojectoptionsfo
                 bounds_x = 56
                 bounds_y = 0
                 bounds_cy = 16
-                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_savestate]
+                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick]
+                optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savestate]
                 visible = False
                 valuedefault = True
               end
@@ -2856,7 +2874,8 @@ object projectoptionsfo: tprojectoptionsfo
                 bounds_x = 70
                 bounds_y = 0
                 bounds_cy = 16
-                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_savestate]
+                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick]
+                optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savestate]
                 visible = False
                 valuedefault = True
               end
@@ -2875,8 +2894,8 @@ object projectoptionsfo: tprojectoptionsfo
                 bounds_y = 0
                 bounds_cx = 668
                 bounds_cy = 16
-                optionsedit1 = [oe1_autopopupmenu]
-                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_savevalue, oe_savestate]
+                optionsedit1 = [oe1_savevalue]
+                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick]
                 reffontheight = 14
               end
             end
@@ -2999,7 +3018,8 @@ object projectoptionsfo: tprojectoptionsfo
                 bounds_x = 0
                 bounds_y = 0
                 bounds_cy = 16
-                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_savestate]
+                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick]
+                optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savestate]
                 visible = False
                 valuedefault = True
               end
@@ -3010,7 +3030,8 @@ object projectoptionsfo: tprojectoptionsfo
                 bounds_x = 14
                 bounds_y = 0
                 bounds_cy = 16
-                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_savestate]
+                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick]
+                optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savestate]
                 visible = False
                 valuedefault = True
               end
@@ -3021,7 +3042,8 @@ object projectoptionsfo: tprojectoptionsfo
                 bounds_x = 28
                 bounds_y = 0
                 bounds_cy = 16
-                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_savestate]
+                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick]
+                optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savestate]
                 visible = False
                 valuedefault = True
               end
@@ -3032,7 +3054,8 @@ object projectoptionsfo: tprojectoptionsfo
                 bounds_x = 42
                 bounds_y = 0
                 bounds_cy = 16
-                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_savestate]
+                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick]
+                optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savestate]
                 visible = False
                 valuedefault = True
               end
@@ -3043,7 +3066,8 @@ object projectoptionsfo: tprojectoptionsfo
                 bounds_x = 56
                 bounds_y = 0
                 bounds_cy = 16
-                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_savestate]
+                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick]
+                optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savestate]
                 visible = False
                 valuedefault = True
               end
@@ -3054,7 +3078,8 @@ object projectoptionsfo: tprojectoptionsfo
                 bounds_x = 70
                 bounds_y = 0
                 bounds_cy = 16
-                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_savestate]
+                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick]
+                optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savestate]
                 visible = False
                 valuedefault = True
               end
@@ -3073,8 +3098,8 @@ object projectoptionsfo: tprojectoptionsfo
                 bounds_y = 0
                 bounds_cx = 668
                 bounds_cy = 16
-                optionsedit1 = [oe1_autopopupmenu]
-                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_savevalue, oe_savestate]
+                optionsedit1 = [oe1_savevalue]
+                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick]
                 reffontheight = 14
               end
             end
@@ -3245,7 +3270,8 @@ object projectoptionsfo: tprojectoptionsfo
                 bounds_x = 0
                 bounds_y = 0
                 bounds_cy = 16
-                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_savestate]
+                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick]
+                optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savestate]
                 visible = False
                 valuedefault = True
               end
@@ -3256,7 +3282,8 @@ object projectoptionsfo: tprojectoptionsfo
                 bounds_x = 14
                 bounds_y = 0
                 bounds_cy = 16
-                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_savestate]
+                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick]
+                optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savestate]
                 visible = False
                 valuedefault = True
               end
@@ -3267,7 +3294,8 @@ object projectoptionsfo: tprojectoptionsfo
                 bounds_x = 28
                 bounds_y = 0
                 bounds_cy = 16
-                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_savestate]
+                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick]
+                optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savestate]
                 visible = False
                 valuedefault = True
               end
@@ -3278,7 +3306,8 @@ object projectoptionsfo: tprojectoptionsfo
                 bounds_x = 42
                 bounds_y = 0
                 bounds_cy = 16
-                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_savestate]
+                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick]
+                optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savestate]
                 visible = False
                 valuedefault = True
               end
@@ -3289,7 +3318,8 @@ object projectoptionsfo: tprojectoptionsfo
                 bounds_x = 56
                 bounds_y = 0
                 bounds_cy = 16
-                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_savestate]
+                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick]
+                optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savestate]
                 visible = False
                 valuedefault = True
               end
@@ -3300,7 +3330,8 @@ object projectoptionsfo: tprojectoptionsfo
                 bounds_x = 70
                 bounds_y = 0
                 bounds_cy = 16
-                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_savestate]
+                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick]
+                optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savestate]
                 visible = False
                 valuedefault = True
               end
@@ -3311,7 +3342,8 @@ object projectoptionsfo: tprojectoptionsfo
                 bounds_x = 85
                 bounds_y = 0
                 bounds_cy = 16
-                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_savestate]
+                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick]
+                optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savestate]
                 visible = False
                 valuedefault = True
               end
@@ -3322,7 +3354,8 @@ object projectoptionsfo: tprojectoptionsfo
                 bounds_x = 99
                 bounds_y = 0
                 bounds_cy = 16
-                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_savestate]
+                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick]
+                optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savestate]
                 visible = False
                 valuedefault = True
               end
@@ -3333,7 +3366,8 @@ object projectoptionsfo: tprojectoptionsfo
                 bounds_x = 113
                 bounds_y = 0
                 bounds_cy = 16
-                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_savestate]
+                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick]
+                optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savestate]
                 visible = False
                 valuedefault = True
               end
@@ -3349,7 +3383,8 @@ object projectoptionsfo: tprojectoptionsfo
                 bounds_x = 127
                 bounds_y = 0
                 bounds_cy = 16
-                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_savestate]
+                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick]
+                optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savestate]
                 visible = False
                 valuedefault = True
               end
@@ -3369,8 +3404,8 @@ object projectoptionsfo: tprojectoptionsfo
                 bounds_y = 0
                 bounds_cx = 611
                 bounds_cy = 16
-                optionsedit1 = [oe1_autopopupmenu]
-                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_savevalue, oe_savestate]
+                optionsedit1 = [oe1_savevalue]
+                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick]
                 controller.options = [fdo_directory, fdo_file]
                 controller.historymaxcount = 0
                 controller.captionopen = 'Select unit directory'
@@ -3574,7 +3609,8 @@ object projectoptionsfo: tprojectoptionsfo
                 bounds_x = 0
                 bounds_y = 0
                 bounds_cy = 16
-                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_savestate]
+                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick]
+                optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savestate]
                 visible = False
                 valuedefault = True
               end
@@ -3585,7 +3621,8 @@ object projectoptionsfo: tprojectoptionsfo
                 bounds_x = 14
                 bounds_y = 0
                 bounds_cy = 16
-                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_savestate]
+                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick]
+                optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savestate]
                 visible = False
                 valuedefault = True
               end
@@ -3596,7 +3633,8 @@ object projectoptionsfo: tprojectoptionsfo
                 bounds_x = 28
                 bounds_y = 0
                 bounds_cy = 16
-                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_savestate]
+                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick]
+                optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savestate]
                 visible = False
                 valuedefault = True
               end
@@ -3607,7 +3645,8 @@ object projectoptionsfo: tprojectoptionsfo
                 bounds_x = 42
                 bounds_y = 0
                 bounds_cy = 16
-                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_savestate]
+                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick]
+                optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savestate]
                 visible = False
                 valuedefault = True
               end
@@ -3618,7 +3657,8 @@ object projectoptionsfo: tprojectoptionsfo
                 bounds_x = 56
                 bounds_y = 0
                 bounds_cy = 16
-                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_savestate]
+                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick]
+                optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savestate]
                 visible = False
                 valuedefault = True
               end
@@ -3629,7 +3669,8 @@ object projectoptionsfo: tprojectoptionsfo
                 bounds_x = 70
                 bounds_y = 0
                 bounds_cy = 16
-                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_savestate]
+                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick]
+                optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savestate]
                 visible = False
                 valuedefault = True
               end
@@ -3648,8 +3689,8 @@ object projectoptionsfo: tprojectoptionsfo
                 bounds_y = 0
                 bounds_cx = 668
                 bounds_cy = 16
-                optionsedit1 = [oe1_autopopupmenu]
-                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_savevalue, oe_savestate]
+                optionsedit1 = [oe1_savevalue]
+                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick]
                 reffontheight = 14
               end
             end
@@ -3971,7 +4012,8 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_x = 0
             bounds_y = 0
             bounds_cy = 16
-            optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_savestate]
+            optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick]
+            optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savestate]
             visible = False
             value = True
             valuedefault = True
@@ -3983,7 +4025,8 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_x = 14
             bounds_y = 0
             bounds_cy = 16
-            optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_savestate]
+            optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick]
+            optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savestate]
             visible = False
             value = True
             valuedefault = True
@@ -3995,7 +4038,8 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_x = 28
             bounds_y = 0
             bounds_cy = 16
-            optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_savestate]
+            optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick]
+            optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savestate]
             visible = False
             value = True
             valuedefault = True
@@ -4007,7 +4051,8 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_x = 42
             bounds_y = 0
             bounds_cy = 16
-            optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_savestate]
+            optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick]
+            optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savestate]
             visible = False
             value = True
             valuedefault = True
@@ -4019,7 +4064,8 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_x = 56
             bounds_y = 0
             bounds_cy = 16
-            optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_savestate]
+            optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick]
+            optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savestate]
             visible = False
             value = True
             valuedefault = True
@@ -4031,7 +4077,8 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_x = 70
             bounds_y = 0
             bounds_cy = 16
-            optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_savestate]
+            optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick]
+            optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savestate]
             visible = False
             value = True
             valuedefault = True
@@ -4045,8 +4092,8 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_y = 0
             bounds_cx = 146
             bounds_cy = 16
-            optionsedit1 = [oe1_autopopupmenu]
-            optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_savestate]
+            optionsedit1 = []
+            optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick]
             reffontheight = 14
           end
           object macrovalues: tmemodialogedit
@@ -4064,8 +4111,8 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_y = 0
             bounds_cx = 521
             bounds_cy = 16
-            optionsedit1 = [oe1_autopopupmenu]
-            optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_savestate]
+            optionsedit1 = []
+            optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick]
             reffontheight = 14
           end
         end
@@ -4141,7 +4188,8 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_y = 0
             bounds_cx = 14
             bounds_cy = 16
-            optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_savestate]
+            optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick]
+            optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savestate]
             ondataentered = acttiveselectondataentered
             visible = False
           end
@@ -4154,8 +4202,8 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_y = 0
             bounds_cx = 708
             bounds_cy = 16
-            optionsedit1 = [oe1_autopopupmenu]
-            optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_savestate]
+            optionsedit1 = []
+            optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick]
             reffontheight = 14
           end
         end
@@ -4276,7 +4324,8 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_y = 0
             bounds_cx = 98
             bounds_cy = 16
-            optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_savestate, oe_checkvaluepaststatread]
+            optionsedit1 = []
+            optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick]
             reffontheight = 14
           end
           object fontname: tstringedit
@@ -4290,7 +4339,8 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_y = 0
             bounds_cx = 378
             bounds_cy = 16
-            optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_savestate, oe_checkvaluepaststatread]
+            optionsedit1 = []
+            optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick]
             reffontheight = 14
           end
           object fontheight: tintegeredit
@@ -4303,7 +4353,8 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_y = 0
             bounds_cx = 50
             bounds_cy = 16
-            optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_savestate, oe_checkvaluepaststatread]
+            optionsedit1 = []
+            optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick]
             reffontheight = 14
           end
           object fontwidth: tintegeredit
@@ -4315,7 +4366,8 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_y = 0
             bounds_cx = 50
             bounds_cy = 16
-            optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_savestate, oe_checkvaluepaststatread]
+            optionsedit1 = []
+            optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick]
             reffontheight = 14
           end
           object fontoptions: tstringedit
@@ -4327,7 +4379,8 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_y = 0
             bounds_cx = 50
             bounds_cy = 16
-            optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_savestate, oe_checkvaluepaststatread]
+            optionsedit1 = []
+            optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick]
             reffontheight = 14
           end
           object fontxscale: trealedit
@@ -4339,7 +4392,8 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_y = 0
             bounds_cx = 50
             bounds_cy = 16
-            optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_savestate, oe_checkvaluepaststatread]
+            optionsedit1 = []
+            optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick]
             value = 1
             valuedefault = -Inf
             valuerange = 1
@@ -4357,7 +4411,8 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_y = 0
             bounds_cx = 70
             bounds_cy = 16
-            optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_savestate, oe_checkvaluepaststatread]
+            optionsedit1 = []
+            optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick]
             valuedefault = 'stf_default'
             reffontheight = 14
           end
@@ -4468,7 +4523,8 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_y = 0
             bounds_cx = 22
             bounds_cy = 16
-            optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_savestate]
+            optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick]
+            optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savestate]
             visible = False
             onpaintglyph = drawcol
           end
@@ -4487,7 +4543,8 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_y = 0
             bounds_cx = 97
             bounds_cy = 16
-            optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_savestate, oe_checkvaluepaststatread]
+            optionsedit1 = []
+            optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick]
             value = 0
             valuedefault = 0
             dropdown.options = [deo_autodropdown, deo_keydropdown]
@@ -4508,7 +4565,8 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_y = 0
             bounds_cx = 550
             bounds_cy = 16
-            optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_savestate, oe_checkvaluepaststatread]
+            optionsedit1 = []
+            optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick]
             reffontheight = 14
           end
         end
@@ -4568,7 +4626,7 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_y = 0
             bounds_cx = 144
             bounds_cy = 16
-            optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_savestate, oe_checkvaluepaststatread]
+            optionsedit1 = []
             reffontheight = 14
           end
           object formatmacrovalues: tstringedit
@@ -4580,7 +4638,7 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_y = 0
             bounds_cx = 607
             bounds_cy = 16
-            optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_savestate, oe_checkvaluepaststatread]
+            optionsedit1 = []
             reffontheight = 14
           end
         end
@@ -4703,7 +4761,8 @@ object projectoptionsfo: tprojectoptionsfo
                 bounds_y = 0
                 bounds_cx = 18
                 bounds_cy = 16
-                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_savestate]
+                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick]
+                optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savestate]
                 visible = False
               end
               object expandprojectfilemacros: tbooleanedit
@@ -4718,7 +4777,8 @@ object projectoptionsfo: tprojectoptionsfo
                 bounds_y = 0
                 bounds_cx = 18
                 bounds_cy = 16
-                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_savestate]
+                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick]
+                optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savestate]
                 visible = False
               end
               object newprojectfiles: tfilenameedit
@@ -4736,6 +4796,7 @@ object projectoptionsfo: tprojectoptionsfo
                 bounds_y = 0
                 bounds_cx = 379
                 bounds_cy = 16
+                optionsedit1 = [oe1_savevalue]
                 controller.ongetfilename = expandfilename
                 reffontheight = 14
               end
@@ -4754,7 +4815,8 @@ object projectoptionsfo: tprojectoptionsfo
                 bounds_y = 0
                 bounds_cx = 334
                 bounds_cy = 16
-                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_trimright, oe_trimleft, oe_savevalue, oe_savestate]
+                optionsedit1 = [oe1_savevalue]
+                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_trimright, oe_trimleft]
                 reffontheight = 14
               end
             end
@@ -4895,7 +4957,8 @@ object projectoptionsfo: tprojectoptionsfo
                 bounds_y = 0
                 bounds_cx = 110
                 bounds_cy = 16
-                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_savestate]
+                optionsedit1 = []
+                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter]
                 reffontheight = 14
               end
               object newfifilters: tstringedit
@@ -4908,7 +4971,8 @@ object projectoptionsfo: tprojectoptionsfo
                 bounds_y = 0
                 bounds_cx = 110
                 bounds_cy = 16
-                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_savestate]
+                optionsedit1 = []
+                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter]
                 reffontheight = 14
               end
               object newfiexts: tstringedit
@@ -4921,7 +4985,8 @@ object projectoptionsfo: tprojectoptionsfo
                 bounds_y = 0
                 bounds_cx = 50
                 bounds_cy = 16
-                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_savestate]
+                optionsedit1 = []
+                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter]
                 reffontheight = 14
               end
               object newfisources: tfilenameedit
@@ -4939,7 +5004,8 @@ object projectoptionsfo: tprojectoptionsfo
                 bounds_y = 0
                 bounds_cx = 449
                 bounds_cy = 16
-                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_savestate]
+                optionsedit1 = []
+                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter]
                 reffontheight = 14
               end
             end
@@ -5045,7 +5111,8 @@ object projectoptionsfo: tprojectoptionsfo
                 bounds_y = 0
                 bounds_cx = 96
                 bounds_cy = 16
-                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_savestate]
+                optionsedit1 = []
+                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext]
                 reffontheight = 14
               end
               object newinheritedforms: tbooleanedit
@@ -5054,7 +5121,8 @@ object projectoptionsfo: tprojectoptionsfo
                 bounds_x = 97
                 bounds_y = 0
                 bounds_cy = 16
-                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_savestate]
+                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick]
+                optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savestate]
                 visible = False
               end
               object newformnamebases: tstringedit
@@ -5067,7 +5135,8 @@ object projectoptionsfo: tprojectoptionsfo
                 bounds_y = 0
                 bounds_cx = 73
                 bounds_cy = 16
-                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_savestate]
+                optionsedit1 = []
+                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick]
                 reffontheight = 14
               end
               object newfosources: tfilenameedit
@@ -5085,7 +5154,8 @@ object projectoptionsfo: tprojectoptionsfo
                 bounds_y = 0
                 bounds_cx = 263
                 bounds_cy = 16
-                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_savestate]
+                optionsedit1 = []
+                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick]
                 controller.filterlist.data = (
                   (
                     'Source'
@@ -5114,7 +5184,8 @@ object projectoptionsfo: tprojectoptionsfo
                 bounds_y = 0
                 bounds_cx = 277
                 bounds_cy = 16
-                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_savestate]
+                optionsedit1 = []
+                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick]
                 controller.filterlist.data = (
                   (
                     'Form Files'
@@ -5262,7 +5333,8 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_x = 0
             bounds_y = 0
             bounds_cy = 16
-            optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_savestate]
+            optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick]
+            optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savestate]
             visible = False
           end
           object toolparse: tbooleanedit
@@ -5276,7 +5348,8 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_x = 14
             bounds_y = 0
             bounds_cy = 16
-            optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_savestate]
+            optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick]
+            optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savestate]
             visible = False
           end
           object toolhide: tbooleanedit
@@ -5290,7 +5363,8 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_x = 28
             bounds_y = 0
             bounds_cy = 16
-            optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_savestate]
+            optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick]
+            optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savestate]
             visible = False
           end
           object toolmessages: tbooleanedit
@@ -5300,7 +5374,8 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_x = 42
             bounds_y = 0
             bounds_cy = 16
-            optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_savestate]
+            optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick]
+            optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savestate]
             visible = False
           end
           object toolmenus: tstringedit
@@ -5317,7 +5392,8 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_y = 0
             bounds_cx = 128
             bounds_cy = 16
-            optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_savestate]
+            optionsedit1 = []
+            optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter]
             reffontheight = 14
           end
           object toolfiles: tfilenameedit
@@ -5336,7 +5412,8 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_y = 0
             bounds_cx = 251
             bounds_cy = 16
-            optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_savestate]
+            optionsedit1 = []
+            optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter]
             controller.include = [fa_xusr, fa_xgrp, fa_xoth]
             reffontheight = 14
           end
@@ -5355,7 +5432,8 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_y = 0
             bounds_cx = 296
             bounds_cy = 16
-            optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_savestate]
+            optionsedit1 = []
+            optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter]
             reffontheight = 14
           end
         end

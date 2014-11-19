@@ -391,13 +391,13 @@ inherited cpuavr32fo: tcpuavr32fo
       frame.outerframe = (
         0
         17
-        0
+        1
         0
       )
       taborder = 16
       bounds_x = 47
       bounds_y = 8
-      bounds_cx = 11
+      bounds_cx = 12
       bounds_cy = 28
       onsetvalue = flagssetvalue
     end
@@ -435,13 +435,13 @@ inherited cpuavr32fo: tcpuavr32fo
       frame.outerframe = (
         0
         17
-        0
+        1
         0
       )
       taborder = 18
       bounds_x = 23
       bounds_y = 8
-      bounds_cx = 11
+      bounds_cx = 12
       bounds_cy = 28
       onsetvalue = flagssetvalue
     end
@@ -495,14 +495,14 @@ inherited cpuavr32fo: tcpuavr32fo
       frame.outerframe = (
         0
         1
-        37
+        39
         2
       )
       taborder = 21
       hint = 'Set global interrupt mask while stepping'
       bounds_x = 17
       bounds_y = 236
-      bounds_cx = 50
+      bounds_cx = 52
       bounds_cy = 16
       onsetvalue = irqoffset
     end
@@ -511,7 +511,7 @@ inherited cpuavr32fo: tcpuavr32fo
       taborder = 22
       bounds_x = 112
       bounds_y = 225
-      bounds_cx = 113
+      bounds_cx = 128
       bounds_cy = 20
       state = [as_disabled, as_localdisabled, as_localcaption, as_localonexecute]
       caption = 'Check Exceptstack'
@@ -520,9 +520,9 @@ inherited cpuavr32fo: tcpuavr32fo
     object tlayouter2: tlayouter
       frame.dummy = 0
       taborder = 23
-      bounds_x = 113
+      bounds_x = 114
       bounds_y = 40
-      bounds_cx = 114
+      bounds_cx = 117
       bounds_cy = 160
       optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
       font.name = 'stf_default'
@@ -543,12 +543,12 @@ inherited cpuavr32fo: tcpuavr32fo
         frame.outerframe = (
           0
           0
-          14
+          16
           0
         )
         bounds_x = 0
         bounds_y = 0
-        bounds_cx = 107
+        bounds_cx = 109
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
@@ -569,13 +569,13 @@ inherited cpuavr32fo: tcpuavr32fo
         frame.outerframe = (
           0
           0
-          14
+          16
           0
         )
         taborder = 1
         bounds_x = 0
         bounds_y = 20
-        bounds_cx = 107
+        bounds_cx = 109
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
@@ -596,13 +596,13 @@ inherited cpuavr32fo: tcpuavr32fo
         frame.outerframe = (
           0
           0
-          14
+          16
           0
         )
         taborder = 2
         bounds_x = 0
         bounds_y = 40
-        bounds_cx = 107
+        bounds_cx = 109
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
@@ -623,13 +623,13 @@ inherited cpuavr32fo: tcpuavr32fo
         frame.outerframe = (
           0
           0
-          21
+          24
           0
         )
         taborder = 5
         bounds_x = 0
         bounds_y = 100
-        bounds_cx = 114
+        bounds_cx = 117
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
@@ -650,13 +650,13 @@ inherited cpuavr32fo: tcpuavr32fo
         frame.outerframe = (
           0
           0
-          21
+          24
           0
         )
         taborder = 4
         bounds_x = 0
         bounds_y = 80
-        bounds_cx = 114
+        bounds_cx = 117
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
@@ -677,13 +677,13 @@ inherited cpuavr32fo: tcpuavr32fo
         frame.outerframe = (
           0
           0
-          14
+          16
           0
         )
         taborder = 3
         bounds_x = 0
         bounds_y = 60
-        bounds_cx = 107
+        bounds_cx = 109
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
@@ -704,13 +704,13 @@ inherited cpuavr32fo: tcpuavr32fo
         frame.outerframe = (
           0
           0
-          21
+          24
           0
         )
         taborder = 6
         bounds_x = 0
         bounds_y = 120
-        bounds_cx = 114
+        bounds_cx = 117
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
@@ -731,13 +731,13 @@ inherited cpuavr32fo: tcpuavr32fo
         frame.outerframe = (
           0
           0
-          14
+          15
           0
         )
         taborder = 7
         bounds_x = 0
         bounds_y = 140
-        bounds_cx = 107
+        bounds_cx = 108
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
@@ -754,7 +754,7 @@ inherited cpuavr32fo: tcpuavr32fo
       taborder = 24
       bounds_x = 0
       bounds_y = 40
-      bounds_cx = 110
+      bounds_cx = 111
       bounds_cy = 180
       optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
       font.name = 'stf_default'
@@ -777,13 +777,13 @@ inherited cpuavr32fo: tcpuavr32fo
         frame.outerframe = (
           0
           0
-          14
+          16
           0
         )
         taborder = 1
         bounds_x = 0
         bounds_y = 20
-        bounds_cx = 107
+        bounds_cx = 109
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
@@ -804,12 +804,12 @@ inherited cpuavr32fo: tcpuavr32fo
         frame.outerframe = (
           0
           0
-          14
+          16
           0
         )
         bounds_x = 0
         bounds_y = 0
-        bounds_cx = 107
+        bounds_cx = 109
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
@@ -830,13 +830,13 @@ inherited cpuavr32fo: tcpuavr32fo
         frame.outerframe = (
           0
           0
-          14
+          16
           0
         )
         taborder = 4
         bounds_x = 0
         bounds_y = 80
-        bounds_cx = 107
+        bounds_cx = 109
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
@@ -857,13 +857,13 @@ inherited cpuavr32fo: tcpuavr32fo
         frame.outerframe = (
           0
           0
-          14
+          16
           0
         )
         taborder = 3
         bounds_x = 0
         bounds_y = 60
-        bounds_cx = 107
+        bounds_cx = 109
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
@@ -884,13 +884,13 @@ inherited cpuavr32fo: tcpuavr32fo
         frame.outerframe = (
           0
           0
-          14
+          16
           0
         )
         taborder = 2
         bounds_x = 0
         bounds_y = 40
-        bounds_cx = 107
+        bounds_cx = 109
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
@@ -911,13 +911,13 @@ inherited cpuavr32fo: tcpuavr32fo
         frame.outerframe = (
           0
           0
-          14
+          16
           0
         )
         taborder = 5
         bounds_x = 0
         bounds_y = 100
-        bounds_cx = 107
+        bounds_cx = 109
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
@@ -938,13 +938,13 @@ inherited cpuavr32fo: tcpuavr32fo
         frame.outerframe = (
           0
           0
-          17
+          18
           0
         )
         taborder = 6
         bounds_x = 0
         bounds_y = 120
-        bounds_cx = 110
+        bounds_cx = 111
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
@@ -965,13 +965,13 @@ inherited cpuavr32fo: tcpuavr32fo
         frame.outerframe = (
           0
           0
-          10
+          11
           0
         )
         taborder = 7
         bounds_x = 0
         bounds_y = 140
-        bounds_cx = 103
+        bounds_cx = 104
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
@@ -992,13 +992,13 @@ inherited cpuavr32fo: tcpuavr32fo
         frame.outerframe = (
           0
           0
-          16
+          18
           0
         )
         taborder = 8
         bounds_x = 0
         bounds_y = 160
-        bounds_cx = 109
+        bounds_cx = 111
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1

@@ -34,7 +34,7 @@ inherited cpurl78fo: tcpurl78fo
     bounds_x = 72
     bounds_y = 31
     bounds_cx = 25
-    bounds_cy = 38
+    bounds_cy = 37
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
@@ -43,7 +43,7 @@ inherited cpurl78fo: tcpurl78fo
     base = nb_hex
     bitcount = 8
     max = -1
-    reffontheight = 17
+    reffontheight = 16
   end
   object x: tintegeredit[3]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -63,7 +63,7 @@ inherited cpurl78fo: tcpurl78fo
     bounds_x = 97
     bounds_y = 31
     bounds_cx = 25
-    bounds_cy = 38
+    bounds_cy = 37
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
@@ -72,7 +72,7 @@ inherited cpurl78fo: tcpurl78fo
     base = nb_hex
     bitcount = 8
     max = -1
-    reffontheight = 17
+    reffontheight = 16
   end
   object ax: tintegeredit[4]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -85,7 +85,6 @@ inherited cpurl78fo: tcpurl78fo
     bounds_x = 72
     bounds_y = 69
     bounds_cx = 50
-    bounds_cy = 21
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
@@ -94,7 +93,7 @@ inherited cpurl78fo: tcpurl78fo
     base = nb_hex
     bitcount = 16
     max = -1
-    reffontheight = 17
+    reffontheight = 16
   end
   object bc: tintegeredit[5]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -107,7 +106,6 @@ inherited cpurl78fo: tcpurl78fo
     bounds_x = 123
     bounds_y = 69
     bounds_cx = 50
-    bounds_cy = 21
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
@@ -116,7 +114,7 @@ inherited cpurl78fo: tcpurl78fo
     base = nb_hex
     bitcount = 16
     max = -1
-    reffontheight = 17
+    reffontheight = 16
   end
   object b: tintegeredit[6]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -136,7 +134,7 @@ inherited cpurl78fo: tcpurl78fo
     bounds_x = 123
     bounds_y = 31
     bounds_cx = 25
-    bounds_cy = 38
+    bounds_cy = 37
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
@@ -145,7 +143,7 @@ inherited cpurl78fo: tcpurl78fo
     base = nb_hex
     bitcount = 8
     max = -1
-    reffontheight = 17
+    reffontheight = 16
   end
   object c: tintegeredit[7]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -165,7 +163,7 @@ inherited cpurl78fo: tcpurl78fo
     bounds_x = 148
     bounds_y = 31
     bounds_cx = 25
-    bounds_cy = 38
+    bounds_cy = 37
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
@@ -174,7 +172,7 @@ inherited cpurl78fo: tcpurl78fo
     base = nb_hex
     bitcount = 8
     max = -1
-    reffontheight = 17
+    reffontheight = 16
   end
   object de: tintegeredit[8]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -187,7 +185,6 @@ inherited cpurl78fo: tcpurl78fo
     bounds_x = 174
     bounds_y = 69
     bounds_cx = 50
-    bounds_cy = 21
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
@@ -196,7 +193,7 @@ inherited cpurl78fo: tcpurl78fo
     base = nb_hex
     bitcount = 16
     max = -1
-    reffontheight = 17
+    reffontheight = 16
   end
   object d: tintegeredit[9]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -216,7 +213,7 @@ inherited cpurl78fo: tcpurl78fo
     bounds_x = 174
     bounds_y = 31
     bounds_cx = 25
-    bounds_cy = 38
+    bounds_cy = 37
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
@@ -225,7 +222,7 @@ inherited cpurl78fo: tcpurl78fo
     base = nb_hex
     bitcount = 8
     max = -1
-    reffontheight = 17
+    reffontheight = 16
   end
   object e: tintegeredit[10]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -245,7 +242,7 @@ inherited cpurl78fo: tcpurl78fo
     bounds_x = 199
     bounds_y = 31
     bounds_cx = 25
-    bounds_cy = 38
+    bounds_cy = 37
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
@@ -254,7 +251,7 @@ inherited cpurl78fo: tcpurl78fo
     base = nb_hex
     bitcount = 8
     max = -1
-    reffontheight = 17
+    reffontheight = 16
   end
   object hl: tintegeredit[11]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -267,7 +264,6 @@ inherited cpurl78fo: tcpurl78fo
     bounds_x = 225
     bounds_y = 69
     bounds_cx = 50
-    bounds_cy = 21
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
@@ -276,7 +272,7 @@ inherited cpurl78fo: tcpurl78fo
     base = nb_hex
     bitcount = 16
     max = -1
-    reffontheight = 17
+    reffontheight = 16
   end
   object h: tintegeredit[12]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -296,7 +292,7 @@ inherited cpurl78fo: tcpurl78fo
     bounds_x = 225
     bounds_y = 31
     bounds_cx = 25
-    bounds_cy = 38
+    bounds_cy = 37
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
@@ -305,7 +301,7 @@ inherited cpurl78fo: tcpurl78fo
     base = nb_hex
     bitcount = 8
     max = -1
-    reffontheight = 17
+    reffontheight = 16
   end
   object l: tintegeredit[13]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -325,7 +321,7 @@ inherited cpurl78fo: tcpurl78fo
     bounds_x = 250
     bounds_y = 31
     bounds_cx = 25
-    bounds_cy = 38
+    bounds_cy = 37
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
@@ -334,7 +330,7 @@ inherited cpurl78fo: tcpurl78fo
     base = nb_hex
     bitcount = 8
     max = -1
-    reffontheight = 17
+    reffontheight = 16
   end
   object psw: tintegeredit[14]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -354,7 +350,7 @@ inherited cpurl78fo: tcpurl78fo
     bounds_x = 6
     bounds_y = 175
     bounds_cx = 29
-    bounds_cy = 38
+    bounds_cy = 37
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
@@ -364,7 +360,7 @@ inherited cpurl78fo: tcpurl78fo
     base = nb_hex
     bitcount = 8
     max = -1
-    reffontheight = 17
+    reffontheight = 16
   end
   object tgroupbox1: tgroupbox[15]
     taborder = 67
@@ -383,13 +379,13 @@ inherited cpurl78fo: tcpurl78fo
       frame.outerframe = (
         0
         2
-        19
+        18
         3
       )
       taborder = 1
       bounds_x = 8
       bounds_y = 24
-      bounds_cx = 30
+      bounds_cx = 29
       bounds_cy = 16
       onsetvalue = flagsetvalue
     end
@@ -404,13 +400,13 @@ inherited cpurl78fo: tcpurl78fo
       frame.outerframe = (
         0
         2
-        29
+        30
         3
       )
       taborder = 5
       bounds_x = 8
       bounds_y = 88
-      bounds_cx = 40
+      bounds_cx = 41
       bounds_cy = 16
       onsetvalue = flagsetvalue
     end
@@ -425,13 +421,13 @@ inherited cpurl78fo: tcpurl78fo
       frame.outerframe = (
         0
         2
-        29
+        30
         3
       )
       taborder = 4
       bounds_x = 8
       bounds_y = 72
-      bounds_cx = 40
+      bounds_cx = 41
       bounds_cy = 16
       onsetvalue = flagsetvalue
     end
@@ -509,12 +505,12 @@ inherited cpurl78fo: tcpurl78fo
       frame.outerframe = (
         0
         2
-        10
+        12
         3
       )
       bounds_x = 8
       bounds_y = 8
-      bounds_cx = 21
+      bounds_cx = 23
       bounds_cy = 16
       onsetvalue = flagsetvalue
     end
@@ -558,7 +554,6 @@ inherited cpurl78fo: tcpurl78fo
     bounds_x = 281
     bounds_y = 48
     bounds_cx = 69
-    bounds_cy = 21
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
@@ -567,7 +562,7 @@ inherited cpurl78fo: tcpurl78fo
     base = nb_hex
     bitcount = 16
     max = -1
-    reffontheight = 17
+    reffontheight = 16
   end
   object pc: tintegeredit[17]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -580,14 +575,13 @@ inherited cpurl78fo: tcpurl78fo
     frame.outerframe = (
       0
       0
-      20
+      19
       0
     )
     taborder = 62
     bounds_x = 281
     bounds_y = 69
-    bounds_cx = 70
-    bounds_cy = 21
+    bounds_cx = 69
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
@@ -596,7 +590,7 @@ inherited cpurl78fo: tcpurl78fo
     base = nb_hex
     bitcount = 16
     max = -1
-    reffontheight = 17
+    reffontheight = 16
   end
   object es: tintegeredit[18]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -616,7 +610,6 @@ inherited cpurl78fo: tcpurl78fo
     bounds_x = 281
     bounds_y = 93
     bounds_cx = 69
-    bounds_cy = 21
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
@@ -625,7 +618,7 @@ inherited cpurl78fo: tcpurl78fo
     base = nb_hex
     bitcount = 16
     max = -1
-    reffontheight = 17
+    reffontheight = 16
   end
   object cs: tintegeredit[19]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -638,14 +631,13 @@ inherited cpurl78fo: tcpurl78fo
     frame.outerframe = (
       0
       0
-      20
+      19
       0
     )
     taborder = 64
     bounds_x = 281
     bounds_y = 114
-    bounds_cx = 70
-    bounds_cy = 21
+    bounds_cx = 69
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
@@ -654,7 +646,7 @@ inherited cpurl78fo: tcpurl78fo
     base = nb_hex
     bitcount = 16
     max = -1
-    reffontheight = 17
+    reffontheight = 16
   end
   object pmc: tintegeredit[20]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -674,7 +666,6 @@ inherited cpurl78fo: tcpurl78fo
     bounds_x = 281
     bounds_y = 136
     bounds_cx = 79
-    bounds_cy = 21
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
@@ -683,7 +674,7 @@ inherited cpurl78fo: tcpurl78fo
     base = nb_hex
     bitcount = 8
     max = -1
-    reffontheight = 17
+    reffontheight = 16
   end
   object bank0_r6: tintegeredit[21]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -696,7 +687,6 @@ inherited cpurl78fo: tcpurl78fo
     bounds_x = 250
     bounds_y = 93
     bounds_cx = 25
-    bounds_cy = 21
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
@@ -705,7 +695,7 @@ inherited cpurl78fo: tcpurl78fo
     base = nb_hex
     bitcount = 8
     max = -1
-    reffontheight = 17
+    reffontheight = 16
   end
   object bank0_r7: tintegeredit[22]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -718,7 +708,6 @@ inherited cpurl78fo: tcpurl78fo
     bounds_x = 225
     bounds_y = 93
     bounds_cx = 25
-    bounds_cy = 21
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
@@ -727,7 +716,7 @@ inherited cpurl78fo: tcpurl78fo
     base = nb_hex
     bitcount = 8
     max = -1
-    reffontheight = 17
+    reffontheight = 16
   end
   object bank0_rp3: tintegeredit[23]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -740,7 +729,6 @@ inherited cpurl78fo: tcpurl78fo
     bounds_x = 225
     bounds_y = 114
     bounds_cx = 50
-    bounds_cy = 21
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
@@ -749,7 +737,7 @@ inherited cpurl78fo: tcpurl78fo
     base = nb_hex
     bitcount = 16
     max = -1
-    reffontheight = 17
+    reffontheight = 16
   end
   object bank0_r4: tintegeredit[24]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -762,7 +750,6 @@ inherited cpurl78fo: tcpurl78fo
     bounds_x = 199
     bounds_y = 93
     bounds_cx = 25
-    bounds_cy = 21
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
@@ -771,7 +758,7 @@ inherited cpurl78fo: tcpurl78fo
     base = nb_hex
     bitcount = 8
     max = -1
-    reffontheight = 17
+    reffontheight = 16
   end
   object bank0_r5: tintegeredit[25]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -784,7 +771,6 @@ inherited cpurl78fo: tcpurl78fo
     bounds_x = 174
     bounds_y = 93
     bounds_cx = 25
-    bounds_cy = 21
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
@@ -793,7 +779,7 @@ inherited cpurl78fo: tcpurl78fo
     base = nb_hex
     bitcount = 8
     max = -1
-    reffontheight = 17
+    reffontheight = 16
   end
   object bank0_rp2: tintegeredit[26]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -806,7 +792,6 @@ inherited cpurl78fo: tcpurl78fo
     bounds_x = 174
     bounds_y = 114
     bounds_cx = 50
-    bounds_cy = 21
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
@@ -815,7 +800,7 @@ inherited cpurl78fo: tcpurl78fo
     base = nb_hex
     bitcount = 16
     max = -1
-    reffontheight = 17
+    reffontheight = 16
   end
   object bank0_r2: tintegeredit[27]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -828,7 +813,6 @@ inherited cpurl78fo: tcpurl78fo
     bounds_x = 148
     bounds_y = 93
     bounds_cx = 25
-    bounds_cy = 21
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
@@ -837,7 +821,7 @@ inherited cpurl78fo: tcpurl78fo
     base = nb_hex
     bitcount = 8
     max = -1
-    reffontheight = 17
+    reffontheight = 16
   end
   object bank0_r3: tintegeredit[28]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -850,7 +834,6 @@ inherited cpurl78fo: tcpurl78fo
     bounds_x = 123
     bounds_y = 93
     bounds_cx = 25
-    bounds_cy = 21
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
@@ -859,7 +842,7 @@ inherited cpurl78fo: tcpurl78fo
     base = nb_hex
     bitcount = 8
     max = -1
-    reffontheight = 17
+    reffontheight = 16
   end
   object bank0_rp1: tintegeredit[29]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -872,7 +855,6 @@ inherited cpurl78fo: tcpurl78fo
     bounds_x = 123
     bounds_y = 114
     bounds_cx = 50
-    bounds_cy = 21
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
@@ -881,7 +863,7 @@ inherited cpurl78fo: tcpurl78fo
     base = nb_hex
     bitcount = 16
     max = -1
-    reffontheight = 17
+    reffontheight = 16
   end
   object bank0_rp0: tintegeredit[30]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -894,7 +876,6 @@ inherited cpurl78fo: tcpurl78fo
     bounds_x = 72
     bounds_y = 114
     bounds_cx = 50
-    bounds_cy = 21
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
@@ -903,7 +884,7 @@ inherited cpurl78fo: tcpurl78fo
     base = nb_hex
     bitcount = 16
     max = -1
-    reffontheight = 17
+    reffontheight = 16
   end
   object bank0_r0: tintegeredit[31]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -916,7 +897,6 @@ inherited cpurl78fo: tcpurl78fo
     bounds_x = 97
     bounds_y = 93
     bounds_cx = 25
-    bounds_cy = 21
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
@@ -925,7 +905,7 @@ inherited cpurl78fo: tcpurl78fo
     base = nb_hex
     bitcount = 8
     max = -1
-    reffontheight = 17
+    reffontheight = 16
   end
   object bank0_r1: tintegeredit[32]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -936,16 +916,15 @@ inherited cpurl78fo: tcpurl78fo
     frame.localprops = [frl_levelo, frl_colorclient]
     frame.dummy = 0
     frame.outerframe = (
-      10
+      11
       0
       0
       0
     )
     taborder = 13
-    bounds_x = 62
+    bounds_x = 61
     bounds_y = 93
-    bounds_cx = 35
-    bounds_cy = 21
+    bounds_cx = 36
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
@@ -954,7 +933,7 @@ inherited cpurl78fo: tcpurl78fo
     base = nb_hex
     bitcount = 8
     max = -1
-    reffontheight = 17
+    reffontheight = 16
   end
   object bank1_r1: tintegeredit[33]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -965,16 +944,15 @@ inherited cpurl78fo: tcpurl78fo
     frame.localprops = [frl_levelo, frl_colorclient]
     frame.dummy = 0
     frame.outerframe = (
-      10
+      11
       0
       0
       0
     )
     taborder = 25
-    bounds_x = 62
+    bounds_x = 61
     bounds_y = 136
-    bounds_cx = 35
-    bounds_cy = 21
+    bounds_cx = 36
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
@@ -983,7 +961,7 @@ inherited cpurl78fo: tcpurl78fo
     base = nb_hex
     bitcount = 8
     max = -1
-    reffontheight = 17
+    reffontheight = 16
   end
   object bank1_r0: tintegeredit[34]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -996,7 +974,6 @@ inherited cpurl78fo: tcpurl78fo
     bounds_x = 97
     bounds_y = 136
     bounds_cx = 25
-    bounds_cy = 21
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
@@ -1005,7 +982,7 @@ inherited cpurl78fo: tcpurl78fo
     base = nb_hex
     bitcount = 8
     max = -1
-    reffontheight = 17
+    reffontheight = 16
   end
   object bank1_rp0: tintegeredit[35]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -1018,7 +995,6 @@ inherited cpurl78fo: tcpurl78fo
     bounds_x = 72
     bounds_y = 157
     bounds_cx = 50
-    bounds_cy = 21
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
@@ -1027,7 +1003,7 @@ inherited cpurl78fo: tcpurl78fo
     base = nb_hex
     bitcount = 16
     max = -1
-    reffontheight = 17
+    reffontheight = 16
   end
   object bank1_rp1: tintegeredit[36]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -1040,7 +1016,6 @@ inherited cpurl78fo: tcpurl78fo
     bounds_x = 123
     bounds_y = 157
     bounds_cx = 50
-    bounds_cy = 21
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
@@ -1049,7 +1024,7 @@ inherited cpurl78fo: tcpurl78fo
     base = nb_hex
     bitcount = 16
     max = -1
-    reffontheight = 17
+    reffontheight = 16
   end
   object bank1_r3: tintegeredit[37]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -1062,7 +1037,6 @@ inherited cpurl78fo: tcpurl78fo
     bounds_x = 123
     bounds_y = 136
     bounds_cx = 25
-    bounds_cy = 21
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
@@ -1071,7 +1045,7 @@ inherited cpurl78fo: tcpurl78fo
     base = nb_hex
     bitcount = 8
     max = -1
-    reffontheight = 17
+    reffontheight = 16
   end
   object bank1_r2: tintegeredit[38]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -1084,7 +1058,6 @@ inherited cpurl78fo: tcpurl78fo
     bounds_x = 148
     bounds_y = 136
     bounds_cx = 25
-    bounds_cy = 21
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
@@ -1093,7 +1066,7 @@ inherited cpurl78fo: tcpurl78fo
     base = nb_hex
     bitcount = 8
     max = -1
-    reffontheight = 17
+    reffontheight = 16
   end
   object bank1_rp2: tintegeredit[39]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -1106,7 +1079,6 @@ inherited cpurl78fo: tcpurl78fo
     bounds_x = 174
     bounds_y = 157
     bounds_cx = 50
-    bounds_cy = 21
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
@@ -1115,7 +1087,7 @@ inherited cpurl78fo: tcpurl78fo
     base = nb_hex
     bitcount = 16
     max = -1
-    reffontheight = 17
+    reffontheight = 16
   end
   object bank1_r5: tintegeredit[40]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -1128,7 +1100,6 @@ inherited cpurl78fo: tcpurl78fo
     bounds_x = 174
     bounds_y = 136
     bounds_cx = 25
-    bounds_cy = 21
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
@@ -1137,7 +1108,7 @@ inherited cpurl78fo: tcpurl78fo
     base = nb_hex
     bitcount = 8
     max = -1
-    reffontheight = 17
+    reffontheight = 16
   end
   object bank1_r4: tintegeredit[41]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -1150,7 +1121,6 @@ inherited cpurl78fo: tcpurl78fo
     bounds_x = 199
     bounds_y = 136
     bounds_cx = 25
-    bounds_cy = 21
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
@@ -1159,7 +1129,7 @@ inherited cpurl78fo: tcpurl78fo
     base = nb_hex
     bitcount = 8
     max = -1
-    reffontheight = 17
+    reffontheight = 16
   end
   object bank1_rp3: tintegeredit[42]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -1172,7 +1142,6 @@ inherited cpurl78fo: tcpurl78fo
     bounds_x = 225
     bounds_y = 157
     bounds_cx = 50
-    bounds_cy = 21
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
@@ -1181,7 +1150,7 @@ inherited cpurl78fo: tcpurl78fo
     base = nb_hex
     bitcount = 16
     max = -1
-    reffontheight = 17
+    reffontheight = 16
   end
   object bank1_r7: tintegeredit[43]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -1194,7 +1163,6 @@ inherited cpurl78fo: tcpurl78fo
     bounds_x = 225
     bounds_y = 136
     bounds_cx = 25
-    bounds_cy = 21
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
@@ -1203,7 +1171,7 @@ inherited cpurl78fo: tcpurl78fo
     base = nb_hex
     bitcount = 8
     max = -1
-    reffontheight = 17
+    reffontheight = 16
   end
   object bank1_r6: tintegeredit[44]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -1216,7 +1184,6 @@ inherited cpurl78fo: tcpurl78fo
     bounds_x = 250
     bounds_y = 136
     bounds_cx = 25
-    bounds_cy = 21
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
@@ -1225,7 +1192,7 @@ inherited cpurl78fo: tcpurl78fo
     base = nb_hex
     bitcount = 8
     max = -1
-    reffontheight = 17
+    reffontheight = 16
   end
   object bank2_r1: tintegeredit[45]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -1236,16 +1203,15 @@ inherited cpurl78fo: tcpurl78fo
     frame.localprops = [frl_levelo, frl_colorclient]
     frame.dummy = 0
     frame.outerframe = (
-      10
+      11
       0
       0
       0
     )
     taborder = 37
-    bounds_x = 62
+    bounds_x = 61
     bounds_y = 179
-    bounds_cx = 35
-    bounds_cy = 21
+    bounds_cx = 36
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
@@ -1254,7 +1220,7 @@ inherited cpurl78fo: tcpurl78fo
     base = nb_hex
     bitcount = 8
     max = -1
-    reffontheight = 17
+    reffontheight = 16
   end
   object bank2_r0: tintegeredit[46]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -1267,7 +1233,6 @@ inherited cpurl78fo: tcpurl78fo
     bounds_x = 97
     bounds_y = 179
     bounds_cx = 25
-    bounds_cy = 21
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
@@ -1276,7 +1241,7 @@ inherited cpurl78fo: tcpurl78fo
     base = nb_hex
     bitcount = 8
     max = -1
-    reffontheight = 17
+    reffontheight = 16
   end
   object bank2_rp0: tintegeredit[47]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -1289,7 +1254,6 @@ inherited cpurl78fo: tcpurl78fo
     bounds_x = 72
     bounds_y = 200
     bounds_cx = 50
-    bounds_cy = 21
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
@@ -1298,7 +1262,7 @@ inherited cpurl78fo: tcpurl78fo
     base = nb_hex
     bitcount = 16
     max = -1
-    reffontheight = 17
+    reffontheight = 16
   end
   object bank2_rp1: tintegeredit[48]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -1311,7 +1275,6 @@ inherited cpurl78fo: tcpurl78fo
     bounds_x = 123
     bounds_y = 200
     bounds_cx = 50
-    bounds_cy = 21
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
@@ -1320,7 +1283,7 @@ inherited cpurl78fo: tcpurl78fo
     base = nb_hex
     bitcount = 16
     max = -1
-    reffontheight = 17
+    reffontheight = 16
   end
   object bank2_r3: tintegeredit[49]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -1333,7 +1296,6 @@ inherited cpurl78fo: tcpurl78fo
     bounds_x = 123
     bounds_y = 179
     bounds_cx = 25
-    bounds_cy = 21
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
@@ -1342,7 +1304,7 @@ inherited cpurl78fo: tcpurl78fo
     base = nb_hex
     bitcount = 8
     max = -1
-    reffontheight = 17
+    reffontheight = 16
   end
   object bank2_r2: tintegeredit[50]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -1355,7 +1317,6 @@ inherited cpurl78fo: tcpurl78fo
     bounds_x = 148
     bounds_y = 179
     bounds_cx = 25
-    bounds_cy = 21
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
@@ -1364,7 +1325,7 @@ inherited cpurl78fo: tcpurl78fo
     base = nb_hex
     bitcount = 8
     max = -1
-    reffontheight = 17
+    reffontheight = 16
   end
   object bank2_rp2: tintegeredit[51]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -1377,7 +1338,6 @@ inherited cpurl78fo: tcpurl78fo
     bounds_x = 174
     bounds_y = 200
     bounds_cx = 50
-    bounds_cy = 21
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
@@ -1386,7 +1346,7 @@ inherited cpurl78fo: tcpurl78fo
     base = nb_hex
     bitcount = 16
     max = -1
-    reffontheight = 17
+    reffontheight = 16
   end
   object bank2_r5: tintegeredit[52]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -1399,7 +1359,6 @@ inherited cpurl78fo: tcpurl78fo
     bounds_x = 174
     bounds_y = 179
     bounds_cx = 25
-    bounds_cy = 21
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
@@ -1408,7 +1367,7 @@ inherited cpurl78fo: tcpurl78fo
     base = nb_hex
     bitcount = 8
     max = -1
-    reffontheight = 17
+    reffontheight = 16
   end
   object bank2_r4: tintegeredit[53]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -1421,7 +1380,6 @@ inherited cpurl78fo: tcpurl78fo
     bounds_x = 199
     bounds_y = 179
     bounds_cx = 25
-    bounds_cy = 21
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
@@ -1430,7 +1388,7 @@ inherited cpurl78fo: tcpurl78fo
     base = nb_hex
     bitcount = 8
     max = -1
-    reffontheight = 17
+    reffontheight = 16
   end
   object bank2_rp3: tintegeredit[54]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -1443,7 +1401,6 @@ inherited cpurl78fo: tcpurl78fo
     bounds_x = 225
     bounds_y = 200
     bounds_cx = 50
-    bounds_cy = 21
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
@@ -1452,7 +1409,7 @@ inherited cpurl78fo: tcpurl78fo
     base = nb_hex
     bitcount = 16
     max = -1
-    reffontheight = 17
+    reffontheight = 16
   end
   object bank2_r7: tintegeredit[55]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -1465,7 +1422,6 @@ inherited cpurl78fo: tcpurl78fo
     bounds_x = 225
     bounds_y = 179
     bounds_cx = 25
-    bounds_cy = 21
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
@@ -1474,7 +1430,7 @@ inherited cpurl78fo: tcpurl78fo
     base = nb_hex
     bitcount = 8
     max = -1
-    reffontheight = 17
+    reffontheight = 16
   end
   object bank2_r6: tintegeredit[56]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -1487,7 +1443,6 @@ inherited cpurl78fo: tcpurl78fo
     bounds_x = 250
     bounds_y = 179
     bounds_cx = 25
-    bounds_cy = 21
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
@@ -1496,7 +1451,7 @@ inherited cpurl78fo: tcpurl78fo
     base = nb_hex
     bitcount = 8
     max = -1
-    reffontheight = 17
+    reffontheight = 16
   end
   object bank3_r1: tintegeredit[57]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -1507,16 +1462,15 @@ inherited cpurl78fo: tcpurl78fo
     frame.localprops = [frl_levelo, frl_colorclient]
     frame.dummy = 0
     frame.outerframe = (
-      10
+      11
       0
       0
       0
     )
     taborder = 49
-    bounds_x = 62
+    bounds_x = 61
     bounds_y = 222
-    bounds_cx = 35
-    bounds_cy = 21
+    bounds_cx = 36
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
@@ -1525,7 +1479,7 @@ inherited cpurl78fo: tcpurl78fo
     base = nb_hex
     bitcount = 8
     max = -1
-    reffontheight = 17
+    reffontheight = 16
   end
   object bank3_r0: tintegeredit[58]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -1538,7 +1492,6 @@ inherited cpurl78fo: tcpurl78fo
     bounds_x = 97
     bounds_y = 222
     bounds_cx = 25
-    bounds_cy = 21
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
@@ -1547,7 +1500,7 @@ inherited cpurl78fo: tcpurl78fo
     base = nb_hex
     bitcount = 8
     max = -1
-    reffontheight = 17
+    reffontheight = 16
   end
   object bank3_rp0: tintegeredit[59]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -1560,7 +1513,6 @@ inherited cpurl78fo: tcpurl78fo
     bounds_x = 72
     bounds_y = 243
     bounds_cx = 50
-    bounds_cy = 21
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
@@ -1569,7 +1521,7 @@ inherited cpurl78fo: tcpurl78fo
     base = nb_hex
     bitcount = 16
     max = -1
-    reffontheight = 17
+    reffontheight = 16
   end
   object bank3_rp1: tintegeredit[60]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -1582,7 +1534,6 @@ inherited cpurl78fo: tcpurl78fo
     bounds_x = 123
     bounds_y = 243
     bounds_cx = 50
-    bounds_cy = 21
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
@@ -1591,7 +1542,7 @@ inherited cpurl78fo: tcpurl78fo
     base = nb_hex
     bitcount = 16
     max = -1
-    reffontheight = 17
+    reffontheight = 16
   end
   object bank3_r3: tintegeredit[61]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -1604,7 +1555,6 @@ inherited cpurl78fo: tcpurl78fo
     bounds_x = 123
     bounds_y = 222
     bounds_cx = 25
-    bounds_cy = 21
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
@@ -1613,7 +1563,7 @@ inherited cpurl78fo: tcpurl78fo
     base = nb_hex
     bitcount = 8
     max = -1
-    reffontheight = 17
+    reffontheight = 16
   end
   object bank3_r2: tintegeredit[62]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -1626,7 +1576,6 @@ inherited cpurl78fo: tcpurl78fo
     bounds_x = 148
     bounds_y = 222
     bounds_cx = 25
-    bounds_cy = 21
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
@@ -1635,7 +1584,7 @@ inherited cpurl78fo: tcpurl78fo
     base = nb_hex
     bitcount = 8
     max = -1
-    reffontheight = 17
+    reffontheight = 16
   end
   object bank3_rp2: tintegeredit[63]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -1648,7 +1597,6 @@ inherited cpurl78fo: tcpurl78fo
     bounds_x = 174
     bounds_y = 243
     bounds_cx = 50
-    bounds_cy = 21
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
@@ -1657,7 +1605,7 @@ inherited cpurl78fo: tcpurl78fo
     base = nb_hex
     bitcount = 16
     max = -1
-    reffontheight = 17
+    reffontheight = 16
   end
   object bank3_r5: tintegeredit[64]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -1670,7 +1618,6 @@ inherited cpurl78fo: tcpurl78fo
     bounds_x = 174
     bounds_y = 222
     bounds_cx = 25
-    bounds_cy = 21
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
@@ -1679,7 +1626,7 @@ inherited cpurl78fo: tcpurl78fo
     base = nb_hex
     bitcount = 8
     max = -1
-    reffontheight = 17
+    reffontheight = 16
   end
   object bank3_r4: tintegeredit[65]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -1692,7 +1639,6 @@ inherited cpurl78fo: tcpurl78fo
     bounds_x = 199
     bounds_y = 222
     bounds_cx = 25
-    bounds_cy = 21
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
@@ -1701,7 +1647,7 @@ inherited cpurl78fo: tcpurl78fo
     base = nb_hex
     bitcount = 8
     max = -1
-    reffontheight = 17
+    reffontheight = 16
   end
   object bank3_rp3: tintegeredit[66]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -1714,7 +1660,6 @@ inherited cpurl78fo: tcpurl78fo
     bounds_x = 225
     bounds_y = 243
     bounds_cx = 50
-    bounds_cy = 21
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
@@ -1723,7 +1668,7 @@ inherited cpurl78fo: tcpurl78fo
     base = nb_hex
     bitcount = 16
     max = -1
-    reffontheight = 17
+    reffontheight = 16
   end
   object bank3_r7: tintegeredit[67]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -1736,7 +1681,6 @@ inherited cpurl78fo: tcpurl78fo
     bounds_x = 225
     bounds_y = 222
     bounds_cx = 25
-    bounds_cy = 21
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
@@ -1745,7 +1689,7 @@ inherited cpurl78fo: tcpurl78fo
     base = nb_hex
     bitcount = 8
     max = -1
-    reffontheight = 17
+    reffontheight = 16
   end
   object bank3_r6: tintegeredit[68]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -1758,7 +1702,6 @@ inherited cpurl78fo: tcpurl78fo
     bounds_x = 250
     bounds_y = 222
     bounds_cx = 25
-    bounds_cy = 21
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
@@ -1767,7 +1710,7 @@ inherited cpurl78fo: tcpurl78fo
     base = nb_hex
     bitcount = 8
     max = -1
-    reffontheight = 17
+    reffontheight = 16
   end
   object mem: tintegeredit[69]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -1780,14 +1723,13 @@ inherited cpurl78fo: tcpurl78fo
     frame.outerframe = (
       0
       0
-      29
+      31
       0
     )
     taborder = 66
     bounds_x = 281
     bounds_y = 157
-    bounds_cx = 79
-    bounds_cy = 21
+    bounds_cx = 81
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
@@ -1796,6 +1738,6 @@ inherited cpurl78fo: tcpurl78fo
     base = nb_hex
     bitcount = 8
     max = -1
-    reffontheight = 17
+    reffontheight = 16
   end
 end

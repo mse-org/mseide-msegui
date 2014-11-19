@@ -217,7 +217,8 @@ object objectinspectorfo: tobjectinspectorfo
       bounds_y = 0
       bounds_cx = 90
       bounds_cy = 16
-      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_resetselectonexit, oe_exitoncursor, oe_hintclippedtext, oe_locate, oe_savestate]
+      optionsedit1 = []
+      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_resetselectonexit, oe_exitoncursor, oe_hintclippedtext, oe_locate]
       onkeydown = propskeydownexe
       onupdaterowvalues = propupdaterowvalue
       options = [teo_treecolnavig, teo_keyrowmoving]
@@ -250,8 +251,8 @@ object objectinspectorfo: tobjectinspectorfo
       bounds_y = 0
       bounds_cx = 148
       bounds_cy = 15
-      optionsedit1 = [oe1_autopopupmenu]
-      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_forcereturncheckvalue, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_savestate]
+      optionsedit1 = []
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_forcereturncheckvalue, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext]
       font.name = 'stf_default'
       font.xscale = 1
       font.dummy = 0

@@ -88,6 +88,7 @@ object iircoeffeditorfo: tiircoeffeditorfo
       bounds_y = 0
       bounds_cx = 113
       bounds_cy = 16
+      optionsedit1 = [oe1_savevalue]
       ondataentered = datentexe
       value = 0
       valuedefault = 0
@@ -106,6 +107,7 @@ object iircoeffeditorfo: tiircoeffeditorfo
       bounds_y = 0
       bounds_cx = 106
       bounds_cy = 16
+      optionsedit1 = [oe1_savevalue]
       ondataentered = datentexe
       value = 0
       valuedefault = 0
@@ -124,7 +126,8 @@ object iircoeffeditorfo: tiircoeffeditorfo
       bounds_y = 0
       bounds_cx = 114
       bounds_cy = 16
-      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_savevalue, oe_savestate, oe_checkvaluepaststatread]
+      optionsedit1 = [oe1_savevalue]
+      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly]
       textflagsactive = [tf_right, tf_ycentered]
       value = -Inf
       valuedefault = -Inf
@@ -143,7 +146,8 @@ object iircoeffeditorfo: tiircoeffeditorfo
       bounds_y = 0
       bounds_cx = 117
       bounds_cy = 16
-      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_savevalue, oe_savestate, oe_checkvaluepaststatread]
+      optionsedit1 = [oe1_savevalue]
+      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly]
       textflagsactive = [tf_right, tf_ycentered]
       value = -Inf
       valuedefault = -Inf

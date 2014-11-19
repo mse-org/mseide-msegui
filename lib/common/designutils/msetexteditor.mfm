@@ -6,8 +6,6 @@ object msetexteditorfo: tmsetexteditorfo
   bounds_cx = 369
   bounds_cy = 268
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets]
-  container.frame.zoomwidthstep = 1
-  container.frame.zoomheightstep = 1
   container.bounds = (
     0
     0
@@ -81,8 +79,8 @@ object msetexteditorfo: tmsetexteditorfo
       bounds_cy = 14
       font.xscale = 1
       font.dummy = 0
-      optionsedit1 = [oe1_keyexecute]
-      optionsedit = [oe_closequery, oe_checkmrcancel, oe_linebreak, oe_eatreturn, oe_exitoncursor, oe_nofirstarrownavig, oe_savevalue, oe_savestate]
+      optionsedit1 = [oe1_keyexecute, oe1_savevalue, oe1_savestate]
+      optionsedit = [oe_closequery, oe_checkmrcancel, oe_linebreak, oe_eatreturn, oe_exitoncursor, oe_nofirstarrownavig]
       oneditnotifcation = editnotify
       options = [seo_autoindent, seo_markbrackets]
       reffontheight = 14
