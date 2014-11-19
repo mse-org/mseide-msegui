@@ -149,14 +149,19 @@ begin
   sys_mutexunlock(semaphorelock);
 
   while true do begin
-   result:= waitpid(__pid,__stat_loc,wnohang);
-   if (result = __pid) or 
-                   (result < 0) and (sys_getlasterror <> eintr) then begin
+   repeat
+    result:= waitpid(__pid,__stat_loc,wnohang);
+   until (result >= 0) or (sys_getlasterror <> eintr);
+   if (result = __pid) or (result < 0) then begin
     break;
    end;
    int1:= lwo1-timestamp;
    if int1 > 0 then begin
     sys_semwait(semele.sem,int1);
+   end
+   else begin
+    result:= waitpid(__pid,__stat_loc,wnohang);
+    break;
    end;
   end;
   
