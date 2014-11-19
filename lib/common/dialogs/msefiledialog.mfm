@@ -8,8 +8,6 @@ object filedialogfo: Tfiledialogfo
   bounds_cxmin = 360
   bounds_cymin = 150
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets]
-  container.frame.zoomwidthstep = 1
-  container.frame.zoomheightstep = 1
   container.onlayout = foonchildscaled
   container.bounds = (
     0
@@ -28,7 +26,7 @@ object filedialogfo: Tfiledialogfo
     visible = False
     bounds_x = 0
     bounds_y = 232
-    bounds_cx = 467
+    bounds_cx = 456
     bounds_cy = 50
     anchors = [an_left, an_top, an_right]
   end
@@ -36,9 +34,9 @@ object filedialogfo: Tfiledialogfo
     optionswidget = [ow_tabfocus, ow_parenttabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousewheel, ow_destroywidgets]
     taborder = 5
     visible = True
-    bounds_x = 467
+    bounds_x = 456
     bounds_y = 234
-    bounds_cx = 120
+    bounds_cx = 131
     bounds_cy = 71
     anchors = [an_right, an_bottom]
     optionsscale = [osc_expandx, osc_shrinkx]
@@ -50,12 +48,12 @@ object filedialogfo: Tfiledialogfo
       frame.outerframe = (
         0
         1
-        101
+        112
         2
       )
       bounds_x = 6
       bounds_y = 16
-      bounds_cx = 114
+      bounds_cx = 125
       bounds_cy = 16
       onsetvalue = showhiddenonsetvalue
     end
@@ -74,7 +72,7 @@ object filedialogfo: Tfiledialogfo
       taborder = 2
       bounds_x = 49
       bounds_y = 51
-      bounds_cx = 49
+      bounds_cx = 52
       bounds_cy = 20
       bounds_cxmin = 35
       anchors = [an_left, an_bottom]
@@ -129,9 +127,9 @@ object filedialogfo: Tfiledialogfo
     optionswidget1 = [ow1_autowidth, ow1_autoheight]
     optionswidget = [ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
     taborder = 9
-    bounds_x = 535
+    bounds_x = 531
     bounds_y = 3
-    bounds_cx = 52
+    bounds_cx = 56
     bounds_cy = 20
     bounds_cxmin = 35
     anchors = [an_top, an_right]
@@ -144,7 +142,7 @@ object filedialogfo: Tfiledialogfo
     optionswidget1 = [ow1_autowidth, ow1_autoheight]
     optionswidget = [ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
     taborder = 7
-    bounds_x = 452
+    bounds_x = 446
     bounds_y = 3
     bounds_cx = 35
     bounds_cy = 20
@@ -163,13 +161,13 @@ object filedialogfo: Tfiledialogfo
     frame.outerframe = (
       0
       0
-      37
+      39
       0
     )
     taborder = 3
     bounds_x = 1
     bounds_y = 259
-    bounds_cx = 487
+    bounds_cx = 489
     anchors = [an_left, an_right, an_bottom]
     optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_savevalue, oe_savestate]
     oncopytoclipboard = copytolip
@@ -192,13 +190,13 @@ object filedialogfo: Tfiledialogfo
     frame.outerframe = (
       0
       0
-      30
+      34
       0
     )
     taborder = 4
     bounds_x = 1
     bounds_y = 284
-    bounds_cx = 480
+    bounds_cx = 484
     anchors = [an_left, an_right, an_bottom]
     ondataentered = filepathentered
     onsetvalue = filteronsetvalue
@@ -221,14 +219,14 @@ object filedialogfo: Tfiledialogfo
     frame.outerframe = (
       0
       0
-      19
+      20
       0
     )
     taborder = 6
     onshowhint = dirshowhint
     bounds_x = 1
     bounds_y = 2
-    bounds_cx = 449
+    bounds_cx = 443
     anchors = [an_left, an_top, an_right]
     textflags = [tf_ycentered, tf_noselect, tf_ellipseleft]
     dropdown.options = [deo_selectonly, deo_keydropdown]
@@ -237,7 +235,7 @@ object filedialogfo: Tfiledialogfo
   end
   object tspacer1: tspacer
     taborder = 2
-    bounds_x = 487
+    bounds_x = 481
     bounds_y = 0
     bounds_cx = 2
     bounds_cy = 20
@@ -247,7 +245,7 @@ object filedialogfo: Tfiledialogfo
   end
   object tspacer2: tspacer
     taborder = 1
-    bounds_x = 533
+    bounds_x = 529
     bounds_y = 0
     bounds_cx = 2
     bounds_cy = 20
@@ -259,9 +257,9 @@ object filedialogfo: Tfiledialogfo
     optionswidget1 = [ow1_autowidth, ow1_autoheight]
     optionswidget = [ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
     taborder = 8
-    bounds_x = 489
+    bounds_x = 483
     bounds_y = 3
-    bounds_cx = 44
+    bounds_cx = 46
     bounds_cy = 20
     bounds_cxmin = 35
     anchors = [an_top, an_right]
@@ -272,7 +270,7 @@ object filedialogfo: Tfiledialogfo
   end
   object tspacer3: tspacer
     taborder = 11
-    bounds_x = 450
+    bounds_x = 444
     bounds_y = 0
     bounds_cx = 2
     bounds_cy = 20

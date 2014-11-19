@@ -1563,7 +1563,12 @@ begin
   amodule^.hasmenuitem:= true;
   item1:= tmenuitem.create;
   with item1 do begin
-   caption:= msefileutils.filename(amodule^.filename);
+   if amodule^.modified then begin
+    caption:= '*'+msefileutils.filename(amodule^.filename);
+   end
+   else begin
+    caption:= msefileutils.filename(amodule^.filename);
+   end;
    onexecute:= {$ifdef FPC}@{$endif}doshowform;
    tagpointer:= amodule;
    options:= options + [mao_asyncexecute];
@@ -2149,6 +2154,7 @@ function tmainfo.openproject(const aname: filenamety;
   breakpointsfo.clear;
   watchpointsfo.clear(true);
   cleardebugdisp;
+  designer.savecanceled(); //reset saveall flag
  end;
  
 var

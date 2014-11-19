@@ -135,6 +135,7 @@ type
  {$endif}
   backupcreated: boolean;
   modified: boolean;
+  readermodified: boolean;
   resolved: boolean;
   hasmenuitem: boolean;
 //  options: moduleoptionsty;
@@ -422,6 +423,8 @@ type
 //   procedure doasyncevent(var atag: integer); override;
    procedure readererror(reader: treader; const message: string;
                                  var handled: boolean);
+   procedure readerseterror(const reader: treader; const atype: ptypeinfo;
+                            const aitemname: string; var avalue: integer);
    procedure forallmethodproperties(const aroot: tcomponent;
                  const ainstance: tobject; const data: pointer;
                  const aproc: propprocty;
@@ -618,7 +621,7 @@ uses
  msefiledialog,projectoptionsform,sourceupdate,sourceform,sourcepage,
  pascaldesignparser,msearrayprops,rtlconsts,msedatamodules,
  msesimplewidgets,msesysutils,mseobjecttext,msestreaming,msedatanodes,main,
- actionsmodule;
+ actionsmodule,mseeditglob;
 
 const
  renewbackuptag = 0;
@@ -4513,6 +4516,33 @@ begin
  end;
 end;
 
+procedure tdesigner.readererror(reader: treader; const message: string;
+               var handled: boolean);
+var
+ comp1: tcomponent;
+begin
+ comp1:= reader.lookuproot;
+ if comp1 = nil then begin
+  comp1:= reader.root;
+ end;
+ with exception(ExceptObject) do begin
+  message:= actionsmo.c[ord(ac_component)]+
+                            ownernamepath(comp1)+'":'+lineend+message;
+ end;
+end;
+
+procedure tdesigner.readerseterror(const reader: treader; 
+         const atype: ptypeinfo; const aitemname: string; var avalue: integer);
+begin
+ if atype = typeinfo(optioneditty) then begin
+  if (aitemname = 'oe_autopopupmenu') or 
+            (aitemname = 'oe_keyexecute') then begin
+   avalue:= -2; //skip
+   floadingmodulepo^.readermodified:= true;
+  end;
+ end;
+end;
+
 function tdesigner.loadformfile(filename: msestring;
                          const skipexisting: boolean): pmoduleinfoty;
 var
@@ -4640,6 +4670,7 @@ begin //loadformfile
          reader.onancestornotfound:= {$ifdef FPC}@{$endif}ancestornotfound;
          reader.oncreatecomponent:= createcomponent();
          reader.onerror:= {$ifdef FPC}@{$endif}readererror;
+         reader.onseterror:= @readerseterror;
          module.Name:= modulename;
          reader.ReadrootComponent(module);
         {$ifndef mse_nomethodswap}
@@ -4741,7 +4772,10 @@ begin //loadformfile
         result^.designform.getcorbainterface(typeinfo(iformdesigner),
                                              result^.designformintf);
         checkmethodtypes(result,true);
-        result^.modified:= false;
+        result^.modified:= result^.readermodified;
+//        if result^.modified then begin
+//         mainfo.sourcechanged(nil);
+//        end;
        end;
       finally
        loadingdesigner:= nil;
@@ -5716,21 +5750,6 @@ function tdesigner.selectedcomponents: componentarty;
 begin
  setlength(result,fselections.count);
  move(fselections.datapo^,result[0],length(result)*sizeof(pointer)); 
-end;
-
-procedure tdesigner.readererror(reader: treader; const message: string;
-               var handled: boolean);
-var
- comp1: tcomponent;
-begin
- comp1:= reader.lookuproot;
- if comp1 = nil then begin
-  comp1:= reader.root;
- end;
- with exception(ExceptObject) do begin
-  message:= actionsmo.c[ord(ac_component)]+
-                            ownernamepath(comp1)+'":'+lineend+message;
- end;
 end;
 
 function tdesigner.clickedcomp: tcomponent;

@@ -276,11 +276,11 @@ type
 procedure deletememorystatstream(const streamname: msestring);
 function memorystatstreams: tmemorystreams;
 
-function canstatvalue(const editoptions: optionseditty;
+function canstatvalue(const editoptions: optionsedit1ty;
                          const stat: tstatfiler): boolean;
-function canstatstate(const editoptions: optionseditty;
+function canstatstate(const editoptions: optionsedit1ty;
                          const stat: tstatfiler): boolean;
-function canstatoptions(const editoptions: optionseditty;
+function canstatoptions(const editoptions: optionsedit1ty;
                          const stat: tstatfiler): boolean;
 
 procedure readstringar(const reader: treader; out avalue: stringarty);
@@ -366,22 +366,22 @@ begin
  end;
 end;
 
-function canstatvalue(const editoptions: optionseditty;
+function canstatvalue(const editoptions: optionsedit1ty;
                          const stat: tstatfiler): boolean;
 begin
- result:= (oe_savevalue in editoptions) and stat.candata;
+ result:= (oe1_savevalue in editoptions) and stat.candata;
 end;
 
-function canstatstate(const editoptions: optionseditty;
+function canstatstate(const editoptions: optionsedit1ty;
                          const stat: tstatfiler): boolean;
 begin
- result:= (oe_savestate in editoptions) and stat.canstate;
+ result:= (oe1_savestate in editoptions) and stat.canstate;
 end;
 
-function canstatoptions(const editoptions: optionseditty;
+function canstatoptions(const editoptions: optionsedit1ty;
                          const stat: tstatfiler): boolean;
 begin
- result:= (oe_saveoptions in editoptions) and stat.canoptions;
+ result:= (oe1_saveoptions in editoptions) and stat.canoptions;
 end;
 
 var

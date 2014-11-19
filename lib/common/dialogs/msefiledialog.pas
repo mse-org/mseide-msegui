@@ -230,8 +230,8 @@ type
  end;
 
 const
- defaultfiledialogoptionsedit = defaultoptionsedit+
-                                  [oe_savevalue,oe_savestate,oe_saveoptions];
+ defaultfiledialogoptionsedit1 = defaultoptionsedit1+
+                                 [oe1_savevalue,oe1_savestate,oe1_saveoptions];
  
 type 
  tfiledialog = class(tdialog,istatfile)
@@ -240,11 +240,14 @@ type
    fstatvarname: msestring;
    fstatfile: tstatfile;
    fdialogkind: filedialogkindty;
-   foptionsedit: optionseditty;
+//   foptionsedit: optionseditty;
+   foptionsedit1: optionsedit1ty;
    fstatpriority: integer;
    procedure setcontroller(const value: tfiledialogcontroller);
    procedure setstatfile(const Value: tstatfile);
+   procedure readoptionsedit(reader: treader);
   protected
+   procedure defineproperties(filer: tfiler); override;
    //istatfile
    procedure dostatread(const reader: tstatreader);
    procedure dostatwrite(const writer: tstatwriter);
@@ -267,11 +270,13 @@ type
    property statvarname: msestring read getstatvarname write fstatvarname;
    property statpriority: integer read fstatpriority 
                                        write fstatpriority default 0;
-   property controller: tfiledialogcontroller read fcontroller write setcontroller;
+   property controller: tfiledialogcontroller read fcontroller 
+                                                        write setcontroller;
    property dialogkind: filedialogkindty read fdialogkind write fdialogkind
                                                            default fdk_none;
-   property optionsedit: optionseditty read foptionsedit write foptionsedit
-                                  default defaultfiledialogoptionsedit;
+//   property optionsedit: optionseditty read foptionsedit write setoptionsedit;
+   property optionsedit1: optionsedit1ty read foptionsedit1 write foptionsedit1
+                                  default defaultfiledialogoptionsedit1;
  end;
 
  tcustomfilenameedit1 = class;
@@ -1922,7 +1927,8 @@ end;
 
 constructor tfiledialog.create(aowner: tcomponent);
 begin
- foptionsedit:= defaultfiledialogoptionsedit;
+// foptionsedit:= defaultfiledialogoptionsedit;
+ foptionsedit1:= defaultfiledialogoptionsedit1;
  fcontroller:= tfiledialogcontroller.create(nil);
  inherited;
 end;
@@ -1956,26 +1962,26 @@ end;
 
 procedure tfiledialog.dostatread(const reader: tstatreader);
 begin
- if canstatvalue(foptionsedit,reader) then begin
+ if canstatvalue(foptionsedit1,reader) then begin
   fcontroller.readstatvalue(reader);
  end;
- if canstatstate(foptionsedit,reader) then begin
+ if canstatstate(foptionsedit1,reader) then begin
   fcontroller.readstatstate(reader);
  end;
- if canstatoptions(foptionsedit,reader) then begin
+ if canstatoptions(foptionsedit1,reader) then begin
   fcontroller.readstatoptions(reader);
  end;
 end;
 
 procedure tfiledialog.dostatwrite(const writer: tstatwriter);
 begin
- if canstatvalue(foptionsedit,writer) then begin
+ if canstatvalue(foptionsedit1,writer) then begin
   fcontroller.writestatvalue(writer);
  end;
- if canstatstate(foptionsedit,writer) then begin
+ if canstatstate(foptionsedit1,writer) then begin
   fcontroller.writestatstate(writer);
  end;
- if canstatoptions(foptionsedit,writer) then begin
+ if canstatoptions(foptionsedit1,writer) then begin
   fcontroller.writestatoptions(writer);
  end;
 end;
@@ -2009,6 +2015,24 @@ end;
 function tfiledialog.getstatpriority: integer;
 begin
  result:= fstatpriority;
+end;
+
+procedure tfiledialog.readoptionsedit(reader: treader);
+var
+ opt1: optionseditty;
+begin
+ opt1:= optionseditty(reader.readset(typeinfo(optionseditty)));
+ updatebit(longword(foptionsedit1),ord(oe1_savevalue),oe_savevalue in opt1);
+ updatebit(longword(foptionsedit1),ord(oe1_savestate),oe_savestate in opt1);
+ updatebit(longword(foptionsedit1),ord(oe1_saveoptions),oe_saveoptions in opt1);
+ updatebit(longword(foptionsedit1),ord(oe1_checkvalueafterstatread),
+                                     oe_checkvaluepaststatread in opt1);
+end;
+
+procedure tfiledialog.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('optionsedit',@readoptionsedit,nil,false);
 end;
 
 { tfilenameeditcontroller }

@@ -192,6 +192,7 @@ type
    procedure updatecoloptions(const aoptions: coloptionsty);
    procedure updatecoloptions1(const aoptions: coloptions1ty);
    procedure setoptionsedit(const avalue: optionseditty); override;
+   procedure setoptionsedit1(const avalue: optionsedit1ty); override;
    procedure statdataread; virtual;
    procedure griddatasourcechanged; virtual;
   {$ifdef mse_with_ifi}
@@ -1913,7 +1914,7 @@ begin
    updatedatalist;
   end;
   fgriddatalink:= tcustomwidgetgrid1(fgridintf.getgrid).getgriddatalink;
-  fgridintf.updateeditoptions(foptionsedit);
+  fgridintf.updateeditoptions(foptionsedit,feditor.optionsedit1);
   if (ow1_autoscale in foptionswidget1) and
               (foptionswidget1 * [ow1_fontglyphheight,ow1_fontlineheight] <> []) then begin
    fgridintf.getcol.grid.datarowheight:= bounds_cy;
@@ -1938,15 +1939,12 @@ end;
 procedure tcustomdataedit.updatecoloptions(const aoptions: coloptionsty);
 var
  opt1: optionseditty;
+ opt2: optionsedit1ty;
 begin
  opt1:= foptionsedit;
- fgridintf.coloptionstoeditoptions(opt1);
+ fgridintf.coloptionstoeditoptions(opt1,opt2);
  optionsedit:= opt1;
-end;
-
-procedure tcustomdataedit.updatecoloptions1(const aoptions: coloptions1ty);
-begin
- //dummy
+ optionsedit1:= opt2;
 end;
 
 procedure tcustomdataedit.setoptionsedit(const avalue: optionseditty);
@@ -1954,9 +1952,22 @@ begin
  if foptionsedit <> avalue then begin
   inherited;
   if fgridintf <> nil then begin
-   fgridintf.updateeditoptions(foptionsedit);
+   fgridintf.updateeditoptions(foptionsedit,feditor.optionsedit1);
   end;
  end;
+end;
+
+procedure tcustomdataedit.setoptionsedit1(const avalue: optionsedit1ty);
+begin
+ inherited;
+ if fgridintf <> nil then begin
+  fgridintf.updateeditoptions(foptionsedit,feditor.optionsedit1);
+ end;
+end;
+
+procedure tcustomdataedit.updatecoloptions1(const aoptions: coloptions1ty);
+begin
+ //dummy
 end;
 
 procedure tcustomdataedit.statdataread;
@@ -2023,13 +2034,13 @@ end;
 procedure tcustomdataedit.dostatwrite(const writer: tstatwriter);
 begin
  if not (des_isdb in fstate) and (fgridintf = nil) and 
-                        canstatvalue(foptionsedit,writer) then begin
+                        canstatvalue(optionsedit1,writer) then begin
   writestatvalue(writer);
  end;
- if canstatstate(foptionsedit,writer) then begin
+ if canstatstate(optionsedit1,writer) then begin
   writestatstate(writer);
  end;
- if canstatoptions(foptionsedit,writer) then begin
+ if canstatoptions(optionsedit1,writer) then begin
   writestatoptions(writer);
  end;
 end;
@@ -2038,14 +2049,14 @@ procedure tcustomdataedit.dostatread(const reader: tstatreader);
 begin
  exclude(fstate,des_valueread);
  if not (des_isdb in fstate) and (fgridintf = nil)
-                     and canstatvalue(foptionsedit,reader) then begin
+                     and canstatvalue(optionsedit1,reader) then begin
   readstatvalue(reader);
   include(fstate,des_valueread);
  end;
- if canstatstate(foptionsedit,reader) then begin
+ if canstatstate(optionsedit1,reader) then begin
   readstatstate(reader);
  end;
- if canstatoptions(foptionsedit,reader) then begin
+ if canstatoptions(optionsedit1,reader) then begin
   readstatoptions(reader);
  end;
 end;
@@ -2059,7 +2070,7 @@ procedure tcustomdataedit.statread;
 var
  bo1: boolean;
 begin
- if (oe_checkvaluepaststatread in foptionsedit) and 
+ if (oe1_checkvalueafterstatread in optionsedit1) and 
                       (des_valueread in fstate) then begin
   bo1:= des_statreading in fstate;
   include(fstate,des_statreading);
@@ -5313,7 +5324,8 @@ begin
   end;
 }
   rea1:= reapplyrange(rea1,fvaluerange,fvaluestart);
-  if not ((des_isdb in fstate) and (rea1 = emptyreal)) then begin
+  if not (((des_isdb in fstate) or (oe_null in foptionsedit)) and 
+                                         (rea1 = emptyreal)) then begin
    if (cmprealty(fmin,rea1) > 0) or (cmprealty(fmax,rea1) < 0) then begin
     rangeerror(fmin,fmax,quiet);
     accept:= false;

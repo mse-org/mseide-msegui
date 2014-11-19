@@ -360,6 +360,8 @@ type
   end;
 
   TAbstractObjectReader = class
+  protected
+   freader: treader;
   public
     function NextValue: TValueType; virtual; abstract;
     function ReadValue: TValueType; virtual; abstract;
@@ -446,6 +448,10 @@ type
     procedure SkipValue; override;
   end;
 
+  seterroreventty = procedure (const reader: treader;
+                    const atype: ptypeinfo; const aitemname: string;
+                                            var avalue: integer) of object;
+
   treader = class(tfiler)
   private
     FDriver: TAbstractObjectReader;
@@ -464,6 +470,7 @@ type
     FPropName: string;
     FCanHandleExcepts: Boolean;
     FOnReadStringProperty:TReadWriteStringPropertyEvent;
+    fonseterror: seterroreventty;
     procedure DoFixupReferences;
     function FindComponentClass(const AClassName: string): TComponentClass;
   protected
@@ -529,15 +536,24 @@ type
     property Owner: tcomponent read FOwner write FOwner;
     property Parent: tcomponent read FParent write FParent;
     property OnError: TReaderError read FOnError write FOnError;
-    property OnPropertyNotFound: TPropertyNotFoundEvent read FOnPropertyNotFound write FOnPropertyNotFound;
-    property OnFindMethod: TFindMethodEvent read FOnFindMethod write FOnFindMethod;
-    property OnSetMethodProperty: TSetMethodPropertyEvent read FOnSetMethodProperty write FOnSetMethodProperty;
+    property OnPropertyNotFound: TPropertyNotFoundEvent 
+                            read FOnPropertyNotFound write FOnPropertyNotFound;
+    property OnFindMethod: TFindMethodEvent read FOnFindMethod 
+                                                           write FOnFindMethod;
+    property OnSetMethodProperty: TSetMethodPropertyEvent 
+                           read FOnSetMethodProperty write FOnSetMethodProperty;
     property OnSetName: TSetNameEvent read FOnSetName write FOnSetName;
-    property OnReferenceName: TReferenceNameEvent read FOnReferenceName write FOnReferenceName;
-    property OnAncestorNotFound: TAncestorNotFoundEvent read FOnAncestorNotFound write FOnAncestorNotFound;
-    property OnCreateComponent: TCreateComponentEvent read FOnCreateComponent write FOnCreateComponent;
-    property OnFindComponentClass: TFindComponentClassEvent read FOnFindComponentClass write FOnFindComponentClass;
-    property OnReadStringProperty: TReadWriteStringPropertyEvent read FOnReadStringProperty write FOnReadStringProperty;
+    property OnReferenceName: TReferenceNameEvent read FOnReferenceName 
+                                                      write FOnReferenceName;
+    property OnAncestorNotFound: TAncestorNotFoundEvent 
+                          read FOnAncestorNotFound write FOnAncestorNotFound;
+    property OnCreateComponent: TCreateComponentEvent 
+                           read FOnCreateComponent write FOnCreateComponent;
+    property OnFindComponentClass: TFindComponentClassEvent 
+                        read FOnFindComponentClass write FOnFindComponentClass;
+    property OnReadStringProperty: TReadWriteStringPropertyEvent 
+                        read FOnReadStringProperty write FOnReadStringProperty;
+    property onseterror: seterroreventty read fonseterror write fonseterror;
   end;
 
   TAbstractObjectWriter = class
@@ -4442,8 +4458,19 @@ begin
       if Length(Name) = 0 then
         break;
       Value := GetEnumValue(PTypeInfo(EnumType), Name);
-      if Value = -1 then
+      if Value = -1 then begin
+       if (freader <> nil) and assigned(freader.fonseterror) then begin
+        freader.fonseterror(freader,enumtype,name,value);
+       end;
+       if value = -1 then begin
         raise EReadError.Create(SInvalidPropertyValue);
+       end
+       else begin
+        if value = -2 then begin
+         continue; //skip
+        end;
+       end;
+      end;
       include(tset(result),Value);
     end;
   except
@@ -5722,6 +5749,7 @@ begin
   If (Stream=Nil) then
     Raise EReadError.Create(SEmptyStreamIllegalReader);
   FDriver := CreateDriver(Stream, BufSize);
+  fdriver.freader:= self;
 end;
 
 destructor TReader.Destroy;

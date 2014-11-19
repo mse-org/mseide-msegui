@@ -19,8 +19,8 @@ uses
 const
  defaultsnapdist = 4;
  markersnapdist = 2;
- defaultchartoptionsedit = [oe_checkvaluepaststatread,oe_savevalue,
-                                                             oe_savestate];
+ defaultchartoptionsedit1 = [oe1_checkvalueafterstatread,oe1_savevalue,
+                                                             oe1_savestate];
  defaultcharteditoptionswidget = defaultchartoptionswidget + [ow_mousefocus]; 
  
 type
@@ -51,6 +51,7 @@ type
   private
    factivetrace: integer;
    foptionsedit: optionseditty;
+   foptionsedit1: optionsedit1ty;
    fobjectpicker: tobjectpicker;
    fsnapdist: integer;
    foffsetmin: pointty;
@@ -148,8 +149,10 @@ type
    property readonly: boolean read getreadonly write setreadonly;
    property activetrace: integer read factivetrace 
                            write setactivetrace default 0;
-   property optionsedit: optionseditty read foptionsedit 
-                           write setoptionsedit default defaultchartoptionsedit;
+   property optionsedit: optionseditty read foptionsedit write setoptionsedit 
+                                                  default defaultoptionsedit;
+   property optionsedit1: optionsedit1ty read foptionsedit1 write foptionsedit1
+                                               default defaultchartoptionsedit1;
    property snapdist: integer read fsnapdist write fsnapdist 
                                               default defaultsnapdist;
    property options: charteditoptionsty read foptions
@@ -355,7 +358,8 @@ type
 constructor tcustomchartedit.create(aowner: tcomponent);
 begin
  fsnapdist:= defaultsnapdist;
- foptionsedit:= defaultchartoptionsedit;
+ foptionsedit:= defaultoptionsedit;
+ foptionsedit1:= defaultchartoptionsedit1;
  resetnodehint;
  inherited;
  optionswidget:= defaultcharteditoptionswidget;
@@ -1566,7 +1570,7 @@ var
  co1: complexty;
  pt1: pointty;
 begin
- if oe_savestate in foptionsedit then begin
+ if canstatstate(optionsedit1,reader) then begin
   inherited;
   with frame do begin
    co1:= zoom;
@@ -1580,7 +1584,7 @@ begin
   end;
   activetrace:= reader.readinteger('activetrace',activetrace,0,ftraces.count-1);
  end;
- if oe_savevalue in foptionsedit then begin
+ if canstatvalue(optionsedit1,reader) then begin
   doreadvalue(reader);
  end;
 end;
@@ -1590,7 +1594,7 @@ var
  co1: complexty;
  pt1: pointty;
 begin
- if oe_savestate in foptionsedit then begin
+ if canstatstate(optionsedit1,writer) then begin
   inherited;
   with frame do begin
    co1:= zoom;
@@ -1602,7 +1606,7 @@ begin
   end;
   writer.writeinteger('activetrace',activetrace);
  end;
- if oe_savevalue in foptionsedit then begin
+ if canstatvalue(optionsedit1,writer) then begin
   dowritevalue(writer);
  end;
 end;
@@ -1610,7 +1614,7 @@ end;
 procedure tcustomchartedit.statread;
 begin
  inherited;
- if (oe_checkvaluepaststatread in foptionsedit) and hasactivetrace then begin
+ if (oe1_checkvalueafterstatread in foptionsedit1) and hasactivetrace then begin
   checkvalue;
  end;
 end;
@@ -1699,13 +1703,14 @@ end;
 procedure tcustomchartedit.setoptionsedit(const avalue: optionseditty);
 begin
  if foptionsedit <> avalue then begin
-  foptionsedit:= avalue;
+  transferoptionsedit(self,avalue,foptionsedit,foptionsedit1);
   if oe_readonly in foptionsedit then begin
    fobjectpicker.options:= fobjectpicker.options - [opo_rectselect];
   end
   else begin
    fobjectpicker.options:= fobjectpicker.options + [opo_rectselect];
   end;
+  
  end;
 end;
 

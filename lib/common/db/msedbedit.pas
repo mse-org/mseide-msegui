@@ -1974,17 +1974,20 @@ type
 //   procedure setdatasource(const Value: tdatasource);
    function getdatacols: tdbstringcols;
    procedure setdatacols(const avalue: tdbstringcols);
+
     //iwidgetgrid (dummy)
    function getbrushorigin: pointty;
    function getcol: twidgetcol;
    procedure getdata(var index: integer; var dest);
-   procedure setdata(var index: integer; const source; const noinvalidate: boolean = false);
+   procedure setdata(var index: integer; const source;
+                                       const noinvalidate: boolean = false);
    procedure datachange(const arow: integer);
    function getrow: integer;
    procedure setrow(arow: integer);
    procedure changed;
    function empty(index: integer): boolean;
-   procedure updateeditoptions(var aoptions: optionseditty);
+   procedure updateeditoptions(var aoptions: optionseditty;
+                                    const aoptions1: optionsedit1ty);
    procedure showrect(const arect: rectty; const aframe: tcustomframe);
    procedure widgetpainted(const canvas: tcanvas);
    function nullcheckneeded(const newfocus: twidget): boolean;
@@ -2041,7 +2044,8 @@ type
    procedure dodeleterow(const sender: tobject); override;
    procedure beforefocuscell(const cell: gridcoordty;
                              const selectaction: focuscellactionty); override;
-   procedure coloptionstoeditoptions(var dest: optionseditty);
+   procedure coloptionstoeditoptions(var dest: optionseditty; 
+                                                  var dest1: optionsedit1ty);
    function isfirstrow: boolean; override;
    function islastrow: boolean; override;
    procedure defineproperties(filer: tfiler); override;
@@ -9707,7 +9711,8 @@ begin
  result:= false;
 end;
 
-procedure tcustomdbstringgrid.updateeditoptions(var aoptions: optionseditty);
+procedure tcustomdbstringgrid.updateeditoptions(var aoptions: optionseditty;
+                                              const aoptions1: optionsedit1ty);
 begin
  //dummy
 end;
@@ -10074,7 +10079,8 @@ begin
  result:= fixcols.dbindicatorcol;
 end;
 
-procedure tcustomdbstringgrid.coloptionstoeditoptions(var dest: optionseditty);
+procedure tcustomdbstringgrid.coloptionstoeditoptions(var dest: optionseditty;
+                                                    var dest1: optionsedit1ty);
 begin
  //dummy
 end;

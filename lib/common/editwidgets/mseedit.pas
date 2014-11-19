@@ -334,7 +334,6 @@ type
    procedure setcaretwidth(const Value: integer);   
    procedure setcursorreadonly(const avalue: cursorshapety);
    function getoptionsedit1: optionsedit1ty;
-   procedure setoptionsedit1(const avalue: optionsedit1ty);
   protected
    ftextflags: textflagsty;
    ftextflagsactive: textflagsty;
@@ -382,6 +381,8 @@ type
    procedure writepwchar(writer: twriter);
    procedure defineproperties(filer: tfiler); override;
    function verticalfontheightdelta: boolean; override;
+   procedure setoptionsedit1(const avalue: optionsedit1ty); virtual;
+
      //iedit
    function getoptionsedit: optionseditty; virtual;
    function hasselection: boolean; virtual;
@@ -408,7 +409,7 @@ type
    property editor: tinplaceedit read feditor;
    property readonly: boolean read getreadonly write setreadonly;
    property optionsedit: optionseditty read getoptionsedit write setoptionsedit
-                   default defaultoptionsedit;
+                                                     default defaultoptionsedit;
    property optionsedit1: optionsedit1ty read getoptionsedit1 
                              write setoptionsedit1 default defaultoptionsedit1;
    property passwordchar: msechar read getpasswordchar
@@ -425,13 +426,15 @@ type
    property textflagsactive: textflagsty read ftextflagsactive
                   write settextflagsactive default defaulttextflagsactive;
    property font: twidgetfont read getfont write setfont stored isfontstored;
-   property caretwidth: integer read getcaretwidth write setcaretwidth default defaultcaretwidth;
+   property caretwidth: integer read getcaretwidth write setcaretwidth 
+                                                    default defaultcaretwidth;
    property onchange: notifyeventty read fonchange write fonchange;
-   property ontextedited: texteditedeventty read fontextedited write fontextedited;
+   property ontextedited: texteditedeventty read fontextedited 
+                                                           write fontextedited;
    property oncopytoclipboard: updatestringeventty read foncopytoclipboard 
                   write foncopytoclipboard;
-   property onpastefromclipboard: updatestringeventty read fonpastefromclipboard 
-                  write fonpastefromclipboard;
+   property onpastefromclipboard: updatestringeventty 
+                read fonpastefromclipboard write fonpastefromclipboard;
    property onpaintimage: painteventty read fonpaintimage write fonpaintimage;
   published
    property optionswidget1 default defaulteditwidgetoptions1; //first!
@@ -1131,7 +1134,7 @@ begin
  inherited;
 // cursor:= cr_ibeam;
  fcursorreadonly:= cr_default;
- optionsedit:= defaultoptionsedit;
+ foptionsedit:= defaultoptionsedit;
  fwidgetrect.cx:= defaulteditwidgetwidth;
  fwidgetrect.cy:= defaulteditwidgetheight;
  if feditor = nil then begin
@@ -1316,16 +1319,22 @@ var
  opt1: optionsedit1ty;
 begin
  if foptionsedit <> avalue then begin
+  opt1:= feditor.optionsedit1;
+  transferoptionsedit(self,avalue,foptionsedit,opt1);
+  {
   foptionsedit:= avalue - deprecatedoptionsedit;
   if (csreading in componentstate) and 
                            (avalue * deprecatedoptionsedit <> []) then begin
    opt1:= feditor.optionsedit1;
-   updatebit({$ifdef FPC}longword{$else}byte{$endif}(opt1),
-                      ord(oe1_autopopupmenu),oe_autopopupmenu in avalue);
-   updatebit({$ifdef FPC}longword{$else}byte{$endif}(opt1),
-                      ord(oe1_keyexecute),oe_keyexecute in avalue);
+   updatebit(longword(opt1),ord(oe1_savevalue),oe_savevaluex in avalue);
+   updatebit(longword(opt1),ord(oe1_savestate),oe_savestatex in avalue);
+   updatebit(longword(opt1),ord(oe1_saveoptions),oe_saveoptionsx in avalue);
+   updatebit(longword(opt1),ord(oe1_checkvalueafterstatread),
+                                     oe_checkvaluepaststatreadx in avalue);
    feditor.optionsedit1:= opt1;
   end;
+  }
+  feditor.optionsedit1:= opt1;
   updatereadonlystate;
  end;
 end;
@@ -1779,7 +1788,7 @@ end;
 
 procedure tedit.statread;
 begin
- if (oe_checkvaluepaststatread in foptionsedit) then begin
+ if (oe1_checkvalueafterstatread in optionsedit1) then begin
   dotextedited;
  end;
 end;
