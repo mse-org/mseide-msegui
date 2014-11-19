@@ -557,6 +557,8 @@ type
   end;
 
   TAbstractObjectWriter = class
+  protected
+   fwriter: twriter;
   public
     { Begin/End markers. Those ones who don't have an end indicator, use
       "EndList", after the occurrence named in the comment. Note that this
@@ -6925,6 +6927,7 @@ begin
   If (Stream=Nil) then
     Raise EWriteError.Create(SEmptyStreamIllegalWriter);
   FDriver := CreateDriver(Stream, BufSize);
+  fdriver.fwriter:= self;
   FDestroyDriver := True;
 end;
 
