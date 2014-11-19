@@ -100,7 +100,7 @@ object watchpointsfo: twatchpointsfo
     fixrows.count = 1
     fixrows.items = <    
       item
-        height = 15
+        height = 16
         captions.count = 7
         captions.items = <        
           item
@@ -169,10 +169,10 @@ object watchpointsfo: twatchpointsfo
         widgetname = 'wptcondition'
         dataclass = tgridmsestringdatalist
       end>
-    datarowheight = 15
+    datarowheight = 16
     statfile = mainfo.projectstatfile
     onrowsdeleting = deleterow
-    reffontheight = 13
+    reffontheight = 14
     object wpton: tbooleanedit
       optionsskin = [osk_framebuttononly]
       frame.levelo = 0
@@ -183,8 +183,8 @@ object watchpointsfo: twatchpointsfo
       bounds_x = 0
       bounds_y = 0
       bounds_cx = 16
-      bounds_cy = 15
-      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_savestate, oe_autopopupmenu]
+      bounds_cy = 16
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_savestate]
       visible = False
       onsetvalue = wptononsetvalue
     end
@@ -200,7 +200,7 @@ object watchpointsfo: twatchpointsfo
       bounds_x = 17
       bounds_y = 0
       bounds_cx = 33
-      bounds_cy = 15
+      bounds_cy = 16
       textflags = [tf_xcentered, tf_ycentered, tf_noselect]
       ondataentered = wptondataentered
       dropdown.cols.count = 1
@@ -216,7 +216,7 @@ object watchpointsfo: twatchpointsfo
       valuedefault = 0
       min = 0
       max = 2
-      reffontheight = 13
+      reffontheight = 14
     end
     object wptexpression: tstringedit
       optionswidget1 = [ow1_fontglyphheight]
@@ -231,9 +231,9 @@ object watchpointsfo: twatchpointsfo
       bounds_x = 51
       bounds_y = 0
       bounds_cx = 158
-      bounds_cy = 15
+      bounds_cy = 16
       ondataentered = wptondataentered
-      reffontheight = 13
+      reffontheight = 14
     end
     object wptno: tintegeredit
       optionswidget1 = [ow1_fontglyphheight]
@@ -248,10 +248,10 @@ object watchpointsfo: twatchpointsfo
       bounds_x = 210
       bounds_y = 0
       bounds_cx = 9
-      bounds_cy = 15
+      bounds_cy = 16
       optionsedit1 = [oe1_autopopupmenu]
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_savestate]
-      reffontheight = 13
+      reffontheight = 14
     end
     object wptcount: tintegeredit
       optionswidget1 = [ow1_fontglyphheight]
@@ -266,10 +266,10 @@ object watchpointsfo: twatchpointsfo
       bounds_x = 220
       bounds_y = 0
       bounds_cx = 34
-      bounds_cy = 15
+      bounds_cy = 16
       optionsedit1 = [oe1_autopopupmenu]
       optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_savestate]
-      reffontheight = 13
+      reffontheight = 14
     end
     object wptignore: tintegeredit
       optionswidget1 = [ow1_fontglyphheight]
@@ -284,10 +284,10 @@ object watchpointsfo: twatchpointsfo
       bounds_x = 255
       bounds_y = 0
       bounds_cx = 38
-      bounds_cy = 15
+      bounds_cy = 16
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_forcereturncheckvalue, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_savevalue, oe_savestate]
       ondataentered = wptondataentered
-      reffontheight = 13
+      reffontheight = 14
     end
     object wptcondition: tstringedit
       optionswidget1 = [ow1_fontglyphheight]
@@ -302,9 +302,9 @@ object watchpointsfo: twatchpointsfo
       bounds_x = 294
       bounds_y = 0
       bounds_cx = 174
-      bounds_cy = 15
+      bounds_cy = 16
       ondataentered = wptondataentered
-      reffontheight = 13
+      reffontheight = 14
     end
   end
   object gripopup: tpopupmenu

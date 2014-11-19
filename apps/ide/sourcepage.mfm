@@ -74,7 +74,7 @@ object sourcepage: tsourcepage
     onrowsinserted = gridonrowsinserted
     onrowsdeleted = gridonrowsdeleted
     oncellevent = gridoncellevent
-    reffontheight = 13
+    reffontheight = 14
     object edit: tsyntaxedit
       optionsskin = [osk_framebuttononly]
       taborder = 1
@@ -105,7 +105,7 @@ object sourcepage: tsourcepage
       bounds_y = 0
       bounds_cx = 15
       bounds_cy = 18
-      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_savestate, oe_autopopupmenu]
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_savestate]
       options = [bo_executeonkey, bo_executeonshortcut, bo_executedefaultonenterkey]
       visible = False
       valuedefault = -2147483648
@@ -139,14 +139,14 @@ object sourcepage: tsourcepage
     frame.dummy = 0
     taborder = 2
     bounds_x = 0
-    bounds_y = 210
+    bounds_y = 209
     bounds_cx = 68
-    bounds_cy = 17
+    bounds_cy = 18
     anchors = [an_left, an_bottom]
     optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_hintclippedtext, oe_savevalue, oe_savestate, oe_checkvaluepaststatread]
     textflags = [tf_xcentered, tf_ycentered]
     textflagsactive = [tf_xcentered, tf_ycentered]
-    reffontheight = 13
+    reffontheight = 14
   end
   object pathdisp: tstringedit
     optionsskin = [osk_framebuttononly]
@@ -157,12 +157,12 @@ object sourcepage: tsourcepage
     frame.dummy = 0
     taborder = 1
     bounds_x = 68
-    bounds_y = 210
+    bounds_y = 209
     bounds_cx = 243
-    bounds_cy = 17
+    bounds_cy = 18
     anchors = [an_left, an_right, an_bottom]
     optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_caretonreadonly, oe_focusrectonreadonly, oe_hintclippedtext, oe_savevalue, oe_savestate, oe_checkvaluepaststatread]
     textflags = [tf_ycentered, tf_ellipseleft]
-    reffontheight = 13
+    reffontheight = 14
   end
 end

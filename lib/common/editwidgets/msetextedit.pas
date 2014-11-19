@@ -117,6 +117,7 @@ type
    ffilerights: filerightsty;
    flines: tgridrichstringdatalist;
    procedure setoptionsedit(const avalue: optionseditty); override;
+   procedure setoptionsedit1(const avalue: optionsedit1ty); override;
 
    function beforechange: boolean; //true if not aborted
    procedure fontchanged; override;
@@ -684,8 +685,12 @@ begin
 end;
 
 procedure tcustomtextedit.updatecoloptions(const aoptions: coloptionsty);
+var
+ opt1: optionsedit1ty;
 begin
- fgridintf.coloptionstoeditoptions(foptionsedit);
+ opt1:= feditor.optionsedit1;
+ fgridintf.coloptionstoeditoptions(foptionsedit,opt1);
+ feditor.optionsedit1:= opt1;
 end;
 
 procedure tcustomtextedit.updatecoloptions1(const aoptions: coloptions1ty);
@@ -730,8 +735,16 @@ begin
  if foptionsedit <> opt1 then begin
   inherited setoptionsedit(opt1);
   if fgridintf <> nil then begin
-   fgridintf.updateeditoptions(foptionsedit);
+   fgridintf.updateeditoptions(foptionsedit,feditor.optionsedit1);
   end;
+ end;
+end;
+
+procedure tcustomtextedit.setoptionsedit1(const avalue: optionsedit1ty);
+begin
+ inherited;
+ if fgridintf <> nil then begin
+  fgridintf.updateeditoptions(foptionsedit,feditor.optionsedit1);
  end;
 end;
 
@@ -1017,26 +1030,26 @@ end;
 }
 procedure tcustomtextedit.dostatread(const reader: tstatreader);
 begin
- if (fgridintf = nil) and canstatvalue(foptionsedit,reader) then begin
+ if (fgridintf = nil) and canstatvalue(feditor.optionsedit1,reader) then begin
 //   value:= reader.readmsestring(valuevarname,value);
  end;
- if canstatstate(foptionsedit,reader) then begin
+ if canstatstate(feditor.optionsedit1,reader) then begin
 //  readstatstate(reader);
  end;
- if canstatoptions(foptionsedit,reader) then begin
+ if canstatoptions(feditor.optionsedit1,reader) then begin
 //  readstatoptions(reader);
  end;
 end;
 
 procedure tcustomtextedit.dostatwrite(const writer: tstatwriter);
 begin
- if (fgridintf = nil) and canstatvalue(foptionsedit,writer) then begin
+ if (fgridintf = nil) and canstatvalue(feditor.optionsedit1,writer) then begin
 //   writestatvalue(writer);
  end;
- if canstatstate(foptionsedit,writer) then begin
+ if canstatstate(feditor.optionsedit1,writer) then begin
 //  writestatstate(writer);
  end;
- if canstatoptions(foptionsedit,writer) then begin
+ if canstatoptions(feditor.optionsedit1,writer) then begin
 //  writestatoptions(writer);
  end;
 end;

@@ -682,7 +682,8 @@ type
    function getcursor(const arow: integer; 
                         const actcellzone: cellzonety): cursorshapety; virtual;
    function getdatastatname: msestring;
-   procedure coloptionstoeditoptions(var dest: optionseditty);
+   procedure coloptionstoeditoptions(var dest: optionseditty;
+                                                 var dest1: optionsedit1ty);
    procedure clean(const start,stop: integer); override;
    function defaultrowheight: integer; virtual;
   public
@@ -6396,10 +6397,11 @@ begin
  end;
 end;
 
-procedure tdatacol.coloptionstoeditoptions(var dest: optionseditty);
+procedure tdatacol.coloptionstoeditoptions(var dest: optionseditty;
+                                              var dest1: optionsedit1ty);
 begin
  updatebit(longword(dest),ord(oe_readonly),isreadonly);
- updatebit(longword(dest),ord(oe_savevalue),co_savevalue in foptions);
+ updatebit(longword(dest1),ord(oe1_savevalue),co_savevalue in foptions);
 end;
 
 procedure tdatacol.dostatread(const reader: tstatreader);

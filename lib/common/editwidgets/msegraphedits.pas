@@ -110,6 +110,7 @@ type
    fstatvarname: msestring;
    fstatfile: tstatfile;
    foptionsedit: optionseditty;
+   foptionsedit1: optionsedit1ty;
    fedited: boolean;
    fvalueread: boolean;
    fstatpriority: integer;
@@ -119,6 +120,7 @@ type
    function getreadonly: boolean;
    procedure setreadonly(const avalue: boolean);
    procedure setedited(const avalue: boolean); virtual;
+   procedure setoptionsedit1(const avalue: optionsedit1ty);
   protected
    fdatalist: tdatalist;
    fgridintf: iwidgetgrid;
@@ -249,8 +251,11 @@ type
                                        write fstatpriority default 0;
    property optionsedit: optionseditty read getoptionsedit write setoptionsedit
                               default defaultoptionsedit;
+   property optionsedit1: optionsedit1ty read foptionsedit1
+                         write setoptionsedit1 default defaultoptionsedit1;
    property onchange: notifyeventty read fonchange write fonchange;
-   property ondataentered: notifyeventty read fondataentered write fondataentered;
+   property ondataentered: notifyeventty read fondataentered 
+                                                    write fondataentered;
 //   property onmouseevent: mouseeventty read fonmouseevent write fonmouseevent;
 //   property onkeydown: keyeventty read fonkeydown write fonkeydown;
  end;
@@ -1532,6 +1537,7 @@ end;
 constructor tgraphdataedit.create(aowner: tcomponent);
 begin
  foptionsedit:= defaultoptionsedit;
+ foptionsedit1:= defaultoptionsedit1;
  inherited;
  fcolorglyph:= cl_glyph;
 end;
@@ -1756,14 +1762,14 @@ procedure tgraphdataedit.dostatread(const reader: tstatreader);
 begin
  fvalueread:= false;
  if not (des_isdb in fstate) and (fgridintf = nil) and 
-                        canstatvalue(foptionsedit,reader) then begin
+                        canstatvalue(foptionsedit1,reader) then begin
   fvalueread:= true;
   readstatvalue(reader);
  end;
- if canstatstate(foptionsedit,reader) then begin
+ if canstatstate(foptionsedit1,reader) then begin
   readstatstate(reader);
  end;
- if canstatoptions(foptionsedit,reader) then begin
+ if canstatoptions(foptionsedit1,reader) then begin
   readstatoptions(reader);
  end;
 end;
@@ -1771,13 +1777,13 @@ end;
 procedure tgraphdataedit.dostatwrite(const writer: tstatwriter);
 begin
  if not (des_isdb in fstate) and (fgridintf = nil) and 
-                                 canstatvalue(foptionsedit,writer) then begin
+                                 canstatvalue(foptionsedit1,writer) then begin
   writestatvalue(writer);
  end;
- if canstatstate(foptionsedit,writer) then begin
+ if canstatstate(foptionsedit1,writer) then begin
   writestatstate(writer);
  end;
- if canstatoptions(foptionsedit,writer) then begin
+ if canstatoptions(foptionsedit1,writer) then begin
   writestatoptions(writer);
  end;
 end;
@@ -1794,7 +1800,7 @@ end;
 
 procedure tgraphdataedit.statread;
 begin
- if (oe_checkvaluepaststatread in foptionsedit) and fvalueread then begin
+ if (oe1_checkvalueafterstatread in foptionsedit1) and fvalueread then begin
   checkvalue;
  end;
 end;
@@ -1969,9 +1975,21 @@ end;
 procedure tgraphdataedit.setoptionsedit(const avalue: optionseditty);
 begin
  if foptionsedit <> avalue then begin
-  foptionsedit:= avalue;
+  transferoptionsedit(self,avalue,foptionsedit,foptionsedit1);
+                           //move deprecated flags
   if fgridintf <> nil then begin
-   fgridintf.updateeditoptions(foptionsedit);
+   fgridintf.updateeditoptions(foptionsedit,foptionsedit1);
+  end;
+  updateoptions;
+ end;
+end;
+
+procedure tgraphdataedit.setoptionsedit1(const avalue: optionsedit1ty);
+begin
+ if foptionsedit1 <> avalue then begin
+  foptionsedit1:= avalue;
+  if fgridintf <> nil then begin
+   fgridintf.updateeditoptions(foptionsedit,foptionsedit1);
   end;
   updateoptions;
  end;
@@ -2044,10 +2062,13 @@ end;
 procedure tgraphdataedit.updatecoloptions(const aoptions: coloptionsty);
 var
  opt1: optionseditty;
+ opt2: optionsedit1ty;
 begin
  opt1:= foptionsedit;
- fgridintf.coloptionstoeditoptions(opt1);
+ opt2:= foptionsedit1;
+ fgridintf.coloptionstoeditoptions(opt1,opt2);
  optionsedit:= opt1;
+ optionsedit1:= opt2;
 end;
 
 procedure tgraphdataedit.updatecoloptions1(const aoptions: coloptions1ty);

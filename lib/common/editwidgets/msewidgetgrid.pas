@@ -45,9 +45,12 @@ type
   procedure changed;
   function empty(index: integer): boolean;
   function cangridcopy: boolean;
-  procedure updateeditoptions(var aoptions: optionseditty);
-  procedure coloptionstoeditoptions(var dest: optionseditty);
-  function showcaretrect(const arect: rectty; const aframe: tcustomframe): pointty;
+  procedure updateeditoptions(var aoptions: optionseditty;
+                                      const aoptions1: optionsedit1ty);
+  procedure coloptionstoeditoptions(var dest: optionseditty;
+                                               var dest1: optionsedit1ty);
+  function showcaretrect(const arect: rectty; 
+                                    const aframe: tcustomframe): pointty;
   procedure widgetpainted(const canvas: tcanvas);
   function nullcheckneeded(const newfocus: twidget): boolean;
   function nonullcheck: boolean;
@@ -134,7 +137,8 @@ type
    procedure setrow(arow: integer);
    function empty(arow: integer): boolean;
    function cangridcopy: boolean;
-   procedure updateeditoptions(var aoptions: optionseditty);
+   procedure updateeditoptions(var aoptions: optionseditty;
+                                           const aoptions1: optionsedit1ty);
    function showcaretrect(const arect: rectty; const aframe: tcustomframe): pointty;
    procedure widgetpainted(const canvas: tcanvas);
    function nullcheckneeded(const newfocus: twidget): boolean;
@@ -1621,11 +1625,12 @@ begin
  result:= tcustomwidgetgrid(fcellinfo.grid).datacols.hasselection;
 end;
 
-procedure twidgetcol.updateeditoptions(var aoptions: optionseditty);
+procedure twidgetcol.updateeditoptions(var aoptions: optionseditty;
+                                           const aoptions1: optionsedit1ty);
 begin
  if not (gps_readonlyupdating in fstate) then begin
   updatebit(longword(foptions),ord(co_readonly),oe_readonly in aoptions);
-  updatebit(longword(foptions),ord(co_savevalue),oe_savevalue in aoptions);
+  updatebit(longword(foptions),ord(co_savevalue),oe1_savevalue in aoptions1);
  end;
 end;
 

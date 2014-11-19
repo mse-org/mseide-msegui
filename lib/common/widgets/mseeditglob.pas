@@ -13,7 +13,8 @@ unit mseeditglob;
 
 interface
 uses
- mseglob,mseguiglob,{msegui,}msetypes,{msegraphics,}msegraphutils;
+ mseglob,mseguiglob,{msegui,}msetypes,{msegraphics,}msegraphutils,
+                                                        classes,mclasses;
 
 type
               //used in MSEifi
@@ -49,22 +50,29 @@ type
                  oe_casesensitive,
                  
                  oe_notnull,
-                 oe_savevalue,oe_savestate,oe_saveoptions,
-                 oe_checkvaluepaststatread,
+                 oe_null, //accept empty value independent of min setting
+                          //in trealedit
+                          
+                 oe_savevalue,oe_savestate,oe_saveoptions, //deprecated,
+                 oe_checkvaluepaststatread           //moved to optionsedit1ty                 
                  
-                 oe_autopopupmenu, //deprecated, moved to optionsedit1ty
-                 oe_keyexecute 
+//                 oe_autopopupmenu, //deprecated, moved to optionsedit1ty
+//                 oe_keyexecute 
                  );
  optionseditty = set of optioneditty;
 const
- deprecatedoptionsedit = [oe_autopopupmenu,oe_keyexecute];
- invisibleoptionsedit = [ord(oe_autopopupmenu),ord(oe_keyexecute)];
+ deprecatedoptionsedit = [oe_savevalue,oe_savestate,
+                          oe_saveoptions,oe_checkvaluepaststatread];
+ invisibleoptionsedit = [ord(oe_savevalue),ord(oe_savestate),
+                         ord(oe_saveoptions),ord(oe_checkvaluepaststatread)];
  
 type
  optionedit1ty = (oe1_noselectall,oe1_multiline,
                   oe1_autopopupmenu, 
                   oe1_keyexecute,    //alt+down-key starts dialog
-                  oe1_readonlydialog);
+                  oe1_readonlydialog,
+                  oe1_savevalue,oe1_savestate,oe1_saveoptions,
+                  oe1_checkvalueafterstatread);
  optionsedit1ty = set of optionedit1ty;
 
  dataeditstatety = (des_edited,des_emptytext,des_grayed,
@@ -121,10 +129,9 @@ const
                        oe_autoselect,oe_endonenter,
                        oe_autoselectonfirstclick,
                        oe_resetselectonexit,
-//                       oe_autopopupmenu,oe_keyexecute,
-                       oe_checkvaluepaststatread,oe_savevalue,oe_savestate,
                        oe_checkmrcancel];
- defaultoptionsedit1 = [oe1_autopopupmenu,oe1_keyexecute];
+ defaultoptionsedit1 = [oe1_autopopupmenu,oe1_keyexecute,
+               oe1_checkvalueafterstatread,oe1_savevalue,oe1_savestate];
  
  nullcoord: gridcoordty = (col: 0; row: 0);
  invalidcell: gridcoordty = (col: invalidaxis; row: invalidaxis);
@@ -149,8 +156,15 @@ function mgr(const start,stop: gridcoordty): gridrectty;  overload;
 
 function gridcoordisequal(const a,b: gridcoordty): boolean;
 
+procedure transferoptionsedit(const sender: tcomponent;
+                 const source: optionseditty; var dest: optionseditty; 
+                                              var dest1: optionsedit1ty);
+                 //move deprecated flags
+                 
 implementation
-
+uses
+ msebits;
+ 
 function makegridcoord(col: integer; row: integer): gridcoordty;
 begin
  result.col:= col;
@@ -230,6 +244,24 @@ begin
   result.row:= stop.row;
   result.rowcount:= start.row - stop.row + 1;
  end;
+end;
+
+procedure transferoptionsedit(const sender: tcomponent;
+                 const source: optionseditty; var dest: optionseditty; 
+                                              var dest1: optionsedit1ty);
+begin
+  dest:= source - deprecatedoptionsedit;
+  if (csreading in sender.componentstate) and 
+                           (source * deprecatedoptionsedit <> []) then begin
+   updatebit(longword(dest1),ord(oe1_savevalue),
+                                           oe_savevalue in source);
+   updatebit(longword(dest1),ord(oe1_savestate),
+                                           oe_savestate in source);
+   updatebit(longword(dest1),ord(oe1_saveoptions),
+                                           oe_saveoptions in source);
+   updatebit(longword(dest1),ord(oe1_checkvalueafterstatread),
+                                        oe_checkvaluepaststatread in source);
+  end;
 end;
 
 end.

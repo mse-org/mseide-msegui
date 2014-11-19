@@ -1,5 +1,10 @@
 MSEide+MSEgui breaking changes version history
 
+2014-11-19
+ tdataedit.optionsedit oe_savevalue,oe_savestate,oe_saveoptions,
+ oe_checkvaluepaststatread -> optionsedit1 oe1_savevalue,oe1_savestate,
+ oe1_saveoptions,oe1_checkvalueafterstatread.
+ tfiledialog.optionseedit -> optionsedit1.
 2014-11-16
  Type of "onshortcut" is "shortcuteventty" with an additional "origin" 
  parameter.

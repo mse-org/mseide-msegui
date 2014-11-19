@@ -20,7 +20,7 @@ type
  tasinheritedreader = class;
  tasinheritedobjectreader = class(tbinaryobjectreader)
   protected
-   freader: tasinheritedreader;
+//   freader: tasinheritedreader;
    procedure findexistingcomponent(child: tcomponent);
   public
    procedure begincomponent(var flags: tfilerflags; var achildpos: integer;
@@ -112,9 +112,10 @@ end;
 
 procedure tasinheritedobjectreader.findexistingcomponent(child: tcomponent);
 begin
- if (freader.fexistingcomp = nil) and 
-     (stringicompupper(child.name,freader.fexistingcompname) = 0) then begin
-  freader.fexistingcomp:= child;
+ if (tasinheritedreader(freader).fexistingcomp = nil) and 
+     (stringicompupper(child.name,
+              tasinheritedreader(freader).fexistingcompname) = 0) then begin
+  tasinheritedreader(freader).fexistingcomp:= child;
  end;
 end;
 
@@ -124,15 +125,16 @@ var
  comp1: tcomponent;
 begin
  inherited;
- freader.fexistingcomp:= nil;
- if (freader.lookuproot = nil) or freader.fforceinherited then begin
+ tasinheritedreader(freader).fexistingcomp:= nil;
+ if (tasinheritedreader(freader).lookuproot = nil) or 
+          tasinheritedreader(freader).fforceinherited then begin
   include(flags,ffinherited);
  end
  else begin
   comp1:= freader.parent;
-  freader.fexistingcomp:= nil;
-  freader.fexistingcompname:= struppercase(compname);
-  while (freader.fexistingcomp = nil) and (comp1 <> nil) do begin
+  tasinheritedreader(freader).fexistingcomp:= nil;
+  tasinheritedreader(freader).fexistingcompname:= struppercase(compname);
+  while (tasinheritedreader(freader).fexistingcomp = nil) and (comp1 <> nil) do begin
    tcomponent1(freader.parent).getchildren(
                       {$ifdef FPC}@{$endif}findexistingcomponent,comp1);
    if comp1 = freader.root then begin
@@ -140,11 +142,11 @@ begin
    end;
    comp1:= comp1.owner;
   end;
-  if freader.fexistingcomp = nil then begin
-   freader.fexistingcomp:= freader.lookuproot.findcomponent(compname);
+  if tasinheritedreader(freader).fexistingcomp = nil then begin
+   tasinheritedreader(freader).fexistingcomp:= freader.lookuproot.findcomponent(compname);
   end;
   exclude(flags,ffinherited);
-  if freader.fexistingcomp <> nil then begin
+  if tasinheritedreader(freader).fexistingcomp <> nil then begin
    include(flags,ffinherited);
   end;
  end;
