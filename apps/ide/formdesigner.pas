@@ -2042,9 +2042,9 @@ begin
   snaptogrid:= e.snaptogrid;
   gridsizex:= e.gridsizex;
   gridsizey:= e.gridsizey;
-  if e.formdesignerdocking xor (frame.grip_size <> 0) then begin
+  if not e.noformdesignerdocking xor (frame.grip_size <> 0) then begin
    beginplacement();
-   if e.formdesignerdocking then begin
+   if not e.noformdesignerdocking then begin
     frame.grip_size:= 10;
    end
    else begin

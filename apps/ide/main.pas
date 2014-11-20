@@ -42,6 +42,62 @@ const
  idecaption = 'MSEide';
 
 type
+ stringconsts = (
+  unresreferences,    //0 Unresolved references in
+  str_to,             //1 to
+  wishsearch,         //2 Do you wish to search the formfile?
+  warning,            //3 WARNING
+  formfile,           //4 Formfile for
+  formfiles,          //5 Formfiles
+  recursive,          //6 Recursive form hierarchy for "
+  error,              //7 ERROR
+  str_classtype,      //8 Classtype
+  notfound,           //9 not found.
+  project,            //10 Project
+  ismodified,         //11 is modified. Save?
+  confirmation,       //12 Confirmation
+  unableopen,         //13 Unable to open file "
+  running,            //14 *** Running ***
+  str_downloading,        //15 Downloading
+  str_downloaded,         //16 Downloaded
+  startgdbservercommand, //17 Start gdb server command "
+  running2,           //18 " running.
+  startgdbserver,     //19 Start gdb Server
+  gdbserverstarterror,//20 gdb server start error
+  gdbservercanceled,  //21 gdb server start canceled.
+  cannotrunstartgdb,  //22 Can not run start gdb command.
+  str_uploadcommand,  //23 Uploadcommand "
+  downloaderror,      //24 Download ***ERROR***
+  downloadfinished,   //25 Download finished.
+  downloadcanceled,   //26 Download canceled.
+  str_file,           //27 File "
+  notfound2,          //28 " not found.
+  exists,             //29 " exists.
+  str_new,            //30 New
+  selectancestor,     //31 Select ancestor
+  newform,            //32 New form
+  pascalfiles,        //33 Pascal Files
+  new2,               //34 new
+  cannotloadproj,     //35 Can not load Project "
+  selecttemplate,     //36 Select project template
+  projectfiles,       //37 Project files
+  str_allfiles,       //38 All files
+  selectprogramfile,  //39 Select program file
+  pascalprogfiles,    //40 Pascal program files
+  cfiles,             //41 C program files
+  str_newproject,     //42 New Project
+  cannotstartprocess, //43 Can not start process
+  process,            //44 Process
+  running3,           //45 running.
+  processterminated,  //46 Process terminated
+  proctermnormally,   //47 Process terminated normally.
+  makeerror,          //48 Make ***ERROR***
+  makeok,             //49 Make OK.
+  str_sourcechanged,  //50 Source has changed, do you wish to remake project?
+  loadwindowlayout,   //51 Load Window Layout
+  dockingarea         //52 Docking Area
+ );
+
  filekindty = (fk_none,fk_source,fk_unit);
  messagetextkindty = (mtk_info,mtk_running,mtk_finished,mtk_error,mtk_signal);
 
@@ -284,8 +340,6 @@ var
  mainfo: tmainfo;
 
 procedure handleerror(const e: exception; const text: string);
-procedure dockareacaption(const canvas: tcanvas; const sender: twidget);
-
 implementation
 uses
  regwidgets,regeditwidgets,regdialogs,regkernel,regprinter,
@@ -326,63 +380,6 @@ uses
  {$ifdef unix},mselibc {$endif}, //SIGRT*
  mseprocutils
  {$ifdef mse_dumpunitgroups},dumpunitgroups{$endif};
-
-type
- stringconsts = (
-  unresreferences,    //0 Unresolved references in
-  str_to,             //1 to
-  wishsearch,         //2 Do you wish to search the formfile?
-  warning,            //3 WARNING
-  formfile,           //4 Formfile for
-  formfiles,          //5 Formfiles
-  recursive,          //6 Recursive form hierarchy for "
-  error,              //7 ERROR
-  str_classtype,      //8 Classtype
-  notfound,           //9 not found.
-  project,            //10 Project
-  ismodified,         //11 is modified. Save?
-  confirmation,       //12 Confirmation
-  unableopen,         //13 Unable to open file "
-  running,            //14 *** Running ***
-  str_downloading,        //15 Downloading
-  str_downloaded,         //16 Downloaded
-  startgdbservercommand, //17 Start gdb server command "
-  running2,           //18 " running.
-  startgdbserver,     //19 Start gdb Server
-  gdbserverstarterror,//20 gdb server start error
-  gdbservercanceled,  //21 gdb server start canceled.
-  cannotrunstartgdb,  //22 Can not run start gdb command.
-  str_uploadcommand,  //23 Uploadcommand "
-  downloaderror,      //24 Download ***ERROR***
-  downloadfinished,   //25 Download finished.
-  downloadcanceled,   //26 Download canceled.
-  str_file,           //27 File "
-  notfound2,          //28 " not found.
-  exists,             //29 " exists.
-  str_new,            //30 New
-  selectancestor,     //31 Select ancestor
-  newform,            //32 New form
-  pascalfiles,        //33 Pascal Files
-  new2,               //34 new
-  cannotloadproj,     //35 Can not load Project "
-  selecttemplate,     //36 Select project template
-  projectfiles,       //37 Project files
-  str_allfiles,       //38 All files
-  selectprogramfile,  //39 Select program file
-  pascalprogfiles,    //40 Pascal program files
-  cfiles,             //41 C program files
-  str_newproject,     //42 New Project
-  cannotstartprocess, //43 Can not start process
-  process,            //44 Process
-  running3,           //45 running.
-  processterminated,  //46 Process terminated
-  proctermnormally,   //47 Process terminated normally.
-  makeerror,          //48 Make ***ERROR***
-  makeok,             //49 Make OK.
-  str_sourcechanged,  //50 Source has changed, do you wish to remake project?
-  loadwindowlayout,   //51 Load Window Layout
-  dockingarea         //52 Docking Area
- );
  
 procedure handleerror(const e: exception; const text: string);
 begin
@@ -394,16 +391,6 @@ begin
  end;
 end;
 
-procedure dockareacaption(const canvas: tcanvas; const sender: twidget);
-begin
- if sender.childrencount = 0 then begin
-  canvas.save;
-  canvas.font.height:= 20;
-  drawtext(canvas,mainfo.c[ord(dockingarea)],sender.paintclientrect(),
-                                       [tf_xcentered,tf_ycentered,tf_grayed]);
-  canvas.restore;
- end;
-end;
 
 { tmainfo }
 
@@ -2885,7 +2872,7 @@ end;
 procedure tmainfo.basedockpaintexe(const sender: twidget;
                const acanvas: tcanvas);
 begin
- dockareacaption(acanvas,sender);
+ dockareacaption(acanvas,sender,mainfo.c[ord(dockingarea)]);
 end;
 
 end.

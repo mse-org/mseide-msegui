@@ -195,7 +195,7 @@ type
    feditmarkbrackets: boolean;
    fbackupfilecount: integer;
    fencoding: integer;
-   fformdesignerdocking: boolean;
+   fnoformdesignerdocking: boolean;
    function limitgridsize(const avalue: integer): integer;
    procedure setgridsizex(const avalue: integer);
    procedure setgridsizey(const avalue: integer);
@@ -214,8 +214,8 @@ type
    property snaptogrid: boolean read fsnaptogrid write fsnaptogrid;
    property moveonfirstclick: boolean read fmoveonfirstclick 
                                          write fmoveonfirstclick;
-   property formdesignerdocking: boolean read fformdesignerdocking
-                                         write fformdesignerdocking;
+   property noformdesignerdocking: boolean read fnoformdesignerdocking
+                                         write fnoformdesignerdocking;
    property gridsizex: integer read fgridsizex write setgridsizex;
    property gridsizey: integer read fgridsizey write setgridsizey;
    property autoindent: boolean read fautoindent write fautoindent;
@@ -781,7 +781,7 @@ type
    tspacer4: tspacer;
    stripmessageesc: tbooleanedit;
    raiseonbreak: tbooleanedit;
-   formdesignerdocking: tbooleanedit;
+   noformdesignerdocking: tbooleanedit;
    procedure acttiveselectondataentered(const sender: TObject);
    procedure colonshowhint(const sender: tdatacol; const arow: Integer; 
                       var info: hintinfoty);

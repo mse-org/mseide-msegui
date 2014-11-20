@@ -613,6 +613,9 @@ type
    property icon: tmaskedbitmap read ficon write seticon;
  end;
 
+procedure dockareacaption(const canvas: tcanvas; const sender: twidget;
+                             const atext: msestring = 'Docking Area');
+
 implementation
 uses
  msearrayutils,sysutils,msebits,msetabs,mseguiintf,mseforms,msestream;
@@ -663,6 +666,18 @@ type
    constructor create(const atabwidget: tdocktabwidget; const awidget: twidget);
               reintroduce;
  end;
+
+procedure dockareacaption(const canvas: tcanvas; const sender: twidget;
+                             const atext: msestring = 'Docking Area');
+begin
+ if sender.childrencount = 0 then begin
+  canvas.save;
+  canvas.font.height:= 20;
+  drawtext(canvas,atext,sender.paintclientrect(),
+                                       [tf_xcentered,tf_ycentered,tf_grayed]);
+  canvas.restore;
+ end;
+end;
 
 { twidgetdragobject }
 

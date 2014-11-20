@@ -1099,7 +1099,7 @@ object projectoptionsfo: tprojectoptionsfo
             end
           end
         end
-        object formdesignerdocking: tbooleanedit
+        object noformdesignerdocking: tbooleanedit
           frame.caption = 'Docking'
           frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
           frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
@@ -1115,6 +1115,7 @@ object projectoptionsfo: tprojectoptionsfo
           bounds_y = 53
           bounds_cx = 66
           bounds_cy = 16
+          options = [bo_executeonclick, bo_executeonkey, bo_executeonshortcut, bo_executedefaultonenterkey, bo_reversed]
         end
       end
       object debuggerpage: ttabpage
