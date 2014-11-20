@@ -2872,7 +2872,7 @@ end;
 procedure tmainfo.basedockpaintexe(const sender: twidget;
                const acanvas: tcanvas);
 begin
- dockareacaption(acanvas,sender,mainfo.c[ord(dockingarea)]);
+ paintdockingareacaption(acanvas,sender,mainfo.c[ord(dockingarea)]);
 end;
 
 end.

@@ -42,13 +42,21 @@ type
    constructor create(const apanel: tdockpanelform);
    destructor destroy; override;
  end;
- 
+
+ tdockpanelformscrollbox = class(tdockformscrollbox)
+  protected
+   fdockingareacaption: msestring;
+   procedure dopaintbackground(const canvas: tcanvas) override;
+ end;
+  
  tdockpanelform = class(tdockformwidget)
   private
    fmenuitem: tdockpanelformmenuitem;
    fnameindex: integer; //0 for unnumbered
    fcontroller: tdockpanelformcontroller;
    procedure showexecute(const sender: tobject);
+   procedure setdockingareacaption(const avalue: msestring);
+   function getdockingareacaption: msestring;
   protected
    procedure updatecaption(acaption: msestring);
    procedure dodockcaptionchanged(const sender: tdockcontroller); override;
@@ -69,6 +77,8 @@ type
    property bounds_cy default defaultdockpanelheight;
    property options default defaultdockpaneloptions;
    property optionswidget default defaultdockpaneloptionswidget;
+   property dockingareacaption: msestring read getdockingareacaption
+                                                   write setdockingareacaption;
  end;
 
  panelfoclassty = class of tdockpanelform;
@@ -103,6 +113,7 @@ type
    fcaption: msestring;
    fstatfileclients: tstatfilearrayprop;
    fstatpriority: integer;
+   fdockingareacaption: msestring;
    procedure updatestat(const filer: tstatfiler);
    procedure setmenu(const avalue: tcustommenu);
 //   procedure checkstatfile(const avalue: tstatfile; const ref: tstatfile);
@@ -137,6 +148,8 @@ type
    property menunamepath: string read fmenunamepath write fmenunamepath;
                       //delimiter = '.'
    property caption: msestring read fcaption write fcaption;
+   property dockingareacaption: msestring read fdockingareacaption 
+                                                   write fdockingareacaption;
    property optionsdock: optionsdockty read foptionsdock
                    write foptionsdock default defaultdockpaneloptionsdock;
    property optionsgrip: gripoptionsty read foptionsgrip 
@@ -295,6 +308,9 @@ begin
  with result do begin
   name:= aname;
   fnameindex:= int2;
+  if dockingareacaption = '' then begin
+   dockingareacaption:= self.dockingareacaption;
+  end;
   if item1 <> nil then begin
    tdockpanelformmenuitem.create(result);
 //   fmenuitem:= tmenuitem.create(nil,nil);
@@ -417,7 +433,7 @@ begin
  if aowner is tdockpanelformcontroller then begin
   setlinkedvar(tmsecomponent(aowner),tmsecomponent(fcontroller));
  end;
- inherited create(aowner);
+ inherited;
 end;
 
 constructor tdockpanelform.create(aowner: tcomponent; load: boolean);
@@ -426,6 +442,7 @@ begin
   fdragdock:= tpanelformdockcontroller.create(idockcontroller(self));
  end;
  include(fmsecomponentstate,cs_ismodule);
+ fscrollbox:= tdockpanelformscrollbox.create(self);
  inherited;
 end;
 
@@ -620,12 +637,35 @@ begin
  result:= 'tdockpanelform';
 end;
 
+procedure tdockpanelform.setdockingareacaption(const avalue: msestring);
+begin
+ with tdockpanelformscrollbox(fscrollbox) do begin
+  fdockingareacaption:= avalue;
+  invalidate;
+ end;
+end;
+
+function tdockpanelform.getdockingareacaption: msestring;
+begin
+ result:= tdockpanelformscrollbox(fscrollbox).fdockingareacaption;
+end;
+
 { tpanelformdockcontroller }
 
 constructor tpanelformdockcontroller.create(aintf: idockcontroller);
 begin
  inherited;
  foptionsdock:= defaultoptionsdock;
+end;
+
+{ tdockpanelformscrollbox }
+
+procedure tdockpanelformscrollbox.dopaintbackground(const canvas: tcanvas);
+begin
+ inherited;
+ if fdockingareacaption <> '' then begin
+  paintdockingareacaption(canvas,self,fdockingareacaption);
+ end;
 end;
 
 end.

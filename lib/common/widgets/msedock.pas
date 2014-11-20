@@ -559,12 +559,14 @@ type
    fstatvarname: string;
    ficon: tmaskedbitmap;
    fstatpriority: integer;
+   fdockingareacaption: msestring;
    procedure setdragdock(const Value: tnochildrendockcontroller);
    function getframe: tgripframe;
    procedure setframe(const Value: tgripframe);
    procedure setstatfile(const Value: tstatfile);
    procedure seticon(const avalue: tmaskedbitmap);
    procedure iconchanged(const sender: tobject);
+   procedure setdockingareacaption(const avalue: msestring);
   protected
 //   procedure mouseevent(var info: mouseeventinfoty); override;
    procedure childmouseevent(const sender: twidget;
@@ -580,6 +582,7 @@ type
    procedure poschanged; override;
    procedure parentchanged; override;
    function calcminscrollsize: sizety; override;
+   procedure dopaintbackground(const canvas: tcanvas); override;
    //idockcontroller
    function checkdock(var info: draginfoty): boolean;
    function getbuttonrects(const index: dockbuttonrectty): rectty;
@@ -611,9 +614,11 @@ type
    property statpriority: integer read fstatpriority 
                                        write fstatpriority default 0;
    property icon: tmaskedbitmap read ficon write seticon;
+   property dockingareacaption: msestring read fdockingareacaption 
+                                                   write setdockingareacaption;
  end;
 
-procedure dockareacaption(const canvas: tcanvas; const sender: twidget;
+procedure paintdockingareacaption(const canvas: tcanvas; const sender: twidget;
                              const atext: msestring = 'Docking Area');
 
 implementation
@@ -667,7 +672,7 @@ type
               reintroduce;
  end;
 
-procedure dockareacaption(const canvas: tcanvas; const sender: twidget;
+procedure paintdockingareacaption(const canvas: tcanvas; const sender: twidget;
                              const atext: msestring = 'Docking Area');
 begin
  if sender.childrencount = 0 then begin
@@ -5188,6 +5193,20 @@ begin
  result:= inherited calcminscrollsize();
  if not (csdesigning in componentstate) then begin
   fdragdock.updateminscrollsize(result);
+ end;
+end;
+
+procedure tdockpanel.setdockingareacaption(const avalue: msestring);
+begin
+ fdockingareacaption:= avalue;
+ invalidate;
+end;
+
+procedure tdockpanel.dopaintbackground(const canvas: tcanvas);
+begin
+ inherited;
+ if fdockingareacaption <> '' then begin
+  paintdockingareacaption(canvas,self,fdockingareacaption);
  end;
 end;
 

@@ -283,7 +283,7 @@ end;
 
 procedure tpanelfo.paintexe(const sender: twidget; const acanvas: tcanvas);
 begin
- dockareacaption(acanvas,sender,mainfo.c[ord(dockingarea)]);
+ paintdockingareacaption(acanvas,sender,mainfo.c[ord(dockingarea)]);
 end;
 
 initialization
