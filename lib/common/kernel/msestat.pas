@@ -142,7 +142,8 @@ type
    function readint64(const name: msestring; const default: int64 = 0;
                const min: int64 = -(maxint64)-1; const max: int64 = maxint64): int64;
    function readreal(const name: msestring; const default: real = 0;
-               const min: real = -bigreal; const max: real = bigreal): realty;
+               const min: real = -bigreal; const max: real = bigreal;
+                                 const acceptempty: boolean = false): realty;
    function readstring(const name: msestring; const default: string): string;
    function readbinarystring(const name: msestring; const default: string): string;
    function readmsestring(const name: msestring; const default: msestring): msestring;
@@ -966,7 +967,8 @@ begin
 end;
 
 function tstatreader.readreal(const name: msestring; const default: real = 0;
-               const min: real = -bigreal; const max: real = bigreal): realty;
+               const min: real = -bigreal; const max: real = bigreal;
+                                const acceptempty: boolean = false): realty;
 var
  str1: msestring;
 begin
@@ -974,11 +976,16 @@ begin
   result:= default;
  end
  else begin
-  try
-   result:= strtorealtydot(str1);
-   checkrealrange(result,min,max);
-  except
-   result:= default;
+  if (str1 = '') and acceptempty then begin
+   result:= emptyreal;
+  end
+  else begin
+   if trystrtorealtydot(str1,result) then begin
+    checkrealrange(result,min,max);
+   end
+   else begin
+    result:= default;
+   end;
   end;
  end;
 end;
