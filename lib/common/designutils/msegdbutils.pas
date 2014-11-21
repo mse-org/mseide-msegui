@@ -4581,7 +4581,11 @@ begin
 {$ifdef CPU64}
  fprocessor:= pro_x86_64;
 {$else}
- fprocessor:= pro_i386;
+ {$ifdef CPUARM}
+  fprocessor:= pro_arm;
+ {$else}
+  fprocessor:= pro_i386;
+ {$endif}
 {$endif}
  for pro1:= low(processorty) to high(processorty) do begin
   if processornames[pro1] = avalue then begin
