@@ -1,0 +1,297 @@
+[mainmo.projectstat]
+savedmemoryfiles=6
+ macros.sta
+ memodialog.sta
+ testedit.sta
+ run.sta
+ edit.sta
+ groupedit.sta
+macros.sta=9
+ [macrosfo]
+ stackedunder=
+ x=335
+ y=331
+ cx=604
+ cy=491
+ wsize=0
+ active=1
+ visible=1
+memodialog.sta=8
+ [msememodialogfo]
+ x=507
+ y=359
+ cx=386
+ cy=291
+ wsize=0
+ active=1
+ visible=1
+testedit.sta=9
+ [testeditfo]
+ stackedunder=
+ x=225
+ y=419
+ cx=596
+ cy=581
+ wsize=0
+ active=1
+ visible=1
+run.sta=6
+ [runfo]
+ stackedunder=
+ x=337
+ y=266
+ cx=749
+ cy=460
+edit.sta=9
+ [groupeditfo]
+ stackedunder=
+ x=225
+ y=419
+ cx=596
+ cy=581
+ wsize=0
+ active=1
+ visible=1
+groupedit.sta=9
+ [groupeditfo]
+ stackedunder=
+ x=225
+ y=419
+ cx=596
+ cy=581
+ wsize=0
+ active=1
+ visible=1
+[tree]
+kind=0
+a=0,665,0,
+c=2
+ (
+ kind=1
+ a=0,665,5,Compile applications
+ c=2
+  (
+  kind=1
+  a=0,665,5,MSEide-MSEgui
+  c=1
+   (
+   kind=2
+   a=0,648,2,MSEide
+   teststate=2
+   path=apps/ide/mseide.pas
+   comment=
+   cc=
+   cd=
+   rc=
+   rd=
+   in=
+   eo=
+   ee=
+   eec=
+   cr=0
+   ao=
+   ae=/bin/sh: /home/mse/packs/standard/svn/fp/install/: Is a directory
+   +
+   aec=126
+   ie=0
+   )
+  teststate=2
+  path=${MSEBASEDIR}mseide-msegui/
+  comment=
+  cc=
+  cd=
+  rc=
+  rd=
+  in=
+  eo=
+  ee=
+  eec=
+  cdef=
+  pdef=
+  )
+  (
+  kind=1
+  a=0,665,5,MSEuniverse
+  c=3
+   (
+   kind=2
+   a=0,648,1,MSEgit
+   teststate=1
+   path=msegit/msegit.pas
+   comment=
+   cc=
+   cd=
+   rc=
+   rd=
+   in=
+   eo=
+   ee=
+   eec=
+   cr=0
+   ao=
+   ae=
+   aec=0
+   ie=0
+   )
+   (
+   kind=2
+   a=0,648,2,MSEspice
+   teststate=2
+   path=msespice/msespice.pas
+   comment=
+   cc=
+   cd=
+   rc=
+   rd=
+   in=
+   eo=
+   ee=
+   eec=
+   cr=1
+   ao=
+   ae=
+   aec=0
+   ie=0
+   )
+   (
+   kind=2
+   a=0,648,2,MSEtest
+   teststate=2
+   path=msetest/msetest.pas
+   comment=
+   cc=
+   cd=
+   rc=
+   rd=
+   in=
+   eo=
+   ee=
+   eec=
+   cr=1
+   ao=
+   ae=
+   aec=0
+   ie=0
+   )
+  teststate=2
+  path=${MSEBASEDIR}mseuniverse/tools/
+  comment=
+  cc=${FPC} -Fu${MSEBASEDIR}mseuniverse/tools/toolsskin ${FILE}
+  cd=
+  rc=
+  rd=
+  in=
+  eo=
+  ee=
+  eec=
+  cdef=
+  pdef=
+  )
+ teststate=2
+ path=
+ comment=
+ cc=${FPC} ${FILE}
+ cd=${FPC}
+ rc=
+ rd=
+ in=
+ eo=
+ ee=
+ eec=
+ cdef=
+ pdef=
+ )
+ (
+ kind=2
+ a=0,648,1,Copy binaries
+ teststate=1
+ path=/home/mse/proj/mseguidist/copybin.sh
+ comment=
+ cc=${FILE}
+ cd=
+ rc=
+ rd=
+ in=
+ eo=
+ ee=
+ eec=
+ cr=0
+ ao=
+ ae=
+ aec=0
+ ie=0
+ )
+teststate=0
+[options]
+[mainmo.stoponfirsterr]
+checked=1
+[mainmo.stoponcomperr]
+checked=1
+[mainmo.trttistat1]
+macronames=9
+ FPCINSTDIR
+ MSEBASEDIR
+ MSELIBDIR
+ FPCUNITS
+ MSEUNITS
+ COMPILER
+ FPCFLAGS
+ FPC
+ test
+macrovalues=9
+ /home/mse/packs/standard/svn/fp/install/
+ /home/mse/packs/standard/git/
+ ${MSEBASEDIR}mseide-msegui/lib/common/
+ -Fu${FPCINSTDIR}lib/fpc/2.6.5/units/i383-linux/*
+ -Fu${MSELIBDIR}* -Fu${MSELIBDIR}kernel/linux
+ ${FPCINSTDIR}bin/fpc
+ -Xg -B -O2 -XX -Xs -CX -l -Fcutf8 -dmse_with_deprecated ${MSEUNITS} ${FPCUNITS}
+ ${COMPILER} ${FPCFLAGS}
+ ${test}
+macroon=9
+ 63
+ 63
+ 63
+ 63
+ 63
+ 63
+ 63
+ 63
+ 63
+macrogroup=0
+groupcomment=6
+ 
+ 
+ 
+ 
+ 
+ 
+[mainfo]
+stackedunder=
+x=54
+y=313
+cx=672
+cy=316
+wsize=0
+active=1
+visible=1
+[mainfo.grid]
+propcolwidthref=581
+width0=50
+sortdescend0=0
+width1=176
+sortdescend1=0
+width2=250
+sortdescend2=0
+width3=259
+sortdescend3=0
+sortdescend4=0
+rowstate=8
+ 0 0
+ 0 0
+ 0 0
+ 0 0
+ 0 0
+ 0 0
+ 0 0
+ 0 0
