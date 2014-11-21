@@ -42,10 +42,10 @@ type
    procedure setrec(const index: integer; const avalue: msestring);
    function getrec(const index: integer): msestring;
    procedure resetexpandlevel;
-   function getvalue(const aname: msestring;
-                                      var aexpandlevel: integer): msestring;
+   function getvalue(const aname: msestring; var aexpandlevel: integer;
+                                        out found: pmacroinfoty): msestring;
    function callhandler(const aname: msestring;const aparams: msestringarty;
-                                        var aexpandlevel: integer): msestring;
+                var aexpandlevel: integer; out found: pmacroinfoty): msestring;
    //istatupdatevalue
    procedure statreadvalue(const aname: msestring; const reader: tstatreader);
    procedure statwritevalue(const aname: msestring; const writer: tstatwriter);
@@ -313,7 +313,8 @@ begin
 end;
 
 function tmacrolist.getvalue(const aname: msestring; 
-                       var aexpandlevel: integer): msestring;
+                        var aexpandlevel: integer;
+                        out found: pmacroinfoty): msestring;
 var
  info: macroinfoty;
  int1: integer;
@@ -325,7 +326,8 @@ begin
   info.name:= aname;
  end;
  if internalfind(info,int1) then begin
-  with pmacroinfoaty(fdata)^[int1] do begin
+  found:= @pmacroinfoaty(fdata)^[int1];
+  with found^ do begin
    result:= value;
    int1:= expandlevel;
    expandlevel:= aexpandlevel;
@@ -339,7 +341,8 @@ begin
 end;
 
 function tmacrolist.callhandler(const aname: msestring; 
-           const aparams: msestringarty; var aexpandlevel: integer): msestring;
+           const aparams: msestringarty; var aexpandlevel: integer;
+           out found: pmacroinfoty): msestring;
 var
  info: macroinfoty;
  int1: integer;
@@ -351,7 +354,8 @@ begin
   info.name:= aname;
  end;
  if internalfind(info,int1) then begin
-  with pmacroinfoaty(fdata)^[int1] do begin
+  found:= @pmacroinfoaty(fdata)^[int1];
+  with found^ do begin
    if handler <> nil then begin
     result:= handler(aparams);
    end
@@ -364,8 +368,9 @@ begin
   end;
  end
  else begin
+  found:= nil;
   result:= '';
-  aexpandlevel:= bigint+1;
+  aexpandlevel:= bigint+1; //not found
  end;
 end;
 
@@ -428,9 +433,11 @@ var
  po1,po2,po3,po4,po5: pmsechar;
  str1,str2,str3: msestring;
  ar1: msestringarty;
+ found: pmacroinfoty;
  
 begin
  if avalue <> '' then begin
+  found:= nil;
   str1:= avalue; //copy
   po2:= pmsechar(str1);
   start:= po2;
@@ -508,24 +515,27 @@ begin
          internalexpandmacros(ar1[int2],expandlevel+1,integerarty(nil^));
         end;
         int1:= expandlevel+1;
-        str3:= callhandler(str2,ar1,int1);
+        str3:= callhandler(str2,ar1,int1,found);
        end
        else begin
         int1:= bigint+1; //not found
        end;
       end
       else begin
-       str3:= getvalue(str2,int1);
+       str3:= getvalue(str2,int1,found);
       end;
      end
      else begin
-      str3:= getvalue(str2,int1);
+      str3:= getvalue(str2,int1,found);
      end;
      if int1 <= expandlevel then begin
-      str3:= '***'+str2+'***';
+      str3:= '!!!*'+str2+'*!!!';
      end
      else begin
       internalexpandmacros(str3,expandlevel+1,integerarty(nil^));
+     end;
+     if found <> nil then begin
+      found^.expandlevel:= bigint; //can be reused
      end;
      if @refindex <> nil then begin
       int4:= (po2-po1);
