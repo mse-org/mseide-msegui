@@ -1959,6 +1959,12 @@ end;
 
 function tgdbmi.fileexec(const filename: filenamety;
                            const noproginfo: boolean = false): gdbresultty;
+const
+ {$ifdef cpuarm}
+ loadwaitus = 20000000;
+ {$else}
+ loadwaitus = 10000000;
+ {$endif}
 begin
  abort;
  resetexec;
@@ -1968,7 +1974,7 @@ begin
  end
  else begin
   result:= synccommand('-file-exec-and-symbols '+togdbfilepath(filename),
-                                    10000000);
+                                    loadwaitus);
   updatebit({$ifdef FPC}longword{$else}longword{$endif}(fstate),
                  ord(gs_execloaded),result = gdb_ok);
   if (result = gdb_ok) and not noproginfo then begin

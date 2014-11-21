@@ -1276,10 +1276,14 @@ begin
      end;                
     end
    end;
+   mainfo.setstattext(actionsmo.c[ord(ac_loading)]+'.',mtk_running);
+   application.processmessages();
+   application.beginwait();
    if checkgdberror(gdb.fileexec(str1,forcedownload)) then begin
     inc(fexecstamp);
     breakpointsfo.updatebreakpoints;
    end;
+   application.endwait();
    checkbluedots;
   end;
  end;

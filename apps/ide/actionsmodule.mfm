@@ -2332,6 +2332,7 @@ object actionsmo: tactionsmo
       'Object Inspector'
       'Store Component'
       'Attaching Process'
+      'Loading'
     )
     left = 288
     top = 392

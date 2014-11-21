@@ -108,7 +108,8 @@ type
   ac_about,                       //78 About
   ac_objectinspector,             //79 Object Inspector
   ac_storecomponent,              //80 Store Component
-  ac_attachingprocess             //81 Attaching Process
+  ac_attachingprocess,            //81 Attaching Process
+  ac_loading                      //82 Loading
  );
 
 type
