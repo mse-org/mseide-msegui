@@ -1,11 +1,18 @@
 [mainmo.projectstat]
 savedmemoryfiles=6
+ run.sta
  macros.sta
  memodialog.sta
  testedit.sta
- run.sta
  edit.sta
  groupedit.sta
+run.sta=6
+ [runfo]
+ stackedunder=
+ x=575
+ y=100
+ cx=749
+ cy=460
 macros.sta=9
  [macrosfo]
  stackedunder=
@@ -35,13 +42,6 @@ testedit.sta=9
  wsize=0
  active=1
  visible=1
-run.sta=6
- [runfo]
- stackedunder=
- x=575
- y=100
- cx=749
- cy=460
 edit.sta=9
  [groupeditfo]
  stackedunder=
@@ -190,7 +190,7 @@ c=2
  path=
  comment=
  cc=${FPC} ${FILE}
- cd=${FPC}
+ cd=
  rc=
  rd=
  in=

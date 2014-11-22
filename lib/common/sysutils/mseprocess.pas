@@ -785,6 +785,9 @@ end;
 
 procedure tmseprocess.terminate;
 begin
+{$ifdef mswindows}
+ kill();
+{$else}
  application.lock;
  try
   if running then begin
@@ -793,6 +796,7 @@ begin
  finally
   application.unlock;
  end;
+{$endif}
 end;
 
 procedure tmseprocess.kill;
