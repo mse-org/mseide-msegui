@@ -5413,20 +5413,7 @@ end;
 
 procedure tcustomrealedit.readstatvalue(const reader: tstatreader);
 begin
-// if fgridintf <> nil then begin
-//  with fgridintf.getcol do begin
-//   with trealdatalist(datalist) do begin
-//    min:= fmin;
-//    max:= fmax;
-//   end;
-//   dostatread(reader);
-//  end;
-//  reader.readrealdatalist(valuevarname,
-//                          trealdatalist(fgridintf.getcol.datalist),fmin,fmax);
-// end
-// else begin
-  value:= reader.readreal(valuevarname,value,fmin,fmax)
-// end;
+ value:= reader.readreal(valuevarname,value,fmin,fmax,oe_null in foptionsedit);
 end;
 
 procedure tcustomrealedit.writestatvalue(const writer: tstatwriter);
@@ -5938,7 +5925,8 @@ var
 begin
  dat1:= gettextvalue(accept,quiet);
  if accept then begin
-  if not ((des_isdb in fstate) and (dat1 = emptydatetime)) then begin
+  if not (((des_isdb in fstate) or (oe_null in foptionsedit)) and 
+                                        (dat1 = emptydatetime)) then begin
    if fkind = dtk_time then begin
     if (fmax = emptydatetime) and not (dat1 = emptydatetime) or
          not (fmin = emptydatetime) and (dat1 < frac(fmin)) or 
@@ -6053,18 +6041,7 @@ end;
 
 procedure tcustomdatetimeedit.readstatvalue(const reader: tstatreader);
 begin
-// if fgridintf <> nil then begin
-//  with fgridintf.getcol do begin
-//   with trealdatalist(datalist) do begin
-//    min:= fmin;
-//    max:= fmax;
-//   end;
-//   dostatread(reader);
-//  end;
-// end
-// else begin
-  value:= reader.readreal(valuevarname,value,fmin,fmax)
-// end;
+ value:= reader.readreal(valuevarname,value,fmin,fmax,oe_null in foptionsedit);
 end;
 
 procedure tcustomdatetimeedit.writestatvalue(const writer: tstatwriter);
