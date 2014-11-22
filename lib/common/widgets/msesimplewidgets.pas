@@ -593,8 +593,9 @@ type
  end;
  
 const
- defaultgroupboxoptionswidget = defaultoptionswidget + 
-        [ow_arrowfocusin,ow_arrowfocusout,ow_parenttabfocus,ow_subfocus];
+ defaultgroupboxoptionswidget = (defaultoptionswidget + 
+        [ow_arrowfocusin,ow_arrowfocusout,ow_parenttabfocus,ow_subfocus])-
+        [ow_mousefocus];
  
 type
  tgroupbox = class(tscalingwidget)
