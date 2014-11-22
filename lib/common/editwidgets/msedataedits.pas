@@ -1942,6 +1942,7 @@ var
  opt2: optionsedit1ty;
 begin
  opt1:= foptionsedit;
+ opt2:= optionsedit1;
  fgridintf.coloptionstoeditoptions(opt1,opt2);
  optionsedit:= opt1;
  optionsedit1:= opt2;
