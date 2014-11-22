@@ -1120,6 +1120,7 @@ type
    procedure writestatvalue(const writer: tstatwriter); override;
    function getdefaultvalue: pointer; override;
    procedure setnullvalue(); override;
+   procedure updatereadonlystate(); override;
   public
    constructor create(aowner: tcomponent); override;
 //   function griddata: trealdatalist;
@@ -1359,6 +1360,7 @@ type
    function getdefaultvalue: pointer; override;
    procedure setnullvalue(); override;
    procedure updatedatalist; override;
+   procedure updatereadonlystate(); override;
   public
    constructor create(aowner: tcomponent); override;
    procedure fillcol(const value: tdatetime);
@@ -5596,6 +5598,7 @@ begin
  with tgridrealdatalist(fdatalist) do begin
   min:= self.min;
   max:= self.max;
+  updateeditoptions(foptionsedit);
  end;
 end;
 
@@ -5618,6 +5621,15 @@ procedure tcustomrealedit.setnullvalue;
 begin
  value:= emptyreal;
  nullvalueset();
+end;
+
+procedure tcustomrealedit.updatereadonlystate();
+begin
+ inherited;
+ if fdatalist <> nil then begin
+  tgridrealdatalist(fdatalist).updateeditoptions(foptionsedit);
+                                      //for acceptempty
+ end;
 end;
 
 { tspineditframe }
@@ -6182,6 +6194,7 @@ begin
  with tgridrealdatalist(fdatalist) do begin
   min:= self.min;
   max:= self.max;
+  updateeditoptions(foptionsedit);
  end;
 end;
 
@@ -6224,6 +6237,15 @@ procedure tcustomdatetimeedit.setnullvalue;
 begin
  value:= emptydatetime;
  nullvalueset();
+end;
+
+procedure tcustomdatetimeedit.updatereadonlystate();
+begin
+ inherited;
+ if fdatalist <> nil then begin
+  tgridrealdatalist(fdatalist).updateeditoptions(foptionsedit);
+                                      //for acceptempty
+ end;
 end;
 
 end.

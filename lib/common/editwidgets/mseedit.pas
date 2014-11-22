@@ -1321,19 +1321,6 @@ begin
  if foptionsedit <> avalue then begin
   opt1:= feditor.optionsedit1;
   transferoptionsedit(self,avalue,foptionsedit,opt1);
-  {
-  foptionsedit:= avalue - deprecatedoptionsedit;
-  if (csreading in componentstate) and 
-                           (avalue * deprecatedoptionsedit <> []) then begin
-   opt1:= feditor.optionsedit1;
-   updatebit(longword(opt1),ord(oe1_savevalue),oe_savevaluex in avalue);
-   updatebit(longword(opt1),ord(oe1_savestate),oe_savestatex in avalue);
-   updatebit(longword(opt1),ord(oe1_saveoptions),oe_saveoptionsx in avalue);
-   updatebit(longword(opt1),ord(oe1_checkvalueafterstatread),
-                                     oe_checkvaluepaststatreadx in avalue);
-   feditor.optionsedit1:= opt1;
-  end;
-  }
   feditor.optionsedit1:= opt1;
   updatereadonlystate;
  end;

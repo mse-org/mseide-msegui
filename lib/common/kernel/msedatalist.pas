@@ -465,6 +465,7 @@ type
   private
    fdefaultzero: boolean;
    fdefaultval: realty;
+   facceptempty: boolean;
    function Getitems(index: integer): realty;
    procedure Setitems(index: integer; const Value: realty);
    function getasarray: realarty;
@@ -504,7 +505,10 @@ type
 
    property asarray: realarty read getasarray write setasarray;
    property items[index: integer]: realty read Getitems write Setitems; default;
-   property defaultzero: boolean read fdefaultzero write fdefaultzero default false;
+   property defaultzero: boolean read fdefaultzero 
+                                       write fdefaultzero default false;
+   property acceptempty: boolean read facceptempty 
+                                       write facceptempty default false;
  end;
 
  tdatetimedatalist = class(trealdatalist)
@@ -3811,13 +3815,18 @@ procedure trealdatalist.setstatdata(const index: integer; const value: msestring
 var
  rea1: realty;
 begin
- rea1:= strtorealtydot(value);
- if cmprealty(rea1,min) < 0 then begin
-  rea1:= min;
+ if (value = '') and facceptempty then begin
+  rea1:= emptyreal;
  end
  else begin
-  if cmprealty(rea1,max) > 0 then begin
-   rea1:= max;
+  rea1:= strtorealtydot(value);
+  if cmprealty(rea1,min) < 0 then begin
+   rea1:= min;
+  end
+  else begin
+   if cmprealty(rea1,max) > 0 then begin
+    rea1:= max;
+   end;
   end;
  end;
  items[index]:= rea1;

@@ -473,6 +473,7 @@ type
   public
    constructor create(owner: twidgetcol); reintroduce;
    function empty(const index: integer): boolean; override;   //true wenn leer
+   procedure updateeditoptions(const aoptions: optionseditty);
  end;
 
 type
@@ -860,6 +861,11 @@ begin
  else begin
   result:= inherited empty(index);
  end;
+end;
+
+procedure tgridrealdatalist.updateeditoptions(const aoptions: optionseditty);
+begin
+ acceptempty:= oe_null in aoptions;
 end;
 
 { twidgetfixrow }
