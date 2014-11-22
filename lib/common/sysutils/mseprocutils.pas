@@ -830,21 +830,7 @@ begin
     end;
    end;
   end;
-  if (exo_settty in options) then begin
-   bo1:= false;        //search posssible controlling TTY
-   if (topipehandles.writedes <> invalidfilehandle) and 
-                       (isatty(topipehandles.readdes) <> 0) then begin
-    bo1:= ioctl(topipehandles.readdes,TIOCSCTTY,[]) <> -1;
-   end;
-   if not bo1 and (frompipehandles.writedes <> invalidfilehandle) and 
-                           (isatty(frompipehandles.writedes) <> 0) then begin
-     bo1:= ioctl(frompipehandles.writedes,TIOCSCTTY,[]) <> -1;
-   end;
-   if not bo1 and (errorpipehandles.writedes <> invalidfilehandle) and 
-                          (isatty(errorpipehandles.writedes) <> 0) then begin
-    bo1:= ioctl(errorpipehandles.writedes,TIOCSCTTY,[]) <> -1;
-   end;
-  end;
+
   if topipe <> nil then begin
    __close(topipehandles.writedes);
    if dup2(topipehandles.ReadDes,0) = -1 then begin
@@ -875,6 +861,23 @@ begin
   if frompipe <> nil then begin
    __close(frompipehandles.writedes);
   end;
+
+  if (exo_settty in options) then begin
+   bo1:= false;        //search posssible controlling TTY
+   if (topipehandles.writedes <> invalidfilehandle) and 
+                       (isatty(0) <> 0) then begin
+    bo1:= ioctl(0,TIOCSCTTY,[]) <> -1;
+   end;
+   if not bo1 and (frompipehandles.writedes <> invalidfilehandle) and 
+                           (isatty(1) <> 0) then begin
+     bo1:= ioctl(1,TIOCSCTTY,[]) <> -1;
+   end;
+   if not bo1 and (errorpipehandles.writedes <> invalidfilehandle) and 
+                          (isatty(2) <> 0) then begin
+    bo1:= ioctl(2,TIOCSCTTY,[]) <> -1;
+   end;
+  end;
+
  {$ifdef FPC}
   mselibc.execl(shell,shell,['-c',pchar(commandline),nil]);
  {$else}
