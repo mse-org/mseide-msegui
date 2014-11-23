@@ -14,4 +14,3 @@ else
  echo Please press return key
  read
 fi
-read
