@@ -202,8 +202,8 @@ c=2
  )
  (
  kind=2
- a=0,648,2,Copy binaries
- teststate=2
+ a=0,648,1,Copy binaries
+ teststate=1
  path=/home/mse/proj/mseguidist/copybin.sh
  comment=
  cc=${FILE}
@@ -214,7 +214,7 @@ c=2
  eo=
  ee=
  eec=
- cr=1
+ cr=0
  ao=
  ae=
  aec=0
