@@ -31,8 +31,6 @@ const
  defaultterminaloptions = [{teo_tty}];
  defaultoptionsprocess = [pro_output,pro_errorouttoout,pro_input,
                         pro_winpipewritehandles,pro_inactive,pro_tty,pro_ctrlc];
- updateeditpostag = 84629514;
- 
 type 
 // terminalstatety = ({ts_running,}ts_listening);
 // terminalstatesty = set of terminalstatety;
@@ -83,7 +81,6 @@ type
    procedure editnotification(var info: editnotificationinfoty); override;
    procedure docellevent(const ownedcol: boolean; 
                                      var info: celleventinfoty); override;
-   procedure doasyncevent(var atag: integer); override;
    procedure updateeditpos;
 //   function stripescapesequences(avalue: msestring): msestring;
   public
@@ -498,7 +495,7 @@ begin
  end;
 end;
 
-procedure tterminal.updateeditpos();
+procedure tterminal.updateeditpos;
 var
  int1: integer;
 begin
@@ -508,14 +505,6 @@ begin
    finputcolindex:= length(datalist[int1]);
   end;
   editpos:= makegridcoord(finputcolindex,int1);
- end;
-end;
-
-procedure tterminal.doasyncevent(var atag: integer);
-begin
- inherited;
- if atag = updateeditpostag then begin
-  updateeditpos();
  end;
 end;
 
@@ -570,13 +559,7 @@ begin
    mstr1:= avalue;
   end;
   datalist.addchars(mstr1,[aco_processeditchars],fmaxchars);
-  if application.ismainthread then begin
-   updateeditpos;
-  end
-  else begin
-   asyncevent(updateeditpostag); 
-          //possible deadlock by scrolling, calls getevents
-  end;
+  updateeditpos;
  end;
 end;
 
