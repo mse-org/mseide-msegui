@@ -14393,15 +14393,17 @@ var
  event: twindowrectevent;
 begin
  if appinst <> nil then begin
-  gui_flushgdi;
-  appinst.getevents;
-  for int1:= 0 to appinst.eventlist.count - 1 do begin
-   event:= twindowrectevent(appinst.eventlist[int1]);
-   if (event <> nil) and (event.kind = ek_expose) and
-             (event.fwinid = fwindow.id) then begin
-    invalidaterect(event.frect);
-    appinst.eventlist[int1]:= nil;
-    event.free1;
+  if appinst.ismainthread() then begin //avoid possible deadlock in getevents()
+   gui_flushgdi;
+   appinst.getevents;
+   for int1:= 0 to appinst.eventlist.count - 1 do begin
+    event:= twindowrectevent(appinst.eventlist[int1]);
+    if (event <> nil) and (event.kind = ek_expose) and
+              (event.fwinid = fwindow.id) then begin
+     invalidaterect(event.frect);
+     appinst.eventlist[int1]:= nil;
+     event.free1;
+    end;
    end;
   end;
   internalupdate;

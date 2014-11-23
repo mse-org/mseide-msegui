@@ -72,12 +72,12 @@ c=2
  c=2
   (
   kind=1
-  a=0,665,4,MSEide-MSEgui
+  a=0,665,3,MSEide-MSEgui
   c=1
    (
    kind=2
-   a=0,648,1,MSEide
-   teststate=1
+   a=0,648,0,MSEide
+   teststate=0
    path=apps/ide/mseide.pas
    comment=
    cc=
@@ -94,7 +94,7 @@ c=2
    aec=0
    ie=0
    )
-  teststate=1
+  teststate=0
   path=${MSEBASEDIR}mseide-msegui/
   comment=
   cc=
