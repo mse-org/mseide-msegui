@@ -429,17 +429,17 @@ object settingsfo: tsettingsfo
           end>
       end>
     datacols.count = 2
-    datacols.options = [co_savevalue, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
+    datacols.options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savevalue, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
     datacols.items = <    
       item[macroname]
         width = 152
-        options = [co_proportional, co_savevalue, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
+        options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savevalue, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
         widgetname = 'macroname'
         dataclass = tgridmsestringdatalist
       end    
       item[macrovalue]
         width = 144
-        options = [co_fill, co_savevalue, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
+        options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savevalue, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
         widgetname = 'macrovalue'
         dataclass = tgridmsestringdatalist
       end>
