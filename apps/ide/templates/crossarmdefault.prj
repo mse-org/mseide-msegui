@@ -722,7 +722,7 @@ windowlayout=567
  [memoryfo]
  splitdir=0
  useroptions=16507
- stackedunder=findinfilefo
+ stackedunder=cpuarmfo
  parent=
  mdistate=0
  nx=0
@@ -749,7 +749,7 @@ windowlayout=567
  [disassfo]
  splitdir=0
  useroptions=16491
- stackedunder=cpuarmfo
+ stackedunder=findinfilefo
  parent=
  mdistate=0
  nx=0
@@ -872,7 +872,7 @@ windowlayout=567
  [breakpointsfo]
  splitdir=0
  useroptions=16491
- stackedunder=objectinspectorfo
+ stackedunder=projecttreefo
  parent=
  mdistate=0
  nx=0
@@ -893,7 +893,7 @@ windowlayout=567
  [objectinspectorfo]
  splitdir=0
  useroptions=16491
- stackedunder=disassfo
+ stackedunder=breakpointsfo
  parent=
  mdistate=0
  nx=0
@@ -918,7 +918,7 @@ windowlayout=567
  [symbolfo]
  splitdir=0
  useroptions=16507
- stackedunder=watchfo
+ stackedunder=targetconsolefo
  parent=
  mdistate=0
  nx=0
@@ -1132,7 +1132,7 @@ windowlayout=567
  [mainfo.panel1]
  splitdir=2
  useroptions=32235
- stackedunder=stackfo
+ stackedunder=mainfo
  parent=
  mdistate=0
  nx=0
@@ -1152,7 +1152,7 @@ windowlayout=567
  irqoff=0
  splitdir=0
  useroptions=16491
- stackedunder=componentpalettefo
+ stackedunder=disassfo
  parent=
  mdistate=0
  nx=0
