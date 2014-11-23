@@ -278,6 +278,36 @@ In order to install the Zeos components add the path to the Zeos source to
 There is a predefined IDE project apps/ide/mseide_zeos.prj, update 'Project'-
 'Options'-'Macros' according to your installation.
 
+Crosscompiling and remote debugging i386-linux -> arm-linux
+***********************************************************
+For Raspberry Pi:
+- Establish a ssh login without password (public key).
+- Mount the home directory of the remote target by on the host by sshfs.
+
+- On the i386-linux host download and extract 
+http://sourceforge.net/projects/mseide-msegui/files/fpcrossarm/crossfpc-i386_linux-eabi.tar.gz
+to <yourdirectory>.
+
+- Start MSEide, in 'Settings'-'Configure MSEide'-'Global Macros' add:
+Name          Value
+
+CROSSMSEDIR   <the directory of the MSEide+MSEgui checkout you like to use>
+CROSSFPCDIR   <yourdirectory>/eabi
+CROSSDESTDIR  <path to the mounted remote home directory on host>
+HOSTIP        <the IP of the host>
+REMOTEIP      <the IP of the remote target>
+REMOTEPORT    <the remote port, ex: 2345>
+REMOTEUSER    pi
+
+- 'Project'-'New'-'From Template', select "crossarmdefault.prj".
+- Create the new project.
+- 'Project'-'Options'-'Macros', set the TARGETPROJECTDIR value to the project
+  path in target and the mounted CROSSDESTDIR, ex: "proj/testcase".
+- Check the TARGETDIR macro.
+
+Press F9 and hope the best. ;-)
+
+
 Have a lot of fun!
 
 Martin
