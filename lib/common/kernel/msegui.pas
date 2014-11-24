@@ -16047,10 +16047,12 @@ var
  ev1: tmseevent;
 begin
  gdi_lock;
- while gui_hasevent do begin
-  ev1:= gui_getevent;
-  if ev1 <> nil then begin
-   eventlist.add(ev1);
+ if ismainthread then begin   //otherwise events of gui_getevent() of mainthread
+  while gui_hasevent do begin //could be eaten   
+   ev1:= gui_getevent;
+   if ev1 <> nil then begin
+    eventlist.add(ev1);
+   end;
   end;
  end;
  result:= eventlist.count;
