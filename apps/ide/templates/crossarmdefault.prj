@@ -18,8 +18,8 @@ order15=0
 order16=0
 order17=0
 [projectoptions]
-projectdir=/home/mse/packs/standard/git/mseide-msegui_arm/apps/ide/templates
-projectfilename=/home/mse/packs/standard/git/mseide-msegui_arm/apps/ide/templates/crossarmdefault.prj
+projectdir=/home/mse/packs/standard/git/mseide-msegui/apps/ide/templates
+projectfilename=/home/mse/packs/standard/git/mseide-msegui/apps/ide/templates/crossarmdefault.prj
 options=99
  [projectoptionsfo.twidgetgrid3]
  propcolwidthref=788
@@ -338,12 +338,12 @@ macroon=17
  2
  2
  2
- 61
  2
  61
  2
  61
  2
+ 61
  2
  2
  2
@@ -351,6 +351,7 @@ macroon=17
 macronames=17
  TARGETPROJECTDIR
  TARGETDIR
+ TARGETENV
  HOSTTARGETDIR
  MSEDIR
  TARGETEXE
@@ -361,7 +362,6 @@ macronames=17
  RUNTARGET
  REMOTETARGET
  REMOTETARGET
- TARGETENV
  DEBUGGER
  COMPILER
  FPCOPTIONS
@@ -369,6 +369,7 @@ macronames=17
 macrovalues=17
  <your project dir on target ex: proj/testcase>
   /home/pi/${TARGETPROJECTDIR}
+ XAUTHORITY=/home/pi/.Xauthority DISPLAY=:0.0
  ${CROSSDESTDIR}/${TARGETPROJECTDIR}
  ${CROSSMSEDIR}/
  ${PROJECTNAME}${EXEEXT}
@@ -379,7 +380,6 @@ macrovalues=17
  
  remote ${REMOTEIP}:${REMOTEPORT}
  
- XAUTHORITY=/home/pi/.Xauthority DISPLAY=:0.0
  ${CROSSFPCDIR}/bin/gdb
  ${CROSSFPCDIR}/lib/fpc/2.6.5/ppcrossarm
  -n -Xd -viwn -e${CROSSFPCDIR}/bin -Fl${CROSSFPCDIR}/lib -Fu${CROSSFPCDIR}/lib/fpc/2.6.5/units/arm-linux/*
@@ -569,7 +569,7 @@ files=
  a=0,4132,6,Text Files
  )
 [componentstore]
-storedir=/home/mse/packs/standard/git/mseide-msegui_arm/apps/ide/compstore/
+storedir=/home/mse/packs/standard/git/mseide-msegui/apps/ide/templates/${CROSSMSEDIR}/apps/ide/compstore/
 filename=
 [components]
 [selecteditpage]
@@ -749,7 +749,7 @@ windowlayout=567
  [disassfo]
  splitdir=0
  useroptions=16491
- stackedunder=cpuarmfo
+ stackedunder=targetconsolefo
  parent=
  mdistate=0
  nx=0
@@ -1012,7 +1012,7 @@ windowlayout=567
  [componentstorefo]
  splitdir=0
  useroptions=24699
- stackedunder=symbolfo
+ stackedunder=cpuarmfo
  parent=
  mdistate=0
  nx=0
@@ -1129,30 +1129,11 @@ windowlayout=567
  checked=1
  [actionsmo.bluedotsonact]
  checked=1
- [mainfo.panel1]
- splitdir=2
- useroptions=32235
- stackedunder=stackfo
- parent=
- mdistate=0
- nx=0
- ny=0
- ncx=0
- ncy=0
- x=4
- y=201
- cx=734
- cy=491
- rcx=0
- rcy=0
- wsize=0
- active=0
- visible=1
  [cpuarmfo]
  irqoff=0
  splitdir=0
  useroptions=16491
- stackedunder=componentpalettefo
+ stackedunder=symbolfo
  parent=
  mdistate=0
  nx=0
@@ -1168,6 +1149,25 @@ windowlayout=567
  wsize=0
  active=0
  visible=0
+ [mainfo.panel1]
+ splitdir=2
+ useroptions=32235
+ stackedunder=mainfo
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=4
+ y=201
+ cx=734
+ cy=491
+ rcx=0
+ rcy=0
+ wsize=0
+ active=0
+ visible=1
 [targetconsole]
 finddtext=
 findhistory=0

@@ -130,15 +130,16 @@ they can be overridden by 'Project'-'Options'-'Macros'.
 MSEide file macros
 ******************
 Macro format is ${FILE_*(fileparameter)} or ${FILE_*("fileparameter")}.
-FILE_MSE    convert to MSE format.
-FILE_SYS    convert to sys format.
-FILE_PATH   absolute path.
-FILE_FILE   no trailing path delimiter.
-FILE_DIR    trailing path delimiter.
-FILE_NAME   no directory part.
-FILE_EXT    file name extension.
-FILE_NONAME directory part only.
-FILE_NOEXT  no file name extension.
+FILE_MSE       convert to MSE format.
+FILE_SYS       convert to sys format.
+FILE_PATH      absolute path.
+FILE_FILE      no trailing path delimiter.
+FILE_DIR       trailing path delimiter.
+FILE_NAME      no directory part.
+FILE_NAMEBASE  no directory and no name extension part.
+FILE_EXT       file name extension.
+FILE_NONAME    directory part only.
+FILE_NOEXT     no file name extension.
 
 MSEide macros in 'Project'-'Options'-'Debugger'-'xterm Command'
 ***************************************************************
@@ -281,18 +282,18 @@ There is a predefined IDE project apps/ide/mseide_zeos.prj, update 'Project'-
 Crosscompiling and remote debugging i386-linux -> arm-linux
 ***********************************************************
 For Raspberry Pi:
-- Establish a ssh login without password (public key).
-- Mount the home directory of the remote target by on the host by sshfs.
+- Establish a ssh login without password (public key authentication).
+- Mount the home directory of the remote target on the host by sshfs.
 
 - On the i386-linux host download and extract 
 http://sourceforge.net/projects/mseide-msegui/files/fpcrossarm/crossfpc-i386_linux-eabi.tar.gz
-to <yourdirectory>.
+to <your crossfpc directory>.
 
 - Start MSEide, in 'Settings'-'Configure MSEide'-'Global Macros' add:
 Name          Value
 
 CROSSMSEDIR   <the directory of the MSEide+MSEgui checkout you like to use>
-CROSSFPCDIR   <yourdirectory>/eabi
+CROSSFPCDIR   <your crossfpc directory>/eabi
 CROSSDESTDIR  <path to the mounted remote home directory on host>
 HOSTIP        <the IP of the host>
 REMOTEIP      <the IP of the remote target>
@@ -303,7 +304,7 @@ REMOTEUSER    pi
 - Create the new project.
 - 'Project'-'Options'-'Macros', set the TARGETPROJECTDIR value to the project
   path in target and the mounted CROSSDESTDIR, ex: "proj/testcase".
-- Check the TARGETDIR macro.
+- Check the TARGETDIR and TARGETENV macros.
 
 Press F9 and hope the best. ;-)
 
