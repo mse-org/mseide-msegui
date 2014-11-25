@@ -9,8 +9,8 @@ savedmemoryfiles=6
 run.sta=6
  [runfo]
  stackedunder=
- x=537
- y=199
+ x=400
+ y=157
  cx=749
  cy=460
 macros.sta=9
@@ -354,8 +354,8 @@ c=2
  )
  (
  kind=2
- a=0,648,1,Copy binaries
- teststate=1
+ a=0,648,0,Copy binaries
+ teststate=0
  path=/home/mse/proj/mseguidist/copybin.sh
  comment=
  cc=${FILE}

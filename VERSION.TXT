@@ -1,5 +1,7 @@
 MSEide+MSEgui breaking changes version history
 
+Version 3.6
+2014-11-25
 2014-11-19
  tdataedit.optionsedit oe_savevalue,oe_savestate,oe_saveoptions,
  oe_checkvaluepaststatread -> optionsedit1 oe1_savevalue,oe1_savestate,

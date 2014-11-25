@@ -38,7 +38,7 @@ uses
  mselistbrowser,projecttreeform,msepipestream,msestringcontainer,msesys,
  msewidgets;
 const
- versiontext = '3.5';
+ versiontext = '3.6';
  idecaption = 'MSEide';
 
 type
