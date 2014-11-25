@@ -244,7 +244,7 @@ macrovalues=9
  -Fu${FPCINSTDIR}lib/fpc/2.6.5/units/i383-linux/*
  -Fu${MSELIBDIR}* -Fu${MSELIBDIR}kernel/linux
  ${FPCINSTDIR}bin/fpc
- -Xg -B -O2 -XX -Xs -CX -l -Fcutf8 -dmse_with_deprecated ${MSEUNITS} ${FPCUNITS}
+ -n -Xg -B -O2 -XX -Xs -CX -l -viwn -Fcutf8 -dmse_with_deprecated ${MSEUNITS} ${FPCUNITS}
  ${COMPILER} ${FPCFLAGS}
  ${test}
 macroon=9
