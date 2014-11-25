@@ -529,7 +529,7 @@ begin
       str3:= getvalue(str2,int1,found);
      end;
      if int1 <= expandlevel then begin
-      str3:= '!!!*'+str2+'*!!!';
+      str3:= '!!R*'+str2+'*R!!';
      end
      else begin
       internalexpandmacros(str3,expandlevel+1,integerarty(nil^));

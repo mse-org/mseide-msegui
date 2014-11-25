@@ -1,6 +1,6 @@
 MSEide+MSEgui Pascal Cross Platform GUI Development System.
 
-2014-08-20 Version 3.4a
+2014-08-20 Version 3.6
 Copyright (c) 1999-2014 by Martin Schreiber
 
 * 2.8.6 -> 3.0:
@@ -12,7 +12,7 @@ Copyright (c) 1999-2014 by Martin Schreiber
 
 - Compiles with FPC 2.6.2 or 2.6.4
 - Tested on i386-linux SuSE 13.1, x86_64-linux SuSE 13.1, x86_64-freebsd,
-  i386-win32 2000, XP and Vista.
+  Raspberry Pi, i386-win32 2000, XP and Vista.
 - Links to xlib and gdi32, no external widget library needed.
 - Internal character encoding is UCS2.
 - Uses anti aliased fonts on Linux (Xft).
@@ -43,10 +43,10 @@ Installation:
 *************
 1. Download and install FPC 2.6.4, you can get it from 
    http://www.freepascal.org/download.var
-2. Download mseide_msegui_src_3_4a.zip and mseide_i386_win32_3_4a.zip or
-   mseide_i386_linux_3_4a.tar.gz or mseide_x84_64_linux_3_4a.tar.gz or
-   mseide_x84_64_freebsd_3_4a.tar.gz
-   http://sourceforge.net/projects/mseide-msegui/files/mseide-msegui/3.4/
+2. Download mseide_msegui_src_3_6.zip and mseide_i386_win32_3_6.zip or
+   mseide_i386_linux_3_6.tar.gz or mseide_x84_64_linux_3_6.tar.gz or
+   mseide_x84_64_freebsd_3_6.tar.gz or mseide_i386_linux_3_6.tar.gz.
+   http://sourceforge.net/projects/mseide-msegui/files/mseide-msegui/3.6/
 3. Extract them to a directory of your choice ('yourdirectory') .
 4. Run 'yourdirectory/bin/mseide' on linux or 
    'yourdirectory\bin\mseide.exe' on windows.
@@ -130,15 +130,16 @@ they can be overridden by 'Project'-'Options'-'Macros'.
 MSEide file macros
 ******************
 Macro format is ${FILE_*(fileparameter)} or ${FILE_*("fileparameter")}.
-FILE_MSE    convert to MSE format.
-FILE_SYS    convert to sys format.
-FILE_PATH   absolute path.
-FILE_FILE   no trailing path delimiter.
-FILE_DIR    trailing path delimiter.
-FILE_NAME   no directory part.
-FILE_EXT    file name extension.
-FILE_NONAME directory part only.
-FILE_NOEXT  no file name extension.
+FILE_MSE       convert to MSE format.
+FILE_SYS       convert to sys format.
+FILE_PATH      absolute path.
+FILE_FILE      no trailing path delimiter.
+FILE_DIR       trailing path delimiter.
+FILE_NAME      no directory part.
+FILE_NAMEBASE  no directory and no name extension part.
+FILE_EXT       file name extension.
+FILE_NONAME    directory part only.
+FILE_NOEXT     no file name extension.
 
 MSEide macros in 'Project'-'Options'-'Debugger'-'xterm Command'
 ***************************************************************
@@ -277,6 +278,36 @@ In order to install the Zeos components add the path to the Zeos source to
 -dmse_with_zeoslib -dMSEgui.
 There is a predefined IDE project apps/ide/mseide_zeos.prj, update 'Project'-
 'Options'-'Macros' according to your installation.
+
+Crosscompiling and remote debugging i386-linux -> arm-linux
+***********************************************************
+For Raspberry Pi:
+- Establish a ssh login without password (public key authentication).
+- Mount the home directory of the remote target on the host by sshfs.
+
+- On the i386-linux host download and extract 
+http://sourceforge.net/projects/mseide-msegui/files/fpcrossarm/crossfpc-i386_linux-eabi.tar.gz
+to <your crossfpc directory>.
+
+- Start MSEide, in 'Settings'-'Configure MSEide'-'Global Macros' add:
+Name          Value
+
+CROSSMSEDIR   <the directory of the MSEide+MSEgui checkout you like to use>
+CROSSFPCDIR   <your crossfpc directory>/eabi
+CROSSDESTDIR  <path to the mounted remote home directory on host>
+HOSTIP        <the IP of the host>
+REMOTEIP      <the IP of the remote target>
+REMOTEPORT    <the remote port, ex: 2345>
+REMOTEUSER    pi
+
+- 'Project'-'New'-'From Template', select "crossarmdefault.prj".
+- Create the new project.
+- 'Project'-'Options'-'Macros', set the TARGETPROJECTDIR value to the project
+  path in target and the mounted CROSSDESTDIR, ex: "proj/testcase".
+- Check the TARGETDIR and TARGETENV macros.
+
+Press F9 and hope the best. ;-)
+
 
 Have a lot of fun!
 

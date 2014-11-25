@@ -38,7 +38,7 @@ uses
  mselistbrowser,projecttreeform,msepipestream,msestringcontainer,msesys,
  msewidgets;
 const
- versiontext = '3.5';
+ versiontext = '3.6';
  idecaption = 'MSEide';
 
 type
@@ -1232,7 +1232,8 @@ begin
  end;
 end;
 
-function tmainfo.loadexec(isattach: boolean; const forcedownload: boolean): boolean;
+function tmainfo.loadexec(isattach: boolean; 
+                         const forcedownload: boolean): boolean;
 var
  str1: filenamety;
 begin
@@ -1282,6 +1283,7 @@ begin
    if checkgdberror(gdb.fileexec(str1,forcedownload)) then begin
     inc(fexecstamp);
     breakpointsfo.updatebreakpoints;
+    mainfo.setstattext('',mtk_info);
    end;
    application.endwait();
    checkbluedots;

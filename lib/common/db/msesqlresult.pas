@@ -660,7 +660,7 @@ end;
 function tdbcol.getasvariant: variant;
 begin
  if isnull then begin
-  result:= unassigned;
+  result:= null;//unassigned;
  end
  else begin
   result:= getvariantvar;
@@ -1661,7 +1661,7 @@ function tsqlresult.asvariant(const aclose: boolean = false): variant;
 begin
  refresh;
  if eof or (cols.count = 0) then begin
-  result:= unassigned;
+  result:= null;//unassigned;
  end
  else begin
   result:= cols[0].asvariant;
@@ -1682,7 +1682,7 @@ var
 begin
  refresh;
  if eof or (cols.count = 0) then begin
-  result:= unassigned;
+  result:= null;//unassigned;
  end
  else begin
   setlength(result,cols.count);
@@ -1706,7 +1706,7 @@ var
 begin
  refresh;
  if eof or (cols.count = 0) then begin
-  result:= unassigned;
+  result:= null;//unassigned;
   while not eof do begin
    next; //eat the rest;
   end;

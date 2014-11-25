@@ -9,15 +9,15 @@ savedmemoryfiles=6
 run.sta=6
  [runfo]
  stackedunder=
- x=575
- y=100
+ x=400
+ y=157
  cx=749
  cy=460
 macros.sta=9
  [macrosfo]
  stackedunder=
- x=335
- y=331
+ x=308
+ y=231
  cx=604
  cy=491
  wsize=0
@@ -72,13 +72,34 @@ c=2
  c=2
   (
   kind=1
-  a=0,665,4,MSEide-MSEgui
-  c=1
+  a=0,665,4,i368
+  c=2
    (
-   kind=2
-   a=0,648,1,MSEide
+   kind=1
+   a=0,665,4,MSEide-MSEgui
+   c=1
+    (
+    kind=2
+    a=0,648,1,MSEide
+    teststate=1
+    path=apps/ide/mseide.pas
+    comment=
+    cc=
+    cd=
+    rc=
+    rd=
+    in=
+    eo=
+    ee=
+    eec=
+    cr=0
+    ao=
+    ae=
+    aec=0
+    ie=0
+    )
    teststate=1
-   path=apps/ide/mseide.pas
+   path=${MSEBASEDIR}mseide-msegui/
    comment=
    cc=
    cd=
@@ -88,14 +109,89 @@ c=2
    eo=
    ee=
    eec=
-   cr=0
-   ao=
-   ae=
-   aec=0
-   ie=0
+   cdef=
+   pdef=
+   )
+   (
+   kind=1
+   a=0,665,4,MSEuniverse
+   c=3
+    (
+    kind=2
+    a=0,648,1,MSEgit
+    teststate=1
+    path=msegit/msegit.pas
+    comment=
+    cc=
+    cd=
+    rc=
+    rd=
+    in=
+    eo=
+    ee=
+    eec=
+    cr=0
+    ao=
+    ae=
+    aec=0
+    ie=0
+    )
+    (
+    kind=2
+    a=0,648,1,MSEspice
+    teststate=1
+    path=msespice/msespice.pas
+    comment=
+    cc=
+    cd=
+    rc=
+    rd=
+    in=
+    eo=
+    ee=
+    eec=
+    cr=0
+    ao=
+    ae=
+    aec=0
+    ie=0
+    )
+    (
+    kind=2
+    a=0,648,1,MSEtest
+    teststate=1
+    path=msetest/msetest.pas
+    comment=
+    cc=
+    cd=
+    rc=
+    rd=
+    in=
+    eo=
+    ee=
+    eec=
+    cr=0
+    ao=
+    ae=
+    aec=0
+    ie=0
+    )
+   teststate=1
+   path=${MSEBASEDIR}mseuniverse/tools/
+   comment=
+   cc=${FPC_I386} -Fu${MSEBASEDIR}mseuniverse/tools/toolsskin ${FILE}
+   cd=
+   rc=
+   rd=
+   in=
+   eo=
+   ee=
+   eec=
+   cdef=
+   pdef=
    )
   teststate=1
-  path=${MSEBASEDIR}mseide-msegui/
+  path=
   comment=
   cc=
   cd=
@@ -110,13 +206,34 @@ c=2
   )
   (
   kind=1
-  a=0,665,4,MSEuniverse
-  c=3
+  a=0,665,4,arm
+  c=2
    (
-   kind=2
-   a=0,648,1,MSEgit
+   kind=1
+   a=0,665,4,MSEide-MSEgui
+   c=1
+    (
+    kind=2
+    a=0,648,1,MSEide
+    teststate=1
+    path=apps/ide/mseide.pas
+    comment=
+    cc=
+    cd=
+    rc=
+    rd=
+    in=
+    eo=
+    ee=
+    eec=
+    cr=0
+    ao=
+    ae=
+    aec=0
+    ie=0
+    )
    teststate=1
-   path=msegit/msegit.pas
+   path=${MSEBASEDIR}mseide-msegui/
    comment=
    cc=
    cd=
@@ -126,19 +243,77 @@ c=2
    eo=
    ee=
    eec=
-   cr=0
-   ao=
-   ae=
-   aec=0
-   ie=0
+   cdef=
+   pdef=
    )
    (
-   kind=2
-   a=0,648,1,MSEspice
+   kind=1
+   a=0,665,4,MSEuniverse
+   c=3
+    (
+    kind=2
+    a=0,648,1,MSEgit
+    teststate=1
+    path=msegit/msegit.pas
+    comment=
+    cc=
+    cd=
+    rc=
+    rd=
+    in=
+    eo=
+    ee=
+    eec=
+    cr=0
+    ao=
+    ae=
+    aec=0
+    ie=0
+    )
+    (
+    kind=2
+    a=0,648,1,MSEspice
+    teststate=1
+    path=msespice/msespice.pas
+    comment=
+    cc=
+    cd=
+    rc=
+    rd=
+    in=
+    eo=
+    ee=
+    eec=
+    cr=0
+    ao=
+    ae=
+    aec=0
+    ie=0
+    )
+    (
+    kind=2
+    a=0,648,1,MSEtest
+    teststate=1
+    path=msetest/msetest.pas
+    comment=
+    cc=
+    cd=
+    rc=
+    rd=
+    in=
+    eo=
+    ee=
+    eec=
+    cr=0
+    ao=
+    ae=
+    aec=0
+    ie=0
+    )
    teststate=1
-   path=msespice/msespice.pas
+   path=${MSEBASEDIR}mseuniverse/tools/
    comment=
-   cc=
+   cc=${FPC_ARM} -Fu${MSEBASEDIR}mseuniverse/tools/toolsskin ${FILE}
    cd=
    rc=
    rd=
@@ -146,36 +321,13 @@ c=2
    eo=
    ee=
    eec=
-   cr=0
-   ao=
-   ae=
-   aec=0
-   ie=0
-   )
-   (
-   kind=2
-   a=0,648,1,MSEtest
-   teststate=1
-   path=msetest/msetest.pas
-   comment=
-   cc=
-   cd=
-   rc=
-   rd=
-   in=
-   eo=
-   ee=
-   eec=
-   cr=0
-   ao=
-   ae=
-   aec=0
-   ie=0
+   cdef=
+   pdef=
    )
   teststate=1
-  path=${MSEBASEDIR}mseuniverse/tools/
+  path=
   comment=
-  cc=${FPC} -Fu${MSEBASEDIR}mseuniverse/tools/toolsskin ${FILE}
+  cc=${FPC_ARM} ${FILE}
   cd=
   rc=
   rd=
@@ -189,7 +341,7 @@ c=2
  teststate=1
  path=
  comment=
- cc=${FPC} ${FILE}
+ cc=${FPC_I386} ${FILE}
  cd=
  rc=
  rd=
@@ -202,8 +354,8 @@ c=2
  )
  (
  kind=2
- a=0,648,2,Copy binaries
- teststate=2
+ a=0,648,0,Copy binaries
+ teststate=0
  path=/home/mse/proj/mseguidist/copybin.sh
  comment=
  cc=${FILE}
@@ -214,7 +366,7 @@ c=2
  eo=
  ee=
  eec=
- cr=1
+ cr=0
  ao=
  ae=
  aec=0
@@ -227,27 +379,45 @@ checked=0
 [mainmo.stoponcomperr]
 checked=0
 [mainmo.trttistat1]
-macronames=9
+macronames=15
+ INSTDIR
  FPCINSTDIR
  MSEBASEDIR
  MSELIBDIR
- FPCUNITS
+ FPCUNITS_I386
  MSEUNITS
- COMPILER
+ COMPILER_I386
  FPCFLAGS
- FPC
- test
-macrovalues=9
+ FPCFLAGS_I386
+ FPC_I386
+ FPCARMDIR
+ COMPILER_ARM
+ FPCUNITS_ARM
+ FPCFLAGS_ARM
+ FPC_ARM
+macrovalues=15
+ /home/mse/proj/mseguidist/bin/arm-linux/
  /home/mse/packs/standard/svn/fp/install/
  /home/mse/packs/standard/git/
  ${MSEBASEDIR}mseide-msegui/lib/common/
- -Fu${FPCINSTDIR}lib/fpc/2.6.5/units/i383-linux/*
+ -Fu${FPCINSTDIR}lib/fpc/2.6.5/units/i386-linux/*
  -Fu${MSELIBDIR}* -Fu${MSELIBDIR}kernel/linux
- ${FPCINSTDIR}bin/fpc
- -n -Xg -B -O2 -XX -Xs -CX -l -viwn -Fcutf8 -dmse_with_deprecated ${MSEUNITS} ${FPCUNITS}
- ${COMPILER} ${FPCFLAGS}
- ${test}
-macroon=9
+ ${FPCINSTDIR}lib/fpc/2.6.5/ppc386
+ -n -viwn -B -O2 -XX -Xs -CX -l -Fcutf8 -dmse_with_deprecated ${MSEUNITS}
+ ${FPCFLAGS}  ${FPCUNITS_i386}
+ ${COMPILER_I386} ${FPCFLAGS_I386}
+ /home/mse/packs/standard/svn/fp/arm/install/eabi/
+ ${FPCARMDIR}lib/fpc/2.6.5/ppcrossarm
+ -Fu${FPCARMDIR}lib/fpc/2.6.5/units/arm-linux/* -Fl${FPCARMDIR}lib
+ -Xd -e${FPCARMDIR}bin ${FPCFLAGS} ${FPCUNITS_ARM}
+ ${COMPILER_ARM} ${FPCFLAGS_ARM} -o${INSTDIR}${FILE_NAMEBASE(${FILE})} -FU./
+macroon=15
+ 63
+ 63
+ 63
+ 63
+ 63
+ 63
  63
  63
  63
@@ -267,25 +437,33 @@ groupcomment=6
  
 [mainfo]
 stackedunder=
-x=54
-y=313
-cx=672
-cy=316
+x=604
+y=289
+cx=677
+cy=347
 wsize=0
 active=1
 visible=1
 [mainfo.grid]
-propcolwidthref=581
+propcolwidthref=586
 width0=50
 sortdescend0=0
-width1=176
+width1=180
 sortdescend1=0
-width2=250
+width2=249
 sortdescend2=0
-width3=259
+width3=136
 sortdescend3=0
 sortdescend4=0
-rowstate=8
+rowstate=16
+ 0 0
+ 0 0
+ 0 0
+ 0 0
+ 0 0
+ 0 0
+ 0 0
+ 0 0
  0 0
  0 0
  0 0

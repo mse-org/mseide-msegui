@@ -904,7 +904,7 @@ procedure textnotfound(const ainfo: findinfoty);
 begin
  showmessage(sourcefo.c[ord(str_text)]+' '''+
            ainfo.text+''' '+
-           sourcefo.c[ord(notfound)]);
+           sourcefo.c[ord(str_notfound)]);
 end;
 
 procedure findintextedit(const edit: tcustomtextedit; var info: findinfoty;
@@ -933,7 +933,7 @@ begin
     end
     else begin
      if askok(sourcefo.c[ord(str_text)]+' '''+text+
-              ''' '+sourcefo.c[ord(notfound)]+' '+
+              ''' '+sourcefo.c[ord(str_notfound)]+' '+
               sourcefo.c[ord(restartbegin)]) then begin
       findpos:= nullcoord;
       if not edit.find(text,options,findpos,edit.editpos,true,findshowpos) then begin

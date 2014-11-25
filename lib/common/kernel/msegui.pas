@@ -26,7 +26,7 @@ uses
                                {$ifdef mse_with_ifi},mseifiglob{$endif};
 
 const
- mseguiversiontext = '3.5';
+ mseguiversiontext = '3.6';
  
  defaultwidgetcolor = cl_default;
  defaulttoplevelwidgetcolor = cl_background;
@@ -14393,15 +14393,17 @@ var
  event: twindowrectevent;
 begin
  if appinst <> nil then begin
-  gui_flushgdi;
-  appinst.getevents;
-  for int1:= 0 to appinst.eventlist.count - 1 do begin
-   event:= twindowrectevent(appinst.eventlist[int1]);
-   if (event <> nil) and (event.kind = ek_expose) and
-             (event.fwinid = fwindow.id) then begin
-    invalidaterect(event.frect);
-    appinst.eventlist[int1]:= nil;
-    event.free1;
+  if appinst.ismainthread() then begin //avoid possible deadlock in getevents()
+   gui_flushgdi;
+   appinst.getevents;
+   for int1:= 0 to appinst.eventlist.count - 1 do begin
+    event:= twindowrectevent(appinst.eventlist[int1]);
+    if (event <> nil) and (event.kind = ek_expose) and
+              (event.fwinid = fwindow.id) then begin
+     invalidaterect(event.frect);
+     appinst.eventlist[int1]:= nil;
+     event.free1;
+    end;
    end;
   end;
   internalupdate;
@@ -16045,10 +16047,12 @@ var
  ev1: tmseevent;
 begin
  gdi_lock;
- while gui_hasevent do begin
-  ev1:= gui_getevent;
-  if ev1 <> nil then begin
-   eventlist.add(ev1);
+ if ismainthread then begin   //otherwise events of gui_getevent() of mainthread
+  while gui_hasevent do begin //could be eaten   
+   ev1:= gui_getevent;
+   if ev1 <> nil then begin
+    eventlist.add(ev1);
+   end;
   end;
  end;
  result:= eventlist.count;

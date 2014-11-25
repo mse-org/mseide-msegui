@@ -77,6 +77,14 @@ begin
  end;
 end;
 
+function file_namebase(const params: msestringarty): msestring;
+begin
+ result:= '';
+ if params <> nil then begin
+  result:= filenamebase(params[0]);
+ end;
+end;
+
 function file_ext(const params: msestringarty): msestring;
 begin
  result:= '';
@@ -102,7 +110,7 @@ begin
 end;
 
 const
- filemacroconst: array[0..8] of macroinfoty = (
+ filemacroconst: array[0..9] of macroinfoty = (
   (name: 'FILE_MSE'; value: ''; handler: macrohandlerty(@file_mse);
                      expandlevel: 0), //convert to mse format
   (name: 'FILE_SYS'; value: ''; handler: macrohandlerty(@file_sys);
@@ -115,6 +123,8 @@ const
                      expandlevel: 0), //trailing path delimiter
   (name: 'FILE_NAME'; value: ''; handler: macrohandlerty(@file_name);
                      expandlevel: 0), //no directory part
+  (name: 'FILE_NAMEBASE'; value: ''; handler: macrohandlerty(@file_namebase);
+                     expandlevel: 0), //no directory and name extension part
   (name: 'FILE_EXT'; value: ''; handler: macrohandlerty(@file_ext);
                      expandlevel: 0), //file name extension
   (name: 'FILE_NONAME'; value: ''; handler: macrohandlerty(@file_noname);
