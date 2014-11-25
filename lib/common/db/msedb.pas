@@ -1424,10 +1424,15 @@ type
                    const akeyoptions: array of locatekeyoptionsty;
                    const aoptions: locaterecordoptionsty = []): locateresultty;
    procedure appendrecord(const values: array of const);
+   procedure appendrecord1(const values: array of const;
+                                       const aisnull: array of boolean);
    procedure appendrecord(const values: array of const;
                                        const afields: array of tfield);
+   procedure appendrecord1(const values: array of const;
+               const aisnull: array of boolean; const afields: array of tfield);
    procedure appendrecord(const values: variantarty);
-   procedure appenddata(const adata: variantararty; const afields: array of tfield);
+   procedure appenddata(const adata: variantararty; 
+                                           const afields: array of tfield);
                                                      //[] -> all
    procedure getfieldclass(const fieldtype: tfieldtype; out result: tfieldclass);
    procedure beginfilteredit(const akind: filtereditkindty);
@@ -7094,9 +7099,9 @@ begin
  result:= locaterecord(tdataset(fowner),dso_utf8 in foptions,key,field,options);
 end;
 }
-procedure tdscontroller.appendrecord(const values: array of const;
-                                       const afields: array of tfield);
-
+procedure tdscontroller.appendrecord1(const values: array of const;
+                          const aisnull: array of boolean;
+                                            const afields: array of tfield);
 var
  int1,int2: integer;
  field1: tfield;
@@ -7109,61 +7114,73 @@ begin
   end;
   for int1:= 0 to int2 do begin
    field1:= afields[int1];
-   with values[int1] do begin
-    case vtype of
-     vtInteger:    field1.asinteger:= VInteger;
-     vtInt64:      field1.aslargeint:= VInt64^;
-     vtBoolean:    field1.asboolean:= VBoolean;
-     vtChar:       field1.asstring:= VChar;
-     vtWideChar:   field1.asstring:= VWideChar;
-     vtExtended:   field1.asfloat:= VExtended^;
-     vtString:     field1.asstring:= VString^;
- //  vtPointer:
-     vtPChar:      field1.asstring:= VPChar;
- //  vtObject:
- //  vtClass:
-     vtPWideChar:  field1.asstring:= VPWideChar;
-     vtAnsiString: field1.asstring:= ansistring(VAnsiString);
-     vtCurrency:   field1.ascurrency:= VCurrency^;
-     vtVariant:    field1.asvariant:= VVariant^;
- //    vtInterface:
-    {$ifdef mse_hasvtunicodestring}
-     vtunicodestring: begin
-      if (field1 is tmsestringfield) then begin
-       tmsestringfield(field1).asmsestring:= msestring(vunicodestring);
-      end
-      else begin 
-       if (field1 is tmsememofield) then begin
-        tmsememofield(field1).asmsestring:= msestring(vunicodestring);
+   if (int1 <= high(aisnull)) and aisnull[int1] then begin
+    field1.clear();
+   end
+   else begin
+    with values[int1] do begin
+     case vtype of
+      vtInteger:    field1.asinteger:= VInteger;
+      vtInt64:      field1.aslargeint:= VInt64^;
+      vtBoolean:    field1.asboolean:= VBoolean;
+      vtChar:       field1.asstring:= VChar;
+      vtWideChar:   field1.asstring:= VWideChar;
+      vtExtended:   field1.asfloat:= VExtended^;
+      vtString:     field1.asstring:= VString^;
+  //  vtPointer:
+      vtPChar:      field1.asstring:= VPChar;
+  //  vtObject:
+  //  vtClass:
+      vtPWideChar:  field1.asstring:= VPWideChar;
+      vtAnsiString: field1.asstring:= ansistring(VAnsiString);
+      vtCurrency:   field1.ascurrency:= VCurrency^;
+      vtVariant:    field1.asvariant:= VVariant^;
+  //    vtInterface:
+     {$ifdef mse_hasvtunicodestring}
+      vtunicodestring: begin
+       if (field1 is tmsestringfield) then begin
+        tmsestringfield(field1).asmsestring:= msestring(vunicodestring);
        end
-       else begin
-        field1.asstring:= widestring(vunicodestring);
+       else begin 
+        if (field1 is tmsememofield) then begin
+         tmsememofield(field1).asmsestring:= msestring(vunicodestring);
+        end
+        else begin
+         field1.asstring:= widestring(vunicodestring);
+        end;
        end;
       end;
-     end;
-    {$endif}
-     vtWideString: begin
-      if (field1 is tmsestringfield) then begin
-       tmsestringfield(field1).asmsestring:= msestring(vwidestring);
-      end
-      else begin 
-       if (field1 is tmsememofield) then begin
-        tmsememofield(field1).asmsestring:= msestring(vwidestring);
+     {$endif}
+      vtWideString: begin
+       if (field1 is tmsestringfield) then begin
+        tmsestringfield(field1).asmsestring:= msestring(vwidestring);
        end
-       else begin
-        field1.asstring:= widestring(vwidestring);
+       else begin 
+        if (field1 is tmsememofield) then begin
+         tmsememofield(field1).asmsestring:= msestring(vwidestring);
+        end
+        else begin
+         field1.asstring:= widestring(vwidestring);
+        end;
        end;
       end;
+  //  vtInt64:
+  //  vtQWord:
      end;
- //  vtInt64:
- //  vtQWord:
     end;
    end;
   end; 
  end;
 end;
 
-procedure tdscontroller.appendrecord(const values: array of const);
+procedure tdscontroller.appendrecord(const values: array of const;
+                                            const afields: array of tfield);
+begin
+ appendrecord1(values,[],afields);
+end;
+
+procedure tdscontroller.appendrecord1(const values: array of const; 
+                                            const aisnull: array of boolean);
 var
  ar1: fieldarty;
  int1: integer;
@@ -7174,7 +7191,12 @@ begin
    ar1[int1]:= fields[int1];
   end;
  end;
- appendrecord(values,ar1);
+ appendrecord1(values,aisnull,ar1);
+end;
+
+procedure tdscontroller.appendrecord(const values: array of const);
+begin
+ appendrecord1(values,[]);
 end;
 
 procedure tdscontroller.appendrecord(const values: variantarty);

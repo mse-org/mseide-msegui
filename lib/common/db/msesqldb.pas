@@ -144,6 +144,8 @@ type
    destructor destroy; override;
    function isutf8: boolean; override;
    procedure appendrecord(const values: array of const);
+   procedure appendrecord(const values: array of const;
+                                     const aisnull: array of boolean);
    function moveby(const distance: integer): integer;
    procedure cancel; override;
    procedure post; override;
@@ -486,6 +488,12 @@ end;
 procedure tmsesqlquery.appendrecord(const values: array of const);
 begin
  fcontroller.appendrecord(values);
+end;
+
+procedure tmsesqlquery.appendrecord(const values: array of const;
+                                     const aisnull: array of boolean);
+begin
+ fcontroller.appendrecord1(values,aisnull);
 end;
 
 procedure tmsesqlquery.sqlonchange(const sender: tobject);
