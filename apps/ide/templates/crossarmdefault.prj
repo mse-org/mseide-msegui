@@ -329,7 +329,7 @@ unitdirson=3
  196671
  65599
  65599
-macroon=21
+macroon=22
  6
  6
  2
@@ -349,9 +349,10 @@ macroon=21
  6
  6
  6
- 6
+ 2
+ 4
  57
-macronames=21
+macronames=22
  TARGETPROJECTDIR
  TARGETENV
  ABI
@@ -373,7 +374,8 @@ macronames=21
  FPCOPTIONS
  FPCOPT
  FPCOPT
-macrovalues=21
+ FPCOPT
+macrovalues=22
  <your project dir on target ex: /home/pi/proj/test>
  XAUTHORITY=/home/pi/.Xauthority DISPLAY=:0.0
  eabi
@@ -394,6 +396,7 @@ macrovalues=21
  ${CROSSFPC}/lib/fpc/2.6.5/ppcrossarm
  -n -Xd -viwn -e${CROSSFPC}/bin -Fl${CROSSFPC}/lib -Fu${CROSSFPC}/lib/fpc/2.6.5/units/arm-linux/*
  ${FPCOPTIONS}
+ ${FPCOPTIONS} -CpARMV6 -CfVFPV2
  
 macrogroup=2
 groupcomments=6
@@ -580,7 +583,7 @@ files=
  a=0,4132,6,Text Files
  )
 [componentstore]
-storedir=
+storedir=/home/mse/packs/standard/git/mseide-msegui_arm/apps/ide/compstore/
 filename=
 [components]
 [selecteditpage]
@@ -611,8 +614,18 @@ tabsize=134
 firsttab=0
 index=-1
 [layout]
-windowlayout=567
+windowlayout=561
  [mainfo.openform]
+ filenames=1
+  /home/mse/packs/standard/git/mseide-msegui_arm/apps/ide/sourceform.mfm
+ filehistory=7
+  /home/mse/packs/standard/git/mseide-msegui_arm/apps/ide/sourceform.mfm
+  /home/mse/packs/standard/git/mseide-msegui_arm/apps/ide/actionsmodule.mfm
+  /home/mse/packs/standard/git/mseide-msegui/apps/ide/guitemplates.mfm
+  /home/mse/packs/standard/git/mseide-msegui/apps/ide/sourceform.mfm
+  /home/mse/packs/standard/git/mseide-msegui/lib/common/dialogs/msefiledialogres.mfm
+  /home/mse/packs/standard/git/mseide-msegui/apps/ide/actionsmodule.mfm
+  /home/mse/packs/standard/git/mseide-msegui/apps/ide/main.mfm
  filefilterindex=0
  filefilter=*.mfm
  filecolwidth=174
@@ -621,6 +634,20 @@ windowlayout=567
  cx=0
  cy=0
  [mainfo.projectfiledia]
+ filenames=1
+  /home/mse/proj/msegui/testcase/mse/arm/crossarm/default/default.prj
+ lastdir=/home/mse/proj/msegui/testcase/mse/arm/crossarm/default/
+ filehistory=10
+  /home/mse/proj/msegui/testcase/mse/arm/crossarm/default/default.prj
+  /home/mse/packs/standard/git/mseide-msegui_arm/apps/ide/templates/crossarmdefault.prj
+  /home/mse/packs/standard/git/mseide-msegui/apps/ide/templates/crossarmdefault.prj
+  /home/mse/packs/standard/git/mseide-msegui_arm/apps/ide/mse_mseide_rpi.prj
+  /home/mse/proj/msegui/testcase/mse/arm/hello.prj
+  /home/mse/packs/standard/git/mseuniverse/tools/msespice/mse_msespice.prj
+  /home/mse/packs/standard/git/mseuniverse/tools/msegit/mse_msegit.prj
+  /home/mse/packs/standard/git/mseide-msegui/apps/ide/mse_mseide.prj
+  /home/mse/packs/standard/git/mseuniverse/tools/msetest/mse_msetest.prj
+  /home/mse/proj/test3/test3.prj
  filefilterindex=0
  filefilter=*.prj
  filecolwidth=190
@@ -629,6 +656,18 @@ windowlayout=567
  cx=588
  cy=307
  [mainfo.openfile]
+ filenames=0
+ filehistory=10
+  /home/mse/packs/standard/git/mseide-msegui_arm/apps/ide/actionsmodule.pas
+  /home/mse/packs/standard/git/mseide-msegui/apps/ide/actionsmodule.pas
+  /home/mse/packs/standard/git/mseide-msegui/apps/ide/guitemplates.pas
+  /home/mse/packs/standard/git/mseide-msegui/lib/common/designutils/msegdbutils.pas
+  /home/mse/packs/standard/git/mseide-msegui_arm/lib/common/editwidgets/msedropdownlist.pas
+  /home/mse/packs/standard/git/mseide-msegui_arm/lib/common/editwidgets/msedataedits.pas
+  /home/mse/packs/standard/git/mseide-msegui_arm/apps/ide/projectoptionsform.pas
+  /home/mse/packs/standard/git/mseide-msegui_arm/apps/ide/main.pas
+  /home/mse/packs/standard/git/mseide-msegui_arm/lib/common/kernel/mselibc.pas
+  /home/mse/packs/standard/git/mseide-msegui_arm/lib/common/graphics/msefcfontselect.pas
  filefilterindex=0
  filefilter="*.pp" "*.pas" "*.inc" "*.dpr"
  filecolwidth=174
@@ -724,7 +763,7 @@ windowlayout=567
  [disassfo]
  splitdir=0
  useroptions=16491
- stackedunder=stackfo
+ stackedunder=targetconsolefo
  parent=
  mdistate=0
  nx=0
@@ -821,6 +860,25 @@ windowlayout=567
  wsize=0
  active=0
  visible=0
+ [watchpointsfo.grid]
+ propcolwidthref=352
+ sortdescend0=0
+ values1=0
+ values1_ci=-1
+ width1=33
+ sortdescend1=0
+ values2=0
+ width2=239
+ sortdescend2=0
+ width4=34
+ sortdescend4=0
+ values5=0
+ values5_ci=-1
+ width5=38
+ sortdescend5=0
+ values6=0
+ width6=103
+ sortdescend6=0
  [breakpointsfo]
  splitdir=0
  useroptions=16491
@@ -926,6 +984,21 @@ windowlayout=567
  wsize=0
  active=0
  visible=0
+ [watchfo.grid]
+ propcolwidthref=105
+ values0=0
+ values0_ci=-1
+ sortdescend0=0
+ values1=0
+ width1=152
+ sortdescend1=0
+ values3=0
+ values3_ci=-1
+ sortdescend3=0
+ values4=0
+ values4_ci=-1
+ width4=13
+ sortdescend4=0
  [watchfo.watchon]
  [watchfo.expression]
  [watchfo.watcheson]
@@ -975,6 +1048,8 @@ windowlayout=567
  width3=185
  sortdescend3=0
  [componentstorefo.storefiledialog]
+ filenames=0
+ lastdir=/home/mse/test/msegui/apps/ide/compstore/
  filehistory=0
  filefilterindex=0
  filefilter=
@@ -984,6 +1059,8 @@ windowlayout=567
  cx=0
  cy=0
  [componentstorefo.groupfiledialog]
+ filenames=0
+ lastdir=/home/mse/test/msegui/apps/ide/compstore/
  filehistory=0
  filefilterindex=0
  filefilter=
