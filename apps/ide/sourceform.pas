@@ -41,7 +41,7 @@ type
   str_new,           //8 <new>
   syntaxdeffile,     //9 Syntaxdeffile:
   str_text,          //10 Text
-  notfound,          //11 not found.
+  str_notfound,      //11 not found.
   restartbegin,      //12 Restart from begin of file?
   cancel,            //13 Cancel?
   replaceoccu,       //14 Do you wish to to replace this occurence?
