@@ -16,10 +16,10 @@ run.sta=6
 macros.sta=9
  [macrosfo]
  stackedunder=
- x=308
+ x=102
  y=231
- cx=604
- cy=491
+ cx=1122
+ cy=561
  wsize=0
  active=1
  visible=1
@@ -35,8 +35,8 @@ memodialog.sta=8
 testedit.sta=9
  [testeditfo]
  stackedunder=
- x=225
- y=419
+ x=187
+ y=313
  cx=596
  cy=581
  wsize=0
@@ -210,13 +210,34 @@ c=2
   c=2
    (
    kind=1
-   a=0,665,4,MSEide-MSEgui
-   c=1
+   a=0,665,4,eabi
+   c=2
     (
-    kind=2
-    a=0,648,1,MSEide
+    kind=1
+    a=0,664,4,MSEide-MSEgui
+    c=1
+     (
+     kind=2
+     a=0,648,1,MSEide
+     teststate=1
+     path=apps/ide/mseide.pas
+     comment=
+     cc=
+     cd=
+     rc=
+     rd=
+     in=
+     eo=
+     ee=
+     eec=
+     cr=0
+     ao=
+     ae=
+     aec=0
+     ie=0
+     )
     teststate=1
-    path=apps/ide/mseide.pas
+    path=${MSEBASEDIR}mseide-msegui/
     comment=
     cc=
     cd=
@@ -226,16 +247,91 @@ c=2
     eo=
     ee=
     eec=
-    cr=0
-    ao=
-    ae=
-    aec=0
-    ie=0
+    cdef=
+    pdef=
+    )
+    (
+    kind=1
+    a=0,665,4,MSEuniverse
+    c=3
+     (
+     kind=2
+     a=0,648,1,MSEgit
+     teststate=1
+     path=msegit/msegit.pas
+     comment=
+     cc=
+     cd=
+     rc=
+     rd=
+     in=
+     eo=
+     ee=
+     eec=
+     cr=0
+     ao=
+     ae=
+     aec=0
+     ie=0
+     )
+     (
+     kind=2
+     a=0,648,1,MSEspice
+     teststate=1
+     path=msespice/msespice.pas
+     comment=
+     cc=
+     cd=
+     rc=
+     rd=
+     in=
+     eo=
+     ee=
+     eec=
+     cr=0
+     ao=
+     ae=
+     aec=0
+     ie=0
+     )
+     (
+     kind=2
+     a=0,648,1,MSEtest
+     teststate=1
+     path=msetest/msetest.pas
+     comment=
+     cc=
+     cd=
+     rc=
+     rd=
+     in=
+     eo=
+     ee=
+     eec=
+     cr=0
+     ao=
+     ae=
+     aec=0
+     ie=0
+     )
+    teststate=1
+    path=${MSEBASEDIR}mseuniverse/tools/
+    comment=
+    cc=${FPC_ARMEABI} -Fu${MSEBASEDIR}mseuniverse/tools/toolsskin ${FILE}
+    cd=
+    rc=
+    rd=
+    in=
+    eo=
+    ee=
+    eec=
+    cdef=
+    pdef=
     )
    teststate=1
-   path=${MSEBASEDIR}mseide-msegui/
+   path=
    comment=
-   cc=
+   cc=${FPC_ARMEABI} ${FILE}
    cd=
    rc=
    rd=
@@ -248,13 +344,34 @@ c=2
    )
    (
    kind=1
-   a=0,665,4,MSEuniverse
-   c=3
+   a=0,665,4,eabihf
+   c=2
     (
-    kind=2
-    a=0,648,1,MSEgit
+    kind=1
+    a=0,664,4,MSEide-MSEgui
+    c=1
+     (
+     kind=2
+     a=0,648,1,MSEide
+     teststate=1
+     path=apps/ide/mseide.pas
+     comment=
+     cc=
+     cd=
+     rc=
+     rd=
+     in=
+     eo=
+     ee=
+     eec=
+     cr=0
+     ao=
+     ae=
+     aec=0
+     ie=0
+     )
     teststate=1
-    path=msegit/msegit.pas
+    path=${MSEBASEDIR}mseide-msegui/
     comment=
     cc=
     cd=
@@ -264,19 +381,77 @@ c=2
     eo=
     ee=
     eec=
-    cr=0
-    ao=
-    ae=
-    aec=0
-    ie=0
+    cdef=
+    pdef=
     )
     (
-    kind=2
-    a=0,648,1,MSEspice
+    kind=1
+    a=0,665,4,MSEuniverse
+    c=3
+     (
+     kind=2
+     a=0,648,1,MSEgit
+     teststate=1
+     path=msegit/msegit.pas
+     comment=
+     cc=
+     cd=
+     rc=
+     rd=
+     in=
+     eo=
+     ee=
+     eec=
+     cr=0
+     ao=
+     ae=
+     aec=0
+     ie=0
+     )
+     (
+     kind=2
+     a=0,648,1,MSEspice
+     teststate=1
+     path=msespice/msespice.pas
+     comment=
+     cc=
+     cd=
+     rc=
+     rd=
+     in=
+     eo=
+     ee=
+     eec=
+     cr=0
+     ao=
+     ae=
+     aec=0
+     ie=0
+     )
+     (
+     kind=2
+     a=0,648,1,MSEtest
+     teststate=1
+     path=msetest/msetest.pas
+     comment=
+     cc=
+     cd=
+     rc=
+     rd=
+     in=
+     eo=
+     ee=
+     eec=
+     cr=0
+     ao=
+     ae=
+     aec=0
+     ie=0
+     )
     teststate=1
-    path=msespice/msespice.pas
+    path=${MSEBASEDIR}mseuniverse/tools/
     comment=
-    cc=
+    cc=${FPC_ARMEABIHF} -Fu${MSEBASEDIR}mseuniverse/tools/toolsskin ${FILE}
     cd=
     rc=
     rd=
@@ -284,36 +459,13 @@ c=2
     eo=
     ee=
     eec=
-    cr=0
-    ao=
-    ae=
-    aec=0
-    ie=0
-    )
-    (
-    kind=2
-    a=0,648,1,MSEtest
-    teststate=1
-    path=msetest/msetest.pas
-    comment=
-    cc=
-    cd=
-    rc=
-    rd=
-    in=
-    eo=
-    ee=
-    eec=
-    cr=0
-    ao=
-    ae=
-    aec=0
-    ie=0
+    cdef=
+    pdef=
     )
    teststate=1
-   path=${MSEBASEDIR}mseuniverse/tools/
+   path=
    comment=
-   cc=${FPC_ARM} -Fu${MSEBASEDIR}mseuniverse/tools/toolsskin ${FILE}
+   cc=${FPC_ARMEABIHF} ${FILE}
    cd=
    rc=
    rd=
@@ -379,7 +531,7 @@ checked=0
 [mainmo.stoponcomperr]
 checked=0
 [mainmo.trttistat1]
-macronames=15
+macronames=20
  INSTDIR
  FPCINSTDIR
  MSEBASEDIR
@@ -391,12 +543,17 @@ macronames=15
  FPCFLAGS_I386
  FPC_I386
  FPCARMDIR
- COMPILER_ARM
- FPCUNITS_ARM
- FPCFLAGS_ARM
+ FPCUNITS_ARMEABI
+ FPCUNITS_ARMEABIHF
+ FPCFLAGS_ARMEABI
+ FPCFLAGS_ARMEABIHF
+ COMPILER_ARMEABI
+ COMPILER_ARMEABIHF
  FPC_ARM
-macrovalues=15
- /home/mse/proj/mseguidist/bin/arm-linux/
+ FPC_ARMEABI
+ FPC_ARMEABIHF
+macrovalues=20
+ /home/mse/proj/mseguidist/bin/
  /home/mse/packs/standard/svn/fp/install/
  /home/mse/packs/standard/git/
  ${MSEBASEDIR}mseide-msegui/lib/common/
@@ -406,12 +563,22 @@ macrovalues=15
  -n -viwn -B -O2 -XX -Xs -CX -l -Fcutf8 -dmse_with_deprecated ${MSEUNITS}
  ${FPCFLAGS}  ${FPCUNITS_i386}
  ${COMPILER_I386} ${FPCFLAGS_I386}
- /home/mse/packs/standard/svn/fp/arm/install/eabi/
- ${FPCARMDIR}lib/fpc/2.6.5/ppcrossarm
- -Fu${FPCARMDIR}lib/fpc/2.6.5/units/arm-linux/* -Fl${FPCARMDIR}lib
- -Xd -e${FPCARMDIR}bin ${FPCFLAGS} ${FPCUNITS_ARM}
- ${COMPILER_ARM} ${FPCFLAGS_ARM} -o${INSTDIR}${FILE_NAMEBASE(${FILE})} -FU./
-macroon=15
+ /home/mse/packs/standard/svn/fp/arm/install
+ -Fu${FPCARMDIR}/eabi/lib/fpc/2.6.5/units/arm-linux/* -Fl${FPCARMDIR}/eabi/lib
+ -Fu${FPCARMDIR}/eabihf/lib/fpc/2.6.5/units/arm-linux/* -Fl${FPCARMDIR}/eabihf/lib
+ -Xd -e${FPCARMDIR}/eabi/bin ${FPCFLAGS} ${FPCUNITS_ARMEABI} -o${INSTDIR}/arm-linux-eabi/${FILE_NAMEBASE(${FILE})}
+ -Xd -e${FPCARMDIR}/eabihf/bin ${FPCFLAGS} ${FPCUNITS_ARMEABIHF} -o${INSTDIR}/arm-linux-eabihf/${FILE_NAMEBASE(${FILE})}
+ ${FPCARMDIR}/eabi/lib/fpc/2.6.5/ppcrossarm ${FPCFLAGS_ARMEABI}
+ ${FPCARMDIR}/eabihf/lib/fpc/2.6.5/ppcrossarm ${FPCFLAGS_ARMEABIHF}
+ -FU./
+ ${COMPILER_ARMEABI} ${FPC_ARM}
+ ${COMPILER_ARMEABIHF} ${FPC_ARM} -CpARMV6 -CfVFPV2
+macroon=20
+ 63
+ 63
+ 63
+ 63
+ 63
  63
  63
  63
@@ -437,25 +604,31 @@ groupcomment=6
  
 [mainfo]
 stackedunder=
-x=604
-y=289
-cx=677
-cy=347
+x=476
+y=204
+cx=709
+cy=464
 wsize=0
 active=1
 visible=1
 [mainfo.grid]
-propcolwidthref=586
+propcolwidthref=618
 width0=50
 sortdescend0=0
-width1=180
+width1=189
 sortdescend1=0
-width2=249
+width2=263
 sortdescend2=0
-width3=136
+width3=144
 sortdescend3=0
 sortdescend4=0
-rowstate=16
+rowstate=22
+ 0 0
+ 0 0
+ 0 0
+ 0 0
+ 0 0
+ 0 0
  0 0
  0 0
  0 0
