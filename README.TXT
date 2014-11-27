@@ -283,18 +283,17 @@ Crosscompiling and remote debugging i386-linux -> arm-linux
 ***********************************************************
 For Raspberry Pi:
 - Establish a ssh login without password (public key authentication).
-- Mount the home directory of the remote target on the host by sshfs.
 
 - On the i386-linux host download and extract 
-http://sourceforge.net/projects/mseide-msegui/files/fpcrossarm/crossfpc-i386_linux-eabi.tar.gz
+http://sourceforge.net/projects/mseide-msegui/files/fpcrossarm/crossfpc-i386_linux-eabihf.tar.gz
 to <your crossfpc directory>.
 
 - Start MSEide, in 'Settings'-'Configure MSEide'-'Global Macros' add:
+
 Name          Value
 
-CROSSMSEDIR   <the directory of the MSEide+MSEgui checkout you like to use>
-CROSSFPCDIR   <your crossfpc directory>/eabi
-CROSSDESTDIR  <path to the mounted remote home directory on host>
+CROSSMSEDIR   <MSEide+MSEgui directory>
+CROSSFPCDIR   <your crossfpc directory>
 HOSTIP        <the IP of the host>
 REMOTEIP      <the IP of the remote target>
 REMOTEPORT    <the remote port, ex: 2345>
@@ -303,8 +302,8 @@ REMOTEUSER    pi
 - 'Project'-'New'-'From Template', select "crossarmdefault.prj".
 - Create the new project.
 - 'Project'-'Options'-'Macros', set the TARGETPROJECTDIR value to the project
-  path in target and the mounted CROSSDESTDIR, ex: "proj/testcase".
-- Check the TARGETDIR and TARGETENV macros.
+  path in remote target, ex: "/home/pi/proj/testcase".
+- Check the TARGETENV macro.
 
 Press F9 and hope the best. ;-)
 
