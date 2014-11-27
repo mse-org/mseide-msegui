@@ -6,8 +6,6 @@ object messagesfo: tmessagesfo
   bounds_cx = 421
   bounds_cy = 234
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets]
-  container.frame.zoomwidthstep = 1
-  container.frame.zoomheightstep = 1
   container.bounds = (
     0
     0
@@ -45,7 +43,7 @@ object messagesfo: tmessagesfo
       bounds_y = 0
       bounds_cx = 1024
       bounds_cy = 16
-      optionsedit = [oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_exitoncursor, oe_nofirstarrownavig, oe_caretonreadonly, oe_focusrectonreadonly, oe_savestate, oe_checkvaluepaststatread]
+      optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savestate, oe1_checkvalueafterstatread]
       options = [teo_readonly]
       reffontheight = 14
     end

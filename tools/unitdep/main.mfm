@@ -82,7 +82,7 @@ object mainfo: tmainfo
       bounds_y = 0
       bounds_cx = 395
       bounds_cy = 16
-      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_locate, oe_savevalue, oe_savestate, oe_checkvaluepaststatread]
+      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_locate]
       options = [teo_treecolnavig]
       reffontheight = 14
     end
@@ -153,7 +153,7 @@ object mainfo: tmainfo
     taborder = 6
     visible = False
     bounds_x = 199
-    bounds_y = 232
+    bounds_y = 234
     bounds_cx = 3
     bounds_cy = 20
     options = [spo_hprop, spo_dockleft, spo_docktop, spo_dockright, spo_dockbottom]

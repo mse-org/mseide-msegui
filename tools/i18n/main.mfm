@@ -145,7 +145,8 @@ object mainfo: tmainfo
       bounds_y = 0
       bounds_cx = 195
       bounds_cy = 16
-      optionsedit = [oe_readonly, oe_undoonesc, oe_checkmrcancel, oe_exitoncursor, oe_hintclippedtext, oe_savestate]
+      optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savestate]
+      optionsedit = [oe_readonly, oe_undoonesc, oe_checkmrcancel, oe_exitoncursor, oe_hintclippedtext]
       textflags = [tf_ycentered, tf_clipo, tf_noselect, tf_ellipseleft]
       onupdaterowvalues = treeonupdaterowvalues
       options = [teo_treecolnavig]
@@ -164,7 +165,8 @@ object mainfo: tmainfo
       bounds_y = 0
       bounds_cx = 50
       bounds_cy = 16
-      optionsedit = [oe_readonly, oe_undoonesc, oe_checkmrcancel, oe_exitoncursor, oe_savestate]
+      optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savestate]
+      optionsedit = [oe_readonly, oe_undoonesc, oe_checkmrcancel, oe_exitoncursor]
       dropdown.options = [deo_selectonly, deo_autodropdown, deo_disabled]
       dropdown.cols.count = 1
       dropdown.cols.items = <      
@@ -183,7 +185,8 @@ object mainfo: tmainfo
       bounds_y = 0
       bounds_cx = 19
       bounds_cy = 16
-      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_savestate, oe_autopopupmenu, oe_keyexecute]
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick]
+      optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savestate]
       visible = False
       onsetvalue = donottranslateonsetvalue
     end
@@ -200,7 +203,8 @@ object mainfo: tmainfo
       bounds_y = 0
       bounds_cx = 124
       bounds_cy = 16
-      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_savestate]
+      optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savestate]
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext]
       font.height = 12
       font.name = 'stf_default'
       font.xscale = 1
@@ -222,7 +226,8 @@ object mainfo: tmainfo
       bounds_y = 0
       bounds_cx = 102
       bounds_cy = 16
-      optionsedit = [oe_readonly, oe_undoonesc, oe_checkmrcancel, oe_exitoncursor, oe_hintclippedtext, oe_savestate]
+      optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savestate]
+      optionsedit = [oe_readonly, oe_undoonesc, oe_checkmrcancel, oe_exitoncursor, oe_hintclippedtext]
       reffontheight = 14
     end
   end
@@ -242,7 +247,7 @@ object mainfo: tmainfo
     bounds_cx = 32
     bounds_cy = 16
     statfile = projectfo.projectstat
-    optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_savevalue, oe_savestate, oe_checkvaluepaststatread, oe_autopopupmenu, oe_keyexecute]
+    optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick]
     ondataentered = formatchanged
   end
   object stringonly: tbooleanedit

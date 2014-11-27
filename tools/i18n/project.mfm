@@ -6,8 +6,6 @@ object projectfo: tprojectfo
   bounds_cx = 683
   bounds_cy = 501
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets]
-  container.frame.zoomwidthstep = 1
-  container.frame.zoomheightstep = 1
   container.onlayout = childscaled
   container.bounds = (
     0
@@ -76,19 +74,19 @@ object projectfo: tprojectfo
       end>
     datacols.count = 3
     datacols.items = <    
-      item
+      item[rootname]
         width = 71
         options = [co_readonly, co_savevalue, co_savestate]
         widgetname = 'rootname'
         dataclass = tgridmsestringdatalist
       end    
-      item
+      item[filename]
         width = 479
         options = [co_fill, co_savevalue]
         widgetname = 'filename'
         dataclass = tgridmsestringdatalist
       end    
-      item
+      item[filekind]
         width = 126
         widgetname = 'filekind'
         dataclass = tgridenumdatalist
@@ -108,7 +106,8 @@ object projectfo: tprojectfo
       bounds_y = 0
       bounds_cx = 71
       bounds_cy = 16
-      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_savevalue, oe_savestate]
+      optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savevalue, oe1_savestate]
+      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick]
       reffontheight = 14
     end
     object filename: tfilenameedit
@@ -206,12 +205,12 @@ object projectfo: tprojectfo
       end>
     datacols.count = 2
     datacols.items = <    
-      item
+      item[lang]
         width = 94
         widgetname = 'lang'
         dataclass = tgridmsestringdatalist
       end    
-      item
+      item[dir]
         width = 583
         options = [co_fill, co_savevalue]
         widgetname = 'dir'
@@ -251,7 +250,6 @@ object projectfo: tprojectfo
     end
   end
   object splitter: tsplitter
-    optionswidget = [ow_destroywidgets]
     color = -1879048189
     taborder = 8
     bounds_x = 0
