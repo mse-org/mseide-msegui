@@ -506,8 +506,8 @@ c=2
  )
  (
  kind=2
- a=0,648,0,Copy binaries
- teststate=0
+ a=0,648,1,Copy binaries
+ teststate=1
  path=/home/mse/proj/mseguidist/copybin.sh
  comment=
  cc=${FILE}
@@ -571,8 +571,8 @@ macrovalues=20
  ${FPCARMDIR}/eabi/lib/fpc/2.6.5/ppcrossarm ${FPCFLAGS_ARMEABI}
  ${FPCARMDIR}/eabihf/lib/fpc/2.6.5/ppcrossarm ${FPCFLAGS_ARMEABIHF}
  -FU./
- ${COMPILER_ARMEABI} ${FPC_ARM}
- ${COMPILER_ARMEABIHF} ${FPC_ARM} -CpARMV6 -CfVFPV2
+ ${COMPILER_ARMEABI} ${FPC_ARM} -CaEABI
+ ${COMPILER_ARMEABIHF} ${FPC_ARM} -CpARMV6 -CfVFPV2 -CaEABIHF
 macroon=20
  63
  63
@@ -606,20 +606,20 @@ groupcomment=6
 stackedunder=
 x=476
 y=204
-cx=709
-cy=464
+cx=683
+cy=436
 wsize=0
 active=1
 visible=1
 [mainfo.grid]
-propcolwidthref=618
+propcolwidthref=592
 width0=50
 sortdescend0=0
-width1=189
+width1=181
 sortdescend1=0
-width2=263
+width2=246
 sortdescend2=0
-width3=144
+width3=138
 sortdescend3=0
 sortdescend4=0
 rowstate=22
