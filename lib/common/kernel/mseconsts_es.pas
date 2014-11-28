@@ -145,7 +145,7 @@ const
   'Deshacer',                          //sc_undo
   'Rehacer',                           //sc_redo
   'Cortar',                            //sc_cut
-  'Seleccioinar todo',                 //sc_select_all
+  'Seleccionar todo',                  //sc_select_all
   'Filtro apagado',                    //sc_filter_off
   'Vertical',                          //sc_portrait print orientation
   'Apaisado',                          //sc_landscape print orientation
