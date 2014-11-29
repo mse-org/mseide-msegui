@@ -4,6 +4,7 @@ object mseshortcutdialogfo: tmseshortcutdialogfo
   bounds_y = 222
   bounds_cx = 595
   bounds_cy = 340
+  container.onlayout = layoutexe
   container.bounds = (
     0
     0
@@ -12,18 +13,20 @@ object mseshortcutdialogfo: tmseshortcutdialogfo
   )
   options = [fo_screencentered, fo_closeonesc, fo_localshortcuts, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
   caption = 'Shortcuts'
+  onlayout = layoutexe
   moduleclassname = 'tmseform'
   object tsimplewidget1: tsimplewidget
     taborder = 4
     visible = True
-    bounds_x = 64
+    bounds_x = 71
     bounds_y = 285
-    bounds_cx = 411
+    bounds_cx = 403
     bounds_cy = 53
     bounds_cxmin = 200
     anchors = [an_left, an_right, an_bottom]
     object sc1ed: tstringedit
       Tag = 1
+      frame.options = [cfo_fixtop]
       frame.levelo = 0
       frame.framewidth = 1
       frame.colorframe = -1610612734
@@ -43,7 +46,7 @@ object mseshortcutdialogfo: tmseshortcutdialogfo
       ondeactivate = eddeactivate
       bounds_x = 208
       bounds_y = 4
-      bounds_cx = 197
+      bounds_cx = 189
       bounds_cy = 37
       anchors = [an_left, an_right, an_bottom]
       optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savevalue, oe1_savestate]
@@ -66,6 +69,7 @@ object mseshortcutdialogfo: tmseshortcutdialogfo
       linkright = sc1ed
     end
     object sced: tstringedit
+      frame.options = [cfo_fixtop]
       frame.levelo = 0
       frame.framewidth = 1
       frame.colorframe = -1610612734
@@ -209,39 +213,80 @@ object mseshortcutdialogfo: tmseshortcutdialogfo
       reffontheight = 14
     end
   end
-  object tbutton1: tbutton
+  object okbu: tbutton
+    optionswidget1 = [ow1_fontglyphheight, ow1_autoscale, ow1_autowidth]
     taborder = 1
-    bounds_x = 478
+    bounds_x = 482
     bounds_y = 306
     bounds_cx = 50
     bounds_cy = 20
+    bounds_cxmin = 50
     anchors = [an_right, an_bottom]
     state = [as_localcaption]
     caption = '&OK'
     modalresult = mr_ok
+    reffontheight = 14
   end
-  object tbutton2: tbutton
+  object cancelbu: tbutton
+    optionswidget1 = [ow1_fontglyphheight, ow1_autoscale, ow1_autowidth]
     taborder = 2
-    bounds_x = 534
+    bounds_x = 540
     bounds_y = 306
-    bounds_cx = 50
+    bounds_cx = 52
     bounds_cy = 20
+    bounds_cxmin = 50
     anchors = [an_right, an_bottom]
     state = [as_localcaption]
     caption = '&Cancel'
     modalresult = mr_cancel
+    reffontheight = 14
   end
   object defaultbu: tbutton
+    optionswidget1 = [ow1_fontglyphheight, ow1_autoscale, ow1_autowidth]
     color = -2147483645
     taborder = 3
     bounds_x = 8
     bounds_y = 306
-    bounds_cx = 50
+    bounds_cx = 55
     bounds_cy = 20
+    bounds_cxmin = 50
     anchors = [an_left, an_bottom]
     state = [as_localcaption, as_localcolor, as_localonexecute]
     caption = '&Default'
     onexecute = defaultex
+    reffontheight = 14
+  end
+  object tspacer2: tspacer
+    taborder = 5
+    bounds_x = 532
+    bounds_y = 304
+    bounds_cx = 8
+    bounds_cy = 20
+    anchors = [an_left, an_bottom]
+    linkleft = okbu
+    linkright = cancelbu
+    options = [spao_glueright]
+  end
+  object tspacer1: tspacer
+    taborder = 6
+    bounds_x = 474
+    bounds_y = 304
+    bounds_cx = 8
+    bounds_cy = 20
+    anchors = [an_left, an_bottom]
+    linkleft = tsimplewidget1
+    linkright = okbu
+    options = [spao_glueright]
+  end
+  object tspacer3: tspacer
+    taborder = 7
+    bounds_x = 63
+    bounds_y = 304
+    bounds_cx = 8
+    bounds_cy = 20
+    anchors = [an_left, an_bottom]
+    linkleft = defaultbu
+    linkright = tsimplewidget1
   end
   object tpopupmenu1: tpopupmenu
     menu.submenu.count = 2

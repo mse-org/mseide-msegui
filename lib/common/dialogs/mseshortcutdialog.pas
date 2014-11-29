@@ -23,8 +23,8 @@ type
    sc: ttreeitemedit;
    scdi: tstringedit;
    sc1di: tstringedit;
-   tbutton1: tbutton;
-   tbutton2: tbutton;
+   okbu: tbutton;
+   cancelbu: tbutton;
    defaultbu: tbutton;
    tpopupmenu1: tpopupmenu;
    timer: ttimer;
@@ -32,6 +32,9 @@ type
    sc1ed: tstringedit;
    tsplitter1: tsplitter;
    sced: tstringedit;
+   tspacer2: tspacer;
+   tspacer1: tspacer;
+   tspacer3: tspacer;
    procedure updaterowvalues(const sender: TObject; const aindex: Integer;
                    const aitem: tlistitem);
    procedure scdikey(const sender: twidget; var info: keyeventinfoty);
@@ -49,6 +52,7 @@ type
                    var cellinfo: cellinfoty; var processed: Boolean);
    procedure keyhint(const sender: TObject; var info: hintinfoty);
    procedure keytimeout(const sender: TObject);
+   procedure layoutexe(const sender: TObject);
   private
 //   fkeyentering: boolean;
    frootnodes: treelistedititemarty;
@@ -619,6 +623,11 @@ begin
  if not twidget(sender).active then begin
   info.caption:= '';
  end;
+end;
+
+procedure tmseshortcutdialogfo.layoutexe(const sender: TObject);
+begin
+ aligny(wam_center,[sced,defaultbu,okbu,cancelbu]);
 end;
 
 end.

@@ -31,7 +31,7 @@ object settingsfo: tsettingsfo
     linktop = macrogrid
     grip = stb_none
     object tbutton2: tbutton
-      optionswidget1 = [ow1_autoscale, ow1_autowidth]
+      optionswidget1 = [ow1_fontglyphheight, ow1_autoscale, ow1_autowidth]
       taborder = 2
       bounds_x = 284
       bounds_y = 16
@@ -42,9 +42,10 @@ object settingsfo: tsettingsfo
       state = [as_localcaption]
       caption = '&Cancel'
       modalresult = mr_cancel
+      reffontheight = 14
     end
     object tbutton1: tbutton
-      optionswidget1 = [ow1_autoscale, ow1_autowidth]
+      optionswidget1 = [ow1_fontglyphheight, ow1_autoscale, ow1_autowidth]
       taborder = 1
       bounds_x = 226
       bounds_y = 16
@@ -55,9 +56,10 @@ object settingsfo: tsettingsfo
       state = [as_default, as_localdefault, as_localcaption]
       caption = '&OK'
       modalresult = mr_ok
+      reffontheight = 14
     end
     object shortcutbu: tbutton
-      optionswidget1 = [ow1_autoscale, ow1_autowidth]
+      optionswidget1 = [ow1_fontglyphheight, ow1_autoscale, ow1_autowidth]
       bounds_x = 9
       bounds_y = 16
       bounds_cx = 78
@@ -66,6 +68,7 @@ object settingsfo: tsettingsfo
       state = [as_localcaption, as_localonexecute]
       caption = '&Shortcuts'
       onexecute = editshortcuts
+      reffontheight = 14
     end
     object tspacer2: tspacer
       taborder = 3
