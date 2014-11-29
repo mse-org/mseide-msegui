@@ -31,35 +31,51 @@ object settingsfo: tsettingsfo
     linktop = macrogrid
     grip = stb_none
     object tbutton2: tbutton
+      optionswidget1 = [ow1_autoscale, ow1_autowidth]
       taborder = 2
-      bounds_x = 286
+      bounds_x = 284
       bounds_y = 16
-      bounds_cx = 50
+      bounds_cx = 52
       bounds_cy = 22
+      bounds_cxmin = 50
       anchors = [an_top, an_right]
       state = [as_localcaption]
       caption = '&Cancel'
       modalresult = mr_cancel
     end
     object tbutton1: tbutton
+      optionswidget1 = [ow1_autoscale, ow1_autowidth]
       taborder = 1
-      bounds_x = 230
+      bounds_x = 226
       bounds_y = 16
       bounds_cx = 50
       bounds_cy = 22
+      bounds_cxmin = 50
       anchors = [an_top, an_right]
       state = [as_default, as_localdefault, as_localcaption]
       caption = '&OK'
       modalresult = mr_ok
     end
     object shortcutbu: tbutton
+      optionswidget1 = [ow1_autoscale, ow1_autowidth]
       bounds_x = 9
       bounds_y = 16
       bounds_cx = 78
       bounds_cy = 22
+      bounds_cxmin = 78
       state = [as_localcaption, as_localonexecute]
       caption = '&Shortcuts'
       onexecute = editshortcuts
+    end
+    object tspacer2: tspacer
+      taborder = 3
+      bounds_x = 276
+      bounds_y = 16
+      bounds_cx = 8
+      bounds_cy = 20
+      linkleft = tbutton1
+      linkright = tbutton2
+      options = [spao_glueright]
     end
   end
   object tlayouter1: tlayouter
@@ -83,6 +99,7 @@ object settingsfo: tsettingsfo
       optionsscale = [osc_expandy, osc_shrinky]
       object targetosdir: tstringedit
         Tag = 11
+        frame.options = [cfo_fixtop]
         frame.caption = '${TARGETOSDIR}'
         frame.dummy = 0
         frame.outerframe = (
@@ -116,6 +133,7 @@ object settingsfo: tsettingsfo
       end
       object target: tstringedit
         Tag = 10
+        frame.options = [cfo_fixtop]
         frame.caption = '${TARGET}'
         frame.dummy = 0
         frame.outerframe = (
@@ -134,6 +152,7 @@ object settingsfo: tsettingsfo
       end
       object exeext: tstringedit
         Tag = 9
+        frame.options = [cfo_fixtop]
         frame.caption = '${EXEEXT}'
         frame.dummy = 0
         frame.outerframe = (
@@ -446,7 +465,6 @@ object settingsfo: tsettingsfo
     datarowheight = 16
     reffontheight = 14
     object macroname: tstringedit
-      optionswidget1 = [ow1_fontglyphheight]
       optionsskin = [osk_framebuttononly]
       taborder = 1
       visible = False
