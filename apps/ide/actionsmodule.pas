@@ -768,6 +768,7 @@ begin
   repeatfind.enabled:= find.enabled and 
            (projectoptions.findreplaceinfo.find.text <> '');
  end;
+ findcompallact.enabled:= not find.enabled;
 end;
 
 procedure tactionsmo.findcompexe(const sender: TObject);
