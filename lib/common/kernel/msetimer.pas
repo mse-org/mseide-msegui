@@ -16,13 +16,16 @@ uses
  classes,mclasses,msetypes,mseevent,mseclasses,mseglob;
 
 type
- timeroptionty = (to_single,   //single shot
-                  to_absolute, //use absolute time (timestamp()) for to_single
-                               //disabled for ttimer
-                  to_autostart,//set enabled for to_single by setting interval,
-                               //disabled for ttimer
-                  to_leak);    //do not catch up missed timeouts
- timeroptionsty = set of timeroptionty;
+ timeroptionty = (to_single,    //single shot
+                  to_leak,      //do not catch up missed timeouts
+                  to_highres,   //call application.beginhighrestimer/
+                                //endhighrestimer, necessary on windows in order
+                                //to get 1ms jitter
+                  to_absolute,  //use absolute time (timestamp()) for to_single
+                                //disabled for ttimer
+                  to_autostart);//set enabled for to_single by setting interval,
+                                //disabled for ttimer
+timeroptionsty = set of timeroptionty;
  
  tsimpletimer = class(tnullinterfacedobject)
   private
@@ -35,6 +38,7 @@ type
    procedure setinterval(const avalue: longword);
    function getsingleshot: boolean;
    procedure setsingleshot(const avalue: boolean);
+   procedure setoptions(const avalue: timeroptionsty);
   protected
    procedure dotimer; virtual;
   public
@@ -53,7 +57,7 @@ type
              //restarts timer if enabled
              //0 -> fire once in mainloop idle
    property singleshot: boolean read getsingleshot write setsingleshot;
-   property options: timeroptionsty read foptions write foptions;
+   property options: timeroptionsty read foptions write setoptions;
    property ontimer: notifyeventty read fontimer write fontimer;
    property enabled: boolean read fenabled write setenabled default true;
              //last!
@@ -471,9 +475,15 @@ begin
   sys_mutexlock(mutex);
   fenabled:= Value;
   if not value then begin
+   if to_highres in foptions then begin
+    application.endhighrestimer();
+   end;
    killtimertick({$ifdef FPC}@{$endif}dotimer);
   end
   else begin
+   if to_highres in foptions then begin
+    application.beginhighrestimer();
+   end;
    settimertick(finterval,{$ifdef FPC}@{$endif}dotimer,foptions);
   end;
   sys_mutexunlock(mutex);
@@ -536,6 +546,26 @@ begin
  end
  else begin
   options:= options - [to_single];
+ end;
+end;
+
+procedure tsimpletimer.setoptions(const avalue: timeroptionsty);
+var
+ opt1: timeroptionsty;
+begin
+ opt1:= foptions >< avalue;
+ if opt1 <> [] then begin
+  foptions:= avalue;
+  if enabled then begin
+   if to_highres in opt1 then begin
+    if to_highres in avalue then begin
+     application.beginhighrestimer();
+    end
+    else begin
+     application.endhighrestimer();
+    end;
+   end;
+  end;
  end;
 end;
 
