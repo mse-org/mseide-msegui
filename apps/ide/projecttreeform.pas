@@ -568,11 +568,16 @@ begin
   clear;
  end
  else begin
-  if fformfile = nil then begin
-   fformfile:= tformnode.create;
-   add(ttreelistitem(fformfile));
+  projecttreefo.projectedit.itemlist.beginupdate();
+  try
+   if fformfile = nil then begin
+    fformfile:= tformnode.create;
+    add(ttreelistitem(fformfile));
+   end;
+   fformfile.filename:= afilename;
+  finally
+   projecttreefo.projectedit.itemlist.endupdate();
   end;
-  fformfile.filename:= afilename;
  end;
  result:= fformfile;
  imagenr:= getcurrentimagenr;
@@ -609,25 +614,28 @@ var
 begin
  result:= findfile(afilename);
  if result = nil then begin
-  projecttreefo.projectedit.itemlist.beginupdate;
-  n1:= currentnode;
-  if n1 <> nil then begin
-   ind1:= n1.count;
-  end;  
-  while (n1 <> nil) and (n1.fkind <> pnk_dir) do begin
-   ind1:= n1.parentindex;
-   n1:= tprojectnode(n1.parent);
+  projecttreefo.projectedit.itemlist.beginupdate();
+  try
+   n1:= currentnode;
+   if n1 <> nil then begin
+    ind1:= n1.count;
+   end;  
+   while (n1 <> nil) and (n1.fkind <> pnk_dir) do begin
+    ind1:= n1.parentindex;
+    n1:= tprojectnode(n1.parent);
+   end;
+   if (n1 = nil) then begin
+    n1:= self;
+    ind1:= count;   
+   end;
+   result:= createnode;   
+   n1.insert(ind1,result);
+   result.filename:= afilename;
+   fhashlist.add(result.fpath,result);
+   inc(fchangedcount);
+  finally
+   projecttreefo.projectedit.itemlist.endupdate();
   end;
-  if (n1 = nil) then begin
-   n1:= self;
-   ind1:= count;   
-  end;
-  result:= createnode;   
-  n1.insert(ind1,result);
-  result.filename:= afilename;
-  fhashlist.add(result.fpath,result);
-  inc(fchangedcount);
-  projecttreefo.projectedit.itemlist.endupdate;
  end;
 end;
 
