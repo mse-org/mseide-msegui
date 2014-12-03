@@ -18,7 +18,7 @@ uses
 
 implementation
 uses
- mselibc,mseevent,msesysintf1,mseapplication,msenogui;
+ mselibc,mseevent,msesysintf1,mseapplication,msenogui,mseprocmonitor;
 type
  tapplication1 = class(tnoguiapplication);
 var
