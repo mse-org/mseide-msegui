@@ -714,7 +714,7 @@ begin
          combineframestateflags(shs_disabled in state,false,
                                                shs_clicked in state,false));
       if ca.colorglyph = cl_default then begin
-       ca.colorglyph:= itemframetemplateactive.glyphcolor;
+       ca.colorglyph:= itemframetemplateactive.colorglyph;
       end;
      end;
      face:= itemfaceactive;
@@ -732,7 +732,7 @@ begin
                combineframestateflags(shs_disabled in state,false,
                                               shs_clicked in state,false));
       if ca.colorglyph = cl_default then begin
-       ca.colorglyph:= itemframetemplate.glyphcolor;
+       ca.colorglyph:= itemframetemplate.colorglyph;
       end;
      end;
      face:= itemface;
