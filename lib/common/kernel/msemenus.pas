@@ -196,6 +196,7 @@ type
    function parentmenu: tmenuitem;
    function actualcolor: colorty;
    function actualcoloractive: colorty;
+   function actualcolorglyph: colorty;
    property owner: tcustommenu read fowner; //can be nil
    function execute: boolean; //true if onexecute fired
    function asyncexecute: boolean;
@@ -1570,6 +1571,19 @@ begin
  else begin
   if result = cl_normal then begin
    result:= actualcolor;
+  end;
+ end;
+end;
+
+function tmenuitem.actualcolorglyph: colorty;
+begin
+ result:= finfo.colorglyph;
+ if (result = cl_default) or (result = cl_parent) then begin
+  if fparentmenu <> nil then begin
+   result:= fparentmenu.actualcolorglyph;
+  end
+  else begin
+   result:= cl_default;
   end;
  end;
 end;

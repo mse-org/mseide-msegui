@@ -477,7 +477,8 @@ begin
      if ashortcutwidth > shortcutwidth then begin
       shortcutwidth:= ashortcutwidth;
      end;
-     colorglyph:= item1.finfo.colorglyph; //layout.colorglyph;
+     colorglyph:= item1.actualcolorglyph();
+                                   //finfo.colorglyph; //layout.colorglyph;
      caption:= item1.finfo.caption1;
      imagenr:= item1.finfo.imagenr;
      imagenrdisabled:= item1.finfo.imagenrdisabled;
@@ -689,6 +690,7 @@ procedure drawmenu(const canvas: tcanvas; const layout: menulayoutinfoty);
 var
  int1: integer;
  po1,po2: pframety;
+ colorglyphbefore: colorty;
 begin
  with layout do begin
   if itemframetemplate <> nil then begin
@@ -705,11 +707,15 @@ begin
   end; 
   for int1:= 0 to high(cells) do begin
    with cells[int1],buttoninfo do begin
+    colorglyphbefore:= ca.colorglyph;
     if int1 = activeitem then begin
      if itemframetemplateactive <> nil then begin
       itemframetemplateactive.paintbackground(canvas,ca.dim,
          combineframestateflags(shs_disabled in state,false,
                                                shs_clicked in state,false));
+      if ca.colorglyph = cl_default then begin
+       ca.colorglyph:= itemframetemplateactive.glyphcolor;
+      end;
      end;
      face:= itemfaceactive;
      ca.font:= fontactive;
@@ -725,11 +731,18 @@ begin
       itemframetemplate.paintbackground(canvas,ca.dim,
                combineframestateflags(shs_disabled in state,false,
                                               shs_clicked in state,false));
+      if ca.colorglyph = cl_default then begin
+       ca.colorglyph:= itemframetemplate.glyphcolor;
+      end;
      end;
      face:= itemface;
      ca.font:= fontinactive;
      state:= state - [shs_focused,shs_active,shs_focusanimation];
+     if ca.colorglyph = cl_default then begin
+      ca.colorglyph:= cl_glyph;
+     end;
      drawmenubutton(canvas,buttoninfo,po1);
+     ca.colorglyph:= colorglyphbefore;
      if itemframetemplate <> nil then begin
           itemframetemplate.paintoverlay(canvas,ca.dim,
                  combineframestateflags(shs_disabled in state,false,
