@@ -94,6 +94,7 @@ type
    ffont: tmenufont;
    ffontactive: tmenufontactive;
    fcoloractive: colorty;
+   fcolorglyphactive: colorty;
    function getsubmenu: tmenuitems;
    procedure setsubmenu(const Value: tmenuitems);
    procedure setcaption(const avalue: captionty);
@@ -197,6 +198,7 @@ type
    function actualcolor: colorty;
    function actualcoloractive: colorty;
    function actualcolorglyph: colorty;
+   function actualcolorglyphactive: colorty;
    property owner: tcustommenu read fowner; //can be nil
    function execute: boolean; //true if onexecute fired
    function asyncexecute: boolean;
@@ -246,12 +248,15 @@ type
                             stored isimagenrdisabledstored default -2;
    property color: colorty read finfo.color write setcolor 
                           stored iscolorstored default cl_default;
-   property colorglyph: colorty read finfo.colorglyph write setcolorglyph 
-                          stored iscolorglyphstored default cl_default;
-                                //cl_default maps to cl_glyph
    property coloractive: colorty read fcoloractive write setcoloractive 
                           default cl_default;
            //cl_default maps to cl_parent, cl_normal maps to color property
+   property colorglyph: colorty read finfo.colorglyph write setcolorglyph 
+                          stored iscolorglyphstored default cl_default;
+                                //cl_default maps to cl_glyph
+   property colorglyphactive: colorty read fcolorglyphactive 
+                                 write fcolorglyphactive default cl_default;
+                                //cl_default maps to colorglyph
    property font: tmenufont read getfont write setfont stored isfontstored;
    property fontactive: tmenufontactive read getfontactive write setfontactive
                             stored isfontactivestored;
@@ -784,6 +789,7 @@ begin
  finfo.color:= cl_default;
  finfo.colorglyph:= cl_default;
  fcoloractive:= cl_default;
+ fcolorglyphactive:= cl_default;
  inherited create;
 end;
 
@@ -1581,6 +1587,19 @@ begin
  if (result = cl_default) or (result = cl_parent) then begin
   if fparentmenu <> nil then begin
    result:= fparentmenu.actualcolorglyph;
+  end
+  else begin
+   result:= cl_default;
+  end;
+ end;
+end;
+
+function tmenuitem.actualcolorglyphactive: colorty;
+begin
+ result:= fcolorglyphactive;
+ if (result = cl_default) or (result = cl_parent) then begin
+  if fparentmenu <> nil then begin
+   result:= fparentmenu.actualcolorglyphactive;
   end
   else begin
    result:= cl_default;

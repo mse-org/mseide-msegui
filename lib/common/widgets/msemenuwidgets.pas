@@ -25,6 +25,7 @@ type
   dimouter: rectty;
   fontinactive: tfont;
   fontactive: tfont;
+  colorglyphactive: colorty;
  // coloractive: colorty;
  end;
  menucellinfoarty = array of menucellinfoty;
@@ -479,6 +480,10 @@ begin
      end;
      colorglyph:= item1.actualcolorglyph();
                                    //finfo.colorglyph; //layout.colorglyph;
+     colorglyphactive:= item1.actualcolorglyphactive();
+     if colorglyphactive = cl_default then begin
+      colorglyphactive:= colorglyph;
+     end;
      caption:= item1.finfo.caption1;
      imagenr:= item1.finfo.imagenr;
      imagenrdisabled:= item1.finfo.imagenrdisabled;
@@ -709,6 +714,7 @@ begin
    with cells[int1],buttoninfo do begin
     colorglyphbefore:= ca.colorglyph;
     if int1 = activeitem then begin
+     ca.colorglyph:= colorglyphactive;
      if itemframetemplateactive <> nil then begin
       itemframetemplateactive.paintbackground(canvas,ca.dim,
          combineframestateflags(shs_disabled in state,false,
@@ -742,13 +748,13 @@ begin
       ca.colorglyph:= cl_glyph;
      end;
      drawmenubutton(canvas,buttoninfo,po1);
-     ca.colorglyph:= colorglyphbefore;
      if itemframetemplate <> nil then begin
           itemframetemplate.paintoverlay(canvas,ca.dim,
                  combineframestateflags(shs_disabled in state,false,
                  shs_clicked in state,false));
      end;
     end;
+    ca.colorglyph:= colorglyphbefore;
    end;
   end;
  end;
