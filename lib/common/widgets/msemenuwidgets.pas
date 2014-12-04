@@ -481,9 +481,9 @@ begin
      colorglyph:= item1.actualcolorglyph();
                                    //finfo.colorglyph; //layout.colorglyph;
      colorglyphactive:= item1.actualcolorglyphactive();
-     if colorglyphactive = cl_default then begin
-      colorglyphactive:= colorglyph;
-     end;
+//     if colorglyphactive = cl_default then begin
+//      colorglyphactive:= colorglyph;
+//     end;
      caption:= item1.finfo.caption1;
      imagenr:= item1.finfo.imagenr;
      imagenrdisabled:= item1.finfo.imagenrdisabled;

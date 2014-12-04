@@ -163,6 +163,7 @@ type
    procedure writesc(writer: twriter);
    procedure readsc1(reader: treader);
    procedure writesc1(writer: twriter);
+   procedure setcolorglyphactive(const avalue: colorty);
   protected
    finfo: actioninfoty;
    fowner: tcustommenu;
@@ -255,8 +256,8 @@ type
                           stored iscolorglyphstored default cl_default;
                                 //cl_default maps to cl_glyph
    property colorglyphactive: colorty read fcolorglyphactive 
-                                 write fcolorglyphactive default cl_default;
-                                //cl_default maps to colorglyph
+                                 write setcolorglyphactive default cl_default;
+                                //cl_default maps to cl_glyph
    property font: tmenufont read getfont write setfont stored isfontstored;
    property fontactive: tmenufontactive read getfontactive write setfontactive
                             stored isfontactivestored;
@@ -980,6 +981,14 @@ begin
  if avalue <> fcoloractive then begin
   fcoloractive:= avalue;
   actionchanged;
+ end;
+end;
+
+procedure tmenuitem.setcolorglyphactive(const avalue: colorty);
+begin
+ if avalue <> fcolorglyphactive then begin
+  fcolorglyphactive:= avalue;
+  actionchanged();
  end;
 end;
 
