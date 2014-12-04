@@ -40,29 +40,6 @@ const
 
 type
 
- tpaintbox = class(tpublishedwidget)
-  private
-  protected
-  published
-   property font: twidgetfont read getfont write setfont stored isfontstored;
-   property onbeforepaint;
-   property onpaintbackground;
-   property onpaint;
-   property onafterpaint;
-
-   property onmouseevent;
-   property onchildmouseevent;
-   property onclientmouseevent;
-   property onmousewheelevent;
-
-   property onkeydown;
-   property onkeyup;
-   property onshortcut;
-
-   property onresize;
-   property onmove;
- end;
-
  teventwidget = class(tcustomeventwidget)
   published
    property onfocusedwidgetchanged;
@@ -642,6 +619,29 @@ type
    property onscroll: pointeventty read fonscroll write fonscroll;
    property optionswidget default defaultscrollboxoptionswidget;
    property optionsscale default defaultscrollboxoptionsscale;
+ end;
+
+ tpaintbox = class(tscrollbox)
+  private
+  protected
+  published
+   property font: twidgetfont read getfont write setfont stored isfontstored;
+   property onbeforepaint;
+   property onpaintbackground;
+   property onpaint;
+   property onafterpaint;
+
+   property onmouseevent;
+   property onchildmouseevent;
+   property onclientmouseevent;
+   property onmousewheelevent;
+
+   property onkeydown;
+   property onkeyup;
+   property onshortcut;
+
+   property onresize;
+   property onmove;
  end;
 
  tstepboxframe = class(tcustomstepframe)
