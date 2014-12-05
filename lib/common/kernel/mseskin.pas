@@ -241,15 +241,19 @@ type
  tskinfont = class(tpersistent)
   private
    fcolor: colorty;
+   fshadow_color: colorty;
    fshadow_shiftx: integer;
    fshadow_shifty: integer;
    fgloss_color: colorty;
    fgloss_shiftx: integer;
    fgloss_shifty: integer;
+   fgrayed_color: colorty;
+   fgrayed_colorshadow: colorty;
+   fgrayed_shiftx: integer;
+   fgrayed_shifty: integer;
    fextraspace: integer;
    fstyle: fontstylesty;
    fcolorbackground: colorty;
-   fshadow_color: colorty;
   public
    constructor create;
    procedure updatefont(const adest: tfont);
@@ -270,6 +274,16 @@ type
                 fgloss_shiftx default -1;
    property gloss_shifty: integer read fgloss_shifty write
                 fgloss_shifty default -1;
+
+   property grayed_color: colorty read fgrayed_color
+                                write fgrayed_color default cl_default;
+   property grayed_colorshadow: colorty read fgrayed_colorshadow
+                                write fgrayed_colorshadow default cl_default;
+   property grayed_shiftx: integer read fgrayed_shiftx write
+                fgrayed_shiftx default 1;
+   property grayed_shifty: integer read fgrayed_shifty write
+                fgrayed_shifty default 1;
+
    property extraspace: integer read fextraspace write fextraspace default 0;
    property style: fontstylesty read fstyle write fstyle default [];
  end;
@@ -2786,6 +2800,10 @@ begin
  fgloss_color:= cl_default;
  fgloss_shiftx:= -1;
  fgloss_shifty:= -1;
+ fgrayed_color:= cl_default;
+ fgrayed_colorshadow:= cl_default;
+ fgrayed_shiftx:= 1;
+ fgrayed_shifty:= 1;
 end;
 
 procedure tskinfont.updatefont(const adest: tfont);
@@ -2814,6 +2832,18 @@ begin
   end;
   if fgloss_shifty <> -1 then begin
    gloss_shifty:= fgloss_shifty;
+  end;
+  if fgrayed_color <> cl_default then begin
+   grayed_color:= fgrayed_color;
+  end;
+  if fgrayed_colorshadow <> cl_default then begin
+   grayed_colorshadow:= fgrayed_colorshadow;
+  end;
+  if fgrayed_shiftx <> 1 then begin
+   grayed_shiftx:= fgrayed_shiftx;
+  end;
+  if fgrayed_shifty <> 1 then begin
+   grayed_shifty:= fgrayed_shifty;
   end;
   if fextraspace <> 0 then begin
    extraspace:= extraspace;
