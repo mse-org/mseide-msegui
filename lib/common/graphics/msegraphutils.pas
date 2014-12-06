@@ -86,15 +86,15 @@ const
  cl_text =                   cl_mapped + 9;
  cl_selectedtext =           cl_mapped + 10;
  cl_selectedtextbackground = cl_mapped + 11;
- cl_grayed =                 cl_mapped + 12;
- cl_grayedshadow =           cl_mapped + 13;
- cl_infobackground =         cl_mapped + 14;
- cl_glyph =                  cl_mapped + 15;
- cl_activegrip =             cl_mapped + 16;
- cl_empty =                  cl_mapped + 17;
- cl_emptytext =              cl_mapped + 18;
- cl_emptytextbackground =    cl_mapped + 19;
- cl_zebra =                  cl_mapped + 20;
+ cl_infobackground =         cl_mapped + 12;
+ cl_glyph =                  cl_mapped + 13;
+ cl_activegrip =             cl_mapped + 14;
+ cl_empty =                  cl_mapped + 15;
+ cl_emptytext =              cl_mapped + 16;
+ cl_emptytextbackground =    cl_mapped + 17;
+ cl_zebra =                  cl_mapped + 18;
+ cl_grayed =                 cl_mapped + 19;
+ cl_grayedshadow =           cl_mapped + 20;
  cl_lastmapped =             cl_mapped + 21;
 
  cl_0 =                      cl_namedrgb + 0; //select colorbackground for monochrome bitmaps
@@ -205,15 +205,15 @@ const
     (name: 'cl_text';  rgb:                  (blue: $00; green: $00; red: $00; res: $00)), //9
     (name: 'cl_selectedtext'; rgb:           (blue: $ff; green: $ff; red: $ff; res: $00)), //10
     (name: 'cl_selectedtextbackground'; rgb: (blue: $c0; green: $00; red: $00; res: $00)), //11
-    (name: 'cl_grayed'; rgb:                 (blue: $80; green: $80; red: $80; res: $00)), //12
-    (name: 'cl_grayedshadow'; rgb:           (blue: $ff; green: $ff; red: $ff; res: $00)), //13
-    (name: 'cl_infobackground'; rgb:         (blue: $e0; green: $ff; red: $ff; res: $00)), //14
-    (name: 'cl_glyph'; rgb:                  (blue: $00; green: $00; red: $00; res: $00)), //15
-    (name: 'cl_activegrip'; rgb:             (blue: $90; green: $20; red: $20; res: $00)), //16
-    (name: 'cl_empty';  rgb:                 (blue: $a0; green: $a0; red: $ff; res: $00)), //17
-    (name: 'cl_emptytext';  rgb:             (blue: $ff; green: $ff; red: $ff; res: $00)), //18
-    (name: 'cl_emptytextbackground';  rgb:   (blue: $00; green: $00; red: $ff; res: $00)), //19
-    (name: 'cl_zebra';  rgb:                 (blue: $ff; green: $ff; red: $e0; res: $00))  //20
+    (name: 'cl_infobackground'; rgb:         (blue: $e0; green: $ff; red: $ff; res: $00)), //12
+    (name: 'cl_glyph'; rgb:                  (blue: $00; green: $00; red: $00; res: $00)), //13
+    (name: 'cl_activegrip'; rgb:             (blue: $90; green: $20; red: $20; res: $00)), //14
+    (name: 'cl_empty';  rgb:                 (blue: $a0; green: $a0; red: $ff; res: $00)), //15
+    (name: 'cl_emptytext';  rgb:             (blue: $ff; green: $ff; red: $ff; res: $00)), //16
+    (name: 'cl_emptytextbackground';  rgb:   (blue: $00; green: $00; red: $ff; res: $00)), //17
+    (name: 'cl_zebra';  rgb:                 (blue: $ff; green: $ff; red: $e0; res: $00)), //18
+    (name: 'cl_grayed'; rgb:                 (blue: $80; green: $80; red: $80; res: $00)), //19
+    (name: 'cl_grayedshadow'; rgb:           (blue: $ff; green: $ff; red: $ff; res: $00))  //20
    );
 
  defaultnamedrgb: array[0..namedrgbcolorcount-1]
