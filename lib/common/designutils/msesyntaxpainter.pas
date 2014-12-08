@@ -237,7 +237,7 @@ type
    fclients: clientinfoarty;
    fsyntaxdefs: syntaxdefarty;
    fdefdefs: tdoublemsestringdatalist;
-   fdefsdir: string;
+   fdefsdir: filenamety;
    fdeftext: tmsestringdatalist;
    fdefaultsyntax: integer;
    procedure dotimer(const sender: tobject);
@@ -291,7 +291,7 @@ type
         //              '*.pp'           'pas.sdef'
         //              '"*.pp" "*.pas"' 'pas.sdef'
 
-   property defsdir: string read fdefsdir write fdefsdir;
+   property defsdir: filenamety read fdefsdir write fdefsdir;
    property deftext: tmsestringdatalist read fdeftext write setdeftext;
   end;
 
