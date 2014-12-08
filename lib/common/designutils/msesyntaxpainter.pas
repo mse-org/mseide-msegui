@@ -477,8 +477,9 @@ begin
  end;
 end;
 
-function tsyntaxpainter.registerclient(sender: tobject; alist: trichstringdatalist;
-   aonlinechanged: integerchangedeventty = nil; asyntaxdefhandle: integer = 0): integer;
+function tsyntaxpainter.registerclient(sender: tobject; 
+       alist: trichstringdatalist; aonlinechanged: integerchangedeventty = nil;
+                                       asyntaxdefhandle: integer = 0): integer;
 
  procedure initclient(var info: clientinfoty);
  begin

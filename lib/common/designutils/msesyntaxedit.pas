@@ -26,7 +26,7 @@ const
  closebrackets: array[bracketkindty] of msechar = (#0,')',']','}');
 
 type
- syntaxeditoptionty = (seo_autoindent,seo_markbrackets);
+ syntaxeditoptionty = (seo_autoindent,seo_markbrackets,seo_defaultsyntax);
  syntaxeditoptionsty = set of syntaxeditoptionty;
  
  tsyntaxedit = class(tundotextedit)
@@ -36,20 +36,22 @@ type
 //   fautoindent: boolean;
    flinkpos: gridcoordty;
    flinklength: integer;
-   fdefaultsyntax: boolean;
+//   fdefaultsyntax: boolean;
    fsyntaxchanging: integer;
    fbracketsetting: integer;
    fbracketchecking: integer;
    procedure setsyntaxpainter(const Value: tsyntaxpainter);
    procedure unregistersyntaxpainter;
    procedure syntaxchanged(const sender: tobject; const index: integer);
-   procedure setdefaultsyntax(const avalue: boolean);
+//   procedure setdefaultsyntax(const avalue: boolean);
    procedure checkdefaultsyntax;
    procedure readautoindent(reader: treader);
+   procedure readdefaultsyntax(reader: treader);
    function getautoindent: boolean;
    procedure setautoindent(const avalue: boolean);
    function getmarkbrackets: boolean;
    procedure setmarkbrackets(const avalue: boolean);
+   procedure setoptions(const avalue: syntaxeditoptionsty);
   protected
    foptions: syntaxeditoptionsty;
    fbracket1,fbracket2: gridcoordty;
@@ -97,9 +99,9 @@ type
   published
    property syntaxpainter: tsyntaxpainter read fsyntaxpainter
                                                     write setsyntaxpainter;
-   property defaultsyntax: boolean read fdefaultsyntax 
-                             write setdefaultsyntax default false;
-   property options: syntaxeditoptionsty read foptions write foptions 
+//   property defaultsyntax: boolean read fdefaultsyntax 
+//                             write setdefaultsyntax default false;
+   property options: syntaxeditoptionsty read foptions write setoptions 
                                                                   default [];
  end;
 
@@ -192,7 +194,7 @@ end;
 
 procedure tsyntaxedit.checkdefaultsyntax;
 begin
- if fdefaultsyntax and not (csloading in componentstate) and 
+ if (seo_defaultsyntax in foptions) and not (csloading in componentstate) and 
        (fsyntaxpainter <> nil) and (flines <> nil) and 
             (fsyntaxpainterhandle < 0) then begin
   setsyntaxdef(fsyntaxpainter.defaultsyntax);
@@ -209,13 +211,13 @@ begin
   checkdefaultsyntax;
  end;
 end;
-
+{
 procedure tsyntaxedit.setdefaultsyntax(const avalue: boolean);
 begin
  fdefaultsyntax:= avalue;
  checkdefaultsyntax;
 end;
-
+}
 procedure tsyntaxedit.setsyntaxdef(const sourcefilename: filenamety);
 begin
  if fsyntaxpainter <> nil then begin
@@ -916,10 +918,18 @@ begin
  end;
 end;
 
+procedure tsyntaxedit.readdefaultsyntax(reader: treader);
+begin
+ if reader.readboolean then begin
+  include(foptions,seo_defaultsyntax);
+ end;
+end;
+
 procedure tsyntaxedit.defineproperties(filer: tfiler);
 begin
  inherited;
- filer.defineproperty('autoindent',{$ifdef FPC}@{$endif}readautoindent,nil,false);
+ filer.defineproperty('autoindent',@readautoindent,nil,false);
+ filer.defineproperty('defaultsyntax',@readdefaultsyntax,nil,false);
 end;
 
 procedure tsyntaxedit.editnotification(var info: editnotificationinfoty);
@@ -976,6 +986,19 @@ begin
  end
  else begin
   options:= options - [seo_markbrackets];
+ end;
+end;
+
+procedure tsyntaxedit.setoptions(const avalue: syntaxeditoptionsty);
+var
+ delta: syntaxeditoptionsty;
+begin
+ delta:= foptions >< avalue;
+ if delta <> [] then begin
+  foptions:= avalue;
+  if seo_defaultsyntax in delta then begin
+   checkdefaultsyntax;
+  end;
  end;
 end;
 
