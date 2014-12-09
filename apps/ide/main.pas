@@ -40,6 +40,7 @@ uses
 const
  versiontext = '3.7';
  idecaption = 'MSEide';
+ statname = 'mseide';
 
 type
  stringconsts = (
@@ -1756,16 +1757,16 @@ begin
    createdir(wstr1);
   end;
   {$ifdef mswindows}
-  mainstatfile.filename:= 'mseidewi.sta';
+  mainstatfile.filename:= statname+'wi.sta';
   {$endif}
   {$ifdef linux}
-  mainstatfile.filename:= 'mseideli.sta';
+  mainstatfile.filename:= statname+'li.sta';
   {$endif}
   {$ifdef openbsd}
-  mainstatfile.filename:= 'mseideobsd.sta';
+  mainstatfile.filename:= statname+'obsd.sta';
   {$endif}
   {$ifdef bsd}
-  mainstatfile.filename:= 'mseidebsd.sta';
+  mainstatfile.filename:= statname+'bsd.sta';
   {$endif}
   mainstatfile.readstat;
   expandprojectmacros;
