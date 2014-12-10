@@ -2404,6 +2404,7 @@ type
    fcurrmodalinfo: pmodalinfoty;
    flooplevel: integer;
    
+   fmousewheelsensitivity: real;
    procedure invalidated;
    function grabpointer(const aid: winidty): boolean;
    function ungrabpointer: boolean;
@@ -2610,12 +2611,18 @@ type
    property buttonreleasewidgetbefore: twidget read fbuttonreleasewidgetbefore;
    property dblclicktime: integer read fdblclicktime write fdblclicktime default
                  defaultdblclicktime; //us
-   property mousewheelfrequmin: real read fmousewheelfrequmin write fmousewheelfrequmin;
-   property mousewheelfrequmax: real read fmousewheelfrequmax write fmousewheelfrequmax;
-   property mousewheeldeltamin: real read fmousewheeldeltamin write fmousewheeldeltamin;
-   property mousewheeldeltamax: real read fmousewheeldeltamax write fmousewheeldeltamax;
+   property mousewheelsensitivity: real read fmousewheelsensitivity 
+                                                  write fmousewheelsensitivity;
+   property mousewheelfrequmin: real read fmousewheelfrequmin 
+                                                  write fmousewheelfrequmin;
+   property mousewheelfrequmax: real read fmousewheelfrequmax 
+                                                  write fmousewheelfrequmax;
+   property mousewheeldeltamin: real read fmousewheeldeltamin 
+                                                  write fmousewheeldeltamin;
+   property mousewheeldeltamax: real read fmousewheeldeltamax 
+                                                  write fmousewheeldeltamax;
    property mousewheelaccelerationmax: real read fmousewheelaccelerationmax 
-                                  write fmousewheelaccelerationmax;
+                                              write fmousewheelaccelerationmax;
  end;
 
 function translatewidgetpoint(const point: pointty;
@@ -17497,6 +17504,7 @@ end;
 constructor tguiapplication.create(aowner: tcomponent);
 begin
  fwidgetcursorshape:= cr_default;
+ fmousewheelsensitivity:= 1;
  fmousewheelfrequmin:= 1;
  fmousewheelfrequmax:= 100;
  fmousewheeldeltamin:= 0.05;
@@ -18598,6 +18606,7 @@ begin
  if info.wheel = mw_down then begin
   info.delta:= - info.delta;
  end;
+ info.delta:= info.delta * fmousewheelsensitivity;
 end;
 
 function tguiapplication.mousewheelacceleration(const avalue: real): real;
