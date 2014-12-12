@@ -18,7 +18,7 @@ unit msegui;
 
 interface
 uses
- classes,mclasses,sysutils,msegraphics,msetypes,
+ classes,mclasses,sysutils,msegraphics,msetypes,mseact,
  msestrings,mseerr,msegraphutils,mseapplication,msedragglob,
  msepointer,mseevent,msekeyboard,mseclasses,mseglob,mseguiglob,mselist,
  msesystypes,msethread,mseguiintf,{msesysdnd,}
@@ -515,6 +515,7 @@ type
    procedure setdisabled(const value: boolean); virtual;
    procedure updateclientrect; virtual;
    class function calcpaintframe(const afi: baseframeinfoty): framety;
+   class function calcinnerframe(const afi: baseframeinfoty): framety;
    procedure calcrects;
    procedure updaterects; virtual;
    procedure internalupdatestate;
@@ -833,13 +834,22 @@ type
    constructor create(const owner: tmsecomponent;
                   const onchange: notifyeventty); override;
    destructor destroy; override;
-   procedure paintbackground(const acanvas: tcanvas; arect: rectty;
+   procedure paintbackground(const acanvas: tcanvas; const arect: rectty;
                                  const astate: framestateflagsty = []);
                                        //arect = paintrect
    procedure paintoverlay(const acanvas: tcanvas; const arect: rectty;
-                        const astate: framestateflagsty);
+                        const astate: framestateflagsty = []);
                                        //arect = paintrect
+   procedure paintbackgroundframe(const acanvas: tcanvas; const arect: rectty;
+                                 const astate: framestateflagsty = []);
+                                       //arect = framerect
+   procedure paintoverlayframe(const acanvas: tcanvas; const arect: rectty;
+                        const astate: framestateflagsty = []);
+                                       //arect = framerect
    function paintframe: framety;
+   function innerframe: framety;
+   function paintframedim: sizety;
+   function innerframedim: sizety;
    procedure createfont;
   published
    property levelo: integer read fi.ba.levelo write setlevelo default 0;
@@ -2786,6 +2796,8 @@ function activateprocesswindow(const procid: integer;
          //true if ok
 function combineframestateflags(
             const disabled,active,mouse,clicked: boolean): framestateflagsty;
+function combineframestateflags(
+                         const astate: shapestatesty): framestateflagsty;
 
 {$ifdef mse_debug}
 procedure debugwindow(const atext: string; const aid: winidty); overload;
@@ -2999,6 +3011,24 @@ begin
  if active then include(result,fsf_active);
  if mouse then include(result,fsf_mouse);
  if clicked then include(result,fsf_clicked);
+end;
+
+function combineframestateflags(
+                         const astate: shapestatesty): framestateflagsty;
+begin
+ result:= [];
+ if shs_disabled in astate then begin
+  include(result,fsf_disabled);
+ end;
+ if shs_active in astate then begin
+  include(result,fsf_active);
+ end;
+ if shs_mouse in astate then begin
+  include(result,fsf_mouse);
+ end;
+ if shs_clicked in astate then begin
+  include(result,fsf_clicked);
+ end;
 end;
 
 function wbounds_x(const awidget: twidget): integer;
@@ -4233,6 +4263,15 @@ begin
    end;
   end;
  end;
+end;
+
+class function tcustomframe.calcinnerframe(const afi: baseframeinfoty): framety;
+begin
+ result:= calcpaintframe(afi);
+ result.left:= result.left + afi.innerframe.left;
+ result.top:= result.left + afi.innerframe.top;
+ result.right:= result.left + afi.innerframe.right;
+ result.bottom:= result.left + afi.innerframe.bottom;
 end;
 
 procedure tcustomframe.calcrects;
@@ -5613,13 +5652,12 @@ begin
  end;
 end;
 
-procedure tframetemplate.paintbackground(const acanvas: tcanvas;
-            arect: rectty; const astate: framestateflagsty = []);
+procedure tframetemplate.paintbackgroundframe(const acanvas: tcanvas;
+            const arect: rectty; const astate: framestateflagsty = []);
 var
  int1: integer;
  
 begin
- inflaterect1(arect,tcustomframe.calcpaintframe(fi.ba));
  if fi.ba.colorclient <> cl_transparent then begin
   acanvas.fillrect(arect,fi.ba.colorclient);
  end;
@@ -5631,11 +5669,24 @@ begin
  end;
 end;
 
+procedure tframetemplate.paintoverlayframe(const acanvas: tcanvas;
+                const arect: rectty; const astate: framestateflagsty = []);
+begin
+ tcustomframe.drawframe(acanvas,arect,fi.ba,astate);
+end;
+
+procedure tframetemplate.paintbackground(const acanvas: tcanvas;
+            const arect: rectty; const astate: framestateflagsty = []);
+begin
+ paintbackgroundframe(acanvas,
+          inflaterect(arect,tcustomframe.calcpaintframe(fi.ba)),astate);
+end;
+
 procedure tframetemplate.paintoverlay(const acanvas: tcanvas;
                 const arect: rectty; const astate: framestateflagsty = []);
 begin
- tcustomframe.drawframe(acanvas,
-     inflaterect(arect,tcustomframe.calcpaintframe(fi.ba)),fi.ba,astate);
+ paintoverlayframe(acanvas,
+         inflaterect(arect,tcustomframe.calcpaintframe(fi.ba)),astate);
 end;
 
 procedure tframetemplate.copyinfo(const source: tpersistenttemplate);
@@ -5656,6 +5707,29 @@ end;
 function tframetemplate.paintframe: framety;
 begin
  result:= tcustomframe.calcpaintframe(fi.ba);
+end;
+
+function tframetemplate.innerframe: framety;
+begin
+ result:= tcustomframe.calcinnerframe(fi.ba);
+end;
+
+function tframetemplate.paintframedim: sizety;
+var
+ fr1: framety;
+begin
+ fr1:= tcustomframe.calcpaintframe(fi.ba);
+ result.cx:= fr1.left + fr1.right;
+ result.cy:= fr1.top + fr1.bottom;
+end;
+
+function tframetemplate.innerframedim: sizety;
+var
+ fr1: framety;
+begin
+ fr1:= tcustomframe.calcinnerframe(fi.ba);
+ result.cx:= fr1.left + fr1.right;
+ result.cy:= fr1.top + fr1.bottom;
 end;
 
 function tframetemplate.getfont: toptionalfont;

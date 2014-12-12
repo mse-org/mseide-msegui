@@ -13,8 +13,8 @@ unit msemenuwidgets;
 
 interface
 uses
- classes,mclasses,msewidgets,mseshapes,msemenus,msegraphutils,msegraphics,msetypes,
- msegui,mseglob,mseguiglob,mseevent,mseclasses;
+ classes,mclasses,msewidgets,mseshapes,msemenus,msegraphutils,msegraphics,
+ msetypes,msegui,mseglob,mseguiglob,mseevent,mseclasses;
 
 const
  defaultpopupmenuwidgetoptions = 
@@ -47,6 +47,7 @@ type
   itemface: tcustomface;
   itemframetemplateactive: tframetemplate;
   itemfaceactive: tcustomface;
+  checkboxframetemplate: tframetemplate;
  end;
 
  ppopupmenuwidget = ^tpopupmenuwidget;
@@ -344,6 +345,9 @@ var
  nomouseanim1: boolean;
  noclickanim1: boolean;
  nofocusanim1: boolean;
+ checkboxwidth: integer;
+ checkboxheight: integer;
+ size1: sizety;
  
 begin
  ar1:= nil; //compiler warning
@@ -354,7 +358,13 @@ begin
 //  framehalfwidth:= 0;
   needsmenuarrow:= not (mlo_horz in layout.options) or (owner <> nil) and 
                         (mo_mainarrow in owner.options);
-
+  checkboxwidth:= menucheckboxwidth;
+  checkboxheight:= menucheckboxheight;
+  if checkboxframetemplate <> nil then begin
+   size1:= checkboxframetemplate.innerframedim();
+   checkboxwidth:= checkboxwidth + size1.cx;
+   checkboxheight:= checkboxheight + size1.cy;
+  end;
   if itemframetemplateactive <> nil then begin
    frame2:= itemframetemplateactive.paintframe;
 //   with tframetemplate1(itemframetemplateactive) do begin
@@ -513,7 +523,12 @@ begin
     
      if not (shs_invisible in state) then begin
       hassubmenu:= hassubmenu or (shs_menuarrow in state);
-      hascheckbox:= hascheckbox or ([shs_checkbox,shs_radiobutton] * state <> []);
+      if [shs_checkbox,shs_radiobutton] * state <> [] then begin
+       hascheckbox:= true;
+       if checkboxheight > atextsize.cy then begin
+        atextsize.cy:= checkboxheight;
+       end;
+      end;
       with dim do begin
        if mlo_horz in layout.options then begin                //horizonzal
         if shs_separator in state then begin
@@ -521,17 +536,14 @@ begin
         end
         else begin
          if [shs_checkbox,shs_radiobutton] * state <> [] then begin
-          inc(atextsize.cx,menucheckboxwidth);
-          dec(tabpos,menucheckboxwidth);
+          inc(atextsize.cx,checkboxwidth);
+          dec(tabpos,checkboxwidth);
          end;
          cx:= atextsize.cx + 4;
          if (ashortcutwidth > 0) then begin
           tabpos:= tabpos + atextsize.cx + shortcutdist;
           cx:= cx + shortcutdist + ashortcutwidth;
          end;
-//         if ss_checkbox in state then begin
-//          cx:= cx + menucheckboxwidth;
-//         end;
         end;
         x:= ax;
         y:= ay;
@@ -628,7 +640,7 @@ begin
      textwidth:= textwidth + menuarrowwidth;
     end;
     if hascheckbox then begin
-     textwidth:= textwidth + menucheckboxwidth;
+     textwidth:= textwidth + checkboxwidth;
     end;
     maxheight:= 0;
     for int1:= 0 to count - 1 do begin
@@ -713,6 +725,7 @@ begin
   for int1:= 0 to high(cells) do begin
    with cells[int1],buttoninfo do begin
     colorglyphbefore:= ca.colorglyph;
+    checkboxframe:= checkboxframetemplate;
     if int1 = activeitem then begin
      ca.colorglyph:= colorglyphactive;
      if itemframetemplateactive <> nil then begin
@@ -954,6 +967,12 @@ begin
   else begin
    freeandnil(flayout.itemfaceactive);
   end;
+  if checkboxframe <> nil then begin
+   flayout.checkboxframetemplate:= checkboxframe.template;
+  end
+  else begin
+   flayout.checkboxframetemplate:= nil;
+  end;
   updatelayout;
  end;
 end;
@@ -966,6 +985,7 @@ begin
  setlinkedvar(source.itemface,tmsecomponent(ftemplates.itemface));
  setlinkedvar(source.itemframeactive,tmsecomponent(ftemplates.itemframeactive));
  setlinkedvar(source.itemfaceactive,tmsecomponent(ftemplates.itemfaceactive));
+ setlinkedvar(source.checkboxframe,tmsecomponent(ftemplates.checkboxframe));
  updatetemplates; 
 end;
 

@@ -116,6 +116,7 @@ type
   svitemframe: tframecomp;
   svitemfaceactive: tfacecomp;
   svitemframeactive: tframecomp;
+  svcheckboxframe: tframecomp;
 //  options: skinmenuoptionsty;
  end;  
  mainmenuskininfoty = record
@@ -566,6 +567,7 @@ type
    procedure setpopupmenu_itemframe(const avalue: tframecomp);
    procedure setpopupmenu_itemfaceactive(const avalue: tfacecomp);
    procedure setpopupmenu_itemframeactive(const avalue: tframecomp);
+   procedure setpopupmenu_checkboxframe(const avalue: tframecomp);
    
    procedure setmainmenu_face(const avalue: tfacecomp);
    procedure setmainmenu_frame(const avalue: tframecomp);
@@ -573,6 +575,7 @@ type
    procedure setmainmenu_itemframe(const avalue: tframecomp);
    procedure setmainmenu_itemfaceactive(const avalue: tfacecomp);
    procedure setmainmenu_itemframeactive(const avalue: tframecomp);
+   procedure setmainmenu_checkboxframe(const avalue: tframecomp);
    procedure setmainmenu_popupface(const avalue: tfacecomp);
    procedure setmainmenu_popupframe(const avalue: tframecomp);
    procedure setmainmenu_popupitemface(const avalue: tfacecomp);
@@ -897,6 +900,8 @@ type
                                       write setpopupmenu_itemfaceactive;
    property popupmenu_itemframeactive: tframecomp 
             read fpopupmenu.svitemframeactive write setpopupmenu_itemframeactive;
+   property popupmenu_checkboxframe: tframecomp read fpopupmenu.svcheckboxframe 
+                                 write setpopupmenu_checkboxframe;
 {            
    property mainmenu_options: skinmenuoptionsty read fmainmenu.ma.options
                 write fmainmenu.ma.options default [];         
@@ -915,6 +920,9 @@ type
    property mainmenu_itemframeactive: tframecomp 
                                  read fmainmenu.svmain.svitemframeactive 
                                  write setmainmenu_itemframeactive;
+   property mainmenu_checkboxframe: tframecomp 
+                                 read fmainmenu.svmain.svcheckboxframe 
+                                 write setmainmenu_checkboxframe;
    property mainmenu_popupface: tfacecomp read fmainmenu.svpopup.svface 
                                  write setmainmenu_popupface;
    property mainmenu_popupframe: tframecomp read fmainmenu.svpopup.svframe 
@@ -1714,6 +1722,10 @@ begin
              (itemframetemplateactive = nil) then begin
    itemframetemplateactive:= ainfo.svitemframeactive;
   end;
+  if (ainfo.svcheckboxframe <> nil) and
+             (checkboxframetemplate = nil) then begin
+   checkboxframetemplate:= ainfo.svcheckboxframe;
+  end;
  end;
 end;
 
@@ -1743,6 +1755,10 @@ begin
   if (svpopup.svitemframeactive <> nil) and
              (popupitemframetemplateactive = nil) then begin
    popupitemframetemplateactive:= svpopup.svitemframeactive;
+  end;
+  if (svpopup.svcheckboxframe <> nil) and
+             (popupcheckboxframetemplate = nil) then begin
+   popupcheckboxframetemplate:= svpopup.svcheckboxframe;
   end;
  end;
 end;
@@ -2402,6 +2418,11 @@ begin
  setlinkedvar(avalue,tmsecomponent(fpopupmenu.svitemframeactive));
 end;
 
+procedure tskincontroller.setpopupmenu_checkboxframe(const avalue: tframecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fpopupmenu.svcheckboxframe));
+end;
+
 procedure tskincontroller.setmainmenu_face(const avalue: tfacecomp);
 begin
  setlinkedvar(avalue,tmsecomponent(fmainmenu.svmain.svface));
@@ -2430,6 +2451,11 @@ end;
 procedure tskincontroller.setmainmenu_itemframeactive(const avalue: tframecomp);
 begin
  setlinkedvar(avalue,tmsecomponent(fmainmenu.svmain.svitemframeactive));
+end;
+
+procedure tskincontroller.setmainmenu_checkboxframe(const avalue: tframecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fmainmenu.svmain.svcheckboxframe));
 end;
 
 procedure tskincontroller.setmainmenu_popupface(const avalue: tfacecomp);

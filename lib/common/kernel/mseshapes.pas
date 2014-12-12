@@ -20,6 +20,7 @@ const
  menuarrowwidth = 8;
  menuarrowwidthhorz = 15;
  menucheckboxwidth = 13;
+ menucheckboxheight = 13;
  defaultshapecaptiondist = 2;
  defaultshapefocusrectdist = 1;
  defaultcaptiontextflags = [tf_xcentered,tf_ycentered];
@@ -57,6 +58,7 @@ type
   imagecheckedoffset: integer;
   face: tcustomface;
   frame: tcustomframe;
+  checkboxframe: tframetemplate;
   mouseframe: framety;
   tag: integer;
   doexecute: tagmouseprocty;
@@ -1148,18 +1150,34 @@ end;
 function drawbuttoncheckbox(const canvas: tcanvas; const info: shapeinfoty;
               var arect: rectty; const pos: imageposty = ip_left): boolean;
 var
- rect1: rectty;
+ rect1,rect2: rectty;
  align1: alignmentsty;
  int1: integer;
+ co1: colorty;
+ framestates: framestateflagsty;
 begin
  result:= [shs_checkbox,shs_radiobutton] * info.state <> [];
  if result then begin
   rect1:= arect;
   rect1.cx:= menucheckboxwidth;
+  if info.checkboxframe <> nil then begin
+   rect1.cx:= rect1.cx + info.checkboxframe.innerframedim.cx;
+  end;
   if pos <> ip_left then begin
    inc(rect1.x,arect.cx-rect1.cx);
   end;
-  draw3dframe(canvas,rect1,-1,defaultframecolors,[]);
+  if info.checkboxframe <> nil then begin
+   framestates:= combineframestateflags(info.state);
+   info.checkboxframe.paintbackgroundframe(canvas,rect1,framestates);
+   rect2:= deflaterect(rect1,info.checkboxframe.innerframe);
+  end
+  else begin
+   rect2:= rect1;
+  end;
+  if (info.checkboxframe = nil) or 
+               not (fso_flat in info.checkboxframe.optionsskin) then begin
+   draw3dframe(canvas,rect2,-1,defaultframecolors,[]);
+  end;
   if pos = ip_left then begin
    inc(arect.x,menucheckboxwidth);
   end;
@@ -1177,7 +1195,15 @@ begin
    else begin
     int1:= ord(stg_checked);
    end;
-   stockobjects.glyphs.paint(canvas,int1,rect1,align1,info.ca.colorglyph);
+   co1:= info.ca.colorglyph;
+   if (info.checkboxframe <> nil) and 
+           (info.checkboxframe.colorglyph <> cl_default) then begin
+    co1:= info.checkboxframe.colorglyph;
+   end;
+   stockobjects.glyphs.paint(canvas,int1,rect2,align1,co1);
+  end;
+  if info.checkboxframe <> nil then begin
+   info.checkboxframe.paintoverlayframe(canvas,rect1,framestates);
   end;
  end;
 end;

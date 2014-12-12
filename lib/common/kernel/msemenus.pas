@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2014 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -288,6 +288,7 @@ type
   itemface: tfacecomp;
   itemframeactive: tframecomp;
   itemfaceactive: tfacecomp;
+  checkboxframe: tframecomp;
  end;
 
  tcustommenu = class(tmsecomponent)
@@ -306,6 +307,7 @@ type
    procedure setitemframetemplateactive(const avalue: tframecomp);
    procedure setitemfacetemplateactive(const avalue: tfacecomp);
    procedure setoptions(const avalue: menuoptionsty);
+   procedure setcheckboxframetemplate(const avalue: tframecomp);
   protected
    ftransientfor: twidget;
    fmouseinfopo: pmouseeventinfoty;
@@ -344,6 +346,8 @@ type
                             write setitemframetemplateactive;
    property itemfacetemplateactive: tfacecomp read ftemplate.itemfaceactive 
                             write setitemfacetemplateactive;
+   property checkboxframetemplate: tframecomp read ftemplate.checkboxframe 
+                            write setcheckboxframetemplate;
    property template: menutemplatety read ftemplate;
    property options: menuoptionsty read foptions write setoptions 
                                                 default defaultmenuoptions;
@@ -360,6 +364,7 @@ type
    property itemfacetemplate;
    property itemframetemplateactive;
    property itemfacetemplateactive;
+   property checkboxframetemplate;
    property menu; //last
  end;
 
@@ -404,6 +409,7 @@ type
    procedure setpopupitemfacetemplate(const avalue: tfacecomp);
    procedure setpopupitemframetemplateactive(const avalue: tframecomp);
    procedure setpopupitemfacetemplateactive(const avalue: tfacecomp);
+   procedure setpopupcheckboxframetemplate(const avalue: tframecomp);
   protected
    class function classskininfo: skininfoty; override;
    procedure menuchanged(const sender: tmenuitem);
@@ -428,6 +434,9 @@ type
                       write setpopupitemframetemplateactive;
    property popupitemfacetemplateactive: tfacecomp read fpopuptemplate.itemfaceactive
                       write setpopupitemfacetemplateactive;
+   property popupcheckboxframetemplate: tframecomp 
+                      read fpopuptemplate.checkboxframe 
+                                write setpopupcheckboxframetemplate;
  end;
  
  tmainmenu = class(tcustommainmenu)
@@ -440,6 +449,7 @@ type
    property itemfacetemplate;
    property itemframetemplateactive;
    property itemfacetemplateactive;
+   property checkboxframetemplate;
 
    property popupframetemplate;
    property popupfacetemplate;
@@ -467,6 +477,7 @@ type
    property popupitemfacetemplate;
    property popupitemframetemplateactive;
    property popupitemfacetemplateactive;
+   property popupcheckboxframetemplate;
    property menu; //last
  end; 
 procedure freetransientmenu(var amenu: tcustommenu);
@@ -668,6 +679,14 @@ procedure tcustommenu.setitemfacetemplateactive(const avalue: tfacecomp);
 begin
  if avalue <> ftemplate.itemfaceactive then begin
   setlinkedvar(avalue,tmsecomponent(ftemplate.itemfaceactive));
+  sendchangeevent;
+ end;
+end;
+
+procedure tcustommenu.setcheckboxframetemplate(const avalue: tframecomp);
+begin
+ if avalue <> ftemplate.checkboxframe then begin
+  setlinkedvar(avalue,tmsecomponent(ftemplate.checkboxframe));
   sendchangeevent;
  end;
 end;
@@ -2081,17 +2100,27 @@ begin
  end;
 end;
 
-procedure tcustommainmenu.setpopupitemframetemplateactive(const avalue: tframecomp);
+procedure tcustommainmenu.setpopupitemframetemplateactive(
+                                                     const avalue: tframecomp);
 begin
  if avalue <> fpopuptemplate.itemframeactive then begin
   setlinkedvar(avalue,tmsecomponent(fpopuptemplate.itemframeactive));
  end;
 end;
 
-procedure tcustommainmenu.setpopupitemfacetemplateactive(const avalue: tfacecomp);
+procedure tcustommainmenu.setpopupitemfacetemplateactive(
+                                                      const avalue: tfacecomp);
 begin
  if avalue <> fpopuptemplate.itemfaceactive then begin
   setlinkedvar(avalue,tmsecomponent(fpopuptemplate.itemfaceactive));
+ end;
+end;
+
+procedure tcustommainmenu.setpopupcheckboxframetemplate(
+                                                     const avalue: tframecomp);
+begin
+ if avalue <> fpopuptemplate.checkboxframe then begin
+  setlinkedvar(avalue,tmsecomponent(fpopuptemplate.checkboxframe));
  end;
 end;
 
