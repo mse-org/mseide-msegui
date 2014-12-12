@@ -1155,13 +1155,21 @@ var
  int1: integer;
  co1: colorty;
  framestates: framestateflagsty;
+ size1: sizety;
 begin
  result:= [shs_checkbox,shs_radiobutton] * info.state <> [];
  if result then begin
   rect1:= arect;
   rect1.cx:= menucheckboxwidth;
+  int1:= menucheckboxheight;
   if info.checkboxframe <> nil then begin
-   rect1.cx:= rect1.cx + info.checkboxframe.innerframedim.cx;
+   size1:= info.checkboxframe.innerframedim;
+   rect1.cx:= rect1.cx + size1.cx;
+   int1:= int1 + size1.cy;
+  end;
+  if int1 < arect.cy then begin
+   rect1.cy:= int1;
+   rect1.y:= rect1.y + (arect.cy - int1) div 2;
   end;
   if pos <> ip_left then begin
    inc(rect1.x,arect.cx-rect1.cx);

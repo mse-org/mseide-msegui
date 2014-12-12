@@ -4269,9 +4269,9 @@ class function tcustomframe.calcinnerframe(const afi: baseframeinfoty): framety;
 begin
  result:= calcpaintframe(afi);
  result.left:= result.left + afi.innerframe.left;
- result.top:= result.left + afi.innerframe.top;
- result.right:= result.left + afi.innerframe.right;
- result.bottom:= result.left + afi.innerframe.bottom;
+ result.top:= result.top + afi.innerframe.top;
+ result.right:= result.right + afi.innerframe.right;
+ result.bottom:= result.bottom + afi.innerframe.bottom;
 end;
 
 procedure tcustomframe.calcrects;
