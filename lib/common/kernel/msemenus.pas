@@ -288,6 +288,7 @@ type
   itemface: tfacecomp;
   itemframeactive: tframecomp;
   itemfaceactive: tfacecomp;
+  separatorframe: tframecomp;
   checkboxframe: tframecomp;
  end;
 
@@ -307,6 +308,7 @@ type
    procedure setitemframetemplateactive(const avalue: tframecomp);
    procedure setitemfacetemplateactive(const avalue: tfacecomp);
    procedure setoptions(const avalue: menuoptionsty);
+   procedure setseparatorframetemplate(const avalue: tframecomp);
    procedure setcheckboxframetemplate(const avalue: tframecomp);
   protected
    ftransientfor: twidget;
@@ -317,7 +319,10 @@ type
    procedure setexecitem(const avalue: tmenuitem);
    property execitem: tmenuitem write setexecitem;
    procedure assigntemplate(const source: tcustommenu);
-   procedure objectevent(const sender: tobject; const event: objecteventty); override;
+   procedure templateevent(const sender: tobject; 
+                   const event: objecteventty; var template: menutemplatety);
+   procedure objectevent(const sender: tobject; 
+                                const event: objecteventty); override;
    function gettemplatefont(const sender: tmenuitem): tmenufont; virtual;
    function gettemplatefontactive(
                        const sender: tmenuitem): tmenufontactive; virtual;
@@ -346,6 +351,9 @@ type
                             write setitemframetemplateactive;
    property itemfacetemplateactive: tfacecomp read ftemplate.itemfaceactive 
                             write setitemfacetemplateactive;
+   property separatorframetemplate: tframecomp 
+                           read ftemplate.separatorframe 
+                                        write setseparatorframetemplate;
    property checkboxframetemplate: tframecomp read ftemplate.checkboxframe 
                             write setcheckboxframetemplate;
    property template: menutemplatety read ftemplate;
@@ -364,6 +372,7 @@ type
    property itemfacetemplate;
    property itemframetemplateactive;
    property itemfacetemplateactive;
+   property separatorframetemplate;
    property checkboxframetemplate;
    property menu; //last
  end;
@@ -409,6 +418,7 @@ type
    procedure setpopupitemfacetemplate(const avalue: tfacecomp);
    procedure setpopupitemframetemplateactive(const avalue: tframecomp);
    procedure setpopupitemfacetemplateactive(const avalue: tfacecomp);
+   procedure setpopupseparatorframetemplate(const avalue: tframecomp);
    procedure setpopupcheckboxframetemplate(const avalue: tframecomp);
   protected
    class function classskininfo: skininfoty; override;
@@ -416,6 +426,8 @@ type
    function gettemplatefont(const sender: tmenuitem): tmenufont; override;
    function gettemplatefontactive(
                        const sender: tmenuitem): tmenufontactive; override;
+   procedure objectevent(const sender: tobject; 
+                                const event: objecteventty); override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -434,6 +446,9 @@ type
                       write setpopupitemframetemplateactive;
    property popupitemfacetemplateactive: tfacecomp read fpopuptemplate.itemfaceactive
                       write setpopupitemfacetemplateactive;
+   property popupseparatorframetemplate: tframecomp 
+                      read fpopuptemplate.separatorframe 
+                                write setpopupseparatorframetemplate;
    property popupcheckboxframetemplate: tframecomp 
                       read fpopuptemplate.checkboxframe 
                                 write setpopupcheckboxframetemplate;
@@ -449,6 +464,7 @@ type
    property itemfacetemplate;
    property itemframetemplateactive;
    property itemfacetemplateactive;
+   property separatorframetemplate;
    property checkboxframetemplate;
 
    property popupframetemplate;
@@ -457,6 +473,8 @@ type
    property popupitemfacetemplate;
    property popupitemframetemplateactive;
    property popupitemfacetemplateactive;
+   property popupseparatorframetemplate;
+   property popupcheckboxframetemplate;
    property menu; //last
  end;
 
@@ -470,6 +488,8 @@ type
    property itemfacetemplate;
    property itemframetemplateactive;
    property itemfacetemplateactive;
+   property separatorframetemplate;
+   property checkboxframetemplate;
 
    property popupframetemplate;
    property popupfacetemplate;
@@ -477,6 +497,7 @@ type
    property popupitemfacetemplate;
    property popupitemframetemplateactive;
    property popupitemfacetemplateactive;
+   property popupseparatorframetemplate;
    property popupcheckboxframetemplate;
    property menu; //last
  end; 
@@ -683,6 +704,14 @@ begin
  end;
 end;
 
+procedure tcustommenu.setseparatorframetemplate(const avalue: tframecomp);
+begin
+ if avalue <> ftemplate.separatorframe then begin
+  setlinkedvar(avalue,tmsecomponent(ftemplate.separatorframe));
+  sendchangeevent;
+ end;
+end;
+
 procedure tcustommenu.setcheckboxframetemplate(const avalue: tframecomp);
 begin
  if avalue <> ftemplate.checkboxframe then begin
@@ -691,35 +720,50 @@ begin
  end;
 end;
 
-procedure tcustommenu.objectevent(const sender: tobject; const event: objecteventty);
+procedure tcustommenu.templateevent(const sender: tobject; 
+                   const event: objecteventty; var template: menutemplatety);
 begin
  case event of
   oe_changed,oe_destroyed: begin
-   if (sender = ftemplate.face) or (sender = ftemplate.frame) or 
-      (sender = ftemplate.itemface) or (sender = ftemplate.itemframe) or 
-      (sender = ftemplate.itemfaceactive) or 
-      (sender = ftemplate.itemframeactive) then begin
+   if (sender = template.face) or (sender = ftemplate.frame) or 
+      (sender = template.itemface) or (sender = ftemplate.itemframe) or 
+      (sender = template.itemfaceactive) or 
+      (sender = template.itemframeactive) or 
+      (sender = template.separatorframe) or
+      (sender = template.checkboxframe) then begin
     if event = oe_destroyed then begin
-     if sender = ftemplate.face then begin
-      ftemplate.face:= nil;
+     if sender = template.face then begin
+      template.face:= nil;
      end;
-     if sender = ftemplate.frame then begin
-      ftemplate.frame:= nil;
+     if sender = template.frame then begin
+      template.frame:= nil;
      end;
-     if sender = ftemplate.itemface then begin
-      ftemplate.itemface:= nil;
+     if sender = template.itemface then begin
+      template.itemface:= nil;
      end;
-     if sender = ftemplate.itemframe then begin
-      ftemplate.itemframe:= nil;
+     if sender = template.itemframe then begin
+      template.itemframe:= nil;
      end;
-     if sender = ftemplate.itemframeactive then begin
-      ftemplate.itemframeactive:= nil;
+     if sender = template.itemframeactive then begin
+      template.itemframeactive:= nil;
+     end;
+     if sender = template.separatorframe then begin
+      template.separatorframe:= nil;
+     end;
+     if sender = template.checkboxframe then begin
+      template.checkboxframe:= nil;
      end;
     end;
     sendchangeevent;
    end;
   end;
  end;
+end;
+
+procedure tcustommenu.objectevent(const sender: tobject; 
+                                          const event: objecteventty);
+begin
+ templateevent(sender,event,ftemplate);
  inherited;
 end;
 
@@ -2116,6 +2160,14 @@ begin
  end;
 end;
 
+procedure tcustommainmenu.setpopupseparatorframetemplate(
+                                                     const avalue: tframecomp);
+begin
+ if avalue <> fpopuptemplate.separatorframe then begin
+  setlinkedvar(avalue,tmsecomponent(fpopuptemplate.separatorframe));
+ end;
+end;
+
 procedure tcustommainmenu.setpopupcheckboxframetemplate(
                                                      const avalue: tframecomp);
 begin
@@ -2172,6 +2224,13 @@ begin
  else begin
   result:= inherited gettemplatefontactive(sender);
  end;
+end;
+
+procedure tcustommainmenu.objectevent(const sender: tobject;
+               const event: objecteventty);
+begin
+ templateevent(sender,event,fpopuptemplate);
+ inherited;
 end;
 
 end.

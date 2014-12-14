@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2008-2013 by Martin Schreiber
+{ MSEgui Copyright (c) 2008-2014 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -116,6 +116,7 @@ type
   svitemframe: tframecomp;
   svitemfaceactive: tfacecomp;
   svitemframeactive: tframecomp;
+  svseparatorframe: tframecomp;
   svcheckboxframe: tframecomp;
 //  options: skinmenuoptionsty;
  end;  
@@ -567,6 +568,7 @@ type
    procedure setpopupmenu_itemframe(const avalue: tframecomp);
    procedure setpopupmenu_itemfaceactive(const avalue: tfacecomp);
    procedure setpopupmenu_itemframeactive(const avalue: tframecomp);
+   procedure setpopupmenu_separatorframe(const avalue: tframecomp);
    procedure setpopupmenu_checkboxframe(const avalue: tframecomp);
    
    procedure setmainmenu_face(const avalue: tfacecomp);
@@ -575,6 +577,7 @@ type
    procedure setmainmenu_itemframe(const avalue: tframecomp);
    procedure setmainmenu_itemfaceactive(const avalue: tfacecomp);
    procedure setmainmenu_itemframeactive(const avalue: tframecomp);
+   procedure setmainmenu_separatorframe(const avalue: tframecomp);
    procedure setmainmenu_checkboxframe(const avalue: tframecomp);
    procedure setmainmenu_popupface(const avalue: tfacecomp);
    procedure setmainmenu_popupframe(const avalue: tframecomp);
@@ -899,7 +902,9 @@ type
    property popupmenu_itemfaceactive: tfacecomp read fpopupmenu.svitemfaceactive 
                                       write setpopupmenu_itemfaceactive;
    property popupmenu_itemframeactive: tframecomp 
-            read fpopupmenu.svitemframeactive write setpopupmenu_itemframeactive;
+           read fpopupmenu.svitemframeactive write setpopupmenu_itemframeactive;
+   property popupmenu_separatorframe: tframecomp read 
+                 fpopupmenu.svseparatorframe write setpopupmenu_separatorframe;
    property popupmenu_checkboxframe: tframecomp read fpopupmenu.svcheckboxframe 
                                  write setpopupmenu_checkboxframe;
 {            
@@ -920,6 +925,9 @@ type
    property mainmenu_itemframeactive: tframecomp 
                                  read fmainmenu.svmain.svitemframeactive 
                                  write setmainmenu_itemframeactive;
+   property mainmenu_separatorframe: tframecomp 
+                                 read fmainmenu.svmain.svseparatorframe 
+                                 write setmainmenu_separatorframe;
    property mainmenu_checkboxframe: tframecomp 
                                  read fmainmenu.svmain.svcheckboxframe 
                                  write setmainmenu_checkboxframe;
@@ -938,6 +946,12 @@ type
    property mainmenu_popupitemframeactive: tframecomp 
                                  read fmainmenu.svpopup.svitemframeactive 
                                  write setmainmenu_popupitemframeactive;
+   property mainmenu_popupseparatorframe: tframecomp 
+                                 read fmainmenu.svpopup.svseparatorframe 
+                                 write setpopupmenu_separatorframe;
+   property mainmenu_popupcheckboxframe: tframecomp 
+                                 read fmainmenu.svpopup.svcheckboxframe 
+                                 write setpopupmenu_checkboxframe;
  end;
 
  skincontrollerarty = array of tcustomskincontroller;
@@ -1722,6 +1736,10 @@ begin
              (itemframetemplateactive = nil) then begin
    itemframetemplateactive:= ainfo.svitemframeactive;
   end;
+  if (ainfo.svseparatorframe <> nil) and
+             (separatorframetemplate = nil) then begin
+   separatorframetemplate:= ainfo.svseparatorframe;
+  end;
   if (ainfo.svcheckboxframe <> nil) and
              (checkboxframetemplate = nil) then begin
    checkboxframetemplate:= ainfo.svcheckboxframe;
@@ -1755,6 +1773,10 @@ begin
   if (svpopup.svitemframeactive <> nil) and
              (popupitemframetemplateactive = nil) then begin
    popupitemframetemplateactive:= svpopup.svitemframeactive;
+  end;
+  if (svpopup.svseparatorframe <> nil) and
+             (popupseparatorframetemplate = nil) then begin
+   popupseparatorframetemplate:= svpopup.svseparatorframe;
   end;
   if (svpopup.svcheckboxframe <> nil) and
              (popupcheckboxframetemplate = nil) then begin
@@ -2413,9 +2435,15 @@ begin
  setlinkedvar(avalue,tmsecomponent(fpopupmenu.svitemfaceactive));
 end;
 
-procedure tskincontroller.setpopupmenu_itemframeactive(const avalue: tframecomp);
+procedure tskincontroller.setpopupmenu_itemframeactive(
+                                                 const avalue: tframecomp);
 begin
  setlinkedvar(avalue,tmsecomponent(fpopupmenu.svitemframeactive));
+end;
+
+procedure tskincontroller.setpopupmenu_separatorframe(const avalue: tframecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fpopupmenu.svseparatorframe));
 end;
 
 procedure tskincontroller.setpopupmenu_checkboxframe(const avalue: tframecomp);
@@ -2451,6 +2479,11 @@ end;
 procedure tskincontroller.setmainmenu_itemframeactive(const avalue: tframecomp);
 begin
  setlinkedvar(avalue,tmsecomponent(fmainmenu.svmain.svitemframeactive));
+end;
+
+procedure tskincontroller.setmainmenu_separatorframe(const avalue: tframecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fmainmenu.svmain.svseparatorframe));
 end;
 
 procedure tskincontroller.setmainmenu_checkboxframe(const avalue: tframecomp);

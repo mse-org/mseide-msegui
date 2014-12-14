@@ -851,6 +851,7 @@ type
    function paintframedim: sizety;
    function innerframedim: sizety;
    procedure createfont;
+   property framei: framety read fi.ba.innerframe;
   published
    property levelo: integer read fi.ba.levelo write setlevelo default 0;
    property leveli: integer read fi.ba.leveli write setleveli default 0;

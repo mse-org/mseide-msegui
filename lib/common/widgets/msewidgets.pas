@@ -3435,7 +3435,8 @@ begin
  end;
 end;
 
-procedure tcustomstepframe.paintoverlay(const canvas: tcanvas; const arect: rectty);
+procedure tcustomstepframe.paintoverlay(const canvas: tcanvas; 
+                                                         const arect: rectty);
 var
  int1: integer;
  po1: pshapeinfoty;

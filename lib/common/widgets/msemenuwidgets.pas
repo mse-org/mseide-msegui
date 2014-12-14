@@ -47,6 +47,7 @@ type
   itemface: tcustomface;
   itemframetemplateactive: tframetemplate;
   itemfaceactive: tcustomface;
+  separatorframetemplate: tframetemplate;
   checkboxframetemplate: tframetemplate;
  end;
 
@@ -530,9 +531,14 @@ begin
        end;
       end;
       with dim do begin
-       if mlo_horz in layout.options then begin                //horizonzal
+       if mlo_horz in layout.options then begin                //horizontal
         if shs_separator in state then begin
-         cx:= 2;
+         if separatorframetemplate <> nil then begin
+          cx:= separatorframetemplate.innerframedim.cx;
+         end
+         else begin
+          cx:= 2;
+         end;
         end
         else begin
          if [shs_checkbox,shs_radiobutton] * state <> [] then begin
@@ -555,7 +561,12 @@ begin
        else begin                                              //vertical
         y:= ay;
         if shs_separator in state then begin
-         cy:= 2;
+         if separatorframetemplate <> nil then begin
+          cy:= separatorframetemplate.innerframedim.cy;
+         end
+         else begin
+          cy:= 2;
+         end;
         end
         else begin
          cy:= atextsize.cy;
@@ -746,25 +757,36 @@ begin
      end;
     end
     else begin
-     if itemframetemplate <> nil then begin
-      itemframetemplate.paintbackground(canvas,ca.dim,
-               combineframestateflags(shs_disabled in state,false,
-                                              shs_clicked in state,false));
-      if ca.colorglyph = cl_default then begin
-       ca.colorglyph:= itemframetemplate.colorglyph;
+     if (shs_separator in state) and (separatorframetemplate <> nil) then begin
+      separatorframetemplate.paintbackgroundframe(canvas,ca.dim);
+      if not (fso_flat in separatorframetemplate.optionsskin) then begin
+       draw3dframe(canvas,
+         inflaterect(deflaterect(ca.dim,separatorframetemplate.innerframe),1),
+                                                     -1,defaultframecolors,[]);
       end;
-     end;
-     face:= itemface;
-     ca.font:= fontinactive;
-     state:= state - [shs_focused,shs_active,shs_focusanimation];
-     if ca.colorglyph = cl_default then begin
-      ca.colorglyph:= cl_glyph;
-     end;
-     drawmenubutton(canvas,buttoninfo,po1);
-     if itemframetemplate <> nil then begin
-          itemframetemplate.paintoverlay(canvas,ca.dim,
-                 combineframestateflags(shs_disabled in state,false,
-                 shs_clicked in state,false));
+      separatorframetemplate.paintoverlayframe(canvas,ca.dim);
+     end
+     else begin
+      if itemframetemplate <> nil then begin
+       itemframetemplate.paintbackground(canvas,ca.dim,
+                combineframestateflags(shs_disabled in state,false,
+                                               shs_clicked in state,false));
+       if ca.colorglyph = cl_default then begin
+        ca.colorglyph:= itemframetemplate.colorglyph;
+       end;
+      end;
+      face:= itemface;
+      ca.font:= fontinactive;
+      state:= state - [shs_focused,shs_active,shs_focusanimation];
+      if ca.colorglyph = cl_default then begin
+       ca.colorglyph:= cl_glyph;
+      end;
+      drawmenubutton(canvas,buttoninfo,po1);
+      if itemframetemplate <> nil then begin
+           itemframetemplate.paintoverlay(canvas,ca.dim,
+                  combineframestateflags(shs_disabled in state,false,
+                  shs_clicked in state,false));
+      end;
      end;
     end;
     ca.colorglyph:= colorglyphbefore;
@@ -967,6 +989,12 @@ begin
   else begin
    freeandnil(flayout.itemfaceactive);
   end;
+  if separatorframe <> nil then begin
+   flayout.separatorframetemplate:= separatorframe.template;
+  end
+  else begin
+   flayout.separatorframetemplate:= nil;
+  end;
   if checkboxframe <> nil then begin
    flayout.checkboxframetemplate:= checkboxframe.template;
   end
@@ -985,6 +1013,7 @@ begin
  setlinkedvar(source.itemface,tmsecomponent(ftemplates.itemface));
  setlinkedvar(source.itemframeactive,tmsecomponent(ftemplates.itemframeactive));
  setlinkedvar(source.itemfaceactive,tmsecomponent(ftemplates.itemfaceactive));
+ setlinkedvar(source.separatorframe,tmsecomponent(ftemplates.separatorframe));
  setlinkedvar(source.checkboxframe,tmsecomponent(ftemplates.checkboxframe));
  updatetemplates; 
 end;
