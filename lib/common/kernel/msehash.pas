@@ -112,7 +112,7 @@ type
    constructor create(const datasize: integer);
    destructor destroy; override;
    procedure clear; virtual;
-   procedure reset; //net next will return first
+   procedure reset; //next next will return first, next prev will return last
    procedure mark(out ref: ptruint);
    procedure release(const ref: ptruint);
    property capacity: integer read fcapacity write setcapacity;
@@ -145,9 +145,9 @@ type
                          const all: boolean = false): boolean; overload;
                          //true if found
    function first: pintegerdataty;
+   function next: pintegerdataty; //wraps to first after last
    function last: pintegerdataty;
-   function next: pintegerdataty;
-   function prev: pintegerdataty;
+   function prev: pintegerdataty; //wraps to last after first
  end;
 
  ptruintdataty = record
@@ -175,7 +175,9 @@ type
                          const all: boolean = false): boolean; overload;
                          //true if found
    function first: pptruintdataty;
-   function next: pptruintdataty;
+   function next: pptruintdataty; //wraps to first after last
+   function last: pptruintdataty;
+   function prev: pptruintdataty; //wraps to last after first
  end;
 
  pointerptruintdataty = record
@@ -206,7 +208,9 @@ type
    function find(const akey: ptruint): pointer; overload;
    function find(const akey: ptruint; out avalue: pointer): boolean; overload;
    function first: ppointerptruintdataty;
-   function next: ppointerptruintdataty;
+   function next: ppointerptruintdataty; //wraps to first after last
+   function last: ppointerptruintdataty;
+   function prev: ppointerptruintdataty; //wraps to last after first
    procedure iterate(const akey: ptruint;
                      const aiterator: pointerptruintiteratorprocty); overload;
  end;
@@ -240,7 +244,9 @@ type
    function find(const akey: ptruint): ansistring; overload;
    function find(const akey: ptruint; out avalue: ansistring): boolean; overload;
    function first: pansistringptruintdataty;
-   function next: pansistringptruintdataty;
+   function next: pansistringptruintdataty; //wraps to first after last
+   function last: pansistringptruintdataty;
+   function prev: pansistringptruintdataty; //wraps to last after first
    procedure iterate(const akey: ptruint;
                      const aiterator: ansistringptruintiteratorprocty); overload;
    function setdata(const akey: ptruint; const avalue: ansistring): boolean;
@@ -276,7 +282,9 @@ type
    function find(const akey: ptruint): msestring; overload;
    function find(const akey: ptruint; out avalue: msestring): boolean; overload;
    function first: pmsestringptruintdataty;
-   function next: pmsestringptruintdataty;
+   function next: pmsestringptruintdataty; //wraps to first after last
+   function last: pmsestringptruintdataty;
+   function prev: pmsestringptruintdataty; //wraps to last after first
    procedure iterate(const akey: ptruint;
                      const aiterator: msestringptruintiteratorprocty); overload;
    function setdata(const akey: ptruint; const avalue: msestring): boolean;
@@ -318,7 +326,9 @@ type
                          const all: boolean = false): boolean; overload;
                          //true if found
    function first: pansistringdataty;
-   function next: pansistringdataty;
+   function next: pansistringdataty; //wraps to first after last
+   function last: pansistringdataty;
+   function prev: pansistringdataty; //wraps to last after first
    procedure iterate(const akey: ansistring;
                      const aiterator: ansistringhashiteratorprocty); overload;
  end;
@@ -355,7 +365,9 @@ type
    function find(const akey: ansistring; out avalue: pointer): boolean; overload;
    function find(const akey: lstringty): pointer; overload;
    function first: ppointeransistringdataty;
-   function next: ppointeransistringdataty;
+   function next: ppointeransistringdataty; //wraps to first after last
+   function last: ppointeransistringdataty;
+   function prev: ppointeransistringdataty; //wraps to last after first
    procedure iterate(const akey: ansistring;
                      const aiterator: pointeransistringiteratorprocty); overload;
  end;
@@ -397,6 +409,8 @@ type
                                       //true if found
    function first: pmsestringdataty;
    function next: pmsestringdataty; //wraps to first after last
+   function last: pmsestringdataty;
+   function prev: pmsestringdataty; //wraps to last after first
    procedure iterate(const akey: msestring;
                      const aiterator: msestringiteratorprocty); overload;
  end;
@@ -432,7 +446,9 @@ type
                                         out acount: integer): boolean; overload;
    function find(const akey: lmsestringty): pointer; overload;
    function first: ppointermsestringdataty;
-   function next: ppointermsestringdataty;
+   function next: ppointermsestringdataty; //wraps to first after last
+   function last: ppointermsestringdataty;
+   function prev: ppointermsestringdataty; //wraps to last after first
    procedure iterate(const akey: msestring;
                      const aiterator: pointermsestringiteratorprocty); overload;
  end;
@@ -468,7 +484,9 @@ type
                                         out acount: integer): boolean; overload;
    function find(const akey: lmsestringty): integer; overload; //-1 if not found
    function first: pintegermsestringdataty;
-   function next: pintegermsestringdataty;
+   function next: pintegermsestringdataty; //wraps to first after last
+   function last: pintegermsestringdataty;
+   function prev: pintegermsestringdataty; //wraps to last after first
    procedure iterate(const akey: msestring;
                      const aiterator: integermsestringiteratorprocty); overload;
  end;
@@ -502,7 +520,9 @@ type
    function find(const akey: msestring; out avalue: tobject;
                                         out acount: integer): boolean; overload;
    function first: pobjectmsestringdataty;
-   function next: pobjectmsestringdataty;
+   function next: pobjectmsestringdataty; //wraps to first after last
+   function last: pobjectmsestringdataty;
+   function prev: pobjectmsestringdataty; //wraps to last after first
    procedure iterate(const akey: msestring;
                      const aiterator: objectmsestringiteratorprocty); overload;
  end;
@@ -1503,6 +1523,16 @@ begin
  result:= pptruintdataty(internalnext);
 end;
 
+function tptruinthashdatalist.last: pptruintdataty;
+begin
+ result:= pptruintdataty(internallast);
+end;
+
+function tptruinthashdatalist.prev: pptruintdataty;
+begin
+ result:= pptruintdataty(internalprev);
+end;
+
 function tptruinthashdatalist.delete(const akey: ptruint;
                const all: boolean = false): boolean;
 begin
@@ -1579,6 +1609,16 @@ end;
 function tpointerptruinthashdatalist.next: ppointerptruintdataty;
 begin
  result:= ppointerptruintdataty(internalnext);
+end;
+
+function tpointerptruinthashdatalist.last: ppointerptruintdataty;
+begin
+ result:= ppointerptruintdataty(internallast);
+end;
+
+function tpointerptruinthashdatalist.prev: ppointerptruintdataty;
+begin
+ result:= ppointerptruintdataty(internalprev);
 end;
 
 procedure tpointerptruinthashdatalist.iterate(const akey: ptruint;
@@ -1658,6 +1698,16 @@ end;
 function tansistringptruinthashdatalist.next: pansistringptruintdataty;
 begin
  result:= pansistringptruintdataty(internalnext);
+end;
+
+function tansistringptruinthashdatalist.last: pansistringptruintdataty;
+begin
+ result:= pansistringptruintdataty(internallast);
+end;
+
+function tansistringptruinthashdatalist.prev: pansistringptruintdataty;
+begin
+ result:= pansistringptruintdataty(internalprev);
 end;
 
 procedure tansistringptruinthashdatalist.iterate(const akey: ptruint;
@@ -1754,6 +1804,16 @@ end;
 function tmsestringptruinthashdatalist.next: pmsestringptruintdataty;
 begin
  result:= pmsestringptruintdataty(internalnext);
+end;
+
+function tmsestringptruinthashdatalist.last: pmsestringptruintdataty;
+begin
+ result:= pmsestringptruintdataty(internallast);
+end;
+
+function tmsestringptruinthashdatalist.prev: pmsestringptruintdataty;
+begin
+ result:= pmsestringptruintdataty(internalprev);
 end;
 
 procedure tmsestringptruinthashdatalist.iterate(const akey: ptruint;
@@ -1901,6 +1961,16 @@ begin
  result:= pansistringdataty(internalnext);
 end;
 
+function tansistringhashdatalist.last: pansistringdataty;
+begin
+ result:= pansistringdataty(internallast);
+end;
+
+function tansistringhashdatalist.prev: pansistringdataty;
+begin
+ result:= pansistringdataty(internalprev);
+end;
+
 procedure tansistringhashdatalist.iterate(const akey: ansistring;
                const aiterator: ansistringhashiteratorprocty);
 begin
@@ -1995,6 +2065,16 @@ end;
 function tpointeransistringhashdatalist.next: ppointeransistringdataty;
 begin
  result:= ppointeransistringdataty(internalnext);
+end;
+
+function tpointeransistringhashdatalist.last: ppointeransistringdataty;
+begin
+ result:= ppointeransistringdataty(internallast);
+end;
+
+function tpointeransistringhashdatalist.prev: ppointeransistringdataty;
+begin
+ result:= ppointeransistringdataty(internalprev);
 end;
 
 procedure tpointeransistringhashdatalist.iterate(const akey: ansistring;
@@ -2136,6 +2216,16 @@ begin
  result:= pmsestringdataty(internalnext);
 end;
 
+function tmsestringhashdatalist.last: pmsestringdataty;
+begin
+ result:= pmsestringdataty(internallast);
+end;
+
+function tmsestringhashdatalist.prev: pmsestringdataty;
+begin
+ result:= pmsestringdataty(internalprev);
+end;
+
 procedure tmsestringhashdatalist.iterate(const akey: msestring;
                const aiterator: msestringiteratorprocty);
 begin
@@ -2235,6 +2325,16 @@ end;
 function tpointermsestringhashdatalist.next: ppointermsestringdataty;
 begin
  result:= ppointermsestringdataty(internalnext);
+end;
+
+function tpointermsestringhashdatalist.last: ppointermsestringdataty;
+begin
+ result:= ppointermsestringdataty(internallast);
+end;
+
+function tpointermsestringhashdatalist.prev: ppointermsestringdataty;
+begin
+ result:= ppointermsestringdataty(internalprev);
 end;
 
 procedure tpointermsestringhashdatalist.iterate(const akey: msestring;
@@ -2348,6 +2448,16 @@ begin
  result:= pintegermsestringdataty(internalnext);
 end;
 
+function tintegermsestringhashdatalist.last: pintegermsestringdataty;
+begin
+ result:= pintegermsestringdataty(internallast);
+end;
+
+function tintegermsestringhashdatalist.prev: pintegermsestringdataty;
+begin
+ result:= pintegermsestringdataty(internalprev);
+end;
+
 procedure tintegermsestringhashdatalist.iterate(const akey: msestring;
                const aiterator: integermsestringiteratorprocty);
 begin
@@ -2399,12 +2509,22 @@ end;
 
 function tobjectmsestringhashdatalist.first: pobjectmsestringdataty;
 begin
- result:= pobjectmsestringdataty(inherited first);
+ result:= pobjectmsestringdataty(internalfirst);
 end;
 
 function tobjectmsestringhashdatalist.next: pobjectmsestringdataty;
 begin
- result:= pobjectmsestringdataty(inherited next);
+ result:= pobjectmsestringdataty(internalnext);
+end;
+
+function tobjectmsestringhashdatalist.last: pobjectmsestringdataty;
+begin
+ result:= pobjectmsestringdataty(internallast);
+end;
+
+function tobjectmsestringhashdatalist.prev: pobjectmsestringdataty;
+begin
+ result:= pobjectmsestringdataty(internalprev);
 end;
 
 procedure tobjectmsestringhashdatalist.iterate(const akey: msestring;
