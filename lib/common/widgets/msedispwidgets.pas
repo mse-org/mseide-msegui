@@ -765,10 +765,10 @@ end;
 function tbytestringdisp.getvaluetext: msestring;
 begin
  if length(fvalue) > 256 then begin
-  result:= bytestrtostr(copy(fvalue,1,256),fbase,true)+'...';
+  result:= bytestrtostr(copy(fvalue,1,256),fbase,' ')+'...';
  end
  else begin
-  result:= bytestrtostr(fvalue,fbase,true);
+  result:= bytestrtostr(fvalue,fbase,' ');
  end;
 end;
 

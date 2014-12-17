@@ -72,9 +72,11 @@ var
    ShortMonthNames: ('Jan','Feb','Mar','Apr','May','Jun', 
                      'Jul','Aug','Sep','Oct','Nov','Dec');
    LongMonthNames: ('January','February','March','April','May','June',
-                    'July','August','September','October','November','December');
+                    'July','August','September','October','November',
+                    'December');
    ShortDayNames: ('Sun','Mon','Tue','Wed','Thu','Fri','Sat');
-   LongDayNames:  ('Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday');
+   LongDayNames:  ('Sunday','Monday','Tuesday','Wednesday','Thursday','Friday',
+                   'Saturday');
    TwoDigitYearCenturyWindow: 50;
  );
 
@@ -312,8 +314,8 @@ function strtointvalue64(const text: msestring; base: numbasety): qword; overloa
 
 
 function bytestrtostr(const inp: ansistring; base: numbasety = nb_hex;
-                                          space: boolean = false): string;
-   //wandelt bytefolge in ascii hexstring
+                                          spacechar: char = #0): string;
+   //wandelt bytefolge in ascii hexstring, spacechar #0 -> none
 function bytestrtobin(const inp: ansistring; abstand: boolean): string;
    //wandelt bytefolge in ascii binstring,
    // letztes zeichen = anzahl gueltige bits in letztem byte
@@ -3931,7 +3933,7 @@ begin
 end;
 
 function bytestrtostr(const inp: ansistring; base: numbasety = nb_hex;
-                               space: boolean = false): string;
+                               spacechar: char = #0): string;
    //wandelt bytefolge in ascii hexstring
 var
  int1: integer;
@@ -3939,8 +3941,8 @@ begin
  result:= '';
  for int1:= 1 to length(inp) do begin
   result:= result + intvaluetostr(byte(inp[int1]),base,8);
-  if space and (int1 <> length(inp)) then begin
-    result:= result + ' ';
+  if (spacechar <> #0) and (int1 <> length(inp)) then begin
+    result:= result + spacechar;
   end;
  end;
 end;

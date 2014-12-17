@@ -3485,10 +3485,10 @@ begin
   str1:= ansistring(data);
  end;
  if length(str1) > 256 then begin
-  result:= bytestrtostr(copy(str1,1,256),nb_hex,true)+'...';
+  result:= bytestrtostr(copy(str1,1,256),nb_hex,' ')+'...';
  end
  else begin
-  result:= bytestrtostr(str1,nb_hex,true);
+  result:= bytestrtostr(str1,nb_hex,' ');
  end;
 end;
 
