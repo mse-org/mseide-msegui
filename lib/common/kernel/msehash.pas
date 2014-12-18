@@ -44,7 +44,7 @@ type
                                        //hashdatadataty
  findcheckprocty = procedure(const aitemdata; var accept: boolean) of object;
 
- hashliststatety = (hls_needsnull,hls_needsfinalize);
+ hashliststatety = (hls_needsnull,hls_needsfinalize,hls_destroying);
  hashliststatesty = set of hashliststatety;
 
  thashdatalist = class
@@ -628,6 +628,7 @@ end;
 
 destructor thashdatalist.destroy;
 begin
+ include(fstate,hls_destroying);
  clear;
  inherited;
 end;
@@ -1194,36 +1195,36 @@ begin
 end;
 
 function thashdatalist.internalnext: phashdatadataty;
+var
+ po1: phashdataty;
 begin
  result:= nil;
  if count > 0 then begin
-  if fcurrentitem = 0 then begin
+  po1:= phashdataty(fdata + fcurrentitem);
+  if (fcurrentitem = 0) or (po1^.header.nextlist = 0) then begin
    fcurrentitem:= fassignedfirst;
   end
   else begin
-   inc(fcurrentitem,phashdataty(pchar(fdata) + fcurrentitem)^.header.nextlist);
-   if fcurrentitem = 0 then begin
-    fcurrentitem:= fassignedfirst;
-   end;
+   fcurrentitem:= fcurrentitem + po1^.header.nextlist;
   end;
-  result:= phashdatadataty(pchar(fdata) + fcurrentitem + sizeof(hashheaderty));
+  result:= fdata + fcurrentitem + sizeof(hashheaderty);
  end;
 end;
 
 function thashdatalist.internalprev: phashdatadataty;
+var
+ po1: phashdataty;
 begin
  result:= nil;
  if count > 0 then begin
-  if fcurrentitem = 0 then begin
+  po1:= phashdataty(fdata + fcurrentitem);
+  if (fcurrentitem = 0) or (po1^.header.prevlist = 0) then begin
    fcurrentitem:= fassignedlast;
   end
   else begin
-   dec(fcurrentitem,phashdataty(pchar(fdata) + fcurrentitem)^.header.prevlist);
-   if fcurrentitem = 0 then begin
-    fcurrentitem:= fassignedlast;
-   end;
+   fcurrentitem:= fcurrentitem - po1^.header.prevlist;
   end;
-  result:= phashdatadataty(pchar(fdata) + fcurrentitem + sizeof(hashheaderty));
+  result:= fdata + fcurrentitem + sizeof(hashheaderty);
  end;
 end;
 
