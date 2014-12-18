@@ -247,8 +247,8 @@ type
    procedure setstatfile(const Value: tstatfile);
    procedure readoptionsedit(reader: treader);
   protected
-   procedure defineproperties(filer: tfiler); override;
-   //istatfile
+   procedure defineproperties(filer: tfiler); override; 
+    //istatfile
    procedure dostatread(const reader: tstatreader);
    procedure dostatwrite(const writer: tstatwriter);
    procedure statreading;

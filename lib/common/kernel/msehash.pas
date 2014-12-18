@@ -893,18 +893,16 @@ end;
 procedure thashdatalist.release(const ref: ptruint);
 var
  po1,pend: phashdataty;
- puint1: ptruint;
 begin
  if fassignedlast <> 0 then begin
   pend:= pointer(pchar(fdata)+ref);
   po1:= pointer(pchar(fdata)+fassignedlast);
   while po1 <> pend do begin
-   puint1:= po1^.header.prevlist;
    internaldeleteitem(po1);
-   if puint1 = 0 then begin
+   if po1^.header.prevlist = 0 then begin
     break;
    end;
-   inc(pchar(po1),puint1);
+   dec(pchar(po1),po1^.header.prevlist);
   end;
  end;
 end;
