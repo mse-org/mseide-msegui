@@ -73,8 +73,8 @@ type
    property data: pointer read fdata;
    property assignedfirst: ptruint read fassignedfirst;
    property assignedlast: ptruint read fassignedlast;
-   function getdatapo(const aoffset: longword): pointer;
-   function getdataoffset(const adata: pointer): longword;
+   function getdatapo(const aoffset: longword): pointer; inline;
+   function getdataoffset(const adata: pointer): longword; inline;
    function internaladd(const akey): phashdataty;
    function internaladdhash(hash1: hashvaluety): phashdataty;
    procedure internaldeleteitem(const aitem: phashdataty); overload;
@@ -93,8 +93,6 @@ type
    function internalfindexact(const akey;
                            out acount: integer): phashdataty; overload;
    procedure checkexact(const aitemdata; var accept: boolean); virtual;
-   function scramble(const avalue: hashvaluety): hashvaluety;
-                                          {$ifdef FPC}inline;{$endif}
    function hashkey(const akey): hashvaluety; virtual; abstract;
    function checkkey(const akey; const aitemdata): boolean; virtual; abstract;
    procedure rehash;
@@ -527,16 +525,23 @@ type
                      const aiterator: objectmsestringiteratorprocty); overload;
  end;
  
+function scramble(const avalue: hashvaluety): hashvaluety; inline;
 function datahash(const data; len: integer): longword; //simple
 function datahash2(const data; len: integer): longword;
 function stringhash(const key: string): longword; overload;
 function stringhash(const key: lstringty): longword; overload;
 function stringhash(const key: msestring): longword; overload;
 function stringhash(const key: lmsestringty): longword; overload;
+function pointerhash(const key: pointer): longword; inline;
  
 implementation
 uses
  sysutils,msebits;
+
+function scramble(const avalue: hashvaluety): hashvaluety;
+begin
+ result:= ((avalue xor (avalue shr 8)) xor (avalue shr 16)) xor (avalue shr 24);
+end;
 
 function datahash(const data; len: integer): longword;
 var
@@ -614,6 +619,16 @@ begin
   result := ((result shl 2) or (result shr (sizeof(result) * 8 - 2))) xor
                             ord(po^[int1]);
  end;
+end;
+
+function pointerhash(const key: pointer): longword; inline;
+begin
+{$ifdef cpu64}
+ result:= scramble(ptruint(key xor (ptruint(key) shr 32)) xor 
+                                                 (ptruint(key) shr 2));
+{$else}
+ result:= scramble(ptruint(key) xor (ptruint(key) shr 2));
+{$endif}
 end;
 
 { thashdatalist }
@@ -1233,19 +1248,14 @@ begin
  accept:= false; //dummy
 end;
 
-function thashdatalist.getdatapo(const aoffset: longword): pointer;
+function thashdatalist.getdatapo(const aoffset: longword): pointer; inline;
 begin
  result:= pchar(fdata)+aoffset;
 end;
 
-function thashdatalist.getdataoffset(const adata: pointer): longword;
+function thashdatalist.getdataoffset(const adata: pointer): longword; inline;
 begin
  result:= pchar(adata)-pchar(fdata);
-end;
-
-function thashdatalist.scramble(const avalue: hashvaluety): hashvaluety;
-begin
- result:= ((avalue xor (avalue shr 8)) xor (avalue shr 16)) xor (avalue shr 24);
 end;
 
 {$ifdef mse_debug_hash}
@@ -1479,7 +1489,8 @@ end;
 function tptruinthashdatalist.hashkey(const akey): hashvaluety;
 // todo: optimize
 begin
- result:= scramble(ptruint(akey) xor (ptruint(akey) shr 2));
+ result:= pointerhash(pointer(akey));
+// result:= scramble(ptruint(akey) xor (ptruint(akey) shr 2));
 end;
 
 function tptruinthashdatalist.add(const akey: ptruint): pointer;
