@@ -124,6 +124,8 @@ type
    procedure writedata(writer: twriter);
    procedure readdataprops(reader: treader);
    procedure writedataprops(writer: twriter);
+   function getfixrowwidgets(aindex: integer): twidget;
+   procedure setfixrowwidgets(aindex: integer; const avalue: twidget);
   protected
    fintf: igridwidget;
     //iwidgetgrid
@@ -184,6 +186,8 @@ type
                                              var result: cellzonety); override;
    function actualfont: tfont; override;
    property editwidget: twidget read geteditwidget write seteditwidget;
+   property fixrowwidgets[aindex: integer]: twidget read getfixrowwidgets 
+                                                      write setfixrowwidgets;
    property grid: tcustomwidgetgrid read getgrid;
   published
    property datalist stored false; //stored by defineproperties
@@ -233,6 +237,8 @@ type
    ffixrowwidgetnames: stringarty;
    procedure readfixwidgetnames(reader: treader);
    procedure writefixwidgetnames(writer: twriter);
+   function getfixrowwidgets(aindex: integer): twidget;
+   procedure setfixrowwidgets(aindex: integer; const avalue: twidget);
   protected
    procedure defineproperties(filer: tfiler); override;
    procedure setfixrowwidget(const awidget: twidget; const rowindex: integer);
@@ -240,6 +246,8 @@ type
    constructor create(const agrid: tcustomgrid;
                             const aowner: tgridarrayprop); override;
    destructor destroy; override;
+   property fixrowwidgets[aindex: integer]: twidget read getfixrowwidgets 
+                                                      write setfixrowwidgets;
  end;
  
  twidgetfixcols = class(tfixcols)
@@ -1971,6 +1979,21 @@ begin
  end;
 end;
 
+function twidgetcol.getfixrowwidgets(aindex: integer): twidget;
+var
+ i1: int32;
+begin
+ i1:= -1-aindex;
+ checkarrayindex(ffixrowwidgets,i1);
+ result:= ffixrowwidgets[i1];
+end;
+
+procedure twidgetcol.setfixrowwidgets(aindex: integer; const avalue: twidget);
+begin
+ checkarrayindex(ffixrowwidgets,-1-aindex);
+ setfixrowwidget(avalue,aindex);
+end;
+
 { twidgetcols }
 
 constructor twidgetcols.create(const aowner: tcustomwidgetgrid);
@@ -2212,6 +2235,22 @@ begin
  tcustomwidgetgrid(fcellinfo.grid).removefixwidget(awidget);
  ffixrowwidgets[-rowindex-1]:= awidget;
  fcellinfo.grid.layoutchanged;
+end;
+
+function twidgetfixcol.getfixrowwidgets(aindex: integer): twidget;
+var
+ i1: int32;
+begin
+ i1:= -1-aindex;
+ checkarrayindex(ffixrowwidgets,i1);
+ result:= ffixrowwidgets[i1];
+end;
+
+procedure twidgetfixcol.setfixrowwidgets(aindex: integer;
+               const avalue: twidget);
+begin
+ checkarrayindex(ffixrowwidgets,-1-aindex);
+ setfixrowwidget(avalue,aindex);
 end;
 
 { twidgetfixcols }
