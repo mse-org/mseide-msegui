@@ -1066,7 +1066,13 @@ begin
   afonthandle1:= tfont1(font).gethandle;
   with {fvaluepo^.}font do begin
    acolorforeground:= color;
+   if acolorforeground = cl_default then begin
+    acolorforeground:= cl_text;
+   end;
    acolorbackground:= colorbackground;
+   if acolorbackground = cl_default then begin
+    acolorbackground:= cl_transparent;
+   end;
    acolorshadow:= shadow_color;
   end;
   checkgcstate([cs_font,cs_acolorforeground,cs_acolorbackground]);

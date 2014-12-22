@@ -532,9 +532,9 @@ type
    property strikeout: boolean read getstrikeout write setstrikeout;   
 
   published
-   property color: colorty read getcolor write setcolor default cl_text;
+   property color: colorty read getcolor write setcolor default cl_default;
    property colorbackground: colorty read getcolorbackground
-                 write setcolorbackground default cl_transparent;
+                 write setcolorbackground default cl_default;
    property shadow_color: colorty read getshadow_color
                  write setshadow_color default cl_none;
    property shadow_shiftx: integer read getshadow_shiftx write
@@ -1156,6 +1156,15 @@ const
                 cs_fonthandle,cs_font,cs_fontcolor,cs_fontcolorbackground,
                 cs_fonteffect,
                 cs_brush,cs_brushorigin] + linecanvasstates;
+
+type
+ editfontcolorinfoty = record
+  text: colorty;
+  textbackground: colorty;
+  selectedtext: colorty;
+  selectedtextbackground: colorty;  
+ end;
+ 
 var
  defaultframecolors: framecolorinfoty =
   (light: (color: cl_light; effectcolor: cl_highlight; effectwidth: 1);
@@ -1164,6 +1173,13 @@ var
    hiddenedges: []
   );
 
+ defaulteditfontcolors: editfontcolorinfoty = (
+  text: cl_text;
+  textbackground: cl_transparent;
+  selectedtext: cl_selectedtext;
+  selectedtextbackground: cl_selectedtextbackground;
+ );
+ 
 procedure init;
 procedure deinit;
 procedure gdi_lock;   //locks only if not mainthread
@@ -2458,8 +2474,8 @@ begin
  if finfopo = nil then begin
   finfopo:= @finfo;
  end;
- finfopo^.color:= cl_text;
- finfopo^.colorbackground:= cl_transparent;
+ finfopo^.color:= cl_default;
+ finfopo^.colorbackground:= cl_default;
  finfopo^.shadow_color:= cl_none;
  finfopo^.shadow_shiftx:= 1;
  finfopo^.shadow_shifty:= 1;
@@ -3461,8 +3477,8 @@ procedure tcanvas.init;
    else begin
     color:= cl_black;
     colorbackground:= cl_transparent;
-    font.color:= cl_black;
-    font.colorbackground:= cl_transparent;
+    font.color:= cl_default;
+    font.colorbackground:= cl_default;
    end;
    rasterop:= rop_copy;
   end;
@@ -4612,6 +4628,9 @@ begin
      end;
     end;
     acolorbackground:= cl_transparent;
+    if acolorforeground = cl_default then begin
+     acolorforeground:= cl_text;
+    end;
     checkgcstate([cs_font,cs_acolorforeground,cs_acolorbackground]);
     gdi(gdf_drawstring16);
     if grayed then begin
@@ -4639,6 +4658,9 @@ begin
      end;
      acolorforeground:= po1^.color;
     end;
+    if acolorforeground = cl_default then begin
+     acolorforeground:= cl_text;
+    end;
     checkgcstate([cs_acolorforeground]);
     gdi(gdf_drawstring16);
    end
@@ -4648,6 +4670,12 @@ begin
     end
     else begin
      acolorforeground:= po1^.color;
+    end;
+    if acolorforeground = cl_default then begin
+     acolorforeground:= cl_text;
+    end;
+    if acolorbackground = cl_default then begin
+     acolorbackground:= cl_transparent;
     end;
     checkgcstate([cs_font,cs_acolorforeground,cs_acolorbackground]);
     gdi(gdf_drawstring16);
@@ -4663,6 +4691,7 @@ var
  linewidthbefore: integer;
  capstylebefore: capstylety;
  pt1,pt2: pointty;
+ co1: colorty;
 begin
  linewidthbefore:= linewidth;
  capstylebefore:= capstyle;
@@ -4685,8 +4714,11 @@ begin
    drawline(pt1,pt2,gloss_color);
   end;
  end;
- 
- drawline(startpoint,endpoint,font.color);
+ co1:= font.color;
+ if co1 = cl_default then begin
+  co1:= cl_text;
+ end; 
+ drawline(startpoint,endpoint,co1);
  linewidth:= linewidthbefore;
  capstyle:= capstylebefore;
 end;

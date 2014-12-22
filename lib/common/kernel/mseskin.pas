@@ -160,6 +160,8 @@ type
   private
    fframecolors: framecolorinfoty;
    fframecolorsbefore: framecolorinfoty;
+   feditfontcolors: editfontcolorinfoty;
+   feditfontcolorsbefore: editfontcolorinfoty;
   public
    constructor create;
    class function getitemclasstype: persistentclassty; override;
@@ -180,6 +182,15 @@ type
               write fframecolors.light.effectwidth default -1;
    property colorframe: colorty read fframecolors.frame
               write fframecolors.frame default cl_default;
+   property edittext: colorty read feditfontcolors.text
+              write feditfontcolors.text default cl_default;
+   property edittextbackground: colorty read feditfontcolors.textbackground
+              write feditfontcolors.textbackground default cl_default;
+   property editselectedtext: colorty read feditfontcolors.selectedtext
+              write feditfontcolors.selectedtext default cl_default;
+   property editselectedtextbackground: colorty 
+               read feditfontcolors.selectedtextbackground
+             write feditfontcolors.selectedtextbackground default cl_default;
  end;
 
  tskinfontalias = class(tvirtualpersistent)
@@ -1034,6 +1045,12 @@ begin
   shadow.effectwidth:= -1;
   frame:= cl_default;
  end;
+ with feditfontcolors do begin
+  text:= cl_default;
+  textbackground:= cl_default;
+  selectedtext:= cl_default;
+  selectedtextbackground:= cl_default;
+ end;
  inherited create(tskincolor);
 end;
 
@@ -1078,6 +1095,20 @@ begin
  if fframecolors.frame <> cl_default then begin
   defaultframecolors.frame:= fframecolors.frame;
  end;
+ feditfontcolorsbefore:= defaulteditfontcolors;
+ if feditfontcolors.text <> cl_default then begin
+  defaulteditfontcolors.text:= feditfontcolors.text;
+ end;
+ if feditfontcolors.textbackground <> cl_default then begin
+  defaulteditfontcolors.textbackground:= feditfontcolors.textbackground;
+ end;
+ if feditfontcolors.selectedtext <> cl_default then begin
+  defaulteditfontcolors.selectedtext:= feditfontcolors.selectedtext;
+ end;
+ if feditfontcolors.selectedtextbackground <> cl_default then begin
+  defaulteditfontcolors.selectedtextbackground:= 
+                          feditfontcolors.selectedtextbackground;
+ end;
 end;
 
 procedure tskincolors.restorecolors;
@@ -1090,6 +1121,7 @@ begin
   end;
  end;
  defaultframecolors:= fframecolorsbefore;
+ defaulteditfontcolors:= feditfontcolorsbefore;
 end;
 
 { tskinfontaliass }

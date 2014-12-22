@@ -1913,6 +1913,7 @@ end;
 procedure tinplaceedit.dopaint(const canvas: tcanvas);
 var
  str1: msestring;
+ co1,co2: rgbtriplety; 
 begin
  ftextrectbefore:= finfo.res;
  if length(finfo.text.text) > 0 then begin
@@ -1932,7 +1933,21 @@ begin
   if ffontcolorbackground <> cl_none then begin
    canvas.font.colorbackground:= ffontcolorbackground;
   end;
+  with defaulteditfontcolors do begin
+   if canvas.font.color = cl_default then begin
+    canvas.font.color:= text;
+   end;
+   if canvas.font.colorbackground = cl_default then begin
+    canvas.font.colorbackground:= textbackground;
+   end;
+   co1:= colortorgb(cl_selectedtext);
+   co2:= colortorgb(cl_selectedtextbackground);
+   setcolormapvalue(cl_selectedtext,selectedtext);
+   setcolormapvalue(cl_selectedtextbackground,selectedtextbackground);
+  end;
   msedrawtext.drawtext(canvas,finfo);
+  setcolormapvalue(cl_selectedtext,co1.red,co1.green,co1.blue);
+  setcolormapvalue(cl_selectedtextbackground,co2.red,co2.green,co2.blue);
   if fpasswordchar <> #0 then begin
    finfo.text.text:= str1;
   end;
