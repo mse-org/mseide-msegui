@@ -2509,14 +2509,18 @@ var
  fname1: filenamety;
 begin
  if (sender <> nil) then begin
+  storemacros(sender);
   fname1:= sender.settingsfile.value;
+  expandprmacros1(fname1);
   if not askyesno(actionsmo.c[ord(ac_replacesettings)]+lineend+
-              '"'+fname1+'"?',actionsmo.c[ord(ac_warning)]) then begin
+                                        '"'+fname1+'"?',
+                                actionsmo.c[ord(ac_warning)]) then begin
    exit;
   end;
  end
  else begin
   fname1:= projectoptions.o.settingsfile;
+  expandprmacros1(fname1);
  end;
  if fname1 <> '' then begin
   savevalues(sender,buffer);
@@ -2526,7 +2530,7 @@ begin
   end;
   projectoptions.disabled:= getdisabledoptions;
   try
-   read1:= tstatreader.create(buffer.settingsfile,ce_utf8n);
+   read1:= tstatreader.create(fname1,ce_utf8n);
    try
     read1.setsection('projectoptions');
     if projectoptions.o.settingsprojecttree then begin
@@ -2567,7 +2571,9 @@ var
  fname1: filenamety;
 begin
  if sender <> nil then begin
+  storemacros(sender);
   fname1:= sender.settingsfile.value;
+  expandprmacros1(fname1);
   if findfile(fname1) and not askyesno(actionsmo.c[ord(ac_file)]+fname1+
                     actionsmo.c[ord(ac_exists)]+lineend+
     actionsmo.c[ord(ac_wantoverwrite)],actionsmo.c[ord(ac_warning)]) then begin
@@ -2576,6 +2582,7 @@ begin
  end
  else begin
   fname1:= projectoptions.o.settingsfile;
+  expandprmacros1(fname1);
  end;
  if fname1 <> '' then begin
   stat1:= tstatwriter.create(fname1,ce_utf8n,true);

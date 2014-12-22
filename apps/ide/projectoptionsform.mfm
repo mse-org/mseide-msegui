@@ -5549,6 +5549,7 @@ object projectoptionsfo: tprojectoptionsfo
               80
               0
             )
+            onshowhint = hintexpandedmacros
             bounds_x = 5
             bounds_y = 5
             bounds_cx = 639
