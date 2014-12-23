@@ -183,6 +183,10 @@ var
 // wstr1: filenamety;
 begin
  with projectoptions,o,texp do begin
+  if makecommand = '' then begin
+   result:= '';
+   exit;
+  end;
   str3:= quotefilename(tosysfilepath(makecommand));
   str1:= str3;
   if (targetfile <> '') and (targpref <> '') then begin
@@ -287,10 +291,15 @@ procedure tprogrunner.runprog(const acommandline: string);
 var
  wdbefore: filenamety;
 begin
+ if acommandline = '' then begin
+  fexitcode:= 0;
+  fmessagefinished:= true;
+  ffinished:= true;
+  exit;
+ end; 
  fexitcode:= 1; //defaulterror
  fmessagefinished:= false;
  ffinished:= false;
- 
  procid:= invalidprochandle;
  with projectoptions,o.texp do begin
   if fsetmakedir and (makedir <> '') then begin
