@@ -624,7 +624,7 @@ end;
 function pointerhash(const key: pointer): longword; inline;
 begin
 {$ifdef cpu64}
- result:= scramble(ptruint(key xor (ptruint(key) shr 32)) xor 
+ result:= scramble((ptruint(key) xor (ptruint(key) shr 32)) xor 
                                                  (ptruint(key) shr 2));
 {$else}
  result:= scramble(ptruint(key) xor (ptruint(key) shr 2));
