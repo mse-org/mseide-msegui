@@ -160,7 +160,7 @@ procedure Register;
 begin
  registerclass(tmsedatamodule);
  registercomponents('Gui',[tmainmenu,tpopupmenu,
-                    tfacecomp,tfacelist,tframecomp,tskincontroller,
+                    tfacecomp,tfacelist,tframecomp,tfontcomp,tskincontroller,
 //                    tskinextender,
                     tbitmapcomp,timagelist,tshortcutcontroller,thelpcontroller,
                     taction,tguithreadcomp]);

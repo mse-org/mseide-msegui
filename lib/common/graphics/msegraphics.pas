@@ -610,6 +610,8 @@ type
                                  //0..2*pi-> 0degree..360degree CCW
    procedure defineproperties(filer: tfiler); override;
    procedure settemplateinfo(const ainfo: fonteffectinfoty);
+   procedure objectevent(const sender: tobject; 
+                        const event: objecteventty); override;
   public
    constructor create; override;
    destructor destroy; override;
@@ -2711,7 +2713,8 @@ begin
  end;
 end;
 }
-procedure tfont.dochanged(const changed: canvasstatesty; const nochange: boolean);
+procedure tfont.dochanged(const changed: canvasstatesty;
+                                           const nochange: boolean);
 begin
  if assigned(fonchange) and not nochange then begin
   fonchange(self);
@@ -3363,58 +3366,105 @@ begin
  setlinkedvar(avalue,tmsecomponent(ftemplate));
  if (avalue <> nil) and not (csreading in avalue.componentstate) then begin
   assign(avalue);
+  dochanged([],false);
  end;
 end;
 
 procedure tfont.settemplateinfo(const ainfo: fonteffectinfoty);
+var
+ changed1: canvasstatesty = [];
 begin
  with finfopo^.effect do begin
   if not (flp_color in flocalprops) then begin
-   color:= ainfo.color;
+   if color <> ainfo.color then begin
+    color:= ainfo.color;
+    include(changed1,cs_fontcolor);
+   end;
   end;
   if not (flp_colorbackground in flocalprops) then begin
-   colorbackground:= ainfo.colorbackground;
+   if colorbackground <> ainfo.colorbackground then begin
+    colorbackground:= ainfo.colorbackground;
+    include(changed1,cs_fontcolorbackground);
+   end;
   end;
   if not (flp_shadow_color in flocalprops) then begin
-   shadow_color:= ainfo.shadow_color;
+   if shadow_color <> ainfo.shadow_color then begin
+    shadow_color:= ainfo.shadow_color;
+    include(changed1,cs_fonteffect);
+   end;
   end;
   if not (flp_shadow_shiftx in flocalprops) then begin
-   shadow_shiftx:= ainfo.shadow_shiftx;
+   if shadow_shiftx <> ainfo.shadow_shiftx then begin
+    shadow_shiftx:= ainfo.shadow_shiftx;
+    include(changed1,cs_fonteffect);
+   end;
   end;
   if not (flp_shadow_shifty in flocalprops) then begin
-   shadow_shifty:= ainfo.shadow_shifty;
+   if shadow_shifty <> ainfo.shadow_shifty then begin
+    shadow_shifty:= ainfo.shadow_shifty;
+    include(changed1,cs_fonteffect);
+   end;
   end;
   if not (flp_gloss_color in flocalprops) then begin
-   gloss_color:= ainfo.gloss_color;
+   if gloss_color <> ainfo.gloss_color then begin
+    gloss_color:= ainfo.gloss_color;
+    include(changed1,cs_fonteffect);
+   end;
   end;
   if not (flp_gloss_shiftx in flocalprops) then begin
-   gloss_shiftx:= ainfo.gloss_shiftx;
+   if gloss_shiftx <> ainfo.gloss_shiftx then begin
+    gloss_shiftx:= ainfo.gloss_shiftx;
+    include(changed1,cs_fonteffect);
+   end;
   end;
   if not (flp_gloss_shifty in flocalprops) then begin
-   gloss_shifty:= ainfo.gloss_shifty;
+   if gloss_shifty <> ainfo.gloss_shifty then begin
+    gloss_shifty:= ainfo.gloss_shifty;
+    include(changed1,cs_fonteffect);
+   end;
   end;
    
   if not (flp_grayed_color in flocalprops) then begin
-   grayed_color:= ainfo.grayed_color;
+   if grayed_color <> ainfo.grayed_color then begin
+    grayed_color:= ainfo.grayed_color;
+    include(changed1,cs_fonteffect);
+   end;
   end;
   if not (flp_grayed_colorshadow in flocalprops) then begin
-   grayed_colorshadow:= ainfo.grayed_colorshadow;
+   if grayed_colorshadow <> ainfo.grayed_colorshadow then begin
+    grayed_colorshadow:= ainfo.grayed_colorshadow;
+    include(changed1,cs_fonteffect);
+   end;
   end;
   if not (flp_grayed_shifty in flocalprops) then begin
-   grayed_shiftx:= ainfo.grayed_shiftx;
+   if grayed_shiftx <> ainfo.grayed_shiftx then begin
+    grayed_shiftx:= ainfo.grayed_shiftx;
+    include(changed1,cs_fonteffect);
+   end;
   end;
   if not (flp_grayed_shifty in flocalprops) then begin
-   grayed_shifty:= ainfo.grayed_shifty;
-  end;
-  if not (flp_style in flocalprops) then begin
-   style:= ainfo.style;
+   if grayed_shifty <> ainfo.grayed_shifty then begin
+    grayed_shifty:= ainfo.grayed_shifty;
+    include(changed1,cs_fonteffect);
+   end;
   end;
   if not (flp_xscale in flocalprops) then begin
-   xscale:= ainfo.xscale;
+   if xscale <> ainfo.xscale then begin
+    xscale:= ainfo.xscale;
+    releasehandles(true);
+    include(changed1,cs_font);
+   end;
   end;
-  updatehandlepo();
-  dochanged([cs_font,cs_fontcolor,cs_fontcolorbackground,cs_fonteffect],true);
-  releasehandles();
+  if not (flp_style in flocalprops) then begin
+   if style <> ainfo.style then begin
+    style:= ainfo.style;
+    updatehandlepo();
+    include(changed1,cs_font);
+   end;  
+  end;
+  if changed1 <> [] then begin
+   dochanged(changed1,true);
+  end;
  end;
 end;
 
@@ -3511,6 +3561,15 @@ function tfont.isstylestored: boolean;
 begin
  result:= (ftemplate = nil) and 
           (finfopo^.effect.style <> []) or (flp_style in flocalprops);
+end;
+
+procedure tfont.objectevent(const sender: tobject; const event: objecteventty);
+begin
+ inherited;
+ if (event = oe_changed) and (ftemplate <> nil) and 
+                                     (ftemplate = sender) then begin
+  settemplateinfo(tfontcomp(sender).template.fi);
+ end;
 end;
 
 { tcanvasfont }
