@@ -2791,6 +2791,7 @@ end;
 
 procedure tfont.setgrayed_color(const avalue: colorty);
 begin
+ include(flocalprops,flp_grayed_color);
  with finfopo^.effect do begin
   if grayed_color <> avalue then begin
    grayed_color:= avalue;
@@ -2806,6 +2807,7 @@ end;
 
 procedure tfont.setgrayed_colorshadow(const avalue: colorty);
 begin
+ include(flocalprops,flp_grayed_colorshadow);
  with finfopo^.effect do begin
   if grayed_colorshadow <> avalue then begin
    grayed_colorshadow:= avalue;
@@ -2821,6 +2823,7 @@ end;
 
 procedure tfont.setgrayed_shiftx(const avalue: integer);
 begin
+ include(flocalprops,flp_grayed_shiftx);
  with finfopo^.effect do begin
   if grayed_shiftx <> avalue then begin
    grayed_shiftx:= avalue;
@@ -2836,6 +2839,7 @@ end;
 
 procedure tfont.setgrayed_shifty(const avalue: integer);
 begin
+ include(flocalprops,flp_grayed_shifty);
  with finfopo^.effect do begin
   if grayed_shifty <> avalue then begin
    grayed_shifty:= avalue;
@@ -3130,6 +3134,7 @@ end;
 
 procedure tfont.setxscale(const avalue: real);
 begin
+ include(flocalprops,flp_xscale);
  if finfopo^.effect.xscale <> avalue then begin
   finfopo^.effect.xscale:= avalue;
   releasehandles;
@@ -4651,7 +4656,7 @@ begin
    afonthandle1:= ffont.gethandle;
    po1:= @fvaluepo^.font;
    with fvaluepo^.font do begin
-    acolorbackground:= colorbackground;
+    acolorbackground:= effect.colorbackground;
    end;
   end;
   with fdrawinfo.text16pos do begin
