@@ -343,6 +343,15 @@ type
               const linkintf: iobjectlink = nil); overload;
  end;
 
+ tlinkedoptionalpersistent = class(tlinkedpersistent)
+  private
+   procedure readdummy(reader: treader);
+   procedure writedummy(writer: twriter);
+  protected
+   procedure defineproperties(filer : tfiler); override;
+   function isoptional: boolean; virtual;
+ end;
+ 
  teventpersistent = class(tlinkedpersistent,ievent)
   protected
    procedure receiveevent(const event: tobjectevent); virtual;
@@ -4067,6 +4076,31 @@ begin
 end;
 
 function toptionalpersistent.isoptional: boolean;
+begin
+ result:= true;
+end;
+
+{ tlinkedoptionalpersistent }
+
+procedure tlinkedoptionalpersistent.readdummy(reader: treader);
+begin
+ reader.readinteger;
+end;
+
+procedure tlinkedoptionalpersistent.writedummy(writer: twriter);
+begin
+ writer.writeinteger(0);
+end;
+
+procedure tlinkedoptionalpersistent.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('dummy',{$ifdef FPC}@{$endif}readdummy,
+        {$ifdef FPC}@{$endif}writedummy,(filer.ancestor = nil) and isoptional);
+ //in order to create optional instance
+end;
+
+function tlinkedoptionalpersistent.isoptional: boolean;
 begin
  result:= true;
 end;

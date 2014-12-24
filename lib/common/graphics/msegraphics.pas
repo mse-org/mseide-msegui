@@ -435,13 +435,81 @@ type
   21: (moverect: moverectinfoty)
  end;
 
+ tfonttemplate = class(tpersistenttemplate)
+  private
+   procedure setcolor(const avalue: colorty);
+   procedure setcolorbackground(const avalue: colorty);
+   procedure setshadow_color(const avalue: colorty);
+   procedure setshadow_shiftx(const avalue: integer);
+   procedure setshadow_shifty(const avalue: integer);
+   procedure setgloss_color(const avalue: colorty);
+   procedure setgloss_shiftx(const avalue: integer);
+   procedure setgloss_shifty(const avalue: integer);
+   procedure setgrayed_color(const avalue: colorty);
+   procedure setgrayed_colorshadow(const avalue: colorty);
+   procedure setgrayed_shiftx(const avalue: integer);
+   procedure setgrayed_shifty(const avalue: integer);
+   procedure setstyle(const avalue: fontstylesty);
+   procedure setxscale(const avalue: real);   
+  protected
+   fi: fonteffectinfoty;
+   procedure doassignto(dest: tpersistent); override;
+   function getinfosize: integer; override;
+   function getinfoad: pointer; override;
+  public
+   constructor create(const owner: tmsecomponent;
+                  const onchange: notifyeventty); override;
+  published
+   property color: colorty read fi.color write setcolor default cl_default;
+   property colorbackground: colorty read fi.colorbackground
+                 write setcolorbackground default cl_default;
+   property shadow_color: colorty read fi.shadow_color
+                 write setshadow_color default cl_none;
+   property shadow_shiftx: integer read fi.shadow_shiftx write
+                setshadow_shiftx default 1;
+   property shadow_shifty: integer read fi.shadow_shifty write
+                setshadow_shifty default 1;
+
+   property gloss_color: colorty read fi.gloss_color
+                 write setgloss_color default cl_none;
+   property gloss_shiftx: integer read fi.gloss_shiftx write
+                setgloss_shiftx default -1;
+   property gloss_shifty: integer read fi.gloss_shifty write
+                setgloss_shifty default -1;
+
+   property grayed_color: colorty read fi.grayed_color
+                 write setgrayed_color default cl_grayed;
+   property grayed_colorshadow: colorty read fi.grayed_colorshadow
+                 write setgrayed_colorshadow default cl_grayedshadow;
+   property grayed_shiftx: integer read fi.grayed_shiftx write
+                setgrayed_shiftx default 1;
+   property grayed_shifty: integer read fi.grayed_shifty write
+                setgrayed_shifty default 1;
+   property style: fontstylesty read fi.style write setstyle default [];
+   property xscale: real read fi.xscale write setxscale;
+                                 //default 1.0
+
+ end;
+
+ tfontcomp = class(ttemplatecontainer)
+  private
+   function gettemplate: tfonttemplate;
+   procedure settemplate(const avalue: tfonttemplate);
+  protected
+   function gettemplateclass: templateclassty; override;
+  public
+  published
+   property template: tfonttemplate read gettemplate write settemplate;
+ end; 
+ 
  getfontfuncty = function (var drawinfo: drawinfoty): boolean of object;
 
- tfont = class(toptionalpersistent,icanvas)
+ tfont = class(tlinkedoptionalpersistent,icanvas)
   private
    finfopo: pfontinfoty;
    fonchange: notifyeventty;
    flocalprops: fontlocalpropsty;
+   ftemplate: tfontcomp;
    function getextraspace: integer;
    procedure setextraspace(const avalue: integer);
    procedure setcolorbackground(const Value: colorty);
@@ -512,6 +580,21 @@ type
    procedure setgrayed_shiftx(const avalue: integer);
    function getgrayed_shifty: integer;
    procedure setgrayed_shifty(const avalue: integer);
+   procedure settemplate(const avalue: tfontcomp);
+   function iscolorstored(): boolean;
+   function iscolorbackgroundstored(): boolean;
+   function isshadow_colorstored(): boolean;
+   function isshadow_shiftxstored(): boolean;
+   function isshadow_shiftystored(): boolean;
+   function isgloss_colorstored(): boolean;
+   function isgloss_shiftxstored(): boolean;
+   function isgloss_shiftystored(): boolean;
+   function isgrayed_colorstored(): boolean;
+   function isgrayed_colorshadowstored(): boolean;
+   function isgrayed_shiftxstored(): boolean;
+   function isgrayed_shiftystored(): boolean;
+   function isxscalestored(): boolean;
+   function isstylestored(): boolean;
   protected
    finfo: fontinfoty;
    fhandlepo: ^fontnumty;
@@ -526,6 +609,7 @@ type
    property rotation: real read getrotation write setrotation; 
                                  //0..2*pi-> 0degree..360degree CCW
    procedure defineproperties(filer: tfiler); override;
+   procedure settemplateinfo(const ainfo: fonteffectinfoty);
   public
    constructor create; override;
    destructor destroy; override;
@@ -548,43 +632,56 @@ type
    property strikeout: boolean read getstrikeout write setstrikeout;   
 
   published
-   property color: colorty read getcolor write setcolor default cl_default;
+   property color: colorty read getcolor write setcolor
+                  stored iscolorstored default cl_default;
    property colorbackground: colorty read getcolorbackground
-                 write setcolorbackground default cl_default;
+                 write setcolorbackground
+                  stored iscolorbackgroundstored  default cl_default;
    property shadow_color: colorty read getshadow_color
-                 write setshadow_color default cl_none;
+                 write setshadow_color
+                  stored isshadow_colorstored default cl_none;
    property shadow_shiftx: integer read getshadow_shiftx write
-                setshadow_shiftx default 1;
+                setshadow_shiftx 
+                  stored isshadow_shiftxstored default 1;
    property shadow_shifty: integer read getshadow_shifty write
-                setshadow_shifty default 1;
+                setshadow_shifty 
+                  stored isshadow_shiftystored default 1;
 
    property gloss_color: colorty read getgloss_color
-                 write setgloss_color default cl_none;
-   property gloss_shiftx: integer read getgloss_shiftx write
-                setgloss_shiftx default -1;
-   property gloss_shifty: integer read getgloss_shifty write
-                setgloss_shifty default -1;
+                 write setgloss_color 
+                  stored isgloss_colorstored default cl_none;
+   property gloss_shiftx: integer read getgloss_shiftx write setgloss_shiftx 
+                  stored isgloss_shiftxstored default -1;
+   property gloss_shifty: integer read getgloss_shifty write setgloss_shifty 
+                  stored isgloss_shiftystored default -1;
 
    property grayed_color: colorty read getgrayed_color
-                 write setgrayed_color default cl_grayed;
+                 write setgrayed_color 
+                  stored isgrayed_colorstored default cl_grayed;
    property grayed_colorshadow: colorty read getgrayed_colorshadow
-                 write setgrayed_colorshadow default cl_grayedshadow;
+                 write setgrayed_colorshadow 
+                  stored isgrayed_colorshadowstored default cl_grayedshadow;
    property grayed_shiftx: integer read getgrayed_shiftx write
-                setgrayed_shiftx default 1;
+                setgrayed_shiftx 
+                  stored isgrayed_shiftxstored default 1;
    property grayed_shifty: integer read getgrayed_shifty write
-                setgrayed_shifty default 1;
+                setgrayed_shifty 
+                  stored isgrayed_shiftystored default 1;
 
    property height: integer read getheight write setheight default 0;
                   //pixel
    property width: integer read getwidth write setwidth default 0;
                   //avg. character width in 1/10 pixel, 0 = default
-   property extraspace: integer read getextraspace write setextraspace default 0;
-   property style: fontstylesty read getstyle write setstyle default [];
+   property extraspace: integer read getextraspace write setextraspace 
+                                                                 default 0;
+   property style: fontstylesty read getstyle write setstyle 
+                              stored isstylestored default [];
    property name: string read getname write setname;
    property charset: string read getcharset write setcharset;
    property options: fontoptionsty read getoptions write setoptions default [];
-   property xscale: real read getxscale write setxscale;
+   property xscale: real read getxscale write setxscale stored isxscalestored;
                                  //default 1.0
+   property template: tfontcomp read ftemplate write settemplate;
    property localprops: fontlocalpropsty read flocalprops write flocalprops
                                                            default []; //last!
  end;
@@ -2485,14 +2582,10 @@ begin
  fscanhigh:=  fsize.cx * fsize.cy - 1;
 end;
 
-{ tfont }
 
-constructor tfont.create;
+procedure initfonteffect(var ainfo: fonteffectinfoty);
 begin
- if finfopo = nil then begin
-  finfopo:= @finfo;
- end;
- with finfopo^.effect do begin
+ with ainfo do begin
   color:= cl_default;
   colorbackground:= cl_default;
   shadow_color:= cl_none;
@@ -2510,6 +2603,16 @@ begin
 
   xscale:= 1.0;
  end;
+end;
+
+{ tfont }
+
+constructor tfont.create;
+begin
+ if finfopo = nil then begin
+  finfopo:= @finfo;
+ end;
+ initfonteffect(finfopo^.effect);
  updatehandlepo;
  dochanged([cs_fontcolor,cs_fontcolorbackground,cs_fonteffect],true);
 end;
@@ -3253,6 +3356,161 @@ end;
 procedure tfont.getcanvasimage(const bgr: boolean; var aimage: maskedimagety);
 begin
  //dummy
+end;
+
+procedure tfont.settemplate(const avalue: tfontcomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(ftemplate));
+ if (avalue <> nil) and not (csreading in avalue.componentstate) then begin
+  assign(avalue);
+ end;
+end;
+
+procedure tfont.settemplateinfo(const ainfo: fonteffectinfoty);
+begin
+ with finfopo^.effect do begin
+  if not (flp_color in flocalprops) then begin
+   color:= ainfo.color;
+  end;
+  if not (flp_colorbackground in flocalprops) then begin
+   colorbackground:= ainfo.colorbackground;
+  end;
+  if not (flp_shadow_color in flocalprops) then begin
+   shadow_color:= ainfo.shadow_color;
+  end;
+  if not (flp_shadow_shiftx in flocalprops) then begin
+   shadow_shiftx:= ainfo.shadow_shiftx;
+  end;
+  if not (flp_shadow_shifty in flocalprops) then begin
+   shadow_shifty:= ainfo.shadow_shifty;
+  end;
+  if not (flp_gloss_color in flocalprops) then begin
+   gloss_color:= ainfo.gloss_color;
+  end;
+  if not (flp_gloss_shiftx in flocalprops) then begin
+   gloss_shiftx:= ainfo.gloss_shiftx;
+  end;
+  if not (flp_gloss_shifty in flocalprops) then begin
+   gloss_shifty:= ainfo.gloss_shifty;
+  end;
+   
+  if not (flp_grayed_color in flocalprops) then begin
+   grayed_color:= ainfo.grayed_color;
+  end;
+  if not (flp_grayed_colorshadow in flocalprops) then begin
+   grayed_colorshadow:= ainfo.grayed_colorshadow;
+  end;
+  if not (flp_grayed_shifty in flocalprops) then begin
+   grayed_shiftx:= ainfo.grayed_shiftx;
+  end;
+  if not (flp_grayed_shifty in flocalprops) then begin
+   grayed_shifty:= ainfo.grayed_shifty;
+  end;
+  if not (flp_style in flocalprops) then begin
+   style:= ainfo.style;
+  end;
+  if not (flp_xscale in flocalprops) then begin
+   xscale:= ainfo.xscale;
+  end;
+  updatehandlepo();
+  dochanged([cs_font,cs_fontcolor,cs_fontcolorbackground,cs_fonteffect],true);
+  releasehandles();
+ end;
+end;
+
+function tfont.iscolorstored: boolean;
+begin
+ result:= (ftemplate = nil) and (finfopo^.effect.color <> cl_default) or 
+                                           (flp_color in flocalprops);
+end;
+
+function tfont.iscolorbackgroundstored: boolean;
+begin
+ result:= (ftemplate = nil) and 
+          (finfopo^.effect.colorbackground <> cl_default) or 
+                                         (flp_colorbackground in flocalprops);
+end;
+
+function tfont.isshadow_colorstored: boolean;
+begin
+ result:= (ftemplate = nil) and 
+          (finfopo^.effect.shadow_color <> cl_none) or 
+                                           (flp_shadow_color in flocalprops);
+end;
+
+function tfont.isshadow_shiftxstored: boolean;
+begin
+ result:= (ftemplate = nil) and 
+          (finfopo^.effect.shadow_shiftx <> 1) or 
+                                           (flp_shadow_shiftx in flocalprops);
+end;
+
+function tfont.isshadow_shiftystored: boolean;
+begin
+ result:= (ftemplate = nil) and 
+          (finfopo^.effect.shadow_shifty <> 1) or 
+                                           (flp_shadow_shifty in flocalprops);
+end;
+
+function tfont.isgloss_colorstored: boolean;
+begin
+ result:= (ftemplate = nil) and 
+          (finfopo^.effect.gloss_color <> cl_none) or 
+                                           (flp_gloss_color in flocalprops);
+end;
+
+function tfont.isgloss_shiftxstored: boolean;
+begin
+ result:= (ftemplate = nil) and 
+          (finfopo^.effect.gloss_shiftx <> -1) or 
+                                           (flp_gloss_shiftx in flocalprops);
+end;
+
+function tfont.isgloss_shiftystored: boolean;
+begin
+ result:= (ftemplate = nil) and 
+          (finfopo^.effect.gloss_shifty <> -1) or 
+                                           (flp_gloss_shifty in flocalprops);
+end;
+
+function tfont.isgrayed_colorstored: boolean;
+begin
+ result:= (ftemplate = nil) and 
+          (finfopo^.effect.grayed_color <> cl_grayed) or 
+                                           (flp_grayed_color in flocalprops);
+end;
+
+function tfont.isgrayed_colorshadowstored: boolean;
+begin
+ result:= (ftemplate = nil) and 
+          (finfopo^.effect.grayed_colorshadow <> cl_grayedshadow) or 
+                                      (flp_grayed_colorshadow in flocalprops);
+end;
+
+function tfont.isgrayed_shiftxstored: boolean;
+begin
+ result:= (ftemplate = nil) and 
+          (finfopo^.effect.grayed_shifty <> 1) or 
+                                           (flp_grayed_shifty in flocalprops);
+end;
+
+function tfont.isgrayed_shiftystored: boolean;
+begin
+ result:= (ftemplate = nil) and 
+          (finfopo^.effect.grayed_shifty <> 1) or 
+                                           (flp_grayed_shifty in flocalprops);
+end;
+
+function tfont.isxscalestored: boolean;
+begin
+ result:= (ftemplate = nil) and 
+          (finfopo^.effect.xscale <> 1) or (flp_xscale in flocalprops);
+end;
+
+function tfont.isstylestored: boolean;
+begin
+ result:= (ftemplate = nil) and 
+          (finfopo^.effect.style <> []) or (flp_style in flocalprops);
 end;
 
 { tcanvasfont }
@@ -6207,6 +6465,135 @@ end;
 function tcanvas.size: sizety;
 begin
  result:= getfitrect().size;
+end;
+
+{ tfontcomp }
+
+function tfontcomp.gettemplate: tfonttemplate;
+begin
+ result:= tfonttemplate(ftemplate);
+end;
+
+procedure tfontcomp.settemplate(const avalue: tfonttemplate);
+begin
+ ftemplate.assign(avalue);
+end;
+
+function tfontcomp.gettemplateclass: templateclassty;
+begin
+ result:= tfonttemplate;
+end;
+
+{ tfonttemplate }
+
+constructor tfonttemplate.create(const owner: tmsecomponent;
+               const onchange: notifyeventty);
+begin
+ initfonteffect(fi);
+ inherited;
+end;
+
+procedure tfonttemplate.setcolor(const avalue: colorty);
+begin
+ fi.color:= avalue;
+ changed();
+end;
+
+procedure tfonttemplate.setcolorbackground(const avalue: colorty);
+begin
+ fi.colorbackground:= avalue;
+ changed();
+end;
+
+procedure tfonttemplate.setshadow_color(const avalue: colorty);
+begin
+ fi.shadow_color:= avalue;
+ changed();
+end;
+
+procedure tfonttemplate.setshadow_shiftx(const avalue: integer);
+begin
+ fi.shadow_shiftx:= avalue;
+ changed();
+end;
+
+procedure tfonttemplate.setshadow_shifty(const avalue: integer);
+begin
+ fi.shadow_shifty:= avalue;
+ changed();
+end;
+
+procedure tfonttemplate.setgloss_color(const avalue: colorty);
+begin
+ fi.gloss_color:= avalue;
+ changed();
+end;
+
+procedure tfonttemplate.setgloss_shiftx(const avalue: integer);
+begin
+ fi.gloss_shiftx:= avalue;
+ changed();
+end;
+
+procedure tfonttemplate.setgloss_shifty(const avalue: integer);
+begin
+ fi.gloss_shifty:= avalue;
+ changed();
+end;
+
+procedure tfonttemplate.setgrayed_color(const avalue: colorty);
+begin
+ fi.grayed_color:= avalue;
+ changed();
+end;
+
+procedure tfonttemplate.setgrayed_colorshadow(const avalue: colorty);
+begin
+ fi.grayed_colorshadow:= avalue;
+ changed();
+end;
+
+procedure tfonttemplate.setgrayed_shiftx(const avalue: integer);
+begin
+ fi.grayed_shiftx:= avalue;
+ changed();
+end;
+
+procedure tfonttemplate.setgrayed_shifty(const avalue: integer);
+begin
+ fi.grayed_shifty:= avalue;
+ changed();
+end;
+
+procedure tfonttemplate.setstyle(const avalue: fontstylesty);
+begin
+ fi.style:= avalue;
+ changed();
+end;
+
+procedure tfonttemplate.setxscale(const avalue: real);
+begin
+ fi.xscale:= avalue;
+ changed();
+end;
+
+procedure tfonttemplate.doassignto(dest: tpersistent);
+begin
+ if dest is tfont then begin
+  with tfont(dest) do begin
+   settemplateinfo(self.fi);
+  end;
+ end;
+end;
+
+function tfonttemplate.getinfosize: integer;
+begin
+ result:= sizeof(fi);
+end;
+
+function tfonttemplate.getinfoad: pointer;
+begin
+ result:= @fi;
 end;
 
 initialization
