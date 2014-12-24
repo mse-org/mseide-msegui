@@ -751,7 +751,7 @@ type
                                   write fslider.svcolor default cl_default;
    property slider_face: tfacecomp read fslider.svwidget.svface 
                                               write setslider_face;
-   property slider_frame: tframecomp read fdatabutton.svwidget.svframe 
+   property slider_frame: tframecomp read fslider.svwidget.svframe 
                                                       write setslider_frame;
 
    property slider_sb_horz_facebutton: tfacecomp 
