@@ -33,6 +33,7 @@ type
                          cfo_captionnogray,
                          cfo_captiondistouter,cfo_captionframecentered,
                          cfo_captionnoclip,cfo_nofocusrect,
+                         cfo_focusrect, //override template fso_nofocusrect
                          cfo_captionfocus{,cfo_captionbackground});
  captionframeoptionsty = set of captionframeoptionty;
 
@@ -2724,7 +2725,7 @@ end;
 
 procedure tcustomcaptionframe.setoptions(const avalue: captionframeoptionsty);
 const
- mask1: captionframeoptionsty = [cfo_captiondistouter,cfo_captionframecentered];
+// mask1: captionframeoptionsty = [cfo_captiondistouter,cfo_captionframecentered];
  mask2: captionframeoptionsty = [cfo_captiondistouter];
 var
  optionsbefore: captionframeoptionsty;
@@ -2732,11 +2733,16 @@ var
 begin
  if avalue <> foptions then begin
   optionsbefore:= foptions;
+ (*
   foptions:= captionframeoptionsty(setsinglebit(
             {$ifdef FPC}longword{$else}word{$endif}(avalue),
             {$ifdef FPC}longword{$else}word{$endif}(foptions),
             {$ifdef FPC}longword{$else}word{$endif}(mask1)));
-
+  *)
+  foptions:= captionframeoptionsty(
+                setsinglebit(longword(avalue),longword(foptions),
+                  [longword([cfo_captiondistouter,cfo_captionframecentered]),
+                   longword([cfo_focusrect,cfo_nofocusrect])]));
   if (({$ifdef FPC}longword{$else}word{$endif}(optionsbefore) xor
        {$ifdef FPC}longword{$else}word{$endif}(foptions)) and
        {$ifdef FPC}longword{$else}word{$endif}(mask2) <> 0) and
@@ -2992,7 +2998,10 @@ end;
 
 function tcustomcaptionframe.needsfocuspaint: boolean;
 begin
- result:= inherited needsfocuspaint and not (cfo_nofocusrect in foptions);
+ result:= inherited needsfocuspaint and 
+     not (cfo_nofocusrect in foptions) and 
+     ((cfo_focusrect in foptions) or (ftemplate = nil) or
+                      not (fso_nofocusrect in ftemplate.template.optionsskin));
 end;
 
 procedure tcustomcaptionframe.settemplateinfo(const ainfo: frameinfoty);
