@@ -375,12 +375,12 @@ begin
      (d.h.d.familyoptions = s.options * fontfamilymask) and
      (d.h.d.antialiasedoptions = s.options * fontantialiasedmask) and
      ({$ifdef FPC}longword{$else}byte{$endif}(d.h.d.style) xor 
-      {$ifdef FPC}longword{$else}byte{$endif}(s.style) and
+      {$ifdef FPC}longword{$else}byte{$endif}(s.effect.style) and
                                           fontstylehandlemask = 0) and
      (d.h.name = s.name) and
      (d.h.charset = s.charset) and
      (d.h.d.rotation = s.rotation) and
-     (d.h.d.xscale = s.xscale);
+     (d.h.d.xscale = s.effect.xscale);
 
 end;
 
@@ -443,11 +443,11 @@ begin
  d.h.d.familyoptions:= s.options * fontfamilymask;
  d.h.d.pitchoptions:= s.options * fontpitchmask;
  d.h.d.antialiasedoptions:= s.options * fontantialiasedmask;
- d.h.d.style:= fontstylesty({$ifdef FPC}longword{$else}byte{$endif}(s.style) and
-                          fontstylehandlemask);
+ d.h.d.style:= fontstylesty({$ifdef FPC}longword{$else}byte{$endif}
+                                  (s.effect.style) and fontstylehandlemask);
  d.h.d.glyph:= s.glyph;
  d.h.d.rotation:= s.rotation;
- d.h.d.xscale:= s.xscale;
+ d.h.d.xscale:= s.effect.xscale;
  d.h.name:= s.name;
  d.h.charset:= s.charset;
 end;

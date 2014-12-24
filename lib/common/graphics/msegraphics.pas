@@ -150,13 +150,14 @@ type
 
  tcanvas = class;
 
- fontaliasmodety = (fam_nooverwrite,    //do not change if allready registered
-                    fam_overwrite,      //do change if allready registered not fam_fix
-                    fam_fix,            //will never be changed
-                    fam_fixnooverwrite);//do not change if allready registered,
-                                        //fix existing
- fontinfoty = record
-  handles: array[0..fontstylehandlemask] of fontnumty;
+ fontaliasmodety = (
+  fam_nooverwrite,    //do not change if allready registered
+  fam_overwrite,      //do change if allready registered not fam_fix
+  fam_fix,            //will never be changed
+  fam_fixnooverwrite  //do not change if allready registered,
+ );                   //fix existing
+
+ fonteffectinfoty = record
   color: colorty;
   colorbackground: colorty;
   shadow_color: colorty;
@@ -170,6 +171,21 @@ type
   grayed_shiftx: integer;
   grayed_shifty: integer;
   style: fontstylesty;
+  xscale: real;   //default 1.0
+ end;
+
+ fontlocalpropty = (
+  flp_color,flp_colorbackground,
+  flp_shadow_color,flp_shadow_shiftx,flp_shadow_shifty,
+  flp_gloss_color,flp_gloss_shiftx,flp_gloss_shifty,
+  flp_grayed_color,flp_grayed_colorshadow,flp_grayed_shiftx,flp_grayed_shifty,
+  flp_style,flp_xscale
+ );
+ fontlocalpropsty = set of fontlocalpropty;
+ 
+ fontinfoty = record
+  handles: array[0..fontstylehandlemask] of fontnumty;
+  effect: fonteffectinfoty;
   height: integer;
   width: integer;
   extraspace: integer;
@@ -179,7 +195,6 @@ type
   glyph: unicharty;
   gdifuncs: pgdifunctionaty;
   rotation: real; //0..2*pi -> 0deg..360deg CCW
-  xscale: real;   //default 1.0
  end;
  pfontinfoty = ^fontinfoty;
 
@@ -426,6 +441,7 @@ type
   private
    finfopo: pfontinfoty;
    fonchange: notifyeventty;
+   flocalprops: fontlocalpropsty;
    function getextraspace: integer;
    procedure setextraspace(const avalue: integer);
    procedure setcolorbackground(const Value: colorty);
@@ -569,6 +585,8 @@ type
    property options: fontoptionsty read getoptions write setoptions default [];
    property xscale: real read getxscale write setxscale;
                                  //default 1.0
+   property localprops: fontlocalpropsty read flocalprops write flocalprops
+                                                           default []; //last!
  end;
  pfont = ^tfont;
  fontarty = array of tfont;
@@ -2474,22 +2492,24 @@ begin
  if finfopo = nil then begin
   finfopo:= @finfo;
  end;
- finfopo^.color:= cl_default;
- finfopo^.colorbackground:= cl_default;
- finfopo^.shadow_color:= cl_none;
- finfopo^.shadow_shiftx:= 1;
- finfopo^.shadow_shifty:= 1;
+ with finfopo^.effect do begin
+  color:= cl_default;
+  colorbackground:= cl_default;
+  shadow_color:= cl_none;
+  shadow_shiftx:= 1;
+  shadow_shifty:= 1;
 
- finfopo^.gloss_color:= cl_none;
- finfopo^.gloss_shiftx:= -1;
- finfopo^.gloss_shifty:= -1;
+  gloss_color:= cl_none;
+  gloss_shiftx:= -1;
+  gloss_shifty:= -1;
 
- finfopo^.grayed_color:= cl_grayed;
- finfopo^.grayed_colorshadow:= cl_grayedshadow;
- finfopo^.grayed_shiftx:= 1;
- finfopo^.grayed_shifty:= 1;
+  grayed_color:= cl_grayed;
+  grayed_colorshadow:= cl_grayedshadow;
+  grayed_shiftx:= 1;
+  grayed_shifty:= 1;
 
- finfopo^.xscale:= 1.0;
+  xscale:= 1.0;
+ end;
  updatehandlepo;
  dochanged([cs_fontcolor,cs_fontcolorbackground,cs_fonteffect],true);
 end;
@@ -2648,158 +2668,190 @@ end;
 
 procedure tfont.setcolorbackground(const Value: colorty);
 begin
- if finfopo^.colorbackground <> value then begin
-  finfopo^.colorbackground := Value;
-  dochanged([cs_fontcolorbackground],false);
+ include(flocalprops,flp_colorbackground);
+ with finfopo^.effect do begin
+  if colorbackground <> value then begin
+   colorbackground:= Value;
+   dochanged([cs_fontcolorbackground],false);
+  end;
  end;
 end;
 
 function tfont.getcolorbackground: colorty;
 begin
- result:= finfopo^.colorbackground;
+ result:= finfopo^.effect.colorbackground;
 end;
 
 procedure tfont.setshadow_color(avalue: colorty);
 begin
+ include(flocalprops,flp_shadow_color);
  if avalue = cl_invalid then begin
   avalue:= cl_none;
  end;
- if finfopo^.shadow_color <> avalue then begin
-  finfopo^.shadow_color:= avalue;
-  dochanged([cs_fonteffect],false);
+ with finfopo^.effect do begin
+  if shadow_color <> avalue then begin
+   shadow_color:= avalue;
+   dochanged([cs_fonteffect],false);
+  end;
  end;
 end;
 
 function tfont.getshadow_color: colorty;
 begin
- result:= finfopo^.shadow_color;
+ result:= finfopo^.effect.shadow_color;
 end;
 
 procedure tfont.setshadow_shiftx(const avalue: integer);
 begin
- if finfopo^.shadow_shiftx <> avalue then begin
-  finfopo^.shadow_shiftx:= avalue;
-  dochanged([cs_fonteffect],false);
+ include(flocalprops,flp_shadow_shiftx);
+ with finfopo^.effect do begin
+  if shadow_shiftx <> avalue then begin
+   shadow_shiftx:= avalue;
+   dochanged([cs_fonteffect],false);
+  end;
  end;
 end;
 
 function tfont.getshadow_shiftx: integer;
 begin
- result:= finfopo^.shadow_shiftx;
+ result:= finfopo^.effect.shadow_shiftx;
 end;
 
 procedure tfont.setshadow_shifty(const avalue: integer);
 begin
- if finfopo^.shadow_shifty <> avalue then begin
-  finfopo^.shadow_shifty:= avalue;
-  dochanged([cs_fonteffect],false);
+ include(flocalprops,flp_shadow_shifty);
+ with finfopo^.effect do begin
+  if shadow_shifty <> avalue then begin
+   shadow_shifty:= avalue;
+   dochanged([cs_fonteffect],false);
+  end;
  end;
 end;
 
 function tfont.getshadow_shifty: integer;
 begin
- result:= finfopo^.shadow_shifty;
+ result:= finfopo^.effect.shadow_shifty;
 end;
 
 procedure tfont.setgloss_color(avalue: colorty);
 begin
+ include(flocalprops,flp_gloss_color);
  if avalue = cl_invalid then begin
   avalue:= cl_none;
  end;
- if finfopo^.gloss_color <> avalue then begin
-  finfopo^.gloss_color:= avalue;
-  dochanged([cs_fonteffect],false);
+ with finfopo^.effect do begin
+  if gloss_color <> avalue then begin
+   gloss_color:= avalue;
+   dochanged([cs_fonteffect],false);
+  end;
  end;
 end;
 
 function tfont.getgloss_color: colorty;
 begin
- result:= finfopo^.gloss_color;
+ result:= finfopo^.effect.gloss_color;
 end;
 
 procedure tfont.setgloss_shiftx(const avalue: integer);
 begin
- if finfopo^.gloss_shiftx <> avalue then begin
-  finfopo^.gloss_shiftx:= avalue;
-  dochanged([cs_fonteffect],false);
+ include(flocalprops,flp_gloss_shiftx);
+ with finfopo^.effect do begin
+  if gloss_shiftx <> avalue then begin
+   gloss_shiftx:= avalue;
+   dochanged([cs_fonteffect],false);
+  end;
  end;
 end;
 
 function tfont.getgloss_shiftx: integer;
 begin
- result:= finfopo^.gloss_shiftx;
+ result:= finfopo^.effect.gloss_shiftx;
 end;
 
 procedure tfont.setgloss_shifty(const avalue: integer);
 begin
- if finfopo^.gloss_shifty <> avalue then begin
-  finfopo^.gloss_shifty:= avalue;
-  dochanged([cs_fonteffect],false);
+ include(flocalprops,flp_gloss_shifty);
+ with finfopo^.effect do begin
+  if gloss_shifty <> avalue then begin
+   gloss_shifty:= avalue;
+   dochanged([cs_fonteffect],false);
+  end;
  end;
 end;
 
 function tfont.getgloss_shifty: integer;
 begin
- result:= finfopo^.gloss_shifty;
+ result:= finfopo^.effect.gloss_shifty;
 end;
 
 function tfont.getgrayed_color: colorty;
 begin
- result:= finfopo^.grayed_color;
+ result:= finfopo^.effect.grayed_color;
 end;
 
 procedure tfont.setgrayed_color(const avalue: colorty);
 begin
- if finfopo^.grayed_color <> avalue then begin
-  finfopo^.grayed_color:= avalue;
-  dochanged([cs_fonteffect],false);
+ with finfopo^.effect do begin
+  if grayed_color <> avalue then begin
+   grayed_color:= avalue;
+   dochanged([cs_fonteffect],false);
+  end;
  end;
 end;
 
 function tfont.getgrayed_colorshadow: colorty;
 begin
- result:= finfopo^.grayed_colorshadow;
+ result:= finfopo^.effect.grayed_colorshadow;
 end;
 
 procedure tfont.setgrayed_colorshadow(const avalue: colorty);
 begin
- if finfopo^.grayed_colorshadow <> avalue then begin
-  finfopo^.grayed_colorshadow:= avalue;
-  dochanged([cs_fonteffect],false);
+ with finfopo^.effect do begin
+  if grayed_colorshadow <> avalue then begin
+   grayed_colorshadow:= avalue;
+   dochanged([cs_fonteffect],false);
+  end;
  end;
 end;
 
 function tfont.getgrayed_shiftx: integer;
 begin
- result:= finfopo^.grayed_shiftx;
+ result:= finfopo^.effect.grayed_shiftx;
 end;
 
 procedure tfont.setgrayed_shiftx(const avalue: integer);
 begin
- if finfopo^.grayed_shiftx <> avalue then begin
-  finfopo^.grayed_shiftx:= avalue;
-  dochanged([cs_fonteffect],false);
+ with finfopo^.effect do begin
+  if grayed_shiftx <> avalue then begin
+   grayed_shiftx:= avalue;
+   dochanged([cs_fonteffect],false);
+  end;
  end;
 end;
 
 function tfont.getgrayed_shifty: integer;
 begin
- result:= finfopo^.grayed_shifty;
+ result:= finfopo^.effect.grayed_shifty;
 end;
 
 procedure tfont.setgrayed_shifty(const avalue: integer);
 begin
- if finfopo^.grayed_shifty <> avalue then begin
-  finfopo^.grayed_shifty:= avalue;
-  dochanged([cs_fonteffect],false);
+ with finfopo^.effect do begin
+  if grayed_shifty <> avalue then begin
+   grayed_shifty:= avalue;
+   dochanged([cs_fonteffect],false);
+  end;
  end;
 end;
 
 procedure tfont.setcolor(const Value: colorty);
 begin
- if finfopo^.color <> value then begin
-  finfopo^.color := Value;
-  dochanged([cs_fontcolor],false);
+ include(flocalprops,flp_color);
+ with finfopo^.effect do begin
+  if color <> value then begin
+   color := Value;
+   dochanged([cs_fontcolor],false);
+  end;
  end;
 end;
 
@@ -2811,60 +2863,60 @@ var
 begin
  changed:= [];
  with tfont(source),self.finfopo^ do begin
-  if finfopo^.colorbackground <> colorbackground then begin
-   colorbackground:= finfopo^.colorbackground;
+  if effect.colorbackground <> finfopo^.effect.colorbackground then begin
+   effect.colorbackground:= finfopo^.effect.colorbackground;
    include(changed,cs_fontcolorbackground);
   end;
 
-  if shadow_color <> finfopo^.shadow_color then begin
-   shadow_color:= finfopo^.shadow_color;
+  if effect.shadow_color <> finfopo^.effect.shadow_color then begin
+   effect.shadow_color:= finfopo^.effect.shadow_color;
    include(changed,cs_fonteffect);
   end;
-  if shadow_shiftx <> finfopo^.shadow_shiftx then begin
-   shadow_shiftx:= finfopo^.shadow_shiftx;
+  if effect.shadow_shiftx <> finfopo^.effect.shadow_shiftx then begin
+   effect.shadow_shiftx:= finfopo^.effect.shadow_shiftx;
    include(changed,cs_fonteffect);
   end;
-  if shadow_shifty <> finfopo^.shadow_shifty then begin
-   shadow_shifty:= finfopo^.shadow_shifty;
+  if effect.shadow_shifty <> finfopo^.effect.shadow_shifty then begin
+   effect.shadow_shifty:= finfopo^.effect.shadow_shifty;
    include(changed,cs_fonteffect);
   end;
   
-  if gloss_color <> finfopo^.gloss_color then begin
-   gloss_color:= finfopo^.gloss_color;
+  if effect.gloss_color <> finfopo^.effect.gloss_color then begin
+   effect.gloss_color:= finfopo^.effect.gloss_color;
    include(changed,cs_fonteffect);
   end;
-  if gloss_shiftx <> finfopo^.gloss_shiftx then begin
-   gloss_shiftx:= finfopo^.gloss_shiftx;
+  if effect.gloss_shiftx <> finfopo^.effect.gloss_shiftx then begin
+   effect.gloss_shiftx:= finfopo^.effect.gloss_shiftx;
    include(changed,cs_fonteffect);
   end;
-  if gloss_shifty <> finfopo^.gloss_shifty then begin
-   gloss_shifty:= finfopo^.gloss_shifty;
+  if effect.gloss_shifty <> finfopo^.effect.gloss_shifty then begin
+   effect.gloss_shifty:= finfopo^.effect.gloss_shifty;
    include(changed,cs_fonteffect);
   end;
 
-  if grayed_color <> finfopo^.grayed_color then begin
-   grayed_color:= finfopo^.grayed_color;
+  if effect.grayed_color <> finfopo^.effect.grayed_color then begin
+   effect.grayed_color:= finfopo^.effect.grayed_color;
    include(changed,cs_fonteffect);
   end;
-  if grayed_colorshadow <> finfopo^.grayed_colorshadow then begin
-   grayed_colorshadow:= finfopo^.grayed_colorshadow;
+  if effect.grayed_colorshadow <> finfopo^.effect.grayed_colorshadow then begin
+   effect.grayed_colorshadow:= finfopo^.effect.grayed_colorshadow;
    include(changed,cs_fonteffect);
   end;
-  if grayed_shiftx <> finfopo^.grayed_shiftx then begin
-   grayed_shiftx:= finfopo^.grayed_shiftx;
+  if effect.grayed_shiftx <> finfopo^.effect.grayed_shiftx then begin
+   effect.grayed_shiftx:= finfopo^.effect.grayed_shiftx;
    include(changed,cs_fonteffect);
   end;
-  if grayed_shifty <> finfopo^.grayed_shifty then begin
-   grayed_shifty:= finfopo^.grayed_shifty;
+  if effect.grayed_shifty <> finfopo^.effect.grayed_shifty then begin
+   effect.grayed_shifty:= finfopo^.effect.grayed_shifty;
    include(changed,cs_fonteffect);
   end;
   
-  if color <> finfopo^.color then begin
-   color:= finfopo^.color;
+  if effect.color <> finfopo^.effect.color then begin
+   effect.color:= finfopo^.effect.color;
    include(changed,cs_fontcolor);
   end;
-  if style <> finfopo^.style then begin
-   style:= finfopo^.style;
+  if effect.style <> finfopo^.effect.style then begin
+   effect.style:= finfopo^.effect.style;
    self.updatehandlepo;
    include(changed,cs_font);
   end;
@@ -2892,8 +2944,8 @@ begin
    options:= finfopo^.options;
    include(changed,cs_font);
   end;
-  if xscale <> finfopo^.xscale then begin
-   xscale:= finfopo^.xscale;
+  if effect.xscale <> finfopo^.effect.xscale then begin
+   effect.xscale:= finfopo^.effect.xscale;
    include(changed,cs_font);
   end;
   bo1:= false;
@@ -2953,14 +3005,15 @@ end;
 procedure tfont.updatehandlepo;
 begin
  fhandlepo:= @finfopo^.handles[
-    {$ifdef FPC}longword{$else}byte{$endif}(finfopo^.style) and
+    {$ifdef FPC}longword{$else}byte{$endif}(finfopo^.effect.style) and
                     fontstylehandlemask];
 end;
 
 procedure tfont.setstyle(const Value: fontstylesty);
 begin
- if finfopo^.style <> value then begin
-  finfopo^.style := Value;
+ include(flocalprops,flp_style);
+ if finfopo^.effect.style <> value then begin
+  finfopo^.effect.style := Value;
   updatehandlepo;
   dochanged([cs_font],false);
  end;
@@ -2991,7 +3044,7 @@ end;
 
 function tfont.getcolor: colorty;
 begin
- result:= finfopo^.color;
+ result:= finfopo^.effect.color;
 end;
 
 function tfont.getheight: integer;
@@ -3028,7 +3081,7 @@ end;
 
 function tfont.getstyle: fontstylesty;
 begin
- result:= finfopo^.style;
+ result:= finfopo^.effect.style;
 end;
 
 function tfont.getname: string;
@@ -3072,13 +3125,13 @@ end;
 
 function tfont.getxscale: real;
 begin
- result:= finfopo^.xscale;
+ result:= finfopo^.effect.xscale;
 end;
 
 procedure tfont.setxscale(const avalue: real);
 begin
- if finfopo^.xscale <> avalue then begin
-  finfopo^.xscale:= avalue;
+ if finfopo^.effect.xscale <> avalue then begin
+  finfopo^.effect.xscale:= avalue;
   releasehandles;
  end;
 end;
@@ -3471,14 +3524,14 @@ procedure tcanvas.init;
    if icanvas(fintf).getkind = bmk_mono then begin
     color:= cl_1;
     colorbackground:= cl_0;
-    font.color:= cl_1;
-    font.colorbackground:= cl_transparent;
+    font.effect.color:= cl_1;
+    font.effect.colorbackground:= cl_transparent;
    end
    else begin
     color:= cl_black;
     colorbackground:= cl_transparent;
-    font.color:= cl_default;
-    font.colorbackground:= cl_default;
+    font.effect.color:= cl_default;
+    font.effect.colorbackground:= cl_default;
    end;
    rasterop:= rop_copy;
   end;
@@ -4605,26 +4658,26 @@ begin
    pos:= @apos;
    text:= pointer(atext);
    count:= acount;
-   if grayed and (po1^.grayed_colorshadow <> cl_none) or
-                            (po1^.shadow_color <> cl_none) or
-                                 (po1^.gloss_color <> cl_none) then begin
+   if grayed and (po1^.effect.grayed_colorshadow <> cl_none) or
+                      (po1^.effect.shadow_color <> cl_none) or
+                           (po1^.effect.gloss_color <> cl_none) then begin
     if grayed then begin
-     acolorforeground:= po1^.grayed_colorshadow;//cl_white;
-     inc(pos^.x,po1^.grayed_shiftx);
-     inc(pos^.y,po1^.grayed_shifty);
+     acolorforeground:= po1^.effect.grayed_colorshadow;//cl_white;
+     inc(pos^.x,po1^.effect.grayed_shiftx);
+     inc(pos^.y,po1^.effect.grayed_shifty);
 //     inc(pos^.x,po1^.shadow_shiftx);
 //     inc(pos^.y,po1^.shadow_shifty);
     end
     else begin
-     if po1^.shadow_color <> cl_none then begin
-      acolorforeground:= po1^.shadow_color;
-      inc(pos^.x,po1^.shadow_shiftx);
-      inc(pos^.y,po1^.shadow_shifty);
+     if po1^.effect.shadow_color <> cl_none then begin
+      acolorforeground:= po1^.effect.shadow_color;
+      inc(pos^.x,po1^.effect.shadow_shiftx);
+      inc(pos^.y,po1^.effect.shadow_shifty);
      end
      else begin
-      acolorforeground:= po1^.gloss_color;
-      inc(pos^.x,po1^.gloss_shiftx);
-      inc(pos^.y,po1^.gloss_shifty);
+      acolorforeground:= po1^.effect.gloss_color;
+      inc(pos^.x,po1^.effect.gloss_shiftx);
+      inc(pos^.y,po1^.effect.gloss_shifty);
      end;
     end;
     acolorbackground:= cl_transparent;
@@ -4634,29 +4687,29 @@ begin
     checkgcstate([cs_font,cs_acolorforeground,cs_acolorbackground]);
     gdi(gdf_drawstring16);
     if grayed then begin
-     dec(pos^.x,po1^.grayed_shiftx);
-     dec(pos^.y,po1^.grayed_shifty);
-     acolorforeground:= po1^.grayed_color;//cl_dkgray;
+     dec(pos^.x,po1^.effect.grayed_shiftx);
+     dec(pos^.y,po1^.effect.grayed_shifty);
+     acolorforeground:= po1^.effect.grayed_color;//cl_dkgray;
     end
     else begin
-     if po1^.shadow_color <> cl_none then begin
-      dec(pos^.x,po1^.shadow_shiftx);
-      dec(pos^.y,po1^.shadow_shifty);
-      if po1^.gloss_color <> cl_none then begin
-       acolorforeground:= po1^.gloss_color;
-       inc(pos^.x,po1^.gloss_shiftx);
-       inc(pos^.y,po1^.gloss_shifty);
+     if po1^.effect.shadow_color <> cl_none then begin
+      dec(pos^.x,po1^.effect.shadow_shiftx);
+      dec(pos^.y,po1^.effect.shadow_shifty);
+      if po1^.effect.gloss_color <> cl_none then begin
+       acolorforeground:= po1^.effect.gloss_color;
+       inc(pos^.x,po1^.effect.gloss_shiftx);
+       inc(pos^.y,po1^.effect.gloss_shifty);
        checkgcstate([cs_font,cs_acolorforeground,cs_acolorbackground]);
        gdi(gdf_drawstring16);
-       dec(pos^.x,po1^.gloss_shiftx);
-       dec(pos^.y,po1^.gloss_shifty);
+       dec(pos^.x,po1^.effect.gloss_shiftx);
+       dec(pos^.y,po1^.effect.gloss_shifty);
       end;
      end
      else begin
-      dec(pos^.x,po1^.gloss_shiftx);
-      dec(pos^.y,po1^.gloss_shifty);
+      dec(pos^.x,po1^.effect.gloss_shiftx);
+      dec(pos^.y,po1^.effect.gloss_shifty);
      end;
-     acolorforeground:= po1^.color;
+     acolorforeground:= po1^.effect.color;
     end;
     if acolorforeground = cl_default then begin
      acolorforeground:= cl_text;
@@ -4666,10 +4719,10 @@ begin
    end
    else begin
     if grayed then begin
-     acolorforeground:= po1^.grayed_color;
+     acolorforeground:= po1^.effect.grayed_color;
     end
     else begin
-     acolorforeground:= po1^.color;
+     acolorforeground:= po1^.effect.color;
     end;
     if acolorforeground = cl_default then begin
      acolorforeground:= cl_text;
@@ -4699,19 +4752,19 @@ begin
  capstyle:= cs_butt;
  
  with fvaluepo^.font do begin
-  if (shadow_color <> cl_none) then begin
-   pt1.x:= startpoint.x + shadow_shiftx;     
-   pt1.y:= startpoint.y + shadow_shifty;     
-   pt2.x:= endpoint.x + shadow_shiftx;     
-   pt2.y:= endpoint.y + shadow_shifty;     
-   drawline(pt1,pt2,shadow_color);
+  if (effect.shadow_color <> cl_none) then begin
+   pt1.x:= startpoint.x + effect.shadow_shiftx;     
+   pt1.y:= startpoint.y + effect.shadow_shifty;     
+   pt2.x:= endpoint.x + effect.shadow_shiftx;     
+   pt2.y:= endpoint.y + effect.shadow_shifty;     
+   drawline(pt1,pt2,effect.shadow_color);
   end;
-  if (gloss_color <> cl_none) then begin
-   pt1.x:= startpoint.x + gloss_shiftx;     
-   pt1.y:= startpoint.y + gloss_shifty;     
-   pt2.x:= endpoint.x + gloss_shiftx;     
-   pt2.y:= endpoint.y + gloss_shifty;     
-   drawline(pt1,pt2,gloss_color);
+  if (effect.gloss_color <> cl_none) then begin
+   pt1.x:= startpoint.x + effect.gloss_shiftx;     
+   pt1.y:= startpoint.y + effect.gloss_shifty;     
+   pt2.x:= endpoint.x + effect.gloss_shiftx;     
+   pt2.y:= endpoint.y + effect.gloss_shifty;     
+   drawline(pt1,pt2,effect.gloss_color);
   end;
  end;
  co1:= font.color;

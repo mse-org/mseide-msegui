@@ -1869,7 +1869,7 @@ end;
 constructor treptabfont.create;
 begin
  inherited;
- finfo.color:= defaultrepfontcolor;
+ finfo.effect.color:= defaultrepfontcolor;
  finfo.name:= defaultrepfontname;
 end;
 
@@ -7170,7 +7170,7 @@ end;
 constructor trepwidgetfont.create;
 begin
  inherited;
- finfo.color:= defaultrepfontcolor;
+ finfo.effect.color:= defaultrepfontcolor;
  finfo.name:= defaultrepfontname;
 end;
 
@@ -7189,7 +7189,7 @@ end;
 constructor trepfont.create;
 begin
  inherited;
- finfo.color:= defaultrepfontcolor;
+ finfo.effect.color:= defaultrepfontcolor;
  finfo.name:= defaultrepfontname;
 end;
 
