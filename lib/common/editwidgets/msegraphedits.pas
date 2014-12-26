@@ -354,6 +354,7 @@ type
    procedure setgridvalues(const avalue: realarty);
   protected
    fvalue: realty;
+   procedure internalcreateframe; override;
    procedure paintglyph(const canvas: tcanvas; const acolorglyph: colorty;
                         const avalue; const arect: rectty); override;
    procedure setdirection(const avalue: graphicdirectionty); virtual;
@@ -401,6 +402,11 @@ type
    property onsetvalue;
    property direction;
    property onpaintglyph;
+ end;
+ 
+ tsliderframe = class(tgrapheditframe)
+  protected
+   procedure settemplateinfo(const ainfo: frameinfoty); override;
  end;
  
 const
@@ -1373,6 +1379,11 @@ begin
   end;
   fonpaintglyph(self,canvas,val1,int1);
  end;
+end;
+
+procedure tcustomrealgraphdataedit.internalcreateframe;
+begin
+ tsliderframe.create(iscrollframe(self));
 end;
 
 { tcustomslider }
@@ -4531,6 +4542,21 @@ begin
  filer.defineproperty('format',{$ifdef FPC}@{$endif}readformat,
                                     {$ifdef FPC}@{$endif}writeformat,true);
  filer.defineproperty('valuescale',{$ifdef FPC}@{$endif}readvaluescale,nil,false);
+end;
+
+{ tsliderframe }
+
+procedure tsliderframe.settemplateinfo(const ainfo: frameinfoty);
+begin
+ inherited;
+ if not (frl1_colorglyph in flocalprops1) and 
+                          (ainfo.ba.colorglyph <> cl_default) then begin
+  tslider(fintf.getwidget).scrollbar.colorglyph:= ainfo.ba.colorglyph;
+ end;
+ if not (frl1_colorpattern in flocalprops1) and 
+                          (ainfo.ba.colorpattern <> cl_default) then begin
+  tslider(fintf.getwidget).scrollbar.colorpattern:= ainfo.ba.colorpattern;
+ end;
 end;
 
 end.

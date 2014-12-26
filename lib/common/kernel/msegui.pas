@@ -236,7 +236,8 @@ type
                       frl1_framefaceoffsetactivemouse,
                       frl1_framefaceoffsetactiveclicked,
                       frl1_font,frl1_captiondist,frl1_captionoffset,
-                      frl1_colorglyph //for menu template
+                      frl1_colorglyph, //for menu template
+                      frl1_colorpattern
                      );
  framelocalprops1ty = set of framelocalprop1ty;
 
@@ -270,7 +271,7 @@ const
                       frl1_framefaceoffsetactivemouse,
                       frl1_framefaceoffsetactiveclicked,
                       frl1_font,frl1_captiondist,frl1_captionoffset,
-                      frl1_colorglyph];
+                      frl1_colorglyph,frl1_colorpattern];
 type
  facelocalpropty = (fal_options,fal_fadirection,fal_image,
                     fal_fapos,fal_facolor,fal_faopapos,fal_faopacolor,
@@ -367,7 +368,8 @@ type
   colorclient: colorty;
   innerframe: framety;
 
-  colorglyph: colorty; //for menu template
+  colorglyph: colorty;      //for menu template and scrollbar
+  colorpattern: colorty;    //for scrollbar
   
   frameimage_left: integer;
   frameimage_top: integer;
@@ -773,6 +775,7 @@ type
    procedure setcolordkwidth(const avalue: integer);
    procedure setcolorhlwidth(const avalue: integer);
    procedure setcolorglyph(const avalue: colorty);
+   procedure setcolorpattern(const avalue: colorty);
    
    procedure sethiddenedges(const avalue: edgesty);
 
@@ -863,6 +866,8 @@ type
                      write setcolorframeactive default cl_default;
    property colorglyph: colorty read fi.ba.colorglyph
                      write setcolorglyph default cl_default;
+   property colorpattern: colorty read fi.ba.colorpattern
+                     write setcolorpattern default cl_default;
 
    property framei_left: integer read fi.ba.innerframe.left 
                      write setframei_left default 0;
@@ -3785,6 +3790,7 @@ begin
   colorframe:= cl_default;
   colorframeactive:= cl_default;
   colorglyph:= cl_default;
+  colorpattern:= cl_default;
   with framecolors do begin
    shadow.effectcolor:= cl_default;
    shadow.color:= cl_default;
@@ -5402,6 +5408,12 @@ end;
 procedure tframetemplate.setcolorglyph(const avalue: colorty);
 begin
  fi.ba.colorglyph:= avalue;
+ changed;
+end;
+
+procedure tframetemplate.setcolorpattern(const avalue: colorty);
+begin
+ fi.ba.colorpattern:= avalue;
  changed;
 end;
 
