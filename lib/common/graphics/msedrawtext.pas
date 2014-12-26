@@ -986,6 +986,7 @@ var
   int2,int3,int4,int5,int6: integer;
   xbefore: integer;
   x: integer;
+  co1: colorty;
  begin
   if acount > 0 then begin
    if layoutinfo.xyswapped then begin
@@ -1014,7 +1015,8 @@ var
         inc(x,charwidths[int2]);
        end;
        int3:= charwidths[tabchars[int4].index - 1];
-       if font.colorbackground <> cl_transparent then begin
+       co1:= font.colorbackground;
+       if (co1 <> cl_transparent) and (co1 <> cl_default) then begin
         if xyswapped then begin
          if reversed then begin
           fillrect(makerect(pos.x-font.descent,x - int3,
