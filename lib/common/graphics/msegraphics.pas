@@ -469,8 +469,9 @@ type
                   const onchange: notifyeventty); override;
   published
    property color: colorty read fi.color write setcolor default cl_default;
+                                                              //cl_text
    property colorbackground: colorty read fi.colorbackground
-                 write setcolorbackground default cl_default;
+                 write setcolorbackground default cl_default; //cl_transparent
    property shadow_color: colorty read fi.shadow_color
                  write setshadow_color default cl_none;
    property shadow_shiftx: integer read fi.shadow_shiftx write
@@ -486,9 +487,10 @@ type
                 setgloss_shifty default -1;
 
    property grayed_color: colorty read fi.grayed_color
-                 write setgrayed_color default cl_grayed;
+                 write setgrayed_color default cl_default; //cl_grayed
    property grayed_colorshadow: colorty read fi.grayed_colorshadow
-                 write setgrayed_colorshadow default cl_grayedshadow;
+                 write setgrayed_colorshadow default cl_default; 
+                                                           //cl_grayedshadow;
    property grayed_shiftx: integer read fi.grayed_shiftx write
                 setgrayed_shiftx default 1;
    property grayed_shifty: integer read fi.grayed_shifty write
@@ -659,19 +661,16 @@ type
 
   published
    property color: colorty read getcolor write setcolor
-                  stored iscolorstored default cl_default;
+                  stored iscolorstored default cl_default;    //cl_text
    property colorbackground: colorty read getcolorbackground
-                 write setcolorbackground
-                  stored iscolorbackgroundstored  default cl_default;
-   property shadow_color: colorty read getshadow_color
-                 write setshadow_color
-                  stored isshadow_colorstored default cl_none;
-   property shadow_shiftx: integer read getshadow_shiftx write
-                setshadow_shiftx 
-                  stored isshadow_shiftxstored default 1;
-   property shadow_shifty: integer read getshadow_shifty write
-                setshadow_shifty 
-                  stored isshadow_shiftystored default 1;
+                 write setcolorbackground stored iscolorbackgroundstored 
+                                          default cl_default; //cl_transparent
+   property shadow_color: colorty read getshadow_color write setshadow_color
+                                    stored isshadow_colorstored default cl_none;
+   property shadow_shiftx: integer read getshadow_shiftx write setshadow_shiftx 
+                                         stored isshadow_shiftxstored default 1;
+   property shadow_shifty: integer read getshadow_shifty write setshadow_shifty 
+                                         stored isshadow_shiftystored default 1;
 
    property gloss_color: colorty read getgloss_color
                  write setgloss_color 
@@ -683,10 +682,11 @@ type
 
    property grayed_color: colorty read getgrayed_color
                  write setgrayed_color 
-                  stored isgrayed_colorstored default cl_grayed;
+                  stored isgrayed_colorstored default cl_default;//cl_grayed
    property grayed_colorshadow: colorty read getgrayed_colorshadow
                  write setgrayed_colorshadow 
-                  stored isgrayed_colorshadowstored default cl_grayedshadow;
+                  stored isgrayed_colorshadowstored default cl_default;
+                                                             //cl_grayedshadow
    property grayed_shiftx: integer read getgrayed_shiftx write
                 setgrayed_shiftx 
                   stored isgrayed_shiftxstored default 1;
@@ -2617,8 +2617,8 @@ end;
 procedure initfontinfo(var ainfo: basefontinfoty);
 begin
  with ainfo do begin
-  color:= cl_default;
-  colorbackground:= cl_default;
+  color:= cl_default;              //cl_text
+  colorbackground:= cl_default;    //cl_transparent
   shadow_color:= cl_none;
   shadow_shiftx:= 1;
   shadow_shifty:= 1;
@@ -2627,8 +2627,8 @@ begin
   gloss_shiftx:= -1;
   gloss_shifty:= -1;
 
-  grayed_color:= cl_grayed;
-  grayed_colorshadow:= cl_grayedshadow;
+  grayed_color:= cl_default;       //cl_grayed;
+  grayed_colorshadow:= cl_default; //cl_grayedshadow;
   grayed_shiftx:= 1;
   grayed_shifty:= 1;
 
@@ -5096,6 +5096,9 @@ begin
                            (po1^.baseinfo.gloss_color <> cl_none) then begin
     if grayed then begin
      acolorforeground:= po1^.baseinfo.grayed_colorshadow;//cl_white;
+     if acolorforeground = cl_default then begin
+      acolorforeground:= cl_grayedshadow;
+     end;
      inc(pos^.x,po1^.baseinfo.grayed_shiftx);
      inc(pos^.y,po1^.baseinfo.grayed_shifty);
 //     inc(pos^.x,po1^.shadow_shiftx);
@@ -5123,6 +5126,9 @@ begin
      dec(pos^.x,po1^.baseinfo.grayed_shiftx);
      dec(pos^.y,po1^.baseinfo.grayed_shifty);
      acolorforeground:= po1^.baseinfo.grayed_color;//cl_dkgray;
+     if acolorforeground = cl_default then begin
+      acolorforeground:= cl_grayed;
+     end;
     end
     else begin
      if po1^.baseinfo.shadow_color <> cl_none then begin
