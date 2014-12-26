@@ -1,5 +1,8 @@
 MSEide+MSEgui breaking changes version history
 
+2014-12-26
+ tskinfont has template property instead of individual properties.
+ 
 Version 3.6
 2014-11-25
 2014-11-19

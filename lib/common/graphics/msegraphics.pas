@@ -3479,7 +3479,7 @@ begin
    end;
   end;
   if not (flp_xscale in flocalprops) then begin
-   if xscale <> ainfo.xscale then begin
+   if (xscale <> 1) and (xscale <> ainfo.xscale) then begin
     xscale:= ainfo.xscale;
     include(changed1,cs_fonthandle);
    end;
@@ -3493,14 +3493,14 @@ begin
   end;
 
   if not (flp_height in flocalprops) then begin
-   if height <> ainfo.height then begin
+   if (ainfo.height <> 0) and (height <> ainfo.height) then begin
     height:= ainfo.height;
     include(changed1,cs_fonthandle);
    end;  
   end;
 
   if not (flp_width in flocalprops) then begin
-   if width <> ainfo.width then begin
+   if (ainfo.width <> 0) and (width <> ainfo.width) then begin
     width := ainfo.width;
     include(changed1,cs_fonthandle);
    end;  
@@ -3512,7 +3512,7 @@ begin
    end;  
   end;
   if not (flp_name in flocalprops) then begin
-   if name <> ainfo.name then begin
+   if (ainfo.name <> '') and (name <> ainfo.name) then begin
     name:= ainfo.name;
     include(changed1,cs_fonthandle);
    end;  
@@ -3524,7 +3524,7 @@ begin
    end;  
   end;
   if not (flp_options in flocalprops) then begin
-   if options <> ainfo.options then begin
+   if (ainfo.options <> []) and (options <> ainfo.options) then begin
     options:= ainfo.options;
     include(changed1,cs_fonthandle);
    end;  

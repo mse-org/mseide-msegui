@@ -251,8 +251,9 @@ type
 
  skinextenderarty = array of tskinextender;
 
- tskinfont = class(tpersistent)
+ tskinfont = class(tlinkedpersistent)
   private
+  {
    fcolor: colorty;
    fshadow_color: colorty;
    fshadow_shiftx: integer;
@@ -267,10 +268,14 @@ type
    fextraspace: integer;
    fstyle: fontstylesty;
    fcolorbackground: colorty;
+  }
+   ftemplate: tfontcomp;
+   procedure settemplate(const avalue: tfontcomp);
   public
-   constructor create;
+//   constructor create;
    procedure updatefont(const adest: tfont);
   published
+  {
    property color: colorty read fcolor write fcolor default cl_default;
    property colorbackground: colorty read fcolorbackground 
                            write fcolorbackground default cl_default;
@@ -299,6 +304,8 @@ type
 
    property extraspace: integer read fextraspace write fextraspace default 0;
    property style: fontstylesty read fstyle write fstyle default [];
+  }
+   property template: tfontcomp read ftemplate write settemplate;
  end;
 
  groupinfoty = record
@@ -2880,9 +2887,10 @@ begin
 end;
 
 { tskinfont }
-
+(*
 constructor tskinfont.create;
 begin
+{
  fcolor:= cl_default;
  fcolorbackground:= cl_default;
  fshadow_color:= cl_default;
@@ -2895,11 +2903,17 @@ begin
  fgrayed_colorshadow:= cl_default;
  fgrayed_shiftx:= 1;
  fgrayed_shifty:= 1;
+}
 end;
-
+*)
 procedure tskinfont.updatefont(const adest: tfont);
 begin
- with adest do begin
+ if ftemplate <> nil then begin
+  with adest do begin
+   if template = nil then begin
+    template:= ftemplate;
+   end;
+ {
   if fcolor <> cl_default then begin
    color:= fcolor;
   end;
@@ -2942,7 +2956,14 @@ begin
   if fstyle <> [] then begin
    style:= fstyle;
   end;
+ }
+  end;
  end;
+end;
+
+procedure tskinfont.settemplate(const avalue: tfontcomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(ftemplate));
 end;
 
 { tskinhandler }
