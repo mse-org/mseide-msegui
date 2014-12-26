@@ -222,6 +222,7 @@ type
   protected
    fhorz,fvert: tcustomscrollbar;
    foptionsscroll: optionsscrollty;
+   procedure settemplateinfo(const ainfo: frameinfoty); override;
    procedure updatestate; override;
    procedure updatevisiblescrollbars; virtual;
    procedure updaterects; override;
@@ -3333,6 +3334,21 @@ begin
  inherited;
  fvert.activechanged;
  fhorz.activechanged;
+end;
+
+procedure tcustomscrollframe.settemplateinfo(const ainfo: frameinfoty);
+begin
+ inherited;
+ if not (frl1_colorglyph in flocalprops1) and 
+                          (ainfo.ba.colorglyph <> cl_default) then begin
+  sbhorz.colorglyph:= ainfo.ba.colorglyph;
+  sbvert.colorglyph:= ainfo.ba.colorglyph;
+ end;
+ if not (frl1_colorpattern in flocalprops1) and 
+                          (ainfo.ba.colorpattern <> cl_default) then begin
+  sbhorz.colorpattern:= ainfo.ba.colorpattern;
+  sbvert.colorpattern:= ainfo.ba.colorpattern;
+ end;
 end;
 
 { tcustomstepframe }
