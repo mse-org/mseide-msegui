@@ -1869,8 +1869,8 @@ end;
 constructor treptabfont.create;
 begin
  inherited;
- finfo.effect.color:= defaultrepfontcolor;
- finfo.name:= defaultrepfontname;
+ finfo.baseinfo.color:= defaultrepfontcolor;
+ finfo.baseinfo.name:= defaultrepfontname;
 end;
 
 procedure treptabfont.setname(const avalue: string);
@@ -7170,8 +7170,8 @@ end;
 constructor trepwidgetfont.create;
 begin
  inherited;
- finfo.effect.color:= defaultrepfontcolor;
- finfo.name:= defaultrepfontname;
+ finfo.baseinfo.color:= defaultrepfontcolor;
+ finfo.baseinfo.name:= defaultrepfontname;
 end;
 
 procedure trepwidgetfont.setname(const avalue: string);
@@ -7189,8 +7189,8 @@ end;
 constructor trepfont.create;
 begin
  inherited;
- finfo.effect.color:= defaultrepfontcolor;
- finfo.name:= defaultrepfontname;
+ finfo.baseinfo.color:= defaultrepfontcolor;
+ finfo.baseinfo.name:= defaultrepfontname;
 end;
 
 procedure trepfont.setname(const avalue: string);

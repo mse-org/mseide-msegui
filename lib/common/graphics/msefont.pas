@@ -369,18 +369,18 @@ begin
  result:=
      (d.h.d.glyph = s.glyph) and           //unicode substitutes
      (d.h.d.gdifuncs = s.gdifuncs) and
-     (d.h.d.height = s.height) and
-     (d.h.d.width = s.width)  and
-     (d.h.d.pitchoptions = s.options * fontpitchmask) and
-     (d.h.d.familyoptions = s.options * fontfamilymask) and
-     (d.h.d.antialiasedoptions = s.options * fontantialiasedmask) and
+     (d.h.d.height = s.baseinfo.height) and
+     (d.h.d.width = s.baseinfo.width)  and
+     (d.h.d.pitchoptions = s.baseinfo.options * fontpitchmask) and
+     (d.h.d.familyoptions = s.baseinfo.options * fontfamilymask) and
+     (d.h.d.antialiasedoptions = s.baseinfo.options * fontantialiasedmask) and
      ({$ifdef FPC}longword{$else}byte{$endif}(d.h.d.style) xor 
-      {$ifdef FPC}longword{$else}byte{$endif}(s.effect.style) and
+      {$ifdef FPC}longword{$else}byte{$endif}(s.baseinfo.style) and
                                           fontstylehandlemask = 0) and
-     (d.h.name = s.name) and
-     (d.h.charset = s.charset) and
+     (d.h.name = s.baseinfo.name) and
+     (d.h.charset = s.baseinfo.charset) and
      (d.h.d.rotation = s.rotation) and
-     (d.h.d.xscale = s.effect.xscale);
+     (d.h.d.xscale = s.baseinfo.xscale);
 
 end;
 
@@ -438,18 +438,18 @@ procedure getfontvalues(const s: fontinfoty; var d: fontdataty);
 begin
  fillchar(d.h.d,sizeof(d.h.d),0);
  d.h.d.gdifuncs:= s.gdifuncs;
- d.h.d.height:= s.height;
- d.h.d.width:= s.width;
- d.h.d.familyoptions:= s.options * fontfamilymask;
- d.h.d.pitchoptions:= s.options * fontpitchmask;
- d.h.d.antialiasedoptions:= s.options * fontantialiasedmask;
+ d.h.d.height:= s.baseinfo.height;
+ d.h.d.width:= s.baseinfo.width;
+ d.h.d.familyoptions:= s.baseinfo.options * fontfamilymask;
+ d.h.d.pitchoptions:= s.baseinfo.options * fontpitchmask;
+ d.h.d.antialiasedoptions:= s.baseinfo.options * fontantialiasedmask;
  d.h.d.style:= fontstylesty({$ifdef FPC}longword{$else}byte{$endif}
-                                  (s.effect.style) and fontstylehandlemask);
+                                  (s.baseinfo.style) and fontstylehandlemask);
  d.h.d.glyph:= s.glyph;
  d.h.d.rotation:= s.rotation;
- d.h.d.xscale:= s.effect.xscale;
- d.h.name:= s.name;
- d.h.charset:= s.charset;
+ d.h.d.xscale:= s.baseinfo.xscale;
+ d.h.name:= s.baseinfo.name;
+ d.h.charset:= s.baseinfo.charset;
 end;
 
 function getfontnum(const fontinfo: fontinfoty; var drawinfo: drawinfoty;
