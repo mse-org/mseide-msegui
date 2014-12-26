@@ -3493,15 +3493,17 @@ begin
   end;
 
   if not (flp_height in flocalprops) then begin
-   if (ainfo.height <> 0) and (height <> ainfo.height) then begin
-    height:= ainfo.height;
+   if (ainfo.height <> 0) and (height <> 
+                          (ainfo.height shl fontsizeshift)) then begin
+    height:= ainfo.height shl fontsizeshift;
     include(changed1,cs_fonthandle);
    end;  
   end;
 
   if not (flp_width in flocalprops) then begin
-   if (ainfo.width <> 0) and (width <> ainfo.width) then begin
-    width := ainfo.width;
+   if (ainfo.width <> 0) and (width <> 
+                             (ainfo.width shl fontsizeshift)) then begin
+    width:= ainfo.width shl fontsizeshift;
     include(changed1,cs_fonthandle);
    end;  
   end;
