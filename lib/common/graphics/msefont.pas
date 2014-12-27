@@ -12,10 +12,10 @@ unit msefont;
 
 interface
 uses
- mseguiglob,msegraphics;
+ mseguiglob,msegraphics,mseclasses;
 
 function getfontnum(const fontinfo: fontinfoty; var drawinfo: drawinfoty;
-                     getfont: getfontfuncty): fontnumty;
+                 getfont: getfontfuncty; var atemplate: tfontcomp): fontnumty;
 procedure addreffont(font: fontnumty);
 procedure releasefont(font: fontnumty);
 
@@ -30,7 +30,8 @@ function registerfontalias(const alias,name: string;
               const height: integer = 0; const width: integer = 0;
               const options: fontoptionsty = [];
               const xscale: real = 1.0;
-              ancestor: string = defaultfontalias): boolean;
+              ancestor: string = defaultfontalias;
+              const template: tfontcomp = nil): boolean;
               //true if registering ok
 function unregisterfontalias(const alias: string): boolean;
               //false if alias does not exist
@@ -38,7 +39,8 @@ procedure clearfontalias; //removes all alias which are not fam_fix
 function fontaliascount: integer;
 procedure setfontaliascount(const acount: integer);
 function realfontname(const aliasname: string): string;
-function getfontforglyph(const abasefont: fontty; const glyph: unicharty): fontnumty;
+function getfontforglyph(const abasefont: fontty;
+                                          const glyph: unicharty): fontnumty;
 function fontoptioncharstooptions(const astring: string): fontoptionsty;
 
 procedure init;
@@ -52,7 +54,7 @@ var
 implementation
 uses
  mselist,sysutils,mseguiintf,msegraphutils,msetypes,msesys,
- msestrings,mseformatstr,msehash;
+ msestrings,mseformatstr,msehash,mseglob;
  
 type
  fontnumdataty = record
@@ -90,17 +92,20 @@ type
   width: integer;
   options: fontoptionsty;
   xscale: real;
+  template: tfontcomp;
  end;
  pfontaliasty = ^fontaliasty;
  fontaliasaty = array[0..0] of fontaliasty;
  pfontaliasaty = ^fontaliasaty;
 
- tfontaliaslist = class(trecordlist)
+ tfontaliaslist = class(tlinkedrecordlist)
   protected
    procedure finalizerecord(var item); override;
    procedure copyrecord(var item); override;
-   procedure updatefontdata(var info: fontdataty);
+   procedure updatefontdata(var info: fontdataty; var atemplate: tfontcomp);
    function find(const alias: string): integer;
+   procedure objectevent(const sender: tobject;
+                            const event: objecteventty); override;
   public
    constructor create;
    function registeralias(const alias,name: string;
@@ -108,7 +113,8 @@ type
               const height: integer = 0; const width: integer = 0;
               const options: fontoptionsty = [];
               const xscale: real = 1.0;
-              const ancestor: string = ''): boolean;
+              const ancestor: string = '';
+              const template: tfontcomp = nil): boolean;
               //true if registering ok
  end;
 
@@ -131,14 +137,15 @@ function registerfontalias(const alias,name: string;
               const height: integer = 0; const width: integer = 0;
               const options: fontoptionsty = [];
               const xscale: real = 1.0;
-              ancestor: string = defaultfontalias): boolean;
+              ancestor: string = defaultfontalias;
+              const template: tfontcomp = nil): boolean;
               //true if registering ok
 begin
  if (alias = defaultfontalias) and (ancestor = defaultfontalias) then begin
   ancestor:= '';
  end;
  result:= fontaliaslist.registeralias(alias,name,mode,height,width,options,
-                                       xscale,ancestor);
+                                       xscale,ancestor,template);
 end;
 
 function realfontname(const aliasname: string): string;
@@ -453,7 +460,7 @@ begin
 end;
 
 function getfontnum(const fontinfo: fontinfoty; var drawinfo: drawinfoty;
-                     getfont: getfontfuncty): fontnumty;
+                  getfont: getfontfuncty; var atemplate: tfontcomp): fontnumty;
 var
  int1: integer;
  data1: fontdataty; 
@@ -473,7 +480,7 @@ begin
    fillchar(data1,sizeof(data1),0);
    getfontvalues(fontinfo,data1);
    if ffontaliaslist <> nil then begin
-    ffontaliaslist.updatefontdata(data1);
+    ffontaliaslist.updatefontdata(data1,atemplate);
    end;
    drawinfo.getfont.fontdata:= @data1;
    drawinfo.getfont.basefont:= 0;
@@ -664,7 +671,8 @@ begin
  end;
 end;
 
-procedure tfontaliaslist.updatefontdata(var info: fontdataty);
+procedure tfontaliaslist.updatefontdata(var info: fontdataty; 
+                                               var atemplate: tfontcomp);
 var
  int1: integer;
  str1: string;
@@ -703,6 +711,9 @@ begin
       (info.h.d.pitchoptions * fontantialiasedmask = []) then begin
     info.h.d.antialiasedoptions:= options * fontantialiasedmask;
    end;
+   if (template <> nil) and (atemplate = nil) then begin
+    atemplate:= template;
+   end;
   end;
  end;
  if po1 <> nil then begin
@@ -715,7 +726,8 @@ function tfontaliaslist.registeralias(const alias,name: string;
                const height: integer = 0; const width: integer = 0;
                const options: fontoptionsty = [];
                const xscale: real = 1.0;
-               const ancestor: string = ''): boolean;
+               const ancestor: string = '';
+               const template: tfontcomp = nil): boolean;
               //true if registering ok
 var
  po1: pfontaliasty;
@@ -729,6 +741,10 @@ var
   po1^.options:= options;
   po1^.xscale:= xscale;
   po1^.ancestor:= ancestor;
+  if template <> po1^.template then begin
+   getobjectlinker.setlink(iobjectlink(self),template,
+                                   tmsecomponent(po1^.template));
+  end;
  end;
 
 var
@@ -768,6 +784,24 @@ begin
  end;
  if mode = fam_fixnooverwrite then begin
   po1^.mode:= fam_fix;
+ end;
+end;
+
+procedure tfontaliaslist.objectevent(const sender: tobject;
+               const event: objecteventty);
+var
+ po1,pe: pfontaliasty;
+begin
+ inherited;
+ if event = oe_destroyed then begin
+  po1:= datapo;
+  pe:= po1 + count;
+  while po1 < pe do begin
+   if po1^.template = sender then begin
+    po1^.template:= nil;
+   end;
+   inc(po1);
+  end;
  end;
 end;
 

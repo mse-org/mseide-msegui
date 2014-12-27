@@ -195,7 +195,7 @@ type
              write feditfontcolors.selectedtextbackground default cl_default;
  end;
 
- tskinfontalias = class(tvirtualpersistent)
+ tskinfontalias = class(townedpersistent)
   private
    fname: string;
    falias: string;
@@ -205,8 +205,10 @@ type
    foptions: fontoptionsty;
    fancestor: string;
    fxscale: real;
+   ftemplate: tfontcomp;
+   procedure settemplate(const avalue: tfontcomp);
   public
-   constructor create; override;
+   constructor create(aowner: tobject); override;
   published
    property name: string read fname write fname;
    property alias: string read falias write falias;
@@ -217,19 +219,20 @@ type
    property width: integer read fwidth write fwidth default 0;
    property options: fontoptionsty read foptions write foptions default [];
    property xscale: real read fxscale write fxscale;
+   property template: tfontcomp read ftemplate write settemplate;
  end;
 
- tskinfontaliass = class(tpersistentarrayprop)   
+ tcustomskincontroller = class;
+ 
+ tskinfontaliass = class(townedpersistentarrayprop)   
   public
-   constructor create;
-   class function getitemclasstype: persistentclassty; override;
+   constructor create(const aowner: tcustomskincontroller); reintroduce;
+//   class function getitemclasstype: persistentclassty; override;
    procedure setfontalias;
  end;
 
  createprocty = procedure of object;
 
- tcustomskincontroller = class;
- 
  beforeskinupdateeventty = procedure(const sender: tcustomskincontroller; 
                 const ainfo: skininfoty; var handled: boolean) of object;
  skincontrollereventty = procedure(const sender: tcustomskincontroller; 
@@ -1161,16 +1164,16 @@ end;
 
 { tskinfontaliass }
 
-constructor tskinfontaliass.create;
+constructor tskinfontaliass.create(const aowner: tcustomskincontroller);
 begin
- inherited create(tskinfontalias);
+ inherited create(aowner,tskinfontalias);
 end;
-
+{
 class function tskinfontaliass.getitemclasstype: persistentclassty;
 begin
  result:= tskinfontalias;
 end;
-
+}
 procedure tskinfontaliass.setfontalias;
 var
  int1: integer;
@@ -1178,10 +1181,12 @@ begin
  for int1:= 0 to high(fitems) do begin
   with tskinfontalias(fitems[int1]) do begin
    if fancestor <> '' then begin
-    registerfontalias(alias,name,mode,height,width,options,xscale,ancestor);
+    registerfontalias(alias,name,mode,height,width,options,xscale,
+                                                           ancestor,template);
    end
    else begin
-    registerfontalias(alias,name,mode,height,width,options,xscale);
+    registerfontalias(alias,name,mode,height,width,options,xscale,
+                                                   defaultfontalias,template);
    end;
   end;
  end;
@@ -1194,7 +1199,7 @@ var
  fo1: stockfontty;
 begin
  fcolors:= tskincolors.create;
- ffontalias:= tskinfontaliass.create;
+ ffontalias:= tskinfontaliass.create(self);
  for fo1:= low(stockfontty) to high(stockfontty) do begin
   fskinfonts[fo1]:= tskinfont.create;
  end;
@@ -2881,11 +2886,16 @@ end;
 
 { tskinfontalias }
 
-constructor tskinfontalias.create;
+constructor tskinfontalias.create(aowner: tobject);
 begin
  fmode:= fam_overwrite;
  fxscale:= 1;
  inherited;
+end;
+
+procedure tskinfontalias.settemplate(const avalue: tfontcomp);
+begin
+ tcustomskincontroller(fowner).setlinkedvar(avalue,tmsecomponent(ftemplate));
 end;
 
 { tskinextender }

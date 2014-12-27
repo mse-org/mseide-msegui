@@ -2672,6 +2672,7 @@ end;
 procedure tfont.createhandle(const canvas: tcanvas);
 var
  int1: integer;
+ templ1: tfontcomp;
 begin
  if (canvas <> nil) then begin
   canvas.checkgcstate([cs_gc]); //windows needs gc
@@ -2688,10 +2689,18 @@ begin
   end;
   finfopo^.gdifuncs:= canvas.fdrawinfo.gc.fontgdifuncs;
 //  finfopo^.gdifuncs:= gdifuncs[canvas.fgdinum];
+  templ1:= nil;
   fhandlepo^:= getfontnum(finfopo^,canvas.fdrawinfo,
-                                         {$ifdef FPC}@{$endif}getfont);
+                                         {$ifdef FPC}@{$endif}getfont,templ1);
   if fhandlepo^ = 0 then begin
    canvas.error(gde_font,finfopo^.baseinfo.name);
+  end;
+  if (templ1 <> nil) and (ftemplate = nil) then begin
+   settemplateinfo(templ1.template.fi);
+   if fhandlepo^ = 0 then begin
+    fhandlepo^:= getfontnum(finfopo^,canvas.fdrawinfo,
+                                         {$ifdef FPC}@{$endif}getfont,templ1);
+   end;
   end;
  end
  else begin
