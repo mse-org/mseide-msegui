@@ -2673,6 +2673,9 @@ procedure tfont.createhandle(const canvas: tcanvas);
 var
  int1: integer;
  templ1: tfontcomp;
+ po1: pfontdataty;
+ info1: fontinfoty;
+ opt1: fontoptionsty;
 begin
  if (canvas <> nil) then begin
   canvas.checkgcstate([cs_gc]); //windows needs gc
@@ -2696,10 +2699,31 @@ begin
    canvas.error(gde_font,finfopo^.baseinfo.name);
   end;
   if (templ1 <> nil) and (ftemplate = nil) then begin
+   po1:= getfontdata(fhandlepo^);
    settemplateinfo(templ1.template.fi);
    if fhandlepo^ = 0 then begin
-    fhandlepo^:= getfontnum(finfopo^,canvas.fdrawinfo,
-                                         {$ifdef FPC}@{$endif}getfont,templ1);
+    info1:= finfopo^;
+    with po1^.realfont do begin
+     if (info1.baseinfo.name = '') and (name <> '') then begin
+      info1.baseinfo.name:= name;
+     end;
+     if (info1.baseinfo.height = 0) and (d.height <> 0) then begin
+      info1.baseinfo.height:= d.height;
+     end;
+     if info1.baseinfo.options = [] then begin
+      opt1:= d.familyoptions + d.pitchoptions + d.antialiasedoptions;
+      if opt1 <> [] then begin
+       info1.baseinfo.options:= opt1;
+      end;
+     end;
+     if (info1.baseinfo.width = 0) and (d.width <> 0) then begin
+      info1.baseinfo.width:= d.width;
+     end;
+     if (info1.baseinfo.xscale = 1) and (d.xscale <> 1) then begin
+      info1.baseinfo.xscale:= d.xscale;
+     end;
+    end;
+    fhandlepo^:= getfontnum(info1,canvas.fdrawinfo,@getfont,templ1);
    end;
   end;
  end

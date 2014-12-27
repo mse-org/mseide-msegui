@@ -288,6 +288,7 @@ type
  end;
  
  tlinkedrecordlist = class(trecordlist,iobjectlink)
+  protected
    fobjectlinker: tobjectlinker;
    function getobjectlinker: tobjectlinker;
    procedure objectevent(const sender: tobject;
