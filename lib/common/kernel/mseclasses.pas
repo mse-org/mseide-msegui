@@ -247,6 +247,11 @@ type
    procedure setlinkedvar(const linkintf: iobjectlink; 
                           const source: tmsecomponent; var dest: tmsecomponent;
                           const ainterfacetype: pointer = nil); overload;
+
+   procedure setlink(const linkintf: iobjectlink; 
+                          const source: tmsecomponent; var dest: tmsecomponent;
+                          const ainterfacetype: pointer = nil); overload;
+                                         //no automatic nil setting
    procedure sendevent(event: objecteventty);
    procedure objevent(const sender: iobjectlink; const event: objecteventty);
    procedure forall(const proc: objectlinkprocty; 
@@ -281,6 +286,27 @@ type
    destructor destroy; override;
 //   property objectlinker: tobjectlinker read getobjectlinker;
  end;
+ 
+ tlinkedrecordlist = class(trecordlist,iobjectlink)
+   fobjectlinker: tobjectlinker;
+   function getobjectlinker: tobjectlinker;
+   procedure objectevent(const sender: tobject;
+                            const event: objecteventty); virtual;
+   procedure setlinkedvar(const source: tmsecomponent; var dest: tmsecomponent;
+              const linkintf: iobjectlink = nil); overload;
+   procedure setlinkedvar(const source: tlinkedobject; var dest: tlinkedobject;
+              const linkintf: iobjectlink = nil); overload;
+    //iobjectlink
+   procedure link(const source,dest: iobjectlink; valuepo: pointer = nil;
+                   ainterfacetype: pointer = nil; once: boolean = false);
+   procedure unlink(const source,dest: iobjectlink; valuepo: pointer = nil);
+   procedure objevent(const sender: iobjectlink;
+                                 const event: objecteventty); virtual;
+   function getinstance: tobject;
+ public
+   destructor destroy; override;
+ end;
+ 
 (*
  tnullinterfacedobject = class(tobject,iunknown)
   protected
@@ -3790,6 +3816,25 @@ begin
  end;
 end;
 
+procedure tobjectlinker.setlink(const linkintf: iobjectlink; 
+                          const source: tmsecomponent; var dest: tmsecomponent;
+                          const ainterfacetype: pointer = nil); overload;
+                                         //no automatic nil setting
+var
+ ba: tmsecomponent;
+begin
+ if source <> dest then begin
+  ba:= dest;
+  dest:= source;
+  if source <> nil then begin
+   link(linkintf,ievent(source),nil,ainterfacetype);
+  end;
+  if ba <> nil then begin
+   unlink(linkintf,ievent(ba),nil);
+  end;
+ end;
+end;
+
 function tobjectlinker.isempty(var item): boolean;
 begin
  with linkinfoty(item) do begin
@@ -4002,6 +4047,71 @@ function tlinkedobject.getinstance: tobject;
 begin
  result:= self;
 end;
+
+{ tlinkedrecordlist }
+
+destructor tlinkedrecordlist.destroy;
+begin
+ inherited;
+ freeandnil(fobjectlinker);
+end;
+
+function tlinkedrecordlist.getobjectlinker: tobjectlinker;
+begin
+ createobjectlinker(self,{$ifdef FPC}@{$endif}objectevent,fobjectlinker);
+ result:= fobjectlinker;
+end;
+
+procedure tlinkedrecordlist.objectevent(const sender: tobject; 
+                                           const event: objecteventty);
+begin
+ //dummy
+end;
+
+procedure tlinkedrecordlist.setlinkedvar(const source: tmsecomponent; var dest: tmsecomponent;
+              const linkintf: iobjectlink = nil);
+begin
+ if linkintf = nil then begin
+  getobjectlinker.setlinkedvar(iobjectlink(self),source,dest);
+ end
+ else begin
+  getobjectlinker.setlinkedvar(linkintf,source,dest);
+ end;
+end;
+
+procedure tlinkedrecordlist.setlinkedvar(const source: tlinkedobject;
+                                                    var dest: tlinkedobject;
+              const linkintf: iobjectlink = nil);
+begin
+ if linkintf = nil then begin
+  getobjectlinker.setlinkedvar(iobjectlink(self),source,dest);
+ end
+ else begin
+  getobjectlinker.setlinkedvar(linkintf,source,dest);
+ end;
+end;
+
+procedure tlinkedrecordlist.link(const source,dest: iobjectlink; valuepo: pointer = nil;
+                              ainterfacetype: pointer = nil; once: boolean = false);
+begin
+ getobjectlinker.link(source,dest,valuepo,ainterfacetype,once);
+end;
+
+procedure tlinkedrecordlist.unlink(const source,dest: iobjectlink; valuepo: pointer = nil);
+begin
+ getobjectlinker.unlink(source,dest,valuepo);
+end;
+
+procedure tlinkedrecordlist.objevent(const sender: iobjectlink; const event: objecteventty);
+begin
+ getobjectlinker.objevent(sender,event);
+end;
+
+function tlinkedrecordlist.getinstance: tobject;
+begin
+ result:= self;
+end;
+
 (*
 { tnullinterfacedobject }
 
