@@ -765,23 +765,31 @@ begin
    end;    
    inc(fpaintedbutton);
   end;
+  colorbackground:= col1;
+  brush:= stockobjects.bitmaps[stb_dens50];
+  if fclickedarea = sba_start then begin
+   color:= cl_black;
+  end
+  else begin
+   color:= fcolorpattern;
+  end;
   if fcolorpattern <> cl_none then begin
-   colorbackground:= col1;
-   brush:= stockobjects.bitmaps[stb_dens50];
-   if fclickedarea = sba_start then begin
-    color:= cl_black;
-   end
-   else begin
-    color:= fcolorpattern;
-   end;
    fillrect(areas[sba_start].ca.dim,cl_brushcanvas);
-   if fclickedarea = sba_end then begin
-    color:= cl_black;
-   end
-   else begin
-    color:= fcolorpattern;
-   end;
+  end
+  else begin
+   fillrect(areas[sba_start].ca.dim,col1);
+  end;
+  if fclickedarea = sba_end then begin
+   color:= cl_black;
+  end
+  else begin
+   color:= fcolorpattern;
+  end;
+  if fcolorpattern <> cl_none then begin
    fillrect(areas[sba_end].ca.dim,cl_brushcanvas);
+  end
+  else begin
+   fillrect(areas[sba_end].ca.dim,col1);
   end;
   restore;
  end;
