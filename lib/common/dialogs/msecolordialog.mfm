@@ -240,6 +240,8 @@ object colordialogfo: tcolordialogfo
     bounds_cy = 38
     anchors = [an_left, an_bottom]
     optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky, osc_expandshrinkx, osc_expandshrinky]
+    font.name = 'stf_default'
+    font.dummy = 0
     linktop = tlayouter1
     options = [spao_gluebottom]
     optionslayout = [lao_aligny]
@@ -317,10 +319,6 @@ object colordialogfo: tcolordialogfo
     bounds_y = 0
     bounds_cx = 221
     bounds_cy = 219
-    font.name = 'stf_default'
-    font.xscale = 1
-    font.localprops = [flp_xscale]
-    font.dummy = 0
     optionslayout = [lao_aligny]
     align_mode = wam_start
     object sliderblue: tslider
