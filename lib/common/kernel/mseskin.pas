@@ -2090,8 +2090,8 @@ begin
  fslider.svcolor:= cl_default;
  fslider.svsb_horz.svcolorpattern:= cl_default;
  fslider.svsb_horz.svcolorglyph:= cl_default;
- fslider.svsb_horz.svcolorpattern:= cl_default;
- fslider.svsb_horz.svcolorglyph:= cl_default;
+ fslider.svsb_vert.svcolorpattern:= cl_default;
+ fslider.svsb_vert.svcolorglyph:= cl_default;
  fframebutton.svcolor:= cl_default;
  fframebutton.svcolorglyph:= cl_default;
  ftabbar.svtabhorz.svcolor:= cl_default;

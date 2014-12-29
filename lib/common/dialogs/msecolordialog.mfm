@@ -61,7 +61,6 @@ object colordialogfo: tcolordialogfo
     frame.caption = 'new'
     frame.captionpos = cp_bottom
     frame.localprops = [frl_colorframe, frl_colorclient]
-    frame.dummy = 0
     frame.outerframe = (
       0
       0
@@ -84,7 +83,6 @@ object colordialogfo: tcolordialogfo
     frame.caption = 'old'
     frame.captionpos = cp_bottom
     frame.localprops = [frl_colorframe, frl_colorclient]
-    frame.dummy = 0
     frame.outerframe = (
       0
       0
@@ -321,6 +319,7 @@ object colordialogfo: tcolordialogfo
     bounds_cy = 219
     font.name = 'stf_default'
     font.xscale = 1
+    font.localprops = [flp_xscale]
     font.dummy = 0
     optionslayout = [lao_aligny]
     align_mode = wam_start
