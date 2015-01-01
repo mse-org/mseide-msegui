@@ -40,6 +40,11 @@ type
  tactivator1 = class(tactivator);
  tskincontroller1 = class(tskincontroller);
 
+ temptysetpropertyeditor = class(tsetpropertyeditor)
+  public
+   procedure updatedefaultvalue; override;  //implicit [] default
+ end;
+ 
  tactionpropertyeditor = class(tcomponentpropertyeditor)
   protected
    function getdefaultstate: propertystatesty; override;
@@ -130,7 +135,7 @@ type
   public
  end;
 
- tfacelocalpropseditor = class(tsetpropertyeditor)
+ tfacelocalpropseditor = class(temptysetpropertyeditor)
   protected
    function getinvisibleitems: tintegerset; override;
  end;
@@ -171,6 +176,15 @@ begin
                     tstringcontainer,tkeystringcontainer]);
  registercomponenttabhints(['NoGui'],['Components without GUI dependence']);
 
+ registerpropertyeditor(typeinfo(fontlocalpropsty),nil,'',
+                                                    temptysetpropertyeditor);
+ registerpropertyeditor(typeinfo(framelocalpropsty),nil,'',
+                                                    temptysetpropertyeditor);
+ registerpropertyeditor(typeinfo(framelocalprops1ty),nil,'',
+                                                    temptysetpropertyeditor);
+ registerpropertyeditor(typeinfo(facelocalpropsty),nil,'',
+                                           tfacelocalpropseditor);
+
  registerpropertyeditor(typeinfo(tstatfile),tstatfile,'',
                                       tlinkcomponentpropertyeditor);
 
@@ -181,8 +195,6 @@ begin
  registerpropertyeditor(typeinfo(tcustomaction),nil,'',tactionpropertyeditor);
  registerpropertyeditor(typeinfo(tshortcutactions),nil,'',
                            tshortcutactionspropertyeditor);
- registerpropertyeditor(typeinfo(facelocalpropsty),nil,'',
-                                           tfacelocalpropseditor);
  registerpropertyeditor(typeinfo(tcolorarrayprop),tcustomface,'fade_color',
                                     tfacefadecoloreditor);
  registerpropertyeditor(typeinfo(trealarrayprop),tcustomface,'fade_pos',
@@ -646,6 +658,18 @@ end;
 function tfacelistpropertyeditor.geteditorclass: propertyeditorclassty;
 begin
  result:= tfaceelementeditor;
+end;
+
+{ temptysetpropertyeditor }
+
+procedure temptysetpropertyeditor.updatedefaultvalue;
+begin
+ if getordvalue <> 0 then begin
+  include(fstate,ps_modified);
+ end
+ else begin
+  exclude(fstate,ps_modified);
+ end;
 end;
 
 initialization
