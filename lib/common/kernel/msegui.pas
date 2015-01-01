@@ -512,6 +512,7 @@ type
    finnerclientrect: rectty;     //origin = fpaintrect.pos
    fpaintposbefore: pointty;
    fi: baseframeinfoty;
+   procedure defineproperties(filer: tfiler); override;
    function isoptional: boolean; override;
    procedure settemplateinfo(const ainfo: frameinfoty); virtual;
    procedure setdisabled(const value: boolean); virtual;
@@ -5335,6 +5336,12 @@ begin
  result:= not fintf.getstaticframe;
 end;
 
+procedure tcustomframe.defineproperties(filer: tfiler);
+begin
+ filer.defineproperty('dummy',@readdummy,nil,false);
+ // inherited; //no dummy necessary because of localprops
+end;
+
 { tframetemplate }
 
 constructor tframetemplate.create(const owner: tmsecomponent;
@@ -6417,7 +6424,8 @@ end;
 
 procedure tcustomface.defineproperties(filer: tfiler);
 begin
- inherited;
+// inherited; //no dummy necessary because of localprops
+ filer.defineproperty('dummy',@readdummy,nil,false);
  filer.defineproperty('fade_transparency',@readtransparency,nil,false);
 end;
 
