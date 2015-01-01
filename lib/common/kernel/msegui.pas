@@ -706,9 +706,9 @@ type
    property colorclient: colorty read fi.colorclient write setcolorclient
                     stored iscolorclientstored default cl_transparent;
    property localprops: framelocalpropsty read flocalprops 
-                    write setlocalprops default []; 
+                    write setlocalprops {default []}; 
    property localprops1: framelocalprops1ty read flocalprops1 
-                    write setlocalprops1 default []; 
+                    write setlocalprops1 {default []}; 
    property template: tframecomp read ftemplate write settemplate;
  end;
 
@@ -1109,7 +1109,7 @@ type
                     stored isframeimage_offsetstored default 0;
 
    property localprops: facelocalpropsty read flocalprops 
-                    write setlocalprops default []; 
+                    write setlocalprops {default []}; 
                                    //before template
    property template: tfacecomp read ftemplate write settemplate;
  end;

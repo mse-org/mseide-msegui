@@ -712,9 +712,9 @@ type
    property xscale: real read getxscale write setxscale stored isxscalestored;
                                  //default 1.0
 
-   property template: tfontcomp read ftemplate write settemplate;
    property localprops: fontlocalpropsty read flocalprops write flocalprops
-                                                           default []; //last!
+                                  {default []}; //before template!
+   property template: tfontcomp read ftemplate write settemplate;
  end;
  pfont = ^tfont;
  fontarty = array of tfont;
