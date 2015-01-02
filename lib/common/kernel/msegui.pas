@@ -512,6 +512,7 @@ type
    finnerclientrect: rectty;     //origin = fpaintrect.pos
    fpaintposbefore: pointty;
    fi: baseframeinfoty;
+   procedure defineproperties(filer: tfiler); override;
    function isoptional: boolean; override;
    procedure settemplateinfo(const ainfo: frameinfoty); virtual;
    procedure setdisabled(const value: boolean); virtual;
@@ -706,9 +707,9 @@ type
    property colorclient: colorty read fi.colorclient write setcolorclient
                     stored iscolorclientstored default cl_transparent;
    property localprops: framelocalpropsty read flocalprops 
-                    write setlocalprops default []; 
+                    write setlocalprops {default []}; 
    property localprops1: framelocalprops1ty read flocalprops1 
-                    write setlocalprops1 default []; 
+                    write setlocalprops1 {default []}; 
    property template: tframecomp read ftemplate write settemplate;
  end;
 
@@ -1109,7 +1110,7 @@ type
                     stored isframeimage_offsetstored default 0;
 
    property localprops: facelocalpropsty read flocalprops 
-                    write setlocalprops default []; 
+                    write setlocalprops {default []}; 
                                    //before template
    property template: tfacecomp read ftemplate write settemplate;
  end;
@@ -5335,6 +5336,12 @@ begin
  result:= not fintf.getstaticframe;
 end;
 
+procedure tcustomframe.defineproperties(filer: tfiler);
+begin
+ filer.defineproperty('dummy',@readdummy,nil,false);
+ // inherited; //no dummy necessary because of localprops
+end;
+
 { tframetemplate }
 
 constructor tframetemplate.create(const owner: tmsecomponent;
@@ -6417,7 +6424,8 @@ end;
 
 procedure tcustomface.defineproperties(filer: tfiler);
 begin
- inherited;
+// inherited; //no dummy necessary because of localprops
+ filer.defineproperty('dummy',@readdummy,nil,false);
  filer.defineproperty('fade_transparency',@readtransparency,nil,false);
 end;
 

@@ -335,9 +335,9 @@ type
 
  toptionalpersistent = class(tnullinterfacedpersistent)
   private
-   procedure readdummy(reader: treader);
    procedure writedummy(writer: twriter);
   protected
+   procedure readdummy(reader: treader);
    procedure defineproperties(filer : tfiler); override;
    function isoptional: boolean; virtual;
  end;

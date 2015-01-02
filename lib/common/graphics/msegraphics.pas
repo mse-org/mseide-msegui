@@ -615,6 +615,7 @@ type
    function isgrayed_shiftystored(): boolean;
    function isxscalestored(): boolean;
    function isstylestored(): boolean;
+   procedure readdummy(reader: treader);
   protected
    finfo: fontinfoty;
    fhandlepo: ^fontnumty;
@@ -712,9 +713,9 @@ type
    property xscale: real read getxscale write setxscale stored isxscalestored;
                                  //default 1.0
 
-   property template: tfontcomp read ftemplate write settemplate;
    property localprops: fontlocalpropsty read flocalprops write flocalprops
-                                                           default []; //last!
+                                  {default []}; //before template!
+   property template: tfontcomp read ftemplate write settemplate;
  end;
  pfont = ^tfont;
  fontarty = array of tfont;
@@ -3155,9 +3156,15 @@ begin
  shadow_color:= reader.readinteger;
 end;
 
+procedure tfont.readdummy(reader: treader);
+begin
+ reader.readinteger();
+end;
+
 procedure tfont.defineproperties(filer: tfiler);
 begin
- inherited;
+// inherited; //no dummy necessary because of localprops
+ filer.defineproperty('dummy',@readdummy,nil,false);
  filer.defineproperty('colorshadow',{$ifdef FPC}@{$endif}readcolorshadow,
                                                                   nil,false);
 end;
