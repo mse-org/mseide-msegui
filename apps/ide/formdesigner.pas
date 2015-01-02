@@ -3118,7 +3118,7 @@ procedure tformdesignerfo.endstreaming;
 begin
  if fmodule is twidget then begin
   with twidget1(fmodule) do begin
-   fwidgetrect.pos:= paintpos;
+   fwidgetrect.pos:= self.paintpos;
    rootchanged(true);
   end;
  end;
