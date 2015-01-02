@@ -1524,14 +1524,15 @@ begin
       int2:= 0;
       case falign_glue of
        wam_start: begin
-        int2:= innerclientwidgetpos.x;
+        int2:= innerclientpos.x;
        end;
        wam_end: begin
-        int2:= fwidgetrect.cx - (innerclientwidgetpos.x + innerclientsize.cx);
+        int2:= clientwidth - (innerclientpos.x + innerclientsize.cx);
        end;
        else begin //wam_center
-        int2:= (fwidgetrect.cx - 2*innerclientwidgetpos.x -
-                                             innerclientsize.cx) div 2;
+        with innerclientframe do begin
+         int2:= right-left;
+        end;
        end;
       end;
       alignx(align_mode,ar1,align_glue,int2);
@@ -1543,14 +1544,15 @@ begin
       int2:= 0;
       case falign_glue of
        wam_start: begin
-        int2:= innerclientwidgetpos.y;
+        int2:= innerclientpos.y;
        end;
        wam_end: begin
-        int2:= fwidgetrect.cy - (innerclientwidgetpos.y + innerclientsize.cy);
+        int2:= clientheight - (innerclientpos.y + innerclientsize.cy);
        end;
        else begin //wam_center
-        int2:= (fwidgetrect.cy - 2*innerclientwidgetpos.y -
-                                             innerclientsize.cy) div 2;
+        with innerclientframe do begin
+         int2:= bottom-top;
+        end;
        end;
       end;
       aligny(align_mode,ar1,align_glue,int2);

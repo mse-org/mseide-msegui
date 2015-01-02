@@ -1976,12 +1976,12 @@ type
                         const awidgets: array of twidget;
                         const glue: widgetalignmodety = wam_none;
                         const margin: integer = 0): integer;
-                        //returns reference point
+                        //returns reference point, margin reference = clientrect
    function aligny(const mode: widgetalignmodety;
                         const awidgets: array of twidget;
                         const glue: widgetalignmodety = wam_none;
                         const margin: integer = 0): integer;
-                        //returns reference point
+                        //returns reference point, margin reference = clientrect
 {
    function alignx(const mode: widgetalignmodety;
                      const awidgets: array of twidget;
