@@ -39,6 +39,7 @@ type
  twidget1 = class(twidget);
  tactivator1 = class(tactivator);
  tskincontroller1 = class(tskincontroller);
+ tarrayelementeditor1 = class(tarrayelementeditor);
 
  temptysetpropertyeditor = class(tsetpropertyeditor)
   public
@@ -60,6 +61,12 @@ type
    function geteditorclass: propertyeditorclassty; override;
  end;
 
+ tskincolorarraypropertyeditor = class(tpersistentarraypropertyeditor)
+  protected
+   function itemgetvalue(const sender: tarrayelementeditor): msestring;
+                                                                    override;
+ end;   
+ 
  tlevelarrayelementeditor = class(tarrayelementeditor)
   public
    function name: msestring; override;
@@ -185,6 +192,8 @@ begin
  registerpropertyeditor(typeinfo(facelocalpropsty),nil,'',
                                            tfacelocalpropseditor);
 
+ registerpropertyeditor(typeinfo(tskincolors),nil,'',
+                                                 tskincolorarraypropertyeditor);
  registerpropertyeditor(typeinfo(tstatfile),tstatfile,'',
                                       tlinkcomponentpropertyeditor);
 
@@ -670,6 +679,15 @@ begin
  else begin
   exclude(fstate,ps_modified);
  end;
+end;
+
+{ tskincolorarraypropertyeditor }
+
+function tskincolorarraypropertyeditor.itemgetvalue(
+              const sender: tarrayelementeditor): msestring;
+begin
+ result:= '<'+colortostring(tskincolor(
+                     tarrayelementeditor1(sender).getordvalue(0)).color) + '>';
 end;
 
 initialization
