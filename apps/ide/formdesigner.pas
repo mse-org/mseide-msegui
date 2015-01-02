@@ -3558,6 +3558,7 @@ begin
      else begin
       if (ss1 = [ss_left,ss_shift]) and isinpaintrect then begin
        factarea:= ar_selectrect;
+       capturemouse();
        fxorpicoffset:= mousepos1;
        if form <> nil then begin
         fpickwidget:= widgetatpos(mousepos1,false);
