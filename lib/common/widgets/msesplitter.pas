@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2015 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -251,12 +251,13 @@ type
  pwidgetlayoutinfoty = ^widgetlayoutinfoty;
  widgetlayoutinfoarty = array of widgetlayoutinfoty;
 
- layouterstatety = (las_propsizing,las_scalesizerefvalid);
+ layouterstatety = (las_propsizing,las_scalesizerefvalid,
+                    las_delayedupdatelayoutpending);
  layouterstatesty = set of layouterstatety;
  
  tlayouter = class;
  layoutereventty = procedure(const sender: tlayouter) of object;
-  
+
  tlayouter = class(tspacer)
   private
    foptionslayout: layoutoptionsty;
@@ -295,6 +296,7 @@ type
    function childrenheight: integer;
    procedure scalesizerefchanged;
    procedure updatescalesizeref;
+   procedure delayedupdatelayout();
    procedure updatelayout;
    procedure loaded; override;
    procedure fontchanged; override;
@@ -308,6 +310,7 @@ type
    function widgetinfoindex(const awidget: twidget): integer;
    procedure updatewidgetinfo(var ainfo: widgetlayoutinfoty; 
                                     const awidget: twidget);
+   procedure doasyncevent(var atag: integer); override;
   public
    constructor create(aowner: tcomponent); override;
   published
@@ -1460,6 +1463,12 @@ var
 begin
  if (componentstate * [csloading,csdestroying] = []) and 
                             (flayoutupdating = 0) then begin
+  for int1:= 0 to high(fwidgets) do begin
+   if csloading in fwidgets[int1].componentstate then begin
+    delayedupdatelayout();
+    exit;
+   end;
+  end;
   if canevent(tmethod(fonbeforelayout)) then begin
    fonbeforelayout(self);
   end;
@@ -2007,7 +2016,7 @@ var
  int1: integer;
  rea1: real;
 begin
-  with ainfo do begin
+ with ainfo do begin
   if awidget <> nil then begin
    widget:= awidget;
   end;
@@ -2094,6 +2103,27 @@ begin
     refscalesize:= size1;
    end;
   end;
+ end;
+end;
+
+const
+ updatelayouttag = 8436026;
+ 
+procedure tlayouter.delayedupdatelayout;
+begin
+ if not (las_delayedupdatelayoutpending in fstate) then begin
+  include(fstate,las_delayedupdatelayoutpending);
+  asyncevent(updatelayouttag,[peo_local,peo_first]); 
+                                //before childscaled events
+ end;
+end;
+
+procedure tlayouter.doasyncevent(var atag: integer);
+begin
+ inherited;
+ if atag = updatelayouttag then begin
+  exclude(fstate,las_delayedupdatelayoutpending);
+  updatelayout();
  end;
 end;
 
