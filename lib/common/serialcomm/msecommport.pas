@@ -982,8 +982,13 @@ begin       //open
  overlappedtx.hevent:= createevent(nil,true,false,nil);
  
  repeat
-  fhandle:= createfile(pchar(str1),GENERIC_READ or GENERIC_WRITE, 0, nil,
-               OPEN_EXISTING,FILE_FLAG_OVERLAPPED,0);
+  fhandle:= createfile(pchar(str1),GENERIC_READ or GENERIC_WRITE, 0,
+                                    nil,OPEN_EXISTING,FILE_FLAG_OVERLAPPED,0);
+  if (fhandle = invalidfilehandle) and (pos('//./',str1) = 0) then begin
+   str1:= '//./'+str1;
+   fhandle:= createfile(pchar(str1),GENERIC_READ or GENERIC_WRITE, 0,
+                                    nil,OPEN_EXISTING,FILE_FLAG_OVERLAPPED,0);
+  end;
   if fhandle = invalidfilehandle then begin
    sleep(100);
   end;
