@@ -394,6 +394,7 @@ type
    ffindcompclasstag: integer;       //stamp of createcomponenttag
    fcheckfixups: moduleinfopoarty;
    fskipall: integer;
+   fstreaming: integer;
    function formfiletoname(const filename: msestring): msestring;
   {$ifdef mse_nomethodswap}
    procedure setmethodproperty(reader: treader;
@@ -432,8 +433,8 @@ type
    procedure componentevent(const event: tcomponentevent); override;
    function checkmodule(const filename: msestring): pmoduleinfoty;
    procedure checkident(const aname: string);
-   procedure beginstreaming(const amodule: pmoduleinfoty);
-   procedure endstreaming(const amodule: pmoduleinfoty);
+   procedure beginstreaming({const amodule: pmoduleinfoty});
+   procedure endstreaming({const amodule: pmoduleinfoty});
   {$ifndef mse_nomethodswap}
    procedure internaldoswapmethodpointers(const aroot: tcomponent;
                       const ainstance: tobject; const ainit: boolean);
@@ -2529,7 +2530,7 @@ begin
      raise exception.create(actionsmo.c[ord(ac_ancestorfor)]+
            designmoduleclassname+actionsmo.c[ord(ac_notfound)]);
     end;
-    fdesigner.beginstreaming(po1);
+    fdesigner.beginstreaming({po1});
     try
      inheritedbefore:= des_inheritednewmodule in fdesigner.fstate;
      include(fdesigner.fstate,des_inheritednewmodule);
@@ -2538,7 +2539,7 @@ begin
      if not inheritedbefore then begin
       exclude(fdesigner.fstate,des_inheritednewmodule);
      end;
-     fdesigner.endstreaming(po1);
+     fdesigner.endstreaming({po1});
     end;
     moduleintf:= po1^.moduleintf;
     designformclass:= po1^.designformclass;
@@ -3496,22 +3497,50 @@ begin
  end;
 end;
 
-procedure tdesigner.beginstreaming(const amodule: pmoduleinfoty);
+procedure tdesigner.beginstreaming({const amodule: pmoduleinfoty});
+var
+ i1: int32;
 begin
+ if fstreaming = 0 then begin
+  for i1:= 0 to fmodules.count - 1 do begin
+   with fmodules[i1]^ do begin
+    if designform <> nil then begin
+     tformdesignerfo(designform).beginstreaming;
+    end;
+   end;
+  end;
+ end;
+ inc(fstreaming);
+{
  with amodule^ do begin
   if designform <> nil then begin
    tformdesignerfo(designform).beginstreaming;
   end;
  end;
+}
 end;
 
-procedure tdesigner.endstreaming(const amodule: pmoduleinfoty);
+procedure tdesigner.endstreaming({const amodule: pmoduleinfoty});
+var
+ i1: int32;
 begin
+ dec(fstreaming);
+ if fstreaming = 0 then begin
+  for i1:= 0 to fmodules.count - 1 do begin
+   with fmodules[i1]^ do begin
+    if designform <> nil then begin
+     tformdesignerfo(designform).endstreaming;
+    end;
+   end;
+  end;
+ end;
+{
  with amodule^ do begin
   if designform <> nil then begin
    tformdesignerfo(designform).endstreaming;
   end;
  end;
+}
 end;
 
 procedure tdesigner.modulechanged(const amodule: pmoduleinfoty);
@@ -3720,7 +3749,7 @@ begin
  if root <> nil then begin
   po1:= fmodules.findmodule(root);
   if po1 <> nil then begin
-   beginstreaming(po1);
+   beginstreaming({po1});
   {$ifndef mse_nomethodswap}
    buildmethodtable(po1);
   {$endif}
@@ -3835,7 +3864,7 @@ begin
   fdescendentinstancelist.endstreaming;
   endsubmodulecopy;
   if po1 <> nil then begin
-   endstreaming(po1);
+   endstreaming({po1});
   {$ifndef mse_nomethodswap}
    releasemethodtable(po1);
   {$endif}
@@ -4945,7 +4974,7 @@ begin
   if instance is twidget then begin
    fdescendentinstancelist.setnodefaultpos(twidget(instance));
   end;
-  beginstreaming(amodule);
+  beginstreaming({amodule});
   try
    if csancestor in instance.componentstate then begin
     ancestor:= fdescendentinstancelist.findancestor(instance);
@@ -4960,7 +4989,7 @@ begin
    writer1.writedescendent(instance,ancestor);
   finally
    fdescendentinstancelist.endstreaming;
-   endstreaming(amodule);
+   endstreaming({amodule});
    writer1.free;
  {$ifndef mse_nomethodswap}
    doswapmethodpointers(instance,true);
