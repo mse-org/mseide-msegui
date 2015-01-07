@@ -29,12 +29,12 @@ type
    procedure checkindex(const index: integer);
    procedure checkcapacity;
    procedure setcapacity(Value: integer);
-   procedure inccount;
   protected
    frecordsize: integer;
    fcount: integer;
    fdata: pchar;
    fstate: recordliststatesty;
+   procedure inccount;
    procedure setcount(const Value: integer);
    procedure setitem(const index: integer; const source);
    procedure getitem(const index: integer; out dest);
