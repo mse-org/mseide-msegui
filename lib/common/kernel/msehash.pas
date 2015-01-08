@@ -49,7 +49,7 @@ type
 
  thashdatalist = class
   private
-   fdatasize: integer;
+//   fdatasize: integer;
    frecsize: integer;
    fcapacity: integer;
    fcount: integer;
@@ -635,9 +635,8 @@ end;
 
 constructor thashdatalist.create(const datasize: integer);
 begin
- fdatasize:= datasize;
- frecsize:= sizeof(hashheaderty) + 
-              ((datasize + 3) and not 3) + fdatasize; //round up to 4 byte
+// fdatasize:= datasize;
+ frecsize:= (sizeof(hashheaderty) + datasize + 3) and not 3;
  inherited create;
 end;
 
