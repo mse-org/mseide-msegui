@@ -494,6 +494,8 @@ type
     //imsefield
 //   function getproviderflags1: providerflags1ty;
 //   function getlookupinfo: plookupfieldinfoty;
+   function getasid: integer;
+   procedure setasid(const avalue: integer);
   protected
    procedure readlookup(reader: treader);
          //workaround for breaking fix of FPC Mantis 12809
@@ -513,6 +515,7 @@ type
    function asoldsql: string;
 //   property asmsestring: msestring read getasmsestring write setasmsestring;
    property tagpo: pointer read ftagpo write ftagpo;
+   property asid: integer read getasid write setasid; //-1 -> NULL
   published
 //   property providerflags1: providerflags1ty read fproviderflags1 
 //                        write fproviderflags1 default [];
@@ -4548,6 +4551,26 @@ begin
  end
  else begin
   inherited;
+ end;
+end;
+
+function tmsesmallintfield.getasid: integer;
+begin
+ if isnull then begin
+  result:= -1;
+ end
+ else begin
+  result:= asinteger;
+ end;
+end;
+
+procedure tmsesmallintfield.setasid(const avalue: integer);
+begin
+ if avalue = -1 then begin
+  clear;
+ end
+ else begin
+  asinteger:= avalue;
  end;
 end;
 {
