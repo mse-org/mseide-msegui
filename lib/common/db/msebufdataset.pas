@@ -6747,7 +6747,7 @@ end;
 procedure tmsebufdataset.currentcheckbrowsemode;
 begin
  if (state <> dsbrowse) and (fcurrentupdating = 0) and 
-                        not (bs1_recordupdating in fbstate1) then begin
+              ([bs1_recordupdating,bs1_posting] * fbstate1 = []) then begin
   checkbrowsemode;
  end;
 end;
@@ -9506,7 +9506,8 @@ var
 label
  endlab;
 begin
- if not nocheckbrowsemode then begin
+ if not nocheckbrowsemode and ([bs1_posting,bs1_recordupdating] *
+                               tmsebufdataset(fowner).fbstate1 = []) then begin
   tmsebufdataset(fowner).checkbrowsemode;
  end;
  lastind:= high(avalues);
