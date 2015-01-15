@@ -975,6 +975,7 @@ type
    procedure dofilterrecord(var acceptable: boolean); virtual;
    procedure dobeforeapplyupdate; virtual;
    procedure doafterapplyupdate; virtual;
+   procedure dointernalcalcfields(const fetching: boolean);
    
    function islocal: boolean; virtual;
    function updatesortfield(const afield: tfield; const adescend: boolean): boolean;
@@ -3633,6 +3634,7 @@ begin
     finally
      if bs_curvaluemodified in fbstate then begin
       by2:= true;
+      dointernalcalcfields(false);
 //      if (updatekind = ukmodify) and 
 //                          (bs_refreshupdateindex in fbstate) or
 //      (updatekind = ukinsert) and 
@@ -5360,6 +5362,12 @@ begin
  end;
 end;
 
+procedure tmsebufdataset.dointernalcalcfields(const fetching: boolean);
+begin
+ if checkcanevent(self,tmethod(foninternalcalcfields)) then begin
+  foninternalcalcfields(self,fetching);
+ end;
+end;
 
 procedure tmsebufdataset.dataevent(event: tdataevent; info: ptrint);
 var
@@ -5390,12 +5398,10 @@ begin
  end;
  case ord(event) of
   ord(deupdaterecord): begin
-   if checkcanevent(self,tmethod(foninternalcalcfields)) then begin
-    foninternalcalcfields(self,false);
-   end;
+   dointernalcalcfields(false);
   end;
   de_modified: begin
-   notifylookupclients;
+   notifylookupclients();
   end;
  end;
 end;
