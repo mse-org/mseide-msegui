@@ -522,7 +522,7 @@ type
  bufdatasetstatesty = set of bufdatasetstatety;
 
  bufdatasetstate1ty = (bs1_needsresync,
-     bs1_lookupnotifying,bs1_lookupnotifypending,bs1_posting,
+     bs1_lookupnotifying,bs1_lookupnotifypending,bs1_posting,bs1_recordupdating,
                           bs1_deferdeleterecupdatebuffer,bs1_restoreupdate);
  bufdatasetstates1ty = set of bufdatasetstate1ty;
  
@@ -1042,6 +1042,7 @@ type
    procedure enablecontrols; override;
    procedure beginlookupupdate(); //delays notifylookupclient calls
    procedure endlookupupdate();
+   procedure updaterecord(); override;
    procedure post; override;
    procedure gotobookmark(const abookmark: bookmarkdataty); overload;
    function findbookmark(const abookmark: bookmarkdataty): boolean;
@@ -5406,6 +5407,21 @@ begin
  end;
 end;
 
+procedure tmsebufdataset.updaterecord();
+var
+ bo1: boolean;
+begin
+ bo1:= bs1_recordupdating in fbstate1;
+ include(fbstate1,bs1_recordupdating);
+ try
+  inherited;
+ finally
+  if not bo1 then begin
+   exclude(fbstate1,bs1_recordupdating);
+  end;
+ end;
+end;
+
 function tmsebufdataset.bookmarkdatatobookmark(
                       const abookmark: bookmarkdataty): bookmarkty;
 begin
@@ -6730,7 +6746,8 @@ end;
 
 procedure tmsebufdataset.currentcheckbrowsemode;
 begin
- if (state <> dsbrowse) and (fcurrentupdating = 0) then begin
+ if (state <> dsbrowse) and (fcurrentupdating = 0) and 
+                        not (bs1_recordupdating in fbstate1) then begin
   checkbrowsemode;
  end;
 end;

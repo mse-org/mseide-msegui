@@ -1693,7 +1693,7 @@ type
     procedure SetFields(const Values: array of const);
     function  Translate(Src, Dest: PChar; ToOem: Boolean): Integer; virtual;
     procedure UpdateCursorPos;
-    procedure UpdateRecord;
+    procedure UpdateRecord; virtual;
     function UpdateStatus: TUpdateStatus; virtual;
     property BlockReadSize: Integer read FBlockReadSize write SetBlockReadSize;
     property BOF: Boolean read FBOF;
