@@ -18656,6 +18656,7 @@ function tguiapplication.terminate(const sender: twindow = nil): boolean;
 var
  int1: integer;
 begin
+ result:= false;
  include(fstate,aps_terminating);
  try
   int1:= 0;
