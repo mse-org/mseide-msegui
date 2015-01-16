@@ -508,7 +508,7 @@ type
                       bs_connected,
                       bs_hasindex,bs_fetchall,bs_initinternalcalc,
                       bs_blobsfetched,bs_blobscached,bs_blobssorted,
-                      bs_indexvalid,
+                      bs_hasvalidindex,
                       bs_editing,bs_append,bs_internalcalc,bs_startedit,
                       bs_utf8,
                       bs_hasfilter,bs_visiblerecordcountvalid,
@@ -671,7 +671,7 @@ type
                     //returns index
    procedure internalsetrecno(const avalue: integer);
    procedure setactindex(const avalue: integer);
-   procedure checkindex(const force: boolean);
+   procedure checkindex(const aid: integer{; const force: boolean});
    
    function getmsestringdata(const sender: tmsestringfield; 
                                out avalue: msestring): boolean;
@@ -2637,13 +2637,14 @@ begin
  end;
 end;
 
-function tmsebufdataset.findbookmarkindex(const abookmark: bookmarkdataty): integer;
+function tmsebufdataset.findbookmarkindex(
+                                const abookmark: bookmarkdataty): integer;
 begin
  with abookmark do begin
   if (recno >= fbrecordcount) or (recno < 0) then begin
    databaseerror('Invalid bookmark recno: '+inttostr(recno)+'.'); 
   end;
-  checkindex(false);
+//  checkindex(false);
   if (factindexpo^.ind[recno] <> recordpo) and (recordpo <> nil) then begin
    result:= findrecord(recordpo);
    if result < 0 then begin
@@ -2670,7 +2671,7 @@ var
 begin
  result:= false;
  with abookmark do begin
-  checkindex(false);
+//  checkindex(false);
   if (recno < 0) or (recno >= fbrecordcount) or 
           (factindexpo^.ind[recno] <> recordpo) and (recordpo <> nil) then begin
    int1:= findrecord(recordpo);
@@ -3869,22 +3870,24 @@ var
  int1: integer;
  lastind: integer;
 begin
- if (bs_indexvalid in fbstate) then begin
+ if (bs_hasvalidindex in fbstate) then begin
   setlength(ar1,findexlocal.count);
   setlength(ar2,length(ar1));
   setlength(ar3,length(ar1));
   for int1:= high(ar1) downto 0 do begin
-   with findexlocal[int1] do begin
-    lastind:= high(findexfieldinfos);
-    ar2[int1]:= compare1(oldbuffer,newbuffer,lastind,false);
-    if ar2[int1] <> 0 then begin
-     if int1 = factindex - 1 then begin
-      ar1[int1]:= frecno + 1; //for fast find of bufpo
-     end
-     else begin
-      ar1[int1]:= findboundary(oldbuffer,lastind,true); //old boundary
+   if findexes[int1+1].ind <> nil then begin
+    with findexlocal[int1] do begin
+     lastind:= high(findexfieldinfos);
+     ar2[int1]:= compare1(oldbuffer,newbuffer,lastind,false);
+     if ar2[int1] <> 0 then begin
+      if int1 = factindex - 1 then begin
+       ar1[int1]:= frecno + 1; //for fast find of bufpo
+      end
+      else begin
+       ar1[int1]:= findboundary(oldbuffer,lastind,true); //old boundary
+      end;
+      ar3[int1]:= findboundary(newbuffer,lastind,true); //new boundary
      end;
-     ar3[int1]:= findboundary(newbuffer,lastind,true); //new boundary
     end;
    end;
   end;
@@ -3896,25 +3899,27 @@ procedure tmsebufdataset.relocateindex(const abuffer: pintrecordty;
 var
  int1,int2,int3: integer;
 begin
- if bs_indexvalid in fbstate then begin
+ if bs_hasvalidindex in fbstate then begin
 //  with pdsrecordty(activebuffer)^ do begin
   for int1:= high(ar1) downto 0 do begin
-   if ar2[int1] <> 0 then begin // position changed
-    include(fbstate1,bs1_needsresync);
-    int2:= ar3[int1];           //new boundary
-    with findexes[int1+1] do begin
-     for int3:= ar1[int1] - 1 downto 0 do begin
-      if ind[int3] = abuffer then begin //update indexes
-       move(ind[int3+1],ind[int3],(fbrecordcount-int3-1)*sizeof(pointer));
-       if int3 < int2 then begin
-        dec(int2);
+   if findexes[int1+1].ind <> nil then begin
+    if ar2[int1] <> 0 then begin // position changed
+     include(fbstate1,bs1_needsresync);
+     int2:= ar3[int1];           //new boundary
+     with findexes[int1+1] do begin
+      for int3:= ar1[int1] - 1 downto 0 do begin
+       if ind[int3] = abuffer then begin //update indexes
+        move(ind[int3+1],ind[int3],(fbrecordcount-int3-1)*sizeof(pointer));
+        if int3 < int2 then begin
+         dec(int2);
+        end;
+        move(ind[int2],ind[int2+1],(fbrecordcount-int2-1)*sizeof(pointer));
+        ind[int2]:= abuffer;
+        if (int1 = factindex - 1) then begin
+         frecno:= int2;
+        end;
+        break;
        end;
-       move(ind[int2],ind[int2+1],(fbrecordcount-int2-1)*sizeof(pointer));
-       ind[int2]:= abuffer;
-       if (int1 = factindex - 1) then begin
-        frecno:= int2;
-       end;
-       break;
       end;
      end;
     end;
@@ -3940,7 +3945,7 @@ var
  canapply: boolean;
  
 begin
- checkindex(false); //needed for first append
+ checkindex(factindex); //needed for first append
  with pdsrecordty(activebuffer)^ do begin
   bo1:= false;
   if state = dsinsert then begin
@@ -4823,9 +4828,11 @@ begin
  if high(factindexpo^.ind) <= fbrecordcount then begin
   int2:= (fbrecordcount+16)*2;
   setlength(findexes[0].ind,int2);
-  if bs_indexvalid in fbstate then begin
+  if bs_hasvalidindex in fbstate then begin
    for int1:= 1 to high(findexes) do begin
-    setlength(findexes[int1].ind,int2);
+    if findexes[int1].ind <> nil then begin
+     setlength(findexes[int1].ind,int2);
+    end;
    end;
   end;
  end;
@@ -4836,18 +4843,20 @@ var
  int1,int2: integer;
 begin
  result:= frecno;
- if bs_indexvalid in fbstate then begin
+ if bs_hasvalidindex in fbstate then begin
   for int1:= 1 to high(findexes) do begin
-   with findexlocal[int1-1] do begin
-    int2:= findboundary(arecord,high(findexfieldinfos),true);
-   end;
-   with findexes[int1] do begin
-    if int2 < fbrecordcount then begin
-     move(ind[int2],ind[int2+1],(fbrecordcount-int2)*sizeof(pointer));
+   if findexes[int1].ind <> nil then begin
+    with findexlocal[int1-1] do begin
+     int2:= findboundary(arecord,high(findexfieldinfos),true);
     end;
-    ind[int2]:= arecord;
-    if int1 = factindex then begin
-     result:= int2;
+    with findexes[int1] do begin
+     if int2 < fbrecordcount then begin
+      move(ind[int2],ind[int2+1],(fbrecordcount-int2)*sizeof(pointer));
+     end;
+     ind[int2]:= arecord;
+     if int1 = factindex then begin
+      result:= int2;
+     end;
     end;
    end;
   end;
@@ -4858,15 +4867,17 @@ procedure tmsebufdataset.removeindexrefs(const arecord: pintrecordty);
 var
  int1,int2: integer;
 begin
- if bs_indexvalid in fbstate then begin
+ if bs_hasvalidindex in fbstate then begin
   for int1:= 1 to high(findexes) do begin
-   if int1 <> factindex then begin
-    int2:= findexlocal[int1-1].findrecord(arecord);
-    if int2 < 0 then begin
-     databaseerror('Internal error: Indexed record not found.');
-    end;
-    with findexes[int1] do begin
-     move(ind[int2+1],ind[int2],(fbrecordcount-int2-1)*sizeof(pointer));
+   if findexes[int1].ind <> nil then begin
+    if int1 <> factindex then begin
+     int2:= findexlocal[int1-1].findrecord(arecord);
+     if int2 < 0 then begin
+      databaseerror('Internal error: Indexed record not found.');
+     end;
+     with findexes[int1] do begin
+      move(ind[int2+1],ind[int2],(fbrecordcount-int2-1)*sizeof(pointer));
+     end;
     end;
    end;
   end;
@@ -4937,7 +4948,7 @@ procedure tmsebufdataset.deleterecord(const arecord: pintrecordty);
 var
  int1: integer;
 begin
- if bs_indexvalid in fbstate then begin
+ if bs_hasvalidindex in fbstate then begin
   int1:= factindex;
   factindex:= 0;
   removeindexrefs(arecord);
@@ -4952,7 +4963,7 @@ var
 // int1: integer;
 begin
  po1:= factindexpo^.ind[arecno];
- if bs_indexvalid in fbstate then begin
+ if bs_hasvalidindex in fbstate then begin
   removeindexrefs(po1);
   if factindex <> 0 then begin
    move(factindexpo^.ind[arecno+1],factindexpo^.ind[arecno],
@@ -4979,26 +4990,24 @@ begin
  end;
 end;
 
-procedure tmsebufdataset.checkindex(const force: boolean);
+procedure tmsebufdataset.checkindex(const aid: integer);
 var
- int1,int2{,int3}: integer;
+ int2: integer;
 begin
- if (force or (factindex <> 0)) and not (bs_indexvalid in fbstate) then begin
+ if aid > 0 then begin
   int2:= length(findexes[0].ind);
   if int2 > 0 then begin
-   for int1:= 1 to high(findexes) do begin
-    with findexes[int1] do begin
-     if ind = nil then begin
-      allocuninitedarray(int2,sizeof(pointer),ind);
-      if fbrecordcount > 0 then begin
-       move(findexes[0].ind[0],ind[0],fbrecordcount*sizeof(pointer));
-       findexlocal.items[int1-1].sort(ind);
-      end;
+   with findexes[aid] do begin
+    if ind = nil then begin
+     allocuninitedarray(int2,sizeof(pointer),ind);
+     if fbrecordcount > 0 then begin
+      move(findexes[0].ind[0],ind[0],fbrecordcount*sizeof(pointer));
+      findexlocal.items[aid-1].sort(ind);
      end;
     end;
    end;
   end;
-  include(fbstate,bs_indexvalid);
+  include(fbstate,bs_hasvalidindex);
  end;
 end;
 
@@ -5009,7 +5018,7 @@ begin
   fcurrentbuf:= nil;
  end
  else begin
-  checkindex(false);
+  checkindex(factindex);
   fcurrentbuf:= factindexpo^.ind[avalue];
  end;
 // tdatasetcracker(self).fbof:= frecno = 0;
@@ -5019,7 +5028,7 @@ procedure tmsebufdataset.clearindex;
 begin
  findexes:= nil;
  factindexpo:= nil;
- exclude(fbstate,bs_indexvalid);
+ exclude(fbstate,bs_hasvalidindex);
 end;
 
 procedure tmsebufdataset.setindexlocal(const avalue: tlocalindexes);
@@ -5071,7 +5080,7 @@ begin
  for int1:= 1 to high(findexes) do begin
   findexes[int1].ind:= nil;
  end;
- exclude(fbstate,bs_indexvalid);
+ exclude(fbstate,bs_hasvalidindex);
 end;
 
 function tmsebufdataset.GetFieldClass(FieldType: TFieldType): TFieldClass;
@@ -6216,7 +6225,8 @@ begin
  actindexbefore:= factindex;
  factindex:= 0;
  factindexpo:= @findexes[0];
- fbstate:= fbstate - [bs_blobscached,bs_indexvalid];
+ fbstate:= fbstate - [bs_blobscached];
+ resetindex();
 // exclude(fbstate,bs_blobscached);
  reader:= tbufstreamreader.create(self,floadingstream);
  try
@@ -6444,6 +6454,7 @@ begin
   reader.free;
   factindex:= actindexbefore;
   factindexpo:= @findexes[factindex];
+  checkindex(factindex);
  end;
 end;
 
@@ -6819,7 +6830,7 @@ begin
  if afield.dataset <> self then begin
   raise ecurrentvalueaccess.create(self,afield,'Wrong dataset.');
  end;
- checkindex(false);
+ checkindex(factindex);
  if aindex < 0 then begin
   aindex:= frecno;
  end;
@@ -6900,7 +6911,7 @@ begin
  if (afield.fieldkind <> fkinternalcalc) then begin
   raise ecurrentvalueaccess.create(self,afield,'Field must be fkInternalCalc.');
  end;
- checkindex(false);
+ checkindex(factindex);
  if aindex < 0 then begin
   aindex:= frecno;
  end;
@@ -7778,7 +7789,7 @@ begin
  if ft1 = ftwidestring then begin 
   ft1:= ftstring
  end;
- checkindex(false);
+ checkindex(factindex);
  int1:= afield.fieldno-1;
  with ffieldinfos[int1] do begin
   if not (ext.basetype in fielddatacompatibility[ft1]) then begin
@@ -8423,7 +8434,7 @@ var
  bm1: bookmarkdataty;
 begin
  if indexnum >= 0 then begin
-  checkindex(true);
+  checkindex(indexnum+1);
  end;
  bm1.recno:= arecord;
  bm1.recordpo:= findexes[indexnum+1].ind[arecord];
@@ -8465,7 +8476,7 @@ var
  bm1: bookmarkdataty;
 begin
  if indexnum >= 0 then begin
-  checkindex(true);
+  checkindex(indexnum+1);
  end;
  bm1.recno:= arecord;
  bm1.recordpo:= findexes[indexnum+1].ind[arecord];
@@ -8478,7 +8489,7 @@ var
  bm1: bookmarkdataty;
 begin
  if indexnum >= 0 then begin
-  checkindex(true);
+  checkindex(indexnum+1);
  end;
  bm1.recno:= arecord;
  bm1.recordpo:= findexes[indexnum+1].ind[arecord];
@@ -8833,7 +8844,7 @@ begin
      else begin
       with tmsebufdataset(fowner) do begin
        findexes[int1+1].ind:= nil;
-       exclude(tmsebufdataset(fowner).fbstate,bs_indexvalid);
+//       exclude(tmsebufdataset(fowner).fbstate,bs_indexvalid);
       end;
      end;      
     end;
@@ -8853,7 +8864,7 @@ begin
     finvalid:= false;
     with tmsebufdataset(fowner) do begin
      findexes[int1+1].ind:= nil;
-     exclude(fbstate,bs_indexvalid);
+//     exclude(fbstate,bs_indexvalid);
     end;
    end;
   end;
@@ -8941,7 +8952,7 @@ begin
       checkbrowsemode;
      end;
      ind:= nil;
-     exclude(fbstate,bs_indexvalid);
+//     exclude(fbstate,bs_indexvalid);
      if factindex = int1 then begin
       internalsetrecno(findrecord(fcurrentbuf));
       resync([]);
@@ -9333,43 +9344,46 @@ var
  lo,up,pivot: integer;
 begin
  result:= 0;
- with tmsebufdataset(fowner),findexes[findexlocal.indexof(self) + 1] do begin
-  if fbrecordcount > 0 then begin
-   int1:= 0;
-   checkindex(true);
-   lo:= 0;
-   up:= fbrecordcount - 1;
-   if abigger then begin
-    while lo <= up do begin
-     pivot:= (up + lo) div 2;
-     int1:= compare1(arecord,ind[pivot],alastindex,false);
-     if int1 >= 0 then begin //pivot <= rev
-      lo:= pivot + 1;
-     end
-     else begin
-      up:= pivot;
-      if up = lo then begin
-       break;
+ with tmsebufdataset(fowner) do begin
+  int1:= findexlocal.indexof(self) + 1;
+  with findexes[int1] do begin
+   if fbrecordcount > 0 then begin
+    checkindex(int1);
+    int1:= 0;
+    lo:= 0;
+    up:= fbrecordcount - 1;
+    if abigger then begin
+     while lo <= up do begin
+      pivot:= (up + lo) div 2;
+      int1:= compare1(arecord,ind[pivot],alastindex,false);
+      if int1 >= 0 then begin //pivot <= rev
+       lo:= pivot + 1;
+      end
+      else begin
+       up:= pivot;
+       if up = lo then begin
+        break;
+       end;
       end;
      end;
-    end;
-    result:= lo;
-   end
-   else begin
-    while lo <= up do begin
-     pivot:= (up + lo + 1) div 2;
-     int1:= compare1(arecord,ind[pivot],alastindex,false);
-     if int1 <= 0 then begin //pivot >= rev
-      up:= pivot - 1;
-     end
-     else begin
-      lo:= pivot;
-      if up = lo then begin
-       break;
+     result:= lo;
+    end
+    else begin
+     while lo <= up do begin
+      pivot:= (up + lo + 1) div 2;
+      int1:= compare1(arecord,ind[pivot],alastindex,false);
+      if int1 <= 0 then begin //pivot >= rev
+       up:= pivot - 1;
+      end
+      else begin
+       lo:= pivot;
+       if up = lo then begin
+        break;
+       end;
       end;
      end;
+     result:= up;
     end;
-    result:= up;
    end;
   end;
  end;
@@ -9904,13 +9918,15 @@ end;
 
 function tlocalindex.getbookmark(const arecno: integer): bookmarkty;
 var
+ int1: integer;
  bm1: bookmarkdataty;
 begin
  with tmsebufdataset(fowner) do begin
   checkrecno(arecno);
-  checkindex(true);
+  int1:= findexlocal.indexof(self) + 1;
+  checkindex(int1);
   bm1.recno:= arecno - 1;
-  bm1.recordpo:= findexes[findexlocal.indexof(self) + 1].ind[arecno-1];
+  bm1.recordpo:= findexes[int1].ind[arecno-1];
   result:= bookmarkdatatobookmark(bm1);
  end;
 end;
