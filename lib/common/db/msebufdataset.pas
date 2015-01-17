@@ -3945,7 +3945,7 @@ var
  canapply: boolean;
  
 begin
- checkindex(factindex); //needed for first append
+ checkindex(factindex);
  with pdsrecordty(activebuffer)^ do begin
   bo1:= false;
   if state = dsinsert then begin
@@ -4026,6 +4026,9 @@ begin
   if state = dsinsert then begin
    with dsheader.bookmark do  begin
     frecno:= insertrecord(frecno,fcurrentbuf);
+    if factindexpo^.ind = nil then begin
+     checkindex(factindex); //for first record
+    end;
     fcurrentbuf:= factindexpo^.ind[frecno];
     data.recordpo:= fcurrentbuf;
     data.recno:= frecno;
