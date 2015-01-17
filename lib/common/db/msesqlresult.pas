@@ -1706,7 +1706,7 @@ var
 begin
  refresh;
  if eof or (cols.count = 0) then begin
-  result:= null;//unassigned;
+  result:= nil;
   while not eof do begin
    next; //eat the rest;
   end;
