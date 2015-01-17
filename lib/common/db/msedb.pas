@@ -1101,8 +1101,8 @@ type
 
  tmsedatalink = class(tdatalink)
   private
-   function getrecnonullbased: integer;
-   procedure setrecnonullbased(const avalue: integer);
+   function getrecnozerobased: integer;
+   procedure setrecnozerobased(const avalue: integer);
   protected
    fcanclosing: integer;
    fdscontroller: tdscontroller;
@@ -1129,8 +1129,8 @@ type
    property utf8: boolean read getutf8;
    property filtereditkind: filtereditkindty read getfiltereditkind;
    function canclose: boolean;
-   property recnonullbased: integer read getrecnonullbased 
-                                          write setrecnonullbased;
+   property recnozerobased: integer read getrecnozerobased 
+                                          write setrecnozerobased;
  end;
 
  fielddatalinkstatety = (fds_ismsestring,fds_islargeint,fds_isstring,
@@ -1378,8 +1378,8 @@ type
    procedure setfields(const avalue: tpersistentfields);
    function getcontroller: tdscontroller;
    procedure updatelinkedfields;
-   function getrecnonullbased: integer;
-   procedure setrecnonullbased(const avalue: integer);
+   function getrecnozerobased: integer;
+   procedure setrecnozerobased(const avalue: integer);
    function getrecno: integer;
    procedure setrecno(const avalue: integer);
    procedure registeronidle;
@@ -1451,12 +1451,12 @@ type
    procedure modified;
    procedure dataevent(const event: tdataevent; info: ptrint);
    property recno: integer read getrecno write setrecno;
-   property recnonullbased: integer read getrecnonullbased 
-                                       write setrecnonullbased;
+   property recnozerobased: integer read getrecnozerobased
+                                       write setrecnozerobased;
    property recnooffset: integer read frecnooffset;
    function findrecno(const arecno: integer; 
                             const options: recnosearchoptionsty = []): integer;
-   function findrecnonullbased(const arecno: integer; 
+   function findrecnozerobased(const arecno: integer; 
                             const options: recnosearchoptionsty = []): integer;
    
    function moveby(const distance: integer): integer;
@@ -6412,13 +6412,13 @@ begin
  end;
 end;
 
-function tmsedatalink.getrecnonullbased: integer;
+function tmsedatalink.getrecnozerobased: integer;
 var
  ds1: tdataset;
 begin
  result:= -1;
  if fdscontroller <> nil then begin
-  result:= fdscontroller.recnonullbased;
+  result:= fdscontroller.recnozerobased;
  end
  else begin
   ds1:= dataset;
@@ -6428,12 +6428,12 @@ begin
  end;
 end;
 
-procedure tmsedatalink.setrecnonullbased(const avalue: integer);
+procedure tmsedatalink.setrecnozerobased(const avalue: integer);
 var
  ds1: tdataset;
 begin
  if fdscontroller <> nil then begin
-  fdscontroller.recnonullbased:= avalue;
+  fdscontroller.recnozerobased:= avalue;
  end
  else begin
   ds1:= dataset;
@@ -7271,7 +7271,7 @@ begin
  result:= msefieldtypeclasses[tfieldtypetotypety[fieldtype]];
 end;
 
-function tdscontroller.getrecnonullbased: integer;
+function tdscontroller.getrecnozerobased: integer;
 begin
  with tdataset1(fowner) do begin
   if bof and eof then begin
@@ -7307,9 +7307,9 @@ begin
  end;
 end;
 
-procedure tdscontroller.setrecnonullbased(const avalue: integer);
+procedure tdscontroller.setrecnozerobased(const avalue: integer);
 begin
- if avalue <> getrecnonullbased then begin
+ if avalue <> getrecnozerobased then begin
   tdataset1(fowner).recno:= avalue - recnooffset;
   frecno:= avalue;
   factiverecordbefore:= tdataset1(fowner).activerecord;
@@ -7329,31 +7329,31 @@ end;
 
 function tdscontroller.getrecno: integer;
 begin
- result:= recnonullbased - frecnooffset;
+ result:= recnozerobased - frecnooffset;
 end;
 
 procedure tdscontroller.setrecno(const avalue: integer);
 begin
- recnonullbased:= avalue + frecnooffset;
+ recnozerobased:= avalue + frecnooffset;
 end;
 
 function tdscontroller.findrecno(const arecno: integer;
                const options: recnosearchoptionsty): integer;
 begin
- result:= findrecnonullbased(arecno+frecnooffset,options)-frecnooffset;
+ result:= findrecnozerobased(arecno+frecnooffset,options)-frecnooffset;
 end;
 
-function tdscontroller.findrecnonullbased(const arecno: integer;
+function tdscontroller.findrecnozerobased(const arecno: integer;
                const options: recnosearchoptionsty = []): integer;
 begin
  try
-  recnonullbased:= arecno;
+  recnozerobased:= arecno;
  except
   with tdataset(fowner) do begin
    disablecontrols;
    try
     resync([]);
-    if (recnonullbased > arecno) and (rso_backward in options) then begin
+    if (recnozerobased > arecno) and (rso_backward in options) then begin
      prior;
     end;
    finally
@@ -7361,7 +7361,7 @@ begin
    end;
   end;
  end;
- result:= recnonullbased;
+ result:= recnozerobased;
 end;
 
 procedure tdscontroller.updatelinkedfields;

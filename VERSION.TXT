@@ -1,5 +1,7 @@
 MSEide+MSEgui breaking changes version history
 
+2015-01-17
+ tdscontroller.recnonullbased -> recnozerobased.
 2014-12-26
  tskinfont has template property instead of individual properties.
  

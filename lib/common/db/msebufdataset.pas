@@ -1046,6 +1046,9 @@ type
    procedure post; override;
    procedure gotobookmark(const abookmark: bookmarkdataty); overload;
    function findbookmark(const abookmark: bookmarkdataty): boolean;
+   property bookmarkdata: bookmarkdataty read getbookmarkdata1
+                                             write setbookmarkdata1;
+   function recnobookmark(const arecnozerobased: int32): bookmarkdataty;
    
    function createblobstream(field: tfield;
                                      mode: tblobstreammode): tstream; override;
@@ -1182,9 +1185,6 @@ type
    function updatestatus: tupdatestatus; overload; override;
    function updatestatus(out aflags: recupdateflagsty): tupdatestatus; overload;
    
-   property bookmarkdata: bookmarkdataty read getbookmarkdata1
-                                             write setbookmarkdata1;
-
    procedure currentbeginupdate; virtual;
    procedure currentendupdate; virtual;
    function currentrecordhigh: integer; //calls checkbrowsemode
@@ -8723,6 +8723,14 @@ end;
 function tmsebufdataset.getcomponent: tcomponent;
 begin
  result:= self;
+end;
+
+function tmsebufdataset.recnobookmark(
+              const arecnozerobased: int32): bookmarkdataty;
+begin
+ checkrecno(arecnozerobased+1);
+ result.recno:= arecnozerobased;
+ result.recordpo:= factindexpo^.ind[arecnozerobased];
 end;
 
 { tlocalindexes }

@@ -1400,7 +1400,7 @@ type
                              const selectaction: focuscellactionty);
    function domoveby(const distance: integer): integer; virtual;
    function moveby(distance: integer): integer; override;
-   function rowtorecnonullbased(const row: integer): integer;
+   function rowtorecnozerobased(const row: integer): integer;
    function isfirstrow: boolean;
    function islastrow: boolean;
    property owner: tcustomgrid read fgrid;
@@ -7968,17 +7968,17 @@ end;
 function tgriddatalink.arecord: integer;
 begin
  if fdscontroller <> nil then begin
-  result:= fdscontroller.recnonullbased;
+  result:= fdscontroller.recnozerobased;
  end
  else begin
   result:= dataset.recno;
  end;
 end;
 
-function tgriddatalink.rowtorecnonullbased(const row: integer): integer;
+function tgriddatalink.rowtorecnozerobased(const row: integer): integer;
 begin
  if active then begin
-  result:= recnonullbased + row - activerecord;
+  result:= recnozerobased + row - activerecord;
  end
  else begin
   result:= -1;
@@ -8427,14 +8427,14 @@ begin
  if (cell.row >= 0) and (cell.row <> fgrid.row) then begin
   ds1:= dataset;
   if (ds1 <> nil) then begin
-   int1:= rowtorecnonullbased(cell.row);
+   int1:= rowtorecnozerobased(cell.row);
    if not (finserting and not finsertingbefore) then begin
-    int3:= recnonullbased;
+    int3:= recnozerobased;
     if (ds1.state <> dsfilter) and not fautoinserting and 
                         (tcustomgrid1(fgrid).fnocheckvalue = 0) then begin
      ds1.checkbrowsemode;
     end;
-    int4:= recnonullbased;
+    int4:= recnozerobased;
     if (int1 < int3) and (int1 >= int4) then begin
      inc(int1);
     end
@@ -8447,7 +8447,7 @@ begin
    int2:= ds1.recordcount;
    if (int1 >= 0) and (int1 < int2) and (ds1.state <> dsfilter) then begin
     invalidateindicator; //grid can be defocused
-    int1:= int1-recnonullbased;
+    int1:= int1-recnozerobased;
     if int1 <> 0 then begin
      dataset.moveby(int1);
     end;
