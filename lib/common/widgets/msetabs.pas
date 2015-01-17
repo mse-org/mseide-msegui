@@ -194,7 +194,7 @@ type
    procedure createitem(const index: integer; var item: tpersistent); override;
    procedure dochange(const index: integer); override;
    procedure checktemplate(const sender: tobject);
-   //iframe
+    //iframe
    procedure setframeinstance(instance: tcustomframe);
    procedure setstaticframe(value: boolean);
    function getstaticframe: boolean;
@@ -2847,7 +2847,7 @@ end;
 
 procedure ttabbar.dostatread(const reader: tstatreader);
 begin
- flayoutinfo.tabs.dostatread(reader);
+ flayoutinfo.tabs.dostatread(reader,tabo_dragdest in foptions);
  if reader.canstate then begin
   activetab:= reader.readinteger('activetab',activetab);
  end;
@@ -2855,7 +2855,7 @@ end;
 
 procedure ttabbar.dostatwrite(const writer: tstatwriter);
 begin
- flayoutinfo.tabs.dostatwrite(writer);
+ flayoutinfo.tabs.dostatwrite(writer,tabo_dragdest in foptions);
  if writer.canstate then begin
   writer.writeinteger('activetab',activetab);
  end;
@@ -4508,7 +4508,7 @@ end;
    //istatfile
 procedure tcustomtabwidget.dostatread(const reader: tstatreader);
 begin
- ftabs.flayoutinfo.tabs.dostatread(reader);
+ ftabs.flayoutinfo.tabs.dostatread(reader,tabo_dragdest in tab_options);
  if reader.canstate then begin
   if tabo_tabsizing in tab_options then begin
    tab_size:= reader.readinteger('tabsize',tab_size);
@@ -4520,7 +4520,7 @@ end;
 
 procedure tcustomtabwidget.dostatwrite(const writer: tstatwriter);
 begin
- ftabs.flayoutinfo.tabs.dostatwrite(writer);
+ ftabs.flayoutinfo.tabs.dostatwrite(writer,tabo_dragdest in tab_options);
  if writer.canstate then begin
   if tabo_tabsizing in tab_options then begin
    writer.writeinteger('tabsize',tab_size);

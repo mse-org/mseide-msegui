@@ -1590,12 +1590,12 @@ end;
 
 procedure tcustomtoolbar.dostatread(const reader: tstatreader);
 begin
- flayout.buttons.dostatread(reader);
+ flayout.buttons.dostatread(reader,tbo_dragdest in foptions);
 end;
 
 procedure tcustomtoolbar.dostatwrite(const writer: tstatwriter);
 begin
- flayout.buttons.dostatwrite(writer);
+ flayout.buttons.dostatwrite(writer,tbo_dragdest in foptions);
 end;
 
 procedure tcustomtoolbar.statreading;

@@ -411,10 +411,10 @@ type
    constructor create(const aowner: tobject; aclasstype: indexpersistentclassty);
                    reintroduce; virtual;
    procedure add(const item: tindexpersistent);
-   procedure dostatwrite(const writer: tstatwriter);
+   procedure dostatwrite(const writer: tstatwriter; const aorder: boolean);
    procedure writeorder(const writer: tstatwriter);
    function readorder(const reader: tstatreader): integerarty;
-   procedure dostatread(const reader: tstatreader);
+   procedure dostatread(const reader: tstatreader; const aorder: boolean);
    procedure clearorder; //ident order = index order
    function newident: integer;
    property idents: integerarty read getidents;
@@ -2013,14 +2013,17 @@ begin
  end;
 end;
 
-procedure tindexpersistentarrayprop.dostatread(const reader: tstatreader);
+procedure tindexpersistentarrayprop.dostatread(const reader: tstatreader;
+                                                       const aorder: boolean);
 var
  int1: integer;
 begin
  if reader.canstate then begin
   beginupdate;
   try
-   readorder(reader);
+   if aorder then begin
+    readorder(reader);
+   end;
    for int1:= 0 to count -1 do begin
     tindexpersistent(fitems[int1]).dostatread(reader);
    end;
@@ -2030,7 +2033,8 @@ begin
  end;
 end;
 
-procedure tindexpersistentarrayprop.dostatwrite(const writer: tstatwriter);
+procedure tindexpersistentarrayprop.dostatwrite(const writer: tstatwriter;
+                                                        const aorder: boolean);
 var
  int1: integer;
 begin
@@ -2038,7 +2042,9 @@ begin
   for int1:= 0 to count -1 do begin
    tindexpersistent(fitems[int1]).dostatwrite(writer);
   end;
-  writeorder(writer);
+  if aorder then begin
+   writeorder(writer);
+  end;
  end;
 end;
 

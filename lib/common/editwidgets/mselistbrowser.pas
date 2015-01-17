@@ -207,8 +207,10 @@ type
    procedure changeselectedrange(const start,oldend,newend: gridcoordty;
             calldoselectcell: boolean); override;
    procedure gridrecttoindex(const rect: gridrectty; out start,stop: integer);
-   procedure dostatread(const reader: tstatreader); override;
-   procedure dostatwrite(const writer: tstatwriter); override;
+   procedure dostatread(const reader: tstatreader;
+                                      const aorder: boolean); override;
+   procedure dostatwrite(const writer: tstatwriter;
+                                      const aorder: boolean); override;
   public
    constructor create(aowner: tcustomlistview);
    procedure setselectedrange(const start,stop: gridcoordty;
@@ -1187,7 +1189,8 @@ begin
  end;
 end;
 
-procedure tlistcols.dostatread(const reader: tstatreader);
+procedure tlistcols.dostatread(const reader: tstatreader;
+                                      const aorder: boolean);
 begin
  inherited;
  with tcustomlistview(fgrid) do begin
@@ -1197,7 +1200,8 @@ begin
  end;
 end;
 
-procedure tlistcols.dostatwrite(const writer: tstatwriter);
+procedure tlistcols.dostatwrite(const writer: tstatwriter;
+                                      const aorder: boolean);
 begin
  inherited;
  with tcustomlistview(fgrid) do begin

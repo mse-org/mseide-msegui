@@ -1509,8 +1509,10 @@ type
 
    function hassortstat: boolean;
    function hasdatastat: boolean;
-   procedure dostatread(const reader: tstatreader); virtual;
-   procedure dostatwrite(const writer: tstatwriter); virtual;
+   procedure dostatread(const reader: tstatreader; 
+                                          const aorder: boolean); virtual;
+   procedure dostatwrite(const writer: tstatwriter;
+                                          const aorder: boolean); virtual;
    
    function cancopy: boolean;
    function canpaste: boolean;
@@ -8401,7 +8403,7 @@ begin
  result:= tdatacol(l).fcellinfo.cell.col - tdatacol(r).fcellinfo.cell.col;
 end;
 
-procedure tdatacols.dostatread(const reader: tstatreader);
+procedure tdatacols.dostatread(const reader: tstatreader; const aorder: boolean);
 var
  int1: integer;
  ar1: integerarty;
@@ -8459,7 +8461,7 @@ begin
  end;
 end;
 
-procedure tdatacols.dostatwrite(const writer: tstatwriter);
+procedure tdatacols.dostatwrite(const writer: tstatwriter; const aorder: boolean);
 begin
  inherited;
  if (og_savestate in fgrid.foptionsgrid) and writer.canstate and
@@ -9902,7 +9904,8 @@ begin
   if reader.canstate then begin
    fpropcolwidthref:= reader.readinteger('propcolwidthref',fpropcolwidthref,0);
   end;
-  fdatacols.dostatread(reader);
+  fdatacols.dostatread(reader,foptionsgrid * [og_savestate,og_colmoving] = 
+                                                   [og_savestate,og_colmoving]);
   if (og_savestate in foptionsgrid) and reader.canstate then begin
    sorted:= reader.readboolean('sorted',sorted);
    po1.col:= reader.readinteger('col',ffocusedcell.col);
@@ -9936,7 +9939,8 @@ begin
  if writer.canstate then begin
   writer.writeinteger('propcolwidthref',fpropcolwidthref);
  end;
- fdatacols.dostatwrite(writer);
+ fdatacols.dostatwrite(writer,foptionsgrid * [og_savestate,og_colmoving] = 
+                                                   [og_savestate,og_colmoving]);
  row:= int1;
  if (og_savestate in foptionsgrid) and writer.canstate then begin
   writer.writeboolean('sorted',hassort);
