@@ -2543,6 +2543,9 @@ begin
  if canevent(tmethod(fontabmoved)) then begin
   fontabmoved(self,curindex,newindex);
  end;
+ if csdesigning in componentstate then begin
+  designchanged;
+ end;
 end;
 
 function tcustomtabbar.dostep(const event: stepkindty; const adelta: real;
