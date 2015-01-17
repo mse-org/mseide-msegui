@@ -818,7 +818,7 @@ begin                 //postrecord
  inititemheader(str1,ik_fieldrec,0,int3+sizeof(fieldrecdataty),
                                      pchar(po1));
  po1^.header.kind:= akind;
- po1^.header.rowindex:= fdscontroller.recnonullbased;
+ po1^.header.rowindex:= fdscontroller.recnozerobased;
  po1^.header.count:= int2;
  po2:= @po1^.data;
  for int1:= 0 to int2 - 1 do begin
@@ -866,13 +866,13 @@ end;
 {$ifdef FPC}
 procedure tifidscontroller.sendchangedrecord(var aitem: ptruintdataty);
 begin
- fdscontroller.recnonullbased:= aitem.key;
+ fdscontroller.recnozerobased:= aitem.key;
  postrecord1(frk_edit,pbyte(@aitem.data));
 end;
 {$else}
 procedure tifidscontroller.sendchangedrecord(var aitem{: pptruintdataty});
 begin
- fdscontroller.recnonullbased:= ptruintdataty(aitem).key;
+ fdscontroller.recnozerobased:= ptruintdataty(aitem).key;
  postrecord1(frk_edit,pbyte(@ptruintdataty(aitem).data));
 end;
 {$endif}
@@ -1016,7 +1016,7 @@ begin
     include(fistate,ids_remotedata);
     try
      if adata^.header.kind = frk_delete then begin
-      fdscontroller.recnonullbased:= adata^.header.rowindex;
+      fdscontroller.recnozerobased:= adata^.header.rowindex;
       delete;
      end
      else begin
@@ -1026,12 +1026,12 @@ begin
         append;
        end
        else begin
-        fdscontroller.recnonullbased:= adata^.header.rowindex;
+        fdscontroller.recnozerobased:= adata^.header.rowindex;
         insert;
        end;
       end
       else begin
-       fdscontroller.recnonullbased:= adata^.header.rowindex;
+       fdscontroller.recnozerobased:= adata^.header.rowindex;
        edit;
       end;
       po1:= @adata^.data;
@@ -1129,7 +1129,7 @@ begin
      field1:= findfield(str1);
      if field1 <> nil then begin
       include(fistate,ids_remotedata);
-      fdscontroller.recnonullbased:= int1;
+      fdscontroller.recnozerobased:= int1;
       try
        if not (state in [dsedit,dsinsert]) then begin
         edit;
@@ -1155,13 +1155,13 @@ begin
          append;
         end
         else begin
-         fdscontroller.recnonullbased:= dest1;
+         fdscontroller.recnozerobased:= dest1;
          insert;
         end;
 //        post;
        end;
        gck_deleterow: begin
-        fdscontroller.recnonullbased:= dest1;
+        fdscontroller.recnozerobased:= dest1;
         delete;
        end;
       end;
