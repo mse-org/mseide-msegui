@@ -2645,6 +2645,7 @@ begin
    databaseerror('Invalid bookmark recno: '+inttostr(recno)+'.'); 
   end;
 //  checkindex(false);
+  checkindex(factindex);
   if (factindexpo^.ind[recno] <> recordpo) and (recordpo <> nil) then begin
    result:= findrecord(recordpo);
    if result < 0 then begin
@@ -2672,6 +2673,7 @@ begin
  result:= false;
  with abookmark do begin
 //  checkindex(false);
+  checkindex(factindex);
   if (recno < 0) or (recno >= fbrecordcount) or 
           (factindexpo^.ind[recno] <> recordpo) and (recordpo <> nil) then begin
    int1:= findrecord(recordpo);
