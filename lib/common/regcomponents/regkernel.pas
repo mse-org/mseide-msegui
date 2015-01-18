@@ -687,7 +687,7 @@ function tskincolorarraypropertyeditor.itemgetvalue(
               const sender: tarrayelementeditor): msestring;
 begin
  result:= '<'+colortostring(tskincolor(
-                     tarrayelementeditor1(sender).getordvalue(0)).color) + '>';
+                     tarrayelementeditor1(sender).getpointervalue(0)).color) + '>';
 end;
 
 initialization
