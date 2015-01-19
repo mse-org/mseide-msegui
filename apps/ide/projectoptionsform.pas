@@ -510,7 +510,8 @@ type
   projectdir: filenamety;
   defaultmake: integer;
   sigsettings: sigsetinfoarty;
-  propgparamhistory: msestringarty;
+  progparamhistory: msestringarty;
+  workdirparamhistory: msestringarty;
   envvarons: longboolarty;
   findreplaceinfo: replaceinfoty;
   targetconsolefindinfo: findinfoty;
