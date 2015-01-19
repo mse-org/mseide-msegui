@@ -620,6 +620,16 @@ begin
         if po4^.proptype^.kind in 
               [tkInteger,tkChar,tkEnumeration,tkWChar,tkSet] then begin
          setordprop(dest.obj,po1,getordprop(comp1,po4));
+        end
+        else begin
+         if po4^.proptype^.kind in [tkustring] then begin
+          setordprop(dest.obj,po1,ord(pmsechar(getunicodestrprop(comp1,po4))^));
+         end
+         else begin
+          if po4^.proptype^.kind in [tkastring,tklstring,tkstring] then begin
+           setordprop(dest.obj,po1,ord(pchar(getstrprop(comp1,po4))^));
+          end;
+         end;
         end;
        end;
        tkint64: begin
@@ -766,6 +776,18 @@ begin
         if po4^.proptype^.kind in 
               [tkInteger,tkChar,tkEnumeration,tkWChar,tkSet] then begin
          setordprop(comp1,po4,getordprop(source.obj,po1));
+        end
+        else begin
+         if proptype^.kind in [tkchar,tkwchar] then begin
+          if po4^.proptype^.kind in [tkastring,tklstring,tkstring] then begin
+           setstrprop(comp1,po4,char(getordprop(source.obj,po1)));
+          end
+          else begin
+           if po4^.proptype^.kind in [tkustring] then begin
+            setunicodestrprop(comp1,po4,widechar(getordprop(source.obj,po1)));
+           end;
+          end;
+         end;
         end;
        end;
        tkint64: begin
