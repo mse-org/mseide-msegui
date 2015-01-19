@@ -1699,16 +1699,23 @@ type
 
  tdbwidgetcol = class(twidgetcol)
   protected
+   fdatalink: tcustomeditwidgetdatalink;
+
    procedure dobeforedrawcell(const acanvas: tcanvas; 
                           var processed: boolean); override;
    procedure doafterdrawcell(const acanvas: tcanvas); override;
    procedure setwidget(const awidget: twidget); override;
+  public
+   property datalink: tcustomeditwidgetdatalink read fdatalink;
  end;
  
  tdbwidgetcols = class(twidgetcols)
+  private
+   function getcols(const index: integer): tdbwidgetcol;
   protected
   public
    class function getitemclasstype: persistentclassty; override;
+   property cols[const index: integer]: tdbwidgetcol read getcols; default;
  end;
 
  tcustomdbwidgetgrid = class(tcustomwidgetgrid,igriddatalink)
@@ -1719,6 +1726,8 @@ type
    procedure setdatalink(const avalue: tgriddatalink);
    function getfixcols: tdbwidgetfixcols;
    procedure setfixcols(const avalue: tdbwidgetfixcols);
+   function getdatacols: tdbwidgetcols;
+   procedure setdatacols(const avalue: tdbwidgetcols);
   protected
    function createdatacols: tdatacols; override;
    procedure createdatacol(const index: integer; out item: tdatacol); override;
@@ -1777,6 +1786,7 @@ type
    property datalink: tgriddatalink read fdatalink write setdatalink;
    property zebra_step default 0;
    property fixcols: tdbwidgetfixcols read getfixcols write setfixcols;
+   property datacols: tdbwidgetcols read getdatacols write setdatacols;
  end;
 
  tdbwidgetgrid = class(tcustomdbwidgetgrid)
@@ -9156,6 +9166,16 @@ procedure tcustomdbwidgetgrid.createdatacol(const index: integer;
 begin
  item:= tdbwidgetcol.create(self,fdatacols);
 end;
+
+function tcustomdbwidgetgrid.getdatacols: tdbwidgetcols;
+begin
+ result:= tdbwidgetcols(fdatacols);
+end;
+
+procedure tcustomdbwidgetgrid.setdatacols(const avalue: tdbwidgetcols);
+begin
+ inherited;
+end;
 {
 procedure tcustomdbwidgetgrid.doenter;
 begin
@@ -11927,20 +11947,28 @@ begin
  result:= tdbwidgetcol;
 end;
 
+function tdbwidgetcols.getcols(const index: integer): tdbwidgetcol;
+begin
+ result:= tdbwidgetcol(items[index]);
+end;
+
 { tdbwidgetcol }
 
 procedure tdbwidgetcol.setwidget(const awidget: twidget);
 var
  intf1: idbeditfieldlink;
- link1: tcustomeditwidgetdatalink;
 begin
  inherited;
- if (awidget <> nil) and 
-      awidget.getcorbainterface(typeinfo(idbeditfieldlink),intf1) then begin
-  link1:= intf1.getfieldlink;
-  if link1 <> nil then begin
-   link1.navigator:= tdbwidgetgrid(fcellinfo.grid).fdatalink.navigator;
+ if (awidget <> nil) then begin 
+  if awidget.getcorbainterface(typeinfo(idbeditfieldlink),intf1) then begin
+   fdatalink:= intf1.getfieldlink();
+   if fdatalink <> nil then begin
+    fdatalink.navigator:= tdbwidgetgrid(fcellinfo.grid).fdatalink.navigator;
+   end;
   end;
+ end
+ else begin
+  fdatalink:= nil;
  end;
 end;
 
