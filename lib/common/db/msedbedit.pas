@@ -1699,14 +1699,14 @@ type
 
  tdbwidgetcol = class(twidgetcol)
   protected
-   fdatalink: tcustomeditwidgetdatalink;
+   fdatalink: tfielddatalink;
 
    procedure dobeforedrawcell(const acanvas: tcanvas; 
                           var processed: boolean); override;
    procedure doafterdrawcell(const acanvas: tcanvas); override;
    procedure setwidget(const awidget: twidget); override;
   public
-   property datalink: tcustomeditwidgetdatalink read fdatalink;
+   property datalink: tfielddatalink read fdatalink;
  end;
  
  tdbwidgetcols = class(twidgetcols)
@@ -2553,7 +2553,7 @@ function encoderowstate(const color: integer = -1; const font: integer = -1;
 implementation
 uses
  msestockobjects,mseshapes,msereal,msebits,
- mseactions,mseact,rtlconsts,msedrawtext,sysutils;
+ mseactions,mseact,rtlconsts,msedrawtext,sysutils,msedbdispwidgets;
 
 type
  tcomponent1 = class(tcomponent);
@@ -11957,13 +11957,20 @@ end;
 procedure tdbwidgetcol.setwidget(const awidget: twidget);
 var
  intf1: idbeditfieldlink;
+ intf2: idbdispfieldlink;
 begin
  inherited;
  if (awidget <> nil) then begin 
   if awidget.getcorbainterface(typeinfo(idbeditfieldlink),intf1) then begin
    fdatalink:= intf1.getfieldlink();
    if fdatalink <> nil then begin
-    fdatalink.navigator:= tdbwidgetgrid(fcellinfo.grid).fdatalink.navigator;
+    tcustomeditwidgetdatalink(fdatalink).navigator:= 
+                            tdbwidgetgrid(fcellinfo.grid).fdatalink.navigator;
+   end;
+  end
+  else begin
+   if awidget.getcorbainterface(typeinfo(idbdispfieldlink),intf2) then begin
+    fdatalink:= intf2.getfieldlink();
    end;
   end;
  end

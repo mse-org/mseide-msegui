@@ -203,7 +203,7 @@ type
                              const arow: integer): pointer; override;
  end;
  
- tdblookup1 = class(tcustomdataedit,idblookupdispfieldlink)
+ tdblookup1 = class(tcustomdataedit,idblookupdispfieldlink,idbdispfieldlink)
   private
    fdatalink: tlookupdispfielddatalink;
    procedure setdatalink(const avalue: tlookupdispfielddatalink);
@@ -224,6 +224,7 @@ type
    function getrowdatapo(const arow: integer): pointer; override;
  
     //idispfieldlink
+   function getfieldlink: tdispfielddatalink;
    procedure fieldtovalue;
    procedure valuetofield;
    procedure getfieldtypes(var afieldtypes: fieldtypesty); virtual;
@@ -925,6 +926,11 @@ begin
  else begin
   result:= nil;
  end;
+end;
+
+function tdblookup1.getfieldlink: tdispfielddatalink;
+begin
+ result:= fdatalink;
 end;
 
 { tdblookuplb }

@@ -12,19 +12,21 @@ unit msedbdispwidgets;
 interface
 uses
  mdb,classes,mclasses,msesimplewidgets,msedb,msetypes,mseclasses,mseguiglob,
- mseglob,
+ mseglob,mseinterfaces,
  msedispwidgets,msestrings,mselookupbuffer,msegui,msemenus,mseevent,
  msebarcode;
  
 type 
-
- idbdispfieldlink = interface(inullinterface)
+ tdispfielddatalink = class; 
+ 
+ idbdispfieldlink = interface(inullinterface)[miid_idbdispfieldlink]
   procedure fieldtovalue;
   procedure setnullvalue;
   function getwidget: twidget;
   procedure getfieldtypes(var afieldtypes: fieldtypesty); //[] = all
+  function getfieldlink(): tdispfielddatalink;
  end;
- 
+
  tdispfielddatalink = class(tfielddatalink,idbeditinfo)
   private
    procedure readdatasource(reader: treader);
@@ -47,11 +49,12 @@ type
  tdblabel = class(tcustomlabel,idbdispfieldlink,ireccontrol)
   private
    fdatalink: tdispfielddatalink;
-  //idbdispfieldlink
+    //idbdispfieldlink
+   function getfieldlink: tdispfielddatalink;
    procedure getfieldtypes(var fieldtypes: fieldtypesty);
    procedure fieldtovalue;
    procedure setnullvalue;
-  //ireccontrol
+    //ireccontrol
    procedure recchanged;
    procedure setdatalink(const avalue: tdispfielddatalink);
   protected   
@@ -72,11 +75,12 @@ type
  tdbstringdisp = class(tcustomstringdisp,idbdispfieldlink,ireccontrol)
   private
    fdatalink: tdispfielddatalink;
-   //idbdispfieldlink
+    //idbdispfieldlink
+   function getfieldlink: tdispfielddatalink;
    procedure getfieldtypes(var fieldtypes: fieldtypesty); virtual;
    procedure fieldtovalue; virtual;
    procedure setnullvalue;
-   //ireccontrol
+    //ireccontrol
    procedure recchanged;
    procedure setdatalink(const avalue: tdispfielddatalink);
   protected   
@@ -121,11 +125,12 @@ type
   private
    fdatalink: tdispfielddatalink;
    fisnotnull: boolean;
-     //idbdispfieldlink
+    //idbdispfieldlink
+   function getfieldlink: tdispfielddatalink;
    procedure getfieldtypes(var fieldtypes: fieldtypesty);
    procedure fieldtovalue; virtual;
    procedure setnullvalue;
-   //ireccontrol
+    //ireccontrol
    procedure recchanged;
    procedure setdatalink(const avalue: tdispfielddatalink);
   protected   
@@ -170,11 +175,12 @@ type
   private
    fisnotnull: boolean;
    fdatalink: tdispfielddatalink;
-     //idbdispfieldlink
+    //idbdispfieldlink
+   function getfieldlink: tdispfielddatalink;
    procedure getfieldtypes(var fieldtypes: fieldtypesty);
    procedure fieldtovalue;
    procedure setnullvalue;
-   //ireccontrol
+    //ireccontrol
    procedure recchanged;
    procedure setdatalink(const avalue: tdispfielddatalink);
   protected   
@@ -191,6 +197,7 @@ type
   private
    fdatalink: tdispfielddatalink;
     //idbdispfieldlink
+   function getfieldlink: tdispfielddatalink;
    procedure getfieldtypes(var fieldtypes: fieldtypesty); virtual;
    procedure fieldtovalue; virtual;
    procedure setnullvalue;
@@ -234,11 +241,12 @@ type
  tdbdatetimedisp = class(tcustomdatetimedisp,idbdispfieldlink,ireccontrol)
   private
    fdatalink: tdispfielddatalink;
-     //idbdispfieldlink
+    //idbdispfieldlink
+   function getfieldlink: tdispfielddatalink;
    procedure getfieldtypes(var fieldtypes: fieldtypesty); virtual;
    procedure fieldtovalue; virtual;
    procedure setnullvalue;
-   //ireccontrol
+    //ireccontrol
    procedure recchanged;
    procedure setdatalink(const avalue: tdispfielddatalink);
   protected   
@@ -278,11 +286,12 @@ type
  tdbbarcode = class(tcustombarcode1,idbdispfieldlink,ireccontrol)
   private
    fdatalink: tdispfielddatalink;
-   //idbdispfieldlink
+    //idbdispfieldlink
+   function getfieldlink: tdispfielddatalink;
    procedure getfieldtypes(var fieldtypes: fieldtypesty); virtual;
    procedure fieldtovalue; virtual;
    procedure setnullvalue;
-   //ireccontrol
+    //ireccontrol
    procedure recchanged;
    procedure setdatalink(const avalue: tdispfielddatalink);
   protected   
@@ -425,6 +434,11 @@ begin
  fdatalink.fixupproperties(filer);  //move values to datalink
 end;
 
+function tdblabel.getfieldlink: tdispfielddatalink;
+begin
+ result:= fdatalink;
+end;
+
 { tdbstringdisp }
 
 constructor tdbstringdisp.create(aowner: tcomponent);
@@ -470,6 +484,11 @@ begin
  fdatalink.fixupproperties(filer);  //move values to datalink
 end;
 
+function tdbstringdisp.getfieldlink: tdispfielddatalink;
+begin
+ result:= fdatalink;
+end;
+
 { tdbbarcode }
 
 constructor tdbbarcode.create(aowner: tcomponent);
@@ -507,6 +526,11 @@ end;
 procedure tdbbarcode.setdatalink(const avalue: tdispfielddatalink);
 begin
  fdatalink.assign(avalue);
+end;
+
+function tdbbarcode.getfieldlink: tdispfielddatalink;
+begin
+ result:= fdatalink;
 end;
 
 { tdbstringdisplb }
@@ -625,6 +649,11 @@ begin
  fdatalink.fixupproperties(filer);  //move values to datalink
 end;
 
+function tdbintegerdisp.getfieldlink: tdispfielddatalink;
+begin
+ result:= fdatalink;
+end;
+
 { tdbintegerdisplb }
 
 procedure tdbintegerdisplb.fieldtovalue;
@@ -737,6 +766,11 @@ begin
  fdatalink.fixupproperties(filer);  //move values to datalink
 end;
 
+function tdbbooleandisp.getfieldlink: tdispfielddatalink;
+begin
+ result:= fdatalink;
+end;
+
 { tdbrealdisp }
 
 constructor tdbrealdisp.create(aowner: tcomponent);
@@ -780,6 +814,11 @@ procedure tdbrealdisp.defineproperties(filer: tfiler);
 begin
  inherited;
  fdatalink.fixupproperties(filer);  //move values to datalink
+end;
+
+function tdbrealdisp.getfieldlink: tdispfielddatalink;
+begin
+ result:= fdatalink;
 end;
 
 { tdbrealdisplb }
@@ -887,6 +926,11 @@ procedure tdbdatetimedisp.defineproperties(filer: tfiler);
 begin
  inherited;
  fdatalink.fixupproperties(filer);  //move values to datalink
+end;
+
+function tdbdatetimedisp.getfieldlink: tdispfielddatalink;
+begin
+ result:= fdatalink;
 end;
 
 { tdbdatetimedisplb }

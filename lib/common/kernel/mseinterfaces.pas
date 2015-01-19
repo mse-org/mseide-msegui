@@ -102,6 +102,7 @@ const
  miid_ibandparent =            'FA.mse';{40}
  miid_idocktarget =            'lA.mse';{41}
  miid_itabpage =               'VA.mse';{42}
+ miid_idbdispfieldlink =       '1A.mse';{43}
   
 implementation
 end.
