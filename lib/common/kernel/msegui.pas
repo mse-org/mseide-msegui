@@ -14229,68 +14229,62 @@ begin
   else begin
    self1:= nil;
    setlinkedvar(self,self1); //for destroy check
-   with capture do begin
-    absposbefore:= info.mouse.pos;
-    subpoint1(info.mouse.pos,rootpos);
-    posbefore:= info.mouse.pos;
-    appinst.fmousewidgetpos:= posbefore;
-    appinst.fdelayedmouseshift:= nullpoint;
-    if info.mouse.eventkind = ek_mousewheel then begin
-     mousewheelevent(info.wheel);
-    end
-    else begin
-     mouseevent(info.mouse);
+   try
+    with capture do begin
+     absposbefore:= info.mouse.pos;
+     subpoint1(info.mouse.pos,rootpos);
+     posbefore:= info.mouse.pos;
+     appinst.fmousewidgetpos:= posbefore;
+     appinst.fdelayedmouseshift:= nullpoint;
+     if info.mouse.eventkind = ek_mousewheel then begin
+      mousewheelevent(info.wheel);
+     end
+     else begin
+      mouseevent(info.mouse);
+      if self1 = nil then begin
+       exit;
+      end;
+      if (info.mouse.eventkind = ek_buttonpress) and ispopup and
+       (ow_mousefocus in self.fownerwidget.foptionswidget) then begin
+       activate; //possibly not done by windowmanager
+      end;
+     end;
      if self1 = nil then begin
       exit;
      end;
-     if (info.mouse.eventkind = ek_buttonpress) and ispopup and
-      (ow_mousefocus in self.fownerwidget.foptionswidget) then begin
-      activate; //possibly not done by windowmanager
-     end;
-    end;
-    if self1 = nil then begin
-     exit;
-    end;
-    posbefore:= subpoint(info.mouse.pos,posbefore);
-    addpoint1(posbefore,appinst.fdelayedmouseshift);
-    if (posbefore.x <> 0) or (posbefore.y <> 0) then begin
-     gui_flushgdi;
-     with appinst do begin
-      getevents;
-      po1:= peventaty(eventlist.datapo);
-      for int1:= 0 to eventlist.count -1 do begin
-       if (po1^[int1] <> nil) and (po1^[int1].kind = ek_mousemove) then begin
-        freeandnil(po1^[int1]); //remove invalid events
+     posbefore:= subpoint(info.mouse.pos,posbefore);
+     addpoint1(posbefore,appinst.fdelayedmouseshift);
+     if (posbefore.x <> 0) or (posbefore.y <> 0) then begin
+      gui_flushgdi;
+      with appinst do begin
+       getevents;
+       po1:= peventaty(eventlist.datapo);
+       for int1:= 0 to eventlist.count -1 do begin
+        if (po1^[int1] <> nil) and (po1^[int1].kind = ek_mousemove) then begin
+         freeandnil(po1^[int1]); //remove invalid events
+        end;
        end;
+       mouse.move(posbefore);
       end;
-      mouse.move(posbefore);
      end;
     end;
-   end;
-   with info.mouse do begin
-    if (eventkind = ek_buttonrelease) and 
-      (appinst.fmousecapturewidget = nil) and 
-                     (mousecapturewidgetbefore <> nil) then begin
-     exclude(eventstate,es_processed);
-     eventkind:= ek_mousemove;
-     pos:= addpoint(absposbefore,posbefore);
-     dispatchmouseevent(info,nil);  //immediate mouseenter
-     eventkind:= ek_buttonrelease;
+    with info.mouse do begin
+     if (eventkind = ek_buttonrelease) and 
+       (appinst.fmousecapturewidget = nil) and 
+                      (mousecapturewidgetbefore <> nil) then begin
+      exclude(eventstate,es_processed);
+      eventkind:= ek_mousemove;
+      pos:= addpoint(absposbefore,posbefore);
+      dispatchmouseevent(info,nil);  //immediate mouseenter
+      eventkind:= ek_buttonrelease;
+     end;
+    end;
+   finally
+    if self1 <> nil then begin
+     setlinkedvar(nil,self1);
     end;
    end;
-   if self1 = nil then begin
-    exit;
-   end;
-   setlinkedvar(nil,self1);
   end;
-  {
- end
- else begin
-  if (info.mouse.eventkind = ek_buttonpress) and 
-                            (tws_buttonendmodal in fstate) then begin
-   endmodal;
-  end;
-  }
  end;
 end;
 
