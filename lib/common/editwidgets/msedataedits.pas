@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2014 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2015 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -754,6 +754,10 @@ type
    procedure setgridvalues(const Value: int64arty);
 //   procedure setmin(const avalue: int64);
 //   procedure setmax(const avalue: int64);
+  {$ifdef mse_with_ifi}
+   function getifilink: tifiint64linkcomp;
+   procedure setifilink(const avalue: tifiint64linkcomp);
+  {$endif}
   protected
    fisnull: boolean; //used in tdbintegeredit
    procedure texttovalue(var accept: boolean; const quiet: boolean); override;
@@ -785,6 +789,9 @@ type
         read getgridvalue write setgridvalue; default;
    property gridvalues: int64arty read getgridvalues write setgridvalues;
    function griddata: tgridint64datalist;
+{$ifdef mse_with_ifi}
+   property ifilink: tifiint64linkcomp read getifilink write setifilink;
+{$endif}
  end;
 
  tint64edit = class(tcustomint64edit)
@@ -796,6 +803,9 @@ type
    property bitcount;
    property min;
    property max;
+  {$ifdef mse_with_ifi}
+   property ifilink;
+  {$endif}
  end;
  
  tkeystringdropdowncontroller = class(tdropdownlistcontroller)
@@ -4453,6 +4463,18 @@ begin
 // tint64datalist(fgridintf.getcol.datalist).asarray:= value;
 end;
 
+{$ifdef mse_with_ifi}
+function tcustomint64edit.getifilink: tifiint64linkcomp;
+begin
+ result:= tifiint64linkcomp(fifilink);
+end;
+
+procedure tcustomint64edit.setifilink(const avalue: tifiint64linkcomp);
+begin
+ inherited setifilink(avalue);
+end;
+
+{$endif}
 procedure tcustomint64edit.fillcol(const value: int64);
 begin
  internalfillcol(value);
