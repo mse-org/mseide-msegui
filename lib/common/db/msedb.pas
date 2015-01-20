@@ -1218,7 +1218,7 @@ type
    property asmsestring: msestring read getasmsestring write setasmsestring;
    property msedefaultexpression: msestring read getmsedefaultexpression;
    function msedisplaytext(const aformat: msestring = '';
-                                          const aedit: boolean = false): msestring;
+                          const aedit: boolean = false): msestring; virtual;
    property nullsymbol: msestring read fnullsymbol write fnullsymbol;
  end;
  

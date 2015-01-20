@@ -380,17 +380,26 @@ type
    property ondataentered;
  end;
 
+ lookupdatatypety = (ldt_int32,ldt_int64,ldt_string);
  tlookupeditdatalink = class(teditwidgetdatalink)
   private
    ffieldnametext: string;
    ffieldtext: tfield;
    procedure setfieldnametext(const avalue: string);
   protected
+   fowner: tcustomdataedit;
+   fdatatype: lookupdatatypety;
    procedure updatefields; override;
    function getsortfield: tfield; override;
    property fieldtext: tfield read ffieldtext;
    procedure getfieldtypes(out apropertynames: stringarty; 
                                      out afieldtypes: fieldtypesarty); override;
+  public
+   constructor create(const aowner: tcustomdataedit;
+                      const adatatype: lookupdatatypety;
+                      const intf: idbeditfieldlink);
+   function msedisplaytext(const aformat: msestring = '';
+                          const aedit: boolean = false): msestring; override;
   published
    property fieldnametext: string read ffieldnametext write setfieldnametext;
  end;
@@ -624,13 +633,14 @@ type
    procedure fieldtovalue;
    procedure getfieldtypes(var afieldtypes: fieldtypesty);
    function getfieldlink: tcustomeditwidgetdatalink;
-  //ireccontrol
+    //ireccontrol
    procedure recchanged;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
   published
-   property datalink: tstringlookupeditdatalink read fdatalink write setdatalink;
+   property datalink: tstringlookupeditdatalink read fdatalink
+                                                          write setdatalink;
    property dropdown;
    property valuedefault;
    property onsetvalue;
@@ -2559,6 +2569,7 @@ type
  tcomponent1 = class(tcomponent);
  twidget1 = class(twidget);
  tcustomgrid1 = class(tcustomgrid);
+ tcustomdataedit1 = class(tcustomdataedit);
  tdatacols1 = class(tdatacols);
  tdropdowncols1 = class(tdropdowncols);
  tdataedit1 = class(tdataedit);
@@ -4149,7 +4160,8 @@ end;
 
 constructor tdbkeystringedit.create(aowner: tcomponent);
 begin
- fdatalink:= tstringlookupeditdatalink.Create(idbeditfieldlink(self));
+ fdatalink:= tstringlookupeditdatalink.Create(self,ldt_string,
+                                                    idbeditfieldlink(self));
  inherited;
 end;
 
@@ -5636,7 +5648,7 @@ end;
 
 constructor tcustomdbenumedit.create(aowner: tcomponent);
 begin
- fdatalink:= tlookupeditdatalink.create(idbeditfieldlink(self));
+ fdatalink:= tlookupeditdatalink.create(self,ldt_int32,idbeditfieldlink(self));
  inherited;
 end;
 
@@ -10697,7 +10709,7 @@ end;
 
 constructor tdbenum64editlb.create(aowner: tcomponent);
 begin
- fdatalink:= tlookupeditdatalink.create(idbeditfieldlink(self));
+ fdatalink:= tlookupeditdatalink.create(self,ldt_int64,idbeditfieldlink(self));
  inherited;
 end;
 
@@ -10827,7 +10839,7 @@ end;
 
 constructor tdbenum64editdb.create(aowner: tcomponent);
 begin
- fdatalink:= tlookupeditdatalink.create(idbeditfieldlink(self));
+ fdatalink:= tlookupeditdatalink.create(self,ldt_int64,idbeditfieldlink(self));
  inherited;
 end;
 
@@ -11885,6 +11897,45 @@ begin
 end;
 
 { tlookupeditdatalink }
+
+constructor tlookupeditdatalink.create(const aowner: tcustomdataedit;
+              const adatatype: lookupdatatypety; const intf: idbeditfieldlink);
+begin
+ inherited create(intf);
+ fowner:= aowner;
+ fdatatype:= adatatype; 
+end;
+
+function tlookupeditdatalink.msedisplaytext(const aformat: msestring = '';
+               const aedit: boolean = false): msestring;
+var
+ i1: int32;
+ li1: int64;
+ s1: msestring;
+begin
+ if fowner <> nil then begin
+  result:= '';
+  if (field <> nil) and not field.isnull then begin
+   case fdatatype of
+    ldt_int32: begin
+     i1:= field.asinteger;
+     result:= tcustomdataedit1(fowner).internaldatatotext(i1);
+    end;
+    ldt_int64: begin
+     li1:= field.aslargeint;
+     result:= tcustomdataedit1(fowner).internaldatatotext(li1);
+    end;
+    ldt_string: begin
+     s1:= field.asunicodestring;
+     result:= tcustomdataedit1(fowner).internaldatatotext(s1);
+    end;
+   end;
+  end;
+ end
+ else begin
+  result:= inherited msedisplaytext(aformat,aedit);
+ end;
+end;
 
 procedure tlookupeditdatalink.setfieldnametext(const avalue: string);
 begin

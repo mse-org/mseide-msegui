@@ -101,6 +101,7 @@ type
 
  getintegereventty = function: integer of object;
  getint64eventty = function: int64 of object;
+ getmsestringeventty = function: msestring of object;
  getstringareventty = function: stringarty of object;
  
  updatestringeventty = procedure(const sender: tobject; 
