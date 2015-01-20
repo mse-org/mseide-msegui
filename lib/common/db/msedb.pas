@@ -39,6 +39,8 @@ const
  allfieldkinds = [fkData,fkCalculated,fkLookup,fkInternalCalc];
 
 type
+ lookupdatatypety = (ldt_int32,ldt_int64,ldt_string);
+
  bookmarkty = string;
    //use instead of TBookmarkStr in order to avoid
    // FPC deprecated warning

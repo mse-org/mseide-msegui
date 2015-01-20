@@ -380,7 +380,6 @@ type
    property ondataentered;
  end;
 
- lookupdatatypety = (ldt_int32,ldt_int64,ldt_string);
  tlookupeditdatalink = class(teditwidgetdatalink)
   private
    ffieldnametext: string;

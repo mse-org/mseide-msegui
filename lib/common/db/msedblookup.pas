@@ -41,11 +41,12 @@ type
  
  tlookupdispfielddatalink = class(tdispfielddatalink)
   private
-   fowner: tcustomdataedit;
    function getdatasource1: tdatasource;
    procedure setwidgetdatasource(const avalue: tdatasource);
    procedure griddatasourcechanged;
   protected
+   fowner: tcustomdataedit;
+   fdatatype: lookupdatatypety;
    fisnull: boolean;
    procedure lookupchange;
    function datatotext(const data): msestring; virtual; abstract;
@@ -54,8 +55,11 @@ type
    function getrowdatapo(const alink: tgriddatalink; 
                                const arow: integer): pointer; virtual; abstract;
   public
-   constructor create(const aowner: tcustomdataedit; 
+   constructor create(const aowner: tcustomdataedit;
+                           const adatatype: lookupdatatypety;
                                     const intf: idblookupdispfieldlink);
+   function msedisplaytext(const aformat: msestring = '';
+                          const aedit: boolean = false): msestring; override;
   published
    property datasource: tdatasource read getdatasource1 write setwidgetdatasource;
  end;
@@ -93,7 +97,8 @@ type
    procedure getfieldtypes(out apropertynames: stringarty; 
                                      out afieldtypes: fieldtypesarty); override;
   public
-   constructor create(const aowner: tcustomdataedit; 
+   constructor create(const aowner: tcustomdataedit;
+                          const adatatype: lookupdatatypety;
                                     const intf: idblookupdbdispfieldlink);
    destructor destroy; override;
   published
@@ -129,6 +134,7 @@ type
    function getlookupbuffer: tcustomlookupbuffer;
   public
    constructor create(const aowner: tcustomdataedit; 
+                           const adatatype: lookupdatatypety;
                                     const intf: idblookuplbdispfieldlink);
    destructor destroy; override;
   published
@@ -774,9 +780,11 @@ type
 { tlookupdispfielddatalink }
 
 constructor tlookupdispfielddatalink.create(const aowner: tcustomdataedit;
+                    const adatatype: lookupdatatypety;
                                const intf: idblookupdispfieldlink);
 begin
  fowner:= aowner;
+ fdatatype:= adatatype;
  fisnull:= true;
  inherited create(intf);
 end;
@@ -812,6 +820,37 @@ begin
                                             (field <> nil) then begin
   idblookupdispfieldlink(fintf).formatchanged;
   idblookupdispfieldlink(fintf).fieldtovalue;
+ end;
+end;
+
+function tlookupdispfielddatalink.msedisplaytext(const aformat: msestring = '';
+               const aedit: boolean = false): msestring;
+var
+ i1: int32;
+ li1: int64;
+ s1: msestring;
+begin
+ if fowner <> nil then begin
+  result:= '';
+  if (field <> nil) and not field.isnull then begin
+   case fdatatype of
+    ldt_int32: begin
+     i1:= field.asinteger;
+     result:= tcustomdataedit1(fowner).internaldatatotext(i1);
+    end;
+    ldt_int64: begin
+     li1:= field.aslargeint;
+     result:= tcustomdataedit1(fowner).internaldatatotext(li1);
+    end;
+    ldt_string: begin
+     s1:= field.asunicodestring;
+     result:= tcustomdataedit1(fowner).internaldatatotext(s1);
+    end;
+   end;
+  end;
+ end
+ else begin
+  result:= inherited msedisplaytext(aformat,aedit);
  end;
 end;
 
@@ -944,7 +983,7 @@ end;
 
 function tdblookup32lb.createdatalink: tlookupdispfielddatalink;
 begin
- result:= tlookup32lbdispfielddatalink.create(self,
+ result:= tlookup32lbdispfielddatalink.create(self,ldt_int32,
                                       idblookuplbdispfieldlink(self));
 end;
 
@@ -955,7 +994,7 @@ end;
 
 function tdblookup64lb.createdatalink: tlookupdispfielddatalink;
 begin
- result:= tlookup64lbdispfielddatalink.create(self,
+ result:= tlookup64lbdispfielddatalink.create(self,ldt_int64,
                                       idblookuplbdispfieldlink(self));
 end;
 
@@ -966,7 +1005,7 @@ end;
 
 function tdblookupstrlb.createdatalink: tlookupdispfielddatalink;
 begin
- result:= tlookupstrlbdispfielddatalink.create(self,
+ result:= tlookupstrlbdispfielddatalink.create(self,ldt_string,
                                       idblookuplbdispfieldlink(self));
 end;
 
@@ -2080,12 +2119,13 @@ end;
 
 { tlookupdbdispfielddatalink }
 
-constructor tlookupdbdispfielddatalink.create(const aowner: tcustomdataedit;
-               const intf: idblookupdbdispfieldlink);
+constructor tlookupdbdispfielddatalink.create(
+           const aowner: tcustomdataedit; const adatatype: lookupdatatypety;
+                                         const intf: idblookupdbdispfieldlink);
 begin
  flookupdatalink:= tlookupdatalink.create;
  flookupdatalink.fdisplink:= self;
- inherited create(aowner,intf);
+ inherited create(aowner,adatatype,intf);
 end;
 
 destructor tlookupdbdispfielddatalink.destroy;
@@ -2196,7 +2236,7 @@ end;
 
 function tdblookup32db.createdatalink: tlookupdispfielddatalink;
 begin
- result:= tlookup32dbdispfielddatalink.create(self,
+ result:= tlookup32dbdispfielddatalink.create(self,ldt_int32,
                                           idblookupdbdispfieldlink(self));
 end;
 
@@ -2209,7 +2249,7 @@ end;
 
 function tdblookup64db.createdatalink: tlookupdispfielddatalink;
 begin
- result:= tlookup64dbdispfielddatalink.create(self,
+ result:= tlookup64dbdispfielddatalink.create(self,ldt_int64,
                                           idblookupdbdispfieldlink(self));
 end;
 
@@ -2222,7 +2262,7 @@ end;
 
 function tdblookupstrdb.createdatalink: tlookupdispfielddatalink;
 begin
- result:= tlookupstrdbdispfielddatalink.create(self,
+ result:= tlookupstrdbdispfielddatalink.create(self,ldt_string,
                                           idblookupdbdispfieldlink(self));
 end;
 
@@ -2411,11 +2451,12 @@ end;
 { tlookuplbdispfielddatalink }
 
 constructor tlookuplbdispfielddatalink.create(const aowner: tcustomdataedit;
-               const intf: idblookuplbdispfieldlink);
+                           const adatatype: lookupdatatypety;
+                                         const intf: idblookuplbdispfieldlink);
 begin
  fobjectlinker:= tobjectlinker.create(iobjectlink(self),
                                 {$ifdef FPC}@{$endif}objectevent);
- inherited create(aowner,intf);
+ inherited create(aowner,adatatype,intf);
 end;
 
 destructor tlookuplbdispfielddatalink.destroy;
