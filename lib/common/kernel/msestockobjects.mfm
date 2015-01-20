@@ -1,8 +1,8 @@
 object stockdata: tstockdata
   bounds_cx = 188
   bounds_cy = 85
-  left = 312
-  top = 31
+  left = 124
+  top = 54
   moduleclassname = 'tmsedatamodule'
   object glyphs: timagelist
     width = 15

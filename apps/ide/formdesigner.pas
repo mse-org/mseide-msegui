@@ -188,6 +188,8 @@ type
    fclientsizevalid: boolean;
    fcompoffsbefore: pointty;
    fsizebefore: sizety;
+   fshift: pointty;
+   fshiftroot: tcomponent;
    procedure drawgrid(const canvas: tcanvas);
    procedure hidexorpic(const canvas: tcanvas);
    procedure showxorpic(const canvas: tcanvas);
@@ -197,6 +199,7 @@ type
    procedure doaddcomponent(acomponent: tcomponent);
    procedure doinitcomponent(const acomponent: tcomponent;
                                             const parent: tcomponent);
+   procedure shiftcomp(child: tcomponent);
 
    procedure setshowgrid(const avalue: boolean);
    procedure setgridsizex(const avalue: integer);
@@ -1383,6 +1386,12 @@ begin
  end;
 end;
 
+procedure tformdesignerfo.shiftcomp(child: tcomponent);
+begin
+ setcomponentpos(child,addpoint(getcomponentpos(child),fshift));
+ tcomponent1(child).getchildren(@shiftcomp,fshiftroot);
+end;
+
 procedure tformdesignerfo.doinitcomponent(const acomponent: tcomponent;
                       const parent: tcomponent);
 var
@@ -1429,6 +1438,9 @@ begin
    end;
   end;
   setcomponentpos(acomponent,pt1);
+  fshiftroot:= acomponent.owner;
+  fshift:= subpoint(pt1,pt2);
+  tcomponent1(acomponent).getchildren(@shiftcomp,fshiftroot);
  end;
 end;
 
