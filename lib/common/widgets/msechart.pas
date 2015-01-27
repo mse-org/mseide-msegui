@@ -3667,32 +3667,34 @@ var
   int1: integer;
  begin
   with adial do begin
-   if do_opposite in options then begin
-    if active2 then begin
-     indent1:= -shift2-fitdist;
-    end;
-   end
-   else begin
-    if active2 then begin
-     indent1:= -shift1-fitdist;
-    end;
-   end;
-   checklayout;
-   expandrectext1(ext1,tdialticks1(ticks).fdim);
-   expandrectext1(ext1,tdialmarkers1(markers).fdim);
-   with tdialticks1(ticks).fdim do begin
-    if isx then begin
-     int1:= fitdist + bottom - top;
+   if visible then begin
+    if do_opposite in options then begin
+     if active2 then begin
+      indent1:= -shift2-fitdist;
+     end;
     end
     else begin
-     int1:= fitdist + right - left;
+     if active2 then begin
+      indent1:= -shift1-fitdist;
+     end;
     end;
-   end;
-   if do_opposite in options then begin
-    shift2:= shift2 + int1;
-   end
-   else begin
-    shift1:= shift1 + int1;
+    checklayout;
+    expandrectext1(ext1,tdialticks1(ticks).fdim);
+    expandrectext1(ext1,tdialmarkers1(markers).fdim);
+    with tdialticks1(ticks).fdim do begin
+     if isx then begin
+      int1:= fitdist + bottom - top;
+     end
+     else begin
+      int1:= fitdist + right - left;
+     end;
+    end;
+    if do_opposite in options then begin
+     shift2:= shift2 + int1;
+    end
+    else begin
+     shift1:= shift1 + int1;
+    end;
    end;
   end;
  end;
