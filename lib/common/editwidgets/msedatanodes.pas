@@ -244,7 +244,7 @@ type
    procedure objectevent(const sender: tobject;
                                      const event: objecteventty); override;
    function createsubnode: ttreelistitem; virtual;
-   procedure swap(const a,b: integer);
+   procedure internalswap(const a,b: integer);
    procedure internalmove(const source,dest: integer);
    procedure statreadsubnode(const reader: tstatreader;
                                             var anode: ttreelistitem); virtual;
@@ -335,6 +335,7 @@ type
    procedure insert(const aitem: ttreelistitem; aindex: integer); deprecated;
                                //use insert(aindex,aitem) above instead
    procedure move(const source,dest: integer);
+   procedure swap(const a,b: integer);
    procedure clear; virtual;
 
    function getnodes(const must: nodestatesty; 
@@ -2035,7 +2036,7 @@ begin
                                 //child class = parent class
 end;
 
-procedure ttreelistitem.swap(const a,b: integer);
+procedure ttreelistitem.internalswap(const a,b: integer);
 var
  item1: ttreelistitem;
 begin
@@ -2046,6 +2047,12 @@ begin
  fitems[a]:= fitems[b];
  fitems[a].fparentindex:= a;
  fitems[b]:= item1;
+end;
+
+procedure ttreelistitem.swap(const a,b: integer);
+begin
+ internalswap(a,b);
+ aftermove();
 end;
 
 procedure ttreelistitem.internalmove(const source,dest: integer);

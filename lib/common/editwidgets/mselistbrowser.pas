@@ -5463,7 +5463,7 @@ begin
         if key = key_up then begin
          if (int1 > 0) and (itemlist[row].parent = itemlist[row-1].parent) and 
                     checkrowmove(row,row-1) then begin
-          ttreelistitem1(fparent).swap(int1,int1-1);
+          ttreelistitem1(fparent).internalswap(int1,int1-1);
           moverow(row,row-1,1);
          end;
         end
@@ -5471,7 +5471,7 @@ begin
          if (int1 < fparent.count-1) and 
               (itemlist[row].parent = itemlist[row+1].parent) and
                checkrowmove(row,row+1) then begin
-          ttreelistitem1(fparent).swap(int1,int1+1);
+          ttreelistitem1(fparent).internalswap(int1,int1+1);
           moverow(row,row+1,1);
          end;
         end;
