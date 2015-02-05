@@ -711,24 +711,45 @@ function tcustomchartedit.chartcoordxy(const atrace: integer;
                                             const avalue: complexty): pointty;
 var
  rect1: rectty;
+ x,y: real;
 begin
  if (atrace >= 0) and (atrace < ftraces.count) then begin
   rect1:= getdialrect;
   with ttrace1(traces[atrace]) do begin
    if cto_logx in options then begin
-    result.x:= rect1.x + 
-      chartround(rect1.cx*(chartln(avalue.re)-flnxstart)/flnxrange);
+    x:= rect1.x + (rect1.cx*(chartln(avalue.re)-flnxstart)/flnxrange);
    end
    else begin
-    result.x:= rect1.x + chartround(((avalue.re-xstart)/xrange)*rect1.cx);
+    x:= rect1.x + (((avalue.re-xstart)/xrange)*rect1.cx);
    end;
    if cto_logy in options then begin
-    result.y:= rect1.y + rect1.cy -
-      chartround(rect1.cy*(chartln(avalue.im)-flnystart)/flnyrange);
+    y:= rect1.y + rect1.cy -
+      (rect1.cy*(chartln(avalue.im)-flnystart)/flnyrange);
    end
    else begin
-    result.y:= rect1.y + rect1.cy - 
-                         chartround(((avalue.im-ystart)/yrange)*rect1.cy);
+    y:= rect1.y + rect1.cy - (((avalue.im-ystart)/yrange)*rect1.cy);
+   end;
+  end;
+  if x > 100000 then begin
+   result.x:= 100000;
+  end
+  else begin
+   if x < -100000 then begin
+    result.x:= -100000;
+   end
+   else begin
+    result.x:= round(x);
+   end;
+  end;
+  if y > 100000 then begin
+   result.y:= 100000;
+  end
+  else begin
+   if y < -100000 then begin
+    result.y:= -100000;
+   end
+   else begin
+    result.y:= round(y);
    end;
   end;
  end
@@ -741,6 +762,7 @@ function tcustomchartedit.chartcoordxseries(const atrace: integer;
                                         const avalue: xseriesdataty): pointty;
 var
  rect1: rectty;
+ y: real;
 begin
  if (atrace >= 0) and (atrace < ftraces.count) then begin
   rect1:= getdialrect;
@@ -752,12 +774,22 @@ begin
     result.x:= rect1.x + (avalue.index * rect1.cx) div (count-1);
    end;
    if cto_logy in options then begin
-    result.y:= rect1.y + rect1.cy -
-      chartround(rect1.cy*(chartln(avalue.value)-flnystart)/flnyrange);
+    y:= rect1.y + rect1.cy - 
+                          (rect1.cy*(chartln(avalue.value)-flnystart)/flnyrange);
    end
    else begin
-    result.y:= rect1.y + rect1.cy - 
-                         chartround(((avalue.value-ystart)/yrange)*rect1.cy);
+    y:= rect1.y + rect1.cy - (((avalue.value-ystart)/yrange)*rect1.cy);
+   end;
+   if y > 100000 then begin
+    result.y:= 100000;
+   end
+   else begin
+    if y < -100000 then begin
+     result.y:= -100000;
+    end
+    else begin
+     result.y:= round(y);
+    end;
    end;
   end;
  end
@@ -799,8 +831,14 @@ var
    int2,int3: integer;
   begin
    int2:= apos.x - pt1.x;
-   int2:= int2*int2;
+   if abs(int2) > fsnapdist then begin
+    exit;
+   end;
    int3:= apos.y - pt1.y;
+   if abs(int3) > fsnapdist then begin
+    exit;
+   end;
+   int2:= int2*int2;
    int3:= int3*int3;
    int3:= int2+int3;
    if int3 < dist then begin
