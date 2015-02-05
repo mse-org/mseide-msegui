@@ -450,6 +450,7 @@ type
    function getitems1(const index: integer): tlistitem;
    procedure setitems(const index: integer; const Value: tlistitem); 
    procedure freedata(var data); override;
+   procedure removeitem(const aindex: integer); //no free item
    procedure change(const item: tlistitem); reintroduce; overload;
    procedure nodenotification(const sender: tlistitem;
                   var ainfo: nodeactioninfoty); virtual;
@@ -1811,6 +1812,21 @@ begin
  end;
 end;
 
+procedure tcustomitemlist.removeitem(const aindex: integer);
+var
+ bo1: boolean;
+begin
+ bo1:= ils_freelock in fitemstate;
+ include(fitemstate,ils_freelock);
+ try
+  deleteitems(aindex,1);
+ finally
+  if not bo1 then begin
+   exclude(fitemstate,ils_freelock);
+  end;
+ end;
+end;
+
 function tlistitem.gettop: boolean;
 begin
  result:= ns1_top in fstate1;
@@ -1936,12 +1952,20 @@ var
 begin
  result:= -1;
  if aitem <> nil then begin
+  if aitem = self then begin
+   raise exception.create('Can not add self.');
+  end;
   if aitem.parent = self then begin
    internalmove(aitem.parentindex,fcount-1);
   end
   else begin
    if aitem.fparent <> nil then begin
     aitem.fparent.remove(aitem.fparentindex);
+   end
+   else begin
+    if aitem.fowner <> nil then begin
+     aitem.fowner.removeitem(aitem.findex);
+    end;
    end;
    int1:= treeheight;
    dosetitems(inccount,aitem);
