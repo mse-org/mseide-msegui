@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2014 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2015 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -2726,6 +2726,7 @@ begin
    widgetrect:= arect;
   end
   else begin
+   updategrip(sd_none,widget0);
    arect:= clipinrect(arect,application.screenrect); //shift into screen
    widgetrect:= arect;
    application.postevent(tobjectevent.create(ek_checkscreenrange,
