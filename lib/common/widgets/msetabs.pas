@@ -667,7 +667,6 @@ type
  
  tcustomtabwidget = class(tactionwidget,iobjectpicker,istatfile)
   private
-   ftabs: tcustomtabbar1;
    fobjectpicker: tobjectpicker;
    factivepageindex: integer;
    factivepageindex1: integer;
@@ -752,6 +751,7 @@ type
    function gettab_widthmax: integer;
    procedure settab_widthmax(const avalue: integer);
   protected
+   ftabs: tcustomtabbar1;
    fupdating: integer;
    fpopuptab: integer;
    factivepageindexdesign: integer;
@@ -801,6 +801,16 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   
+   procedure createtabframe();
+   procedure createtabface();
+   procedure createtabfont();
+   procedure createtabframetab();
+   procedure createtabfacetab();
+   procedure createtabfonttab();
+   procedure createtabfaceactivetab();
+   procedure createtabfontactivetab();
+   
    procedure beginupdate;
    procedure endupdate;
    procedure synctofontheight; override;
@@ -5118,6 +5128,46 @@ end;
 function tcustomtabwidget.getstatpriority: integer;
 begin
  result:= fstatpriority;
+end;
+
+procedure tcustomtabwidget.createtabframe();
+begin
+ ftabs.createframe();
+end;
+
+procedure tcustomtabwidget.createtabface();
+begin
+ ftabs.createface();
+end;
+
+procedure tcustomtabwidget.createtabfont();
+begin
+ ftabs.createfont();
+end;
+
+procedure tcustomtabwidget.createtabframetab();
+begin
+ ftabs.tabs.createframe();
+end;
+
+procedure tcustomtabwidget.createtabfacetab();
+begin
+ ftabs.tabs.createface();
+end;
+
+procedure tcustomtabwidget.createtabfonttab();
+begin
+ ftabs.tabs.createfont();
+end;
+
+procedure tcustomtabwidget.createtabfaceactivetab;
+begin
+ ftabs.tabs.createfaceactive();
+end;
+
+procedure tcustomtabwidget.createtabfontactivetab;
+begin
+ ftabs.tabs.createfontactive();
 end;
 
 { tpagetab }
