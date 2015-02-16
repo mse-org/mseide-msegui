@@ -432,12 +432,6 @@ function removelineterminator(const s: msestring): msestring;
 procedure removetabterminator(var s: msestring);
 function stripescapesequences(avalue: msestring): msestring;
 
-procedure msestrtotvarrec(const value: ansistring; out varrec: tvarrec); overload;
-procedure msestrtotvarrec(const value: msestring; out varrec: tvarrec); overload;
-
-function tvarrectoansistring(value: tvarrec): ansistring;
-function tvarrectomsestring(value: tvarrec): msestring;
-
 procedure stringaddref(var str: string); overload;
 procedure stringaddref(var str: msestring); overload;
 
@@ -3814,33 +3808,6 @@ begin
    end;
   end;
  end;
-end;
-
-procedure msestrtotvarrec(const value: ansistring; out varrec: tvarrec);
-begin
- varrec.vtype:= vtansistring;
- varrec.vansistring:= pointer(value);
-end;
-
-procedure msestrtotvarrec(const value: msestring; out varrec: tvarrec);
-begin
-{$ifdef mse_hasvtunicodestring}
- varrec.vtype:= vtunicodestring;
- varrec.vunicodestring:= pointer(value); //msestringimplementation
-{$else}
- varrec.vtype:= vtwidestring;
- varrec.vwidestring:= pointer(value); //msestringimplementation
-{$endif}
-end;
-
-function tvarrectoansistring(value: tvarrec): ansistring;
-begin
- result:= ansistring(value.vansistring^);
-end;
-
-function tvarrectomsestring(value: tvarrec): msestring;
-begin
- result:= msestring(value.vwidestring^); //msestringimplementation
 end;
 
 procedure removereturn(var avalue: msestring; var aindex: integer);

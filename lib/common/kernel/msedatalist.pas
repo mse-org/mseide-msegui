@@ -4513,19 +4513,7 @@ begin
  writer.WriteString(string(value));
 // {$endif}
 end;
-{
-function tansistringdatalist.Getasvarrec(index: integer): tvarrec;
-begin
- ansistringvar:= items[index];
- msestrtotvarrec(ansistringvar,result);
-end;
 
-procedure tansistringdatalist.Setasvarrec(index: integer;
-  const Value: tvarrec);
-begin
- items[index]:= tvarrectoansistring(value);
-end;
-}
 procedure tansistringdatalist.fill(acount: integer;
   const defaultvalue: ansistring);
 begin

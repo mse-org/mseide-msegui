@@ -416,6 +416,12 @@ function decodebase64(const atext: string): string;
 function TryStrToQWord(const S: string; out Value: QWord): Boolean;
 {$endif}
 
+procedure msestrtotvarrec(const value: ansistring; out varrec: tvarrec);
+procedure msestrtotvarrec(const value: msestring; out varrec: tvarrec);
+
+function tvarrectoansistring(const value: tvarrec): ansistring;
+function tvarrectomsestring(const value: tvarrec): msestring;
+
 function formatmacros: tformatmacrolist;
 procedure clearformatmacros;
 
@@ -5088,6 +5094,159 @@ begin
  else begin
   if int1 > len then begin
    system.fillchar(result[1],len,fc_keinplatzchar);
+  end;
+ end;
+end;
+
+procedure msestrtotvarrec(const value: ansistring; out varrec: tvarrec);
+begin
+ varrec.vtype:= vtansistring;
+ varrec.vansistring:= pointer(value);
+end;
+
+procedure msestrtotvarrec(const value: msestring; out varrec: tvarrec);
+begin
+{$ifdef mse_hasvtunicodestring}
+ varrec.vtype:= vtunicodestring;
+ varrec.vunicodestring:= pointer(value); //msestringimplementation
+{$else}
+ varrec.vtype:= vtwidestring;
+ varrec.vwidestring:= pointer(value); //msestringimplementation
+{$endif}
+end;
+
+function tvarrectoansistring(const value: tvarrec): ansistring;
+begin
+ with value do begin
+  case vtype of
+   vtAnsiString: begin
+    result:= ansistring(VAnsiString);
+   end;
+   vtInteger: begin
+    result:= inttostr(VInteger);
+   end;
+   vtBoolean: begin
+    result:= booltostr(VBoolean);
+   end;
+   vtChar: begin
+    result:= VChar;
+   end;
+   vtWideChar: begin
+    result:= VWideChar;
+   end;
+   vtExtended: begin
+    result:= doubletostring(VExtended^);
+   end;
+   vtString: begin
+    result:= VString^;
+   end;
+   vtPointer: begin
+    result:= hextostr(VPointer);
+   end;
+   vtPChar: begin
+    result:= VPChar;
+   end;
+   vtObject: begin
+    result:= hextostr(VObject);
+   end;
+   vtClass: begin
+    result:= hextostr(VClass);
+   end;
+   vtPWideChar: begin
+    result:= unicodestring(VPWideChar);
+   end;
+   vtCurrency: begin
+    result:= currtostr(VCurrency^);
+   end;
+   vtVariant: begin
+    result:= VVariant^;
+   end;
+   vtInterface: begin
+    result:= hextostr(VInterface);
+   end;
+   vtWideString: begin
+    result:= widestring(VWideString);
+   end;
+   vtInt64: begin
+    result:= inttostr(VInt64^);
+   end;
+   vtUnicodeString: begin
+    result:= unicodestring(VUnicodeString);
+   end;
+   vtQWord: begin
+    result:= inttostr(VQWord^);
+   end
+   else begin
+    result:= '';
+   end;
+  end;
+ end;
+end;
+
+function tvarrectomsestring(const value: tvarrec): msestring;
+begin
+ with value do begin
+  case vtype of
+   vtUnicodeString: begin
+    result:= unicodestring(VUnicodeString);
+   end;
+   vtInteger: begin
+    result:= inttostrmse(VInteger);
+   end;
+   vtBoolean: begin
+    result:= booltostr(VBoolean);
+   end;
+   vtChar: begin
+    result:= VChar;
+   end;
+   vtWideChar: begin
+    result:= VWideChar;
+   end;
+   vtExtended: begin
+    result:= doubletostring(VExtended^);
+   end;
+   vtString: begin
+    result:= VString^;
+   end;
+   vtPointer: begin
+    result:= hextostr(VPointer);
+   end;
+   vtPChar: begin
+    result:= VPChar;
+   end;
+   vtObject: begin
+    result:= hextostr(VObject);
+   end;
+   vtClass: begin
+    result:= hextostr(VClass);
+   end;
+   vtPWideChar: begin
+    result:= unicodestring(VPWideChar);
+   end;
+   vtAnsiString: begin
+    result:= ansistring(VAnsiString);
+   end;
+   vtCurrency: begin
+    result:= currtostr(VCurrency^);
+   end;
+   vtVariant: begin
+    result:= VVariant^;
+   end;
+   vtInterface: begin
+    result:= hextostr(VInterface);
+   end;
+   vtWideString: begin
+    result:= widestring(VWideString);
+   end;
+   vtInt64: begin
+    result:= inttostr(VInt64^);
+   end;
+   vtQWord: begin
+    result:= inttostr(VQWord^);
+   end
+   else begin
+    result:= '';
+   end;
   end;
  end;
 end;
