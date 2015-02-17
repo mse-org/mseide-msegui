@@ -24,6 +24,8 @@ type
  sortcomparemethodarty = array of sortcomparemethodty;
  indexsortcomparemethodty = function (const l,r: integer): integer of object;
 
+ tvarrecarty = array of tvarrec;
+ 
 procedure deleteitem(var value; const typeinfo: pdynarraytypeinfo;
                           const aindex: integer); overload;
   //value = array of type which needs no finalize
@@ -324,6 +326,8 @@ function opentodynarrayi(const items: array of integer): integerarty;
 function opentodynarrayr(const items: array of realty): realarty;
 function opentodynarraybo(const items: array of boolean): booleanarty;
 function opentodynarrayby(const items: array of byte): bytearty;
+
+function dynarraytovararray(const avalue: int64arty): tvarrecarty;
 
 procedure copytore(const source: realarty; var dest: complexarty);
 procedure copytoim(const source: realarty; var dest: complexarty);
@@ -3131,6 +3135,20 @@ begin
  setlength(result,length(items));
  for int1:= 0 to high(items) do begin
   result[int1]:= items[int1];
+ end;
+end;
+
+function dynarraytovararray(const avalue: int64arty): tvarrecarty;
+var
+ i1: integer;
+begin
+ result:= nil; //compiler warning
+ allocuninitedarray(length(avalue),sizeof(result[0]),result);
+ for i1:= 0 to high(avalue) do begin
+  with result[i1] do begin
+   vtype:= vtint64;
+   vint64:= @avalue[i1];
+  end;
  end;
 end;
 
