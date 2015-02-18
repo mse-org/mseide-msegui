@@ -495,7 +495,7 @@ type
                                 const offset: pointty): rectty;
     //iface
    function getclientrect: rectty;
-   procedure invalidate;
+   procedure invalidatewidget();
    function translatecolor(const acolor: colorty): colorty;
    procedure setlinkedvar(const source: tmsecomponent; var dest: tmsecomponent;
               const linkintf: iobjectlink = nil);
@@ -4662,9 +4662,9 @@ begin
  result:= fcontroller.fintf.getwidget.clientrect;
 end;
 
-procedure tgripframe.invalidate;
+procedure tgripframe.invalidatewidget();
 begin
- fcontroller.fintf.getwidget.invalidate;
+ fcontroller.fintf.getwidget.invalidatewidget();
 end;
 
 procedure tgripframe.setlinkedvar(const source: tmsecomponent;

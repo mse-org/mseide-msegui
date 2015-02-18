@@ -996,7 +996,7 @@ type
 
  tcustomface = class;
  iface = interface(inullinterface)
-  procedure invalidate;
+  procedure invalidatewidget;
   function translatecolor(const acolor: colorty): colorty;
   function getclientrect: rectty;
   procedure setlinkedvar(const source: tmsecomponent; var dest: tmsecomponent;
@@ -1147,7 +1147,7 @@ type
   private
    flist: tfacearrayprop;
    procedure setlist(const avalue: tfacearrayprop);
-   procedure invalidate;
+   procedure invalidatewidget();
    function translatecolor(const acolor: colorty): colorty;
    function getclientrect: rectty;
    function getcomponentstate: tcomponentstate;
@@ -5866,7 +5866,7 @@ end;
 
 procedure tcustomface.change;
 begin
- fintf.invalidate;
+ fintf.invalidatewidget(); //face can be element of frame (tcustomstepframe)
 end;
 
 procedure updatefadearray(var fi: faceinfoty; const sender: tarrayprop);
@@ -6639,8 +6639,9 @@ begin
  flist.assign(avalue);
 end;
 
-procedure tfacelist.invalidate;
+procedure tfacelist.invalidatewidget();
 begin
+ //dummy
 end;
 
 function tfacelist.translatecolor(const acolor: colorty): colorty;
