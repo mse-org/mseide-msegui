@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2015 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -38,7 +38,8 @@ type
    procedure setcount(const Value: integer);
    procedure setitem(const index: integer; const source);
    procedure getitem(const index: integer; out dest);
-   function add(const source): integer;
+   function add(const source): integer; //returns index of new record
+   function add(): pointer; //returns pointer of new record
    procedure insert(const source; const index: integer);
    function getitempo(const index: integer): pointer;
        //nil if index < 0
@@ -530,6 +531,13 @@ begin
   copyrecord(po1^);
  end;
 end;
+
+function trecordlist.add: pointer;
+begin
+ inccount();
+ result:= pointer(fdata) + (fcount - 1) * frecordsize;
+end;
+
 
 procedure trecordlist.insert(const source; const index: integer);
 var
