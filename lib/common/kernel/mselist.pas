@@ -54,6 +54,8 @@ type
    constructor create(const arecordsize: integer; const aoptions: recordliststatesty = []);
    destructor destroy; override;
    procedure assign(const source: trecordlist);
+   function invalidindex(const aindex: int32): boolean; inline;
+   function validindex(const aindex: int32): boolean; inline;
    function datapo: pointer;
    function dataend: pointer; //after datablock
    function newitem: pointer; virtual;
@@ -678,6 +680,16 @@ end;
 procedure trecordlist.change;
 begin
  //dummy
+end;
+
+function trecordlist.invalidindex(const aindex: int32): boolean;
+begin
+ result:= (aindex < 0) or (aindex >= fcount);
+end;
+
+function trecordlist.validindex(const aindex: int32): boolean;
+begin
+ result:= (aindex >= 0) and (aindex < fcount);
 end;
 
 { torderedrecordlist }
