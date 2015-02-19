@@ -160,6 +160,8 @@ type
  basefontinfoty = record
   color: colorty;
   colorbackground: colorty;
+  colorselect: colorty;
+  colorselectbackground: colorty;
   shadow_color: colorty;
   shadow_shiftx: integer;
   shadow_shifty: integer;
@@ -182,7 +184,7 @@ type
  end;
 
  fontlocalpropty = (
-  flp_color,flp_colorbackground,
+  flp_color,flp_colorbackground,flp_colorselect,flp_colorselectbackground,
   flp_shadow_color,flp_shadow_shiftx,flp_shadow_shifty,
   flp_gloss_color,flp_gloss_shiftx,flp_gloss_shifty,
   flp_grayed_color,flp_grayed_colorshadow,flp_grayed_shiftx,flp_grayed_shifty,
@@ -441,6 +443,8 @@ type
   private
    procedure setcolor(const avalue: colorty);
    procedure setcolorbackground(const avalue: colorty);
+   procedure setcolorselect(const avalue: colorty);
+   procedure setcolorselectbackground(const avalue: colorty);
    procedure setshadow_color(const avalue: colorty);
    procedure setshadow_shiftx(const avalue: integer);
    procedure setshadow_shifty(const avalue: integer);
@@ -472,6 +476,12 @@ type
                                                               //cl_text
    property colorbackground: colorty read fi.colorbackground
                  write setcolorbackground default cl_default; //cl_transparent
+   property colorselect: colorty read fi.colorselect
+             write setcolorselect default cl_default;  //cl_selectedtext
+   property colorselectbackground: colorty read fi.colorselectbackground
+             write setcolorselectbackground default cl_default; 
+                                               //cl_selectedtextbackground
+
    property shadow_color: colorty read fi.shadow_color
                  write setshadow_color default cl_none;
    property shadow_shiftx: integer read fi.shadow_shiftx write
@@ -534,6 +544,8 @@ type
    procedure setextraspace(const avalue: integer);
    procedure setcolorbackground(const Value: colorty);
    function getcolorbackground: colorty;
+   procedure setcolorselectbackground(const Value: colorty);
+   function getcolorselectbackground: colorty;
 
    procedure setshadow_color(avalue: colorty);
    function getshadow_color: colorty;
@@ -551,6 +563,8 @@ type
 
    procedure setcolor(const Value: colorty);
    function getcolor: colorty;
+   procedure setcolorselect(const Value: colorty);
+   function getcolorselect: colorty;
    procedure setheight(avalue: integer);
    function getheight: integer;
    function getwidth: integer;
@@ -603,6 +617,8 @@ type
    procedure settemplate(const avalue: tfontcomp);
    function iscolorstored(): boolean;
    function iscolorbackgroundstored(): boolean;
+   function iscolorselectstored(): boolean;
+   function iscolorselectbackgroundstored(): boolean;
    function isshadow_colorstored(): boolean;
    function isshadow_shiftxstored(): boolean;
    function isshadow_shiftystored(): boolean;
@@ -666,6 +682,11 @@ type
    property colorbackground: colorty read getcolorbackground
                  write setcolorbackground stored iscolorbackgroundstored 
                                           default cl_default; //cl_transparent
+   property colorselect: colorty read getcolorselect write setcolorselect
+             stored iscolorselectstored default cl_default;    //cl_selectedtext
+   property colorselectbackground: colorty read getcolorselectbackground
+        write setcolorselectbackground stored iscolorselectbackgroundstored 
+                               default cl_default; //cl_selectedtextbackground
    property shadow_color: colorty read getshadow_color write setshadow_color
                                     stored isshadow_colorstored default cl_none;
    property shadow_shiftx: integer read getshadow_shiftx write setshadow_shiftx 
@@ -2620,6 +2641,8 @@ begin
  with ainfo do begin
   color:= cl_default;              //cl_text
   colorbackground:= cl_default;    //cl_transparent
+  colorselect:= cl_default;              //cl_selectedtext
+  colorselectbackground:= cl_default;    //cl_selectedtxtbackground
   shadow_color:= cl_none;
   shadow_shiftx:= 1;
   shadow_shifty:= 1;
@@ -2846,9 +2869,25 @@ begin
  end;
 end;
 
+procedure tfont.setcolorselectbackground(const Value: colorty);
+begin
+ include(flocalprops,flp_colorselectbackground);
+ with finfopo^.baseinfo do begin
+  if colorselectbackground <> value then begin
+   colorselectbackground:= Value;
+   dochanged([cs_fonteffect],false);
+  end;
+ end;
+end;
+
 function tfont.getcolorbackground: colorty;
 begin
  result:= finfopo^.baseinfo.colorbackground;
+end;
+
+function tfont.getcolorselectbackground: colorty;
+begin
+ result:= finfopo^.baseinfo.colorselectbackground;
 end;
 
 procedure tfont.setshadow_color(avalue: colorty);
@@ -3028,6 +3067,17 @@ begin
  end;
 end;
 
+procedure tfont.setcolorselect(const Value: colorty);
+begin
+ include(flocalprops,flp_colorselect);
+ with finfopo^.baseinfo do begin
+  if colorselect <> value then begin
+   colorselect := Value;
+   dochanged([cs_fonteffect],false);
+  end;
+ end;
+end;
+
 procedure tfont.assignproperties(const source: tfont; const ahandles: boolean);
 var
  int1: integer;
@@ -3039,6 +3089,11 @@ begin
   if baseinfo.colorbackground <> finfopo^.baseinfo.colorbackground then begin
    baseinfo.colorbackground:= finfopo^.baseinfo.colorbackground;
    include(changed,cs_fontcolorbackground);
+  end;
+  if baseinfo.colorselectbackground <> 
+             finfopo^.baseinfo.colorselectbackground then begin
+   baseinfo.colorselectbackground:= finfopo^.baseinfo.colorselectbackground;
+   include(changed,cs_fonteffect);
   end;
 
   if baseinfo.shadow_color <> finfopo^.baseinfo.shadow_color then begin
@@ -3087,6 +3142,10 @@ begin
   if baseinfo.color <> finfopo^.baseinfo.color then begin
    baseinfo.color:= finfopo^.baseinfo.color;
    include(changed,cs_fontcolor);
+  end;
+  if baseinfo.colorselect <> finfopo^.baseinfo.colorselect then begin
+   baseinfo.colorselect:= finfopo^.baseinfo.colorselect;
+   include(changed,cs_fonteffect);
   end;
   if baseinfo.style <> finfopo^.baseinfo.style then begin
    baseinfo.style:= finfopo^.baseinfo.style;
@@ -3224,6 +3283,11 @@ end;
 function tfont.getcolor: colorty;
 begin
  result:= finfopo^.baseinfo.color;
+end;
+
+function tfont.getcolorselect: colorty;
+begin
+ result:= finfopo^.baseinfo.colorselect;
 end;
 
 function tfont.getheight: integer;
@@ -3454,6 +3518,18 @@ begin
   if not (flp_colorbackground in flocalprops) then begin
    if colorbackground <> ainfo.colorbackground then begin
     colorbackground:= ainfo.colorbackground;
+    include(changed1,cs_fonteffect);
+   end;
+  end;
+  if not (flp_colorselect in flocalprops) then begin
+   if colorselect <> ainfo.colorselect then begin
+    colorselect:= ainfo.colorselect;
+    include(changed1,cs_fonteffect);
+   end;
+  end;
+  if not (flp_colorselectbackground in flocalprops) then begin
+   if colorselectbackground <> ainfo.colorselectbackground then begin
+    colorselectbackground:= ainfo.colorselectbackground;
     include(changed1,cs_fontcolorbackground);
    end;
   end;
@@ -3593,6 +3669,19 @@ begin
  result:= (ftemplate = nil) and 
           (finfopo^.baseinfo.colorbackground <> cl_default) or 
                                          (flp_colorbackground in flocalprops);
+end;
+
+function tfont.iscolorselectstored: boolean;
+begin
+ result:= (ftemplate = nil) and (finfopo^.baseinfo.colorselect <> cl_default) or 
+                                           (flp_colorselect in flocalprops);
+end;
+
+function tfont.iscolorselectbackgroundstored: boolean;
+begin
+ result:= (ftemplate = nil) and 
+          (finfopo^.baseinfo.colorselectbackground <> cl_default) or 
+                                    (flp_colorselectbackground in flocalprops);
 end;
 
 function tfont.isshadow_colorstored: boolean;
@@ -6718,6 +6807,18 @@ end;
 procedure tfonttemplate.setcolorbackground(const avalue: colorty);
 begin
  fi.colorbackground:= avalue;
+ changed();
+end;
+
+procedure tfonttemplate.setcolorselect(const avalue: colorty);
+begin
+ fi.colorselect:= avalue;
+ changed();
+end;
+
+procedure tfonttemplate.setcolorselectbackground(const avalue: colorty);
+begin
+ fi.colorselectbackground:= avalue;
  changed();
 end;
 

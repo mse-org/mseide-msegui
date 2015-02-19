@@ -1145,8 +1145,18 @@ var
     end
     else begin
      if (fs_selected in style.fontstyle) then begin
-      font.color:= cl_selectedtext;
-      font.colorbackground:= cl_selectedtextbackground;
+      if font.colorselect = cl_default then begin
+       font.color:= cl_selectedtext;
+      end
+      else begin
+       font.color:= font.colorselect;
+      end;
+      if font.colorselectbackground = cl_default then begin
+       font.colorbackground:= cl_selectedtextbackground;
+      end
+      else begin
+       font.colorbackground:= font.colorselectbackground;
+      end;
      end
      else begin
       if style.fontcolor = 0 then begin
