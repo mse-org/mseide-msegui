@@ -1738,12 +1738,19 @@ begin
 end;
 
 procedure tsyntaxpainter.deflistchanged(const sender: tobject);
+var
+ stream1: ttextstream;
 begin
  if not (csdesigning in componentstate) then begin
   if fdefaultsyntax <> - 1 then begin
    freedeffile(fdefaultsyntax);
   end;
-  fdefaultsyntax:= readdeffile(fdeftext.dataastextstream);
+  stream1:= fdeftext.dataastextstream;
+  try
+   fdefaultsyntax:= readdeffile(stream1);
+  finally
+   stream1.destroy();
+  end;
  end;
 end;
 
