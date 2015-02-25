@@ -488,6 +488,7 @@ procedure textdim(const atext: msestring; out firstx,lastx,y: integer);
 
 function shrinkpathellipse(var value: msestring): boolean;
 function shrinkstring(const value: msestring; maxcharcount: integer): msestring;
+procedure extendstring(var value: string; const mincharcount: integer);
 procedure extendstring(var value: msestring; const mincharcount: integer);
 
 function nullstring(const count: integer): string;
@@ -2813,6 +2814,19 @@ begin
  result:= value;
  repeat
  until (length(result) <= maxcharcount) or not shrinkpathellipse(result);
+end;
+
+procedure extendstring(var value: string; const mincharcount: integer);
+var
+ int1: integer;
+begin
+ int1:= length(value);
+ if int1 < mincharcount then begin
+  setlength(value,mincharcount);
+  for int1:= int1 to mincharcount do begin
+   pchar(pointer(value))[int1]:= ' ';
+  end;
+ end;
 end;
 
 procedure extendstring(var value: msestring; const mincharcount: integer);
