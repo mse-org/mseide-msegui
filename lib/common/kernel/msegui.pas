@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2014 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2015 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -273,7 +273,9 @@ const
                       frl1_font,frl1_captiondist,frl1_captionoffset,
                       frl1_colorglyph,frl1_colorpattern];
 type
- facelocalpropty = (fal_options,fal_fadirection,fal_image,
+ facelocalpropty = (fal_options,fal_framei_left,fal_framei_top,
+                    fal_framei_right,fal_framei_bottom,
+                    fal_fadirection,fal_image,
                     fal_fapos,fal_facolor,fal_faopapos,fal_faopacolor,
                     fal_fatransparency,
                     fal_faopacity,fal_frameimagelist,fal_frameimageoffset);
@@ -281,7 +283,9 @@ type
 
 const
  allfacelocalprops: facelocalpropsty =
-                    [fal_options,fal_fadirection,fal_image,
+                    [fal_options,fal_framei_left,fal_framei_top,
+                    fal_framei_right,fal_framei_bottom,
+                    fal_fadirection,fal_image,
                     fal_fapos,fal_facolor,fal_faopapos,fal_faopacolor,
                     fal_fatransparency,
                     fal_faopacity,fal_frameimagelist,fal_frameimageoffset];
@@ -1022,6 +1026,7 @@ type
  faceinfoty = record
   frameimage_offset: integer;
   options: faceoptionsty;
+  framei: framety;
 
   frameimage_list: timagelist;         //not copied by move
   fade_direction: graphicdirectionty;
@@ -1043,6 +1048,15 @@ type
    procedure settemplateinfo(const ainfo: faceinfoty);
    procedure setoptions(const avalue: faceoptionsty);
    function isoptionsstored: boolean;
+   procedure setframei_left(const avalue: integer);
+   function isframei_leftstored(): boolean;
+   procedure setframei_top(const avalue: integer);
+   function isframei_topstored(): boolean;
+   procedure setframei_right(const avalue: integer);
+   function isframei_rightstored(): boolean;
+   procedure setframei_bottom(const avalue: integer);
+   function isframei_bottomstored(): boolean;
+
    procedure setimage(const value: tmaskedbitmap);
    function isimagestored: boolean;
    procedure setfade_color(const Value: tfadecolorarrayprop);
@@ -1081,9 +1095,18 @@ type
    destructor destroy; override;
    procedure checktemplate(const sender: tobject);
    procedure assign(source: tpersistent); override;
-   procedure paint(const canvas: tcanvas; const rect: rectty); virtual;
+   procedure paint(const canvas: tcanvas; const arect: rectty); virtual;
    property options: faceoptionsty read fi.options write setoptions
                    stored isoptionsstored default [];
+   property framei_left: integer read fi.framei.left write setframei_left
+                                   stored isframei_leftstored default 0;
+   property framei_top: integer read fi.framei.top write setframei_top
+                                   stored isframei_topstored default 0;
+   property framei_right: integer read fi.framei.right write setframei_right
+                                   stored isframei_rightstored default 0;
+   property framei_bottom: integer read fi.framei.bottom write setframei_bottom
+                                   stored isframei_bottomstored default 0;
+                                   
    property image: tmaskedbitmap read fi.image write setimage
                      stored isimagestored;
    property fade_pos: trealarrayprop read fi.fade_pos write setfade_pos
@@ -1119,6 +1142,10 @@ type
   published
    property options;
    property image;
+   property framei_left;
+   property framei_top;
+   property framei_right;
+   property framei_bottom;
    property fade_pos;
    property fade_color;
    property fade_opapos;
@@ -1166,6 +1193,11 @@ type
   private
    fi: faceinfoty;
    procedure setoptions(const avalue: faceoptionsty);
+   procedure setframei_left(const avalue: integer);
+   procedure setframei_top(const avalue: integer);
+   procedure setframei_right(const avalue: integer);
+   procedure setframei_bottom(const avalue: integer);
+   
    procedure setfade_color(const Value: tfadecolorarrayprop);
    procedure setfade_pos(const Value: trealarrayprop);
    procedure setfade_opacolor(const Value: tfadeopacolorarrayprop);
@@ -1190,6 +1222,15 @@ type
    destructor destroy; override;
   published
    property options: faceoptionsty read fi.options write setoptions default [];
+   property framei_left: integer read fi.framei.left 
+                                        write setframei_left default 0;
+   property framei_top: integer read fi.framei.top 
+                                        write setframei_top default 0;
+   property framei_right: integer read fi.framei.right 
+                                        write setframei_right default 0;
+   property framei_bottom: integer read fi.framei.bottom 
+                                        write setframei_bottom default 0;
+                                        
    property image: tmaskedbitmap read fi.image write setimage;
    property fade_pos: trealarrayprop read fi.fade_pos write setfade_pos;
    property fade_color: tfadecolorarrayprop read fi.fade_color 
@@ -5936,6 +5977,10 @@ begin
     self.fade_opacity:= fade_opacity;
     self.image:= image;
     self.options:= options;
+    self.framei_left:= framei_left;
+    self.framei_top:= framei_top;
+    self.framei_right:= framei_right;
+    self.framei_bottom:= framei_bottom;
    end;
   end;
  end
@@ -5944,10 +5989,10 @@ begin
  end;
 end;
 
-procedure tcustomface.paint(const canvas: tcanvas; const rect: rectty);
+procedure tcustomface.paint(const canvas: tcanvas; const arect: rectty);
 
 var
- rect1: rectty;
+ rect,rect1: rectty;
 
  procedure createalphabuffer(const amasked: boolean);
  begin
@@ -6107,35 +6152,37 @@ var
    end;
   end;
   if fi.frameimage_list <> nil then begin
-   fi.frameimage_list.paint(canvas,fi.frameimage_offset,rect.pos);
+   fi.frameimage_list.paint(canvas,fi.frameimage_offset,arect.pos);
    fi.frameimage_list.paint(canvas,fi.frameimage_offset+1,
-   makerect(rect.x,
-            rect.y+fi.frameimage_list.height,
+   makerect(arect.x,
+            arect.y+fi.frameimage_list.height,
             fi.frameimage_list.width,
-            rect.cy-2*fi.frameimage_list.height),[al_stretchy]);
-   fi.frameimage_list.paint(canvas,fi.frameimage_offset+2,rect,[al_bottom]);
+            arect.cy-2*fi.frameimage_list.height),[al_stretchy]);
+   fi.frameimage_list.paint(canvas,fi.frameimage_offset+2,arect,[al_bottom]);
    fi.frameimage_list.paint(canvas,fi.frameimage_offset+3,
-   makerect(rect.x+fi.frameimage_list.width,
-            rect.y+rect.cy-fi.frameimage_list.height,
-            rect.cx-2*fi.frameimage_list.width,
+   makerect(arect.x+fi.frameimage_list.width,
+            arect.y+arect.cy-fi.frameimage_list.height,
+            arect.cx-2*fi.frameimage_list.width,
             fi.frameimage_list.height),[al_stretchx]);
-   fi.frameimage_list.paint(canvas,fi.frameimage_offset+4,rect,
+   fi.frameimage_list.paint(canvas,fi.frameimage_offset+4,arect,
                                                 [al_bottom,al_right]);
    fi.frameimage_list.paint(canvas,fi.frameimage_offset+5,
-   makerect(rect.x+rect.cx-fi.frameimage_list.width,
-            rect.y+fi.frameimage_list.height,
+   makerect(arect.x+arect.cx-fi.frameimage_list.width,
+            arect.y+fi.frameimage_list.height,
             fi.frameimage_list.width,
-            rect.cy-2*fi.frameimage_list.height),[al_stretchy]);
-   fi.frameimage_list.paint(canvas,fi.frameimage_offset+6,rect,[al_right]);
+            arect.cy-2*fi.frameimage_list.height),[al_stretchy]);
+   fi.frameimage_list.paint(canvas,fi.frameimage_offset+6,arect,[al_right]);
    fi.frameimage_list.paint(canvas,fi.frameimage_offset+7,
-   makerect(rect.x+fi.frameimage_list.width,rect.y,
-            rect.cx-2*fi.frameimage_list.width,
+   makerect(arect.x+fi.frameimage_list.width,arect.y,
+            arect.cx-2*fi.frameimage_list.width,
             fi.frameimage_list.height),[al_stretchx]);
   end;
  end;
 
 begin
- if intersectrect(rect,canvas.clipbox,rect1) then begin
+ rect:= deflaterect(arect,fi.framei);
+ if intersectrect(rect,canvas.clipbox,rect1) or 
+               testintersectrect(arect,canvas.clipbox) then begin
   if fao_fadeoverlay in options then begin
    paintimage;
   end;
@@ -6239,6 +6286,42 @@ begin
       {$ifdef FPC}longword{$else}byte{$endif}(fi.options))) then begin
    fintf.widgetregioninvalid;
   end;
+  change;
+ end;
+end;
+
+procedure tcustomface.setframei_left(const avalue: integer);
+begin
+ include(flocalprops,fal_framei_left);
+ if fi.framei.left <> avalue then begin
+  fi.framei.left:= avalue;
+  change;
+ end;
+end;
+
+procedure tcustomface.setframei_top(const avalue: integer);
+begin
+ include(flocalprops,fal_framei_top);
+ if fi.framei.top <> avalue then begin
+  fi.framei.top:= avalue;
+  change;
+ end;
+end;
+
+procedure tcustomface.setframei_right(const avalue: integer);
+begin
+ include(flocalprops,fal_framei_right);
+ if fi.framei.right <> avalue then begin
+  fi.framei.right:= avalue;
+  change;
+ end;
+end;
+
+procedure tcustomface.setframei_bottom(const avalue: integer);
+begin
+ include(flocalprops,fal_framei_bottom);
+ if fi.framei.bottom <> avalue then begin
+  fi.framei.bottom:= avalue;
   change;
  end;
 end;
@@ -6348,6 +6431,18 @@ begin
  if not (fal_frameimageoffset in flocalprops) then begin
   fi.frameimage_offset:= ainfo.frameimage_offset;
  end;
+ if not (fal_framei_left in flocalprops) then begin
+  fi.framei.left:= ainfo.framei.left;
+ end;
+ if not (fal_framei_top in flocalprops) then begin
+  fi.framei.top:= ainfo.framei.top;
+ end;
+ if not (fal_framei_right in flocalprops) then begin
+  fi.framei.right:= ainfo.framei.right;
+ end;
+ if not (fal_framei_bottom in flocalprops) then begin
+  fi.framei.bottom:= ainfo.framei.bottom;
+ end;
  if not (fal_options in flocalprops) then begin
   options:= ainfo.options;
  end;
@@ -6370,6 +6465,26 @@ end;
 function tcustomface.isoptionsstored: boolean;
 begin
  result:= (ftemplate = nil) or (fal_options in flocalprops);
+end;
+
+function tcustomface.isframei_leftstored: boolean;
+begin
+ result:= (ftemplate = nil) or (fal_framei_left in flocalprops);
+end;
+
+function tcustomface.isframei_topstored: boolean;
+begin
+ result:= (ftemplate = nil) or (fal_framei_top in flocalprops);
+end;
+
+function tcustomface.isframei_rightstored: boolean;
+begin
+ result:= (ftemplate = nil) or (fal_framei_right in flocalprops);
+end;
+
+function tcustomface.isframei_bottomstored: boolean;
+begin
+ result:= (ftemplate = nil) or (fal_framei_bottom in flocalprops);
 end;
 
 function tcustomface.isimagestored: boolean;
@@ -6488,6 +6603,30 @@ begin
     {$ifdef FPC}longword{$else}byte{$endif}(avalue),
     {$ifdef FPC}longword{$else}byte{$endif}(fi.options),
     {$ifdef FPC}longword{$else}byte{$endif}(faceoptionsmask)));
+ changed;
+end;
+
+procedure tfacetemplate.setframei_left(const avalue: integer);
+begin
+ fi.framei.left:= avalue;
+ changed;
+end;
+
+procedure tfacetemplate.setframei_top(const avalue: integer);
+begin
+ fi.framei.top:= avalue;
+ changed;
+end;
+
+procedure tfacetemplate.setframei_right(const avalue: integer);
+begin
+ fi.framei.right:= avalue;
+ changed;
+end;
+
+procedure tfacetemplate.setframei_bottom(const avalue: integer);
+begin
+ fi.framei.bottom:= avalue;
  changed;
 end;
 
