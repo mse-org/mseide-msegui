@@ -1500,6 +1500,7 @@ object projectoptionsfo: tprojectoptionsfo
                 dropdown.cols.count = 1
                 dropdown.cols.items = <                
                   item
+                    width = 100
                   end>
                 reffontheight = 14
               end
