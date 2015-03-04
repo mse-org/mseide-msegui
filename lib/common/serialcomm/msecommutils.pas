@@ -33,7 +33,7 @@ type
    procedure setvaluename(const avalue: filenamety);
   protected
    procedure getdropdowninfo(var aenums: integerarty;
-         const names: tdropdowncols); override;
+         const names: tdropdowndatacols); override;
    function createdropdowncontroller: tcustomdropdowncontroller; override;
    procedure texttovalue(var accept: boolean; const quiet: boolean); override;
    function internaldatatotext(const data): msestring; override;
@@ -116,7 +116,7 @@ begin
 end;
 
 procedure tcommselector.getdropdowninfo(var aenums: integerarty;
-  const names: tdropdowncols);
+  const names: tdropdowndatacols);
 var
  comm: commnrty;
  int1: integer;

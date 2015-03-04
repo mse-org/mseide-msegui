@@ -31,7 +31,7 @@ uses
  sysutils,regglob,msearrayutils,mseeditglob;
 
 type
- tdropdowncolpropertyeditor = class(tarraypropertyeditor)
+ tdropdowndatacolpropertyeditor = class(tarraypropertyeditor)
   protected
    function geteditorclass: propertyeditorclassty; override;
  end;
@@ -133,8 +133,8 @@ begin
  registercomponenttabhints(['Edit'],
  ['Edit widgets, twidgetgrid and widgets'+c_linefeed+
   'which can be placed into twidgetgrid']);
- registerpropertyeditor(tdropdowncols.classinfo,nil,'',
-                                      tdropdowncolpropertyeditor);
+ registerpropertyeditor(tdropdowndatacols.classinfo,nil,'',
+                                      tdropdowndatacolpropertyeditor);
  registerpropertyeditor(ttabulators.classinfo,tcustomtextedit,'tabulators',
             toptionalpersistentarraypropertyeditor);
  registerpropertyeditor(tcustomitemlist.classinfo,nil,'',
@@ -168,9 +168,9 @@ begin
                            trefreshbooleanpropertyeditor);
 end;
 
-{ tdropdowncolpropertyeditor }
+{ tdropdowndatacolpropertyeditor }
 
-function tdropdowncolpropertyeditor.geteditorclass: propertyeditorclassty;
+function tdropdowndatacolpropertyeditor.geteditorclass: propertyeditorclassty;
 begin
  result:= tmsestringdatalistpropertyeditor;
 end;

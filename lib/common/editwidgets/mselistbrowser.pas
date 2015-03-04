@@ -653,7 +653,7 @@ type
     //idropdown
    procedure dobeforedropdown; virtual;
    procedure doafterclosedropdown; virtual;
-   function getdropdownitems: tdropdowncols;
+   function getdropdownitems: tdropdowndatacols;
    function getvalueempty: integer; virtual;
    procedure imagelistchanged; virtual;
   public
@@ -3535,7 +3535,7 @@ begin
  end;
 end;
 }
-function tdropdownitemedit.getdropdownitems: tdropdowncols;
+function tdropdownitemedit.getdropdownitems: tdropdowndatacols;
 begin
  result:= nil;
 end;

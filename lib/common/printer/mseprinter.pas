@@ -446,7 +446,7 @@ type
    procedure setongetvalue(const avalue: pagesizeeventty);
   protected
    procedure getdropdowninfo(var aenums: integerarty;
-         const names: tdropdowncols); override;
+                                const names: tdropdowndatacols); override;
    procedure dochange; override;
    procedure checkpagedim;
   public
@@ -472,7 +472,7 @@ type
    procedure setongetvalue(const avalue: pageorientationeventty);
   protected
    procedure getdropdowninfo(var aenums: integerarty;
-         const names: tdropdowncols); override;
+                              const names: tdropdowndatacols); override;
    procedure dochange; override;
   public
    constructor create(aowner: tcomponent); override;
@@ -1550,14 +1550,16 @@ var
  pa1: stdpagesizety;
 begin
  inherited;
+ dropdown.cols.beginupdate();
  for pa1:= low(stdpagesizety) to high(stdpagesizety) do begin
   addrow([stdpagesizes[pa1].name]);
  end;
+ dropdown.cols.endupdate();
  inherited value:= integer(sps_a4);
 end;
 
 procedure tpagesizeselector.getdropdowninfo(var aenums: integerarty; 
-                              const names: tdropdowncols);
+                              const names: tdropdowndatacols);
 var
  pa1: stdpagesizety;
 begin
@@ -1565,7 +1567,8 @@ begin
  names.clear;
  for pa1:= stdpagesizety(1) to high(stdpagesizety) do begin
   with stdpagesizes[pa1] do begin
-   names.addrow([name+' ('+formatfloat('0',width)+'*'+formatfloat('0',height)+' mm2)']); 
+   names.addrow([name+' ('+formatfloat('0',width)+'*'+
+                                     formatfloat('0',height)+' mm2)']); 
   end;
   aenums[ord(pa1)-1]:= ord(pa1);
  end;
@@ -1682,7 +1685,7 @@ begin
 end;
 
 procedure tpageorientationselector.getdropdowninfo(var aenums: integerarty; 
-    const names: tdropdowncols);
+                                                const names: tdropdowndatacols);
 begin
  names.clear;
  names.addrow([stockcaptions(sc_portrait)]);

@@ -562,7 +562,7 @@ type
    procedure dostatread(const reader: tstatreader); override;
    procedure dostatwrite(const writer: tstatwriter); override;
     //idropdownlist
-   function getdropdownitems: tdropdowncols; virtual;
+   function getdropdownitems: tdropdowndatacols; virtual;
    function createdropdowncontroller: tcustomdropdowncontroller; override;
    procedure internalsort(const acol: integer; 
                           out sortlist: integerarty); virtual;
@@ -1028,14 +1028,14 @@ type
 
  tcustomselector = class(tcustomenuedit)
   private
-   fdropdownitems: tdropdowncols;
+   fdropdownitems: tdropdowndatacols;
    fdropdownenums: integerarty;
   protected
    procedure texttovalue(var accept: boolean; const quiet: boolean); override;
    procedure dobeforedropdown; override;
    procedure getdropdowninfo(var aenums: integerarty;
-         const names: tdropdowncols); virtual; abstract;
-   function getdropdownitems: tdropdowncols; override;
+         const names: tdropdowndatacols); virtual; abstract;
+   function getdropdownitems: tdropdowndatacols; override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -1048,15 +1048,17 @@ type
   private
    fongetdropdowninfo: selectoreventty;
    foninit: selectoreventty;
-   procedure setdropdownitems(const avalue: tdropdowncols);
+   procedure setdropdownitems(const avalue: tdropdowndatacols);
   protected
    procedure getdropdowninfo(var aenums: integerarty;
-         const names: tdropdowncols); override;
+         const names: tdropdowndatacols); override;
    procedure loaded; override;
   public
   published
-   property dropdownitems: tdropdowncols read getdropdownitems write setdropdownitems;
-   property ongetdropdowninfo: selectoreventty read fongetdropdowninfo write fongetdropdowninfo;
+   property dropdownitems: tdropdowndatacols read getdropdownitems
+                                                     write setdropdownitems;
+   property ongetdropdowninfo: selectoreventty read fongetdropdowninfo
+                                                     write fongetdropdowninfo;
    property oninit: selectoreventty read foninit write foninit;
    property valueoffset; //before value
    property value;
@@ -3722,7 +3724,7 @@ end;
 
 { tcustomdropdownlistedit }
 
-function tcustomdropdownlistedit.getdropdownitems: tdropdowncols;
+function tcustomdropdownlistedit.getdropdownitems: tdropdowndatacols;
 begin
  result:= nil;
 end;
@@ -5150,8 +5152,10 @@ end;
 
 constructor tcustomselector.create(aowner: tcomponent);
 begin
- fdropdownitems:= tdropdowncols.create(nil);
  inherited;
+ fdropdownitems:= tdropdowndatacols.create(
+                          tcustomdropdownlistcontroller(fdropdown));
+// inherited;
 end;
 
 destructor tcustomselector.destroy;
@@ -5165,11 +5169,11 @@ begin
  inherited;
  fdropdownenums:= copy(enums);
  getdropdowninfo(fdropdownenums,fdropdownitems);
- tdropdowncols1(fdropdownitems).fitemindex:= 
+ tdropdowncols1(dropdown.cols).fitemindex:= 
                          getindex1(fvalue1,fdropdownenums,fvalueoffset);
 end;
 
-function tcustomselector.getdropdownitems: tdropdowncols;
+function tcustomselector.getdropdownitems: tdropdowndatacols;
 begin
  result:= fdropdownitems;
 end;
@@ -5209,7 +5213,7 @@ end;
 { tselector }
 
 procedure tselector.getdropdowninfo(var aenums: integerarty;
-  const names: tdropdowncols);
+                                          const names: tdropdowndatacols);
 begin
  if canevent(tmethod(fongetdropdowninfo)) then begin
   fongetdropdowninfo(self)
@@ -5224,7 +5228,7 @@ begin
  end;
 end;
 
-procedure tselector.setdropdownitems(const avalue: tdropdowncols);
+procedure tselector.setdropdownitems(const avalue: tdropdowndatacols);
 begin
  fdropdownitems.Assign(avalue);
 end;

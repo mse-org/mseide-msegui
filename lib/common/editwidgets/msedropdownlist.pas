@@ -59,7 +59,37 @@ type
    class function getinstancepo(owner: tobject): pfont; override;
  end;
 
- tdropdowncol = class(tmsestringdatalist)
+ tdropdowndata = class(tmsestringdatalist)
+ end;
+
+ tdropdowndatacols = class(townedpersistentarrayprop)
+  private
+   fupdating1: integer;
+   fonitemchange: indexeventty;
+   function getitems(const index: integer): tdropdowndata;
+  protected
+   function maxrowcount: integer;
+   function minrowcount: integer;
+   procedure createitem(const index: integer; var item: tpersistent); override;
+   procedure itemchanged(const sender: tdatalist; const index: integer);
+             //sender = nil -> col undefined
+   procedure checkrowindex(const aindex: integer);
+   procedure setrowcount(const avalue: integer);
+  public
+   constructor create(const aowner: tcustomdropdownlistcontroller); reintroduce;
+   procedure beginupdate;
+   procedure endupdate;
+   procedure clear;
+   function addrow(const aitems: array of msestring): integer; 
+                                                   //returns itemindex
+   procedure insertrow(const aindex: integer; const aitems: array of msestring);
+   procedure deleterow(const aindex: integer);
+   function getrow(const aindex: integer): msestringarty;
+   property rowcount: integer read maxrowcount write setrowcount;
+   property items[const index: integer]: tdropdowndata read getitems; default;
+ end;
+ 
+ tdropdowncol = class(tdropdowndata)
   private
    fwidth: integer;
    foptions: coloptionsty;
@@ -85,6 +115,7 @@ type
    procedure setfacetemplate(const avalue: tfacecomp);
   protected
    fowner: tobject;
+//   fdata: tdropdowndata; //for tselector
    procedure defineproperties(filer: tfiler); override;
   public
    constructor create(const aowner: tcustomdropdownlistcontroller); reintroduce;
@@ -127,11 +158,9 @@ type
   public
    class function getinstancepo(owner: tobject): pfont; override;
  end;
- 
- tdropdowncols = class(townedpersistentarrayprop)
+
+ tdropdowncols = class(tdropdowndatacols)
   private
-   fupdating1: integer;
-   fonitemchange: indexeventty;
    fnostreaming: boolean;
 //   maxrowcount: integer;
    fwidth: integer;
@@ -147,7 +176,6 @@ type
    fframetemplate: tframecomp;
    ffacetemplate: tfacecomp;
    function getitems(const index: integer): tdropdowncol;
-   procedure setrowcount(const avalue: integer);
    procedure setnostreaming(const avalue: boolean);
    procedure setwidth(const avalue: integer);
    procedure setoptions(const avalue: coloptionsty);
@@ -165,17 +193,13 @@ type
    procedure setframetemplate(const avalue: tframecomp);
    procedure setfacetemplate(const avalue: tfacecomp);
   protected
+   fdatacols: tdropdowndatacols; //for tselector
    fitemindex: integer;
    fkeyvalue64: int64;
    fkeyvalue: msestring;
    procedure setcount1(acount: integer; doinit: boolean); override;
    procedure createitem(const index: integer; var item: tpersistent); override;
-   procedure itemchanged(const sender: tdatalist; const index: integer);
-             //sender = nil -> col undefined
-   function maxrowcount: integer;
-   function minrowcount: integer;
    function getcolclass: dropdowncolclassty; virtual;
-   procedure checkrowindex(const aindex: integer);
    procedure defineproperties(filer: tfiler); override;
   public
    constructor create(const aowner: tcustomdropdownlistcontroller); reintroduce;
@@ -183,16 +207,8 @@ type
    class function getitemclasstype: persistentclassty; override;
    procedure createfont();
    procedure createfontselect();
-   procedure beginupdate;
-   procedure endupdate;
-   procedure clear;
-   function addrow(const aitems: array of msestring): integer; //returns itemindex
-   procedure insertrow(const aindex: integer; const aitems: array of msestring);
-   procedure deleterow(const aindex: integer);
-   function getrow(const aindex: integer): msestringarty;
    property nostreaming: boolean read fnostreaming 
                                           write setnostreaming;
-   property rowcount: integer read maxrowcount write setrowcount;
    property onitemchange: indexeventty read fonitemchange write fonitemchange;
    property items[const index: integer]: tdropdowncol read getitems; default;
   published
@@ -233,7 +249,7 @@ type
  end;
 
  idropdownlist = interface(idropdown)
-  function getdropdownitems: tdropdowncols;
+  function getdropdownitems: tdropdowndatacols;
               //nil -> dropdowncontroller.fdropdownitems
   procedure imagelistchanged;
  end;
@@ -494,7 +510,7 @@ type
    fbuttonlength: integer;
    fbuttonendlength: integer;
    fbuttonminlength: integer;
-   fdropdownitems: tdropdowncols;
+//   fdropdownitems: tdropdowncols;
    fdropdownlist: tdropdownlist;
    fcols: tdropdowncols;
    procedure dotimer(const sender: tobject);
@@ -757,6 +773,192 @@ begin
  result:= @tdropdowncols(owner).ffontselect;
 end;
 
+{ tdropdowndatacols }
+
+constructor tdropdowndatacols.create(
+              const aowner: tcustomdropdownlistcontroller);
+begin
+ inherited create(aowner,nil);
+ count:= 1;
+end;
+
+procedure tdropdowndatacols.createitem(const index: integer;
+               var item: tpersistent);
+begin
+ item:= tdropdowndata.create();
+end;
+
+function tdropdowndatacols.getitems(const index: integer): tdropdowndata;
+begin
+ result:= tdropdowndata(inherited getitems(index));
+end;
+
+procedure tdropdowndatacols.checkrowindex(const aindex: integer);
+begin
+ if count = 0 then begin
+  raise exception.create('No columns.');
+ end;
+ if (aindex < 0) or (aindex >= maxrowcount) then begin
+  tlist.error(slistindexerror,aindex);
+ end; 
+end;
+
+procedure tdropdowndatacols.setrowcount(const avalue: integer);
+var
+ int1: integer;
+begin
+ for int1:= 0 to high(fitems) do begin
+  tdropdowndata(fitems[int1]).count:= avalue;
+ end;
+end;
+
+procedure tdropdowndatacols.itemchanged(const sender: tdatalist;
+                                                     const index: integer);
+begin
+ if (fupdating1 = 0 ) and assigned(fonitemchange) then begin
+  fonitemchange(sender,index);
+ end;
+end;
+
+function tdropdowndatacols.maxrowcount: integer;
+var
+ int1,int2: integer;
+begin
+ result:= 0;
+ for int1:= 0 to count - 1 do begin
+  int2:= items[int1].count;
+  if int2 > result then begin
+   result:= int2;
+  end;
+ end;
+end;
+
+function tdropdowndatacols.minrowcount: integer;
+var
+ int1,int2: integer;
+begin
+ if count > 0 then begin
+  result:= bigint;
+  for int1:= 0 to count - 1 do begin
+   int2:= items[int1].count;
+   if int2 < result then begin
+    result:= int2;
+   end;
+  end;
+ end
+ else begin
+  result:= 0;
+ end;
+end;
+
+procedure tdropdowndatacols.beginupdate;
+begin
+ inc(fupdating1);
+end;
+
+procedure tdropdowndatacols.endupdate;
+begin
+ dec(fupdating1);
+ if fupdating1 = 0 then begin
+  itemchanged(nil,-1);
+ end;
+end;
+
+procedure tdropdowndatacols.clear;
+var
+ int1: integer;
+begin
+ beginupdate;
+ try
+  for int1:= 0 to count - 1 do begin
+   items[int1].count:= 0;
+  end;
+ finally
+  endupdate;
+ end;
+end;
+
+function tdropdowndatacols.getrow(const aindex: integer): msestringarty;
+var
+ int1: integer;
+begin
+ if (aindex < 0) or (aindex >= minrowcount) then begin
+  tlist.error({$ifndef fpc}@{$endif}slistindexerror, aindex);
+ end;
+ setlength(result,count);
+ for int1:= 0 to high(fitems) do begin
+  result[int1]:= pmsestring(tdropdowndata(fitems[int1]).fdatapo +
+                                          aindex * sizeof(msestring))^;
+ end; 
+end;
+
+function tdropdowndatacols.addrow(const aitems: array of msestring): integer;
+var
+ int1: integer;
+begin
+ result:= maxrowcount;
+ beginupdate;
+ try
+  for int1:= 0 to count - 1 do begin
+   items[int1].count:= result + 1;
+   if int1 < length(aitems) then begin
+    items[int1][result]:= aitems[int1];
+   end;
+  end;
+ finally
+  endupdate;
+ end;
+end;
+
+procedure tdropdowndatacols.insertrow(const aindex: integer;
+               const aitems: array of msestring);
+var
+ int1,int2: integer;
+begin
+ int2:= maxrowcount;
+ if aindex = int2 then begin
+  addrow(aitems);
+ end
+ else begin
+  checkrowindex(aindex);  
+  beginupdate;
+  try
+   for int1:= 0 to count - 1 do begin
+    with items[int1] do begin
+     count:= int2;
+     if int1 <= high(aitems) then begin
+      insert(aindex,aitems[int1]);
+     end
+     else begin
+      insert(aindex,'');
+     end;
+    end;
+   end;
+  finally
+   endupdate;
+  end;
+ end;
+end;
+
+procedure tdropdowndatacols.deleterow(const aindex: integer);
+var
+ int1,int2: integer;
+begin
+ checkrowindex(aindex);
+ int2:= maxrowcount;
+ beginupdate;
+ try
+  for int1:= 0 to count - 1 do begin
+   with items[int1] do begin
+    count:= int2;
+    deletedata(aindex);
+   end;
+  end;
+ finally
+  endupdate;
+ end;
+end;
+
 { tdropdowncols }
 
 constructor tdropdowncols.create(const aowner: tcustomdropdownlistcontroller);
@@ -769,8 +971,7 @@ begin
  fcolorselect:= cl_default;
 // ffontcolorselect:= cl_default;
 
- inherited create(aowner,nil);
- count:= 1;
+ inherited create(aowner{,nil});
 // items[0].options:= items[0].options + [co_fill];
 end;
 
@@ -883,76 +1084,9 @@ begin
  end;
 end;
 
-function tdropdowncols.getitems(
-  const index: integer): tdropdowncol;
+function tdropdowncols.getitems(const index: integer): tdropdowncol;
 begin
  result:= tdropdowncol(inherited getitems(index));
-end;
-
-procedure tdropdowncols.itemchanged(const sender: tdatalist;
-                                                     const index: integer);
-begin
- if (fupdating1 = 0 ) and assigned(fonitemchange) then begin
-  fonitemchange(sender,index);
- end;
-end;
-
-procedure tdropdowncols.beginupdate;
-begin
- inc(fupdating1);
-end;
-
-procedure tdropdowncols.endupdate;
-begin
- dec(fupdating1);
- if fupdating1 = 0 then begin
-  itemchanged(nil,-1);
- end;
-end;
-
-procedure tdropdowncols.clear;
-var
- int1: integer;
-begin
- beginupdate;
- try
-  for int1:= 0 to count - 1 do begin
-   items[int1].count:= 0;
-  end;
- finally
-  endupdate;
- end;
-end;
-
-function tdropdowncols.maxrowcount: integer;
-var
- int1,int2: integer;
-begin
- result:= 0;
- for int1:= 0 to count - 1 do begin
-  int2:= items[int1].count;
-  if int2 > result then begin
-   result:= int2;
-  end;
- end;
-end;
-
-function tdropdowncols.minrowcount: integer;
-var
- int1,int2: integer;
-begin
- if count > 0 then begin
-  result:= bigint;
-  for int1:= 0 to count - 1 do begin
-   int2:= items[int1].count;
-   if int2 < result then begin
-    result:= int2;
-   end;
-  end;
- end
- else begin
-  result:= 0;
- end;
 end;
 
 procedure tdropdowncols.setcount1(acount: integer; doinit: boolean);
@@ -962,106 +1096,6 @@ begin
   acount:= tcustomdropdownlistcontroller(fowner).fvaluecol + 1;
  end;
  inherited;
-end;
-
-function tdropdowncols.getrow(const aindex: integer): msestringarty;
-var
- int1: integer;
-begin
- if (aindex < 0) or (aindex >= minrowcount) then begin
-  tlist.error({$ifndef fpc}@{$endif}slistindexerror, aindex);
- end;
- setlength(result,count);
- for int1:= 0 to high(fitems) do begin
-  result[int1]:= pmsestring(tdropdowncol(fitems[int1]).fdatapo +
-                                          aindex * sizeof(msestring))^;
- end; 
-end;
-
-function tdropdowncols.addrow(const aitems: array of msestring): integer;
-var
- int1: integer;
-begin
- result:= maxrowcount;
- beginupdate;
- try
-  for int1:= 0 to count - 1 do begin
-   items[int1].count:= result + 1;
-   if int1 < length(aitems) then begin
-    items[int1][result]:= aitems[int1];
-   end;
-  end;
- finally
-  endupdate;
- end;
-end;
-
-procedure tdropdowncols.setrowcount(const avalue: integer);
-var
- int1: integer;
-begin
- for int1:= 0 to high(fitems) do begin
-  tdropdowncol(fitems[int1]).count:= avalue;
- end;
-end;
-
-procedure tdropdowncols.checkrowindex(const aindex: integer);
-begin
- if count = 0 then begin
-  raise exception.create('No columns.');
- end;
- if (aindex < 0) or (aindex >= maxrowcount) then begin
-  tlist.error(slistindexerror,aindex);
- end; 
-end;
-
-procedure tdropdowncols.insertrow(const aindex: integer;
-               const aitems: array of msestring);
-var
- int1,int2: integer;
-begin
- int2:= maxrowcount;
- if aindex = int2 then begin
-  addrow(aitems);
- end
- else begin
-  checkrowindex(aindex);  
-  beginupdate;
-  try
-   for int1:= 0 to count - 1 do begin
-    with items[int1] do begin
-     count:= int2;
-     if int1 <= high(aitems) then begin
-      insert(aindex,aitems[int1]);
-     end
-     else begin
-      insert(aindex,'');
-     end;
-    end;
-   end;
-  finally
-   endupdate;
-  end;
- end;
-end;
-
-procedure tdropdowncols.deleterow(const aindex: integer);
-var
- int1,int2: integer;
-begin
- checkrowindex(aindex);
- int2:= maxrowcount;
- beginupdate;
- try
-  for int1:= 0 to count - 1 do begin
-   with items[int1] do begin
-    count:= int2;
-    deletedata(aindex);
-   end;
-  end;
- finally
-  endupdate;
- end;
 end;
 
 procedure tdropdowncols.setwidth(const avalue: integer);
@@ -1754,7 +1788,7 @@ end;
 
 function tcustomdropdownlistcontroller.createdropdownlist: tdropdownlist;
 begin
- result:= tdropdownlist.create(self,fdropdownitems,getfixcolclass);
+ result:= tdropdownlist.create(self,fcols,getfixcolclass);
  result.name:= '_dropdownlist'; //debug purposes
 end;
 
@@ -1805,13 +1839,20 @@ var
 // rect1: rectty;
  str1: msestring;
  widget1: twidget;
+ items1: tdropdowndatacols;
 begin
  inherited;
  if event.kind = ek_dropdown then begin
   if fdropdownlist = nil then begin
-   fdropdownitems:= idropdownlist(fintf).getdropdownitems;
-   if fdropdownitems = nil then begin
-    fdropdownitems:= fcols;
+   items1:= idropdownlist(fintf).getdropdownitems;
+   if items1 <> nil then begin  //tselector
+    if fcols.count < items1.count then begin
+     fcols.count:= items1.count;
+    end;
+    fcols.fdatacols:= items1;
+   end
+   else begin
+    fcols.fdatacols:= fcols;
    end;
    setlinkedcomponent(ievent(self),createdropdownlist,
                                          tmsecomponent(fdropdownlist));
@@ -1853,10 +1894,10 @@ begin
        end;
       end;
       str1:= self.fintf.geteditor.text;
-      int2:= fdropdownitems.fitemindex;
+      int2:= fcols.fitemindex;
       if (int2 >= 0) and
-           ((fdropdownitems.fitemindex >= fdropdownitems[0].count) or 
-                   (str1 <> fdropdownitems[0][int2])) then begin
+           ((int1 >= fcols.fdatacols[0].count) or 
+                   (str1 <> fcols.fdatacols[0][int2])) then begin
        int2:= -1;
       end;
       fselectkey:= key_none;
@@ -2303,18 +2344,21 @@ begin
   fdatacols.createfontselect();
   datacols.fontselect.assign(acols.fontselect);
  end;
- if acols.count > 0 then begin
+ if (acols.count > 0) and (acols.fdatacols.count > 0) then begin
   if deo_colsizing in fcontroller.options then begin
    optionsgrid:= optionsgrid + [og_colsizing];
   end;
-  rowcount:= acols[0].count;
+  int2:= acols.fdatacols.maxrowcount;
+  rowcount:= int2;
   fdatacols.count:= acols.count;
-  int2:= acols.maxrowcount;
   for int1:= 0 to acols.count - 1 do begin  
    col1:= acols[int1];
-   col1.count:= int2;
    with tstringcol1(fdatacols[int1]) do begin
-    fdata:= col1;
+    if acols.fdatacols.count > int1 then begin
+     fdata:= acols.fdatacols[int1];
+     fdata.count:= int2;
+    end;
+//    fdata:= col1.fdata;
     options:= col1.foptions;
     optionsedit:= defaultstringcoleditoptions - [scoe_autoselect,scoe_autoselectonfirstclick];
     width:= col1.fwidth;
