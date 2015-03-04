@@ -11,7 +11,7 @@ object projectoptionsfo: tprojectoptionsfo
   container.frame.localprops = [frl_fibottom, frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
   container.frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
   container.frame.sbhorz.options = [sbo_moveauto, sbo_showauto]
-  container.face.dummy = 0
+  container.face.localprops = []
   container.bounds = (
     0
     0
@@ -38,7 +38,6 @@ object projectoptionsfo: tprojectoptionsfo
       frame.framei_bottom = 5
       frame.localprops = [frl_fitop, frl_fibottom]
       frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
-      frame.dummy = 0
       bounds_x = 0
       bounds_y = 538
       bounds_cx = 759
@@ -92,7 +91,6 @@ object projectoptionsfo: tprojectoptionsfo
       frame.captionoffset = 3
       frame.localprops = [frl_levelo]
       frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
-      frame.dummy = 0
       anchors = [an_top, an_bottom]
       taborder = 1
       activepageindex = 2
@@ -120,7 +118,6 @@ object projectoptionsfo: tprojectoptionsfo
           color = -2147483645
           frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
           frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
-          frame.dummy = 0
           taborder = 6
           bounds_x = 0
           bounds_y = 89
@@ -140,7 +137,7 @@ object projectoptionsfo: tprojectoptionsfo
             frame.caption = 'Test'
             frame.captionpos = cp_topright
             frame.font.xscale = 1
-            frame.font.dummy = 0
+            frame.font.localprops = [flp_xscale]
             frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
             frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
             frame.outerframe = (
@@ -156,7 +153,7 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_cy = 91
             anchors = [an_left, an_top, an_right]
             font.xscale = 1
-            font.dummy = 0
+            font.localprops = [flp_xscale]
             optionsgrid = [og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_wrapcol, og_autopopup]
             rowcount = 2
             rowcolors.count = 1
@@ -194,7 +191,7 @@ object projectoptionsfo: tprojectoptionsfo
               bounds_cy = 14
               font.name = 'stf_default'
               font.xscale = 1
-              font.dummy = 0
+              font.localprops = [flp_xscale]
               optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savestate]
               optionsedit = [oe_closequery, oe_checkmrcancel, oe_linebreak, oe_eatreturn, oe_exitoncursor, oe_nofirstarrownavig]
               reffontheight = 14
@@ -204,7 +201,6 @@ object projectoptionsfo: tprojectoptionsfo
             color = -2147483645
             frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
             frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
-            frame.dummy = 0
             taborder = 2
             bounds_x = 0
             bounds_y = 85
@@ -218,7 +214,6 @@ object projectoptionsfo: tprojectoptionsfo
               frame.caption = 'Extra Sp.'
               frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
               frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
-              frame.dummy = 0
               frame.outerframe = (
                 0
                 17
@@ -240,7 +235,6 @@ object projectoptionsfo: tprojectoptionsfo
               frame.caption = 'Width'
               frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
               frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
-              frame.dummy = 0
               frame.outerframe = (
                 0
                 17
@@ -259,7 +253,6 @@ object projectoptionsfo: tprojectoptionsfo
               frame.caption = 'Height'
               frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
               frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
-              frame.dummy = 0
               frame.outerframe = (
                 0
                 17
@@ -279,7 +272,6 @@ object projectoptionsfo: tprojectoptionsfo
               frame.caption = 'Font'
               frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
               frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
-              frame.dummy = 0
               frame.outerframe = (
                 0
                 17
@@ -296,6 +288,8 @@ object projectoptionsfo: tprojectoptionsfo
             end
             object editfontcolor: tcoloredit
               frame.caption = 'Color'
+              frame.localprops = []
+              frame.localprops1 = []
               frame.button.color = -2147483646
               frame.buttonellipse.color = -2147483646
               frame.buttonellipse.imagenr = 17
@@ -319,6 +313,8 @@ object projectoptionsfo: tprojectoptionsfo
             end
             object editbkcolor: tcoloredit
               frame.caption = 'Bk. Color'
+              frame.localprops = []
+              frame.localprops1 = []
               frame.button.color = -2147483646
               frame.buttonellipse.color = -2147483646
               frame.buttonellipse.imagenr = 17
@@ -344,7 +340,6 @@ object projectoptionsfo: tprojectoptionsfo
               frame.caption = 'Anti aliased'
               frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
               frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
-              frame.dummy = 0
               frame.outerframe = (
                 0
                 1
@@ -364,7 +359,6 @@ object projectoptionsfo: tprojectoptionsfo
             color = -2147483645
             frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
             frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
-            frame.dummy = 0
             taborder = 1
             bounds_x = 0
             bounds_y = 39
@@ -407,7 +401,6 @@ object projectoptionsfo: tprojectoptionsfo
               frame.caption = 'Scroll H.'
               frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
               frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
-              frame.dummy = 0
               frame.outerframe = (
                 0
                 17
@@ -428,7 +421,6 @@ object projectoptionsfo: tprojectoptionsfo
               frame.caption = 'Characters'
               frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
               frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
-              frame.dummy = 0
               frame.outerframe = (
                 0
                 17
@@ -451,7 +443,6 @@ object projectoptionsfo: tprojectoptionsfo
               frame.caption = 'Mark Brackets'
               frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
               frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
-              frame.dummy = 0
               frame.outerframe = (
                 0
                 1
@@ -467,6 +458,8 @@ object projectoptionsfo: tprojectoptionsfo
             end
             object statementcolor: tcoloredit
               frame.caption = 'Statem. Col.'
+              frame.localprops = []
+              frame.localprops1 = []
               frame.button.color = -2147483646
               frame.buttonellipse.color = -2147483646
               frame.buttonellipse.imagenr = 17
@@ -501,7 +494,6 @@ object projectoptionsfo: tprojectoptionsfo
                 frame.caption = 'Right Margin Line'
                 frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
                 frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
-                frame.dummy = 0
                 frame.outerframe = (
                   0
                   1
@@ -517,7 +509,8 @@ object projectoptionsfo: tprojectoptionsfo
               end
               object linenumberson: tbooleanedit
                 frame.caption = 'Line Numbers'
-                frame.dummy = 0
+                frame.localprops = []
+                frame.localprops1 = []
                 frame.outerframe = (
                   0
                   1
@@ -535,7 +528,6 @@ object projectoptionsfo: tprojectoptionsfo
             color = -2147483645
             frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
             frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
-            frame.dummy = 0
             bounds_x = 0
             bounds_y = 0
             bounds_cx = 757
@@ -548,7 +540,6 @@ object projectoptionsfo: tprojectoptionsfo
               frame.caption = 'Backup File Count'
               frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
               frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
-              frame.dummy = 0
               frame.outerframe = (
                 0
                 17
@@ -568,7 +559,6 @@ object projectoptionsfo: tprojectoptionsfo
               frame.caption = 'Space'
               frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
               frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
-              frame.dummy = 0
               frame.outerframe = (
                 0
                 1
@@ -585,7 +575,6 @@ object projectoptionsfo: tprojectoptionsfo
               frame.caption = 'Block Indent'
               frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
               frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
-              frame.dummy = 0
               frame.outerframe = (
                 0
                 17
@@ -608,7 +597,6 @@ object projectoptionsfo: tprojectoptionsfo
               frame.caption = 'Auto Indent'
               frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
               frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
-              frame.dummy = 0
               frame.outerframe = (
                 0
                 1
@@ -623,7 +611,8 @@ object projectoptionsfo: tprojectoptionsfo
             end
             object tabindent: tbooleanedit
               frame.caption = 'Tab'
-              frame.dummy = 0
+              frame.localprops = []
+              frame.localprops1 = []
               frame.outerframe = (
                 0
                 1
@@ -640,7 +629,6 @@ object projectoptionsfo: tprojectoptionsfo
               frame.caption = 'Tabstops'
               frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
               frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
-              frame.dummy = 0
               frame.outerframe = (
                 0
                 17
@@ -659,7 +647,8 @@ object projectoptionsfo: tprojectoptionsfo
             end
             object showtabs: tbooleanedit
               frame.caption = 'Show Tabs'
-              frame.dummy = 0
+              frame.localprops = []
+              frame.localprops1 = []
               frame.outerframe = (
                 0
                 1
@@ -679,7 +668,6 @@ object projectoptionsfo: tprojectoptionsfo
           frame.caption = 'Form Designer'
           frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
           frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
-          frame.dummy = 0
           frame.outerframe = (
             0
             7
@@ -696,7 +684,6 @@ object projectoptionsfo: tprojectoptionsfo
           frame.caption = 'Show Grid'
           frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
           frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
-          frame.dummy = 0
           frame.outerframe = (
             0
             1
@@ -715,7 +702,6 @@ object projectoptionsfo: tprojectoptionsfo
           frame.caption = 'Snap to Grid'
           frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
           frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
-          frame.dummy = 0
           frame.outerframe = (
             0
             1
@@ -734,7 +720,6 @@ object projectoptionsfo: tprojectoptionsfo
           frame.caption = 'Grid size X'
           frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
           frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
-          frame.dummy = 0
           frame.outerframe = (
             0
             17
@@ -754,7 +739,6 @@ object projectoptionsfo: tprojectoptionsfo
             frame.caption = 'Grid size X'
             frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
             frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
-            frame.dummy = 0
             frame.outerframe = (
               0
               17
@@ -772,7 +756,6 @@ object projectoptionsfo: tprojectoptionsfo
           frame.caption = 'Grid size Y'
           frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
           frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
-          frame.dummy = 0
           frame.outerframe = (
             0
             17
@@ -793,7 +776,6 @@ object projectoptionsfo: tprojectoptionsfo
           frame.caption = 'Move on first Click'
           frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
           frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
-          frame.dummy = 0
           frame.outerframe = (
             0
             1
@@ -818,6 +800,8 @@ object projectoptionsfo: tprojectoptionsfo
           anchors = [an_top, an_bottom]
           taborder = 7
           activepageindex = 0
+          tab_frame.localprops = []
+          tab_frame.localprops1 = []
           tab_color = -2147483645
           tab_size = 18
           statfile = statfile1
@@ -974,6 +958,8 @@ object projectoptionsfo: tprojectoptionsfo
             end
           end
           object ttabpage19: ttabpage
+            frame.localprops = []
+            frame.localprops1 = []
             taborder = 3
             bounds_x = 0
             bounds_y = 18
@@ -1103,7 +1089,6 @@ object projectoptionsfo: tprojectoptionsfo
           frame.caption = 'Docking'
           frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
           frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
-          frame.dummy = 0
           frame.outerframe = (
             0
             1
@@ -1163,7 +1148,6 @@ object projectoptionsfo: tprojectoptionsfo
           frame.captionoffset = 3
           frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
           frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
-          frame.dummy = 0
           frame.outerframe = (
             0
             17
@@ -1193,7 +1177,6 @@ object projectoptionsfo: tprojectoptionsfo
           tab_frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
           tab_frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
           tab_face.localprops = [fal_frameimageoffset]
-          tab_face.dummy = 0
           tab_color = -2147483645
           tab_size = 18
           statfile = statfile1
@@ -1327,7 +1310,6 @@ object projectoptionsfo: tprojectoptionsfo
                 frame.colorclient = -2147483645
                 frame.localprops = [frl_levelo, frl_colorclient]
                 frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
-                frame.dummy = 0
                 taborder = 1
                 bounds_x = 0
                 bounds_y = 0
@@ -1345,7 +1327,6 @@ object projectoptionsfo: tprojectoptionsfo
                 frame.colorclient = -2147483645
                 frame.localprops = [frl_levelo, frl_colorclient]
                 frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
-                frame.dummy = 0
                 taborder = 2
                 visible = False
                 bounds_x = 23
@@ -1512,7 +1493,6 @@ object projectoptionsfo: tprojectoptionsfo
                 dropdownitems.count = 2
                 dropdownitems.items = <                
                   item
-                    options = [co_readonly, co_mousemovefocus, co_focusselect]
                   end                
                   item
                   end>
@@ -1586,7 +1566,6 @@ object projectoptionsfo: tprojectoptionsfo
                 frame.colorclient = -2147483645
                 frame.localprops = [frl_levelo, frl_colorclient]
                 frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
-                frame.dummy = 0
                 taborder = 1
                 bounds_x = 0
                 bounds_y = 0
@@ -1602,7 +1581,6 @@ object projectoptionsfo: tprojectoptionsfo
                 frame.colorclient = -2147483645
                 frame.localprops = [frl_levelo, frl_colorclient]
                 frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
-                frame.dummy = 0
                 taborder = 2
                 visible = False
                 bounds_x = 48
@@ -1633,7 +1611,7 @@ object projectoptionsfo: tprojectoptionsfo
               color = -2147483645
               frame.framei_right = 2
               frame.localprops = [frl_firight]
-              frame.dummy = 0
+              frame.localprops1 = []
               taborder = 2
               bounds_x = 0
               bounds_y = 74
@@ -1674,7 +1652,8 @@ object projectoptionsfo: tprojectoptionsfo
               end
               object nogdbserverexit: tbooleanedit
                 frame.caption = 'no wait for exit'
-                frame.dummy = 0
+                frame.localprops = []
+                frame.localprops1 = []
                 frame.outerframe = (
                   0
                   1
@@ -1690,7 +1669,8 @@ object projectoptionsfo: tprojectoptionsfo
               end
               object gdbservertty: tbooleanedit
                 frame.caption = 'TTY'
-                frame.dummy = 0
+                frame.localprops = []
+                frame.localprops1 = []
                 frame.outerframe = (
                   0
                   1
@@ -1709,7 +1689,6 @@ object projectoptionsfo: tprojectoptionsfo
               frame.captionoffset = 3
               frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
               frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
-              frame.dummy = 0
               frame.outerframe = (
                 0
                 17
@@ -1730,7 +1709,6 @@ object projectoptionsfo: tprojectoptionsfo
               color = -2147483645
               frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
               frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
-              frame.dummy = 0
               taborder = 5
               bounds_x = 0
               bounds_y = 188
@@ -1855,7 +1833,6 @@ object projectoptionsfo: tprojectoptionsfo
               color = -2147483645
               frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
               frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
-              frame.dummy = 0
               taborder = 6
               bounds_x = 0
               bounds_y = 225
@@ -1949,7 +1926,6 @@ object projectoptionsfo: tprojectoptionsfo
               color = -2147483645
               frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
               frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
-              frame.dummy = 0
               taborder = 1
               bounds_x = 0
               bounds_y = 37
@@ -1991,7 +1967,6 @@ object projectoptionsfo: tprojectoptionsfo
                 frame.caption = 'Wait before connect'
                 frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
                 frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
-                frame.dummy = 0
                 frame.outerframe = (
                   0
                   17
@@ -2016,7 +1991,8 @@ object projectoptionsfo: tprojectoptionsfo
               end
               object gdbserverstartonce: tbooleanedit
                 frame.caption = 'Start once'
-                frame.dummy = 0
+                frame.localprops = []
+                frame.localprops1 = []
                 frame.outerframe = (
                   0
                   1
@@ -2037,7 +2013,7 @@ object projectoptionsfo: tprojectoptionsfo
               frame.captionoffset = 3
               frame.font.name = 'stf_default'
               frame.font.xscale = 1
-              frame.font.dummy = 0
+              frame.font.localprops = [flp_xscale]
               frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
               frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
               frame.button.color = -2147483646
@@ -2064,7 +2040,6 @@ object projectoptionsfo: tprojectoptionsfo
               frame.framei_left = 1
               frame.localprops = [frl_fileft, frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
               frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
-              frame.dummy = 0
               taborder = 4
               bounds_x = 0
               bounds_y = 151
@@ -2101,16 +2076,6 @@ object projectoptionsfo: tprojectoptionsfo
                 dropdown.cols.count = 1
                 dropdown.cols.items = <                
                   item
-                    data = (
-                      'Auto'
-                      'i386'
-                      'x86_64'
-                      'arm'
-                      'armm3'
-                      'cpu32'
-                      'avr32'
-                      'rl78'
-                    )
                   end>
                 reffontheight = 14
               end
@@ -2118,7 +2083,6 @@ object projectoptionsfo: tprojectoptionsfo
                 frame.caption = 'Simulator'
                 frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
                 frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
-                frame.dummy = 0
                 frame.outerframe = (
                   0
                   1
@@ -2136,7 +2100,6 @@ object projectoptionsfo: tprojectoptionsfo
                 frame.caption = 'gdb download'
                 frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
                 frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
-                frame.dummy = 0
                 frame.outerframe = (
                   0
                   1
@@ -2154,7 +2117,6 @@ object projectoptionsfo: tprojectoptionsfo
                 frame.caption = 'Always download before run'
                 frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
                 frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
-                frame.dummy = 0
                 frame.outerframe = (
                   0
                   1
@@ -2172,7 +2134,6 @@ object projectoptionsfo: tprojectoptionsfo
                 frame.caption = 'Startup BKPT'
                 frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
                 frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
-                frame.dummy = 0
                 frame.outerframe = (
                   0
                   17
@@ -2191,7 +2152,6 @@ object projectoptionsfo: tprojectoptionsfo
                 color = -2147483645
                 frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
                 frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
-                frame.dummy = 0
                 taborder = 5
                 bounds_x = 580
                 bounds_y = 21
@@ -2204,7 +2164,6 @@ object projectoptionsfo: tprojectoptionsfo
           color = -2147483645
           frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
           frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
-          frame.dummy = 0
           taborder = 2
           bounds_x = 7
           bounds_y = 164
@@ -2222,7 +2181,6 @@ object projectoptionsfo: tprojectoptionsfo
             frame.caption = '&External'#10'Console'
             frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
             frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
-            frame.dummy = 0
             frame.outerframe = (
               0
               8
@@ -2240,7 +2198,6 @@ object projectoptionsfo: tprojectoptionsfo
             frame.caption = 'Show &Console'#10'on Run'
             frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
             frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
-            frame.dummy = 0
             frame.outerframe = (
               0
               8
@@ -2257,7 +2214,6 @@ object projectoptionsfo: tprojectoptionsfo
             frame.caption = '&Stop'#10'on Exception'
             frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
             frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
-            frame.dummy = 0
             frame.outerframe = (
               0
               8
@@ -2274,7 +2230,6 @@ object projectoptionsfo: tprojectoptionsfo
             frame.caption = '&Activate'#10'on Break'
             frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
             frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
-            frame.dummy = 0
             frame.outerframe = (
               0
               8
@@ -2292,7 +2247,6 @@ object projectoptionsfo: tprojectoptionsfo
             frame.caption = '&Value'#10'Hints'
             frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
             frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
-            frame.dummy = 0
             frame.outerframe = (
               0
               8
@@ -2306,7 +2260,8 @@ object projectoptionsfo: tprojectoptionsfo
           end
           object nodebugbeginend: tbooleanedit
             frame.caption = 'Call GUI_DEBUGBEGIN/'#10'GUI_DEBUGEND'
-            frame.dummy = 0
+            frame.localprops = []
+            frame.localprops1 = []
             frame.outerframe = (
               0
               8
@@ -2323,7 +2278,8 @@ object projectoptionsfo: tprojectoptionsfo
           end
           object settty: tbooleanedit
             frame.caption = 'Set TT&Y'
-            frame.dummy = 0
+            frame.localprops = []
+            frame.localprops1 = []
             frame.outerframe = (
               0
               1
@@ -2341,7 +2297,6 @@ object projectoptionsfo: tprojectoptionsfo
             frame.caption = '&Raise'#10'on Break'
             frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
             frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
-            frame.dummy = 0
             frame.outerframe = (
               0
               8
@@ -2421,6 +2376,8 @@ object projectoptionsfo: tprojectoptionsfo
         end
         object xtermcommand: tmemodialogedit
           frame.caption = 'xterm command'
+          frame.localprops = []
+          frame.localprops1 = []
           frame.button.imagenr = 17
           frame.outerframe = (
             0
@@ -2637,7 +2594,6 @@ object projectoptionsfo: tprojectoptionsfo
           frame.caption = 'Copy messages to &file'
           frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
           frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
-          frame.dummy = 0
           frame.outerframe = (
             0
             1
@@ -2655,7 +2611,6 @@ object projectoptionsfo: tprojectoptionsfo
           frame.caption = 'Close message window after compile'
           frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
           frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
-          frame.dummy = 0
           frame.outerframe = (
             0
             1
@@ -2674,7 +2629,6 @@ object projectoptionsfo: tprojectoptionsfo
           frame.caption = 'Check method headers'
           frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
           frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
-          frame.dummy = 0
           frame.outerframe = (
             0
             1
@@ -2701,12 +2655,13 @@ object projectoptionsfo: tprojectoptionsfo
           tab_frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
           tab_frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
           tab_face.localprops = [fal_frameimageoffset]
-          tab_face.dummy = 0
           tab_color = -2147483645
           tab_size = 18
           statfile = statfile1
           reffontheight = 14
           object ttabpage17: ttabpage
+            frame.localprops = []
+            frame.localprops1 = []
             taborder = 3
             bounds_x = 0
             bounds_y = 18
@@ -2886,6 +2841,7 @@ object projectoptionsfo: tprojectoptionsfo
                 frame.levelo = 0
                 frame.colorclient = -2147483645
                 frame.localprops = [frl_levelo, frl_colorclient]
+                frame.localprops1 = []
                 frame.button.color = -1879048187
                 frame.button.imagenr = 17
                 taborder = 7
@@ -2908,7 +2864,6 @@ object projectoptionsfo: tprojectoptionsfo
             frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
             frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
             face.localprops = [fal_frameimageoffset]
-            face.dummy = 0
             taborder = 2
             bounds_x = 0
             bounds_y = 18
@@ -3090,6 +3045,7 @@ object projectoptionsfo: tprojectoptionsfo
                 frame.levelo = 0
                 frame.colorclient = -2147483645
                 frame.localprops = [frl_levelo, frl_colorclient]
+                frame.localprops1 = []
                 frame.button.color = -1879048187
                 frame.button.imagenr = 17
                 taborder = 7
@@ -3379,7 +3335,6 @@ object projectoptionsfo: tprojectoptionsfo
                 frame.colorclient = -2147483645
                 frame.localprops = [frl_levelo, frl_colorclient]
                 frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
-                frame.dummy = 0
                 taborder = 10
                 bounds_x = 127
                 bounds_y = 0
@@ -3418,7 +3373,6 @@ object projectoptionsfo: tprojectoptionsfo
               frame.caption = 'Unit pref.(-Fu)'
               frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
               frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
-              frame.dummy = 0
               frame.outerframe = (
                 0
                 17
@@ -3437,7 +3391,6 @@ object projectoptionsfo: tprojectoptionsfo
               frame.caption = 'Inc pref.(-Fi)'
               frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
               frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
-              frame.dummy = 0
               frame.outerframe = (
                 0
                 17
@@ -3456,7 +3409,6 @@ object projectoptionsfo: tprojectoptionsfo
               frame.caption = 'Lib pref.(-Fl)'
               frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
               frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
-              frame.dummy = 0
               frame.outerframe = (
                 0
                 17
@@ -3475,7 +3427,6 @@ object projectoptionsfo: tprojectoptionsfo
               frame.caption = 'Obj pref. (-Fo)'
               frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
               frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
-              frame.dummy = 0
               frame.outerframe = (
                 0
                 17
@@ -3502,6 +3453,8 @@ object projectoptionsfo: tprojectoptionsfo
             end
           end
           object ttabpage18: ttabpage
+            frame.localprops = []
+            frame.localprops1 = []
             taborder = 4
             bounds_x = 0
             bounds_y = 18
@@ -3681,6 +3634,7 @@ object projectoptionsfo: tprojectoptionsfo
                 frame.levelo = 0
                 frame.colorclient = -2147483645
                 frame.localprops = [frl_levelo, frl_colorclient]
+                frame.localprops1 = []
                 frame.button.color = -1879048187
                 frame.button.imagenr = 17
                 taborder = 7
@@ -3701,7 +3655,6 @@ object projectoptionsfo: tprojectoptionsfo
           frame.caption = 'Targ. pref. (-o)'
           frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
           frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
-          frame.dummy = 0
           frame.outerframe = (
             0
             17
@@ -3795,6 +3748,8 @@ object projectoptionsfo: tprojectoptionsfo
         end
         object colorerror: tcoloredit
           frame.caption = 'Error Color'
+          frame.localprops = []
+          frame.localprops1 = []
           frame.buttonellipse.imagenr = 17
           frame.outerframe = (
             0
@@ -3822,6 +3777,8 @@ object projectoptionsfo: tprojectoptionsfo
         end
         object colorwarning: tcoloredit
           frame.caption = 'Warning Color'
+          frame.localprops = []
+          frame.localprops1 = []
           frame.buttonellipse.imagenr = 17
           frame.outerframe = (
             0
@@ -3849,6 +3806,8 @@ object projectoptionsfo: tprojectoptionsfo
         end
         object colornote: tcoloredit
           frame.caption = 'Note Color'
+          frame.localprops = []
+          frame.localprops1 = []
           frame.buttonellipse.imagenr = 17
           frame.outerframe = (
             0
@@ -3879,7 +3838,6 @@ object projectoptionsfo: tprojectoptionsfo
           frame.caption = 'Strip ESC sequences'
           frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
           frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
-          frame.dummy = 0
           frame.outerframe = (
             0
             1
@@ -4104,6 +4062,7 @@ object projectoptionsfo: tprojectoptionsfo
             frame.levelo = 0
             frame.colorclient = -2147483645
             frame.localprops = [frl_levelo, frl_colorclient]
+            frame.localprops1 = []
             frame.button.color = -1879048187
             frame.button.imagenr = 17
             taborder = 8
@@ -4434,7 +4393,6 @@ object projectoptionsfo: tprojectoptionsfo
           color = -2147483645
           frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
           frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
-          frame.dummy = 0
           taborder = 1
           bounds_x = 0
           bounds_y = 1001
@@ -4559,7 +4517,6 @@ object projectoptionsfo: tprojectoptionsfo
             frame.colorclient = -2147483645
             frame.localprops = [frl_levelo, frl_colorclient]
             frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
-            frame.dummy = 0
             taborder = 3
             visible = False
             bounds_x = 121
@@ -4573,6 +4530,8 @@ object projectoptionsfo: tprojectoptionsfo
         end
       end
       object ttabpage21: ttabpage
+        frame.localprops = []
+        frame.localprops1 = []
         taborder = 10
         bounds_x = 1
         bounds_y = 19
@@ -4582,6 +4541,8 @@ object projectoptionsfo: tprojectoptionsfo
         caption = 'F&ormat Macros'
         tabhint = 'Used by formatfloatmse() and formatdatetimemse()'
         object formatmacrogrid: twidgetgrid
+          frame.localprops = []
+          frame.localprops1 = []
           bounds_x = 0
           bounds_y = 0
           bounds_cx = 757
@@ -4700,7 +4661,6 @@ object projectoptionsfo: tprojectoptionsfo
                 item
                   frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
                   frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
-                  frame.dummy = 0
                   height = 16
                   captions.count = 4
                   captions.items = <                  
@@ -4756,7 +4716,6 @@ object projectoptionsfo: tprojectoptionsfo
                 frame.colorclient = -2147483645
                 frame.localprops = [frl_levelo, frl_colorclient]
                 frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
-                frame.dummy = 0
                 taborder = 1
                 bounds_x = 0
                 bounds_y = 0
@@ -4772,7 +4731,6 @@ object projectoptionsfo: tprojectoptionsfo
                 frame.colorclient = -2147483645
                 frame.localprops = [frl_levelo, frl_colorclient]
                 frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
-                frame.dummy = 0
                 taborder = 2
                 bounds_x = 19
                 bounds_y = 0
@@ -4808,7 +4766,6 @@ object projectoptionsfo: tprojectoptionsfo
                 frame.colorclient = -2147483645
                 frame.localprops = [frl_levelo, frl_colorclient]
                 frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
-                frame.dummy = 0
                 taborder = 4
                 onshowhint = hintexpandedmacros
                 visible = False
@@ -4884,6 +4841,8 @@ object projectoptionsfo: tprojectoptionsfo
             reffontheight = 14
             object twidgetgrid1: twidgetgrid
               color = -2147483645
+              frame.localprops = []
+              frame.localprops1 = []
               bounds_x = 0
               bounds_y = 0
               bounds_cx = 755
@@ -4996,6 +4955,7 @@ object projectoptionsfo: tprojectoptionsfo
                 frame.levelo = 0
                 frame.colorclient = -2147483645
                 frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
+                frame.localprops1 = []
                 frame.button.color = -1879048187
                 frame.button.imagenr = 17
                 taborder = 4
@@ -5028,6 +4988,8 @@ object projectoptionsfo: tprojectoptionsfo
             reffontheight = 14
             object twidgetgrid4: twidgetgrid
               color = -2147483645
+              frame.localprops = []
+              frame.localprops1 = []
               bounds_x = -1
               bounds_y = 0
               bounds_cx = 755
@@ -5146,6 +5108,7 @@ object projectoptionsfo: tprojectoptionsfo
                 frame.levelo = 0
                 frame.colorclient = -2147483645
                 frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
+                frame.localprops1 = []
                 frame.button.color = -1879048187
                 frame.button.imagenr = 17
                 taborder = 4
@@ -5176,6 +5139,7 @@ object projectoptionsfo: tprojectoptionsfo
                 frame.levelo = 0
                 frame.colorclient = -2147483645
                 frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
+                frame.localprops1 = []
                 frame.button.color = -1879048187
                 frame.button.imagenr = 17
                 taborder = 5
@@ -5329,7 +5293,6 @@ object projectoptionsfo: tprojectoptionsfo
             frame.colorclient = -2147483645
             frame.localprops = [frl_levelo, frl_leveli, frl_fileft, frl_fitop, frl_firight, frl_fibottom, frl_colorclient]
             frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
-            frame.dummy = 0
             taborder = 1
             bounds_x = 0
             bounds_y = 0
@@ -5344,7 +5307,6 @@ object projectoptionsfo: tprojectoptionsfo
             frame.colorclient = -2147483645
             frame.localprops = [frl_levelo, frl_leveli, frl_fileft, frl_fitop, frl_firight, frl_fibottom, frl_colorclient]
             frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
-            frame.dummy = 0
             taborder = 2
             bounds_x = 14
             bounds_y = 0
@@ -5359,7 +5321,6 @@ object projectoptionsfo: tprojectoptionsfo
             frame.colorclient = -2147483645
             frame.localprops = [frl_levelo, frl_leveli, frl_fileft, frl_fitop, frl_firight, frl_fibottom, frl_colorclient]
             frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
-            frame.dummy = 0
             taborder = 3
             bounds_x = 28
             bounds_y = 0
@@ -5385,7 +5346,6 @@ object projectoptionsfo: tprojectoptionsfo
             frame.colorclient = -2147483645
             frame.localprops = [frl_levelo, frl_colorclient]
             frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
-            frame.dummy = 0
             taborder = 5
             onshowhint = hintexpandedmacros
             visible = False
@@ -5425,7 +5385,6 @@ object projectoptionsfo: tprojectoptionsfo
             frame.colorclient = -2147483645
             frame.localprops = [frl_levelo, frl_colorclient]
             frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
-            frame.dummy = 0
             taborder = 7
             onshowhint = hintexpandedmacros
             visible = False
@@ -5440,6 +5399,8 @@ object projectoptionsfo: tprojectoptionsfo
         end
       end
       object ttabpage20: ttabpage
+        frame.localprops = []
+        frame.localprops1 = []
         taborder = 9
         bounds_x = 1
         bounds_y = 19
@@ -5450,7 +5411,8 @@ object projectoptionsfo: tprojectoptionsfo
         object settingseditor: tbooleanedit
           optionsskin = [osk_nolayoutcx, osk_nolayoutcy]
           frame.caption = 'Load/save editor settings'
-          frame.dummy = 0
+          frame.localprops = []
+          frame.localprops1 = []
           frame.outerframe = (
             0
             1
@@ -5465,7 +5427,8 @@ object projectoptionsfo: tprojectoptionsfo
         end
         object settingsautoload: tbooleanedit
           frame.caption = 'Auto load'
-          frame.dummy = 0
+          frame.localprops = []
+          frame.localprops1 = []
           frame.outerframe = (
             0
             1
@@ -5480,7 +5443,8 @@ object projectoptionsfo: tprojectoptionsfo
         end
         object settingsautosave: tbooleanedit
           frame.caption = 'Auto save'
-          frame.dummy = 0
+          frame.localprops = []
+          frame.localprops1 = []
           frame.outerframe = (
             0
             1
@@ -5499,7 +5463,7 @@ object projectoptionsfo: tprojectoptionsfo
           frame.framei_right = 5
           frame.framei_bottom = 5
           frame.localprops = [frl_fileft, frl_fitop, frl_firight, frl_fibottom]
-          frame.dummy = 0
+          frame.localprops1 = []
           bounds_x = 0
           bounds_y = 13
           bounds_cx = 757
@@ -5541,6 +5505,8 @@ object projectoptionsfo: tprojectoptionsfo
             optionsskin = [osk_nolayoutcx, osk_nolayoutcy]
             frame.caption = 'Settings File'
             frame.captionpos = cp_right
+            frame.localprops = []
+            frame.localprops1 = []
             frame.button.color = -2147483646
             frame.button.imagenr = 17
             frame.outerframe = (
@@ -5573,7 +5539,8 @@ object projectoptionsfo: tprojectoptionsfo
         object settingsdebugger: tbooleanedit
           optionsskin = [osk_nolayoutcx, osk_nolayoutcy]
           frame.caption = 'Load/save debugger settings'
-          frame.dummy = 0
+          frame.localprops = []
+          frame.localprops1 = []
           frame.outerframe = (
             0
             1
@@ -5589,7 +5556,8 @@ object projectoptionsfo: tprojectoptionsfo
         object settingsstorage: tbooleanedit
           optionsskin = [osk_nolayoutcx, osk_nolayoutcy]
           frame.caption = 'Load/save storage settings'
-          frame.dummy = 0
+          frame.localprops = []
+          frame.localprops1 = []
           frame.outerframe = (
             0
             1
@@ -5605,7 +5573,8 @@ object projectoptionsfo: tprojectoptionsfo
         object settingsprojecttree: tbooleanedit
           optionsskin = [osk_nolayoutcx, osk_nolayoutcy]
           frame.caption = 'Load/save project tree'
-          frame.dummy = 0
+          frame.localprops = []
+          frame.localprops1 = []
           frame.outerframe = (
             0
             1
