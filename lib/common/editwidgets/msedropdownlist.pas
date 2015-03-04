@@ -579,6 +579,8 @@ type
  tnocolsdropdownlistcontroller = class(tcustomdropdownlistcontroller)
   protected
    function getbuttonframeclass: dropdownbuttonframeclassty; override;
+  public
+   constructor create(const intf: idropdownlist);
   published
    property options;
    property dropdownrowcount;
@@ -2210,6 +2212,12 @@ end;
 
 { tnocolsdropdownlistcontroller }
 
+constructor tnocolsdropdownlistcontroller.create(const intf: idropdownlist);
+begin
+ inherited;
+ cols.nostreaming:= true;
+end;
+
 function tnocolsdropdownlistcontroller.getbuttonframeclass: dropdownbuttonframeclassty;
 begin
  result:= tdropdownbuttonframe;
@@ -2831,6 +2839,7 @@ begin
  fimageframe:= acontroller.imageframe;
  width:= fimagelist.width + acontroller.fimageframe.left +
                                       acontroller.fimageframe.right;
+ fcolorselect:= acontroller.cols.colorselect;
 end;
 
 procedure timagefixcol.drawcell(const canvas: tcanvas);

@@ -34,7 +34,7 @@ type
   protected
    procedure getdropdowninfo(var aenums: integerarty;
          const names: tdropdowndatacols); override;
-   function createdropdowncontroller: tcustomdropdowncontroller; override;
+//   function createdropdowncontroller: tcustomdropdowncontroller; override;
    procedure texttovalue(var accept: boolean; const quiet: boolean); override;
    function internaldatatotext(const data): msestring; override;
    procedure readstatvalue(const reader: tstatreader); override;
@@ -109,6 +109,7 @@ var
  comm: commnrty;
 begin
  inherited;
+ dropdown.cols.nostreaming:= true;
  inherited value:= integer(cnr_1);
  for comm:= low(comminfo) to high(comminfo) do begin
   tdropdownlistcontroller(fdropdown).cols[0].add(comminfo[comm].anzeigetext);
@@ -158,12 +159,12 @@ procedure tcommselector.setvalue(const aValue: commnrty);
 begin
  inherited setvalue(integer(avalue));
 end;
-
+{
 function tcommselector.createdropdowncontroller: tcustomdropdowncontroller;
 begin
  result:= tnocolsenumdropdowncontroller.create(idropdownlist(self));
 end;
-
+}
 procedure tcommselector.setvaluename(const avalue: filenamety);
 begin
  if avalue <> fvaluename then begin

@@ -171,8 +171,16 @@ end;
 { tdropdowndatacolpropertyeditor }
 
 function tdropdowndatacolpropertyeditor.geteditorclass: propertyeditorclassty;
+var
+ obj1: tobject;
 begin
- result:= tmsestringdatalistpropertyeditor;
+ pointer(obj1):= getpointervalue();
+ if (obj1 is tdropdowncols) and tdropdowncols(obj1).nostreaming then begin
+  result:= tclasselementeditor;
+ end
+ else begin
+  result:= tmsestringdatalistpropertyeditor;
+ end;
 end;
 
 { titemlistpropertyeditor }

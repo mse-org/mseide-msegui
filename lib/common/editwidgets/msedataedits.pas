@@ -881,6 +881,8 @@ type
  end;
 
  tenumdropdowncontroller = class(tnocolsenumdropdowncontroller)
+  public
+   constructor create(const intf: idropdownlist);
   published
    property cols;
    property valuecol; //after cols
@@ -6272,6 +6274,14 @@ begin
   tgridrealdatalist(fdatalist).updateeditoptions(foptionsedit);
                                       //for acceptempty
  end;
+end;
+
+{ tenumdropdowncontroller }
+
+constructor tenumdropdowncontroller.create(const intf: idropdownlist);
+begin
+ inherited;
+ cols.nostreaming:= false;
 end;
 
 end.
