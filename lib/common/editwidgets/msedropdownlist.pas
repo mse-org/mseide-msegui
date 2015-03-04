@@ -1842,6 +1842,7 @@ var
  str1: msestring;
  widget1: twidget;
  items1: tdropdowndatacols;
+ bo1: boolean;
 begin
  inherited;
  if event.kind = ek_dropdown then begin
@@ -1895,11 +1896,16 @@ begin
         int1:= fwidth;
        end;
       end;
-      str1:= self.fintf.geteditor.text;
+      with self.fintf.geteditor do begin
+       str1:= text;
+       bo1:= canundo();
+      end;
       int2:= fcols.fitemindex;
       if (int2 >= 0) and
-           ((int1 >= fcols.fdatacols[0].count) or 
-                   (str1 <> fcols.fdatacols[0][int2])) then begin
+           ((fcols.fdatacols.count = 0) or (int2 >= fcols.fdatacols[0].count) or 
+                   (str1 <> fcols.fdatacols[0][int2]) and 
+                                (bo1 or (fcols.fdatacols = fcols))) then begin
+                                       //no tselector
        int2:= -1;
       end;
       fselectkey:= key_none;
