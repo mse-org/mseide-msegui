@@ -1608,8 +1608,10 @@ var
  int1: integer;
  val1,val2{,val3}: optionsdockty;
  bo1: boolean;
+ optbefore: optionsdockty;
 begin
  if foptionsdock <> avalue then begin
+  optbefore:= foptionsdock;
   bo1:= od_fixsize in foptionsdock;
   splitdirbefore:= fsplitdir;
   val1:= optionsdockty(
@@ -1623,7 +1625,12 @@ begin
   foptionsdock:= (avalue - (mask1+mask2{+mask3})) + val1*mask1 + val2*mask2 {+ 
                                  val3*mask3};
   if not (od_nofit in foptionsdock) then begin
-   exclude(foptionsdock,od_banded);
+   if not (od_banded in optbefore) and (od_banded in foptionsdock) then begin
+    include(foptionsdock,od_nofit);
+   end
+   else begin
+    exclude(foptionsdock,od_banded);
+   end;
   end;
   if (od_banded in foptionsdock) and (foptionsdock * mask2 = []) then begin
    include(foptionsdock,od_aligncenter);
