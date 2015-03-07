@@ -536,7 +536,8 @@ type
    procedure dokeydown(var info: keyeventinfoty); virtual;
    function checkshortcut(var info: keyeventinfoty): boolean; virtual;
    procedure parentfontchanged; virtual;
-   procedure dopaintfocusrect(const canvas: tcanvas; const rect: rectty); virtual;
+   procedure dopaintfocusrect(const canvas: tcanvas;
+                                                 const rect: rectty); virtual;
    procedure updatewidgetstate; virtual;
    procedure updatemousestate(const sender: twidget;
                                        const info: mouseeventinfoty); virtual;
@@ -624,8 +625,8 @@ type
 
    property frameimage_list: timagelist read fi.frameimage_list 
                     write setframeimage_list stored isframeimage_liststored;
-     //imagenr 0 = topleft, 1 = left, 2 = bottomleft, 3 = bottom, 4 = bottomright
-     //5 = right, 6 = topright, 7 = top
+     //imagenr 0 = topleft, 1 = left, 2 = bottomleft, 3 = bottom,
+     //4 = bottomright, 5 = right, 6 = topright, 7 = top
    property frameimage_left: integer read fi.frameimage_left
                     write setframeimage_left
                     stored isframeimage_leftstored default 0;

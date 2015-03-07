@@ -1125,10 +1125,8 @@ var
 begin 
  if not (shs_invisible in info.state) then begin
   if info.frame <> nil then begin 
-   //todo: optimize, move settings to tcustomstepframe updatestate
-//   canvas.save;
+   frameskinoptionstoshapestate(info.frame,info);
    info.frame.paintbackground(canvas,info.ca.dim,false);
-//   canvas.restore;
    if not (fso_noinnerrect in info.frame.optionsskin) then begin
     frame1:= info.frame.innerframe;
     deflaterect1(info.ca.dim,frame1);
@@ -1136,7 +1134,6 @@ begin
    else begin
     frame1:= nullframe;
    end;
-   frameskinoptionstoshapestate(info.frame,info);
   end; 
   if drawbuttonframe(canvas,info,rect1) then begin
    info.ca.imagepos:= ip_center;

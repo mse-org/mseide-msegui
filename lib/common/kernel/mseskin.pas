@@ -51,6 +51,8 @@ type
 //  face: tfacecomp;
 //  frame: tframecomp;
   svbuttonface: tfacecomp;
+  svbuttonframe: tframecomp;
+  svbuttonframeseparator: tframecomp;
  end;
  gridpropskininfoty = record
   svface: tfacecomp;
@@ -580,9 +582,13 @@ type
    procedure settoolbar_horz_face(const avalue: tfacecomp);
    procedure settoolbar_horz_frame(const avalue: tframecomp);
    procedure settoolbar_horz_buttonface(const avalue: tfacecomp);
+   procedure settoolbar_horz_buttonframe(const avalue: tframecomp);
+   procedure settoolbar_horz_buttonframeseparator(const avalue: tframecomp);
    procedure settoolbar_vert_face(const avalue: tfacecomp);
    procedure settoolbar_vert_frame(const avalue: tframecomp);
    procedure settoolbar_vert_buttonface(const avalue: tfacecomp);
+   procedure settoolbar_vert_buttonframe(const avalue: tframecomp);
+   procedure settoolbar_vert_buttonframeseparator(const avalue: tframecomp);
 
    
    procedure setpopupmenu_face(const avalue: tfacecomp);
@@ -921,12 +927,24 @@ type
                                         write settoolbar_horz_frame;
    property toolbar_horz_buttonface: tfacecomp read ftoolbar_horz.svbuttonface 
                             write settoolbar_horz_buttonface;
+   property toolbar_horz_buttonframe: tframecomp 
+                        read ftoolbar_horz.svbuttonframe
+                            write settoolbar_horz_buttonframe;
+   property toolbar_horz_buttonframeseparator: tframecomp 
+                        read ftoolbar_horz.svbuttonframeseparator
+                            write settoolbar_horz_buttonframeseparator;
    property toolbar_vert_face: tfacecomp read ftoolbar_vert.svwidget.svface 
                             write settoolbar_vert_face;
    property toolbar_vert_frame: tframecomp read ftoolbar_vert.svwidget.svframe
                             write settoolbar_vert_frame;
    property toolbar_vert_buttonface: tfacecomp read ftoolbar_vert.svbuttonface 
                             write settoolbar_vert_buttonface;
+   property toolbar_vert_buttonframe: tframecomp 
+                        read ftoolbar_vert.svbuttonframe
+                            write settoolbar_vert_buttonframe;
+   property toolbar_vert_buttonframeseparator: tframecomp 
+                        read ftoolbar_vert.svbuttonframeseparator
+                            write settoolbar_vert_buttonframeseparator;
 
    property tabpage_face: tfacecomp read ftabpage.svwidget.svface 
                                                 write settabpage_face;
@@ -2482,6 +2500,17 @@ begin
  setlinkedvar(avalue,tmsecomponent(ftoolbar_horz.svbuttonface));
 end;
 
+procedure tskincontroller.settoolbar_horz_buttonframe(const avalue: tframecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(ftoolbar_horz.svbuttonframe));
+end;
+
+procedure tskincontroller.settoolbar_horz_buttonframeseparator(
+                                                    const avalue: tframecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(ftoolbar_horz.svbuttonframeseparator));
+end;
+
 procedure tskincontroller.settoolbar_vert_face(const avalue: tfacecomp);
 begin
  setlinkedvar(avalue,tmsecomponent(ftoolbar_vert.svwidget.svface));
@@ -2495,6 +2524,17 @@ end;
 procedure tskincontroller.settoolbar_vert_buttonface(const avalue: tfacecomp);
 begin
  setlinkedvar(avalue,tmsecomponent(ftoolbar_vert.svbuttonface));
+end;
+
+procedure tskincontroller.settoolbar_vert_buttonframe(const avalue: tframecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(ftoolbar_vert.svbuttonframe));
+end;
+
+procedure tskincontroller.settoolbar_vert_buttonframeseparator(
+                                                    const avalue: tframecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(ftoolbar_vert.svbuttonframeseparator));
 end;
 
 procedure tskincontroller.setpopupmenu_face(const avalue: tfacecomp);
@@ -2817,8 +2857,20 @@ begin
   setstepbuttonskin(tb1.frame,fstepbutton);
   if ftoolbar_horz.svbuttonface <> nil then begin
    with tb1.buttons do begin
-    createface;
+    createface();
     setfacetemplate(ftoolbar_horz.svbuttonface,face);
+   end;
+  end;
+  if ftoolbar_horz.svbuttonframe <> nil then begin
+   with tb1.buttons do begin
+    createframe();
+    setframetemplate(ftoolbar_horz.svbuttonframe,frame);
+   end;
+  end;
+  if ftoolbar_horz.svbuttonframeseparator <> nil then begin
+   with tb1.buttons do begin
+    createframeseparator();
+    setframetemplate(ftoolbar_horz.svbuttonframeseparator,frameseparator);
    end;
   end;
  end
@@ -2827,8 +2879,20 @@ begin
   setstepbuttonskin(tb1.frame,fstepbutton);
   if ftoolbar_vert.svbuttonface <> nil then begin
    with tb1.buttons do begin
-    createface;
+    createface();
     setfacetemplate(ftoolbar_vert.svbuttonface,face);
+   end;
+  end;
+  if ftoolbar_horz.svbuttonframe <> nil then begin
+   with tb1.buttons do begin
+    createframe();
+    setframetemplate(ftoolbar_horz.svbuttonframe,frame);
+   end;
+  end;
+  if ftoolbar_horz.svbuttonframeseparator <> nil then begin
+   with tb1.buttons do begin
+    createframeseparator();
+    setframetemplate(ftoolbar_horz.svbuttonframeseparator,frameseparator);
    end;
   end;
  end;

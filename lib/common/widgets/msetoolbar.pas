@@ -312,6 +312,7 @@ type
    class function classskininfo: skininfoty; override;
    procedure buttonchanged(sender: tcustomtoolbutton);
    procedure checkvert(const asize: sizety);
+   function getseparatorwidth(): integer;
    procedure getautopaintsize(var asize: sizety); override;
    procedure updatelayout;
    procedure clientrectchanged; override;
@@ -1060,6 +1061,7 @@ procedure tcustomtoolbar.getautopaintsize(var asize: sizety);
 var
  int1: integer;
  size1: sizety;
+ sepwidth1: integer;
 begin
  with flayout do begin
   if (defaultsize.cx = 0) or (buttons.width = 0) or 
@@ -1070,6 +1072,7 @@ begin
     size1.cy:= size1.cy - fframe.framei_top - fframe.framei_bottom;
    end;
    checkvert(size1);
+   sepwidth1:= getseparatorwidth();
    if vert then begin
     defaultsize.cx:= buttonsize.cx;
     defaultsize.cy:= 0;
@@ -1077,7 +1080,7 @@ begin
      with buttons[int1] do begin
       if not (as_invisible in state) then begin
        if mao_separator in options then begin
-        inc(defaultsize.cy,separatorwidth);
+        inc(defaultsize.cy,sepwidth1);
        end
        else begin
         inc(defaultsize.cy,buttonsize.cy);
@@ -1093,7 +1096,7 @@ begin
      with buttons[int1] do begin
       if not (as_invisible in state) then begin
        if mao_separator in options then begin
-        inc(defaultsize.cx,separatorwidth);
+        inc(defaultsize.cx,sepwidth1);
        end
        else begin
         inc(defaultsize.cx,buttonsize.cx);
@@ -1115,6 +1118,7 @@ procedure tcustomtoolbar.updatelayout;
 
 var
  buttonsizecxy: integer;
+ sepwidth1: integer;
  
  function step(const index: integer): integer;
  begin
@@ -1122,7 +1126,7 @@ var
   with flayout,buttons[index] do begin
    if not (as_invisible in state)then begin
     if mao_separator in options then begin
-     result:= separatorwidth;
+     result:= sepwidth1;
     end
     else begin
      result:= buttonsizecxy;
@@ -1157,6 +1161,7 @@ begin
     with flayout do begin
      defaultsize:= nullsize;
      checkvert(rect1.size);
+     sepwidth1:= getseparatorwidth();
 //     bu1:= frame.buttonpos;
      if frame.buttonpos in [sbp_top,sbp_right] then begin
       if vert then begin
@@ -1289,7 +1294,7 @@ begin
        include(cells[int1].state,shs_invisible);
        if not (as_invisible in buttons[int1].state)then begin
         if mao_separator in buttons[int1].options then begin
-         dec(int2,separatorwidth);
+         dec(int2,sepwidth1);
         end
         else begin
          if vert then begin
@@ -1693,6 +1698,26 @@ end;
 function tcustomtoolbar.getstatpriority: integer;
 begin
  result:= fstatpriority;
+end;
+
+function tcustomtoolbar.getseparatorwidth: integer;
+begin
+ if flayout.buttons.fframeseparator <> nil then begin
+  with flayout.buttons.fframeseparator do begin
+   if flayout.vert then begin
+    result:= innerframedim.cy;
+   end
+   else begin
+    result:= innerframedim.cx;
+   end;
+   if not (fso_flat in optionsskin) then begin
+    inc(result,separatorwidth);
+   end;
+  end;
+ end
+ else begin
+  result:= separatorwidth;
+ end;
 end;
 
 { tdocktoolbar }
