@@ -1124,6 +1124,7 @@ var
  frame1: framety;
 begin 
  if not (shs_invisible in info.state) then begin
+//  frameskinoptionstoshapestate(info.frame,info);
   if info.frame <> nil then begin 
    frameskinoptionstoshapestate(info.frame,info);
    info.frame.paintbackground(canvas,info.ca.dim,false);
@@ -1134,7 +1135,7 @@ begin
    else begin
     frame1:= nullframe;
    end;
-  end; 
+  end;
   if drawbuttonframe(canvas,info,rect1) then begin
    info.ca.imagepos:= ip_center;
    drawbuttonimage(canvas,info,rect1{,cp_center});

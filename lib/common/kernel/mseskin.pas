@@ -52,7 +52,8 @@ type
 //  frame: tframecomp;
   svbuttonface: tfacecomp;
   svbuttonframe: tframecomp;
-  svbuttonframeseparator: tframecomp;
+  svbuttonframesephorz: tframecomp;
+  svbuttonframesepvert: tframecomp;
  end;
  gridpropskininfoty = record
   svface: tfacecomp;
@@ -583,12 +584,14 @@ type
    procedure settoolbar_horz_frame(const avalue: tframecomp);
    procedure settoolbar_horz_buttonface(const avalue: tfacecomp);
    procedure settoolbar_horz_buttonframe(const avalue: tframecomp);
-   procedure settoolbar_horz_buttonframeseparator(const avalue: tframecomp);
+   procedure settoolbar_horz_buttonframesephorz(const avalue: tframecomp);
+   procedure settoolbar_horz_buttonframesepvert(const avalue: tframecomp);
    procedure settoolbar_vert_face(const avalue: tfacecomp);
    procedure settoolbar_vert_frame(const avalue: tframecomp);
    procedure settoolbar_vert_buttonface(const avalue: tfacecomp);
    procedure settoolbar_vert_buttonframe(const avalue: tframecomp);
-   procedure settoolbar_vert_buttonframeseparator(const avalue: tframecomp);
+   procedure settoolbar_vert_buttonframesephorz(const avalue: tframecomp);
+   procedure settoolbar_vert_buttonframesepvert(const avalue: tframecomp);
 
    
    procedure setpopupmenu_face(const avalue: tfacecomp);
@@ -930,9 +933,12 @@ type
    property toolbar_horz_buttonframe: tframecomp 
                         read ftoolbar_horz.svbuttonframe
                             write settoolbar_horz_buttonframe;
-   property toolbar_horz_buttonframeseparator: tframecomp 
-                        read ftoolbar_horz.svbuttonframeseparator
-                            write settoolbar_horz_buttonframeseparator;
+   property toolbar_horz_buttonframesephorz: tframecomp 
+                        read ftoolbar_horz.svbuttonframesephorz
+                            write settoolbar_horz_buttonframesephorz;
+   property toolbar_horz_buttonframesepvert: tframecomp 
+                        read ftoolbar_vert.svbuttonframesepvert
+                            write settoolbar_horz_buttonframesepvert;
    property toolbar_vert_face: tfacecomp read ftoolbar_vert.svwidget.svface 
                             write settoolbar_vert_face;
    property toolbar_vert_frame: tframecomp read ftoolbar_vert.svwidget.svframe
@@ -942,9 +948,12 @@ type
    property toolbar_vert_buttonframe: tframecomp 
                         read ftoolbar_vert.svbuttonframe
                             write settoolbar_vert_buttonframe;
-   property toolbar_vert_buttonframeseparator: tframecomp 
-                        read ftoolbar_vert.svbuttonframeseparator
-                            write settoolbar_vert_buttonframeseparator;
+   property toolbar_vert_buttonframesephorz: tframecomp 
+                        read ftoolbar_vert.svbuttonframesephorz
+                            write settoolbar_vert_buttonframesephorz;
+   property toolbar_vert_buttonframesepvert: tframecomp 
+                        read ftoolbar_vert.svbuttonframesepvert
+                            write settoolbar_vert_buttonframesepvert;
 
    property tabpage_face: tfacecomp read ftabpage.svwidget.svface 
                                                 write settabpage_face;
@@ -2505,10 +2514,16 @@ begin
  setlinkedvar(avalue,tmsecomponent(ftoolbar_horz.svbuttonframe));
 end;
 
-procedure tskincontroller.settoolbar_horz_buttonframeseparator(
+procedure tskincontroller.settoolbar_horz_buttonframesephorz(
                                                     const avalue: tframecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(ftoolbar_horz.svbuttonframeseparator));
+ setlinkedvar(avalue,tmsecomponent(ftoolbar_horz.svbuttonframesephorz));
+end;
+
+procedure tskincontroller.settoolbar_horz_buttonframesepvert(
+                                                    const avalue: tframecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(ftoolbar_horz.svbuttonframesepvert));
 end;
 
 procedure tskincontroller.settoolbar_vert_face(const avalue: tfacecomp);
@@ -2531,10 +2546,16 @@ begin
  setlinkedvar(avalue,tmsecomponent(ftoolbar_vert.svbuttonframe));
 end;
 
-procedure tskincontroller.settoolbar_vert_buttonframeseparator(
+procedure tskincontroller.settoolbar_vert_buttonframesephorz(
                                                     const avalue: tframecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(ftoolbar_vert.svbuttonframeseparator));
+ setlinkedvar(avalue,tmsecomponent(ftoolbar_vert.svbuttonframesephorz));
+end;
+
+procedure tskincontroller.settoolbar_vert_buttonframesepvert(
+                                                    const avalue: tframecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(ftoolbar_vert.svbuttonframesepvert));
 end;
 
 procedure tskincontroller.setpopupmenu_face(const avalue: tfacecomp);
@@ -2867,10 +2888,16 @@ begin
     setframetemplate(ftoolbar_horz.svbuttonframe,frame);
    end;
   end;
-  if ftoolbar_horz.svbuttonframeseparator <> nil then begin
+  if ftoolbar_horz.svbuttonframesephorz <> nil then begin
    with tb1.buttons do begin
-    createframeseparator();
-    setframetemplate(ftoolbar_horz.svbuttonframeseparator,frameseparator);
+    createframesephorz();
+    setframetemplate(ftoolbar_horz.svbuttonframesephorz,framesephorz);
+   end;
+  end;
+  if ftoolbar_horz.svbuttonframesepvert <> nil then begin
+   with tb1.buttons do begin
+    createframesepvert();
+    setframetemplate(ftoolbar_horz.svbuttonframesepvert,framesepvert);
    end;
   end;
  end
@@ -2889,10 +2916,16 @@ begin
     setframetemplate(ftoolbar_horz.svbuttonframe,frame);
    end;
   end;
-  if ftoolbar_horz.svbuttonframeseparator <> nil then begin
+  if ftoolbar_horz.svbuttonframesephorz <> nil then begin
    with tb1.buttons do begin
-    createframeseparator();
-    setframetemplate(ftoolbar_horz.svbuttonframeseparator,frameseparator);
+    createframesephorz();
+    setframetemplate(ftoolbar_horz.svbuttonframesephorz,framesephorz);
+   end;
+  end;
+  if ftoolbar_horz.svbuttonframesepvert <> nil then begin
+   with tb1.buttons do begin
+    createframesepvert();
+    setframetemplate(ftoolbar_horz.svbuttonframesepvert,framesepvert);
    end;
   end;
  end;

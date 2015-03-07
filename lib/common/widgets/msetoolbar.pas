@@ -202,7 +202,8 @@ type
    fcolor: colorty;
    fface: tface;
    fframe: tframe;
-   fframeseparator: tframe;
+   fframesephorz: tframe;
+   fframesepvert: tframe;
    procedure setitems(const index: integer; const Value: tcustomtoolbutton);
    function getitems(const index: integer): tcustomtoolbutton; reintroduce;
    procedure setheight(const Value: integer);
@@ -214,8 +215,10 @@ type
    procedure setface(const avalue: tface);
    function getframe: tframe;
    procedure setframe(const avalue: tframe);
-   function getframeseparator: tframe;
-   procedure setframeseparator(const avalue: tframe);
+   function getframesephorz: tframe;
+   procedure setframesephorz(const avalue: tframe);
+   function getframesepvert: tframe;
+   procedure setframesepvert(const avalue: tframe);
   protected
    fbuttonstate: toolbuttonsstatesty;
    procedure createitem(const index: integer; var item: tpersistent); override;
@@ -228,7 +231,8 @@ type
    class function getitemclasstype(): persistentclassty; override;
    procedure createface();
    procedure createframe();
-   procedure createframeseparator();
+   procedure createframesephorz();
+   procedure createframesepvert();
    procedure doupdate();
    procedure resetradioitems(const group: integer);
    function getcheckedradioitem(const group: integer): tcustomtoolbutton;
@@ -244,8 +248,10 @@ type
    property color: colorty read fcolor write setcolor default cl_transparent;
    property face: tface read getface write setface;
    property frame: tframe read getframe write setframe;
-   property frameseparator: tframe read getframeseparator 
-                                              write setframeseparator;
+   property framesephorz: tframe read getframesephorz 
+                                              write setframesephorz;
+   property framesepvert: tframe read getframesepvert 
+                                              write setframesepvert;
  end;
 
  ttoolbuttons = class(tcustomtoolbuttons)
@@ -259,7 +265,8 @@ type
    property color;
    property face;
    property frame;
-   property frameseparator;
+   property framesephorz;
+   property framesepvert;
  end;
  
  tstockglyphtoolbuttons = class(ttoolbuttons)
@@ -392,14 +399,19 @@ begin
     if testintersectrect(rect1,ca.dim) then begin
      face:= buttons.fface;
      if shs_separator in state then begin
-      frame:= buttons.frameseparator;
+      if vert then begin
+       frame:= buttons.framesepvert;
+      end
+      else begin
+       frame:= buttons.framesephorz;
+      end;
      end
      else begin
       frame:= buttons.frame;
      end;
+     drawtoolbutton(canvas,po1^);
     end;
    end;
-   drawtoolbutton(canvas,po1^);
   end;
  end;
 end;
@@ -768,7 +780,8 @@ begin
  inherited;
  fface.free;
  fframe.free();
- fframeseparator.free();
+ fframesephorz.free();
+ fframesepvert.free();
 end;
 
 class function tcustomtoolbuttons.getitemclasstype: persistentclassty;
@@ -945,17 +958,31 @@ begin
  tcustomtoolbar(fowner).invalidate();
 end;
 
-function tcustomtoolbuttons.getframeseparator: tframe;
+function tcustomtoolbuttons.getframesephorz: tframe;
 begin
- tcustomtoolbar(fowner).getoptionalobject(fframeseparator,
-                                                    @createframeseparator);
- result:= fframeseparator;
+ tcustomtoolbar(fowner).getoptionalobject(fframesephorz,
+                                                    @createframesephorz);
+ result:= fframesephorz;
 end;
 
-procedure tcustomtoolbuttons.setframeseparator(const avalue: tframe);
+procedure tcustomtoolbuttons.setframesephorz(const avalue: tframe);
 begin
- tcustomtoolbar(fowner).setoptionalobject(avalue,fframeseparator,
-                                                        @createframeseparator);
+ tcustomtoolbar(fowner).setoptionalobject(avalue,fframesephorz,
+                                                        @createframesephorz);
+ tcustomtoolbar(fowner).invalidate();
+end;
+
+function tcustomtoolbuttons.getframesepvert: tframe;
+begin
+ tcustomtoolbar(fowner).getoptionalobject(fframesepvert,
+                                                    @createframesepvert);
+ result:= fframesepvert;
+end;
+
+procedure tcustomtoolbuttons.setframesepvert(const avalue: tframe);
+begin
+ tcustomtoolbar(fowner).setoptionalobject(avalue,fframesepvert,
+                                                        @createframesepvert);
  tcustomtoolbar(fowner).invalidate();
 end;
 
@@ -966,10 +993,17 @@ begin
  end;
 end;
 
-procedure tcustomtoolbuttons.createframeseparator();
+procedure tcustomtoolbuttons.createframesephorz();
 begin
- if fframeseparator = nil then begin
-  fframeseparator:= tnosetinstanceframe.create(iframe(tcustomtoolbar(fowner)));
+ if fframesephorz = nil then begin
+  fframesephorz:= tnosetinstanceframe.create(iframe(tcustomtoolbar(fowner)));
+ end;
+end;
+
+procedure tcustomtoolbuttons.createframesepvert();
+begin
+ if fframesepvert = nil then begin
+  fframesepvert:= tnosetinstanceframe.create(iframe(tcustomtoolbar(fowner)));
  end;
 end;
 
@@ -1702,21 +1736,31 @@ end;
 
 function tcustomtoolbar.getseparatorwidth: integer;
 begin
- if flayout.buttons.fframeseparator <> nil then begin
-  with flayout.buttons.fframeseparator do begin
-   if flayout.vert then begin
+ if flayout.vert then begin
+  if flayout.buttons.fframesepvert <> nil then begin
+   with flayout.buttons.fframesepvert do begin
     result:= innerframedim.cy;
-   end
-   else begin
-    result:= innerframedim.cx;
+    if not (fso_flat in optionsskin) then begin
+     inc(result,separatorwidth);
+    end;
    end;
-   if not (fso_flat in optionsskin) then begin
-    inc(result,separatorwidth);
-   end;
+  end
+  else begin
+   result:= separatorwidth;
   end;
  end
  else begin
-  result:= separatorwidth;
+  if flayout.buttons.fframesephorz <> nil then begin
+   with flayout.buttons.fframesephorz do begin
+    result:= innerframedim.cx;
+    if not (fso_flat in optionsskin) then begin
+     inc(result,separatorwidth);
+    end;
+   end;
+  end
+  else begin
+   result:= separatorwidth;
+  end;
  end;
 end;
 

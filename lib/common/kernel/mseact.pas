@@ -64,6 +64,7 @@ type
  menuactionoptionsty = set of menuactionoptionty;
 
 const
+                    
  actionstatesmask: actionstatesty = 
                             [as_disabled,as_checked,as_invisible,as_default,
                              as_repeatshortcut];
