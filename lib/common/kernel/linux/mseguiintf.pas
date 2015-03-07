@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2014 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2015 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -3930,11 +3930,11 @@ begin
   end;
   xselectinput(appdisp,id,icmask or
               KeymapStateMask or
- 		      KeyPressMask or KeyReleaseMask or
+              KeyPressMask or KeyReleaseMask or
                        buttonpressmask or buttonreleasemask or
                        pointermotionmask or
- 		      EnterWindowMask or LeaveWindowMask or
- 		      FocusChangeMask or PropertyChangeMask or
+              EnterWindowMask or LeaveWindowMask or
+              FocusChangeMask or PropertyChangeMask or
                        exposuremask or structurenotifymask
                        );
   xsetwmprotocols(appdisp,id,@wmprotocols[low(wmprotocolty)],

@@ -813,7 +813,9 @@ begin
  result:= false;
  with canvas,info do begin
   if shs_separator in state then begin
-   draw3dframe(canvas,ca.dim,-1,defaultframecolors,[]);
+   if not (shs_flat in state) then begin
+    draw3dframe(canvas,ca.dim,-1,defaultframecolors,[]);
+   end;
   end
   else begin
    if shs_flat in state then begin

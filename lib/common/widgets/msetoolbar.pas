@@ -201,6 +201,8 @@ type
    fcolorglyph: colorty;
    fcolor: colorty;
    fface: tface;
+   fframe: tframe;
+   fframeseparator: tframe;
    procedure setitems(const index: integer; const Value: tcustomtoolbutton);
    function getitems(const index: integer): tcustomtoolbutton; reintroduce;
    procedure setheight(const Value: integer);
@@ -210,6 +212,10 @@ type
    procedure setcolor(const avalue: colorty);
    function getface: tface;
    procedure setface(const avalue: tface);
+   function getframe: tframe;
+   procedure setframe(const avalue: tframe);
+   function getframeseparator: tframe;
+   procedure setframeseparator(const avalue: tframe);
   protected
    fbuttonstate: toolbuttonsstatesty;
    procedure createitem(const index: integer; var item: tpersistent); override;
@@ -218,21 +224,28 @@ type
    class function getbuttonclass: toolbuttonclassty; virtual;
   public
    constructor create(const aowner: tcustomtoolbar); reintroduce;
-   destructor destroy; override;
-   class function getitemclasstype: persistentclassty; override;
-   procedure createface;
-   procedure doupdate;
+   destructor destroy(); override;
+   class function getitemclasstype(): persistentclassty; override;
+   procedure createface();
+   procedure createframe();
+   procedure createframeseparator();
+   procedure doupdate();
    procedure resetradioitems(const group: integer);
    function getcheckedradioitem(const group: integer): tcustomtoolbutton;
    function add: tcustomtoolbutton;
-   property items[const index: integer]: tcustomtoolbutton read getitems write setitems; default;
+   property items[const index: integer]: tcustomtoolbutton 
+                                       read getitems write setitems; default;
   published
    property width: integer read fwidth write setwidth default 0;
    property height: integer read fheight write setheight default 0;
    property imagelist: timagelist read fimagelist write setimagelist;
-   property colorglyph: colorty read fcolorglyph write setcolorglyph default cl_glyph;
+   property colorglyph: colorty read fcolorglyph 
+                                       write setcolorglyph default cl_glyph;
    property color: colorty read fcolor write setcolor default cl_transparent;
    property face: tface read getface write setface;
+   property frame: tframe read getframe write setframe;
+   property frameseparator: tframe read getframeseparator 
+                                              write setframeseparator;
  end;
 
  ttoolbuttons = class(tcustomtoolbuttons)
@@ -245,6 +258,8 @@ type
    property colorglyph;
    property color;
    property face;
+   property frame;
+   property frameseparator;
  end;
  
  tstockglyphtoolbuttons = class(ttoolbuttons)
@@ -273,7 +288,7 @@ type
  toolbuttoneventty = procedure(const sender: tobject;
               const button: tcustomtoolbutton) of object;
 
- tcustomtoolbar = class(tcustomstepbox,istatfile)
+ tcustomtoolbar = class(tcustomstepbox,istatfile,iframe)
   private
    flayoutok: boolean;
    foptions: toolbaroptionsty;
@@ -307,7 +322,7 @@ type
                       ashiftstate: shiftstatesty): boolean; override;
    procedure doshortcut(var info: keyeventinfoty; const sender: twidget); override;
    procedure objectchanged(const sender: tobject); override;
-   //istatfile
+    //istatfile
    procedure dostatread(const reader: tstatreader); virtual;
    procedure dostatwrite(const writer: tstatwriter); virtual;
    procedure statreading;
@@ -365,11 +380,25 @@ procedure drawtoolbuttons(const canvas: tcanvas;
            var layout: toolbarlayoutinfoty);
 var
  int1: integer;
+ rect1: rectty;
+ po1: pshapeinfoty;
 begin
  with layout do begin
+  rect1:= canvas.clipbox;
   for int1:= 0 to high(cells) do begin
-   cells[int1].face:= buttons.fface;
-   drawtoolbutton(canvas,cells[int1]);
+   po1:= @cells[int1];
+   with po1^ do begin
+    if testintersectrect(rect1,ca.dim) then begin
+     face:= buttons.fface;
+     if shs_separator in state then begin
+      frame:= buttons.frameseparator;
+     end
+     else begin
+      frame:= buttons.frame;
+     end;
+    end;
+   end;
+   drawtoolbutton(canvas,po1^);
   end;
  end;
 end;
@@ -737,6 +766,8 @@ destructor tcustomtoolbuttons.destroy;
 begin
  inherited;
  fface.free;
+ fframe.free();
+ fframeseparator.free();
 end;
 
 class function tcustomtoolbuttons.getitemclasstype: persistentclassty;
@@ -899,6 +930,46 @@ begin
  tcustomtoolbar(fowner).setoptionalobject(avalue,fface,
                                {$ifdef FPC}@{$endif}createface);
  tcustomtoolbar(fowner).invalidate;
+end;
+
+function tcustomtoolbuttons.getframe: tframe;
+begin
+ tcustomtoolbar(fowner).getoptionalobject(fframe,@createframe);
+ result:= fframe;
+end;
+
+procedure tcustomtoolbuttons.setframe(const avalue: tframe);
+begin
+ tcustomtoolbar(fowner).setoptionalobject(avalue,fframe,@createframe);
+ tcustomtoolbar(fowner).invalidate();
+end;
+
+function tcustomtoolbuttons.getframeseparator: tframe;
+begin
+ tcustomtoolbar(fowner).getoptionalobject(fframeseparator,
+                                                    @createframeseparator);
+ result:= fframeseparator;
+end;
+
+procedure tcustomtoolbuttons.setframeseparator(const avalue: tframe);
+begin
+ tcustomtoolbar(fowner).setoptionalobject(avalue,fframeseparator,
+                                                        @createframeseparator);
+ tcustomtoolbar(fowner).invalidate();
+end;
+
+procedure tcustomtoolbuttons.createframe();
+begin
+ if fframe = nil then begin
+  fframe:= tnosetinstanceframe.create(iframe(tcustomtoolbar(fowner)));
+ end;
+end;
+
+procedure tcustomtoolbuttons.createframeseparator();
+begin
+ if fframeseparator = nil then begin
+  fframeseparator:= tnosetinstanceframe.create(iframe(tcustomtoolbar(fowner)));
+ end;
 end;
 
 procedure tcustomtoolbuttons.objectchanged(const sender: tobject);
