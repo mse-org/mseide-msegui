@@ -1265,7 +1265,12 @@ begin
        with cells[int1] do begin
         color:= cl_parent;
         actioninfotoshapeinfo(buttons[int1].finfo,cells[int1]);
-        include(state,shs_flat);
+        if shs_separator in state then begin
+         exclude(state,shs_flat);
+        end
+        else begin
+         include(state,shs_flat);
+        end;
         if state * [shs_checkbox,shs_radiobutton] <> [] then begin
          include(state,shs_checkbutton);
         end;
