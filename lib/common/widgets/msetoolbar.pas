@@ -969,7 +969,7 @@ procedure tcustomtoolbuttons.setframesephorz(const avalue: tframe);
 begin
  tcustomtoolbar(fowner).setoptionalobject(avalue,fframesephorz,
                                                         @createframesephorz);
- tcustomtoolbar(fowner).invalidate();
+ tcustomtoolbar(fowner).clientrectchanged();
 end;
 
 function tcustomtoolbuttons.getframesepvert: tframe;
@@ -983,7 +983,7 @@ procedure tcustomtoolbuttons.setframesepvert(const avalue: tframe);
 begin
  tcustomtoolbar(fowner).setoptionalobject(avalue,fframesepvert,
                                                         @createframesepvert);
- tcustomtoolbar(fowner).invalidate();
+ tcustomtoolbar(fowner).clientrectchanged();
 end;
 
 procedure tcustomtoolbuttons.createframe();
