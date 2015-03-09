@@ -768,11 +768,6 @@ type
    property template;
  end;
 
- tnosetinstanceframe = class(tframe)
-  public
-   constructor create(const intf: iframe);
- end;
- 
  tframetemplate = class(tpersistenttemplate,iimagelistinfo)
   private
    foptionsskincontroller: frameskincontrolleroptionsty;
@@ -5387,14 +5382,6 @@ procedure tcustomframe.defineproperties(filer: tfiler);
 begin
  filer.defineproperty('dummy',@readdummy,nil,false);
  // inherited; //no dummy necessary because of localprops
-end;
-
-{ tnosetinstanceframe }
-
-constructor tnosetinstanceframe.create(const intf: iframe);
-begin
- include(fstate,fs_nosetinstance);
- inherited;
 end;
 
 { tframetemplate }

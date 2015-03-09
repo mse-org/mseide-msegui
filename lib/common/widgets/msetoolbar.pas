@@ -188,6 +188,25 @@ type
    property onbeforeexecute; 
    property onafterexecute;
  end;
+
+const
+ defaulttoolbuttonoptionsskin = [fso_flat,fso_nofocusrect,fso_nodefaultrect];
+ defaulttoolseparatoroptionsskin = defaulttoolbuttonoptionsskin - [fso_flat];
+
+type
+ ttoolbuttonframe = class(tframe)
+  public
+   constructor create(const intf: iframe);
+  published
+   property optionsskin default defaulttoolbuttonoptionsskin;
+ end;
+ 
+ ttoolseparatorframe = class(ttoolbuttonframe)
+  public
+   constructor create(const intf: iframe);
+  published
+   property optionsskin default defaulttoolseparatoroptionsskin;
+ end;
   
  toolbuttonsstatety = (tbs_nocandefocus);
  toolbuttonsstatesty = set of toolbuttonsstatety;
@@ -201,9 +220,9 @@ type
    fcolorglyph: colorty;
    fcolor: colorty;
    fface: tface;
-   fframe: tframe;
-   fframesephorz: tframe;
-   fframesepvert: tframe;
+   fframe: ttoolbuttonframe;
+   fframesephorz: ttoolseparatorframe;
+   fframesepvert: ttoolseparatorframe;
    procedure setitems(const index: integer; const Value: tcustomtoolbutton);
    function getitems(const index: integer): tcustomtoolbutton; reintroduce;
    procedure setheight(const Value: integer);
@@ -766,6 +785,23 @@ begin
  end;
 end;
 
+{ ttoolbuttonframe }
+
+constructor ttoolbuttonframe.create(const intf: iframe);
+begin
+ include(fstate,fs_nosetinstance);
+ inherited;
+ fi.optionsskin:= defaulttoolbuttonoptionsskin;
+end;
+
+{ ttoolseparatorframe }
+
+constructor ttoolseparatorframe.create(const intf: iframe);
+begin
+ inherited;
+ fi.optionsskin:= defaulttoolseparatoroptionsskin;
+end;
+
 { tcustomtoolbuttons }
 
 constructor tcustomtoolbuttons.create(const aowner: tcustomtoolbar);
@@ -989,21 +1025,21 @@ end;
 procedure tcustomtoolbuttons.createframe();
 begin
  if fframe = nil then begin
-  fframe:= tnosetinstanceframe.create(iframe(tcustomtoolbar(fowner)));
+  fframe:= ttoolbuttonframe.create(iframe(tcustomtoolbar(fowner)));
  end;
 end;
 
 procedure tcustomtoolbuttons.createframesephorz();
 begin
  if fframesephorz = nil then begin
-  fframesephorz:= tnosetinstanceframe.create(iframe(tcustomtoolbar(fowner)));
+  fframesephorz:= ttoolseparatorframe.create(iframe(tcustomtoolbar(fowner)));
  end;
 end;
 
 procedure tcustomtoolbuttons.createframesepvert();
 begin
  if fframesepvert = nil then begin
-  fframesepvert:= tnosetinstanceframe.create(iframe(tcustomtoolbar(fowner)));
+  fframesepvert:= ttoolseparatorframe.create(iframe(tcustomtoolbar(fowner)));
  end;
 end;
 
