@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2015 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -516,7 +516,12 @@ begin
        coloractive:= item1.coloractive;
       end;
      end;
-     include(state,shs_flat);
+     if mao_separator in item1.options then begin
+      exclude(state,shs_flat);
+     end
+     else begin
+      include(state,shs_flat);
+     end;
      updatebit(longword(state),ord(shs_noanimation),noanim1);
      updatebit(longword(state),ord(shs_nomouseanimation),nomouseanim1);
      updatebit(longword(state),ord(shs_noclickanimation),noclickanim1);
