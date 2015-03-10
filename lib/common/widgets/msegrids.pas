@@ -10807,7 +10807,8 @@ var
 
 begin
  inherited;
- if not (es_processed in info.eventstate) then begin
+ bo1:= es_processed in info.eventstate;
+ if not bo1 then begin
   fobjectpicker.mouseevent(info);
   if (info.eventkind = ek_buttonpress) and 
              not(csdesigning in componentstate) and
@@ -10824,6 +10825,9 @@ begin
   if es_processed in info.eventstate then begin
    if info.eventkind in [ek_mousemove,ek_mousepark] then begin
     checkrepeater(true);
+   end;
+   if not bo1 then begin
+    cellmouseevent(fmousecell,info);
    end;
   end
   else begin                           
