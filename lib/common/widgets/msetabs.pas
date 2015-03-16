@@ -750,6 +750,8 @@ type
    procedure settab_widthmin(const avalue: integer);
    function gettab_widthmax: integer;
    procedure settab_widthmax(const avalue: integer);
+   function gettab_optionsskin: optionsskinty;
+   procedure settab_optionsskin(const avalue: optionsskinty);
   protected
    ftabs: tcustomtabbar1;
    fupdating: integer;
@@ -884,6 +886,8 @@ type
                             default defaulttabsizemax;
    property tab_optionswidget: optionswidgetty read gettab_optionswidget
                  write settab_optionswidget default defaultoptionswidgettab;
+   property tab_optionsskin: optionsskinty read gettab_optionsskin
+                 write settab_optionsskin default [];
    property tab_optionswidget1: optionswidget1ty read gettab_optionswidget1
                  write settab_optionswidget1 default defaultoptionswidget1tab;
    property statfile: tstatfile read fstatfile write setstatfile;
@@ -953,6 +957,7 @@ type
    property tab_size;
    property tab_optionswidget;
    property tab_optionswidget1;
+   property tab_optionsskin;
    property statfile;
    property statvarname;
    property statpriority;
@@ -4960,6 +4965,16 @@ end;
 procedure tcustomtabwidget.settab_optionswidget1(const avalue: optionswidget1ty);
 begin
  ftabs.optionswidget1:= avalue;
+end;
+
+function tcustomtabwidget.gettab_optionsskin: optionsskinty;
+begin
+ result:= ftabs.optionsskin;
+end;
+
+procedure tcustomtabwidget.settab_optionsskin(const avalue: optionsskinty);
+begin
+ ftabs.optionsskin:= avalue;
 end;
 
 function tcustomtabwidget.gettab_font: ttab_font;
