@@ -14256,7 +14256,7 @@ begin
    testintersectrect(fcanvas.clipbox,appinst.caret.rootcliprect);
   }
   bo1:= false;
-  if appinst.caret.islinkedto(fcanvas) and appinst.fcaret.visible and
+  if appinst.caret.islinkedto(fcanvas) and appinst.fcaret.active and
       testintersectrect(fcanvas.clipbox,appinst.caret.rootcliprect) then begin
    reg1:= fcanvas.copyclipregion;
    fcanvas.regintersectrect(reg1,appinst.caret.rootcliprect);
