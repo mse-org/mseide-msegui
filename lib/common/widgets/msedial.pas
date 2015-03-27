@@ -514,6 +514,7 @@ type
                                                  default defaultoptionsdial;
   published
    property color default cl_transparent;
+   property optionswidget default defaultoptionswidgetnofocus;
  end;
  
  tdial = class(tcustomdial)
@@ -2737,6 +2738,7 @@ begin
  inherited;
  size:= makesize(100,15);
  color:= cl_transparent;
+ optionswidget:= defaultoptionswidgetnofocus;
 end;
 
 destructor tcustomdial.destroy;
