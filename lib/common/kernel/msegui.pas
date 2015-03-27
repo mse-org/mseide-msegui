@@ -14244,16 +14244,26 @@ var
  bmp: tbitmap;
  rect1: rectty;
  po1: pointty;
+ reg1: regionty;
 begin
  result:= false;
  if (ws_visible in fownerwidget.fwidgetstate) and (fupdateregion.region <> 0) then begin
   checkwindow(false); //ev. reposition window
   fcanvas.reset;
   fcanvas.clipregion:= fupdateregion.region; //canvas owns the region
+  {
   bo1:= appinst.caret.islinkedto(fcanvas) and
    testintersectrect(fcanvas.clipbox,appinst.caret.rootcliprect);
-  if bo1 then begin
-   tcaret1(appinst.fcaret).remove;
+  }
+  bo1:= false;
+  if appinst.caret.islinkedto(fcanvas) and appinst.fcaret.visible then begin
+   reg1:= fcanvas.copyclipregion;
+   fcanvas.regintersectrect(reg1,appinst.caret.rootcliprect);
+   bo1:= not fcanvas.regionisempty(reg1);
+   fcanvas.destroyregion(reg1);
+   if bo1 then begin
+    tcaret1(appinst.fcaret).remove;
+   end;
   end;
   include(fstate,tws_painting);
   if flushgdi then begin
