@@ -195,6 +195,8 @@ function packarray(source: msestringarty): msestringarty; overload;
 
 procedure checkarrayindex(const value; const index: integer);
           //value = dynamic array, exception bei ungueltigem index
+procedure checkarrayindexcount(const count: int32; const index: int32);
+
 procedure splitcomplexar(const acomplex: complexarty; out re,im: realarty);
 
 function comparepointer(const l,r): integer;
@@ -1428,6 +1430,14 @@ begin
  if (index < 0) or (index > high(bytearty(value))) then begin
   raise exception.Create('Invalid arrayindex: '+inttostr(index)+ ' max: ' + 
                    inttostr(high(bytearty(value)))+'.');
+ end;
+end;
+
+procedure checkarrayindexcount(const count: int32; const index: int32);
+begin
+ if (index < 0) or (index >= count) then begin
+  raise exception.Create('Invalid arrayindex: '+inttostr(index)+ ' max: ' + 
+                   inttostr(count-1)+'.');
  end;
 end;
 

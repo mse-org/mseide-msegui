@@ -28,6 +28,7 @@ type
  
  processorty = (pro_i386,pro_x86_64,pro_arm,pro_armm3,
                 pro_cpu32,pro_avr32,pro_rl78);
+ languagety = (lan_none,lan_undef,lan_pascal);
 
 const
  gdberrortexts: array[gdbresultty] of string =
@@ -129,6 +130,7 @@ type
   line: integer;
   addr: qword;
   func: string;
+  language: languagety;
   signalname: string;
   signalmeaning: string;
   messagetext: string;
@@ -325,6 +327,7 @@ type
    fbeforeconnect: filenamety;
    fafterconnect: filenamety;
    fxtermcommand: filenamety;
+   fcurrentlanguage: languagety;
    procedure setstoponexception(const avalue: boolean);
    procedure checkactive;
    function checkconnection(const proginfo: boolean): gdbresultty;
@@ -364,7 +367,7 @@ type
    function synccommand(const acommand: string; 
                          atimeout: integer = defaultsynctimeout): gdbresultty;
    function clicommand(const acommand: string; list: boolean = false;
-                              timeout: integer = defaultsynctimeout): gdbresultty;
+                           timeout: integer = defaultsynctimeout): gdbresultty;
    function getcliresult(const acommand: string; 
                                        var aresult: stringarty): gdbresultty;
    function getcliresultstring(const acommand: string;
@@ -383,8 +386,9 @@ type
                               const expression: string): msestring;
    function getpcharvar(address: qword): string;
    function getpmsecharvar(address: qword): msestring;
-   function getnumarrayvalue(const response: resultinfoarty; const aname: string;
-                 var avalue; setnumproc: setnumprocty; setlenproc: setlenprocty): boolean;
+   function getnumarrayvalue(const response: resultinfoarty; 
+                  const aname: string; var avalue; setnumproc: setnumprocty; 
+                                            setlenproc: setlenprocty): boolean;
    function getpascalvalue(const avalue: string): string;
    function getbkptid: integer;
    function getwptid: integer;
@@ -398,8 +402,9 @@ type
    function getsysregnum(const varname: string; out num: integer): boolean;
    function currentlang: string;
    function assignoperator: string;
-   function getbreakpointinfo(var atup: resultinfoty; var info: breakpointinfoty;
-                                 const full: boolean): boolean;
+   function getbreakpointinfo(var atup: resultinfoty;
+                     var info: breakpointinfoty; const full: boolean): boolean;
+   procedure updatepascalexpression(var aexpression: string);
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -414,36 +419,44 @@ type
 
    procedure consolecommand(acommand: string);
    function source(const afilename: filenamety): gdbresultty; //run script
-   function micommand(const command: string; out values: resultinfoarty): gdbresultty;
+   function micommand(const command: string;
+                                    out values: resultinfoarty): gdbresultty;
                   //false on error or timeout, values = nil on timeout
    function geterrormessage(const aresult: gdbresultty): string;
    property errormessage: string read ferrormessage;
       //for synccommand if error = gdb_message
 
-   function handle(const signame: string; const aflags: sigflagsty): gdbresultty;
+   function handle(const signame: string;
+                                    const aflags: sigflagsty): gdbresultty;
               //
    function breakinsert(var info: breakpointinfoty): gdbresultty; overload;
    function breakinsert(const funcname: string): integer; overload;
                 //returns bkpt id, -1 on error
    function breakinsert(const address: qword): integer; overload;
-   function breaklist(var list: breakpointinfoarty; const full: boolean): gdbresultty;
+   function breaklist(var list: breakpointinfoarty; 
+                                           const full: boolean): gdbresultty;
                //full = false -> only bkptno, address and passcount
    function breakdelete(bkptnum: integer): gdbresultty; //bkptnum = 0 -> all
-   function breakenable(bkptnum: integer; value: boolean): gdbresultty; //bkptnum = 0 -> all
+   function breakenable(bkptnum: integer; value: boolean): gdbresultty; 
+                                                         //bkptnum = 0 -> all
    function breakafter(bkptnum: integer; const passcount: integer): gdbresultty;
-   function breakcondition(bkptnum: integer; const condition: string): gdbresultty;
+   function breakcondition(bkptnum: integer; 
+                                          const condition: string): gdbresultty;
    function infobreakpoint(var info: breakpointinfoty;
                                const full: boolean = true): gdbresultty;
               //updates info for breakpoint info.bkptnum
    function watchinsert(var info: watchpointinfoty): gdbresultty;
 
    function getstopinfo(const response: resultinfoarty;
-              const lastconsoleoutput: ansistring; out info: stopinfoty): boolean;
+                             const lastconsoleoutput: ansistring;
+                                              out info: stopinfoty): boolean;
 
-   function getvalueindex(const response: resultinfoarty; const aname: string): integer;
+   function getvalueindex(const response: resultinfoarty;
+                                                 const aname: string): integer;
                  //-1 if not found
    function getenumvalue(const response: resultinfoarty;
-          const aname: string; const enums: array of string; var avalue: integer): boolean;
+          const aname: string; const enums: array of string;
+                                                var avalue: integer): boolean;
    function gettuplevalue(const response: resultinfoarty; const aname: string;
                  var avalue: resultinfoarty): boolean; overload;
    function gettuplevalue(const response: resultinfoty;
@@ -461,7 +474,8 @@ type
                  var avalue: integer): boolean; overload;
    function getintegervalue(const response: resultinfoty; const aname: string;
                  var avalue: integer): boolean; overload;
-   function getinteger64value(const response: resultinfoarty; const aname: string;
+   function getinteger64value(const response: resultinfoarty; 
+                                                           const aname: string;
                  var avalue: int64): boolean; overload;
    function getinteger64value(const response: resultinfoty; const aname: string;
                  var avalue: int64): boolean; overload;
@@ -476,16 +490,16 @@ type
                  const hasitemnames: boolean;
                  var avalue: resultinfoarty): boolean;
 
-   function gettuplearrayvalue(const response: resultinfoarty; const aname: string;
-                 var avalue: resultinfoararty): boolean;
-   function getstringarrayvalue(const response: resultinfoarty; const aname: string;
-                 var avalue: stringarty): boolean;
-   function getbytearrayvalue(const response: resultinfoarty; const aname: string;
-                 var avalue: bytearty): boolean;
-   function getwordarrayvalue(const response: resultinfoarty; const aname: string;
-                 var avalue: wordarty): boolean;
-   function getlongwordarrayvalue(const response: resultinfoarty; const aname: string;
-                 var avalue: longwordarty): boolean;
+   function gettuplearrayvalue(const response: resultinfoarty;
+                    const aname: string; var avalue: resultinfoararty): boolean;
+   function getstringarrayvalue(const response: resultinfoarty;
+                         const aname: string; var avalue: stringarty): boolean;
+   function getbytearrayvalue(const response: resultinfoarty;
+                    const aname: string; var avalue: bytearty): boolean;
+   function getwordarrayvalue(const response: resultinfoarty;
+           const aname: string; var avalue: wordarty): boolean;
+   function getlongwordarrayvalue(const response: resultinfoarty; 
+                  const aname: string; var avalue: longwordarty): boolean;
 
    function fileexec(const filename: filenamety;
                            const noproginfo: boolean = false): gdbresultty;
@@ -534,16 +548,24 @@ type
                  var aresult: wordarty): gdbresultty;
    function readmemorylongwords(const address: qword; const count: integer;
                  var aresult: longwordarty): gdbresultty;
-   function readmemorybyte(const address: qword; out aresult: byte): gdbresultty;
-   function readmemoryword(const address: qword; out aresult: word): gdbresultty;
-   function readmemorylongword(const address: qword; out aresult: longword): gdbresultty;
-   function readmemorypointer(const address: qword; out aresult: qword): gdbresultty;
-   function writememorybyte(const address: qword; const avalue: byte): gdbresultty;
-   function writememoryword(const address: qword; const avalue: word): gdbresultty;
-   function writememorylongword(const address: qword; const avalue: longword): gdbresultty;
+   function readmemorybyte(const address: qword;
+                                               out aresult: byte): gdbresultty;
+   function readmemoryword(const address: qword; 
+                                               out aresult: word): gdbresultty;
+   function readmemorylongword(const address: qword; 
+                                           out aresult: longword): gdbresultty;
+   function readmemorypointer(const address: qword;
+                                              out aresult: qword): gdbresultty;
+   function writememorybyte(const address: qword;
+                                              const avalue: byte): gdbresultty;
+   function writememoryword(const address: qword;
+                                              const avalue: word): gdbresultty;
+   function writememorylongword(const address: qword;
+                                          const avalue: longword): gdbresultty;
 
-   function readpascalvariable(const varname: string; out aresult: msestring): gdbresultty;
-   function writepascalvariable(const varname: string; const value: string;
+   function readpascalvariable(varname: string; 
+                                         out aresult: msestring): gdbresultty;
+   function writepascalvariable(varname: string; const value: string;
                 var aresult: string): gdbresultty;
    function evaluateexpression(const expression: string;
                                            out aresult: string): gdbresultty;
@@ -555,13 +577,16 @@ type
                     last: integer = 100): gdbresultty;
    function selectstackframe(const aframe: integer): gdbresultty;
    function selectstackpointer(const aframe: qword): gdbresultty;
-   function getsourcename(var path: filenamety; frame: integer = 0): gdbresultty;
+   function getsourcename(out path: filenamety; out language: languagety;
+                                              frame: integer = 0): gdbresultty;
    function getprocaddress(const procname: string;
                         out aaddress: qword): gdbresultty;
 
    function getpc(out addr: qword): gdbresultty;
-   function getregistervalue(const aname: string; out avalue: qword): gdbresultty;
-   function setregistervalue(const aname: string; const avalue: qword): gdbresultty;
+   function getregistervalue(const aname: string;
+                                               out avalue: qword): gdbresultty;
+   function setregistervalue(const aname: string;
+                                             const avalue: qword): gdbresultty;
    function listregisternames(out aresult: stringarty): gdbresultty;
    function listregistervalues(out aresult: registerinfoarty): gdbresultty;
    function listlines(const path: filenamety; out lines: integerarty;
@@ -593,19 +618,23 @@ type
 
    property execloaded: boolean read getexecloaded;
    property attached: boolean read getattached;
-   property stoponexception: boolean read fstoponexception write setstoponexception default false;
-   property ignoreexceptionclasses: stringarty read fignoreexceptionclasses write
-                     setignoreexceptionclasses;
+   property stoponexception: boolean read fstoponexception 
+                                       write setstoponexception default false;
+   property ignoreexceptionclasses: stringarty read fignoreexceptionclasses
+                                               write setignoreexceptionclasses;
    property pointersize: integer read fpointersize;
    property pointerhexdigits: integer read fpointerhexdigits;
    property stoptime: tdatetime read fstoptime;
 
    property progparameters: string read fprogparameters write fprogparameters;
-   property workingdirectory: filenamety read fworkingdirectory write fworkingdirectory;
+   property workingdirectory: filenamety read fworkingdirectory 
+                                                      write fworkingdirectory;
 //   {$ifdef mswindows}
    property newconsole: boolean read fnewconsole write fnewconsole;
 //   {$endif}
-   property processorname: ansistring read getprocessorname write setprocessorname;
+   property processorname: ansistring read getprocessorname 
+                                                        write setprocessorname;
+   property currentlanguage: languagety read fcurrentlanguage;
   published
    property guiintf: boolean read fguiintf write fguiintf default false;
                    //call GUI_DEBUGBEGIN/END
@@ -614,7 +643,8 @@ type
    property gdbdownload: boolean read fgdbdownload write fgdbdownload;
    property settty: boolean read fsettty write fsettty default true;
    property simulator: boolean read fsimulator write fsimulator;
-   property processor: processorty read fprocessor write fprocessor default pro_i386;
+   property processor: processorty read fprocessor 
+                                             write fprocessor default pro_i386;
    property beforeconnect: filenamety read fbeforeconnect write fbeforeconnect;
    property afterconnect: filenamety read fafterconnect write fafterconnect;
    property beforeload: filenamety read fbeforeload write fbeforeload;
@@ -3181,13 +3211,18 @@ begin
  end;
 end;
 
-function tgdbmi.getsourcename(var path: filenamety; frame: integer = 0): gdbresultty;
+function tgdbmi.getsourcename(out path: filenamety; 
+              out language: languagety;frame: integer = 0): gdbresultty;
 var
  strar1: stringarty;
  int1: integer;
  bo1: boolean;
+ po1: pchar;
+ str1: string;
+ i1: int32;
 begin
  path:= '';
+ language:= lan_undef;
  if frame <> 0 then begin
 //  result:= synccommand('-stack-select-frame '+inttostr(frame)); //does not change soourcefile
   result:= clicommand('frame ' + inttostr(frame));
@@ -3208,6 +3243,15 @@ begin
 //    break;
 //   end
 //   else begin
+    if startsstr('Source language is ',strar1[int1]) then begin
+     i1:= findlastchar(strar1[int1],'.');
+     if i1 > 0 then begin
+      str1:= copy(strar1[int1],20,i1-20);
+     end;
+     if str1 = 'pascal' then begin
+      language:= lan_pascal;
+     end;
+    end;
     if path = '' then begin
      if startsstr('Current source file is ',strar1[int1]) then begin
       path:= copy(strar1[int1],24,bigint);
@@ -3330,7 +3374,7 @@ begin
       getintegervalue(frame,'line',line);
       getstringvalue(frame,'func',func);
       getinteger64value(frame,'addr',int64(addr));
-      if getsourcename(wstr1)= gdb_ok then begin
+      if getsourcename(wstr1,language) = gdb_ok then begin
        filedir:= msefileutils.filedir(wstr1);
       end;
      end;
@@ -3374,6 +3418,7 @@ begin
     end;
    end;
   end;
+  fcurrentlanguage:= language;
  end;
 end;
 {
@@ -4309,7 +4354,7 @@ begin
  end;
 end;
 
-function tgdbmi.readpascalvariable(const varname: string; 
+function tgdbmi.readpascalvariable(varname: string; 
                                           out aresult: msestring): gdbresultty;
 var
  str1,str2: string;
@@ -4337,6 +4382,7 @@ begin
    end;
    exit;
   end;
+  updatepascalexpression(varname);
   result:= symboltype(varname,str1);
   if result = gdb_ok then begin
    result:= evaluateexpression(varname,str2);
@@ -4358,7 +4404,7 @@ begin
  end;
 end;
 
-function tgdbmi.writepascalvariable(const varname: string; const value: string;
+function tgdbmi.writepascalvariable(varname: string; const value: string;
                         var aresult: string): gdbresultty;
 var
  int1: integer; 
@@ -4375,6 +4421,7 @@ begin
   end;
  end
  else begin
+  updatepascalexpression(varname);
   result:= evaluateexpression(varname+assignoperator+value,aresult);
  end;
 end;
@@ -4615,6 +4662,16 @@ begin
 {$ifdef UNIX}
  ftargetterminal.input.overloadsleepus:= avalue;
 {$endif}
+end;
+
+procedure tgdbmi.updatepascalexpression(var aexpression: string);
+begin
+ if fcurrentlanguage = lan_pascal then begin
+//  if not startsstr('self.',aexpression) and (aexpression <> 'self') then begin
+   aexpression:= uppercase(aexpression); 
+           //workaround for gdb bug with class fields
+//  end;
+ end;
 end;
 
 {$ifdef UNIX}
