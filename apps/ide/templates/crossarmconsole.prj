@@ -496,20 +496,6 @@ windowlayout=531
  cx=0
  cy=0
  [mainfo.projectfiledia]
- filenames=1
-  /home/mse/packs/standard/git/mseide-msegui_arm/apps/ide/templates/crossarmdefault.prj
- lastdir=/home/mse/packs/standard/git/mseide-msegui_arm/apps/ide/templates/
- filehistory=10
-  /home/mse/packs/standard/git/mseide-msegui_arm/apps/ide/templates/crossarmdefault.prj
-  /home/mse/packs/standard/git/mseide-msegui_arm/apps/ide/templates/crossarmconsole.prj
-  /home/mse/packs/standard/git/mseide-msegui/apps/ide/templates/crossarmconsole.prj
-  /home/mse/packs/standard/git/mseide-msegui/apps/ide/mse_mseide.prj
-  /home/mse/proj/msegui/testcase/mse/arm/test/test1/test1.prj
-  /home/mse/packs/standard/git/mseide-msegui/apps/ide/templates/crossarmdefault.prj
-  /home/mse/packs/standard/git/mseide-msegui/apps/ide/templates/default.prj
-  /home/mse/packs/standard/git/mseide-msegui/apps/ide/templates/console.prj
-  /home/mse/packs/standard/git/mselang/mselang/llvmdump/mse_llvmdump.prj
-  /home/mse/proj/msegui/testcase/mse/arm/hello.prj
  filefilterindex=0
  filefilter=*.prj
  filecolwidth=174

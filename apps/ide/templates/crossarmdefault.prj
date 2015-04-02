@@ -603,7 +603,7 @@ tabsize=105
 firsttab=0
 index=-1
 [layout]
-windowlayout=530
+windowlayout=531
  [mainfo.openform]
  filenames=0
  filehistory=0
@@ -615,19 +615,6 @@ windowlayout=530
  cx=0
  cy=0
  [mainfo.projectfiledia]
- filenames=0
- lastdir=/home/mse/packs/standard/git/mseide-msegui/apps/ide/templates/
- filehistory=10
-  /home/mse/packs/standard/git/mseide-msegui/apps/ide/templates/crossarmdefault.prj
-  /home/mse/packs/standard/git/mseide-msegui/apps/ide/templates/crossarmconsole.prj
-  /home/mse/packs/standard/git/mseide-msegui/apps/ide/templates/default.prj
-  /home/mse/packs/standard/git/mseide-msegui/apps/ide/templates/console.prj
-  /home/mse/packs/standard/git/mselang/mselang/llvmdump/mse_llvmdump.prj
-  /home/mse/proj/msegui/testcase/mse/arm/hello.prj
-  /home/mse/packs/standard/git/mselang/mselang/grammargen/mse_grammargen.prj
-  /home/mse/proj/test3/test3.prj
-  /home/mse/packs/standard/git/mseide-msegui/apps/ide/mse_mseide.prj
-  /home/mse/packs/standard/git/mselang/mselang/llvmtest.prj
  filefilterindex=0
  filefilter=*.prj
  filecolwidth=174
@@ -651,7 +638,7 @@ windowlayout=530
  [mainfo]
  splitdir=0
  useroptions=123
- stackedunder=targetconsolefo
+ stackedunder=componentpalettefo
  parent=
  mdistate=0
  nx=0
@@ -898,7 +885,7 @@ windowlayout=530
  [symbolfo]
  splitdir=0
  useroptions=16507
- stackedunder=mainfo
+ stackedunder=targetconsolefo
  parent=
  mdistate=0
  nx=0
