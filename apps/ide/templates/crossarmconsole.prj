@@ -1,4 +1,26 @@
+[componentpalette]
+order0=0
+order1=0
+order2=0
+order3=0
+order4=0
+order5=0
+order6=0
+order7=0
+order8=0
+order9=0
+order10=0
+order11=0
+order12=0
+order13=0
+order14=0
+order15=0
+order16=0
+order17=0
+order18=0
 [projectoptions]
+projectdir=/home/mse/packs/standard/git/mseide-msegui_arm/apps/ide/templates
+projectfilename=/home/mse/packs/standard/git/mseide-msegui_arm/apps/ide/templates/crossarmconsole.prj
 mainfile=${PROJECTNAME}.pas
 targetfile=${PROJECTNAME}${EXEEXT}
 messageoutputfile=
@@ -407,3 +429,594 @@ sigsettings=27
  29,29,F,F
  30,30,T,F
 defaultmake=1
+[breakpoints]
+on=0
+path=0
+line=0
+address=0
+addbkpt=0
+ignore=0
+condition=0
+panels=1
+ panel1
+units=
+ (
+ a=0,4132,6,Pascal Units
+ )
+cmodules=
+ (
+ a=0,4132,6,C Modules
+ )
+files=
+ (
+ a=0,4132,6,Text Files
+ )
+[componentstore]
+storedir=/home/mse/packs/standard/git/mseide-msegui_arm/apps/ide/compstore/
+filename=
+[components]
+[selecteditpage]
+colwidth=100
+x=0
+y=0
+cx=0
+cy=0
+[progparams]
+progparamhistory=0
+workdirparamhistory=0
+envvarons=0
+[edit]
+hintwidth=0
+hintheight=0
+finddtext=
+findhistory=0
+findoptions=1
+editpos=0
+sourcefiles=0
+relpaths=0
+ismoduletexts=0
+modules=0
+moduleoptions=0
+visiblemodules=0
+nomenumodules=0
+[sourcefo.tabwidget]
+tabsize=60
+firsttab=0
+index=-1
+[layout]
+windowlayout=531
+ [mainfo.openform]
+ filenames=0
+ filehistory=0
+ filefilterindex=0
+ filefilter=
+ filecolwidth=0
+ x=0
+ y=0
+ cx=0
+ cy=0
+ [mainfo.projectfiledia]
+ filenames=1
+  /home/mse/packs/standard/git/mseide-msegui_arm/apps/ide/templates/crossarmdefault.prj
+ lastdir=/home/mse/packs/standard/git/mseide-msegui_arm/apps/ide/templates/
+ filehistory=10
+  /home/mse/packs/standard/git/mseide-msegui_arm/apps/ide/templates/crossarmdefault.prj
+  /home/mse/packs/standard/git/mseide-msegui_arm/apps/ide/templates/crossarmconsole.prj
+  /home/mse/packs/standard/git/mseide-msegui/apps/ide/templates/crossarmconsole.prj
+  /home/mse/packs/standard/git/mseide-msegui/apps/ide/mse_mseide.prj
+  /home/mse/proj/msegui/testcase/mse/arm/test/test1/test1.prj
+  /home/mse/packs/standard/git/mseide-msegui/apps/ide/templates/crossarmdefault.prj
+  /home/mse/packs/standard/git/mseide-msegui/apps/ide/templates/default.prj
+  /home/mse/packs/standard/git/mseide-msegui/apps/ide/templates/console.prj
+  /home/mse/packs/standard/git/mselang/mselang/llvmdump/mse_llvmdump.prj
+  /home/mse/proj/msegui/testcase/mse/arm/hello.prj
+ filefilterindex=0
+ filefilter=*.prj
+ filecolwidth=174
+ x=0
+ y=0
+ cx=0
+ cy=0
+ [mainfo.openfile]
+ filenames=0
+ filehistory=0
+ filefilterindex=0
+ filefilter=
+ filecolwidth=174
+ x=0
+ y=0
+ cx=0
+ cy=0
+ [mainfo.basedock]
+ splitdir=2
+ useroptions=15488
+ [mainfo]
+ splitdir=0
+ useroptions=123
+ stackedunder=
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=4
+ y=24
+ cx=300
+ cy=74
+ rcx=0
+ rcy=0
+ wsize=0
+ active=1
+ visible=1
+ [targetconsolefo]
+ splitdir=0
+ useroptions=16489
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=116
+ y=297
+ cx=904
+ cy=347
+ rcx=0
+ rcy=0
+ wsize=0
+ active=0
+ visible=1
+ [threadsfo]
+ splitdir=0
+ useroptions=16489
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=37
+ y=270
+ cx=349
+ cy=276
+ rcx=0
+ rcy=0
+ wsize=0
+ active=0
+ visible=0
+ [memoryfo]
+ splitdir=0
+ useroptions=16507
+ stackedunder=cpui386fo
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=100
+ y=100
+ cx=453
+ cy=354
+ rcx=0
+ rcy=0
+ wsize=0
+ active=0
+ visible=0
+ [memoryfo.add]
+ value=0
+ [memoryfo.memon]
+ value=0
+ [memoryfo.bitwidth]
+ value=0
+ [memoryfo.cnt]
+ value=0
+ [disassfo]
+ splitdir=0
+ useroptions=16491
+ stackedunder=findinfilefo
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=162
+ y=502
+ cx=564
+ cy=210
+ rcx=0
+ rcy=0
+ wsize=0
+ active=0
+ visible=0
+ [findinfilefo]
+ splitdir=0
+ useroptions=16491
+ stackedunder=symbolfo
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=548
+ y=115
+ cx=369
+ cy=198
+ rcx=0
+ rcy=0
+ [projecttreefo]
+ splitdir=0
+ useroptions=16491
+ stackedunder=memoryfo
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=321
+ y=101
+ cx=698
+ cy=413
+ rcx=0
+ rcy=0
+ wsize=0
+ active=0
+ visible=0
+ [projecttreefo.grid]
+ propcolwidthref=547
+ width0=141
+ sortdescend0=0
+ width1=541
+ sortdescend1=0
+ sorted=0
+ col=-1073741823
+ row=-1073741823
+ rowheight=16
+ [stackfo]
+ splitdir=0
+ useroptions=24681
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=407
+ y=349
+ cx=254
+ cy=180
+ rcx=0
+ rcy=0
+ wsize=0
+ active=0
+ visible=0
+ [watchpointsfo]
+ splitdir=0
+ useroptions=16489
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=537
+ y=26
+ cx=483
+ cy=210
+ rcx=0
+ rcy=0
+ wsize=0
+ active=0
+ visible=0
+ [watchpointsfo.grid]
+ propcolwidthref=352
+ sortdescend0=0
+ values1=0
+ values1_ci=-1
+ width1=33
+ sortdescend1=0
+ values2=0
+ width2=239
+ sortdescend2=0
+ width4=34
+ sortdescend4=0
+ values5=0
+ values5_ci=-1
+ width5=38
+ sortdescend5=0
+ values6=0
+ width6=103
+ sortdescend6=0
+ [breakpointsfo]
+ splitdir=0
+ useroptions=16491
+ stackedunder=projecttreefo
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=107
+ y=404
+ cx=477
+ cy=128
+ rcx=0
+ rcy=0
+ wsize=0
+ active=0
+ visible=0
+ [breakpointsfo.bkptson]
+ value=1
+ [objectinspectorfo]
+ splitdir=0
+ useroptions=16491
+ stackedunder=breakpointsfo
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=670
+ y=179
+ cx=316
+ cy=484
+ rcx=0
+ rcy=0
+ wsize=0
+ active=0
+ visible=0
+ [objectinspectorfo.grid]
+ propcolwidthref=347
+ width0=113
+ sortdescend0=0
+ width1=187
+ sortdescend1=0
+ [symbolfo]
+ splitdir=0
+ useroptions=16507
+ stackedunder=targetconsolefo
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=142
+ y=257
+ cx=361
+ cy=137
+ rcx=0
+ rcy=0
+ wsize=0
+ active=0
+ visible=0
+ [symbolfo.grid]
+ propcolwidthref=222
+ values0=0
+ width0=111
+ sortdescend0=0
+ width1=135
+ sortdescend1=0
+ [symbolfo.symbol]
+ [watchfo]
+ splitdir=0
+ useroptions=24681
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=510
+ y=325
+ cx=310
+ cy=245
+ rcx=0
+ rcy=0
+ wsize=0
+ active=0
+ visible=0
+ [watchfo.grid]
+ propcolwidthref=105
+ values0=0
+ values0_ci=-1
+ sortdescend0=0
+ values1=0
+ width1=152
+ sortdescend1=0
+ values3=0
+ values3_ci=-1
+ sortdescend3=0
+ values4=0
+ values4_ci=-1
+ width4=13
+ sortdescend4=0
+ [watchfo.watchon]
+ [watchfo.expression]
+ [watchfo.watcheson]
+ value=1
+ [messagefo]
+ splitdir=0
+ useroptions=49259
+ parent=mainfo.panel1.container
+ visible=0
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=0
+ y=411
+ cx=724
+ cy=80
+ rcx=0
+ rcy=0
+ [componentstorefo]
+ splitdir=0
+ useroptions=24699
+ stackedunder=disassfo
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=100
+ y=100
+ cx=445
+ cy=354
+ rcx=0
+ rcy=0
+ wsize=0
+ active=0
+ visible=0
+ [componentstorefo.grid]
+ propcolwidthref=435
+ width0=111
+ sortdescend0=0
+ sortdescend1=0
+ width2=160
+ sortdescend2=0
+ width3=185
+ sortdescend3=0
+ [componentstorefo.storefiledialog]
+ filenames=1
+  /home/mse/packs/standard/git/mseide-msegui_arm/apps/ide/compstore/
+ lastdir=/home/mse/packs/standard/git/mseide-msegui_arm/apps/ide/compstore/
+ filehistory=0
+ filefilterindex=0
+ filefilter=
+ filecolwidth=0
+ x=0
+ y=0
+ cx=0
+ cy=0
+ [componentstorefo.groupfiledialog]
+ filenames=1
+  /home/mse/packs/standard/git/mseide-msegui_arm/apps/ide/compstore/
+ lastdir=/home/mse/packs/standard/git/mseide-msegui_arm/apps/ide/compstore/
+ filehistory=0
+ filefilterindex=0
+ filefilter=
+ filecolwidth=0
+ x=0
+ y=0
+ cx=0
+ cy=0
+ [componentstorefo.compfiledialog]
+ filenames=0
+ lastdir=
+ filehistory=0
+ filefilterindex=0
+ filefilter=
+ filecolwidth=0
+ x=0
+ y=0
+ cx=0
+ cy=0
+ [componentpalettefo]
+ splitdir=0
+ useroptions=24683
+ stackedunder=mainfo
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=335
+ y=24
+ cx=440
+ cy=129
+ rcx=0
+ rcy=0
+ wsize=0
+ active=0
+ visible=1
+ [componentpalettefo.componentpages]
+ activetab=0
+ [debuggerfo]
+ splitdir=0
+ useroptions=24683
+ parent=mainfo.basedock
+ visible=1
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=0
+ y=0
+ cx=290
+ cy=38
+ rcx=0
+ rcy=0
+ [sourcefo]
+ splitdir=0
+ useroptions=16489
+ parent=mainfo.panel1.container
+ visible=1
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=0
+ y=0
+ cx=724
+ cy=491
+ rcx=0
+ rcy=0
+ [actionsmo.watchesonact]
+ checked=1
+ [actionsmo.bluedotsonact]
+ checked=1
+ [cpui386fo]
+ irqoff=0
+ splitdir=0
+ useroptions=16491
+ stackedunder=componentstorefo
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=312
+ y=341
+ cx=283
+ cy=210
+ rcx=0
+ rcy=0
+ wsize=0
+ active=0
+ visible=0
+ [mainfo.panel1]
+ splitdir=2
+ useroptions=32235
+ stackedunder=componentpalettefo
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=4
+ y=201
+ cx=734
+ cy=491
+ rcx=0
+ rcy=0
+ wsize=0
+ active=0
+ visible=1
+[targetconsole]
+finddtext=
+findhistory=0
+findoptions=1
