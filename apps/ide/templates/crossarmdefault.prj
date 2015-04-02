@@ -551,7 +551,7 @@ windowlayout=530
  [mainfo]
  splitdir=0
  useroptions=123
- stackedunder=componentpalettefo
+ stackedunder=
  parent=
  mdistate=0
  nx=0
@@ -995,6 +995,25 @@ windowlayout=530
  checked=1
  [actionsmo.bluedotsonact]
  checked=1
+ [mainfo.panel1]
+ splitdir=2
+ useroptions=32235
+ stackedunder=mainfo
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=4
+ y=201
+ cx=734
+ cy=491
+ rcx=0
+ rcy=0
+ wsize=0
+ active=0
+ visible=1
  [cpuarmfo]
  irqoff=0
  splitdir=0
@@ -1015,25 +1034,6 @@ windowlayout=530
  wsize=0
  active=0
  visible=0
- [mainfo.panel1]
- splitdir=2
- useroptions=32235
- stackedunder=
- parent=
- mdistate=0
- nx=0
- ny=0
- ncx=0
- ncy=0
- x=4
- y=201
- cx=734
- cy=491
- rcx=0
- rcy=0
- wsize=0
- active=1
- visible=1
 [targetconsole]
 finddtext=
 findhistory=0

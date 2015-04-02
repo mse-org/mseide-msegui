@@ -148,7 +148,7 @@ fontnames=0
 scriptbeforecopy=
 scriptaftercopy=
 newprojectfiles=1
- ${TEMPLATEDIR}/console/programarm.pas
+ ${TEMPLATEDIR}/console/projectarm.pas
 newprojectfilesdest=1
  ${%PROJECTNAME%}.pas
 newfinames=3
@@ -584,7 +584,7 @@ tabsize=104
 firsttab=0
 index=-1
 [layout]
-windowlayout=531
+windowlayout=545
  [mainfo.openform]
  filenames=0
  filehistory=0
@@ -633,7 +633,7 @@ windowlayout=531
  [mainfo]
  splitdir=0
  useroptions=123
- stackedunder=componentpalettefo
+ stackedunder=
  parent=
  mdistate=0
  nx=0
@@ -715,7 +715,7 @@ windowlayout=531
  [disassfo]
  splitdir=0
  useroptions=16491
- stackedunder=findinfilefo
+ stackedunder=watchfo
  parent=
  mdistate=0
  nx=0
@@ -880,7 +880,7 @@ windowlayout=531
  [symbolfo]
  splitdir=0
  useroptions=16507
- stackedunder=targetconsolefo
+ stackedunder=disassfo
  parent=
  mdistate=0
  nx=0
@@ -898,7 +898,21 @@ windowlayout=531
  visible=0
  [symbolfo.grid]
  propcolwidthref=222
- values0=0
+ values0=14
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
  width0=111
  sortdescend0=0
  width1=135
@@ -960,7 +974,7 @@ windowlayout=531
  [componentstorefo]
  splitdir=0
  useroptions=24699
- stackedunder=disassfo
+ stackedunder=findinfilefo
  parent=
  mdistate=0
  nx=0
@@ -1100,7 +1114,7 @@ windowlayout=531
  [mainfo.panel1]
  splitdir=2
  useroptions=32235
- stackedunder=
+ stackedunder=mainfo
  parent=
  mdistate=0
  nx=0
@@ -1114,7 +1128,7 @@ windowlayout=531
  rcx=0
  rcy=0
  wsize=0
- active=1
+ active=0
  visible=1
 [targetconsole]
 finddtext=
