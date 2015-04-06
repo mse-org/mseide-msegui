@@ -567,11 +567,11 @@ type
                                          out aresult: msestring): gdbresultty;
    function writepascalvariable(varname: string; const value: string;
                 var aresult: string): gdbresultty;
-   function evaluateexpression(const expression: string;
+   function evaluateexpression(expression: string;
                                            out aresult: string): gdbresultty;
-   function symboltype(const symbol: string;
+   function symboltype(symbol: string;
                                      out aresult: ansistring): gdbresultty;
-   function symboladdress(const symbol: string;
+   function symboladdress(symbol: string;
                                      out aresult: ansistring): gdbresultty;
    function stacklistframes(out list: frameinfoarty; first: integer = 0;
                     last: integer = 100): gdbresultty;
@@ -3433,9 +3433,10 @@ begin
  end;
 end;
 }
-function tgdbmi.evaluateexpression(const expression: string;
+function tgdbmi.evaluateexpression(expression: string;
                                           out aresult: string): gdbresultty;
 begin
+ updatepascalexpression(expression);
  aresult:= '';
  result:= synccommand('-data-evaluate-expression ' + '"'+expression+'"');
  case result of
@@ -3454,9 +3455,10 @@ begin
  end;
 end;
 
-function tgdbmi.symboltype(const symbol: string;
+function tgdbmi.symboltype(symbol: string;
                                     out aresult: string): gdbresultty;
 begin
+ updatepascalexpression(symbol);
  result:= clicommand('ptype '+symbol);
  case result of
   gdb_ok: begin
@@ -3471,9 +3473,10 @@ begin
  end;
 end;
 
-function tgdbmi.symboladdress(const symbol: ansistring; 
+function tgdbmi.symboladdress(symbol: ansistring; 
                                     out aresult: ansistring): gdbresultty;
 begin
+ updatepascalexpression(symbol);
  result:= evaluateexpression('@('+symbol+')',aresult);
 end;
 
