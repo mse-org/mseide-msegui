@@ -14,13 +14,12 @@ unit msefiledialog;
 interface
 
 uses
- mseglob,mseguiglob,msegui,mseforms,classes,mclasses,mseclasses,
- msewidgets,msegrids,
- mselistbrowser,mseedit,msesimplewidgets,msedataedits,msedialog,msetypes,
- msestrings,msesystypes,msesys,msedispwidgets,msedatalist,msestat,
- msestatfile,msebitmap,
- msedatanodes,msefileutils,msedropdownlist,mseevent,msegraphedits,mseeditglob,
- msesplitter,msemenus,msegridsglob,msegraphics,msegraphutils;
+ mseglob,mseguiglob,msegui,mseforms,classes,mclasses,mseclasses,msewidgets,
+ msegrids,mselistbrowser,mseedit,msesimplewidgets,msedataedits,msedialog,
+ msetypes,msestrings,msesystypes,msesys,msedispwidgets,msedatalist,msestat,
+ msestatfile,msebitmap,msedatanodes,msefileutils,msedropdownlist,mseevent,
+ msegraphedits,mseeditglob,msesplitter,msemenus,msegridsglob,msegraphics,
+ msegraphutils;
 
 const
  defaultlistviewoptionsfile = defaultlistviewoptions + [lvo_readonly];
@@ -403,6 +402,10 @@ type
    dir: tdirdropdownedit;
    home: tbutton;
    tspacer3: tspacer;
+   tspacer5: tspacer;
+   tspacer6: tspacer;
+   forward: tstockglyphbutton;
+   back: tstockglyphbutton;
    procedure createdironexecute(const sender: TObject);
    procedure listviewselectionchanged(const sender: tcustomlistview);
    procedure listviewitemevent(const sender: tcustomlistview;
@@ -426,21 +429,26 @@ type
    procedure copytolip(const sender: TObject; var avalue: msestring);
    procedure pastefromclip(const sender: TObject; var avalue: msestring);
    procedure homeaction(const sender: TObject);
+   procedure backexe(const sender: TObject);
+   procedure forwardexe(const sender: TObject);
   private
-    { Private declarations }
    fselectednames: filenamearty;
    finit: boolean;
+   fcourse: filenamearty;
+   fcourseid: int32;
+   fcourselock: boolean;
    procedure updatefiltertext;
-//   function readlist: boolean; //true if ok
-   function tryreadlist(const adir: filenamety;
-                                const errormessage: boolean): boolean;
+   function tryreadlist(const adir: filenamety; 
+                                     const errormessage: boolean): boolean;
                   //restores old dir on error
-   procedure changedir(const adir: filenamety);
+   function changedir(const adir: filenamety): boolean;
+   procedure checkcoursebuttons();
+   procedure course(const adir: filenamety);
+   procedure doup();
   public
    dialogoptions: filedialogoptionsty;
    defaultext: filenamety;
    filenames: filenamearty;
-    { Public declarations }
  end;
 
 function filedialog(var afilenames: filenamearty;
@@ -1127,9 +1135,12 @@ begin
  end;
 end;
 
-procedure tfiledialogfo.changedir(const adir: filenamety);
+function tfiledialogfo.changedir(const adir: filenamety): boolean;
 begin
- tryreadlist(filepath(adir),true);
+ result:= tryreadlist(filepath(adir),true);
+ if result then begin
+  course(adir);
+ end;
  with listview do begin
   if filelist.count > 0 then begin
    focuscell(makegridcoord(0,0));
@@ -1139,11 +1150,14 @@ end;
 
 procedure tfiledialogfo.listviewitemevent(const sender: tcustomlistview;
                 const index: Integer; var info: celleventinfoty);
+var
+ str1: filenamety;
 begin
  with tfilelistview(sender) do begin
   if iscellclick(info) then begin
    if filelist.isdir(index) then begin
-    changedir(filepath(directory+filelist[index].name));
+    str1:= filepath(directory+filelist[index].name);
+    changedir(str1);
    end
    else begin
     if info.eventkind = cek_keydown then begin
@@ -1159,11 +1173,17 @@ begin
  end;
 end;
 
+procedure tfiledialogfo.doup();
+begin
+ listview.updir();
+ course(listview.directory);
+end;
+
 procedure tfiledialogfo.listviewonkeydown(const sender: twidget; var info: keyeventinfoty);
 begin
  with info do begin
   if (key = key_pageup) and (shiftstate = [ss_ctrl]) then begin
-   listview.updir;
+   doup();
    include(info.eventstate,es_processed);
   end;
  end;
@@ -1171,7 +1191,7 @@ end;
 
 procedure Tfiledialogfo.upaction(const sender: TObject);
 begin
- listview.updir;
+ doup();
 end;
 {
 function tfiledialogfo.readlist: boolean;
@@ -1298,7 +1318,16 @@ begin
   bo1:= true;
  end;
  if bo1 then begin
-  tryreadlist(newdir,not finit);
+  if tryreadlist(newdir,not finit) then begin
+   if  finit then begin
+    setlength(fcourse,1);
+    fcourse[0]:= newdir;
+    fcourseid:= 0;
+   end
+   else begin
+    course(newdir);
+   end;
+  end;
   if fdo_directory in dialogoptions then begin
    avalue:= listview.directory;
   end;
@@ -1317,6 +1346,9 @@ procedure tfiledialogfo.dironsetvalue(const sender: TObject;
 begin
 //
  accept:= tryreadlist(avalue,true);
+ if accept then begin
+  course(avalue);
+ end;
 // listview.directory:= avalue;
 end;
 
@@ -1422,7 +1454,7 @@ procedure tfiledialogfo.foonchildscaled(const sender: TObject);
 begin
 // syncmaxautosize([up,createdir]);
  placeyorder(2,[2],[dir,listview,filename,filter],2);
- aligny(wam_center,[dir,home,up,createdir]);
+ aligny(wam_center,[dir,back,forward,home,up,createdir]);
  aligny(wam_center,[filename,showhidden]);
  aligny(wam_center,[filter,ok,cancel]);
  syncpaintwidth([filename,filter],namecont.bounds_cx);
@@ -1444,6 +1476,7 @@ end;
 
 procedure tfiledialogfo.formoncreate(const sender: TObject);
 begin
+ fcourseid:= -1;
  with stockobjects do begin
   dir.frame.caption:= captions[sc_dirhk];
   home.caption:= captions[sc_homehk];
@@ -1478,9 +1511,58 @@ end;
 
 procedure tfiledialogfo.homeaction(const sender: TObject);
 begin
- tryreadlist(sys_getuserhomedir,true);
- dir.value:= listview.directory;
-// readlist;
+ if tryreadlist(sys_getuserhomedir,true) then begin
+  dir.value:= listview.directory;
+  course(listview.directory);
+ end;
+end;
+
+procedure tfiledialogfo.checkcoursebuttons();
+begin
+ back.enabled:= fcourseid > 0;
+ forward.enabled:= fcourseid < high(fcourse);
+end;
+
+procedure tfiledialogfo.course(const adir: filenamety);
+begin
+ if not fcourselock then begin
+  inc(fcourseid);
+  setlength(fcourse,fcourseid+1);
+  fcourse[fcourseid]:= adir;
+  checkcoursebuttons();
+ end;
+end;
+
+procedure tfiledialogfo.backexe(const sender: TObject);
+begin
+ fcourselock:= true;
+ try
+  dec(fcourseid);
+  if changedir(fcourse[fcourseid]) then begin
+   checkcoursebuttons();
+  end
+  else begin
+   inc(fcourseid);
+  end;
+ finally
+  fcourselock:= false;
+ end;
+end;
+
+procedure tfiledialogfo.forwardexe(const sender: TObject);
+begin
+ fcourselock:= true;
+ try
+  inc(fcourseid);
+  if changedir(fcourse[fcourseid]) then begin
+   checkcoursebuttons();
+  end
+  else begin
+   dec(fcourseid);
+  end;
+ finally
+  fcourselock:= false;
+ end;
 end;
 
 { tfiledialogcontroller }

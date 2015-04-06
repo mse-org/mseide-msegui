@@ -8,6 +8,8 @@ object filedialogfo: Tfiledialogfo
   bounds_cxmin = 360
   bounds_cymin = 150
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets]
+  container.frame.localprops = []
+  container.frame.localprops1 = []
   container.onlayout = foonchildscaled
   container.bounds = (
     0
@@ -44,7 +46,8 @@ object filedialogfo: Tfiledialogfo
     options = [spao_glueright]
     object showhidden: tbooleanedit
       frame.caption = '&Show hidden files'
-      frame.dummy = 0
+      frame.localprops = []
+      frame.localprops1 = []
       frame.outerframe = (
         0
         1
@@ -100,6 +103,8 @@ object filedialogfo: Tfiledialogfo
   end
   object listview: tfilelistview
     optionswidget = [ow_mousefocus, ow_arrowfocus, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets]
+    frame.localprops = []
+    frame.localprops1 = []
     taborder = 10
     bounds_x = 0
     bounds_y = 26
@@ -157,6 +162,8 @@ object filedialogfo: Tfiledialogfo
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
     frame.caption = '&Name'
     frame.captionpos = cp_right
+    frame.localprops = []
+    frame.localprops1 = []
     frame.button.color = -2147483646
     frame.outerframe = (
       0
@@ -187,6 +194,8 @@ object filedialogfo: Tfiledialogfo
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
     frame.caption = '&Filter'
     frame.captionpos = cp_right
+    frame.localprops = []
+    frame.localprops1 = []
     frame.button.color = -2147483646
     frame.outerframe = (
       0
@@ -216,6 +225,8 @@ object filedialogfo: Tfiledialogfo
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
     frame.caption = '&Dir'
     frame.captionpos = cp_right
+    frame.localprops = []
+    frame.localprops1 = []
     frame.button.color = -2147483646
     frame.outerframe = (
       0
@@ -227,7 +238,7 @@ object filedialogfo: Tfiledialogfo
     onshowhint = dirshowhint
     bounds_x = 1
     bounds_y = 2
-    bounds_cx = 443
+    bounds_cx = 413
     anchors = [an_left, an_top, an_right]
     textflags = [tf_ycentered, tf_noselect, tf_ellipseleft]
     dropdown.options = [deo_selectonly, deo_keydropdown]
@@ -271,12 +282,60 @@ object filedialogfo: Tfiledialogfo
   end
   object tspacer3: tspacer
     taborder = 11
-    bounds_x = 444
+    bounds_x = 414
     bounds_y = 0
     bounds_cx = 2
     bounds_cy = 20
     linkleft = dir
+    linkright = back
+    options = [spao_glueright]
+  end
+  object tspacer5: tspacer
+    taborder = 12
+    bounds_x = 429
+    bounds_y = 0
+    bounds_cx = 2
+    bounds_cy = 20
+    linkleft = back
+    linkright = forward
+    options = [spao_glueright]
+  end
+  object tspacer6: tspacer
+    taborder = 13
+    bounds_x = 444
+    bounds_y = 0
+    bounds_cx = 2
+    bounds_cy = 20
+    linkleft = forward
     linkright = up
     options = [spao_glueright]
+  end
+  object forward: tstockglyphbutton
+    optionswidget1 = [ow1_fontglyphheight, ow1_autoscale, ow1_autowidth]
+    taborder = 14
+    bounds_x = 431
+    bounds_y = 3
+    bounds_cx = 13
+    bounds_cy = 20
+    anchors = [an_top, an_right]
+    state = [as_disabled, as_localdisabled, as_localimagelist, as_localimagenr, as_localonexecute]
+    glyph = stg_arrowright
+    autosize_cx = -10
+    onexecute = forwardexe
+    reffontheight = 14
+  end
+  object back: tstockglyphbutton
+    optionswidget1 = [ow1_fontglyphheight, ow1_autoscale, ow1_autowidth]
+    taborder = 15
+    bounds_x = 416
+    bounds_y = 3
+    bounds_cx = 13
+    bounds_cy = 20
+    anchors = [an_top, an_right]
+    state = [as_disabled, as_localdisabled, as_localimagelist, as_localimagenr, as_localonexecute]
+    glyph = stg_arrowleft
+    autosize_cx = -10
+    onexecute = backexe
+    reffontheight = 14
   end
 end
