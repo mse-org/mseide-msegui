@@ -3217,7 +3217,7 @@ var
  strar1: stringarty;
  int1: integer;
  bo1: boolean;
- po1: pchar;
+// po1: pchar;
  str1: string;
  i1: int32;
 begin
