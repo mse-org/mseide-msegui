@@ -98,7 +98,7 @@ type
 
  locatekeyoptionty = (lko_caseinsensitive,lko_partialkey,lko_posinsensitive);
  locatekeyoptionsty = set of locatekeyoptionty;
- locaterecordoptionty = (lro_noforeward,lro_nobackward,lro_nocurrent,lro_utf8);
+ locaterecordoptionty = (lro_noforward,lro_nobackward,lro_nocurrent,lro_utf8);
  locaterecordoptionsty = set of locaterecordoptionty;
  
  fieldarty = array of tfield;
@@ -2854,7 +2854,7 @@ begin
   bm:= bookmark;
   disablecontrols;
   try
-   if not (loo_noforeward in options) then begin
+   if not (loo_noforward in options) then begin
     while not eof do begin
      if field.asinteger = key then begin
       result:= loc_ok;
@@ -2900,7 +2900,7 @@ begin
   bm:= bookmark;
   disablecontrols;
   try
-   if not (loo_noforeward in options) then begin
+   if not (loo_noforward in options) then begin
     while not eof do begin
      if field.aslargeint = key then begin
       result:= loc_ok;
@@ -3041,7 +3041,7 @@ begin
   end;
   disablecontrols;
   try
-   if not (loo_noforeward in options) then begin
+   if not (loo_noforward in options) then begin
     if caseinsensitive or ismsestringfield then begin
      while not eof do begin
       if checkmsestring then begin
@@ -3431,7 +3431,7 @@ begin
      exit;
     end;
    end;
-   if not (lro_noforeward in options) then begin
+   if not (lro_noforward in options) then begin
     next;
     while not eof do begin
      if check then begin
