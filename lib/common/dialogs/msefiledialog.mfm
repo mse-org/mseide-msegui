@@ -147,16 +147,21 @@ object filedialogfo: Tfiledialogfo
     optionswidget1 = [ow1_autowidth, ow1_autoheight]
     optionswidget = [ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
     taborder = 7
+    onshowhint = buttonshowhint
     bounds_x = 446
     bounds_y = 3
     bounds_cx = 35
     bounds_cy = 20
     bounds_cxmin = 35
     anchors = [an_top, an_right]
-    state = [as_localcaption, as_localonexecute]
+    state = [as_localcaption, as_localshortcut, as_localonexecute]
     caption = '&Up'
     options = [bo_executeonclick, bo_executeonkey, bo_executeonshortcut, bo_executedefaultonenterkey, bo_candefocuswindow]
     onexecute = upaction
+    sc = (
+      1
+      16662
+    )
   end
   object filename: thistoryedit
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -312,30 +317,42 @@ object filedialogfo: Tfiledialogfo
   end
   object forward: tstockglyphbutton
     optionswidget1 = [ow1_fontglyphheight, ow1_autoscale, ow1_autowidth]
+    optionswidget = [ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_disabledhint]
     taborder = 14
+    onshowhint = buttonshowhint
     bounds_x = 431
     bounds_y = 3
     bounds_cx = 13
     bounds_cy = 20
     anchors = [an_top, an_right]
-    state = [as_disabled, as_localdisabled, as_localimagelist, as_localimagenr, as_localonexecute]
+    state = [as_disabled, as_localdisabled, as_localimagelist, as_localimagenr, as_localshortcut, as_localonexecute]
     glyph = stg_arrowright
     autosize_cx = -10
     onexecute = forwardexe
     reffontheight = 14
+    sc = (
+      1
+      24666
+    )
   end
   object back: tstockglyphbutton
     optionswidget1 = [ow1_fontglyphheight, ow1_autoscale, ow1_autowidth]
+    optionswidget = [ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_disabledhint]
     taborder = 15
+    onshowhint = buttonshowhint
     bounds_x = 416
     bounds_y = 3
     bounds_cx = 13
     bounds_cy = 20
     anchors = [an_top, an_right]
-    state = [as_disabled, as_localdisabled, as_localimagelist, as_localimagenr, as_localonexecute]
+    state = [as_disabled, as_localdisabled, as_localimagelist, as_localimagenr, as_localshortcut, as_localonexecute]
     glyph = stg_arrowleft
     autosize_cx = -10
     onexecute = backexe
     reffontheight = 14
+    sc = (
+      1
+      16474
+    )
   end
 end

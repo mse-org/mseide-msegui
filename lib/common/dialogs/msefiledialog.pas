@@ -431,6 +431,7 @@ type
    procedure homeaction(const sender: TObject);
    procedure backexe(const sender: TObject);
    procedure forwardexe(const sender: TObject);
+   procedure buttonshowhint(const sender: TObject; var ainfo: hintinfoty);
   private
    fselectednames: filenamearty;
    finit: boolean;
@@ -495,7 +496,7 @@ procedure updatefileinfo(const item: tlistitem; const info: fileinfoty;
 
 implementation
 uses
- msefiledialog_mfm,sysutils,msebits,
+ msefiledialog_mfm,sysutils,msebits,mseactions,
  msestringenter,msedirtree,msefiledialogres,msekeyboard,
  msestockobjects,msesysintf,msearrayutils;
 
@@ -1486,8 +1487,11 @@ begin
   filter.frame.caption:= captions[sc_filterhk];
   showhidden.frame.caption:= captions[sc_show_hidden_fileshk];
   ok.caption:= modalresulttext[mr_ok];
-  cancel.caption:= modalresulttext[mr_cancel];  
+  cancel.caption:= modalresulttext[mr_cancel];
  end;
+ back.tag:= ord(sc_back);
+ forward.tag:= ord(sc_forward);
+ up.tag:= ord(sc_up);
 end;
 
 procedure tfiledialogfo.dirshowhint(const sender: TObject;
@@ -1562,6 +1566,15 @@ begin
   end;
  finally
   fcourselock:= false;
+ end;
+end;
+
+procedure tfiledialogfo.buttonshowhint(const sender: TObject;
+               var ainfo: hintinfoty);
+begin
+ with tcustombutton(sender) do begin
+  ainfo.caption:= sc(stockcaptionty(tag))+' '+
+                                     '('+encodeshortcutname(shortcut)+')';
  end;
 end;
 
