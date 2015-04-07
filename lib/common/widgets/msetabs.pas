@@ -2565,11 +2565,30 @@ end;
 
 function tcustomtabbar.dostep(const event: stepkindty; const adelta: real;
                                ashiftstate: shiftstatesty): boolean;
+var
+ stepinfo1: framestepinfoty;
+ i1: int32;
 begin
  result:= false;
  if frame.canstep then begin
-  firsttab:= frame.executestepevent(event,flayoutinfo.stepinfo,
-                                                flayoutinfo.firsttab);
+  stepinfo1:= flayoutinfo.stepinfo;
+  if ss_ctrl in ashiftstate then begin
+   with stepinfo1 do begin  //reverst step height
+    i1:= pagedown;
+    pagedown:= down;
+    down:= i1; 
+    i1:= pageup;
+    pageup:= up;
+    up:= i1;
+   end;
+   if stepinfo1.pagedown < -1 then begin
+    stepinfo1.pagedown:= -1;
+   end;
+   if stepinfo1.pageup > 1 then begin
+    stepinfo1.pageup:= 1;
+   end;
+  end;
+  firsttab:= frame.executestepevent(event,stepinfo1,flayoutinfo.firsttab);
   result:= true;
  end;
 end;
