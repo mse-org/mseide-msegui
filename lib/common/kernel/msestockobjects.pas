@@ -100,6 +100,7 @@ type
                     sc_Show_hidden_fileshk,sc_Filterhk,
                     sc_Save,sc_Open,
                     sc_name,sc_create_new_directory,
+                    sc_back,sc_forward,sc_up,
                     sc_file,sc_exists_overwrite,sc_is_modified_save,
                     sc_warningupper,sc_errorupper,sc_exception,sc_system,
                     sc_does_not_exist,

@@ -86,6 +86,9 @@ const
   'Buka',                  //sc_open
   'Nama',                  //sc_name
   'Buat Direktori Baru',   //sc_create_new_directory
+  'Back',                  //sc_back
+  'Forward',               //sc_forward
+  'Up',                    //sc_up
   'File',                  //sc_file
   'sudah ada, akan ditimpa?', //sc_exists_overwrite
   'is modified. Save?',  //sc_is_modified_save

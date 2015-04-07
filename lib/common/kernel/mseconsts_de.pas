@@ -87,7 +87,10 @@ const
   #214'ffnen',            //sc_open
   'Name',                 //sc_name
   'Verzeichnis erstellen',//sc_create_new_directory
-  'Datei',                                     //sc_file
+  'Zurück',               //sc_back
+  'Forw'#228'rts',        //sc_forward
+  'Aufw'#228'rts',        //sc_up
+  'Datei',                //sc_file
   'existiert, wollen Sie '#252'berschreiben?', //sc_exists_overwrite
   'wurde geändert, wollen Sie speichern?',     //sc_is_modified_save
   'WARNUNG',                                   //sc_warningupper

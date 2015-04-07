@@ -128,6 +128,9 @@ const
   'Ouvrir',                               //sc_open
   'Nom',                                  //sc_name1
   'Cr'#233'er un nouveau r'#233'pertoire',//sc_create_new_directory
+  'Back',                //sc_back
+  'Forward',             //sc_forward
+  'Up',                  //sc_up
   'Fichier',                              //sc_file
   'existe, Remplacer ?',                  //sc_exists_overwrite
   'modifi'#233'. Enregistrer ?',          //sc_is_modified_save

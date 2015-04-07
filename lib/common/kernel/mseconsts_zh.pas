@@ -90,7 +90,10 @@ const
   'O'#25171#24320,                           //sc_open
   #21517#31216,                              //sc_name
   #26032#24314#25991#20214#22841,            //sc_create_new_directory
-  #25991#20214,                              //sc_filehk
+  'Back',                //sc_back
+  'Forward',             //sc_forward
+  'Up',                  //sc_up
+  #25991#20214,                              //sc_file
   #25991#20214#24050#32463#23384#22312#65292#26159#21542#35206#30422#65311, //sc_exists_overwrite
     'is modified. Save?',  //sc_is_modified_save
 

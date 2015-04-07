@@ -90,6 +90,9 @@ const
   'Abrir',                        //sc_open
   'Nombre',                       //sc_name1
   'Crear una carpeta nueva',               //sc_create_new_directory
+  'Back',                //sc_back
+  'Forward',             //sc_forward
+  'Up',                  //sc_up
   'Archivo',                               //sc_file
   'existe, '#191'quiere sobreescribirlo?', //sc_exists_overwrite
   'ha sido modificado. '#191'Guardar?',    //sc_is_modified_save

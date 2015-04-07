@@ -95,7 +95,10 @@ const
   #1054#1095#1080#1096 ,            //sc_open     =>  Otkryt`
   'Name',                //sc_name
   'Create new directory',//sc_create_new_directory
-  'File',               //sc_file
+  'Back',                //sc_back
+  'Forward',             //sc_forward
+  'Up',                  //sc_up
+  'File',                //sc_file
   'exists, do you want to overwrite?', //sc_exists_overwrite
   'is modified. Save?',  //sc_is_modified_save
   'WARNING',                //sc_warningupper
