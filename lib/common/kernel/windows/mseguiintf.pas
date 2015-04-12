@@ -49,6 +49,7 @@ function createbitmapdata(const size: sizety; const kind: bitmapkindty;
 
 procedure beginsdndwrite(const athread: threadty);
 procedure endsdndwrite;
+function nestedwindowproc(): boolean; //window frame clicked
 
 {$ifdef mse_debuggdi}
 var
@@ -2173,6 +2174,11 @@ var
  sizingwindow: hwnd;
  eventlooping: integer;
  escapepressed: boolean;
+
+function nestedwindowproc(): boolean; //window frame clicked
+begin
+ result:= eventlooping > 0;
+end;
  
 procedure gui_wakeup;
 begin
