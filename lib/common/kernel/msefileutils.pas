@@ -1826,48 +1826,56 @@ var
  info: fileinfoty;
  bo1,bo2: boolean;
  err1: syserrorty;
+ ar1: filenamearty;
+ i1: int32;
 begin
+ unquotefilename(directoryname,ar1);
  fillchar(dirstream,sizeof(dirstream),0);
- with dirstream,dirinfo do begin
-  options:= aoptions;
-  dirname:= unquotefilename(filepath(directoryname,fk_file));
-  mask:= amask;
-  include:= aincludeattrib;
-  exclude:= aexcludeattrib;
-  infolevel:= ainfolevel;
- end;
- err1:= sys_opendirstream(dirstream);
- result:= err1 = sye_ok;
- if not result then begin
-  if not noexception then begin
-   syserror(err1,quotechar+dirstream.dirinfo.dirname + '" ');
-  end
-  else begin
-   exit;
-  end;
- end;
- beginupdate;
+ beginupdate();
  try
-  finalize(info);
-  fillchar(info,sizeof(info),0);
-  repeat
-   bo1:= sys_readdirstream(dirstream,info);
-   if bo1 then begin
-    if not ((info.extinfo1.filetype = ft_dir) and ((info.name = dotchar) or
-                 (info.name = '..'))) then begin
-     bo2:= true;
-     if assigned(acheckproc) then begin
-      acheckproc(self,dirstream.dirinfo,info,bo2);
-     end;
-     if bo2 then begin
-      add(info);
-     end;
+  for i1:= 0 to high(ar1) do begin
+   with dirstream,dirinfo do begin
+    options:= aoptions;
+    dirname:= filepath(ar1[i1],fk_file);
+    mask:= amask;
+    include:= aincludeattrib;
+    exclude:= aexcludeattrib;
+    infolevel:= ainfolevel;
+   end;
+   err1:= sys_opendirstream(dirstream);
+   result:= err1 = sye_ok;
+   if not result then begin
+    if not noexception then begin
+     syserror(err1,quotechar+dirstream.dirinfo.dirname + '" ');
+    end
+    else begin
+     exit;
     end;
    end;
-  until not bo1;
+   try
+    finalize(info);
+    fillchar(info,sizeof(info),0);
+    repeat
+     bo1:= sys_readdirstream(dirstream,info);
+     if bo1 then begin
+      if not ((info.extinfo1.filetype = ft_dir) and ((info.name = dotchar) or
+                   (info.name = '..'))) then begin
+       bo2:= true;
+       if assigned(acheckproc) then begin
+        acheckproc(self,dirstream.dirinfo,info,bo2);
+       end;
+       if bo2 then begin
+        add(info);
+       end;
+      end;
+     end;
+    until not bo1;
+   finally
+    sys_closedirstream(dirstream);
+   end;
+  end;
  finally
-  sys_closedirstream(dirstream);
-  endupdate;
+  endupdate();
  end;
 end;
 

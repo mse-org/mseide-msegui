@@ -180,57 +180,62 @@ procedure tfindinfilepagefo.threadonexecute(const sender: tthreadcomp);
   end;
  end;
 
- procedure searchdirectory(const dir: filenamety);
+ procedure searchdirectory(const adir: filenamety);
  var
   stream1: ttextstream;
   filelist: tfiledatalist;
-  int1: integer;
+  int1,int2: integer;
+  ar1: filenamearty;
  begin
   with sender,tfindinfilepagefo(datapo),finfo do begin
    filelist:= tfiledatalist.create;
    filelist.options:= [flo_sortname];
    try
-    if fifo_subdirs in options then begin
+    unquotefilename(adir,ar1);
+    for int2:= 0 to high(ar1) do begin
+     ar1[int2]:= filepath(ar1[int2],fk_file);
+     if fifo_subdirs in options then begin
+     {$ifndef FPC}
+      if filelist.adddirectory2(ar1[int2],fil_ext1,'',
+                              [fa_dir],[],[],nil,true) then begin
+     {$else}
+      if filelist.adddirectory(ar1[int2],fil_ext1,'',
+                              [fa_dir],[],[],nil,true) then begin
+     {$endif}
+       for int1:= 0 to filelist.count - 1 do begin
+        if terminated then begin
+         break;
+        end;
+        with filelist[int1] do begin
+         searchdirectory(ar1[int2]+'/'+ name);
+        end;
+       end;
+      end;
+     end;
+     filelist.clear;
     {$ifndef FPC}
-     if filelist.adddirectory2(dir,fil_ext1,'',
-                             [fa_dir],[],[],nil,true) then begin
+     if filelist.adddirectory2(ar1[int2],fil_ext1,filemask,
+                                [fa_all],[fa_dir],[],nil,true) then begin
     {$else}
-     if filelist.adddirectory(dir,fil_ext1,'',
-                             [fa_dir],[],[],nil,true) then begin
+     if filelist.adddirectory(ar1[int2],fil_ext1,filemask,
+                                [fa_all],[fa_dir],[],nil,true) then begin
     {$endif}
       for int1:= 0 to filelist.count - 1 do begin
        if terminated then begin
         break;
        end;
        with filelist[int1] do begin
-        searchdirectory(dir+'/'+ name);
-       end;
-      end;
-     end;
-    end;
-    filelist.clear;
-   {$ifndef FPC}
-    if filelist.adddirectory2(dir,fil_ext1,filemask,
-                               [fa_all],[fa_dir],[],nil,true) then begin
-   {$else}
-    if filelist.adddirectory(dir,fil_ext1,filemask,
-                               [fa_all],[fa_dir],[],nil,true) then begin
-   {$endif}
-     for int1:= 0 to filelist.count - 1 do begin
-      if terminated then begin
-       break;
-      end;
-      with filelist[int1] do begin
-       try
-        if ttextstream.trycreate(
-                 stream1,dir+'/'+name,fm_read) = sye_ok then begin
-         try
-          searchstream(stream1,stream1.filename);
-         finally
-          stream1.free;
+        try
+         if ttextstream.trycreate(
+                  stream1,ar1[int2]+'/'+name,fm_read) = sye_ok then begin
+          try
+           searchstream(stream1,stream1.filename);
+          finally
+           stream1.free;
+          end;
          end;
+        except
         end;
-       except
        end;
       end;
      end;
@@ -290,7 +295,7 @@ begin
   application.lock;
   expandprmacros1(mstr1);
   application.unlock;
-  searchdirectory(filepath(mstr1,fk_file));
+  searchdirectory(mstr1);
  end;
 end;
 

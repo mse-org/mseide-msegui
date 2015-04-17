@@ -62,7 +62,8 @@ implementation
 uses
  msebits,findinfiledialogform_mfm,projectoptionsform;
 
-function findinfiledialogexecute(var info: findinfileinfoty; const useinfo: boolean): boolean;
+function findinfiledialogexecute(var info: findinfileinfoty;
+                                         const useinfo: boolean): boolean;
 var
  fo: tfindinfiledialogfo;
 begin
