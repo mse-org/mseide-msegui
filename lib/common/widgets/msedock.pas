@@ -2146,16 +2146,21 @@ var
  sd1: splitdirty;
  int1,int2: integer;
  mouseinhandle: boolean;
+ ischild1: boolean;
 
  function checkaccept: boolean;
  var
   intf1: idocktarget;
   widget2: twidget;
  begin
-  result:= (info.dragobjectpo^ is tdockdragobject) and
-    ((tdockdragobject(info.dragobjectpo^).fdock.getparentcontroller = self) or
+  ischild1:= (info.dragobjectpo^ is tdockdragobject);
+  if ischild1 then begin
+    ischild1:= 
+       (tdockdragobject(info.dragobjectpo^).fdock.getparentcontroller = self);
+   result:= ischild1 or
       (od_acceptsdock in foptionsdock) and 
-      (od_candock in tdockdragobject(info.dragobjectpo^).fdock.foptionsdock));
+      (od_candock in tdockdragobject(info.dragobjectpo^).fdock.foptionsdock);
+  end;
   if result and not mouseinhandle and (od_dockparent in foptionsdock) and 
      not widget1.checkdescendent(
           tdockdragobject(info.dragobjectpo^).fdock.fintf.getwidget) then begin    
@@ -2387,7 +2392,9 @@ begin
      end;
     end;
     dek_drop: begin
-     if checkaccept then begin
+     if checkaccept and (not ischild1 or 
+             (tdockdragobject(info.dragobjectpo^).fdock.fmdistate <> 
+                                                   mds_maximized)) then begin
       dockwidget;
      end;
     end;
