@@ -3079,7 +3079,8 @@ end;
 
 function tdockcontroller.canbegindrag: boolean;
 begin
- result:= fdockstate * [dos_moving,dos_sizing,dos_xorpic] = [];
+ result:= (fdockstate * [dos_moving,dos_sizing,dos_xorpic] = []) and 
+   not ((fmdistate = mds_maximized) and not (od_canfloat in foptionsdock));
 end;
 
 procedure tdockcontroller.clientmouseevent(var info: mouseeventinfoty);
