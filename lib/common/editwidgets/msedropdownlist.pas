@@ -305,6 +305,7 @@ type
    frepeater: tsimpletimer;
    ffiltertext: msestring;
    fselectedindex: integer;
+   fupdatelayoutcount: int32;
    procedure canceldropdown;
    procedure killrepeater;
    procedure startrepeater(up: boolean);
@@ -2804,13 +2805,20 @@ procedure tdropdownlist.updatelayout;
 var
  int1: integer;
 begin
- inherited;
- if fcontroller.width = -1 then begin
-  int1:= fcontroller.getautowidth;
-  if width <> int1 then begin
-   width:= int1;
-   updatelayout;
+ try
+  inc(fupdatelayoutcount);
+  if fupdatelayoutcount < 16 then begin
+   inherited;
+   if fcontroller.width = -1 then begin
+    int1:= fcontroller.getautowidth;
+    if width <> int1 then begin
+     width:= int1;
+     updatelayout;
+    end;
+   end;
   end;
+ finally
+  dec(fupdatelayoutcount);
  end;
 end;
 
