@@ -50,6 +50,9 @@ type
                         ops_xorpicpainted,ops_xorpicremoved,
                         ops_newwidgetgrab,ops_newwindowgrab);
  objectpickerstatesty = set of objectpickerstatety;
+const
+ activestates = [ops_picking,ops_rectselecting,ops_multiselecting,ops_moving];
+type
  objectpickeroptionty = (opo_mousemoveobjectquery,opo_rectselect,
                          opo_multiselect,opo_thumbtrack);
  objectpickeroptionsty = set of objectpickeroptionty;
@@ -93,6 +96,7 @@ type
    function rectselecting: boolean;
    function multiselecting: boolean;
    function moving: boolean;
+   function active: boolean;
    
    property mouseoverobjects: integerarty read fmouseoverobjects;
    property selectobjects: integerarty read fselectobjects;
@@ -624,6 +628,11 @@ end;
 function tobjectpicker.moving: boolean;
 begin
  result:= ops_moving in fstate;
+end;
+
+function tobjectpicker.active: boolean;
+begin
+ result:= fstate*activestates <> [];
 end;
 
 function tobjectpicker.getcurrentobjects: integerarty;
