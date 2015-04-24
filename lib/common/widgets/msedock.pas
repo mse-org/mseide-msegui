@@ -2153,9 +2153,10 @@ var
   intf1: idocktarget;
   widget2: twidget;
  begin
-  ischild1:= (info.dragobjectpo^ is tdockdragobject);
-  if ischild1 then begin
-    ischild1:= 
+  ischild1:= false;
+  result:= (info.dragobjectpo^ is tdockdragobject);
+  if result then begin
+   ischild1:= 
        (tdockdragobject(info.dragobjectpo^).fdock.getparentcontroller = self);
    result:= ischild1 or
       (od_acceptsdock in foptionsdock) and 
