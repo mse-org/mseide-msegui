@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2015 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -223,7 +223,8 @@ var
   if not bo1 then begin
    fcursorshape:= cr_default;
   end;
-  include(info.eventstate,es_processed);
+  info.eventstate:= info.eventstate+[es_processed,es_objectpicking];
+//   include(info.eventstate,es_processed);
   fmouseoverobjects:= nil;
   domousemovequery(true);
  end; //doend
@@ -234,7 +235,8 @@ var
    fcursorshape:= actualcursor(widgetmousepos(info));
   end;
   if fintf.getcursorshape(self,fcursorshape) then begin
-   include(info.eventstate,es_processed);
+   info.eventstate:= info.eventstate+[es_processed,es_objectpicking];
+//   include(info.eventstate,es_processed);
   end
   else begin
    fcursorshape:= cr_default;
@@ -335,7 +337,8 @@ begin
       fmouseoverobjects:= ar1;
       if (ar1 = nil) then begin
        if fselectobjects <> nil then begin
-        include(info.eventstate,es_processed);
+        info.eventstate:= info.eventstate+[es_processed,es_objectpicking];
+//        include(info.eventstate,es_processed);
         fselectobjects:= nil;
        end;
       end
@@ -358,7 +361,8 @@ begin
        fintf.beginpickmove(self);
        widget1.window.update;
        paintxorpic;
-       include(info.eventstate,es_processed);
+       info.eventstate:= info.eventstate+[es_processed,es_objectpicking];
+//       include(info.eventstate,es_processed);
        checkcursorshape;
       end;
      end
@@ -367,7 +371,8 @@ begin
                           (opo_rectselect in foptions) then begin
        application.registeronkeypress({$ifdef FPC}@{$endif}dokeypress);
        include(fstate,ops_rectselecting);
-       include(info.eventstate,es_processed);
+       info.eventstate:= info.eventstate+[es_processed,es_objectpicking];
+       //include(info.eventstate,es_processed);
       end
       else begin
        if (shiftstates1 = [ss_ctrl,ss_left]) and 
@@ -380,7 +385,8 @@ begin
          addintersection(ar1);
         end;
         paintxorpic;
-        include(info.eventstate,es_processed);
+        info.eventstate:= info.eventstate+[es_processed,es_objectpicking];
+      //  include(info.eventstate,es_processed);
         checkcursorshape;
        end;
       end;
@@ -432,7 +438,8 @@ begin
       fintf.pickthumbtrack(self);
      end;
      paintxorpic;
-     include(info.eventstate,es_processed);
+     info.eventstate:= info.eventstate+[es_processed,es_objectpicking];
+   //  include(info.eventstate,es_processed);
     end
     else begin
      if ops_rectselecting in fstate then begin

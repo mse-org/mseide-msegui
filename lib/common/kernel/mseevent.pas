@@ -50,7 +50,7 @@ const
 type
  eventstatety = (es_processed,es_child,es_parent,es_preview,es_client,
                  es_transientfor, //mousewheel from upper modal window
-                 es_local,es_broadcast,es_modal,es_drag,
+                 es_local,es_broadcast,es_modal,es_drag,es_objectpicking,
                  es_reflected,es_nofocus,es_designcall);
  eventstatesty = set of eventstatety;
  tmseevent = class(tnullinterfacedobject)

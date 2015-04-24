@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2014 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2015 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -2756,7 +2756,7 @@ begin
     if (zone <> cz_none) and not
             ((zone = cz_default) and (ccr_nodefaultzone in restrictions)) then begin
      with info.mouseeventinfopo^ do begin
-      if (button = mb_left)  and 
+      if (button = mb_left) and not (es_objectpicking in eventstate) and
                 (shiftstate * shiftstatemustinclude = shiftstatemustinclude) and
                 (shiftstate * shiftstatemustnotinclude = []) then begin
        if ((ccr_buttonpress in restrictions) and (eventkind = ek_buttonpress) or

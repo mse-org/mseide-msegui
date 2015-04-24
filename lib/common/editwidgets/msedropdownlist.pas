@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2014 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2015 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -595,6 +595,8 @@ type
  end;
 
  tdropdownlistcontroller = class(tnocolsdropdownlistcontroller)
+  public
+   constructor create(const intf: idropdownlist);
   published
    property imagelist;
    property imageframe_left;
@@ -2228,6 +2230,14 @@ end;
 function tnocolsdropdownlistcontroller.getbuttonframeclass: dropdownbuttonframeclassty;
 begin
  result:= tdropdownbuttonframe;
+end;
+
+{ tdropdownlistcontroller }
+
+constructor tdropdownlistcontroller.create(const intf: idropdownlist);
+begin
+ inherited;
+ cols.nostreaming:= false;
 end;
 
 { tmbdropdownlistcontroller }
