@@ -30,7 +30,7 @@ type
    function execute: modalresultty; virtual; abstract;
  end;
 
-  tellipsebuttonframe = class(tbuttonframe)
+ tellipsebuttonframe = class(tmultibuttonframe)
   private
    function getbutton: tstockglyphframebutton;
    procedure setbutton(const avalue: tstockglyphframebutton);
@@ -86,8 +86,8 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   property frame: tellipsebuttonframe read getframe write setframe;
   published
+   property frame: tellipsebuttonframe read getframe write setframe;
    property textflags default defaulttextflagsnoycentered;
    property textflagsactive default defaulttextflagsactivenoycentered;
  end;
@@ -243,19 +243,21 @@ constructor tellipsebuttonframe.create(const intf: icaptionframe;
   const buttonintf: ibutton);
 begin
  inherited;
- buttons.count:= 1;
- buttons[0].imagelist:= stockobjects.glyphs;
- buttons[0].imagenr:= ord(stg_ellipsesmall);
+// buttons.count:= 1;
+ with buttons[0] do begin
+  imagelist:= stockobjects.glyphs;
+  imagenr:= ord(stg_ellipsesmall);
+ end;
 end;
 
 function tellipsebuttonframe.getbutton: tstockglyphframebutton;
 begin
- result:= tstockglyphframebutton(buttons[0]);
+ result:= tstockglyphframebutton(inherited getbutton());
 end;
 
 procedure tellipsebuttonframe.setbutton(const avalue: tstockglyphframebutton);
 begin
- buttons[0].assign(avalue);
+ inherited setbutton(avalue);
 end;
 
 { tdialogcontroller }

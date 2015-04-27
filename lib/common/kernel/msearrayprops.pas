@@ -48,7 +48,7 @@ type
    procedure change(const index: integer); virtual;
    function getcount: integer; virtual; abstract;
    function getdatapo: pointer; virtual; abstract;
-   procedure checkcount(var acount: integer);
+   procedure checkcount(var acount: integer); virtual;
    procedure setcount1(acount: integer; doinit: boolean); virtual;
    procedure setcount(const acount: integer);
    procedure dosizechanged; virtual;
@@ -1495,7 +1495,9 @@ var
  ar1: persistentarty;
  pers1: tpersistent;
 begin
- checkcount(acount);
+ if not (aps_destroying in fstate) then begin
+  checkcount(acount);
+ end;
  int1:= length(fitems) - acount;
  if int1 > 0 then begin
   pers1:= fdestroyingitem;

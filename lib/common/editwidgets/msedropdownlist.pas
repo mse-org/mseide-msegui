@@ -351,20 +351,16 @@ type
  
  tcustomdropdownbuttonframe = class(tcustombuttonframe)
   private
-   factivebutton: integer;
    freadonly: boolean;
-   procedure setactivebutton(const avalue: integer);
    procedure setreadonly(const Value: boolean);
-   function getbutton: tdropdownbutton;
-   procedure setbutton(const avalue: tdropdownbutton);
   protected
    function getbuttonclass: framebuttonclassty; override;
+   function getbutton: tdropdownbutton;
+   procedure setbutton(const avalue: tdropdownbutton);
   public
    constructor create(const intf: icaptionframe;
                                          const buttonintf: ibutton); override;                                                  
    procedure updatedropdownoptions(const avalue: dropdowneditoptionsty);
-   property activebutton: integer read factivebutton write setactivebutton 
-                                                                    default 0;
    property readonly: boolean read freadonly write setreadonly default false;
    property button: tdropdownbutton read getbutton write setbutton;
  end;
@@ -1257,13 +1253,6 @@ constructor tcustomdropdownbuttonframe.create(const intf: icaptionframe;
                const buttonintf: ibutton);
 begin
  inherited;
- buttons.count:= 1;
- setactivebutton(0);
-end;
-
-procedure tcustomdropdownbuttonframe.setactivebutton(const avalue: integer);
-begin
- factivebutton:= avalue;
 end;
 
 procedure tcustomdropdownbuttonframe.setreadonly(const Value: boolean);
@@ -1284,16 +1273,6 @@ begin
 }
 end;
 
-function tcustomdropdownbuttonframe.getbutton: tdropdownbutton;
-begin
- result:= tdropdownbutton(buttons[factivebutton]);
-end;
-
-procedure tcustomdropdownbuttonframe.setbutton(const avalue: tdropdownbutton);
-begin
- buttons[factivebutton].assign(avalue);
-end;
-
 function tcustomdropdownbuttonframe.getbuttonclass: framebuttonclassty;
 begin
  result:= tdropdownbutton;
@@ -1303,6 +1282,16 @@ procedure tcustomdropdownbuttonframe.updatedropdownoptions(
                                          const avalue: dropdowneditoptionsty);
 begin
  buttons[factivebutton].visible:= not (deo_disabled in avalue);
+end;
+
+function tcustomdropdownbuttonframe.getbutton: tdropdownbutton;
+begin
+ result:= tdropdownbutton(inherited getbutton);
+end;
+
+procedure tcustomdropdownbuttonframe.setbutton(const avalue: tdropdownbutton);
+begin
+ inherited setbutton(avalue);
 end;
 
 { tcustomdropdowncontroller }

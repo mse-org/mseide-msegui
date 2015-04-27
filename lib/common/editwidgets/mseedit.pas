@@ -176,7 +176,7 @@ type
              fbo_noanim,fbo_nomouseanim,fbo_noclickanim,fbo_nofocusanim);
  framebuttonoptionsty = set of framebuttonoptionty;
 
- tcustombuttonframe = class;
+ tcustombuttonsframe = class;
  
  tframebutton = class(townedeventpersistent,iframe,iimagelistinfo)
   private
@@ -268,9 +268,10 @@ type
    function getitems1(const index: integer): tframebutton;
   protected
    procedure dosizechanged; override;
+   procedure checkcount(var acount: integer); override;
    procedure updatestate;
   public
-   constructor create(const aowner: tcustombuttonframe;
+   constructor create(const aowner: tcustombuttonsframe;
                     const buttonclass: framebuttonclassty);
    class function getitemclasstype: persistentclassty; override;
    procedure updatewidgetstate;
@@ -280,11 +281,12 @@ type
    procedure checktemplate(const sender: tobject);
  end;
 
- tcustombuttonframe = class(teditframe)
+ tcustombuttonsframe = class(teditframe)
   private
    fbuttons: tframebuttons;
    procedure setbuttons(const Value: tframebuttons);
   protected
+   factivebutton: integer;
    fbuttonintf: ibutton;
    procedure getpaintframe(var aframe: framety); override;
    function getbuttonclass: framebuttonclassty; virtual;
@@ -304,11 +306,31 @@ type
    property buttons: tframebuttons read fbuttons write setbuttons;
  end;
 
+ tbuttonsframe = class(tcustombuttonsframe)
+  published
+   property buttons;
+ end;
+ 
+ tcustombuttonframe = class(tcustombuttonsframe) //has at least one button
+  private
+  protected
+   procedure setactivebutton(avalue: integer);
+   function getbutton: tframebutton;
+   procedure setbutton(const avalue: tframebutton);
+  public
+   constructor create(const intf: icaptionframe; const buttonintf: ibutton);
+                                                                     override;
+   property activebutton: integer read factivebutton write setactivebutton 
+                                                                    default 0;
+   property button: tframebutton read getbutton write setbutton;
+ end;
+ 
  tbuttonframe = class(tcustombuttonframe)
  end;
 
  tmultibuttonframe = class(tcustombuttonframe)
   published
+   property activebutton;
    property buttons;
  end;
  
@@ -503,7 +525,7 @@ uses
 type
  twidget1 = class(twidget);
  tdatacol1 = class(tdatacol);
- tcustombuttonframe1 = class(tcustombuttonframe);
+// tcustombuttonframe1 = class(tcustombuttonframe);
  tinplaceedit1 = class(tinplaceedit);
 
 { teditframe }
@@ -751,7 +773,8 @@ procedure tframebutton.setframe(const avalue: tframe);
 begin
  tcustombuttonframe(fowner).fintf.getwidget.setoptionalobject(avalue,fframe,
                                {$ifdef FPC}@{$endif}createframe);
- tcustombuttonframe(fowner).fintf.getwidget.invalidate;
+// tcustombuttonframe(fowner).fintf.getwidget.invalidate;
+ changed();
 end;
 
 
@@ -891,7 +914,7 @@ end;
 
 { tframebuttons }
 
-constructor tframebuttons.create(const aowner: tcustombuttonframe;
+constructor tframebuttons.create(const aowner: tcustombuttonsframe;
                       const buttonclass: framebuttonclassty);
 begin
  inherited create(aowner,buttonclass{tframebutton});
@@ -918,7 +941,7 @@ var
  int1: integer;
  widget1: twidget;
 begin
- widget1:= tcustombuttonframe1(fowner).fintf.getwidget;
+ widget1:= tcustombuttonsframe(fowner).fintf.getwidget;
  for int1:= 0 to high(fitems) do begin
 //  updatewidgetshapestate(tframebutton(fitems[int1]).finfo,widget1);
   tframebutton(fitems[int1]).updatewidgetstate(widget1);
@@ -964,29 +987,38 @@ begin
  end;
 end;
 
-{ tcustombuttonframe }
+procedure tframebuttons.checkcount(var acount: integer);
+begin
+ inherited;
+ if acount <= tcustombuttonsframe(fowner).factivebutton then begin
+  acount:= tcustombuttonsframe(fowner).factivebutton+1;
+ end;
+end;
 
-constructor tcustombuttonframe.create(const intf: icaptionframe;
+{ tcustombuttonsframe }
+
+constructor tcustombuttonsframe.create(const intf: icaptionframe;
                                              const buttonintf: ibutton);
 begin
+ factivebutton:= -1; //none
  fbuttons:= tframebuttons.create(self,getbuttonclass);
  fbuttonintf:= buttonintf;
  intf.setstaticframe(true);
  inherited create(intf);
 end;
 
-destructor tcustombuttonframe.destroy;
+destructor tcustombuttonsframe.destroy;
 begin
  inherited;
  fbuttons.free;
 end;
 
-function tcustombuttonframe.getbuttonclass: framebuttonclassty;
+function tcustombuttonsframe.getbuttonclass: framebuttonclassty;
 begin
  result:= tstockglyphframebutton;
 end;
 
-function tcustombuttonframe.buttonframe: framety;
+function tcustombuttonsframe.buttonframe: framety;
 var
  int1: integer;
 begin
@@ -1005,7 +1037,7 @@ begin
  end;
 end;
 
-procedure tcustombuttonframe.getpaintframe(var aframe: framety);
+procedure tcustombuttonsframe.getpaintframe(var aframe: framety);
 var
  int1: integer;
 begin
@@ -1045,7 +1077,7 @@ begin
  end;
 end;
 
-procedure tcustombuttonframe.initgridframe;
+procedure tcustombuttonsframe.initgridframe;
 var
  int1: integer;
 begin
@@ -1055,7 +1087,7 @@ begin
  end;
 end;
 
-procedure tcustombuttonframe.mouseevent(var info: mouseeventinfoty);
+procedure tcustombuttonsframe.mouseevent(var info: mouseeventinfoty);
 var
  int1: integer;
 begin
@@ -1066,7 +1098,7 @@ begin
  end;
 end;
 
-procedure tcustombuttonframe.paintoverlay(const canvas: tcanvas;
+procedure tcustombuttonsframe.paintoverlay(const canvas: tcanvas;
                                                      const arect: rectty);
 var
  int1: integer;
@@ -1102,12 +1134,12 @@ begin
  inherited;
 end;
 
-procedure tcustombuttonframe.setbuttons(const Value: tframebuttons);
+procedure tcustombuttonsframe.setbuttons(const Value: tframebuttons);
 begin
  fbuttons.Assign(Value);
 end;
 
-procedure tcustombuttonframe.updatemousestate(const sender: twidget;
+procedure tcustombuttonsframe.updatemousestate(const sender: twidget;
                              const info: mouseeventinfoty);
 begin
  inherited;
@@ -1119,22 +1151,53 @@ begin
  end;
 end;
 
-procedure tcustombuttonframe.updatewidgetstate;
+procedure tcustombuttonsframe.updatewidgetstate;
 begin
  inherited;
  fbuttons.updatewidgetstate;
 end;
 
-procedure tcustombuttonframe.checktemplate(const sender: tobject);
+procedure tcustombuttonsframe.checktemplate(const sender: tobject);
 begin
  inherited;
  fbuttons.checktemplate(sender);
 end;
 
-procedure tcustombuttonframe.updatestate;
+procedure tcustombuttonsframe.updatestate;
 begin
  fbuttons.updatestate; //set skin options
  inherited; 
+end;
+
+{ tcutombuttonframe }
+
+constructor tcustombuttonframe.create(const intf: icaptionframe;
+                                             const buttonintf: ibutton);
+begin
+ inherited;
+ buttons.count:= 1;
+ setactivebutton(0);
+end;
+
+procedure tcustombuttonframe.setactivebutton(avalue: integer);
+begin
+ if avalue < 0 then begin
+  avalue:= 0;
+ end;
+ if avalue >= fbuttons.count then begin
+  avalue:= fbuttons.count-1;
+ end;
+ factivebutton:= avalue;
+end;
+
+function tcustombuttonframe.getbutton: tframebutton;
+begin
+ result:= buttons[factivebutton];
+end;
+
+procedure tcustombuttonframe.setbutton(const avalue: tframebutton);
+begin
+ buttons[factivebutton].assign(avalue);
 end;
 
 { tcustomedit }

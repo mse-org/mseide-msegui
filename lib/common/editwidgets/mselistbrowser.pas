@@ -503,7 +503,9 @@ type
    fcalcsize: sizety;
    foncheckcanedit: itemcanediteventty;
    fonextendimage: extendimageeventty;
-                      
+
+   function getframe: tbuttonsframe;
+   procedure setframe(const avalue: tbuttonsframe);                      
    function getitemlist: titemeditlist;
    procedure setitemlist(const Value: titemeditlist);
    function getitems(const index: integer): tlistitem;
@@ -622,6 +624,7 @@ type
    property maxlength;
    property textflags default defaultitemedittextflags;
    property textflagsactive default defaultitemedittextflagsactive;
+   property frame: tbuttonsframe read getframe write setframe;
    property onchange;
 //   property onbeforepaint;
 //   property onpaintbackground;
@@ -648,7 +651,7 @@ type
   protected
    procedure doupdatecelllayout; override;
    function getframe: tdropdownbuttonframe;
-   procedure setframe(const Value: tdropdownbuttonframe);
+   procedure setframe(const avalue: tdropdownbuttonframe);
    function getdropdowncontrollerclass: dropdownlistcontrollerclassty; virtual;
     //idropdown
    procedure dobeforedropdown; virtual;
@@ -3061,7 +3064,7 @@ end;
 
 procedure titemedit.internalcreateframe;
 begin
- tcustombuttonframe.create(iscrollframe(self),ibutton(self));
+ tbuttonsframe.create(iscrollframe(self),ibutton(self));
 end;
 
 {$ifdef mse_with_ifi}
@@ -3427,6 +3430,16 @@ begin
  end;
 end;
 
+function titemedit.getframe(): tbuttonsframe;
+begin
+ result:= tbuttonsframe(inherited getframe());
+end;
+
+procedure titemedit.setframe(const avalue: tbuttonsframe);
+begin
+ inherited setframe(avalue);
+end;
+
 {
 function titemedit.actualcursor(const apos: pointty): cursorshapety;
 var
@@ -3483,12 +3496,12 @@ end;
 }
 function tdropdownitemedit.getframe: tdropdownbuttonframe;
 begin
- result:= tdropdownbuttonframe(inherited getframe);
+ result:= tdropdownbuttonframe(pointer(inherited getframe));
 end;
 
-procedure tdropdownitemedit.setframe(const Value: tdropdownbuttonframe);
+procedure tdropdownitemedit.setframe(const avalue: tdropdownbuttonframe);
 begin
- inherited setframe(value);
+ inherited setframe(tbuttonsframe(pointer(avalue)));
 end;
 {
 function tdropdownitemedit.getbutton: tdropdownbutton;
@@ -3593,7 +3606,8 @@ begin
  inherited setframe(value);
 end;
 
-function tmbdropdownitemedit.getdropdowncontrollerclass: dropdownlistcontrollerclassty;
+function tmbdropdownitemedit.getdropdowncontrollerclass:
+                                            dropdownlistcontrollerclassty;
 begin
  result:= tmbdropdownlistcontroller;
 end;
