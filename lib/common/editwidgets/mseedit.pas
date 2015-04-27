@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2014 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2015 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -185,6 +185,7 @@ type
    fonexecute: notifyeventty;
    procedure setbuttonwidth(const Value: integer);
    procedure setoptions(const Value: framebuttonoptionsty);
+   procedure optionstostate();
    procedure changed;
    function getleft: boolean;
    procedure setleft(const Value: boolean);
@@ -256,7 +257,8 @@ type
   public
    constructor create(aowner: tobject); override;
   published
-   property imagelist read finfo.ca.imagelist write setimagelist stored isimageliststored;
+   property imagelist read finfo.ca.imagelist write setimagelist 
+                                                     stored isimageliststored;
  end;
 
  framebuttonclassty = class of tframebutton;
@@ -565,6 +567,20 @@ begin
  end;
 end;
 
+procedure tframebutton.optionstostate();
+begin
+ updatebit(longword(finfo.state),ord(shs_invisible),fbo_invisible in foptions);
+ updatebit(longword(finfo.state),ord(shs_disabled),fbo_disabled in foptions);
+ updatebit(longword(finfo.state),ord(shs_flat),fbo_flat in foptions);
+ updatebit(longword(finfo.state),ord(shs_noanimation),fbo_noanim in foptions);
+ updatebit(longword(finfo.state),ord(shs_nomouseanimation),
+                                                  fbo_nomouseanim in foptions);
+ updatebit(longword(finfo.state),ord(shs_noclickanimation),
+                                                  fbo_noclickanim in foptions);
+ updatebit(longword(finfo.state),ord(shs_nofocusanimation),
+                                                  fbo_nofocusanim in foptions);
+end;
+
 procedure tframebutton.setoptions(const Value: framebuttonoptionsty);
 var
  statebefore: shapestatesty;
@@ -573,16 +589,7 @@ begin
  statebefore:= finfo.state;
  optionsbefore:= foptions;
  foptions:= Value;
- updatebit(longword(finfo.state),ord(shs_invisible),fbo_invisible in value);
- updatebit(longword(finfo.state),ord(shs_disabled),fbo_disabled in value);
- updatebit(longword(finfo.state),ord(shs_flat),fbo_flat in value);
- updatebit(longword(finfo.state),ord(shs_noanimation),fbo_noanim in value);
- updatebit(longword(finfo.state),ord(shs_nomouseanimation),
-                                                  fbo_nomouseanim in value);
- updatebit(longword(finfo.state),ord(shs_noclickanimation),
-                                                  fbo_noclickanim in value);
- updatebit(longword(finfo.state),ord(shs_nofocusanimation),
-                                                  fbo_nofocusanim in value);
+ optionstostate();
  if (statebefore <> finfo.state) or 
        ((optionsbefore >< foptions) * [fbo_left,fbo_invisible] <> []) then begin
   changed();
@@ -950,6 +957,9 @@ begin
   with tframebutton(fitems[int1]) do begin
    frameskinoptionstoshapestate(fframe,finfo);
    finfo.state:= finfo.state - [shs_showfocusrect,shs_showdefaultrect];
+   if (fframe = nil) then begin
+    optionstostate(); //restore flat and anim settings
+   end;
   end;
  end;
 end;

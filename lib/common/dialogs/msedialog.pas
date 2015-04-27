@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2015 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -108,7 +108,8 @@ type
   protected
 //   function execute(var avalue: msestring): boolean; override;
   public
-   property onexecute: stringdialogexeceventty read getonexecute write setonexecute;
+   property onexecute: stringdialogexeceventty read getonexecute
+                                                          write setonexecute;
  end;
 
  tdialogstringedit = class(tcustomdialogstringedit)
