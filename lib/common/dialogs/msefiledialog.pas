@@ -1481,7 +1481,7 @@ begin
  with stockobjects do begin
   dir.frame.caption:= captions[sc_dirhk];
   home.caption:= captions[sc_homehk];
-  up.caption:= captions[sc_uphk];
+//  up.caption:= captions[sc_uphk];
   createdir.caption:= captions[sc_new_dirhk];
   filename.frame.caption:= captions[sc_namehk];
   filter.frame.caption:= captions[sc_filterhk];
