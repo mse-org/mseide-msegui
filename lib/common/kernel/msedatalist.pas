@@ -693,7 +693,9 @@ type
 
  tmsestringdatalist = class;
 
- addcharoptionty = (aco_processeditchars,aco_stripescsequence);
+ addcharoptionty = (aco_processeditchars,aco_stripescsequence,
+                    aco_multilinepara); //breaks lines by maxchars in a
+                                        //single list row
  addcharoptionsty = set of addcharoptionty;
  
  tpoorstringdatalist = class(tdynamicpointerdatalist)
@@ -4688,7 +4690,8 @@ var
  ar1,ar2: msestringarty;
  ar3,ar4: booleanarty;
  first: pmsestring;
- mstr1: msestring; 
+ mstr1: msestring;
+ bo1: boolean;
 begin
  result:= 0;
  ar1:= nil; //compilerwarning
@@ -4741,15 +4744,27 @@ begin
     setlength(ar4,int2);
     setlength(ar3,int2+1);
     int2:= 0;
+    bo1:= aco_multilinepara in aoptions;
     for int1:= 0 to high(ar1) do begin
      ar4[int2]:= true;                  //paragraph start
      int3:= length(ar1[int1]);
      if int3 > maxchars then begin
       int4:= 1;
-      while int4 <= int3 do begin
-       ar2[int2]:= copy(ar1[int1],int4,maxchars);
+      while int4 <= int3 do begin //todo: handle surrogate pairs
+       if bo1 then begin
+        ar2[int2]:= ar2[int2]+copy(ar1[int1],int4,maxchars)+lineend;
+       end
+       else begin
+        ar2[int2]:= copy(ar1[int1],int4,maxchars);
+       end;
        int4:= int4 + maxchars;
-       ar3[int2]:= true;                //appended line
+       if not bo1 then begin
+        ar3[int2]:= true;                //appended line
+        inc(int2);
+       end;
+      end;
+      if bo1 then begin
+       setlength(ar2[int2],length(ar2[int2])-length(lineend));
        inc(int2);
       end;
      end
