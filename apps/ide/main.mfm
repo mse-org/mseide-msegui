@@ -1,8 +1,9 @@
 object mainfo: tmainfo
   optionswidget = [ow_arrowfocus, ow_subfocus, ow_destroywidgets, ow_hinton]
+  frame.localprops = []
+  frame.localprops1 = []
   frame.grip_size = 10
   frame.grip_options = [go_fixsizebutton, go_topbutton, go_backgroundbutton, go_lockbutton]
-  frame.dummy = 0
   visible = False
   bounds_x = 45
   bounds_y = 165
@@ -14,6 +15,7 @@ object mainfo: tmainfo
   container.frame.framei_right = 0
   container.frame.framei_bottom = 0
   container.frame.localprops = [frl_fileft, frl_fitop, frl_firight, frl_fibottom]
+  container.frame.localprops1 = []
   container.frame.sbhorz.options = [sbo_moveauto, sbo_showauto]
   container.frame.sbvert.options = [sbo_moveauto, sbo_showauto]
   container.onlayout = onscale
@@ -52,7 +54,7 @@ object mainfo: tmainfo
   object statdisp: tstringdisp
     optionswidget = [ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
     frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
-    frame.dummy = 0
+    frame.localprops1 = []
     taborder = 1
     bounds_x = 0
     bounds_y = 1
@@ -61,7 +63,7 @@ object mainfo: tmainfo
     anchors = [an_top]
     font.name = 'stf_default'
     font.xscale = 1
-    font.dummy = 0
+    font.localprops = [flp_xscale]
     options = [dwo_hintclippedtext]
     reffontheight = 14
   end
@@ -1518,8 +1520,8 @@ object mainfo: tmainfo
       'New Project'
       'Can not start process'
       'Process'
-      'running.'
-      'Process terminated'
+      'running'
+      'Process terminated. Exitcode: '
       'Process terminated normally.'
       'Make ***ERROR***'
       'Make OK.'

@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2014 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2015 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -25,7 +25,8 @@ unit projectoptionsform;
 
 interface
 uses
- mseforms,msefiledialog,msegui,msestat,msestatfile,msetabs,msesimplewidgets,
+ mseforms,msefiledialog,mseapplication,msegui,msestat,msestatfile,msetabs,
+ msesimplewidgets,
  msetypes,msestrings,msedataedits,msetextedit,msegraphedits,msewidgetgrid,
  msegrids,msesplitter,msemacros,msegdbutils,msedispwidgets,msesys,mseclasses,
  msegraphutils,mseevent,msetabsglob,msearrayutils,msegraphics,msedropdownlist,
@@ -694,8 +695,7 @@ type
    startupbkpton: tbooleanedit;
    valuehints: tbooleanedit;
    debugtarget: tfilenameedit;
-   runcommand: tfilenameedit;
-   tsplitter6: tsplitter;
+   debugtargetsplitter: tsplitter;
    fontwidth: tintegeredit;
    fontoptions: tstringedit;
    fontxscale: trealedit;
@@ -775,7 +775,7 @@ type
    colornote: tcoloredit;
    c: tstringcontainer;
    xtermcommand: tmemodialogedit;
-   xtermsplitter: tsplitter;
+   debugsplitter: tsplitter;
    tlayouter14: tlayouter;
    rightmarginon: tbooleanedit;
    linenumberson: tbooleanedit;
@@ -783,6 +783,7 @@ type
    stripmessageesc: tbooleanedit;
    raiseonbreak: tbooleanedit;
    noformdesignerdocking: tbooleanedit;
+   runcommand: tfilenameedit;
    procedure acttiveselectondataentered(const sender: TObject);
    procedure colonshowhint(const sender: tdatacol; const arow: Integer; 
                       var info: hintinfoty);
@@ -801,7 +802,7 @@ type
                 var accept: Boolean);
    procedure fontondataentered(const sender: TObject);
    procedure makepageonchildscaled(const sender: TObject);
-   procedure debuggeronchildscaled(const sender: TObject);
+   procedure debuggerlayoutexe(const sender: TObject);
    procedure macronchildscaled(const sender: TObject);
    procedure formtemplateonchildscaled(const sender: TObject);
    procedure encodingsetvalue(const sender: TObject; var avalue: integer;
@@ -815,12 +816,12 @@ type
    procedure downloadchange(const sender: TObject);
    procedure processorchange(const sender: TObject);
    procedure copymessagechanged(const sender: TObject);
-   procedure runcommandchange(const sender: TObject);
+   procedure updatedebugenabled(const sender: TObject);
    procedure newprojectchildscaled(const sender: TObject);
    procedure saveexe(const sender: TObject);
    procedure settingsdataent(const sender: TObject);
    procedure loadexe(const sender: TObject);
-   procedure extconschangeexe(const sender: TObject);
+//   procedure extconschangeexe(const sender: TObject);
    procedure setxtermcommandexe(const sender: TObject; var avalue: msestring;
                    var accept: Boolean);
    procedure activateonbreakset(const sender: TObject; var avalue: Boolean;
@@ -2257,14 +2258,15 @@ begin
  end;
 end;
 
-procedure tprojectoptionsfo.debuggeronchildscaled(const sender: TObject);
+procedure tprojectoptionsfo.debuggerlayoutexe(const sender: TObject);
 begin
-{$ifdef mswindows}
- placeyorder(0,[0,0,10],[debugcommand,debugoptions,debugtarget,tlayouter1]);
-{$else}
- placeyorder(0,[0,0,2],[debugcommand,debugoptions,debugtarget,tlayouter1]);
-{$endif}
- aligny(wam_center,[debugtarget,runcommand,xtermcommand]);
+//{$ifdef mswindows}
+ placeyorder(2,[0,0,10],[runcommand,debugcommand,debugtarget,tlayouter1]);
+//{$else}
+// placeyorder(0,[0,0,2],[debugcommand,debugoptions,debugtarget,tlayouter1]);
+//{$endif}
+ aligny(wam_center,[debugcommand,debugoptions]);
+ aligny(wam_center,[debugtarget,xtermcommand]);
 end;
 
 procedure tprojectoptionsfo.macronchildscaled(const sender: TObject);
@@ -2379,9 +2381,24 @@ begin
  messageoutputfile.enabled:= copymessages.value;
 end;
 
-procedure tprojectoptionsfo.runcommandchange(const sender: TObject);
+procedure tprojectoptionsfo.updatedebugenabled(const sender: TObject);
+var
+ bo1: boolean;
 begin
- debugtarget.enabled:= runcommand.value = '';
+ bo1:= runcommand.value = '';
+ debugcommand.enabled:= bo1;
+ debugoptions.enabled:= bo1;
+ debugtarget.enabled:= bo1;
+{$ifndef mswindows}
+ xtermcommand.enabled:= bo1 and externalconsole.value;
+{$endif}
+ activateonbreak.enabled:= bo1;
+ raiseonbreak.enabled:= bo1;
+ nodebugbeginend.enabled:= bo1;
+ stoponexception.enabled:= bo1;
+ stoponexception.enabled:= bo1;
+ showconsole.enabled:= not externalconsole.value;
+ settty.enabled:= bo1;
 end;
 
 procedure tprojectoptionsfo.newprojectchildscaled(const sender: TObject);
@@ -2630,14 +2647,14 @@ begin
  savebu.enabled:= bo1;
  loadbu.enabled:= bo1;
 end;
-
+(*
 procedure tprojectoptionsfo.extconschangeexe(const sender: TObject);
 begin
 {$ifndef mswindows}
  xtermcommand.enabled:= externalconsole.value;
 {$endif}
 end;
-
+*)
 procedure tprojectoptionsfo.setxtermcommandexe(const sender: TObject;
                var avalue: msestring; var accept: Boolean);
 begin

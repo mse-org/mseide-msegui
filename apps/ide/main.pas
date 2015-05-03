@@ -279,6 +279,7 @@ type
    procedure updatetargetenvironment;
    function needsdownload: boolean;
    function candebug: boolean; //run command empty or process attached
+   procedure startconsole();
   public
    factivedesignmodule: pmoduleinfoty;
    fprojectloaded: boolean;
@@ -1233,6 +1234,14 @@ begin
  end;
 end;
 
+procedure tmainfo.startconsole();
+begin
+ targetconsolefo.clear;
+ if projectoptions.d.showconsole then begin
+  targetconsolefo.activate;
+ end;
+end;
+
 function tmainfo.loadexec(isattach: boolean; 
                          const forcedownload: boolean): boolean;
 var
@@ -1294,10 +1303,7 @@ begin
  if result then begin
   updatetargetenvironment;
   watchpointsfo.clear;
-  targetconsolefo.clear;
-  if projectoptions.d.showconsole then begin
-   targetconsolefo.activate;
-  end;
+  startconsole();
   if forcedownload and projectoptions.d.gdbdownload then begin
    if startgdbconnection(false) then begin
     gdb.download(false);
@@ -2471,24 +2477,29 @@ begin
     mstr1:= mstr1 + ' ' + progparameters;
    end;
    if progworkingdirectory <> '' then begin
-//    pwdbefore:= getcurrentdirmse;
     pwdbefore:= setcurrentdirmse(progworkingdirectory);
    end;
-   frunningprocess:= targetconsolefo.terminal.execprog(mstr1);   
-   if frunningprocess = invalidprochandle then begin
-    setstattext(c[ord(cannotstartprocess)],mtk_error);
-    exit;
-   end;
-   runprocmon.listentoprocess(frunningprocess);
    try
+    if projectoptions.d.externalconsole then begin
+     frunningprocess:= execmse4(mstr1,[exo_newconsole]);
+    end
+    else begin
+     startconsole();
+     frunningprocess:= targetconsolefo.terminal.execprog(mstr1);
+    end;
+    if frunningprocess = invalidprochandle then begin
+     setstattext(c[ord(cannotstartprocess)],mtk_error);
+     exit;
+    end;
+    runprocmon.listentoprocess(frunningprocess);
    finally
     if progworkingdirectory <> '' then begin
      setcurrentdirmse(pwdbefore);
     end;
    end;
   end;
-  setstattext(c[ord(process)]+' '+inttostr(frunningprocess)+' '+
-                     c[ord(running3)],mtk_running);
+  setstattext('*** '+c[ord(process)]+' '+inttostr(frunningprocess)+' '+
+                     c[ord(running3)]+' ***',mtk_running);
  end;
 end;
 
@@ -2499,8 +2510,8 @@ begin
  if prochandle = frunningprocess then begin
   frunningprocess:= invalidprochandle;
   if execresult <> 0 then begin
-   setstattext(c[ord(processterminated)]+' '+inttostr(execresult)+'.',
-                                    mtk_error);
+   setstattext(c[ord(processterminated)]+' '+inttostr(execresult){+'.'},
+                                    mtk_finished);
   end
   else begin
    setstattext(c[ord(proctermnormally)],mtk_finished);
@@ -2513,7 +2524,8 @@ function tmainfo.runtarget: boolean;
 begin
  result:= true;
  if not gdb.attached then begin
-  if projectoptions.d.texp.runcommand = '' then begin
+  if (projectoptions.d.texp.runcommand = '') and 
+         (projectoptions.d.t.debugcommand <> '') then begin
    if not gdb.started then begin
     if loadexec(false,false) then begin
      result:= false;
@@ -2523,7 +2535,9 @@ begin
   end
   else begin
    result:= false;
-   dorun;
+   if (projectoptions.d.texp.runcommand <> '') then begin
+    dorun;
+   end;
   end;
  end;
 end;
