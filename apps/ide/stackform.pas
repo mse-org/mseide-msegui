@@ -62,7 +62,7 @@ begin
   grid.row:= aframenr;
   with frameinfo[aframenr] do begin
    if filename <> '' then begin
-    result:= sourcefo.showsourceline(objpath(filename),line-1,0,true) <> nil;
+    result:= sourcefo.showsourceline(sourcepath(filename),line-1,0,true) <> nil;
    end;
   end;
  end

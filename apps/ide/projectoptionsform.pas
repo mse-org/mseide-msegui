@@ -26,15 +26,14 @@ unit projectoptionsform;
 interface
 uses
  mseforms,msefiledialog,mseapplication,msegui,msestat,msestatfile,msetabs,
- msesimplewidgets,
- msetypes,msestrings,msedataedits,msetextedit,msegraphedits,msewidgetgrid,
- msegrids,msesplitter,msemacros,msegdbutils,msedispwidgets,msesys,mseclasses,
- msegraphutils,mseevent,msetabsglob,msearrayutils,msegraphics,msedropdownlist,
- mseformatstr,mseinplaceedit,msedatanodes,mselistbrowser,msebitmap,
- msecolordialog,msedrawtext,msewidgets,msepointer,mseguiglob,msepipestream,
- msemenus,sysutils,mseglob,mseedit,msedialog,msescrollbar,msememodialog,
- msecodetemplates,mseifiglob,msestream,msestringcontainer,mserttistat,
- mseificomp,mseificompglob;
+ msesimplewidgets,msetypes,msestrings,msedataedits,msetextedit,msegraphedits,
+ msewidgetgrid,msegrids,msesplitter,msemacros,msegdbutils,msedispwidgets,msesys,
+ mseclasses,msegraphutils,mseevent,msetabsglob,msearrayutils,msegraphics,
+ msedropdownlist,mseformatstr,mseinplaceedit,msedatanodes,mselistbrowser,
+ msebitmap,msecolordialog,msedrawtext,msewidgets,msepointer,mseguiglob,
+ msepipestream,msemenus,sysutils,mseglob,mseedit,msedialog,msescrollbar,
+ msememodialog,msecodetemplates,mseifiglob,msestream,msestringcontainer,
+ mserttistat,mseificomp,mseificompglob;
 
 const
  defaultsourceprintfont = 'Courier';
@@ -274,6 +273,7 @@ type
    fbeforeconnect: filenamety;
    fafterconnect: filenamety;
    fxtermcommand: msestring;
+   fsourcebase: msestring;
   protected
   public
    constructor create;
@@ -297,6 +297,7 @@ type
    property beforeload: filenamety read fbeforeload write fbeforeload;
    property afterload: filenamety read fafterload write fafterload;
    property beforerun: filenamety read fbeforerun write fbeforerun;
+   property sourcebase: msestring read fsourcebase write fsourcebase;
    property sourcedirs: msestringarty read fsourcedirs write fsourcedirs;
    property defines: msestringarty read fdefines write fdefines;
 
@@ -784,6 +785,8 @@ type
    raiseonbreak: tbooleanedit;
    noformdesignerdocking: tbooleanedit;
    runcommand: tfilenameedit;
+   sourcebase: tfilenameedit;
+   tspacer7: tspacer;
    procedure acttiveselectondataentered(const sender: TObject);
    procedure colonshowhint(const sender: tdatacol; const arow: Integer; 
                       var info: hintinfoty);
@@ -826,6 +829,7 @@ type
                    var accept: Boolean);
    procedure activateonbreakset(const sender: TObject; var avalue: Boolean;
                    var accept: Boolean);
+   procedure sourcedirhint(const sender: TObject; var info: hintinfoty);
   private
    procedure activegroupchanged;
  end;
@@ -848,6 +852,7 @@ function checkprojectloadabort: boolean; //true on load abort
 function getsigname(const anum: integer): string;
 procedure projectoptionstofont(const afont: tfont);
 function objpath(const aname: filenamety): filenamety;
+function sourcepath(const aname: filenamety): filenamety;
 function gettargetfile: filenamety;
 function getmacros: tmacrolist;
 procedure hintmacros(const sender: tcustomedit; var info: hintinfoty);
@@ -997,6 +1002,19 @@ begin
  result:= '';
  if aname <> '' then begin
   result:= filepath(projectoptions.o.texp.makedir,aname);
+ end;
+end;
+
+function sourcepath(const aname: filenamety): filenamety;
+begin
+ result:= '';
+ if aname <> '' then begin
+  if projectoptions.d.t.sourcebase <> '' then begin
+   result:= filepath(projectoptions.d.texp.sourcebase,aname);
+  end
+  else begin
+   result:= objpath(aname);
+  end;
  end;
 end;
 
@@ -2667,6 +2685,17 @@ procedure tprojectoptionsfo.activateonbreakset(const sender: TObject;
                var avalue: Boolean; var accept: Boolean);
 begin
  raiseonbreak.enabled:= avalue;
+end;
+
+procedure tprojectoptionsfo.sourcedirhint(const sender: TObject;
+               var info: hintinfoty);
+begin
+ if tcustomedit(sender).text = '' then begin
+  hintexpandedmacros(makedir,info);
+ end
+ else begin
+  hintexpandedmacros(sender,info);
+ end;
 end;
 
 { tprojectoptions }

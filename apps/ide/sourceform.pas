@@ -310,7 +310,7 @@ begin
  result:= false;
  if checkerrormessage(text,lev1,fna1,col1,row1) and (fna1 <> '') and 
                                                 (lev1 >= minlevel) then begin
-  apage:= sourcefo.showsourceline(objpath(fna1),row1,col1,true);
+  apage:= sourcefo.showsourceline(sourcepath(fna1),row1,col1,true);
   result:= true;
  end;
 end;
@@ -942,7 +942,7 @@ function tsourcefo.locate(const info: stopinfoty): tsourcepage;
 begin
  resetactiverow;
  if info.filename <> '' then begin
-  result:= openfile(filepath(projectoptions.o.texp.makedir,info.filename));
+  result:= openfile(sourcepath(info.filename));
   if result <> nil then begin
    result.activerow:= info.line-1;
    result.show;
