@@ -402,6 +402,7 @@ type
    function getsysregnum(const varname: string; out num: integer): boolean;
    function currentlang: string;
    function assignoperator: string;
+   function getfullname(const tup: resultinfoarty): string;
    function getbreakpointinfo(var atup: resultinfoty;
                      var info: breakpointinfoty; const full: boolean): boolean;
    procedure updatepascalexpression(var aexpression: string);
@@ -2729,6 +2730,14 @@ begin
  end;
 end;
 
+function tgdbmi.getfullname(const tup: resultinfoarty): string;
+begin
+ result:='';
+ if not getstringvalue(tup,'fullname',result) or (result = '') then begin
+  getstringvalue(tup,'file',result);
+ end;
+end;
+
 function tgdbmi.getbreakpointinfo(var atup: resultinfoty;
                                        var info: breakpointinfoty;
                                        const full: boolean): boolean;
@@ -2744,11 +2753,7 @@ begin
    getqwordvalue(tup1,'addr',address);
    if full then begin
     getintegervalue(tup1,'line',line);
-    filename:= '';
-    getstringvalue(tup1,'fullname',filename);
-    if filename = '' then begin
-     getstringvalue(tup1,'file',filename);
-    end;
+    filename:= getfullname(tup1);
     if filename <> '' then begin
      path:= filename;
     end;
@@ -3304,7 +3309,7 @@ var
  int1: integer;
  ar1: resultinfoarty;
  frame: resultinfoarty;
- str1: string;
+// str1: string;
  wstr1: filenamety;
  frames1: frameinfoarty;
  res1: gdbresultty;
@@ -3370,8 +3375,7 @@ begin
     if not (reason in [sr_exited_normally,sr_detached]) then begin
      result:= getqwordvalue(response,'thread-id',threadid);
      if gettuplevalue(response,'frame',frame) then begin
-      getstringvalue(frame,'file',str1);
-      filename:= str1;
+      filename:= getfullname(frame);
       getintegervalue(frame,'line',line);
       getstringvalue(frame,'func',func);
       getinteger64value(frame,'addr',int64(addr));
@@ -4535,7 +4539,7 @@ function tgdbmi.stacklistframes(out list: frameinfoarty; first,
 var
  ar1,ar2,ar3,ar4: resultinfoarty;
  int1,int2: integer;
- str1: string;
+// str1: string;
  {$ifndef FPC}
  lint1: int64;
  {$endif}
@@ -4561,8 +4565,7 @@ begin
       getinteger64value(ar2,'addr',int64(addr));
   {$endif}
       getstringvalue(ar2,'func',func);
-      getstringvalue(ar2,'file',str1);
-      filename:= str1;
+      filename:= getfullname(ar2);
       getintegervalue(ar2,'line',line);
      end;
     end;
