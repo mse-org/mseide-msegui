@@ -2187,7 +2187,8 @@ var
  int1: integer;
 begin
  fpointersize:= 4;
- if evaluateexpression('sizeof(pointer)',str1) = gdb_ok then begin
+ if (evaluateexpression('sizeof(void*)',str1) = gdb_ok) or 
+       (evaluateexpression('sizeof(pointer)',str1) = gdb_ok) then begin
    //I know there is a gdbcommand for this, I could not find it
   if trystrtoint(str1,int1) then begin
    fpointersize:= int1;
