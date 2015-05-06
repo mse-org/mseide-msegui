@@ -1183,7 +1183,7 @@ object projectoptionsfo: tprojectoptionsfo
           bounds_x = 0
           bounds_y = 204
           bounds_cx = 757
-          bounds_cy = 314
+          bounds_cy = 315
           anchors = [an_left, an_top, an_right, an_bottom]
           taborder = 6
           activepageindex = 0
@@ -1204,7 +1204,7 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_x = 0
             bounds_y = 18
             bounds_cx = 757
-            bounds_cy = 296
+            bounds_cy = 297
             anchors = [an_left, an_top, an_right, an_bottom]
             caption = 'Source &directories'
             reffontheight = 14
@@ -1217,7 +1217,7 @@ object projectoptionsfo: tprojectoptionsfo
               bounds_x = 0
               bounds_y = 24
               bounds_cx = 757
-              bounds_cy = 270
+              bounds_cy = 272
               bounds_cymin = 40
               anchors = [an_top, an_bottom]
               optionsgrid = [og_rowmoving, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_selectedrowsdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_wrapcol, og_autopopup]
@@ -1315,7 +1315,7 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_x = 0
             bounds_y = 18
             bounds_cx = 757
-            bounds_cy = 296
+            bounds_cy = 297
             anchors = [an_left, an_top, an_right, an_bottom]
             caption = 'Defi&nes'
             reffontheight = 14
@@ -1326,7 +1326,7 @@ object projectoptionsfo: tprojectoptionsfo
               bounds_x = 0
               bounds_y = 0
               bounds_cx = 757
-              bounds_cy = 296
+              bounds_cy = 297
               anchors = []
               optionsgrid = [og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_colchangeontabkey, og_wrapcol, og_autopopup]
               fixrows.count = 1
@@ -1406,7 +1406,7 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_x = 0
             bounds_y = 18
             bounds_cx = 757
-            bounds_cy = 296
+            bounds_cy = 297
             anchors = [an_left, an_top, an_right, an_bottom]
             caption = '&Signals'
             reffontheight = 14
@@ -1419,7 +1419,7 @@ object projectoptionsfo: tprojectoptionsfo
               bounds_x = 0
               bounds_y = 0
               bounds_cx = 757
-              bounds_cy = 296
+              bounds_cy = 297
               bounds_cymin = 40
               anchors = []
               optionsgrid = [og_colsizing, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_sorted, og_wrapcol, og_autopopup]
@@ -1573,7 +1573,7 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_x = 0
             bounds_y = 18
             bounds_cx = 757
-            bounds_cy = 296
+            bounds_cy = 297
             anchors = [an_left, an_top, an_right, an_bottom]
             caption = '&Exceptions'
             reffontheight = 14
@@ -1584,7 +1584,7 @@ object projectoptionsfo: tprojectoptionsfo
               bounds_x = 0
               bounds_y = 0
               bounds_cx = 757
-              bounds_cy = 296
+              bounds_cy = 297
               anchors = []
               optionsgrid = [og_colsizing, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_colchangeontabkey, og_wrapcol, og_autopopup]
               fixrows.count = 1
@@ -1661,7 +1661,7 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_x = 0
             bounds_y = 18
             bounds_cx = 757
-            bounds_cy = 296
+            bounds_cy = 297
             anchors = [an_left, an_top, an_right, an_bottom]
             caption = '&Target'
             reffontheight = 14
