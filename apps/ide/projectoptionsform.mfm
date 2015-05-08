@@ -2070,7 +2070,7 @@ object projectoptionsfo: tprojectoptionsfo
                 frame.outerframe = (
                   0
                   17
-                  82
+                  58
                   0
                 )
                 taborder = 1
@@ -2133,7 +2133,7 @@ object projectoptionsfo: tprojectoptionsfo
               onshowhint = hintexpandedmacros
               bounds_x = 1
               bounds_y = 0
-              bounds_cx = 755
+              bounds_cx = 526
               bounds_cy = 37
               anchors = [an_left, an_top, an_right]
               textflags = [tf_ycentered, tf_noselect, tf_ellipseleft]
@@ -2263,6 +2263,32 @@ object projectoptionsfo: tprojectoptionsfo
                 bounds_y = 21
                 onchange = downloadchange
               end
+            end
+            object gdbloadtimeout: trealedit
+              frame.caption = 'Load Timeout'
+              frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
+              frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
+              frame.outerframe = (
+                0
+                17
+                15
+                0
+              )
+              taborder = 7
+              bounds_x = 529
+              bounds_y = 0
+              bounds_cx = 86
+              bounds_cy = 37
+              anchors = [an_top, an_right]
+              value = -Inf
+              valuedefault = -Inf
+              formatedit = '0.#'
+              formatdisp = '0.#sec'
+              valuerange = 1
+              valuestart = 0
+              min = -Inf
+              max = 200
+              reffontheight = 14
             end
           end
         end

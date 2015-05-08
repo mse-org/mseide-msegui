@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2014 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2015 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -319,6 +319,7 @@ type
    fstartupbkpt: longword;
    fstartupbkpton: boolean;
    foverloadsleepus: integer;
+   floadtimeoutus: integer;
    fstoptime: tdatetime;
    fstopinfo: resultinfoarty;
    fstopthreadid: integer;
@@ -630,6 +631,8 @@ type
    property progparameters: string read fprogparameters write fprogparameters;
    property workingdirectory: filenamety read fworkingdirectory 
                                                       write fworkingdirectory;
+   property loadtimeoutus: integer read floadtimeoutus write floadtimeoutus;
+                             //0 -> default
 //   {$ifdef mswindows}
    property newconsole: boolean read fnewconsole write fnewconsole;
 //   {$endif}
@@ -1996,6 +1999,8 @@ const
  {$else}
  loadwaitus = 10000000;
  {$endif}
+var
+ int1: integer;
 begin
  abort;
  resetexec;
@@ -2004,8 +2009,13 @@ begin
   result:= synccommand('-file-exec-and-symbols');
  end
  else begin
-  result:= synccommand('-file-exec-and-symbols '+togdbfilepath(filename),
-                                    loadwaitus);
+  if floadtimeoutus = 0 then begin
+   int1:= loadwaitus;
+  end
+  else begin
+   int1:= floadtimeoutus;
+  end;
+  result:= synccommand('-file-exec-and-symbols '+togdbfilepath(filename),int1);
   updatebit({$ifdef FPC}longword{$else}longword{$endif}(fstate),
                  ord(gs_execloaded),result = gdb_ok);
   if (result = gdb_ok) and not noproginfo then begin

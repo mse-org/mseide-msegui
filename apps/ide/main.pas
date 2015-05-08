@@ -1325,6 +1325,12 @@ procedure tmainfo.startgdb(const killserver: boolean);
 begin
  terminategdbserver(killserver);
  with projectoptions,d.texp do begin
+  if d.gdbloadtimeout = emptyreal then begin
+   gdb.loadtimeoutus:= 0;
+  end
+  else begin
+   gdb.loadtimeoutus:= round(d.gdbloadtimeout*1000000);
+  end;
   gdb.remoteconnection:= remoteconnection;
   gdb.gdbdownload:= d.gdbdownload;
   gdb.simulator:= d.gdbsimulator;

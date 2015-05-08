@@ -333,6 +333,7 @@ type
    fsettty: boolean;
    fgdbserverstartonce: boolean;
    fraiseonbreak: boolean;
+   fgdbloadtimeout: realty;
   protected
    function gett: tobject; override;
    function gettexp: tobject; override;
@@ -356,6 +357,7 @@ type
    property gdbsimulator: boolean read fgdbsimulator write fgdbsimulator;
    property gdbserverstartonce: boolean read fgdbserverstartonce 
                             write fgdbserverstartonce;
+   property gdbloadtimeout: real read fgdbloadtimeout write fgdbloadtimeout;
    property gdbserverwait: real read fgdbserverwait write fgdbserverwait;
    property nogdbserverexit: boolean read fnogdbserverexit 
                                                    write fnogdbserverexit;
@@ -787,6 +789,7 @@ type
    runcommand: tfilenameedit;
    sourcebase: tfilenameedit;
    tspacer7: tspacer;
+   gdbloadtimeout: trealedit;
    procedure acttiveselectondataentered(const sender: TObject);
    procedure colonshowhint(const sender: tdatacol; const arow: Integer; 
                       var info: hintinfoty);
@@ -2823,6 +2826,7 @@ begin
  settty:= true;
  additem(fexceptclassnames,'EconvertError');
  additem(fexceptignore,false);
+ fgdbloadtimeout:= emptyreal;
 
  inherited;
 end;
