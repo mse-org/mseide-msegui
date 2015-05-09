@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2014 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2015 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -2702,6 +2702,16 @@ begin
    application.lock;
   end;
  end;
+end;
+
+procedure gui_disconnectmaineventqueue(); //called by application.lock()
+begin
+ //dummy
+end;
+
+procedure gui_connectmaineventqueue();    //called by application.unlock()
+begin
+ //dummy
 end;
 
 function createapphandle(out id: winidty): guierrorty;

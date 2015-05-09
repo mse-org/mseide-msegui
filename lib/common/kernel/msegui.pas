@@ -2497,6 +2497,8 @@ type
    procedure doafterrun; override;
    procedure internalinitialize; override;
    procedure internaldeinitialize;  override;
+   procedure dobeginthreadlock; override;
+   procedure doendthreadlock; override;
    procedure objecteventdestroyed(const sender: tobjectevent); override;
    procedure dragstarted; //calls dragstarted of all known widgets
    procedure internalpackwindowzorder(); virtual;
@@ -19167,6 +19169,16 @@ begin
  else begin
   optionsgui:= optionsgui - [gao_forcezorder];
  end;
+end;
+
+procedure tguiapplication.dobeginthreadlock();
+begin
+ gui_disconnectmaineventqueue();
+end;
+
+procedure tguiapplication.doendthreadlock();
+begin
+ gui_connectmaineventqueue();
 end;
 
 { tasyncmessageevent }

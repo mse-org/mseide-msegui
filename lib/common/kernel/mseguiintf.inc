@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2015 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -22,6 +22,9 @@ function gui_grouphideminimizedwindows: boolean; //true for win32
 function gui_postevent(event: tmseevent): guierrorty;
 function gui_settimer(us: longword): guierrorty;
                //send et_timer event after delay of us (micro seconds)
+
+procedure gui_disconnectmaineventqueue(); //called by application.lock()
+procedure gui_connectmaineventqueue();    //called by application.unlock()
 
 function gui_hasevent: boolean;         //false if no event pending
 function gui_getevent: tmseevent;          //can be nil

@@ -267,6 +267,8 @@ type
    procedure incidlecount;
    procedure dobeforerun; virtual;
    procedure doafterrun; virtual;
+   procedure dobeginthreadlock; virtual;
+   procedure doendthreadlock; virtual;
    procedure dowakeup(sender: tobject);
    property eventlist: teventlist read feventlist;
    procedure internalinitialize; virtual;
@@ -1196,6 +1198,9 @@ begin
  if not sys_issamethread(flockthread,athread) then begin
   result:= true;
   flockthread:= athread;
+  if flockthread <> fthread then begin
+   dobeginthreadlock();
+  end;
  end
  else begin
   result:= false;
@@ -1249,6 +1254,9 @@ begin
    dec(count);
    dec(flockcount);
    if flockcount = 0 then begin
+    if flockthread <> fthread then begin
+     doendthreadlock();
+    end;
     flockthread:= 0;
    end;
    sys_mutexunlock(fmutex);
@@ -1814,6 +1822,16 @@ begin
                           (event is treleaseevent) then begin
   treleaseevent(event).fobject.free;
  end;
+end;
+
+procedure tcustomapplication.dobeginthreadlock;
+begin
+ //dummy
+end;
+
+procedure tcustomapplication.doendthreadlock;
+begin
+ //dummy
 end;
 
 { tactivatorcontroller }

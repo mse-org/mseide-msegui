@@ -5377,6 +5377,25 @@ begin
  end;
 end;
 
+var
+ connectmutex1: mutexty;
+ connectmutex2: mutexty;
+
+procedure gui_disconnectmaineventqueue(); //called by application.lock()
+begin
+ sys_mutexlock(connectmutex2);
+ if sys_mutextrylock(connectmutex1) <> sye_ok then begin
+  pthread_kill(application.mainthread,sigio);  
+  sys_mutexlock(connectmutex1);
+ end;
+end;
+
+procedure gui_connectmaineventqueue();     //called by application.unlock()
+begin
+ sys_mutexunlock(connectmutex1);
+ sys_mutexunlock(connectmutex2);
+end;
+
 function gui_getevent: tmseevent;
 
 var
@@ -5448,7 +5467,11 @@ begin
     if not application.unlock then begin
      guierror(gue_notlocked);
     end;
+    sys_mutexlock(connectmutex1);
     int1:= poll(@pollinfo,pollcount,1000); 
+    sys_mutexunlock(connectmutex1);
+    sys_mutexlock(connectmutex2);
+    sys_mutexunlock(connectmutex2);
      //wakeup clientmessages are sometimes missed with xcb ???
     if int1 = 0 then begin  //timeout
      inc(timeoutcount);
@@ -6011,6 +6034,8 @@ var
 begin
  gdi_lock;
  try
+  sys_mutexcreate(connectmutex1);
+  sys_mutexcreate(connectmutex2);
   resetrepeatkey;
   {$ifdef mse_flushgdi}
   xinitthreads;
@@ -6361,6 +6386,8 @@ begin
    xclosedisplay(appdisp);
    appdisp:= nil;
   end;
+  sys_mutexdestroy(connectmutex1);
+  sys_mutexdestroy(connectmutex2);
   signal(sigalrm,sigtimerbefore);
   signal(sigterm,sigtermbefore);
   signal(sigchld,sigchldbefore);
