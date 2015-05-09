@@ -5380,12 +5380,14 @@ end;
 var
  connectmutex1: mutexty;
  connectmutex2: mutexty;
+ connectpipe: tpipedescriptors;
+ dummybyte: byte;
 
 procedure gui_disconnectmaineventqueue(); //called by application.lock()
 begin
  sys_mutexlock(connectmutex2);
  if sys_mutextrylock(connectmutex1) <> sye_ok then begin
-  pthread_kill(application.mainthread,sigio);  
+  sys_write(connectpipe.writedes,@dummybyte,1);
   sys_mutexlock(connectmutex1);
  end;
 end;
@@ -5408,7 +5410,7 @@ var
  chars: msestring;
  int1: integer;
 // event: xevent;
- pollinfo: array[0..1] of pollfd;
+ pollinfo: array[0..2] of pollfd;
              //0 connection, 1 sessionmanagement
  pollcount: integer;
 // str1: string;
@@ -5446,15 +5448,19 @@ begin
    break;
   end;
   fillchar(pollinfo,sizeof(pollinfo),0);
-  pollcount:= 1;
+  pollcount:= 2;
   with pollinfo[0] do begin
    fd:= xconnectionnumber(appdisp);
+   events:= pollin or pollpri;
+  end;
+  with pollinfo[1] do begin
+   fd:= connectpipe.readdes;
    events:= pollin or pollpri;
   end;
 {$ifdef with_sm}
   if hassm then begin
    if sminfo.fd > 0 then begin
-    with pollinfo[1] do begin
+    with pollinfo[2] do begin
      fd:= sminfo.fd;
      events:= pollin or pollpri;
     end;
@@ -5471,6 +5477,11 @@ begin
     int1:= poll(@pollinfo,pollcount,1000); 
     sys_mutexunlock(connectmutex1);
     sys_mutexlock(connectmutex2);
+    if pollinfo[1].revents <> 0 then begin
+     repeat
+     until (__read(connectpipe.readdes,dummybyte,1) < 0) and 
+                                     (sys_getlasterror() = eagain);
+    end;
     sys_mutexunlock(connectmutex2);
      //wakeup clientmessages are sometimes missed with xcb ???
     if int1 = 0 then begin  //timeout
@@ -5484,7 +5495,7 @@ begin
    until (int1 <> -1) or timerevent or terminated or childevent;
  {$ifdef with_sm}
    if hassm then begin
-    if (int1 > 0) and (pollinfo[1].revents <> 0) then begin
+    if (int1 > 0) and (pollinfo[2].revents <> 0) then begin
      iceprocessmessages(sminfo.iceconnection,nil,int2);
      with sminfo do begin
       if shutdown then begin
@@ -6036,6 +6047,7 @@ begin
  try
   sys_mutexcreate(connectmutex1);
   sys_mutexcreate(connectmutex2);
+  pipe2(connectpipe,o_cloexec or o_nonblock);
   resetrepeatkey;
   {$ifdef mse_flushgdi}
   xinitthreads;
@@ -6386,6 +6398,8 @@ begin
    xclosedisplay(appdisp);
    appdisp:= nil;
   end;
+  sys_closefile(connectpipe.writedes);
+  sys_closefile(connectpipe.readdes);
   sys_mutexdestroy(connectmutex1);
   sys_mutexdestroy(connectmutex2);
   signal(sigalrm,sigtimerbefore);

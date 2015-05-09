@@ -92,7 +92,7 @@ const
  filetypes: array[filetypety] of longword = (0,s_ifdir,s_ifblk,
                                 s_ifchr,s_ifreg,s_iflnk,s_ifsock,s_ififo);
 // timeoffset = 0.0;
- o_cloexec = $080000;
+// o_cloexec = $080000;
  
 type
  dirstreamlinuxdty = record

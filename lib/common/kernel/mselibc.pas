@@ -529,6 +529,7 @@ const
    O_SYNC     = $01000;//&010000;
    O_FSYNC    = O_SYNC;
    O_ASYNC    = $02000;//&020000;
+   O_CLOEXEC  = $80000;
 
    O_DIRECT    = $04000;//&0040000;
    O_DIRECTORY = $10000;//&0200000;
@@ -2504,6 +2505,9 @@ function pipe(var __pipedes: TPipes):longint;
                    cdecl; external clib name 'pipe'; overload;
 function pipe(var PipeDes: TPipeDescriptors): Integer; cdecl;
                                external clib name 'pipe'; overload;
+function pipe2(var PipeDes: TPipeDescriptors; flags: cint): Integer; cdecl;
+                               external clib name 'pipe2';
+                               
 function vfork: __pid_t; cdecl; external clib name 'vfork';
 function fork: __pid_t; cdecl; external clib name 'fork';
 function setsid: __pid_t; cdecl; external clib name 'setsid';
