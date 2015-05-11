@@ -1,13 +1,16 @@
 object targetconsolefo: ttargetconsolefo
+  frame.localprops = []
+  frame.localprops1 = []
   frame.grip_size = 10
-  frame.grip_options = [go_closebutton, go_fixsizebutton, go_topbutton]
-  frame.dummy = 0
+  frame.grip_options = [go_closebutton, go_fixsizebutton, go_floatbutton, go_topbutton, go_backgroundbutton]
   popupmenu = popupmen
   visible = False
   bounds_x = 209
   bounds_y = 385
   bounds_cx = 368
   bounds_cy = 137
+  container.frame.localprops = []
+  container.frame.localprops1 = []
   container.bounds = (
     0
     0
@@ -46,6 +49,8 @@ object targetconsolefo: ttargetconsolefo
   onidle = targetconsoleonidle
   moduleclassname = 'tdockform'
   object grid: twidgetgrid
+    frame.localprops = []
+    frame.localprops1 = []
     bounds_x = 0
     bounds_y = 0
     bounds_cx = 358
@@ -53,7 +58,7 @@ object targetconsolefo: ttargetconsolefo
     anchors = []
     font.name = 'stf_fixed'
     font.xscale = 1
-    font.dummy = 0
+    font.localprops = [flp_xscale]
     optionsgrid = [og_focuscellonenter, og_autofirstrow, og_colchangeontabkey, og_wrapcol, og_autopopup]
     rowcountmax = 5000
     datacols.count = 1
