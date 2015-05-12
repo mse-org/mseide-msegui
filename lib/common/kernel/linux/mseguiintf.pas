@@ -5534,7 +5534,7 @@ begin
   end;
  end;
  result:= nil;
- if not gui_hasevent then begin
+ if xpending(appdisp) <= 0 then begin
   exit;
  end;
 
