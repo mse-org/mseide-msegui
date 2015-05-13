@@ -1,14 +1,7 @@
 MSEide+MSEgui Pascal Cross Platform GUI Development System.
 
-2014-11-27 Version 3.6
-Copyright (c) 1999-2014 by Martin Schreiber
-
-* 2.8.6 -> 3.0:
-* MSEgui now has own implementations for "classes" and "db" units.
-* FPC has no support for unit alias
-* http://www.mail-archive.com/fpc-pascal%40lists.freepascal.org/msg31117.html
-* Please change "db" to "mdb" in uses and add 
-* "mclasses" after "classes" in uses in your units
+2015-05-13 Version 3.8
+Copyright (c) 1999-2015 by Martin Schreiber
 
 - Compiles with FPC 2.6.2 or 2.6.4
 - Tested on i386-linux SuSE 13.1, x86_64-linux SuSE 13.1, x86_64-freebsd,
@@ -124,6 +117,10 @@ Predefined project macros:
 PROJECTNAME, PROJECTDIR, MAINFILE, TARGETFILE,
 TARGETENV (in format for "env" unix command), TARGETPARAMS,
 they can be overridden by 'Project'-'Options'-'Macros'.
+
+MSEide environment macros
+*************************
+${ENV_VAR(variablename)} returns the environment variable value.
 
 MSEide file macros
 ******************
