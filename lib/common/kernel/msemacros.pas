@@ -14,7 +14,9 @@ uses
  msestrings,mselist,msearrayutils,msetypes,msestat;
  
 type
- macrohandlerty = function(params: msestringarty): msestring;
+ tmacrolist = class;
+ macrohandlerty = function(const sender: tmacrolist;
+                                      const params: msestringarty): msestring;
  macrohandlerarty = array of macrohandlerty;
  
  macroinfoty = record
@@ -55,6 +57,8 @@ type
    constructor create(const aoptions: macrooptionsty);
    constructor create(const aoptions: macrooptionsty;
                              const apredefined: array of macroinfoty);
+   function find(const aname: msestring; out item: pmacroinfoty): boolean;
+                //true if found;
    function itempo(const index: integer): pmacroinfoty;
    procedure add(const avalue: tmacrolist); overload;
    procedure add(const avalue: macroinfoty); overload;
@@ -341,9 +345,9 @@ begin
  end;
 end;
 
-function tmacrolist.callhandler(const aname: msestring; 
-           const aparams: msestringarty; var aexpandlevel: integer;
-           out found: pmacroinfoty): msestring;
+function tmacrolist.find(const aname: msestring; 
+                                out item: pmacroinfoty): boolean;
+                //true if found;
 var
  info: macroinfoty;
  int1: integer;
@@ -354,11 +358,38 @@ begin
  else begin
   info.name:= aname;
  end;
+ result:= internalfind(info,int1);
+ if result then begin
+  item:= @pmacroinfoaty(fdata)^[int1];
+ end
+ else begin
+  item:= nil;
+ end;
+end;
+
+function tmacrolist.callhandler(const aname: msestring; 
+           const aparams: msestringarty; var aexpandlevel: integer;
+           out found: pmacroinfoty): msestring;
+
+var
+// info: macroinfoty;
+ int1: integer;
+
+begin
+{
+ if mao_caseinsensitive in foptions then begin
+  info.name:= struppercase(aname);
+ end
+ else begin
+  info.name:= aname;
+ end;
  if internalfind(info,int1) then begin
-  found:= @pmacroinfoaty(fdata)^[int1];
+}
+ if find(aname,found) then begin
+//  found:= @pmacroinfoaty(fdata)^[int1];
   with found^ do begin
    if handler <> nil then begin
-    result:= handler(aparams);
+    result:= handler(self,aparams);
    end
    else begin
     result:= value;
@@ -369,7 +400,7 @@ begin
   end;
  end
  else begin
-  found:= nil;
+//  found:= nil;
   result:= '';
   aexpandlevel:= bigint+1; //not found
  end;

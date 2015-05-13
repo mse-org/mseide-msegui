@@ -8,34 +8,40 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 }
 
-unit mseenvmacros;
+unit msemacmacros;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
  msemacros;
 
-function envmacros(): macroinfoarty;
+function macmacros(): macroinfoarty;
 
 implementation
 uses
  msestrings,msesysintf;
 
 var
- fenvmacros: macroinfoarty;
+ fmacmacros: macroinfoarty;
 
-function envmacros(): macroinfoarty;
+function macmacros(): macroinfoarty;
 begin
- result:= fenvmacros;
+ result:= fmacmacros;
 end;
 
-function env_var(const sender: tmacrolist; 
+function mac_ifdef(const sender: tmacrolist; 
                                       const params: msestringarty): msestring;
+                                      //name,[ifndef value[,ifdef value]]
+var
+ po1: pmacroinfoty;
 begin
  result:= '';
  if params <> nil then begin
-  if sys_getenv(params[0],result) then begin
+  if sender.find(params[0],po1) then begin
    if high(params) > 1 then begin
     result:= params[2];
+   end
+   else begin
+    result:= po1^.value;
    end;
   end
   else begin
@@ -47,21 +53,21 @@ begin
 end;
 
 const
- envmacroconst: array[0..0] of macroinfoty = (
-  (name: 'ENV_VAR'; value: ''; handler: macrohandlerty(@env_var);
+ macmacroconst: array[0..0] of macroinfoty = (
+  (name: 'MAC_IFDEF'; value: ''; handler: macrohandlerty(@mac_ifdef);
                      expandlevel: 0)
  );
 
-procedure initenvmacros();
+procedure initmacmacros();
 var
  int1: integer;
 begin
- setlength(fenvmacros,length(envmacroconst));
- for int1:= 0 to high(envmacroconst) do begin
-  fenvmacros[int1]:= envmacroconst[int1];
+ setlength(fmacmacros,length(macmacroconst));
+ for int1:= 0 to high(macmacroconst) do begin
+  fmacmacros[int1]:= macmacroconst[int1];
  end;
 end;
 
 initialization
- initenvmacros();
+ initmacmacros();
 end.

@@ -118,9 +118,21 @@ PROJECTNAME, PROJECTDIR, MAINFILE, TARGETFILE,
 TARGETENV (in format for "env" unix command), TARGETPARAMS,
 they can be overridden by 'Project'-'Options'-'Macros'.
 
+MSEide macro functions
+**********************
+${MAC_IFDEF(macroname)} returns the macro value if defined.
+${MAC_IFDEF(macroname,notdefinedvalue)} returns the macro value if defined,
+ notdefinedvalue otherwise.
+${MAC_IFDEF(macroname,notdefinedvalue,definedvalue)}
+ returns definedvalue if macroname is defined, notdefinedvalue otherwise.
+
 MSEide environment macros
 *************************
-${ENV_VAR(variablename)} returns the environment variable value.
+${ENV_VAR(variablename)} returns the macro value if defined.
+${ENV_VAR(variablename,notdefinedvalue)} returns the variable value if defined,
+ notdefinedvalue otherwise.
+${ENV_VAR(variablename,notdefinedvalue,definedvalue)}
+ returns definedvalue if variablename is defined, notdefinedvalue otherwise.
 
 MSEide file macros
 ******************

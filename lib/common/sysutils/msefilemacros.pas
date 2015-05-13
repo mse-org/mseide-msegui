@@ -28,7 +28,8 @@ begin
  result:= ffilemacros;
 end;
 
-function file_mse(const params: msestringarty): msestring;
+function file_mse(const sender: tmacrolist; 
+                           const params: msestringarty): msestring;
 begin
  result:= '';
  if params <> nil then begin
@@ -36,7 +37,8 @@ begin
  end;
 end;
 
-function file_sys(const params: msestringarty): msestring;
+function file_sys(const sender: tmacrolist; 
+                           const params: msestringarty): msestring;
 begin
  result:= '';
  if params <> nil then begin
@@ -44,7 +46,8 @@ begin
  end;
 end;
 
-function file_path(const params: msestringarty): msestring;
+function file_path(const sender: tmacrolist; 
+                           const params: msestringarty): msestring;
 begin
  result:= '';
  if params <> nil then begin
@@ -52,7 +55,8 @@ begin
  end;
 end;
 
-function file_file(const params: msestringarty): msestring;
+function file_file(const sender: tmacrolist; 
+                           const params: msestringarty): msestring;
                     //no trailing path delimiter
 begin
  result:= '';
@@ -61,7 +65,8 @@ begin
  end;
 end;
 
-function file_dir(const params: msestringarty): msestring;
+function file_dir(const sender: tmacrolist; 
+                           const params: msestringarty): msestring;
 begin
  result:= '';
  if params <> nil then begin
@@ -69,7 +74,8 @@ begin
  end;
 end;
 
-function file_name(const params: msestringarty): msestring;
+function file_name(const sender: tmacrolist; 
+                           const params: msestringarty): msestring;
 begin
  result:= '';
  if params <> nil then begin
@@ -77,7 +83,8 @@ begin
  end;
 end;
 
-function file_namebase(const params: msestringarty): msestring;
+function file_namebase(const sender: tmacrolist; 
+                           const params: msestringarty): msestring;
 begin
  result:= '';
  if params <> nil then begin
@@ -85,7 +92,8 @@ begin
  end;
 end;
 
-function file_ext(const params: msestringarty): msestring;
+function file_ext(const sender: tmacrolist; 
+                           const params: msestringarty): msestring;
 begin
  result:= '';
  if params <> nil then begin
@@ -93,7 +101,8 @@ begin
  end;
 end;
 
-function file_noname(const params: msestringarty): msestring;
+function file_noname(const sender: tmacrolist; 
+                           const params: msestringarty): msestring;
 begin
  result:= '';
  if params <> nil then begin
@@ -101,7 +110,8 @@ begin
  end;
 end;
 
-function file_noext(const params: msestringarty): msestring;
+function file_noext(const sender: tmacrolist; 
+                           const params: msestringarty): msestring;
 begin
  result:= '';
  if params <> nil then begin
