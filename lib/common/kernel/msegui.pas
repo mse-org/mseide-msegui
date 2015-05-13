@@ -2517,11 +2517,6 @@ type
 
    function createform(instanceclass: widgetclassty; var reference): twidget;
    procedure invalidate; //invalidates all registered forms
-{   
-   procedure lockgdi();
-   procedure unlockgdi();
-   function gdilocked(): boolean;
-}   
    procedure processmessages; override; //handle with care!
    function idle: boolean; override;
    function modallevel: integer; override;
@@ -19175,41 +19170,7 @@ begin
   optionsgui:= optionsgui - [gao_forcezorder];
  end;
 end;
-{
-procedure tguiapplication.dobeginthreadlock();
-begin
- gui_disconnectmaineventqueue();
-end;
 
-procedure tguiapplication.doendthreadlock();
-begin
- gui_connectmaineventqueue();
-end;
-}
-{
-function tguiapplication.gdilocked(): boolean;
-begin
- result:= (fgdilockcount > 0);
-end;
-
-procedure tguiapplication.lockgdi();
-begin
- lock();
- inc(fgdilockcount);
- if (fgdilockcount = 1) and not ismainthread then begin
-  gui_disconnectmaineventqueue();
- end;
-end;
-
-procedure tguiapplication.unlockgdi();
-begin
- dec(fgdilockcount);
- if (fgdilockcount = 0) and not ismainthread then begin
-  gui_connectmaineventqueue();
- end;
- unlock();
-end;
-}
 { tasyncmessageevent }
 
 constructor tasyncmessageevent.create(const amessage: msestring;
