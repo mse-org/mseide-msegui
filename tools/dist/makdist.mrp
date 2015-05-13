@@ -1,0 +1,292 @@
+[mainmo.projectstat]
+savedmemoryfiles=6
+ run.sta
+ macros.sta
+ memodialog.sta
+ testedit.sta
+ edit.sta
+ groupedit.sta
+run.sta=6
+ [runfo]
+ stackedunder=
+ x=337
+ y=266
+ cx=897
+ cy=460
+macros.sta=9
+ [macrosfo]
+ stackedunder=
+ x=4
+ y=331
+ cx=1195
+ cy=491
+ wsize=0
+ active=1
+ visible=1
+memodialog.sta=8
+ [msememodialogfo]
+ x=507
+ y=359
+ cx=386
+ cy=291
+ wsize=0
+ active=1
+ visible=1
+testedit.sta=9
+ [testeditfo]
+ stackedunder=
+ x=255
+ y=239
+ cx=596
+ cy=581
+ wsize=0
+ active=1
+ visible=1
+edit.sta=9
+ [groupeditfo]
+ stackedunder=
+ x=225
+ y=419
+ cx=596
+ cy=581
+ wsize=0
+ active=1
+ visible=1
+groupedit.sta=9
+ [groupeditfo]
+ stackedunder=
+ x=225
+ y=419
+ cx=596
+ cy=581
+ wsize=0
+ active=1
+ visible=1
+[tree]
+kind=0
+a=0,665,0,
+c=1
+ (
+ kind=1
+ a=0,665,4,
+ c=2
+  (
+  kind=1
+  a=0,665,4,MSEide-MSEgui
+  c=1
+   (
+   kind=2
+   a=0,648,1,MSEide
+   teststate=1
+   path=apps/ide/mseide.pas
+   comment=
+   cc=
+   cd=
+   rc=
+   rd=
+   in=
+   eo=
+   ao=0
+   ee=
+   ae=0
+   eec=0
+   cr=0
+   ao=
+   ae=
+   aec=0
+   ie=0
+   )
+  teststate=1
+  path=${MSEBASEDIR}mseide-msegui/
+  comment=
+  cc=
+  cd=
+  rc=
+  rd=
+  in=
+  eo=
+  ao=0
+  ee=
+  ae=0
+  eec=0
+  cdef=
+  pdef=
+  )
+  (
+  kind=1
+  a=0,665,4,MSEuniverse
+  c=3
+   (
+   kind=2
+   a=0,648,1,MSEgit
+   teststate=1
+   path=msegit/msegit.pas
+   comment=
+   cc=
+   cd=
+   rc=
+   rd=
+   in=
+   eo=
+   ao=0
+   ee=
+   ae=0
+   eec=
+   cr=0
+   ao=
+   ae=
+   aec=0
+   ie=0
+   )
+   (
+   kind=2
+   a=0,648,1,MSEspice
+   teststate=1
+   path=msespice/msespice.pas
+   comment=
+   cc=
+   cd=
+   rc=
+   rd=
+   in=
+   eo=
+   ao=0
+   ee=
+   ae=0
+   eec=
+   cr=0
+   ao=
+   ae=
+   aec=0
+   ie=0
+   )
+   (
+   kind=2
+   a=0,648,1,MSErun
+   teststate=1
+   path=mserun/mserun.pas
+   comment=
+   cc=
+   cd=
+   rc=
+   rd=
+   in=
+   eo=
+   ao=0
+   ee=
+   ae=0
+   eec=
+   cr=0
+   ao=
+   ae=
+   aec=0
+   ie=0
+   )
+  teststate=1
+  path=${MSEBASEDIR}mseuniverse/tools/
+  comment=
+  cc=${FPC} -Fu${MSEBASEDIR}mseuniverse/tools/toolsskin ${FILE}
+  cd=
+  rc=
+  rd=
+  in=
+  eo=
+  ao=0
+  ee=
+  ae=0
+  eec=
+  cdef=
+  pdef=
+  )
+ teststate=1
+ path=
+ comment=
+ cc=${FPC} ${FILE}
+ cd=
+ rc=
+ rd=
+ in=
+ eo=
+ ao=0
+ ee=
+ ae=0
+ eec=0
+ cdef=
+ pdef=
+ )
+teststate=0
+[options]
+[mainmo.stoponfirsterr]
+checked=0
+[mainmo.stoponcomperr]
+checked=0
+[mainmo.trttistat1]
+macronames=10
+ FPCINSTDIR
+ COMPILERBIN
+ COMPILERBIN
+ MSEBASEDIR
+ MSELIBDIR
+ FPCUNITS
+ MSEUNITS
+ COMPILER
+ FPCFLAGS
+ FPC
+macrovalues=10
+ 
+ ppc386
+ ppcx64
+ /home/mse/packs/standard/git/
+ ${MSEBASEDIR}mseide-msegui/lib/common/
+ -Fu${FPCINSTDIR}lib/fpc/2.6.5/units/i386-linux/*
+ -Fu${MSELIBDIR}* -Fu${MSELIBDIR}kernel/linux
+ ${FPCINSTDIR}bin/${COMPILERBIN}
+ -n -viwn -Xg -B -O2 -XX -Xs -CX -l -Fcutf8 -dmse_with_deprecated ${MSEUNITS} ${FPCUNITS} ${MAC_IFDEF(OPT)}
+ ${COMPILER} ${FPCFLAGS}
+macroon=10
+ 0
+ 0
+ 0
+ 0
+ 63
+ 63
+ 63
+ 63
+ 63
+ 63
+macrogroup=0
+groupcomment=6
+ 386
+ x64
+ 
+ 
+ 
+ 
+[mainfo]
+stackedunder=
+x=54
+y=313
+cx=1018
+cy=316
+wsize=0
+active=1
+visible=1
+[mainfo.grid]
+propcolwidthref=927
+width0=50
+sortdescend0=0
+width1=281
+sortdescend1=0
+width2=548
+sortdescend2=0
+width3=413
+sortdescend3=0
+sortdescend4=0
+rowstate=7
+ 0 0
+ 0 0
+ 0 0
+ 0 0
+ 0 0
+ 0 0
+ 0 0
