@@ -1,5 +1,7 @@
 MSEide+MSEgui breaking changes version history
 
+2015-05-13
+ tcustomapplication.locked() -> islockedthread().
 2015-02-04
  tselector.dropdownitems ->tdropdowndatacols, published properties removed.
 2015-01-17

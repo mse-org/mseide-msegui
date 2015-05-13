@@ -5383,7 +5383,7 @@ var
  connectpipe: tpipedescriptors;
  dummybyte: byte;
 
-procedure gui_disconnectmaineventqueue(); //called by application.lock()
+procedure gui_disconnectmaineventqueue(); //called by gdi_lock()
 begin
  sys_mutexlock(connectmutex2);
  if sys_mutextrylock(connectmutex1) <> sye_ok then begin
@@ -5392,7 +5392,7 @@ begin
  end;
 end;
 
-procedure gui_connectmaineventqueue();     //called by application.unlock()
+procedure gui_connectmaineventqueue();     //called by gdi_unlock()
 begin
  sys_mutexunlock(connectmutex1);
  sys_mutexunlock(connectmutex2);

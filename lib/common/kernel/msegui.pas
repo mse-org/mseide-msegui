@@ -2486,6 +2486,7 @@ type
    procedure setforcezorder(const avalue: boolean);
   protected  
    foptionsgui: guiappoptionsty;
+   fgdilockcount: int32;
    procedure sysevent(const awindow: winidty; var aevent: syseventty;
                                                     var handled: boolean);
    procedure sethighrestimer(const avalue: boolean); override;
@@ -2497,8 +2498,8 @@ type
    procedure doafterrun; override;
    procedure internalinitialize; override;
    procedure internaldeinitialize;  override;
-   procedure dobeginthreadlock; override;
-   procedure doendthreadlock; override;
+//   procedure dobeginthreadlock; override;
+//   procedure doendthreadlock; override;
    procedure objecteventdestroyed(const sender: tobjectevent); override;
    procedure dragstarted; //calls dragstarted of all known widgets
    procedure internalpackwindowzorder(); virtual;
@@ -2516,7 +2517,11 @@ type
 
    function createform(instanceclass: widgetclassty; var reference): twidget;
    procedure invalidate; //invalidates all registered forms
-   
+{   
+   procedure lockgdi();
+   procedure unlockgdi();
+   function gdilocked(): boolean;
+}   
    procedure processmessages; override; //handle with care!
    function idle: boolean; override;
    function modallevel: integer; override;
@@ -19170,7 +19175,7 @@ begin
   optionsgui:= optionsgui - [gao_forcezorder];
  end;
 end;
-
+{
 procedure tguiapplication.dobeginthreadlock();
 begin
  gui_disconnectmaineventqueue();
@@ -19180,7 +19185,31 @@ procedure tguiapplication.doendthreadlock();
 begin
  gui_connectmaineventqueue();
 end;
+}
+{
+function tguiapplication.gdilocked(): boolean;
+begin
+ result:= (fgdilockcount > 0);
+end;
 
+procedure tguiapplication.lockgdi();
+begin
+ lock();
+ inc(fgdilockcount);
+ if (fgdilockcount = 1) and not ismainthread then begin
+  gui_disconnectmaineventqueue();
+ end;
+end;
+
+procedure tguiapplication.unlockgdi();
+begin
+ dec(fgdilockcount);
+ if (fgdilockcount = 0) and not ismainthread then begin
+  gui_connectmaineventqueue();
+ end;
+ unlock();
+end;
+}
 { tasyncmessageevent }
 
 constructor tasyncmessageevent.create(const amessage: msestring;

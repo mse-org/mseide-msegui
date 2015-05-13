@@ -248,7 +248,6 @@ var
 begin
  ffonthashlist.delete(index);
  with fonts[index] do begin
-//  finalize(data^);
   gdi_lock;
   drawinfo.getfont.fontdata:= data;
   freefontdata(drawinfo);

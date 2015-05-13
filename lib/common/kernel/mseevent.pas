@@ -205,7 +205,7 @@ begin
   include(fstate,oes_modaldeferred);
  end;
  if (finterface <> nil) then begin
-  if application.locked then begin
+  if application.islockedthread() then begin
    include(fstate,oes_islinked);
  {$ifndef FPC}
    po1:= pointer(1);

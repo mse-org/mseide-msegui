@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2015 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -226,7 +226,6 @@ type
   private
    fapplicationname: filenamety;
    flockthread: threadty;
-   flockcount: integer;
    fmutex: mutexty;
    feventlist: teventlist;
    feventlock: mutexty;
@@ -234,8 +233,6 @@ type
    fpostedeventslocal: eventarty;
    fidlecount: integer;
    fcheckoverloadlock: integer;
-//   fexceptionactive: integer;
-//   fexceptioncount: longword;
    fexceptioncount: integer;
    fonexception: exceptioneventty;
    finiting: integer;
@@ -246,6 +243,7 @@ type
    procedure setterminated(const Value: boolean);
    function gethighrestimer: boolean;
   protected
+   flockcount: integer;
    foptions: applicationoptionsty;
    fthread: threadty;
    fstate: applicationstatesty;
@@ -267,8 +265,6 @@ type
    procedure incidlecount;
    procedure dobeforerun; virtual;
    procedure doafterrun; virtual;
-   procedure dobeginthreadlock; virtual;
-   procedure doendthreadlock; virtual;
    procedure dowakeup(sender: tobject);
    property eventlist: teventlist read feventlist;
    procedure internalinitialize; virtual;
@@ -310,13 +306,6 @@ type
    function checkoverload(const asleepus: integer = 100000): boolean;
               //true if never idle since last call,
               // unlocks application and calls sleep if not mainthread and asleepus >= 0
-{              
-   function waitdialog(const athread: tthreadcomp = nil; const atext: msestring = '';
-                   const caption: msestring = '';
-                   const acancelaction: notifyeventty = nil;
-                   const aexecuteaction: notifyeventty = nil;
-                   const aidleaction: waitidleeventty = nil): boolean; virtual;
-}
    procedure handleexception(sender: tobject = nil; 
                                        const leadingtext: msestring = '');
    procedure showexception(e: exception; const leadingtext: msestring = '');
@@ -329,7 +318,10 @@ type
    procedure registeronidle(const method: idleeventty);
    procedure unregisteronidle(const method: idleeventty);
    procedure settimer(const us: integer); virtual;
-   function locked: boolean; //true if calling thread holds the lock
+
+   function islockedthread: boolean; //true if calling thread holds the lock
+   function islockedmainthread: boolean; 
+            //true if calling thread holds the lock and is mainthread
    function trylock: boolean;
    function lock: boolean;
     //synchronizes calling thread with main event loop (mutex),
@@ -1198,9 +1190,11 @@ begin
  if not sys_issamethread(flockthread,athread) then begin
   result:= true;
   flockthread:= athread;
+  {
   if flockthread <> fthread then begin
    dobeginthreadlock();
   end;
+  }
  end
  else begin
   result:= false;
@@ -1220,10 +1214,18 @@ begin
  result:= dolock;
 end;
 
-function tcustomapplication.locked: boolean; 
+function tcustomapplication.islockedthread: boolean; 
                        //true if calling thread holds the lock
 begin
- result:= flockthread = sys_getcurrentthread;
+ result:= (flockcount > 0) and (flockthread = sys_getcurrentthread());
+end;
+
+function tcustomapplication.islockedmainthread: boolean; 
+var
+ id: threadty;
+begin
+ id:= sys_getcurrentthread();
+ result:= (flockcount > 0) and (id = flockthread) and (id = fthread);
 end;
 
 function tcustomapplication.trylock: boolean;
@@ -1254,9 +1256,11 @@ begin
    dec(count);
    dec(flockcount);
    if flockcount = 0 then begin
+{
     if flockthread <> fthread then begin
      doendthreadlock();
     end;
+}
     flockthread:= 0;
    end;
    sys_mutexunlock(fmutex);
@@ -1823,7 +1827,7 @@ begin
   treleaseevent(event).fobject.free;
  end;
 end;
-
+{
 procedure tcustomapplication.dobeginthreadlock;
 begin
  //dummy
@@ -1833,7 +1837,7 @@ procedure tcustomapplication.doendthreadlock;
 begin
  //dummy
 end;
-
+}
 { tactivatorcontroller }
 
 constructor tactivatorcontroller.create(const aowner: tcomponent;

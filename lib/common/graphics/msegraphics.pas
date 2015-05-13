@@ -1350,8 +1350,11 @@ var
  
 procedure init;
 procedure deinit;
-procedure gdi_lock;   //locks only if not mainthread
-procedure gdi_unlock; //unlocks only if not mainthread
+
+procedure gdi_lock();
+procedure gdi_unlock();
+function gdi_locked(): boolean;
+
 procedure gdi_call(const func: gdifuncty; var drawinfo: drawinfoty;
                                    gdi: pgdifunctionaty = nil);
 function getdefaultgdifuncs: pgdifunctionaty;{$ifdef FPC}inline;{$endif}
@@ -1415,7 +1418,7 @@ type
 
 var
  gdilockcount: integer;
- gdilocked: boolean;
+// gdilocked: boolean;
  
 {$ifdef mse_debuggdisync}
 procedure gdilockerror(const text: string);
@@ -1592,26 +1595,27 @@ begin
  inc(gdinum);
 end;
 
-procedure gdi_lock;
+procedure gdi_lock();
 begin
- with application do begin
-  if not locked then begin
-   lock;
-   gdilocked:= true;
-  end;
-  inc(gdilockcount);
+ application.lock();
+ if (gdilockcount = 0) and not application.ismainthread then begin
+  gui_disconnectmaineventqueue();
  end;
+ inc(gdilockcount);
 end;
 
-procedure gdi_unlock;
+procedure gdi_unlock();
 begin
- with application do begin
-  dec(gdilockcount);
-  if gdilocked and (gdilockcount = 0) then begin
-   gdilocked:= false;
-   unlock;
-  end;
+ dec(gdilockcount);
+ if (gdilockcount = 0) and not application.ismainthread then begin
+  gui_connectmaineventqueue();
  end;
+ application.unlock();
+end;
+
+function gdi_locked(): boolean;
+begin
+ result:= (gdilockcount > 0) or application.islockedmainthread();
 end;
 
 procedure gdi_call(const func: gdifuncty; var drawinfo: drawinfoty;
@@ -1624,26 +1628,24 @@ begin
 end;
 
 begin
- with application do begin
-  if gdi = nil then begin
-   gdi:= gdifuncs[0];//gui_getgdifuncs;
-  end;
-  if not locked then begin
-   lock();
-   try
-    gdi^[func](drawinfo);
-    if flushgdi then begin
-     doflush()
-    end;
-   finally
-    unlock();
-   end;
-  end
-  else begin
+ if gdi = nil then begin
+  gdi:= gdifuncs[0];//gui_getgdifuncs;
+ end;
+ if not gdi_locked() then begin
+  gdi_lock();
+  try
    gdi^[func](drawinfo);
    if flushgdi then begin
-    doflush();
+    doflush()
    end;
+  finally
+   gdi_unlock();
+  end;
+ end
+ else begin
+  gdi^[func](drawinfo);
+  if flushgdi then begin
+   doflush();
   end;
  end;
 end;
@@ -3937,17 +3939,24 @@ end;
 
 function tcanvas.lock: boolean;
 begin
+ result:= not gdi_locked();
+ if result then begin
+  gdi_lock();
+ end;
+{
  with application do begin
-  result:= not locked;
+  result:= not gdilocked();
   if result then begin
-   lock;
+   lockgdi();
   end;
  end;
+}
 end;
 
 procedure tcanvas.unlock;
 begin
- application.unlock;
+ gdi_unlock();
+// application.unlockgdi();
 end;
 
 procedure tcanvas.doflush;
