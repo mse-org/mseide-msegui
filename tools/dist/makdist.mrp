@@ -16,8 +16,8 @@ run.sta=6
 macros.sta=9
  [macrosfo]
  stackedunder=
- x=4
- y=331
+ x=12
+ y=391
  cx=1195
  cy=491
  wsize=0
@@ -97,7 +97,7 @@ c=1
    ie=0
    )
   teststate=1
-  path=${MSEBASEDIR}mseide-msegui/
+  path=${MSEBASEDIR}/mseide-msegui/
   comment=
   cc=
   cd=
@@ -183,9 +183,9 @@ c=1
    ie=0
    )
   teststate=1
-  path=${MSEBASEDIR}mseuniverse/tools/
+  path=${MSEBASEDIR}/mseuniverse/tools/
   comment=
-  cc=${FPC} -Fu${MSEBASEDIR}mseuniverse/tools/toolsskin ${FILE}
+  cc=${FPC} -Fu${MSEBASEDIR}/mseuniverse/tools/toolsskin ${FILE}
   cd=
   rc=
   rd=
@@ -237,10 +237,10 @@ macrovalues=10
  ppc386
  ppcx64
  /home/mse/packs/standard/git/
- ${MSEBASEDIR}mseide-msegui/lib/common/
- -Fu${FPCINSTDIR}lib/fpc/2.6.5/units/i386-linux/*
- -Fu${MSELIBDIR}* -Fu${MSELIBDIR}kernel/linux
- ${FPCINSTDIR}bin/${COMPILERBIN}
+ ${FILE_SYS(${MSEBASEDIR}/mseide-msegui/lib/common/)}
+ -Fu${FILE_SYS(${FPCINSTDIR}/${FPCUNITDIR}/*)}
+ -Fu${MSELIBDIR}* -Fu${FILE_SYS(${MSELIBDIR}kernel/)}${TARGET}
+ ${FPCINSTDIR}${FILE_SYS(/bin/${COMPILERBIN})}
  -n -viwn -Xg -B -O2 -XX -Xs -CX -l -Fcutf8 -dmse_with_deprecated ${MSEUNITS} ${FPCUNITS} ${MAC_IFDEF(OPT)}
  ${COMPILER} ${FPCFLAGS}
 macroon=10
