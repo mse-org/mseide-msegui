@@ -78,6 +78,7 @@ type
    property options: macrooptionsty read foptions write foptions;
    
    procedure setpredefined(const avalue: array of macroinfoty);
+   procedure setpredefined(const avalue: array of macroinfoarty);
    property predefined: macroinfoarty read fpredefined write fpredefined;
                             //appended by setasarray procedures
  end;
@@ -692,6 +693,11 @@ begin
 end;
 
 procedure tmacrolist.setpredefined(const avalue: array of macroinfoty);
+begin
+ fpredefined:= initmacros(avalue);
+end;
+
+procedure tmacrolist.setpredefined(const avalue: array of macroinfoarty);
 begin
  fpredefined:= initmacros(avalue);
 end;
