@@ -16,8 +16,8 @@ run.sta=6
 macros.sta=9
  [macrosfo]
  stackedunder=
- x=12
- y=391
+ x=145
+ y=63
  cx=1195
  cy=491
  wsize=0
@@ -91,8 +91,8 @@ c=1
    ae=0
    eec=0
    cr=0
-   ao=
-   ae=
+   ao=0
+   ae=0
    aec=0
    ie=0
    )
@@ -133,8 +133,8 @@ c=1
    ae=0
    eec=
    cr=0
-   ao=
-   ae=
+   ao=0
+   ae=0
    aec=0
    ie=0
    )
@@ -155,8 +155,8 @@ c=1
    ae=0
    eec=
    cr=0
-   ao=
-   ae=
+   ao=0
+   ae=0
    aec=0
    ie=0
    )
@@ -177,8 +177,8 @@ c=1
    ae=0
    eec=
    cr=0
-   ao=
-   ae=
+   ao=0
+   ae=0
    aec=0
    ie=0
    )
@@ -240,7 +240,7 @@ macrovalues=10
  ${FILE_SYS(${MSEBASEDIR}/mseide-msegui/lib/common/)}
  -Fu${FILE_SYS(${FPCINSTDIR}/${FPCUNITDIR}/*)}
  -Fu${MSELIBDIR}* -Fu${FILE_SYS(${MSELIBDIR}kernel/)}${TARGET}
- ${FPCINSTDIR}${FILE_SYS(/bin/${COMPILERBIN})}
+ ${FPCINSTDIR}${FILE_SYS(${COMPILERBIN})}
  -n -viwn -Xg -B -O2 -XX -Xs -CX -l -Fcutf8 -dmse_with_deprecated ${MSEUNITS} ${FPCUNITS} ${MAC_IFDEF(OPT)}
  ${COMPILER} ${FPCFLAGS}
 macroon=10
