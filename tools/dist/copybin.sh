@@ -27,5 +27,5 @@ echo DEST: $3
 
 docopy "" ${MSELINUXDIR} i386-linux
 docopy "" ${MSELINUX64DIR} x86_64-linux
-docopy "" ${MSEBSDDIR} x86_64-bsd
+docopy "" ${MSEBSDDIR} x86_64-freebsd
 docopy ".exe" ${MSEWINDOWSDIR} i386-win32
