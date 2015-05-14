@@ -20,7 +20,7 @@ echo DEST: $3
  TMP=$2/mseuniverse/tools/msegit/msegit$1
  echo " Copying $TMP"
  cp $TMP ${DESTDIR}/$3
- TMP=$2/mseuniverse/tools/msetest/msetest$1
+ TMP=$2/mseuniverse/tools/mserun/mserun$1
  echo " Copying $TMP"
  cp $TMP ${DESTDIR}/$3
 }
