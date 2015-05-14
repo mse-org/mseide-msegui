@@ -97,7 +97,7 @@ c=1
    ie=0
    )
   teststate=1
-  path=${MSEBASEDIR}/mseide-msegui/
+  path=${MSEBASEDIR}/mseide-msegui${MAC_IFDEF(DIREXT)}/
   comment=
   cc=
   cd=
@@ -183,7 +183,7 @@ c=1
    ie=0
    )
   teststate=1
-  path=${MSEBASEDIR}/mseuniverse/tools/
+  path=${MSEBASEDIR}/mseuniverse${MAC_IFDEF(DIREXT)}/tools/
   comment=
   cc=${FPC} -Fu${MSEBASEDIR}/mseuniverse/tools/toolsskin ${FILE}
   cd=
