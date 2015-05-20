@@ -284,6 +284,53 @@ type
    function find(const avalue: msestring): integer; override;
          //returns id, -1 if not found
  end;
+
+ bufferoffsetty = ptrint;
+  
+ bufferheaderty = record
+  size: bufferoffsetty;
+  data: record
+  end;
+ end;
+ pbufferheaderty = ^bufferheaderty;
+
+ bufferdataliststatety = (bdls_destroying);
+ bufferdataliststatesty = set of bufferdataliststatety; 
+ tbufferdatalist = class
+  private
+   fbuffer: pointer;
+   fbuffersize: bufferoffsetty;
+   fbuffercapacity: bufferoffsetty;
+   fnextitem: bufferoffsetty;
+  protected
+   fstate: bufferdataliststatesty;
+   function adddata(asize: int32): pointer; virtual;
+   function adddata(const asize: int32; out aoffset: bufferoffsetty): pointer;
+  public
+   constructor create();
+   destructor destroy(); override;
+   procedure checkcapacity(const asize: int32);
+   procedure clear(); virtual;
+   procedure mark(out ref: bufferoffsetty);
+   procedure release(const ref: bufferoffsetty);
+   function absdata(const aoffset: bufferoffsetty): pointer; inline;
+   function firstdata: pointer; //nil if none
+   function nextdata: pointer;  //nil if none
+ end;
+
+ tindexbufferdatalist = class(tbufferdatalist)
+  private
+   findex: ptrintarty;
+   fcapacity: int32;
+   function getitems(index: integer): pointer;
+  protected
+   fcount: int32;
+   function adddata(asize: int32): pointer; override;
+  public
+   procedure clear(); override;
+   property items[index: integer]: pointer read getitems;
+   property count: int32 read fcount;
+ end;
  
 implementation
 uses
@@ -1653,6 +1700,127 @@ begin
   raise exception.create('Invalid order index '+inttostr(avalue)+'.');
  end;
  forder:= avalue;
+end;
+
+{ tbufferdatalist }
+
+constructor tbufferdatalist.create;
+begin
+end;
+
+destructor tbufferdatalist.destroy();
+begin
+ include(fstate,bdls_destroying);
+ clear();
+end;
+
+procedure tbufferdatalist.clear;
+begin
+ if fbuffer <> nil then begin
+  freemem(fbuffer);
+  fbuffer:= nil;
+  fbuffersize:= 0;
+  fbuffercapacity:= 0;
+ end;
+end;
+
+procedure tbufferdatalist.mark(out ref: bufferoffsetty);
+begin
+ ref:= fbuffersize;
+end;
+
+procedure tbufferdatalist.release(const ref: bufferoffsetty);
+begin
+ fbuffersize:= ref;
+end;
+
+function tbufferdatalist.absdata(const aoffset: bufferoffsetty): pointer;
+begin
+ result:= fbuffer + aoffset;
+end;
+
+procedure tbufferdatalist.checkcapacity(const asize: int32);
+begin
+ fbuffersize:= fbuffersize + ((asize+3) and not 3); //4 byte align
+ if fbuffersize > fbuffercapacity then begin
+  fbuffercapacity:= fbuffersize*2 + 1024;
+  reallocmem(fbuffer,fbuffercapacity);
+ end;
+end;
+{
+procedure tbufferdatalist.add(const asize: int32);
+begin
+ checkcapacity(asize);
+ fbuffersize:= fbuffersize + asize;
+end;
+}
+
+function tbufferdatalist.adddata(asize: int32): pointer;
+var
+ i1: bufferoffsetty;
+begin
+ asize:= asize + sizeof(bufferheaderty);
+ i1:= fbuffersize;
+ checkcapacity(asize);
+ result:= fbuffer + i1;
+ pbufferheaderty(result)^.size:= fbuffersize-i1;
+ inc(result,sizeof(bufferheaderty));
+end;
+
+function tbufferdatalist.adddata(const asize: int32;
+                                    out aoffset: bufferoffsetty): pointer;
+begin
+ aoffset:= fbuffersize;
+ result:= adddata(asize);
+end;
+
+function tbufferdatalist.firstdata: pointer;
+begin
+ result:= nil;
+ if fbuffersize > 0 then begin
+  result:= fbuffer;
+  fnextitem:= pbufferheaderty(result)^.size;
+  inc(result,sizeof(bufferheaderty));
+ end;
+end;
+
+function tbufferdatalist.nextdata: pointer;
+begin
+ result:= nil;
+ if fnextitem < fbuffersize then begin
+  result:= fbuffer + fnextitem;
+  inc(fnextitem,pbufferheaderty(result)^.size);
+  inc(result,sizeof(bufferheaderty));
+ end;
+end;
+
+{ tindexbufferdatalist }
+
+procedure tindexbufferdatalist.clear;
+begin
+ inherited;
+ findex:= nil;
+ fcount:= 0;
+ fcapacity:= 0;
+end;
+
+function tindexbufferdatalist.adddata(asize: int32): pointer;
+begin
+ result:= inherited adddata(asize);
+ if fcount >= fcapacity then begin
+  fcapacity:= 2*fcount + 1024;
+  reallocuninitedarray(fcapacity,sizeof(findex[0]),findex);
+ end;
+ findex[fcount]:= result-fbuffer;
+ inc(fcount);
+end;
+
+function tindexbufferdatalist.getitems(index: integer): pointer;
+begin
+ if (index < 0) or (index >= fcount) then begin
+  tlist.error(slistindexerror,index);
+ end;
+ result:= fbuffer + findex[index] + sizeof(bufferheaderty);
 end;
 
 end.
