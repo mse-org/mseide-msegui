@@ -6,6 +6,8 @@ object findinfilepagefo: tfindinfilepagefo
   bounds_cx = 573
   bounds_cy = 310
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets]
+  container.frame.localprops = []
+  container.frame.localprops1 = []
   container.onlayout = childscaled
   container.bounds = (
     0
@@ -20,6 +22,8 @@ object findinfilepagefo: tfindinfilepagefo
   object grid: twidgetgrid
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets]
     color = -1879048187
+    frame.localprops = []
+    frame.localprops1 = []
     taborder = 1
     bounds_x = 0
     bounds_y = 24
@@ -69,7 +73,8 @@ object findinfilepagefo: tfindinfilepagefo
     end
   end
   object filename: tstringdisp
-    frame.dummy = 0
+    frame.localprops = []
+    frame.localprops1 = []
     taborder = 3
     bounds_x = 1
     bounds_y = 0
@@ -81,7 +86,8 @@ object findinfilepagefo: tfindinfilepagefo
     reffontheight = 14
   end
   object foundcount: tintegerdisp
-    frame.dummy = 0
+    frame.localprops = []
+    frame.localprops1 = []
     taborder = 2
     bounds_x = 407
     bounds_y = 0
@@ -101,7 +107,7 @@ object findinfilepagefo: tfindinfilepagefo
     bounds_cy = 20
     anchors = [an_top, an_right]
     state = [as_disabled, as_localdisabled, as_localcaption, as_localonexecute]
-    caption = 'Cancel'
+    caption = '&Cancel'
     onexecute = cancelonexecute
     reffontheight = 14
   end
@@ -116,7 +122,7 @@ object findinfilepagefo: tfindinfilepagefo
     bounds_cy = 20
     anchors = [an_top, an_right]
     state = [as_localcaption, as_localonexecute]
-    caption = 'again'
+    caption = '&again'
     onexecute = againonexecute
     reffontheight = 14
   end
