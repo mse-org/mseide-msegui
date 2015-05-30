@@ -111,10 +111,13 @@ type
    destructor destroy; override;
    procedure clear; virtual;
    procedure reset; //next next will return first, next prev will return last
-   procedure mark(out ref: ptruint);
-   procedure release(const ref: ptruint);
    property capacity: integer read fcapacity write setcapacity;
    property count: integer read fcount;
+   procedure mark(out ref: ptruint);
+   procedure release(const ref: ptruint);
+   function absdata(const ref: ptrint): pointer; 
+                   //returns pointer to hashdataty.data from mark(ref)
+   property recsize: int32 read frecsize;
    procedure iterate(const aiterator: hashiteratorprocty); overload;
  end;
  
@@ -920,6 +923,12 @@ begin
    dec(pchar(po1),po1^.header.prevlist);
   end;
  end;
+end;
+
+function thashdatalist.absdata(const ref: ptrint): pointer; 
+                   //returns pointer to hashdataty.data from mark(ref)
+begin
+ result:= fdata + ref + sizeof(hashheaderty);
 end;
 
 procedure thashdatalist.internaldeleteitem(const aitem: phashdatadataty);
