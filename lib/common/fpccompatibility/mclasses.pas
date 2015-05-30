@@ -902,6 +902,8 @@ TStringsEnumerator = class
     function Seek(Offset: Longint; Origin: Word): Longint; overload; virtual;
     function Seek(const Offset: Int64; Origin: TSeekOrigin): Int64;
                                              overload; virtual;
+    function seek(const offset: int64; const origin: tseekorigin; 
+                            out newpos: int64): syserrorty; overload; virtual;
     procedure ReadBuffer(var Buffer; Count: Longint);
     function tryreadbuffer(var buffer; count: longint): syserrorty;
     procedure WriteBuffer(const Buffer; Count: Longint);
@@ -3588,6 +3590,16 @@ end;
         raise ERangeError.Create(SRangeError);
       Result:=Seek(longint(Offset),ord(Origin));
     end;
+
+function tstream.seek(const offset: int64; const origin: tseekorigin; 
+                            out newpos: int64): syserrorty;
+begin
+ newpos:= seek(offset,origin);
+ result:= sye_ok;
+ if newpos < 0 then begin
+  result:= sye_lasterror;
+ end;
+end;
 
 function TStream.read(var buffer; const count: longint;
                out acount: longint): syserrorty;
