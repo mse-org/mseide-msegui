@@ -378,7 +378,8 @@ begin
  end;
 end;
 
-function tcustomsplitter.getcursorshape(const sender: tobjectpicker; var shape: cursorshapety): boolean;
+function tcustomsplitter.getcursorshape(const sender: tobjectpicker;
+                                          var shape: cursorshapety): boolean;
 begin
  result:= canmouseinteract and
                 pointinrect(sender.pos,makerect(nullpoint,fwidgetrect.size));
@@ -398,6 +399,9 @@ begin
    else begin
     result:= false;
    end;
+  end;
+  if result and (cursor <> cr_default) then begin
+   shape:= cursor;
   end;
  end;
 end;

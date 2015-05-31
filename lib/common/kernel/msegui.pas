@@ -1841,10 +1841,12 @@ type
    function containswidget(awidget: twidget): boolean;
 
    procedure insertwidget(const awidget: twidget); overload;
-   procedure insertwidget(const awidget: twidget; const apos: pointty); overload; virtual;
+   procedure insertwidget(const awidget: twidget; 
+                                  const apos: pointty); overload; virtual;
                     //widget can be child
 
-   function iswidgetclick(const info: mouseeventinfoty; const caption: boolean = false): boolean;
+   function iswidgetclick(const info: mouseeventinfoty; 
+                                    const caption: boolean = false): boolean;
    //true if eventtype = et_butonrelease, button is mb_left,
    // clicked and pos in clientrect or in frame.caption if caption = true,
    // origin = pos
@@ -1965,7 +1967,8 @@ type
    function clientwidgetrect: rectty;        //origin = pos
    function clientwidgetpos: pointty;        //origin = pos
    function clientparentpos: pointty;        //origin = parentwidget.pos
-   property parentclientpos: pointty read getparentclientpos write setparentclientpos;
+   property parentclientpos: pointty read getparentclientpos 
+                                                  write setparentclientpos;
                                              //origin = parentwidget.clientpos
    function paintparentpos: pointty;         //origin = parentwidget.pos
    function parentpaintpos: pointty;         //origin = parentwidget.paintpos
@@ -2048,8 +2051,10 @@ type
                                             write setoptionsskin default [];
    function actualcursor(const apos: pointty): cursorshapety; virtual;
                              //origin = pos
-   property cursor: cursorshapety read fcursor write setcursor default cr_default;
-   property color: colorty read fcolor write setcolor default defaultwidgetcolor;
+   property cursor: cursorshapety read fcursor write setcursor 
+                                                  default cr_default;
+   property color: colorty read fcolor write setcolor 
+                                                default defaultwidgetcolor;
    property visible: boolean read getvisible write setvisible default true;
    property enabled: boolean read getenabled write setenabled default true;
    property taborder: integer read ftaborder write settaborder default 0;
