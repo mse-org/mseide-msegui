@@ -21,7 +21,7 @@ uses
  classes,mclasses,sysutils,msegraphics,msetypes,mseact,
  msestrings,mseerr,msegraphutils,mseapplication,msedragglob,
  msepointer,mseevent,msekeyboard,mseclasses,mseglob,mseguiglob,mselist,
- msesystypes,msethread,mseguiintf,{msesysdnd,}
+ msesystypes,msethread,mseguiintf,{msesysdnd,}mseassistive,
  msebitmap,msearrayprops,msethreadcomp,mserichstring,msearrayutils
                                {$ifdef mse_with_ifi},mseifiglob{$endif};
 
@@ -1325,7 +1325,7 @@ type
  widgetclassty = class of twidget;
  navigrequesteventty = procedure(const sender: twidget;
                                 var ainfo: naviginfoty) of object; 
- twidget = class(tactcomponent,iscrollframe,iface)
+ twidget = class(tactcomponent,iscrollframe,iface,iassistiveclient)
   private
    fwidgetregion: gdiregionty;
    frootpos: pointty;   //position in rootwindow
@@ -9680,6 +9680,9 @@ procedure twidget.mouseevent(var info: mouseeventinfoty);
  begin
   include(info.eventstate,es_client);
   try
+   if assistiveserver <> nil then begin
+    assistiveserver.clientmouseevent(iassistiveclient(self),info);
+   end;
    clientmouseevent(info);
   finally
    exclude(info.eventstate,es_client);
@@ -10431,6 +10434,9 @@ begin
     end;
    end;
    include(fwidgetstate,ws_entered);
+   if assistiveserver <> nil then begin
+    assistiveserver.doenter(iassistiveclient(self));
+   end;
    doenter;
    if needsfocuspaint then begin
     invalidatewidget;
