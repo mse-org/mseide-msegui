@@ -1677,6 +1677,9 @@ type
    function getclientrect: rectty;
    function windowpo: pwindowty;
    function canclose1: boolean; 
+   
+    //iassistiveclient
+   function getassistivename(): msestring; virtual;
   public
    constructor create(aowner: tcomponent); overload; override;
    constructor create(const aowner: tcomponent;
@@ -13291,6 +13294,11 @@ function twidget.isdesignwidget: boolean;
 begin
  result:= (csdesigning in componentstate) or 
                                     (ws1_designwidget in fwidgetstate1);
+end;
+
+function twidget.getassistivename: msestring;
+begin
+ result:= name;
 end;
 
 { twindow }

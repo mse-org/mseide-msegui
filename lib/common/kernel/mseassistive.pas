@@ -11,11 +11,12 @@ unit mseassistive;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- mseguiglob,mseglob;
+ mseguiglob,mseglob,msestrings;
 
 type
  iassistiveclient = interface(inullinterface)
   function getinstance: tobject;
+  function getassistivename(): msestring;
  end;
 
  iassistiveserver = interface(inullinterface)

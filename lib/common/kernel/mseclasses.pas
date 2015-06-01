@@ -494,7 +494,7 @@ type
    function getcomponentinstance: tcomponent;
    procedure getcompchildren(const proc: tgetchildproc;
                                                   const root: tcomponent);
-   
+
     //iobjectlink
    procedure link(const source,dest: iobjectlink; valuepo: pointer = nil;
                ainterfacetype: pointer = nil; once: boolean = false);
@@ -523,10 +523,6 @@ type
    procedure componentevent(const event: tcomponentevent); virtual;
    procedure doasyncevent(var atag: integer); virtual;
    procedure doafterload; virtual;
-
-//   procedure getchildren(proc: tgetchildproc; root: tcomponent); override;
-//   procedure getchildren1(const proc: tgetchildproc;
-//                                      const root: tcomponent); virtual;
   public
    destructor destroy; override;
    procedure writestate(writer: twriter); override;
