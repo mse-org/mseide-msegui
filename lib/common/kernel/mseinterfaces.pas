@@ -56,7 +56,9 @@ min_iactivatorclient,
 min_istatfile,
 min_ibandparent,
 min_idocktarget,
-min_itabpage);
+min_itabpage,
+min_iassistiveclient,
+min_iassistiveserver);
 
 const
  miid_iformdesigner =          'AA.mse';{0}
@@ -103,6 +105,8 @@ const
  miid_idocktarget =            'lA.mse';{41}
  miid_itabpage =               'VA.mse';{42}
  miid_idbdispfieldlink =       '1A.mse';{43}
+ miid_iassistiveclient =       'NA.mse';{44}
+ miid_iassistiveserver =       'tA.mse';{45}
   
 implementation
 end.

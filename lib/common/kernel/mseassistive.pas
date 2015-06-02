@@ -11,15 +11,15 @@ unit mseassistive;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- mseguiglob,mseglob,msestrings;
+ mseguiglob,mseglob,msestrings,mseinterfaces;
 
 type
- iassistiveclient = interface(inullinterface)
+ iassistiveclient = interface(inullinterface)[miid_iassistiveclient]
   function getinstance: tobject;
   function getassistivename(): msestring;
  end;
 
- iassistiveserver = interface(inullinterface)
+ iassistiveserver = interface(inullinterface)[miid_iassistiveserver]
   procedure doenter(const sender: iassistiveclient);
   procedure clientmouseevent(const sender: iassistiveclient;
                                           var info: mouseeventinfoty);
