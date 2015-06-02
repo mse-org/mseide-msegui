@@ -2158,7 +2158,7 @@ end;
 
 procedure tactionsimplebutton.dokeydown(var info: keyeventinfoty);
 begin
- inherited;
+// inherited;
  with info do begin
   if (shiftstate * singlekeyshiftstatesmask = []) and 
                               (bo_executeonkey in foptions) then begin
@@ -2173,6 +2173,9 @@ begin
     end;
    end;
   end;
+ end;
+ if not (es_processed in info.eventstate) then begin
+  inherited;
  end;
 end;
 
