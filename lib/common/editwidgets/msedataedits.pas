@@ -930,6 +930,7 @@ type
    function createdropdowncontroller: tcustomdropdowncontroller; override;
    procedure internalsort(const acol: integer;
                                out sortlist: integerarty); override;
+   function sortfunc(const l,r): integer; override;
 
    function getvalueempty: integer; override;
    function textcellcopy: boolean; override;
@@ -5093,6 +5094,11 @@ procedure tcustomenuedit.setnullvalue;
 begin
  dropdown.itemindex:= -1;
  nullvalueset();
+end;
+
+function tcustomenuedit.sortfunc(const l; const r): integer;
+begin
+ result:= tdatalist1(twidgetcol1(fgridintf.getcol).fdata).compare(l,r);
 end;
 
 { tnocolsenumdropdowncontroller }

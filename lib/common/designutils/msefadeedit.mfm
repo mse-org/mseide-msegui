@@ -6,6 +6,8 @@ object fadeeditfo: tfadeeditfo
   bounds_cx = 519
   bounds_cy = 443
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets]
+  container.frame.localprops = []
+  container.frame.localprops1 = []
   container.bounds = (
     0
     0
@@ -36,7 +38,6 @@ object fadeeditfo: tfadeeditfo
         color = -1610612731
         face.fade_direction = gd_down
         face.localprops = [fal_fadirection]
-        face.dummy = 0
         taborder = 5
         visible = True
         bounds_x = 444
@@ -55,9 +56,11 @@ object fadeeditfo: tfadeeditfo
         object opagrid: twidgetgrid
           Tag = 1
           frame.caption = 'Opacity'
+          frame.localprops = []
+          frame.localprops1 = []
           frame.outerframe = (
             0
-            17
+            16
             0
             0
           )
@@ -97,25 +100,25 @@ object fadeeditfo: tfadeeditfo
               widgetname = 'opacolored'
               dataclass = tgridenumdatalist
             end>
-          datarowheight = 16
+          datarowheight = 15
           statfile = fadestatfile
           onrowsinserted = rowinsertev
           onrowsdeleted = rowdeleteev
           oncellevent = gridcellev
-          reffontheight = 14
+          reffontheight = 13
           object opaposed: trealedit
             optionswidget1 = [ow1_fontglyphheight]
             optionsskin = [osk_framebuttononly]
             frame.levelo = 0
             frame.colorclient = -2147483645
             frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
-            frame.dummy = 0
+            frame.localprops1 = []
             taborder = 1
             visible = False
             bounds_x = 25
             bounds_y = 0
             bounds_cx = 89
-            bounds_cy = 16
+            bounds_cy = 15
             optionsedit1 = [oe1_savevalue]
             ondataentered = dataenteterev
             value = -Inf
@@ -126,13 +129,14 @@ object fadeeditfo: tfadeeditfo
             valuestart = 0
             min = 0
             max = 1
-            reffontheight = 14
+            reffontheight = 13
           end
           object opacolored: tcoloredit
             optionsskin = [osk_framebuttononly]
             frame.levelo = 0
             frame.colorclient = -2147483645
             frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
+            frame.localprops1 = []
             frame.button.color = -1879048187
             frame.buttonellipse.color = -1879048187
             frame.buttonellipse.imagenr = 17
@@ -141,15 +145,17 @@ object fadeeditfo: tfadeeditfo
             bounds_x = 115
             bounds_y = 0
             bounds_cx = 290
-            bounds_cy = 16
+            bounds_cy = 15
             optionsedit1 = [oe1_savevalue]
             ondataentered = dataenteterev
             valuedefault = -1610612731
             dropdown.options = [deo_autodropdown, deo_keydropdown]
-            reffontheight = 14
+            reffontheight = 13
           end
         end
         object grid: twidgetgrid
+          frame.localprops = []
+          frame.localprops1 = []
           taborder = 1
           bounds_x = 0
           bounds_y = 0
@@ -166,7 +172,7 @@ object fadeeditfo: tfadeeditfo
           fixrows.count = 1
           fixrows.items = <          
             item
-              height = 16
+              height = 15
               captions.count = 4
               captions.items = <              
                 item
@@ -205,29 +211,29 @@ object fadeeditfo: tfadeeditfo
             end          
             item[opaed]
               width = 138
-              options = [co_invisible, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savevalue, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
+              options = [co_invisible, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savevalue, co_savestate, co_nosort, co_cancopy, co_canpaste, co_mousescrollrow]
               widgetname = 'opaed'
               dataclass = tgridenumdatalist
             end>
-          datarowheight = 16
+          datarowheight = 15
           statfile = fadestatfile
           onrowsinserted = rowinsertev
           onrowsdeleted = rowdeleteev
           oncellevent = gridcellev
-          reffontheight = 14
+          reffontheight = 13
           object posed: trealedit
             optionswidget1 = [ow1_fontglyphheight]
             optionsskin = [osk_framebuttononly]
             frame.levelo = 0
             frame.colorclient = -2147483645
             frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
-            frame.dummy = 0
+            frame.localprops1 = []
             taborder = 1
             visible = False
             bounds_x = 25
             bounds_y = 0
             bounds_cx = 89
-            bounds_cy = 16
+            bounds_cy = 15
             optionsedit1 = [oe1_savevalue]
             ondataentered = dataenteterev
             value = -Inf
@@ -238,13 +244,14 @@ object fadeeditfo: tfadeeditfo
             valuestart = 0
             min = 0
             max = 1
-            reffontheight = 14
+            reffontheight = 13
           end
           object colored: tcoloredit
             optionsskin = [osk_framebuttononly]
             frame.levelo = 0
             frame.colorclient = -2147483645
             frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
+            frame.localprops1 = []
             frame.button.color = -1879048187
             frame.buttonellipse.color = -1879048187
             frame.buttonellipse.imagenr = 17
@@ -253,12 +260,12 @@ object fadeeditfo: tfadeeditfo
             bounds_x = 115
             bounds_y = 0
             bounds_cx = 151
-            bounds_cy = 16
+            bounds_cy = 15
             optionsedit1 = [oe1_savevalue]
             ondataentered = dataenteterev
             valuedefault = -1610612731
             dropdown.options = [deo_autodropdown, deo_keydropdown]
-            reffontheight = 14
+            reffontheight = 13
           end
           object opaed: tcoloredit
             optionswidget1 = [ow1_fontglyphheight]
@@ -266,6 +273,7 @@ object fadeeditfo: tfadeeditfo
             frame.levelo = 0
             frame.colorclient = -2147483645
             frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
+            frame.localprops1 = []
             frame.button.color = -1879048187
             frame.buttonellipse.color = -1879048187
             frame.buttonellipse.imagenr = 17
@@ -274,12 +282,12 @@ object fadeeditfo: tfadeeditfo
             bounds_x = 267
             bounds_y = 0
             bounds_cx = 138
-            bounds_cy = 16
+            bounds_cy = 15
             optionsedit1 = [oe1_savevalue]
             ondataentered = dataenteterev
             valuedefault = -1610612730
             dropdown.options = [deo_autodropdown, deo_keydropdown]
-            reffontheight = 14
+            reffontheight = 13
           end
         end
         object splitter: tsplitter
@@ -301,7 +309,7 @@ object fadeeditfo: tfadeeditfo
         frame.leveli = -1
         frame.framei_bottom = 2
         frame.localprops = [frl_leveli, frl_fibottom]
-        frame.dummy = 0
+        frame.localprops1 = []
         taborder = 2
         onpaint = pospaintev
         bounds_x = 8
@@ -319,7 +327,7 @@ object fadeeditfo: tfadeeditfo
         object tsimplewidget3: tsimplewidget
           optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_mousetransparent, ow_destroywidgets]
           color = -1610612731
-          face.dummy = 0
+          face.localprops = []
           taborder = 3
           visible = True
           bounds_x = 1
@@ -353,7 +361,7 @@ object fadeeditfo: tfadeeditfo
         object fadedisp: tsimplewidget
           optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_mousetransparent, ow_destroywidgets]
           color = -2147483645
-          face.dummy = 0
+          face.localprops = []
           visible = True
           bounds_x = 1
           bounds_y = 0
@@ -389,10 +397,9 @@ object fadeeditfo: tfadeeditfo
         color = -2147483645
         frame.leveli = -1
         frame.localprops = [frl_leveli]
-        frame.dummy = 0
+        frame.localprops1 = []
         face.fade_direction = gd_down
         face.localprops = [fal_fadirection]
-        face.dummy = 0
         taborder = 1
         visible = True
         bounds_x = 444
@@ -410,10 +417,10 @@ object fadeeditfo: tfadeeditfo
       frame.framei_bottom = 2
       frame.caption = 'Opacity'
       frame.localprops = [frl_leveli, frl_fibottom]
-      frame.dummy = 0
+      frame.localprops1 = []
       frame.outerframe = (
         0
-        17
+        16
         0
         0
       )
@@ -422,7 +429,7 @@ object fadeeditfo: tfadeeditfo
       bounds_x = 8
       bounds_y = 0
       bounds_cx = 504
-      bounds_cy = 67
+      bounds_cy = 66
       bounds_cxmin = 461
       anchors = [an_left, an_top, an_right]
       onclientmouseevent = mouseev
@@ -435,10 +442,10 @@ object fadeeditfo: tfadeeditfo
       object opadisp: tsimplewidget
         optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_mousetransparent, ow_destroywidgets]
         color = -2147483645
-        face.dummy = 0
+        face.localprops = []
         visible = True
         bounds_x = 1
-        bounds_y = 17
+        bounds_y = 16
         bounds_cx = 502
         bounds_cy = 40
         anchors = [an_top]
@@ -461,57 +468,59 @@ object fadeeditfo: tfadeeditfo
     place_mindist = 5
     object switchlayout: tlayouter
       bounds_x = 0
-      bounds_y = 0
-      bounds_cx = 142
-      bounds_cy = 30
+      bounds_y = 1
+      bounds_cx = 118
+      bounds_cy = 28
       optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
       optionslayout = [lao_placex, lao_aligny]
       align_glue = wam_center
       place_mindist = 5
       object splitopa: tbooleanedit
         frame.caption = 'Separate'#10'Opacity'
-        frame.dummy = 0
+        frame.localprops = []
+        frame.localprops1 = []
         frame.outerframe = (
           0
+          7
+          47
           8
-          61
-          9
         )
-        bounds_x = 68
+        bounds_x = 58
         bounds_y = 1
-        bounds_cx = 74
-        bounds_cy = 30
+        bounds_cx = 60
+        bounds_cy = 28
         onsetvalue = sepopaset
       end
       object reverse: tbooleanedit
         frame.caption = '&reverse'
-        frame.dummy = 0
+        frame.localprops = []
+        frame.localprops1 = []
         frame.outerframe = (
           0
           1
-          50
-          2
+          40
+          1
         )
         taborder = 1
         bounds_x = 0
-        bounds_y = 8
-        bounds_cx = 63
-        bounds_cy = 16
+        bounds_y = 7
+        bounds_cx = 53
+        bounds_cy = 15
         ondataentered = reverseenteredev
       end
     end
     object buttonlayout: tlayouter
       taborder = 1
-      bounds_x = 178
+      bounds_x = 187
       bounds_y = 0
-      bounds_cx = 328
+      bounds_cx = 319
       bounds_cy = 31
       optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
       optionslayout = [lao_placex]
       place_mindist = 5
       object tbutton2: tbutton
         optionswidget1 = [ow1_autoscale, ow1_autowidth]
-        bounds_x = 270
+        bounds_x = 261
         bounds_y = 0
         bounds_cx = 58
         bounds_cy = 31
@@ -523,7 +532,7 @@ object fadeeditfo: tfadeeditfo
       object tbutton1: tbutton
         optionswidget1 = [ow1_autoscale, ow1_autowidth]
         taborder = 1
-        bounds_x = 207
+        bounds_x = 198
         bounds_y = 0
         bounds_cx = 58
         bounds_cy = 31
@@ -534,7 +543,7 @@ object fadeeditfo: tfadeeditfo
       end
       object tsimplewidget1: tsimplewidget
         taborder = 2
-        bounds_x = 198
+        bounds_x = 189
         bounds_y = 8
         bounds_cx = 4
         bounds_cy = 18
@@ -542,7 +551,7 @@ object fadeeditfo: tfadeeditfo
       object tbutton3: tbutton
         optionswidget1 = [ow1_autoscale, ow1_autowidth]
         taborder = 3
-        bounds_x = 135
+        bounds_x = 126
         bounds_y = 0
         bounds_cx = 58
         bounds_cy = 31
@@ -554,7 +563,7 @@ object fadeeditfo: tfadeeditfo
       object tbutton4: tbutton
         optionswidget1 = [ow1_autoscale, ow1_autowidth]
         taborder = 4
-        bounds_x = 72
+        bounds_x = 63
         bounds_y = 0
         bounds_cx = 58
         bounds_cy = 31
@@ -569,7 +578,7 @@ object fadeeditfo: tfadeeditfo
         hint = 'Clear opacity gradient'
         bounds_x = 0
         bounds_y = 0
-        bounds_cx = 67
+        bounds_cx = 58
         bounds_cy = 31
         bounds_cxmin = 58
         state = [as_disabled, as_localdisabled, as_localcaption, as_localhint, as_localonexecute]
