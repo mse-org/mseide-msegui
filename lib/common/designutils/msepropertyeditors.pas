@@ -330,7 +330,7 @@ type
  tshortcutpropertyeditor = class(tenumpropertyeditor)
   protected
    fsc1: boolean;
-   function getvaluetext(avalue: shortcutty): msestring;
+   function getvaluetext(const avalue: shortcutty): msestring;
    function texttovalue(const atext: msestring): shortcutty;
   public
    constructor create(const adesigner: idesigner;
@@ -4862,12 +4862,17 @@ begin
  inherited;
 end;
 
-function tshortcutpropertyeditor.getvaluetext(avalue: shortcutty): msestring;
+function tshortcutpropertyeditor.getvaluetext(
+                                      const avalue: shortcutty): msestring;
+{
 var
  int1,int2: integer;
  keys: integerarty;
  names: msestringarty;
+}
 begin
+ result:= getshortcutname(avalue);
+{
  int2:= avalue;
  if int2 = 0 then begin
   result:= '';
@@ -4882,6 +4887,7 @@ begin
   end;
   result:= '$'+intvaluetostr(int2,nb_hex,16);
  end;
+}
 end;
 
 procedure tshortcutpropertyeditor.setvalue(const value: msestring);

@@ -280,6 +280,9 @@ procedure setactionimagelist(const sender: iactionlink;
 function isactionimageliststored(const info: actioninfoty): boolean;
  
 procedure getshortcutlist(out keys: integerarty; out names: msestringarty);
+function getshortcutname(const shortcut: shortcutty): msestring;
+function getshortcutname(const key: keyty; 
+                              const shiftstate: shiftstatesty): msestring;
 //function getshortcutname(key: shortcutarty): msestring;
 function getsysshortcutdispname(const aitem: sysshortcutty): msestring;
 
@@ -510,6 +513,46 @@ begin
   getpadvalues(bottom,'Ctrl+Pad+',key_modpadctrl,keys,names);
   getpadvalues(bottom,'Shift+Ctrl+Pad+',key_modpadshiftctrl,keys,names);
  end;
+end;
+
+function getshortcutname(const shortcut: shortcutty): msestring;
+var
+ int1{,int2}: integer;
+ keys: integerarty;
+ names: msestringarty;
+begin
+ result:= '';
+ if shortcut <> 0 then begin
+  getshortcutlist(keys,names);
+  for int1:= 0 to high(keys) do begin
+   if shortcut = keys[int1] then begin
+    result:= names[int1];
+    exit;
+   end;
+  end;
+  result:= '$'+intvaluetostr(shortcut,nb_hex,16);
+ end;
+end;
+
+function getshortcutname(const key: keyty; 
+                               const shiftstate: shiftstatesty): msestring;
+var
+ shortcut: shortcutty;
+begin
+ shortcut:= ord(key);
+ if ss_shift in shiftstate then begin
+  shortcut:= shortcut or shift;
+ end;
+ if ss_ctrl in shiftstate then begin
+  shortcut:= shortcut or ctrl;
+ end;
+ if ss_alt in shiftstate then begin
+  shortcut:= shortcut or alt;
+ end;
+ if ss_second in shiftstate then begin
+  shortcut:= shortcut or pad;
+ end;
+ result:= getshortcutname(shortcut);
 end;
 {
 function getshortcutname(key: shortcutarty): msestring;

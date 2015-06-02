@@ -11081,6 +11081,9 @@ end;
 procedure twidget.dokeydown1(var info: keyeventinfoty);
 begin
  exclude(fwidgetstate1,ws1_onkeydowncalled);
+ if assistiveserver <> nil then begin
+  assistiveserver.dokeydown(iassistiveclient(self),info);
+ end;
  dokeydown(info);
 end;
 
@@ -14506,6 +14509,7 @@ var
  widgetar: widgetarty;
  int1,int2: integer;
  bo1: boolean;
+ ass1,ass2: iassistiveclient;
 begin
  widgetar:= nil; //compiler warning
  if (ffocusedwidget <> widget) and ((fmodalwidget = nil) or (widget = nil) or
@@ -14588,6 +14592,17 @@ begin
    end
    else begin
     fenteredwidget:= nil;
+   end;
+   if assistiveserver <> nil then begin
+    ass1:= nil;
+    if focusedwidgetbefore <> nil then begin
+     ass1:= iassistiveclient(focusedwidgetbefore);
+    end;
+    ass2:= nil;
+    if focusedwidget <> nil then begin
+     ass2:= iassistiveclient(focusedwidget);
+    end;
+    assistiveserver.dofocuschanged(ass1,ass2);
    end;
    fownerwidget.dofocuschanged(focusedwidgetbefore,ffocusedwidget);
    if (appinst.factivewindow = self) and 

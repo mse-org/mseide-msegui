@@ -23,6 +23,9 @@ type
   procedure doenter(const sender: iassistiveclient);
   procedure clientmouseevent(const sender: iassistiveclient;
                                           var info: mouseeventinfoty);
+  procedure dofocuschanged(const oldwidget,newwidget: iassistiveclient);
+  procedure dokeydown(const sender: iassistiveclient;
+                                        const info: keyeventinfoty);
  end;
 
 var
