@@ -2379,7 +2379,8 @@ end;
 
 function tcustomdataedit.sortfunc(const l,r): integer;
 begin
- result:= tdatalist1(twidgetcol1(fgridintf.getcol).fdata).compare(l,r);
+// result:= tdatalist1(twidgetcol1(fgridintf.getcol).fdata).compare(l,r);
+ result:= tdatalist1(fdatalist).compare(l,r);
 end;
 
 function tcustomdataedit.griddata: tdatalist;
@@ -5098,7 +5099,8 @@ end;
 
 function tcustomenuedit.sortfunc(const l; const r): integer;
 begin
- result:= tdatalist1(twidgetcol1(fgridintf.getcol).fdata).compare(l,r);
+// result:= tdatalist1(twidgetcol1(fgridintf.getcol).fdata).compare(l,r);
+ result:= tdatalist1(fdatalist).compare(l,r);
 end;
 
 { tnocolsenumdropdowncontroller }
