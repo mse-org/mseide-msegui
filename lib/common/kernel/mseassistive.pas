@@ -11,7 +11,7 @@ unit mseassistive;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- mseguiglob,mseglob,msestrings,mseinterfaces;
+ mseguiglob,mseglob,msestrings,mseinterfaces,mseact;
 
 type
  iassistiveclient = interface(inullinterface)[miid_iassistiveclient]
@@ -26,6 +26,7 @@ type
   procedure dofocuschanged(const oldwidget,newwidget: iassistiveclient);
   procedure dokeydown(const sender: iassistiveclient;
                                         const info: keyeventinfoty);
+  procedure doactionexecute(const sender: tobject; const info: actioninfoty);
  end;
 
 var
