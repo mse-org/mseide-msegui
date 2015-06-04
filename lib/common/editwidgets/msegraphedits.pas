@@ -1116,7 +1116,7 @@ type
 implementation
 uses
  SysUtils,msekeyboard,msebits,msereal,msedispwidgets,mseformatstr,mserichstring,
- mseactions,msestreaming;
+ mseactions,msestreaming,mseassistive;
 
 type
  tcustomframe1 = class(tcustomframe);
@@ -1618,6 +1618,9 @@ end;
 procedure tgraphdataedit.dochange;
 begin
  if not (ws_loadedproc in fwidgetstate) then begin
+  if assistiveserver <> nil then begin
+   assistiveserver.dochange(iassistiveclient(self));
+  end;
   if canevent(tmethod(fonchange)) then begin
    fonchange(self);
   end;

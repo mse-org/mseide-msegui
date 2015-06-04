@@ -22,11 +22,12 @@ type
  iassistiveserver = interface(inullinterface)[miid_iassistiveserver]
   procedure doenter(const sender: iassistiveclient);
   procedure clientmouseevent(const sender: iassistiveclient;
-                                          var info: mouseeventinfoty);
+                                          const info: mouseeventinfoty);
   procedure dofocuschanged(const oldwidget,newwidget: iassistiveclient);
   procedure dokeydown(const sender: iassistiveclient;
                                         const info: keyeventinfoty);
   procedure doactionexecute(const sender: tobject; const info: actioninfoty);
+  procedure dochange(const sender: iassistiveclient);
  end;
 
 var

@@ -520,7 +520,7 @@ type
 
 implementation
 uses
- sysutils,msekeyboard,msebits,msedataedits,msestockobjects,mseact;
+ sysutils,msekeyboard,msebits,msedataedits,msestockobjects,mseact,mseassistive;
 
 type
  twidget1 = class(twidget);
@@ -1584,6 +1584,9 @@ procedure tcustomedit.dochange;
 begin
  checkautosize;
  if not (ws_loadedproc in fwidgetstate) then begin
+  if assistiveserver <> nil then begin
+   assistiveserver.dochange(iassistiveclient(self));
+  end;
   if canevent(tmethod(fonchange)) then begin
    fonchange(self);
   end;
