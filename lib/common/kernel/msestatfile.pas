@@ -405,7 +405,7 @@ end;
 
 function cmpclients(const l,r): integer;
 begin
- result:= statclientinfoty(l).priority - statclientinfoty(l).priority;
+ result:= statclientinfoty(l).priority - statclientinfoty(r).priority;
 end;
 
 procedure tstatfile.internalreadstat;
