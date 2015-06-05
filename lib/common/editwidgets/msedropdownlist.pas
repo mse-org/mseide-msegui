@@ -378,7 +378,8 @@ type
    property activebutton;
  end;
 
- dropdowncontrollerstatety = (dcs_forcecaret,dcs_itemselecting,dcs_isstringkey);
+ dropdowncontrollerstatety = (dcs_forcecaret,dcs_itemselecting,dcs_isstringkey,
+                              dcs_customfiltered);
  dropdowncontrollerstatesty = set of dropdowncontrollerstatety;
 
  tcustomdropdowncontroller = class(teventpersistent,ibutton,ievent,
@@ -2718,36 +2719,41 @@ var
 begin
  result:= invalidaxis;
  if (rowcount > 0) and (fdatacols.count > 0) then begin
-  folded:= true;
-  beginupdate;
-  int1:= 0;
-  opt1:= [lso_nodown];
-  if dlo_casesensitive in foptions1 then begin
-   include(opt1,lso_casesensitive);
-  end;
-  if dlo_posinsensitive in foptions1 then begin
-   include(opt1,lso_posinsensitive);
-  end;
-  count1:= fdatacols[0].datalist.count;
-  repeat
-   int2:= int1;
-   bo1:= locatestring(ffiltertext,{$ifdef FPC}@{$endif}getkeystring,opt1,
-                                                                  count1,int1);
-   if not bo1 then begin
-    int1:= fdatacols[0].datalist.count;
+  if dcs_customfiltered in fcontroller.fstate then begin
+   result:= 0;
+  end
+  else begin
+   folded:= true;
+   beginupdate;
+   int1:= 0;
+   opt1:= [lso_nodown];
+   if dlo_casesensitive in foptions1 then begin
+    include(opt1,lso_casesensitive);
    end;
-   for int3:= int2 to int1 - 1 do begin
-    rowhidden[int3]:= true;
+   if dlo_posinsensitive in foptions1 then begin
+    include(opt1,lso_posinsensitive);
    end;
-   if bo1 then begin
-    rowhidden[int1]:= false;
-    if result = invalidaxis then begin
-     result:= int1;
+   count1:= fdatacols[0].datalist.count;
+   repeat
+    int2:= int1;
+    bo1:= locatestring(ffiltertext,{$ifdef FPC}@{$endif}getkeystring,opt1,
+                                                                   count1,int1);
+    if not bo1 then begin
+     int1:= fdatacols[0].datalist.count;
     end;
-    inc(int1);
-   end;
-  until not bo1 or (int1 >= count1);
-  endupdate;
+    for int3:= int2 to int1 - 1 do begin
+     rowhidden[int3]:= true;
+    end;
+    if bo1 then begin
+     rowhidden[int1]:= false;
+     if result = invalidaxis then begin
+      result:= int1;
+     end;
+     inc(int1);
+    end;
+   until not bo1 or (int1 >= count1);
+   endupdate;
+  end;
  end;
 end;
 
