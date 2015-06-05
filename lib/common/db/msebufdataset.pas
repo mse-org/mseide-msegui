@@ -2218,7 +2218,8 @@ begin
    deleteblob(blobinfo,int2,blobfree);
   end
   else begin
-   if blobfree then begin                //else done in post
+   if blobfree then begin                //else necessary for //done in post 
+                                         //cancelupdate
     freeblobcache(po1,ablob.ffield); 
    end;
   end;
@@ -3997,8 +3998,10 @@ begin
    for int1:= high(blobinfo) downto 0 do begin
     with blobinfo[int1] do begin
      if new then begin
-      deleteblob(fcurrentbuf^.header.blobinfo,field,false);
-                            //no reassign of blobinfo
+//      deleteblob(fcurrentbuf^.header.blobinfo,field,false);
+      deleteblob(fcurrentbuf^.header.blobinfo,field,true); 
+                //no reassign of blobinfo
+                //blobcache data needed for possible cancelupdate
       new:= false;
       bo1:= true;
      end;
