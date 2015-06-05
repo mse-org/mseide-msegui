@@ -11771,7 +11771,6 @@ begin
   sortfieldno:= cols[0].fieldno;
   setlength(fedrecnums,flookupbuffer.count);
   if assigned(fonfilter) then begin
-   include(fstate,dcs_customfiltered);
    int3:= 0;
    for int1:= 0 to high(fedrecnums) do begin
     int4:= flookupbuffer.textindex(sortfieldno,int1,true);

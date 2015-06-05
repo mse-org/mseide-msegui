@@ -39,7 +39,9 @@ type
                         deo_keydropdown,//shift down starts dropdown
                         deo_modifiedbeforedropdown, 
                         //edit.modified called before dropdown
-                        deo_casesensitive,deo_posinsensitive,deo_livefilter,
+                        deo_casesensitive,deo_posinsensitive,
+                        deo_livefilter,
+                        deo_customfilter, //do not hide rows
                         deo_sorted,deo_disabled,deo_autosavehistory,
                         deo_cliphint,deo_right,deo_colsizing,deo_savestate);
  dropdowneditoptionsty = set of dropdowneditoptionty;
@@ -378,8 +380,7 @@ type
    property activebutton;
  end;
 
- dropdowncontrollerstatety = (dcs_forcecaret,dcs_itemselecting,dcs_isstringkey,
-                              dcs_customfiltered);
+ dropdowncontrollerstatety = (dcs_forcecaret,dcs_itemselecting,dcs_isstringkey);
  dropdowncontrollerstatesty = set of dropdowncontrollerstatety;
 
  tcustomdropdowncontroller = class(teventpersistent,ibutton,ievent,
@@ -2719,7 +2720,7 @@ var
 begin
  result:= invalidaxis;
  if (rowcount > 0) and (fdatacols.count > 0) then begin
-  if dcs_customfiltered in fcontroller.fstate then begin
+  if deo_customfilter in fcontroller.options then begin
    result:= 0;
   end
   else begin
