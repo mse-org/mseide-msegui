@@ -6657,6 +6657,8 @@ begin
         FRoot.ReadState(Self);
         Exclude(FRoot.FComponentState, csReading);
 
+        GlobalFixupReferences();
+
         if localloaded then begin
          for i := 0 to FLoaded.Count - 1 do begin
           TComponent(FLoaded[i]).Loaded;
@@ -6669,7 +6671,7 @@ begin
        end;
        FLoaded := nil;
       end;
-      GlobalFixupReferences;
+//      GlobalFixupReferences;
     except
       RemoveFixupReferences(ARoot, '');
       if not Assigned(ARoot) then
