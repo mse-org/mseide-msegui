@@ -4923,8 +4923,8 @@ begin
  if (frecno > arecno) then begin
   inc(frecno);
  end;
- fcurrentbuf:= arecord;
-// fcurrentbuf:= factindexpo^.ind[frecno];
+// fcurrentbuf:= arecord;
+ fcurrentbuf:= factindexpo^.ind[frecno];
  inc(fbrecordcount);
 end;
 
