@@ -21,7 +21,7 @@ uses
  classes,mclasses,sysutils,msegraphics,msetypes,mseact,
  msestrings,mseerr,msegraphutils,mseapplication,msedragglob,
  msepointer,mseevent,msekeyboard,mseclasses,mseglob,mseguiglob,mselist,
- msesystypes,msethread,mseguiintf,{msesysdnd,}mseassistive,
+ msesystypes,msethread,mseguiintf,{msesysdnd,}mseassistiveclient,
  msebitmap,msearrayprops,msethreadcomp,mserichstring,msearrayutils
                                {$ifdef mse_with_ifi},mseifiglob{$endif};
 
@@ -51,7 +51,8 @@ type
 
  frameskinoptionty = (fso_flat,
                       fso_noanim,fso_nomouseanim,fso_noclickanim,fso_nofocusanim,
-                      fso_nofocusrect,fso_nodefaultrect,fso_noinnerrect);
+                      fso_focusrect,fso_nofocusrect,fso_forcefocusrect,
+                      fso_nodefaultrect,fso_noinnerrect);
  frameskinoptionsty = set of frameskinoptionty;
 
  frameskincontrolleroptionty =
@@ -2843,6 +2844,7 @@ procedure showwidgets(awidgets: array of twidget);
 procedure hidewidgets(awidgets: array of twidget);
 function showmodalwidget(const aclass: widgetclassty): modalresultty;
 
+function getiassistiveclient(const awidget: twidget): iassistiveclient;
 
 procedure writewidgetnames(const writer: twriter; const ar: widgetarty);
 function needswidgetnamewriting(const ar: widgetarty): boolean; overload;
@@ -2871,7 +2873,7 @@ uses
  msesysintf,typinfo,msestreaming,msetimer,msebits,msewidgets,
  mseshapes,msestockobjects,msefileutils,msedatalist,Math,msesysutils,
  rtlconsts,{$ifndef FPC}classes_del,{$endif}mseformatstr,
- mseprocutils,msesys,msesysdnd;
+ mseprocutils,msesys,msesysdnd,mseassistiveserver;
 
 const
  faceoptionsmask: faceoptionsty = [fao_alphafadeimage,fao_alphafadenochildren,
@@ -3598,6 +3600,14 @@ begin
   result:= widget1.show(true);
  finally
   widget1.free;
+ end;
+end;
+
+function getiassistiveclient(const awidget: twidget): iassistiveclient;
+begin
+ result:= nil;
+ if awidget <> nil then begin
+  result:= iassistiveclient(awidget);
  end;
 end;
 

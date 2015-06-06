@@ -520,7 +520,8 @@ type
 
 implementation
 uses
- sysutils,msekeyboard,msebits,msedataedits,msestockobjects,mseact,mseassistive;
+ sysutils,msekeyboard,msebits,msedataedits,msestockobjects,mseact,
+ mseassistiveserver,mseassistiveclient;
 
 type
  twidget1 = class(twidget);

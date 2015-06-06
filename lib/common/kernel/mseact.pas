@@ -344,7 +344,7 @@ procedure translateshortcut1(var akey: shortcutty);
 
 implementation
 uses
- msebits,sysutils,msekeyboard,mseassistive;
+ msebits,sysutils,msekeyboard,mseassistiveserver;
 
 procedure translateshortcut1(var akey: shortcutty);
 begin

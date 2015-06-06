@@ -13,8 +13,8 @@ unit mserichstring;
 
 interface
 uses
- SysUtils,msetypes,msekeyboard,mseevent,msedatalist,msegraphutils,classes,mclasses,
- msestrings;
+ SysUtils,msetypes,msekeyboard,mseevent,msedatalist,msegraphutils,
+ classes,mclasses,msestrings;
 
 const
  fsboldmask = $01;

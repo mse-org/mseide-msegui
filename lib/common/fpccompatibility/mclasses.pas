@@ -8173,11 +8173,16 @@ var
   ClassList : TThreadlist;
   ClassAliasList : TStringList;
 
+procedure commoninit(); forward;
+
 procedure RegisterClass(AClass: TPersistentClass);
 var
 aClassname : String;
 begin
   //Classlist is created during initialization.
+  if classlist = nil then begin
+   commoninit(); //initialization order sometimes wrong in FPC
+  end;
  {
   if classlist = nil then begin
    classlist:= tthreadlist.create; 
@@ -9040,8 +9045,15 @@ begin
     AddString;
 end;
 
+var
+ inited: boolean;
+
 procedure CommonInit;
 begin
+ if inited then begin
+  exit;
+ end;
+ inited:= true;
 //  InitCriticalSection(SynchronizeCritSect);
 //  ExecuteEvent:=RtlEventCreate;
 //  SynchronizeTimeoutEvent:=RtlEventCreate;

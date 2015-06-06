@@ -13,8 +13,8 @@ unit msestockobjects;
 
 interface
 uses
- msegraphics,mseglob,msegui,msebitmap,msegraphutils,mseclasses,msestrings,
- msedatamodules,mseguiglob;
+ msegraphics,mseglob,msegui,msebitmap,msegraphutils,mseclasses,
+ msestrings,msedatamodules,mseguiglob;
 
 const
  boxsize = 11;      //for treelistitem expand box
@@ -184,7 +184,7 @@ type
 function stockobjects: tstockobjects;
 function sc(const acaption: stockcaptionty): msestring;
 
-procedure init;	
+procedure init;
 procedure deinit;
 
 implementation

@@ -32,7 +32,7 @@ type
                                //paint area as big as possible
                          cfo_captionnogray,
                          cfo_captiondistouter,cfo_captionframecentered,
-                         cfo_captionnoclip,cfo_nofocusrect,
+                         cfo_captionnoclip,cfo_nofocusrect,cfo_forcefocusrect,
                          cfo_focusrect, //override template fso_nofocusrect
                          cfo_captionfocus{,cfo_captionbackground});
  captionframeoptionsty = set of captionframeoptionty;
@@ -3002,9 +3002,12 @@ end;
 
 function tcustomcaptionframe.needsfocuspaint: boolean;
 begin
- result:= inherited needsfocuspaint and 
+ result:= (inherited needsfocuspaint or 
+           (cfo_forcefocusrect in foptions) or
+            ((ftemplate <> nil) and 
+              (fso_forcefocusrect in ftemplate.template.optionsskin))) and 
      not (cfo_nofocusrect in foptions) and 
-     ((cfo_focusrect in foptions) or (ftemplate = nil) or
+      ((cfo_focusrect in foptions) or (ftemplate = nil) or
                       not (fso_nofocusrect in ftemplate.template.optionsskin));
 end;
 

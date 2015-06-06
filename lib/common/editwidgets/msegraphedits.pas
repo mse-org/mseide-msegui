@@ -1116,7 +1116,7 @@ type
 implementation
 uses
  SysUtils,msekeyboard,msebits,msereal,msedispwidgets,mseformatstr,mserichstring,
- mseactions,msestreaming,mseassistive;
+ mseactions,msestreaming,mseassistiveserver,mseassistiveclient;
 
 type
  tcustomframe1 = class(tcustomframe);

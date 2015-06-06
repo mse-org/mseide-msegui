@@ -7,17 +7,18 @@
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 }
-unit mseassistive;
+unit mseassistiveserver;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- mseguiglob,mseglob,msestrings,mseinterfaces,mseact,mseshapes;
+ mseguiglob,mseglob,msestrings,mseinterfaces,mseact,mseshapes,
+ mseassistiveclient;
 
 type
  iassistiveserver = interface(inullinterface)[miid_iassistiveserver]
   procedure doenter(const sender: iassistiveclient);
-  procedure doitementer(const sender: iassistiveclient;
-                            const items: shapeinfoarty; const index: integer);
+  procedure doitementer(const sender: iassistiveclient; //sender can be nil
+                            const items: shapeinfoarty; const aindex: integer);
   procedure clientmouseevent(const sender: iassistiveclient;
                                           const info: mouseeventinfoty);
   procedure dofocuschanged(const oldwidget,newwidget: iassistiveclient);

@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2015 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -45,7 +45,6 @@ type
   captionclipped: boolean;
  end;
  
-
  shapeinfoty = record
   ca: captioninfoty;
   focusrectdist: integer;
@@ -125,7 +124,7 @@ procedure initcaptioninfo(var ainfo: captioninfoty);
  
 implementation
 uses
- classes,msestockobjects,msebits,sysutils;
+ classes,msestockobjects,msebits,sysutils,mseassistiveserver;
 type
  twidget1 = class(twidget);
  tframe1 = class(tcustomframe);
@@ -477,6 +476,9 @@ begin
      widget.invalidaterect(infos[focuseditem].ca.dim);
     end;
     focuseditem:= int1;
+    if (int1 >= 0) and (assistiveserver <> nil) then begin
+     assistiveserver.doitementer(getiassistiveclient(widget),infos,int1);
+    end;
    end;
   end;
  end;
