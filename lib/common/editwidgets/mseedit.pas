@@ -92,6 +92,7 @@ type
    property captionpos;
    property captiondist;
    property captionoffset;
+   property focusrectdist;
    property font;
    property localprops; //before template
    property localprops1; //before template
@@ -394,7 +395,8 @@ type
    procedure dodefocus; override;
    procedure dopaintforeground(const canvas: tcanvas); override;
    procedure paintimage(const canvas: tcanvas); virtual;
-   procedure doafterpaint(const canvas: tcanvas); override;
+   function needsfocuspaint: boolean; override;
+//   procedure doafterpaint(const canvas: tcanvas); override;
    procedure rootchanged(const awidgetregionivalid: boolean); override;
    procedure showhint(var info: hintinfoty); override;
 
@@ -1298,6 +1300,13 @@ begin
  feditor.dopaint(canvas);
 end;
 
+function tcustomedit.needsfocuspaint: boolean;
+begin
+ result:= inherited needsfocuspaint or 
+           ([oe_focusrectonreadonly,oe_readonly] * optionsedit = 
+                                 [oe_focusrectonreadonly,oe_readonly]);
+end;
+{
 procedure tcustomedit.doafterpaint(const canvas: tcanvas);
 begin
  if ([oe_focusrectonreadonly,oe_readonly] * optionsedit = 
@@ -1306,7 +1315,7 @@ begin
  end;
  inherited;
 end;
-
+}
 procedure tcustomedit.editnotification(var info: editnotificationinfoty);
 begin
  case info.action of

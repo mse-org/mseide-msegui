@@ -161,6 +161,7 @@ type
    property captionpos;
    property captiondist;
    property captionoffset;
+   property focusrectdist;
    property font;
    property localprops;  //before template
    property localprops1; //before template
@@ -309,6 +310,7 @@ type
    property captionpos;
    property captiondist;
    property captionoffset;
+   property focusrectdist;
    property font;
    property localprops; //before template
    property localprops1; //before template
@@ -492,6 +494,7 @@ type
    property captionpos;
    property captiondist;
    property captionoffset;
+   property focusrectdist;
    property font;
    property localprops; //before template
    property localprops1; //before template
@@ -670,6 +673,9 @@ type
    property caption;
    property captiontextflags;
    property captionpos;
+   property captiondist;
+   property captionoffset;
+   property focusrectdist;
    property font;
    property localprops; //before template
    property localprops1; //before template
@@ -3003,12 +3009,22 @@ end;
 function tcustomcaptionframe.needsfocuspaint: boolean;
 begin
  result:= (inherited needsfocuspaint or 
-           (cfo_forcefocusrect in foptions) or
-            ((ftemplate <> nil) and 
-              (fso_forcefocusrect in ftemplate.template.optionsskin))) and 
+            (ftemplate <> nil) and 
+               (fso_forcefocusrect in ftemplate.template.optionsskin)) and 
      not (cfo_nofocusrect in foptions) and 
-      ((cfo_focusrect in foptions) or (ftemplate = nil) or
-                      not (fso_nofocusrect in ftemplate.template.optionsskin));
+     ((cfo_focusrect in foptions) or (ftemplate = nil) or
+                       not (fso_nofocusrect in ftemplate.template.optionsskin));
+ result:= result or (cfo_forcefocusrect in foptions);
+ if result then begin
+  if cfo_captionfocus in foptions then begin
+   include(fstate,fs_captionfocus);
+   exclude(fstate,fs_paintrectfocus);
+  end
+  else begin
+   include(fstate,fs_paintrectfocus);
+   exclude(fstate,fs_captionfocus);
+  end;
+ end;
 end;
 
 procedure tcustomcaptionframe.settemplateinfo(const ainfo: frameinfoty);

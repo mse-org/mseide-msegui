@@ -697,6 +697,7 @@ type
    property captionpos;
    property captiondist;
    property captionoffset;
+   property focusrectdist;
    property font;
    property buttonface;
    property buttonframe;

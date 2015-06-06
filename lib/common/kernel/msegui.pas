@@ -238,6 +238,7 @@ type
                       frl1_framefaceoffsetactivemouse,
                       frl1_framefaceoffsetactiveclicked,
                       frl1_font,frl1_captiondist,frl1_captionoffset,
+                      frl1_focusrectdist,
                       frl1_colorglyph, //for menu template
                       frl1_colorpattern
                      );
@@ -273,6 +274,7 @@ const
                       frl1_framefaceoffsetactivemouse,
                       frl1_framefaceoffsetactiveclicked,
                       frl1_font,frl1_captiondist,frl1_captionoffset,
+                      frl1_focusrectdist,
                       frl1_colorglyph,frl1_colorpattern];
 type
  facelocalpropty = (fal_options,fal_framei_left,fal_framei_top,
@@ -373,6 +375,7 @@ type
   framecolors: framecolorinfoty;
   colorclient: colorty;
   innerframe: framety;
+  focusrectdist: int32;
 
   colorglyph: colorty;      //for menu template and scrollbar
   colorpattern: colorty;    //for scrollbar
@@ -499,6 +502,8 @@ type
    
    procedure setcolorclient(const Value: colorty);
    function iscolorclientstored: boolean;
+   procedure setfocusrectdist(const avalue: int32);
+   function isfocusrectdiststored: boolean;
    procedure settemplate(const avalue: tframecomp);
    procedure setlocalprops(const avalue: framelocalpropsty);
    procedure setlocalprops1(const avalue: framelocalprops1ty);
@@ -711,6 +716,9 @@ type
 
    property optionsskin: frameskinoptionsty read fi.optionsskin 
                     write setoptionsskin stored isoptionsskinstored default [];
+   property focusrectdist: int32 read fi.focusrectdist 
+                         write setfocusrectdist 
+                                   stored isfocusrectdiststored default 0;
    property colorclient: colorty read fi.colorclient write setcolorclient
                     stored iscolorclientstored default cl_transparent;
    property localprops: framelocalpropsty read flocalprops 
@@ -756,6 +764,8 @@ type
    property frameface_offsetactiveclicked;
 
    property optionsskin;
+
+   property focusrectdist;
 
    property colorclient;
    property colordkshadow;
@@ -830,6 +840,7 @@ type
    function isfontstored: boolean;
    procedure setcaptiondist(const avalue: integer);
    procedure setcaptionoffset(const avalue: integer);
+   procedure setfocusrectdist(const avalue: integer);
    procedure fontchanged(const sender: tobject);
   protected
    fi: frameinfoty;
@@ -958,7 +969,8 @@ type
                  write setcaptiondist default 0;   //not used if font not set
    property captionoffset: integer read fi.capt.captionoffset 
                  write setcaptionoffset default 0; //not used if font not set
-   
+   property fucusrectdist: int32 read fi.ba.focusrectdist 
+                        write setfocusrectdist default 0;   
    property extraspace: integer read fextraspace
                         write setextraspace default 0;
    property imagedist: integer read fimagedist
@@ -4233,11 +4245,11 @@ procedure tcustomframe.dopaintfocusrect(const canvas: tcanvas; const rect: rectt
 var
  rect1: rectty;
 begin
- if fs_paintrectfocus in fstate then begin
+// if fs_paintrectfocus in fstate then begin
   rect1:= deflaterect(rect,fpaintframe);
-//  inflaterect1(rect1,-1);
+  inflaterect1(rect1,-fi.focusrectdist);
   drawfocusrect(canvas,rect1);
- end;
+// end;
 end;
 (*
 procedure tcustomframe.paint(const canvas: tcanvas; const rect: rectty);
@@ -4517,6 +4529,15 @@ begin
  if fi.innerframe.bottom <> value then begin
   fi.innerframe.bottom:= Value;
   internalupdatestate;
+ end;
+end;
+
+procedure tcustomframe.setfocusrectdist(const avalue: int32);
+begin
+ include(flocalprops1,frl1_focusrectdist);
+ if fi.focusrectdist <> avalue then begin
+  fi.focusrectdist:= avalue;
+  internalupdatestate();
  end;
 end;
 
@@ -4962,6 +4983,10 @@ begin
    end;
   end;
   
+  if not (frl1_focusrectdist in flocalprops1) then begin
+   focusrectdist:= ainfo.ba.focusrectdist;
+  end;
+
   if not (frl_optionsskin in flocalprops) then begin
    optionsskin:= ainfo.ba.optionsskin;
   end;
@@ -5324,6 +5349,10 @@ begin
  result:= (ftemplate = nil) or (frl_colorclient in flocalprops);
 end;
 
+function tcustomframe.isfocusrectdiststored: boolean;
+begin
+ result:= (ftemplate = nil) or (frl1_focusrectdist in flocalprops1);
+end;
 
 procedure tcustomframe.changedirection(const oldvalue: graphicdirectionty;
                const newvalue: graphicdirectionty);
@@ -5356,6 +5385,7 @@ begin
    framei_top:= round(framei_top * ascale);
    framei_right:= round(framei_right * ascale);
    framei_bottom:= round(framei_bottom * ascale);
+   focusrectdist:= round(focusrectdist * ascale);
   end;
  end;
 end;
@@ -5837,6 +5867,12 @@ end;
 procedure tframetemplate.setcaptionoffset(const avalue: integer);
 begin
  fi.capt.captionoffset:= avalue;
+ changed;
+end;
+
+procedure tframetemplate.setfocusrectdist(const avalue: integer);
+begin
+ fi.ba.focusrectdist:= avalue;
  changed;
 end;
 
@@ -8652,10 +8688,12 @@ end;
 
 procedure twidget.doafterpaint(const canvas: tcanvas);
 begin
- if fframe <> nil then begin
-  if needsfocuspaint and (fwidgetstate * [ws_focused,ws_active] =
+ if needsfocuspaint and (fwidgetstate * [ws_focused,ws_active] =
                 [ws_focused,ws_active]) then begin
+  if fframe <> nil then begin
    fframe.dopaintfocusrect(canvas,makerect(nullpoint,fwidgetrect.size));
+  end
+  else begin
   end;
  end;
 end;
