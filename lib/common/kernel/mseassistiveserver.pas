@@ -12,13 +12,15 @@ unit mseassistiveserver;
 interface
 uses
  mseguiglob,mseglob,msestrings,mseinterfaces,mseact,mseshapes,
- mseassistiveclient;
+ mseassistiveclient,msemenuwidgets;
 
 type
  iassistiveserver = interface(inullinterface)[miid_iassistiveserver]
   procedure doenter(const sender: iassistiveclient);
   procedure doitementer(const sender: iassistiveclient; //sender can be nil
                             const items: shapeinfoarty; const aindex: integer);
+  procedure doitementer(const sender: iassistiveclient;
+                         const items: menucellinfoarty; const aindex: integer);
   procedure clientmouseevent(const sender: iassistiveclient;
                                           const info: mouseeventinfoty);
   procedure dofocuschanged(const oldwidget,newwidget: iassistiveclient);

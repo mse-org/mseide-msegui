@@ -15,7 +15,8 @@ interface
 uses
  mseact,msegui,msearrayprops,mseclasses,msegraphutils,
  msedrawtext,msegraphics,mseevent,mseglob,mseguiglob,mseshapes,mserichstring,
- msetypes,msestrings,classes,mclasses,msekeyboard,msebitmap;
+ msetypes,msestrings,classes,mclasses,msekeyboard,msebitmap,
+ mseassistiveclient;
 
 type
  menuoptionty = (mo_noinsert,mo_stopinsert,mo_insertfirst,mo_noseparator,
@@ -84,7 +85,8 @@ type
   function getstate: actionstatesty;  
  end;
  
- tmenuitem = class(teventpersistent,iactionlink,imenuitem,iimagelistinfo)
+ tmenuitem = class(teventpersistent,iactionlink,imenuitem,iimagelistinfo,
+                   iassistiveclient)
   private
    fparentmenu: tmenuitem;
    fonchange: menuitemeventty;
@@ -164,6 +166,8 @@ type
    procedure readsc1(reader: treader);
    procedure writesc1(writer: twriter);
    procedure setcolorglyphactive(const avalue: colorty);
+    //iassistiveclient
+   function getassistivename(): msestring;
   protected
    finfo: actioninfoty;
    fowner: tcustommenu;
@@ -480,6 +484,7 @@ type
 
  twidgetmainmenu = class(tcustommainmenu)
   published
+   property Name stored true;
    property options;
    property onupdate;
 //   property frametemplate;
@@ -1726,6 +1731,14 @@ begin
    end;
   end;
  end;
+end;
+
+function tmenuitem.getassistivename: msestring;
+begin
+ result:= fname;
+ if (result = '') and (fowner <> nil) then begin
+  result:= fowner.name;
+ end;  
 end;
 
 { tmenuitems }

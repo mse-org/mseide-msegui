@@ -208,7 +208,8 @@ function showpopupmenu(const menu: tmenuitem; const transientfor: twidget;
 implementation
 uses
  msedrawtext,mserichstring,msestockobjects,sysutils,msekeyboard,msebits,
- mseact,mseguiintf,msestrings,msebitmap,msesysutils;
+ mseact,mseguiintf,msestrings,msebitmap,msesysutils,
+ mseassistiveclient,mseassistiveserver;
 
 type
  tmenuitem1 = class(tmenuitem);
@@ -1391,6 +1392,9 @@ begin
      end;
     end;
     capturemouse;
+    if assistiveserver <> nil then begin
+     assistiveserver.doitementer(iassistiveclient(menu),cells,activeitem);
+    end;
    end;
   end
   else begin
