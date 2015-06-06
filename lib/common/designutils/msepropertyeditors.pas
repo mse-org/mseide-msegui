@@ -5719,7 +5719,7 @@ end;
 
 procedure tnamepropertyeditor.setvalue(const value: msestring);
 begin
- if not isvalidident(value) then begin
+ if (value <> '') and not isvalidident(value) then begin
   raise exception.create(mo.c[ord(invalidcomponentname)]+' '''+value+'''.');
  end;
  inherited;
