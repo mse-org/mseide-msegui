@@ -2691,7 +2691,8 @@ function cellkeypress(const info: celleventinfoty): keyty;
 
 implementation
 uses
- mseguiintf,msestockobjects,mseact,mseactions,rtlconsts,msegraphedits;
+ mseguiintf,msestockobjects,mseact,mseactions,rtlconsts,msegraphedits,
+ mseassistiveclient,mseassistiveserver;
 type
  tframe1 = class(tcustomframe);
  tdatalist1 = class(tdatalist);
@@ -10989,6 +10990,9 @@ begin
   end;
   if info.cell.col >= 0 then begin
    datacols[info.cell.col].docellevent(info);
+  end;
+  if assistiveserver <> nil then begin
+   assistiveserver.docellevent(iassistiveclient(self),info);
   end;
  {$ifdef mse_with_ifi}
   if fifilink <> nil then begin

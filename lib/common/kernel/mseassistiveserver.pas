@@ -12,7 +12,7 @@ unit mseassistiveserver;
 interface
 uses
  mseguiglob,mseglob,msestrings,mseinterfaces,mseact,mseshapes,
- mseassistiveclient,msemenuwidgets;
+ mseassistiveclient,msemenuwidgets,msegrids;
 
 type
  iassistiveserver = interface(inullinterface)[miid_iassistiveserver]
@@ -28,7 +28,9 @@ type
                                         const info: keyeventinfoty);
   procedure doactionexecute(const sender: tobject; const info: actioninfoty);
   procedure dochange(const sender: iassistiveclient);
- end;
+  procedure docellevent(const sender: iassistiveclient; 
+                                      const info: celleventinfoty);
+end;
 
 var
  assistiveserver: iassistiveserver;
