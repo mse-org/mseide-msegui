@@ -341,10 +341,12 @@ function translateshortcut(const akey: shortcutty): shortcutty;
 procedure translateshortcut1(var akey: shortcutty); 
            //update for new modifier layout
 
-
+var
+ assistiveexechandler: procedure(const sender: tobject;
+                                         const info: actioninfoty);
 implementation
 uses
- msebits,sysutils,msekeyboard,mseassistiveserver;
+ msebits,sysutils,msekeyboard;
 
 procedure translateshortcut1(var akey: shortcutty);
 begin
@@ -409,8 +411,8 @@ begin
      end;
     end;
    end;
-   if assistiveserver <> nil then begin
-    assistiveserver.doactionexecute(sender,info);
+   if assigned(assistiveexechandler) then begin
+    assistiveexechandler(sender,info);
    end;
    if assigned(beforeexecute) then begin
     beforeexecute;

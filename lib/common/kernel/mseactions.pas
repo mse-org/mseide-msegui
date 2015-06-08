@@ -343,7 +343,7 @@ var
 implementation
 uses
  sysutils,mserichstring,msestream,typinfo,mseformatstr,msestreaming,
- msestockobjects;
+ msestockobjects,mseassistiveserver;
  
 const   
  letterkeycount = ord('z') - ord('a') + 1;
@@ -376,6 +376,13 @@ var
  padcharshortcutnames: msestringarty;
  padspecialshortcutkeys: integerarty;
  padspecialshortcutnames: msestringarty;
+
+procedure handleassistiveexec(const sender: tobject; const info: actioninfoty);
+begin
+ if assistiveserver <> nil then begin
+  assistiveserver.doactionexecute(sender,info);
+ end;
+end;
 
 function issysshortcut(const ashortcut: sysshortcutty;
                                  const ainfo: keyeventinfoty): boolean;
@@ -1850,5 +1857,6 @@ end;
 
 initialization
  sysshortcuts:= defaultsysshortcuts; 
- sysshortcuts1:= defaultsysshortcuts1; 
+ sysshortcuts1:= defaultsysshortcuts1;
+ assistiveexechandler:= @handleassistiveexec;
 end.
