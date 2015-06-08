@@ -52,8 +52,10 @@ type
    fapplication: string;
   protected
    function comparename(const l,r): integer;
+   function comparedep(const l,r): integer;
    procedure finalizerecord(var item); override;
    procedure copyrecord(var item); override;  
+   procedure resetchecked();
   public
    constructor create;
    procedure parse(const afilename: filenamety);
@@ -61,8 +63,11 @@ type
    function getnodes(const aname: string): treelistedititemarty;
 //   function getdependencytree: ttreelistedititem;
    function find(const aname: string; out aindex: integer): pdependencyinfoty;
+   function finddep(const adepend: string; out aindex: integer): pdependencyinfoty;
    function getunitnames: msestringarty;
    function findpath(const astart,adest: string): msestringarty;
+                         //dest = '' -> find first start
+   function finddependnames(const aname: string): msestringarty;
  end;
  
  tmainfo = class(tmainform)
@@ -81,6 +86,7 @@ type
    procedure filenamedatentexe(const sender: TObject);
   private
    flist: tdependencylist;
+  protected
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -93,7 +99,9 @@ implementation
 
 uses
  main_mfm,msestream,strutils,msedatalist,msearrayutils;
-
+type
+ ttreelistitem1 = class(ttreelistitem);
+ 
 constructor tmainfo.create(aowner: tcomponent);
 begin
  flist:= tdependencylist.create;
@@ -127,8 +135,13 @@ end;
 
 procedure tmainfo.pathdatentexe(const sender: TObject);
 begin
- if (start.value <> '') and (dest.value <> '') then begin
-  pathdisp.value:= concatstrings(flist.findpath(start.value,dest.value),',');
+ if (start.value <> '') {and (dest.value <> '')} then begin
+  if dest.value = '' then begin
+   pathdisp.value:= concatstrings(flist.finddependnames(start.value),':');
+  end
+  else begin
+   pathdisp.value:= concatstrings(flist.findpath(start.value,dest.value),',');
+  end;
  end
  else begin
   pathdisp.value:= '';
@@ -147,7 +160,7 @@ constructor tdependencylist.create;
 begin
  inherited create(sizeof(dependencyinfoty),
             [rels_needsinitialize,rels_needsfinalize,rels_needscopy]);
- setcomparefuncs([@comparename]);
+ setcomparefuncs([@comparename,@comparedep]);
 end;
 
 procedure tdependencylist.finalizerecord(var item);
@@ -239,6 +252,17 @@ begin
   end;
  end;
 end;
+
+function tdependencylist.comparedep(const l; const r): integer;
+begin
+ with dependencyinfoty(l) do begin
+  result:= stringcomp(depend,dependencyinfoty(r).depend);
+  if result = 0 then begin
+   result:= stringcomp(name,dependencyinfoty(r).name);
+  end;
+ end;
+end;
+
 (*
 function tdependencylist.getdependencytree: ttreelistedititem;
 var
@@ -288,7 +312,8 @@ begin
 end;
 *)
 
-function tdependencylist.find(const aname: string; out aindex: integer): pdependencyinfoty;
+function tdependencylist.find(const aname: string;
+                                out aindex: integer): pdependencyinfoty;
 var
  info1: dependencyinfoty;
 begin
@@ -296,6 +321,19 @@ begin
  info1.name:= aname;
  internalfind(0,info1,aindex,result);
  if (result <> nil) and (result^.name <> aname) then begin
+  result:= nil;
+ end;
+end;
+
+function tdependencylist.finddep(const adepend: string;
+                                out aindex: integer): pdependencyinfoty;
+var
+ info1: dependencyinfoty;
+begin
+ result:= nil;
+ info1.depend:= adepend;
+ internalfind(1,info1,aindex,result);
+ if (result <> nil) and (result^.depend <> adepend) then begin
   result:= nil;
  end;
 end;
@@ -383,6 +421,53 @@ begin
  setlength(result,int2);
 end;
 
+function tdependencylist.finddependnames(const aname: string): msestringarty;
+var
+ po1,po2: pdependencyinfoty;
+ i1,i2: int32;
+ name1: string;
+ ar1: msestringarty;
+begin
+ result:= nil;
+ po1:= finddep(aname,i1);
+ if po1 <> nil then begin
+  name1:= '';
+  while i1 < count do begin
+   po1:= findexes[1][i1];
+   if po1^.depend <> aname then begin
+    break;
+   end;
+   if po1^.name <> name1 then begin
+    name1:= po1^.name;
+    resetchecked();
+    ar1:= nil;
+    po2:= po1;
+    repeat
+     additem(ar1,msestring(po2^.depend));
+     po2^.checked:= true;
+     po2:= finddep(po2^.name,i2);
+    until (po2 = nil) or po2^.checked or (po2^.name = fapplication);
+    if po2 <> nil then begin
+     additem(result,concatstrings(ar1,','));
+    end;
+   end;
+   inc(i1);
+  end;
+ end;
+end;
+
+procedure tdependencylist.resetchecked();
+var
+ po1,po2: pdependencyinfoty;
+begin
+ po1:= datapo;
+ po2:= dataend;
+ while po1 < po2 do begin
+  po1^.checked:= false;
+  inc(po1);
+ end;
+end;
+
 function tdependencylist.findpath(const astart: string;
                const adest: string): msestringarty;
 var
@@ -424,17 +509,11 @@ var
  end;
 var
  int1,int2: integer; 
- po1,po2: pdependencyinfoty;
 begin
  result:= nil;
- po2:= dataend;
  maxlevel:= 0;
  repeat
-  po1:= datapo;
-  while po1 < po2 do begin
-   po1^.checked:= false;
-   inc(po1);
-  end;
+  resetchecked();
   maxlevelfound:= false;
   if find1(astart,0) then begin
    setlength(result,length(destar1));

@@ -4,6 +4,8 @@ object mainfo: tmainfo
   bounds_y = 220
   bounds_cx = 403
   bounds_cy = 280
+  container.frame.localprops = []
+  container.frame.localprops1 = []
   container.bounds = (
     0
     0
@@ -14,6 +16,14 @@ object mainfo: tmainfo
   caption = 'MSEunitdep'
   moduleclassname = 'tmainform'
   object filename: tfilenameedit
+    frame.localprops = []
+    frame.localprops1 = []
+    frame.buttons.count = 1
+    frame.buttons.items = <    
+      item
+        color = -2147483646
+        imagenr = 17
+      end>
     frame.button.color = -2147483646
     frame.button.imagenr = 17
     hint = 'FPC -vu compiler message file'
@@ -45,6 +55,8 @@ object mainfo: tmainfo
     onexecute = scanexe
   end
   object grid: twidgetgrid
+    frame.localprops = []
+    frame.localprops1 = []
     taborder = 2
     bounds_x = 1
     bounds_y = 32
@@ -76,6 +88,7 @@ object mainfo: tmainfo
       frame.levelo = 0
       frame.colorclient = -2147483645
       frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
+      frame.localprops1 = []
       taborder = 1
       visible = False
       bounds_x = 0
@@ -89,6 +102,8 @@ object mainfo: tmainfo
   end
   object start: tdropdownlistedit
     frame.caption = 'Start Unit'
+    frame.localprops = []
+    frame.localprops1 = []
     frame.button.color = -2147483646
     frame.outerframe = (
       0
@@ -103,6 +118,7 @@ object mainfo: tmainfo
     bounds_cy = 37
     anchors = [an_left, an_bottom]
     statfile = tstatfile1
+    optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_forcereturncheckvalue, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly]
     ondataentered = pathdatentexe
     ifilink = dropdownunits
     dropdown.options = [deo_selectonly, deo_autodropdown, deo_keydropdown, deo_cliphint]
@@ -114,6 +130,8 @@ object mainfo: tmainfo
   end
   object dest: tdropdownlistedit
     frame.caption = 'Dest. Unit'
+    frame.localprops = []
+    frame.localprops1 = []
     frame.button.color = -2147483646
     frame.outerframe = (
       0
@@ -128,6 +146,7 @@ object mainfo: tmainfo
     bounds_cy = 37
     anchors = [an_left, an_right, an_bottom]
     statfile = tstatfile1
+    optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_forcereturncheckvalue, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly]
     ondataentered = pathdatentexe
     ifilink = dropdownunits
     dropdown.options = [deo_selectonly, deo_autodropdown, deo_keydropdown, deo_cliphint]
@@ -138,7 +157,8 @@ object mainfo: tmainfo
     reffontheight = 14
   end
   object pathdisp: tstringdisp
-    frame.dummy = 0
+    frame.localprops = []
+    frame.localprops1 = []
     taborder = 5
     bounds_x = 1
     bounds_y = 259
