@@ -3625,12 +3625,15 @@ begin
  if (deo_selectonly in fdropdown.options) and 
                      not fdropdown.dataselected then begin
   if (text <> '') then begin
-   accept:= false;
    if not quiet and not (deo_autodropdown in fdropdown.options) then begin
+    accept:= false;
     fdropdown.dropdown;
    end
    else begin
-    feditor.undo;
+    if feditor.canundo then begin //otherwise no userentry
+     accept:= false;
+     feditor.undo;
+    end;
    end
   end
   else begin
