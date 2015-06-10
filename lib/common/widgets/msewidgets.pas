@@ -1294,6 +1294,9 @@ function askconfirmation(const atext: msestring;
                      const defaultbutton: modalresultty = mr_yes;  
                      const minwidth: integer = 0): boolean;
                             //true if yes pressed
+function askconfirmationcancel(const atext: msestring;
+                     const defaultbutton: modalresultty = mr_yes;  
+                     const minwidth: integer = 0): modalresultty;
 function askyesnocancel(const atext: msestring; const caption: msestring = '';
                      const defaultbutton: modalresultty = mr_yes;  
                      const minwidth: integer = 0): modalresultty;
@@ -2022,15 +2025,6 @@ begin
                           minwidth) = mr_yes;
 end;
 
-function askconfirmation(const atext: msestring;
-                    const defaultbutton: modalresultty = mr_yes;  
-                    const minwidth: integer = 0): boolean;
-                  //true if yes pressed
-begin
- result:= showmessage(atext,sc(sc_confirmation),[mr_yes,mr_no],defaultbutton,[],
-                          minwidth) = mr_yes;
-end;
-
 function askyesnocancel(const atext: msestring; const caption: msestring = '';
                     const defaultbutton: modalresultty = mr_yes;  
                     const minwidth: integer = 0 ): modalresultty;
@@ -2040,6 +2034,22 @@ begin
  if not (result in [mr_yes,mr_no]) then begin
   result:= mr_cancel;
  end;
+end;
+
+function askconfirmation(const atext: msestring;
+                    const defaultbutton: modalresultty = mr_yes;  
+                    const minwidth: integer = 0): boolean;
+                  //true if yes pressed
+begin
+ result:= showmessage(atext,sc(sc_confirmation),[mr_yes,mr_no],defaultbutton,[],
+                          minwidth) = mr_yes;
+end;
+
+function askconfirmationcancel(const atext: msestring;
+                     const defaultbutton: modalresultty = mr_yes;  
+                     const minwidth: integer = 0): modalresultty;
+begin
+ result:= askyesnocancel(atext,sc(sc_confirmation),defaultbutton,minwidth);
 end;
 
 { tframefont}
