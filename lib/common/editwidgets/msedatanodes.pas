@@ -371,7 +371,11 @@ type
   function getfieldtext(const fieldindex: integer): msestring;
   procedure setfieldtext(const fieldindex: integer; var avalue: msestring);
  end;
- 
+
+ irecordvaluefield = interface(irecordfield)
+  procedure getvalueinfo(out atype: listdatatypety; out aindex: int32);
+ end;
+  
  trecordfielditem = class(ttreelistitem)
   private
    ffieldindex: integer;
@@ -389,10 +393,6 @@ type
 //   property valuetext: msestring read getvaluetext write setvaluetext;
  end;
 
- irecordvaluefield = interface(irecordfield)
-//  function getvalueinfo(out akind: int32): int32;
- end;
- 
  trecordfieldvalueitem = class(trecordfielditem)
   public
    constructor create(const intf: irecordvaluefield; const afieldindex: integer;

@@ -220,7 +220,7 @@ type
    constructor create; override;
    destructor destroy; override;
 
-   //idatalist
+    //idatalist
    procedure listdestroyed(const sender: tdatalist); virtual;
    procedure sourcechange(const sender: tdatalist;
                                          const aindex: integer); virtual;

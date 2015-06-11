@@ -73,14 +73,14 @@ type
  tlistedititem = class(tlistitem)
  end;
  
- trecordfieldlistedititem = class(tlistedititem,irecordvaluefield)
+ trecordvaluelistedititem = class(tlistedititem,irecordvaluefield)
   protected
-    //irecordfield
+    //irecordvaluefield
    function getfieldtext(const fieldindex: integer): msestring; virtual;
    procedure setfieldtext(const fieldindex: integer;
                                               var avalue: msestring); virtual;
+   procedure getvalueinfo(out atype: listdatatypety; out aindex: int32); virtual;
   public
-   constructor create(const aowner: tcustomitemlist); override;
  end;
  
  listedititemarty = array of tlistitem;
@@ -505,6 +505,7 @@ type
    fvalueindex: int32;
    feditwidget: twidget;
    fgridintf: igridwidget;
+   fdatatype: listdatatypety;
    procedure seteditwidget(const avalue: twidget);
    procedure setvalueindex(const avalue: int32);
   protected
@@ -2641,6 +2642,13 @@ begin
    raise exception.create('Invalid item field edit widget "'+avalue.name+'".');
   end;
   titemedit(fowner).setlinkedvar(avalue,tmsecomponent(feditwidget));
+  if avalue = nil then begin
+   fgridintf:= nil;
+   fdatatype:= dl_none;
+  end
+  else begin
+   fdatatype:= fgridintf.getdatalistclass().datatype();
+  end;
   changed();
  end;
 end;
@@ -5941,21 +5949,22 @@ begin
  change;
 end;
 
-{ trecordfieldlistedititem }
+{ trecordvaluelistedititem }
 
-constructor trecordfieldlistedititem.create(const aowner: tcustomitemlist);
+procedure trecordvaluelistedititem.getvalueinfo(out atype: listdatatypety;
+               out aindex: int32);
 begin
-// include(fstate1,ns1_irecordvaluefield);
- inherited;
+ atype:= dl_none;
+ aindex:= -1;
 end;
 
-function trecordfieldlistedititem.getfieldtext(
+function trecordvaluelistedititem.getfieldtext(
               const fieldindex: integer): msestring;
 begin
  result:= '';
 end;
 
-procedure trecordfieldlistedititem.setfieldtext(const fieldindex: integer;
+procedure trecordvaluelistedititem.setfieldtext(const fieldindex: integer;
                var avalue: msestring);
 begin
  //dummy
