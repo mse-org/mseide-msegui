@@ -2881,11 +2881,37 @@ begin
 end;
 
 procedure titemedit.drawcell(const canvas: tcanvas);
+var
+ vtype: listdatatypety;
+ vindex: int32;
+ i1,i2: int32;
 begin
  with cellinfoty(canvas.drawinfopo^) do begin
   doextendimage(canvas.drawinfopo,flayoutinfocell.imageextra);
   flayoutinfocell.rowindex:= cell.row;
   flayoutinfocell.textflags:= textflags;
+  if (fvalueedits.count > 0) and 
+          (tlistitem(datapo^) is trecordvaluelistedititem) then begin
+   with irecordvaluefield(trecordvaluelistedititem(datapo^)) do begin
+    getvalueinfo(vtype,vindex);
+    if vtype <> dl_none then begin
+     i1:= -1;
+     if (vindex >= 0) and (vindex < fvalueedits.count) then begin
+      if tvalueedititem(fvalueedits.fitems[vindex]).fdatatype = vtype then begin
+       i1:= vindex;          //check matching index item
+      end;
+     end;
+    end;
+    if i1 < 0 then begin
+     for i2:= 0 to fvalueedits.count - 1 do begin
+      if tvalueedititem(fvalueedits.fitems[i2]).fdatatype = vtype then begin
+       i1:= i2;              //check any match
+       break;
+      end;
+     end;
+    end;
+   end;
+  end;
   tlistitem(datapo^).drawcell(canvas);
  end;
  paintimage(canvas);
