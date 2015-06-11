@@ -178,6 +178,7 @@ type
    fowner: tobject;
   public
    constructor create(aowner: tobject); reintroduce; virtual;
+   property owner: tobject read fowner;
  end;
 
  tlinkedobject = class;

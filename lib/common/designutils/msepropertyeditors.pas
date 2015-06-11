@@ -190,6 +190,7 @@ type
    property selected: boolean read getselected write setselected;
    property module: tmsecomponent read fmodule;
    property component: tcomponent read fcomponent;
+   property parenteditor: tpropertyeditor read fparenteditor;
    property valueeditor: tpropertyeditor read getvalueeditor;
    property linksource: tcomponent read getlinksource;
    property linkcomponent: tcomponent read getlinkcomponent;
@@ -730,7 +731,7 @@ type
    procedure dokeydown(var ainfo: keyeventinfoty); override;
  end;
  
-  tconstelementeditor = class(tarrayelementeditor)
+ tconstelementeditor = class(tarrayelementeditor)
   protected
    fvalue: msestring;
   public
