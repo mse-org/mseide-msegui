@@ -387,6 +387,18 @@ type
 //   property valuetext: msestring read getvaluetext write setvaluetext;
  end;
 
+ irecordvaluefield = interface(irecordfield)
+ end;
+ 
+ trecordfieldvalueitem = class(trecordfielditem)
+  public
+   constructor create(const intf: irecordvaluefield; const afieldindex: integer;
+                      const acaption: msestring;
+                      const fixedcaption: boolean = false;
+                      const aimagenr: integer = 0;
+                      const aimagelist: timagelist = nil);
+ end;
+ 
  ptreelistitem = ^ttreelistitem;
 
  itemliststatety = (ils_destroying,ils_updateitemvalues,
@@ -3439,6 +3451,16 @@ begin
    inherited;
   end;
  end;
+end;
+
+{ trecordfieldvalueitem }
+
+constructor trecordfieldvalueitem.create(const intf: irecordvaluefield;
+               const afieldindex: integer; const acaption: msestring;
+               const fixedcaption: boolean = false; const aimagenr: integer = 0;
+               const aimagelist: timagelist = nil);
+begin
+ inherited create(intf,afieldindex,acaption,fixedcaption,aimagenr,aimagelist);
 end;
 
 { ttreenode }

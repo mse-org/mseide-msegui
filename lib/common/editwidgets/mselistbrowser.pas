@@ -89,6 +89,10 @@ type
    property captionformat: formatinfoarty read fformat write setcaptionformat;
  end;
 
+ tlisteditvalueitem = class(tlistitem)
+  protected
+ end;
+ 
  ttreeitemeditlist = class;
  ttreelistedititem = class;
  treelistedititemclassty = class of ttreelistedititem;
