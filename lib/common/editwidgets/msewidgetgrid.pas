@@ -74,7 +74,7 @@ type
                          const apos: pointty;
                            var result: cellzonety);
   function createdatalist(const sender: twidgetcol): tdatalist;
-  function getdatatype: datalistclassty;
+  function getdatalistclass: datalistclassty;
   procedure datalistdestroyed;
   function getdefaultvalue: pointer;
 //  function getrowdatapo(const info: cellinfoty): pointer;
@@ -1455,7 +1455,7 @@ begin
     fdata:= fintf.createdatalist(self);
    end
    else begin
-    if (dl1 <> nil) and not (dl1 is fintf.getdatatype) then begin
+    if (dl1 <> nil) and not (dl1 is fintf.getdatalistclass) then begin
      componentexception(awidget,'Wrong datalist type.');
     end;
     fdata:= dl1;
@@ -1535,7 +1535,7 @@ begin
  end
  else begin
   if fintf <> nil then begin
-   datatype:= fintf.getdatatype.datatype;
+   datatype:= fintf.getdatalistclass.datatype;
    if arow >= 0 then begin
     info.cell.row:= arow;
     po1:= fintf.getrowdatapo(info.cell.row);

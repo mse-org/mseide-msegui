@@ -31,7 +31,7 @@ type
    procedure setsumlevel(index: integer; const avalue: integer);
   protected
    function createdatalist(const sender: twidgetcol): tdatalist; override;
-   function getdatatype: datalistclassty; override;
+   function getdatalistclass: datalistclassty; override;
 //   function internaldatatotext(const data): msestring; override;
 //   procedure valuetogrid(const arow: integer); override;
    function getoptionsedit: optionseditty; override;
@@ -111,7 +111,7 @@ begin
  result:= tgridrealsumlist.create(sender);
 end;
 
-function trealsumedit.getdatatype: datalistclassty;
+function trealsumedit.getdatalistclass: datalistclassty;
 begin
  result:= tgridrealsumlist;
 end;

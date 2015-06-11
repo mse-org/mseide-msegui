@@ -110,14 +110,14 @@ type
    function getinvisibleitems: tintegerset; override;
  end;
 
- tfieldeditspropertyeditor = class(tpersistentarraypropertyeditor)
+ tvalueeditspropertyeditor = class(tpersistentarraypropertyeditor)
   protected
    function itemgetvalue(const sender: tarrayelementeditor): msestring;
                                                                    override;
 //   function geteditorclass: propertyeditorclassty; override;
  end;
 
- titemfieldeditpropertyeditor = class(tcomponentpropertyeditor)
+ titemvalueeditpropertyeditor = class(tcomponentpropertyeditor)
   protected
    function filtercomponent(const acomponent: tcomponent): boolean; override;
  end;
@@ -179,9 +179,9 @@ begin
                            trefreshbooleanpropertyeditor);
  registerpropertyeditor(typeinfo(boolean),tcustomdatabutton,'enabled',
                            trefreshbooleanpropertyeditor);
- registerpropertyeditor(typeinfo(tfieldedits),nil,'',tfieldeditspropertyeditor);
- registerpropertyeditor(typeinfo(twidget),tfieldedititem,'',
-                           titemfieldeditpropertyeditor);
+ registerpropertyeditor(typeinfo(tvalueedits),nil,'',tvalueeditspropertyeditor);
+ registerpropertyeditor(typeinfo(twidget),tvalueedititem,'',
+                           titemvalueeditpropertyeditor);
 end;
 
 { tdropdowndatacolpropertyeditor }
@@ -346,23 +346,23 @@ begin
  result:= rowstatefoldhiddentag;
 end;
 
-{ titemfieldeditpropertyeditor }
+{ titemvalueeditpropertyeditor }
 
-function titemfieldeditpropertyeditor.filtercomponent(
+function titemvalueeditpropertyeditor.filtercomponent(
               const acomponent: tcomponent): boolean;
 var
  intf1: igridwidget;
 begin
  result:= (acomponent is twidget) and 
   ((twidget(acomponent).parentwidget) =
-    tfieldedititem(tpropertyeditor1(parenteditor).getpointervalue()).owner) and 
+    tvalueedititem(tpropertyeditor1(parenteditor).getpointervalue()).owner) and 
                getcorbainterface(acomponent,typeinfo(igridwidget),intf1);
 end;
 
-function tfieldeditspropertyeditor.itemgetvalue(
+function tvalueeditspropertyeditor.itemgetvalue(
               const sender: tarrayelementeditor): msestring;
 begin
- with tfieldedititem(
+ with tvalueedititem(
          tpropertyeditor1(sender.valueeditor).getpointervalue()) do begin
   if editwidget <> nil then begin
    result:= '<'+editwidget.name+'>';

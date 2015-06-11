@@ -177,7 +177,7 @@ type
    procedure setfirstclick(var ainfo: mouseeventinfoty);
    function createdatalist(const sender: twidgetcol): tdatalist; virtual; abstract;
    procedure datalistdestroyed; virtual;
-   function getdatatype: datalistclassty; virtual; abstract;
+   function getdatalistclass: datalistclassty; virtual; abstract;
    function getdefaultvalue: pointer; virtual;
    function getrowdatapo(const arow: integer): pointer; virtual;
    procedure setgridintf(const intf: iwidgetgrid); virtual;
@@ -277,7 +277,7 @@ type
    procedure setgridvalues(const avalue: pointerarty);
   protected
    function createdatalist(const sender: twidgetcol): tdatalist; override;
-   function getdatatype: datalistclassty; override;
+   function getdatalistclass: datalistclassty; override;
    procedure paintglyph(const canvas: tcanvas; const acolorglyph: colorty;
                 const avalue; const arect: rectty); override;
    procedure gridtovalue(arow: integer); override;
@@ -359,7 +359,7 @@ type
                         const avalue; const arect: rectty); override;
    procedure setdirection(const avalue: graphicdirectionty); virtual;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
-   function getdatatype: datalistclassty; override;
+   function getdatalistclass: datalistclassty; override;
    procedure valuetogrid(arow: integer); override;
    procedure gridtovalue(arow: integer); override;
    procedure internalcheckvalue(var avalue; var accept: boolean); override;
@@ -610,7 +610,7 @@ type
    procedure checkgridvalue(const index: integer); override;
    function gridvaluechecked(const aindex: integer): boolean; override;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
-   function getdatatype: datalistclassty; override;
+   function getdatalistclass: datalistclassty; override;
    procedure togglevalue(const areadonly: boolean;
                                     const down: boolean); override;
    procedure paintglyph(const canvas: tcanvas;  const acolorglyph: colorty; 
@@ -745,7 +745,7 @@ type
   protected
 //   procedure setgridintf(const intf: iwidgetgrid); override;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
-   function getdatatype: datalistclassty; override;
+   function getdatalistclass: datalistclassty; override;
    function getdefaultvalue: pointer; override;
    procedure valuetogrid(arow: integer); override;
    procedure gridtovalue(arow: integer); override;
@@ -1247,7 +1247,7 @@ begin
  result:= tgridrealdatalist.create(sender);
 end;
 
-function tcustomrealgraphdataedit.getdatatype: datalistclassty;
+function tcustomrealgraphdataedit.getdatalistclass: datalistclassty;
 begin
  result:= tgridrealdatalist;
 end;
@@ -2483,7 +2483,7 @@ begin
  result:= tgridintegerdatalist.create(sender);
 end;
 
-function tcustombooleanedit.getdatatype: datalistclassty;
+function tcustombooleanedit.getdatalistclass: datalistclassty;
 begin
  result:= tgridintegerdatalist;
 end;
@@ -3106,7 +3106,7 @@ begin
  result:= fdatalist;
 end;
 
-function tcustomintegergraphdataedit.getdatatype: datalistclassty;
+function tcustomintegergraphdataedit.getdatalistclass: datalistclassty;
 begin
  result:= tgridintegerdatalist;
 end;
@@ -4221,7 +4221,7 @@ begin
  result:= tgridpointerdatalist.create(sender);
 end;
 
-function tpointeredit.getdatatype: datalistclassty;
+function tpointeredit.getdatalistclass: datalistclassty;
 begin
  result:= tgridpointerdatalist;
 end;

@@ -2393,7 +2393,7 @@ type
    procedure writestatvalue(const writer: tstatwriter); override;
 
    function createdatalist(const sender: twidgetcol): tdatalist; override;
-   function getdatatype: datalistclassty; override;
+   function getdatalistclass: datalistclassty; override;
 
   {$ifdef mse_with_ifi}
    function getifidatalinkintf: iifidatalink; override;
@@ -10448,7 +10448,7 @@ begin
  result:= tgridenum64datalist.create(sender);
 end;
 
-function tcustomenum64edit.getdatatype: datalistclassty;
+function tcustomenum64edit.getdatalistclass: datalistclassty;
 begin
  result:= tgridenum64datalist;
 end;

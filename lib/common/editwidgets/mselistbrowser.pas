@@ -500,23 +500,23 @@ type
    property onstatread;
  end;
 
- tfieldedititem = class(townedpersistent)
+ tvalueedititem = class(townedpersistent)
   private
-   ffieldindex: int32;
+   fvalueindex: int32;
    feditwidget: twidget;
    fgridintf: igridwidget;
    procedure seteditwidget(const avalue: twidget);
-   procedure setfieldindex(const avalue: int32);
+   procedure setvalueindex(const avalue: int32);
   protected
    procedure changed();
   public
    destructor destroy(); override;
   published
-   property fieldindex: int32 read ffieldindex write setfieldindex default 0;
+   property fieldindex: int32 read fvalueindex write setvalueindex default 0;
    property editwidget: twidget read feditwidget write seteditwidget;
  end;
 
- tfieldedits = class(townedpersistentarrayprop)
+ tvalueedits = class(townedpersistentarrayprop)
   public
    constructor create(const aowner: titemedit); reintroduce;
   published
@@ -543,7 +543,7 @@ type
    foncheckcanedit: itemcanediteventty;
    fonextendimage: extendimageeventty;
 
-   ffieldedits: tfieldedits;
+   fvalueedits: tvalueedits;
    function getframe: tbuttonsframe;
    procedure setframe(const avalue: tbuttonsframe);                      
    function getitemlist: titemeditlist;
@@ -556,13 +556,13 @@ type
    function getifilink: tifistringlinkcomp;
    procedure setifilink(const avalue: tifistringlinkcomp);
   {$endif}
-   procedure setfieldedits(const avalue: tfieldedits);
+   procedure setvalueedits(const avalue: tvalueedits);
   protected
    flayoutinfofocused: listitemlayoutinfoty;
    flayoutinfocell: listitemlayoutinfoty;
    fvalue: tlistitem;
 
-   procedure fieldeditchanged();
+   procedure valueeditchanged();
    procedure unregisterchildwidget(const child: twidget); override;
                         //track removing of field edits
    procedure loaded(); override;
@@ -604,7 +604,7 @@ type
    procedure setgridintf(const intf: iwidgetgrid); override;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    procedure datalistdestroyed; override;
-   function getdatatype: datalistclassty; override;
+   function getdatalistclass: datalistclassty; override;
    procedure drawcell(const canvas: tcanvas); override;
    procedure valuetogrid(arow: integer); override;
    procedure gridtovalue(arow: integer); override;
@@ -673,7 +673,7 @@ type
    property textflags default defaultitemedittextflags;
    property textflagsactive default defaultitemedittextflagsactive;
    property frame: tbuttonsframe read getframe write setframe;
-   property fieldedits: tfieldedits read ffieldedits write setfieldedits;
+   property valueedits: tvalueedits read fvalueedits write setvalueedits;
    property onchange;
 //   property onbeforepaint;
 //   property onpaintbackground;
@@ -949,7 +949,7 @@ type
                                var processed: boolean); override;
    procedure aftercelldragevent(var ainfo: draginfoty; const arow: integer;
                                var processed: boolean); override;
-   function getdatatype: datalistclassty; override;
+   function getdatalistclass: datalistclassty; override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -2615,24 +2615,24 @@ begin
  oncreateobject:= createobjecteventty(value);
 end;
 
-{ tfieldedititem }
+{ tvalueedititem }
 
-destructor tfieldedititem.destroy;
+destructor tvalueedititem.destroy;
 begin
  editwidget:= nil; //remove link, objectlinker of owner is used.
  inherited;
 end;
 
-procedure tfieldedititem.changed;
+procedure tvalueedititem.changed;
 begin
  with titemedit(fowner) do begin
   if componentstate * [csloading,csdestroying] = [] then begin
-   fieldeditchanged();
+   valueeditchanged();
   end;
  end;
 end;
 
-procedure tfieldedititem.seteditwidget(const avalue: twidget);
+procedure tvalueedititem.seteditwidget(const avalue: twidget);
 begin
  if avalue <> feditwidget then begin
   if (avalue <> nil) and (not getcorbainterface(avalue,typeinfo(igridwidget),
@@ -2645,26 +2645,26 @@ begin
  end;
 end;
 
-procedure tfieldedititem.setfieldindex(const avalue: int32);
+procedure tvalueedititem.setvalueindex(const avalue: int32);
 begin
- if fieldindex <> avalue then begin
-  fieldindex:= avalue;
+ if fvalueindex <> avalue then begin
+  fvalueindex:= avalue;
   changed();
  end;
 end;
 
-{ tfieldedits }
+{ tvalueedits }
 
-constructor tfieldedits.create(const aowner: titemedit);
+constructor tvalueedits.create(const aowner: titemedit);
 begin
- inherited create(aowner,tfieldedititem);
+ inherited create(aowner,tvalueedititem);
 end;
 
 { titemedit }
 
 constructor titemedit.create(aowner: tcomponent);
 begin
- ffieldedits:= tfieldedits.create(self);
+ fvalueedits:= tvalueedits.create(self);
  include(fstate,des_editing);
 // fediting:= true;
  if fitemlist = nil then begin
@@ -2681,7 +2681,7 @@ begin
  if fgridintf = nil then begin
   freeandnil(fitemlist);
  end;
- ffieldedits.free();
+ fvalueedits.free();
  inherited;
 end;
 
@@ -2690,7 +2690,7 @@ begin
  result:= fitemlist;
 end;
 
-function titemedit.getdatatype: datalistclassty;
+function titemedit.getdatalistclass: datalistclassty;
 begin
  result:= titemeditlist;
 end;
@@ -3551,19 +3551,19 @@ begin
  end;
 end;
 
-procedure titemedit.setfieldedits(const avalue: tfieldedits);
+procedure titemedit.setvalueedits(const avalue: tvalueedits);
 begin
- ffieldedits.assign(avalue);
+ fvalueedits.assign(avalue);
 end;
 
-procedure titemedit.fieldeditchanged();
+procedure titemedit.valueeditchanged();
 begin
 end;
 
 procedure titemedit.loaded();
 begin
  inherited;
- fieldeditchanged();
+ valueeditchanged();
 end;
 
 procedure titemedit.unregisterchildwidget(const child: twidget);
@@ -3571,8 +3571,8 @@ var
  i1: int32;
 begin
  if not (csdestroying in componentstate) then begin
-  for i1:= 0 to ffieldedits.count - 1 do begin
-   with tfieldedititem(ffieldedits.fitems[i1]) do begin
+  for i1:= 0 to fvalueedits.count - 1 do begin
+   with tvalueedititem(fvalueedits.fitems[i1]) do begin
     if feditwidget = child then begin
      editwidget:= nil;
     end;
@@ -5189,7 +5189,7 @@ begin
  inherited;
 end;
 
-function ttreeitemedit.getdatatype: datalistclassty;
+function ttreeitemedit.getdatalistclass: datalistclassty;
 begin
  result:= ttreeitemeditlist;
 end;

@@ -218,7 +218,7 @@ type
    function createdatalink: tlookupdispfielddatalink; virtual; abstract;
    procedure dochange; override;
    
-   function getdatatype: datalistclassty; override;
+   function getdatalistclass: datalistclassty; override;
    procedure valuetogrid(row: integer); override;
    procedure griddatasourcechanged; override;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
@@ -913,7 +913,7 @@ begin
  fdatalink.recordchanged(nil);
 end;
 
-function tdblookup1.getdatatype: datalistclassty;
+function tdblookup1.getdatalistclass: datalistclassty;
 begin
  result:= tnonedatalist;
 end;
@@ -923,7 +923,7 @@ begin
  //dummy
 end;
 
-procedure tdblookup1.refreshfieldvalue;	
+procedure tdblookup1.refreshfieldvalue;
 begin
  valuetotext;
  changed;
