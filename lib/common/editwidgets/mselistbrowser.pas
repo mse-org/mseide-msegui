@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2014 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2015 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -21,7 +21,7 @@ uses
  msebitmap,mseclasses,mseguiglob,msedrawtext,msefileutils,msedataedits,
  mseeditglob,msewidgetgrid,msewidgets,mseedit,mseevent,msegui,msedropdownlist,
  msesys,msedrag,msestat,mseinplaceedit,msepointer,msegridsglob,
- mserichstring
+ mserichstring,msearrayprops
  {$ifdef mse_with_ifi}
  ,mseificomp,mseifiglob,mseificompglob
  {$endif}
@@ -487,6 +487,28 @@ type
    property onstatread;
  end;
 
+ tfieldedititem = class(townedpersistent)
+  private
+   fid: int32;
+   feditwidget: twidget;
+   fgridintf: igridwidget;
+   procedure seteditwidget(const avalue: twidget);
+   procedure setid(const avalue: int32);
+  protected
+   procedure changed();
+  public
+   destructor destroy(); override;
+  published
+   property id: int32 read fid write setid default 0;
+   property editwidget: twidget read feditwidget write seteditwidget;
+ end;
+
+ tfieldedits = class(townedpersistentarrayprop)
+  public
+   constructor create(const aowner: titemedit); reintroduce;
+  published
+ end;
+ 
  itemindexeventty = procedure(const sender: tobject; const aindex: integer;
                      const aitem: tlistitem) of object;
  itemcanediteventty = procedure(const sender: tobject;
@@ -508,6 +530,7 @@ type
    foncheckcanedit: itemcanediteventty;
    fonextendimage: extendimageeventty;
 
+   ffieldedits: tfieldedits;
    function getframe: tbuttonsframe;
    procedure setframe(const avalue: tbuttonsframe);                      
    function getitemlist: titemeditlist;
@@ -520,11 +543,17 @@ type
    function getifilink: tifistringlinkcomp;
    procedure setifilink(const avalue: tifistringlinkcomp);
   {$endif}
+   procedure setfieldedits(const avalue: tfieldedits);
   protected
    flayoutinfofocused: listitemlayoutinfoty;
    flayoutinfocell: listitemlayoutinfoty;
    fvalue: tlistitem;
 
+   procedure fieldeditchanged();
+   procedure unregisterchildwidget(const child: twidget); override;
+                        //track removing of field edits
+   procedure loaded(); override;
+   
    function valuecanedit: boolean;
    procedure doextendimage(const cellinfopo: pcellinfoty; 
                                         var aextend: sizety); virtual;
@@ -595,6 +624,8 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   procedure insertwidget(const awidget: twidget;
+                                            const apos: pointty); override;
    function textclipped(const arow: integer;
                        out acellrect: rectty): boolean; overload; override;
    function getvaluetext: msestring;
@@ -629,6 +660,7 @@ type
    property textflags default defaultitemedittextflags;
    property textflagsactive default defaultitemedittextflagsactive;
    property frame: tbuttonsframe read getframe write setframe;
+   property fieldedits: tfieldedits read ffieldedits write setfieldedits;
    property onchange;
 //   property onbeforepaint;
 //   property onpaintbackground;
@@ -2568,10 +2600,56 @@ begin
  oncreateobject:= createobjecteventty(value);
 end;
 
+{ tfieldedititem }
+
+destructor tfieldedititem.destroy;
+begin
+ editwidget:= nil; //remove link, objectlinker of owner is used.
+ inherited;
+end;
+
+procedure tfieldedititem.changed;
+begin
+ with titemedit(fowner) do begin
+  if componentstate * [csloading,csdestroying] = [] then begin
+   fieldeditchanged();
+  end;
+ end;
+end;
+
+procedure tfieldedititem.seteditwidget(const avalue: twidget);
+begin
+ if avalue <> feditwidget then begin
+  if (avalue <> nil) and (not getcorbainterface(avalue,typeinfo(igridwidget),
+                                                           fgridintf) or 
+                                 (avalue.parentwidget <> fowner)) then begin
+   raise exception.create('Invalid item field edit widget "'+avalue.name+'".');
+  end;
+  titemedit(fowner).setlinkedvar(avalue,tmsecomponent(feditwidget));
+  changed();
+ end;
+end;
+
+procedure tfieldedititem.setid(const avalue: int32);
+begin
+ if fid <> avalue then begin
+  fid:= avalue;
+  changed();
+ end;
+end;
+
+{ tfieldedits }
+
+constructor tfieldedits.create(const aowner: titemedit);
+begin
+ inherited create(aowner,tfieldedititem);
+end;
+
 { titemedit }
 
 constructor titemedit.create(aowner: tcomponent);
 begin
+ ffieldedits:= tfieldedits.create(self);
  include(fstate,des_editing);
 // fediting:= true;
  if fitemlist = nil then begin
@@ -2588,6 +2666,7 @@ begin
  if fgridintf = nil then begin
   freeandnil(fitemlist);
  end;
+ ffieldedits.free();
  inherited;
 end;
 
@@ -3442,6 +3521,50 @@ end;
 procedure titemedit.setframe(const avalue: tbuttonsframe);
 begin
  inherited setframe(avalue);
+end;
+
+procedure titemedit.insertwidget(const awidget: twidget; const apos: pointty);
+var
+ intf1: igridwidget;
+begin
+ inherited;
+ if not (csloading in componentstate) then begin
+  if awidget.getcorbainterface(typeinfo(igridwidget),intf1) then begin
+   awidget.visible:= false;
+   intf1.initgridwidget();
+  end;
+ end;
+end;
+
+procedure titemedit.setfieldedits(const avalue: tfieldedits);
+begin
+ ffieldedits.assign(avalue);
+end;
+
+procedure titemedit.fieldeditchanged();
+begin
+end;
+
+procedure titemedit.loaded();
+begin
+ inherited;
+ fieldeditchanged();
+end;
+
+procedure titemedit.unregisterchildwidget(const child: twidget);
+var
+ i1: int32;
+begin
+ if not (csdestroying in componentstate) then begin
+  for i1:= 0 to ffieldedits.count - 1 do begin
+   with tfieldedititem(ffieldedits.fitems[i1]) do begin
+    if feditwidget = child then begin
+     editwidget:= nil;
+    end;
+   end;
+  end;
+ end;
+ inherited;
 end;
 
 {
