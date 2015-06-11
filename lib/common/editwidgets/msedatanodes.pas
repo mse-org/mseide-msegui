@@ -41,6 +41,8 @@ type
                  ns1_childchecked,ns1_parentnotchecked,
                  ns1_checkboxclicked,ns1_customsort,
                  ns1_nofreeroot,ns1_top,ns1_fixedcaption
+ //                ns1_irecordfield,      //implements irecordfield
+ //                ns1_irecordvaluefield  //irecordvaluefield
                 );
  nodestates1ty = set of nodestate1ty;
  
@@ -388,6 +390,7 @@ type
  end;
 
  irecordvaluefield = interface(irecordfield)
+//  function getvalueinfo(out akind: int32): int32;
  end;
  
  trecordfieldvalueitem = class(trecordfielditem)

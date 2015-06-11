@@ -72,6 +72,17 @@ type
 
  tlistedititem = class(tlistitem)
  end;
+ 
+ trecordfieldlistedititem = class(tlistedititem,irecordvaluefield)
+  protected
+    //irecordfield
+   function getfieldtext(const fieldindex: integer): msestring; virtual;
+   procedure setfieldtext(const fieldindex: integer;
+                                              var avalue: msestring); virtual;
+  public
+   constructor create(const aowner: tcustomitemlist); override;
+ end;
+ 
  listedititemarty = array of tlistitem;
  listedititemclassty = class of tlistedititem;
  
@@ -146,8 +157,10 @@ type
    function path(const astart: integer = 0): filenamety;
  end;
  
- createlistitemeventty = procedure(const sender: tcustomitemlist; var item: tlistedititem) of object;
- createtreelistitemeventty = procedure(const sender: tcustomitemlist; var item: ttreelistedititem) of object;
+ createlistitemeventty = procedure(const sender: tcustomitemlist;
+                                           var item: tlistedititem) of object;
+ createtreelistitemeventty = procedure(const sender: tcustomitemlist; 
+                                       var item: ttreelistedititem) of object;
  nodenotificationeventty = procedure(const sender: tlistitem;
            var action: nodeactionty) of object;
 
@@ -489,17 +502,17 @@ type
 
  tfieldedititem = class(townedpersistent)
   private
-   fid: int32;
+   ffieldindex: int32;
    feditwidget: twidget;
    fgridintf: igridwidget;
    procedure seteditwidget(const avalue: twidget);
-   procedure setid(const avalue: int32);
+   procedure setfieldindex(const avalue: int32);
   protected
    procedure changed();
   public
    destructor destroy(); override;
   published
-   property id: int32 read fid write setid default 0;
+   property fieldindex: int32 read ffieldindex write setfieldindex default 0;
    property editwidget: twidget read feditwidget write seteditwidget;
  end;
 
@@ -897,7 +910,8 @@ type
                          teo_enteronimageclick);
  treeitemeditoptionsty = set of treeitemeditoptionty;
 
- checkmoveeventty = procedure(const curindex,newindex: integer; var accept: boolean) of object;
+ checkmoveeventty = procedure(const curindex,newindex: integer; 
+                                            var accept: boolean) of object;
 
  trecordfieldedit = class(tmbdropdownitemedit)
   private
@@ -928,7 +942,8 @@ type
    procedure doupdatelayout; override;
    function getitemclass: listitemclassty; override;
    procedure dokeydown(var info: keyeventinfoty); override;
-   procedure docellevent(const ownedcol: boolean; var info: celleventinfoty); override;
+   procedure docellevent(const ownedcol: boolean; 
+                                       var info: celleventinfoty); override;
    function checkrowmove(const curindex,newindex: integer): boolean;
    procedure beforecelldragevent(var ainfo: draginfoty; const arow: integer;
                                var processed: boolean); override;
@@ -2630,10 +2645,10 @@ begin
  end;
 end;
 
-procedure tfieldedititem.setid(const avalue: int32);
+procedure tfieldedititem.setfieldindex(const avalue: int32);
 begin
- if fid <> avalue then begin
-  fid:= avalue;
+ if fieldindex <> avalue then begin
+  fieldindex:= avalue;
   changed();
  end;
 end;
@@ -5924,6 +5939,26 @@ procedure trichlistedititem.setcaptionformat(const avalue: formatinfoarty);
 begin
  fformat:= avalue;
  change;
+end;
+
+{ trecordfieldlistedititem }
+
+constructor trecordfieldlistedititem.create(const aowner: tcustomitemlist);
+begin
+// include(fstate1,ns1_irecordvaluefield);
+ inherited;
+end;
+
+function trecordfieldlistedititem.getfieldtext(
+              const fieldindex: integer): msestring;
+begin
+ result:= '';
+end;
+
+procedure trecordfieldlistedititem.setfieldtext(const fieldindex: integer;
+               var avalue: msestring);
+begin
+ //dummy
 end;
 
 initialization
