@@ -22,7 +22,7 @@ interface
 
 implementation
 uses
- {$ifdef FPC}classes{$else}Classes{$endif},mseedit,msedataedits,msegraphedits,
+ classes,mclasses,mseedit,msedataedits,msegraphedits,
  msedataimage,mselistbrowser,msecalendardatetimeedit,
  msewidgetgrid,msetextedit,msedesignintf,regeditwidgets_bmp,msepropertyeditors,
  msedropdownlist,mseterminal,msedrawtext,msedatanodes,{msedialog,}msestrings,
@@ -31,6 +31,7 @@ uses
  sysutils,regglob,msearrayutils,mseeditglob;
 
 type
+ tpropertyeditor1 = class(tpropertyeditor);
  tdropdowndatacolpropertyeditor = class(tarraypropertyeditor)
   protected
    function geteditorclass: propertyeditorclassty; override;
@@ -108,7 +109,19 @@ type
   protected
    function getinvisibleitems: tintegerset; override;
  end;
-  
+
+ tfieldeditspropertyeditor = class(tpersistentarraypropertyeditor)
+  protected
+   function itemgetvalue(const sender: tarrayelementeditor): msestring;
+                                                                   override;
+//   function geteditorclass: propertyeditorclassty; override;
+ end;
+
+ titemfieldeditpropertyeditor = class(tcomponentpropertyeditor)
+  protected
+   function filtercomponent(const acomponent: tcomponent): boolean; override;
+ end;
+   
 procedure Register;
 begin
  registercomponents('Edit',[twidgetgrid,
@@ -166,6 +179,9 @@ begin
                            trefreshbooleanpropertyeditor);
  registerpropertyeditor(typeinfo(boolean),tcustomdatabutton,'enabled',
                            trefreshbooleanpropertyeditor);
+ registerpropertyeditor(typeinfo(tfieldedits),nil,'',tfieldeditspropertyeditor);
+ registerpropertyeditor(typeinfo(twidget),tfieldedititem,'',
+                           titemfieldeditpropertyeditor);
 end;
 
 { tdropdowndatacolpropertyeditor }
@@ -328,6 +344,33 @@ end;
 function trowstatelistsourcefoldhiddenpropertyeditor.gettag: integer;
 begin
  result:= rowstatefoldhiddentag;
+end;
+
+{ titemfieldeditpropertyeditor }
+
+function titemfieldeditpropertyeditor.filtercomponent(
+              const acomponent: tcomponent): boolean;
+var
+ intf1: igridwidget;
+begin
+ result:= (acomponent is twidget) and 
+  ((twidget(acomponent).parentwidget) =
+    tfieldedititem(tpropertyeditor1(parenteditor).getpointervalue()).owner) and 
+               getcorbainterface(acomponent,typeinfo(igridwidget),intf1);
+end;
+
+function tfieldeditspropertyeditor.itemgetvalue(
+              const sender: tarrayelementeditor): msestring;
+begin
+ with tfieldedititem(
+         tpropertyeditor1(sender.valueeditor).getpointervalue()) do begin
+  if editwidget <> nil then begin
+   result:= '<'+editwidget.name+'>';
+  end
+  else begin
+   result:= '<>';
+  end;
+ end;
 end;
 
 initialization
