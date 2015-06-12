@@ -194,6 +194,7 @@ type
                                var handled: boolean); virtual;
    procedure valuetogrid(row: integer); virtual; abstract;
    procedure gridtovalue(row: integer); virtual;
+   procedure setvaluedata(const source); virtual; abstract;
    function getnulltext: msestring;
    procedure docellevent(const ownedcol: boolean;
                                         var info: celleventinfoty); virtual;
@@ -276,6 +277,7 @@ type
    function getgridvalues: pointerarty;
    procedure setgridvalues(const avalue: pointerarty);
   protected
+   procedure setvaluedata(const source); override;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    function getdatalistclass: datalistclassty; override;
    procedure paintglyph(const canvas: tcanvas; const acolorglyph: colorty;
@@ -354,6 +356,7 @@ type
    procedure setgridvalues(const avalue: realarty);
   protected
    fvalue: realty;
+   procedure setvaluedata(const source); override;
    procedure internalcreateframe; override;
    procedure paintglyph(const canvas: tcanvas; const acolorglyph: colorty;
                         const avalue; const arect: rectty); override;
@@ -602,6 +605,7 @@ type
   {$endif}
   protected
    class function classskininfo: skininfoty; override;
+   procedure setvaluedata(const source); override;
    procedure setnullvalue;
    function getdefaultvalue: pointer; override;
    procedure valuetogrid(arow: integer); override;
@@ -744,6 +748,7 @@ type
    function getdatalist: tintegerdatalist;
   protected
 //   procedure setgridintf(const intf: iwidgetgrid); override;
+   procedure setvaluedata(const source); override;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    function getdatalistclass: datalistclassty; override;
    function getdefaultvalue: pointer; override;
@@ -1384,6 +1389,11 @@ end;
 procedure tcustomrealgraphdataedit.internalcreateframe;
 begin
  tsliderframe.create(iscrollframe(self));
+end;
+
+procedure tcustomrealgraphdataedit.setvaluedata(const source);
+begin
+ value:= realty(source);
 end;
 
 { tcustomslider }
@@ -2830,6 +2840,11 @@ begin
  result:= tgridintegerdatalist(inherited griddata);
 end;
 
+procedure tcustombooleanedit.setvaluedata(const source);
+begin
+ value:= boolean(source);
+end;
+
 { tcustombooleaneditradio }
 
 function tcustombooleaneditradio.getglyph: stockglyphty;
@@ -3222,6 +3237,11 @@ end;
 function tcustomintegergraphdataedit.griddata: tgridintegerdatalist;
 begin
  result:= tgridintegerdatalist(inherited griddata);
+end;
+
+procedure tcustomintegergraphdataedit.setvaluedata(const source);
+begin
+ value:= integer(source);
 end;
 
 
@@ -4292,6 +4312,11 @@ end;
 function tpointeredit.griddata: tgridpointerdatalist;
 begin
  result:= tgridpointerdatalist(inherited griddata);
+end;
+
+procedure tpointeredit.setvaluedata(const source);
+begin
+ value:= pointer(source);
 end;
 
 { tbarface }

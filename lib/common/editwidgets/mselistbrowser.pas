@@ -582,6 +582,11 @@ type
    procedure updateifigriddata(const sender: tobject;
                                            const alist: tdatalist); override;
   {$endif}
+  
+   function finddataedit(aitem: tlistitem; out awidget: twidget;
+                  out agridintf: igridwidget; out avaluepo: pointer): boolean;
+   function updateeditwidget(): boolean; //true if editwidgetactivated
+
     //iedit
    function locatecount: integer; override;        //number of locate values
    function getkeystring(const index: integer): msestring; override;
@@ -2838,6 +2843,7 @@ begin
  else begin
   text:= fvalue.caption;
  end;
+ updateeditwidget();
  setupeditor;
 end;
 
@@ -2854,16 +2860,6 @@ begin
  end
  else begin
   fvalue:= fitemlist[int1];
-{
-  if not (des_updating in fstate) then begin
-   fitemlist.incupdate;
-   try
-    updateitemvalues(int1,1);
-   finally
-    fitemlist.decupdate;
-   end;
-  end;
-}
  end;
  getitemvalues;
  inherited;
@@ -2881,47 +2877,90 @@ begin
  end;
 end;
 
-procedure titemedit.drawcell(const canvas: tcanvas);
+function titemedit.finddataedit(aitem: tlistitem; out awidget: twidget;
+                  out agridintf: igridwidget; out avaluepo: pointer): boolean;
 var
  vtype: listdatatypety;
  vindex: int32;
  i1,i2: int32;
+begin
+ result:= false;
+ if (fvalueedits.count > 0) and 
+         (aitem is trecordvaluelistedititem) then begin
+  with irecordvaluefield(trecordvaluelistedititem(aitem)) do begin
+   getvalueinfo(vtype,vindex,avaluepo);
+   if vtype <> dl_none then begin
+    i1:= -1;
+    if (vindex >= 0) and (vindex < fvalueedits.count) then begin
+     if tvalueedititem(fvalueedits.fitems[vindex]).fdatatype = vtype then begin
+      i1:= vindex;          //check matching index item
+     end;
+    end;
+   end;
+   if i1 < 0 then begin
+    for i2:= 0 to fvalueedits.count - 1 do begin
+     if tvalueedititem(fvalueedits.fitems[i2]).fdatatype = vtype then begin
+      i1:= i2;              //check any match
+      break;
+     end;
+    end;
+   end;
+   result:= i1 >= 0;
+  end;
+ end;
+ if result then begin
+  with tvalueedititem(fvalueedits.fitems[i1]) do begin
+   awidget:= feditwidget;
+   agridintf:= fgridintf;
+  end;
+ end
+ else begin
+  awidget:= nil;
+  agridintf:= nil;
+ end;
+end;
+
+function titemedit.updateeditwidget(): boolean; //true if editwidgetactivated
+var
+ widget1: twidget;
+ intf1: igridwidget;
+ po1: pointer;
+ i1: integer;
+begin
+ result:= finddataedit(fvalue,widget1,intf1,po1);
+ if result then begin
+  for i1:= 0 to fvalueedits.count - 1 do begin
+   with tvalueedititem(fvalueedits.fitems[i1]) do begin
+    if (feditwidget <> widget1) and (feditwidget <> nil) then begin
+     feditwidget.visible:= false;
+    end;
+   end;
+  end;
+  intf1.setvaluedata(po1^);
+  widget1.visible:= true;
+ end;
+end;
+
+procedure titemedit.drawcell(const canvas: tcanvas);
+var
  databefore: pointer;
  po1: pointer;
+ widget1: twidget;
+ intf1: igridwidget;
 begin
  with cellinfoty(canvas.drawinfopo^) do begin
   doextendimage(canvas.drawinfopo,flayoutinfocell.imageextra);
   flayoutinfocell.rowindex:= cell.row;
   flayoutinfocell.textflags:= textflags;
-  if (fvalueedits.count > 0) and 
-          (tlistitem(datapo^) is trecordvaluelistedititem) then begin
-   with irecordvaluefield(trecordvaluelistedititem(datapo^)) do begin
-    getvalueinfo(vtype,vindex,po1);
-    if vtype <> dl_none then begin
-     i1:= -1;
-     if (vindex >= 0) and (vindex < fvalueedits.count) then begin
-      if tvalueedititem(fvalueedits.fitems[vindex]).fdatatype = vtype then begin
-       i1:= vindex;          //check matching index item
-      end;
-     end;
-    end;
-    if i1 < 0 then begin
-     for i2:= 0 to fvalueedits.count - 1 do begin
-      if tvalueedititem(fvalueedits.fitems[i2]).fdatatype = vtype then begin
-       i1:= i2;              //check any match
-       break;
-      end;
-     end;
-    end;
-    if i1 >= 0 then begin
-     databefore:= datapo;
-     datapo:= po1;
-     tvalueedititem(fvalueedits.fitems[i1]).fgridintf.drawcell(canvas);
-     datapo:= databefore;
-    end;
-   end;
+  if finddataedit(tlistitem(datapo^),widget1,intf1,po1) then begin
+   databefore:= datapo;
+   datapo:= po1;
+   intf1.drawcell(canvas);
+   datapo:= databefore;
+  end
+  else begin
+   tlistitem(datapo^).drawcell(canvas);
   end;
-  tlistitem(datapo^).drawcell(canvas);
  end;
  paintimage(canvas);
 end;

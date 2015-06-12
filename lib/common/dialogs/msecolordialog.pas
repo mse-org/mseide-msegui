@@ -55,6 +55,7 @@ type
    function getgridvalues: colorarty;
    procedure setgridvalues(const avalue: colorarty);
   protected
+   procedure setvaluedata(const source); override;
    function internaldatatotext1(
                  const avalue: integer): msestring; virtual;
    function internaldatatotext(const data): msestring; override;
@@ -537,6 +538,11 @@ procedure tcustomcoloredit.dochange;
 begin
  inherited;
  invalidate;
+end;
+
+procedure tcustomcoloredit.setvaluedata(const source);
+begin
+ value:= colorty(source);
 end;
 
 { tcolordialogfo }

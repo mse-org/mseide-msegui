@@ -92,6 +92,7 @@ type
   procedure gridtovalue(row: integer);  //row = -1 -> focused row,
                                         // -2 -> default value
   procedure valuetogrid(row: integer);  //row = -1 -> focused row
+  procedure setvaluedata(const source);
   function getnulltext: msestring;
   procedure docellevent(const ownedcol: boolean; var info: celleventinfoty);
   function sortfunc(const l,r): integer;

@@ -168,6 +168,7 @@ type
    procedure initgridwidget;
    procedure valuetogrid(row: integer);
    procedure gridtovalue(row: integer);
+   procedure setvaluedata(const source); virtual;
    procedure docellevent(const ownedcol: boolean; 
                                          var info: celleventinfoty); virtual;
    function sortfunc(const l,r): integer;
@@ -2356,6 +2357,11 @@ end;
 function tcustomtextedit.getstatpriority: integer;
 begin
  result:= fstatpriority;
+end;
+
+procedure tcustomtextedit.setvaluedata(const source);
+begin
+ text:= msestring(source);
 end;
 
 { tundotextedit }
