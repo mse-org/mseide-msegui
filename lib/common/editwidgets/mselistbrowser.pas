@@ -560,6 +560,7 @@ type
   {$endif}
    procedure setvalueedits(const avalue: tvalueedits);
   protected
+   factiveedit: twidget;
    flayoutinfofocused: listitemlayoutinfoty;
    flayoutinfocell: listitemlayoutinfoty;
    fvalue: tlistitem;
@@ -568,6 +569,7 @@ type
    procedure unregisterchildwidget(const child: twidget); override;
                         //track removing of field edits
    procedure loaded(); override;
+   procedure dofocus; override;
    
    function valuecanedit: boolean;
    procedure doextendimage(const cellinfopo: pcellinfoty; 
@@ -2929,15 +2931,23 @@ var
 begin
  result:= finddataedit(fvalue,widget1,intf1,po1);
  if result then begin
-  for i1:= 0 to fvalueedits.count - 1 do begin
-   with tvalueedititem(fvalueedits.fitems[i1]) do begin
-    if (feditwidget <> widget1) and (feditwidget <> nil) then begin
-     feditwidget.visible:= false;
-    end;
+  if factiveedit <> widget1 then begin
+   if factiveedit <> nil then begin
+    factiveedit.visible:= false;
    end;
   end;
+  factiveedit:= widget1;
   intf1.setvaluedata(po1^);
   widget1.visible:= true;
+  if focused then begin 
+   widget1.setfocus;
+  end;
+ end
+ else begin
+  if factiveedit <> nil then begin
+   factiveedit.visible:= false;
+   factiveedit:= nil;
+  end;
  end;
 end;
 
@@ -3648,11 +3658,24 @@ begin
  valueeditchanged();
 end;
 
+procedure titemedit.dofocus();
+begin
+ if factiveedit <> nil then begin
+  factiveedit.setfocus();
+ end
+ else begin
+  inherited;
+ end;
+end;
+
 procedure titemedit.unregisterchildwidget(const child: twidget);
 var
  i1: int32;
 begin
  if not (csdestroying in componentstate) then begin
+  if child = factiveedit then begin 
+   factiveedit:= nil;
+  end;
   for i1:= 0 to fvalueedits.count - 1 do begin
    with tvalueedititem(fvalueedits.fitems[i1]) do begin
     if feditwidget = child then begin

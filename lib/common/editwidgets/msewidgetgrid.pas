@@ -3650,7 +3650,8 @@ end;
 procedure tcustomwidgetgrid.dokeydown(var info: keyeventinfoty);
 begin
  if not (es_child in info.eventstate) or 
-         (window.focusedwidget = factivewidget) or 
+         ((factivewidget <> nil) and 
+          factivewidget.checkdescendent(window.focusedwidget)) or 
          (factivewidget = nil) and 
           not (fcontainer1.entered or fcontainer3.entered) then begin
   inherited;
