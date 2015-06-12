@@ -74,6 +74,7 @@ type
    procedure valuetogrid(row: integer); virtual;
    procedure gridtovalue(row: integer); virtual;
    procedure setvaluedata(const source); virtual;
+   procedure getvaluedata(out dest); virtual;
    procedure docellevent(const ownedcol: boolean; var info: celleventinfoty); virtual;
    function sortfunc(const l,r): integer; virtual;
    procedure gridvaluechanged(const index: integer); virtual;
@@ -511,6 +512,11 @@ end;
 procedure tcustomdataimage.setvaluedata(const source);
 begin
  value:= string(source);
+end;
+
+procedure tcustomdataimage.getvaluedata(out dest);
+begin
+ //dummy
 end;
 
 procedure tcustomdataimage.setparentgridwidget(const intf: igridwidget);

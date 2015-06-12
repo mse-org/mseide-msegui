@@ -107,6 +107,7 @@ type
                      //for titemedit children
   procedure setparentgridwidget(const intf: igridwidget);
   procedure setvaluedata(const source);
+  procedure getvaluedata(out dest);
   procedure childdataentered(const sender: igridwidget);
  end;
 

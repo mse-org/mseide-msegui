@@ -196,6 +196,7 @@ type
    procedure valuetogrid(row: integer); virtual; abstract;
    procedure gridtovalue(row: integer); virtual;
    procedure setvaluedata(const source); virtual; abstract;
+   procedure getvaluedata(out dest); virtual; abstract;
    function getnulltext: msestring;
    procedure docellevent(const ownedcol: boolean;
                                         var info: celleventinfoty); virtual;
@@ -281,6 +282,7 @@ type
    procedure setgridvalues(const avalue: pointerarty);
   protected
    procedure setvaluedata(const source); override;
+   procedure getvaluedata(out dest); override;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    function getdatalistclass: datalistclassty; override;
    procedure paintglyph(const canvas: tcanvas; const acolorglyph: colorty;
@@ -360,6 +362,7 @@ type
   protected
    fvalue: realty;
    procedure setvaluedata(const source); override;
+   procedure getvaluedata(out dest); override;
    procedure internalcreateframe; override;
    procedure paintglyph(const canvas: tcanvas; const acolorglyph: colorty;
                         const avalue; const arect: rectty); override;
@@ -609,6 +612,7 @@ type
   protected
    class function classskininfo: skininfoty; override;
    procedure setvaluedata(const source); override;
+   procedure getvaluedata(out dest); override;
    procedure setnullvalue;
    function getdefaultvalue: pointer; override;
    procedure valuetogrid(arow: integer); override;
@@ -752,6 +756,7 @@ type
   protected
 //   procedure setgridintf(const intf: iwidgetgrid); override;
    procedure setvaluedata(const source); override;
+   procedure getvaluedata(out dest); override;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    function getdatalistclass: datalistclassty; override;
    function getdefaultvalue: pointer; override;
@@ -1397,6 +1402,11 @@ end;
 procedure tcustomrealgraphdataedit.setvaluedata(const source);
 begin
  value:= realty(source);
+end;
+
+procedure tcustomrealgraphdataedit.getvaluedata(out dest);
+begin
+ realty(dest):= value;
 end;
 
 { tcustomslider }
@@ -2861,6 +2871,11 @@ begin
  value:= boolean(source);
 end;
 
+procedure tcustombooleanedit.getvaluedata(out dest);
+begin
+ boolean(dest):= value;
+end;
+
 { tcustombooleaneditradio }
 
 function tcustombooleaneditradio.getglyph: stockglyphty;
@@ -3258,6 +3273,11 @@ end;
 procedure tcustomintegergraphdataedit.setvaluedata(const source);
 begin
  value:= integer(source);
+end;
+
+procedure tcustomintegergraphdataedit.getvaluedata(out dest);
+begin
+ integer(dest):= value;
 end;
 
 
@@ -4333,6 +4353,11 @@ end;
 procedure tpointeredit.setvaluedata(const source);
 begin
  value:= pointer(source);
+end;
+
+procedure tpointeredit.getvaluedata(out dest);
+begin
+ pointer(dest):= value;
 end;
 
 { tbarface }

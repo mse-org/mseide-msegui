@@ -169,6 +169,7 @@ type
    procedure valuetogrid(row: integer);
    procedure gridtovalue(row: integer);
    procedure setvaluedata(const source); virtual;
+   procedure getvaluedata(out dest); virtual;
    procedure docellevent(const ownedcol: boolean; 
                                          var info: celleventinfoty); virtual;
    function sortfunc(const l,r): integer;
@@ -2374,6 +2375,11 @@ end;
 procedure tcustomtextedit.childdataentered(const sender: igridwidget);
 begin
  //dummy
+end;
+
+procedure tcustomtextedit.getvaluedata(out dest);
+begin
+ msestring(dest):= text;
 end;
 
 { tundotextedit }

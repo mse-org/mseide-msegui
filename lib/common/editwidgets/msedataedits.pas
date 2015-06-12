@@ -188,6 +188,7 @@ type
    procedure valuetogrid(row: integer); virtual; abstract;
    procedure gridtovalue(row: integer); virtual;
    procedure setvaluedata(const source); virtual; abstract;
+   procedure getvaluedata(out dest); virtual; abstract;
    procedure docellevent(const ownedcol: boolean; var info: celleventinfoty); virtual;
    function sortfunc(const l,r): integer; virtual;
    procedure gridvaluechanged(const index: integer); virtual;
@@ -344,6 +345,7 @@ type
    fvalue: msestring;
    fvaluedefault: msestring;
    procedure setvaluedata(const source); override;
+   procedure getvaluedata(out dest); override;
    function getvaluetext: msestring; virtual;
    procedure updatedisptext(var avalue: msestring); virtual;
 
@@ -458,6 +460,7 @@ type
   protected
    fvalue: ansistring;
    procedure setvaluedata(const source); override;
+   procedure getvaluedata(out dest); override;
    procedure dosetvalue(var avalue: ansistring; var accept: boolean); virtual;
    procedure texttovalue(var accept: boolean; const quiet: boolean); override;
    function internaldatatotext(const data): msestring; override;
@@ -695,6 +698,7 @@ type
   protected
    fisnull: boolean; //used in tdbintegeredit
    procedure setvaluedata(const source); override;
+   procedure getvaluedata(out dest); override;
    function gettextvalue(var accept: boolean; const quiet: boolean): integer;
    procedure texttovalue(var accept: boolean; const quiet: boolean); override;
    function internaldatatotext(const data): msestring; override;
@@ -768,6 +772,7 @@ type
   protected
    fisnull: boolean; //used in tdbintegeredit
    procedure setvaluedata(const source); override;
+   procedure getvaluedata(out dest); override;
    procedure texttovalue(var accept: boolean; const quiet: boolean); override;
    function internaldatatotext(const data): msestring; override;
    procedure texttodata(const atext: msestring; var data); override;
@@ -838,6 +843,7 @@ type
    fvalue1: msestring;
    procedure setvalue(const avalue: msestring);
    procedure setvaluedata(const source); override;
+   procedure getvaluedata(out dest); override;
    function createdropdowncontroller: tcustomdropdowncontroller; override;
    procedure texttovalue(var accept: boolean; const quiet: boolean); override;
    procedure setnullvalue; override; //for dbedits
@@ -926,6 +932,7 @@ type
    fvalueempty: integer;
    procedure setvalue(const avalue: integer);
    procedure setvaluedata(const source); override;
+   procedure getvaluedata(out dest); override;
    procedure setnullvalue; override; //for dbedits
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    function getdatalistclass: datalistclassty; override;
@@ -1130,6 +1137,7 @@ type
    fmin: realty;
    fmax: realty;
    procedure setvaluedata(const source); override;
+   procedure getvaluedata(out dest); override;
    procedure updatedatalist; override;
    procedure setmin(const avalue: realty); virtual;
    procedure setmax(const avalue: realty); virtual;
@@ -1372,6 +1380,7 @@ type
    procedure setshowutc(const avalue: boolean);
   protected
    procedure setvaluedata(const source); override;
+   procedure getvaluedata(out dest); override;
    function gettextvalue(var accept: boolean; const quiet: boolean): tdatetime;
    procedure texttovalue(var accept: boolean; const quiet: boolean); override;
    function internaldatatotext(const data): msestring; override;
@@ -3172,6 +3181,11 @@ begin
  value:= msestring(source);
 end;
 
+procedure tcustomstringedit.getvaluedata(out dest);
+begin
+ msestring(dest):= value;
+end;
+
 { tstringedit }
 
 { tcustommemoedit }
@@ -3580,6 +3594,11 @@ end;
 procedure thexstringedit.setvaluedata(const source);
 begin
  value:= string(source);
+end;
+
+procedure thexstringedit.getvaluedata(out dest);
+begin
+ string(dest):= value;
 end;
 
 { tcustomdropdownedit }
@@ -4322,6 +4341,11 @@ begin
  value:= integer(source);
 end;
 
+procedure tcustomintegeredit.getvaluedata(out dest);
+begin
+ integer(dest):= value;
+end;
+
 { tcustomint64edit }
 
 constructor tcustomint64edit.create(aowner: tcomponent);
@@ -4548,6 +4572,11 @@ procedure tcustomint64edit.setvaluedata(const source);
 begin
  value:= int64(source);
 end;
+
+procedure tcustomint64edit.getvaluedata(out dest);
+begin
+ int64(dest):= value;
+end;
 {
 procedure tcustomint64edit.setmin(const avalue: int64);
 begin
@@ -4737,6 +4766,11 @@ end;
 procedure tcustomkeystringedit.setvaluedata(const source);
 begin
  value:= msestring(source);
+end;
+
+procedure tcustomkeystringedit.getvaluedata(out dest);
+begin
+ msestring(dest):= value;
 end;
 
 { tcustomenuedit }
@@ -5159,6 +5193,11 @@ end;
 procedure tcustomenuedit.setvaluedata(const source);
 begin
  value:= integer(source);
+end;
+
+procedure tcustomenuedit.getvaluedata(out dest);
+begin
+ integer(dest):= value;
 end;
 
 { tnocolsenumdropdowncontroller }
@@ -5729,6 +5768,11 @@ end;
 procedure tcustomrealedit.setvaluedata(const source);
 begin
  value:= realty(source);
+end;
+
+procedure tcustomrealedit.getvaluedata(out dest);
+begin
+ realty(dest):= value;
 end;
 
 { tspineditframe }
@@ -6350,6 +6394,11 @@ end;
 procedure tcustomdatetimeedit.setvaluedata(const source);
 begin
  value:= tdatetime(source);
+end;
+
+procedure tcustomdatetimeedit.getvaluedata(out dest);
+begin
+ tdatetime(dest):= value;
 end;
 
 { tenumdropdowncontroller }
