@@ -81,6 +81,8 @@ type
                                               var avalue: msestring); virtual;
    procedure getvalueinfo(out atype: listdatatypety; out aindex: int32;
                                                 out avaluead: pointer); virtual;
+   procedure setvalue(const atype: listdatatypety;
+          const aindex: int32; const getvaluemethod: getvaluemethodty); virtual;
   public
  end;
  
@@ -501,12 +503,16 @@ type
    property onstatread;
  end;
 
+ valueeditinfoty = record
+  datatype: listdatatypety;
+  valueindex: int32;
+  editwidget: twidget;
+  gridintf: igridwidget;
+ end;
+ 
  tvalueedititem = class(townedpersistent)
   private
-   fvalueindex: int32;
-   feditwidget: twidget;
-   fgridintf: igridwidget;
-   fdatatype: listdatatypety;
+   finfo: valueeditinfoty;
    procedure seteditwidget(const avalue: twidget);
    procedure setvalueindex(const avalue: int32);
   protected
@@ -514,8 +520,9 @@ type
   public
    destructor destroy(); override;
   published
-   property fieldindex: int32 read fvalueindex write setvalueindex default 0;
-   property editwidget: twidget read feditwidget write seteditwidget;
+   property valueindex: int32 read finfo.valueindex write 
+                                        setvalueindex default 0;
+   property editwidget: twidget read finfo.editwidget write seteditwidget;
  end;
 
  tvalueedits = class(townedpersistentarrayprop)
@@ -560,8 +567,7 @@ type
   {$endif}
    procedure setvalueedits(const avalue: tvalueedits);
   protected
-   factiveedit: twidget;
-   factiveeditintf: igridwidget;
+   factiveinfo: valueeditinfoty;
    flayoutinfofocused: listitemlayoutinfoty;
    flayoutinfocell: listitemlayoutinfoty;
    fvalue: tlistitem;
@@ -586,8 +592,8 @@ type
                                            const alist: tdatalist); override;
   {$endif}
   
-   function finddataedit(aitem: tlistitem; out awidget: twidget;
-                  out agridintf: igridwidget; out avaluepo: pointer): boolean;
+   function finddataedit(aitem: tlistitem; out ainfo: valueeditinfoty; 
+                                               out avaluepo: pointer): boolean;
    function updateeditwidget(): boolean; //true if editwidgetactivated
    procedure childdataentered(const sender: igridwidget); override;
 
@@ -2645,19 +2651,19 @@ end;
 
 procedure tvalueedititem.seteditwidget(const avalue: twidget);
 begin
- if avalue <> feditwidget then begin
+ if avalue <> finfo.editwidget then begin
   if (avalue <> nil) and (not getcorbainterface(avalue,typeinfo(igridwidget),
-                                                           fgridintf) or 
+                                                           finfo.gridintf) or 
                                  (avalue.parentwidget <> fowner)) then begin
    raise exception.create('Invalid item field edit widget "'+avalue.name+'".');
   end;
-  titemedit(fowner).setlinkedvar(avalue,tmsecomponent(feditwidget));
+  titemedit(fowner).setlinkedvar(avalue,tmsecomponent(finfo.editwidget));
   if avalue = nil then begin
-   fgridintf:= nil;
-   fdatatype:= dl_none;
+   finfo.gridintf:= nil;
+   finfo.datatype:= dl_none;
   end
   else begin
-   fdatatype:= fgridintf.getdatalistclass().datatype();
+   finfo.datatype:= finfo.gridintf.getdatalistclass().datatype();
   end;
   changed();
  end;
@@ -2665,8 +2671,8 @@ end;
 
 procedure tvalueedititem.setvalueindex(const avalue: int32);
 begin
- if fvalueindex <> avalue then begin
-  fvalueindex:= avalue;
+ if finfo.valueindex <> avalue then begin
+  finfo.valueindex:= avalue;
   changed();
  end;
 end;
@@ -2881,29 +2887,30 @@ begin
  end;
 end;
 
-function titemedit.finddataedit(aitem: tlistitem; out awidget: twidget;
-                  out agridintf: igridwidget; out avaluepo: pointer): boolean;
+function titemedit.finddataedit(aitem: tlistitem; out ainfo: valueeditinfoty;
+                                               out avaluepo: pointer): boolean;
 var
- vtype: listdatatypety;
- vindex: int32;
  i1,i2: int32;
 begin
  result:= false;
  if (fvalueedits.count > 0) and 
          (aitem is trecordvaluelistedititem) then begin
   with irecordvaluefield(trecordvaluelistedititem(aitem)) do begin
-   getvalueinfo(vtype,vindex,avaluepo);
-   if vtype <> dl_none then begin
+   getvalueinfo(ainfo.datatype,ainfo.valueindex,avaluepo);
+   if ainfo.datatype <> dl_none then begin
     i1:= -1;
-    if (vindex >= 0) and (vindex < fvalueedits.count) then begin
-     if tvalueedititem(fvalueedits.fitems[vindex]).fdatatype = vtype then begin
-      i1:= vindex;          //check matching index item
+    if (ainfo.valueindex >= 0) and 
+                        (ainfo.valueindex < fvalueedits.count) then begin
+     if tvalueedititem(fvalueedits.fitems[ainfo.valueindex]).finfo.datatype = 
+                                                      ainfo.datatype then begin
+      i1:= ainfo.valueindex;          //check matching index item
      end;
     end;
    end;
    if i1 < 0 then begin
     for i2:= 0 to fvalueedits.count - 1 do begin
-     if tvalueedititem(fvalueedits.fitems[i2]).fdatatype = vtype then begin
+     if tvalueedititem(fvalueedits.fitems[i2]).finfo.datatype = 
+                                                     ainfo.datatype then begin
       i1:= i2;              //check any match
       break;
      end;
@@ -2914,43 +2921,39 @@ begin
  end;
  if result then begin
   with tvalueedititem(fvalueedits.fitems[i1]) do begin
-   awidget:= feditwidget;
-   agridintf:= fgridintf;
+   ainfo:= finfo
   end;
  end
  else begin
-  awidget:= nil;
-  agridintf:= nil;
+  ainfo.editwidget:= nil;
+  ainfo.gridintf:= nil;
  end;
 end;
 
 function titemedit.updateeditwidget(): boolean; //true if editwidgetactivated
 var
- widget1: twidget;
- intf1: igridwidget;
+ info1: valueeditinfoty;
  po1: pointer;
 begin
- result:= finddataedit(fvalue,widget1,intf1,po1);
+ result:= finddataedit(fvalue,info1,po1);
  if result then begin
-  if factiveedit <> widget1 then begin
-   if factiveedit <> nil then begin
-    factiveedit.visible:= false;
+  if factiveinfo.editwidget <> info1.editwidget then begin
+   if factiveinfo.editwidget <> nil then begin
+    factiveinfo.editwidget.visible:= false;
    end;
   end;
-  factiveedit:= widget1;
-  factiveeditintf:= intf1;
-  intf1.setparentgridwidget(igridwidget(self));
-  intf1.setvaluedata(po1^);
-  widget1.visible:= true;
+  factiveinfo:= info1;
+  info1.gridintf.setparentgridwidget(igridwidget(self));
+  info1.gridintf.setvaluedata(po1^);
+  info1.editwidget.visible:= true;
   if focused then begin 
-   widget1.setfocus;
+   info1.editwidget.setfocus;
   end;
  end
  else begin
-  if factiveedit <> nil then begin
-   factiveedit.visible:= false;
-   factiveedit:= nil;
-   factiveeditintf:= nil;
+  if factiveinfo.editwidget <> nil then begin
+   factiveinfo.editwidget.visible:= false;
+   fillchar(factiveinfo,sizeof(factiveinfo),0);
   end;
  end;
 end;
@@ -2959,17 +2962,16 @@ procedure titemedit.drawcell(const canvas: tcanvas);
 var
  databefore: pointer;
  po1: pointer;
- widget1: twidget;
- intf1: igridwidget;
+ info1: valueeditinfoty;
 begin
  with cellinfoty(canvas.drawinfopo^) do begin
   doextendimage(canvas.drawinfopo,flayoutinfocell.imageextra);
   flayoutinfocell.rowindex:= cell.row;
   flayoutinfocell.textflags:= textflags;
-  if finddataedit(tlistitem(datapo^),widget1,intf1,po1) then begin
+  if finddataedit(tlistitem(datapo^),info1,po1) then begin
    databefore:= datapo;
    datapo:= po1;
-   intf1.drawcell(canvas);
+   info1.gridintf.drawcell(canvas);
    datapo:= databefore;
   end
   else begin
@@ -2977,6 +2979,17 @@ begin
   end;
  end;
  paintimage(canvas);
+end;
+
+procedure titemedit.childdataentered(const sender: igridwidget);
+begin
+ if sender = factiveinfo.gridintf then begin
+  if fvalue is trecordvaluelistedititem then begin
+   with irecordvaluefield(trecordvaluelistedititem(fvalue)) do begin
+    setvalue(factiveinfo.datatype,factiveinfo.valueindex,@sender.getvaluedata);
+   end;
+  end;
+ end;
 end;
 
 function titemedit.internaldatatotext(const data): msestring;
@@ -3612,7 +3625,7 @@ begin
   if result then begin
    acellrect:= grid1.clippedcellrect(cell1,cil_inner);
    if focused and (arow = grid1.row) then begin
-    result:= feditor.lasttextclipped;
+    result:= feditor.lasttextclipped; //todo: check value edit widget
    end
    else begin
     result:= ns1_captionclipped in tlistitem1(fitemlist[arow]).fstate1;
@@ -3664,8 +3677,8 @@ end;
 
 procedure titemedit.dofocus();
 begin
- if factiveedit <> nil then begin
-  factiveedit.setfocus();
+ if factiveinfo.editwidget <> nil then begin
+  factiveinfo.editwidget.setfocus();
  end
  else begin
   inherited;
@@ -3677,26 +3690,19 @@ var
  i1: int32;
 begin
  if not (csdestroying in componentstate) then begin
-  if child = factiveedit then begin
-   factiveeditintf.setparentgridwidget(nil);
-   factiveedit:= nil;
-   factiveeditintf:= nil;
+  if child = factiveinfo.editwidget then begin
+   factiveinfo.gridintf.setparentgridwidget(nil);
+   fillchar(factiveinfo,sizeof(factiveinfo),0);
   end;
   for i1:= 0 to fvalueedits.count - 1 do begin
    with tvalueedititem(fvalueedits.fitems[i1]) do begin
-    if feditwidget = child then begin
+    if finfo.editwidget = child then begin
      editwidget:= nil;     
     end;
    end;
   end;
  end;
  inherited;
-end;
-
-procedure titemedit.childdataentered(const sender: igridwidget);
-begin
- if sender = factiveeditintf then begin
- end;
 end;
 
 {
@@ -3743,7 +3749,8 @@ begin
  fdropdown.free;
 end;
 
-function tdropdownitemedit.getdropdowncontrollerclass: dropdownlistcontrollerclassty;
+function tdropdownitemedit.getdropdowncontrollerclass():
+                                             dropdownlistcontrollerclassty;
 begin
  result:= tdropdownlistcontroller;
 end;
@@ -6076,6 +6083,12 @@ end;
 
 procedure trecordvaluelistedititem.setfieldtext(const fieldindex: integer;
                var avalue: msestring);
+begin
+ //dummy
+end;
+
+procedure trecordvaluelistedititem.setvalue(const atype: listdatatypety;
+                  const aindex: int32; const getvaluemethod: getvaluemethodty);
 begin
  //dummy
 end;

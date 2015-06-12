@@ -372,9 +372,13 @@ type
   procedure setfieldtext(const fieldindex: integer; var avalue: msestring);
  end;
 
+ getvaluemethodty = procedure(out dest) of object;
+
  irecordvaluefield = interface(irecordfield)
   procedure getvalueinfo(out atype: listdatatypety; out aindex: int32;
                                                         out avaluead: pointer);
+  procedure setvalue(const atype: listdatatypety;
+               const aindex: int32; const getvaluemethod: getvaluemethodty);
  end;
   
  trecordfielditem = class(ttreelistitem)
