@@ -73,19 +73,6 @@ type
  tlistedititem = class(tlistitem)
  end;
  
- trecordvaluelistedititem = class(tlistedititem,irecordvaluefield)
-  protected
-    //irecordvaluefield
-   function getfieldtext(const fieldindex: integer): msestring; virtual;
-   procedure setfieldtext(const fieldindex: integer;
-                                              var avalue: msestring); virtual;
-   procedure getvalueinfo(out atype: listdatatypety; out aindex: int32;
-                                                out avaluead: pointer); virtual;
-   procedure setvalue(const atype: listdatatypety;
-          const aindex: int32; const getvaluemethod: getvaluemethodty); virtual;
-  public
- end;
- 
  listedititemarty = array of tlistitem;
  listedititemclassty = class of tlistedititem;
  
@@ -142,16 +129,6 @@ type
  end;
  ptreelistedititem = ^ttreelistedititem;
   
- trecordtreelistedititem = class(ttreelistedititem,irecordfield)   
-                                          //does not statsave subitems
-  protected
-   function getfieldtext(const fieldindex: integer): msestring;
-   procedure setfieldtext(const fieldindex: integer; var avalue: msestring);
-  public
-   constructor create(const aowner: tcustomitemlist = nil;
-              const aparent: ttreelistitem = nil); override;
- end;
-
  tdirtreenode = class(ttreelistedititem)
   protected
    procedure checkfiles(var afiles: filenamearty); virtual;
@@ -994,7 +971,7 @@ type
 
 implementation
 uses
- sysutils,msebits,msekeyboard,msearrayutils;
+ sysutils,msebits,msekeyboard,msearrayutils,msevaluenodes;
 
 type
  tdatalist1 = class(tdatalist);
@@ -4008,27 +3985,6 @@ begin
  end;
 end;
 
-{ trecordtreelistedititem }
-
-constructor trecordtreelistedititem.create(const aowner: tcustomitemlist;
-  const aparent: ttreelistitem);
-begin
- inherited;
- include(fstate,ns_nosubnodestat);
-end;
-
-function trecordtreelistedititem.getfieldtext(
-                                 const fieldindex: integer): msestring;
-begin
- result:= '';
-end;
-
-procedure trecordtreelistedititem.setfieldtext(const fieldindex: integer;
-                var avalue: msestring);
-begin
- //dummy
-end;
-
 { ttreeitemeditlist }
 
 constructor ttreeitemeditlist.create;
@@ -6063,34 +6019,6 @@ procedure trichlistedititem.setcaptionformat(const avalue: formatinfoarty);
 begin
  fformat:= avalue;
  change;
-end;
-
-{ trecordvaluelistedititem }
-
-procedure trecordvaluelistedititem.getvalueinfo(out atype: listdatatypety;
-                                   out aindex: int32; out avaluead: pointer);
-begin
- atype:= dl_none;
- aindex:= -1;
- avaluead:= nil;
-end;
-
-function trecordvaluelistedititem.getfieldtext(
-              const fieldindex: integer): msestring;
-begin
- result:= '';
-end;
-
-procedure trecordvaluelistedititem.setfieldtext(const fieldindex: integer;
-               var avalue: msestring);
-begin
- //dummy
-end;
-
-procedure trecordvaluelistedititem.setvalue(const atype: listdatatypety;
-                  const aindex: int32; const getvaluemethod: getvaluemethodty);
-begin
- //dummy
 end;
 
 initialization

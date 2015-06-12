@@ -25,7 +25,8 @@ uses
  mseforms,msewidgetgrid,mselistbrowser,msedatanodes,msetypes,msemenus,mseevent,
  mseactions,msefiledialog,msestat,msegrids,msedesigner,msedataedits,
  msegraphutils,msegui,msestrings,mseact,mseguiglob,mseclasses,msebitmap,mseedit,
- mseglob,msegraphics,msescrollbar,msesys,msehash,mseifiglob,msestringcontainer;
+ mseglob,msegraphics,msescrollbar,msesys,msehash,mseifiglob,msestringcontainer,
+ msevaluenodes;
 
 type
  projectnodety = (pnk_none,pnk_source,pnk_form,pnk_files,pnk_dir);

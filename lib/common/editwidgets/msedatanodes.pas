@@ -367,46 +367,6 @@ type
    property items[const aindex: integer]: ttreelistitem read getitems; default;
  end;
 
- irecordfield = interface(inullinterface)
-  function getfieldtext(const fieldindex: integer): msestring;
-  procedure setfieldtext(const fieldindex: integer; var avalue: msestring);
- end;
-
- getvaluemethodty = procedure(out dest) of object;
-
- irecordvaluefield = interface(irecordfield)
-  procedure getvalueinfo(out atype: listdatatypety; out aindex: int32;
-                                                        out avaluead: pointer);
-  procedure setvalue(const atype: listdatatypety;
-               const aindex: int32; const getvaluemethod: getvaluemethodty);
- end;
-  
- trecordfielditem = class(ttreelistitem)
-  private
-   ffieldindex: integer;
-   fintf: irecordfield;
-  protected
-  public
-   constructor create(const intf: irecordfield; const afieldindex: integer;
-                      const acaption: msestring;
-                      const fixedcaption: boolean = false;
-                      const aimagenr: integer = 0;
-                      const aimagelist: timagelist = nil); reintroduce;
-   function getvaluetext: msestring; override;
-   procedure setvaluetext(var avalue: msestring); override;
-   property fieldindex: integer read ffieldindex;
-//   property valuetext: msestring read getvaluetext write setvaluetext;
- end;
-
- trecordfieldvalueitem = class(trecordfielditem)
-  public
-   constructor create(const intf: irecordvaluefield; const afieldindex: integer;
-                      const acaption: msestring;
-                      const fixedcaption: boolean = false;
-                      const aimagenr: integer = 0;
-                      const aimagelist: timagelist = nil);
- end;
- 
  ptreelistitem = ^ttreelistitem;
 
  itemliststatety = (ils_destroying,ils_updateitemvalues,
@@ -3418,57 +3378,6 @@ end;
 function ttreelistitem.treechecked: boolean;
 begin
  result:= (ns_checked in fstate) and not (ns1_parentnotchecked in fstate1);
-end;
-
-{ trecordfielditem }
-
-constructor trecordfielditem.create(const intf: irecordfield;
-               const afieldindex: integer;
-               const acaption: msestring; const fixedcaption: boolean;
-                                    const aimagenr: integer = 0;
-                                    const aimagelist: timagelist = nil);
-begin
- fintf:= intf;
- ffieldindex:= afieldindex;
- inherited create;
- fcaption:= acaption;
- fimagenr:= aimagenr;
- imagelist:= aimagelist;
- if fixedcaption then begin
-  fstate1:= fstate1 + [ns1_fixedcaption];
- end;
-end;
-
-function trecordfielditem.getvaluetext: msestring;
-begin
- if fintf <> nil then begin
-  result:= fintf.getfieldtext(ffieldindex);
- end
- else begin
-  result:= inherited getvaluetext;
- end;
-end;
-
-procedure trecordfielditem.setvaluetext(var avalue: msestring);
-begin
- if fintf <> nil then begin
-  fintf.setfieldtext(ffieldindex,avalue);
- end
- else begin
-  if not (ns1_fixedcaption in fstate1) then begin
-   inherited;
-  end;
- end;
-end;
-
-{ trecordfieldvalueitem }
-
-constructor trecordfieldvalueitem.create(const intf: irecordvaluefield;
-               const afieldindex: integer; const acaption: msestring;
-               const fixedcaption: boolean = false; const aimagenr: integer = 0;
-               const aimagelist: timagelist = nil);
-begin
- inherited create(intf,afieldindex,acaption,fixedcaption,aimagenr,aimagelist);
 end;
 
 { ttreenode }
