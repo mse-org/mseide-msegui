@@ -79,7 +79,8 @@ type
    function getfieldtext(const fieldindex: integer): msestring; virtual;
    procedure setfieldtext(const fieldindex: integer;
                                               var avalue: msestring); virtual;
-   procedure getvalueinfo(out atype: listdatatypety; out aindex: int32); virtual;
+   procedure getvalueinfo(out atype: listdatatypety; out aindex: int32;
+                                                out avaluead: pointer); virtual;
   public
  end;
  
@@ -2885,6 +2886,8 @@ var
  vtype: listdatatypety;
  vindex: int32;
  i1,i2: int32;
+ databefore: pointer;
+ po1: pointer;
 begin
  with cellinfoty(canvas.drawinfopo^) do begin
   doextendimage(canvas.drawinfopo,flayoutinfocell.imageextra);
@@ -2893,7 +2896,7 @@ begin
   if (fvalueedits.count > 0) and 
           (tlistitem(datapo^) is trecordvaluelistedititem) then begin
    with irecordvaluefield(trecordvaluelistedititem(datapo^)) do begin
-    getvalueinfo(vtype,vindex);
+    getvalueinfo(vtype,vindex,po1);
     if vtype <> dl_none then begin
      i1:= -1;
      if (vindex >= 0) and (vindex < fvalueedits.count) then begin
@@ -2909,6 +2912,12 @@ begin
        break;
       end;
      end;
+    end;
+    if i1 >= 0 then begin
+     databefore:= datapo;
+     datapo:= po1;
+     tvalueedititem(fvalueedits.fitems[i1]).fgridintf.drawcell(canvas);
+     datapo:= databefore;
     end;
    end;
   end;
@@ -5978,10 +5987,11 @@ end;
 { trecordvaluelistedititem }
 
 procedure trecordvaluelistedititem.getvalueinfo(out atype: listdatatypety;
-               out aindex: int32);
+                                   out aindex: int32; out avaluead: pointer);
 begin
  atype:= dl_none;
  aindex:= -1;
+ avaluead:= nil;
 end;
 
 function trecordvaluelistedititem.getfieldtext(

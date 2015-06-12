@@ -373,7 +373,8 @@ type
  end;
 
  irecordvaluefield = interface(irecordfield)
-  procedure getvalueinfo(out atype: listdatatypety; out aindex: int32);
+  procedure getvalueinfo(out atype: listdatatypety; out aindex: int32;
+                                                        out avaluead: pointer);
  end;
   
  trecordfielditem = class(ttreelistitem)
