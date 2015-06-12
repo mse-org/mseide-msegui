@@ -84,6 +84,8 @@ type
    {$ifdef mse_with_ifi}
    function getifilink: tifilinkcomp;
    {$endif}
+   procedure setparentgridwidget(const intf: igridwidget);
+   procedure childdataentered(const sender: igridwidget); virtual;
   public
    constructor create(aowner: tcomponent); override;
    function seteditfocus: boolean;
@@ -509,6 +511,16 @@ end;
 procedure tcustomdataimage.setvaluedata(const source);
 begin
  value:= string(source);
+end;
+
+procedure tcustomdataimage.setparentgridwidget(const intf: igridwidget);
+begin
+ //dummy
+end;
+
+procedure tcustomdataimage.childdataentered(const sender: igridwidget);
+begin
+ //dummy
 end;
 
 end.

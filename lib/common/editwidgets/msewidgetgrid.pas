@@ -92,7 +92,6 @@ type
   procedure gridtovalue(row: integer);  //row = -1 -> focused row,
                                         // -2 -> default value
   procedure valuetogrid(row: integer);  //row = -1 -> focused row
-  procedure setvaluedata(const source);
   function getnulltext: msestring;
   procedure docellevent(const ownedcol: boolean; var info: celleventinfoty);
   function sortfunc(const l,r): integer;
@@ -105,6 +104,10 @@ type
  {$ifdef mse_with_ifi}
   function getifilink: tifilinkcomp;
  {$endif}  
+                     //for titemedit children
+  procedure setparentgridwidget(const intf: igridwidget);
+  procedure setvaluedata(const source);
+  procedure childdataentered(const sender: igridwidget);
  end;
 
  twidgetcol = class(tdatacol,iwidgetgrid,idatalistclient)

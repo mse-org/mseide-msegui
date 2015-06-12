@@ -88,6 +88,7 @@ type
    fgriddatalink: pointer;
    fdatalist: tdatalist;
    fcontrollerintf: idataeditcontroller;
+   fparentintf: igridwidget;
 {$ifdef mse_with_ifi}
    fifilink: tifivaluelinkcomp;
    function getdefaultifilink: iificlient; override;
@@ -199,6 +200,8 @@ type
   {$ifdef mse_with_ifi}
    function getifilink: tifilinkcomp;
   {$endif}
+   procedure setparentgridwidget(const intf: igridwidget);
+   procedure childdataentered(const sender: igridwidget); virtual;
 
    procedure formaterror(const quiet: boolean);
    procedure rangeerror(const min,max; const quiet: boolean);
@@ -1519,6 +1522,9 @@ begin
     texttovalue(result,quiet);
     if result then begin
      exclude(fstate,des_edited);
+     if fparentintf <> nil then begin
+      fparentintf.childdataentered(igridwidget(self));
+     end;
      if not quiet and canevent(tmethod(fondataentered)) then begin
       fondataentered(self);
      end;
@@ -2915,6 +2921,16 @@ end;
 function tcustomdataedit.getstatpriority: integer;
 begin
  result:= fstatpriority;
+end;
+
+procedure tcustomdataedit.setparentgridwidget(const intf: igridwidget);
+begin
+ fparentintf:= intf;
+end;
+
+procedure tcustomdataedit.childdataentered(const sender: igridwidget);
+begin
+ //dummy
 end;
 
 { tcustomstringedit }

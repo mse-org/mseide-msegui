@@ -181,6 +181,8 @@ type
    function getifilink: tifilinkcomp;
    procedure dochange; override;
    {$endif}
+   procedure setparentgridwidget(const intf: igridwidget);
+   procedure childdataentered(const sender: igridwidget); virtual;
 
     //istatfile
    procedure dostatread(const reader: tstatreader);
@@ -2362,6 +2364,16 @@ end;
 procedure tcustomtextedit.setvaluedata(const source);
 begin
  text:= msestring(source);
+end;
+
+procedure tcustomtextedit.setparentgridwidget(const intf: igridwidget);
+begin
+ //dummy
+end;
+
+procedure tcustomtextedit.childdataentered(const sender: igridwidget);
+begin
+ //dummy
 end;
 
 { tundotextedit }

@@ -2927,7 +2927,6 @@ var
  widget1: twidget;
  intf1: igridwidget;
  po1: pointer;
- i1: integer;
 begin
  result:= finddataedit(fvalue,widget1,intf1,po1);
  if result then begin

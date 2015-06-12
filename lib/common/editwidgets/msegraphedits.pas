@@ -125,6 +125,7 @@ type
    fdatalist: tdatalist;
    fgridintf: iwidgetgrid;
    fgriddatalink: pointer;
+   fparentintf: igridwidget;
    fstate: dataeditstatesty;
 {$ifdef mse_with_ifi}
    fifilink: tifivaluelinkcomp;
@@ -205,6 +206,8 @@ type
    procedure statdataread; virtual;
    procedure griddatasourcechanged; virtual;
    procedure fontchanged; override;
+   procedure setparentgridwidget(const intf: igridwidget);
+   procedure childdataentered(const sender: igridwidget); virtual;
 
    //istatfile
    procedure dostatread(const reader: tstatreader);
@@ -1729,6 +1732,9 @@ begin
  internalcheckvalue(avalue,result);
  if result then begin
   fedited:= false;
+  if fparentintf <> nil then begin
+   fparentintf.childdataentered(igridwidget(self));
+  end;
   if canevent(tmethod(fondataentered)) then begin
    fondataentered(self);
   end;
@@ -2272,6 +2278,16 @@ end;
 function tgraphdataedit.getstatpriority: integer;
 begin
  result:= fstatpriority;
+end;
+
+procedure tgraphdataedit.setparentgridwidget(const intf: igridwidget);
+begin
+ fparentintf:= intf;
+end;
+
+procedure tgraphdataedit.childdataentered(const sender: igridwidget);
+begin
+ //dummy
 end;
 
 { ttogglegraphdataedit}
