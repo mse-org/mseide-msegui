@@ -11,7 +11,8 @@ unit msevaluenodes;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- mseglob,msestrings,msedatalist,msedatanodes,msebitmap,mselistbrowser;
+ mseglob,msestrings,msedatalist,msedatanodes,msebitmap,mselistbrowser,
+ msetypes;
 type
  irecordfield = interface(inullinterface)
   function getfieldtext(const fieldindex: integer): msestring;
@@ -76,6 +77,19 @@ type
               const aparent: ttreelistitem = nil); override;
  end;
 
+ trealvaluelistedititem = class(trecordvaluelistedititem)
+  private
+   fvalue: realty;
+   procedure setvalue(const avalue: realty);
+  protected
+   procedure getvalueinfo(out atype: listdatatypety;
+                        out aindex: int32; out avaluead: pointer); override;
+   procedure setvalue(const atype: listdatatypety;
+       const aindex: int32; const getvaluemethod: getvaluemethodty); override;
+  public
+   property value: realty read fvalue write setvalue;
+ end;
+  
  
 implementation
 { trecordfielditem }
@@ -176,6 +190,35 @@ procedure trecordvaluelistedititem.setvalue(const atype: listdatatypety;
                   const aindex: int32; const getvaluemethod: getvaluemethodty);
 begin
  //dummy
+end;
+
+{ trealvaluelistedititem }
+
+procedure trealvaluelistedititem.setvalue(const avalue: realty);
+begin
+ if fvalue <> avalue then begin
+  fvalue:= avalue;
+  valuechange();
+ end;
+end;
+
+procedure trealvaluelistedititem.getvalueinfo(out atype: listdatatypety;
+             out aindex: int32; out avaluead: pointer);
+begin
+ atype:= dl_real;
+ aindex:= 0;
+ avaluead:= @fvalue;
+end;
+
+procedure trealvaluelistedititem.setvalue(const atype: listdatatypety;
+               const aindex: int32; const getvaluemethod: getvaluemethodty);
+var
+ rea1: realty;
+begin
+ if (atype = dl_real) and (aindex = 0) then begin
+  getvaluemethod(rea1);
+  value:= rea1;
+ end;
 end;
 
 end.
