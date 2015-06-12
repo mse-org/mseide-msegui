@@ -561,6 +561,7 @@ type
    procedure setvalueedits(const avalue: tvalueedits);
   protected
    factiveedit: twidget;
+   factiveeditintf: igridwidget;
    flayoutinfofocused: listitemlayoutinfoty;
    flayoutinfocell: listitemlayoutinfoty;
    fvalue: tlistitem;
@@ -588,6 +589,7 @@ type
    function finddataedit(aitem: tlistitem; out awidget: twidget;
                   out agridintf: igridwidget; out avaluepo: pointer): boolean;
    function updateeditwidget(): boolean; //true if editwidgetactivated
+   procedure childdataentered(const sender: igridwidget); override;
 
     //iedit
    function locatecount: integer; override;        //number of locate values
@@ -2936,6 +2938,8 @@ begin
    end;
   end;
   factiveedit:= widget1;
+  factiveeditintf:= intf1;
+  intf1.setparentgridwidget(igridwidget(self));
   intf1.setvaluedata(po1^);
   widget1.visible:= true;
   if focused then begin 
@@ -2946,6 +2950,7 @@ begin
   if factiveedit <> nil then begin
    factiveedit.visible:= false;
    factiveedit:= nil;
+   factiveeditintf:= nil;
   end;
  end;
 end;
@@ -3672,18 +3677,26 @@ var
  i1: int32;
 begin
  if not (csdestroying in componentstate) then begin
-  if child = factiveedit then begin 
+  if child = factiveedit then begin
+   factiveeditintf.setparentgridwidget(nil);
    factiveedit:= nil;
+   factiveeditintf:= nil;
   end;
   for i1:= 0 to fvalueedits.count - 1 do begin
    with tvalueedititem(fvalueedits.fitems[i1]) do begin
     if feditwidget = child then begin
-     editwidget:= nil;
+     editwidget:= nil;     
     end;
    end;
   end;
  end;
  inherited;
+end;
+
+procedure titemedit.childdataentered(const sender: igridwidget);
+begin
+ if sender = factiveeditintf then begin
+ end;
 end;
 
 {
