@@ -54,19 +54,6 @@ type
                       const aimagelist: timagelist = nil);
  end;
 
- trecordvaluelistedititem = class(tlistedititem,irecordvaluefield)
-  protected
-    //irecordvaluefield
-   function getfieldtext(const fieldindex: integer): msestring; virtual;
-   procedure setfieldtext(const fieldindex: integer;
-                                              var avalue: msestring); virtual;
-   procedure getvalueinfo(out atype: listdatatypety; out aindex: int32;
-                                                out avaluead: pointer); virtual;
-   procedure setvalue(const atype: listdatatypety;
-          const aindex: int32; const getvaluemethod: getvaluemethodty); virtual;
-  public
- end;
- 
  trecordtreelistedititem = class(ttreelistedititem,irecordfield)   
                                           //does not statsave subitems
   protected
@@ -77,6 +64,34 @@ type
               const aparent: ttreelistitem = nil); override;
  end;
 
+ trecordvaluelistedititem = class(tlistedititem,irecordvaluefield)
+  protected
+   fvalueindex: int32;
+    //irecordvaluefield
+   function getfieldtext(const fieldindex: integer): msestring; virtual;
+   procedure setfieldtext(const fieldindex: integer;
+                                              var avalue: msestring); virtual;
+   procedure getvalueinfo(out atype: listdatatypety; out aindex: int32;
+                                                out avaluead: pointer); virtual;
+   procedure setvalue(const atype: listdatatypety;
+          const aindex: int32; const getvaluemethod: getvaluemethodty); virtual;
+  public
+   property valueindex: int32 read fvalueindex write fvalueindex;
+ end;
+ 
+ tintegervaluelistedititem = class(trecordvaluelistedititem)
+  private
+   fvalue: int32;
+   procedure setvalue(const avalue: int32);
+  protected
+   procedure getvalueinfo(out atype: listdatatypety;
+                        out aindex: int32; out avaluead: pointer); override;
+   procedure setvalue(const atype: listdatatypety;
+       const aindex: int32; const getvaluemethod: getvaluemethodty); override;
+  public
+   property value: int32 read fvalue write setvalue;
+ end;
+  
  trealvaluelistedititem = class(trecordvaluelistedititem)
   private
    fvalue: realty;
@@ -170,7 +185,7 @@ procedure trecordvaluelistedititem.getvalueinfo(out atype: listdatatypety;
                                    out aindex: int32; out avaluead: pointer);
 begin
  atype:= dl_none;
- aindex:= -1;
+ aindex:= fvalueindex;
  avaluead:= nil;
 end;
 
@@ -192,6 +207,35 @@ begin
  //dummy
 end;
 
+{ tintegervaluelistedititem }
+
+procedure tintegervaluelistedititem.setvalue(const avalue: int32);
+begin
+ if fvalue <> avalue then begin
+  fvalue:= avalue;
+  valuechange();
+ end;
+end;
+
+procedure tintegervaluelistedititem.getvalueinfo(out atype: listdatatypety;
+               out aindex: int32; out avaluead: pointer);
+begin
+ inherited;
+ atype:= dl_integer;
+ avaluead:= @fvalue;
+end;
+
+procedure tintegervaluelistedititem.setvalue(const atype: listdatatypety;
+               const aindex: int32; const getvaluemethod: getvaluemethodty);
+var
+ i1: int32;
+begin
+ if (atype = dl_integer) and (aindex = fvalueindex) then begin
+  getvaluemethod(i1);
+  value:= i1;
+ end;
+end;
+
 { trealvaluelistedititem }
 
 procedure trealvaluelistedititem.setvalue(const avalue: realty);
@@ -205,8 +249,8 @@ end;
 procedure trealvaluelistedititem.getvalueinfo(out atype: listdatatypety;
              out aindex: int32; out avaluead: pointer);
 begin
+ inherited;
  atype:= dl_real;
- aindex:= 0;
  avaluead:= @fvalue;
 end;
 
@@ -215,7 +259,7 @@ procedure trealvaluelistedititem.setvalue(const atype: listdatatypety;
 var
  rea1: realty;
 begin
- if (atype = dl_real) and (aindex = 0) then begin
+ if (atype = dl_real) and (aindex = fvalueindex) then begin
   getvaluemethod(rea1);
   value:= rea1;
  end;
