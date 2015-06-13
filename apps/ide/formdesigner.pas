@@ -3344,6 +3344,7 @@ procedure tformdesignerfo.designmouseevent(var info: moeventinfoty;
                                                          capture: twidget);
 var
  mousepos1: pointty;
+ ss1: shiftstatesty;
 
  function griddelta: pointty;
  begin
@@ -3403,16 +3404,18 @@ var
  var
   shape: cursorshapety;
  begin
-  case area of
-   ht_topleft: shape:= cr_topleftcorner;
-   ht_bottomright: shape:= cr_bottomrightcorner;
-   ht_topright: shape:= cr_toprightcorner;
-   ht_bottomleft: shape:= cr_bottomleftcorner;
-   ht_top,ht_bottom: shape:= cr_sizever;
-   ht_left,ht_right: shape:= cr_sizehor;
-   else shape:= cr_arrow;
+  shape:= cr_arrow;
+  if ss1 = [] then begin
+   case area of
+    ht_topleft: shape:= cr_topleftcorner;
+    ht_bottomright: shape:= cr_bottomrightcorner;
+    ht_topright: shape:= cr_toprightcorner;
+    ht_bottomleft: shape:= cr_bottomleftcorner;
+    ht_top,ht_bottom: shape:= cr_sizever;
+    ht_left,ht_right: shape:= cr_sizehor;
+   end;
+   application.widgetcursorshape:= shape;
   end;
-  application.widgetcursorshape:= shape;
  end;
 
 
@@ -3426,7 +3429,6 @@ var
  area1: areaty;
  isinpaintrect: boolean;
  designactive: boolean;
- ss1: shiftstatesty;
  po1: pformselectedinfoty;
  pt1: pointty; 
 label
@@ -3659,8 +3661,9 @@ begin
          if fpickwidget <> self then begin
           rect1.pos:= translatewidgetpoint(fpickpos,self,fpickwidget);
           for int1:= 0 to fpickwidget.widgetcount -1 do begin
-           widget1:= fpickwidget[int1];
-           if rectinrect(widget1.widgetrect,rect1) then begin
+           widget1:= fpickwidget.widgets[int1];
+           if rectinrect(widget1.widgetrect,rect1) and 
+                         (ws_iswidget in widget1.widgetstate) then begin
             selectcomponent(widget1,selectmode);
            end;
           end;
