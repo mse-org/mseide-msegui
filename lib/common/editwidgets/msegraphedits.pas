@@ -1557,7 +1557,18 @@ begin
  inherited;
  fscrollbar.options:= fscrollbar.options + 
                        [sbo_noarrowkeys,sbo_nopagekeys,sbo_noreflectedclick];
- color:= cl_parent;
+// color:= cl_parent;
+ if fgridintf <> nil then begin
+  with fgridintf.getcol do begin
+   if self.color = cl_default then begin
+    color:= cl_parent;
+   end
+   else begin
+    color:= self.color;
+   end;
+   options:= options - [co_drawfocus];
+  end;
+ end;
 end;
 
 class function tcustomslider.classskininfo: skininfoty;
