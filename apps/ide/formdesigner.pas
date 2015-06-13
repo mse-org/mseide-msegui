@@ -3455,8 +3455,8 @@ begin
    bo1:= false;
    if (eventkind = ek_buttonpress) and (button = mb_left) then begin
     fpickpos:= mousepos1;
-    if (ss1 = [ss_left]) or (ss1 = [ss_left,ss_ctrl]) or 
-                (ss1 = [ss_left,ss_ctrl,ss_shift]) then begin
+    if (ss1 = [ss_left]) or (ss1 = [ss_left,ss_ctrl]){ or 
+                (ss1 = [ss_left,ss_ctrl,ss_shift])} then begin
      factarea:= fselections.getareainfo(mousepos1,factcompindex);
      if factcompindex >= 0 then begin
       fsizerect:= fselections.itempo(factcompindex)^.rect;
@@ -3504,7 +3504,8 @@ begin
      info.mouse.pos:= pt1;
     end;
    end;
-   if not (es_processed in eventstate) then begin
+   if not (es_processed in eventstate) and 
+                     (ss1 <> [ss_left,ss_shift,ss_ctrl]) then begin
     area1:= fselections.getareainfo(mousepos1,int1);
     bo2:= not ((eventkind = ek_buttonpress) and (button = mb_left) and 
                      (ss1 = [ss_left]));
@@ -3556,7 +3557,7 @@ begin
    end;
    if not (es_processed in eventstate) then begin
     if (eventkind = ek_buttonpress) and (button = mb_left) then begin
-     if ss1 = [ss_left] then begin
+     if (ss1 = [ss_left]) or (ss1 = [ss_left,ss_shift,ss_ctrl]) then begin
       if isinpaintrect then begin
        component:= fdesigner.createcurrentcomponent(module);
        if (component = nil) and componentstorefo.hasselection then begin
@@ -3564,7 +3565,14 @@ begin
        end;
       end;
       if component <> nil then begin
-       placecomponent(component,mousepos1);
+       if (ss1 = [ss_left,ss_shift,ss_ctrl]) and 
+                    (fselections.count = 1) then begin
+                      //insert in current selected widget
+        placecomponent(component,mousepos1,fselections[0]);
+       end
+       else begin
+        placecomponent(component,mousepos1);
+       end;
       end;
      end
      else begin
