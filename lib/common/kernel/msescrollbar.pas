@@ -162,6 +162,8 @@ type
    function getwidget: twidget;
    function getwidgetrect: rectty;
    function getframestateflags: framestateflagsty;
+   function getfocused: boolean;
+   procedure setfocused(const avalue: boolean);
   protected
    fstate: scrollbarstatesty;
    fintf: iscrollbar;
@@ -195,8 +197,10 @@ type
    procedure mousewheelevent(var info: mousewheeleventinfoty;
                                const pagingreversed: boolean = false);
    procedure keydown(var info: keyeventinfoty);
-   procedure enter;
-   procedure exit;
+   procedure enter();
+   procedure exit();
+   property focused: boolean read getfocused write setfocused; 
+                                //does not invalidate
    function clicked: boolean;
    procedure activechanged;
 
@@ -1315,6 +1319,21 @@ begin
  with fdrawinfo,areas[sbbu_move] do begin
   exclude(fdrawinfo.areas[sbbu_move].state,shs_focused);
   fintf.invalidaterect(buttonareas[bbu_move],forg);
+ end;
+end;
+
+function tcustomscrollbar.getfocused: boolean;
+begin
+ result:= shs_focused in fdrawinfo.areas[sbbu_move].state;
+end;
+
+procedure tcustomscrollbar.setfocused(const avalue: boolean);
+begin
+ if avalue then begin
+  include(fdrawinfo.areas[sbbu_move].state,shs_focused);
+ end
+ else begin
+  exclude(fdrawinfo.areas[sbbu_move].state,shs_focused);
  end;
 end;
 

@@ -1431,6 +1431,7 @@ procedure tcustomslider.paintglyph(const canvas: tcanvas;
 var
  rea1: realty;
  col1: colorty;
+ bo1: boolean;
 begin
  if @avalue = nil then begin
   rea1:= fvalue;
@@ -1448,7 +1449,14 @@ begin
  end; 
  inc(fupdating);
  fscrollbar.value:= rea1;
+ if @avalue <> nil then begin
+  bo1:= fscrollbar.focused;
+  fscrollbar.focused:= false;
+ end;
  fscrollbar.paint(canvas,col1);
+ if @avalue <> nil then begin
+  fscrollbar.focused:= bo1;
+ end;
  if @avalue <> nil then begin
   canvas.remove(cellinfoty(canvas.drawinfopo^).innerrect.pos);
  end;
@@ -1470,8 +1478,9 @@ end;
 
 procedure tcustomslider.clientmouseevent(var info: mouseeventinfoty);
 begin
- if not (es_processed in info.eventstate) and not (csdesigning in componentstate) and
-        not (oe_readonly in getoptionsedit) then begin
+ if not (es_processed in info.eventstate) and
+               not (csdesigning in componentstate) and
+                          not (oe_readonly in getoptionsedit) then begin
   fscrollbar.mouseevent(info);
  end;
  inherited;
@@ -1487,14 +1496,16 @@ end;
 
 procedure tcustomslider.dokeydown(var info: keyeventinfoty);
 begin
- if not (es_processed in info.eventstate) and not (csdesigning in componentstate) and
-    not (oe_readonly in getoptionsedit) then begin
+ if not (es_processed in info.eventstate) and 
+                not (csdesigning in componentstate) and
+                          not (oe_readonly in getoptionsedit) then begin
   fscrollbar.keydown(info);
  end;
  inherited;
 end;
 
-procedure tcustomslider.scrollevent(sender: tcustomscrollbar; event: scrolleventty);
+procedure tcustomslider.scrollevent(sender: tcustomscrollbar;
+                                                      event: scrolleventty);
 var
  rea1: realty;
 begin
@@ -1529,7 +1540,7 @@ end;
 
 procedure tcustomslider.activechanged;
 begin
- fscrollbar.activechanged;
+ fscrollbar.activechanged();
  inherited;
 end;
 
