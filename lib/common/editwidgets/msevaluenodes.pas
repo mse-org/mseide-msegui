@@ -92,6 +92,15 @@ type
    property value: int32 read fvalue write setvalue;
  end;
   
+ tbooleanvaluelistedititem = class(tintegervaluelistedititem)
+  private
+   procedure setvalue(const avalue: boolean); reintroduce;
+   function getvalue: boolean;
+  protected
+  public
+   property value: boolean read getvalue write setvalue;
+ end;
+
  trealvaluelistedititem = class(trecordvaluelistedititem)
   private
    fvalue: realty;
@@ -104,9 +113,35 @@ type
   public
    property value: realty read fvalue write setvalue;
  end;
-  
- 
+
+ tdatetimevaluelistedititem = class(trecordvaluelistedititem)
+  private
+   fvalue: tdatetime;
+   procedure setvalue(const avalue: tdatetime);
+  protected
+   procedure getvalueinfo(out atype: listdatatypety;
+                        out aindex: int32; out avaluead: pointer); override;
+   procedure setvalue(const atype: listdatatypety;
+       const aindex: int32; const getvaluemethod: getvaluemethodty); override;
+  public
+   property value: tdatetime read fvalue write setvalue;
+ end;
+
+ tstringvaluelistedititem = class(trecordvaluelistedititem)
+  private
+   fvalue: msestring;
+   procedure setvalue(const avalue: msestring);
+  protected
+   procedure getvalueinfo(out atype: listdatatypety;
+                        out aindex: int32; out avaluead: pointer); override;
+   procedure setvalue(const atype: listdatatypety;
+       const aindex: int32; const getvaluemethod: getvaluemethodty); override;
+  public
+   property value: msestring read fvalue write setvalue;
+ end;
+   
 implementation
+
 { trecordfielditem }
 
 constructor trecordfielditem.create(const intf: irecordfield;
@@ -236,6 +271,21 @@ begin
  end;
 end;
 
+{ tbooleanvaluelistedititem }
+
+procedure tbooleanvaluelistedititem.setvalue(const avalue: boolean);
+begin
+ if longbool(fvalue) <> avalue then begin
+  longbool(fvalue):= avalue;
+  valuechange();
+ end;
+end;
+
+function tbooleanvaluelistedititem.getvalue: boolean;
+begin
+ result:= longbool(fvalue);
+end;
+
 { trealvaluelistedititem }
 
 procedure trealvaluelistedititem.setvalue(const avalue: realty);
@@ -262,6 +312,64 @@ begin
  if (atype = dl_real) and (aindex = fvalueindex) then begin
   getvaluemethod(rea1);
   value:= rea1;
+ end;
+end;
+
+{ tdatetimevaluelistedititem }
+
+procedure tdatetimevaluelistedititem.setvalue(const avalue: tdatetime);
+begin
+ if fvalue <> avalue then begin
+  fvalue:= avalue;
+  valuechange();
+ end;
+end;
+
+procedure tdatetimevaluelistedititem.getvalueinfo(out atype: listdatatypety;
+               out aindex: int32; out avaluead: pointer);
+begin
+ inherited;
+ atype:= dl_datetime;
+ avaluead:= @fvalue;
+end;
+
+procedure tdatetimevaluelistedititem.setvalue(const atype: listdatatypety;
+               const aindex: int32; const getvaluemethod: getvaluemethodty);
+var
+ dat1: tdatetime;
+begin
+ if (atype = dl_datetime) and (aindex = fvalueindex) then begin
+  getvaluemethod(dat1);
+  value:= dat1;
+ end;
+end;
+
+{ tstringvaluelistedititem }
+
+procedure tstringvaluelistedititem.setvalue(const avalue: msestring);
+begin
+ if fvalue <> avalue then begin
+  fvalue:= avalue;
+  valuechange();
+ end;
+end;
+
+procedure tstringvaluelistedititem.getvalueinfo(out atype: listdatatypety;
+               out aindex: int32; out avaluead: pointer);
+begin
+ inherited;
+ atype:= dl_msestring;
+ avaluead:= @fvalue;
+end;
+
+procedure tstringvaluelistedititem.setvalue(const atype: listdatatypety;
+               const aindex: int32; const getvaluemethod: getvaluemethodty);
+var
+ mstr1: msestring;
+begin
+ if (atype = dl_msestring) and (aindex = fvalueindex) then begin
+  getvaluemethod(mstr1);
+  value:= mstr1;
  end;
 end;
 
