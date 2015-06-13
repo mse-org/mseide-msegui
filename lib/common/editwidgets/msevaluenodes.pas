@@ -65,6 +65,7 @@ type
  end;
 
  trecordvaluelistedititem = class(tlistedititem,irecordvaluefield)
+  private
   protected
    fvalueindex: int32;
     //irecordvaluefield
@@ -76,6 +77,8 @@ type
    procedure setvalue(const atype: listdatatypety;
           const aindex: int32; const getvaluemethod: getvaluemethodty); virtual;
   public
+   constructor create(const avalueindex: int32; 
+                               const aowner: tcustomitemlist = nil); virtual;
    property valueindex: int32 read fvalueindex write fvalueindex;
  end;
  
@@ -240,6 +243,13 @@ procedure trecordvaluelistedititem.setvalue(const atype: listdatatypety;
                   const aindex: int32; const getvaluemethod: getvaluemethodty);
 begin
  //dummy
+end;
+
+constructor trecordvaluelistedititem.create(const avalueindex: int32;
+               const aowner: tcustomitemlist = nil);
+begin
+ fvalueindex:= avalueindex;
+ create(aowner);
 end;
 
 { tintegervaluelistedititem }
