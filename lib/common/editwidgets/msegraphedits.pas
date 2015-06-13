@@ -1387,7 +1387,7 @@ begin
    int1:= gridrow;
   end
   else begin
-   val1:= integer(avalue);
+   val1:= real(avalue);
    int1:= pcellinfoty(canvas.drawinfopo)^.cell.row;
   end;
   fonpaintglyph(self,canvas,val1,int1);
