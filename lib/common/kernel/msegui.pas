@@ -8628,6 +8628,7 @@ var
  actcolor,col1: colorty;
  pt1: pointty;
 begin
+ canvas.save();
  actcolor:= actualcolor;
  if (ws_opaque in fwidgetstate) or (actcolor <> cl_transparent) then begin
   col1:= actcolor;
@@ -8707,6 +8708,7 @@ procedure twidget.paintoverlay(const canvas: tcanvas;
 var
  face1: tcustomface;
 begin
+ canvas.restore();
  face1:= getactface;
  if face1 <> nil then begin
   if fao_overlay in face1.options then begin
