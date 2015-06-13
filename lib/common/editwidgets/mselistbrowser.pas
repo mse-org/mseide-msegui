@@ -2876,23 +2876,27 @@ begin
    getvalueinfo(ainfo.datatype,ainfo.valueindex,avaluepo);
    if ainfo.datatype <> dl_none then begin
     i1:= -1;
-    if (ainfo.valueindex >= 0) and 
-                        (ainfo.valueindex < fvalueedits.count) then begin
-     if tvalueedititem(fvalueedits.fitems[ainfo.valueindex]).finfo.datatype = 
+    if (ainfo.valueindex >= 0) then begin
+     for i2:= 0 to fvalueedits.count - 1 do begin
+      with tvalueedititem(fvalueedits.fitems[i2]) do begin
+       if (finfo.datatype = ainfo.datatype) and 
+                            (finfo.valueindex = ainfo.valueindex) then begin
+        i1:= i2;           //check index match
+        break;
+       end;
+      end;
+     end;
+    end;
+    if i1 < 0 then begin
+     for i2:= 0 to fvalueedits.count - 1 do begin
+      if tvalueedititem(fvalueedits.fitems[i2]).finfo.datatype = 
                                                       ainfo.datatype then begin
-      i1:= ainfo.valueindex;          //check matching index item
+       i1:= i2;              //check any match
+       break;
+      end;
      end;
     end;
-   end;
-   if i1 < 0 then begin
-    for i2:= 0 to fvalueedits.count - 1 do begin
-     if tvalueedititem(fvalueedits.fitems[i2]).finfo.datatype = 
-                                                     ainfo.datatype then begin
-      i1:= i2;              //check any match
-      break;
-     end;
     end;
-   end;
    result:= i1 >= 0;
   end;
  end;

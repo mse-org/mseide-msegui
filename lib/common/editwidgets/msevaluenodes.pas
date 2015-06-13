@@ -77,9 +77,10 @@ type
    procedure setvalue(const atype: listdatatypety;
           const aindex: int32; const getvaluemethod: getvaluemethodty); virtual;
   public
-   constructor create(const avalueindex: int32; 
+   constructor create(const avalueindex: int32 = -1;
                                const aowner: tcustomitemlist = nil); virtual;
    property valueindex: int32 read fvalueindex write fvalueindex;
+                             //-1 -> any
  end;
  
  tintegervaluelistedititem = class(trecordvaluelistedititem)
@@ -275,7 +276,7 @@ procedure tintegervaluelistedititem.setvalue(const atype: listdatatypety;
 var
  i1: int32;
 begin
- if (atype = dl_integer) and (aindex = fvalueindex) then begin
+ if (atype = dl_integer) then begin
   getvaluemethod(i1);
   value:= i1;
  end;
@@ -319,7 +320,7 @@ procedure trealvaluelistedititem.setvalue(const atype: listdatatypety;
 var
  rea1: realty;
 begin
- if (atype = dl_real) and (aindex = fvalueindex) then begin
+ if (atype = dl_real) then begin
   getvaluemethod(rea1);
   value:= rea1;
  end;
@@ -339,7 +340,7 @@ procedure tdatetimevaluelistedititem.getvalueinfo(out atype: listdatatypety;
                out aindex: int32; out avaluead: pointer);
 begin
  inherited;
- atype:= dl_datetime;
+ atype:= dl_real;
  avaluead:= @fvalue;
 end;
 
@@ -348,7 +349,7 @@ procedure tdatetimevaluelistedititem.setvalue(const atype: listdatatypety;
 var
  dat1: tdatetime;
 begin
- if (atype = dl_datetime) and (aindex = fvalueindex) then begin
+ if (atype = dl_real) then begin
   getvaluemethod(dat1);
   value:= dat1;
  end;
@@ -377,7 +378,7 @@ procedure tstringvaluelistedititem.setvalue(const atype: listdatatypety;
 var
  mstr1: msestring;
 begin
- if (atype = dl_msestring) and (aindex = fvalueindex) then begin
+ if (atype = dl_msestring) then begin
   getvaluemethod(mstr1);
   value:= mstr1;
  end;
