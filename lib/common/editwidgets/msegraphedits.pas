@@ -1434,15 +1434,17 @@ var
  col1: colorty;
  bo1: boolean;
 begin
+ col1:= cl_none;
  if @avalue = nil then begin
   rea1:= fvalue;
-  col1:= cl_none;
  end
  else begin
   rea1:= realty(avalue); //cell
-  with cellinfoty(canvas.drawinfopo^) do begin
-   col1:= color;
-   canvas.move(innerrect.pos);
+  if fgridintf <> nil then begin
+   with cellinfoty(canvas.drawinfopo^) do begin
+    col1:= color;
+    canvas.move(innerrect.pos);
+   end;
   end;
  end;
  if rea1 = emptyreal then begin
