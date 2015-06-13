@@ -1712,28 +1712,12 @@ begin
  //dummy;
 end;
 
-{
-procedure tgraphdataedit.updatecellzone(const pos: pointty; var result: cellzonety);
-begin
- //dummy
-end;
-}
 procedure tgraphdataedit.initgridwidget;
 begin
  defaultinitgridwidget(self,fgridintf);
- fgridintf.getcol.options:= fgridintf.getcol.options + [co_drawfocus];
-{
- if fframe <> nil then begin
-  with fframe do begin
-   leveli:= 0;
-   levelo:= 0;
-   colorclient:= cl_transparent;
-  end;
+ if fgridintf <> nil then begin
+  fgridintf.getcol.options:= fgridintf.getcol.options + [co_drawfocus];
  end;
- fgridintf.getcol.options:= fgridintf.getcol.options + [co_drawfocus];
- optionswidget:= optionswidget - [ow_autoscale];
- optionsskin:= optionsskin + defaultgridskinoptions;
-}
 end;
 
 function tgraphdataedit.docheckvalue(var avalue): boolean;
