@@ -1596,11 +1596,15 @@ type
    function getactface: tcustomface; virtual;
    procedure dobeforepaint(const canvas: tcanvas); virtual;
    procedure dopaint(const canvas: tcanvas); virtual;
+   procedure paintbackground(const canvas: tcanvas; 
+                                            const arect: rectty); virtual;
    procedure dopaintbackground(const canvas: tcanvas); virtual;
    procedure doonpaintbackground(const canvas: tcanvas); virtual;
    procedure dobeforepaintforeground(const canvas: tcanvas); virtual;
    procedure dopaintforeground(const canvas: tcanvas); virtual;
    procedure doonpaint(const canvas: tcanvas); virtual;
+   procedure paintoverlay(const canvas: tcanvas; 
+                                            const arect: rectty); virtual;
    procedure dopaintoverlay(const canvas: tcanvas); virtual;
    procedure doafterpaint(const canvas: tcanvas); virtual;
 
@@ -1995,6 +1999,7 @@ type
                                              //nullrect if parent = nil,
    function clientrectparent: rectty;        //origin = paintpos,
                                              //nullrect if parent = nil,
+   function innerparentrect: rectty;         //origin = parentwidget.pos
    function innerwidgetrect: rectty;         //origin = pos
    function innerclientrect: rectty;         //origin = clientpos
    function innerclientsize: sizety;
@@ -8615,6 +8620,49 @@ begin
  end;
 end;
 
+procedure twidget.paintbackground(const canvas: tcanvas; 
+                                            const arect: rectty);
+var
+ colorbefore: colorty;
+ face1: tcustomface;
+ actcolor,col1: colorty;
+ pt1: pointty;
+begin
+ actcolor:= actualcolor;
+ if (ws_opaque in fwidgetstate) or (actcolor <> cl_transparent) then begin
+  col1:= actcolor;
+  if actcolor = cl_transparent then begin
+   col1:= cl_background; //no parent
+  end;
+  canvas.fillrect(arect,col1);
+ end;
+ pt1:= canvas.origin;
+ if frame <> nil then begin
+  colorbefore:= canvas.color;
+  canvas.color:= actualcolor;
+  fframe.paintbackground(canvas,arect,true);
+  canvas.color:= colorbefore;
+ end;
+ if not canvas.clipregionisempty then begin
+  face1:= getactface;
+  if face1 <> nil then begin
+   if not (fao_overlay in face1.options) then begin
+    if fframe <> nil then begin
+     fframe.checkstate();
+     canvas.remove(fframe.fclientrect.pos);
+     face1.paint(canvas,makerect(nullpoint,
+                           subsize(arect.size,fframe.paintframedim)));
+     canvas.move(fframe.fclientrect.pos);
+    end
+    else begin
+     face1.paint(canvas,arect);
+    end;
+   end;
+  end;
+ end;
+ canvas.origin:= pt1; //no shift to paintrect
+end;
+
 procedure twidget.doonpaintbackground(const canvas: tcanvas);
 begin
  //dummy
@@ -8642,10 +8690,7 @@ begin
  if face1 <> nil then begin
   if fao_overlay in face1.options then begin
    if fframe <> nil then begin
-//    canvas.remove(fframe.fclientrect.pos);
-//    face1.paint(canvas,makerect(nullpoint,fframe.fpaintrect.size));
     face1.paint(canvas,fframe.fpaintrect);
-//    canvas.move(fframe.fclientrect.pos);
    end
    else begin
     face1.paint(canvas,makerect(nullpoint,fwidgetrect.size));
@@ -8654,6 +8699,27 @@ begin
  end;
  if fframe <> nil then begin
   fframe.paintoverlay(canvas,makerect(nullpoint,fwidgetrect.size));
+ end;
+end;
+
+procedure twidget.paintoverlay(const canvas: tcanvas; 
+                                            const arect: rectty);
+var
+ face1: tcustomface;
+begin
+ face1:= getactface;
+ if face1 <> nil then begin
+  if fao_overlay in face1.options then begin
+   if fframe <> nil then begin
+    face1.paint(canvas,deflaterect(arect,fframe.paintframe));
+   end
+   else begin
+    face1.paint(canvas,arect);
+   end;
+  end;
+ end;
+ if fframe <> nil then begin
+  fframe.paintoverlay(canvas,arect);
  end;
 end;
 
@@ -9307,6 +9373,12 @@ begin
  else begin
   result:= clientrect;
  end;
+end;
+
+function twidget.innerparentrect: rectty;         //origin = parentwidget.pos
+begin
+ result:= innerwidgetrect;
+ addpoint1(result.pos,fwidgetrect.pos);
 end;
 
 function twidget.innerwidgetrect: rectty;

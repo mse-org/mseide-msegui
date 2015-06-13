@@ -2233,6 +2233,33 @@ var
  int1: integer;
  rect1: rectty;
  fra1: framety;
+
+ procedure cellpaint(const rect: rectty; const innerrect: rectty);
+ begin
+  if bo1 and (fempty_color <> cl_none) and 
+                                 not (des_grayed in fstate) then begin
+   canvas.fillrect(rect,fempty_color);
+  end;
+  paintimage(canvas);
+  if mstr1 <> '' then begin
+   if bo1 then begin    
+    canvas.font:= getfontempty1{fempty_font};
+    atextflags:= fempty_textflags;
+    if fempty_textcolor <> cl_none then begin
+     canvas.font.color:= fempty_textcolor;
+    end;
+    if fempty_textcolorbackground <> cl_none then begin
+     canvas.font.color:= fempty_textcolorbackground;
+    end;
+   end;
+   if des_grayed in fstate then begin
+    include(atextflags,tf_grayed);
+   end;
+   drawtext(canvas,mstr1,deflaterect(innerrect,fra1),deflaterect(rect,fra1),
+                                                                 atextflags);
+  end;
+ end; //cellpaint
+
 begin
  atextflags:= textflags;
  with cellinfoty(canvas.drawinfopo^) do begin
@@ -2255,26 +2282,13 @@ begin
    end;
   end
   else begin
-   if bo1 and (fempty_color <> cl_none) and not (des_grayed in fstate) then begin
-    canvas.fillrect(rect,fempty_color);
-   end;
-   paintimage(canvas);
-   if mstr1 <> '' then begin
-    if bo1 then begin    
-     canvas.font:= getfontempty1{fempty_font};
-     atextflags:= fempty_textflags;
-     if fempty_textcolor <> cl_none then begin
-      canvas.font.color:= fempty_textcolor;
-     end;
-     if fempty_textcolorbackground <> cl_none then begin
-      canvas.font.color:= fempty_textcolorbackground;
-     end;
-    end;
-    if des_grayed in fstate then begin
-     include(atextflags,tf_grayed);
-    end;
-    drawtext(canvas,mstr1,deflaterect(innerrect,fra1),deflaterect(rect,fra1),
-                                                                  atextflags);
+   if (fgridintf = nil) and (fparentintf <> nil) then begin
+    paintbackground(canvas,widgetrect);
+    cellpaint(widgetrect,innerparentrect);
+    paintoverlay(canvas,widgetrect);
+   end
+   else begin
+    cellpaint(rect,innerrect);
    end;
   end;
  end;

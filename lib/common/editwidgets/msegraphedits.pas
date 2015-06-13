@@ -1725,7 +1725,14 @@ begin
    if col1 = cl_font then begin
     col1:= font.color;
    end;
-   paintglyph(canvas,col1,datapo^,innerrect);
+   if (fgridintf = nil) and (fparentintf <> nil) then begin
+    paintbackground(canvas,widgetrect);
+    paintglyph(canvas,col1,datapo^,self.innerparentrect);
+    paintoverlay(canvas,widgetrect);
+   end
+   else begin
+    paintglyph(canvas,col1,datapo^,innerrect);
+   end;
   end;
  end;
 end;
