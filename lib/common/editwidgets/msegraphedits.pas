@@ -927,6 +927,7 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   procedure initnewwidget(const ascale: real); override;
    procedure doupdate;
    procedure synctofontheight; override;
    procedure initgridwidget; override;
@@ -4167,6 +4168,15 @@ procedure tcustomdatabutton.gridtovalue(arow: integer);
 begin
  inherited;
  checkdisabled();
+end;
+
+procedure tcustomdatabutton.initnewwidget(const ascale: real);
+begin
+ inherited;
+ if fgridintf <> nil then begin
+  fgridintf.getcol.options:= 
+                fgridintf.getcol.grid.datacols.options - [co_drawfocus];
+ end;
 end;
 
 { tstockglyphdatabutton }
