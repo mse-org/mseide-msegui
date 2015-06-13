@@ -365,7 +365,7 @@ begin
  with tvalueedititem(
          tpropertyeditor1(sender.valueeditor).getpointervalue()) do begin
   if editwidget <> nil then begin
-   result:= '<'+editwidget.name+'>';
+   result:= '<'+inttostr(valueindex)+'>'+'<'+editwidget.name+'>';
   end
   else begin
    result:= '<>';
