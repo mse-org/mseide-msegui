@@ -2634,12 +2634,16 @@ begin
                                  (avalue.parentwidget <> fowner)) then begin
    raise exception.create('Invalid item field edit widget "'+avalue.name+'".');
   end;
+  if (finfo.editwidget <> nil) and (finfo.gridintf <> nil) then begin
+   finfo.gridintf.setparentgridwidget(nil);
+  end;
   titemedit(fowner).setlinkedvar(avalue,tmsecomponent(finfo.editwidget));
   if avalue = nil then begin
    finfo.gridintf:= nil;
    finfo.datatype:= dl_none;
   end
   else begin
+   finfo.gridintf.setparentgridwidget(igridwidget(titemedit(fowner)));
    finfo.datatype:= finfo.gridintf.getdatalistclass().datatype();
   end;
   changed();
@@ -2924,7 +2928,6 @@ begin
    end;
   end;
   factiveinfo:= info1;
-  info1.gridintf.setparentgridwidget(igridwidget(self));
   info1.gridintf.setvaluedata(po1^);
   info1.editwidget.visible:= true;
   if focused then begin 
