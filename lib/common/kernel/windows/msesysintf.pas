@@ -13,21 +13,84 @@ unit msesysintf; //i386-win32
 
 interface
 uses
- msesys,{msethread,}msetypes,msesystypes,msestrings,windows;
+ msesys,{msethread,}msetypes,msesystypes,msestrings,windows,msectypes;
  
 {$include ..\msesysintf.inc}
 
+type
+ NTSTATUS = longword;
+ 
 const
  ASFW_ANY = dword(-1);
+         //PROCESSINFOCLASS
+ ProcessBasicInformation = 0;
+ ProcessDebugPort = 7;
+ ProcessWow64Information = 26;
+ ProcessImageFileName = 27;
+ ProcessBreakOnTermination = 29;
+ 
 var
  AllowSetForegroundWindow: function(dwProcessId: DWORD):WINBOOL; stdcall;
 
+function procidfromprochandle(const ahandle: prochandlety): procidty;
+
 implementation
 uses
- sysutils,msebits,msefileutils,{msedatalist,}dateutils,msectypes,
+ sysutils,msebits,msefileutils,{msedatalist,}dateutils,
  msesystimer,msearrayutils,msesysintf1,msedynload;
 
 //todo: correct unicode implementation, long filepaths, stubs for win95
+type
+{$packrecords c} 
+ PROCESS_BASIC_INFORMATION = record
+     Reserved1: PVOID;
+     PebBaseAddress: pointer;//PPEB;
+     Reserved2: array[0..1] of PVOID;
+     UniqueProcessId: ULONG_PTR;
+     Reserved3: PVOID;
+ end;
+ pPROCESS_BASIC_INFORMATION = ^PROCESS_BASIC_INFORMATION;
+
+var
+ ZwQueryInformationProcess: function(ProcessHandle: HANDLE;
+                  ProcessInformationClass: cint{PROCESSINFOCLASS};
+                  ProcessInformation: PVOID;
+                  ProcessInformationLength: ULONG;
+                  ReturnLength: PULONG): NTSTATUS; stdcall;
+ NtQueryInformationProcess: function(
+                  ProcessHandle: HANDLE;
+                  ProcessInformationClass: cint{PROCESSINFOCLASS};
+                  ProcessInformation: PVOID;
+                  ProcessInformationLength: cULONG;
+                  ReturnLength: PULONG): NTSTATUS; stdcall;
+ GetProcessId: function(Process: HANDLE): DWORD; stdcall;
+                 
+function procidfromprochandle(const ahandle: prochandlety): procidty;
+var
+ info: PROCESS_BASIC_INFORMATION;
+ len1: culong;
+begin
+ result:= invalidprocid;
+ if getprocessid <> nil then begin
+  result:= getprocessid(ahandle);
+ end
+ else begin
+  if NtQueryInformationProcess <> nil then begin
+   if NtQueryInformationProcess(ahandle,processbasicinformation,@info,
+                                           sizeof(info),@len1) = 0 then begin
+    result:= info.uniqueprocessid;
+   end;
+  end
+  else begin
+   if ZwQueryInformationProcess <> nil then begin
+    if ZwQueryInformationProcess(ahandle,processbasicinformation,@info,
+                                            sizeof(info),@len1) = 0 then begin
+     result:= info.uniqueprocessid;
+    end;
+   end;
+  end;
+ end;
+end;
 
 var
  apphomedir: filenamety;
@@ -1789,6 +1852,12 @@ begin
  checkprocaddresses(['user32.dll'],
       ['AllowSetForegroundWindow'],
       [{$ifndef FPC}@{$endif}@AllowSetForegroundWindow]);
+ checkprocaddresses(['ntdll.dll'],['ZwQueryInformationProcess'],
+      [@ZwQueryInformationProcess]);
+ checkprocaddresses(['ntdll.dll'],['NtQueryInformationProcess'],
+      [@NtQueryInformationProcess]);
+ checkprocaddresses(['kernel32.dll'],['GetProcessId'],
+      [@GetProcessId]);
 end;
 {
 procedure initformatsettings;

@@ -104,6 +104,8 @@ procedure killprocess(handle: prochandlety);
 procedure killprocesstree(handle: prochandlety);
 function terminateprocess(handle: prochandlety): integer;
            //sendet sigterm, bringt exitresult, -1 on error
+procedure killprocessid(id: procidty);
+procedure killprocesstreeid(id: procidty);
 
 function getpid: procidty; 
            
@@ -178,16 +180,61 @@ implementation
 uses 
  msesysintf1,msesysintf,msestrings,mseprocmonitor,msearrayutils,mseapplication;
 
-procedure killprocesstree(handle: prochandlety);
+procedure killprocesstree1(id: procidty);
 var
  ar1: procidarty;
  int1: integer;
 begin
- ar1:= getprocesschildren(handle);
+ ar1:= getprocesschildren(id);
  for int1:= 0 to high(ar1) do begin
-  killprocesstree(ar1[int1]);
+  killprocesstree1(ar1[int1]);
+  killprocessid(ar1[int1]);
  end;
+end;
+
+procedure killprocesstree(handle: prochandlety);
+begin
+{$ifdef windows}
+ killprocesstree1(procidfromprochandle(handle));
+{$else}
+ killprocesstree1(handle);
+{$endif}
  killprocess(handle);
+end;
+
+procedure killprocessid(id: procidty);
+{$ifdef mswindows}
+var
+ h1: prochandlety;
+{$endif}
+begin
+{$ifdef mswindows}
+ h1:= windows.openprocess(process_terminate,false,id);
+ if h1 <> 0 then begin
+  windows.terminateprocess(h1,0);
+  windows.closehandle(h1);
+ end;
+{$else}
+ killprocess(id);
+{$endif}
+end;
+
+procedure killprocesstreeid(id: procidty);
+{$ifdef mswindows}
+var
+ h1: prochandlety;
+{$endif}
+begin
+{$ifdef mswindows}
+ h1:= windows.openprocess(process_terminate,false,id);
+ if h1 <> 0 then begin
+  killprocesstree(h1);
+  windows.closehandle(h1);
+ end;
+{$else}
+ killprocesstree1(id);
+ killprocessid(id);
+{$endif}
 end;
 
 function getpid: procidty;
@@ -467,7 +514,7 @@ begin
   startupinfo.dwflags:= startupinfo.dwFlags or startf_useshowwindow;
  end;
  if exo_shell in options then begin
-  bo1:= createprocess(nil,pchar('cmd.exe '+'/c'+commandline),
+  bo1:= createprocess(nil,pchar('cmd.exe '+'/q /c'+commandline),
                  nil,nil,true,creationflags,nil,pointer(workingdirectory),
                                                      startupinfo,processinfo);
  end
