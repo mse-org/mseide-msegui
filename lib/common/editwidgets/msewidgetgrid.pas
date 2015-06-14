@@ -1245,7 +1245,8 @@ begin
      activewidgetbefore:= intf.getwidget;
     end;
    end;
-   if (activewidgetbefore <> nil) and (activewidgetbefore <> factivewidget) then begin
+   if (activewidgetbefore <> nil) and 
+                             (activewidgetbefore <> factivewidget) then begin
     activewidgetbefore.visible:= false;
    end;
   end;
@@ -2909,7 +2910,8 @@ begin
  end;
 end;
 
-function tcustomwidgetgrid.editwidgetatpos(const apos: pointty; out cell: gridcoordty): twidget;
+function tcustomwidgetgrid.editwidgetatpos(const apos: pointty; 
+                                             out cell: gridcoordty): twidget;
 begin
  if cellatpos(apos,cell) = ck_data then begin
   result:= datacols[cell.col].editwidget;
@@ -3314,7 +3316,8 @@ var
 begin
  with info do begin
   if not (es_reflected in eventstate)  then begin
-   if (eventkind in [ek_mousemove,ek_mousepark,ek_buttonpress,ek_buttonrelease]) then begin
+   if (eventkind in [ek_mousemove,ek_mousepark,
+                               ek_buttonpress,ek_buttonrelease]) then begin
     po1:= translateclientpoint(nullpoint,sender,self);
     addpoint1(pos,po1);
     if sender = factivewidget then begin
@@ -3323,7 +3326,8 @@ begin
     else begin
      with fobjectpicker do begin
       if (sender <> fcontainer2) and (sender <> self) and
-             ((fpickkind = pok_datacolsize) or (eventkind <> ek_buttonpress)) then begin
+                             ((fpickkind = pok_datacolsize) or
+                               (eventkind <> ek_buttonpress)) then begin
        include(fstate,gs_child);
        mouseevent(info);
        exclude(fstate,gs_child);
@@ -3573,7 +3577,7 @@ begin
     ((fmouseactivewidget <> factivewidget) or
      ((ffocusedcell.row <> fmousefocusedcell.row)) or 
       (fmousefocusedwidget <> window.focusedwidget)) and
-                        (mouseeventwidget(info) = factivewidget) then begin
+           (factivewidget.checkdescendent(mouseeventwidget(info))) then begin
   bo1:= gs1_mousecaptureendlock in fstate1;
   include(fstate1,gs1_mousecaptureendlock);
   try
