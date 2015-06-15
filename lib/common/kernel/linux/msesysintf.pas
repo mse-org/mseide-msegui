@@ -51,7 +51,8 @@ implementation
 uses
  msesysintf1,sysutils,msesysutils,msefileutils
  {$ifdef FPC},dateutils{$else},DateUtils,classes_del{$endif},msedate
- {$ifdef mse_debugmutex},mseapplication{$endif};
+ {$ifdef mse_debugmutex},mseapplication{$endif}
+ {$ifdef freebsd},msedynload{$endif};
  
 function sigactionex(SigNum: Integer; var Action: TSigActionex;
                               OldAction: PSigAction): Integer;
@@ -180,6 +181,202 @@ begin
  end;
 end;
 
+{$ifdef freebsd}
+{$packrecords c}
+type
+ procstat = record
+ end;
+ pprocstat = ^procstat;
+
+ pargs = record //from user.h
+ end;
+ ppargs = ^pargs;
+ proc = record
+ end;
+ pproc = ^proc;
+ user = record
+ end;
+ puser = ^user;
+ vnode = record
+ end;
+ pvnode = ^vnode;
+ filedesc = record
+ end;
+ pfiledesc = ^filedesc;
+ vmspace = record
+ end;
+ pvmspace = ^vmspace;
+ 
+ kinfo_proc = record 
+  ki_structsize: cint;      //* size of this structure */
+  ki_layout: cint;          //* reserved: layout identifier */
+  ki_args: ppargs;  //* address of command arguments */
+  ki_paddr: pproc;  //* address of proc */
+  ki_addr: puser;  //* kernel virtual addr of u-area */
+  ki_tracep: pvnode; //* pointer to trace file */
+  ki_textvp: pvnode; //* pointer to executable file */
+  ki_fd: pfiledesc;  //* pointer to open file info */
+  ki_vmspace: pvmspace; //* pointer to kernel vmspace struct */
+  ki_wchan: pointer;  //* sleep address */
+  ki_pid: pid_t;   //* Process identifier */
+  ki_ppid: pid_t;  //* parent process id */
+  ki_pgid: pid_t;  //* process group id */
+  ki_tpgid: pid_t;  //* tty process group id */
+  ki_sid: pid_t;   //* Process session ID */
+  ki_tsid: pid_t;  //* Terminal session ID */
+  ki_jobc: cshort;  //* job control counter */
+   //... see below
+ end;
+ pkinfo_proc = ^kinfo_proc;
+{
+ short ki_spare_short1; /* unused (just here for alignment) */
+ dev_t ki_tdev;  /* controlling tty dev */
+ sigset_t ki_siglist;  /* Signals arrived but not delivered */
+ sigset_t ki_sigmask;  /* Current signal mask */
+ sigset_t ki_sigignore;  /* Signals being ignored */
+ sigset_t ki_sigcatch;  /* Signals being caught by user */
+ uid_t ki_uid;   /* effective user id */
+ uid_t ki_ruid;  /* Real user id */
+ uid_t ki_svuid;  /* Saved effective user id */
+ gid_t ki_rgid;  /* Real group id */
+ gid_t ki_svgid;  /* Saved effective group id */
+ short ki_ngroups;  /* number of groups */
+ short ki_spare_short2; /* unused (just here for alignment) */
+ gid_t ki_groups[KI_NGROUPS]; /* groups */
+ vm_size_t ki_size;  /* virtual size */
+ segsz_t ki_rssize;  /* current resident set size in pages */
+ segsz_t ki_swrss;  /* resident set size before last swap */
+ segsz_t ki_tsize;  /* text size (pages) XXX */
+ segsz_t ki_dsize;  /* data size (pages) XXX */
+ segsz_t ki_ssize;  /* stack size (pages) */
+ u_short ki_xstat;  /* Exit status for wait & stop signal */
+ u_short ki_acflag;  /* Accounting flags */
+ fixpt_t ki_pctcpu;   /* %cpu for process during ki_swtime */
+ u_int ki_estcpu;   /* Time averaged value of ki_cpticks */
+ u_int ki_slptime;   /* Time since last blocked */
+ u_int ki_swtime;   /* Time swapped in or out */
+ u_int ki_cow;   /* number of copy-on-write faults */
+ u_int64_t ki_runtime;  /* Real time in microsec */
+ struct timeval ki_start; /* starting time */
+ struct timeval ki_childtime; /* time used by process children */
+ long ki_flag;  /* P_* flags */
+ long ki_kiflag;  /* KI_* flags (below) */
+ int ki_traceflag;  /* Kernel trace points */
+ char ki_stat;  /* S* process status */
+ signed char ki_nice;  /* Process "nice" value */
+ char ki_lock;  /* Process lock (prevent swap) count */
+ char ki_rqindex;  /* Run queue index */
+ u_char ki_oncpu;  /* Which cpu we are on */
+ u_char ki_lastcpu;  /* Last cpu we were on */
+ char ki_tdname[TDNAMLEN+1]; /* thread name */
+ char ki_wmesg[WMESGLEN+1]; /* wchan message */
+ char ki_login[LOGNAMELEN+1]; /* setlogin name */
+ char ki_lockname[LOCKNAMELEN+1]; /* lock name */
+ char ki_comm[COMMLEN+1]; /* command name */
+ char ki_emul[KI_EMULNAMELEN+1];  /* emulation name */
+ char ki_loginclass[LOGINCLASSLEN+1]; /* login class */
+ /*
+  * When adding new variables, take space for char-strings from the
+  * front of ki_sparestrings, and ints from the end of ki_spareints.
+  * That way the spare room from both arrays will remain contiguous.
+  */
+ char ki_sparestrings[50]; /* spare string space */
+ int ki_spareints[KI_NSPARE_INT]; /* spare room for growth */
+ int ki_flag2;  /* P2_* flags */
+ int ki_fibnum;  /* Default FIB number */
+ u_int ki_cr_flags;  /* Credential flags */
+ int ki_jid;   /* Process jail ID */
+ int ki_numthreads;  /* XXXKSE number of threads in total */
+ lwpid_t ki_tid;   /* XXXKSE thread id */
+ struct priority ki_pri; /* process priority */
+ struct rusage ki_rusage; /* process rusage statistics */
+ /* XXX - most fields in ki_rusage_ch are not (yet) filled in */
+ struct rusage ki_rusage_ch; /* rusage of children processes */
+ struct pcb *ki_pcb;  /* kernel virtual addr of pcb */
+ void *ki_kstack;  /* kernel virtual addr of stack */
+ void *ki_udata;  /* User convenience pointer */
+ struct thread *ki_tdaddr; /* address of thread */
+ /*
+  * When adding new variables, take space for pointers from the
+  * front of ki_spareptrs, and longs from the end of ki_sparelongs.
+  * That way the spare room from both arrays will remain contiguous.
+  */
+ void *ki_spareptrs[KI_NSPARE_PTR]; /* spare room for growth */
+ long ki_sparelongs[KI_NSPARE_LONG]; /* spare room for growth */
+ long ki_sflag;  /* PS_* flags */
+ long ki_tdflags;  /* XXXKSE kthread flag */
+}
+const
+///*
+// * KERN_PROC subtypes
+// */
+ KERN_PROC_ALL = 0; //* everything */
+ KERN_PROC_PID = 1; //* by process id */
+ KERN_PROC_PGRP = 2; //* by process group id */
+ KERN_PROC_SESSION = 3; //* by session of pid */
+ KERN_PROC_TTY = 4; //* by controlling tty */
+ KERN_PROC_UID = 5; //* by effective uid */
+ KERN_PROC_RUID = 6; //* by real uid */
+ KERN_PROC_ARGS = 7; //* get/set arguments/proctitle */
+ KERN_PROC_PROC = 8; //* only return procs */
+ KERN_PROC_SV_NAME = 9; //* get syscall vector name */
+ KERN_PROC_RGID = 10; //* by real group id */
+ KERN_PROC_GID = 11; //* by effective group id */
+ KERN_PROC_PATHNAME = 12; //* path to executable */
+ KERN_PROC_OVMMAP = 13; //* Old VM map entries for process */
+ KERN_PROC_OFILEDESC = 14; //* Old file descriptors for process */
+ KERN_PROC_KSTACK = 15; //* Kernel stacks for process */
+ KERN_PROC_INC_THREAD = $10; //*
+//      * modifier for pid, pgrp, tty,
+//      * uid, ruid, gid, rgid and proc
+//      * This effectively uses 16-31
+//      */
+ KERN_PROC_VMMAP = 32; //* VM map entries for process */
+ KERN_PROC_FILEDESC = 33; //* File descriptors for process */
+ KERN_PROC_GROUPS = 34; //* process groups */
+ KERN_PROC_ENV = 35; //* get environment */
+ KERN_PROC_AUXV = 36; //* get ELF auxiliary vector */
+ KERN_PROC_RLIMIT = 37; //* process resource limits */
+ KERN_PROC_PS_STRINGS = 38; //* get ps_strings location */
+ KERN_PROC_UMASK = 39; //* process umask */
+ KERN_PROC_OSREL = 40; //* osreldate for process binary */
+ KERN_PROC_SIGTRAMP = 41; //* signal trampoline location */
+ 
+var
+ haslibprocstat: boolean;
+ procstat_open_sysctl: function(): pprocstat; cdecl; 
+ procstat_close: procedure(procstat: pprocstat); cdecl;
+ procstat_getprocs: function(procstat: pprocstat; what: cint; arg: cint;
+                                           count: pcuint): pkinfo_proc; cdecl;
+ procstat_freeprocs: procedure(procstat: pprocstat; p: pkinfo_proc); cdecl;
+
+function sys_getprocesses: procitemarty;
+var
+ stat: pprocstat;
+ proc,po1: pkinfo_proc;
+ ca1: cuint;
+begin
+ result:= nil;
+ if haslibprocstat then begin
+  stat:= procstat_open_sysctl();
+  if stat <> nil then begin
+   proc:= procstat_getprocs(stat,KERN_PROC_PROC,0,@ca1);
+   if proc <> nil then begin
+    setlength(result,ca1);
+    po1:= proc;
+    for ca1:= 0 to high(result) do begin
+     result[ca1].pid:= po1^.ki_pid;
+     result[ca1].ppid:= po1^.ki_ppid;
+     inc(pointer(po1),po1^.ki_structsize);
+    end;
+    procstat_freeprocs(stat,proc);
+   end;
+   procstat_close(stat);
+  end;
+ end;
+end;
+
+{$else}
 function sys_getprocesses: procitemarty;
 var
  filelist: tfiledatalist;
@@ -212,6 +409,7 @@ begin
  filelist.free;
  setlength(result,int2);
 end;
+{$endif}
 
 procedure sys_schedyield;
 begin
@@ -1089,6 +1287,20 @@ begin
  sigaction(sigio,@info,nil);
 end;
 
+{$ifdef freebsd}
+procedure initfreebsd();
+begin
+ haslibprocstat:= checkprocaddresses(['libprocstat.so.1','libprocstat.so'],
+    ['procstat_open_sysctl','procstat_close','procstat_getprocs',
+     'procstat_freeprocs'],
+    [@procstat_open_sysctl,@procstat_close,@procstat_getprocs,
+     @procstat_freeprocs]);
+end;
+{$endif}
+
 initialization
  setsighandlers;
+{$ifdef freebsd}
+ initfreebsd();
+{$endif}
 end.

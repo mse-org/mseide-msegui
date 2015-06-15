@@ -272,13 +272,13 @@ var
  ar1: procitemarty;
  int2: integer;
 begin
- ar1:= getprocesstree;
- if findarrayitem(pid,ar1,sizeof(procitemty),
-                         {$ifdef FPC}@{$endif}findprocitem,int2) then begin
-  result:= ar1[int2].children;
- end
- else begin
-  result:= nil;
+ result:= nil;
+ if pid <> invalidprocid then begin
+  ar1:= getprocesstree;
+  if findarrayitem(pid,ar1,sizeof(procitemty),
+                          {$ifdef FPC}@{$endif}findprocitem,int2) then begin
+   result:= ar1[int2].children;
+  end;
  end;
 end;
 
