@@ -509,6 +509,7 @@ var
  wo1: word;
 {$endif}
  po1: pchar;
+ i1: int32;
 begin
  with tsqlite3cursor(cursor) do begin
   frowsaffected:= -1;
@@ -521,8 +522,15 @@ begin
      end
      else begin
       case datatype of
-       ftinteger,ftboolean,ftsmallint: begin
+       ftinteger,ftsmallint: begin
         checkerror(sqlite3_bind_int(fstatement,int1+1,asinteger));
+       end;
+       ftboolean: begin
+        i1:= asinteger;
+        if i1 <> 0 then begin
+         i1:= 1;
+        end;
+        checkerror(sqlite3_bind_int(fstatement,int1+1,i1));
        end;
        ftword: begin
         checkerror(sqlite3_bind_int(fstatement,int1+1,asword));
