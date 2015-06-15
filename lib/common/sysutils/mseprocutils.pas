@@ -40,9 +40,10 @@ type
 const
  pipewritehandlemask = [exo_usepipewritehandles
                   {$ifdef mswindows},exo_winpipewritehandles{$endif}];
-                    
+type
+ processexiterrorty = (pee_ok,pee_timeout,pee_error);                    
 function getprocessexitcode(prochandle: prochandlety; out exitcode: integer;
-                              const timeoutus: integer = 0): boolean;
+                             const timeoutus: integer = 0): processexiterrorty;
                                //<0 -> no timeout
                  //true if ok, close handle
 function waitforprocess(prochandle: prochandlety): integer;
@@ -312,32 +313,34 @@ end;
 
 {$ifdef mswindows}
 function getprocessexitcode(prochandle: prochandlety; out exitcode: integer;
-                  const timeoutus: integer = 0): boolean;
+                  const timeoutus: integer = 0): processexiterrorty;
                  //true if ok, close handle
 var
  dwo1: longword;
  ca1: longword;
 begin
- result:= false;
+ result:= pee_error;
  exitcode:= -1;
  if prochandle <> invalidprochandle then begin
   if timeoutus < 0 then begin
    exitcode:= waitforprocess(prochandle);
-   result:= true;
+   if exitcode <> -1 then begin
+    result:= pee_ok;
+   end;
   end
   else begin
    ca1:= timestep(timeoutus);
    while true do begin
-    result:= getexitcodeprocess(prochandle,dwo1);
-    if result then begin
+    if getexitcodeprocess(prochandle,dwo1) then begin
      if dwo1 <> still_active then begin
       exitcode:= dwo1;
       closehandle(prochandle);
+      result:= pee_ok;
       break;
      end
      else begin
       if (timeoutus = 0) or timeout(ca1) then begin
-       result:= false;
+       result:= pee_timeout;
        break;
       end;
       sys_schedyield;
@@ -345,7 +348,6 @@ begin
     end
     else begin
      exit;
-//     raise eoserror.create('');
     end;
    end;
   end;
@@ -572,9 +574,8 @@ end;
 
 {$ifdef UNIX}
 function getprocessexitcode(prochandle: prochandlety; out exitcode: integer;
-                               const timeoutus: integer = 0): boolean;
+                               const timeoutus: integer = 0): processexiterrorty;
                                //-1 -> no timeout
-                 //true if ok, close handle
 var
  dwo1: longword;
  cancel: boolean;
@@ -591,50 +592,58 @@ var
   else begin
    if sys_getlasterror <> eintr then begin
     cancel:= true;
-//    raise eoserror.create('getprocessexitcode: ');
    end;
   end;
  end;
 
+var
+ i1: int32;
+ 
 begin
- result:= false;
+ result:= pee_error;
  cancel:= false;
  exitcode:= -1;
  if prochandle <> invalidprochandle then begin
-  result:= check(waitpid(prochandle,@dwo1,wnohang));
-  if not result and (timeoutus <> 0) then begin
-   if timeoutus < 0 then begin
-    repeat
-     result:= check(waitpid(prochandle,@dwo1,0));
-    until result or cancel;
-   end
-   else begin
-    result:= check(timedwaitpid(prochandle,@dwo1,timeoutus));
-   end;
-  end;
- end;
- {
- while true do begin
-  pid:= waitpid(prochandle,@dwo1,wnohang);
-  if pid <> -1 then begin
-   result:= pid = prochandle;
-   if result then begin
-    exitcode:= wexitstatus(dwo1);
-    break;
-   end
-   else begin
-    if timeout(ca1) then begin
-     break;
-    end;
-    sys_schedyield;
-//    sys_threadschedyield;
-   end;
+  if check(waitpid(prochandle,@dwo1,wnohang)) then begin
+   result:= pee_ok;
+   exit;
   end
   else begin
-   raise eoserror.create('');
+   if not cancel then begin
+    result:= pee_timeout;
+   end;
+  end;
+   
+  if (result = pee_timeout) and (timeoutus <> 0) then begin
+   if timeoutus < 0 then begin
+    repeat
+    until check(waitpid(prochandle,@dwo1,0)) or cancel;
+    if cancel then begin
+     result:= pee_error;
+    end
+    else begin
+     result:= pee_ok;
+    end
+   end
+   else begin
+    i1:= timedwaitpid(prochandle,@dwo1,timeoutus);
+    case i1 of
+     -2: begin
+      result:= pee_timeout;
+     end;
+     else begin
+      if i1 >= 0 then begin
+       result:= pee_ok;
+       exitcode:= wexitstatus(dwo1);
+      end
+      else begin
+       result:= pee_error;
+      end;
+     end;
+    end;
+   end;
   end;
  end;
- }
 end;
 
 function waitforprocess(prochandle: prochandlety): integer;

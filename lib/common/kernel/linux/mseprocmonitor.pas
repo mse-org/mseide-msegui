@@ -19,6 +19,7 @@ procedure sigchildcallback;
 function timedwaitpid(__pid: __pid_t; __stat_loc: plongint;
                                               const waitus: integer): __pid_t;
                 //waitus must be > 0
+                //result -1 -> error, -2 -> timeout
 
 implementation
 uses
@@ -127,6 +128,8 @@ end;
 
 function timedwaitpid(__pid: __pid_t; __stat_loc: plongint;
                                              const waitus: integer): __pid_t;
+                //waitus must be > 0
+                //result -1 -> error, -2 -> timeout
 var
  semele: semelety;
  lwo1: longword;
@@ -161,6 +164,9 @@ begin
    end
    else begin
     result:= waitpid(__pid,__stat_loc,wnohang);
+    if result < 0 then begin
+     result:= -2;
+    end;
     break;
    end;
   end;

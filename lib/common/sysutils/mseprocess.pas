@@ -537,8 +537,10 @@ var
  int1: integer;
  bo1: boolean;
  ts1: longword;
+ procerr: processexiterrorty;
 begin
  result:= false;
+ procerr:= pee_ok;
  bo1:= prs_listening in fstate;
  unlisten;
  if bo1 then begin
@@ -551,24 +553,27 @@ begin
      application.processmessages;
      int1:= application.unlockall;
     end;
-    result:= mseprocutils.getprocessexitcode(fprochandle,fexitcode,100000);
-   until result or (pro_checkescape in foptions) and application.waitescaped or 
+    procerr:= mseprocutils.getprocessexitcode(fprochandle,fexitcode,100000);
+   until (procerr <> pee_timeout) or 
+             (pro_checkescape in foptions) and application.waitescaped or 
                                           (atimeoutus >= 0) and timeout(ts1);
+   result:= procerr = pee_ok;
    if not result then begin
     terminateprocess(fprochandle);
     procend;
    end;
   end
   else begin
-   result:= mseprocutils.getprocessexitcode(fprochandle,fexitcode,atimeoutus);
+   procerr:= mseprocutils.getprocessexitcode(fprochandle,fexitcode,atimeoutus);
+   result:= procerr = pee_ok;
   end;
   application.relockall(int1);
  end
  else begin
   result:= true;
  end;
- if result  then begin
-  procend;
+ if result or (procerr = pee_error) then begin
+  procend();
  end;
 end;
 
