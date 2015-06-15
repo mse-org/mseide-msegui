@@ -65,25 +65,31 @@ begin
  application.unlock;
 end;
 
-procedure checkchildproc;
+procedure checkchildproc();
 var
- int1,int2: integer;
+ int1,int2,int3: integer;
  dwo1: dword;
  execresult: integer;
 begin
  application.lock;
  int1:= high(infos);
  while int1 >= 0 do begin
-  if (waitpid(infos[int1].prochandle,@dwo1,wnohang) > 0) and
-                       (wifexited(dwo1) or wifsignaled(dwo1)) then begin
+  int3:= waitpid(infos[int1].prochandle,@dwo1,wnohang);
+  if (int3 > 0) and (wifexited(dwo1) or wifsignaled(dwo1)) then begin
    execresult:= wexitstatus(dwo1);
+  end
+  else begin
+   execresult:= -2; //still running for int3 = 0
+   if (int3 < 0) and (sys_getlasterror() = ECHILD) then begin
+    execresult:= -1;
+   end;
+  end;
+  if execresult >= -1 then begin
    for int2:= int1 downto 0 do begin
     with infos[int2] do begin
      if prochandle = infos[int1].prochandle then begin     
       if dest <> nil then begin
        dest.processdied(prochandle,execresult,data);
-//       application.postevent(tchildprocevent.create(dest,prochandle,execresult,
-//                                                     data));
       end;
       deleteitem(infos,typeinfo(procinfoarty),int2);
       if int2 <> int1 then begin

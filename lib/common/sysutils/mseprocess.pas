@@ -411,7 +411,7 @@ begin
    outp:= nil;
    erroroutp:= nil;
    inp:= nil;
-   finalizeexec;
+   finalizeexec();
    if avalue then begin
     application.lock;
     try
