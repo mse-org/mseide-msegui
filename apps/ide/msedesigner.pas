@@ -123,6 +123,9 @@ type
 }
  moduleinfoty = record
   filename: msestring;
+  filetag: longword;
+  filechanged: boolean;
+  savetime: tdatetime;
   moduleclassname: string[80]; //can not be ansistring!
   instancevarname: string;
   instance: tmsecomponent;
@@ -5008,7 +5011,7 @@ function tdesigner.saveformfile(const modulepo: pmoduleinfoty;
 var
  stream1: tmemorystream;
  stream2: tmsefilestream;
- 
+ info: fileinfoty; 
 begin
  if createdatafile and projectoptions.o.checkmethods 
                        and not checkmethodtypes(modulepo,false{,nil}) then begin
@@ -5036,6 +5039,9 @@ begin
    end;
    if issamefilename(afilename,filename) then begin
     modified:= false;
+    if getfileinfo(afilename,info) then begin
+     savetime:= info.extinfo1.modtime;
+    end;
    end;
    if createdatafile then begin
     formtexttoobjsource(afilename,moduleclassname,'',fobjformat);

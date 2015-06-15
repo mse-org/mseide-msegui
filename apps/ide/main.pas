@@ -1616,6 +1616,10 @@ begin
   end;
   try
    result:= designer.loadformfile(wstr1,skipexisting);
+   if result <> nil then begin
+    result^.filetag:= sourcefo.newfiletag;
+    sourcefo.filechangenotifyer.addnotification(wstr1,result^.filetag);
+   end;
   except
    showobjecttext(nil,wstr1,false);
    errorformfilename:= wstr1;
@@ -1667,9 +1671,9 @@ begin
  sourcefo.openfile(replacefileext(formfilename,pasfileext),aactivate);
 end;
 
-function tmainfo.opensource(const filekind: filekindty; const addtoproject: boolean;
-               const aactivate: boolean = true;
-                   const currentnode: tprojectnode = nil): boolean;
+function tmainfo.opensource(const filekind: filekindty;
+               const addtoproject: boolean; const aactivate: boolean = true;
+                               const currentnode: tprojectnode = nil): boolean;
 
 var
  unitnode: tunitnode;
@@ -2034,8 +2038,10 @@ function tmainfo.closemodule(const amodule: pmoduleinfoty;
                             nocheckclose: boolean = false): boolean;
 var
  str1: string;
+ mstr1: filenamety;
 begin
  if amodule <> nil then begin
+  mstr1:= amodule^.filename;
   if nocheckclose or designer.checkcanclose(amodule,str1) then begin
    result:= designer.closemodule(amodule,achecksave);
   end
@@ -2046,6 +2052,7 @@ begin
    amodule^.hasmenuitem:= false;
   end;
   if result then begin
+   sourcefo.filechangenotifyer.removenotification(mstr1);
    if factivedesignmodule = amodule then begin
     factivedesignmodule:= nil;
    end;

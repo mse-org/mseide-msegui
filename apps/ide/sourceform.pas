@@ -751,16 +751,33 @@ begin
  end;
 end;
 
+function modulecanchangenotify(const amodule: pmoduleinfoty;
+                                       const info: filechangeinfoty): boolean;
+begin
+ result:= false;
+end;
+
 procedure tsourcefo.onfilechanged(const sender: tfilechangenotifyer; 
                                           const info: filechangeinfoty);
 var
  int1: integer;
+ po1: pmoduleinfoty;
 begin
  for int1:= 0 to count - 1 do begin
   with items[int1] do begin
    if (longword(info.tag) = filetag) and canchangenotify(info) then begin
     filechanged:= true;
-    application.wakeupmainthread;
+    application.wakeupmainthread();
+   end;
+  end;
+ end;
+ for int1:= 0 to designer.modules.count - 1 do begin
+  po1:= designer.modules.itempo[int1];
+  with po1^ do begin
+   if (longword(info.tag) = filetag) and 
+                                  modulecanchangenotify(po1,info) then begin
+    filechanged:= true;
+    application.wakeupmainthread();
    end;
   end;
  end;
