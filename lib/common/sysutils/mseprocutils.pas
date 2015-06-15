@@ -633,8 +633,13 @@ begin
      end;
      else begin
       if i1 >= 0 then begin
-       result:= pee_ok;
-       exitcode:= wexitstatus(dwo1);
+       if i1 > 0 then begin
+        result:= pee_ok;
+        exitcode:= wexitstatus(dwo1);
+       end
+       else begin
+        result:= pee_timeout;
+       end;
       end
       else begin
        result:= pee_error;

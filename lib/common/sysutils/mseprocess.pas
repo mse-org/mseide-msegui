@@ -538,6 +538,7 @@ var
  bo1: boolean;
  ts1: longword;
  procerr: processexiterrorty;
+ i2: int32;
 begin
  result:= false;
  procerr:= pee_ok;
@@ -547,13 +548,17 @@ begin
   int1:= application.unlockall;
   if foptions*[pro_checkescape,pro_processmessages] <> [] then begin
    ts1:= timestep(atimeoutus);
+   i2:= 100000;
+   if (atimeoutus >= 0) and (atimeoutus < i2) then begin
+    i2:= atimeoutus;
+   end;
    repeat
     if pro_processmessages in foptions then begin
      application.relockall(int1);
      application.processmessages;
      int1:= application.unlockall;
     end;
-    procerr:= mseprocutils.getprocessexitcode(fprochandle,fexitcode,100000);
+    procerr:= mseprocutils.getprocessexitcode(fprochandle,fexitcode,i2);
    until (procerr <> pee_timeout) or 
              (pro_checkescape in foptions) and application.waitescaped or 
                                           (atimeoutus >= 0) and timeout(ts1);
