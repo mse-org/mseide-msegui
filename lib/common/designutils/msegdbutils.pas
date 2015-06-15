@@ -1310,7 +1310,7 @@ begin
      fstoptime:= stopinfo.time;
      stopinfo.reason:= sr_gdbdied;
      stopinfo.messagetext:= 'Process died.';
-     if getprocessexitcode(fgdb,int1,2000000) then begin
+     if getprocessexitcode(fgdb,int1,2000000) = pee_ok then begin
       stopinfo.messagetext:= stopinfo.messagetext + 
                                          ' Exitcode: '+inttostr(int1)+'.';
       fgdb:= invalidprochandle;

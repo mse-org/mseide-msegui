@@ -1021,11 +1021,12 @@ begin
  end;
 end;
 
-procedure tmainfo.gdbserverexe(const sender: tguiapplication; var again: boolean);
+procedure tmainfo.gdbserverexe(const sender: tguiapplication; 
+                                                    var again: boolean);
 begin
  sys_schedyield;
  if timeout(fgdbservertimeout) and 
-     (getprocessexitcode(fgdbserverprocid,fgdbserverexitcode,100000) or
+ ((getprocessexitcode(fgdbserverprocid,fgdbserverexitcode,100000) = pee_ok) or
       projectoptions.d.nogdbserverexit) then begin
   sender.terminatewait;
  end
@@ -1042,7 +1043,7 @@ begin
  if (fgdbserverprocid <> invalidprochandle) and 
         (not projectoptions.d.gdbserverstartonce or force) then begin
   try
-   if not getprocessexitcode(fgdbserverprocid,int1) then begin
+   if (getprocessexitcode(fgdbserverprocid,int1) <> pee_ok) then begin
     killprocesstree(fgdbserverprocid);
    end;
   except

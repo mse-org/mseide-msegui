@@ -328,7 +328,7 @@ end;
 
 procedure tprogrunner.doasyncevent(var atag: integer);
 begin
- if not getprocessexitcode(procid,fexitcode,5000000) then begin
+ if getprocessexitcode(procid,fexitcode,5000000) <> pee_ok then begin
   messagefo.messages.appendrow([actionsmo.c[ord(ac_errortimeout)]]);
   messagefo.messages.appendrow(['']);
   killprocess(procid);
