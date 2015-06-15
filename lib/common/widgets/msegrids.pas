@@ -2586,9 +2586,12 @@ type
                  out acellrect: rectty): boolean; overload;
    function textclipped(const acell: gridcoordty): boolean; overload;
    
-   function appendrow(const value: array of msestring): integer; overload;
-   function appendrow(const value: msestringarty): integer; overload;
-   function appendrow(const value: msestring): integer; overload;
+   function appendrow(const value: array of msestring;
+                        const ashowlastrow: boolean = false): integer; overload;
+   function appendrow(const value: msestringarty;
+                        const ashowlastrow: boolean = false): integer; overload;
+   function appendrow(const value: msestring;
+                        const ashowlastrow: boolean = false): integer; overload;
          //for visible single row append
 
    function appenddatarow(const value: array of msestring): integer; overload;
@@ -16481,7 +16484,8 @@ begin
  result:= textclipped(acell,rect1);
 end;
 
-function tcustomstringgrid.appendrow(const value: msestringarty): integer;
+function tcustomstringgrid.appendrow(const value: msestringarty;
+                        const ashowlastrow: boolean = false): integer;
 var
  int1: integer;
 begin
@@ -16489,9 +16493,13 @@ begin
  for int1:= 0 to high(value) do begin
   datacols[int1][result]:= value[int1];
  end;
+ if ashowlastrow then begin
+  showlastrow();
+ end;
 end;
 
-function tcustomstringgrid.appendrow(const value: array of msestring): integer;
+function tcustomstringgrid.appendrow(const value: array of msestring;
+                        const ashowlastrow: boolean = false): integer;
 var
  int1: integer;
 begin
@@ -16499,15 +16507,19 @@ begin
  for int1:= 0 to high(value) do begin
   datacols[int1][result]:= value[int1];
  end;
+ if ashowlastrow then begin
+  showlastrow();
+ end;
 end;
 
-function tcustomstringgrid.appendrow(const value: msestring): integer;
+function tcustomstringgrid.appendrow(const value: msestring;
+                        const ashowlastrow: boolean = false): integer;
 var
  ar1: msestringarty;
 begin
  setlength(ar1,1);
  ar1[0]:= value;
- result:= appendrow(ar1);
+ result:= appendrow(ar1,ashowlastrow);
 end;
 
 function tcustomstringgrid.appenddatarow(const value: msestringarty): integer;
