@@ -158,6 +158,7 @@ type
    foncalclayout: docklayouteventty;
    fonlayoutchanged: dockcontrollereventty;
    fonboundschanged: dockcontrollereventty;
+   foncaptionchanged: dockcontrollereventty;
    fonfloat: notifyeventty;
    fondock: notifyeventty;
    fonchilddock: widgeteventty;
@@ -412,6 +413,8 @@ type
                                                        write fonlayoutchanged;
    property onboundschanged: dockcontrollereventty read fonboundschanged 
                                                        write fonboundschanged;
+   property oncaptionchanged: dockcontrollereventty read foncaptionchanged 
+                                                       write foncaptionchanged;
    property onbeforefloat: dockrecteventty read fonbeforefloat 
                                                      write fonbeforefloat;
    property onfloat: notifyeventty read fonfloat write fonfloat;
@@ -3957,9 +3960,9 @@ var
 begin
  idockcontroller(fintf).dodockcaptionchanged(self);
  widget1:= fintf.getwidget;
-// if widget1.canevent(tmethod(fonlayoutchanged)) then begin
-//  fonlayoutchanged(self);
-// end;
+ if widget1.canevent(tmethod(foncaptionchanged)) then begin
+  foncaptionchanged(self);
+ end;
  widget1:= widget1.parentwidget;
  while widget1 <> nil do begin
   if widget1.getcorbainterface(typeinfo(idocktarget),intf1) then begin
