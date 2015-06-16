@@ -565,6 +565,7 @@ type
    function saveformfile(const modulepo: pmoduleinfoty;
                  const afilename: msestring; createdatafile: boolean): boolean;
                         //false if canceled
+   procedure refreshdatafile(const amodule: pmoduleinfoty);
    function saveall(noconfirm,createdatafile: boolean): modalresultty;
    procedure savecanceled; //resets fallsaved
    procedure setactivemodule(const adesignform: tcustommseform);
@@ -5052,6 +5053,13 @@ begin
   finally
    stream1.free;
   end;
+ end;
+end;
+
+procedure tdesigner.refreshdatafile(const amodule: pmoduleinfoty);
+begin
+ with amodule^ do begin
+  formtexttoobjsource(filename,moduleclassname,'',fobjformat);
  end;
 end;
 

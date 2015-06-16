@@ -742,7 +742,6 @@ begin
        flayoutstream:= ttextstream.create();
        mainfo.savewindowlayout(flayoutstream);
       end;
-      filechanged:= false;
       if ask(filename,modified) then begin
        fna1:= filename;
        hasmenu1:= hasmenuitem;
@@ -758,8 +757,17 @@ begin
        else begin
         po1:= designer.loadformfile(fna1,false);
        end;
-       po1^.modified:= true;
+       po1^.filechanged:= true;
       end;
+     end;
+    end;
+   end;
+   for int1:= 0 to designer.modules.count - 1 do begin
+    po1:= designer.modules.itempo[int1];
+    with po1^ do begin
+     if filechanged then begin
+      filechanged:= false;
+      designer.refreshdatafile(po1);
      end;
     end;
    end;
