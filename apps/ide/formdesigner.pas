@@ -162,6 +162,7 @@ type
    fmodulesetting: integer;
    fmoduleoptions: moduleoptionsty;
    fsizeerrorcount: integer;
+   fupdatecaptionpending: boolean;
 
    fpickpos: pointty;
    fmousepos: pointty;
@@ -2424,6 +2425,7 @@ var
 begin
  case designerfoeventty(atag) of
   fde_updatecaption: begin
+   fupdatecaptionpending:= false;
    doupdatecaption();
   end;
   fde_syncsize: begin
@@ -2474,7 +2476,10 @@ end;
 
 procedure tformdesignerfo.updatecaption;
 begin
- asyncevent(integer(fde_updatecaption));
+ if not fupdatecaptionpending then begin
+  fupdatecaptionpending:= true;
+  asyncevent(integer(fde_updatecaption));
+ end;
 end;
 
 procedure tformdesignerfo.formcontainerscrolled;
