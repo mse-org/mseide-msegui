@@ -706,7 +706,7 @@ begin
  checksavecancel(result);
 end;
 
-procedure tmainfo.updatemodifiedforms;
+procedure tmainfo.updatemodifiedforms();
 var
  int1: integer;
 begin

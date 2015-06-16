@@ -695,9 +695,27 @@ begin
 end;
 
 procedure tsourcefo.formonidle(var again: boolean);
+
+ function ask(const filepath: filenamety; const modified: boolean): boolean;
+ var
+  mstr1: msestring;
+ begin
+  mstr1:= c[ord(str_file)]+filepath+c[ord(haschanged)];
+  if modified then begin
+   mstr1:= mstr1 + ' '+ c[ord(modieditalso)];
+  end;
+  mstr1:= mstr1 + ' '+c[ord(wishreload)];
+  result:= askok(mstr1,c[ord(confirmation)]);
+ end;
+
 var
  int1: integer;
- wstr1: msestring;
+ po1: pmoduleinfoty;
+ fna1: filenamety;
+ hasdesignfo1: boolean;
+ hasmenu1: boolean;
+ visible1: boolean;
+ active1: boolean;
 begin
  if (application.activewindow <> nil) and not fasking then begin
   fasking:= true;
@@ -706,15 +724,36 @@ begin
     with items[int1] do begin
      if filechanged then begin
       filechanged:= false;
-      wstr1:= c[ord(str_file)]+filepath+c[ord(haschanged)];
-      if modified then begin
-       wstr1:= wstr1 + ' '+ c[ord(modieditalso)];
-      end;
-      wstr1:= wstr1 + ' '+c[ord(wishreload)];
-      if askok(wstr1,c[ord(confirmation)]) then begin
+      if ask(filepath,modified) then begin
        filechanged:= false;
        reload;
        mainfo.sourcechanged(items[int1]);
+      end;
+     end;
+    end;
+   end;
+   for int1:= 0 to designer.modules.count - 1 do begin
+    po1:= designer.modules.itempo[int1];
+    with po1^ do begin
+     if filechanged then begin
+      filechanged:= false;
+      if ask(filename,modified) then begin
+       fna1:= filename;
+       hasmenu1:= hasmenuitem;
+       hasdesignfo1:= designform <> nil;
+       if hasdesignfo1 then begin
+        visible1:= designform.visible;
+        active1:= designform.activeentered;
+       end;
+       designform.free();
+       if hasdesignfo1 then begin
+        po1:= mainfo.openformfile(fna1,visible1,active1,false,hasmenu1,false);
+       end
+       else begin
+        po1:= designer.loadformfile(fna1,false);
+       end;
+       po1^.modified:= true;
+       mainfo.sourcechanged(nil);
       end;
      end;
     end;

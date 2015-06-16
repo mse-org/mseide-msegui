@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2013 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2015 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -115,12 +115,7 @@ type
   dispname: string;
  end;
  componentnamearty = array of componentnamety;
-{
- moduledockinfoty = record
-  panelname: string;
-  rect: rectty;
- end;
-}
+
  moduleinfoty = record
   filename: msestring;
   filetag: longword;
@@ -141,11 +136,9 @@ type
   readermodified: boolean;
   resolved: boolean;
   hasmenuitem: boolean;
-//  options: moduleoptionsty;
   components: tcomponents;
   designform: tcustommseform;
   designformintf: iformdesigner;
-//  dockinfo: moduledockinfoty;
   referencedmodules: stringarty;
   loadingstream: tstream;
  end;
@@ -2334,6 +2327,9 @@ begin
  inherited;
  removeitem(pointerarty(fdesigner.fcheckfixups),@info);
  with info do begin
+  if filetag <> 0 then begin
+   sourcefo.filechangenotifyer.removenotification(filename,filetag);
+  end;
   freeandnil(loadingstream);
   freeandnil(methods);
   freeandnil(components);
@@ -4678,8 +4674,8 @@ begin //loadformfile
      begingloballoading;
      try
       try
-       moduleinfo:= fmodules.newmodule(isinherited,filename,moduleclassname1,modulename,
-       designmoduleclassname);
+       moduleinfo:= fmodules.newmodule(isinherited,filename,moduleclassname1,
+                                             modulename,designmoduleclassname);
        fmodules.add(moduleinfo);
        result:= @moduleinfo.info;
        result^.loadingstream:= stream2;
