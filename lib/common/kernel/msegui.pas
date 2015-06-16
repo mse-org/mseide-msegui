@@ -18142,7 +18142,8 @@ var
  info: mouseeventinfoty;
 begin
  if fmousecapturewidget <> sender then begin
-  if fmousecapturewidget <> nil then begin
+  if (fmousecapturewidget <> nil) and 
+            not (csdestroying in fmousecapturewidget.componentstate) then begin
    widget:= fmousecapturewidget;
    fmousecapturewidget:= sender;
    fillchar(info,sizeof(info),0);
