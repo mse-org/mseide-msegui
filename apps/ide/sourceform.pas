@@ -504,33 +504,7 @@ begin
   fgdbpage:= nil;
  end;
 end;
-{
-function encodemoduledock(const ainfo: moduledockinfoty): string;
-begin
- with ainfo do begin
-  if panelname <> '' then begin
-   result:= encoderecord([panelname,rect.x,rect.y,rect.cx,rect.cy]);
-  end
-  else begin
-   result:= '';
-  end;
- end;
-end;
 
-function decodemoduledock(const atext: string; 
-                                    var ainfo: moduledockinfoty): boolean;
-                                        //true if ok
-begin
- with ainfo do begin
-  result:= decoderecord(atext,[@panelname,@rect.x,@rect.y,
-                             @rect.cx,@rect.cy],'siiii');
-  if not result then begin
-   panelname:= '';
-   rect:= nullrect;
-  end;
- end;
-end;
-}
 procedure tsourcefo.updatestat(const statfiler: tstatfiler);
 var
  int1: integer;
@@ -754,7 +728,7 @@ end;
 function modulecanchangenotify(const amodule: pmoduleinfoty;
                                        const info: filechangeinfoty): boolean;
 begin
- result:= false;
+ result:= (info.changed - [fc_force,fc_accesstime] <> []);
 end;
 
 procedure tsourcefo.onfilechanged(const sender: tfilechangenotifyer; 
@@ -1053,13 +1027,7 @@ end;
 procedure tsourcefo.saveactivepage(const newname: filenamety = '');
 begin
  if activepage <> nil then begin
-//  if newname <> '' then begin
-//   filechangenotifyer.removenotification(activepage.filepath);
-//  end;
   activepage.save(newname);
-//  if newname <> '' then begin
-//   filechangenotifyer.addnotification(activepage.filepath,activepage.filetag);
-//  end;
  end;
 end;
 

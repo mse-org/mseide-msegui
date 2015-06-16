@@ -5022,6 +5022,9 @@ begin
  with modulepo^ do begin
   createbackupfile(afilename,filename,
                           backupcreated,projectoptions.e.backupfilecount);
+  if createdatafile and (filetag <> 0) then begin
+   sourcefo.filechangenotifyer.removenotification(filename,filetag);
+  end;
   stream1:= tmemorystream.Create;
   try
    writemodule(modulepo,stream1);
@@ -5044,6 +5047,10 @@ begin
     end;
    end;
    if createdatafile then begin
+    if filetag = 0 then begin
+     filetag:= sourcefo.newfiletag;
+    end;
+    sourcefo.filechangenotifyer.addnotification(filename,filetag,false);
     formtexttoobjsource(afilename,moduleclassname,'',fobjformat);
    end;
   finally
