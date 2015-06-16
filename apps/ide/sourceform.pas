@@ -112,6 +112,7 @@ type
    fpagedestroying: integer;
    popuprow: integer;
    fallsaved: boolean;
+   flayoutstream: ttextstream;
    function geteditpositem(const index: integer): msestring;
    procedure seteditposcount(const count: integer);
    procedure  seteditpositem(const index: integer; const avalue: msestring);
@@ -485,6 +486,7 @@ begin
  hidesourcehint;
  inherited;
  fnaviglist.Free;
+ flayoutstream.free;
 end;
 
 function tsourcefo.hidesourcehint: boolean;
@@ -736,6 +738,10 @@ begin
     po1:= designer.modules.itempo[int1];
     with po1^ do begin
      if filechanged then begin
+      if flayoutstream = nil then begin
+       flayoutstream:= ttextstream.create();
+       mainfo.savewindowlayout(flayoutstream);
+      end;
       filechanged:= false;
       if ask(filename,modified) then begin
        fna1:= filename;
@@ -753,9 +759,17 @@ begin
         po1:= designer.loadformfile(fna1,false);
        end;
        po1^.modified:= true;
-       mainfo.sourcechanged(nil);
       end;
      end;
+    end;
+   end;
+   if flayoutstream <> nil then begin
+    try
+     flayoutstream.position:= 0;
+     mainfo.loadwindowlayout(flayoutstream);
+     mainfo.sourcechanged(nil);
+    finally
+     freeandnil(flayoutstream);
     end;
    end;
   finally

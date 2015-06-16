@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2015 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -145,7 +145,8 @@ type
                       const rights: filerightsty = defaultfilerights); overload;
    constructor createtransaction(const afilename: filenamety;
                       rights: filerightsty = defaultfilerights); overload;
-   constructor createtempfile(const prefix: filenamety; out afilename: filenamety);
+   constructor createtempfile(const prefix: filenamety; 
+                                                  out afilename: filenamety);
    constructor create(ahandle: integer); overload; virtual; //allways called
    constructor create; overload; 
                                   //memorystream

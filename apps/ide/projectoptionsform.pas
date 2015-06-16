@@ -1775,20 +1775,19 @@ begin
   projectoptionstofont(textpropertyfont);
 
   if not iswriter then begin
-   if guitemplatesmo.sysenv.getintegervalue(int1,ord(env_vargroup),1,6) then begin
+   if guitemplatesmo.sysenv.getintegervalue(int1,
+                                             ord(env_vargroup),1,6) then begin
     o.macrogroup:= int1-1;
    end;
    expandprojectmacros;
    projecttree.updatelist;
   end;
 
-//  formdesigner.updatestat(statfiler,false);
   beginpanelplacement();
   try
    sourcefo.updatestat(statfiler);   //needs actual fontalias
    setsection('layout');
    mainfo.projectstatfile.updatestat('windowlayout',statfiler);
- //  sourcefo.updatestat(statfiler);   //needs actual fontalias
   finally
    endpanelplacement();
   end;

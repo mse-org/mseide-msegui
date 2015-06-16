@@ -33,7 +33,7 @@ uses
  msedispwidgets,msedataedits,msestat,msestatfile,msemenus,msebitmap,msetoolbar,
  msegrids,msefiledialog,msetypes,sourcepage,msetabs,msedesignintf,msedesigner,
  classes,mclasses,mseclasses,msegraphutils,typinfo,msedock,sysutils,msesysenv,
- msemacros,msestrings,msepostscriptprinter,msegraphics,mseglob,
+ msemacros,msestrings,msepostscriptprinter,msegraphics,mseglob,msestream,
  mseprocmonitorcomp,msesystypes,mserttistat,msedatanodes,mseedit,mseifiglob,
  mselistbrowser,projecttreeform,msepipestream,msestringcontainer,msesys,
  msewidgets;
@@ -95,7 +95,7 @@ type
   makeerror,          //48 Make ***ERROR***
   makeok,             //49 Make OK.
   str_sourcechanged,  //50 Source has changed, do you wish to remake project?
-  loadwindowlayout,   //51 Load Window Layout
+  str_loadwindowlayout,   //51 Load Window Layout
   dockingarea         //52 Docking Area
  );
 
@@ -310,6 +310,9 @@ type
    function openproject(const aname: filenamety;
                              const ascopy: boolean = false): boolean;
    procedure saveproject(aname: filenamety; const ascopy: boolean = false);
+   procedure savewindowlayout(const astream: ttextstream);
+   procedure loadwindowlayout(const astream: ttextstream);
+
    procedure sourcechanged(const sender: tsourcepage);
    function opensource(const filekind: filekindty; const addtoproject: boolean;
                         const aactivate: boolean = true;
@@ -375,7 +378,7 @@ uses
  skeletons,msedatamodules,mseact,
  mseformdatatools,mseshapes,msefileutils,mseeditglob,
  findinfileform,formdesigner,sourceupdate,actionsmodule,programparametersform,
- objectinspector,msesysutils,msestream,cpuform,disassform,
+ objectinspector,msesysutils,cpuform,disassform,
  panelform,watchpointsform,threadsform,targetconsole,
  debuggerform,componentpaletteform,componentstore,
  messageform,msesettings,mseintegerenter,symbolform
@@ -2859,30 +2862,63 @@ begin
  end;
 end;
 
+procedure tmainfo.savewindowlayout(const astream: ttextstream);
+var
+ statwriter: tstatwriter;
+begin
+ statwriter:= tstatwriter.create(astream,ce_utf8n);
+ try
+  statwriter.setsection('breakpoints');
+  beginpanelplacement();
+  try
+   panelform.updatestat(statwriter);
+   statwriter.setsection('layout');
+   mainfo.projectstatfile.updatestat('windowlayout',statwriter);
+  finally
+   endpanelplacement();
+  end;
+ finally
+  statwriter.free;
+ end;
+end;
 
-procedure tmainfo.loadwindowlayoutexe(const sender: TObject);
+procedure tmainfo.loadwindowlayout(const astream: ttextstream);
 var
  statreader: tstatreader;
 begin
- if filedialog(windowlayoutfile,[fdo_checkexist],c[ord(loadwindowlayout)],
+ statreader:= tstatreader.create(astream,ce_utf8n);
+ try
+  beginpanelplacement();
+  statreader.setsection('breakpoints');
+  panelform.updatestat(statreader);
+  statreader.setsection('layout');
+  projectstatfile.options:= projectstatfile.options + 
+                                          [sfo_nodata,sfo_nooptions];
+  flayoutloading:= true;
+  projectstatfile.readstat('windowlayout',statreader);
+ finally
+  flayoutloading:= false;
+  projectstatfile.options:= projectstatfile.options -
+                                          [sfo_nodata,sfo_nooptions];
+  statreader.free;
+  endpanelplacement();
+ end;
+end;
+
+procedure tmainfo.loadwindowlayoutexe(const sender: TObject);
+var
+ str1: ttextstream;
+begin
+ if filedialog(windowlayoutfile,[fdo_checkexist],c[ord(str_loadwindowlayout)],
           [c[ord(projectfiles)],c[ord(str_allfiles)]],['*.prj','*'],'prj',
           nil,nil,nil,[fa_all],[fa_hidden],
-                        @windowlayouthistory) = mr_ok then begin          
-  statreader:= tstatreader.create(windowlayoutfile,ce_utf8n);
-  try
-   statreader.setsection('breakpoints');
-   panelform.updatestat(statreader);
-   statreader.setsection('layout');
-   projectstatfile.options:= projectstatfile.options + 
-                                           [sfo_nodata,sfo_nooptions];
-   flayoutloading:= true;
-   projectstatfile.readstat('windowlayout',statreader);
-  finally
-   flayoutloading:= false;
-   projectstatfile.options:= projectstatfile.options -
-                                           [sfo_nodata,sfo_nooptions];
-   statreader.free;
-  end;
+                        @windowlayouthistory) = mr_ok then begin
+ str1:= ttextstream.create(windowlayoutfile);
+ try
+  loadwindowlayout(str1);
+ finally
+  str1.destroy();
+ end;
  end;
 end;
 

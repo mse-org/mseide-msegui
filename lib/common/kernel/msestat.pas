@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2015 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -147,10 +147,6 @@ type
    function readstring(const name: msestring; const default: string): string;
    function readbinarystring(const name: msestring; const default: string): string;
    function readmsestring(const name: msestring; const default: msestring): msestring;
-  {   
-   function readmsestrings(const name: msestring; const default: msestring): msestring;
-                         //handles linebreaks, 'ar' is multiline name extension
-  }
    procedure readdatalist(const name: msestring; const value: tdatalist);
    function readarray(const name: msestring; const default: stringarty): stringarty; overload;
    function readarray(const name: msestring; const default: msestringarty): msestringarty; overload;
@@ -191,7 +187,7 @@ type
    procedure writelistval(const avalue: msestring);
   public
    constructor create(const astream: ttextstream;
-                              const aencoding: charencodingty = ce_utf8n); overload;
+                     const aencoding: charencodingty = ce_utf8n); overload;
    constructor create(const filename: filenamety; 
                               const aencoding: charencodingty = ce_utf8n;
                               const atransaction: boolean = true); overload;
