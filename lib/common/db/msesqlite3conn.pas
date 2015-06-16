@@ -46,7 +46,8 @@ type
    fparams: ansistring;
  end;
  
- sqliteoptionty = (slo_transactions,slo_designtransactions);
+ sqliteoptionty = (slo_transactions,slo_designtransactions,
+                   slo_negboolean); //boolean true = -1 instead of 1
  sqliteoptionsty = set of sqliteoptionty;
  
  tsqlite3connection = class(tcustomsqlconnection,idbcontroller,iblobconnection)
@@ -527,7 +528,7 @@ begin
        end;
        ftboolean: begin
         i1:= asinteger;
-        if i1 <> 0 then begin
+        if (i1 <> 0) and not (slo_negboolean in foptions) then begin
          i1:= 1;
         end;
         checkerror(sqlite3_bind_int(fstatement,int1+1,i1));
