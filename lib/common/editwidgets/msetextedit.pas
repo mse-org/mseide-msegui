@@ -184,6 +184,7 @@ type
    {$endif}
    procedure setparentgridwidget(const intf: igridwidget);
    procedure childdataentered(const sender: igridwidget); virtual;
+   procedure childfocused(const sender: igridwidget); virtual;
 
     //istatfile
    procedure dostatread(const reader: tstatreader);
@@ -2373,6 +2374,11 @@ begin
 end;
 
 procedure tcustomtextedit.childdataentered(const sender: igridwidget);
+begin
+ //dummy
+end;
+
+procedure tcustomtextedit.childfocused(const sender: igridwidget);
 begin
  //dummy
 end;

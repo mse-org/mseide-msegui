@@ -203,6 +203,7 @@ type
   {$endif}
    procedure setparentgridwidget(const intf: igridwidget);
    procedure childdataentered(const sender: igridwidget); virtual;
+   procedure childfocused(const sender: igridwidget); virtual;
 
    procedure formaterror(const quiet: boolean);
    procedure rangeerror(const min,max; const quiet: boolean);
@@ -1627,7 +1628,10 @@ end;
 
 procedure tcustomdataedit.dofocus;
 begin
- valuetotext;
+ if fparentintf <> nil then begin
+  fparentintf.childfocused(igridwidget(self));
+ end;
+ valuetotext();
  inherited;
 end;
 
@@ -2952,6 +2956,11 @@ begin
 end;
 
 procedure tcustomdataedit.childdataentered(const sender: igridwidget);
+begin
+ //dummy
+end;
+
+procedure tcustomdataedit.childfocused(const sender: igridwidget);
 begin
  //dummy
 end;

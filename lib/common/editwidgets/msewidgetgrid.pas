@@ -109,6 +109,7 @@ type
   procedure setvaluedata(const source);
   procedure getvaluedata(out dest);
   procedure childdataentered(const sender: igridwidget);
+  procedure childfocused(const sender: igridwidget);
  end;
 
  twidgetcol = class(tdatacol,iwidgetgrid,idatalistclient)

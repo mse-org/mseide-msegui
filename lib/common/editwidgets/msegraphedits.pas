@@ -147,6 +147,7 @@ type
    procedure loaded; override;
    procedure internalcreateframe; override;
    procedure setenabled(const avalue: boolean); override;
+   procedure dofocus; override;
 
    function getgridintf: iwidgetgrid;
    procedure checkgrid;
@@ -209,6 +210,7 @@ type
    procedure fontchanged; override;
    procedure setparentgridwidget(const intf: igridwidget);
    procedure childdataentered(const sender: igridwidget); virtual;
+   procedure childfocused(const sender: igridwidget); virtual;
 
    //istatfile
    procedure dostatread(const reader: tstatreader);
@@ -1771,6 +1773,15 @@ begin
  {$endif}
  end;
 end;
+
+procedure tgraphdataedit.dofocus;
+begin
+ if fparentintf <> nil then begin
+  fparentintf.childfocused(igridwidget(self));
+ end;
+ inherited;
+end;
+
 {
 function tgraphdataedit.edited: boolean;
 begin
@@ -2312,6 +2323,11 @@ begin
 end;
 
 procedure tgraphdataedit.childdataentered(const sender: igridwidget);
+begin
+ //dummy
+end;
+
+procedure tgraphdataedit.childfocused(const sender: igridwidget);
 begin
  //dummy
 end;

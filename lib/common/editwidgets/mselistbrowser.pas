@@ -485,6 +485,7 @@ type
   valueindex: int32;
   editwidget: twidget;
   gridintf: igridwidget;
+  visible: boolean;
  end;
  pvalueeditinfoty = ^valueeditinfoty;
  
@@ -564,16 +565,17 @@ type
                                       var asize: sizety); override;
    procedure calclayout(const asize: sizety; 
                                        out alayout: listitemlayoutinfoty);
+   function finddataedits(aitem: tlistitem; out ainfos: recvaluearty): boolean;
+   function updateeditwidget(): boolean; //true if editwidgetactivated
+   procedure childdataentered(const sender: igridwidget); override;
+   procedure childfocused(const sender: igridwidget); override;
+
   {$ifdef mse_with_ifi}
     //iifidatalink
    procedure updateifigriddata(const sender: tobject;
                                            const alist: tdatalist); override;
   {$endif}
   
-   function finddataedits(aitem: tlistitem; out ainfos: recvaluearty): boolean;
-   function updateeditwidget(): boolean; //true if editwidgetactivated
-   procedure childdataentered(const sender: igridwidget); override;
-
     //iedit
    function locatecount: integer; override;        //number of locate values
    function getkeystring(const index: integer): msestring; override;
@@ -2872,6 +2874,7 @@ function titemedit.finddataedits(aitem: tlistitem;
                           out ainfos: recvaluearty): boolean;
 var
  i1,i2: int32;
+ po1: precvaluety;
 begin
  result:= false;
  if (fvalueedits.count > 0) and 
@@ -2879,28 +2882,28 @@ begin
   with irecordvaluefield(trecordlistedititem(aitem)) do begin
    getvalueinfo(ainfos);
    for i1:= 0 to high(ainfos) do begin
-    with ainfos[i1] do begin
-     if datatype <> dl_none then begin
-      if (valueindex >= 0) then begin
-       for i2:= 0 to fvalueedits.count - 1 do begin
-        with tvalueedititem(fvalueedits.fitems[i2]) do begin
-         if (finfo.datatype = datatype) and 
-                              (finfo.valueindex = valueindex) then begin
-          dummypointer:= @finfo; //check index match
-          result:= true;
-          break;
-         end;
+    po1:= @ainfos[i1];
+    po1^.dummypointer:= nil;
+    if po1^.datatype <> dl_none then begin
+     if (po1^.valueindex >= 0) then begin
+      for i2:= 0 to fvalueedits.count - 1 do begin
+       with tvalueedititem(fvalueedits.fitems[i2]) do begin
+        if (finfo.datatype = po1^.datatype) and 
+                             (finfo.valueindex = po1^.valueindex) then begin
+         po1^.dummypointer:= @finfo; //check index match
+         result:= true;
+         break;
         end;
        end;
       end;
-      if i1 < 0 then begin
-       for i2:= 0 to fvalueedits.count - 1 do begin
-        with tvalueedititem(fvalueedits.fitems[i2]) do begin
-         if finfo.datatype = datatype then begin
-          dummypointer:= @finfo;
-          result:= true;
-          break;
-         end;
+     end;
+     if po1^.dummypointer = nil then begin
+      for i2:= 0 to fvalueedits.count - 1 do begin
+       with tvalueedititem(fvalueedits.fitems[i2]) do begin
+        if finfo.datatype = po1^.datatype then begin
+         po1^.dummypointer:= @finfo; //check any match
+         result:= true;
+         break;
         end;
        end;
       end;
@@ -2911,34 +2914,58 @@ begin
  end;
 end;
 
-function titemedit.updateeditwidget(): boolean; //true if editwidgetactivated
+function titemedit.updateeditwidget(): boolean; 
+                                        //true if editwidgetactivated
 var
  infos1: recvaluearty;
+ i1: int32;
+ bo1: boolean;
 begin
  result:= finddataedits(fvalue,infos1);
  if result then begin
-  with infos1[0] do begin
-   if dummypointer <> nil then begin
-    with pvalueeditinfoty(dummypointer)^ do begin
-     if factiveinfo.editwidget <> editwidget then begin
-      if factiveinfo.editwidget <> nil then begin
-       factiveinfo.editwidget.visible:= false;
+  for i1:= 0 to fvalueedits.count - 1 do begin
+   with tvalueedititem(fvalueedits.fitems[i1]) do begin
+    finfo.visible:= false;
+   end;
+  end;
+  bo1:= false;
+  for i1:= 0 to high(infos1) do begin
+   with infos1[i1] do begin
+    if dummypointer <> nil then begin
+     with pvalueeditinfoty(dummypointer)^ do begin
+      if gridintf <> nil then begin
+       visible:= true;
+       gridintf.setvaluedata(valuead^);
+       editwidget.visible:= true;
+       if not bo1 then begin
+        bo1:= true;
+        factiveinfo:= pvalueeditinfoty(dummypointer)^;
+        if focused then begin 
+         editwidget.setfocus();
+        end;
+       end;
       end;
      end;
     end;
-    factiveinfo:= pvalueeditinfoty(dummypointer)^;
-    factiveinfo.gridintf.setvaluedata(valuead^);
-    factiveinfo.editwidget.visible:= true;
-    if focused then begin 
-     factiveinfo.editwidget.setfocus;
+   end;
+  end;
+  for i1:= 0 to fvalueedits.count - 1 do begin
+   with tvalueedititem(fvalueedits.fitems[i1]) do begin
+    if not finfo.visible and (finfo.editwidget <> nil) then begin
+     finfo.editwidget.visible:= false;
     end;
    end;
   end;
  end
  else begin
-  if factiveinfo.editwidget <> nil then begin
-   factiveinfo.editwidget.visible:= false;
-   fillchar(factiveinfo,sizeof(factiveinfo),0);
+  fillchar(factiveinfo,sizeof(factiveinfo),0);
+  for i1:= 0 to fvalueedits.count - 1 do begin
+   with tvalueedititem(fvalueedits.fitems[i1]) do begin
+    finfo.visible:= false;
+    if finfo.editwidget <> nil then begin
+     finfo.editwidget.visible:= false;
+    end;
+   end;
   end;
  end;
 end;
@@ -2947,21 +2974,24 @@ procedure titemedit.drawcell(const canvas: tcanvas);
 var
  databefore: pointer;
  infos1: recvaluearty;
+ i1: int32;
 begin
  with cellinfoty(canvas.drawinfopo^) do begin
   doextendimage(canvas.drawinfopo,flayoutinfocell.imageextra);
   flayoutinfocell.rowindex:= cell.row;
   flayoutinfocell.textflags:= textflags;
   if finddataedits(tlistitem(datapo^),infos1) then begin
-   with infos1[0] do begin
-    if dummypointer <> nil then begin
-     databefore:= datapo;
-     with pvalueeditinfoty(dummypointer)^ do begin
-      datapo:= valuead;
-      gridintf.drawcell(canvas);
+   databefore:= datapo;
+   for i1:= 0 to high(infos1) do begin
+    with infos1[i1] do begin
+     if dummypointer <> nil then begin
+      with pvalueeditinfoty(dummypointer)^ do begin
+       datapo:= valuead;
+       gridintf.drawcell(canvas);
+      end;
      end;
-     datapo:= databefore;
     end;
+    datapo:= databefore;
    end;
   end
   else begin
@@ -2977,6 +3007,31 @@ begin
   if fvalue is trecordlistedititem then begin
    with irecordvaluefield(trecordlistedititem(fvalue)) do begin
     setvalue(factiveinfo.datatype,factiveinfo.valueindex,@sender.getvaluedata);
+   end;
+  end;
+ end;
+end;
+
+procedure titemedit.childfocused(const sender: igridwidget);
+var
+ infos1: recvaluearty;
+ i1: int32;
+ widget1: twidget;
+begin
+ if fvalue is trecordlistedititem then begin
+  if finddataedits(tlistitem(fvalue),infos1) then begin
+   widget1:= sender.getwidget;
+   for i1:= 0 to high(infos1) do begin
+    with infos1[i1] do begin
+     if (dummypointer <> nil) then begin
+      with pvalueeditinfoty(dummypointer)^ do begin
+       if editwidget = widget1 then begin
+        factiveinfo:= pvalueeditinfoty(dummypointer)^;
+        break;
+       end;
+      end;
+     end;
+    end;
    end;
   end;
  end;

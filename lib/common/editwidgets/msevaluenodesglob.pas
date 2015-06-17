@@ -19,6 +19,7 @@ type
   valuead: pointer;
   dummypointer: pointer; //can be used by clients, inited with nil
  end;
+ precvaluety = ^recvaluety;
  recvaluearty = array of recvaluety;
  
 implementation
