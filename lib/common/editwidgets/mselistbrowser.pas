@@ -2875,8 +2875,8 @@ var
 begin
  result:= false;
  if (fvalueedits.count > 0) and 
-         (aitem is trecordvaluelistedititem) then begin
-  with irecordvaluefield(trecordvaluelistedititem(aitem)) do begin
+         (aitem is trecordlistedititem) then begin
+  with irecordvaluefield(trecordlistedititem(aitem)) do begin
    getvalueinfo(ainfos);
    for i1:= 0 to high(ainfos) do begin
     with ainfos[i1] do begin
