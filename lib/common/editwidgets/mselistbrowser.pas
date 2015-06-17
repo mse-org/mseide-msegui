@@ -2974,8 +2974,8 @@ end;
 procedure titemedit.childdataentered(const sender: igridwidget);
 begin
  if sender = factiveinfo.gridintf then begin
-  if fvalue is trecordvaluelistedititem then begin
-   with irecordvaluefield(trecordvaluelistedititem(fvalue)) do begin
+  if fvalue is trecordlistedititem then begin
+   with irecordvaluefield(trecordlistedititem(fvalue)) do begin
     setvalue(factiveinfo.datatype,factiveinfo.valueindex,@sender.getvaluedata);
    end;
   end;
