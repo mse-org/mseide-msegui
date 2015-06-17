@@ -110,8 +110,14 @@ type
    function getinvisibleitems: tintegerset; override;
  end;
 
+ tvalueeditpropertyeditor = class(tclasselementeditor)
+  public
+   procedure navigevent(); override;
+ end;
+ 
  tvalueeditspropertyeditor = class(tpersistentarraypropertyeditor)
   protected
+   function geteditorclass: propertyeditorclassty; override;
    function itemgetvalue(const sender: tarrayelementeditor): msestring;
                                                                    override;
 //   function geteditorclass: propertyeditorclassty; override;
@@ -369,6 +375,22 @@ begin
   end
   else begin
    result:= '<>';
+  end;
+ end;
+end;
+
+function tvalueeditspropertyeditor.geteditorclass: propertyeditorclassty;
+begin
+ result:= tvalueeditpropertyeditor;
+end;
+
+{ tvalueeditpropertyeditor }
+
+procedure tvalueeditpropertyeditor.navigevent;
+begin
+ with tvalueedititem(getpointervalue()) do begin
+  if editwidget <> nil then begin
+   editwidget.bringtofront();
   end;
  end;
 end;

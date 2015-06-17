@@ -183,7 +183,8 @@ type
    procedure dopopup(var amenu: tpopupmenu;  const atransientfor: twidget;
                 var mouseinfo: mouseeventinfoty); virtual;
    procedure dokeydown(var ainfo: keyeventinfoty); virtual;
-   procedure edit; virtual;
+   procedure edit(); virtual;
+   procedure navigevent(); virtual;
    property typinfo: ptypeinfo read gettypinfo;
    property count: integer read getcount;
    property expanded: boolean read getexpanded write setexpanded;
@@ -521,6 +522,7 @@ type
    function getvalue: msestring; override;
    function getvalues: msestringarty; override;
    procedure setvalue(const value: msestring); override;
+   procedure navigevent(); override;
    function method: tmethod;
  end;
 
@@ -972,7 +974,7 @@ uses
  mseformatbmpicoread{$ifdef FPC},mseformatjpgread,mseformatpngread,
  mseformatpnmread,mseformattgaread,mseformatxpmread,mseformattiffread{$endif},
  msestat,msestatfile,msefileutils,
- msedesigner,variants,mseeditglob,msepropertyeditorsmodule;
+ msedesigner,variants,mseeditglob,msepropertyeditorsmodule,objectinspector;
 
 const
  methodsortlevel = 100;
@@ -2237,9 +2239,14 @@ begin
  end;
 end;
 
-function tpropertyeditor.gettypinfo: ptypeinfo;
+function tpropertyeditor.gettypinfo(): ptypeinfo;
 begin
  result:= ftypeinfo;
+end;
+
+procedure tpropertyeditor.navigevent();
+begin
+ //dummy
 end;
 
 { tordinalpropertyeditor }
@@ -2482,6 +2489,11 @@ end;
 function tmethodpropertyeditor.getdefaultstate: propertystatesty;
 begin
  result:= [ps_valuelist,ps_sortlist];
+end;
+
+procedure tmethodpropertyeditor.navigevent;
+begin
+ objectinspectorfo.showmethodsource(self);
 end;
 
 { tsetpropertyeditor }

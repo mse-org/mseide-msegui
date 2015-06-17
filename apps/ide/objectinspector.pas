@@ -156,7 +156,6 @@ type
    function candragsource(const apos: pointty; var row: integer): boolean;
    function candragdest(const apos: pointty; var row: integer): boolean;
    procedure rereadprops;
-   procedure showmethodsource(const aeditor: tmethodpropertyeditor);
   protected
    procedure updatecompselection;
    procedure updatedefaultstate(const aindex: integer);
@@ -175,6 +174,7 @@ type
    destructor destroy; override;
    procedure refresh;
    procedure clickedcomponentchanged(const aclickedcomp: tcomponent);
+   procedure showmethodsource(const aeditor: tmethodpropertyeditor);
 
    //idesignnotification
    procedure itemdeleted(const adesigner: idesigner;
@@ -567,7 +567,8 @@ begin
  node:= tpropertyvalue.create(sender);
 end;
 
-procedure tobjectinspectorfo.showmethodsource(const aeditor: tmethodpropertyeditor);
+procedure tobjectinspectorfo.showmethodsource(
+                                   const aeditor: tmethodpropertyeditor);
 begin
  if aeditor.method.data <> nil then begin
   sourcefo.showsourcepos(sourceupdater.findmethodpos(aeditor.method,true),true);
@@ -579,10 +580,11 @@ procedure tobjectinspectorfo.valuesonmouseevent(const sender: twidget;
 begin
  if sender.isdblclick(info) then begin
   with tpropertyitem(props.item) do begin
-   if feditor is tmethodpropertyeditor then begin
-    if not values.edited or values.checkvalue then begin
-     showmethodsource(tmethodpropertyeditor(feditor));
-    end;
+//   if feditor is tmethodpropertyeditor then begin
+   if not values.edited or values.checkvalue then begin
+    feditor.valueeditor.navigevent();
+//     showmethodsource(tmethodpropertyeditor(feditor));
+//    end;
    end;
   end;
  end;
@@ -1376,9 +1378,12 @@ begin
     edit;
    end
    else begin
+    feditor.valueeditor.navigevent();
+   {
     if (feditor is tmethodpropertyeditor) then begin
      showmethodsource(tmethodpropertyeditor(feditor));
     end;
+   }
    end;
   end;
  end;
