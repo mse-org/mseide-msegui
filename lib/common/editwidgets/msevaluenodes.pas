@@ -63,17 +63,23 @@ type
               const aparent: ttreelistitem = nil); override;
  end;
 
- trecordvaluelistedititem = class(tlistedititem,irecordvaluefield)
+ trecordlistedititem = class(tlistedititem,irecordvaluefield)
   private
   protected
-   fvalueindex: int32;
     //irecordvaluefield
+   procedure getvalueinfo(out avalues: recvaluearty); virtual;
    function getfieldtext(const fieldindex: integer): msestring; virtual;
    procedure setfieldtext(const fieldindex: integer;
                                               var avalue: msestring); virtual;
-   procedure getvalueinfo(out avalues: recvaluearty); virtual;
    procedure setvalue(const atype: listdatatypety;
           const aindex: int32; const getvaluemethod: getvaluemethodty); virtual;
+  public
+ end;
+ 
+ trecordvaluelistedititem = class(trecordlistedititem)
+  protected
+   fvalueindex: int32;
+   procedure getvalueinfo(out avalues: recvaluearty); override;
   public
    constructor create(const avalueindex: int32 = -1;
                                const aowner: tcustomitemlist = nil); virtual;
@@ -214,7 +220,39 @@ begin
  //dummy
 end;
 
+{ trecordlistedititem }
+
+function trecordlistedititem.getfieldtext(
+              const fieldindex: integer): msestring;
+begin
+ result:= '';
+end;
+
+procedure trecordlistedititem.setfieldtext(const fieldindex: integer;
+               var avalue: msestring);
+begin
+ //dummy
+end;
+
+procedure trecordlistedititem.setvalue(const atype: listdatatypety;
+                  const aindex: int32; const getvaluemethod: getvaluemethodty);
+begin
+ //dummy
+end;
+
+procedure trecordlistedititem.getvalueinfo(out avalues: recvaluearty);
+begin
+ avalues:= nil;
+end;
+
 { trecordvaluelistedititem }
+
+constructor trecordvaluelistedititem.create(const avalueindex: int32;
+               const aowner: tcustomitemlist = nil);
+begin
+ fvalueindex:= avalueindex;
+ create(aowner);
+end;
 
 procedure trecordvaluelistedititem.getvalueinfo(out avalues: recvaluearty);
 begin
@@ -225,31 +263,6 @@ begin
   valuead:= nil;
   dummypointer:= nil;
  end;
-end;
-
-function trecordvaluelistedititem.getfieldtext(
-              const fieldindex: integer): msestring;
-begin
- result:= '';
-end;
-
-procedure trecordvaluelistedititem.setfieldtext(const fieldindex: integer;
-               var avalue: msestring);
-begin
- //dummy
-end;
-
-procedure trecordvaluelistedititem.setvalue(const atype: listdatatypety;
-                  const aindex: int32; const getvaluemethod: getvaluemethodty);
-begin
- //dummy
-end;
-
-constructor trecordvaluelistedititem.create(const avalueindex: int32;
-               const aowner: tcustomitemlist = nil);
-begin
- fvalueindex:= avalueindex;
- create(aowner);
 end;
 
 { tintegervaluelistedititem }
