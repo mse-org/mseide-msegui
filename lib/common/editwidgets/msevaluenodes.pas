@@ -12,7 +12,7 @@ unit msevaluenodes;
 interface
 uses
  mseglob,msestrings,msedatalist,msedatanodes,msebitmap,mselistbrowser,
- msetypes;
+ msetypes,msevaluenodesglob;
 type
  irecordfield = interface(inullinterface)
   function getfieldtext(const fieldindex: integer): msestring;
@@ -21,14 +21,6 @@ type
 
  getvaluemethodty = procedure(out dest) of object;
 
- recvaluety = record
-  datatype: listdatatypety;
-  valueindex: int32;
-  valuead: pointer;
-  dummypointer: pointer; //can be used by clients, inited with nil
- end;
- recvaluearty = array of recvaluety;
- 
  irecordvaluefield = interface(irecordfield)
   procedure getvalueinfo(out avalues: recvaluearty);
   procedure setvalue(const atype: listdatatypety;

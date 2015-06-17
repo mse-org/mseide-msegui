@@ -836,7 +836,8 @@ begin
 // breakpoints.Free;
 end;
 
-procedure tsourcepage.editonmodifiedchanged(const sender: tobject; const value: boolean);
+procedure tsourcepage.editonmodifiedchanged(const sender: tobject;
+                                                         const value: boolean);
 begin
  updatecaption(value);
 end;
