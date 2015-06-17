@@ -2872,36 +2872,44 @@ function titemedit.finddataedit(aitem: tlistitem; out ainfo: valueeditinfoty;
                                                out avaluepo: pointer): boolean;
 var
  i1,i2: int32;
+ ar1: recvaluearty;
 begin
  result:= false;
  if (fvalueedits.count > 0) and 
          (aitem is trecordvaluelistedititem) then begin
   with irecordvaluefield(trecordvaluelistedititem(aitem)) do begin
-   getvalueinfo(ainfo.datatype,ainfo.valueindex,avaluepo);
-   if ainfo.datatype <> dl_none then begin
-    i1:= -1;
-    if (ainfo.valueindex >= 0) then begin
-     for i2:= 0 to fvalueedits.count - 1 do begin
-      with tvalueedititem(fvalueedits.fitems[i2]) do begin
-       if (finfo.datatype = ainfo.datatype) and 
-                            (finfo.valueindex = ainfo.valueindex) then begin
-        i1:= i2;           //check index match
+   getvalueinfo(ar1);
+   if ar1 <> nil then begin
+    with ar1[0] do begin
+     ainfo.datatype:= datatype;
+     ainfo.valueindex:= valueindex;
+     avaluepo:= valuead;
+    end;
+    if ainfo.datatype <> dl_none then begin
+     i1:= -1;
+     if (ainfo.valueindex >= 0) then begin
+      for i2:= 0 to fvalueedits.count - 1 do begin
+       with tvalueedititem(fvalueedits.fitems[i2]) do begin
+        if (finfo.datatype = ainfo.datatype) and 
+                             (finfo.valueindex = ainfo.valueindex) then begin
+         i1:= i2;           //check index match
+         break;
+        end;
+       end;
+      end;
+     end;
+     if i1 < 0 then begin
+      for i2:= 0 to fvalueedits.count - 1 do begin
+       if tvalueedititem(fvalueedits.fitems[i2]).finfo.datatype = 
+                                                       ainfo.datatype then begin
+        i1:= i2;              //check any match
         break;
        end;
       end;
      end;
     end;
-    if i1 < 0 then begin
-     for i2:= 0 to fvalueedits.count - 1 do begin
-      if tvalueedititem(fvalueedits.fitems[i2]).finfo.datatype = 
-                                                      ainfo.datatype then begin
-       i1:= i2;              //check any match
-       break;
-      end;
-     end;
-    end;
-    end;
-   result:= i1 >= 0;
+    result:= i1 >= 0;
+   end;
   end;
  end;
  if result then begin

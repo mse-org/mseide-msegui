@@ -21,9 +21,16 @@ type
 
  getvaluemethodty = procedure(out dest) of object;
 
+ recvaluety = record
+  datatype: listdatatypety;
+  valueindex: int32;
+  valuead: pointer;
+  dummypointer: pointer; //can be used by clients, inited with nil
+ end;
+ recvaluearty = array of recvaluety;
+ 
  irecordvaluefield = interface(irecordfield)
-  procedure getvalueinfo(out atype: listdatatypety; out aindex: int32;
-                                                        out avaluead: pointer);
+  procedure getvalueinfo(out avalues: recvaluearty);
   procedure setvalue(const atype: listdatatypety;
                const aindex: int32; const getvaluemethod: getvaluemethodty);
  end;
@@ -72,8 +79,7 @@ type
    function getfieldtext(const fieldindex: integer): msestring; virtual;
    procedure setfieldtext(const fieldindex: integer;
                                               var avalue: msestring); virtual;
-   procedure getvalueinfo(out atype: listdatatypety; out aindex: int32;
-                                                out avaluead: pointer); virtual;
+   procedure getvalueinfo(out avalues: recvaluearty); virtual;
    procedure setvalue(const atype: listdatatypety;
           const aindex: int32; const getvaluemethod: getvaluemethodty); virtual;
   public
@@ -88,8 +94,7 @@ type
    fvalue: int32;
    procedure setvalue(const avalue: int32);
   protected
-   procedure getvalueinfo(out atype: listdatatypety;
-                        out aindex: int32; out avaluead: pointer); override;
+   procedure getvalueinfo(out avalues: recvaluearty); override;
    procedure setvalue(const atype: listdatatypety;
        const aindex: int32; const getvaluemethod: getvaluemethodty); override;
   public
@@ -110,8 +115,7 @@ type
    fvalue: realty;
    procedure setvalue(const avalue: realty);
   protected
-   procedure getvalueinfo(out atype: listdatatypety;
-                        out aindex: int32; out avaluead: pointer); override;
+   procedure getvalueinfo(out avalues: recvaluearty); override;
    procedure setvalue(const atype: listdatatypety;
        const aindex: int32; const getvaluemethod: getvaluemethodty); override;
   public
@@ -123,8 +127,7 @@ type
    fvalue: tdatetime;
    procedure setvalue(const avalue: tdatetime);
   protected
-   procedure getvalueinfo(out atype: listdatatypety;
-                        out aindex: int32; out avaluead: pointer); override;
+   procedure getvalueinfo(out avalues: recvaluearty); override;
    procedure setvalue(const atype: listdatatypety;
        const aindex: int32; const getvaluemethod: getvaluemethodty); override;
   public
@@ -136,8 +139,7 @@ type
    fvalue: msestring;
    procedure setvalue(const avalue: msestring);
   protected
-   procedure getvalueinfo(out atype: listdatatypety;
-                        out aindex: int32; out avaluead: pointer); override;
+   procedure getvalueinfo(out avalues: recvaluearty); override;
    procedure setvalue(const atype: listdatatypety;
        const aindex: int32; const getvaluemethod: getvaluemethodty); override;
   public
@@ -145,7 +147,9 @@ type
  end;
    
 implementation
-
+uses
+ msearrayutils;
+ 
 { trecordfielditem }
 
 constructor trecordfielditem.create(const intf: irecordfield;
@@ -220,12 +224,15 @@ end;
 
 { trecordvaluelistedititem }
 
-procedure trecordvaluelistedititem.getvalueinfo(out atype: listdatatypety;
-                                   out aindex: int32; out avaluead: pointer);
+procedure trecordvaluelistedititem.getvalueinfo(out avalues: recvaluearty);
 begin
- atype:= dl_none;
- aindex:= fvalueindex;
- avaluead:= nil;
+ allocuninitedarray(1,sizeof(recvaluety),avalues);
+ with avalues[0] do begin
+  datatype:= dl_none;
+  valueindex:= fvalueindex;
+  valuead:= nil;
+  dummypointer:= nil;
+ end;
 end;
 
 function trecordvaluelistedititem.getfieldtext(
@@ -263,12 +270,13 @@ begin
  end;
 end;
 
-procedure tintegervaluelistedititem.getvalueinfo(out atype: listdatatypety;
-               out aindex: int32; out avaluead: pointer);
+procedure tintegervaluelistedititem.getvalueinfo(out avalues: recvaluearty);
 begin
  inherited;
- atype:= dl_integer;
- avaluead:= @fvalue;
+ with avalues[0] do begin
+  datatype:= dl_integer;
+  valuead:= @fvalue;
+ end;
 end;
 
 procedure tintegervaluelistedititem.setvalue(const atype: listdatatypety;
@@ -307,12 +315,13 @@ begin
  end;
 end;
 
-procedure trealvaluelistedititem.getvalueinfo(out atype: listdatatypety;
-             out aindex: int32; out avaluead: pointer);
+procedure trealvaluelistedititem.getvalueinfo(out avalues: recvaluearty);
 begin
  inherited;
- atype:= dl_real;
- avaluead:= @fvalue;
+ with avalues[0] do begin
+  datatype:= dl_real;
+  valuead:= @fvalue;
+ end;
 end;
 
 procedure trealvaluelistedititem.setvalue(const atype: listdatatypety;
@@ -336,12 +345,13 @@ begin
  end;
 end;
 
-procedure tdatetimevaluelistedititem.getvalueinfo(out atype: listdatatypety;
-               out aindex: int32; out avaluead: pointer);
+procedure tdatetimevaluelistedititem.getvalueinfo(out avalues: recvaluearty);
 begin
  inherited;
- atype:= dl_real;
- avaluead:= @fvalue;
+ with avalues[0] do begin
+  datatype:= dl_real;
+  valuead:= @fvalue;
+ end;
 end;
 
 procedure tdatetimevaluelistedititem.setvalue(const atype: listdatatypety;
@@ -365,12 +375,13 @@ begin
  end;
 end;
 
-procedure tstringvaluelistedititem.getvalueinfo(out atype: listdatatypety;
-               out aindex: int32; out avaluead: pointer);
+procedure tstringvaluelistedititem.getvalueinfo(out avalues: recvaluearty);
 begin
  inherited;
- atype:= dl_msestring;
- avaluead:= @fvalue;
+ with avalues[0] do begin
+  datatype:= dl_msestring;
+  valuead:= @fvalue;
+ end;
 end;
 
 procedure tstringvaluelistedititem.setvalue(const atype: listdatatypety;
