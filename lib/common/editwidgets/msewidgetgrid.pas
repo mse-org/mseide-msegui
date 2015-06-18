@@ -321,7 +321,8 @@ type
    procedure clientmouseevent(var info: mouseeventinfoty); override;
    procedure dokeydown(var info: keyeventinfoty); override;
    procedure doexit; override;
-   procedure navigrequest(var info: naviginfoty); override;
+   procedure navigrequest(var info: naviginfoty;
+                                         const nowrap: boolean); override;
    procedure checkrowreadonlystate; override;
    procedure updaterowdata; override;
    function cellhasfocus: boolean; override;
@@ -3794,7 +3795,8 @@ begin
  end;
 end;
 
-procedure tcustomwidgetgrid.navigrequest(var info: naviginfoty);
+procedure tcustomwidgetgrid.navigrequest(var info: naviginfoty;
+                                                 const nowrap: boolean);
 begin
  inherited;
  if (info.nearest = fcontainer0) or (info.nearest = fcontainer2) then begin

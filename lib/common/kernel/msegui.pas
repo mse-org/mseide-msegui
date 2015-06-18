@@ -1464,8 +1464,10 @@ type
 
    function navigstartrect: rectty; virtual; //origin = pos
    function navigrect: rectty; virtual;      //origin = pos
-   procedure navigrequest(var info: naviginfoty); virtual;
-   function navigdistance(var info: naviginfoty): integer; virtual;
+   procedure navigrequest(var info: naviginfoty;
+                                       const nowrap: boolean = false); virtual;
+   function navigdistance(var info: naviginfoty;
+                          const nowrap: boolean = false): integer; virtual;
 
    function getwidgetrects(const awidgets: array of twidget): rectarty;
    procedure setwidgetrects(const awidgets: array of twidget;
@@ -1640,7 +1642,8 @@ type
                                                                      virtual;
                     //called twice, first before dokeydown with es_preview set
    function checkfocusshortcut(var info: keyeventinfoty): boolean; virtual;
-   procedure handlenavigkeys(var info: keyeventinfoty); virtual;
+   procedure handlenavigkeys(var info: keyeventinfoty;
+                                     const nowrap: boolean = false); virtual;
    procedure dokeydownaftershortcut(var info: keyeventinfoty); virtual;
    procedure dokeyup(var info: keyeventinfoty); virtual;
 
@@ -1752,7 +1755,8 @@ type
                        //nil if can not focus
    function firsttabfocus: twidget;
    function lasttabfocus: twidget;
-   function nexttaborder(const down: boolean = false): twidget;
+   function nexttaborder(const down: boolean = false;
+                                        nowrap: boolean = false): twidget;
    function focusback(const aactivate: boolean = true): boolean; virtual;
                                //false if focus not changed
 
@@ -10484,7 +10488,8 @@ begin
  end;
 end;
 
-function twidget.nexttaborder(const down: boolean = false): twidget;
+function twidget.nexttaborder(const down: boolean = false;
+                                        nowrap: boolean = false): twidget;
 label
  doreturn;
 var
@@ -10499,6 +10504,9 @@ begin
     dec(int1);
     with fparentwidget do begin
      if int1 < 0 then begin
+      if nowrap then begin
+       exit;
+      end;
       if (ow_parenttabfocus in foptionswidget) and 
                          (fparentwidget <> nil) then begin
        result:= nexttaborder(down);
@@ -10517,6 +10525,9 @@ begin
     inc(int1);
     with fparentwidget do begin
      if int1 >= widgetcount then begin
+      if nowrap then begin
+       exit;
+      end;
       if (ow_parenttabfocus in foptionswidget) and 
                          (fparentwidget <> nil) then begin
        result:= nexttaborder(down);
@@ -10988,7 +10999,8 @@ begin
  activechanged;
 end;
 
-function twidget.navigdistance(var info: naviginfoty): integer;
+function twidget.navigdistance(var info: naviginfoty;
+                             const nowrap: boolean = false): integer;
 const
  wrapweighting = 1;
  orthoweighting = 30;
@@ -11027,6 +11039,10 @@ begin
    dist:= -dist;
   end;
   if dist < 0 then begin
+   if nowrap then begin
+    result:= bigint;
+    exit;
+   end;
    widget1:= sender.fparentwidget;
    while (ow_arrowfocusout in widget1.foptionswidget) and 
                         (widget1.fparentwidget <> nil) do begin
@@ -11061,7 +11077,8 @@ begin
  result:= navigrect;
 end;
 
-procedure twidget.navigrequest(var info: naviginfoty);
+procedure twidget.navigrequest(var info: naviginfoty;
+                                           const nowrap: boolean = false);
 var
  int1,int2: integer;
  widget1,widget2: twidget;
@@ -11088,7 +11105,7 @@ begin
     end;
     if (nearest = widget2) and not hastarget then begin
      hastarget:= true;
-     int2:= widget1.navigdistance(info);
+     int2:= widget1.navigdistance(info,nowrap);
      if int2 < distance then begin
       nearest:= widget1;
       distance:= int2;
@@ -11133,7 +11150,8 @@ begin
  end;
 end;
 
-procedure twidget.handlenavigkeys(var info: keyeventinfoty);
+procedure twidget.handlenavigkeys(var info: keyeventinfoty;
+                                     const nowrap: boolean = false);
 var
  naviginfo: naviginfoty;
  widget1: twidget;
@@ -11146,7 +11164,7 @@ begin
       ({(key = key_enter) or} (key = key_return)) and 
       (shiftstate1 - [ss_shift] =  []) then begin
     include(eventstate,es_processed);
-    widget1:= nexttaborder(ss_shift in shiftstate1);
+    widget1:= nexttaborder(ss_shift in shiftstate1,nowrap);
     if widget1 <> nil then begin
      widget1.setfocus;
     end;
@@ -11159,7 +11177,7 @@ begin
       direction:= gd_none;
       case key of
        key_tab,key_backtab: begin
-        widget1:= nexttaborder(key = key_backtab);
+        widget1:= nexttaborder(key = key_backtab,nowrap);
         if widget1 <> nil then begin
          widget1.setfocus;
         end;
@@ -11180,7 +11198,7 @@ begin
         down:= false;
         startingrect:= navigstartrect;
         translatewidgetpoint1(startingrect.pos,self,nil);
-        fparentwidget.navigrequest(naviginfo);
+        fparentwidget.navigrequest(naviginfo,nowrap);
         if nearest <> nil then begin
          nearest.setfocus;
         end;

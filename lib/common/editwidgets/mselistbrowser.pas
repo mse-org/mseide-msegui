@@ -3296,7 +3296,7 @@ begin
     if (fvisiblevalueeditcount > 0) then begin
      widget1:= window.focusedwidget;
      if checkdescendent(widget1) then begin
-      twidget1(widget1).handlenavigkeys(info);
+      twidget1(widget1).handlenavigkeys(info,true); //nowrap
      end;
      if window.focusedwidget = widget1 then begin
       exclude(info.eventstate,es_processed);
