@@ -373,6 +373,7 @@ type
    function geteditfont: tfont; virtual;
    function getinnerframe: framety; virtual;
    function geteditframe: framety; virtual;
+   procedure gettextrects(out outer: rectty; out inner: rectty);
    procedure setupeditor; virtual;
    procedure internalcreateframe; override;
    procedure clientrectchanged; override;
@@ -1442,6 +1443,34 @@ begin
  result:= nullframe;
 end;
 
+procedure tcustomedit.gettextrects(out outer: rectty; out inner: rectty);
+var
+ fra1: framety;
+begin
+ fra1:= geteditframe;
+ if fframe = nil then begin
+  outer:= deflaterect(clientrect,fra1);
+  inner:= deflaterect(outer,getinnerframe);
+ end
+ else begin
+  outer:= deflaterect(clientsizerect,fra1);
+  inner:= deflaterect(innerclientrect,fra1);
+ end;
+end;
+
+procedure tcustomedit.setupeditor;
+var
+ outer1,inner1: rectty;
+begin
+ if not (csloading in componentstate) then begin
+  gettextrects(outer1,inner1);
+  with feditor do begin
+   setup(text,curindex,true,inner1,outer1,nil,nil,geteditfont);
+  end;
+ end;
+end;
+
+{
 procedure tcustomedit.setupeditor;
 var
  fra1: framety;
@@ -1461,7 +1490,7 @@ begin
   end;
  end;
 end;
-
+}
 function tcustomedit.verticalfontheightdelta: boolean;
 begin
  result:= tf_rotate90 in textflags;

@@ -2264,6 +2264,10 @@ var
   end;
  end; //cellpaint
 
+var
+ outer1,inner1: rectty;
+ pt1: pointty;
+ 
 begin
  atextflags:= textflags;
  with cellinfoty(canvas.drawinfopo^) do begin
@@ -2288,7 +2292,11 @@ begin
   else begin
    if (fgridintf = nil) and (fparentintf <> nil) then begin
     paintbackground(canvas,widgetrect);
-    cellpaint(widgetrect,innerparentrect);
+    gettextrects(outer1,inner1);
+    pt1:= paintparentpos;
+    addpoint1(outer1.pos,pt1);
+    addpoint1(inner1.pos,pt1);
+    cellpaint(outer1,inner1);
     paintoverlay(canvas,widgetrect);
    end
    else begin
