@@ -1640,6 +1640,7 @@ type
                                                                      virtual;
                     //called twice, first before dokeydown with es_preview set
    function checkfocusshortcut(var info: keyeventinfoty): boolean; virtual;
+   procedure handlenavigkeys(var info: keyeventinfoty); virtual;
    procedure dokeydownaftershortcut(var info: keyeventinfoty); virtual;
    procedure dokeyup(var info: keyeventinfoty); virtual;
 
@@ -11132,11 +11133,10 @@ begin
  end;
 end;
 
-procedure twidget.dokeydownaftershortcut(var info: keyeventinfoty);
+procedure twidget.handlenavigkeys(var info: keyeventinfoty);
 var
  naviginfo: naviginfoty;
  widget1: twidget;
- bo1: boolean;
  shiftstate1: shiftstatesty;
 begin
  with info do begin
@@ -11190,6 +11190,15 @@ begin
     end;
    end;
   end;
+ end;
+end;
+
+procedure twidget.dokeydownaftershortcut(var info: keyeventinfoty);
+var
+ bo1: boolean;
+begin
+ with info do begin
+  handlenavigkeys(info);
   if not (es_processed in info.eventstate) and (fparentwidget <> nil) and
                              (self <> window.fmodalwidget) then begin
    bo1:= es_child in eventstate;

@@ -986,6 +986,7 @@ type
  tframe1 = class(tcustomframe);
  twidgetcol1 = class(twidgetcol);
  tdatacols1 = class(tdatacols);
+ twidget1 = class(twidget);
 
 { titemviewlist }
 
@@ -3255,6 +3256,8 @@ begin
 end;
 
 procedure titemedit.dokeydown(var info: keyeventinfoty);
+var
+ widget1: twidget;
 begin
  doonkeydown(info);
  with info do begin
@@ -3286,6 +3289,17 @@ begin
                    (ns_checkbox in fvalue.state) and
                    (editor.filtertext = '') then begin
       fvalue.checked:= not fvalue.checked;
+     end;
+    end;
+   end
+   else begin
+    if (fvisiblevalueeditcount > 0) then begin
+     widget1:= window.focusedwidget;
+     if checkdescendent(widget1) then begin
+      twidget1(widget1).handlenavigkeys(info);
+     end;
+     if window.focusedwidget = widget1 then begin
+      exclude(info.eventstate,es_processed);
      end;
     end;
    end;
