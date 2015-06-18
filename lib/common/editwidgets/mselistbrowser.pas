@@ -547,6 +547,7 @@ type
    procedure setvalueedits(const avalue: tvalueedits);
   protected
    factiveinfo: valueeditinfoty;
+   fvisiblevalueeditcount: int32;
    flayoutinfofocused: listitemlayoutinfoty;
    flayoutinfocell: listitemlayoutinfoty;
    fvalue: tlistitem;
@@ -2929,6 +2930,7 @@ begin
    end;
   end;
   bo1:= false;
+  fvisiblevalueeditcount:= 0;
   for i1:= 0 to high(infos1) do begin
    with infos1[i1] do begin
     if dummypointer <> nil then begin
@@ -2937,6 +2939,7 @@ begin
        visible:= true;
        gridintf.setvaluedata(valuead^);
        editwidget.visible:= true;
+       inc(fvisiblevalueeditcount);
        if not bo1 then begin
         bo1:= true;
         factiveinfo:= pvalueeditinfoty(dummypointer)^;
@@ -3256,33 +3259,34 @@ begin
  doonkeydown(info);
  with info do begin
   if not(es_processed in eventstate) then begin
-   if (oe_locate in foptionsedit) and isenterkey(nil,key) and 
-                       (shiftstate = []) then begin
-    if not editing then begin
-     editing:= not (oe_readonly in foptionsedit) and valuecanedit() and
-                     ((fvalue = nil) or tlistitem1(fvalue).cancaptionedit());
-
-                  ;
-     if editing then begin
-      include(eventstate,es_processed);
+   if not (es_child in info.eventstate) then begin
+    if (oe_locate in foptionsedit) and isenterkey(nil,key) and 
+                        (shiftstate = []) then begin
+     if not editing then begin
+      editing:= not (oe_readonly in foptionsedit) and valuecanedit() and
+                      ((fvalue = nil) or tlistitem1(fvalue).cancaptionedit());
+ 
+                   ;
+      if editing then begin
+       include(eventstate,es_processed);
+      end;
+     end
+     else begin
+      if not editing then begin
+       include(eventstate,es_processed); //trigger checkvalue otherwise
+      end;
+      editing:= false;
      end;
     end
     else begin
-//     inherited;
-     if not editing then begin
-      include(eventstate,es_processed); //trigger checkvalue otherwise
+     if (key = key_space) and 
+        (shiftstate * singlekeyshiftstatesmask = []) and 
+        not (es_processed in eventstate) and 
+        (not editing)  and valuecanedit() and 
+                   (ns_checkbox in fvalue.state) and
+                   (editor.filtertext = '') then begin
+      fvalue.checked:= not fvalue.checked;
      end;
-     editing:= false;
-    end;
-   end
-   else begin
-    if (key = key_space) and 
-       (shiftstate * singlekeyshiftstatesmask = []) and 
-       not (es_processed in eventstate) and 
-       (not editing)  and valuecanedit() and 
-                  (ns_checkbox in fvalue.state) and
-                  (editor.filtertext = '') then begin
-     fvalue.checked:= not fvalue.checked;
     end;
    end;
   end;
@@ -5679,8 +5683,8 @@ var
 begin
  doonkeydown(info);
  with info do begin
-  if (fgridintf <> nil) and not (es_processed in eventstate) and
-                                                  (fvalue <> nil) then begin
+  if not (es_child in eventstate) and (fgridintf <> nil) and 
+                not (es_processed in eventstate) and (fvalue <> nil) then begin
    with twidgetgrid1(fgridintf.getcol.grid),ttreelistitem1(fvalue) do begin
     if shiftstate = [] then begin
      atreelevel:= treelevel;

@@ -1632,10 +1632,12 @@ type
                               var info: mouseeventinfoty); virtual;
    procedure mousewheelevent(var info: mousewheeleventinfoty); virtual;
 
-   procedure dokeydown1(var info: keyeventinfoty); //updates flags, calls dokeydown
+   procedure dokeydown1(var info: keyeventinfoty); 
+                                       //updates flags, calls dokeydown
    procedure dokeydown(var info: keyeventinfoty); virtual;
                                        //do not call dokeydown, call dokeydown1
-   procedure doshortcut(var info: keyeventinfoty; const sender: twidget); virtual;
+   procedure doshortcut(var info: keyeventinfoty; const sender: twidget);
+                                                                     virtual;
                     //called twice, first before dokeydown with es_preview set
    function checkfocusshortcut(var info: keyeventinfoty): boolean; virtual;
    procedure dokeydownaftershortcut(var info: keyeventinfoty); virtual;
