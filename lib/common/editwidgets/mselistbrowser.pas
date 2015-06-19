@@ -548,6 +548,7 @@ type
   protected
    factiveinfo: valueeditinfoty;
    fvisiblevalueeditcount: int32;
+   flastzonewidget: twidget;
    flayoutinfofocused: listitemlayoutinfoty;
    flayoutinfocell: listitemlayoutinfoty;
    fentryedge: graphicdirectionty;
@@ -3623,37 +3624,66 @@ end;
 function titemedit.getcellcursor(const arow: integer;
             const acellzone: cellzonety; const apos: pointty): cursorshapety;
 begin
- if (acellzone = cz_caption) and 
-                       ((foptionsedit * [oe_locate,oe_readonly] = []) or
-                       (arow < 0) and (editing)) then begin
-  result:= cursor;
-  if result = cr_default then begin
-   result:= cr_ibeam;
+ if acellzone = cz_child then begin
+  if flastzonewidget <> nil then begin
+   result:= flastzonewidget.actualcursor(apos);
+  end
+  else begin
+   result:= cr_default;
   end;
  end
  else begin
   if (acellzone = cz_caption) and 
-                    (foptionsedit * [oe_locate,oe_readonly] <> []) then begin
-   result:= cursorreadonly;
+                        ((foptionsedit * [oe_locate,oe_readonly] = []) or
+                        (arow < 0) and (editing)) then begin
+   result:= cursor;
    if result = cr_default then begin
-    result:= cr_arrow;
+    result:= cr_ibeam;
    end;
   end
   else begin
-   result:= cr_arrow;
-//   result:= cr_default;
+   if (acellzone = cz_caption) and 
+                     (foptionsedit * [oe_locate,oe_readonly] <> []) then begin
+    result:= cursorreadonly;
+    if result = cr_default then begin
+     result:= cr_arrow;
+    end;
+   end
+   else begin
+    result:= cr_arrow;
+ //   result:= cr_default;
+   end;
   end;
  end;
 end;
 
 procedure titemedit.updatecellzone(const row: integer; const apos: pointty;
                             var result: cellzonety);
+var
+ ar1: recvaluearty;
+ i1: int32;
 begin
  inherited;
- if fvalueedits.count > 0 then begin
- end;
  if fitemlist <> nil then begin
-  fitemlist[row].updatecellzone(apos,result);
+  flastzonewidget:= nil;
+  if (fvalueedits.count > 0) and finddataedits(fitemlist[row],ar1) then begin
+   for i1:= 0 to high(ar1) do begin
+    with ar1[i1] do begin
+     if dummypointer <> nil then begin
+      with pvalueeditinfoty(dummypointer)^ do begin
+       if (editwidget <> nil) and 
+           pointinrect(apos,editwidget.widgetrect) then begin
+        result:= cz_child;
+        flastzonewidget:= editwidget;
+       end;
+      end;
+     end;
+    end;
+   end;
+  end;
+  if flastzonewidget = nil then begin
+   fitemlist[row].updatecellzone(apos,result);
+  end;
  end;
 end;
 
@@ -3790,6 +3820,9 @@ begin
      editwidget:= nil;     
     end;
    end;
+  end;
+  if child = flastzonewidget then begin
+   flastzonewidget:= nil;
   end;
  end;
  inherited;
