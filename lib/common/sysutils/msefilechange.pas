@@ -159,8 +159,10 @@ const
 function adddir(const sender: tdirchangethread; 
                                const name: filenamety): integer;
 var
+{$ifdef linux}
  flags: longword;
  action: tsigactionex;
+{$endif}
  str1: string;
 begin
  str1:= name;
@@ -243,7 +245,7 @@ type
 
 procedure tdirinfo.changed;
 const
- notcheckflags = [fc_accesstime];
+ notcheckflags = [fc_accesstime,fc_ctime]; //ctime is unreliable in freebsd
 var
  int1: integer;
  bo1: boolean;
@@ -418,8 +420,10 @@ begin
  end;
 end;
 {$else}    //unix
+{$ifdef linux}
 var
  int1: integer;
+{$endif}
 begin
  while not terminated  do begin
  {$ifdef linux}
