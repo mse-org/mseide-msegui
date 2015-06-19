@@ -187,6 +187,7 @@ to
 Section "Device"
 of xorg.conf, see
 https://bugs.freedesktop.org/show_bug.cgi?id=69543
+https://bugs.freedesktop.org/show_bug.cgi?id=84253
 
 Flashing taskbar widgets in IceWM
 *********************************
