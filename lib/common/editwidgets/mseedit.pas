@@ -1271,7 +1271,9 @@ procedure tcustomedit.dokeydown(var info: keyeventinfoty);
 begin
  doonkeydown(info);
  if not (es_processed in info.eventstate) then begin
-  feditor.dokeydown(info);
+  if not (es_child in info.eventstate) then begin
+   feditor.dokeydown(info);
+  end;
   if not (es_processed in info.eventstate) then begin
    inherited;
   end;
