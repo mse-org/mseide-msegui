@@ -59,12 +59,13 @@ type
    function getrowdatapo(const arow: integer): pointer; virtual;
    procedure setgridintf(const intf: iwidgetgrid);
    function getcellframe: framety;
-   function getcellcursor(const arow: integer;
-                             const acellzone: cellzonety): cursorshapety;
+   function getcellcursor(const arow: integer; const acellzone: cellzonety;
+                                          const apos: pointty): cursorshapety;
    procedure updatecellzone(const row: integer; const apos: pointty;
                             var result: cellzonety);
    function getnulltext: msestring;
-   procedure loadcellbmp(const acanvas: tcanvas; const abmp: tmaskedbitmap); virtual;
+   procedure loadcellbmp(const acanvas: tcanvas; 
+                                        const abmp: tmaskedbitmap); virtual;
    procedure drawcell(const canvas: tcanvas);
    procedure updateautocellsize(const canvas: tcanvas);
    procedure beforecelldragevent(var ainfo: draginfoty; const arow: integer;
@@ -232,13 +233,14 @@ begin
 end;
 
 function tcustomdataimage.getcellcursor(const arow: integer;
-                                  const acellzone: cellzonety): cursorshapety;
+                                  const acellzone: cellzonety;
+                                          const apos: pointty): cursorshapety;
 begin
  result:= actualcursor(nullpoint);
 end;
 
-procedure tcustomdataimage.updatecellzone(const row: integer; const apos: pointty;
-                            var result: cellzonety);
+procedure tcustomdataimage.updatecellzone(const row: integer;
+                            const apos: pointty; var result: cellzonety);
 begin
  //dummy
 end;

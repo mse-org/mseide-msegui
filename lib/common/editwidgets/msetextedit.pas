@@ -154,8 +154,8 @@ type
    procedure setgridintf(const intf: iwidgetgrid);
    function getgridintf: iwidgetgrid;
    function getcellframe: framety; virtual;
-   function getcellcursor(const arow: integer;
-                          const acellzone: cellzonety): cursorshapety; virtual;
+   function getcellcursor(const arow: integer; const acellzone: cellzonety;
+                             const apos: pointty): cursorshapety; virtual;
    procedure updatecellzone(const row: integer; const apos: pointty;
                             var result: cellzonety); virtual;
    function getnulltext: msestring;
@@ -533,13 +533,14 @@ begin
 end;
 
 function tcustomtextedit.getcellcursor(const arow: integer;
-                                   const acellzone: cellzonety): cursorshapety;
+                                   const acellzone: cellzonety;
+                                       const apos: pointty): cursorshapety;
 begin
  result:= actualcursor(nullpoint);
 end;
 
-procedure tcustomtextedit.updatecellzone(const row: integer; const apos: pointty;
-                            var result: cellzonety);
+procedure tcustomtextedit.updatecellzone(const row: integer; 
+                             const apos: pointty;  var result: cellzonety);
 begin
  //dummy
 end;

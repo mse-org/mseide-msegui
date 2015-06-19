@@ -595,8 +595,8 @@ type
    function getcolorglyph: colorty;
 
     //igridwidget
-   function getcellcursor(const arow: integer; 
-                         const acellzone: cellzonety): cursorshapety; override;
+   function getcellcursor(const arow: integer; const acellzone: cellzonety;
+                                 const apos: pointty): cursorshapety; override;
    procedure updatecellzone(const row: integer; const apos: pointty;
                             var result: cellzonety); override;
    procedure setgridintf(const intf: iwidgetgrid); override;
@@ -3168,7 +3168,7 @@ begin
  if (fvalue <> nil) and (info.eventkind in mouseposevents) then begin
   zone1:= cz_default;
   fvalue.updatecellzone(info.pos,zone1);
-  application.widgetcursorshape:= getcellcursor(-1,zone1);
+  application.widgetcursorshape:= getcellcursor(-1,zone1,info.pos);
  end;
  if canevent(tmethod(fonclientmouseevent)) then begin
   fonclientmouseevent(self,info);
@@ -3621,7 +3621,7 @@ begin
 end;
 
 function titemedit.getcellcursor(const arow: integer;
-                                  const acellzone: cellzonety): cursorshapety;
+            const acellzone: cellzonety; const apos: pointty): cursorshapety;
 begin
  if (acellzone = cz_caption) and 
                        ((foptionsedit * [oe_locate,oe_readonly] = []) or
@@ -3633,7 +3633,7 @@ begin
  end
  else begin
   if (acellzone = cz_caption) and 
-                       (foptionsedit * [oe_locate,oe_readonly] <> []) then begin
+                    (foptionsedit * [oe_locate,oe_readonly] <> []) then begin
    result:= cursorreadonly;
    if result = cr_default then begin
     result:= cr_arrow;
@@ -3650,6 +3650,8 @@ procedure titemedit.updatecellzone(const row: integer; const apos: pointty;
                             var result: cellzonety);
 begin
  inherited;
+ if fvalueedits.count > 0 then begin
+ end;
  if fitemlist <> nil then begin
   fitemlist[row].updatecellzone(apos,result);
  end;

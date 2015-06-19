@@ -29,7 +29,7 @@ type
                       fca_focusinshift,fca_focusinrepeater,fca_setfocusedcell,
                       fca_selectstart,fca_selectend);
 
- cellzonety = (cz_none,cz_default,cz_checkbox,cz_image,cz_caption);
+ cellzonety = (cz_none,cz_default,cz_checkbox,cz_image,cz_caption,cz_child);
 
 implementation
 end.

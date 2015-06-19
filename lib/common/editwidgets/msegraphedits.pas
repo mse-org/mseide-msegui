@@ -177,15 +177,16 @@ type
    
     //igridwidget
    procedure setfirstclick(var ainfo: mouseeventinfoty);
-   function createdatalist(const sender: twidgetcol): tdatalist; virtual; abstract;
+   function createdatalist(const sender: twidgetcol): tdatalist; 
+                                                     virtual; abstract;
    procedure datalistdestroyed; virtual;
    function getdatalistclass: datalistclassty; virtual; abstract;
    function getdefaultvalue: pointer; virtual;
    function getrowdatapo(const arow: integer): pointer; virtual;
    procedure setgridintf(const intf: iwidgetgrid); virtual;
    function getcellframe: framety; virtual;
-   function getcellcursor(const arow: integer; 
-                        const acellzone: cellzonety): cursorshapety; virtual;
+   function getcellcursor(const arow: integer; const acellzone: cellzonety;
+                                  const apos: pointty): cursorshapety; virtual;
    procedure updatecellzone(const arow: integer; const apos: pointty;
                             var result: cellzonety); virtual;
    procedure drawcell(const canvas: tcanvas);
@@ -2223,7 +2224,7 @@ begin
 end;
 
 function tgraphdataedit.getcellcursor(const arow: integer;
-                              const acellzone: cellzonety): cursorshapety;
+             const acellzone: cellzonety; const apos: pointty): cursorshapety;
 begin
  result:= actualcursor(nullpoint);
 end;

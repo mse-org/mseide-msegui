@@ -69,7 +69,7 @@ type
                                           var mouseinfo: mouseeventinfoty);
   function getcellframe: framety;
   function getcellcursor(const arow: integer; //-1 -> widget
-                const acellzone: cellzonety): cursorshapety;
+               const acellzone: cellzonety; const apos: pointty): cursorshapety;
   procedure updatecellzone(const arow: integer; //-1 -> widget
                          const apos: pointty;
                            var result: cellzonety);
@@ -175,8 +175,8 @@ type
    function getinnerframe: framety; override;
    procedure setoptions(const avalue: coloptionsty); override;
    procedure setoptions1(const avalue: coloptions1ty); override;
-   function getcursor(const arow: integer; 
-                       const actcellzone: cellzonety): cursorshapety; override;
+   function getcursor(const arow: integer; const actcellzone: cellzonety;
+                          const amousepos: pointty): cursorshapety; override;
    procedure datasourcechanged;
    procedure beforedragevent(var ainfo: draginfoty; const arow: integer;
                                 var processed: boolean); override;
@@ -1871,12 +1871,13 @@ begin
 end;
 
 function twidgetcol.getcursor(const arow: integer; 
-                            const actcellzone: cellzonety): cursorshapety;
+                             const actcellzone: cellzonety;
+                                  const amousepos: pointty): cursorshapety;
 begin
- result:= inherited getcursor(arow,actcellzone);
+ result:= inherited getcursor(arow,actcellzone,amousepos);
  if (result = cr_default) and (fintf <> nil){ and 
                          not (co_readonly in foptions)} then begin
-  result:= fintf.getcellcursor(arow,actcellzone);
+  result:= fintf.getcellcursor(arow,actcellzone,amousepos);
  end;
 end;
 

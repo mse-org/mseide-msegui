@@ -166,15 +166,16 @@ type
                    
     //igridwidget
    procedure setfirstclick(var ainfo: mouseeventinfoty);
-   function createdatalist(const sender: twidgetcol): tdatalist; virtual; abstract;
+   function createdatalist(const sender: twidgetcol): tdatalist; 
+                                                   virtual; abstract;
    procedure datalistdestroyed; virtual;
    function getdatalistclass: datalistclassty; virtual; abstract;
    function getdefaultvalue: pointer; virtual;
    function getrowdatapo(const arow: integer): pointer; virtual;
    procedure setgridintf(const intf: iwidgetgrid); virtual;
    function getcellframe: framety; virtual;
-   function getcellcursor(const arow: integer;
-                      const acellzone: cellzonety): cursorshapety; virtual;
+   function getcellcursor(const arow: integer; const acellzone: cellzonety;
+                                  const apos: pointty): cursorshapety; virtual;
    procedure updatecellzone(const row: integer; const apos: pointty;
                                            var result: cellzonety); virtual;
    function getnulltext: msestring; virtual;
@@ -2708,7 +2709,7 @@ begin
    if int1 >= 0 then begin
     updatecellzone(int1,widgetpostoclientpos(apos),zone1);
 //    result:= getcellcursor(int1,zone1);
-    result:= getcellcursor(-1,zone1);
+    result:= getcellcursor(-1,zone1,apos);
     exit;
    end;
   finally
@@ -2719,7 +2720,7 @@ begin
 end;
 
 function tcustomdataedit.getcellcursor(const arow: integer; 
-                                 const acellzone: cellzonety): cursorshapety;
+              const acellzone: cellzonety; const apos: pointty): cursorshapety;
 var
  bo1: boolean;
 begin
@@ -2731,8 +2732,8 @@ begin
  end;
 end;
 
-procedure tcustomdataedit.updatecellzone(const row: integer; const apos: pointty;
-                                                  var result: cellzonety);
+procedure tcustomdataedit.updatecellzone(const row: integer;
+                                const apos: pointty; var result: cellzonety);
 begin
  //dummy
 end;

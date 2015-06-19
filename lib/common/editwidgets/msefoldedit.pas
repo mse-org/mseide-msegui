@@ -94,8 +94,8 @@ type
                                            var result: cellzonety); override;
    procedure updatelevelcellzone(const alevel: integer; const apos: pointty;
                                          var azone: cellzonety); virtual;
-   function getcellcursor(const arow: integer;
-                      const acellzone: cellzonety): cursorshapety; override;
+   function getcellcursor(const arow: integer; const acellzone: cellzonety;
+                               const apos: pointty): cursorshapety; override;
    procedure doonpaint(const acanvas: tcanvas); override;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    function getdefaultvalue: pointer; override;
@@ -833,10 +833,10 @@ begin
 end;
 
 function tfoldedit.getcellcursor(const arow: integer;
-               const acellzone: cellzonety): cursorshapety;
+               const acellzone: cellzonety; const apos: pointty): cursorshapety;
 begin
  if acellzone = cz_caption then begin
-  result:= inherited getcellcursor(arow,acellzone);
+  result:= inherited getcellcursor(arow,acellzone,apos);
  end
  else begin
   result:= cr_arrow;

@@ -679,8 +679,8 @@ type
    function sortcompare(const index1,index2: integer): integer; virtual;
    function isempty(const aindex: integer): boolean; virtual;
    procedure docellevent(var info: celleventinfoty); virtual;
-   function getcursor(const arow: integer; 
-                        const actcellzone: cellzonety): cursorshapety; virtual;
+   function getcursor(const arow: integer; const actcellzone: cellzonety; 
+                            const amousepos: pointty): cursorshapety; virtual;
    function getdatastatname: msestring;
    procedure coloptionstoeditoptions(var dest: optionseditty;
                                                  var dest1: optionsedit1ty);
@@ -807,8 +807,8 @@ type
    procedure docellevent(var info: celleventinfoty); override;
    procedure updatelayout; override;
    function getinnerframe: framety; override;
-   function getcursor(const arow: integer;
-                        const actcellzone: cellzonety): cursorshapety; override;
+   function getcursor(const arow: integer; const actcellzone: cellzonety;
+                            const amousepos: pointty): cursorshapety; override;
    procedure modified; virtual;
    procedure checkcellvalue(var avalue: msestring; var accept: boolean);
    function defaultrowheight(): integer; override;
@@ -1959,6 +1959,7 @@ type
    fnonullcheck: integer;
    fnocheckvalue: integer;
    fappendcount: integer;
+   flastcellpos: pointty;
    flastcellzone: cellzonety;
    class function classskininfo: skininfoty; override;
    
@@ -6386,8 +6387,8 @@ begin
  end;
 end;
 
-function tdatacol.getcursor(const arow: integer;
-                          const actcellzone: cellzonety): cursorshapety;
+function tdatacol.getcursor(const arow: integer; const actcellzone: cellzonety;
+                                       const amousepos: pointty): cursorshapety;
 begin
  result:= cursor;
 // result:= cr_arrow;
@@ -6735,9 +6736,10 @@ begin
 end;
 
 function tcustomstringcol.getcursor(const arow: integer;
-                        const actcellzone: cellzonety): cursorshapety;
+                               const actcellzone: cellzonety;
+                                   const amousepos: pointty): cursorshapety;
 begin
- result:= inherited getcursor(arow,actcellzone);
+ result:= inherited getcursor(arow,actcellzone,amousepos);
  if result = cr_default then begin
   if not isreadonly and not (scoe_checkbox in foptionsedit) then begin
    result:= cr_ibeam;
@@ -10571,7 +10573,8 @@ begin
   
  with fmousecell do begin
   if (row >= 0) and (col >= 0) and (col < datacols.count) then begin
-   result:= datacols[fmousecell.col].getcursor(fmousecell.row,flastcellzone);
+   result:= datacols[fmousecell.col].getcursor(fmousecell.row,flastcellzone,
+                                                 subpoint(apos,flastcellpos));
   end
   else begin
    result:= inherited actualcursor(apos);
@@ -10888,7 +10891,8 @@ begin
       if not (es_child in info.eventstate) then begin
        if cellkind = ck_data then begin
         application.widgetcursorshape:= 
-              datacols[fmousecell.col].getcursor(fmousecell.row,flastcellzone);
+              datacols[fmousecell.col].getcursor(fmousecell.row,
+                              flastcellzone,subpoint(info.pos,flastcellpos));
        end
        else begin
         application.widgetcursorshape:= cr_default;
@@ -11021,7 +11025,7 @@ procedure tcustomgrid.cellmouseevent(const acell: gridcoordty;
                            const aeventkind: celleventkindty = cek_none);
 var
  cellinfo: celleventinfoty;
- po1: pointty;
+// po1: pointty;
  cellinfopo: pcelleventinfoty;
 begin
  cellinfopo:= acellinfopo;
@@ -11047,9 +11051,9 @@ begin
    if eventkind in mousecellevents then begin
     zone:= cz_default;
    end;
-   po1:= cellrect(cellinfo.cell).pos;
+   flastcellpos:= cellrect(cellinfo.cell).pos;
    try
-    subpoint1(info.pos,po1);
+    subpoint1(info.pos,flastcellpos);
     if (eventkind = cek_buttonrelease) and (cell.row < 0) and 
                                   (cell.row <> invalidaxis) then begin
      docellevent(cellinfopo^);
@@ -11061,7 +11065,7 @@ begin
      docellevent(cellinfopo^);
     end;
    finally
-    addpoint1(info.pos,po1);
+    addpoint1(info.pos,flastcellpos);
    end;
   end;
  end;
