@@ -189,7 +189,8 @@ type
    procedure gridtovalue(row: integer); virtual;
    procedure setvaluedata(const source); virtual; abstract;
    procedure getvaluedata(out dest); virtual; abstract;
-   procedure docellevent(const ownedcol: boolean; var info: celleventinfoty); virtual;
+   procedure docellevent(const ownedcol: boolean; 
+                                       var info: celleventinfoty); virtual;
    function sortfunc(const l,r): integer; virtual;
    procedure gridvaluechanged(const index: integer); virtual;
    procedure updatecoloptions(const aoptions: coloptionsty);

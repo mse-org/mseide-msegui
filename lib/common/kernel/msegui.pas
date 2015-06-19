@@ -1848,6 +1848,8 @@ type
                    const clientorigin: boolean = true): twidget; virtual;
    function gettaborderedwidgets: widgetarty;
    function getvisiblewidgets: widgetarty;
+   function getcornerwidget(const side: graphicdirectionty;
+                                        const visibleonly: boolean): twidget;
    function getsortxchildren(const banded: boolean = false): widgetarty;
               //banded -> row,column order
    function getsortychildren(const banded: boolean = false): widgetarty;
@@ -1891,16 +1893,7 @@ type
    //origin = paintrect.pos
    function isleftbuttondown(const info: mouseeventinfoty;
                       const akeyshiftstate: shiftstatesty): boolean; overload;
-{
-   function eatwidgetclick(var info: mouseeventinfoty;
-                                     const caption: boolean = false): boolean;
-   function eatclick(var info: mouseeventinfoty): boolean;
-   function eatdblclick(var info: mouseeventinfoty): boolean;
-   function eatdblclicked(var info: mouseeventinfoty): boolean;
-   function eatleftbuttondown(var info: mouseeventinfoty): boolean; overload;
-   function eatleftbuttondown(var info: mouseeventinfoty;
-                      const akeyshiftstate: shiftstatesty): boolean; overload;
-}
+
    function widgetmousepos(const ainfo: mouseeventinfoty): pointty; 
                                     //translates to widgetpos if necessary
 
@@ -12102,6 +12095,83 @@ begin
   end;
  end;
  setlength(result,int2);
+end;
+
+function twidget.getcornerwidget(const side: graphicdirectionty;
+                                     const visibleonly: boolean): twidget;
+var
+ i1,i2: int32;
+ po1,pe: pwidget;
+begin
+ result:= nil;
+ case side of 
+  gd_left: begin
+   i1:= maxint;
+   po1:= pointer(fwidgets);
+   pe:= po1 + length(fwidgets);
+   while po1 < pe do begin
+    with po1^ do begin
+     if not visibleonly or visible then begin
+      if fwidgetrect.x < i1 then begin
+       result:= po1^;
+       i1:= fwidgetrect.x;
+      end;
+     end;
+    end;
+    inc(po1);
+   end;
+  end;
+  gd_up: begin
+   i1:= maxint;
+   po1:= pointer(fwidgets);
+   pe:= po1 + length(fwidgets);
+   while po1 < pe do begin
+    with po1^ do begin
+     if not visibleonly or visible then begin
+      if fwidgetrect.y < i1 then begin
+       result:= po1^;
+       i1:= fwidgetrect.y;
+      end;
+     end;
+    end;
+    inc(po1);
+   end;
+  end;
+  gd_right: begin
+   i1:= minint;
+   po1:= pointer(fwidgets);
+   pe:= po1 + length(fwidgets);
+   while po1 < pe do begin
+    with po1^ do begin
+     if not visibleonly or visible then begin
+      i2:= fwidgetrect.x + fwidgetrect.cx;
+      if i2 > i1 then begin
+       result:= po1^;
+       i1:= i2;
+      end;
+     end;
+    end;
+    inc(po1);
+   end;
+  end;
+  gd_down: begin
+   i1:= minint;
+   po1:= pointer(fwidgets);
+   pe:= po1 + length(fwidgets);
+   while po1 < pe do begin
+    with po1^ do begin
+     if not visibleonly or visible then begin
+      i2:= fwidgetrect.y + fwidgetrect.cy;
+      if i2 > i1 then begin
+       result:= po1^;
+       i1:= i2;
+      end;
+     end;
+    end;
+    inc(po1);
+   end;
+  end;
+ end;
 end;
 
 procedure twidget.updatetaborder(awidget: twidget);

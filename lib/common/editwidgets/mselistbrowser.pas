@@ -550,6 +550,7 @@ type
    fvisiblevalueeditcount: int32;
    flayoutinfofocused: listitemlayoutinfoty;
    flayoutinfocell: listitemlayoutinfoty;
+   fentryedge: graphicdirectionty;
    fvalue: tlistitem;
 
    procedure valueeditchanged();
@@ -2673,6 +2674,7 @@ end;
 
 constructor titemedit.create(aowner: tcomponent);
 begin
+ fentryedge:= gd_none;
  fvalueedits:= tvalueedits.create(self);
  include(fstate,des_editing);
 // fediting:= true;
@@ -2922,6 +2924,7 @@ var
  infos1: recvaluearty;
  i1: int32;
  bo1: boolean;
+ widget1: twidget;
 begin
  result:= finddataedits(fvalue,infos1);
  if result then begin
@@ -2944,9 +2947,11 @@ begin
        if not bo1 then begin
         bo1:= true;
         factiveinfo:= pvalueeditinfoty(dummypointer)^;
+{
         if focused then begin 
          editwidget.setfocus();
         end;
+}
        end;
       end;
      end;
@@ -2957,6 +2962,17 @@ begin
    with tvalueedititem(fvalueedits.fitems[i1]) do begin
     if not finfo.visible and (finfo.editwidget <> nil) then begin
      finfo.editwidget.visible:= false;
+    end;
+   end;
+  end;
+  if focused then begin
+   widget1:= getcornerwidget(fentryedge,true);
+   if widget1 <> nil then begin
+    widget1.setfocus();
+   end
+   else begin
+    if factiveinfo.editwidget <> nil then begin
+     factiveinfo.editwidget.setfocus();
     end;
    end;
   end;
@@ -3457,34 +3473,43 @@ begin
     if fvalue <> nil then begin
      fvalue.updatecellzone(info.mouseeventinfopo^.pos,info.zone);
     end;
+   end;
+   if (info.eventkind = cek_enter) then begin
+    if (widgetcount > 1) and (cellbefore.col >= 0) and 
+                                            (cellbefore.row >= 0) then begin
+    fentryedge:= gd_none;
+     if cellbefore.row < cell.row then begin
+      fentryedge:= gd_up;
+     end
+     else begin
+      if cellbefore.row > cell.row then begin
+       fentryedge:= gd_down;
+      end
+      else begin
+       if cellbefore.col < cell.col then begin
+        fentryedge:= gd_left;
+       end
+       else begin
+        if cellbefore.col > cell.col then begin
+         fentryedge:= gd_right;
+        end;
+       end;
+      end;
+     end;
+    end;
    end
    else begin
-//    if eventkind = cek_exit then begin
-//     filtertext:= '';
-//    end;
+    if eventkind = cek_exit then begin
+     fentryedge:= gd_none;
+    end;
    end;
   end;
   if (info.eventkind = cek_enter) or 
-                    (info.eventkind = cek_exit) then begin
+                            (info.eventkind = cek_exit) then begin
    if oe_locate in foptionsedit then begin
     editing:= false;
    end;
    factiverow:= info.newcell.row;
-{
-   if fvalue <> nil then begin
-//    fitemlist.incupdate;
-//    try
-     if info.eventkind = cek_enter then begin
-      updateitemvalues(info.newcell.row,1);
-     end
-     else begin
-      updateitemvalues(info.cellbefore.row,1);
-     end;
-//    finally
-//     fitemlist.decupdate;
-//    end;
-   end;
-}
   end;
  end;
  if canevent(tmethod(foncellevent)) then begin
@@ -3492,15 +3517,7 @@ begin
  end;
  inherited;
 end;
-{
-procedure titemedit.updatefilterselect;
-begin
- if islocating then begin
-  feditor.selstart:= 0;
-  feditor.sellength:= length(ffiltertext);
- end;
-end;
-}
+
 function titemedit.getediting: boolean;
 begin
  result:= des_editing in fstate;
@@ -3739,12 +3756,20 @@ begin
 end;
 
 procedure titemedit.dofocus();
+var
+ widget1: twidget;
 begin
- if factiveinfo.editwidget <> nil then begin
-  factiveinfo.editwidget.setfocus();
+ widget1:= getcornerwidget(fentryedge,true);
+ if widget1 <> nil then begin
+  widget1.setfocus();
  end
  else begin
-  inherited;
+  if factiveinfo.editwidget <> nil then begin
+   factiveinfo.editwidget.setfocus();
+  end
+  else begin
+   inherited;
+  end;
  end;
 end;
 
