@@ -52,6 +52,8 @@ function sys_flushfile(const handle: integer): syserrorty;
 function sys_dup(const source: integer; out dest: integer): syserrorty;
 function sys_truncatefile(const handle: integer; const size: int64): syserrorty;
 
+function sys_access(const path: filenamety; 
+                                const accessmodes: accessmodesty): syserrorty;
 function sys_setfilerights(const path: filenamety;
                               const rights: filerightsty): syserrorty;
 function sys_setfdrights(const fd: longint;

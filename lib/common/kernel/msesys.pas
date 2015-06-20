@@ -66,8 +66,10 @@ type
                     fa_offline,fa_reparsepoint,fa_sparsefile,fa_system,
                     fa_temporary,
                     fa_all);
-
  fileattributesty = set of fileattributety;
+ accessmodety = (am_read,am_write,am_execute,am_exist);
+ accessmodesty = set of accessmodety;
+ 
 const
  filerightattributes = [fa_rusr,fa_wusr,fa_xusr,
                         fa_rgrp,fa_wgrp,fa_xgrp,
@@ -152,6 +154,11 @@ function syeseterror(aerror: integer): syserrorty;
           //if aerror <> 0 -> returns sye_lasterror, sets mselasterror,
           //                  returns sye_ok otherwise
 function syesetextendederror(const aerrormessage: msestring): syserrorty;
+function buildsyserrormessage(const error: syserrorty; 
+                                      const text: string = ''): msestring;
+function buildsyserrormessage(const error: syserrorty; const sender: tobject;
+                       text: string = ''): msestring;
+
 function getcommandlinearguments: stringarty;
                  //refcount of result = 1
 function getcommandlineargument(const index: integer): string;
@@ -176,7 +183,8 @@ uses
 {$ifdef FPC}
  {$ifdef MSWINDOWS}
 Procedure CatchUnhandledException (Obj : TObject; Addr: Pointer;
- FrameCount: Longint; Frames: PPointer);external name 'FPC_BREAK_UNHANDLED_EXCEPTION';
+ FrameCount: Longint; Frames: PPointer);
+                         external name 'FPC_BREAK_UNHANDLED_EXCEPTION';
  //[public,alias:'FPC_BREAK_UNHANDLED_EXCEPTION'];
  {$endif}
 {$endif}
@@ -285,11 +293,45 @@ begin
  mselasterror:= sys_getlasterror;
 end;
 
+function buildsyserrormessage(const error: syserrorty; 
+                                      const text: string = ''): msestring;
+begin
+ result:= '';
+ if error = sye_lasterror then begin
+  result:= text + sys_geterrortext(mselasterror);
+ end
+ else begin
+  if error = sye_extendederror then begin
+   result:= text + mselasterrormessage;
+  end
+  else begin
+   result:= text;
+  end;
+ end;
+end;
+
+function buildsyserrormessage(const error: syserrorty; const sender: tobject;
+                       text: string = ''): msestring;
+begin
+ result:= '';
+ if error <> sye_ok then begin
+  if sender <> nil then begin
+   text:= sender.classname + ' ' + text;
+   if sender is tcomponent then begin
+    text:= text + fullcomponentname(tcomponent(sender));
+   end;
+  end;
+  result:= buildsyserrormessage(error,text);
+ end;
+end;
+
 procedure syserror(const error: syserrorty; const text: string); overload;
 begin
  if error = sye_ok then begin
   exit;
  end;
+ esys.create(error,buildsyserrormessage(error,text));
+{
  if error = sye_lasterror then begin
   raise esys.create(error,text + sys_geterrortext(mselasterror));
  end
@@ -301,6 +343,7 @@ begin
    raise esys.create(error,text);
   end;
  end;
+}
 end;
 
 procedure syserror(const error: syserrorty; const sender: tobject;
@@ -309,6 +352,8 @@ begin
  if error = sye_ok then begin
   exit;
  end;
+ esys.create(error,buildsyserrormessage(error,sender,text));
+{
  if sender <> nil then begin
   text:= sender.classname + ' ' + text;
   if sender is tcomponent then begin
@@ -316,6 +361,7 @@ begin
   end;
  end;
  syserror(error,text);
+}
 end;
 
 { esys }

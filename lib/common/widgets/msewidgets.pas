@@ -14,7 +14,7 @@ unit msewidgets;
 interface
 uses
  classes,mclasses,msegui,mseguiglob,msetypes,msestrings,msegraphutils,
- msegraphics,
+ msegraphics,msesystypes,
  mseevent,msescrollbar,msemenus,mserichstring,msedrawtext,mseglob,mseact,
  mseshapes,mseclasses,msebitmap,msetimer;
 
@@ -1302,6 +1302,13 @@ function askyesnocancel(const atext: msestring; const caption: msestring = '';
                      const minwidth: integer = 0): modalresultty;
 function confirmsavechangedfile(const filename: filenamety;
                out modalresult: modalresultty; multiple: boolean = false): boolean;
+function showsyserrormessage(const error: syserrorty;
+                            const text: msestring = ''): boolean;
+                               //returns true for sye_ok
+function showsyserrormessage(const error: syserrorty;
+                  const sender: tobject; const text: msestring = ''): boolean;
+                               //returns true for sye_ok
+
 //end threadsave routines
 
 procedure copytoclipboard(const value: msestring;
@@ -1312,15 +1319,15 @@ function pastefromclipboard(out value: msestring;
                    const buffer: clipboardbufferty = cbb_clipboard): boolean;
             //false if empty
 function placepopuprect(const awindow: twindow; const adest: rectty; //screenorig
-                 const placement: captionposty; const asize: sizety): rectty; overload;
+                 const placement: captionposty; const asize: sizety): rectty;
  //placement actually only cp_bottomleft and cp_center
  //todo
 function placepopuprect(const awidget: twidget;
            const adest: rectty; //widgetorig
-         const placement: captionposty; const asize: sizety): rectty; overload;
+         const placement: captionposty; const asize: sizety): rectty;
 function placeclientpopuprect(const awidget: twidget;
            const adest: rectty; //clientorig
-         const placement: captionposty; const asize: sizety): rectty; overload;
+         const placement: captionposty; const asize: sizety): rectty;
 procedure getwindowicon(const abitmap: tmaskedbitmap; out aicon,amask: pixmapty;
                         const anodefault: boolean = false);
 
@@ -1331,7 +1338,7 @@ implementation
 
 uses
  msebits,mseguiintf,msestockobjects,msekeyboard,sysutils,msemenuwidgets,
- mseactions,msepointer,msestreaming;
+ mseactions,msepointer,msestreaming,msesys;
 
 const
  captionmargin = 1; //distance focusrect to caption in tcaptionframe
@@ -1531,6 +1538,26 @@ begin
   modalresult:= mr_cancel;
  end;
  result:= modalresult in [mr_yes,mr_all];
+end;
+
+function showsyserrormessage(const error: syserrorty;
+                            const text: msestring = ''): boolean;
+                               //returns true for sye_ok
+begin
+ result:= error = sye_ok;
+ if not result then begin
+  showerror(buildsyserrormessage(error,text));
+ end;
+end;
+
+function showsyserrormessage(const error: syserrorty;
+                 const sender: tobject; const text: msestring = ''): boolean;
+                               //returns true for sye_ok
+begin
+ result:= error = sye_ok;
+ if not result then begin
+  showerror(buildsyserrormessage(error,sender,text));
+ end;
 end;
 
 function getmaxdropdownheight(const parent: twidget): integer;

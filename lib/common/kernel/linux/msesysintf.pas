@@ -959,7 +959,7 @@ begin
 
 end;
 
-function getmodebits(value: fileattributesty): __mode_t;
+function getmodebits(const value: fileattributesty): __mode_t;
 begin
  result:= 0;
 
@@ -981,6 +981,14 @@ begin
 
 end;
 
+function getaccessbits(const value: accessmodesty): cint;
+begin
+ result:= 0;
+ if am_read in value then result:= result or r_ok;
+ if am_write in value then result:= result or w_ok;
+ if am_execute in value then result:= result or x_ok;
+ if am_exist in value then result:= result or f_ok;
+end;
 
 function filetimetodatetime(const value: timespec): tdatetime;
 begin
@@ -1218,6 +1226,21 @@ begin
  result:= fstat64(fd,@statbuffer) = 0;
  if result then begin
   stattofileinfo(statbuffer,info);
+ end;
+end;
+
+function sys_access(const path: filenamety; 
+                               const accessmodes: accessmodesty): syserrorty;
+var
+ str1: filenamety;
+begin
+ str1:= tosysfilepath(path);
+ if mselibc.access(pchar(string(str1)),
+                                  getaccessbits(accessmodes)) = 0 then begin
+  result:= sye_ok;
+ end
+ else begin
+  result:= syelasterror();
  end;
 end;
 

@@ -1639,6 +1639,12 @@ begin
  end;
 end;
 
+function sys_access(const path: filenamety; 
+                                const accessmodes: accessmodesty): syserrorty;
+begin
+ result:= sye_notimplemented;
+end;
+
 function sys_setfilerights(const path: filenamety;
                                        const rights: filerightsty): syserrorty;
 var

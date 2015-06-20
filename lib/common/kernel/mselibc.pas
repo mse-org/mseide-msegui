@@ -1915,6 +1915,18 @@ function ftruncate64(handle: cint; size: cint64): cint; cdecl;
 function ftruncate64(handle: cint; size: cint64): cint; cdecl; 
                                      external clib name 'ftruncate';
 {$endif}
+//from unistd.h
+//* Values for the second argument to access.
+//   These may be OR'd together.  */
+const
+ R_OK = 4;  //* Test for read permission.  */
+ W_OK = 2;  //* Test for write permission.  */
+ X_OK = 1;  //* Test for execute permission.  */
+ F_OK = 0;  //* Test for existence.  */
+
+//* Test for access to NAME using the real UID and real GID.  */
+function access(__name: pchar; __type: cint): cint; 
+                                        cdecl; external clib name 'access';
 
 function fsync(__fd: cint): cint; cdecl; external clib name 'fsync';
 function dup(__fd: cint): cint; cdecl; external clib name 'dup';
