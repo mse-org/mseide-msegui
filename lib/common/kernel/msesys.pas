@@ -330,7 +330,7 @@ begin
  if error = sye_ok then begin
   exit;
  end;
- esys.create(error,buildsyserrormessage(error,text));
+ raise esys.create(error,buildsyserrormessage(error,text));
 {
  if error = sye_lasterror then begin
   raise esys.create(error,text + sys_geterrortext(mselasterror));
