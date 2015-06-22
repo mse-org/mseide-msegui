@@ -1443,10 +1443,15 @@ begin
  end
  else begin
   rea1:= realty(avalue); //cell
-  if fgridintf <> nil then begin
+  if (fgridintf <> nil) then begin
    with cellinfoty(canvas.drawinfopo^) do begin
     col1:= color;
     canvas.move(innerrect.pos);
+   end;
+  end
+  else begin
+   if fparentintf <> nil then begin
+    canvas.move(arect.pos); //innerrext?
    end;
   end;
  end;
@@ -1462,9 +1467,12 @@ begin
  fscrollbar.paint(canvas,col1);
  if @avalue <> nil then begin
   fscrollbar.focused:= bo1;
- end;
- if @avalue <> nil then begin
-  canvas.remove(cellinfoty(canvas.drawinfopo^).innerrect.pos);
+  if (fgridintf <> nil) then begin
+   canvas.remove(cellinfoty(canvas.drawinfopo^).innerrect.pos);
+  end
+  else begin
+    canvas.remove(arect.pos); //innerrext?
+  end;
  end;
  dec(fupdating);
  inherited;
