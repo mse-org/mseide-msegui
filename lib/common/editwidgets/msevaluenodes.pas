@@ -59,16 +59,6 @@ type
                       const aimagelist: timagelist = nil);
  end;
 
- trecordtreelistedititem = class(ttreelistedititem,irecordfield)   
-                                          //does not statsave subitems
-  protected
-   function getfieldtext(const fieldindex: integer): msestring;
-   procedure setfieldtext(const fieldindex: integer; var avalue: msestring);
-  public
-   constructor create(const aowner: tcustomitemlist = nil;
-              const aparent: ttreelistitem = nil); override;
- end;
-
  trecordlistedititem = class(tlistedititem,irecordvaluefield)
   private
   protected
@@ -92,6 +82,33 @@ type
           const aindex: int32; const getvaluemethod: getvaluemethodty); virtual;
   public
  end;
+
+ trecordtreelistedititem = class(ttreelistedititem,irecordvaluefield)   
+                                          //does not statsave subitems
+  protected
+   procedure initvalueinfo(out ainfo: recvaluety);
+   procedure initvalueinfo(const aindex: int32; var avalue: int32;
+                                                     out ainfo: recvaluety);
+   procedure initvalueinfo(const aindex: int32; var avalue: longbool;
+                                                     out ainfo: recvaluety);
+   procedure initvalueinfo(const aindex: int32; var avalue: realty;
+                                                     out ainfo: recvaluety);
+   procedure initvalueinfo(const aindex: int32; var avalue: tdatetime;
+                                                     out ainfo: recvaluety);
+   procedure initvalueinfo(const aindex: int32; var avalue: msestring;
+                                                     out ainfo: recvaluety);
+    //irecordvaluefield
+   procedure getvalueinfo(out avalues: recvaluearty); virtual;
+   function getfieldtext(const fieldindex: integer): msestring; virtual;
+   procedure setfieldtext(const fieldindex: integer;
+                                              var avalue: msestring); virtual;
+   procedure setvalue(const atype: listdatatypety;
+          const aindex: int32; const getvaluemethod: getvaluemethodty); virtual;
+  public
+   constructor create(const aowner: tcustomitemlist = nil;
+              const aparent: ttreelistitem = nil); override;
+ end;
+
 { 
  trecordtreelistedititem = class(tlistedititem,irecordvaluefield)
   private
@@ -273,15 +290,76 @@ begin
 end;
 
 function trecordtreelistedititem.getfieldtext(
-                                 const fieldindex: integer): msestring;
+              const fieldindex: integer): msestring;
 begin
  result:= '';
 end;
 
 procedure trecordtreelistedititem.setfieldtext(const fieldindex: integer;
-                var avalue: msestring);
+               var avalue: msestring);
 begin
  //dummy
+end;
+
+procedure trecordtreelistedititem.setvalue(const atype: listdatatypety;
+                  const aindex: int32; const getvaluemethod: getvaluemethodty);
+begin
+ //dummy
+end;
+
+procedure trecordtreelistedititem.getvalueinfo(out avalues: recvaluearty);
+begin
+ avalues:= nil;
+end;
+
+procedure trecordtreelistedititem.initvalueinfo(out ainfo: recvaluety);
+begin
+ ainfo.dummypointer:= nil;
+end;
+
+procedure trecordtreelistedititem.initvalueinfo(const aindex: int32;
+               var avalue: int32; out ainfo: recvaluety);
+begin
+ initvalueinfo(ainfo);
+ ainfo.datatype:= dl_integer;
+ ainfo.valueindex:= aindex;
+ ainfo.valuead:= @avalue;
+end;
+
+procedure trecordtreelistedititem.initvalueinfo(const aindex: int32;
+               var avalue: longbool; out ainfo: recvaluety);
+begin
+ initvalueinfo(ainfo);
+ ainfo.datatype:= dl_integer;
+ ainfo.valueindex:= aindex;
+ ainfo.valuead:= @avalue;
+end;
+
+procedure trecordtreelistedititem.initvalueinfo(const aindex: int32;
+               var avalue: realty; out ainfo: recvaluety);
+begin
+ initvalueinfo(ainfo);
+ ainfo.datatype:= dl_real;
+ ainfo.valueindex:= aindex;
+ ainfo.valuead:= @avalue;
+end;
+
+procedure trecordtreelistedititem.initvalueinfo(const aindex: int32;
+               var avalue: tdatetime; out ainfo: recvaluety);
+begin
+ initvalueinfo(ainfo);
+ ainfo.datatype:= dl_real;
+ ainfo.valueindex:= aindex;
+ ainfo.valuead:= @avalue;
+end;
+
+procedure trecordtreelistedititem.initvalueinfo(const aindex: int32;
+               var avalue: msestring; out ainfo: recvaluety);
+begin
+ initvalueinfo(ainfo);
+ ainfo.datatype:= dl_msestring;
+ ainfo.valueindex:= aindex;
+ ainfo.valuead:= @avalue;
 end;
 
 { trecordlistedititem }
