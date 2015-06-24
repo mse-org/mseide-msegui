@@ -144,6 +144,8 @@ type
                           const acasesensitive: boolean): integer; virtual;
    function cancaptionedit: boolean; virtual;
    function canvalueedit: boolean; virtual;
+   function getvalueitem: tlistitem; virtual;
+   procedure setvalueitem(const avalue: tlistitem); virtual;
   public
    tag: integer;
    tagpointer: pointer;
@@ -1830,6 +1832,16 @@ end;
 function tlistitem.canvalueedit: boolean;
 begin
  result:= not (ns_readonly in fstate);
+end;
+
+function tlistitem.getvalueitem: tlistitem;
+begin
+ result:= self;
+end;
+
+procedure tlistitem.setvalueitem(const avalue: tlistitem);
+begin
+ //dummy
 end;
 
 { ttreelistitem }

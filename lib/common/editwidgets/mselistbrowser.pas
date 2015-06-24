@@ -431,6 +431,7 @@ type
    procedure nodenotification(const sender: tlistitem;
                                       var ainfo: nodeactioninfoty); override;
    function compare(const l,r): integer; override;
+   class function defaultitemclass(): listedititemclassty; virtual;
   public
    constructor create; overload; override;
    constructor create(const intf: iitemlist;
@@ -478,6 +479,19 @@ type
    property onstatreaditem;
    property onstatwrite;                        
    property onstatread;
+ end;
+
+ trecordfielditem = class(tlistedititem)
+  protected
+   fvalueitem: tlistitem;
+   function getvalueitem: tlistitem; override;
+   procedure setvalueitem(const avalue: tlistitem); override;
+  public
+  end;
+ 
+ trecordfielditemeditlist = class(titemeditlist)
+  protected
+   class function defaultitemclass(): listedititemclassty; override;   
  end;
 
  valueeditinfoty = record
@@ -919,6 +933,8 @@ type
    procedure storevalue(var avalue: msestring); override;
 //   procedure dosetvalue(var avalue: msestring; var accept: boolean); override;
    function getoptionsedit: optionseditty; override;
+  public
+   constructor create(aowner: tcomponent); override;
  end;
  
  ttreeitemedit = class(titemedit,idragcontroller)
@@ -2424,14 +2440,20 @@ constructor tcustomitemeditlist.create;
 begin
  fcolorglyph:= cl_black;
  inherited;
- fitemclass:= tlistedititem;
- fstate:= fstate + [dls_nogridstreaming,dls_propertystreaming]
+ fitemclass:= defaultitemclass();
+ fstate:= fstate + [dls_nogridstreaming,dls_propertystreaming];
 end;
 
-constructor tcustomitemeditlist.create(const intf: iitemlist; const owner: titemedit);
+constructor tcustomitemeditlist.create(const intf: iitemlist;
+                                                  const owner: titemedit);
 begin
  fowner:= owner;
  inherited create(intf);
+end;
+
+class function tcustomitemeditlist.defaultitemclass(): listedititemclassty;
+begin
+ result:= tlistedititem;
 end;
 
 procedure tcustomitemeditlist.setcolorglyph(const Value: colorty);
@@ -2880,11 +2902,16 @@ function titemedit.finddataedits(aitem: tlistitem;
 var
  i1,i2: int32;
  po1: precvaluety;
+ intf1: irecordvaluefield;
 begin
  result:= false;
  if (fvalueedits.count > 0) and 
-         (aitem is trecordlistedititem) then begin
-  with irecordvaluefield(trecordlistedititem(aitem)) do begin
+   mseclasses.getcorbainterface(aitem,
+                       typeinfo(irecordvaluefield),intf1) then begin
+
+//         (aitem is trecordlistedititem) then begin
+//  with irecordvaluefield(trecordlistedititem(aitem)) do begin
+  with intf1 do begin
    getvalueinfo(ainfos);
    for i1:= 0 to high(ainfos) do begin
     po1:= @ainfos[i1];
@@ -3023,10 +3050,15 @@ begin
 end;
 
 procedure titemedit.childdataentered(const sender: igridwidget);
+var
+ intf1: irecordvaluefield;
 begin
  if sender = factiveinfo.gridintf then begin
-  if fvalue is trecordlistedititem then begin
-   with irecordvaluefield(trecordlistedititem(fvalue)) do begin
+  if mseclasses.getcorbainterface(fvalue,
+                       typeinfo(irecordvaluefield),intf1) then begin
+//  if fvalue is trecordlistedititem then begin
+//   with irecordvaluefield(trecordlistedititem(fvalue)) do begin
+   with intf1 do begin
     setvalue(factiveinfo.datatype,factiveinfo.valueindex,@sender.getvaluedata);
    end;
   end;
@@ -3038,8 +3070,11 @@ var
  infos1: recvaluearty;
  i1: int32;
  widget1: twidget;
+ intf1: irecordvaluefield;
 begin
- if fvalue is trecordlistedititem then begin
+ if mseclasses.getcorbainterface(fvalue,
+                       typeinfo(irecordvaluefield),intf1) then begin
+// if fvalue is trecordlistedititem then begin
   if finddataedits(tlistitem(fvalue),infos1) then begin
    widget1:= sender.getwidget;
    for i1:= 0 to high(infos1) do begin
@@ -5378,7 +5413,39 @@ begin
 // deleteitems(aindex,1);
 end;
 
+{ trecordfielditem }
+
+function trecordfielditem.getvalueitem: tlistitem;
+begin
+ if fvalueitem <> nil then begin
+  result:= fvalueitem;
+ end
+ else begin
+  result:= self;
+ end;
+end;
+
+procedure trecordfielditem.setvalueitem(const avalue: tlistitem);
+begin
+ fvalueitem:= avalue;
+end;
+
+{ trecordfielditemeditlist }
+
+class function trecordfielditemeditlist.defaultitemclass: listedititemclassty;
+begin
+ result:= trecordfielditem;
+end;
+
 { trecordfieldedit }
+
+constructor trecordfieldedit.create(aowner: tcomponent);
+begin
+ if fitemlist = nil then begin
+  fitemlist:=  trecordfielditemeditlist.create(iitemlist(self),self);
+ end;
+ inherited;
+end;
 
 function trecordfieldedit.getoptionsedit: optionseditty;
 begin
@@ -5721,12 +5788,16 @@ procedure ttreeitemedit.updateitemvalues(const index: integer;
                                            const count: integer);
 var
  int1: integer;
- po1: ptreelistedititematy;
+ po1: ptreelistedititem;
 begin
  if ffieldedit <> nil then begin
-  po1:= fitemlist.datapo;
+  po1:= fitemlist.getitempo(index);
   for int1:= index to index + count - 1 do begin
-   ffieldedit[int1].valuetext:= po1^[int1].valuetext;
+   with tlistitem1(ffieldedit[int1]) do begin
+    valuetext:= po1^.valuetext;
+    setvalueitem(po1^);
+   end;
+   inc(po1);
   end;
  end;
  inherited;
@@ -6135,6 +6206,11 @@ begin
  result:= titemeditlist.create;
 end;
 
+function createtrecordfielditemeditlist(const aowner: twidgetcol): tdatalist;
+begin
+ result:= trecordfielditemeditlist.create;
+end;
+
 function createttreeitemeditlist(const aowner: twidgetcol): tdatalist;
 begin
  result:= ttreeitemeditlist.create;
@@ -6169,7 +6245,9 @@ end;
 
 initialization
  registergriddatalistclass(titemeditlist.classname,
-                     {$ifdef FPC}@{$endif}createtitemeditlist);
+                                      @createtitemeditlist);
+ registergriddatalistclass(trecordfielditemeditlist.classname,
+                                      @createtrecordfielditemeditlist);
  registergriddatalistclass(ttreeitemeditlist.classname,
-                     {$ifdef FPC}@{$endif}createttreeitemeditlist);
+                                      @createttreeitemeditlist);
 end.

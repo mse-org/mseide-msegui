@@ -12,16 +12,16 @@ unit msevaluenodes;
 interface
 uses
  mseglob,msestrings,msedatalist,msedatanodes,msebitmap,mselistbrowser,
- msetypes,msevaluenodesglob;
+ msetypes,msevaluenodesglob,mseinterfaces;
 type
- irecordfield = interface(inullinterface)
-  function getfieldtext(const fieldindex: integer): msestring;
-  procedure setfieldtext(const fieldindex: integer; var avalue: msestring);
+ irecordfield = interface(inullinterface) [miid_irecordfield]
+  function getfieldtext(const afieldindex: integer): msestring;
+  procedure setfieldtext(const afieldindex: integer; var avalue: msestring);
  end;
 
  getvaluemethodty = procedure(out dest) of object;
 
- irecordvaluefield = interface(irecordfield)
+ irecordvaluefield = interface(irecordfield) [miid_irecordvaluefield]
   procedure getvalueinfo(out avalues: recvaluearty);
   procedure setvalue(const atype: listdatatypety;
                const aindex: int32; const getvaluemethod: getvaluemethodty);
@@ -44,7 +44,13 @@ type
 //   property valuetext: msestring read getvaluetext write setvaluetext;
  end;
 
- trecordfieldvalueitem = class(trecordfielditem)
+ trecordfieldvalueitem = class(trecordfielditem,irecordfield)
+  protected
+   function getfieldtext(const afieldindex: integer): msestring;
+   procedure setfieldtext(const afieldindex: integer; var avalue: msestring);
+   procedure getvalueinfo(out avalues: recvaluearty);
+   procedure setvalue(const atype: listdatatypety;
+               const aindex: int32; const getvaluemethod: getvaluemethodty);
   public
    constructor create(const intf: irecordvaluefield; const afieldindex: integer;
                       const acaption: msestring;
@@ -86,7 +92,31 @@ type
           const aindex: int32; const getvaluemethod: getvaluemethodty); virtual;
   public
  end;
- 
+{ 
+ trecordtreelistedititem = class(tlistedititem,irecordvaluefield)
+  private
+  protected
+   procedure initvalueinfo(out ainfo: recvaluety);
+   procedure initvalueinfo(const aindex: int32; var avalue: int32;
+                                                     out ainfo: recvaluety);
+   procedure initvalueinfo(const aindex: int32; var avalue: longbool;
+                                                     out ainfo: recvaluety);
+   procedure initvalueinfo(const aindex: int32; var avalue: realty;
+                                                     out ainfo: recvaluety);
+   procedure initvalueinfo(const aindex: int32; var avalue: tdatetime;
+                                                     out ainfo: recvaluety);
+   procedure initvalueinfo(const aindex: int32; var avalue: msestring;
+                                                     out ainfo: recvaluety);
+    //irecordvaluefield
+   procedure getvalueinfo(out avalues: recvaluearty); virtual;
+   function getfieldtext(const fieldindex: integer): msestring; virtual;
+   procedure setfieldtext(const fieldindex: integer;
+                                              var avalue: msestring); virtual;
+   procedure setvalue(const atype: listdatatypety;
+          const aindex: int32; const getvaluemethod: getvaluemethodty); virtual;
+  public
+ end;
+}
  trecordvaluelistedititem = class(trecordlistedititem)
   protected
    fvalueindex: int32;
@@ -154,7 +184,7 @@ type
   public
    property value: msestring read fvalue write setvalue;
  end;
-   
+ 
 implementation
 uses
  msearrayutils;
@@ -208,6 +238,29 @@ constructor trecordfieldvalueitem.create(const intf: irecordvaluefield;
                const aimagelist: timagelist = nil);
 begin
  inherited create(intf,afieldindex,acaption,fixedcaption,aimagenr,aimagelist);
+end;
+
+procedure trecordfieldvalueitem.getvalueinfo(out avalues: recvaluearty);
+begin
+ irecordvaluefield(fintf).getvalueinfo(avalues);
+end;
+
+procedure trecordfieldvalueitem.setvalue(const atype: listdatatypety;
+               const aindex: int32; const getvaluemethod: getvaluemethodty);
+begin
+ irecordvaluefield(fintf).setvalue(atype,aindex,getvaluemethod);
+end;
+
+function trecordfieldvalueitem.getfieldtext(
+              const afieldindex: integer): msestring;
+begin
+ result:= '';
+end;
+
+procedure trecordfieldvalueitem.setfieldtext(const afieldindex: integer;
+               var avalue: msestring);
+begin
+ //dummy
 end;
 
 { trecordtreelistedititem }

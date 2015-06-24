@@ -58,7 +58,9 @@ min_ibandparent,
 min_idocktarget,
 min_itabpage,
 min_iassistiveclient,
-min_iassistiveserver);
+min_iassistiveserver,
+min_irecordfield,
+min_irecordvaluefield);
 
 const
  miid_iformdesigner =          'AA.mse';{0}
@@ -107,6 +109,8 @@ const
  miid_idbdispfieldlink =       '1A.mse';{43}
  miid_iassistiveclient =       'NA.mse';{44}
  miid_iassistiveserver =       'tA.mse';{45}
+ miid_irecordfield =           'dA.mse';{46}
+ miid_irecordvaluefield =      '9A.mse';{47}
   
 implementation
 end.
