@@ -3803,6 +3803,7 @@ begin
   if awidget.getcorbainterface(typeinfo(igridwidget),intf1) then begin
    awidget.visible:= false;
    intf1.initgridwidget();
+   awidget.anchors:= [];
   end;
  end;
 end;
