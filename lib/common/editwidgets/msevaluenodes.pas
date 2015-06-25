@@ -22,7 +22,8 @@ type
  getvaluemethodty = procedure(out dest) of object;
 
  irecordvaluefield = interface(irecordfield) [miid_irecordvaluefield]
-  procedure getvalueinfo(out avalues: recvaluearty);
+  procedure getvalueinfo(out avalues: recvaluearty; const aindex: int32 = -1);
+                                                   //-1 -> all
   procedure setvalue(const atype: listdatatypety;
                const aindex: int32; const getvaluemethod: getvaluemethodty);
  end;
@@ -44,11 +45,11 @@ type
 //   property valuetext: msestring read getvaluetext write setvaluetext;
  end;
 
- trecordfieldvalueitem = class(trecordfielditem,irecordfield)
+ trecordfieldvalueitem = class(trecordfielditem,irecordvaluefield)
   protected
    function getfieldtext(const afieldindex: integer): msestring;
    procedure setfieldtext(const afieldindex: integer; var avalue: msestring);
-   procedure getvalueinfo(out avalues: recvaluearty);
+   procedure getvalueinfo(out avalues: recvaluearty; const aindex: int32 = -1);
    procedure setvalue(const atype: listdatatypety;
                const aindex: int32; const getvaluemethod: getvaluemethodty);
   public
@@ -59,22 +60,20 @@ type
                       const aimagelist: timagelist = nil);
  end;
 
+ fieldinfoty = record
+  datatype: listdatatypety;
+  data: pointer;
+ end;
+
+//
+// hint: irecordvaluefield can be slow
+//
  trecordlistedititem = class(tlistedititem,irecordvaluefield)
   private
   protected
-   procedure initvalueinfo(out ainfo: recvaluety);
-   procedure initvalueinfo(const aindex: int32; var avalue: int32;
-                                                     out ainfo: recvaluety);
-   procedure initvalueinfo(const aindex: int32; var avalue: longbool;
-                                                     out ainfo: recvaluety);
-   procedure initvalueinfo(const aindex: int32; var avalue: realty;
-                                                     out ainfo: recvaluety);
-   procedure initvalueinfo(const aindex: int32; var avalue: tdatetime;
-                                                     out ainfo: recvaluety);
-   procedure initvalueinfo(const aindex: int32; var avalue: msestring;
-                                                     out ainfo: recvaluety);
     //irecordvaluefield
-   procedure getvalueinfo(out avalues: recvaluearty); virtual;
+   procedure getvalueinfo(out avalues: recvaluearty; const aindex: int32 = -1);
+                                                                        virtual;
    function getfieldtext(const fieldindex: integer): msestring; virtual;
    procedure setfieldtext(const fieldindex: integer;
                                               var avalue: msestring); virtual;
@@ -86,19 +85,9 @@ type
  trecordtreelistedititem = class(ttreelistedititem,irecordvaluefield)   
                                           //does not statsave subitems
   protected
-   procedure initvalueinfo(out ainfo: recvaluety);
-   procedure initvalueinfo(const aindex: int32; var avalue: int32;
-                                                     out ainfo: recvaluety);
-   procedure initvalueinfo(const aindex: int32; var avalue: longbool;
-                                                     out ainfo: recvaluety);
-   procedure initvalueinfo(const aindex: int32; var avalue: realty;
-                                                     out ainfo: recvaluety);
-   procedure initvalueinfo(const aindex: int32; var avalue: tdatetime;
-                                                     out ainfo: recvaluety);
-   procedure initvalueinfo(const aindex: int32; var avalue: msestring;
-                                                     out ainfo: recvaluety);
     //irecordvaluefield
-   procedure getvalueinfo(out avalues: recvaluearty); virtual;
+   procedure getvalueinfo(out avalues: recvaluearty; const aindex: int32 = -1);
+                                                                        virtual;
    function getfieldtext(const fieldindex: integer): msestring; virtual;
    procedure setfieldtext(const fieldindex: integer;
                                               var avalue: msestring); virtual;
@@ -137,7 +126,8 @@ type
  trecordvaluelistedititem = class(trecordlistedititem)
   protected
    fvalueindex: int32;
-   procedure getvalueinfo(out avalues: recvaluearty); override;
+   procedure getvalueinfo(out avalues: recvaluearty; const aindex: int32 = -1);
+                                                                       override;
   public
    constructor create(const avalueindex: int32 = -1;
                                const aowner: tcustomitemlist = nil); virtual;
@@ -150,7 +140,8 @@ type
    fvalue: int32;
    procedure setvalue(const avalue: int32);
   protected
-   procedure getvalueinfo(out avalues: recvaluearty); override;
+   procedure getvalueinfo(out avalues: recvaluearty; const aindex: int32 = -1);
+                                                                       override;
    procedure setvalue(const atype: listdatatypety;
        const aindex: int32; const getvaluemethod: getvaluemethodty); override;
   public
@@ -171,7 +162,8 @@ type
    fvalue: realty;
    procedure setvalue(const avalue: realty);
   protected
-   procedure getvalueinfo(out avalues: recvaluearty); override;
+   procedure getvalueinfo(out avalues: recvaluearty; const aindex: int32 = -1);
+                                                                       override;
    procedure setvalue(const atype: listdatatypety;
        const aindex: int32; const getvaluemethod: getvaluemethodty); override;
   public
@@ -183,7 +175,8 @@ type
    fvalue: tdatetime;
    procedure setvalue(const avalue: tdatetime);
   protected
-   procedure getvalueinfo(out avalues: recvaluearty); override;
+   procedure getvalueinfo(out avalues: recvaluearty; const aindex: int32 = -1);
+                                                                       override;
    procedure setvalue(const atype: listdatatypety;
        const aindex: int32; const getvaluemethod: getvaluemethodty); override;
   public
@@ -195,17 +188,158 @@ type
    fvalue: msestring;
    procedure setvalue(const avalue: msestring);
   protected
-   procedure getvalueinfo(out avalues: recvaluearty); override;
+   procedure getvalueinfo(out avalues: recvaluearty; const aindex: int32 = -1);
+                                                                       override;
    procedure setvalue(const atype: listdatatypety;
        const aindex: int32; const getvaluemethod: getvaluemethodty); override;
   public
    property value: msestring read fvalue write setvalue;
  end;
+
+procedure initvalueinfo(out ainfo: recvaluety);
+procedure initvalueinfo(const aindex: int32; var avalue: int32;
+                                                  out ainfo: recvaluety);
+procedure initvalueinfo(const aindex: int32; var avalue: longbool;
+                                                  out ainfo: recvaluety);
+procedure initvalueinfo(const aindex: int32; var avalue: realty;
+                                                  out ainfo: recvaluety);
+procedure initvalueinfo(const aindex: int32; var avalue: tdatetime;
+                                                  out ainfo: recvaluety);
+procedure initvalueinfo(const aindex: int32; var avalue: msestring;
+                                                  out ainfo: recvaluety);
+function valuefield(var avalue: int32): fieldinfoty;
+function valuefield(var avalue: longbool): fieldinfoty;
+function valuefield(var avalue: real): fieldinfoty;
+function valuefield(var avalue: realty): fieldinfoty;
+function valuefield(var avalue: tdatetime): fieldinfoty;
+function valuefield(var avalue: msestring): fieldinfoty;
+function buildvalueinfos(const afields: array of fieldinfoty; 
+                            const aindex: int32): recvaluearty;
+                                 //-1 -> all
  
 implementation
 uses
  msearrayutils;
  
+procedure initvalueinfo(out ainfo: recvaluety);
+begin
+ ainfo.dummypointer:= nil;
+end;
+
+procedure initvalueinfo(const aindex: int32;
+               var avalue: int32; out ainfo: recvaluety);
+begin
+ initvalueinfo(ainfo);
+ ainfo.datatype:= dl_integer;
+ ainfo.valueindex:= aindex;
+ ainfo.valuead:= @avalue;
+end;
+
+procedure initvalueinfo(const aindex: int32;
+               var avalue: longbool; out ainfo: recvaluety);
+begin
+ initvalueinfo(ainfo);
+ ainfo.datatype:= dl_integer;
+ ainfo.valueindex:= aindex;
+ ainfo.valuead:= @avalue;
+end;
+
+procedure initvalueinfo(const aindex: int32;
+               var avalue: realty; out ainfo: recvaluety);
+begin
+ initvalueinfo(ainfo);
+ ainfo.datatype:= dl_real;
+ ainfo.valueindex:= aindex;
+ ainfo.valuead:= @avalue;
+end;
+
+procedure initvalueinfo(const aindex: int32;
+               var avalue: tdatetime; out ainfo: recvaluety);
+begin
+ initvalueinfo(ainfo);
+ ainfo.datatype:= dl_real;
+ ainfo.valueindex:= aindex;
+ ainfo.valuead:= @avalue;
+end;
+
+procedure initvalueinfo(const aindex: int32;
+               var avalue: msestring; out ainfo: recvaluety);
+begin
+ initvalueinfo(ainfo);
+ ainfo.datatype:= dl_msestring;
+ ainfo.valueindex:= aindex;
+ ainfo.valuead:= @avalue;
+end;
+
+function valuefield(var avalue: int32): fieldinfoty;
+begin
+ result.datatype:= dl_integer;
+ result.data:= @avalue;
+end;
+
+function valuefield(var avalue: longbool): fieldinfoty;
+begin
+ result.datatype:= dl_integer;
+ result.data:= @avalue;
+end;
+
+function valuefield(var avalue: real): fieldinfoty;
+begin
+ result.datatype:= dl_real;
+ result.data:= @avalue;
+end;
+
+function valuefield(var avalue: realty): fieldinfoty;
+begin
+ result.datatype:= dl_real;
+ result.data:= @avalue;
+end;
+
+function valuefield(var avalue: tdatetime): fieldinfoty;
+begin
+ result.datatype:= dl_real;
+ result.data:= @avalue;
+end;
+
+function valuefield(var avalue: msestring): fieldinfoty;
+begin
+ result.datatype:= dl_msestring;
+ result.data:= @avalue;
+end;
+
+function buildvalueinfos(
+              const afields: array of fieldinfoty;
+               const aindex: int32): recvaluearty;
+
+ procedure setup(const aindex: int32; const source: fieldinfoty;
+                                               out dest: recvaluety);
+ begin
+  initvalueinfo(dest);
+  dest.datatype:= source.datatype;
+  dest.valueindex:= aindex;
+  dest.valuead:= source.data;
+ end;//setup
+
+var
+ i1: int32;                           
+begin
+ if aindex < 0 then begin
+  setlength(result,length(afields));
+  for i1:= 0 to high(result) do begin
+   setup(i1,afields[i1],result[i1]);
+  end;
+ end
+ else begin
+  if aindex >= high(afields) then begin
+   setlength(result,1);
+   setup(aindex,afields[aindex],result[0]);
+  end
+  else begin
+   result:= nil;
+  end;
+ end;
+end;
+
 { trecordfielditem }
 
 constructor trecordfielditem.create(const intf: irecordfield;
@@ -257,9 +391,10 @@ begin
  inherited create(intf,afieldindex,acaption,fixedcaption,aimagenr,aimagelist);
 end;
 
-procedure trecordfieldvalueitem.getvalueinfo(out avalues: recvaluearty);
+procedure trecordfieldvalueitem.getvalueinfo(out avalues: recvaluearty;
+                                                    const aindex: int32 = -1);
 begin
- irecordvaluefield(fintf).getvalueinfo(avalues);
+ irecordvaluefield(fintf).getvalueinfo(avalues,fieldindex);
 end;
 
 procedure trecordfieldvalueitem.setvalue(const atype: listdatatypety;
@@ -307,62 +442,19 @@ begin
  //dummy
 end;
 
-procedure trecordtreelistedititem.getvalueinfo(out avalues: recvaluearty);
+procedure trecordtreelistedititem.getvalueinfo(out avalues: recvaluearty;
+                                                      const aindex: int32 = -1);
 begin
  avalues:= nil;
 end;
 
-procedure trecordtreelistedititem.initvalueinfo(out ainfo: recvaluety);
-begin
- ainfo.dummypointer:= nil;
-end;
-
-procedure trecordtreelistedititem.initvalueinfo(const aindex: int32;
-               var avalue: int32; out ainfo: recvaluety);
-begin
- initvalueinfo(ainfo);
- ainfo.datatype:= dl_integer;
- ainfo.valueindex:= aindex;
- ainfo.valuead:= @avalue;
-end;
-
-procedure trecordtreelistedititem.initvalueinfo(const aindex: int32;
-               var avalue: longbool; out ainfo: recvaluety);
-begin
- initvalueinfo(ainfo);
- ainfo.datatype:= dl_integer;
- ainfo.valueindex:= aindex;
- ainfo.valuead:= @avalue;
-end;
-
-procedure trecordtreelistedititem.initvalueinfo(const aindex: int32;
-               var avalue: realty; out ainfo: recvaluety);
-begin
- initvalueinfo(ainfo);
- ainfo.datatype:= dl_real;
- ainfo.valueindex:= aindex;
- ainfo.valuead:= @avalue;
-end;
-
-procedure trecordtreelistedititem.initvalueinfo(const aindex: int32;
-               var avalue: tdatetime; out ainfo: recvaluety);
-begin
- initvalueinfo(ainfo);
- ainfo.datatype:= dl_real;
- ainfo.valueindex:= aindex;
- ainfo.valuead:= @avalue;
-end;
-
-procedure trecordtreelistedititem.initvalueinfo(const aindex: int32;
-               var avalue: msestring; out ainfo: recvaluety);
-begin
- initvalueinfo(ainfo);
- ainfo.datatype:= dl_msestring;
- ainfo.valueindex:= aindex;
- ainfo.valuead:= @avalue;
-end;
-
 { trecordlistedititem }
+
+procedure trecordlistedititem.getvalueinfo(out avalues: recvaluearty;
+                                                   const aindex: int32 = -1);
+begin
+ avalues:= nil;
+end;
 
 function trecordlistedititem.getfieldtext(
               const fieldindex: integer): msestring;
@@ -382,61 +474,6 @@ begin
  //dummy
 end;
 
-procedure trecordlistedititem.getvalueinfo(out avalues: recvaluearty);
-begin
- avalues:= nil;
-end;
-
-procedure trecordlistedititem.initvalueinfo(out ainfo: recvaluety);
-begin
- ainfo.dummypointer:= nil;
-end;
-
-procedure trecordlistedititem.initvalueinfo(const aindex: int32;
-               var avalue: int32; out ainfo: recvaluety);
-begin
- initvalueinfo(ainfo);
- ainfo.datatype:= dl_integer;
- ainfo.valueindex:= aindex;
- ainfo.valuead:= @avalue;
-end;
-
-procedure trecordlistedititem.initvalueinfo(const aindex: int32;
-               var avalue: longbool; out ainfo: recvaluety);
-begin
- initvalueinfo(ainfo);
- ainfo.datatype:= dl_integer;
- ainfo.valueindex:= aindex;
- ainfo.valuead:= @avalue;
-end;
-
-procedure trecordlistedititem.initvalueinfo(const aindex: int32;
-               var avalue: realty; out ainfo: recvaluety);
-begin
- initvalueinfo(ainfo);
- ainfo.datatype:= dl_real;
- ainfo.valueindex:= aindex;
- ainfo.valuead:= @avalue;
-end;
-
-procedure trecordlistedititem.initvalueinfo(const aindex: int32;
-               var avalue: tdatetime; out ainfo: recvaluety);
-begin
- initvalueinfo(ainfo);
- ainfo.datatype:= dl_real;
- ainfo.valueindex:= aindex;
- ainfo.valuead:= @avalue;
-end;
-
-procedure trecordlistedititem.initvalueinfo(const aindex: int32;
-               var avalue: msestring; out ainfo: recvaluety);
-begin
- initvalueinfo(ainfo);
- ainfo.datatype:= dl_msestring;
- ainfo.valueindex:= aindex;
- ainfo.valuead:= @avalue;
-end;
-
 { trecordvaluelistedititem }
 
 constructor trecordvaluelistedititem.create(const avalueindex: int32;
@@ -446,7 +483,8 @@ begin
  create(aowner);
 end;
 
-procedure trecordvaluelistedititem.getvalueinfo(out avalues: recvaluearty);
+procedure trecordvaluelistedititem.getvalueinfo(out avalues: recvaluearty;
+                                                     const aindex: int32 = -1);
 begin
  allocuninitedarray(1,sizeof(recvaluety),avalues);
  with avalues[0] do begin
@@ -467,7 +505,8 @@ begin
  end;
 end;
 
-procedure tintegervaluelistedititem.getvalueinfo(out avalues: recvaluearty);
+procedure tintegervaluelistedititem.getvalueinfo(out avalues: recvaluearty;
+                                                      const aindex: int32 = -1);
 begin
  inherited;
  with avalues[0] do begin
@@ -512,7 +551,8 @@ begin
  end;
 end;
 
-procedure trealvaluelistedititem.getvalueinfo(out avalues: recvaluearty);
+procedure trealvaluelistedititem.getvalueinfo(out avalues: recvaluearty;
+                                                   const aindex: int32 = -1);
 begin
  inherited;
  with avalues[0] do begin
@@ -542,7 +582,8 @@ begin
  end;
 end;
 
-procedure tdatetimevaluelistedititem.getvalueinfo(out avalues: recvaluearty);
+procedure tdatetimevaluelistedititem.getvalueinfo(out avalues: recvaluearty;
+                                                     const aindex: int32 = -1);
 begin
  inherited;
  with avalues[0] do begin
@@ -572,7 +613,8 @@ begin
  end;
 end;
 
-procedure tstringvaluelistedititem.getvalueinfo(out avalues: recvaluearty);
+procedure tstringvaluelistedititem.getvalueinfo(out avalues: recvaluearty;
+                                                     const aindex: int32 = -1);
 begin
  inherited;
  with avalues[0] do begin
