@@ -1738,7 +1738,8 @@ begin
    if col1 = cl_font then begin
     col1:= font.color;
    end;
-   if (fgridintf = nil) and (fparentintf <> nil) then begin
+   if (fgridintf = nil) and (fparentintf <> nil) and 
+                                  (oe1_nocellpaint in optionsedit1) then begin
     paintbackground(canvas,widgetrect);
     paintglyph(canvas,col1,datapo^,self.innerparentrect);
     paintoverlay(canvas,widgetrect);

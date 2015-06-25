@@ -3023,6 +3023,7 @@ var
  databefore: pointer;
  infos1: recvaluearty;
  i1: int32;
+ fra1,fra2: framety;
 begin
  with cellinfoty(canvas.drawinfopo^) do begin
   doextendimage(canvas.drawinfopo,flayoutinfocell.imageextra);
@@ -3030,16 +3031,22 @@ begin
   flayoutinfocell.textflags:= textflags;
   if finddataedits(tlistitem(datapo^),infos1) then begin
    databefore:= datapo;
+   fra1:= getcellframe;
+   inflaterect1(innerrect,fra1);
    for i1:= 0 to high(infos1) do begin
     with infos1[i1] do begin
      if dummypointer <> nil then begin
       with pvalueeditinfoty(dummypointer)^ do begin
        datapo:= valuead;
+       fra2:= gridintf.getcellframe;
+       deflaterect1(innerrect,fra2);
        gridintf.drawcell(canvas);
+       inflaterect1(innerrect,fra2);
       end;
      end;
     end;
     datapo:= databefore;
+    deflaterect1(innerrect,fra1);
    end;
   end
   else begin

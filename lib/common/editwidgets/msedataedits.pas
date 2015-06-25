@@ -1979,7 +1979,12 @@ begin
   result:= frame.cellframe;
  end
  else begin
-  result:= tgridarrayprop(fgridintf.getcol.prop).innerframe;
+  if fgridintf <> nil then begin
+   result:= tgridarrayprop(fgridintf.getcol.prop).innerframe;
+  end
+  else begin
+   result:= getinnerframe;
+  end;
  end;
 end;
 
@@ -2293,7 +2298,7 @@ begin
   end
   else begin
    if (fgridintf = nil) and (fparentintf <> nil) and 
-                                  (oe1_nocellpaint in optionsedit1)then begin
+                                  (oe1_nocellpaint in optionsedit1) then begin
     paintbackground(canvas,widgetrect);
     gettextrects(outer1,inner1);
     pt1:= paintparentpos;
