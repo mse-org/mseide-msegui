@@ -330,7 +330,7 @@ begin
   end;
  end
  else begin
-  if aindex >= high(afields) then begin
+  if aindex <= high(afields) then begin
    setlength(result,1);
    setup(aindex,afields[aindex],result[0]);
   end
@@ -438,8 +438,19 @@ end;
 
 procedure trecordtreelistedititem.setvalue(const atype: listdatatypety;
                   const aindex: int32; const getvaluemethod: getvaluemethodty);
+var
+ values1: recvaluearty;
 begin
- //dummy
+ if aindex >= 0 then begin
+  getvalueinfo(values1,aindex);
+  if (values1 <> nil) then begin
+   with values1[0] do begin
+    if datatype = atype then begin
+     getvaluemethod(valuead^);
+    end;
+   end;
+  end;
+ end;
 end;
 
 procedure trecordtreelistedititem.getvalueinfo(out avalues: recvaluearty;

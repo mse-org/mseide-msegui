@@ -194,6 +194,7 @@ type
    function getvaluetext: msestring; virtual;
    procedure setvaluetext(var avalue: msestring); virtual;
    property valuetext: msestring read getvaluetext write setvaluetext1;
+   property valueitem: tlistitem read getvalueitem;
    property top: boolean read gettop write settop;
  end;
 

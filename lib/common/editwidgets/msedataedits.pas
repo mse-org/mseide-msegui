@@ -2292,7 +2292,8 @@ begin
    end;
   end
   else begin
-   if (fgridintf = nil) and (fparentintf <> nil) then begin
+   if (fgridintf = nil) and (fparentintf <> nil) and 
+                                  (oe1_nocellpaint in optionsedit1)then begin
     paintbackground(canvas,widgetrect);
     gettextrects(outer1,inner1);
     pt1:= paintparentpos;

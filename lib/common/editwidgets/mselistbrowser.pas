@@ -2905,8 +2905,8 @@ var
  intf1: irecordvaluefield;
 begin
  result:= false;
- if (fvalueedits.count > 0) and 
-   mseclasses.getcorbainterface(aitem,
+ if (fvalueedits.count > 0) and (aitem <> nil) and
+   mseclasses.getcorbainterface(aitem.valueitem,
                        typeinfo(irecordvaluefield),intf1) then begin
 
 //         (aitem is trecordlistedititem) then begin
@@ -3054,7 +3054,7 @@ var
  intf1: irecordvaluefield;
 begin
  if sender = factiveinfo.gridintf then begin
-  if mseclasses.getcorbainterface(fvalue,
+  if (fvalue <> nil) and mseclasses.getcorbainterface(fvalue.valueitem,
                        typeinfo(irecordvaluefield),intf1) then begin
 //  if fvalue is trecordlistedititem then begin
 //   with irecordvaluefield(trecordlistedititem(fvalue)) do begin
