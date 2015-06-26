@@ -2024,6 +2024,7 @@ type
    function entered: boolean;
    function activeentered: boolean; 
      //true if entered and window is regularactivewindow or inactivated
+   function activefocused(): boolean;
    function focused: boolean;
    function clicked: boolean;
 
@@ -11579,6 +11580,11 @@ function twidget.activeentered: boolean;
 begin
  result:= entered and ((appinst.regularactivewindow = window) or 
                 (appinst.finactivewindow = window));
+end;
+
+function twidget.activefocused: boolean;
+begin
+ result:= fwidgetstate * [ws_focused,ws_active] = [ws_focused,ws_active];
 end;
 
 function twidget.focused: boolean;
