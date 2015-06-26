@@ -1104,7 +1104,8 @@ begin
     widget1.parentwidget:= fcontainer2;
    end;
    if (csdesigning in componentstate) or (ffocusedcell.row < 0) then begin
-    rect1:= cellrect(makegridcoord(colindex,0),cil_noline);
+    rect1:= cellrect(makegridcoord(colindex,invalidaxis),cil_noline);
+    rect1.cy:= datarowheight;
     if not (csdesigning in componentstate) then begin
      if row >= 0 then begin
       rect1.cx:= rect1.cx + fdatacols.mergedwidth(index,
