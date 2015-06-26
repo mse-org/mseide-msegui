@@ -2247,27 +2247,29 @@ var
 
  procedure cellpaint(const rect: rectty; const innerrect: rectty);
  begin
-  if bo1 and (fempty_color <> cl_none) and 
-                                 not (des_grayed in fstate) then begin
-   canvas.fillrect(rect,fempty_color);
-  end;
-  paintimage(canvas);
-  if mstr1 <> '' then begin
-   if bo1 then begin    
-    canvas.font:= getfontempty1{fempty_font};
-    atextflags:= fempty_textflags;
-    if fempty_textcolor <> cl_none then begin
-     canvas.font.color:= fempty_textcolor;
-    end;
-    if fempty_textcolorbackground <> cl_none then begin
-     canvas.font.color:= fempty_textcolorbackground;
-    end;
+  if (rect.cx > 0) and (rect.cy > 0) then begin
+   if bo1 and (fempty_color <> cl_none) and 
+                                  not (des_grayed in fstate) then begin
+    canvas.fillrect(rect,fempty_color);
    end;
-   if des_grayed in fstate then begin
-    include(atextflags,tf_grayed);
+   paintimage(canvas);
+   if mstr1 <> '' then begin
+    if bo1 then begin    
+     canvas.font:= getfontempty1{fempty_font};
+     atextflags:= fempty_textflags;
+     if fempty_textcolor <> cl_none then begin
+      canvas.font.color:= fempty_textcolor;
+     end;
+     if fempty_textcolorbackground <> cl_none then begin
+      canvas.font.color:= fempty_textcolorbackground;
+     end;
+    end;
+    if des_grayed in fstate then begin
+     include(atextflags,tf_grayed);
+    end;
+    drawtext(canvas,mstr1,deflaterect(innerrect,fra1),deflaterect(rect,fra1),
+                                                                  atextflags);
    end;
-   drawtext(canvas,mstr1,deflaterect(innerrect,fra1),deflaterect(rect,fra1),
-                                                                 atextflags);
   end;
  end; //cellpaint
 
@@ -2299,13 +2301,15 @@ begin
   else begin
    if (fgridintf = nil) and (fparentintf <> nil) and 
                                   (oe1_nocellpaint in optionsedit1) then begin
-    paintbackground(canvas,widgetrect);
-    gettextrects(outer1,inner1);
-    pt1:= paintparentpos;
-    addpoint1(outer1.pos,pt1);
-    addpoint1(inner1.pos,pt1);
-    cellpaint(outer1,inner1);
-    paintoverlay(canvas,widgetrect);
+    if (fwidgetrect.cx > 0) and (fwidgetrect.cy > 0) then begin
+     paintbackground(canvas,fwidgetrect);
+     gettextrects(outer1,inner1);
+     pt1:= paintparentpos;
+     addpoint1(outer1.pos,pt1);
+     addpoint1(inner1.pos,pt1);
+     cellpaint(outer1,inner1);
+     paintoverlay(canvas,fwidgetrect);
+    end;
    end
    else begin
     cellpaint(rect,innerrect);

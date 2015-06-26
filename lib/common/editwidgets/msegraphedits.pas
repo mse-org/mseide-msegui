@@ -1649,9 +1649,9 @@ begin
    col1:= getfont1.color;
   end;
  end;
- {$ifdef FPC} {$checkpointer off} {$endif}
- paintglyph(canvas,col1,nil^,innerclientrect);
- {$ifdef FPC} {$checkpointer default} {$endif}
+ if (innerclientrect.cx > 0) and (innerclientrect.cy > 0) then begin
+  paintglyph(canvas,col1,nil^,innerclientrect);
+ end;
  if (fgridintf <> nil) and not (csdesigning in componentstate) then begin
   fgridintf.widgetpainted(canvas);
  end;
@@ -1731,6 +1731,7 @@ end;
 procedure tgraphdataedit.drawcell(const canvas: tcanvas);
 var
  col1: colorty;
+ rect1: rectty;
 begin
  with cellinfoty(canvas.drawinfopo^) do begin
   if datapo <> nil then begin
@@ -1740,12 +1741,19 @@ begin
    end;
    if (fgridintf = nil) and (fparentintf <> nil) and 
                                   (oe1_nocellpaint in optionsedit1) then begin
-    paintbackground(canvas,widgetrect);
-    paintglyph(canvas,col1,datapo^,self.innerparentrect);
-    paintoverlay(canvas,widgetrect);
+    if (fwidgetrect.cx > 0) and (fwidgetrect.cy > 0) then begin
+     paintbackground(canvas,widgetrect);
+     rect1:= self.innerparentrect;
+     if (rect1.cx > 0) and (rect1.cy > 0) then begin
+      paintglyph(canvas,col1,datapo^,rect1);
+     end;
+     paintoverlay(canvas,widgetrect);
+    end;
    end
    else begin
-    paintglyph(canvas,col1,datapo^,innerrect);
+    if (innerrect.cx > 0) and (innerrect.cy > 0) then begin
+     paintglyph(canvas,col1,datapo^,innerrect);
+    end;
    end;
   end;
  end;
