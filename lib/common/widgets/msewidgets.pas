@@ -4126,6 +4126,7 @@ begin
 // fzoomwheelsensitivity:= 1;
  fowner:= owner;
  inherited create(intf,iscrollbox(self));
+ fstate:= fstate+ [fs_canclientextendx,fs_canclientextendy];
  initinnerframe;
  internalupdatestate;
 // options:= defaultscrolloptions;

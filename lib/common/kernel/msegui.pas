@@ -172,7 +172,8 @@ type
                  fs_cancaptionsyncx,fs_cancaptionsyncy,
                  fs_drawfocusrect,fs_paintrectfocus,
                  fs_captionfocus,fs_captionhint,fs_rectsvalid,
-                 fs_widgetactive,fs_paintposinited,fs_needsmouseinvalidate);
+                 fs_widgetactive,fs_paintposinited,fs_needsmouseinvalidate,
+                 fs_canclientextendx,fs_canclientextendy);
  framestatesty = set of framestatety;
 
  hintflagty = (hfl_show,hfl_custom,{hfl_left,hfl_top,hfl_right,hfl_bottom,}
@@ -5421,10 +5422,10 @@ end;
 procedure tcustomframe.checkminclientsize(var asize: sizety);
 begin
  checkstate;
- if asize.cx < fpaintrect.cx then begin
+ if not (fs_canclientextendx in fstate) or (asize.cx < fpaintrect.cx) then begin
   asize.cx:= fpaintrect.cx;
  end;
- if asize.cy < fpaintrect.cy then begin
+ if not (fs_canclientextendy in fstate) or (asize.cy < fpaintrect.cy) then begin
   asize.cy:= fpaintrect.cy;
  end;
 end;
@@ -8450,7 +8451,7 @@ begin
   else begin
    int1:= 0; //loopcount
    repeat
-    size1:= fparentwidget.minclientsize;
+    size1:= fparentwidget.minclientsize();
     rect1:= fwidgetrect;
     delta:= subsize(size1,fparentclientsize);
     if ws1_anchorsetting in fwidgetstate1 then begin

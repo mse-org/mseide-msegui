@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2014 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2015 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -401,8 +401,11 @@ var
    end;
    scrolllength:= alength - endblen - endblen;
   end;
- end;
- 
+ end; //checkscrollength
+
+var
+ i1: int32;
+  
 begin
  with fdim,fdrawinfo do begin
   minblen:= fbuttonminlength;
@@ -481,6 +484,10 @@ begin
   end;
   if buttonlength1 < minblen then begin
    buttonlength1:= minblen;
+  end; 
+  i1:= scrolllength div 2;
+  if buttonlength1 > i1 then begin
+   buttonlength1:= i1;
   end;
   if fdirection in [gd_right,gd_left] then begin
    areas[sbbu_move].ca.dim.cx:= buttonlength1;
