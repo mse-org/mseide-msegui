@@ -427,6 +427,8 @@ type
    fonitemnotification: nodenotificationeventty;
    procedure setcolorglyph(const Value: colorty);
   protected
+   procedure createstatitem(const reader: tstatreader;
+                                     out item: tlistitem); override;
    procedure doitemchange(const index: integer); override;
    procedure nodenotification(const sender: tlistitem;
                                       var ainfo: nodeactioninfoty); override;
@@ -2613,6 +2615,25 @@ begin
   result:= msecomparetext(tlistitem1(l).fcaption,tlistitem1(r).fcaption);
  end;
 }
+end;
+
+procedure tcustomitemeditlist.createstatitem(const reader: tstatreader;
+                                                       out item: tlistitem);
+var
+ i1: int32;
+begin
+ if no_createvalueitems in foptions then begin
+  i1:= reader.readinteger(valuenodetypename);
+  if (i1 <= 0) or (i1 > ord(high(valuenodeclasses))) then begin
+   inherited;
+  end
+  else begin
+   item:= valuenodeclasses[listdatatypety(i1)].create(self);
+  end;
+ end
+ else begin
+  inherited;
+ end;
 end;
 
 { titemeditlist}

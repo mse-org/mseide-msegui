@@ -52,7 +52,9 @@ type
                  no_updateparentnotchecked, 
                          //track ns1_parentnotchecked state, slow!
                  no_cellitemselect,     //copy cell select state to item select
-                 no_nofreeitems         //do not free items for removed rows
+                 no_nofreeitems,        //do not free items for removed rows
+                 no_createvalueitems    //titemeditlist creates items depending
+                                        //on statread type value
                  );
  nodeoptionsty = set of nodeoptionty;
 
@@ -443,6 +445,8 @@ type
    procedure updatelayout; virtual;
    procedure docreateobject(var instance: tobject); override;
    procedure createitem(out item: tlistitem); virtual;
+   procedure createstatitem(const reader: tstatreader;
+                                     out item: tlistitem); virtual;
    procedure statreaditem(const reader: tstatreader;
                     var aitem: tlistitem); virtual;
    procedure statreadtreeitem(const reader: tstatreader; const parent: ttreelistitem;
@@ -1478,6 +1482,12 @@ begin
  item:= listitemclassty(fitemclass).create(self);
 end;
 
+procedure tcustomitemlist.createstatitem(const reader: tstatreader;
+                                                     out item: tlistitem);
+begin
+ createitem(item);
+end;
+
 procedure tcustomitemlist.statreaditem(const reader: tstatreader;
                               var aitem: tlistitem);
 begin
@@ -1485,7 +1495,7 @@ begin
   fonstatreaditem(self,reader,aitem);
  end;
  if aitem = nil then begin
-  createitem(aitem);
+  createstatitem(reader,aitem);
  end;
 end;
 

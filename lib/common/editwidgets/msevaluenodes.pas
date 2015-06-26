@@ -12,7 +12,13 @@ unit msevaluenodes;
 interface
 uses
  mseglob,msestrings,msedatalist,msedatanodes,msebitmap,mselistbrowser,
- msetypes,msevaluenodesglob,mseinterfaces;
+ msetypes,msevaluenodesglob,mseinterfaces,msestat;
+
+const
+ valuenodetypename = 't';
+ valuenodeindexname = 'i';
+ valuenodevaluename = 'v';
+  
 type
  irecordfield = interface(inullinterface) [miid_irecordfield]
   function getfieldtext(const afieldindex: integer): msestring;
@@ -124,27 +130,35 @@ type
  end;
 }
  trecordvaluelistedititem = class(trecordlistedititem)
+  private
   protected
    fvalueindex: int32;
    procedure getvalueinfo(out avalues: recvaluearty; const aindex: int32 = -1);
                                                                        override;
+   function getvaluetype: listdatatypety; virtual;
   public
    constructor create(const avalueindex: int32 = -1;
                                const aowner: tcustomitemlist = nil); virtual;
+   procedure dostatread(const reader: tstatreader); override;
+   procedure dostatwrite(const writer: tstatwriter); override;
    property valueindex: int32 read fvalueindex write fvalueindex;
                              //-1 -> any
  end;
- 
+ recordvaluelistedititemty = class of trecordvaluelistedititem;
+  
  tintegervaluelistedititem = class(trecordvaluelistedititem)
   private
    fvalue: int32;
    procedure setvalue(const avalue: int32);
   protected
+   function getvaluetype: listdatatypety; override;
    procedure getvalueinfo(out avalues: recvaluearty; const aindex: int32 = -1);
                                                                        override;
    procedure setvalue(const atype: listdatatypety;
        const aindex: int32; const getvaluemethod: getvaluemethodty); override;
   public
+   procedure dostatread(const reader: tstatreader); override;
+   procedure dostatwrite(const writer: tstatwriter); override;
    property value: int32 read fvalue write setvalue;
  end;
   
@@ -162,40 +176,64 @@ type
    fvalue: realty;
    procedure setvalue(const avalue: realty);
   protected
+   function getvaluetype: listdatatypety; override;
    procedure getvalueinfo(out avalues: recvaluearty; const aindex: int32 = -1);
                                                                        override;
    procedure setvalue(const atype: listdatatypety;
        const aindex: int32; const getvaluemethod: getvaluemethodty); override;
   public
+   procedure dostatread(const reader: tstatreader); override;
+   procedure dostatwrite(const writer: tstatwriter); override;
    property value: realty read fvalue write setvalue;
  end;
 
- tdatetimevaluelistedititem = class(trecordvaluelistedititem)
+ tdatetimevaluelistedititem = class(trealvaluelistedititem)
   private
-   fvalue: tdatetime;
-   procedure setvalue(const avalue: tdatetime);
+//   fvalue: tdatetime;
+   procedure setvalue(const avalue: tdatetime); reintroduce;
   protected
-   procedure getvalueinfo(out avalues: recvaluearty; const aindex: int32 = -1);
-                                                                       override;
-   procedure setvalue(const atype: listdatatypety;
-       const aindex: int32; const getvaluemethod: getvaluemethodty); override;
+//   procedure getvalueinfo(out avalues: recvaluearty; const aindex: int32 = -1);
+//                                                                       override;
+//   procedure setvalue(const atype: listdatatypety;
+//       const aindex: int32; const getvaluemethod: getvaluemethodty); override;
   public
    property value: tdatetime read fvalue write setvalue;
  end;
 
- tstringvaluelistedititem = class(trecordvaluelistedititem)
+ tmsestringvaluelistedititem = class(trecordvaluelistedititem)
   private
    fvalue: msestring;
    procedure setvalue(const avalue: msestring);
   protected
+   function getvaluetype: listdatatypety; override;
    procedure getvalueinfo(out avalues: recvaluearty; const aindex: int32 = -1);
                                                                        override;
    procedure setvalue(const atype: listdatatypety;
        const aindex: int32; const getvaluemethod: getvaluemethodty); override;
   public
+   procedure dostatread(const reader: tstatreader); override;
+   procedure dostatwrite(const writer: tstatwriter); override;
    property value: msestring read fvalue write setvalue;
  end;
 
+const
+ valuenodeclasses: array[listdatatypety] of recordvaluelistedititemty = (
+//dl_none,                 dl_integer,
+  trecordvaluelistedititem,tintegervaluelistedititem,
+//dl_int64,                dl_currency,
+  trecordvaluelistedititem,trecordvaluelistedititem,
+//dl_real,               dl_realint,              dl_realsum,
+  trealvaluelistedititem,trecordvaluelistedititem,trecordvaluelistedititem,
+//    dl_datetime,
+  tdatetimevaluelistedititem,
+//dl_ansistring,           dl_msestring,
+  trecordvaluelistedititem,tmsestringvaluelistedititem,
+//dl_doublemsestring,      dl_msestringint,
+  trecordvaluelistedititem,trecordvaluelistedititem,
+//dl_complex,              dl_rowstate,             dl_custom
+  trecordvaluelistedititem,trecordvaluelistedititem,trecordvaluelistedititem
+  );
+ 
 procedure initvalueinfo(out ainfo: recvaluety);
 procedure initvalueinfo(const aindex: int32; var avalue: int32;
                                                   out ainfo: recvaluety);
@@ -220,7 +258,7 @@ function buildvalueinfos(const afields: array of fieldinfoty;
 implementation
 uses
  msearrayutils;
- 
+
 procedure initvalueinfo(out ainfo: recvaluety);
 begin
  ainfo.dummypointer:= nil;
@@ -506,6 +544,24 @@ begin
  end;
 end;
 
+procedure trecordvaluelistedititem.dostatread(const reader: tstatreader);
+begin
+ inherited;
+ fvalueindex:= reader.readinteger(valuenodeindexname,fvalueindex);
+end;
+
+procedure trecordvaluelistedititem.dostatwrite(const writer: tstatwriter);
+begin
+ inherited;
+ writer.writeinteger(valuenodetypename,ord(getvaluetype));
+ writer.writeinteger(valuenodeindexname,fvalueindex);
+end;
+
+function trecordvaluelistedititem.getvaluetype: listdatatypety;
+begin
+ result:= dl_none;
+end;
+
 { tintegervaluelistedititem }
 
 procedure tintegervaluelistedititem.setvalue(const avalue: int32);
@@ -535,6 +591,23 @@ begin
   getvaluemethod(i1);
   value:= i1;
  end;
+end;
+
+procedure tintegervaluelistedititem.dostatread(const reader: tstatreader);
+begin
+ inherited;
+ fvalue:= reader.readinteger(valuenodevaluename,fvalue);
+end;
+
+procedure tintegervaluelistedititem.dostatwrite(const writer: tstatwriter);
+begin
+ inherited;
+ writer.writeinteger(valuenodevaluename,fvalue);
+end;
+
+function tintegervaluelistedititem.getvaluetype: listdatatypety;
+begin
+ result:= dl_integer;
 end;
 
 { tbooleanvaluelistedititem }
@@ -583,16 +656,36 @@ begin
  end;
 end;
 
+function trealvaluelistedititem.getvaluetype: listdatatypety;
+begin
+ result:= dl_real;
+end;
+
+procedure trealvaluelistedititem.dostatread(const reader: tstatreader);
+begin
+ inherited;
+ fvalue:= reader.readreal(valuenodevaluename,fvalue);
+end;
+
+procedure trealvaluelistedititem.dostatwrite(const writer: tstatwriter);
+begin
+ inherited;
+ writer.writereal(valuenodevaluename,fvalue);
+end;
+
 { tdatetimevaluelistedititem }
 
 procedure tdatetimevaluelistedititem.setvalue(const avalue: tdatetime);
 begin
+ inherited setvalue(avalue);
+{
  if fvalue <> avalue then begin
   fvalue:= avalue;
   valuechange();
  end;
+}
 end;
-
+{
 procedure tdatetimevaluelistedititem.getvalueinfo(out avalues: recvaluearty;
                                                      const aindex: int32 = -1);
 begin
@@ -613,10 +706,10 @@ begin
   value:= dat1;
  end;
 end;
+}
+{ tmsestringvaluelistedititem }
 
-{ tstringvaluelistedititem }
-
-procedure tstringvaluelistedititem.setvalue(const avalue: msestring);
+procedure tmsestringvaluelistedititem.setvalue(const avalue: msestring);
 begin
  if fvalue <> avalue then begin
   fvalue:= avalue;
@@ -624,7 +717,7 @@ begin
  end;
 end;
 
-procedure tstringvaluelistedititem.getvalueinfo(out avalues: recvaluearty;
+procedure tmsestringvaluelistedititem.getvalueinfo(out avalues: recvaluearty;
                                                      const aindex: int32 = -1);
 begin
  inherited;
@@ -634,7 +727,7 @@ begin
  end;
 end;
 
-procedure tstringvaluelistedititem.setvalue(const atype: listdatatypety;
+procedure tmsestringvaluelistedititem.setvalue(const atype: listdatatypety;
                const aindex: int32; const getvaluemethod: getvaluemethodty);
 var
  mstr1: msestring;
@@ -643,6 +736,23 @@ begin
   getvaluemethod(mstr1);
   value:= mstr1;
  end;
+end;
+
+function tmsestringvaluelistedititem.getvaluetype: listdatatypety;
+begin
+ result:= dl_msestring;
+end;
+
+procedure tmsestringvaluelistedititem.dostatread(const reader: tstatreader);
+begin
+ inherited;
+ fvalue:= reader.readmsestring(valuenodevaluename,fvalue);
+end;
+
+procedure tmsestringvaluelistedititem.dostatwrite(const writer: tstatwriter);
+begin
+ inherited;
+ writer.writemsestring(valuenodevaluename,fvalue);
 end;
 
 end.
