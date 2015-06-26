@@ -1106,7 +1106,10 @@ begin
    if (csdesigning in componentstate) or (ffocusedcell.row < 0) then begin
     rect1:= cellrect(makegridcoord(colindex,0),cil_noline);
     if not (csdesigning in componentstate) then begin
-     rect1.cx:= rect1.cx + fdatacols.mergedwidth(index,row);
+     if row >= 0 then begin
+      rect1.cx:= rect1.cx + fdatacols.mergedwidth(index,
+                                          fdatacols.rowstate.merged[row]);
+     end;
     end;
     if co_nohscroll in self.foptions then begin
      rect1.y:= 0;
