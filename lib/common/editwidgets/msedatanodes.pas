@@ -40,7 +40,7 @@ type
                  ns1_destroying,ns1_updating,ns1_noowner,ns1_captionclipped,
                  ns1_childchecked,ns1_parentnotchecked,
                  ns1_checkboxclicked,ns1_customsort,
-                 ns1_nofreeroot,ns1_top,ns1_fixedcaption
+                 ns1_nofreeroot,ns1_top,ns1_fixedcaption,ns1_nodefaultimagelist
  //                ns1_irecordfield,      //implements irecordfield
  //                ns1_irecordvaluefield  //irecordvaluefield
                 );
@@ -1090,7 +1090,7 @@ end;
 function tlistitem.getimagelist: timagelist;
 begin
  if fimagelist = nil then begin
-  if fowner <> nil then begin
+  if (fowner <> nil) and not (ns1_nodefaultimagelist in fstate1) then begin
    result:= fowner.fimagelist;
   end
   else begin
