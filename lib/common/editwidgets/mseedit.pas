@@ -103,6 +103,9 @@ type
   public
    constructor create(const intf: iscrollframe; const scrollintf: iscrollbar);
   published
+   property options;
+   property optionsscroll;
+   property dragbuttons;
    property levelo default -2;
    property leveli;
    property framewidth;
@@ -115,22 +118,50 @@ type
    property colordkwidth;
    property colorhlwidth;
    property hiddenedges;
+   property colorclient default cl_foreground;
    property framei_left default 1;
    property framei_top default 1;
    property framei_right default 1;
    property framei_bottom default 1;
-   property sbhorz; 
-   property sbvert;
-   property colorclient default cl_foreground;
+
+   property frameimage_list;
+   property frameimage_left;
+   property frameimage_top;
+   property frameimage_right;
+   property frameimage_bottom;
+   property frameimage_offset;
+   property frameimage_offset1;
+   property frameimage_offsetdisabled;
+   property frameimage_offsetmouse;
+   property frameimage_offsetclicked;
+   property frameimage_offsetactive;
+   property frameimage_offsetactivemouse;
+   property frameimage_offsetactiveclicked;
+
+   property frameface_list;
+   property frameface_offset;
+   property frameface_offset1;
+   property frameface_offsetdisabled;
+   property frameface_offsetmouse;
+   property frameface_offsetclicked;
+   property frameface_offsetactive;
+   property frameface_offsetactivemouse;
+   property frameface_offsetactiveclicked;
+   
+   property optionsskin;
+
    property caption;
    property captiontextflags;
    property captionpos;
    property captiondist;
    property captionoffset;
+   property focusrectdist;
    property font;
    property localprops; //before template
    property localprops1; //before template
    property template;
+   property sbhorz; 
+   property sbvert;
  end;
 
  tscrollboxeditframe = class(tcustomscrollboxframe)
