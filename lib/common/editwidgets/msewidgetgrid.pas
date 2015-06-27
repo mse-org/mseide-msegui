@@ -3573,6 +3573,8 @@ var
  fmousefocusedcell: gridcoordty;
  fmouseactivewidget: twidget;
  fmousefocusedwidget: twidget;
+ pt1: pointty;
+ widget1: twidget;
 begin
  fmousefocusedcell:= ffocusedcell;
  fmouseactivewidget:= factivewidget;
@@ -3597,7 +3599,14 @@ begin
   if ffocusedcell.col >= 0 then begin
    with twidgetcols(fdatacols)[ffocusedcell.col] do begin
     if (fintf <> nil) then begin
-     fintf.setfirstclick(info);
+     widget1:= fintf.getwidget();
+     pt1:= info.pos;
+     try
+      translatewidgetpoint1(info.pos,self,widget1);     
+      fintf.setfirstclick(info);
+     finally
+      info.pos:= pt1;
+     end;
     end;
    end;
   end;

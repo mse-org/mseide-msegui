@@ -612,6 +612,7 @@ type
    function getcolorglyph: colorty;
 
     //igridwidget
+   procedure setfirstclick(var ainfo: mouseeventinfoty); override;
    function getcellcursor(const arow: integer; const acellzone: cellzonety;
                                  const apos: pointty): cursorshapety; override;
    procedure updatecellzone(const row: integer; const apos: pointty;
@@ -3849,6 +3850,17 @@ procedure titemedit.loaded();
 begin
  inherited;
  valueeditchanged();
+end;
+
+procedure titemedit.setfirstclick(var ainfo: mouseeventinfoty);
+begin
+ if (factiveinfo.editwidget <> nil) and 
+      pointinrect(ainfo.pos,factiveinfo.editwidget.paintparentrect) then begin
+  factiveinfo.gridintf.setfirstclick(ainfo);
+ end
+ else begin
+  inherited;
+ end;
 end;
 
 procedure titemedit.dofocus();

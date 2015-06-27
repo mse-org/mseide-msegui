@@ -1991,6 +1991,7 @@ type
    property parentclientpos: pointty read getparentclientpos 
                                                   write setparentclientpos;
                                              //origin = parentwidget.clientpos
+   function paintparentrect: rectty;         //origin = parentwidget.pos
    function paintparentpos: pointty;         //origin = parentwidget.pos
    function parentpaintpos: pointty;         //origin = parentwidget.paintpos
                                              //nullpoint if parent = nil
@@ -10274,6 +10275,12 @@ begin
    result:= addpoint(parentclientpos,innerclientpos);
   end;
  end;
+end;
+
+function twidget.paintparentrect: rectty;         //origin = parentwidget.pos
+begin
+ result:= paintrect;
+ addpoint1(result.pos,fwidgetrect.pos);
 end;
 
 function twidget.paintparentpos: pointty;       //origin = parentwidget.pos
