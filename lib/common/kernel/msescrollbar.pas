@@ -484,10 +484,12 @@ begin
   end;
   if buttonlength1 < minblen then begin
    buttonlength1:= minblen;
-  end; 
-  i1:= scrolllength div 2;
-  if buttonlength1 > i1 then begin
-   buttonlength1:= i1;
+  end;
+  if fbuttonlength > 0 then begin
+   i1:= scrolllength div 2;
+   if buttonlength1 > i1 then begin
+    buttonlength1:= i1;
+   end;
   end;
   if fdirection in [gd_right,gd_left] then begin
    areas[sbbu_move].ca.dim.cx:= buttonlength1;
