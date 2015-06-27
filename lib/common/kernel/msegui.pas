@@ -11584,7 +11584,7 @@ end;
 
 function twidget.activefocused: boolean;
 begin
- result:= fwidgetstate * [ws_focused,ws_active] = [ws_focused,ws_active];
+ result:= (ws_active in fwidgetstate) and (window.focusedwidget = self);
 end;
 
 function twidget.focused: boolean;
