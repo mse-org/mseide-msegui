@@ -385,7 +385,9 @@ type
                   setmaxundosize default defaultundobuffermaxsize;
  end;
 
-procedure normalizetextrect(const po1,po2: gridcoordty; out start,stop: gridcoordty);
+procedure normalizetextrect(const po1,po2: gridcoordty; 
+                                              out start,stop: gridcoordty);
+function istextdblclick(const ainfo: textmouseeventinfoty): boolean;
 
 implementation
 uses
@@ -424,6 +426,12 @@ begin
  end;
 end;
 
+function istextdblclick(const ainfo: textmouseeventinfoty): boolean;
+begin
+ result:= (ainfo.eventkind = cek_buttonpress) and
+             (ss_double in ainfo.mouseeventinfopo^.shiftstate);
+end;
+ 
 function createtgridrichstringdatalist(const aowner:twidgetcol): tdatalist;
 begin
  result:= tgridrichstringdatalist.create(aowner);

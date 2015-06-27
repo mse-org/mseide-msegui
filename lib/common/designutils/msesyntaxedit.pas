@@ -84,6 +84,10 @@ type
               const delimchars: msestring; 
               const nodelimstrings: array of msestring;
               const leftofcursor: boolean = false): msestring; overload;
+   function wordatpos(const apos: gridcoordty;
+              const delimchars: msestring; 
+              const nodelimstrings: array of msestring;
+              const leftofcursor: boolean = false): msestring; overload;
    procedure indent(const acount: integer; const atabs: boolean);
    procedure unindent(const acount: integer);
    procedure removelink;
@@ -366,6 +370,15 @@ function tsyntaxedit.wordatpos(const apos: gridcoordty; out start: gridcoordty;
 begin
  start:= wordatpos(apos,result,delimchars,nodelimstrings,leftofcursor);
 end;
+
+function tsyntaxedit.wordatpos(const apos: gridcoordty;
+               const delimchars: msestring;
+               const nodelimstrings: array of msestring;
+               const leftofcursor: boolean = false): msestring;
+begin
+ wordatpos(apos,result,delimchars,nodelimstrings,leftofcursor);
+end;
+
 
 procedure tsyntaxedit.indent(const acount: integer; const atabs: boolean);
 var
