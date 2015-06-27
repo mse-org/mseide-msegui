@@ -839,7 +839,8 @@ begin
    if updatecaretcountref <> fupdatecaretcount then begin
     exit;
    end;
-   if (fowner.activefocused or (ies_forcecaret in fstate)) and not nocaret then begin
+   if (fowner.activefocused or (ies_forcecaret in fstate)) and 
+                                                         not nocaret then begin
     fowner.getcaret;
     with application.caret do begin
      bounds:= actioninfo.caretrect;
@@ -854,7 +855,8 @@ begin
   end;
  end;
  if (finfo.dest.x <> posbefore.x) or (finfo.dest.y <> posbefore.y) or 
-    (finfo.dest.cx <> posbefore.cx) or (finfo.dest.cy <> posbefore.cy) then begin
+                 (finfo.dest.cx <> posbefore.cx) or 
+                                 (finfo.dest.cy <> posbefore.cy) then begin
   invalidatetextrect(minint,bigint);
  end;
 end;

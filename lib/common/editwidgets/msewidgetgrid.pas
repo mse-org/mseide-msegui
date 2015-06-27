@@ -3327,7 +3327,7 @@ begin
                                ek_buttonpress,ek_buttonrelease]) then begin
     po1:= translateclientpoint(nullpoint,sender,self);
     addpoint1(pos,po1);
-    if sender = factivewidget then begin
+    if sender.checkancestor(factivewidget) then begin
      clientmouseevent(info);
     end
     else begin
