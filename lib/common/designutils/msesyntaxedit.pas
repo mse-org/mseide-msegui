@@ -16,7 +16,7 @@ uses
  classes,mclasses,msetextedit,msesyntaxpainter,mseclasses,
  mseglob,mseguiglob,msetypes,mseevent,
  mseeditglob,msestrings,msewidgetgrid,msedatalist,msemenus,msegui,mseinplaceedit,
- msegrids,mseedit;
+ msegrids,mseedit,msegraphics;
  
 type
  bracketkindty = (bki_none,bki_round,bki_square,bki_curly);
@@ -66,6 +66,8 @@ type
    procedure checkbrackets;
    procedure editnotification(var info: editnotificationinfoty); override;
    procedure doasyncevent(var atag: integer); override;
+   procedure doafterpaint(const canvas: tcanvas); override;
+   function needsfocuspaint: boolean; override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -113,7 +115,7 @@ function checkbracketkind(const achar: msechar; out open: boolean): bracketkindt
 
 implementation
 uses
- mserichstring,msegraphics,msekeyboard,msegraphutils,msepointer;
+ mserichstring,msekeyboard,msegraphutils,msepointer;
 const
  checkbrackettag = 84621847;
  
@@ -970,6 +972,19 @@ begin
   fbracketchecking:= 0;
   checkbrackets;
  end;
+end;
+
+procedure tsyntaxedit.doafterpaint(const canvas: tcanvas);
+begin
+ inherited;
+ if (fgridintf <> nil) and not (csdesigning in componentstate) then begin
+  fgridintf.widgetpainted(canvas);
+ end;
+end;
+
+function tsyntaxedit.needsfocuspaint: boolean;
+begin
+ result:= (fgridintf = nil) and inherited needsfocuspaint;
 end;
 
 function tsyntaxedit.getautoindent: boolean;
