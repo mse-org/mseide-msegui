@@ -385,7 +385,7 @@ function trystringtodatetime(const text: msestring;
                               out value: tdatetime;
                                const convert: dateconvertty = dc_none): boolean;  overload;
 function trystringtodatetime(const text: msestring;
-                              const aformat: msestring;
+                              aformat: msestring;
                               out value: tdatetime;
                                const convert: dateconvertty = dc_none): boolean;  overload;
 procedure checkdateconvert(const convert: dateconvertty; var value: tdatetime);
@@ -2025,7 +2025,7 @@ begin
 end;
 
 function trystringtodatetime(const text: msestring;
-                const aformat: msestring; out value: tdatetime;
+                aformat: msestring; out value: tdatetime;
                                const convert: dateconvertty = dc_none): boolean;
  procedure removequotes(var astring: msestring);
  var
@@ -2150,6 +2150,7 @@ var
                   { = (dttg_year,dttg_mon,dttg_day);}
 
 begin
+ checkformatmacros(aformat);
  result:= false;
  if text = '' then begin
   value:= emptydatetime;

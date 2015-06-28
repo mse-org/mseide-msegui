@@ -4463,14 +4463,18 @@ begin
  fgrid.invalidate;
 end;
 
-procedure tcolheader.createframe;
+procedure tcolheader.createframe();
 begin
- tfixcellframe.create(iframe(self));
+ if fframe = nil then begin
+  tfixcellframe.create(iframe(self));
+ end;
 end;
 
-procedure tcolheader.createface;
+procedure tcolheader.createface();
 begin
- fface:= tfixcellface.create(iface(self));
+ if fface = nil then begin
+  fface:= tfixcellface.create(iface(self));
+ end;
 end;
 
 procedure tcolheader.setcolor(const avalue: colorty);
