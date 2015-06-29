@@ -7341,7 +7341,7 @@ begin
      else begin //wam_center
       if length(awidgets) > 0 then begin
        with awidgets[0] do begin
-        shift:= margin + ar1[0].x + framepos.x + framesize.cx div 2;
+        shift:= margin + ar1[0].x + framepos.x + (framesize.cx+1) div 2;
        end;
        shift:= clientwidgetpos.x + clientwidth div 2 - shift;
       end;
@@ -7465,7 +7465,7 @@ begin
      else begin //wam_center
       if length(awidgets) > 0 then begin
        with awidgets[0] do begin
-        shift:= margin + ar1[0].y + framepos.y + framesize.cy div 2;
+        shift:= margin + ar1[0].y + framepos.y + (framesize.cy+1) div 2;
        end;
        shift:= clientwidgetpos.y + clientheight div 2 - shift;
       end;
