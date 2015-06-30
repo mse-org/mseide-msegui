@@ -301,7 +301,7 @@ type
    procedure postevent(event: tmseevent;
                    const aoptions: posteventoptionsty = []);
                             //peo_local -> direcly to the internal queue
-                            //peo_afirst imlpies peo_local
+                            //peo_first implies peo_local
                             //peo_modaldefer -> deliver in current modallevel
    function checkoverload(const asleepus: integer = 100000): boolean;
               //true if never idle since last call,

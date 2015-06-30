@@ -23,7 +23,7 @@ function timedwaitpid(__pid: __pid_t; __stat_loc: plongint;
 
 implementation
 uses
- mseapplication,msedatalist,msearrayutils,msesysintf1,msesysutils;
+ mseapplication,msedatalist,msearrayutils,msesysintf1,msesysutils,sysutils;
  
 type
  procinfoty = record
@@ -120,11 +120,35 @@ type
 var
  semaphorelock: mutexty;
  semaphores: psemelety;
+{$ifdef mse_debugprocmonitor}
+var
+ semcount: int32;
+
+procedure checksemaphores();
+var
+ i1: int32;
+ po1: psemelety;
+begin
+ i1:= 0;
+ po1:= semaphores;
+ while po1 <> nil do begin
+  inc(i1);
+  po1:= po1^.next;
+ end;
+ if i1 <> semcount then begin
+  raise exception.create('Invalid procmonitor semaphores');
+ end;
+end;
+
+{$endif}
   
 procedure sigchildcallback();
 var
  po1: psemelety;
 begin
+{$ifdef mse_debugprocmonitor}
+ checksemaphores();
+{$endif}
  po1:= semaphores;
  while po1 <> nil do begin
   sys_sempost(po1^.sem);
@@ -147,6 +171,9 @@ begin
   sys_semcreate(semele.sem,0);
 
   sys_mutexlock(semaphorelock);
+{$ifdef mse_debugprocmonitor}
+  checksemaphores();
+{$endif}
   semele.prev:= semaphores;
   semele.next:= nil;
   if semaphores = nil then begin
@@ -155,6 +182,10 @@ begin
   else begin
    interlockedexchange(semaphores^.next,@semele);
   end;
+{$ifdef mse_debugprocmonitor}
+  inc(semcount);
+  checksemaphores();
+{$endif}
   sys_mutexunlock(semaphorelock);
 
   while true do begin
@@ -178,12 +209,20 @@ begin
   end;
   
   sys_mutexlock(semaphorelock);
-  if semele.prev = nil then begin
+{$ifdef mse_debugprocmonitor}
+  checksemaphores();
+{$endif}
+//  if semele.prev = nil then begin
+  if semaphores = @semele then begin
    interlockedexchange(semaphores,semele.next);
   end
   else begin
    interlockedexchange(semele.prev^.next,semele.next);
   end;
+{$ifdef mse_debugprocmonitor}
+  dec(semcount);
+  checksemaphores();
+{$endif}
   sys_mutexunlock(semaphorelock);
 
   sys_semdestroy(semele.sem);

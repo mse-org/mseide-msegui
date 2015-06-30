@@ -998,7 +998,8 @@ begin
      end;
      while waitpid(handle,@int1,0) = -1 do begin
       if sys_getlasterror <> eintr then begin
-       raise eoserror.create('');
+       break;
+//       raise eoserror.create('');
       end;
      end;
     end;
@@ -1015,8 +1016,11 @@ begin
  result:= -1;
  if handle <> invalidprochandle then begin
   int1:= kill(handle,sigterm);
-  if (int1 <> 0) and (errno <> esrch) then raise eoserror.create(''); 
-              //sigterm nicht moeglich
+  if (int1 <> 0) and (errno <> esrch) then begin
+   exit; //sigterm nicht moeglich
+//   raise eoserror.create(''); 
+  end;
+              
   while waitpid(handle,@result,0) = -1 do begin
    if sys_getlasterror <> eintr then begin
     break;

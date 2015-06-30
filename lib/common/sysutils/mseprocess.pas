@@ -31,8 +31,9 @@ type
                     pro_nowaitforpipeeof,
                     pro_nopipeterminate,  //not used
                     pro_usepipewritehandles,pro_winpipewritehandles,
-                    pro_waitcursor,pro_checkescape,pro_processmessages,
-                               //kill process if esc pressed
+                    pro_waitcursor,pro_checkescape,pro_escapekill,
+                               //terminate or kill process if esc pressed
+                    pro_processmessages,
                     pro_ctrlc                     //for tterminal
                     );
  processoptionsty = set of processoptionty;
@@ -69,6 +70,7 @@ type
    fworkingdirectory: filenamety;
    fpipewaitus: integer;
    fstatpriority: integer;
+   foncheckabort: updatebooleaneventty;
    procedure setoutput(const avalue: tpipereaderpers);
    procedure seterroroutput(const avalue: tpipereaderpers);
    function getactive: boolean;
@@ -135,39 +137,46 @@ type
    property erroroutput: tpipereaderpers read ferroroutput write seterroroutput;
    property onprocfinished: notifyeventty read fonprocfinished 
                                                      write fonprocfinished;
+   property oncheckabort: updatebooleaneventty 
+                          read foncheckabort write foncheckabort;
  end;
 
 function getprocessoutput(const acommandline: string; const todata: string;
                          out fromdata: string; out errordata: string;
                          const atimeout: integer = -1;
                          const aoptions: processoptionsty = 
-                            defaultgetprocessoutputoptions): integer; overload;
+                            defaultgetprocessoutputoptions;
+                       const acheckabort: updatebooleaneventty = nil): integer;
                          //returns program exitcode, -1 in case of error
 function getprocessoutput(const acommandline: string; const todata: string;
                          out fromdata: string;
                          const atimeout: integer = -1;
                     const aoptions: processoptionsty = 
-              defaultgetprocessoutputoptionserrorouttoout): integer; overload;
+                            defaultgetprocessoutputoptionserrorouttoout;
+                       const acheckabort: updatebooleaneventty = nil): integer;
                          //returns program exitcode, -1 in case of error
 function getprocessoutput(out prochandle: prochandlety;
                          const acommandline: string; const todata: string;
                          out fromdata: string; out errordata: string;
                          const atimeout: integer = -1;
                          const aoptions: processoptionsty = 
-                            defaultgetprocessoutputoptions): integer; overload;
+                            defaultgetprocessoutputoptions;
+                       const acheckabort: updatebooleaneventty = nil): integer;
                          //returns program exitcode, -1 in case of error
 function getprocessoutput(out prochandle: prochandlety;
                          const acommandline: string; const todata: string;
                          out fromdata: string;
                          const atimeout: integer = -1;
                     const aoptions: processoptionsty = 
-              defaultgetprocessoutputoptionserrorouttoout): integer; overload;
+                              defaultgetprocessoutputoptionserrorouttoout;
+                       const acheckabort: updatebooleaneventty = nil): integer;
                          //returns program exitcode, -1 in case of error
 
 function startprocessandwait(const acommandline: string;
-                         const atimeout: integer = -1;
-                         const aoptions: processoptionsty = 
-                            defaultgetprocessoutputoptions): integer;
+                     const atimeout: integer = -1;
+                     const aoptions: processoptionsty = 
+                            defaultgetprocessoutputoptions;
+                       const acheckabort: updatebooleaneventty = nil): integer;
                          //returns program exitcode, -1 in case of error
 implementation
 uses
@@ -187,7 +196,8 @@ type
 function getprocessoutput1(const prochandlepo: pprochandlety;
                const acommandline: string; const todata: string;
                out fromdata: string; out errordata: string;
-               const atimeout: integer; const aoptions: processoptionsty): integer;
+               const atimeout: integer; const aoptions: processoptionsty;
+                             const acheckabort: updatebooleaneventty): integer;
                          //returns program exitcode, -1 in case of error
 var
  proc1: tstringprocess;
@@ -198,6 +208,7 @@ begin
   with proc1 do begin
    commandline:= acommandline;
    options:= aoptions + [pro_output,pro_erroroutput,pro_input];
+   oncheckabort:= acheckabort;
    active:= true;
    if prochandlepo <> nil then begin
     application.lock;
@@ -238,7 +249,8 @@ end;
 function startprocessandwait(const acommandline: string;
                          const atimeout: integer = -1;
                          const aoptions: processoptionsty = 
-                            defaultstartprocessoptions): integer;
+                                            defaultstartprocessoptions;
+                       const acheckabort: updatebooleaneventty = nil): integer;
                          //returns program exitcode, -1 in case of error
 var
  proc1: tmseprocess;
@@ -249,6 +261,7 @@ begin
   with proc1 do begin
    commandline:= acommandline;
    options:= aoptions - [pro_output,pro_erroroutput,pro_input];
+   oncheckabort:= acheckabort;
    active:= true;
    if atimeout < 0 then begin
     result:= waitforprocess;
@@ -268,22 +281,24 @@ function getprocessoutput(const acommandline: string; const todata: string;
                          out fromdata: string; out errordata: string;
                          const atimeout: integer = -1;
                           const aoptions: processoptionsty = 
-                            defaultgetprocessoutputoptions): integer;
+                            defaultgetprocessoutputoptions;
+                       const acheckabort: updatebooleaneventty = nil): integer;
 begin
  result:= getprocessoutput1(nil,acommandline,todata,fromdata,errordata,
-                                                          atimeout,aoptions);
+                                               atimeout,aoptions,acheckabort);
 end;
  
 function getprocessoutput(const acommandline: string; const todata: string;
                          out fromdata: string;
                          const atimeout: integer = -1;
                          const aoptions: processoptionsty = 
-                      defaultgetprocessoutputoptionserrorouttoout): integer;
+                      defaultgetprocessoutputoptionserrorouttoout;
+                       const acheckabort: updatebooleaneventty = nil): integer;
 var
  str1: string;
 begin
  result:= getprocessoutput1(nil,acommandline,todata,fromdata,str1,
-                                             atimeout,aoptions);
+                                             atimeout,aoptions,acheckabort);
 end;
 
 function getprocessoutput(out prochandle: prochandlety;
@@ -291,10 +306,11 @@ function getprocessoutput(out prochandle: prochandlety;
                          out fromdata: string; out errordata: string;
                          const atimeout: integer = -1;
                           const aoptions: processoptionsty = 
-                            defaultgetprocessoutputoptions): integer;
+                            defaultgetprocessoutputoptions;
+                       const acheckabort: updatebooleaneventty = nil): integer;
 begin
  result:= getprocessoutput1(@prochandle,acommandline,todata,fromdata,errordata,
-                                                          atimeout,aoptions);
+                                                 atimeout,aoptions,acheckabort);
 end;
  
 function getprocessoutput(out prochandle: prochandlety;
@@ -302,12 +318,13 @@ function getprocessoutput(out prochandle: prochandlety;
                          out fromdata: string;
                          const atimeout: integer = -1;
                          const aoptions: processoptionsty = 
-                      defaultgetprocessoutputoptionserrorouttoout): integer;
+                          defaultgetprocessoutputoptionserrorouttoout;
+                       const acheckabort: updatebooleaneventty = nil): integer;
 var
  str1: string;
 begin
  result:= getprocessoutput1(@prochandle,acommandline,todata,fromdata,str1,
-                                             atimeout,aoptions);
+                                             atimeout,aoptions,acheckabort);
 end;
  
 { tmseprocess }
@@ -546,7 +563,8 @@ begin
  unlisten;
  if bo1 then begin
   int1:= application.unlockall;
-  if foptions*[pro_checkescape,pro_processmessages] <> [] then begin
+  if (foptions*[pro_checkescape,pro_processmessages] <> []) or 
+              assigned(foncheckabort) then begin
    ts1:= timestep(atimeoutus);
    i2:= 100000;
    if (atimeoutus >= 0) and (atimeoutus < i2) then begin
@@ -559,12 +577,24 @@ begin
      int1:= application.unlockall;
     end;
     procerr:= mseprocutils.getprocessexitcode(fprochandle,fexitcode,i2);
-   until (procerr <> pee_timeout) or 
-             (pro_checkescape in foptions) and application.waitescaped or 
-                                          (atimeoutus >= 0) and timeout(ts1);
+    bo1:= (procerr <> pee_timeout) or ((atimeoutus >= 0) and timeout(ts1));
+    if not bo1 then begin
+     if (pro_checkescape in foptions) then begin
+      bo1:= application.waitescaped;
+     end;
+     if assigned(foncheckabort) then begin
+      foncheckabort(self,bo1);
+     end;
+    end; 
+   until bo1;
    result:= procerr = pee_ok;
    if not result then begin
-    terminateprocess(fprochandle);
+    if pro_escapekill in foptions then begin
+     killprocess(fprochandle);
+    end
+    else begin
+     terminateprocess(fprochandle);
+    end;
     procend;
    end;
   end
