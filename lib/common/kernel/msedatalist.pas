@@ -2213,7 +2213,7 @@ begin
    datadeleted(count,countvorher-count);
   end;
   if not nochangeandinit and (countvorher <> value) then begin
-   change(-1);
+   change(-2);
   end;
  end;
 end;
@@ -6683,7 +6683,7 @@ end;
 
 procedure tcustomrowstatelist.change(const aindex: integer);
 begin
- if aindex < 0 then begin
+ if (aindex < 0) and (aindex <> -2) then begin //no count change
   initdirty;
  end;
  inherited;

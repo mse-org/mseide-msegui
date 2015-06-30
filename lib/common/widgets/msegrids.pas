@@ -1379,6 +1379,8 @@ type
    procedure cleanvisible(visibleindex: integer);
    procedure clean(arow: integer); reintroduce;
    procedure cleanrowheight(const aindex: integer);
+   procedure invalidatedirtyrowheight(const arow: int32);
+                               //-2 -> count change
    procedure checkdirty(const arow: integer); override;
    procedure checkdirtyautorowheight(const arow: integer);
    procedure recalchidden; override;
@@ -1800,6 +1802,7 @@ type
    fvisiblerowsupdating: integer;
    fnullchecking: integer;
    frowdatachanging: integer;
+   frowdatachangestart: int32;
    fnoshowcaretrect: integer;
    finvalidatedcells: gridcoordarty;
 
@@ -2028,6 +2031,7 @@ type
    procedure rowchanged(const arow: integer); virtual;
    procedure rowstatechanged(const arow: integer); virtual;
    procedure scrolled(const dist: pointty); virtual;
+   function hascolumnsort: boolean;
    procedure sortchanged(const all: boolean);
    procedure checkinvalidate;
    function startanchor: gridcoordty;
@@ -2161,7 +2165,8 @@ type
    function actualcursor(const apos: pointty): cursorshapety; override;
 
    procedure beginupdate;
-   procedure endupdate(const nosort: boolean = false);
+   procedure endupdate(const nosort: boolean = false;
+                                    const invalidrowstart: int32 = 0);
    function updating: boolean; reintroduce;
    function calcminscrollsize: sizety; override;
    procedure layoutchanged;
@@ -9285,6 +9290,9 @@ begin
   end
   else begin
    include(fstate,gs_rowdatachanged);
+   if acell.row < frowdatachangestart then begin
+    frowdatachangestart:= acell.row;
+   end;
   end;
  end;
 end;
@@ -14335,15 +14343,6 @@ begin
  rowcount:= rowcount+1;
 end;
 
-procedure tcustomgrid.beginupdate;
-begin
- if fupdating = 0 then begin
-  exclude(fstate,gs_emptyrowremoved); //possibly checked in endupdate
-  fappendcount:= 0;
- end;
- inc(fupdating);
-end;
-
 procedure tcustomgrid.checkinvalidate;
 var
  int1: integer;
@@ -14369,7 +14368,18 @@ begin
  end;
 end;
 
-procedure tcustomgrid.endupdate(const nosort: boolean = false);
+procedure tcustomgrid.beginupdate;
+begin
+ if fupdating = 0 then begin
+  exclude(fstate,gs_emptyrowremoved); //possibly checked in endupdate
+  fappendcount:= 0;
+  frowdatachangestart:= rowcount;
+ end;
+ inc(fupdating);
+end;
+
+procedure tcustomgrid.endupdate(const nosort: boolean = false; 
+                                     const invalidrowstart: int32 = 0);
 var
  int1,int2: integer;
 {$ifdef mse_with_ifi}
@@ -14406,7 +14416,12 @@ begin
   end;
   if gs_rowdatachanged in fstate then begin
    updaterowdata;
-   rowdatachanged(makegridcoord(invalidaxis,0),frowcount);
+   if frowdatachangestart < rowcount then begin
+    rowdatachanged(makegridcoord(invalidaxis,frowdatachangestart),
+                                               frowcount-frowdatachangestart);
+   end;
+//   rowdatachanged(makegridcoord(invalidaxis,invalidrowstart),
+//                                               frowcount-invalidrowstart);
   end; 
   if gs_selectionchanged in fstate then begin
    internalselectionchanged;
@@ -15148,13 +15163,19 @@ begin
  end;
 end;
 
+function tcustomgrid.hascolumnsort: boolean;
+begin
+ result:= (og_sorted in foptionsgrid) and (assigned(onsort) or 
+                                             (fdatacols.fsortcol >= 0));
+end;
+
 procedure tcustomgrid.sortchanged(const all: boolean);
 begin
  if not(csloading in componentstate) then begin
   if assigned(fonsortchanged) then begin
    fonsortchanged(self);
   end;
-  if (og_sorted in foptionsgrid) then begin
+  if hascolumnsort then begin
    if not all and (gs1_sortvalid in fstate1) and 
            (ffocusedcell.row >= 0) then begin
     reorderrow;
@@ -17276,18 +17297,44 @@ begin
  end;
 end;
 
+procedure trowstatelist.invalidatedirtyrowheight(const arow: int32);
+                               //-2 -> count change
+begin
+ if (arow = -2) then begin
+  if count < fdirtyrowheight  then begin
+   fdirtyrowheight:= count;
+  end
+  else begin
+   if fdirtyrowheight > 0 then begin
+    dec(fdirtyrowheight); //could be above previous count
+   end;
+  end;
+  if count < fdirtyautorowheight  then begin
+   fdirtyautorowheight:= count;
+  end
+  else begin
+   if fdirtyautorowheight > 0 then begin
+    dec(fdirtyautorowheight); //could be above previous count
+   end;
+  end;
+ end
+ else begin
+  fdirtyrowheight:= 0;
+  fdirtyautorowheight:= 0;
+ end;
+end;
+
 procedure trowstatelist.checkdirtyautorowheight(const arow: integer);
 var
  bo1: boolean;
 begin
  bo1:= false;
  if arow < 0 then begin
-  fdirtyrowheight:= 0;
-  fdirtyautorowheight:= 0;
+  invalidatedirtyrowheight(arow);
   bo1:= true;
  end
  else begin
-  if finfolevel >= ril_rowheight then begin
+  if (finfolevel >= ril_rowheight) and (arow < count) then begin
    with prowstaterowheightty(getitempo(arow))^ do begin
     if rowheight.height <= 0 then begin
      rowheight.height:= 0;
@@ -17312,8 +17359,7 @@ end;
 procedure trowstatelist.change(const index: integer);
 begin
  if (finfolevel >= ril_rowheight) and (index < 0) then begin
-  fdirtyrowheight:= 0;
-  fdirtyautorowheight:= 0;
+  invalidatedirtyrowheight(index);
   inherited;
   fgrid.layoutchanged;
  end
