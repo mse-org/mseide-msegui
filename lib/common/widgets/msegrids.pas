@@ -98,7 +98,7 @@ type
                  og_focuscellonenter,og_containerfocusbackonesc,
                  og_autofirstrow,og_autoappend,og_appendempty,og_noinsertempty,
                  og_savestate,og_nosaveremoveappendedrow,
-                 og_sorted,og_noreorderrow,
+                 og_sorted,og_nodefaultsort,og_noreorderrow,
                  og_folded,og_colmerged,og_rowheight,
                  og_colchangeontabkey,og_colchangeonreturnkey,
                  og_wraprow,og_wrapcol,
@@ -4595,8 +4595,10 @@ begin
   al1:= [al_right,al_ycentered];
   with tdatacol(fgrid.fdatacols.fitems[index]) do begin
    if not (fgrid.hassort) or
-        (co_nosort in options) or (fgrid.datacols.sortcol >= 0) and 
-                                (fgrid.datacols.sortcol <> index) then begin
+     (co_nosort in options) or 
+     (fgrid.datacols.sortcol >= 0) and (fgrid.datacols.sortcol <> index) or 
+     (fgrid.datacols.sortcol < 0) and 
+                           (og_nodefaultsort in fgrid.foptionsgrid) then begin
     include(al1,al_grayed);
    end;
    if co_sortdescend in options then begin
@@ -15165,8 +15167,9 @@ end;
 
 function tcustomgrid.hascolumnsort: boolean;
 begin
- result:= (og_sorted in foptionsgrid) and (assigned(onsort) or 
-                                             (fdatacols.fsortcol >= 0));
+ result:= (og_sorted in foptionsgrid) and 
+          (assigned(fonsort) or (fdatacols.fsortcol >= 0) or 
+                                    not (og_nodefaultsort in foptionsgrid));
 end;
 
 procedure tcustomgrid.sortchanged(const all: boolean);
