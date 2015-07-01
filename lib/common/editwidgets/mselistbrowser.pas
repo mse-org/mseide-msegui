@@ -2041,7 +2041,7 @@ var
  cell: gridcoordty;
  int1: integer;
 begin
- if index = -1 then begin
+ if index < 0 then begin
   layoutchanged;
   updatelayout;
   beginupdate;

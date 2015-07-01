@@ -1966,7 +1966,7 @@ end;
 procedure ttabs.dochange(const index: integer);
 begin
  inherited;
- if (index = -1) and (fskinupdating = 0) and (count > 0) and 
+ if (index < 0) and (fskinupdating = 0) and (count > 0) and 
             not (csloading in tcustomtabbar(fowner).componentstate) then begin
   tcustomtabbar(fowner).updateskin; 
         //could be a new item which needs skin setup
