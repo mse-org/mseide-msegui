@@ -17,7 +17,7 @@ uses
  msegui,mseglob,mseguiglob,msetypes,msestrings,msegraphics,mseevent,
  mseact,msewidgets,
  mserichstring,mseshapes,classes,mclasses,mseclasses,msebitmap,msedrawtext,
- msedrag,msestockobjects,msegraphutils,msemenus;
+ msedrag,msestockobjects,msegraphutils,msemenus,msetimer;
 
 const
  defaultbuttonwidth = 50;
@@ -443,6 +443,9 @@ type
    property textflags;
  end;
 
+ animationoptionty = (ano_singleshot,ano_designactive);
+ animationoptionsty = set of animationoptionty;
+ 
  tcustomicon = class(tpublishedwidget)
   private
    fimagelist: timagelist;
@@ -452,6 +455,10 @@ type
    falignment: alignmentsty;
    fopacity: colorty;
    fimagesize: sizety;
+   fanim_intervalus: int32;
+   fanim_count: int32;
+   fanim_enabled: boolean;
+   fanim_options: animationoptionsty;
    procedure setimagelist(const avalue: timagelist);
    procedure setimagenum(const avalue: integer);
    procedure setcolorglyph(const avalue: colorty);
@@ -459,7 +466,18 @@ type
    procedure setalignment(const avalue: alignmentsty);
    procedure setopacity(const avalue: colorty);
    procedure readtransparency(reader: treader);
+   procedure setanim_intervalus(const avalue: int32);
+   procedure setanim_count(const avalue: int32);
+   procedure setanim_enabled(const avalue: boolean);
+   procedure setanim_options(const avalue: animationoptionsty);
+   procedure setcurrentanimoffset(const avalue: int32);
   protected
+   fanimimagenum: int32;
+   fcurrentanimoffset: int32;
+   ftimer: tsimpletimer;
+   procedure resetanim();
+   procedure animtick(const sender: tobject);
+   procedure updateanim();
    procedure dopaintforeground(const canvas: tcanvas); override;
    procedure enabledchanged; override;
    procedure getautopaintsize(var asize: sizety); override;
@@ -467,9 +485,10 @@ type
    procedure objectevent(const sender: tobject;
                              const event: objecteventty); override;
    procedure defineproperties(filer: tfiler); override;
+   procedure loaded(); override;
   public
    constructor create(aowner: tcomponent); override;
-  public
+   destructor destroy(); override;
    property imagelist: timagelist read fimagelist write setimagelist;
    property imagenum: integer read fimagenum write setimagenum default -1;
    property colorglyph: colorty read fcolorglyph 
@@ -480,6 +499,18 @@ type
                            write setopacity default cl_default;
    property alignment: alignmentsty read falignment 
                         write setalignment default [al_xcentered,al_ycentered];
+   property currentanimoffset: int32 read fcurrentanimoffset 
+                                             write setcurrentanimoffset;
+   procedure animrestart();
+   property anim_intervalus: int32 read fanim_intervalus 
+                                 write setanim_intervalus default 0; 
+                         //micro seconds, 0 = animation off
+   property anim_count: int32 read fanim_count write setanim_count default 0; 
+                         //starts from imagenum, < 2 -> animation off
+   property anim_enabled: boolean read fanim_enabled write
+                                      setanim_enabled default false;
+   property anim_options: animationoptionsty read fanim_options write
+                                      setanim_options default [];
   published
    property optionswidget default defaulticonoptionswidget;
    property optionswidget1 default defaulticonoptionswidget1;
@@ -495,6 +526,10 @@ type
    property colorbackground;
    property opacity;
    property alignment;
+   property anim_intervalus; 
+   property anim_count;
+   property anim_enabled;
+   property anim_options;
  end;
   
  tgroupboxframe = class(tcaptionframe)
@@ -1835,6 +1870,12 @@ begin
  fwidgetrect.cy:= defaulticonwidgetheight;
 end;
 
+destructor tcustomicon.destroy;
+begin
+ freeandnil(ftimer);
+ inherited;
+end;
+
 procedure tcustomicon.setimagelist(const avalue: timagelist);
 begin
  if fimagelist <> avalue then begin
@@ -1853,10 +1894,16 @@ begin
 end;
 
 procedure tcustomicon.dopaintforeground(const canvas: tcanvas);
+var
+ i1: int32;
 begin
  inherited;
  if fimagelist <> nil then begin
-  fimagelist.paint(canvas,fimagenum,innerclientrect,falignment,fcolorglyph,
+  i1:= fimagenum;
+  if ftimer <> nil then begin
+   i1:= i1 + fcurrentanimoffset;
+  end;
+  fimagelist.paint(canvas,i1,innerclientrect,falignment,fcolorglyph,
                    fcolorbackground,fopacity);
  end;
 end;
@@ -1947,6 +1994,110 @@ procedure tcustomicon.defineproperties(filer: tfiler);
 begin
  inherited;
  filer.defineproperty('transparency',@readtransparency,nil,false);
+end;
+
+procedure tcustomicon.setanim_intervalus(const avalue: int32);
+begin
+ if avalue <> fanim_intervalus then begin
+  fanim_intervalus:= avalue;
+  updateanim();
+ end;
+end;
+
+procedure tcustomicon.setanim_count(const avalue: int32);
+begin
+ if avalue <> fanim_count then begin
+  fanim_count:= avalue;
+  updateanim();
+ end;
+end;
+
+procedure tcustomicon.setanim_enabled(const avalue: boolean);
+begin
+ if avalue <> fanim_enabled then begin
+  fanim_enabled:= avalue;
+  updateanim();
+ end;
+end;
+
+procedure tcustomicon.setanim_options(const avalue: animationoptionsty);
+begin
+ if avalue <> fanim_options then begin
+  fanim_options:= avalue;
+  updateanim();
+ end;
+end;
+
+procedure tcustomicon.animtick(const sender: tobject);
+begin
+ inc(fcurrentanimoffset);
+ if fcurrentanimoffset >= fanim_count then begin
+  if ano_singleshot in fanim_options then begin
+   dec(fcurrentanimoffset);
+   if ftimer <> nil then begin
+    ftimer.enabled:= false;
+   end;
+  end
+  else begin
+   fcurrentanimoffset:= 0;
+  end;
+ end;
+ invalidate();
+end;
+
+procedure tcustomicon.resetanim();
+begin
+ fcurrentanimoffset:= -1;
+ animtick(nil);
+end;
+
+procedure tcustomicon.setcurrentanimoffset(const avalue: int32);
+begin
+ fcurrentanimoffset:= avalue;
+ invalidate();
+end;
+
+procedure tcustomicon.updateanim;
+begin
+ if not (csloading in componentstate) then begin
+  if (fanim_intervalus > 0) and (fanim_count > 1) and
+          (not (csdesigning in componentstate) or 
+                          (ano_designactive in fanim_options)) then begin
+   if fanim_enabled  then begin
+    if ftimer = nil then begin
+     resetanim();
+     ftimer:= tsimpletimer.create(fanim_intervalus,@animtick,false);
+    end
+    else begin
+     ftimer.interval:= fanim_intervalus;
+    end;
+    if ano_singleshot in fanim_options then begin
+     resetanim();
+    end;
+    ftimer.enabled:= true;
+   end
+   else begin
+    if ftimer <> nil then begin
+     ftimer.enabled:= false;
+    end;
+   end;
+  end
+  else begin
+   freeandnil(ftimer);
+  end;
+ end
+end;
+
+procedure tcustomicon.loaded();
+begin
+ inherited;
+ updateanim();
+end;
+
+procedure tcustomicon.animrestart();
+begin
+ updateanim();
+ resetanim();
 end;
 
 { tgroupboxframe }
