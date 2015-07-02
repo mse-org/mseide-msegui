@@ -12,7 +12,7 @@ unit mseprocess;
 interface
 uses
  classes,mclasses,mseclasses,msepipestream,msestrings,msestatfile,msestat,
- msesystypes,mseevent,msetypes,mseprocmonitor,mseapplication;
+ msesystypes,mseevent,msetypes,mseprocmonitor,mseapplication,msedatalist;
 const 
  defaultpipewaitus = 0;
 type
@@ -20,7 +20,7 @@ type
  processstatesty = set of processstatety;
  processoptionty = (pro_output,pro_erroroutput,pro_input,pro_errorouttoout,
                     pro_shell,    //default on linux
-                    pro_noshell,  //default on windows, todo: implement on linux
+                    pro_noshell,  //default on windows,
                     pro_inactive,pro_nostdhandle, //windows only
                     pro_newconsole,pro_nowindow,pro_detached,    //windows only
                     pro_allowsetforegroundwindow, //windows only
@@ -71,6 +71,8 @@ type
    fpipewaitus: integer;
    fstatpriority: integer;
    foncheckabort: updatebooleaneventty;
+   fparams: tmsestringdatalist;
+   fenvvars: tmsestringdatalist;
    procedure setoutput(const avalue: tpipereaderpers);
    procedure seterroroutput(const avalue: tpipereaderpers);
    function getactive: boolean;
@@ -81,6 +83,8 @@ type
    procedure procend;
    procedure setoptions(const avalue: processoptionsty);
    procedure setinput(const avalue: tpipewriterpers);
+   procedure setparams(const avalue: tmsestringdatalist);
+   procedure setenvvars(const avalue: tmsestringdatalist);
   protected
    fstate: processstatesty;
    procedure setactive(const avalue: boolean); override;
@@ -122,6 +126,8 @@ type
    property parameter: msestring read fparameter write fparameter;
    property workingdirectory: filenamety read fworkingdirectory 
                                                 write fworkingdirectory;
+   property params: tmsestringdatalist read fparams write setparams;
+   property envvars: tmsestringdatalist read fenvvars write setenvvars;
    property active: boolean read getactive write setactive default false;
    property options: processoptionsty read foptions write setoptions 
                                                 default defaultprocessoptions;
@@ -337,15 +343,19 @@ begin
  foutput:= tpipereaderpers.create(self);
  ferroroutput:= tpipereaderpers.create(self);
  fpipewaitus:= defaultpipewaitus;
+ fparams:= tmsestringdatalist.create;
+ fenvvars:= tmsestringdatalist.create;
  inherited;
 end;
 
 destructor tmseprocess.destroy;
 begin
- finalizeexec;
- finput.free;    
- foutput.free;         //calls application.unlockall
- ferroroutput.free;    //calls application.unlockall
+ finalizeexec();
+ finput.free();    
+ foutput.free();         //calls application.unlockall
+ ferroroutput.free();    //calls application.unlockall
+ fparams.free();
+ fenvvars.free();
  inherited;
 // finput.free;
 // foutput.free;
@@ -415,8 +425,8 @@ var
  sessionleader: boolean;
  group: integer;
  opt1: execoptionsty;
- str1: ansistring;
- mstr1: msestring;
+// str1: ansistring;
+// mstr1: msestring;
 begin
  sessionleader:= false;
  group:= -1;
@@ -500,14 +510,19 @@ begin
      if pro_winpipewritehandles in foptions then begin
       include(opt1,exo_winpipewritehandles);
      end;
+     {
      if fworkingdirectory <> '' then begin
       mstr1:= filepath(fworkingdirectory);
       sys_tosysfilepath(mstr1);
       str1:= mstr1;
      end;
+     }
      try
       fprochandle:= execmse2(syscommandline(fcommandline1),
-                                    inp,outp,erroroutp,group,opt1,str1);
+                       inp,outp,erroroutp,group,opt1,fworkingdirectory,
+                       fparams.asarray,fenvvars.asarray);
+//      fprochandle:= execmse2(syscommandline(fcommandline1),
+//                                    inp,outp,erroroutp,group,opt1,str1);
      except
       fprochandle:= invalidprochandle;
       flastprochandle:= invalidprochandle;
@@ -889,6 +904,16 @@ end;
 procedure tmseprocess.setinput(const avalue: tpipewriterpers);
 begin
  finput.assign(avalue);
+end;
+
+procedure tmseprocess.setparams(const avalue: tmsestringdatalist);
+begin
+ fparams.assign(avalue);
+end;
+
+procedure tmseprocess.setenvvars(const avalue: tmsestringdatalist);
+begin
+ fenvvars.assign(avalue);
 end;
 
 { tstringprocess }

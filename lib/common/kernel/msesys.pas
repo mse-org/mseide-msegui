@@ -159,9 +159,9 @@ function buildsyserrormessage(const error: syserrorty;
 function buildsyserrormessage(const error: syserrorty; const sender: tobject;
                        text: string = ''): msestring;
 
-function getcommandlinearguments: stringarty;
+function getcommandlinearguments: msestringarty;
                  //refcount of result = 1
-function getcommandlineargument(const index: integer): string;
+function getcommandlineargument(const index: integer): msestring;
 procedure deletecommandlineargument(const index: integer);
                 //index 1..argumentcount-1, no action otherwise
 
@@ -234,7 +234,7 @@ const
    );
 
 var
- commandlineargs: stringarty;
+ commandlineargs: msestringarty;
 
 procedure initcommandlineargs;
 begin
@@ -243,7 +243,7 @@ begin
  end;
 end;
 
-function getcommandlineargument(const index: integer): string;
+function getcommandlineargument(const index: integer): msestring;
 begin
  initcommandlineargs;
  if index > high(commandlineargs) then begin
@@ -254,7 +254,7 @@ begin
  end;
 end;
 
-function getcommandlinearguments: stringarty;
+function getcommandlinearguments: msestringarty;
 begin
  initcommandlineargs;
  result:= copy(commandlineargs);

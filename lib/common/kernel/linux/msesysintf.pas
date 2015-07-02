@@ -436,7 +436,7 @@ begin
  result:= paramstr(0);
 end;
 
-function sys_getcommandlinearguments: stringarty;
+function sys_getcommandlinearguments: msestringarty;
 var
  av: pcharpoaty;
  ac: pinteger;

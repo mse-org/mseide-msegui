@@ -88,7 +88,9 @@ type
    destructor destroy; override;
    function prochandle: integer;
    function execprog(const acommandline: msestring;
-                            const aworkingdirectory: filenamety = ''): integer;
+                    const aworkingdirectory: filenamety = '';
+                    const aparams: msestringarty = nil; 
+                    const aenvvars: msestringarty = nil): integer;
      //returns prochandle
    procedure terminateprocess;
    procedure killprocess;
@@ -597,7 +599,9 @@ begin
 end;
 
 function tterminal.execprog(const acommandline: msestring;
-                            const aworkingdirectory: filenamety = ''): integer;
+                            const aworkingdirectory: filenamety = '';
+                    const aparams: msestringarty = nil; 
+                    const aenvvars: msestringarty = nil): integer;
 begin
  with fprocess do begin
   active:= false;
@@ -606,6 +610,8 @@ begin
 //  end;
   commandline:= acommandline;
   workingdirectory:= aworkingdirectory;
+  params.asarray:= aparams;
+  envvars.asarray:= aenvvars;
   active:= true;
   result:= lastprochandle;
  end;

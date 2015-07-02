@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2015 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -15,7 +15,8 @@ unit mseprocutils;
 interface
 uses
  {$ifdef mswindows}windows{$else}mselibc{$endif},
- msetypes,msestream,msepipestream,sysutils,msesysutils,msesystypes,msesys;
+ msetypes,msestream,msepipestream,sysutils,msesysutils,msesystypes,msesys,
+ msestrings;
  
 type
  pipedescriptorty = record
@@ -24,7 +25,6 @@ type
  end;
  execoptionty = (exo_shell,                    //default on Linux
                  exo_noshell,                  //default on Windows
-                          //todo: implement on linux
                  exo_inactive,                 //windows only
                  exo_nostdhandle,              //windows only
                  exo_newconsole,               //windows only
@@ -48,56 +48,69 @@ function getprocessexitcode(prochandle: prochandlety; out exitcode: integer;
                  //true if ok, close handle
 function waitforprocess(prochandle: prochandlety): integer;
 
-function execmse(const commandline: string; const options: execoptionsty = [];
-             const workingdirectory: ansistring = ''): boolean;
+function execmse(const commandline: msestring; //sys format
+                 const options: execoptionsty = [];
+                 const workingdirectory: filenamety = '';
+                 const params: msestringarty = nil;
+                 const envvars: msestringarty = nil): boolean;
 //starts program, true if OK
 
-function execmse4(const commandline: string; const  options: execoptionsty = [];
-             const workingdirectory: ansistring = ''): prochandlety;
+function execmse4(const commandline: msestring; //sys format 
+                  const  options: execoptionsty = [];
+                  const workingdirectory: filenamety = '';
+                  const params: msestringarty = nil;
+                  const envvars: msestringarty = nil): prochandlety;
 //starts program, returns processhandle, execerror on error
 //don't forget closehandle on windows!
 
-function execmse1(const commandline: ansistring; topipe: pinteger = nil;
-             frompipe: pinteger = nil;
-             errorpipe: pinteger = nil;
-             groupid: integer = -1; //-1 -> keine, 0 = childpid
-             const options: execoptionsty = [];
-             frompipewritehandle: pinteger = nil;
-             errorpipewritehandle: pinteger = nil;
-             const workingdirectory: ansistring = ''
-                 ): prochandlety;
-//starts program, returns processhandle, execerror on error
-//don't forget closehandle on windows!
-//creates pipes
-
-function execmse2(const commandline: string; topipe: tpipewriter = nil;
-                      frompipe: tpipereader = nil;
-                      errorpipe: tpipereader = nil;
-             groupid: integer = -1; //-1 -> keine, 0 = childpid
-             const options: execoptionsty = [];
-             const workingdirectory: ansistring = ''
-                 ): prochandlety;
+function execmse1(const commandline: msestring; //sys format
+                  topipe: pinteger = nil;
+                  frompipe: pinteger = nil;
+                  errorpipe: pinteger = nil;
+                  groupid: integer = -1; //-1 -> keine, 0 = childpid
+                  const options: execoptionsty = [];
+                  frompipewritehandle: pinteger = nil;
+                  errorpipewritehandle: pinteger = nil;
+                  const workingdirectory: filenamety = '';
+                  const params: msestringarty = nil;
+                  const envvars: msestringarty = nil): prochandlety;
 //starts program, returns processhandle, execerror on error
 //don't forget closehandle on windows!
 //creates pipes
 
-function execmse3(const commandline: string; topipe: pinteger = nil;
-             frompipe: pinteger = nil;
-             errorpipe: pinteger = nil;
-             groupid: integer = -1; //-1 -> keine, 0 = childpid
-             const options: execoptionsty = [];
-             frompipewritehandle: pinteger = nil;
-             errorpipewritehandle: pinteger = nil;
-             const workingdirectory: ansistring = ''
-                 ): prochandlety;
+function execmse2(const commandline: msestring; //sys format
+                  topipe: tpipewriter = nil;
+                  frompipe: tpipereader = nil;
+                  errorpipe: tpipereader = nil;
+                  groupid: integer = -1; //-1 -> keine, 0 = childpid
+                  const options: execoptionsty = [];
+                  const workingdirectory: filenamety = '';
+                  const params: msestringarty = nil;
+                  const envvars: msestringarty = nil): prochandlety;
+//starts program, returns processhandle, execerror on error
+//don't forget closehandle on windows!
+//creates pipes
+
+function execmse3(const commandline: msestring; //sys format
+                  topipe: pinteger = nil;
+                  frompipe: pinteger = nil;
+                  errorpipe: pinteger = nil;
+                  groupid: integer = -1; //-1 -> keine, 0 = childpid
+                  const options: execoptionsty = [];
+                  frompipewritehandle: pinteger = nil;
+                  errorpipewritehandle: pinteger = nil;
+                  const workingdirectory: filenamety = '';
+                  const params: msestringarty = nil;
+                  const envvars: msestringarty = nil): prochandlety;
 //starts program, returns processhandle, execerror on error
 //don't forget closehandle on windows!
 //uses existing file handles
 
-function execwaitmse(const commandline: string;
+function execwaitmse(const commandline: msestring; //sys format
                      const options: execoptionsty = [];
-                     const workingdirectory: ansistring = ''
-                      ): integer; overload;
+                     const workingdirectory: filenamety = '';
+                     const params: msestringarty = nil;
+                     const envvars: msestringarty = nil): integer; overload;
 //runs programm, waits for program termination, returns program exitcode
 //inactive true -> no console window (win32 only)
 
@@ -179,7 +192,8 @@ type
 
 implementation
 uses 
- msesysintf1,msesysintf,msestrings,mseprocmonitor,msearrayutils,mseapplication;
+ msesysintf1,msesysintf,mseprocmonitor,msearrayutils,
+                                       mseapplication,msefileutils;
 
 procedure killprocesstree1(id: procidty);
 var
@@ -713,7 +727,9 @@ function execmse0(const commandline: string; topipe: pinteger = nil;
              const options: execoptionsty = [];
              frompipewritehandle: pinteger = nil;
              errorpipewritehandle: pinteger = nil;
-             const workingdirectory: ansistring = ''
+             const workingdirectory: filenamety = '';
+             const params: msestringarty = nil;
+             const envvars: msestringarty = nil
              ): prochandlety;
 const
  shell = shortstring('/bin/sh');
@@ -728,10 +744,6 @@ var
  ptynameout: namebufferty;
  ptynameerr: namebufferty;
  
-{$ifndef FPC}
- params: array[0..3] of pchar;
-{$endif}
-
  procedure execerr;
  var
   errorbefore: integer;
@@ -827,7 +839,50 @@ var
 
 var
  bo1: boolean;
+ i1,i2: int32;
+ wd1: ansistring;
+ command1,commandline1: ansistring;
+ params1,envvars1: pointerarty;
+ par,env: stringarty;
 begin
+ commandline1:= ansistring(commandline);
+ if workingdirectory <> '' then begin
+  wd1:= tosysfilepath(workingdirectory);
+ end;
+ setlength(par,length(params));
+ for i1:= 0 to high(par) do begin
+  par[i1]:= params[i1];
+ end;
+ setlength(env,length(envvars));
+ for i1:= 0 to high(env) do begin
+  env[i1]:= envvars[i1];
+ end;
+ if not (exo_noshell in options) then begin
+  command1:= shell;
+  setlength(params1,3);
+  params1[1]:= pchar('-c');
+  params1[2]:= pchar(commandline1);
+ end
+ else begin
+  command1:= tosysfilepath(commandline);
+  setlength(params1,1);
+ end;
+
+ params1[0]:= pchar(command1);
+ i2:= length(params1);
+ setlength(params1,i2+length(params)+1);
+ for i1:= 0 to high(par) do begin
+  params1[i2]:= pchar(ansistring(par[i1]));
+  inc(i2);
+ end;
+ params1[high(params1)]:= nil;
+
+ setlength(envvars1,length(envvars)+1);
+ for i1:= 0 to high(env) do begin
+  envvars1[i1]:= pchar(ansistring(env[i1]));
+ end;
+ envvars1[high(envvars1)]:= nil;
+
  ptyout:= -1;
  ptyerr:= -1;
  result:= invalidprochandle; //compilerwarnung;
@@ -870,13 +925,15 @@ begin
    end;
   end;
  end;
+
  procid:= mselibc.vfork;
 // procid:= mselibc.fork;
+
  if procid = -1 then execerr;
+
  if procid = 0 then begin   //child
-{$ifdef FPC}{$checkpointer off}{$endif}
-  if workingdirectory <> '' then begin
-   mselibc.__chdir(pointer(workingdirectory));
+  if wd1 <> '' then begin
+   mselibc.__chdir(pointer(wd1));
   end;
   if exo_sessionleader in options then begin
    setsid;
@@ -939,19 +996,15 @@ begin
    end;
   end;
 
- {$ifdef FPC}
-  mselibc.execl(shell,shell,['-c',pchar(commandline),nil]);
- {$else}
-  params[0]:= shell;
-  params[1]:= pchar('-c');
-  params[2]:= pchar(commandline);
-  params[3]:= nil;
- {$warnings off}
-  mselibc.syscall(11,pchar(shell),@params,envp); //problems with kylix debugger
- {$warnings on}
-{$endif}
+//  mselibc.execl(shell,shell,['-c',pchar(commandline),nil]);
+  if envvars <> nil then begin
+   mselibc.execve(pointer(pchar(command1)),pointer(params1),pointer(envvars1));
+  end
+  else begin
+   mselibc.execv(pointer(pchar(command1)),pointer(params1));
+  end;
   mselibc._exit(exit_failure); //execl misslungen
-{$ifdef FPC}{$checkpointer default}{$endif}
+
  end
  else begin //parent
   if topipe <> nil then begin
@@ -1157,8 +1210,11 @@ end;
 
 {$endif}
 
-function execmse(const commandline: string; const options: execoptionsty = [];
-             const workingdirectory: ansistring = ''): boolean;
+function execmse(const commandline: msestring; 
+                 const options: execoptionsty = [];
+                 const workingdirectory: filenamety = '';
+                 const params: msestringarty = nil;
+                 const envvars: msestringarty = nil): boolean;
 var
  procid: prochandlety;
 begin
@@ -1167,7 +1223,7 @@ begin
  try
   try
    procid:= execmse1(commandline,nil,nil,nil,-1,options,nil,nil,
-                                                          workingdirectory);
+                                            workingdirectory,params,envvars);
   finally
    if procid <> invalidprochandle then begin
     closehandle(procid);
@@ -1179,7 +1235,7 @@ begin
 {$else}
  try
   procid:= execmse1(commandline,nil,nil,nil,-1,options,nil,nil,
-                                                     workingdirectory);
+                                            workingdirectory,params,envvars);
   pro_killzombie(procid);
  except
   result:= false;
@@ -1187,9 +1243,11 @@ begin
 {$endif}
 end;
 
-function execwaitmse(const commandline: string;
+function execwaitmse(const commandline: msestring;
                      const options: execoptionsty = [];
-             const workingdirectory: ansistring = ''): integer;
+             const workingdirectory: filenamety = '';
+             const params: msestringarty = nil;
+             const envvars: msestringarty = nil): integer;
 //startet programm, wartet auf ende, bring exitcode, -1 wenn start nicht moeglich
 var
  prochandle: prochandlety;
@@ -1197,7 +1255,7 @@ begin
  result:= -1;
    //programm wurde nicht gestartet oder getexitcodeprozessproblem
  prochandle:= execmse1(commandline,nil,nil,nil,-1,options,nil,nil,
-                                                      workingdirectory);
+                               workingdirectory,params,envvars);
  if prochandle <> invalidprochandle then begin
   result:= waitforprocess(prochandle);
  end;
@@ -1213,15 +1271,16 @@ begin
 end;
 }
 
-function execmse1(const commandline: ansistring; topipe: pinteger = nil;
+function execmse1(const commandline: msestring; topipe: pinteger = nil;
              frompipe: pinteger = nil;
              errorpipe: pinteger = nil;
              groupid: integer = -1; //-1 -> keine, 0 = childpid
              const options: execoptionsty = [];
              frompipewritehandle: pinteger = nil;
              errorpipewritehandle: pinteger = nil;
-             const workingdirectory: ansistring = ''
-                 ): prochandlety;
+             const workingdirectory: filenamety = '';
+             const params: msestringarty = nil;
+             const envvars: msestringarty = nil): prochandlety;
         //creates pipes
 begin
  if topipe <> nil then begin
@@ -1234,16 +1293,18 @@ begin
   errorpipe^:= invalidfilehandle;
  end;
  result:= execmse0(commandline,topipe,frompipe,errorpipe,groupid,options,
-                     frompipewritehandle,errorpipewritehandle,workingdirectory);
+           frompipewritehandle,errorpipewritehandle,
+                                             workingdirectory,params,envvars);
 end;
 
-function execmse2(const commandline: string; topipe: tpipewriter = nil;
+function execmse2(const commandline: msestring; topipe: tpipewriter = nil;
              frompipe: tpipereader = nil;
              errorpipe: tpipereader = nil;
              groupid: integer = -1; //-1 -> keine, 0 = childpid
              const options: execoptionsty = [];
-             const workingdirectory: ansistring = ''
-             ): prochandlety;
+             const workingdirectory: filenamety = '';
+             const params: msestringarty = nil;
+             const envvars: msestringarty = nil): prochandlety;
  //bringt procid
 var
  top,fromp,errp,fromwrite,errwrite: integer;
@@ -1286,7 +1347,7 @@ begin
  end;
  result:= execmse1(commandline,topp,frompp,errpp,groupid,
                          options,
-                         fromwritep,errwritep,workingdirectory);
+                         fromwritep,errwritep,workingdirectory,params,envvars);
  if topp <> nil then begin
   topipe.Handle:= topp^;
  end;
@@ -1306,26 +1367,32 @@ begin
  end;
 end;
 
-function execmse3(const commandline: string; topipe: pinteger = nil;
-             frompipe: pinteger = nil;
-             errorpipe: pinteger = nil;
-             groupid: integer = -1; //-1 -> keine, 0 = childpid
-             const options: execoptionsty = [];
-             frompipewritehandle: pinteger = nil;
-             errorpipewritehandle: pinteger = nil;
-             const workingdirectory: ansistring = ''
-                         ): prochandlety;
+function execmse3(const commandline: msestring;
+                  topipe: pinteger = nil;
+                  frompipe: pinteger = nil;
+                  errorpipe: pinteger = nil;
+                  groupid: integer = -1; //-1 -> keine, 0 = childpid
+                  const options: execoptionsty = [];
+                  frompipewritehandle: pinteger = nil;
+                  errorpipewritehandle: pinteger = nil;
+                  const workingdirectory: filenamety = '';
+                  const params: msestringarty = nil;
+                  const envvars: msestringarty = nil): prochandlety;
     //uses existing file handles
 begin
  result:= execmse0(commandline,topipe,frompipe,errorpipe,
            groupid,options,frompipewritehandle,errorpipewritehandle,
-           workingdirectory);
+                                             workingdirectory,params,envvars);
 end;
 
-function execmse4(const commandline: string; const options: execoptionsty = [];
-             const workingdirectory: ansistring = ''): prochandlety;
+function execmse4(const commandline: msestring;
+                  const options: execoptionsty = [];
+                  const workingdirectory: filenamety = '';
+                  const params: msestringarty = nil;
+                  const envvars: msestringarty = nil): prochandlety;
 begin
- result:= execmse1(commandline,nil,nil,nil,-1,options,nil,nil,workingdirectory);
+ result:= execmse1(commandline,nil,nil,nil,-1,options,nil,nil,
+                   workingdirectory,params,envvars);
 end;
 
 end.

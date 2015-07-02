@@ -2537,6 +2537,10 @@ function execl(__path:Pchar; __arg:Pchar):longint;
                cdecl;varargs;external clib name 'execl'; overload;
 function execl(__path:Pchar; __arg:Pchar; args:array of const):longint;
                     cdecl;external clib name 'execl'; overload;
+function execv (__path: pcchar; __argv: ppchar): cint;
+                    cdecl;external clib name 'execv';
+function execve(__path: pcchar; __argv: ppchar; __envp:ppchar): cint;
+                    cdecl;external clib name 'execve';
 
 Type
   error_t = Integer;

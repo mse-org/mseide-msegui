@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2009 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2015 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -22,7 +22,7 @@ function sys_threadschedyield: syserrorty;
 function sys_getcurrentthread: threadty;
 function sys_issamethread(const a,b: threadty): boolean;
 function sys_getapplicationpath: filenamety;
-function sys_getcommandlinearguments: stringarty;
+function sys_getcommandlinearguments: msestringarty;
 function sys_getenv(const aname: msestring; out avalue: msestring): boolean;
                           //true if found
 function sys_setenv(const aname: msestring; 

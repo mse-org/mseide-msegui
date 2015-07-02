@@ -264,14 +264,15 @@ function msestringicomp(const a,b: msestring): integer;
 function msestringicompupper(const a,upstr: msestring): integer;
          //ascii case insensitive, upstr must be uppercase
 
-function comparestrlen(S1,S2: string): integer;
+function comparestrlen(const S1,S2: string): integer;
                 //case sensitiv, beruecksichtigt nur s1 laenge
+function msecomparestrlen(const S1,S2: msestring): integer;
+                //case sensitiv, beruecksichtigt nur s1 laenge
+
 function msecomparestr(const S1, S2: msestring): Integer; {$ifdef FPC} inline; {$endif}
                 //case sensitive
 function msecomparetext(const S1, S2: msestring): Integer;{$ifdef FPC} inline; {$endif}
                 //case insensitive
-function msecomparestrlen(const S1, S2: msestring): Integer;
-                //case sensitiv, beruecksichtigt nur s1 laenge
 function mseCompareTextlen(const S1, S2: msestring): Integer;
                 //case insensitiv, beruecksichtigt nur s1 laenge
 function mseCompareTextlenupper(const S1, S2: msestring): Integer;
@@ -5171,7 +5172,7 @@ begin
  move(str^,result[1],len*sizeof(msechar));
 end;
 
-function comparestrlen(S1,S2: string): integer;
+function comparestrlen(const S1,S2: string): integer;
                 //case sensitiv, beruecksichtigt nur s1 laenge
 begin
  if (length(s1) = 0) or (pointer(s1) = pointer(s2)) then begin
@@ -5184,6 +5185,22 @@ begin
  end
  else begin
   result:= strlcomp(pointer(s1),pointer(s2),length(s1));
+ end;
+end;
+
+function msecomparestrlen(const S1,S2: msestring): integer;
+                //case sensitiv, beruecksichtigt nur s1 laenge
+begin
+ if (length(s1) = 0) or (pointer(s1) = pointer(s2)) then begin
+  result:= 0;
+  exit;
+ end;
+ if length(s2) = 0 then begin
+  result:= 1;
+  exit;
+ end
+ else begin
+  result:= msestrlcomp(pointer(s1),pointer(s2),length(s1));
  end;
 end;
 
@@ -5222,15 +5239,6 @@ begin
 {$else}
  result:= widecomparetext(s1,s2);
 {$endif}
-end;
-
-function mseCompareStrlen(const S1, S2: msestring): Integer;
-                //case sensitiv, beruecksichtigt nur s1 laenge
-var
- str1: msestring;
-begin
- str1:= copy(s2,1,length(s1)); //todo: optimize
- result:= msecomparestr(s1,str1);
 end;
 
 function mseCompareTextlen(const S1, S2: msestring): Integer;

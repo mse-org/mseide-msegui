@@ -2053,20 +2053,6 @@ type
                         const glue: widgetalignmodety = wam_none;
                         const margin: integer = 0): integer;
                         //returns reference point, margin reference = clientrect
-{
-   function alignx(const mode: widgetalignmodety;
-                     const awidgets: array of twidget;
-                               const margin: integer): integer;
-                        //shifts to client border, returns reference point
-
-   function aligny(const mode: widgetalignmodety;
-                        const awidgets: array of twidget): integer;
-                        //returns reference point
-   function aligny(const mode: widgetalignmodety;
-                        const awidgets: array of twidget;
-                               const margin: integer): integer;
-                        //shifts to client border, returns reference point
-}
    property optionswidget: optionswidgetty read foptionswidget 
                  write setoptionswidget default defaultoptionswidget;
    property optionswidget1: optionswidget1ty read foptionswidget1 
@@ -18029,7 +18015,7 @@ end;
 
 procedure getmseguiarguments();
 var
- ar1: stringarty;
+ ar1: msestringarty;
  int1,int2: integer;
 
  procedure deleteitem();

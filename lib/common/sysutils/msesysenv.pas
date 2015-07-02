@@ -80,15 +80,13 @@ type
 
  argumentdefty = record
   kind: argumentkindty;
-  name: string;   //case sensitive, single char ->
+  name: msestring;   //case sensitive, single char ->
                   //  short parameter 'a' 'b' -> '-a' '-b' or '-ab' or '-ba',
                   // '-abcde' -> '--abcde'
-  anames: pstring;//pointer auf array[0..0] of string alias,
+  anames: pmsestring;//pointer auf array[0..0] of string alias,
                      //letzter string muss leer sein ('abc','def','');
   flags: argumentflagsty;
-  initvalue: string;
-//  argument: string;
-//  help: string;
+  initvalue: msestring;
  end;
 
  pargumentdefty = ^argumentdefty;
@@ -229,15 +227,15 @@ type
  end;
 
 procedure defstoarguments(const defs: sysenvdefarty; 
-                 out arguments: argumentdefarty; out alias: stringararty);
+                 out arguments: argumentdefarty; out alias: msestringararty);
 
 implementation
 uses
  msesysutils,RTLConsts,msestream,msesys{$ifdef UNIX},mselibc{$endif},
- typinfo,mseapplication,msebits;
+ typinfo,mseapplication,msebits,msesysintf;
 
 procedure defstoarguments(const defs: sysenvdefarty; 
-                 out arguments: argumentdefarty; out alias: stringararty);
+                 out arguments: argumentdefarty; out alias: msestringararty);
 var
  int1,int2: integer;
  d: psysenvdefty;
@@ -386,7 +384,7 @@ end;
 procedure tsysenvmanager.doinit;
 var
  ar1: argumentdefarty;
- ar2: stringararty;
+ ar2: msestringararty;
 begin
  if not (csdesigning in componentstate) then begin
   if assigned(foninit) then begin
@@ -779,21 +777,21 @@ procedure tsysenvmanager.init(const arguments: array of argumentdefty);
 
 var
  index: integer;
- strar1: stringarty;
+ strar1: msestringarty;
 
- function finddef(typen: argumentkindsty; aname: string): integer;
+ function finddef(typen: argumentkindsty; aname: msestring): integer;
 
   function checkname(const argumentdef: argumentdefty): boolean;
 
    function checkanames: boolean;
    var
-    po1: pstring;
+    po1: pmsestring;
    begin
     result:= false;
     po1:= argumentdef.anames;
     if po1 <> nil then begin
      while po1^ <> '' do begin
-      if comparestrlen(aname,po1^) = 0 then begin
+      if msecomparestrlen(aname,po1^) = 0 then begin
        result:= true;
        exit;
       end;
@@ -806,7 +804,7 @@ var
    with argumentdef do begin
     result:= kind in typen;
     if result then begin
-     result:= (comparestrlen(aname,name) = 0) or checkanames;
+     result:= (msecomparestrlen(aname,name) = 0) or checkanames;
     end;
    end;
   end;
@@ -830,12 +828,12 @@ var
   result:= -1;
  end;
 
- function isparameter(const str: string): boolean;
+ function isparameter(const str: msestring): boolean;
  begin
   result:= (length(str) > 0) and (str[1] = commandlineparchar);
  end;
 
- procedure findswitch(str1: string);
+ procedure findswitch(str1: msestring);
  var
   int1: integer;
 
@@ -891,7 +889,7 @@ var
   end;
 
  var
-  strar2: stringarty;
+  strar2: msestringarty;
 
  begin //findswitch
   if length(str1) > 0 then begin
@@ -956,10 +954,10 @@ var
 
 var
  int1: integer;
- str1: string;
- {$ifdef UNIX}
- po1: pchar;
- {$endif}
+ str1: msestring;
+// {$ifdef UNIX}
+// po1: pchar;
+// {$endif}
 begin            //init
  if high(arguments) = -1 then begin
   exit;
@@ -1012,9 +1010,14 @@ begin            //init
      errorme(setdef(int1,str1,[arf_envdefined]),name);
     end;
     {$else}
+{
     po1:= getenv(pchar(name));
     if po1 <> nil then begin
      errorme(setdef(int1,po1,[arf_envdefined]),name);
+    end;
+}
+    if sys_getenv(name,str1) then begin
+     errorme(setdef(int1,str1,[arf_envdefined]),name);
     end;
     {$endif};
    end;

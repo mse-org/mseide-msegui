@@ -547,7 +547,7 @@ procedure initfontalias;
 const
  paramname = '--FONTALIAS=';
 var
- ar1,ar2: stringarty;
+ ar1,ar2: msestringarty;
  int1,{int2,}int3,int4{,int5}: integer;
  ar3: array[0..1] of integer;
  options1: fontoptionsty;
@@ -559,7 +559,8 @@ begin
  int3:= 1;
  xscale1:= 1.0;
  for int1:= 1 to high(ar1) do begin
-  if strlicomp(pchar(ar1[int1]),pchar(paramname),length(paramname)) = 0 then begin
+  if msestrlicomp(pmsechar(ar1[int1]),pmsechar(paramname),
+                                           length(paramname)) = 0 then begin
    ar2:= nil;
    splitstringquoted(copy(ar1[int1],length(paramname)+1,bigint),ar2,'"',',');
    if (high(ar2) >= 1) and (high(ar2) <= 6) then begin
