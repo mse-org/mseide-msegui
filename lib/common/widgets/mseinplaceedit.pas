@@ -208,6 +208,7 @@ type
    property curindex: integer read fcurindex write setcurindex;
    property caretpos: pointty read fcaretpos;
    function lasttextclipped: boolean; //result of last drawing
+   function lasttextclipped(const acliprect: rectty): boolean;
    function textclipped: boolean;
    function mousepostotextindex(const apos: pointty): integer;
    function textindextomousepos(const aindex: integer): pointty;
@@ -995,6 +996,11 @@ end;
 function tinplaceedit.lasttextclipped: boolean;
 begin
  result:= not rectinrect(finfo.res,finfo.clip);
+end;
+
+function tinplaceedit.lasttextclipped(const acliprect: rectty): boolean;
+begin
+ result:= not rectinrect(finfo.res,intersectrect(finfo.clip,acliprect));
 end;
 
 function tinplaceedit.mousepostotextindex(const apos: pointty): integer;
