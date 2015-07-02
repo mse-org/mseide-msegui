@@ -142,6 +142,9 @@ type
    procedure dofontheightdelta(var delta: integer); override;
    procedure sizechanged; override;
    function getinnerframe: framety; override;
+   function textclipped(const arow: integer;
+                       out acellrect: rectty): boolean; virtual;
+   function textclipped(const arow: integer): boolean;
 
     //igridwidget
    procedure setfirstclick(var ainfo: mouseeventinfoty);
@@ -401,6 +404,7 @@ type
  tinplaceedit1 = class(tinplaceedit);
  twidgetcol1 = class(twidgetcol);
  tcustomrowstatelist1 = class(tcustomrowstatelist);
+ twidget1 = class(twidget);
 
 procedure normalizetextrect(const po1,po2: gridcoordty; out start,stop: gridcoordty);
 begin
@@ -536,7 +540,12 @@ begin
   result:= frame.cellframe;
  end
  else begin
-  result:= tgridarrayprop(fgridintf.getcol.prop).innerframe;
+  if fgridintf <> nil then begin
+   result:= tgridarrayprop(fgridintf.getcol.prop).innerframe;
+  end
+  else begin
+   result:= getinnerframe;
+  end;
  end;
 end;
 
@@ -1740,6 +1749,40 @@ begin
  end;
 end;
 
+function tcustomtextedit.textclipped(const arow: integer;
+                                        out acellrect: rectty): boolean;
+var
+ rect2: rectty;
+ canvas1: tcanvas;
+ cell1: gridcoordty;
+ grid1: tcustomgrid;
+begin
+ checkgrid;
+ with twidgetcol1(fgridintf.getcol) do begin
+  grid1:= grid;
+  cell1.row:= arow;
+  cell1.col:= colindex;
+  result:= grid1.isdatacell(cell1);
+  if result then begin
+   acellrect:= grid1.clippedcellrect(cell1,cil_inner);
+   canvas1:= getcanvas;
+   rect2:= textrect(canvas1,richstringty(getdatapo(arow)^),
+                   acellrect,feditor.textflags,font);
+   result:= not rectinrect(rect2,acellrect);
+  end
+  else begin
+   acellrect:= nullrect;
+  end;
+ end;
+end;
+
+function tcustomtextedit.textclipped(const arow: integer): boolean;
+var
+ rect1: rectty;
+begin
+ result:= textclipped(arow,rect1);
+end;
+
 procedure tcustomtextedit.docellevent(const ownedcol: boolean; 
                                                 var info: celleventinfoty);
 var
@@ -1748,6 +1791,7 @@ var
  po1: pointty;
  int1,int2: integer;
  rect1: rectty;
+ hintinfo: hintinfoty;
 begin
  if ownedcol then begin
   with info do begin
@@ -1830,6 +1874,23 @@ begin
        subpoint1(mouseeventinfopo^.pos,po1);
       end;
      end;
+    end;
+    cek_firstmousepark: begin
+     if (oe_hintclippedtext in foptionsedit) and application.active and 
+            textclipped(info.cell.row) and 
+            ((info.grid.row <> info.cell.row) or 
+            (info.grid.col <> info.cell.col)) and
+     {$warnings off}
+            twidget1(info.grid).getshowhint then begin
+     {$warnings on}
+      application.inithintinfo(hintinfo,info.grid);
+     {$warnings off}
+      hintinfo.caption:= 
+         richstringty(
+                 twidgetcol1(fgridintf.getcol).getdatapo(info.cell.row)^).text;
+     {$warnings on}
+      application.showhint(info.grid,hintinfo);
+     end; 
     end;
     cek_mouseleave: begin
      fmousetextpos:= invalidcell;

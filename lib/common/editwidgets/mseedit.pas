@@ -430,6 +430,7 @@ type
    function needsfocuspaint: boolean; override;
 //   procedure doafterpaint(const canvas: tcanvas); override;
    procedure rootchanged(const awidgetregionivalid: boolean); override;
+   function gettextcliprect(): rectty; virtual;
    procedure showhint(var info: hintinfoty); override;
 
    procedure dochange; virtual;
@@ -1807,10 +1808,15 @@ begin
  result:= false;
 end;
 
+function tcustomedit.gettextcliprect(): rectty;
+begin
+ result:= clippedpaintrect();
+end;
+
 procedure tcustomedit.showhint(var info: hintinfoty);
 begin
  if (oe_hintclippedtext in foptionsedit) and 
-                      editor.lasttextclipped and getshowhint then begin
+          editor.lasttextclipped(gettextcliprect) and getshowhint then begin
   info.caption:= text;
  end;
  inherited;

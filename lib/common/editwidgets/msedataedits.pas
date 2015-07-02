@@ -253,8 +253,8 @@ type
    function griddata: tdatalist;
    property gridintf: iwidgetgrid read fgridintf;
    function textclipped(const arow: integer;
-                       out acellrect: rectty): boolean; overload; virtual;
-   function textclipped(const arow: integer): boolean; overload;
+                       out acellrect: rectty): boolean; virtual;
+   function textclipped(const arow: integer): boolean;
 
    function checkvalue(const quiet: boolean = false): boolean; virtual;
    function canclose(const newfocus: twidget): boolean; override;
