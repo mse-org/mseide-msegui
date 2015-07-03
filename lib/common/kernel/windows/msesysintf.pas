@@ -300,10 +300,10 @@ begin
  result:= tomsefilepath(str1);
 end;
 
-function sys_getcommandlinearguments: stringarty;
+function sys_getcommandlinearguments: msestringarty;
 begin
  {$ifdef FPC}{$checkpointer off}{$endif}
- result:= parsecommandline(cmdline);
+ result:= parsecommandline(msestring(cmdline)); //todo: use unicode
  {$ifdef FPC}{$checkpointer default}{$endif}
 end;
 

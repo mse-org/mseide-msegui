@@ -416,14 +416,16 @@ begin
  end;
 end;
 
-function execmse0(const commandline: string; topipe: pinteger = nil;
+function execmse0(const commandline: msestring; topipe: pinteger = nil;
              frompipe: pinteger = nil;
              errorpipe: pinteger = nil;
              groupid: integer = -1; //-1 -> keine, 0 = childpid
              const options: execoptionsty = [];
              frompipewritehandle: pinteger = nil;
              errorpipewritehandle: pinteger = nil;
-             const workingdirectory: ansistring = ''
+             const workingdirectory: ansistring = '';
+             const params: msestringarty = nil;
+             const envvars: msestringarty = nil             
              ): prochandlety;
 //startet programm, bringt processhandle, execerror wenn misslungen
 //closehandle nicht vergessen!
@@ -453,6 +455,7 @@ var
  creationflags: dword;
  processinfo: tprocessinformation;
  bo1: boolean;
+ wd1,cmd1: string;
 begin
  creationflags:= 0;
  result:= invalidprochandle;
@@ -529,14 +532,17 @@ begin
   startupinfo.wShowWindow:= sw_hide;
   startupinfo.dwflags:= startupinfo.dwFlags or startf_useshowwindow;
  end;
+ wd1:= tosysfilepath(workingdirectory);
+ cmd1:= commandline;
+               //todo: use createprocessW
  if exo_shell in options then begin
-  bo1:= createprocess(nil,pchar('cmd.exe '+'/q /c'+commandline),
-                 nil,nil,true,creationflags,nil,pointer(workingdirectory),
+  bo1:= createprocess(nil,pchar('cmd.exe '+'/q /c'+cmd1),
+                 nil,nil,true,creationflags,nil,pointer(wd1),
                                                      startupinfo,processinfo);
  end
  else begin
-  bo1:= createprocess(nil,pchar(commandline),nil,nil,true,creationflags,nil,
-                           pointer(workingdirectory),startupinfo,processinfo);
+  bo1:= createprocess(nil,pchar(cmd1),nil,nil,true,creationflags,nil,
+                           pointer(wd1),startupinfo,processinfo);
  end;
  if bo1 then begin
   if topipehandles.readdes <> invalidfilehandle then begin
