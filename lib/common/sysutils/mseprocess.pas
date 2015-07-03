@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2010-2012 by Martin Schreiber
+{ MSEgui Copyright (c) 2010-2015 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -147,14 +147,14 @@ type
                           read foncheckabort write foncheckabort;
  end;
 
-function getprocessoutput(const acommandline: string; const todata: string;
+function getprocessoutput(const acommandline: msestring; const todata: string;
                          out fromdata: string; out errordata: string;
                          const atimeout: integer = -1;
                          const aoptions: processoptionsty = 
                             defaultgetprocessoutputoptions;
                        const acheckabort: updatebooleaneventty = nil): integer;
                          //returns program exitcode, -1 in case of error
-function getprocessoutput(const acommandline: string; const todata: string;
+function getprocessoutput(const acommandline: msestring; const todata: string;
                          out fromdata: string;
                          const atimeout: integer = -1;
                     const aoptions: processoptionsty = 
@@ -162,7 +162,7 @@ function getprocessoutput(const acommandline: string; const todata: string;
                        const acheckabort: updatebooleaneventty = nil): integer;
                          //returns program exitcode, -1 in case of error
 function getprocessoutput(out prochandle: prochandlety;
-                         const acommandline: string; const todata: string;
+                         const acommandline: msestring; const todata: string;
                          out fromdata: string; out errordata: string;
                          const atimeout: integer = -1;
                          const aoptions: processoptionsty = 
@@ -170,7 +170,7 @@ function getprocessoutput(out prochandle: prochandlety;
                        const acheckabort: updatebooleaneventty = nil): integer;
                          //returns program exitcode, -1 in case of error
 function getprocessoutput(out prochandle: prochandlety;
-                         const acommandline: string; const todata: string;
+                         const acommandline: msestring; const todata: string;
                          out fromdata: string;
                          const atimeout: integer = -1;
                     const aoptions: processoptionsty = 
@@ -178,7 +178,7 @@ function getprocessoutput(out prochandle: prochandlety;
                        const acheckabort: updatebooleaneventty = nil): integer;
                          //returns program exitcode, -1 in case of error
 
-function startprocessandwait(const acommandline: string;
+function startprocessandwait(const acommandline: msestring;
                      const atimeout: integer = -1;
                      const aoptions: processoptionsty = 
                             defaultgetprocessoutputoptions;
@@ -258,7 +258,7 @@ begin
  end;
 end;
 
-function startprocessandwait(const acommandline: string;
+function startprocessandwait(const acommandline: msestring;
                          const atimeout: integer = -1;
                          const aoptions: processoptionsty = 
                                             defaultstartprocessoptions;
@@ -289,7 +289,7 @@ begin
  end;
 end;
 
-function getprocessoutput(const acommandline: string; const todata: string;
+function getprocessoutput(const acommandline: msestring; const todata: string;
                          out fromdata: string; out errordata: string;
                          const atimeout: integer = -1;
                           const aoptions: processoptionsty = 
@@ -300,7 +300,7 @@ begin
                                                atimeout,aoptions,acheckabort);
 end;
  
-function getprocessoutput(const acommandline: string; const todata: string;
+function getprocessoutput(const acommandline: msestring; const todata: string;
                          out fromdata: string;
                          const atimeout: integer = -1;
                          const aoptions: processoptionsty = 
@@ -314,7 +314,7 @@ begin
 end;
 
 function getprocessoutput(out prochandle: prochandlety;
-                         const acommandline: string; const todata: string;
+                         const acommandline: msestring; const todata: string;
                          out fromdata: string; out errordata: string;
                          const atimeout: integer = -1;
                           const aoptions: processoptionsty = 
@@ -326,7 +326,7 @@ begin
 end;
  
 function getprocessoutput(out prochandle: prochandlety;
-                         const acommandline: string; const todata: string;
+                         const acommandline: msestring; const todata: string;
                          out fromdata: string;
                          const atimeout: integer = -1;
                          const aoptions: processoptionsty = 
