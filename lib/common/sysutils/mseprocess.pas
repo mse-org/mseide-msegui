@@ -192,7 +192,11 @@ type
  tstringprocess = class(tmseprocess)
   private
    ffromdata: string;
+   ffromcount: sizeint;
    ferrordata: string;
+   ferrorcount: sizeint;
+   procedure readdata(const sender: tpipereader;
+                                    var adata: string; var acount: sizeint);
    procedure fromavail(const sender: tpipereader);
    procedure erroravail(const sender: tpipereader);
   public
@@ -237,7 +241,9 @@ begin
     end;
    end;
    if result <> -1 then begin
+    setlength(proc1.ffromdata,proc1.ffromcount);
     fromdata:= proc1.ffromdata;
+    setlength(proc1.ferrordata,proc1.ferrorcount);
     errordata:= proc1.ferrordata;
    end;
   end;
@@ -926,18 +932,29 @@ begin
  erroroutput.pipereader.oninputavailable:= {$ifdef FPC}@{$endif}erroravail;
 end;
 
-procedure tstringprocess.fromavail(const sender: tpipereader);
+procedure tstringprocess.readdata(const sender: tpipereader;
+                                    var adata: string; var acount: sizeint);
 begin
  if sender.active then begin
-  ffromdata:= ffromdata + sender.readdatastring;
+  if adata = '' then begin
+   adata:= sender.readbuffer; //try to get complete small results without
+                              //buffer oversize
+   acount:= length(adata);
+  end
+  else begin
+   sender.appenddatastring(adata,acount);
+  end;
  end;
+end;
+
+procedure tstringprocess.fromavail(const sender: tpipereader);
+begin
+ readdata(sender,ffromdata,ffromcount);
 end;
 
 procedure tstringprocess.erroravail(const sender: tpipereader);
 begin
- if sender.active then begin
-  ferrordata:= ferrordata + sender.readdatastring;
- end;
+ readdata(sender,ferrordata,ferrorcount);
 end;
 
 end.

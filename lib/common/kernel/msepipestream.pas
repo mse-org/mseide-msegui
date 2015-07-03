@@ -87,7 +87,8 @@ type
    function Seek(const Offset: Int64; Origin: TSeekOrigin): Int64; override;
                    //no seek, result always 0
    function readdatastring: string; override;
-         //bringt alle erhaeltlichen zeichen, keine lineauswertung
+   procedure appenddatastring(var adata: string; var acount: sizeint);
+   
    function readbuffer: string; //does not try to get additional data
    function readuln(var value: string): boolean;
            //bringt auch unvollstaendige zeilen, false wenn unvollstaendig
@@ -396,62 +397,6 @@ begin
  end;
 end;
 
-function tpipereader.readbytes(var buf): integer;
- 
- procedure getmorebytes;
-{$ifdef mswindows}
- var
-  int1: integer;
-{$endif}
- begin
- {$ifdef mswindows}
-  if peeknamedpipe(handle,nil,0,nil,@int1,nil) and (int1 > 0) then begin
-   if int1 > sizeof(fmsbuf) then begin
-    int1:= sizeof(fmsbuf);
-   end;
-   if not doread(fmsbuf,int1,fmsbufcount) then begin
-    fstate:= fstate + [tss_error,tss_eof];
-   end;
-  end
-  else begin
-   fmsbufcount:= 0;
-  end;
- {$else}
-  if not doread(fmsbuf,sizeof(fmsbuf),fmsbufcount,true) then begin
-    fstate:= fstate + [tss_error,tss_eof]; //broken pipe
-  end;
- {$endif}
-  if fmsbufcount = 0 then begin
-   exclude(fstate,tss_pipeactive);
-   fthread.sempost;
-  end;
- end;
- 
-begin
- result:= fmsbufcount;
- if result > 0 then begin
-  move(fmsbuf,buf,fmsbufcount);
-  getmorebytes;
- end
- else begin
-  if sys_getcurrentthread = fthread.id then begin //check again fore more
-   include(fstate,tss_pipeactive);
-   if fthread.semcount > 0 then begin
-    fthread.semwait; //reset semaphore
-   end;
-   getmorebytes;
-   result:= fmsbufcount;
-   if result > 0 then begin
-    move(fmsbuf,buf,fmsbufcount);
-    getmorebytes;
-   end;
-  end;
-  if tss_error in fstate then begin
-   include(fstate,tss_eof);
-  end;
- end;
-end;
-
 function tpipereader.execthread(thread: tmsethread): integer;
 var
  int1: integer;
@@ -544,6 +489,62 @@ begin
  fdatastatus:= pr_empty;
 end;
 
+function tpipereader.readbytes(var buf): integer;
+ 
+ procedure getmorebytes;
+{$ifdef mswindows}
+ var
+  int1: integer;
+{$endif}
+ begin
+ {$ifdef mswindows}
+  if peeknamedpipe(handle,nil,0,nil,@int1,nil) and (int1 > 0) then begin
+   if int1 > sizeof(fmsbuf) then begin
+    int1:= sizeof(fmsbuf);
+   end;
+   if not doread(fmsbuf,int1,fmsbufcount) then begin
+    fstate:= fstate + [tss_error,tss_eof];
+   end;
+  end
+  else begin
+   fmsbufcount:= 0;
+  end;
+ {$else}
+  if not doread(fmsbuf,sizeof(fmsbuf),fmsbufcount,true) then begin
+    fstate:= fstate + [tss_error,tss_eof]; //broken pipe
+  end;
+ {$endif}
+  if fmsbufcount = 0 then begin
+   exclude(fstate,tss_pipeactive);
+   fthread.sempost;
+  end;
+ end;
+ 
+begin
+ result:= fmsbufcount;
+ if result > 0 then begin
+  move(fmsbuf,buf,fmsbufcount);
+  getmorebytes;
+ end
+ else begin
+  if sys_getcurrentthread = fthread.id then begin //check again fore more
+   include(fstate,tss_pipeactive);
+   if fthread.semcount > 0 then begin
+    fthread.semwait; //reset semaphore
+   end;
+   getmorebytes;
+   result:= fmsbufcount;
+   if result > 0 then begin
+    move(fmsbuf,buf,fmsbufcount);
+    getmorebytes;
+   end;
+  end;
+  if tss_error in fstate then begin
+   include(fstate,tss_eof);
+  end;
+ end;
+end;
+
 function tpipereader.readbuf: string;
 var
  int1: integer;
@@ -556,24 +557,6 @@ begin
  end
  else begin
   result:= '';
- end;
-end;
-
-function tpipereader.readdatastring: string;
-var
- int1,int2: integer;
-begin
- result:= readbuffer;
- while true do begin
-  int1:= readbytes(fbuffer^);
-  if int1 > 0 then begin
-   int2:= length(result);
-   setlength(result,int1+int2);
-   move(fbuffer^,result[int2+1],int1);
-  end
-  else begin
-   break;
-  end;
  end;
 end;
 
@@ -590,6 +573,81 @@ begin
   exclude(fstate,tss_pipeactive);
   fthread.sempost;
  end;
+end;
+
+function tpipereader.readdatastring: string;
+var
+ int1: integer;
+ len1: sizeint;
+begin
+ result:= readbuffer;
+ len1:= length(result);
+ while true do begin
+  int1:= readbytes(fbuffer^);
+  if int1 > 0 then begin
+   len1:= len1+int1;
+   if len1 > length(result) then begin
+    setlength(result,2*len1);
+   end;
+   move(fbuffer^,result[len1-int1+1],int1);
+  end
+  else begin
+   break;
+  end;
+ end;
+ setlength(result,len1);
+end;
+
+procedure tpipereader.appenddatastring(var adata: string; var acount: sizeint);
+var
+ len1: sizeint;
+ i1: int32;
+begin
+ i1:= 0;
+ if bufoffset <> nil then begin
+  i1:= bufend - bufoffset;
+ end;
+ len1:= acount + i1 + fmsbufcount;
+ if len1 > length(adata) then begin
+  setlength(adata,2*len1);
+ end;
+ if bufoffset <> nil then begin
+  move(bufoffset^,(pointer(adata)+acount)^,i1);
+  bufoffset:= nil;
+ end;
+ move(fmsbuf,(pointer(adata)+acount+i1)^,fmsbufcount);
+ fmsbufcount:= 0;
+
+ repeat
+ {$ifdef mswindows}
+  if peeknamedpipe(handle,nil,0,nil,@i1,nil) and (i1 > 0) then begin
+   if len1+i1 > length(adata) then begin
+    setlength(adata,2*(len1+i1));
+   end;   
+   if not doread((pointer(adata)+len1)^,i1,i1) then begin
+    fstate:= fstate + [tss_error,tss_eof];
+   end;
+  end
+  else begin
+   break;
+  end;
+ {$else}
+  if len1 >= length(adata) then begin
+   setlength(adata,2*len1);
+  end;
+  i1:= length(adata) - len1; //fill current buffer
+  if not doread((pointer(adata))^+len1,i1,i1) then begin
+   fstate:= fstate + [tss_error,tss_eof]; //broken pipe
+  end;
+  if i1 = 0 then begin
+   break;
+  end;
+ {$endif}
+  len1:= len1 + i1;
+ until fstate * [tss_error,tss_eof] <> [];
+ acount:= len1;
+ exclude(fstate,tss_pipeactive);
+ fthread.sempost;
 end;
 
 function tpipereader.checkdata: pr_piperesultty;
