@@ -3179,6 +3179,7 @@ begin
  else begin
   getitemclass.calcitemlayout(asize,minimalframe,fitemlist,alayout);
  end;
+ alayout.textflags:= textflags;
 end;
 
 procedure titemedit.doupdatelayout;
