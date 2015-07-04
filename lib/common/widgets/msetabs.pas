@@ -3785,8 +3785,13 @@ end;
 
 procedure tcustomtabwidget.clear;
 begin
- while count > 0 do begin
-  items[count-1].Free;
+ beginupdate();
+ try  
+  while count > 0 do begin
+   items[count-1].Free;
+  end;
+ finally
+  endupdate();
  end;
 end;
 
