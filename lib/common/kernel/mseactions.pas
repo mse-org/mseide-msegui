@@ -297,7 +297,8 @@ function checkshortcutcode(const shortcut: shortcutty;
 function checkactionshortcut(var info: actioninfoty;
                         var keyinfo: keyeventinfoty): boolean; //true if done
 function doactionshortcut(const sender: tobject; var info: actioninfoty;
-                        var keyinfo: keyeventinfoty): boolean; 
+                        var keyinfo: keyeventinfoty;
+                        const beforeexecute: proceventty = nil): boolean; 
                         //true if executed
 procedure calccaptiontext(var info: actioninfoty; const aseparator: msechar);
 function issysshortcut(const ashortcut: sysshortcutty;
@@ -1138,13 +1139,14 @@ begin
 end;
 
 function doactionshortcut(const sender: tobject; var info: actioninfoty;
-                        var keyinfo: keyeventinfoty): boolean; //true if done
+                        var keyinfo: keyeventinfoty;
+                        const beforeexecute: proceventty = nil): boolean; //true if done
 var
  bo1: boolean;
 begin
  result:= checkactionshortcut(info,keyinfo);
  if result then begin
-  result:= doactionexecute1(sender,info,bo1,false,false);
+  result:= doactionexecute1(sender,info,bo1,false,false,beforeexecute);
  end;
 end;
 

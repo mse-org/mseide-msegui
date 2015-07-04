@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2014 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2015 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -205,6 +205,7 @@ type
    property selstart: integer read fselstart write setselstart;
    property sellength: halfinteger read fsellength write setsellength;
    function selectedtext: msestring;
+   function hasselection: boolean;
    property curindex: integer read fcurindex write setcurindex;
    property caretpos: pointty read fcaretpos;
    function lasttextclipped: boolean; //result of last drawing
@@ -1150,7 +1151,7 @@ begin
   end
   else begin
    if issysshortcut(sho_copy,kinfo) then begin
-    if passwordchar = #0 then begin
+    if (passwordchar = #0) and hasselection then begin
      finished:= copytoclipboard(cbb_clipboard);;
     end
     else begin
@@ -1168,7 +1169,7 @@ begin
     end
     else begin
      if issysshortcut(sho_cut,kinfo) then begin
-      if canedit and (passwordchar = #0) then begin
+      if canedit and (passwordchar = #0) and hasselection then begin
        finished:= cuttoclipboard(cbb_clipboard);
       end
       else begin
@@ -2266,6 +2267,11 @@ end;
 function tinplaceedit.canredo: boolean;
 begin
  result:= false;
+end;
+
+function tinplaceedit.hasselection: boolean;
+begin
+ result:= fsellength > 0;
 end;
 
 { ttextundolist }

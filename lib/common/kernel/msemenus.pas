@@ -105,6 +105,7 @@ type
    function getstate: actionstatesty;
    function isstatestored: Boolean;
 
+   procedure resetradiobuttons();
    procedure actionchanged;
    procedure checksubmenu;
    function getitems(const index: integer): tmenuitem;
@@ -1060,27 +1061,6 @@ begin
  end;
 end;
 
-procedure tmenuitem.actionchanged;
-const
- mask: actionstatesty = [as_checked];
-var
- state1: actionstatesty;
-begin
- if assigned(fonchange) then begin
-  fonchange(self);
- end;
- if (fparentmenu <> nil) and assigned(fparentmenu.fonchange) then begin
-  fparentmenu.fonchange(self);
- end;
- if ([mao_checkbox,mao_radiobutton] * finfo.options <> []) and
-         (fsource <> nil) and (fowner <> nil) and (fowner.ftransient) then begin
-  state1:= fsource.getstate;
-  state1:= actionstatesty(
-          replacebits(longword(state),longword(state1),longword(mask)));
-  fsource.setstate(state1);  
- end;
-end;
-
 function tmenuitem.getitems(const index: integer): tmenuitem;
 begin
  checksubmenu;
@@ -1163,7 +1143,7 @@ end;
 function tmenuitem.doexec: boolean;
 begin
  result:= doactionexecute(self,finfo,true,
-                mao_nocandefocus in finfo.options{false},{$ifdef FPC}@{$endif}befexec);
+                             mao_nocandefocus in finfo.options,@befexec);
 end;
 
 function tmenuitem.internalexecute(async: boolean): boolean;
@@ -1292,7 +1272,7 @@ procedure tmenuitem.doshortcut(var info: keyeventinfoty);
 var
  int1: integer;
 begin
- if doactionshortcut(self,finfo,info) then begin
+ if doactionshortcut(self,finfo,info,@befexec) then begin
   actionchanged;
  end
  else begin
@@ -1335,26 +1315,68 @@ begin
  result:= as_checked in finfo.state;
 end;
 
-procedure tmenuitem.setchecked(const avalue: boolean);
+procedure tmenuitem.resetradiobuttons();
 var
- bo1: boolean;
  int1: integer;
  item1: tmenuitem;
 begin
- bo1:= as_checked in finfo.state;
- if bo1 <> avalue then begin
+ if (mao_radiobutton in finfo.options) and (fparentmenu <> nil) then begin
+  for int1:= 0 to fparentmenu.count-1 do begin
+   item1:= fparentmenu[int1];
+   with item1 do begin
+    if (mao_radiobutton in finfo.options) and (item1 <> self) and
+            (finfo.group = self.finfo.group) then begin
+     setactionchecked(iactionlink(item1),false);
+    end;
+   end;
+  end;
+ end;
+end;
+
+procedure tmenuitem.setchecked(const avalue: boolean);
+begin
+ if (as_checked in finfo.state) <> avalue then begin
+  if avalue then begin
+   resetradiobuttons();
+  end;
+{
   if avalue and (mao_radiobutton in finfo.options) and (fparentmenu <> nil) then begin
    for int1:= 0 to fparentmenu.count-1 do begin
     item1:= fparentmenu[int1];
     with item1 do begin
-     if (finfo.options * [{mao_checkbox,}mao_radiobutton] = [{mao_checkbox,}mao_radiobutton]) and
+     if (mao_radiobutton in finfo.options) and (item1 <> self) and
              (finfo.group = self.finfo.group) then begin
       setactionchecked(iactionlink(item1),false);
      end;
     end;
    end;
   end;
+}
   setactionchecked(iactionlink(self),avalue);
+ end;
+end;
+
+procedure tmenuitem.actionchanged;
+const
+ mask: actionstatesty = [as_checked];
+var
+ state1: actionstatesty;
+begin
+ if as_checked in finfo.state then begin
+  resetradiobuttons();
+ end;
+ if assigned(fonchange) then begin
+  fonchange(self);
+ end;
+ if (fparentmenu <> nil) and assigned(fparentmenu.fonchange) then begin
+  fparentmenu.fonchange(self);
+ end;
+ if ([mao_checkbox,mao_radiobutton] * finfo.options <> []) and
+         (fsource <> nil) and (fowner <> nil) and (fowner.ftransient) then begin
+  state1:= fsource.getstate;
+  state1:= actionstatesty(
+          replacebits(longword(state),longword(state1),longword(mask)));
+  fsource.setstate(state1);  
  end;
 end;
 
