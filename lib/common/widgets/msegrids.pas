@@ -7382,8 +7382,8 @@ begin
   for int1:= 0 to count-1 do begin
    with tcol(fitems[int1]) do begin
     if (scrollables xor (co_nohscroll in foptions)) and 
-     not ((startx < fstart) and (endx <= fstart) or 
-          (startx >= ar1[int1]) and (endx > ar1[int1])) then begin
+     (calcautocellsize or not ((startx < fstart) and (endx <= fstart) or 
+          (startx >= ar1[int1]) and (endx > ar1[int1]))) then begin
      pt2.x:= fstart + pt1.x;
      canvas.origin:= pt2;
      paint(info);
