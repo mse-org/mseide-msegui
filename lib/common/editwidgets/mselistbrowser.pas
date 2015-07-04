@@ -602,7 +602,7 @@ type
    procedure itemchanged(const index: integer); virtual;
    procedure createnode(var item: tlistitem); virtual;
 
-   procedure doupdatelayout; virtual;
+   procedure doupdatelayout(const nocolinvalidate: boolean); virtual;
    procedure doupdatecelllayout; virtual;
 
     //iitemlist
@@ -629,7 +629,7 @@ type
    procedure storevalue(var avalue: msestring); virtual;
    procedure texttovalue(var accept: boolean; const quiet: boolean); override;
    procedure clientrectchanged; override;
-   procedure updatelayout;
+   procedure updatelayout();
    procedure doitembuttonpress(var info: mouseeventinfoty); virtual;
    procedure clientmouseevent(var info: mouseeventinfoty); override;
    function getitemclass: listitemclassty; virtual;
@@ -957,7 +957,7 @@ type
    function locatecurrentindex: integer; override; //index of current row
    procedure locatesetcurrentindex(const aindex: integer); override;
    function getkeystring(const aindex: integer): msestring; override; //locate text
-   procedure doupdatelayout; override;
+   procedure doupdatelayout(const nocolinvalidate: boolean); override;
    function getitemclass: listitemclassty; override;
    procedure dokeydown(var info: keyeventinfoty); override;
    procedure docellevent(const ownedcol: boolean; 
@@ -3182,12 +3182,12 @@ begin
  alayout.textflags:= textflags;
 end;
 
-procedure titemedit.doupdatelayout;
+procedure titemedit.doupdatelayout(const nocolinvalidate: boolean);
 begin
  if (fgridintf <> nil) and (fitemlist <> nil) then begin
   calclayout(paintrect.size,flayoutinfofocused);
   invalidate;
-  if not fitemlist.updating then begin
+  if not fitemlist.updating and not nocolinvalidate then begin
    fgridintf.getcol.changed;
   end;
  end;
@@ -3201,7 +3201,7 @@ end;
 
 procedure titemedit.updatelayout;
 begin
- doupdatelayout;
+ doupdatelayout(false);
  doupdatecelllayout;
 end;
 
@@ -3209,7 +3209,8 @@ procedure titemedit.clientrectchanged;
 var
  bo1: boolean;
 begin
- updatelayout;
+ doupdatelayout(true); //col invalidated by grid
+ doupdatecelllayout;
  bo1:= des_updatelayout in fstate;
  include(fstate,des_updatelayout); //for setupeditor
  try
@@ -5677,7 +5678,7 @@ begin
 end;
 *)
 
-procedure ttreeitemedit.doupdatelayout;
+procedure ttreeitemedit.doupdatelayout(const nocolinvalidate: boolean);
 begin
  inherited;
  flayoutinfofocused.colorline:= ttreeitemeditlist(fitemlist).fcolorline;
