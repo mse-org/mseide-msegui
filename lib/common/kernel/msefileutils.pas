@@ -1448,15 +1448,15 @@ begin
   end
   else begin
    int2:= findchar(acommandline,' ');//end of exe
-   if int2 < 0 then begin
+   if int2 <= 0 then begin
     int2:= length(acommandline);
    end;
    int3:= int2;
   end;
  end;
  if int1 > 1 then begin //quoted
-  result:= quotechar+tosysfilepath(copy(acommandline,int1,int2-int1)) + quotechar+
-                       copy(acommandline,int3,bigint);
+  result:= quotechar+tosysfilepath(copy(acommandline,int1,int2-int1)) + 
+                                    quotechar+ copy(acommandline,int3,bigint);
  end
  else begin
   result:= tosysfilepath(copy(acommandline,int1,int2-int1)) +
