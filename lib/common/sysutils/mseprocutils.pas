@@ -455,7 +455,10 @@ var
  creationflags: dword;
  processinfo: tprocessinformation;
  bo1: boolean;
- wd1,cmd1: string;
+ mstr1: msestring;
+ wd1,cmd1,env1: string;
+ i1,i2,i3,i4: int32;
+ envar1: stringarty;
 begin
  creationflags:= 0;
  result:= invalidprochandle;
@@ -533,15 +536,42 @@ begin
   startupinfo.dwflags:= startupinfo.dwFlags or startf_useshowwindow;
  end;
  wd1:= tosysfilepath(workingdirectory);
- cmd1:= commandline;
+ mstr1:= commandline;
+ for i1:= 0 to high(params) do begin
+  mstr1:= mstr1 + ' '+quotestring(params[i1],'"',false);
+ end;
                //todo: use createprocessW
+ cmd1:= mstr1;
+ env1:= '';
+ if envvars <> nil then begin
+  i2:= 1; //for terminating 0
+  i3:= 0;
+  setlength(envar1,length(envvars));
+  for i1:= 0 to high(envvars) do begin
+   envar1[i3]:= envvars[i1]; //ansi
+   i4:= length(envvars[i1]);
+   if i4 > 0 then begin
+    i2:= i2+i4;
+   end;
+   inc(i3);
+  end;
+  setlength(env1,i2+i3);
+  i3:= 0;
+  for i1:= 0 to high(envvars) do begin
+   i4:= length(envvars[i1]);
+   if i4 > 0 then begin
+    move(pointer(ansistring(envar1[i1]))^,(pointer(env1)+i3)^,i4+1);
+    i3:= i3 + i4 + 1;
+   end;
+  end;
+ end;
  if exo_shell in options then begin
   bo1:= createprocess(nil,pchar('cmd.exe '+'/q /c'+cmd1),
-                 nil,nil,true,creationflags,nil,pointer(wd1),
+                 nil,nil,true,creationflags,pointer(env1),pointer(wd1),
                                                      startupinfo,processinfo);
  end
  else begin
-  bo1:= createprocess(nil,pchar(cmd1),nil,nil,true,creationflags,nil,
+  bo1:= createprocess(nil,pchar(cmd1),nil,nil,true,creationflags,pointer(env1),
                            pointer(wd1),startupinfo,processinfo);
  end;
  if bo1 then begin

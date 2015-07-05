@@ -689,6 +689,7 @@ begin
 //exit;
  threadinfoty(infopo^).id:= threadty(getcurrentthreadid);
  result:= threadinfoty(infopo^).threadproc();
+ endthread();
 end;
 
 {$else}
