@@ -3275,7 +3275,8 @@ begin
  inherited setframe(avalue);
 end;
 
-procedure tcustommemoedit.scrollevent(sender: tcustomscrollbar; event: scrolleventty);
+procedure tcustommemoedit.scrollevent(sender: tcustomscrollbar; 
+                                                      event: scrolleventty);
 var
  pagesize: integer;
  stepsize: integer;

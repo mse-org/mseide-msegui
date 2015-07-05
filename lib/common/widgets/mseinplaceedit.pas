@@ -43,7 +43,7 @@ type
 
  inplaceeditstatety = (ies_focused,ies_poschanging,ies_firstclick,ies_istextedit,
                        ies_forcecaret,ies_textrectvalid,ies_touched,
-                       ies_cangroupundo);
+                       ies_cangroupundo,ies_caretposvalid);
  inplaceeditstatesty = set of inplaceeditstatety;
 
  tinplaceedit = class
@@ -70,6 +70,7 @@ type
    fmaxlength: integer;
    fpasswordchar: msechar;
    fmousemovepos: pointty;
+   fscrollsum: pointty; //for getcaretpos
    frepeater: tsimpletimer;
    ffiltertext: msestring;
    foptionsedit1: optionsedit1ty;
@@ -110,6 +111,7 @@ type
    function getfontcanvas: tcanvas;
 
    procedure setfiltertext(const avalue: msestring);
+   function getcaretpos: pointty;
   protected
    fupdating: integer;
    fstate: inplaceeditstatesty;
@@ -207,7 +209,7 @@ type
    function selectedtext: msestring;
    function hasselection: boolean;
    property curindex: integer read fcurindex write setcurindex;
-   property caretpos: pointty read fcaretpos;
+   property caretpos: pointty read getcaretpos;
    function lasttextclipped: boolean; //result of last drawing
    function lasttextclipped(const acliprect: rectty): boolean;
    function textclipped: boolean;
@@ -681,7 +683,8 @@ begin
 //  fcaretpos:= textindextopos(canvas,finfo,fcurindex); 
   fcaretpos:= textindextomousepos(fcurindex); 
              //updates finfo.res
-
+  include(fstate,ies_caretposvalid);
+  fscrollsum:= nullpoint;
   int1:= finfo.dest.x + finfo.res.cx;
   int2:= ftextrect.x + ftextrect.cx;
   if int1 < int2 then begin //right margin
@@ -1700,6 +1703,7 @@ begin
   end;
  end;
  fcurindex:= int1;
+ exclude(fstate,ies_caretposvalid);
  internalupdatecaret(ies_forcecaret in fstate);
 end;
 
@@ -1884,6 +1888,7 @@ begin
  end;
  clearundo;
  exclude(fstate,ies_touched);
+ updatecaret();
 end;
 
 procedure tinplaceedit.dofocus;
@@ -2086,6 +2091,16 @@ begin
 // fupdating:= int1;
 end;
 
+function tinplaceedit.getcaretpos: pointty;
+begin
+ if not (ies_caretposvalid in fstate) then begin
+  fcaretpos:= textindextomousepos(fcurindex); 
+  include(fstate,ies_caretposvalid);
+  fscrollsum:= nullpoint;
+ end;
+ result:= addpoint(fcaretpos,fscrollsum);
+end;
+
 procedure tinplaceedit.poschanged;
 begin
  if fstate * [ies_focused,ies_poschanging] = [ies_focused] then begin
@@ -2156,9 +2171,9 @@ begin
   if rect1.cx > 0 then begin
    int1:= -(finfo.dest.x + round(rect1.cx*avalue) - ftextrect.x);
    if int1 <> 0 then begin
-//    inc(finfo.dest.x,int1);
     fowner.scrollrect(makepoint(int1,0),finfo.clip,true);
     inc(finfo.dest.x,int1);
+    inc(fscrollsum.x,int1);
    end;
   end;   
  end
@@ -2166,9 +2181,9 @@ begin
   if rect1.cy > 0 then begin
    int1:= -(finfo.dest.y + round(rect1.cy*avalue) - ftextrect.y);
    if int1 <> 0 then begin
-//    inc(finfo.dest.y,int1);
     fowner.scrollrect(makepoint(0,int1),finfo.clip,true);
     inc(finfo.dest.y,int1);
+    inc(fscrollsum.y,int1);
    end;
   end;   
  end;
