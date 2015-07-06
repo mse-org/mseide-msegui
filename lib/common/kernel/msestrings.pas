@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2014 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2015 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -445,6 +445,7 @@ procedure reallocarray(var value; elementsize: integer); overload;
 procedure resizearray(var value; newlength, elementsize: integer);
                 //ohne finalize
 
+function lineatindex(const value: msestring; const index: int32): msestring;
 procedure wordatindex(const value: msestring; const index: integer;
                           out first,pastlast: pmsechar;
                      const delimchars: msestring;
@@ -3149,6 +3150,34 @@ begin
  end;
 end;
 
+function lineatindex(const value: msestring; const index: int32): msestring;
+var
+ po1,po2,ps,pe: pmsechar;
+begin
+ result:= '';
+ if value <> '' then begin
+  ps:= pointer(value);
+  pe:= ps + length(value);
+  po1:= ps + index;
+  po2:= po1;
+  if (po1^ = c_linefeed) and (po1 > ps) then begin
+   dec(po1);
+  end;
+  if (po1^ = c_return) and (po1 > ps) then begin
+   dec(po1);
+  end;
+  while (po1^ <> c_linefeed) and (po1 > ps) do begin
+   dec(po1);
+  end;
+  if po1^ = c_linefeed then begin
+   inc(po1);
+  end;
+  while not ((po2^ = c_return) or (po2^ = c_linefeed)) and (po2 < pe) do begin
+   inc(po2);
+  end;
+  result:= psubstr(po1,po2);
+ end;    
+end;
 
 procedure wordatindex(const value: msestring; const index: integer;
                           out first,pastlast: pmsechar;
