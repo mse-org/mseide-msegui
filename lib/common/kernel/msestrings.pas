@@ -3154,7 +3154,6 @@ function lineatindex(const value: msestring; const index: int32): msestring;
 var
  po1,po2,ps,pe: pmsechar;
 begin
- result:= '';
  if value <> '' then begin
   ps:= pointer(value);
   pe:= ps + length(value);
@@ -3176,7 +3175,10 @@ begin
    inc(po2);
   end;
   result:= psubstr(po1,po2);
- end;    
+ end
+ else begin
+  result:= '';
+ end;
 end;
 
 procedure wordatindex(const value: msestring; const index: integer;

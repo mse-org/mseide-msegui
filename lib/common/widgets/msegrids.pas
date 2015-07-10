@@ -11416,6 +11416,7 @@ function tcustomgrid.focuscell(cell: gridcoordty;
     end;
    end;
   finally
+   ffocusedcell:= cell;
    endupdate(true);
   end;
  end; //doselectaction()
@@ -11681,7 +11682,7 @@ begin     //focuscell
    end
    else begin
     doselectaction;
-    ffocusedcell:= cell;
+//    ffocusedcell:= cell; moved to doselectaction
    end;
    if bo1 then begin
     showcell(cell,ashowcell);
@@ -11698,7 +11699,6 @@ begin     //focuscell
      exit;
     end;
    end;
-//   else begin
    if (gs_hasactiverowcolor in fstate) and 
             (ffocusedcell.row <> cellbefore.row) then begin
     if cellbefore.row >= 0 then begin
@@ -11708,9 +11708,8 @@ begin     //focuscell
      invalidaterow(ffocusedcell.row);
     end;
    end;
-//   end;
   end
-  else begin
+  else begin //cell = ffocusedcell
    cellbefore:= ffocusedcell;
    if bo1 then begin
     showcell(cell,ashowcell);
