@@ -2286,7 +2286,7 @@ end;
 
 function tinplaceedit.hasselection: boolean;
 begin
- result:= fsellength > 0;
+ result:= (fsellength > 0) or fintf.hasselection();
 end;
 
 { ttextundolist }
