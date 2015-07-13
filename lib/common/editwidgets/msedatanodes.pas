@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2014 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2015 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -13,9 +13,10 @@ unit msedatanodes;
 
 interface
 uses
- classes,msegraphutils,msedrawtext,msegraphics,msedatalist,mseglob,mseguiglob,
+ classes,mclasses,msegraphutils,msedrawtext,msegraphics,msedatalist,mseglob,
+ mseguiglob,
  msebitmap,mseclasses,mseevent,msegrids,msetypes,msestrings,mseinplaceedit,
- msestat,msegridsglob,mselist,msearrayutils;
+ msestat,msegridsglob,mselist,msearrayutils,msearrayprops;
 
 type
 
@@ -372,6 +373,20 @@ type
    property items[const aindex: integer]: ttreelistitem read getitems; default;
  end;
 
+ tfontarrayprop = class(tpersistentarrayprop)
+  private
+   procedure setitems(const index: integer; const avalue: tfont);
+  protected
+   function getitems(const index: integer): tfont;
+   procedure createitem(const index: integer; var item: tpersistent); override;
+  public
+   constructor create();
+   class function getitemclasstype: persistentclassty; override;
+                         //used in dumpunitgroups
+   property items[const index: integer]: tfont read getitems 
+                                                   write setitems; default;
+ end;
+
  ptreelistitem = ^ttreelistitem;
 
  itemliststatety = (ils_destroying,ils_updateitemvalues,
@@ -403,6 +418,7 @@ type
    fonstatwritetreeitem: statwritetreeitemeventty;
    fonstatwrite: statwriteitemlisteventty;
    fonstatread: statreaditemlisteventty;
+   ffonts: tfontarrayprop;
    procedure setimnr_base(const Value: integer);
    procedure setimnr_expanded(const Value: integer);
    procedure setimnr_selected(const Value: integer);
@@ -417,6 +433,7 @@ type
    procedure setimagewidth(const Value: integer);
    procedure setimagesize(const avalue: sizety);
    procedure setimagealignment(const avalue: alignmentsty);
+   procedure setfonts(const avalue: tfontarrayprop);
   protected
    fdefaultnodestate: nodestatesty;
    fimagelist: timagelist;
@@ -510,6 +527,7 @@ type
    property options: nodeoptionsty read foptions write setoptions default [];
    property captionpos: captionposty read fcaptionpos write setcaptionpos
                                                               default cp_right;
+   property fonts: tfontarrayprop read ffonts write setfonts;
    property levelstep: integer read flevelstep write setlevelstep
                                                     default defaultlevelstep;
    property defaultnodestate: nodestatesty read fdefaultnodestate 
@@ -587,6 +605,38 @@ begin
   result[int1]:= listitemclassty(asource[int1].classtype).create(nil);
   result[int1].assign(asource[int1]);
  end;
+end;
+
+{ tfontarrayprop }
+
+constructor tfontarrayprop.create();
+begin
+ inherited create(tfont);
+end;
+
+procedure tfontarrayprop.setitems(const index: integer; const avalue: tfont);
+begin
+ checkindex(index);
+ if fitems[index] <> nil then begin
+  fitems[index].assign(avalue);
+ end;
+end;
+
+function tfontarrayprop.getitems(const index: integer): tfont;
+begin
+ result:= tfont(inherited getitems(index));
+end;
+
+procedure tfontarrayprop.createitem(const index: integer;
+               var item: tpersistent);
+begin
+ item:= tfont.create;
+ item.assign(stockobjects.fonts[stf_default]);
+end;
+
+class function tfontarrayprop.getitemclasstype: persistentclassty;
+begin
+ result:= tfont;
 end;
 
 { tlistitem }
@@ -1227,6 +1277,7 @@ begin
  fcaptionpos:= cp_right;
  fimagealignment:= [al_xcentered,al_ycentered];
  flevelstep:= defaultlevelstep;
+ ffonts:= tfontarrayprop.create();
  inherited;
  fitemclass:= tlistitem;
 end;
@@ -1241,6 +1292,7 @@ destructor tcustomitemlist.destroy;
 begin
  include(fitemstate,ils_destroying);
  inherited;
+ ffonts.free();
  fobjectlinker.free;
 end;
 
@@ -1818,6 +1870,11 @@ begin
    exclude(fitemstate,ils_freelock);
   end;
  end;
+end;
+
+procedure tcustomitemlist.setfonts(const avalue: tfontarrayprop);
+begin
+ ffonts.assign(avalue);
 end;
 
 function tlistitem.gettop: boolean;

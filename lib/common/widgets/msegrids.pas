@@ -1747,6 +1747,7 @@ type
   public
    constructor create(const aowner: tcustomgrid);
    class function getitemclasstype: persistentclassty; override;
+                         //used in dumpunitgroups
    property items[const index: integer]: tfont read getitems 
                                                    write setitems; default;
  end;
@@ -16679,7 +16680,7 @@ procedure trowfontarrayprop.createitem(const index: integer;
                                                       var item: tpersistent);
 begin
  item:= tfont.create;
- item.Assign(stockobjects.fonts[stf_default]);
+ item.assign(stockobjects.fonts[stf_default]);
 end;
 
 procedure trowfontarrayprop.setitems(const index: integer; const avalue: tfont);

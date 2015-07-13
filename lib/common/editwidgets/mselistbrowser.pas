@@ -171,6 +171,7 @@ type
                                           write setoncreateitem;
    property options;
    property captionpos;
+   property fonts;
    property imnr_base;
    property imagelist;
    property imagewidth;
@@ -474,6 +475,7 @@ type
    property imagealignment;
    property defaultnodestate;
    property captionpos;
+   property fonts;
    property options;
    property onitemnotification;
    property oncreateitem: createlistitemeventty read getoncreateitem 
@@ -902,6 +904,7 @@ type
    property imagealignment;
    property defaultnodestate;
    property captionpos;
+   property fonts;
    property options;
    property onitemnotification;
    property colorline: colorty read fcolorline write setcolorline default cl_dkgray;
