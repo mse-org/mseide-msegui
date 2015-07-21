@@ -3206,6 +3206,7 @@ end;
 function gui_init: guierrorty;
 const
  classstyle = cs_owndc;
+ childclassstyle = 0;
 var
  classinfow: twndclassw;
  classinfoa: twndclassa;
@@ -3230,7 +3231,7 @@ begin
    lpszclassname:= childwidgetclassname;
    lpfnwndproc:= @childwindowproc;
    hinstance:= {$ifdef FPC}system{$else}sysinit{$endif}.HInstance;
-   style:= classstyle;
+   style:= childclassstyle;
    cbwndextra:= wndextrabytes;
   end;
   childwidgetclass:= registerclassa(classinfoa);
@@ -3250,7 +3251,7 @@ begin
    lpszclassname:= childwidgetclassname;
    lpfnwndproc:= @childwindowproc;
    hinstance:= {$ifdef FPC}system{$else}sysinit{$endif}.HInstance;
-   style:= classstyle;
+   style:= childclassstyle;
    cbwndextra:= wndextrabytes;
 //   hbrbackground:= getstockobject(hollow_brush);
   end;
