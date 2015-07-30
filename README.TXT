@@ -66,24 +66,37 @@ Creating a new console project
 
 MSEgui command line parameters
 ******************************
+--FONTALIAS=<alias>,<fontname>[,<fontheight>[,<fontwidth>[,<options>[,<xscale>]
+                              [,<ancestor>]]]]
+ Change the used fonts. Example for a 16 pixel height default font:
+ --FONTALIAS=stf_default,,16
+
 --NOZORDERHANDLING
  Do not touch Z-order of the windows.
+
 --NORESTACKWINDOW
  Do not use the NET_RESTACK_WINDOW protocol.
+
 --RESTACKWINDOW
  Use the NET_RESTACK_WINDOW protocol.
+
 --NORECONFIGUREWMWINDOW
  Do not use xreconfigurewmwindow() for window stacking operation.
+
 --RECONFIGUREWMWINDOW
  Use xreconfigurewmwindow() for window stacking operation.
+
 --STACKMODEBELOWWORKAROUND
  Necessary for windowmanagers with buggy xreconfigurewmwindow() handling.
+
 --NOSTACKMODEBELOWWORKAROUND
  No workaround.
+
 --TOPLEVELRAISE
  Use the top level frame window id instead of the application client window id
  for window raise operation. Implies --NORESTACKWINDOW and
  --NORECONFIGUREWMWINDOW.
+
 --NOSTATICGRAVITY
  Simulates staticgravity for buggy window managers.
  
@@ -91,17 +104,17 @@ MSEide command line parameters
 ******************************
 -np
  Do not load a project.
+
 -ns
  Do not use a skin, no fades.
+
 --macrogroup=<n>
  Use 'Project'-'Options'-'Macros'-'Active group' number <n>, <n> = 1..6.
+
 --macrodef=<name>,<value>{,<name>,<value>}
  Macro definition, will be overridden by 'Project'-'Options'-'Macros'. Example:
  --macrodef=MAC1,abc,MAC2,def
  defines ${MAC1} with value 'abc' and ${MAC2} with value 'def'.
---fontalias=<alias>,<fontname>[,<fontheight>[,<fontwidth>[,<options>[,<xscale>]
-                              [,<ancestor>]]]]
- Change the used fonts. <alias> can be stf_default, stf_menu or mseide_source.
  
 MSEide environment variables
 ****************************
