@@ -149,11 +149,14 @@ type
   po: pchar;
   len: integer;
  end;
+ plstringty = ^lstringty;
 
  lmsestringty = record
   po: pmsechar;
   len: integer;
  end;
+ plmsestringty = ^lmsestringty;
+ 
  lstringarty = array of lstringty;
  lmsestringarty = array of lmsestringty;
  
