@@ -306,7 +306,7 @@ For Raspberry Pi:
 - Establish a ssh login without password (public key authentication).
 
 - On the i386-linux host download and extract 
-http://sourceforge.net/projects/mseide-msegui/files/fpcrossarm/crossfpc-i386_linux-eabihf.tar.gz
+http://sourceforge.net/projects/mseide-msegui/files/fpcrossarm/crossfpc-i386_linux-eabihf_1.tar.gz
 to <your crossfpc directory>.
 
 - Start MSEide, in 'Settings'-'Configure MSEide'-'Global Macros' add:
