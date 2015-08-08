@@ -1246,8 +1246,8 @@ begin
    result:= false;
    if errormessage then begin
     with stockobjects do begin
-      showerror(captions[sc_can_not_read_directory]+ ' ' + esys(ex).text,
-                captions[sc_error]);
+      showerror(captions[sc_can_not_read_directory]+ ' ' + 
+                       msestring(esys(ex).text),captions[sc_error]);
     end;
    end;
   end;
@@ -1616,7 +1616,7 @@ begin
   fhistory:= reader.readarray('filehistory',fhistory);
  end;
  ffilterindex:= reader.readinteger('filefilterindex',ffilterindex);
- ffilter:= reader.readstring('filefilter',ffilter);
+ ffilter:= reader.readmsestring('filefilter',ffilter);
  fwindowrect.x:= reader.readinteger('x',fwindowrect.x);
  fwindowrect.y:= reader.readinteger('y',fwindowrect.y);
  fwindowrect.cx:= reader.readinteger('cx',fwindowrect.cx);
@@ -1651,7 +1651,7 @@ begin
   writer.writearray('filehistory',fhistory);
  end;
  writer.writeinteger('filefilterindex',ffilterindex);
- writer.writestring('filefilter',ffilter);
+ writer.writemsestring('filefilter',ffilter);
  writer.writeinteger('filecolwidth',fcolwidth);
  writer.writeinteger('x',fwindowrect.x);
  writer.writeinteger('y',fwindowrect.y);

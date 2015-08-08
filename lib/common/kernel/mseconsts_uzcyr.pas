@@ -20,7 +20,7 @@ uses
  
 implementation
 uses
- msestrings,sysutils;
+ msestrings,sysutils,mseformatstr;
 const
  uzcyr_modalresulttext: defaultmodalresulttextty = (
   '',                                             //mr_none => Nichego
@@ -171,7 +171,7 @@ begin
    result:= 'Delete selected row?'
   end
   else begin
-   result:= 'Delete '+inttostr(vinteger)+' selected rows?';
+   result:= 'Delete '+inttostrmse(vinteger)+' selected rows?';
   end;
  end;
 end;

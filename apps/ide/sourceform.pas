@@ -238,10 +238,10 @@ begin
       end;
      end;
     end;
-    if trystrtointmse(ar3[0],row) then begin
+    if trystrtoint(ar3[0],row) then begin
      dec(row);
      if high(ar3) >= 1 then begin
-      if trystrtointmse(ar3[1],col) then begin
+      if trystrtoint(ar3[1],col) then begin
        dec(col);
        result:= true;
       end;
@@ -284,9 +284,9 @@ begin
     end;
    end;
    if alevel <> el_none then begin
-    if trystrtointmse(ar1[1],row) then begin
+    if trystrtoint(ar1[1],row) then begin
      dec(row);
-     if trystrtointmse(ar1[2],col) then begin
+     if trystrtoint(ar1[2],col) then begin
       dec(col);
      end
      else begin

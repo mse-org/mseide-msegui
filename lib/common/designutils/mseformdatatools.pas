@@ -172,7 +172,7 @@ begin
   objformat:= format;
  end;
  if unitname = '' then begin
-  unitname:= removefileext(filename(outfilename));
+  unitname:= ansistring(removefileext(filename(outfilename)));
  end;
  outstream:= ttextstream.Create(outfilename,fm_create);
  try
@@ -236,13 +236,13 @@ begin
    instream.position:= 0;
   end;
   if unitname = '' then begin
-   unitname:= removefileext(filename(sourcefilename));
+   unitname:= ansistring(removefileext(filename(sourcefilename)));
   end;
-  outname:= removefileext(sourcefilename) + formdataext;
+  outname:= ansistring(removefileext(sourcefilename)) + formdataext;
   memstream:= tmemorystream.Create;
   try
    objecttexttobinarymse(instream,memstream);
-   outstream:= ttextstream.createtransaction(outname+'.pas');
+   outstream:= ttextstream.createtransaction(filenamety(outname)+'.pas');
    try
     outstream.writeln('unit ' + unitname + formdataext+';');
     outstream.writeln(compilerdefaults);

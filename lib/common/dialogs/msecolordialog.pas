@@ -329,7 +329,7 @@ begin
    if not accept then begin
     exit;
    end;
-   if not trystringtocolor(mstr1,co1) then begin
+   if not trystringtocolor(ansistring(mstr1),co1) then begin
     accept:= false;
     formaterror(quiet);
    end;
@@ -362,7 +362,7 @@ begin
      co1:= value;
      if colordialog(co1) = mr_ok then begin
       tcolordropdowncontroller(fdropdown).resetselection; 
-      text:= colortostring(co1);
+      text:= msestring(colortostring(co1));
       checkvalue;  
      end;
     end;
@@ -373,7 +373,7 @@ end;
 
 function tcustomcoloredit.internaldatatotext1(const avalue: integer): msestring;
 begin
- result:= colortostring(avalue);
+ result:= msestring(colortostring(avalue));
 end;
 
 function tcustomcoloredit.internaldatatotext(const data): msestring;

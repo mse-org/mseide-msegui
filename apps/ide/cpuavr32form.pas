@@ -179,8 +179,7 @@ procedure tcpuavr32fo.checkexcept(const sender: TObject);
   filename: filenamety;
   line: integer;
   start,stop: qword;
-  str1: string;
-  mstr1: msestring;
+  mstr1,mstr2: msestring;
  begin
   disassfo.refresh(address);
   mstr1:= '';
@@ -190,14 +189,14 @@ procedure tcpuavr32fo.checkexcept(const sender: TObject);
     if sourcefo.showsourceline(filename,line-1,0,true) <> nil then begin
      exit;
     end;
-    mstr1:= filename+':'+inttostr(line);
+    mstr1:= filename+':'+inttostrmse(line);
    end;
-   str1:= hextostr(address,8);
-   if infosymbol('*0x'+str1,mstr1) = gdb_ok then begin
+   mstr2:= hextostrmse(address,8);
+   if infosymbol('*0x'+mstr2,mstr1) = gdb_ok then begin
     mstr1:= mstr1+lineend+mstr1;
    end
    else begin
-    mstr1:= mstr1+lineend+cs[ord(retad)]+' '+str1;
+    mstr1:= mstr1+lineend+cs[ord(retad)]+' '+mstr2;
    end;
   end;
   showmessage(mstr1,cs[ord(exceptreturn)]);

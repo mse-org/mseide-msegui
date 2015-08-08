@@ -18,7 +18,7 @@ uses
  
 implementation
 uses
- msestrings,sysutils;
+ msestrings,sysutils,mseformatstr;
 const
  zh_modalresulttext: defaultmodalresulttextty =
  ('',                        //mr_none
@@ -170,7 +170,7 @@ begin
   end
   else begin
    result:= #30830#23450#21024#38500#25152#36873#25321#30340' '+
-                    inttostr(vinteger)+' '#34892#35760#24405#21527#65311;
+                    inttostrmse(vinteger)+' '#34892#35760#24405#21527#65311;
   end;
  end;
 end;

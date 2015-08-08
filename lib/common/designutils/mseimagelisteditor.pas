@@ -54,7 +54,7 @@ function editimagelist(aimagelist: timagelist): modalresultty;
 
 implementation
 uses
- mseimagelisteditor_mfm,sysutils,
+ mseimagelisteditor_mfm,sysutils,mseformatstr,
  msekeyboard,msedatanodes,msefileutils,msegraphicstream;
 
 function editimagelist(aimagelist: timagelist): modalresultty;
@@ -193,7 +193,7 @@ begin
  disp.beginupdate;
  for int1:= 0 {int} to disp.itemlist.count - 1 do begin
   with disp.itemlist[int1] do begin
-   caption:= inttostr(int1);
+   caption:= inttostrmse(int1);
    imagenr:= int1;
   end;
  end;

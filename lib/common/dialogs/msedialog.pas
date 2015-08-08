@@ -633,7 +633,7 @@ end;
 procedure tintegerdialogcontroller.setexecresult(var avalue: integer);
 begin
  with tcustomintegeredit(fowner) do begin
-  text:= inttostr(avalue);
+  text:= inttostrmse(avalue);
  end;
 end;
 
