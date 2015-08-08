@@ -490,7 +490,7 @@ type
    ffacebarrect: rectty;
    fvaluerange: real;
    fvaluestart: real;
-   fformat: string;
+   fformat: msestring;
    ftextflags: textflagsty;
    fonfinished: progresseventty;
    fonprogress: progresseventty;
@@ -502,7 +502,7 @@ type
    procedure updatebar;
    procedure setvaluerange(const avalue: real);
    procedure setvaluestart(const avalue: real);
-   procedure setformat(const avalue: string);
+   procedure setformat(const avalue: msestring);
    procedure settextflags(const avalue: textflagsty);
    procedure setbar_frame(const avalue: tbarframe);
    procedure readformat(reader: treader);
@@ -536,7 +536,7 @@ type
    property bar_frame: tbarframe read fbar_frame write setbar_frame;
    property valuerange: real read fvaluerange write setvaluerange; //default 100
    property valuestart: real read fvaluestart write setvaluestart;
-   property format: string read fformat write setformat stored false;
+   property format: msestring read fformat write setformat stored false;
                    //default '0%', '' for no numeric
    property textflags: textflagsty read ftextflags write settextflags default
                               [tf_ycentered,tf_xcentered];
@@ -4605,7 +4605,7 @@ begin
  formatchanged;
 end;
 
-procedure tcustomprogressbar.setformat(const avalue: string);
+procedure tcustomprogressbar.setformat(const avalue: msestring);
 begin
  fformat:= avalue;
  formatchanged;
