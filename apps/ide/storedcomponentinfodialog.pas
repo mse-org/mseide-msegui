@@ -52,7 +52,8 @@ begin
  infopo:= @ainfo;
  inherited create(nil);
  with ainfo do begin
-  self.caption:= actionsmo.c[ord(ac_storecomponent)]+' '+componentname+': '+compclass;
+  self.caption:= actionsmo.c[ord(ac_storecomponent)]+' '+
+             msestring(componentname)+': '+msestring(compclass);
   self.compname.value:= compname;
   self.compdesc.value:= compdesc;
   self.filepath.value:= filepath;
