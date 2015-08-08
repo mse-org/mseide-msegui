@@ -46,7 +46,7 @@ var
  
 implementation
 uses
- msetexteditor_mfm,sysutils,msewidgets,mseshapes;
+ msetexteditor_mfm,sysutils,msewidgets,mseshapes,mseformatstr;
 
 const
  sqlsyntaxdef = '';
@@ -88,8 +88,8 @@ procedure tmsetexteditorfo.editnotify(const sender: TObject;
              var info: editnotificationinfoty);
 begin
  if info.action = ea_indexmoved then begin
-  linedisp.value:= inttostr(textedit.editpos.row+1) + ':'+
-                          inttostr(textedit.editpos.col+1);
+  linedisp.value:= inttostrmse(textedit.editpos.row+1) + ':'+
+                          inttostrmse(textedit.editpos.col+1);
  end;
 end;
 
