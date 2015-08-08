@@ -1653,7 +1653,7 @@ begin
               ftextdata[int4].data[int1]:= utf8tostring(textf[int4].asstring);
              end
              else begin
-              ftextdata[int4].data[int1]:= textf[int4].asstring;
+              ftextdata[int4].data[int1]:= msestring(textf[int4].asstring);
              end;
             except
              ftextdata[int4].data[int1]:= converrorstring;

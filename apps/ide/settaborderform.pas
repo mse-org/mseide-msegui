@@ -21,7 +21,7 @@ unit settaborderform;
 interface
 uses
  mseforms,msegrids,msegui,msewidgetgrid,msedataedits,msesimplewidgets,msedesigner,
- mseevent,mseglob,mseguiglob,msestat,msestatfile,msegridsglob;
+ mseevent,mseglob,mseguiglob,msestat,msestatfile,msegridsglob,msestrings;
 
 type
 
@@ -149,9 +149,9 @@ begin
  fchildren:= fparent.container.gettaborderedwidgets;
  grid.rowcount:= length(fchildren);
  for int1:= 0 to high(fchildren) do begin
-  wname[int1]:= fchildren[int1].Name;
+  wname[int1]:= msestring(fchildren[int1].Name);
   windex[int1]:= int1;
-  if wname[int1] = fwidget.name then begin
+  if wname[int1] = msestring(fwidget.name) then begin
    grid.row:= int1;
   end;
  end;

@@ -1543,7 +1543,7 @@ type
    fprinter: tcustomprinter; //preliminary 
    fstream: ttextstream;
    fstreamset: boolean;
-   fcommand: string;
+   fcommand: msestring;
    fcanvas: tcanvas;
    fpagenum: integer;
    fthread: tmsethread;
@@ -1601,7 +1601,7 @@ type
                               const acanvas: tcanvas);
    
    procedure internalrender(const acanvas: tcanvas; const aprinter: tcustomprinter;
-                  const acommand: string; const astream: ttextstream;
+                  const acommand: msestring; const astream: ttextstream;
                   const anilstream: boolean; const onafterrender: reporteventty);
    procedure unregisterchildwidget(const child: twidget); override;
    procedure getchildren(proc: tgetchildproc; root: tcomponent); override;
@@ -1621,7 +1621,8 @@ type
    procedure insertwidget(const awidget: twidget; const apos: pointty); override;
    procedure render(const acanvas: tcanvas;
                         const onafterrender: reporteventty = nil); overload;
-   procedure render(const aprinter: tstreamprinter; const command: string = '';
+   procedure render(const aprinter: tstreamprinter;
+                        const command: msestring = '';
                         const onafterrender: reporteventty = nil); overload;
    procedure render(const aprinter: tstreamprinter;
                         const astream: ttextstream; //owns the stream
@@ -6409,7 +6410,7 @@ begin
 end;
 
 procedure tcustomreport.internalrender(const acanvas: tcanvas;
-               const aprinter: tcustomprinter; const acommand: string;
+               const aprinter: tcustomprinter; const acommand: msestring;
                const astream: ttextstream; const anilstream: boolean;
                const onafterrender: reporteventty);
 begin
@@ -6467,7 +6468,7 @@ begin
 end;
 
 procedure tcustomreport.render(const aprinter: tstreamprinter;
-               const command: string = '';
+               const command: msestring = '';
               const onafterrender: reporteventty = nil);
 begin
  internalrender(aprinter.canvas,aprinter,command,nil,false,onafterrender);
@@ -6971,7 +6972,7 @@ end;
 
 function tcustomrepvaluedisp.getdisptext: msestring;
 begin
- result:= name;
+ result:= msestring(name);
  dogettext(result);
 end;
 
@@ -7033,7 +7034,7 @@ function trepvaluedisp.getdisptext: msestring;
 begin
  result:= fvalue;
  if (csdesigning in componentstate) and (result = '') then begin
-  result:= name;
+  result:= msestring(name);
  end;
  if rendering then begin
   dogettext(result);
@@ -7085,7 +7086,7 @@ begin
       else begin
        int2:= fparentintf.getlastreppagecount;
       end;
-      mstr1:= copy(fformat,1,int1-1) + '"' +inttostr(int2) +'"' +
+      mstr1:= copy(fformat,1,int1-1) + '"' +inttostrmse(int2) +'"' +
                               copy(fformat,int1+1,bigint);
      end;
     end;
@@ -7130,7 +7131,7 @@ end;
 function trepprintdatedisp.getdisptext: msestring;
 var
  ti1: tdatetime;
- str1: string;
+ str1: msestring;
 begin
  if fparentintf <> nil then begin
   if bo_localvalue in foptions then begin
@@ -7145,7 +7146,8 @@ begin
   else begin
    str1:= fformat;
   end;
-  result:= formatdatetime(str1,ti1);
+  result:= mseformatstr.datetimetostring(ti1,str1);
+//  result:= formatdatetime(str1,ti1);
   dogettext(result);
  end
  else begin
