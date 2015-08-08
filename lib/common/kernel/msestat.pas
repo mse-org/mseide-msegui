@@ -647,7 +647,7 @@ function tstatfiler.varname(const intf: istatfile): msestring;
 begin
  result:= intf.getstatvarname;
  if result = '' then begin
-  result:= ownernamepath(tcomponent(intf.getinstance));
+  result:= msestring(ownernamepath(tcomponent(intf.getinstance)));
  end;
 end;
 
@@ -994,7 +994,7 @@ begin
   result:= default;
  end
  else begin
-  result:= str1;
+  result:= ansistring(str1);
  end;
 end;
 
@@ -1007,7 +1007,7 @@ begin
   result:= default;
  end
  else begin 
-  result:= decodebase64(mstr1);
+  result:= decodebase64(ansistring(mstr1));
  end;
 end;
 
@@ -1169,7 +1169,7 @@ begin
  if findvar(name,str1) and trystrtointmse(str1,int2) then begin
   setlength(result,int2);
   for int1:= 0 to int2-1 do begin
-   result[int1]:= readlistitem;
+   result[int1]:= ansistring(readlistitem);
   end;
  end
  else begin
@@ -1586,18 +1586,18 @@ end;
 
 procedure tstatwriter.writereal(const name: msestring; const value: real);
 begin
- writeval(name,realtytostrdot(value));
+ writeval(name,msestring(realtytostrdot(value)));
 end;
 
 procedure tstatwriter.writestring(const name: msestring; const value: string);
 begin
- writeval(name,value);
+ writeval(name,msestring(value));
 end;
 
 procedure tstatwriter.writebinarystring(const name: msestring;
                const value: string);
 begin
- writemsestring(name,encodebase64(value,76));
+ writemsestring(name,msestring(encodebase64(value,76)));
 end;
 
 procedure tstatwriter.writemsestring(const name: msestring;
@@ -1694,7 +1694,7 @@ end;
 
 procedure tstatwriter.writelistitem(const value: realty);
 begin
- writelistval(realtytostrdot(value));
+ writelistval(msestring(realtytostrdot(value)));
 end;
 
 procedure tstatwriter.writelistitem(const value: complexty);
@@ -1724,7 +1724,7 @@ var
 begin
  writeinteger(name,length(value));
  for int1:= 0 to high(value) do begin
-  writelistitem(value[int1]);
+  writelistitem(msestring(value[int1]));
  end;
 end;
 
@@ -1989,7 +1989,8 @@ begin
  end;
  int1:= findname(streamname);
  if (int1 >= 0) and (fstreams[int1].stream <> nil) then begin
-  raise exception.Create('Memorystream '''+streamname+''' allready open.');
+  raise exception.Create(ansistring('Memorystream '''+
+                                       streamname+''' allready open.'));
  end;
  if int1 < 0 then begin
   int1:= findname('');
