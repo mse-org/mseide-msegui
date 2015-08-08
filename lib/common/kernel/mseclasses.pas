@@ -1319,8 +1319,9 @@ end;
 procedure componentexception(const acomponent: tcomponent;
                                       const atext: msestring);
 begin
- raise exception.create(acomponent.name+':'+acomponent.classname+':'+ lineend +
-                        atext);
+ raise exception.create(ansistring(
+     msestring(acomponent.name+':'+acomponent.classname+':'+ lineend) +
+                                                                  atext));
 end;
 
 function getfproppath(const writer:twriter): string;
@@ -1828,7 +1829,7 @@ var
  int1: integer;
 begin
  for int1:= 0 to high(anames) do begin
-  comp1:= owner.findcomponent(anames[int1]);
+  comp1:= owner.findcomponent(ansistring(anames[int1]));
 {$warnings off}
   with tcomponent1(owner).fcomponents do begin
 {$warnings on}
@@ -1965,7 +1966,7 @@ begin
  with typedata1^ do begin
   setlength(result,maxvalue-minvalue+1);
   for int1:= 0 to high(result) do begin
-   result[int1]:= getenumname(atypeinfo,int1);
+   result[int1]:= msestring(getenumname(atypeinfo,int1));
   end;
   {
   int2:= 0;
