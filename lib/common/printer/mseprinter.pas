@@ -229,7 +229,7 @@ type
                                    var avalue: ansistring) of object;
  tstreamprinter = class(tprinter)
   private
-   fprintcommand: string;
+   fprintcommand: msestring;
    fonupdateprintcommand: updateprinteransistringeventty;
    procedure setstream(const avalue: ttextstream);
   protected
@@ -238,14 +238,14 @@ type
    procedure doupdateprintcommand(const adata: pointer);
   public
    constructor create(aowner: tcomponent); override;
-   procedure beginprint(command: string = ''; 
+   procedure beginprint(command: msestring = ''; 
                     const apreamble: string = ''); overload;
    procedure beginprint(const astream: ttextstream; 
                     const apreamble: string = ''); overload;
     //printer owns the stream, nil -> dummy mode
    procedure endprint; override;
   published
-   property printcommand: string read fprintcommand write fprintcommand;
+   property printcommand: msestring read fprintcommand write fprintcommand;
    property options;
    property onerror;  //call abort for quiet cancel
    property onupdateprintcommand: updateprinteransistringeventty 
@@ -536,8 +536,8 @@ begin
     inc(int2);
    end;
   except
-   raise exception.create('Invalid pages: '''+avalue+'''.'+lineend+
-                          'Example: ''1-5,7,9,11-13''');
+   raise exception.create(ansistring('Invalid pages: '''+avalue+'''.'+lineend+
+                          'Example: ''1-5,7,9,11-13'''));
   end;
   setlength(ar3,int2);
   result:= ar3;
@@ -1552,7 +1552,7 @@ begin
  inherited;
  dropdown.cols.beginupdate();
  for pa1:= low(stdpagesizety) to high(stdpagesizety) do begin
-  addrow([stdpagesizes[pa1].name]);
+  addrow([msestring(stdpagesizes[pa1].name)]);
  end;
  dropdown.cols.endupdate();
  inherited value:= integer(sps_a4);
@@ -1567,8 +1567,8 @@ begin
  names.clear;
  for pa1:= stdpagesizety(1) to high(stdpagesizety) do begin
   with stdpagesizes[pa1] do begin
-   names.addrow([name+' ('+formatfloat('0',width)+'*'+
-                                     formatfloat('0',height)+' mm2)']); 
+   names.addrow([msestring(name+' ('+formatfloat('0',width)+'*'+
+                                     formatfloat('0',height)+' mm2)')]); 
   end;
   aenums[ord(pa1)-1]:= ord(pa1);
  end;
@@ -1609,7 +1609,7 @@ end;
 
 function tpagesizeselector.pagesizename: msestring;
 begin
- result:= stdpagesizes[value].name;
+ result:= msestring(stdpagesizes[value].name);
 end;
 
 procedure tpagesizeselector.setpagewidth(const avalue: real);
@@ -1725,7 +1725,7 @@ begin
  end;
 end;
 
-procedure tstreamprinter.beginprint(command: string = ''; 
+procedure tstreamprinter.beginprint(command: msestring = ''; 
                                             const apreamble: string = '');
 var
  pip1: tpipewriter;
@@ -1735,7 +1735,7 @@ begin
   command:= fprintcommand;
  end;
  if command = '' then begin
-  command:= sys_getprintcommand;
+  command:= msestring(sys_getprintcommand());
  end;
  if canevent(tmethod(fonupdateprintcommand)) then begin
   application.synchronize({$ifdef FPC}@{$endif}doupdateprintcommand,@command);
@@ -1834,7 +1834,7 @@ procedure tstreamprinter.dostatread(const reader: tstatreader);
 begin
  inherited;
  with reader do begin
-  printcommand:= readstring('printcommand',printcommand);
+  printcommand:= readmsestring('printcommand',printcommand);
  end;
 end;
 
@@ -1842,7 +1842,7 @@ procedure tstreamprinter.dostatwrite(const writer: tstatwriter);
 begin
  inherited;
  with writer do begin
-  writestring('printcommand',printcommand);
+  writemsestring('printcommand',printcommand);
  end;
 end;
 
