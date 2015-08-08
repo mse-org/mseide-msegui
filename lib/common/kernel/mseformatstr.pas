@@ -590,10 +590,10 @@ var
    procedure StoreInt(Value, Digits: integer);
    var S: msestring; Len: integer;
    begin
-   S := IntToStr(Value);
+   S := IntToStrmse(Value);
    Len := Length(S);
    if Len < Digits then begin
-      S := copy('0000', 1, Digits - Len) + S;
+      S := copy(msestring('0000'), 1, Digits - Len) + S;
       Len := Digits;
       end ;
    StoreStr(pmsechar(pointer(S)), Len);
@@ -1435,11 +1435,11 @@ begin
    end
    else begin
     if innum then begin
-     result:= result + '" "'+po1^;
+     result:= result + '" "'+char(po1^);
      innum:= false;
     end
     else begin
-     result:= result + po1^;
+     result:= result + char(po1^);
     end;
    end;
   end;
@@ -1932,6 +1932,11 @@ begin
  raise exception.Create('Invalid value '''+value+'''.');
 end;
 
+procedure formaterror(const value: msestring);
+begin
+ formaterror(ansistring(value));
+end;
+
 type
  datetimeformattokenty = (
   dtft_default,        // c        shortdateformat + ' ' + longtimeformat
@@ -2184,7 +2189,8 @@ begin
   expand(mstr1,tokeninfos[2],defaultformatsettingsmse.shortdateformat);//ddddd
   expand(mstr1,tokeninfos[3],defaultformatsettingsmse.longtimeformat); //tt
   expand(mstr1,tokeninfos[4],defaultformatsettingsmse.shorttimeformat);//t
-  allocuninitedarray(length(mstr1),sizeof(scanar[0]),scanar); //max
+  allocuninitedarray(length(mstr1),sizeof(scaninfoty{scanar[0]}),scanar); //max
+                                           //fpc 3.0 warning
   scanindex:= 0;
   for int1:= startscan to high(tokeninfos) do begin
    scan(mstr1,tokeninfos[int1]);
@@ -2353,34 +2359,34 @@ begin
    -1: begin
    end;
    0: begin
-    day:= strtoint(ar1[datear[0]]);
+    day:= strtointmse(ar1[datear[0]]);
    end;
    1: begin
     if month = 0 then begin //no month name found
      if finddateorder(dttg_mon) > finddateorder(dttg_day) then begin
-      day:= strtoint(ar1[datear[0]]);
-      month:= strtoint(ar1[datear[1]]);
+      day:= strtointmse(ar1[datear[0]]);
+      month:= strtointmse(ar1[datear[1]]);
      end
      else begin
-      day:= strtoint(ar1[datear[1]]);
-      month:= strtoint(ar1[datear[0]]);
+      day:= strtointmse(ar1[datear[1]]);
+      month:= strtointmse(ar1[datear[0]]);
      end;
     end
     else begin
      if finddateorder(dttg_year) > finddateorder(dttg_day) then begin
-      day:= strtoint(ar1[datear[0]]);
-      year:= strtoint(ar1[datear[1]]);
+      day:= strtointmse(ar1[datear[0]]);
+      year:= strtointmse(ar1[datear[1]]);
      end
      else begin
-      day:= strtoint(ar1[datear[1]]);
-      year:= strtoint(ar1[datear[0]]);
+      day:= strtointmse(ar1[datear[1]]);
+      year:= strtointmse(ar1[datear[0]]);
      end;
     end;
    end;
    else begin //>= 2
     for int1:= 0 to 2 do begin
      mstr1:= ar1[datear[int1]];
-     int2:= strtoint(mstr1);
+     int2:= strtointmse(mstr1);
      case dateorder[int1] of
       dttg_year: begin
        if length(mstr1) <= 2 then begin
@@ -2410,24 +2416,24 @@ begin
   int1:= high(timear);
   if int1 >= 0 then begin
    if int1 >= 3 then begin
-    millisecond:= strtoint(ar1[timear[3]]);
+    millisecond:= strtointmse(ar1[timear[3]]);
    end
    else begin
     millisecond:= 0;
    end;
    if int1 >= 2 then begin
-    second:= strtoint(ar1[timear[2]]);
+    second:= strtointmse(ar1[timear[2]]);
    end
    else begin
     second:= 0;
    end;
    if int1 >= 1 then begin
-    minute:= strtoint(ar1[timear[1]]);
+    minute:= strtointmse(ar1[timear[1]]);
    end
    else begin
     minute:= 0;
    end;
-   hour:= strtoint(ar1[timear[0]]);
+   hour:= strtointmse(ar1[timear[0]]);
    if ispm and (hour < 12) then begin
     hour:= hour + 12;
    end;
@@ -2523,10 +2529,10 @@ begin
       mstr1:= text;
      end;
     end;
-    result:= trystrtodatetime(mstr1,value);
+    result:= trystrtodatetime(ansistring(mstr1),value);
    end
    else begin
-    result:= trystrtodatetime(text,value);
+    result:= trystrtodatetime(ansistring(text),value);
    end;
    if result then begin
     checkdateconvert(convert,value);
@@ -3771,7 +3777,7 @@ begin
     sint1:= expos[ord(ch1)];
     if sint1 <> 0 then begin
      setlength(str1,length(str1)-1);
-     str1:= str1 + 'E'+inttostr(sint1);
+     str1:= str1 + 'E'+inttostrmse(sint1);
     end;
    end;
   end;
@@ -3799,7 +3805,7 @@ begin
   result:= emptyrealstring;
  end
  else begin
-  result:= doubletostring(val);
+  result:= ansistring(doubletostring(val));
 (*
  {$ifdef withformatsettings}
   result:= floattostr(val,defaultformatsettingsdot);
@@ -4584,7 +4590,7 @@ function trystrtointvalue(const text: msestring; base: numbasety;
 var
  str1: string;
 begin
- str1:= trim(text);
+ str1:= ansistring(trim(text));
  case base of
   nb_bin: begin
    result:= trystrtobin(str1,value);
@@ -4606,7 +4612,7 @@ function trystrtointvalue64(const text: msestring; base: numbasety;
 var
  str1: string;
 begin
- str1:= trim(text);
+ str1:= ansistring(trim(text));
  case base of
   nb_bin: begin
    result:= trystrtobin64(str1,value);
@@ -5133,10 +5139,10 @@ begin
     result:= VChar;
    end;
    vtWideChar: begin
-    result:= VWideChar;
+    result:= ansistring(VWideChar);
    end;
    vtExtended: begin
-    result:= doubletostring(VExtended^);
+    result:= ansistring(doubletostring(VExtended^));
    end;
    vtString: begin
     result:= VString^;
@@ -5154,7 +5160,7 @@ begin
     result:= hextostr(VClass);
    end;
    vtPWideChar: begin
-    result:= unicodestring(VPWideChar);
+    result:= ansistring(unicodestring(VPWideChar));
    end;
    vtCurrency: begin
     result:= currtostr(VCurrency^);
@@ -5166,13 +5172,13 @@ begin
     result:= hextostr(VInterface);
    end;
    vtWideString: begin
-    result:= widestring(VWideString);
+    result:= ansistring(widestring(VWideString));
    end;
    vtInt64: begin
     result:= inttostr(VInt64^);
    end;
    vtUnicodeString: begin
-    result:= unicodestring(VUnicodeString);
+    result:= ansistring(unicodestring(VUnicodeString));
    end;
    vtQWord: begin
     result:= inttostr(VQWord^);
@@ -5195,10 +5201,10 @@ begin
     result:= inttostrmse(VInteger);
    end;
    vtBoolean: begin
-    result:= booltostr(VBoolean);
+    result:= msestring(booltostr(VBoolean));
    end;
    vtChar: begin
-    result:= VChar;
+    result:= msestring(VChar);
    end;
    vtWideChar: begin
     result:= VWideChar;
@@ -5207,43 +5213,43 @@ begin
     result:= doubletostring(VExtended^);
    end;
    vtString: begin
-    result:= VString^;
+    result:= msestring(VString^);
    end;
    vtPointer: begin
-    result:= hextostr(VPointer);
+    result:= msestring(hextostr(VPointer));
    end;
    vtPChar: begin
     result:= VPChar;
    end;
    vtObject: begin
-    result:= hextostr(VObject);
+    result:= msestring(hextostr(VObject));
    end;
    vtClass: begin
-    result:= hextostr(VClass);
+    result:= msestring(hextostr(VClass));
    end;
    vtPWideChar: begin
     result:= unicodestring(VPWideChar);
    end;
    vtAnsiString: begin
-    result:= ansistring(VAnsiString);
+    result:= msestring(ansistring(VAnsiString));
    end;
    vtCurrency: begin
-    result:= currtostr(VCurrency^);
+    result:= msestring(currtostr(VCurrency^));
    end;
    vtVariant: begin
     result:= VVariant^;
    end;
    vtInterface: begin
-    result:= hextostr(VInterface);
+    result:= msestring(hextostr(VInterface));
    end;
    vtWideString: begin
     result:= widestring(VWideString);
    end;
    vtInt64: begin
-    result:= inttostr(VInt64^);
+    result:= inttostrmse(VInt64^);
    end;
    vtQWord: begin
-    result:= inttostr(VQWord^);
+    result:= inttostrmse(VQWord^);
    end
    else begin
     result:= '';
