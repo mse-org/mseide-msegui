@@ -1846,7 +1846,7 @@ end;
 procedure tcustomlabel.initnewcomponent(const ascale: real);
 begin
  inherited;
- caption:= name;
+ caption:= msestring(name);
 end;
 
 function tcustomlabel.checkfocusshortcut(var info: keyeventinfoty): boolean;
