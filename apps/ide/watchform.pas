@@ -131,10 +131,10 @@ begin
  result:= true;
  if (index >= 0) and gdb.cancommand then begin
   if watcheson.value and watchon[index] then begin
-   result:= gdb.readpascalvariable(expression[index],mstr1) <> gdb_timeout;
+   result:= gdb.readpascalvariable(ansistring(expression[index]),mstr1) <> gdb_timeout;
    fc:= numformatty(formatcode[index]);
    if fc <> nf_default then begin
-    if trystrtointvalue64(mstr1,qword(int641)) then begin
+    if trystrtointvalue64(ansistring(mstr1),qword(int641)) then begin
      int2:= highestbit64(int641);
      if int2 <= 0 then begin
       int2:= 1;
@@ -149,18 +149,18 @@ begin
         ns_32: int2:= 32; 
         ns_64: int2:= 64; 
        end;
-       mstr1:= '%'+bintostr(qword(int641),int2);
+       mstr1:= '%'+msestring(bintostr(qword(int641),int2));
       end;
       nf_decs: begin
        case fs of
-        ns_8: mstr1:= inttostr(shortint(int641));
-        ns_16: mstr1:= inttostr(smallint(int641));
-        ns_32: mstr1:= inttostr(integer(int641));
-        else mstr1:= inttostr(int641);
+        ns_8: mstr1:= inttostrmse(shortint(int641));
+        ns_16: mstr1:= inttostrmse(smallint(int641));
+        ns_32: mstr1:= inttostrmse(integer(int641));
+        else mstr1:= inttostrmse(int641);
        end;
       end;
       nf_decu: begin
-       mstr1:= inttostr(qword(int641));
+       mstr1:= inttostrmse(qword(int641));
       end;
       nf_hex: begin
        int2:= int2 div 4 + 1; //nibble count
@@ -170,7 +170,7 @@ begin
         ns_32: int2:= 8; 
         ns_64: int2:= 16; 
        end;
-       mstr1:= '0x'+hextostr(qword(int641),int2);
+       mstr1:= '0x'+hextostrmse(qword(int641),int2);
       end;
      end;
     end;
@@ -214,13 +214,14 @@ var
  str1: string;
 begin
  gdb.interrupttarget;
- accept:= gdb.writepascalvariable(expression.value,avalue,str1) = gdb_ok;
+ accept:= gdb.writepascalvariable(ansistring(expression.value),
+                                     ansistring(avalue),str1) = gdb_ok;
  if accept then begin
   refresh;
-  avalue:= str1;
+  avalue:= msestring(str1);
  end
  else begin
-  showerror(str1);
+  showerror(msestring(str1));
   tstringedit(sender).editor.undo;
  end;
  gdb.restarttarget;
@@ -300,7 +301,7 @@ procedure twatchfo.addresswatch(const sender: TObject);
 var
  str1: ansistring;
 begin
- if gdb.symboladdress(expression.value,str1) = gdb_ok then begin
+ if gdb.symboladdress(ansistring(expression.value),str1) = gdb_ok then begin
   str1:= '('+str1+'^)';
   case tmenuitem(sender).tag of
    0: begin
@@ -316,10 +317,10 @@ begin
     str1:= 'qword'+str1;
    end;
   end;
-  watchpointsfo.addwatch(str1);
+  watchpointsfo.addwatch(msestring(str1));
  end
  else begin
-  showerror(str1);
+  showerror(msestring(str1));
  end;
 end;
 
