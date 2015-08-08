@@ -169,7 +169,8 @@ function createdockpanelform(const aclass: tclass;
 
 implementation
 uses
- {msedockpanelform_mfm,}sysutils,msekeyboard,mseactions,msearrayutils;
+ {msedockpanelform_mfm,}sysutils,msekeyboard,mseactions,msearrayutils,
+ mseformatstr;
 type
  tcomponent1 = class(tcomponent);
  tmsecomponent1 = class(tmsecomponent);
@@ -224,7 +225,7 @@ begin
  if filer.iswriter then begin
   setlength(ar1,fpanellist.count);
   for int1:= 0 to high(ar1) do begin
-   ar1[int1]:= tdockpanelform(fpanellist[int1]).name;
+   ar1[int1]:= msestring(tdockpanelform(fpanellist[int1]).name);
   end;
  end;
  filer.updatevalue('panels',ar1);
@@ -234,7 +235,7 @@ begin
   end;
   for int1:= 0 to high(ar1) do begin
    try
-    newpanel(ar1[int1]);
+    newpanel(ansistring(ar1[int1]));
    except
    end;
   end;
@@ -243,7 +244,7 @@ begin
   for int1:= 0 to count - 1 do begin
    with items[int1] do begin
     if (statfile <> nil) and (statfile <> fstatfile) then begin
-     statfile.updatestat('client_'+inttostr(int1),filer);
+     statfile.updatestat('client_'+inttostrmse(int1),filer);
     end;
    end;
   end;
@@ -508,7 +509,7 @@ begin
     if menucapt <> '' then begin
      menucapt:= acaption + ' ';
     end;
-    menucapt:= menucapt + '&' + inttostr(fnameindex+1);
+    menucapt:= menucapt + '&' + inttostrmse(fnameindex+1);
    end
    else begin
     shortcut:= 0;
@@ -524,7 +525,7 @@ begin
   end;
  end
  else begin
-  acaption:= acaption+' '+inttostr(fnameindex+1);
+  acaption:= acaption+' '+inttostrmse(fnameindex+1);
  end;
  if (fcontroller <> nil) and 
            fcontroller.canevent(tmethod(fcontroller.fonupdatecaption)) then begin

@@ -2956,7 +2956,7 @@ var
  mstr1: msestring;
 begin
  for int1:= 0 to count - 1 do begin
-  mstr1:= inttostr(int1);
+  mstr1:= inttostrmse(int1);
   with tcustomdialcontroller(fitems[int1]) do begin
    if do_savestate in foptions then begin
     start:= reader.readreal('start'+mstr1,start);
@@ -2980,7 +2980,7 @@ var
  mstr1: msestring;
 begin
  for int1:= 0 to count - 1 do begin
-  mstr1:= inttostr(int1);
+  mstr1:= inttostrmse(int1);
   with tcustomdialcontroller(fitems[int1]) do begin
    if do_savestate in options then begin
     writer.writereal('start'+mstr1,start);

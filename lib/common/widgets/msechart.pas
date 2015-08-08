@@ -849,7 +849,7 @@ function makexseriesdata(const value: real; const index: integer): xseriesdataty
 
 implementation
 uses
- sysutils,math,msebits,rtlconsts,msestockobjects,msearrayutils;
+ sysutils,math,msebits,rtlconsts,msestockobjects,msearrayutils,mseformatstr;
 
 type
  tcustomdialcontroller1 = class(tcustomdialcontroller);
@@ -3137,7 +3137,7 @@ var
  mstr1: msestring;
 begin
  for int1:= 0 to count - 1 do begin
-  mstr1:= inttostr(int1);
+  mstr1:= inttostrmse(int1);
   with ttrace(fitems[int1]) do begin
    if cto_savexscale in foptions then begin
     xstart:= reader.readreal('xstart'+mstr1,xstart);
@@ -3157,7 +3157,7 @@ var
  mstr1: msestring;
 begin
  for int1:= 0 to count - 1 do begin
-  mstr1:= inttostr(int1);
+  mstr1:= inttostrmse(int1);
   with ttrace(fitems[int1]) do begin
    if cto_savexscale in foptions then begin
     writer.writereal('xstart'+mstr1,xstart);
