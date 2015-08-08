@@ -15,6 +15,9 @@
 {$ifdef FPC}{$mode objfpc}{$endif}
 
 {$define unicodeversion}
+{$if fpc_fullversion >= 30000}
+ {$define fpcv3}
+{$endif}
 unit cwstring;
 {$ifndef FPC}
 interface          //dummy
@@ -142,8 +145,13 @@ procedure unlockiconv(var lockcount: integer);
 begin
  interlockeddecrement(lockcount);
 end;
-  
+
+{$ifdef fpcv3}
+procedure Wide2AnsiMove(source:pwidechar;var dest:RawByteString;cp : TSystemCodePage;len:SizeInt);
+                            //todo: codepages
+{$else}
 procedure Wide2AnsiMove(source:pwidechar; var dest:ansistring; len:SizeInt);
+{$endif}
   var
     outlength,
     outoffset,
@@ -202,8 +210,13 @@ procedure Wide2AnsiMove(source:pwidechar; var dest:ansistring; len:SizeInt);
     setlength(dest,length(dest)-outleft);
   end;
 
-
+{$ifdef fpcv3}
+procedure Ansi2WideMove(source:pchar;cp : TSystemCodePage;
+                                          var dest:widestring;len:SizeInt);
+                 //todo: codepages
+{$else}
 procedure Ansi2WideMove(source:pchar;var dest:widestring;len:SizeInt);
+{$endif}
   var
     outlength,
     outoffset,

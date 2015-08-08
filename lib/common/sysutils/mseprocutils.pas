@@ -192,7 +192,7 @@ type
 
 implementation
 uses 
- msesysintf1,msesysintf,mseprocmonitor,msearrayutils,
+ msesysintf1,msesysintf,mseprocmonitor,msearrayutils,mseformatstr,
                                        mseapplication,msefileutils;
 
 procedure killprocesstree1(id: procidty);
@@ -320,9 +320,10 @@ begin
  addproc(pid);
 end;
 
-procedure execerror(const errno: integer; const commandline: string);
+procedure execerror(const errno: integer; const commandline: msestring);
 begin
- raise eexecerror.Create(errno,'Can not execute "'+commandline+'".'+lineend);
+ raise eexecerror.Create(errno,
+           ansistring('Can not execute "'+commandline+'".'+lineend));
 end;
 
 {$ifdef mswindows}
@@ -756,7 +757,7 @@ begin
  name:= buffer; 
 end;
 
-function execmse0(const commandline: string; topipe: pinteger = nil;
+function execmse0(const commandline: msestring; topipe: pinteger = nil;
              frompipe: pinteger = nil;
              errorpipe: pinteger = nil;
              groupid: integer = -1; //-1 -> keine, 0 = childpid
@@ -883,15 +884,15 @@ var
 begin
  commandline1:= ansistring(commandline);
  if workingdirectory <> '' then begin
-  wd1:= tosysfilepath(workingdirectory);
+  wd1:= ansistring(tosysfilepath(workingdirectory));
  end;
  setlength(par,length(params));
  for i1:= 0 to high(par) do begin
-  par[i1]:= params[i1];
+  par[i1]:= ansistring(params[i1]);
  end;
  setlength(env,length(envvars));
  for i1:= 0 to high(env) do begin
-  env[i1]:= envvars[i1];
+  env[i1]:= ansistring(envvars[i1]);
  end;
  if not (exo_noshell in options) then begin
   command1:= shell;
@@ -900,7 +901,7 @@ begin
   params1[2]:= pchar(commandline1);
  end
  else begin
-  command1:= tosysfilepath(commandline);
+  command1:= ansistring(tosysfilepath(msestring(commandline)));
   setlength(params1,1);
  end;
 
@@ -1124,7 +1125,7 @@ var
  stream: ttextstream;
  str1: string;
 begin
- stream:= ttextstream.create('/proc/'+inttostr(pid)+'/stat',fm_read);
+ stream:= ttextstream.create('/proc/'+inttostrmse(pid)+'/stat',fm_read);
  try
   fillchar(result,sizeof(result),0);
   stream.readln(str1);
@@ -1144,7 +1145,7 @@ var
  str1: string;
  commpo: pchar;
 begin
- stream:= ttextstream.create('/proc/'+inttostr(pid)+'/stat',fm_read);
+ stream:= ttextstream.create('/proc/'+inttostrmse(pid)+'/stat',fm_read);
  try
   fillchar(result,sizeof(result),0);
   stream.readln(str1);

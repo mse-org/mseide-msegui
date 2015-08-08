@@ -433,7 +433,7 @@ end;
 
 function sys_getapplicationpath: filenamety;
 begin
- result:= paramstr(0);
+ result:= filenamety(paramstr(0));
 end;
 
 function sys_getcommandlinearguments: msestringarty;
@@ -461,7 +461,7 @@ begin
  result:= po1 <> nil;
  if result then begin
   str1:= po1;
-  avalue:= str1;
+  avalue:= msestring(str1);
  end;
 end;
 
@@ -575,7 +575,7 @@ function sys_createdir(const path: msestring; const rights: filerightsty): syser
 var
  str1: string;
 begin
- str1:= path;
+ str1:= ansistring(path);
  if mselibc.__mkdir(pchar(str1),
                  getfilerights(rights)) <> 0 then begin
 //  result:= sye_createdir;
@@ -609,7 +609,7 @@ const
 begin
  str2:= path;
  sys_tosysfilepath(str2);
- str1:= str2;
+ str1:= ansistring(str2);
  handle:= Integer(mselibc.open(PChar(str1), openmodes[openmode] or 
                             defaultopenflags,[getfilerights(rights)]));
  if handle >= 0 then begin
@@ -848,8 +848,8 @@ var
  lwo1: longword;
  po1: pointer;
 begin
- str1:= oldfile;
- str2:= newfile;
+ str1:= ansistring(oldfile);
+ str2:= ansistring(newfile);
  result:= sye_copyfile;
  source:= mselibc.open(pchar(str1),o_rdonly);
  if source <> -1 then begin
@@ -900,8 +900,8 @@ function sys_renamefile(const oldname,newname: filenamety): syserrorty;
 var
  str1,str2: string;
 begin
- str1:= oldname;
- str2:= newname;
+ str1:= ansistring(oldname);
+ str2:= ansistring(newname);
  if mselibc.__rename(pchar(str1),pchar(str2)) = -1 then begin
   result:= syelasterror;
  end
@@ -914,7 +914,7 @@ function sys_deletefile(const filename: filenamety): syserrorty;
 var
  str1: string;
 begin
- str1:= filename;
+ str1:= ansistring(filename);
  if mselibc.unlink(pchar(str1)) = -1 then begin
   result:= syelasterror;
  end
@@ -1013,7 +1013,7 @@ begin
   po1:= getcwd(@str1[1],length(str1));
  until (po1 <> nil) or (sys_getlasterror() <> erange);
  setlength(str1,strlen(po1));
- result:= str1;
+ result:= msestring(str1);
 end;
 
 function sys_getuserhomedir: filenamety;
@@ -1022,7 +1022,7 @@ var
 begin
  po1:= getenv('HOME');
  if po1 <> nil then begin
-  result:= string(po1);
+  result:= filenamety(string(po1));
  end
  else begin
   result:= '';
@@ -1046,14 +1046,14 @@ begin
   str1:= '/tmp/'
  end;
  str1:= includetrailingpathdelimiter(str1);
- result:= tomsefilepath(str1);
+ result:= tomsefilepath(filenamety(str1));
 end;
 
 function sys_setcurrentdir(const dirname: filenamety): syserrorty;
 var
  str1: string;
 begin
- str1:= dirname;
+ str1:= ansistring(dirname);
  if mselibc.__chdir(pchar(str1)) = 0 then begin
   result:= sye_ok;
  end
@@ -1071,7 +1071,7 @@ var
  str1: string;
 begin
  checkdirstreamdata(stream);
- str1:= stream.dirinfo.dirname;
+ str1:= ansistring(stream.dirinfo.dirname);
  with stream,dirinfo,dirstreamlinuxty(platformdata) do begin
 {$ifdef FPC}
   d.dir:= pdir(opendir(pchar(str1)));
@@ -1129,7 +1129,7 @@ begin
           (po1 <> nil) then begin
      with info do begin
       str1:= dirent.d_name;
-      name:= str1;
+      name:= filenamety(str1);
       if checkfilename(info.name,stream) then begin
        if d.needsstat or d.needstype and 
        ((dirent.d_type = dt_unknown) or (dirent.d_type = dt_lnk)) then begin

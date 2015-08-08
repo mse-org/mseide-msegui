@@ -131,19 +131,20 @@ begin
  
  with defaultformatsettingsmse do begin
  {$ifdef FPC}
-  mstr1:= getlocstr(decimal_point,decimalseparator);
+  mstr1:= msestring(getlocstr(decimal_point,ansistring(decimalseparator)));
   if mstr1 <> '' then begin
    decimalseparator:= mstr1[1];
   end;
-  mstr1:= getlocstr(thousands_sep,thousandseparator);
+  mstr1:= msestring(getlocstr(thousands_sep,ansistring(thousandseparator)));
   if mstr1 <> '' then begin
    thousandseparator:= mstr1[1];
   end
   else begin
-   mstr1:= getlocstr(mon_decimal_point,decimalseparator);
+   mstr1:= msestring(getlocstr(mon_decimal_point,ansistring(decimalseparator)));
    if mstr1 <> '' then begin
     decimalseparator:= mstr1[1];
-    mstr1:= getlocstr(mon_thousands_sep,thousandseparator);
+    mstr1:= msestring(getlocstr(mon_thousands_sep,
+                                         ansistring(thousandseparator)));
     if mstr1 <> '' then begin
      thousandseparator:= mstr1[1];
     end
@@ -157,36 +158,45 @@ begin
   end;
   
   for int1:= 1 to 12 do begin
-   shortmonthnames[int1]:= getlocstr(abmon_1 + int1 - 1,shortmonthnames[int1]);
-   longmonthnames[int1]:= getlocstr(mon_1 + int1 - 1,longmonthnames[int1]);
+   shortmonthnames[int1]:= msestring(getlocstr(abmon_1 + int1 - 1,
+                                ansistring(shortmonthnames[int1])));
+   longmonthnames[int1]:= msestring(getlocstr(mon_1 + int1 - 1,
+                                ansistring(longmonthnames[int1])));
   end;
   for int1:= 1 to 7 do begin
-   shortdaynames[int1]:= getlocstr(abday_1 + int1 - 1,shortdaynames[int1]);
-   longdaynames[int1]:= getlocstr(day_1 + int1 - 1,longdaynames[int1]);
+   shortdaynames[int1]:= msestring(getlocstr(abday_1 + int1 - 1,
+                                ansistring(shortdaynames[int1])));
+   longdaynames[int1]:= msestring(getlocstr(day_1 + int1 - 1,
+                                ansistring(longdaynames[int1])));
   end;
-  shortdateformat:= convertcformatstring(getlocstr(d_fmt,''),shortdateformat);
+  shortdateformat:= msestring(convertcformatstring(getlocstr(d_fmt,''),
+                                   ansistring(shortdateformat)));
   str1:= getlocstr(d_t_fmt,'');
   str2:= getlocstr(t_fmt,''); 
   int1:= pos(str2,str1);
   if int1 > 0 then begin
    str1:= trimright(copy(str1,1,int1-1));
   end;
-  longdateformat:= convertcformatstring(str1,longdateformat);   
+  longdateformat:= msestring(convertcformatstring(str1,
+                                          ansistring(longdateformat)));
  // longdateformat:= convertcformatstring(getlocstr(d_t_fmt,''),longdateformat);   
-  shorttimeformat:= convertcformatstring(getlocstr(t_fmt,''),shorttimeformat);
-  longtimeformat:= convertcformatstring(getlocstr(t_fmt_ampm,''),longtimeformat);
+  shorttimeformat:= msestring(convertcformatstring(getlocstr(t_fmt,''),
+                                          ansistring(shorttimeformat)));
+  longtimeformat:= msestring(convertcformatstring(getlocstr(t_fmt_ampm,''),
+                                          ansistring(longtimeformat)));
   findfirstchar(shortdateformat,'./-',dateseparator);
   findfirstchar(shorttimeformat,':.',timeseparator);
   
-  timeamstring:= getlocstr(am_str,timeamstring);
+  timeamstring:= msestring(getlocstr(am_str,ansistring(timeamstring)));
   if timeamstring = '' then begin
    timeamstring:= 'am';
   end;
-  timepmstring:= getlocstr(pm_str,timepmstring);
+  timepmstring:= msestring(getlocstr(pm_str,ansistring(timepmstring)));
   if timepmstring = '' then begin
    timepmstring:= 'pm';
   end;
-  currencystring:= getlocstr(currency_symbol,currencystring);
+  currencystring:= msestring(getlocstr(currency_symbol,
+                                         ansistring(currencystring)));
  {$ifdef FPC}{$checkpointer off}{$endif}
   ch1:= nl_langinfo(p_cs_precedes)^;
   ch2:= nl_langinfo(p_sep_by_space)^;
