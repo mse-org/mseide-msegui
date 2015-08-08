@@ -14,10 +14,10 @@
 unit mseconsts_ru;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
-uses
- mseconsts,msestrings,sysutils;
- 
 implementation
+uses
+ mseconsts,msestrings,sysutils,mseformatstr;
+ 
 const
  ru_modalresulttext: defaultmodalresulttextty = (
   '',                                             //mr_none => Nichego
@@ -208,7 +208,7 @@ begin
    result:= #1059#1076#1072#1083#1080#1090#1100' '#1074#1099#1073#1088#1072#1085#1085#1091#1102' '#1089#1090#1088#1086#1082#1091'?'
   end
   else begin
-   result:= #1059#1076#1072#1083#1080#1090#1100' '+inttostr(vinteger)+' '#1074#1099#1073#1088#1072#1085#1085#1091#1102' '#1089#1090#1088#1086#1082#1091'?';
+   result:= #1059#1076#1072#1083#1080#1090#1100' '+inttostrmse(vinteger)+' '#1074#1099#1073#1088#1072#1085#1085#1091#1102' '#1089#1090#1088#1086#1082#1091'?';
   end;
  end;
 end;

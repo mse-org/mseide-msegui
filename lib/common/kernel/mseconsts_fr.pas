@@ -56,7 +56,7 @@ uses
  
 implementation
 uses
- msestrings,sysutils;
+ msestrings,sysutils,mseformatstr;
 const
  fr_modalresulttext: defaultmodalresulttextty =
  ('',             //mr_none
@@ -204,7 +204,7 @@ begin
    result:= 'Effacer le fichier s'#233'lectionn'#233' ?'
   end
   else begin
-   result:= 'Effacer les '+inttostr(vinteger)+
+   result:= 'Effacer les '+inttostrmse(vinteger)+
             ' fichiers s'#233'lectionn'#233's ?';
   end;
  end;

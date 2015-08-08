@@ -18,7 +18,7 @@ uses
  
 implementation
 uses
- msestrings,sysutils;
+ msestrings,sysutils,mseformatstr;
 const
  es_modalresulttext: defaultmodalresulttextty =
  ('',            //mr_none
@@ -166,7 +166,7 @@ begin
    result:= #191'Borrar la fila seleccionada?'
   end
   else begin
-   result:= #191'Borrar '+inttostr(vinteger)+' filas seleccionadas?';
+   result:= #191'Borrar '+inttostrmse(vinteger)+' filas seleccionadas?';
   end;
  end;
 end;

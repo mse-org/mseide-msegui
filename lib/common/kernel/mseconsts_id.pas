@@ -13,10 +13,11 @@
 unit mseconsts_id;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
-uses
- mseconsts,msestrings,sysutils;
  
 implementation
+uses
+ mseconsts,msestrings,sysutils,mseformatstr;
+
 const
  id_modalresulttext: defaultmodalresulttextty =
  ('',            //mr_none
@@ -162,7 +163,7 @@ begin
    result:= 'Delete selected row?'
   end
   else begin
-   result:= 'Delete '+inttostr(vinteger)+' selected rows?';
+   result:= 'Delete '+inttostrmse(vinteger)+' selected rows?';
   end;
  end;
 end;

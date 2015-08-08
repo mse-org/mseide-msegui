@@ -15,7 +15,7 @@ uses
  
 implementation
 uses
- msestrings,sysutils;
+ msestrings,sysutils,mseformatstr;
 const
  de_modalresulttext: defaultmodalresulttextty =
  ('',            //mr_none
@@ -163,7 +163,7 @@ begin
    result:= 'Gew'#228'hlte Zeile l'#246'schen?';
   end
   else begin
-   result:= inttostr(vinteger)+
+   result:= inttostrmse(vinteger)+
      widestring(' gew'#228'hlte Zeilen l'#246'schen?');
   end;
  end;    
