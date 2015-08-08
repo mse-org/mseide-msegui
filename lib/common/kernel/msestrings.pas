@@ -4694,6 +4694,17 @@ begin
  dec(result);
 end;
 
+function minhigh(const a,b: msestring): integer; overload;
+begin
+ if length(a) < length(b) then begin
+  result:= length(a);
+ end
+ else begin
+  result:= length(b);
+ end;
+ dec(result);
+end;
+
 function lstringcomp(const a,b: lstringty): integer;
 var
  int1: integer;
