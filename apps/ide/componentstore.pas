@@ -224,7 +224,7 @@ begin
   with reader do begin
    fisnode:= readboolean('isnode',fisnode);
    compname:= readmsestring('compname',compname);
-   compclass:= readmsestring('compclass',compclass);
+   compclass:= readstring('compclass',compclass);
    compdesc:= readmsestring('compdesc',compdesc);
    finfo.filepath:= readmsestring('filepath',filepath);
    finfo.storedir:= readmsestring('storedir',storedir);
@@ -239,7 +239,7 @@ begin
  with writer do begin
   writeboolean('isnode',fisnode);
   writemsestring('compname',compname);
-  writemsestring('compclass',compclass);
+  writestring('compclass',compclass);
   writemsestring('compdesc',compdesc);
   writemsestring('filepath',finfo.filepath);
   writemsestring('storedir',storedir);
@@ -339,6 +339,7 @@ begin
    if not pastefromclipboard(str2) then begin
     exit;
    end;
+   str1:= ansistring(str2);
   end
   else begin 
    if compfiledialog.execute <> mr_ok then begin
@@ -346,13 +347,12 @@ begin
    end;
    stream2:= ttextstream.create(compfiledialog.controller.filename,fm_read);
    try
-    str2:= stream2.readdatastring;
+    str1:= stream2.readdatastring;
    finally
     stream2.free;
    end;
   end;
    
-  str1:= str2;
   stream1:= tstringcopystream.create(str1);
   stream2:= ttextstream.create;
   try
@@ -369,7 +369,7 @@ begin
    end;
    exit;        //invalid
   end;
-  info.compname:= info.compclass;
+  info.compname:= msestring(info.compclass);
   dialogfo:= tstoredcomponentinfodialogfo.create(info);
   if apaste then begin
    dialogfo.checkfilename;
@@ -417,8 +417,8 @@ begin
                                                   c[ord(warning)]) then begin
   bo1:= false;
   if pastefromclipboard(mstr1) then begin
-   stream1:= tstringcopystream.create(mstr1);
-   str1:= mstr1;
+   str1:= ansistring(mstr1);
+   stream1:= tstringcopystream.create(str1);
    stream2:= ttextstream.create;
    try
     objecttexttobinarymse(stream1,stream2);
@@ -458,7 +458,7 @@ end;
 
 procedure tcomponentstorefo.docopycomponent(const sender: TObject);
 begin
- copytoclipboard(copycomponent);
+ copytoclipboard(msestring(copycomponent));
 end;
 
 procedure tcomponentstorefo.statreadexe(const sender: TObject;
@@ -572,7 +572,7 @@ begin
   on e: exception do begin
    fchanged:= true;
    result:= showmessage(c[ord(errorwriting)]+lineend+
-               e.message,c[ord(error)],[mr_cancel,mr_ignore]);
+               msestring(e.message),c[ord(error)],[mr_cancel,mr_ignore]);
    if result = mr_ignore then begin
     result:= mr_ok;
    end;
