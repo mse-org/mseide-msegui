@@ -200,6 +200,8 @@ function realtostr(const value: double): string;     //immer'.' als separator
 function strtoreal(const s: string): double;   //immer'.' als separator
 function trystrtoreal(const s: string; out value: real): boolean;
                                                //immer'.' als separator
+function trystrtorealmse(const s: msestring; out value: real): boolean;
+                                               //immer'.' als separator
 function currencytostr(const avalue: currency): string; 
                          //always '.' as as decimal separator
 function currencytostrmse(const avalue: currency): msestring;
@@ -3680,6 +3682,11 @@ begin
 end;
 
 function trystrtoreal(const s: string; out value: real): boolean;
+begin
+ result:= trystrtodouble(s,double(value),'.');
+end;
+
+function trystrtorealmse(const s: msestring; out value: real): boolean;
 begin
  result:= trystrtodouble(s,double(value),'.');
 end;

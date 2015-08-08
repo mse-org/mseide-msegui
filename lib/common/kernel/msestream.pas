@@ -812,7 +812,7 @@ begin
     {$ifdef mse_hasvtunicodestring}
     vtunicodeString: mstr1:= msestring(VunicodeString);
     {$endif}
-    vtInt64:      mstr1:= inttostr(VInt64^);
+    vtInt64:      mstr1:= inttostrmse(VInt64^);
    end;
   end;
 //  escapechars(mstr1);
@@ -945,21 +945,21 @@ begin
      end;
     end;
     'i': begin
-     result:= result and trystrtoint(ar1[int1],pinteger(fields[int1])^);
+     result:= result and trystrtointmse(ar1[int1],pinteger(fields[int1])^);
     end;
     'I': begin
-     result:= result and trystrtoint64(ar1[int1],pint64(fields[int1])^);
+     result:= result and trystrtoint64mse(ar1[int1],pint64(fields[int1])^);
     end;
     'r': begin
      if ar1[int1] = '' then begin
       preal(fields[int1])^:= emptyreal;
      end
      else begin
-      result:= result and trystrtoreal(ar1[int1],preal(fields[int1])^);
+      result:= result and trystrtorealmse(ar1[int1],preal(fields[int1])^);
      end;
     end;
     's': begin
-     pstring(fields[int1])^:= ar1[int1];
+     pstring(fields[int1])^:= ansistring(ar1[int1]);
     end;
     'S': begin
       pmsestring(fields[int1])^:= ar1[int1];
@@ -1858,7 +1858,7 @@ begin
   writestr(value);
  end
  else begin
-  writestr(encode(value));
+  writestr(encode(msestring(value)));
  end;
 end;
 
@@ -1985,7 +1985,7 @@ function ttextstream.readln(var value: string): boolean;
 begin
  result:= readstrln(value);
  if fencoding <> ce_locale then begin
-  value:= decode(value);
+  value:= ansistring(decode(value));
  end;
 end;
 
@@ -2024,6 +2024,7 @@ end;
 function ttextstream.readln(out value: msestringarty): boolean;
 var
  str1: string;
+ mstr1: msestring;
  int1: integer;
 begin
  result:= readstrln(str1);
@@ -2038,8 +2039,8 @@ begin
   if not result then begin
    exit;
   end;
-  result:= readln(str1);
-  value[int1]:= str1;
+  result:= readln(mstr1);
+  value[int1]:= mstr1;
  end;
 end;
 
