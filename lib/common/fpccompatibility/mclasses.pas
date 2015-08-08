@@ -6717,12 +6717,12 @@ begin
     begin
       Result := FDriver.ReadString(StringType);
       if (StringType=vaUTF8String) then
-        Result:=utf8Decode(Result);
+        Result:= ansistring(utf8Decode(Result));
     end
   else if StringType in [vaWString] then
-    Result:= FDriver.ReadWidestring
+    Result:= ansistring(FDriver.ReadWidestring)
   else if StringType in [vaUString] then
-    Result:= FDriver.ReadUnicodeString
+    Result:= ansistring(FDriver.ReadUnicodeString)
   else
     raise EReadError.Create(SInvalidPropertyValue);
 end;
