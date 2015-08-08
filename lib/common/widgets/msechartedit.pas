@@ -1799,7 +1799,7 @@ var
  int1: integer;
 begin
  for int1:= 0 to ftraces.count - 1 do begin
-  ftraces[int1].xydata:= reader.readarray('value'+inttostr(int1),
+  ftraces[int1].xydata:= reader.readarray('value'+inttostrmse(int1),
                     ftraces[int1].xydata);
  end;
  if hasactivetrace then begin
@@ -1813,7 +1813,7 @@ var
  int1: integer;
 begin
  for int1:= 0 to ftraces.count - 1 do begin
-  writer.writearray('value'+inttostr(int1),ftraces[int1].xydata);
+  writer.writearray('value'+inttostrmse(int1),ftraces[int1].xydata);
  end;
 // writer.writearray('value',fvalue);
 end;

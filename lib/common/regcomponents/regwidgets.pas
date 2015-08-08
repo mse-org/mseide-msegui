@@ -47,7 +47,7 @@ uses
  msesplitter,msedock,mseforms,mseclasses,typinfo,msearrayprops,msewidgets,
  msegui,formdesigner,msedial,msemenuwidgets,msewindowwidget,msechart,
  msepolygon,msepickwidget,msetraywidget,msedockpanelform,msechartedit,mseedit,
- msebarcode,msedatalist,mseact
+ msebarcode,msedatalist,mseact,mseformatstr
  {$ifndef mse_no_opengl}
 //  {$ifdef FPC}
      ,mseopenglwidget
@@ -272,7 +272,8 @@ end;
 function tfixgridpropeditor.name: msestring;
 begin
 // result:= 'Item '+inttostr(findex - tarrayprop(tpropertyeditor1(fparenteditor).getordvalue).count);
- result:= tpersistentarraypropertyeditor(fparenteditor).itemprefix+inttostr(-findex - 1);
+ result:= tpersistentarraypropertyeditor(fparenteditor).itemprefix+
+                         inttostrmse(-findex - 1);
 end;
 
 { tfixgridpropseditor }
@@ -286,7 +287,7 @@ end;
 
 function tdatacoleditor.getvalue: msestring;
 begin
- result:= '<'+tdatacol(getpointervalue).name+'>';
+ result:= msestring('<'+tdatacol(getpointervalue).name+'>');
 end;
 
 { tdatacolseditor }
@@ -370,7 +371,7 @@ end;
 
 function ttraceeditor.getvalue: msestring;
 begin
- result:= '<'+ttrace(getpointervalue).name+'>';
+ result:= msestring('<'+ttrace(getpointervalue).name+'>');
 end;
 
 { ttraceseditor }
@@ -390,7 +391,7 @@ begin
   end
   else begin
    if action <> nil then begin
-    result:= '<'+action.name+'>';
+    result:= msestring('<'+action.name+'>');
    end
    else begin
     result:= '<>';
