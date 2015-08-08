@@ -156,7 +156,7 @@ begin
  end
  else begin
   if fdata = '' then begin
-   result:= ftext;
+   result:= ansistring(ftext);
   end
   else begin
    result:= fdata;
@@ -171,7 +171,7 @@ begin
  end
  else begin
   if ftext = '' then begin
-   result:= fdata;
+   result:= msestring(fdata);
   end
   else begin
    result:= ftext;
@@ -194,7 +194,7 @@ end;
 function tmimedragobject.convertmimedata(const atypeindex: integer): string;
 begin
  if fdata = '' then begin
-  result:= ftext;
+  result:= ansistring(ftext);
  end
  else begin
   result:= fdata;
@@ -207,7 +207,7 @@ end;
 function tmimedragobject.convertmimetext(const atypeindex: integer): msestring;
 begin
  if ftext = '' then begin
-  result:= fdata;
+  result:= msestring(fdata);
  end
  else begin
   result:= ftext;
