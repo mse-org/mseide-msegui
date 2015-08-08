@@ -58,7 +58,7 @@ var
 // str1: string;
 begin
  inherited create(nil);
- caption:= c[ord(setcomponentcreateorder)]+' '+amodule.name;
+ caption:= c[ord(setcomponentcreateorder)]+' '+msestring(amodule.name);
  fmodule:= amodule;
  with amodule do begin
   for int1:= 0 to componentcount - 1 do begin

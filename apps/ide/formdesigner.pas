@@ -525,8 +525,8 @@ begin
    end;
   end;
  end;
- raise exception.Create(actionsmo.c[ord(ac_unknownmodclass)]+ aclassname^ +'": "'+
-              designmoduleclassname+'".');
+ raise exception.Create(ansistring(actionsmo.c[ord(ac_unknownmodclass)]+ 
+        msestring(aclassname^) +'": "'+ msestring(designmoduleclassname)+'".'));
 end;
 
 function createdesignform(const aowner: tdesigner; 
@@ -1303,7 +1303,7 @@ begin
  end
  else begin
   result.cx:= complabelleftmargin + 
-                  getcanvas.getstringwidth(component.name) +
+                  getcanvas.getstringwidth(msestring(component.name)) +
                    complabelrightmargin;
   if not bo1 then begin 
    result.cx:= result.cx + componentsize;
@@ -1586,7 +1586,7 @@ begin
    for int1:= 0 to count - 1 do begin
     with items[int1] do begin
      if componentstate * [csancestor,csinline] = [csancestor] then begin
-      showmessage(actionsmo.c[ord(ac_inheritedcomp)]+name+
+      showmessage(actionsmo.c[ord(ac_inheritedcomp)]+msestring(name)+
                       actionsmo.c[ord(ac_cannotdel)],actionsmo.c[ord(ac_error)]);
       exit;
      end;             
@@ -1611,10 +1611,10 @@ begin
  with tmenuitem(sender) do begin
   ar1:= splitstring(caption,widechar(' '));
   if fselectwidget <> nil then begin
-   comp1:= fselectwidget.findlogicalchild(ar1[0]);
+   comp1:= fselectwidget.findlogicalchild(ansistring(ar1[0]));
   end
   else begin
-   comp1:= fselectcomp.findcomponent(ar1[0]);
+   comp1:= fselectcomp.findcomponent(ansistring(ar1[0]));
   end;
   if comp1 <> nil then begin
    selectcomponent(comp1,sm_select);
@@ -1709,7 +1709,7 @@ begin
    setlength(ar1,length(ar2));
    for int1:= 0 to high(ar1) do begin
     with ar2[int1] do begin
-     ar1[int1]:= name + ' (' + classname+')';
+     ar1[int1]:= msestring(name + ' (' + classname+')');
     end;
    end;
    sortarray(ar1);
@@ -2297,12 +2297,12 @@ var
    if not (iswidget or issub) then begin
     if isdatasubmodule(component,true) then begin
      canvas.fillrect(rect1,cl_ltgray);
-     drawtext(canvas,component.name,rect1,[tf_ycentered,tf_xcentered],
+     drawtext(canvas,msestring(component.name),rect1,[tf_ycentered,tf_xcentered],
                        stockobjects.fonts[stf_default]);
     end
     else begin
      rect1.cx:= rect1.cx - complabelrightmargin;
-     drawtext(canvas,component.name,rect1,[tf_ycentered,tf_right],
+     drawtext(canvas,msestring(component.name),rect1,[tf_ycentered,tf_right],
                         stockobjects.fonts[stf_default]);
      rect1.cx:= rect1.cy;
      registeredcomponents.drawcomponenticon(component,canvas,rect1);
@@ -2407,7 +2407,7 @@ var
  mstr1: msestring;
 begin
  if fmodule <> nil then begin
-  mstr1:= fmodule.name;
+  mstr1:= msestring(fmodule.name);
   if fmoduleoptions <> [] then begin
    mstr1:= '-'+mstr1;
   end;
@@ -3313,18 +3313,18 @@ begin
  name1:= '';
 // with tdesignwindow(fwindow) do begin
   if fselections.count > 0 then begin
-   name1:= ownernamepath(fselections[0]);
+   name1:= msestring(ownernamepath(fselections[0]));
   end;
   if compnamedialog(designer.getcomponentnametree(nil,true,true,nil,
                       @filterfindcomp,fmodule),name1,true) = mr_ok then begin
-   if name1 = fmodule.name then begin
+   if name1 = msestring(fmodule.name) then begin
     designer.selectcomponent(fmodule);
    end
    else begin
     replacechar1(name1,':','.');
     designer.selectcomponent(
-      designer.modules.findmodule(fmodule)^.components.getcomponent(name1,
-                                                                        true));
+      designer.modules.findmodule(fmodule)^.
+                          components.getcomponent(ansistring(name1),true));
    end;
   end;
 // end;
