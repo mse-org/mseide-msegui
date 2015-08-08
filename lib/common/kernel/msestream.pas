@@ -955,7 +955,7 @@ begin
       preal(fields[int1])^:= emptyreal;
      end
      else begin
-      result:= result and trystrtorealmse(ar1[int1],preal(fields[int1])^);
+      result:= result and trystrtoreal(ar1[int1],preal(fields[int1])^);
      end;
     end;
     's': begin

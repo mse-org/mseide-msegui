@@ -587,10 +587,10 @@ begin
      end;
      bo1:= lowercase(ar2[0]) = defaultfontalias;
      if bo1 and (ar2[1] = '') then begin
-      ar2[1]:= gui_getdefaultfontnames[stf_default];
+      ar2[1]:= msestring(gui_getdefaultfontnames[stf_default]);
      end;
      if high(ar2) >= 6 then begin
-      str1:= trim(ar2[6]);
+      str1:= ansistring(trim(ar2[6]));
      end
      else begin
       if bo1 then begin
@@ -601,8 +601,8 @@ begin
       end;
      end;
      
-     fontaliaslist.registeralias(ar2[0],ar2[1],fam_overwrite,ar3[0],ar3[1],options1,
-                                 xscale1,str1);
+     fontaliaslist.registeralias(ansistring(ar2[0]),ansistring(ar2[1]),
+                         fam_overwrite,ar3[0],ar3[1],options1,xscale1,str1);
      deletecommandlineargument(int3);
      dec(int3);
     except
