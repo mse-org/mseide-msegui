@@ -1958,7 +1958,7 @@ begin
            not((fto^.kind = tk_operator) and (fto^.op = '}')) do begin
          str1:= str1 + getorigtoken;
         end;
-        filename:= str1;
+        filename:= filenamety(str1);
        end;
        if findoperator('}') then begin
 //        endpos:= lasttokenpos;
@@ -2369,7 +2369,7 @@ begin
       end;
       skiprest;
       if bo1 then begin
-       callincludefile(str1,startpos,anum);
+       callincludefile(filenamety(str1),startpos,anum);
        skipcomment;
        exit; //no skip of rest of line
       end
@@ -2656,7 +2656,7 @@ begin
         with additem^ do begin
          valuetype:= vawstring;
          name:= str1;
-         value:= cstringtostring(str2);
+         value:= msestring(cstringtostring(str2));
          offset:= apos-pchar(pointer(fscanner.fsource));
          len:= fto^.value.po-apos;
         end;
