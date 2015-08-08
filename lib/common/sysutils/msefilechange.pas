@@ -52,7 +52,7 @@ type
     fdirhandle: integer;
     procedure deleteinfo(index: integer);
    public
-    constructor create(afd: integer; const apath: string); //owns the fd
+    constructor create(afd: integer; const apath: filenamety); //owns the fd
     destructor destroy; override;
     procedure addfile(root: boolean; const sender: tfilechangenotifyer;
                       const tag: integer; const aforce: boolean;
@@ -165,7 +165,7 @@ var
 {$endif}
  str1: string;
 begin
- str1:= name;
+ str1:= ansistring(name);
  result:= mselibc.open(PChar(str1),o_rdonly);
 // if sys_openfile(name,fm_read,[],[],result) = sye_ok then begin
 {$ifdef linux}
@@ -192,7 +192,7 @@ end;
 
 { tdirinfo }
 
-constructor tdirinfo.create(afd: integer; const apath: string);
+constructor tdirinfo.create(afd: integer; const apath: filenamety);
 begin
  fdirhandle:= afd;
  fpath:= apath;
@@ -282,9 +282,9 @@ begin
     aevent:= tfilechangeevent.Create(ievent(owner),0);
     aevent.info:= info;
     application.postevent(aevent);
-    str1:= info.infovorher.name;
+    str1:= ansistring(info.infovorher.name);
     info.infovorher:= info.info;
-    info.infovorher.name:= str1;
+    info.infovorher.name:= filenamety(str1);
     info.changed:= [];
    end;
   end;
