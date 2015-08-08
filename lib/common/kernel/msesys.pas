@@ -298,7 +298,7 @@ function buildsyserrormessage(const error: syserrorty;
 begin
  result:= '';
  if error = sye_lasterror then begin
-  result:= text + sys_geterrortext(mselasterror);
+  result:= text + msestring(sys_geterrortext(mselasterror));
  end
  else begin
   if error = sye_extendederror then begin
@@ -316,9 +316,9 @@ begin
  result:= '';
  if error <> sye_ok then begin
   if sender <> nil then begin
-   text:= sender.classname + ' ' + text;
+   text:= msestring(sender.classname) + ' ' + text;
    if sender is tcomponent then begin
-    text:= text + fullcomponentname(tcomponent(sender));
+    text:= text + msestring(fullcomponentname(tcomponent(sender)));
    end;
   end;
   result:= buildsyserrormessage(error,text);
@@ -330,20 +330,7 @@ begin
  if error = sye_ok then begin
   exit;
  end;
- raise esys.create(error,buildsyserrormessage(error,text));
-{
- if error = sye_lasterror then begin
-  raise esys.create(error,text + sys_geterrortext(mselasterror));
- end
- else begin
-  if error = sye_extendederror then begin
-   raise esys.create(error,text + mselasterrormessage);
-  end
-  else begin
-   raise esys.create(error,text);
-  end;
- end;
-}
+ raise esys.create(error,ansistring(buildsyserrormessage(error,text)));
 end;
 
 procedure syserror(const error: syserrorty; const sender: tobject;
@@ -352,7 +339,7 @@ begin
  if error = sye_ok then begin
   exit;
  end;
- esys.create(error,buildsyserrormessage(error,sender,text));
+ esys.create(error,ansistring(buildsyserrormessage(error,sender,text)));
 {
  if sender <> nil then begin
   text:= sender.classname + ' ' + text;
@@ -402,34 +389,34 @@ begin
   defaultformatsettingsmse.ListSeparator:= widechar(
      {$ifdef FPC}defaultformatsettings.{$endif}ListSeparator);
   defaultformatsettingsmse.CurrencyString:= 
-     {$ifdef FPC}defaultformatsettings.{$endif}CurrencyString;
+     msestring({$ifdef FPC}defaultformatsettings.{$endif}CurrencyString);
   defaultformatsettingsmse.ShortDateFormat:= 
-     {$ifdef FPC}defaultformatsettings.{$endif}ShortDateFormat;
+     msestring({$ifdef FPC}defaultformatsettings.{$endif}ShortDateFormat);
   defaultformatsettingsmse.LongDateFormat:= 
-     {$ifdef FPC}defaultformatsettings.{$endif}LongDateFormat;
+     msestring({$ifdef FPC}defaultformatsettings.{$endif}LongDateFormat);
   defaultformatsettingsmse.TimeAMString:= 
-     {$ifdef FPC}defaultformatsettings.{$endif}TimeAMString;
+     msestring({$ifdef FPC}defaultformatsettings.{$endif}TimeAMString);
   defaultformatsettingsmse.TimePMString:= 
-     {$ifdef FPC}defaultformatsettings.{$endif}TimePMString;
+     msestring({$ifdef FPC}defaultformatsettings.{$endif}TimePMString);
   defaultformatsettingsmse.ShortTimeFormat:= 
-     {$ifdef FPC}defaultformatsettings.{$endif}ShortTimeFormat;
+     msestring({$ifdef FPC}defaultformatsettings.{$endif}ShortTimeFormat);
   defaultformatsettingsmse.LongTimeFormat:= 
-     {$ifdef FPC}defaultformatsettings.{$endif}LongTimeFormat;
+     msestring({$ifdef FPC}defaultformatsettings.{$endif}LongTimeFormat);
   for int1:= low(tmonthnamearraymse) to high(tmonthnamearraymse) do begin
    defaultformatsettingsmse.ShortMonthNames[int1]:= 
-     {$ifdef FPC}defaultformatsettings.{$endif}ShortMonthNames[int1];
+     msestring({$ifdef FPC}defaultformatsettings.{$endif}ShortMonthNames[int1]);
   end;
   for int1:= low(tmonthnamearraymse) to high(tmonthnamearraymse) do begin
    defaultformatsettingsmse.LongMonthNames[int1]:= 
-     {$ifdef FPC}defaultformatsettings.{$endif}LongMonthNames[int1];
+     msestring({$ifdef FPC}defaultformatsettings.{$endif}LongMonthNames[int1]);
   end;
   for int1:= low(tweeknamearraymse) to high(tweeknamearraymse) do begin
    defaultformatsettingsmse.ShortDayNames[int1]:= 
-     {$ifdef FPC}defaultformatsettings.{$endif}ShortDayNames[int1];
+     msestring({$ifdef FPC}defaultformatsettings.{$endif}ShortDayNames[int1]);
   end;
   for int1:= low(tweeknamearraymse) to high(tweeknamearraymse) do begin
    defaultformatsettingsmse.LongDayNames[int1]:= 
-     {$ifdef FPC}defaultformatsettings.{$endif}LongDayNames[int1];
+     msestring({$ifdef FPC}defaultformatsettings.{$endif}LongDayNames[int1]);
   end;
   defaultformatsettingsmse.TwoDigitYearCenturyWindow:= 
      {$ifdef FPC}defaultformatsettings.{$endif}TwoDigitYearCenturyWindow;
@@ -457,34 +444,34 @@ begin
  {$ifdef FPC}defaultformatsettings.{$endif}ListSeparator:= 
                       char(defaultformatsettingsmse.ListSeparator);
  {$ifdef FPC}defaultformatsettings.{$endif}CurrencyString:= 
-                      defaultformatsettingsmse.CurrencyString;
+                      ansistring(defaultformatsettingsmse.CurrencyString);
  {$ifdef FPC}defaultformatsettings.{$endif}ShortDateFormat:= 
-                      defaultformatsettingsmse.ShortDateFormat;
+                      ansistring(defaultformatsettingsmse.ShortDateFormat);
  {$ifdef FPC}defaultformatsettings.{$endif}LongDateFormat:= 
-                      defaultformatsettingsmse.LongDateFormat;
+                      ansistring(defaultformatsettingsmse.LongDateFormat);
  {$ifdef FPC}defaultformatsettings.{$endif}TimeAMString:= 
-                      defaultformatsettingsmse.TimeAMString;
+                      ansistring(defaultformatsettingsmse.TimeAMString);
  {$ifdef FPC}defaultformatsettings.{$endif}TimePMString:= 
-                      defaultformatsettingsmse.TimePMString;
+                      ansistring(defaultformatsettingsmse.TimePMString);
  {$ifdef FPC}defaultformatsettings.{$endif}ShortTimeFormat:= 
-                      defaultformatsettingsmse.ShortTimeFormat;
+                      ansistring(defaultformatsettingsmse.ShortTimeFormat);
  {$ifdef FPC}defaultformatsettings.{$endif}LongTimeFormat:= 
-                      defaultformatsettingsmse.LongTimeFormat;
+                      ansistring(defaultformatsettingsmse.LongTimeFormat);
  for int1:= low(tmonthnamearraymse) to high(tmonthnamearraymse) do begin
   {$ifdef FPC}defaultformatsettings.{$endif}ShortMonthNames[int1]:=
-                      defaultformatsettingsmse.ShortMonthNames[int1];
+                     ansistring(defaultformatsettingsmse.ShortMonthNames[int1]);
  end;
  for int1:= low(tmonthnamearraymse) to high(tmonthnamearraymse) do begin
   {$ifdef FPC}defaultformatsettings.{$endif}LongMonthNames[int1]:=
-                      defaultformatsettingsmse.LongMonthNames[int1];
+                      ansistring(defaultformatsettingsmse.LongMonthNames[int1]);
  end;
  for int1:= low(tweeknamearraymse) to high(tweeknamearraymse) do begin
   {$ifdef FPC}defaultformatsettings.{$endif}ShortDayNames[int1]:=
-                      defaultformatsettingsmse.ShortDayNames[int1];
+                      ansistring(defaultformatsettingsmse.ShortDayNames[int1]);
  end;
  for int1:= low(tweeknamearraymse) to high(tweeknamearraymse) do begin
   {$ifdef FPC}defaultformatsettings.{$endif}LongDayNames[int1]:=
-                      defaultformatsettingsmse.LongDayNames[int1];
+                      ansistring(defaultformatsettingsmse.LongDayNames[int1]);
  end;
  {$ifdef FPC}defaultformatsettings.{$endif}TwoDigitYearCenturyWindow:=
                       defaultformatsettingsmse.TwoDigitYearCenturyWindow;
@@ -503,16 +490,17 @@ Var
  i: longint;
 begin
  if Obj is exception then begin
-    result:= Exception(Obj).ClassName+' : '+Exception(Obj).Message+ lineend;
+    result:= msestring(Exception(Obj).ClassName)+' : '+
+                             msestring(Exception(Obj).Message)+ lineend;
  end
  else begin
-  result:= 'Exception object '+Obj.ClassName+
+  result:= 'Exception object '+msestring(Obj.ClassName)+
            ' is not of class Exception.'+lineend;
  end;
- result:= result + BackTraceStrFunc(Addr)+lineend;
+ result:= result + msestring(BackTraceStrFunc(Addr))+lineend;
  if (FrameCount>0) then begin
   for i:=0 to FrameCount-1 do begin
-    result:= result+BackTraceStrFunc(Frames[i])+lineend;
+    result:= result+msestring(BackTraceStrFunc(Frames[i]))+lineend;
   end;
  end;
 end;
@@ -521,35 +509,14 @@ function getexceptiontext(obj: tobject; addr: pointer; framecount: longint;
                                      frames: ppointer): msestring;
 begin
  result:= 'An exception occurred at $'+
-               HexStr(Ptrint(Addr),sizeof(PtrInt)*2)+' :' + lineend;
+               hextostrmse(Addr)+' :' + lineend;
  result:= result + getexceptionstack(obj,addr,framecount,frames); 
 end;
 
 procedure listexceptionstack(Obj: TObject; Addr:Pointer; FrameCount: Longint;
                                   Frames: PPointer);
-{
-Var
- Message: String;
- i: longint;
-}
 begin
-{
- if Obj is exception then begin
-    Message:=Exception(Obj).ClassName+' : '+Exception(Obj).Message;
-    debugWriteln(Message);
- end
- else begin
-  debugWriteln('Exception object '+Obj.ClassName+' is not of class Exception.');
- end;
- debugWriteln(BackTraceStrFunc(Addr));
- if (FrameCount>0) then begin
-  for i:=0 to FrameCount-1 do begin
-    debugWriteln(BackTraceStrFunc(Frames[i]));
-  end;
- end;
- debugWriteln('');
-}
- debugwriteln(getexceptionstack(obj,addr,framecount,frames));
+ debugwriteln(ansistring(getexceptionstack(obj,addr,framecount,frames)));
 end;
 
 Procedure CatchUnhandledExcept(Obj : TObject; Addr: Pointer; FrameCount: Longint;

@@ -257,6 +257,15 @@ function hextostr(inp: qword;
 function hextostr(const inp: pointer;
              digits: integer = 2*sizeof(pointer)): string; overload;
    //convert pointer to hexstring, digits = nibble count
+function hextostrmse(inp: longword;
+             digits: integer = 2*sizeof(longword)): msestring; overload;
+   //convert longword to hexstring, digits = nibble count
+function hextostrmse(inp: qword;
+             digits: integer = 2*sizeof(qword)): msestring; overload;
+   //convert qword to hexstring, digits = nibble count
+function hextostrmse(const inp: pointer;
+             digits: integer = 2*sizeof(pointer)): msestring; overload;
+   //convert pointer to hexstring, digits = nibble count
 function hextocstr(const inp: longword; stellen: integer): string; overload;
    //convert longword to 0x..., digits = nibble count
 function hextocstr(const inp: qword; stellen: integer): string; overload;
@@ -4350,6 +4359,43 @@ function hextostr(const inp: pointer;
    //convert pointer to hexstring, digits = nibble count
 begin
  result:= hextostr(ptruint(inp),digits);
+end;
+
+function hextostrmse(inp: longword; digits: integer): msestring;
+   //wandelt longword in hexstring, stellen = anzahl nibbles
+var
+ int1: integer;
+begin
+ setlength(result,digits);
+ for int1:= digits downto 1  do begin
+  result[int1]:= msechar(ord('0') + (inp and $f));
+  if result[int1] > '9' then begin
+   inc(result[int1],ord('A')-ord('9')-1);
+  end;
+  inp:= inp shr 4;
+ end;
+end;
+
+function hextostrmse(inp: qword; digits: integer): msestring;
+   //wandelt longword in hexstring, stellen = anzahl nibbles
+var
+ int1: integer;
+begin
+ setlength(result,digits);
+ for int1:= digits downto 1  do begin
+  result[int1]:= msechar(ord('0') + (inp and $f));
+  if result[int1] > '9' then begin
+   inc(result[int1],ord('A')-ord('9')-1);
+  end;
+  inp:= inp shr 4;
+ end;
+end;
+
+function hextostrmse(const inp: pointer;
+             digits: integer = 2*sizeof(pointer)): msestring; overload;
+   //convert pointer to hexstring, digits = nibble count
+begin
+ result:= hextostrmse(ptruint(inp),digits);
 end;
 
 function hextocstr(const inp: longword; stellen: integer): string;
