@@ -3124,7 +3124,7 @@ begin
    end;
    dek_drop: begin
     if dragobjectpo^ is tstringdragobject then begin
-     value:= tstringdragobject(dragobjectpo^).data;
+     value:= msestring(tstringdragobject(dragobjectpo^).data);
     end
     else begin
      inherited;
@@ -3563,7 +3563,7 @@ begin
   if not accept then begin
    exit;
   end;
-  str1:= strtobytestr(printableascii(mstr1))
+  str1:= strtobytestr(printableascii(ansistring(mstr1)))
  except
   formaterror(quiet);
   accept:= false
@@ -3589,10 +3589,10 @@ begin
   str1:= ansistring(data);
  end;
  if length(str1) > 256 then begin
-  result:= bytestrtostr(copy(str1,1,256),nb_hex,' ')+'...';
+  result:= msestring(bytestrtostr(copy(str1,1,256),nb_hex,' '))+'...';
  end
  else begin
-  result:= bytestrtostr(str1,nb_hex,' ');
+  result:= msestring(bytestrtostr(str1,nb_hex,' '));
  end;
 end;
 
@@ -4290,10 +4290,10 @@ end;
 function tcustomintegeredit.internaldatatotext(const data): msestring;
 begin
  if @data = nil then begin
-  result:= intvaluetostr(fvalue,fbase,fbitcount);
+  result:= msestring(intvaluetostr(fvalue,fbase,fbitcount));
  end
  else begin
-  result:= intvaluetostr(integer(data),fbase,fbitcount);
+  result:= msestring(intvaluetostr(integer(data),fbase,fbitcount));
  end;
 end;
 
@@ -4550,10 +4550,10 @@ end;
 function tcustomint64edit.internaldatatotext(const data): msestring;
 begin
  if @data = nil then begin
-  result:= intvaluetostr(fvalue,fbase,fbitcount);
+  result:= msestring(intvaluetostr(fvalue,fbase,fbitcount));
  end
  else begin
-  result:= intvaluetostr(int64(data),fbase,fbitcount);
+  result:= msestring(intvaluetostr(int64(data),fbase,fbitcount));
  end;
 end;
 
@@ -4885,7 +4885,7 @@ begin
   int2:= getindex(int1);
   if (int2 < 0) or (int2 >= valuelist.count) then begin
    if not (deo_selectonly in options) and (int1 <> fvalueempty) then begin
-    result:= intvaluetostr(int1,fbase,fbitcount);
+    result:= msestring(intvaluetostr(int1,fbase,fbitcount));
    end
    else begin
     result:= '';
