@@ -204,7 +204,7 @@ type
  end;
  
 function getprocessoutput1(const prochandlepo: pprochandlety;
-               const acommandline: string; const todata: string;
+               const acommandline: msestring; const todata: string;
                out fromdata: string; out errordata: string;
                const atimeout: integer; const aoptions: processoptionsty;
                              const acheckabort: updatebooleaneventty): integer;

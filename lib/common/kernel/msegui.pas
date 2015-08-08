@@ -13522,7 +13522,7 @@ end;
 
 function twidget.getassistivename: msestring;
 begin
- result:= name;
+ result:= msestring(name);
 end;
 
 { twindow }
