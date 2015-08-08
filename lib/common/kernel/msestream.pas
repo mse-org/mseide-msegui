@@ -756,7 +756,7 @@ begin
    result:= stringtolatin1(value);
   end;
   else begin //ce_locale
-   result:= value;
+   result:= msestring(value);
   end;
  end;
 end;
@@ -775,7 +775,7 @@ begin
    result:= latin1tostring(value);
   end;
   else begin //ce_ansi or current locale
-   result:= value;
+   result:= msestring(value);
   end;
  end;
 end;
@@ -796,7 +796,7 @@ begin
   mstr1:= '';
   with tvarrec(fields[int1]) do begin
    case vtype of
-    vtInteger:    mstr1:= inttostr(VInteger);
+    vtInteger:    mstr1:= inttostrmse(VInteger);
     vtBoolean:    if VBoolean then mstr1:= 'T' else mstr1:= 'F';
     vtChar:       mstr1:= VChar;
     vtExtended:   if not (vextended^ = emptyreal) then mstr1:= realtostr(VExtended^);

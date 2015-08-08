@@ -307,8 +307,8 @@ begin
  try
   raise exception.create('');
  except
-  debugwriteln(getexceptiontext(exceptobject,
-                           exceptaddr,exceptframecount,exceptframes));
+  debugwriteln(ansistring(getexceptiontext(exceptobject,
+                           exceptaddr,exceptframecount,exceptframes)));
  end;
  raisemaxframecount:= int1;
 {$endif}
@@ -346,8 +346,9 @@ end;
 procedure debugoutend(const ts: longword;
                    const sender: tcomponent; const atext: ansistring);
 begin
- debugout(sender,'**end '+formatfloatmse(
-                           (timestamp-ts)/1000000,'0.000000')+'s '+atext);
+ debugout(sender,ansistring('**end '+formatfloatmse(
+                           (timestamp-ts)/1000000,'0.000000')+'s '+
+                                                        msestring(atext)));
 end;
 
 procedure internalerror(const text: string);
