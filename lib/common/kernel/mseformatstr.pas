@@ -216,6 +216,7 @@ function realtytostrrange(const val: realty; const format: msestring = '';
                                             const range: real = 1;
                                             const offset: real = 0): msestring;
 function realtytostrdot(const val: realty): string;
+function realtytostrdotmse(const val: realty): msestring;
 
 function wordtostr(const avalue: longword): string;
 
@@ -293,6 +294,7 @@ function trystrtointmse(const text: msestring;
 function strtointmse(const text: msestring): integer;
 function trystrtointmse(const text: msestring;
                                    out value: longword): boolean; overload;
+function strtoint64mse(const text: msestring): int64;
 function trystrtoint64mse(const text: msestring; out value: int64): boolean;
 function trystrtoqwordmse(const text: msestring; out value: qword): boolean;
 
@@ -3816,6 +3818,16 @@ begin
  end;
 end;
 
+function realtytostrdotmse(const val: realty): msestring;
+begin
+ if val = emptyreal then begin
+  result:= emptyrealstring;
+ end
+ else begin
+  result:= doubletostring(val);
+ end;
+end;
+
 function strtorealtydot(const ein: string): realty;
 
 begin
@@ -4493,6 +4505,14 @@ begin
 //  end;
 // end;
  result:= true;
+end;
+
+
+function strtoint64mse(const text: msestring): int64;
+begin
+ if not trystrtoint64mse(text,result) then begin
+  raise EConvertError.CreateFmt(SInvalidInteger,[string(text)]);
+ end;
 end;
 
 function trystrtoint64mse(const text: msestring; out value: int64): boolean;

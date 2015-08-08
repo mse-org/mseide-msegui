@@ -3141,7 +3141,7 @@ end;
 
 function tintegerdatalist.getstatdata(const index: integer): msestring;
 begin
- result:= inttostr(items[index]);
+ result:= inttostrmse(items[index]);
 end;
 
 procedure tintegerdatalist.setstatdata(const index: integer;
@@ -3149,7 +3149,7 @@ procedure tintegerdatalist.setstatdata(const index: integer;
 var
  int1: integer;
 begin
- int1:= strtoint(value);
+ int1:= strtointmse(value);
  if int1 < min then begin
   int1:= min;
  end
@@ -3203,7 +3203,7 @@ end;
 
 function tintegerdatalist.getastext(const index: integer): msestring;
 begin
- result:= inttostr(items[index]);
+ result:= inttostrmse(items[index]);
 end;
 
 procedure tintegerdatalist.setastext(const index: integer;
@@ -3211,7 +3211,7 @@ procedure tintegerdatalist.setastext(const index: integer;
 var
  int1: integer;
 begin
- if trystrtoint(avalue,int1) then begin
+ if trystrtointmse(avalue,int1) then begin
   items[index]:= int1;
  end;
 end;
@@ -3317,13 +3317,13 @@ procedure tint64datalist.setstatdata(const index: integer;
 var
  int1: int64;
 begin
- int1:= strtoint64(value);
+ int1:= strtoint64mse(value);
  setdata(index,int1);
 end;
 
 function tint64datalist.getstatdata(const index: integer): msestring;
 begin
- result:= inttostr(items[index]);
+ result:= inttostrmse(items[index]);
 end;
 
 function tint64datalist.empty(const index: integer): boolean;
@@ -3374,7 +3374,7 @@ end;
 
 function tint64datalist.getastext(const index: integer): msestring;
 begin
- result:= inttostr(items[index]);
+ result:= inttostrmse(items[index]);
 end;
 
 procedure tint64datalist.setastext(const index: integer;
@@ -3382,7 +3382,7 @@ procedure tint64datalist.setastext(const index: integer;
 var
  int1: int64;
 begin
- if trystrtoint64(avalue,int1) then begin
+ if trystrtoint64mse(avalue,int1) then begin
   items[index]:= int1;
  end;
 end;
@@ -3466,13 +3466,13 @@ procedure tcurrencydatalist.setstatdata(const index: integer;
 var
  int1: currency;
 begin
- int1:= strtocurr(value);
+ int1:= strtocurr(ansistring(value));
  setdata(index,int1);
 end;
 
 function tcurrencydatalist.getstatdata(const index: integer): msestring;
 begin
- result:= currtostr(items[index]);
+ result:= msestring(currtostr(items[index]));
 end;
 
 function tcurrencydatalist.empty(const index: integer): boolean;
@@ -3523,7 +3523,7 @@ end;
 
 function tcurrencydatalist.getastext(const index: integer): msestring;
 begin
- result:= currtostr(items[index]);
+ result:= msestring(currtostr(items[index]));
 end;
 
 procedure tcurrencydatalist.setastext(const index: integer;
@@ -3531,7 +3531,7 @@ procedure tcurrencydatalist.setastext(const index: integer;
 var
  cu1: currency;
 begin
- if trystrtocurr(avalue,cu1) then begin
+ if trystrtocurr(ansistring(avalue),cu1) then begin
   items[index]:= cu1;
  end;
 end;
@@ -3810,7 +3810,8 @@ end;
 
 function trealdatalist.getstatdata(const index: integer): msestring;
 begin
- result:= realtytostrdot(items[index]);
+ result:= realtytostrdotmse(items[index]);
+// result:= realtytostrdot(items[index]);
 end;
 
 procedure trealdatalist.setstatdata(const index: integer; const value: msestring);
@@ -3871,7 +3872,7 @@ begin
   items[index]:= emptyreal;
  end
  else begin
-  if trystrtofloat(avalue,double(rea1)) then begin
+  if trystrtodouble(avalue,double(rea1)) then begin
    items[index]:= rea1;
   end;
  end;
@@ -4524,12 +4525,12 @@ end;
 
 function tansistringdatalist.getstatdata(const index: integer): msestring;
 begin
- result:= items[index];
+ result:= msestring(items[index]);
 end;
 
 procedure tansistringdatalist.setstatdata(const index: integer; const value: msestring);
 begin
- items[index]:= value;
+ items[index]:= ansistring(value);
 end;
 
 function tansistringdatalist.getasarray: stringarty;
@@ -4553,7 +4554,7 @@ begin
  po1:= datapo;
  s1:= size;
  for int1:= 0 to fcount - 1 do begin
-  result[int1]:= po1^;
+  result[int1]:= msestring(po1^);
   inc(pchar(pointer(po1)),s1);
  end;
 end;
@@ -4568,7 +4569,7 @@ begin
  po1:= pointer(fdatapo);
  s1:= size;
  for int1:= 0 to high(avalue) do begin
-  po1^:= avalue[int1];
+  po1^:= ansistring(avalue[int1]);
   inc(pchar(po1),s1);
  end;
  change(-1);
@@ -4581,13 +4582,13 @@ end;
 
 function tansistringdatalist.getastext(const index: integer): msestring;
 begin
- result:= items[index];
+ result:= msestring(items[index]);
 end;
 
 procedure tansistringdatalist.setastext(const index: integer;
                const avalue: msestring);
 begin
- items[index]:= avalue;
+ items[index]:= ansistring(avalue);
 end;
 
 function tansistringdatalist.textlength: integer;
@@ -4902,7 +4903,7 @@ begin
     s1:= self.size;
     s2:= size;
     for int1:= 0 to count - 1 do begin
-     po1^:= po3^;
+     po1^:= msestring(po3^);
      inc(pchar(po1),s1);
      inc(pchar(po3),s2);
     end;
@@ -4981,7 +4982,7 @@ begin
    capacity:= self.fcount;
    po1:= pointer(fdatapo);
    for int1:= 0 to self.count-1 do begin
-    add(po1^);
+    add(ansistring(po1^));
     inc(pchar(po1),fsize);
    end;
   end;
@@ -5166,7 +5167,7 @@ begin
  setlength(result,count);
  po1:= datapo;
  for int1:= 0 to count - 1 do begin
-  result[int1]:= po1^;
+  result[int1]:= ansistring(po1^);
   pchar(po1):= pchar(po1)+fsize;
  end;
 end;
@@ -5181,7 +5182,7 @@ begin
  po1:= pointer(fdatapo);
  s1:= size;
  for int1:= 0 to high(data) do begin
-  po1^:= data[int1];
+  po1^:= msestring(data[int1]);
   inc(pchar(po1),s1);
  end;
  change(-1);
@@ -6003,7 +6004,7 @@ var
 begin
  int1:= findchar(value,',');
  if int1 > 0 then begin
-  strint1.int:= strtoint(copy(value,1,int1-1));
+  strint1.int:= strtointmse(copy(value,1,int1-1));
   strint1.mstr:= copy(value,int1+1,bigint);
   setdata(index,strint1);
  end;
@@ -6012,7 +6013,7 @@ end;
 function tmsestringintdatalist.getstatdata(const index: integer): msestring;
 begin
  with pmsestringintty(getitempo(index))^ do begin
-  result:= inttostr(int)+','+mstr;
+  result:= inttostrmse(int)+','+mstr;
  end;
 end;
 
@@ -6287,7 +6288,7 @@ begin
     d1.rea:= max;
    end;
   end;
-  d1.int:= strtoint(copy(value,int1+1,bigint));
+  d1.int:= strtointmse(copy(value,int1+1,bigint));
   setdata(index,d1);
  end;
 end;
@@ -6295,7 +6296,7 @@ end;
 function trealintdatalist.getstatdata(const index: integer): msestring;
 begin
  with prealintty(getitempo(index))^ do begin
-  result:=  realtytostrdot(rea)+','+inttostr(int);
+  result:=  realtytostrdotmse(rea)+','+inttostrmse(int);
  end;
 end;
 
