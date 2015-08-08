@@ -614,7 +614,7 @@ var
  ristr: prichstringty;
  wpo1: pmsechar;
  alen,keywordlen: integer;
- ar1: msestringarty;
+// ar1: msestringarty;
  stok1: starttokenty;
  format: formatinfoarty;
  firstrow,lastrow: integer;
@@ -624,7 +624,7 @@ label
  endlab;
  
 begin
- ar1:= nil; //copilerwarning
+// ar1:= nil; //copilerwarning
  format:= nil; //copilerwarning
  firstrow:= start;
  lastrow:= start+count-1;
@@ -1280,7 +1280,7 @@ var
     while nexttokeninfo(lstr1,str1,tf1) do begin
      setlength(ar1,high(ar1)+2);
      with ar1[high(ar1)] do begin
-      name:= str1;
+      name:= msestring(str1);
       flags:= tf1;
      end;
      isnextline:= false;
@@ -1451,7 +1451,7 @@ begin
          end;
          if bo1 then begin
           setlength(wstrar1,length(wstrar1)+1);
-          wstrar1[high(wstrar1)]:= str1;
+          wstrar1[high(wstrar1)]:= msestring(str1);
          end;
         until not bo1;
         nextword(lstr1,lstr3);
@@ -1487,7 +1487,7 @@ begin
          invalidstring;
         end;
         setlength(ar1,1);
-        ar1[0].name:= str1;
+        ar1[0].name:= msestring(str1);
         ar1[0].flags:= tf1;
         addquotedtokens(ar1,isnextline);
         if not isnextline then begin
@@ -1720,7 +1720,8 @@ begin
      result:= readdeffile(stream);
     except
      on e: exception do begin
-      e.message:= 'tsyntaxpaintermse: file ''' +str1 + ''' ' +e.message;
+      e.message:= ansistring(
+             'tsyntaxpaintermse: file ''' +str1 + ''' ' +msestring(e.message));
       raise;
      end;
     end;
