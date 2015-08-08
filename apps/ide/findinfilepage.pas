@@ -61,7 +61,7 @@ implementation
 uses
  findinfilepage_mfm,sourcepage,sourceform,mseeditglob,sysutils,mserichstring,
  msegraphics,msestream,msefileutils,msesys,findinfiledialogform,msegraphutils,
- projectoptionsform,msesystypes;
+ projectoptionsform,msesystypes,mseformatstr;
 
 type
  stringconsts = (
@@ -121,22 +121,22 @@ const
  maxfoundlength = maxfoundpos + maxcenteredpos;
 var
  int1: integer;
- str1,str2: string;
+ str1,str2: msestring;
 begin
  if foundlist <> nil then begin
   application.lock;
   try
-   str1:= filename.value+'('+inttostr(linenr+1)+','+inttostr(col+1)+'): ';
+   str1:= filename.value+'('+inttostrmse(linenr+1)+','+inttostrmse(col+1)+'): ';
    if col > maxfoundpos then begin
     int1:= col - maxcenteredpos;
-    str2:= '...'+copy(text,int1,maxfoundlength);
+    str2:= '...'+msestring(copy(text,int1,maxfoundlength));
     col:= maxcenteredpos + 3;
     if length(text) > length(str2) + int1 - 4 then begin
      str2:= str2 + '...';
     end;
    end
    else begin
-    str2:= copy(text,1,maxfoundlength);
+    str2:= msestring(copy(text,1,maxfoundlength));
     if length(text) > length(str2) then begin
      str2:= str2 + '...';
     end;

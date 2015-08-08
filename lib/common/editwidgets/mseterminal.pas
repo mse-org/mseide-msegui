@@ -530,7 +530,7 @@ begin
     addchars(utf8tostring(str1));
    end
    else begin
-    addchars(str1);
+    addchars(msestring(str1));
    end;
    if teo_bufferchunks in foptions then begin
     int1:= application.unlockall;
