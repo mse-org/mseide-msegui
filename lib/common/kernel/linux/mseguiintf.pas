@@ -1411,7 +1411,7 @@ begin
     end
     else begin
      if (acttype = textatom) or (acttype = textplainatom) then begin
-      value:= value1; //current locale
+      value:= msestring(value1); //current locale
      end
      else begin
       if acttype = compound_textatom then begin
@@ -3939,8 +3939,8 @@ begin
                        );
   xsetwmprotocols(appdisp,id,@wmprotocols[low(wmprotocolty)],
               integer(high(wmprotocolty))+1);
-  setstringproperty(id,wmclassatom,
-       filename(sys_getapplicationpath)+#0+application.applicationname);
+  setstringproperty(id,wmclassatom,ansistring(
+       filename(sys_getapplicationpath)+#0+application.applicationname));
   setnetcardinal(id,net_wm_pid,getpid);
   if (wo_popup in options.options) and (options.transientfor <> 0) then begin
    gui_raisewindow(options.transientfor);
@@ -4843,7 +4843,7 @@ begin
    result:= pastefromclipboard(fdata[typeindex],xdndatoms[xdnd_selection],
           fdroptimestamp,[fdatatypeatoms[typeindex]],acttype,actformat,nitems);
    if result = gue_ok then begin
-    ftext[typeindex]:= fdata[typeindex];
+    ftext[typeindex]:= msestring(fdata[typeindex]);
    end;
   end;
   if result = gue_ok then begin
@@ -5289,7 +5289,7 @@ begin
      end
      else begin
       if (target = textatom) or (target = textplainatom) then begin
-       adata:= buffer; //current locale
+       adata:= ansistring(buffer); //current locale
       end
       else begin
        result:= false;
