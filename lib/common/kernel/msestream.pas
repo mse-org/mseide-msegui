@@ -945,10 +945,10 @@ begin
      end;
     end;
     'i': begin
-     result:= result and trystrtointmse(ar1[int1],pinteger(fields[int1])^);
+     result:= result and trystrtoint(ar1[int1],pinteger(fields[int1])^);
     end;
     'I': begin
-     result:= result and trystrtoint64mse(ar1[int1],pint64(fields[int1])^);
+     result:= result and trystrtoint64(ar1[int1],pint64(fields[int1])^);
     end;
     'r': begin
      if ar1[int1] = '' then begin

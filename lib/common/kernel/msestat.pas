@@ -923,7 +923,7 @@ begin
   result:= default;
  end
  else begin
-  if trystrtointmse(str1,result) then begin
+  if trystrtoint(str1,result) then begin
    checkintegerrange(result,min,max);
   end
   else begin
@@ -941,7 +941,7 @@ begin
   result:= default;
  end
  else begin
-  if trystrtoint64mse(str1,result) then begin
+  if trystrtoint64(str1,result) then begin
    checkint64range(result,min,max);
   end
   else begin
@@ -1082,7 +1082,7 @@ begin
   try
    value.beginupdate;
    try
-    if trystrtointmse(str1,int1) then begin
+    if trystrtoint(str1,int1) then begin
      tdatalist1(value).readstate(self,int1,name);
      tdatalist1(value).readappendix(self,name);
     end;
@@ -1130,7 +1130,7 @@ var
  str1: msestring;
  int1,int2: integer;
 begin
- if findvar(name,str1) and trystrtointmse(str1,int2)then begin
+ if findvar(name,str1) and trystrtoint(str1,int2)then begin
   setlength(result,int2);
   for int1:= 0 to int2-1 do begin
    result[int1]:= readlistitem;
@@ -1148,7 +1148,7 @@ var
  str1: msestring;
  int1,int2: integer;
 begin
- if findvar(name,str1) and trystrtointmse(str1,int2) then begin
+ if findvar(name,str1) and trystrtoint(str1,int2) then begin
   setlength(result,int2);
   for int1:= 0 to int2-1 do begin
    result[int1]:= readlistitem;
@@ -1166,7 +1166,7 @@ var
  str1: msestring;
  int1,int2: integer;
 begin
- if findvar(name,str1) and trystrtointmse(str1,int2) then begin
+ if findvar(name,str1) and trystrtoint(str1,int2) then begin
   setlength(result,int2);
   for int1:= 0 to int2-1 do begin
    result[int1]:= ansistring(readlistitem);
@@ -1183,10 +1183,10 @@ var
  str1: msestring;
  int1,int2: integer;
 begin
- if findvar(name,str1) and trystrtointmse(str1,int2) then begin
+ if findvar(name,str1) and trystrtoint(str1,int2) then begin
   setlength(result,int2);
   for int1:= 0 to int2-1 do begin
-   if not trystrtointmse(readlistitem,result[int1]) then begin
+   if not trystrtoint(readlistitem,result[int1]) then begin
     result:= default;
     break;
    end;
@@ -1203,10 +1203,10 @@ var
  str1: msestring;
  int1,int2: integer;
 begin
- if findvar(name,str1) and trystrtointmse(str1,int2) then begin
+ if findvar(name,str1) and trystrtoint(str1,int2) then begin
   setlength(result,int2);
   for int1:= 0 to int2-1 do begin
-   if not trystrtoint64mse(readlistitem,result[int1]) then begin
+   if not trystrtoint64(readlistitem,result[int1]) then begin
     result:= default;
     break;
    end;
@@ -1223,10 +1223,10 @@ var
  str1: msestring;
  int1,int2,int3: integer;
 begin
- if findvar(name,str1) and trystrtointmse(str1,int2) then begin
+ if findvar(name,str1) and trystrtoint(str1,int2) then begin
   setlength(result,int2);
   for int1:= 0 to int2-1 do begin
-   if not trystrtointmse(readlistitem,int3) then begin
+   if not trystrtoint(readlistitem,int3) then begin
     result:= default;
     break;
    end;
@@ -1244,10 +1244,10 @@ var
  str1: msestring;
  int1,int2,int3: integer;
 begin
- if findvar(name,str1) and trystrtointmse(str1,int2) then begin
+ if findvar(name,str1) and trystrtoint(str1,int2) then begin
   setlength(result,int2);
   for int1:= 0 to int2-1 do begin
-   if not trystrtointmse(readlistitem,int3) then begin
+   if not trystrtoint(readlistitem,int3) then begin
     result:= default;
     break;
    end;
@@ -1265,7 +1265,7 @@ var
  str1: msestring;
  int1,int2: integer;
 begin
- if findvar(name,str1) and trystrtointmse(str1,int2) then begin
+ if findvar(name,str1) and trystrtoint(str1,int2) then begin
   setlength(result,int2);
   for int1:= 0 to int2-1 do begin
    if not trystrtorealtydot(readlistitem,result[int1]) then begin
@@ -1285,7 +1285,7 @@ var
  str1: msestring;
  int1,int2: integer;
 begin
- if findvar(name,str1) and trystrtointmse(str1,int2) then begin   
+ if findvar(name,str1) and trystrtoint(str1,int2) then begin   
   setlength(result,int2);
   for int1:= 0 to int2-1 do begin
    if not decoderecord(
@@ -1321,7 +1321,7 @@ var
  str1: msestring;
  int1,int2: integer;
 begin
- if findvar(name,str1) and trystrtointmse(str1,int2) then begin
+ if findvar(name,str1) and trystrtoint(str1,int2) then begin
   try
    if assigned(setcount) then begin
     setcount(int2);
@@ -1350,7 +1350,7 @@ var
  str1: msestring;
  int1,int2: integer;
 begin
- if findvar(name,str1) and trystrtointmse(str1,int2) then begin
+ if findvar(name,str1) and trystrtoint(str1,int2) then begin
   try
    if assigned(setcount) then begin
     setcount(int2);

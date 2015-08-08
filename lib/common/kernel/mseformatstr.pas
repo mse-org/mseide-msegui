@@ -303,16 +303,20 @@ function strtohex64(const inp: string): qword;
 
 
 function trystrtoint(const text: string; out value: integer): boolean;
+function strtoint(const text: string): integer;
 function trystrtoint(const text: string; out value: longword): boolean;
 
-function trystrtointmse(const text: msestring;
+function trystrtoint(const text: msestring;
                                    out value: integer): boolean; overload;
-function strtointmse(const text: msestring): integer;
-function trystrtointmse(const text: msestring;
+function strtoint(const text: msestring): integer;
+function trystrtoint(const text: msestring;
                                    out value: longword): boolean; overload;
-function strtoint64mse(const text: msestring): int64;
-function trystrtoint64mse(const text: msestring; out value: int64): boolean;
-function trystrtoqwordmse(const text: msestring; out value: qword): boolean;
+function strtoint64(const text: string): int64;
+function trystrtoint64(const text: string; out value: int64): boolean;
+function strtoint64(const text: msestring): int64;
+function trystrtoint64(const text: msestring; out value: int64): boolean;
+function trystrtoqword(const text: string; out value: qword): boolean;
+function trystrtoqword(const text: msestring; out value: qword): boolean;
 
 function trystrtointvalue(const inp: string;
                             out value: longword): boolean; overload;
@@ -2377,34 +2381,34 @@ begin
    -1: begin
    end;
    0: begin
-    day:= strtointmse(ar1[datear[0]]);
+    day:= strtoint(ar1[datear[0]]);
    end;
    1: begin
     if month = 0 then begin //no month name found
      if finddateorder(dttg_mon) > finddateorder(dttg_day) then begin
-      day:= strtointmse(ar1[datear[0]]);
-      month:= strtointmse(ar1[datear[1]]);
+      day:= strtoint(ar1[datear[0]]);
+      month:= strtoint(ar1[datear[1]]);
      end
      else begin
-      day:= strtointmse(ar1[datear[1]]);
-      month:= strtointmse(ar1[datear[0]]);
+      day:= strtoint(ar1[datear[1]]);
+      month:= strtoint(ar1[datear[0]]);
      end;
     end
     else begin
      if finddateorder(dttg_year) > finddateorder(dttg_day) then begin
-      day:= strtointmse(ar1[datear[0]]);
-      year:= strtointmse(ar1[datear[1]]);
+      day:= strtoint(ar1[datear[0]]);
+      year:= strtoint(ar1[datear[1]]);
      end
      else begin
-      day:= strtointmse(ar1[datear[1]]);
-      year:= strtointmse(ar1[datear[0]]);
+      day:= strtoint(ar1[datear[1]]);
+      year:= strtoint(ar1[datear[0]]);
      end;
     end;
    end;
    else begin //>= 2
     for int1:= 0 to 2 do begin
      mstr1:= ar1[datear[int1]];
-     int2:= strtointmse(mstr1);
+     int2:= strtoint(mstr1);
      case dateorder[int1] of
       dttg_year: begin
        if length(mstr1) <= 2 then begin
@@ -2434,24 +2438,24 @@ begin
   int1:= high(timear);
   if int1 >= 0 then begin
    if int1 >= 3 then begin
-    millisecond:= strtointmse(ar1[timear[3]]);
+    millisecond:= strtoint(ar1[timear[3]]);
    end
    else begin
     millisecond:= 0;
    end;
    if int1 >= 2 then begin
-    second:= strtointmse(ar1[timear[2]]);
+    second:= strtoint(ar1[timear[2]]);
    end
    else begin
     second:= 0;
    end;
    if int1 >= 1 then begin
-    minute:= strtointmse(ar1[timear[1]]);
+    minute:= strtoint(ar1[timear[1]]);
    end
    else begin
     minute:= 0;
    end;
-   hour:= strtointmse(ar1[timear[0]]);
+   hour:= strtoint(ar1[timear[0]]);
    if ispm and (hour < 12) then begin
     hour:= hour + 12;
    end;
@@ -4504,7 +4508,14 @@ begin
  result:= true;
 end;
 
-function trystrtointmse(const text: msestring; out value: integer): boolean;
+function strtoint(const text: string): integer;
+begin
+ if not trystrtoint(text,result) then begin
+  raise EConvertError.CreateFmt(SInvalidInteger,[text]);
+ end;
+end;
+
+function trystrtoint(const text: msestring; out value: integer): boolean;
 const
  max = maxint div 10;
 var
@@ -4558,9 +4569,9 @@ begin
  result:= true;
 end;
 
-function strtointmse(const text: msestring): integer;
+function strtoint(const text: msestring): integer;
 begin
- if not trystrtointmse(text,result) then begin
+ if not trystrtoint(text,result) then begin
   raise EConvertError.CreateFmt(SInvalidInteger,[string(text)]);
  end;
 end;
@@ -4598,7 +4609,7 @@ begin
  result:= true;
 end;
 
-function trystrtointmse(const text: msestring; out value: longword): boolean;
+function trystrtoint(const text: msestring; out value: longword): boolean;
 const
  max = $ffffffff div 10;
 var
@@ -4652,15 +4663,75 @@ begin
  result:= true;
 end;
 
-
-function strtoint64mse(const text: msestring): int64;
+function trystrtoint64(const text: string; out value: int64): boolean;
+const
+ max = maxint64 div 10;
+var
+ po1: pchar;
+ neg: boolean;
 begin
- if not trystrtoint64mse(text,result) then begin
+ result:= false;
+ value:= 0;
+ if text <> '' then begin
+  po1:= pointer(text);
+  while (po1^ = ' ') or (po1^ = c_tab) do begin
+   inc(po1);
+  end;
+  neg:= po1^ = char('-');
+  if not neg then begin
+   if po1^ = '+' then begin
+    inc(po1);
+   end;
+  end
+  else begin
+   inc(po1);
+  end;
+  if po1^ = #0 then begin
+   exit;
+  end;
+  while po1^ <> #0 do begin
+   if (po1^ < '0') or (po1^ > '9')  then begin
+    exit;
+   end;
+   if value < 0 then begin
+    exit;
+   end;
+   if value > max then begin
+    exit;
+   end;
+   value:= value * 10 + (ord(po1^) - ord('0'));
+   inc(po1);
+  end;
+ end;
+ if neg then begin
+  if (value < 0) and (value <> $8000000000000000) then begin
+   exit;
+  end;  
+  value:= -value;
+ end
+ else begin
+  if value < 0 then begin
+   exit;
+  end;
+ end;
+ result:= true;
+end;
+
+function strtoint64(const text: string): int64;
+begin
+ if not trystrtoint64(text,result) then begin
+  raise EConvertError.CreateFmt(SInvalidInteger,[text]);
+ end;
+end;
+
+function strtoint64(const text: msestring): int64;
+begin
+ if not trystrtoint64(text,result) then begin
   raise EConvertError.CreateFmt(SInvalidInteger,[string(text)]);
  end;
 end;
 
-function trystrtoint64mse(const text: msestring; out value: int64): boolean;
+function trystrtoint64(const text: msestring; out value: int64): boolean;
 const
  max = maxint64 div 10;
 var
@@ -4714,7 +4785,43 @@ begin
  result:= true;
 end;
 
-function trystrtoqwordmse(const text: msestring; out value: qword): boolean;
+function trystrtoqword(const text: string; out value: qword): boolean;
+const
+ max = 1844674407370955161;
+var
+ po1: pchar;
+ bo1: boolean;
+begin
+ result:= false;
+ value:= 0;
+ if text <> '' then begin
+  po1:= pointer(text);
+  while (po1^ = ' ') or (po1^ = c_tab) do begin
+   inc(po1);
+  end;
+  if po1^ = #0 then begin
+   exit;
+  end;
+  while po1^ <> #0 do begin
+   if (po1^ < '0') or (po1^ > '9')  then begin
+    exit;
+   end;
+   if value > max then begin
+    exit;
+   end;
+   value:= value * 10;
+   bo1:= int64(value) < 0;
+   value:= value + (ord(po1^) - ord('0'));
+   if bo1 and (int64(value) >= 0) then begin
+    exit;
+   end;
+   inc(po1);
+  end;
+ end;
+ result:= true;
+end;
+
+function trystrtoqword(const text: msestring; out value: qword): boolean;
 const
  max = 1844674407370955161;
 var

@@ -2702,7 +2702,7 @@ function cellkeypress(const info: celleventinfoty): keyty;
 implementation
 uses
  mseguiintf,msestockobjects,mseact,mseactions,rtlconsts,msegraphedits,
- mseassistiveclient,mseassistiveserver;
+ mseassistiveclient,mseassistiveserver,mseformatstr;
 type
  tframe1 = class(tcustomframe);
  tdatalist1 = class(tdatalist);
@@ -4999,7 +4999,7 @@ begin
   end
   else begin
    if (fnumstep <> 0) and (cell.col >= 0) then begin
-    ftextinfo.text.text:= inttostr(fnumstart+fnumstep*cell.col);
+    ftextinfo.text.text:= inttostrmse(fnumstart+fnumstep*cell.col);
     drawtext(canvas,ftextinfo);
    end;
   end;
@@ -6409,10 +6409,10 @@ end;
 function tdatacol.getdatastatname: msestring;
 begin
  if fname <> '' then begin
-  result:= fname;
+  result:= msestring(fname);
  end
  else begin
-  result:= gridvaluevarname + inttostr(ident);
+  result:= gridvaluevarname + inttostrmse(ident);
  end;
 end;
 
@@ -6434,7 +6434,7 @@ begin
   reader.readdatalist(getdatastatname,fdata);
  end;
  if (co_savestate in foptions) and reader.canstate then begin
-  mstr1:= inttostr(ident);
+  mstr1:= inttostrmse(ident);
   if not (co_fixwidth in foptions) and 
                    (og_colsizing in fcellinfo.grid.optionsgrid) then begin
    width:= reader.readinteger('width'+mstr1,fwidth,0);
@@ -6461,7 +6461,7 @@ begin
   writer.writedatalist(getdatastatname,fdata);
  end;
  if (co_savestate in foptions) and writer.canstate then begin
-  mstr1:= inttostr(ident);
+  mstr1:= inttostrmse(ident);
   if not (co_fixwidth in foptions) and 
                    (og_colsizing in fcellinfo.grid.optionsgrid) then begin
    writer.writeinteger('width'+mstr1,fwidth);
@@ -6982,7 +6982,7 @@ function tcustomstringcol.readpipe(const text: string;
 var
  mstr1: msestring;
 begin
- mstr1:= text;
+ mstr1:= msestring(text);
  result:= datalist.addchars(mstr1,aoptions,maxchars);
 end;
 
@@ -7166,7 +7166,7 @@ begin
    else begin
     if fnumstep <> 0 then begin
      ftextinfo.text.text:= 
-               inttostr(fcellinfo.grid.fnumoffset+fnumstart+fnumstep*cell.row);
+               inttostrmse(fcellinfo.grid.fnumoffset+fnumstart+fnumstep*cell.row);
      drawtext(canvas,ftextinfo);
     end;
    end;
@@ -17871,9 +17871,9 @@ var
  int1: integer;
 begin
  with prowstaterowheightty(inherited getitempo(index))^ do begin
-  result:= inttostr(normal.fold + normal.flags shl 8);
+  result:= inttostrmse(normal.fold + normal.flags shl 8);
   if finfolevel >= ril_colmerge then begin
-   result:= result + ' ' + inttostr(colmerge.merged);
+   result:= result + ' ' + inttostrmse(colmerge.merged);
   end;
   if (finfolevel >= ril_rowheight) and 
                       (og_savestate in fgrid.foptionsgrid) then begin
@@ -17881,7 +17881,7 @@ begin
    if int1 < 0 then begin
     int1:= 0;     //auto height
    end;
-   result:= result + ' ' + inttostr(int1);
+   result:= result + ' ' + inttostrmse(int1);
   end;
  end;
 end;

@@ -3149,7 +3149,7 @@ procedure tintegerdatalist.setstatdata(const index: integer;
 var
  int1: integer;
 begin
- int1:= strtointmse(value);
+ int1:= strtoint(value);
  if int1 < min then begin
   int1:= min;
  end
@@ -3211,7 +3211,7 @@ procedure tintegerdatalist.setastext(const index: integer;
 var
  int1: integer;
 begin
- if trystrtointmse(avalue,int1) then begin
+ if trystrtoint(avalue,int1) then begin
   items[index]:= int1;
  end;
 end;
@@ -3317,7 +3317,7 @@ procedure tint64datalist.setstatdata(const index: integer;
 var
  int1: int64;
 begin
- int1:= strtoint64mse(value);
+ int1:= strtoint64(value);
  setdata(index,int1);
 end;
 
@@ -3382,7 +3382,7 @@ procedure tint64datalist.setastext(const index: integer;
 var
  int1: int64;
 begin
- if trystrtoint64mse(avalue,int1) then begin
+ if trystrtoint64(avalue,int1) then begin
   items[index]:= int1;
  end;
 end;
@@ -6004,7 +6004,7 @@ var
 begin
  int1:= findchar(value,',');
  if int1 > 0 then begin
-  strint1.int:= strtointmse(copy(value,1,int1-1));
+  strint1.int:= strtoint(copy(value,1,int1-1));
   strint1.mstr:= copy(value,int1+1,bigint);
   setdata(index,strint1);
  end;
@@ -6288,7 +6288,7 @@ begin
     d1.rea:= max;
    end;
   end;
-  d1.int:= strtointmse(copy(value,int1+1,bigint));
+  d1.int:= strtoint(copy(value,int1+1,bigint));
   setdata(index,d1);
  end;
 end;

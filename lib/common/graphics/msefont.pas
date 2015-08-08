@@ -571,7 +571,7 @@ begin
       end
       else begin
        if trim(ar2[int4+2]) <> '' then begin
-        ar3[int4]:= strtointmse(ar2[int4+2]);
+        ar3[int4]:= strtoint(ar2[int4+2]);
        end
        else begin
         ar3[int4]:= 0;
