@@ -509,7 +509,7 @@ implementation
 
 uses
  msefileutils,msebits,{msegui,}sysconst,msesysutils,
- msesysintf1,msesysintf,mseformatstr,
+ msesysintf1,msesysintf,mseformatstr,msefloattostr,
  msedatalist,mseapplication,msearrayutils,
         {$ifdef UNIX} mselibc,
         {$else} windows,
@@ -756,7 +756,7 @@ begin
    result:= stringtolatin1(value);
   end;
   else begin //ce_locale
-   result:= msestring(value);
+   result:= ansistring(value);
   end;
  end;
 end;
@@ -798,14 +798,16 @@ begin
    case vtype of
     vtInteger:    mstr1:= inttostrmse(VInteger);
     vtBoolean:    if VBoolean then mstr1:= 'T' else mstr1:= 'F';
-    vtChar:       mstr1:= VChar;
-    vtExtended:   if not (vextended^ = emptyreal) then mstr1:= realtostr(VExtended^);
-    vtString:     mstr1:= VString^;
+    vtChar:       mstr1:= msestring(VChar);
+    vtExtended:   if not (vextended^ = emptyreal) then begin
+                    mstr1:= doubletostring(VExtended^);
+                  end;
+    vtString:     mstr1:= msestring(VString^);
     vtWideChar:   mstr1:= VWideChar;
-    vtPChar:      mstr1:= string(VPChar);
+    vtPChar:      mstr1:= msestring(string(VPChar));
     vtPWideChar:  mstr1:= msestring(VPWideChar);
-    vtAnsiString: mstr1:= ansistring(VAnsiString);
-    vtCurrency:   mstr1:= realtostr(VCurrency^);
+    vtAnsiString: mstr1:= msestring(ansistring(VAnsiString));
+    vtCurrency:   mstr1:= currencytostrmse(VCurrency^);
     vtWideString: mstr1:= msestring(VWideString);
     {$ifdef mse_hasvtunicodestring}
     vtunicodeString: mstr1:= msestring(VunicodeString);
