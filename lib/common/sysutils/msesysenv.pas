@@ -232,7 +232,7 @@ procedure defstoarguments(const defs: sysenvdefarty;
 implementation
 uses
  msesysutils,RTLConsts,msestream,msesys{$ifdef UNIX},mselibc{$endif},
- typinfo,mseapplication,msebits,msesysintf;
+ typinfo,mseapplication,msebits,msesysintf,mseformatstr;
 
 procedure defstoarguments(const defs: sysenvdefarty; 
                  out arguments: argumentdefarty; out alias: msestringararty);
@@ -407,7 +407,7 @@ begin
      defstoarguments(fdefs,ar1,ar2);
     except
      on e: exception do begin
-      componentexception(self,e.message);
+      componentexception(self,msestring(e.message));
      end;
     end;
    except
@@ -424,10 +424,10 @@ begin
  if nr <> ern_io then begin
   if not (seo_noerrormess in foptions) then begin
    if nr = ern_user then begin
-    str1:= value;
+    str1:= ansistring(value);
    end
    else begin
-    str1:= errtexte[nr] + ': '+value;
+    str1:= ansistring(errtexte[nr] + ': '+value);
    end;
    if seo_toerror in foptions then begin
     writestderr(str1,true);
@@ -550,11 +550,11 @@ procedure tsysenvmanager.printhelp;
    end;
    if mstr1 <> '' then begin
     if before <> '' then begin
-     writestderr(before,true);
+     writestderr(ansistring(before),true);
     end;
-    writestderr(mstr1,true);
+    writestderr(ansistring(mstr1),true);
     if after <> '' then begin
-     writestderr(after,true);
+     writestderr(ansistring(after),true);
     end;
    end;
   end;
@@ -565,7 +565,7 @@ var
  
 begin
  if fhelpheader <> '' then begin
-  writestderr(fhelpheader,true);
+  writestderr(ansistring(fhelpheader),true);
  end;
  for int1:= 0 to high(fdefs) do begin
   printitem(fdefs[int1]{,false});
@@ -576,7 +576,7 @@ begin
  end;
 }
  if fhelpfooter <> '' then begin
-  writestderr(fhelpfooter,true);
+  writestderr(ansistring(fhelpfooter),true);
  end;
 end;
 
@@ -584,7 +584,7 @@ procedure tsysenvmanager.printmessage(value: msestring);
 begin
  if seo_tooutput in foptions then begin
   value:= value+lineend;
-  writestdout(value);
+  writestdout(ansistring(value));
  end
  else begin
 //  dispmessage(value);  //!!!!todo
@@ -710,7 +710,7 @@ function tsysenvmanager.setdef(index: integer; avalue: msestringarty;
                             adefined: argumentflagsty): sysenverrornrty;
 var
  strar1: msestringarty;
- int1: integer;
+ int1,int2: integer;
  bo1: boolean;
 begin
  result:= ern_io;
@@ -746,9 +746,7 @@ begin
     else begin
      if arf_integer in flags then begin
       for int1:= 0 to high(avalue) do begin
-       try
-        strtoint(avalue[int1]);
-       except
+       if not trystrtoint(avalue[int1],int2) then begin
         result:= ern_invalidinteger;
         break;
        end;
@@ -1031,7 +1029,7 @@ end;
 procedure tsysenvmanager.processinfo(index: integer; value: string);
 begin
  if defined[index] then begin
-  printmessage(value);
+  printmessage(msestring(value));
  end;
 end;
 
@@ -1184,7 +1182,7 @@ end;
 procedure tsysenvmanager.setintegervalue(index: integer;
   const Value: integer);
 begin
- setvalue(index,inttostr(value));
+ setvalue(index,inttostrmse(value));
 end;
 
 function tsysenvmanager.getcommandlinemacros(
