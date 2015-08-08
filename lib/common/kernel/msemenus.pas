@@ -1757,9 +1757,9 @@ end;
 
 function tmenuitem.getassistivename: msestring;
 begin
- result:= fname;
+ result:= msestring(fname);
  if (result = '') and (fowner <> nil) then begin
-  result:= fowner.name;
+  result:= msestring(fowner.name);
  end;  
 end;
 

@@ -171,8 +171,8 @@ type
   protected
    procedure setfixcount(const avalue: integer); override;
    procedure dochange(const aindex: integer); override;
-   procedure dostatread(const varname: string; const reader: tstatreader);
-   procedure dostatwrite(const varname: string; const writer: tstatwriter);
+   procedure dostatread(const varname: msestring; const reader: tstatreader);
+   procedure dostatwrite(const varname: msestring; const writer: tstatwriter);
    procedure readitem(const index: integer; reader: treader); override;
   public
    constructor create(const aowner: tcomponent; const adatapo: psysshortcutaty);
@@ -414,7 +414,7 @@ begin
  bottom:= bottom + letterkeycount;
  for int1:= bottom to bottom + functionkeycount - 1 do begin
   keys[int1]:= (ord(key_f1) + int1-bottom) or modvalue;
-  names[int1]:= prefix+'F'+inttostr(int1-bottom+1);
+  names[int1]:= prefix+'F'+inttostrmse(int1-bottom+1);
  end;
  bottom:= bottom+functionkeycount;
  for int1:= bottom to bottom+misckeycount-1 do begin
@@ -538,7 +538,7 @@ begin
     exit;
    end;
   end;
-  result:= '$'+intvaluetostr(shortcut,nb_hex,16);
+  result:= '$'+msestring(intvaluetostr(shortcut,nb_hex,16));
  end;
 end;
 
@@ -714,7 +714,7 @@ begin
    result:= '';
   end
   else begin
-   result:= '$'+hextostr(key,4);
+   result:= '$'+hextostrmse(key,4);
   end;
  end
  else begin
@@ -1461,7 +1461,7 @@ begin
  ar1:= splitstring(avalue, msechar(' '));
  with fstatinfos[index] do begin
   if high(ar1) >= 0 then begin
-   name:= ar1[0];
+   name:= ansistring(ar1[0]);
    setlength(shortcut,high(ar1) div 2); 
    setlength(shortcut1,length(shortcut));
              //backward compatibilty with single shortcut
@@ -1504,7 +1504,7 @@ var
 begin
  with tshortcutaction(factions[index]) do begin
   if action <> nil then begin
-   result:= ownernamepath(action);
+   result:= msestring(ownernamepath(action));
    with action do begin
     int2:= high(shortcuts);
     if high(shortcuts1) > int2 then begin
@@ -1512,13 +1512,13 @@ begin
     end;
     for int1:= 0 to int2 do begin
      if int1 <= high(shortcuts) then begin
-      result:= result + ' '+inttostr(shortcuts[int1]);
+      result:= result + ' '+inttostrmse(shortcuts[int1]);
      end
      else begin
       result:= result + ' 0';
      end;
      if int1 <= high(shortcuts1) then begin
-      result:= result + ' '+inttostr(shortcuts1[int1]);
+      result:= result + ' '+inttostrmse(shortcuts1[int1]);
      end
      else begin
       result:= result + ' 0';
@@ -1790,7 +1790,7 @@ begin
  end;
 end;
 
-procedure tsysshortcuts.dostatread(const varname: string;
+procedure tsysshortcuts.dostatread(const varname: msestring;
                const reader: tstatreader);
 var
  int1,int2: integer;
@@ -1815,7 +1815,7 @@ begin
  result:= encoderecord([getenumname(typeinfo(sysshortcutty),index),fitems[index]]);
 end;
 
-procedure tsysshortcuts.dostatwrite(const varname: string;
+procedure tsysshortcuts.dostatwrite(const varname: msestring;
                const writer: tstatwriter);
 begin
  writer.writerecordarray(varname,count,
