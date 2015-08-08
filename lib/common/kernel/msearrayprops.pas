@@ -1741,7 +1741,7 @@ end;
 function tpersistentarrayprop.displayname(const index: integer): msestring;
 begin
  if fitemclasstype <> nil then begin
-  result:= PTypeInfo(fitemclasstype.ClassInfo)^.name;
+  result:= msestring(PTypeInfo(fitemclasstype.ClassInfo)^.name);
  end
  else begin
   result:= '';

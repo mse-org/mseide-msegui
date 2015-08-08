@@ -1928,7 +1928,7 @@ end;
 function tcustomificlientcontroller.getstatvarname: msestring;
 begin
  if fstatvarname = '' then begin
-  result:= ownernamepath(fowner);
+  result:= msestring(ownernamepath(fowner));
   if result = '' then begin
    result:= '.'; //dummy, statfiler can not get componentname because 
                  //self is no tcomponent
@@ -3809,7 +3809,7 @@ begin
  for int1:= 0 to count - 1 do begin
   with tififield(fitems[int1]) do begin
    if (atypes = []) or (datatype in atypes) then begin
-    result[int2]:= fieldname;
+    result[int2]:= msestring(fieldname);
     inc(int2);
    end;
   end;
@@ -4497,7 +4497,7 @@ begin
       if comp1 is tifistringlinkcomp then begin
        with tifistringlinkcomp(comp1).controller do begin
         if fdatalist <> nil then begin
-         griddata[fdatalist.count-1]:= vstring^;
+         griddata[fdatalist.count-1]:= msestring(vstring^);
         end;
        end;
       end;
@@ -4506,7 +4506,7 @@ begin
       if comp1 is tifistringlinkcomp then begin
        with tifistringlinkcomp(comp1).controller do begin
         if fdatalist <> nil then begin
-         griddata[fdatalist.count-1]:= ansistring(vansistring);
+         griddata[fdatalist.count-1]:= msestring(ansistring(vansistring));
         end;
        end;
       end;
@@ -4553,7 +4553,7 @@ begin
       if comp1 is tifistringlinkcomp then begin
        with tifistringlinkcomp(comp1).controller do begin
         if fdatalist <> nil then begin
-         griddata[fdatalist.count-1]:= vchar;
+         griddata[fdatalist.count-1]:= msestring(vchar);
         end;
        end;
       end;
