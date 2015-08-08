@@ -698,7 +698,7 @@ function psrealtostr(const avalue: real): string;
 begin
 // result:= replacechar(formatfloat('0.###',avalue),decimalseparator,'.');
           //todo: optimize
- result:= doubletostring(avalue,-3,fsm_default,'.',#0);
+ result:= ansistring(doubletostring(avalue,-3,fsm_default,'.',#0));
 // result:= formatfloatmse(avalue,'0.000');
 end;
 
@@ -746,8 +746,8 @@ begin
                   inttostr(fboundingbox.bottom)+' '+
                   inttostr(fboundingbox.right)+' '+
                   inttostr(fboundingbox.top)+nl+
-'%%Creator: '+application.applicationname+nl+
-'%%Title: '+ftitle+nl+
+'%%Creator: '+ansistring(application.applicationname)+nl+
+'%%Title: '+ansistring(ftitle)+nl+
 '%%DocumentMedia: '+stdpagesizes[fprinter.pa_size].name+' '+
                   inttostr(fpapersize.cx)+' '+
                   inttostr(fpapersize.cy)+' 0 () ()'+nl+
