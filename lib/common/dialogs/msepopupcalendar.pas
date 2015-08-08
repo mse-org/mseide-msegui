@@ -140,14 +140,15 @@ begin
 end;
 
 procedure tcalendarcontroller.editnotification(var info: editnotificationinfoty);
+var
+ dt1: tdatetime;
 begin
  inherited;
  if fdropdownwidget <> nil then begin
   case info.action of
    ea_textedited: begin
-    try
-     tpopupcalendarfo(fdropdownwidget).value:= strtodatetime(fintf.geteditor.text);    
-    except
+    if trystringtodate(fintf.geteditor.text,dt1) then begin
+     tpopupcalendarfo(fdropdownwidget).value:= dt1;
     end;    
    end
   end;
