@@ -766,10 +766,10 @@ end;
 function tbytestringdisp.getvaluetext: msestring;
 begin
  if length(fvalue) > 256 then begin
-  result:= bytestrtostr(copy(fvalue,1,256),fbase,' ')+'...';
+  result:= msestring(bytestrtostr(copy(fvalue,1,256),fbase,' '))+'...';
  end
  else begin
-  result:= bytestrtostr(fvalue,fbase,' ');
+  result:= msestring(bytestrtostr(fvalue,fbase,' '));
  end;
 end;
 
@@ -835,7 +835,7 @@ end;
 
 function tcustomintegerdisp.getvaluetext: msestring;
 begin
- result:= intvaluetostr(fvalue,fbase,fbitcount);
+ result:= msestring(intvaluetostr(fvalue,fbase,fbitcount));
 end;
 
 procedure tcustomintegerdisp.setbase(const Value: numbasety);
@@ -899,7 +899,7 @@ end;
 
 function tcustomint64disp.getvaluetext: msestring;
 begin
- result:= intvaluetostr(fvalue,fbase,fbitcount);
+ result:= msestring(intvaluetostr(fvalue,fbase,fbitcount));
 end;
 
 procedure tcustomint64disp.setbase(const Value: numbasety);

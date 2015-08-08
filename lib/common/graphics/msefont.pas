@@ -571,7 +571,7 @@ begin
       end
       else begin
        if trim(ar2[int4+2]) <> '' then begin
-        ar3[int4]:= strtoint(ar2[int4+2]);
+        ar3[int4]:= strtointmse(ar2[int4+2]);
        end
        else begin
         ar3[int4]:= 0;
@@ -580,7 +580,7 @@ begin
      end;
      options1:= [];
      if high(ar2) >= 4 then begin
-      options1:= fontoptioncharstooptions(ar2[4]);
+      options1:= fontoptioncharstooptions(ansistring(ar2[4]));
      end;
      if (high(ar2) >= 5) and (trim(ar2[5]) <> '') then begin
       xscale1:= strtoreal(ar2[5]);
