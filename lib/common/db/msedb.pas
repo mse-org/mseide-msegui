@@ -233,8 +233,8 @@ type
   public
    function HasParent: Boolean; override;
    procedure Clear; override;
-   function assql: string;
-   function asoldsql: string;
+   function assql: msestring;
+   function asoldsql: msestring;
 //   property asmsestring: msestring read getasmsestring write setasmsestring;
    property tagpo: pointer read ftagpo write ftagpo;
   published
@@ -302,8 +302,8 @@ type
    destructor destroy; override;
    function HasParent: Boolean; override;
    procedure Clear; override;
-   function assql: string;
-   function asoldsql: string;
+   function assql: msestring;
+   function asoldsql: msestring;
 //   property asmsestring: msestring read getasmsestring write setasmsestring;
    property asnullmsestring: msestring read getasunicodestring 
                                           write setasnullmsestring;
@@ -372,8 +372,8 @@ type
   public
    function HasParent: Boolean; override;
    procedure Clear; override;
-   function assql: string;
-   function asoldsql: string;
+   function assql: msestring;
+   function asoldsql: msestring;
 //   property asmsestring: msestring read getasmsestring write setasmsestring;
    property tagpo: pointer read ftagpo write ftagpo;
   published
@@ -418,8 +418,8 @@ type
   public
    function HasParent: Boolean; override;
    procedure Clear; override;
-   function assql: string;
-   function asoldsql: string;
+   function assql: msestring;
+   function asoldsql: msestring;
    function asoldid: integer;
    function sum: integer;
 //   property asmsestring: msestring read getasmsestring write setasmsestring;
@@ -465,8 +465,8 @@ type
   public
    function HasParent: Boolean; override;
    procedure Clear; override;
-   function assql: string;
-   function asoldsql: string;
+   function assql: msestring;
+   function asoldsql: msestring;
    function asoldid: int64;
    function sum: int64;
 //   property asmsestring: msestring read getasmsestring write setasmsestring;
@@ -513,8 +513,8 @@ type
   public
    function HasParent: Boolean; override;
    procedure Clear; override;
-   function assql: string;
-   function asoldsql: string;
+   function assql: msestring;
+   function asoldsql: msestring;
 //   property asmsestring: msestring read getasmsestring write setasmsestring;
    property tagpo: pointer read ftagpo write ftagpo;
    property asid: integer read getasid write setasid; //-1 -> NULL
@@ -556,8 +556,8 @@ type
   public
    function HasParent: Boolean; override;
    procedure Clear; override;
-   function assql: string;
-   function asoldsql: string;
+   function assql: msestring;
+   function asoldsql: msestring;
 //   property asmsestring: msestring read getasmsestring write setasmsestring;
    property tagpo: pointer read ftagpo write ftagpo;
   published
@@ -594,8 +594,8 @@ type
   public
    function HasParent: Boolean; override;
    procedure Clear; override;
-   function assql: string;
-   function asoldsql: string;
+   function assql: msestring;
+   function asoldsql: msestring;
 //   property asmsestring: msestring read getasmsestring write setasmsestring;
    property tagpo: pointer read ftagpo write ftagpo;
   published
@@ -638,8 +638,8 @@ type
   public
    function HasParent: Boolean; override;
    procedure Clear; override;
-   function assql: string;
-   function asoldsql: string;
+   function assql: msestring;
+   function asoldsql: msestring;
    function sum: double;
 //   property asmsestring: msestring read getasmsestring write setasmsestring;
    property tagpo: pointer read ftagpo write ftagpo;
@@ -694,8 +694,8 @@ type
    function HasParent: Boolean; override;
    constructor Create(AOwner: TComponent); override;
    procedure Clear; override;
-   function assql: string;
-   function asoldsql: string;
+   function assql: msestring;
+   function asoldsql: msestring;
    function sum: integer; //counts true values
 //   property asmsestring: msestring read getasmsestring write setasmsestring;
    property tagpo: pointer read ftagpo write ftagpo;
@@ -746,8 +746,8 @@ type
   public
    function HasParent: Boolean; override;
    procedure Clear; override;
-   function assql: string;
-   function asoldsql: string;
+   function assql: msestring;
+   function asoldsql: msestring;
 //   property asmsestring: msestring read getasmsestring write setasmsestring;
    property tagpo: pointer read ftagpo write ftagpo;
   published
@@ -795,8 +795,8 @@ type
   public
    function HasParent: Boolean; override;
    procedure Clear; override;
-   function assql: string;
-   function asoldsql: string;
+   function assql: msestring;
+   function asoldsql: msestring;
 //   property asmsestring: msestring read getasmsestring write setasmsestring;
    property tagpo: pointer read ftagpo write ftagpo;
   published
@@ -835,8 +835,8 @@ type
   public
    function HasParent: Boolean; override;
    procedure Clear; override;
-   function assql: string;
-   function asoldsql: string;
+   function assql: msestring;
+   function asoldsql: msestring;
 //   property asmsestring: msestring read getasmsestring write setasmsestring;
    property tagpo: pointer read ftagpo write ftagpo;
   published
@@ -875,8 +875,8 @@ type
   public
    function HasParent: Boolean; override;
    procedure Clear; override;
-   function assql: string;
-   function asoldsql: string;
+   function assql: msestring;
+   function asoldsql: msestring;
 //   property asmsestring: msestring read getasmsestring write setasmsestring;
    property tagpo: pointer read ftagpo write ftagpo;
   published
@@ -916,8 +916,8 @@ type
   public
    function HasParent: Boolean; override;
    procedure Clear; override;
-   function assql: string;
-   function asoldsql: string;
+   function assql: msestring;
+   function asoldsql: msestring;
    function sum: currency;
 //   property asmsestring: msestring read getasmsestring write setasmsestring;
    property Value: Currency read GetAsCurrency write SetAsCurrency;
@@ -995,8 +995,8 @@ type
    function HasParent: Boolean; override;
    procedure Clear; override;
    procedure clearcache; virtual;
-   function assql: string;
-   function asoldsql: string;
+   function assql: msestring;
+   function asoldsql: msestring;
 //   property asmsestring: msestring read getasmsestring write setasmsestring;
    procedure LoadFromStream(Stream: TStream);
    procedure LoadFromFile(const FileName: filenamety);
@@ -1035,8 +1035,8 @@ type
    procedure Clear; override;
 //   property asmsestring: msestring read getasmsestring write setasmsestring;
    function oldmsestring(out aisnull: boolean): msestring;
-   function assql: string;
-   function asoldsql: string;
+   function assql: msestring;
+   function asoldsql: msestring;
   published
    property Transliterate default True;
    property DataSet stored false;
@@ -1085,8 +1085,8 @@ type
    procedure setascurrency(avalue: currency); override;
    procedure SetDataset(AValue : TDataset); override;
   public
-   function assql: string;
-   function asoldsql: string;
+   function assql: msestring;
+   function asoldsql: msestring;
 //   property asmsestring: msestring read getasmsestring write setasmsestring;
   published
 //   property providerflags1: providerflags1ty read fproviderflags1 
@@ -1197,7 +1197,7 @@ type
    procedure updatefields; override;
    function getsortfield: tfield; virtual;
   public
-   function assql: string;
+   function assql: msestring;
    function fieldactive: boolean;
    procedure clear;
    property field: tfield read ffield;
@@ -1485,16 +1485,16 @@ type
    procedure checkrefresh; //makes pending delayed refresh
    procedure copyrecord(const aappend: boolean = false);
 
-   function assql(const avalue: boolean): string; overload;
-   function assql(const avalue: msestring): string; overload;
-   function assql(const avalue: integer): string; overload;
-   function assql(const avalue: int64): string; overload;
-   function assql(const avalue: currency): string; overload;
-   function assqlcurrency(const avalue: realty): string; overload;
-   function assql(const avalue: realty): string; overload;
-   function assql(const avalue: tdatetime): string; overload;
-   function assqldate(const avalue: tdatetime): string;
-   function assqltime(const avalue: tdatetime): string;
+   function assql(const avalue: boolean): msestring; overload;
+   function assql(const avalue: msestring): msestring; overload;
+   function assql(const avalue: integer): msestring; overload;
+   function assql(const avalue: int64): msestring; overload;
+   function assql(const avalue: currency): msestring; overload;
+   function assqlcurrency(const avalue: realty): msestring; overload;
+   function assql(const avalue: realty): msestring; overload;
+   function assql(const avalue: tdatetime): msestring; overload;
+   function assqldate(const avalue: tdatetime): msestring;
+   function assqltime(const avalue: tdatetime): msestring;
    
    property noedit: boolean read getnoedit write setnoedit;
    property noinsert: boolean read getnoinsert write setnoinsert;
@@ -1989,7 +1989,7 @@ begin
    str1:= editformat;
   end;
  end;
- result:= formatfloatmse(avalue,str1);
+ result:= ansistring(formatfloatmse(avalue,msestring(str1)));
 end;
 
 procedure varianttorealty(const value: variant; out dest: realty);
@@ -2169,7 +2169,7 @@ begin
      result:= utf8tostring(field.asstring);
     end
     else begin
-     result:= field.asstring;
+     result:= msestring(field.asstring);
     end;
    end;
   end;
@@ -2192,7 +2192,7 @@ begin
      field.asstring:= stringtoutf8(avalue);
     end
     else begin
-     field.asstring:= avalue;
+     field.asstring:= ansistring(avalue);
     end;
    end;
   end;
@@ -2212,7 +2212,7 @@ begin
     end;
    end;
   end;
-  param.asstring:= avalue;
+  param.asstring:= ansistring(avalue);
  end;
 end;
 
@@ -2308,10 +2308,10 @@ begin
   if (po1^ < #$20) {or (po1^ > #$ff)} or (po1^ = #$7f) then begin
    innum:= true;
    if po1^ < #$100 then begin
-    result:= result + '\x'+hextostr(ord(po1^),2);
+    result:= result + '\x'+hextostrmse(ord(po1^),2);
    end
    else begin
-    result:= result + '\x'+hextostr(ord(po1^),4);
+    result:= result + '\x'+hextostrmse(ord(po1^),4);
    end;
   end
   else begin
@@ -2360,37 +2360,38 @@ end;
 
 function encodesqlinteger(const avalue: integer): msestring;
 begin
- result:= inttostr(avalue);
+ result:= inttostrmse(avalue);
 end;
 
 function encodesqllongword(const avalue: longword): msestring;
 begin
- result:= wordtostr(avalue);
+ result:= msestring(wordtostr(avalue));
 end;
 
 function encodesqllargeint(const avalue: int64): msestring;
 begin
- result:= inttostr(avalue);
+ result:= inttostrmse(avalue);
 end;
 
 function encodesqlqword(const avalue: qword): msestring;
 begin
- result:= inttostr(avalue);
+ result:= inttostrmse(avalue);
 end;
 
 function encodesqldatetime(const avalue: tdatetime): msestring;
 begin
- result := '''' + formatdatetime('yyyy-mm-dd hh:mm:ss',avalue) + '''';
+ result := '''' + 
+          msestring(formatdatetime('yyyy-mm-dd hh:mm:ss',avalue)) + '''';
 end;
 
 function encodesqldate(const avalue: tdatetime): msestring;
 begin
- result:= '''' + formatdatetime('yyyy-mm-dd',avalue) + '''';
+ result:= '''' + msestring(formatdatetime('yyyy-mm-dd',avalue)) + '''';
 end;
 
 function encodesqltime(const avalue: tdatetime): msestring;
 begin
- result:= '''' + formatdatetime('hh:mm:ss',avalue) + '''';
+ result:= '''' + msestring(formatdatetime('hh:mm:ss',avalue)) + '''';
 end;
 
 function encodesqlfloat(const avalue: real): msestring;
@@ -2476,10 +2477,10 @@ function encodesqlvariant(const avalue: variant;
 //   varstrarg = $48;
    varstring: begin
     if cstyle then begin 
-     result:= encodesqlstring(pansistring(abase)^);
+     result:= encodesqlstring(msestring(pansistring(abase)^));
     end
     else begin
-     result:= encodesqlcstring(pansistring(abase)^);
+     result:= encodesqlcstring(msestring(pansistring(abase)^));
     end;
    end;
   end;
@@ -2555,7 +2556,7 @@ begin
    ftstring,ftguid: begin
     if not (field is tmsestringfield) {or 
          (tmsestringfield(field).fdsintf = nil)} then begin
-     result:= encodesqlstring(field.asstring);
+     result:= encodesqlstring(msestring(field.asstring));
 //     result:= tmsestringfield(field).assql;
     end
     else begin
@@ -2570,7 +2571,7 @@ begin
      result:= encodesqlstring(tmsememofield(field).asmsestring);
     end
     else begin
-     result:= encodesqlstring(field.asstring);
+     result:= encodesqlstring(msestring(field.asstring));
     end;
    end;
    ftblob,ftgraphic,ftbytes,ftvarbytes: begin
@@ -2598,7 +2599,7 @@ begin
     result:= encodesqlvariant(field.asvariant,false);
    end;
    else begin
-    result := field.asstring;
+    result := msestring(field.asstring);
    end;
   end;
  end;
@@ -2637,14 +2638,14 @@ begin
      result:= encodesqlstring(aswidestring);
     end;
     ftstring,ftguid: begin
-     result:= encodesqlstring(asstring);
+     result:= encodesqlstring(msestring(asstring));
     end;
     ftmemo: begin
      if (aparam.collection is tmseparams) and tmseparams(collection).isutf8 then begin
       result:= encodesqlstring(utf8tostring(asstring));
      end
      else begin
-      result:= encodesqlstring(asstring);
+      result:= encodesqlstring(msestring(asstring));
      end;
     end;
     ftblob,ftgraphic,ftbytes,ftvarbytes: begin
@@ -2672,7 +2673,7 @@ begin
      result:= encodesqlvariant(value,false);
     end;
     else begin
-     result:= asstring;
+     result:= msestring(asstring);
     end;
    end;
   end;
@@ -2736,10 +2737,11 @@ begin
  //    ftParadoxOle, ftDBaseOle, ftTypedBinary, ftCursor, 
     ftWideString: begin
  //    wstr1:= field.aswidestring;
-     wstr1:= field.asstring;
+     wstr1:= widestring(field.asstring);
      ds1.settempstate(astate); 
  //    result:= (field.isnull xor isnull) or (wstr1 <> field.aswidestring);
-     result:= (field.isnull xor isnull) or (wstr1 <> field.asstring);
+     result:= (field.isnull xor isnull) or 
+                              (wstr1 <> widestring(field.asstring));
     end;
     ftLargeint: begin
      int641:= tlargeintfield(field).aslargeint;
@@ -2814,7 +2816,7 @@ begin
   sender.asstring:= stringtoutf8(avalue);
  end
  else begin
-  sender.asstring:= avalue; //locale conversion
+  sender.asstring:= ansistring(avalue); //locale conversion
  end; 
 end;
 
@@ -2827,7 +2829,7 @@ begin
  else begin
   {$ifdef unix}
   try
-   result:= sender.asstring;
+   result:= msestring(sender.asstring);
   except
    on e: eiconv do begin
     //no crash by iconverror
@@ -3359,20 +3361,20 @@ begin
         if lko_caseinsensitive in opt1 then begin
     {$ifdef mse_hasvtunicodestring}
          if vtype = vtunicodestring then begin
-          keyansistrings[int1]:=
-                       mseuppercase(msestring(tvarrec(keys[int1]).vunicodestring));
+          keyansistrings[int1]:= ansistring(mseuppercase(
+                            msestring(tvarrec(keys[int1]).vunicodestring)));
          end
          else begin
     {$endif}
-          keyansistrings[int1]:=
-                       mseuppercase(msestring(tvarrec(keys[int1]).vwidestring));
+          keyansistrings[int1]:= ansistring(
+                    mseuppercase(msestring(tvarrec(keys[int1]).vwidestring)));
     {$ifdef mse_hasvtunicodestring}
          end;
     {$endif}
         end
         else begin
          keyansistrings[int1]:=
-                       msestring(tvarrec(keys[int1]).vwidestring);
+                       ansistring(msestring(tvarrec(keys[int1]).vwidestring));
         end;
        end;
        pvarrec(@keys[int1])^.vansistring:= pointer(keyansistrings[int1]);
@@ -3386,10 +3388,12 @@ begin
                msestringcomp[{$ifdef FPC}longword{$else}byte{$endif}(opt1)];
        if lko_caseinsensitive in opt1 then begin
         keymsestrings[int1]:=
-                  mseuppercase(ansistring(tvarrec(keys[int1]).vansistring));
+                  mseuppercase(msestring(
+                            ansistring(tvarrec(keys[int1]).vansistring)));
        end
        else begin
-        keymsestrings[int1]:= ansistring(tvarrec(keys[int1]).vansistring);
+        keymsestrings[int1]:= msestring(
+                               ansistring(tvarrec(keys[int1]).vansistring));
        end;
        pvarrec(@keys[int1])^.vwidestring:= pointer(keymsestrings[int1]);
       end
@@ -3501,12 +3505,12 @@ begin
 end;
 
 
-function tmsefield.assql: string;
+function tmsefield.assql: msestring;
 begin
  result:= fieldtosql(self);
 end;
 
-function tmsefield.asoldsql: string;
+function tmsefield.asoldsql: msestring;
 begin
  result:= fieldtooldsql(self);
 end;
@@ -3579,7 +3583,7 @@ begin
  result:= dataset <> nil;
 end;
 
-function tmsestringfield.assql: string;
+function tmsestringfield.assql: msestring;
 begin
  result:= fieldtosql(self);
 end;
@@ -3709,7 +3713,7 @@ end;
 function tmsestringfield.GetAsString: string;
 begin
  if assigned(fgetmsestringdata) then begin
-  result:= getasunicodestring;
+  result:= ansistring(getasunicodestring);
  end
  else begin
   result:= inherited getasstring;
@@ -3736,7 +3740,7 @@ end;
 procedure tmsestringfield.SetAsString(const AValue: string);
 begin
  if assigned(fsetmsestringdata) then begin
-  fsetmsestringdata(self,avalue);
+  fsetmsestringdata(self,msestring(avalue));
  end
  else begin
   inherited;
@@ -3753,7 +3757,7 @@ begin
  end;
 end;
 
-function tmsestringfield.asoldsql: string;
+function tmsestringfield.asoldsql: msestring;
 begin
  result:= fieldtooldsql(self);
 end;
@@ -3762,7 +3766,7 @@ function tmsestringfield.getdefaultexpression: msestring;
 begin
  if inherited defaultexpression <> fdefaultexpressionbefore then begin
   fdefaultexpressionbefore:= inherited defaultexpression;
-  fdefaultexpressionstr:= fdefaultexpressionbefore;
+  fdefaultexpressionstr:= msestring(fdefaultexpressionbefore);
  end;
  result:= fdefaultexpressionstr;
 end;
@@ -3771,7 +3775,7 @@ procedure tmsestringfield.setdefaultexpression(const avalue: msestring);
 begin
  fdefaultexpressionstr:= avalue;
  try
-  fdefaultexpressionbefore:= avalue;
+  fdefaultexpressionbefore:= ansistring(avalue);
   inherited defaultexpression:= fdefaultexpressionbefore;
  except        //catch conversion exception
   fdefaultexpressionbefore:= '';
@@ -3827,7 +3831,7 @@ begin
  inherited;
 end;
 
-function tmsememofield.assql: string;
+function tmsememofield.assql: msestring;
 begin
  result:= fieldtosql(self);
 end;
@@ -3867,7 +3871,7 @@ begin
  setdata(nil);
 end;
 
-function tmsememofield.asoldsql: string;
+function tmsememofield.asoldsql: msestring;
 begin
  result:= fieldtooldsql(self);
 end;
@@ -3983,7 +3987,7 @@ begin
  result:= dataset <> nil;
 end;
 
-function tmsenumericfield.assql: string;
+function tmsenumericfield.assql: msestring;
 begin
  result:= fieldtosql(self);
 end;
@@ -4024,7 +4028,7 @@ begin
  setdata(nil);
 end;
 
-function tmsenumericfield.asoldsql: string;
+function tmsenumericfield.asoldsql: msestring;
 begin
  result:= fieldtooldsql(self);
 end;
@@ -4073,7 +4077,7 @@ begin
  result:= dataset <> nil;
 end;
 
-function tmselongintfield.assql: string;
+function tmselongintfield.assql: msestring;
 begin
  result:= fieldtosql(self);
 end;
@@ -4139,7 +4143,7 @@ begin
  end;
 end;
 
-function tmselongintfield.asoldsql: string;
+function tmselongintfield.asoldsql: msestring;
 begin
  result:= fieldtooldsql(self);
 end;
@@ -4273,7 +4277,7 @@ begin
  result:= dataset <> nil;
 end;
 
-function tmselargeintfield.assql: string;
+function tmselargeintfield.assql: msestring;
 begin
  result:= fieldtosql(self);
 end;
@@ -4329,7 +4333,7 @@ begin
  setdata(nil);
 end;
 
-function tmselargeintfield.asoldsql: string;
+function tmselargeintfield.asoldsql: msestring;
 begin
  result:= fieldtooldsql(self);
 end;
@@ -4450,7 +4454,7 @@ begin
  result:= dataset <> nil;
 end;
 
-function tmsesmallintfield.assql: string;
+function tmsesmallintfield.assql: msestring;
 begin
  result:= fieldtosql(self);
 end;
@@ -4519,7 +4523,7 @@ begin
  setdata(nil);
 end;
 
-function tmsesmallintfield.asoldsql: string;
+function tmsesmallintfield.asoldsql: msestring;
 begin
  result:= fieldtooldsql(self);
 end;
@@ -4588,7 +4592,7 @@ begin
  result:= dataset <> nil;
 end;
 
-function tmsewordfield.assql: string;
+function tmsewordfield.assql: msestring;
 begin
  result:= fieldtosql(self);
 end;
@@ -4657,7 +4661,7 @@ begin
  setdata(nil);
 end;
 
-function tmsewordfield.asoldsql: string;
+function tmsewordfield.asoldsql: msestring;
 begin
  result:= fieldtooldsql(self);
 end;
@@ -4706,7 +4710,7 @@ begin
  result:= dataset <> nil;
 end;
 
-function tmseautoincfield.assql: string;
+function tmseautoincfield.assql: msestring;
 begin
  result:= fieldtosql(self);
 end;
@@ -4747,7 +4751,7 @@ begin
  setdata(nil);
 end;
 
-function tmseautoincfield.asoldsql: string;
+function tmseautoincfield.asoldsql: msestring;
 begin
  result:= fieldtooldsql(self);
 end;
@@ -4796,7 +4800,7 @@ begin
  result:= dataset <> nil;
 end;
 
-function tmsefloatfield.assql: string;
+function tmsefloatfield.assql: msestring;
 begin
  result:= fieldtosql(self);
 end;
@@ -4870,7 +4874,7 @@ begin
  setdata(nil);
 end;
 
-function tmsefloatfield.asoldsql: string;
+function tmsefloatfield.asoldsql: msestring;
 begin
  result:= fieldtooldsql(self);
 end;
@@ -4977,7 +4981,7 @@ begin
  result:= dataset <> nil;
 end;
 
-function tmsebooleanfield.assql: string;
+function tmsebooleanfield.assql: msestring;
 begin
  result:= fieldtosql(self);
 end;
@@ -5065,12 +5069,12 @@ end;
 
 function tmsebooleanfield.getasstring: string;
 begin
- result:= getasunicodestring;
+ result:= ansistring(getasunicodestring());
 end;
 
 procedure tmsebooleanfield.setasstring(const avalue: string);
 begin
- setasunicodestring(avalue);
+ setasunicodestring(msestring(avalue));
 end;
 
 function tmsebooleanfield.GetDefaultWidth: Longint;
@@ -5081,7 +5085,7 @@ begin
  end;
 end;
 
-function tmsebooleanfield.asoldsql: string;
+function tmsebooleanfield.asoldsql: msestring;
 begin
  result:= fieldtooldsql(self);
 end;
@@ -5230,7 +5234,7 @@ begin
  result:= dataset <> nil;
 end;
 
-function tmsedatetimefield.assql: string;
+function tmsedatetimefield.assql: msestring;
 begin
  result:= fieldtosql(self);
 end;
@@ -5302,7 +5306,7 @@ begin
  setdata(nil);
 end;
 
-function tmsedatetimefield.asoldsql: string;
+function tmsedatetimefield.asoldsql: msestring;
 begin
  result:= fieldtooldsql(self);
 end;
@@ -5349,7 +5353,7 @@ begin
   thetext:= '';
  end
  else begin
-  thetext:= gettext1(getasdatetime,adisplaytext);
+  thetext:= ansistring(gettext1(getasdatetime,adisplaytext));
  end;
 end;
 {
@@ -5413,19 +5417,19 @@ begin
  result:= dataset <> nil;
 end;
 
-function tmsebinaryfield.assql: string;
+function tmsebinaryfield.assql: msestring;
 begin
  result:= fieldtosql(self);
 end;
 
 procedure tmsebinaryfield.setasunicodestring(const avalue: msestring);
 begin
- asstring:= avalue;
+ asstring:= ansistring(avalue);
 end;
 
 function tmsebinaryfield.getasunicodestring: msestring;
 begin
- result:= asstring;
+ result:= msestring(asstring);
 end;
 
 procedure tmsebinaryfield.readlookup(reader: treader);
@@ -5454,7 +5458,7 @@ begin
  setdata(nil);
 end;
 
-function tmsebinaryfield.asoldsql: string;
+function tmsebinaryfield.asoldsql: msestring;
 begin
  result:= fieldtooldsql(self);
 end;
@@ -5503,14 +5507,14 @@ begin
  result:= dataset <> nil;
 end;
 
-function tmsebytesfield.assql: string;
+function tmsebytesfield.assql: msestring;
 begin
  result:= fieldtosql(self);
 end;
 
 procedure tmsebytesfield.setasunicodestring(const avalue: unicodestring);
 begin
- asstring:= avalue;
+ asstring:= ansistring(avalue);
 end;
 
 function tmsebytesfield.getasunicodestring: msestring;
@@ -5544,7 +5548,7 @@ begin
  setdata(nil);
 end;
 
-function tmsebytesfield.asoldsql: string;
+function tmsebytesfield.asoldsql: msestring;
 begin
  result:= fieldtooldsql(self);
 end;
@@ -5629,7 +5633,7 @@ begin
  result:= dataset <> nil;
 end;
 
-function tmsevarbytesfield.assql: string;
+function tmsevarbytesfield.assql: msestring;
 begin
  result:= fieldtosql(self);
 end;
@@ -5670,7 +5674,7 @@ begin
  setdata(nil);
 end;
 
-function tmsevarbytesfield.asoldsql: string;
+function tmsevarbytesfield.asoldsql: msestring;
 begin
  result:= fieldtooldsql(self);
 end;
@@ -5760,7 +5764,7 @@ begin
  result:= dataset <> nil;
 end;
 
-function tmsebcdfield.assql: string;
+function tmsebcdfield.assql: msestring;
 begin
  result:= fieldtosql(self);
 end;
@@ -5801,7 +5805,7 @@ begin
  setdata(nil);
 end;
 
-function tmsebcdfield.asoldsql: string;
+function tmsebcdfield.asoldsql: msestring;
 begin
  result:= fieldtooldsql(self);
 end;
@@ -5917,7 +5921,7 @@ begin
  result:= dataset <> nil;
 end;
 
-function tmseblobfield.assql: string;
+function tmseblobfield.assql: msestring;
 begin
  result:= fieldtosql(self);
 end;
@@ -5945,16 +5949,16 @@ begin
  end
  else begin
   removecache;
-  inherited loadfromfile(tosysfilepath(filename));
+  inherited loadfromfile(ansistring(tosysfilepath(filename)));
  end;
 end;
 
 procedure tmseblobfield.SaveToFile(const FileName: filenamety);
 begin
- inherited savetofile(tosysfilepath(filename));
+ inherited savetofile(ansistring(tosysfilepath(filename)));
 end;
 
-function tmseblobfield.asoldsql: string;
+function tmseblobfield.asoldsql: msestring;
 begin
  result:= fieldtooldsql(self);
 end;
@@ -6261,12 +6265,12 @@ begin
  setvarvalue(avalue);
 end;
 
-function tmsevariantfield.assql: string;
+function tmsevariantfield.assql: msestring;
 begin
  result:= fieldtosql(self);
 end;
 
-function tmsevariantfield.asoldsql: string;
+function tmsevariantfield.asoldsql: msestring;
 begin
  result:= fieldtooldsql(self);
 end;
@@ -6631,7 +6635,7 @@ begin
     result:= utf8tostring(field.asstring);
    end
    else begin
-    result:= field.asstring;
+    result:= msestring(field.asstring);
    end;
   except
    result:= converrorstring;
@@ -6648,7 +6652,7 @@ begin
   end;
  end
  else begin
-  result:= ffield.defaultexpression;
+  result:= msestring(ffield.defaultexpression);
  end;
 end;
 
@@ -6662,7 +6666,7 @@ begin
    ffield.asstring:= stringtoutf8(avalue);
   end
   else begin
-   ffield.asstring:= avalue;
+   ffield.asstring:= ansistring(avalue);
   end;
  end;
 end;
@@ -6676,10 +6680,10 @@ function tfielddatalink.msedisplaytext(const aformat: msestring = '';
   end
   else begin
    if aedit then begin
-    result:= ffield.text;
+    result:= msestring(ffield.text);
    end
    else begin
-    result:= ffield.displaytext;
+    result:= msestring(ffield.displaytext);
    end;
   end;
  end;
@@ -6719,7 +6723,7 @@ begin
  end;
 end;
 
-function tfielddatalink.assql: string;
+function tfielddatalink.assql: msestring;
 begin
  result:= fieldtosql(ffield);
 end;
@@ -7149,7 +7153,7 @@ begin
       vtInt64:      field1.aslargeint:= VInt64^;
       vtBoolean:    field1.asboolean:= VBoolean;
       vtChar:       field1.asstring:= VChar;
-      vtWideChar:   field1.asstring:= VWideChar;
+      vtWideChar:   field1.asstring:= ansistring(VWideChar);
       vtExtended:   field1.asfloat:= VExtended^;
       vtString:     field1.asstring:= VString^;
   //  vtPointer:
@@ -7171,7 +7175,7 @@ begin
          tmsememofield(field1).asmsestring:= msestring(vunicodestring);
         end
         else begin
-         field1.asstring:= widestring(vunicodestring);
+         field1.asstring:= ansistring(widestring(vunicodestring));
         end;
        end;
       end;
@@ -7185,7 +7189,7 @@ begin
          tmsememofield(field1).asmsestring:= msestring(vwidestring);
         end
         else begin
-         field1.asstring:= widestring(vwidestring);
+         field1.asstring:= ansistring(widestring(vwidestring));
         end;
        end;
       end;
@@ -7614,7 +7618,7 @@ begin
  result:= self;
 end;
 
-function tdscontroller.assql(const avalue: boolean): string;
+function tdscontroller.assql(const avalue: boolean): msestring;
 begin
  if idscontroller(fintf).getnumboolean then begin
   if avalue then begin
@@ -7629,42 +7633,42 @@ begin
  end;
 end;
 
-function tdscontroller.assql(const avalue: msestring): string;
+function tdscontroller.assql(const avalue: msestring): msestring;
 begin
  if avalue = '' then begin
   result:= 'NULL';
  end
  else begin
-  if dso_utf8 in foptions then begin
-   result:= encodesqlstring(stringtoutf8(avalue));
-  end
-  else begin
-   result:= encodesqlstring(avalue);
-  end;
+//  if dso_utf8 in foptions then begin
+//   result:= encodesqlstring(stringtoutf8(avalue));
+//  end
+//  else begin
+  result:= encodesqlstring(avalue);
+//  end;
  end;
 end;
 
-function tdscontroller.assql(const avalue: integer): string;
+function tdscontroller.assql(const avalue: integer): msestring;
 begin
- result:= inttostr(avalue);
+ result:= inttostrmse(avalue);
 end;
 
-function tdscontroller.assql(const avalue: int64): string;
+function tdscontroller.assql(const avalue: int64): msestring;
 begin
- result:= inttostr(avalue);
+ result:= inttostrmse(avalue);
 end;
 
-function tdscontroller.assql(const avalue: realty): string;
+function tdscontroller.assql(const avalue: realty): msestring;
 begin
  if avalue = emptyreal then begin
   result:= 'NULL';
  end
  else begin
-  result:= realtostr(avalue);
+  result:= realtostrmse(avalue);
  end;
 end;
 
-function tdscontroller.assqlcurrency(const avalue: realty): string;
+function tdscontroller.assqlcurrency(const avalue: realty): msestring;
 begin
  if avalue = emptyreal then begin
   result:= 'NULL';
@@ -7683,13 +7687,13 @@ begin
  end;
 end;
 
-function tdscontroller.assql(const avalue: currency): string;
+function tdscontroller.assql(const avalue: currency): msestring;
 begin
  if idscontroller(fintf).getint64currency then begin
  {$ifdef FPC}
-  result:= inttostr(int64(avalue));
+  result:= inttostrmse(int64(avalue));
  {$else}
-  result:= inttostr(int64(ar8ty(avalue)));
+  result:= inttostrmse(int64(ar8ty(avalue)));
  {$endif}
  end
  else begin
@@ -7697,7 +7701,7 @@ begin
  end;
 end;
 
-function tdscontroller.assql(const avalue: tdatetime): string;
+function tdscontroller.assql(const avalue: tdatetime): msestring;
 begin
  if avalue = emptydatetime then begin
   result:= 'NULL';
@@ -7712,14 +7716,14 @@ begin
  end;
 end;
 
-function tdscontroller.assqldate(const avalue: tdatetime): string;
+function tdscontroller.assqldate(const avalue: tdatetime): msestring;
 begin
  if avalue = emptydatetime then begin
   result:= 'NULL';
  end
  else begin
   if idscontroller(fintf).getfloatdate then begin
-   result:= inttostr(trunc(avalue));
+   result:= inttostrmse(trunc(avalue));
   end
   else begin
    result:= encodesqldate(avalue);
@@ -7727,7 +7731,7 @@ begin
  end;
 end;
 
-function tdscontroller.assqltime(const avalue: tdatetime): string;
+function tdscontroller.assqltime(const avalue: tdatetime): msestring;
 begin
  if avalue = emptydatetime then begin
   result:= 'NULL';
@@ -8294,7 +8298,7 @@ begin
     result:= utf8tostring(field1.asstring);
    end
    else begin
-    result:= field1.asstring;
+    result:= msestring(field1.asstring);
    end;
   end;
  end;
@@ -8318,7 +8322,7 @@ begin
     field1.asstring:= stringtoutf8(avalue);
    end
    else begin
-    field1.asstring:= avalue;
+    field1.asstring:= ansistring(avalue);
    end;
   end;
  end;
@@ -8732,10 +8736,11 @@ begin
            if DoCreate then
              begin
              // Check if this is the first occurance of the parameter
-             tmpParam := FindParam(ParamName);
+             tmpParam := FindParam(ansistring(ParamName));
              // If so, create the parameter and assign the Parameterindex
              if not assigned(tmpParam) then
-               ParameterIndex := CreateParam(ftUnknown, ParamName, ptInput).Index
+               ParameterIndex := CreateParam(ftUnknown,
+                                      ansistring(ParamName), ptInput).Index
              else  // else only assign the ParameterIndex
                ParameterIndex := tmpParam.Index;
              end
@@ -8743,7 +8748,7 @@ begin
            else
              begin
                if ParamName<>'' then
-                 ParameterIndex:=ParamByName(ParamName).Index
+                 ParameterIndex:=ParamByName(ansistring(ParamName)).Index
                else
                begin
                  ParameterIndex:=QuestionMarkParamCount;
@@ -8793,7 +8798,7 @@ begin
     psInterbase : NewQuery[NewQueryIndex]:='?';
     psPostgreSQL,
     psSimulated : begin
-     ParamName:= IntToStr(ParamBinding[i]+1);
+     ParamName:= IntToStrmse(ParamBinding[i]+1);
      for b:= 1 to length(ReplaceString) do begin
       NewQuery[NewQueryIndex]:='$';
       Inc(NewQueryIndex);
@@ -8894,7 +8899,7 @@ begin
     result:= stringtoutf8(aswidestring);
    end
    else begin
-    result:= stringtoutf8(asstring);
+    result:= stringtoutf8(msestring(asstring));
    end;
   end
   else begin
@@ -8921,7 +8926,7 @@ begin
  setlength(result,count);
  for int1:= high(result) downto 0 do begin
   result[int1]:= -1;
-  mstr1:= items[int1].name;
+  mstr1:= msestring(items[int1].name);
   for int2:= high(anames) downto 0 do begin
    if anames[int2] = mstr1 then begin
     result[int1]:= int2;
