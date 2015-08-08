@@ -909,19 +909,19 @@ begin
  setlength(result,namedrgbcolorcount+mappedcolorcount+
           functionalcolorcount+usercolorcount-1);
  for int1:= 0 to high(defaultnamedrgb) do begin
-  result[int1]:= defaultnamedrgb[int1].name;
+  result[int1]:= msestring(defaultnamedrgb[int1].name);
  end;
  int2:= namedrgbcolorcount;
  for int1:= 0 to high(defaultmapped) do begin
-  result[int1+int2]:= defaultmapped[int1].name;
+  result[int1+int2]:= msestring(defaultmapped[int1].name);
  end;
  inc(int2,mappedcolorcount);
- result[int2]:= defaultfunctional[cl_nonenum].name;
+ result[int2]:= msestring(defaultfunctional[cl_nonenum].name);
  for int1:= 1 to cl_nonenum-1 do begin
-  result[int1+int2]:= defaultfunctional[int1].name;
+  result[int1+int2]:= msestring(defaultfunctional[int1].name);
  end;
  for int1:= cl_nonenum + 1 to functionalcolorcount-1 do begin
-  result[int1-1+int2]:= defaultfunctional[int1].name;
+  result[int1-1+int2]:= msestring(defaultfunctional[int1].name);
  end;
  {
  for int1:= cl_nonenum+1 to high(defaultfunctional) do begin
@@ -930,7 +930,7 @@ begin
  }
  inc(int2,functionalcolorcount-1);
  for int1:= 0 to high(defaultuser) do begin
-  result[int1+int2]:= defaultuser[int1].name;
+  result[int1+int2]:= msestring(defaultuser[int1].name);
  end;
 end;
 
