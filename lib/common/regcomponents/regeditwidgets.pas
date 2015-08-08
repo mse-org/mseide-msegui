@@ -221,7 +221,7 @@ begin
  col1:= twidgetcol(getpointervalue);
  result:= inherited getvalue;
  if col1.editwidget <> nil then begin
-  result:= result + '<'+col1.editwidget.name+'>';
+  result:= result + msestring('<'+col1.editwidget.name+'>');
  end
  else begin
   result:= result + '<>';
@@ -284,7 +284,7 @@ begin
     with cols[int1] do begin
      if (name <> '') and 
                (tdatalist(fprops[0].instance).canlink(datalist,gettag)) then begin
-      additem(result,name);
+      additem(result,msestring(name));
      end;
     end;
    end;
@@ -371,7 +371,7 @@ begin
  with tvalueedititem(
          tpropertyeditor1(sender.valueeditor).getpointervalue()) do begin
   if editwidget <> nil then begin
-   result:= '<'+inttostr(valueindex)+'>'+'<'+editwidget.name+'>';
+   result:= msestring('<'+inttostr(valueindex)+'>'+'<'+editwidget.name+'>');
   end
   else begin
    result:= '<>';
