@@ -275,7 +275,7 @@ function msegettempdir: filenamety;
 implementation
 
 uses
- sysutils,msedate,mseprocutils;
+ sysutils,msedate,mseprocutils,mseformatstr;
 
 const
  quotechar = msechar('"');
@@ -297,12 +297,12 @@ var
  fname1,fname2: filenamety;
  int1: integer;
 begin
- fname1:= aname + intermediatefileextension + inttostr(getpid);
+ fname1:= aname + intermediatefileextension + inttostrmse(getpid);
  fname2:= fname1;
  int1:= 0;
  while findfile(fname2) do begin
   inc(int1);
-  fname2:= fname1 + '_'+inttostr(int1);
+  fname2:= fname1 + '_'+inttostrmse(int1);
  end;
  result:= fname2;
 end;
@@ -399,8 +399,8 @@ begin
  end
  else begin
   result:= true;
-  syserror(sys_copyfile(oldfile,newfile),'Can not copy File "'+oldfile+
-            '" to "'+newfile+'": ');
+  syserror(sys_copyfile(oldfile,newfile),
+            ansistring('Can not copy File "'+oldfile+'" to "'+newfile+'": '));
  end;
 end;
 
@@ -426,8 +426,8 @@ begin
  end
  else begin
   result:= true;
-  syserror(sys_renamefile(oldname,newname),'Can not rename File "'+oldname+
-            '" to "'+newname+'": ');
+  syserror(sys_renamefile(oldname,newname),
+          ansistring('Can not rename File "'+oldname+'" to "'+newname+'": '));
  end;
 end;
 
@@ -439,7 +439,7 @@ begin
  err:= sys_deletefile(filename);
  result:= err = sye_ok;
  if not result and findfile(filename) then begin
-  syserror(err,'Can not delete file "'+filename+'".');
+  syserror(err,ansistring('Can not delete file "'+filename+'".'));
  end;
 end;
 
@@ -490,7 +490,8 @@ begin
  result:= sys_getcurrentdir;
  error:= sys_setcurrentdir(path);
  if error <> sye_ok then begin
-  syserror(error,'Setcurrentdir "'+ path + quotechar+':'+lineend);
+  syserror(error,
+        ansistring('Setcurrentdir "'+ path + quotechar+':'+lineend));
  end;
 end;
 
@@ -1713,7 +1714,7 @@ begin
   int1:= 1;
   splitfilepath(path,dir,name,ext);
   repeat
-   result:= dir+name+inttostr(int1)+ext;
+   result:= dir+name+inttostrmse(int1)+ext;
    inc(int1);
   until not findfileordir(result);
  end;
@@ -1846,7 +1847,7 @@ begin
    result:= err1 = sye_ok;
    if not result then begin
     if not noexception then begin
-     syserror(err1,quotechar+dirstream.dirinfo.dirname + '" ');
+     syserror(err1,ansistring(quotechar+dirstream.dirinfo.dirname + '" '));
     end
     else begin
      exit;
