@@ -408,8 +408,8 @@ begin
   cols[0].clear;
   for int1:= 0 to count-1 do begin
    with itempo(int1)^ do begin
-    cols[0].add(designer.getcomponentdispname(instance)+
-          ' ('+designer.getclassname(instance)+')');
+    cols[0].add(msestring(designer.getcomponentdispname(instance))+
+          ' ('+msestring(designer.getclassname(instance))+')');
    end;
   end;
  end;
@@ -662,7 +662,8 @@ procedure tobjectinspectorfo.moduleactivated(const adesigner: idesigner;
                   const amodule: tmsecomponent);
 begin
  factmodule:= amodule;
- caption:= actionsmo.c[ord(ac_objectinspector)] + ' (' + amodule.Name+')';
+ caption:= actionsmo.c[ord(ac_objectinspector)] + ' (' + 
+                                        msestring(amodule.Name)+')';
  updatecomponentname;
 // clear;
 end;
@@ -747,7 +748,8 @@ begin
     end;
     fillchar(result[int1],length(edar1)*sizeof(result[0]),0);
     result[int1]:= trecordpropertyeditor.create(designer,amodule,acomponent,
-         iobjectinspector(self),copy(str1,1,int2-2),reviseproperties(edar1));
+                      iobjectinspector(self),ansistring(copy(str1,1,int2-2)),
+                                                      reviseproperties(edar1));
     int1:= int3;
    end
    else begin
@@ -1169,10 +1171,10 @@ begin
  if instance <> nil then begin
   if (factmodule <> nil) and not factmodule.checkowned(instance) and 
           (factmodule <> instance) and (instance.owner <> nil) then begin
-   result:=  instance.owner.name+'.';
+   result:=  msestring(instance.owner.name)+'.';
   end;
-  result:= result + designer.getcomponentdispname(instance) +
-                  ' (' + designer.getclassname(instance)+')';
+  result:= result + msestring(designer.getcomponentdispname(instance)) +
+                  ' (' + msestring(designer.getclassname(instance))+')';
  end;
 end;
 
@@ -1194,7 +1196,8 @@ begin
     cols[0].count:= po1^.components.count;
     for int1:= 0 to cols[0].count-1 do begin
      with fcomponentnames[int1] do begin
-      cols[0][int1]:= dispname + ' (' + designer.getclassname(instance)+')';
+      cols[0][int1]:= msestring(dispname) + ' (' + 
+                             msestring(designer.getclassname(instance))+')';
       if cols[0][int1] = str1 then begin
        int2:= int1;
       end;

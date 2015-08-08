@@ -63,7 +63,7 @@ end;
 procedure ttargetconsolefo.sendtext(const sender: tobject;
                                var atext: msestring; var donotsend: Boolean);
 begin
- mainfo.gdb.targetwriteln(atext);
+ mainfo.gdb.targetwriteln(ansistring(atext));
  donotsend:= true;
  terminal.inputcolindex:= length(terminal.text);
  terminal.addline('');
@@ -76,7 +76,7 @@ end;
 
 procedure ttargetconsolefo.addtext(const atext: string);
 begin
- fbuffer.addchars(atext);
+ fbuffer.addchars(msestring(atext));
 end;
 
 constructor ttargetconsolefo.create(aowner: tcomponent);

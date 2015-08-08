@@ -76,7 +76,7 @@ var
   
 procedure createcpufo;
 begin
- mainfo.gdb.processorname:= projectoptions.d.texp.gdbprocessor;
+ mainfo.gdb.processorname:= ansistring(projectoptions.d.texp.gdbprocessor);
  if (cpufo = nil) or (currentproc <> mainfo.gdb.processor) then begin
   freeandnil(cpufo);
   currentproc:= mainfo.gdb.processor;
@@ -148,7 +148,7 @@ begin
      ed1:= fedits[num];
      if ed1 <> nil then begin
       str1:= ed1.text;
-      ed1.text:= ar1[int1].bits;
+      ed1.text:= msestring(ar1[int1].bits);
       ed1.checkvalue(true);
       if ed1.text <> str1 then begin
        ed1.font.color:= cl_red;
