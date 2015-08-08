@@ -108,12 +108,12 @@ end;
 
 function twatchpointsfo.watchpointerror(const error: gdbresultty): boolean;
 var
- str1: string;
+ str1: msestring;
 begin
  result:= error <> gdb_ok;
  if result then begin
   if error in [gdb_message,gdb_timeout] then begin
-   str1:= gdb.errormessage;
+   str1:= msestring(gdb.errormessage);
   end
   else begin
    str1:= c[ord(watcherror)];
@@ -145,9 +145,9 @@ begin
   if avalue then begin
    with info do begin
     kind:= watchpointkindty(wptkind.value);
-    expression:= wptexpression.value;
+    expression:= ansistring(wptexpression.value);
     ignore:= wptignore.value;
-    condition:= wptcondition.value;
+    condition:= ansistring(wptcondition.value);
    end;
    if watchpointerror(gdb.watchinsert(info)) then begin
     avalue:= false;
