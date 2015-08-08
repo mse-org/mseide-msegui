@@ -109,14 +109,14 @@ begin
     if aline > 0 then begin
      apage:= sourcefo.openfile(fname1);
      grid.rowcount:= int2 + 1 + length(ar1);
-     grid[3][int2]:= inttostr(aline-1);
+     grid[3][int2]:= inttostrmse(aline-1);
      if (apage <> nil) and (aline > 0) and 
                               (aline <= apage.grid.rowcount) then begin
       grid[1][int2]:= apage.edit[aline-1];
       grid[2][int2]:= fname1;
      end
      else begin
-      grid[1][int2]:= '<line ' + inttostr(aline)+'>';
+      grid[1][int2]:= '<line ' + inttostrmse(aline)+'>';
      end;
      grid.rowcolorstate[int2]:= 1;
      inc(int2);
@@ -126,8 +126,8 @@ begin
     end;
     for int1:= 0 to high(ar1) do begin
      with ar1[int1] do begin
-      grid[0][int2]:= hextostr(address,digits);
-      grid[1][int2]:= instruction;
+      grid[0][int2]:= hextostrmse(address,digits);
+      grid[1][int2]:= msestring(instruction);
       if address = faddress then begin
        factiverow:= int2;
        grid.rowcolorstate[int2]:= 0;
@@ -279,7 +279,7 @@ begin
  with cellinfo do begin
   if pmsestring(datapo)^ <> '' then begin
    if breakpointsfo.isactivebreakpoint(
-                             strtohex64(pmsestring(datapo)^)) then begin
+                   strtohex64(ansistring(pmsestring(datapo)^))) then begin
     color:= cl_ltred;
    end;
   end;
@@ -292,7 +292,7 @@ begin
  with info do begin
   if iscellclick(info,[ccr_buttonpress]) then begin
    breakpointsfo.toggleaddrbreakpoint(
-                    strtohex64(self.grid[cell.col][cell.row]));
+                    strtohex64(ansistring(self.grid[cell.col][cell.row])));
    grid.invalidatecell(cell);
   end;
  end;
@@ -315,7 +315,8 @@ begin
    end;
   end;
   if (int1 >= 0) and (int1 < grid.rowcount) then begin
-   sourcefo.showsourceline(grid[2][int1],strtoint(grid[3][int1]),0,true);
+   sourcefo.showsourceline(grid[2][int1],strtoint64(
+                   ansistring(grid[3][int1])),0,true);
   end;
  end;
 end;
@@ -324,13 +325,13 @@ procedure tdisassfo.popupupdate(const sender: tcustommenu);
 begin
  popupmen.menu.itembyname('showbreak').enabled:= grid.focusedcellvalid and
     (grid[0][grid.row] <> '') and
-    breakpointsfo.isactivebreakpoint(strtohex64(grid[0][grid.row]));          
+    breakpointsfo.isactivebreakpoint(strtohex64(ansistring(grid[0][grid.row])));
 end;
 
 procedure tdisassfo.showbreakexe(const sender: TObject);
 begin
  breakpointsfo.showbreakpoint(
-                    strtohex64(self.grid[0][grid.row]),true);
+                    strtohex64(ansistring(self.grid[0][grid.row])),true);
 end;
 
 end.
