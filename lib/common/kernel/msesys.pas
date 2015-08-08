@@ -145,9 +145,9 @@ function fileattributestofilerights(
 
 procedure checkdirstreamdata(var adata: dirstreamty);
  
-procedure syserror(const error: syserrorty; const text: string = ''); overload;
+procedure syserror(const error: syserrorty; const text: msestring = ''); overload;
 procedure syserror(const error: syserrorty;
-                  const sender: tobject; text: string = ''); overload;
+                  const sender: tobject; text: msestring = ''); overload;
 
 function syelasterror: syserrorty; //returns sye_lasterror, sets mselasterror
 function syeseterror(aerror: integer): syserrorty;
@@ -155,9 +155,9 @@ function syeseterror(aerror: integer): syserrorty;
           //                  returns sye_ok otherwise
 function syesetextendederror(const aerrormessage: msestring): syserrorty;
 function buildsyserrormessage(const error: syserrorty; 
-                                      const text: string = ''): msestring;
+                                      const text: msestring = ''): msestring;
 function buildsyserrormessage(const error: syserrorty; const sender: tobject;
-                       text: string = ''): msestring;
+                       text: msestring = ''): msestring;
 
 function getcommandlinearguments: msestringarty;
                  //refcount of result = 1
@@ -294,7 +294,7 @@ begin
 end;
 
 function buildsyserrormessage(const error: syserrorty; 
-                                      const text: string = ''): msestring;
+                                      const text: msestring = ''): msestring;
 begin
  result:= '';
  if error = sye_lasterror then begin
@@ -311,7 +311,7 @@ begin
 end;
 
 function buildsyserrormessage(const error: syserrorty; const sender: tobject;
-                       text: string = ''): msestring;
+                       text: msestring = ''): msestring;
 begin
  result:= '';
  if error <> sye_ok then begin
@@ -325,7 +325,7 @@ begin
  end;
 end;
 
-procedure syserror(const error: syserrorty; const text: string); overload;
+procedure syserror(const error: syserrorty; const text: msestring); overload;
 begin
  if error = sye_ok then begin
   exit;
@@ -347,7 +347,7 @@ begin
 end;
 
 procedure syserror(const error: syserrorty; const sender: tobject;
-                       text: string = ''); overload;
+                       text: msestring = ''); overload;
 begin
  if error = sye_ok then begin
   exit;

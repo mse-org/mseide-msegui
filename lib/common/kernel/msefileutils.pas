@@ -400,7 +400,7 @@ begin
  else begin
   result:= true;
   syserror(sys_copyfile(oldfile,newfile),
-            ansistring('Can not copy File "'+oldfile+'" to "'+newfile+'": '));
+            'Can not copy File "'+oldfile+'" to "'+newfile+'": ');
  end;
 end;
 
@@ -427,7 +427,7 @@ begin
  else begin
   result:= true;
   syserror(sys_renamefile(oldname,newname),
-          ansistring('Can not rename File "'+oldname+'" to "'+newname+'": '));
+          'Can not rename File "'+oldname+'" to "'+newname+'": ');
  end;
 end;
 
@@ -439,7 +439,7 @@ begin
  err:= sys_deletefile(filename);
  result:= err = sye_ok;
  if not result and findfile(filename) then begin
-  syserror(err,ansistring('Can not delete file "'+filename+'".'));
+  syserror(err,'Can not delete file "'+filename+'".');
  end;
 end;
 
@@ -490,8 +490,7 @@ begin
  result:= sys_getcurrentdir;
  error:= sys_setcurrentdir(path);
  if error <> sye_ok then begin
-  syserror(error,
-        ansistring('Setcurrentdir "'+ path + quotechar+':'+lineend));
+  syserror(error,'Setcurrentdir "'+ path + quotechar+':'+lineend);
  end;
 end;
 
@@ -1847,7 +1846,7 @@ begin
    result:= err1 = sye_ok;
    if not result then begin
     if not noexception then begin
-     syserror(err1,ansistring(quotechar+dirstream.dirinfo.dirname + '" '));
+     syserror(err1,quotechar+dirstream.dirinfo.dirname + '" ');
     end
     else begin
      exit;
