@@ -1153,9 +1153,9 @@ function tmsestringarrayprop.checkstored(ancestor: tpersistent): boolean;
 var
  int1: integer;
 begin
- result:= not (ancestor is tstringarrayprop);
+ result:= not (ancestor is tmsestringarrayprop);
  if not result then begin
-  with tstringarrayprop(ancestor) do begin
+  with tmsestringarrayprop(ancestor) do begin
    result:= self.count <> count;
    if not result then begin
     for int1:= 0 to count - 1 do begin
