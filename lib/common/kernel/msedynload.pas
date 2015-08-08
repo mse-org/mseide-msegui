@@ -92,7 +92,7 @@ function getprocaddresses(const lib: tlibhandle;
                           const libname: msestring = ''): boolean; overload;
 var
  int1: integer;
- str1: string;
+ mstr1: msestring;
 begin
  result:= true;
  for int1:= 0 to high(procedures) do begin
@@ -106,10 +106,10 @@ begin
     result:= false;
     if not noexception then begin
      if libname <> '' then begin
-      str1:= libname + lineend;
+      mstr1:= libname + lineend;
      end;
-     str1:= str1 + 'Function "'+n+'" not found.';
-     raise edynload.create(str1);
+     mstr1:= mstr1 + 'Function "'+msestring(n)+'" not found.';
+     raise edynload.create(ansistring(mstr1));
     end;
    end;
   end;
@@ -122,7 +122,7 @@ function getprocaddresses(const lib: tlibhandle; const anames: array of string;
                                 const libname: msestring = ''): boolean;
 var
  int1: integer;
- str1: string;
+ mstr1: msestring;
 begin
  if high(anames) <> high(adest) then begin
   raise exception.create('Invalid parameter.');
@@ -134,10 +134,10 @@ begin
    result:= false;
    if not noexception then begin
     if libname <> '' then begin
-     str1:= libname + lineend;
+     mstr1:= libname + lineend;
     end;
-    str1:= str1 + 'Function "'+anames[int1]+'" not found.';
-    raise exception.create(str1);
+    mstr1:= mstr1 + 'Function "'+msestring(anames[int1])+'" not found.';
+    raise exception.create(ansistring(mstr1));
    end;
   end;
  end;
@@ -194,8 +194,8 @@ begin
   end;
  end;
  if (result = 0) and not noexception then begin
-  raise exception.create(errormessage+
-                   'Library '+quotelibnames(libnames)+' not found.');
+  raise exception.create(ansistring(errormessage+
+                   'Library '+quotelibnames(libnames)+' not found.'));
  end;
 end;
 
@@ -357,7 +357,8 @@ begin
        end;
       except
        on e: exception do begin
-        e.message:= errormessage+'Library "'+libname+'": '+e.message;
+        e.message:= ansistring(
+         errormessage+'Library "'+libname+'": '+msestring(e.message));
         if unloadlibrary(libhandle) then begin
          libhandle:= nilhandle;
         end;
