@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2015 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -200,6 +200,10 @@ function realtostr(const value: double): string;     //immer'.' als separator
 function strtoreal(const s: string): double;   //immer'.' als separator
 function trystrtoreal(const s: string; out value: real): boolean;
                                                //immer'.' als separator
+function currencytostr(const avalue: currency): string; 
+                         //always '.' as as decimal separator
+function currencytostrmse(const avalue: currency): msestring;
+                         //always '.' as as decimal separator
 
 function trystrtorealty(const ein: msestring; out value: realty;
                              forcevalue: boolean = false): boolean;
@@ -3697,6 +3701,88 @@ begin
   end;
   result:= formatfloatmse(rea1,format,defaultformatsettingsmse);
  end;
+end;
+
+function currencytostr(const avalue: currency): string; 
+                         //always '.' as as decimal separator
+var
+ buffer: array[0..23] of char;
+ int1,int2: integer;
+ lwo1,lwo2: qword;
+const
+ dotpos = high(buffer)-4;
+ 
+begin
+ lwo1:= abs(int64(avalue));
+ if lwo1 = 0 then begin
+  result:= '0';
+  exit;
+ end;
+ buffer[dotpos]:= '.';
+ int1:= high(buffer);
+ while (lwo1 > 0) or (int1 >= dotpos-1) do begin
+  if int1 <> dotpos then begin
+   lwo2:= lwo1 div 10;
+   buffer[int1]:= msechar(lwo1 - lwo2 * 10 + ord('0'));
+   lwo1:= lwo2;
+  end;
+  dec(int1);
+ end;
+ if int64(avalue) < 0 then begin
+  buffer[int1]:= msechar('-');
+  dec(int1);
+ end;
+ int2:= high(buffer);
+ while buffer[int2] = '0' do begin
+  dec(int2);
+ end;
+ if int2 = dotpos then begin
+  dec(int2);
+ end;
+ int2:= int2-int1;
+ setlength(result,int2);
+ move(buffer[int1+1],pointer(result)^,int2*sizeof(char));
+end;
+
+function currencytostrmse(const avalue: currency): msestring;
+                         //always '.' as as decimal separator
+var
+ buffer: array[0..23] of msechar;
+ int1,int2: integer;
+ lwo1,lwo2: qword;
+const
+ dotpos = high(buffer)-4;
+ 
+begin
+ lwo1:= abs(int64(avalue));
+ if lwo1 = 0 then begin
+  result:= '0';
+  exit;
+ end;
+ buffer[dotpos]:= '.';
+ int1:= high(buffer);
+ while (lwo1 > 0) or (int1 >= dotpos-1) do begin
+  if int1 <> dotpos then begin
+   lwo2:= lwo1 div 10;
+   buffer[int1]:= msechar(lwo1 - lwo2 * 10 + ord('0'));
+   lwo1:= lwo2;
+  end;
+  dec(int1);
+ end;
+ if int64(avalue) < 0 then begin
+  buffer[int1]:= msechar('-');
+  dec(int1);
+ end;
+ int2:= high(buffer);
+ while buffer[int2] = '0' do begin
+  dec(int2);
+ end;
+ if int2 = dotpos then begin
+  dec(int2);
+ end;
+ int2:= int2-int1;
+ setlength(result,int2);
+ move(buffer[int1+1],pointer(result)^,int2*sizeof(msechar));
 end;
 
 function realtytostrrange(const val: realty; const format: msestring = '';
