@@ -67,7 +67,7 @@ begin
         grid[int2][int1]:= '';
        end
        else begin
-        grid[int2][int1]:= hextostr(bytes[int3],2);
+        grid[int2][int1]:= hextostrmse(bytes[int3],2);
        end;
        inc(int3);
       end;
@@ -83,7 +83,7 @@ begin
         grid[int2][int1]:= '';
        end
        else begin
-        grid[int2][int1]:= hextostr(words[int3],4);
+        grid[int2][int1]:= hextostrmse(words[int3],4);
        end;
        inc(int3);
       end;
@@ -99,7 +99,7 @@ begin
         grid[int2][int1]:= '';
        end
        else begin
-        grid[int2][int1]:= hextostr(longwords[int3],8);
+        grid[int2][int1]:= hextostrmse(longwords[int3],8);
        end;
        inc(int3);
       end;
@@ -117,7 +117,8 @@ end;
 procedure tmemoryfo.drawfixcol(const sender: tcol; const canvas: tcanvas;
                const cellinfo: cellinfoty);
 begin
- drawtext(canvas,hextostr(longword(firstadd+cellinfo.cell.row*16),8),cellinfo.innerrect);
+ drawtext(canvas,hextostrmse(longword(firstadd+cellinfo.cell.row*16),8),
+                                                      cellinfo.innerrect);
 end;
 
 procedure tmemoryfo.updatelayoutexe(const sender: TObject);
@@ -130,7 +131,7 @@ begin
    mstr1:= 'WW';
    grid.datacols.count:= 16;
    for int1:= 0 to 15 do begin
-    grid.fixrows[-1].captions[int1].caption:= charhex[int1];
+    grid.fixrows[-1].captions[int1].caption:= msechar(charhex[int1]);
 //    grid.datacols[int1].ondataentered:= {$ifdef FPC}@{$endif}celldataentered;
     grid.datacols[int1].onsetvalue:= {$ifdef FPC}@{$endif}cellsetvalue;
    end;
@@ -139,7 +140,7 @@ begin
    mstr1:= 'WWWW';
    grid.datacols.count:= 8;
    for int1:= 0 to 7 do begin
-    grid.fixrows[-1].captions[int1].caption:= charhex[int1*2];
+    grid.fixrows[-1].captions[int1].caption:= msechar(charhex[int1*2]);
 //    grid.datacols[int1].ondataentered:= {$ifdef FPC}@{$endif}celldataentered;
     grid.datacols[int1].onsetvalue:= {$ifdef FPC}@{$endif}cellsetvalue;
    end;
@@ -149,7 +150,7 @@ begin
    mstr1:= 'WWWWWWWW';
    grid.datacols.count:= 4;
    for int1:= 0 to 3 do begin
-    grid.fixrows[-1].captions[int1].caption:= charhex[int1*4];
+    grid.fixrows[-1].captions[int1].caption:= msechar(charhex[int1*4]);
 //    grid.datacols[int1].ondataentered:= {$ifdef FPC}@{$endif}celldataentered;
     grid.datacols[int1].onsetvalue:= {$ifdef FPC}@{$endif}cellsetvalue;
    end;
@@ -171,12 +172,11 @@ procedure tmemoryfo.cellsetvalue(const sender: TObject; var avalue: msestring;
                var accept: Boolean);
 var
  val: longword;
- str1: ansistring;
  res: gdbresultty;
 begin
  if mainfo.gdb.cancommand then begin
   accept:= false;
-  val:= strtohex(avalue);
+  val:= strtohex(ansistring(avalue));
   res:= gdb_error;
   case bitwidthty(bitwidth.value) of
    bw_8: begin
@@ -190,8 +190,7 @@ begin
    end;
   end;
   if res <> gdb_ok then begin
-   str1:= mainfo.gdb.errormessage;
-   showerror(str1);
+   showerror(msestring(mainfo.gdb.errormessage));
   end;
   refresh;
  end;
