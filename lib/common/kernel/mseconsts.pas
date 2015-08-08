@@ -56,7 +56,7 @@ type
  
 implementation
 uses
- sysutils,msesysintf,msearrayutils;
+ sysutils,msesysintf,msearrayutils,mseformatstr;
  
 type
  langinfoty = record
@@ -227,7 +227,7 @@ begin
    result:= 'Delete selected row?'
   end
   else begin
-   result:= 'Delete '+inttostr(vinteger)+' selected rows?';
+   result:= 'Delete '+inttostrmse(vinteger)+' selected rows?';
   end;
  end;
 end;

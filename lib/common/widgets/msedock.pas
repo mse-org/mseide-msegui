@@ -559,7 +559,7 @@ type
    fdragdock: tnochildrendockcontroller;
    foptionswindow: windowoptionsty;
    fstatfile: tstatfile;
-   fstatvarname: string;
+   fstatvarname: msestring;
    ficon: tmaskedbitmap;
    fstatpriority: integer;
    fdockingareacaption: msestring;
@@ -613,7 +613,7 @@ type
                                                write foptionswindow default [];
    property frame: tgripframe read getframe write setframe;
    property statfile: tstatfile read fstatfile write setstatfile;
-   property statvarname: string read fstatvarname write fstatvarname;
+   property statvarname: msestring read fstatvarname write fstatvarname;
    property statpriority: integer read fstatpriority 
                                        write fstatpriority default 0;
    property icon: tmaskedbitmap read ficon write seticon;
@@ -626,7 +626,8 @@ procedure paintdockingareacaption(const canvas: tcanvas; const sender: twidget;
 
 implementation
 uses
- msearrayutils,sysutils,msebits,msetabs,mseguiintf,mseforms,msestream;
+ msearrayutils,sysutils,msebits,msetabs,mseguiintf,mseforms,msestream,
+ mseformatstr;
 
 type
  twidget1 = class(twidget);
@@ -843,7 +844,7 @@ begin
   caption:= intf1.getdockcontroller.getdockcaption;
  end
  else begin
-  caption:= 'Page '+inttostr(atabwidget.count);
+  caption:= 'Page '+inttostrmse(atabwidget.count);
  end;
  awidget.anchors:= [];
  parentwidget:= atabwidget;
@@ -2642,7 +2643,7 @@ begin
    if (fsplitdir = sd_tabed) and (ftabwidget <> nil) then begin
     int3:= 0;
     for int1:= 0 to high(ftaborder) do begin
-     str1:= ftaborder[int1];
+     str1:= ansistring(ftaborder[int1]);
      for int2:= int3 to tdocktabwidget(ftabwidget).count - 1 do begin
       widget1:= tdocktabpage(tdocktabwidget(ftabwidget)[int2]).ftarget;
       if (widget1 <> nil) and (widget1.Name = str1) then begin
@@ -2870,7 +2871,7 @@ begin
   with tdocktabwidget(ftabwidget) do begin
    setlength(ar1,count);
    for int1:= 0 to high(ar1) do begin
-    ar1[int1]:= tdocktabpage(items[int1]).ftarget.Name;
+    ar1[int1]:= msestring(tdocktabpage(items[int1]).ftarget.Name);
    end;
    writer.writearray('order',ar1);
    writer.writeinteger('activetab',activepageindex);
