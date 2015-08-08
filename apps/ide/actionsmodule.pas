@@ -295,7 +295,7 @@ uses
  main,make,actionsmodule_mfm,sourceform,msedesigner,msetypes,msefiledialog,
  projectoptionsform,findinfileform,breakpointsform,watchform,selecteditpageform,
  disassform,printform,msegdbutils,mseintegerenter,msesettings,
- componentstore,cpuform,sysutils,msecomptree;
+ componentstore,cpuform,sysutils,msecomptree,mseformatstr;
  
 procedure configureide;
 begin
@@ -667,7 +667,8 @@ begin
   int1:= 0;
   if integerenter(int1,minint,maxint,self.c[ord(ac_processid)],
                       self.c[ord(ac_attachtoprocess)]) = mr_ok then begin
-   setstattext(self.c[ord(ac_attachingprocess)]+' '+inttostr(int1),mtk_running);
+   setstattext(self.c[ord(ac_attachingprocess)]+' '+
+                                    inttostrmse(int1),mtk_running);
    application.processmessages;
    startgdb(false);
    gdb.attach(int1,info);
@@ -795,12 +796,12 @@ begin
  name1:= '';
  with designer do begin
   if selections.count > 0 then begin
-   name1:= ownernamepath(selections[0]);
+   name1:= msestring(ownernamepath(selections[0]));
   end;
   if compnamedialog(designer.getcomponentnametree(nil,true,true,nil,
                       @filterfindcomp,nil),name1,true) = mr_ok then begin
    replacechar1(name1,':','.');
-   comp1:= designer.getcomponent(name1,po1);
+   comp1:= designer.getcomponent(ansistring(name1),po1);
    designer.showformdesigner(po1);
    designer.selectcomponent(comp1);
   end;

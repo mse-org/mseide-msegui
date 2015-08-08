@@ -138,7 +138,7 @@ type
  end;
  
 var
- defaultprintcommand: string;
+ defaultprintcommand: msestring;
  
 function fileattributestofilerights(
                    const attributes: fileattributesty): filerightsty;

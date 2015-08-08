@@ -82,7 +82,7 @@ function sys_getutctime: tdatetime;
 function sys_getlocaltime: tdatetime;
 function sys_localtimeoffset: tdatetime;
 function sys_getlangname: string;
-function sys_getprintcommand: string;
+function sys_getprintcommand: msestring;
 (*
 function sys_utctolocaltime(const value: tdatetime): tdatetime;
 function sys_localtimetoutc(const value: tdatetime): tdatetime;

@@ -44,7 +44,7 @@ implementation
 uses
  printform_mfm,main,sourceform,msestream,msesys,msegraphutils,msedrawtext,
  msesettings,msereal,msewidgets,sysutils,projectoptionsform,mserichstring,
- mseguiglob;
+ mseguiglob,mseformatstr;
 type
  stringconsts = (
   page,           //0 Page
@@ -72,14 +72,14 @@ begin
      else begin
       printorientation:= pao_portrait;
      end;      
-     font.name:= sourcefont.value;
+     font.name:= ansistring(sourcefont.value);
      font.height:= round(fontsize.value);
      headerheight:= round(fontsize.value*5/3);
      if linenum.value then begin
       indentx:= round(4*fontsize.value);
      end;
      font1.assign(font);
-     font1.name:= titlefont.value;
+     font1.name:= ansistring(titlefont.value);
     end;
     with sourcefo.activepage.edit do begin
      if rowindex >= datalist.count then begin
@@ -88,8 +88,8 @@ begin
      end
      else begin
       if linenum.value then begin
-       drawtext(inttostr(linenumber+1),makerect(0,liney,round(3*fontsize.value),0),
-                             [tf_right],font1);
+       drawtext(inttostrmse(linenumber+1),
+             makerect(0,liney,round(3*fontsize.value),0),[tf_right],font1);
       end;
       writeln(expandtabs(richlines[rowindex],projectoptions.e.tabstops));
       inc(rowindex);
@@ -123,10 +123,10 @@ procedure tprintfo.pronpagestart(const sender: tcustomprinter);
 begin
  with sender.canvas do begin
   save;
-  font.name:= titlefont.value;
+  font.name:= ansistring(titlefont.value);
   drawtext(sourcefo.activepage.filepath,makerect(0,0,clientsize.cx-
                           round(10*fontsize.value),0),[tf_ellipseleft]);
-  drawtext(c[ord(page)]+' '+inttostr(pagenumber+1),
+  drawtext(c[ord(page)]+' '+inttostrmse(pagenumber+1),
                  makerect(clientsize.cx,0,0,0),[tf_right]);
   restore;
  end;

@@ -70,7 +70,7 @@ type
  end;
  settingsty = record
   macros: settingsmacrosty;
-  printcommand: string;
+  printcommand: msestring;
  end;
   
  tsettingsfo = class(tmseform)
@@ -119,7 +119,7 @@ var
 procedure updatesettings(const filer: tstatfiler);
 function getsettingsmacros: macroinfoarty;
 function getsyssettingsmacros: macroinfoarty;
-function getprintcommand: string;
+function getprintcommand: msestring;
 function editsettings(const acaption: msestring = '';
                            const shortcuts: tshortcutcontroller = nil): boolean;
  
@@ -161,7 +161,7 @@ begin
  end;
 end;
  
-function getprintcommand: string;
+function getprintcommand: msestring;
 begin
  result:= settings.printcommand;
 end;

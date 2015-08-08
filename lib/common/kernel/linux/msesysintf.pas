@@ -173,7 +173,7 @@ begin
  result:= stderr;
 end;
 
-function sys_getprintcommand: string;
+function sys_getprintcommand: msestring;
 begin
  result:= defaultprintcommand;
  if result = '' then begin
