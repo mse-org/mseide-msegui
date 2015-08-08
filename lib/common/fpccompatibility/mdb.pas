@@ -5584,7 +5584,7 @@ end;
 
 function TField.GetAsWideString: WideString;
 begin
-  Result := GetAsString;
+  Result := widestring(GetAsString);
 end;
 
 function TField.GetOldValue: Variant;
@@ -5954,7 +5954,7 @@ end;
 
 procedure TField.SetAsWideString(const aValue: WideString);
 begin
-  SetAsString(aValue);
+  SetAsString(ansistring(aValue));
 end;
 
 function TField.getasguid: tguid;
@@ -6130,12 +6130,12 @@ end;
 
 function TField.getasunicodestring: unicodestring;
 begin
- result:= getasstring;
+ result:= unicodestring(getasstring);
 end;
 
 procedure TField.setasunicodestring(const avalue: unicodestring);
 begin
- setasstring(avalue);
+ setasstring(ansistring(avalue));
 end;
 
 const
@@ -6519,12 +6519,12 @@ end;
 
 function TWideStringField.GetAsString: string;
 begin
-  Result := GetAsWideString;
+  Result := ansistring(GetAsWideString);
 end;
 
 procedure TWideStringField.SetAsString(const aValue: string);
 begin
-  SetAsWideString(aValue);
+  SetAsWideString(widestring(aValue));
 end;
 
 function twidestringfield.getasunicodestring: unicodestring;
@@ -8248,12 +8248,12 @@ end;
 
 function TMemoField.GetAsWideString: WideString;
 begin
-  Result := GetAsString;
+  Result := widestring(GetAsString);
 end;
 
 procedure TMemoField.SetAsWideString(const aValue: WideString);
 begin
-  SetAsString(aValue);
+  SetAsString(ansistring(aValue));
 end;
 
 { TWideMemoField }
@@ -8266,23 +8266,26 @@ end;
 
 function TWideMemoField.GetAsString: string;
 begin
-  Result := GetAsWideString;
+  Result := ansistring(GetAsWideString);
 end;
 
 procedure TWideMemoField.SetAsString(const aValue: string);
 begin
-  SetAsWideString(aValue);
+  SetAsWideString(widestring(aValue));
 end;
 
 function TWideMemoField.GetAsVariant: Variant;
 
-Var s : string;
+//Var s : string;
 
 begin
   if not GetIsNull then
     begin
+    result:= getaswidestring;
+   {
     s := GetAsWideString;
     result := s;
+   }
     end
   else result := Null;
 end;
