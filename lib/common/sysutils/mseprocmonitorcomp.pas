@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2008-2009 by Martin Schreiber
+{ MSEgui Copyright (c) 2008-2015 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -11,7 +11,7 @@ unit mseprocmonitorcomp;
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
 interface
 uses
- mseclasses,msesystypes,mseevent,mseprocmonitor,mseprocutils;
+ mseclasses,msesystypes,mseevent,mseprocmonitor,mseprocutils,msestrings;
  
 type
  proclisteninfoty = record
@@ -41,7 +41,7 @@ type
                                  const adata: pointer = nil): boolean;
           //does nothing and returns false if aprochandle = invalidprochandle
    procedure unlistentoprocess(const aprochandle: prochandlety);
-   function exec(const acommandline: string; 
+   function exec(const acommandline: msestring; 
                  const aoptions: execoptionsty = []
 //                       const inactive: boolean = true; 
                           //windows only
@@ -126,7 +126,7 @@ begin
  internalunlistentoprocess(aprochandle, false);
 end;
 
-function tprocessmonitor.exec(const acommandline: string;
+function tprocessmonitor.exec(const acommandline: msestring;
                const aoptions: execoptionsty = []
 //               const inactive: boolean = true;
 //               const nostdhandle: boolean = false

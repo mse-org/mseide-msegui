@@ -25,7 +25,7 @@ uses
 procedure domake(atag: integer);
 procedure abortmake;
 function making: boolean;
-function buildmakecommandline(const atag: integer): string;
+function buildmakecommandline(const atag: integer): msestring;
 function addmessagetext(const sender: tpipereader;
                               const procid: pprocidty): string;
 
@@ -62,8 +62,8 @@ type
    procedure inputavailable(const sender: tpipereader);
    procedure messagefinished(const sender: tpipereader);
    procedure dofinished; virtual;
-   function getcommandline: ansistring; virtual;
-   procedure runprog(const acommandline: string);
+   function getcommandline: msestring; virtual;
+   procedure runprog(const acommandline: msestring);
   public
    constructor create(const aowner: tcomponent;
                          const clearscreen,setmakedir: boolean); reintroduce;
@@ -74,7 +74,7 @@ type
   private
    fscriptpath: filenamety;
   protected
-   function getcommandline: ansistring; override;
+   function getcommandline: msestring; override;
    procedure dofinished; override;
   public
    constructor create(const aowner: tcomponent; const ascriptpath: filenamety;
@@ -94,7 +94,7 @@ type
   protected
    procedure doasyncevent(var atag: integer); override;
    procedure dofinished; override;
-   function getcommandline: ansistring; override;
+   function getcommandline: msestring; override;
   public
    constructor create(atag: integer); reintroduce;
  end;
@@ -102,7 +102,7 @@ type
  tloader = class(tprogrunner)
   protected
    procedure dofinished; override;
-   function getcommandline: ansistring; override;
+   function getcommandline: msestring; override;
   public
    constructor create(aowner: tcomponent);
  end;
@@ -170,7 +170,7 @@ begin
  end;
 end;
 
-function buildmakecommandline(const atag: integer): string;
+function buildmakecommandline(const atag: integer): msestring;
  
  function normalizename(const aname: filenamety): filenamety;
  begin
@@ -287,7 +287,7 @@ begin
  inherited;
 end;
 
-procedure tprogrunner.runprog(const acommandline: string);
+procedure tprogrunner.runprog(const acommandline: msestring);
 var
  wdbefore: filenamety;
 begin
@@ -306,7 +306,7 @@ begin
    wdbefore:= setcurrentdirmse(makedir);
   end;
   try
-   procid:= execmse2(acommandline,nil,messagepipe,messagepipe,-1,
+   procid:= execmse2(msestring(acommandline),nil,messagepipe,messagepipe,-1,
                                                    [exo_inactive,exo_tty]);
   except
    on e1: exception do begin
@@ -317,7 +317,7 @@ begin
 {$warnings on}
     end;
     application.handleexception(nil,actionsmo.c[ord(ac_runerrorwith)]+
-                                                          acommandline+'": ');
+                                                msestring(acommandline)+'": ');
    end;
   end;
   if fsetmakedir and (makedir <> '') then begin
@@ -376,7 +376,7 @@ begin
  end;
 end;
 
-function tprogrunner.getcommandline: ansistring;
+function tprogrunner.getcommandline: msestring;
 begin
  result:= ''; //dummy
 end;
@@ -409,7 +409,7 @@ begin
  inherited;
 end;
 
-function tmaker.getcommandline: ansistring;
+function tmaker.getcommandline: msestring;
 begin
  result:= '';
  with projectoptions,o do begin
@@ -465,7 +465,7 @@ procedure tmaker.doasyncevent(var atag: integer);
               [foo_antialiased2];
  end;
 var
- str1: string;
+ str1: msestring;
 begin
  inherited;
  str1:= getcommandline;
@@ -498,7 +498,7 @@ begin
  inherited;
 end;
 
-function tloader.getcommandline: ansistring;
+function tloader.getcommandline: msestring;
 begin
  result:= projectoptions.d.texp.uploadcommand;
 end;
@@ -524,7 +524,7 @@ begin
  end;
 end;
 
-function tscriptrunner.getcommandline: ansistring;
+function tscriptrunner.getcommandline: msestring;
 begin
  result:= fscriptpath;
 end;
