@@ -109,8 +109,8 @@ begin
      instance.count:= fields.rowcount;
      for int1:= 0 to fields.rowhigh() do begin
       with tififieldlink(instance[int1]) do begin
-       sourcefieldname:= msestring(fo.sourcefieldname[int1]);
-       fieldname:= msestring(fo.fieldname[int1]);
+       sourcefieldname:= ansistring(fo.sourcefieldname[int1]);
+       fieldname:= ansistring(fo.fieldname[int1]);
        datatype:= listdatatypety(fo.datatype[int1]);
       end; 
      end;

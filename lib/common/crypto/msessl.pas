@@ -321,7 +321,7 @@ var
 begin
  int1:= err_get_error();
  if int1 <> 0 then begin
-  raiseerror(int1,cryptoerrormessages[aerror]);
+  raiseerror(int1,ansistring(cryptoerrormessages[aerror]));
  end;
 end;
 
