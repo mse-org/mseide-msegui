@@ -156,7 +156,8 @@ type
    procedure internalRollBackRetaining(trans : TSQLHandle); override;
    procedure UpdateIndexDefs(var IndexDefs : TIndexDefs;
                                           const aTableName : string); override;
-   function GetSchemaInfoSQL(SchemaType : TSchemaType; SchemaObjectName, SchemaPattern : string) : string; override;
+   function GetSchemaInfoSQL(SchemaType : TSchemaType; SchemaObjectName,
+                           SchemaPattern : msestring) : msestring; override;
    function CreateBlobStream(const Field: TField; const Mode: TBlobStreamMode;
                           const acursor: tsqlcursor): TStream; override;
    function getblobdatasize: integer; override;
@@ -308,7 +309,7 @@ var
 begin
  if ((Status[0] = 1) and (Status[1] <> 0)) then begin
   p:= @Status;
-  msg:= procname;
+  msg:= msestring(procname);
   while isc_interprete(Buf, @p) > 0 do begin
    Msg := Msg + lineend +' -' + connectionmessage(Buf);
   end;
@@ -1324,15 +1325,17 @@ begin
   end;
 end;
 
-function TIBConnection.GetSchemaInfoSQL(SchemaType : TSchemaType; SchemaObjectName, SchemaPattern : string) : string;
+function TIBConnection.GetSchemaInfoSQL(SchemaType : TSchemaType;
+                SchemaObjectName, SchemaPattern : msestring) : msestring;
 
-var s : string;
+var s : msestring;
 
 begin
   case SchemaType of
     stTables     : s := 'select '+
                           'rdb$relation_id          as recno, '+
-                          '''' + DatabaseName + ''' as catalog_name, '+
+                          '''' + msestring(DatabaseName) +
+                           ''' as catalog_name, '+
                           '''''                     as schema_name, '+
                           'rdb$relation_name        as table_name, '+
                           '0                        as table_type '+
@@ -1344,7 +1347,8 @@ begin
 
     stSysTables  : s := 'select '+
                           'rdb$relation_id          as recno, '+
-                          '''' + DatabaseName + ''' as catalog_name, '+
+                          '''' + msestring(DatabaseName) + 
+                          ''' as catalog_name, '+
                           '''''                     as schema_name, '+
                           'rdb$relation_name        as table_name, '+
                           '0                        as table_type '+
@@ -1356,7 +1360,8 @@ begin
 
     stProcedures : s := 'select '+
                            'rdb$procedure_id        as recno, '+
-                          '''' + DatabaseName + ''' as catalog_name, '+
+                          '''' + msestring(DatabaseName) +
+                          ''' as catalog_name, '+
                           '''''                     as schema_name, '+
                           'rdb$procedure_name       as proc_name, '+
                           '0                        as proc_type, '+
@@ -1368,7 +1373,8 @@ begin
                           '(rdb$system_flag = 0 or rdb$system_flag is null)';
     stColumns    : s := 'select '+
                            'rdb$field_id            as recno, '+
-                          '''' + DatabaseName + ''' as catalog_name, '+
+                          '''' + msestring(DatabaseName) +
+                          ''' as catalog_name, '+
                           '''''                     as schema_name, '+
                           'rdb$relation_name        as table_name, '+
                           'rdb$field_name           as column_name, '+
@@ -1384,7 +1390,8 @@ begin
                         'from '+
                           'rdb$relation_fields '+
                         'WHERE '+
-                          '(rdb$system_flag = 0 or rdb$system_flag is null) and (rdb$relation_name = ''' + Uppercase(SchemaObjectName) + ''') ' +
+                        '(rdb$system_flag = 0 or rdb$system_flag is null) and'+
+      ' (rdb$relation_name = ''' + Uppercase(SchemaObjectName) + ''') ' +
                         'order by rdb$field_name';
   else
     DatabaseError(SMetadataUnavailable)
@@ -1421,7 +1428,8 @@ begin
               'rel_con.rdb$index_name = ind.rdb$index_name '+
             'where '+
               '(ind_seg.rdb$index_name = ind.rdb$index_name) and '+
-              '(ind.rdb$relation_name=''' +  uppercase(atablename) +''') '+
+              '(ind.rdb$relation_name=''' +  
+                        msestring(uppercase(atablename)) +''') '+
             'order by '+
               'ind.rdb$index_name;';
    active:= true;
@@ -1854,12 +1862,13 @@ end;
 
 { eiberror }
 
-constructor eiberror.create(const asender: tibconnection; const amessage: msestring;
+constructor eiberror.create(const asender: tibconnection;
+                        const amessage: msestring;
                         const aerror: statusvectorty; const asqlcode: integer);
 begin
  fstatus:= aerror;
  fsqlcode:= asqlcode;
- inherited create(asender,amessage,amessage,aerror[1]);
+ inherited create(asender,ansistring(amessage),amessage,aerror[1]);
 end;
 
 end.

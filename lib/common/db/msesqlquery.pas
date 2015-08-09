@@ -184,7 +184,7 @@ type
    procedure Prepare; virtual;
    procedure UnPrepare; virtual;
    procedure ExecSQL; virtual;
-   function executedirect(const asql: string): integer; 
+   function executedirect(const asql: msestring): integer; 
              //uses writetransaction of tsqlquery
    function rowsreturned: integer; //-1 if not supported
    function rowsaffected: integer; //-1 if not supported
@@ -827,7 +827,7 @@ begin
          );
    if fparsesql and (pos(',',FFromPart) <= 0) then begin
             //don't change tablename otherwise
-    ftablename:= ffrompart;
+    ftablename:= ansistring(ffrompart);
     int1:= findchars(ftablename,endchars);
     if int1 > 0 then begin
      setlength(ftablename,int1-1); //use real name only
@@ -1482,8 +1482,8 @@ begin
     ((FUpdateMode = UpWhereChanged) and 
     (of_InWhere in optionsfield) and 
     (value <> oldvalue)) then begin
-   sql_where := sql_where + '(' + quotechar+FieldName+quotechar+ 
-             '= :OLD_' + FieldName + ') and ';
+   sql_where := sql_where + '(' + quotechar+msestring(FieldName)+quotechar+ 
+             '= :OLD_' + msestring(FieldName) + ') and ';
   end;
  end;
 end;
@@ -1507,7 +1507,7 @@ begin
     if int2 = 0 then begin
      result:= ' returning ';
     end;
-    result:= result + field1.fieldname + ',';
+    result:= result + msestring(field1.fieldname) + ',';
     inc(int2);
     if update then begin
      if not (bs_refreshupdateindex in fbstate) and
@@ -1562,7 +1562,8 @@ begin
    if fieldkind = fkdata then begin
     UpdateWherePart(sql_where,field1);
     if (of_InUpdate in optionsfield) then begin
-     sql_set:= sql_set + quotechar+FieldName+quotechar + '=:' + FieldName + ',';
+     sql_set:= sql_set + quotechar+msestring(FieldName)+quotechar + '=:' + 
+               msestring(FieldName) + ',';
     end;
    end;
   end;
@@ -1575,7 +1576,8 @@ begin
  end;
  setlength(sql_set,length(sql_set)-1);
  setlength(sql_where,length(sql_where)-5);
- result := 'update ' + FTableName + ' set ' + sql_set + ' where ' + sql_where;
+ result := 'update ' + msestring(FTableName) + ' set ' + sql_set + 
+                                                   ' where ' + sql_where;
  result:= result + refreshrecquery(true);
 end;
 
@@ -1595,8 +1597,8 @@ begin
   with fields[x] do begin
    if (fieldkind = fkdata) {and not IsNull} and 
                           (of_InInsert in optionsfield) then begin 
-    sql_fields:= sql_fields + quotechar+FieldName+quotechar+ ',';
-    sql_values:= sql_values + ':' + FieldName + ',';
+    sql_fields:= sql_fields + quotechar+msestring(FieldName)+quotechar+ ',';
+    sql_values:= sql_values + ':' + msestring(FieldName) + ',';
    end;
   end;
  end;
@@ -1605,8 +1607,8 @@ begin
  end;
  setlength(sql_fields,length(sql_fields)-1);
  setlength(sql_values,length(sql_values)-1);
- result := 'insert into ' + FTableName + ' (' + sql_fields + ') values (' +
-                     sql_values + ')';
+ result := 'insert into ' + msestring(FTableName) +
+                 ' (' + sql_fields + ') values (' +sql_values + ')';
  result:= result + refreshrecquery(false);
 end;
 
@@ -1628,7 +1630,7 @@ begin
   databaseerror('No "where" part in SQLDelete statement.',self);
  end;
  setlength(sql_where,length(sql_where)-5);
- result := 'delete from ' + FTableName + ' where ' + sql_where;
+ result := 'delete from ' + msestring(FTableName) + ' where ' + sql_where;
 end;
 
 Procedure TSQLQuery.internalApplyRecUpdate(UpdateKind : TUpdateKind);
@@ -2082,7 +2084,7 @@ begin
  end;
 end;
 }
-function TSQLQuery.executedirect(const asql: string): integer;
+function TSQLQuery.executedirect(const asql: msestring): integer;
 begin
  checkdatabase(name,fdatabase);
  result:= database.executedirect(asql,writetransaction); 

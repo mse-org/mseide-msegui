@@ -24,10 +24,10 @@ type
   protected
    procedure loaded; override;
    //idbcontroller
-   function readsequence(const sequencename: string): string; override;
-   function sequencecurrvalue(const sequencename: string): string; override;
+   function readsequence(const sequencename: string): msestring; override;
+   function sequencecurrvalue(const sequencename: string): msestring; override;
    function writesequence(const sequencename: string;
-                    const avalue: largeint): string; override;
+                    const avalue: largeint): msestring; override;
    function CreateBlobStream(const Field: TField; const Mode: TBlobStreamMode; 
                        const acursor: tsqlcursor): TStream; override;
   public
@@ -38,7 +38,7 @@ type
  
 implementation
 uses
- msefileutils,sysutils;
+ msefileutils,sysutils,mseformatstr;
 
 { tmseibconnection }
 
@@ -75,20 +75,24 @@ begin
  end;
 end;
 
-function tmseibconnection.readsequence(const sequencename: string): string;
+function tmseibconnection.readsequence(const sequencename: string): msestring;
 begin
- result:= 'select gen_id('+sequencename+',1) as res from RDB$DATABASE;';
+ result:= 'select gen_id('+msestring(sequencename)+
+                                   ',1) as res from RDB$DATABASE;';
 end;
 
-function tmseibconnection.sequencecurrvalue(const sequencename: string): string;
+function tmseibconnection.sequencecurrvalue(
+                                       const sequencename: string): msestring;
 begin
- result:= 'select gen_id('+sequencename+',0) as res from RDB$DATABASE;';
+ result:= 'select gen_id('+msestring(sequencename)+
+                                    ',0) as res from RDB$DATABASE;';
 end;
 
 function tmseibconnection.writesequence(const sequencename: string;
-               const avalue: largeint): string;
+               const avalue: largeint): msestring;
 begin
- result:= 'set generator '+sequencename+' to '+inttostr(avalue)+';';
+ result:= 'set generator '+msestring(sequencename)+
+                                    ' to '+inttostrmse(avalue)+';';
 end;
 
 function tmseibconnection.CreateBlobStream(const Field: TField;

@@ -366,7 +366,7 @@ type
 
  toptionalclasspropertyeditor = class(tclasspropertyeditor)
   protected
-   function getniltext: string; virtual;
+   function getniltext: msestring; virtual;
    function getinstance: tpersistent; virtual;
    function getdefaultstate: propertystatesty; override;
    procedure deleteinstance;
@@ -380,7 +380,7 @@ type
  ppersistent = ^tpersistent;
  tparentclasspropertyeditor = class(toptionalclasspropertyeditor)
   protected
-   function getniltext: string; override;
+   function getniltext: msestring; override;
    function getinstancepo(acomponent: tobject): ppersistent; virtual; abstract;
    function getinstance: tpersistent; override;
   public
@@ -583,7 +583,7 @@ type
 
  toptionaldatalistpropertyeditor = class(tdatalistpropertyeditor)
   protected
-   function getniltext: string; virtual;
+   function getniltext: msestring; virtual;
    function getinstance: tpersistent; virtual;
    procedure deleteinstance;
    function getdefaultstate: propertystatesty; override;
@@ -824,7 +824,7 @@ type
 
  toptionalpersistentarraypropertyeditor = class(tpersistentarraypropertyeditor)
   protected
-   function getniltext: string; virtual;
+   function getniltext: msestring; virtual;
    function getinstance: tpersistent; virtual;
    function getdefaultstate: propertystatesty; override;
   public
@@ -999,10 +999,10 @@ begin
   result:= '<nil>'
  end
  else begin
-  result:= designer.getcomponentname(acomp);
+  result:= msestring(designer.getcomponentname(acomp));
  end;
  if result = '' then begin
-  result:= ownernamepath(acomp);
+  result:= msestring(ownernamepath(acomp));
  end;
 end;
 
@@ -1094,7 +1094,7 @@ begin
  int2:= 0;
  for int1:= 0 to 31 do begin
   if longword(value) and bits[int1] <> 0 then begin
-   result[int2]:= getenumname(typeinfo,int1);
+   result[int2]:= msestring(getenumname(typeinfo,int1));
    inc(int2);
   end;
  end;
@@ -1114,7 +1114,8 @@ begin
  for int1:= 0 to high(value) do begin
   int2:= getenumvalue(enumtype,value[int1]);
   if (int2 < 0) then begin
-   raise exception.Create(mo.c[ord(invalidsetitem)]+': '''+value[int1]+'''');
+   raise exception.Create(
+           ansistring(mo.c[ord(invalidsetitem)])+': '''+value[int1]+'''');
   end;
   ar1[int2]:= true;
  end;
@@ -1402,7 +1403,7 @@ begin
  if aprops <> nil then begin
   fprops:= copy(aprops); //!!!! crash whithout copy, why ?
 // reallocarray(fprops,sizeof(props[0]));
-  fname:= fprops[0].propinfo^.Name;
+  fname:= msestring(fprops[0].propinfo^.Name);
  end;
  fstate:= getdefaultstate;
  updatedefaultvalue;
@@ -1846,7 +1847,8 @@ begin
  end
  else begin
   with fprops[index] do begin
-   result:= decodemsestring(GetstrProp(instance,propinfo));
+   result:= ansistring(decodemsestring(
+                               msestring(GetstrProp(instance,propinfo))));
   end;
  end;
 end;
@@ -1861,7 +1863,7 @@ begin
   fremote.setstringvalue(value);
  end
  else begin
-  str1:= encodemsestring(value);
+  str1:= ansistring(encodemsestring(msestring(value)));
   ar1:= queryselectedpropinstances;
   if ar1 = nil then begin
    for int1:= 0 to high(fprops) do begin
@@ -1896,7 +1898,7 @@ begin
     numcharchar: begin po1^:= numcharchar; inc(po1); po1^:= numcharchar; end;
     else begin
      if avalue[int1] < widechar(32) then begin
-      mstr1:= numcharchar+inttostr(ord(avalue[int1]));
+      mstr1:= numcharchar+inttostrmse(ord(avalue[int1]));
       if (avalue[int1+1] >= '0') and (avalue[int1+1] <= '9') or 
                      (avalue[int1+1] = ' ') then begin
        mstr1:= mstr1 + ' ';
@@ -2148,7 +2150,7 @@ end;
 
 procedure tpropertyeditor.properror;
 begin
- raise exception.Create(mo.c[ord(wrongpropertyvalue)]);
+ raise exception.Create(ansistring(mo.c[ord(wrongpropertyvalue)]));
 end;
 
 function tpropertyeditor.getdefaultstate: propertystatesty;
@@ -2271,12 +2273,12 @@ end;
 
 function tordinalpropertyeditor.getvalue: msestring;
 begin
- result:= inttostr(getordvalue);
+ result:= inttostrmse(getordvalue);
 end;
 
 procedure tordinalpropertyeditor.setvalue(const value: msestring);
 begin
- setordvalue(strtointvalue(value));
+ setordvalue(strtointvalue(ansistring(value)));
 end;
 
 function tordinalpropertyeditor.getdefaultstate: propertystatesty;
@@ -2306,12 +2308,12 @@ end;
 
 function tint64propertyeditor.getvalue: msestring;
 begin
- result:= inttostr(getint64value);
+ result:= inttostrmse(getint64value);
 end;
 
 procedure tint64propertyeditor.setvalue(const value: msestring);
 begin
- setint64value(strtointvalue64(value));
+ setint64value(strtointvalue64(ansistring(value)));
 end;
 
 function tint64propertyeditor.getdefaultstate: propertystatesty;
@@ -2325,7 +2327,7 @@ procedure tcharpropertyeditor.setvalue(const value: msestring);
 var
  str1: string;
 begin
- str1:= encodemsestring(value);
+ str1:= ansistring(encodemsestring(value));
  if str1 = '' then begin
   setordvalue(0);
  end
@@ -2343,7 +2345,7 @@ begin
   result:= '';
  end
  else begin
-  result:= decodemsestring(char(int1));
+  result:= decodemsestring(msechar(char(int1)));
  end;
 end;
 
@@ -2411,7 +2413,7 @@ var
 begin
  method1:= getmethodvalue;
  if method1.data <> nil then begin
-  result:= fdesigner.getmethodname(method1,fcomponent);
+  result:= msestring(fdesigner.getmethodname(method1,fcomponent));
  end
  else begin
   result:= '';
@@ -2450,29 +2452,30 @@ begin
   setmethodvalue(method1);
  end
  else begin
-  if not isvalidident(value) then begin
-   raise exception.create(mo.c[ord(invalidmethodname)]+' '''+value+'''.');
+  if not isvalidident(ansistring(value)) then begin
+   raise exception.create(ansistring(
+                    mo.c[ord(invalidmethodname)]+' '''+value+'''.'));
   end;
-  method1:= fdesigner.getmethod(value,fmodule,
+  method1:= fdesigner.getmethod(ansistring(value),fmodule,
                   fprops[0].propinfo^.proptype{$ifndef FPC}^{$endif},true);
   if method1.data = nil then begin //method not found
    if (method2.data <> nil) and not isselected and 
                          fdesigner.isownedmethod(fmodule,method2)then begin
-    fdesigner.changemethodname(method2,value,
+    fdesigner.changemethodname(method2,ansistring(value),
          fprops[0].propinfo^.proptype{$ifndef FPC}^{$endif});
     method1:= method2;
    end
    else begin
     if method1.data <> nil then begin
-     raise exception.create(mo.c[ord(str_methodname)]+' '''+value+''' '+
-                       mo.c[ord(exists)]);
+     raise exception.create(ansistring(mo.c[ord(str_methodname)]+' '''+value+''' '+
+                       mo.c[ord(exists)]));
     end;
-    method1:= fdesigner.createmethod(value,fmodule,
+    method1:= fdesigner.createmethod(ansistring(value),fmodule,
                  fprops[0].propinfo^.proptype{$ifndef FPC}^{$endif});
    end;
   end
   else begin
-   fdesigner.checkmethod(method1,value,fmodule,
+   fdesigner.checkmethod(method1,ansistring(value),fmodule,
                  fprops[0].propinfo^.proptype{$ifndef FPC}^{$endif});
   end;
   setmethodvalue(method1);
@@ -2540,7 +2543,7 @@ var
  str1: string;
  ar1: stringarty;
 begin
- str1:= trim(value);
+ str1:= trim(ansistring(value));
  if (length(str1) > 0) and (str1[1] = '[') then begin
   str1:= copy(str1,2,bigint);
  end;
@@ -2638,7 +2641,7 @@ begin
 {$else}
 // result:= getenumname(gettypedata(fparent.fprops[0].propinfo^.proptype^)^.comptype^,findex);
  {$endif}
- result:= getenumname(ftypeinfo,findex);
+ result:= msestring(getenumname(ftypeinfo,findex));
 end;
 
 procedure tsetelementeditor.setvalue(const value: msestring);
@@ -2678,13 +2681,14 @@ end;
 
 function tclasspropertyeditor.checkfreeoptionalclass: boolean;
 begin
- result:= askok(mo.c[ord(wishdestroy)]+' ' + fname+' ('+ftypeinfo^.Name+
-          ')?',stockobjects.captions[sc_confirmation]);
+ result:= askok(mo.c[ord(wishdestroy)]+' ' + fname+' ('+
+             msestring(ftypeinfo^.Name)+
+                     ')?',stockobjects.captions[sc_confirmation]);
 end;
 
 function tclasspropertyeditor.dispname: msestring;
 begin
- result:= ftypeinfo^.name;
+ result:= msestring(ftypeinfo^.name);
 end;
 
 function tclasspropertyeditor.getvalue: msestring;
@@ -2945,11 +2949,11 @@ begin
  if co1 = nil then begin
   mstr1:= fcomppath;
   if mstr1 = '' then begin
-   mstr1:= fmodule.name;
+   mstr1:= msestring(fmodule.name);
   end;
  end
  else begin
-  mstr1:= ownernamepath(co1);
+  mstr1:= msestring(ownernamepath(co1));
  end;
  if compnamedialog(tree1,mstr1,false) = mr_ok then begin
   fcomppath:= mstr1;
@@ -2973,11 +2977,11 @@ begin
    if value <> getvalue then begin
     int1:= pos('<',value);
     if int1 > 0 then begin
-     comp:= fdesigner.getcomponent(copy(value,1,int1-1),fmodule);
+     comp:= fdesigner.getcomponent(copy(ansistring(value),1,int1-1),fmodule);
 //     comp:= fmodule.findcomponent(copy(value,1,int1-1));
     end
     else begin
-     comp:= fdesigner.getcomponent(value,fmodule);
+     comp:= fdesigner.getcomponent(ansistring(value),fmodule);
     end;
     if (comp = nil) or not comp.InheritsFrom(gettypedata(ftypeinfo)^.classtype) then begin
      properror;
@@ -3147,7 +3151,7 @@ begin
  result:= tpersistent(getpointervalue);
 end;
 
-function toptionalclasspropertyeditor.getniltext: string;
+function toptionalclasspropertyeditor.getniltext: msestring;
 begin
  result:= '<disabled>';
 end;
@@ -3209,7 +3213,7 @@ begin
  result:= getinstancepo(instance)^;
 end;
 
-function tparentclasspropertyeditor.getniltext: string;
+function tparentclasspropertyeditor.getniltext: msestring;
 begin
  result:= '<parent>';
 end;
@@ -3258,12 +3262,12 @@ end;
 
 function tstringpropertyeditor.getvalue: msestring;
 begin
- result:= getstringvalue(0);
+ result:= msestring(getstringvalue(0));
 end;
 
 procedure tstringpropertyeditor.setvalue(const value: msestring);
 begin
- setstringvalue(value);
+ setstringvalue(ansistring(value));
 end;
 
 { tmsestringpropertyeditor }
@@ -3348,7 +3352,7 @@ end;
 
 function tarraypropertyeditor.getvalue: msestring;
 begin
- result:= inttostr(tarrayprop(getpointervalue).count);
+ result:= inttostrmse(tarrayprop(getpointervalue).count);
 end;
 
 function tarraypropertyeditor.name: msestring;
@@ -3376,8 +3380,8 @@ begin
   end;
  end;
  int1:= tarrayprop(getpointervalue).count;
- if ( int1 > va) and not askok(mo.c[ord(wishdelete)]+' '+inttostr(va) +
-         ' '+mo.c[ord(str_to)]+' '+ inttostr(int1-1) + '?',
+ if ( int1 > va) and not askok(mo.c[ord(wishdelete)]+' '+inttostrmse(va) +
+         ' '+mo.c[ord(str_to)]+' '+ inttostrmse(int1-1) + '?',
          stockobjects.captions[sc_confirmation]) then begin
   exit;
  end;
@@ -3532,7 +3536,7 @@ end;
 function tarraypropertyeditor.itemname(
                 const sender: tarrayelementeditor): msestring;
 begin
- result:= itemprefix + inttostr(sender.findex);
+ result:= itemprefix + inttostrmse(sender.findex);
 end;
 
 function tarraypropertyeditor.itemsubproperties(
@@ -3973,7 +3977,7 @@ begin
  result:= tpersistent(getpointervalue);
 end;
 
-function toptionalpersistentarraypropertyeditor.getniltext: string;
+function toptionalpersistentarraypropertyeditor.getniltext: msestring;
 begin
  result:= '<disabled>';
 end;
@@ -4008,7 +4012,7 @@ begin
  else begin
   result:= '<' + decodemsestring(item1.caption) + '>';
   if item1.name <> '' then begin
-   result:= result + '<' + item1.name + '>';
+   result:= result + '<' + msestring(item1.name) + '>';
   end;
  end;
 end;
@@ -4119,7 +4123,7 @@ end;
 
 function tclasselementeditor.dispname: msestring;
 begin
- result:= tobject(getpointervalue).classtype.classname;
+ result:= msestring(tobject(getpointervalue).classtype.classname);
 end;
 
 { tcllectionitemeditor }
@@ -4182,7 +4186,7 @@ end;
 
 function tcollectionitemeditor.name: msestring;
 begin
- result:= 'Item '+inttostr(findex);
+ result:= 'Item '+inttostrmse(findex);
 end;
 {
 function tcollectionitemeditor.getordvalue(const index: integer = 0): integer;
@@ -4326,7 +4330,7 @@ var
 begin
  col1:= tcollection(getpointervalue);
  if col1 <> nil then begin
-  result:= inttostr(col1.count);
+  result:= inttostrmse(col1.count);
  end
  else begin
   result:= '<nil>';
@@ -4352,8 +4356,8 @@ begin
   end;
   int1:= col1.count;
   if ( int1 > va) then begin
-   if askok('Do you wish to delete items '+inttostr(va) +
-          ' to '+ inttostr(int1-1) + '?','CONFIRMATION') then begin
+   if askok('Do you wish to delete items '+inttostrmse(va) +
+          ' to '+ inttostrmse(int1-1) + '?','CONFIRMATION') then begin
     for int2:= int1 - 1 downto va do begin
      col1.items[int2].free;
     end;
@@ -4386,7 +4390,8 @@ begin
  if col1 <> nil then begin
   setlength(result,col1.count);
   itemtypeinfo:= ptypeinfo(col1.itemclass.classinfo);
-  edtype:= propertyeditors.geteditorclass(itemtypeinfo,fcomponent.classtype,fname);
+  edtype:= propertyeditors.geteditorclass(
+                       itemtypeinfo,fcomponent.classtype,ansistring(fname));
   for int1:= 0 to high(result) do begin
    result[int1]:= tcollectionitemeditor.create(int1,self,edtype,fdesigner,
             fobjectinspector,fprops,itemtypeinfo);
@@ -4458,12 +4463,12 @@ end;
 
 function tenumpropertyeditor.getvalue: msestring;
 begin
- result:= getenumname(gettypeinfo,getordvalue);
+ result:= msestring(getenumname(gettypeinfo,getordvalue));
 end;
 
 procedure tenumpropertyeditor.setvalue(const value: msestring);
 begin
- setordvalue(getenumvalue(gettypeinfo,value));
+ setordvalue(getenumvalue(gettypeinfo,ansistring(value)));
 end;
 
 function tenumpropertyeditor.getvalues: msestringarty;
@@ -4476,8 +4481,8 @@ begin
  with typedata1^ do begin
   if minvalue < 0 then begin //for boolean
    setlength(result,2);
-   result[0]:= getenumname(atypeinfo,0);
-   result[1]:= getenumname(atypeinfo,1);
+   result[0]:= msestring(getenumname(atypeinfo,0));
+   result[1]:= msestring(getenumname(atypeinfo,1));
   end
   else begin
    result:= getenumnames(atypeinfo);
@@ -4512,7 +4517,8 @@ end;
 
 procedure tbooleanpropertyeditor.setvalue(const value: msestring);
 begin
- setordvalue(longword(uppercase(trim(value)) = uppercase(truename)));
+ setordvalue(longword(uppercase(trim(value)) = 
+                                   uppercase(msestring(truename))));
 end;
 
 function tbooleanpropertyeditor.getvalue: msestring;
@@ -4575,7 +4581,7 @@ function tbitmappropertyeditor.getvalue: msestring;
 begin
  with tmaskedbitmap(getpointervalue) do begin
   if source <> nil then begin
-   result:= fdesigner.getcomponentname(source);
+   result:= msestring(fdesigner.getcomponentname(source));
   end
   else begin
    if isempty then begin
@@ -4627,7 +4633,7 @@ end;
 
 function trealpropertyeditor.getvalue: msestring;
 begin
- result:= realtostr(getfloatvalue);
+ result:= msestring(realtostr(getfloatvalue));
 end;
 
 { tcurrencypropertyeditor }
@@ -4657,7 +4663,7 @@ end;
 
 function tcurrencypropertyeditor.getvalue: msestring;
 begin
- result:= realtostr(getcurrencyvalue);
+ result:= currencytostrmse(getcurrencyvalue);
 end;
 
 { trealtypropertyeditor }
@@ -4755,7 +4761,7 @@ procedure tdatetimepropertyeditor.setvalue(const value: msestring);
    end;
   end
   else begin
-   raise exception.create(mo.c[ord(emptydate)]+'.');
+   raise exception.create(ansistring(mo.c[ord(emptydate)]+'.'));
   end;
   result:= encodedate(year,month,day);
  end;
@@ -4780,7 +4786,7 @@ procedure tdatetimepropertyeditor.setvalue(const value: msestring);
    result:= encodetime(hour,minute,second,0);
   end
   else begin
-   raise exception.create(mo.c[ord(emptytime)]+'.');
+   raise exception.create(ansistring(mo.c[ord(emptytime)]+'.'));
   end;
  end;
  
@@ -5021,7 +5027,7 @@ end;
 
 function tcolorpropertyeditor.getvalue: msestring;
 begin
- result:= colortostring(getordvalue);
+ result:= msestring(colortostring(getordvalue));
 end;
 
 function tcolorpropertyeditor.getvalues: msestringarty;
@@ -5031,7 +5037,7 @@ end;
 
 procedure tcolorpropertyeditor.setvalue(const value: msestring);
 begin
- setordvalue(stringtocolor(value));
+ setordvalue(stringtocolor(ansistring(value)));
 end;
 
 { tstringspropertyeditor }
@@ -5047,7 +5053,7 @@ begin
     try
      clear;
      for int1:= 0 to grid.rowcount-1 do begin
-      Add(valueedit[int1]);
+      Add(ansistring(valueedit[int1]));
      end;
     finally
      endupdate
@@ -5073,7 +5079,7 @@ begin
   with editform do begin
    grid.rowcount:= strings.Count;
    for int1:= 0 to strings.Count - 1 do begin
-    valueedit[int1]:= strings[int1];
+    valueedit[int1]:= msestring(strings[int1]);
    end;
    show(true,nil);
   end;
@@ -5136,7 +5142,7 @@ begin
           str1:= stringtoutf8(textedit[int1]);
          end
          else begin
-          str1:= textedit[int1];
+          str1:= ansistring(textedit[int1]);
          end;
          updateline(str1);
          add(str1);
@@ -5203,7 +5209,7 @@ begin
       textedit[int1]:= utf8tostring(strings[int1]);
      end
      else begin
-      textedit[int1]:= strings[int1];
+      textedit[int1]:= msestring(strings[int1]);
      end;
     end;
    end;
@@ -5408,7 +5414,7 @@ begin
    result:= '<empty>';
   end
   else begin
-   result:= '<'+datalist1.classname+'>';
+   result:= msestring('<'+datalist1.classname+'>');
   end;
  end;
 end;
@@ -5649,7 +5655,7 @@ var
  int1: integer;
 begin
  inherited create(adesigner,amodule,acomponent,aobjectinspector,nil,nil);
- fname:= aname;
+ fname:= msestring(aname);
  fsubproperties:= subprops;
  for int1:= 0 to high(fsubproperties) do begin
   with fsubproperties[int1] do begin
@@ -5732,8 +5738,9 @@ end;
 
 procedure tnamepropertyeditor.setvalue(const value: msestring);
 begin
- if (value <> '') and not isvalidident(value) then begin
-  raise exception.create(mo.c[ord(invalidcomponentname)]+' '''+value+'''.');
+ if (value <> '') and not isvalidident(ansistring(value)) then begin
+  raise exception.create(
+           ansistring(mo.c[ord(invalidcomponentname)]+' '''+value+'''.'));
  end;
  inherited;
 end;
@@ -5776,7 +5783,7 @@ end;
 
 { toptionaldatalistpropertyeditor }
 
-function toptionaldatalistpropertyeditor.getniltext: string;
+function toptionaldatalistpropertyeditor.getniltext: msestring;
 begin
  result:= '<disabled>';
 end;

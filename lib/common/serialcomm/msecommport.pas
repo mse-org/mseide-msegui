@@ -460,7 +460,7 @@ implementation
 uses
 // {$ifdef UNIX} {kernelioctl,}msesysbindings, {$endif}
  sysutils,mseapplication,msesysintf1,msesysintf,msesys,msesysutils,
- msepipestream,msefileutils;
+ msepipestream,msefileutils,mseformatstr;
 
 const
  asciipufferlaenge = 255;
@@ -936,7 +936,7 @@ var
 begin       //open
  close;
  if fcommname <> '' then begin
-  str1:= tosysfilepath(fcommname);
+  str1:= ansistring(tosysfilepath(fcommname));
  end
  else begin
  {$ifdef MSWINDOWS}
@@ -1912,7 +1912,7 @@ end;
 function tcommport.geterrortext(error: integer): msestring;
 begin
  if not extracterrortext(error,errortexte,result) then begin
-  result:= 'Error Nr.: '+inttostr(error);
+  result:= 'Error Nr.: '+inttostrmse(error);
  end;
 end;
 

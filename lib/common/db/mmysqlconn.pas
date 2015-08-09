@@ -179,7 +179,7 @@ Type
    procedure setupblobdata(const afield: tfield; const acursor: tsqlcursor;
                                    const aparam: tparam);
    function blobscached: boolean;
-   function identquotechar: ansistring; override;
+   function identquotechar: msestring; override;
    
   Public
    constructor create(aowner: tcomponent); override;
@@ -651,11 +651,11 @@ begin
  HMySQL := mysql_init(HMySQL);
  dynloadunlock;
  if myo_ssl in foptions then begin
-  key:= tosysfilepath(fssl_key);
-  cert:= tosysfilepath(fssl_cert);
-  ca:= tosysfilepath(fssl_ca);
-  capath:= tosysfilepath(fssl_capath);
-  cipher:= fssl_cipher;  
+  key:= ansistring(tosysfilepath(fssl_key));
+  cert:= ansistring(tosysfilepath(fssl_cert));
+  ca:= ansistring(tosysfilepath(fssl_ca));
+  capath:= ansistring(tosysfilepath(fssl_capath));
+  cipher:= ansistring(fssl_cipher);
   mysql_ssl_set(hmysql,pointer(key),pointer(cert),pointer(ca),pointer(capath),
            pointer(cipher));
  end;
@@ -781,7 +781,7 @@ begin
  bo1:= transaction.active;
  try
   for int1:= 0 to params.count-1 do begin
-   executedirect(params[int1]);
+   executedirect(msestring(params[int1]));
   end;
   if not bo1 then begin
    bo1:= true;
@@ -874,8 +874,9 @@ begin
    if (mstr1 <> '') and (mstr1[length(mstr1)] = ';') then begin
     setlength(mstr1,length(mstr1)-1);
    end;
-   str1:= mstr1;
-   if mysql_stmt_prepare(fprepstatement,pchar(str1),length(str1)) <> 0 then begin
+   str1:= ansistring(mstr1); //utf8?
+   if mysql_stmt_prepare(fprepstatement,pchar(str1),
+                                              length(str1)) <> 0 then begin
     try
      checkstmterror(serrprepare,fprepstatement);
     finally
@@ -1110,7 +1111,7 @@ begin
    str1:= stringtoutf8(mstr1);
   end
   else begin
-   str1:= mstr1;
+   str1:= ansistring(mstr1);
   end;
   doexecuteunprepared(c,atransaction,str1);
  end;
@@ -1708,7 +1709,7 @@ begin
  try
   with qry do begin
    database:= Self;
-   sql.text:= 'show index from ' + aTableName;
+   sql.text:= 'show index from ' + msestring(aTableName);
    active:= true;
    keynamef:= cols.colbyname('Key_name');
    columnnamef:= cols.colbyname('Column_name');
@@ -1886,7 +1887,7 @@ begin
  }
 end;
 
-function tmysqlconnection.identquotechar: ansistring;
+function tmysqlconnection.identquotechar: msestring;
 begin
  result:= '`'; //needed for reserved words as fieldnames
 end;

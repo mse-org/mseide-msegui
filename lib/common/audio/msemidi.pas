@@ -593,7 +593,7 @@ end;
 
 procedure tmidisource.error(const aerror: midierrorty);
 begin
- raise emidiexception.create(self.name+': '+errormessages[aerror]);
+ raise emidiexception.create(self.name+': '+ansistring(errormessages[aerror]));
 end;
 
 procedure tmidisource.dotrackevent;

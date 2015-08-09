@@ -57,7 +57,7 @@ type
  
  applyrecupdateeventty = 
      procedure(const sender: tmsesqlquery; const updatekind: tupdatekind;
-                        var asql: string; var done: boolean) of object;
+                        var asql: msestring; var done: boolean) of object;
  afterapplyrecupdateeventty = 
      procedure(const sender: tmsesqlquery; 
                            const updatekind: tupdatekind) of object;
@@ -607,7 +607,7 @@ end;
 procedure tmsesqlquery.applyrecupdate(updatekind: tupdatekind);
 var
  bo1: boolean;
- str1: string;
+ str1: msestring;
 begin
  try
   if sqs_userapplyrecupdate in fmstate then begin

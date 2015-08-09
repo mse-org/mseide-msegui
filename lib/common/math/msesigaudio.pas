@@ -11,7 +11,7 @@ unit msesigaudio;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- mseaudio,msesignal,classes,mclasses,msethread,msetypes;
+ mseaudio,msesignal,classes,mclasses,msethread,msetypes,msestrings;
  
 const 
  defaultblocksize = 1000;
@@ -449,7 +449,7 @@ procedure tsigaudioout.initnames;
 begin
  inherited;
  if fstreamname = '' then begin
-  fstreamname:= fsigout.name;
+  fstreamname:= msestring(fsigout.name);
  end;
 end;
 

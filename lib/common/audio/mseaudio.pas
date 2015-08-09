@@ -267,7 +267,7 @@ begin
   fappname:= application.applicationname;
  end;
  if fstreamname = '' then begin
-  fstreamname:= name;
+  fstreamname:= msestring(name);
  end;
 end;
 

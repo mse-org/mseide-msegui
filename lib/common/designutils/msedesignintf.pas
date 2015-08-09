@@ -366,7 +366,7 @@ function getcomponentpos(const component: tcomponent): pointty;
 implementation
 uses
  msesysutils,msestream,msewidgets,msedatalist,rtlconsts,msedesigner,
- msetabs,mseapplication,mseobjecttext,msedatamodules;
+ msetabs,mseapplication,mseobjecttext,msedatamodules,mseformatstr;
  
 type
  treader1 = class(treader);
@@ -636,13 +636,15 @@ begin
  filer.setsection('componentpalette');
  if filer.iswriter then begin
   for int1:= 0 to high(fpagecomporders) do begin
-   tstatwriter(filer).writearray('order'+inttostr(int1),fpagecomporders[int1]);
+   tstatwriter(filer).writearray('order'+inttostrmse(int1),
+                                                 fpagecomporders[int1]);
   end;
  end
  else begin
   ar2:= componentcounts;
   for int1:= 0 to high(fpagecomporders) do begin
-   ar1:= tstatreader(filer).readarray('order'+inttostr(int1),integerarty(nil));
+   ar1:= tstatreader(filer).readarray('order'+inttostrmse(int1),
+                                                        integerarty(nil));
    if ar1 <> nil then begin
     if length(ar1) <> ar2[int1] then begin
      ar1:= nil; //invalid
@@ -1006,7 +1008,7 @@ end;
 
 procedure tdesignerselections.copytoclipboard;
 begin
- msewidgets.copytoclipboard(getobjecttext);
+ msewidgets.copytoclipboard(msestring(getobjecttext));
 end;
 
 procedure tdesignerselections.doadd(component: tcomponent);
@@ -1277,7 +1279,7 @@ var
 begin
  result:= nil;
  if msewidgets.pastefromclipboard(str1) then begin
-  result:= pastefromobjecttext(str1,aowner,aparent,initproc);
+  result:= pastefromobjecttext(ansistring(str1),aowner,aparent,initproc);
  end;
 end;
 

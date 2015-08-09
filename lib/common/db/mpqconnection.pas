@@ -117,7 +117,8 @@ type
    procedure internalRollBackRetaining(trans : TSQLHandle); override;
    procedure UpdateIndexDefs(var IndexDefs : TIndexDefs;
                                  const aTableName : string); override;
-   function GetSchemaInfoSQL(SchemaType : TSchemaType; SchemaObjectName, SchemaPattern : string) : string; override;
+   function GetSchemaInfoSQL(SchemaType : TSchemaType;
+         SchemaObjectName, SchemaPattern : msestring) : msestring; override;
    procedure dopqexec(const asql: ansistring); overload;
    procedure dopqexec(const asql: ansistring; const aconnection: ppgconn); overload;
 
@@ -295,7 +296,8 @@ begin
   flasterrormessage:= connectionmessage(pqresulterrormessage(ares));
   PQclear(ares);
   ares:= nil;
-  raise epqerror.create(self,amessage+' (PostgreSQL: '+flasterrormessage+ ')',
+  raise epqerror.create(self,amessage+' (PostgreSQL: '+
+                            ansistring(flasterrormessage)+ ')',
                             flasterrormessage,flastsqlcode);
  end
  else begin
@@ -385,7 +387,7 @@ var
 begin
  aconnection:= PQconnectdb(pchar(aConnectString));
  if (PQstatus(aconnection) = CONNECTION_BAD) then begin
-  msg:= connectionmessage(PQerrorMessage(aconnection));
+  msg:= ansistring(connectionmessage(PQerrorMessage(aconnection)));
   pqfinish(aconnection);
   aconnection:= nil;
   DatabaseError(sErrConnectionFailed + ' (PostgreSQL: ' + msg + ')',self);
@@ -731,7 +733,7 @@ begin
           (strpas(pqresulterrorfield(res,ord(pg_diag_sqlstate))) <> '42P05');
            //no   duplicate_prepared_statement
    if (PQresultStatus(res) <> PGRES_COMMAND_OK) then begin
-     s:= connectionmessage(pqresulterrormessage(res));
+     s:= ansistring(connectionmessage(pqresulterrormessage(res)));
      pqclear(res);
      DatabaseError(SErrPrepareFailed + lineend +
           ' (PostgreSQL: ' + s + ')',self)
@@ -812,7 +814,7 @@ begin
           s:= stringtoutf8(encodesqlvariant(value,true));
          end
          else begin
-          s:= encodesqlvariant(value,true);
+          s:= ansistring(encodesqlvariant(value,true));
          end;
         end;
         else begin
@@ -850,7 +852,7 @@ begin
     s:= stringtoutf8(mstr1);
    end
    else begin
-    s:= mstr1;
+    s:= ansistring(mstr1);
    end;
    res:= pqexec(tr.fconn,pchar(s));
   end;
@@ -1142,7 +1144,7 @@ var
         pwidestring(buffer)^:= utf8tostring(str1);
        end
        else begin
-        pwidestring(buffer)^:= str1;
+        pwidestring(buffer)^:= msestring(str1);
        end;
        inc(buffer,sizeof(widestring));
        inc(currbuff,asize);
@@ -1360,7 +1362,8 @@ begin
               '(ia.attrelid = i.indexrelid) and '+
               '(ic.oid = i.indexrelid) and '+
               '(ta.attnum = i.indkey[ia.attnum-1]) and '+
-              '(upper(tc.relname)=''' +  UpperCase(aTableName) +''') '+
+              '(upper(tc.relname)=''' +  
+                      msestring(UpperCase(aTableName)) +''') '+
             'order by '+
               'ic.relname;';
    active:= true;
@@ -1388,15 +1391,16 @@ begin
 end;
 
 function TPQConnection.GetSchemaInfoSQL(SchemaType: TSchemaType;
-  SchemaObjectName, SchemaPattern: string): string;
+  SchemaObjectName, SchemaPattern: msestring): msestring;
 
-var s : string;
+var s : msestring;
 
 begin
   case SchemaType of
     stTables     : s := 'select '+
                           'relfilenode              as recno, '+
-                          '''' + DatabaseName + ''' as catalog_name, '+
+                          '''' + msestring(DatabaseName) + 
+                          ''' as catalog_name, '+
                           '''''                     as schema_name, '+
                           'relname                  as table_name, '+
                           '0                        as table_type '+
@@ -1408,7 +1412,8 @@ begin
 
     stSysTables  : s := 'select '+
                           'relfilenode              as recno, '+
-                          '''' + DatabaseName + ''' as catalog_name, '+
+                          '''' + msestring(DatabaseName) + 
+                          ''' as catalog_name, '+
                           '''''                     as schema_name, '+
                           'relname                  as table_name, '+
                           '0                        as table_type '+
@@ -1540,7 +1545,8 @@ begin
  if pqresultstatus(res) <> pgres_command_ok then begin
   pqclear(res);
   databaseerror('PQExecerror'+ ' (postgresql: ' + 
-                        connectionmessage(pqerrormessage(aconnection)) + ')',self);
+            ansistring(connectionmessage(pqerrormessage(aconnection)))
+                                                                + ')',self);
  end
  else begin
   pqclear(res);

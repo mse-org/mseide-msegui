@@ -240,8 +240,8 @@ type
     procedure doafterinternalconnect; override;
     procedure dobeforeinternaldisconnect; override;
     procedure DoInternalDisconnect; override;
-    function GetAsSQLText(const Field : TField) : string; overload; virtual;
-    function GetAsSQLText(const Param : TParam) : string; overload; virtual;
+    function GetAsSQLText(const Field : TField) : msestring; overload; virtual;
+    function GetAsSQLText(const Param : TParam) : msestring; overload; virtual;
     function GetHandle : pointer; virtual;
     procedure updateprimarykeyfield(const afield: tfield;
                                    const atransaction: tsqltransaction); virtual;
@@ -280,13 +280,13 @@ type
     function getprimarykeyfield(const atablename: string;
                              const acursor: tsqlcursor): string; virtual;
     function GetSchemaInfoSQL(SchemaType : TSchemaType;
-              SchemaObjectName, SchemaPattern : string) : string; virtual;
+              SchemaObjectName, SchemaPattern : msestring) : msestring; virtual;
     function CreateBlobStream(const Field: TField; const Mode: TBlobStreamMode;
                  const acursor: tsqlcursor): TStream; virtual;
     
     procedure closeds(out activeds: integerarty);
     procedure reopends(const activeds: integerarty);
-    function identquotechar: ansistring; virtual;
+    function identquotechar: msestring; virtual;
     procedure beginupdate; virtual;
     procedure endupdate; virtual;
     function internalExecuteDirect(const aSQL: mseString;
@@ -295,10 +295,10 @@ type
           aisutf8: boolean; const noprepare: boolean): integer;
    //idbcontroller
    procedure setinheritedconnected(const avalue: boolean);
-   function readsequence(const sequencename: string): string; virtual;
-   function sequencecurrvalue(const sequencename: string): string; virtual;
+   function readsequence(const sequencename: string): msestring; virtual;
+   function sequencecurrvalue(const sequencename: string): msestring; virtual;
    function writesequence(const sequencename: string;
-                    const avalue: largeint): string; virtual;                    
+                    const avalue: largeint): msestring; virtual;                    
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -355,9 +355,9 @@ type
    procedure GetFieldNames(const TableName: string;
                out List: msestringarty); virtual;
    function getinsertid(const atransaction: tsqltransaction): int64; virtual;
-   function fieldtosql(const afield: tfield): string;
-   function fieldtooldsql(const afield: tfield): string;
-   function paramtosql(const aparam: tparam): string;
+   function fieldtosql(const afield: tfield): msestring;
+   function fieldtooldsql(const afield: tfield): msestring;
+   function paramtosql(const aparam: tparam): msestring;
    
    property Password : string read FPassword write FPassword;
    property Transaction : TSQLTransaction read FTransaction write SetTransaction;
@@ -972,7 +972,7 @@ begin
   end;
  end
  else begin
-  add(ar1[int1]);
+  add(msestring(ar1[int1]));
  end;
 end;
 {
@@ -1063,12 +1063,12 @@ begin
  if (str1 <> '') and (str1[1] = '''') and 
                     (str1[length(str1)] = '''') then begin
   fdatabasename:= str1;
-  tmdatabase(fowner).databasename:= copy(str1,2,length(str1)-2);
+  tmdatabase(fowner).databasename:= ansistring(copy(str1,2,length(str1)-2));
  end
  else begin
   fdatabasename:= tomsefilepath(str1);
   tmdatabase(fowner).databasename:= 
-                   tosysfilepath(filepath(str1,fk_default,true));
+                   ansistring(tosysfilepath(filepath(str1,fk_default,true)));
  end;
 end;
 
@@ -1114,18 +1114,20 @@ begin
  connected:= avalue;
 end;
 
-function tcustomsqlconnection.readsequence(const sequencename: string): string;
+function tcustomsqlconnection.readsequence(
+                               const sequencename: string): msestring;
 begin
  result:= ''; //dummy
 end;
 
-function tcustomsqlconnection.sequencecurrvalue(const sequencename: string): string;
+function tcustomsqlconnection.sequencecurrvalue(
+                               const sequencename: string): msestring;
 begin
  result:= ''; //dummy
 end;
 
 function tcustomsqlconnection.writesequence(const sequencename: string;
-               const avalue: largeint): string;
+                                         const avalue: largeint): msestring;
 begin
  result:= ''; //dummy
 end;
@@ -1335,7 +1337,7 @@ begin
  try
   with res do begin
    database:= Self;
-   sql.text:= GetSchemaInfoSQL(SchemaType, SchemaObjectName, '');
+   sql.text:= GetSchemaInfoSQL(SchemaType, msestring(SchemaObjectName), '');
    active:= true;
    col1:= cols.colbyname(returnfield);
    if rowsreturned >= 0 then begin
@@ -1408,12 +1410,12 @@ begin
   GetDBInfo(stColumns,TableName,'column_name',List);
 end;
 
-function tcustomsqlconnection.GetAsSQLText(const Field: TField): string;
+function tcustomsqlconnection.GetAsSQLText(const Field: TField): msestring;
 begin
  result:= msedb.fieldtosql(field);
 end;
 
-function tcustomsqlconnection.GetAsSQLText(const Param: TParam): string;
+function tcustomsqlconnection.GetAsSQLText(const Param: TParam): msestring;
 begin
  result:= msedb.paramtosql(param);
 end;
@@ -1468,7 +1470,7 @@ begin
    str1:= stringtoutf8(mstr1);
   end
   else begin
-   str1:= mstr1;
+   str1:= ansistring(mstr1);
   end;
   internalexecuteunprepared(cursor,atransaction,str1);
  finally
@@ -1477,7 +1479,7 @@ begin
 end;
      
 function tcustomsqlconnection.GetSchemaInfoSQL( SchemaType : TSchemaType;
-            SchemaObjectName, SchemaPattern : string) : string;
+            SchemaObjectName, SchemaPattern : msestring) : msestring;
 
 begin
  result:= ''; //compiler warning
@@ -1838,11 +1840,11 @@ begin
   result:= stringtoutf8(avalue);
  end
  else begin
-  result:= avalue;
+  result:= ansistring(avalue);
  end;
 end;
 
-function tcustomsqlconnection.identquotechar: ansistring;
+function tcustomsqlconnection.identquotechar: msestring;
 begin
  result:= '"';
 end;
@@ -1857,12 +1859,12 @@ begin
  //dummy
 end;
 
-function tcustomsqlconnection.fieldtosql(const afield: tfield): string;
+function tcustomsqlconnection.fieldtosql(const afield: tfield): msestring;
 begin
  result:= getassqltext(afield);
 end;
 
-function tcustomsqlconnection.fieldtooldsql(const afield: tfield): string;
+function tcustomsqlconnection.fieldtooldsql(const afield: tfield): msestring;
 var
  statebefore: tdatasetstate;
 begin
@@ -1872,7 +1874,7 @@ begin
  tdataset1(afield.dataset).restorestate(statebefore);
 end;
 
-function tcustomsqlconnection.paramtosql(const aparam: tparam): string;
+function tcustomsqlconnection.paramtosql(const aparam: tparam): msestring;
 begin
  result:= getassqltext(aparam);
 end;
@@ -3020,7 +3022,7 @@ begin
   end;
  end;
  if result = nil then begin
-  raise exception.create('Macro "'+aname+'" not found.');
+  raise exception.create('Macro "'+ansistring(aname)+'" not found.');
  end;
 end;
 

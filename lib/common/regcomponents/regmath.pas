@@ -22,7 +22,7 @@ interface
 
 implementation
 uses
- classes,mclasses,msefft,msedesignintf,msesignal,msefilter,
+ classes,mclasses,msefft,msedesignintf,msesignal,msefilter,mseformatstr,
  msepropertyeditors,msestrings,msedesigner,msesigfft,regmath_bmp,
  msesiggui,msesigfftgui,msesignoise,msesigmidi,msedatalist,
  mseiircoeffeditor,msefircoeffeditor,msegui,sysutils,mseglob;
@@ -98,7 +98,7 @@ begin
   result:= '<->';
  end
  else begin
-  result:= '<'+designer.getcomponentdispname(inst.source)+'>';
+  result:= msestring('<'+designer.getcomponentdispname(inst.source)+'>');
  end;
 end;
 
@@ -146,7 +146,7 @@ begin
      grid.rowlinewidth[int3-1]:= 3;
     end;
     for int2:= 0 to inst.sections[int1] - 1 do begin
-     captions[int3]:= 's'+inttostr(int1)+':'+inttostr(-int2);
+     captions[int3]:= 's'+inttostrmse(int1)+':'+inttostrmse(-int2);
      inc(int3);
     end;
    end;
@@ -180,7 +180,7 @@ begin
      grid.rowlinewidth[int3-1]:= 3;
     end;
     for int2:= 0 to inst.sections[int1] - 1 do begin
-     captions[int3]:= 's'+inttostr(int1)+':'+inttostr(-int2);
+     captions[int3]:= 's'+inttostrmse(int1)+':'+inttostrmse(-int2);
      inc(int3);
     end;
    end;

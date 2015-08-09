@@ -1,5 +1,6 @@
 MSEide+MSEgui breaking changes version history
 
+2015-08-09 applyrecupdateeventty asql parameter is msestring
 2015-07-02 Commandline functions and params use msestring instead of string.
 
 Version 3.8

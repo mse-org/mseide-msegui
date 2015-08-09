@@ -5173,7 +5173,7 @@ begin
   dest.asstring:= stringtoutf8(source);
  end
  else begin
-  dest.asstring:= source;
+  dest.asstring:= ansistring(source);
  end;
 end;
 
@@ -7840,7 +7840,8 @@ begin
   end;
   ftstring: begin
    for int1:= 0 to fbrecordcount-1 do begin
-    pansistring(po2)^:= pmsestring(pchar(ppointeraty(indexpo)^[int1])+offs)^;
+    pansistring(po2)^:= 
+        ansistring(pmsestring(pchar(ppointeraty(indexpo)^[int1])+offs)^);
     inc(pchar(po2),step);
    end;
   end;
@@ -7975,7 +7976,7 @@ begin
     tmsestringfield(df).asmsestring:= pmsestring(po1)^;
    end
    else begin
-    df.asstring:= pmsestring(po1)^;
+    df.asstring:= ansistring(pmsestring(po1)^);
    end;
   end;
   ftinteger: begin
@@ -8469,7 +8470,7 @@ begin
                                     currentbmasdatetime[afield,bm1],true);
    end;
    ftbcd: begin
-    result:= currtostr(currentbmascurrency[afield,bm1]);
+    result:= currencytostrmse(currentbmascurrency[afield,bm1]);
    end;
    else begin
     result:= '';
@@ -9518,7 +9519,7 @@ begin
  if amessage <> '' then begin
   mstr1:= mstr1 + lineend+amessage;
  end;
- databaseerror(mstr1);
+ databaseerror(ansistring(mstr1));
 end;
 
 function tlocalindex.find(const avalues: array of const;
@@ -9547,10 +9548,10 @@ begin
  for int1:= lastind downto 0 do begin
   if (avalues[int1].vtype <> vtpointer) and 
               (avalues[int1].vtype <> findexfieldinfos[int1].vtype) then begin
-   paramerror(tmsebufdataset(fowner).name+
-    'field '+ findexfieldinfos[int1].fieldinstance.fieldname+
-    ' wanted vtype: '+ inttostr(findexfieldinfos[int1].vtype)+
-    ' actual vtype: '+ inttostr(avalues[int1].vtype));
+   paramerror(msestring(tmsebufdataset(fowner).name)+
+    'field '+ msestring(findexfieldinfos[int1].fieldinstance.fieldname)+
+    ' wanted vtype: '+ inttostrmse(findexfieldinfos[int1].vtype)+
+    ' actual vtype: '+ inttostrmse(avalues[int1].vtype));
   end;
  end;
  po1:= tmsebufdataset(fowner).intallocrecord;

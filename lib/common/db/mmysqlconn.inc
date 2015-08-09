@@ -159,7 +159,7 @@ Type
    procedure setupblobdata(const afield: tfield; const acursor: tsqlcursor;
                                    const aparam: tparam);
    function blobscached: boolean;
-   function identquotechar: ansistring; override;
+   function identquotechar: msestring; override;
    
   Public
     Function AllocateTransactionHandle : TSQLHandle; override;
@@ -495,7 +495,7 @@ begin
    str1:= stringtoutf8(mstr1);
   end
   else begin
-   str1:= mstr1;
+   str1:= ansistring(mstr1);
   end;
   
   if mysql_query(FMySQL,Pchar(str1))<>0 then begin
@@ -948,7 +948,7 @@ begin
  try
   with qry do begin
    database := Self;
-   sql.text:= 'show index from ' +  aTableName;
+   sql.text:= 'show index from ' +  msestring(aTableName);
    active:= true;
    keynamef:= cols.colbyname('Key_name');
    columnnamef:= cols.colbyname('Column_name');
@@ -1087,7 +1087,7 @@ begin
  }
 end;
 
-function TConnectionName.identquotechar: ansistring;
+function TConnectionName.identquotechar: msestring;
 begin
  result:= '`'; //needed for reserved words as fieldnames
 end;

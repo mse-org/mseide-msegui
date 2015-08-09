@@ -113,7 +113,7 @@ begin
    with afielddefs[int1] do begin
     if (atype = dl_none) or 
               (datatype in listtypecompatibledbtypes[atype]) then begin
-     result[int2]:= name;
+     result[int2]:= msestring(name);
      inc(int2);
     end;
    end;
@@ -238,7 +238,7 @@ begin
  for int1:= 0 to high(result) do begin
   def1:= fielddefs[int1];
   with result[int1] do begin
-   name:= def1.name;
+   name:= msestring(def1.name);
    datatype:= def1.datatype;
   end;
  end;

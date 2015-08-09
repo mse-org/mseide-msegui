@@ -1534,10 +1534,10 @@ type
  
  idbcontroller = interface(iactivatorclient)[miid_idbcontroller]
   procedure setinheritedconnected(const avalue: boolean);
-  function readsequence(const sequencename: string): string;
-  function sequencecurrvalue(const sequencename: string): string;
+  function readsequence(const sequencename: string): msestring;
+  function sequencecurrvalue(const sequencename: string): msestring;
   function writesequence(const sequencename: string;
-                    const avalue: largeint): string;
+                    const avalue: largeint): msestring;
   function ExecuteDirect(const SQL : mseString;
                const aisutf8: boolean): integer;
   procedure updateutf8(var autf8: boolean);

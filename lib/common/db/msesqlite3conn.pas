@@ -81,8 +81,8 @@ type
    function getfloatdate: boolean; override;
    function getint64currency: boolean; override;
    
-   function getassqltext(const field : tfield) : string; override;
-   function getassqltext(const param : tparam) : string; override;
+   function getassqltext(const field : tfield) : msestring; override;
+   function getassqltext(const param : tparam) : msestring; override;
    
    procedure resetstatement(const astatement: psqlite3_stmt);
    procedure checkerror(const aerror: integer);
@@ -160,7 +160,7 @@ type
 
 implementation
 uses
- msesqldb,msebufdataset,
+ msesqldb,msebufdataset,mseformatstr,
  {$ifdef FPC}dbconst{$else}dbconst_del,classes_del{$endif},
  sysutils,typinfo,dateutils,msesysintf,msedate,
  msefileutils;
@@ -822,7 +822,7 @@ begin
 //  DatabaseError(SErrNoDatabaseName,self);
 // end;
  initializesqlite3([]);
- str1:= stringtoutf8(inherited databasename);
+ str1:= stringtoutf8(msestring(inherited databasename));
  checkerror(sqlite3_open(pchar(str1),@fhandle));
  checkbusytimeout;
 end;
@@ -852,7 +852,8 @@ begin
  if aerror <> sqlite_ok then begin
   flasterror:= aerror;
   flasterrormessage:= utf8tostring(sqlite3_errmsg(fhandle));
-  raise esqlite3error.create(self,flasterrormessage,flasterrormessage,flasterror);
+  raise esqlite3error.create(self,ansistring(flasterrormessage),
+                                           flasterrormessage,flasterror);
  end;
 end;
 
@@ -1071,7 +1072,7 @@ begin
  end;
 end;
 
-function tsqlite3connection.getassqltext(const field: tfield): string;
+function tsqlite3connection.getassqltext(const field: tfield): msestring;
 begin
  if field.isnull then begin
   result:= inherited getassqltext(field);
@@ -1083,9 +1084,9 @@ begin
    end;
    ftbcd: begin
    {$ifdef FPC}
-    result:= inttostr(int64(field.ascurrency));
+    result:= inttostrmse(int64(field.ascurrency));
    {$else}
-    result:= inttostr(int64(ar8ty(field.ascurrency)));
+    result:= inttostrmse(int64(ar8ty(field.ascurrency)));
    {$endif}
    end;
    else begin
@@ -1095,7 +1096,7 @@ begin
  end;
 end;
 
-function tsqlite3connection.getassqltext(const param: tparam): string;
+function tsqlite3connection.getassqltext(const param: tparam): msestring;
 begin
  if param.isnull then begin
   result:= inherited getassqltext(param);
@@ -1107,9 +1108,9 @@ begin
    end;
    ftbcd: begin
    {$ifdef FPC}
-    result:= inttostr(int64(param.ascurrency));
+    result:= inttostrmse(int64(param.ascurrency));
    {$else}
-    result:= inttostr(int64(ar8ty(param.ascurrency)));
+    result:= inttostrmse(int64(ar8ty(param.ascurrency)));
    {$endif}
    end;
    else begin

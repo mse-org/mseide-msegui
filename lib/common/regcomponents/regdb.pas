@@ -601,7 +601,7 @@ begin
   fdbeditinfointf.getfieldtypes(ar1,ar2);
   int2:= 0;
   for int1:= 0 to high(ar1) do begin
-   if ar1[int1] = name then begin
+   if msestring(ar1[int1]) = name then begin
     int2:= int1;
     break;
    end;
@@ -627,7 +627,7 @@ begin
   fdbeditinfointf.getfieldtypes(propertynames,fieldtypes);
   if high(propertynames) >= 0 then begin
    for int1:= 0 to high(propertynames) do begin
-    if propertynames[int1] = fname then begin
+    if msestring(propertynames[int1]) = fname then begin
      int2:= int1;
      break;
     end;
@@ -692,7 +692,7 @@ begin
   fdbcolinfointf.getfieldtypes(ar1,ar2);
   int2:= 0;
   for int1:= 0 to high(ar1) do begin
-   if ar1[int1] = name then begin
+   if msestring(ar1[int1]) = name then begin
     int2:= int1;
     break;
    end;
@@ -719,7 +719,7 @@ begin
   fdbcolinfointf.getfieldtypes(propertynames,fieldtypes);
   if high(propertynames) >= 0 then begin
    for int1:= 0 to high(propertynames) do begin
-    if propertynames[int1] = fname then begin
+    if msestring(propertynames[int1]) = fname then begin
      int2:= int1;
      break;
     end;
@@ -775,7 +775,8 @@ end;
 
 function tpersistentfieldelementeditor.getvalue: msestring;
 begin
- result:= '<'+tfield(getpointervalue).fieldname+'>' + inherited getvalue;
+ result:= msestring('<'+tfield(getpointervalue).fieldname+'>') +
+                                                    inherited getvalue;
 end;
 
 { tpersistentfieldspropertyeditor }
@@ -854,7 +855,7 @@ begin
    (fclass.inheritsfrom(ds.fielddefs[int1].fieldclass) or 
     (fclass.inheritsfrom(tmsebooleanfield)) and 
       (ds.fielddefs[int1].fieldclass.inheritsfrom(tlongintfield))) then begin
-    additem(result,ar3[int1]);
+    additem(result,msestring(ar3[int1]));
    end;
   end;
  end;
@@ -865,8 +866,9 @@ var
  ds: tdataset;
 begin
  ds:= tfield(fprops[0].instance).dataset;
- if (ds <> nil) and (ds.findfield(value) <> nil) then begin
-  raise exception.create('Field '''+value+''' exists in '+ds.name+'.');
+ if (ds <> nil) and (ds.findfield(ansistring(value)) <> nil) then begin
+  raise exception.create('Field '''+ansistring(value)+
+                                           ''' exists in '+ds.name+'.');
  end;
  inherited;
 end;
@@ -1257,8 +1259,8 @@ end;
 function tfielddefpropertyeditor.getvalue: msestring;
 begin
  with tfielddef(fprops[0].instance) do begin
-  result:= '<'+name+'><'+
-    getenumname(typeinfo(tfieldtype),ord(datatype))+'>';
+  result:= msestring('<'+name+'><'+
+    getenumname(typeinfo(tfieldtype),ord(datatype))+'>');
  end;
 end;
 
@@ -1267,7 +1269,8 @@ end;
 function tdbparampropertyeditor.getvalue: msestring;
 begin
  with tparam(fprops[0].instance) do begin
-  result:= '<'+name+'><'+getenumname(typeinfo(tfieldtype),ord(datatype))+
+  result:= msestring('<'+name+'><'+
+                    getenumname(typeinfo(tfieldtype),ord(datatype)))+
       {'><'+getenumname(typeinfo(tparamtype),ord(paramtype))+}'>';
  end;
 end;
@@ -1277,9 +1280,9 @@ end;
 function tmseparampropertyeditor.getvalue: msestring;
 begin
  with tmseparam(fprops[0].instance) do begin
-  result:= '<'+name+'><'+fieldname+'><';
+  result:= msestring('<'+name+'><'+fieldname+'><');
   if connector <> nil then begin
-   result:= result+connector.name;
+   result:= result+msestring(connector.name);
   end;
   result:= result+'>';
  end;
@@ -1289,7 +1292,8 @@ end;
 
 function tdbstringcoleditor.getvalue: msestring;
 begin
- result:= inherited getvalue +  '<'+tdbstringcol(getpointervalue).datafield+'>';
+ result:= inherited getvalue + 
+                 msestring('<'+tdbstringcol(getpointervalue).datafield+'>');
 end;
 
 { tdbstringcolseditor }
@@ -1340,7 +1344,7 @@ end;
 
 function tindexfieldpropertyeditor.getvalue: msestring;
 begin
- result:= '<'+tindexfield(getpointervalue).fieldname+'>';
+ result:= msestring('<'+tindexfield(getpointervalue).fieldname+'>');
 end;
 
 function tindexfieldpropertyeditor.getdefaultstate: propertystatesty;
@@ -1362,10 +1366,10 @@ var
  int1: integer;
 begin
  with tlocalindex(getpointervalue),fields do begin
-  result:= '<'+name+'><';
+  result:= msestring('<'+name+'><');
   if count > 0 then begin
    for int1:= 0 to count - 1 do begin
-    result:= result + items[int1].fieldname+',';
+    result:= result + msestring(items[int1].fieldname+',');
    end;
    setlength(result,length(result)-1);
   end;
@@ -1449,7 +1453,7 @@ begin
  end;
  setlength(result,length(ar1));
  for int1:= 0 to high(ar1) do begin
-  result[int1]:= ar1[int1];
+  result[int1]:= msestring(ar1[int1]);
  end;
 end;
 
@@ -1531,7 +1535,7 @@ begin
   if lb1 <> nil then begin
    ar1:= lb1.fieldnamestext;
    if (fieldno >= 0) and (fieldno <= high(ar1)) then begin
-    result:= '<'+ar1[fieldno]+'>';
+    result:= msestring('<'+ar1[fieldno]+'>');
    end;
   end;
  end;
@@ -1554,8 +1558,8 @@ end;
 function tdbdropdowncolseditor.itemgetvalue(
                      const sender: tarrayelementeditor): msestring;
 begin
- result:= '<'+tdbdropdowncol(
-             tarrayelementeditor1(sender).getpointervalue).datafield+'>';
+ result:= msestring('<'+tdbdropdowncol(
+             tarrayelementeditor1(sender).getpointervalue).datafield+'>');
 end;
 
 { tparamvaluepropertyeditor }
@@ -1620,9 +1624,9 @@ begin
  with tdestparam(tarrayelementeditor1(sender).getpointervalue) do begin
   result:= '<';
   if datasource <> nil then begin
-   result:= result + datasource.name;
+   result:= result + msestring(datasource.name);
   end;
-  result:= result+'.'+fieldname+'>'+'<'+paramname+'>';
+  result:= result+msestring('.'+fieldname+'>'+'<'+paramname+'>');
  end;
 end;
 
@@ -1646,9 +1650,9 @@ begin
  with tdestfield(tarrayelementeditor1(sender).getpointervalue) do begin
   result:= '<';
   if datasource <> nil then begin
-   result:= result + datasource.name;
+   result:= result + msestring(datasource.name);
   end;
-  result:= result+'.'+fieldname+'>'+'<'+destfieldname+'>';
+  result:= result+msestring('.'+fieldname+'>'+'<'+destfieldname+'>');
  end;
 end;
 
@@ -1693,14 +1697,14 @@ begin
   with adataset.fields do begin
    setlength(result,count);
    for int1:= 0 to high(result) do begin
-    result[int1]:= fields[int1].fieldname;
+    result[int1]:= msestring(fields[int1].fieldname);
    end;
   end;
   if result = nil then begin
    with adataset.fielddefs do begin
     setlength(result,count);
     for int1:= 0 to high(result) do begin
-     result[int1]:= items[int1].name;
+     result[int1]:= msestring(items[int1].name);
     end;
    end;
   end;

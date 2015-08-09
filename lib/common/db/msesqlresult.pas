@@ -714,7 +714,7 @@ begin
   result:= utf8tostring(str1);
  end
  else begin
-  result:= str1;
+  result:= msestring(str1);
  end;
 end;
 
@@ -930,7 +930,7 @@ end;
 
 function tfloatdbcol.getasstring: string;
 begin
- result:= getasmsestring;
+ result:= ansistring(getasmsestring);
 end;
 
 function tfloatdbcol.getasmsestring: msestring;
@@ -1032,7 +1032,7 @@ var
  int1: integer;
 begin
  if fdatatype in widecharfields then begin
-  result:= getasmsestring;
+  result:= ansistring(getasmsestring);
  end
  else begin
   int1:= fdatasize;
@@ -1136,7 +1136,7 @@ end;
 
 function tguiddbcol.getassql: msestring;
 begin
- result:= encodesqlstring(asstring);
+ result:= encodesqlstring(msestring(asstring));
 end;
 
 function tguiddbcol.getasstring: string;

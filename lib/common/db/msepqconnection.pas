@@ -34,27 +34,30 @@ type
    procedure setoptions(const avalue: pqconnectionoptionsty);
   protected
    procedure loaded; override;
-   procedure internalexecute(const cursor: tsqlcursor; const atransaction: tsqltransaction;
+   procedure internalexecute(const cursor: tsqlcursor;
+                     const atransaction: tsqltransaction;
                      const aparams: tmseparams; const autf8: boolean); override;
    function CreateBlobStream(const Field: TField; const Mode: TBlobStreamMode;
                          const acursor: tsqlcursor): TStream; override;
    //idbcontroller
-   function readsequence(const sequencename: string): string; override;
-   function sequencecurrvalue(const sequencename: string): string; override;
+   function readsequence(const sequencename: string): msestring; override;
+   function sequencecurrvalue(const sequencename: string): msestring; override;
    function writesequence(const sequencename: string;
-                    const avalue: largeint): string; override;
+                    const avalue: largeint): msestring; override;
   public
    constructor create(aowner: tcomponent); override;
   published
    property DatabaseName: filenamety read getdatabasename write setdatabasename;
-   property Connected: boolean read getconnected write setconnected default false;
+   property Connected: boolean read getconnected write setconnected 
+                                                               default false;
    property options: pqconnectionoptionsty read foptions write setoptions 
                                  default defaultpqconnectionoptionsty;
 end;
  
 implementation
 uses
- msefileutils,msebits,sysutils,msedatalist,msesqldb,msebufdataset,postgres3dyn;
+ msefileutils,msebits,sysutils,msedatalist,msesqldb,msebufdataset,postgres3dyn,
+ mseformatstr;
  
 { tmsepqconnection }
 
@@ -154,20 +157,22 @@ begin
           {$ifdef FPC}longword{$else}byte{$endif}(mask)));
 end;
 
-function tmsepqconnection.readsequence(const sequencename: string): string;
+function tmsepqconnection.readsequence(const sequencename: string): msestring;
 begin
- result:= 'select nextval(''' +sequencename+''') as res;';
+ result:= 'select nextval(''' +msestring(sequencename)+''') as res;';
 end;
 
-function tmsepqconnection.sequencecurrvalue(const sequencename: string): string;
+function tmsepqconnection.sequencecurrvalue(
+                                const sequencename: string): msestring;
 begin
- result:= 'select last_value from ' + sequencename + ';';
+ result:= 'select last_value from ' + msestring(sequencename) + ';';
 end;
 
 function tmsepqconnection.writesequence(const sequencename: string;
-               const avalue: largeint): string;
+               const avalue: largeint): msestring;
 begin
- result:= 'select setval(''' +sequencename+''','+inttostr(avalue)+');';
+ result:= 'select setval(''' +msestring(sequencename)+''','+
+                                                     inttostrmse(avalue)+');';
 end;
 
 function tmsepqconnection.CreateBlobStream(const Field: TField;

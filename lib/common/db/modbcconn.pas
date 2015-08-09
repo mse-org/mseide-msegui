@@ -114,7 +114,8 @@ type
     procedure UpdateIndexDefs(var IndexDefs:TIndexDefs;
                           const aTableName:string); override;
     // - Schema info
-    function GetSchemaInfoSQL(SchemaType:TSchemaType; SchemaObjectName, SchemaObjectPattern:string):string; override;
+    function GetSchemaInfoSQL(SchemaType:TSchemaType; 
+       SchemaObjectName, SchemaObjectPattern:msestring):msestring; override;
 
     // Internal utility functions
     function CreateConnectionString:string;
@@ -382,8 +383,9 @@ begin
   end;
   // raise error
 //  raise EODBCException.Create(TotalMessage);
-  raise econnectionerror.create(self,connectionmessage(pchar(totalmessage)),
-                              firstmessage,firsterror);
+  raise econnectionerror.create(self,
+           ansistring(connectionmessage(pchar(totalmessage))),
+                              msestring(firstmessage),firsterror);
 end;
 
 procedure todbcconnection.ODBCCheckResult(
@@ -1643,9 +1645,11 @@ begin
   end;
 end;
 
-function TODBCConnection.GetSchemaInfoSQL(SchemaType: TSchemaType; SchemaObjectName, SchemaObjectPattern: string): string;
+function TODBCConnection.GetSchemaInfoSQL(SchemaType: TSchemaType; 
+   SchemaObjectName, SchemaObjectPattern: msestring): msestring;
 begin
-  Result:=inherited GetSchemaInfoSQL(SchemaType, SchemaObjectName, SchemaObjectPattern);
+  Result:=inherited GetSchemaInfoSQL(
+                        SchemaType, SchemaObjectName, SchemaObjectPattern);
   // TODO: implement this
 end;
 
