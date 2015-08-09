@@ -21,7 +21,7 @@ unit componentpaletteform;
 interface
 uses
  msegui,mseclasses,mseforms,msetabs,msetoolbar,msegraphutils,msestat,mseguiglob,
- msedragglob;
+ msedragglob,msestrings;
 
 type
  tcomponentpalettefo = class(tdockform)
@@ -125,7 +125,7 @@ begin
        options:= [mao_checkbox,mao_radiobutton];
        imagelist:= registeredcomponents.imagelist;
        imagenr:= icon;
-       hint:= classtyp.classname;
+       hint:= msestring(classtyp.classname);
        tagpointer:= classtyp;
       end;
      end;

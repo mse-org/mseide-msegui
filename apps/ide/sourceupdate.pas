@@ -180,11 +180,12 @@ type
                 out filenum: integer; const interfaceonly: boolean): punitinfoty;
 
    function gettext(const infopo: punitinfoty;
-                          const startpos,endpos: sourceposty): string;
+                          const startpos,endpos: sourceposty): msestring;
    procedure replacetext(const infopo: punitinfoty; 
-                      const startpos,endpos: sourceposty; const newtext: string);
+              const startpos,endpos: sourceposty; const newtext: msestring);
 
-   function getmatchingmethods(const amodule: tmsecomponent; const atype: ptypeinfo): msestringarty;
+   function getmatchingmethods(const amodule: tmsecomponent;
+                                   const atype: ptypeinfo): msestringarty;
    function parsemodule(const amodule: tmsecomponent): pclassinfoty;
    function findunitfile(const aunitname: msestring): msestring;
    function findmethodpos(const amethod: tmethod; const imp: boolean = false): sourceposty;
@@ -285,7 +286,7 @@ begin
   for int1:= 1 to high(ar1) do begin
    if (ar1[int1] <> '') and 
              (length(ar1[int1]) + linelength > maxlength) then begin
-    result:= result + lineend + charstring(' ',indent) + ar1[int1];
+    result:= result + lineend + charstring(msechar(' '),indent) + ar1[int1];
     linelength:= indent + length(ar1[int1]);
    end
    else begin
@@ -361,7 +362,7 @@ begin
     end;
     stop:= p.implementationend;
     if not isemptysourcepos(start) then begin
-     adest:= gettext(aunit,start,stop);
+     adest:= msestring(gettext(aunit,start,stop));
      result:= true;
     end;
    end;
@@ -419,10 +420,11 @@ begin
       po3:= finddef(po1,apos);
       if po3 <> nil then begin
        if po3^.deflist <> nil then begin
-        definition:= po3^.deflist.rootnamepath;
+        definition:= msestring(po3^.deflist.rootnamepath);
        end
        else begin
-        definition:= po3^.owner.rootnamepath+'.'+uppercase(po3^.name);
+        definition:= msestring(po3^.owner.rootnamepath+'.'+
+                                                 uppercase(po3^.name));
        end;
        if po3^.kind in [syk_procdef,syk_procimp] then begin
         int1:= findchar(definition,'$');
@@ -669,13 +671,13 @@ begin
 end;
 
 function tsourceupdater.gettext(const infopo: punitinfoty;
-                 const startpos,endpos: sourceposty): string;
+                 const startpos,endpos: sourceposty): msestring;
 begin
  result:= sourcefo.getfiletext(infopo^.sourcefilename,startpos.pos,endpos.pos);
 end;
 
 procedure tsourceupdater.replacetext(const infopo: punitinfoty;
-  const startpos, endpos: sourceposty; const newtext: string);
+  const startpos, endpos: sourceposty; const newtext: msestring);
 begin
  sourcefo.replacefiletext(infopo^.sourcefilename,startpos.pos,endpos.pos,newtext);
 end;
@@ -1244,7 +1246,7 @@ procedure tsourceupdater.createmethodbody(const unitinfopo: punitinfoty;
                 const classinfopo: pclassinfoty; const aname: string;
                 const atype: ptypeinfo; beforeitem: integer);
 var
- str1: string;
+ str1: msestring;
  pos1: sourceposty;
  int1: integer;
  bo1: boolean;
@@ -1290,8 +1292,8 @@ begin
  else begin
   str1:= lineend;
  end;
- str1:= str1 + limitlinelength(
-          composeprocedureheader(classinfopo^.name+'.'+aname,atype,false,false),
+ str1:= str1 + limitlinelength(msestring(
+        composeprocedureheader(classinfopo^.name+'.'+aname,atype,false,false)),
                              fmaxlinelength,procheaderbreakchars,14) + lineend;
  str1:= str1 + 'begin' + lineend + 'end;' + lineend;
  if bo1 then begin
@@ -1307,7 +1309,7 @@ var
  cpo: pclassinfoty;
  scope: tdeflist;
  int1: integer;
- str1: string;
+ str1: msestring;
  parser: tpascalparser;
  po1: pchar;
  ar1: propinfoarty;
@@ -1321,11 +1323,12 @@ var
   int1:= length(breaklines(atext));
   with cpo^ do begin
    if isfield then begin
-    replacetext(infopo,privatefieldend,privatefieldend,'   '+atext+lineend);
+    replacetext(infopo,privatefieldend,privatefieldend,
+                                   msestring('   '+atext+lineend));
     inc(privatefieldend.pos.row,int1);
    end
    else begin
-    replacetext(infopo,privateend,privateend,'   '+atext+lineend);
+    replacetext(infopo,privateend,privateend,msestring('   '+atext+lineend));
    end;
    inc(privateend.pos.row,int1);
    privateend.pos.col:= 0;
@@ -1355,25 +1358,29 @@ var
    if issetter then begin
     if scope.finddef(setter,syk_nopars,scope1) = nil then begin
      if indextext <> '' then begin
-      insertprivate(false,breakline('procedure '+setter+'('+
-       indextext+'; const avalue: '+
-       concatstrings(typetext,'.')+');'));
+      insertprivate(false,ansistring(
+       breakline('procedure '+msestring(setter+'('+
+       indextext+'; const avalue: ')+
+       msestring(concatstrings(typetext,'.')+');'))));
      end
      else begin
-      insertprivate(false,breakline('procedure '+setter+'(const avalue: '+
-       concatstrings(typetext,'.')+');'));
+      insertprivate(false,ansistring(
+       breakline('procedure '+msestring(setter)+'(const avalue: '+
+                         msestring(concatstrings(typetext,'.'))+');')));
      end;
     end;
    end
    else begin
     if scope.finddef(getter,syk_nopars,scope1) = nil then begin
      if indextext <> '' then begin
-      insertprivate(false,breakline('function '+getter+'('+indextext+'): '+
-       concatstrings(typetext,'.')+';'));
+      insertprivate(false,ansistring(
+       breakline('function '+msestring(getter)+'('+msestring(indextext)+'): '+
+       msestring(concatstrings(typetext,'.'))+';')));
      end
      else begin
-      insertprivate(false,breakline('function '+getter+': '+
-       concatstrings(typetext,'.'))+';');
+      insertprivate(false,ansistring(breakline('function '+
+                                            msestring(getter)+': '+
+       msestring(concatstrings(typetext,'.'))))+';');
      end;
     end;
    end;
@@ -1384,6 +1391,7 @@ var
  po2: pdefinfoty;   
  newimp: boolean;
  classindex1: integer;
+ str2: string;
 begin                        //completeclass
  result:= false;
  with infopo^ do begin
@@ -1404,9 +1412,9 @@ begin                        //completeclass
     for int1:= 0 to high(scope.infos) do begin
      with scope.infos[int1] do begin
       if (kind = syk_vardef) and (vf_property in varflags) then begin
-       str1:= getdefinfotext(@scope.infos[int1]);     
-       if str1 <> '' then begin
-        parser:= tpascalparser.create(designer.designfiles,str1);
+       str2:= getdefinfotext(@scope.infos[int1]);     
+       if str2 <> '' then begin
+        parser:= tpascalparser.create(designer.designfiles,str2);
         try
          with parser do begin
           setlength(ar1,high(ar1)+2);
@@ -1497,7 +1505,7 @@ begin                        //completeclass
     if isemptysourcepos(procimpstart) then begin
      newimp:= true;
      replacetext(infopo,infopo^.p.implementationend,infopo^.p.implementationend,
-      '{ '+name+' }'+lineend);
+      msestring('{ '+name+' }'+lineend));
      result:= true;
      procimpstart:= infopo^.p.implementationend;
      inc(procimpstart.pos.row,1);
@@ -1509,8 +1517,8 @@ begin                        //completeclass
      with ppo^ do begin
       if isemptysourcepos(impheaderstartpos) and 
                  not (mef_abstract in params.flags) then begin
-       str1:= lineend + 
-           limitlinelength(composeprocedureheader(ppo,cpo,true),
+       str1:= lineend +
+           limitlinelength(msestring(composeprocedureheader(ppo,cpo,true)),
                           fmaxlinelength,procheaderbreakchars,14) + lineend +
                  'begin'+lineend+
                  'end;'+lineend;
@@ -1578,8 +1586,9 @@ begin
   if not isemptysourcepos(pos1) then begin
    createmethodbody(po1,po2,aname,atype,posindex);
    str1:= composeprocedureheader(aname,atype,false,false);
-   replacetext(po1,pos1,pos1,limitlinelength(
-             '   ' + str1,fmaxlinelength,procheaderbreakchars,18)+lineend);
+   replacetext(po1,pos1,pos1,
+     limitlinelength('   ' + msestring(str1),
+                              fmaxlinelength,procheaderbreakchars,18)+lineend);
   end;
  end;
 //end;
@@ -1617,12 +1626,12 @@ begin
    name:= newname;
    if not isemptysourcepos(impheaderstartpos) then begin
     replacetext(po1,impheaderstartpos,impheaderendpos,
-     limitlinelength(composeprocedureheader(po3,po2,false),fmaxlinelength,
-                          procheaderbreakchars,14,impheaderstartpos.pos.col));
+      limitlinelength(msestring(composeprocedureheader(po3,po2,false)),
+            fmaxlinelength,procheaderbreakchars,14,impheaderstartpos.pos.col));
    end;
    if not isemptysourcepos(intstartpos) then begin
     replacetext(po1,intstartpos,intendpos,
-     limitlinelength(composeproceduretext(po3,false),fmaxlinelength,
+      limitlinelength(msestring(composeproceduretext(po3,false)),fmaxlinelength,
              procheaderbreakchars,18,intstartpos.pos.col));
    end;
   end;
@@ -1846,7 +1855,7 @@ begin
     inc(po4);
    end;
    if po3 <> nil then begin
-    replacetext(po1,po3^.namepos,po3^.nameend,newname);
+    replacetext(po1,po3^.namepos,po3^.nameend,msestring(newname));
    end;
   end;
  end;
@@ -1869,10 +1878,11 @@ var
  po2: pclassinfoty;
  po3: pmoduleinfoty;
  pos1: sourceposty;
- str1,str2: string;
+ str1,str2: msestring;
  classna,unitna: string;
  int1: integer;
- ar1: stringarty;
+ ar1: msestringarty;
+ ar2: stringarty;
  first: boolean;
 begin
  try
@@ -1882,7 +1892,7 @@ begin
  end;
  updateunit(po1,true);
  po2:= findclassinfobyinstance(amodule,po1);
- str1:= uppercase(aitem.Name);
+ str1:= msestring(uppercase(aitem.Name));
  pos1:= emptysourcepos;
  if po2 <> nil then begin
   if (csinline in aitem.componentstate) and 
@@ -1901,7 +1911,7 @@ begin
    pos1:= po2^.procedurestart;
   end;
   if not isemptysourcepos(pos1) then begin
-   str1:= '   ' + aitem.Name + ': ' + classna+';' + lineend;
+   str1:= msestring('   ' + aitem.Name + ': ' + classna+';' + lineend);
    replacetext(po1,pos1,pos1,str1);
   end;
   with po1^.p.interfaceuses do begin
@@ -1909,17 +1919,17 @@ begin
     if (startpos.filenum = endpos.filenum) and 
            not isemptysourcepos(startpos) then begin
      str2:= gettext(po1,startpos,endpos);
-     ar1:= unitgroups.getneededunits(unitna);
+     ar2:= unitgroups.getneededunits(unitna);
      first:= count = 0;
-     for int1:= 0 to high(ar1) do begin
-      if (find(ar1[int1]) = nil) then begin
+     for int1:= 0 to high(ar2) do begin
+      if (find(ar2[int1]) = nil) then begin
        if not first then begin
         str2:= str2 + ',';
        end
        else begin
         first:= false;
        end;
-       str2:= str2 + ar1[int1];
+       str2:= str2 + msestring(ar2[int1]);
       end
      end;
      if str2 <> '' then begin
@@ -1931,7 +1941,8 @@ begin
        deleteitem(ar1,0);
       end;
       str2:= concatstrings(ar1,'');
-      str2:= lineend+' '+limitlinelength(str2,fmaxlinelength,',',1,1);
+      str2:= lineend+' '+
+                   limitlinelength(str2,fmaxlinelength,',',1,1);
      end;
      replacetext(po1,startpos,endpos,str2);
     end;
@@ -2221,7 +2232,7 @@ begin
   updateunit(result,true);
  end
  else begin
-  str1:= findunitfile(aunitname);
+  str1:= findunitfile(msestring(aunitname));
   if str1 <> '' then begin
    result:= updatesourceunit(str1,int1,true);
   end

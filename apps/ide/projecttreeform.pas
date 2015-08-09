@@ -491,9 +491,9 @@ begin
   except
   end;
   if po1 <> nil then begin
-   fclasstype:= po1^.moduleclassname;
-   fformname:= po1^.instance.Name;
-   finstancevarname:= po1^.instancevarname;
+   fclasstype:= msestring(po1^.moduleclassname);
+   fformname:= msestring(po1^.instance.Name);
+   finstancevarname:= msestring(po1^.instancevarname);
   end
   else begin
    fclasstype:= '';
@@ -514,7 +514,8 @@ begin
  end;
 end;
 
-procedure tformnode.setfieldtext(const fieldindex: integer; var avalue: msestring);
+procedure tformnode.setfieldtext(const fieldindex: integer; 
+                                                var avalue: msestring);
 var
  n1: tfilesnode;
 begin
@@ -522,15 +523,17 @@ begin
  n1.removefilehash(self);
  case fieldindex of
   0: begin
-   fclasstype:= designer.changemoduleclassname(fpath,avalue);
+   fclasstype:= msestring(designer.changemoduleclassname(fpath,
+                                                       ansistring(avalue)));
    avalue:= fclasstype;
   end;
   1: begin
-   fformname:= designer.changemodulename(fpath,avalue);
+   fformname:= msestring(designer.changemodulename(fpath,ansistring(avalue)));
    avalue:= fformname;
   end;
   2: begin
-   finstancevarname:= designer.changeinstancevarname(fpath,avalue);
+   finstancevarname:= msestring(designer.changeinstancevarname(
+                                              fpath,ansistring(avalue)));
    avalue:= finstancevarname;
   end;
  end;

@@ -175,9 +175,9 @@ type
    function gettextstream(const filename: filenamety;
                                            forwrite: boolean): ttextstream;
    function getfiletext(const filename: filenamety;
-                   const startpos,endpos: gridcoordty): string;
+                   const startpos,endpos: gridcoordty): msestring;
    procedure replacefiletext(const filename: filenamety;
-                   const startpos,endpos: gridcoordty; const newtext: string);
+                const startpos,endpos: gridcoordty; const newtext: msestring);
    property sourcepos: sourceposty read getsourcepos;
    property sourcehintwidget: twidget read fsourcehintwidget 
                                                     write setsourcehintwidget;
@@ -220,19 +220,20 @@ begin
   if length(ar2) > 1 then begin
    splitstring(ar2[0],ar3,msechar(','));
    if (high(ar3) >= 0) then begin
-    if startsstr(' Error:',ar2[1]) or startsstr(' Fatal:',ar2[1]) then begin
+    if msestartsstr(' Error:',ar2[1]) or 
+                    msestartsstr(' Fatal:',ar2[1]) then begin
      alevel:= el_error;
     end
     else begin
-     if startsstr(' Warning:',ar2[1]) then begin
+     if msestartsstr(' Warning:',ar2[1]) then begin
       alevel:= el_warning;
      end
      else begin
-      if startsstr(' Note:',ar2[1]) then begin
+      if msestartsstr(' Note:',ar2[1]) then begin
        alevel:= el_note;
       end
       else begin
-       if startsstr(' Hint:',ar2[1]) then begin
+       if msestartsstr(' Hint:',ar2[1]) then begin
         alevel:= el_hint;
        end;
       end;
@@ -565,7 +566,7 @@ begin
                {$ifdef FPC}@{$endif}geteditpositem);
    for int1:= 0 to high(fbookmarkar) do begin
     factbookmark:= int1;
-    tstatwriter(statfiler).writerecordarray('bookmarks'+inttostr(int1),
+    tstatwriter(statfiler).writerecordarray('bookmarks'+inttostrmse(int1),
                 length(fbookmarkar[int1]),
                 {$ifdef FPC}@{$endif}getbookmarkitem);
    end;
@@ -577,7 +578,7 @@ begin
    setlength(fbookmarkar,length(feditposar));
    for int1:= 0 to high(fbookmarkar) do begin
     factbookmark:= int1;
-    tstatreader(statfiler).readrecordarray('bookmarks'+inttostr(int1),
+    tstatreader(statfiler).readrecordarray('bookmarks'+inttostrmse(int1),
             {$ifdef FPC}@{$endif}setbookmarkcount,
             {$ifdef FPC}@{$endif}setbookmarkitem);
    end;
@@ -1262,7 +1263,7 @@ begin
 end;
 
 function tsourcefo.getfiletext(const filename: filenamety;
-                   const startpos,endpos: gridcoordty): string;
+                   const startpos,endpos: gridcoordty): msestring;
 var
  apage: tsourcepage;
 begin
@@ -1276,14 +1277,14 @@ begin
 end;
 
 procedure tsourcefo.replacefiletext(const filename: filenamety;
-                   const startpos,endpos: gridcoordty; const newtext: string);
+                 const startpos,endpos: gridcoordty; const newtext: msestring);
 var
  apage: tsourcepage;
 begin
  apage:= openfile(filename);
  if apage <> nil then begin
   apage.edit.deletetext(startpos,endpos);
-  apage.edit.inserttext(startpos,newtext);
+  apage.edit.inserttext(startpos,msestring(newtext));
  end;
 end;
 
@@ -1419,7 +1420,7 @@ end;
 procedure tsourcefo.insguiexec(const sender: TObject);
 begin
  with activepage.edit do begin
-  inserttext(editpos,'['''+createguidstring+''']');
+  inserttext(editpos,'['''+msestring(createguidstring)+''']');
  end;
 end;
 
@@ -1451,7 +1452,7 @@ begin
   end;
   
   with activepage.edit do begin
-   inserttext(editpos,'['''+str2+''']{'+inttostr(id1)+'}');
+   inserttext(editpos,'['''+msestring(str2)+''']{'+inttostrmse(id1)+'}');
   end;
   projectoptions.o.uid:= id1+1;
  end;
@@ -1482,9 +1483,9 @@ begin
   ar1:= breaklines(mstr1);
   mstr3:= messagestr(mstr1);
   for int1:= 0 to high(ar1)-1 do begin
-   ar1[int1]:= stringtopascalstring(ar1[int1])+'+lineend+';
+   ar1[int1]:= msestring(stringtopascalstring(ar1[int1]))+'+lineend+';
   end;
-  ar1[high(ar1)]:= stringtopascalstring(ar1[high(ar1)]);  
+  ar1[high(ar1)]:= msestring(stringtopascalstring(ar1[high(ar1)]));
   mstr2:= concatstrings(ar1,lineend);
   mstr4:= messagestr(mstr2);
   if askyesno(c[ord(wishreplace)]+lineend+mstr3+lineend+c[ord(str_with)]+lineend+

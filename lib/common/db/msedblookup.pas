@@ -1110,8 +1110,8 @@ end;
 function tdbintegerlookuplb.lookuptext(const aindex: integer): msestring;
 begin
  with tlookuplbdispfielddatalink(fdatalink) do begin
-  result:= intvaluetostr(flookupbuffer.integervaluephys(
-                        flookupvaluefieldno,aindex),fbase,fbitcount);
+  result:= msestring(intvaluetostr(flookupbuffer.integervaluephys(
+                        flookupvaluefieldno,aindex),fbase,fbitcount));
  end;
 end;
 
@@ -1152,9 +1152,9 @@ end;
 
 function tdbintegerlookupdb.lookuptext(const abm: bookmarkdataty): msestring;
 begin
- result:= intvaluetostr(
+ result:= msestring(intvaluetostr(
            tlookupdbdispfielddatalink(fdatalink).getintegerlookupvalue(abm),
-                        fbase,fbitcount);
+                        fbase,fbitcount));
 end;
 
 procedure tdbintegerlookupdb.setbase(const avalue: numbasety);
@@ -1194,9 +1194,9 @@ end;
 
 function tdbintegerlookup64db.lookuptext(const abm: bookmarkdataty): msestring;
 begin
- result:= intvaluetostr(
+ result:= msestring(intvaluetostr(
            tlookupdbdispfielddatalink(fdatalink).getintegerlookupvalue(abm),
-                        fbase,fbitcount);
+                        fbase,fbitcount));
 end;
 
 procedure tdbintegerlookup64db.setbase(const avalue: numbasety);
@@ -1236,9 +1236,9 @@ end;
 
 function tdbintegerlookupstrdb.lookuptext(const abm: bookmarkdataty): msestring;
 begin
- result:= intvaluetostr(
+ result:= msestring(intvaluetostr(
            tlookupdbdispfielddatalink(fdatalink).getintegerlookupvalue(abm),
-                        fbase,fbitcount);
+                        fbase,fbitcount));
 end;
 
 procedure tdbintegerlookupstrdb.setbase(const avalue: numbasety);
@@ -1717,8 +1717,8 @@ end;
 function tdbintegerlookup64lb.lookuptext(const aindex: integer): msestring;
 begin
  with tlookuplbdispfielddatalink(fdatalink) do begin
-  result:= intvaluetostr(flookupbuffer.integervaluephys(
-                        flookupvaluefieldno,aindex),fbase,fbitcount);
+  result:= msestring(intvaluetostr(flookupbuffer.integervaluephys(
+                        flookupvaluefieldno,aindex),fbase,fbitcount));
  end;
 end;
 
@@ -1905,8 +1905,8 @@ end;
 function tdbintegerlookupstrlb.lookuptext(const aindex: integer): msestring;
 begin
  with tlookuplbdispfielddatalink(fdatalink) do begin
-  result:= intvaluetostr(flookupbuffer.integervaluephys(
-                        flookupvaluefieldno,aindex),fbase,fbitcount);
+  result:= msestring(intvaluetostr(flookupbuffer.integervaluephys(
+                        flookupvaluefieldno,aindex),fbase,fbitcount));
  end;
 end;
 

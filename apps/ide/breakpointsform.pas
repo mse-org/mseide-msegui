@@ -208,7 +208,7 @@ begin
   int1:= -1;
  end;
  conderr[index]:= int1;
- condition[index]:= info.condition;
+ condition[index]:= msestring(info.condition);
  info1:= info;
  info1.bkpton:= bkpton[index];
  lineinfo:= infotolineinfo(info1);
@@ -225,7 +225,7 @@ begin
  info.bkptno:= bkptno[index];
  info.bkpton:= bkpton[index] and bkptson.value;
  info.ignore:= ignore[index];
- info.condition:= condition[index];
+ info.condition:= ansistring(condition[index]);
  if (info.conditionmessage = '') and (conderr[index] = 0) then begin
   info.conditionmessage:= ' '; //old error
  end;
@@ -356,13 +356,13 @@ end;
 function tbreakpointsfo.breakpointerror(const error: gdbresultty;
                                             out errme: msestring): boolean;
 var
- str1: string;
+ str1: msestring;
 begin
  result:= error <> gdb_ok;
  errme:= '';
  if result then begin
   if error = gdb_message then begin
-   str1:= gdb.errormessage;
+   str1:= msestring(gdb.errormessage);
   end
   else begin
    str1:= c[ord(breakpointerror0)];
@@ -473,7 +473,7 @@ begin
   if int1 >= 0 then begin
    if (condition[int1] <> '') and (flags[int1] = 0) then begin
     flags[int1]:= 1;
-    str1:= condition[int1];
+    str1:= ansistring(condition[int1]);
     if breakpointerror(gdb.breakcondition(stopinfo.bkptno,str1),
                                                           mstr1) then begin
      conderr[int1]:= 0;
@@ -589,7 +589,8 @@ var
  mstr1: msestring;
 begin
  if gdb.execloaded then begin
-  if breakpointerror(gdb.breakcondition(bkptno.value,avalue),mstr1) then begin
+  if breakpointerror(gdb.breakcondition(bkptno.value,ansistring(avalue)),
+                                                            mstr1) then begin
    conderr.value:= 0;
    errormessage.value:= mstr1;
   end

@@ -1102,7 +1102,7 @@ end;
 procedure projectoptionstofont(const afont: tfont);
 begin
  with projectoptions,afont do begin
-  name:= e.editfontname;
+  name:= ansistring(e.editfontname);
   height:= e.editfontheight;
   width:= e.editfontwidth;
   extraspace:= e.editfontextraspace;
@@ -1120,13 +1120,13 @@ function checkprojectloadabort: boolean;
 begin
  result:= false;
  if exceptobject is exception then begin
-  if showmessage(exception(exceptobject).Message,
+  if showmessage(msestring(exception(exceptobject).Message),
       actionsmo.c[ord(ac_error)],[mr_skip,mr_cancel]) <> mr_skip then begin
    result:= true;
   end;
  end
  else begin
-  raise exception.create(actionsmo.c[ord(ac_invalidexception)]);
+  raise exception.create(ansistring(actionsmo.c[ord(ac_invalidexception)]));
  end;
 end;
 
@@ -1237,10 +1237,11 @@ begin
    end;
    for int1:= 0 to int2 do begin
     try
-     registerfontalias(fontalias[int1],fontnames[int1],fam_overwrite,
+     registerfontalias(ansistring(fontalias[int1]),
+                ansistring(fontnames[int1]),fam_overwrite,
                 fontheights[int1],fontwidths[int1],
-                fontoptioncharstooptions(fontoptions[int1]),
-                fontxscales[int1],fontancestors[int1]);
+                fontoptioncharstooptions(ansistring(fontoptions[int1])),
+                fontxscales[int1],ansistring(fontancestors[int1]));
     except
      application.handleexception;
     end;
@@ -1342,7 +1343,7 @@ begin
     break;
    end;
    if d.exceptignore[int1] then begin
-    additem(ignoreexceptionclasses,d.exceptclassnames[int1]);
+    additem(ignoreexceptionclasses,ansistring(d.exceptclassnames[int1]));
    end;
   end;
   for int1:= 0 to usercolorcount - 1 do begin
@@ -1704,7 +1705,7 @@ var
  modulenames1: msestringarty;
  moduletypes1: msestringarty;
  modulefiles1: filenamearty;
- moduledock1: msestringarty;
+// moduledock1: msestringarty;
 begin
  with statfiler,projectoptions do begin
   if iswriter then begin
@@ -1715,11 +1716,11 @@ begin
     setlength(modulenames1,int2);
     setlength(moduletypes1,int2);
     setlength(modulefiles1,int2);
-    setlength(moduledock1,int2);
+//    setlength(moduledock1,int2);
     for int1:= 0 to high(modulenames1) do begin
      with pmoduleinfoty(submenu[int1+int3].tagpointer)^ do begin
-      modulenames1[int1]:= struppercase(instance.name);
-      moduletypes1[int1]:= struppercase(string(moduleclassname));
+      modulenames1[int1]:= msestring(struppercase(instance.name));
+      moduletypes1[int1]:= msestring(struppercase(string(moduleclassname)));
       modulefiles1[int1]:= filename;
      end;
     end;
@@ -1821,7 +1822,8 @@ begin
  fo.colgrid.fixcols[-1].captions.count:= usercolorcount;
  with fo,projectoptions do begin
   for int1:= 0 to colgrid.rowhigh do begin
-   colgrid.fixcols[-1].captions[int1]:= colortostring(cl_user+longword(int1));
+   colgrid.fixcols[-1].captions[int1]:= 
+                   msestring(colortostring(cl_user+longword(int1)));
   end;
  end;
  with fo.signame do begin
@@ -1831,8 +1833,8 @@ begin
    with siginfos[int1] do begin
     if not (sfl_internal in flags) then begin
      enums[int2]:= num;
-     dropdownitems.addrow([name,comment]);
-     dropdown.cols.addrow([comment+ ' ('+name+')']);
+     dropdownitems.addrow([msestring(name),msestring(comment)]);
+     dropdown.cols.addrow([msestring(comment)+ ' ('+msestring(name)+')']);
      inc(int2);
     end;
    end;
@@ -2056,7 +2058,7 @@ begin
  except
   on e: exception do begin
    showerror(actionsmo.c[ord(ac_cannotreadproject)]+' "'+filename+'".'+
-                               lineend+e.message,actionsmo.c[ord(ac_error)]);
+                   lineend+msestring(e.message),actionsmo.c[ord(ac_error)]);
   end;
  end;
 end;
@@ -2225,7 +2227,7 @@ var
  format1: formatinfoarty;
 begin
  with fontdisp.font do begin
-  name:= editfontname.value;
+  name:= ansistring(editfontname.value);
   height:= editfontheight.value;
   width:= editfontwidth.value;
   extraspace:= editfontextraspace.value;
@@ -2245,8 +2247,8 @@ begin
   updatefontstyle1(format1,3*length(teststring),length(teststring),fs_bold,true);
   fontdisp.richformats[0]:= format1;
   fontdisp[1]:= 
-    'Ascent: '+inttostr(ascent)+' Descent: '+inttostr(descent)+
-    ' Linespacing: '+inttostr(lineheight);
+    'Ascent: '+inttostrmse(ascent)+' Descent: '+inttostrmse(descent)+
+    ' Linespacing: '+inttostrmse(lineheight);
  end;
  dispgrid.rowcolorstate[1]:= 0;
  dispgrid.rowcolors[0]:= statementcolor.value;
@@ -2331,7 +2333,7 @@ begin
 // xtermoptions.visible:= true;
  {$endif}
  for int1:= ord(firstsiginfocomment) to ord(lastsiginfocomment) do begin
-  siginfos[int1-ord(firstsiginfocomment)].comment:= c[int1];
+  siginfos[int1-ord(firstsiginfocomment)].comment:= ansistring(c[int1]);
  end;
 end;
 
@@ -2358,8 +2360,9 @@ begin
  str1:= '';
  for int1:= 0 to colgrid.rowhigh do begin
   if usercolors[int1] <> 0 then begin
-   str1:= str1 + ' setcolormapvalue('+colortostring(cl_user+longword(int1))+','+
-               colortostring(usercolors[int1])+');';
+   str1:= str1 + ' setcolormapvalue('+
+             msestring(colortostring(cl_user+longword(int1)))+','+
+               msestring(colortostring(usercolors[int1]))+');';
    if usercolorcomment[int1] <> '' then begin
     str1:= str1 + ' //'+usercolorcomment[int1];
    end;
@@ -2387,7 +2390,7 @@ end;
 
 procedure tprojectoptionsfo.processorchange(const sender: TObject);
 begin
- mainfo.gdb.processorname:= gdbprocessor.value;
+ mainfo.gdb.processorname:= ansistring(gdbprocessor.value);
  if not (mainfo.gdb.processor in simulatorprocessors) then begin
   gdbsimulator.value:= false;
   gdbsimulator.enabled:= false;

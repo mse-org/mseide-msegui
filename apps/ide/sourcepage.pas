@@ -164,7 +164,7 @@ implementation
 uses
  sourcepage_mfm,msefileutils,sourceform,main,
  sysutils,msewidgets,finddialogform,replacedialogform,msekeyboard,
- sourceupdate,msefiledialog,mseintegerenter,msedesigner,
+ sourceupdate,msefiledialog,mseintegerenter,msedesigner,mseformatstr,
  msesys,make,actionsmodule,msegraphics,sourcehintform,
  mseedit,msedrawtext,msebits,msearrayutils,msestream,msedesignintf,
  msesysutils,msedesignparser,msesyntaxpainter,msemacros,msecodetemplates,
@@ -320,7 +320,7 @@ begin
   updatestatvalues;
  except
   on e: exception do begin
-   handleerror(e,sourcefo.c[ord(syntaxdeffile)]);
+   handleerror(e,ansistring(sourcefo.c[ord(syntaxdeffile)]));
   end;
  end;
 end;
@@ -536,7 +536,7 @@ begin
      textflags:= [tf_wordbreak,tf_noselect];
      textflagsactive:= [tf_wordbreak];
      anchors:= [an_top];
-     text:= values[high(values)-int1];
+     text:= msestring(values[high(values)-int1]);
     end;
    end;
    for int1:= high(values) downto 0 do begin
@@ -1121,7 +1121,7 @@ begin
    if (po1.row <> flasthint.row) or (po1.col <> flasthint.col) or
          (length(str1) <> flasthintlength) then begin
     if str1 <> '' then begin
-     if mainfo.gdb.readpascalvariable(str1,str2) = gdb_ok then begin
+     if mainfo.gdb.readpascalvariable(ansistring(str1),str2) = gdb_ok then begin
       application.showhint(nil,str1 + ' = ' + str2,
        inflaterect(edit.textpostomouserect(po1,true),20),cp_bottomleft,0);
      end
@@ -1181,8 +1181,8 @@ end;
 
 procedure tsourcepage.updatelinedisp;
 begin
- linedisp.value:= inttostr(edit.editpos.row+1) + ':'+
-                                          inttostr(edit.editpos.col+1);
+ linedisp.value:= inttostrmse(edit.editpos.row+1) + ':'+
+                                          inttostrmse(edit.editpos.col+1);
 end;
 
 procedure tsourcepage.editoneditnotification(const sender: tobject;
@@ -1453,7 +1453,8 @@ begin
  with info,tsyntaxedit(sender).editor,projectoptions do begin
   if e.spacetabs and (e.tabstops > 0) and (shiftstate = []) and 
                                              (key = key_tab) then begin
-   chars:= charstring(' ',(curindex div e.tabstops + 1) * e.tabstops - curindex);
+   chars:= charstring(msechar(' '),
+                        (curindex div e.tabstops + 1) * e.tabstops - curindex);
   end;
  end;
 end;

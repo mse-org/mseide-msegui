@@ -17,7 +17,7 @@ function richstringtolatex(const source: richstringty): msestring;
 
 implementation
 uses
- msegraphutils,msearrayutils,msegraphics,sysutils;
+ msegraphutils,msearrayutils,msegraphics,sysutils,mseformatstr;
  
 const
  escchars = ['#','$','%','&','{','}','_'];
@@ -135,12 +135,12 @@ begin
        if i2 < 0 then begin
         additem(longwordarty(defcolors),colorty(rgb1));
         i2:= high(defcolors);
-        add('\definecolor{c'+inttostr(i2)+'}{RGB}{'+
-                      inttostr(rgb1.red)+','+
-                      inttostr(rgb1.green)+','+
-                      inttostr(rgb1.blue)+'}');
+        add('\definecolor{c'+inttostrmse(i2)+'}{RGB}{'+
+                      inttostrmse(rgb1.red)+','+
+                      inttostrmse(rgb1.green)+','+
+                      inttostrmse(rgb1.blue)+'}');
        end;
-       add('\color{c'+inttostr(i2)+'}');
+       add('\color{c'+inttostrmse(i2)+'}');
       end;
      end;
      if fs_bold in styles1 then begin

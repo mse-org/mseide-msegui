@@ -54,7 +54,7 @@ type
 implementation
 uses
  templateeditor_mfm,msecodetemplates,projectoptionsform,sysutils,msefileutils,
- msedatalist,msesysintf,msearrayutils;
+ msedatalist,msesysintf,msearrayutils,mseformatstr;
 type
  stringconststy = (
   wantdelete,      //0 Do you want to delete "
@@ -111,7 +111,7 @@ begin
  case info.action of
   ea_indexmoved: begin
    with templed.editpos do begin
-    cursordisp.value:= inttostr(row+1) + ':'+inttostr(col+1);
+    cursordisp.value:= inttostrmse(row+1) + ':'+inttostrmse(col+1);
    end;
   end;
  end;

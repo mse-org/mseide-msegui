@@ -224,7 +224,7 @@ begin
   end;
   tabbar.tabs.count:= report.reppagecount;
   for int1:= 0 to tabbar.tabs.count - 1 do begin
-   tabbar.tabs[int1].caption:= report[int1].name;
+   tabbar.tabs[int1].caption:= msestring(report[int1].name);
   end;
   if (report.reppagecount > 0) then begin
    if tabbar.activetab < 0 then begin
@@ -394,7 +394,7 @@ begin
      if pages[int2] = comp1 then begin
       bo1:= true;
       if not askok(sc[ord(sc_wishdelete)]+' '''+
-               comp1.name+'''?',sc[ord(sc_warning)],mr_cancel) then begin
+          msestring(comp1.name)+'''?',sc[ord(sc_warning)],mr_cancel) then begin
        exit;
       end;
      end;
@@ -436,8 +436,8 @@ var
  comp1: tcomponent;
 begin
  comp1:= report[tabbar.activetab];
- if askok(sc[ord(sc_wishdelete)]+' '''+
-               comp1.name+'''?',sc[ord(sc_warning)],mr_cancel) then begin
+ if askok(sc[ord(sc_wishdelete)]+' '''+msestring(comp1.name)+'''?',
+                                 sc[ord(sc_warning)],mr_cancel) then begin
 //  designer.deletecomponent(comp1);
   deletecomponent(comp1);
   updatetabs;
