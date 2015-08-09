@@ -279,7 +279,7 @@ begin
  result:= sye_sockaddr;
  with addr,win32sockaddrty(platformdata) do begin
   if kind = sok_inet then begin
-   str1:= url;
+   str1:= ansistring(url);
    ar1:= splitstring(str1,'.');
    if high(ar1) = 3 then begin
     bo1:= true;

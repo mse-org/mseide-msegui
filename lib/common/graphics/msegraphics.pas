@@ -841,8 +841,8 @@ type
    fgclinksfrom: canvasarty;
    procedure adjustrectar(po: prectty; count: integer);
    procedure readjustrectar(po: prectty; count: integer);
-   procedure error(nr: gdierrorty; const text: string);
-   procedure intparametererror(value: integer; const text: string);
+   procedure error(nr: gdierrorty; const text: msestring);
+   procedure intparametererror(value: integer; const text: msestring);
    procedure freevalues(var values: canvasvaluesty);
 
    function getcolor: colorty;
@@ -1374,9 +1374,9 @@ procedure extendbuffer(var buffer: bufferty; const extension: integer;
 function replacebuffer(var buffer: bufferty; size: integer): pointer;
 procedure freebuffer(var buffer: bufferty);
 
-procedure gdierrorlocked(error: gdierrorty; const text: string = ''); overload;
+procedure gdierrorlocked(error: gdierrorty; const text: msestring = ''); overload;
 procedure gdierrorlocked(error: gdierrorty; sender: tobject;
-                                               text: string = ''); overload;
+                                               text: msestring = ''); overload;
 
 function colortorgb(color: colorty): rgbtriplety;
 function colortopixel(color: colorty): pixelty;
@@ -1421,7 +1421,7 @@ var
 // gdilocked: boolean;
  
 {$ifdef mse_debuggdisync}
-procedure gdilockerror(const text: string);
+procedure gdilockerror(const text: msestring);
 var
  str1: string;
 begin
@@ -1771,14 +1771,14 @@ begin
  buffer.size:= size; 
 end;
 
-procedure gdierrorlocked(error: gdierrorty; const text: string = ''); overload;
+procedure gdierrorlocked(error: gdierrorty; const text: msestring = ''); overload;
 begin
  gdi_unlock;
  gdierror(error,text);
 end;
 
 procedure gdierrorlocked(error: gdierrorty; sender: tobject;
-                       text: string = ''); overload;
+                       text: msestring = ''); overload;
 begin
  gdi_unlock;
  gdierror(error,sender,text);
@@ -1819,7 +1819,7 @@ begin
   if (map < cm_rgb) or (map > high(map)) or
        (longword(color) >= longword(mapcolorcounts[map])) then begin
    gdierror(gde_invalidcolor,
-       hextostr(longword(color)+longword(map) shl speccolorshift,8));
+       hextostrmse(longword(color)+longword(map) shl speccolorshift,8));
   end;
   result:= rgbtriplety(gui_pixeltorgb(colormaps[map][longword(color)]));
  end;
@@ -1839,7 +1839,7 @@ begin
   if (map < cm_rgb) or (map > high(map)) or
        (longword(color) >= longword(mapcolorcounts[map])) then begin
    gdierror(gde_invalidcolor,
-       hextostr(longword(color)+longword(map) shl speccolorshift,8));
+       hextostrmse(longword(color)+longword(map) shl speccolorshift,8));
   end;
   result:= colormaps[map][longword(color)];
  end;
@@ -1921,7 +1921,7 @@ begin
  if (map <= cm_rgb) or (map > high(map)) or
        (longword(index) >= longword(mapcolorcounts[map])) then begin
   gdierror(gde_invalidcolor,
-       hextostr(longword(index)+longword(map) shl speccolorshift,8));
+       hextostrmse(longword(index)+longword(map) shl speccolorshift,8));
  end;
  colormaps[map][longword(index)]:= gui_rgbtopixel(rgbtocolor(red,green,blue));
 end;
@@ -2722,7 +2722,7 @@ begin
   fhandlepo^:= getfontnum(finfopo^,canvas.fdrawinfo,
                                          {$ifdef FPC}@{$endif}getfont,templ1);
   if fhandlepo^ = 0 then begin
-   canvas.error(gde_font,finfopo^.baseinfo.name);
+   canvas.error(gde_font,msestring(finfopo^.baseinfo.name));
   end;
   if (templ1 <> nil) and (ftemplate = nil) then begin
    po1:= getfontdata(fhandlepo^);
@@ -3932,7 +3932,7 @@ begin
 // result:= gui_getgdifuncs;
 end;
 
-procedure tcanvas.error(nr: gdierrorty; const text: string);
+procedure tcanvas.error(nr: gdierrorty; const text: msestring);
 begin
  gdierror(nr,fuser,text);
 end;
@@ -3993,9 +3993,9 @@ begin
 end;
 
 
-procedure tcanvas.intparametererror(value: integer; const text: string);
+procedure tcanvas.intparametererror(value: integer; const text: msestring);
 begin
- error(gde_parameter,text + ' ' + inttostr(value));
+ error(gde_parameter,text + ' ' + inttostrmse(value));
 end;
 
 procedure tcanvas.initgcvalues;
@@ -4186,12 +4186,12 @@ var
 begin
  with fvaluestack do begin
   if index >= count then begin
-   error(gde_invalidsaveindex,inttostr(index));
+   error(gde_invalidsaveindex,inttostrmse(index));
 //index:= count-1;
   end;
   if index < 0 then begin
    if count < 2 then begin
-    error(gde_invalidsaveindex,inttostr(index));
+    error(gde_invalidsaveindex,inttostrmse(index));
    end;
    index:= count - 2;
   end;

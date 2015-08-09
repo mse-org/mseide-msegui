@@ -424,7 +424,7 @@ function execmse0(const commandline: msestring; topipe: pinteger = nil;
              const options: execoptionsty = [];
              frompipewritehandle: pinteger = nil;
              errorpipewritehandle: pinteger = nil;
-             const workingdirectory: ansistring = '';
+             const workingdirectory: msestring = '';
              const params: msestringarty = nil;
              const envvars: msestringarty = nil             
              ): prochandlety;
@@ -536,20 +536,20 @@ begin
   startupinfo.wShowWindow:= sw_hide;
   startupinfo.dwflags:= startupinfo.dwFlags or startf_useshowwindow;
  end;
- wd1:= tosysfilepath(workingdirectory);
+ wd1:= ansistring(tosysfilepath(workingdirectory));
  mstr1:= commandline;
  for i1:= 0 to high(params) do begin
   mstr1:= mstr1 + ' '+quotestring(params[i1],'"',false);
  end;
                //todo: use createprocessW
- cmd1:= mstr1;
+ cmd1:= ansistring(mstr1);
  env1:= '';
  if envvars <> nil then begin
   i2:= 1; //for terminating 0
   i3:= 0;
   setlength(envar1,length(envvars));
   for i1:= 0 to high(envvars) do begin
-   envar1[i3]:= envvars[i1]; //ansi
+   envar1[i3]:= ansistring(envvars[i1]); //ansi
    i4:= length(envvars[i1]);
    if i4 > 0 then begin
     i2:= i2+i4;

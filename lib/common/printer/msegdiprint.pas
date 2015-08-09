@@ -139,14 +139,15 @@ var
 {$endif}
   
 {$ifdef mswindows}
-procedure checkprinterror(const aresult: integer; const atext: string = '');
+procedure checkprinterror(const aresult: integer; const atext: msestring = '');
 begin
  if aresult <= 0 then begin
   syserror(syelasterror,atext);
  end;
 end;
 
-procedure checkprintboolerror(const aresult: boolean; const atext: string = '');
+procedure checkprintboolerror(const aresult: boolean; 
+                                                  const atext: msestring = '');
 begin
  if not aresult then begin
   syserror(syelasterror,atext);
@@ -589,10 +590,10 @@ var
 begin
  if frefprintername <> screenrefprintername then begin
   if frefprintername = '' then begin
-   str1:= defaultprinter;
+   str1:= ansistring(defaultprinter);
   end
   else begin
-   str1:= frefprintername;
+   str1:= ansistring(frefprintername);
   end;
  end;
  agc.refgc:= createdc('WINSPOOL',pansichar(str1),nil,nil);

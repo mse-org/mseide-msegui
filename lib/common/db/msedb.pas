@@ -2839,7 +2839,7 @@ begin
    end;
   end;
   {$else}
-  result:= sender.asstring;
+  result:= msestring(sender.asstring);
   {$endif}
  end;
 end;

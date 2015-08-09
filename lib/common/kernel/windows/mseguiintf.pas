@@ -481,7 +481,7 @@ begin
   if openclipboard(0) then begin
    if emptyclipboard then begin
     if iswin95 then begin
-     str1:= value;
+     str1:= ansistring(value);
      mem:= globalalloc(GMEM_MOVEABLE or GMEM_DDESHARE,length(str1)+1); //nullterminator
      if mem <> 0 then begin
       po1:= globallock(mem);
@@ -584,7 +584,7 @@ begin
        result:= gue_ok;
        setlength(str1,length(pchar(str1)));
       end;
-      value:= str1;
+      value:= msestring(str1);
      end
      else begin
       setlength(value,globalsize(data) div 2);
@@ -1501,7 +1501,7 @@ function gui_setwindowcaption(id: winidty; const caption: msestring): guierrorty
   str1: string;
  begin
   if iswin95 then begin
-   str1:= caption;
+   str1:= ansistring(caption);
    if windows.SetWindowTextA(id,pchar(str1)) then begin
     result:= gue_ok;
    end
@@ -2332,7 +2332,7 @@ begin
     if wparam and $ff00 <> 0 then begin
      str1:= char(wparam shr 8) + str1;
     end;
-    charbuffer:= charbuffer + str1;    
+    charbuffer:= charbuffer + msestring(str1);    
    end
    else begin
     charbuffer:= charbuffer + ucs4tostring(wparam);
@@ -2637,7 +2637,7 @@ begin
       while peekmessagea(msg1,msg.hwnd,wm_syschar,wm_syschar,pm_remove) do begin
        str1:= str1 + char(msg1.wparam);
       end;
-      charbuffer:= charbuffer + str1;
+      charbuffer:= charbuffer + msestring(str1);
       dispatchmessagea(msg);
      end
      else begin
@@ -2719,7 +2719,7 @@ var
  str1: string;
  menu1: hmenu;
 begin
- str1:= application.applicationname;
+ str1:= ansistring(application.applicationname);
  id:= windows.CreateWindow(widgetclassname,pchar(str1),
              WS_POPUP or WS_CAPTION or WS_CLIPSIBLINGS or 
              WS_SYSMENU or WS_MINIMIZEBOX,0,0,0,0,0,0,hinstance,nil);

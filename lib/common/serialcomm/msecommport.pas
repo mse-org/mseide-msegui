@@ -600,7 +600,7 @@ begin
 end;
  {$else}
 begin
- result:= gettickcount*1000;
+ result:= windows.gettickcount*1000;
 end;
  {$endif}
 

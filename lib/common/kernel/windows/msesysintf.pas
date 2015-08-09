@@ -232,7 +232,7 @@ begin
  result:= getstdhandle(std_error_handle);
 end;
 
-function sys_getprintcommand: string;
+function sys_getprintcommand: msestring;
 begin
  result:= defaultprintcommand;
  if result = '' then begin
@@ -297,7 +297,7 @@ begin
  setlength(str1,bufsize);
  int1:= getmodulefilename(hinstance,@str1[1],bufsize-1);
  setlength(str1,int1);
- result:= tomsefilepath(str1);
+ result:= tomsefilepath(msestring(str1));
 end;
 
 function sys_getcommandlinearguments: msestringarty;
@@ -324,7 +324,7 @@ begin
     lwo1:= getenvironmentvariablea(pchar(str2),pointer(str1),lwo1);
     result:= lwo1 > 0;
     setlength(str1,lwo1);
-    avalue:= str1;
+    avalue:= msestring(str1);
    end;
   end;
  end
@@ -501,7 +501,7 @@ begin
 
  mstr2:= winfilepath(path,'');
  if iswin95 then begin
-  str1:= mstr2;
+  str1:= ansistring(mstr2);
   if openmode = fm_Create then begin
    handle:= CreateFilea(PChar(str1),openmodes[openmode], //todo: rights -> securityattributes
       ca1, nil, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
@@ -583,8 +583,8 @@ var
  str1,str2: string;
 begin
  if iswin95 then begin
-  str1:= winfilepath(oldfile,'');
-  str2:= winfilepath(newfile,'');
+  str1:= ansistring(winfilepath(oldfile,''));
+  str2:= ansistring(winfilepath(newfile,''));
   if windows.copyfilea(pchar(str1),pchar(str2),false) then begin
    result:= sye_ok;
   end
@@ -608,8 +608,8 @@ var
  str1,str2: string;
 begin 
  if iswin95 then begin
-  str1:= winfilepath(oldname,'');
-  str2:= winfilepath(newname,'');
+  str1:= ansistring(winfilepath(oldname,''));
+  str2:= ansistring(winfilepath(newname,''));
   if windows.copyfilea(pchar(str1),pchar(str2),false) then begin
    if windows.deletefilea(pchar(str1)) then begin
     result:= sye_ok;
@@ -638,7 +638,7 @@ var
  str1: string;
 begin
  if iswin95 then begin
-  str1:= winfilepath(filename,'');
+  str1:= ansistring(winfilepath(filename,''));
   if windows.deletefilea(pchar(str1)) then begin
    result:= sye_ok;
   end
@@ -660,9 +660,20 @@ function sys_createdir(const path: msestring;
                  const rights: filerightsty): syserrorty;
 var
  str1: string;
+ str2: msestring;
+ bo1: boolean;
 begin
- str1:= winfilepath(path,'');
- if windows.createdirectory(pchar(str1),nil) then begin //todo: rights -> securityattributes
+ if iswin95 then begin
+  str1:= ansistring(winfilepath(path,''));
+  bo1:= windows.createdirectorya(pchar(str1),nil); 
+                           //todo: rights -> securityattributes
+ end
+ else begin
+  str2:= winfilepath(path,'');
+  bo1:= windows.createdirectoryw(pmsechar(str2),nil); 
+                           //todo: rights -> securityattributes
+ end;
+ if bo1 then begin
   result:= sye_ok;
  end
  else begin
@@ -1294,7 +1305,7 @@ begin
      if countchars(dirname,msechar('/')) = 2 then begin //list shares
       drivenum:= -2;
       finddatapo:= nil;
-      result:= findserver(copy(ansiuppercase(dirname),3,bigint),
+      result:= findserver(copy(ansiuppercase(ansistring(dirname)),3,bigint),
                               pnetresource(finddatapo));
       if finddatapo <> nil then begin
        result:= sye_ok;
@@ -1421,7 +1432,8 @@ begin
       if wo1 = no_error then begin
        po2:= strrscan(po1^.lpRemoteName,'\');
        if po2 <> nil then begin
-        info.name:= copy(po1^.lpRemoteName,po2-po1^.lpRemoteName+2,bigint);
+        info.name:= msestring(
+                    copy(po1^.lpRemoteName,po2-po1^.lpRemoteName+2,bigint));
         checkinfo;
        end
        else begin
@@ -1700,7 +1712,7 @@ begin
    ca1:= getcurrentdirectorya(0,nil);
    setlength(str1,ca1-1);
   until (ca1 < 2) or (getcurrentdirectorya(ca1,@str1[1]) = ca1-1);
-  result:= str1;
+  result:= msestring(str1);
  end
  else begin
   repeat
@@ -1755,7 +1767,7 @@ var
  str1: string;
 begin
  if iswin95 then begin
-  str1:= tosysfilepath(dirname);
+  str1:= ansistring(tosysfilepath(dirname));
   if not setcurrentdirectorya(pchar(str1)) then begin
    result:= syelasterror;
   end

@@ -480,8 +480,8 @@ function DoCompareStringA(const s1, s2: unicodestring; Flags: DWORD): PtrInt;
   var
     a1, a2: AnsiString;
   begin
-    a1:=s1;
-    a2:=s2;
+    a1:=ansistring(s1);
+    a2:=ansistring(s2);
     SetLastError(0);
     Result:=CompareStringA(LOCALE_USER_DEFAULT,Flags,pchar(a1),
       length(a1),pchar(a2),length(a2))-2;

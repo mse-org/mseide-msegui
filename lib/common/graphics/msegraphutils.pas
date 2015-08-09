@@ -508,9 +508,9 @@ const
    setosi: {$ifdef FPC}@{$endif}ssetx;
  );
 
-procedure gdierror(error: gdierrorty; const text: string = ''); overload;
+procedure gdierror(error: gdierrorty; const text: msestring = ''); overload;
 procedure gdierror(error: gdierrorty; sender: tobject;
-                                            text: string = ''); overload;
+                                            text: msestring = ''); overload;
  
 function stringtocolor(const text: string): colorty;
 function trystringtocolor(text: string; out value: colorty): boolean;
@@ -1908,24 +1908,24 @@ begin
  asize.cy:= avalue;
 end;
 
-procedure gdierror(error: gdierrorty; const text: string = ''); overload;
+procedure gdierror(error: gdierrorty; const text: msestring = ''); overload;
 begin
  if error = gde_ok then begin
   exit;
  end;
- raise egdi.create(error,text);
+ raise egdi.create(error,ansistring(text));
 end;
 
 procedure gdierror(error: gdierrorty; sender: tobject;
-                       text: string = ''); overload;
+                       text: msestring = ''); overload;
 begin
  if error = gde_ok then begin
   exit;
  end;
  if sender <> nil then begin
-  text:= sender.classname + ' ' + text;
+  text:= msestring(sender.classname) + ' ' + text;
   if sender is tcomponent then begin
-   text:= text + ' ' + fullcomponentname(tcomponent(sender));
+   text:= text + ' ' + msestring(fullcomponentname(tcomponent(sender)));
   end;
  end;
  gdierror(error,text);
