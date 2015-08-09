@@ -11,7 +11,7 @@ unit msezstream;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- classes,mclasses,msezlib,msecryptohandler,msestream,mseclasses;
+ classes,mclasses,msezlib,msecryptohandler,msestream,mseclasses,msestrings;
 
 const
  defaultzstreambuffersize = 16384;
@@ -175,7 +175,7 @@ procedure tzstreamhandler.checkerror(const aclient: cryptoclientinfoty;
 begin
  if aerror < 0 then begin
   with zstreamhandlerdataty(aclient.handlerdata).d do begin
-   componentexception(self,string(strm^.msg));
+   componentexception(self,msestring(string(strm^.msg)));
   end;
  end;
 end;

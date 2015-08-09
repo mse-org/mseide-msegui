@@ -137,7 +137,8 @@ end;
 procedure tmsedbf.setfilepath(const avalue: filenamety);
 begin
  ffilepath:= tomsefilepath(avalue);
- inherited filepath:= tosysfilepath(msefileutils.filepath(avalue,fk_default,true));
+ inherited filepath:= ansistring(
+           tosysfilepath(msefileutils.filepath(avalue,fk_default,true)));
 end;
 
 procedure tmsedbf.setcontroller(const avalue: tdscontroller);

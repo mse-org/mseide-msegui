@@ -85,13 +85,13 @@ procedure tnoguiapplication.showexception(e: exception;
                const leadingtext: msestring = '');
 begin
  writestderr('EXCEPTION: ');
- writestderr(leadingtext+e.message,true);
+ writestderr(ansistring(leadingtext)+e.message,true);
 end;
 
 procedure tnoguiapplication.errormessage(const amessage: msestring);
 begin
  writestderr('ERROR: ');
- writestderr(amessage,true);
+ writestderr(ansistring(amessage),true);
 end;
 
 procedure tnoguiapplication.settimer(const us: integer);

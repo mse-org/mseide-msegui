@@ -67,7 +67,7 @@ begin
  if filer.iswriter then begin
   setlength(ar1,panellist.count);
   for int1:= 0 to high(ar1) do begin
-   ar1[int1]:= tpanelfo(panellist[int1]).name;
+   ar1[int1]:= msestring(tpanelfo(panellist[int1]).name);
   end;
  end;
  filer.updatevalue('panels',ar1);
@@ -77,7 +77,7 @@ begin
   end;
   for int1:= 0 to high(ar1) do begin
    try
-    newpanel(ar1[int1]);
+    newpanel(ansistring(ar1[int1]));
    except
    end;
   end;
@@ -199,7 +199,7 @@ begin
   onexecute:= {$ifdef FPC}@{$endif}showexecute;
   if fnameindex < 9 then begin
    shortcut:= (ord(key_f1) or key_modctrl) + fnameindex;
-   caption:= '&' + inttostr(fnameindex+1)+' '+acaption;
+   caption:= '&' + inttostrmse(fnameindex+1)+' '+acaption;
   end
   else begin
    shortcut:= 0;

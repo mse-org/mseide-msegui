@@ -86,9 +86,10 @@ begin
  with projectoptions,d,tstatreader(filer) do begin
   if not filer.iswriter then begin
    with t do begin
-    progparameters:= readstring('parameters',progparameters);
+    progparameters:= readmsestring('parameters',progparameters);
 //   progparamhistory:= readarray('progparamhistory',propgparamhistory);
-    progworkingdirectory:= readstring('workingdirectory',progworkingdirectory);
+    progworkingdirectory:=
+                        readmsestring('workingdirectory',progworkingdirectory);
 //    envvarons:= readarray('envvarons',envvarons);
     envvarnames:= readarray('envvarnames',envvarnames);
     envvarvalues:= readarray('envvarvalues',envvarvalues);

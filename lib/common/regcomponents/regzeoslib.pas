@@ -168,7 +168,7 @@ begin
   tzconnection(fprops[0].instance).getprotocolnames(list1);
   setlength(result,list1.count);
   for int1:= 0 to high(result) do begin
-   result[int1]:= list1[int1];
+   result[int1]:= msestring(list1[int1]);
   end;
  finally
   list1.free;
@@ -195,7 +195,7 @@ begin
   tzconnection(fprops[0].instance).getcatalognames(list1);
   setlength(result,list1.count);
   for int1:= 0 to high(result) do begin
-   result[int1]:= list1[int1];
+   result[int1]:= msestring(list1[int1]);
   end;
  finally
   list1.free;

@@ -112,7 +112,8 @@ begin
  dropdown.cols.nostreaming:= true;
  inherited value:= integer(cnr_1);
  for comm:= low(comminfo) to high(comminfo) do begin
-  tdropdownlistcontroller(fdropdown).cols[0].add(comminfo[comm].anzeigetext);
+  tdropdownlistcontroller(fdropdown).cols[0].add(
+                  msestring(comminfo[comm].anzeigetext));
  end;
 end;
 
@@ -133,7 +134,7 @@ begin
  for comm:= low(comminfo) to high(comminfo) do begin
   if (comm = activecomm) or checkcommport(comm) then begin
    aenums[int1]:= integer(comm);
-   names[0].add(comminfo[comm].dropdowntext);
+   names[0].add(msestring(comminfo[comm].dropdowntext));
    inc(int1);
   end;
  end;

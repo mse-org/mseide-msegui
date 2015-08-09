@@ -212,7 +212,8 @@ end;
 procedure tmsefixedformatdataset.setfilename(const avalue: filenamety);
 begin
  ffilename:= tomsefilepath(avalue);
- inherited filename:= tosysfilepath(filepath(avalue,fk_default,true));
+ inherited filename:= ansistring(
+                       tosysfilepath(filepath(avalue,fk_default,true)));
 end;
 
 procedure tmsefixedformatdataset.setcontroller(const avalue: tdscontroller);
@@ -483,7 +484,8 @@ end;
 procedure tmsesdfdataset.setfilename(const avalue: filenamety);
 begin
  ffilename:= tomsefilepath(avalue);
- inherited filename:= tosysfilepath(filepath(avalue,fk_default,true));
+ inherited filename:= ansistring(
+                     tosysfilepath(filepath(avalue,fk_default,true)));
 end;
 
 procedure tmsesdfdataset.setcontroller(const avalue: tdscontroller);
