@@ -411,7 +411,7 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
 
-   procedure startgdb(commandline: string);
+   procedure startgdb(commandline: msestring);
    procedure closegdb;
    function interrupttarget: gdbresultty; //stop for breakpointsetting
    function restarttarget: gdbresultty;
@@ -924,7 +924,7 @@ begin
  end;
 end;
 
-procedure tgdbmi.startgdb(commandline: string);
+procedure tgdbmi.startgdb(commandline: msestring);
 const
  lcmessages = 'LC_MESSAGES';
 var
@@ -962,7 +962,7 @@ begin
  end;
  if fgdb <> invalidprochandle then begin
   if haslang then begin
-   setenv(lcmessages,langbefore);
+   setenv(lcmessages,ansistring(langbefore));
   end
   else begin
    unsetenv(lcmessages);
@@ -1362,7 +1362,7 @@ begin
       end;
       bo1:= getstopinfo(values,flastconsoleoutput,stopinfo);
       if not bo1 then begin
-       stopinfo.messagetext:= actionsmo.c[ord(ac_stoperror)]+': ' +
+       stopinfo.messagetext:= ansistring(actionsmo.c[ord(ac_stoperror)])+': ' +
                                                       stopinfo.messagetext;
       end
       else begin
@@ -1836,12 +1836,12 @@ begin
  result:= false;
  if fxtermcommand <> '' then begin
   ftargetterminal.outecho:= true;
-  pts:= ftargetterminal.devicename;
+  pts:= msestring(ftargetterminal.devicename);
   ar1:= splitstring(ftargetterminal.devicename,'/'); 
   if ar1 <> nil then begin
-   ptsn:= ar1[high(ar1)];
+   ptsn:= msestring(ar1[high(ar1)]);
   end;
-  ptsh:= inttostr(ftargetterminal.fpty);
+  ptsh:= inttostrmse(ftargetterminal.fpty);
   ftargetconsole.commandline:=
 {$ifdef FPC}
        expandmacros(fxtermcommand,['PTS','PTSN','PTSH'],[pts,ptsn,ptsh],
@@ -1900,7 +1900,8 @@ end;
 
 function tgdbmi.source(const afilename: filenamety): gdbresultty;
 begin
- result:= synccommand('source '+quotefilename(tosysfilepath(afilename)));
+ result:= synccommand('source '+
+                       ansistring(quotefilename(tosysfilepath(afilename))));
 end;
 
 function tgdbmi.synccommand(const acommand: string; 
@@ -2015,7 +2016,8 @@ begin
   else begin
    int1:= floadtimeoutus;
   end;
-  result:= synccommand('-file-exec-and-symbols '+togdbfilepath(filename),int1);
+  result:= synccommand('-file-exec-and-symbols '+
+                       ansistring(togdbfilepath(filename)),int1);
   updatebit({$ifdef FPC}longword{$else}longword{$endif}(fstate),
                  ord(gs_execloaded),result = gdb_ok);
   if (result = gdb_ok) and not noproginfo then begin
@@ -2034,7 +2036,7 @@ begin
   result:= synccommand('-file-symbol-file');
  end
  else begin
-  result:= synccommand('-file-symbol-file '+togdbfilepath(filename),
+  result:= synccommand('-file-symbol-file '+ansistring(togdbfilepath(filename)),
                                     10000000);
 //  updatebit({$ifdef FPC}longword{$else}longword{$endif}(fstate),
 //                 ord(gs_execloaded),result = gdb_ok);
@@ -2088,7 +2090,7 @@ begin
       info.filename:= filename;
       info.line:= line;
       info.messagetext:= 'Attached to process '+inttostr(procid) + ' File: '+
-       filename+':'+inttostr(line)+' Function: '+func;
+       ansistring(filename)+':'+inttostr(line)+' Function: '+func;
      end;
     end;
 //   end;
@@ -2134,7 +2136,7 @@ begin
      info.filename:= filename;
      info.line:= line;
      info.messagetext:= 'Attached to target ' + ' File: '+
-      filename+':'+inttostr(line)+' Function: '+func;
+      ansistring(filename)+':'+inttostr(line)+' Function: '+func;
     end;
    end;
   end;
@@ -2237,7 +2239,7 @@ begin
  killtargetconsole;
  if fnewconsole then begin
   if not createtargetconsole then begin
-   raise exception.create('Can not run '+ftargetconsole.filename);
+   raise exception.create('Can not run '+ansistring(ftargetconsole.filename));
   end;
  end;
 {$endif}
@@ -2267,7 +2269,7 @@ begin
      stopinfo.filename:= filename;
      stopinfo.line:= line;
      stopinfo.messagetext:= 'Startup. File: '+
-                         filename+':'+inttostr(line)+' Function: '+func;
+                 ansistring(filename)+':'+inttostr(line)+' Function: '+func;
     end;
    end;
    include(fstate,gs_started);
@@ -2303,7 +2305,8 @@ begin
   end;
  end;
  synccommand('-exec-arguments '+ fprogparameters);
- synccommand('-environment-cd '+ tosysfilepath(filepath(fworkingdirectory)));
+ synccommand('-environment-cd '+ 
+                       ansistring(tosysfilepath(filepath(fworkingdirectory))));
  updateenvvars();   
         //for remote gdbserver too late, process has already been created
  {$ifdef mswindows}
@@ -2340,7 +2343,7 @@ begin
     include(fstate,gs_async);
    end;
    if result = gdb_ok then begin
-    result:= synccommand('-target-select '+fremoteconnection);
+    result:= synccommand('-target-select '+ansistring(fremoteconnection));
    end;
    if result <> gdb_ok then begin
     exit;
@@ -2365,7 +2368,7 @@ function tgdbmi.tryconnect: boolean;
 begin
  result:= fremoteconnection = '';
  result:= result or 
-                 (synccommand('-target-select '+fremoteconnection) = gdb_ok);
+       (synccommand('-target-select '+ansistring(fremoteconnection)) = gdb_ok);
 end;
 
 function tgdbmi.run: gdbresultty;
@@ -2633,7 +2636,7 @@ begin
    str1:= '*'+hextocstr(address,8)
   end
   else begin
-   str1:= filename(path)+':'+inttostr(line);
+   str1:= ansistring(filename(path))+':'+inttostr(line);
   end;
   result:= synccommand('-break-insert '+ str1);
   if (result = gdb_ok) or (result = gdb_message) then begin
@@ -2765,7 +2768,7 @@ begin
     getintegervalue(tup1,'line',line);
     filename:= getfullname(tup1);
     if filename <> '' then begin
-     path:= filename;
+     path:= msestring(filename);
     end;
     getbooleanvalue(tup1,'enabled',bkpton);
    end;
@@ -2899,8 +2902,8 @@ begin
  result:= getstringvalue(ar1,aname,avalue);
 end;
 
-function tgdbmi.getqwordvalue(const response: resultinfoarty; const aname: string;
-                 var avalue: qword): boolean;
+function tgdbmi.getqwordvalue(const response: resultinfoarty;
+                        const aname: string; var avalue: qword): boolean;
 var
  int1: integer;
 begin
@@ -2911,7 +2914,7 @@ begin
    if valuekind = vk_value then begin
     if (length(value) > 1) and (value[1] = '0') and (value[2] <> 'x') and
              (value[2] <> 'X') then begin
-     result:= trystrtointvalue64(value,nb_oct,avalue);
+     result:= trystrtointvalue64(msestring(value),nb_oct,avalue);
     end
     else begin
      result:= trystrtointvalue64(value,avalue);
@@ -3270,12 +3273,12 @@ begin
     end;
     if path = '' then begin
      if startsstr('Current source file is ',strar1[int1]) then begin
-      path:= copy(strar1[int1],24,bigint);
+      path:= msestring(copy(strar1[int1],24,bigint));
      end;
     end
     else begin
      if not bo1 and startsstr('Compilation directory is ',strar1[int1]) then begin
-      path:= copy(strar1[int1],26,bigint) + path;
+      path:= msestring(copy(strar1[int1],26,bigint)) + path;
       bo1:= true;
      end;
     end;
@@ -3336,7 +3339,7 @@ begin
      info.filename:= filename;
      info.line:= line;
      info.messagetext:= 'Stopped. File: '+
-                    filename+':'+inttostr(line)+' Function: '+func;
+              ansistring(filename)+':'+inttostr(line)+' Function: '+func;
     end;
    end
    else begin
@@ -3385,7 +3388,7 @@ begin
     if not (reason in [sr_exited_normally,sr_detached]) then begin
      result:= getqwordvalue(response,'thread-id',threadid);
      if gettuplevalue(response,'frame',frame) then begin
-      filename:= getfullname(frame);
+      filename:= msestring(getfullname(frame));
       getintegervalue(frame,'line',line);
       getstringvalue(frame,'func',func);
       getinteger64value(frame,'addr',int64(addr));
@@ -3404,7 +3407,7 @@ begin
      messagetext:= messagetext + ', ' + signalmeaning + '.';
     end;
     if filename <> '' then begin
-     messagetext:= messagetext + ' File: ' + filename;
+     messagetext:= messagetext + ' File: ' + ansistring(filename);
     end;
     if line > 0 then begin
      messagetext:= messagetext + ':'+inttostr(line);
@@ -3509,7 +3512,7 @@ begin
    ar1:= fsyncvalues;
   end;
   if getstringvalue(ar1,'file',str1) then begin
-   filename:= str1;
+   filename:= msestring(str1);
   end;  
   getintegervalue(ar1,'line',line);
  end;
@@ -3774,7 +3777,8 @@ function tgdbmi.infoline(const filename: filenamety; const line: integer;
 var
  str1: string;
 begin
- result:= getcliresultstring('info line '+filename+':'+inttostr(line),str1);
+ result:= getcliresultstring('info line '+ansistring(filename)+':'+
+                                                       inttostr(line),str1);
  if result = gdb_ok then begin
   if not getcliint64('starts at address',str1,int64(start)) or
           not getcliint64('ends at',str1,int64(stop)) then begin
@@ -3793,7 +3797,7 @@ begin
   if getclistring('of "',str1,str2) and getcliinteger('Line',str1,line) and
      getcliint64('starts at address',str1,int64(start)) and
      getcliint64('ends at',str1,int64(stop)) then begin
-   filename:= copy(str2,1,length(str2)-1);
+   filename:= msestring(copy(str2,1,length(str2)-1));
    filename:= filepath(filename);
   end
   else begin
@@ -3808,14 +3812,14 @@ var
  ar1: msestringarty;
  mstr1: msestring;
 begin
- result:= clicommand('info address '+symbol);
+ result:= clicommand('info address '+ansistring(symbol));
  case result of
   gdb_ok: begin
-   aresult:= trim(removelinebreaks(fclivalues));
+   aresult:= trim(removelinebreaks(msestring(fclivalues)));
    ar1:= splitstring(aresult,msechar(' '));
    if (high(ar1) >= 0) then begin
     mstr1:= ar1[high(ar1)];
-    if startsstr('0x',mstr1) then begin
+    if msestartsstr('0x',mstr1) then begin
      if mstr1[length(mstr1)] = '.' then begin
       setlength(mstr1,length(mstr1)-1);
      end;
@@ -3824,7 +3828,7 @@ begin
    end;
   end;
   gdb_message: begin
-   aresult:= errormessage;
+   aresult:= msestring(errormessage);
   end;
   else begin
    aresult:= '';
@@ -3835,13 +3839,13 @@ end;
 function tgdbmi.infosymbol(const symbol: msestring;
                               out info: msestring): gdbresultty;
 begin
- result:= clicommand('info symbol '+symbol);
+ result:= clicommand('info symbol '+ansistring(symbol));
  case result of
   gdb_ok: begin
-   info:= fclivalues;
+   info:= msestring(fclivalues);
   end;
   gdb_message: begin
-   info:= errormessage;
+   info:= msestring(errormessage);
   end;
   else begin
    info:= '';
@@ -3913,7 +3917,7 @@ var
  str1: string;
  ar1: disassarty;
 begin
- str1:= '-data-disassemble -f '+filename+' -l '+inttostr(line) +
+ str1:= '-data-disassemble -f '+ansistring(filename)+' -l '+inttostr(line) +
                  ' -n ' + inttostr(count);
  result:= internaldisassemble(ar1,str1,false);
  if result = gdb_ok then begin
@@ -3939,7 +3943,7 @@ function tgdbmi.disassemble(out aresult: disassarty; const filename: filenamety;
 var
  str1: string;
 begin
- str1:= '-data-disassemble -f '+filename+' -l '+inttostr(line) +
+ str1:= '-data-disassemble -f '+ansistring(filename)+' -l '+inttostr(line) +
                  ' -n ' + inttostr(count);
  result:= internaldisassemble(aresult,str1,true);
 end;
@@ -4068,7 +4072,8 @@ var
 begin
  lines:= nil;
  addresses:= nil;
- result:= synccommand('-symbol-list-lines '+filename(path),5*defaultsynctimeout);
+ result:= synccommand('-symbol-list-lines '+
+                   ansistring(filename(path)),5*defaultsynctimeout);
  if result = gdb_ok then begin
   result:= gdb_dataerror;
   if getarrayvalue(fsyncvalues,'lines',false,ar1) then begin
@@ -4194,7 +4199,7 @@ begin
   repeat
    while true do begin
     if blocklength <= 0 then begin
-     result:= 'Can not read memory at $'+inttohex(address,8);
+     result:= 'Can not read memory at $'+hextostrmse(address,8);
      exit;
     end;
     if readmemorywords(address,blocklength,data) <> gdb_ok then begin
@@ -4249,13 +4254,14 @@ var
  ar1: stringarty;
  str1,str2,str3: string;
  mstr1: msestring;
- ad1,ad2,ad3: qword;
+ ad1,ad2: qword;
+ ad3: int64;
  res1: gdbresultty;
  int1: integer;
  bo1: boolean;
 begin
  ar1:= nil; //compiler warning
- result:= value;
+ result:= msestring(value);
  ar1:= breaklines(typeinfo);
  str1:= '';
  if length(ar1) > 0 then begin
@@ -4275,7 +4281,7 @@ begin
  if ispointervalue(value,ad1) then begin
   if str1 <> '' then begin
    if (str1 = '^CHARACTER') or (str1 = '^CHAR') then begin
-    result:= getpcharvar(ad1);
+    result:= msestring(getpcharvar(ad1));
    end
    else begin
     if (str1 = '^WCHAR') or (str1 = '^WIDECHAR') then begin
@@ -4299,7 +4305,7 @@ begin
         result:= niltext;
        end
        else begin
-        if readmemorypointer(ad2-fpointersize,ad3) = gdb_ok then begin
+        if readmemorypointer(ad2-fpointersize,qword(ad3)) = gdb_ok then begin
         //read arrayhigh
          str3:= '^'+copy(str1,length(str2)+1,bigint)+'('+qwordtocstr(ad2)+')[';
          result:= '(';
@@ -4389,14 +4395,14 @@ begin
    if result = gdb_ok then begin
     ar1:= splitstring(str2,'=');
     if high(ar1) = 1 then begin
-     aresult:= trim(ar1[1]);
+     aresult:= msestring(trim(ar1[1]));
     end
     else begin
-     aresult:= str2;
+     aresult:= msestring(str2);
     end;
    end
    else begin
-    aresult:= geterrormessage(result);
+    aresult:= msestring(geterrormessage(result));
    end;
    exit;
   end;
@@ -4409,7 +4415,7 @@ begin
      aresult:= matchpascalformat(str1,str2,varname);
     end;
     gdb_message: begin
-     aresult:= errormessage;
+     aresult:= msestring(errormessage);
     end;
     else begin
      aresult:= '';
@@ -4417,7 +4423,7 @@ begin
    end;
   end
   else begin
-   aresult:= str1;
+   aresult:= msestring(str1);
   end;
  end;
 end;
@@ -4435,7 +4441,7 @@ begin
   end
   else begin
    result:= readpascalvariable('sysreg['+inttostr(int1)+']',mstr1);
-   aresult:= mstr1;
+   aresult:= ansistring(mstr1);
   end;
  end
  else begin
@@ -4575,7 +4581,7 @@ begin
       getinteger64value(ar2,'addr',int64(addr));
   {$endif}
       getstringvalue(ar2,'func',func);
-      filename:= getfullname(ar2);
+      filename:= msestring(getfullname(ar2));
       getintegervalue(ar2,'line',line);
      end;
     end;
@@ -4806,7 +4812,7 @@ var
  sr1: stopreasonty;
 begin
  for sr1:= sr_unknown to high(stopreasonty) do begin
-  stopreasontext[sr1]:= actionsmo.c[ord(ac_sr_unknown)-1+ord(sr1)];
+  stopreasontext[sr1]:= ansistring(actionsmo.c[ord(ac_sr_unknown)-1+ord(sr1)]);
  end;
 end;
 

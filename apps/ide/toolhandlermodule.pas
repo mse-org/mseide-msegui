@@ -19,7 +19,7 @@ unit toolhandlermodule;
 interface
 uses
  classes,mclasses,mseglob,mseapplication,mseclasses,msedatamodules,msepipestream,
- mseprocess,mseprocutils;
+ mseprocess,mseprocutils,msestrings;
 
 type
  ttoolhandlermo = class(tmsedatamodule)
@@ -27,7 +27,7 @@ type
    procedure inputavailexe(const sender: tpipereader);
    procedure procfinishedexe(const sender: TObject);
   public
-   constructor create(const aowner: tcomponent; const acommandline: string;
+   constructor create(const aowner: tcomponent; const acommandline: msestring;
                 const aoptions: execoptionsty); reintroduce;
  end;
 
@@ -46,7 +46,7 @@ begin
 end;
 
 constructor ttoolhandlermo.create(const aowner: tcomponent;
-               const acommandline: string; const aoptions: execoptionsty);
+               const acommandline: msestring; const aoptions: execoptionsty);
 var
  opt1: processoptionsty;
 begin

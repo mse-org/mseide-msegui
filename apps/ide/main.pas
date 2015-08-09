@@ -372,7 +372,7 @@ uses
   {$include regcomponents.inc}
  {$endif}
 
- mseparser,msesysintf,memoryform,msedrawtext,
+ mseparser,msesysintf,memoryform,msedrawtext,mseformatstr,
  main_mfm,sourceform,watchform,breakpointsform,stackform,
  guitemplates,projectoptionsform,make,msepropertyeditors,
  skeletons,msedatamodules,mseact,
@@ -464,7 +464,8 @@ var
             projectoptions.d.texp.sourcedirs,wstr1) then begin
       try
        po1:= openformfile(wstr1,false,false,false,false,false);
-       result:= (po1 <> nil) and (struppercase(po1^.instancevarname) = wstr2);
+       result:= (po1 <> nil) and 
+                      (msestring(struppercase(po1^.instancevarname)) = wstr2);
       except
        application.handleexception;
        result:= false;
@@ -482,7 +483,7 @@ var
  mstr1: filenamety;
 
 begin
- wstr2:= struppercase(aname);
+ wstr2:= msestring(struppercase(aname));
  int1:= findchar(wstr2,'.');
  if int1 > 0 then begin
   setlength(wstr2,int1-1); //main name only
@@ -490,16 +491,18 @@ begin
  with projectoptions do begin
   bo1:= dofind(o.modulenames,o.modulefiles);
  end;
- if not bo1 and projecttree.units.findformbyname(wstr2,mstr1) then begin
+ if not bo1 and 
+           projecttree.units.findformbyname(ansistring(wstr2),mstr1) then begin
   bo1:= dofind([wstr2],[mstr1]);
  end;
  if bo1 then begin
   action:= mr_ok;
  end
  else begin
-  action:= showmessage(c[ord(unresreferences)]+' '+amodule^.moduleclassname+' '+
+  action:= showmessage(c[ord(unresreferences)]+' '+
+            msestring(amodule^.moduleclassname)+' '+
                         c[ord(str_to)]+' ' +
-                aname + '.'+lineend+
+                msestring(aname) + '.'+lineend+
                        ' '+c[ord(wishsearch)],c[ord(warning)],
                        [mr_ok,mr_cancel],mr_ok);
   case action of
@@ -508,7 +511,7 @@ begin
 //    openform.controller.filename:= '';
 //    openform.controller.captionopen:= c[ord(formfile)]+' '+ aname;
     if openform.controller.execute(wstr2,fdk_open,
-                                     c[ord(formfile)]+' '+ aname) then begin
+                            c[ord(formfile)]+' '+ msestring(aname)) then begin
 //    action:= filedialog(wstr2,[fdo_checkexist],c[ord(formfile)]+' '+ aname,
 //                 [c[ord(formfiles)]],['*.mfm'],'',nil,nil,nil,[fa_all],[fa_hidden]);
 //                 //defaultvalues don't work on kylix
@@ -556,14 +559,14 @@ var
 begin
 // ar1:= nil; //compilerwarning
  if fcheckmodulelevel >= 16 then begin
-  showmessage(c[ord(recursive)]+atypename+'"',c[ord(error)]);
+  showmessage(c[ord(recursive)]+msestring(atypename)+'"',c[ord(error)]);
   sysutils.abort;
  end;
  inc(fcheckmodulelevel);
  try
   with projectoptions do begin
    po1:= nil;
-   wstr2:= struppercase(atypename);
+   wstr2:= msestring(struppercase(atypename));
    for int1:= 0 to high(o.moduletypes) do begin
     if o.moduletypes[int1] = wstr2 then begin
      if int1 <= high(o.modulefiles) then begin
@@ -574,7 +577,7 @@ begin
    end;
   end;
   if po1 = nil then begin
-   if projecttree.units.findformbyclass(wstr2,mstr1) then begin
+   if projecttree.units.findformbyclass(ansistring(wstr2),mstr1) then begin
     checkmodule(mstr1);
    end;
   {
@@ -589,11 +592,13 @@ begin
   end;
   if (po1 = nil) or 
              (stringicomp(po1^.moduleclassname,atypename) <> 0) then begin
-   if showmessage(c[ord(str_classtype)]+' '+atypename+' '+c[ord(notfound)]+lineend+
+   if showmessage(c[ord(str_classtype)]+' '+msestring(atypename)+
+                         ' '+c[ord(notfound)]+lineend+
                          ' '+c[ord(wishsearch)],c[ord(warning)],
                          [mr_yes,mr_cancel]) = mr_yes then begin
     wstr2:= '';
-    if filedialog(wstr2,[fdo_checkexist],c[ord(formfile)]+' '+ atypename,
+    if filedialog(wstr2,[fdo_checkexist],c[ord(formfile)]+' '+ 
+               msestring(atypename),
                    [c[ord(formfiles)]],['*.mfm']) = mr_ok then begin
      openformfile(wstr2,false,false,false,false,false);
     end;
@@ -775,8 +780,8 @@ procedure tmainfo.expronsetvalue(const sender: tobject;
 var
  expres: string;
 begin
- gdb.evaluateexpression(avalue,expres);
- exprdisp.value:= expres;
+ gdb.evaluateexpression(ansistring(avalue),expres);
+ exprdisp.value:= msestring(expres);
 end;
 
 procedure tmainfo.refreshframe;
@@ -846,7 +851,7 @@ begin
   if po1 <> nil then begin
    str1:= replacefileext(po1^.filename,pasfileext);
    if sourcefo.openfile(str1,true) = nil then begin
-    raise exception.create(c[ord(unableopen)]+str1+'".');
+    raise exception.create(ansistring(c[ord(unableopen)]+str1+'".'));
    end;
   end
   else begin
@@ -909,15 +914,15 @@ begin
  with astopinfo do begin
   case reason of
    sr_signal_received: begin
-    setstattext(messagetext,mtk_signal);
+    setstattext(msestring(messagetext),mtk_signal);
    end;
    sr_error: begin
-    setstattext(messagetext,mtk_error);
+    setstattext(msestring(messagetext),mtk_error);
    end; 
    sr_exception: begin
    end; 
    else begin
-    setstattext(messagetext,mtk_finished);
+    setstattext(msestring(messagetext),mtk_finished);
    end;
   end;
   watchfo.refresh;
@@ -928,7 +933,7 @@ begin
   cpufo.refresh;
   disassfo.refresh(addr);
   if (reason = sr_exception) then begin
-   setstattext(messagetext+' '+stackfo.infotext(1),mtk_signal);
+   setstattext(msestring(messagetext)+' '+stackfo.infotext(1),mtk_signal);
    if not stackfo.showsource(1) then begin
     sourcefo.locate(stopinfo);
    end;
@@ -980,7 +985,7 @@ begin
      else begin
       if reason = sr_detached then begin
        cleardebugdisp;
-       setstattext(stopinfo.messagetext,mtk_finished);
+       setstattext(msestring(stopinfo.messagetext),mtk_finished);
        programfinished;
       end
       else begin
@@ -997,7 +1002,7 @@ begin
    setstattext(c[ord(running)],mtk_running);   
   end;
   gek_error,gek_writeerror,gek_gdbdied: begin
-   setstattext('GDB: '+stopinfo.messagetext,mtk_error);
+   setstattext('GDB: '+msestring(stopinfo.messagetext),mtk_error);
   end;
   gek_targetoutput: begin
    targetconsolefo.addtext(values[0].value);
@@ -1005,8 +1010,8 @@ begin
   gek_download: begin
    with stopinfo do begin
     if sectionsize > 0 then begin
-     setstattext(c[ord(str_downloading)]+' '+section+' '+
-         inttostr(round(sectionsent/sectionsize*100))+'%',mtk_running);
+     setstattext(c[ord(str_downloading)]+' '+msestring(section)+' '+
+         inttostrmse(round(sectionsent/sectionsize*100))+'%',mtk_running);
     end;
    end;
   end;
@@ -1364,8 +1369,8 @@ procedure tmainfo.symboltypeonsetvalue(const sender: tobject;
 var
  expres: string;
 begin
- gdb.symboltype(avalue,expres);
- symboltypedisp.value:= expres;
+ gdb.symboltype(ansistring(avalue),expres);
+ symboltypedisp.value:= msestring(expres);
 end;
 
 procedure tmainfo.viewbreakpointsonexecute(const sender: tobject);
@@ -1799,12 +1804,13 @@ begin
  {$endif}
 end;
 
-function getmodulename(const aname,suffix: string): string;
+function getmodulename(const aname,suffix: msestring): msestring;
 var
  int1: integer;
 begin
  int1:= length(aname) - length(suffix);
- if (int1 >= 0) and (strcomp(pchar(aname)+int1,pchar(suffix)) = 0) then begin
+ if (int1 >= 0) and 
+            (strcomp(pmsechar(aname)+int1,pmsechar(suffix)) = 0) then begin
   result:= copy(aname,1,int1) + copy(suffix,1,2);
  end
  else begin
@@ -1816,15 +1822,14 @@ procedure tmainfo.createform(const aname: filenamety; const namebase: string;
                         const ancestor: string);
 var
  stream1: ttextstream;
- str1,str2,str3: string;
+ str1,str2,str3: msestring;
  po1: pmoduleinfoty;
 begin
-  str2:= removefileext(filename(aname));
-  str3:= str2;
-  str2:= getmodulename(str2,namebase);
+  str3:= removefileext(filename(aname));
+  str2:= msestring(getmodulename(str3,namebase));
   stream1:= ttextstream.create(aname,fm_create);
   try
-   formskeleton(stream1,filename(str3),str2,ancestor);
+   formskeleton(stream1,ansistring(filename(str3)),ansistring(str2),ancestor);
   finally
    stream1.Free;
   end;
@@ -1859,7 +1864,7 @@ var
 begin
  stream1:= ttextstream.create(aname,fm_create);
  try
-  programskeleton(stream1,removefileext(filename(aname)));
+  programskeleton(stream1,ansistring(removefileext(filename(aname))));
  finally
   stream1.Free;
  end;
@@ -1898,7 +1903,7 @@ begin
     base:= base + dir;
     int1:= 1;
     repeat
-     path2:= base+inttostr(int1)+ext;
+     path2:= base+inttostrmse(int1)+ext;
      inc(int1);
     until not findfile(path2);
    end;
@@ -1958,7 +1963,7 @@ var
  str1,str2,str3,str4,str5: filenamety;
  dir,base,ext: filenamety;
  po1: pmoduleinfoty;
- ancestorclass,ancestorunit: string;
+ ancestorclass,ancestorunit: msestring;
  
 begin
 // if formkindty(tmenuitem(sender).tag) = fok_inherited then begin
@@ -1967,7 +1972,7 @@ begin
   if po1 = nil then begin
    exit;
   end;
-  ancestorclass:= po1^.moduleclassname;
+  ancestorclass:= msestring(po1^.moduleclassname);
   ancestorunit:= filenamebase(po1^.filename);
  end
  else begin
@@ -2515,7 +2520,7 @@ begin
     end;
    end;
   end;
-  setstattext('*** '+c[ord(process)]+' '+inttostr(frunningprocess)+' '+
+  setstattext('*** '+c[ord(process)]+' '+inttostrmse(frunningprocess)+' '+
                      c[ord(running3)]+' ***',mtk_running);
  end;
 end;
@@ -2527,7 +2532,7 @@ begin
  if prochandle = frunningprocess then begin
   frunningprocess:= invalidprochandle;
   if execresult <> 0 then begin
-   setstattext(c[ord(processterminated)]+' '+inttostr(execresult){+'.'},
+   setstattext(c[ord(processterminated)]+' '+inttostrmse(execresult){+'.'},
                                     mtk_finished);
   end
   else begin
@@ -2604,7 +2609,7 @@ procedure tmainfo.aftermake(const adesigner: idesigner;
                                const exitcode: integer);
 begin
  if exitcode <> 0 then begin
-  setstattext(c[ord(makeerror)]+' '+inttostr(exitcode)+'.',mtk_error);
+  setstattext(c[ord(makeerror)]+' '+inttostrmse(exitcode)+'.',mtk_error);
   showfirsterror;
  end
  else begin
@@ -2754,7 +2759,7 @@ end;
 
 procedure tmainfo.runtool(const sender: tobject);
 var
- str1: ansistring;
+ str1: msestring;
  mstr1: msestring;
  macrolist: tmacrolist;
 // gridcoord1: gridcoordty;
@@ -2803,7 +2808,7 @@ begin
      ar1:= designer.selectedcomponents;
      if high(ar1) = 0 then begin
       with gettypedata(ar1[0].classinfo)^ do begin
-       curcomponentclass:= uppercase(unitname+'.'+ar1[0].classname);
+       curcomponentclass:= msestring(uppercase(unitname+'.'+ar1[0].classname));
       end;
       propit:= tpropertyitem(objectinspectorfo.props.item);
       if propit <> nil then begin
