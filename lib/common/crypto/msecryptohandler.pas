@@ -208,7 +208,7 @@ end;
 procedure tbasecryptohandler.error(const err: cryptoerrorty);
 begin
  checkerror(err);
- raise ecryptohandler.create(cryptoerrormessages[err]); 
+ raise ecryptohandler.create(ansistring(cryptoerrormessages[err])); 
            //there was no queued error
 end;
 

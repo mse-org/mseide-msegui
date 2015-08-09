@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2014 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2015 by Martin Schreiber
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@ uses
  mseapplication,mseglob,mseguiglob,mseskin,msedesigner,
  mseguithreadcomp,mseprocmonitorcomp,msefadepropedit,
  msearrayprops,msesumlist,mserttistat,msestockobjects,regglob,msearrayutils,
- msecryptohandler,msestringcontainer;
+ msecryptohandler,msestringcontainer,mseformatstr;
 
 type
  twidget1 = class(twidget);
@@ -291,7 +291,7 @@ end;
 function tbounds_xeditor.getvalue: msestring;
 begin
  if fprops[0].instance = fmodule then begin
-  result:= inttostr(fdesigner.getmodulex(fmodule));
+  result:= inttostrmse(fdesigner.getmodulex(fmodule));
 //  result:= inttostr(twidget(fprops[0].instance).screenpos.x);
  end
  else begin
@@ -314,7 +314,7 @@ end;
 function tbounds_yeditor.getvalue: msestring;
 begin
  if fprops[0].instance = fmodule then begin
-  result:= inttostr(fdesigner.getmoduley(fmodule));
+  result:= inttostrmse(fdesigner.getmoduley(fmodule));
 //  result:= inttostr(twidget(fprops[0].instance).screenpos.y);
  end
  else begin
@@ -346,7 +346,7 @@ function tframepropertyeditor.dispname: msestring;
 begin
  with tcustomframe(getpointervalue) do begin
   if template <> nil then begin
-   result:= template.name;
+   result:= msestring(template.name);
   end
   else begin
    result:= inherited dispname;
@@ -375,7 +375,7 @@ begin
   ar1:= getclientnames;
   setlength(result,length(fclients));
   for int1:= 0 to high(result) do begin
-   result[int1]:= tconstelementeditor.create(ar1[int1],
+   result[int1]:= tconstelementeditor.create(msestring(ar1[int1]),
          int1,self,geteditorclass,fdesigner,fobjectinspector,fprops,ftypeinfo);
   end;
  end;
@@ -401,7 +401,7 @@ begin
   ar1:= getextendernames;
   setlength(result,length(fextenders));
   for int1:= 0 to high(result) do begin
-   result[int1]:= tconstelementeditor.create(ar1[int1],
+   result[int1]:= tconstelementeditor.create(msestring(ar1[int1]),
          int1,self,geteditorclass,fdesigner,fobjectinspector,fprops,ftypeinfo);
   end;
  end;
@@ -461,7 +461,7 @@ end;
 
 function tsysshortcutelementeditor.name: msestring;
 begin
- result:= getenumname(typeinfo(sysshortcutty),findex);
+ result:= msestring(getenumname(typeinfo(sysshortcutty),findex));
 end;
 
 { tlevelarraypropertyeditor }
@@ -475,7 +475,7 @@ end;
 
 function tlevelarrayelementeditor.name: msestring;
 begin
- result:= 'Level ' + inttostr(findex+1);
+ result:= 'Level ' + inttostrmse(findex+1);
 end;
 
 { tneglevelarraypropertyeditor }
@@ -489,7 +489,7 @@ end;
 
 function tneglevelarrayelementeditor.name: msestring;
 begin
- result:= 'Level ' + inttostr(-(findex+1));
+ result:= 'Level ' + inttostrmse(-(findex+1));
 end;
 
 (*
@@ -640,7 +640,7 @@ function tfacepropertyeditor.dispname: msestring;
 begin
  with tcustomface(getpointervalue) do begin
   if template <> nil then begin
-   result:= template.name;
+   result:= msestring(template.name);
   end
   else begin
    result:= inherited dispname;
@@ -654,7 +654,7 @@ function tfaceelementeditor.dispname: msestring;
 begin
  with tcustomface(getpointervalue) do begin
   if template <> nil then begin
-   result:= template.name;
+   result:= msestring(template.name);
   end
   else begin
    result:= inherited dispname;
@@ -686,8 +686,8 @@ end;
 function tskincolorarraypropertyeditor.itemgetvalue(
               const sender: tarrayelementeditor): msestring;
 begin
- result:= '<'+colortostring(tskincolor(
-                     tarrayelementeditor1(sender).getpointervalue(0)).color) + '>';
+ result:= msestring('<'+colortostring(tskincolor(
+            tarrayelementeditor1(sender).getpointervalue(0)).color) + '>');
 end;
 
 initialization
