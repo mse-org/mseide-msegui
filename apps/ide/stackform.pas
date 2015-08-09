@@ -21,7 +21,7 @@ unit stackform;
 interface
 uses
  mseforms,msegrids,msetypes,msegdbutils,msegui,msedispwidgets,msemenus,
- mseguiintf,msegridsglob;
+ mseguiintf,msegridsglob,msestrings;
 
 type
  tstackfo = class(tdockform)
@@ -42,7 +42,7 @@ type
    procedure refresh;
    procedure clear;
    function showsource(const aframenr: integer): boolean;
-   function infotext(const aframenr: integer): string;
+   function infotext(const aframenr: integer): msestring;
  end;
 
 var
@@ -52,7 +52,7 @@ implementation
 
 uses
  sysutils,stackform_mfm,sourceform,msefileutils,mseformatstr,main,mseguiglob,
- msegraphutils,msestrings,projectoptionsform,msewidgets;
+ msegraphutils,projectoptionsform,msewidgets;
 
 { tstackfo }
 
@@ -71,11 +71,12 @@ begin
  end;
 end;
 
-function tstackfo.infotext(const aframenr: integer): string;
+function tstackfo.infotext(const aframenr: integer): msestring;
 begin
  if (aframenr >= 0) and (aframenr <= high(frameinfo)) then begin
   with frameinfo[aframenr] do begin
-   result:= 'File: '+filename+':'+inttostr(line)+' '+'Function: '+func;
+   result:= 'File: '+filename+':'+inttostrmse(line)+' '+'Function: '+
+                                                           msestring(func);
   end;
  end
  else begin
@@ -140,7 +141,7 @@ end;
 procedure tstackfo.refresh;
 var
  int1,int2: integer;
- str1: string;
+ str1: msestring;
 begin
  if visible and gdb.cancommand then begin
   gdb.stacklistframes(frameinfo);
@@ -149,19 +150,19 @@ begin
   grid.rowcount:= length(frameinfo);
   for int1:= 0 to high(frameinfo) do begin
    with frameinfo[int1] do begin
-    grid[0][int1]:= inttostr(level);
-    str1:= func + '(';
+    grid[0][int1]:= inttostrmse(level);
+    str1:= msestring(func) + '(';
     if high(params) >= 0 then begin
      for int2:= 0 to high(params) do begin
-      str1:= str1 + params[int2].name + '=' + 
-            removelinebreaks(params[int2].value) + ', ';
+      str1:= str1 + msestring(params[int2].name) + '=' + 
+            removelinebreaks(msestring(params[int2].value)) + ', ';
      end;
      setlength(str1,length(str1)-2);
     end;
     grid[1][int1]:= str1 + ')';
     grid[2][int1]:= filename;
-    grid[3][int1]:= inttostr(line);
-    grid[4][int1]:= hextostr(addr,8);
+    grid[3][int1]:= inttostrmse(line);
+    grid[4][int1]:= hextostrmse(addr,8);
    end;
   end;
   if grid.rowcount > 0 then begin
@@ -189,7 +190,7 @@ var
 begin
  mstr1:= '';
  for int1:= 0 to grid.rowhigh do begin
-  mstr1:= mstr1 + '#'+inttostr(int1)+'  '+grid[4][int1]+' '+
+  mstr1:= mstr1 + '#'+inttostrmse(int1)+'  '+grid[4][int1]+' '+
           filename(grid[2][int1])+':'+
                 grid[3][int1]+' '+grid[1][int1]+lineend;
  end;
