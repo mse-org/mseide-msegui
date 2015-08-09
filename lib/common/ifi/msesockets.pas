@@ -283,7 +283,7 @@ begin
    raise esys.create(error,text+soc_geterrortext(mselasterror));
   end;
   else begin
-   syserror(error,text);
+   syserror(error,msestring(text));
   end;
  end;
 end;

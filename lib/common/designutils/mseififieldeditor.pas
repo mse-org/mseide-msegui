@@ -79,7 +79,7 @@ function editififields(const instance: tificonnectedfields): boolean;
 
 implementation
 uses
- mseififieldeditor_mfm,typinfo,msewidgets,sysutils;
+ mseififieldeditor_mfm,typinfo,msewidgets,sysutils,mseformatstr;
  
 type
  tificonnectedfields1 = class(tificonnectedfields);
@@ -109,8 +109,8 @@ begin
      instance.count:= fields.rowcount;
      for int1:= 0 to fields.rowhigh() do begin
       with tififieldlink(instance[int1]) do begin
-       sourcefieldname:= fo.sourcefieldname[int1];
-       fieldname:= fo.fieldname[int1];
+       sourcefieldname:= msestring(fo.sourcefieldname[int1]);
+       fieldname:= msestring(fo.fieldname[int1]);
        datatype:= listdatatypety(fo.datatype[int1]);
       end; 
      end;
@@ -213,20 +213,21 @@ var
 begin
  if ffieldintf <> nil then begin
   caption:= 'ifi '+c[ord(str_connection)]+': '+
-                                 tificonnectedfields1(ffields).fowner.name;
+                   msestring(tificonnectedfields1(ffields).fowner.name);
   ar1:= ffieldintf.getfieldinfos();
   fielddefli.rowcount:= length(ar1);
   for int1:= 0 to high(ar1) do begin
    with ar1[int1] do begin
     fielddefli[0][int1]:= name;
-    fielddefli[1][int1]:= getenumname(typeinfo(tfieldtype),ord(datatype));   
+    fielddefli[1][int1]:= msestring(getenumname(
+                                 typeinfo(tfieldtype),ord(datatype)));   
    end;
   end;
   fields.rowcount:= ffields.count;
   for int1:= 0 to fields.rowhigh do begin
    f1:= tififieldlink(ffields[int1]);
-   fieldname[int1]:= f1.fieldname;
-   sourcefieldname[int1]:= f1.sourcefieldname;
+   fieldname[int1]:= msestring(f1.fieldname);
+   sourcefieldname[int1]:= msestring(f1.sourcefieldname);
    datatype[int1]:= ord(f1.datatype);
   end;
   checkfielddefs();
@@ -295,7 +296,7 @@ begin
 startlab:
  mstr2:= mstr1;
  if int2 <> 0 then begin
-  mstr2:= mstr2+inttostr(int2);
+  mstr2:= mstr2+inttostrmse(int2);
  end;
  for int1:= 0 to high(ar1) do begin
   if ar1[int1] = mstr2 then begin
@@ -314,7 +315,7 @@ var
 begin
  if (avalue <> '') then begin
   if not typeok(avalue,listdatatypety(datatype.value)) then begin
-   dl1:= ffieldintf.getdatatype(avalue);
+   dl1:= ffieldintf.getdatatype(ansistring(avalue));
    if dl1 <> dl_none then begin
     datatype.value:= ord(dl1);
    end;
@@ -431,7 +432,7 @@ begin
     fieldname[fields.rowhigh]:= uniquefieldname(mstr1);
 //    classty[fields.rowhigh]:= ord(fieldclasstoclasstyp(
 ///             ffields.dataset.fielddefs[ar1[int1]].fieldclass));
-    datatype[fields.rowhigh]:= ord(ffieldintf.getdatatype(mstr1));
+    datatype[fields.rowhigh]:= ord(ffieldintf.getdatatype(ansistring(mstr1)));
     ar2[int2]:= fields.rowhigh;
     inc(int2);
    except

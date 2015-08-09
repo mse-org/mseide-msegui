@@ -285,7 +285,7 @@ begin
   str1:= str1 + pchar(str2);
  end;
  if str1 <> '' then begin
-  raise essl.create(cryptoerrormessages[err]+lineend+str1);
+  raise essl.create(ansistring(cryptoerrormessages[err])+lineend+str1);
  end;
 end;
 
@@ -541,11 +541,11 @@ begin
   setlength(str1,length(str1)-1);
   sslerror(ssl_set_cipher_list(ssl,pchar(str1)));
   if fcertfile <> '' then begin
-   str1:= tosysfilepath(filepath(fcertfile));
+   str1:= ansistring(tosysfilepath(filepath(fcertfile)));
    sslerror(ssl_use_certificate_file(ssl,pchar(str1),ssl_filetype_pem));
   end;
   if fprivkeyfile <> '' then begin
-   str1:= tosysfilepath(filepath(fprivkeyfile));
+   str1:= ansistring(tosysfilepath(filepath(fprivkeyfile)));
    sslerror(ssl_use_privatekey_file(ssl,pchar(str1),ssl_filetype_pem));
   end;
   sslerror(ssl_set_rfd(ssl,rxfd));

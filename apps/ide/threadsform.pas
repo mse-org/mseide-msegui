@@ -48,7 +48,7 @@ var
 implementation
 uses
  threadsform_mfm,sysutils,sourceform,msefileutils,main,stackform,mseguiintf,
- sourcepage,msewidgets;
+ sourcepage,msewidgets,mseformatstr;
 type
  stringconsts = (
   active,     //0 *active*
@@ -76,7 +76,7 @@ begin
    for int1:= 0 to high(ar1) do begin
     with ar1[int1] do begin
      fids[int1]:= id;
-     grid[0][int1]:= inttostr(threadid);
+     grid[0][int1]:= inttostrmse(threadid);
      case state of
       ts_active: begin
        wstr1:= c[ord(active)];
@@ -88,7 +88,7 @@ begin
       end;
      end;
      grid[1][int1]:= wstr1;
-     grid[2][int1]:= stackframe;
+     grid[2][int1]:= msestring(stackframe);
     end;
    end;
   end
@@ -139,7 +139,7 @@ var
 begin
  mstr1:= '';
  for int1:= 0 to grid.rowhigh do begin
-  mstr1:= mstr1 + '#'+inttostr(int1)+'  '+grid[0][int1]+' '+
+  mstr1:= mstr1 + '#'+inttostrmse(int1)+'  '+grid[0][int1]+' '+
           grid[1][int1]+' '+grid[2][int1]+lineend;
  end;
  msewidgets.copytoclipboard(mstr1);

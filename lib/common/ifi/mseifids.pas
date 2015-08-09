@@ -509,7 +509,7 @@ end;
 procedure storestringfield(const acol: tifidatacol; const aindex: integer;
                                         const afield: tfield);
 begin
- acol.asmsestring[aindex]:= afield.asstring;
+ acol.asmsestring[aindex]:= msestring(afield.asstring);
 end;
 
 procedure storelongintfield(const acol: tifidatacol; const aindex: integer;
@@ -1076,7 +1076,7 @@ begin
    except
     on e: exception do begin
      if ids_sendpostresult in fistate then begin
-      sendpostresult(asequence,pc_error,e.message);
+      sendpostresult(asequence,pc_error,msestring(e.message));
      end;
     end;
    end;

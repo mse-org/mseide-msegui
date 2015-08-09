@@ -131,7 +131,7 @@ begin
        end;
       end;
       try
-       ar1[int1].fieldname:= fieldname[int1];
+       ar1[int1].fieldname:= ansistring(fieldname[int1]);
       except
        application.handleexception(nil);
       end;
@@ -185,18 +185,18 @@ var
  field1: tfield;
 begin
  with ffields.dataset do begin
-  caption:= c[ord(str_dataset)]+': '+name;
+  caption:= c[ord(str_dataset)]+': ' + msestring(name);
   fielddefli.rowcount:= fielddefs.count;
   for int1:= 0 to fielddefs.count-1 do begin
-   fielddefli[0][int1]:= fielddefs[int1].name;
-   fielddefli[1][int1]:= getenumname(typeinfo(tfieldtype),
-                                 ord(fielddefs[int1].datatype));
+   fielddefli[0][int1]:= msestring(fielddefs[int1].name);
+   fielddefli[1][int1]:= msestring(getenumname(typeinfo(tfieldtype),
+                                 ord(fielddefs[int1].datatype)));
   end;
  end;
  fields.rowcount:= ffields.count + ffields.dataset.fields.count;
  for int1:= 0 to ffields.count - 1 do begin
   index[int1]:= int1+1;
-  fieldname[int1]:= ffields[int1].fieldname;
+  fieldname[int1]:= msestring(ffields[int1].fieldname);
   classty[int1]:= ord(fieldclasstoclasstyp(fieldclassty(ffields[int1].classtype)));
   fieldkind[int1]:= ord(ffields[int1].fieldkind);
  end;
@@ -205,7 +205,7 @@ begin
   field1:= ffields.dataset.fields[int1-ffields.count];
   fieldpo[int1]:= field1;
   with field1 do begin
-   self.fieldname[int1]:= fieldname;
+   self.fieldname[int1]:= msestring(fieldname);
    classty[int1]:= ord(fieldclasstoclasstyp(fieldclassty(classtype)));
    self.fieldkind[int1]:= ord(fieldkind);
   end;

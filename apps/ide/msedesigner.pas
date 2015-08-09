@@ -615,7 +615,7 @@ implementation
 uses
  msestream,msefileutils,
 // {$ifdef mswindows}windows{$else}mselibc{$endif},
- designer_bmp,msesys,msewidgets,formdesigner,objectinspector,
+ designer_bmp,msesys,msewidgets,formdesigner,objectinspector,mseformatstr,
  msefiledialog,projectoptionsform,sourceupdate,sourceform,sourcepage,
  pascaldesignparser,msearrayprops,rtlconsts,msedatamodules,
  msesimplewidgets,msesysutils,mseobjecttext,msestreaming,msedatanodes,main,
@@ -1784,8 +1784,8 @@ var
      comp1:= findnestedcomponent(po1^.descendent,newpath);
      if comp1 <> nil then begin
       raise exception.create(po1^.descendent.name+': '+
-             actionsmo.c[ord(ac_component)]+
-             newpath+actionsmo.c[ord(ac_exists)]);
+             ansistring(actionsmo.c[ord(ac_component)])+
+             newpath+ansistring(actionsmo.c[ord(ac_exists)]));
      end;
      donamechange(fdesigner.modules.findmodule(po1^.descendent));
     end;
@@ -2527,8 +2527,8 @@ begin
    if ainherited then begin
     po1:= fdesigner.getinheritedmodule(designmoduleclassname);
     if po1 = nil then begin
-     raise exception.create(actionsmo.c[ord(ac_ancestorfor)]+
-           designmoduleclassname+actionsmo.c[ord(ac_notfound)]);
+     raise exception.create(ansistring(actionsmo.c[ord(ac_ancestorfor)])+
+           designmoduleclassname+ansistring(actionsmo.c[ord(ac_notfound)]));
     end;
     fdesigner.beginstreaming({po1});
     try
@@ -3492,8 +3492,8 @@ function tdesigner.checkmodule(const filename: msestring): pmoduleinfoty;
 begin
  result:= fmodules.findmodule(filename);
  if result = nil then begin
-  raise exception.Create(actionsmo.c[ord(ac_module)]+
-                          filename+actionsmo.c[ord(ac_notfound)]);
+  raise exception.Create(ansistring(actionsmo.c[ord(ac_module)]+
+                          filename+actionsmo.c[ord(ac_notfound)]));
  end;
 end;
 
@@ -3601,7 +3601,7 @@ begin
    end
    else begin
     if not (des_skipall in fstate) then begin
-     mstr1:= exception(exceptobj).message;
+     mstr1:= msestring(exception(exceptobj).message);
      res1:= [mr_skip,mr_cancel];
      if fskipall > 0 then begin
       include(res1,mr_skipall);
@@ -3646,17 +3646,20 @@ end;
 procedure tdesigner.checkident(const aname: string);
 begin
  if not isvalidident(aname) or (aname = '') then begin
-  raise exception.Create(actionsmo.c[ord(ac_invalidname)]+aname+'".');
+  raise exception.Create(ansistring(actionsmo.c[ord(ac_invalidname)])+
+                                                               aname+'".');
  end;
 end;
 
-function tdesigner.changemoduleclassname(const filename: msestring; const avalue: string): string;
+function tdesigner.changemoduleclassname(const filename: msestring;
+                                                const avalue: string): string;
 var
  po1: pmoduleinfoty;
 begin
  po1:= checkmodule(filename);
  checkident(avalue);
- designnotifications.moduleclassnamechanging(idesigner(self),po1^.instance,avalue);
+ designnotifications.moduleclassnamechanging(idesigner(self),
+                                                        po1^.instance,avalue);
  po1^.moduleclassname:= avalue;
  result:= po1^.moduleclassname;
  modulechanged(po1);
@@ -4089,15 +4092,15 @@ var
  oldname: string;
 begin
  if not isvalidident(newname) then begin
-  raise exception.Create(actionsmo.c[ord(ac_invalidmethodname)]+' '''+
-                                                            newname+'''.');
+  raise exception.Create(ansistring(actionsmo.c[ord(ac_invalidmethodname)])+
+                                                          ' '''+newname+'''.');
  end;
  getmethodinfo(method,po2,po1);
  if po2 = nil then begin
-  raise exception.Create(actionsmo.c[ord(ac_modulenotfound)]);
+  raise exception.Create(ansistring(actionsmo.c[ord(ac_modulenotfound)]));
  end;
  if po1 = nil then begin
-  raise exception.Create(actionsmo.c[ord(ac_methodnotfound)]);
+  raise exception.Create(ansistring(actionsmo.c[ord(ac_methodnotfound)]));
  end;
  oldname:= po1^.name;
  po1^.name:= newname;
@@ -4443,16 +4446,19 @@ var
         mr1:= mr_none;
         if (po2 = nil) or not po2^.managed then begin
          mr1:= askyesnocancel(actionsmo.c[ord(ac_publishedmeth)]+ ' '+
-                 amodule^.instance.name+'.'+po1^.name+' ('+
-                 comp1.name+'.'+ar1[int1]^.name+') '+
+                 msestring(amodule^.instance.name)+'.'+
+                 msestring(po1^.name)+' ('+
+                 msestring(comp1.name)+'.'+msestring(ar1[int1]^.name)+') '+
                  actionsmo.c[ord(ac_doesnotexist)]+lineend+
                  actionsmo.c[ord(ac_wishdelete)],actionsmo.c[ord(ac_warning)]);
         end
         else begin
          if not parametersmatch(po1^.typeinfo,po2^.params) then begin
-           mr1:= askyesnocancel(actionsmo.c[ord(ac_method)]+
-                ' '+amodule^.instance.name+'.'+po1^.name+' ('+
-                 comp1.name+'.'+ar1[int1]^.name+') '+
+           mr1:= askyesnocancel(
+            actionsmo.c[ord(ac_method)]+
+                ' '+msestring(amodule^.instance.name)+'.'+
+                msestring(po1^.name)+' ('+
+                 msestring(comp1.name)+'.'+msestring(ar1[int1]^.name)+') '+
                  actionsmo.c[ord(ac_differentparams)]+lineend+
                  actionsmo.c[ord(ac_wishdelete)],actionsmo.c[ord(ac_warning)]);
          end;
@@ -4555,7 +4561,7 @@ begin
   comp1:= reader.root;
  end;
  with exception(ExceptObject) do begin
-  message:= actionsmo.c[ord(ac_component)]+
+  message:= ansistring(actionsmo.c[ord(ac_component)])+
                             ownernamepath(comp1)+'":'+lineend+message;
  end;
 end;
@@ -4665,8 +4671,8 @@ begin //loadformfile
       if skipexisting and issamefilepath(result^.filename,filename) then begin
        exit;
       end;
-      raise exception.create(actionsmo.c[ord(ac_amodule)]+modulename+
-                            actionsmo.c[ord(ac_isopen)]);
+      raise exception.create(ansistring(actionsmo.c[ord(ac_amodule)])+
+                          modulename+ansistring(actionsmo.c[ord(ac_isopen)]));
      end;
      stream2.Position:= 0;
      loadingdesignerbefore:= loadingdesigner;
@@ -4774,13 +4780,14 @@ begin //loadformfile
           removefixupreferences(module,'');
          end;
          if rootnames.Count > 0 then begin
-          wstr1:= rootnames[0];
+          wstr1:= msestring(rootnames[0]);
           for int1:= 1 to rootnames.Count - 1 do begin
-           wstr1:= wstr1 + ','+rootnames[int1];
+           wstr1:= wstr1 + ','+msestring(rootnames[int1]);
           end;
-          raise exception.Create(actionsmo.c[ord(ac_unresolvedref)]+' '+
-                                                       lastmissed+lineend+
-                          actionsmo.c[ord(ac_modules)]+' '+wstr1+'.');
+          raise exception.Create(ansistring(
+                                   actionsmo.c[ord(ac_unresolvedref)]+' '+
+                                            msestring(lastmissed)+lineend+
+                          actionsmo.c[ord(ac_modules)]+' '+wstr1+'.'));
          end;
          result^.resolved:= true;
         except
@@ -4817,8 +4824,8 @@ begin //loadformfile
      end;
     except
      on e: exception do begin
-      e.Message:= actionsmo.c[ord(ac_cannotreadform)]+filename+'".'+
-                                                       lineend+e.Message;
+      e.Message:= ansistring(actionsmo.c[ord(ac_cannotreadform)]+filename)+
+                                                        '".'+lineend+e.Message;
       raise;
      end;
     end;
@@ -4841,9 +4848,10 @@ begin //loadformfile
          else begin
           str1:= '';
          end;
-         exp1:= exception.create(
+         exp1:= exception.create(ansistring(
              actionsmo.c[ord(ac_cannotreadform)]+filename+'".'+lineend+
-             actionsmo.c[ord(ac_unresolvedref)]+rootnames[0]+str1+'.');
+             actionsmo.c[ord(ac_unresolvedref)]+
+                                           msestring(rootnames[0]+str1+'.')));
         end;
         instance.free;
         fmodules.removemoduleinfo(fcheckfixups[high(fcheckfixups)]);
@@ -4893,9 +4901,9 @@ begin
   backupcreated:= true;
   mstr1:= origname + backupext;
   for int1:= backupcount-1 downto 2 do begin
-   mstr2:= mstr1+inttostr(int1-1);
+   mstr2:= mstr1+inttostrmse(int1-1);
    if findfile(mstr2) then begin
-    msefileutils.renamefile(mstr2,mstr1+inttostr(int1));
+    msefileutils.renamefile(mstr2,mstr1+inttostrmse(int1));
    end;
   end;
   if backupcount > 1 then begin
@@ -5499,7 +5507,7 @@ var
    if ((aowner = nil) or (aowner = comp1.owner)) and 
             (includeinherited or 
             (comp1.componentstate * [csinline,csancestor] = [])) then begin
-    additem(result,str1+getcomponentdispname(comp1),acount);
+    additem(result,str1+msestring(getcomponentdispname(comp1)),acount);
    end;
   end;
   for int3:= 0 to comp1.componentcount - 1  do begin
@@ -5524,7 +5532,7 @@ begin
    str1:= ' ';
   end
   else begin
-   str1:= 'z'+po1^.instancevarname + '.';
+   str1:= msestring('z'+po1^.instancevarname + '.');
   end;
   with po1^.components do begin
    for int2:= 0 to count - 1 do begin
@@ -5552,9 +5560,10 @@ begin
     result[int2]:= ' ';
    end
    else begin
-    result[int2]:= 'z'+co1.name + '.';
+    result[int2]:= msestring('z'+co1.name + '.');
    end;
-   result[int2]:= result[int2] + getcomponentdispname(acomponents[int1]);
+   result[int2]:= result[int2] + 
+                   msestring(getcomponentdispname(acomponents[int1]));
    inc(int2);
   end;
  end;
@@ -5581,7 +5590,7 @@ begin
  inherited create;
  isvalue:= aisvalue;
  if acomp <> nil then begin
-  caption:= acomp.name;
+  caption:= msestring(acomp.name);
  end;
 end;
 
@@ -5713,7 +5722,7 @@ begin
   po1:= findcomponentmodule(acomponent);
   if po1 <> nil then begin
    if newname = '' then begin
-    raise exception.Create(actionsmo.c[ord(ac_invalidcompname)]);
+    raise exception.Create(ansistring(actionsmo.c[ord(ac_invalidcompname)]));
    end;
    if acomponent.name <> newname then begin
     if stringicomp(acomponent.name,newname) <> 0 then begin

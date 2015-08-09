@@ -144,7 +144,7 @@ begin
  result:= '<nil>';
  obj1:= tificolitem(getpointervalue);
  if (obj1 <> nil) and (obj1.link <> nil) then begin
-  result:= '<'+obj1.link.name+'>';
+  result:= msestring('<'+obj1.link.name+'>');
  end;
 end;
 
@@ -174,7 +174,7 @@ begin
                                                               intf1) then begin
   dataso:= nil;
   types:= [];
-  intf1.getfieldinfo(fname,dataso,types);
+  intf1.getfieldinfo(ansistring(fname),dataso,types);
   if (dataso <> nil) and getcorbainterface(dataso,typeinfo(iififieldsource),
                                                               intf2) then begin
    result:= intf2.getfieldnames(types);
@@ -196,7 +196,7 @@ begin
  result:= nil;
  if getcorbainterface(fprops[0].instance,
                                 typeinfo(iififieldlinksource),intf1) then begin
-  result:= intf1.getfieldnames(fname);
+  result:= intf1.getfieldnames(ansistring(fname));
  end;
 end;
 
@@ -207,7 +207,7 @@ begin
  inherited;
  if getcorbainterface(fprops[0].instance,
                                 typeinfo(iififieldlinksource),intf1) then begin
-  intf1.setdesignsourcefieldname(value);
+  intf1.setdesignsourcefieldname(ansistring(value));
  end;
 end;
 
@@ -223,7 +223,7 @@ end;
 function tificonnectedfieldselementeditor.getvalue: msestring;
 begin
  with tififieldlink(getpointervalue) do begin
-  result:= '<'+sourcefieldname+'><'+fieldname+'>';
+  result:= msestring('<'+sourcefieldname+'><'+fieldname+'>');
  end;
 end;
 

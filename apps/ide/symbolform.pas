@@ -82,16 +82,16 @@ begin
   syminfo[aindex]:= trim(removelinebreaks(str1));
   path[aindex]:= '';
   line[aindex]:= 0;
-  if not startsstr('0x',str2) then begin
+  if not msestartsstr('0x',str2) then begin
    mainfo.gdb.infoaddress(str2,str1);
   end
   else begin
    str1:= '';
-   if trystrtointvalue64(str2,ad1) then begin
+   if trystrtointvalue64(ansistring(str2),ad1) then begin
     if mainfo.gdb.infoline(ad1,mstr1,int1,ad2,ad3) = gdb_ok then begin
      path[aindex]:= mstr1;
      line[aindex]:= int1;
-     str1:= mstr1+':'+inttostr(int1);     
+     str1:= mstr1+':'+inttostrmse(int1);     
     end;
    end;    
   end;

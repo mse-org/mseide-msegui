@@ -127,7 +127,7 @@ function tmodulelinkitemeditor.getvalue: msestring;
 // mstr1: msestring;
 begin
  with tmodulelinkprop(getpointervalue) do begin
-  result:= '<'+name+'>';
+  result:= msestring('<'+name+'>');
  end;
 end;
 
@@ -143,7 +143,7 @@ begin
    result:= result+'<>';
   end
   else begin
-   mstr1:= fdesigner.getcomponentname(action);
+   mstr1:= msestring(fdesigner.getcomponentname(action));
    if mstr1 = '' then begin
     ownernamepath(action);
    end;
@@ -192,7 +192,7 @@ begin
    result:= result+'<>';
   end
   else begin
-   mstr1:= fdesigner.getcomponentname(widget);
+   mstr1:= msestring(fdesigner.getcomponentname(widget));
    if mstr1 = '' then begin
     ownernamepath(widget);
    end;
@@ -240,7 +240,7 @@ var
 begin
  field1:= tifidscontroller(fprops[0].instance).getfield(findex);
  if field1 <> nil then begin
-  result:= field1.fieldname;
+  result:= msestring(field1.fieldname);
  end
  else begin
   result:= inherited name;
@@ -270,7 +270,7 @@ end;
 function tifidatacolsitemeditor.getvalue: msestring;
 begin
  with tifidatacol(getpointervalue) do begin
-  result:= '<'+name+'>';
+  result:= msestring('<'+name+'>');
  end;
 end;
 

@@ -53,7 +53,7 @@ begin
   result:= getcomponentpropname(tcomponent(aobject));
  end
  else begin
-  result:= aobject.classname;
+  result:= msestring(aobject.classname);
  end;
 end;
  
@@ -75,7 +75,7 @@ begin
   for int1:= 0 to high(ar1) do begin
    edfo.na[int1].caption:= getdispname(ar1[int1]);
   end;
-  edfo.caption:= edfo.caption + ' ('+acomponent.name+')';
+  edfo.caption:= edfo.caption + ' ('+msestring(acomponent.name)+')';
   result:= edfo.show(true);
   if result = mr_ok then begin
    ar2:= edfo.po.gridvalues;
@@ -134,11 +134,11 @@ var
  comp1: tcomponent;
  int1: integer;
 begin
- comp1:= designer.getcomponent(avalue,fcomp.owner);
+ comp1:= designer.getcomponent(ansistring(avalue),fcomp.owner);
  po.value:= comp1;
  if comp1 <> nil then begin
   avalue:= getdispname(tcomponent(po.value));
-  fpath:= ownernamepath(comp1);
+  fpath:= msestring(ownernamepath(comp1));
   int1:= findlastchar(fpath,'.');
   if int1 > 0 then begin
    setlength(fpath,int1-1);
@@ -167,7 +167,7 @@ begin
  finstances:= po.griddata.datapo;
  tree1:= designer.getcomponentnametree(tcomponent,true,false,nil,
                                       {$ifdef FPC}@{$endif}filtercomponent);
- mstr1:= ownernamepath(tcomponent(po.value));
+ mstr1:= msestring(ownernamepath(tcomponent(po.value)));
  if mstr1 = '' then begin
   mstr1:= fpath;
  end;

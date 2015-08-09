@@ -410,7 +410,7 @@ end;
 
 procedure tdblabel.fieldtovalue;
 begin
- caption:= datalink.field.displaytext;
+ caption:= msestring(datalink.field.displaytext); //tmsestringfield?
 end;
 
 procedure tdblabel.setnullvalue;

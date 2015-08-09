@@ -1369,26 +1369,12 @@ end;
 
 function tvaluelink.getasansistring: ansistring;
 begin
- result:= getasmsestring;
- {
- if fdatakind = idk_msestring then begin
-  result:= fmsestringvalue;
- end
- else begin
-  checkdatakind(idk_ansistring);
-  result:= fansistringvalue;
- end;
- }
+ result:= ansistring(getasmsestring);
 end;
 
 procedure tvaluelink.setasansistring(const avalue: ansistring);
 begin
- setasmsestring(avalue);
- {
- fdatakind:= idk_ansistring;
- fansistringvalue:= avalue;
- sendvalue('value',fansistringvalue);
- }
+ setasmsestring(msestring(avalue));
 end;
 
 procedure tvaluelink.setenabled(const avalue: boolean);

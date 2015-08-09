@@ -53,7 +53,7 @@ implementation
 
 uses
  panelform_mfm,main,sysutils,msekeyboard,mselist,msetypes,msedatalist,
- msearrayutils;
+ msearrayutils,mseformatstr;
 
 var
  panellist: tpointerlist;
@@ -206,7 +206,7 @@ begin
    caption:= acaption;
   end;
   if shortcut <> 0 then begin
-   acaption:= acaption + ' (Ctrl+F' + inttostr(fnameindex+1)+')';
+   acaption:= acaption + ' (Ctrl+F' + inttostrmse(fnameindex+1)+')';
   end;
   self.caption:= acaption;
  end;

@@ -1018,8 +1018,8 @@ begin
   gek_done: begin
    if sender.downloaded then begin
     downloaded;
-    setstattext(c[ord(str_downloaded)]+' '+formatfloat('0.00,',
-                        stopinfo.totalsent/1024)+'kB',mtk_finished);      
+    setstattext(c[ord(str_downloaded)]+' '+formatfloatmse(
+                        stopinfo.totalsent/1024,'0.00,')+'kB',mtk_finished);      
 //    sender.abort;
    end;
   end;
@@ -1105,8 +1105,8 @@ begin
      if (fgdbserverexitcode <> 0) and 
                      not (projectoptions.d.nogdbserverexit and 
                                (fgdbserverexitcode = -1)) then begin
-      setstattext(c[ord(gdbserverstarterror)]+' '+inttostr(fgdbserverexitcode)+'.',
-                mtk_error);
+      setstattext(c[ord(gdbserverstarterror)]+' '+
+                            inttostrmse(fgdbserverexitcode)+'.',mtk_error);
       exit;
      end;
     end
@@ -1128,7 +1128,7 @@ function tmainfo.checkgdberror(aresult: gdbresultty): boolean;
 begin
  result:= aresult = gdb_ok;
  if not result then begin
-  setstattext('GDB: ' + gdb.geterrormessage(aresult),mtk_error);
+  setstattext(msestring('GDB: ' + gdb.geterrormessage(aresult)),mtk_error);
  end;
 end;
 
@@ -1225,7 +1225,7 @@ var
  int1: integer;
 begin
  with projectoptions,d.texp do begin
-  gdb.progparameters:= progparameters;
+  gdb.progparameters:= ansistring(progparameters);
   gdb.workingdirectory:= progworkingdirectory;
   gdb.clearenvvars;
   for int1:= 0 to high(envvarons) do begin
@@ -1234,10 +1234,10 @@ begin
     break;
    end;
    if envvarons[int1] then begin
-    gdb.setenvvar(envvarnames[int1],envvarvalues[int1]);
+    gdb.setenvvar(ansistring(envvarnames[int1]),ansistring(envvarvalues[int1]));
    end
    else begin
-    gdb.unsetenvvar(envvarnames[int1]);
+    gdb.unsetenvvar(ansistring(envvarnames[int1]));
    end;
   end;
  end;
@@ -1279,7 +1279,7 @@ begin
          {$ifdef FPC}@{$endif}uploadexe) then begin
       if downloadresult <> 0 then begin
        setstattext(c[ord(downloaderror)]+' '+
-                                inttostr(downloadresult)+'.',mtk_error);
+                                inttostrmse(downloadresult)+'.',mtk_error);
        exit;
       end
       else begin
@@ -1343,7 +1343,7 @@ begin
   gdb.remoteconnection:= remoteconnection;
   gdb.gdbdownload:= d.gdbdownload;
   gdb.simulator:= d.gdbsimulator;
-  gdb.processorname:= gdbprocessor;
+  gdb.processorname:= ansistring(gdbprocessor);
   gdb.guiintf:= not d.nodebugbeginend;
   gdb.beforeconnect:= beforeconnect;  
   gdb.afterconnect:= afterconnect;
@@ -1826,7 +1826,7 @@ var
  po1: pmoduleinfoty;
 begin
   str3:= removefileext(filename(aname));
-  str2:= msestring(getmodulename(str3,namebase));
+  str2:= msestring(getmodulename(str3,msestring(namebase)));
   stream1:= ttextstream.create(aname,fm_create);
   try
    formskeleton(stream1,ansistring(filename(str3)),ansistring(str2),ancestor);

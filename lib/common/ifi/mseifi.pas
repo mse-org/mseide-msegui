@@ -445,7 +445,7 @@ type
   private
    frx: tpipereader;
    ftx: tpipewriter;
-   fserverapp: string;
+   fserverapp: msestring;
    fprochandle: integer;
   protected
    procedure internalconnect; override;
@@ -466,7 +466,7 @@ type
   published
    property active;
    property activator;
-   property serverapp: string read fserverapp write fserverapp;
+   property serverapp: msestring read fserverapp write fserverapp;
             //stdin, stdout if ''
    property localconn;
  end;
@@ -1668,15 +1668,12 @@ procedure tcustompipeiochannel.internalconnect;
 begin
  resetrxbuffer;
  if fserverapp <> '' then begin
-//  fprochandle:= execmse2(fserverapp,ftx,frx,nil,false,-1,true,true);
   fprochandle:= execmse2(fserverapp,ftx,frx,nil,{false,}-1,[exo_inactive]
                               {true,false});
  end
  else begin
   ftx.connect(sys_stdout);
   frx.connect(sys_stdin);
-//  ftx.handle:= sys_stdout;
-//  frx.handle:= sys_stdin;
  end;
 end;
 

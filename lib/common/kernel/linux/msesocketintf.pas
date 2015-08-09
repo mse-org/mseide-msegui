@@ -128,7 +128,7 @@ begin
  result:= sye_ok;
  with addr do begin
   if kind = sok_local then begin
-   str1:= tosysfilepath(url);
+   str1:= ansistring(tosysfilepath(url));
    int1:= sizeof(locsockaddrty)+length(str1)+1;
    getmem(po1,int1);
    po1^.sa_family:= af_local;
@@ -237,7 +237,7 @@ begin
  result:= sye_ok;
  with addr do begin
   if kind = sok_local then begin
-   str1:= tosysfilepath(url);
+   str1:= ansistring(tosysfilepath(url));
    int1:= sizeof(locsockaddrty)+length(str1)+1;
    getmem(po1,int1);
    po1^.sa_family:= af_local;
@@ -332,10 +332,10 @@ begin
  result:= sye_ok;
  with addr,linuxsockaddrty(platformdata) do begin
   if kind = sok_local then begin
-   str1:= tosysfilepath(url);
+   str1:= ansistring(tosysfilepath(url));
   end
   else begin
-   str1:= url;
+   str1:= ansistring(url);
   end;
   fillchar(info1,sizeof(addrinfo),0);
   with info1 do begin

@@ -7615,7 +7615,7 @@ begin
      fstringbuffer:= utf8tostring(afield.asstring);
     end
     else begin
-     fstringbuffer:= afield.asstring;
+     fstringbuffer:= msestring(afield.asstring);
     end;
    end;
   end;
@@ -7644,7 +7644,7 @@ begin
       fstringbuffer:= utf8tostring(afield.displaytext);
      end
      else begin
-      fstringbuffer:= afield.displaytext;
+      fstringbuffer:= msestring(afield.displaytext);
      end;
     end;
    end;
@@ -10004,7 +10004,7 @@ begin
                       (-ffieldnamedisplayfixrow <= ffixrows.count) then begin
          with ffixrows[ffieldnamedisplayfixrow] do begin
           captions.count:= datacols.count;
-          captions[datacols.count-1].caption:= displaylabel;
+          captions[datacols.count-1].caption:= msestring(displaylabel);
          end;
         end;
        end;
