@@ -88,7 +88,7 @@ type
    procedure execute;
    procedure sqlparser(var asql: msestring);
    procedure applyfilter;
-   function addfilter(sqlstr : string) : string;
+   function addfilter(sqlstr : msestring) : msestring;
    function getdatabase1: tcustomsqlconnection;
    procedure setdatabase1(const avalue: tcustomsqlconnection);
    procedure setparams(const avalue: tmseparams);
@@ -700,15 +700,15 @@ begin
   Result := Assigned(FCursor) and FCursor.FPrepared;
 end;
 
-Function TSQLQuery.AddFilter(SQLstr : string) : string;
+Function TSQLQuery.AddFilter(SQLstr : msestring) : msestring;
 
 begin
   if FWhereStartPos = 0 then
-    SQLstr := SQLstr + ' where (' + Filter + ')'
+    SQLstr := SQLstr + ' where (' + msestring(Filter) + ')'
   else if FWhereStopPos > 0 then
-    system.insert(' and ('+Filter+') ',SQLstr,FWhereStopPos+1)
+    system.insert(' and ('+msestring(Filter)+') ',SQLstr,FWhereStopPos+1)
   else
-    system.insert(' where ('+Filter+') ',SQLstr,FWhereStartPos);
+    system.insert(' where ('+msestring(Filter)+') ',SQLstr,FWhereStartPos);
   Result := SQLstr;
 end;
 
