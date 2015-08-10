@@ -108,11 +108,22 @@ object guitemplatesmo: tguitemplatesmo
     top = 16
   end
   object sysenv: tsysenvmanager
-    helpheader = 'MSEide Copyright 1999-2013 by Martin Schreiber'#10'Usage: mseide [OPTION]... [PROJECTFILE]'#10#10'Options:'
+    helpheader = 'MSEide Copyright 1999-2015 by Martin Schreiber'#10'Usage: mseide [OPTION]... [PROJECTFILE]'#10#10'Options:'
     helpfooter = #10'Environment variables'#10'FPCDIR, FPCLIBDIR, MSEDIR, MSELIBDIR'#10'SYNTAXDEFDIR, TEMPLATEDIR, COMPSTOREDIR'#10'COMPILER, DEBUGGER, EXEEXT,TARGET,TARGETOSDIR'#10'can be used to override the settings macros.'#10#10'Have a lot of fun!'#10#10'Martin'
     left = 24
     top = 96
     defs = (
+      (
+        ak_pararg
+        '-globstatfile'
+        (        )
+        []
+        ''
+        '<filepath>'
+        'Set path to global status file.'
+        ''
+        ''
+      )
       (
         ak_pararg
         '-macrodef'

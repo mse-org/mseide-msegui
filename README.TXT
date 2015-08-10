@@ -115,6 +115,8 @@ MSEide command line parameters
  Macro definition, will be overridden by 'Project'-'Options'-'Macros'. Example:
  --macrodef=MAC1,abc,MAC2,def
  defines ${MAC1} with value 'abc' and ${MAC2} with value 'def'.
+--globstatfile=<filepath> 
+ Use <filepath> instead the default global MSEide status file.
  
 MSEide environment variables
 ****************************

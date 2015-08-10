@@ -17,7 +17,7 @@
 unit main;
 {$ifdef linux}{$define unix}{$endif}
 {$ifdef FPC}
- {$mode objfpc}{$h+}
+ {$mode objfpc}{$h+}{$goto on}
 {$endif}
 {$ifndef mse_no_ifi}
  {$define mse_with_ifi}
@@ -395,7 +395,6 @@ begin
   writestderr(e.message,true);
  end;
 end;
-
 
 { tmainfo }
 
@@ -1775,8 +1774,17 @@ end;
 procedure tmainfo.mainonloaded(const sender: tobject);
 var
  wstr1: msestring;
+label
+ endlab;
 begin
  try
+  if guitemplatesmo.sysenv.defined[ord(env_globstatfile)] then begin
+   wstr1:= guitemplatesmo.sysenv.value[ord(env_globstatfile)];
+   if wstr1 <> '' then begin
+    mainstatfile.filename:= wstr1;
+    goto endlab;
+   end;
+  end;
   wstr1:= filepath(statdirname);
   if not finddir(wstr1) then begin
    createdir(wstr1);
@@ -1793,6 +1801,7 @@ begin
   {$ifdef bsd}
   mainstatfile.filename:= statname+'bsd.sta';
   {$endif}
+endlab:
   mainstatfile.readstat;
   expandprojectmacros;
   onscale(nil);

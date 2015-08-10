@@ -6,7 +6,7 @@ uses
  msesysenv,msemacros;
 
 type
- envvarty = (env_macrodef,env_vargroup,env_np,env_ns,env_help,
+ envvarty = (env_globstatfile,env_macrodef,env_vargroup,env_np,env_ns,env_help,
              env_fpcdir,env_fpclibdir,env_msedir,env_mselibdir,env_syntaxdefdir,
              env_templatedir,env_compstoredir,env_compiler,env_debugger,
              env_exeext,env_target,env_targetosdir,
@@ -104,6 +104,8 @@ end;
 *)
 
 procedure tguitemplatesmo.loadedexe(const sender: TObject);
+var
+ mstr1: msestring;
 begin
 // sysenv.init(sysenvvalues);
  skin.active:= not sysenv.defined[ord(env_ns)];
