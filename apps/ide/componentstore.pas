@@ -951,13 +951,14 @@ end;
 function tcomponentstorefo.saveall(const quiet: boolean): modalresultty;
 begin
  result:= mr_none;
- if fchanged and 
-           (quiet or confirmsavechangedfile(fgroupfilename,result)) then begin
+ if fchanged then begin
   if fgroupfilename = '' then begin
-   result:= dosavegroupas;
+   result:= dosavegroupas();
   end
   else begin
-   result:= writestoregroup(fgroupfilename);
+   if quiet or confirmsavechangedfile(fgroupfilename,result) then begin
+    result:= writestoregroup(fgroupfilename);
+   end;
   end;
  end;
 end;
