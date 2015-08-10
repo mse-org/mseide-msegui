@@ -108,6 +108,9 @@ MSEide command line parameters
 -ns
  Do not use a skin, no fades.
 
+--globstatfile=<filepath> 
+ Use <filepath> instead the default global MSEide status file.
+
 --macrogroup=<n>
  Use 'Project'-'Options'-'Macros'-'Active group' number <n>, <n> = 1..6.
 
@@ -115,8 +118,6 @@ MSEide command line parameters
  Macro definition, will be overridden by 'Project'-'Options'-'Macros'. Example:
  --macrodef=MAC1,abc,MAC2,def
  defines ${MAC1} with value 'abc' and ${MAC2} with value 'def'.
---globstatfile=<filepath> 
- Use <filepath> instead the default global MSEide status file.
  
 MSEide environment variables
 ****************************
