@@ -32,7 +32,7 @@ type
  eiconv = class(econverterror)
  end;
 
-procedure SetCWidestringManager;
+procedure SetCWidestringManager();
 
 implementation
 {$ifdef FPC}{$linklib c}{$endif}
@@ -537,6 +537,12 @@ function StrCompAnsi(s1,s2 : PChar): PtrInt;
     result:=strcoll(s1,s2);
   end;
 
+var
+{$ifdef unicodeversion}
+  widestringmanagerbefore : TUnicodeStringManager;
+{$else}
+  widestringmanagerbefore : TWideStringManager;
+{$endif}
 
 Procedure SetCWideStringManager;
 Var
@@ -546,6 +552,7 @@ Var
   CWideStringManager : TWideStringManager;
 {$endif}
 begin
+ widestringmanagerbefore:= widestringmanager;
  CWideStringManager:= widestringmanager;
  With CWideStringManager do begin
   Wide2AnsiMoveProc:= @Wide2AnsiMove;
@@ -586,6 +593,10 @@ begin
  SetWideStringManager(CWideStringManager);
 end;
 
+procedure unSetCWidestringManager();
+begin
+ widestringmanager:= widestringmanagerbefore;
+end;
 
 initialization
  setlocale(LC_ALL,'');
@@ -594,8 +605,9 @@ initialization
  iconv_ansi2wide:=iconv_open(unicode_encoding,nl_langinfo(CODESET));
 // iconv_ucs42ansi:=iconv_open(nl_langinfo(CODESET),'UCS4');
 // iconv_ansi2ucs4:=iconv_open('UCS4',nl_langinfo(CODESET));
- SetCWideStringManager;
+ SetCWideStringManager();
 finalization
+ unSetCWideStringManager();
  if iconv_wide2ansi <> nil then begin
   iconv_close(iconv_wide2ansi);
  end;
