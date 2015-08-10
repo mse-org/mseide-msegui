@@ -164,7 +164,7 @@ type
    function seek(const offset: int64; origin: tseekorigin): int64; override;
    function readdatastring: string; override;
              //read available data
-   procedure writedatastring(const value: string); override;
+   procedure writedatastring(const value: rawbytestring); override;
    function isopen: boolean;
    property filename: filenamety read ffilename;
    property openmode: fileopenmodety read fopenmode;
@@ -218,7 +218,7 @@ type
    procedure internalwritebuffer(const buffer; count: longint);
   public
    constructor create(ahandle: integer); override;
-   constructor createdata(const adata: string);
+   constructor createdata(const adata: rawbytestring);
    procedure clear; override;        //only for memorystream
 
    procedure setsize(const newsize: int64); override;
@@ -1305,7 +1305,7 @@ begin
  end;
 end;
 
-procedure tmsefilestream.writedatastring(const value: string);
+procedure tmsefilestream.writedatastring(const value: rawbytestring);
 begin
  if (value <> '') or (fcryptohandler <> nil) then begin
   writebuffer(pointer(value)^,length(value));
@@ -1462,7 +1462,7 @@ begin
  inherited;
 end;
 
-constructor tcustombufstream.createdata(const adata: string);
+constructor tcustombufstream.createdata(const adata: rawbytestring);
 begin
  create;
  writedatastring(adata);

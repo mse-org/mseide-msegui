@@ -28,7 +28,9 @@ unit mclasses;
 {$if defined(FPC) and (fpc_fullversion >= 020601)}
  {$define mse_fpc_2_6_2}
 {$ifend}
-
+{$if fpc_fullversion >= 030000}
+ {$define fpcv3}
+{$endif}
 interface
 
 uses
@@ -48,6 +50,9 @@ type
 {$endif}
 {$ifndef mse_fpc_2_6_2}
  tbytes = array of byte;
+{$endif}
+{$ifndef fpcv3}
+ RawByteString = ansistring;
 {$endif}
  tstrings = class;
  tstringlist = class;
@@ -910,7 +915,7 @@ TStringsEnumerator = class
     function trywritebuffer(const buffer; count: longint): syserrorty;
     function readdatastring: string; virtual;
              //read available data
-    procedure writedatastring(const value: string); virtual;
+    procedure writedatastring(const value: rawbytestring); virtual;
     function CopyFrom(Source: TStream; Count: Int64): Int64;
     function ReadComponent(Instance: TComponent): TComponent;
     function ReadComponentRes(Instance: TComponent): TComponent;
@@ -3735,7 +3740,7 @@ begin
  setlength(result,read(pointer(result)^,length(result)));
 end;
 
-procedure TStream.writedatastring(const value: string);
+procedure TStream.writedatastring(const value: rawbytestring);
 begin
  if value <> '' then begin
   writebuffer(pointer(value)^,length(value));
