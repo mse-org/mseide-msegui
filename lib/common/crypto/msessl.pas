@@ -330,7 +330,7 @@ function filebio(const aname: filenamety;
 var
  str1,str2: string;
 begin
- str1:= stringtoutf8(tosysfilepath(filepath(aname)));
+ str1:= stringtoutf8ansi(tosysfilepath(filepath(aname)));
  case aopenmode of
   fm_write: begin
    str2:= 'a+';      //-> append, not supported
@@ -783,7 +783,7 @@ end;
 
 procedure tcustomopensslcryptohandler.setkeyphrase(const avalue: msestring);
 begin
- fkey:= stringtoutf8(avalue);
+ fkey:= stringtoutf8ansi(avalue);
  fkeyphrase:= avalue;
 end;
 

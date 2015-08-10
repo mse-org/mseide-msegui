@@ -2189,7 +2189,7 @@ begin
    end
    else begin
     if utf8 then begin
-     field.asstring:= stringtoutf8(avalue);
+     field.asstring:= stringtoutf8ansi(avalue);
     end
     else begin
      field.asstring:= ansistring(avalue);
@@ -2207,7 +2207,7 @@ begin
   if dataset <> nil then begin
    if getcorbainterface(dataset,typeinfo(igetdscontroller),intf1) then begin
     if dso_utf8 in intf1.getcontroller.options then begin
-     param.asstring:= stringtoutf8(avalue);
+     param.asstring:= stringtoutf8ansi(avalue);
      exit;
     end;
    end;
@@ -2627,7 +2627,7 @@ begin
     ftstring,ftwidestring: begin
      if (aparam.collection is tmseparams) and 
                          tmseparams(aparam.collection).isutf8 then begin
-      result:= encodesqlstring(stringtoutf8(aswidestring));
+      result:= encodesqlstring(stringtoutf8ansi(aswidestring));
      end
      else begin
       result:= encodesqlstring(asstring);
@@ -2813,7 +2813,7 @@ procedure fieldsetmsestring(const avalue: msestring; const sender: tfield;
                                    const aintf: idsfieldcontroller);
 begin
  if (aintf <> nil) and (dso_utf8 in aintf.getcontroller.options) then begin
-  sender.asstring:= stringtoutf8(avalue);
+  sender.asstring:= stringtoutf8ansi(avalue);
  end
  else begin
   sender.asstring:= ansistring(avalue); //locale conversion
@@ -3029,7 +3029,7 @@ begin
   end
   else begin
    if autf8 then begin
-    str1:= stringtoutf8(key);
+    str1:= stringtoutf8ansi(key);
    end
    else begin
     str1:= key;
@@ -3331,12 +3331,12 @@ begin
         if lko_caseinsensitive in opt1 then begin
     {$ifdef mse_hasvtunicodestring}
          if vtype = vtunicodestring then begin
-          keyansistrings[int1]:= stringtoutf8(mseuppercase(
+          keyansistrings[int1]:= stringtoutf8ansi(mseuppercase(
                                msestring(tvarrec(keys[int1]).vunicodestring)));
          end
          else begin
     {$endif}
-          keyansistrings[int1]:= stringtoutf8(mseuppercase(
+          keyansistrings[int1]:= stringtoutf8ansi(mseuppercase(
                                   msestring(tvarrec(keys[int1]).vwidestring)));
     {$ifdef mse_hasvtunicodestring}
          end;
@@ -3346,12 +3346,12 @@ begin
     {$ifdef mse_hasvtunicodestring}
          if vtype = vtunicodestring then begin
           keyansistrings[int1]:= 
-           stringtoutf8(msestring(tvarrec(keys[int1]).vunicodestring));
+           stringtoutf8ansi(msestring(tvarrec(keys[int1]).vunicodestring));
          end
          else begin
     {$endif}
           keyansistrings[int1]:= 
-           stringtoutf8(msestring(tvarrec(keys[int1]).vwidestring));
+           stringtoutf8ansi(msestring(tvarrec(keys[int1]).vwidestring));
     {$ifdef mse_hasvtunicodestring}
          end;
     {$endif}
@@ -6663,7 +6663,7 @@ begin
  end
  else begin
   if utf8 then begin
-   ffield.asstring:= stringtoutf8(avalue);
+   ffield.asstring:= stringtoutf8ansi(avalue);
   end
   else begin
    ffield.asstring:= ansistring(avalue);
@@ -7640,7 +7640,7 @@ begin
  end
  else begin
 //  if dso_utf8 in foptions then begin
-//   result:= encodesqlstring(stringtoutf8(avalue));
+//   result:= encodesqlstring(stringtoutf8ansi(avalue));
 //  end
 //  else begin
   result:= encodesqlstring(avalue);
@@ -8319,7 +8319,7 @@ begin
   end
   else begin
    if isutf8 then begin
-    field1.asstring:= stringtoutf8(avalue);
+    field1.asstring:= stringtoutf8ansi(avalue);
    end
    else begin
     field1.asstring:= ansistring(avalue);
@@ -8896,10 +8896,10 @@ begin
  with items[index] do begin
   if not (datatype in [ftblob,ftmemo,ftbytes,ftvarbytes]) and isutf8 then begin
    if vartype(value) = varolestr then begin
-    result:= stringtoutf8(aswidestring);
+    result:= stringtoutf8ansi(aswidestring);
    end
    else begin
-    result:= stringtoutf8(msestring(asstring));
+    result:= stringtoutf8ansi(msestring(asstring));
    end;
   end
   else begin

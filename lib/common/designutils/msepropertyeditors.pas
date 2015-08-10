@@ -5139,7 +5139,7 @@ begin
         clear;
         for int1:= 0 to grid.rowcount-1 do begin
          if utf8 then begin
-          str1:= stringtoutf8(textedit[int1]);
+          str1:= stringtoutf8ansi(textedit[int1]);
          end
          else begin
           str1:= ansistring(textedit[int1]);

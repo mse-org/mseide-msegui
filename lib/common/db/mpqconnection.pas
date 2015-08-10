@@ -811,7 +811,7 @@ begin
         ftbcd: s:= realtostr(ascurrency);
         ftvariant: begin
          if isutf8 then begin
-          s:= stringtoutf8(encodesqlvariant(value,true));
+          s:= stringtoutf8ansi(encodesqlvariant(value,true));
          end
          else begin
           s:= ansistring(encodesqlvariant(value,true));
@@ -849,7 +849,7 @@ begin
     mstr1:= statementm;
    end;
    if autf8 then begin
-    s:= stringtoutf8(mstr1);
+    s:= stringtoutf8ansi(mstr1);
    end
    else begin
     s:= ansistring(mstr1);

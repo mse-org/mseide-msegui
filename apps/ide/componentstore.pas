@@ -863,7 +863,7 @@ begin
   reader1:= nil;
   stream1:= nil;
   try
-   stream1:= ttextstream.createdata(stringtoutf8(mstr1));
+   stream1:= ttextstream.createdata(stringtoutf8ansi(mstr1));
 //   stream1.encoding:= ce_utf8n;
    reader1:= tstatreader.create(stream1,ce_utf8n);
    if reader1.findsection('nodecopy') and 

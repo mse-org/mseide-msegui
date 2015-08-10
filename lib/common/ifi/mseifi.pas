@@ -788,7 +788,7 @@ function encodeifidata(const avalue: msestring;
 var
  str1: string;
 begin
- str1:= stringtoutf8(avalue);
+ str1:= stringtoutf8ansi(avalue);
  stringtoifiname(str1,pifinamety(
       initdataheader(headersize,idk_msestring,length(str1),result)));
 end;
@@ -799,7 +799,7 @@ var
  str1: string;
  po1: pifimsestringintty;
 begin
- str1:= stringtoutf8(avalue.mstr);
+ str1:= stringtoutf8ansi(avalue.mstr);
  po1:= pifimsestringintty(initdataheader(
            headersize,idk_msestringint,length(str1),result));
  po1^.int:= avalue.int;

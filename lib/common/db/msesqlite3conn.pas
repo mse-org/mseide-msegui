@@ -822,7 +822,7 @@ begin
 //  DatabaseError(SErrNoDatabaseName,self);
 // end;
  initializesqlite3([]);
- str1:= stringtoutf8(msestring(inherited databasename));
+ str1:= stringtoutf8ansi(msestring(inherited databasename));
  checkerror(sqlite3_open(pchar(str1),@fhandle));
  checkbusytimeout;
 end;

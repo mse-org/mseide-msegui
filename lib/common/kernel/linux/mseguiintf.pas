@@ -1447,21 +1447,6 @@ begin
  gdi_unlock;
 end;
 
-{
-function stringtotextproperty(const value: msestring; const style: txiccencodingstyle;
-                               out textproperty: xtextproperty): boolean;
-var
- list: array[0..0] of pchar;
- str1: utf8string;
-begin
- str1:= stringtoutf8(value);
- list[0]:= pchar(str1);
- result:= xutf8textlisttotextproperty(appdisp,@list,1,style,@textproperty) >= 0;
- if not result then begin
-  fillchar(textproperty,0,sizeof(textproperty));
- end;
-end;
-}
 function getwmstate(id: winidty): wmstatety;
 type
  wmstatety = record
@@ -4421,7 +4406,7 @@ begin
  at1:= netatoms[net_system_tray_message_data];
  if (win1 <> 0) and (at1 <> 0) then begin
   messageid:= getidnum;
-  str1:= stringtoutf8(message);
+  str1:= stringtoutf8ansi(message);
   int1:= length(str1);
   str1:= str1 + #0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0;
   result:= sendtraymessage(win1,awindow.id,system_tray_begin_message,timeoutms,
@@ -5281,7 +5266,7 @@ begin
    else begin
     result:= true;
     if target = utf8_stringatom then begin
-     adata:= stringtoutf8(buffer);
+     adata:= stringtoutf8ansi(buffer);
     end
     else begin
      if target = stringatom then begin

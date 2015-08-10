@@ -324,7 +324,7 @@ begin
        bo2:= echooff(bo3);
        try
         if teo_utf8 in foptions then begin
-         fprocess.input.pipewriter.writeln(stringtoutf8(mstr1));
+         fprocess.input.pipewriter.writeln(stringtoutf8ansi(mstr1));
         end
         else begin
          fprocess.input.pipewriter.writeln(mstr1);

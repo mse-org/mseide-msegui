@@ -1469,7 +1469,7 @@ begin
    mstr1:= asql;
   end;
   if autf8 then begin
-   str1:= stringtoutf8(mstr1);
+   str1:= stringtoutf8ansi(mstr1);
   end
   else begin
    str1:= ansistring(mstr1);
@@ -1839,7 +1839,7 @@ end;
 function tcustomsqlconnection.todbstring(const avalue: msestring): string;
 begin
  if isutf8 then begin
-  result:= stringtoutf8(avalue);
+  result:= stringtoutf8ansi(avalue);
  end
  else begin
   result:= ansistring(avalue);

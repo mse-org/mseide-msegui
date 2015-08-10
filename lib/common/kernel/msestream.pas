@@ -750,7 +750,7 @@ begin
    result:= stringtopascalstring(value);
   end;
   ce_utf8n: begin
-   result:= stringtoutf8(value);
+   result:= stringtoutf8ansi(value);
   end;
   ce_iso8859_1: begin
    result:= stringtolatin1(value);
@@ -2879,7 +2879,7 @@ function tcustomcryptohandler.encrypttext(const atext: msestring;
                                const base64: boolean = false;
               const maxlinelength: integer = defaultbase64linelength): string;
 begin
- result:= encrypt(stringtoutf8(atext),base64,maxlinelength);
+ result:= encrypt(stringtoutf8ansi(atext),base64,maxlinelength);
 end;
 
 function tcustomcryptohandler.decrypttext(const adata: string;

@@ -492,7 +492,7 @@ begin
    mstr1:= c.fstatementm;
   end;
   if autf8 then begin
-   str1:= stringtoutf8(mstr1);
+   str1:= stringtoutf8ansi(mstr1);
   end
   else begin
    str1:= ansistring(mstr1);

@@ -80,7 +80,7 @@ begin
       end;
      end;
     end;
-    str1:= str1 + name + #0 + stringtoutf8(value) + #0;
+    str1:= str1 + name + #0 + stringtoutf8ansi(value) + #0;
    end;
   end;
  end;

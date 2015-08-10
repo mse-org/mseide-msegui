@@ -1235,7 +1235,7 @@ var
  str1,str2: string;
  po1: pchar;
 begin
- str2:= stringtoutf8(avalue);
+ str2:= stringtoutf8ansi(avalue);
  initpropertyrecord(str1,aname,idk_msestring,length(str2),po1);
  stringtoifiname(str2,pifinamety(po1));
  tcustommodulelink(fowner).senddata(str1);

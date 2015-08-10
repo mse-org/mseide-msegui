@@ -1287,7 +1287,7 @@ var
  str1,str2: string;
  po1: pointer;
 begin
- str2:= stringtoutf8(amessage);
+ str2:= stringtoutf8ansi(amessage);
  inititemheader(str1,ik_postresult,asequence,
                                      length(str2),pchar(po1)); 
  with ppostresultdataty(po1)^ do begin

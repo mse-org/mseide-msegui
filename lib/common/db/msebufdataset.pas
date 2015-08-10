@@ -5149,7 +5149,7 @@ begin
   else begin
   {
    if bs_utf8 in fbstate then begin
-    dest.asstring:= stringtoutf8(mstr1);
+    dest.asstring:= stringtoutf8ansi(mstr1);
    end
    else begin
     dest.asstring:= mstr1;
@@ -5170,7 +5170,7 @@ procedure tmsebufdataset.stringtoparam(const source: msestring;
                const dest: tparam);
 begin
  if bs_utf8 in fbstate then begin
-  dest.asstring:= stringtoutf8(source);
+  dest.asstring:= stringtoutf8ansi(source);
  end
  else begin
   dest.asstring:= ansistring(source);
