@@ -845,7 +845,7 @@ begin
   writer1.writemsestring('signature',nodecopysig);
   node.item.dostatwrite(writer1);
   stream1.position:= 0;
-  copytoclipboard(utf8tostring(stream1.readdatastring));
+  copytoclipboard(utf8tostringansi(stream1.readdatastring));
  finally
   writer1.free;
   stream1.free;

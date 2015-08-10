@@ -711,7 +711,7 @@ var
 begin
  str1:= getasstring;
  if futf8 then begin
-  result:= utf8tostring(str1);
+  result:= utf8tostringansi(str1);
  end
  else begin
   result:= msestring(str1);

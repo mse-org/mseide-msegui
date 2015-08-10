@@ -769,7 +769,7 @@ begin
    result:= pascalstringtostring(value);
   end;
   ce_utf8n: begin
-   result:= utf8tostring(value);
+   result:= utf8tostringansi(value);
   end;
   ce_iso8859_1: begin
    result:= latin1tostring(value);
@@ -2885,7 +2885,7 @@ end;
 function tcustomcryptohandler.decrypttext(const adata: string;
                                const base64: boolean = false): msestring;
 begin
- result:= utf8tostring(decrypt(adata,base64));
+ result:= utf8tostringansi(decrypt(adata,base64));
 end;
 
 procedure tcustomcryptohandler.setchain(const avalue: tcustomcryptohandler);

@@ -527,7 +527,7 @@ begin
     fonreceivetext(self,str1,sender = fprocess.erroroutput.pipereader);
    end;
    if teo_utf8 in foptions then begin
-    addchars(utf8tostring(str1));
+    addchars(utf8tostringansi(str1));
    end
    else begin
     addchars(msestring(str1));

@@ -2166,7 +2166,7 @@ begin
    end
    else begin
     if utf8 then begin
-     result:= utf8tostring(field.asstring);
+     result:= utf8tostringansi(field.asstring);
     end
     else begin
      result:= msestring(field.asstring);
@@ -2642,7 +2642,7 @@ begin
     end;
     ftmemo: begin
      if (aparam.collection is tmseparams) and tmseparams(collection).isutf8 then begin
-      result:= encodesqlstring(utf8tostring(asstring));
+      result:= encodesqlstring(utf8tostringansi(asstring));
      end
      else begin
       result:= encodesqlstring(msestring(asstring));
@@ -2824,7 +2824,7 @@ function fieldgetmsestring(const sender: tfield;
                       const aintf: idsfieldcontroller): msestring;
 begin
  if (aintf <> nil) and (dso_utf8 in aintf.getcontroller.options) then begin
-  result:= utf8tostring(sender.asstring);
+  result:= utf8tostringansi(sender.asstring);
  end
  else begin
   {$ifdef unix}
@@ -2956,7 +2956,7 @@ var
   end
   else begin
    if autf8 then begin
-    mstr2:= utf8tostring(field.asstring);
+    mstr2:= utf8tostringansi(field.asstring);
    end
    else begin
     mstr2:= field.asstring;
@@ -6632,7 +6632,7 @@ begin
  else begin
   try
    if utf8 then begin
-    result:= utf8tostring(field.asstring);
+    result:= utf8tostringansi(field.asstring);
    end
    else begin
     result:= msestring(field.asstring);
@@ -6676,7 +6676,7 @@ function tfielddatalink.msedisplaytext(const aformat: msestring = '';
  function defaulttext: msestring;
  begin
   if utf8 and (ffield.datatype in textfields) then begin
-   result:= utf8tostring(ffield.displaytext);
+   result:= utf8tostringansi(ffield.displaytext);
   end
   else begin
    if aedit then begin
@@ -8295,7 +8295,7 @@ begin
   end
   else begin
    if isutf8 then begin
-    result:= utf8tostring(field1.asstring);
+    result:= utf8tostringansi(field1.asstring);
    end
    else begin
     result:= msestring(field1.asstring);

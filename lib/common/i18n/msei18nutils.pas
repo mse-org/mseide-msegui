@@ -323,7 +323,7 @@ begin
    inc(po1,length(info.name)+1);
    str1:= po1;
    inc(po1,length(str1)+1);
-   info.value:= utf8tostring(str1);
+   info.value:= utf8tostringansi(str1);
    add(info);
   until po1 - pchar(@data^.data) >= data^.size;
  end;

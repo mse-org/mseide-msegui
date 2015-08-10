@@ -7612,7 +7612,7 @@ begin
    end
    else begin
     if utf8 and (afield.datatype in textfields) then begin
-     fstringbuffer:= utf8tostring(afield.asstring);
+     fstringbuffer:= utf8tostringansi(afield.asstring);
     end
     else begin
      fstringbuffer:= msestring(afield.asstring);
@@ -7641,7 +7641,7 @@ begin
     end
     else begin
      if utf8 and (afield.datatype in textfields) then begin
-      fstringbuffer:= utf8tostring(afield.displaytext);
+      fstringbuffer:= utf8tostringansi(afield.displaytext);
      end
      else begin
       fstringbuffer:= msestring(afield.displaytext);

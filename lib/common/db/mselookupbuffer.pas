@@ -1650,7 +1650,7 @@ begin
            else begin
             try
              if utf8 then begin
-              ftextdata[int4].data[int1]:= utf8tostring(textf[int4].asstring);
+              ftextdata[int4].data[int1]:= utf8tostringansi(textf[int4].asstring);
              end
              else begin
               ftextdata[int4].data[int1]:= msestring(textf[int4].asstring);
@@ -1780,7 +1780,7 @@ begin
    end;
    for int1:= 0 to high(textf) do begin
     if utf8 then begin
-     ftextdata[int1].data:= breaklines(utf8tostring(textf[int1].asstring));
+     ftextdata[int1].data:= breaklines(utf8tostringansi(textf[int1].asstring));
     end
     else begin
      ftextdata[int1].data:= breaklines(msestring(textf[int1].asstring));

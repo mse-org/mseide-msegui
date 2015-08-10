@@ -968,7 +968,7 @@ begin
  clear;
  if bo1 then begin
   for int1:= 0 to high(ar1) do begin
-   add(utf8tostring(ar1[int1]));
+   add(utf8tostringansi(ar1[int1]));
   end;
  end
  else begin

@@ -938,7 +938,7 @@ begin
   datakinderror;
  end;
  ifinametostring(pifinamety(@source^.data),str1);
- dest:= utf8tostring(str1);
+ dest:= utf8tostringansi(str1);
  result:= datarecsizes[idk_msestring] + length(str1);
 end;
 
@@ -1027,7 +1027,7 @@ begin
  po1:= @source^.data;
  dest.int:= po1^.int;
  ifinametostring(pifinamety(@po1^.mstr),str1);
- dest.mstr:= utf8tostring(str1);
+ dest.mstr:= utf8tostringansi(str1);
  result:= datarecsizes[idk_msestringint] + length(str1);
 end;
 

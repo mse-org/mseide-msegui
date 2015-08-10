@@ -1141,7 +1141,7 @@ var
        setlength(str1,asize);
        move(currbuff^,str1[1],asize);
        if aisutf8 then begin
-        pwidestring(buffer)^:= utf8tostring(str1);
+        pwidestring(buffer)^:= utf8tostringansi(str1);
        end
        else begin
         pwidestring(buffer)^:= msestring(str1);

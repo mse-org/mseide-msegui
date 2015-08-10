@@ -661,7 +661,7 @@ begin
  with adata^ do begin
   acode:= code;
   ifinametostring(@message,str1);
-  amessage:= utf8tostring(str1);
+  amessage:= utf8tostringansi(str1);
  end;
 end;
 

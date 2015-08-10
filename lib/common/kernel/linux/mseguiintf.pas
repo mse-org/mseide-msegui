@@ -1407,7 +1407,7 @@ begin
    end
    else begin
     if acttype = utf8_stringatom then begin
-      value:= utf8tostring(value1);
+      value:= utf8tostringansi(value1);
     end
     else begin
      if (acttype = textatom) or (acttype = textplainatom) then begin
@@ -1423,7 +1423,7 @@ begin
        end;
        xutf8textpropertytotextlist(appdisp,@prop1,@po2,@int1);
        if int1 >= 1 then begin
-        value:= utf8tostring(string(po2^));
+        value:= utf8tostringansi(string(po2^));
        end;
        xfreestringlist(po2);
       end
@@ -5634,7 +5634,7 @@ eventrestart:
     if icstatus = xbufferoverflow then begin
      xutf8lookupstring(aic,@xev.xkey,@buffer[1],length(buffer),@akey,@icstatus);
     end;
-    chars:= utf8tostring(buffer);
+    chars:= utf8tostringansi(buffer);
    {$ifdef mse_debugkey}
     debugwriteln('*X11keypress window '+hextostr(window,8)+'"'+chars+'" '+
                                                               inttostr(akey));

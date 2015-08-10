@@ -2885,7 +2885,7 @@ begin
        else begin
         try
          if bs_utf8 in fbstate then begin
-          po2^:= utf8tostring(str1);
+          po2^:= utf8tostringansi(str1);
          end
          else begin
           po2^:= msestring(str1);

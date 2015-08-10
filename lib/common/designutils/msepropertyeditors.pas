@@ -5206,7 +5206,7 @@ begin
     grid.rowcount:= strings.Count;
     for int1:= 0 to strings.Count - 1 do begin
      if utf8 then begin
-      textedit[int1]:= utf8tostring(strings[int1]);
+      textedit[int1]:= utf8tostringansi(strings[int1]);
      end
      else begin
       textedit[int1]:= msestring(strings[int1]);

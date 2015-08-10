@@ -851,7 +851,7 @@ procedure tsqlite3connection.checkerror(const aerror: integer);
 begin
  if aerror <> sqlite_ok then begin
   flasterror:= aerror;
-  flasterrormessage:= utf8tostring(sqlite3_errmsg(fhandle));
+  flasterrormessage:= utf8tostringansi(sqlite3_errmsg(fhandle));
   raise esqlite3error.create(self,ansistring(flasterrormessage),
                                            flasterrormessage,flasterror);
  end;

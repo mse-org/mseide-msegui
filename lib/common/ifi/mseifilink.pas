@@ -1295,7 +1295,7 @@ begin
    end;
    idk_msestring: begin
     ifinametostring(pifinamety(@data),str1);
-    fmsestringvalue:= utf8tostring(str1);
+    fmsestringvalue:= utf8tostringansi(str1);
    end;
   end;
  end;
