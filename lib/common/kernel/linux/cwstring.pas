@@ -147,8 +147,22 @@ begin
 end;
 
 {$ifdef fpcv3}
-procedure Wide2AnsiMove(source:pwidechar;var dest:RawByteString;cp : TSystemCodePage;len:SizeInt);
-                            //todo: codepages
+Type
+  PAnsiRec = ^TAnsiRec;
+  TAnsiRec = Record
+    CodePage    : TSystemCodePage;
+    ElementSize : Word;
+{$ifdef CPU64}	
+    { align fields  }
+	Dummy       : DWord;
+{$endif CPU64}
+    Ref         : SizeInt;
+    Len         : SizeInt;
+  end;
+  
+procedure Wide2AnsiMove(source:pwidechar;var dest:RawByteString;
+                                          cp : TSystemCodePage; len:SizeInt);
+                            //todo: convert codepages
 {$else}
 procedure Wide2AnsiMove(source:pwidechar; var dest:ansistring; len:SizeInt);
 {$endif}
@@ -208,6 +222,9 @@ procedure Wide2AnsiMove(source:pwidechar; var dest:ansistring; len:SizeInt);
     unlockiconv(lock_wide2ansi);
     // truncate string
     setlength(dest,length(dest)-outleft);
+   {$ifdef fpcv3}
+    pansirec(pointer(dest)-sizeof(tansirec))^.codepage:= cp;
+   {$endif}
   end;
 
 {$ifdef fpcv3}
