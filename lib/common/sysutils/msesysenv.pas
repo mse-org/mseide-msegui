@@ -99,6 +99,7 @@ type
   values: msestringarty;
   name: msestring;
  end;
+ penvvarty = ^envvarty;
  envvararty = array of envvarty;
 
  tsysenvmanager = class;
@@ -1192,6 +1193,7 @@ function tsysenvmanager.getcommandlinemacros(
 var
  ar1,ar2: msestringarty;
  int1,int2,int3,int4: integer;
+ po1: penvvarty;
 begin
  result:= prepend;
  checkindex(macrodef);
@@ -1203,8 +1205,11 @@ begin
    if defined[int1] then begin
     setlength(result,high(result) + 2);
     with result[high(result)] do begin
-     name:= fenvvars[int1].name;
-     value:= value[int1];
+     po1:= @fenvvars[int1];
+     name:= po1^.name;
+     if po1^.values <> nil then begin
+      value:= po1^.values[high(po1^.values)];
+     end;
     end;
    end;
   end;

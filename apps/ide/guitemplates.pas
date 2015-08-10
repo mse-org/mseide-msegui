@@ -104,8 +104,6 @@ end;
 *)
 
 procedure tguitemplatesmo.loadedexe(const sender: TObject);
-var
- mstr1: msestring;
 begin
 // sysenv.init(sysenvvalues);
  skin.active:= not sysenv.defined[ord(env_ns)];
