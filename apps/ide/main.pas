@@ -1810,7 +1810,7 @@ var
 begin
  int1:= length(aname) - length(suffix);
  if (int1 >= 0) and 
-            (strcomp(pmsechar(aname)+int1,pmsechar(suffix)) = 0) then begin
+            (msestringcomp(copy(aname,int1+1,bigint),suffix) = 0) then begin
   result:= copy(aname,1,int1) + copy(suffix,1,2);
  end
  else begin
