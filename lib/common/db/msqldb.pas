@@ -972,7 +972,9 @@ begin
   end;
  end
  else begin
-  add(msestring(ar1[int1]));
+  for int1:= 0 to high(ar1) do begin
+   add(msestring(ar1[int1]));
+  end;
  end;
 end;
 {

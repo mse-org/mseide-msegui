@@ -555,13 +555,19 @@ function parsecommandline(const s: string): stringarty; overload;
 function parsecommandline(const s: msestring): msestringarty; overload;
 
            //no surrogate pair handling!
-function stringtoutf8(const value: msestring): utf8string; overload;
+function stringtoutf8(const value: msestring): utf8string;
+function stringtoutf8ansi(const value: msestring): ansistring;
 function stringtoutf8(const value: pmsechar;
-                            const count: integer): utf8string; overload;
-function utf8tostring(const value: pchar): msestring; overload;
-function utf8tostring(const value: lstringty): msestring; overload;
-function utf8tostring(const value: utf8string): msestring; overload;
-function checkutf8(const value: ansistring): boolean;
+                            const count: integer): utf8string;
+function stringtoutf8ansi(const value: pmsechar;
+                            const count: integer): ansistring;
+function utf8tostring(const value: pchar): msestring;
+function utf8tostring(const value: lstringty): msestring;
+function utf8tostring(const value: utf8string): msestring;
+function utf8tostringansi(const value: ansistring): msestring;
+function checkutf8(const value: utf8string): boolean;
+              //true if valid utf8
+function checkutf8ansi(const value: ansistring): boolean;
               //true if valid utf8
 function stringtolatin1(const value: msestring): string;
 function latin1tostring(const value: string): msestring;
@@ -802,16 +808,18 @@ begin
  end;
 end;
 
-//no surrogate pair handling!
+//todo: surrogate pair handling!
 
-function stringtoutf8(const value: pmsechar; const count: integer): utf8string; overload;
+procedure dostringtoutf8(const value: pmsechar;
+                                     var count: integer; const dest: pointer);
 var
  int1: integer;
  po1: pchar;
  wo1,wo2: word;
 begin
- setlength(result,length(value)*3); //max
- po1:= pchar(pointer(result));
+// setlength(result,length(value)*3); //max
+// po1:= pchar(pointer(result));
+ po1:= dest;
  for int1:= 0 to count-1 do begin
   wo1:= word(value[int1]);
   wo2:= wo1 and $ff80;
@@ -837,12 +845,50 @@ begin
    end;
   end;
  end;
- setlength(result,po1-pchar(pointer(result)));
+ count:= po1-pchar(dest);
+// setlength(result,po1-pchar(pointer(result)));
+end;
+
+function stringtoutf8(const value: pmsechar;
+                            const count: integer): utf8string;
+var
+ i1: int32;
+begin
+ i1:= count;
+ setlength(result,i1*3); //max
+ dostringtoutf8(value,i1,pointer(result));
+ setlength(result,i1);
+end;
+
+function stringtoutf8ansi(const value: pmsechar;
+                            const count: integer): ansistring;
+var
+ i1: int32;
+begin
+ i1:= count;
+ setlength(result,i1*3); //max
+ dostringtoutf8(value,i1,pointer(result));
+ setlength(result,i1);
 end;
 
 function stringtoutf8(const value: msestring): utf8string;
+var
+ i1: int32;
 begin
- result:= stringtoutf8(pmsechar(value),length(value));
+ i1:= length(value);
+ setlength(result,i1*3); //max
+ dostringtoutf8(pointer(value),i1,pointer(result));
+ setlength(result,i1);
+end;
+
+function stringtoutf8ansi(const value: msestring): ansistring;
+var
+ i1: int32;
+begin
+ i1:= length(value);
+ setlength(result,i1*3); //max
+ dostringtoutf8(pointer(value),i1,pointer(result));
+ setlength(result,i1);
 end;
 
 function doutf8tostring(const value: pchar; const alength: integer): msestring;
@@ -884,14 +930,14 @@ begin
  setlength(result,po1-pmsechar(pointer(result)));
 end;
 
-function checkutf8(const value: ansistring): boolean;
+function docheckutf8(const value: pointer; const count: int32): boolean;
               //true if valid utf8
 var
  po1: pbyte;
 begin
  result:= true;
- if value <> '' then begin
-  po1:= pointer(value);
+ if count > 0 then begin
+  po1:= value;
   while po1^ <> $00 do begin
    if po1^ >= $80 then begin
     case po1^ and $e0 of
@@ -922,20 +968,37 @@ begin
    end;
    inc(po1);
   end;
-  if pointer(po1) <> pchar(value) + length(value) then begin
+  if pointer(po1) <> value + count then begin
    result:= false;    //#0 in string
   end;
  end;
 end;
 
+function checkutf8(const value: utf8string): boolean;
+              //true if valid utf8
+begin
+ result:= docheckutf8(pointer(value),length(value));
+end;
+
+function checkutf8ansi(const value: ansistring): boolean;
+              //true if valid utf8
+begin
+ result:= docheckutf8(pointer(value),length(value));
+end;
+
 function utf8tostring(const value: utf8string): msestring;
 begin
- result:= doutf8tostring(pchar(value),length(value));
+ result:= doutf8tostring(pointer(value),length(value));
+end;
+
+function utf8tostringansi(const value: ansistring): msestring;
+begin
+ result:= doutf8tostring(pointer(value),length(value));
 end;
 
 function utf8tostring(const value: pchar): msestring;
 begin
- result:= doutf8tostring(pchar(value),length(value));
+ result:= doutf8tostring(value,strlen(value));
 end;
 
 function utf8tostring(const value: lstringty): msestring;
