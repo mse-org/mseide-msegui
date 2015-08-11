@@ -3976,7 +3976,7 @@ begin
   for int1:= 0 to high(ar1)- 2 do begin
    if (ar1[int1] = 'frame') and (ar1[int1+1] = 'at') then begin
     setlength(ar1[int1+2],length(ar1[int1+2])-1); //remove ':'
-    if not trystrtoqword(ar1[int1+2],address) then begin
+    if not trystrtointvalue64(ar1[int1+2],address) then begin
      exit;
     end;
     break;
