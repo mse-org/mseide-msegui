@@ -452,14 +452,13 @@ var
  end;
 
 var
- startupinfo: tstartupinfo;
+ startupinfo: tstartupinfow;
  creationflags: dword;
  processinfo: tprocessinformation;
  bo1: boolean;
  mstr1: msestring;
- wd1,cmd1,env1: string;
+ wd1,cmd1,env1: msestring;
  i1,i2,i3,i4: int32;
- envar1: stringarty;
 begin
  creationflags:= 0;
  result:= invalidprochandle;
@@ -536,45 +535,49 @@ begin
   startupinfo.wShowWindow:= sw_hide;
   startupinfo.dwflags:= startupinfo.dwFlags or startf_useshowwindow;
  end;
- wd1:= ansistring(tosysfilepath(workingdirectory));
+ wd1:= tosysfilepath(workingdirectory);
  mstr1:= commandline;
  for i1:= 0 to high(params) do begin
   mstr1:= mstr1 + ' '+quotestring(params[i1],'"',false);
  end;
-               //todo: use createprocessW
- cmd1:= ansistring(mstr1);
+
+ cmd1:= mstr1;
  env1:= '';
  if envvars <> nil then begin
   i2:= 0;
-  i3:= 0;
-  setlength(envar1,length(envvars));
   for i1:= 0 to high(envvars) do begin
-   envar1[i3]:= ansistring(envvars[i1]); //ansi
    i4:= length(envvars[i1]);
    if i4 > 0 then begin
     i2:= i2+i4;
    end;
-   inc(i3);
   end;
-  setlength(env1,i2+i3);
+  setlength(env1,i2+length(envvars));
   i3:= 0;
   for i1:= 0 to high(envvars) do begin
    i4:= length(envvars[i1]);
    if i4 > 0 then begin
-    move(pointer(ansistring(envar1[i1]))^,(pointer(env1)+i3)^,i4+1);
+    move(pointer(envvars[i1])^,(pmsechar(pointer(env1))+i3)^,
+                                           (i4+1)*sizeof(msechar));
     i3:= i3 + i4 + 1;
    end;
   end;
- end;
+ end; //string has terminating #0
+
  if exo_shell in options then begin
-  bo1:= createprocess(nil,pchar('cmd.exe '+'/q /c'+cmd1),
-                 nil,nil,true,creationflags,pointer(env1),pointer(wd1),
-                                                     startupinfo,processinfo);
+  cmd1:= 'cmd.exe /q /c'+cmd1;
+ end;
+ if iswin95 then begin 
+  bo1:= createprocessa(nil,pchar(ansistring(cmd1)),nil,nil,true,creationflags,
+               pointer(ansistring(env1)),
+               pointer(ansistring(wd1)),startupinfoa(startupinfo),processinfo);
  end
  else begin
-  bo1:= createprocess(nil,pchar(cmd1),nil,nil,true,creationflags,pointer(env1),
-                           pointer(wd1),startupinfo,processinfo);
+  bo1:= createprocessw(nil,pmsechar(cmd1),nil,nil,true,
+                                   creationflags or create_unicode_environment,
+               pointer(env1),
+               pointer(wd1),startupinfo,processinfo);
  end;
+ 
  if bo1 then begin
   if topipehandles.readdes <> invalidfilehandle then begin
    closehandle(topipehandles.readdes);
