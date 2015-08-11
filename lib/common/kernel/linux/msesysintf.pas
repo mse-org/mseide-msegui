@@ -450,7 +450,7 @@ begin
  end;
 end;
 
-property sys_getenvvars(out names: msestringarty; out values: msestringarty);
+procedure sys_getenvvars(out names: msestringarty; out values: msestringarty);
 begin
 end;
 
