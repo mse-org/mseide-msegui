@@ -298,7 +298,12 @@ var
  item1: tpropertyitem;
 begin
  if aitem.feditor <> nil then begin
-  aitem.expanded:= true; //else root item
+  try
+   aitem.expanded:= true; //else root item
+  except
+   aitem.expanded:= false; //probably multiselection with less items
+   exit;
+  end;
  end;
  for int1:= 0 to fcount - 1 do begin
   with tproppathinfo(fitems[int1]) do begin
