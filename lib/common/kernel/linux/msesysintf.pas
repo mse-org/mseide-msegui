@@ -450,6 +450,10 @@ begin
  end;
 end;
 
+property sys_getenvvars(out names: msestringarty; out values: msestringarty);
+begin
+end;
+
 function sys_getenv(const aname: msestring; out avalue: msestring): boolean;
                           //true if found
 var

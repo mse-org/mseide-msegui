@@ -23,6 +23,7 @@ function sys_getcurrentthread: threadty;
 function sys_issamethread(const a,b: threadty): boolean;
 function sys_getapplicationpath: filenamety;
 function sys_getcommandlinearguments: msestringarty;
+procedure sys_getenvvars(out names: msestringarty; out values: msestringarty);
 function sys_getenv(const aname: msestring; out avalue: msestring): boolean;
                           //true if found
 function sys_setenv(const aname: msestring; 

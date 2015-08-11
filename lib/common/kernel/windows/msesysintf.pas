@@ -307,6 +307,54 @@ begin
  {$ifdef FPC}{$checkpointer default}{$endif}
 end;
 
+procedure sys_getenvvars(out names: msestringarty; out values: msestringarty);
+var
+ po0,po1,po2,po3: pmsechar;
+ po0a,po1a,po2a,po3a: pchar;
+ str1: ansistring;
+begin
+ if iswin95 then begin
+  po0a:= getenvironmentstringsa();
+  po1a:= po0a;
+  while po1a^ <> #0 do begin
+   po2a:= po1a;
+   while po2a^ <> #0 do begin
+    inc(po2a);
+   end;
+   po3a:= po1a;
+   while (po3a^ <> '=') and (po3a < po2a) do begin
+    inc(po3a);
+   end;
+   str1:= psubstr(po1a,po3a);
+   oemtoansibuff(pointer(str1),pointer(str1),length(str1));
+   additem(names,msestring(str1));
+   str1:= psubstr(po3a+1,po2a);
+   oemtoansibuff(pointer(str1),pointer(str1),length(str1));
+   additem(values,msestring(str1));
+   po1a:= po2a+1;
+  end;
+  freeenvironmentstringsa(po0a);
+ end
+ else begin
+  po0:= getenvironmentstringsw();
+  po1:= po0;
+  while po1^ <> #0 do begin
+   po2:= po1;
+   while po2^ <> #0 do begin
+    inc(po2);
+   end;
+   po3:= po1;
+   while (po3^ <> '=') and (po3 < po2) do begin
+    inc(po3);
+   end;
+   additem(names,psubstr(po1,po3));
+   additem(values,psubstr(po3+1,po2));
+   po1:= po2+1;
+  end;
+  freeenvironmentstringsw(po0);
+ end;
+end;
+
 function sys_getenv(const aname: msestring; out avalue: msestring): boolean;
                           //true if found
 var
