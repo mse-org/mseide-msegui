@@ -545,7 +545,7 @@ begin
  cmd1:= ansistring(mstr1);
  env1:= '';
  if envvars <> nil then begin
-  i2:= 1; //for terminating 0
+  i2:= 0;
   i3:= 0;
   setlength(envar1,length(envvars));
   for i1:= 0 to high(envvars) do begin
