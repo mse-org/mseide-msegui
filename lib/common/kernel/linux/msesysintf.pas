@@ -49,7 +49,7 @@ procedure setcloexec(const fd: integer);
 
 implementation
 uses
- msesysintf1,sysutils,msesysutils,msefileutils
+ msesysintf1,sysutils,msesysutils,msefileutils,msearrayutils
  {$ifdef FPC},dateutils{$else},DateUtils,classes_del{$endif},msedate
  {$ifdef mse_debugmutex},mseapplication{$endif}
  {$ifdef freebsd},msedynload{$endif};
@@ -451,7 +451,33 @@ begin
 end;
 
 procedure sys_getenvvars(out names: msestringarty; out values: msestringarty);
+var
+ str1: string;
+ po1: ppchar;
+ po2,po3,po4: pchar;
 begin
+ po1:= environ;
+ if po1 <> nil then begin
+  while true do begin
+   po2:= po1^;
+   if po2 = nil then begin
+    break;
+   end;
+   po3:= po2;
+   while po3^ <> #0 do begin
+    inc(po3);
+   end;
+   po4:= po2;
+   while (po4^ <> '=') and (po4 < po3) do begin
+    inc(po4);
+   end;
+   str1:= psubstr(po2,po4);
+   additem(names,msestring(str1));
+   str1:= psubstr(po4+1,po3);
+   additem(values,msestring(str1));
+   inc(po1);
+  end;
+ end;
 end;
 
 function sys_getenv(const aname: msestring; out avalue: msestring): boolean;

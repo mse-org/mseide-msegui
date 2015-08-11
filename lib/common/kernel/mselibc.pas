@@ -2017,7 +2017,7 @@ function fstat64(__fd:longint; __buf:Pstat64):longint;
 
 function lstat(__file:Pchar; __buf:Pstat):longint;
 function lstat64(__file:Pchar; __buf:Pstat64):longint;
-{$else}
+{$else} //linux
 function stat(__file:Pchar; __buf:Pstat):longint; cdecl;
                                    external clib name 'stat';
 function fstat(__fd:longint; __buf:Pstat):longint; cdecl;
@@ -2030,7 +2030,7 @@ function lstat(__file:Pchar; __buf:Pstat):longint; cdecl;
                                    external clib name 'lstat';
 function lstat64(__file:Pchar; __buf:Pstat64):longint; cdecl;
                                    external clib name 'lstat';
-{$endif}
+{$endif} //not linux
 
 function S_ISDIR(mode : __mode_t) : boolean;
 
@@ -2048,6 +2048,9 @@ function __chdir(__path:Pchar):longint;cdecl;external clib name 'chdir';
 function opendir(__name:Pchar):PDIR;cdecl;external clib name 'opendir';
 function closedir(__dirp:PDIR):longint;cdecl;external clib name 'closedir';
 
+var
+ environ : ppchar; cvar; external;
+ 
 type
   TUnixTime = tm;
   PUnixTime = ^TUnixTime;
