@@ -4240,13 +4240,13 @@ begin
  if int1 > 0 then begin
   setlength(avalue,int1-1);
  end;
- result:= trystrtoqword(avalue,pointervalue);
+ result:= trystrtointvalue64(avalue,pointervalue);
 end;
 
 function tgdbmi.matchpascalformat(const typeinfo: string;
                    value: string; const expression: string): msestring;
 const
- typetoken = 'type = ';
+ typetoken = 'TYPE = ';
  dynartoken = 'ARRAY [0..-1] OF ';
  dynartoken2 = 'ARRAY [0..0] OF ';
  dynartoken3 = '^(ARRAY [0..-1] OF ';
@@ -4262,13 +4262,13 @@ var
 begin
  ar1:= nil; //compiler warning
  result:= msestring(value);
- ar1:= breaklines(typeinfo);
+ ar1:= breaklines(uppercase(typeinfo));
  str1:= '';
  if length(ar1) > 0 then begin
   if startsstr(typetoken,ar1[0]) then begin
    str1:= copy(ar1[0],length(typetoken)+1,length(ar1[0])-length(typetoken));
   end;
-  str1:= struppercase(str1);
+//  str1:= struppercase(str1);
   if startsstr(dynartoken2,str1) then begin
    if evaluateexpression('@('+expression+')',str3) = gdb_ok then begin
     if trystrtointvalue64(str3,ad1) then begin
