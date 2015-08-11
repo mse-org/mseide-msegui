@@ -2568,7 +2568,13 @@ begin
  checkpointersize;
  if fguiintf then begin
   getprocaddress('MSEGUIINTF_GUI_DEBUGBEGIN',ftargetdebugbegin);
+  if ftargetdebugbegin = 0 then begin
+   getprocaddress('MSEGUIINTF_$$_GUI_DEBUGBEGIN',ftargetdebugbegin);
+  end;
   getprocaddress('MSEGUIINTF_GUI_DEBUGEND',ftargetdebugend);
+  if ftargetdebugend = 0 then begin
+   getprocaddress('MSEGUIINTF_$$_GUI_DEBUGEND',ftargetdebugend);
+  end;
  end
  else begin
   ftargetdebugbegin:= 0;
@@ -3306,7 +3312,7 @@ begin
     if str1[length(str1)] = '.' then begin
      setlength(str1,length(str1)-1);
     end;
-    if trystrtoqword(str1,aaddress) then begin
+    if trystrtointvalue64(str1,aaddress) then begin
      result:= gdb_ok;
     end;
     break;
