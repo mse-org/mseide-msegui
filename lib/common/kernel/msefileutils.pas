@@ -1433,6 +1433,9 @@ var
  int1,int2,int3: integer;
 begin
  result:= '';
+ int1:= 0;
+ int2:= 0;
+ int3:= 0;
  if length(acommandline) > 0 then begin
   int1:= 1; //start exe
   if acommandline[1] = quotechar then begin

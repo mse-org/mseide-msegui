@@ -92,6 +92,7 @@ function checkpassword(const password: msestring): boolean;
 var
  res: modalresultty;
 begin
+ res:= mr_none;
  repeat
   result:= checkpassword(password,res);
  until result or (res <> mr_ok);

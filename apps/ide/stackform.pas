@@ -58,6 +58,7 @@ uses
 
 function tstackfo.showsource(const aframenr: integer): boolean;
 begin
+ result:= false;
  if (aframenr >= 0) and (aframenr <= high(frameinfo)) then begin
   grid.row:= aframenr;
   with frameinfo[aframenr] do begin
@@ -65,9 +66,6 @@ begin
     result:= sourcefo.showsourceline(sourcepath(filename),line-1,0,true) <> nil;
    end;
   end;
- end
- else begin
-  result:= false;
  end;
 end;
 

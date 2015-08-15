@@ -1371,6 +1371,7 @@ var
  end;
  
 begin
+ result:= nil;
  recursionlevel:= 32; //max
  adddescendent(aancestor);
 end;
@@ -2851,7 +2852,7 @@ begin
  with registeredcomponents do begin
   if (acomponent.ComponentState * [csancestor] = []) or
          (acomponent.Owner = nil) or (acomponent.Owner = module) then begin //probaly inline
-
+   classna:= '';
    str1:= acomponent.Name;
    acomponent.name:= '';
    if csinline in acomponent.componentstate then begin

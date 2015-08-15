@@ -1832,6 +1832,8 @@ var
  cached: boolean;
 begin
  result:= true;
+ rowbytes:= 0;
+ ar1:= nil;
  cached:= getimagecache(ick_3,acanvas,sourcerect,varname{,rowbytes});
  if not cached then begin
   gdi_lock;

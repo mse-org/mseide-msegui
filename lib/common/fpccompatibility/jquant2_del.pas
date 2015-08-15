@@ -926,6 +926,7 @@ begin
   ncolors := 0;
   for i := 0 to pred(numcolors) do
   begin
+{$warnings off}
     if (mindist[i] <= minmaxdist) then
     begin
       colorlist[ncolors] := JSAMPLE(i);
@@ -934,7 +935,7 @@ begin
   end;
   find_nearby_colors := ncolors;
 end;
-
+{$warnings on}
 
 {LOCAL}
 procedure find_best_colors (cinfo : j_decompress_ptr;

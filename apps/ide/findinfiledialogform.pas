@@ -111,6 +111,7 @@ end;
 }
 procedure tfindinfiledialogfo.valuestoinfo(out info: findinfileinfoty);
 begin
+{$warnings off}
  with info.findinfo do begin
   text:= findtext.value;
   history:= findtext.dropdown.valuelist.asarray;
@@ -128,7 +129,7 @@ begin
   end;
  end;
 end;
-
+{$warnings on}
 procedure tfindinfiledialogfo.infotovalues(const info: findinfileinfoty);
 begin
  with info.findinfo do begin

@@ -353,6 +353,7 @@ function addmessagetext(const sender: tpipereader;
 var
  str1: string;
 begin
+ result:= '';
  str1:= sender.readdatastring;
  while application.checkoverload(-1) do begin
   if (procid <> nil) and (procid^ = invalidprochandle) then begin

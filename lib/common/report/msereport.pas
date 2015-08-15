@@ -2701,6 +2701,7 @@ begin
  bandcx:= adest.cx;
  saved:= false;
  moved:= false;
+ visiblemask:= [];
  if apaint then begin  
   with fband do begin
    cellrect:= adest;

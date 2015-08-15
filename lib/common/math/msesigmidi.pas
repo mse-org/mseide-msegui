@@ -598,6 +598,7 @@ begin
   updatepatch;
  end;
  if ftrackevent.event.kind in [mmk_noteon,mmk_noteoff,mmk_notepressure] then begin
+  by1:= 0; //compiler warning
   int1:= fpatchpanel.geteventindex(ftrackevent.event);
   if int1 >= 0 then begin
    with fchannels[int1] do begin

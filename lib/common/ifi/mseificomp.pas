@@ -3932,6 +3932,7 @@ end;
 function tconnectedifidatasource.getfieldnames(
                    const adatatype: listdatatypety): msestringarty;
 begin
+ result:= nil;
  if fconnectionintf <> nil then begin
   result:= fconnectionintf.getfieldnames(adatatype);
  end;

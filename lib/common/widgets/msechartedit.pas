@@ -893,6 +893,7 @@ var
  int1,int2: integer;
   
 begin
+ aindex:= 0;
  dist:= maxint;
  if hasactivetrace and not all then begin
   atrace:= factivetrace;
@@ -1021,6 +1022,8 @@ var
  int1,int2,int3: integer;
  min,max: integer;
 begin
+ min:= 0;
+ max:= 0;
  atrace:= -1;
  setlength(aindex,length(aitems));
  for int1:= 0 to high(aindex) do begin
@@ -1117,6 +1120,9 @@ var
  isy: boolean;
  dial1,index1: integer;
 begin
+ objs:= nil;
+ ar1:= nil;
+ trace1:= 0;
  fpickref:= nullpoint;
  rect1:= getdialrect;
  mi.x:= maxint;

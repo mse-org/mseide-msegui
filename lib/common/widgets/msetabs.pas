@@ -2675,6 +2675,7 @@ var
 
 begin
  if not fdragcontroller.beforedragevent(info) then begin
+  int1:= 0;
   with info do begin
    case eventkind of
     dek_begin: begin
@@ -2740,6 +2741,7 @@ end;
 
 function tcustomtabbar.getbuttonhint(const aindex: integer): msestring;
 begin
+ result:= '';
  with flayoutinfo.tabs[aindex] do begin
   if hint <> '' then begin
    result:= hint;

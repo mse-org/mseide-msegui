@@ -1176,6 +1176,7 @@ var
  
 begin
  if not (trs_datapointsvalid in finfo.state) and visible then begin
+  dpcounty1:= 0;
   finfo.datapoints:= nil;
   include(finfo.state,trs_datapointsvalid);
   dpcountx:= 0;
@@ -4313,6 +4314,7 @@ var
  startx,endx,y: integer;
  rea1,rea2: real;
 begin
+ mcanvas:= nil;
  if (chs_hasdialshift in fstate) and (fshiftsum < 0) then begin
   exclude(fstate,chs_chartvalid);
  end;

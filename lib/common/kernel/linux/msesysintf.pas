@@ -1152,6 +1152,7 @@ var
  error: boolean;
 begin
  result:= false;
+ po1:= nil;
  with stream,dirinfo,dirstreamlinuxty(platformdata) do begin
   if not ((include <> []) and (fa_all in exclude)) then begin
    while true do begin

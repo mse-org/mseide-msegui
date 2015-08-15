@@ -1338,6 +1338,7 @@ var
  atom1: atom;
 
 begin
+ value1:= '';
  gdi_lock;
  acttype:= 0;
  actformat:= 0;
@@ -1938,6 +1939,7 @@ var
 //  id1: winidty;
   ar1: atomarty;
  begin
+  children:= nil;
   result:= false;
   if (gui_windowvisible(aparent) or (getwmstate(aparent) = wms_iconic)) and
    readcardinalproperty(aparent,netatoms[net_wm_pid],1,int1) and checkpid(int1) then begin
@@ -2419,6 +2421,7 @@ var
 label
  endlab;
 begin
+ int2:= 0;
  gdi_lock;
  bo1:= false;
  if netsupported then begin
@@ -3682,10 +3685,11 @@ begin
    end;
   end;
  end;
+{$warnings off}
  aoffset:= offset;
  result:= true;
 end;
-
+{$warnings on}
 function settransientforhint(id,transientfor: winidty): guierrorty;
 begin
 {$ifdef mse_debuggdisync}
@@ -5890,6 +5894,7 @@ begin
   xblueshift:= 0 + blues;
   xbluemask:= bluem;
   for int1:= 0 to 255 do begin
+{$warnings off}
    with map1[int1] do begin
     pixel:= int1;
     red:= ($ffff*(int1 and redm)) div redm ;
@@ -5912,6 +5917,7 @@ begin
   xstorecolors(appdisp,msecolormap,@map1,256);
  end;
 end;
+{$warnings on}
 {
 function createappic: boolean; forward;
 function icdestroyed(ic: txic; client_data: txpointer; 

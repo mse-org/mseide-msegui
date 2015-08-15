@@ -3310,6 +3310,8 @@ var
  
 begin
  int1:= 0;
+ stepsize:= 0;
+ pagesize:= 0;
  case event of
   sbe_stepup: begin
    init;

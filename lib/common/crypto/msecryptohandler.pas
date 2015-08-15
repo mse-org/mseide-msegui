@@ -383,6 +383,7 @@ function tpaddedcryptohandler.seek(var aclient: cryptoclientinfoty;
                const offset: int64; origin: tseekorigin): int64;
 begin
  if (offset <> 0) or (origin = soend) then begin
+  result:= 0; //compiler warning
   error(cerr_notseekable);
  end
  else begin

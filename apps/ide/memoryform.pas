@@ -126,6 +126,7 @@ var
  int1: integer;
  mstr1: msestring;
 begin
+ mstr1:= '';
  case bitwidthty(bitwidth.value) of
   bw_8: begin
    mstr1:= 'WW';

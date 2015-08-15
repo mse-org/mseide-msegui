@@ -249,6 +249,8 @@ var
  
 begin            //balance
  n3:= anode;
+ n5:= nil; //compiler warning
+ po1:= nil;
  while true do begin
   n4:= n3.fup;
   if n4 = nil then begin

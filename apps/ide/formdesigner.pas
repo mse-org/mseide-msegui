@@ -623,6 +623,7 @@ var
  bo1,bo2: boolean;
 begin
  result:= false;
+ ar1:= nil;
  amodule:= fowner.fmodule;
  checkowned;
  inherited assign(source);

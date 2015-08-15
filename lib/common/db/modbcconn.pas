@@ -338,7 +338,8 @@ begin
   if ODBCSucces(LastReturnCode) then begin
     Exit; // no error; all is ok
   end;
-
+  
+  firstmessage:= '';
   // build TotalMessage for exception to throw
   TotalMessage:=Format('%s ODBC error details:',[ErrorMsg]);
   // retrieve status records
@@ -1023,6 +1024,7 @@ var
   cu1: currency;
   
 begin
+ str1:= '';
  ODBCCursor:= TODBCCursor(cursor);
 
  // load the field using SQLGetData

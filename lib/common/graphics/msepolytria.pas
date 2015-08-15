@@ -827,6 +827,7 @@ var
   end; //calctandiff
  
  begin
+  result:= 0;
   dx1:= b.x - a.x;
   dx2:= c.x - b.x;
   if dx1 >= 0 then begin

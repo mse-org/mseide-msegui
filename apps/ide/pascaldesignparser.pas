@@ -494,6 +494,7 @@ var
  bo1: boolean;
  int1: integer;
 begin
+ result:= false;
  bo1:= atoken = pid_class;
  if bo1 then begin
   if getident(int1) then begin
@@ -1133,6 +1134,8 @@ var
 
  begin
   if procnestinglevel < 32 then begin
+   classname.po:= nil;
+   classname.len:= 0;
    inc(procnestinglevel);
    lasttoken;
    pos1:= sourcepos;

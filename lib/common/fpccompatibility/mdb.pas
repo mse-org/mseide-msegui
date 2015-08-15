@@ -4260,6 +4260,7 @@ Procedure TDataset.DoInsertAppend(DoAppend : Boolean);
       TempBuf : pointer;
 
   begin
+  bookbeforeinsert:= '';
   // need to scroll up al buffers after current one,
   // but copy current bookmark to insert buffer.
   If FRecordcount > 0 then
@@ -6383,6 +6384,7 @@ begin
       begin
       if transliterate then
         begin
+{$warnings off}
         DataSet.Translate(Buf,TBuf,False);
         AValue:=TBuf;
         end
@@ -6408,6 +6410,7 @@ begin
       end
     end;
 end;
+{$warnings on}
 
 procedure TStringField.SetAsBoolean(AValue: Boolean);
 
@@ -6448,6 +6451,7 @@ begin
     end
   else if FTransliterate then
     begin
+{$warnings off}
     DataSet.Translate(@AValue[1],Buf,True);
     Buf[DataSize-1] := #0;
     SetData(@buf);
@@ -6466,6 +6470,7 @@ begin
     SetData(@Buf);
     end;
 end;
+{$warnings on}
 
 procedure TStringField.SetVarValue(const AValue: Variant);
 begin
@@ -10249,6 +10254,8 @@ begin
   if DoCreate then Clear;
   // Parse the SQL and build ParamBinding
   ParamCount:=0;
+  paramname:= '';
+  paramnamestart:= nil;
   NewQueryLength:=Length(SQL);
   SetLength(ParamPart,ParamAllocStepSize);
   SetLength(Parambinding,ParamAllocStepSize);

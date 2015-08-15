@@ -3739,18 +3739,21 @@ function createregion(const gdi: pgdifunctionaty): gdiregionty; overload;
 var
  info: drawinfoty;
 begin
+{$warnings off}
  with info.regionoperation do begin
   gdi_call(gdf_createemptyregion,info,gdi);
   result.region:= dest;
   result.gdi:= gdi;
  end;
 end;
+{$warnings on}
 
 function createregion(const arect: rectty;
                           const gdi: pgdifunctionaty): gdiregionty; overload;
 var
  info: drawinfoty;
 begin
+{$warnings off}
  with info.regionoperation do begin
   rect:= arect;
   gdi_call(gdf_createrectregion,info,gdi);
@@ -3758,12 +3761,14 @@ begin
   result.gdi:= gdi;
  end;
 end;
+{$warnings on}
 
 function createregion(const rects: rectarty;
                            const gdi: pgdifunctionaty): gdiregionty; overload;
 var
  info: drawinfoty;
 begin
+{$warnings off}
  with info.regionoperation do begin
   rectscount:= length(rects);
   if rectscount > 0 then begin
@@ -3777,11 +3782,13 @@ begin
   end;
  end;
 end;
+{$warnings on}
 
 procedure regmove(const region: gdiregionty; const dist: pointty);
 var
  info: drawinfoty;
 begin
+{$warnings off}
  with region,info.regionoperation do begin
   if region <> 0 then begin
    source:= region;
@@ -3790,11 +3797,13 @@ begin
   end;
  end;
 end;
+{$warnings on}
 
 function regcliprect(const region: gdiregionty): rectty;
 var
  info: drawinfoty;
 begin
+{$warnings off}
  with region,info.regionoperation do begin
   if region <> 0 then begin
    source:= region;
@@ -3806,28 +3815,33 @@ begin
   end;
  end;
 end;
+{$warnings on}
 
 procedure regintersectrect(const region: gdiregionty; const arect: rectty);
 var
  info: drawinfoty;
 begin
+{$warnings off}
  with region,info.regionoperation do begin
   dest:= region;
   rect:= arect;
   gdi_call(gdf_regintersectrect,info,gdi);
  end;
 end;
+{$warnings on}
 
 procedure regaddrect(const region: gdiregionty; const arect: rectty);
 var
  info: drawinfoty;
 begin
+{$warnings off}
  with region,info.regionoperation do begin
   dest:= region;
   rect:= arect;
   gdi_call(gdf_regaddrect,info,gdi);
  end;
 end;
+{$warnings on}
 
 { twidgetfont}
 
@@ -10259,6 +10273,9 @@ begin
   end;
   org_inner: begin
    result:= addpoint(parentclientpos,innerclientpos);
+  end;
+  else begin
+   result:= nullpoint;
   end;
  end;
 end;

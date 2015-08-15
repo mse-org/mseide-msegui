@@ -404,6 +404,7 @@ var                             //todo: optimize
 begin
  po1:= fcoeff.datapo;
  i:= finput.value;
+ o:= 0;
  startindex1:= fzindex; //ringbuffer
  for int3:= 0 to high(fsections.fitems) do begin
   endindex1:= startindex1 + fsections.fitems[int3] - 1;

@@ -1906,6 +1906,7 @@ begin
   with {$ifndef FPC}tguid_fpc({$endif}guid{$ifndef FPC}){$endif} do begin
    time_low:= (readbyte shl 24) or (readbyte shl 16) or (readbyte shl 8) or
                                                                      readbyte;
+{$warnings off}
    if checkhyphen then begin
     time_mid:= (readbyte shl 8) or readbyte;
     if checkhyphen then begin
@@ -1924,6 +1925,7 @@ begin
   end;
  end;
 end;
+{$warnings on}
 
 function dbstringtoguid(const value: string): tguid;
 begin
@@ -6375,6 +6377,7 @@ end;
 function tmsedatalink.moveby(distance: integer): integer;
  
 begin
+ result:= 0;
  if (distance <> 0) and active then begin
   if fdscontroller <> nil then begin
    result:= fdscontroller.moveby(distance);
@@ -6489,6 +6492,7 @@ var
  int1: integer;
  ds1: tdataset1;
 begin
+ int1:= 0;
 {$warnings off}
  ds1:= tdataset1(dataset);
 {$warnings on}
@@ -8544,6 +8548,7 @@ end;
 
 function tfieldfieldlink.getdataset(const aindex: integer): tdataset;
 begin
+ result:= nil;
  case aindex of
   0: begin
    result:= fsourcedatalink.dataset;
@@ -8636,6 +8641,8 @@ begin
 
   // Parse the SQL and build ParamBinding
  ParamCount:=0;
+ paramname:= '';
+ paramnamestart:= nil;
 // NewQueryLength:=Length(SQL);
  SetLength(ParamPart,ParamAllocStepSize);
  SetLength(Parambinding,ParamAllocStepSize);

@@ -997,6 +997,7 @@ end;
 
 function TDbfFile.GetLanguageStr: String;
 begin
+ result:= '';
   if FDbfVersion >= xBaseVII then
     Result := PAfterHdrVII(PChar(Header) + SizeOf(rDbfHdr))^.LanguageDriverName;
 end;
@@ -1733,6 +1734,7 @@ var
   end;
 
 begin
+ date:= 0;
   TempFieldDef := TDbfFieldDef(FFieldDefs.Items[Column]);
   FieldSize := TempFieldDef.Size;
   FieldPrec := TempFieldDef.Precision;
@@ -2380,6 +2382,7 @@ var
     errorMsg: string;
     I: Integer;
   begin
+   errormsg:= '';
     // rollback committed indexes
     for I := 0 to Count-1 do
     begin

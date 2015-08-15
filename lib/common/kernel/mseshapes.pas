@@ -947,6 +947,7 @@ var
  reg1: regionty;
  co1: colorty;
 begin
+ co1:= 0;
  with canvas,info do begin
   if (ca.imagelist <> nil) then begin
    reg1:= canvas.copyclipregion;
@@ -1143,11 +1144,13 @@ begin
    drawbuttonimage(canvas,info,rect1{,cp_center});
   end;
   if info.frame <> nil then begin
+{$warnings off}
    inflaterect1(info.ca.dim,frame1);
    info.frame.paintoverlay(canvas,info.ca.dim);
   end; 
  end;
 end;
+{$warnings on}
 
 function drawbuttoncheckbox(const canvas: tcanvas; const info: shapeinfoty;
               var arect: rectty; const pos: imageposty = ip_left): boolean;
@@ -1159,6 +1162,7 @@ var
  framestates: framestateflagsty;
  size1: sizety;
 begin
+ framestates:= [];
  result:= [shs_checkbox,shs_radiobutton] * info.state <> [];
  if result then begin
   rect1:= arect;
@@ -1316,6 +1320,7 @@ begin
     drawbuttoncaption(canvas,info,rect1,pos1,@rect2);
    end;
    if frame <> nil then begin
+{$warnings off}
     inflaterect1(info.ca.dim,frame1);
     frame.paintoverlay(canvas,info.ca.dim);
     ca.dim:= rect3;
@@ -1351,6 +1356,7 @@ begin
   end;
  end;
 end;
+{$warnings on}
 
 initialization
  buttontab:= tcustomtabulators.create;

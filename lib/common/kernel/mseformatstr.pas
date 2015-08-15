@@ -2770,6 +2770,7 @@ var
 begin
  checkformatmacros(format);
  result:= '';
+ ar1[0]:= 0;
  with formatsettings do begin
   if dot then begin
    decimalsep:= '.';
@@ -4464,6 +4465,7 @@ var
  neg: boolean;
 begin
  result:= false;
+ neg:= false;
  value:= 0;
  if text <> '' then begin
   po1:= pointer(text);
@@ -4525,6 +4527,7 @@ var
  neg: boolean;
 begin
  result:= false;
+ neg:= false;
  value:= 0;
  if text <> '' then begin
   po1:= pointer(text);
@@ -4673,6 +4676,7 @@ var
  neg: boolean;
 begin
  result:= false;
+ neg:= false;
  value:= 0;
  if text <> '' then begin
   po1:= pointer(text);
@@ -4741,6 +4745,7 @@ var
  neg: boolean;
 begin
  result:= false;
+ neg:= false;
  value:= 0;
  if text <> '' then begin
   po1:= pointer(text);

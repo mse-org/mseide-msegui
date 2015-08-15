@@ -405,6 +405,7 @@ var
  lwo1,lwo2: longword;
  info: pollfd;
 begin
+ lwo1:= 0;
  pollres:= [];
  fillchar(info,sizeof(info),0);
  with info do begin

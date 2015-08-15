@@ -1835,6 +1835,7 @@ var
 begin
  result:= false;
  if fxtermcommand <> '' then begin
+  ptsn:= '';
   ftargetterminal.outecho:= true;
   pts:= msestring(ftargetterminal.devicename);
   ar1:= splitstring(ftargetterminal.devicename,'/'); 
@@ -3247,6 +3248,7 @@ var
  i1: int32;
 begin
  path:= '';
+ str1:= '';
  language:= lan_undef;
  if frame <> 0 then begin
 //  result:= synccommand('-stack-select-frame '+inttostr(frame)); //does not change soourcefile
@@ -4143,6 +4145,7 @@ begin
   result:= '''''';
  end
  else begin
+  data:= nil;
   result:= '''';
   int1:= 2;
   blocklength:= maxblocklength;
@@ -4194,6 +4197,7 @@ var
  bo1: boolean;
  blocklength: integer;
 begin
+ data:= nil;
  if address = 0 then begin
   result:= '''''';
  end

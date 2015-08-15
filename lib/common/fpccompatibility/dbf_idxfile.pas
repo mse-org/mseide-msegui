@@ -2899,6 +2899,7 @@ var
 {$endif}
 
 begin
+ floatrec.exponent:= 0;
   // need to convert numeric?
   Result := PChar(Buffer);
   if PIndexHdr(FIndexHeader)^.KeyType in ['N', 'F'] then

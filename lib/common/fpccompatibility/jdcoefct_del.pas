@@ -322,6 +322,7 @@ begin
         start_col := MCU_col_num * compptr^.MCU_width;
         for yindex := 0 to pred(compptr^.MCU_height) do
         begin
+{$warnings off}
           buffer_ptr := JBLOCKROW(@ buffer[ci]^[yindex+yoffset]^[start_col]);
           for xindex := 0 to pred(compptr^.MCU_width) do
           begin
@@ -356,7 +357,7 @@ begin
   cinfo^.inputctl^.finish_input_pass (cinfo);
   consume_data := JPEG_SCAN_COMPLETED;
 end;
-
+{$warnings on}
 
 { Decompress and return some data in the multi-pass case.
   Always attempts to emit one fully interleaved MCU row ("iMCU" row).

@@ -626,6 +626,8 @@ label
 begin
 // ar1:= nil; //copilerwarning
  format:= nil; //copilerwarning
+ str1:= '';
+ int2:= 0;
  firstrow:= start;
  lastrow:= start+count-1;
  with fclients[handle] do begin

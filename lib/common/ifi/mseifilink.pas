@@ -1491,6 +1491,7 @@ var
  index1: integer;
 begin
  result:= nil;
+ po2:= nil;
  po1:= apropname;
  index1:= -1;
  arraypropkind:= apk_none;
@@ -1866,6 +1867,7 @@ function tcustommodulelink.processdataitem(const adata: pifirecty;
 var
  str2: string;
 begin
+ result:= false;
  with adata^ do begin
   case header.kind of
    ik_actionfired: begin
@@ -2139,6 +2141,7 @@ function tcustommodulelink.propertychangereceived(const atag: integer;
  end; //check
  
 begin
+ result:= false;
  check(fvalues);
  if not result then begin
   check(fvaluecomponents);

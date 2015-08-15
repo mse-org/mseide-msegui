@@ -1606,6 +1606,8 @@ var
  int1: integer;
 begin
  ar1:= designer.getancestorclassinfo(amodule,false,ar2);
+ po1:= nil;
+ po2:= nil;
  po3:= nil;
  for int1:= high(ar1) downto 0 do begin
   po1:= ar2[int1];

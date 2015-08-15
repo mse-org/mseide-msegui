@@ -2360,6 +2360,7 @@ begin
  widget1:= fintf.getwidget;
  container1:= widget1.container;
  result:= false;
+ ischild1:= false;
  if not(csdesigning in widget1.ComponentState) then begin
   with info do begin
    mouseinhandle:= (fdockhandle <> nil) and pointinrect(
@@ -2864,6 +2865,7 @@ var
  int1: integer;
  po1: prectty;
 begin
+ str1:= '';
  writer.writeinteger('splitdir',ord(fsplitdir));
  writer.writeinteger('useroptions',
          {$ifdef FPC}longword{$else}longword{$endif}(fuseroptions));
@@ -3188,6 +3190,8 @@ var
   rect1: rectty;
   bandindex: integer;
  begin
+  stop:= 0;
+  start:= 0;
   ar1:= checksplit(propsize,fixsize,prop,fix,false);
   if fsizeindex <= high(ar1) then begin
    movestart:= fr^.pos(fplacementrect);
@@ -4224,6 +4228,7 @@ label
  endlab;
 begin
  inherited;
+ dirbefore:= gd_none;
  checkstate;
  checkgripsize;
  with canvas do begin

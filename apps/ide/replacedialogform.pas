@@ -67,6 +67,7 @@ end;
  
 procedure treplacedialogfo.valuestoinfo(out info: replaceinfoty);
 begin
+{$warnings off}
  with info.find do begin
   text:= findtext.value;
   history:= findtext.dropdown.valuelist.asarray;
@@ -76,6 +77,7 @@ begin
  info.prompt:= promptonreplace.value;
  info.replacetext:= replacetext.value;
 end;
+{$warnings on}
 
 procedure treplacedialogfo.infotovalues(const info: replaceinfoty);
 begin

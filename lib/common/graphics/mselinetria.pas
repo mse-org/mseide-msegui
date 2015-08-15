@@ -815,6 +815,7 @@ begin
     end;
    end;
    if closed then begin
+{$warnings off}
     (ppointty(buffer.buffer))^:= pt0;
     (ppointty(buffer.buffer)+1)^:= pt1;
     (ppointty(buffer.buffer)+3)^:= pt1;
@@ -893,7 +894,7 @@ begin
   apointcount:= li.dest-ppointty(buffer.buffer);
  end;
 end;
-
+{$warnings on}
 procedure linesegmentstria(var drawinfo: drawinfoty;
                   out atriangles: ptrianglety; out atrianglecount: integer);
 var

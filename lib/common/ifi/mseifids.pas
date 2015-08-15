@@ -950,6 +950,7 @@ var
  cu1: currency;
  realint1: realintty;
 begin
+ result:= 0;
  case datapo^.header.kind of
   idk_null: begin
    afield.clear;
@@ -1591,6 +1592,7 @@ var
  int2: integer;
  fielddef1: tfielddef;
 begin
+ fielddef1:= nil;
  for int1:= fields.count - 1 downto 0 do begin
   field1:= fields[int1];
   if bind then begin
@@ -1643,8 +1645,8 @@ var
  int1: integer;
 begin 
  result:= false;
+ buffer:= nil;
  if not active then begin
-  buffer:= nil;
   exit;
  end;
  int1:= afield.fieldno - 1;
@@ -1730,6 +1732,7 @@ function tifidataset.getfieldbuffer(const afield: tfield; const isnull: boolean;
 var
  int1: integer;
 begin 
+ result:= nil;
  if not ((state in dswritemodes - [dsinternalcalc,dscalcfields]) or 
        (afield.fieldkind = fkinternalcalc) and 
                                 (state = dsinternalcalc) or
@@ -2040,6 +2043,7 @@ var
  int1,int2,int3: integer;
  field1: tfield;
 begin
+ int3:= 0;
  fmsestringpositions:= nil;
  fansistringpositions:= nil;
  int1:= fielddefs.count;

@@ -152,6 +152,7 @@ constructor Tcompressionstream.create(level:Tcompressionlevel;
 var err,l:smallint;
 
 begin
+ l:= 0;
   inherited create(dest);
   Fstream.next_out:=Fbuffer;
   Fstream.avail_out:=bufsize;

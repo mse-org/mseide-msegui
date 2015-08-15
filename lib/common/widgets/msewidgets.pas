@@ -3262,6 +3262,8 @@ var
  end;
 
 begin
+ int1:= 0;
+ int2:= 0;
  fstate:= fstate - [fs_sbleft,fs_sbtop,fs_sbright,fs_sbbottom];
  if fs_sbhorzon in fstate then begin
   if fs_sbhorztop in fstate then begin

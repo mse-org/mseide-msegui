@@ -894,6 +894,7 @@ end;
 
 function tsourcepage.modified: boolean;
 begin
+ result:= false;
  if edit <> nil then begin
   result:= edit.modified;
  end;

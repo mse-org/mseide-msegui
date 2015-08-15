@@ -60,6 +60,7 @@ const
 function DropWhiteSpaces(Stream : TStream) :Char;
 
 begin
+ result:= #0;
   with Stream do
     begin
     repeat

@@ -407,6 +407,7 @@ var
  i1: int32;
   
 begin
+ scrolllength:= 0;
  with fdim,fdrawinfo do begin
   minblen:= fbuttonminlength;
   areas[sbbu_up].ca.imagelist:= stockobjects.glyphs;
@@ -717,6 +718,7 @@ var
  col1: colorty;
  statebefore: shapestatesty;
 begin
+ statebefore:= []; //compiler warning
  with canvas,self.fdrawinfo do begin
   save;
   areas[sbbu_up].face:= ffaceendbutton;

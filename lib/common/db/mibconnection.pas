@@ -310,6 +310,7 @@ begin
  if ((Status[0] = 1) and (Status[1] <> 0)) then begin
   p:= @Status;
   msg:= msestring(procname);
+{$warnings off}
   while isc_interprete(Buf, @p) > 0 do begin
    Msg := Msg + lineend +' -' + connectionmessage(Buf);
   end;
@@ -319,6 +320,7 @@ begin
   raise eiberror.create(self,msg,status,flastsqlcode);
  end;
 end;
+{$warnings on}
 
 procedure tibconnection.CheckError(const ProcName : string;
                                                      const Status: integer);
@@ -1274,6 +1276,7 @@ begin
   end;
 
 {$ifdef FPC}
+{$warnings off}
   STime.Year        := CTime.tm_year + 1900;
   STime.Month       := CTime.tm_mon + 1;
   STime.Day         := CTime.tm_mday;
@@ -1292,6 +1295,7 @@ begin
 {$endif}
   pdatetime(buffer)^:= SystemTimeToDateTime(STime);
 end;
+{$warnings on}
 
 procedure TIBConnection.SetDateTime(CurrBuff: pointer; PTime : TDateTime; AType : integer);
 var
@@ -1331,6 +1335,7 @@ function TIBConnection.GetSchemaInfoSQL(SchemaType : TSchemaType;
 var s : msestring;
 
 begin
+ s:= '';
   case SchemaType of
     stTables     : s := 'select '+
                           'rdb$relation_id          as recno, '+
@@ -1496,6 +1501,7 @@ var
   blobInfo : array[0..50] of byte;
 
 begin
+ result:= 0;
   iscInfoBlobMaxSegment:= isc_info_blob_max_segment;
   if isc_blob_info(@Fstatus, @blobHandle, sizeof(iscInfoBlobMaxSegment),
           @iscInfoBlobMaxSegment, sizeof(blobInfo) - 2, @blobInfo) <> 0 then
@@ -1519,6 +1525,7 @@ var
  blobSegLen : word;
  maxBlobSize : longInt; 
 begin
+ blobseglen:= 0;
  blobHandle:= nil;
  if isc_open_blob(@FStatus, @FSQLDatabaseHandle, @acursor.ftrans,
                         @blobHandle, @blobId) <> 0 then begin

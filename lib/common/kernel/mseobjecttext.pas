@@ -343,6 +343,7 @@ procedure ObjectBinaryToText1(Input, Output: TStream;
 *)
   function ReadInt(ValueType: TValueType): Int64; overload;
   begin
+   result:= 0;
     case ValueType of
       vaInt8: Result := ShortInt({$ifdef FPC}Input.{$endif}ReadByte);
       vaInt16: Result := SmallInt(ReadWord);
@@ -608,6 +609,7 @@ procedure ObjectBinaryToText1(Input, Output: TStream;
     ObjClassName, ObjName: String;
     ChildPos: LongInt;
   begin
+   childpos:= 0;
     // Check for FilerFlags
     b := {$ifdef FPC}Input.{$endif}ReadByte;
     if (b and $f0) = $f0 then begin
@@ -1036,6 +1038,7 @@ var
     ObjectName, ObjectType: String;
     ChildPos: Integer;
   begin
+   childpos:= 0;
     if parser.TokenSymbolIs('OBJECT') then
       Flags :=0  { IsInherited := False }
     else begin
@@ -1189,6 +1192,7 @@ end;
 
 function TParser.GetHexValue(c: char): byte; {$ifdef CLASSESINLINE} inline; {$endif CLASSESINLINE}
 begin
+ result:= 0;
   case c of
     '0'..'9' : Result:=ord(c)-$30;
     'A'..'F' : Result:=ord(c)-$37; //-$41+$0A

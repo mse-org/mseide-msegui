@@ -928,6 +928,8 @@ var
  int1: integer;
   
 begin
+ stop1:= 0;
+ start1:= 0;
  with tcustomdialcontroller(fowner),fli,finfo,line do begin
   getactdialrect(rect1);
   active:= false;
@@ -1588,6 +1590,7 @@ var
 // int1: integer;
  bo1: boolean;
 begin
+ linestart:= 0;
  bo1:= (do_opposite in foptions) xor aopposite;
  linedirection:= fdirection;
  if bo1 then begin
@@ -1843,6 +1846,12 @@ var
  
 begin
  if not (dis_layoutvalid in fstate) then begin
+  intervalcount1:= 0;
+  logstartn:= 0;
+  first:= 0;
+  valstep:= 0;
+  ar1:= nil;
+  rea1:= 0;
   canvas1:= fintf.getwidget.getcanvas;
   bo1:= getactdialrect(rect1);
   exclude(fstate,dis_needstransform);

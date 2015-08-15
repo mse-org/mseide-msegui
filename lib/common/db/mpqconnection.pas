@@ -896,6 +896,7 @@ var
  precision: integer;
  isarray: boolean;
 begin
+ precision:= 0;
  fielddefs.clear;
  with tpqcursor(cursor) do begin
   nFields:= PQnfields(Res);
@@ -1079,6 +1080,7 @@ var
    with TPQCursor(cursor) do begin
     case aDataType of
      ftInteger,ftSmallint,ftword: begin
+      int1:= 0;
       case asize of               // postgres returns big-endian numbers
        sizeof(integer): begin
         int1:= BEtoN(pinteger(CurrBuff)^);
@@ -1192,6 +1194,7 @@ var
       inc(currbuff,asize);
      end;
      ftBCD: begin
+      
       case atype of
        oid_float4: begin
         cur:= getfloat4;
@@ -1200,9 +1203,9 @@ var
         cur:= getfloat8;
        end;
        else begin
+        cur := 0;
         result:= getnumeric(numericrecord);
         if result then begin
-         cur := 0;
          for tel := 1 to NumericRecord.Digits  do begin
            cur := cur + beton(pword(currbuff)^) * intpower(10000,-(tel-1)+
                                                        NumericRecord.weight);
@@ -1396,6 +1399,7 @@ function TPQConnection.GetSchemaInfoSQL(SchemaType: TSchemaType;
 var s : msestring;
 
 begin
+ s:= '';
   case SchemaType of
     stTables     : s := 'select '+
                           'relfilenode              as recno, '+

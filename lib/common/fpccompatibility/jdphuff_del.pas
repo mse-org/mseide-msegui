@@ -1015,12 +1015,13 @@ undoit:
   while (num_newnz > 0) do
   begin
     Dec(num_newnz);
+{$warnings off}
     block^[newnz_pos[num_newnz]] := 0;
   end;
 
   decode_mcu_AC_refine := FALSE;
 end;
-
+{$warnings on}
 
 { Module initialization routine for progressive Huffman entropy decoding. }
 

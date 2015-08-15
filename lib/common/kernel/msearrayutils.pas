@@ -531,7 +531,6 @@ var
 begin
 {$warnings off}
  if pointer(dynamicarray) <> nil then begin
-{$warnings on}
   raise exception.Create('allocunitedarray: dynamicarray not nil');
  end;
  getmem(po1,count * itemsize + 2 * sizeof(sizeint));
@@ -543,6 +542,7 @@ begin
  {$endif}
  pointer(dynamicarray):= pointer(pchar(po1) + 2 * sizeof(sizeint));
 end;
+{$warnings on}
 
 procedure reallocuninitedarray(count,itemsize: integer; var dynamicarray);
                  //does not init memory, dynamicarray must be unique
@@ -1315,7 +1315,6 @@ var
 begin
 {$warnings off}
  if pointer(source) = pointer(result) then begin
-{$warnings on}
   ar1:= copy(source);
  end
  else begin
@@ -1328,6 +1327,7 @@ begin
   dec(int2);
  end;
 end;
+{$warnings on}
 
 function reversearray(const source: integerarty): integerarty; overload;
 var
@@ -1336,7 +1336,6 @@ var
 begin
 {$warnings off}
  if pointer(source) = pointer(result) then begin
-{$warnings on}
   ar1:= copy(source);
  end
  else begin
@@ -1349,6 +1348,7 @@ begin
   dec(int2);
  end;
 end;
+{$warnings on}
 
 function reversearray(const source: pointerarty): pointerarty; overload;
 var
@@ -1357,7 +1357,6 @@ var
 begin
 {$warnings off}
  if pointer(source) = pointer(result) then begin
-{$warnings on}
   ar1:= copy(source);
  end
  else begin
@@ -1370,6 +1369,7 @@ begin
   dec(int2);
  end;
 end;
+{$warnings on}
 
 procedure removearrayduplicates(var value: pointerarty);
 var

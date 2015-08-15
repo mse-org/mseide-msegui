@@ -2530,6 +2530,7 @@ Var P : Pchar;
     S,NL : String;
 
 begin
+ nl:= '';
   CheckSpecialChars;
   // Determine needed place
   Case FLBS of
@@ -4431,6 +4432,7 @@ function TBinaryObjectReader.ReadIdent(ValueType: TValueType): String;
 var
   i: Byte;
 begin
+ result:= '';
   case ValueType of
     vaIdent:
       begin

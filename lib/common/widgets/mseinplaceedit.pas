@@ -666,6 +666,7 @@ begin
                     (csdestroying in fowner.componentstate) then begin
   exit;  //no createwindow by getcanvas
  end;
+ wstr1:= ''; //compiler warning
  inc(fupdatecaretcount);
  updatecaretcountref:= fupdatecaretcount;
  posbefore:= finfo.dest;
@@ -1929,6 +1930,7 @@ var
  str1: msestring;
  co1,co2: rgbtriplety; 
 begin
+ str1:= '';
  ftextrectbefore:= finfo.res;
  if length(finfo.text.text) > 0 then begin
   if fpasswordchar <> #0 then begin
@@ -2354,6 +2356,7 @@ var
  undocount: integer;
  forcednew: boolean;
 begin
+ result:= nil;
  alink:= alink or (flinked > 0);
  forcednew:= (dls_forcenew in fstate);
  if (fcount = 0) then begin

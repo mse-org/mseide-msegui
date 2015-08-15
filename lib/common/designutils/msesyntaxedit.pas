@@ -329,6 +329,7 @@ var
  stringpo: pmsestring;
  gc1: gridcoordty;
 begin
+ po2:= nil;
  word:= '';
  if (apos.row < 0) or (apos.row >= flines.count) then begin
   result:= invalidcell;

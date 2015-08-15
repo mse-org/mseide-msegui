@@ -151,6 +151,7 @@ begin
         Result.Gray:=false;
         if (not TestAlpha) and (not Test16Bit) then break;
       end;
+{$warnings off}
       if Test16Bit then begin
         Need16Bit(col.red);
         Need16Bit(col.green);
@@ -165,6 +166,7 @@ begin
     end;
   end;
 end;
+{$warnings on}
 
 function GetMinimumFPCompactImg(Img: TFPCustomImage; FreeImg: boolean;
   FuzzyDepth: word = 4): TFPCustomImage;

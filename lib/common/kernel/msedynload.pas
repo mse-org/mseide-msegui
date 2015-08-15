@@ -95,6 +95,7 @@ var
  mstr1: msestring;
 begin
  result:= true;
+ mstr1:= '';
  for int1:= 0 to high(procedures) do begin
   with procedures[int1] do begin
   {$ifdef FPC}
@@ -127,6 +128,7 @@ begin
  if high(anames) <> high(adest) then begin
   raise exception.create('Invalid parameter.');
  end;
+ mstr1:= '';
  result:= true;
  for int1:= 0 to high(anames) do begin
   adest[int1]^:= getprocaddress(lib,pansichar(anames[int1]));

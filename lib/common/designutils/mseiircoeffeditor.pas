@@ -28,6 +28,7 @@ var
  int1: integer;
  norm: real;
 begin
+ norm:= 0;
  for int1:= 0 to grid.rowhigh do begin
   if (int1 = 0) or (grid.rowlinewidth[int1-1] > 1) then begin
    if dened[int1] = 0 then begin

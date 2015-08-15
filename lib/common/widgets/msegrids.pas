@@ -9645,6 +9645,8 @@ var
 
 begin
  inherited;
+ lines:= nil;
+ lineinfos:= nil;
  rowheight1:= og_rowheight in foptionsgrid;
  rowstate1:= fdatacols.frowstate;
  internalupdatelayout(true);
@@ -12814,6 +12816,7 @@ var
 label
  checkwidgetexit;
 begin
+ actioncol:= fca_none;
  if canevent(tmethod(fonkeydown)) then begin
   fonkeydown(self,info);
  end;
@@ -13740,6 +13743,7 @@ var
  ar1: integerarty;
  {bo1,}s1,d1: boolean;
 begin
+ int1:= 0;
  offset:= sender.pickoffset;
  apos:= sender.pos;
  ar1:= sender.currentobjects;
@@ -17850,6 +17854,8 @@ var
  by1: byte;
  bo1: boolean;
 begin
+ by1:= 0;
+ nextfoldlevel:= 0;
  checkindexrange(arow);
  po1:= datapo;
  inc(pchar(po1),arow*fsize);
@@ -18159,6 +18165,7 @@ var
  int1: integer;
  po1: prowstatety;
 begin
+ lev2:= 0;
  checkindexrange(aindex,acount);
  normalizering;
  po1:= getitempo(aindex);
@@ -18424,6 +18431,7 @@ end;
 
 function trowstatelist.getlinkdatatypes(const atag: integer): listdatatypesty;
 begin
+ result:= [];
  case atag of
   rowstatefoldleveltag,rowstateissumtag,rowstatefoldhiddentag: begin
    result:= [dl_integer];

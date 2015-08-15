@@ -1939,6 +1939,7 @@ function getgdicanvasclass(const agdi: pgdifunctionaty;
 var
  info1: drawinfoty;
 begin
+{$warnings off}
  with info1.getcanvasclass do begin
   kind:= akind;
   canvasclass:= tcanvas; //default
@@ -1946,6 +1947,7 @@ begin
   result:= canvasclass;
  end;
 end;
+{$warnings on}
 
 function creategdicanvas(const agdi: pgdifunctionaty;
                   const akind: bitmapkindty; const user: tobject;
@@ -2190,6 +2192,7 @@ var
 begin
  if (fsize.cx > 0) and (fsize.cy > 0) then begin
   if fhandle = 0 then begin
+{$warnings off}
    with info.createpixmap do begin
     size:= fsize;
 //    monochrome:= (pms_monochrome in fstate);
@@ -2210,6 +2213,7 @@ begin
   end;
  end;
 end;
+{$warnings on}
 
 procedure tsimplebitmap.releasehandle;
 begin
@@ -5660,6 +5664,7 @@ end;
 
 function tcanvas.createregion(const rects: array of rectty): regionty;
 begin
+ result:= 0;
  with fdrawinfo.regionoperation do begin
   rectscount:= high(rects) + 1;
   if rectscount > 0 then begin

@@ -373,6 +373,7 @@ var diff : byte;
       diff := lp;
   end;
 begin
+ diff:= 0;
   case LineFilter of
     0 : diff := 0;
     1 : FilterSub;

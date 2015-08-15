@@ -1303,6 +1303,7 @@ end;
 
 function TDbf.GetLanguageStr: String;
 begin
+ result:= '';
   if FDbfFile <> nil then
     Result := FDbfFile.LanguageStr;
 end;
@@ -1892,6 +1893,7 @@ var
   lIndexDef: TDbfIndexDef;
   lIndexFile, lSaveIndexFile: TIndexFile;
 begin
+ lsaveindexname:= '';
   lCursor := nil;
   lSaveCursor := nil;
   lIndexFile := nil;

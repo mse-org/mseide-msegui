@@ -1234,6 +1234,7 @@ end;
 
 function tfieldparamlink.param(const aname: string): tparam;
 begin
+ result:= nil;
  if fdestdataset = nil then begin
   databaseerror(name+': No destdataset');
  end
@@ -1247,6 +1248,7 @@ end;
 
 function tfieldparamlink.field(const aname: string): tfield;
 begin
+ result:= nil;
  if fdestdataset = nil then begin
   databaseerror(name+': No destdataset');
  end
@@ -1763,6 +1765,7 @@ end;
 
 function tdestfield.getdataset(const aindex: integer): tdataset;
 begin
+ result:= nil;
  case aindex of
   0: result:= fdatalink.dataset;
   1: result:= tfieldparamlink(fowner).fdestdataset;

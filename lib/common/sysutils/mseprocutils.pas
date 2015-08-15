@@ -885,6 +885,7 @@ var
  params1,envvars1: pointerarty;
  par,env: stringarty;
 begin
+ wd1:= '';
  commandline1:= ansistring(commandline);
  if workingdirectory <> '' then begin
   wd1:= ansistring(tosysfilepath(workingdirectory));

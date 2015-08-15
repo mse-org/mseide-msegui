@@ -1819,6 +1819,7 @@ end;
 
 function twidgetcol.sortcompare(const index1,index2: integer): integer;
 begin
+ result:= 0;
  if (fintf <> nil) then begin
   if fdata <> nil then begin
    with tdatalist1(fdata) do begin
@@ -2477,6 +2478,7 @@ begin
  if (fgrid.factivewidget <> nil) and 
            (og_containerfocusbackonesc in fgrid.foptionsgrid) then begin
   fgrid.factivewidget.activate;
+  result:= true;
  end
  else begin
   result:= inherited focusback(aactivate);

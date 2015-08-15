@@ -2205,6 +2205,7 @@ end;
 
 function tlookupdbdispfielddatalink.getdataset(const aindex: integer): tdataset;
 begin
+ result:= nil;
  case aindex of
   0: begin
    result:= inherited getdataset(aindex);
@@ -2287,8 +2288,8 @@ function tlookup32dbdispfielddatalink.datatotext(const data): msestring;
  end; //lookup
 
 begin
+ result:= '';
  if (@data = nil) and fisnull then begin
-  result:= '';
  end
  else begin
   if @data = nil then begin
@@ -2347,8 +2348,8 @@ function tlookup64dbdispfielddatalink.datatotext(const data): msestring;
  end; //lookup
   
 begin
+ result:= '';
  if (@data = nil) and fisnull then begin
-  result:= '';
  end
  else begin
   if @data = nil then begin
@@ -2407,8 +2408,8 @@ function tlookupstrdbdispfielddatalink.datatotext(const data): msestring;
  end; //lookup
   
 begin
+ result:= '';
  if (@data = nil) and fisnull then begin
-  result:= '';
  end
  else begin
   if @data = nil then begin
@@ -2566,8 +2567,8 @@ function tlookup32lbdispfielddatalink.datatotext(const data): msestring;
  end; //lookup
   
 begin
+ result:= '';
  if (@data = nil) and fisnull then begin
-  result:= '';
  end
  else begin
   if @data = nil then begin
@@ -2624,8 +2625,8 @@ function tlookup64lbdispfielddatalink.datatotext(const data): msestring;
  end; //lookup
   
 begin
+ result:= '';
  if (@data = nil) and fisnull then begin
-  result:= '';
  end
  else begin
   if @data = nil then begin
@@ -2682,8 +2683,8 @@ function tlookupstrlbdispfielddatalink.datatotext(const data): msestring;
  end; //lookup
   
 begin
+ result:= '';
  if (@data = nil) and fisnull then begin
-  result:= '';
  end
  else begin
   if @data = nil then begin

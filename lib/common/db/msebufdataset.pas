@@ -3954,6 +3954,7 @@ begin
   if state = dsinsert then begin
    fcurrentbuf:= intallocrecord;
   end;
+  newupdatebuffer:= false;
   canapply:= not (dso_noapply in fcontroller.options);
   if canapply then begin
    newupdatebuffer:= not getrecordupdatebuffer;
@@ -4770,6 +4771,7 @@ begin
    end;
   end;
   findcachedblob(cacheinfo);
+ {$warnings off}
   with ainfo,info do begin
    id:= cacheinfo.id;
    new:= false;
@@ -4778,6 +4780,7 @@ begin
   end;
  end;
 end;
+ {$warnings on}
 
 procedure tmsebufdataset.setofflineblob(const adata: precheaderty;
                        const aindex: integer; const ainfo: blobstreaminfoty);
@@ -5184,6 +5187,7 @@ var
  int2: integer;
  fielddef1: tfielddef;
 begin
+ fielddef1:= nil;
  for int1:= fields.count - 1 downto 0 do begin
   field1:= fields[int1];
   if bind then begin

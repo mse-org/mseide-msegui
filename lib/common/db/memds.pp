@@ -289,6 +289,7 @@ function TMemDataset.MDSGetBufferSize(FieldNo: integer;
 var
  dt1: tfieldtype;
 begin
+ result:= 0; //compiler warning
  dt1:= FieldDefs.Items[FieldNo-1].Datatype;
  case dt1 of
   ftString:   result:=FieldDefs.Items[FieldNo-1].Size+1;

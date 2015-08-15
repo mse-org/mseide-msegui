@@ -1314,9 +1314,9 @@ function tindexfieldnamepropertyeditor.getvalues: msestringarty;
 var
  int1: integer;
 begin
+ result:= nil;
  if high(fprops) = 0 then begin
   with tmsebufdataset(fcomponent) do begin
-   result:= nil;
    if active or (fields.count > 0) then begin
     for int1:= 0 to fields.count -1 do begin
      with fields[int1] do begin

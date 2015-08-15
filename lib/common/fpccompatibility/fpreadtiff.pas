@@ -172,7 +172,7 @@ end;
 type
  worda4ty = array[0..3] of word;
  pworda4ty = ^worda4ty;
- 
+{$warnings off} 
 procedure TFPReaderTiff.ReadImageProperties(out RedBits, GreenBits, BlueBits,
   GrayBits, AlphaBits: Word; out ExtraSamples: PWord; out
   ExtraSampleCnt: DWord; out SampleBits: PWord; out SampleBitsPerPixel: DWord);
@@ -190,7 +190,6 @@ begin
   if ExtraSampleCnt>=SampleCnt then
     TiffError('Samples='+IntToStr(SampleCnt)+' ExtraSampleCnt='+IntToStr(
       ExtraSampleCnt));
-
   case IFD.PhotoMetricInterpretation of
   0, 1: if SampleCnt-ExtraSampleCnt<>1 then
     TiffError('gray images expect one sample per pixel, but found '+IntToStr(
@@ -305,6 +304,7 @@ begin
   if not (IFD.FillOrder in [0, 1]) then
     TiffError('FillOrder unsupported: '+IntToStr(IFD.FillOrder));
 end;
+{$warnings on}
 
 procedure TFPReaderTiff.SetFPImgExtras(CurImg: TFPCustomImage);
 begin
@@ -493,6 +493,7 @@ var
   FortyTwo: Word;
 begin
   Result:=false;
+  bigendian:= false;
   // read byte order  II low endian, MM big endian
   ByteOrder:='  ';
   s.Read(ByteOrder[1],2);
@@ -2081,6 +2082,8 @@ begin
   end;
 end;
 
+{$warnings off}
+
 procedure DecompressLZW(Buffer: Pointer; Count: PtrInt; out NewBuffer: PByte;
   out NewCount: PtrInt);
 type
@@ -2159,7 +2162,7 @@ var
   begin
     Result:=Code<258+TableCount;
   end;
-
+  
   procedure WriteStringFromCode(Code: integer; AddFirstChar: boolean = false);
   var
     s: TLZWString;
@@ -2300,6 +2303,7 @@ begin
 
   ReAllocMem(NewBuffer,NewCount);
 end;
+{$warnings on}
 
 function DecompressDeflate(Compressed: PByte; CompressedCount: cardinal;
   out Decompressed: PByte; var DecompressedCount: cardinal;

@@ -685,8 +685,8 @@ begin
    if po1 = nil then begin
     raise exception.create('Out of memory.');
    end;
+   puint1:= frecsize*fcount;
    if fcount > 0 then begin
-    puint1:= frecsize*fcount;
     fdestpo:= pointer(pchar(po1) + frecsize);
     internaliterate({$ifdef FPC}@{$endif}moveitem);
     fassignedlast:= puint1;

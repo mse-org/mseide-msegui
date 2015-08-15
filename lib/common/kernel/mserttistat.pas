@@ -606,6 +606,7 @@ var
  bo1: boolean;
  list1: tdatalist;
 begin
+ obj1:= nil;
  ar1:= getpropinfoar(dest.obj);
  for int1 := 0 to high(ar1) do begin
   po1:= ar1[int1];
@@ -762,6 +763,7 @@ var
  bo1: boolean;
  info1: objectinfoty;
 begin
+ obj1:= nil;
  ar1:= getpropinfoar(source.obj);
  for int1 := 0 to high(ar1) do begin
   po1:= ar1[int1];

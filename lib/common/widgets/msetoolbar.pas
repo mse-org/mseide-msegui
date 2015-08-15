@@ -1683,6 +1683,7 @@ var
  end;
 
 begin
+ button1:= nil;
  if not fdragcontroller.beforedragevent(info) then begin
   with info do begin
    case eventkind of

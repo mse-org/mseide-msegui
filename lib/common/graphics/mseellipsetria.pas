@@ -218,6 +218,9 @@ var
  shiftfact: integer;
 begin
  result:= false;
+ dashstep:= 0;
+ x2:= 0;
+ y2:= 0;
  with drawinfo,drawinfo.arc,rect^,triagcty(gc.platformdata).d do begin
   lineendings:= not (trf_capbutt in triaflags);
   li.offsx:= 0;

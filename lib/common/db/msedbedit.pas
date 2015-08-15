@@ -7308,6 +7308,7 @@ procedure tkeystringeditdb.recordselected(const arecordnum: integer;
 var
  bo1: boolean;
 begin
+ bo1:= false;
  if arecordnum >= 0 then begin
   with tdbdropdownlistcontroller(fdropdown) do begin
    text:= getasmsestring(fdatalink.textfield,fdatalink.utf8);
@@ -10295,6 +10296,7 @@ procedure tdbenumeditlb.recordselected(const arecordnum: integer; const akey: ke
 var
  bo1: boolean;
 begin
+ bo1:= false;
  if arecordnum >= 0 then begin
   with tlbdropdownlistcontroller(fdropdown) do begin
    text:= flookupbuffer.textvaluephys(cols[0].ffieldno,arecordnum);
@@ -10369,6 +10371,7 @@ procedure tenumeditlb.recordselected(const arecordnum: integer; const akey: keyt
 var
  bo1: boolean;
 begin
+ bo1:= false;
  if arecordnum >= 0 then begin
   with tlbdropdownlistcontroller(fdropdown) do begin
    text:= flookupbuffer.textvaluephys(cols[0].ffieldno,arecordnum);
@@ -10597,6 +10600,7 @@ procedure tcustomenum64editlb.recordselected(const arecordnum: integer; const ak
 var
  bo1: boolean;
 begin
+ bo1:= false;
  if arecordnum >= 0 then begin
   with tlbdropdownlistcontroller(fdropdown) do begin
    text:= flookupbuffer.textvaluephys(cols[0].ffieldno,arecordnum);
@@ -10986,6 +10990,7 @@ procedure tdbkeystringeditlb.recordselected(const arecordnum: integer;
 var
  bo1: boolean;
 begin
+ bo1:= false;
  if arecordnum >= 0 then begin
   with tlbdropdownlistcontroller(fdropdown) do begin
    text:= flookupbuffer.textvaluephys(cols[0].ffieldno,arecordnum);
@@ -11063,6 +11068,7 @@ procedure tkeystringeditlb.recordselected(const arecordnum: integer;
 var
  bo1: boolean;
 begin
+ bo1:= false;
  if arecordnum >= 0 then begin
   with tlbdropdownlistcontroller(fdropdown) do begin
    text:= flookupbuffer.textvaluephys(cols[0].ffieldno,arecordnum);
@@ -11687,6 +11693,7 @@ function tlbdropdownlist.locate(const filter: msestring): boolean;
 var
  int1: integer;
 begin
+ int1:= 0;
  result:= false;
  if (datacols.count > 0) then begin
   with tlbdropdownstringcol(datacols[0]) do begin

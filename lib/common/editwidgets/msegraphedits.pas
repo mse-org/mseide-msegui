@@ -1437,6 +1437,7 @@ var
  col1: colorty;
  bo1: boolean;
 begin
+ bo1:= false;
  col1:= cl_none;
  if @avalue = nil then begin
   rea1:= fvalue;

@@ -1341,6 +1341,7 @@ var
  end;
 
 begin
+ str1:= '';
  result:= false;
  C:= tmysqlcursor(Cursor);
  fno:= fieldnum;

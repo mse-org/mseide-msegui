@@ -1275,6 +1275,7 @@ var
  bo1: boolean;
  newdir: filenamety;
 begin
+ newdir:= '';
  avalue:= trim(avalue);
  unquotefilename(avalue,fselectednames);
  if (fdo_single in dialogoptions) and (high(fselectednames) > 0) then begin

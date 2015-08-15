@@ -90,6 +90,7 @@ end;
 function cryptowrite(var ainfo: cryptoioinfoty; const buffer: pointer;
                  const count: integer; const atimeoutms: integer): integer;
 begin
+ result:= 0;
  if ainfo.classtype <> nil then begin
   result:= ainfo.classtype.write(ainfo,buffer,count,atimeoutms);
  end;
@@ -98,6 +99,7 @@ end;
 function cryptoread(var ainfo: cryptoioinfoty; const buffer: pointer;
            const count: integer; const atimeoutms: integer): integer;
 begin
+ result:= 0;
  if ainfo.classtype <> nil then begin
   result:= ainfo.classtype.read(ainfo,buffer,count,atimeoutms);
  end;

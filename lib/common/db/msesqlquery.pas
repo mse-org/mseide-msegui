@@ -1013,7 +1013,7 @@ Var
 begin
  PSQL:=Pmsechar(ASQL);
  ParsePart := ppStart;
-
+ PStatementPart:= nil;
  CurrentP := PSQL-1;
  PhraseP := PSQL;
  resetparsing;

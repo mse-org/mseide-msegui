@@ -1114,7 +1114,7 @@ begin
      idk_int64: begin
       if list.datatype = dl_int64 then begin
        result:= decodeifidata(source,lint1);
-       tint64datalist(list)[aindex]:= int1;
+       tint64datalist(list)[aindex]:= lint1;
       end;
      end;
      idk_msestring: begin

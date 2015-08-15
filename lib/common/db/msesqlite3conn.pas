@@ -863,6 +863,7 @@ var
  str1: string;
  int1: integer;
 begin
+ str1:= '';
  err:= nil;
 {$ifdef FPC} {$checkpointer off} {$endif};
  int1:= sqlite3_exec(fhandle,pchar(asql),nil,nil^,@err);
