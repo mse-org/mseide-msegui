@@ -2182,6 +2182,16 @@ object projectoptionsfo: tprojectoptionsfo
                 dropdown.cols.count = 1
                 dropdown.cols.items = <                
                   item
+                    data = (
+                      'auto'
+                      'i386'
+                      'x86_64'
+                      'arm'
+                      'armm3'
+                      'cpu32'
+                      'avr32'
+                      'rl78'
+                    )
                   end>
                 reffontheight = 14
               end
@@ -5730,7 +5740,7 @@ object projectoptionsfo: tprojectoptionsfo
             optionswidget1 = [ow1_fontlineheight, ow1_autoscale]
             taborder = 2
             bounds_x = 703
-            bounds_y = 5
+            bounds_y = 4
             bounds_cx = 49
             bounds_cy = 21
             anchors = [an_top, an_right]
@@ -5743,7 +5753,7 @@ object projectoptionsfo: tprojectoptionsfo
             optionswidget1 = [ow1_fontlineheight, ow1_autoscale]
             taborder = 1
             bounds_x = 649
-            bounds_y = 5
+            bounds_y = 4
             bounds_cx = 49
             bounds_cy = 21
             anchors = [an_top, an_right]
@@ -5774,7 +5784,7 @@ object projectoptionsfo: tprojectoptionsfo
             )
             onshowhint = hintexpandedmacros
             bounds_x = 5
-            bounds_y = 5
+            bounds_y = 4
             bounds_cx = 639
             anchors = [an_left, an_top, an_right]
             ondataentered = settingsdataent
