@@ -1265,7 +1265,9 @@ end;
 
 function trichstringdatalist.getasarray: richstringarty;
 begin
- setlength(result,fcount);
+ result:= nil;
+ allocuninitedarray(fcount,sizeof(result[0]),result);
+// setlength(result,fcount);
  internalgetasarray(pointer(result),sizeof(richstringty));
 end;
 

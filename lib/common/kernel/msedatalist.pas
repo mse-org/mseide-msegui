@@ -4535,7 +4535,9 @@ end;
 
 function tansistringdatalist.getasarray: stringarty;
 begin
- setlength(result,fcount);
+ result:= nil;
+ allocuninitedarray(fcount,sizeof(result[0]),result);
+// setlength(result,fcount);
  internalgetasarray(pointer(result),sizeof(string));
 end;
 
@@ -5150,7 +5152,9 @@ end;
 
 function tpoorstringdatalist.getasarray: msestringarty;
 begin
- setlength(result,fcount);
+ result:= nil;
+ allocuninitedarray(fcount,sizeof(result[0]),result);
+// setlength(result,fcount); //possible memory leak in FPC 3.0
  internalgetasarray(pointer(result),sizeof(msestring));
 end;
 
@@ -5602,7 +5606,9 @@ end;
 
 function tdoublemsestringdatalist.getasarray: doublemsestringarty;
 begin
- setlength(result,fcount);
+ result:= nil;
+ allocuninitedarray(fcount,sizeof(result[0]),result);
+// setlength(result,fcount);
  internalgetasarray(pointer(result),sizeof(doublemsestringty));
 end;
 
@@ -5889,7 +5895,9 @@ end;
 
 function tmsestringintdatalist.getasarray: msestringintarty;
 begin
- setlength(result,fcount);
+ result:= nil;
+ allocuninitedarray(fcount,sizeof(result[0]),result);
+// setlength(result,fcount);
  internalgetasarray(pointer(result),sizeof(msestringintty));
 end;
 

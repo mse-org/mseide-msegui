@@ -436,7 +436,7 @@ function removelineterminator(const s: msestring): msestring;
 procedure removetabterminator(var s: msestring);
 function stripescapesequences(avalue: msestring): msestring;
 
-procedure stringaddref(var str: string); overload;
+procedure stringaddref(var str: ansistring); overload;
 procedure stringaddref(var str: msestring); overload;
 
 procedure reallocstring(var value: ansistring); overload;
@@ -1178,12 +1178,12 @@ begin
  end;
 end;
 
-procedure stringaddref(var str: string);
+procedure stringaddref(var str: ansistring);
 var
  po1: psizeint;
 begin
  if pointer(str) <> nil then begin
-  po1:= psizeint(pchar(pointer(str))-2*sizeof(sizeint));
+  po1:= pointer(str)-2*sizeof(sizeint);
   if po1^ >= 0 then begin
    inc(po1^);
   end;
@@ -1198,7 +1198,7 @@ var
 begin
  if pointer(str) <> nil then begin
 {$ifndef msestringsarenotrefcounted}
-  po1:= psizeint(pchar(pointer(str))-2*sizeof(sizeint));
+  po1:= pointer(str)-2*sizeof(sizeint);
   if po1^ >= 0 then begin
    inc(po1^);
   end;
