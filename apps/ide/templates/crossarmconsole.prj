@@ -269,8 +269,8 @@ macrovalues=22
  
  ${CROSSFPCDIR}/${ABI}
  ${CROSSFPC}/bin/gdb
- ${CROSSFPC}/lib/fpc/2.6.5/ppcrossarm
- -n -Xd -viwn -e${CROSSFPC}/bin -Fl${CROSSFPC}/lib -Fu${CROSSFPC}/lib/fpc/2.6.5/units/arm-linux/*
+ ${CROSSFPC}/lib/fpc/3.0.1/ppcrossarm
+ -n -Xd -viwn -e${CROSSFPC}/bin -Fl${CROSSFPC}/lib -Fu${CROSSFPC}/lib/fpc/3.0.1/units/arm-linux/*
  ${FPCOPTIONS}
  ${FPCOPTIONS} -CpARMV6 -CfVFPV2
  
