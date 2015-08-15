@@ -360,6 +360,8 @@ function strtobytes(const inp: string; out dest: bytearty): boolean;
 function inttostrlen(inp: integer; len: integer;
      rechtsbuendig: boolean = true; fillchar: char = ' '): ansistring;
  //wandelt integer in string fester laenge
+function inttostrlenmse(inp: integer; len: integer;
+     rechtsbuendig: boolean = true; fillchar: msechar = ' '): msestring;
 {
 function filename(inp: string): string;
 //bringt filenamen ohne pfad und extension
@@ -5373,6 +5375,31 @@ begin
  else begin
   if int1 > len then begin
    system.fillchar(result[1],len,fc_keinplatzchar);
+  end;
+ end;
+end;
+
+function inttostrlenmse(inp: integer; len: integer;
+     rechtsbuendig: boolean = true; fillchar: msechar = ' '): msestring;
+ //wandelt integer in string fester laenge
+var
+ int1: integer;
+begin
+ result:= inttostrmse(inp);
+ int1:= length(result);
+ setlength(result,len);
+ if int1 < len then begin
+  if rechtsbuendig then begin
+   move(result[1],result[len-int1+1],int1*sizeof(msechar));
+   system.fillword(result[1],len-int1,card16(fillchar));
+  end
+  else begin
+   system.fillword(result[int1+1],len-int1,card16(fillchar));
+  end;
+ end
+ else begin
+  if int1 > len then begin
+   system.fillword(result[1],len,card16(msechar(fc_keinplatzchar)));
   end;
  end;
 end;
