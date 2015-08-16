@@ -180,6 +180,7 @@ function buildmakecommandline(const atag: integer): msestring;
 var
  int1,int2: integer;
  str1,str2,str3: msestring;
+ ar1: filenamearty;
 // wstr1: filenamety;
 begin
  with projectoptions,o,texp do begin
@@ -187,7 +188,11 @@ begin
    result:= '';
    exit;
   end;
-  str3:= quotefilename(tosysfilepath(makecommand));
+  unquotefilename(makecommand,ar1);
+  if ar1 <> nil then begin
+   tosysfilepath1(ar1[0]);
+  end;
+  str3:= quotefilename(ar1);
   str1:= str3;
   if (targetfile <> '') and (targpref <> '') then begin
    str1:= str1 + ' '+quotefilename(targpref+normalizename(targetfile));
