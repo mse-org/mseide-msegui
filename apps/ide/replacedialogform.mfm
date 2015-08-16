@@ -2,12 +2,14 @@ object replacedialogfo: treplacedialogfo
   visible = False
   bounds_x = 142
   bounds_y = 302
-  bounds_cx = 421
+  bounds_cx = 427
   bounds_cy = 163
+  container.frame.localprops = []
+  container.frame.localprops1 = []
   container.bounds = (
     0
     0
-    421
+    427
     163
   )
   options = [fo_freeonclose, fo_closeonesc, fo_localshortcuts, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savezorder]
@@ -16,6 +18,8 @@ object replacedialogfo: treplacedialogfo
   moduleclassname = 'tmseform'
   object findtext: thistoryedit
     frame.caption = 'Text to &find'
+    frame.localprops = []
+    frame.localprops1 = []
     frame.button.color = -2147483646
     frame.outerframe = (
       0
@@ -25,7 +29,7 @@ object replacedialogfo: treplacedialogfo
     )
     bounds_x = 8
     bounds_y = 7
-    bounds_cx = 407
+    bounds_cx = 410
     bounds_cy = 37
     anchors = [an_left, an_top, an_right]
     dropdown.cols.count = 1
@@ -36,6 +40,8 @@ object replacedialogfo: treplacedialogfo
   end
   object replacetext: thistoryedit
     frame.caption = '&Replace with'
+    frame.localprops = []
+    frame.localprops1 = []
     frame.button.color = -2147483646
     frame.outerframe = (
       0
@@ -46,7 +52,7 @@ object replacedialogfo: treplacedialogfo
     taborder = 1
     bounds_x = 8
     bounds_y = 47
-    bounds_cx = 407
+    bounds_cx = 410
     bounds_cy = 37
     anchors = [an_left, an_top, an_right]
     statfile = statfile1
@@ -58,7 +64,8 @@ object replacedialogfo: treplacedialogfo
   end
   object casesensitive: tbooleanedit
     frame.caption = '&casesensitive'
-    frame.dummy = 0
+    frame.localprops = []
+    frame.localprops1 = []
     frame.outerframe = (
       0
       1
@@ -73,7 +80,8 @@ object replacedialogfo: treplacedialogfo
   end
   object wholeword: tbooleanedit
     frame.caption = '&whole word'
-    frame.dummy = 0
+    frame.localprops = []
+    frame.localprops1 = []
     frame.outerframe = (
       0
       1
@@ -108,7 +116,8 @@ object replacedialogfo: treplacedialogfo
   end
   object selectedonly: tbooleanedit
     frame.caption = 'select&ed only'
-    frame.dummy = 0
+    frame.localprops = []
+    frame.localprops1 = []
     frame.outerframe = (
       0
       1
@@ -134,7 +143,8 @@ object replacedialogfo: treplacedialogfo
   end
   object promptonreplace: tbooleanedit
     frame.caption = '&prompt on rep.'
-    frame.dummy = 0
+    frame.localprops = []
+    frame.localprops1 = []
     frame.outerframe = (
       0
       1
