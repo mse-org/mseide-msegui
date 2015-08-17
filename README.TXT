@@ -118,7 +118,10 @@ MSEide command line parameters
  Macro definition, will be overridden by 'Project'-'Options'-'Macros'. Example:
  --macrodef=MAC1,abc,MAC2,def
  defines ${MAC1} with value 'abc' and ${MAC2} with value 'def'.
- 
+--storeglobalmacros
+ Store --macrodef defines as global 'Settings'-'Configure MSEide' macros and
+ terminate MSEide.
+   
 MSEide environment variables
 ****************************
 Macros in 'Settings'-'Configure MSEide' can be overridden by environment

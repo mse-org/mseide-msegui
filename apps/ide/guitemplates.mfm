@@ -136,6 +136,17 @@ object guitemplatesmo: tguitemplatesmo
         ''
       )
       (
+        ak_par
+        '-storeglobalmacros'
+        (        )
+        []
+        ''
+        ''
+        'Store --macrodef values as global macros and terminate MSEide. '
+        ''
+        ''
+      )
+      (
         ak_pararg
         '-macrogroup'
         (        )

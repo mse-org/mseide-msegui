@@ -347,7 +347,7 @@ var
 procedure handleerror(const e: exception; const text: string);
 implementation
 uses
- regwidgets,regeditwidgets,regdialogs,regkernel,regprinter,
+ regwidgets,regeditwidgets,regdialogs,regkernel,regprinter,msearrayutils,
  toolhandlermodule,
 {$ifndef mse_no_math}
  regmath,regmm,
@@ -1806,7 +1806,9 @@ endlab:
   expandprojectmacros;
   onscale(nil);
  finally
-  mainfo.activate;
+  if not application.terminated then begin
+   mainfo.activate;
+  end;
  end;
  {$ifdef mse_dumpunitgroups}
  dumpunitgr;
@@ -2434,8 +2436,12 @@ procedure tmainfo.mainstatfileonupdatestat(const sender: tobject;
                    const filer: tstatfiler);
 var
  mstr1: filenamety;
+ mstr2: msestring;
  ar1: msestringarty;
- int1: integer;
+ int1,i2: integer;
+ ar2: macroinfoarty;
+ ma1: settingsmacroty;
+ bo1: boolean;
 begin
  ar1:= nil; //compiler warning
  updatesettings(filer);
@@ -2447,6 +2453,46 @@ begin
  filer.updatevalue('windowlayouthistory',windowlayouthistory);
  
  if not filer.iswriter then begin
+  if guitemplatesmo.sysenv.defined[ord(env_storeglobalmacros)] then begin
+   ar2:= guitemplatesmo.sysenv.getcommandlinemacros(ord(env_macrodef));
+   with settings.macros do begin
+    for int1:= 0 to high(ar2) do begin
+     mstr2:= ar2[int1].name;
+     bo1:= false;
+     for ma1:= low(settingsmacroty) to high(settingsmacroty) do begin
+      if msecomparetext(mstr2,settingsmacronames[ma1]) = 0 then begin
+       macros[ma1]:= ar2[int1].value;
+       bo1:= true;
+       break;
+      end;
+     end;
+     if not bo1 then begin
+      bo1:= false;
+      for i2:= 0 to high(globmacronames) do begin
+       if msecomparetext(mstr2,globmacronames[i2]) = 0 then begin
+        bo1:= true;
+        if high(globmacrovalues) < i2 then begin
+         setlength(globmacrovalues,i2+1);
+        end;
+        globmacronames[i2]:= ar2[int1].name;
+        globmacrovalues[i2]:= ar2[int1].value;
+       end;
+      end;
+      if not bo1 then begin
+       additem(globmacronames,ar2[int1].name);
+       if high(globmacrovalues) < high(globmacronames) then begin
+        setlength(globmacrovalues,high(globmacronames)+1);
+       end;
+       globmacrovalues[high(globmacronames)]:= ar2[int1].value;
+      end;
+     end;
+    end;
+   end;
+   application.terminated:= true;
+   projectoptions.projectfilename:= mstr1;
+   mainstatfile.writestat();
+   exit();
+  end;
   if guitemplatesmo.sysenv.defined[ord(env_filename)] then begin
    ar1:= guitemplatesmo.sysenv.values[ord(env_filename)];
    if (high(ar1) = 0) and (fileext(ar1[0]) = 'prj') then begin
