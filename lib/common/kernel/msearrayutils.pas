@@ -533,14 +533,16 @@ begin
  if pointer(dynamicarray) <> nil then begin
   raise exception.Create('allocunitedarray: dynamicarray not nil');
  end;
- getmem(po1,count * itemsize + 2 * sizeof(sizeint));
- po1^:= 1; //refcount
- {$ifdef FPC}
- psizeint(pchar(po1)+sizeof(sizeint))^:= count - 1; //high
- {$else}
- psizeint(pchar(po1)+sizeof(sizeint))^:= count;     //count
- {$endif}
- pointer(dynamicarray):= pointer(pchar(po1) + 2 * sizeof(sizeint));
+ if count > 0 then begin
+  getmem(po1,count * itemsize + 2 * sizeof(sizeint));
+  po1^:= 1; //refcount
+  {$ifdef FPC}
+  psizeint(pchar(po1)+sizeof(sizeint))^:= count - 1; //high
+  {$else}
+  psizeint(pchar(po1)+sizeof(sizeint))^:= count;     //count
+  {$endif}
+  pointer(dynamicarray):= pointer(pchar(po1) + 2 * sizeof(sizeint));
+ end;
 end;
 {$warnings on}
 
