@@ -147,7 +147,7 @@ ${MAC_IFDEF(macroname,notdefinedvalue,definedvalue)}
 
 MSEide environment macros
 *************************
-${ENV_VAR(variablename)} returns the macro value if defined.
+${ENV_VAR(variablename)} returns the variable value if defined.
 ${ENV_VAR(variablename,notdefinedvalue)} returns the variable value if defined,
  notdefinedvalue otherwise.
 ${ENV_VAR(variablename,notdefinedvalue,definedvalue)}
@@ -166,6 +166,10 @@ FILE_NAMEBASE  no directory and no name extension part.
 FILE_EXT       file name extension.
 FILE_NONAME    directory part only.
 FILE_NOEXT     no file name extension.
+
+MSEide exec macros
+******************
+${EXEC_OUT(commandline)} executes commandline, returns the process output.
 
 MSEide macros in 'Project'-'Options'-'Debugger'-'xterm Command'
 ***************************************************************

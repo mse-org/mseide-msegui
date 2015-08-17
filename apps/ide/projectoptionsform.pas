@@ -874,7 +874,7 @@ uses
  watchform,stackform,main,projecttreeform,findinfileform,
  selecteditpageform,programparametersform,sourceupdate,mseimagelisteditor,
  msesysenvmanagereditor,targetconsole,
- msefilemacros,mseenvmacros,msemacmacros,
+ msefilemacros,mseenvmacros,msemacmacros,mseexecmacros,
  msedesigner,panelform,watchpointsform,commandlineform,messageform,
  componentpaletteform,mserichstring,msesettings,formdesigner,actionsmodule,
  msestringlisteditor,msetexteditor,msepropertyeditors,mseshapes,mseactions,
@@ -1077,7 +1077,7 @@ begin
    value:= d.t.progparameters;
   end;
  end;
- result:= initmacros([result,macmacros,filemacros,envmacros]);
+ result:= initmacros([result,macmacros,filemacros,envmacros,execmacros]);
 end;
 
 procedure hintmacros(const sender: tcustomedit; var info: hintinfoty);
