@@ -18,7 +18,7 @@ function execmacros(): macroinfoarty;
 
 implementation
 uses
- mseprocess,mseprocutils,msefileutils,msestrings;
+ mseprocess,mseprocutils,msefileutils,msestrings,mseformatstr;
 
 var
  fexecmacros: macroinfoarty;
@@ -30,12 +30,24 @@ end;
 
 function exec_out(const sender: tmacrolist; 
                            const params: msestringarty): msestring;
+const
+ defaulttimeout = 1000000; //1 second
 var
  str1: string;
+ i1: int32;
 begin
  result:= '';
  if params <> nil then begin
-  getprocessoutput(syscommandline(params[0]),'',str1,1000000);
+  i1:= defaulttimeout;
+  if high(params) >= 1 then begin
+   if trystrtoint(params[1],i1) then begin
+    i1:= i1 * 1000;
+   end
+   else begin
+    i1:= defaulttimeout;
+   end;
+  end;
+  getprocessoutput(syscommandline(params[0]),'',str1,i1);
   result:= msestring(str1);
  end;
 end;

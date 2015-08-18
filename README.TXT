@@ -153,6 +153,16 @@ ${ENV_VAR(variablename,notdefinedvalue)} returns the variable value if defined,
 ${ENV_VAR(variablename,notdefinedvalue,definedvalue)}
  returns definedvalue if variablename is defined, notdefinedvalue otherwise.
 
+MSEide string macros
+********************
+Macro format is ${STR_*(text)}.
+STR_TRIM
+ Trim whitespace from the ends of text.
+STR_TRIMLEFT
+ Trim whitespace from the beginning of text.
+STR_TRIMRIGHT
+ Trim whitespace from the end of text.
+
 MSEide file macros
 ******************
 Macro format is ${FILE_*(fileparameter)} or ${FILE_*("fileparameter")}.
@@ -169,7 +179,9 @@ FILE_NOEXT     no file name extension.
 
 MSEide exec macros
 ******************
-${EXEC_OUT(commandline)} executes commandline, returns the process output.
+${EXEC_OUT(commandline[,timeoutms])} 
+ Executes commandline, returns the process output. Timeout in
+ milli seconds, default = 1000, -1 = infinite.
 
 MSEide macros in 'Project'-'Options'-'Debugger'-'xterm Command'
 ***************************************************************
