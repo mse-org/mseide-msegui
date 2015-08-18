@@ -204,9 +204,9 @@ type
  tmsesqlscript = class;
  tcustomsqlconnection = class(TmDatabase,idbcontroller,iactivatorclient)
   private
-    FPassword            : string;
+    FPassword            : ansistring;
     FTransaction         : TSQLTransaction;
-    FUserName            : string;
+    FUserName            : ansistring;
     FHostName            : string;
     FCharSet             : string;
     FRole                : String;
@@ -359,11 +359,11 @@ type
    function fieldtooldsql(const afield: tfield): msestring;
    function paramtosql(const aparam: tparam): msestring;
    
-   property Password : string read FPassword write FPassword;
+   property Password : ansistring read FPassword write FPassword;
    property Transaction : TSQLTransaction read FTransaction write SetTransaction;
    property transactionwrite : tsqltransaction read ftransactionwrite 
                                                   write settransactionwrite;
-   property UserName : string read FUserName write FUserName;
+   property UserName : ansistring read FUserName write FUserName;
    property CharSet : string read FCharSet write FCharSet;
    property HostName : string Read FHostName Write FHostName;
 
