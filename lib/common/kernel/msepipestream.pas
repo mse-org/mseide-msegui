@@ -636,7 +636,7 @@ begin
    setlength(adata,2*len1+64);
   end;
   i1:= length(adata) - len1; //fill current buffer
-  if not doread((pointer(adata)+len1)^,i1,i1) then begin
+  if not doread((pointer(adata)+len1)^,i1,i1,true) then begin
    fstate:= fstate + [tss_error,tss_eof]; //broken pipe
   end;
   if i1 = 0 then begin
