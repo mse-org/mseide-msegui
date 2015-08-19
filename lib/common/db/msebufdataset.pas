@@ -4841,7 +4841,8 @@ begin
   setlength(findexes[0].ind,int2);
   if bs_hasvalidindex in fbstate then begin
    for int1:= 1 to high(findexes) do begin
-    if findexes[int1].ind <> nil then begin
+    if (findexes[int1].ind <> nil) or (int1 = factindex) then begin
+                                      //init for first insert/append
      setlength(findexes[int1].ind,int2);
     end;
    end;
