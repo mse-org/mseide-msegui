@@ -350,7 +350,7 @@ REMOTEUSER    pi
   path in remote target, ex: "/home/pi/proj/testcase".
 - Check the TARGETENV macro.
 - If your application needs additional libraries copy them from Raspberry Pi
-  /lib/arm-linux-gnueabihf or /network/rpissh/usr/lib/arm-linux-gnueabihf to
+  /lib/arm-linux-gnueabihf or /usr/lib/arm-linux-gnueabihf to
   <your crossfpc directory>/eabihf/lib
 
 Press F9 and hope the best. ;-)
