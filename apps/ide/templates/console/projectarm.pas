@@ -3,7 +3,6 @@ program ${%PROJECTNAME%};
 {$ifdef mswindows}{$apptype console}{$endif}
 uses
  {$ifdef FPC}{$ifdef unix}cthreads,cwstring,{$endif}{$endif}
- sysutils,xlib; 
-           //xlib necessary in order to avoid linking error, probably FPC bug
+ sysutils;
 begin
 end.

@@ -342,11 +342,15 @@ REMOTEIP      <the IP of the remote target>
 REMOTEPORT    <the remote port, ex: 2345>
 REMOTEUSER    pi
 
-- 'Project'-'New'-'From Template', select "crossarmdefault.prj".
+- 'Project'-'New'-'From Template', select "crossarmdefault.prj" or
+  "crossarmconsole.prj".
 - Create the new project.
 - 'Project'-'Options'-'Macros', set the TARGETPROJECTDIR value to the project
   path in remote target, ex: "/home/pi/proj/testcase".
 - Check the TARGETENV macro.
+- If your application needs additional libraries copy them form Raspberry Pi
+  /lib/arm-linux-gnueabihf or /network/rpissh/usr/lib/arm-linux-gnueabihf to
+  <your crossfpc directory>/eabihf/lib
 
 Press F9 and hope the best. ;-)
 
