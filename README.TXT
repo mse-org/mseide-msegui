@@ -349,7 +349,7 @@ REMOTEUSER    pi
 - 'Project'-'Options'-'Macros', set the TARGETPROJECTDIR value to the project
   path in remote target, ex: "/home/pi/proj/testcase".
 - Check the TARGETENV macro.
-- If your application needs additional libraries copy them form Raspberry Pi
+- If your application needs additional libraries copy them from Raspberry Pi
   /lib/arm-linux-gnueabihf or /network/rpissh/usr/lib/arm-linux-gnueabihf to
   <your crossfpc directory>/eabihf/lib
 
