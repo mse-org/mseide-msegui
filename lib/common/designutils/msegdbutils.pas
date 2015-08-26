@@ -3460,7 +3460,7 @@ begin
 end;
 }
 function tgdbmi.evaluateexpression(expression: string;
-                                          out aresult: string): gdbresultty;
+                                        out aresult: string): gdbresultty;
 begin
  updatepascalexpression(expression);
  aresult:= '';
@@ -4699,7 +4699,8 @@ end;
 
 procedure tgdbmi.updatepascalexpression(var aexpression: string);
 begin
- if fcurrentlanguage = lan_pascal then begin
+ if (fcurrentlanguage = lan_pascal) and (pos('$',aexpression) = 0) then begin
+                                         //no register name
 //  if not startsstr('self.',aexpression) and (aexpression <> 'self') then begin
    aexpression:= uppercase(aexpression); 
            //workaround for gdb bug with class fields
