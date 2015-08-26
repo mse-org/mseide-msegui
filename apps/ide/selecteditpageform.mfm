@@ -4,6 +4,8 @@ object selecteditpagefo: tselecteditpagefo
   bounds_y = 124
   bounds_cx = 704
   bounds_cy = 473
+  container.frame.localprops = []
+  container.frame.localprops1 = []
   container.onlayout = formonchildscaled
   container.bounds = (
     0
@@ -18,9 +20,10 @@ object selecteditpagefo: tselecteditpagefo
   onlayout = formonchildscaled
   moduleclassname = 'tmseform'
   object list: tlistview
-    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_focusbackonesc, ow_destroywidgets, ow_multiplehint]
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_multiplehint]
     frame.colorclient = -1879048187
     frame.localprops = [frl_colorclient]
+    frame.localprops1 = []
     bounds_x = 0
     bounds_y = 0
     bounds_cx = 704
@@ -32,13 +35,15 @@ object selecteditpagefo: tselecteditpagefo
     cellheight = 20
     cellframe.leveli = 1
     cellframe.localprops = [frl_leveli]
+    cellframe.localprops1 = []
     optionsgrid = [og_colsizing, og_focuscellonenter, og_colchangeontabkey, og_wraprow, og_wrapcol, og_autopopup]
     options = [lvo_readonly, lvo_drawfocus, lvo_mousemovefocus, lvo_focusselect, lvo_mouseselect, lvo_locate, lvo_hintclippedtext]
     onitemevent = doonitemevent
     reffontheight = 14
   end
   object pathdisp: tstringdisp
-    frame.dummy = 0
+    frame.localprops = []
+    frame.localprops1 = []
     taborder = 2
     bounds_x = 0
     bounds_y = 454
