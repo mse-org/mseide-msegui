@@ -327,9 +327,10 @@ Crosscompiling and remote debugging i386-linux -> arm-linux
 For Raspberry Pi:
 - Establish a ssh login without password (public key authentication).
 
-- On the i386-linux host download and extract 
-http://sourceforge.net/projects/mseide-msegui/files/fpcrossarm/crossfpc-i386_linux-eabihf_3_0_1.tar.gz
-to <your crossfpc directory>.
+- On the i386-linux host install the scp program
+- download and extract 
+  http://sourceforge.net/projects/mseide-msegui/files/fpcrossarm/crossfpc-i386_linux-eabihf_3_0_1.tar.gz
+  to <your crossfpc directory>.
 
 - Start MSEide, in 'Settings'-'Configure MSEide'-'Global Macros' add:
 
@@ -342,11 +343,15 @@ REMOTEIP      <the IP of the remote target>
 REMOTEPORT    <the remote port, ex: 2345>
 REMOTEUSER    pi
 
-- 'Project'-'New'-'From Template', select "crossarmdefault.prj".
+- 'Project'-'New'-'From Template', select "crossarmdefault.prj" or
+  "crossarmconsole.prj".
 - Create the new project.
 - 'Project'-'Options'-'Macros', set the TARGETPROJECTDIR value to the project
   path in remote target, ex: "/home/pi/proj/testcase".
 - Check the TARGETENV macro.
+- If your application needs additional libraries copy them from Raspberry Pi
+  /lib/arm-linux-gnueabihf or /usr/lib/arm-linux-gnueabihf to
+  <your crossfpc directory>/eabihf/lib
 
 Press F9 and hope the best. ;-)
 
