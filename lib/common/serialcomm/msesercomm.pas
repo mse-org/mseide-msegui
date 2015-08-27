@@ -220,6 +220,7 @@ type
                                   const aoncheckabort: checkeventty = nil);
   published
    property commnr;
+   property commname;
    property baud;
    property databits;
    property stopbit;
