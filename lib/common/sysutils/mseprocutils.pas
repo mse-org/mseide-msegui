@@ -541,7 +541,7 @@ begin
   mstr1:= mstr1 + ' '+quotestring(params[i1],'"',false);
  end;
 
- cmd1:= mstr1;
+ cmd1:= copy(mstr1,1,bigint); //must be writeable for createprocessw
  env1:= '';
  if envvars <> nil then begin
   i2:= 0;
