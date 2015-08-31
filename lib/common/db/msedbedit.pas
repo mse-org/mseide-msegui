@@ -62,7 +62,7 @@ const
 
 type
  dbnavigatoroptionty = (dno_confirmdelete,dno_confirmcopy,
-                        dno_append,dno_shortcuthint,
+                        dno_append,dno_nomultiinsert,dno_shortcuthint,
                         dno_norefreshrecno,
                         dno_dialogifinactive,dno_nodialogifempty,
                         dno_nodialogifnoeditmode,dno_nodialogifreadonly,
@@ -2682,6 +2682,10 @@ begin
    end;
    dsedit,dsinsert: begin
     bu1:= bu1 + [dbnb_post,dbnb_cancel,dbnb_refresh,dbnb_insert,dbnb_delete];
+    if (datasource.state = dsinsert) and 
+                          (dno_nomultiinsert in options1) then begin
+     exclude(bu1,dbnb_insert);
+    end;
    end;
    else begin
     bu1:= bu1 + [dbnb_refresh,dbnb_insert,dbnb_delete,dbnb_edit,
