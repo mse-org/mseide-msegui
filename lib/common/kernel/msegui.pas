@@ -8898,6 +8898,7 @@ begin
   end;
  end;
  canvas.restore;
+ canvas.brushorigin:= nullpoint;
  face1:= getactface;
  if (face1 <> nil) and (fao_alphafadeall in face1.fi.options) then begin
   canvas.move(paintpos);
