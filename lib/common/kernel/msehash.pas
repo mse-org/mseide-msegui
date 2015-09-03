@@ -141,6 +141,8 @@ type
    constructor create(const datasize: integer);
    function add(const akey: integer): pointer;
    function addunique(const akey: integer): pointer;
+   function addunique(const akey: integer; out adata: pointer): boolean;
+                                             //true if new
    function find(const akey: integer): pointer;
    function delete(const akey: integer; 
                          const all: boolean = false): boolean; overload;
@@ -1453,6 +1455,18 @@ begin
  result:= find(akey);
  if result = nil then begin
   result:= add(akey);
+ end;
+end;
+
+function tintegerhashdatalist.addunique(const akey: integer; 
+                                                out adata: pointer): boolean;
+                                             //true if new
+begin
+ adata:= find(akey);
+ result:= false;
+ if adata = nil then begin
+  adata:= add(akey);
+  result:= true;
  end;
 end;
 
