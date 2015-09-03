@@ -72,6 +72,10 @@ type
    fpropoffsetrecursion: integer;
    fstatpriority: integer;
    fwidgetrectbefore: rectty;
+   fdist_left: integer;
+   fdist_top: integer;
+   fdist_right: integer;
+   fdist_bottom: integer;
    procedure setstatfile(const avalue: tstatfile);
    procedure setlinkbottom(const avalue: twidget);
    procedure setlinkleft(const avalue: twidget);
@@ -82,6 +86,10 @@ type
    procedure setcolorgrip(const avalue: colorty);
    procedure setgrip(const avalue: stockbitmapty);
    procedure setoptions(const avalue: splitteroptionsty);
+   procedure setdist_left(const avalue: integer);
+   procedure setdist_top(const avalue: integer);
+   procedure setdist_right(const avalue: integer);
+   procedure setdist_bottom(const avalue: integer);
   protected
    fstate: splitterstatesty;
    procedure postupdatepropevent;
@@ -136,6 +144,15 @@ type
    property linkright: twidget read flinkright write setlinkright;
    property linkbottom: twidget read flinkbottom write setlinkbottom;
 
+   property dist_left: integer read fdist_left 
+                                    write setdist_left default 0;
+   property dist_top: integer read fdist_top 
+                                    write setdist_top default 0;
+   property dist_right: integer read fdist_right 
+                                    write setdist_right default 0;
+   property dist_bottom: integer read fdist_bottom 
+                                    write setdist_bottom default 0;
+
    property color default defaultsplittercolor;
    property grip: stockbitmapty read fgrip write setgrip 
                                                default defaultsplittergrip;
@@ -160,6 +177,10 @@ type
    property linktop;
    property linkright;
    property linkbottom;
+   property dist_left;
+   property dist_top;
+   property dist_right;
+   property dist_bottom;
 
 //   property color;
    property grip;
@@ -986,18 +1007,18 @@ begin
         (foptions * [spo_dockleft,spo_dockright] = 
                            [spo_dockleft,spo_dockright])then begin
     if flinkleft <> nil then begin
-     flinkleft.widgetrect:= makerect(bounds_x,flinkleft.bounds_y,bounds_cx,
-                                         flinkleft.bounds_cy);
+     flinkleft.widgetrect:= makerect(bounds_x+fdist_left,flinkleft.bounds_y,
+                         bounds_cx-fdist_left-fdist_right,flinkleft.bounds_cy);
     end;
    end
    else begin
     if (flinkleft <> nil) and (spo_dockleft in foptions) then begin
-     flinkleft.bounds_cx:= bounds_x - flinkleft.bounds_x;
+     flinkleft.bounds_cx:= bounds_x - flinkleft.bounds_x - fdist_left;
     end;
     if (flinkright <> nil) and (spo_dockright in foptions) then begin
      rect1:= flinkright.widgetrect;
-     rect1.cx:= rect1.cx + (rect1.x - pt1.x);
-     rect1.pos.x:= pt1.x;
+     rect1.cx:= rect1.cx + (rect1.x - pt1.x) - fdist_right;
+     rect1.pos.x:= pt1.x + fdist_right;
      flinkright.widgetrect:= rect1;
     end;
    end;
@@ -1005,18 +1026,19 @@ begin
         (foptions * [spo_docktop,spo_dockbottom] = 
                            [spo_docktop,spo_dockbottom]) then begin
     if flinktop <> nil then begin
-     flinktop.widgetrect:= makerect(flinktop.bounds_x,bounds_y,
-                                       flinktop.bounds_cx,bounds_cy);
+     flinktop.widgetrect:= makerect(flinktop.bounds_x,bounds_y+fdist_top,
+                                       flinktop.bounds_cx,bounds_cy-
+                                                     fdist_top-fdist_bottom);
     end;
    end
    else begin
     if (flinktop <> nil) and (spo_docktop in foptions) then begin
-     flinktop.bounds_cy:= bounds_y - flinktop.bounds_y;
+     flinktop.bounds_cy:= bounds_y - flinktop.bounds_y - fdist_top;
     end;
     if (flinkbottom <> nil)  and (spo_dockbottom in foptions) then begin
      rect1:= flinkbottom.widgetrect;
-     rect1.cy:= rect1.cy + (rect1.y - pt1.y);
-     rect1.pos.y:= pt1.y;
+     rect1.cy:= rect1.cy + (rect1.y - pt1.y) - fdist_bottom;
+     rect1.pos.y:= pt1.y + fdist_bottom;
      flinkbottom.widgetrect:= rect1;
     end;
    end;
@@ -1066,6 +1088,38 @@ begin
    fobjectpicker.options:= fobjectpicker.options - [opo_thumbtrack];
   end;
   updatedock;
+ end;
+end;
+
+procedure tcustomsplitter.setdist_left(const avalue: integer);
+begin
+ if fdist_left <> avalue then begin
+  fdist_left:= avalue;
+  updatedock();
+ end;
+end;
+
+procedure tcustomsplitter.setdist_top(const avalue: integer);
+begin
+ if fdist_top <> avalue then begin
+  fdist_top:= avalue;
+  updatedock();
+ end;
+end;
+
+procedure tcustomsplitter.setdist_right(const avalue: integer);
+begin
+ if fdist_right <> avalue then begin
+  fdist_right:= avalue;
+  updatedock();
+ end;
+end;
+
+procedure tcustomsplitter.setdist_bottom(const avalue: integer);
+begin
+ if fdist_bottom <> avalue then begin
+  fdist_bottom:= avalue;
+  updatedock();
  end;
 end;
 
