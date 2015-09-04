@@ -1369,7 +1369,7 @@ object actionsmo: tactionsmo
     top = 136
   end
   object shortcuts: tshortcutcontroller
-    actions.count = 82
+    actions.count = 83
     actions.items = <    
       item
         dispname = 'File'
@@ -1863,6 +1863,10 @@ object actionsmo: tactionsmo
       item
         action = projectopenact
         dispname = 'Open'
+      end    
+      item
+        action = projectsaveact
+        dispname = 'Save'
       end    
       item
         action = projecttreeact
