@@ -8765,6 +8765,7 @@ begin
    fframe.dopaintfocusrect(canvas,makerect(nullpoint,fwidgetrect.size));
   end
   else begin
+   drawfocusrect(canvas,makerect(nullpoint,fwidgetrect.size));
   end;
  end;
 end;

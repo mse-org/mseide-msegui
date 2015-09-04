@@ -157,6 +157,7 @@ type
    procedure setgridintf(const intf: iwidgetgrid);
    function getgridintf: iwidgetgrid;
    function getcellframe: framety; virtual;
+   function needscellfocuspaint(): boolean;
    function getcellcursor(const arow: integer; const acellzone: cellzonety;
                              const apos: pointty): cursorshapety; virtual;
    procedure updatecellzone(const row: integer; const apos: pointty;
@@ -547,6 +548,11 @@ begin
    result:= getinnerframe;
   end;
  end;
+end;
+
+function tcustomtextedit.needscellfocuspaint(): boolean;
+begin
+ result:= inherited needsfocuspaint();
 end;
 
 function tcustomtextedit.getcellcursor(const arow: integer;

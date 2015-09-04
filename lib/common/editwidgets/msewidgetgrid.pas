@@ -68,6 +68,7 @@ type
   procedure updatepopupmenu(var amenu: tpopupmenu; 
                                           var mouseinfo: mouseeventinfoty);
   function getcellframe: framety;
+  function needscellfocuspaint(): boolean;
   function getcellcursor(const arow: integer; //-1 -> widget
                const acellzone: cellzonety; const apos: pointty): cursorshapety;
   procedure updatecellzone(const arow: integer; //-1 -> widget
@@ -1669,10 +1670,10 @@ end;
 
 procedure twidgetcol.widgetpainted(const canvas: tcanvas);
 begin
- if co_drawfocus in foptions then begin
-  with fintf.getwidget do begin
+ if (co_drawfocus in self.foptions) or fintf.needscellfocuspaint() then begin
+  with fintf.getwidget() do begin
    if active then begin
-    drawfocusrect(canvas,inflaterect(paintrect,ffocusrectdist));
+    drawfocusrect(canvas,inflaterect(paintrect,self.ffocusrectdist));
    end;
   end;
  end;

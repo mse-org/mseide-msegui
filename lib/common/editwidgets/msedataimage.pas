@@ -59,6 +59,7 @@ type
    function getrowdatapo(const arow: integer): pointer; virtual;
    procedure setgridintf(const intf: iwidgetgrid);
    function getcellframe: framety;
+   function needscellfocuspaint(): boolean;
    function getcellcursor(const arow: integer; const acellzone: cellzonety;
                                           const apos: pointty): cursorshapety;
    procedure updatecellzone(const row: integer; const apos: pointty;
@@ -230,6 +231,11 @@ begin
  else begin
   result:= nullframe;
  end;
+end;
+
+function tcustomdataimage.needscellfocuspaint(): boolean;
+begin
+ result:= inherited needsfocuspaint();
 end;
 
 function tcustomdataimage.getcellcursor(const arow: integer;

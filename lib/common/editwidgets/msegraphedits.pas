@@ -185,6 +185,7 @@ type
    function getrowdatapo(const arow: integer): pointer; virtual;
    procedure setgridintf(const intf: iwidgetgrid); virtual;
    function getcellframe: framety; virtual;
+   function needscellfocuspaint(): boolean;
    function getcellcursor(const arow: integer; const acellzone: cellzonety;
                                   const apos: pointty): cursorshapety; virtual;
    procedure updatecellzone(const arow: integer; const apos: pointty;
@@ -1727,6 +1728,11 @@ begin
  else begin
   result:= nullframe;
  end;
+end;
+
+function tgraphdataedit.needscellfocuspaint(): boolean;
+begin
+ result:= inherited needsfocuspaint();
 end;
 
 procedure tgraphdataedit.drawcell(const canvas: tcanvas);
