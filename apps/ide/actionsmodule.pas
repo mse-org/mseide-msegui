@@ -209,6 +209,16 @@ type
    findcompact: taction;
    findcompallact: taction;
    forcezorderact: taction;
+   tool0: taction;
+   tool1: taction;
+   tool2: taction;
+   tool3: taction;
+   tool4: taction;
+   tool5: taction;
+   tool6: taction;
+   tool7: taction;
+   tool8: taction;
+   tool9: taction;
    procedure findinfileonexecute(const sender: tobject);
 
    //file
@@ -283,6 +293,9 @@ type
    procedure forcezorderexe(const sender: TObject);
   private
    function filterfindcomp(const acomponent: tcomponent): boolean;
+  public
+   function gettoolshortcutaction(const index: int32;
+                                       out act: taction): boolean;
  end;
 
 var
@@ -308,6 +321,25 @@ begin
 end;
 
 { tactionsmo }
+
+function tactionsmo.gettoolshortcutaction(const index: int32;
+                                        out act: taction): boolean;
+begin
+ case index of
+  0: act:= tool0;
+  1: act:= tool1;
+  2: act:= tool2;
+  3: act:= tool3;
+  4: act:= tool4;
+  5: act:= tool5;
+  6: act:= tool6;
+  7: act:= tool7;
+  8: act:= tool8;
+  9:act:= tool9;
+  else act:= nil;
+ end;
+ result:= act <> nil;
+end;
 
 procedure tactionsmo.updateshortcuts(const sender: tshortcutcontroller);
 begin

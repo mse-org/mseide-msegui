@@ -1,5 +1,5 @@
 object actionsmo: tactionsmo
-  bounds_cx = 474
+  bounds_cx = 542
   bounds_cy = 439
   left = 7
   top = 160
@@ -1369,7 +1369,7 @@ object actionsmo: tactionsmo
     top = 136
   end
   object shortcuts: tshortcutcontroller
-    actions.count = 83
+    actions.count = 94
     actions.items = <    
       item
         dispname = 'File'
@@ -1890,6 +1890,49 @@ object actionsmo: tactionsmo
           1
           304
         )
+      end    
+      item
+        dispname = 'Tools'
+      end    
+      item
+        action = tool0
+        dispname = 'Tool 1'
+      end    
+      item
+        action = tool1
+        dispname = 'Tool 2'
+      end    
+      item
+        action = tool2
+        dispname = 'Tool 3'
+      end    
+      item
+        action = tool3
+        dispname = 'Tool 4'
+      end    
+      item
+        action = tool4
+        dispname = 'Tool 5'
+      end    
+      item
+        action = tool5
+        dispname = 'Tool 6'
+      end    
+      item
+        action = tool6
+        dispname = 'Tool 7'
+      end    
+      item
+        action = tool7
+        dispname = 'Tool 8'
+      end    
+      item
+        action = tool8
+        dispname = 'Tool 9'
+      end    
+      item
+        action = tool9
+        dispname = 'Tool 10'
       end>
     sysshortcuts.count = 11
     sysshortcuts.items = (
@@ -2372,5 +2415,45 @@ object actionsmo: tactionsmo
     onchange = forcezorderexe
     left = 136
     top = 400
+  end
+  object tool0: taction
+    left = 472
+    top = 8
+  end
+  object tool1: taction
+    left = 472
+    top = 24
+  end
+  object tool2: taction
+    left = 472
+    top = 40
+  end
+  object tool3: taction
+    left = 472
+    top = 56
+  end
+  object tool4: taction
+    left = 472
+    top = 72
+  end
+  object tool5: taction
+    left = 472
+    top = 88
+  end
+  object tool6: taction
+    left = 472
+    top = 104
+  end
+  object tool7: taction
+    left = 472
+    top = 120
+  end
+  object tool8: taction
+    left = 472
+    top = 136
+  end
+  object tool9: taction
+    left = 472
+    top = 152
   end
 end
