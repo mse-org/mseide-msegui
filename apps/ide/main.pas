@@ -2262,10 +2262,17 @@ var
  macrolist: tmacrolist;
  copiedfiles: filenamearty;
  bo1: boolean;
-  
+label
+ endlab;  
 begin
  mstr2:= projecttemplatedir; //use macros of current project
- if openproject('') then begin
+ if fromprogram then begin
+  if (checksave() = mr_cancel) or not closeall(false) then begin
+   exit;
+  end;
+  setprojectname('');
+ end;
+ if fromprogram or openproject('') then begin
   gdb.closegdb;
   cleardebugdisp;
   sourcechanged(nil);
@@ -2297,6 +2304,9 @@ begin
      expandprojectmacros;
     end;
     aname:= aname + '.prj';
+   end
+   else begin
+    goto endlab;
    end;
   end;
   if filedialog(aname,[fdo_save,fdo_checkexist],c[ord(str_newproject)],
@@ -2384,6 +2394,7 @@ begin
    end;
   end
   else begin
+endlab:
    projectoptions.projectfilename:= '';
    projectoptions.modified:= true;
   end;

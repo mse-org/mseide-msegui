@@ -1456,7 +1456,7 @@ begin
   ignoreexceptionclasses:= nil;
 
   additem(fmakeoptions,'-l -Mobjfpc -Sh -Fcutf8');
-  additem(fmakeoptions,'-gl');
+  additem(fmakeoptions,'-gl -O-');
   additem(fmakeoptions,'-B');
   additem(fmakeoptions,'-O2 -XX -CX -Xs');
   setlength(fmakeoptionson,length(fmakeoptions));
