@@ -15,7 +15,7 @@ uses
  
 implementation
 uses
- cwstring,sysutils,msestrings,mseformatstr;
+ cwstring,sysutils,msestrings,mseformatstr,msetypes;
  
 function getlocstr(const id: integer; const defaultvalue: string): string;
 var
@@ -114,15 +114,18 @@ procedure initformatsettings;
 {$ifdef FPC}
 var
  int1: integer;
- ch1,ch2,ch3: char;
+ ch1,ch2{$ifdef linux},ch3{$endif}: char;
  str1,str2: string;
  mstr1: msestring;
+ bo1: boolean;
 
  currfo: array[0..1,0..1] of byte = ((1,3),(0,2));
            //[p_cs_precedes,p_sep_by_space]
+{$ifdef linux}
  negcurrfo: array[0..1,0..1,0..4] of byte =
                 (((4,5,7,6,7),(15,8,10,13,10)),((0,1,3,1,2),(14,9,11,9,12)));
            //[n_cs_precedes,n_sep_by_space,n_sign_posn]
+{$endif}
 {$endif}
 begin
  initdefaultformatsettings; 
@@ -197,6 +200,7 @@ begin
   end;
   currencystring:= msestring(getlocstr(currency_symbol,
                                          ansistring(currencystring)));
+{$ifdef linux}
  {$ifdef FPC}{$checkpointer off}{$endif}
   ch1:= nl_langinfo(p_cs_precedes)^;
   ch2:= nl_langinfo(p_sep_by_space)^;
@@ -211,6 +215,23 @@ begin
   if byte(ch1) < 127 then begin
    currencydecimals:= ord(ch1);
   end;
+{$else} //bsd
+ if currencystring <> '' then begin
+  ch1:= #0;
+  ch2:= #0;
+  bo1:= true;
+  case currencystring[1] of
+   '-': ch1:= #1;
+   '+': ch1:= #0;
+   '.': ch1:= #0; //not suported
+   else bo1:= false;
+  end;
+  if bo1 then begin
+   currencystring:= copy(currencystring,2,bigint);
+   currencyformat:= currfo[ord(ch1),ord(ch2)];
+  end;   
+ end;
+{$endif}
   saveformatsettings;
  {$ifdef FPC}{$checkpointer default}{$endif}
  {$endif} 

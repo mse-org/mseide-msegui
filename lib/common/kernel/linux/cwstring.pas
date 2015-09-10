@@ -76,27 +76,27 @@ function wcscoll (__s1:pwchar_t; __s2:pwchar_t):cint;cdecl;external libiconvname
 function strcoll (__s1:pchar; __s2:pchar):cint;cdecl;external libiconvname name 'strcoll';
 
 const
-{$ifdef linux}
-  __LC_CTYPE = 0;
-  _NL_CTYPE_CLASS = (__LC_CTYPE shl 16);
-  _NL_CTYPE_CODESET_NAME = (_NL_CTYPE_CLASS)+14;
-  CODESET = _NL_CTYPE_CODESET_NAME;
-{$else linux}
-{$ifdef darwin}
-  CODESET = 0;
-{$else darwin}
-{$ifdef FreeBSD} // actually FreeBSD5. internationalisation is afaik not default on 4.
-  CODESET = 0;
-{$else freebsd}
-{$ifdef solaris}
-  CODESET=49;
-{$else}
-{$error lookup the value of CODESET in /usr/include/langinfo.h for your OS }
+//{$ifdef linux}
+//  __LC_CTYPE = 0;
+//  _NL_CTYPE_CLASS = (__LC_CTYPE shl 16);
+//  _NL_CTYPE_CODESET_NAME = (_NL_CTYPE_CLASS)+14;
+//  CODESET = _NL_CTYPE_CODESET_NAME;
+//{$else linux}
+//{$ifdef darwin}
+//  CODESET = 0;
+//{$else darwin}
+//{$ifdef FreeBSD} // actually FreeBSD5. internationalisation is afaik not default on 4.
+//  CODESET = 0;
+//{$else freebsd}
+//{$ifdef solaris}
+//  CODESET=49;
+//{$else}
+//{$error lookup the value of CODESET in /usr/include/langinfo.h for your OS }
 // and while doing it, check if iconv is in libc, and if the symbols are prefixed with iconv_ or libiconv_
-{$endif solaris}
-{$endif FreeBSD}
-{$endif darwin}
-{$endif linux}
+//{$endif solaris}
+//{$endif FreeBSD}
+//{$endif darwin}
+//{$endif linux}
 
 { unicode encoding name }
 {$ifdef FPC_LITTLE_ENDIAN}

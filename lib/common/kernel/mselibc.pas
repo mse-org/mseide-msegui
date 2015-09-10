@@ -1110,6 +1110,7 @@ Type
   P__timer_t = ^__timer_t;
 
 const
+{$ifdef linux}
   __LC_CTYPE    = 0;
   __LC_NUMERIC  = 1;
   __LC_TIME     = 2;
@@ -1500,7 +1501,114 @@ const
    GROUPING = __GROUPING;
    YESSTR = __YESSTR;
    NOSTR = __NOSTR;
- 
+{$else} //bsd
+ LC_ALL = 0;
+ LC_COLLATE = 1;
+ LC_CTYPE = 2;
+ LC_MONETARY = 3;
+ LC_NUMERIC = 4;
+ LC_TIME = 5;
+ LC_MESSAGES = 6;
+
+ _LC_LAST = 7;  //* marks end */
+
+ CODESET = 0; //* codeset name */
+ D_T_FMT = 1; //* string for formatting date and time */
+ D_FMT = 2; //* date format string */
+ T_FMT = 3; //* time format string */
+ T_FMT_AMPM = 4; //* a.m. or p.m. time formatting string */
+ AM_STR = 5; //* Ante Meridian affix */
+ PM_STR = 6; //* Post Meridian affix */
+
+//* week day names */
+ DAY_1 = 7;
+ DAY_2 = 8;
+ DAY_3 = 9;
+ DAY_4 = 10;
+ DAY_5 = 11;
+ DAY_6 = 12;
+ DAY_7 = 13;
+
+//* abbreviated week day names */
+ ABDAY_1 = 14;
+ ABDAY_2 = 15;
+ ABDAY_3 = 16;
+ ABDAY_4 = 17;
+ ABDAY_5 = 18;
+ ABDAY_6 = 19;
+ ABDAY_7 = 20;
+
+//* month names */
+ MON_1 = 21;
+ MON_2 = 22;
+ MON_3 = 23;
+ MON_4 = 24;
+ MON_5 = 25;
+ MON_6 = 26;
+ MON_7 = 27;
+ MON_8 = 28;
+ MON_9 = 29;
+ MON_10 = 30;
+ MON_11 = 31;
+ MON_12 = 32;
+
+//* abbreviated month names */
+ ABMON_1 = 33;
+ ABMON_2 = 34;
+ ABMON_3 = 35;
+ ABMON_4 = 36;
+ ABMON_5 = 37;
+ ABMON_6 = 38;
+ ABMON_7 = 39;
+ ABMON_8 = 40;
+ ABMON_9 = 41;
+ ABMON_10 = 42;
+ ABMON_11 = 43;
+ ABMON_12 = 44;
+
+ ERA = 45; //* era description segments */
+ ERA_D_FMT = 46; //* era date format string */
+ ERA_D_T_FMT = 47; //* era date and time format string */
+ ERA_T_FMT = 48; //* era time format string */
+ ALT_DIGITS = 49; //* alternative symbols for digits */
+
+ RADIXCHAR = 50; //* radix char */
+ DECIMAL_POINT = RADIXCHAR;
+ MON_DECIMAL_POINT = RADIXCHAR;
+ THOUSEP  = 51; //* separator for thousands */
+ THOUSANDS_SEP = THOUSEP;
+ MON_THOUSANDS_SEP = THOUSEP;
+
+ YESEXPR  = 52; //* affirmative response expression */
+ NOEXPR  = 53; //* negative response expression */
+
+//#if __BSD_VISIBLE || __XSI_VISIBLE <= 500
+ YESSTR = 54; //* affirmative response for yes/no queries */
+ NOSTR = 55; //* negative response for yes/no queries */
+//#endif
+
+ CRNCYSTR = 56; //* currency symbol */
+ CURRENCY_SYMBOL = CRNCYSTR;
+
+//#if __BSD_VISIBLE
+ D_MD_ORDER = 57; //* month/day order (local extension) */
+//#endif
+
+//* standalone months forms for %OB */
+ ALTMON_1 = 58;
+ ALTMON_2 = 59;
+ ALTMON_3 = 60;
+ ALTMON_4 = 61;
+ ALTMON_5 = 62;
+ ALTMON_6 = 63;
+ ALTMON_7 = 64;
+ ALTMON_8 = 65;
+ ALTMON_9 = 66;
+ ALTMON_10 = 67;
+ ALTMON_11 = 68;
+ ALTMON_12 = 69;
+
+{$endif} 
 type
  Pnl_item = ^nl_item;
  nl_item = longint;
