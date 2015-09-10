@@ -1628,6 +1628,7 @@ var
  end;
  
 begin
+ result:= '';
  charcount:= 0;
  po2:= value;
  while po2^ <> #0 do begin
