@@ -117,7 +117,9 @@ var
  ch1,ch2{$ifdef linux},ch3{$endif}: char;
  str1,str2: string;
  mstr1: msestring;
+{$ifndef linux}
  bo1: boolean;
+{$endif}
 
  currfo: array[0..1,0..1] of byte = ((1,3),(0,2));
            //[p_cs_precedes,p_sep_by_space]
