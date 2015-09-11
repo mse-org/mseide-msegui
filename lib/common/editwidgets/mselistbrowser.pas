@@ -288,7 +288,7 @@ type
    procedure limitcellwidth(var avalue: integer);
 
    procedure setoptions(const avalue: listviewoptionsty); virtual;
-   procedure rootchanged(const awidgetregioninvalid: boolean); override;
+   procedure rootchanged(const aflags: rootchangeflagsty); override;
    procedure doitemchange(index: integer);
    procedure doitemevent(const index: integer;
                                var info: celleventinfoty); virtual;
@@ -2022,7 +2022,7 @@ begin
 }
 end;
 
-procedure tcustomlistview.rootchanged(const awidgetregioninvalid: boolean);
+procedure tcustomlistview.rootchanged(const aflags: rootchangeflagsty);
 begin
  inherited;
  feditor.poschanged;

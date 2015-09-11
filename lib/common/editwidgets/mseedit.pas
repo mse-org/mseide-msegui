@@ -429,7 +429,7 @@ type
    procedure paintimage(const canvas: tcanvas); virtual;
    function needsfocuspaint: boolean; override;
 //   procedure doafterpaint(const canvas: tcanvas); override;
-   procedure rootchanged(const awidgetregionivalid: boolean); override;
+   procedure rootchanged(const aflags: rootchangeflagsty); override;
    function gettextcliprect(): rectty; virtual;
    procedure showhint(var info: hintinfoty); override;
 
@@ -1704,7 +1704,7 @@ begin
  feditor.dofocus;
 end;
 
-procedure tcustomedit.rootchanged(const awidgetregionivalid: boolean);
+procedure tcustomedit.rootchanged(const aflags: rootchangeflagsty);
 begin
  inherited;
  feditor.poschanged;

@@ -244,6 +244,7 @@ type
    procedure afterconstruction; override;
    procedure freeinstance override;
    procedure reload(const callafterload: boolean = false);
+   procedure writestate(writer: twriter); override;
    
    procedure insertwidget(const widget: twidget; const apos: pointty); override;
    procedure dolayout(const sender: twidget); override;
@@ -1055,6 +1056,12 @@ begin
  if callafterload then begin
   doafterload;
  end;
+end;
+
+procedure tcustommseform.writestate(writer: twriter);
+begin
+ tscrollboxframe(fscrollbox.frame).scrollpos:= nullpoint;
+ inherited;
 end;
 
 {$ifdef mse_with_ifi}

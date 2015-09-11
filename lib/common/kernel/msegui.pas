@@ -1334,7 +1334,10 @@ type
 
  modallevelty = (ml_none,ml_application, //call eventloop
                  ml_window);             //reflect window focus
- 
+
+ rootchangeflagty = (rcf_widgetregioninvalid,rcf_windowset,rcf_windowremove);
+ rootchangeflagsty = set of rootchangeflagty;
+  
  widgetalignmodety = (wam_none,wam_start,wam_center,wam_end);
  widgetclassty = class of twidget;
  navigrequesteventty = procedure(const sender: twidget;
@@ -1585,7 +1588,7 @@ type
    procedure poschanged; virtual;
    procedure clientrectchanged; virtual;
    procedure parentchanged; virtual;
-   procedure rootchanged(const awidgetregioninvalid: boolean); virtual;
+   procedure rootchanged(const aflags: rootchangeflagsty); virtual;
    function getdefaultfocuschild: twidget; virtual;
                                    //returns first focusable widget
    procedure setdefaultfocuschild(const value: twidget); virtual;
@@ -7508,13 +7511,19 @@ begin
 end;
 
 procedure twidget.registerchildwidget(const child: twidget);
+var
+ flags: rootchangeflagsty;
 begin
  if indexofwidget(child) >= 0 then begin
   guierror(gue_alreadyregistered,self,':'+child.name);
  end;
  setlength(fwidgets,high(fwidgets)+2);
  fwidgets[high(fwidgets)]:= child;
- child.rootchanged(true);
+ flags:= [rcf_widgetregioninvalid];
+ if child.fwindow <> fwindow then begin
+  flags:= flags + [rcf_windowremove,rcf_windowset];
+ end;
+ child.rootchanged(flags);
 // child.updateopaque(true); //for cl_parent
  if not isloading then begin
   child.updateopaque(true,false); //for cl_parent
@@ -7544,7 +7553,7 @@ begin
  if fdefaultfocuschild = child then begin
   fdefaultfocuschild:= nil;
  end;
- child.rootchanged(true);
+ child.rootchanged([rcf_widgetregioninvalid]);
  if not isloading then begin
   updatetaborder(nil);
   if child.isvisible then begin
@@ -7817,7 +7826,7 @@ begin
   end;
   fwidgetrect.x:= value.x;
   fwidgetrect.y:= value.y;
-  rootchanged(false);
+  rootchanged([]);
  end;
  if sizecha then begin
   inc(fsetwidgetrectcount);
@@ -9024,7 +9033,7 @@ begin
  end;
 end;
 
-procedure twidget.rootchanged(const awidgetregioninvalid: boolean);
+procedure twidget.rootchanged(const aflags: rootchangeflagsty);
 var
  int1: integer;
 begin
@@ -9032,11 +9041,11 @@ begin
   fwindow:= nil;
  end;
  fwidgetstate1:= fwidgetstate1 - [{ws1_widgetregionvalid,}ws1_rootvalid];
- if awidgetregioninvalid then begin
+ if rcf_widgetregioninvalid in aflags then begin
   exclude(fwidgetstate1,ws1_widgetregionvalid);
  end;
  for int1:= 0 to high(fwidgets) do begin
-  fwidgets[int1].rootchanged(awidgetregioninvalid);
+  fwidgets[int1].rootchanged(aflags);
  end;
 end;
 
@@ -9505,7 +9514,7 @@ var
  widget1: twidget;
 begin
  result:= false;
- if fparentwidget <> nil then begin
+ if (fparentwidget <> nil) and showing then begin
   updateroot;
   addpoint1(arect.pos,fwidgetrect.pos);
   for int1:= high(fparentwidget.fwidgets) downto 0 do begin
@@ -9513,7 +9522,8 @@ begin
    if widget1 = self then begin
     break;
    end;
-   if intersectrect(widget1.fwidgetrect,arect,arect) then begin
+   if intersectrect(widget1.fwidgetrect,arect,arect) and 
+                                        widget1.showing then begin
     result:= true;
     exit;
    end; 
@@ -11940,7 +11950,7 @@ begin
    with widget1 do begin
     addpoint1(fwidgetrect.pos,dist);
     addpoint1(frootpos,dist);
-    rootchanged(false);
+    rootchanged([]);
    end;
    if appinst.fcaretwidget = widget1 then begin
     widget1.reclipcaret;
@@ -11987,7 +11997,8 @@ begin
    inc(rect1.x,fframe.fpaintrect.x);
    inc(rect1.y,fframe.fpaintrect.y); //widget origin
   end;
-  if (ow_noscroll in foptionswidget) and not (csdesigning in componentstate) or
+  if (ow_noscroll in foptionswidget) or{and not}
+     (csdesigning in componentstate) or //restore grid
      (tws_painting in fwindow.fstate) or
      (abs(dist.x) >= rect.cx) or (abs(dist.y) > rect1.cy) then begin
    invalidaterect(rect1,org_widget);
@@ -13558,7 +13569,7 @@ begin
  fasynccanvas:= creategdicanvas(fgdi,bmk_rgb,self,icanvas(self));
  fscrollnotifylist:= tnotifylist.create;
  inherited create;
- fownerwidget.rootchanged(false); //nil all references
+ fownerwidget.rootchanged([rcf_windowset]); //nil all references
 end;
 
 destructor twindow.destroy;
@@ -13571,7 +13582,7 @@ begin
   dec(ftransientfor.ftransientforcount);
  end;
  if fownerwidget <> nil then begin
-  fownerwidget.rootchanged(false);
+  fownerwidget.rootchanged([rcf_windowremove]);
  end;
  destroywindow;
  fcanvas.free;

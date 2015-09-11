@@ -213,6 +213,7 @@ type
    procedure clientsizechanged;
    procedure adjustchildcomponentpos(var apos: pointty);
    procedure readjustchildcomponentpos(var apos: pointty);
+   procedure widgetscrolled(const sender: tobject);
 
 
    procedure setmodule(const value: tmsecomponent);
@@ -289,6 +290,7 @@ type
    procedure checksynctoformsize();
    procedure checksynctomodulepos();
    procedure formcontainerwidgetregionchanged(const sender: twidget);
+   procedure rootchanged(const aflags: rootchangeflagsty); override;
    procedure parentchanged(); override;
    procedure poschanged; override;
    procedure sizechanged; override;
@@ -1169,6 +1171,25 @@ begin
  fselections.free();
 end;
 
+procedure tformdesignerfo.rootchanged(const aflags: rootchangeflagsty);
+begin
+ if (rcf_windowremove in aflags) and (fwindow <> nil) then begin
+  fwindow.unregisteronscroll(@widgetscrolled);
+ end;
+ inherited;
+ if (rcf_windowset in aflags) then begin
+  window.registeronscroll(@widgetscrolled);
+ end;
+end;
+
+procedure tformdesignerfo.parentchanged();
+begin
+ inherited;
+// checksynctoformsize();
+ updateformcont();
+ updatedockinfo();
+end;
+
 procedure tformdesignerfo.ValidateRename(AComponent: TComponent;
   const CurName, NewName: string);
 begin
@@ -1286,6 +1307,11 @@ procedure tformdesignerfo.readjustchildcomponentpos(var apos: pointty);
 begin
  addpoint1(apos,componentoffset);
  subpoint1(apos,widgetrefpoint);
+end;
+
+procedure tformdesignerfo.widgetscrolled(const sender: tobject);
+begin
+ fselections.change();
 end;
 
 function tformdesignerfo.getcomponentrect(const component: tcomponent;
@@ -2552,14 +2578,6 @@ begin
  end;
 end;
 
-procedure tformdesignerfo.parentchanged();
-begin
- inherited;
-// checksynctoformsize();
- updateformcont();
- updatedockinfo();
-end;
-
 procedure tformdesignerfo.beffloatexe(const sender: twidget;
                var arect: rectty);
 begin
@@ -3142,7 +3160,7 @@ begin
  if fmodule is twidget then begin
   with twidget1(fmodule) do begin
    fwidgetrect.pos:= self.paintpos;
-   rootchanged(true);
+   rootchanged([rcf_widgetregioninvalid]);
   end;
  end;
 end;
