@@ -679,6 +679,7 @@ begin
  inherited create(aowner); //dockcontroller needs owner
  setsubcomponent(true);
  exclude(fwidgetstate,ws_iswidget);
+ include(fwidgetstate1,ws1_designactive);
  foptionswidget:= defaultcontaineroptionswidget;
 // parentwidget:= aowner;
  setlockedparentwidget(aowner);

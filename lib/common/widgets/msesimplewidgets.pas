@@ -2402,6 +2402,7 @@ end;
 constructor tscrollbox.create(aowner: tcomponent);
 begin
  inherited;
+ include(fwidgetstate1,ws1_designactive);
  foptionswidget:= defaultoptionswidgetmousewheel;
  foptionsscale:= defaultscrollboxoptionsscale;
  internalcreateframe;
