@@ -177,6 +177,11 @@ type
   public
    function getvalue: msestring; override;
  end;
+
+ tfielddatalinkpropertyeditor = class(tdatalinkpropertyeditor)
+  public
+   function getvalue: msestring; override;
+ end;
   
  tnolistdropdowncolpropertyeditor = class(tarraypropertyeditor)
   protected
@@ -428,6 +433,8 @@ begin
  registercomponenttabhints(['DBf'],['Datafield and data display components']);
 
  registerpropertyeditor(typeinfo(tdatalink),nil,'',tdatalinkpropertyeditor);
+ registerpropertyeditor(typeinfo(tfielddatalink),nil,'',
+                                              tfielddatalinkpropertyeditor);
  registerpropertyeditor(typeinfo(datasetoptionsty),nil,'',
                                            tdatasetoptionspropertyeditor);
  registerpropertyeditor(typeinfo(variant),tmseparam,'value',
@@ -1756,6 +1763,19 @@ begin
  end
  else begin
   result:= inherited getvalue;
+ end;
+end;
+
+{ tfielddatalinkpropertyeditor }
+
+function tfielddatalinkpropertyeditor.getvalue: msestring;
+var
+ inst: tfielddatalink;
+begin
+ inst:= tfielddatalink(getpointervalue());
+ result:= inherited getvalue();
+ if inst.fieldname <> '' then begin
+  result:= '<'+msestring(inst.fieldname)+'>'+result;
  end;
 end;
 
