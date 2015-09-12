@@ -172,7 +172,12 @@ type
  tpropertyeditor1 = class(tpropertyeditor);
  tlbdropdowncol1 = class(tlbdropdowncol);
  tarrayelementeditor1 = class(tarrayelementeditor);
- 
+
+ tdatalinkpropertyeditor = class(tclasspropertyeditor)
+  public
+   function getvalue: msestring; override;
+ end;
+  
  tnolistdropdowncolpropertyeditor = class(tarraypropertyeditor)
   protected
    function geteditorclass: propertyeditorclassty; override;
@@ -422,6 +427,7 @@ begin
       ]);
  registercomponenttabhints(['DBf'],['Datafield and data display components']);
 
+ registerpropertyeditor(typeinfo(tdatalink),nil,'',tdatalinkpropertyeditor);
  registerpropertyeditor(typeinfo(datasetoptionsty),nil,'',
                                            tdatasetoptionspropertyeditor);
  registerpropertyeditor(typeinfo(variant),tmseparam,'value',
@@ -1736,6 +1742,21 @@ begin
      {$else}
         mask1
      {$endif});
+end;
+
+{ tdatalinkpropertyeditor }
+
+function tdatalinkpropertyeditor.getvalue: msestring;
+var
+ inst: tdatalink;
+begin
+ inst:= tdatalink(getpointervalue());
+ if (inst <> nil) and (inst.datasource <> nil) then begin
+  result:= '<'+getcomponentpropname(inst.datasource)+'>';
+ end
+ else begin
+  result:= inherited getvalue;
+ end;
 end;
 
 initialization
