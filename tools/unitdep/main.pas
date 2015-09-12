@@ -23,7 +23,7 @@ uses
  msedataedits,msedatanodes,mseedit,msefiledialog,msegrids,mseifiglob,
  mselistbrowser,msestrings,msesys,msetypes,msesimplewidgets,msewidgets,
  msewidgetgrid,mselist,classes,mclasses,mseificomp,mseificompglob,msedispwidgets,
- msesplitter;
+ msesplitter,msevaluenodes;
 
 type
  tdependencylist = class;
@@ -124,7 +124,7 @@ begin
   clear;
   add(flist.getnodes(flist.fapplication));
  end;
- grid.fixrows[-1].captions[0].caption:= flist.fapplication;
+ grid.fixrows[-1].captions[0].caption:= msestring(flist.fapplication);
  str1:= start.value;
  str2:= dest.value;
  dropdownunits.controller.dropdown.cols[0].asarray:= flist.getunitnames;
@@ -137,10 +137,12 @@ procedure tmainfo.pathdatentexe(const sender: TObject);
 begin
  if (start.value <> '') {and (dest.value <> '')} then begin
   if dest.value = '' then begin
-   pathdisp.value:= concatstrings(flist.finddependnames(start.value),':');
+   pathdisp.value:= concatstrings(
+                          flist.finddependnames(ansistring(start.value)),':');
   end
   else begin
-   pathdisp.value:= concatstrings(flist.findpath(start.value,dest.value),',');
+   pathdisp.value:= concatstrings(flist.findpath(ansistring(start.value),
+                                               ansistring(dest.value)),',');
   end;
  end
  else begin
@@ -391,7 +393,7 @@ begin
     if depend <> dep1 then begin
      dep1:= depend;
      n1:= tunitdependencynode.create(self);
-     n1.caption:= depend;
+     n1.caption:= msestring(depend);
      additem(pointerarty(result),pointer(n1),count1);
     end;
     inc(int1);
@@ -414,7 +416,7 @@ begin
  for int1:= 0 to fcount - 1 do begin
   if str1 <> pdependencyinfoty(ar1[int1])^.name then begin
    str1:= pdependencyinfoty(ar1[int1])^.name;
-   result[int2]:= str1;
+   result[int2]:= msestring(str1);
    inc(int2);
   end;
  end;
@@ -519,7 +521,7 @@ begin
    setlength(result,length(destar1));
    int2:= 0;
    for int1:= high(destar1) downto 0 do begin
-    result[int2]:= destar1[int1];
+    result[int2]:= msestring(destar1[int1]);
     inc(int2);
    end;
    break;
@@ -544,7 +546,7 @@ var
 begin
  if (ainfo.action = na_expand) and not fsubitemschecked then begin
   fsubitemschecked:= true;
-  add(flist.getnodes(caption));
+  add(flist.getnodes(ansistring(caption)));
   for int1:= 0 to fcount - 1 do begin
    n1:= fitems[int1];
    n2:= n1.parent;
