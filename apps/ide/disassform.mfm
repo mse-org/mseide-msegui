@@ -1,7 +1,8 @@
 object disassfo: tdisassfo
+  frame.localprops = []
+  frame.localprops1 = []
   frame.grip_size = 10
   frame.grip_options = [go_closebutton, go_fixsizebutton, go_floatbutton, go_topbutton, go_backgroundbutton]
-  frame.dummy = 0
   onactivate = act
   ondeactivate = deact
   visible = False
@@ -9,6 +10,8 @@ object disassfo: tdisassfo
   bounds_y = 502
   bounds_cx = 564
   bounds_cy = 210
+  container.frame.localprops = []
+  container.frame.localprops1 = []
   container.bounds = (
     0
     0
@@ -90,6 +93,9 @@ object disassfo: tdisassfo
   moduleclassname = 'tdockform'
   object grid: tstringgrid
     color = -1879048187
+    frame.sbvert.options = [sbo_thumbtrack, sbo_show]
+    frame.localprops = []
+    frame.localprops1 = []
     popupmenu = popupmen
     bounds_x = 0
     bounds_y = 0
@@ -111,12 +117,12 @@ object disassfo: tdisassfo
         optionsedit = [scoe_eatreturn, scoe_hintclippedtext]
         font.name = 'stf_fixed'
         font.xscale = 1
-        font.dummy = 0
+        font.localprops = [flp_xscale]
         valuefalse = '0'
         valuetrue = '1'
       end    
       item
-        width = 370
+        width = 355
         options = [co_readonly, co_drawfocus, co_fill, co_savestate]
         textflags = [tf_ycentered, tf_noselect, tf_tabtospace]
         textflagsactive = [tf_ycentered, tf_tabtospace]
