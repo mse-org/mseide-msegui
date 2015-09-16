@@ -2077,8 +2077,14 @@ begin
    for int1:= fitemlist.count to rowcount * datacols.count - 1 do begin
     fdatacols.selected[indextocell(int1)]:= false; //empty cells
    end;
-   if (lvo_focusselect in foptions) and focusedcellvalid() then begin
-    datacols[ffocusedcell.col].selected[ffocusedcell.row]:= true;
+   if focusedcellvalid() then begin
+    int1:= celltoindex(ffocusedcell,false);
+    if int1 >= 0 then begin
+     if (lvo_focusselect in foptions) then begin
+      itemlist[int1].selected:= true;
+     end;
+     itemstatetocellstate(int1,ffocusedcell);
+    end;
    end;
   finally
    endupdate;
