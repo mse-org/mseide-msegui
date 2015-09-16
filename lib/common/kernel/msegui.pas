@@ -2482,6 +2482,7 @@ type
    flooplevel: integer;
    
    fmousewheelsensitivity: real;
+   fhintwidgetclass: widgetclassty;
    procedure invalidated;
    function grabpointer(const aid: winidty): boolean;
    function ungrabpointer: boolean;
@@ -2565,6 +2566,9 @@ type
    procedure showasyncexception(e: exception; const leadingtext: msestring = '');
                 //messege posted in queue
    procedure errormessage(const amessage: msestring); override;
+   
+   property hintwidgetclass: widgetclassty read fhintwidgetclass 
+                                                    write fhintwidgetclass;
    procedure inithintinfo(var info: hintinfoty; const ahintedwidget: twidget);
    procedure showhint(const sender: twidget; const hint: msestring;
          const aposrect: rectty; const aplacement: captionposty = cp_bottomleft;
@@ -18041,6 +18045,7 @@ begin
  fmousewheeldeltamin:= 0.05;
  fmousewheeldeltamax:= 30;
  fmousewheelaccelerationmax:= 30;
+ fhintwidgetclass:= thintwidget;
  gui_registergdi;
  inherited;
 end;
@@ -18633,6 +18638,7 @@ procedure tguiapplication.internalshowhint(const sender: twidget;
                             const ahintwidget: twidget);
 var
  window1: twindow;
+ widgetclass1: widgetclassty;
 begin
  fhintforwidget:= sender;
  with tinternalapplication(self),fhintinfo do begin
@@ -18643,16 +18649,17 @@ begin
   end;
   if ahintwidget = nil then begin
    if hintwidgetclass <> nil then begin
-    if hintwidgetclass.inheritsfrom(tcustomhintwidget) then begin
-     fhintwidget:= hintwidgetclassty(hintwidgetclass).create(
-                                                nil,window1,fhintinfo);
-    end
-    else begin
-     fhintwidget:= hintwidgetclass.create(nil);
-    end;
+    widgetclass1:= hintwidgetclass;
    end
    else begin
-    fhintwidget:= thintwidget.create(nil,window1,fhintinfo);
+    widgetclass1:= fhintwidgetclass;
+   end;
+   if widgetclass1.inheritsfrom(tcustomhintwidget) then begin
+    fhintwidget:= hintwidgetclassty(widgetclass1).create(
+                                               nil,window1,fhintinfo);
+   end
+   else begin
+    fhintwidget:= widgetclass1.create(nil);
    end;
   end
   else begin
