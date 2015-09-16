@@ -45,7 +45,7 @@ type
   public
    constructor create(const asender: tobject; var instance: tdragobject;
                     const apickpos: pointty; const dataobject: tobject);
-  property data: tobject read fdata;
+   property data: tobject read fdata;
  end;
 
  tstringdragobject = class(tdragobject)

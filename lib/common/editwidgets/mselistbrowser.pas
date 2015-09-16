@@ -227,6 +227,15 @@ type
    function item: tlistitem;
  end;
 
+ tlistitemsdragobject = class(tdragobject)
+  private
+   fitems: listitemarty;
+  public
+   constructor create(const asender: tobject; var instance: tdragobject;
+                 const apickpos: pointty; const aitems: array of tlistitem);
+   property items: listitemarty read fitems;
+ end;
+
  listvieweventty = procedure(const sender: tcustomlistview) of object;
  
  tcustomlistview = class(tcellgrid,iedit)
@@ -299,7 +308,6 @@ type
    procedure drawfocusedcell(const acanvas: tcanvas); override;
    procedure loaded; override;
    procedure dokeydown(var info: keyeventinfoty); override;
-   procedure moveitem(const source,dest: tlistitem; focus: boolean);
    procedure scrolled(const dist: pointty); override;
 
     //iedit
@@ -316,7 +324,9 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    procedure synctofontheight; override;
-   procedure dragevent(var info: draginfoty); override;
+   function internaldragevent(var info: draginfoty): boolean; override;
+                                //true if processed
+   procedure moveitem(const source,dest: tlistitem; focus: boolean);
    function indextocell(const index: integer): gridcoordty;
    function celltoindex(const cell: gridcoordty; limit: boolean): integer;
    function itematpos(const apos: pointty): tlistitem;
@@ -1448,6 +1458,21 @@ begin
  result:= tlistitem(fdata);
 end;
 
+{ tlistitemsdragobject }
+
+constructor tlistitemsdragobject.create(const asender: tobject;
+               var instance: tdragobject; const apickpos: pointty;
+               const aitems: array of tlistitem);
+var
+ i1: int32;
+begin
+ setlength(fitems,length(aitems));
+ for i1:= 0 to high(fitems) do begin
+  fitems[i1]:= aitems[i1];
+ end;
+ inherited create(asender,instance,apickpos);
+end;
+
 { tcustomlistview }
 
 constructor tcustomlistview.create(aowner: tcomponent);
@@ -2052,6 +2077,9 @@ begin
    for int1:= fitemlist.count to rowcount * datacols.count - 1 do begin
     fdatacols.selected[indextocell(int1)]:= false;
    end;
+   if (lvo_focusselect in foptions) and focusedcellvalid() then begin
+    datacols[ffocusedcell.col].selected[ffocusedcell.row]:= true;
+   end;
   finally
    endupdate;
   end;
@@ -2146,12 +2174,13 @@ begin
  cellheight:= int1;
 end;
 
-procedure tcustomlistview.dragevent(var info: draginfoty);
+function tcustomlistview.internaldragevent(var info: draginfoty): boolean;
 var
  item: tlistitem;
 begin
- with info do begin
-  if lvo_mousemoving in foptions then begin
+ if lvo_mousemoving in foptions then begin
+  result:= true;
+  with info do begin
    item:= itematpos(pos);
    if item <> nil then begin
     case eventkind of
@@ -2159,7 +2188,10 @@ begin
       tlistitemdragobject.create(self,dragobjectpo^,fdragcontroller.pickpos,item);
      end;
      dek_check: begin
-      accept:= item <> focuseditem;
+      accept:= (item <> focuseditem) and (info.dragobjectpo <> nil) and
+        isobjectdrag(info.dragobjectpo^,tlistitem) and 
+        (tlistitem(tobjectdragobject(info.dragobjectpo^).data).owner = 
+                                                                  fitemlist);
      end;
      dek_drop: begin
       moveitem(tlistitemdragobject(dragobjectpo^).item,item,true);
@@ -2167,8 +2199,10 @@ begin
     end;
    end;
   end;
+ end
+ else begin
+  result:= inherited internaldragevent(info);
  end;
- inherited;
 end;
 (*
 procedure tcustomlistview.setfiltertext(const value: msestring);

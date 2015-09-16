@@ -2163,6 +2163,8 @@ type
    procedure initnewcomponent(const ascale: real); override;
    procedure synctofontheight; override;
    procedure dragevent(var info: draginfoty); override;
+   function internaldragevent(var info: draginfoty): boolean; virtual;
+                                //true if processed
    function actualcursor(const apos: pointty): cursorshapety; override;
 
    procedure beginupdate;
@@ -10850,7 +10852,7 @@ begin
    if info.eventkind in [ek_mousemove,ek_mousepark] then begin
     checkrepeater(true);
    end;
-   if not bo1 then begin
+   if not bo1 and isvalidcell(fmousecell) then begin
     cellmouseevent(fmousecell,info);
    end;
   end
@@ -14547,6 +14549,11 @@ begin
  ffixrows.synctofontheight;
 end;
 
+function tcustomgrid.internaldragevent(var info: draginfoty): boolean;
+begin
+ result:= false;
+end;
+
 procedure tcustomgrid.dragevent(var info: draginfoty);
 var
  bo1,bo2: boolean;
@@ -14559,11 +14566,15 @@ begin
    bo1:= false;
    datacols[cell1.col].beforedragevent(info,cell1.row,bo1);
    if not bo1 then begin
-    inherited;
+    if not internaldragevent(info) then begin
+     inherited;
+    end;
    end;
   end
   else begin
-   inherited;
+   if not internaldragevent(info) then begin
+    inherited;
+   end;
   end;
  end;
  if not fdragcontroller.afterdragevent(info) then begin
@@ -14576,7 +14587,8 @@ end;
 
 function tcustomgrid.getdisprect: rectty;
 begin
- if (ffocusedcell.row = invalidaxis) and (ffocusedcell.col = invalidaxis) then begin
+ if (ffocusedcell.row = invalidaxis) and 
+                              (ffocusedcell.col = invalidaxis) then begin
   result:= inherited getdisprect;
  end
  else begin

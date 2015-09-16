@@ -1599,10 +1599,17 @@ begin
 end;
 
 procedure tcustomitemlist.nodenotification(const sender: tlistitem;
-                     var ainfo: nodeactioninfoty);
+                                               var ainfo: nodeactioninfoty);
 begin
- if (ainfo.action = na_change) then begin
-  change(sender);
+ if ainfo.action = na_destroying then begin
+  if not deleting then begin
+   deletedata(sender.index);
+  end;
+ end
+ else begin
+  if (ainfo.action = na_change) then begin
+   change(sender);
+  end;
  end;
 end;
 
@@ -1678,8 +1685,8 @@ end;
 
 function tcustomitemlist.add(const aitem: tlistitem): integer;
 begin
- result:= inherited add(aitem);
  aitem.setowner(self);
+ result:= inherited add(aitem);
 end;
 
 procedure tcustomitemlist.add(const aitems: array of msestring);
