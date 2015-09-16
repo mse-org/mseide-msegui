@@ -18656,7 +18656,7 @@ begin
    end;
    if widgetclass1.inheritsfrom(tcustomhintwidget) then begin
     fhintwidget:= hintwidgetclassty(widgetclass1).create(
-                                               nil,window1,fhintinfo);
+                                               nil,window1,fhintinfo,sender);
    end
    else begin
     fhintwidget:= widgetclass1.create(nil);

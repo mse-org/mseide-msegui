@@ -1137,18 +1137,20 @@ type
  end;
 
  tcustomhintwidget = class(tpopupwidget)
-  private
-   fcaption: captionty;
   public
-   constructor create(aowner: tcomponent; transientfor: twindow;
-                             var info: hintinfoty); virtual; reintroduce;
-   destructor destroy; override;
+   constructor create(const aowner: tcomponent; const transientfor: twindow;
+             var info: hintinfoty; const sender: tobject); virtual; reintroduce;
  end;
  hintwidgetclassty = class of tcustomhintwidget;
  
  thintwidget = class(tcustomhintwidget)
+  private
+   fcaption: captionty;
   protected
    procedure dopaintforeground(const canvas: tcanvas); override;
+  public
+   constructor create(const aowner: tcomponent; const transientfor: twindow;
+                     var info: hintinfoty; const sender: tobject); override;
  end;
 
  tmessagewidget = class(tcaptionwidget)
@@ -5699,12 +5701,12 @@ end;
 
 { tcustomhintwidget }
 
-constructor tcustomhintwidget.create(aowner: tcomponent; transientfor: twindow;
-                 var info: hintinfoty);
+constructor tcustomhintwidget.create(const aowner: tcomponent; 
+                 const transientfor: twindow;
+                 var info: hintinfoty; const sender: tobject);
 var
  rect1,rect2: rectty;
 begin
- fcaption:= info.caption;
  inherited create(aowner,transientfor);
  internalcreateframe;
  fframe.levelo:= 1;
@@ -5723,12 +5725,15 @@ begin
                                                                  rect1.size);
 end;
 
-destructor tcustomhintwidget.destroy;
+{ thintwidget}
+
+constructor thintwidget.create(const aowner: tcomponent;
+               const transientfor: twindow; var info: hintinfoty;
+               const sender: tobject);
 begin
+ fcaption:= info.caption;
  inherited;
 end;
-
-{ thintwidget}
 
 procedure thintwidget.dopaintforeground(const canvas: tcanvas);
 begin
