@@ -2075,7 +2075,7 @@ begin
   beginupdate;
   try
    for int1:= fitemlist.count to rowcount * datacols.count - 1 do begin
-    fdatacols.selected[indextocell(int1)]:= false;
+    fdatacols.selected[indextocell(int1)]:= false; //empty cells
    end;
    if (lvo_focusselect in foptions) and focusedcellvalid() then begin
     datacols[ffocusedcell.col].selected[ffocusedcell.row]:= true;
