@@ -1136,15 +1136,19 @@ type
    constructor create(aowner: tcomponent; transientfor: twindow); reintroduce; overload;
  end;
 
- thintwidget = class(tpopupwidget)
+ tcustomhintwidget = class(tpopupwidget)
   private
    fcaption: captionty;
-  protected
-   procedure dopaintforeground(const canvas: tcanvas); override;
   public
    constructor create(aowner: tcomponent; transientfor: twindow;
-                             var info: hintinfoty); reintroduce;
+                             var info: hintinfoty); virtual; reintroduce;
    destructor destroy; override;
+ end;
+ hintwidgetclassty = class of tcustomhintwidget;
+ 
+ thintwidget = class(tcustomhintwidget)
+  protected
+   procedure dopaintforeground(const canvas: tcanvas); override;
  end;
 
  tmessagewidget = class(tcaptionwidget)
@@ -5693,9 +5697,9 @@ begin
  end;
 end;
 
-{ thintwidget }
+{ tcustomhintwidget }
 
-constructor thintwidget.create(aowner: tcomponent; transientfor: twindow;
+constructor tcustomhintwidget.create(aowner: tcomponent; transientfor: twindow;
                  var info: hintinfoty);
 var
  rect1,rect2: rectty;
@@ -5715,19 +5719,22 @@ begin
  addsize1(rect1.size,fframe.innerframedim);
 // inc(rect1.cx,fframe.innerframedim.cx);
 // inc(rect1.cy,fframe.innerframedim.cy);
- widgetrect:= placepopuprect(transientfor,info.posrect,info.placement,rect1.size);
+ widgetrect:= placepopuprect(transientfor,info.posrect,info.placement,
+                                                                 rect1.size);
 end;
+
+destructor tcustomhintwidget.destroy;
+begin
+ inherited;
+end;
+
+{ thintwidget}
 
 procedure thintwidget.dopaintforeground(const canvas: tcanvas);
 begin
  inherited;
  drawtext(canvas,fcaption,innerclientrect,[tf_wordbreak],
                                       stockobjects.fonts[stf_hint]);
-end;
-
-destructor thintwidget.destroy;
-begin
- inherited;
 end;
 
 { tmessagewidget }

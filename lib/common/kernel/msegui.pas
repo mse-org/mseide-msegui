@@ -180,17 +180,6 @@ type
                hfl_noautohidemove);
  hintflagsty = set of hintflagty;
 
- hintinfoty = record
-  flags: hintflagsty;
-  caption: captionty;
-  posrect: rectty;
-  placement: captionposty;
-  showtime: integer;
-  mouserefpos: pointty;
- end;
-
- showhinteventty = procedure(const sender: tobject; var info: hintinfoty) of object;
-
 const
  defaultwidgetstates = [ws_visible,ws_enabled,ws_iswidget,ws_isvisible];
  defaultwidgetstatesinvisible = [ws_enabled,ws_iswidget];
@@ -298,10 +287,21 @@ deprecatedfacelocalprops = [fal_fatransparency];
 invisiblefacelocalprops = [ord(fal_fatransparency)];
 
 type
-
- 
  twidget = class;
+ widgetclassty = class of twidget;
  tcustomframe = class;
+
+ hintinfoty = record
+  flags: hintflagsty;
+  caption: captionty;
+  posrect: rectty;
+  placement: captionposty;
+  showtime: integer;
+  mouserefpos: pointty;
+  hintwidgetclass: widgetclassty;
+ end;
+
+ showhinteventty = procedure(const sender: tobject; var info: hintinfoty) of object;
 
  iframe = interface(inullinterface)
   procedure setframeinstance(instance: tcustomframe);
@@ -1339,7 +1339,6 @@ type
  rootchangeflagsty = set of rootchangeflagty;
   
  widgetalignmodety = (wam_none,wam_start,wam_center,wam_end);
- widgetclassty = class of twidget;
  navigrequesteventty = procedure(const sender: twidget;
                                 var ainfo: naviginfoty) of object; 
  twidget = class(tactcomponent,iscrollframe,iface,iassistiveclient)
@@ -2493,7 +2492,8 @@ type
    procedure activatehint;
    procedure deactivatehint;
    procedure hinttimer(const sender: tobject);
-   procedure internalshowhint(const sender: twidget);
+   procedure internalshowhint(const sender: twidget; 
+                                       const ahintwidget: twidget);
    procedure setmainwindow(const Value: twindow);
    procedure setcursorshape(const avalue: cursorshapety);
    procedure setwidgetcursorshape(const avalue: cursorshapety);
@@ -2567,19 +2567,21 @@ type
    procedure errormessage(const amessage: msestring); override;
    procedure inithintinfo(var info: hintinfoty; const ahintedwidget: twidget);
    procedure showhint(const sender: twidget; const hint: msestring;
-              const aposrect: rectty; const aplacement: captionposty = cp_bottomleft;
+         const aposrect: rectty; const aplacement: captionposty = cp_bottomleft;
               const ashowtime: integer = defaulthintshowtime; //0 -> inifinite,
                  // -1 defaultshowtime if ow_timedhint in sender.optionswidget
-              const aflags: hintflagsty = defaulthintflags
-                      ); overload;
+              const aflags: hintflagsty = defaulthintflags);
    procedure showhint(const sender: twidget; const hint: msestring;
               const apos: pointty;
               const ashowtime: integer = defaulthintshowtime; //0 -> inifinite,
                  // -1 defaultshowtime if ow_timedhint in sender.optionswidget
-              const aflags: hintflagsty = defaulthintflags
-                      ); overload;
-   procedure showhint(const sender: twidget; const info: hintinfoty); overload;
-   procedure showhint(const sender: twidget; const hint: msestring); overload;
+              const aflags: hintflagsty = defaulthintflags);
+   procedure showhint(const sender: twidget; const info: hintinfoty);
+   procedure showhint(const sender: twidget; const hint: msestring);
+   procedure showhint(const sender: twidget; const hintwidget: twidget;
+             const ashowtime: integer = defaulthintshowtime; //0 -> inifinite,
+                 // -1 defaultshowtime if ow_timedhint in sender.optionswidget
+              const aflags: hintflagsty = defaulthintflags);
    procedure hidehint;
    procedure restarthint(const sender: twidget);
    function hintedwidget: twidget; //last hinted widget
@@ -3003,7 +3005,7 @@ type
    fdesigning: boolean;
    fmodalwindow: twindow;
    flockupdatewindowstack: twindow;
-   fhintwidget: thintwidget;
+   fhintwidget: twidget;//thintwidget;
    fhinttimer: tsimpletimer;
    fmouseparktimer: tsimpletimer;
    fmouseparkeventinfo: mouseeventinfoty;
@@ -18627,7 +18629,8 @@ begin
  end;
 end;
 
-procedure tguiapplication.internalshowhint(const sender: twidget);
+procedure tguiapplication.internalshowhint(const sender: twidget;
+                            const ahintwidget: twidget);
 var
  window1: twindow;
 begin
@@ -18638,7 +18641,23 @@ begin
               (activewindow = sender.window) and activewindow.modal) then begin
    window1:= sender.window;
   end;
-  fhintwidget:= thintwidget.create(nil,window1,fhintinfo);
+  if ahintwidget = nil then begin
+   if hintwidgetclass <> nil then begin
+    if hintwidgetclass.inheritsfrom(tcustomhintwidget) then begin
+     fhintwidget:= hintwidgetclassty(hintwidgetclass).create(
+                                                nil,window1,fhintinfo);
+    end
+    else begin
+     fhintwidget:= hintwidgetclass.create(nil);
+    end;
+   end
+   else begin
+    fhintwidget:= thintwidget.create(nil,window1,fhintinfo);
+   end;
+  end
+  else begin
+   fhintwidget:= ahintwidget;
+  end;
  {$ifdef mse_debugzorder}
   debugwriteln('** showhint '+tinternalapplication(self).fhintinfo.caption);
  {$endif}
@@ -18701,7 +18720,7 @@ begin
   end;
   placement:= aplacement;
  end;
- internalshowhint(sender);
+ internalshowhint(sender,nil);
 end;
 
 procedure tguiapplication.showhint(const sender: twidget; const hint: msestring;
@@ -18732,6 +18751,24 @@ begin
  inithintinfo(info,sender);
  info.caption:= hint;
  showhint(sender,info);
+end;
+
+procedure tguiapplication.showhint(const sender: twidget; 
+             const hintwidget: twidget;
+             const ashowtime: integer = defaulthintshowtime; //0 -> inifinite,
+                 // -1 defaultshowtime if ow_timedhint in sender.optionswidget
+              const aflags: hintflagsty = defaulthintflags);
+begin
+ deactivatehint;
+ fhintedwidget:= sender;
+ inithintinfo(fhintinfo,sender);
+ with fhintinfo do begin
+  flags:= aflags;
+  if ashowtime >= 0 then begin
+   showtime:= ashowtime;
+  end;
+ end;
+ internalshowhint(sender,hintwidget);
 end;
 
 procedure tguiapplication.hidehint;
@@ -18800,7 +18837,7 @@ begin
   with fhintinfo do begin
    if (hfl_show in flags) or (caption <> '') then begin
     translateclientpoint1(posrect.pos,fhintedwidget,nil);
-    internalshowhint(fhintedwidget);
+    internalshowhint(fhintedwidget,nil);
    end;
   end;
  end;
