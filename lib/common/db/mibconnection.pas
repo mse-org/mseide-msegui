@@ -380,6 +380,15 @@ var
   tr       : TIBTrans;
   s        : string;
   int1: integer;
+  s2: string;
+  i2: int32;
+
+ procedure paramerror();
+ begin
+  raise econnectionerror.create(self,
+                           'Invalid transaction parameter "'+s+'"','',0);
+ end; //paramerror
+
 begin
   result := false;
 
@@ -408,7 +417,23 @@ begin
      else if s='isc_tpb_ignore_limbo' then TPB := TPB + chr(isc_tpb_ignore_limbo)
      else if s='isc_tpb_autocommit' then TPB := TPB + chr(isc_tpb_autocommit)
      else if s='isc_tpb_restart_requests' then TPB := TPB + chr(isc_tpb_restart_requests)
-     else if s='isc_tpb_no_auto_undo' then TPB := TPB + chr(isc_tpb_no_auto_undo);
+     else if s='isc_tpb_no_auto_undo' then TPB := TPB + chr(isc_tpb_no_auto_undo)
+     else if pos('isc_tpb_lock_timeout',s) = 1 then begin
+      i2:= length('isc_tpb_lock_timeout');
+      if length(s) > i2 then begin
+       s2:= trim(copy(s,i2+1,bigint));
+       if trystrtoint(s2,i2) then begin
+        tpb:= tpb + chr(isc_tpb_lock_timeout)+#4+
+             chr(i2)+chr(i2 shr 8)+chr(i2 shr 16)+chr(i2 shr 24);
+       end
+       else begin
+        paramerror();
+       end;
+      end
+      else begin
+       paramerror();
+      end;
+     end;
     end;
     TransactionHandle := nil;
     if isc_start_transaction(@Status, @TransactionHandle, 1,
