@@ -1651,8 +1651,8 @@ var
 label
  endstep;
 begin
+ aindexlist:= nil;
  if alength = 0 then begin
-  aindexlist:= nil;
   exit;
  end;
  po1:= pointer(asortlist);
@@ -1865,8 +1865,8 @@ var
 label
  endstep;
 begin
+ aindexlist:= nil;
  if acount = 0 then begin
-  aindexlist:= nil;
   exit;
  end;
  po1:= pointer(adata);
@@ -1988,8 +1988,8 @@ var
 label
  endstep;
 begin
+ aoffsetlist:= nil;
  if acount = 0 then begin
-  aoffsetlist:= nil;
   exit;
  end;
  po1:= pointer(adata);
@@ -2111,8 +2111,8 @@ var
 label
  endstep;
 begin
+ apointerlist:= nil;
  if acount = 0 then begin
-  apointerlist:= nil;
   exit;
  end;
 // po1:= pointer(adata);
@@ -2283,8 +2283,8 @@ var
 label
  endstep;
 begin
+ aindexlist:= nil;
  if acount = 0 then begin
-  aindexlist:= nil;
   exit;
  end;
  allocuninitedarray(acount,sizeof(integer),ar1);

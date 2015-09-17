@@ -600,6 +600,7 @@ function copylistitems(const asource: listitemarty): listitemarty;
 var
  int1: integer;
 begin
+ result:= nil;
  allocuninitedarray(length(asource),sizeof(pointer),result);
  for int1:= 0 to high(result) do begin
   result[int1]:= listitemclassty(asource[int1].classtype).create(nil);

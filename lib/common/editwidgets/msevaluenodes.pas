@@ -535,6 +535,7 @@ end;
 procedure trecordvaluelistedititem.getvalueinfo(out avalues: recvaluearty;
                                                      const aindex: int32 = -1);
 begin
+ avalues:= nil;
  allocuninitedarray(1,sizeof(recvaluety),avalues);
  with avalues[0] do begin
   datatype:= dl_none;

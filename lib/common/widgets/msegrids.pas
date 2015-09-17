@@ -4211,7 +4211,8 @@ begin
   autocellsize.cx:= acolwidth;
   autocellsize.cy:= fcellinfo.grid.datarowheight;
   canvas:= fcellinfo.grid.getcanvas;  
-  allocuninitedarray(acount,sizeof(rows[0]),rows);
+  
+  (acount,sizeof(rows[0]),rows);
   int2:= acol;
   startrow:= acol;
   endrow:= acol + acount - 1;

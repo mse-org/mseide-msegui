@@ -1353,6 +1353,7 @@ var
  ca1: longword;
 begin
  checkimage(false);
+ result:= nil;
  allocuninitedarray(fimage.length,sizeof(longword),result); //max
  case fkind of
   bmk_mono,bmk_gray: begin
