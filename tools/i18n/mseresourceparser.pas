@@ -717,7 +717,10 @@ procedure writefpcresourcestrings(const outstream: ttextstream;
 var
  int1: integer;
  node1,node2: tpropinfonode;
- str1: string;
+ str1,str2: string;
+ mstr1: msestring;
+ po1: pmsechar;
+ i1: int32;
 begin
  for int1:= 0 to node.count - 1 do begin
   node1:= node[int1];
@@ -731,7 +734,14 @@ begin
     until (node2.fparent = nil) or (node2.parent.parent = nil);
     outstream.writeln('');
     outstream.writeln('# hash value = '+inttostr(hash(msestringvalue)));
-    outstream.writeln(str1+'='+stringtopascalstring(msestringvalue));
+    str2:= ansistring(msestringvalue);
+    setlength(mstr1,length(str2));
+    po1:= pmsechar(mstr1);
+    for i1:= 1 to length(mstr1) do begin
+     po1^:= msechar(byte(str2[i1])); //use locale encoding
+     inc(po1);
+    end;
+    outstream.writeln(str1+'='+stringtopascalstring(mstr1));
    end
    else begin
     writefpcresourcestrings(outstream,node1);
