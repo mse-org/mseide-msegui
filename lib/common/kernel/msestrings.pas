@@ -561,6 +561,7 @@ function stringtoutf8(const value: pmsechar;
                             const count: integer): utf8string;
 function stringtoutf8ansi(const value: pmsechar;
                             const count: integer): ansistring;
+function utf8tostring(const value: pchar; const alength: integer): msestring;
 function utf8tostring(const value: pchar): msestring;
 function utf8tostring(const value: lstringty): msestring;
 function utf8tostring(const value: utf8string): msestring;
@@ -891,7 +892,7 @@ begin
  setlength(result,i1);
 end;
 
-function doutf8tostring(const value: pchar; const alength: integer): msestring;
+function utf8tostring(const value: pchar; const alength: integer): msestring;
 var
  int1,int2: integer;
  by1: byte;
@@ -988,22 +989,22 @@ end;
 
 function utf8tostring(const value: utf8string): msestring;
 begin
- result:= doutf8tostring(pointer(value),length(value));
+ result:= utf8tostring(pointer(value),length(value));
 end;
 
 function utf8tostringansi(const value: ansistring): msestring;
 begin
- result:= doutf8tostring(pointer(value),length(value));
+ result:= utf8tostring(pointer(value),length(value));
 end;
 
 function utf8tostring(const value: pchar): msestring;
 begin
- result:= doutf8tostring(value,strlen(value));
+ result:= utf8tostring(value,strlen(value));
 end;
 
 function utf8tostring(const value: lstringty): msestring;
 begin
- result:= doutf8tostring(value.po,value.len);
+ result:= utf8tostring(value.po,value.len);
 end;
 
 function stringtolatin1(const value: msestring): string;
