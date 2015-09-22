@@ -2569,6 +2569,9 @@ var
  count: integer;
  str1,str2: string;
  apos: pchar;
+ mstr1: msestring;
+ po1: pchar;
+ i1: int32;
  
 begin
  ar:= nil;
@@ -2586,7 +2589,15 @@ begin
      with ar[count-1] do begin
       valuetype:= vawstring;
       name:= str1;
-      value:= pascalstringtostring(str2);
+      mstr1:= pascalstringtostring(str2);
+      setlength(str1,length(mstr1));
+      po1:= pointer(str1);
+      for i1:= 1 to length(mstr1) do begin
+       po1^:= char(byte(mstr1[i1])); //utf8 is returned as #byte array,
+       inc(po1);
+      end;
+      value:= str1; //assume locale encoding,
+                    //{$codepage} does not work with FPC 2.6.4 resourcestrings
       offset:= apos-pchar(pointer(fscanner.fsource));
       len:= fto^.value.po-apos;
      end;

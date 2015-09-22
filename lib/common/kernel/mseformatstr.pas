@@ -290,7 +290,9 @@ function strtooct(const inp: string): longword;
 function trystrtodec(const inp: string; out value: longword): boolean;
 function strtodec(const inp: string): longword;
 function trystrtohex(const inp: string; out value: longword): boolean;
+function trystrtohex(const inp: msestring; out value: longword): boolean;
 function strtohex(const inp: string): longword;
+function strtohex(const inp: msestring): longword;
 
 function trystrtobin64(const inp: string; out value: qword): boolean;
 function strtobin64(const inp: string): qword;
@@ -303,17 +305,14 @@ function strtohex64(const inp: string): qword;
 
 
 function trystrtoint(const text: string; out value: integer): boolean;
+function trystrtoint(const text: msestring; out value: integer): boolean;
 function strtoint(const text: string): integer;
-function trystrtoint(const text: string; out value: longword): boolean;
-
-function trystrtoint(const text: msestring;
-                                   out value: integer): boolean; overload;
 function strtoint(const text: msestring): integer;
-function trystrtoint(const text: msestring;
-                                   out value: longword): boolean; overload;
+function trystrtoint(const text: string; out value: longword): boolean;
+function trystrtoint(const text: msestring; out value: longword): boolean;
 function strtoint64(const text: string): int64;
-function trystrtoint64(const text: string; out value: int64): boolean;
 function strtoint64(const text: msestring): int64;
+function trystrtoint64(const text: string; out value: int64): boolean;
 function trystrtoint64(const text: msestring; out value: int64): boolean;
 function trystrtoqword(const text: string; out value: qword): boolean;
 function trystrtoqword(const text: msestring; out value: qword): boolean;
@@ -1533,14 +1532,15 @@ function trypascalstringtostring(const value: string;
 
 var
  po1: pmsechar;
- po2,po3: pchar;
+ po2,po3: pmsechar;
  int1: integer;
- str1: string;
+ mstr1,source1: msestring;
 begin
  result:= false;
- setlength(res,length(value)); //max length
- po1:= pmsechar(pointer(res));
- po2:= pchar(value);
+ source1:= msestring(value);    //assume locale encoding
+ setlength(res,length(source1)); //max length
+ po1:= pmsechar(pointer(res)); 
+ po2:= pmsechar(source1);
  while po2^ <> #0 do begin
   case po2^ of
    '#': begin
@@ -1551,16 +1551,16 @@ begin
      while po2^ in ['0'..'9','a'..'f','A'..'F'] do begin
       inc(po2);
      end;
-     setstring(str1,po3,po2-po3);
-     po1^:= msechar(strtohex(str1));
+     setstring(mstr1,po3,po2-po3);
+     po1^:= msechar(strtohex(mstr1));
     end
     else begin
      po3:= po2;
      while (po2^ >= '0') and (po2^ <= '9') do begin
       inc(po2);
      end;
-     setstring(str1,po3,po2-po3);
-     po1^:= msechar(strtoint(str1));
+     setstring(mstr1,po3,po2-po3);
+     po1^:= msechar(strtoint(mstr1));
     end;
     inc(po1);
    end;
@@ -5201,6 +5201,45 @@ begin
 // result:= trystrtoint('$'+inp,integer(value));
 end;
 
+function strtohex1(const inp: msestring; out value: longword): boolean;
+var
+ po1: pmsechar;
+ ch1: msechar;
+ int1: integer;
+begin
+ value:= 0;
+ int1:= length(inp);
+ result:= (int1 > 0) and (int1 <= 8);
+ if result then begin
+  po1:= pointer(inp);
+  while true do begin
+   ch1:= po1^;
+   if ch1 = #0 then begin
+    break;
+   end;
+   value:= value shl 4;
+   if (ch1 >= '0') and (ch1 <= '9') then begin
+    value:= value + ord(ch1) - ord('0');
+   end
+   else begin
+    if (ch1 >= 'a') and (ch1 <= 'f') then begin
+     value:= value + ord(ch1) - (ord('a')-10);
+    end
+    else begin
+     if (ch1 >= 'A') and (ch1 <= 'F') then begin
+      value:= value + ord(ch1) - (ord('A')-10);
+     end
+     else begin
+      result:= false;
+      break;
+     end;
+    end;
+   end;
+   inc(po1);
+  end;
+ end;
+end;
+
 function strtohex164(const inp: string; out value: qword): boolean;
 var
  po1: pchar;
@@ -5249,6 +5288,14 @@ begin
  end;
 end;
 
+function trystrtohex(const inp: msestring; out value: longword): boolean;
+begin
+ result:= strtohex1(inp,value);
+ if not result then begin
+  result:= trystrtointvalue(ansistring(inp),value);
+ end;
+end;
+
 function trystrtohex64(const inp: string; out value: qword): boolean;
 begin
  result:= strtohex164(inp,value);
@@ -5258,6 +5305,13 @@ begin
 end;
 
 function strtohex(const inp: string): longword;
+begin
+ if not trystrtohex(inp,result) then begin
+  formaterror(inp);
+ end;
+end;
+
+function strtohex(const inp: msestring): longword;
 begin
  if not trystrtohex(inp,result) then begin
   formaterror(inp);
