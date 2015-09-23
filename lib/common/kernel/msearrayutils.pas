@@ -42,6 +42,8 @@ function arrayrefcount(var dynamicarray): sizeint;
 function arrayminhigh(arrays: array of pointer): integer;
                        //array of dynamicarray
 function dynarrayelesize(const typinfo: pdynarraytypeinfo): sizeint; inline;
+function dynarrayhigh(const value: pointer): sizeint; inline;
+function dynarraylength(const value: pointer): sizeint; inline;
 function incrementarraylength(var value: pointer; typeinfo: pdynarraytypeinfo;
                              increment: integer = 1): sizeint; overload;
   //returns new length
@@ -403,6 +405,26 @@ begin
  inc(pchar(ti),length(ti^.name));
  result:= ti^.elsize;
 {$endif}
+end;
+
+function dynarrayhigh(const value: pointer): sizeint; inline;
+begin
+ if value = nil then begin
+  result:= -1;
+ end
+ else begin
+  result:= (psizeint(value)-1)^;
+ end;
+end;
+
+function dynarraylength(const value: pointer): sizeint; inline;
+begin
+ if value = nil then begin
+  result:= 0;
+ end
+ else begin
+  result:= (psizeint(value)-1)^+1;
+ end;
 end;
 
 function decrementarraylength(var value: pointer; const typeinfo: pdynarraytypeinfo;

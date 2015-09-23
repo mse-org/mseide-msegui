@@ -2596,7 +2596,7 @@ begin
        po1^:= char(byte(mstr1[i1])); //utf8 is returned as #byte array,
        inc(po1);
       end;
-      value:= str1; //assume locale encoding,
+      value:= msestring(str1); //assume locale encoding,
                     //{$codepage} does not work with FPC 2.6.4 resourcestrings
       offset:= apos-pchar(pointer(fscanner.fsource));
       len:= fto^.value.po-apos;

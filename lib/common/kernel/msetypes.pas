@@ -74,7 +74,18 @@ type
 // pint64 = ^int64;
  int64arty = array of int64;
  pint64arty = ^int64arty;
- float32 = single;
+
+ flo32 = single;
+ pflo32 = ^flo32;
+ flo32arty = array of flo32;
+ pflo32arty = ^flo32arty;
+ 
+ flo64 = double;
+ pflo64 = ^flo64;
+ flo64arty = array of flo64;
+ pflo64arty = ^flo64arty;
+
+ float32 = single;            //todo: remove
  pfloat32 = ^float32;
  float32arty = array of float32;
  pfloat32arty = ^float32arty;
@@ -86,7 +97,7 @@ type
  pfloat = ^float;
  floatarty = array of float;
  pfloatarty = ^floatarty;
- 
+  
  uint8 = byte;
  puint8 = ^uint8;
  uint16 = word;
