@@ -36,6 +36,8 @@ procedure allocuninitedarray(count,itemsize: integer; out dynamicarray);
                  //does not init memory, dynamicarray must be nil!
 procedure reallocuninitedarray(count,itemsize: integer; var dynamicarray);
                  //does not init memory, dynamicarray must be unique!
+procedure freeuninitedarray(var dynamicarray);
+                 //does not finalize items, dynamicarray must be unique!
 function arrayrefcount(var dynamicarray): sizeint;
 function arrayminhigh(arrays: array of pointer): integer;
                        //array of dynamicarray
@@ -574,6 +576,22 @@ begin
   psizeint(pchar(po1)+sizeof(sizeint))^:= count;     //count
   {$endif}
   pointer(dynamicarray):= pointer(pchar(po1) + 2 * sizeof(sizeint));
+ end;
+end;
+
+procedure freeuninitedarray(var dynamicarray);
+                 //does not finalize items, dynamicarray must be unique!
+var
+ po1: psizeint;
+begin
+ po1:= pointer(dynamicarray);
+ if po1 <> nil then begin
+  po1:= pointer(pchar(po1) - 2 * sizeof(sizeint));
+  if po1^ <> 1 then begin
+   raise exception.Create('reallocunitedarray: dynamicarray not unique');
+  end;
+  freemem(po1);
+  pointer(dynamicarray):= nil;
  end;
 end;
 

@@ -69,6 +69,7 @@ const
  c_stx = #$02;
  c_etx = #$03;
  c_linefeed = #$0a;
+ c_formfeed = #$0c;
  c_return = #$0d;
  c_tab = #$09;
  c_backspace = #$08;
@@ -221,10 +222,12 @@ function lstringtostring(const value: pmsechar;
 function lstringtostring(const value: lstringty): string; overload;
 function lstringtostring(const value: pchar;
                                     const len: integer): string; overload;
-procedure stringtolstring(const value: string; var{out} res: lstringty); overload;  //todo!!!!! fpbug 3221
-procedure stringtolstring(const value: msestring; var{out} res: lmsestringty); overload;
-function stringtolstring(const value: string): lstringty; overload;
-function stringtolstring(const value: msestring): lmsestringty; overload;
+procedure stringtolstring(const value: string; 
+               var{out} res: lstringty); inline;  //todo!!!!! fpbug 3221
+procedure stringtolstring(const value: msestring; 
+                             var{out} res: lmsestringty); inline;
+function stringtolstring(const value: string): lstringty; inline;
+function stringtolstring(const value: msestring): lmsestringty; inline;
 function lstringartostringar(const value: lstringarty): stringarty;
 
 procedure nextword(const value: msestring; out res: lmsestringty); overload;
@@ -2660,18 +2663,19 @@ begin
 end;
 
 procedure stringtolstring(const value: msestring; var{out} res: lmsestringty);
+                                                              inline;
 begin
  res.po:= pointer(value);
  res.len:= length(value);
 end;
 
-function stringtolstring(const value: string): lstringty;
+function stringtolstring(const value: string): lstringty; inline;
 begin
  result.po:= pointer(value);
  result.len:= length(value);
 end;
 
-function stringtolstring(const value: msestring): lmsestringty;
+function stringtolstring(const value: msestring): lmsestringty; inline;
 begin
  result.po:= pointer(value);
  result.len:= length(value);
