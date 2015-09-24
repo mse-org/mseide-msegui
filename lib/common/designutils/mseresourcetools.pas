@@ -36,7 +36,7 @@ procedure rsjarrayitem(var adata; const aindex: int32;
                const avalue: jsonvaluety);
 begin
  with constinfoarty(adata)[aindex] do begin
-  name:= jsonasstring(avalue,['name']);
+  name:= stringtoutf8ansi(jsonasstring(avalue,['name']));
   value:= jsonasstring(avalue,['value']);
   hash:= jsonasint32(avalue,['hash']);
   valuetype:= vawstring;
@@ -128,7 +128,7 @@ begin
    end;
   end;
  end;
- outfilename:= filedir(sourcefilename) + unitname + destfileext;
+ outfilename:= filedir(sourcefilename) + msestring(unitname) + destfileext;
  outstream:= ttextstream.create(outfilename,fm_create);
  try
   outstream.writeln('unit ' + unitname + ';');

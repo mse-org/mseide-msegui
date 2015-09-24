@@ -141,17 +141,17 @@ function tpropinfonode.valuetext: msestring;
 begin
  case info.valuetype of
   vaint8,vaint16,vaint32: begin
-   result:= inttostr(info.integervalue);
+   result:= inttostrmse(info.integervalue);
   end;
   vaint64: begin
-   result:= inttostr(info.int64value);
+   result:= inttostrmse(info.int64value);
   end;
   vaSingle,vaCurrency,vaDate,vaExtended: begin
-   result:= floattostr(info.realvalue);
+   result:= realtostrmse(info.realvalue);
   end;
 //  vaset,vaident,vastring,valstring: begin
   vaset,vaident: begin
-   result:= info.stringvalue;
+   result:= msestring(info.stringvalue);
   end;
   vastring,valstring,vawstring,vautf8string: begin
    result:= info.msestringvalue;
@@ -216,7 +216,7 @@ end;
 procedure tpropinfonode.nodetoitem(const listitem: ttreelistitem);
 begin
  with tpropinfoitem(listitem) do begin
-  fcaption:= self.info.name;
+  fcaption:= msestring(self.info.name);
   node:= self;
  end;
 end;
@@ -725,14 +725,15 @@ begin
   with node1.info do begin
    if valuetype = vawstring then begin
     node2:= tpropinfonode(node1.fparent);
-    mstr1:= name;
+    mstr1:= msestring(name);
     repeat
-     mstr1:= node2.info.name + '.' + mstr1;
+     mstr1:= msestring(node2.info.name) + '.' + mstr1;
      node2:= tpropinfonode(node2.fparent);
     until (node2.fparent = nil) or (node2.parent.parent = nil);
     jsonadditems(jsonaddvalues(json,[nil])^,
           ['hash','name','value'],
-                         [hash(msestringvalue),mstr1,msestringvalue]);
+                         [hash(stringtoutf8ansi(msestringvalue)),mstr1,
+                                                               msestringvalue]);
    end
    else begin
     getjsonresourcestrings(json,node1);
@@ -775,7 +776,8 @@ begin
       node2:= tpropinfonode(node2.fparent);
      until (node2.fparent = nil) or (node2.parent.parent = nil);
      outstream.writeln('');
-     outstream.writeln('# hash value = '+inttostr(hash(msestringvalue)));
+     outstream.writeln('# hash value = '+
+                      inttostr(hash(ansistring(msestringvalue))));
      str2:= ansistring(msestringvalue);
      setlength(mstr1,length(str2));
      po1:= pmsechar(mstr1);
@@ -797,7 +799,7 @@ procedure tpropinfonode.dotransferlang(const sender: ttreenode);
 
  procedure doerror(mess: string);
  begin
-  showmessage(mess);
+  showmessage(msestring(mess));
  end;
 
 begin
