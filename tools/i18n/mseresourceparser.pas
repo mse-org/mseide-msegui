@@ -98,7 +98,8 @@ procedure writefpcresourcestrings(const outstream: ttextstream;
 
 implementation
 uses
- sysutils,mseformatstr,msearrayutils,typinfo,msebits,msewidgets;
+ sysutils,mseformatstr,msearrayutils,typinfo,msebits,msewidgets,msejson,
+ msefileutils,msesys;
 
 type
  treader1 = class(treader);
@@ -712,6 +713,34 @@ begin
  outstream.CopyFrom(instream,instream.Size-instream.position);
 end;
 
+procedure getjsonresourcestrings(var json: jsonvaluety; 
+                                               const node: tpropinfonode);
+var
+ node1,node2: tpropinfonode;
+ mstr1: msestring;
+ int1: int32;
+begin
+ for int1:= 0 to node.count - 1 do begin
+  node1:= node[int1];
+  with node1.info do begin
+   if valuetype = vawstring then begin
+    node2:= tpropinfonode(node1.fparent);
+    mstr1:= name;
+    repeat
+     mstr1:= node2.info.name + '.' + mstr1;
+     node2:= tpropinfonode(node2.fparent);
+    until (node2.fparent = nil) or (node2.parent.parent = nil);
+    jsonadditems(jsonaddvalues(json,[nil])^,
+          ['hash','name','value'],
+                         [hash(msestringvalue),mstr1,msestringvalue]);
+   end
+   else begin
+    getjsonresourcestrings(json,node1);
+   end;
+  end;
+ end;
+end;
+
 procedure writefpcresourcestrings(const outstream: ttextstream;
                   const node: tpropinfonode);
 var
@@ -721,30 +750,44 @@ var
  mstr1: msestring;
  po1: pmsechar;
  i1: int32;
+ json: jsonvaluety;
+ pj: pjsonvaluety;
 begin
- for int1:= 0 to node.count - 1 do begin
-  node1:= node[int1];
-  with node1.info do begin
-   if valuetype = vawstring then begin
-    node2:= tpropinfonode(node1.fparent);
-    str1:= name;
-    repeat
-     str1:= node2.info.name + '.' + str1;
-     node2:= tpropinfonode(node2.fparent);
-    until (node2.fparent = nil) or (node2.parent.parent = nil);
-    outstream.writeln('');
-    outstream.writeln('# hash value = '+inttostr(hash(msestringvalue)));
-    str2:= ansistring(msestringvalue);
-    setlength(mstr1,length(str2));
-    po1:= pmsechar(mstr1);
-    for i1:= 1 to length(mstr1) do begin
-     po1^:= msechar(byte(str2[i1])); //use locale encoding
-     inc(po1);
+ if fileext(outstream.filename) = 'rsj' then begin
+  jsonvalueinit(json);
+  try
+   pj:= jsonadditems(json,['version','strings'],[1,nil]);
+   getjsonresourcestrings(pj^,node);
+   syserror(jsonencode(json,outstream));
+  finally
+   jsonvaluefree(json);
+  end;
+ end
+ else begin
+  for int1:= 0 to node.count - 1 do begin
+   node1:= node[int1];
+   with node1.info do begin
+    if valuetype = vawstring then begin
+     node2:= tpropinfonode(node1.fparent);
+     str1:= name;
+     repeat
+      str1:= node2.info.name + '.' + str1;
+      node2:= tpropinfonode(node2.fparent);
+     until (node2.fparent = nil) or (node2.parent.parent = nil);
+     outstream.writeln('');
+     outstream.writeln('# hash value = '+inttostr(hash(msestringvalue)));
+     str2:= ansistring(msestringvalue);
+     setlength(mstr1,length(str2));
+     po1:= pmsechar(mstr1);
+     for i1:= 1 to length(mstr1) do begin
+      po1^:= msechar(byte(str2[i1])); //use locale encoding
+      inc(po1);
+     end;
+     outstream.writeln(str1+'='+stringtopascalstring(mstr1));
+    end
+    else begin
+     writefpcresourcestrings(outstream,node1);
     end;
-    outstream.writeln(str1+'='+stringtopascalstring(mstr1));
-   end
-   else begin
-    writefpcresourcestrings(outstream,node1);
    end;
   end;
  end;

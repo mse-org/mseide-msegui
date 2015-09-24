@@ -16,6 +16,10 @@ unit msei18nutils;
  {$define internalresstrhandling}
 {$endif}
 
+{$if fpc_fullversion >= 30000}
+ {$define fpcv3}
+{$endif} 
+
 (*
 {$ifdef FPC}
  {$if fpc_fullversion < 20301}
@@ -123,7 +127,12 @@ var
  po1: presourcestringinfoty;
 begin
  if tresourcestringlist(arg).find(name,po1) then begin
+ {$ifdef fpcv3}
+  result:= '';
+  utf8string(pointer(result)):= stringtoutf8(po1^.value);
+ {$else}
   result:= po1^.value;
+ {$endif}
  end
  else begin
   result:= '';

@@ -5181,18 +5181,16 @@ end;
 function trystrtohex(const inp: pchar; const len: int32;
                                                 out value: longword): boolean;
 var
- po1: pchar;
+ po1,pe: pchar;
  ch1: char;
 begin
  value:= 0;
  result:= (len > 0) and (len <= 8);
  if result then begin
   po1:= inp;
-  while true do begin
+  pe:= po1+len;
+  while po1 < pe do begin
    ch1:= po1^;
-   if ch1 = #0 then begin
-    break;
-   end;
    value:= value shl 4;
    if (ch1 >= '0') and (ch1 <= '9') then begin
     value:= value + ord(ch1) - ord('0');

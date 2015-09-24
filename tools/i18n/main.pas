@@ -24,7 +24,7 @@ uses
  msedatanodes,msegraphedits,msestream,mseglob,msemenus,classes,mclasses,
  msetypes,msestrings,msethreadcomp,mseguiglob,msegui,mseresourceparser,
  msedialog,msememodialog,mseobjecttext,mseifiglob,msesysenv,msemacros,
- msestringcontainer,mseclasses,mseskin,msebitmap;
+ msestringcontainer,mseclasses,mseskin,msebitmap,msejson;
 
 const
  msei18nversiontext = mseguiversiontext;
@@ -435,22 +435,27 @@ begin
  scanner:= nil;
  parser:= nil;
  try
-  if fpcformat then begin
-   scanner:= tpascalscanner.Create;
-   scanner.source:= stream.readdatastring;
-   parser:= tfpcresstringparser.create(nil);
+  if fpcformat and (fileext(stream.filename) = 'rsj') then begin
+   ar1:= rsjgetconsts(stream);
   end
   else begin
-   scanner:= tcscanner.Create;
-   scanner.source:= stream.readdatastring;
-   parser:= tresstringlistparser.Create(nil);
-  end;
-  parser.scanner:= scanner;
-  if fpcformat then begin
-   tfpcresstringparser(parser).getconsts(ar1);
-  end
-  else begin
-   tresstringlistparser(parser).getconsts(ar1);
+   if fpcformat then begin
+    scanner:= tpascalscanner.Create;
+    scanner.source:= stream.readdatastring;
+    parser:= tfpcresstringparser.create(nil);
+   end
+   else begin
+    scanner:= tcscanner.Create;
+    scanner.source:= stream.readdatastring;
+    parser:= tresstringlistparser.Create(nil);
+   end;
+   parser.scanner:= scanner;
+   if fpcformat then begin
+    tfpcresstringparser(parser).getconsts(ar1);
+   end
+   else begin
+    tresstringlistparser(parser).getconsts(ar1);
+   end;
   end;
   node:= tpropinfonode.Create;
   node.info.name:= filename(stream.filename);

@@ -50,6 +50,16 @@ type
  pjsonitemty = ^jsonitemty;
  jsonitemarty = array of jsonitemty;
 
+ arraystartmethodty = procedure(var adata;
+                                   const acount: int32) of object;
+ arrayitemmethodty = procedure(var adata; 
+                      const aindex: int32; const aitem: jsonvaluety) of object;
+
+ arraystartprocty = procedure(var adata;
+                                   const acount: int32);
+ arrayitemprocty = procedure(var adata; 
+                      const aindex: int32; const aitem: jsonvaluety);
+
  tjsoncontainer = class
   private
   protected
@@ -70,9 +80,47 @@ type
    function asint32(const names: array of msestring): int32;
    function asint64(const names: array of msestring): int64;
    function asflo64(const names: array of msestring): flo64;
+   procedure iteratearray(const names: array of msestring; var adata;
+                    const startproc: arraystartmethodty;
+                                           const itemproc: arrayitemmethodty);
+   procedure iteratearray(const names: array of msestring; var adata;
+                    const startproc: arraystartprocty;
+                                           const itemproc: arrayitemprocty);
  end;
  
-procedure jsonvaluefree(var avalue: jsonvaluety);
+procedure jsonvalueinit(var avalue: jsonvaluety); //inits to null value
+procedure jsonvaluefree(var avalue: jsonvaluety); 
+
+function jsonfindvalue(const avalue: jsonvaluety;
+                          const names: array of msestring; 
+                         const raiseexception: boolean = false): pjsonvaluety;
+function jsonasstring(const avalue: jsonvaluety;
+                                 const names: array of msestring): msestring;
+function jsonasint32(const avalue: jsonvaluety;
+                                    const names: array of msestring): int32;
+function jsonasint64(const avalue: jsonvaluety;
+                                      const names: array of msestring): int64;
+function jsonasflo64(const avalue: jsonvaluety;
+                                    const names: array of msestring): flo64;
+function jsonasboolean(const avalue: jsonvaluety;
+                                     const names: array of msestring): boolean;
+procedure jsoniteratearray(const avalue: jsonvaluety;
+               const names: array of msestring;
+               var adata; const startproc: arraystartprocty;
+               const itemproc: arrayitemprocty);
+procedure jsoniteratearray(const avalue: jsonvaluety;
+               const names: array of msestring;
+               var adata; const startproc: arraystartmethodty;
+               const itemproc: arrayitemmethodty);
+function jsonadditems(var jvalue: jsonvaluety; const anames: array of msestring;
+                                   const avalues: array of const): pjsonvaluety;
+             //if jvalue is a null value it will be converted to object
+             //[nil] -> null, returns the last added item or @jvalue
+function jsonaddvalues(var jvalue: jsonvaluety;
+                                   const avalues: array of const): pjsonvaluety;
+             //if jvalue is a null value it will be converted to array
+             //[nil] -> null, returns the last added item or @jvalue
+
 function jsondecode(const adata: string; out avalue:jsonvaluety): boolean;
 function jsonencode(const avalue: jsonvaluety;
                                     const adest: tstream): syserrorty; 
@@ -97,6 +145,12 @@ begin
 end;
 
 {$implicitexceptions off}
+
+procedure jsonvalueinit(var avalue: jsonvaluety);
+begin
+ avalue.kind:= jok_value;
+ avalue.val.typ:= jot_null;
+end;
 
 procedure jsonitemfree(var aitem: jsonitemty); forward;
 
@@ -188,13 +242,14 @@ begin
    else begin
     mch1:= ps^;
     if (mch1 < #$20) or (mch1 > #$7f) then begin
+     inc(pd);
      pd^:= 'u';
      inc(pd);
-     pd^:= charhex[(card16(mch1) and $f000) shl 12];
+     pd^:= charhex[(card16(mch1) and $f000) shr 12];
      inc(pd);
-     pd^:= charhex[(card16(mch1) and $0f00) shl 8];
+     pd^:= charhex[(card16(mch1) and $0f00) shr 8];
      inc(pd);
-     pd^:= charhex[(card16(mch1) and $00f0) shl 4];
+     pd^:= charhex[(card16(mch1) and $00f0) shr 4];
      inc(pd);
      ch1:= charhex[(card16(mch1) and $000f)];
     end;
@@ -322,7 +377,7 @@ var
   mch1: msechar;
   ca1: card32;
 
-  procedure put(); inline;
+  procedure put(); {inline;}
   begin
    if po1 <> po2 then begin
     mstr1:= utf8tostring(po2,po1-po2);
@@ -332,11 +387,12 @@ var
      capacity:= 2*len+32;
      setlength(result,capacity);
     end;
-    move(pointer(mstr1)^,(pointer(result)+i1)^,length(mstr1)*sizeof(msechar));
+    move(pointer(mstr1)^,(pmsechar(pointer(result))+i1)^,
+                                           length(mstr1)*sizeof(msechar));
    end;
   end; //put
 
- begin
+ begin //getstring
   po1:= pc;
   pe1:= pe;
   result:= '';
@@ -364,11 +420,12 @@ var
         error:= true;
         break;
        end;
+       inc(po1,3);
        mch1:= msechar(card16(ca1));
       end;
      end;
     end;
-    pchar(pointer(result))[len]:= mch1;
+    pmsechar(pointer(result))[len]:= mch1;
     inc(len);
     po2:= po1 + 1; //new start
    end;
@@ -557,6 +614,417 @@ begin
  result:= not error;
 end;
 
+function jsonfindvalue(const avalue: jsonvaluety;
+                          const names: array of msestring; 
+                         const raiseexception: boolean = false): pjsonvaluety;
+           //todo: use hash cache
+var
+ pv: pjsonvaluety;
+ pi: pjsonitemty;
+ pe: pointer;
+ i1: int32;
+ mstr1: msestring;
+ 
+ procedure nameerror();
+ begin
+  pv:= nil;
+  if raiseexception then begin
+   nameserror(copy(opentodynarraym(names),0,i1+1));
+  end;
+ end; //nameerror
+ 
+begin
+ pv:= @avalue;
+ if high(names) >= 0 then begin
+  for i1:= 0 to high(names) do begin
+   if pv^.kind <> jok_object then begin
+    nameerror();
+    break;
+   end;
+   mstr1:= names[i1];
+   pi:= pv^.obj;
+   pe:= pi + dynarraylength(pi);
+   while (pi < pe) and (pi^.name <> mstr1) do begin
+    inc(pi);
+   end;
+   if pi < pe then begin
+    pv:= @pi^.value;
+   end
+   else begin
+    nameerror();
+    break;
+   end;
+  end;
+  result:= pv;
+ end;
+end;
+
+function jsonfindvaluevalue(const avalue: jsonvaluety;
+              const names: array of msestring): pjsonvaluety;
+begin
+ result:= jsonfindvalue(avalue,names,true);
+ if result^.kind <> jok_value then begin
+  error('No value');
+ end;  
+end;
+
+function jsonasstring(const avalue: jsonvaluety;
+                                 const names: array of msestring): msestring;
+var
+ po1: pjsonvaluety;
+begin
+ po1:= jsonfindvaluevalue(avalue,names);
+ case po1^.val.typ of
+  jot_null: begin
+   result:= '';
+  end;
+  jot_string: begin
+   result:= msestring(po1^.val.vstring);
+  end;
+  jot_boolean: begin
+   if po1^.val.vboolean then begin
+    result:= 'true';
+   end
+   else begin
+    result:= 'false';
+   end;
+  end;
+  jot_int32: begin 
+   result:= inttostrmse(po1^.val.vint32);
+  end;
+  jot_int64: begin 
+   result:= inttostrmse(po1^.val.vint64);
+  end;
+  jot_flo64: begin
+   result:= realtostrmse(po1^.val.vflo64);
+  end;
+ end;   
+end;
+
+function jsonasint32(const avalue: jsonvaluety;
+                                    const names: array of msestring): int32;
+var
+ po1: pjsonvaluety;
+begin
+ po1:= jsonfindvaluevalue(avalue,names);
+ case po1^.val.typ of
+  jot_int32: begin
+   result:= po1^.val.vint32;
+  end;
+  jot_int64: begin
+   result:= po1^.val.vint64;
+  end;
+  jot_flo64: begin
+   result:= round(po1^.val.vflo64);
+  end;
+  jot_boolean: begin
+   if po1^.val.vboolean then begin
+    result:= 1;
+   end
+   else begin
+    result:= 0;
+   end;
+  end;
+  jot_null: begin
+   result:= 0;
+  end;
+  jot_string: begin
+   if not trystrtoint(msestring(po1^.val.vstring),result) then begin
+    conversionerror(names);
+   end;
+  end;
+ end;
+end;
+
+function jsonasint64(const avalue: jsonvaluety;
+                                      const names: array of msestring): int64;
+var
+ po1: pjsonvaluety;
+begin
+ po1:= jsonfindvaluevalue(avalue,names);
+ case po1^.val.typ of
+  jot_int64: begin
+   result:= po1^.val.vint64;
+  end;
+  jot_int32: begin
+   result:= po1^.val.vint32;
+  end;
+  jot_flo64: begin
+   result:= round(po1^.val.vflo64);
+  end;
+  jot_boolean: begin
+   if po1^.val.vboolean then begin
+    result:= 1;
+   end
+   else begin
+    result:= 0;
+   end;
+  end;
+  jot_null: begin
+   result:= 0;
+  end;
+  jot_string: begin
+   if not trystrtoint64(msestring(po1^.val.vstring),result) then begin
+    conversionerror(names);
+   end;
+  end;
+ end;
+end;
+
+function jsonasflo64(const avalue: jsonvaluety;
+                                    const names: array of msestring): flo64;
+var
+ po1: pjsonvaluety;
+begin
+ po1:= jsonfindvaluevalue(avalue,names);
+ case po1^.val.typ of
+  jot_flo64: begin
+   result:= po1^.val.vflo64;
+  end;
+  jot_int32: begin
+   result:= po1^.val.vint32;
+  end;
+  jot_int64: begin
+   result:= po1^.val.vint64;
+  end;
+  jot_boolean: begin
+   if po1^.val.vboolean then begin
+    result:= 1;
+   end
+   else begin
+    result:= 0;
+   end;
+  end;
+  jot_null: begin
+   result:= 0;
+  end;
+  jot_string: begin
+   if not trystrtodouble(msestring(po1^.val.vstring),result,'.') then begin
+    conversionerror(names);
+   end;
+  end;
+ end;
+end;
+
+function jsonasboolean(const avalue: jsonvaluety;
+                                     const names: array of msestring): boolean;
+var
+ po1: pjsonvaluety;
+begin
+ po1:= jsonfindvaluevalue(avalue,names);
+ case po1^.val.typ of
+  jot_boolean: begin
+   result:= po1^.val.vboolean;
+  end;
+  jot_int32: begin
+   result:= po1^.val.vint32 <> 0;
+  end;
+  jot_int64: begin
+   result:= po1^.val.vint64 <> 0;
+  end;
+  jot_flo64: begin
+   result:= round(po1^.val.vflo64) <> 0;
+  end;
+  jot_null: begin
+   result:= false;
+  end;
+  jot_string: begin
+   result:= msestring(po1^.val.vstring) = 'true';
+   if not result and (msestring(po1^.val.vstring) <> 'false') then begin
+    conversionerror(names);
+   end;
+  end;
+ end;
+end;
+
+procedure jsoniteratearray(const avalue: jsonvaluety;
+               const names: array of msestring;
+               var adata; const startproc: arraystartprocty;
+               const itemproc: arrayitemprocty);
+var
+ po1: pjsonvaluety;
+ i1: int32;
+ pv,pe: pjsonvaluety;
+begin
+ po1:= jsonfindvalue(avalue,names,true);
+ if po1^.kind <> jok_array then begin
+  error('No array');
+ end;
+ pv:= po1^.ar;
+ i1:= dynarraylength(pv);
+ if startproc <> nil then begin
+  startproc(adata,i1);
+ end;
+ if itemproc <> nil then begin
+  pe:= pv + i1;
+  i1:= 0;
+  while pv < pe do begin
+   itemproc(adata,i1,pv^);
+   inc(pv);
+   inc(i1);
+  end;
+ end;
+end;
+
+procedure jsoniteratearray(const avalue: jsonvaluety;
+               const names: array of msestring;
+               var adata; const startproc: arraystartmethodty;
+               const itemproc: arrayitemmethodty);
+var
+ po1: pjsonvaluety;
+ i1: int32;
+ pv,pe: pjsonvaluety;
+begin
+ po1:= jsonfindvalue(avalue,names,true);
+ if po1^.kind <> jok_array then begin
+  error('No array');
+ end;
+ pv:= po1^.ar;
+ i1:= dynarraylength(pv);
+ if startproc <> nil then begin
+  startproc(adata,i1);
+ end;
+ if itemproc <> nil then begin
+  pe:= pv + i1;
+  i1:= 0;
+  while pv < pe do begin
+   itemproc(adata,i1,pv^);
+   inc(pv);
+   inc(i1);
+  end;
+ end;
+end;
+
+procedure setvalue(var jvalue: jsonvaluety; const avalue: tvarrec);
+begin
+ with jvalue,avalue do begin //todo: vtvariant
+  kind:= jok_value;
+  case avalue.vtype of
+   vtinteger: begin
+    val.typ:= jot_int32;
+    val.vint32:= vinteger;
+   end;
+   vtunicodestring: begin
+    val.typ:= jot_string;
+    msestring(val.vstring):= unicodestring(vunicodestring);
+   end;
+   vtwidestring: begin
+    val.typ:= jot_string;
+    msestring(val.vstring):= widestring(vunicodestring);
+   end;
+   vtansistring: begin
+    val.typ:= jot_string;
+    msestring(val.vstring):= widestring(vansistring);
+   end;
+   vtchar: begin
+    val.typ:= jot_string;
+    msestring(val.vstring):= msestring(vchar);
+   end;
+   vtwidechar: begin
+    val.typ:= jot_string;
+    msestring(val.vstring):= vwidechar;
+   end;
+   vtstring: begin
+    val.typ:= jot_string;
+    msestring(val.vstring):= msestring(vstring^);
+   end;
+   vtpchar: begin
+    val.typ:= jot_string;
+    msestring(val.vstring):= msestring(string(vpchar));
+   end;
+   vtpwidechar: begin
+    val.typ:= jot_string;
+    msestring(val.vstring):= msestring(vpwidechar);
+   end;
+   vtextended: begin
+    val.typ:= jot_flo64;
+    val.vflo64:= vextended^;
+   end;
+   vtcurrency: begin
+    val.typ:= jot_flo64;
+    val.vflo64:= vcurrency^;
+   end;
+   vtboolean: begin
+    val.typ:= jot_boolean;
+    val.vboolean:= vboolean;
+   end;
+   vtint64: begin
+    val.typ:= jot_int64;
+    val.vint64:= vint64^;
+   end;
+   else begin
+    val.typ:= jot_null;
+   end;
+  end;
+ end;
+end;
+
+function jsonadditems(var jvalue: jsonvaluety; const anames: array of msestring;
+                                   const avalues: array of const): pjsonvaluety;
+             //if jvalue is a null value it will be converted to object
+             //[nil] -> null, returns the last added item or @jvalue
+var
+ i1,i2: int32;
+ pi: pjsonitemty;
+begin
+ if high(anames) <> high(avalues) then begin
+  error('jsonadditems(): Name count <> value count');
+ end;
+ if (jvalue.kind = jok_value) and (jvalue.val.typ = jot_null) then begin
+  jvalue.kind:= jok_object;
+  jvalue.obj:= nil;
+ end;
+ if jvalue.kind <> jok_object then begin
+  error('jsonadditems(): jvalue must be jok_object or null value');
+ end;
+ i2:= high(avalues);
+ if i2 >= 0 then begin
+  i1:= high(jsonitemarty(jvalue.ar));
+  setlength(jsonitemarty(jvalue.ar),i1+i2+2);
+  pi:= @jsonitemarty(jvalue.ar)[i1+1];
+  for i1:= 0 to i2 do begin
+   pi^.name:= anames[i1];
+   setvalue(pi^.value,avalues[i1]);
+   inc(pi);
+  end;
+  result:= @((pi-1)^.value);
+ end
+ else begin
+  result:= @jvalue;
+ end;
+end;
+
+function jsonaddvalues(var jvalue: jsonvaluety;
+                                   const avalues: array of const): pjsonvaluety;
+             //if jvalue is a null value it will be converted to array
+             //[nil] -> null, returns the last added item or @jvalue
+var
+ i1,i2: int32;
+ pv: pjsonvaluety;
+begin
+ if (jvalue.kind = jok_value) and (jvalue.val.typ = jot_null) then begin
+  jvalue.kind:= jok_array;
+  jvalue.ar:= nil;
+ end;
+ if jvalue.kind <> jok_array then begin
+  error('jsonaddvalues(): jvalue must be jok_object or null value');
+ end;
+ i2:= high(avalues);
+ if i2 >= 0 then begin
+  i1:= high(jsonvaluearty(jvalue.ar));
+  setlength(jsonvaluearty(jvalue.ar),i1+i2+2);
+  pv:= @jsonvaluearty(jvalue.ar)[i1+1];
+  for i1:= 0 to i2 do begin
+   setvalue(pv^,avalues[i1]);
+   inc(pv);
+  end;
+  result:= pv-1;
+ end
+ else begin
+  result:= @jvalue;
+ end;
+end;
+
 {$implicitexceptions on}
 
 { tjsoncontainer }
@@ -593,218 +1061,53 @@ end;
 function tjsoncontainer.findvalue(const names: array of msestring; 
                          const raiseexception: boolean = false): pjsonvaluety;
            //todo: use hash cache
-var
- pv: pjsonvaluety;
- pi: pjsonitemty;
- pe: pointer;
- i1: int32;
- mstr1: msestring;
- 
- procedure nameerror();
- begin
-  pv:= nil;
-  if raiseexception then begin
-   nameserror(copy(opentodynarraym(names),0,i1+1));
-  end;
- end; //nameerror
- 
 begin
- pv:= @fvalue;
- if high(names) >= 0 then begin
-  for i1:= 0 to high(names) do begin
-   if pv^.kind <> jok_object then begin
-    nameerror();
-    break;
-   end;
-   mstr1:= names[i1];
-   pi:= pv^.obj;
-   pe:= pi + dynarraylength(pi);
-   while (pi < pe) and (pi^.name <> mstr1) do begin
-    inc(pi);
-   end;
-   if pi < pe then begin
-    pv:= @pi^.value;
-   end
-   else begin
-    nameerror();
-    break;
-   end;
-  end;
-  result:= pv;
- end;
+ result:= jsonfindvalue(fvalue,names,raiseexception);
 end;
 
 function tjsoncontainer.findvaluevalue(
               const names: array of msestring): pjsonvaluety;
 begin
- result:= findvalue(names,true);
- if result^.kind <> jok_value then begin
-  error('No value');
- end;  
+ result:= jsonfindvaluevalue(fvalue,names);
 end;
 
 function tjsoncontainer.asstring(const names: array of msestring): msestring;
-var
- po1: pjsonvaluety;
 begin
- po1:= findvaluevalue(names);
- case po1^.val.typ of
-  jot_null: begin
-   result:= '';
-  end;
-  jot_string: begin
-   result:= msestring(po1^.val.vstring);
-  end;
-  jot_boolean: begin
-   if po1^.val.vboolean then begin
-    result:= 'true';
-   end
-   else begin
-    result:= 'false';
-   end;
-  end;
-  jot_int32: begin 
-   result:= inttostrmse(po1^.val.vint32);
-  end;
-  jot_int64: begin 
-   result:= inttostrmse(po1^.val.vint64);
-  end;
-  jot_flo64: begin
-   result:= realtostrmse(po1^.val.vflo64);
-  end;
- end;   
+ result:= jsonasstring(fvalue,names);
 end;
 
 function tjsoncontainer.asint32(const names: array of msestring): int32;
-var
- po1: pjsonvaluety;
 begin
- po1:= findvaluevalue(names);
- case po1^.val.typ of
-  jot_int32: begin
-   result:= po1^.val.vint32;
-  end;
-  jot_int64: begin
-   result:= po1^.val.vint64;
-  end;
-  jot_flo64: begin
-   result:= round(po1^.val.vflo64);
-  end;
-  jot_boolean: begin
-   if po1^.val.vboolean then begin
-    result:= 1;
-   end
-   else begin
-    result:= 0;
-   end;
-  end;
-  jot_null: begin
-   result:= 0;
-  end;
-  jot_string: begin
-   if not trystrtoint(msestring(po1^.val.vstring),result) then begin
-    conversionerror(names);
-   end;
-  end;
- end;
+ result:= jsonasint32(fvalue,names);
 end;
 
 function tjsoncontainer.asint64(const names: array of msestring): int64;
-var
- po1: pjsonvaluety;
 begin
- po1:= findvaluevalue(names);
- case po1^.val.typ of
-  jot_int64: begin
-   result:= po1^.val.vint64;
-  end;
-  jot_int32: begin
-   result:= po1^.val.vint32;
-  end;
-  jot_flo64: begin
-   result:= round(po1^.val.vflo64);
-  end;
-  jot_boolean: begin
-   if po1^.val.vboolean then begin
-    result:= 1;
-   end
-   else begin
-    result:= 0;
-   end;
-  end;
-  jot_null: begin
-   result:= 0;
-  end;
-  jot_string: begin
-   if not trystrtoint64(msestring(po1^.val.vstring),result) then begin
-    conversionerror(names);
-   end;
-  end;
- end;
+ result:= jsonasint64(fvalue,names);
 end;
 
 function tjsoncontainer.asflo64(const names: array of msestring): flo64;
-var
- po1: pjsonvaluety;
 begin
- po1:= findvaluevalue(names);
- case po1^.val.typ of
-  jot_flo64: begin
-   result:= po1^.val.vflo64;
-  end;
-  jot_int32: begin
-   result:= po1^.val.vint32;
-  end;
-  jot_int64: begin
-   result:= po1^.val.vint64;
-  end;
-  jot_boolean: begin
-   if po1^.val.vboolean then begin
-    result:= 1;
-   end
-   else begin
-    result:= 0;
-   end;
-  end;
-  jot_null: begin
-   result:= 0;
-  end;
-  jot_string: begin
-   if not trystrtodouble(msestring(po1^.val.vstring),result,'.') then begin
-    conversionerror(names);
-   end;
-  end;
- end;
+ result:= jsonasflo64(fvalue,names);
 end;
 
 function tjsoncontainer.asboolean(const names: array of msestring): boolean;
-var
- po1: pjsonvaluety;
 begin
- po1:= findvaluevalue(names);
- case po1^.val.typ of
-  jot_boolean: begin
-   result:= po1^.val.vboolean;
-  end;
-  jot_int32: begin
-   result:= po1^.val.vint32 <> 0;
-  end;
-  jot_int64: begin
-   result:= po1^.val.vint64 <> 0;
-  end;
-  jot_flo64: begin
-   result:= round(po1^.val.vflo64) <> 0;
-  end;
-  jot_null: begin
-   result:= false;
-  end;
-  jot_string: begin
-   result:= msestring(po1^.val.vstring) = 'true';
-   if not result and (msestring(po1^.val.vstring) <> 'false') then begin
-    conversionerror(names);
-   end;
-  end;
- end;
+ result:= jsonasboolean(fvalue,names);
+end;
+
+procedure tjsoncontainer.iteratearray(const names: array of msestring;
+               var adata; const startproc: arraystartprocty;
+               const itemproc: arrayitemprocty);
+begin
+ jsoniteratearray(fvalue,names,adata,startproc,itemproc);
+end;
+
+procedure tjsoncontainer.iteratearray(const names: array of msestring;
+               var adata; const startproc: arraystartmethodty;
+               const itemproc: arrayitemmethodty);
+begin
+ jsoniteratearray(fvalue,names,adata,startproc,itemproc);
 end;
 
 end.

@@ -12,19 +12,58 @@ unit mseresourcetools;
 
 interface
 uses
- msestrings,sysutils;
- 
+ msestrings,sysutils,classes,mclasses,mseparser;
+
+function rsjgetconsts(const astream: tstream): constinfoarty; 
 procedure resourcetexttoresourcesource(const sourcefilename: filenamety;
                              const unitname: string; const fpcformat: boolean);
    //FPC resourcestringtable to resourceunit
 implementation
 uses
- classes,mseformdatatools,msefileutils,mseparser,msestream,msesys,typinfo,
- mseclasses;
+ mseformdatatools,msefileutils,msestream,msesys,typinfo,
+ mseclasses,msejson;
  
 const
  destfileext = '.pas';
  dataname = 'resourcedata';
+
+procedure rsjarraystart(var adata; const acount: int32);
+begin
+ setlength(constinfoarty(adata),acount);
+end;
+
+procedure rsjarrayitem(var adata; const aindex: int32;
+               const avalue: jsonvaluety);
+begin
+ with constinfoarty(adata)[aindex] do begin
+  name:= jsonasstring(avalue,['name']);
+  value:= jsonasstring(avalue,['value']);
+  hash:= jsonasint32(avalue,['hash']);
+  valuetype:= vawstring;
+ end;
+end;
+
+function rsjgetconsts(const astream: tstream): constinfoarty;
+var
+ json: tjsoncontainer;
+begin
+ json:= nil;
+ try
+  try
+   json:= tjsoncontainer.create(astream.readdatastring);
+   json.iteratearray(['strings'],result,@rsjarraystart,@rsjarrayitem);
+  except
+   on e: exception do begin
+    if astream is tfilestream then begin
+     e.message:= tfilestream(astream).filename+':'+lineend+e.message;
+    end;
+    raise;
+   end;
+  end;
+ finally
+  json.free();
+ end;
+end;
 
 procedure resourcetexttoresourcesource(const sourcefilename: filenamety;
                              const unitname: string; const fpcformat: boolean);
@@ -43,27 +82,32 @@ var
 begin
  instream:= ttextstream.create(sourcefilename,fm_read);
  try
-  scanner:= nil;
-  parser:= nil;
-  try
-   scanner:= tpascalscanner.Create;
-   scanner.source:= instream.readdatastring;
-   if fpcformat then begin
-    parser:= tfpcresstringparser.create(nil);
-   end
-   else begin
-    parser:= tresstringlistparser.Create(nil);
+  if fpcformat and (fileext(sourcefilename) = 'rsj') then begin
+   ar1:= rsjgetconsts(instream);
+  end
+  else begin 
+   scanner:= nil;
+   parser:= nil;
+   try
+    scanner:= tpascalscanner.Create;
+    scanner.source:= instream.readdatastring;
+    if fpcformat then begin
+     parser:= tfpcresstringparser.create(nil);
+    end
+    else begin
+     parser:= tresstringlistparser.Create(nil);
+    end;
+    parser.scanner:= scanner;
+    if fpcformat then begin
+     tfpcresstringparser(parser).getconsts(ar1);
+    end
+    else begin
+     tresstringlistparser(parser).getconsts(ar1);
+    end;
+   finally
+    parser.free;
+    scanner.free;
    end;
-   parser.scanner:= scanner;
-   if fpcformat then begin
-    tfpcresstringparser(parser).getconsts(ar1);
-   end
-   else begin
-    tresstringlistparser(parser).getconsts(ar1);
-   end;
-  finally
-   parser.free;
-   scanner.free;
   end;
  finally
   instream.free;

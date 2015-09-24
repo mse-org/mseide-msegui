@@ -418,7 +418,9 @@ type
   valuetype: tvaluetype;
   value: msestring;
   resource: boolean;
-  offset,len: integer;
+  case integer of
+   0:(offset,len: integer);
+   1:(hash: card32);
  end;
  pconstinfoty = ^constinfoty;
  constinfoarty = array of constinfoty;
