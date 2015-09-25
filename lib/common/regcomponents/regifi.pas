@@ -96,10 +96,8 @@ begin
        tconnectedifidatasource{,tifisqldatasource,}
        {$ifndef mse_no_db}{$ifdef FPC},tifisqlresult{$endif}{$endif}]);
  registercomponenttabhints(['ifi'],
-   ['MSEifi components.'+lineend+
-   'Compile MSEide with -dmse_with_ifirem '+
-   'in order to install the experimental MSEifi remote components.'+lineend+
-   'Compile with -dmse_with_pascalscript for PascalScript components.']);
+   ['MSEifi and socket components.'+lineend+
+   'Please compile with -dmse_with_pascalscript for PascalScript components.']);
 // registerpropertyeditor(typeinfo(tcomponent),tcustomificlientcontroller,
 //                                               'widget',tifiwidgeteditor);
  registercomponenteditor(tifilinkcomp,tifilinkcompeditor);

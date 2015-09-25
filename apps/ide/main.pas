@@ -356,7 +356,7 @@ uses
  regdb,regreport,
 {$endif}
 {$ifdef mse_with_ifi}
- regifi,{$ifdef mse_with_ifirem}regifirem,{$endif}
+ regifi,{$ifndef mse_no_ifirem}regifirem,{$endif}
 {$endif}
 {$ifdef mse_with_pascalscript}
  regpascalscript,
