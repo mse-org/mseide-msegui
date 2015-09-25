@@ -307,6 +307,8 @@ function trystrtohex64(const inp: string; out value: qword): boolean;
 function strtohex64(const inp: string): qword;
 
 
+function trystrtoint(const text: pchar; const len: int32; 
+                                          out value: integer): boolean;
 function trystrtoint(const text: lstringty; out value: integer): boolean;
 function trystrtoint(const text: string; out value: integer): boolean;
 function trystrtoint(const text: msestring; out value: integer): boolean;
@@ -4463,7 +4465,8 @@ begin
  end;
 end;
 
-function trystrtoint(const text: lstringty; out value: integer): boolean;
+function trystrtoint(const text: pchar; const len: int32; 
+                                          out value: integer): boolean;
 const
  max = maxint div 10;
 var
@@ -4473,9 +4476,9 @@ begin
  result:= false;
  neg:= false;
  value:= 0;
- if text.len > 0 then begin
-  po1:= text.po;
-  pe:= po1 + text.len;
+ if len > 0 then begin
+  po1:= text;
+  pe:= po1 + len;
   while ((po1^ = ' ') or (po1^ = c_tab)) and (po1 < pe) do begin
    inc(po1);
   end;
@@ -4488,7 +4491,7 @@ begin
   else begin
    inc(po1);
   end;
-  if po1^ >= pe then begin
+  if po1 >= pe then begin
    exit;
   end;
   while po1 < pe do begin
@@ -4519,14 +4522,19 @@ begin
  result:= true;
 end;
 
+function trystrtoint(const text: lstringty; out value: integer): boolean;
+begin
+ result:= trystrtoint(text.po,text.len,value);
+end;
+
 function trystrtoint(const text: string; out value: integer): boolean;
 begin
- result:= trystrtoint(stringtolstring(text),value);
+ result:= trystrtoint(pointer(text),length(text),value);
 end;
 
 function strtoint(const text: string): integer;
 begin
- if not trystrtoint(text,result) then begin
+ if not trystrtoint(pointer(text),length(text),result) then begin
   raise EConvertError.CreateFmt(SInvalidInteger,[text]);
  end;
 end;
