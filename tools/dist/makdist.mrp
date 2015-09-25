@@ -16,8 +16,8 @@ run.sta=6
 macros.sta=9
  [macrosfo]
  stackedunder=
- x=145
- y=63
+ x=89
+ y=193
  cx=1195
  cy=491
  wsize=0
@@ -91,8 +91,8 @@ c=1
    ae=0
    eec=0
    cr=0
-   ao=
-   ae=
+   ao=0
+   ae=0
    aec=0
    ie=0
    )
@@ -133,8 +133,8 @@ c=1
    ae=0
    eec=
    cr=0
-   ao=
-   ae=
+   ao=0
+   ae=0
    aec=0
    ie=0
    )
@@ -155,8 +155,8 @@ c=1
    ae=0
    eec=
    cr=0
-   ao=
-   ae=
+   ao=0
+   ae=0
    aec=0
    ie=0
    )
@@ -177,8 +177,8 @@ c=1
    ae=0
    eec=
    cr=0
-   ao=
-   ae=
+   ao=0
+   ae=0
    aec=0
    ie=0
    )
@@ -221,10 +221,14 @@ checked=0
 [mainmo.stoponcomperr]
 checked=0
 [mainmo.trttistat1]
-macronames=10
+macronames=14
+ FPCINSTDIR
  FPCINSTDIR
  COMPILERBIN
  COMPILERBIN
+ FPCUNITDIR
+ FPCUNITDIR
+ TARGET
  MSEBASEDIR
  MSELIBDIR
  FPCUNITS
@@ -232,32 +236,40 @@ macronames=10
  COMPILER
  FPCFLAGS
  FPC
-macrovalues=10
- 
- ppc386
- ppcx64
+macrovalues=14
+ /home/mse/packs/standard/svn/fp/builds/fixes_2_6
+ /home/mse/packs/standard/svn/fp/builds/fixes_3_0
+ lib/fpc/2.6.5/ppc386
+ lib/fpc/3.0.1/ppc386
+ lib/fpc/2.6.5/units/i386-linux
+ lib/fpc/3.0.1/units/i386-linux
+ linux
  /home/mse/packs/standard/git/
  ${FILE_SYS(${MSEBASEDIR}/mseide-msegui/lib/common/)}
  -Fu${FILE_SYS(${FPCINSTDIR}/${FPCUNITDIR}/*)}
  -Fu${MSELIBDIR}* -Fu${FILE_SYS(${MSELIBDIR}kernel/)}${TARGET}
- ${FPCINSTDIR}${FILE_SYS(${COMPILERBIN})}
+ ${FPCINSTDIR}/${FILE_SYS(${COMPILERBIN})}
  -n -viwn -Xg -B -O2 -XX -Xs -CX -l -Fcutf8 -dmse_with_deprecated ${MSEUNITS} ${FPCUNITS} ${MAC_IFDEF(OPT)}
  ${COMPILER} ${FPCFLAGS}
-macroon=10
- 0
- 0
- 0
- 0
+macroon=14
+ 1
+ 2
+ 1
+ 2
+ 1
+ 2
  63
  63
  63
  63
  63
  63
-macrogroup=0
+ 63
+ 63
+macrogroup=1
 groupcomment=6
- 386
- x64
+ fixes_2_6
+ fixes_3_0
  
  
  
