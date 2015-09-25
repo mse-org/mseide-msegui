@@ -11,6 +11,9 @@ unit mseprocutils;
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 {$ifndef FPC}{$ifdef linux} {$define UNIX} {$endif}{$endif}
+{$if fpc_fullversion >= 30000}
+ {$define fpcv3}
+{$endif}
 
 interface
 uses
@@ -452,7 +455,7 @@ var
  end;
 
 var
- startupinfo: tstartupinfow;
+ startupinfo: {$ifdef fpcv3}tstartupinfow{$else}tstartupinfo{$endif};
  creationflags: dword;
  processinfo: tprocessinformation;
  bo1: boolean;
@@ -569,7 +572,8 @@ begin
  if iswin95 then begin 
   bo1:= createprocessa(nil,pchar(ansistring(cmd1)),nil,nil,true,creationflags,
                pointer(ansistring(env1)),
-               pointer(ansistring(wd1)),startupinfoa(startupinfo),processinfo);
+               pointer(ansistring(wd1)),
+               {$ifdef fpcv3}tstartupinfoa{$endif}(startupinfo),processinfo);
  end
  else begin
   bo1:= createprocessw(nil,pmsechar(cmd1),nil,nil,true,
