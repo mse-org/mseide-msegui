@@ -25,6 +25,7 @@ object filedialogfo: Tfiledialogfo
   top = 138
   moduleclassname = 'tmseform'
   object namecont: tgroupbox
+    taborder = 8
     visible = False
     bounds_x = 0
     bounds_y = 232
@@ -34,7 +35,7 @@ object filedialogfo: Tfiledialogfo
   end
   object bucont: tspacer
     optionswidget = [ow_tabfocus, ow_parenttabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousewheel, ow_destroywidgets]
-    taborder = 5
+    taborder = 10
     visible = True
     bounds_x = 455
     bounds_y = 234
@@ -105,7 +106,7 @@ object filedialogfo: Tfiledialogfo
     optionswidget = [ow_mousefocus, ow_arrowfocus, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets]
     frame.localprops = []
     frame.localprops1 = []
-    taborder = 10
+    taborder = 9
     bounds_x = 0
     bounds_y = 26
     bounds_cx = 587
@@ -131,7 +132,7 @@ object filedialogfo: Tfiledialogfo
   object createdir: tbutton
     optionswidget1 = [ow1_fontglyphheight, ow1_autoscale, ow1_autowidth]
     optionswidget = [ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
-    taborder = 9
+    taborder = 5
     bounds_x = 530
     bounds_y = 2
     bounds_cx = 56
@@ -147,9 +148,9 @@ object filedialogfo: Tfiledialogfo
   object up: tstockglyphbutton
     optionswidget1 = [ow1_fontglyphheight, ow1_autoscale]
     optionswidget = [ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
-    taborder = 7
+    taborder = 1
     onshowhint = buttonshowhint
-    bounds_x = 463
+    bounds_x = 433
     bounds_y = 2
     bounds_cx = 17
     bounds_cy = 20
@@ -177,7 +178,7 @@ object filedialogfo: Tfiledialogfo
       39
       0
     )
-    taborder = 3
+    taborder = 6
     bounds_x = 1
     bounds_y = 259
     bounds_cx = 488
@@ -209,7 +210,7 @@ object filedialogfo: Tfiledialogfo
       34
       0
     )
-    taborder = 4
+    taborder = 7
     bounds_x = 1
     bounds_y = 284
     bounds_cx = 483
@@ -240,7 +241,6 @@ object filedialogfo: Tfiledialogfo
       20
       0
     )
-    taborder = 6
     onshowhint = dirshowhint
     bounds_x = 1
     bounds_y = 2
@@ -252,17 +252,17 @@ object filedialogfo: Tfiledialogfo
     reffontheight = 14
   end
   object tspacer1: tspacer
-    taborder = 2
+    taborder = 11
     bounds_x = 480
     bounds_y = 0
     bounds_cx = 2
     bounds_cy = 20
-    linkleft = up
+    linkleft = forward
     linkright = home
     options = [spao_glueright]
   end
   object tspacer2: tspacer
-    taborder = 1
+    taborder = 12
     bounds_x = 528
     bounds_y = 0
     bounds_cx = 2
@@ -274,7 +274,7 @@ object filedialogfo: Tfiledialogfo
   object home: tbutton
     optionswidget1 = [ow1_fontglyphheight, ow1_autoscale, ow1_autowidth]
     optionswidget = [ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
-    taborder = 8
+    taborder = 4
     bounds_x = 482
     bounds_y = 2
     bounds_cx = 46
@@ -288,18 +288,18 @@ object filedialogfo: Tfiledialogfo
     reffontheight = 14
   end
   object tspacer3: tspacer
-    taborder = 11
+    taborder = 13
     bounds_x = 431
     bounds_y = 0
     bounds_cx = 2
     bounds_cy = 20
     linkleft = dir
-    linkright = back
+    linkright = up
     options = [spao_glueright]
   end
   object tspacer5: tspacer
-    taborder = 12
-    bounds_x = 446
+    taborder = 14
+    bounds_x = 465
     bounds_y = 0
     bounds_cx = 2
     bounds_cy = 20
@@ -308,21 +308,21 @@ object filedialogfo: Tfiledialogfo
     options = [spao_glueright]
   end
   object tspacer6: tspacer
-    taborder = 13
-    bounds_x = 461
+    taborder = 15
+    bounds_x = 450
     bounds_y = 0
     bounds_cx = 2
     bounds_cy = 20
-    linkleft = forward
-    linkright = up
+    linkleft = up
+    linkright = back
     options = [spao_glueright]
   end
   object forward: tstockglyphbutton
     optionswidget1 = [ow1_fontglyphheight, ow1_autoscale]
     optionswidget = [ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_disabledhint]
-    taborder = 14
+    taborder = 3
     onshowhint = buttonshowhint
-    bounds_x = 448
+    bounds_x = 467
     bounds_y = 2
     bounds_cx = 13
     bounds_cy = 20
@@ -340,9 +340,9 @@ object filedialogfo: Tfiledialogfo
   object back: tstockglyphbutton
     optionswidget1 = [ow1_fontglyphheight, ow1_autoscale]
     optionswidget = [ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_disabledhint]
-    taborder = 15
+    taborder = 2
     onshowhint = buttonshowhint
-    bounds_x = 433
+    bounds_x = 452
     bounds_y = 2
     bounds_cx = 13
     bounds_cy = 20
