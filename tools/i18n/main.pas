@@ -144,7 +144,7 @@ uses
  main_mfm,msefileutils,msesystypes,msesys,sysutils,mselist,project,
  rtlconsts,mseprocutils,msestockobjects,
  msewidgets,mseparser,mseformdatatools,mseresourcetools,
- msearrayutils,msesettings,messagesform,mseeditglob;
+ msearrayutils,msesettings,messagesform,mseeditglob,mseformatstr;
 type
  strinconsts = (
   sc_name,               //0
@@ -295,7 +295,7 @@ begin
   delete:= (sender.count = 0) and (valuetype in [vanull,valist,vacollection]) and 
            (stringonly.value or ntonly.value and not donottranslate);
   if not delete and flat.value then begin
-   sender.caption:= node.rootstring;
+   sender.caption:= msestring(node.rootstring);
   end;
  end;
 end;
@@ -398,7 +398,7 @@ begin
   parser.scanner:= scanner;
   node:= tpropinfonode.Create;
   node.info.name:= parser.getconsts(ar1);
-  result:= node.info.name;
+  result:= msestring(node.info.name);
   rootnode.add(node);
   for int1:= 0 to high(ar1) do begin
    with ar1[int1] do begin
@@ -458,8 +458,8 @@ begin
    end;
   end;
   node:= tpropinfonode.Create;
-  node.info.name:= filename(stream.filename);
-  result:= node.info.name;
+  node.info.name:= ansistring(filename(stream.filename));
+  result:= msestring(node.info.name);
   str1:= '';
   for int1:= 0 to high(ar1) do begin
    with ar1[int1] do begin
@@ -518,7 +518,7 @@ begin
   memstream.Position:= 0;
   node:= tpropinfonode.Create;
   readprops(memstream,node);
-  result:= node.info.name;
+  result:= msestring(node.info.name);
   rootnode.add(node);
  except
   application.handleexception(self,c[ord(sc_cannotreadmodule)]+' '+stream.filename+':');
@@ -538,7 +538,7 @@ begin
  if ttreenode1(sender).fparent <> nil then begin
   with tpropinfonode(sender),info do begin
    str1:= rootstring(',');
-   str2:= typedisp.enumname(ord(valuetype));
+   str2:= ansistring(typedisp.enumname(ord(valuetype)));
    mstr3:= valuetext;
    rec:= mergevarrec([str1,str2,donottranslate,comment,mstr3],[]);
    for int1:= 0 to high(variants) do begin
@@ -856,7 +856,7 @@ var
   else begin
    int3:= messagesfo.messages.waitforprocess;
    if int3 <> 0 then begin
-    addmessage(c[ord(sc_execerror)]+' '+inttostr(int3)+'.');
+    addmessage(c[ord(sc_execerror)]+' '+inttostrmse(int3)+'.');
     error:= true;
    end
    else begin
@@ -913,7 +913,8 @@ begin
      break;
     end;
     for int3:= 0 to rootnode.count - 1 do begin
-     if rootnode[int3].info.name = projectfo.rootname[int2] then begin
+     if rootnode[int3].info.name = 
+                       ansistring(projectfo.rootname[int2]) then begin
       node:= rootnode[int3];
       break;
      end;
@@ -940,7 +941,7 @@ begin
        finally
         stream2.Free;
        end;
-       str1:= filenamebase(afilename)+rstext;
+       str1:= ansistring(filenamebase(afilename))+rstext;
        resourcetexttoresourcesource(afilename,str1,true);
        additem(resourcenames,str1);
       end;
@@ -972,7 +973,7 @@ begin
         stream.Free;
        end;
        formtexttoobjsource(afilename,'','',of_default,true);
-       additem(modulenames,filenamebase(afilename));
+       additem(modulenames,ansistring(filenamebase(afilename)));
       end;
      end;
     end;
@@ -1012,7 +1013,7 @@ begin
    end;
   except
    on e: exception do begin
-    addmessage(e.message+lineend);
+    addmessage(msestring(e.message+lineend));
     error:= true;
    end;
    else begin
@@ -1132,8 +1133,8 @@ begin
    mainstatfile.writestat;
   except
    on e: exception do begin
-    if showmessage(c[ord(sc_closeerror)]+lineend+e.message,c[ord(sc_error)],
-                      [mr_ignore,mr_cancel]) <> mr_ignore then begin
+    if showmessage(c[ord(sc_closeerror)]+lineend+msestring(e.message),
+          c[ord(sc_error)],[mr_ignore,mr_cancel]) <> mr_ignore then begin
      amodalresult:= mr_none;
     end;
    end;
