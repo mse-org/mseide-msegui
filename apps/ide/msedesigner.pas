@@ -420,6 +420,8 @@ type
 //   procedure doasyncevent(var atag: integer); override;
    procedure readererror(reader: treader; const message: string;
                                  var handled: boolean);
+   procedure readerenumerror(const reader: treader; const atype: ptypeinfo;
+                            const aitemname: string; var avalue: longword);
    procedure readerseterror(const reader: treader; const atype: ptypeinfo;
                             const aitemname: string; var avalue: integer);
    procedure forallmethodproperties(const aroot: tcomponent;
@@ -4567,6 +4569,17 @@ begin
  end;
 end;
 
+procedure tdesigner.readerenumerror(const reader: treader; 
+         const atype: ptypeinfo; const aitemname: string; var avalue: longword);
+begin
+ if atype = typeinfo(charcodingty) then begin
+  if (aitemname = 'ce_utf8n') then begin
+   avalue:= ord(ce_utf8n);
+   floadingmodulepo^.readermodified:= true;
+  end;
+ end;
+end;
+
 procedure tdesigner.readerseterror(const reader: treader; 
          const atype: ptypeinfo; const aitemname: string; var avalue: integer);
 begin
@@ -4707,6 +4720,7 @@ begin //loadformfile
          reader.oncreatecomponent:= createcomponent();
          reader.onerror:= {$ifdef FPC}@{$endif}readererror;
          reader.onseterror:= @readerseterror;
+         reader.onenumerror:= @readerenumerror;
          module.Name:= modulename;
          reader.ReadrootComponent(module);
         {$ifndef mse_nomethodswap}
