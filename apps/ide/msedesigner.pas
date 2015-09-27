@@ -4572,9 +4572,9 @@ end;
 procedure tdesigner.readerenumerror(const reader: treader; 
          const atype: ptypeinfo; const aitemname: string; var avalue: longword);
 begin
- if atype = typeinfo(charcodingty) then begin
+ if atype = typeinfo(charencodingty) then begin
   if (aitemname = 'ce_utf8n') then begin
-   avalue:= ord(ce_utf8n);
+   avalue:= ord(ce_utf8);
    floadingmodulepo^.readermodified:= true;
   end;
  end;

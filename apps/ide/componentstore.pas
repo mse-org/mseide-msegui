@@ -518,7 +518,7 @@ var
  reader1: tstatreader;
 begin
  with aitem do begin
-  reader1:= tstatreader.create(finfo.filepath,ce_utf8n);
+  reader1:= tstatreader.create(finfo.filepath,ce_utf8);
   try
    reader1.setsection('store'); 
    aitem.dostatread(reader1);
@@ -540,7 +540,7 @@ begin
  fgroupfilename:= msefileutils.filepath(afilename);
  writer2:= nil;
  try
-  writer2:= tstatwriter.create(fgroupfilename,ce_utf8n,true);
+  writer2:= tstatwriter.create(fgroupfilename,ce_utf8,true);
   with writer2,node do begin
    for int1:= 0 to itemlist.count - 1 do begin
     item1:= tstoredcomponent(items[int1]);
@@ -554,7 +554,7 @@ begin
     for int1:= 0 to high(far1) do begin
      with far1[int1] do begin
       if isstatechanged then begin
-       writer1:= tstatwriter.create(finfo.filepath,ce_utf8n,true);
+       writer1:= tstatwriter.create(finfo.filepath,ce_utf8,true);
        try
         writer1.writesection('store'); 
         far1[int1].dostatwrite(writer1);
@@ -597,7 +597,7 @@ begin
   try
    fgroupfilename:= msefileutils.filepath(afilename);
    storedir1:= getstoredir;
-   reader2:= tstatreader.create(fgroupfilename,ce_utf8n);
+   reader2:= tstatreader.create(fgroupfilename,ce_utf8);
    with reader2,node do begin
     setsection('componentstore');
     readrecordarray('stores',{$ifdef FPC}@{$endif}dosetstorescount,
@@ -838,7 +838,7 @@ var
  writer1: tstatwriter;
 begin
  stream1:= ttextstream.create; //memory stream
- writer1:= tstatwriter.create(stream1,ce_utf8n);
+ writer1:= tstatwriter.create(stream1,ce_utf8);
 // stream1.encoding:= ce_utf8n;
  try
   writer1.writesection('nodecopy');
@@ -865,7 +865,7 @@ begin
   try
    stream1:= ttextstream.createdata(stringtoutf8ansi(mstr1));
 //   stream1.encoding:= ce_utf8n;
-   reader1:= tstatreader.create(stream1,ce_utf8n);
+   reader1:= tstatreader.create(stream1,ce_utf8);
    if reader1.findsection('nodecopy') and 
         (reader1.readmsestring('signature','') = nodecopysig) then begin
     node1:= tstoredcomponent.create(true);

@@ -2071,7 +2071,7 @@ var
 begin
  result:= false;
  try
-  statreader:= tstatreader.create(filename,ce_utf8n);
+  statreader:= tstatreader.create(filename,ce_utf8);
   try
    application.beginwait;
    updateprojectoptions(statreader,filename);
@@ -2096,7 +2096,7 @@ begin
  if filename = '' then begin
   filename:= projectoptions.projectfilename;
  end;
- statwriter:= tstatwriter.create(filename,ce_utf8n,true);
+ statwriter:= tstatwriter.create(filename,ce_utf8,true);
  try
   updateprojectoptions(statwriter,filename);
  finally
@@ -2532,7 +2532,7 @@ var
  write1: tstatwriter;
 begin
  astream:= ttextstream.create; //memory stream
- write1:= tstatwriter.create(astream,ce_utf8n);
+ write1:= tstatwriter.create(astream,ce_utf8);
  try
   write1.setsection('projectoptions');
   updateprojectsettings(write1); //save projectoptions state
@@ -2546,7 +2546,7 @@ var
  read1: tstatreader;
 begin
  astream.position:= 0;
- read1:= tstatreader.create(astream,ce_utf8n);
+ read1:= tstatreader.create(astream,ce_utf8);
  try
   read1.setsection('projectoptions');
   updateprojectsettings(read1); //restore projectoptions state
@@ -2598,7 +2598,7 @@ begin
   end;
   projectoptions.disabled:= getdisabledoptions;
   try
-   read1:= tstatreader.create(fname1,ce_utf8n);
+   read1:= tstatreader.create(fname1,ce_utf8);
    try
     read1.setsection('projectoptions');
     if projectoptions.o.settingsprojecttree then begin
@@ -2653,7 +2653,7 @@ begin
   expandprmacros1(fname1);
  end;
  if fname1 <> '' then begin
-  stat1:= tstatwriter.create(fname1,ce_utf8n,true);
+  stat1:= tstatwriter.create(fname1,ce_utf8,true);
   with projectoptions do begin
    try
     savestat(stream1);

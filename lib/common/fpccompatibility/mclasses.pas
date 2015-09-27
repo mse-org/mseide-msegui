@@ -6517,10 +6517,17 @@ begin
       SetOrdProp(Instance, PropInfo, Ord(ReadWideChar));
     tkEnumeration:
       begin
-        Value := GetEnumValue(PropType, ReadIdent);
-        if Value = -1 then
-          raise EReadError.Create(SInvalidPropertyValue);
-        SetOrdProp(Instance, PropInfo, Value);
+       ident:= ReadIdent;
+       Value := GetEnumValue(PropType, ident);
+       if Value = -1 then begin
+        if assigned(fonenumerror) then begin
+         fonenumerror(self,proptype,ident,value);
+        end;
+       end;
+       if Value = -1 then begin        
+        raise EReadError.Create(SInvalidPropertyValue);
+       end;
+       SetOrdProp(Instance, PropInfo, Value);
       end;
 {$ifndef FPUNONE}
     tkFloat:

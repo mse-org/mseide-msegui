@@ -165,7 +165,7 @@ var
 begin
  result:= false;
  initinfo(ainfo);
- stat:= tstatreader.create(afilename,ce_utf8n);
+ stat:= tstatreader.create(afilename,ce_utf8);
  with stat,ainfo do begin
   if findsection('header') then begin
    name:= readmsestring('name','');
@@ -191,7 +191,7 @@ procedure tcodetemplates.savefile(const ainfo: templateinfoty);
 var
  stat: tstatwriter; 
 begin
- stat:= tstatwriter.create(ainfo.path,ce_utf8n,true);
+ stat:= tstatwriter.create(ainfo.path,ce_utf8,true);
  with stat,ainfo do begin
   writesection('header');
   writemsestring('name',name);

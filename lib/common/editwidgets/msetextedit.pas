@@ -940,7 +940,7 @@ begin
  try
   flines.loadfromstream(stream);
   fhasbom:= false;
-  if stream.encoding in [ce_utf8n] then begin
+  if stream.encoding = ce_utf8 then begin
    if (flines.count > 0) then begin
     po1:= flines.datapo;
     if (po1^ <> '') and (card16(po1^[1]) = $feff) then begin
@@ -983,7 +983,7 @@ const
 begin
  stream.encoding:= fencoding;
 // stream.filerights:= ffilerights;
- if (fencoding = ce_utf8n) and (fhasbom or (teeo_bom in foptions)) and 
+ if (fencoding = ce_utf8) and (fhasbom or (teeo_bom in foptions)) and 
                                      not(teeo_nobom in foptions) then begin
   stream.writebuffer(bom,length(bom));
  end;

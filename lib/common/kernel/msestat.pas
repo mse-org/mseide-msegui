@@ -52,7 +52,7 @@ type
   protected
   public
    constructor create(const astream: ttextstream;
-                            const aencoding: charencodingty = ce_utf8n);
+                            const aencoding: charencodingty = ce_utf8);
    destructor destroy; override;
    function varname(const intf: istatfile): msestring;
    function arrayname(const name: msestring; index: integer): msestring;
@@ -124,9 +124,9 @@ type
                         out isarray: boolean): boolean; overload; //true if ok
   public
    constructor create(const astream: ttextstream;
-                      const aencoding: charencodingty = ce_utf8n); overload;
+                      const aencoding: charencodingty = ce_utf8); overload;
    constructor create(const filename: filenamety;
-                      const aencoding: charencodingty = ce_utf8n); overload;
+                      const aencoding: charencodingty = ce_utf8); overload;
    destructor destroy; override;
    function sections: msestringarty;
    function findsection(const name: msestring): boolean; //true if found
@@ -187,9 +187,9 @@ type
    procedure writelistval(const avalue: msestring);
   public
    constructor create(const astream: ttextstream;
-                     const aencoding: charencodingty = ce_utf8n); overload;
+                     const aencoding: charencodingty = ce_utf8); overload;
    constructor create(const filename: filenamety; 
-                              const aencoding: charencodingty = ce_utf8n;
+                              const aencoding: charencodingty = ce_utf8;
                               const atransaction: boolean = true); overload;
  
    procedure writesection(const name: msestring);
@@ -402,7 +402,7 @@ end;
 { tstatfiler }                                                          
 
 constructor tstatfiler.create(const astream: ttextstream;
-                              const aencoding: charencodingty = ce_utf8n);
+                              const aencoding: charencodingty = ce_utf8);
 begin
  fstream:= astream;
  if fstream <> nil then begin
@@ -669,7 +669,7 @@ end;
 { tstatreader }
 
 constructor tstatreader.create(const astream: ttextstream;
-                                  const aencoding: charencodingty = ce_utf8n);
+                                  const aencoding: charencodingty = ce_utf8);
 begin
  inherited;
  fsectionlist:= tpointermsestringhashdatalist.create;
@@ -677,7 +677,7 @@ begin
 end;
 
 constructor tstatreader.create(const filename: filenamety;
-                               const aencoding: charencodingty = ce_utf8n);
+                               const aencoding: charencodingty = ce_utf8);
 var
  stream1: ttextstream;
 begin
@@ -1494,14 +1494,14 @@ end;
 { tstatwriter }
 
 constructor tstatwriter.create(const astream: ttextstream;
-                                const aencoding: charencodingty = ce_utf8n);
+                                const aencoding: charencodingty = ce_utf8);
 begin
  fiswriter:= true;
  inherited;
 end;
 
 constructor tstatwriter.create(const filename: filenamety;
-                               const aencoding: charencodingty = ce_utf8n;
+                               const aencoding: charencodingty = ce_utf8;
                                        const atransaction: boolean = true);
 var
  stream1: ttextstream;

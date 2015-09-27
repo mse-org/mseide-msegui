@@ -159,7 +159,7 @@ procedure tfindinfilepagefo.threadonexecute(const sender: tthreadcomp);
  begin
   case projectoptions.e.encoding of
    1: begin
-    stream.encoding:= ce_utf8n;
+    stream.encoding:= ce_utf8;
    end;
    2: begin
     stream.encoding:= ce_iso8859_1;

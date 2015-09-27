@@ -192,7 +192,7 @@ type
                       tss_nosigio,tss_unblocked,tss_haslink);
  textstreamstatesty = set of textstreamstatety;
 
- charencodingty = (ce_locale,ce_utf8n,ce_ascii,ce_iso8859_1);
+ charencodingty = (ce_locale,ce_utf8,ce_ascii,ce_iso8859_1);
                          //ce_ascii -> 7Bit,
                          //string and msestrings -> pascalstrings
 
@@ -477,9 +477,9 @@ function getrecordtypechars(const fields: array of const): string;
                 // r -> real
 
 function encodestring(const value: msestring; 
-                           const encoding: charencodingty = ce_utf8n): string;
+                           const encoding: charencodingty = ce_utf8): string;
 function decodestring(const value: string; 
-                   const encoding: charencodingty = ce_utf8n): msestring;
+                   const encoding: charencodingty = ce_utf8): msestring;
 
 function encoderecord(const fields: array of const;
                forcequote: boolean = false; const quotechar: msechar = '"';
@@ -743,13 +743,13 @@ begin
 end;
 
 function encodestring(const value: msestring; 
-                           const encoding: charencodingty = ce_utf8n): string;
+                           const encoding: charencodingty = ce_utf8): string;
 begin
  case encoding  of
   ce_ascii: begin
    result:= stringtopascalstring(value);
   end;
-  ce_utf8n: begin
+  ce_utf8: begin
    result:= stringtoutf8ansi(value);
   end;
   ce_iso8859_1: begin
@@ -762,13 +762,13 @@ begin
 end;
 
 function decodestring(const value: string; 
-                   const encoding: charencodingty = ce_utf8n): msestring;
+                   const encoding: charencodingty = ce_utf8): msestring;
 begin
  case encoding  of
   ce_ascii: begin
    result:= pascalstringtostring(value);
   end;
-  ce_utf8n: begin
+  ce_utf8: begin
    result:= utf8tostringansi(value);
   end;
   ce_iso8859_1: begin

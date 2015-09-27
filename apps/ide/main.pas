@@ -2937,7 +2937,7 @@ procedure tmainfo.savewindowlayout(const astream: ttextstream);
 var
  statwriter: tstatwriter;
 begin
- statwriter:= tstatwriter.create(astream,ce_utf8n);
+ statwriter:= tstatwriter.create(astream,ce_utf8);
  try
   statwriter.setsection('breakpoints');
   beginpanelplacement();
@@ -2957,7 +2957,7 @@ procedure tmainfo.loadwindowlayout(const astream: ttextstream);
 var
  statreader: tstatreader;
 begin
- statreader:= tstatreader.create(astream,ce_utf8n);
+ statreader:= tstatreader.create(astream,ce_utf8);
  try
   beginpanelplacement();
   statreader.setsection('breakpoints');

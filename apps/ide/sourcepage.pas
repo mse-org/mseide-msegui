@@ -1284,7 +1284,7 @@ begin
    edit.markbrackets:= e.editmarkbrackets;
    case e.encoding of
     1: begin
-     edit.encoding:= ce_utf8n;
+     edit.encoding:= ce_utf8;
     end;
     2: begin
      edit.encoding:= ce_iso8859_1;
