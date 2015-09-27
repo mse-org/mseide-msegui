@@ -12,10 +12,12 @@ unit msesetlocale;
 interface
 uses
  mselibc,msesys;
- 
+
+function getcodeset(): string;
+
 implementation
 uses
- cwstring,sysutils,msestrings,mseformatstr,msetypes;
+ cwstring,sysutils,msestrings,mseformatstr,msetypes,msesysintf;
  
 function getlocstr(const id: integer; const defaultvalue: string): string;
 var
@@ -28,6 +30,11 @@ begin
  else begin
   result:= po1;
  end;
+end;
+
+function getcodeset(): string;
+begin
+ result:= getlocstr(codeset,'');
 end;
 
 function convertcformatstring(const source,defaultvalue: string): string;
@@ -237,6 +244,11 @@ begin
   saveformatsettings;
  {$ifdef FPC}{$checkpointer default}{$endif}
  {$endif} 
+ end;
+
+ str1:= strlowercase(getcodeset());
+ if (str1 = 'utf8') or (str1 = 'utf-8') then begin
+  filenameutfoptions:= [uto_storeinvalid];
  end;
 end;
 

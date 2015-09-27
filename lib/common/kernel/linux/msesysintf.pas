@@ -25,6 +25,7 @@ uses
  
 var
  thread1: threadty;
+ filenameutfoptions: utfoptionsty;
 
 {$ifdef msedebug}
 var                         //!!!!todo: link with correct location
@@ -601,11 +602,31 @@ begin
  end;
 end;
 
+function tosys(const avalue: filenamety): string;
+begin
+ if filenameutfoptions <> [] then begin
+  result:= stringtoutf8(avalue,filenameutfoptions);
+ end
+ else begin
+  result:= ansistring(avalue);
+ end;
+end;
+
+function fromsys(const avalue: string): filenamety;
+begin
+ if filenameutfoptions <> [] then begin
+  result:= utf8tostringansi(avalue,filenameutfoptions);
+ end
+ else begin
+  result:= filenamety(avalue);
+ end;
+end;
+
 function sys_createdir(const path: msestring; const rights: filerightsty): syserrorty;
 var
  str1: string;
 begin
- str1:= ansistring(path);
+ str1:= tosys(path);
  if mselibc.__mkdir(pchar(str1),
                  getfilerights(rights)) <> 0 then begin
 //  result:= sye_createdir;
@@ -639,7 +660,7 @@ const
 begin
  str2:= path;
  sys_tosysfilepath(str2);
- str1:= ansistring(str2);
+ str1:= tosys(str2);
  handle:= Integer(mselibc.open(PChar(str1), openmodes[openmode] or 
                             defaultopenflags,[getfilerights(rights)]));
  if handle >= 0 then begin
@@ -878,8 +899,8 @@ var
  lwo1: longword;
  po1: pointer;
 begin
- str1:= ansistring(oldfile);
- str2:= ansistring(newfile);
+ str1:= tosys(oldfile);
+ str2:= tosys(newfile);
  result:= sye_copyfile;
  source:= mselibc.open(pchar(str1),o_rdonly);
  if source <> -1 then begin
@@ -930,8 +951,8 @@ function sys_renamefile(const oldname,newname: filenamety): syserrorty;
 var
  str1,str2: string;
 begin
- str1:= ansistring(oldname);
- str2:= ansistring(newname);
+ str1:= tosys(oldname);
+ str2:= tosys(newname);
  if mselibc.__rename(pchar(str1),pchar(str2)) = -1 then begin
   result:= syelasterror;
  end
@@ -944,7 +965,7 @@ function sys_deletefile(const filename: filenamety): syserrorty;
 var
  str1: string;
 begin
- str1:= ansistring(filename);
+ str1:= tosys(filename);
  if mselibc.unlink(pchar(str1)) = -1 then begin
   result:= syelasterror;
  end
@@ -1083,7 +1104,7 @@ function sys_setcurrentdir(const dirname: filenamety): syserrorty;
 var
  str1: string;
 begin
- str1:= ansistring(dirname);
+ str1:= tosys(dirname);
  if mselibc.__chdir(pchar(str1)) = 0 then begin
   result:= sye_ok;
  end
@@ -1101,7 +1122,7 @@ var
  str1: string;
 begin
  checkdirstreamdata(stream);
- str1:= ansistring(stream.dirinfo.dirname);
+ str1:= tosys(stream.dirinfo.dirname);
  with stream,dirinfo,dirstreamlinuxty(platformdata) do begin
 {$ifdef FPC}
   d.dir:= pdir(opendir(pchar(str1)));
@@ -1160,7 +1181,7 @@ begin
           (po1 <> nil) then begin
      with info do begin
       str1:= dirent.d_name;
-      name:= filenamety(str1);
+      name:= fromsys(str1);
       if checkfilename(info.name,stream) then begin
        if d.needsstat or d.needstype and 
        ((dirent.d_type = dt_unknown) or (dirent.d_type = dt_lnk)) then begin
@@ -1241,7 +1262,7 @@ begin
  clearfileinfo(info);
  str1:= tosysfilepath(path);
  fillchar(statbuffer,sizeof(statbuffer),0);
- result:= stat64(pchar(string(str1)),@statbuffer) = 0;
+ result:= stat64(pchar(tosys(str1)),@statbuffer) = 0;
  if result then begin
   stattofileinfo(statbuffer,info);
   splitfilepath(filepath(path),str1,info.name);
@@ -1281,7 +1302,7 @@ var
  str1: filenamety;
 begin
  str1:= tosysfilepath(path);
- if chmod(pchar(string(str1)),
+ if chmod(pchar(tosys(str1)),
                getmodebits(fileattributesty(rights))) = 0 then begin
   result:= sye_ok;
  end
