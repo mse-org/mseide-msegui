@@ -1088,7 +1088,7 @@ end;
 }
 
 function docheckutf8(const value: pointer; const count: int32): boolean;
-              //true if valid utf8
+                     //null terminated
 var
  po1: pbyte;
 begin
@@ -1096,34 +1096,61 @@ begin
  if count > 0 then begin
   po1:= value;
   while po1^ <> $00 do begin
-   if po1^ >= $80 then begin
-    case po1^ and $e0 of
-     $c0: begin //two bytes
-      if po1^ and $0f = 0 then begin
-       result:= false; //overlong
-       exit;
-      end;
-      inc(po1);
-      if po1^ and $c0 <> $80 then begin
-       result:= false;
-       exit;
-      end;
+   if po1^ >= $80 then begin //2 bytes
+    if po1^ < $e0 then begin 
+     if po1^ and $1e = 0 then begin
+      result:= false; //overlong
+      exit;
      end;
-     $e0: begin //three bytes
-      inc(po1);
-      if po1^ and $c0 <> $80 then begin
-       result:= false;
-       exit;
-      end;
-      inc(po1);
-      if po1^ and $c0 <> $80 then begin
-       result:= false;
-       exit;
-      end;
-     end;
-     else begin
+     inc(po1);
+     if po1^ and $c0 <> $80 then begin
       result:= false;
       exit;
+     end;
+    end
+    else begin
+     if po1^ < $f0 then begin //3 bytes
+      inc(po1);
+      if (po1^ and $20 = 0) and ((po1-1)^ and $0f = 0) then begin
+       result:= false; //overolong
+       exit;
+      end;
+      if po1^ and $c0 <> $80 then begin
+       result:= false;
+       exit;
+      end;
+      inc(po1);
+      if po1^ and $c0 <> $80 then begin
+       result:= false;
+       exit;
+      end;
+     end
+     else begin
+      if po1^ < $f80 then begin //4 bytes
+       inc(po1);
+       if po1^ and $c0 <> $80 then begin
+        result:= false;
+        exit;
+       end;
+       if (po1^ and $30 = 0) and ((po1-1)^ and $07 = 0) then begin
+        result:= false; //overolong
+        exit;
+       end;
+       inc(po1);
+       if po1^ and $c0 <> $80 then begin
+        result:= false;
+        exit;
+       end;
+       inc(po1);
+       if po1^ and $c0 <> $80 then begin
+        result:= false;
+        exit;
+       end;
+      end
+      else begin
+       result:= false;
+       exit;
+      end;
      end;
     end;
    end;
