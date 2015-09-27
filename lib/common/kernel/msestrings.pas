@@ -62,7 +62,7 @@ type
  utfoptionsty = set of utfoptionty;
 
 const
- utf16privatebase = $e000; //used to store invalid utf8 chars in filenamety
+ utf16privatebase = $f800; //used to store invalid utf8 chars in filenamety
  utferrorchar = char('?'); //single byte only
  
  {$ifdef mse_unicodestring}
