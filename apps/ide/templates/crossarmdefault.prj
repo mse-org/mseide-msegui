@@ -19,9 +19,14 @@ order16=0
 order17=0
 order18=0
 [projectoptions]
-projectdir=/home/mse/packs/standard/git/mseide-msegui_arm/apps/ide/templates
-projectfilename=/home/mse/packs/standard/git/mseide-msegui_arm/apps/ide/templates/crossarmdefault.prj
-options=99
+projectdir=/home/mse/packs/standard/git/mseide-msegui/apps/ide/templates
+projectfilename=/home/mse/packs/standard/git/mseide-msegui/apps/ide/templates/crossarmdefault.prj
+options=110
+ [projectoptionsfo.toolshortcuts]
+ dropdowncolwidths=3
+  70
+  70
+  70
  [projectoptionsfo.twidgetgrid3]
  propcolwidthref=726
  sortdescend0=0
@@ -34,6 +39,12 @@ options=99
  sortdescend5=0
  width6=296
  sortdescend6=0
+ width7=50
+ sortdescend7=0
+ width8=1
+ sortdescend8=0
+ width9=296
+ sortdescend9=0
  [projectoptionsfo.twidgetgrid4]
  propcolwidthref=550
  width0=96
@@ -96,7 +107,7 @@ options=99
  sortdescend1=0
  [projectoptionsfo.ttabwidget1]
  firsttab=0
- index=0
+ index=4
  [projectoptionsfo.grid]
  propcolwidthref=511
  width0=219
@@ -114,7 +125,7 @@ options=99
  index=0
  [projectoptionsfo.tabwidget]
  firsttab=0
- index=9
+ index=3
  [projectoptionsfo]
  stackedunder=
  x=19
@@ -364,7 +375,7 @@ macronames=22
  FPCOPT
  FPCOPT
 macrovalues=22
- <your project dir on target ex: /home/pi/proj/test>
+ your project dir on target example: /home/pi/proj/test
  XAUTHORITY=/home/pi/.Xauthority DISPLAY=:0.0
  eabi
  eabihf
@@ -381,8 +392,8 @@ macrovalues=22
  
  ${CROSSFPCDIR}/${ABI}
  ${CROSSFPC}/bin/gdb
- ${CROSSFPC}/lib/fpc/3.0.1/ppcrossarm
- -n -Xd -viwn -e${CROSSFPC}/bin -Fl${CROSSFPC}/lib -Fu${CROSSFPC}/lib/fpc/3.0.1/units/arm-linux/*
+ ${CROSSFPC}/lib/fpc/${CROSSFPCVERSION}/ppcrossarm
+ -n -Xd -viwn -e${CROSSFPC}/bin -Fl${CROSSFPC}/lib -Fu${CROSSFPC}/lib/fpc/${CROSSFPCVERSION}/units/arm-linux/*
  ${FPCOPTIONS}
  ${FPCOPTIONS} -CpARMV6 -CfVFPV2
  
@@ -398,6 +409,7 @@ toolsave=0
 toolhide=0
 toolparse=0
 toolmessages=0
+toolshortcuts=0
 fontalias=0
 fontancestors=0
 fontheights=0
@@ -487,6 +499,7 @@ afterconnect=
 beforeload=
 afterload=
 beforerun=
+sourcebase=
 sourcedirs=4
  ${MSEDIR}lib/addon/*/
  ${MSEDIR}lib/common/kernel/$TARGETOSDIR/
@@ -511,6 +524,7 @@ startupbkpt=0
 startupbkpton=0
 gdbsimulator=0
 gdbserverstartonce=0
+gdbloadtimeout=
 gdbserverwait=1
 nogdbserverexit=1
 gdbservertty=0
@@ -571,7 +585,7 @@ files=
  a=0,4132,6,Text Files
  )
 [componentstore]
-storedir=/home/mse/packs/standard/git/mseide-msegui_arm/apps/ide/compstore/
+storedir=
 filename=
 [components]
 [selecteditpage]
@@ -603,7 +617,7 @@ tabsize=105
 firsttab=0
 index=-1
 [layout]
-windowlayout=531
+windowlayout=545
  [mainfo.openform]
  filenames=0
  filehistory=0
@@ -638,7 +652,7 @@ windowlayout=531
  [mainfo]
  splitdir=0
  useroptions=123
- stackedunder=componentpalettefo
+ stackedunder=
  parent=
  mdistate=0
  nx=0
@@ -652,7 +666,7 @@ windowlayout=531
  rcx=0
  rcy=0
  wsize=0
- active=0
+ active=1
  visible=1
  [targetconsolefo]
  splitdir=0
@@ -693,7 +707,7 @@ windowlayout=531
  [memoryfo]
  splitdir=0
  useroptions=16507
- stackedunder=cpuarmfo
+ stackedunder=symbolfo
  parent=
  mdistate=0
  nx=0
@@ -720,7 +734,7 @@ windowlayout=531
  [disassfo]
  splitdir=0
  useroptions=16491
- stackedunder=findinfilefo
+ stackedunder=stackfo
  parent=
  mdistate=0
  nx=0
@@ -739,7 +753,7 @@ windowlayout=531
  [findinfilefo]
  splitdir=0
  useroptions=16491
- stackedunder=symbolfo
+ stackedunder=cpuarmfo
  parent=
  mdistate=0
  nx=0
@@ -755,7 +769,7 @@ windowlayout=531
  [projecttreefo]
  splitdir=0
  useroptions=16491
- stackedunder=memoryfo
+ stackedunder=breakpointsfo
  parent=
  mdistate=0
  nx=0
@@ -839,7 +853,7 @@ windowlayout=531
  [breakpointsfo]
  splitdir=0
  useroptions=16491
- stackedunder=projecttreefo
+ stackedunder=objectinspectorfo
  parent=
  mdistate=0
  nx=0
@@ -860,7 +874,7 @@ windowlayout=531
  [objectinspectorfo]
  splitdir=0
  useroptions=16491
- stackedunder=breakpointsfo
+ stackedunder=watchfo
  parent=
  mdistate=0
  nx=0
@@ -885,7 +899,7 @@ windowlayout=531
  [symbolfo]
  splitdir=0
  useroptions=16507
- stackedunder=targetconsolefo
+ stackedunder=componentstorefo
  parent=
  mdistate=0
  nx=0
@@ -903,7 +917,21 @@ windowlayout=531
  visible=0
  [symbolfo.grid]
  propcolwidthref=222
- values0=0
+ values0=14
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
  width0=111
  sortdescend0=0
  width1=135
@@ -965,7 +993,7 @@ windowlayout=531
  [componentstorefo]
  splitdir=0
  useroptions=24699
- stackedunder=disassfo
+ stackedunder=findinfilefo
  parent=
  mdistate=0
  nx=0
@@ -991,9 +1019,6 @@ windowlayout=531
  width3=185
  sortdescend3=0
  [componentstorefo.storefiledialog]
- filenames=1
-  /home/mse/packs/standard/git/mseide-msegui_arm/apps/ide/compstore/
- lastdir=/home/mse/packs/standard/git/mseide-msegui_arm/apps/ide/compstore/
  filehistory=0
  filefilterindex=0
  filefilter=
@@ -1003,9 +1028,6 @@ windowlayout=531
  cx=0
  cy=0
  [componentstorefo.groupfiledialog]
- filenames=1
-  /home/mse/packs/standard/git/mseide-msegui_arm/apps/ide/compstore/
- lastdir=/home/mse/packs/standard/git/mseide-msegui_arm/apps/ide/compstore/
  filehistory=0
  filefilterindex=0
  filefilter=
@@ -1082,30 +1104,11 @@ windowlayout=531
  checked=1
  [actionsmo.bluedotsonact]
  checked=1
- [mainfo.panel1]
- splitdir=2
- useroptions=32235
- stackedunder=
- parent=
- mdistate=0
- nx=0
- ny=0
- ncx=0
- ncy=0
- x=4
- y=201
- cx=734
- cy=491
- rcx=0
- rcy=0
- wsize=0
- active=1
- visible=1
  [cpuarmfo]
  irqoff=0
  splitdir=0
  useroptions=16491
- stackedunder=componentstorefo
+ stackedunder=projecttreefo
  parent=
  mdistate=0
  nx=0
@@ -1121,6 +1124,25 @@ windowlayout=531
  wsize=0
  active=0
  visible=0
+ [mainfo.panel1]
+ splitdir=2
+ useroptions=32235
+ stackedunder=mainfo
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=4
+ y=201
+ cx=734
+ cy=491
+ rcx=0
+ rcy=0
+ wsize=0
+ active=0
+ visible=1
 [targetconsole]
 finddtext=
 findhistory=0

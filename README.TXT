@@ -334,14 +334,15 @@ For Raspberry Pi:
 
 - Start MSEide, in 'Settings'-'Configure MSEide'-'Global Macros' add:
 
-Name          Value
+Name            Value
 
-CROSSMSEDIR   <MSEide+MSEgui directory>
-CROSSFPCDIR   <your crossfpc directory>
-HOSTIP        <the IP of the host>
-REMOTEIP      <the IP of the remote target>
-REMOTEPORT    <the remote port, ex: 2345>
-REMOTEUSER    pi
+CROSSMSEDIR     <MSEide+MSEgui directory>
+CROSSFPCDIR     <your crossfpc directory>
+CROSSFPCVERSION 3.0.1
+HOSTIP          <the IP of the host>
+REMOTEIP        <the IP of the remote target>
+REMOTEPORT      <the remote port, ex: 2345>
+REMOTEUSER      pi
 
 - 'Project'-'New'-'From Template', select "crossarmdefault.prj" or
   "crossarmconsole.prj".
