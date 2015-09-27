@@ -4118,7 +4118,7 @@ begin
    else begin
     str1[2]:= inp[int1];
    end;
-   result[int3]:= char(strtoint('$'+str1));
+   result[int3]:= char(strtohex(str1));
    inc(int1);
    inc(int3);
   end;
