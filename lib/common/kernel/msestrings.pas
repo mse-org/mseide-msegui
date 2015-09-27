@@ -58,8 +58,13 @@ type
  pmsechar = pwidechar;
  {$endif}
  stringposty = (sp_left,sp_center,sp_right);
+ utfoptionty = (uto_storeinvalid);  //store invalid utf8 chars in private area
+ utfoptionsty = set of utfoptionty;
 
 const
+ utf16privatebase = $e000; //used to store invalid utf8 chars in filenamety
+ utferrorchar = char('?'); //single byte only
+ 
  {$ifdef mse_unicodestring}
  msestringtypekind = tkustring;
  {$else}
@@ -107,8 +112,8 @@ type
  filenamearty = msestringarty;
  filenamechar = msechar;
  pfilenamechar = ^filenamechar;
-
-const
+ 
+const 
  upperchars: array[char] of char = (
   #$00,#$01,#$02,#$03,#$04,#$05,#$06,#$07,#$08,#$09,#$0a,#$0b,#$0c,#$0d,#$0e,#$0f,
   #$10,#$11,#$12,#$13,#$14,#$15,#$16,#$17,#$18,#$19,#$1a,#$1b,#$1c,#$1d,#$1e,#$1f,
@@ -557,14 +562,14 @@ function parsecommandline(const s: pmsechar): msestringarty; overload;
 function parsecommandline(const s: string): stringarty; overload;
 function parsecommandline(const s: msestring): msestringarty; overload;
 
-           //no surrogate pair handling!
 function stringtoutf8(const value: msestring): utf8string;
 function stringtoutf8ansi(const value: msestring): ansistring;
 function stringtoutf8(const value: pmsechar;
                             const count: integer): utf8string;
 function stringtoutf8ansi(const value: pmsechar;
                             const count: integer): ansistring;
-function utf8tostring(const value: pchar; const alength: integer): msestring;
+function utf8tostring(const value: pchar; const alength: integer;
+                           const options: utfoptionsty = []): msestring;
 function utf8tostring(const value: pchar): msestring;
 function utf8tostring(const value: lstringty): msestring;
 function utf8tostring(const value: utf8string): msestring;
@@ -812,8 +817,75 @@ begin
  end;
 end;
 
-//todo: surrogate pair handling!
+procedure dostringtoutf8(const value: pmsechar;
+                                     var count: integer; const dest: pointer);
+var
+ ps,pe: pcard16;
+ pd: pchar;
+ ca1: card16;
+ 
+ procedure store3(); {inline;}
+ begin
+  pd^:= char((ca1 shr 12) or $e0);
+  inc(pd);
+  pd^:= char(((ca1 shr 6) or (ps^ shr 6) and $0f) and $3f or $80);
+  inc(pd);
+  pd^:= char(ca1 and $3f or $80);;
+ end; //store3
+ 
+begin
+ pd:= dest;
+ ps:= pointer(value);
+ pe:= ps + count;
+ while ps < pe do begin
+  ca1:= ps^;
+  inc(ps);
+  if ca1 < $80 then begin //1 byte
+   pd^:= char(ca1);
+  end
+  else begin
+   if ca1 < $0800 then begin //2byte
+    pd^:= char((ca1 shr 6) or $c0);
+    inc(pd);
+    pd^:= char((ca1 and $3f) or $80);
+   end
+   else begin
+    if ca1 < $d800 then begin
+     store3();
+    end
+    else begin
+     if (ca1 > $dbff) then begin //3 byte
+      store3();
+     end
+     else begin //surrogate pair
+      if (ca1 >= $dc00) or (ps = pe) then begin
+           //missing high or low surrogate
+       pd^:= utferrorchar;
+      end;
+      if ps^ and $fc00 <> $dc00 then begin //invalid low surrogate
+       pd^:= utferrorchar;
+      end
+      else begin
+       ca1:= ca1 - card16($d800 - $0040);
+       pd^:= char((ca1 shr 8) or $f0);
+       inc(pd);
+       pd^:= char((ca1 shr 2) and $3f or $80);
+       inc(pd);
+       pd^:= char(((ca1 shl 4) and $30 or (ps^ shr 6) and $0f) or $80);
+       inc(pd);
+       pd^:= char(ps^ and $3f or $80);
+       inc(ps);
+      end;
+     end;
+    end;
+   end;
+  end;
+  inc(pd);
+ end;
+ count:= pd - pchar(dest);
+end;
 
+(*
 procedure dostringtoutf8(const value: pmsechar;
                                      var count: integer; const dest: pointer);
 var
@@ -852,6 +924,7 @@ begin
  count:= po1-pchar(dest);
 // setlength(result,po1-pchar(pointer(result)));
 end;
+*)
 
 function stringtoutf8(const value: pmsechar;
                             const count: integer): utf8string;
@@ -895,7 +968,86 @@ begin
  setlength(result,i1);
 end;
 
-function utf8tostring(const value: pchar; const alength: integer): msestring;
+function utf8tostring(const value: pchar; const alength: integer;
+                           const options: utfoptionsty = []): msestring;
+var
+ by1: byte;
+ pc,pe: pbyte;
+ pd: pmsechar;
+begin
+ setlength(result,alength); //max
+ pd:= pmsechar(pointer(result));
+ pc:= pointer(value);
+ pe:= pc+alength;
+ while pc < pe do begin
+  by1:= pc^;
+  inc(pc);
+  if by1 < $80 then begin //1 byte
+   pd^:= msechar(word(by1));
+  end
+  else begin
+   if by1 < $e0 then begin //2 byte
+    if (pc < pe) and (pc^ and $c0 = $80) then begin 
+     pd^:= msechar(((by1 and $1f) shl word(6)) or (pc^ and $3f));
+     if pd^ < msechar($80) then begin
+      pd^:= utferrorchar; //overlong
+     end;
+     inc(pc);
+    end
+    else begin
+     pd:= utferrorchar;
+     dec(pc);
+    end;
+   end
+   else begin
+    if (by1 < $f0) then begin //3byte
+     if (pe - pc >= 1) and (pc^ and $c0 = $80) and 
+                                         ((pc+1)^ and $c0 = $80) then begin 
+      pd^:= msechar((by1 shl word(12)) or 
+            (pc^ and $3f) shl word(6) or ((pc+1)^ and $3f));
+      if pd^ < msechar($0800) then begin
+       pd^:= utferrorchar; //overlong
+      end;
+      inc(pc,2);
+     end
+     else begin
+      pd^:= utferrorchar;
+     end;
+    end
+    else begin
+     if (by1 < $f8) then begin //4byte
+      if (pe - pc >= 2) and (pc^ and $c0 = $80) and ((pc+1)^ and $c0 = $80) and 
+                              ((pc+2)^ and $c0 = $80) then begin
+       if ((by1 <= $e0) and (pc^ < $90)) then begin //overlong
+        pd^:= utferrorchar;
+       end
+       else begin                                     
+        pd^:= msechar(
+              (((by1 and $07) shl word(8)) or 
+               ((pc^ and $3f) shl word(2)) or
+               ((pc+1)^ and $30 shr word(4))) + 
+                         (word($d800) - word($10000 shr 10)));
+        inc(pd);
+        pd^:= msechar((((pc+1)^ and $0f) shl word(6)) or 
+                                         ((pc+2)^ and $3f) or word($dc00));
+       end;
+       inc(pc,3);
+      end;
+     end
+     else begin
+      pd^:= utferrorchar;
+     end;
+    end;
+   end;
+  end;
+  inc(pd);
+ end;
+ setlength(result,pd-pmsechar(pointer(result)));
+end;
+
+{
+function utf8tostring(const value: pchar; const alength: integer;
+                           const options: utfoptionsty = []): msestring;
 var
  int1,int2: integer;
  by1: byte;
@@ -933,6 +1085,7 @@ begin
  end;
  setlength(result,po1-pmsechar(pointer(result)));
 end;
+}
 
 function docheckutf8(const value: pointer; const count: int32): boolean;
               //true if valid utf8
@@ -946,6 +1099,10 @@ begin
    if po1^ >= $80 then begin
     case po1^ and $e0 of
      $c0: begin //two bytes
+      if po1^ and $0f = 0 then begin
+       result:= false; //overlong
+       exit;
+      end;
       inc(po1);
       if po1^ and $c0 <> $80 then begin
        result:= false;
