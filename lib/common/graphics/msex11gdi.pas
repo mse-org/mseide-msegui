@@ -1390,6 +1390,7 @@ var
  glyphinfo: txglyphinfo;
  bo1: boolean;
  po3: pxftfont;
+ ca1: card32;
 
 begin
  gdi_lock;
@@ -1409,17 +1410,25 @@ begin
     end;
     pe:= po1 + count;
     while po1 < pe do begin
-     xfttextextentsutf16(appdisp,po3,pointer(po1),fcendianlittle,2,@glyphinfo);
-     po2^:= glyphinfo.xoff;
-     if (card16(po1^) and $fc = $d8) then begin //surrogate pair
+     ca1:= card16(po1^);
+     if (ca1 and $fc00 = $d800) then begin //surrogate pair
       inc(po1);
-      if (card16(po1^) and $fc <> $dc) then begin
-       dec(po1);                        //invalid low part
+      if (card16(po1^) and $fc00 = $dc00) then begin
+       ca1:= ((ca1 + ($0040-$d800)) shl 10) + card16(po1^) - $dc00;
+       xfttextextents32(appdisp,po3,@ca1,1,@glyphinfo);
+       po2^:= glyphinfo.xoff;
+       inc(po2);
+       po2^:= 0;
       end
       else begin
-       inc(po2); //dummy for low part
-       po2^:= 0;
+       dec(po1); //invalid low part
+       xfttextextents32(appdisp,po3,@ca1,1,@glyphinfo);
+       po2^:= glyphinfo.xoff;
       end;
+     end
+     else begin
+      xfttextextents32(appdisp,po3,@ca1,1,@glyphinfo);
+      po2^:= glyphinfo.xoff;
      end;
      inc(po1);
      inc(po2);
@@ -3047,14 +3056,11 @@ const
 begin
 {$ifndef staticxft}
  result:= false;
- try
-  initializefontconfig([]);
-  fhasfontconfig:= true;
-  getprocaddresses(xftnames,funcs);
- except
+ initializefontconfig([]);
+ fhasfontconfig:= true;
+ if getprocaddresses(xftnames,funcs,true) = 0 then begin
   exit;
  end;
-
 {$endif} //not staticxft
  result:= true;
 end;

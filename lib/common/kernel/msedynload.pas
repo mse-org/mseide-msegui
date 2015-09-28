@@ -162,7 +162,10 @@ var
 begin
  result:= loadlib(libnames,str1,'',noexception);
  if result <> 0 then begin
-  getprocaddresses(result,procedures,noexception,str1);
+  if not getprocaddresses(result,procedures,noexception,str1) then begin
+   unloadlibrary(result);
+   result:= 0;
+  end;
  end;
 end;
 
