@@ -3013,6 +3013,9 @@ begin
       inc(po2);
      end;
     end;
+    if gcpresults.nglyphs < count then begin
+     //has surrogate pairs, //todo: insert dummy 0's for low pair part
+    end;
    end
    else begin
     po1:= text;

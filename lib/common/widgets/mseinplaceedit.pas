@@ -1077,7 +1077,6 @@ procedure tinplaceedit.deleteback;
 var
  bo1: boolean;
  ch1: msechar;
- i1: int32;
 begin
  if fcurindex > 0 then begin
   ch1:= finfo.text.text[fcurindex];

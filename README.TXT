@@ -7,7 +7,7 @@ Copyright (c) 1999-2015 by Martin Schreiber
 - Tested on i386-linux SuSE 13.1, x86_64-linux SuSE 13.1, x86_64-freebsd,
   Raspberry Pi, i386-win32 2000, XP and Vista.
 - Links to xlib and gdi32, no external widget library needed.
-- Internal character encoding is UCS2.
+- Internal character encoding is utf-16.
 - Uses anti aliased fonts on Linux (Xft).
 - All screen drawing is double buffered.
 - Has docking forms and MDI.
