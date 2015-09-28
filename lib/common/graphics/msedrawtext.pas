@@ -332,7 +332,7 @@ var
    if tf_tabtospace in info.flags then begin
     with drawinfo.getfontmetrics do begin
      fontdata:= drawinfo.getchar16widths.fontdata;
-     char:= ' ';
+     char:= ord(' ');
      resultpo:= @fontmetrics1;       
      getfontmetrics({datapo,}drawinfo);
     end;

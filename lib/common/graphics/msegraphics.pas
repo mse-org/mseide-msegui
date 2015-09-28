@@ -301,7 +301,7 @@ type
   resultpo: pinteger;
  end;
  getfontmetricsinfoty = record
-  char: msechar;
+  char: ucs4char;
   fontdata: pfontdataty;
   resultpo: pfontmetricsty;
  end;
@@ -1115,6 +1115,8 @@ type
    function getstringwidth(const atext: pmsechar; const acount: integer;
                                  const afont: tfont = nil): integer; overload;
                   //sum of cellwidths
+   function getfontmetrics(const achar: ucs4char;
+                                     const afont: tfont = nil): fontmetricsty;
    function getfontmetrics(const achar: msechar;
                                      const afont: tfont = nil): fontmetricsty;
 
@@ -5405,7 +5407,7 @@ begin
  result:= getstringwidth(pmsechar(atext),length(atext),afont);
 end;
 
-function tcanvas.getfontmetrics(const achar: msechar;
+function tcanvas.getfontmetrics(const achar: ucs4char;
                      const afont: tfont = nil): fontmetricsty;
 var
  afontnum: integer;
@@ -5428,6 +5430,12 @@ begin
  with result do begin
   sum:= width - leftbearing - rightbearing;
  end;
+end;
+
+function tcanvas.getfontmetrics(const achar: msechar;
+                                  const afont: tfont = nil): fontmetricsty;
+begin
+ result:= getfontmetrics(ucs4char(card16(achar)),afont);
 end;
 
 procedure tcanvas.drawframe(const arect: rectty; awidth: integer;

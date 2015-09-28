@@ -60,90 +60,89 @@ const
 
 
 type
+ TFcChar8 = byte;           
+ PFcChar8 = ^TFcChar8;
+ TFcChar16 = word;
+ PFcChar16 = ^TFcChar16;
+ TFcChar32 = dword;
+ PFcChar32 = ^TFcChar32;
+ TFcBool = longbool; //integer;
+ PFcBool = ^TFcBool;
+ TFcEndian = (FcEndianBig, FcEndianLittle);
+ TFcResult = (FcResultMatch, FcResultNoMatch, FcResultTypeMismatch, FcResultNoId);
+ PFcResult = ^TFcResult;
 
-       TFcChar8 = byte;           //from fontconfig.h
-       PFcChar8 = ^TFcChar8;
-       TFcChar16 = word;
-       PFcChar16 = ^TFcChar16;
-       TFcChar32 = dword;
-       PFcChar32 = ^TFcChar32;
-       TFcBool = longbool; //integer;
-       PFcBool = ^TFcBool;
-       TFcEndian = (FcEndianBig, FcEndianLittle);
-       TFcResult = (FcResultMatch, FcResultNoMatch, FcResultTypeMismatch, FcResultNoId);
-       PFcResult = ^TFcResult;
+ TFcType = (FcTypeVoid,FcTypeInteger,FcTypeDouble,
+     FcTypeString,FcTypeBool,FcTypeMatrix,
+     FcTypeCharSet,FcTypeFTFace,FcTypeLangSet
+     );
+ TFcMatchKind = (FcMatchPattern,FcMatchFont);
+ TFcMatrix = record
+  xx: cdouble;
+  xy: cdouble;
+  yx: cdouble;
+  yy: cdouble;
+ end;
+ PFcMatrix = ^TFcMatrix;
 
-     TFcType = (FcTypeVoid,FcTypeInteger,FcTypeDouble,
-         FcTypeString,FcTypeBool,FcTypeMatrix,
-         FcTypeCharSet,FcTypeFTFace,FcTypeLangSet
-         );
-     TFcMatchKind = (FcMatchPattern,FcMatchFont);
-    TFcMatrix = record
-     xx: cdouble;
-     xy: cdouble;
-     yx: cdouble;
-     yy: cdouble;
-    end;
-    PFcMatrix = ^TFcMatrix;
+ TFcLangSet = record
+  //dummy
+ end;
+ PFcLangSet = ^TFcLangset;
 
-    TFcLangSet = record
-     //dummy
-    end;
-    PFcLangSet = ^TFcLangset;
+ TFcStrList = record
+  //dummy
+ end;
+ PFcStrList = ^TFcStrList;
 
-    TFcStrList = record
-     //dummy
-    end;
-    PFcStrList = ^TFcStrList;
+ TFcCharset =  record
+  //dummy
+ end;
+ PFcCharset = ^TFcCharset;
+ PPFcCharset = ^PFcCharset;
 
-    TFcCharset =  record
-     //dummy
-    end;
-    PFcCharset = ^TFcCharset;
-    PPFcCharset = ^PFcCharset;
+ TFcPattern =  record
+  //dummy
+ end;
+ PFcPattern  = ^TFcPattern;
+ PPFcPattern = ^PFcPattern;
+ pfcpatternpoaty = array[0..0] of PFcPattern;
 
-    TFcPattern =  record
-     //dummy
-    end;
-    PFcPattern  = ^TFcPattern;
-    PPFcPattern = ^PFcPattern;
-    pfcpatternpoaty = array[0..0] of PFcPattern;
-
-    TFcValue = record
-     _type: TFcType;
-     u: record
-      case longint of
-       0 : ( s : ^TFcChar8 );
-       1 : ( i : longint );
-       2 : ( b : TFcBool );
-       3 : ( d : cdouble );
-       4 : ( m : ^TFcMatrix );
-       5 : ( c : ^TFcCharSet );
-       6 : ( f : pointer );
-       7 : ( p : ^TFcPattern );
-       8 : ( l : ^TFcLangSet );
-     end;
-    end;
-
-    TFcObjectSet = record
-     nobject: longint;
-     sobject: longint;
-     objects: ppchar;
-    end;
-    PFcObjectSet = ^TFcObjectSet;
-
-    TFcConfig = record
-     //dummy
-    end;
-    PFcConfig = ^TFcConfig;
-
-  TFcFontSet =  record
-    nfont : integer;
-    sfont : integer;
-    fonts : PPFcPattern;
+ TFcValue = record
+  _type: TFcType;
+  u: record
+   case longint of
+    0 : ( s : ^TFcChar8 );
+    1 : ( i : longint );
+    2 : ( b : TFcBool );
+    3 : ( d : cdouble );
+    4 : ( m : ^TFcMatrix );
+    5 : ( c : ^TFcCharSet );
+    6 : ( f : pointer );
+    7 : ( p : ^TFcPattern );
+    8 : ( l : ^TFcLangSet );
   end;
-  PFcFontSet = ^TFcFontSet;
-  
+ end;
+
+ TFcObjectSet = record
+  nobject: longint;
+  sobject: longint;
+  objects: ppchar;
+ end;
+ PFcObjectSet = ^TFcObjectSet;
+
+ TFcConfig = record
+  //dummy
+ end;
+ PFcConfig = ^TFcConfig;
+
+ TFcFontSet =  record
+   nfont : integer;
+   sfont : integer;
+   fonts : PPFcPattern;
+ end;
+ PFcFontSet = ^TFcFontSet;
+ 
 var
  FcInit: function: tfcbool;cdecl;
  FcFini: procedure;cdecl;
