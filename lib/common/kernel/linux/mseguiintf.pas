@@ -471,27 +471,31 @@ procedure XSetICFocus(IC: XIC); cdecl;
                               external sXLib name 'XSetICFocus';
 procedure XUnsetICFocus(IC: XIC); cdecl;
                               external sXLib name 'XUnsetICFocus';
+{
 function XwcLookupString(IC: XIC; Event: PXKeyPressedEvent;
   BufferReturn: Pucs4char; WCharsBuffer: Longint; KeySymReturn: PKeySym;
   StatusReturn: PStatus): Longint; cdecl;
                               external sXLib name 'XwcLookupString';
+}
 function Xutf8LookupString(IC: XIC; Event: PXKeyPressedEvent;
   BufferReturn: Pchar; CharsBuffer: Longint; KeySymReturn: PKeySym;
   StatusReturn: PStatus): Longint; cdecl;
                               external sXLib name 'Xutf8LookupString';
+(*
 function XwcTextListToTextProperty(para1:PDisplay; para2:PPucs4Char;
            para3: integer; para4: integer{TXICCEncodingStyle};
            para5:PXTextProperty): integer;cdecl;
                               external sXLib name 'XwcTextListToTextProperty';
+*)
 function XCreateImage(Display: PDisplay; Visual: msePVisual; Depth: longword;
   Format: Longint; Offset: Longint; Data: PChar; Width, Height: longword;
   BitmapPad: Longint; BytesPerLine: Longint): PXImage; cdecl;
                               external sXLib name 'XCreateImage';
-{ xwc function seems to be more stable
-function Xutf8TextListToTextProperty(para1:PDisplay; para2:PPchar; para3: integer;
-            para4:TXICCEncodingStyle; para5:PXTextProperty): integer; cdecl;
+function Xutf8TextListToTextProperty(para1:PDisplay; para2:PPchar;
+                   para3: integer; para4: integer{TXICCEncodingStyle};
+                    para5: PXTextProperty): integer; cdecl;
                      external sXLib name 'Xutf8TextListToTextProperty';
-}
+
 function Xutf8TextPropertyToTextList(para1:PDisplay; para2:PXTextProperty;
             para3:PPPchar; para4: pinteger): integer; cdecl;
                      external sXlib name 'Xutf8TextPropertyToTextList';
@@ -871,20 +875,27 @@ function msestringtoucs4string(const value: msestring): ucs4string;
 var
  po1: pmsechar;
  po2: pwchar_t;
+ ca1: ucs4char;
 begin
- setlength(result,length(value)+1);
+ setlength(result,length(value)+1); //max
  po1:= pmsechar(value);
  po2:= pwchar_t(result);
  while true do begin
-  {$ifdef FPC} {$checkpointer off} {$endif} //po1 can be in textsegment
-  po2^:= pword(pointer(po1))^;
-  if po1^ = #0 then begin
+  ca1:= card16(po1^);
+  if ca1 and $fc00 = $d800 then begin
+   inc(po1);
+   if (card16(po1^) and $fc00 = $dc00) then begin
+    ca1:= ((ca1 + ($0040-$d800)) shl 10) + card16(po1^) - $dc00;
+   end;
+  end;
+  po2^:= ca1;
+  if ca1 = 0 then begin
    break;
   end;
-  {$ifdef FPC} {$checkpointer default} {$endif}
   inc(po1);
   inc(po2);
  end;
+ setlength(result,po2-pwchar_t(pointer(result)));
 end;
 
 procedure setstringproperty(id: winidty; prop: atom; value: string);
@@ -1084,16 +1095,21 @@ begin
  end;
 end;
 
-function stringtotextproperty(const value: msestring; const style: txiccencodingstyle;
-                                  out textproperty: xtextproperty): boolean;
+function stringtotextproperty(const value: msestring; 
+                                 const style: txiccencodingstyle;
+                                     out textproperty: xtextproperty): boolean;
 var
- list: array[0..0] of ucs4string;
+ list: array[0..0] of pchar;
+ str1: string;
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
 {$endif} 
- list[0]:= msestringtoucs4string(value);
- result:= xwctextlisttotextproperty(appdisp,@list,1,ord(style),@textproperty) >= 0;
+// list[0]:= msestringtoucs4string(value);
+ str1:= stringtoutf8ansi(value);
+ list[0]:= pchar(str1);
+ result:= xutf8textlisttotextproperty(
+                          appdisp,@list,1,ord(style),@textproperty) >= 0;
  if not result then begin
   fillchar(textproperty,0,sizeof(textproperty));
  end;
@@ -1703,12 +1719,13 @@ begin
  xfree(value.value);
 end;
 
-function gui_setwindowcaption(id: winidty; const caption: msestring): guierrorty;
+function gui_setwindowcaption(id: winidty;
+                                     const caption: msestring): guierrorty;
 var
  textprop: xtextproperty;
 begin
  gdi_lock;
- if stringtotextproperty(caption,xstdicctextstyle,textprop) then begin
+ if stringtotextproperty(caption,xutf8stringstyle,textprop) then begin
   xsetwmname(appdisp,id,@textprop);
   freetextproperty(textprop);
   result:= gue_ok;
