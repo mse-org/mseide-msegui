@@ -2965,8 +2965,8 @@ label                        //todo: kerning?
  endlab;
 var
  int1,int2: integer;
- po1: pmsechar;
- po2: {$ifdef FPC}objpas.{$endif}pinteger;
+ po1,pe: pmsechar;
+ po2,pde: {$ifdef FPC}objpas.{$endif}pinteger;
  wo1: word;
  widths: pcharwidthsty;
  overha: integer;
@@ -3013,8 +3013,27 @@ begin
       inc(po2);
      end;
     end;
-    if gcpresults.nglyphs < count then begin
-     //has surrogate pairs, //todo: insert dummy 0's for low pair part
+    int1:= count - gcpresults.nglyphs;
+    if int1 > 0 then begin //has surrogate pairs, 
+                         //insert dummy 0's for low pair part
+                         //not tested!
+     po1:= text;
+     pe:= text + count;
+     po2:= resultpo;
+     pde:= po2 + count;
+     while (po1 < pe) and (int1 > 0) do begin
+      if card16(po1^) and $fc00 = $d800 then begin
+       inc(po1);
+       if card16(po1^) and $fc00 = $dc00 then begin
+        inc(po2);
+        move(po2^,(po2+1)^,((pde-po2)-int1)*sizeof(po2^));
+        po2^:= 0;
+        dec(int1);
+       end;
+      end;
+      inc(po1);
+      inc(po2);
+     end;
     end;
    end
    else begin
