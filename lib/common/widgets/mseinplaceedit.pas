@@ -119,6 +119,8 @@ type
    frow: integer;
    fbackup: msestring;
    function initactioninfo(aaction: editactionty): editnotificationinfoty;
+   function updateindex(const avalue: int32): int32;
+   procedure checkindexvalues;
    procedure setcurindex(const Value: integer);
    procedure deletechar; virtual;
    procedure deleteback; virtual;
@@ -577,7 +579,7 @@ begin
  finfo.text.format:= copy(format);
  finfo.tabulators:= tabulators;
  if not shift then begin
-  fselstart:= fcurindex;
+  fselstart:= updateindex(fcurindex);
   fsellength:= 0;
  end;
  setselected1(finfo.text,fselstart,fsellength);
@@ -1075,6 +1077,7 @@ procedure tinplaceedit.deleteback;
 var
  bo1: boolean;
  ch1: msechar;
+ i1: int32;
 begin
  if fcurindex > 0 then begin
   ch1:= finfo.text.text[fcurindex];
@@ -1083,8 +1086,10 @@ begin
   ch1:= #0;
  end;
  bo1:= nofullinvalidateneeded and (ch1 <> c_return) and (ch1 <> c_linefeed);
- if (fcurindex > 1) and (finfo.text.text[fcurindex-1] = c_return) and 
-               (ch1 = c_linefeed) and (fcurindex > 1) then begin
+ if (fcurindex > 1) and 
+                ((card16(ch1) and $fc00 = $dc00) or 
+                 (finfo.text.text[fcurindex-1] = c_return) and 
+                              (ch1 = c_linefeed)) then begin
   richdelete(finfo.text,fcurindex-1,2);
   fcurindex:= fcurindex - 2;
  end
@@ -1109,9 +1114,10 @@ begin
   ch1:= #0;
  end;
  bo1:= nofullinvalidateneeded and (ch1 <> c_return) and (ch1 <> c_linefeed);
- if (ch1 = c_linefeed) and (fcurindex > 0) and
-          (finfo.text.text = c_return) then begin
-  richdelete(finfo.text,fcurindex,2);
+ if (card16(ch1) and $fc00 = $d800) or 
+          (ch1 = c_linefeed) and (fcurindex > 0) and
+                                     (finfo.text.text = c_return) then begin
+  richdelete(finfo.text,fcurindex+1,2);
  end
  else begin
   richdelete(finfo.text,fcurindex+1,1);
@@ -1445,7 +1451,7 @@ begin
    else begin
     if canedit then begin
      enterchars(chars);
-     fselstart:= fcurindex;
+     fselstart:= updateindex(fcurindex);
      include(eventstate,es_processed);
     end;
    end;
@@ -1640,6 +1646,18 @@ begin
    newindex:= 0;
   end;
  end;
+ if finfo.text.text <> '' then begin
+  if (newindex < fcurindex) and 
+           (card16(finfo.text.text[newindex]) and $fc00 = $d800) then begin
+   dec(newindex); //surrogate pair
+  end
+  else begin
+   if (newindex > fcurindex) and
+           (card16(finfo.text.text[newindex]) and $fc00 = $d800) then begin
+    inc(newindex); //surrogate pair
+   end;
+  end;
+ end;
  if shift then begin
   if fcurindex = fselstart then begin
    anchor:= fselstart + fsellength;
@@ -1689,21 +1707,27 @@ begin
  end;
 end;
 
-procedure tinplaceedit.setcurindex(const Value: integer);
-var
- int1: integer;
+function tinplaceedit.updateindex(const avalue: int32): int32;
 begin
- include(fstate,ies_touched);
- int1:= value;
- if int1 > length(finfo.text.text) then begin
-  int1:= length(finfo.text.text);
+ result:= avalue;
+ if result > length(finfo.text.text) then begin
+  result:= length(finfo.text.text);
  end
  else begin
-  if int1 < 0 then begin
-   int1:= 0;
+  if result < 0 then begin
+   result:= 0;
   end;
  end;
- fcurindex:= int1;
+ if (finfo.text.text <> '') and 
+             (card16(finfo.text.text[result]) and $fc00 = $d800) then begin
+  inc(result); //surrogate pair
+ end;
+end;
+
+procedure tinplaceedit.setcurindex(const Value: integer);
+begin
+ include(fstate,ies_touched);
+ fcurindex:= updateindex(value);
  exclude(fstate,ies_caretposvalid);
  internalupdatecaret(ies_forcecaret in fstate);
 end;
@@ -1711,7 +1735,7 @@ end;
 procedure tinplaceedit.setsellength(const Value: halfinteger);
 begin
  if fsellength <> value then begin
-  fsellength := Value;
+  fsellength:= updateindex(Value) - fselstart;
   updateselect;
  end;
 end;
@@ -1719,7 +1743,7 @@ end;
 procedure tinplaceedit.setselstart(const Value: integer);
 begin
  if fselstart <> value then begin
-  fselstart := Value;
+  fselstart:= updateindex(Value);
   if fsellength > 0 then begin
    updateselect;
   end;
@@ -2022,9 +2046,17 @@ begin
  end;
 end;
 
+procedure tinplaceedit.checkindexvalues();
+begin
+ fcurindex:= updateindex(fcurindex);
+ fselstart:= updateindex(fselstart);
+ fsellength:= updateindex(fselstart+fsellength)-fselstart;
+end;
+
 procedure tinplaceedit.settext(const Value: msestring);
 begin
  finfo.text.text:= Value;
+ checkindexvalues();
  invalidatetext(false,false);
  if ies_focused in fstate then begin
   internalupdatecaret;
@@ -2037,6 +2069,7 @@ begin
  finfo.text := avalue;
  setlength(finfo.text.format,length(finfo.text.format));
  invalidatetext(false,false);
+ checkindexvalues();
  if ies_focused in fstate then begin
   internalupdatecaret;
  end;
