@@ -25,21 +25,21 @@ object filedialogfo: Tfiledialogfo
   top = 138
   moduleclassname = 'tmseform'
   object namecont: tgroupbox
-    taborder = 8
+    taborder = 9
     visible = False
     bounds_x = 0
     bounds_y = 232
-    bounds_cx = 455
+    bounds_cx = 466
     bounds_cy = 50
     anchors = [an_left, an_top, an_right]
   end
   object bucont: tspacer
     optionswidget = [ow_tabfocus, ow_parenttabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousewheel, ow_destroywidgets]
-    taborder = 10
+    taborder = 2
     visible = True
-    bounds_x = 455
+    bounds_x = 466
     bounds_y = 234
-    bounds_cx = 131
+    bounds_cx = 120
     bounds_cy = 71
     anchors = [an_right, an_bottom]
     optionsscale = [osc_expandx, osc_shrinkx]
@@ -52,12 +52,12 @@ object filedialogfo: Tfiledialogfo
       frame.outerframe = (
         0
         1
-        112
+        101
         2
       )
       bounds_x = 6
       bounds_y = 16
-      bounds_cx = 125
+      bounds_cx = 114
       bounds_cy = 16
       onsetvalue = showhiddenonsetvalue
     end
@@ -76,7 +76,7 @@ object filedialogfo: Tfiledialogfo
       taborder = 2
       bounds_x = 49
       bounds_y = 51
-      bounds_cx = 52
+      bounds_cx = 49
       bounds_cy = 20
       bounds_cxmin = 35
       anchors = [an_left, an_bottom]
@@ -106,7 +106,7 @@ object filedialogfo: Tfiledialogfo
     optionswidget = [ow_mousefocus, ow_arrowfocus, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets]
     frame.localprops = []
     frame.localprops1 = []
-    taborder = 9
+    taborder = 10
     bounds_x = 0
     bounds_y = 26
     bounds_cx = 587
@@ -132,10 +132,10 @@ object filedialogfo: Tfiledialogfo
   object createdir: tbutton
     optionswidget1 = [ow1_fontglyphheight, ow1_autoscale, ow1_autowidth]
     optionswidget = [ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
-    taborder = 5
-    bounds_x = 530
+    taborder = 8
+    bounds_x = 534
     bounds_y = 2
-    bounds_cx = 56
+    bounds_cx = 52
     bounds_cy = 20
     bounds_cxmin = 35
     anchors = [an_top, an_right]
@@ -148,9 +148,9 @@ object filedialogfo: Tfiledialogfo
   object up: tstockglyphbutton
     optionswidget1 = [ow1_fontglyphheight, ow1_autoscale]
     optionswidget = [ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
-    taborder = 1
+    taborder = 4
     onshowhint = buttonshowhint
-    bounds_x = 433
+    bounds_x = 439
     bounds_y = 2
     bounds_cx = 17
     bounds_cy = 20
@@ -175,13 +175,12 @@ object filedialogfo: Tfiledialogfo
     frame.outerframe = (
       0
       0
-      39
+      37
       0
     )
-    taborder = 6
     bounds_x = 1
     bounds_y = 259
-    bounds_cx = 488
+    bounds_cx = 486
     anchors = [an_left, an_right, an_bottom]
     optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savevalue, oe1_savestate]
     optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick]
@@ -207,13 +206,13 @@ object filedialogfo: Tfiledialogfo
     frame.outerframe = (
       0
       0
-      34
+      30
       0
     )
-    taborder = 7
+    taborder = 1
     bounds_x = 1
     bounds_y = 284
-    bounds_cx = 483
+    bounds_cx = 479
     anchors = [an_left, an_right, an_bottom]
     ondataentered = filepathentered
     onsetvalue = filteronsetvalue
@@ -238,13 +237,14 @@ object filedialogfo: Tfiledialogfo
     frame.outerframe = (
       0
       0
-      20
+      19
       0
     )
+    taborder = 3
     onshowhint = dirshowhint
     bounds_x = 1
     bounds_y = 2
-    bounds_cx = 430
+    bounds_cx = 436
     anchors = [an_left, an_top, an_right]
     textflags = [tf_ycentered, tf_noselect, tf_ellipseleft]
     dropdown.options = [deo_selectonly, deo_keydropdown]
@@ -253,7 +253,7 @@ object filedialogfo: Tfiledialogfo
   end
   object tspacer1: tspacer
     taborder = 11
-    bounds_x = 480
+    bounds_x = 486
     bounds_y = 0
     bounds_cx = 2
     bounds_cy = 20
@@ -263,7 +263,7 @@ object filedialogfo: Tfiledialogfo
   end
   object tspacer2: tspacer
     taborder = 12
-    bounds_x = 528
+    bounds_x = 532
     bounds_y = 0
     bounds_cx = 2
     bounds_cy = 20
@@ -274,10 +274,10 @@ object filedialogfo: Tfiledialogfo
   object home: tbutton
     optionswidget1 = [ow1_fontglyphheight, ow1_autoscale, ow1_autowidth]
     optionswidget = [ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
-    taborder = 4
-    bounds_x = 482
+    taborder = 7
+    bounds_x = 488
     bounds_y = 2
-    bounds_cx = 46
+    bounds_cx = 44
     bounds_cy = 20
     bounds_cxmin = 35
     anchors = [an_top, an_right]
@@ -289,7 +289,7 @@ object filedialogfo: Tfiledialogfo
   end
   object tspacer3: tspacer
     taborder = 13
-    bounds_x = 431
+    bounds_x = 437
     bounds_y = 0
     bounds_cx = 2
     bounds_cy = 20
@@ -299,7 +299,7 @@ object filedialogfo: Tfiledialogfo
   end
   object tspacer5: tspacer
     taborder = 14
-    bounds_x = 465
+    bounds_x = 471
     bounds_y = 0
     bounds_cx = 2
     bounds_cy = 20
@@ -309,7 +309,7 @@ object filedialogfo: Tfiledialogfo
   end
   object tspacer6: tspacer
     taborder = 15
-    bounds_x = 450
+    bounds_x = 456
     bounds_y = 0
     bounds_cx = 2
     bounds_cy = 20
@@ -320,9 +320,9 @@ object filedialogfo: Tfiledialogfo
   object forward: tstockglyphbutton
     optionswidget1 = [ow1_fontglyphheight, ow1_autoscale]
     optionswidget = [ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_disabledhint]
-    taborder = 3
+    taborder = 6
     onshowhint = buttonshowhint
-    bounds_x = 467
+    bounds_x = 473
     bounds_y = 2
     bounds_cx = 13
     bounds_cy = 20
@@ -340,9 +340,9 @@ object filedialogfo: Tfiledialogfo
   object back: tstockglyphbutton
     optionswidget1 = [ow1_fontglyphheight, ow1_autoscale]
     optionswidget = [ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_disabledhint]
-    taborder = 2
+    taborder = 5
     onshowhint = buttonshowhint
-    bounds_x = 452
+    bounds_x = 458
     bounds_y = 2
     bounds_cx = 13
     bounds_cy = 20
