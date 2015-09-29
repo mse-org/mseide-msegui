@@ -55,7 +55,7 @@ begin
   except
    on e: exception do begin
     if astream is tmsefilestream then begin
-     e.message:= tmsefilestream(astream).filename+':'+lineend+e.message;
+     e.message:= ansistring(tmsefilestream(astream).filename)+':'+lineend+e.message;
     end;
     raise;
    end;

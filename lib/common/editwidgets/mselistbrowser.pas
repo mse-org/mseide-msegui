@@ -4370,7 +4370,8 @@ begin
      int1:= int2;
      while int1 < self.fcount do begin
       po1:= ptreelistitem(getitempo(int1));
-      if ttreelistitem1(po1^).ftreelevel <= ftreelevel then begin
+      if (po1^ <> nil) and 
+                   (ttreelistitem1(po1^).ftreelevel <= ftreelevel) then begin
        break; //next same level node
       end;
       po1^:= nil;
