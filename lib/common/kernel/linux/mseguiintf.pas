@@ -903,7 +903,8 @@ begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
 {$endif} 
- xchangeproperty(appdisp,id,prop,stringatom,8,propmodereplace,pbyte(pchar(value)),length(value)+1);
+ xchangeproperty(appdisp,id,prop,stringatom,8,propmodereplace,
+                                        pbyte(pchar(value)),length(value)+1);
 end;
 
 procedure setwinidproperty(id: winidty; prop: atom; value: winidty);

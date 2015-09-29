@@ -179,7 +179,7 @@ procedure Wide2AnsiMove(source:pwidechar; var dest:ansistring; len:SizeInt);
 {$ifdef fpcv3}
  if (cp = cp_utf8) or (cp = cp_acp) and 
                           (DefaultSystemCodePage = cp_utf8) then begin
-  dest:= stringtoutf8(source);
+  dest:= stringtoutf8(source,len);
  end
  else begin
 {$endif}
