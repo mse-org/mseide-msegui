@@ -837,7 +837,7 @@ var
  begin
   pd^:= (ca1 shr 12) or $e0;
   inc(pd);
-  pd^:= ((ca1 shr 6) or (ps^ shr 6) and $0f) and $3f or $80;
+  pd^:= (ca1 shr 6) and $3f or $80;
   inc(pd);
   pd^:= ca1 and $3f or $80;
  end; //store3
