@@ -468,7 +468,7 @@ var
     else begin
      po1:= pc;
      po2:= po1;
-     while not (po2^ in whitechars+[',']) and (po2 < pe) do begin
+     while not (po2^ in whitechars+[',',']','}']) and (po2 < pe) do begin
       inc(po2);
      end;
      pc:= po2-1;

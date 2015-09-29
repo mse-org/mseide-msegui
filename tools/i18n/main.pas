@@ -748,7 +748,7 @@ procedure tmainfo.readprojectdata;
 begin
  if projectfo.datafilename.value <> '' then begin
   try
-   doread(ttextdatastream.Create(projectfo.datafilename.value),ce_utf8n);
+   doread(ttextdatastream.Create(projectfo.datafilename.value),ce_utf8);
   except
    application.handleexception(self);
   end;
@@ -772,7 +772,7 @@ var
  stream: ttextdatastream;
 begin
  stream:= ttextdatastream.Create(projectfo.datafilename.value,fm_create);
- dowrite(stream,ce_utf8n);
+ dowrite(stream,ce_utf8);
  fdatachanged:= false;
  updatecaption;
 end;

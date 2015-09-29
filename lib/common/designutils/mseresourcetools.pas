@@ -54,8 +54,8 @@ begin
    json.iteratearray(['strings'],result,@rsjarraystart,@rsjarrayitem);
   except
    on e: exception do begin
-    if astream is tfilestream then begin
-     e.message:= tfilestream(astream).filename+':'+lineend+e.message;
+    if astream is tmsefilestream then begin
+     e.message:= tmsefilestream(astream).filename+':'+lineend+e.message;
     end;
     raise;
    end;
