@@ -455,6 +455,9 @@ begin
   end;
   if result then begin
    checkoperator(';');
+   if checkident(ord(pid_inline)) then begin
+    checkoperator(';');
+   end;   
   end;
  end;
 end;
@@ -523,6 +526,7 @@ begin
      pid_overload: include(po1^.params.flags,mef_overload);
      pid_override: include(po1^.params.flags,mef_override);
      pid_virtual: include(po1^.params.flags,mef_virtual);
+//     pid_inline: include(po1^.params.flags,mef_inline);
      pid_invalid: break;
     else
      lasttoken;

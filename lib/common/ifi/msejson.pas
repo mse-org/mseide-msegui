@@ -377,7 +377,7 @@ var
   mch1: msechar;
   ca1: card32;
 
-  procedure put(); {inline;}
+  procedure put(); inline;
   begin
    if po1 <> po2 then begin
     mstr1:= utf8tostring(po2,po1-po2);
