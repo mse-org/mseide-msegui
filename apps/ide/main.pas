@@ -38,7 +38,7 @@ uses
  mselistbrowser,projecttreeform,msepipestream,msestringcontainer,msesys,
  msewidgets;
 const
- versiontext = '3.9';
+ versiontext = '4.0beta1';
  idecaption = 'MSEide';
  statname = 'mseide';
 

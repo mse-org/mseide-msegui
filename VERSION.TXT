@@ -1,5 +1,6 @@
 MSEide+MSEgui breaking changes version history
 
+Version 4.0beta1
 2015-09-30 
  tfiledialog statvalues lastdir, filehistory, filefilter and fielefilterindext
   moved to oe1_saveoptions section.
