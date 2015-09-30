@@ -1,7 +1,7 @@
 object mainfo: tmainfo
   visible = False
-  bounds_x = 91
-  bounds_y = 53
+  bounds_x = 58
+  bounds_y = 273
   bounds_cx = 638
   bounds_cy = 286
   container.frame.levelo = -1
@@ -9,8 +9,9 @@ object mainfo: tmainfo
   container.frame.framewidth = 1
   container.frame.colorframe = 13092491
   container.frame.localprops = [frl_levelo, frl_leveli, frl_framewidth, frl_colorframe]
+  container.frame.localprops1 = []
   container.face.image.alignment = [al_tiled]
-  container.face.image.transparency = 8421504
+  container.face.image.opacity = 8355711
   container.face.image.image = {
     00000000000000009600000096000000380A0100000000000000000000000000
     0000000000000000000000000000000000000000D8D8D801DBDBDB01DADADA02
@@ -2147,16 +2148,15 @@ object mainfo: tmainfo
   }
   container.face.fade_pos.count = 2
   container.face.fade_pos.items = (
-     0.0000000000000000E+0000
-     1.0000000000000000E+0000
+    0
+    1
   )
   container.face.fade_color.count = 2
   container.face.fade_color.items = (
     15590106
     11906751
   )
-  container.face.localprops = [fal_fatransparency]
-  container.face.dummy = 0
+  container.face.localprops = [fal_faopacity]
   container.taborder = 1
   container.bounds = (
     0
@@ -2179,10 +2179,10 @@ object mainfo: tmainfo
     frame.caption = 'Caption &topleft'
     frame.font.color = 29539
     frame.font.name = 'stf_default'
-    frame.font.xscale =  1.0000000000000000E+0000
-    frame.font.dummy = 0
+    frame.font.xscale = 1
+    frame.font.localprops = [flp_color, flp_xscale]
     frame.localprops = [frl_leveli, frl_framewidth, frl_colorframe, frl_colorclient]
-    frame.dummy = 0
+    frame.localprops1 = []
     frame.outerframe = (
       0
       17
@@ -2191,7 +2191,6 @@ object mainfo: tmainfo
     )
     bounds_x = 107
     bounds_y = 39
-    bounds_cx = 100
     bounds_cy = 43
     statfile = tstatfile1
     reffontheight = 14
@@ -2207,10 +2206,10 @@ object mainfo: tmainfo
     frame.font.color = 37241
     frame.font.style = [fs_bold]
     frame.font.name = 'stf_default'
-    frame.font.xscale =  1.0000000000000000E+0000
-    frame.font.dummy = 0
+    frame.font.xscale = 1
+    frame.font.localprops = [flp_color, flp_style, flp_xscale]
     frame.localprops = [frl_leveli, frl_framewidth, frl_colorframe, frl_colorclient]
-    frame.dummy = 0
+    frame.localprops1 = []
     frame.outerframe = (
       0
       17
@@ -2219,21 +2218,19 @@ object mainfo: tmainfo
     )
     face.fade_pos.count = 2
     face.fade_pos.items = (
-       0.0000000000000000E+0000
-       1.0000000000000000E+0000
+      0
+      1
     )
     face.fade_color.count = 2
     face.fade_color.items = (
       12378329
       10592767
     )
-    face.fade_transparency = 10526880
-    face.localprops = [fal_fatransparency]
-    face.dummy = 0
+    face.fade_opacity = 6250335
+    face.localprops = [fal_faopacity]
     taborder = 1
     bounds_x = 262
     bounds_y = 39
-    bounds_cx = 100
     bounds_cy = 43
     statfile = tstatfile1
     reffontheight = 14
@@ -2250,20 +2247,20 @@ object mainfo: tmainfo
     frame.font.color = -1610612730
     frame.font.style = [fs_bold, fs_italic]
     frame.font.name = 'stf_default'
-    frame.font.xscale =  1.0000000000000000E+0000
-    frame.font.dummy = 0
+    frame.font.xscale = 1
+    frame.font.localprops = [flp_color, flp_style, flp_xscale]
     frame.localprops = [frl_levelo, frl_leveli, frl_framewidth, frl_colorframe, frl_colorclient]
-    frame.dummy = 0
+    frame.localprops1 = []
     frame.outerframe = (
-      68
+      81
       0
       0
       0
     )
     face.fade_pos.count = 2
     face.fade_pos.items = (
-       0.0000000000000000E+0000
-       1.0000000000000000E+0000
+      0
+      1
     )
     face.fade_color.count = 2
     face.fade_color.items = (
@@ -2271,13 +2268,12 @@ object mainfo: tmainfo
       -1610612731
     )
     face.fade_direction = gd_up
-    face.fade_transparency = 8421504
-    face.localprops = [fal_fadirection, fal_fatransparency]
-    face.dummy = 0
+    face.fade_opacity = 8355711
+    face.localprops = [fal_fadirection, fal_faopacity]
     taborder = 3
-    bounds_x = 36
+    bounds_x = 23
     bounds_y = 112
-    bounds_cx = 168
+    bounds_cx = 181
     bounds_cy = 32
     statfile = tstatfile1
     reffontheight = 14
@@ -2292,10 +2288,10 @@ object mainfo: tmainfo
     frame.captionpos = cp_bottom
     frame.font.color = 12419927
     frame.font.name = 'stf_default'
-    frame.font.xscale =  1.0000000000000000E+0000
-    frame.font.dummy = 0
+    frame.font.xscale = 1
+    frame.font.localprops = [flp_color, flp_xscale]
     frame.localprops = [frl_levelo, frl_leveli, frl_framewidth, frl_frameimagelist, frl_frameimageoffset, frl_colorclient]
-    frame.dummy = 0
+    frame.localprops1 = []
     frame.outerframe = (
       0
       0
@@ -2305,7 +2301,6 @@ object mainfo: tmainfo
     taborder = 6
     bounds_x = 261
     bounds_y = 177
-    bounds_cx = 100
     bounds_cy = 49
     statfile = tstatfile1
     reffontheight = 14
@@ -2322,20 +2317,20 @@ object mainfo: tmainfo
     frame.font.color = 8876645
     frame.font.colorbackground = 13418736
     frame.font.name = 'stf_default'
-    frame.font.xscale =  1.0000000000000000E+0000
-    frame.font.dummy = 0
+    frame.font.xscale = 1
+    frame.font.localprops = [flp_color, flp_colorbackground, flp_xscale]
     frame.localprops = [frl_levelo, frl_leveli, frl_framewidth, frl_colorframe, frl_colorclient]
-    frame.dummy = 0
+    frame.localprops1 = []
     frame.outerframe = (
-      10
+      28
       0
       0
       17
     )
     taborder = 5
-    bounds_x = 94
+    bounds_x = 76
     bounds_y = 176
-    bounds_cx = 110
+    bounds_cx = 128
     bounds_cy = 49
     statfile = tstatfile1
     reffontheight = 14
@@ -2351,20 +2346,20 @@ object mainfo: tmainfo
     frame.font.color = 11372216
     frame.font.style = [fs_italic]
     frame.font.name = 'stf_default'
-    frame.font.xscale =  1.0000000000000000E+0000
-    frame.font.dummy = 0
+    frame.font.xscale = 1
+    frame.font.localprops = [flp_color, flp_style, flp_xscale]
     frame.localprops = [frl_levelo, frl_leveli, frl_framewidth, frl_frameimagelist, frl_frameimageoffset, frl_colorclient]
-    frame.dummy = 0
+    frame.localprops1 = []
     frame.outerframe = (
       0
       0
-      73
+      84
       0
     )
     face.fade_pos.count = 2
     face.fade_pos.items = (
-       0.0000000000000000E+0000
-       1.0000000000000000E+0000
+      0
+      1
     )
     face.fade_color.count = 2
     face.fade_color.items = (
@@ -2372,13 +2367,12 @@ object mainfo: tmainfo
       -1610612731
     )
     face.fade_direction = gd_up
-    face.fade_transparency = 8421504
-    face.localprops = [fal_fadirection, fal_fatransparency]
-    face.dummy = 0
+    face.fade_opacity = 8355711
+    face.localprops = [fal_fadirection, fal_faopacity]
     taborder = 4
     bounds_x = 261
     bounds_y = 113
-    bounds_cx = 173
+    bounds_cx = 184
     bounds_cy = 32
     statfile = tstatfile1
     reffontheight = 14
@@ -2393,7 +2387,7 @@ object mainfo: tmainfo
     frame.framei_right = 4
     frame.colorclient = -2147483645
     frame.localprops = [frl_levelo, frl_leveli, frl_framewidth, frl_colorframe, frl_fileft, frl_firight, frl_colorclient]
-    frame.dummy = 0
+    frame.localprops1 = []
     face.options = [fao_alphafadeimage]
     face.image.transparentcolor = -2147483642
     face.image.options = [bmo_masked]
@@ -3111,47 +3105,47 @@ object mainfo: tmainfo
       837654017C724C017A6D440A72663C047A6D440283765401887D580190866401
       7C724C012E492A01D2FADA01F3FEF41E0F000000F8FFFFFF1FF07F000C000000
       3F010000F8FFFFFF1FFCFFA10F000000FF000000F0FFFFFF1FFEFFC30F000000
-      FF030000E8FFFFFF8FFFFFEFFFF6C536FF070000C0FFFFFF8FFFFFFF0F00FFFF
-      FF0F000080FFFFFFE7FFFFFF5FD50000FF3F000000FEFFFFC3FFFFFF0F000000
-      FF7F000000FCFFFFE1FFFFFF0F0059E4FF7F01000080FFFFE0FFFFFF0F000000
+      FF030000E8FFFFFF8FFFFFEF0F000000FF070000C0FFFFFF8FFFFFFF0F000000
+      FF0F000080FFFFFFE7FFFFFF0F000000FF3F000000FEFFFFC3FFFFFF0F000000
+      FF7F000000FCFFFFE1FFFFFF0F000000FF7F01000080FFFFE0FFFFFF0F000000
       FFFF00000000FC7FE8FFFFFF0F000000FFFF01000000E01FF0FFFFFF0B000000
-      FFFF050000000007F0FFFDFF07000000FEFF030000000000F07FFFFFFFFFFF77
-      FFFF030000000000E0DFFFFF0FFFFF00F7FF030000000000E0FFFFFF0F000000
+      FFFF050000000007F0FFFDFF07000000FEFF030000000000F07FFFFF0F000000
+      FFFF030000000000E0DFFFFF0F000000F7FF030000000000E0FFFFFF0F000000
       9FFF030000000000E0FFFFFF0F000000FFEB030000000000C0FFFFFF0F000000
-      FFFF01000000000080FFFFFF1F050000FFFF03000000000000FFFFFF0F000000
+      FFFF01000000000080FFFFFF0F000000FFFF03000000000000FFFFFF0F000000
       FFFF01000000000080FEFFFF0F000000FFFF01000000000000FEFFFF0F000000
-      FFFF03000020000000FEFFFF0F000000FFFF03000000000000FCFFFF0FBBD9FF
-      FFFF07000000000000FCFFFF0F0000FFFFFF0F000000000000FCFFFFFFAE1900
-      FFFF07000700000000FCFFFF8FADF6E5FFFF07F07F00000000FCFFFFFFAE1900
-      FFFF07F8FF01000000FDFFFFFFE75B00FFFF07FEFF01000000FCFFFF0F25CDF7
-      FFFF03FFFF03000000FCCFFFFFCBFAEDFFFF07FFFF07000000FCFFFE0F000000
-      FFFF01FFBF07000000F8FFF7FFFF0045FFFF81FFDF07000000F8FFEFFF007BFF
-      FFFF80FFFF07000000F0FFFFFF00BDFFFF7F80FFFF0F000000E0FF7F0F0000D2
-      FF7F80BFFF5F000000C0FFFFEE00EFFFFF3F80FFFF3F000000C0FFFF0D000000
-      FF1F80FFFF7F010000F4FFFFBDFF47FFFF0F00FFFFFF000000FEFFFF5FFFFF00
-      FF0700FFFFFF000090FFFFFFFF5B2DFFFF0000FFFFFF0000E0FFFFFFF1FF5B58
-      000000FFFFFF0000F8FFFF07F0CDFF00000000FFFFDF0100FCFFFF0FA0F4FE79
-      020000FFFFFF0040FFFFFF2F0408FFFF030000FFFFFF0080FFFFFFFFFF0500FF
-      070080FFFF7F00E0FFFFFFFFFFB96A130F0000FFFFEF00F8FFFFFBFF0700FFFF
-      1F0000FFFF3F00FFFFFFFFFF0F00F2FF3F0000FEFF3FF0FFFF7FFFFFFFFFFFFF
-      FF0000FCFF5FFDFFFFFFFFFFFF00F1FFFF0000F8FF0FFFFFFFEFFFFFFFF600FF
-      FF0000F0FFEFFFFFFFFBFFFFFFFF0EFBFF0100C0FFF1FFFFFFFEFFFF0BFFFF00
-      FF01000000F8FFFFBFFFFFFF0FF4FF0EFF07000000FCFFFFF7FFFFFFFF0000FF
-      FF03000000FFFFFFFCFFFFFF07F4FF0EFF07000080FFFFCFFFFFFFFF0F00D5FF
-      FE0F0000E0FFFFFEFFFFFFFF0F000000FF1F0000F0FFEFFFFFFFFFFF0F0000FF
-      FD1F0000FAFFFFFFFFFFFFFF0F0CFFF0FF1F0000FCFFFFFFFFFFFFFFFF000000
-      FF3F0000FFFFFFFFFFFFFFFFFFC300FFFFFF0180FFFFFFFFFFFFFFFF0F0000FF
-      FFFFAFEAFFFFFFFFFFFFFFFF3FFFC000FFFFFFF1FFFFFFFFFFFFFFFFFF0000FF
-      7FFFFFFFFFFBFFFFFFFFFFFF3FFFC000FFFDFFFFFFFFFFFFC7FFFFFF3FFFFF00
-      FFFFFFFFFFFDFFFFFFFEFFFF0FB7FF56FFBFFFFFFFFFFF7FFFFBFFFFFF0000FF
-      FFFFFEFFFFFFFFFFFFFFFFFF0FFFFF00FFFFFFFF7FFFFFFFFFFFFFFFFFFF001C
-      FFFFDFFFFFFFFFFFFFFFFFFFFF0032C4FFFF7FFFFFFFFFDFFFFFFFFFFF0022CE
-      FFFFFFFFFFFFFFFFFFFFFFFF0F00007BC5FFFFEFF7FFFFFFFFFFEF7FF0001FB6
-      FFFEFFFFFFFFFFFFFFFFFFFF0F000000FFFFFFFFFFFFFFFFFFFFFFFF1FC5FBD5
-      FFF7FFFFFFFFFFDFFFFDFFFF9FFFFF00FFEFFFFFFFFFFFFFFF81FFFFFF0000FF
-      FFDFFFFFFFFFFFFFFF01F4FFFFFF96F7FFFFFFFFFFFFFFFFFF0100FCFF780000
+      FFFF03000020000000FEFFFF0F000000FFFF03000000000000FCFFFF0F000000
+      FFFF07000000000000FCFFFF0F000000FFFF0F000000000000FCFFFF0F000000
+      FFFF07000700000000FCFFFF0F000000FFFF07F07F00000000FCFFFF0F000000
+      FFFF07F8FF01000000FDFFFF0F000000FFFF07FEFF01000000FCFFFF0F000000
+      FFFF03FFFF03000000FCCFFF0F000000FFFF07FFFF07000000FCFFFE0F000000
+      FFFF01FFBF07000000F8FFF70F000000FFFF81FFDF07000000F8FFEF0F000000
+      FFFF80FFFF07000000F0FFFF0F000000FF7F80FFFF0F000000E0FF7F0F000000
+      FF7F80BFFF5F000000C0FFFF0E000000FF3F80FFFF3F000000C0FFFF0D000000
+      FF1F80FFFF7F010000F4FFFF0D000000FF0F00FFFFFF000000FEFFFF0F000000
+      FF0700FFFFFF000090FFFFFF0F000000FF0000FFFFFF0000E0FFFFFF01000000
+      000000FFFFFF0000F8FFFF0700000000000000FFFFDF0100FCFFFF0F00000000
+      020000FFFFFF0040FFFFFF2F04000000030000FFFFFF0080FFFFFFFF0F000000
+      070080FFFF7F00E0FFFFFFFF0F0000000F0000FFFFEF00F8FFFFFBFF07000000
+      1F0000FFFF3F00FFFFFFFFFF0F0000003F0000FEFF3FF0FFFF7FFFFF0F000000
+      FF0000FCFF5FFDFFFFFFFFFF0F000000FF0000F8FF0FFFFFFFEFFFFF0F000000
+      FF0000F0FFEFFFFFFFFBFFFF0F000000FF0100C0FFF1FFFFFFFEFFFF0B000000
+      FF01000000F8FFFFBFFFFFFF0F000000FF07000000FCFFFFF7FFFFFF0F000000
+      FF03000000FFFFFFFCFFFFFF07000000FF07000080FFFFCFFFFFFFFF0F000000
+      FE0F0000E0FFFFFEFFFFFFFF0F000000FF1F0000F0FFEFFFFFFFFFFF0F000000
+      FD1F0000FAFFFFFFFFFFFFFF0F000000FF1F0000FCFFFFFFFFFFFFFF0F000000
+      FF3F0000FFFFFFFFFFFFFFFF0F000000FFFF0180FFFFFFFFFFFFFFFF0F000000
+      FFFFAFEAFFFFFFFFFFFFFFFF0F000000FFFFFFF1FFFFFFFFFFFFFFFF0F000000
+      7FFFFFFFFFFBFFFFFFFFFFFF0F000000FFFDFFFFFFFFFFFFC7FFFFFF0F000000
+      FFFFFFFFFFFDFFFFFFFEFFFF0F000000FFBFFFFFFFFFFF7FFFFBFFFF0F000000
+      FFFFFEFFFFFFFFFFFFFFFFFF0F000000FFFFFFFF7FFFFFFFFFFFFFFF0F000000
+      FFFFDFFFFFFFFFFFFFFFFFFF0F000000FFFF7FFFFFFFFFDFFFFFFFFF0F000000
+      FFFFFFFFFFFFFFFFFFFFFFFF0F000000C5FFFFEFF7FFFFFFFFFFEF7F00000000
+      FFFEFFFFFFFFFFFFFFFFFFFF0F000000FFFFFFFFFFFFFFFFFFFFFFFF0F000000
+      FFF7FFFFFFFFFFDFFFFDFFFF0F000000FFEFFFFFFFFFFFFFFF81FFFF0F000000
+      FFDFFFFFFFFFFFFFFF01F4FF0F000000FFFFFFFFFFFFFFFFFF0100FC0F000000
       F0FFFFFFFFFFFF7FFF01000000000000C0FFFFFFFFFFFFFFFF00000000000000
-      00DFFFFFBFFFFFFFFF000000E097000000FCFFFFFFFFFFFFFB00000000000000
+      00DFFFFFBFFFFFFFFF0000000000000000FCFFFFFFFFFFFFFB00000000000000
       00F8FFFFFFFEFFFFFF0000000000000000848FFFFFFDFFFF7F00000000000000
       000000FAFFFFFFFF3F00000000000000000000F0FFFBFFFF3F00000000000000
       000000E0FFFBFFFF5F00000000000000000000C0FFFBFFFF1F00000000000000
@@ -3159,15 +3153,15 @@ object mainfo: tmainfo
       00000000FFFFFFFF1F0000000000000000000000FFFFFFFF3F00000000000000
       00000000FEFFFFFF3F0000000000000000000000FEFFFFFF3F00000000000000
       00000000FEFFFFFF3F0000000000000000000000FCFFFFFF7F00000000000000
-      00000000FCFFFFFF3F000000000000BD
+      00000000FCFFFFFF3F00000000000000
     }
     face.fade_pos.count = 5
     face.fade_pos.items = (
-       0.0000000000000000E+0000
-       2.0000000000000001E-0001
-       5.0000000000000000E-0001
-       8.0000000000000004E-0001
-       1.0000000000000000E+0000
+      0
+      0.2
+      0.5
+      0.8
+      1
     )
     face.fade_color.count = 5
     face.fade_color.items = (
@@ -3178,8 +3172,7 @@ object mainfo: tmainfo
       16777215
     )
     face.fade_direction = gd_up
-    face.localprops = [fal_options, fal_fadirection, fal_fatransparency]
-    face.dummy = 0
+    face.localprops = [fal_options, fal_fadirection, fal_faopacity]
     taborder = 2
     bounds_x = 400
     bounds_y = 40
@@ -3200,7 +3193,7 @@ object mainfo: tmainfo
     frame.frameimage_offsetactiveclicked = 16
     frame.colorclient = -2147483645
     frame.localprops = [frl_levelo, frl_leveli, frl_framewidth, frl_fileft, frl_firight, frl_frameimagelist, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_colorclient]
-    frame.dummy = 0
+    frame.localprops1 = []
     face.options = [fao_alphafadeimage]
     face.image.alignment = [al_xcentered, al_ycentered, al_tiled]
     face.image.image = {
@@ -3300,9 +3293,9 @@ object mainfo: tmainfo
     }
     face.fade_pos.count = 3
     face.fade_pos.items = (
-       0.0000000000000000E+0000
-       5.0000000000000000E-0001
-       1.0000000000000000E+0000
+      0
+      0.5
+      1
     )
     face.fade_color.count = 3
     face.fade_color.items = (
@@ -3310,8 +3303,7 @@ object mainfo: tmainfo
       0
       16777215
     )
-    face.localprops = [fal_options, fal_fatransparency]
-    face.dummy = 0
+    face.localprops = [fal_options, fal_faopacity]
     taborder = 7
     bounds_x = 400
     bounds_y = 168
@@ -3323,8 +3315,8 @@ object mainfo: tmainfo
   object buttonface1: tfacecomp
     template.fade_pos.count = 2
     template.fade_pos.items = (
-       0.0000000000000000E+0000
-       1.0000000000000000E+0000
+      0
+      1
     )
     template.fade_color.count = 2
     template.fade_color.items = (
@@ -3432,8 +3424,8 @@ object mainfo: tmainfo
   object buttonface2: tfacecomp
     template.fade_pos.count = 2
     template.fade_pos.items = (
-       0.0000000000000000E+0000
-       1.0000000000000000E+0000
+      0
+      1
     )
     template.fade_color.count = 2
     template.fade_color.items = (
@@ -3466,7 +3458,7 @@ object mainfo: tmainfo
   object imli: timagelist
     width = 4
     height = 4
-    masked = False
+    options = []
     count = 35
     left = 448
     top = 112
