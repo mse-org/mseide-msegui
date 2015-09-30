@@ -211,7 +211,7 @@ var
 begin
  with drawinfo.getfontmetrics do begin
   face:= tftface(pointer(fontdata^.font));
-  if face.getglyph(char,po1,false) then begin
+  if face.getglyph(msechar(char),po1,false) then begin //todo: 32bit
    with resultpo^ do begin
     width:= po1^.width;
     leftbearing:= po1^.leftbearing;
@@ -374,7 +374,7 @@ begin
   end;
  end
 end;
-
+                         //todo: 32bit
 function tftface.getglyph(const achar: msechar; out ainfo: pglyphinfoty; 
                         const forceload: boolean): boolean;
 var
