@@ -18,9 +18,9 @@ order15=0
 order16=0
 order17=0
 order18=0
-order19=0
-order20=0
 [projectoptions]
+projectdir=/home/mse/packs/standard/git/mseide-msegui/apps/ide/templates
+projectfilename=/home/mse/packs/standard/git/mseide-msegui/apps/ide/templates/layoutconsole.prj
 mainfile=
 targetfile=
 messageoutputfile=
@@ -313,17 +313,18 @@ panels=2
  panel2
 units=
  (
- a=0,4132,0,Pascal Units
+ a=0,4132,6,Pascal Units
  )
 cmodules=
  (
- a=0,4132,0,C Modules
+ a=0,4132,6,C Modules
  )
 files=
  (
- a=0,4132,0,Text Files
+ a=0,4132,6,Text Files
  )
 [componentstore]
+storedir=/home/mse/packs/standard/git/mseide-msegui/apps/ide/compstore/
 filename=
 [components]
 [selecteditpage]
@@ -355,20 +356,18 @@ tabsize=127
 firsttab=0
 index=-1
 [layout]
-windowlayout=530
+windowlayout=528
  [mainfo.openform]
  filenames=0
- filehistory=0
- filefilterindex=0
- filefilter=
  filecolwidth=0
  x=0
  y=0
  cx=0
  cy=0
- [mainfo.projectfiledia]
+ filehistory=0
  filefilterindex=0
- filefilter=*.prj
+ filefilter=
+ [mainfo.projectfiledia]
  filecolwidth=174
  x=0
  y=0
@@ -376,14 +375,14 @@ windowlayout=530
  cy=0
  [mainfo.openfile]
  filenames=0
- filehistory=0
- filefilterindex=0
- filefilter=
  filecolwidth=0
  x=0
  y=0
  cx=0
  cy=0
+ filehistory=0
+ filefilterindex=0
+ filefilter=
  [mainfo.basedock]
  splitdir=2
  useroptions=146560
@@ -445,7 +444,7 @@ windowlayout=530
  [memoryfo]
  splitdir=0
  useroptions=16507
- stackedunder=targetconsolefo
+ stackedunder=componentpalettefo
  parent=
  mdistate=0
  nx=0
@@ -472,7 +471,7 @@ windowlayout=530
  [disassfo]
  splitdir=0
  useroptions=16491
- stackedunder=
+ stackedunder=targetconsolefo
  parent=
  mdistate=0
  nx=0
@@ -491,7 +490,7 @@ windowlayout=530
  [findinfilefo]
  splitdir=0
  useroptions=16491
- stackedunder=
+ stackedunder=disassfo
  parent=
  mdistate=0
  nx=0
@@ -610,7 +609,7 @@ windowlayout=530
  [objectinspectorfo]
  splitdir=0
  useroptions=16491
- stackedunder=
+ stackedunder=breakpointsfo
  parent=
  mdistate=0
  nx=0
@@ -635,7 +634,7 @@ windowlayout=530
  [symbolfo]
  splitdir=0
  useroptions=16507
- stackedunder=
+ stackedunder=findinfilefo
  parent=
  mdistate=0
  nx=0
@@ -713,7 +712,7 @@ windowlayout=530
  [componentstorefo]
  splitdir=0
  useroptions=24699
- stackedunder=
+ stackedunder=symbolfo
  parent=
  mdistate=0
  nx=0
@@ -740,41 +739,41 @@ windowlayout=530
  sortdescend3=0
  [componentstorefo.storefiledialog]
  filenames=0
- lastdir=
- filehistory=0
- filefilterindex=0
- filefilter=
  filecolwidth=0
  x=0
  y=0
  cx=0
  cy=0
+ lastdir=
+ filehistory=0
+ filefilterindex=0
+ filefilter=
  [componentstorefo.groupfiledialog]
  filenames=0
- lastdir=
- filehistory=0
- filefilterindex=0
- filefilter=
  filecolwidth=0
  x=0
  y=0
  cx=0
  cy=0
+ lastdir=
+ filehistory=0
+ filefilterindex=0
+ filefilter=
  [componentstorefo.compfiledialog]
  filenames=0
- lastdir=
- filehistory=0
- filefilterindex=0
- filefilter=
  filecolwidth=0
  x=0
  y=0
  cx=0
  cy=0
+ lastdir=
+ filehistory=0
+ filefilterindex=0
+ filefilter=
  [componentpalettefo]
  splitdir=0
  useroptions=24683
- stackedunder=
+ stackedunder=componentstorefo
  parent=
  mdistate=0
  nx=0

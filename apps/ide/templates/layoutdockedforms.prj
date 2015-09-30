@@ -18,9 +18,9 @@ order15=0
 order16=0
 order17=0
 order18=0
-order19=0
-order20=0
 [projectoptions]
+projectdir=/home/mse/packs/standard/git/mseide-msegui/apps/ide/templates
+projectfilename=/home/mse/packs/standard/git/mseide-msegui/apps/ide/templates/layoutdockedforms.prj
 mainfile=
 targetfile=
 messageoutputfile=
@@ -308,12 +308,13 @@ address=0
 addbkpt=0
 ignore=0
 condition=0
-panels=5
+panels=6
  panel1
  panel2
  panel3
  panel4
  panel5
+ panel6
 units=
  (
  a=0,4132,6,Pascal Units
@@ -327,7 +328,7 @@ files=
  a=0,4132,6,Text Files
  )
 [componentstore]
-storedir=
+storedir=/home/mse/packs/standard/git/mseide-msegui/apps/ide/compstore/
 filename=
 [components]
 [selecteditpage]
@@ -359,20 +360,18 @@ tabsize=127
 firsttab=0
 index=-1
 [layout]
-windowlayout=575
+windowlayout=589
  [mainfo.openform]
  filenames=0
- filehistory=0
- filefilterindex=0
- filefilter=
  filecolwidth=0
  x=0
  y=0
  cx=0
  cy=0
- [mainfo.projectfiledia]
+ filehistory=0
  filefilterindex=0
- filefilter=*.prj
+ filefilter=
+ [mainfo.projectfiledia]
  filecolwidth=174
  x=0
  y=0
@@ -380,14 +379,14 @@ windowlayout=575
  cy=0
  [mainfo.openfile]
  filenames=0
- filehistory=0
- filefilterindex=0
- filefilter=
  filecolwidth=0
  x=0
  y=0
  cx=0
  cy=0
+ filehistory=0
+ filefilterindex=0
+ filefilter=
  [mainfo.basedock]
  splitdir=2
  useroptions=146560
@@ -449,7 +448,7 @@ windowlayout=575
  [memoryfo]
  splitdir=0
  useroptions=16507
- stackedunder=targetconsolefo
+ stackedunder=componentstorefo
  parent=
  mdistate=0
  nx=0
@@ -476,7 +475,7 @@ windowlayout=575
  [disassfo]
  splitdir=0
  useroptions=16491
- stackedunder=mainfo.panel2
+ stackedunder=targetconsolefo
  parent=
  mdistate=0
  nx=0
@@ -614,24 +613,24 @@ windowlayout=575
  [objectinspectorfo]
  splitdir=0
  useroptions=16491
- parent=mainfo.panel3.container
+ parent=mainfo.panel5.container
  visible=1
  mdistate=0
  nx=0
  ny=0
  ncx=0
  ncy=0
- x=509
+ x=518
  y=0
- cx=252
- cy=605
+ cx=233
+ cy=517
  rcx=0
  rcy=0
  [objectinspectorfo.grid]
- propcolwidthref=252
- width0=93
+ propcolwidthref=233
+ width0=86
  sortdescend0=0
- width1=153
+ width1=141
  sortdescend1=0
  [symbolfo]
  splitdir=0
@@ -741,37 +740,37 @@ windowlayout=575
  sortdescend3=0
  [componentstorefo.storefiledialog]
  filenames=0
- lastdir=
- filehistory=0
- filefilterindex=0
- filefilter=
  filecolwidth=0
  x=0
  y=0
  cx=0
  cy=0
+ lastdir=
+ filehistory=0
+ filefilterindex=0
+ filefilter=
  [componentstorefo.groupfiledialog]
  filenames=0
- lastdir=
- filehistory=0
- filefilterindex=0
- filefilter=
  filecolwidth=0
  x=0
  y=0
  cx=0
  cy=0
+ lastdir=
+ filehistory=0
+ filefilterindex=0
+ filefilter=
  [componentstorefo.compfiledialog]
  filenames=0
- lastdir=
- filehistory=0
- filefilterindex=0
- filefilter=
  filecolwidth=0
  x=0
  y=0
  cx=0
  cy=0
+ lastdir=
+ filehistory=0
+ filefilterindex=0
+ filefilter=
  [componentpalettefo]
  splitdir=0
  useroptions=24683
@@ -784,8 +783,8 @@ windowlayout=575
  ncy=0
  x=0
  y=0
- cx=506
- cy=97
+ cx=761
+ cy=75
  rcx=0
  rcy=0
  [componentpalettefo.componentpages]
@@ -830,7 +829,7 @@ windowlayout=575
  irqoff=0
  splitdir=0
  useroptions=16491
- stackedunder=componentstorefo
+ stackedunder=mainfo.panel2
  parent=
  mdistate=0
  nx=0
@@ -886,7 +885,7 @@ windowlayout=575
  visible=1
  [mainfo.panel3]
  splitdir=1
- useroptions=33586667
+ useroptions=32235
  stackedunder=mainfo
  parent=
  mdistate=0
@@ -915,12 +914,12 @@ windowlayout=575
  ncy=0
  x=0
  y=0
- cx=506
+ cx=761
  cy=605
  rcx=0
  rcy=0
  [mainfo.panel5]
- splitdir=2
+ splitdir=1
  useroptions=32235
  parent=mainfo.panel4.container
  visible=1
@@ -930,9 +929,25 @@ windowlayout=575
  ncx=0
  ncy=0
  x=0
- y=100
- cx=506
- cy=505
+ y=78
+ cx=761
+ cy=517
+ rcx=0
+ rcy=0
+ [mainfo.panel6]
+ splitdir=2
+ useroptions=32235
+ parent=mainfo.panel5.container
+ visible=1
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=0
+ y=0
+ cx=515
+ cy=517
  rcx=0
  rcy=0
 [targetconsole]

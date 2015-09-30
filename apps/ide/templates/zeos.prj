@@ -11,234 +11,129 @@ order8=0
 order9=0
 order10=0
 order11=0
+order12=0
+order13=0
+order14=0
+order15=0
+order16=0
+order17=0
+order18=0
 [projectoptions]
-projectdir=/home/mse/packs/standard/svn/mse/trunk/apps/ide/templates
-projectfilename=/home/mse/packs/standard/svn/mse/trunk/apps/ide/templates/zeos.prj
-options=83
- [projectoptionsfo.twidgetgrid3]
- propcolwidthref=801
- width0=13
- sortdescent0=0
- width1=13
- sortdescent1=0
- width2=13
- sortdescent2=0
- width3=139
- sortdescent3=0
- width4=292
- sortdescent4=0
- width5=320
- sortdescent5=0
- [projectoptionsfo.newfile]
- firsttab=0
- index=0
- [projectoptionsfo.fontaliasgrid]
- propcolwidthref=541
- values0=0
- width0=98
- sortdescent0=0
- values1=0
- width1=531
- sortdescent1=0
- values2=0
- width2=30
- sortdescent2=0
- values3=0
- width3=50
- sortdescent3=0
- values4=0
- width4=50
- sortdescent4=0
- values5=0
- width5=50
- sortdescent5=0
- [projectoptionsfo.macrosplitter]
- x=0
- y=178
- xprop=0
- yprop=0.34296724470134
- [projectoptionsfo.macrogrid]
- propcolwidthref=595
- width0=13
- sortdescent0=0
- width1=13
- sortdescent1=0
- width2=13
- sortdescent2=0
- width3=13
- sortdescent3=0
- width4=13
- sortdescent4=0
- width5=13
- sortdescent5=0
- width6=146
- sortdescent6=0
- width7=583
- sortdescent7=0
- [projectoptionsfo.makegroupbox]
- firsttab=0
- index=1
- [projectoptionsfo.exceptionsgrid]
- propcolwidthref=772
- width0=47
- sortdescent0=0
- values1=1
-  EconvertError
- width1=766
- sortdescent1=0
- [projectoptionsfo.ttabwidget1]
- firsttab=0
- index=0
- [projectoptionsfo.tabwidget]
- firsttab=0
- index=2
- [projectoptionsfo]
- stackedunder=
- x=151
- y=68
- cx=821
- cy=572
-sigsettings=27
- 1,1,T,F
- 3,3,T,F
- 4,4,T,F
- 6,6,T,F
- 7,7,T,F
- 8,8,T,F
- 9,9,T,F
- 10,10,T,F
- 11,11,T,F
- 12,12,T,F
- 13,13,T,F
- 15,15,T,F
- 16,16,T,F
- 17,17,F,F
- 18,18,T,F
- 19,19,T,F
- 20,20,T,F
- 21,21,T,F
- 22,22,T,F
- 23,23,T,F
- 24,24,T,F
- 25,25,T,F
- 26,26,T,F
- 27,27,T,F
- 28,28,T,F
- 29,29,T,F
- 30,30,T,F
-gridsizex=8
-gridsizey=8
-exceptclassnames=1
- EconvertError
-exceptignore=1
- 0
-modulenames=0
-moduletypes=0
-modulefiles=0
+projectdir=/home/mse/packs/standard/git/mseide-msegui/apps/ide/templates
+projectfilename=/home/mse/packs/standard/git/mseide-msegui/apps/ide/templates/zeos.prj
 mainfile=${PROJECTNAME}.pas
 targetfile=${PROJECTNAME}${EXEEXT}
 messageoutputfile=
-copymessages=0
-closemessages=1
-checkmethods=1
 makecommand=${COMPILER}
 makedir=
-debugcommand=${DEBUGGER}
-debugoptions=
-debugtarget=
-runcommand=
-remoteconnection=
-uploadcommand=
-gdbdownload=0
-downloadalways=0
-startupbkpt=0
-startupbkpton=0
-gdbsimulator=0
-gdbprocessor=Auto
-gdbservercommand=
-gdbserverwait=0
-beforeload=
-afterload=
-beforerun=
-defaultmake=1
-makeoptions=4
- -l -Mdelphi -Sh
- -gl -O-
- -B
- -OG2p3 -XX -Xs
-makeoptionson=4
- 63
- 31
- 34
- 32
-macroon=1
- 63
-macronames=1
- zeosdir
-macrovalues=1
- /home/mse/packs/standard/svn/zeos/trunk/
-macrogroup=0
-groupcomments=6
- 
- 
- 
- 
- 
- 
-sourcedirs=6
- ${MSEDIR}lib/addon/*/
- ${zeosdir}src/*/
- ${zeosdir}src/
- ${MSEDIR}lib/common/kernel/$TARGETOSDIR/
- ${MSEDIR}lib/common/*/
- ./
-defines=0
-defineson=0
 unitdirs=5
  ${MSEDIR}lib/addon/*/
  ${zeosdir}src/*/
  ${zeosdir}src/
  ${MSELIBDIR}kernel/$TARGETOSDIR/
  ${MSELIBDIR}*/
-unitdirson=5
- 196671
- 983103
- 983103
- 65599
- 65599
 unitpref=-Fu
 incpref=-Fi
 libpref=-Fl
 objpref=-Fo
 targpref=-o
-sourcefilemasks=3
- "*.pas" "*.dpr" "*.pp" "*.inc"
- "*.c" "*.cc" "*.h"
- "*.mfm"
-syntaxdeffiles=3
- ${SYNTAXDEFDIR}pascal.sdef
- ${SYNTAXDEFDIR}cpp.sdef
- ${SYNTAXDEFDIR}objecttext.sdef
-filemasknames=3
- Source
- Forms
- All Files
-filemasks=3
- "*.pp" "*.pas" "*.inc" "*.dpr"
- *.mfm
- *
-toolsave=0
-toolhide=0
-toolparse=0
+befcommand=0
+aftcommand=0
+makeoptions=4
+ -l -Mdelphi -Sh
+ -gl -O-
+ -B
+ -OG2p3 -XX -Xs
+codetemplatedirs=1
+ ${TEMPLATEDIR}
 toolmenus=0
 toolfiles=0
 toolparams=0
-fontalias=0
 fontnames=0
-fontheights=0
-fontwidths=0
-fontoptions=0
-fontxscales=0
+scriptbeforecopy=
+scriptaftercopy=
+newprojectfiles=4
+ ${TEMPLATEDIR}default/project.pas
+ ${TEMPLATEDIR}default/main.pas
+ ${TEMPLATEDIR}default/main.mfm
+ ${TEMPLATEDIR}default/main_mfm.pas
+newprojectfilesdest=4
+ ${%PROJECTNAME%}.pas
+ 
+ 
+ 
+newfinames=3
+ Program
+ Unit
+ Textfile
+newfifilters=3
+ "*.pas" "*.pp"
+ "*.pas" "*.pp"
+ 
+newfiexts=3
+ pas
+ pas
+ 
+newfisources=3
+ ${TEMPLATEDIR}default/program.pas
+ ${TEMPLATEDIR}default/unit.pas
+ 
+newfonames=11
+ Mainform
+ Simple Form
+ Docking Form
+ Datamodule
+ Subform
+ Scrollboxform
+ Tabform
+ Dockpanel
+ Report
+ Scriptform
+ Inherited Form
+newfonamebases=11
+ form
+ form
+ form
+ module
+ form
+ form
+ form
+ form
+ report
+ script
+ form
+newfosources=11
+ ${TEMPLATEDIR}default/mainform.pas
+ ${TEMPLATEDIR}default/simpleform.pas
+ ${TEMPLATEDIR}default/dockingform.pas
+ ${TEMPLATEDIR}default/datamodule.pas
+ ${TEMPLATEDIR}default/subform.pas
+ ${TEMPLATEDIR}default/scrollboxform.pas
+ ${TEMPLATEDIR}default/tabform.pas
+ ${TEMPLATEDIR}default/dockpanelform.pas
+ ${TEMPLATEDIR}default/report.pas
+ ${TEMPLATEDIR}default/pascform.pas
+ ${TEMPLATEDIR}default/inheritedform.pas
+newfoforms=11
+ ${TEMPLATEDIR}default/mainform.mfm
+ ${TEMPLATEDIR}default/simpleform.mfm
+ ${TEMPLATEDIR}default/dockingform.mfm
+ ${TEMPLATEDIR}default/datamodule.mfm
+ ${TEMPLATEDIR}default/subform.mfm
+ ${TEMPLATEDIR}default/scrollboxform.mfm
+ ${TEMPLATEDIR}default/tabform.mfm
+ ${TEMPLATEDIR}default/dockpanelform.mfm
+ ${TEMPLATEDIR}default/report.mfm
+ ${TEMPLATEDIR}default/pascform.mfm
+ ${TEMPLATEDIR}default/inheritedform.mfm
+forcezorder=0
+stripmessageesc=0
+copymessages=0
+closemessages=1
+checkmethods=1
+colorerror=-1610612712
+colorwarning=-1610612717
+colornote=-1610612716
 usercolors=30
  0
  0
@@ -301,34 +196,56 @@ usercolorcomment=30
  
  
  
-showgrid=1
-snaptogrid=1
-moveonfirstclick=1
-autoindent=1
-blockindent=1
-rightmarginon=1
-rightmarginchars=80
-scrollheight=0
-tabstops=4
-spacetabs=0
-editfontname=mseide_source
-editfontheight=0
-editfontwidth=0
-editfontextraspace=0
-editfontantialiased=1
-editmarkbrackets=1
-backupfilecount=2
-encoding=0
-newprojectfiles=4
- ${TEMPLATEDIR}default/project.pas
- ${TEMPLATEDIR}default/main.pas
- ${TEMPLATEDIR}default/main.mfm
- ${TEMPLATEDIR}default/main_mfm.pas
-newprojectfilesdest=4
- ${%PROJECTNAME%}.pas
+formatmacronames=0
+formatmacrovalues=0
+settingsfile=
+settingseditor=0
+settingsdebugger=0
+settingsstorage=0
+settingsprojecttree=0
+settingsautoload=0
+settingsautosave=0
+modulenames=0
+moduletypes=0
+modulefiles=0
+befcommandon=0
+makeoptionson=4
+ 63
+ 31
+ 34
+ 32
+aftcommandon=0
+unitdirson=5
+ 196671
+ 983103
+ 983103
+ 65599
+ 65599
+macroon=1
+ 63
+macronames=1
+ zeosdir
+macrovalues=1
+ /home/mse/packs/standard/svn/zeos/trunk/
+macrogroup=0
+groupcomments=6
  
  
  
+ 
+ 
+ 
+toolsave=0
+toolhide=0
+toolparse=0
+toolmessages=0
+toolshortcuts=0
+fontalias=0
+fontancestors=0
+fontheights=0
+fontwidths=0
+fontoptions=0
+fontxscales=0
 expandprojectfilemacros=4
  1
  1
@@ -339,27 +256,141 @@ loadprojectfile=4
  1
  1
  0
-newprogramfile=${TEMPLATEDIR}default/program.pas
-newunitfile=${TEMPLATEDIR}default/unit.pas
-newmainfosource=${TEMPLATEDIR}default/mainform.pas
-newmainfoform=${TEMPLATEDIR}default/mainform.mfm
-newsimplefosource=${TEMPLATEDIR}default/simpleform.pas
-newsimplefoform=${TEMPLATEDIR}default/simpleform.mfm
-newdockingfosource=${TEMPLATEDIR}default/dockingform.pas
-newdockingfoform=${TEMPLATEDIR}default/dockingform.mfm
-newdatamodsource=${TEMPLATEDIR}default/datamodule.pas
-newdatamodform=${TEMPLATEDIR}default/datamodule.mfm
-newsubfosource=${TEMPLATEDIR}default/subform.pas
-newsubfoform=${TEMPLATEDIR}default/subform.mfm
-newreportsource=${TEMPLATEDIR}default/report.pas
-newreportform=${TEMPLATEDIR}default/report.mfm
-newinheritedsource=${TEMPLATEDIR}default/inheritedform.pas
-newinheritedform=${TEMPLATEDIR}default/inheritedform.mfm
+newinheritedforms=11
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ -1
+uid=0
+sourcefilemasks=3
+ "*.pas" "*.dpr" "*.lpr" "*.pp" "*.inc"
+ "*.c" "*.cc" "*.h"
+ "*.mfm"
+syntaxdeffiles=3
+ ${SYNTAXDEFDIR}pascal.sdef
+ ${SYNTAXDEFDIR}cpp.sdef
+ ${SYNTAXDEFDIR}objecttext.sdef
+filemasknames=3
+ Source
+ Forms
+ All Files
+filemasks=3
+ "*.pp" "*.pas" "*.inc" "*.dpr" "*.lpr"
+ *.mfm
+ *
+showgrid=1
+snaptogrid=1
+moveonfirstclick=1
+noformdesignerdocking=0
+gridsizex=8
+gridsizey=8
+autoindent=1
+blockindent=1
+linenumberson=0
+rightmarginon=1
+rightmarginchars=80
+scrollheight=0
+tabstops=4
+spacetabs=0
+showtabs=0
+tabindent=0
+editfontname=mseide_source
+editfontheight=0
+editfontwidth=0
+editfontextraspace=0
+editfontcolor=-1879048183
+editbkcolor=-1879048186
+statementcolor=14745599
+editfontantialiased=1
+editmarkbrackets=1
+backupfilecount=2
+encoding=1
+codetemplatedirs=1
+ ${TEMPLATEDIR}
+debugcommand=${DEBUGGER}
+debugoptions=
+debugtarget=
+runcommand=
+xtermcommand=xterm -S${PTSN}/${PTSH}
+remoteconnection=
+uploadcommand=
+gdbprocessor=auto
+gdbservercommand=
+gdbservercommandattach=
+beforeconnect=
+afterconnect=
+beforeload=
+afterload=
+beforerun=
+sourcebase=
+sourcedirs=3
+ ${MSELIBDIR}kernel/$TARGETOSDIR/
+ ${MSELIBDIR}*/
+ ./
+defines=0
+progparameters=
+progworkingdirectory=
+envvarnames=0
+envvarvalues=0
+defineson=0
 stoponexception=0
 valuehints=1
 activateonbreak=1
+raiseonbreak=1
 showconsole=0
 externalconsole=0
+settty=1
+gdbdownload=0
+downloadalways=0
+startupbkpt=0
+startupbkpton=0
+gdbsimulator=0
+gdbserverstartonce=0
+gdbloadtimeout=
+gdbserverwait=0
+nogdbserverexit=0
+gdbservertty=0
+exceptclassnames=1
+ EconvertError
+exceptignore=1
+ 0
+nodebugbeginend=0
+sigsettings=27
+ 1,1,T,F
+ 3,3,T,F
+ 4,4,T,F
+ 6,6,T,F
+ 7,7,T,F
+ 8,8,T,F
+ 9,9,T,F
+ 10,10,T,F
+ 11,11,T,F
+ 12,12,T,F
+ 13,13,T,F
+ 15,15,T,F
+ 16,16,T,F
+ 17,17,F,F
+ 18,18,T,F
+ 19,19,T,F
+ 20,20,T,F
+ 21,21,T,F
+ 22,22,T,F
+ 23,23,T,F
+ 24,24,T,F
+ 25,25,T,F
+ 26,26,T,F
+ 27,27,T,F
+ 28,28,T,F
+ 29,29,T,F
+ 30,30,T,F
+defaultmake=1
 [breakpoints]
 on=0
 path=0
@@ -368,48 +399,100 @@ address=0
 addbkpt=0
 ignore=0
 condition=0
-panels=1
+panels=2
  panel1
+ panel2
 units=
  (
- modulefilenames=0
- modulenames=0
- moduleclassnames=0
- a=0,4132,0,Units
+ a=0,4132,6,Pascal Units
+ )
+cmodules=
+ (
+ a=0,4132,6,C Modules
  )
 files=
  (
- a=0,4132,0,Text Files
+ a=0,4132,6,Text Files
  )
 [componentstore]
-storedir=/home/mse/test/msegui/apps/ide/compstore/
+storedir=/home/mse/packs/standard/git/mseide-msegui/apps/ide/compstore/
 filename=
+[components]
+[selecteditpage]
+colwidth=100
+x=0
+y=0
+cx=0
+cy=0
+[progparams]
+progparamhistory=0
+workdirparamhistory=0
+envvarons=0
+[edit]
+hintwidth=0
+hintheight=0
+finddtext=
+findhistory=0
+findoptions=1
+editpos=0
+sourcefiles=0
+relpaths=0
+ismoduletexts=0
+modules=0
+moduleoptions=0
+visiblemodules=0
+nomenumodules=0
+[sourcefo.tabwidget]
+tabsize=114
+firsttab=0
+index=-1
 [layout]
-windowlayout=400
+windowlayout=530
+ [mainfo.openform]
+ filenames=0
+ filecolwidth=0
+ x=0
+ y=0
+ cx=0
+ cy=0
+ filehistory=0
+ filefilterindex=0
+ filefilter=
+ [mainfo.projectfiledia]
+ filecolwidth=174
+ x=0
+ y=0
+ cx=0
+ cy=0
  [mainfo.openfile]
  filenames=0
- filehistory=10
-  /home/mse/packs/standard/svn/zeos/trunk/src/Zeos.inc
-  /home/mse/packs/standard/svn/zeos/trunk/src/dbc/ZDbcInterbase6Utils.pas
-  /home/mse/packs/standard/svn/mse/trunk/lib/common/regcomponents/regzeoslib.pas
-  /home/mse/packs/standard/svn/mse/trunk/lib/common/widgets/mseforms.pas
-  /home/mse/packs/standard/svn/mse/trunk/lib/common/db/msesqlite3conn.pas
-  /home/mse/packs/standard/svn/mse/trunk/lib/common/db/sqlite3dyn.pas
-  /home/mse/packs/standard/svn/mse/trunk/lib/common/db/mibconnection.pas
-  /home/mse/packs/standard/svn/mse/trunk/apps/ide/formdesigner.pas
-  /home/mse/packs/standard/svn/mse/trunk/lib/common/db/msememds.pas
-  /home/mse/packs/standard/svn/mse/trunk/lib/common/db/msesqldb.pas
+ filecolwidth=0
+ x=0
+ y=0
+ cx=0
+ cy=0
+ filehistory=0
  filefilterindex=0
- filecolwidth=174
+ filefilter=
  [mainfo.basedock]
  splitdir=2
- useroptions=15488
+ useroptions=146560
  [mainfo]
- stackedunder=mainfo.panel1
+ splitdir=0
+ useroptions=33554555
+ stackedunder=
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
  x=4
- y=24
- cx=286
- cy=74
+ y=25
+ cx=323
+ cy=64
+ rcx=0
+ rcy=0
  wsize=0
  active=0
  visible=1
@@ -422,10 +505,12 @@ windowlayout=400
  ny=0
  ncx=0
  ncy=0
- x=116
- y=297
- cx=904
- cy=347
+ x=209
+ y=385
+ cx=368
+ cy=137
+ rcx=0
+ rcy=0
  wsize=0
  active=0
  visible=0
@@ -442,6 +527,8 @@ windowlayout=400
  y=270
  cx=349
  cy=276
+ rcx=0
+ rcy=0
  wsize=0
  active=0
  visible=0
@@ -459,6 +546,8 @@ windowlayout=400
  y=100
  cx=453
  cy=354
+ rcx=0
+ rcy=0
  wsize=0
  active=0
  visible=0
@@ -473,7 +562,7 @@ windowlayout=400
  [disassfo]
  splitdir=0
  useroptions=16491
- stackedunder=projecttreefo
+ stackedunder=mainfo.panel1
  parent=
  mdistate=0
  nx=0
@@ -484,13 +573,15 @@ windowlayout=400
  y=502
  cx=564
  cy=210
+ rcx=0
+ rcy=0
  wsize=0
  active=0
  visible=0
  [findinfilefo]
  splitdir=0
  useroptions=16491
- stackedunder=targetconsolefo
+ stackedunder=disassfo
  parent=
  mdistate=0
  nx=0
@@ -501,78 +592,9 @@ windowlayout=400
  y=115
  cx=369
  cy=198
+ rcx=0
+ rcy=0
  [projecttreefo]
- splitdir=0
- useroptions=16491
- stackedunder=stackfo
- parent=
- mdistate=0
- nx=0
- ny=0
- ncx=0
- ncy=0
- x=321
- y=101
- cx=698
- cy=413
- wsize=0
- active=0
- visible=0
- [stackfo]
- splitdir=0
- useroptions=16489
- parent=
- mdistate=0
- nx=0
- ny=0
- ncx=0
- ncy=0
- x=407
- y=349
- cx=254
- cy=180
- wsize=0
- active=0
- visible=0
- [watchpointsfo]
- splitdir=0
- useroptions=16489
- parent=
- mdistate=0
- nx=0
- ny=0
- ncx=0
- ncy=0
- x=537
- y=26
- cx=483
- cy=210
- wsize=0
- active=0
- visible=0
- [watchpointsfo.grid]
- propcolwidthref=352
- width0=16
- sortdescent0=0
- values1=1
-  0
- width1=33
- sortdescent1=0
- values2=1
-  pinteger(0x126c6b4)^
- width2=239
- sortdescent2=0
- width4=34
- sortdescent4=0
- values5=1
-  0
- width5=38
- sortdescent5=0
- values6=1
-  
- width6=103
- sortdescent6=0
- [breakpointsfo]
  splitdir=0
  useroptions=16491
  stackedunder=memoryfo
@@ -582,10 +604,94 @@ windowlayout=400
  ny=0
  ncx=0
  ncy=0
+ x=263
+ y=431
+ cx=286
+ cy=201
+ rcx=0
+ rcy=0
+ wsize=0
+ active=0
+ visible=0
+ [projecttreefo.grid]
+ propcolwidthref=135
+ width0=141
+ sortdescend0=0
+ width1=129
+ sortdescend1=0
+ sorted=0
+ col=-1073741823
+ row=-1073741823
+ rowheight=16
+ [stackfo]
+ splitdir=0
+ useroptions=24681
+ parent=mainfo.panel2.container
+ visible=1
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=0
+ y=0
+ cx=313
+ cy=295
+ rcx=0
+ rcy=0
+ [watchpointsfo]
+ splitdir=0
+ useroptions=16489
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=120
+ y=368
+ cx=483
+ cy=210
+ rcx=0
+ rcy=0
+ wsize=0
+ active=0
+ visible=0
+ [watchpointsfo.grid]
+ propcolwidthref=352
+ sortdescend0=0
+ values1=0
+ values1_ci=-1
+ width1=33
+ sortdescend1=0
+ values2=0
+ width2=158
+ sortdescend2=0
+ width4=34
+ sortdescend4=0
+ values5=0
+ values5_ci=-1
+ width5=38
+ sortdescend5=0
+ values6=0
+ width6=184
+ sortdescend6=0
+ [breakpointsfo]
+ splitdir=0
+ useroptions=16491
+ stackedunder=projecttreefo
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
  x=107
  y=404
- cx=477
+ cx=636
  cy=128
+ rcx=0
+ rcy=0
  wsize=0
  active=0
  visible=0
@@ -594,56 +700,86 @@ windowlayout=400
  [objectinspectorfo]
  splitdir=0
  useroptions=16491
- stackedunder=componentstorefo
+ stackedunder=mainfo.panel2
  parent=
  mdistate=0
  nx=0
  ny=0
  ncx=0
  ncy=0
- x=670
- y=179
- cx=316
- cy=484
+ x=724
+ y=157
+ cx=296
+ cy=566
+ rcx=0
+ rcy=0
+ wsize=0
+ active=0
+ visible=1
+ [objectinspectorfo.grid]
+ propcolwidthref=286
+ width0=105
+ sortdescend0=0
+ width1=175
+ sortdescend1=0
+ [symbolfo]
+ splitdir=0
+ useroptions=16507
+ stackedunder=findinfilefo
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=142
+ y=257
+ cx=361
+ cy=137
+ rcx=0
+ rcy=0
  wsize=0
  active=0
  visible=0
- [objectinspectorfo.grid]
- propcolwidthref=347
- width0=113
- sortdescent0=0
- width1=187
- sortdescent1=0
+ [symbolfo.grid]
+ propcolwidthref=222
+ values0=0
+ width0=111
+ sortdescend0=0
+ width1=135
+ sortdescend1=0
+ [symbolfo.symbol]
  [watchfo]
  splitdir=0
  useroptions=24681
- parent=
+ parent=mainfo.panel2.container
+ visible=1
  mdistate=0
  nx=0
  ny=0
  ncx=0
  ncy=0
- x=510
- y=325
- cx=310
- cy=245
- wsize=0
- active=0
- visible=0
+ x=0
+ y=298
+ cx=313
+ cy=236
+ rcx=0
+ rcy=0
  [watchfo.grid]
- propcolwidthref=113
- width0=13
- sortdescent0=0
+ propcolwidthref=118
+ values0=0
+ values0_ci=-1
+ sortdescend0=0
  values1=0
  width1=152
- sortdescent1=0
- values2=0
+ sortdescend1=0
  values3=0
- width3=12
- sortdescent3=0
+ values3_ci=-1
+ sortdescend3=0
  values4=0
+ values4_ci=-1
  width4=13
- sortdescent4=0
+ sortdescend4=0
  [watchfo.watchon]
  [watchfo.expression]
  [watchfo.watcheson]
@@ -652,59 +788,85 @@ windowlayout=400
  splitdir=0
  useroptions=49259
  parent=mainfo.panel1.container
- visible=0
+ visible=1
  mdistate=0
  nx=0
  ny=0
  ncx=0
  ncy=0
  x=0
- y=411
- cx=724
- cy=80
+ y=510
+ cx=675
+ cy=95
+ rcx=0
+ rcy=0
  [componentstorefo]
  splitdir=0
- useroptions=24675
- stackedunder=findinfilefo
+ useroptions=24699
+ stackedunder=symbolfo
  parent=
  mdistate=0
  nx=0
  ny=0
  ncx=0
  ncy=0
- x=100
- y=100
+ x=305
+ y=101
  cx=445
  cy=354
+ rcx=0
+ rcy=0
  wsize=0
  active=0
  visible=0
  [componentstorefo.grid]
  propcolwidthref=435
  width0=111
- sortdescent0=0
- width1=157
- sortdescent1=0
- width2=160
- sortdescent2=0
+ sortdescend0=0
+ sortdescend1=0
+ width2=112
+ sortdescend2=0
+ width3=185
+ sortdescend3=0
  [componentstorefo.storefiledialog]
  filenames=1
-  /home/mse/test/msegui/apps/ide/compstore/
- lastdir=/home/mse/test/msegui/apps/ide/compstore/
+  /home/mse/packs/standard/git/mseide-msegui/apps/ide/compstore/
+ filecolwidth=0
+ x=0
+ y=0
+ cx=0
+ cy=0
+ lastdir=/home/mse/packs/standard/git/mseide-msegui/apps/ide/compstore/
  filehistory=0
  filefilterindex=0
- filecolwidth=0
+ filefilter=
  [componentstorefo.groupfiledialog]
  filenames=1
-  /home/mse/test/msegui/apps/ide/compstore/
- lastdir=/home/mse/test/msegui/apps/ide/compstore/
+  /home/mse/packs/standard/git/mseide-msegui/apps/ide/compstore/
+ filecolwidth=0
+ x=0
+ y=0
+ cx=0
+ cy=0
+ lastdir=/home/mse/packs/standard/git/mseide-msegui/apps/ide/compstore/
  filehistory=0
  filefilterindex=0
+ filefilter=
+ [componentstorefo.compfiledialog]
+ filenames=0
  filecolwidth=0
+ x=0
+ y=0
+ cx=0
+ cy=0
+ lastdir=
+ filehistory=0
+ filefilterindex=0
+ filefilter=
  [componentpalettefo]
  splitdir=0
  useroptions=24683
- stackedunder=mainfo
+ stackedunder=objectinspectorfo
  parent=
  mdistate=0
  nx=0
@@ -712,9 +874,11 @@ windowlayout=400
  ncx=0
  ncy=0
  x=335
- y=24
- cx=440
- cy=129
+ y=25
+ cx=685
+ cy=103
+ rcx=0
+ rcy=0
  wsize=0
  active=0
  visible=1
@@ -732,8 +896,10 @@ windowlayout=400
  ncy=0
  x=0
  y=0
- cx=286
- cy=36
+ cx=313
+ cy=28
+ rcx=0
+ rcy=0
  [sourcefo]
  splitdir=0
  useroptions=16489
@@ -746,33 +912,38 @@ windowlayout=400
  ncy=0
  x=0
  y=0
- cx=724
- cy=491
+ cx=675
+ cy=507
+ rcx=0
+ rcy=0
  [actionsmo.watchesonact]
  checked=1
  [actionsmo.bluedotsonact]
  checked=1
  [cpui386fo]
+ irqoff=0
  splitdir=0
  useroptions=16491
- stackedunder=threadsfo
+ stackedunder=componentstorefo
  parent=
  mdistate=0
  nx=0
  ny=0
  ncx=0
  ncy=0
- x=312
- y=341
- cx=283
- cy=210
+ x=337
+ y=295
+ cx=273
+ cy=207
+ rcx=0
+ rcy=0
  wsize=0
  active=0
  visible=0
  [mainfo.panel1]
  splitdir=2
- useroptions=32233
- stackedunder=
+ useroptions=33586667
+ stackedunder=componentpalettefo
  parent=
  mdistate=0
  nx=0
@@ -780,44 +951,34 @@ windowlayout=400
  ncx=0
  ncy=0
  x=4
- y=201
- cx=734
- cy=491
+ y=118
+ cx=685
+ cy=605
+ rcx=0
+ rcy=0
+ wsize=0
+ active=0
+ visible=1
+ [mainfo.panel2]
+ splitdir=2
+ useroptions=33586667
+ stackedunder=mainfo
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=697
+ y=189
+ cx=323
+ cy=534
+ rcx=0
+ rcy=0
  wsize=0
  active=1
  visible=1
-[edit]
-hintwidth=0
-hintheight=0
-autoindent=1
-blockindent=1
-rightmarginon=1
-rightmarginchars=80
-tabstops=4
+[targetconsole]
 finddtext=
 findhistory=0
 findoptions=1
-editpos=0
-sourcefiles=0
-relpaths=0
-ismoduletexts=0
-modules=0
-visiblemodules=0
-[sourcefo.tabwidget]
-tabsize=134
-firsttab=0
-index=-1
-[components]
-[selecteditpage]
-colwidth=100
-x=0
-y=0
-cx=0
-cy=0
-[progparams]
-parameters=
-progparamhistory=0
-workingdirectory=
-envvarons=0
-envvarnames=0
-envvarvalues=0
