@@ -21,8 +21,6 @@ order18=0
 order19=0
 order20=0
 [projectoptions]
-projectdir=/home/mse/packs/standard/git/mseide-msegui/apps/ide/templates
-projectfilename=/home/mse/packs/standard/git/mseide-msegui/apps/ide/templates/layoutconsole.prj
 mainfile=
 targetfile=
 messageoutputfile=
@@ -326,7 +324,6 @@ files=
  a=0,4132,0,Text Files
  )
 [componentstore]
-storedir=/home/mse/packs/standard/git/mseide-msegui/apps/ide/compstore/
 filename=
 [components]
 [selecteditpage]
@@ -358,7 +355,7 @@ tabsize=127
 firsttab=0
 index=-1
 [layout]
-windowlayout=544
+windowlayout=530
  [mainfo.openform]
  filenames=0
  filehistory=0
@@ -370,20 +367,6 @@ windowlayout=544
  cx=0
  cy=0
  [mainfo.projectfiledia]
- filenames=1
-  /home/mse/packs/standard/git/mseide-msegui/apps/ide/templates/layoutgui.prj
- lastdir=/home/mse/packs/standard/git/mseide-msegui/apps/ide/templates/
- filehistory=10
-  /home/mse/packs/standard/git/mseide-msegui/apps/ide/templates/layoutgui.prj
-  /home/mse/packs/standard/git/mseide-msegui/apps/ide/templates/layoutconsole.prj
-  /home/mse/packs/standard/git/mseuniverse/tools/msegit/mse_msegit.prj
-  /home/mse/packs/standard/git/mseide-msegui/apps/ide/mse_mseide.prj
-  /home/mse/proj/msegui/testcase/chefou/msegui_zengl/test.prj
-  /home/mse/packs/standard/git/mseuniverse/samples/widgets/layout/mse_layout.prj
-  /home/mse/packs/standard/git/mselang/mselang/mse_mselang.prj
-  /home/mse/packs/standard/git/sak/sak/sak_mse/examples/mse_mse_sak_demo.prj
-  /home/mse/packs/standard/git/mseuniverse/tools/msespice/mse_msespice.prj
-  /home/mse/proj/msegui/testcase/mse/process/terminate/terminateprocess.prj
  filefilterindex=0
  filefilter=*.prj
  filecolwidth=174

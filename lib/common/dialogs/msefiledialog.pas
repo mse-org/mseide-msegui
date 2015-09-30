@@ -426,7 +426,7 @@ type
                   var accept: Boolean);
    procedure formoncreate(const sender: TObject);
    procedure dirshowhint(const sender: TObject; var info: hintinfoty);
-   procedure copytolip(const sender: TObject; var avalue: msestring);
+   procedure copytoclip(const sender: TObject; var avalue: msestring);
    procedure pastefromclip(const sender: TObject; var avalue: msestring);
    procedure homeaction(const sender: TObject);
    procedure backexe(const sender: TObject);
@@ -1503,7 +1503,7 @@ begin
  end;
 end;
 
-procedure tfiledialogfo.copytolip(const sender: TObject; var avalue: msestring);
+procedure tfiledialogfo.copytoclip(const sender: TObject; var avalue: msestring);
 begin
  tosysfilepath1(avalue);
 end;
