@@ -1465,6 +1465,7 @@ object mainfo: tmainfo
     controller.defaultext = 'prj'
     controller.captionopen = 'Open Project'
     controller.captionsave = 'Save Project'
+    optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savestate, oe1_checkvalueafterstatread]
     left = 264
     top = 1
   end

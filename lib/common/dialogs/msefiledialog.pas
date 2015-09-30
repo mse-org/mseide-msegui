@@ -1610,12 +1610,6 @@ end;
 
 procedure tfiledialogcontroller.readstatstate(const reader: tstatreader);
 begin
- if fdo_savelastdir in foptions then begin
-  flastdir:= reader.readmsestring('lastdir',flastdir);
- end;
- if fhistorymaxcount > 0 then begin
-  fhistory:= reader.readarray('filehistory',fhistory);
- end;
  ffilterindex:= reader.readinteger('filefilterindex',ffilterindex);
  ffilter:= reader.readmsestring('filefilter',ffilter);
  fwindowrect.x:= reader.readinteger('x',fwindowrect.x);
@@ -1633,6 +1627,12 @@ end;
 
 procedure tfiledialogcontroller.readstatoptions(const reader: tstatreader);
 begin
+ if fdo_savelastdir in foptions then begin
+  flastdir:= reader.readmsestring('lastdir',flastdir);
+ end;
+ if fhistorymaxcount > 0 then begin
+  fhistory:= reader.readarray('filehistory',fhistory);
+ end;
 end;
 
 procedure tfiledialogcontroller.writestatvalue(const writer: tstatwriter);
@@ -1645,14 +1645,6 @@ end;
 
 procedure tfiledialogcontroller.writestatstate(const writer: tstatwriter);
 begin
- if fdo_savelastdir in foptions then begin
-  writer.writemsestring('lastdir',flastdir);
- end;
- if fhistorymaxcount > 0 then begin
-  writer.writearray('filehistory',fhistory);
- end;
- writer.writeinteger('filefilterindex',ffilterindex);
- writer.writemsestring('filefilter',ffilter);
  writer.writeinteger('filecolwidth',fcolwidth);
  writer.writeinteger('x',fwindowrect.x);
  writer.writeinteger('y',fwindowrect.y);
@@ -1662,7 +1654,14 @@ end;
 
 procedure tfiledialogcontroller.writestatoptions(const writer: tstatwriter);
 begin
- //dummy
+ if fdo_savelastdir in foptions then begin
+  writer.writemsestring('lastdir',flastdir);
+ end;
+ if fhistorymaxcount > 0 then begin
+  writer.writearray('filehistory',fhistory);
+ end;
+ writer.writeinteger('filefilterindex',ffilterindex);
+ writer.writemsestring('filefilter',ffilter);
 end;
 
 procedure tfiledialogcontroller.componentevent(const event: tcomponentevent);

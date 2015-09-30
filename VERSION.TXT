@@ -1,5 +1,8 @@
 MSEide+MSEgui breaking changes version history
 
+2015-09-30 
+ tfiledialog statvalues lastdir, filehistory, filefilter and fielefilterindext
+  moved to oe1_saveoptions section.
 2015-09-27
  charencodingty ce_utf8n -> ce_utf8, load broken forms into MSEide in order
   to fix the resource file.
