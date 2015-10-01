@@ -7,6 +7,8 @@ Version 4.0beta1
 2015-09-27
  charencodingty ce_utf8n -> ce_utf8, load broken forms into MSEide in order
   to fix the resource file.
+2015-09-15 
+ Internal character encoding is utf-16 instead of UCS2.
 2015-08-09
  applyrecupdateeventty asql parameter is msestring.
 2015-08-08
