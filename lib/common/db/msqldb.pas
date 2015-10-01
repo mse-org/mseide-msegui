@@ -555,7 +555,7 @@ type
    fparams: tmseparams;
    foptions: sqlstatementoptionsty;
 //   procedure defineproperties(afiler: tfiler); override;
-   
+   function getdatabase: tcustomconnection; //for isqlpropertyeditor
    procedure setactive(avalue: boolean); virtual;
    procedure execute; virtual; abstract;
    procedure dobeforeexecute(const adatabase: tcustomsqlconnection;
@@ -2590,6 +2590,12 @@ end;
 function tcustomsqlstatement.getactive: boolean;
 begin
  result:= false;
+end;
+
+function tcustomsqlstatement.getdatabase: tcustomconnection; 
+                                         //for isqlpropertyeditor
+begin
+ result:= fdatabase;
 end;
 
 procedure tcustomsqlstatement.setactive(avalue: boolean);

@@ -83,6 +83,7 @@ type
  tsqlpropertyeditor = class(ttextstringspropertyeditor)
   private
    factivebefore: boolean;
+   fdbactivebefore: boolean;
    fintf: isqlpropertyeditor;
   protected
    function nocheck: boolean; virtual;
@@ -95,20 +96,9 @@ type
    procedure edit; override;
  end;
 
- tmsesqlpropertyeditor = class(ttextstringspropertyeditor)
-  private
-   factivebefore: boolean;
-   fintf: isqlpropertyeditor;
+ tmsesqlpropertyeditor = class(tsqlpropertyeditor)
   protected
    function ismsestring: boolean; override;
-   function nocheck: boolean; virtual;
-   function getsyntaxindex: integer; override;
-   procedure doafterclosequery(var amodalresult: modalresultty); override;
-   function gettestbutton: boolean; override;
-   function getutf8: boolean; override;
-   function getcaption: msestring; override;
-  public
-   procedure edit; override;
  end;
  
  tsqlnocheckpropertyeditor = class(tsqlpropertyeditor)
@@ -1058,13 +1048,20 @@ begin
  if not nocheck and getcorbainterface(fprops[0].instance,
                             typeinfo(isqlpropertyeditor),fintf) then begin
   factivebefore:= fintf.getactive;
+  fdbactivebefore:= (fintf.getdatabase() = nil) or 
+                                   fintf.getdatabase.connected;
  end
  else begin
   fintf:= nil;
  end;
  inherited;
- if not factivebefore and (fintf <> nil) then begin
-  fintf.setactive(false);
+ if fintf <> nil then begin
+  if not factivebefore then begin
+   fintf.setactive(false);
+  end;
+  if not fdbactivebefore and (fintf.getdatabase <> nil) then begin
+   fintf.getdatabase.connected:= false;
+  end;
  end;
 end;
 
@@ -1079,63 +1076,6 @@ begin
 end;
 
 { tmsesqlpropertyeditor }
-
-function tmsesqlpropertyeditor.getsyntaxindex: integer;
-begin
- if sqlindex < 0 then begin
-  sqlindex:= msetexteditor.syntaxpainter.readdeffile(sqlsyntax);
- end;
- result:= sqlindex;
-end;
-
-procedure tmsesqlpropertyeditor.doafterclosequery(
-                 var amodalresult: modalresultty);
-var
- bo1: boolean;
-begin
- if amodalresult = mr_canclose then begin
-  if fintf <> nil then begin
-   bo1:= fintf.getactive;
-   fintf.setactive(true);
-   fintf.setactive(bo1);
-  end;
- end;
-end;
-
-function tmsesqlpropertyeditor.gettestbutton: boolean;
-begin
- result:= fintf <> nil;
-end;
-
-function tmsesqlpropertyeditor.getutf8: boolean;
-begin
- result:= (fintf <> nil) and fintf.isutf8;
-end;
-
-procedure tmsesqlpropertyeditor.edit;
-begin
- if not nocheck and getcorbainterface(fprops[0].instance,
-                            typeinfo(isqlpropertyeditor),fintf) then begin
-  factivebefore:= fintf.getactive;
- end
- else begin
-  fintf:= nil;
- end;
- inherited;
- if not factivebefore and (fintf <> nil) then begin
-  fintf.setactive(false);
- end;
-end;
-
-function tmsesqlpropertyeditor.getcaption: msestring;
-begin
- result:= 'SQL Editor';
-end;
-
-function tmsesqlpropertyeditor.nocheck: boolean;
-begin
- result:= false;
-end;
 
 function tmsesqlpropertyeditor.ismsestring: boolean;
 begin

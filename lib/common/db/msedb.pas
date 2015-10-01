@@ -85,12 +85,6 @@ const
  converrorstring = '?';
  
 type
- isqlpropertyeditor = interface(inullinterface)[miid_isqlpropertyeditor]
-  procedure setactive(avalue: boolean);
-  function getactive: boolean;
-  function isutf8: boolean;
- end; 
-
  filtereditkindty = (fek_filter,fek_filtermin,fek_filtermax,fek_find);
  locateresultty = (loc_timeout,loc_notfound,loc_ok); 
  recnosearchoptionty = (rso_backward);

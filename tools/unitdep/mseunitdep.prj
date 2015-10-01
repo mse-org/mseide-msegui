@@ -16,18 +16,127 @@ order13=0
 order14=0
 order15=0
 order16=0
-order17=0
-order18=0
 [projectoptions]
-projectdir=/home/mse/packs/standard/git/mseide-msegui/tools/unitdep
-projectfilename=/home/mse/packs/standard/git/mseide-msegui/tools/unitdep/mseunitdep.prj
+projectdir=/f:/proj/mseide-msegui/tools/unitdep
+projectfilename=/f:/proj/mseide-msegui/tools/unitdep/mseunitdep.prj
+options=110
+ [projectoptionsfo.toolshortcuts]
+ dropdowncolwidths=3
+  70
+  70
+  70
+ [projectoptionsfo.twidgetgrid3]
+ propcolwidthref=726
+ sortdescend0=0
+ sortdescend1=0
+ sortdescend2=0
+ sortdescend3=0
+ width4=97
+ sortdescend4=0
+ width5=78
+ sortdescend5=0
+ width6=50
+ sortdescend6=0
+ width7=50
+ sortdescend7=0
+ width8=101
+ sortdescend8=0
+ width9=296
+ sortdescend9=0
+ [projectoptionsfo.twidgetgrid4]
+ propcolwidthref=550
+ width0=96
+ sortdescend0=0
+ sortdescend1=0
+ width2=73
+ sortdescend2=0
+ width3=263
+ sortdescend3=0
+ width4=277
+ sortdescend4=0
+ sorted=0
+ col=-1073741823
+ row=-1073741823
+ rowheight=15
+ [projectoptionsfo.newfile]
+ firsttab=0
+ index=0
+ [projectoptionsfo.fontaliasgrid]
+ propcolwidthref=389
+ width0=98
+ sortdescend0=0
+ width1=378
+ sortdescend1=0
+ width2=50
+ sortdescend2=0
+ width3=50
+ sortdescend3=0
+ width4=50
+ sortdescend4=0
+ width5=50
+ sortdescend5=0
+ width6=70
+ sortdescend6=0
+ [projectoptionsfo.macrosplitter]
+ x=0
+ y=121
+ xprop=1
+ yprop=0.23846153846154
+ [projectoptionsfo.macrogrid]
+ propcolwidthref=533
+ sortdescend0=0
+ sortdescend1=0
+ sortdescend2=0
+ sortdescend3=0
+ sortdescend4=0
+ sortdescend5=0
+ width6=146
+ sortdescend6=0
+ width7=521
+ sortdescend7=0
+ [projectoptionsfo.makegroupbox]
+ firsttab=0
+ index=1
+ [projectoptionsfo.exceptionsgrid]
+ propcolwidthref=710
+ width0=47
+ sortdescend0=0
+ width1=704
+ sortdescend1=0
+ [projectoptionsfo.ttabwidget1]
+ firsttab=0
+ index=0
+ [projectoptionsfo.grid]
+ propcolwidthref=511
+ width0=219
+ sortdescend0=0
+ width1=504
+ sortdescend1=0
+ [projectoptionsfo.filefiltergrid]
+ propcolwidthref=618
+ width0=112
+ sortdescend0=0
+ width1=611
+ sortdescend1=0
+ [projectoptionsfo.ttabwidget2]
+ firsttab=0
+ index=0
+ [projectoptionsfo.tabwidget]
+ firsttab=0
+ index=2
+ [projectoptionsfo]
+ stackedunder=
+ x=19
+ y=122
+ cx=759
+ cy=568
 mainfile=${projectname}.pas
 targetfile=${projectname}${exeext}
 messageoutputfile=
 makecommand=${COMPILER}
 makedir=
 unitdirs=3
- ${MSELIBDIR}kernel/$TARGET/
+ ${MSELIBDIR}kernel/$TARGETOSDIR
  ${MSELIBDIR}kernel/
  ${MSELIBDIR}*/
 unitpref=-Fu
@@ -208,7 +317,7 @@ modulenames=1
 moduletypes=1
  TMAINFO
 modulefiles=1
- /home/mse/packs/standard/git/mseide-msegui/tools/unitdep/main.mfm
+ /f:/proj/mseide-msegui/tools/unitdep/main.mfm
 befcommandon=0
 makeoptionson=4
  63
@@ -411,7 +520,7 @@ files=
  a=0,4132,6,Text Files
  )
 [componentstore]
-storedir=/home/mse/packs/standard/git/mseide-msegui/apps/ide/compstore/
+storedir=/f:/proj/mseide-msegui/apps/ide/compstore/
 filename=
 [components]
 [selecteditpage]
@@ -434,13 +543,13 @@ editpos=1
  0,0
 bookmarks0=0
 sourcefiles=1
- /home/mse/packs/standard/git/mseide-msegui/tools/unitdep/main.pas
+ /f:/proj/mseide-msegui/tools/unitdep/main.pas
 relpaths=1
  main.pas
 ismoduletexts=1
  0
 modules=1
- /home/mse/packs/standard/git/mseide-msegui/tools/unitdep/main.mfm
+ /f:/proj/mseide-msegui/tools/unitdep/main.mfm
 moduleoptions=1
  0
 visiblemodules=1
@@ -630,7 +739,7 @@ windowlayout=552
  sorted=0
  col=-1073741823
  row=-1073741823
- rowheight=16
+ rowheight=15
  [stackfo]
  splitdir=0
  useroptions=24681
@@ -905,7 +1014,7 @@ windowlayout=552
  x=0
  y=0
  cx=313
- cy=28
+ cy=30
  rcx=0
  rcy=0
  [sourcefo]

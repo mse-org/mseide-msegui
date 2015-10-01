@@ -20,7 +20,7 @@ unit msedatabase;
 interface
 uses
  classes,mclasses,mdb,sysutils,msedb,msestrings,mseclasses,mseglob,msetypes,
- mseapplication;
+ mseapplication,mseinterfaces;
 
 type
  databaseoptionty = 
@@ -172,6 +172,13 @@ type
 //    property BeforeDisconnect : TNotifyEvent read FBeforeDisconnect write fBeforeDisconnect;
 //    property OnLogin: TLoginEvent read FOnLogin write FOnLogin;
   end;
+
+ isqlpropertyeditor = interface(inullinterface)[miid_isqlpropertyeditor]
+  procedure setactive(avalue: boolean);
+  function getactive: boolean;
+  function getdatabase: tcustomconnection;
+  function isutf8: boolean;
+ end; 
 
  databaseeventty = procedure(const sender: tmdatabase) of object;
  databaseerroreventty = procedure(const sender: tmdatabase;

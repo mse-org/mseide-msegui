@@ -116,6 +116,7 @@ type
    fprimarykeyfield: tfield;                   
    futf8: boolean;
    foptionsmasterlink: optionsmasterlinkty;
+   function getdatabase: tcustomconnection; //for isqlpropertyeditor
    procedure settransactionwrite(const avalue: tmdbtransaction); override;
    procedure checkpendingupdates; virtual;
    procedure notification(acomponent: tcomponent; operation: toperation); override;   
@@ -2069,6 +2070,11 @@ end;
 function TSQLQuery.getdatabase1: tcustomsqlconnection;
 begin
  result:= tcustomsqlconnection(inherited database);
+end;
+
+function tsqlquery.getdatabase: tcustomconnection; //for isqlpropertyeditor
+begin
+ result:= database;
 end;
 
 procedure TSQLQuery.setdatabase1(const avalue: tcustomsqlconnection);
