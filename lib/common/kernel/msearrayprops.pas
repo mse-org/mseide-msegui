@@ -296,6 +296,7 @@ type
    function propkind: arraypropkindty; override;
    function displayname(const index: integer): msestring; virtual;
    procedure add(const item: tpersistent);
+   function add(): tpersistent; //returns added element
    function indexof(const aitem: tpersistent): integer; //-1 if not found
    class function getitemclasstype: persistentclassty; virtual;
                //used in dumpunitgroups
@@ -1756,6 +1757,12 @@ begin
  fitems[high(fitems)]:= item;
  setcount1(length(fitems),false);
  endupdate;
+end;
+
+function tpersistentarrayprop.add(): tpersistent; //returns added element
+begin
+ count:= count+1;
+ result:= fitems[high(fitems)];
 end;
 
 function tpersistentarrayprop.indexof(const aitem: tpersistent): integer; //-1 if not found

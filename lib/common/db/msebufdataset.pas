@@ -434,6 +434,7 @@ type
                 //sets dataset cursor if found
 
    function unique(const avalues: array of const): boolean;
+   procedure deleteduplicates(); //does not store recupdates, no delete events
    function getbookmark(const arecno: integer): bookmarkty;
    property desc: boolean read getdesc write setdesc;
    property default: boolean read getdefault write setdefault;
@@ -785,6 +786,8 @@ type
                                                            const abm: bookmarkdataty;
                    const avalue: variant);
    procedure setcryptohandler(const avalue: tcustomcryptohandler);
+   function getrecnozerobased: int32;
+   procedure setrecnozerobased(const avalue: int32);
   protected
    fcontroller: tdscontroller;
    fbrecordcount: integer;
@@ -796,7 +799,7 @@ type
    fallpacketsfetched : boolean;
    fapplyindex: integer; //take care about canceled updates while applying
    ffailedcount: integer;
-   frecno: integer; //null based
+   frecno: integer; //zero based
    findexes: array of indexty;
    fblobcache: blobcacheinfoarty;
    fblobcount: integer;
@@ -1188,6 +1191,8 @@ type
    procedure currentbeginupdate; virtual;
    procedure currentendupdate; virtual;
    function currentrecordhigh: integer; //calls checkbrowsemode
+   property recnozerobased: int32 read getrecnozerobased 
+                                        write setrecnozerobased;
 
        //calls checkbrowsemode, writing for fkInternalCalc only, 
        //aindex = -1 -> current record
@@ -4364,26 +4369,36 @@ begin
  setrecno1(value,false);
 end;
 
+procedure tmsebufdataset.setrecnozerobased(const avalue: int32);
+begin
+ setrecno1(avalue + 1,false);
+end;
+
 function tmsebufdataset.getrecno: longint;
 begin
+ result:= getrecnozerobased + 1;
+end;
+
+function tmsebufdataset.getrecnozerobased: int32;
+begin
  if bs_internalcalc in fbstate then begin
-  result:= frecno + 1;
+  result:= frecno;
  end
  else begin
-  result:= 0;
+  result:= -1;
   if activebuffer <> nil then begin
    with pdsrecordty(activebuffer)^.dsheader.bookmark do begin
     if state = dsinsert  then begin
      if (bs_append in fbstate) or (fbrecordcount = 0) then begin
-      result:= fbrecordcount + 1;
+      result:= fbrecordcount;
      end
      else begin
-      result:= data.recno + 1;
+      result:= data.recno;
      end;
     end
     else begin
      if fbrecordcount > 0 then begin
-      result:= data.recno + 1;
+      result:= data.recno;
      end;
     end;
    end;
@@ -9936,6 +9951,41 @@ var
 begin
  result:= not find(avalues,[],bm1,false,false,true) or 
       (bm1.recordpo = tmsebufdataset(fowner).bookmarkdata.recordpo);
+end;
+
+procedure tlocalindex.deleteduplicates();
+var
+ i1,i2: int32;
+ po1,po2: pointer;
+ ar1: pointerarty;
+begin
+ with tmsebufdataset(fowner) do begin
+  checkbrowsemode();
+  disablecontrols();
+  try
+   i1:= findexlocal.indexof(self) + 1;
+   checkindex(i1);
+   ar1:= findexes[i1].ind;
+   i2:= 1;
+   while i2 < fbrecordcount do begin
+    po1:= ar1[i2-1];
+    po2:= ar1[i2];
+    while (compare2(po1,po2) = 0) and (i2 < fbrecordcount) do begin
+     deleterecord(po2);
+     intfreerecord(po2);
+     po2:= ar1[i2];
+    end;
+    inc(i2);
+   end;
+  finally
+   frecno:= 0;
+   if fbrecordcount = 0 then begin
+    frecno:= -1;
+   end;
+   resync([]);
+   enablecontrols();
+  end;
+ end;
 end;
 
 function tlocalindex.getbookmark(const arecno: integer): bookmarkty;
