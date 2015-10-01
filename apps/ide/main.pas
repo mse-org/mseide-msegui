@@ -458,9 +458,12 @@ var
   for int1:= 0 to high(modulenames) do begin
    if modulenames[int1] = wstr2 then begin
     if int1 <= high(modulefilenames) then begin
-     if findfile(modulefilenames[int1],projectoptions.d.texp.sourcedirs,wstr1) or
+     wstr1:= modulefilenames[int1];
+     if relocatepath(projectoptions.projectdir,'',wstr1,[pro_preferenew]) or
+            findfile(modulefilenames[int1],
+                           projectoptions.d.texp.sourcedirs,wstr1) or
             findfile(filename(modulefilenames[int1]),
-            projectoptions.d.texp.sourcedirs,wstr1) then begin
+                            projectoptions.d.texp.sourcedirs,wstr1) then begin
       try
        po1:= openformfile(wstr1,false,false,false,false,false);
        result:= (po1 <> nil) and 

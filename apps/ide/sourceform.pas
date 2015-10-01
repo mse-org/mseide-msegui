@@ -634,6 +634,12 @@ begin
       else begin
        bo1:= ar1[int1];
       end;
+      mstr1:= modulenames[int1];
+      relocatepath(projectoptions.projectdir,'',mstr1,
+                                             [pro_preferenew,pro_rootpath]);
+      po1:= mainfo.openformfile(filepath(mstr1),bo1,false,false,
+                                                         not ar2[int1],true);
+{
       mstr1:= relativepath(modulenames[int1],projectoptions.projectdir);
       if findfile(mstr1) then begin
        po1:= mainfo.openformfile(filepath(mstr1),bo1,false,false,
@@ -643,6 +649,7 @@ begin
        po1:= mainfo.openformfile(modulenames[int1],bo1,false,false,
                                                          not ar2[int1],true);
       end;
+}
       if (po1 <> nil) then begin
        with po1^ do begin
         designformintf.moduleoptions:= 

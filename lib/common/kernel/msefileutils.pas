@@ -30,7 +30,9 @@ type
                                     const fileinfo: fileinfoty;
                                     var accept: boolean) of object;
                                      //default true
-
+ pathrelocateoptionty = (pro_preferenew,pro_onlynew,pro_rootpath);
+ pathrelocateoptionsty = set of pathrelocateoptionty;
+ 
 const
  sortflags: filelistoptionsty = [flo_sortname,flo_sorttime,flo_sortsize];
  intermediatefileextension = '.tmp';
@@ -129,9 +131,10 @@ function relativepath(const path: filenamety; const root: filenamety = '';
                         const kind: filekindty = fk_default): filenamety;
        //root = '' -> currentdir
 function relocatepath(const olddir,newdir: filenamety; 
-                                       var apath: filenamety): boolean;
-//searches file in newdir relative to olddir if apath not found, updates
-//apath to the new location if found
+          var apath: filenamety; 
+                     const options: pathrelocateoptionsty = []): boolean;
+//searches file in newdir relative to olddir or in original position,
+//updates apath, returns true if found
 function isrelativepath(const path: filenamety): boolean;
 function isrootdir(const path: filenamety): boolean;
 function removelastpathsection(path: filenamety): filenamety;
@@ -1523,19 +1526,37 @@ begin
 end;
 
 function relocatepath(const olddir,newdir: filenamety; 
-                                       var apath: filenamety): boolean;
+                      var apath: filenamety;
+                      const options: pathrelocateoptionsty = []): boolean;
 //searches file in newdir relative to olddir if apath not found, updates
 //apath to the new location if found
 var
  mstr1: filenamety;
 begin
  result:= true;
- if not findfile(apath) then begin
+ if options * [pro_preferenew,pro_onlynew] <> [] then begin
   mstr1:= filepath(newdir,relativepath(apath,olddir));
   result:= findfile(mstr1);
   if result then begin
    apath:= mstr1;
+  end
+  else begin
+   if not (pro_onlynew in options) then begin
+    result:= findfile(apath);
+   end;
   end;
+ end
+ else begin
+  if not findfile(apath) then begin
+   mstr1:= filepath(newdir,relativepath(apath,olddir));
+   result:= findfile(mstr1);
+   if result then begin
+    apath:= mstr1;
+   end;
+  end;
+ end;
+ if pro_rootpath in options then begin
+  apath:= filepath(apath);
  end;
 end;
 
