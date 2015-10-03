@@ -555,6 +555,7 @@ type
    function needsmouseenterinvalidate: boolean;
    procedure activechanged; virtual;
    function needsfocuspaint: boolean; virtual;
+   function ishintarea(const apos: pointty): boolean; virtual;
    procedure checkminscrollsize(var asize: sizety); virtual;
    procedure checkminclientsize(var asize: sizety); virtual;
    class procedure drawframe(const canvas: tcanvas; const rect2: rectty; 
@@ -4022,6 +4023,11 @@ end;
 function tcustomframe.needsfocuspaint: boolean;
 begin
  result:= fs_drawfocusrect in fstate;
+end;
+
+function tcustomframe.ishintarea(const apos: pointty): boolean;
+begin
+ result:= (fs_captionhint in fstate) and pointincaption(apos);
 end;
 
 function calcframestateoffs(const astate: framestateflagsty; 
@@ -16455,8 +16461,8 @@ begin
        with widget1.fframe do begin
         checkstate;
         pt1:= translatewidgetpoint(abspos,nil,widget1);
-        if not (pointinrect(pt1,fpaintrect) or 
-            (fs_captionhint in fstate) and pointincaption(pt1)) then begin
+        if not ishintarea(pt1) and not pointinrect(pt1,fpaintrect) then begin
+               //first because there can be state changes by call
          widget1:= nil;
         end;
        end;

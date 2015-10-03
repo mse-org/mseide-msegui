@@ -36,14 +36,14 @@ type
             od_propsize,od_fixsize,od_top,od_background,
             od_alignbegin,od_aligncenter,od_alignend,
             od_nofit,od_banded,od_nosplitsize,od_nosplitmove,
-            od_lock,od_thumbtrack);
+            od_lock,od_thumbtrack,od_captionhint);
  optionsdockty = set of optiondockty;
 
  dockbuttonrectty = (dbr_none,dbr_handle,dbr_close,dbr_maximize,dbr_normalize,
                      dbr_minimize,dbr_fixsize,dbr_float,
                      dbr_top,dbr_background,dbr_lock);
 const
- defaultoptionsdock = [od_savepos,od_savezorder,od_savechildren];
+ defaultoptionsdock = [od_savepos,od_savezorder,od_savechildren,od_captionhint];
  defaultoptionsdocknochildren = defaultoptionsdock - [od_savechildren];
  dbr_first = dbr_handle;
  dbr_last = dbr_lock;
@@ -82,6 +82,8 @@ type
   function checkdock(var info: draginfoty): boolean;
   function getbuttonrects(const index: dockbuttonrectty): rectty;  
                                       //origin = clientrect.pos
+  function notinhintarea(): boolean;
+  procedure resetnotinhintarea();
   function getplacementrect: rectty;  //origin = container.pos
   function getminimizedsize(out apos: captionposty): sizety;  
                      //cx = 0 -> normalwidth, cy = 0 -> normalheight
@@ -453,7 +455,7 @@ const
 
 type
 
- gripstatety = (grps_sizevalid);
+ gripstatety = (grps_sizevalid,grps_notinhintarea);
  gripstatesty = set of gripstatety;
  
  tgripframe = class(tcaptionframe,iobjectpicker,iface)
@@ -494,6 +496,7 @@ type
    procedure updaterects; override;
    procedure updatestate; override;
    procedure getpaintframe(var frame: framety); override;
+   function ishintarea(const apos: pointty): boolean; override;
    function calcsizingrect(const akind: sizingkindty;
                                 const offset: pointty): rectty;
     //iface
@@ -532,6 +535,8 @@ type
                                                  read getbuttonrects;
    function getminimizedsize(out apos: captionposty): sizety;
    function griprect: rectty; //origin = pos
+   function notinhintarea(): boolean;
+   procedure resetnotinhintarea();
   published
    property grip_size: integer read fgrip_size write setgrip_size stored true;
                                //for optionalclass
@@ -589,6 +594,8 @@ type
    //idockcontroller
    function checkdock(var info: draginfoty): boolean;
    function getbuttonrects(const index: dockbuttonrectty): rectty;
+   function notinhintarea(): boolean;
+   procedure resetnotinhintarea();
    function getplacementrect: rectty;
    function getminimizedsize(out apos: captionposty): sizety;
    function getcaption: msestring;
@@ -3363,6 +3370,9 @@ const
           dos_normalizebuttonclicked,dos_minimizebuttonclicked,
           dos_fixsizebuttonclicked,dos_floatbuttonclicked,dos_topbuttonclicked,
           dos_backgroundbuttonclicked,dos_lockbuttonclicked,dos_moving];
+
+var
+ hintinfo: hintinfoty;
              
 begin
  inherited;
@@ -3517,6 +3527,17 @@ begin
       end;
      end;
      fdockstate:= fdockstate - resetmousedockstate;
+    end;
+    ek_mousepark: begin
+     if (od_captionhint in optionsdock) and
+      (caption <> '') and (checkbuttonarea(pos) = dbr_handle) and
+              ((application.hintedwidget <> widget1) or 
+                        idockcontroller(fintf).notinhintarea) then begin
+      idockcontroller(fintf).resetnotinhintarea();
+      application.inithintinfo(hintinfo,widget1);
+      hintinfo.caption:= caption;
+      application.showhint(widget1,hintinfo);  
+     end;
     end;
    end;
   end;
@@ -4095,6 +4116,7 @@ begin
  fgrip_grip:= defaultgripgrip;
  fgrip_options:= defaultgripoptions;
  fcontroller:= acontroller;
+ fgripstate:= [grps_notinhintarea];
  inherited create(intf);
  fobjectpicker:= tobjectpicker.create(iobjectpicker(self));
 end;
@@ -4897,6 +4919,27 @@ begin
  //dummy
 end;
 
+function tgripframe.ishintarea(const apos: pointty): boolean;
+var
+ bo1: boolean;
+begin
+ bo1:= pointinrect(apos,frects[dbr_handle]);
+ result:= inherited ishintarea(apos) or bo1;
+ if not bo1 then begin
+  include(fgripstate,grps_notinhintarea);
+ end;
+end;
+
+function tgripframe.notinhintarea: boolean;
+begin
+ result:= grps_notinhintarea in fgripstate;
+end;
+
+procedure tgripframe.resetnotinhintarea;
+begin
+ exclude(fgripstate,grps_notinhintarea);
+end;
+
 { tdockhandle }
 
 constructor tdockhandle.create(aowner: tcomponent);
@@ -5076,6 +5119,24 @@ begin
   result:= tgripframe(fframe).getbuttonrects(index);
  end;
 end;
+
+function tdockpanel.notinhintarea: boolean;
+begin
+ if fframe = nil then begin
+  result:= false;
+ end
+ else begin
+  result:= tgripframe(fframe).notinhintarea();
+ end;
+end;
+
+procedure tdockpanel.resetnotinhintarea;
+begin
+ if fframe <> nil then begin
+  tgripframe(fframe).resetnotinhintarea();
+ end;
+end;
+
 
 function tdockpanel.getminimizedsize(out apos: captionposty): sizety;
 begin
