@@ -3,7 +3,7 @@ unit msezeos;
 interface
 uses
  classes,mclasses,mdb,ZDataset,msedb,ZStoredProcedure,msestrings,
- msedbgraphics,mseapplication;
+ msedbgraphics,mseapplication,msedatabase;
 type
  tmsezgraphicfield = class(tmsegraphicfield)
   public
@@ -58,6 +58,8 @@ type
    function islastrecord: boolean;
    procedure begindisplaydata;
    procedure enddisplaydata;
+    //isqlpropertyeditor
+   function getdatabase: tcustomconnection; //for isqlpropertyeditor
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -130,6 +132,8 @@ type
    function islastrecord: boolean;
    procedure begindisplaydata;
    procedure enddisplaydata;
+    //isqlpropertyeditor
+   function getdatabase: tcustomconnection; //for isqlpropertyeditor
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -562,6 +566,11 @@ begin
  inherited delete();
 end;
 
+function tmsezreadonlyquery.getdatabase: tcustomconnection;
+begin
+ result:= nil;
+end;
+
 { tmsezquery }
 
 constructor tmsezquery.create(aowner: tcomponent);
@@ -824,6 +833,11 @@ end;
 procedure tmsezquery.inheriteddelete;
 begin
  inherited delete();
+end;
+
+function tmsezquery.getdatabase: tcustomconnection;
+begin
+ result:= nil;
 end;
 
 { tmseztable }
