@@ -2,7 +2,7 @@ object findinfilefo: tfindinfilefo
   frame.localprops = []
   frame.localprops1 = []
   frame.grip_size = 10
-  frame.grip_options = [go_closebutton, go_fixsizebutton, go_topbutton]
+  frame.grip_options = [go_closebutton, go_fixsizebutton, go_topbutton, go_nolockbutton]
   visible = False
   bounds_x = 548
   bounds_y = 115

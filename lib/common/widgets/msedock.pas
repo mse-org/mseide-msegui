@@ -442,7 +442,7 @@ type
                  go_maximizebutton,
                  go_fixsizebutton,
                  go_floatbutton,go_topbutton,go_backgroundbutton,
-                 go_lockbutton,go_unlockbutton,
+                 go_lockbutton,go_nolockbutton,
                  go_horz,go_vert,go_opposite,go_showsplitcaption,
                  go_showfloatcaption);
  gripoptionsty = set of gripoptionty;
@@ -4322,7 +4322,7 @@ begin
                                                                  colorbutton);
    end;
    if (frects[dbr_nolock].cx > 0) and 
-                           (go_unlockbutton in fgrip_options) then begin
+                           (go_nolockbutton in fgrip_options) then begin
     drawgripbutton(canvas,dbr_nolock,frects[dbr_nolock],colorglyph,
                                                                  colorbutton);
    end;
@@ -4693,7 +4693,7 @@ begin
   if go_lockbutton in fgrip_options then begin
    initrect(dbr_lock);
   end;
-  if go_unlockbutton in fgrip_options then begin
+  if go_nolockbutton in fgrip_options then begin
    initrect(dbr_nolock);
   end;
  end;
