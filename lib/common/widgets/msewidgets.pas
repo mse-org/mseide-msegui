@@ -5715,6 +5715,9 @@ var
 begin
  inherited create(aowner,transientfor);
  foptionswidget:= defaultoptionshintwidget;
+ if transientfor = nil then begin
+  include(foptionswidget,ow_ultratop);
+ end;
  internalcreateframe;
  fframe.levelo:= 1;
  fframe.framei_left:= 1;

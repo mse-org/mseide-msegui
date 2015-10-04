@@ -68,7 +68,7 @@ type
                                         //adjust clientsize in skincontroller
  frameskincontrolleroptionsty = set of frameskincontrolleroptionty;
   
- optionwidgetty = (ow_background,ow_top,
+ optionwidgetty = (ow_background,ow_top,ow_ultratop,
                    ow_noautosizing, //don't use, moved to optionswidget1
                    ow_mousefocus,ow_tabfocus,
                    ow_parenttabfocus,ow_arrowfocus,
@@ -17006,8 +17006,7 @@ begin
  end
  else begin
   str1:= str1+'NIL';
- end;
- 
+ end; 
  debugwriteln(str1);
 end;
 
@@ -17625,7 +17624,17 @@ begin
   result:= 'nil';
  end
  else begin
-  result:= '"'+awindow.fownerwidget.name+'"';
+  if awindow = application.activewindow then begin
+   result:= 'A';
+   if awindow.modal then begin
+    result:= result+'M';
+   end;
+  end
+  else begin
+   result:= '';
+  end;
+  result:= result+'"'+awindow.fownerwidget.name+':'+
+                               awindow.fownerwidget.classname+'"';
  end;
 end;
 
@@ -17640,7 +17649,7 @@ begin
   else begin
    debugwrite('- ');
   end;
-  debugwriteln(debugwindowinfo(ar3[int1])+' '+
+  debugwriteln(debugwindowinfo(ar3[int1])+' transientfor:'+
                  debugwindowinfo(ar3[int1].ftransientfor));
  end;
 end;
@@ -17801,6 +17810,7 @@ const
  transientforactiveweight = 1 shl 9;
  invisibleweight =          1 shl 10;
  popupweight =              1 shl 11;
+ ultratopweight =           1 shl 12;
 var
  window1: twindow;
 {$ifdef mse_debugzorder}
@@ -17839,11 +17849,17 @@ begin
  if ow_top in twindow(l).fownerwidget.foptionswidget then begin
   inc(result,topweight);
  end;
+ if ow_ultratop in twindow(l).fownerwidget.foptionswidget then begin
+  inc(result,ultratopweight);
+ end;
  if ow_background in twindow(r).fownerwidget.foptionswidget then begin
   inc(result,backgroundweight);
  end;
  if ow_top in twindow(r).fownerwidget.foptionswidget then begin
   dec(result,topweight);
+ end;
+ if ow_ultratop in twindow(r).fownerwidget.foptionswidget then begin
+  dec(result,ultratopweight);
  end;
  if twindow(l).ispopup then begin
   inc(result,popupweight);
@@ -18694,7 +18710,8 @@ begin
    fhintwidget:= ahintwidget;
   end;
  {$ifdef mse_debugzorder}
-  debugwriteln('** showhint '+tinternalapplication(self).fhintinfo.caption);
+  debugwriteln('** showhint '+tinternalapplication(self).fhintinfo.caption+' '+
+                  debugwindowinfo(fhintedwidget.window));
  {$endif}
   fhintwidget.show(ml_none,window1);
   if showtime <> 0 then begin
