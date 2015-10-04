@@ -656,6 +656,7 @@ type
   protected
    procedure doclosepage(const sender: tobject); override;
    procedure dopageremoved(const apage: twidget);  override;
+   procedure tabchanged(const synctabindex: boolean); override;
    procedure updateoptions;
   public
    constructor create(const acontroller: tdockcontroller;
@@ -827,7 +828,16 @@ begin
   fcontroller.fsplitterrects:= nil;
   release;
  end;
- fcontroller.dolayoutchanged;
+ fcontroller.dolayoutchanged();
+end;
+
+procedure tdocktabwidget.tabchanged(const synctabindex: boolean);
+begin
+ inherited;
+ if fcontroller.fintf.getwidget.componentstate * 
+                               [csloading,csdestroying] = [] then begin
+  fcontroller.dolayoutchanged();
+ end;
 end;
 
 { tdocktabpage }

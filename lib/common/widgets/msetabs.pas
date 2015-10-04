@@ -764,7 +764,7 @@ type
    procedure unregisterchildwidget(const child: twidget); override;
    procedure pagechanged(const sender: itabpage);
    procedure GetChildren(Proc: TGetChildProc; Root: TComponent); override;
-   procedure tabchanged(const synctabindex: boolean);
+   procedure tabchanged(const synctabindex: boolean); virtual;
    procedure loaded; override;
    procedure clientrectchanged; override;
    procedure widgetregionchanged(const sender: twidget); override;
