@@ -1,12 +1,15 @@
 object breakpointsfo: tbreakpointsfo
+  frame.localprops = []
+  frame.localprops1 = []
   frame.grip_size = 10
   frame.grip_options = [go_closebutton, go_fixsizebutton, go_floatbutton, go_topbutton, go_backgroundbutton]
-  frame.dummy = 0
   visible = False
   bounds_x = 107
   bounds_y = 404
   bounds_cx = 636
   bounds_cy = 128
+  container.frame.localprops = []
+  container.frame.localprops1 = []
   container.bounds = (
     0
     0
@@ -14,7 +17,7 @@ object breakpointsfo: tbreakpointsfo
     128
   )
   dragdock.splitter_size = 0
-  dragdock.optionsdock = [od_savepos, od_savezorder, od_canmove, od_canfloat, od_candock, od_propsize]
+  dragdock.optionsdock = [od_savepos, od_savezorder, od_canmove, od_canfloat, od_candock, od_propsize, od_captionhint]
   options = [fo_savepos, fo_savezorder, fo_savestate]
   statfile = mainfo.projectstatfile
   caption = 'Breakpoints'
@@ -81,6 +84,8 @@ object breakpointsfo: tbreakpointsfo
   moduleclassname = 'tdockform'
   object grid: twidgetgrid
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets]
+    frame.localprops = []
+    frame.localprops1 = []
     taborder = 1
     popupmenu = gripopup
     bounds_x = 0
@@ -292,7 +297,7 @@ object breakpointsfo: tbreakpointsfo
       frame.levelo = 0
       frame.colorclient = -2147483645
       frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
-      frame.dummy = 0
+      frame.localprops1 = []
       taborder = 5
       visible = False
       bounds_x = 278
@@ -302,7 +307,7 @@ object breakpointsfo: tbreakpointsfo
       optionsedit1 = [oe1_savevalue]
       font.name = 'stf_fixed'
       font.xscale = 1
-      font.dummy = 0
+      font.localprops = [flp_xscale]
       ondataentered = addressentered
       base = nb_hex
       max = -1
@@ -314,7 +319,7 @@ object breakpointsfo: tbreakpointsfo
       frame.levelo = 0
       frame.colorclient = -2147483645
       frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
-      frame.dummy = 0
+      frame.localprops1 = []
       taborder = 6
       bounds_x = 340
       bounds_y = 0
@@ -426,7 +431,8 @@ object breakpointsfo: tbreakpointsfo
   end
   object bkptson: tbooleanedit
     frame.caption = 'Breakpoints &on'
-    frame.dummy = 0
+    frame.localprops = []
+    frame.localprops1 = []
     frame.outerframe = (
       0
       1

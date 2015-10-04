@@ -3,7 +3,7 @@ object panelfo: tpanelfo
   frame.localprops = []
   frame.localprops1 = []
   frame.grip_size = 10
-  frame.grip_options = [go_closebutton, go_fixsizebutton, go_floatbutton, go_topbutton, go_backgroundbutton, go_lockbutton]
+  frame.grip_options = [go_closebutton, go_fixsizebutton, go_floatbutton, go_topbutton, go_backgroundbutton, go_lockbutton, go_unlockbutton]
   onpaint = paintexe
   visible = False
   bounds_x = 157

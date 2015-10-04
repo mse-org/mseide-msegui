@@ -65,7 +65,7 @@ inherited cpucpu32fo: tcpucpu32fo
       frame.caption = 'T'
       frame.captionpos = cp_top
       frame.localprops = [frl_levelo, frl_colorclient]
-      frame.dummy = 0
+      frame.localprops1 = []
       frame.outerframe = (
         0
         17
@@ -86,7 +86,7 @@ inherited cpucpu32fo: tcpucpu32fo
       frame.caption = 'S'
       frame.captionpos = cp_top
       frame.localprops = [frl_levelo, frl_colorclient]
-      frame.dummy = 0
+      frame.localprops1 = []
       frame.outerframe = (
         0
         17
@@ -108,7 +108,7 @@ inherited cpucpu32fo: tcpucpu32fo
       frame.caption = 'I'
       frame.captionpos = cp_top
       frame.localprops = [frl_levelo, frl_colorclient]
-      frame.dummy = 0
+      frame.localprops1 = []
       frame.outerframe = (
         0
         17
@@ -130,7 +130,7 @@ inherited cpucpu32fo: tcpucpu32fo
       frame.caption = 'X'
       frame.captionpos = cp_top
       frame.localprops = [frl_levelo, frl_colorclient]
-      frame.dummy = 0
+      frame.localprops1 = []
       frame.outerframe = (
         0
         17
@@ -152,7 +152,7 @@ inherited cpucpu32fo: tcpucpu32fo
       frame.caption = 'N'
       frame.captionpos = cp_top
       frame.localprops = [frl_levelo, frl_colorclient]
-      frame.dummy = 0
+      frame.localprops1 = []
       frame.outerframe = (
         0
         17
@@ -174,7 +174,7 @@ inherited cpucpu32fo: tcpucpu32fo
       frame.caption = 'Z'
       frame.captionpos = cp_top
       frame.localprops = [frl_levelo, frl_colorclient]
-      frame.dummy = 0
+      frame.localprops1 = []
       frame.outerframe = (
         0
         17
@@ -196,7 +196,7 @@ inherited cpucpu32fo: tcpucpu32fo
       frame.caption = 'V'
       frame.captionpos = cp_top
       frame.localprops = [frl_levelo, frl_colorclient]
-      frame.dummy = 0
+      frame.localprops1 = []
       frame.outerframe = (
         0
         17
@@ -217,7 +217,7 @@ inherited cpucpu32fo: tcpucpu32fo
       frame.caption = 'C'
       frame.captionpos = cp_top
       frame.localprops = [frl_levelo, frl_colorclient]
-      frame.dummy = 0
+      frame.localprops1 = []
       frame.outerframe = (
         0
         17
@@ -238,7 +238,7 @@ inherited cpucpu32fo: tcpucpu32fo
       frame.colorclient = -1879048185
       frame.captionpos = cp_top
       frame.localprops = [frl_levelo, frl_colorclient]
-      frame.dummy = 0
+      frame.localprops1 = []
       taborder = 8
       bounds_x = 70
       bounds_y = 20
@@ -253,7 +253,7 @@ inherited cpucpu32fo: tcpucpu32fo
       frame.colorclient = -1879048185
       frame.captionpos = cp_top
       frame.localprops = [frl_levelo, frl_colorclient]
-      frame.dummy = 0
+      frame.localprops1 = []
       taborder = 9
       bounds_x = 48
       bounds_y = 20
@@ -268,7 +268,7 @@ inherited cpucpu32fo: tcpucpu32fo
       frame.colorclient = -1879048185
       frame.captionpos = cp_top
       frame.localprops = [frl_levelo, frl_colorclient]
-      frame.dummy = 0
+      frame.localprops1 = []
       taborder = 10
       bounds_x = 20
       bounds_y = 20
@@ -293,7 +293,7 @@ inherited cpucpu32fo: tcpucpu32fo
         frame.caption = 'a1'
         frame.captionpos = cp_right
         frame.localprops = [frl_levelo, frl_colorclient]
-        frame.dummy = 0
+        frame.localprops1 = []
         frame.outerframe = (
           0
           0
@@ -306,7 +306,7 @@ inherited cpucpu32fo: tcpucpu32fo
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
-        font.dummy = 0
+        font.localprops = [flp_xscale]
         onsetvalue = regsetvalue
         base = nb_hex
         max = -1
@@ -319,7 +319,7 @@ inherited cpucpu32fo: tcpucpu32fo
         frame.caption = 'a0'
         frame.captionpos = cp_right
         frame.localprops = [frl_levelo, frl_colorclient]
-        frame.dummy = 0
+        frame.localprops1 = []
         frame.outerframe = (
           0
           0
@@ -333,7 +333,7 @@ inherited cpucpu32fo: tcpucpu32fo
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
-        font.dummy = 0
+        font.localprops = [flp_xscale]
         onsetvalue = regsetvalue
         base = nb_hex
         max = -1
@@ -346,7 +346,7 @@ inherited cpucpu32fo: tcpucpu32fo
         frame.caption = 'a4'
         frame.captionpos = cp_right
         frame.localprops = [frl_levelo, frl_colorclient]
-        frame.dummy = 0
+        frame.localprops1 = []
         frame.outerframe = (
           0
           0
@@ -360,7 +360,7 @@ inherited cpucpu32fo: tcpucpu32fo
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
-        font.dummy = 0
+        font.localprops = [flp_xscale]
         onsetvalue = regsetvalue
         base = nb_hex
         max = -1
@@ -373,7 +373,7 @@ inherited cpucpu32fo: tcpucpu32fo
         frame.caption = 'a3'
         frame.captionpos = cp_right
         frame.localprops = [frl_levelo, frl_colorclient]
-        frame.dummy = 0
+        frame.localprops1 = []
         frame.outerframe = (
           0
           0
@@ -387,7 +387,7 @@ inherited cpucpu32fo: tcpucpu32fo
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
-        font.dummy = 0
+        font.localprops = [flp_xscale]
         onsetvalue = regsetvalue
         base = nb_hex
         max = -1
@@ -400,7 +400,7 @@ inherited cpucpu32fo: tcpucpu32fo
         frame.caption = 'a2'
         frame.captionpos = cp_right
         frame.localprops = [frl_levelo, frl_colorclient]
-        frame.dummy = 0
+        frame.localprops1 = []
         frame.outerframe = (
           0
           0
@@ -414,7 +414,7 @@ inherited cpucpu32fo: tcpucpu32fo
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
-        font.dummy = 0
+        font.localprops = [flp_xscale]
         onsetvalue = regsetvalue
         base = nb_hex
         max = -1
@@ -427,7 +427,7 @@ inherited cpucpu32fo: tcpucpu32fo
         frame.caption = 'a5'
         frame.captionpos = cp_right
         frame.localprops = [frl_levelo, frl_colorclient]
-        frame.dummy = 0
+        frame.localprops1 = []
         frame.outerframe = (
           0
           0
@@ -441,7 +441,7 @@ inherited cpucpu32fo: tcpucpu32fo
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
-        font.dummy = 0
+        font.localprops = [flp_xscale]
         onsetvalue = regsetvalue
         base = nb_hex
         max = -1
@@ -454,7 +454,7 @@ inherited cpucpu32fo: tcpucpu32fo
         frame.caption = 'fp'
         frame.captionpos = cp_right
         frame.localprops = [frl_levelo, frl_colorclient]
-        frame.dummy = 0
+        frame.localprops1 = []
         frame.outerframe = (
           0
           0
@@ -468,7 +468,7 @@ inherited cpucpu32fo: tcpucpu32fo
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
-        font.dummy = 0
+        font.localprops = [flp_xscale]
         onsetvalue = regsetvalue
         base = nb_hex
         max = -1
@@ -481,7 +481,7 @@ inherited cpucpu32fo: tcpucpu32fo
         frame.caption = 'usp'
         frame.captionpos = cp_right
         frame.localprops = [frl_levelo, frl_colorclient]
-        frame.dummy = 0
+        frame.localprops1 = []
         frame.outerframe = (
           0
           0
@@ -495,7 +495,7 @@ inherited cpucpu32fo: tcpucpu32fo
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
-        font.dummy = 0
+        font.localprops = [flp_xscale]
         onsetvalue = regsetvalue
         base = nb_hex
         max = -1
@@ -508,7 +508,7 @@ inherited cpucpu32fo: tcpucpu32fo
         frame.caption = 'pc'
         frame.captionpos = cp_right
         frame.localprops = [frl_levelo, frl_colorclient]
-        frame.dummy = 0
+        frame.localprops1 = []
         frame.outerframe = (
           0
           0
@@ -522,7 +522,7 @@ inherited cpucpu32fo: tcpucpu32fo
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
-        font.dummy = 0
+        font.localprops = [flp_xscale]
         onsetvalue = regsetvalue
         base = nb_hex
         max = -1
@@ -535,7 +535,7 @@ inherited cpucpu32fo: tcpucpu32fo
         frame.caption = 'ssp'
         frame.captionpos = cp_right
         frame.localprops = [frl_levelo, frl_colorclient]
-        frame.dummy = 0
+        frame.localprops1 = []
         frame.outerframe = (
           0
           0
@@ -549,7 +549,7 @@ inherited cpucpu32fo: tcpucpu32fo
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
-        font.dummy = 0
+        font.localprops = [flp_xscale]
         onsetvalue = regsetvalue
         base = nb_hex
         max = -1
@@ -562,7 +562,7 @@ inherited cpucpu32fo: tcpucpu32fo
         frame.caption = 'vbr'
         frame.captionpos = cp_right
         frame.localprops = [frl_levelo, frl_colorclient]
-        frame.dummy = 0
+        frame.localprops1 = []
         frame.outerframe = (
           0
           0
@@ -576,7 +576,7 @@ inherited cpucpu32fo: tcpucpu32fo
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
-        font.dummy = 0
+        font.localprops = [flp_xscale]
         onsetvalue = regsetvalue
         base = nb_hex
         max = -1
@@ -601,7 +601,7 @@ inherited cpucpu32fo: tcpucpu32fo
         frame.caption = 'd1'
         frame.captionpos = cp_right
         frame.localprops = [frl_levelo, frl_colorclient]
-        frame.dummy = 0
+        frame.localprops1 = []
         frame.outerframe = (
           0
           0
@@ -614,7 +614,7 @@ inherited cpucpu32fo: tcpucpu32fo
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
-        font.dummy = 0
+        font.localprops = [flp_xscale]
         onsetvalue = regsetvalue
         base = nb_hex
         max = -1
@@ -627,7 +627,7 @@ inherited cpucpu32fo: tcpucpu32fo
         frame.caption = 'd0'
         frame.captionpos = cp_right
         frame.localprops = [frl_levelo, frl_colorclient]
-        frame.dummy = 0
+        frame.localprops1 = []
         frame.outerframe = (
           0
           0
@@ -641,7 +641,7 @@ inherited cpucpu32fo: tcpucpu32fo
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
-        font.dummy = 0
+        font.localprops = [flp_xscale]
         onsetvalue = regsetvalue
         base = nb_hex
         max = -1
@@ -654,7 +654,7 @@ inherited cpucpu32fo: tcpucpu32fo
         frame.caption = 'd4'
         frame.captionpos = cp_right
         frame.localprops = [frl_levelo, frl_colorclient]
-        frame.dummy = 0
+        frame.localprops1 = []
         frame.outerframe = (
           0
           0
@@ -668,7 +668,7 @@ inherited cpucpu32fo: tcpucpu32fo
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
-        font.dummy = 0
+        font.localprops = [flp_xscale]
         onsetvalue = regsetvalue
         base = nb_hex
         max = -1
@@ -681,7 +681,7 @@ inherited cpucpu32fo: tcpucpu32fo
         frame.caption = 'd3'
         frame.captionpos = cp_right
         frame.localprops = [frl_levelo, frl_colorclient]
-        frame.dummy = 0
+        frame.localprops1 = []
         frame.outerframe = (
           0
           0
@@ -695,7 +695,7 @@ inherited cpucpu32fo: tcpucpu32fo
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
-        font.dummy = 0
+        font.localprops = [flp_xscale]
         onsetvalue = regsetvalue
         base = nb_hex
         max = -1
@@ -708,7 +708,7 @@ inherited cpucpu32fo: tcpucpu32fo
         frame.caption = 'd2'
         frame.captionpos = cp_right
         frame.localprops = [frl_levelo, frl_colorclient]
-        frame.dummy = 0
+        frame.localprops1 = []
         frame.outerframe = (
           0
           0
@@ -722,7 +722,7 @@ inherited cpucpu32fo: tcpucpu32fo
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
-        font.dummy = 0
+        font.localprops = [flp_xscale]
         onsetvalue = regsetvalue
         base = nb_hex
         max = -1
@@ -735,7 +735,7 @@ inherited cpucpu32fo: tcpucpu32fo
         frame.caption = 'd5'
         frame.captionpos = cp_right
         frame.localprops = [frl_levelo, frl_colorclient]
-        frame.dummy = 0
+        frame.localprops1 = []
         frame.outerframe = (
           0
           0
@@ -749,7 +749,7 @@ inherited cpucpu32fo: tcpucpu32fo
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
-        font.dummy = 0
+        font.localprops = [flp_xscale]
         onsetvalue = regsetvalue
         base = nb_hex
         max = -1
@@ -762,7 +762,7 @@ inherited cpucpu32fo: tcpucpu32fo
         frame.caption = 'd6'
         frame.captionpos = cp_right
         frame.localprops = [frl_levelo, frl_colorclient]
-        frame.dummy = 0
+        frame.localprops1 = []
         frame.outerframe = (
           0
           0
@@ -776,7 +776,7 @@ inherited cpucpu32fo: tcpucpu32fo
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
-        font.dummy = 0
+        font.localprops = [flp_xscale]
         onsetvalue = regsetvalue
         base = nb_hex
         max = -1
@@ -789,7 +789,7 @@ inherited cpucpu32fo: tcpucpu32fo
         frame.caption = 'd7'
         frame.captionpos = cp_right
         frame.localprops = [frl_levelo, frl_colorclient]
-        frame.dummy = 0
+        frame.localprops1 = []
         frame.outerframe = (
           0
           0
@@ -803,7 +803,7 @@ inherited cpucpu32fo: tcpucpu32fo
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
-        font.dummy = 0
+        font.localprops = [flp_xscale]
         onsetvalue = regsetvalue
         base = nb_hex
         max = -1
@@ -816,7 +816,7 @@ inherited cpucpu32fo: tcpucpu32fo
         frame.caption = 'ps'
         frame.captionpos = cp_right
         frame.localprops = [frl_levelo, frl_colorclient]
-        frame.dummy = 0
+        frame.localprops1 = []
         frame.outerframe = (
           0
           0
@@ -830,7 +830,7 @@ inherited cpucpu32fo: tcpucpu32fo
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
-        font.dummy = 0
+        font.localprops = [flp_xscale]
         onsetvalue = regsetvalue
         base = nb_hex
         bitcount = 16
@@ -844,7 +844,7 @@ inherited cpucpu32fo: tcpucpu32fo
         frame.caption = 'sfc'
         frame.captionpos = cp_right
         frame.localprops = [frl_levelo, frl_colorclient]
-        frame.dummy = 0
+        frame.localprops1 = []
         frame.outerframe = (
           0
           0
@@ -858,7 +858,7 @@ inherited cpucpu32fo: tcpucpu32fo
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
-        font.dummy = 0
+        font.localprops = [flp_xscale]
         onchange = flagonchange
         onsetvalue = regsetvalue
         base = nb_hex
@@ -872,7 +872,7 @@ inherited cpucpu32fo: tcpucpu32fo
         frame.caption = 'dfc'
         frame.captionpos = cp_right
         frame.localprops = [frl_levelo, frl_colorclient]
-        frame.dummy = 0
+        frame.localprops1 = []
         frame.outerframe = (
           0
           0
@@ -886,7 +886,7 @@ inherited cpucpu32fo: tcpucpu32fo
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
-        font.dummy = 0
+        font.localprops = [flp_xscale]
         onsetvalue = regsetvalue
         base = nb_hex
         max = -1

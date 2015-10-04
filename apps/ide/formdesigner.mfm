@@ -2,6 +2,8 @@ object formdesignerfo: tformdesignerfo
   optionswidget = [ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousewheel, ow_hinton]
   optionsskin = [osk_framebuttononly]
   color = -1879048187
+  frame.localprops = []
+  frame.localprops1 = []
   frame.grip_size = 0
   frame.grip_options = [go_closebutton, go_fixsizebutton, go_floatbutton, go_topbutton, go_backgroundbutton]
   frame.grip_face.fade_pos.count = 1
@@ -12,8 +14,7 @@ object formdesignerfo: tformdesignerfo
   frame.grip_face.fade_color.items = (
     -1610612717
   )
-  frame.grip_face.dummy = 0
-  frame.dummy = 0
+  frame.grip_face.localprops = []
   popupmenu = popupme
   onenter = enterexe
   onactivate = enterexe
@@ -24,6 +25,8 @@ object formdesignerfo: tformdesignerfo
   bounds_cy = 300
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_mousewheel]
   container.color = -1879048187
+  container.frame.localprops = []
+  container.frame.localprops1 = []
   container.oncalcminscrollsize = calcscrollsize
   container.bounds = (
     0
@@ -31,7 +34,7 @@ object formdesignerfo: tformdesignerfo
     287
     300
   )
-  dragdock.optionsdock = [od_savepos, od_savezorder, od_canmove, od_cansize, od_canfloat, od_candock, od_propsize]
+  dragdock.optionsdock = [od_savepos, od_savezorder, od_canmove, od_cansize, od_canfloat, od_candock, od_propsize, od_captionhint]
   dragdock.onbeforefloat = beffloatexe
   dragdock.onfloat = floatexe
   optionswindow = [wo_notaskbar]

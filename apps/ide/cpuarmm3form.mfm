@@ -256,7 +256,7 @@ inherited cpuarmm3fo: tcpuarmm3fo
       frame.colorclient = -1879048185
       frame.captionpos = cp_top
       frame.localprops = [frl_levelo, frl_colorclient]
-      frame.dummy = 0
+      frame.localprops1 = []
       taborder = 22
       bounds_x = 173
       bounds_y = 25
@@ -270,7 +270,7 @@ inherited cpuarmm3fo: tcpuarmm3fo
       frame.colorclient = -1879048185
       frame.captionpos = cp_top
       frame.localprops = [frl_levelo, frl_colorclient]
-      frame.dummy = 0
+      frame.localprops1 = []
       taborder = 23
       bounds_x = 162
       bounds_y = 25
@@ -284,7 +284,7 @@ inherited cpuarmm3fo: tcpuarmm3fo
       frame.colorclient = -1879048185
       frame.captionpos = cp_top
       frame.localprops = [frl_levelo, frl_colorclient]
-      frame.dummy = 0
+      frame.localprops1 = []
       taborder = 24
       bounds_x = 151
       bounds_y = 25

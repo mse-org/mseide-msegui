@@ -1,8 +1,9 @@
 object objectinspectorfo: tobjectinspectorfo
   optionswidget = [ow_arrowfocus, ow_subfocus, ow_mousewheel, ow_destroywidgets, ow_hinton]
+  frame.localprops = []
+  frame.localprops1 = []
   frame.grip_size = 10
   frame.grip_options = [go_closebutton, go_fixsizebutton, go_floatbutton, go_topbutton, go_backgroundbutton]
-  frame.dummy = 0
   popupmenu = mainpopup
   onenter = enterexe
   onactivate = enterexe
@@ -11,6 +12,8 @@ object objectinspectorfo: tobjectinspectorfo
   bounds_y = 360
   bounds_cx = 254
   bounds_cy = 248
+  container.frame.localprops = []
+  container.frame.localprops1 = []
   container.onlayout = objectinspectoronchildscaled
   container.bounds = (
     0
@@ -20,7 +23,7 @@ object objectinspectorfo: tobjectinspectorfo
   )
   dragdock.splitter_size = 0
   dragdock.caption = 'Objectinspector'
-  dragdock.optionsdock = [od_savepos, od_savezorder, od_canmove, od_canfloat, od_candock, od_propsize]
+  dragdock.optionsdock = [od_savepos, od_savezorder, od_canmove, od_canfloat, od_candock, od_propsize, od_captionhint]
   options = [fo_savepos, fo_savezorder, fo_savestate]
   statfile = mainfo.projectstatfile
   caption = 'Object Inspector'
@@ -98,6 +101,8 @@ object objectinspectorfo: tobjectinspectorfo
   moduleclassname = 'tdockform'
   object compselector: tdropdownlistedit
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
+    frame.localprops = []
+    frame.localprops1 = []
     frame.button.color = -2147483646
     taborder = 2
     bounds_x = 0
@@ -115,6 +120,7 @@ object objectinspectorfo: tobjectinspectorfo
   end
   object grid: twidgetgrid
     frame.localprops = [frl_levelo, frl_colorclient]
+    frame.localprops1 = []
     taborder = 1
     popupmenu = gridpopup
     bounds_x = 0
@@ -133,37 +139,37 @@ object objectinspectorfo: tobjectinspectorfo
       item
         name = 'stf_default'
         xscale = 1
-        dummy = 0
+        localprops = [flp_xscale]
       end    
       item
         color = 32768
         name = 'stf_default'
         xscale = 1
-        dummy = 0
+        localprops = [flp_color, flp_xscale]
       end    
       item
         color = 32768
         name = 'stf_default'
         xscale = 1
-        dummy = 0
+        localprops = [flp_color, flp_xscale]
       end    
       item
         color = -1610612723
         name = 'stf_default'
         xscale = 1
-        dummy = 0
+        localprops = [flp_color, flp_xscale]
       end    
       item
         style = [fs_bold]
         name = 'stf_default'
         xscale = 1
-        dummy = 0
+        localprops = [flp_style, flp_xscale]
       end    
       item
         style = [fs_bold]
         name = 'stf_default'
         xscale = 1
-        dummy = 0
+        localprops = [flp_style, flp_xscale]
       end>
     datacols.count = 2
     datacols.items = <    
@@ -210,6 +216,7 @@ object objectinspectorfo: tobjectinspectorfo
       frame.levelo = 0
       frame.colorclient = -2147483646
       frame.localprops = [frl_levelo, frl_colorclient]
+      frame.localprops1 = []
       taborder = 1
       onpopup = propsonpopup
       visible = False
@@ -231,6 +238,7 @@ object objectinspectorfo: tobjectinspectorfo
       frame.levelo = 0
       frame.colorclient = -2147483646
       frame.localprops = [frl_levelo, frl_colorclient]
+      frame.localprops1 = []
       frame.button.width = 15
       frame.button.color = -1879048187
       frame.buttons.count = 2
@@ -255,7 +263,7 @@ object objectinspectorfo: tobjectinspectorfo
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_forcereturncheckvalue, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext]
       font.name = 'stf_default'
       font.xscale = 1
-      font.dummy = 0
+      font.localprops = [flp_xscale]
       onkeydown = valueskeydown
       onclientmouseevent = valuesonmouseevent
       onsetvalue = valuessetvalue
@@ -289,7 +297,6 @@ object objectinspectorfo: tobjectinspectorfo
     )
     face.fade_direction = gd_down
     face.localprops = [fal_fadirection]
-    face.dummy = 0
     hint = 'Show component editor.'
     bounds_x = 215
     bounds_y = 2
@@ -297,8 +304,8 @@ object objectinspectorfo: tobjectinspectorfo
     bounds_cy = 18
     anchors = [an_top, an_right]
     state = [as_disabled, as_localdisabled, as_localcaption, as_localhint, as_localonexecute]
+    facedisabled.localprops = []
     facedisabled.template = guitemplatesmo.fadevertkonvex
-    facedisabled.dummy = 0
     caption = '&ED'
     onexecute = compeditonexecute
     reffontheight = 14

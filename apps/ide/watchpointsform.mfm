@@ -1,14 +1,15 @@
 object watchpointsfo: twatchpointsfo
   frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
+  frame.localprops1 = []
   frame.grip_size = 10
   frame.grip_options = [go_closebutton, go_fixsizebutton, go_floatbutton, go_topbutton, go_backgroundbutton]
-  frame.dummy = 0
   visible = False
   bounds_x = 120
   bounds_y = 368
   bounds_cx = 483
   bounds_cy = 210
   container.frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
+  container.frame.localprops1 = []
   container.bounds = (
     0
     0
@@ -16,7 +17,7 @@ object watchpointsfo: twatchpointsfo
     210
   )
   dragdock.caption = 'Watchpoints'
-  dragdock.optionsdock = [od_savepos, od_canmove, od_canfloat, od_candock, od_propsize]
+  dragdock.optionsdock = [od_savepos, od_canmove, od_canfloat, od_candock, od_propsize, od_captionhint]
   options = [fo_savepos, fo_savestate]
   statfile = mainfo.projectstatfile
   caption = 'Watchpoints'
@@ -90,6 +91,7 @@ object watchpointsfo: twatchpointsfo
   object grid: twidgetgrid
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets]
     frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
+    frame.localprops1 = []
     popupmenu = gripopup
     bounds_x = 0
     bounds_y = 0
@@ -178,7 +180,7 @@ object watchpointsfo: twatchpointsfo
       frame.levelo = 0
       frame.colorclient = -2147483645
       frame.localprops = [frl_levelo, frl_colorclient]
-      frame.dummy = 0
+      frame.localprops1 = []
       taborder = 1
       bounds_x = 0
       bounds_y = 0
@@ -195,6 +197,7 @@ object watchpointsfo: twatchpointsfo
       frame.levelo = 0
       frame.colorclient = -2147483645
       frame.localprops = [frl_levelo, frl_colorclient]
+      frame.localprops1 = []
       frame.button.color = -2147483646
       taborder = 2
       visible = False
@@ -227,7 +230,7 @@ object watchpointsfo: twatchpointsfo
       frame.levelo = 0
       frame.colorclient = -2147483645
       frame.localprops = [frl_levelo, frl_colorclient]
-      frame.dummy = 0
+      frame.localprops1 = []
       taborder = 3
       visible = False
       bounds_x = 51
@@ -245,7 +248,7 @@ object watchpointsfo: twatchpointsfo
       frame.levelo = 0
       frame.colorclient = -2147483645
       frame.localprops = [frl_levelo, frl_colorclient]
-      frame.dummy = 0
+      frame.localprops1 = []
       taborder = 4
       visible = False
       bounds_x = 210
@@ -263,7 +266,7 @@ object watchpointsfo: twatchpointsfo
       frame.levelo = 0
       frame.colorclient = -2147483645
       frame.localprops = [frl_levelo, frl_colorclient]
-      frame.dummy = 0
+      frame.localprops1 = []
       taborder = 5
       visible = False
       bounds_x = 220
@@ -281,7 +284,7 @@ object watchpointsfo: twatchpointsfo
       frame.levelo = 0
       frame.colorclient = -2147483645
       frame.localprops = [frl_levelo, frl_colorclient]
-      frame.dummy = 0
+      frame.localprops1 = []
       taborder = 6
       visible = False
       bounds_x = 255
@@ -300,7 +303,7 @@ object watchpointsfo: twatchpointsfo
       frame.levelo = 0
       frame.colorclient = -2147483645
       frame.localprops = [frl_levelo, frl_colorclient]
-      frame.dummy = 0
+      frame.localprops1 = []
       taborder = 7
       visible = False
       bounds_x = 294

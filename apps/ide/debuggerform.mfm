@@ -1,12 +1,15 @@
 object debuggerfo: tdebuggerfo
+  frame.localprops = []
+  frame.localprops1 = []
   frame.grip_size = 10
   frame.grip_options = [go_closebutton, go_fixsizebutton, go_floatbutton, go_topbutton, go_backgroundbutton]
-  frame.dummy = 0
   visible = False
   bounds_x = 116
   bounds_y = 131
   bounds_cx = 441
   bounds_cy = 100
+  container.frame.localprops = []
+  container.frame.localprops1 = []
   container.bounds = (
     0
     0
@@ -14,7 +17,7 @@ object debuggerfo: tdebuggerfo
     100
   )
   dragdock.caption = 'Debugger'
-  dragdock.optionsdock = [od_savepos, od_savezorder, od_canmove, od_canfloat, od_candock, od_proportional, od_propsize]
+  dragdock.optionsdock = [od_savepos, od_savezorder, od_canmove, od_canfloat, od_candock, od_proportional, od_propsize, od_captionhint]
   options = [fo_savepos, fo_savezorder, fo_savestate]
   statfile = mainfo.projectstatfile
   icon.image = {
@@ -96,6 +99,8 @@ object debuggerfo: tdebuggerfo
   object gdbtoolbar: ttoolbar
     optionswidget = [ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_timedhint]
     color = -2147483645
+    frame.localprops = []
+    frame.localprops1 = []
     bounds_x = 0
     bounds_y = 0
     bounds_cx = 431

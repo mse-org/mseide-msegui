@@ -1,13 +1,16 @@
 object cpufo: tcpufo
   optionswidget = [ow_mousefocus, ow_arrowfocus, ow_mousewheel, ow_destroywidgets, ow_hinton]
+  frame.localprops = []
+  frame.localprops1 = []
   frame.grip_size = 10
   frame.grip_options = [go_closebutton, go_fixsizebutton, go_floatbutton, go_topbutton, go_backgroundbutton]
-  frame.dummy = 0
   visible = False
   bounds_x = 192
   bounds_y = 451
   bounds_cx = 387
   bounds_cy = 207
+  container.frame.localprops = []
+  container.frame.localprops1 = []
   container.bounds = (
     0
     0
@@ -16,7 +19,7 @@ object cpufo: tcpufo
   )
   dragdock.splitter_size = 0
   dragdock.caption = 'CPU'
-  dragdock.optionsdock = [od_savepos, od_savezorder, od_canmove, od_canfloat, od_candock, od_propsize]
+  dragdock.optionsdock = [od_savepos, od_savezorder, od_canmove, od_canfloat, od_candock, od_propsize, od_captionhint]
   options = [fo_savepos, fo_savezorder, fo_savestate]
   statfile = mainfo.projectstatfile
   caption = 'CPU'
@@ -64,7 +67,8 @@ object cpufo: tcpufo
   object on: tbooleanedit
     Tag = -1
     frame.caption = 'CPU &on'
-    frame.dummy = 0
+    frame.localprops = []
+    frame.localprops1 = []
     frame.outerframe = (
       0
       1
@@ -79,7 +83,8 @@ object cpufo: tcpufo
     value = True
   end
   object stoptime: tdatetimedisp
-    frame.dummy = 0
+    frame.localprops = []
+    frame.localprops1 = []
     taborder = 1
     bounds_x = 80
     bounds_y = 8

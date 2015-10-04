@@ -23,7 +23,7 @@ inherited cpurl78fo: tcpurl78fo
     frame.caption = 'A'
     frame.captionpos = cp_top
     frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
+    frame.localprops1 = []
     frame.outerframe = (
       0
       17
@@ -38,7 +38,7 @@ inherited cpurl78fo: tcpurl78fo
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
-    font.dummy = 0
+    font.localprops = [flp_xscale]
     onsetvalue = regsetvalue
     base = nb_hex
     bitcount = 8
@@ -52,7 +52,7 @@ inherited cpurl78fo: tcpurl78fo
     frame.caption = 'X'
     frame.captionpos = cp_top
     frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
+    frame.localprops1 = []
     frame.outerframe = (
       0
       17
@@ -67,7 +67,7 @@ inherited cpurl78fo: tcpurl78fo
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
-    font.dummy = 0
+    font.localprops = [flp_xscale]
     onsetvalue = regsetvalue
     base = nb_hex
     bitcount = 8
@@ -80,7 +80,7 @@ inherited cpurl78fo: tcpurl78fo
     frame.colorclient = -1879048185
     frame.captionpos = cp_right
     frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
+    frame.localprops1 = []
     taborder = 9
     bounds_x = 72
     bounds_y = 69
@@ -88,7 +88,7 @@ inherited cpurl78fo: tcpurl78fo
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
-    font.dummy = 0
+    font.localprops = [flp_xscale]
     onsetvalue = regsetvalue
     base = nb_hex
     bitcount = 16
@@ -101,7 +101,7 @@ inherited cpurl78fo: tcpurl78fo
     frame.colorclient = -1879048185
     frame.captionpos = cp_right
     frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
+    frame.localprops1 = []
     taborder = 10
     bounds_x = 123
     bounds_y = 69
@@ -109,7 +109,7 @@ inherited cpurl78fo: tcpurl78fo
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
-    font.dummy = 0
+    font.localprops = [flp_xscale]
     onsetvalue = regsetvalue
     base = nb_hex
     bitcount = 16
@@ -123,7 +123,7 @@ inherited cpurl78fo: tcpurl78fo
     frame.caption = 'B'
     frame.captionpos = cp_top
     frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
+    frame.localprops1 = []
     frame.outerframe = (
       0
       17
@@ -138,7 +138,7 @@ inherited cpurl78fo: tcpurl78fo
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
-    font.dummy = 0
+    font.localprops = [flp_xscale]
     onsetvalue = regsetvalue
     base = nb_hex
     bitcount = 8
@@ -152,7 +152,7 @@ inherited cpurl78fo: tcpurl78fo
     frame.caption = 'C'
     frame.captionpos = cp_top
     frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
+    frame.localprops1 = []
     frame.outerframe = (
       0
       17
@@ -167,7 +167,7 @@ inherited cpurl78fo: tcpurl78fo
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
-    font.dummy = 0
+    font.localprops = [flp_xscale]
     onsetvalue = regsetvalue
     base = nb_hex
     bitcount = 8
@@ -180,7 +180,7 @@ inherited cpurl78fo: tcpurl78fo
     frame.colorclient = -1879048185
     frame.captionpos = cp_right
     frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
+    frame.localprops1 = []
     taborder = 11
     bounds_x = 174
     bounds_y = 69
@@ -188,7 +188,7 @@ inherited cpurl78fo: tcpurl78fo
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
-    font.dummy = 0
+    font.localprops = [flp_xscale]
     onsetvalue = regsetvalue
     base = nb_hex
     bitcount = 16
@@ -202,7 +202,7 @@ inherited cpurl78fo: tcpurl78fo
     frame.caption = 'D'
     frame.captionpos = cp_top
     frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
+    frame.localprops1 = []
     frame.outerframe = (
       0
       17
@@ -217,7 +217,7 @@ inherited cpurl78fo: tcpurl78fo
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
-    font.dummy = 0
+    font.localprops = [flp_xscale]
     onsetvalue = regsetvalue
     base = nb_hex
     bitcount = 8
@@ -231,7 +231,7 @@ inherited cpurl78fo: tcpurl78fo
     frame.caption = 'E'
     frame.captionpos = cp_top
     frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
+    frame.localprops1 = []
     frame.outerframe = (
       0
       17
@@ -246,7 +246,7 @@ inherited cpurl78fo: tcpurl78fo
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
-    font.dummy = 0
+    font.localprops = [flp_xscale]
     onsetvalue = regsetvalue
     base = nb_hex
     bitcount = 8
@@ -259,7 +259,7 @@ inherited cpurl78fo: tcpurl78fo
     frame.colorclient = -1879048185
     frame.captionpos = cp_right
     frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
+    frame.localprops1 = []
     taborder = 12
     bounds_x = 225
     bounds_y = 69
@@ -267,7 +267,7 @@ inherited cpurl78fo: tcpurl78fo
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
-    font.dummy = 0
+    font.localprops = [flp_xscale]
     onsetvalue = regsetvalue
     base = nb_hex
     bitcount = 16
@@ -281,7 +281,7 @@ inherited cpurl78fo: tcpurl78fo
     frame.caption = 'H'
     frame.captionpos = cp_top
     frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
+    frame.localprops1 = []
     frame.outerframe = (
       0
       17
@@ -296,7 +296,7 @@ inherited cpurl78fo: tcpurl78fo
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
-    font.dummy = 0
+    font.localprops = [flp_xscale]
     onsetvalue = regsetvalue
     base = nb_hex
     bitcount = 8
@@ -310,7 +310,7 @@ inherited cpurl78fo: tcpurl78fo
     frame.caption = 'L'
     frame.captionpos = cp_top
     frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
+    frame.localprops1 = []
     frame.outerframe = (
       0
       17
@@ -325,7 +325,7 @@ inherited cpurl78fo: tcpurl78fo
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
-    font.dummy = 0
+    font.localprops = [flp_xscale]
     onsetvalue = regsetvalue
     base = nb_hex
     bitcount = 8
@@ -339,7 +339,7 @@ inherited cpurl78fo: tcpurl78fo
     frame.caption = 'PSW'
     frame.captionpos = cp_top
     frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
+    frame.localprops1 = []
     frame.outerframe = (
       2
       17
@@ -354,7 +354,7 @@ inherited cpurl78fo: tcpurl78fo
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
-    font.dummy = 0
+    font.localprops = [flp_xscale]
     onchange = flagonchange
     onsetvalue = regsetvalue
     base = nb_hex
@@ -375,7 +375,7 @@ inherited cpurl78fo: tcpurl78fo
       frame.colorclient = -1879048185
       frame.caption = 'CY'
       frame.localprops = [frl_levelo, frl_colorclient]
-      frame.dummy = 0
+      frame.localprops1 = []
       frame.outerframe = (
         0
         2
@@ -396,7 +396,7 @@ inherited cpurl78fo: tcpurl78fo
       frame.colorclient = -1879048185
       frame.caption = 'ISP0'
       frame.localprops = [frl_levelo, frl_colorclient]
-      frame.dummy = 0
+      frame.localprops1 = []
       frame.outerframe = (
         0
         2
@@ -417,7 +417,7 @@ inherited cpurl78fo: tcpurl78fo
       frame.colorclient = -1879048185
       frame.caption = 'ISP1'
       frame.localprops = [frl_levelo, frl_colorclient]
-      frame.dummy = 0
+      frame.localprops1 = []
       frame.outerframe = (
         0
         2
@@ -438,7 +438,7 @@ inherited cpurl78fo: tcpurl78fo
       frame.colorclient = -1879048185
       frame.caption = 'RBS0'
       frame.localprops = [frl_levelo, frl_colorclient]
-      frame.dummy = 0
+      frame.localprops1 = []
       frame.outerframe = (
         0
         2
@@ -459,7 +459,7 @@ inherited cpurl78fo: tcpurl78fo
       frame.colorclient = -1879048185
       frame.caption = 'AC'
       frame.localprops = [frl_levelo, frl_colorclient]
-      frame.dummy = 0
+      frame.localprops1 = []
       frame.outerframe = (
         0
         2
@@ -480,7 +480,7 @@ inherited cpurl78fo: tcpurl78fo
       frame.colorclient = -1879048185
       frame.caption = 'RBS1'
       frame.localprops = [frl_levelo, frl_colorclient]
-      frame.dummy = 0
+      frame.localprops1 = []
       frame.outerframe = (
         0
         2
@@ -501,7 +501,7 @@ inherited cpurl78fo: tcpurl78fo
       frame.colorclient = -1879048185
       frame.caption = 'Z'
       frame.localprops = [frl_levelo, frl_colorclient]
-      frame.dummy = 0
+      frame.localprops1 = []
       frame.outerframe = (
         0
         2
@@ -521,7 +521,7 @@ inherited cpurl78fo: tcpurl78fo
       frame.colorclient = -1879048185
       frame.caption = 'IE'
       frame.localprops = [frl_levelo, frl_colorclient]
-      frame.dummy = 0
+      frame.localprops1 = []
       frame.outerframe = (
         0
         2
@@ -543,7 +543,7 @@ inherited cpurl78fo: tcpurl78fo
     frame.caption = 'SP'
     frame.captionpos = cp_right
     frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
+    frame.localprops1 = []
     frame.outerframe = (
       0
       0
@@ -557,7 +557,7 @@ inherited cpurl78fo: tcpurl78fo
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
-    font.dummy = 0
+    font.localprops = [flp_xscale]
     onsetvalue = regsetvalue
     base = nb_hex
     bitcount = 16
@@ -571,7 +571,7 @@ inherited cpurl78fo: tcpurl78fo
     frame.caption = 'PC'
     frame.captionpos = cp_right
     frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
+    frame.localprops1 = []
     frame.outerframe = (
       0
       0
@@ -585,7 +585,7 @@ inherited cpurl78fo: tcpurl78fo
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
-    font.dummy = 0
+    font.localprops = [flp_xscale]
     onsetvalue = regsetvalue
     base = nb_hex
     bitcount = 16
@@ -599,7 +599,7 @@ inherited cpurl78fo: tcpurl78fo
     frame.caption = 'ES'
     frame.captionpos = cp_right
     frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
+    frame.localprops1 = []
     frame.outerframe = (
       0
       0
@@ -613,7 +613,7 @@ inherited cpurl78fo: tcpurl78fo
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
-    font.dummy = 0
+    font.localprops = [flp_xscale]
     onsetvalue = regsetvalue
     base = nb_hex
     bitcount = 16
@@ -627,7 +627,7 @@ inherited cpurl78fo: tcpurl78fo
     frame.caption = 'CS'
     frame.captionpos = cp_right
     frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
+    frame.localprops1 = []
     frame.outerframe = (
       0
       0
@@ -641,7 +641,7 @@ inherited cpurl78fo: tcpurl78fo
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
-    font.dummy = 0
+    font.localprops = [flp_xscale]
     onsetvalue = regsetvalue
     base = nb_hex
     bitcount = 16
@@ -655,7 +655,7 @@ inherited cpurl78fo: tcpurl78fo
     frame.caption = 'PMC'
     frame.captionpos = cp_right
     frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
+    frame.localprops1 = []
     frame.outerframe = (
       0
       0
@@ -669,7 +669,7 @@ inherited cpurl78fo: tcpurl78fo
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
-    font.dummy = 0
+    font.localprops = [flp_xscale]
     onsetvalue = regsetvalue
     base = nb_hex
     bitcount = 8
@@ -682,7 +682,7 @@ inherited cpurl78fo: tcpurl78fo
     frame.colorclient = -1879048185
     frame.captionpos = cp_top
     frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
+    frame.localprops1 = []
     taborder = 20
     bounds_x = 250
     bounds_y = 93
@@ -690,7 +690,7 @@ inherited cpurl78fo: tcpurl78fo
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
-    font.dummy = 0
+    font.localprops = [flp_xscale]
     onsetvalue = regsetvalue
     base = nb_hex
     bitcount = 8
@@ -703,7 +703,7 @@ inherited cpurl78fo: tcpurl78fo
     frame.colorclient = -1879048185
     frame.captionpos = cp_top
     frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
+    frame.localprops1 = []
     taborder = 19
     bounds_x = 225
     bounds_y = 93
@@ -711,7 +711,7 @@ inherited cpurl78fo: tcpurl78fo
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
-    font.dummy = 0
+    font.localprops = [flp_xscale]
     onsetvalue = regsetvalue
     base = nb_hex
     bitcount = 8
@@ -724,7 +724,7 @@ inherited cpurl78fo: tcpurl78fo
     frame.colorclient = -1879048185
     frame.captionpos = cp_right
     frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
+    frame.localprops1 = []
     taborder = 24
     bounds_x = 225
     bounds_y = 114
@@ -732,7 +732,7 @@ inherited cpurl78fo: tcpurl78fo
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
-    font.dummy = 0
+    font.localprops = [flp_xscale]
     onsetvalue = regsetvalue
     base = nb_hex
     bitcount = 16
@@ -745,7 +745,7 @@ inherited cpurl78fo: tcpurl78fo
     frame.colorclient = -1879048185
     frame.captionpos = cp_top
     frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
+    frame.localprops1 = []
     taborder = 18
     bounds_x = 199
     bounds_y = 93
@@ -753,7 +753,7 @@ inherited cpurl78fo: tcpurl78fo
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
-    font.dummy = 0
+    font.localprops = [flp_xscale]
     onsetvalue = regsetvalue
     base = nb_hex
     bitcount = 8
@@ -766,7 +766,7 @@ inherited cpurl78fo: tcpurl78fo
     frame.colorclient = -1879048185
     frame.captionpos = cp_top
     frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
+    frame.localprops1 = []
     taborder = 17
     bounds_x = 174
     bounds_y = 93
@@ -774,7 +774,7 @@ inherited cpurl78fo: tcpurl78fo
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
-    font.dummy = 0
+    font.localprops = [flp_xscale]
     onsetvalue = regsetvalue
     base = nb_hex
     bitcount = 8
@@ -787,7 +787,7 @@ inherited cpurl78fo: tcpurl78fo
     frame.colorclient = -1879048185
     frame.captionpos = cp_right
     frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
+    frame.localprops1 = []
     taborder = 23
     bounds_x = 174
     bounds_y = 114
@@ -795,7 +795,7 @@ inherited cpurl78fo: tcpurl78fo
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
-    font.dummy = 0
+    font.localprops = [flp_xscale]
     onsetvalue = regsetvalue
     base = nb_hex
     bitcount = 16
@@ -808,7 +808,7 @@ inherited cpurl78fo: tcpurl78fo
     frame.colorclient = -1879048185
     frame.captionpos = cp_top
     frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
+    frame.localprops1 = []
     taborder = 16
     bounds_x = 148
     bounds_y = 93
@@ -816,7 +816,7 @@ inherited cpurl78fo: tcpurl78fo
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
-    font.dummy = 0
+    font.localprops = [flp_xscale]
     onsetvalue = regsetvalue
     base = nb_hex
     bitcount = 8
@@ -829,7 +829,7 @@ inherited cpurl78fo: tcpurl78fo
     frame.colorclient = -1879048185
     frame.captionpos = cp_top
     frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
+    frame.localprops1 = []
     taborder = 15
     bounds_x = 123
     bounds_y = 93
@@ -837,7 +837,7 @@ inherited cpurl78fo: tcpurl78fo
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
-    font.dummy = 0
+    font.localprops = [flp_xscale]
     onsetvalue = regsetvalue
     base = nb_hex
     bitcount = 8
@@ -850,7 +850,7 @@ inherited cpurl78fo: tcpurl78fo
     frame.colorclient = -1879048185
     frame.captionpos = cp_right
     frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
+    frame.localprops1 = []
     taborder = 22
     bounds_x = 123
     bounds_y = 114
@@ -858,7 +858,7 @@ inherited cpurl78fo: tcpurl78fo
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
-    font.dummy = 0
+    font.localprops = [flp_xscale]
     onsetvalue = regsetvalue
     base = nb_hex
     bitcount = 16
@@ -871,7 +871,7 @@ inherited cpurl78fo: tcpurl78fo
     frame.colorclient = -1879048185
     frame.captionpos = cp_right
     frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
+    frame.localprops1 = []
     taborder = 21
     bounds_x = 72
     bounds_y = 114
@@ -879,7 +879,7 @@ inherited cpurl78fo: tcpurl78fo
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
-    font.dummy = 0
+    font.localprops = [flp_xscale]
     onsetvalue = regsetvalue
     base = nb_hex
     bitcount = 16
@@ -892,7 +892,7 @@ inherited cpurl78fo: tcpurl78fo
     frame.colorclient = -1879048185
     frame.captionpos = cp_top
     frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
+    frame.localprops1 = []
     taborder = 14
     bounds_x = 97
     bounds_y = 93
@@ -900,7 +900,7 @@ inherited cpurl78fo: tcpurl78fo
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
-    font.dummy = 0
+    font.localprops = [flp_xscale]
     onsetvalue = regsetvalue
     base = nb_hex
     bitcount = 8
@@ -914,7 +914,7 @@ inherited cpurl78fo: tcpurl78fo
     frame.caption = '0'
     frame.captionpos = cp_left
     frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
+    frame.localprops1 = []
     frame.outerframe = (
       11
       0
@@ -928,7 +928,7 @@ inherited cpurl78fo: tcpurl78fo
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
-    font.dummy = 0
+    font.localprops = [flp_xscale]
     onsetvalue = regsetvalue
     base = nb_hex
     bitcount = 8
@@ -942,7 +942,7 @@ inherited cpurl78fo: tcpurl78fo
     frame.caption = '1'
     frame.captionpos = cp_left
     frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
+    frame.localprops1 = []
     frame.outerframe = (
       11
       0
@@ -956,7 +956,7 @@ inherited cpurl78fo: tcpurl78fo
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
-    font.dummy = 0
+    font.localprops = [flp_xscale]
     onsetvalue = regsetvalue
     base = nb_hex
     bitcount = 8
@@ -969,7 +969,7 @@ inherited cpurl78fo: tcpurl78fo
     frame.colorclient = -1879048185
     frame.captionpos = cp_top
     frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
+    frame.localprops1 = []
     taborder = 26
     bounds_x = 97
     bounds_y = 136
@@ -977,7 +977,7 @@ inherited cpurl78fo: tcpurl78fo
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
-    font.dummy = 0
+    font.localprops = [flp_xscale]
     onsetvalue = regsetvalue
     base = nb_hex
     bitcount = 8
@@ -990,7 +990,7 @@ inherited cpurl78fo: tcpurl78fo
     frame.colorclient = -1879048185
     frame.captionpos = cp_right
     frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
+    frame.localprops1 = []
     taborder = 33
     bounds_x = 72
     bounds_y = 157
@@ -998,7 +998,7 @@ inherited cpurl78fo: tcpurl78fo
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
-    font.dummy = 0
+    font.localprops = [flp_xscale]
     onsetvalue = regsetvalue
     base = nb_hex
     bitcount = 16
@@ -1011,7 +1011,7 @@ inherited cpurl78fo: tcpurl78fo
     frame.colorclient = -1879048185
     frame.captionpos = cp_right
     frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
+    frame.localprops1 = []
     taborder = 34
     bounds_x = 123
     bounds_y = 157
@@ -1019,7 +1019,7 @@ inherited cpurl78fo: tcpurl78fo
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
-    font.dummy = 0
+    font.localprops = [flp_xscale]
     onsetvalue = regsetvalue
     base = nb_hex
     bitcount = 16
@@ -1032,7 +1032,7 @@ inherited cpurl78fo: tcpurl78fo
     frame.colorclient = -1879048185
     frame.captionpos = cp_top
     frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
+    frame.localprops1 = []
     taborder = 27
     bounds_x = 123
     bounds_y = 136
@@ -1040,7 +1040,7 @@ inherited cpurl78fo: tcpurl78fo
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
-    font.dummy = 0
+    font.localprops = [flp_xscale]
     onsetvalue = regsetvalue
     base = nb_hex
     bitcount = 8
@@ -1053,7 +1053,7 @@ inherited cpurl78fo: tcpurl78fo
     frame.colorclient = -1879048185
     frame.captionpos = cp_top
     frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
+    frame.localprops1 = []
     taborder = 28
     bounds_x = 148
     bounds_y = 136
@@ -1061,7 +1061,7 @@ inherited cpurl78fo: tcpurl78fo
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
-    font.dummy = 0
+    font.localprops = [flp_xscale]
     onsetvalue = regsetvalue
     base = nb_hex
     bitcount = 8
@@ -1074,7 +1074,7 @@ inherited cpurl78fo: tcpurl78fo
     frame.colorclient = -1879048185
     frame.captionpos = cp_right
     frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
+    frame.localprops1 = []
     taborder = 35
     bounds_x = 174
     bounds_y = 157
@@ -1082,7 +1082,7 @@ inherited cpurl78fo: tcpurl78fo
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
-    font.dummy = 0
+    font.localprops = [flp_xscale]
     onsetvalue = regsetvalue
     base = nb_hex
     bitcount = 16
@@ -1095,7 +1095,7 @@ inherited cpurl78fo: tcpurl78fo
     frame.colorclient = -1879048185
     frame.captionpos = cp_top
     frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
+    frame.localprops1 = []
     taborder = 29
     bounds_x = 174
     bounds_y = 136
@@ -1103,7 +1103,7 @@ inherited cpurl78fo: tcpurl78fo
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
-    font.dummy = 0
+    font.localprops = [flp_xscale]
     onsetvalue = regsetvalue
     base = nb_hex
     bitcount = 8
@@ -1116,7 +1116,7 @@ inherited cpurl78fo: tcpurl78fo
     frame.colorclient = -1879048185
     frame.captionpos = cp_top
     frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
+    frame.localprops1 = []
     taborder = 30
     bounds_x = 199
     bounds_y = 136
@@ -1124,7 +1124,7 @@ inherited cpurl78fo: tcpurl78fo
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
-    font.dummy = 0
+    font.localprops = [flp_xscale]
     onsetvalue = regsetvalue
     base = nb_hex
     bitcount = 8
@@ -1137,7 +1137,7 @@ inherited cpurl78fo: tcpurl78fo
     frame.colorclient = -1879048185
     frame.captionpos = cp_right
     frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
+    frame.localprops1 = []
     taborder = 36
     bounds_x = 225
     bounds_y = 157
@@ -1145,7 +1145,7 @@ inherited cpurl78fo: tcpurl78fo
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
-    font.dummy = 0
+    font.localprops = [flp_xscale]
     onsetvalue = regsetvalue
     base = nb_hex
     bitcount = 16
@@ -1158,7 +1158,7 @@ inherited cpurl78fo: tcpurl78fo
     frame.colorclient = -1879048185
     frame.captionpos = cp_top
     frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
+    frame.localprops1 = []
     taborder = 31
     bounds_x = 225
     bounds_y = 136
@@ -1166,7 +1166,7 @@ inherited cpurl78fo: tcpurl78fo
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
-    font.dummy = 0
+    font.localprops = [flp_xscale]
     onsetvalue = regsetvalue
     base = nb_hex
     bitcount = 8
@@ -1179,7 +1179,7 @@ inherited cpurl78fo: tcpurl78fo
     frame.colorclient = -1879048185
     frame.captionpos = cp_top
     frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
+    frame.localprops1 = []
     taborder = 32
     bounds_x = 250
     bounds_y = 136
@@ -1187,7 +1187,7 @@ inherited cpurl78fo: tcpurl78fo
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
-    font.dummy = 0
+    font.localprops = [flp_xscale]
     onsetvalue = regsetvalue
     base = nb_hex
     bitcount = 8
@@ -1201,7 +1201,7 @@ inherited cpurl78fo: tcpurl78fo
     frame.caption = '2'
     frame.captionpos = cp_left
     frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
+    frame.localprops1 = []
     frame.outerframe = (
       11
       0
@@ -1215,7 +1215,7 @@ inherited cpurl78fo: tcpurl78fo
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
-    font.dummy = 0
+    font.localprops = [flp_xscale]
     onsetvalue = regsetvalue
     base = nb_hex
     bitcount = 8
@@ -1228,7 +1228,7 @@ inherited cpurl78fo: tcpurl78fo
     frame.colorclient = -1879048185
     frame.captionpos = cp_top
     frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
+    frame.localprops1 = []
     taborder = 38
     bounds_x = 97
     bounds_y = 179
@@ -1236,7 +1236,7 @@ inherited cpurl78fo: tcpurl78fo
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
-    font.dummy = 0
+    font.localprops = [flp_xscale]
     onsetvalue = regsetvalue
     base = nb_hex
     bitcount = 8
@@ -1249,7 +1249,7 @@ inherited cpurl78fo: tcpurl78fo
     frame.colorclient = -1879048185
     frame.captionpos = cp_right
     frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
+    frame.localprops1 = []
     taborder = 45
     bounds_x = 72
     bounds_y = 200
@@ -1257,7 +1257,7 @@ inherited cpurl78fo: tcpurl78fo
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
-    font.dummy = 0
+    font.localprops = [flp_xscale]
     onsetvalue = regsetvalue
     base = nb_hex
     bitcount = 16
@@ -1270,7 +1270,7 @@ inherited cpurl78fo: tcpurl78fo
     frame.colorclient = -1879048185
     frame.captionpos = cp_right
     frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
+    frame.localprops1 = []
     taborder = 46
     bounds_x = 123
     bounds_y = 200
@@ -1278,7 +1278,7 @@ inherited cpurl78fo: tcpurl78fo
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
-    font.dummy = 0
+    font.localprops = [flp_xscale]
     onsetvalue = regsetvalue
     base = nb_hex
     bitcount = 16
@@ -1291,7 +1291,7 @@ inherited cpurl78fo: tcpurl78fo
     frame.colorclient = -1879048185
     frame.captionpos = cp_top
     frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
+    frame.localprops1 = []
     taborder = 39
     bounds_x = 123
     bounds_y = 179
@@ -1299,7 +1299,7 @@ inherited cpurl78fo: tcpurl78fo
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
-    font.dummy = 0
+    font.localprops = [flp_xscale]
     onsetvalue = regsetvalue
     base = nb_hex
     bitcount = 8
@@ -1312,7 +1312,7 @@ inherited cpurl78fo: tcpurl78fo
     frame.colorclient = -1879048185
     frame.captionpos = cp_top
     frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
+    frame.localprops1 = []
     taborder = 40
     bounds_x = 148
     bounds_y = 179
@@ -1320,7 +1320,7 @@ inherited cpurl78fo: tcpurl78fo
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
-    font.dummy = 0
+    font.localprops = [flp_xscale]
     onsetvalue = regsetvalue
     base = nb_hex
     bitcount = 8
@@ -1333,7 +1333,7 @@ inherited cpurl78fo: tcpurl78fo
     frame.colorclient = -1879048185
     frame.captionpos = cp_right
     frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
+    frame.localprops1 = []
     taborder = 47
     bounds_x = 174
     bounds_y = 200
@@ -1341,7 +1341,7 @@ inherited cpurl78fo: tcpurl78fo
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
-    font.dummy = 0
+    font.localprops = [flp_xscale]
     onsetvalue = regsetvalue
     base = nb_hex
     bitcount = 16
@@ -1354,7 +1354,7 @@ inherited cpurl78fo: tcpurl78fo
     frame.colorclient = -1879048185
     frame.captionpos = cp_top
     frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
+    frame.localprops1 = []
     taborder = 41
     bounds_x = 174
     bounds_y = 179
@@ -1362,7 +1362,7 @@ inherited cpurl78fo: tcpurl78fo
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
-    font.dummy = 0
+    font.localprops = [flp_xscale]
     onsetvalue = regsetvalue
     base = nb_hex
     bitcount = 8
@@ -1375,7 +1375,7 @@ inherited cpurl78fo: tcpurl78fo
     frame.colorclient = -1879048185
     frame.captionpos = cp_top
     frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
+    frame.localprops1 = []
     taborder = 42
     bounds_x = 199
     bounds_y = 179
@@ -1383,7 +1383,7 @@ inherited cpurl78fo: tcpurl78fo
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
-    font.dummy = 0
+    font.localprops = [flp_xscale]
     onsetvalue = regsetvalue
     base = nb_hex
     bitcount = 8
@@ -1396,7 +1396,7 @@ inherited cpurl78fo: tcpurl78fo
     frame.colorclient = -1879048185
     frame.captionpos = cp_right
     frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
+    frame.localprops1 = []
     taborder = 48
     bounds_x = 225
     bounds_y = 200
@@ -1404,7 +1404,7 @@ inherited cpurl78fo: tcpurl78fo
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
-    font.dummy = 0
+    font.localprops = [flp_xscale]
     onsetvalue = regsetvalue
     base = nb_hex
     bitcount = 16
@@ -1417,7 +1417,7 @@ inherited cpurl78fo: tcpurl78fo
     frame.colorclient = -1879048185
     frame.captionpos = cp_top
     frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
+    frame.localprops1 = []
     taborder = 43
     bounds_x = 225
     bounds_y = 179
@@ -1425,7 +1425,7 @@ inherited cpurl78fo: tcpurl78fo
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
-    font.dummy = 0
+    font.localprops = [flp_xscale]
     onsetvalue = regsetvalue
     base = nb_hex
     bitcount = 8
@@ -1438,7 +1438,7 @@ inherited cpurl78fo: tcpurl78fo
     frame.colorclient = -1879048185
     frame.captionpos = cp_top
     frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
+    frame.localprops1 = []
     taborder = 44
     bounds_x = 250
     bounds_y = 179
@@ -1446,7 +1446,7 @@ inherited cpurl78fo: tcpurl78fo
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
-    font.dummy = 0
+    font.localprops = [flp_xscale]
     onsetvalue = regsetvalue
     base = nb_hex
     bitcount = 8
@@ -1460,7 +1460,7 @@ inherited cpurl78fo: tcpurl78fo
     frame.caption = '3'
     frame.captionpos = cp_left
     frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
+    frame.localprops1 = []
     frame.outerframe = (
       11
       0
@@ -1474,7 +1474,7 @@ inherited cpurl78fo: tcpurl78fo
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
-    font.dummy = 0
+    font.localprops = [flp_xscale]
     onsetvalue = regsetvalue
     base = nb_hex
     bitcount = 8
@@ -1487,7 +1487,7 @@ inherited cpurl78fo: tcpurl78fo
     frame.colorclient = -1879048185
     frame.captionpos = cp_top
     frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
+    frame.localprops1 = []
     taborder = 50
     bounds_x = 97
     bounds_y = 222
@@ -1495,7 +1495,7 @@ inherited cpurl78fo: tcpurl78fo
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
-    font.dummy = 0
+    font.localprops = [flp_xscale]
     onsetvalue = regsetvalue
     base = nb_hex
     bitcount = 8
@@ -1508,7 +1508,7 @@ inherited cpurl78fo: tcpurl78fo
     frame.colorclient = -1879048185
     frame.captionpos = cp_right
     frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
+    frame.localprops1 = []
     taborder = 57
     bounds_x = 72
     bounds_y = 243
@@ -1516,7 +1516,7 @@ inherited cpurl78fo: tcpurl78fo
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
-    font.dummy = 0
+    font.localprops = [flp_xscale]
     onsetvalue = regsetvalue
     base = nb_hex
     bitcount = 16
@@ -1529,7 +1529,7 @@ inherited cpurl78fo: tcpurl78fo
     frame.colorclient = -1879048185
     frame.captionpos = cp_right
     frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
+    frame.localprops1 = []
     taborder = 58
     bounds_x = 123
     bounds_y = 243
@@ -1537,7 +1537,7 @@ inherited cpurl78fo: tcpurl78fo
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
-    font.dummy = 0
+    font.localprops = [flp_xscale]
     onsetvalue = regsetvalue
     base = nb_hex
     bitcount = 16
@@ -1550,7 +1550,7 @@ inherited cpurl78fo: tcpurl78fo
     frame.colorclient = -1879048185
     frame.captionpos = cp_top
     frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
+    frame.localprops1 = []
     taborder = 51
     bounds_x = 123
     bounds_y = 222
@@ -1558,7 +1558,7 @@ inherited cpurl78fo: tcpurl78fo
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
-    font.dummy = 0
+    font.localprops = [flp_xscale]
     onsetvalue = regsetvalue
     base = nb_hex
     bitcount = 8
@@ -1571,7 +1571,7 @@ inherited cpurl78fo: tcpurl78fo
     frame.colorclient = -1879048185
     frame.captionpos = cp_top
     frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
+    frame.localprops1 = []
     taborder = 52
     bounds_x = 148
     bounds_y = 222
@@ -1579,7 +1579,7 @@ inherited cpurl78fo: tcpurl78fo
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
-    font.dummy = 0
+    font.localprops = [flp_xscale]
     onsetvalue = regsetvalue
     base = nb_hex
     bitcount = 8
@@ -1592,7 +1592,7 @@ inherited cpurl78fo: tcpurl78fo
     frame.colorclient = -1879048185
     frame.captionpos = cp_right
     frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
+    frame.localprops1 = []
     taborder = 59
     bounds_x = 174
     bounds_y = 243
@@ -1600,7 +1600,7 @@ inherited cpurl78fo: tcpurl78fo
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
-    font.dummy = 0
+    font.localprops = [flp_xscale]
     onsetvalue = regsetvalue
     base = nb_hex
     bitcount = 16
@@ -1613,7 +1613,7 @@ inherited cpurl78fo: tcpurl78fo
     frame.colorclient = -1879048185
     frame.captionpos = cp_top
     frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
+    frame.localprops1 = []
     taborder = 53
     bounds_x = 174
     bounds_y = 222
@@ -1621,7 +1621,7 @@ inherited cpurl78fo: tcpurl78fo
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
-    font.dummy = 0
+    font.localprops = [flp_xscale]
     onsetvalue = regsetvalue
     base = nb_hex
     bitcount = 8
@@ -1634,7 +1634,7 @@ inherited cpurl78fo: tcpurl78fo
     frame.colorclient = -1879048185
     frame.captionpos = cp_top
     frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
+    frame.localprops1 = []
     taborder = 54
     bounds_x = 199
     bounds_y = 222
@@ -1642,7 +1642,7 @@ inherited cpurl78fo: tcpurl78fo
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
-    font.dummy = 0
+    font.localprops = [flp_xscale]
     onsetvalue = regsetvalue
     base = nb_hex
     bitcount = 8
@@ -1655,7 +1655,7 @@ inherited cpurl78fo: tcpurl78fo
     frame.colorclient = -1879048185
     frame.captionpos = cp_right
     frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
+    frame.localprops1 = []
     taborder = 60
     bounds_x = 225
     bounds_y = 243
@@ -1663,7 +1663,7 @@ inherited cpurl78fo: tcpurl78fo
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
-    font.dummy = 0
+    font.localprops = [flp_xscale]
     onsetvalue = regsetvalue
     base = nb_hex
     bitcount = 16
@@ -1676,7 +1676,7 @@ inherited cpurl78fo: tcpurl78fo
     frame.colorclient = -1879048185
     frame.captionpos = cp_top
     frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
+    frame.localprops1 = []
     taborder = 55
     bounds_x = 225
     bounds_y = 222
@@ -1684,7 +1684,7 @@ inherited cpurl78fo: tcpurl78fo
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
-    font.dummy = 0
+    font.localprops = [flp_xscale]
     onsetvalue = regsetvalue
     base = nb_hex
     bitcount = 8
@@ -1697,7 +1697,7 @@ inherited cpurl78fo: tcpurl78fo
     frame.colorclient = -1879048185
     frame.captionpos = cp_top
     frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
+    frame.localprops1 = []
     taborder = 56
     bounds_x = 250
     bounds_y = 222
@@ -1705,7 +1705,7 @@ inherited cpurl78fo: tcpurl78fo
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
-    font.dummy = 0
+    font.localprops = [flp_xscale]
     onsetvalue = regsetvalue
     base = nb_hex
     bitcount = 8
@@ -1719,7 +1719,7 @@ inherited cpurl78fo: tcpurl78fo
     frame.caption = 'MEM'
     frame.captionpos = cp_right
     frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
+    frame.localprops1 = []
     frame.outerframe = (
       0
       0
@@ -1733,7 +1733,7 @@ inherited cpurl78fo: tcpurl78fo
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale = 1
-    font.dummy = 0
+    font.localprops = [flp_xscale]
     onsetvalue = regsetvalue
     base = nb_hex
     bitcount = 8

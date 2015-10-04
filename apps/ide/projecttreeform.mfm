@@ -1,14 +1,17 @@
 object projecttreefo: tprojecttreefo
   optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_hinton]
+  frame.localprops = []
+  frame.localprops1 = []
   frame.grip_size = 10
   frame.grip_options = [go_closebutton, go_fixsizebutton, go_topbutton, go_backgroundbutton]
-  frame.dummy = 0
   visible = False
   bounds_x = 263
   bounds_y = 431
   bounds_cx = 286
   bounds_cy = 201
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets]
+  container.frame.localprops = []
+  container.frame.localprops1 = []
   container.bounds = (
     0
     0
@@ -16,7 +19,7 @@ object projecttreefo: tprojecttreefo
     201
   )
   dragdock.splitter_size = 0
-  dragdock.optionsdock = [od_savepos, od_savezorder, od_canmove, od_canfloat, od_candock, od_propsize]
+  dragdock.optionsdock = [od_savepos, od_savezorder, od_canmove, od_canfloat, od_candock, od_propsize, od_captionhint]
   options = [fo_savepos, fo_savezorder, fo_savestate]
   statfile = mainfo.projectstatfile
   caption = 'Project Tree'
@@ -27,6 +30,8 @@ object projecttreefo: tprojecttreefo
   moduleclassname = 'tdockform'
   object grid: twidgetgrid
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets]
+    frame.localprops = []
+    frame.localprops1 = []
     bounds_x = 0
     bounds_y = 0
     bounds_cx = 276
@@ -71,6 +76,7 @@ object projecttreefo: tprojecttreefo
       frame.levelo = 0
       frame.colorclient = -2147483646
       frame.localprops = [frl_levelo, frl_colorclient]
+      frame.localprops1 = []
       taborder = 1
       onpopup = projecteditonpopup
       visible = False
@@ -93,6 +99,7 @@ object projecttreefo: tprojecttreefo
       frame.levelo = 0
       frame.colorclient = -2147483645
       frame.localprops = [frl_levelo, frl_colorclient]
+      frame.localprops1 = []
       frame.button.color = -2147483646
       frame.button.options = [fbo_invisible]
       frame.buttons.count = 2

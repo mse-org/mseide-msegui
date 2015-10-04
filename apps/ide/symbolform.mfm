@@ -1,19 +1,22 @@
 object symbolfo: tsymbolfo
+  frame.localprops = []
+  frame.localprops1 = []
   frame.grip_size = 10
   frame.grip_options = [go_closebutton, go_fixsizebutton, go_floatbutton, go_topbutton, go_backgroundbutton]
-  frame.dummy = 0
   visible = False
   bounds_x = 142
   bounds_y = 257
   bounds_cx = 361
   bounds_cy = 137
+  container.frame.localprops = []
+  container.frame.localprops1 = []
   container.bounds = (
     0
     0
     351
     137
   )
-  dragdock.optionsdock = [od_savepos, od_savezorder, od_canmove, od_cansize, od_canfloat, od_candock, od_propsize]
+  dragdock.optionsdock = [od_savepos, od_savezorder, od_canmove, od_cansize, od_canfloat, od_candock, od_propsize, od_captionhint]
   options = [fo_savepos, fo_savezorder, fo_savestate]
   statfile = mainfo.projectstatfile
   caption = 'Symbols'
@@ -60,6 +63,7 @@ object symbolfo: tsymbolfo
   object grid: twidgetgrid
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_hinton]
     frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
+    frame.localprops1 = []
     popupmenu = tpopupmenu1
     bounds_x = 0
     bounds_y = 0
@@ -96,7 +100,7 @@ object symbolfo: tsymbolfo
         color = -1610612729
         name = 'stf_default'
         xscale = 1
-        dummy = 0
+        localprops = [flp_color, flp_xscale]
       end>
     datacols.count = 5
     datacols.options = [co_savevalue, co_savestate, co_cancopy, co_mousescrollrow]

@@ -1,13 +1,16 @@
 object componentstorefo: tcomponentstorefo
   optionswidget = [ow_arrowfocus, ow_subfocus, ow_mousewheel, ow_destroywidgets, ow_hinton]
+  frame.localprops = []
+  frame.localprops1 = []
   frame.grip_size = 10
   frame.grip_options = [go_closebutton, go_fixsizebutton, go_floatbutton, go_topbutton, go_backgroundbutton]
-  frame.dummy = 0
   visible = False
   bounds_x = 305
   bounds_y = 101
   bounds_cx = 445
   bounds_cy = 354
+  container.frame.localprops = []
+  container.frame.localprops1 = []
   container.bounds = (
     0
     0
@@ -15,7 +18,7 @@ object componentstorefo: tcomponentstorefo
     354
   )
   dragdock.caption = 'Component Store'
-  dragdock.optionsdock = [od_savepos, od_savezorder, od_canmove, od_cansize, od_canfloat, od_candock, od_proportional, od_propsize]
+  dragdock.optionsdock = [od_savepos, od_savezorder, od_canmove, od_cansize, od_canfloat, od_candock, od_proportional, od_propsize, od_captionhint]
   options = [fo_savepos, fo_savezorder, fo_savestate]
   statfile = mainfo.projectstatfile
   icon.transparentcolor = -2147483642
@@ -87,6 +90,8 @@ object componentstorefo: tcomponentstorefo
   oncreate = createexe
   moduleclassname = 'tdockform'
   object grid: twidgetgrid
+    frame.localprops = []
+    frame.localprops1 = []
     popupmenu = tpopupmenu1
     bounds_x = 0
     bounds_y = 0
@@ -160,6 +165,7 @@ object componentstorefo: tcomponentstorefo
       frame.levelo = 0
       frame.colorclient = -2147483645
       frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
+      frame.localprops1 = []
       taborder = 1
       onenter = nodeenter
       onexit = nodeexit
@@ -201,7 +207,6 @@ object componentstorefo: tcomponentstorefo
           )
           fade_direction = gd_down
           localprops = [fal_fadirection]
-          dummy = 0
         end>
       onsetvalue = setval
     end
@@ -210,6 +215,13 @@ object componentstorefo: tcomponentstorefo
       frame.levelo = 0
       frame.colorclient = -2147483645
       frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
+      frame.localprops1 = []
+      frame.buttons.count = 1
+      frame.buttons.items = <      
+        item
+          color = -2147483646
+          imagenr = 17
+        end>
       frame.button.color = -2147483646
       frame.button.imagenr = 17
       taborder = 3
@@ -229,6 +241,13 @@ object componentstorefo: tcomponentstorefo
       frame.levelo = 0
       frame.colorclient = -2147483645
       frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
+      frame.localprops1 = []
+      frame.buttons.count = 1
+      frame.buttons.items = <      
+        item
+          color = -1879048187
+          imagenr = 17
+        end>
       frame.button.color = -1879048187
       frame.button.imagenr = 17
       taborder = 4

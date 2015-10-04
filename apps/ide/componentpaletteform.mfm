@@ -1,14 +1,17 @@
 object componentpalettefo: tcomponentpalettefo
   optionswidget = [ow_arrowfocus, ow_subfocus, ow_destroywidgets, ow_hinton]
+  frame.localprops = []
+  frame.localprops1 = []
   frame.grip_size = 10
   frame.grip_options = [go_closebutton, go_fixsizebutton, go_floatbutton, go_topbutton, go_backgroundbutton]
-  frame.dummy = 0
   visible = False
   bounds_x = 131
   bounds_y = 289
   bounds_cx = 738
   bounds_cy = 69
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets]
+  container.frame.localprops = []
+  container.frame.localprops1 = []
   container.onlayout = componentgrouponchildscaled
   container.bounds = (
     0
@@ -17,7 +20,7 @@ object componentpalettefo: tcomponentpalettefo
     69
   )
   dragdock.caption = 'Component Palette'
-  dragdock.optionsdock = [od_savepos, od_savezorder, od_canmove, od_canfloat, od_candock, od_proportional, od_propsize]
+  dragdock.optionsdock = [od_savepos, od_savezorder, od_canmove, od_canfloat, od_candock, od_proportional, od_propsize, od_captionhint]
   options = [fo_savepos, fo_savezorder, fo_savestate]
   statfile = mainfo.projectstatfile
   icon.transparentcolor = -2147483642
@@ -94,6 +97,8 @@ object componentpalettefo: tcomponentpalettefo
   object componentpalette: ttoolbar
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_hinton]
     optionsskin = [osk_container]
+    frame.localprops = []
+    frame.localprops1 = []
     taborder = 1
     bounds_x = 0
     bounds_y = 26
@@ -111,6 +116,8 @@ object componentpalettefo: tcomponentpalettefo
   object componentpages: ttabbar
     optionswidget1 = [ow1_fontglyphheight, ow1_autoscale, ow1_autoheight]
     optionswidget = [ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
+    frame.localprops = []
+    frame.localprops1 = []
     bounds_x = 0
     bounds_y = 0
     bounds_cx = 728

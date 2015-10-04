@@ -1,8 +1,9 @@
 object stackfo: tstackfo
   optionswidget = [ow_arrowfocus, ow_subfocus, ow_mousewheel, ow_destroywidgets, ow_hinton]
+  frame.localprops = []
+  frame.localprops1 = []
   frame.grip_size = 10
   frame.grip_options = [go_closebutton, go_fixsizebutton, go_floatbutton, go_topbutton, go_backgroundbutton]
-  frame.dummy = 0
   popupmenu = tpopupmenu1
   visible = False
   bounds_x = 407
@@ -11,6 +12,7 @@ object stackfo: tstackfo
   bounds_cy = 180
   container.frame.framei_right = 0
   container.frame.localprops = [frl_firight]
+  container.frame.localprops1 = []
   container.onlayout = formonchildscaled
   container.bounds = (
     0
@@ -20,7 +22,7 @@ object stackfo: tstackfo
   )
   dragdock.splitter_size = 0
   dragdock.caption = 'Stack'
-  dragdock.optionsdock = [od_savepos, od_canmove, od_canfloat, od_candock, od_proportional, od_propsize]
+  dragdock.optionsdock = [od_savepos, od_canmove, od_canfloat, od_candock, od_proportional, od_propsize, od_captionhint]
   options = [fo_savepos, fo_savestate]
   statfile = mainfo.projectstatfile
   caption = 'Stack'
@@ -105,6 +107,7 @@ object stackfo: tstackfo
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets]
     color = -1879048187
     frame.localprops = [frl_levelo, frl_colorclient]
+    frame.localprops1 = []
     taborder = 2
     bounds_x = 0
     bounds_y = 20
@@ -157,7 +160,8 @@ object stackfo: tstackfo
     reffontheight = 14
   end
   object filedisp: tstringdisp
-    frame.dummy = 0
+    frame.localprops = []
+    frame.localprops1 = []
     taborder = 1
     bounds_x = 71
     bounds_y = 0
@@ -169,7 +173,8 @@ object stackfo: tstackfo
     reffontheight = 14
   end
   object address: tstringdisp
-    frame.dummy = 0
+    frame.localprops = []
+    frame.localprops1 = []
     bounds_x = 1
     bounds_y = 0
     bounds_cx = 70

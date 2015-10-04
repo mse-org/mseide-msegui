@@ -1,9 +1,9 @@
 object watchfo: twatchfo
   optionswidget = [ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_destroywidgets]
   frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
+  frame.localprops1 = []
   frame.grip_size = 10
   frame.grip_options = [go_closebutton, go_fixsizebutton, go_floatbutton, go_topbutton, go_backgroundbutton]
-  frame.dummy = 0
   visible = False
   bounds_x = 291
   bounds_y = 247
@@ -12,6 +12,7 @@ object watchfo: twatchfo
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets]
   container.color = -2147483645
   container.frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
+  container.frame.localprops1 = []
   container.bounds = (
     0
     0
@@ -20,7 +21,7 @@ object watchfo: twatchfo
   )
   dragdock.splitter_size = 0
   dragdock.caption = 'Watches'
-  dragdock.optionsdock = [od_savepos, od_canmove, od_canfloat, od_candock, od_proportional, od_propsize]
+  dragdock.optionsdock = [od_savepos, od_canmove, od_canfloat, od_candock, od_proportional, od_propsize, od_captionhint]
   options = [fo_savepos, fo_savestate]
   statfile = mainfo.projectstatfile
   caption = 'Watches'
@@ -59,6 +60,7 @@ object watchfo: twatchfo
   object grid: twidgetgrid
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_hinton]
     frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
+    frame.localprops1 = []
     taborder = 1
     popupmenu = gripopup
     bounds_x = 0
@@ -105,7 +107,7 @@ object watchfo: twatchfo
         color = -1610612729
         name = 'stf_default'
         xscale = 1
-        dummy = 0
+        localprops = [flp_color, flp_xscale]
       end>
     datacols.count = 5
     datacols.items = <    
@@ -193,7 +195,7 @@ object watchfo: twatchfo
     object formatcode: tdatabutton
       frame.optionsskin = [fso_nofocusrect, fso_nodefaultrect]
       frame.localprops = [frl_optionsskin]
-      frame.dummy = 0
+      frame.localprops1 = []
       taborder = 4
       bounds_x = 250
       bounds_y = 0
@@ -221,7 +223,7 @@ object watchfo: twatchfo
       frame.levelo = 0
       frame.colorclient = -2147483645
       frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
-      frame.dummy = 0
+      frame.localprops1 = []
       taborder = 5
       visible = False
       bounds_x = 263
@@ -235,7 +237,7 @@ object watchfo: twatchfo
   object watcheson: tbooleanedit
     frame.caption = 'Watches &on'
     frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
-    frame.dummy = 0
+    frame.localprops1 = []
     frame.outerframe = (
       0
       1
@@ -298,7 +300,7 @@ object watchfo: twatchfo
       item
         caption = '&Format default'
         name = 'format'
-        state = [as_checked, as_localchecked, as_localcaption, as_localonexecute]
+        state = [as_localchecked, as_localcaption, as_localonexecute]
         options = [mao_radiobutton, mao_shortcutcaption]
         onexecute = formatexecute
       end    

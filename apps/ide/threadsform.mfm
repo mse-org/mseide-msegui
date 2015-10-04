@@ -1,13 +1,16 @@
 object threadsfo: tthreadsfo
   optionswidget = [ow_arrowfocus, ow_subfocus, ow_mousewheel, ow_destroywidgets, ow_hinton]
+  frame.localprops = []
+  frame.localprops1 = []
   frame.grip_size = 10
   frame.grip_options = [go_closebutton, go_fixsizebutton, go_floatbutton, go_topbutton, go_backgroundbutton]
-  frame.dummy = 0
   visible = False
   bounds_x = 37
   bounds_y = 270
   bounds_cx = 349
   bounds_cy = 276
+  container.frame.localprops = []
+  container.frame.localprops1 = []
   container.bounds = (
     0
     0
@@ -15,7 +18,7 @@ object threadsfo: tthreadsfo
     276
   )
   dragdock.caption = 'Threads'
-  dragdock.optionsdock = [od_savepos, od_canmove, od_canfloat, od_candock, od_propsize]
+  dragdock.optionsdock = [od_savepos, od_canmove, od_canfloat, od_candock, od_propsize, od_captionhint]
   options = [fo_savepos, fo_savestate]
   statfile = mainfo.projectstatfile
   caption = 'Threads'
@@ -100,6 +103,8 @@ object threadsfo: tthreadsfo
   moduleclassname = 'tdockform'
   object grid: tstringgrid
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_focusbackonesc, ow_destroywidgets]
+    frame.localprops = []
+    frame.localprops1 = []
     popupmenu = tpopupmenu1
     bounds_x = 0
     bounds_y = 0

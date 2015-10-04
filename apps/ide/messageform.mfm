@@ -1,14 +1,17 @@
 object messagefo: tmessagefo
   optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_hinton]
+  frame.localprops = []
+  frame.localprops1 = []
   frame.grip_size = 10
   frame.grip_options = [go_closebutton, go_fixsizebutton, go_floatbutton, go_topbutton, go_backgroundbutton]
-  frame.dummy = 0
   visible = False
   bounds_x = 100
   bounds_y = 100
   bounds_cx = 491
   bounds_cy = 317
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets]
+  container.frame.localprops = []
+  container.frame.localprops1 = []
   container.bounds = (
     0
     0
@@ -16,7 +19,7 @@ object messagefo: tmessagefo
     317
   )
   dragdock.caption = 'Messages'
-  dragdock.optionsdock = [od_savepos, od_savezorder, od_canmove, od_canfloat, od_candock, od_propsize]
+  dragdock.optionsdock = [od_savepos, od_savezorder, od_canmove, od_canfloat, od_candock, od_propsize, od_captionhint]
   options = [fo_savepos, fo_savezorder, fo_savestate]
   statfile = mainfo.projectstatfile
   icon.image = {
@@ -50,6 +53,8 @@ object messagefo: tmessagefo
   }
   moduleclassname = 'tdockform'
   object messages: tstringgrid
+    frame.localprops = []
+    frame.localprops1 = []
     popupmenu = tpopupmenu1
     bounds_x = 0
     bounds_y = 0
@@ -59,7 +64,7 @@ object messagefo: tmessagefo
     font.name = 'stf_default'
     font.options = [foo_antialiased]
     font.xscale = 1
-    font.dummy = 0
+    font.localprops = [flp_xscale]
     datacols.count = 1
     datacols.linewidth = 0
     datacols.items = <    

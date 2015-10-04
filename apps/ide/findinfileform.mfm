@@ -1,12 +1,15 @@
 object findinfilefo: tfindinfilefo
+  frame.localprops = []
+  frame.localprops1 = []
   frame.grip_size = 10
   frame.grip_options = [go_closebutton, go_fixsizebutton, go_topbutton]
-  frame.dummy = 0
   visible = False
   bounds_x = 548
   bounds_y = 115
   bounds_cx = 369
   bounds_cy = 198
+  container.frame.localprops = []
+  container.frame.localprops1 = []
   container.bounds = (
     0
     0
@@ -15,7 +18,7 @@ object findinfilefo: tfindinfilefo
   )
   dragdock.splitter_size = 0
   dragdock.caption = 'Findresults'
-  dragdock.optionsdock = [od_savepos, od_savezorder, od_canmove, od_canfloat, od_candock, od_propsize]
+  dragdock.optionsdock = [od_savepos, od_savezorder, od_canmove, od_canfloat, od_candock, od_propsize, od_captionhint]
   options = [fo_savepos, fo_savezorder]
   statfile = mainfo.projectstatfile
   caption = 'Find in file results'
@@ -101,6 +104,8 @@ object findinfilefo: tfindinfilefo
     anchors = []
     tab_options = [tabo_dragsource, tabo_dragdest, tabo_opposite, tabo_dblclickedtabfirst, tabo_hintclippedtext]
     tab_frame.buttonslast = True
+    tab_frame.localprops = []
+    tab_frame.localprops1 = []
     tab_size = 18
   end
 end

@@ -17,7 +17,7 @@ object targetconsolefo: ttargetconsolefo
     358
     137
   )
-  dragdock.optionsdock = [od_savepos, od_canmove, od_canfloat, od_candock, od_propsize]
+  dragdock.optionsdock = [od_savepos, od_canmove, od_canfloat, od_candock, od_propsize, od_captionhint]
   options = [fo_savepos, fo_savestate]
   statfile = mainfo.projectstatfile
   caption = 'Target Console'

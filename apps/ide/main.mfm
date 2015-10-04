@@ -25,7 +25,7 @@ object mainfo: tmainfo
     449
     133
   )
-  dragdock.optionsdock = [od_savepos, od_savezorder, od_canmove, od_cansize, od_canfloat, od_candock]
+  dragdock.optionsdock = [od_savepos, od_savezorder, od_canmove, od_cansize, od_canfloat, od_candock, od_captionhint]
   optionswindow = [wo_taskbar]
   mainmenu = mainmenu1
   options = [fo_main, fo_terminateonclose, fo_globalshortcuts, fo_savepos, fo_savezorder, fo_savestate]
@@ -48,7 +48,7 @@ object mainfo: tmainfo
     bounds_cx = 449
     bounds_cy = 114
     anchors = [an_top, an_bottom]
-    dragdock.optionsdock = [od_acceptsdock, od_splitvert, od_splithorz, od_tabed, od_proportional, od_background]
+    dragdock.optionsdock = [od_acceptsdock, od_splitvert, od_splithorz, od_tabed, od_proportional, od_background, od_captionhint]
     statfile = projectstatfile
   end
   object statdisp: tstringdisp

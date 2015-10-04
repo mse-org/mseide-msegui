@@ -20,7 +20,7 @@ inherited reportdesignerfo: treportdesignerfo
   object dialh: tdial[0]
     color = -1879048185
     frame.localprops = [frl_fileft]
-    frame.dummy = 0
+    frame.localprops1 = []
     taborder = 4
     bounds_x = 7
     bounds_y = 18
@@ -66,6 +66,8 @@ inherited reportdesignerfo: treportdesignerfo
     optionswidget1 = [ow1_fontglyphheight, ow1_autoscale, ow1_autoheight]
     optionswidget = [ow_mousewheel, ow_destroywidgets]
     color = -1879048187
+    frame.localprops = []
+    frame.localprops1 = []
     bounds_x = 120
     bounds_y = 0
     bounds_cx = 221
@@ -83,6 +85,7 @@ inherited reportdesignerfo: treportdesignerfo
     frame.optionsscroll = [oscr_drag, oscr_key, oscr_mousewheel]
     frame.colorclient = -1610612730
     frame.localprops = [frl_colorclient]
+    frame.localprops1 = []
     taborder = 1
     bounds_x = 7
     bounds_y = 25
@@ -167,7 +170,8 @@ inherited reportdesignerfo: treportdesignerfo
   end
   object xdisp: trealdisp[7]
     color = -1879048187
-    frame.dummy = 0
+    frame.localprops = []
+    frame.localprops1 = []
     taborder = 7
     bounds_x = 52
     bounds_y = 0
@@ -182,7 +186,8 @@ inherited reportdesignerfo: treportdesignerfo
   end
   object ydisp: trealdisp[8]
     color = -1879048187
-    frame.dummy = 0
+    frame.localprops = []
+    frame.localprops1 = []
     taborder = 8
     bounds_x = 0
     bounds_y = 0
