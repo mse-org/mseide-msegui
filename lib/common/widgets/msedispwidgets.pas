@@ -140,7 +140,7 @@ type
    procedure fontchanged; override;
    procedure internalcreateframe; override;
    procedure doloaded; override;
-   procedure showhint(var info: hintinfoty); override;
+   procedure showhint(const aid: int32; var info: hintinfoty); override;
    procedure enabledchanged; override;
    function verticalfontheightdelta: boolean; override;
    class function classskininfo: skininfoty; override;
@@ -614,7 +614,7 @@ begin
  valuechanged;
 end;
 
-procedure tdispwidget.showhint(var info: hintinfoty);
+procedure tdispwidget.showhint(const aid: int32; var info: hintinfoty);
 begin
  if (dwo_hintclippedtext in foptions) and getshowhint and 
                                    textclipped(getcanvas,finfo) then begin

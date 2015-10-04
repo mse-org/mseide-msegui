@@ -431,7 +431,7 @@ type
 //   procedure doafterpaint(const canvas: tcanvas); override;
    procedure rootchanged(const aflags: rootchangeflagsty); override;
    function gettextcliprect(): rectty; virtual;
-   procedure showhint(var info: hintinfoty); override;
+   procedure showhint(const aid: int32; var info: hintinfoty); override;
 
    procedure dochange; virtual;
    procedure internaltextedited(const aevent: texteditedeventty);
@@ -1813,7 +1813,7 @@ begin
  result:= clippedpaintrect();
 end;
 
-procedure tcustomedit.showhint(var info: hintinfoty);
+procedure tcustomedit.showhint(const aid: int32; var info: hintinfoty);
 begin
  if (oe_hintclippedtext in foptionsedit) and 
           editor.lasttextclipped(gettextcliprect) and getshowhint then begin

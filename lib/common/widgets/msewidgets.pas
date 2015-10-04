@@ -746,7 +746,7 @@ type
    procedure doonpaint(const canvas: tcanvas); override;
    procedure doafterpaint(const canvas: tcanvas); override;
 
-   procedure showhint(var info: hintinfoty); override;
+   procedure showhint(const aid: int32; var info: hintinfoty); override;
    procedure getpopuppos(var apos: pointty); virtual;
    procedure updatepopupmenu(var amenu: tpopupmenu;
                                    var mouseinfo: mouseeventinfoty); virtual;
@@ -1136,10 +1136,16 @@ type
    constructor create(aowner: tcomponent; transientfor: twindow); reintroduce; overload;
  end;
 
+ const
+  defaultoptionshintwidget = defaultoptionstoplevelwidget + [ow_top];
+  
+type
  tcustomhintwidget = class(tpopupwidget)
   public
    constructor create(const aowner: tcomponent; const transientfor: twindow;
              var info: hintinfoty; const sender: tobject); virtual; reintroduce;
+  published
+   property optionswidget default defaultoptionshintwidget;
  end;
  hintwidgetclassty = class of tcustomhintwidget;
  
@@ -5197,7 +5203,7 @@ begin
  inherited;
 end;
 
-procedure tactionwidget.showhint(var info: hintinfoty);
+procedure tactionwidget.showhint(const aid: int32; var info: hintinfoty);
 begin
  inherited;
  if canevent(tmethod(fonshowhint)) then begin
@@ -5407,7 +5413,7 @@ constructor ttoplevelwidget.create(aowner: tcomponent);
 begin
  inherited;
  visible:= false;
- optionswidget:= defaultoptionstoplevelwidget;
+ foptionswidget:= defaultoptionstoplevelwidget;
  optionsskin:= defaultcontainerskinoptions;
 // fcolor:= cl_background;
 end;
@@ -5708,6 +5714,7 @@ var
  rect1,rect2: rectty;
 begin
  inherited create(aowner,transientfor);
+ foptionswidget:= defaultoptionshintwidget;
  internalcreateframe;
  fframe.levelo:= 1;
  fframe.framei_left:= 1;

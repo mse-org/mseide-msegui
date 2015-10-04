@@ -41,6 +41,12 @@ const
  mindragdist = 4;
 
  mousebuttons = [ss_left,ss_right,ss_middle];
+ 
+  //hintid values, user values > 0
+ hintidnone = 0;
+  //internal ranges
+ hintidwidget = -1;
+ hintidframe = -100;
 
 type
 
@@ -299,6 +305,7 @@ type
   showtime: integer;
   mouserefpos: pointty;
   hintwidgetclass: widgetclassty;
+//  id: int32;
  end;
 
  showhinteventty = procedure(const sender: tobject; var info: hintinfoty) of object;
@@ -555,7 +562,7 @@ type
    function needsmouseenterinvalidate: boolean;
    procedure activechanged; virtual;
    function needsfocuspaint: boolean; virtual;
-   function ishintarea(const apos: pointty): boolean; virtual;
+   function ishintarea(const apos: pointty; var aid: int32): boolean; virtual;
    procedure checkminscrollsize(var asize: sizety); virtual;
    procedure checkminclientsize(var asize: sizety); virtual;
    class procedure drawframe(const canvas: tcanvas; const rect2: rectty; 
@@ -569,7 +576,8 @@ type
    procedure scale(const ascale: real); virtual;
    procedure checkwidgetsize(var asize: sizety); virtual;
                 //extends to minimal size
-
+   procedure showhint(const aid: int32; var info: hintinfoty); virtual;
+   
    procedure paintbackground(const canvas: tcanvas;
              const arect: rectty; const clipandmove: boolean); virtual;
    procedure paintoverlay(const canvas: tcanvas; const arect: rectty); virtual;
@@ -1483,7 +1491,7 @@ type
    procedure sethint(const Value: msestring); virtual;
    function ishintstored: boolean; virtual;
    function getshowhint: boolean;
-   procedure showhint(var info: hintinfoty); virtual;
+   procedure showhint(const aid: int32; var info: hintinfoty); virtual;
 
    function isgroupleader: boolean; virtual;
    function needsfocuspaint: boolean; virtual;
@@ -2447,6 +2455,7 @@ type
    fkeyboardcapturewidget: twidget;
    fclientmousewidget: twidget;
    fhintedwidget: twidget;
+   fhintedid: int32;
    fhintforwidget: twidget;
    fhintinfo: hintinfoty;
    fmainwindow: twindow;
@@ -4025,9 +4034,10 @@ begin
  result:= fs_drawfocusrect in fstate;
 end;
 
-function tcustomframe.ishintarea(const apos: pointty): boolean;
+function tcustomframe.ishintarea(const apos: pointty; var aid: int32): boolean;
 begin
- result:= (fs_captionhint in fstate) and pointincaption(apos);
+ result:= pointinrect(apos,fpaintrect) or 
+                         (fs_captionhint in fstate) and pointincaption(apos);
 end;
 
 function calcframestateoffs(const astate: framestateflagsty; 
@@ -5427,6 +5437,11 @@ begin
 end;
 
 procedure tcustomframe.checkwidgetsize(var asize: sizety);
+begin
+ //dummy
+end;
+
+procedure tcustomframe.showhint(const aid: int32; var info: hintinfoty);
 begin
  //dummy
 end;
@@ -8766,14 +8781,19 @@ begin
        ((fparentwidget = nil) or fparentwidget.getshowhint);
 end;
 
-procedure twidget.showhint(var info: hintinfoty);
+procedure twidget.showhint(const aid: int32; var info: hintinfoty);
 var
  mstr1: msestring;
 begin
  if getshowhint and not(csdesigning in componentstate) then begin
-  mstr1:= hint;
-  if mstr1 <> '' then begin
-   info.caption:= mstr1;
+  if (aid <= hintidframe) and (fframe <> nil) then begin
+   fframe.showhint(aid,info);
+  end
+  else begin
+   mstr1:= hint;
+   if mstr1 <> '' then begin
+    info.caption:= mstr1;
+   end;
   end;
  end;
 end;
@@ -16283,6 +16303,7 @@ var
  bo1: boolean;
  widget1: twidget;
  pt1: pointty;
+ hintid1: int32;
 begin
  try
   with event do begin
@@ -16449,6 +16470,7 @@ begin
       widget1:= widget1.widgetatpos(info.mouse.pos);
               //search diabled child
      end;
+     hintid1:= hintidwidget;
      while (widget1 <> nil) and 
        ((ow_mousetransparent in widget1.foptionswidget) or 
          not widget1.isvisible or
@@ -16461,8 +16483,7 @@ begin
        with widget1.fframe do begin
         checkstate;
         pt1:= translatewidgetpoint(abspos,nil,widget1);
-        if not ishintarea(pt1) and not pointinrect(pt1,fpaintrect) then begin
-               //first because there can be state changes by call
+        if not ishintarea(pt1,hintid1) then begin
          widget1:= nil;
         end;
        end;
@@ -16471,12 +16492,13 @@ begin
      if kind in [ek_buttonpress,ek_buttonrelease] then begin
       deactivatehint; //cancel possible hint
      end;
-     if (widget1 <> fhintedwidget) then begin
+     if (widget1 <> fhintedwidget) or (hintid1 <> fhintedid) then begin
       if (widget1 <> fhintwidget) and
                 (fhintedwidget <> nil) or (fhintwidget = nil) then begin
        deactivatehint;
        fhintedwidget:= widget1;
        if fhintedwidget <> nil then begin
+        fhintedid:= hintid1;
         fhinttimer.interval:= hintdelaytime;
         fhinttimer.enabled:= true;
        end;
@@ -18846,7 +18868,7 @@ begin
  deactivatehint;
  if (fhintedwidget <> nil) and (factivewindow <> nil) then begin
   inithintinfo(fhintinfo,fhintedwidget);
-  fhintedwidget.showhint(fhintinfo);
+  fhintedwidget.showhint(fhintedid,fhintinfo);
   with fhintinfo do begin
    if (hfl_show in flags) or (caption <> '') then begin
     translateclientpoint1(posrect.pos,fhintedwidget,nil);

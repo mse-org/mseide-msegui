@@ -98,7 +98,7 @@ type
    procedure fontchanged; override;
    procedure internalcreateframe; override;
    function activateoptionset: boolean;
-   procedure showhint(var info: hintinfoty); override;   
+   procedure showhint(const aid: int32; var info: hintinfoty); override;   
    function trycancelmodal(const newactive: twindow): boolean; override;
    
    procedure release1(const acancelmodal: boolean); virtual;
@@ -1723,20 +1723,14 @@ begin
  result:= (fmenucomp <> nil) and (mo_activate in fmenucomp.options);
 end;
 
-procedure tpopupmenuwidget.showhint(var info: hintinfoty);
+procedure tpopupmenuwidget.showhint(const aid: int32; var info: hintinfoty);
 begin
  inherited;
  with flayout do begin
-  if (activeitem >= 0) and tmenuitem1(menu.items[activeitem]).canshowhint then begin
+  if (activeitem >= 0) and 
+                     tmenuitem1(menu.items[activeitem]).canshowhint then begin
    info.caption:= menu.items[activeitem].hint;
   end;
-  {
-  else begin
-   if tmenuitem1(menu).canshowhint then begin
-    info.caption:= menu.hint;
-   end;
-  end;
-  }
  end;
 end;
 

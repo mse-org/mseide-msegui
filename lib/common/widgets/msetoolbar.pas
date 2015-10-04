@@ -344,7 +344,7 @@ type
    procedure clientrectchanged; override;
    procedure dopaintforeground(const canvas: tcanvas); override;
    procedure clientmouseevent(var info: mouseeventinfoty); override;
-   procedure showhint(var info: hintinfoty); override;
+   procedure showhint(const aid: int32; var info: hintinfoty); override;
    function dostep(const event: stepkindty; const adelta: real;
                       ashiftstate: shiftstatesty): boolean; override;
    procedure doshortcut(var info: keyeventinfoty; const sender: twidget); override;
@@ -1610,7 +1610,7 @@ begin
  end;
 end;
 
-procedure tcustomtoolbar.showhint(var info: hintinfoty);
+procedure tcustomtoolbar.showhint(const aid: int32; var info: hintinfoty);
 begin
  inherited;
 end;

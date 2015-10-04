@@ -224,8 +224,6 @@ type
    //idockcontroller
    function checkdock(var info: draginfoty): boolean;
    function getbuttonrects(const index: dockbuttonrectty): rectty;  
-   function notinhintarea(): boolean;
-   procedure resetnotinhintarea();
    function getplacementrect: rectty;
    function getminimizedsize(out apos: captionposty): sizety;
    procedure dolayoutchanged(const sender: tdockcontroller); virtual;
@@ -1710,24 +1708,6 @@ begin
   result:= tgripframe(fframe).buttonrects[index];
  end;
 end;
-
-function tcustommseform.notinhintarea: boolean;
-begin
- if fframe = nil then begin
-  result:= false;
- end
- else begin
-  result:= tgripframe(fframe).notinhintarea();
- end;
-end;
-
-procedure tcustommseform.resetnotinhintarea();
-begin
- if fframe <> nil then begin
-  tgripframe(fframe).resetnotinhintarea();
- end;
-end;
-
 
 function tcustommseform.getplacementrect: rectty;
 begin
