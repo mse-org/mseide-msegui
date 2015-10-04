@@ -3682,8 +3682,11 @@ begin
   end;
  end
  else begin
-  with twidget1(fintf.getwidget.container) do begin
-   result:= copy(fwidgets);
+  if fsplitdir = sd_horz then begin
+   result:= fintf.getwidget.getsortxchildren();
+  end
+  else begin
+   result:= fintf.getwidget.getsortychildren();
   end;
  end;
 end;
@@ -4111,7 +4114,7 @@ end;
 procedure tgripframe.showhint(const aid: int32; var info: hintinfoty);
 begin
  if -(aid - hintidframe) = ord(dbr_handle) then begin
-  info.caption:= fcontroller.caption;
+  info.caption:= fcontroller.getfloatcaption;
  end;
 end;
 
