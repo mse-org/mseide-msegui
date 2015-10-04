@@ -36,17 +36,17 @@ type
             od_propsize,od_fixsize,od_top,od_background,
             od_alignbegin,od_aligncenter,od_alignend,
             od_nofit,od_banded,od_nosplitsize,od_nosplitmove,
-            od_lock,od_thumbtrack,od_captionhint);
+            od_lock,od_thumbtrack,od_captionhint,od_nolock);
  optionsdockty = set of optiondockty;
 
  dockbuttonrectty = (dbr_none,dbr_handle,dbr_close,dbr_maximize,dbr_normalize,
                      dbr_minimize,dbr_fixsize,dbr_float,
-                     dbr_top,dbr_background,dbr_lock);
+                     dbr_top,dbr_background,dbr_lock,dbr_nolock);
 const
  defaultoptionsdock = [od_savepos,od_savezorder,od_savechildren,od_captionhint];
  defaultoptionsdocknochildren = defaultoptionsdock - [od_savechildren];
  dbr_first = dbr_handle;
- dbr_last = dbr_lock;
+ dbr_last = dbr_nolock;
  defaulttaboptions= [tabo_dragdest,tabo_dragsource];
  
 type
@@ -128,7 +128,7 @@ type
                     dos_normalizebuttonclicked,dos_minimizebuttonclicked,
                     dos_fixsizebuttonclicked,dos_floatbuttonclicked,
                     dos_topbuttonclicked,dos_backgroundbuttonclicked,
-                    dos_lockbuttonclicked,
+                    dos_lockbuttonclicked,dos_nolockbuttonclicked,
                     dos_moving,dos_hasfloatbutton,
                     {dos_proprefvalid,}dos_showed,dos_xorpic);
  dockstatesty = set of dockstatety;
@@ -442,7 +442,7 @@ type
                  go_maximizebutton,
                  go_fixsizebutton,
                  go_floatbutton,go_topbutton,go_backgroundbutton,
-                 go_lockbutton,
+                 go_lockbutton,go_unlockbutton,
                  go_horz,go_vert,go_opposite,go_showsplitcaption,
                  go_showfloatcaption);
  gripoptionsty = set of gripoptionty;
@@ -639,7 +639,8 @@ type
  tface1 = class(tface);
 
 const
- useroptionsmask: optionsdockty = [od_fixsize,od_top,od_background,od_lock];
+ useroptionsmask: optionsdockty = [od_fixsize,od_top,od_background,
+                                                          od_lock,od_nolock];
 
 type
  tchildorderevent = class(tobjectevent)
@@ -1754,7 +1755,7 @@ begin
            {$ifdef FPC}longword{$else}longword{$endif}(avalue),
            {$ifdef FPC}longword{$else}longword{$endif}(foptionsdock),
            {$ifdef FPC}longword{$else}longword{$endif}(useroptionsmask)));
- if (od_lock in foptionsdock) xor (od_lock in optbefore) then begin
+ if (foptionsdock >< optbefore) * [od_lock,od_nolock] <> [] then begin
   widget1:= twidget1(fintf.getwidget);
   if not widget1.isloading then begin
    widget1.parentchanged;
@@ -2547,8 +2548,9 @@ function tdockcontroller.nogrip: boolean;
 var
  parent: tdockcontroller;
 begin
- result:= (od_lock in foptionsdock) or getparentcontroller(parent) and 
-                            parent.nogrip;
+ result:= (od_lock in foptionsdock) or 
+         not (od_nolock in foptionsdock) and getparentcontroller(parent) and 
+                                                                 parent.nogrip;
 end;
 
 procedure tdockcontroller.refused(const apos: pointty);
@@ -3374,7 +3376,8 @@ const
         [dos_closebuttonclicked,dos_maximizebuttonclicked,
           dos_normalizebuttonclicked,dos_minimizebuttonclicked,
           dos_fixsizebuttonclicked,dos_floatbuttonclicked,dos_topbuttonclicked,
-          dos_backgroundbuttonclicked,dos_lockbuttonclicked,dos_moving];
+          dos_backgroundbuttonclicked,
+          dos_lockbuttonclicked,dos_nolockbuttonclicked,dos_moving];
 
 begin
  inherited;
@@ -3461,6 +3464,7 @@ begin
         dbr_top: include(fdockstate,dos_topbuttonclicked);
         dbr_background: include(fdockstate,dos_backgroundbuttonclicked);
         dbr_lock: include(fdockstate,dos_lockbuttonclicked);
+        dbr_nolock: include(fdockstate,dos_nolockbuttonclicked);
        end;
       end;
      end;
@@ -3523,6 +3527,14 @@ begin
          useroptions:= optionsdockty(
           togglebit({$ifdef FPC}longword{$else}longword{$endif}(fuseroptions),
           ord(od_lock)));
+         widget1.invalidatewidget;
+        end;
+       end;
+       dbr_nolock: begin
+        if (dos_nolockbuttonclicked in fdockstate) then begin
+         useroptions:= optionsdockty(
+          togglebit({$ifdef FPC}longword{$else}longword{$endif}(fuseroptions),
+          ord(od_nolock)));
          widget1.invalidatewidget;
         end;
        end;
@@ -4228,6 +4240,13 @@ begin
     drawellipse1(makerect(arect.x+2,arect.y+2,arect.cx-5,arect.cy-5),
                                                                acolorglyph);
    end;
+   dbr_nolock: begin
+    draw3dframe(acanvas,arect,calclevel(od_nolock),defaultframecolors,[]);
+    fillellipse1(makerect(arect.x+2,arect.y+2,arect.cx-5,arect.cy-5),
+                                                               acolorglyph);
+    drawellipse1(makerect(arect.x+2,arect.y+2,arect.cx-5,arect.cy-5),
+                                                               acolorglyph);
+   end;
   end;
  end;  
 end;
@@ -4300,6 +4319,11 @@ begin
    if (frects[dbr_lock].cx > 0) and 
                            (go_lockbutton in fgrip_options) then begin
     drawgripbutton(canvas,dbr_lock,frects[dbr_lock],colorglyph,
+                                                                 colorbutton);
+   end;
+   if (frects[dbr_nolock].cx > 0) and 
+                           (go_unlockbutton in fgrip_options) then begin
+    drawgripbutton(canvas,dbr_nolock,frects[dbr_nolock],colorglyph,
                                                                  colorbutton);
    end;
    rect1:= frects[dbr_handle];
@@ -4551,7 +4575,8 @@ var
 begin
  if not (grps_sizevalid in fgripstate) then begin
   factgripsize:= fgrip_size;
-  if fcontroller.getparentcontroller(parentcontroller) and 
+  if not (od_nolock in fcontroller.foptionsdock) and 
+              fcontroller.getparentcontroller(parentcontroller) and 
                                          parentcontroller.nogrip then begin
    factgripsize:= 0;
   end;
@@ -4667,6 +4692,9 @@ begin
   end;
   if go_lockbutton in fgrip_options then begin
    initrect(dbr_lock);
+  end;
+  if go_unlockbutton in fgrip_options then begin
+   initrect(dbr_nolock);
   end;
  end;
 end;
