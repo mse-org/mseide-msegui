@@ -4681,6 +4681,10 @@ begin
    if (go_floatbutton in fgrip_options) then begin
     initrect(dbr_float);
    end;
+   if (go_nolockbutton in fgrip_options) and 
+                        (fcontroller.getparentcontroller <> nil) then begin
+    initrect(dbr_nolock);
+   end;
   end;
   if bo2 then begin
    if go_topbutton in fgrip_options then begin
@@ -4692,9 +4696,6 @@ begin
   end;
   if go_lockbutton in fgrip_options then begin
    initrect(dbr_lock);
-  end;
-  if go_nolockbutton in fgrip_options then begin
-   initrect(dbr_nolock);
   end;
  end;
 end;
