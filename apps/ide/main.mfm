@@ -3,7 +3,7 @@ object mainfo: tmainfo
   frame.localprops = []
   frame.localprops1 = []
   frame.grip_size = 10
-  frame.grip_options = [go_fixsizebutton, go_topbutton, go_backgroundbutton, go_lockbutton, go_nolockbutton]
+  frame.grip_options = [go_fixsizebutton, go_floatbutton, go_topbutton, go_backgroundbutton, go_lockbutton, go_nolockbutton]
   visible = False
   bounds_x = 45
   bounds_y = 165
