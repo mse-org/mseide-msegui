@@ -22,7 +22,7 @@ uses
  mseevent,mseglob,mseguiglob,msestat,msestatfile,
  mseinplaceedit,msegrids,msetypes,mseshapes,msewidgets,
  msedrawtext,classes,mclasses,msereal,mseclasses,msearrayprops,
- msebitmap,msemenus,msetimer,
+ msebitmap,msemenus,msetimer,mseactions,
  msesimplewidgets,msepointer,msestrings,msescrollbar
          {$ifdef mse_with_ifi},mseifiglob{$endif};
 
@@ -215,6 +215,7 @@ type
    fbuttonwidth: integer;
    foptions: framebuttonoptionsty;
    fonexecute: notifyeventty;
+   faction: taction;
    procedure setbuttonwidth(const Value: integer);
    procedure setoptions(const Value: framebuttonoptionsty);
    procedure optionstostate();
@@ -249,6 +250,7 @@ type
    function getwidget: twidget;
    function getframestateflags: framestateflagsty; virtual;
    function getimagelist: timagelist;
+   procedure setaction(const avalue: taction);
   protected
    fframerect: rectty;
    finfo: shapeinfoty;
@@ -279,6 +281,7 @@ type
    property imagenr: imagenrty read finfo.ca.imagenr write setimagenr default -1;
    property options: framebuttonoptionsty read foptions write setoptions
                                             default [];
+   property action: taction read faction write setaction;
    property onexecute: notifyeventty read fonexecute write fonexecute;
  end;
 
@@ -613,6 +616,7 @@ end;
 destructor tframebutton.destroy;
 begin
  inherited;
+ action:= nil; //remove link
  finfo.face.free;
  fframe.free;
 end;
@@ -727,7 +731,7 @@ procedure tframebutton.mouseevent(var info: mouseeventinfoty;
      const intf: iframe; const buttonintf: ibutton; const index: integer);
 var
  bo1: boolean;
- action: buttonactionty;
+ action1: buttonactionty;
 begin
  with finfo do begin
   bo1:= shs_clicked in state;
@@ -736,21 +740,26 @@ begin
   end;
   if shs_clicked in state then begin
    if not bo1 then begin
-    action:= ba_buttonpress;
-    buttonintf.buttonaction(action,index);
+    action1:= ba_buttonpress;
+    buttonintf.buttonaction(action1,index);
    end;
   end
   else begin
    if bo1 then begin
-    action:= ba_buttonrelease;
-    buttonintf.buttonaction(action,index);
+    action1:= ba_buttonrelease;
+    buttonintf.buttonaction(action1,index);
    end;
   end;
   if bo1 and (info.eventkind = ek_buttonrelease) then begin
-   action:= ba_click;
-   buttonintf.buttonaction(action,index);
-   if assigned(fonexecute) and (action = ba_click) then begin
-    fonexecute(self);
+   action1:= ba_click;
+   buttonintf.buttonaction(action1,index);
+   if action1 = ba_click then begin
+    if faction <> nil then begin
+     faction.execute();
+    end;
+    if assigned(fonexecute) then begin
+     fonexecute(self);
+    end;
    end;
   end;
  end;
@@ -923,6 +932,12 @@ end;
 function tframebutton.getimagelist: timagelist;
 begin
  result:= finfo.ca.imagelist;
+end;
+
+procedure tframebutton.setaction(const avalue: taction);
+begin
+ twidget1(iframe(tcustombuttonsframe(fowner).fintf).getwidget).
+                          setlinkedvar(avalue,tmsecomponent(faction));
 end;
 
 { tstockglyphframebutton}

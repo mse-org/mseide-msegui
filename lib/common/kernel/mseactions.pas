@@ -43,9 +43,9 @@ type
    procedure writesc(writer: twriter);
    procedure readsc1(reader: treader);
    procedure writesc1(writer: twriter);
-  //iimagelistinfo
+    //iimagelistinfo
    function getimagelist: timagelist;
-  //iactionlink
+    //iactionlink
    function getactioninfopo: pactioninfoty;
    procedure actionchanged;
    function shortcutseparator: msechar;
