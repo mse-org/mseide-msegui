@@ -229,12 +229,13 @@ type
    procedure setcolor(const avalue: colorty);
    procedure setcolorglyph(const avalue: colorty);
    procedure setimagelist(const Value: timagelist);
-   procedure setimagenr(const Value: imagenrty);
+   procedure setimagenr(const avalue: imagenrty);
+   procedure setimagenrdisabled(const avalue: imagenrty);
    function getface: tface;
    procedure setface(const avalue: tface);
    function getframe: tframe;
    procedure setframe(const avalue: tframe);
-   //iframe
+    //iframe
    procedure setframeinstance(instance: tcustomframe);
    procedure setstaticframe(value: boolean);
    function getstaticframe: boolean;
@@ -278,7 +279,10 @@ type
    property face: tface read getface write setface;
    property frame: tframe read getframe write setframe;
    property imagelist: timagelist read finfo.ca.imagelist write setimagelist;
-   property imagenr: imagenrty read finfo.ca.imagenr write setimagenr default -1;
+   property imagenr: imagenrty read finfo.ca.imagenr write setimagenr 
+                                                                  default -1;
+   property imagenrdisabled: imagenrty read finfo.imagenrdisabled 
+                                 write setimagenrdisabled default -2; //grayed
    property options: framebuttonoptionsty read foptions write setoptions
                                             default [];
    property action: taction read faction write setaction;
@@ -772,13 +776,22 @@ begin
  changed;
 end;
 
-procedure tframebutton.setimagenr(const Value: imagenrty);
+procedure tframebutton.setimagenr(const avalue: imagenrty);
 begin
- if finfo.ca.imagenr <> value then begin
-  finfo.ca.imagenr := Value;
+ if finfo.ca.imagenr <> avalue then begin
+  finfo.ca.imagenr := avalue;
   changed;
  end;
 end;
+
+procedure tframebutton.setimagenrdisabled(const avalue: imagenrty);
+begin
+ if finfo.imagenrdisabled <> avalue then begin
+  finfo.imagenrdisabled := avalue;
+  changed;
+ end;
+end;
+
 
 procedure tframebutton.createface;
 begin
@@ -1037,6 +1050,7 @@ begin
    end;
   end;
  end;
+ updatewidgetstate(); //restore disabled state
 end;
 
 procedure tframebuttons.checkcount(var acount: integer);
