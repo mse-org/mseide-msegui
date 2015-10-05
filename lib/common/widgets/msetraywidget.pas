@@ -29,7 +29,7 @@ type
    procedure setcaption(const avalue: msestring);
   protected
   {$ifdef mswindows}
-   procedure showhint(var info: hintinfoty); override;
+   procedure showhint(const aid: int32; var info: hintinfoty); override;
   {$endif}
    procedure dotimer(const sender: tobject);
    procedure settrayhint;
@@ -272,7 +272,7 @@ begin
 end;
 
 {$ifdef mswindows}
-procedure ttraywidget.showhint(var info: hintinfoty);
+procedure ttraywidget.showhint(const aid: int32; var info: hintinfoty);
 begin
  //dummy;
 end;
