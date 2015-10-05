@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2014 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2015 by Martin Schreiber
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -138,6 +138,22 @@ type
    function getinvisibleitems: tintegerset; override;
  end;
  
+ tframebuttoneditor = class(tclasspropertyeditor)
+  protected
+   function dispname: msestring; override;
+ end;
+
+ tframebuttonitemeditor = class(tclasselementeditor)
+  public
+   function dispname: msestring; override;
+ end;
+ 
+ tframebuttonseditor = class(tpersistentarraypropertyeditor)
+  protected
+   function geteditorclass: propertyeditorclassty; override;  
+  public
+ end;
+  
 const
  mseformintf: designmoduleintfty = 
   (createfunc: {$ifdef FPC}@{$endif}createmseform;
@@ -237,6 +253,10 @@ begin
                                            tcoloptionseditor);
  registerpropertyeditor(typeinfo(optionsgridty),nil,'',
                                            tgridoptionseditor);
+ registerpropertyeditor(typeinfo(tframebutton),nil,'',
+                                           tframebuttoneditor);
+ registerpropertyeditor(typeinfo(tframebuttons),nil,'',
+                                           tframebuttonseditor);
   
  registerunitgroup(['msegrids'],['msegui','msegraphutils','mseclasses']);
  registerunitgroup(['msewidgetgrid'],['msedataedits',
@@ -419,6 +439,41 @@ end;
 function tgridoptionseditor.getinvisibleitems: tintegerset;
 begin
  result:= invisibleoptionsgrid;
+end;
+
+{ tframebuttoneditor }
+
+function tframebuttoneditor.dispname(): msestring;
+begin
+ with tframebutton(getpointervalue()) do begin
+  if action <> nil then begin
+   result:= msestring(action.name);
+  end
+  else begin
+   result:= inherited dispname();
+  end;
+ end;
+end;
+
+{ tframebuttonitemeditor }
+
+function tframebuttonitemeditor.dispname: msestring;
+begin
+ with tframebutton(getpointervalue()) do begin
+  if action <> nil then begin
+   result:= msestring(action.name);
+  end
+  else begin
+   result:= inherited dispname();
+  end;
+ end;
+end;
+
+{ tframebuttonseditor }
+
+function tframebuttonseditor.geteditorclass: propertyeditorclassty;
+begin
+ result:= tframebuttonitemeditor;
 end;
 
 initialization

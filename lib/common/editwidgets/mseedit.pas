@@ -283,6 +283,7 @@ type
                                             default [];
    property action: taction read faction write setaction;
    property onexecute: notifyeventty read fonexecute write fonexecute;
+                                //executed after action execute
  end;
 
  tstockglyphframebutton = class(tframebutton)
