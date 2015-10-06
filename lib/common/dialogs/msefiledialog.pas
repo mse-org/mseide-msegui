@@ -317,6 +317,7 @@ type
    property sysvalue: filenamety read getsysvalue write setsysvalue;
    property sysvaluequoted: filenamety read getsysvaluequoted write setsysvalue;
   published
+   property optionsedit1 default defaultfiledialogoptionsedit1;
 //   property dialogkind: filedialogkindty read fdialogkind write fdialogkind default fdk_open;
  end;
 
@@ -2155,6 +2156,7 @@ constructor tcustomfilenameedit1.create(aowner: tcomponent);
 begin
 // fcontroller:= tfiledialogcontroller.create(self,{$ifdef FPC}@{$endif}formatchanged);
  inherited;
+ optionsedit1:= defaultfiledialogoptionsedit1;
 end;
 
 destructor tcustomfilenameedit1.destroy;
