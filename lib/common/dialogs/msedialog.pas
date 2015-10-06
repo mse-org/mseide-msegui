@@ -48,8 +48,9 @@ type
   protected
    fowner: tcustomdataedit;
    procedure internalexecute; virtual; abstract;
-   procedure buttonaction(var action: buttonactionty; const buttonindex: integer);
    function iskeyexecute(const info: keyeventinfoty): boolean; virtual;
+     //ibutton
+   procedure buttonaction(var action: buttonactionty; const buttonindex: integer);
 
     //idataeditcontroller
    procedure mouseevent(var info: mouseeventinfoty); virtual;

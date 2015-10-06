@@ -273,7 +273,6 @@ type
                                                         write setcontroller;
    property dialogkind: filedialogkindty read fdialogkind write fdialogkind
                                                            default fdk_none;
-//   property optionsedit: optionseditty read foptionsedit write setoptionsedit;
    property optionsedit1: optionsedit1ty read foptionsedit1 write foptionsedit1
                                   default defaultfiledialogoptionsedit1;
  end;
@@ -289,7 +288,6 @@ type
  tcustomfilenameedit1 = class(tcustomdialogstringed)
   private
    fcontroller: tfiledialogcontroller;
-//   fdialogkind: filedialogkindty;
    procedure setcontroller(const avalue: tfiledialogcontroller);
    function getsysvalue: filenamety;
    procedure setsysvalue(const avalue: filenamety);
@@ -297,7 +295,6 @@ type
   protected
    function createdialogcontroller: tstringdialogcontroller; override;
    procedure texttovalue(var accept: boolean; const quiet: boolean); override;
-//   function execute(var avalue: msestring): boolean; override;
    procedure updatedisptext(var avalue: msestring); override;
    function getvaluetext: msestring; override;
    procedure readstatvalue(const reader: tstatreader); override;
@@ -313,12 +310,12 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    procedure componentevent(const event: tcomponentevent); override;
-   property controller: tfiledialogcontroller read fcontroller write setcontroller;
+   property controller: tfiledialogcontroller read fcontroller 
+                                                         write setcontroller;
    property sysvalue: filenamety read getsysvalue write setsysvalue;
    property sysvaluequoted: filenamety read getsysvaluequoted write setsysvalue;
   published
    property optionsedit1 default defaultfiledialogoptionsedit1;
-//   property dialogkind: filedialogkindty read fdialogkind write fdialogkind default fdk_open;
  end;
 
  tcustomfilenameedit = class(tcustomfilenameedit1)

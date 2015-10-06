@@ -14649,7 +14649,7 @@ end;
 procedure twindow.dispatchmouseevent(var info: moeventinfoty;
                    capture: twidget);
 var
- posbefore,absposbefore: pointty;
+ posbefore{,absposbefore}: pointty;
  mousecapturewidgetbefore: twidget;
  int1: integer;
  po1: peventaty;
@@ -14691,7 +14691,7 @@ begin
    setlinkedvar(self,self1); //for destroy check
    try
     with capture do begin
-     absposbefore:= info.mouse.pos;
+//     absposbefore:= info.mouse.pos;
      subpoint1(info.mouse.pos,rootpos);
      posbefore:= info.mouse.pos;
      appinst.fmousewidgetpos:= posbefore;
@@ -14734,7 +14734,8 @@ begin
                       (mousecapturewidgetbefore <> nil) then begin
       exclude(eventstate,es_processed);
       eventkind:= ek_mousemove;
-      pos:= addpoint(absposbefore,posbefore);
+      pos:= translatewidgetpoint(application.mouse.pos,nil,fownerwidget);
+//      pos:= addpoint(absposbefore,posbefore);
       dispatchmouseevent(info,nil);  //immediate mouseenter
       eventkind:= ek_buttonrelease;
      end;
