@@ -6282,7 +6282,7 @@ begin
   if fao_fadeoverlay in options then begin
    paintimage;
   end;
-  if fi.fade_color.count > 0 then begin
+  if (fi.fade_color.count > 0) and (rect1.cx > 0) and (rect1.cy > 0) then begin
    if (fi.fade_color.count > 1) or 
      ((fi.fade_opacolor.count > 0) or (fi.fade_opacity <> cl_none)) and 
                                (fi.options * faceoptionsmask = []) then begin
