@@ -132,6 +132,8 @@ object stackfo: tstackfo
         colorfocused = -1879048185
         width = 54
         options = [co_readonly, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_cancopy]
+        textflags = [tf_ycentered, tf_noselect, tf_ellipseright]
+        textflagsactive = [tf_ycentered, tf_ellipseright]
         optionsedit = [scoe_eatreturn, scoe_homeonenter]
         valuefalse = '0'
         valuetrue = '1'
