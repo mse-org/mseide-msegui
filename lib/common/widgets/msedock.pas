@@ -4669,7 +4669,7 @@ begin
     initrect(dbr_minimize);
    end;
   end;
-  if bo1 or designing then begin
+  if bo1{ or designing} then begin
    if (go_fixsizebutton in fgrip_options) then begin
     if designing or 
          bo3 and fcontroller.getparentcontroller(parentcontroller) and
@@ -4680,10 +4680,6 @@ begin
    end;
    if (go_floatbutton in fgrip_options) then begin
     initrect(dbr_float);
-   end;
-   if (go_nolockbutton in fgrip_options) and 
-                        (fcontroller.getparentcontroller <> nil) then begin
-    initrect(dbr_nolock);
    end;
   end;
   if bo2 then begin
@@ -4696,6 +4692,10 @@ begin
   end;
   if go_lockbutton in fgrip_options then begin
    initrect(dbr_lock);
+  end;
+  if bo1 and (go_nolockbutton in fgrip_options) and 
+          ((fcontroller.getparentcontroller <> nil) or designing) then begin
+   initrect(dbr_nolock);
   end;
  end;
 end;
