@@ -47,6 +47,8 @@ const
  defaultoptionsdocknochildren = defaultoptionsdock - [od_savechildren];
  dbr_first = dbr_handle;
  dbr_last = dbr_nolock;
+ dbr_firstbutton = dockbuttonrectty(ord(dbr_first)+1);
+ dbr_lastbutton = dbr_last;
  defaulttaboptions= [tabo_dragdest,tabo_dragsource];
  
 type
@@ -3015,11 +3017,16 @@ var
  dbr1: dockbuttonrectty;
 begin
  result:= dbr_none;
- for dbr1:= dbr_first to dbr_last do begin
+ for dbr1:= dbr_firstbutton to dbr_lastbutton do begin
   if pointinrect(apos,idockcontroller(fintf).getbuttonrects(dbr1)) then begin
    result:= dbr1;
    break;
   end;
+ end;
+ if (result = dbr_none) and 
+            pointinrect(apos,
+                 idockcontroller(fintf).getbuttonrects(dbr_handle)) then begin
+  result:= dbr_handle; //handel rect can include buttons
  end;
 end;
 
@@ -5136,7 +5143,12 @@ begin
   end;
  end
  else begin
-  result:= tgripframe(fframe).getbuttonrects(index);
+  if index = dbr_handle then begin
+   result:= tgripframe(fframe).fgriprect;
+  end
+  else begin
+   result:= tgripframe(fframe).getbuttonrects(index);
+  end;
  end;
 end;
 
