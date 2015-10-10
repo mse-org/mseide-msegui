@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2014 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2015 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -738,7 +738,11 @@ begin
        filechanged:= false;
        reload;
        mainfo.sourcechanged(items[int1]);
+      end
+      else begin
+       edit.modified:= true;
       end;
+      mainfo.sourcechanged(items[int1]);
      end;
     end;
    end;
@@ -766,6 +770,9 @@ begin
         po1:= designer.loadformfile(fna1,false);
        end;
        po1^.filechanged:= true;
+      end
+      else begin
+       designer.modulechanged(po1);
       end;
      end;
     end;
