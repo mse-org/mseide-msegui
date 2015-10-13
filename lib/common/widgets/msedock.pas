@@ -4537,7 +4537,12 @@ end;
 function tgripframe.getbuttonrects(const index: dockbuttonrectty): rectty;
 begin
  if (index >= dbr_first) and (index <= dbr_last) then begin
-  result:= frects[index];
+  if index = dbr_handle then begin
+   result:= fgriprect;
+  end
+  else begin
+   result:= frects[index];
+  end;
   dec(result.x,fpaintrect.x+fclientrect.x);
   dec(result.y,fpaintrect.y+fclientrect.y);
  end
