@@ -1702,7 +1702,12 @@ end;
 function tcustommseform.getbuttonrects(const index: dockbuttonrectty): rectty;  
 begin
  if fframe = nil then begin
-  result:= nullrect;
+  if index = dbr_handle then begin
+   result:= clientrect;
+  end
+  else begin
+   result:= nullrect;
+  end;
  end
  else begin
   result:= tgripframe(fframe).buttonrects[index];

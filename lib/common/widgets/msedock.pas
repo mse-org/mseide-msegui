@@ -126,11 +126,13 @@ type
  dockstatety = (dos_layoutvalid,dos_sizing,
                 dos_updating1,dos_updating2,dos_updating3,
                  dos_updating4,dos_updating5,dos_tabedending,
+                 {
                     dos_closebuttonclicked,dos_maximizebuttonclicked,
                     dos_normalizebuttonclicked,dos_minimizebuttonclicked,
                     dos_fixsizebuttonclicked,dos_floatbuttonclicked,
                     dos_topbuttonclicked,dos_backgroundbuttonclicked,
                     dos_lockbuttonclicked,dos_nolockbuttonclicked,
+                 }
                     dos_moving,dos_hasfloatbutton,
                     {dos_proprefvalid,}dos_showed,dos_xorpic);
  dockstatesty = set of dockstatety;
@@ -259,6 +261,8 @@ type
    fr: prectaccessty;
    fw: pwidgetaccessty;
    fplacing: integer;
+   fclickedbutton: dockbuttonrectty;
+   
    procedure checkdirection;
    procedure objectevent(const sender: tobject;
                                       const event: objecteventty); override;
@@ -341,7 +345,7 @@ type
    procedure beginplacement();
    procedure endplacement();
    procedure layoutchanged; //force layout calcualation
-      //istatfile
+    //istatfile
    procedure dostatread(const reader: tstatreader);
    procedure dostatwrite(const writer: tstatwriter;
                                   const bounds: prectty = nil);
@@ -444,7 +448,7 @@ type
                  go_maximizebutton,
                  go_fixsizebutton,
                  go_floatbutton,go_topbutton,go_backgroundbutton,
-                 go_lockbutton,go_nolockbutton,
+                 go_lockbutton,go_nolockbutton,go_buttonframe,
                  go_horz,go_vert,go_opposite,go_showsplitcaption,
                  go_showfloatcaption);
  gripoptionsty = set of gripoptionty;
@@ -488,9 +492,11 @@ type
    procedure createface;
   protected
    frects: array[dbr_first..dbr_last] of rectty;
+   fedges: array[dbr_first..dbr_last] of edgesty;
    fgriprect: rectty;
    fgripstate: gripstatesty;
    factgripsize: integer;
+   fmousebutton: dockbuttonrectty;
    procedure checkgripsize;
    procedure updatewidgetstate; override;   
    procedure updaterects; override;
@@ -499,6 +505,11 @@ type
    function ishintarea(const apos: pointty; var aid: int32): boolean; override;
    function calcsizingrect(const akind: sizingkindty;
                                 const offset: pointty): rectty;
+   procedure drawgripbutton(const acanvas: tcanvas;
+                    const akind: dockbuttonrectty; const arect: rectty; 
+                    const acolorglyph,acolorbutton: colorty;
+                    const ahiddenedges: edgesty); virtual;
+
     //iface
    function getclientrect: rectty;
    procedure invalidatewidget();
@@ -507,9 +518,6 @@ type
               const linkintf: iobjectlink = nil);
    function getcomponentstate: tcomponentstate;
    procedure widgetregioninvalid;
-   procedure drawgripbutton(const acanvas: tcanvas;
-                    const akind: dockbuttonrectty; const arect: rectty; 
-                             const acolorglyph,acolorbutton: colorty); virtual;
     //iobjectpicker
    function getwidget: twidget;
    function getcursorshape(const sender: tobjectpicker;
@@ -533,7 +541,8 @@ type
    procedure mouseevent(var info: mouseeventinfoty);
    procedure paintoverlay(const canvas: tcanvas; const arect: rectty); override;
    property buttonrects[const index:  dockbuttonrectty]: rectty 
-                                                 read getbuttonrects;
+                                                    read getbuttonrects;
+                                                                //client origin
    function getminimizedsize(out apos: captionposty): sizety;
    function griprect: rectty; //origin = pos
   published
@@ -590,7 +599,7 @@ type
    procedure parentchanged; override;
    function calcminscrollsize: sizety; override;
    procedure dopaintbackground(const canvas: tcanvas); override;
-   //idockcontroller
+    //idockcontroller
    function checkdock(var info: draginfoty): boolean;
    function getbuttonrects(const index: dockbuttonrectty): rectty;
    function getplacementrect: rectty;
@@ -2381,7 +2390,8 @@ begin
    mouseinhandle:= (fdockhandle <> nil) and pointinrect(
      translateclientpoint(info.pos,idockcontroller(fintf).getwidget,fdockhandle),
        fdockhandle.gethandlerect) or
-      pointinrect(info.pos,idockcontroller(fintf).getbuttonrects(dbr_handle));
+      pointinrect({widget1.clientpostowidgetpos(}info.pos{)},
+                            idockcontroller(fintf).getbuttonrects(dbr_handle));
    case eventkind of
     dek_begin: begin
      if mouseinhandle then begin
@@ -2404,6 +2414,9 @@ begin
         tdockdragobject.create(self,widget1,dragobjectpo^,fpickpos);
         result:= true;
        end;
+      end;
+      if result then begin
+       fclickedbutton:= dbr_none;
       end;
      end
     end;
@@ -3367,7 +3380,7 @@ var
   else begin
    exclude(fdockstate,dos_xorpic);
   end;
- end;
+ end; //drawxorpic
 
  procedure dosize;
  begin
@@ -3376,15 +3389,41 @@ var
    calcdelta;
    sizechanged(true);
   end;
- end;
+ end; //dosize
+
+ procedure setmousebutton(const abutton: dockbuttonrectty);
+ begin
+  if (widget1.fframe <> nil) and (widget1.fframe is tgripframe) then begin
+   with tgripframe(widget1.fframe) do begin
+    if abutton <> fmousebutton then begin
+     if fmousebutton <> dbr_none then begin
+      widget1.invalidaterect(frects[fmousebutton],org_widget);
+     end;
+     fmousebutton:= abutton;
+     if (fmousebutton >= dbr_first) and (fmousebutton <= dbr_last) then begin
+      widget1.invalidaterect(frects[fmousebutton],org_widget);
+     end;
+    end;
+    if (abutton <> fclickedbutton) and 
+      (abutton >= dbr_first) and (abutton <= dbr_last) then begin
+     widget1.invalidaterect(frects[abutton],org_widget);
+    end;     
+   end;   
+  end;
+  if (abutton <> fclickedbutton) then begin
+   fclickedbutton:= dbr_none;
+  end;
+ end; //setmousebutton
  
 const
  resetmousedockstate =
-        [dos_closebuttonclicked,dos_maximizebuttonclicked,
+        [{dos_closebuttonclicked,dos_maximizebuttonclicked,
           dos_normalizebuttonclicked,dos_minimizebuttonclicked,
           dos_fixsizebuttonclicked,dos_floatbuttonclicked,dos_topbuttonclicked,
           dos_backgroundbuttonclicked,
-          dos_lockbuttonclicked,dos_nolockbuttonclicked,dos_moving];
+          dos_lockbuttonclicked,dos_nolockbuttonclicked,}dos_moving];
+var
+ bu1: dockbuttonrectty;
 
 begin
  inherited;
@@ -3397,6 +3436,7 @@ begin
            widget1,widget1.container); //widget origin
    case info.eventkind of
     ek_mouseleave,ek_clientmouseleave: begin
+     setmousebutton(dbr_none);
      if not (ds_clicked in fstate) or 
                                   (info.eventkind = ek_mouseleave) then begin
       restorepickshape;
@@ -3406,14 +3446,19 @@ begin
       end;
       exclude(fstate,ds_clicked);
       fdockstate:= fdockstate - resetmousedockstate;
+      fclickedbutton:= dbr_none;
      end;
     end;
     ek_mousemove: begin
      if fsizeindex < 0 then begin
+      if not (csdesigning in widget1.componentstate) then begin
+       setmousebutton(checkbuttonarea(pos));
+      end;
       checksizing((dos_moving in fdockstate) or 
                          (od_nosplitsize in foptionsdock));
      end
      else begin
+      setmousebutton(dbr_none);
       if od_thumbtrack in optionsdock then begin
        if fsplitdir = sd_vert then begin
         fsizeoffset:= pos.x - fpickpos.x;
@@ -3461,6 +3506,10 @@ begin
        drawxorpic(true);
       end;
       if not (ss_shift in shiftstate) then begin
+       bu1:= checkbuttonarea(pos);
+       setmousebutton(bu1);
+       fclickedbutton:= bu1;
+      {
        case checkbuttonarea(pos) of
         dbr_close: include(fdockstate,dos_closebuttonclicked);
         dbr_maximize: include(fdockstate,dos_maximizebuttonclicked);
@@ -3473,6 +3522,7 @@ begin
         dbr_lock: include(fdockstate,dos_lockbuttonclicked);
         dbr_nolock: include(fdockstate,dos_nolockbuttonclicked);
        end;
+      }
       end;
      end;
     end;
@@ -3491,7 +3541,7 @@ begin
      else begin
       case checkbuttonarea(pos) of
        dbr_close: begin
-        if (dos_closebuttonclicked in fdockstate) then begin
+        if fclickedbutton = dbr_close then begin
          doclose(widget1);
         end;
        end;
@@ -3499,7 +3549,7 @@ begin
        dbr_normalize: mdistate:= mds_normal;
        dbr_minimize: mdistate:= mds_minimized;
        dbr_fixsize: begin
-        if (dos_fixsizebuttonclicked in fdockstate) then begin
+        if fclickedbutton = dbr_fixsize then begin
          useroptions:= optionsdockty(
           togglebit({$ifdef FPC}longword{$else}longword{$endif}(fuseroptions),
           ord(od_fixsize)));
@@ -3507,14 +3557,14 @@ begin
         end;
        end;
        dbr_float: begin
-        if (dos_floatbuttonclicked in fdockstate) then begin
+        if fclickedbutton = dbr_float then begin
          if not (csdesigning in widget1.componentstate) then begin
           dofloat(nullpoint);
          end;
         end;
        end;
        dbr_top: begin
-        if (dos_topbuttonclicked in fdockstate) then begin
+        if fclickedbutton = dbr_top then begin
          useroptions:= optionsdockty(
           togglebit({$ifdef FPC}longword{$else}longword{$endif}(fuseroptions),
           ord(od_top)));
@@ -3522,7 +3572,7 @@ begin
         end;
        end;
        dbr_background: begin
-        if (dos_backgroundbuttonclicked in fdockstate) then begin
+        if fclickedbutton = dbr_background then begin
          useroptions:= optionsdockty(
           togglebit({$ifdef FPC}longword{$else}longword{$endif}(fuseroptions),
           ord(od_background)));
@@ -3530,7 +3580,7 @@ begin
         end;
        end;
        dbr_lock: begin
-        if (dos_lockbuttonclicked in fdockstate) then begin
+        if fclickedbutton = dbr_lock then begin
          useroptions:= optionsdockty(
           togglebit({$ifdef FPC}longword{$else}longword{$endif}(fuseroptions),
           ord(od_lock)));
@@ -3538,7 +3588,7 @@ begin
         end;
        end;
        dbr_nolock: begin
-        if (dos_nolockbuttonclicked in fdockstate) then begin
+        if fclickedbutton = dbr_nolock then begin
          useroptions:= optionsdockty(
           togglebit({$ifdef FPC}longword{$else}longword{$endif}(fuseroptions),
           ord(od_nolock)));
@@ -3548,6 +3598,7 @@ begin
       end;
      end;
      fdockstate:= fdockstate - resetmousedockstate;
+     fclickedbutton:= dbr_none;
     end;
    end;
   end;
@@ -4149,12 +4200,18 @@ end;
 
 procedure tgripframe.drawgripbutton(const acanvas: tcanvas;
                const akind: dockbuttonrectty; const arect: rectty;
-               const acolorglyph: colorty; const acolorbutton: colorty);
-               
+               const acolorglyph: colorty; const acolorbutton: colorty;
+                                               const ahiddenedges: edgesty);
+
+var
+ hiddenedges1: edgesty;
+                
  function calclevel(const aoption: optiondockty): integer;
  begin
-  if aoption in fcontroller.foptionsdock then begin
+  if (aoption in fcontroller.foptionsdock) or
+                      (fcontroller.fclickedbutton = akind) then begin
    result:= -1;
+   hiddenedges1:= []
   end
   else begin
    result:= 1;
@@ -4164,13 +4221,21 @@ procedure tgripframe.drawgripbutton(const acanvas: tcanvas;
 var
  rect2: rectty;
  int1: integer;
+ i1: int32;
 begin
+ if akind = fmousebutton then begin
+  hiddenedges1:= [];
+ end
+ else begin
+  hiddenedges1:= ahiddenedges;
+ end;
  with acanvas,arect do begin
   fillrect(arect,acolorbutton);
+  i1:= calclevel(optiondockty(-1));
   case akind of
    dbr_close: begin
     if factgripsize >= 8 then begin
-     draw3dframe(acanvas,arect,1,defaultframecolors,[]);
+     draw3dframe(acanvas,arect,i1,defaultframecolors,hiddenedges1);
      drawcross(inflaterect(arect,-2),acolorglyph);
     end
     else begin
@@ -4178,12 +4243,12 @@ begin
     end;
    end;
    dbr_maximize: begin
-    draw3dframe(acanvas,arect,1,defaultframecolors,[]);
+    draw3dframe(acanvas,arect,i1,defaultframecolors,hiddenedges1);
     drawframe(inflaterect(arect,-2),-1,acolorglyph);
     drawvect(makepoint(x+2,y+3),gd_right,cx-5,acolorglyph);
    end;
    dbr_normalize: begin
-    draw3dframe(acanvas,arect,1,defaultframecolors,[]);
+    draw3dframe(acanvas,arect,i1,defaultframecolors,hiddenedges1);
     rect2.cx:= cx * 2 div 3 - 3;
     rect2.cy:= rect2.cx;
     rect2.pos:= addpoint(pos,makepoint(2,2));
@@ -4193,7 +4258,7 @@ begin
     drawrect(rect2,acolorglyph);
    end;
    dbr_minimize: begin
-    draw3dframe(acanvas,arect,1,defaultframecolors,[]);
+    draw3dframe(acanvas,arect,i1,defaultframecolors,hiddenedges1);
     acanvas.move(pos);
     case fgrip_pos of
      cp_left: begin
@@ -4216,12 +4281,12 @@ begin
     acanvas.remove(pos);
    end;
    dbr_fixsize: begin
-    draw3dframe(acanvas,arect,calclevel(od_fixsize),
-                 defaultframecolors,[]);
+    i1:= calclevel(od_fixsize);
+    draw3dframe(acanvas,arect,i1,defaultframecolors,hiddenedges1);
     drawframe(inflaterect(arect,-2),-1,acolorglyph);
    end;
    dbr_float: begin
-    draw3dframe(acanvas,arect,1,defaultframecolors,[]);
+    draw3dframe(acanvas,arect,i1,defaultframecolors,hiddenedges1);
     int1:= cx div 2;
     acanvas.move(pos);
     drawlines([mp(2,int1),mp(2,2),mp(int1,2)],false,acolorglyph);
@@ -4230,25 +4295,29 @@ begin
    end;
    dbr_top: begin
     int1:= x + cx div 2;
-    draw3dframe(acanvas,arect,calclevel(od_top),defaultframecolors,[]);
-    drawlines([makepoint(int1-3,y+4),makepoint(int1,y+1),makepoint(int1,y+cy-1)],
-             false,acolorglyph);
+    i1:= calclevel(od_top);
+    draw3dframe(acanvas,arect,i1,defaultframecolors,hiddenedges1);
+    drawlines([makepoint(int1-3,y+4),makepoint(int1,y+1),
+                     makepoint(int1,y+cy-1)],false,acolorglyph);
     drawline(makepoint(int1+3,y+4),makepoint(int1,y+1),acolorglyph);
    end;
    dbr_background: begin
     int1:= x + cx div 2;
-    draw3dframe(acanvas,arect,calclevel(od_background),defaultframecolors,[]);
-    drawlines([makepoint(int1-3,y+cx-4),makepoint(int1,y+cy-1),makepoint(int1,y+1)],
-             false,acolorglyph);
+    i1:= calclevel(od_background);
+    draw3dframe(acanvas,arect,i1,defaultframecolors,hiddenedges1);
+    drawlines([makepoint(int1-3,y+cx-4),makepoint(int1,y+cy-1),
+                                     makepoint(int1,y+1)],false,acolorglyph);
     drawline(makepoint(int1+3,y+cx-4),makepoint(int1,y+cy-1),acolorglyph);
    end;
    dbr_lock: begin
-    draw3dframe(acanvas,arect,calclevel(od_lock),defaultframecolors,[]);
+    i1:= calclevel(od_lock);
+    draw3dframe(acanvas,arect,i1,defaultframecolors,hiddenedges1);
     drawellipse1(makerect(arect.x+2,arect.y+2,arect.cx-5,arect.cy-5),
                                                                acolorglyph);
    end;
    dbr_nolock: begin
-    draw3dframe(acanvas,arect,calclevel(od_nolock),defaultframecolors,[]);
+    i1:= calclevel(od_nolock);
+    draw3dframe(acanvas,arect,i1,defaultframecolors,hiddenedges1);
     fillellipse1(makerect(arect.x+2,arect.y+2,arect.cx-5,arect.cy-5),
                                                                acolorglyph);
     drawellipse1(makerect(arect.x+2,arect.y+2,arect.cx-5,arect.cy-5),
@@ -4292,46 +4361,53 @@ begin
     colorglyph:= fgrip_colorglyph;
    end;
    if go_closebutton in fgrip_options then begin
-    drawgripbutton(canvas,dbr_close,frects[dbr_close],colorglyph,colorbutton);
+    drawgripbutton(canvas,dbr_close,frects[dbr_close],colorglyph,colorbutton,
+                                    fedges[dbr_close]);
    end;
    if (frects[dbr_maximize].cx > 0) and 
            (go_maximizebutton in fgrip_options) then begin
-    drawgripbutton(canvas,dbr_maximize,frects[dbr_maximize],colorglyph,colorbutton);
+    drawgripbutton(canvas,dbr_maximize,frects[dbr_maximize],colorglyph,
+                           colorbutton,fedges[dbr_maximize]);
    end;
    if (frects[dbr_normalize].cx > 0) and 
                            (go_normalizebutton in fgrip_options) then begin
-    drawgripbutton(canvas,dbr_normalize,frects[dbr_normalize],colorglyph,colorbutton);
+    drawgripbutton(canvas,dbr_normalize,frects[dbr_normalize],colorglyph,
+                            colorbutton,fedges[dbr_normalize]);
    end;
    if (frects[dbr_minimize].cx > 0) and 
                            (go_minimizebutton in fgrip_options) then begin
-    drawgripbutton(canvas,dbr_minimize,frects[dbr_minimize],colorglyph,colorbutton);
+    drawgripbutton(canvas,dbr_minimize,frects[dbr_minimize],colorglyph,
+                           colorbutton,fedges[dbr_minimize]);
    end;
    if (frects[dbr_fixsize].cx > 0) and 
                            (go_fixsizebutton in fgrip_options) then begin
-    drawgripbutton(canvas,dbr_fixsize,frects[dbr_fixsize],colorglyph,colorbutton);
+    drawgripbutton(canvas,dbr_fixsize,frects[dbr_fixsize],colorglyph,
+                          colorbutton,fedges[dbr_fixsize]);
    end;
    if (frects[dbr_float].cx > 0) and 
                            (go_floatbutton in fgrip_options) then begin
-    drawgripbutton(canvas,dbr_float,frects[dbr_float],colorglyph,colorbutton);
+    drawgripbutton(canvas,dbr_float,frects[dbr_float],colorglyph,colorbutton,
+                                    fedges[dbr_float]);
    end;
    if (frects[dbr_top].cx > 0) and 
                            (go_topbutton in fgrip_options)  then begin
-    drawgripbutton(canvas,dbr_top,frects[dbr_top],colorglyph,colorbutton);
+    drawgripbutton(canvas,dbr_top,frects[dbr_top],colorglyph,colorbutton,
+                                  fedges[dbr_top]);
    end;
    if (frects[dbr_background].cx > 0) and 
                            (go_backgroundbutton in fgrip_options) then begin
     drawgripbutton(canvas,dbr_background,frects[dbr_background],colorglyph,
-                                                                 colorbutton);
+                             colorbutton,fedges[dbr_background]);
    end;
    if (frects[dbr_lock].cx > 0) and 
                            (go_lockbutton in fgrip_options) then begin
-    drawgripbutton(canvas,dbr_lock,frects[dbr_lock],colorglyph,
-                                                                 colorbutton);
+    drawgripbutton(canvas,dbr_lock,frects[dbr_lock],colorglyph,colorbutton,
+                                   fedges[dbr_lock]);
    end;
    if (frects[dbr_nolock].cx > 0) and 
                            (go_nolockbutton in fgrip_options) then begin
     drawgripbutton(canvas,dbr_nolock,frects[dbr_nolock],colorglyph,
-                                                                 colorbutton);
+                         colorbutton,fedges[dbr_nolock]);
    end;
    rect1:= frects[dbr_handle];
 //   if fgrip_pos in [cp_top,cp_bottom] then begin
@@ -4460,9 +4536,14 @@ end;
 
 function tgripframe.getbuttonrects(const index: dockbuttonrectty): rectty;
 begin
- result:= frects[index];
- dec(result.x,fpaintrect.x+fclientrect.x);
- dec(result.y,fpaintrect.y+fclientrect.y);
+ if (index >= dbr_first) and (index <= dbr_last) then begin
+  result:= frects[index];
+  dec(result.x,fpaintrect.x+fclientrect.x);
+  dec(result.y,fpaintrect.y+fclientrect.y);
+ end
+ else begin
+  result:= nullrect;
+ end;
 end;
 
 function tgripframe.getminimizedsize(out apos: captionposty): sizety;
@@ -4592,9 +4673,16 @@ begin
 end;
 
 procedure tgripframe.updaterects;
- 
+
+var
+ firstbu,lastbu: dockbuttonrectty;
+  
  procedure initrect(const index: dockbuttonrectty);
  begin
+  if firstbu = dbr_none then begin
+   firstbu:= index;
+  end;
+  lastbu:= index;
   with frects[dbr_handle] do begin
    case fgrip_pos of
     cp_right,cp_left: begin
@@ -4602,13 +4690,18 @@ procedure tgripframe.updaterects;
      frects[index].y:= y;
      inc(y,factgripsize);
      dec(cy,factgripsize);
+     fedges[index]:= [edg_top,edg_bottom];
     end;
     else begin //top,bottom
      dec(cx,factgripsize);
      frects[index].x:= x + cx;
      frects[index].y:= y;
+     fedges[index]:= [edg_left,edg_right];
     end;
    end;
+  end;
+  if go_buttonframe in fgrip_options then begin
+   fedges[index]:= [];
   end;
   with frects[index] do begin
    cx:= factgripsize;
@@ -4620,8 +4713,9 @@ var
  bo1,bo2,bo3,designing: boolean;
  parentcontroller: tdockcontroller;
   
-begin
+begin         //widget origin
  inherited;
+ firstbu:= dbr_none;
  checkgripsize;
  with fgriprect do begin
   case fgrip_pos of
@@ -4703,6 +4797,16 @@ begin
   if bo1 and (go_nolockbutton in fgrip_options) and 
           ((fcontroller.getparentcontroller <> nil) or designing) then begin
    initrect(dbr_nolock);
+  end;
+ end;
+ if firstbu <> dbr_none then begin
+  if fgrip_pos in [cp_right,cp_left] then begin
+   exclude(fedges[firstbu],edg_top);
+   exclude(fedges[lastbu],edg_bottom);
+  end
+  else begin
+   exclude(fedges[firstbu],edg_right);
+   exclude(fedges[lastbu],edg_left);
   end;
  end;
 end;
@@ -5143,12 +5247,7 @@ begin
   end;
  end
  else begin
-  if index = dbr_handle then begin
-   result:= tgripframe(fframe).fgriprect;
-  end
-  else begin
-   result:= tgripframe(fframe).getbuttonrects(index);
-  end;
+  result:= tgripframe(fframe).getbuttonrects(index);
  end;
 end;
 
