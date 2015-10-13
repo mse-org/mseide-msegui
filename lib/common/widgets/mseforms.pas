@@ -432,10 +432,12 @@ type
 
  tcustomdockform = class(tcustommseform,idocktarget)
   private
+   fdockingareacaption: msestring;
    function getdockcontroller: tdockcontroller;
    procedure setdragdock(const Value: tformdockcontroller);
    function getframe: tgripframe;
    procedure setframe(const avalue: tgripframe);
+   procedure setdockingareacaption(const avalue: msestring);
   protected
    fdragdock: tformdockcontroller;
    procedure internalcreateframe; override;
@@ -460,6 +462,8 @@ type
                                const aforce: boolean = false); override;
    function canfocus: boolean; override;
    procedure dragevent(var info: draginfoty); override;
+   property dockingareacaption: msestring read fdockingareacaption 
+                                                   write setdockingareacaption;
   published
    property dragdock: tformdockcontroller read fdragdock write setdragdock;
    property frame: tgripframe read getframe write setframe;
@@ -480,6 +484,7 @@ type
    property statpriority;
    property caption;
    property icon;
+   property dockingareacaption;
 
    property oncreate;
    property oncreated;
@@ -552,6 +557,7 @@ type
    procedure dopaintforeground(const acanvas: tcanvas); override;
    function getdockcontroller: tdockcontroller;
    procedure mouseevent(var info: mouseeventinfoty); override;
+   procedure dopaintbackground(const canvas: tcanvas); override;
   public
    constructor create(aowner: tcustomdockform); reintroduce;
  end;
@@ -823,6 +829,16 @@ procedure tdockformscrollbox.mouseevent(var info: mouseeventinfoty);
 begin
  inherited;
  getdockcontroller.checkmouseactivate(self,info);
+end;
+
+procedure tdockformscrollbox.dopaintbackground(const canvas: tcanvas);
+begin
+ inherited;
+ with tcustomdockform(owner) do begin
+  if fdockingareacaption <> '' then begin
+   paintdockingareacaption(canvas,self,fdockingareacaption);
+  end;
+ end;
 end;
 
 { tcustommseform }
@@ -2254,6 +2270,12 @@ end;
 function tcustomdockform.getwindowcaption: msestring;
 begin
  result:= fdragdock.getfloatcaption;
+end;
+
+procedure tcustomdockform.setdockingareacaption(const avalue: msestring);
+begin
+ fdockingareacaption:= avalue;
+ invalidate;
 end;
 
 { tdockform}

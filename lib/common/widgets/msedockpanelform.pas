@@ -235,7 +235,11 @@ begin
   end;
   for int1:= 0 to high(ar1) do begin
    try
-    newpanel(ansistring(ar1[int1]));
+    with newpanel(ansistring(ar1[int1])) do begin
+     if statfile = self.statfile then begin
+      statreading();
+     end;
+    end;
    except
    end;
   end;
@@ -319,6 +323,9 @@ begin
   updatecaption('');
  end;
  if item1 <> nil then begin
+  if int2 >= fpanellist.count then begin
+   int2:= fpanellist.count-1;
+  end;
   if int2 > item1.count - 2 then begin
    int2:= item1.count - 2;
   end;
