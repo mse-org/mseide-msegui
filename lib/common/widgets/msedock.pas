@@ -456,9 +456,12 @@ type
 const
  defaultgripoptions = [go_closebutton];
  defaultdockpaneloptionswidget = defaultoptionswidget + [ow_subfocus];
-
+ defaulttextflagstop = [tf_ycentered,tf_clipo];
+ defaulttextflagsleft = [tf_ycentered,tf_rotate90,tf_clipo];
+ defaulttextflagsbottom = [tf_ycentered,tf_clipo];
+ defaulttextflagsright = [tf_ycentered,tf_rotate90,tf_clipo];
+ 
 type
-
  gripstatety = (grps_sizevalid);
  gripstatesty = set of gripstatety;
  
@@ -477,6 +480,12 @@ type
    fgrip_colorbuttonactive: colorty;
    fgrip_colorglyphactive: colorty;
    fgrip_face: tface;
+   fgrip_textflagstop: textflagsty;
+   fgrip_textflagsleft: textflagsty;
+   fgrip_textflagsbottom: textflagsty;
+   fgrip_textflagsright: textflagsty;
+   fgrip_captiondist: integer;
+   fgrip_captionoffset: integer;
    procedure setgrip_color(const avalue: colorty);
    procedure setgrip_grip(const avalue: stockbitmapty);
    procedure setgrip_size(const avalue: integer);
@@ -490,6 +499,12 @@ type
    function getgrip_face: tface;
    procedure setgrip_face(const avalue: tface);
    procedure createface;
+   procedure setgrip_textflagstop(const avalue: textflagsty);
+   procedure setgrip_textflagsright(const avalue: textflagsty);
+   procedure setgrip_textflagsbottom(const avalue: textflagsty);
+   procedure setgrip_textflagsrright(const avalue: textflagsty);
+   procedure setgrip_captiondist(const avalue: integer);
+   procedure setgrip_captionoffset(const avalue: integer);
   protected
    frects: array[dbr_first..dbr_last] of rectty;
    fedges: array[dbr_first..dbr_last] of edgesty;
@@ -545,9 +560,21 @@ type
                                                                 //client origin
    function getminimizedsize(out apos: captionposty): sizety;
    function griprect: rectty; //origin = pos
-  published
+  published                    
    property grip_size: integer read fgrip_size write setgrip_size stored true;
-                               //for optionalclass
+                                                          //for optionalclass
+   property grip_textflagstop: textflagsty read fgrip_textflagstop 
+                     write setgrip_textflagstop default defaulttextflagstop;
+   property grip_textflagsleft: textflagsty read fgrip_textflagsleft
+                     write setgrip_textflagsright default defaulttextflagsleft;
+   property grip_textflagsbottom: textflagsty read fgrip_textflagsbottom
+                  write setgrip_textflagsbottom default defaulttextflagsbottom;
+   property grip_textflagsright: textflagsty read fgrip_textflagsright 
+                    write setgrip_textflagsrright default defaulttextflagsright;
+   property grip_captiondist: integer read fgrip_captiondist 
+                                      write setgrip_captiondist default 1;         
+   property grip_captionoffset: integer read fgrip_captionoffset 
+                                      write setgrip_captionoffset default 0;
    property grip_grip: stockbitmapty read fgrip_grip write setgrip_grip
                                                        default defaultgripgrip;
    property grip_color: colorty read fgrip_color write setgrip_color
@@ -4179,6 +4206,11 @@ begin
  fgrip_pos:= defaultgrippos;
  fgrip_grip:= defaultgripgrip;
  fgrip_options:= defaultgripoptions;
+ fgrip_textflagstop:= defaulttextflagstop;
+ fgrip_textflagsleft:= defaulttextflagsleft;
+ fgrip_textflagsbottom:= defaulttextflagsbottom;
+ fgrip_textflagsright:= defaulttextflagsright;
+ fgrip_captiondist:= 1;
  fcontroller:= acontroller;
  inherited create(intf);
  fobjectpicker:= tobjectpicker.create(iobjectpicker(self));
@@ -4330,8 +4362,8 @@ end;
 procedure tgripframe.paintoverlay(const canvas: tcanvas; const arect: rectty);
 
 var
- brushbefore: tsimplebitmap;
- colorbefore: colorty;
+// brushbefore: tsimplebitmap;
+// colorbefore: colorty;
  po1,po2: pointty;
  int1,int2: integer;
  rect1: rectty;
@@ -4351,7 +4383,8 @@ begin
  with canvas do begin
   rect1:= clipbox;
   if testintersectrect(rect1,fgriprect) then begin
-   colorbefore:= color;
+//   colorbefore:= color;
+   canvas.save(); 
    if fintf.getwidget.active then begin
     colorbutton:= fgrip_colorbuttonactive;
     colorglyph:= fgrip_colorglyphactive;
@@ -4435,8 +4468,76 @@ begin
      with info1 do begin
       text.format:= nil;
       dest:= rect1;
+      clip:= rect1;
       font:= self.font;
       tabulators:= nil;
+      case fgrip_pos of
+       cp_top: begin
+        flags:= fgrip_textflagstop;
+        if not ((tf_right in flags) xor (tf_rotate180 in flags)) then begin
+         inc(dest.x,fgrip_captiondist);
+        end;
+        if not (tf_xcentered in flags) then begin
+         dec(dest.cx,fgrip_captiondist);
+        end;
+        inc(dest.y,fgrip_captionoffset);
+        if tf_clipi in flags then begin
+         clip.y:= -1000; //no vertical clip
+         clip.cy:= 2000;
+        end;
+       end;
+       cp_left: begin
+        flags:= fgrip_textflagsleft;
+        if (tf_right in flags) xor (tf_rotate180 in flags) then begin
+         inc(dest.y,fgrip_captiondist);
+        end
+        else begin
+         dec(dest.cy,fgrip_captiondist);
+         if tf_xcentered in flags then begin
+          dec(dest.y,fgrip_captiondist);
+         end;
+        end;
+        inc(dest.x,fgrip_captionoffset);
+        if tf_clipi in flags then begin
+         clip.x:= -1000; //no horicontal clip
+         clip.cx:= 2000;
+        end;
+       end;
+       cp_bottom: begin
+        flags:= fgrip_textflagsbottom;
+        if not ((tf_right in flags)  xor (tf_rotate180 in flags))then begin
+         inc(dest.x,fgrip_captiondist);
+        end;
+        if not (tf_xcentered in flags) then begin
+         dec(dest.cx,fgrip_captiondist);
+        end;
+        dec(dest.y,fgrip_captionoffset);
+        if tf_clipi in flags then begin
+         clip.y:= -1000; //no vertical clip
+         clip.cy:= 2000;
+        end;
+       end;
+       cp_right: begin
+        flags:= fgrip_textflagsright;
+        if (tf_right in flags) xor (tf_rotate180 in flags) then begin
+         inc(dest.y,fgrip_captiondist);
+        end
+        else begin
+         dec(dest.cy,fgrip_captiondist);
+         if tf_xcentered in flags then begin
+          dec(dest.y,fgrip_captiondist);
+         end;
+        end;
+        dec(dest.x,fgrip_captionoffset);
+        if tf_clipi in flags then begin
+         clip.x:= -1000; //no horicontal clip
+         clip.cx:= 2000;
+        end;
+       end;
+      end;
+      drawtext(canvas,info1);
+      canvas.subcliprect(inflaterect(info1.res,1));
+     {
       flags:= [tf_clipi,tf_ycentered];
       if fgrip_pos in [cp_top,cp_bottom] then begin
        inc(dest.x,1);
@@ -4467,6 +4568,7 @@ begin
         goto endlab;
        end;
       end;
+      }
      end;
     end;
 //   end;
@@ -4515,7 +4617,7 @@ begin
     end;
    end
    else begin
-    brushbefore:= brush;
+//    brushbefore:= brush;
     brush:= stockobjects.bitmaps[fgrip_grip];
     if fintf.getwidget.active then begin
      color:= fgrip_coloractive;
@@ -4524,12 +4626,12 @@ begin
      color:= fgrip_color;
     end;
     fillrect(rect1,cl_brushcanvas);
-    brush:= brushbefore;
+//    brush:= brushbefore;
  //  stockobjects.bitmaps[fgrip_grip].paint(canvas,fhandlerect,
  //         [al_xcentered,al_ycentered,al_tiled],fgrip_color,cl_transparent);
    end;
 endlab:
-   color:= colorbefore;
+   canvas.restore;//color:= colorbefore;
   end;
  end;
 end;
@@ -5073,6 +5175,54 @@ begin
  end
  else begin
   result:= inherited ishintarea(apos,aid);
+ end;
+end;
+
+procedure tgripframe.setgrip_textflagstop(const avalue: textflagsty);
+begin
+ if fgrip_textflagstop <> avalue then begin
+  fgrip_textflagstop:= checktextflags(fgrip_textflagstop,avalue);
+  fintf.invalidatewidget();
+ end;
+end;
+
+procedure tgripframe.setgrip_textflagsright(const avalue: textflagsty);
+begin
+ if fgrip_textflagsleft <> avalue then begin
+  fgrip_textflagsleft:= checktextflags(fgrip_textflagsleft,avalue);
+  fintf.invalidatewidget();
+ end;
+end;
+
+procedure tgripframe.setgrip_textflagsbottom(const avalue: textflagsty);
+begin
+ if fgrip_textflagsbottom <> avalue then begin
+  fgrip_textflagsbottom:= checktextflags(fgrip_textflagsbottom,avalue);
+  fintf.invalidatewidget();
+ end;
+end;
+
+procedure tgripframe.setgrip_textflagsrright(const avalue: textflagsty);
+begin
+ if fgrip_textflagsright <> avalue then begin
+  fgrip_textflagsright:= checktextflags(fgrip_textflagsright,avalue);
+  fintf.invalidatewidget();
+ end;
+end;
+
+procedure tgripframe.setgrip_captiondist(const avalue: integer);
+begin
+ if fgrip_captiondist <> avalue then begin
+  fgrip_captiondist:= avalue;
+  fintf.invalidatewidget();
+ end;
+end;
+
+procedure tgripframe.setgrip_captionoffset(const avalue: integer);
+begin
+ if fgrip_captionoffset <> avalue then begin
+  fgrip_captionoffset:= avalue;
+  fintf.invalidatewidget();
  end;
 end;
 
