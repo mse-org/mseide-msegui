@@ -5168,7 +5168,7 @@ end;
 
 function tgripframe.ishintarea(const apos: pointty; var aid: int32): boolean;
 begin
- result:= pointinrect(apos,frects[dbr_handle]) and 
+ result:= pointinrect(apos,fgriprect{frects[dbr_handle]}) and 
                           (od_captionhint in fcontroller.optionsdock);
  if result then begin
   aid:= hintidframe - ord(dbr_handle);
