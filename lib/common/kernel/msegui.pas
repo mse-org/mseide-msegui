@@ -11719,7 +11719,9 @@ begin
     fparentwidget.widgetregionchanged(self);
    end;
   end;
-  visiblepropchanged;
+  if not (csdestroying in componentstate) then begin
+   visiblepropchanged;
+  end;
  end
  else begin
   if avalue then begin
