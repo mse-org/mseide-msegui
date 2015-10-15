@@ -260,7 +260,8 @@ type
    function componentscrollsize: sizety;
    function componentoffset(): pointty;
    function componentatpos(const apos: pointty): tcomponent;
-   function widgetatpos(const apos: pointty; onlywidgets: boolean): twidget;
+   function widgetatpos(const apos: pointty; const onlywidgets: boolean; 
+                                 const everywhere: boolean = false): twidget;
    procedure updateselections;
 
    procedure setrootpos(const component: tcomponent; const apos: pointty);
@@ -1754,12 +1755,12 @@ begin
 end;
 
 function tformdesignerfo.widgetatpos(const apos: pointty;
-                                onlywidgets: boolean): twidget;
+       const onlywidgets: boolean; const everywhere: boolean = false): twidget;
 var
  widgetinfo: widgetatposinfoty;
 begin
  result:= nil;
- if pointinrect(apos,gridrect) then begin
+ if everywhere or pointinrect(apos,gridrect) then begin
   fillchar(widgetinfo,sizeof(widgetinfo),0);
   with widgetinfo do begin
    pos:= translatewidgetpoint(apos,self,form);
@@ -3459,7 +3460,8 @@ var
  isinpaintrect: boolean;
  designactive: boolean;
  po1: pformselectedinfoty;
- pt1: pointty; 
+ pt1: pointty;
+ dockintf: idockcontroller;
 label
  1;
 begin
@@ -3477,7 +3479,11 @@ begin
                 (ws1_designactive in twidget1(capture).fwidgetstate1);
   mousepos1:= translatewidgetpoint(pos,window.owner,self);
   ss1:= shiftstate * (shiftstatesmask);
-  isinpaintrect:= pointinrect(mousepos1,gridrect);
+  isinpaintrect:= pointinrect(mousepos1,gridrect) or 
+    mseclasses.getcorbainterface(fform,typeinfo(idockcontroller),
+                                                              dockintf) and
+         pointinrect(translatewidgetpoint(mousepos1,self,fform),
+                                          dockintf.getbuttonrects(dbr_handle));
   if eventkind in [ek_buttonpress,ek_buttonrelease] then begin
    fmousepos:= mousepos1;
   end;
@@ -3500,7 +3506,7 @@ begin
        if (component = nil) then begin
         if (form <> nil) and 
                  not hidewidgetact.checked then begin
-         component:= widgetatpos(mousepos1,true);
+         component:= widgetatpos(mousepos1,true,true);
         end
         else begin
          component:= module;

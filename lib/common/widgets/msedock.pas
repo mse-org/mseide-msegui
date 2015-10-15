@@ -80,7 +80,7 @@ type
    procedure refused(const apos: pointty); override;
  end;
 
- idockcontroller = interface(idragcontroller)
+ idockcontroller = interface(idragcontroller)[miid_idockcontroller]
   function checkdock(var info: draginfoty): boolean;
   function getbuttonrects(const index: dockbuttonrectty): rectty;  
                                       //origin = clientrect.pos
