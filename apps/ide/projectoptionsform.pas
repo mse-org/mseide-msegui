@@ -196,6 +196,7 @@ type
    fbackupfilecount: integer;
    fencoding: integer;
    fnoformdesignerdocking: boolean;
+   ftrimtrailingwhitespace: boolean;
    function limitgridsize(const avalue: integer): integer;
    procedure setgridsizex(const avalue: integer);
    procedure setgridsizey(const avalue: integer);
@@ -245,6 +246,8 @@ type
    property backupfilecount: integer read fbackupfilecount 
                                               write fbackupfilecount;
    property encoding: integer read fencoding write fencoding;
+   property trimtrailingwhitespace: boolean read ftrimtrailingwhitespace
+                                                write ftrimtrailingwhitespace;
    property codetemplatedirs: msestringarty read getcodetemplatedirs write
                   setcodetemplatedirs;
  end;
@@ -724,7 +727,6 @@ type
    editfontcolor: tcoloredit;
    editbkcolor: tcoloredit;
    editfontantialiased: tbooleanedit;
-   editmarkbrackets: tbooleanedit;
    statementcolor: tcoloredit;
    ttabpage17: ttabpage;
    ttabpage18: ttabpage;
@@ -795,6 +797,8 @@ type
    toolshortcuts: tenumedit;
    toolsc: tstringedit;
    toolscalt: tstringedit;
+   editmarkbrackets: tbooleanedit;
+   trimtrailingwhitespace: tbooleanedit;
    procedure acttiveselectondataentered(const sender: TObject);
    procedure colonshowhint(const sender: tdatacol; const arow: Integer; 
                       var info: hintinfoty);

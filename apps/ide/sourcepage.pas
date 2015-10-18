@@ -856,6 +856,8 @@ end;
 procedure tsourcepage.save(newname: filenamety);
 var
  info: fileinfoty;
+ po1: prichstringty;
+ i1: int32;
 begin
  if newname = '' then begin
   if (edit.filename = '') then begin
@@ -877,7 +879,19 @@ begin
   designnotifications.beforefilesave(idesigner(designer),newname);
  except
   application.handleexception(nil);
- end; 
+ end;
+ if projectoptions.e.trimtrailingwhitespace then begin
+  edit.datalist.beginupdate();
+  try
+   po1:= edit.datalist.datapo;
+   for i1:= 0 to edit.datalist.count - 1 do begin
+    trimright1(po1^.text); 
+    inc(po1);
+   end;
+  finally
+   edit.datalist.endupdate();
+  end;
+ end;
  edit.savetofile(newname);
  if newname <> '' then begin
   if ffiletag = 0 then begin
