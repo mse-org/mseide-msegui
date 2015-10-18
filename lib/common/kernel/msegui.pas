@@ -2700,6 +2700,7 @@ type
    property mousewidget: twidget read fmousewidget;
    property clientmousewidget: twidget read fclientmousewidget;
    property mousecapturewidget: twidget read fmousecapturewidget;
+   property keyboardcapturewidget: twidget read fkeyboardcapturewidget;
    property mainwindow: twindow read fmainwindow write setmainwindow;
    property thread: threadty read fthread;
 

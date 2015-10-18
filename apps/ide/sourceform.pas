@@ -727,7 +727,9 @@ var
  visible1: boolean;
  active1: boolean;
 begin
- if (application.activewindow <> nil) and not fasking then begin
+ if (application.activewindow <> nil) and not fasking and 
+               (application.modallevel = 0) and 
+                           (application.keyboardcapturewidget = nil) then begin
   fasking:= true;
   try
    for int1:= 0 to count - 1 do begin
