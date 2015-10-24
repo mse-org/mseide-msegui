@@ -3479,11 +3479,7 @@ begin
                 (ws1_designactive in twidget1(capture).fwidgetstate1);
   mousepos1:= translatewidgetpoint(pos,window.owner,self);
   ss1:= shiftstate * (shiftstatesmask);
-  isinpaintrect:= pointinrect(mousepos1,gridrect) or 
-    mseclasses.getcorbainterface(fform,typeinfo(idockcontroller),
-                                                              dockintf) and
-         pointinrect(translatewidgetpoint(mousepos1,self,fform),
-                                          dockintf.getbuttonrects(dbr_handle));
+  isinpaintrect:= pointinrect(mousepos1,gridrect);
   if eventkind in [ek_buttonpress,ek_buttonrelease] then begin
    fmousepos:= mousepos1;
   end;
