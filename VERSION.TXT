@@ -1,5 +1,9 @@
 MSEide+MSEgui breaking changes version history
 
+2015-10-24
+ tslider.scrollbar.face moved to tcustomscrollbar, 
+ disable tslider.scrollbar.face in order to show the pattern.
+ 
 Version 4.0beta1
 2015-09-30 
  tfiledialog statvalues lastdir, filehistory, filefilter and fielefilterindext

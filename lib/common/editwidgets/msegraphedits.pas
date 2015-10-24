@@ -309,9 +309,9 @@ type
  
  tsliderscrollbar = class(tscrollbar,iface)
   private
-   fface: tface;
-   procedure setface(const avalue: tface);
+//   fface: tface;
   protected
+{
     //iface
    procedure invalidate;
    function translatecolor(const acolor: colorty): colorty;
@@ -320,11 +320,12 @@ type
                const linkintf: iobjectlink = nil);
    function getcomponentstate: tcomponentstate;
    procedure widgetregioninvalid;
+}
   public
    constructor create(intf: iscrollbar; org: originty = org_client;
               ondimchanged: proceventty = nil); override;
    destructor destroy; override;
-   procedure paint(const canvas: tcanvas; const acolor: colorty = cl_none); override;
+//   procedure paint(const canvas: tcanvas; const acolor: colorty = cl_none); override;
   published
    property options default defaultsliderscrollbaroptions;
 //   property stepsize;
@@ -343,7 +344,6 @@ type
 //   property framebutton;
 //   property frameendbutton1;
 //   property frameendbutton2;
-   property face: tface read fface write setface;
  end;
 
  tcustomrealgraphdataedit = class;
@@ -1182,25 +1182,21 @@ begin
  inherited;
  foptions:= defaultsliderscrollbaroptions;
  buttonlength:= defaultbuttonminlength;
- fface:= tface.create(iface(self));
+// fface:= tface.create(iface(self));
 end;
 
 destructor tsliderscrollbar.destroy;
 begin
  inherited;
- fface.Free;
 end;
 
-procedure tsliderscrollbar.setface(const avalue: tface);
-begin
- fface.assign(avalue);
-end;
 {
 function tsliderscrollbar.getwidget: twidget;
 begin
  result:= fintf.getwidget;
 end;
 }
+{
 function tsliderscrollbar.translatecolor(const acolor: colorty): colorty;
 begin
  result:= fintf.translatecolor(acolor);
@@ -1209,36 +1205,43 @@ end;
 procedure tsliderscrollbar.paint(const canvas: tcanvas;
                                           const acolor: colorty = cl_none);
 begin
- fface.paint(canvas,fdrawinfo.scrollrect);
+ if fface <> nil then begin
+  fface.paint(canvas,fdrawinfo.scrollrect);
+ end;
  inherited;
 end;
-
+}
+{
 procedure tsliderscrollbar.invalidate;
 begin
  fintf.getwidget.invalidate;
 end;
-
+}
+{
 function tsliderscrollbar.getclientrect: rectty;
 begin
  result:= fintf.getwidget.clientrect;
 end;
-
+}
+{
 procedure tsliderscrollbar.setlinkedvar(const source: tmsecomponent;
                var dest: tmsecomponent; const linkintf: iobjectlink = nil);
 begin
  twidget1(fintf.getwidget).setlinkedvar(source,dest,linkintf);
 end;
-
+}
+{
 function tsliderscrollbar.getcomponentstate: tcomponentstate;
 begin
  result:= fintf.getwidget.componentstate;
 end;
-
+}
+{
 procedure tsliderscrollbar.widgetregioninvalid;
 begin
  twidget1(fintf.getwidget).widgetregioninvalid;
 end;
-
+}
 { tcustomrealgraphdataedit }
 
 constructor tcustomrealgraphdataedit.create(aowner: tcomponent);

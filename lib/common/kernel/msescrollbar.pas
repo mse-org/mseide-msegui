@@ -76,7 +76,7 @@ type
  scrollbareventty = procedure(const sender: tcustomscrollbar;
               const akind: scrolleventty; const avalue: real) of object;
             //avalue = step or value              
- tcustomscrollbar = class(tnullinterfacedpersistent,iframe)
+ tcustomscrollbar = class(tnullinterfacedpersistent,iframe,iface)
   private
    forg: originty;
    fdim: rectty;
@@ -99,6 +99,7 @@ type
 //   fframebutton: tframe;
 //   fframeendbutton1: tframe;
 //   fframeendbutton2: tframe;
+   fface: tface;
    fondimchanged: proceventty;
    fbuttonendlength: integer;
    fpaintedbutton: scrollbarareaty;
@@ -129,6 +130,8 @@ type
    procedure dodimchanged;
    function clickedareaisvalid: boolean;
    procedure setcolorpattern(const avalue: colorty);
+   function getface(): tface;
+   procedure setface(const avalue: tface);
    function getfacebutton: tface;
    procedure setfacebutton(const avalue: tface);
    function getfaceendbutton: tface;
@@ -150,6 +153,18 @@ type
    procedure writepagesize(writer: twriter);
    procedure readwheelsensitivity(reader: treader);
    procedure writewheelsensitivity(writer: twriter);
+  protected
+   fstate: scrollbarstatesty;
+   fintf: iscrollbar;
+   foptions: scrollbaroptionsty;
+   fdrawinfo: scrollbardrawinfoty;
+   findentstart,findentend: integer;
+    //iface
+   function translatecolor(const acolor: colorty): colorty;
+   function getclientrect: rectty;
+   procedure setlinkedvar(const source: tmsecomponent; var dest: tmsecomponent;
+               const linkintf: iobjectlink = nil);
+   procedure widgetregioninvalid;
     //iframe
    procedure setframeinstance(instance: tcustomframe);
    procedure setstaticframe(value: boolean);
@@ -166,12 +181,6 @@ type
    function getframestateflags: framestateflagsty;
    function getfocused: boolean;
    procedure setfocused(const avalue: boolean);
-  protected
-   fstate: scrollbarstatesty;
-   fintf: iscrollbar;
-   foptions: scrollbaroptionsty;
-   fdrawinfo: scrollbardrawinfoty;
-   findentstart,findentend: integer;
    function getshiftfact(ashiftstate: shiftstatesty; out fact: real): boolean;
                                              //false if not valid
    procedure setoptions(const avalue: scrollbaroptionsty); virtual;
@@ -187,6 +196,7 @@ type
    constructor create(intf: iscrollbar; org: originty = org_client;
               ondimchanged: proceventty = nil); reintroduce; virtual;
    destructor destroy; override;
+   procedure createface();
    procedure createfacebutton;
    procedure createfaceendbutton;
    procedure createframebutton;
@@ -246,6 +256,7 @@ type
    property buttonendlength: integer read fbuttonendlength 
                          write setbuttonendlength default 0;
                      //0 -> square, -1 -> no endbuttons
+   property face: tface read getface write setface;
    property facebutton: tface read getfacebutton write setfacebutton;
    property faceendbutton: tface read getfaceendbutton write setfaceendbutton;
    property framebutton: tframe read getframebutton write setframebutton;
@@ -288,6 +299,7 @@ type
    property buttonlength;
    property buttonminlength;
    property buttonendlength;
+   property face;
    property facebutton;
    property faceendbutton;
    property framebutton;
@@ -321,6 +333,7 @@ type
    property buttonlength;
    property buttonminlength;
    property buttonendlength;
+   property face;
    property facebutton;
    property faceendbutton;
    property framebutton;
@@ -730,6 +743,9 @@ begin
 //  fdrawinfo.areas[sbbu_down].frame:= fframeendbutton1;
 //  fdrawinfo.areas[sbbu_move].frame:= fframebutton;
 //  fdrawinfo.areas[sbbu_up].frame:= fframeendbutton2;
+  if fface <> nil then begin
+   fface.paint(canvas,fdrawinfo.scrollrect);
+  end;
   if acolor = cl_none then begin
    col1:= fcolor;
   end
@@ -791,31 +807,33 @@ begin
    }
    inc(fpaintedbutton);
   end;
-  colorbackground:= col1;
-  brush:= stockobjects.bitmaps[stb_dens50];
-  if fclickedarea = sba_start then begin
-   color:= cl_black;
-  end
-  else begin
-   color:= fcolorpattern;
-  end;
-  if fcolorpattern <> cl_none then begin
-   fillrect(areas[sba_start].ca.dim,cl_brushcanvas);
-  end
-  else begin
-   fillrect(areas[sba_start].ca.dim,col1);
-  end;
-  if fclickedarea = sba_end then begin
-   color:= cl_black;
-  end
-  else begin
-   color:= fcolorpattern;
-  end;
-  if fcolorpattern <> cl_none then begin
-   fillrect(areas[sba_end].ca.dim,cl_brushcanvas);
-  end
-  else begin
-   fillrect(areas[sba_end].ca.dim,col1);
+  if fface = nil then begin
+   colorbackground:= col1;
+   brush:= stockobjects.bitmaps[stb_dens50];
+   if fclickedarea = sba_start then begin
+    color:= cl_black;
+   end
+   else begin
+    color:= fcolorpattern;
+   end;
+   if fcolorpattern <> cl_none then begin
+    fillrect(areas[sba_start].ca.dim,cl_brushcanvas);
+   end
+   else begin
+    fillrect(areas[sba_start].ca.dim,col1);
+   end;
+   if fclickedarea = sba_end then begin
+    color:= cl_black;
+   end
+   else begin
+    color:= fcolorpattern;
+   end;
+   if fcolorpattern <> cl_none then begin
+    fillrect(areas[sba_end].ca.dim,cl_brushcanvas);
+   end
+   else begin
+    fillrect(areas[sba_end].ca.dim,col1);
+   end;
   end;
   restore;
  end;
@@ -1309,6 +1327,7 @@ destructor tcustomscrollbar.destroy;
 begin
  freeandnil(frepeater);
  inherited;
+ fface.Free;
  fdrawinfo.areas[sbbu_move].face.free;
  fdrawinfo.areas[sbbu_up].face.free;
  fdrawinfo.areas[sbbu_down].frame.free;
@@ -1369,6 +1388,28 @@ begin
  if fdrawinfo.areas[sbbu_move].face = nil then begin
   fdrawinfo.areas[sbbu_move].face:= tface.create(iface(fintf.getwidget));
  end;
+end;
+
+procedure tcustomscrollbar.createface;
+begin
+ if fface = nil then begin
+  fface:= tface.create(iface(self));
+ end;
+end;
+
+function tcustomscrollbar.getface: tface;
+begin
+ fintf.getwidget.getoptionalobject(fface,
+                               {$ifdef FPC}@{$endif}createface);
+ result:= fface;
+end;
+
+procedure tcustomscrollbar.setface(const avalue: tface);
+begin
+ fintf.getwidget.setoptionalobject(avalue,fface,
+                               {$ifdef FPC}@{$endif}createface);
+ invalidate;
+// fface.assign(avalue);
 end;
 
 function tcustomscrollbar.getfacebutton: tface;
@@ -1655,6 +1696,27 @@ begin
    break;
   end;
  end;
+end;
+
+function tcustomscrollbar.translatecolor(const acolor: colorty): colorty;
+begin
+ result:= fintf.translatecolor(acolor);
+end;
+
+function tcustomscrollbar.getclientrect: rectty;
+begin
+ result:= fintf.getwidget.clientrect;
+end;
+
+procedure tcustomscrollbar.setlinkedvar(const source: tmsecomponent;
+               var dest: tmsecomponent; const linkintf: iobjectlink = nil);
+begin
+ twidget1(fintf.getwidget).setlinkedvar(source,dest,linkintf);
+end;
+
+procedure tcustomscrollbar.widgetregioninvalid;
+begin
+ twidget1(fintf.getwidget).widgetregioninvalid;
 end;
 
 { tcustomnomoveautoscrollbar }
