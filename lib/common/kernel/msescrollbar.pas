@@ -367,7 +367,7 @@ begin
  fpagesize:= defaultpagesize;
  fwheelsensitivity:= 1;
  for bu1:= low(scrollbarareaty) to high(scrollbarareaty) do begin
-  fdrawinfo.areas[bu1].color:= cl_parent;
+  fdrawinfo.areas[bu1].color:= cl_transparent;
  end;
 end;
 
@@ -716,14 +716,17 @@ procedure tcustomscrollbar.paint(const canvas: tcanvas;
                                            const acolor: colorty = cl_none);
 var
  col1: colorty;
- statebefore: shapestatesty;
+// statebefore: shapestatesty;
 begin
- statebefore:= []; //compiler warning
+// statebefore:= []; //compiler warning
  with canvas,self.fdrawinfo do begin
   save;
-  areas[sbbu_up].face:= ffaceendbutton;
   areas[sbbu_down].face:= ffaceendbutton;
   areas[sbbu_move].face:= ffacebutton;
+  areas[sbbu_up].face:= ffaceendbutton;
+  areas[sbbu_down].frame:= fframeendbutton1;
+  areas[sbbu_move].frame:= fframebutton;
+  areas[sbbu_up].frame:= fframeendbutton2;
   if acolor = cl_none then begin
    col1:= fcolor;
   end
@@ -731,9 +734,10 @@ begin
    col1:= acolor;
   end;
   col1:= fintf.translatecolor(col1);
-  color:= col1;
+//  color:= col1;
   fpaintedbutton:= firstbutton;
   while fpaintedbutton <= lastbutton do begin
+   {
    case fpaintedbutton of
     sbbu_down: begin
      if fframeendbutton1 <> nil then begin
@@ -750,14 +754,17 @@ begin
       fframeendbutton2.paintbackground(canvas,buttonareas[bbu_up],false);
      end;
     end;
-   end;    
+   end;
    if acolor <> cl_none then begin
     with areas[fpaintedbutton] do begin
      statebefore:= state;
      state:= state - [shs_mouse,shs_clicked];     
     end; 
    end;
+  }
+   fillrect(areas[fpaintedbutton].ca.dim,col1);
    drawtoolbutton(canvas,areas[fpaintedbutton]);
+  {
    if acolor <> cl_none then begin
     areas[fpaintedbutton].state:= statebefore;
    end;
@@ -777,7 +784,8 @@ begin
       fframeendbutton2.paintoverlay(canvas,buttonareas[bbu_up]);
      end;
     end;
-   end;    
+   end;
+   }
    inc(fpaintedbutton);
   end;
   colorbackground:= col1;
