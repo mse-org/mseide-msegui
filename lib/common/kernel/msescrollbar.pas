@@ -31,6 +31,8 @@ type
  buttonareaty = (bbu_down,bbu_move,bbu_up);
 const
  scrollbarclicked = ord(sba_end) + 1;
+ areafrombuttonarea: array[buttonareaty] of scrollbarareaty = 
+                                         (sbbu_down,sbbu_move,sbbu_up);
 
 type
  scrollbaroptionty = (sbo_thumbtrack,sbo_moveauto,sbo_showauto,sbo_show,
@@ -179,6 +181,7 @@ type
    function dostepup(const ashiftstate: shiftstatesty): boolean;
    function dostepdown(const ashiftstate: shiftstatesty): boolean;
    procedure defineproperties(filer: tfiler); override;
+   function getbuttonarea(const apos: pointty): buttonareaty; //-1 -> none
   public
    tag: integer;
    constructor create(intf: iscrollbar; org: originty = org_client;
@@ -1632,6 +1635,19 @@ begin
                       (filer.ancestor = nil) and (fwheelsensitivity <> 1) or
    (filer.ancestor <> nil) and 
       (tcustomscrollbar(filer.ancestor).fwheelsensitivity <> fwheelsensitivity));
+end;
+
+function tcustomscrollbar.getbuttonarea(const apos: pointty): buttonareaty;
+var
+ bu1: buttonareaty;
+begin
+ result:= buttonareaty(-1); //none
+ for bu1:= low(buttonareaty) to high(buttonareaty) do begin
+  if pointinrect(apos,fdrawinfo.buttonareas[bu1]) then begin
+   result:= bu1;
+   break;
+  end;
+ end;
 end;
 
 { tcustomnomoveautoscrollbar }
