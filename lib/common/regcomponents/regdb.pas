@@ -1029,6 +1029,9 @@ begin
  if amodalresult = mr_canclose then begin
   if fintf <> nil then begin
    fintf.setactive(true);
+   if not factivebefore then begin
+    fintf.setactive(false); //avoid exception by empty original statement
+   end;
   end;
  end;
 end;

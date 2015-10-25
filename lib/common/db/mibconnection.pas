@@ -462,6 +462,8 @@ end;
 
 
 procedure TIBConnection.DoInternalConnect;
+const
+ utf8name = 'UTF8';
 var
   DPB           : string;
   ADatabaseName : String;
@@ -482,14 +484,20 @@ begin
   end;
   if (Role <> '') then
      DPB := DPB + chr(isc_dpb_sql_role_name) + chr(Length(Role)) + Role;
-  if Length(CharSet) > 0 then
+  if Length(CharSet) > 0 then begin
     DPB := DPB + Chr(isc_dpb_lc_ctype) + Chr(Length(CharSet)) + CharSet;
+  end
+  else begin
+   if dbo_utf8 in fcontroller.options then begin
+    DPB := DPB + Chr(isc_dpb_lc_ctype) + Chr(Length(utf8name)) + utf8name;
+   end;
+  end;
 
   FSQLDatabaseHandle := nil;
   if HostName <> '' then ADatabaseName := HostName+':'+DatabaseName
     else ADatabaseName := DatabaseName;
-  if isc_attach_database(@FStatus, Length(ADatabaseName), @ADatabaseName[1], @FSQLDatabaseHandle,
-         Length(DPB), @DPB[1]) <> 0 then
+  if isc_attach_database(@FStatus, Length(ADatabaseName), @ADatabaseName[1],
+                           @FSQLDatabaseHandle,Length(DPB), @DPB[1]) <> 0 then
     CheckError('DoInternalConnect', FStatus);
   SetDBDialect;
 {$IfDef LinkDynamically}
