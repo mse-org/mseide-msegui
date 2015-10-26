@@ -1529,12 +1529,18 @@ begin                        //completeclass
      with ppo^ do begin
       if not (mef_abstract in params.flags) then begin
        if isemptysourcepos(impheaderstartpos) then begin
-        str1:= lineend +
-            limitlinelength(msestring(composeprocedureheader(ppo,cpo,true)),
+        if (int1 = 0) and not newimp then begin
+         str1:= '';
+        end
+        else begin
+         str1:= lineend;
+        end;
+        str1:= str1 +
+              limitlinelength(msestring(composeprocedureheader(ppo,cpo,true)),
                            fmaxlinelength,procheaderbreakchars,14) + lineend +
                   'begin'+lineend+
                   'end;'+lineend;
-        if newimp and (int1 = procedurelist.count - 1) then begin
+        if newimp and (int1 = procedurelist.count - 1) or (int1 = 0) then begin
          str1:= str1 + lineend;
         end;
         replacetext(infopo,insertpos,insertpos,str1);
