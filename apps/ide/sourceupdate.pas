@@ -1392,6 +1392,10 @@ var
  newimp: boolean;
  classindex1: integer;
  str2: string;
+ i2: int32;
+ insertpos: sourceposty;
+ insertedlines: int32;
+ 
 begin                        //completeclass
  result:= false;
  with infopo^ do begin
@@ -1512,23 +1516,31 @@ begin                        //completeclass
      procimpstart.pos.col:= 0;
      procimpend:= procimpstart;
     end;
+    insertpos:= procimpstart;
+    insertpos.pos.col:= 0;
+    insertedlines:= 0;
     for int1:= 0 to procedurelist.count - 1 do begin
      ppo:= procedurelist[int1];
      with ppo^ do begin
-      if isemptysourcepos(impheaderstartpos) and 
-                 not (mef_abstract in params.flags) then begin
-       str1:= lineend +
-           limitlinelength(msestring(composeprocedureheader(ppo,cpo,true)),
-                          fmaxlinelength,procheaderbreakchars,14) + lineend +
-                 'begin'+lineend+
-                 'end;'+lineend;
-       if newimp and (int1 = procedurelist.count - 1) then begin
-        str1:= str1 + lineend;
+      if not (mef_abstract in params.flags) then begin
+       if isemptysourcepos(impheaderstartpos) then begin
+        str1:= lineend +
+            limitlinelength(msestring(composeprocedureheader(ppo,cpo,true)),
+                           fmaxlinelength,procheaderbreakchars,14) + lineend +
+                  'begin'+lineend+
+                  'end;'+lineend;
+        if newimp and (int1 = procedurelist.count - 1) then begin
+         str1:= str1 + lineend;
+        end;
+        replacetext(infopo,insertpos,insertpos,str1);
+        result:= true;
+        i2:= high(breaklines(str1));
+        inc(insertpos.pos.row,i2);
+        inc(insertedlines,i2);
+       end
+       else begin
+        insertpos.pos.row:= impendpos.pos.row + insertedlines;
        end;
-       replacetext(infopo,procimpend,procimpend,str1);
-       result:= true;
-       inc(procimpend.pos.row,high(breaklines(str1)));
-       procimpend.pos.col:= 0;
       end;
      end;
     end;
