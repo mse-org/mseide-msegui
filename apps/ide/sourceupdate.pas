@@ -1218,6 +1218,11 @@ begin
    end;
    setlength(result,length(result)-1); //remove last space
    result[length(result)]:= ')';
+  end
+  else begin
+   if mef_brackets in flags then begin
+    result:= result + '()';
+   end;
   end;
   if kind = mkfunction then begin
    result:= result + ': ' + params[high(params)].typename;

@@ -42,7 +42,7 @@ type
     function parserecord: boolean;
     function parseobject: boolean;
     function parseprocparams(const akind: tmethodkind;
-                            var params: paraminfoarty): boolean;
+                var aflags: methodflagsty; var params: paraminfoarty): boolean;
     function parseclassprocedureheader(atoken: pascalidentty;
                   classinfopo: pclassinfoty; const managed: boolean): boolean;
     function skipprocedureparams(atoken: pascalidentty): boolean;
@@ -348,6 +348,7 @@ begin
 end;
 
 function tpascaldesignparser.parseprocparams(const akind: tmethodkind;
+                            var aflags: methodflagsty;
                             var params: paraminfoarty): boolean;
 var
  ar1: stringarty;
@@ -387,6 +388,7 @@ begin
  end
  else begin
   if checkoperator('(') then begin
+   include(aflags,mef_brackets);
    while not eof do begin
     defaultstr:= '';
     int1:= getident;
@@ -480,7 +482,7 @@ begin
   result:= not checkoperator('.'); //interface proc definition?
   if result then begin
    uppername:= uppercase(name);
-   result:= parseprocparams(params.kind,params.params);
+   result:= parseprocparams(params.kind,params.flags,params.params);
    if result then begin
     intendpos:= sourcepos;
    end;
@@ -553,13 +555,14 @@ end;
 function tpascaldesignparser.skipprocedureparams(atoken: pascalidentty): boolean;
 var
  ar1: paraminfoarty;
+ flags1: methodflagsty;
 begin
  case atoken of
   pid_procedure: begin
-   result:= parseprocparams(mkprocedure,ar1);
+   result:= parseprocparams(mkprocedure,flags1,ar1);
   end;
   pid_function: begin
-   result:= parseprocparams(mkfunction,ar1);
+   result:= parseprocparams(mkfunction,flags1,ar1);
   end
   else begin
    result:= false;
@@ -1157,7 +1160,7 @@ var
      po1:= nil;
     end;
     methodinfo.kind:= akind;
-    if parseprocparams(akind,methodinfo.params) then begin
+    if parseprocparams(akind,methodinfo.flags,methodinfo.params) then begin
      if po1 <> nil then begin
       po3:= funitinfopo^.deflist.beginnode(
                 lstringtostring(classname)+'.'+lstringtostring(procname)+

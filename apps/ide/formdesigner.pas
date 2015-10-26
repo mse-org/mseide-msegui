@@ -3461,7 +3461,7 @@ var
  designactive: boolean;
  po1: pformselectedinfoty;
  pt1: pointty;
- dockintf: idockcontroller;
+// dockintf: idockcontroller;
 label
  1;
 begin
