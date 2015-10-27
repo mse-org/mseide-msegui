@@ -73,9 +73,11 @@ type
    property frameimage_offsetmouse;
    property frameimage_offsetclicked;
    property frameimage_offsetactive;
+   property frameimage_offsetfocused;
+{
    property frameimage_offsetactivemouse;
    property frameimage_offsetactiveclicked;
-
+}
    property frameface_list;
    property frameface_offset;
    property frameface_offset1;
@@ -83,9 +85,11 @@ type
    property frameface_offsetmouse;
    property frameface_offsetclicked;
    property frameface_offsetactive;
+   property frameface_offsetfocused;
+{
    property frameface_offsetactivemouse;
    property frameface_offsetactiveclicked;
-
+}
    property colorclient default cl_foreground;
    property caption;
    property captiontextflags;
@@ -135,9 +139,11 @@ type
    property frameimage_offsetmouse;
    property frameimage_offsetclicked;
    property frameimage_offsetactive;
+   property frameimage_offsetfocused;
+{
    property frameimage_offsetactivemouse;
    property frameimage_offsetactiveclicked;
-
+}
    property frameface_list;
    property frameface_offset;
    property frameface_offset1;
@@ -145,9 +151,11 @@ type
    property frameface_offsetmouse;
    property frameface_offsetclicked;
    property frameface_offsetactive;
+   property frameface_offsetfocused;
+{
    property frameface_offsetactivemouse;
    property frameface_offsetactiveclicked;
-   
+}   
    property optionsskin;
 
    property caption;
@@ -937,8 +945,8 @@ end;
 
 function tframebutton.getframestateflags: framestateflagsty;
 begin
- with finfo do begin
-  result:= combineframestateflags(shs_disabled in state,getwidget.active,
+ with getwidget,finfo do begin
+  result:= combineframestateflags(shs_disabled in state,focused,active,
              shs_mouse in state,shs_clicked in state);
  end;
 end;

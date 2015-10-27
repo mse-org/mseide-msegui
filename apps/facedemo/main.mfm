@@ -3189,10 +3189,8 @@ object mainfo: tmainfo
     frame.frameimage_list = imli
     frame.frameimage_offsetmouse = 24
     frame.frameimage_offsetactive = 8
-    frame.frameimage_offsetactivemouse = 24
-    frame.frameimage_offsetactiveclicked = 16
     frame.colorclient = -2147483645
-    frame.localprops = [frl_levelo, frl_leveli, frl_framewidth, frl_fileft, frl_firight, frl_frameimagelist, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_colorclient]
+    frame.localprops = [frl_levelo, frl_leveli, frl_framewidth, frl_fileft, frl_firight, frl_frameimagelist, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_colorclient]
     frame.localprops1 = []
     face.options = [fao_alphafadeimage]
     face.image.alignment = [al_xcentered, al_ycentered, al_tiled]

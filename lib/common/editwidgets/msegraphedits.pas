@@ -70,9 +70,11 @@ type
    property frameimage_offsetmouse;
    property frameimage_offsetclicked;
    property frameimage_offsetactive;
+   property frameimage_offsetfocused;
+{
    property frameimage_offsetactivemouse;
    property frameimage_offsetactiveclicked;
-
+}
    property frameface_list;
    property frameface_offset;
    property frameface_offset1;
@@ -80,9 +82,11 @@ type
    property frameface_offsetmouse;
    property frameface_offsetclicked;
    property frameface_offsetactive;
+   property frameface_offsetfocused;
+{
    property frameface_offsetactivemouse;
    property frameface_offsetactiveclicked;
-
+}
    property colorclient default cl_transparent;
    property caption;
    property captionpos default cp_right;
@@ -3452,7 +3456,7 @@ end;
 function tcustomdatabutton.getframestateflags: framestateflagsty;
 begin
  with finfo do begin
-  result:= combineframestateflags(not isenabled,
+  result:= combineframestateflags(not isenabled,focused,
               not (bo_nodefaultframeactive in foptions) and 
                            (shs_default in finfo.state) or active,
               shs_mouse in state,shs_clicked in state);

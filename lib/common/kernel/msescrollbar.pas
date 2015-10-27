@@ -1594,7 +1594,7 @@ end;
 function tcustomscrollbar.getframestateflags: framestateflagsty;
 begin
  with fdrawinfo.areas[fpaintedbutton],fintf.getwidget do begin
-  result:= combineframestateflags(not isenabled,active,
+  result:= combineframestateflags(not isenabled,focused,active,
        shs_mouse in state, shs_clicked in state); 
  end;
 end;

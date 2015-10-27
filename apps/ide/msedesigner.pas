@@ -4590,6 +4590,20 @@ begin
    floadingmodulepo^.readermodified:= true;
   end;
  end;
+ if atype = typeinfo(framelocalpropty) then begin
+  if (aitemname = 'frl_frameimageoffsetactivemouse') or 
+            (aitemname = 'frl_frameimageoffsetactiveclicked') then begin
+   avalue:= -2; //skip
+   floadingmodulepo^.readermodified:= true;
+  end;
+ end;
+ if atype = typeinfo(framelocalprop1ty) then begin
+  if (aitemname = 'frl1_framefaceoffsetactivemouse') or 
+            (aitemname = 'frl1_framefaceoffsetactiveclicked') then begin
+   avalue:= -2; //skip
+   floadingmodulepo^.readermodified:= true;
+  end;
+ end;
 end;
 
 function tdesigner.loadformfile(filename: msestring;

@@ -1,5 +1,9 @@
 MSEide+MSEgui breaking changes version history
 
+2015-10-27 tcustomframe.frameimage_offsetactivemouse,
+ frameimage_offsetactiveclicked, frameface_offsetactivemouse and
+ frameface_offsetactiveclicked removed. The resulting offset is now the sum
+ of all active offsets.
 2015-10-24
  tslider.scrollbar.face moved to tcustomscrollbar, 
  disable tslider.scrollbar.face in order to show the pattern.

@@ -219,9 +219,12 @@ type
                      frl_frameimageright,frl_frameimagebottom,
                      frl_frameimageoffset,frl_frameimageoffset1,
                      frl_frameimageoffsetdisabled,frl_frameimageoffsetmouse,
-                     frl_frameimageoffsetclicked,frl_frameimageoffsetactive,
+                     frl_frameimageoffsetclicked,
+                     frl_frameimageoffsetfocused,frl_frameimageoffsetactive,
+{
                      frl_frameimageoffsetactivemouse,
                      frl_frameimageoffsetactiveclicked,
+}
                      frl_optionsskin,
                      frl_colorclient,
                      frl_nodisable);
@@ -230,9 +233,12 @@ type
  framelocalprop1ty = (frl1_framefacelist,
                       frl1_framefaceoffset,frl1_framefaceoffset1,
                       frl1_framefaceoffsetdisabled,frl1_framefaceoffsetmouse,
-                      frl1_framefaceoffsetclicked,frl1_framefaceoffsetactive,
+                      frl1_framefaceoffsetclicked,
+                      frl1_framefaceoffsetfocused,frl1_framefaceoffsetactive,
+                     {
                       frl1_framefaceoffsetactivemouse,
                       frl1_framefaceoffsetactiveclicked,
+                     }
                       frl1_font,frl1_captiondist,frl1_captionoffset,
                       frl1_focusrectdist,
                       frl1_colorglyph, //for menu template
@@ -240,7 +246,8 @@ type
                      );
  framelocalprops1ty = set of framelocalprop1ty;
 
- framestateflagty = (fsf_offset1,fsf_disabled,fsf_active,fsf_mouse,fsf_clicked);
+ framestateflagty = (fsf_offset1,fsf_disabled,fsf_focused,fsf_active,
+                     fsf_mouse,fsf_clicked);
  framestateflagsty = set of framestateflagty;
  
 const
@@ -256,9 +263,12 @@ const
                      frl_frameimageright,frl_frameimagebottom,
                      frl_frameimageoffset,frl_frameimageoffset1,
                      frl_frameimageoffsetdisabled,frl_frameimageoffsetmouse,
-                     frl_frameimageoffsetclicked,frl_frameimageoffsetactive,
+                     frl_frameimageoffsetclicked,
+                     frl_frameimageoffsetfocused,frl_frameimageoffsetactive,
+{
                      frl_frameimageoffsetactivemouse,
                      frl_frameimageoffsetactiveclicked,
+}
                      frl_optionsskin,
                      frl_colorclient,
                      frl_nodisable];
@@ -266,9 +276,12 @@ const
                       frl1_framefacelist,
                       frl1_framefaceoffset,frl1_framefaceoffset1,
                       frl1_framefaceoffsetdisabled,frl1_framefaceoffsetmouse,
-                      frl1_framefaceoffsetclicked,frl1_framefaceoffsetactive,
+                      frl1_framefaceoffsetclicked,
+                      frl1_framefaceoffsetfocused,frl1_framefaceoffsetactive,
+                     {
                       frl1_framefaceoffsetactivemouse,
                       frl1_framefaceoffsetactiveclicked,
+                     }
                       frl1_font,frl1_captiondist,frl1_captionoffset,
                       frl1_focusrectdist,
                       frl1_colorglyph,frl1_colorpattern];
@@ -347,8 +360,11 @@ type
   mouse: integer;
   clicked: integer;
   active: integer;
+  focused: integer;
+ {
   activemouse: integer;
   activeclicked: integer;
+ }
  end;
 
  frameimageoffsetsty = record
@@ -358,8 +374,11 @@ type
   mouse: imagenrty;
   clicked: imagenrty;
   active: imagenrty;
+  focused: imagenrty;
+ {
   activemouse: imagenrty;
   activeclicked: imagenrty;
+ }
  end;
 
  framefaceoffsetsty = record
@@ -369,8 +388,9 @@ type
   mouse: facenrty;
   clicked: facenrty;
   active: facenrty;
-  activemouse: facenrty;
-  activeclicked: facenrty;
+  focused: facenrty;
+ // activemouse: facenrty;
+//  activeclicked: facenrty;
  end;
 
  baseframeinfoty = record
@@ -481,11 +501,14 @@ type
    function isframeimage_offsetclickedstored: boolean;
    procedure setframeimage_offsetactive(const avalue: imagenrty);
    function isframeimage_offsetactivestored: boolean;
+   procedure setframeimage_offsetfocused(const avalue: imagenrty);
+   function isframeimage_offsetfocusedstored: boolean;
+{
    procedure setframeimage_offsetactivemouse(const avalue: imagenrty);
    function isframeimage_offsetactivemousestored: boolean;
    procedure setframeimage_offsetactiveclicked(const avalue: imagenrty);
    function isframeimage_offsetactiveclickedstored: boolean;
-
+}
    procedure setframeface_list(const avalue: tfacelist);
    function isframeface_liststored: boolean;
    procedure setframeface_offset(const avalue: facenrty);
@@ -500,11 +523,14 @@ type
    function isframeface_offsetclickedstored: boolean;
    procedure setframeface_offsetactive(const avalue: facenrty);
    function isframeface_offsetactivestored: boolean;
+   procedure setframeface_offsetfocused(const avalue: facenrty);
+   function isframeface_offsetfocusedstored: boolean;
+{
    procedure setframeface_offsetactivemouse(const avalue: facenrty);
    function isframeface_offsetactivemousestored: boolean;
    procedure setframeface_offsetactiveclicked(const avalue: facenrty);
    function isframeface_offsetactiveclickedstored: boolean;
-
+}
    procedure setoptionsskin(const avalue: frameskinoptionsty);
    function isoptionsskinstored: boolean;
    
@@ -557,10 +583,12 @@ type
    procedure updatemousestate(const sender: twidget;
                                        const info: mouseeventinfoty); virtual;
    function needsactiveinvalidate: boolean;
+   function needsfocusedinvalidate: boolean;
    function needsmouseinvalidate: boolean;
    function needsclickinvalidate: boolean;
    function needsmouseenterinvalidate: boolean;
    procedure activechanged; virtual;
+   procedure focusedchanged; virtual;
    function needsfocuspaint: boolean; virtual;
    function ishintarea(const apos: pointty; var aid: int32): boolean; virtual;
    procedure checkminscrollsize(var asize: sizety); virtual;
@@ -680,6 +708,11 @@ type
                     read fi.frameimage_offsets.active
                     write setframeimage_offsetactive
                     stored isframeimage_offsetactivestored default 0;
+   property frameimage_offsetfocused: imagenrty
+                    read fi.frameimage_offsets.focused
+                    write setframeimage_offsetfocused
+                    stored isframeimage_offsetfocusedstored default 0;
+{
    property frameimage_offsetactivemouse: imagenrty
                     read fi.frameimage_offsets.activemouse
                     write setframeimage_offsetactivemouse
@@ -688,7 +721,7 @@ type
                     read fi.frameimage_offsets.activeclicked
                     write setframeimage_offsetactiveclicked
                     stored isframeimage_offsetactiveclickedstored default 0;
-
+}
    property frameface_list: tfacelist read fi.frameface_list 
                     write setframeface_list stored isframeface_liststored;
    property frameface_offset: facenrty read fi.frameface_offsets.offset
@@ -715,6 +748,11 @@ type
                     read fi.frameface_offsets.active
                     write setframeface_offsetactive
                     stored isframeface_offsetactivestored default 0;
+   property frameface_offsetfocused: facenrty 
+                    read fi.frameface_offsets.focused
+                    write setframeface_offsetfocused
+                    stored isframeface_offsetfocusedstored default 0;
+{
    property frameface_offsetactivemouse: facenrty 
                     read fi.frameface_offsets.activemouse
                     write setframeface_offsetactivemouse
@@ -723,7 +761,7 @@ type
                     read fi.frameface_offsets.activeclicked
                     write setframeface_offsetactiveclicked
                     stored isframeface_offsetactiveclickedstored default 0;
-
+}
    property optionsskin: frameskinoptionsty read fi.optionsskin 
                     write setoptionsskin stored isoptionsskinstored default [];
    property focusrectdist: int32 read fi.focusrectdist 
@@ -760,9 +798,11 @@ type
    property frameimage_offsetmouse;
    property frameimage_offsetclicked;
    property frameimage_offsetactive;
+   property frameimage_offsetfocused;
+{
    property frameimage_offsetactivemouse;
    property frameimage_offsetactiveclicked;
-
+}
    property frameface_list;
    property frameface_offset;
    property frameface_offset1;
@@ -770,9 +810,11 @@ type
    property frameface_offsetmouse;
    property frameface_offsetclicked;
    property frameface_offsetactive;
+   property frameface_offsetfocused;
+{
    property frameface_offsetactivemouse;
    property frameface_offsetactiveclicked;
-
+}
    property optionsskin;
 
    property focusrectdist;
@@ -831,9 +873,11 @@ type
    procedure setframeimage_offsetmouse(const avalue: imagenrty);
    procedure setframeimage_offsetclicked(const avalue: imagenrty);
    procedure setframeimage_offsetactive(const avalue: imagenrty);
+   procedure setframeimage_offsetfocused(const avalue: imagenrty);
+{
    procedure setframeimage_offsetactivemouse(const avalue: imagenrty);
    procedure setframeimage_offsetactiveclicked(const avalue: imagenrty);
-
+}
    procedure setframeface_list(const avalue: tfacelist);
    procedure setframeface_offset(const avalue: facenrty);
    procedure setframeface_offset1(const avalue: facenrty);
@@ -841,9 +885,11 @@ type
    procedure setframeface_offsetmouse(const avalue: facenrty);
    procedure setframeface_offsetclicked(const avalue: facenrty);
    procedure setframeface_offsetactive(const avalue: facenrty);
+   procedure setframeface_offsetfocused(const avalue: facenrty);
+{
    procedure setframeface_offsetactivemouse(const avalue: facenrty);
    procedure setframeface_offsetactiveclicked(const avalue: facenrty);
-
+}
    procedure setoptionsskin(const avalue: frameskinoptionsty);
    function getfont: toptionalfont;
    procedure setfont(const avalue: toptionalfont);
@@ -852,6 +898,7 @@ type
    procedure setcaptionoffset(const avalue: integer);
    procedure setfocusrectdist(const avalue: integer);
    procedure fontchanged(const sender: tobject);
+   procedure readdummy(reader: treader);
   protected
    fi: frameinfoty;
    fextraspace: integer;
@@ -862,6 +909,7 @@ type
    function getinfosize: integer; override;
    function getinfoad: pointer; override;
    procedure copyinfo(const source: tpersistenttemplate); override;
+   procedure defineproperties(filer: tfiler); override;
   public
    constructor create(const owner: tmsecomponent;
                   const onchange: notifyeventty); override;
@@ -938,13 +986,17 @@ type
    property frameimage_offsetactive: imagenrty 
                      read fi.ba.frameimage_offsets.active
                      write setframeimage_offsetactive default 0;
+   property frameimage_offsetfocused: imagenrty 
+                     read fi.ba.frameimage_offsets.focused
+                     write setframeimage_offsetfocused default 0;
+{
    property frameimage_offsetactivemouse: imagenrty
                      read fi.ba.frameimage_offsets.activemouse
                      write setframeimage_offsetactivemouse default 0;
    property frameimage_offsetactiveclicked: imagenrty
                      read fi.ba.frameimage_offsets.activeclicked
                      write setframeimage_offsetactiveclicked default 0;
-
+}
    property frameface_list: tfacelist read fi.ba.frameface_list
                      write setframeface_list;
    property frameface_offset: facenrty 
@@ -965,12 +1017,17 @@ type
    property frameface_offsetactive: facenrty
                      read fi.ba.frameface_offsets.active
                      write setframeface_offsetactive default 0;
+   property frameface_offsetfocused: facenrty
+                     read fi.ba.frameface_offsets.focused
+                     write setframeface_offsetfocused default 0;
+{
    property frameface_offsetactivemouse: facenrty
                      read fi.ba.frameface_offsets.activemouse
                      write setframeface_offsetactivemouse default 0;
    property frameface_offsetactiveclicked: facenrty
                      read fi.ba.frameface_offsets.activeclicked
                      write setframeface_offsetactiveclicked default 0;
+}
         //for tcaptionframe
    property font: toptionalfont read getfont write setfont stored isfontstored;
              //used in tmenu.itemframetemplate, itemframtemplateactive,
@@ -2882,8 +2939,8 @@ function getprocesswindow(const procid: integer): winidty;
 function activateprocesswindow(const procid: integer; 
                     const araise: boolean = true): boolean;
          //true if ok
-function combineframestateflags(
-            const disabled,active,mouse,clicked: boolean): framestateflagsty;
+function combineframestateflags(const disabled,focused,active,
+                                   mouse,clicked: boolean): framestateflagsty;
 function combineframestateflags(
                          const astate: shapestatesty): framestateflagsty;
 
@@ -3092,10 +3149,11 @@ var
  appinst: tinternalapplication;
 
 function combineframestateflags(
-            const disabled,active,mouse,clicked: boolean): framestateflagsty;
+      const disabled,focused,active,mouse,clicked: boolean): framestateflagsty;
 begin
  result:= [];
  if disabled then include(result,fsf_disabled);
+ if focused then include(result,fsf_focused);
  if active then include(result,fsf_active);
  if mouse then include(result,fsf_mouse);
  if clicked then include(result,fsf_clicked);
@@ -3107,6 +3165,9 @@ begin
  result:= [];
  if shs_disabled in astate then begin
   include(result,fsf_disabled);
+ end;
+ if shs_focused in astate then begin
+  include(result,fsf_focused);
  end;
  if shs_active in astate then begin
   include(result,fsf_active);
@@ -3962,64 +4023,44 @@ end;
 function tcustomframe.needsactiveinvalidate: boolean;
 begin
  with fi do begin
-  result:=
-   (frameimage_list <> nil) and 
-    ((frameimage_offsetactive <> 0) or 
-     (frameimage_offsetactivemouse <> frameimage_offsetmouse) or
-     (frameimage_offsetactiveclicked <> frameimage_offsetclicked)
-    ) or
-   (frameface_list <> nil) and 
-    ((frameface_offsetactive <> 0) or 
-    (frameface_offsetactivemouse <> frameface_offsetmouse) or
-    (frameface_offsetactiveclicked <> frameface_offsetclicked)
-    );
+  result:= (frameimage_list <> nil) and (frameimage_offsetactive <> 0) or
+           (frameface_list <> nil) and (frameface_offsetactive <> 0);
+ end;
+end;
+
+function tcustomframe.needsfocusedinvalidate: boolean;
+begin
+ with fi do begin
+  result:= (frameimage_list <> nil) and (frameimage_offsetactive <> 0) or 
+           (frameface_list <> nil) and (frameface_offsetfocused <> 0);
  end;
 end;
 
 function tcustomframe.needsmouseinvalidate: boolean;
 begin
  with fi do begin
-  result:= (fs_needsmouseinvalidate in fstate) or
-    (frameimage_list <> nil) and 
-     ((frameimage_offsetmouse <> 0) or 
-      (frameimage_offsetactivemouse <> 0) or
-      (frameimage_offsetactiveclicked <> 0) or
-      (frameimage_offsetclicked <> 0)
-     ) or
-    (frameface_list <> nil) and 
-     ((frameface_offsetmouse <> 0) or 
-      (frameface_offsetactivemouse <> 0) or
-      (frameface_offsetactiveclicked <> 0) or
-      (frameface_offsetclicked <> 0)
-     );
+  result:=
+         (fs_needsmouseinvalidate in fstate) or
+         (frameimage_list <> nil) and 
+           ((frameimage_offsetmouse <> 0) or (frameimage_offsetclicked <> 0)) or
+         (frameface_list <> nil) and 
+           ((frameface_offsetmouse <> 0) or (frameface_offsetclicked <> 0));
  end;
 end;
 
 function tcustomframe.needsclickinvalidate: boolean;
 begin
  with fi do begin
-  result:= (frameimage_list <> nil) and 
-           ((frameimage_offsets.clicked <> 0) or 
-            (frameimage_offsets.activeclicked <> 
-                                   frameimage_offsets.active)) or
-          (frameface_list <> nil) and 
-           ((frameface_offsets.clicked <> 0) or 
-            (frameface_offsets.activeclicked <> 
-                                   frameface_offsets.active));
+  result:= (frameimage_list <> nil) and (frameimage_offsets.clicked <> 0) or
+           (frameface_list <> nil) and (frameface_offsets.clicked <> 0);
  end;
 end;
 
 function tcustomframe.needsmouseenterinvalidate: boolean;
 begin
  with fi do begin
-  result:= ((frameimage_list <> nil) and 
-             ((frameimage_offsets.mouse <> 0) or 
-              (frameimage_offsets.activemouse <> 
-                            frameimage_offsets.active))) or
-            ((frameface_list <> nil) and 
-               ((frameface_offsets.mouse <> 0) or 
-                (frameface_offsets.activemouse <> 
-                            frameface_offsets.active)));
+  result:=  (frameimage_list <> nil) and (frameimage_offsets.mouse <> 0) or
+            (frameface_list <> nil) and (frameface_offsets.mouse <> 0);
  end;
 end;
       
@@ -4027,6 +4068,13 @@ procedure tcustomframe.activechanged;
 begin
  if needsactiveinvalidate then begin
   fintf.getwidget.invalidatewidget;
+ end;
+end;
+
+procedure tcustomframe.focusedchanged;
+begin
+ if needsfocusedinvalidate() then begin
+  fintf.getwidget.invalidatewidget();
  end;
 end;
 
@@ -4051,7 +4099,20 @@ begin
   end;
   if fsf_disabled in astate then begin
    result:= result + disabled;
-  end
+  end;
+  if fsf_active in astate then begin
+   result:= result + active;
+  end;
+  if fsf_focused in astate then begin
+   result:= result + focused;
+  end;
+  if fsf_mouse in astate then begin
+   result:= result + mouse;
+  end;
+  if fsf_clicked in astate then begin
+   result:= result + clicked;
+  end;
+  {
   else begin
    if fsf_active in astate then begin
     if fsf_clicked in astate then begin
@@ -4077,6 +4138,7 @@ begin
     end;
    end;
   end;
+}
  end;
 end;
 
@@ -4670,6 +4732,15 @@ begin
  end;
 end;
 
+procedure tcustomframe.setframeimage_offsetfocused(const avalue: imagenrty);
+begin
+ include(flocalprops,frl_frameimageoffsetfocused);
+ if fi.frameimage_offsets.focused <> avalue then begin
+  fi.frameimage_offsets.focused:= avalue;
+  internalupdatestate;
+ end;
+end;
+
 procedure tcustomframe.setframeimage_offsetactive(const avalue: imagenrty);
 begin
  include(flocalprops,frl_frameimageoffsetactive);
@@ -4678,7 +4749,7 @@ begin
   internalupdatestate;
  end;
 end;
-
+{
 procedure tcustomframe.setframeimage_offsetactivemouse(const avalue: imagenrty);
 begin
  include(flocalprops,frl_frameimageoffsetactivemouse);
@@ -4696,7 +4767,7 @@ begin
   internalupdatestate;
  end;
 end;
-
+}
 procedure tcustomframe.setframeface_list(const avalue: tfacelist);
 begin
  include(flocalprops1,frl1_framefacelist);
@@ -4751,6 +4822,15 @@ begin
  end;
 end;
 
+procedure tcustomframe.setframeface_offsetfocused(const avalue: facenrty);
+begin
+ include(flocalprops1,frl1_framefaceoffsetfocused);
+ if fi.frameface_offsets.focused <> avalue then begin
+  fi.frameface_offsets.focused:= avalue;
+  internalupdatestate;
+ end;
+end;
+
 procedure tcustomframe.setframeface_offsetactive(const avalue: facenrty);
 begin
  include(flocalprops1,frl1_framefaceoffsetactive);
@@ -4759,7 +4839,7 @@ begin
   internalupdatestate;
  end;
 end;
-
+{
 procedure tcustomframe.setframeface_offsetactivemouse(const avalue: facenrty);
 begin
  include(flocalprops1,frl1_framefaceoffsetactivemouse);
@@ -4777,7 +4857,7 @@ begin
   internalupdatestate;
  end;
 end;
-
+}
 procedure tcustomframe.setoptionsskin(const avalue: frameskinoptionsty);
 begin
  include(flocalprops,frl_optionsskin);
@@ -4978,15 +5058,20 @@ begin
    if not (frl_frameimageoffsetclicked in flocalprops) then begin
     clicked:= ainfo.ba.frameimage_offsets.clicked;
    end;
+   if not (frl_frameimageoffsetfocused in flocalprops) then begin
+    focused:= ainfo.ba.frameimage_offsets.focused;
+   end;
    if not (frl_frameimageoffsetactive in flocalprops) then begin
     active:= ainfo.ba.frameimage_offsets.active;
    end;
+  {
    if not (frl_frameimageoffsetactivemouse in flocalprops) then begin
     activemouse:= ainfo.ba.frameimage_offsets.activemouse;
    end;
    if not (frl_frameimageoffsetactiveclicked in flocalprops) then begin
     activeclicked:= ainfo.ba.frameimage_offsets.activeclicked;
    end;
+  }
   end;
   
   if not (frl1_framefacelist in flocalprops1) then begin
@@ -5006,15 +5091,20 @@ begin
    if not (frl1_framefaceoffsetclicked in flocalprops1) then begin
     clicked:= ainfo.ba.frameface_offsets.clicked;
    end;
+   if not (frl1_framefaceoffsetfocused in flocalprops1) then begin
+    focused:= ainfo.ba.frameface_offsets.focused;
+   end;
    if not (frl1_framefaceoffsetactive in flocalprops1) then begin
     active:= ainfo.ba.frameface_offsets.active;
    end;
+  {
    if not (frl1_framefaceoffsetactivemouse in flocalprops1) then begin
     activemouse:= ainfo.ba.frameface_offsets.activemouse;
    end;
    if not (frl1_framefaceoffsetactiveclicked in flocalprops1) then begin
     activeclicked:= ainfo.ba.frameface_offsets.activeclicked;
    end;
+  }
   end;
   
   if not (frl1_focusrectdist in flocalprops1) then begin
@@ -5301,12 +5391,18 @@ begin
                (frl_frameimageoffsetclicked in flocalprops);
 end;
 
+function tcustomframe.isframeimage_offsetfocusedstored: boolean;
+begin
+ result:= (ftemplate = nil) and (fi.frameimage_offsets.focused <> 0) or 
+               (frl_frameimageoffsetfocused in flocalprops);
+end;
+
 function tcustomframe.isframeimage_offsetactivestored: boolean;
 begin
  result:= (ftemplate = nil) and (fi.frameimage_offsets.active <> 0) or 
                (frl_frameimageoffsetactive in flocalprops);
 end;
-
+{
 function tcustomframe.isframeimage_offsetactivemousestored: boolean;
 begin
  result:= (ftemplate = nil) and (fi.frameimage_offsets.activemouse <> 0) or
@@ -5318,7 +5414,7 @@ begin
  result:= (ftemplate = nil) and (fi.frameimage_offsets.activeclicked <> 0) or
                (frl_frameimageoffsetactiveclicked in flocalprops);
 end;
-
+}
 function tcustomframe.isframeface_liststored: boolean;
 begin
  result:= (ftemplate = nil) and (fi.frameface_list <> nil) or
@@ -5355,12 +5451,18 @@ begin
                (frl1_framefaceoffsetclicked in flocalprops1);
 end;
 
+function tcustomframe.isframeface_offsetfocusedstored: boolean;
+begin
+ result:= (ftemplate = nil) and (fi.frameface_offsets.focused <> 0) or
+               (frl1_framefaceoffsetfocused in flocalprops1);
+end;
+
 function tcustomframe.isframeface_offsetactivestored: boolean;
 begin
  result:= (ftemplate = nil) and (fi.frameface_offsets.active <> 0) or
                (frl1_framefaceoffsetactive in flocalprops1);
 end;
-
+{
 function tcustomframe.isframeface_offsetactivemousestored: boolean;
 begin
  result:= (ftemplate = nil) and (fi.frameface_offsets.activemouse <> 0) or
@@ -5372,7 +5474,7 @@ begin
  result:= (ftemplate = nil) and (fi.frameface_offsets.activeclicked <> 0) or
                (frl1_framefaceoffsetactiveclicked in flocalprops1);
 end;
-
+}
 function tcustomframe.isoptionsskinstored: boolean;
 begin
  result:= (ftemplate = nil) or (frl_optionsskin in flocalprops);
@@ -5471,6 +5573,10 @@ end;
 procedure tcustomframe.defineproperties(filer: tfiler);
 begin
  filer.defineproperty('dummy',@readdummy,nil,false);
+ filer.defineproperty('frameimage_offsetactivemouse',@readdummy,nil,false);
+ filer.defineproperty('frameimage_offsetactiveclicked',@readdummy,nil,false);
+ filer.defineproperty('frameface_offsetactivemouse',@readdummy,nil,false);
+ filer.defineproperty('frameface_offsetactiveclicked',@readdummy,nil,false);
  // inherited; //no dummy necessary because of localprops
 end;
 
@@ -5693,12 +5799,18 @@ begin
  changed;
 end;
 
+procedure tframetemplate.setframeimage_offsetfocused(const avalue: imagenrty);
+begin
+ fi.ba.frameimage_offsets.focused:= avalue;
+ changed;
+end;
+
 procedure tframetemplate.setframeimage_offsetactive(const avalue: imagenrty);
 begin
  fi.ba.frameimage_offsets.active:= avalue;
  changed;
 end;
-
+{
 procedure tframetemplate.setframeimage_offsetactivemouse(const avalue: imagenrty);
 begin
  fi.ba.frameimage_offsets.activemouse:= avalue;
@@ -5710,7 +5822,7 @@ begin
  fi.ba.frameimage_offsets.activeclicked:= avalue;
  changed;
 end;
-
+}
 procedure tframetemplate.setframeface_list(const avalue: tfacelist);
 begin
  setlinkedvar(avalue,tmsecomponent(fi.ba.frameface_list));
@@ -5747,12 +5859,18 @@ begin
  changed;
 end;
 
+procedure tframetemplate.setframeface_offsetfocused(const avalue: facenrty);
+begin
+ fi.ba.frameface_offsets.focused:= avalue;
+ changed;
+end;
+
 procedure tframetemplate.setframeface_offsetactive(const avalue: facenrty);
 begin
  fi.ba.frameface_offsets.active:= avalue;
  changed;
 end;
-
+{
 procedure tframetemplate.setframeface_offsetactivemouse(const avalue: facenrty);
 begin
  fi.ba.frameface_offsets.activemouse:= avalue;
@@ -5764,7 +5882,7 @@ begin
  fi.ba.frameface_offsets.activeclicked:= avalue;
  changed;
 end;
-
+}
 procedure tframetemplate.setoptionsskin(const avalue: frameskinoptionsty);
 begin
  fi.ba.optionsskin:= avalue;
@@ -5854,6 +5972,20 @@ begin
    freeandnil(fi.capt.font);
   end;
  end;
+end;
+
+procedure tframetemplate.readdummy(reader: treader);
+begin
+ reader.readinteger();
+end;
+
+procedure tframetemplate.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('frameimage_offsetactivemouse',@readdummy,nil,false);
+ filer.defineproperty('frameimage_offsetactiveclicked',@readdummy,nil,false);
+ filer.defineproperty('frameface_offsetactivemouse',@readdummy,nil,false);
+ filer.defineproperty('frameface_offsetactiveclicked',@readdummy,nil,false);
 end;
 
 function tframetemplate.paintframe: framety;
@@ -10689,6 +10821,9 @@ begin
   if fparentwidget <> nil then begin
    fparentwidget.dochildfocused(self);
   end;
+  if fframe <> nil then begin
+   fframe.focusedchanged();
+  end;
  end;
 end;
 
@@ -10728,6 +10863,9 @@ begin
    ifiwidgetstatechanged;
   end;
  {$endif}
+  if fframe <> nil then begin
+   fframe.focusedchanged();
+  end;
  end;
 end;
 
@@ -13057,7 +13195,8 @@ end;
 
 function twidget.getframestateflags: framestateflagsty;
 begin
- result:= combineframestateflags(not isenabled,ws_active in fwidgetstate,
+ result:= combineframestateflags(not isenabled,ws_focused in fwidgetstate, 
+             ws_active in fwidgetstate,
              appinst.clientmousewidget = self,ws_lclicked in fwidgetstate);
 end;
 

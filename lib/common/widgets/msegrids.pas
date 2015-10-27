@@ -1708,9 +1708,11 @@ type
    property frameimage_offsetmouse;
    property frameimage_offsetclicked;
    property frameimage_offsetactive;
+   property frameimage_offsetfocused;
+{
    property frameimage_offsetactivemouse;
    property frameimage_offsetactiveclicked;
-
+}
    property frameface_list;
    property frameface_offset;
    property frameface_offset1;
@@ -1718,9 +1720,11 @@ type
    property frameface_offsetmouse;
    property frameface_offsetclicked;
    property frameface_offsetactive;
+   property frameface_offsetfocused;
+{
    property frameface_offsetactivemouse;
    property frameface_offsetactiveclicked;
-   
+}   
    property options;
    property optionsskin;
 

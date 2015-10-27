@@ -747,7 +747,7 @@ begin
      ca.colorglyph:= colorglyphactive;
      if itemframetemplateactive <> nil then begin
       itemframetemplateactive.paintbackground(canvas,ca.dim,
-         combineframestateflags(shs_disabled in state,false,
+         combineframestateflags(shs_disabled in state,false,false,
                                                shs_clicked in state,false));
       if ca.colorglyph = cl_default then begin
        ca.colorglyph:= itemframetemplateactive.colorglyph;
@@ -759,7 +759,7 @@ begin
      drawmenubutton(canvas,buttoninfo,po2);
      if itemframetemplateactive <> nil then begin
       itemframetemplateactive.paintoverlay(canvas,ca.dim,
-            combineframestateflags(false,true,shs_clicked in state,false));
+            combineframestateflags(false,true,true,shs_clicked in state,false));
      end;
     end
     else begin
@@ -775,7 +775,7 @@ begin
      else begin
       if itemframetemplate <> nil then begin
        itemframetemplate.paintbackground(canvas,ca.dim,
-                combineframestateflags(shs_disabled in state,false,
+                combineframestateflags(shs_disabled in state,false,false,
                                                shs_clicked in state,false));
        if ca.colorglyph = cl_default then begin
         ca.colorglyph:= itemframetemplate.colorglyph;
@@ -790,7 +790,7 @@ begin
       drawmenubutton(canvas,buttoninfo,po1);
       if itemframetemplate <> nil then begin
            itemframetemplate.paintoverlay(canvas,ca.dim,
-                  combineframestateflags(shs_disabled in state,false,
+                  combineframestateflags(shs_disabled in state,false,false,
                   shs_clicked in state,false));
       end;
      end;
