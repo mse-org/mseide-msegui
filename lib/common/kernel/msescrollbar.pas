@@ -981,7 +981,7 @@ procedure tcustomscrollbar.mouseevent(var info: mouseeventinfoty);
     fclickedarea:= scrollbarareaty(scrollbarclicked);
    end;
    if (fclickedarea = sbbu_move) then begin
-    ar1:= scrollbarareaty(-1);
+    ar1:= sbbu_move;{scrollbarareaty(-1);}
     if info.eventkind = ek_mousemove then begin
      thumbtrack(info.pos);
      if sbo_thumbtrack in foptions then begin
