@@ -6,6 +6,8 @@ object imagelisteditorfo: timagelisteditorfo
   bounds_cx = 301
   bounds_cy = 359
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets]
+  container.frame.localprops = []
+  container.frame.localprops1 = []
   container.bounds = (
     0
     0
@@ -18,6 +20,9 @@ object imagelisteditorfo: timagelisteditorfo
   moduleclassname = 'tmseform'
   object disp: tlistview
     optionswidget1 = [ow1_fontglyphheight]
+    frame.localprops = []
+    frame.localprops1 = []
+    popupmenu = popup
     bounds_x = 0
     bounds_y = 0
     bounds_cx = 303
@@ -38,7 +43,7 @@ object imagelisteditorfo: timagelisteditorfo
   object tlayouter1: tlayouter
     frame.framei_bottom = 5
     frame.localprops = [frl_fibottom]
-    frame.dummy = 0
+    frame.localprops1 = []
     taborder = 1
     bounds_x = 0
     bounds_y = 291
@@ -124,7 +129,8 @@ object imagelisteditorfo: timagelisteditorfo
       end
       object stretch: tbooleanedit
         frame.caption = '&stretch'
-        frame.dummy = 0
+        frame.localprops = []
+        frame.localprops1 = []
         frame.outerframe = (
           0
           1
@@ -151,6 +157,8 @@ object imagelisteditorfo: timagelisteditorfo
       object transparentcolor: tcoloredit
         frame.caption = '&Transparent color'
         frame.captionpos = cp_right
+        frame.localprops = []
+        frame.localprops1 = []
         frame.button.width = 13
         frame.button.color = -2147483646
         frame.buttonellipse.width = 13
@@ -173,7 +181,8 @@ object imagelisteditorfo: timagelisteditorfo
       end
       object masked: tbooleanedit
         frame.caption = '&masked'
-        frame.dummy = 0
+        frame.localprops = []
+        frame.localprops1 = []
         frame.outerframe = (
           0
           1
@@ -203,5 +212,22 @@ object imagelisteditorfo: timagelisteditorfo
     options = [sfo_memory]
     left = 200
     top = 176
+  end
+  object popup: tpopupmenu
+    onupdate = updatemenuexe
+    menu.submenu.count = 2
+    menu.submenu.items = <    
+      item
+        caption = 'Copy Items'
+        state = [as_localcaption, as_localonexecute]
+        onexecute = copyexe
+      end    
+      item
+        caption = 'Paste Items'
+        state = [as_localcaption, as_localonexecute]
+        onexecute = pasteexe
+      end>
+    left = 48
+    top = 96
   end
 end

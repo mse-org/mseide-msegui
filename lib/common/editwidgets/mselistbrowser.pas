@@ -337,6 +337,7 @@ type
    function findcellbycaption(const acaption: msestring;
                                                var cell: gridcoordty): boolean;
    function getselecteditems: listitemarty;
+   function getselectedindexes: integerarty;
 
    property items[const index: integer]: tlistitem read getitems 
                                                   write setitems; default;
@@ -2415,6 +2416,16 @@ function tcustomlistview.getselecteditems: listitemarty;
 begin
  if datacols.hasselection then begin
   result:= fitemlist.getselecteditems;
+ end
+ else begin
+  result:= nil;
+ end;
+end;
+
+function tcustomlistview.getselectedindexes: integerarty;
+begin
+ if datacols.hasselection then begin
+  result:= fitemlist.getselectedindexes();
  end
  else begin
   result:= nil;

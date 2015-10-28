@@ -16,7 +16,7 @@ uses
  mseforms,msegui,mseglob,mseguiglob,msebitmap,msesimplewidgets,msegraphics,
  mselistbrowser,msegrids,msefiledialog,msestat,msestatfile,msestrings,
  msegraphedits,msecolordialog,msemenus,msesplitter,msegraphutils,msewidgets,
- mseifiglob,msetypes,msedataedits,mseedit;
+ mseifiglob,msetypes,msedataedits,mseedit,msedatanodes;
 
 const
  imagelisteditorstatname =  'imagelisteditor.sta';
@@ -37,6 +37,7 @@ type
    la1: tlayouter;
    transparentcolor: tcoloredit;
    masked: tbooleanedit;
+   popup: tpopupmenu;
    procedure addonexecute(const sender: tobject);
    procedure clearonexecute(const sender: tobject);
    procedure disponitemevent(const sender: tcustomlistview; const index: integer;
@@ -46,7 +47,11 @@ type
 
 //   procedure disponpaint(const sender: twidget; const canvas: tcanvas);
    procedure layoutchanged(const sender: tcustomlistview);
+   procedure updatemenuexe(const sender: tcustommenu);
+   procedure pasteexe(const sender: TObject);
+   procedure copyexe(const sender: TObject);
   private
+   fcopyitems: integerarty;
    procedure listchange(const sender: tobject);
  end;
 
@@ -54,8 +59,8 @@ function editimagelist(aimagelist: timagelist): modalresultty;
 
 implementation
 uses
- mseimagelisteditor_mfm,sysutils,mseformatstr,
- msekeyboard,msedatanodes,msefileutils,msegraphicstream;
+ mseimagelisteditor_mfm,sysutils,mseformatstr,msegridsglob,mseactions,
+ msekeyboard,msefileutils,msegraphicstream;
 
 function editimagelist(aimagelist: timagelist): modalresultty;
 var
@@ -151,8 +156,10 @@ var
  int1,int2: integer;
 
 begin
- case cellkeypress(info) of
-  key_delete: begin
+ if info.eventkind = cek_keydown then begin
+  if (info.keyeventinfopo^.key = key_delete) and 
+      (info.keyeventinfopo^.shiftstate*singlekeyshiftstatesmask = []) then begin
+   fcopyitems:= nil;
    imagelist.beginupdate;
    try
     int2:= 0;
@@ -173,6 +180,16 @@ begin
    finally
     imagelist.endupdate;
    end;
+  end
+  else begin
+   if issysshortcut(sho_copy,info.keyeventinfopo^) then begin
+    copyexe(nil);
+   end
+   else begin
+    if issysshortcut(sho_paste,info.keyeventinfopo^) then begin
+     pasteexe(nil);
+    end;
+   end;
   end;
  end;
 end;
@@ -189,6 +206,7 @@ var
  int1{,int2}: integer;
 begin
 // int2:= disp.itemlist.count;
+ fcopyitems:= nil;
  disp.itemlist.count:= imagelist.count;
  disp.beginupdate;
  for int1:= 0 {int} to disp.itemlist.count - 1 do begin
@@ -206,6 +224,39 @@ begin
   itemlist.imagewidth:= cellwidth;
   itemlist.imageheight:= cellheight - font.glyphheight;
  end;
+end;
+
+procedure timagelisteditorfo.updatemenuexe(const sender: tcustommenu);
+begin
+ popup.menu[1].enabled:= fcopyitems <> nil;
+end;
+
+procedure timagelisteditorfo.pasteexe(const sender: TObject);
+var
+ insertid,copystart: int32;
+ i1: int32;
+ bmp1: tmaskedbitmap;
+begin
+ if fcopyitems <> nil then begin
+  bmp1:= tmaskedbitmap.create(bmk_rgb);
+  imagelist.beginupdate();
+  insertid:= disp.focusedindex;
+  copystart:= imagelist.count;
+  for i1:= 0 to high(fcopyitems) do begin
+   imagelist.getimage(fcopyitems[i1],bmp1);  
+   imagelist.addimage(bmp1);  
+  end;
+  for i1:= 0 to high(fcopyitems) do begin
+   imagelist.moveimage(copystart+i1,insertid+i1);
+  end;
+  imagelist.endupdate();
+  bmp1.free;
+ end;
+end;
+
+procedure timagelisteditorfo.copyexe(const sender: TObject);
+begin
+ fcopyitems:= disp.getselectedindexes;
 end;
 
 end.

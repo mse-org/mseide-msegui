@@ -2,7 +2,9 @@ unit main;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- msegui,mseclasses,mseforms,msemenus,msedataedits,msestat,msestatfile,msebitmap;
+ msegui,mseclasses,mseforms,msemenus,msedataedits,msestat,msestatfile,msebitmap,
+ mseapplication,mseedit,mseglob,mseguiglob,mseificomp,mseificompglob,mseifiglob,
+ msestream,msestrings,msetypes,sysutils;
 
 type
  tmainfo = class(tmseform)
