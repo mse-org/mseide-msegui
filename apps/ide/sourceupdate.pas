@@ -1509,40 +1509,48 @@ begin                        //completeclass
     end;
    end;
    newimp:= false;
-   cpo:= infopo^.p.classinfolist[classindex1]; //cpo is invalid after updateunit
+   insertedlines:= 0;
+   cpo:= infopo^.p.classinfolist[classindex1]; 
+                                     //cpo is invalid after updateunit
    with cpo^ do begin                     
     if isemptysourcepos(procimpstart) then begin
      newimp:= true;
-     replacetext(infopo,infopo^.p.implementationend,infopo^.p.implementationend,
-      msestring('{ '+name+' }'+lineend));
-     result:= true;
      procimpstart:= infopo^.p.implementationend;
+     inc(procimpstart.pos.row,insertedlines);
+     replacetext(infopo,procimpstart,procimpstart,
+                                         msestring('{ '+name+' }'+lineend));
+     result:= true;
      inc(procimpstart.pos.row,1);
+     inc(insertedlines,1);
      procimpstart.pos.col:= 0;
      procimpend:= procimpstart;
     end;
     insertpos:= procimpstart;
     insertpos.pos.col:= 0;
-    insertedlines:= 0;
     for int1:= 0 to procedurelist.count - 1 do begin
      ppo:= procedurelist[int1];
      with ppo^ do begin
       if not (mef_abstract in params.flags) then begin
        if isemptysourcepos(impheaderstartpos) then begin
+{
         if (int1 = 0) and not newimp then begin
          str1:= '';
         end
         else begin
          str1:= lineend;
         end;
-        str1:= str1 +
+}
+        str1:= lineend +
               limitlinelength(msestring(composeprocedureheader(ppo,cpo,true)),
                            fmaxlinelength,procheaderbreakchars,14) + lineend +
                   'begin'+lineend+
                   'end;'+lineend;
-        if newimp and (int1 = procedurelist.count - 1) or (int1 = 0) then begin
+(*
+        if not ((int1 = 0) and not newimp)
+        {newimp and (int1 = procedurelist.count - 1) or (int1 = 0)} then begin
          str1:= str1 + lineend;
         end;
+*)
         replacetext(infopo,insertpos,insertpos,str1);
         result:= true;
         i2:= high(breaklines(str1));
