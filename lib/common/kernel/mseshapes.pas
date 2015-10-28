@@ -155,6 +155,9 @@ begin
   else begin
    dest.mouseframe:= nullframe;
   end;
+  if aframe = dest.frame then begin
+   addframe1(dest.mouseframe,aframe.paintframe);
+  end;
  end
  else begin
   dest.state:= (dest.state - [shs_flat,shs_noanimation,shs_nomouseanimation,
