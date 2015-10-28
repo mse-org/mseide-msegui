@@ -423,7 +423,7 @@ var
    scrolllength:= alength - endblen - endblen;
   end;
  end; //checkscrollength
-
+{
  procedure updatebutton(const button: scrollbarareaty);
  var
   po1: pshapeinfoty;
@@ -431,7 +431,7 @@ var
   po1:= @fdrawinfo.areas[scrollbarareaty(button)];
   frameskinoptionstoshapestate(po1^.frame,po1^);
  end; //updatebutton
-
+}
 var
  i1: int32;
   
@@ -578,9 +578,11 @@ begin
                                                     areas[sba_end].ca.dim.y;
    end;
   end;
+ {
   updatebutton(sbbu_down);
   updatebutton(sbbu_move);
   updatebutton(sbbu_up);
+ }
  { 
   with areas[sbbu_down].ca do begin
    buttonareas[bbu_down]:= dim;
