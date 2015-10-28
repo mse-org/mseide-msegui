@@ -1394,7 +1394,7 @@ var
 
 var
  po2: pdefinfoty;   
- newimp: boolean;
+// newimp: boolean;
  classindex1: integer;
  str2: string;
  i2: int32;
@@ -1508,13 +1508,13 @@ begin                        //completeclass
      updateunit(infopo,false);
     end;
    end;
-   newimp:= false;
+//   newimp:= false;
    insertedlines:= 0;
    cpo:= infopo^.p.classinfolist[classindex1]; 
                                      //cpo is invalid after updateunit
    with cpo^ do begin                     
     if isemptysourcepos(procimpstart) then begin
-     newimp:= true;
+//     newimp:= true;
      procimpstart:= infopo^.p.implementationend;
      inc(procimpstart.pos.row,insertedlines);
      replacetext(infopo,procimpstart,procimpstart,
@@ -1558,7 +1558,10 @@ begin                        //completeclass
         inc(insertedlines,i2);
        end
        else begin
-        insertpos.pos.row:= impendpos.pos.row + insertedlines;
+        i2:= impendpos.pos.row + insertedlines;
+        if i2 > insertpos.pos.row then begin
+         insertpos.pos.row:= i2;
+        end;
        end;
       end;
      end;
