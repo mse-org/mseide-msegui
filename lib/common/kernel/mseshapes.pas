@@ -1133,11 +1133,11 @@ begin
    info.frame.paintbackground(canvas,info.ca.dim,false);
    if not (fso_noinnerrect in info.frame.optionsskin) then begin
     frame1:= info.frame.innerframe;
-    deflaterect1(info.ca.dim,frame1);
    end
    else begin
-    frame1:= nullframe;
+    frame1:= info.frame.paintframe;
    end;
+   deflaterect1(info.ca.dim,frame1);
   end;
   if drawbuttonframe(canvas,info,rect1) then begin
    info.ca.imagepos:= ip_center;
