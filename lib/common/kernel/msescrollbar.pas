@@ -28,11 +28,11 @@ const
 type
 
  scrollbarareaty = (sbbu_down,sbbu_move,sbbu_up,sba_start,sba_end);
- buttonareaty = (bbu_down,bbu_move,bbu_up);
+// buttonareaty = (bbu_down,bbu_move,bbu_up);
 const
  scrollbarclicked = ord(sba_end) + 1;
- areafrombuttonarea: array[buttonareaty] of scrollbarareaty = 
-                                         (sbbu_down,sbbu_move,sbbu_up);
+// areafrombuttonarea: array[buttonareaty] of scrollbarareaty = 
+//                                         (sbbu_down,sbbu_move,sbbu_up);
 
 type
  scrollbaroptionty = (sbo_thumbtrack,sbo_moveauto,sbo_showauto,sbo_show,
@@ -64,7 +64,7 @@ type
 
  scrollbardrawinfoty = record
   scrollrect: rectty;
-  buttonareas: array[buttonareaty] of rectty;
+//  buttonareas: array[buttonareaty] of rectty;
   areas: array[scrollbarareaty] of shapeinfoty;
  end;
 
@@ -190,7 +190,7 @@ type
    function dostepup(const ashiftstate: shiftstatesty): boolean;
    function dostepdown(const ashiftstate: shiftstatesty): boolean;
    procedure defineproperties(filer: tfiler); override;
-   function getbuttonarea(const apos: pointty): buttonareaty; //-1 -> none
+//   function getbuttonarea(const apos: pointty): buttonareaty; //-1 -> none
   public
    tag: integer;
    constructor create(intf: iscrollbar; org: originty = org_client;
@@ -203,7 +203,8 @@ type
    procedure createframeendbutton1;
    procedure createframeendbutton2;
    procedure checktemplate(const sender: tobject);
-   procedure paint(const canvas: tcanvas; const acolor: colorty = cl_none); virtual;
+   procedure paint(const canvas: tcanvas;
+                                const acolor: colorty = cl_none); virtual;
                        //color <> cl_none -> flat paint for grid cell
    function wantmouseevent(const apos: pointty): boolean;
    procedure mouseevent(var info: mouseeventinfoty);
@@ -361,7 +362,11 @@ uses
  msestockobjects,sysutils,msekeyboard,msebits,msepointer,mseact;
 type
  twidget1 = class(twidget);
- 
+{
+const
+ buttonareatoscrollbararea: array[buttonareaty] of scrollbarareaty = 
+                                           (sbbu_down,sbbu_move,sbbu_up);
+} 
 { tcustomscrollbar }
 
 constructor tcustomscrollbar.create(intf: iscrollbar; org: originty = org_client;
@@ -418,6 +423,14 @@ var
    scrolllength:= alength - endblen - endblen;
   end;
  end; //checkscrollength
+
+ procedure updatebutton(const button: scrollbarareaty);
+ var
+  po1: pshapeinfoty;
+ begin
+  po1:= @fdrawinfo.areas[scrollbarareaty(button)];
+  frameskinoptionstoshapestate(po1^.frame,po1^);
+ end; //updatebutton
 
 var
  i1: int32;
@@ -565,6 +578,10 @@ begin
                                                     areas[sba_end].ca.dim.y;
    end;
   end;
+  updatebutton(sbbu_down);
+  updatebutton(sbbu_move);
+  updatebutton(sbbu_up);
+ { 
   with areas[sbbu_down].ca do begin
    buttonareas[bbu_down]:= dim;
    if (areas[sbbu_down].frame <> nil) then begin 
@@ -595,6 +612,7 @@ begin
    end;
   end;
   frameskinoptionstoshapestate(areas[sbbu_up].frame,areas[sbbu_up]);
+ }
  end;
 end;
 
@@ -632,12 +650,7 @@ end;
 procedure tcustomscrollbar.invalidateclickedarea;
 begin
  if clickedareaisvalid then begin
-  if fclickedarea <= sbbu_up then begin
-   fintf.invalidaterect(fdrawinfo.buttonareas[buttonareaty(fclickedarea)],forg);  
-  end
-  else begin
-   fintf.invalidaterect(fdrawinfo.areas[fclickedarea].ca.dim,forg);
-  end;
+  fintf.invalidaterect(fdrawinfo.areas[fclickedarea].ca.dim,forg);
  end;
 end;
 
@@ -997,13 +1010,13 @@ procedure tcustomscrollbar.mouseevent(var info: mouseeventinfoty);
     if (ar2 = ar1) then begin
      if not (shs_mouse in state) then begin
       include(state,shs_mouse);
-      fintf.invalidaterect(buttonareas[buttonareaty(ar2)],forg);
+      fintf.invalidaterect(dim,forg);
      end;
     end
     else begin
      if shs_mouse in state then begin
       exclude(state,shs_mouse);
-      fintf.invalidaterect(buttonareas[buttonareaty(ar2)],forg);
+      fintf.invalidaterect(dim,forg);
      end;
     end;
    end;
@@ -1060,7 +1073,7 @@ begin
      else begin
       if fclickedarea = sbbu_move then begin
        fpickpos:= info.pos;
-       with fdrawinfo.buttonareas[bbu_move] do begin
+       with fdrawinfo.areas[sbbu_move].ca.dim do begin
         case fdirection of
          gd_right: fpickoffset:= x - info.pos.x - 
                                fdrawinfo.areas[sba_start].ca.dim.x;
@@ -1356,7 +1369,7 @@ procedure tcustomscrollbar.enter;
 begin
  with fdrawinfo,areas[sbbu_move] do begin
   include(state,shs_focused);
-  fintf.invalidaterect(buttonareas[bbu_move],forg);
+  fintf.invalidaterect(ca.dim,forg);
  end;
 end;
 
@@ -1364,7 +1377,7 @@ procedure tcustomscrollbar.exit;
 begin
  with fdrawinfo,areas[sbbu_move] do begin
   exclude(fdrawinfo.areas[sbbu_move].state,shs_focused);
-  fintf.invalidaterect(buttonareas[bbu_move],forg);
+  fintf.invalidaterect(ca.dim,forg);
  end;
 end;
 
@@ -1684,7 +1697,7 @@ begin
    (filer.ancestor <> nil) and 
       (tcustomscrollbar(filer.ancestor).fwheelsensitivity <> fwheelsensitivity));
 end;
-
+{
 function tcustomscrollbar.getbuttonarea(const apos: pointty): buttonareaty;
 var
  bu1: buttonareaty;
@@ -1697,7 +1710,7 @@ begin
   end;
  end;
 end;
-
+}
 function tcustomscrollbar.translatecolor(const acolor: colorty): colorty;
 begin
  result:= fintf.translatecolor(acolor);
