@@ -1392,14 +1392,28 @@ var
   end;
  end;
 
+ procedure checklineinsert(const info: classinfoty; const startindex: int32;
+                              const startline: int32; const linecount: int32);
+ var
+  po1,pe: pprocedureinfoty;
+ begin
+  po1:= info.procedurelist.datapo;
+  pe:= po1 + info.procedurelist.count;
+  while po1 < pe do begin
+   if po1^.impendpos.pos.row >= startindex then begin
+    inc(po1^.impendpos.pos.row,linecount);
+   end;
+   inc(po1);
+  end;
+ end; //checklineinsert
+ 
 var
  po2: pdefinfoty;   
-// newimp: boolean;
+ atstart: boolean;
  classindex1: integer;
  str2: string;
  i2: int32;
  insertpos: sourceposty;
- insertedlines: int32;
  
 begin                        //completeclass
  result:= false;
@@ -1508,60 +1522,50 @@ begin                        //completeclass
      updateunit(infopo,false);
     end;
    end;
-//   newimp:= false;
-   insertedlines:= 0;
    cpo:= infopo^.p.classinfolist[classindex1]; 
                                      //cpo is invalid after updateunit
    with cpo^ do begin                     
     if isemptysourcepos(procimpstart) then begin
-//     newimp:= true;
      procimpstart:= infopo^.p.implementationend;
-     inc(procimpstart.pos.row,insertedlines);
      replacetext(infopo,procimpstart,procimpstart,
-                                         msestring('{ '+name+' }'+lineend));
+                                 msestring('{ '+name+' }'+lineend+lineend));
      result:= true;
-     inc(procimpstart.pos.row,1);
-     inc(insertedlines,1);
+     checklineinsert(cpo^,0,procimpstart.pos.row,2);
+     inc(procimpstart.pos.row,2);
      procimpstart.pos.col:= 0;
      procimpend:= procimpstart;
     end;
     insertpos:= procimpstart;
     insertpos.pos.col:= 0;
+    atstart:= true;
     for int1:= 0 to procedurelist.count - 1 do begin
      ppo:= procedurelist[int1];
      with ppo^ do begin
       if not (mef_abstract in params.flags) then begin
        if isemptysourcepos(impheaderstartpos) then begin
-{
-        if (int1 = 0) and not newimp then begin
+        if atstart then begin
          str1:= '';
         end
         else begin
          str1:= lineend;
         end;
-}
-        str1:= lineend +
+        str1:= str1 +
               limitlinelength(msestring(composeprocedureheader(ppo,cpo,true)),
                            fmaxlinelength,procheaderbreakchars,14) + lineend +
                   'begin'+lineend+
                   'end;'+lineend;
-(*
-        if not ((int1 = 0) and not newimp)
-        {newimp and (int1 = procedurelist.count - 1) or (int1 = 0)} then begin
+        if atstart then begin
          str1:= str1 + lineend;
         end;
-*)
         replacetext(infopo,insertpos,insertpos,str1);
         result:= true;
         i2:= high(breaklines(str1));
+        checklineinsert(cpo^,insertpos.pos.row,int1,i2);
         inc(insertpos.pos.row,i2);
-        inc(insertedlines,i2);
        end
        else begin
-        i2:= impendpos.pos.row + insertedlines;
-        if i2 > insertpos.pos.row then begin
-         insertpos.pos.row:= i2;
-        end;
+        insertpos.pos.row:= impendpos.pos.row;
+        atstart:= false;
        end;
       end;
      end;
