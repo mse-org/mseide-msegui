@@ -1652,10 +1652,9 @@ begin
   end;
  end;
 end;
-var testvar: tlistitem;
+
 procedure tcustomitemlist.freedata(var data);
 begin
-testvar:= tlistitem(data);
  if not (no_nofreeitems in foptions) and (tlistitem(data) <> nil) and 
                not (ns1_destroying in tlistitem(data).fstate1) then begin
   inherited;
