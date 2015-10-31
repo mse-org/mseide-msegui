@@ -2188,7 +2188,8 @@ var
  pm,ps,pd,pe,po1: pointer;
  scanstep: integer;
  by1,by2: byte;
- wo1: word;
+ wo1,wo2: word;
+ ca1,ca2: card32;
  lwo1: longword;
  pint1: ptrint;
 begin
@@ -2382,20 +2383,23 @@ begin
     pm:= colormaskimage.pixels;
     case colormaskimage.kind of
      bmk_gray: begin
+      rs:= ((word(opacity.red)+word(opacity.green)+word(opacity.blue))*257) div
+                                                                      (3*255);
+                                                         //-> 0..256
       case destimage.kind of
        bmk_gray: begin
         for int1:= 0 to destimage.size.cy - 1 do begin
          po1:= pd;
          ps:= po1 + pint1;
          pe:= po1 + destimage.size.cx;
-         repeat
-          by1:= pbyte(pm)^;
-          by2:= 255-by1;
-          pbyte(po1)^:= (pbyte(po1)^*by2 + pbyte(ps)^*by1) div byte(255);
+         while po1 < pe do begin
+          ca1:= pbyte(pm)^*rs;
+          ca2:= 256*256-ca1;
+          pbyte(po1)^:= (pbyte(po1)^*ca2 + pbyte(ps)^*ca1) div (256*256);
           inc(po1);
           inc(ps);
           inc(pm);
-         until po1 >= pe;
+         end;
          pd:= pd + destimage.linebytes;
         end;
        end;
@@ -2404,12 +2408,12 @@ begin
          po1:= pm;
          pe:= po1 + colormaskimage.size.cx;
          repeat
-          by1:= pbyte(po1)^;
-          by2:= 255-by1;
+          ca1:= pbyte(po1)^*rs;
+          ca2:= 256*256-ca1;
           with prgbtriplety(pd)^ do begin
-           red:=   (by2 * red + by1*prgbtriplety(ps)^.red) div byte(255);
-           green:=   (by2 * green + by1*prgbtriplety(ps)^.green) div byte(255);
-           blue:=   (by2 * blue + by1*prgbtriplety(ps)^.blue) div byte(255);
+           red:= (ca2*red + ca1*prgbtriplety(ps)^.red) div (256*256);
+           green:= (ca2*green + ca1*prgbtriplety(ps)^.green) div (256*256);
+           blue:= (ca2*blue + ca1*prgbtriplety(ps)^.blue) div (256*256);
           end;
           inc(po1);
           inc(ps,4);
@@ -2423,16 +2427,19 @@ begin
      else begin //bmk_rgb
       case destimage.kind of
        bmk_gray: begin
+        rs:= ((word(opacity.red)+word(opacity.green)+
+                              word(opacity.blue))*257) div (3*255);
+                                                      //->0..256
         for int1:= 0 to destimage.size.cy - 1 do begin
          po1:= pd;
          ps:= po1 + pint1;
          pe:= po1 + destimage.size.cx;
          repeat
           with prgbtriplety(pm)^ do begin
-           by1:= (word(red)+word(green)+word(blue)) div 3;
+           ca1:= (rs*(word(red)+word(green)+word(blue)));
           end;
-          by2:= 255-by1;
-          pbyte(po1)^:= (pbyte(po1)^*by2 + pbyte(ps)^*by1) div byte(255);
+          ca2:= 3*256*256-ca1;
+          pbyte(po1)^:= (pbyte(po1)^*ca2 + pbyte(ps)^*ca1) div (3*256*256);
           inc(po1);
           inc(ps);
           inc(pm,4);
@@ -2441,12 +2448,35 @@ begin
         end;
        end;
        else begin   //bmk_rgb
+        rs:= (word(opacity.red)*257) div (255); //->0..256
+        gs:= (word(opacity.green)*257) div (255); //->0..256
+        bs:= (word(opacity.blue)*257) div (255); //->0..256
+        po1:= pd;
+        ps:= po1+pint1;
+        pe:= po1+destimage.length*4;
+        while po1 < pe do begin
+         with prgbtriplety(po1)^ do begin
+          ca1:= prgbtriplety(pm)^.red*rs;
+          red:= (prgbtriplety(po1)^.red*(256*256-ca1)+
+                            (prgbtriplety(ps)^.red*ca1)) div (256*256);
+          ca1:= prgbtriplety(pm)^.green*gs;
+          green:= (prgbtriplety(po1)^.green*(256*256-ca1)+
+                            (prgbtriplety(ps)^.green*ca1)) div (256*256);
+          ca1:= prgbtriplety(pm)^.blue*bs;
+          blue:= (prgbtriplety(po1)^.blue*(256*256-ca1)+
+                            (prgbtriplety(ps)^.blue*ca1)) div (256*256);
+         end;
+         inc(po1,4);
+         inc(ps,4);
+         inc(pm,4);
+        end;
+       {
         for int1:= 0 to destimage.length - 1 do begin
          with rgbtriplety(destimage.pixels[int1]) do begin
-          red:=   (byte(255 - 
+          red:=   (byte(256 - 
                    rgbtriplety(colormaskimage.pixels^[int1]).red) * red +
                    rgbtriplety(colormaskimage.pixels^[int1]).red *
-                   rgbtriplety(sourceimage.pixels^[int1]).red) div byte(255);
+                   rgbtriplety(sourceimage.pixels^[int1]).red) div 256);
           green:= (byte(255 - 
                    rgbtriplety(colormaskimage.pixels^[int1]).green) * green +
                    rgbtriplety(colormaskimage.pixels^[int1]).green *
@@ -2457,6 +2487,7 @@ begin
                    rgbtriplety(sourceimage.pixels^[int1]).blue) div byte(255);
          end;
         end;
+       }
        end;
       end;
      end;
