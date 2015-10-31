@@ -4156,7 +4156,11 @@ begin
   faceoffs:= calcframestateoffs(fintf.getframestateflags,
                                   frameoffsetsty(fi.frameface_offsets));
   if (faceoffs >= 0) and (faceoffs < fi.frameface_list.list.count) then begin
-   fi.frameface_list.list[faceoffs].paint(canvas,rect1);
+   with fi.frameface_list.list[faceoffs] do begin
+    if not (fao_overlay in options) then begin
+     paint(canvas,rect1);
+    end;
+   end;
   end;
  end;
  if clipandmove then begin
@@ -4273,70 +4277,23 @@ begin
 end;
 
 procedure tcustomframe.paintoverlay(const canvas: tcanvas; const arect: rectty);
-begin
- drawframe(canvas,deflaterect(arect,fouterframe),fi,fintf.getframestateflags);
-end;
-{
-procedure tcustomframe.paintoverlay(const canvas: tcanvas; const arect: rectty);
 var
- imageoffs: integer;
- rect2: rectty;
+ faceoffs: int32;
 begin
- if fi.frameimage_list <> nil then begin
-  rect2:= deflaterect(arect,fouterframe);
-  imageoffs:= fi.frameimage_offset;
-  with fintf.getwidget do begin
-   if getframeactive then begin
-    if getframeclicked then begin
-     imageoffs:= imageoffs + fi.frameimage_offsetactiveclicked;
-    end
-    else begin
-     if getframemouse then begin
-      imageoffs:= imageoffs + fi.frameimage_offsetactivemouse;
-     end
-     else begin
-      imageoffs:= imageoffs + fi.frameimage_offsetactive;
-     end;
-    end;
-   end
-   else begin
-    if getframeclicked then begin
-     imageoffs:= imageoffs + fi.frameimage_offsetclicked;
-    end
-    else begin
-     if getframemouse then begin
-      imageoffs:= imageoffs + fi.frameimage_offsetmouse;
-     end;
+ if fi.frameface_list <> nil then begin
+  faceoffs:= calcframestateoffs(fintf.getframestateflags,
+                                  frameoffsetsty(fi.frameface_offsets));
+  if (faceoffs >= 0) and (faceoffs < fi.frameface_list.list.count) then begin
+   with fi.frameface_list.list[faceoffs] do begin
+    if fao_overlay in options then begin
+     paint(canvas,deflaterect(arect,fpaintframe));
     end;
    end;
   end;
-  if imageoffs >= 0 then begin
-   fi.frameimage_list.paint(canvas,imageoffs,rect2.pos);
-   fi.frameimage_list.paint(canvas,imageoffs+1,
-   makerect(rect2.x,rect2.y+fi.frameimage_list.height,
-            fi.frameimage_list.width,rect2.cy-2*fi.frameimage_list.height),
-            [al_stretchy]);
-   fi.frameimage_list.paint(canvas,imageoffs+2,rect2,[al_bottom]);
-   fi.frameimage_list.paint(canvas,imageoffs+3,
-   makerect(rect2.x+fi.frameimage_list.width,
-            rect2.y+rect2.cy-fi.frameimage_list.height,
-            rect2.cx-2*fi.frameimage_list.width,fi.frameimage_list.height),
-            [al_stretchx]);
-   fi.frameimage_list.paint(canvas,imageoffs+4,rect2,[al_bottom,al_right]);
-   fi.frameimage_list.paint(canvas,imageoffs+5,
-   makerect(rect2.x+rect2.cx-fi.frameimage_list.width,
-            rect2.y+fi.frameimage_list.height,
-            fi.frameimage_list.width,rect2.cy-2*fi.frameimage_list.height),
-            [al_stretchy]);
-   fi.frameimage_list.paint(canvas,imageoffs+6,rect2,[al_right]);
-   fi.frameimage_list.paint(canvas,imageoffs+7,
-   makerect(rect2.x+fi.frameimage_list.width,rect2.y,
-            rect2.cx-2*fi.frameimage_list.width,
-            fi.frameimage_list.height),[al_stretchx]);
-  end;
  end;
+ drawframe(canvas,deflaterect(arect,fouterframe),fi,fintf.getframestateflags);
 end;
-}
+
 procedure tcustomframe.dopaintfocusrect(const canvas: tcanvas; const rect: rectty);
 var
  rect1: rectty;
