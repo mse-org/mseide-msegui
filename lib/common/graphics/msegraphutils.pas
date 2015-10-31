@@ -517,6 +517,7 @@ function trystringtocolor(text: string; out value: colorty): boolean;
 function colortostring(value: colorty): string;
 function getcolornames: msestringarty;
 function getcolorvalues: colorarty;
+function opacitycolor(const opacity: real): colorty;
 
 function makepoint(const x,y: integer): pointty; {$ifdef FPC}inline;{$endif}
 function makesize(const cx,cy: integer): sizety; {$ifdef FPC}inline;{$endif}
@@ -961,6 +962,15 @@ begin
  end;
 end;
 
+function opacitycolor(const opacity: real): colorty;
+begin
+ with rgbtriplety(result) do begin
+  red:= round(255 * opacity);
+  green:= red;
+  blue:= red;
+  res:= 0;
+ end;
+end;
 
 function rotateframe(const aframe: framety; const olddirection,
                   newdirection: graphicdirectionty): framety;
