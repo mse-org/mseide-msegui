@@ -966,7 +966,16 @@ begin
  result:= createcolorpi(alphatorendercolor(acolor),alpharenderpictformat);
 end;
 }
-function createmaskpicture(const acolor: rgbtriplety): tpicture; overload;
+type
+ ppxrenderpictformat = ^pxrenderpictformat;
+
+const
+ renderformats: array[bitmapkindty] of ppxrenderpictformat =
+// bmk_mono,              bmk_gray,             bmk_rgb
+  (@bitmaprenderpictformat,@alpharenderpictformat,@screenrenderpictformat);
+
+function createmaskpicture(const acolor: rgbtriplety;
+                                  const akind: bitmapkindty): tpicture;
 var
  attributes: txrenderpictureattributes;
  col: txrendercolor;
@@ -975,44 +984,39 @@ begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
 {$endif} 
- pixmap:= gui_createpixmap(makesize(1,1));
+ pixmap:= gui_createpixmap(makesize(1,1),0,akind);
  attributes._repeat:= repeatnormal;
- attributes.component_alpha:= 1;
- result:= xrendercreatepicture(appdisp,pixmap,screenrenderpictformat,
-                                    cprepeat or cpcomponentalpha,@attributes);
  col:= colortorendercolor(acolor);
+ attributes.component_alpha:= 1;
+ if akind = bmk_gray then begin
+  col.alpha:= (col.red + col.green + col.blue) div 3;
+ end;
+ result:= xrendercreatepicture(appdisp,pixmap,renderformats[akind]^,
+                                    cprepeat or cpcomponentalpha,@attributes);
  xrenderfillrectangle(appdisp,pictopsrc,result,@col,0,0,1,1);
  gui_freepixmap(pixmap);
 end;
 
-function createmaskpicture(const amask: tsimplebitmap): tpicture; overload;
+function createmaskpicture(const ahandle: pixmapty;
+                           const akind: bitmapkindty): tpicture;
 var
  attributes: txrenderpictureattributes;
- handle1: pixmapty;
- format1: pxrenderpictformat;
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
 {$endif} 
  result:= 0;
+ if ahandle <> 0 then begin
+  attributes.component_alpha:= 1;
+  result:= xrendercreatepicture(appdisp,ahandle,
+                           renderformats[akind]^,cpcomponentalpha,@attributes);
+ end;
+end;
+
+function createmaskpicture(const amask: tsimplebitmap): tpicture; overload;
+begin
  if amask <> nil then begin
-  handle1:= tsimplebitmap1(amask).handle;
-  if handle1 <> 0 then begin
-   case amask.kind of
-    bmk_mono: begin
-     format1:= bitmaprenderpictformat;
-    end;
-    bmk_gray: begin
-     format1:= alpharenderpictformat;
-    end;
-    else begin
-     format1:= screenrenderpictformat;
-    end;
-   end;
-   attributes.component_alpha:= 1;
-   result:= xrendercreatepicture(appdisp,tsimplebitmap1(amask).handle,
-                                          format1,cpcomponentalpha,@attributes);
-  end;
+  result:= createmaskpicture(tsimplebitmap1(amask).handle,amask.kind);
  end;
 end;
 
@@ -2157,6 +2161,9 @@ var
   end;
  end;
 
+var
+ opapic,masksourcepic: tpicture;
+
 label
  endlab,endlab2;
 begin
@@ -2186,16 +2193,41 @@ begin
     ax:= x;
     ay:= y;
    end;
+   sx:= ax;
+   sy:= ay;
    pictop:= pictopsrc;
    maskpic:= 0;
    if (longword(opacity) <> maxopacity) and (mask = nil){monomask} then begin
-    maskpic:= createmaskpicture(opacity); 
+    maskpic:= createmaskpicture(opacity,bmk_rgb); 
               //clip_mask ignored by xrender
     pictop:= pictopover;
    end
    else begin
     if not monomask then begin
-     maskpic:= createmaskpicture(mask);
+     if (longword(opacity) <> maxopacity) then begin
+      ax:= 0;
+      ay:= 0;
+      bitmap:= gui_createpixmap(size,0,mask.kind);
+      if bitmap <> 0 then begin
+       xvalues.foreground:= 0;
+       bitmapgc2:= xcreategc(appdisp,bitmap,gcforeground,@xvalues);
+       if bitmapgc2 <> nil then begin
+        xfillrectangle(appdisp,bitmap,bitmapgc2,0,0,cx,cy);
+        xfreegc(appdisp,bitmapgc2);
+        opapic:= createmaskpicture(opacity,mask.kind);
+        masksourcepic:= createmaskpicture(mask);
+        maskpic:= createmaskpicture(bitmap,mask.kind);
+        xrendercomposite(appdisp,pictopover,masksourcepic,opapic,maskpic,
+                                                            x,y,0,0,0,0,cx,cy);
+        xrenderfreepicture(appdisp,opapic);
+        xrenderfreepicture(appdisp,masksourcepic);
+       end;
+       gui_freepixmap(bitmap);
+      end;
+     end
+     else begin
+      maskpic:= createmaskpicture(mask);
+     end;
      updatetransform(maskpic);
      pictop:= pictopover;
     end;
@@ -2320,9 +2352,7 @@ endlab2:
      end;
     end;
    end
-   else begin 
-    sx:= ax;
-    sy:= ay;
+   else begin //no colorconvert
     dx:= destrect^.x;
     dy:= destrect^.y;
     format1:= screenrenderpictformat;
