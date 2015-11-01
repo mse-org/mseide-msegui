@@ -5760,14 +5760,14 @@ eventrestart:
                           makerect(x,y,width,height),nullpoint);
    end;
   end;
-
+{
   graphicsexpose: begin
    with xev.xgraphicsexpose do begin
     result:= twindowrectevent.create(ek_expose,drawable,
                           makerect(x,y,width,height),nullpoint);
    end;
   end;
-
+}
   configurenotify: begin
    with xev.xconfigure do begin
     w:= xwindow;
