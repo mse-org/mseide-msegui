@@ -216,9 +216,13 @@ type
    function getgraymask(): boolean;
    procedure setgraymask(const avalue: boolean);
    procedure setmask_source(const avalue: tbitmapcomp);
+   procedure setmaskpos(const avalue: pointty);
+   procedure setmask_x(const avalue: int32);
+   procedure setmask_y(const avalue: int32);
   protected
    foptions: bitmapoptionsty;
    fmask: tbitmap;
+   fmask_pos: pointty;
    procedure setkind(const avalue: bitmapkindty); override;
    function gettranspcolor(): colorty;
 //   procedure setmonochrome(const avalue: boolean); override;
@@ -230,7 +234,7 @@ type
    function writedata(const ancestor: tmaskedbitmap): boolean;
    procedure defineproperties(filer: tfiler); override;
    procedure objectevent(const sender: tobject; const event: objecteventty);
-   function getmask: tsimplebitmap; override;
+   function getmask(out apos: pointty): tsimplebitmap; override;
    function getsource: tbitmapcomp; override;
    procedure assign1(const source: tsimplebitmap; const docopy: boolean); override;
    procedure getcanvasimage(const bgr: boolean;
@@ -338,6 +342,7 @@ type
    property maskcolorbackground: colorty read fmaskcolorbackground 
                     write fmaskcolorbackground default $000000; //max transparent
                      //used to convert monchrome mask to colormask
+   property mask_pos: pointty read fmask_pos write setmaskpos;
    property origformatdata: string read forigformatdata write setorigformatdata;
   published
    property transparentcolor: colorty read ftransparentcolor 
@@ -346,6 +351,8 @@ type
    property options: bitmapoptionsty read getoptions write setoptions default [];
    property source: tbitmapcomp read fsource write setsource;
    property mask_source: tbitmapcomp read fmask_source write setmask_source;
+   property mask_x: int32 read fmask_pos.x write setmask_x default 0;
+   property mask_y: int32 read fmask_pos.y write setmask_y default 0;
    property origformat: string read forigformat write forigformat;
    property colorforeground;
    property colorbackground;
@@ -743,6 +750,7 @@ var
  bmp: tbitmap;
  sourcebmp: tbitmapcomp;
  amask: tsimplebitmap;
+ maskpos1: pointty;
 // maskpx: pixmapty;
 // maskgchandle: longword;
  rect1,rect2: rectty;
@@ -770,7 +778,7 @@ begin
  with bmp do begin
   if not isempty then begin
    updatealignment(dest,asource,aalignment,rect1,rect2,po1);
-   amask:= getmask;
+   amask:= getmask(maskpos1);
 //   maskpx:= getmaskhandle(maskgchandle);
    if (al_grayed in aalignment) and ((amask <> nil) or 
                                            (fkind = bmk_mono)) then begin
@@ -792,7 +800,8 @@ begin
      end;
      rect2.pos:= nullpoint;
      tcanvas1(acanvas).internalcopyarea(bmp1.canvas,rect2,
-               rect1,acanvas.rasterop,cl_default,bmp1.mask,aalignment,po1,opa);
+               rect1,acanvas.rasterop,cl_default,bmp1.mask,maskpos1,
+                                                       aalignment,po1,opa);
      bmp1.free;     
     end
     else begin //shaddowed mask
@@ -813,7 +822,7 @@ begin
       inc(po1.x);
       inc(po1.y);
       tcanvas1(acanvas).internalcopyarea(canvas2,rect2,
-                rect1,acanvas.rasterop,cl_default,amask{maskpx,maskgchandle},
+                rect1,acanvas.rasterop,cl_default,amask,maskpos1,
                                                         aalignment,po1,opa);
       color:= cl_dkgray;
  //     copyarea(canvas2,rect2,rect1.pos,acanvas.rasterop);
@@ -822,7 +831,7 @@ begin
       dec(po1.x);
       dec(po1.y);
       tcanvas1(acanvas).internalcopyarea(canvas2,rect2,
-                rect1,acanvas.rasterop,cl_default,amask{maskpx,maskgchandle},
+                rect1,acanvas.rasterop,cl_default,amask,maskpos1,
                                                        aalignment,po1,opa);
       color:= col2;
       colorbackground:= col1;
@@ -846,13 +855,15 @@ begin
       acanvas.colorbackground:= self.fcolorbackground;
      end;
      tcanvas1(acanvas).internalcopyarea(bmp.canvas,rect2,
-               rect1,acanvas.rasterop,cl_default,amask,aalignment,po1,opa);
+               rect1,acanvas.rasterop,cl_default,amask,maskpos1,
+                                                   aalignment,po1,opa);
      acanvas.color:= col1;
      acanvas.colorbackground:= col2;
     end
     else begin
      tcanvas1(acanvas).internalcopyarea(bmp.canvas,rect2,
-               rect1,acanvas.rasterop,cl_default,amask,aalignment,po1,opa);
+               rect1,acanvas.rasterop,cl_default,amask,maskpos1,
+                                                   aalignment,po1,opa);
     end;
    end;
   end;
@@ -1811,6 +1822,28 @@ begin
  end;
 end;
 
+procedure tmaskedbitmap.setmaskpos(const avalue: pointty);
+begin
+ fmask_pos:= avalue;
+ change();
+end;
+
+procedure tmaskedbitmap.setmask_x(const avalue: int32);
+begin
+ if fmask_pos.x <> avalue then begin
+  fmask_pos.x:= avalue;
+  change();
+ end;
+end;
+
+procedure tmaskedbitmap.setmask_y(const avalue: int32);
+begin
+ if fmask_pos.y <> avalue then begin
+  fmask_pos.y:= avalue;
+  change();
+ end;
+end;
+
 function tmaskedbitmap.getoptions: bitmapoptionsty;
 begin
  result:= foptions;
@@ -1981,7 +2014,7 @@ begin
  end;
 end;
 }
-function tmaskedbitmap.getmask: tsimplebitmap;
+function tmaskedbitmap.getmask(out apos: pointty): tsimplebitmap;
 begin
  if (fmask_source <> nil) then begin
   result:= fmask_source.bitmap;
@@ -1989,6 +2022,7 @@ begin
  else begin
   result:= fmask;
  end;
+ apos:= fmask_pos;
 end;
 
 procedure tmaskedbitmap.assign1(const source: tsimplebitmap; const docopy: boolean);
@@ -2168,15 +2202,15 @@ begin
   end;
   destrect:= calcrectalignment(mr(nullpoint,size1),source,aalignment);
   tcanvas1(dest.canvas).internalcopyarea(canvas,source,destrect,
-                        rop_copy,cl_none,nil,aalignment,nullpoint,cl_none);
+                        rop_copy,cl_none,nil,nullpoint,aalignment,
+                                                       nullpoint,cl_none);
        
   if masked then begin
    if bo1 then begin
     dest.mask.init(dest.mask.colorbackground);
    end;
    tcanvas1(dest.fmask.canvas).internalcopyarea(mask.canvas,source,
-       destrect,rop_copy,cl_none,nil,aalignment,
-                                                       nullpoint,cl_none);
+       destrect,rop_copy,cl_none,nil,nullpoint,aalignment,nullpoint,cl_none);
    include(dest.fstate,pms_maskvalid);
   end;
  finally

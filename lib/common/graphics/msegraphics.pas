@@ -314,6 +314,7 @@ type
   copymode: rasteropty;
   transparentcolor: pixelty;
   mask: tsimplebitmap;
+  maskshift: pointty;
   opacity: rgbtriplety;
  end;
  fonthasglyphinfoty = record
@@ -922,7 +923,7 @@ type
    procedure internalcopyarea(asource: tcanvas; const asourcerect: rectty;
               const adestrect: rectty; acopymode: rasteropty;
               atransparentcolor: colorty;
-              amask: tsimplebitmap;
+              amask: tsimplebitmap; const amaskpos: pointty;
               const aalignment: alignmentsty; 
               //only al_stretchx, al_stretchy and al_tiled used
               const atileorigin: pointty;
@@ -1246,7 +1247,7 @@ type
    procedure createhandle(acopyfrom: pixmapty); virtual;
    procedure setkind(const avalue: bitmapkindty); virtual;
    function getconverttomonochromecolorbackground: colorty; virtual;
-   function getmask: tsimplebitmap; virtual;
+   function getmask(out apos: pointty): tsimplebitmap; virtual;
    procedure setsize(const avalue: sizety); virtual;
    function normalizeinitcolor(const acolor: colorty): colorty;
    procedure assign1(const source: tsimplebitmap; const docopy: boolean); virtual;
@@ -2435,6 +2436,7 @@ procedure tsimplebitmap.copyarea(const asource: tsimplebitmap;
 var
  bo1,bo2: boolean;
  amask: tsimplebitmap;
+ maskpos1: pointty;
 begin
  bo1:= canvasallocated;
  bo2:= asource.canvasallocated;
@@ -2460,14 +2462,15 @@ begin
   canvas.colorbackground:= acolorbackground;
  end;
  if masked then begin
-  amask:= asource.getmask;
+  amask:= asource.getmask(maskpos1);
  end
  else begin
   amask:= nil;
+  maskpos1:= nullpoint;
  end;
  canvas.internalcopyarea(asource.canvas,asourcerect,
                 calcrectalignment(adestrect,asourcerect,aalignment),acopymode,
-                         cl_default,amask,aalignment,nullpoint,aopacity);
+                       cl_default,amask,maskpos1,aalignment,nullpoint,aopacity);
  if bo1 then begin
   canvas.restore;
  end
@@ -2567,7 +2570,7 @@ begin
 end;
 }
 
-function tsimplebitmap.getmask: tsimplebitmap;
+function tsimplebitmap.getmask(out apos: pointty): tsimplebitmap;
 begin
  result:= nil; //dummy
 end;
@@ -4475,7 +4478,8 @@ end;
 procedure tcanvas.internalcopyarea(asource: tcanvas; const asourcerect: rectty;
                            const adestrect: rectty; acopymode: rasteropty;
                            atransparentcolor: colorty;
-                           amask: tsimplebitmap{pixmapty;  amaskgchandle: ptruint};
+                           amask: tsimplebitmap;
+                           const amaskpos: pointty;
                            const aalignment: alignmentsty;
                            const atileorigin: pointty;
                            const aopacity: colorty); //cl_none -> opaque
@@ -4533,6 +4537,8 @@ begin
   source:= asource;
   sourcerect:= @srect;
   destrect:= @drect;
+  maskshift.x:= -amaskpos.x;
+  maskshift.y:= -amaskpos.y;
   alignment:= aalignment;
   copymode:= acopymode;
   mask:= amask;
@@ -4705,7 +4711,7 @@ procedure tcanvas.copyarea(const asource: tcanvas; const asourcerect: rectty;
 begin
  if cs_inactive in fstate then exit;
  internalcopyarea(asource,asourcerect,makerect(adestpoint,asourcerect.size),
-              acopymode,atransparentcolor,nil,[],nullpoint,aopacity);
+              acopymode,atransparentcolor,nil,nullpoint,[],nullpoint,aopacity);
 end;
 
 procedure tcanvas.copyarea(const asource: tcanvas; const asourcerect: rectty;
@@ -4718,7 +4724,8 @@ procedure tcanvas.copyarea(const asource: tcanvas; const asourcerect: rectty;
 begin
  if cs_inactive in fstate then exit;
  internalcopyarea(asource,asourcerect,adestrect,
-              acopymode,atransparentcolor,nil,alignment,nullpoint,aopacity);
+              acopymode,atransparentcolor,nil,nullpoint,alignment,
+                                                  nullpoint,aopacity);
 end;
 
 procedure tcanvas.drawpoints(const apoints: array of pointty; const acolor: colorty;
