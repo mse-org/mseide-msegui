@@ -4487,7 +4487,7 @@ procedure tcanvas.internalcopyarea(asource: tcanvas; const asourcerect: rectty;
                            //todo: use serverside tiling
                            //      limit stretched rendering to cliprects
 var
- srect,drect,rect1: rectty;
+ srect,drect,rect1,rect2: rectty;
  spoint,dpoint,tileorig: pointty;
  startx: integer;
  endx,endy: integer;
@@ -4498,6 +4498,10 @@ var
 // bo1,bo2: boolean;
 
 begin
+ if (asourcerect.cx = 0) or (asourcerect.cy = 0) or 
+    (adestrect.cx = 0) or (adestrect.cy = 0) then begin //no div 0
+  exit;
+ end;
  checkgcstate([]);  //gc must be valid
  if asource <> self then begin
   asource.checkgcstate([cs_gc]); //gc must be valid
@@ -4532,6 +4536,20 @@ begin
   srect.pos:= spoint;
   srect.size:= asourcerect.size;
   drect.pos:= dpoint;
+ end;
+ if amask <> nil then begin
+  rect2:= intersectrect(srect,mr(amaskpos,amask.size));
+  if (rect2.cx < srect.cx) or (rect2.cy < srect.cy) then begin 
+                                                 //mask not big enough
+   if (rect2.cx <= 0) or (rect2.cy <= 0) then begin
+    exit;
+   end;
+   drect.x:= drect.x + (rect2.x - srect.x) * drect.cx div srect.cx;
+   drect.y:= drect.y + (rect2.y - srect.y) * drect.cy div srect.cy;
+   drect.cx:= (drect.cx * rect2.cx) div srect.cx;
+   drect.cy:= (drect.cy * rect2.cy) div srect.cy;
+   srect:= rect2;
+  end;
  end;
  with fdrawinfo,copyarea do begin
   source:= asource;
