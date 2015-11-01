@@ -2406,7 +2406,8 @@ endlab2:
      xfillrectangle(appdisp,pixmap2,tgc(maskgc.handle),0,0,cx,cy);
      maskgc.cliporigin:= subpoint(cliporigin,destrect^.pos);
      setregion(maskgc,region(gcclipregion));
-     xcopyarea(appdisp,amask,pixmap2,tgc(maskgc.handle),x,y,cx,cy,0,0);
+     xcopyarea(appdisp,amask,pixmap2,tgc(maskgc.handle),
+                             x+maskshift.x,y+maskshift.y,cx,cy,0,0);
      xvalues.clip_x_origin:= destrect^.x;
      xvalues.clip_y_origin:= destrect^.y;
      xvalues.clip_mask:= pixmap2;
@@ -2416,8 +2417,8 @@ endlab2:
     end
     else begin
      xvalues.clip_mask:= amask;
-     xvalues.clip_x_origin:= destrect^.x - x;
-     xvalues.clip_y_origin:= destrect^.y - y;
+     xvalues.clip_x_origin:= destrect^.x - x - maskshift.x;
+     xvalues.clip_y_origin:= destrect^.y - y - maskshift.y;
      xchangegc(appdisp,tgc(gc.handle),gcclipxorigin or gcclipyorigin or
                       gcclipmask,@xvalues);
     end;

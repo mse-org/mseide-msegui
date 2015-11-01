@@ -4555,8 +4555,6 @@ begin
   source:= asource;
   sourcerect:= @srect;
   destrect:= @drect;
-  maskshift.x:= -amaskpos.x;
-  maskshift.y:= -amaskpos.y;
   alignment:= aalignment;
   copymode:= acopymode;
   mask:= amask;
@@ -4590,6 +4588,8 @@ begin
     end;
    end;
   end;
+  maskshift.x:= (-amaskpos.x*drect.cx) div srect.cx;
+  maskshift.y:= (-amaskpos.y*drect.cy) div srect.cy;
   if aopacity = cl_none then begin
    longword(opacity):= maxopacity;
   end
