@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2014 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2015 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -2008,6 +2008,7 @@ var
  bufferbmp: hbitmap;
  rect1: rectty;
  nomaskblt: boolean;
+ maskpos: pointty;
 
  procedure setintpolmode(const ahandle: hdc);
  var
@@ -2052,13 +2053,13 @@ var
     maskbmp:= 0;
    end;
    stretchedbmp:= createcompatiblebitmap(tcanvas1(source).fdrawinfo.gc.handle,
-                                                              rect1.cx,rect1.cy);
+                                                            rect1.cx,rect1.cy);
    destdc:= createcompatibledc(0);
    setintpolmode(destdc);
    if mask <> nil then begin
     selectobject(destdc,maskbmp);
     stretchblt(destdc,po1.x,po1.y,destrect^.cx,destrect^.cy,smaskdc,
-                   x,y,cx,cy,rasterops3[rop_copy]);
+                   maskpos.x,maskpos.y,cx,cy,rasterops3[rop_copy]);
    end;
    selectobject(destdc,stretchedbmp);
    stretchblt(destdc,po1.x,po1.y,destrect^.cx,destrect^.cy,
@@ -2101,12 +2102,14 @@ var
       win95maskblt(handle,destrect^.x,destrect^.y,cx,cy,
                     tcanvas1(source).fdrawinfo.gc.handle,
                     x,y,tsimplebitmap1(mask).fhandle,
-                    tcanvas1(mask.canvas).fdrawinfo.gc.handle,x,y,copymode);
+                    tcanvas1(mask.canvas).fdrawinfo.gc.handle,
+                    maskpos.x,maskpos.y,copymode);
      end
      else begin
       maskblt(handle,destrect^.x,destrect^.y,cx,cy,
                     tcanvas1(source).fdrawinfo.gc.handle,
-                    x,y,tsimplebitmap1(mask).handle,x,y,
+                    x,y,tsimplebitmap1(mask).handle,
+                    maskpos.x,maskpos.y,
                     makerop4(rasterops3[rop_nop],rasterops3[copymode]));
      end;
      if double then begin
@@ -2115,13 +2118,13 @@ var
       if nomaskblt then begin
        win95maskblt(handle,destrect^.x,destrect^.y,cx,cy,
                     tcanvas1(source).fdrawinfo.gc.handle,
-                    x,y,tsimplebitmap1(mask).fhandle,
+                    maskpos.x,maskpos.y,tsimplebitmap1(mask).fhandle,
                     tcanvas1(mask.canvas).fdrawinfo.gc.handle,x,y,rop_or);
       end
       else begin
        maskblt(handle,destrect^.x,destrect^.y,cx,cy,
                     tcanvas1(source).fdrawinfo.gc.handle,
-                    x,y,tsimplebitmap1(mask).fhandle,x,y,
+                    maskpos.x,maskpos.y,tsimplebitmap1(mask).fhandle,x,y,
                     makerop4(rasterops3[rop_nop],rasterops3[rop_or]));
       end;
      end;
@@ -2148,7 +2151,8 @@ var
      end
      else begin
       maskblt(handle,rect1.x,rect1.y,rect1.cx,rect1.cy,destdc,
-                    0,0,maskbmp,0,0,makerop4(rasterops3[rop_nop],rasterops3[copymode]));
+                    0,0,maskbmp,0,0,makerop4(rasterops3[rop_nop],
+                                                      rasterops3[copymode]));
      end;
      if double then begin
       setbkcolor(handle,$000000);
@@ -2159,7 +2163,8 @@ var
       end
       else begin
        maskblt(handle,rect1.x,rect1.y,rect1.cx,rect1.cy,destdc,
-                    0,0,maskbmp,0,0,makerop4(rasterops3[rop_nop],rasterops3[rop_or]));
+                    0,0,maskbmp,0,0,makerop4(rasterops3[rop_nop],
+                                                      rasterops3[rop_or]));
       end;
      end;
      deletestretchedbmps;
@@ -2187,8 +2192,8 @@ var
  sourceposbefore: pointty;
  pm,ps,pd,pe,po1: pointer;
  scanstep: integer;
- by1,by2: byte;
- wo1,wo2: word;
+// by1,by2: byte;
+ wo1{,wo2}: word;
  ca1,ca2: card32;
  lwo1: longword;
  pint1: ptrint;
@@ -2203,6 +2208,7 @@ begin
   nomaskblt:= iswin95 or (kind = gck_printer);
   setintpolmode(handle);
   maskbefore:= mask;
+  maskpos:= addpoint(sourcerect^.pos,maskshift);
   if (mask <> nil) and (mask.kind <> bmk_mono) then begin
    colormask:= tsimplebitmap1(mask);
    mask:= nil;
@@ -2376,7 +2382,8 @@ begin
     deleteobject(selectobject(colormaskdc,colormaskbmp));
     with sourcerect^ do begin
      stretchblt(colormaskdc,destrect^.x,destrect^.y,destrect^.cx,destrect^.cy,
-      tcanvas1(colormask.canvas).fdrawinfo.gc.handle,x,y,cx,cy,
+      tcanvas1(colormask.canvas).fdrawinfo.gc.handle,
+          maskpos.x,maskpos.y,cx,cy,
                                   rasterops3[rop_copy]);
     end;
     gui_pixmaptoimage(colormaskbmp,colormaskimage,colormaskdc);

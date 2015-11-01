@@ -2353,8 +2353,8 @@ endlab2:
     end;
    end
    else begin //no colorconvert
-    ax:= ax + maskshift.x;
-    ay:= ay + maskshift.y;
+    ax:= ax + maskshiftscaled.x;
+    ay:= ay + maskshiftscaled.y;
     dx:= destrect^.x;
     dy:= destrect^.y;
     format1:= screenrenderpictformat;
@@ -2407,7 +2407,7 @@ endlab2:
      maskgc.cliporigin:= subpoint(cliporigin,destrect^.pos);
      setregion(maskgc,region(gcclipregion));
      xcopyarea(appdisp,amask,pixmap2,tgc(maskgc.handle),
-                             x+maskshift.x,y+maskshift.y,cx,cy,0,0);
+                             x+maskshiftscaled.x,y+maskshiftscaled.y,cx,cy,0,0);
      xvalues.clip_x_origin:= destrect^.x;
      xvalues.clip_y_origin:= destrect^.y;
      xvalues.clip_mask:= pixmap2;
@@ -2417,8 +2417,8 @@ endlab2:
     end
     else begin
      xvalues.clip_mask:= amask;
-     xvalues.clip_x_origin:= destrect^.x - x - maskshift.x;
-     xvalues.clip_y_origin:= destrect^.y - y - maskshift.y;
+     xvalues.clip_x_origin:= destrect^.x - x - maskshiftscaled.x;
+     xvalues.clip_y_origin:= destrect^.y - y - maskshiftscaled.y;
      xchangegc(appdisp,tgc(gc.handle),gcclipxorigin or gcclipyorigin or
                       gcclipmask,@xvalues);
     end;
