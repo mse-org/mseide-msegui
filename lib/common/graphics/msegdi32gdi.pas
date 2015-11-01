@@ -2058,8 +2058,15 @@ var
    setintpolmode(destdc);
    if mask <> nil then begin
     selectobject(destdc,maskbmp);
-    stretchblt(destdc,po1.x,po1.y,destrect^.cx,destrect^.cy,smaskdc,
+    if al_nomaskscale in alignment then begin
+     stretchblt(destdc,po1.x,po1.y,destrect^.cx,destrect^.cy,smaskdc,
+                   maskpos.x,maskpos.y,destrect^.cx,destrect^.cy,
+                                                  rasterops3[rop_copy]);
+    end
+    else begin
+     stretchblt(destdc,po1.x,po1.y,destrect^.cx,destrect^.cy,smaskdc,
                    maskpos.x,maskpos.y,cx,cy,rasterops3[rop_copy]);
+    end;
    end;
    selectobject(destdc,stretchedbmp);
    stretchblt(destdc,po1.x,po1.y,destrect^.cx,destrect^.cy,
@@ -2380,11 +2387,21 @@ begin
     colormaskdc:= createcompatibledc(0);
     setintpolmode(colormaskdc);
     deleteobject(selectobject(colormaskdc,colormaskbmp));
-    with sourcerect^ do begin
-     stretchblt(colormaskdc,destrect^.x,destrect^.y,destrect^.cx,destrect^.cy,
-      tcanvas1(colormask.canvas).fdrawinfo.gc.handle,
-          maskpos.x,maskpos.y,cx,cy,
-                                  rasterops3[rop_copy]);
+    if al_nomaskscale in alignment then begin
+     with destrect^ do begin
+      stretchblt(colormaskdc,x,y,cx,cy,
+       tcanvas1(colormask.canvas).fdrawinfo.gc.handle,
+           maskpos.x,maskpos.y,cx,cy,
+                                   rasterops3[rop_copy]);
+     end;
+    end
+    else begin
+     with sourcerect^ do begin
+      stretchblt(colormaskdc,destrect^.x,destrect^.y,destrect^.cx,destrect^.cy,
+       tcanvas1(colormask.canvas).fdrawinfo.gc.handle,
+           maskpos.x,maskpos.y,cx,cy,
+                                   rasterops3[rop_copy]);
+     end;
     end;
     gui_pixmaptoimage(colormaskbmp,colormaskimage,colormaskdc);
     pm:= colormaskimage.pixels;

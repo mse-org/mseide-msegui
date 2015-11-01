@@ -4487,7 +4487,7 @@ procedure tcanvas.internalcopyarea(asource: tcanvas; const asourcerect: rectty;
                            //todo: use serverside tiling
                            //      limit stretched rendering to cliprects
 var
- srect,drect,rect1,rect2: rectty;
+ srect,drect,rect1: rectty;
  spoint,dpoint,tileorig: pointty;
  startx: integer;
  endx,endy: integer;
@@ -4496,6 +4496,26 @@ var
  sourcex,sourcey: integer;
  int1{,int2}: integer;
 // bo1,bo2: boolean;
+
+ function checkmaskrect(var arect,brect: rectty): boolean;
+ var
+  rect2: rectty;
+ begin
+  rect2:= intersectrect(arect,mr(amaskpos,amask.size));
+  if (rect2.cx < arect.cx) or (rect2.cy < arect.cy) then begin 
+                                                 //mask not big enough
+   if (rect2.cx <= 0) or (rect2.cy <= 0) then begin
+    result:= true;
+    exit;
+   end;
+   brect.x:= brect.x + (rect2.x - arect.x) * brect.cx div arect.cx;
+   brect.y:= brect.y + (rect2.y - arect.y) * brect.cy div arect.cy;
+   brect.cx:= (brect.cx * rect2.cx) div arect.cx;
+   brect.cy:= (brect.cy * rect2.cy) div arect.cy;
+   arect:= rect2;
+  end;
+  result:= false;
+ end;
 
 begin
  if (asourcerect.cx = 0) or (asourcerect.cy = 0) or 
@@ -4538,17 +4558,15 @@ begin
   drect.pos:= dpoint;
  end;
  if amask <> nil then begin
-  rect2:= intersectrect(srect,mr(amaskpos,amask.size));
-  if (rect2.cx < srect.cx) or (rect2.cy < srect.cy) then begin 
-                                                 //mask not big enough
-   if (rect2.cx <= 0) or (rect2.cy <= 0) then begin
+  if al_nomaskscale in aalignment then begin
+   if checkmaskrect(drect,srect) then begin
     exit;
    end;
-   drect.x:= drect.x + (rect2.x - srect.x) * drect.cx div srect.cx;
-   drect.y:= drect.y + (rect2.y - srect.y) * drect.cy div srect.cy;
-   drect.cx:= (drect.cx * rect2.cx) div srect.cx;
-   drect.cy:= (drect.cy * rect2.cy) div srect.cy;
-   srect:= rect2;
+  end
+  else begin
+   if checkmaskrect(srect,drect) then begin
+    exit;
+   end;
   end;
  end;
  with fdrawinfo,copyarea do begin
