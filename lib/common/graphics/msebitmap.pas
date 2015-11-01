@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2014 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2015 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -192,6 +192,7 @@ type
    fmaskcolorforeground,fmaskcolorbackground: colorty;
    forigformat: string;
    forigformatdata: string;
+   fmask_source: tbitmapcomp;
    procedure checkmask();
    procedure freemask();
    procedure settransparentcolor(const Value: colorty);
@@ -214,6 +215,7 @@ type
    procedure setmaskkind(const avalue: bitmapkindty);
    function getgraymask(): boolean;
    procedure setgraymask(const avalue: boolean);
+   procedure setmask_source(const avalue: tbitmapcomp);
   protected
    foptions: bitmapoptionsty;
    fmask: tbitmap;
@@ -343,6 +345,7 @@ type
                      //cl_default ->bottom right pixel
    property options: bitmapoptionsty read getoptions write setoptions default [];
    property source: tbitmapcomp read fsource write setsource;
+   property mask_source: tbitmapcomp read fmask_source write setmask_source;
    property origformat: string read forigformat write forigformat;
    property colorforeground;
    property colorbackground;
@@ -1799,6 +1802,15 @@ begin
  end;
 end;
 
+procedure tmaskedbitmap.setmask_source(const avalue: tbitmapcomp);
+begin
+ if avalue <> fmask_source then begin
+  getobjectlinker.setlinkedvar(iobjectlink(self),avalue,
+                                           tmsecomponent(fmask_source));
+ change();
+ end;
+end;
+
 function tmaskedbitmap.getoptions: bitmapoptionsty;
 begin
  result:= foptions;
@@ -1971,7 +1983,12 @@ end;
 }
 function tmaskedbitmap.getmask: tsimplebitmap;
 begin
- result:= fmask;
+ if (fmask_source <> nil) then begin
+  result:= fmask_source.bitmap;
+ end
+ else begin
+  result:= fmask;
+ end;
 end;
 
 procedure tmaskedbitmap.assign1(const source: tsimplebitmap; const docopy: boolean);
