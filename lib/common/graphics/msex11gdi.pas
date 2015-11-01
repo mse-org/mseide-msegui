@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2014 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2015 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -2353,6 +2353,8 @@ endlab2:
     end;
    end
    else begin //no colorconvert
+    ax:= ax + maskshift.x;
+    ay:= ay + maskshift.y;
     dx:= destrect^.x;
     dy:= destrect^.y;
     format1:= screenrenderpictformat;
