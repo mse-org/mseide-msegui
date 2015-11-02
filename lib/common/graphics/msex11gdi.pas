@@ -2228,7 +2228,9 @@ begin
      else begin
       maskpic:= createmaskpicture(mask);
      end;
-     updatetransform(maskpic);
+     if not(al_nomaskscale in alignment) then begin
+      updatetransform(maskpic);
+     end;
      pictop:= pictopover;
     end;
    end;
@@ -2353,8 +2355,14 @@ endlab2:
     end;
    end
    else begin //no colorconvert
-    ax:= ax + maskshiftscaled.x;
-    ay:= ay + maskshiftscaled.y;
+    if al_nomaskscale in alignment then begin
+     ax:= ax + maskshift.x;
+     ay:= ay + maskshift.y;
+    end
+    else begin
+     ax:= ax + maskshiftscaled.x;
+     ay:= ay + maskshiftscaled.y;
+    end;
     dx:= destrect^.x;
     dy:= destrect^.y;
     format1:= screenrenderpictformat;
