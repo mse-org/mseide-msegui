@@ -1092,6 +1092,7 @@ type
  end;
 
  faceoptionty = (fao_alphafadeimage,fao_alphafadenochildren,fao_alphafadeall,
+                 fao_alphaimage,
                  fao_fadeoverlay,fao_overlay);
  faceoptionsty = set of faceoptionty;
 
@@ -2959,8 +2960,9 @@ uses
  mseprocutils,msesys,msesysdnd,mseassistiveserver;
 
 const
- faceoptionsmask: faceoptionsty = [fao_alphafadeimage,fao_alphafadenochildren,
+ faceoptionsmask1: faceoptionsty = [fao_alphafadeimage,fao_alphafadenochildren,
                         fao_alphafadeall];
+ faceoptionsmask2: faceoptionsty = [fao_alphaimage,fao_alphafadeimage];
 type
  tcanvas1 = class(tcanvas);
  tfadecolorarrayprop1 = class(tfadecolorarrayprop);
@@ -6375,7 +6377,7 @@ begin
   if (fi.fade_color.count > 0) and (rect1.cx > 0) and (rect1.cy > 0) then begin
    if (fi.fade_color.count > 1) or 
      ((fi.fade_opacolor.count > 0) or (fi.fade_opacity <> cl_none)) and 
-                               (fi.options * faceoptionsmask = []) then begin
+                               (fi.options * faceoptionsmask1 = []) then begin
     case fi.fade_direction of
      gd_up,gd_down: begin
       pixelscale:= rect.cy;
@@ -6398,7 +6400,7 @@ begin
      bmp.size:= makesize(rect1.cx,1);
     end;
     calcfade(fi.fade_pos,fi.fade_color,bmp);
-    if fi.options * faceoptionsmask = [] then begin
+    if fi.options * faceoptionsmask1 = [] then begin
      if fi.fade_opapos.count > 0 then begin
       bmp.colormask:= true;
       calcfade(fi.fade_opapos,fi.fade_opacolor,bmp.mask);
@@ -6416,7 +6418,7 @@ begin
     bmp.Free;
    end
    else begin //fade_color.count = 1
-    if fi.options * faceoptionsmask <> [] then begin
+    if fi.options * faceoptionsmask1 <> [] then begin
      createalphabuffer(false);
      falphabuffer.opacity:=
        colorty(colortorgb(tfadecolorarrayprop1(fi.fade_color).fitems[0]));
@@ -6430,7 +6432,7 @@ begin
    end;
   end
   else begin //fade_color.count = 0
-   if fi.options * faceoptionsmask <> [] then begin
+   if fi.options * faceoptionsmask1 <> [] then begin
     createalphabuffer(false);
     falphabuffer.opacity:= colorty(colortorgb(fi.fade_opacity));
 //    falphabuffer.opacity:=
@@ -6464,9 +6466,8 @@ begin
  if avalue <> fi.options then begin
   optionsbefore:= fi.options;
   fi.options:= faceoptionsty(
-   setsinglebit({$ifdef FPC}longword{$else}byte{$endif}(avalue),
-                 {$ifdef FPC}longword{$else}byte{$endif}(fi.options),
-                 {$ifdef FPC}longword{$else}byte{$endif}(faceoptionsmask)));
+                 setsinglebit(longword(avalue),longword(fi.options),
+                 [longword(faceoptionsmask1),longword(faceoptionsmask2)]));
   if fao_alphafadeall in (faceoptionsty(
       {$ifdef FPC}longword{$else}byte{$endif}(optionsbefore) xor 
       {$ifdef FPC}longword{$else}byte{$endif}(fi.options))) then begin
@@ -6785,10 +6786,8 @@ end;
 
 procedure tfacetemplate.setoptions(const avalue: faceoptionsty);
 begin
- fi.options:= faceoptionsty(setsinglebit(
-    {$ifdef FPC}longword{$else}byte{$endif}(avalue),
-    {$ifdef FPC}longword{$else}byte{$endif}(fi.options),
-    {$ifdef FPC}longword{$else}byte{$endif}(faceoptionsmask)));
+ fi.options:= faceoptionsty(setsinglebit(longword(avalue),longword(fi.options),
+                      [longword(faceoptionsmask1),longword(faceoptionsmask2)]));
  changed;
 end;
 
