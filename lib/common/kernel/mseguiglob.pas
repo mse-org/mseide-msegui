@@ -22,7 +22,7 @@ uses
 type
  unicharty = longword;
  
- originty = (org_screen,org_widget,org_client,org_inner);
+ originty = (org_screen,org_widget,org_paint,org_client,org_inner);
  captionposty = (cp_center,cp_rightbottom,cp_right,cp_rightcenter,cp_righttop,
                  cp_topright,cp_top,cp_topcenter,cp_topleft,
                  cp_lefttop,cp_left,cp_leftcenter,cp_leftbottom,

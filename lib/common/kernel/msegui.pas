@@ -1083,7 +1083,9 @@ type
  tcustomface = class;
  iface = interface(inullinterface)
   procedure invalidatewidget;
-  function translatecolor(const acolor: colorty): colorty;
+  procedure invalidaterect(const rect: rectty; 
+               const org: originty = org_client; const noclip: boolean = false);
+ function translatecolor(const acolor: colorty): colorty;
   function getclientrect: rectty;
   procedure setlinkedvar(const source: tmsecomponent; var dest: tmsecomponent;
               const linkintf: iobjectlink = nil);
@@ -1276,7 +1278,10 @@ type
   private
    flist: tfacearrayprop;
    procedure setlist(const avalue: tfacearrayprop);
+    //iface
    procedure invalidatewidget();
+   procedure invalidaterect(const rect: rectty; 
+              const org: originty = org_client; const noclip: boolean = false);
    function translatecolor(const acolor: colorty): colorty;
    function getclientrect: rectty;
    function getcomponentstate: tcomponentstate;
@@ -6120,8 +6125,23 @@ end;
 procedure tfacebitmap.setpos(const avalue: pointty);
 begin
  if (avalue.x <> fpos.x) or (avalue.y <> fpos.y) then begin
-  fpos:= avalue;
-  change();
+  if (fowner <> nil) then begin
+   if hasimage() then begin
+    if (alignment*[al_stretchx,al_stretchy,al_tiled] = []) then begin
+     fowner.fintf.invalidaterect(mr(fpos,fsize),org_paint);
+     fpos:= avalue;
+     fowner.fintf.invalidaterect(mr(fpos,fsize),org_paint);
+    end
+    else begin
+     fpos:= avalue;
+     change();
+    end;
+   end;
+  end
+  else begin
+   fpos:= avalue;
+   change();
+  end;
  end;
 end;
 
@@ -7087,6 +7107,12 @@ begin
 end;
 
 procedure tfacelist.invalidatewidget();
+begin
+ //dummy
+end;
+
+procedure tfacelist.invalidaterect(const rect: rectty;
+               const org: originty = org_client; const noclip: boolean = false);
 begin
  //dummy
 end;
@@ -9702,6 +9728,13 @@ begin
   rect2.size:= fwidgetrect.size;
   po1:= @rect2;
   case org of
+   org_paint: begin
+    if fframe <> nil then begin
+     inc(rect1.x,fframe.fpaintrect.pos.x);
+     inc(rect1.y,fframe.fpaintrect.pos.y);
+     po1:= @fframe.fpaintrect;
+    end;
+   end;
    org_client: begin
     if fframe <> nil then begin
      inc(rect1.x,fframe.fclientrect.pos.x);

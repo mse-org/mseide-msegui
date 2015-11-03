@@ -528,6 +528,8 @@ type
     //iface
    function getclientrect: rectty;
    procedure invalidatewidget();
+   procedure invalidaterect(const rect: rectty; 
+              const org: originty = org_client; const noclip: boolean = false);
    function translatecolor(const acolor: colorty): colorty;
    procedure setlinkedvar(const source: tmsecomponent; var dest: tmsecomponent;
               const linkintf: iobjectlink = nil);
@@ -4959,6 +4961,12 @@ end;
 procedure tgripframe.invalidatewidget();
 begin
  fcontroller.fintf.getwidget.invalidatewidget();
+end;
+
+procedure tgripframe.invalidaterect(const rect: rectty;
+               const org: originty = org_client; const noclip: boolean = false);
+begin
+ fcontroller.fintf.getwidget.invalidaterect(rect,org,noclip);
 end;
 
 procedure tgripframe.setlinkedvar(const source: tmsecomponent;
