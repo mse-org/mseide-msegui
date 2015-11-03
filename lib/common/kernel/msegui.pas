@@ -6334,6 +6334,8 @@ var
   redsum,greensum,bluesum,lengthsum: real;
   curnode,nextnode: integer;
   rea1,rea2: real;
+  opar,opag,opab: int32;
+  co1: rgbtriplety;
   col1,col2: prgbtriplety;
   
  begin
@@ -6353,6 +6355,17 @@ var
      inc(po1);
     end;
    end;
+  end;
+  if fadecolor = fi.fade_opacolor then begin
+   co1:= colortorgb(fade_opacity);
+   opar:= (co1.red * 256) div 255;
+   opag:= (co1.green * 256) div 255;
+   opab:= (co1.blue * 256) div 255;
+  end
+  else begin
+   opar:= 256;
+   opag:= 256;
+   opab:= 256;
   end;
   if high(rgbs) > 0 then begin
    po1:= bmp.scanline[0];
@@ -6398,9 +6411,9 @@ var
      if lengthsum > 0 then begin
       rea1:= 1/(2*lengthsum);
       with po1^ do begin
-       red:= round(redsum*rea1);
-       green:= round(greensum*rea1);
-       blue:= round(bluesum*rea1);
+       red:= (round(redsum*rea1)*opar) div 256;
+       green:= (round(greensum*rea1)*opag) div 256;
+       blue:= (round(bluesum*rea1)*opab) div 256;
        res:= 0;
       end;
      end
@@ -6431,12 +6444,12 @@ var
        rea2:= rea1*int2;
        with po1^ do begin
         res:= 0;
-        red:= col1^.red + 
-                      round((col2^.red-col1^.red)*rea2);
-        green:= col1^.green + 
-                      round((col2^.green-col1^.green)*rea2);
-        blue:= col1^.blue + 
-                      round((col2^.blue-col1^.blue)*rea2);
+        red:= ((col1^.red + 
+                      round((col2^.red-col1^.red)*rea2))*opar) div 256;
+        green:= ((col1^.green + 
+                      round((col2^.green-col1^.green)*rea2))*opag) div 256;
+        blue:= ((col1^.blue + 
+                      round((col2^.blue-col1^.blue)*rea2))*opab) div 256;
        end;
        inc(pchar(po1),pixinc);
       end;
@@ -6450,11 +6463,15 @@ var
    end;
   end
   else begin //count = 1
+   co1.red:= (rgbs[0].red*opar) div 256;
+   co1.green:= (rgbs[0].green*opag) div 256;
+   co1.blue:= (rgbs[0].blue*opag) div 256;
+   co1.res:= 0;
    if vert then begin
-    bmp.canvas.drawline(nullpoint,makepoint(0,rect1.cy-1),fadecolor[0]);
+    bmp.canvas.drawline(nullpoint,makepoint(0,rect1.cy-1),colorty(co1));
    end
    else begin
-    bmp.canvas.drawline(nullpoint,makepoint(rect1.cx-1,0),fadecolor[0]);
+    bmp.canvas.drawline(nullpoint,makepoint(rect1.cx-1,0),colorty(co1));
    end;
   end;
  end; //calcfade
