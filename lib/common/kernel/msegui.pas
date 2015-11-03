@@ -6136,6 +6136,9 @@ begin
      fpos:= avalue;
      change();
     end;
+   end
+   else begin
+    fpos:= avalue;
    end;
   end
   else begin
