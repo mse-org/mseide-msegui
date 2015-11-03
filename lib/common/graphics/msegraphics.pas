@@ -1387,6 +1387,8 @@ function graytopixel(color: colorty): pixelty;
 function rgbtocolor(const red,green,blue: integer): colorty;
 function blendcolor(const weight: real; const a,b: colorty): colorty;
                        //0..1
+function opacitycolor(const opacity: real): colorty;
+function invertcolor(const color: colorty): colorty;
 
 procedure setcolormapvalue(index: colorty; const red,green,blue: integer); overload;
                     //RGB values 0..255
@@ -1874,6 +1876,26 @@ begin
  rgbtriplety(result).green:= ca.green + round((cb.green - ca.green)*weight);
  rgbtriplety(result).blue:= ca.blue + round((cb.blue - ca.blue)*weight);
  rgbtriplety(result).res:= 0;
+end;
+
+function opacitycolor(const opacity: real): colorty;
+begin
+ with rgbtriplety(result) do begin
+  red:= round(255 * opacity);
+  green:= red;
+  blue:= red;
+  res:= 0;
+ end;
+end;
+
+function invertcolor(const color: colorty): colorty;
+begin
+ rgbtriplety(result):= colortorgb(color);
+ with rgbtriplety(result) do begin
+  red:= 255-red;
+  green:= 255-green;
+  blue:= 255-blue;
+ end;
 end;
 
 function initcolormap: boolean;

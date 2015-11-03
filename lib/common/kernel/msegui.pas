@@ -1106,6 +1106,25 @@ type
    constructor create;
  end;
  
+ tfacebitmap = class(tmaskedbitmap)
+  private
+   fowner: tcustomface;
+   fpos: pointty;
+   procedure setx(const avalue: int32);
+   procedure sety(const avalue: int32);
+   procedure setpos(const avalue: pointty);
+   procedure setcenter(avalue: pointty);
+   function getcenter: pointty;
+  public
+   constructor create(const aowner: tcustomface);
+                                        //nil -> default
+   property pos: pointty read fpos write setpos;
+   property center: pointty read getcenter write setcenter;
+  published
+   property x: int32 read fpos.x write setx default 0;
+   property y: int32 read fpos.y write sety default 0;
+ end;
+ 
  faceinfoty = record
   frameimage_offset: integer;
   options: faceoptionsty;
@@ -1113,7 +1132,7 @@ type
 
   frameimage_list: timagelist;         //not copied by move
   fade_direction: graphicdirectionty;
-  image: tmaskedbitmap;
+  image: tfacebitmap;
   fade_pos: trealarrayprop;
   fade_color: tfadecolorarrayprop;
   fade_opacity: colorty;
@@ -1140,7 +1159,7 @@ type
    procedure setframei_bottom(const avalue: integer);
    function isframei_bottomstored(): boolean;
 
-   procedure setimage(const value: tmaskedbitmap);
+   procedure setimage(const value: tfacebitmap);
    function isimagestored: boolean;
    procedure setfade_color(const Value: tfadecolorarrayprop);
    function isfacolorstored: boolean;
@@ -1190,12 +1209,12 @@ type
    property framei_bottom: integer read fi.framei.bottom write setframei_bottom
                                    stored isframei_bottomstored default 0;
                                    
-   property image: tmaskedbitmap read fi.image write setimage
-                     stored isimagestored;
+   property image: tfacebitmap read fi.image write setimage
+                                                  stored isimagestored;
    property fade_pos: trealarrayprop read fi.fade_pos write setfade_pos
-                    stored isfaposstored;
-   property fade_color: tfadecolorarrayprop read fi.fade_color write setfade_color
-                    stored isfacolorstored;
+                                                       stored isfaposstored;
+   property fade_color: tfadecolorarrayprop read fi.fade_color 
+                              write setfade_color stored isfacolorstored;
    property fade_direction: graphicdirectionty read fi.fade_direction
                     write setfade_direction
                     stored isfadirectionstored default gd_right ;
@@ -1209,8 +1228,8 @@ type
 
    property frameimage_list: timagelist read fi.frameimage_list 
                     write setframeimage_list stored isframeimage_liststored;
-     //imagenr 0 = topleft, 1 = left, 2 = bottomleft, 3 = bottom, 4 = bottomright
-     //5 = right, 6 = topright, 7 = top
+     //imagenr 0 = topleft, 1 = left, 2 = bottomleft, 3 = bottom,
+     // 4 = bottomright 5 = right, 6 = topright, 7 = top
    property frameimage_offset: integer read fi.frameimage_offset
                     write setframeimage_offset
                     stored isframeimage_offsetstored default 0;
@@ -1287,7 +1306,7 @@ type
    procedure setfade_opapos(const Value: trealarrayprop);
    procedure setfade_opacity(avalue: colorty);
    procedure setfade_direction(const Value: graphicdirectionty);
-   procedure setimage(const Value: tmaskedbitmap);
+   procedure setimage(const Value: tfacebitmap);
    procedure doimagechange(const sender: tobject);
    procedure dochange(const sender: tarrayprop; const index: integer);
    procedure setframeimage_list(const avalue: timagelist);
@@ -1314,7 +1333,7 @@ type
    property framei_bottom: integer read fi.framei.bottom 
                                         write setframei_bottom default 0;
                                         
-   property image: tmaskedbitmap read fi.image write setimage;
+   property image: tfacebitmap read fi.image write setimage;
    property fade_pos: trealarrayprop read fi.fade_pos write setfade_pos;
    property fade_color: tfadecolorarrayprop read fi.fade_color 
                                                    write setfade_color;
@@ -2796,6 +2815,14 @@ function translatepaintrect(const rect: rectty;
                  const source,dest: twidget): rectty;
     //translates from source widget to dest widget, to screen if dest = nil
     //source = nil -> screen
+function translatewidgettopaintpoint(const point: pointty;
+                 const source,dest: twidget): pointty;
+procedure translatewidgettopaintpoint1(var point: pointty;
+                 const source,dest: twidget);
+function translatewidgettopaintrect(const rect: rectty;
+                 const source,dest: twidget): rectty;
+    //translates from source widget to dest widget, to screen if dest = nil
+    //source = nil -> screen
 function translateclientpoint(const point: pointty;
                     const source,dest: twidget): pointty;
 procedure translateclientpoint1(var point: pointty;
@@ -3439,7 +3466,7 @@ begin
  end;
  if dest <> nil then begin
   subpoint1(point,dest.screenpos);
-  subpoint1(point,source.paintpos);
+  subpoint1(point,dest.paintpos);
  end;
 end;
 
@@ -3455,6 +3482,32 @@ function translatepaintrect(const rect: rectty;
 begin
  result:= rect;
  translatepaintpoint1(result.pos,source,dest);
+end;
+
+procedure translatewidgettopaintpoint1(var point: pointty;
+                 const source,dest: twidget);
+begin
+ if source <> nil then begin
+  addpoint1(point,source.screenpos);
+ end;
+ if dest <> nil then begin
+  subpoint1(point,dest.screenpos);
+  subpoint1(point,dest.paintpos);
+ end;
+end;
+
+function translatewidgettopaintpoint(const point: pointty;
+                 const source,dest: twidget): pointty;
+begin
+ result:= point;
+ translatewidgettopaintpoint1(result,source,dest);
+end;
+
+function translatewidgettopaintrect(const rect: rectty;
+                 const source,dest: twidget): rectty;
+begin
+ result:= rect;
+ translatewidgettopaintpoint1(result.pos,source,dest);
 end;
 
 procedure translateclientpoint1(var point: pointty;
@@ -6041,11 +6094,55 @@ begin
  ftemplate.Assign(value);
 end;
 
+
+{ tfacebitmap }
+
+constructor tfacebitmap.create(const aowner: tcustomface);
+begin
+ fowner:= aowner;
+ inherited create(bmk_rgb);
+end;
+
+procedure tfacebitmap.setx(const avalue: int32);
+begin
+ if fpos.x <> avalue then begin
+  setpos(mp(avalue,fpos.y));
+ end;
+end;
+
+procedure tfacebitmap.sety(const avalue: int32);
+begin
+ if fpos.y <> avalue then begin
+  setpos(mp(fpos.x,avalue));
+ end;
+end;
+
+procedure tfacebitmap.setpos(const avalue: pointty);
+begin
+ if (avalue.x <> fpos.x) or (avalue.y <> fpos.y) then begin
+  fpos:= avalue;
+  change();
+ end;
+end;
+
+function tfacebitmap.getcenter: pointty;
+begin
+ result.x:= fpos.x - fsize.cx div 2;
+ result.y:= fpos.y - fsize.cy div 2;
+end;
+
+procedure tfacebitmap.setcenter(avalue: pointty);
+begin
+ avalue.x:= avalue.x - fsize.cx div 2;
+ avalue.y:= avalue.y - fsize.cy div 2;
+ pos:= avalue;
+end;
+
 { tcustomface }
 
 procedure tcustomface.internalcreate;
 begin
- fi.image:= tmaskedbitmap.create(bmk_rgb);
+ fi.image:= tfacebitmap.create(self);
  fi.image.onchange:= {$ifdef fpc}@{$endif}imagechanged;
  fi.fade_pos:= trealarrayprop.create;
  fi.fade_color:= tfadecolorarrayprop.create;
@@ -6198,6 +6295,7 @@ var
 var
  pixelscale: real;
  vert: boolean;
+ alpha: boolean;
  startpix,pixcount: integer;
  
  procedure calcfade(const fadepos: trealarrayprop; 
@@ -6206,7 +6304,7 @@ var
   posar: realarty;
   rgbs: array of rgbtriplety;
   int1,int2: integer;
-  po1: prgbtriplety;
+  po1,pe: prgbtriplety;
   pixelstep: real;
   pixinc: integer;
   curpix,nextpix: integer;
@@ -6221,6 +6319,16 @@ var
    setlength(rgbs,length(fitems));
    for int1:= 0 to high(rgbs) do begin
     rgbs[int1]:= colortorgb(fintf.translatecolor(fitems[int1]));
+   end;
+   if alpha then begin
+    po1:= pointer(rgbs);
+    pe:= po1+length(rgbs);
+    while po1 < pe do begin
+     po1^.red:= 255-po1^.red;
+     po1^.green:= 255-po1^.green;
+     po1^.blue:= 255-po1^.blue;
+     inc(po1);
+    end;
    end;
   end;
   if high(rgbs) > 0 then begin
@@ -6331,10 +6439,10 @@ var
 var
  bmp: tmaskedbitmap;
 
- procedure paintimage;
+ procedure paintimage(const canvas: tcanvas);
  begin
   if fi.image.hasimage then begin
-   fi.image.paint(canvas,rect);
+   fi.image.paint(canvas,mr(addpoint(rect.pos,fi.image.fpos),rect.size));
    if fao_alphafadeimage in fi.options then begin
     doalphablend(canvas);
    end;
@@ -6371,8 +6479,9 @@ begin
  rect:= deflaterect(arect,fi.framei);
  if intersectrect(rect,canvas.clipbox,rect1) or 
                testintersectrect(arect,canvas.clipbox) then begin
-  if fao_fadeoverlay in options then begin
-   paintimage;
+  alpha:= fi.options * faceoptionsmask1 <> [];
+  if options * [fao_fadeoverlay,fao_alphaimage] = [fao_fadeoverlay] then begin
+   paintimage(canvas);
   end;
   if (fi.fade_color.count > 0) and (rect1.cx > 0) and (rect1.cy > 0) then begin
    if (fi.fade_color.count > 1) or 
@@ -6418,13 +6527,17 @@ begin
     bmp.Free;
    end
    else begin //fade_color.count = 1
-    if fi.options * faceoptionsmask1 <> [] then begin
-     createalphabuffer(false);
-     falphabuffer.opacity:=
-       colorty(colortorgb(tfadecolorarrayprop1(fi.fade_color).fitems[0]));
-//     falphabuffer.opacity:=
-//      (longword(colortorgb(tfadecolorarrayprop1(fi.fade_color).fitems[0])) xor
-//                $ffffffff) and $00ffffff;
+    if alpha then begin
+     if fao_alphaimage in fi.options then begin
+      createalphabuffer(true);
+      falphabuffer.mask.canvas.fillrect(mr(nullpoint,rect1.size),
+             invertcolor(tfadecolorarrayprop1(fi.fade_color).fitems[0]));
+     end
+     else begin
+      createalphabuffer(false);
+      falphabuffer.opacity:=
+              invertcolor(tfadecolorarrayprop1(fi.fade_color).fitems[0]);
+     end;
     end
     else begin
      canvas.fillrect(rect1,tfadecolorarrayprop1(fi.fade_color).fitems[0]);
@@ -6432,15 +6545,25 @@ begin
    end;
   end
   else begin //fade_color.count = 0
-   if fi.options * faceoptionsmask1 <> [] then begin
-    createalphabuffer(false);
-    falphabuffer.opacity:= colorty(colortorgb(fi.fade_opacity));
-//    falphabuffer.opacity:=
-//     (longword(colortorgb(fi.fade_opacity)) xor $ffffffff) and $00ffffff;
+   if alpha then begin
+    if fao_alphaimage in fi.options then begin
+     createalphabuffer(true);
+     falphabuffer.mask.canvas.fillrect(mr(nullpoint,rect1.size),
+                                               invertcolor(fi.fade_opacity));
+    end
+    else begin
+     createalphabuffer(false);
+     falphabuffer.opacity:= invertcolor(fi.fade_opacity);
+    end;
    end;
   end;
-  if not (fao_fadeoverlay in options) then begin
-   paintimage;
+  if options * [fao_fadeoverlay,fao_alphaimage] = [] then begin
+   paintimage(canvas);
+  end;
+  if (fao_alphaimage in fi.options) and (falphabuffer <> nil) then begin
+   falphabuffer.mask.canvas.origin:= subpoint(rect.pos,rect1.pos);
+   paintimage(falphabuffer.mask.canvas);
+   falphabuffer.mask.canvas.origin:= nullpoint;
   end;
  end;
 end;
@@ -6453,7 +6576,7 @@ begin
  end;
 end;
 
-procedure tcustomface.setimage(const value: tmaskedbitmap);
+procedure tcustomface.setimage(const value: tfacebitmap);
 begin
  fi.image.assign(value);
 end;
@@ -6735,7 +6858,7 @@ end;
 
 procedure tfacetemplate.internalcreate;
 begin
- fi.image:= tmaskedbitmap.create(bmk_rgb);
+ fi.image:= tfacebitmap.create(nil);
  fi.fade_pos:= trealarrayprop.Create;
  fi.fade_color:= tfadecolorarrayprop.Create;
  fi.fade_pos.link([fi.fade_color,fi.fade_pos]);
@@ -6844,7 +6967,7 @@ begin
  changed;
 end;
 
-procedure tfacetemplate.setimage(const Value: tmaskedbitmap);
+procedure tfacetemplate.setimage(const Value: tfacebitmap);
 begin
  fi.image.assign(value);
  changed;
@@ -19704,7 +19827,6 @@ begin
  inherited;
  fvaluedefault:= defaultfadeopacolor;
 end;
-
 initialization
  registerapplicationclass(tinternalapplication);
 end.
