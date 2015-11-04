@@ -8988,7 +8988,9 @@ begin
  if face1 <> nil then begin
   if fao_overlay in face1.options then begin
    if fframe <> nil then begin
-    face1.paint(canvas,fframe.fpaintrect);
+    canvas.move(fframe.fpaintrect.pos);
+    face1.paint(canvas,makerect(nullpoint,fwidgetrect.size));
+    canvas.remove(fframe.fpaintrect.pos);
    end
    else begin
     face1.paint(canvas,makerect(nullpoint,fwidgetrect.size));
