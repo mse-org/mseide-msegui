@@ -4598,11 +4598,11 @@ begin
   alignment:= aalignment;
   copymode:= acopymode;
   mask:= amask;
+  if (srect.cx = 0) or (srect.cy = 0) then begin
+   exit;
+  end;
   if al_fit in aalignment then begin
    alignment:= alignment + [al_stretchx,al_stretchy];
-   if (srect.cx = 0) or (srect.cy = 0) then begin
-    exit;
-   end;
    if srect.cy * drect.cx > srect.cx * drect.cy then begin //fit vert
     drect.cx:= (srect.cx * drect.cy) div srect.cy;
     int1:= adestrect.cx - drect.cx;
