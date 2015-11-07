@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2014 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2015 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -457,9 +457,14 @@ begin
   end;
   if result then begin
    checkoperator(';');
+   mark();
    if checkident(ord(pid_inline)) then begin
+    pop();
     checkoperator(';');
-   end;   
+   end
+   else begin
+    back(); //after semicolon
+   end;
   end;
  end;
 end;
@@ -528,7 +533,7 @@ begin
      pid_overload: include(po1^.params.flags,mef_overload);
      pid_override: include(po1^.params.flags,mef_override);
      pid_virtual: include(po1^.params.flags,mef_virtual);
-//     pid_inline: include(po1^.params.flags,mef_inline);
+     pid_inline: begin end; //include(po1^.params.flags,mef_inline);
      pid_invalid: break;
     else
      lasttoken;
