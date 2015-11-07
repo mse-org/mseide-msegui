@@ -600,7 +600,8 @@ begin
  if result then begin
   for int1:= 0 to high(a.params) do begin
    with a.params[int1] do begin
-    if (flags*[pfvar,pfconst,pfout] <> b.params[int1].flags*[pfvar,pfconst,pfout]) or
+    if (flags*[pfvar,pfconst,pfout,pfarray] <> 
+                b.params[int1].flags*[pfvar,pfconst,pfout,pfarray]) or
            (stringicomp(typename,b.params[int1].typename) <> 0) then begin
      result:= false;
      break;
