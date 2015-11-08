@@ -1820,7 +1820,7 @@ begin
  if (index < 0) or (index >= fcount) then begin
   tlist.error(slistindexerror,index);
  end;
- result:= fbuffer + findex[index] + sizeof(bufferheaderty);
+ result:= fbuffer + findex[index]{ + sizeof(bufferheaderty)};
 end;
 
 end.
