@@ -337,6 +337,7 @@ type
    fgdbserverstartonce: boolean;
    fraiseonbreak: boolean;
    fgdbloadtimeout: realty;
+   ffpcgdbworkaround: boolean;
   protected
    function gett: tobject; override;
    function gettexp: tobject; override;
@@ -372,6 +373,8 @@ type
                                                  write fexceptignore;
    property nodebugbeginend: boolean read fnodebugbeginend 
                                           write fnodebugbeginend;
+   property fpcgdbworkaround: boolean read ffpcgdbworkaround 
+                                                   write ffpcgdbworkaround;
  end;
    
  tprojectoptions = class(toptions)
@@ -799,6 +802,7 @@ type
    toolscalt: tstringedit;
    editmarkbrackets: tbooleanedit;
    trimtrailingwhitespace: tbooleanedit;
+   fpcgdbworkaround: tbooleanedit;
    procedure acttiveselectondataentered(const sender: TObject);
    procedure colonshowhint(const sender: tdatacol; const arow: Integer; 
                       var info: hintinfoty);
@@ -2062,6 +2066,7 @@ var
 begin
  projecttree.updatelist;
  createcpufo;
+ mainfo.gdb.fpcworkaround:= projectoptions.d.fpcgdbworkaround;
  sourceupdater.unitchanged;
  for int1:= 0 to designer.modules.count - 1 do begin
   tformdesignerfo(designer.modules[int1]^.designform).updateprojectoptions();
@@ -2890,7 +2895,7 @@ begin
  additem(fexceptclassnames,'EconvertError');
  additem(fexceptignore,false);
  fgdbloadtimeout:= emptyreal;
-
+ fpcgdbworkaround:= true;
  inherited;
 end;
 

@@ -329,6 +329,7 @@ type
    fafterconnect: filenamety;
    fxtermcommand: filenamety;
    fcurrentlanguage: languagety;
+   ffpcworkaround: boolean;
    procedure setstoponexception(const avalue: boolean);
    procedure checkactive;
    function checkconnection(const proginfo: boolean): gdbresultty;
@@ -667,6 +668,8 @@ type
                    //${PTSN} expands to tty pts number
                    //${PTSH} expands to tty pts handle
    {$warnings on}
+   property fpcworkaround: boolean read ffpcworkaround write
+                                           ffpcworkaround default false;
  end;
 
 procedure localizetext;
@@ -4701,10 +4704,12 @@ procedure tgdbmi.updatepascalexpression(var aexpression: string);
 begin
  if (fcurrentlanguage = lan_pascal) and (pos('$',aexpression) = 0) then begin
                                          //no register name
+  if ffpcworkaround then begin
 //  if not startsstr('self.',aexpression) and (aexpression <> 'self') then begin
    aexpression:= uppercase(aexpression); 
            //workaround for gdb bug with class fields
 //  end;
+  end;
  end;
 end;
 
