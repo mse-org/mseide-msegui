@@ -5469,6 +5469,7 @@ end;
 constructor tscrollingwidgetnwr.create(aowner: tcomponent);
 begin
  inherited;
+ include(fwidgetstate1,ws1_designactive);
  foptionswidget:= defaultoptionswidgetmousewheel;
  optionsskin:= defaultcontainerskinoptions;
  internalcreateframe;
