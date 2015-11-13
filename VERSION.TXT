@@ -1,5 +1,7 @@
 MSEide+MSEgui breaking changes version history
 
+Version 4.0
+ 2015-11-13
 2015-11-03 tcustomface opacity values of alpha blending inverted, white is
  full opaqueness of the elements.
 2015-10-27 tcustomframe.frameimage_offsetactivemouse,

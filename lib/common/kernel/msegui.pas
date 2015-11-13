@@ -26,7 +26,7 @@ uses
                                {$ifdef mse_with_ifi},mseifiglob{$endif};
 
 const
- mseguiversiontext = '4.0beta1';
+ mseguiversiontext = '4.0';
  copyrighttext = 'Copyright 1999-2015';
  
  defaultwidgetcolor = cl_default;
