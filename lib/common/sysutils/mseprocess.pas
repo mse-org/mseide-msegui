@@ -152,31 +152,39 @@ function getprocessoutput(const acommandline: msestring; const todata: string;
                          const atimeout: integer = -1;
                          const aoptions: processoptionsty = 
                             defaultgetprocessoutputoptions;
-                       const acheckabort: updatebooleaneventty = nil): integer;
+                       const acheckabort: updatebooleaneventty = nil;
+                       const amaxdatalen: integer = 0): integer;
                          //returns program exitcode, -1 in case of error
+                         //-2 in case of maxdatalen reached
 function getprocessoutput(const acommandline: msestring; const todata: string;
                          out fromdata: string;
                          const atimeout: integer = -1;
                     const aoptions: processoptionsty = 
                             defaultgetprocessoutputoptionserrorouttoout;
-                       const acheckabort: updatebooleaneventty = nil): integer;
+                       const acheckabort: updatebooleaneventty = nil;
+                       const amaxdatalen: integer = 0): integer;
                          //returns program exitcode, -1 in case of error
+                         //-2 in case of maxdatalen reached
 function getprocessoutput(out prochandle: prochandlety;
                          const acommandline: msestring; const todata: string;
                          out fromdata: string; out errordata: string;
                          const atimeout: integer = -1;
                          const aoptions: processoptionsty = 
                             defaultgetprocessoutputoptions;
-                       const acheckabort: updatebooleaneventty = nil): integer;
+                       const acheckabort: updatebooleaneventty = nil;
+                       const amaxdatalen: integer = 0): integer;
                          //returns program exitcode, -1 in case of error
+                         //-2 in case of maxdatalen reached
 function getprocessoutput(out prochandle: prochandlety;
                          const acommandline: msestring; const todata: string;
                          out fromdata: string;
                          const atimeout: integer = -1;
                     const aoptions: processoptionsty = 
                               defaultgetprocessoutputoptionserrorouttoout;
-                       const acheckabort: updatebooleaneventty = nil): integer;
+                       const acheckabort: updatebooleaneventty = nil;
+                       const amaxdatalen: integer = 0): integer;
                          //returns program exitcode, -1 in case of error
+                         //-2 in case of maxdatalen reached
 
 function startprocessandwait(const acommandline: msestring;
                      const atimeout: integer = -1;
@@ -195,25 +203,29 @@ type
    ffromcount: sizeint;
    ferrordata: string;
    ferrorcount: sizeint;
+   fmaxdatalen: sizeint;
+   fmaxdatareached: boolean;
    procedure readdata(const sender: tpipereader;
                                     var adata: string; var acount: sizeint);
    procedure fromavail(const sender: tpipereader);
    procedure erroravail(const sender: tpipereader);
   public
-   constructor create(aowner: tcomponent); override;
+   constructor create(const amaxdatalen: sizeint = 0); reintroduce;
  end;
  
 function getprocessoutput1(const prochandlepo: pprochandlety;
                const acommandline: msestring; const todata: string;
                out fromdata: string; out errordata: string;
                const atimeout: integer; const aoptions: processoptionsty;
-                             const acheckabort: updatebooleaneventty): integer;
-                         //returns program exitcode, -1 in case of error
+                             const acheckabort: updatebooleaneventty;
+                                     const amaxdatalen: integer): integer;
+                         //returns program exitcode, -1 in case of error,
+                         //-2 in case of maxdatalen reached
 var
  proc1: tstringprocess;
 begin
  result:= -1;
- proc1:= tstringprocess.create(nil);
+ proc1:= tstringprocess.create(amaxdatalen);
  try
   with proc1 do begin
    commandline:= acommandline;
@@ -240,6 +252,9 @@ begin
      result:= exitcode;
     end;
    end;
+   if fmaxdatareached then begin
+    result:= -2;
+   end;
    if result <> -1 then begin
     setlength(proc1.ffromdata,proc1.ffromcount);
     fromdata:= proc1.ffromdata;
@@ -264,6 +279,7 @@ function startprocessandwait(const acommandline: msestring;
                                             defaultstartprocessoptions;
                        const acheckabort: updatebooleaneventty = nil): integer;
                          //returns program exitcode, -1 in case of error
+                         //-2 in case of maxdatalen reached
 var
  proc1: tmseprocess;
 begin
@@ -294,10 +310,11 @@ function getprocessoutput(const acommandline: msestring; const todata: string;
                          const atimeout: integer = -1;
                           const aoptions: processoptionsty = 
                             defaultgetprocessoutputoptions;
-                       const acheckabort: updatebooleaneventty = nil): integer;
+                       const acheckabort: updatebooleaneventty = nil;
+                       const amaxdatalen: integer = 0): integer;
 begin
  result:= getprocessoutput1(nil,acommandline,todata,fromdata,errordata,
-                                               atimeout,aoptions,acheckabort);
+                                 atimeout,aoptions,acheckabort,amaxdatalen);
 end;
  
 function getprocessoutput(const acommandline: msestring; const todata: string;
@@ -305,12 +322,13 @@ function getprocessoutput(const acommandline: msestring; const todata: string;
                          const atimeout: integer = -1;
                          const aoptions: processoptionsty = 
                       defaultgetprocessoutputoptionserrorouttoout;
-                       const acheckabort: updatebooleaneventty = nil): integer;
+                       const acheckabort: updatebooleaneventty = nil;
+                       const amaxdatalen: integer = 0): integer;
 var
  str1: string;
 begin
  result:= getprocessoutput1(nil,acommandline,todata,fromdata,str1,
-                                             atimeout,aoptions,acheckabort);
+                                atimeout,aoptions,acheckabort,amaxdatalen);
 end;
 
 function getprocessoutput(out prochandle: prochandlety;
@@ -319,10 +337,11 @@ function getprocessoutput(out prochandle: prochandlety;
                          const atimeout: integer = -1;
                           const aoptions: processoptionsty = 
                             defaultgetprocessoutputoptions;
-                       const acheckabort: updatebooleaneventty = nil): integer;
+                       const acheckabort: updatebooleaneventty = nil;
+                       const amaxdatalen: integer = 0): integer;
 begin
  result:= getprocessoutput1(@prochandle,acommandline,todata,fromdata,errordata,
-                                                 atimeout,aoptions,acheckabort);
+                                atimeout,aoptions,acheckabort,amaxdatalen);
 end;
  
 function getprocessoutput(out prochandle: prochandlety;
@@ -331,12 +350,13 @@ function getprocessoutput(out prochandle: prochandlety;
                          const atimeout: integer = -1;
                          const aoptions: processoptionsty = 
                           defaultgetprocessoutputoptionserrorouttoout;
-                       const acheckabort: updatebooleaneventty = nil): integer;
+                       const acheckabort: updatebooleaneventty = nil;
+                       const amaxdatalen: integer = 0): integer;
 var
  str1: string;
 begin
  result:= getprocessoutput1(@prochandle,acommandline,todata,fromdata,str1,
-                                             atimeout,aoptions,acheckabort);
+                                 atimeout,aoptions,acheckabort,amaxdatalen);
 end;
  
 { tmseprocess }
@@ -924,9 +944,10 @@ end;
 
 { tstringprocess }
 
-constructor tstringprocess.create(aowner: tcomponent);
+constructor tstringprocess.create(const amaxdatalen: sizeint = 0);
 begin
- inherited;
+ fmaxdatalen:= amaxdatalen;
+ inherited create(nil);
  options:= options + [pro_output,pro_erroroutput,pro_input];
  output.pipereader.oninputavailable:= {$ifdef FPC}@{$endif}fromavail;
  erroroutput.pipereader.oninputavailable:= {$ifdef FPC}@{$endif}erroravail;
@@ -943,6 +964,10 @@ begin
   end
   else begin
    sender.appenddatastring(adata,acount);
+  end;
+  if (fmaxdatalen > 0) and (acount > fmaxdatalen) then begin
+   kill();
+   fmaxdatareached:= true;
   end;
  end;
 end;

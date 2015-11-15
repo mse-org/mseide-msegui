@@ -309,6 +309,8 @@ procedure orderarray(const sourceorderlist: integerarty;
 procedure orderarray(const sourceorderlist: integerarty;
                              var sortlist: msestringarty); overload;
 procedure orderarray(const sourceorderlist: integerarty;
+                             var sortlist: msestringararty); overload;
+procedure orderarray(const sourceorderlist: integerarty;
                              var sortlist: stringarty); overload;
                              
 procedure reorderarray(const destorderlist: integerarty; 
@@ -2699,6 +2701,19 @@ end;
 procedure orderarray(const sourceorderlist: integerarty; var sortlist: msestringarty);
 var
  ar1: msestringarty;
+ int1: integer;
+begin
+ setlength(ar1,length(sourceorderlist));
+ for int1:= 0 to high(sourceorderlist) do begin
+  ar1[int1]:= sortlist[sourceorderlist[int1]];
+ end;
+ sortlist:= ar1;
+end;
+
+procedure orderarray(const sourceorderlist: integerarty;
+                             var sortlist: msestringararty); overload;
+var
+ ar1: msestringararty;
  int1: integer;
 begin
  setlength(ar1,length(sourceorderlist));
