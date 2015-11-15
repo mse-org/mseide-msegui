@@ -1791,10 +1791,8 @@ var
  widget1: twidget1;
 begin
  optbefore:= foptionsdock;
- optionsdock:= optionsdockty(replacebits(
-           {$ifdef FPC}longword{$else}longword{$endif}(avalue),
-           {$ifdef FPC}longword{$else}longword{$endif}(foptionsdock),
-           {$ifdef FPC}longword{$else}longword{$endif}(useroptionsmask)));
+ optionsdock:= optionsdockty(replacebits(longword(avalue),
+                         longword(foptionsdock),longword(useroptionsmask)));
  if (foptionsdock >< optbefore) * [od_lock,od_nolock] <> [] then begin
   widget1:= twidget1(fintf.getwidget);
   if not widget1.isloading then begin
@@ -2825,9 +2823,8 @@ begin
   fsplitdir:= splitdirty(reader.readinteger('splitdir',ord(fsplitdir),
                               0,ord(high(splitdirty))));
  end;
- useroptions:= optionsdockty({$ifdef FPC}longword{$else}longword{$endif}(
-     reader.readinteger('useroptions',
-     integer({$ifdef FPC}longword{$else}longword{$endif}(fuseroptions)))));
+ useroptions:= optionsdockty(longword(
+     reader.readinteger('useroptions',integer(longword(fuseroptions)))));
 // setoptionsdock(foptionsdock); //check valid values
  ftaborder:= reader.readarray('order',msestringarty(nil));
  factivetab:= reader.readinteger('activetab',0);
@@ -4242,8 +4239,8 @@ var
                 
  function calclevel(const aoption: optiondockty): integer;
  begin
-  if (aoption in fcontroller.foptionsdock) or
-                      (fcontroller.fclickedbutton = akind) then begin
+  if (ord(aoption) >= 0) and ((aoption in fcontroller.foptionsdock) or
+                      (fcontroller.fclickedbutton = akind)) then begin
    result:= -1;
    hiddenedges1:= []
   end
