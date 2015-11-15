@@ -153,6 +153,42 @@ type
    function prev: pintegerdataty; //wraps to last after first
  end;
 
+ doubleintegerty = record
+  a: integer;
+  b: integer;
+ end;
+ doubleintegerdataty = record
+  key: doubleintegerty;
+  data: record end;
+ end;
+ pdoubleintegerdataty = ^doubleintegerdataty;
+ doubleintegerhashdataty = record
+  header: hashheaderty;
+  data: doubleintegerdataty;
+ end;
+ pdoubleintegerhashdataty = ^doubleintegerhashdataty;
+ 
+ tdoubleintegerhashdatalist = class(thashdatalist)
+  private
+  protected
+   function hashkey(const akey): hashvaluety; override;
+   function checkkey(const akey; const aitemdata): boolean; override;
+  public
+   constructor create(const datasize: integer);
+   function add(const akeya,akeyb: integer): pointer;
+   function addunique(const akeya,akeyb: integer): pointer;
+   function addunique(const akeya,akeyb: integer; out adata: pointer): boolean;
+                                             //true if new
+   function find(const akeya,akeyb: integer): pointer;
+   function delete(const akeya,akeyb: integer; 
+                         const all: boolean = false): boolean; overload;
+                         //true if found
+   function first: pdoubleintegerdataty;
+   function next: pdoubleintegerdataty; //wraps to first after last
+   function last: pdoubleintegerdataty;
+   function prev: pdoubleintegerdataty; //wraps to last after first
+ end;
+
  ptruintdataty = record
   key: ptruint;
   data: record end;
@@ -1499,6 +1535,104 @@ function tintegerhashdatalist.delete(const akey: integer;
                const all: boolean = false): boolean;
 begin
  result:= internaldelete(akey,all);
+end;
+
+{ tdoubleintegerhashdatalist }
+
+function mdikey(a,b: integer): doubleintegerty; inline;
+begin
+ result.a:= a;
+ result.b:= b;
+end;
+
+constructor tdoubleintegerhashdatalist.create(const datasize: integer);
+begin
+ inherited create(datasize + sizeof(doubleintegerdataty));
+end;
+
+function tdoubleintegerhashdatalist.hashkey(const akey): hashvaluety;
+var
+ i1: int32;
+begin
+ with doubleintegerty(akey) do begin
+  i1:= a + b;
+ end;
+ result:= scramble((integer(i1) xor (integer(i1) shr 2)));
+end;
+
+function tdoubleintegerhashdatalist.checkkey(const akey;
+               const aitemdata): boolean;
+begin
+ with doubleintegerty(akey) do begin
+  result:= (a = doubleintegerdataty(aitemdata).key.a) and
+                 (b = doubleintegerdataty(aitemdata).key.b);
+ end;
+end;
+
+function tdoubleintegerhashdatalist.add(const akeya,akeyb: integer): pointer;
+var
+ po1: pdoubleintegerhashdataty;
+ k1: doubleintegerty;
+begin
+ k1.a:= akeya;
+ k1.b:= akeyb;
+ po1:= pdoubleintegerhashdataty(internaladd(k1));
+ po1^.data.key:= k1;
+ result:= @po1^.data.data;
+end;
+
+function tdoubleintegerhashdatalist.find(const akeya,akeyb: integer): pointer;
+begin
+ result:= internalfind(mdikey(akeya,akeyb));
+ if result <> nil then begin
+  result:= @pdoubleintegerhashdataty(result)^.data.data;
+ end;
+end;
+
+function tdoubleintegerhashdatalist.addunique(
+                                const akeya,akeyb: integer): pointer;
+begin
+ result:= find(akeya,akeyb);
+ if result = nil then begin
+  result:= add(akeya,akeyb);
+ end;
+end;
+
+function tdoubleintegerhashdatalist.addunique(const akeya,akeyb: integer; 
+                                                   out adata: pointer): boolean;
+begin
+ adata:= find(akeya,akeyb);
+ result:= false;
+ if adata = nil then begin
+  adata:= add(akeya,akeyb);
+  result:= true;
+ end;
+end;
+
+function tdoubleintegerhashdatalist.first: pdoubleintegerdataty;
+begin
+ result:= pdoubleintegerdataty(internalfirst);
+end;
+
+function tdoubleintegerhashdatalist.next: pdoubleintegerdataty;
+begin
+ result:= pdoubleintegerdataty(internalnext);
+end;
+
+function tdoubleintegerhashdatalist.last: pdoubleintegerdataty;
+begin
+ result:= pdoubleintegerdataty(internallast);
+end;
+
+function tdoubleintegerhashdatalist.prev: pdoubleintegerdataty;
+begin
+ result:= pdoubleintegerdataty(internalprev);
+end;
+
+function tdoubleintegerhashdatalist.delete(const akeya,akeyb: integer; 
+                                         const all: boolean = false): boolean;
+begin
+ result:= internaldelete(mdikey(akeya,akeyb),all);
 end;
 
 { tptruinthasdatalist }
