@@ -1420,7 +1420,6 @@ type
 
 var
  gdilockcount: integer;
-// gdilocked: boolean;
  
 {$ifdef mse_debuggdisync}
 procedure gdilockerror(const text: msestring);
@@ -1623,11 +1622,11 @@ end;
 procedure gdi_call(const func: gdifuncty; var drawinfo: drawinfoty;
                                  gdi: pgdifunctionaty = nil);
 
-procedure doflush();
-begin
- gdi^[gdf_flush](drawinfo);
- gui_flushgdi();
-end;
+ procedure doflush();
+ begin
+  gdi^[gdf_flush](drawinfo);
+  gui_flushgdi();
+ end; //doflush
 
 begin
  if gdi = nil then begin
