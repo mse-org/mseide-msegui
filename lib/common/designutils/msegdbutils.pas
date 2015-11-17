@@ -408,6 +408,7 @@ type
    function getbreakpointinfo(var atup: resultinfoty;
                      var info: breakpointinfoty; const full: boolean): boolean;
    procedure updatepascalexpression(var aexpression: string);
+   procedure updatecurrentlanguage();
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -4624,12 +4625,20 @@ end;
 
 function tgdbmi.selectstackframe(const aframe: integer): gdbresultty;
 begin
- result:= synccommand('-stack-select-frame '+inttostr(aframe));
+// result:= synccommand('-stack-select-frame '+inttostr(aframe)); does not
+// switch info source
+ result:= synccommand('frame '+inttostr(aframe)); //switches info source
+ if result = gdb_ok then begin
+  updatecurrentlanguage();
+ end;
 end;
 
 function tgdbmi.selectstackpointer(const aframe: qword): gdbresultty;
 begin
  result:= synccommand('frame '+qwordtocstr(aframe));
+ if result = gdb_ok then begin
+  updatecurrentlanguage();
+ end;
 end;
 
 function tgdbmi.started: boolean;
@@ -4711,6 +4720,13 @@ begin
 //  end;
   end;
  end;
+end;
+
+procedure tgdbmi.updatecurrentlanguage();
+var
+ fna1: filenamety;
+begin
+ getsourcename(fna1,fcurrentlanguage);
 end;
 
 {$ifdef UNIX}
