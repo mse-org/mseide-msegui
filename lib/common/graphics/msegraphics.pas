@@ -4688,9 +4688,7 @@ begin
    stepx:= srect.cx;
    stepy:= srect.cy;
    endx:= rect1.x + rect1.cx;
-//   endcx:= endx - stepx;
    endy:= rect1.y + rect1.cy;
-//   endcy:= endy - stepy;
    sourcex:= srect.x;
    sourcey:= srect.y;
    if not (al_stretchy in aalignment) then begin
@@ -4711,35 +4709,27 @@ begin
      int1:= 0;
     end;
    end;
-//   bo2:= true;
    repeat
     if not (al_stretchy in aalignment) then begin
      if drect.y + srect.cy > endy then begin
       srect.cy:= endy - drect.y;
      end;
-//     if (drect.y > endcy) and not bo2 then begin
-//      srect.cy:= endy - drect.y;
-//      bo2:= false;
-//     end;
      drect.cy:= srect.cy;
     end;
     drect.x:= startx;
     dec(srect.x,int1);
     dec(drect.x,int1);
     inc(srect.cx,int1);
- //   bo1:= true;
     repeat
      if not (al_stretchx in aalignment) then begin
       if drect.x + srect.cx > endx then begin
        srect.cx:= endx - drect.x;
       end;
-//      if (drect.x > endcx) {and not bo1} then begin
-//       srect.cx:= endx - drect.x;
-//      end;
- //     bo1:= false;
       drect.cx:= srect.cx;
      end;
-     gdi(gdf_copyarea);
+     if (srect.cx > 0) and (srect.cy > 0) then begin
+      gdi(gdf_copyarea);
+     end;
      inc(drect.x,srect.cx);
      srect.cx:= stepx;
      srect.x:= sourcex;
