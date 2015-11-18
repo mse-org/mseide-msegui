@@ -41,6 +41,7 @@ type
   mousepos: pointty;
   options: menulayoutoptionsty;
   sizerect: rectty;
+  frameactivediff: framety;
   cells: menucellinfoarty;
 //  colorglyph: colorty;
   itemframetemplate: tframetemplate;
@@ -376,9 +377,11 @@ begin
   else begin
    frame2:= nullframe;
   end;
+  frameactivediff:= frame2;
   if itemframetemplate <> nil then begin
    with tframetemplate1(itemframetemplate) do begin
     frame1:= paintframe;
+    subframe1(frameactivediff,frame1);
     if frame1.left > frame2.left then begin
      frame2.left:= frame1.left;
     end;
@@ -756,11 +759,13 @@ begin
      face:= itemfaceactive;
      ca.font:= fontactive;
      state:= state + [shs_focused,shs_active,shs_focusanimation];
+     deflaterect1(ca.dim,frameactivediff);
      drawmenubutton(canvas,buttoninfo,po2);
      if itemframetemplateactive <> nil then begin
       itemframetemplateactive.paintoverlay(canvas,ca.dim,
             combineframestateflags(false,true,true,shs_clicked in state,false));
      end;
+     inflaterect1(ca.dim,frameactivediff);
     end
     else begin
      if (shs_separator in state) and (separatorframetemplate <> nil) then begin
