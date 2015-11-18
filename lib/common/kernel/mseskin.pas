@@ -625,6 +625,8 @@ type
    procedure setmainmenu_popupitemframeactive(const avalue: tframecomp);
    procedure setmainmenu_popupfont(const avalue: tfontcomp);
    procedure setmainmenu_popupfontactive(const avalue: tfontcomp);
+   procedure setmainmenu_popupseparatorframe(const avalue: tframecomp);
+   procedure setmainmenu_popupcheckboxframe(const avalue: tframecomp);
   protected
    procedure handlewidget(const askin: skininfoty;
                            const acolor: pwidgetcolorinfoty = nil); override;
@@ -1047,10 +1049,10 @@ type
                                  write setmainmenu_popupfontactive;
    property mainmenu_popupseparatorframe: tframecomp 
                                  read fmainmenu.svpopup.svseparatorframe 
-                                 write setpopupmenu_separatorframe;
+                                 write setmainmenu_popupseparatorframe;
    property mainmenu_popupcheckboxframe: tframecomp 
                                  read fmainmenu.svpopup.svcheckboxframe 
-                                 write setpopupmenu_checkboxframe;
+                                 write setmainmenu_popupcheckboxframe;
  end;
 
  skincontrollerarty = array of tcustomskincontroller;
@@ -2767,6 +2769,18 @@ end;
 procedure tskincontroller.setmainmenu_popupfontactive(const avalue: tfontcomp);
 begin
  setlinkedvar(avalue,tmsecomponent(fmainmenu.svpopup.svfontactive));
+end;
+
+procedure tskincontroller.setmainmenu_popupseparatorframe(
+              const avalue: tframecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fmainmenu.svpopup.svseparatorframe));
+end;
+
+procedure tskincontroller.setmainmenu_popupcheckboxframe(
+              const avalue: tframecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fmainmenu.svpopup.svcheckboxframe));
 end;
 
 procedure tskincontroller.handlewidget(const askin: skininfoty;
