@@ -3838,6 +3838,7 @@ begin
  if (event = oe_changed) and (ftemplate <> nil) and 
                                      (ftemplate = sender) then begin
   settemplateinfo(tfontcomp(sender).template.fi);
+  dochanged([],false);
  end;
 end;
 
