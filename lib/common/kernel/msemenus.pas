@@ -93,8 +93,6 @@ type
    fname: string;
 //   fgroup: integer;
    fsource: imenuitem;
-   ffont: tmenufont;
-   ffontactive: tmenufontactive;
    fcoloractive: colorty;
    fcolorglyphactive: colorty;
    function getsubmenu: tmenuitems;
@@ -173,6 +171,8 @@ type
    finfo: actioninfoty;
    fowner: tcustommenu;
    fsubmenu: tmenuitems;
+   ffont: tmenufont;
+   ffontactive: tmenufontactive;
    procedure updatecaption;
    procedure defineproperties(filer: tfiler); override;
    procedure befexec;
