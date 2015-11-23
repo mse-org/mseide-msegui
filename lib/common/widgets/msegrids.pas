@@ -2283,9 +2283,10 @@ type
                                   const auserinput: boolean = false);
    procedure deleterow(aindex: integer; acount: integer = 1;
                                   const auserinput: boolean = false);
-   procedure appinsrow(aindex: integer;const auserinput: boolean = false); 
+   function appinsrow(aindex: integer;const auserinput: boolean = false): int32; 
            //insert or append empty row, set focused row to index
-           // empty row removed by exit row if og_noinsertempty
+           //empty row removed by exit row if og_noinsertempty
+           //returns insert index
    function isinsertempty: boolean; 
          //true if row will be removed by og_noinsertempty
    function isautoappend: boolean; //true if last row is auto appended
@@ -11733,6 +11734,7 @@ begin     //focuscell
    endnonullcheck;
   end;
  end;
+ factiverow:= ffocusedcell.row;
  afterfocuscell(cellbefore,selectaction); 
  flastcol:= ffocusedcell.col;
  result:= true;
@@ -15551,12 +15553,13 @@ begin
  end;
 end;
 
-procedure tcustomgrid.appinsrow(aindex: integer;
-                                       const auserinput: boolean = false);
+function tcustomgrid.appinsrow(aindex: integer;
+                                   const auserinput: boolean = false): int32;
 var
  int1,int2: integer;
  bo1: boolean;
 begin
+ result:= invalidaxis;
  if docheckcellvalue and container.canclose(window.focusedwidget) then begin
                          //for not null check in twidgetgrid
   int1:= ffocusedcell.row;
@@ -15591,6 +15594,7 @@ begin
   if ffocusedcell.row = aindex then begin
    fstate1:= fstate1 + [gs1_rowsortinvalid,gs1_rowinserted];
   end;
+  result:= aindex;
  end;
 end;
 
