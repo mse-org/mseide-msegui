@@ -2785,7 +2785,7 @@ var
 begin
  decoderecord(avalue,[@na,@rect1.x,@rect1.y,@rect1.cx,@rect1.cy],'siiii');
  with fintf.getwidget do begin
-  w1:= findwidget(na);
+  w1:= findchild(na);
   fchildren[index]:= na;
   if w1 <> nil then begin
    rect2:= application.screenrect(window);
@@ -4222,7 +4222,7 @@ begin
    setlength(ar1,length(fchildren));
    widget1:= fintf.getwidget;
    for int1:= 0 to high(fchildren) do begin
-    ar1[int1]:= widget1.findwidget(fchildren[int1]);
+    ar1[int1]:= widget1.findchild(fchildren[int1]);
    end;
    if (ffocusedchild >= 0) and (ffocusedchild <= high(ar1)) and 
        (ar1[ffocusedchild] <> nil) and ar1[ffocusedchild].canfocus then begin

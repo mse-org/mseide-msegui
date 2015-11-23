@@ -345,7 +345,7 @@ begin
    se.templatename[int1]:= name;
    se.comment[int1]:= comment;
    for int2:= 0 to high(params) do begin
-    edit1:= tstringedit(se.grid.findtagwidget(int2+1,tstringedit));
+    edit1:= tstringedit(se.grid.findtagchild(int2+1,tstringedit));
     if edit1 <> nil then begin
      edit1[int1]:= params[int2];
     end;

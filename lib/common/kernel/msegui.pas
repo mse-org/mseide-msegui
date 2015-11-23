@@ -1933,17 +1933,18 @@ type
    function widgetatpos(const pos: pointty): twidget; overload;
    function widgetatpos(const pos: pointty; 
                    const state: widgetstatesty): twidget; overload;
-   function findtagwidget(const atag: integer;
-                                const aclass: widgetclassty): twidget;
-              //returns first matching descendent
-   function findwidget(const aname: ansistring): twidget;
-              //searches in container.widgets, case insensitive
 
    property container: twidget read getcontainer;
    function containeroffset: pointty;
    function childrencount: integer; virtual;
    property children[const index: integer]: twidget read getchildwidgets;
                                                                       default;
+                               //children of container
+   function findtagchild(const atag: integer;
+                                const aclass: widgetclassty): twidget;
+              //returns first matching descendent
+   function findchild(const aname: ansistring): twidget;
+              //searches in container.widgets, case insensitive
    function childatpos(const pos: pointty; 
                    const clientorigin: boolean = true): twidget; virtual;
    function gettaborderedwidgets: widgetarty;
@@ -13525,7 +13526,7 @@ begin
  result:= fhint <> '';
 end;
 
-function twidget.findtagwidget(const atag: integer;
+function twidget.findtagchild(const atag: integer;
                const aclass: widgetclassty): twidget;
 var
  int1: integer;
@@ -13540,7 +13541,7 @@ begin
  end;
  if result = nil then begin
   for int1:= 0 to high(fwidgets) do begin
-   result:= fwidgets[int1].findtagwidget(atag,aclass);
+   result:= fwidgets[int1].findtagchild(atag,aclass);
    if result <> nil then begin
     exit;
    end;
@@ -13563,7 +13564,7 @@ begin
  end;
 end;
 
-function twidget.findwidget(const aname: ansistring): twidget;
+function twidget.findchild(const aname: ansistring): twidget;
 begin
  result:= dofindwidget(container.fwidgets,aname); 
 end;
