@@ -957,8 +957,8 @@ type
                      
    property frameimage_list: timagelist read fi.ba.frameimage_list
                      write setframeimage_list;
-     //imagenr 0 = topleft, 1 = left, 2 = bottomleft, 3 = bottom, 4 = bottomright
-     //5 = right, 6 = topright, 7 = top
+    //imagenr 0 = topleft, 1 = left, 2 = bottomleft, 3 = bottom, 4 = bottomright
+    //5 = right, 6 = topright, 7 = top
    property frameimage_left: integer read fi.ba.frameimage_left
                     write setframeimage_left default 0;
    property frameimage_top: integer read fi.ba.frameimage_top
@@ -1325,7 +1325,8 @@ type
    procedure internalcreate; override;
    procedure defineproperties(filer: tfiler); override;
   public
-   constructor create(const owner: tmsecomponent; const onchange: notifyeventty); override;
+   constructor create(const owner: tmsecomponent;
+                                   const onchange: notifyeventty); override;
    destructor destroy; override;
   published
    property options: faceoptionsty read fi.options write setoptions default [];
@@ -1353,8 +1354,8 @@ type
 
    property frameimage_list: timagelist read fi.frameimage_list 
                      write setframeimage_list;
-     //imagenr 0 = topleft, 1 = left, 2 = bottomleft, 3 = bottom, 4 = bottomright
-     //5 = right, 6 = topright, 7 = top
+    //imagenr 0 = topleft, 1 = left, 2 = bottomleft, 3 = bottom, 4 = bottomright
+    //5 = right, 6 = topright, 7 = top
    property frameimage_offset: integer read fi.frameimage_offset
                      write setframeimage_offset default 0;
  end;
@@ -1664,6 +1665,9 @@ type
  {$endif}                     
    procedure cursorchanged;
    procedure statechanged; virtual; //enabled,active,visible
+                                        // todo:
+                                        //use an universal state*changed()
+                                        //with state mask instead
    procedure enabledchanged; virtual;
    procedure activechanged; virtual;
    procedure visiblepropchanged; virtual;
@@ -1685,7 +1689,8 @@ type
    function trycancelmodal(const newactive: twindow): boolean; virtual;
               //called by twindow.internalactivate, true if accepted
    procedure sortzorder;
-   procedure clampinview(const arect: rectty; const bottomright: boolean); virtual;
+   procedure clampinview(const arect: rectty; 
+                                      const bottomright: boolean); virtual;
                     //origin paintpos
 
    function needsdesignframe: boolean; virtual;
@@ -1747,14 +1752,15 @@ type
    function verticalfontheightdelta: boolean; virtual;
    procedure dofontheightdelta(var delta: integer); virtual;
    procedure syncsinglelinefontheight(const lineheight: boolean = false;
-                                                          const space: integer = 2);
+                                                     const space: integer = 2);
 
    procedure setwidgetrect(const Value: rectty);
    procedure internalsetwidgetrect(Value: rectty;
                                 const windowevent: boolean); virtual;
    function getclientpos: pointty;              
    function getclientsize: sizety;
-   procedure setclientsize(const asize: sizety); virtual; //used in tscrollingwidget
+   procedure setclientsize(const asize: sizety); virtual; 
+                                                 //used in tscrollingwidget
    function getclientwidth: integer;
    procedure setclientwidth(const avalue: integer);
    function getclientheight: integer;
@@ -1955,6 +1961,7 @@ type
    
    property focusedchild: twidget read ffocusedchild;
    property focusedchildbefore: twidget read ffocusedchildbefore;
+   function enteredchild(): twidget;
 
    function mouseeventwidget(const info: mouseeventinfoty): twidget;
    function checkdescendent(awidget: twidget): boolean;
@@ -2125,7 +2132,7 @@ type
    function indexofwidget(const awidget: twidget): integer;
 
    procedure changedirection(const avalue: graphicdirectionty;
-                                            var dest: graphicdirectionty); virtual;
+                                        var dest: graphicdirectionty); virtual;
    procedure placexorder(const startx: integer; const dist: array of integer;
                 const awidgets: array of twidget;
                 const endmargin: integer = minint);
@@ -10016,6 +10023,21 @@ end;
 function twidget.findlogicalchild(const aname: ansistring): twidget;
 begin
  result:= dofindwidget(getlogicalchildren,aname);
+end;
+
+function twidget.enteredchild(): twidget;
+var
+ i1: int32;
+begin
+ result:= nil;
+ with container do begin
+  for i1:= 0 to high(fwidgets) do begin
+   if ws_entered in fwidgets[i1].fwidgetstate then begin
+    result:= fwidgets[i1];
+    break;
+   end;
+  end;
+ end;
 end;
 
 function twidget.mouseeventwidget(const info: mouseeventinfoty): twidget;

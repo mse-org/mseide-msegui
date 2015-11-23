@@ -36,14 +36,16 @@ type
             od_propsize,od_fixsize,od_top,od_background,
             od_alignbegin,od_aligncenter,od_alignend,
             od_nofit,od_banded,od_nosplitsize,od_nosplitmove,
-            od_lock,od_thumbtrack,od_captionhint,od_nolock);
+            od_lock,od_nolock,od_thumbtrack,od_captionhint,
+            od_childicons); //for tformdockcontroller
  optionsdockty = set of optiondockty;
 
  dockbuttonrectty = (dbr_none,dbr_handle,dbr_close,dbr_maximize,dbr_normalize,
                      dbr_minimize,dbr_fixsize,dbr_float,
                      dbr_top,dbr_background,dbr_lock,dbr_nolock);
 const
- defaultoptionsdock = [od_savepos,od_savezorder,od_savechildren,od_captionhint];
+ defaultoptionsdock = [od_savepos,od_savezorder,od_savechildren,od_captionhint,
+                       od_childicons];
  defaultoptionsdocknochildren = defaultoptionsdock - [od_savechildren];
  dbr_first = dbr_handle;
  dbr_last = dbr_nolock;
@@ -88,6 +90,8 @@ type
   function getminimizedsize(out apos: captionposty): sizety;  
                      //cx = 0 -> normalwidth, cy = 0 -> normalheight
   function getcaption: msestring;
+  function getchildicon: tmaskedbitmap; //own or first icon of dockchildren,
+                                        //can return nil
   procedure dolayoutchanged(const sender: tdockcontroller);
   procedure dodockcaptionchanged(const sender: tdockcontroller);
  end;
@@ -262,6 +266,7 @@ type
    fw: pwidgetaccessty;
    fplacing: integer;
    fclickedbutton: dockbuttonrectty;
+   fwidgetstate: widgetstatesty;
    
    procedure checkdirection;
    procedure objectevent(const sender: tobject;
@@ -277,6 +282,8 @@ type
    procedure dochildfloat(const awidget: twidget); virtual;
    function docheckdock(const info: draginfoty): boolean; virtual;
    function dockdrag(const dragobj: tdockdragobject): boolean;
+   procedure childstatechanged(const sender: twidget; 
+                         const newstate,oldstate: widgetstatesty); virtual;
 
    function getparentcontroller(
                      out acontroller: tdockcontroller): boolean; overload;
@@ -300,7 +307,7 @@ type
    function ismdi: boolean;
    function isfloating: boolean;
    function canmdisize: boolean;
-   procedure dolayoutchanged;
+   procedure dolayoutchanged; virtual; 
    procedure doboundschanged;
    procedure docaptionchanged;
    function findbandpos(const apos: integer; out aindex: integer;
@@ -337,7 +344,7 @@ type
             scalefixedalso: boolean = false; const awidgets: widgetarty = nil);
    procedure parentchanged(const sender: twidget);
    procedure poschanged;
-   procedure statechanged(const astate: widgetstatesty);
+   procedure statechanged(const astate: widgetstatesty); virtual;
    procedure widgetregionchanged(const sender: twidget);
    procedure updateminscrollsize(var asize: sizety);
    procedure beginclientrectchanged;
@@ -357,6 +364,7 @@ type
    function getwidget: twidget;
    function activewidget: twidget; //focused child or active tab
    function dockparentname(): string; //'' if none
+   function childicon(): tmaskedbitmap;
 
    property mdistate: mdistatety read fmdistate write setmdistate;
    property currentsplitdir: splitdirty read fsplitdir;
@@ -634,6 +642,7 @@ type
    function getplacementrect: rectty;
    function getminimizedsize(out apos: captionposty): sizety;
    function getcaption: msestring;
+   function getchildicon: tmaskedbitmap;
    procedure dolayoutchanged(const sender: tdockcontroller); virtual;
    procedure dodockcaptionchanged(const sender: tdockcontroller); virtual;
     //istatfile
@@ -2188,6 +2197,16 @@ begin
  calclayout(tdockdragobject(dragobj),false);
  updaterefsize;
  result:= dragobj.fdock.dodock(self);
+end;
+
+procedure tdockcontroller.childstatechanged(const sender: twidget;
+             const newstate: widgetstatesty; const oldstate: widgetstatesty);
+var
+ dock1: tdockcontroller;
+begin
+ if getparentcontroller(dock1) then begin
+  dock1.childstatechanged(sender,newstate,oldstate);
+ end;
 end;
 
 function tdockcontroller.beforedragevent(var info: draginfoty): boolean;
@@ -3916,8 +3935,13 @@ begin
 end;
 
 procedure tdockcontroller.statechanged(const astate: widgetstatesty);
+var
+ dock1: tdockcontroller;
 begin
- //not used
+ if getparentcontroller(dock1) then begin
+  dock1.childstatechanged(fintf.getwidget(),astate,fwidgetstate);
+ end;
+ fwidgetstate:= astate;
 end;
 
 procedure tdockcontroller.settab_options(const avalue: tabbaroptionsty);
@@ -4107,7 +4131,7 @@ begin
   end;
  end
  else begin
-  result:= fintf.getwidget.focusedchild;
+  result:= fintf.getwidget.enteredchild;
  end;
 end;
 
@@ -4118,6 +4142,36 @@ begin
  result:= '';
  if getparentcontroller(parent) then begin
   result:= parent.getwidget.name;
+ end;
+end;
+
+function tdockcontroller.childicon(): tmaskedbitmap;
+
+ function check(const awidget: twidget; var res: tmaskedbitmap): boolean;
+ var
+  intf1: idockcontroller;
+ begin
+  result:= false;
+  if getcorbainterface(awidget,typeinfo(idockcontroller),intf1) then begin
+   res:= intf1.getchildicon();
+   if (res <> nil) and res.hasimage() then begin
+    result:= true;
+   end;
+  end;
+ end; //check
+ 
+var
+ ar1: widgetarty;
+ i1: int32;
+begin
+ if not check(activewidget,result) then begin
+  ar1:= getitems;
+  result:= nil;
+  for i1:= 0 to high(ar1) do begin
+   if check(ar1[i1],result) then begin
+    break;
+   end;
+  end;
  end;
 end;
 
@@ -5430,6 +5484,11 @@ end;
 function tdockpanel.getcaption: msestring;
 begin
  result:= '';
+end;
+
+function tdockpanel.getchildicon: tmaskedbitmap;
+begin
+ result:= nil;
 end;
 
 procedure tdockpanel.setstatfile(const Value: tstatfile);

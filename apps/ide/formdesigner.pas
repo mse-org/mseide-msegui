@@ -1153,7 +1153,7 @@ begin
  fgridsizey:= defaultgridsizey;
  fselections:= tformdesignerselections.create(self);
  fformcont:= tformcontainer.create(self);
- fdragdock:= tformdesignerdockcontroller.create(idockcontroller(self));
+ fdragdock:= tformdesignerdockcontroller.create(self);
 
  createwindow();
  inherited create(aowner);
