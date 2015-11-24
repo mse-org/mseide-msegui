@@ -251,26 +251,26 @@ function octtostr(inp: qword; digits: integer): string; overload;
    //convert longword to octaltring, digits = octet count
 function hextostr(inp: longword;
              digits: integer = 2*sizeof(longword)): string; overload;
-   //convert longword to hexstring, digits = nibble count
+   //convert longword to hexstring, digits = nibble count, 0 -> variable
 function hextostr(inp: qword;
              digits: integer = 2*sizeof(qword)): string; overload;
-   //convert qword to hexstring, digits = nibble count
+   //convert qword to hexstring, digits = nibble count, 0 -> variable
 function hextostr(const inp: pointer;
              digits: integer = 2*sizeof(pointer)): string; overload;
-   //convert pointer to hexstring, digits = nibble count
+   //convert pointer to hexstring, digits = nibble count, 0 -> variable
 function hextostrmse(inp: longword;
              digits: integer = 2*sizeof(longword)): msestring; overload;
-   //convert longword to hexstring, digits = nibble count
+   //convert longword to hexstring, digits = nibble count, 0 -> variable
 function hextostrmse(inp: qword;
              digits: integer = 2*sizeof(qword)): msestring; overload;
-   //convert qword to hexstring, digits = nibble count
+   //convert qword to hexstring, digits = nibble count, 0 -> variable
 function hextostrmse(const inp: pointer;
              digits: integer = 2*sizeof(pointer)): msestring; overload;
-   //convert pointer to hexstring, digits = nibble count
+   //convert pointer to hexstring, digits = nibble count, 0 -> variable
 function hextocstr(const inp: longword; stellen: integer): string; overload;
-   //convert longword to 0x..., digits = nibble count
+   //convert longword to 0x..., digits = nibble count, 0 -> variable
 function hextocstr(const inp: qword; stellen: integer): string; overload;
-   //convert longword to 0x..., digits = nibble count
+   //convert longword to 0x..., digits = nibble count, 0 -> variable
 function ptruinttocstr(inp: ptruint): string; overload;
    //convert ptruint to 0x...
 function qwordtocstr(inp: qword): string; overload;
@@ -524,7 +524,7 @@ const
 implementation
 
 uses
- sysconst,msedate,msereal,Math,msefloattostr,msearrayutils,msesys;
+ sysconst,msedate,msereal,Math,msefloattostr,msearrayutils,msesys,msebits;
 
 function lstring(const s: string; const minwidth: integer): string;
 var
@@ -4350,6 +4350,12 @@ function hextostr(inp: longword; digits: integer): string;
 var
  int1: integer;
 begin
+ if digits = 0 then begin
+  digits:= (highestbit(inp)+4) div 4;
+  if digits = 0 then begin
+   digits:= 1;
+  end;
+ end;
  setlength(result,digits);
  for int1:= digits downto 1  do begin
   result[int1]:= char(ord('0') + (inp and $f));
@@ -4365,6 +4371,12 @@ function hextostr(inp: qword; digits: integer): string;
 var
  int1: integer;
 begin
+ if digits = 0 then begin
+  digits:= (highestbit64(inp)+4) div 4;
+  if digits = 0 then begin
+   digits:= 1;
+  end;
+ end;
  setlength(result,digits);
  for int1:= digits downto 1  do begin
   result[int1]:= char(ord('0') + (inp and $f));
@@ -4387,6 +4399,12 @@ function hextostrmse(inp: longword; digits: integer): msestring;
 var
  int1: integer;
 begin
+ if digits = 0 then begin
+  digits:= (highestbit(inp)+4) div 4;
+  if digits = 0 then begin
+   digits:= 1;
+  end;
+ end;
  setlength(result,digits);
  for int1:= digits downto 1  do begin
   result[int1]:= msechar(ord('0') + (inp and $f));
@@ -4402,6 +4420,12 @@ function hextostrmse(inp: qword; digits: integer): msestring;
 var
  int1: integer;
 begin
+ if digits = 0 then begin
+  digits:= (highestbit64(inp)+4) div 4;
+  if digits = 0 then begin
+   digits:= 1;
+  end;
+ end;
  setlength(result,digits);
  for int1:= digits downto 1  do begin
   result[int1]:= msechar(ord('0') + (inp and $f));
