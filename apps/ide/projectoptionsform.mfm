@@ -1171,12 +1171,18 @@ object projectoptionsfo: tprojectoptionsfo
           controller.ongetfilename = expandfilename
           reffontheight = 14
         end
-        object debugoptions: tstringedit
+        object debugoptions: tmemodialogedit
           frame.options = [cfo_fixtop]
           frame.caption = 'Debug &options'
           frame.captionoffset = 3
           frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive]
           frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive]
+          frame.buttons.count = 1
+          frame.buttons.items = <          
+            item
+              imagenr = 17
+            end>
+          frame.button.imagenr = 17
           frame.outerframe = (
             0
             17
@@ -2380,7 +2386,7 @@ object projectoptionsfo: tprojectoptionsfo
               9
             )
             taborder = 4
-            hint = 'Strop on exceptions'
+            hint = 'Stop on exceptions'
             bounds_x = 388
             bounds_y = 0
             bounds_cx = 77

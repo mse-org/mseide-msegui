@@ -546,7 +546,7 @@ type
    moveonfirstclick: tbooleanedit;
    debuggerpage: ttabpage;
    debugcommand: tfilenameedit;
-   debugoptions: tstringedit;
+   debugoptions: tmemodialogedit;
    ttabwidget1: ttabwidget;
    ttabpage6: ttabpage;
    sourcedirgrid: twidgetgrid;
