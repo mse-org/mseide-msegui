@@ -2324,12 +2324,12 @@ begin
  end;
  if value <> 0 then begin
   info.handle:= value;
-  gdi_lock;
-  try
+//  gdi_lock;
+//  try
   gdierror(gui_getpixmapinfo(info));
-  finally
-   gdi_unlock;
-  end;
+//  finally
+//   gdi_unlock;
+//  end;
   fhandle:= value;
   with info do begin
    fsize:= size;
