@@ -612,6 +612,8 @@ var
  pos1,pos2: sourceposty;
  page1: tsourcepage;
  shiftstate1: shiftstatesty;
+ bo1: boolean;
+ cellpos1: cellpositionty;
  
 begin
  if iscellclick(info,[ccr_nokeyreturn,ccr_dblclick]) and 
@@ -632,14 +634,19 @@ begin
    with info.keyeventinfopo^ do begin
     shiftstate1:= shiftstate * shiftstatesmask;
     if not (es_processed in eventstate) then begin
-     if ((shiftstate1 = [ss_shift,ss_ctrl]) or (shiftstate1 = [ss_ctrl])) then begin
+     if ((shiftstate1 = [ss_shift,ss_ctrl]) or 
+                         (shiftstate1 = [ss_ctrl])) then begin
       include(eventstate,es_processed);
       pos1.pos:= edit.editpos;
       if (shiftstate1 = [ss_shift,ss_ctrl]) then begin
        case key of
         key_up,key_down: begin
-         if switchheaderimplementation(edit.filename,pos1,pos2) then begin
-          page1:= sourcefo.showsourcepos(pos2,true);
+         if switchheaderimplementation(edit.filename,pos1,pos2,bo1) then begin
+          cellpos1:= cep_rowcenteredif;
+          if bo1 then begin
+           cellpos1:= cep_top;
+          end;
+          page1:= sourcefo.showsourcepos(pos2,true,cellpos1);
           if page1 <> nil then begin
            page1.grid.showcell(makegridcoord(1,pos1.pos.row));
           end;
