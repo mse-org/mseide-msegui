@@ -1927,6 +1927,12 @@ type
    procedure setrowlinewidth(index: integer; const avalue: rowlinewidthty);
    function doonsort(const l,r: integer): integer;
    procedure readgridframewidth(reader: treader);
+   function getrowwindowpos: int32;
+   procedure setrowwindowpos(const avalue: int32);
+   function getcolwindowpos: int32;
+   procedure setcolwindowpos(const avalue: int32);
+   function getcellwindowpos: pointty;
+   procedure setcellwindowpos(const avalue: pointty);
   protected
    fupdating: integer;
    ffocuscount: integer;
@@ -2273,6 +2279,12 @@ type
    procedure scrollright;
    procedure scrollpageleft;
    procedure scrollpageright;
+
+                //distance of active cell topleft to datarect topleft
+   property cellwindowpos: pointty read getcellwindowpos 
+                                                  write setcellwindowpos;
+   property rowwindowpos: int32 read getrowwindowpos write setrowwindowpos;
+   property colwindowpos: int32 read getcolwindowpos write setcolwindowpos;
 
    function userinput: boolean;
    procedure movecol(curindex,newindex: integer;
@@ -12608,6 +12620,7 @@ function tcustomgrid.rowvisible(const arow: integer): integer;
 var
  rect1: rectty;
 begin
+ internalupdatelayout;
  rect1:= cellrect(makegridcoord(0,arow));
  if rect1.y < fdatarect.y then begin
   result:= -1;
@@ -15909,6 +15922,53 @@ begin
  fframe.framei_top:= int1;
  fframe.framei_left:= int1;
  fframe.framei_bottom:= int1;
+end;
+
+function tcustomgrid.getcellwindowpos: pointty;
+var
+ rect1: rectty;
+begin
+ if focusedcellvalid() then begin
+  internalupdatelayout;
+  rect1:= cellrect(focusedcell);
+  result:= subpoint(rect1.pos,fdatarect.pos);
+ end
+ else begin
+  result:= nullpoint;
+ end;
+end;
+
+procedure tcustomgrid.setcellwindowpos(const avalue: pointty);
+var
+ rect1: rectty;
+begin
+ if focusedcellvalid() then begin
+  internalupdatelayout;
+  rect1:= cellrect(focusedcell);
+  subpoint1(rect1.pos,fdatarect.pos); //current distance
+  tgridframe(fframe).scrollpos:= addpoint(tgridframe(fframe).scrollpos,
+                                                 subpoint(avalue,rect1.pos));
+ end;
+end;
+
+function tcustomgrid.getrowwindowpos: int32;
+begin
+ result:= getcellwindowpos.y;
+end;
+
+procedure tcustomgrid.setrowwindowpos(const avalue: int32);
+begin
+ setcellwindowpos(mp(getcolwindowpos,avalue));
+end;
+
+function tcustomgrid.getcolwindowpos: int32;
+begin
+ result:= getcellwindowpos.x;
+end;
+
+procedure tcustomgrid.setcolwindowpos(const avalue: int32);
+begin
+ setcellwindowpos(mp(avalue,getrowwindowpos));
 end;
 
 procedure tcustomgrid.defineproperties(filer: tfiler);
