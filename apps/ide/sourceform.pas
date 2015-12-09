@@ -440,7 +440,7 @@ begin
  if findex > 0 then begin
   result:= true;
   dec(findex);
-  updateshowpos;
+  updateshowpos(cep_none);
  end
  else begin
   result:= false;
@@ -452,7 +452,7 @@ begin
  if (findex < count - 1) then begin
   result:= true;
   inc(findex);
-  updateshowpos;
+  updateshowpos(cep_none);
  end
  else begin
   result:= false;
@@ -470,7 +470,7 @@ begin
   items[findex]^:= fsourcefo.sourcepos;
  end;
  findex:= add(apos);
- updateshowpos(cep_top);
+ updateshowpos(cep_none{cep_top});
 end;
 
 { tsourcefo }
@@ -972,7 +972,13 @@ end;
 function tsourcefo.showsourceline(const filename: filenamety;
             line: integer; col: integer = 0; asetfocus: boolean = false;
              const aposition: cellpositionty = cep_rowcentered): tsourcepage;
+var
+ rowpos1: int32;
 begin
+ rowpos1:= 0;
+ if activepage <> nil then begin
+  rowpos1:= activepage.grid.rowwindowpos; //current window pos of focused row
+ end;
  result:= openfile(filename);
  if result <> nil then begin
   result.show;
@@ -982,6 +988,9 @@ begin
     result.edit.editpos:= makegridcoord(col,line);
     result.grid.setfocus;
     result.window.bringtofront;
+   end;
+   if aposition = cep_none then begin
+    result.grid.rowwindowpos:= rowpos1;
    end;
   end;
  end;

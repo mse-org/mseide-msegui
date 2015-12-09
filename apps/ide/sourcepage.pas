@@ -642,7 +642,7 @@ begin
        case key of
         key_up,key_down: begin
          if switchheaderimplementation(edit.filename,pos1,pos2,bo1) then begin
-          cellpos1:= cep_rowcenteredif;
+          cellpos1:= cep_none;
           if bo1 then begin
            cellpos1:= cep_top;
           end;
