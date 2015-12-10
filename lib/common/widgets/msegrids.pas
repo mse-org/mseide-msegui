@@ -178,7 +178,9 @@ const
  notfixcoloptions = [co_fixwidth,co_fixpos,co_fill,co_proportional,co_nohscroll,
                      co_rowdatachange];
  defaultoptionsgrid = [og_autopopup,og_colchangeontabkey,og_focuscellonenter,
-                                   og_mousescrollcol,og_wrapcol];
+                       og_mousescrollcol,og_wrapcol,
+                       og_rowinserting,og_rowdeleting,
+                       og_autofirstrow,og_autoappend];
 
  mousescrolldist = 5;
  griddefaultcolwidth = 50;
