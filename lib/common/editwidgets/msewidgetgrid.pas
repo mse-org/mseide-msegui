@@ -510,7 +510,7 @@ procedure defaultinitgridwidget(const awidget: twidget;
 implementation
 uses
  sysutils,msebits,msedataedits,msewidgets,mseshapes,msekeyboard,typinfo,
- msereal,mseapplication,msehash,msesumlist;
+ msereal,mseapplication,msehash,msesumlist,mseassistiveclient;
 
 type
  tdatalist1 = class(tdatalist);
@@ -526,6 +526,7 @@ type
    fgrid: tcustomwidgetgrid;
    procedure doexit; override;
    procedure doenter; override;
+   function getiassistiveclient(): iassistiveclient; override;
   public
  end;
  
@@ -2339,6 +2340,11 @@ begin
   fgrid.factivewidget.visible:= true;
  end;
  inherited;
+end;
+
+function tcontainer1.getiassistiveclient(): iassistiveclient;
+begin
+ result:= iassistiveclientgrid(fgrid);
 end;
 
 {

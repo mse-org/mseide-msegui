@@ -10156,7 +10156,7 @@ procedure twidget.mouseevent(var info: mouseeventinfoty);
  begin
   include(info.eventstate,es_client);
   try
-   if assistiveserver <> nil then begin
+   if (assistiveserver <> nil) and (ws_iswidget in widgetstate) then begin
     assistiveserver.clientmouseevent(getiassistiveclient(),info);
    end;
    clientmouseevent(info);
@@ -10926,7 +10926,7 @@ begin
     end;
    end;
    include(fwidgetstate,ws_entered);
-   if assistiveserver <> nil then begin
+   if (assistiveserver <> nil) and (ws_iswidget in widgetstate) then begin
     assistiveserver.doenter(getiassistiveclient());
    end;
    doenter;
@@ -11591,7 +11591,7 @@ end;
 procedure twidget.dokeydown1(var info: keyeventinfoty);
 begin
  exclude(fwidgetstate1,ws1_onkeydowncalled);
- if assistiveserver <> nil then begin
+ if (assistiveserver <> nil) and (ws_iswidget in widgetstate) then begin
   assistiveserver.dokeydown(getiassistiveclient(),info);
  end;
  dokeydown(info);

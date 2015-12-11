@@ -142,6 +142,8 @@ type
    procedure updateifigriddata(const sender: tobject; const alist: tdatalist);
    function getgriddata: tdatalist;
    function getvalueprop: ppropinfo;
+    //iassistiveclient
+   function getifidatalinkintf(): iifidatalink; override;
 {$endif}
    function getedited: boolean; virtual;
    function geteditstate: dataeditstatesty;
@@ -2327,6 +2329,11 @@ end;
 function tgraphdataedit.getvalueprop: ppropinfo;
 begin
   result:= getpropinfo(self,'value');
+end;
+
+function tgraphdataedit.getifidatalinkintf(): iifidatalink;
+begin
+ result:= iifidatalink(self);
 end;
 
 function tgraphdataedit.getdefaultifilink: iifilink;

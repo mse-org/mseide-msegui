@@ -108,6 +108,8 @@ type
  dispwidgetoptionty = (dwo_hintclippedtext,dwo_nogray,
                                        dwo_showlocal,dwo_showutc);
  dispwidgetoptionsty = set of dispwidgetoptionty;
+ dispwidgetflagty = (dwf_textrectvalid,dwf_cleared);
+ dispwidgetflagsty = set of dispwidgetflagty;
  
  tdispwidget = class(tpublishedwidget{$ifdef mse_with_ifi},iifidatalink{$endif})
   private
@@ -115,7 +117,7 @@ type
    ftext: msestring;
    foptions: dispwidgetoptionsty;
    ftextflags: textflagsty;
-   ftextrectvalid: boolean;
+//   ftextrectvalid: boolean;
    fonchange: notifyeventty;
    procedure updatetextflags;
    procedure settextflags(const value: textflagsty);
@@ -135,8 +137,8 @@ type
 {$endif}
    procedure invalidatetext;
    procedure setoptions(const avalue: dispwidgetoptionsty); virtual;
-   procedure valuechanged; virtual;
-   procedure formatchanged;
+   procedure valuechanged(); virtual;
+   procedure formatchanged();
    function getvaluetext: msestring; virtual; abstract;
    procedure dopaintforeground(const canvas: tcanvas); override;
    procedure clientrectchanged; override;
@@ -148,11 +150,14 @@ type
    procedure enabledchanged; override;
    function verticalfontheightdelta: boolean; override;
    class function classskininfo: skininfoty; override;
+  protected
+   fflags: dispwidgetflagsty;
   public
    constructor create(aowner: tcomponent); override;
    procedure initnewcomponent(const ascale: real); override;
    procedure synctofontheight; override;
    procedure clear; virtual;
+   procedure resetclear();
    property disptext: msestring read finfo.text.text;
   published
    property text: msestring read ftext write settext;
@@ -492,7 +497,7 @@ end;
 
 procedure tdispwidget.clientrectchanged;
 begin
- ftextrectvalid:= false;
+ exclude(fflags,dwf_textrectvalid);
  inherited;
  finfo.dest:= innerclientrect;
 end;
@@ -507,9 +512,9 @@ begin
  else begin
   fram1:= fframe.framei;
  end;
- if not ftextrectvalid then begin
+ if not (dwf_textrectvalid in fflags) then begin
   msedrawtext.textrect(getcanvas,finfo);
-  ftextrectvalid:= true;
+  include(fflags,dwf_textrectvalid);
  end;
  asize.cx:= finfo.res.size.cx + fram1.left + fram1.right;
  asize.cy:= finfo.res.size.cy + fram1.top + fram1.bottom;
@@ -518,8 +523,13 @@ end;
 procedure tdispwidget.dopaintforeground(const canvas: tcanvas);
 begin
  inherited;
- drawtext(canvas,finfo);
- ftextrectvalid:= true;
+ if not (dwf_cleared in fflags) or (ftext <> '') then begin
+  drawtext(canvas,finfo);
+ end
+ else begin
+  finfo.res:= nullrect;
+ end;
+ include(fflags,dwf_textrectvalid);
 end;
 
 procedure tdispwidget.fontchanged;
@@ -536,6 +546,7 @@ end;
 
 procedure tdispwidget.settext(const avalue: msestring);
 begin
+ exclude(fflags,dwf_cleared);
  ftext:= avalue;
  if avalue = '' then begin
   finfo.text.text:= getvaluetext;
@@ -546,11 +557,11 @@ begin
  invalidatetext;
 end;
 
-procedure tdispwidget.valuechanged;
+procedure tdispwidget.valuechanged();
 begin
+ exclude(fflags,dwf_cleared);
  if ftext = '' then begin
   finfo.text.text:= getvaluetext;
-  ftextrectvalid:= false;
   invalidatetext;
  end;
 {$ifdef mse_with_ifi}
@@ -608,8 +619,8 @@ procedure tdispwidget.formatchanged;
 begin
  if ftext = '' then begin
   finfo.text.text:= getvaluetext;
-  invalidatetext;
  end;
+ invalidatetext;
 end;
 
 procedure tdispwidget.doloaded;
@@ -667,14 +678,27 @@ end;
 
 procedure tdispwidget.invalidatetext;
 begin
- ftextrectvalid:= false;
+ exclude(fflags,dwf_textrectvalid);
  invalidate;
  checkautosize;
 end;
 
 procedure tdispwidget.clear;
 begin
- //dummy
+ if not (dwf_cleared in fflags) then begin
+  include(fflags,dwf_cleared);
+  invalidatetext();
+ end;
+end;
+
+procedure tdispwidget.resetclear();
+begin
+ if dwf_cleared in fflags then begin
+  exclude(fflags,dwf_cleared);
+  if ftext = '' then begin
+   invalidatetext();
+  end;
+ end;
 end;
 
 {$ifdef mse_with_ifi}
@@ -705,9 +729,12 @@ end;
 
 procedure tcustomstringdisp.setvalue(const Value: msestring);
 begin
- if fvalue <> value then begin
-  fvalue := Value;
-  valuechanged;
+ if (fvalue <> value) then begin
+  fvalue:= Value;
+  valuechanged();
+ end
+ else begin
+  resetclear();
  end;
 end;
 
@@ -722,16 +749,20 @@ end;
 procedure tcustomstringdisp.clear;
 begin
  value:= '';
+ inherited;
 end;
 
 { tcustomrichstringdisp }
 
 procedure tcustomrichstringdisp.setvalue(const avalue: msestring);
 begin
-// if fvalue <> value then begin
- finfo.text.text:= avalue;
- finfo.text.format:= nil;
- valuechanged;
+// if (fvalue <> value) or (finfo.text.format <> nil) then begin
+  finfo.text.text:= avalue;
+  finfo.text.format:= nil;
+  valuechanged();
+// end
+// else begin
+//  resetclear();
 // end;
 end;
 
@@ -757,6 +788,7 @@ end;
 procedure tcustomrichstringdisp.clear;
 begin
  richvalue:= emptyrichstring;
+ inherited;
 end;
 
 { tbytestringdisp }
@@ -790,6 +822,9 @@ begin
  if fvalue <> value then begin
   fvalue := Value;
   valuechanged;
+ end
+ else begin
+  resetclear();
  end;
 end;
 
@@ -804,6 +839,7 @@ end;
 procedure tbytestringdisp.clear;
 begin
  value:= '';
+ inherited;
 end;
 
 { tnumdisp }
@@ -860,10 +896,13 @@ end;
 
 procedure tcustomintegerdisp.setvalue(const Value: integer);
 begin
-// if fvalue <> value then begin
+ if fvalue <> value then begin
   fvalue := Value;
-  valuechanged;
-// end;
+  valuechanged();
+ end
+ else begin
+  resetclear();
+ end;
 end;
 
 procedure tcustomintegerdisp.valuechanged;
@@ -877,6 +916,7 @@ end;
 procedure tcustomintegerdisp.clear;
 begin
  value:= 0;
+ inherited;
 end;
 
 { tcustomint64disp }
@@ -924,10 +964,13 @@ end;
 
 procedure tcustomint64disp.setvalue(const Value: int64);
 begin
-// if fvalue <> value then begin
+ if fvalue <> value then begin
   fvalue := Value;
   valuechanged;
-// end;
+ end
+ else begin
+  resetclear();
+ end;
 end;
 
 procedure tcustomint64disp.valuechanged;
@@ -941,6 +984,7 @@ end;
 procedure tcustomint64disp.clear;
 begin
  value:= 0;
+ inherited;
 end;
 
 { tcustomrealdisp }
@@ -984,6 +1028,9 @@ begin
  if fvalue <> avalue then begin
   fvalue := avalue;
   valuechanged;
+ end
+ else begin
+  resetclear();
  end;
 end;
 
@@ -1029,6 +1076,7 @@ end;
 procedure tcustomrealdisp.clear;
 begin
  value:= emptyreal;
+ inherited;
 end;
 
 { tcustomdatetimedisp }
@@ -1044,6 +1092,9 @@ begin
  if fvalue <> avalue then begin
   fvalue := avalue;
   valuechanged;
+ end
+ else begin
+  resetclear();
  end;
 end;
 
@@ -1150,6 +1201,7 @@ end;
 procedure tcustomdatetimedisp.clear;
 begin
  value:= emptydatetime;
+ inherited;
 end;
 
 { tcustombooleandisp }
@@ -1177,6 +1229,9 @@ begin
  if fvalue <> value then begin
   fvalue := Value;
   valuechanged;
+ end
+ else begin
+  resetclear();
  end;
 end;
 
@@ -1203,6 +1258,7 @@ end;
 procedure tcustombooleandisp.clear;
 begin
  value:= false;
+ inherited;
 end;
 
 end.
