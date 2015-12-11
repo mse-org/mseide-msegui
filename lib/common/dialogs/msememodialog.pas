@@ -14,7 +14,7 @@ uses
  mseglob,mseguiglob,mseapplication,msestat,msemenus,msegui,msegraphics,
  msegraphutils,mseevent,mseclasses,mseforms,msedataedits,mseedit,msestrings,
  msetypes,msestatfile,msesimplewidgets,msewidgets,msedialog,classes,mclasses,
- msedropdownlist;
+ msedropdownlist,msesplitter;
  
 type
  tmemodialogcontroller = class(tstringdialogcontroller)
@@ -30,8 +30,9 @@ type
  tmsememodialogfo = class(tmseform)
    memo: tmemoedit;
    tstatfile1: tstatfile;
-   tbutton1: tbutton;
+   tlayouter1: tlayouter;
    tbutton2: tbutton;
+   tbutton1: tbutton;
   public
    constructor create(const aowner: tcomponent; const readonly: boolean);
                                                                   reintroduce;
