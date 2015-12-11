@@ -65,6 +65,7 @@ type
    procedure updatecellzone(const row: integer; const apos: pointty;
                             var result: cellzonety);
    function getnulltext: msestring;
+   function getassistivecelltext(const arow: int32): msestring;
    procedure loadcellbmp(const acanvas: tcanvas; 
                                         const abmp: tmaskedbitmap); virtual;
    procedure drawcell(const canvas: tcanvas);
@@ -252,6 +253,11 @@ begin
 end;
 
 function tcustomdataimage.getnulltext: msestring;
+begin
+ result:= '';
+end;
+
+function tcustomdataimage.getassistivecelltext(const arow: int32): msestring;
 begin
  result:= '';
 end;
