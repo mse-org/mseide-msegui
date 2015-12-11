@@ -696,7 +696,6 @@ type
    tspacer3: tspacer;
    filefiltergrid: tstringgrid;
    ttabpage14: ttabpage;
-   grid: tstringgrid;
    serverla: tlayouter;
    uploadcommand: tfilenameedit;
    gdbservercommand: tfilenameedit;
@@ -803,6 +802,9 @@ type
    editmarkbrackets: tbooleanedit;
    trimtrailingwhitespace: tbooleanedit;
    fpcgdbworkaround: tbooleanedit;
+   twidgetgrid6: twidgetgrid;
+   syntaxdeffile: tfilenameedit;
+   syntaxdeffilemask: tmemodialogedit;
    procedure acttiveselectondataentered(const sender: TObject);
    procedure colonshowhint(const sender: tdatacol; const arow: Integer; 
                       var info: hintinfoty);
@@ -1964,8 +1966,10 @@ begin
   end;
 
   fo.sourcedirs.gridvalues:= reversearray(d.t.sourcedirs);
-  fo.grid[0].datalist.asarray:= e.t.syntaxdeffiles;
-  fo.grid[1].datalist.asarray:= e.t.sourcefilemasks;
+  fo.syntaxdeffile.gridvalues:= e.t.syntaxdeffiles;
+  fo.syntaxdeffilemask.gridvalues:= e.t.sourcefilemasks;
+//  fo.grid[0].datalist.asarray:= e.t.syntaxdeffiles;
+//  fo.grid[1].datalist.asarray:= e.t.sourcefilemasks;
   fo.filefiltergrid[0].datalist.asarray:= e.t.filemasknames;
   fo.filefiltergrid[1].datalist.asarray:= e.t.filemasks;
   fo.settingsdataent(nil);
@@ -2052,8 +2056,10 @@ begin
   end;
   storemacros(fo);
   d.t.sourcedirs:= reversearray(fo.sourcedirs.gridvalues);
-  e.t.syntaxdeffiles:= fo.grid[0].datalist.asarray;
-  e.t.sourcefilemasks:= fo.grid[1].datalist.asarray;
+  e.t.syntaxdeffiles:= fo.syntaxdeffile.gridvalues;
+  e.t.sourcefilemasks:= fo.syntaxdeffilemask.gridvalues;
+//  e.t.syntaxdeffiles:= fo.grid[0].datalist.asarray;
+//  e.t.sourcefilemasks:= fo.grid[1].datalist.asarray;
   e.t.filemasknames:= fo.filefiltergrid[0].datalist.asarray;
   e.t.filemasks:= fo.filefiltergrid[1].datalist.asarray;
  end;
