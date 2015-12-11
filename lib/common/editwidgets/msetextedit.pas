@@ -19,7 +19,7 @@ unit msetextedit;
 interface
 uses
  mseeditglob,mseedit,msewidgetgrid,classes,mclasses,msedatalist,
- msegraphics,msestream,msedragglob,msesys,
+ msegraphics,msestream,msedragglob,msesys,mseassistiveclient,
  msetypes,mserichstring,msestat,msestatfile,mseclasses,mseinplaceedit,msegrids,
  mseevent,mseguiglob,msegui,msegraphutils,msestrings,msedrawtext,msearrayprops,
  msemenus,msepointer,msegridsglob{$ifdef mse_with_ifi},mseificomp{$endif},
@@ -210,7 +210,11 @@ type
                      const ashowcell: cellpositionty);
    procedure normalizeselectedrows(var start,stop: integer);
    procedure internalclearselection;
-
+    //iassistiveclient
+   function getassistivetext(): msestring; override;
+   function getassistiveflags: assistiveflagsty; override;   
+    //iassistiveclientgrid
+   function getassistivecelltext(const arow: int32): msestring;    
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -1939,6 +1943,29 @@ end;
 procedure tcustomtextedit.internalclearselection;
 begin
  setselection(editpos,editpos);
+end;
+
+function tcustomtextedit.getassistivetext(): msestring;
+begin
+ result:= feditor.text;
+end;
+
+function tcustomtextedit.getassistiveflags: assistiveflagsty;
+begin
+ result:= inherited getassistiveflags;
+ if fgridintf <> nil then begin
+  include(result,asf_gridcell);
+ end;
+end;
+
+function tcustomtextedit.getassistivecelltext(const arow: int32): msestring;
+begin
+ if flines <> nil then begin
+  result:= flines[arow];
+ end
+ else begin
+  result:= '';
+ end;
 end;
 
 procedure tcustomtextedit.clearselection;

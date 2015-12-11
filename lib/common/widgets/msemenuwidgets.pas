@@ -1374,6 +1374,9 @@ begin
     end;
    end;
    activeitem:= value1;
+   if menu <> nil then begin
+    tmenuitem1(menu).factiveitem:= value1; //for iassistiveclient
+   end;
    if activeitem >= 0 then begin
     if not menu[value1].canactivate then begin
      activeitem:= nextmenuitem(flayout);
@@ -1398,7 +1401,7 @@ begin
     end;
     capturemouse;
     if assistiveserver <> nil then begin
-     assistiveserver.doitementer(iassistiveclient(menu),cells,activeitem);
+     assistiveserver.doitementer(iassistiveclientmenu(menu),cells,activeitem);
     end;
    end;
   end

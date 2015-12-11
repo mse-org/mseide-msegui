@@ -144,6 +144,8 @@ type
    function gethint: msestring; override;
    procedure sethint(const Value: msestring); override;
    function ishintstored: boolean; override;
+    //iactiveclient
+   function getassistivecaption(): msestring; override;
 
    procedure setenabled(const avalue: boolean); override;
    procedure setvisible(const avalue: boolean); override;
@@ -1173,6 +1175,16 @@ end;
 function tcustombutton.ishintstored: boolean;
 begin
  result:= isactionhintstored(factioninfo);
+end;
+
+function tcustombutton.getassistivecaption(): msestring;
+begin
+ if factioninfo.captiontext <> '' then begin
+  result:= factioninfo.captiontext;
+ end
+ else begin
+  result:= inherited getassistivecaption();
+ end;
 end;
 
 procedure tcustombutton.setshortcut(const avalue: shortcutty);

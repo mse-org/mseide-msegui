@@ -10,13 +10,16 @@
 unit msemenus;
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
+{$ifndef mse_no_ifi}
+ {$define mse_with_ifi}
+{$endif}
 
 interface
 uses
  mseact,msegui,msearrayprops,mseclasses,msegraphutils,
  msedrawtext,msegraphics,mseevent,mseglob,mseguiglob,mseshapes,mserichstring,
  msetypes,msestrings,classes,mclasses,msekeyboard,msebitmap,
- mseassistiveclient;
+ mseassistiveclient{$ifdef mse_with_ifi},mseificompglob{$endif};
 
 type
  menuoptionty = (mo_noinsert,mo_stopinsert,mo_insertfirst,mo_noseparator,
@@ -86,7 +89,7 @@ type
  end;
  
  tmenuitem = class(teventpersistent,iactionlink,imenuitem,iimagelistinfo,
-                   iassistiveclient)
+                   iassistiveclientmenu)
   private
    fparentmenu: tmenuitem;
    fonchange: menuitemeventty;
@@ -165,14 +168,22 @@ type
    procedure readsc1(reader: treader);
    procedure writesc1(writer: twriter);
    procedure setcolorglyphactive(const avalue: colorty);
+   function getactiveitem(out aitem: tmenuitem): boolean;
     //iassistiveclient
-   function getassistivename(): msestring;
+   function getassistivename(): msestring; virtual;
+   function getassistivecaption(): msestring; virtual;
+   function getassistivetext(): msestring; virtual;
+   function getassistiveflags(): assistiveflagsty; virtual;
+  {$ifdef mse_with_ifi}
+   function getifidatalinkintf(): iifidatalink; virtual;
+  {$endif}
   protected
    finfo: actioninfoty;
    fowner: tcustommenu;
    fsubmenu: tmenuitems;
    ffont: tmenufont;
    ffontactive: tmenufontactive;
+   factiveitem: int32; //for iassistiveclient
    procedure updatecaption;
    procedure defineproperties(filer: tfiler); override;
    procedure befexec;
@@ -1758,12 +1769,55 @@ begin
  end;
 end;
 
-function tmenuitem.getassistivename: msestring;
+function tmenuitem.getactiveitem(out aitem: tmenuitem): boolean;
 begin
- result:= msestring(fname);
+ result:= (factiveitem >= 0) and (fsubmenu <> nil) and 
+                                     (factiveitem < fsubmenu.count);
+ if result then begin
+  aitem:= fsubmenu[factiveitem];
+ end;  
+end;
+
+function tmenuitem.getassistivename: msestring;
+var
+ item1: tmenuitem;
+begin
+ if getactiveitem(item1) then begin
+  result:= msestring(item1.fname);
+ end
+ else begin
+  result:= '';
+ end;
  if (result = '') and (fowner <> nil) then begin
   result:= msestring(fowner.name);
  end;  
+end;
+
+function tmenuitem.getassistivecaption(): msestring;
+var
+ item1: tmenuitem;
+begin
+ if getactiveitem(item1) then begin
+  result:= item1.finfo.captiontext;
+ end
+ else begin
+  result:= '';
+ end;
+end;
+
+function tmenuitem.getassistivetext(): msestring;
+begin
+ result:= '';
+end;
+
+function tmenuitem.getassistiveflags(): assistiveflagsty;
+begin
+ result:= [asf_menu];
+end;
+
+function tmenuitem.getifidatalinkintf(): iifidatalink;
+begin
+ result:= nil;
 end;
 
 { tmenuitems }

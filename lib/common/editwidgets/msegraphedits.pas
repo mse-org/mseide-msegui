@@ -204,7 +204,8 @@ type
    procedure gridtovalue(row: integer); virtual;
    procedure setvaluedata(const source); virtual; abstract;
    procedure getvaluedata(out dest); virtual; abstract;
-   function getnulltext: msestring;
+   function getnulltext: msestring; virtual;
+   function getassistivecelltext(const arow: int32): msestring; virtual;
    procedure docellevent(const ownedcol: boolean;
                                         var info: celleventinfoty); virtual;
    function sortfunc(const l,r): integer; virtual;
@@ -2007,6 +2008,11 @@ begin
 end;
 
 function tgraphdataedit.getnulltext: msestring;
+begin
+ result:= '';
+end;
+
+function tgraphdataedit.getassistivecelltext(const arow: int32): msestring;
 begin
  result:= '';
 end;

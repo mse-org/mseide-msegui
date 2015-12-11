@@ -22,7 +22,7 @@ uses
  msetypes,msestrings,msedatalist,mseglob,mseguiglob,msedragglob,
  mseevent,msegraphutils,msedrawtext,msestat,msestatfile,mseclasses,
  msearrayprops,msegrids,msewidgetgrid,msedropdownlist,msedrag,mseforms,
- mseformatstr,typinfo,msemenus,msebitmap,
+ mseformatstr,typinfo,msemenus,msebitmap,mseassistiveclient,
  msescrollbar,msewidgets,msepopupcalendar,msekeyboard,msepointer,msegridsglob
  {$ifdef mse_with_ifi}
  ,mseificomp,mseifiglob,mseificompglob
@@ -92,7 +92,7 @@ type
 {$ifdef mse_with_ifi}
    fifilink: tifivaluelinkcomp;
    function getdefaultifilink: iificlient; override;
-   function getifidatalinkintf: iifidatalink; virtual;
+   function getifidatalinkintf: iifidatalink; override;
    function getoptionsedit: optionseditty; override;
    procedure dochange; override;
     //iifidatalink
@@ -181,6 +181,11 @@ type
                                            var result: cellzonety); virtual;
    function getnulltext: msestring; virtual;
    function getcelltext(const datapo: pointer; out empty: boolean): msestring;
+   function getassistivecelltext(const arow: int32): msestring;
+    //iassistiveclient
+   function getassistivetext(): msestring; override;
+   function getassistiveflags: assistiveflagsty; override;
+   
    procedure drawcell(const canvas: tcanvas); virtual;
    procedure updateautocellsize(const canvas: tcanvas); virtual;
    procedure beforecelldragevent(var ainfo: draginfoty; const arow: integer;
@@ -1405,6 +1410,8 @@ type
    procedure setnullvalue(); override;
    procedure updatedatalist; override;
    procedure updatereadonlystate(); override;
+    //iassistiveclient
+   function getassistiveflags: assistiveflagsty; override;
   public
    constructor create(aowner: tcomponent); override;
    procedure fillcol(const value: tdatetime);
@@ -2244,6 +2251,31 @@ begin
   fongettext(self,mstr1,false);
  end;
  result:= mstr1;
+end;
+
+function tcustomdataedit.getassistivecelltext(const arow: int32): msestring;
+var
+ bo1: boolean;
+begin
+ if fdatalist <> nil then begin
+  result:= getcelltext(fdatalist.getitempo(arow),bo1);
+ end
+ else begin
+  result:= '';
+ end;
+end;
+
+function tcustomdataedit.getassistivetext(): msestring;
+begin
+ result:= feditor.text;
+end;
+
+function tcustomdataedit.getassistiveflags: assistiveflagsty;
+begin
+ result:= inherited getassistiveflags;
+ if fgridintf <> nil then begin
+  include(result,asf_gridcell);
+ end;
 end;
 
 procedure tcustomdataedit.drawcell(const canvas: tcanvas);
@@ -6445,6 +6477,11 @@ begin
   tgridrealdatalist(fdatalist).updateeditoptions(foptionsedit);
                                       //for acceptempty
  end;
+end;
+
+function tcustomdatetimeedit.getassistiveflags: assistiveflagsty;
+begin
+ result:= inherited getassistiveflags() + [asf_datetime];
 end;
 
 procedure tcustomdatetimeedit.setvaluedata(const source);

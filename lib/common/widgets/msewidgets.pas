@@ -83,6 +83,9 @@ type
    function needsfocuspaint: boolean; override;
    procedure updatemousestate(const sender: twidget;
                                const info: mouseeventinfoty); override;
+    //iassistiveclient
+   function getassistivecaption(): msestring; override;
+   
   public
    constructor create(const intf: icaptionframe);
    destructor destroy; override;
@@ -3061,6 +3064,11 @@ begin
    end;
   end;
  end;
+end;
+
+function tcustomcaptionframe.getassistivecaption(): msestring;
+begin
+ result:= getcaption();
 end;
 
 procedure tcustomcaptionframe.scale(const ascale: real);

@@ -23,7 +23,7 @@ uses
  msepointer,mseevent,msekeyboard,mseclasses,mseglob,mseguiglob,mselist,
  msesystypes,msethread,mseguiintf,{msesysdnd,}mseassistiveclient,
  msebitmap,msearrayprops,msethreadcomp,mserichstring,msearrayutils
-                               {$ifdef mse_with_ifi},mseifiglob{$endif};
+                   {$ifdef mse_with_ifi},mseifiglob,mseificompglob{$endif};
 
 const
  mseguiversiontext = '4.0.1';
@@ -596,6 +596,8 @@ type
    class procedure drawframe(const canvas: tcanvas; const rect2: rectty; 
            const afi: baseframeinfoty; const astate: framestateflagsty
            {const disabled,active,clicked,mouse: boolean});
+    //iassistiveclient
+   function getassistivecaption(): msestring; virtual;
   public
    constructor create(const intf: iframe); reintroduce;
    destructor destroy; override;
@@ -1800,9 +1802,16 @@ type
    function getclientrect: rectty;
    function windowpo: pwindowty;
    function canclose1: boolean; 
-   
+
+   function getiassistiveclient(): iassistiveclient; virtual;   
     //iassistiveclient
    function getassistivename(): msestring; virtual;
+   function getassistivecaption(): msestring; virtual;
+   function getassistivetext(): msestring; virtual;
+   function getassistiveflags: assistiveflagsty; virtual;
+  {$ifdef mse_with_ifi}
+   function getifidatalinkintf(): iifidatalink; virtual;
+  {$endif}
   public
    constructor create(aowner: tcomponent); overload; override;
    constructor create(const aowner: tcomponent;
@@ -3762,7 +3771,7 @@ function getiassistiveclient(const awidget: twidget): iassistiveclient;
 begin
  result:= nil;
  if awidget <> nil then begin
-  result:= iassistiveclient(awidget);
+  result:= awidget.getiassistiveclient();
  end;
 end;
 
@@ -4342,6 +4351,11 @@ begin
    end;
   end;
  end;
+end;
+
+function tcustomframe.getassistivecaption(): msestring;
+begin
+ result:= '';
 end;
 
 procedure tcustomframe.paintoverlay(const canvas: tcanvas; const arect: rectty);
@@ -10143,7 +10157,7 @@ procedure twidget.mouseevent(var info: mouseeventinfoty);
   include(info.eventstate,es_client);
   try
    if assistiveserver <> nil then begin
-    assistiveserver.clientmouseevent(iassistiveclient(self),info);
+    assistiveserver.clientmouseevent(getiassistiveclient(),info);
    end;
    clientmouseevent(info);
   finally
@@ -10913,7 +10927,7 @@ begin
    end;
    include(fwidgetstate,ws_entered);
    if assistiveserver <> nil then begin
-    assistiveserver.doenter(iassistiveclient(self));
+    assistiveserver.doenter(getiassistiveclient());
    end;
    doenter;
    if needsfocuspaint then begin
@@ -11578,7 +11592,7 @@ procedure twidget.dokeydown1(var info: keyeventinfoty);
 begin
  exclude(fwidgetstate1,ws1_onkeydowncalled);
  if assistiveserver <> nil then begin
-  assistiveserver.dokeydown(iassistiveclient(self),info);
+  assistiveserver.dokeydown(getiassistiveclient(),info);
  end;
  dokeydown(info);
 end;
@@ -13836,6 +13850,11 @@ begin
  result:= canclose;
 end;
 
+function twidget.getiassistiveclient(): iassistiveclient;
+begin
+ result:= iassistiveclient(self);
+end;
+
 procedure twidget.beginupdate;
 begin
  if fwidgetupdating = 0 then begin
@@ -13884,6 +13903,31 @@ end;
 function twidget.getassistivename: msestring;
 begin
  result:= msestring(name);
+end;
+
+function twidget.getassistivecaption(): msestring;
+begin
+ if fframe <> nil then begin
+  result:= fframe.getassistivecaption();
+ end
+ else begin
+  result:= '';
+ end;
+end;
+
+function twidget.getassistivetext(): msestring;
+begin
+ result:= '';
+end;
+
+function twidget.getassistiveflags: assistiveflagsty;
+begin
+ result:= [];
+end;
+
+function twidget.getifidatalinkintf(): iifidatalink;
+begin
+ result:= nil;
 end;
 
 { twindow }

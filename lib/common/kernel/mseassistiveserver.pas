@@ -19,7 +19,7 @@ type
   procedure doenter(const sender: iassistiveclient);
   procedure doitementer(const sender: iassistiveclient; //sender can be nil
                             const items: shapeinfoarty; const aindex: integer);
-  procedure doitementer(const sender: iassistiveclient;
+  procedure doitementer(const sender: iassistiveclient; //sender can be nil
                          const items: menucellinfoarty; const aindex: integer);
   procedure clientmouseevent(const sender: iassistiveclient;
                                           const info: mouseeventinfoty);
@@ -28,7 +28,7 @@ type
                                         const info: keyeventinfoty);
   procedure doactionexecute(const sender: tobject; const info: actioninfoty);
   procedure dochange(const sender: iassistiveclient);
-  procedure docellevent(const sender: iassistiveclient; 
+  procedure docellevent(const sender: iassistiveclientgrid; 
                                       const info: celleventinfoty);
 end;
 

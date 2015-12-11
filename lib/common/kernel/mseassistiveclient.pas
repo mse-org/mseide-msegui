@@ -9,14 +9,41 @@
 }
 unit mseassistiveclient;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+{$ifndef mse_no_ifi}
+ {$define mse_with_ifi}
+{$endif}
 interface
 uses
- msestrings,mseglob,mseinterfaces;
-
+ msestrings,mseglob,mseinterfaces,msetypes,mseificompglob;
 type
+ assistiveflagty = (asf_grid,asf_gridcell,asf_datetime,asf_menu);
+ assistiveflagsty = set of assistiveflagty;
+ 
  iassistiveclient = interface(inullinterface)[miid_iassistiveclient]
   function getinstance: tobject;
   function getassistivename(): msestring;
+  function getassistivecaption(): msestring;
+  function getassistivetext(): msestring;
+  function getassistiveflags(): assistiveflagsty;
+ {$ifdef mse_with_ifi}
+  function getifidatalinkintf(): iifidatalink; //can be nil
+ {$endif}
  end;
+
+ assistivegridinfoty = record
+  colmin: int32;
+  colmax: int32;
+  rowmin: int32;
+  rowmax: int32;
+ end;
+ 
+ iassistiveclientgrid = interface(iassistiveclient)[miid_iassistiveclientgrid]
+  function getassistivecelltext(const acell: gridcoordty): msestring;
+  function getassistivegridinfo(): assistivegridinfoty;
+ end;
+ 
+ iassistiveclientmenu = interface(iassistiveclient)[miid_iassistiveclientmenu]
+ end;
+
 implementation
 end.

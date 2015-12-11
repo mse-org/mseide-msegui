@@ -94,6 +94,7 @@ type
                                         // -2 -> default value
   procedure valuetogrid(row: integer);  //row = -1 -> focused row
   function getnulltext: msestring;
+  function getassistivecelltext(const arow: int32): msestring;
   procedure docellevent(const ownedcol: boolean; var info: celleventinfoty);
   function sortfunc(const l,r): integer;
   procedure gridvaluechanged(const index: integer); //index = -1 -> undefined, all
@@ -333,6 +334,8 @@ type
    procedure removefixwidget(const awidget: twidget);
    procedure updatepopupmenu(var amenu: tpopupmenu; 
                          var mouseinfo: mouseeventinfoty); override;
+    //iassistiveclientgrid
+   function getassistivecelltext(const acell: gridcoordty): msestring; override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -3783,6 +3786,24 @@ begin
   end;
  end;
  inherited;
+end;
+
+function tcustomwidgetgrid.getassistivecelltext(
+              const acell: gridcoordty): msestring;
+begin
+ if isdatacell(acell) then begin
+  with datacols[acell.col] do begin
+   if fintf <> nil then begin
+    result:= fintf.getassistivecelltext(acell.row);
+   end
+   else begin
+    result:= '';
+   end;
+  end;
+ end
+ else begin
+  result:= inherited getassistivecelltext(acell);
+ end;
 end;
 
 procedure tcustomwidgetgrid.seteditfocus;

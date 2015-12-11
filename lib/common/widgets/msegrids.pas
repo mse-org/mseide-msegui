@@ -19,7 +19,7 @@ unit msegrids;
 interface
 uses
  classes,mclasses,sysutils,mseclasses,msegui,msedragglob,
- msegraphics,msetypes,msestrings,msegraphutils,msebitmap,
+ msegraphics,msetypes,msestrings,msegraphutils,msebitmap,mseassistiveclient,
  msescrollbar,msearrayprops,mseglob,mseguiglob,typinfo,msearrayutils,
  msedatalist,msedrawtext,msewidgets,mseevent,mseinplaceedit,mseeditglob,
  mseobjectpicker,msepointer,msetimer,msebits,msestat,msestatfile,msekeyboard,
@@ -379,7 +379,7 @@ type
    function scrollable: boolean; virtual; abstract;
    function framedim: sizety;
 
-  //iframe
+    //iframe
    function getwidget: twidget;
    procedure setframeinstance(instance: tcustomframe);
    function getwidgetrect: rectty;
@@ -397,7 +397,7 @@ type
    function getframestateflags: framestateflagsty;
 
    procedure updatecellheight(const canvas: tcanvas; var aheight: integer); virtual;
-  //iface
+    //iface
    function getclientrect: rectty;
    procedure setlinkedvar(const source: tmsecomponent; var dest: tmsecomponent;
                const linkintf: iobjectlink = nil);
@@ -1794,7 +1794,8 @@ type
 
  tcustomgrid = class(tpublishedwidget,iautoscrollframe,iobjectpicker,iscrollbar,
                     idragcontroller,istatfile
-                    {$ifdef mse_with_ifi},iifigridlink{$endif})
+                    {$ifdef mse_with_ifi},iifigridlink{$endif},
+                    iassistiveclientgrid)
   private
    frepeater: tsimpletimer;
    frepeataction: focuscellactionty;
@@ -2167,7 +2168,13 @@ type
    procedure endnocheckvalue;
    function nocheckvalue: boolean;
    procedure reorderrow;
-
+   
+   function getiassistiveclient(): iassistiveclient; override;
+    //iassistiveclient
+   function getassistiveflags(): assistiveflagsty; override;
+    //iassistiveclientgrid
+   function getassistivecelltext(const acell: gridcoordty): msestring; virtual;  
+   function getassistivegridinfo(): assistivegridinfoty; virtual;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -2605,6 +2612,8 @@ type
    procedure doselectionchanged; override;
    procedure updatepopupmenu(var amenu: tpopupmenu; 
                          var mouseinfo: mouseeventinfoty); override;
+    //iassistiveclientgrid
+   function getassistivecelltext(const acell: gridcoordty): msestring; override;                         
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -2723,7 +2732,7 @@ function cellkeypress(const info: celleventinfoty): keyty;
 implementation
 uses
  mseguiintf,msestockobjects,mseact,mseactions,rtlconsts,msegraphedits,
- mseassistiveclient,mseassistiveserver,mseformatstr;
+ mseassistiveserver,mseformatstr;
 type
  tframe1 = class(tcustomframe);
  tdatalist1 = class(tdatalist);
@@ -11037,7 +11046,7 @@ begin
    datacols[info.cell.col].docellevent(info);
   end;
   if assistiveserver <> nil then begin
-   assistiveserver.docellevent(iassistiveclient(self),info);
+   assistiveserver.docellevent(iassistiveclientgrid(self),info);
   end;
  {$ifdef mse_with_ifi}
   if fifilink <> nil then begin
@@ -15142,6 +15151,47 @@ begin
  end;
 end;
 
+function tcustomgrid.getiassistiveclient(): iassistiveclient;
+begin
+ result:= iassistiveclientgrid(self);
+end;
+
+function tcustomgrid.getassistiveflags(): assistiveflagsty;
+begin
+ result:= inherited getassistiveflags() + [asf_grid];
+end;
+
+function tcustomgrid.getassistivecelltext(const acell: gridcoordty): msestring;
+begin
+ result:= '';
+ if isvalidcell(acell) then begin
+  if acell.row < 0 then begin
+   with fixrows[acell.row] do begin
+    if acell.col < 0 then begin
+     if -acell.col <= captionsfix.count then begin
+      result:= captionsfix[acell.col].caption;
+     end;
+    end
+    else begin
+     if acell.col < captions.count then begin
+      result:= captions[acell.col].caption;
+     end;
+    end;
+   end;
+  end;
+ end;
+end;
+
+function tcustomgrid.getassistivegridinfo(): assistivegridinfoty;
+begin
+ with result do begin
+  colmin:= -fixcols.count;
+  colmax:= datacols.count;
+  rowmin:= -fixrows.count;
+  rowmax:= rowcount;
+ end;
+end;
+
 procedure tcustomgrid.sort;
 var
  bo1: boolean;
@@ -16145,6 +16195,17 @@ begin
   feditor.updatepopupmenu(amenu,popupmenu,mouseinfo,false);
  end;
  inherited;
+end;
+
+function tcustomstringgrid.getassistivecelltext(
+                                       const acell: gridcoordty): msestring;
+begin
+ if isdatacell(acell) then begin
+  result:= self[acell.col][acell.row];
+ end
+ else begin
+  result:= inherited getassistivecelltext(acell);
+ end;
 end;
 
 procedure tcustomstringgrid.setupeditor(const acell: gridcoordty;
