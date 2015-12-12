@@ -15186,9 +15186,9 @@ function tcustomgrid.getassistivegridinfo(): assistivegridinfoty;
 begin
  with result do begin
   colmin:= -fixcols.count;
-  colmax:= datacols.count;
+  colmax:= datacols.count-1;
   rowmin:= -fixrows.count;
-  rowmax:= rowcount;
+  rowmax:= rowhigh;
  end;
 end;
 
