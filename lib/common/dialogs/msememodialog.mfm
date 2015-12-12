@@ -70,8 +70,6 @@ object msememodialogfo: tmsememodialogfo
       bounds_cxmin = 50
       state = [as_default, as_localdefault, as_localcaption]
       caption = '&OK'
-      font.name = 'stf_default'
-      font.localprops = []
       modalresult = mr_ok
       reffontheight = 14
     end
