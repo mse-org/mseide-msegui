@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2014 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2015 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -106,7 +106,10 @@ type
  end;
 
  dispwidgetoptionty = (dwo_hintclippedtext,dwo_nogray,
-                                       dwo_showlocal,dwo_showutc);
+                           dwo_showlocal,dwo_showutc,
+                           dwo_blank);
+                         //dwo_blank has only effect if componentstate csreading
+                         //or csdesigning are set
  dispwidgetoptionsty = set of dispwidgetoptionty;
  dispwidgetflagty = (dwf_textrectvalid,dwf_cleared);
  dispwidgetflagsty = set of dispwidgetflagty;
@@ -123,6 +126,7 @@ type
    procedure settextflags(const value: textflagsty);
    procedure settext(const avalue: msestring);
   protected
+   fflags: dispwidgetflagsty;
 {$ifdef mse_with_ifi}
    fifilink: tifilinkcomp;
    function getdefaultifilink: iifilink; override;
@@ -150,8 +154,6 @@ type
    procedure enabledchanged; override;
    function verticalfontheightdelta: boolean; override;
    class function classskininfo: skininfoty; override;
-  protected
-   fflags: dispwidgetflagsty;
   public
    constructor create(aowner: tcomponent); override;
    procedure initnewcomponent(const ascale: real); override;
@@ -169,7 +171,8 @@ type
                 default defaultdisptextflags;
    property optionswidget default defaultdispwidgetoptions;
    property optionswidget1 default defaultdispwidgetoptions1;
-   property options: dispwidgetoptionsty read foptions write setoptions default [];
+   property options: dispwidgetoptionsty read foptions 
+                                             write setoptions default [];
    property onchange: notifyeventty read fonchange write fonchange;
    property onshowhint;
  end;
@@ -559,7 +562,11 @@ end;
 
 procedure tdispwidget.valuechanged();
 begin
- exclude(fflags,dwf_cleared);
+ if not (dwo_blank in foptions) or 
+          (componentstate*[csreading,csdesigning] = []) and
+                      not (ws_loadedproc in widgetstate) then begin
+  exclude(fflags,dwf_cleared);
+ end;
  if ftext = '' then begin
   finfo.text.text:= getvaluetext;
   invalidatetext;
@@ -669,6 +676,20 @@ end;
 
 procedure tdispwidget.setoptions(const avalue: dispwidgetoptionsty);
 begin
+ if (componentstate*[csreading,csdesigning] <> []) then begin
+  if dwo_blank in avalue then begin
+   if not (dwf_cleared in fflags) then begin
+    include(fflags,dwf_cleared);
+    invalidatetext();
+   end;
+  end
+  else begin
+   if dwf_cleared in fflags then begin
+    exclude(fflags,dwf_cleared);
+    invalidatetext();
+   end;
+  end;
+ end;
  if foptions <> avalue then begin
   foptions:= avalue-[dwo_showlocal,dwo_showutc];
   updatetextflags;
