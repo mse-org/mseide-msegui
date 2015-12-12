@@ -181,6 +181,8 @@ const
                        og_mousescrollcol,og_wrapcol,
                        og_rowinserting,og_rowdeleting,
                        og_autofirstrow,og_autoappend];
+ defaultoptionsgridrestricted = defaultoptionsgrid - 
+               [og_rowinserting,og_rowdeleting,og_autofirstrow,og_autoappend];
 
  mousescrolldist = 5;
  griddefaultcolwidth = 50;
