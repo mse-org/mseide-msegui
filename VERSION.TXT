@@ -1,8 +1,5 @@
 MSEide+MSEgui breaking changes version history
 
-2015-12-10
- og_rowinserting, og_rowdeleting, og_auotfirstrow, og_autoappend 
- added to defaultoptionsgrid.
 2015-11-23
  twidget.findwidget() -> findchild().
  twidget.findtagwidget() -> findtagchild().

@@ -298,8 +298,7 @@ type
       const acontroller: tcustomdropdownlistcontroller); reintroduce; virtual;
  end;
  dropdownfixcolclassty = class of tdropdownfixcol;
-const
- defaultdropdownoptionsgrid = defaultoptionsgridrestricted;
+
 type
  tdropdownlist = class(tcustomstringgrid)
   private
@@ -344,7 +343,6 @@ type
                 var aitemindex: integer; afiltertext: msestring); reintroduce;
    property filtertext: msestring read ffiltertext write setfiltertext;
    property options: dropdownlistoptionsty read foptions1 write foptions1;
-   property optionsgrid default defaultdropdownoptionsgrid;
  end;
 
  tdropdownbutton = class(tstockglyphframebutton)
@@ -2284,7 +2282,6 @@ begin
  fcontroller:= acontroller;
  aparent:= fcontroller.getwidget;
  inherited create(nil);
- foptionsgrid:= defaultdropdownoptionsgrid;
  fdatacols.innerframe:= defaultdropdowncellinnerframe;
  visible:= false;
  beginupdate;
