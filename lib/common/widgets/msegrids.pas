@@ -117,6 +117,8 @@ const
  rowstateoptions = [og_colmerged,og_rowheight]; //variable rowstate size
  deprecatedoptionsgrid = [og_noresetselect];
  invisibleoptionsgrid = [ord(og_noresetselect)];
+ newcomponentoptionsgridadd = [og_rowinserting,og_rowdeleting,
+                                      og_autofirstrow,og_autoappend];
  
 type
  pickobjectkindty = (pok_none,pok_fixcolsize,pok_fixcol,pok_datacolsize,pok_datacol,
@@ -2643,6 +2645,8 @@ type
  end;
 
  tstringgrid = class(tcustomstringgrid)
+  public
+   procedure initnewcomponent(const ascale: real); override;
   published
    property optionsgrid;
    property optionsgrid1;
@@ -18647,6 +18651,14 @@ begin
 end;
 
 {$endif}
+
+{ tstringgrid }
+
+procedure tstringgrid.initnewcomponent(const ascale: real);
+begin
+ inherited;
+ optionsgrid:= optionsgrid + newcomponentoptionsgridadd;
+end;
 
 end.
 

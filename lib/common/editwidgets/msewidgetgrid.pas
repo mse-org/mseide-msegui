@@ -362,6 +362,8 @@ type
   end;
 
  twidgetgrid = class(tcustomwidgetgrid)
+  public
+   procedure initnewcomponent(const ascale: real); override;
   published
    property optionsgrid;
    property optionsgrid1;
@@ -3925,6 +3927,14 @@ end;
 function createtgridrealdatalist(const aowner:twidgetcol): tdatalist;
 begin
  result:= tgridrealdatalist.create(aowner);
+end;
+
+{ twidgetgrid }
+
+procedure twidgetgrid.initnewcomponent(const ascale: real);
+begin
+ inherited;
+ optionsgrid:= optionsgrid + newcomponentoptionsgridadd;
 end;
 
 initialization
