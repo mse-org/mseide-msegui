@@ -116,7 +116,19 @@ Type
    PISC_UINT64 = ^ISC_UINT64;
    PISC_LONG = ^ISC_LONG;
 
+   {$IFDEF CPU64}
+    FB_API_HANDLE = cuint;
+   {$ELSE}
+    FB_API_HANDLE = pointer;
+   {$ENDIF}
+
+
   const
+     {$IFDEF CPU64}
+     FB_API_NULLHANDLE = 0;
+     {$ELSE}
+     FB_API_NULLHANDLE = nil;
+     {$ENDIF}
      DSQL_close = 1;
      DSQL_drop = 2;
 
@@ -270,13 +282,6 @@ type
        end;
      TBSTREAM = BSTREAM;
      PBstream = ^BSTREAM;
-  {!!MVC
-
-  #define getb(p)       (--(p)->bstr_cnt >= 0 ?  (p)->bstr_ptr++ & 0377: BLOB_get (p))
-  #define putb(x,p) (((x) == '\n' || (!(--(p)->bstr_cnt))) ? BLOB_put ((x),p) : ((int) ( (p)->bstr_ptr++ = (unsigned) (x))))
-  #define putbx(x,p) ((!(--(p)->bstr_cnt)) ? BLOB_put ((x),p) : ((int) ( (p)->bstr_ptr++ = (unsigned) (x))))
-
-  !!MVC  }
   {                          }
   { Dynamic SQL definitions  }
   {                          }
@@ -363,17 +368,18 @@ type
   {                               }
 
   type
-     isc_att_handle = pointer;
-     isc_blob_handle = pointer;
-     isc_db_handle = pointer;
-     isc_form_handle = pointer;
-     isc_req_handle = pointer;
-     isc_stmt_handle = pointer;
-     isc_svc_handle = pointer;
-     isc_tr_handle = pointer;
-     isc_win_handle = pointer;
-     isc_callback = procedure; cdecl;
-     isc_versioncallback = procedure(user_arg: pointer; atext: pchar); cdecl;
+     isc_att_handle = FB_API_HANDLE;
+     isc_blob_handle = FB_API_HANDLE;
+     isc_db_handle = FB_API_HANDLE;
+     isc_form_handle = FB_API_HANDLE;
+     isc_req_handle = FB_API_HANDLE;
+     isc_stmt_handle = FB_API_HANDLE;
+     isc_svc_handle = FB_API_HANDLE;
+     isc_tr_handle = FB_API_HANDLE;
+     isc_win_handle = FB_API_HANDLE;
+     isc_callback = procedure; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+     isc_versioncallback = procedure(user_arg: pointer; atext: pchar); 
+                                {$ifdef wincall}stdcall{$else}cdecl{$endif};
      isc_resv_handle = ISC_LONG;
      tisc_att_handle = isc_att_handle;
      tisc_blob_handle = isc_blob_handle;
@@ -469,9 +475,6 @@ type
   { Blr definitions  }
   {                  }
 {$ifndef _JRD_BLR_H_}
-  {!!MVC
-  #define blr_word(n) ((n) % 256), ((n) / 256)
-  !!MVC }
 
   const
      blr_text = 14;
@@ -837,6 +840,12 @@ type
      isc_spb_dbname = 106;
      isc_spb_verbose = 107;
      isc_spb_options = 108;
+     isc_spb_address_path = 109;
+     isc_spb_process_id = 110;
+     isc_spb_trusted_auth = 111;
+     isc_spb_process_name = 112;
+     isc_spb_trusted_role = 113;
+
      isc_spb_connect_timeout = isc_dpb_connect_timeout;
      isc_spb_dummy_packet_interval = isc_dpb_dummy_packet_interval;
      isc_spb_sql_role_name = isc_dpb_sql_role_name;
@@ -1060,6 +1069,24 @@ type
      isc_action_svc_db_stats = 11;
   { Retrieves the InterBase log file from the server  }
      isc_action_svc_get_ib_log = 12;
+     isc_action_svc_get_fb_log = 12; 
+         //* Retrieves the Firebird log file from the server */
+     isc_action_svc_nbak = 20; //* Incremental nbackup */
+     isc_action_svc_nrest = 21; //* Incremental database restore */
+     isc_action_svc_trace_start = 22; // Start trace session
+     isc_action_svc_trace_stop = 23; // Stop trace session
+     isc_action_svc_trace_suspend = 24; // Suspend trace session
+     isc_action_svc_trace_resume = 25; // Resume trace session
+     isc_action_svc_trace_list = 26; // List existing sessions
+     isc_action_svc_set_mapping = 27; 
+             // Set auto admins mapping in security database
+     isc_action_svc_drop_mapping = 28; 
+             // Drop auto admins mapping in security database
+     isc_action_svc_display_user_adm = 29; 
+             // Displays user(s) from security database with admin info
+     isc_action_svc_validate = 30; // Starts database online validation
+     isc_action_svc_last = 31; // keep it last !
+
   {
      Service information items
                                 }
@@ -1101,6 +1128,9 @@ type
      isc_info_svc_running = 67;
   { Returns the user information from isc_action_svc_display_users  }
      isc_info_svc_get_users = 68;
+     isc_info_svc_stdin = 78;
+                //* Returns size of data, needed as stdin for service */
+
   {
      Parameters for isc_action_(add|delete|modify)_user
    }
@@ -1112,6 +1142,7 @@ type
      isc_spb_sec_firstname = 10;
      isc_spb_sec_middlename = 11;
      isc_spb_sec_lastname = 12;
+     isc_spb_sec_admin = 13;
   {
      Parameters for isc_action_svc_(add|remove)_license,
      isc_info_svc_get_license
@@ -1125,6 +1156,7 @@ type
      isc_spb_bkp_file = 5;
      isc_spb_bkp_factor = 6;
      isc_spb_bkp_length = 7;
+     isc_spb_bkp_stat = 15;
      isc_spb_bkp_ignore_checksums = $01;
      isc_spb_bkp_ignore_limbo = $02;
      isc_spb_bkp_metadata_only = $04;
@@ -1133,6 +1165,7 @@ type
      isc_spb_bkp_non_transportable = $20;
      isc_spb_bkp_convert = $40;
      isc_spb_bkp_expand = $80;
+     isc_spb_bkp_no_triggers = $8000;
   {
      Parameters for isc_action_svc_properties
                                                }
@@ -1147,6 +1180,20 @@ type
      isc_spb_prp_set_sql_dialect = 14;
      isc_spb_prp_activate = $0100;
      isc_spb_prp_db_online = $0200;
+     isc_spb_prp_force_shutdown = 41;
+     isc_spb_prp_attachments_shutdown = 42;
+     isc_spb_prp_transactions_shutdown = 43;
+     isc_spb_prp_shutdown_mode = 44;
+     isc_spb_prp_online_mode = 45;
+///********************************************
+// * Parameters for isc_spb_prp_shutdown_mode *
+// *            and isc_spb_prp_online_mode   *
+// ********************************************/
+     isc_spb_prp_sm_normal = 0;
+     isc_spb_prp_sm_multi = 1;
+     isc_spb_prp_sm_single = 2;
+     isc_spb_prp_sm_full = 3;
+
   {
      Parameters for isc_spb_prp_reserve_space
                                                }
@@ -1198,6 +1245,10 @@ type
      isc_spb_res_page_size = 10;
      isc_spb_res_length = 11;
      isc_spb_res_access_mode = 12;
+     isc_spb_res_fix_fss_data = 13;
+     isc_spb_res_fix_fss_metadata = 14;
+     isc_spb_res_stat = isc_spb_bkp_stat;
+     isc_spb_res_metadata_only = isc_spb_bkp_metadata_only;
      isc_spb_res_deactivate_idx = $0100;
      isc_spb_res_no_shadow = $0200;
      isc_spb_res_no_validity = $0400;
@@ -1205,6 +1256,15 @@ type
      isc_spb_res_replace = $1000;
      isc_spb_res_create = $2000;
      isc_spb_res_use_all_space = $4000;
+
+///*****************************************
+// * Parameters for isc_action_svc_validate *
+// *****************************************/
+     isc_spb_val_tab_incl = 1; // include filter based on regular expression
+     isc_spb_val_tab_excl = 2; // exclude filter based on regular expression
+     isc_spb_val_idx_incl = 3; // regexp of indices to validate
+     isc_spb_val_idx_excl = 4; // regexp of indices to NOT validate
+     isc_spb_val_lock_timeout = 5; // how long to wait for table lock
   {
      Parameters for isc_spb_res_access_mode
                                              }
@@ -1223,6 +1283,28 @@ type
      isc_spb_sts_hdr_pages = $04;
      isc_spb_sts_idx_pages = $08;
      isc_spb_sts_sys_relations = $10;
+     isc_spb_sts_record_versions = $20;
+     isc_spb_sts_table = $40;
+     isc_spb_sts_nocreation = $80;
+
+//* Not available in Firebird 1.5 */
+
+///***************************************
+// * Parameters for isc_action_svc_nbak  *
+// ***************************************/
+
+     isc_spb_nbk_level = 5;
+     isc_spb_nbk_file = 6;
+     isc_spb_nbk_direct = 7;
+     isc_spb_nbk_no_triggers = $01;
+
+///***************************************
+// * Parameters for isc_action_svc_trace *
+// ***************************************/
+
+     isc_spb_trc_id = 1;
+     isc_spb_trc_name = 2;
+     isc_spb_trc_cfg = 3;
   {                        }
   { SQL information items  }
   {                        }
@@ -2044,15 +2126,6 @@ type
   {                                        }
   { Service manager functions              }
   {                                        }
-  (*!!MVC
-  #define ADD_SPB_LENGTH(p, length)     { (p)++ = (length); \
-                                          (p)++ = (length) >> 8;}
-
-  #define ADD_SPB_NUMERIC(p, data)      { (p)++ = (data); \
-                                          (p)++ = (data) >> 8; \
-                                          (p)++ = (data) >> 16; \
-                                          (p)++ = (data) >> 24;}
-  !!MVC *)
 
   function isc_service_attach(_para1:PISC_STATUS; _para2:word; _para3:Pchar; _para4:Pisc_svc_handle; _para5:word;
              _para6:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
@@ -2479,15 +2552,6 @@ var
 {                                        }
 { Service manager functions              }
 {                                        }
-(*!!MVC
-  #define ADD_SPB_LENGTH(p, length)     { (p)++ = (length); \
-  (p)++ = (length) >> 8;}
-
-#define ADD_SPB_NUMERIC(p, data)      { (p)++ = (data); \
-  (p)++ = (data) >> 8; \
-  (p)++ = (data) >> 16; \
-  (p)++ = (data) >> 24;}
-!!MVC *)
   isc_service_attach : function (_para1:PISC_STATUS; _para2:word; _para3:Pchar; _para4:Pisc_svc_handle; _para5:word;_para6:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
   isc_service_detach : function (_para1:PISC_STATUS; _para2:Pisc_svc_handle):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
   isc_service_query : function (_para1:PISC_STATUS; _para2:Pisc_svc_handle; _para3:Pisc_resv_handle; _para4:word; _para5:Pchar;_para6:word; _para7:Pchar; _para8:word; _para9:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
