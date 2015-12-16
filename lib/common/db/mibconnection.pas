@@ -49,7 +49,7 @@ type
    fsqlcode: integer;
   public
    constructor create(const asender: tibconnection; const amessage: msestring;
-                              const aerror: statusvectorty; const asqlcode: integer);
+                         const aerror: statusvectorty; const asqlcode: integer);
    property status: statusvectorty read fstatus;
    property sqlcode: integer read fsqlcode;
  end;
@@ -69,7 +69,8 @@ type
     ParamBinding         : tparambinding;
     paramtypes: fieldtypearty;
    public
-    constructor create(const aowner: icursorclient; const aconnection: tibconnection);
+    constructor create(const aowner: icursorclient;
+                                         const aconnection: tibconnection);
     procedure close; override;
   end;
 
