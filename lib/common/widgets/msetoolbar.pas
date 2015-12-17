@@ -349,6 +349,8 @@ type
                       ashiftstate: shiftstatesty): boolean; override;
    procedure doshortcut(var info: keyeventinfoty; const sender: twidget); override;
    procedure objectchanged(const sender: tobject); override;
+    //iassistiveclient
+   function getassistivehint(): msestring; override;
     //istatfile
    procedure dostatread(const reader: tstatreader); virtual;
    procedure dostatwrite(const writer: tstatwriter); virtual;
@@ -1769,6 +1771,16 @@ procedure tcustomtoolbar.objectchanged(const sender: tobject);
 begin
  inherited;
  flayout.buttons.objectchanged(sender);
+end;
+
+function tcustomtoolbar.getassistivehint(): msestring;
+begin
+ if flayout.focusedbutton >= 0 then begin
+  result:= flayout.buttons[flayout.focusedbutton].hint;
+ end
+ else begin
+  result:= inherited getassistivehint();
+ end;
 end;
 
 function tcustomtoolbar.getstatpriority: integer;
