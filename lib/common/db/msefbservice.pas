@@ -85,6 +85,7 @@ type
    function getinfo(const procname: string; const items: array of byte): string;
    function getmsestringitem(var buffer: pointer; const id: int32;
                                                 var value: msestring): boolean;
+   function internalusers(const ausername: string): fbuserinfoarty;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy(); override;
@@ -471,7 +472,7 @@ begin
  end;
 end;
 
-function tfbservice.users(): fbuserinfoarty;
+function tfbservice.internalusers(const ausername: string): fbuserinfoarty;
 var
  buffer: string;
  po1: pbyte;
@@ -480,6 +481,9 @@ var
 begin
  checkbusy();
  buffer:= char(isc_action_svc_display_user_adm);
+ if ausername <> '' then begin
+  addparam(buffer,isc_spb_sec_username,ausername);
+ end;
  start('users',buffer);
  result:= nil;
  count:= 0;
@@ -517,5 +521,11 @@ begin
  end;
  setlength(result,count);
 end;
+
+function tfbservice.users(): fbuserinfoarty;
+begin
+ result:= internalusers('');
+end;
+
 
 end.

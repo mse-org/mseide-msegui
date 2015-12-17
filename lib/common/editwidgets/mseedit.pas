@@ -457,7 +457,8 @@ type
    procedure defineproperties(filer: tfiler); override;
    function verticalfontheightdelta: boolean; override;
    procedure setoptionsedit1(const avalue: optionsedit1ty); virtual;
-
+     //iassistiveclient
+   function getassistivecaretindex(): int32; override;
      //iedit
    function getoptionsedit: optionseditty; virtual;
    function hasselection: boolean; virtual;
@@ -1498,6 +1499,11 @@ begin
           {$ifdef FPC}longword{$else}byte{$endif}(optbefore)) then begin
   updatereadonlystate;
  end;
+end;
+
+function tcustomedit.getassistivecaretindex(): int32;
+begin
+ result:= feditor.curindex;
 end;
 
 function tcustomedit.geteditfont: tfont;

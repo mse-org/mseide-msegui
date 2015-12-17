@@ -2612,6 +2612,8 @@ type
    procedure doselectionchanged; override;
    procedure updatepopupmenu(var amenu: tpopupmenu; 
                          var mouseinfo: mouseeventinfoty); override;
+    //iassistiveclient
+   function getassistivecaretindex(): int32; override;
     //iassistiveclientgrid
    function getassistivecelltext(const acell: gridcoordty): msestring; override;                         
   public
@@ -16197,6 +16199,11 @@ begin
   feditor.updatepopupmenu(amenu,popupmenu,mouseinfo,false);
  end;
  inherited;
+end;
+
+function tcustomstringgrid.getassistivecaretindex(): int32;
+begin
+ result:= feditor.curindex;
 end;
 
 function tcustomstringgrid.getassistivecelltext(

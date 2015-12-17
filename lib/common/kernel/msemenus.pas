@@ -173,6 +173,8 @@ type
    function getassistivename(): msestring; virtual;
    function getassistivecaption(): msestring; virtual;
    function getassistivetext(): msestring; virtual;
+   function getassistivecaretindex(): int32; virtual;
+   function getassistivehint(): msestring; virtual;
    function getassistiveflags(): assistiveflagsty; virtual;
   {$ifdef mse_with_ifi}
    function getifidatalinkintf(): iifidatalink; virtual;
@@ -1808,6 +1810,23 @@ end;
 function tmenuitem.getassistivetext(): msestring;
 begin
  result:= '';
+end;
+
+function tmenuitem.getassistivecaretindex(): int32;
+begin
+ result:= -1;
+end;
+
+function tmenuitem.getassistivehint(): msestring;
+var
+ item1: tmenuitem;
+begin
+ if getactiveitem(item1) then begin
+  result:= item1.finfo.hint;
+ end
+ else begin
+  result:= '';
+ end;
 end;
 
 function tmenuitem.getassistiveflags(): assistiveflagsty;

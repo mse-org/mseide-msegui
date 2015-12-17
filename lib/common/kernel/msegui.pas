@@ -1808,6 +1808,8 @@ type
    function getassistivename(): msestring; virtual;
    function getassistivecaption(): msestring; virtual;
    function getassistivetext(): msestring; virtual;
+   function getassistivecaretindex(): int32; virtual;
+   function getassistivehint(): msestring; virtual;
    function getassistiveflags: assistiveflagsty; virtual;
   {$ifdef mse_with_ifi}
    function getifidatalinkintf(): iifidatalink; virtual;
@@ -10156,10 +10158,10 @@ procedure twidget.mouseevent(var info: mouseeventinfoty);
  begin
   include(info.eventstate,es_client);
   try
+   clientmouseevent(info);
    if (assistiveserver <> nil) and (ws_iswidget in widgetstate) then begin
     assistiveserver.clientmouseevent(getiassistiveclient(),info);
    end;
-   clientmouseevent(info);
   finally
    exclude(info.eventstate,es_client);
   end;    
@@ -11591,10 +11593,10 @@ end;
 procedure twidget.dokeydown1(var info: keyeventinfoty);
 begin
  exclude(fwidgetstate1,ws1_onkeydowncalled);
+ dokeydown(info);
  if (assistiveserver <> nil) and (ws_iswidget in widgetstate) then begin
   assistiveserver.dokeydown(getiassistiveclient(),info);
  end;
- dokeydown(info);
 end;
 
 procedure twidget.internalkeydown(var info: keyeventinfoty);
@@ -13918,6 +13920,16 @@ end;
 function twidget.getassistivetext(): msestring;
 begin
  result:= '';
+end;
+
+function twidget.getassistivecaretindex(): int32;
+begin
+ result:= -1;
+end;
+
+function twidget.getassistivehint(): msestring;
+begin
+ result:= hint;
 end;
 
 function twidget.getassistiveflags: assistiveflagsty;

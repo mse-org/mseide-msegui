@@ -24,6 +24,8 @@ type
   function getassistivename(): msestring;
   function getassistivecaption(): msestring;
   function getassistivetext(): msestring;
+  function getassistivecaretindex(): int32; //-1 -> none
+  function getassistivehint(): msestring;
   function getassistiveflags(): assistiveflagsty;
  {$ifdef mse_with_ifi}
   function getifidatalinkintf(): iifidatalink; //can be nil
