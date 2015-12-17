@@ -79,6 +79,7 @@ type
    procedure checkerror(const procname : string;
                             const status: integer);
    procedure checkbusy();
+   function dbstring(const avalue: msestring): string;
    procedure start(const procname: string; const params: string);
 //   function getvalueitem(var buffer: pointer; const id: int32): card32;
 //   function getstringitem(var buffer: pointer; const id: int32): string;
@@ -92,7 +93,8 @@ type
    function busy(): boolean;
    function serverinfo(): fbserverinfoty;
    function users(): fbuserinfoarty;
-   
+   function user(const ausername: msestring; var ainfo: fbuserinfoty): boolean;
+                                                       //false if not found
    property lasterror: statusvectorty read flasterror;
    property lasterrormessage: msestring read flasterrormessage;
   published
@@ -398,6 +400,16 @@ begin
  end;
 end;
 
+function tfbservice.dbstring(const avalue: msestring): string;
+begin
+ if fbso_utf8 in foptions then begin
+  result:= stringtoutf8ansi(avalue);
+ end
+ else begin
+  result:= ansistring(avalue);
+ end;
+end;
+
 procedure tfbservice.start(const procname: string; const params: string);
 begin
  checkbusy();
@@ -419,6 +431,7 @@ begin
   checkerror(procname,isc_service_query(@fstatus,@fhandle,nil,length(params1),
       pointer(params1),length(items),@items[0],length(result),pointer(result)));
   if pbyte(pointer(result))^ <> isc_info_truncated then begin
+   exclude(fstate,fbss_busy);
    break;
   end;
   setlength(result,2*length(result));
@@ -525,6 +538,18 @@ end;
 function tfbservice.users(): fbuserinfoarty;
 begin
  result:= internalusers('');
+end;
+
+function tfbservice.user(const ausername: msestring;
+                            var ainfo: fbuserinfoty): boolean;
+var
+ ar1: fbuserinfoarty;
+begin
+ ar1:= internalusers(dbstring(ausername));
+ result:= ar1 <> nil;
+ if result then begin
+  ainfo:= ar1[0];
+ end;
 end;
 
 
