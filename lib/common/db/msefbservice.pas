@@ -19,47 +19,19 @@ type
   get_env_lock: string;
   get_env_msg: string;
  end;
-(*   
-  { Retrieves the number of attachments and databases  }
-     isc_info_svc_svr_db_info = 50;
-  { Retrieves all license keys and IDs from the license file  }
-     isc_info_svc_get_license = 51;
-  { Retrieves a bitmask representing licensed options on the server  }
-     isc_info_svc_get_license_mask = 52;
-  { Retrieves the parameters and values for IB_CONFIG  }
-     isc_info_svc_get_config = 53;
-  { Retrieves the version of the services manager  }
-     isc_info_svc_version = 54;
-  { Retrieves the version of the InterBase server  }
-     isc_info_svc_server_version = 55;
-  { Retrieves the implementation of the InterBase server  }
-     isc_info_svc_implementation = 56;
-  { Retrieves a bitmask representing the server's capabilities  }
-     isc_info_svc_capabilities = 57;
-  { Retrieves the path to the security database in use by the server  }
-     isc_info_svc_user_dbpath = 58;
-  { Retrieves the setting of $INTERBASE  }
-     isc_info_svc_get_env = 59;
-  { Retrieves the setting of $INTERBASE_LCK  }
-     isc_info_svc_get_env_lock = 60;
-  { Retrieves the setting of $INTERBASE_MSG  }
-     isc_info_svc_get_env_msg = 61;
-  { Retrieves 1 line of service output per call  }
-     isc_info_svc_line = 62;
-  { Retrieves as much of the server output as will fit in the supplied buffer  }
-     isc_info_svc_to_eof = 63;
-  { Sets / signifies a timeout value for reading service information  }
-     isc_info_svc_timeout = 64;
-  { Retrieves the number of users licensed for accessing the server  }
-     isc_info_svc_get_licensed_users = 65;
-  { Retrieve the limbo transactions  }
-     isc_info_svc_limbo_trans = 66;
-  { Checks to see if a service is running on an attachment  }
-     isc_info_svc_running = 67;
-  { Returns the user information from isc_action_svc_display_users  }
-     isc_info_svc_get_users = 68;
-     isc_info_svc_stdin = 78;
- *)
+
+ fbuserinfoty = record
+  username: msestring;
+  firstname: msestring;
+  middlename: msestring;
+  lastname: msestring;
+  userid: card32;
+  groupid: card32;
+  admin: card32;
+ end;
+ pfbuserinfoty = ^fbuserinfoty;
+ fbuserinfoarty = array of fbuserinfoty;
+ 
  tfbservice = class;
  
  efbserviceerror = class(edatabaseerror)
@@ -68,15 +40,13 @@ type
    ferrormessage: msestring;
    fsender: tfbservice;
    fstatus: statusvectorty;
-//   fsqlcode: integer;
   public
    constructor create(const asender: tfbservice; const amessage: msestring;
-                       const aerror: statusvectorty{; const asqlcode: integer});
+                       const aerror: statusvectorty);
    property sender: tfbservice read fsender;
    property error: integer read ferror;
    property errormessage: msestring read ferrormessage;
    property status: statusvectorty read fstatus;
-//   property sqlcode: integer read fsqlcode;
  end;
 
  fbservicestatety = (fbss_connected,fbss_busy);
@@ -110,14 +80,17 @@ type
                             const status: integer);
    procedure checkbusy();
    procedure start(const procname: string; const params: string);
-   function getvalueitem(var buffer: pointer; const id: int32): card32;
-   function getstringitem(var buffer: pointer; const id: int32): string;
+//   function getvalueitem(var buffer: pointer; const id: int32): card32;
+//   function getstringitem(var buffer: pointer; const id: int32): string;
    function getinfo(const procname: string; const items: array of byte): string;
+   function getmsestringitem(var buffer: pointer; const id: int32;
+                                                var value: msestring): boolean;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy(); override;
    function busy(): boolean;
-   function serverinfo(): fbserverinfoty;   
+   function serverinfo(): fbserverinfoty;
+   function users(): fbuserinfoarty;
    
    property lasterror: statusvectorty read flasterror;
    property lasterrormessage: msestring read flasterrormessage;
@@ -134,7 +107,47 @@ type
  
 implementation
 uses
- msebits;
+ msebits,msearrayutils;
+
+function readvalue16(var buffer: pbyte): card16;
+begin
+ result:= buffer^;
+ inc(buffer);
+ result:= result + buffer^ shl 8;
+ inc(buffer);
+end;
+
+function readvalue32(var buffer: pbyte): card16;
+begin
+ result:= buffer^;
+ inc(buffer);
+ result:= result + buffer^ shl 8;
+ inc(buffer);
+ result:= result + buffer^ shl 16;
+ inc(buffer);
+ result:= result + buffer^ shl 24;
+ inc(buffer);
+end;
+
+procedure storevalue(var buffer: pbyte; const value: card16);
+begin
+ buffer^:= value;
+ inc(buffer);
+ buffer^:= value shr 8;
+ inc(buffer); 
+end;
+
+procedure storevalue(var buffer: pbyte; const value: card32);
+begin
+ buffer^:= value;
+ inc(buffer);
+ buffer^:= value shr 8;
+ inc(buffer); 
+ buffer^:= value shr 16;
+ inc(buffer); 
+ buffer^:= value shr 24;
+ inc(buffer); 
+end;
 
 procedure addshortparam(var params: string; const id: int32;
                                               const value: string); 
@@ -173,8 +186,7 @@ begin
  po1:= pointer(params)+i2;
  po1^:= id;
  inc(po1);
- pcard16(po1)^:= ntobe(card16(i1));
- inc(po1,2);
+ storevalue(po1,card16(i1));
  move(pointer(value)^,po1^,i1);
 end;
 
@@ -189,7 +201,7 @@ begin
  po1:= pointer(params)+i2;
  po1^:= id;
  inc(po1);
- pcard32(po1)^:= ntobe(card32(value));
+ storevalue(po1,value);
 end;
 
 procedure addparam(var params: string; const id: int32); 
@@ -201,6 +213,33 @@ begin
  setlength(params,i2+1+0);
  po1:= pointer(params)+i2;
  po1^:= id;
+end;
+
+function getvalueitem(var buffer: pointer; const id: int32;
+                                                var value: card32): boolean;
+begin
+ result:= false;
+ if pbyte(buffer)^ = id then begin
+  inc(buffer);
+  value:= readvalue32(buffer);
+  result:= true;
+ end;
+end;
+
+function getstringitem(var buffer: pointer; const id: int32;
+                                                var value: string): boolean;
+var
+ i1: int32;
+begin
+ result:= false;
+ if pbyte(buffer)^ = id then begin
+  inc(buffer);
+  i1:= readvalue16(buffer);
+  setlength(value,i1);
+  move((buffer)^,pointer(value)^,i1);
+  inc(buffer,i1);
+  result:= true;
+ end;
 end;
 
 { efbserviceerror }
@@ -366,35 +405,14 @@ begin
  include(fstate,fbss_busy);
 end;
 
-function tfbservice.getvalueitem(var buffer: pointer; const id: int32): card32;
-begin
- if pbyte(buffer)^ <> id then begin
-  databaseerror('Invalid result',self);
- end;
- result:= leton(pcard32(buffer+1)^);
- inc(buffer,5);
-end;
-
-function tfbservice.getstringitem(var buffer: pointer; const id: int32): string;
-var
- i1: int32;
-begin
- if pbyte(buffer)^ <> id then begin
-  databaseerror('Invalid result',self);
- end;
- i1:= leton(pcard16(buffer+1)^);
- setlength(result,i1);
- move((buffer+3)^,pointer(result)^,i1);
- inc(buffer,3+i1);
-end;
-
 function tfbservice.getinfo(const procname: string; 
                                          const items: array of byte): string;
 var
  params1: string;
 begin
  params1:= '';
- addparam(params1,finfotimeout);
+// params1:=  char(isc_spb_version)+char(isc_spb_current_version);
+ addparam(params1,isc_info_svc_timeout,finfotimeout);
  setlength(result,1024);
  while true do begin
   checkerror(procname,isc_service_query(@fstatus,@fhandle,nil,length(params1),
@@ -406,11 +424,29 @@ begin
  end;
 end;
 
+function tfbservice.getmsestringitem(var buffer: pointer; const id: int32;
+               var value: msestring): boolean;
+var
+ str1: string;
+begin
+ str1:= '';
+ result:= getstringitem(buffer,id,str1);
+ if result then begin
+  if fbso_utf8 in foptions then begin
+   value:= utf8tostringansi(str1);
+  end
+  else begin
+   value:= msestring(str1);
+  end;
+ end;
+end;
+
 function tfbservice.serverinfo(): fbserverinfoty;
 var
  buffer: string;
  po1: pbyte;
 begin
+ checkbusy();
  finalize(result);
  fillchar(result,sizeof(result),0);
  buffer:= getinfo('serverinfo',[isc_info_svc_version,
@@ -420,15 +456,66 @@ begin
             isc_info_svc_get_env_msg]);
  po1:= pointer(buffer);
  with result do begin
-  version:= getvalueitem(po1,isc_info_svc_version);
-  server_version:= getstringitem(po1,isc_info_svc_server_version);
-  _implementation:= getstringitem(po1,isc_info_svc_implementation);
-  capabilities:= getvalueitem(po1,isc_info_svc_capabilities);
-  user_dbpath:= getstringitem(po1,isc_info_svc_user_dbpath);
-  get_env:= getstringitem(po1,isc_info_svc_get_env);
-  get_env_lock:= getstringitem(po1,isc_info_svc_get_env_lock);
-  get_env_msg:= getstringitem(po1,isc_info_svc_get_env_msg);
+  while (po1^ <> isc_info_end) and (po1^ <> 0) do begin
+   if not (getvalueitem(po1,isc_info_svc_version,version) or
+           getstringitem(po1,isc_info_svc_server_version,server_version) or
+           getstringitem(po1,isc_info_svc_implementation,_implementation) or
+           getvalueitem(po1,isc_info_svc_capabilities,capabilities) or
+           getstringitem(po1,isc_info_svc_user_dbpath,user_dbpath) or
+           getstringitem(po1,isc_info_svc_get_env,get_env) or
+           getstringitem(po1,isc_info_svc_get_env_lock,get_env_lock) or
+           getstringitem(po1,isc_info_svc_get_env_msg,get_env_msg)) then begin
+    databaseerror('Unknown serverinfo item',self);
+   end;
+  end;
  end;
+end;
+
+function tfbservice.users(): fbuserinfoarty;
+var
+ buffer: string;
+ po1: pbyte;
+ count: int32;
+ po2: pfbuserinfoty;
+begin
+ checkbusy();
+ buffer:= char(isc_action_svc_display_user_adm);
+ start('users',buffer);
+ result:= nil;
+ count:= 0;
+ buffer:= getinfo('users',[isc_info_svc_get_users]);
+ po1:= pointer(buffer);
+ if po1^ <> isc_info_svc_get_users then begin
+  databaseerror('Invalid users response',self);
+ end;
+ inc(po1,3); //additional bytes 50 0 ???
+ while (po1^ <> isc_info_flag_end) and (po1^ <> isc_info_end) and 
+                                                        (po1^ <> 0) do begin
+  if po1^ = isc_spb_sec_username then begin //must be first field
+   additem(result,typeinfo(result),count);
+   po2:= @result[count-1];
+   getmsestringitem(po1,isc_spb_sec_username,po2^.username)   
+  end
+  else begin
+   if result = nil then begin
+    databaseerror('Invalid users response',self);
+   end;
+  end;
+  with po2^ do begin
+   while (po1^ <> isc_spb_sec_username) and (po1^ <> isc_info_flag_end) and 
+                                 (po1^ <> isc_info_end) and (po1^ <> 0) do begin
+    if not (getmsestringitem(po1,isc_spb_sec_firstname,firstname) or
+            getmsestringitem(po1,isc_spb_sec_middlename,middlename) or
+            getmsestringitem(po1,isc_spb_sec_lastname,lastname) or
+            getvalueitem(po1,isc_spb_sec_userid,userid) or
+            getvalueitem(po1,isc_spb_sec_groupid,groupid) or
+            getvalueitem(po1,isc_spb_sec_admin,admin)) then begin
+     databaseerror('Unknown users item',self);
+    end;
+   end;
+  end;
+ end;
+ setlength(result,count);
 end;
 
 end.

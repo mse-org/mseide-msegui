@@ -940,15 +940,15 @@ type
   {
      Parameters for isc_action_(add|delete|modify)_user
    }
-     isc_spb_sec_userid = 5;
-     isc_spb_sec_groupid = 6;
-     isc_spb_sec_username = 7;
+     isc_spb_sec_userid = 5;                     //card32
+     isc_spb_sec_groupid = 6;                    //card32
+     isc_spb_sec_username = 7;                   //string
      isc_spb_sec_password = 8;
      isc_spb_sec_groupname = 9;
-     isc_spb_sec_firstname = 10;
+     isc_spb_sec_firstname = 10;                 //string
      isc_spb_sec_middlename = 11;
-     isc_spb_sec_lastname = 12;
-     isc_spb_sec_admin = 13;
+     isc_spb_sec_lastname = 12;                  //string
+     isc_spb_sec_admin = 13;                     //card32
   {
      Parameters for isc_action_svc_(add|remove)_license,
      isc_info_svc_get_license
