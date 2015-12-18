@@ -1560,7 +1560,7 @@ var
  maxBlobSize : longInt; 
 begin
  blobseglen:= 0;
- blobHandle:= nil;
+ blobHandle:= FB_API_NULLHANDLE;
  if isc_open_blob(@FStatus, @FSQLDatabaseHandle, @acursor.ftrans,
                         @blobHandle, @blobId) <> 0 then begin
   CheckError('TIBConnection.CreateBlobStream', FStatus);
@@ -1647,7 +1647,7 @@ var
  int1: integer;
 begin
 //  transactionhandle:= atransaction.handle;
- blobhandle:= nil;
+ blobhandle:= FB_API_NULLHANDLE;
  fillchar(blobid,sizeof(blobid),0);
  check(isc_create_blob2(@fstatus,@fsqldatabasehandle,@atransactionhandle,
                       @blobhandle,@blobid,0,nil));
@@ -1718,8 +1718,8 @@ var
  trha: isc_tr_handle;
  bo1: boolean;
 begin
- dbha:= nil;
- trha:= nil;
+ dbha:= FB_API_NULLHANDLE;
+ trha:= FB_API_NULLHANDLE;
 {$ifdef linkdynamically}
  useembeddedfirebird:= ibo_embedded in foptions;
  initializeibase60([]);
@@ -1731,7 +1731,7 @@ begin
    checkerror('createdatabase',fstatus);
   end
   else begin
-   if dbha <> nil then begin
+   if dbha <> FB_API_NULLHANDLE then begin
     isc_detach_database(@FStatus,@dbha);
    end;
   end;
