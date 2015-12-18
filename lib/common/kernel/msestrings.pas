@@ -589,6 +589,8 @@ function checkutf8ansi(const value: ansistring): boolean;
 function stringtolatin1(const value: msestring): string;
 function latin1tostring(const value: string): msestring;
 function ucs4tostring(const achar: dword): msestring;
+function getucs4char(const value: msestring; const aindex: int32): ucs4char;
+            //returns surrogatevalue if index between high and low codeunit
 
 function getasciichar(const source: msechar; out dest: char): boolean;
                                          {$ifdef FPC} inline; {$endif}
@@ -1180,6 +1182,20 @@ begin
   pmsechar(pointer(result))^:= 
                         msechar(word((achar shr 10) and $3ff or $d800));
   (pmsechar(pointer(result))+1)^:= msechar(word(achar) and $3ff or $dc00);
+ end;
+end;
+
+function getucs4char(const value: msestring; const aindex: int32): ucs4char;
+            //returns surrogatevalue if index between high and low codeunit
+begin
+ result:= ord(value[aindex]);
+ if result and $fc00 = $d800 then begin
+  result:= ((result - $d800) shl 10) + ord(value[aindex+1]) - $dc00 + $10000;
+ end
+ else begin
+  if (result and $fc00 = $dc00) and (aindex > 1) then begin
+   result:= result - $dc00 + ((ord(value[aindex-1]) - $d800) shl 10) + $10000;
+  end;
  end;
 end;
 

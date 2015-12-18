@@ -423,7 +423,9 @@ var
  
 var
  y1,orig1,int5: integer;
-   
+ fontmetrics1: fontmetricsty;
+ hasitaliccomp: boolean;
+    
 begin
  tabs:= nil; //compiler warning
  if info.font <> nil then begin
@@ -645,11 +647,29 @@ begin
    res.x:= bigint;
    res.cy:= height;
    res.cx:= 0;
+   hasitaliccomp:= (text.format = nil) and font.italic;
+   if hasitaliccomp then begin
+    with drawinfo.getfontmetrics do begin
+     fontdata:= getfontdata(canvas.font.handle);
+     resultpo:= @fontmetrics1;       
+    end;
+   end;
    for int3:= 0 to high(lineinfos) do begin
     with layoutinfo.lineinfos[int3] do begin
      liy:= y1;
      y1:= y1 + lineheight;     
      listartx:= info.dest.x;
+     if hasitaliccomp and (licount > 0) then begin
+      with drawinfo.getfontmetrics do begin
+       char:= getucs4char(text.text,liindex);
+       msefont.getfontmetrics({datapo,}drawinfo);
+       listartx:= listartx + fontmetrics1.leftbearing;
+       liwidth:= liwidth - fontmetrics1.leftbearing;
+       char:= getucs4char(text.text,liindex+licount-1);
+       msefont.getfontmetrics({datapo,}drawinfo);
+       liwidth:= liwidth-fontmetrics1.rightbearing;
+      end;
+     end;
      if tf_xcentered in flags then begin
       if info.dest.cx < liwidth then begin
        listartx:= listartx + (info.dest.cx - liwidth - 1) div 2;
