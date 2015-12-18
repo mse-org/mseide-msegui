@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2014 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2015 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -323,13 +323,18 @@ type
    procedure clientmouseevent(var info: mouseeventinfoty); override;
    procedure statechanged; override;
    procedure fontchanged; override;
-   procedure doshortcut(var info: keyeventinfoty; const sender: twidget); override;
+   procedure doshortcut(var info: keyeventinfoty;
+                                     const sender: twidget); override;
    procedure clientrectchanged; override;
    procedure getautopaintsize(var asize: sizety); override;
-   procedure objectevent(const sender: tobject; const event: objecteventty); override;
+   procedure objectevent(const sender: tobject; 
+                                const event: objecteventty); override;
    procedure dokeydown(var info: keyeventinfoty); override;
    function upstep(const norotate: boolean): boolean;
    function downstep(const norotate: boolean): boolean;
+    //iassistiveclient
+   function getassistivecaption(): msestring; override;
+   function getassistivehint(): msestring; override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -2085,6 +2090,7 @@ begin
  flayoutinfo.tabs:= ttabs.create(self,nil);
  flayoutinfo.tabs.onchange:= {$ifdef FPC}@{$endif}tabschanged;
  flayoutinfo.activetab:= -1;
+ flayoutinfo.focusedtab:= -1;
  flayoutinfo.lasttab:= -1;
  fhintedbutton:= -2;
  inherited;
@@ -2815,6 +2821,30 @@ begin
      exit;
     end;
    end;
+  end;
+ end;
+end;
+
+function tcustomtabbar.getassistivecaption(): msestring;
+begin
+ with flayoutinfo do begin
+  if (focusedtab >= 0) and (focusedtab < tabs.count) then begin
+   result:= tabs[focusedtab].caption;
+  end
+  else begin
+   result:= inherited getassistivecaption();
+  end;
+ end;
+end;
+
+function tcustomtabbar.getassistivehint(): msestring;
+begin
+ with flayoutinfo do begin
+  if (focusedtab >= 0) and (focusedtab < tabs.count) then begin
+   result:= tabs[focusedtab].hint;
+  end
+  else begin
+   result:= inherited getassistivehint();
   end;
  end;
 end;

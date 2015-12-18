@@ -467,14 +467,16 @@ function updatemouseshapestate(var infos: shapeinfoarty;
                  const widget: twidget; var focuseditem: integer;
                  const aframe: tcustomframe = nil): boolean;
 var
- int1{,int2}: integer;
+ int1,i2: integer;
 begin
  result:= false;
+ i2:= focuseditem;
+ focuseditem:= -1; //none
  for int1:= 0 to high(infos) do begin
   result:= updatemouseshapestate(infos[int1],mouseevent,widget,
                                                  aframe,@infos) or result;
   if shs_mouse in infos[int1].state then begin
-   if focuseditem <> int1 then begin
+   if i2 <> int1 then begin
     if (focuseditem >= 0) and (focuseditem <= high(infos)) then begin
      widget.invalidaterect(infos[focuseditem].ca.dim);
     end;
