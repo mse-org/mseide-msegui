@@ -1871,7 +1871,8 @@ begin
  abuffer:= nil;
 end;
 
-procedure versioncallback(user_arg: pointer; atext: pchar); cdecl;
+procedure versioncallback(user_arg: pointer; atext: pchar); 
+                             {$ifdef mswindows}stdcall{$else}cdecl{$endif};
 begin
  setlength(stringarty(user_arg^),high(stringarty(user_arg^))+2);
  stringarty(user_arg^)[high(stringarty(user_arg^))]:= atext;
