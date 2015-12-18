@@ -1872,7 +1872,8 @@ begin
 end;
 
 procedure versioncallback(user_arg: pointer; atext: pchar); 
-                             {$ifdef mswindows}stdcall{$else}cdecl{$endif};
+//                             {$ifdef mswindows}stdcall{$else}cdecl{$endif};
+                             {$ifdef mswindows}cdecl{$else}cdecl{$endif};
 begin
  setlength(stringarty(user_arg^),high(stringarty(user_arg^))+2);
  stringarty(user_arg^)[high(stringarty(user_arg^))]:= atext;

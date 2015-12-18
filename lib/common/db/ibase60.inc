@@ -377,9 +377,9 @@ type
      isc_svc_handle = FB_API_HANDLE;
      isc_tr_handle = FB_API_HANDLE;
      isc_win_handle = FB_API_HANDLE;
-     isc_callback = procedure; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+     isc_callback = procedure; {$ifdef wincall}cdecl{stdcall}{$else}cdecl{$endif};
      isc_versioncallback = procedure(user_arg: pointer; atext: pchar); 
-                                {$ifdef wincall}stdcall{$else}cdecl{$endif};
+                                {$ifdef wincall}cdecl{stdcall}{$else}cdecl{$endif};
      isc_resv_handle = ISC_LONG;
      tisc_att_handle = isc_att_handle;
      tisc_blob_handle = isc_blob_handle;
