@@ -447,6 +447,7 @@ type
    procedure doenter; override;
    procedure doexit; override;
    procedure activechanged; override;
+   procedure enabledchanged; override;
    procedure scrollevent(sender: tcustomscrollbar; event: scrolleventty);
 
    procedure dochange; override;
@@ -1568,6 +1569,11 @@ procedure tcustomslider.activechanged;
 begin
  fscrollbar.activechanged();
  inherited;
+end;
+
+procedure tcustomslider.enabledchanged;
+begin
+ fscrollbar.disabled:= not enabled;
 end;
 
 procedure tcustomslider.setscrollbar(const avalue: tsliderscrollbar);

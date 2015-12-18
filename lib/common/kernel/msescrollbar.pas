@@ -153,6 +153,8 @@ type
    procedure writepagesize(writer: twriter);
    procedure readwheelsensitivity(reader: treader);
    procedure writewheelsensitivity(writer: twriter);
+   function getdisabled: boolean;
+   procedure setdisabled(const avalue: boolean);
   protected
    fstate: scrollbarstatesty;
    fintf: iscrollbar;
@@ -214,6 +216,8 @@ type
    procedure enter();
    procedure exit();
    property focused: boolean read getfocused write setfocused; 
+                                //does not invalidate
+   property disabled: boolean read getdisabled write setdisabled; 
                                 //does not invalidate
    function clicked: boolean;
    procedure activechanged;
@@ -441,6 +445,9 @@ begin
   minblen:= fbuttonminlength;
   areas[sbbu_up].ca.imagelist:= stockobjects.glyphs;
   areas[sbbu_down].ca.imagelist:= stockobjects.glyphs;
+  areas[sbbu_down].imagenrdisabled:= -2; //grayed
+  areas[sbbu_move].imagenrdisabled:= -2; //grayed
+  areas[sbbu_up].imagenrdisabled:= -2; //grayed
   if fdirection in [gd_right,gd_left] then begin
    width1:= cy;
   end
@@ -1395,6 +1402,25 @@ begin
  end
  else begin
   exclude(fdrawinfo.areas[sbbu_move].state,shs_focused);
+ end;
+end;
+
+function tcustomscrollbar.getdisabled: boolean;
+begin
+ result:= shs_disabled in fdrawinfo.areas[sbbu_move].state;
+end;
+
+procedure tcustomscrollbar.setdisabled(const avalue: boolean);
+begin
+ if avalue then begin
+  include(fdrawinfo.areas[sbbu_down].state,shs_disabled);
+  include(fdrawinfo.areas[sbbu_move].state,shs_disabled);
+  include(fdrawinfo.areas[sbbu_up].state,shs_disabled);
+ end
+ else begin
+  exclude(fdrawinfo.areas[sbbu_down].state,shs_disabled);
+  exclude(fdrawinfo.areas[sbbu_move].state,shs_disabled);
+  exclude(fdrawinfo.areas[sbbu_up].state,shs_disabled);
  end;
 end;
 
