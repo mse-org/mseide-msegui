@@ -716,7 +716,7 @@ type
 
    property height: integer read getheight write setheight 
                                       stored isheightstored default 0;
-                  //pixel
+                  //pixel, 0 = default
    property width: integer read getwidth write setwidth 
                                       stored iswidthstored default 0;
                   //avg. character width in 1/10 pixel, 0 = default
@@ -2881,6 +2881,7 @@ end;
 
 procedure tfont.setextraspace(const avalue: integer);
 begin
+ include(flocalprops,flp_extraspace);
  if finfopo^.baseinfo.extraspace <> avalue then begin
   finfopo^.baseinfo.extraspace := avalue;
   dochanged([cs_font],false);
@@ -3326,6 +3327,7 @@ end;
 
 procedure tfont.setheight(avalue: integer);
 begin
+ include(flocalprops,flp_height);
  if avalue < 0 then begin
   avalue:= 0;
  end;
@@ -3342,6 +3344,7 @@ end;
 
 procedure tfont.setwidth(avalue: integer);
 begin
+ include(flocalprops,flp_width);
  if avalue < 0 then begin
   avalue:= 0;
  end;
@@ -3376,6 +3379,7 @@ end;
 
 procedure tfont.setoptions(const avalue: fontoptionsty);
 begin
+ include(flocalprops,flp_options);
  if finfopo^.baseinfo.options <> avalue then begin
   finfopo^.baseinfo.options:= 
                            checkfontoptions(avalue,finfopo^.baseinfo.options);
