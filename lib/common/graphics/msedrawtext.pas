@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2014 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2015 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -423,8 +423,10 @@ var
  
 var
  y1,orig1,int5: integer;
+{$ifdef mswindows}
  fontmetrics1: fontmetricsty;
  hasitaliccomp: boolean;
+{$endif}
     
 begin
  tabs:= nil; //compiler warning
@@ -647,6 +649,7 @@ begin
    res.x:= bigint;
    res.cy:= height;
    res.cx:= 0;
+  {$ifdef mswindows}
    hasitaliccomp:= (text.format = nil) and font.italic;
    if hasitaliccomp then begin
     with drawinfo.getfontmetrics do begin
@@ -654,11 +657,13 @@ begin
      resultpo:= @fontmetrics1;       
     end;
    end;
+  {$endif}
    for int3:= 0 to high(lineinfos) do begin
     with layoutinfo.lineinfos[int3] do begin
      liy:= y1;
      y1:= y1 + lineheight;     
      listartx:= info.dest.x;
+    {$ifdef mswindows}
      if hasitaliccomp and (licount > 0) then begin
       with drawinfo.getfontmetrics do begin
        char:= getucs4char(text.text,liindex);
@@ -670,6 +675,7 @@ begin
        liwidth:= liwidth-fontmetrics1.rightbearing;
       end;
      end;
+    {$endif}
      if tf_xcentered in flags then begin
       if info.dest.cx < liwidth then begin
        listartx:= listartx + (info.dest.cx - liwidth - 1) div 2;
