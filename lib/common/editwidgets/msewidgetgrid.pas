@@ -336,6 +336,7 @@ type
                          var mouseinfo: mouseeventinfoty); override;
     //iassistiveclientgrid
    function getassistivecelltext(const acell: gridcoordty): msestring; override;
+   function getassistivecaretindex(): int32; override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -3811,6 +3812,16 @@ begin
  end
  else begin
   result:= inherited getassistivecelltext(acell);
+ end;
+end;
+
+function tcustomwidgetgrid.getassistivecaretindex(): int32;
+begin
+ if factivewidget <> nil then begin
+  result:= twidget1(factivewidget).getassistivecaretindex();
+ end
+ else begin
+  result:= inherited getassistivecaretindex();
  end;
 end;
 
