@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2015 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -20,7 +20,7 @@ interface
 uses
  classes,mclasses,msegui,
  mseglob,mseguiglob,msescrollbar,msegraphutils,msegraphics,mseevent,
- msewidgets,mseeditglob,msestockobjects,msestat,msestatfile,
+ msewidgets,mseeditglob,msestockobjects,msestat,msestatfile,mseassistiveclient,
  mseclasses,msesimplewidgets,msemenus,mseact,typinfo,msedragglob,
  msegrids,msewidgetgrid,msedatalist,msebitmap,msetypes,msestrings,msearrayprops,
  msedrawtext,mseshapes
@@ -144,6 +144,7 @@ type
    function getvalueprop: ppropinfo;
     //iassistiveclient
    function getifidatalinkintf(): iifidatalink; override;
+   function getassistiveflags: assistiveflagsty; override;
 {$endif}
    function getedited: boolean; virtual;
    function geteditstate: dataeditstatesty;
@@ -1142,7 +1143,7 @@ type
 implementation
 uses
  SysUtils,msekeyboard,msebits,msereal,msedispwidgets,mseformatstr,mserichstring,
- mseactions,msestreaming,mseassistiveserver,mseassistiveclient;
+ mseactions,msestreaming,mseassistiveserver;
 
 type
  tcustomframe1 = class(tcustomframe);
@@ -2340,6 +2341,14 @@ end;
 function tgraphdataedit.getifidatalinkintf(): iifidatalink;
 begin
  result:= iifidatalink(self);
+end;
+
+function tgraphdataedit.getassistiveflags: assistiveflagsty;
+begin
+ result:= inherited getassistiveflags;
+ if fgridintf <> nil then begin
+  include(result,asf_gridcell);
+ end;
 end;
 
 function tgraphdataedit.getdefaultifilink: iifilink;
