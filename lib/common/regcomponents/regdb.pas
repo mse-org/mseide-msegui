@@ -149,7 +149,8 @@ type
 
 implementation
 uses
- {$ifdef FPC}dbconst{$else} dbconst_del,classes_del{$endif},mdb,mseibconnection,
+ {$ifdef FPC}dbconst{$else} dbconst_del,classes_del{$endif},mdb,
+ mseibconnection,msefbservice,
  msepqconnection,mseodbcconn,{sqldb,}
  mselookupbuffer,mselocaldataset,
  msearrayutils,msedbfieldeditor,sysutils,msetexteditor,
@@ -345,7 +346,8 @@ type
 procedure Register;
 begin
  registercomponents('DB',[     
-      tmseibconnection,tmsepqconnection,tsqlite3connection,tmseodbcconnection,
+      tmseibconnection,tfbservice,
+      tmsepqconnection,tsqlite3connection,tmseodbcconnection,
       tmsemysqlconnection,
       
       tmsesqltransaction,tmsesqlquery,

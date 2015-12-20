@@ -81,7 +81,11 @@ type
 
 { Exception classes }
 
-  EDatabaseError = class(Exception);
+  EDatabaseError = class(Exception)
+   public
+    constructor create(const msg: string; const comp: tcomponent); overload;
+  end;
+  
   EUpdateError   = class(EDatabaseError)
   private
     FContext           : String;
@@ -2239,10 +2243,7 @@ end;
 Procedure DatabaseError (Const Msg : String; Comp : TComponent);
 
 begin
-  if assigned(Comp) and (Comp.Name <> '') then
-    Raise EDatabaseError.CreateFmt('%s : %s',[Comp.Name,Msg])
-  else
-    DatabaseError(Msg);
+ raise edatabaseerror.create(msg,comp);
 end;
 
 Procedure DatabaseErrorFmt (Const Fmt : String; Args : Array Of Const);
@@ -11133,6 +11134,18 @@ begin
          P.Bound:=False;
        end;
     end;
+end;
+
+{ EDatabaseError }
+
+constructor EDatabaseError.create(const msg: string; const comp: tcomponent);
+begin
+ if (comp <> nil) and (comp.name <> '') then begin
+  createfmt('%s : %s',[comp.Name,msg]);
+ end
+ else begin
+  inherited create(msg);
+ end;
 end;
 
 end.

@@ -7,7 +7,7 @@ unit msefbservice;
 interface
 uses
  classes,mclasses,mseclasses,ibase60dyn,msetypes,mdb,msestrings,mibconnection,
- msethread;
+ msethread,sysutils;
 
 const
  defaultinfotimeout = 60; //seconds
@@ -60,7 +60,8 @@ type
 
  fbservicetexteventty = procedure (const sender: tfbservice;
                                            const atext: msestring) of object;
-
+ fbserviceerroreventty = procedure (const sender: tfbservice; 
+                            var e: exception; var handled: boolean) of object;
  tfbservicemonitor = class(tmutexthread)
   private
    fprocname: string;
@@ -85,6 +86,7 @@ type
    finfotimeout: int32;
    fonasynctext: fbservicetexteventty;
    fmonitor: tfbservicemonitor;
+   fonerror: fbserviceerroreventty;
    function getconnected: boolean;
    procedure setconnected(const avalue: boolean);
   protected
@@ -93,12 +95,15 @@ type
    procedure connect();
    procedure disconnect();
    procedure readstate(reader: treader); override;
+   procedure raiseerror(const e: exception);
+   procedure dberror(const msg: string; const comp: tcomponent);
    procedure checkerror(const procname : string;
                             const status : statusvectorty);
    procedure checkerror(const procname : string;
                             const status: integer);
    procedure checkbusy();
    procedure invalidresponse(const procname: string);
+
    procedure start(const procname: string; const params: string);
 //   function getvalueitem(var buffer: pointer; const id: int32): card32;
 //   function getstringitem(var buffer: pointer; const id: int32): string;
@@ -145,12 +150,13 @@ type
    property infotimeout: int32 read finfotimeout write finfotimeout 
                        default defaultinfotimeout; //seconds, -1 -> none
    property onasynctext: fbservicetexteventty read fonasynctext 
-                                                   write fonasynctext; 
+                                                   write fonasynctext;
+   property onerror: fbserviceerroreventty read fonerror write fonerror;
  end;
  
 implementation
 uses
- msebits,msearrayutils,sysutils,mseapplication;
+ msebits,msearrayutils,mseapplication;
 
 function readvalue16(var buffer: pbyte): card16;
 begin
@@ -439,6 +445,7 @@ end;
 
 procedure tfbservice.loaded();
 begin
+ inherited;
  if fbss_connected in fstate then begin
   connect();
  end;
@@ -492,28 +499,53 @@ begin
  inherited;
 end;
 
+procedure tfbservice.raiseerror(const e: exception);
+var
+ bo1: boolean;
+ e1: exception;
+begin
+ connected:= false; //cancel possible running task
+ e1:= e;
+ if canevent(tmethod(fonerror)) then begin
+  bo1:= false;
+  fonerror(self,e1,bo1);
+  if bo1 then begin
+   e1.free;
+  end
+  else begin
+   raise e1;
+  end;
+ end
+ else begin
+  raise e1;
+ end;
+end;
+
+procedure tfbservice.dberror(const msg: string; const comp: tcomponent);
+begin
+ raiseerror(edatabaseerror.create(msg,comp));
+end;
+
 procedure tfbservice.checkerror(const procname: string;
                const status: statusvectorty);
 var
  buf: array [0..1024] of char;
  p: pointer;
- Msg: msestring;  
+ Msg: msestring;
 begin
  if ((Status[0] = 1) and (Status[1] <> 0)) then begin
   p:= @Status;
   msg:= msestring(procname);
-{$warnings off}
+//{$warnings off}
   while isc_interprete(Buf, @p) > 0 do begin
    Msg := Msg + lineend +' -' + connectionmessage(Buf);
   end;
   flasterror:= status;
   flasterrormessage:= msg;
-  exclude(fstate,fbss_busy);
-//  flastsqlcode:= isc_sqlcode(@status);
-  raise efbserviceerror.create(self,msg,status{,flastsqlcode});
+  raiseerror(efbserviceerror.create(self,msg,status{,flastsqlcode}));
  end;
 end;
-{$warnings on}
+//{$warnings on}
 
 procedure tfbservice.checkerror(const procname: string; const status: integer);
 begin
@@ -525,16 +557,16 @@ end;
 procedure tfbservice.checkbusy();
 begin
  if not connected then begin
-  databaseerror('Not connected',self);
+  dberror('Not connected',self);
  end;
  if busy then begin
-  databaseerror('Busy',self);
+  dberror('Busy',self);
  end;
 end;
 
 procedure tfbservice.invalidresponse(const procname: string);
 begin
- databaseerror('Invalid '+procname+' response');
+ raiseerror(edatabaseerror.create('Invalid '+procname+' response',self));
 end;
 
 function tfbservice.todbstring(const avalue: msestring): string;
