@@ -26,7 +26,8 @@ type
 
  threadprocty = function(thread: tmsethread): integer of object;
 
- threadstatety = (ts_started,ts_running,ts_terminated,ts_freeonterminate);
+ threadstatety = (ts_started,ts_running,ts_terminated,ts_freeonterminate,
+                  ts_norun); //no run by create()
  threadstatesty = set of threadstatety;
 
  tmsethread = class
@@ -43,6 +44,7 @@ type
    procedure setfreeonterminate(const avalue: boolean);
   protected
    function execute(thread: tmsethread): integer; virtual;
+   procedure run(); virtual;
   public
    constructor create; overload;
    constructor create(const afreeonterminate: boolean;
@@ -236,7 +238,7 @@ constructor tmsethread.create(const athreadproc: threadprocty;
 begin
  sys_semcreate(fwaitforsem,0);
  fthreadproc:= athreadproc;
- fstate:= [ts_running,ts_started];
+// fstate:= [ts_running,ts_started];
  if afreeonterminate then begin
   include(fstate,ts_freeonterminate);
  end;
@@ -249,14 +251,27 @@ begin
   end;
   threadproc:= {$ifdef FPC}@{$endif}internalthreadproc;
  end;
- createthread(finfo);
+{
+ if not (ts_norun in fstate) then begin
+  run();
+ end;
+}
 end;
 
 procedure tmsethread.afterconstruction;
 begin
+ if not (ts_norun in fstate) then begin
+  run();
+ end;
  if ts_freeonterminate in fstate then begin
   sys_sempost(fwaitforsem);
  end;
+end;
+
+procedure tmsethread.run();
+begin
+ fstate:= fstate + [ts_running,ts_started];
+ createthread(finfo);
 end;
 
 destructor tmsethread.destroy;
@@ -331,7 +346,7 @@ begin
   sys_semwait(fwaitforsem,0);
   info1:= finfo;
   finfo.id:= 0;
-  free;
+  free();
   sys_threaddestroy(info1);
  end;
 end;

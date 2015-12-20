@@ -921,12 +921,17 @@ type
      isc_info_svc_get_env_lock = 60;                    //string
   { Retrieves the setting of $INTERBASE_MSG  }
      isc_info_svc_get_env_msg = 61;                     //string
-  { Retrieves 1 line of service output per call  }
+  { Retrieves 1 line of service output per call 
+       mse: up to the size of buffer, remaining text of line in next call
+            adds a ' ' at end if line, string length 0 -> eof}
      isc_info_svc_line = 62;
   { Retrieves as much of the server output as will fit in the supplied buffer  }
+          //mse: length 0 -> eof
      isc_info_svc_to_eof = 63;
   { Sets / signifies a timeout value for reading service information  }
      isc_info_svc_timeout = 64;
+     //                                       4byte  4byte
+     //mse send params = isc_info_svc_timeout <4> <timeout> isc_info_end
   { Retrieves the number of users licensed for accessing the server  }
      isc_info_svc_get_licensed_users = 65;
   { Retrieve the limbo transactions  }

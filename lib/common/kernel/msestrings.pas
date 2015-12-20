@@ -219,6 +219,7 @@ procedure replacetext1(var dest: msestring; index: integer; const a: msestring);
 
 procedure addstringsegment(var dest: msestring; const a,b: pmsechar);
                //add text from a^ to (b-1)^ to dest
+function stringsegment(a,b: pchar): string;
 function stringsegment(a,b: pmsechar): msestring;
 
 function lstringtostring(const value: lmsestringty): msestring; overload;
@@ -2416,6 +2417,15 @@ begin
  int2:= b-a;
  setlength(dest,int1 + int2);
  move(a^,dest[int1+1],int2*sizeof(msechar));
+end;
+
+function stringsegment(a,b: pchar): string;
+var
+ int1: integer;
+begin
+ int1:= b - a;
+ setlength(result,int1);
+ move(a^,result[1],int1*sizeof(char));
 end;
 
 function stringsegment(a,b: pmsechar): msestring;
