@@ -62,6 +62,8 @@ type
                                            const atext: msestring) of object;
  fbserviceerroreventty = procedure (const sender: tfbservice; 
                             var e: exception; var handled: boolean) of object;
+ fbserviceendeventty = procedure (const sender: tfbservice;
+                                            const aborted: boolean) of object;
  tfbservicemonitor = class(tmutexthread)
   private
    fprocname: string;
@@ -87,6 +89,7 @@ type
    fonasynctext: fbservicetexteventty;
    fmonitor: tfbservicemonitor;
    fonerror: fbserviceerroreventty;
+   fonasyncend: fbserviceendeventty;
    function getconnected: boolean;
    procedure setconnected(const avalue: boolean);
   protected
@@ -104,6 +107,8 @@ type
    procedure checkbusy();
    procedure invalidresponse(const procname: string);
 
+   procedure doasyncend(const aborted: boolean);
+   
    procedure start(const procname: string; const params: string);
 //   function getvalueitem(var buffer: pointer; const id: int32): card32;
 //   function getstringitem(var buffer: pointer; const id: int32): string;
@@ -151,6 +156,8 @@ type
                        default defaultinfotimeout; //seconds, -1 -> none
    property onasynctext: fbservicetexteventty read fonasynctext 
                                                    write fonasynctext;
+   property onasyncend: fbserviceendeventty read fonasyncend 
+                                                    write fonasyncend;
    property onerror: fbserviceerroreventty read fonerror write fonerror;
  end;
  
@@ -508,7 +515,15 @@ begin
  e1:= e;
  if canevent(tmethod(fonerror)) then begin
   bo1:= false;
-  fonerror(self,e1,bo1);
+  application.lock();
+  try
+   fonerror(self,e1,bo1);
+  except
+   application.unlock();
+   e1.free;
+   raise;
+  end;
+  application.unlock();
   if bo1 then begin
    e1.free;
   end
@@ -567,6 +582,18 @@ end;
 procedure tfbservice.invalidresponse(const procname: string);
 begin
  raiseerror(edatabaseerror.create('Invalid '+procname+' response',self));
+end;
+
+procedure tfbservice.doasyncend(const aborted: boolean);
+begin
+ if canevent(tmethod(fonasyncend)) then begin
+  application.lock();
+  try
+   fonasyncend(self,aborted);
+  finally
+   application.unlock();
+  end;
+ end;
 end;
 
 function tfbservice.todbstring(const avalue: msestring): string;
