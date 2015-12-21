@@ -769,8 +769,12 @@ begin
   opa:= aopacity;
  end;
  sourcebmp:= getsource;
+ amask:= getmask(maskpos1);
  if sourcebmp <> nil then begin
   bmp:= sourcebmp.fbitmap;
+  if amask = nil then begin
+   amask:= sourcebmp.fbitmap.getmask(maskpos1);
+  end; 
  end
  else begin
   bmp:= self;
@@ -778,7 +782,7 @@ begin
  with bmp do begin
   if not isempty then begin
    updatealignment(dest,asource,aalignment,rect1,rect2,po1);
-   amask:= getmask(maskpos1);
+//   amask:= getmask(maskpos1);
 //   maskpx:= getmaskhandle(maskgchandle);
    if (al_grayed in aalignment) and ((amask <> nil) or 
                                            (fkind = bmk_mono)) then begin
