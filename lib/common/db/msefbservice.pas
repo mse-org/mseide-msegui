@@ -127,6 +127,9 @@ type
                                  //circular buffer
    procedure startmonitor(const procname: string);
    function serviceisrunning: boolean;
+   function traceaction(const aaction: int32; const aprocname: string; 
+                         const aid: card32; var res: msestringarty;
+                         const maxrowcount: int32): boolean;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy(); override;
@@ -143,7 +146,17 @@ type
               //circular buffer, 0 -> unlimited, returns false on timeout
    procedure tracestart(const cfg: msestring; 
                                      const _name: msestring = '');
-                        //stop by connected:= false or cancel()
+                        //async, stop by connected:= false or cancel()
+   function tracelist(var res: msestringarty;
+                         const maxrowcount: int32 = 0): boolean;
+              //circular buffer, 0 -> unlimited, returns false on timeout
+   function tracestop(const aid: card32; var res: msestringarty;
+                         const maxrowcount: int32 = 0): boolean;
+   function tracesuspend(const aid: card32; var res: msestringarty;
+                         const maxrowcount: int32 = 0): boolean;
+   function traceresume(const aid: card32; var res: msestringarty;
+                         const maxrowcount: int32 = 0): boolean;
+                        
    procedure validatestart(const dbname: msestring;
              const tabincl: msestring = ''; const tabexcl: msestring = '';
              const idxincl: msestring = ''; const idxexcl: msestring = '';
@@ -993,12 +1006,9 @@ end;
 
 function tfbservice.getlog(var res: msestringarty;
                                const maxrowcount: int32 = 0): boolean ;
-var
- params1: string;
 begin
  checkbusy();
- params1:= char(isc_action_svc_get_fb_log);
- start('getlog',params1);
+ start('getlog',char(isc_action_svc_get_fb_log));
  result:= gettext('getlog',maxrowcount,res);
 end;
 
@@ -1015,6 +1025,48 @@ begin
  end;
  start('tracestart',params1);
  startmonitor('tracestart');
+end;
+
+function tfbservice.tracelist(var res: msestringarty;
+                              const maxrowcount: int32 = 0): boolean;
+begin
+ checkbusy();
+ start('tracelist',char(isc_action_svc_trace_list));
+ result:= gettext('tracelist',maxrowcount,res);
+end;
+
+function tfbservice.traceaction(const aaction: int32; const aprocname: string;
+               const aid: card32; var res: msestringarty;
+               const maxrowcount: int32): boolean;
+var
+ params1: string;
+begin
+ checkbusy();
+ params1:= char(aaction);
+ addparam(params1,isc_spb_trc_id,aid);
+ start(aprocname,params1);
+ result:= gettext(aprocname,maxrowcount,res);
+end;
+
+function tfbservice.tracestop(const aid: card32; var res: msestringarty;
+                              const maxrowcount: int32 = 0): boolean;
+begin
+ result:= traceaction(isc_action_svc_trace_stop,'tracestop',
+                                                   aid,res,maxrowcount);
+end;
+
+function tfbservice.tracesuspend(const aid: card32; var res: msestringarty;
+               const maxrowcount: int32 = 0): boolean;
+begin
+ result:= traceaction(isc_action_svc_trace_suspend,'tracesuspend',
+                                                   aid,res,maxrowcount);
+end;
+
+function tfbservice.traceresume(const aid: card32; var res: msestringarty;
+               const maxrowcount: int32 = 0): boolean;
+begin
+ result:= traceaction(isc_action_svc_trace_resume,'traceresume',
+                                                   aid,res,maxrowcount);
 end;
 
 procedure tfbservice.validatestart(const dbname: msestring;
