@@ -35,7 +35,12 @@ type
  end;
  pfbuserinfoty = ^fbuserinfoty;
  fbuserinfoarty = array of fbuserinfoty;
- 
+
+ dbstatoptionty = (dbsto_datapages,dbsto_dblog,dbsto_hdrpages,
+                   dbsto_idxpages,dbsto_sysrelations,dbsto_recordversions,
+                   dbsto_table,dbsto_nocreation);
+ dbstatoptionsty = set of dbstatoptionty;
+  
  tfbservice = class;
  
  efbserviceerror = class(edatabaseerror)
@@ -122,7 +127,10 @@ type
                                               const value: msestring); 
                                                 //value limited to 65535 chars
    function internalusers(const ausername: string): fbuserinfoarty;
-   function gettext(const procname: string;
+//   function gettext(const procname: string;
+//                 const maxrowcount: integer; var res:  msestringarty): boolean;
+                                 //circular buffer
+   function gettext(const params: string; const procname: string;
                  const maxrowcount: integer; var res:  msestringarty): boolean;
                                  //circular buffer
    procedure startmonitor(const procname: string);
@@ -162,7 +170,11 @@ type
                          const maxrowcount: int32 = 0): boolean;
    function setmapping(): boolean;
    function dropmapping(): boolean;
-                        
+
+   function dbstats(const adbname: msestring;
+               const aoptions: dbstatoptionsty; const acommandline: msestring; 
+               var res: msestringarty; const maxrowcount: int32 = 0): boolean;
+                    
    procedure validatestart(const dbname: msestring;
              const tabincl: msestring = ''; const tabexcl: msestring = '';
              const idxincl: msestring = ''; const idxexcl: msestring = '';
@@ -890,7 +902,7 @@ begin
  end;
 end;
 }
-function tfbservice.gettext(const procname: string;
+function tfbservice.gettext(const params: string; const procname: string;
             const maxrowcount: integer; var res:  msestringarty): boolean;
 
 var
@@ -927,6 +939,8 @@ var
  remainder: string;
  ar1: msestringarty;
 begin
+ checkbusy();
+ start(procname,params);
  result:= false;
  res:= nil;
  params1:= '';
@@ -1035,9 +1049,7 @@ function tfbservice.tagaction(const aaction: int32; const aprocname: string;
                               var res: msestringarty;
                               const maxrowcount: int32): boolean;
 begin
- checkbusy();
- start(aprocname,char(aaction));
- result:= gettext(aprocname,maxrowcount,res);
+ result:= gettext(char(aaction),aprocname,maxrowcount,res);
 end;
 
 function tfbservice.tagaction(const aaction: int32;
@@ -1060,11 +1072,9 @@ function tfbservice.traceaction(const aaction: int32; const aprocname: string;
 var
  params1: string;
 begin
- checkbusy();
  params1:= char(aaction);
  addparam(params1,isc_spb_trc_id,aid);
- start(aprocname,params1);
- result:= gettext(aprocname,maxrowcount,res);
+ result:= gettext(params1,aprocname,maxrowcount,res);
 end;
 
 function tfbservice.tracestop(const aid: card32; var res: msestringarty;
@@ -1096,6 +1106,21 @@ end;
 function tfbservice.dropmapping(): boolean;
 begin
  result:= tagaction(isc_action_svc_drop_mapping,'dropmapping');
+end;
+
+function tfbservice.dbstats(const adbname: msestring;
+               const aoptions: dbstatoptionsty; const acommandline: msestring; 
+               var res: msestringarty; const maxrowcount: int32 = 0): boolean;
+var
+ params1: string;
+begin
+ params1:= char(isc_action_svc_db_stats);
+ addmseparam(params1,isc_spb_dbname,adbname);
+ addparam(params1,isc_spb_options,card32(aoptions));
+ if acommandline <> '' then begin
+  addmseparam(params1,isc_spb_command_line,acommandline);
+ end;
+ result:= gettext(params1,'dbstats',maxrowcount,res);
 end;
 
 procedure tfbservice.validatestart(const dbname: msestring;
