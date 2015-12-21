@@ -962,22 +962,6 @@ type
      isc_spb_lic_id = 6;
      isc_spb_lic_desc = 7;
   {
-     Parameters for isc_action_svc_backup
-                                            }
-     isc_spb_bkp_file = 5;
-     isc_spb_bkp_factor = 6;
-     isc_spb_bkp_length = 7;
-     isc_spb_bkp_stat = 15;
-     isc_spb_bkp_ignore_checksums = $01;
-     isc_spb_bkp_ignore_limbo = $02;
-     isc_spb_bkp_metadata_only = $04;
-     isc_spb_bkp_no_garbage_collect = $08;
-     isc_spb_bkp_old_descriptions = $10;
-     isc_spb_bkp_non_transportable = $20;
-     isc_spb_bkp_convert = $40;
-     isc_spb_bkp_expand = $80;
-     isc_spb_bkp_no_triggers = $8000;
-  {
      Parameters for isc_action_svc_properties
                                                }
      isc_spb_prp_page_buffers = 5;
@@ -1021,6 +1005,49 @@ type
      isc_spb_prp_am_readonly = 39;
      isc_spb_prp_am_readwrite = 40;
   {
+     Parameters for isc_action_svc_backup
+                                            }
+     isc_spb_bkp_file = 5;
+     isc_spb_bkp_factor = 6;
+     isc_spb_bkp_length = 7;
+     isc_spb_bkp_stat = 15;
+     isc_spb_bkp_ignore_checksums = $01;
+     isc_spb_bkp_ignore_limbo = $02;
+     isc_spb_bkp_metadata_only = $04;
+     isc_spb_bkp_no_garbage_collect = $08;
+     isc_spb_bkp_old_descriptions = $10;
+     isc_spb_bkp_non_transportable = $20;
+     isc_spb_bkp_convert = $40;
+     isc_spb_bkp_expand = $80;
+     isc_spb_bkp_no_triggers = $8000;
+  {
+     Parameters for isc_action_svc_restore
+                                            }
+     isc_spb_res_buffers = 9;
+     isc_spb_res_page_size = 10;
+     isc_spb_res_length = 11;
+     isc_spb_res_access_mode = 12;
+     isc_spb_res_fix_fss_data = 13;
+     isc_spb_res_fix_fss_metadata = 14;
+     isc_spb_res_stat = isc_spb_bkp_stat;
+     isc_spb_res_metadata_only = isc_spb_bkp_metadata_only;
+     isc_spb_res_deactivate_idx = $0100;
+     isc_spb_res_no_shadow = $0200;
+     isc_spb_res_no_validity = $0400;
+     isc_spb_res_one_at_a_time = $0800;
+     isc_spb_res_replace = $1000;
+     isc_spb_res_create = $2000;
+     isc_spb_res_use_all_space = $4000;
+
+///*****************************************
+// * Parameters for isc_action_svc_validate *
+// *****************************************/
+     isc_spb_val_tab_incl = 1; // include filter based on regular expression
+     isc_spb_val_tab_excl = 2; // exclude filter based on regular expression
+     isc_spb_val_idx_incl = 3; // regexp of indices to validate
+     isc_spb_val_idx_excl = 4; // regexp of indices to NOT validate
+     isc_spb_val_lock_timeout = 5; // how long to wait for table lock
+  {
      Parameters for isc_action_svc_repair
                                             }
      isc_spb_rpr_commit_trans = 15;
@@ -1049,33 +1076,6 @@ type
      isc_spb_rpr_ignore_checksum = $20;
      isc_spb_rpr_kill_shadows = $40;
      isc_spb_rpr_full = $80;
-  {
-     Parameters for isc_action_svc_restore
-                                            }
-     isc_spb_res_buffers = 9;
-     isc_spb_res_page_size = 10;
-     isc_spb_res_length = 11;
-     isc_spb_res_access_mode = 12;
-     isc_spb_res_fix_fss_data = 13;
-     isc_spb_res_fix_fss_metadata = 14;
-     isc_spb_res_stat = isc_spb_bkp_stat;
-     isc_spb_res_metadata_only = isc_spb_bkp_metadata_only;
-     isc_spb_res_deactivate_idx = $0100;
-     isc_spb_res_no_shadow = $0200;
-     isc_spb_res_no_validity = $0400;
-     isc_spb_res_one_at_a_time = $0800;
-     isc_spb_res_replace = $1000;
-     isc_spb_res_create = $2000;
-     isc_spb_res_use_all_space = $4000;
-
-///*****************************************
-// * Parameters for isc_action_svc_validate *
-// *****************************************/
-     isc_spb_val_tab_incl = 1; // include filter based on regular expression
-     isc_spb_val_tab_excl = 2; // exclude filter based on regular expression
-     isc_spb_val_idx_incl = 3; // regexp of indices to validate
-     isc_spb_val_idx_excl = 4; // regexp of indices to NOT validate
-     isc_spb_val_lock_timeout = 5; // how long to wait for table lock
   {
      Parameters for isc_spb_res_access_mode
                                              }

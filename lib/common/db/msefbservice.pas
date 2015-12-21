@@ -40,7 +40,18 @@ type
                    dbsto_idxpages,dbsto_sysrelations,dbsto_recordversions,
                    dbsto_table,dbsto_nocreation);
  dbstatoptionsty = set of dbstatoptionty;
-  
+
+ backupoptionty = (bao_ignorechecksums,bao_ignorelimbo,bao_metadataonly,
+           bao_no_garbagecollect,bao_olddescriptions,bao_nontransportable,
+           bao_convert,bao_expand,bao_notriggers {=$8000});
+ backupoptionsty = set of backupoptionty;
+
+ restoreoptionty = (reo_deactivateidx,reo_no_shadow,reo_no_validity,
+                    reo_one_at_a_time,reo_replace,reo_create,reo_use_all_space);
+ restoreoptionsty = set of restoreoptionty;
+
+ accessmodety = (amo_readonly,amo_readwrite);
+
  tfbservice = class;
  
  efbserviceerror = class(edatabaseerror)
@@ -133,7 +144,7 @@ type
    function gettext(const params: string; const procname: string;
                  const maxrowcount: integer; var res:  msestringarty): boolean;
                                  //circular buffer
-   procedure startmonitor(const procname: string);
+   procedure startmonitor(const procname: string; const aparams: string);
    function serviceisrunning: boolean;
    function tagaction(const aaction: int32; const aprocname: string; 
                               var res: msestringarty;
@@ -179,6 +190,22 @@ type
              const tabincl: msestring = ''; const tabexcl: msestring = '';
              const idxincl: msestring = ''; const idxexcl: msestring = '';
                                                  const locktimeout: int32 = 0);
+   procedure backupstart(const dbname: msestring;
+           const files: array of msestring; const lengths: array of card32;
+                                             //none for last file
+           const verbose: boolean = false; const stat: string = '';
+                                          //stat for FB 3.0 only
+           const aoptions: backupoptionsty = [];
+           const factor: card32 = 0);
+   procedure restorestart(const _file: msestring;
+           const dbnames: array of msestring; const lengths: array of card32;
+           const verbose: boolean = false; const stat: string = '';
+                                          //stat for FB 3.0 only
+           const aoptions: restoreoptionsty = [];
+           const accessmode: accessmodety = amo_readwrite;
+           const buffers: card32 = 0; const pagesize: card32 = 0;
+           const fixfssdata: string = ''; const fixfssmetadata: string = '');
+          
    property lasterror: statusvectorty read flasterror;
    property lasterrormessage: msestring read flasterrormessage;
   published
@@ -186,7 +213,8 @@ type
    property username : ansistring read fusername write fusername;
    property password : ansistring read fpassword write fpassword;
    property connected: boolean read getconnected 
-                                    write setconnected default false;   
+                                    write setconnected default false;
+                                 //connected will be rest by a server error
    property options: fbserviceoptionsty read foptions write foptions default [];
    property infotimeout: int32 read finfotimeout write finfotimeout 
                        default defaultinfotimeout; //seconds, -1 -> none
@@ -199,7 +227,13 @@ type
  
 implementation
 uses
- msebits,msearrayutils,mseapplication;
+ msebits,msearrayutils,mseapplication,msesysintf;
+const
+ restoreflags: array[restoreoptionty] of card32 = (isc_spb_res_deactivate_idx,
+     isc_spb_res_no_shadow,isc_spb_res_no_validity,isc_spb_res_one_at_a_time,
+     isc_spb_res_replace,isc_spb_res_create,isc_spb_res_use_all_space);
+ accessmodeflags: array[accessmodety] of card32 =(isc_spb_prp_am_readonly,
+                                                     isc_spb_prp_am_readwrite);
 
 function readvalue16(var buffer: pbyte): card16;
 begin
@@ -305,6 +339,21 @@ begin
  setlength(params,i2+1+0);
  po1:= pointer(params)+i2;
  po1^:= id;
+end;
+
+procedure addparam(var params: string; const id: int32;
+                                              const value: card8); 
+var
+ i2: int32;
+ po1: pbyte;
+begin
+ i2:= length(params);
+ setlength(params,i2+1+1);
+ po1:= pointer(params)+i2;
+ po1^:= id;
+ inc(po1);
+ po1^:= value;
+ inc(po1);
 end;
 
 procedure addtimeout(var params: string; const atimeout: card32);
@@ -578,7 +627,10 @@ end;
 
 procedure tfbservice.disconnect();
 begin
- freeandnil(fmonitor);
+ if (fmonitor <> nil) and 
+              (sys_getcurrentthread() <> fmonitor.id) then begin
+  freeandnil(fmonitor);
+ end;
  closeconn();
 end;
 
@@ -1002,8 +1054,10 @@ begin
  exclude(fstate,fbss_busy);
 end;
 
-procedure tfbservice.startmonitor(const procname: string);
+procedure tfbservice.startmonitor(const procname: string; const aparams: string);
 begin
+ checkbusy();
+ start(procname,aparams);
  freeandnil(fmonitor);
  fmonitor:= tfbservicemonitor.create(self,procname);
 end;
@@ -1035,14 +1089,12 @@ procedure tfbservice.tracestart(const cfg: msestring;
 var
  params1: string;
 begin
- checkbusy();
  params1:= char(isc_action_svc_trace_start);
  addmseparam(params1,isc_spb_trc_cfg,cfg);
  if _name <> '' then begin
   addmseparam(params1,isc_spb_trc_name,_name);
  end;
- start('tracestart',params1);
- startmonitor('tracestart');
+ startmonitor('tracestart',params1);
 end;
 
 function tfbservice.tagaction(const aaction: int32; const aprocname: string; 
@@ -1130,7 +1182,6 @@ procedure tfbservice.validatestart(const dbname: msestring;
 var
  params1: string;
 begin
- checkbusy();
  params1:= char(isc_action_svc_validate);
  addmseparam(params1,isc_spb_dbname,dbname);
  if tabincl <> '' then begin
@@ -1145,8 +1196,85 @@ begin
  if idxexcl <> '' then begin
   addmseparam(params1,isc_spb_val_idx_excl,idxexcl);
  end;
- start('validatestart',params1);
- startmonitor('validatestart');
+ startmonitor('validatestart',params1);
+end;
+
+procedure tfbservice.backupstart(const dbname: msestring;
+      const files: array of msestring; const lengths: array of card32;
+      const verbose: boolean = false; const stat: string = '';
+      const aoptions: backupoptionsty = [];
+      const factor: card32 = 0);
+var
+ params1: string;
+ i1: int32;
+ ca1: card32;
+begin
+ params1:= char(isc_action_svc_backup);
+ addmseparam(params1,isc_spb_dbname,dbname);
+ for i1:= 0 to high(files) do begin
+  addmseparam(params1,isc_spb_bkp_file,files[i1]);
+ end;
+ for i1:= 0 to high(lengths) do begin
+  addparam(params1,isc_spb_bkp_length,lengths[i1]);
+ end;
+ if verbose then begin
+  addparam(params1,isc_spb_verbose);
+ end;
+ if stat <> '' then begin
+  addparam(params1,isc_spb_bkp_stat,stat);
+ end;
+ ca1:= card32(aoptions - [bao_notriggers]);
+ if bao_notriggers in aoptions then begin
+  ca1:= ca1 or $8000;
+ end;
+ addparam(params1,isc_spb_options,ca1);
+ startmonitor('backupstart',params1);
+end;
+
+procedure tfbservice.restorestart(const _file: msestring;
+              const dbnames: array of msestring; const lengths: array of card32;
+              const verbose: boolean = false; const stat: string = '';
+              const aoptions: restoreoptionsty = [];
+              const accessmode: accessmodety = amo_readwrite;
+              const buffers: card32 = 0; const pagesize: card32 = 0;
+              const fixfssdata: string = ''; const fixfssmetadata: string = '');
+var
+ params1: string;
+ i1: int32;
+ ca1: card32;
+ opt1: restoreoptionty;
+begin
+ params1:= char(isc_action_svc_restore);
+ addmseparam(params1,isc_spb_bkp_file,_file);
+ for i1:= 0 to high(dbnames) do begin
+  addmseparam(params1,isc_spb_dbname,dbnames[i1]);
+ end;
+ for i1:= 0 to high(lengths) do begin
+  addparam(params1,isc_spb_res_length,lengths[i1]);
+ end;
+ if verbose then begin
+  addparam(params1,isc_spb_verbose);
+ end;
+ if stat <> '' then begin
+  addparam(params1,isc_spb_res_stat,stat);
+ end;
+ if aoptions <> [] then begin
+  ca1:= 0;
+  for opt1:= low(opt1) to high(opt1) do begin
+   if opt1 in aoptions then begin
+    ca1:= ca1 or restoreflags[opt1];
+   end;
+  end;
+  addparam(params1,isc_spb_options,ca1);
+ end;
+ addparam(params1,isc_spb_res_access_mode,card8(accessmodeflags[accessmode]));
+ if buffers <> 0 then begin
+  addparam(params1,isc_spb_res_buffers,buffers);
+ end;
+ if pagesize <> 0 then begin
+  addparam(params1,isc_spb_res_page_size,pagesize);
+ end;
+ startmonitor('restorestart',params1);
 end;
 
 end.
