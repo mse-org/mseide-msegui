@@ -127,6 +127,10 @@ type
                                  //circular buffer
    procedure startmonitor(const procname: string);
    function serviceisrunning: boolean;
+   function tagaction(const aaction: int32; const aprocname: string; 
+                              var res: msestringarty;
+                              const maxrowcount: int32): boolean;
+   function tagaction(const aaction: int32; const aprocname: string): boolean;
    function traceaction(const aaction: int32; const aprocname: string; 
                          const aid: card32; var res: msestringarty;
                          const maxrowcount: int32): boolean;
@@ -156,6 +160,8 @@ type
                          const maxrowcount: int32 = 0): boolean;
    function traceresume(const aid: card32; var res: msestringarty;
                          const maxrowcount: int32 = 0): boolean;
+   function setmapping(): boolean;
+   function dropmapping(): boolean;
                         
    procedure validatestart(const dbname: msestring;
              const tabincl: msestring = ''; const tabexcl: msestring = '';
@@ -1007,9 +1013,7 @@ end;
 function tfbservice.getlog(var res: msestringarty;
                                const maxrowcount: int32 = 0): boolean ;
 begin
- checkbusy();
- start('getlog',char(isc_action_svc_get_fb_log));
- result:= gettext('getlog',maxrowcount,res);
+ result:= tagaction(isc_action_svc_get_fb_log,'getlog',res,maxrowcount);
 end;
 
 procedure tfbservice.tracestart(const cfg: msestring;
@@ -1027,12 +1031,27 @@ begin
  startmonitor('tracestart');
 end;
 
+function tfbservice.tagaction(const aaction: int32; const aprocname: string; 
+                              var res: msestringarty;
+                              const maxrowcount: int32): boolean;
+begin
+ checkbusy();
+ start(aprocname,char(aaction));
+ result:= gettext(aprocname,maxrowcount,res);
+end;
+
+function tfbservice.tagaction(const aaction: int32;
+               const aprocname: string): boolean;
+var
+ ar1: msestringarty;
+begin
+ result:= tagaction(aaction,aprocname,ar1,1);
+end;
+
 function tfbservice.tracelist(var res: msestringarty;
                               const maxrowcount: int32 = 0): boolean;
 begin
- checkbusy();
- start('tracelist',char(isc_action_svc_trace_list));
- result:= gettext('tracelist',maxrowcount,res);
+ result:= tagaction(isc_action_svc_trace_list,'tracelist',res,maxrowcount);
 end;
 
 function tfbservice.traceaction(const aaction: int32; const aprocname: string;
@@ -1067,6 +1086,16 @@ function tfbservice.traceresume(const aid: card32; var res: msestringarty;
 begin
  result:= traceaction(isc_action_svc_trace_resume,'traceresume',
                                                    aid,res,maxrowcount);
+end;
+
+function tfbservice.setmapping(): boolean;
+begin
+ result:= tagaction(isc_action_svc_set_mapping,'setmapping');
+end;
+
+function tfbservice.dropmapping(): boolean;
+begin
+ result:= tagaction(isc_action_svc_drop_mapping,'dropmapping');
 end;
 
 procedure tfbservice.validatestart(const dbname: msestring;
