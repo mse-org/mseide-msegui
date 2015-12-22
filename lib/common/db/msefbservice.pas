@@ -197,8 +197,9 @@ type
                                           //stat for FB 3.0 only
            const aoptions: backupoptionsty = [];
            const factor: card32 = 0);
-   procedure restorestart(const _file: msestring;
+   procedure restorestart(const files: array of msestring;
            const dbnames: array of msestring; const lengths: array of card32;
+                                                   //pages
            const verbose: boolean = false; const stat: string = '';
                                           //stat for FB 3.0 only
            const aoptions: restoreoptionsty = [];
@@ -446,11 +447,13 @@ var
  i1,i2: int32;
  str1: string;
  ok: boolean;
+const
+ buffersize = 4096;
 begin
  ok:= false;
  params1:= '';
  addtimeout(params1,1); //1 sec min timeout
- setlength(buffer1,4096);
+ setlength(buffer1,buffersize);
  items1:= char(isc_info_svc_to_eof);
  str1:= '';
  while not terminated and not application.terminated do begin
@@ -468,8 +471,9 @@ begin
      i2:= length(str1);
      setlength(str1,i1+i2);
      move(po1^,(pointer(str1)+i2)^,i1);
-    end
-    else begin
+    end;
+    if i1 < buffersize-10 then begin 
+                 //not truncated, firebird seems not to fill buffer completely
      if str1 <> '' then begin
       application.lock();
       try
@@ -645,30 +649,32 @@ var
  bo1: boolean;
  e1: exception;
 begin
- if dberr then begin
-  connected:= false; //cancel possible running task
- end;
- e1:= e;
- if canevent(tmethod(fonerror)) then begin
-  bo1:= false;
-  application.lock();
-  try
-   fonerror(self,e1,bo1);
-  except
-   application.unlock();
-   e1.free;
-   raise;
+ application.lock();
+ try
+  if dberr then begin
+   connected:= false; //cancel possible running task
   end;
-  application.unlock();
-  if bo1 then begin
-   e1.free;
+  e1:= e;
+  if canevent(tmethod(fonerror)) then begin
+   bo1:= false;
+   try
+    fonerror(self,e1,bo1);
+   except
+    e1.free;
+    raise;
+   end;
+   if bo1 then begin
+    e1.free;
+   end
+   else begin
+    raise e1;
+   end;
   end
   else begin
    raise e1;
   end;
- end
- else begin
-  raise e1;
+ finally
+  application.unlock();
  end;
 end;
 
@@ -1231,7 +1237,7 @@ begin
  startmonitor('backupstart',params1);
 end;
 
-procedure tfbservice.restorestart(const _file: msestring;
+procedure tfbservice.restorestart(const files: array of msestring;
               const dbnames: array of msestring; const lengths: array of card32;
               const verbose: boolean = false; const stat: string = '';
               const aoptions: restoreoptionsty = [];
@@ -1245,7 +1251,9 @@ var
  opt1: restoreoptionty;
 begin
  params1:= char(isc_action_svc_restore);
- addmseparam(params1,isc_spb_bkp_file,_file);
+ for i1:= 0 to high(files) do begin
+  addmseparam(params1,isc_spb_bkp_file,files[i1]);
+ end;
  for i1:= 0 to high(dbnames) do begin
   addmseparam(params1,isc_spb_dbname,dbnames[i1]);
  end;
