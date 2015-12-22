@@ -191,21 +191,22 @@ type
              const idxincl: msestring = ''; const idxexcl: msestring = '';
                                                  const locktimeout: int32 = 0);
    procedure backupstart(const dbname: msestring;
-           const files: array of msestring; const lengths: array of card32;
-                                             //none for last file
+           const backupfiles: array of msestring; const lengths: array of card32;
+                                             //bytes, none for last file
            const verbose: boolean = false; const stat: string = '';
                                           //stat for FB 3.0 only
            const aoptions: backupoptionsty = [];
            const factor: card32 = 0);
-   procedure restorestart(const files: array of msestring;
-           const dbnames: array of msestring; const lengths: array of card32;
-                                                   //pages
+   procedure restorestart(const backupfiles: array of msestring;
+           const dbfiles: array of msestring; const lengths: array of card32;
+                                              //pages, none for last dbfile
            const verbose: boolean = false; const stat: string = '';
                                           //stat for FB 3.0 only
            const aoptions: restoreoptionsty = [];
            const accessmode: accessmodety = amo_readwrite;
            const buffers: card32 = 0; const pagesize: card32 = 0;
            const fixfssdata: string = ''; const fixfssmetadata: string = '');
+                              //CHARACTER SET                 CHARACTER SET   
           
    property lasterror: statusvectorty read flasterror;
    property lasterrormessage: msestring read flasterrormessage;
@@ -1206,7 +1207,7 @@ begin
 end;
 
 procedure tfbservice.backupstart(const dbname: msestring;
-      const files: array of msestring; const lengths: array of card32;
+      const backupfiles: array of msestring; const lengths: array of card32;
       const verbose: boolean = false; const stat: string = '';
       const aoptions: backupoptionsty = [];
       const factor: card32 = 0);
@@ -1217,11 +1218,11 @@ var
 begin
  params1:= char(isc_action_svc_backup);
  addmseparam(params1,isc_spb_dbname,dbname);
- for i1:= 0 to high(files) do begin
-  addmseparam(params1,isc_spb_bkp_file,files[i1]);
- end;
- for i1:= 0 to high(lengths) do begin
-  addparam(params1,isc_spb_bkp_length,lengths[i1]);
+ for i1:= 0 to high(backupfiles) do begin
+  addmseparam(params1,isc_spb_bkp_file,backupfiles[i1]);
+  if i1 <= high(lengths) then begin
+   addparam(params1,isc_spb_bkp_length,lengths[i1]);
+  end;
  end;
  if verbose then begin
   addparam(params1,isc_spb_verbose);
@@ -1237,8 +1238,8 @@ begin
  startmonitor('backupstart',params1);
 end;
 
-procedure tfbservice.restorestart(const files: array of msestring;
-              const dbnames: array of msestring; const lengths: array of card32;
+procedure tfbservice.restorestart(const backupfiles: array of msestring;
+              const dbfiles: array of msestring; const lengths: array of card32;
               const verbose: boolean = false; const stat: string = '';
               const aoptions: restoreoptionsty = [];
               const accessmode: accessmodety = amo_readwrite;
@@ -1251,14 +1252,14 @@ var
  opt1: restoreoptionty;
 begin
  params1:= char(isc_action_svc_restore);
- for i1:= 0 to high(files) do begin
-  addmseparam(params1,isc_spb_bkp_file,files[i1]);
+ for i1:= 0 to high(backupfiles) do begin
+  addmseparam(params1,isc_spb_bkp_file,backupfiles[i1]);
  end;
- for i1:= 0 to high(dbnames) do begin
-  addmseparam(params1,isc_spb_dbname,dbnames[i1]);
- end;
- for i1:= 0 to high(lengths) do begin
-  addparam(params1,isc_spb_res_length,lengths[i1]);
+ for i1:= 0 to high(dbfiles) do begin
+  addmseparam(params1,isc_spb_dbname,dbfiles[i1]);
+  if i1 <= high(lengths) then begin
+   addparam(params1,isc_spb_res_length,lengths[i1]);
+  end;
  end;
  if verbose then begin
   addparam(params1,isc_spb_verbose);
@@ -1281,6 +1282,12 @@ begin
  end;
  if pagesize <> 0 then begin
   addparam(params1,isc_spb_res_page_size,pagesize);
+ end;
+ if fixfssdata <> '' then begin
+  addparam(params1,isc_spb_res_fix_fss_data,fixfssdata);
+ end;
+ if fixfssmetadata <> '' then begin
+  addparam(params1,isc_spb_res_fix_fss_metadata,fixfssmetadata);
  end;
  startmonitor('restorestart',params1);
 end;
