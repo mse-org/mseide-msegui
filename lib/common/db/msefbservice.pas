@@ -52,6 +52,10 @@ type
 
  accessmodety = (amo_readonly,amo_readwrite);
 
+ repairoptionty = (rpo_validate_db,rpo_sweep_db,rpo_mend_db,limbo_trans,
+                   rpo_check_db,rpo_ignore_checksum,rpo_kill_shadows,rpo_full);
+ repairoptionsty = set of repairoptionty;
+
  tfbservice = class;
  
  efbserviceerror = class(edatabaseerror)
@@ -189,25 +193,26 @@ type
    procedure validatestart(const dbname: msestring;
              const tabincl: msestring = ''; const tabexcl: msestring = '';
              const idxincl: msestring = ''; const idxexcl: msestring = '';
-                                                 const locktimeout: int32 = 0);
+                                                 const locktimeout: card32 = 0);
    procedure backupstart(const dbname: msestring;
            const backupfiles: array of msestring; const lengths: array of card32;
                                              //bytes, none for last file
            const verbose: boolean = false; const stat: string = '';
-                                          //stat for FB 3.0 only
+             //stat for FB 2.5.5 only, 1..4 chars, valid chars = T|D|R|W
            const aoptions: backupoptionsty = [];
            const factor: card32 = 0);
    procedure restorestart(const backupfiles: array of msestring;
            const dbfiles: array of msestring; const lengths: array of card32;
                                               //pages, none for last dbfile
            const verbose: boolean = false; const stat: string = '';
-                                          //stat for FB 3.0 only
+             //stat for FB 2.5.5 only, 1..4 chars, valid chars = T|D|R|W
            const aoptions: restoreoptionsty = [];
            const accessmode: accessmodety = amo_readwrite;
            const buffers: card32 = 0; const pagesize: card32 = 0;
            const fixfssdata: string = ''; const fixfssmetadata: string = '');
                               //CHARACTER SET                 CHARACTER SET   
-          
+   procedure repairstart(const adbname: msestring;
+                                       const aoptions: repairoptionsty);
    property lasterror: statusvectorty read flasterror;
    property lasterrormessage: msestring read flasterrormessage;
   published
@@ -1185,7 +1190,7 @@ end;
 procedure tfbservice.validatestart(const dbname: msestring;
                const tabincl: msestring = ''; const tabexcl: msestring = '';
                const idxincl: msestring = ''; const idxexcl: msestring = '';
-               const locktimeout: int32 = 0);
+               const locktimeout: card32 = 0);
 var
  params1: string;
 begin
@@ -1202,6 +1207,9 @@ begin
  end;
  if idxexcl <> '' then begin
   addmseparam(params1,isc_spb_val_idx_excl,idxexcl);
+ end;
+ if locktimeout <> 0 then begin
+  addparam(params1,isc_spb_val_lock_timeout,locktimeout);
  end;
  startmonitor('validatestart',params1);
 end;
@@ -1290,6 +1298,17 @@ begin
   addparam(params1,isc_spb_res_fix_fss_metadata,fixfssmetadata);
  end;
  startmonitor('restorestart',params1);
+end;
+
+procedure tfbservice.repairstart(const adbname: msestring;
+               const aoptions: repairoptionsty);
+var
+ params1: string;
+begin
+ params1:= char(isc_action_svc_repair);
+ addmseparam(params1,isc_spb_dbname,adbname);
+ addparam(params1,isc_spb_options,card32(aoptions));
+ startmonitor('repairstart',params1);
 end;
 
 end.
