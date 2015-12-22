@@ -744,7 +744,7 @@ end;
 procedure tfbservice.start(const procname: string; const params: string);
 begin
  checkbusy();
- checkerror(procname,isc_service_start(@fstatus,@fhandle,FB_API_NULLHANDLE,
+ checkerror(procname,isc_service_start(@fstatus,@fhandle,nil,
                                    length(params),pointer(params)));
  include(fstate,fbss_busy);
 end;
