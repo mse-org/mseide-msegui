@@ -13935,6 +13935,9 @@ end;
 function twidget.getassistiveflags: assistiveflagsty;
 begin
  result:= [];
+ if not (ws_iswidget in fwidgetstate) then begin
+  include(result,asf_embedded);
+ end;
 end;
 
 function twidget.getifidatalinkintf(): iifidatalink;

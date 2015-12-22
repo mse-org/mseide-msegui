@@ -476,11 +476,13 @@ begin
   result:= updatemouseshapestate(infos[int1],mouseevent,widget,
                                                  aframe,@infos) or result;
   if shs_mouse in infos[int1].state then begin
+   focuseditem:= int1;
    if i2 <> int1 then begin
+   {           necessary?
     if (focuseditem >= 0) and (focuseditem <= high(infos)) then begin
      widget.invalidaterect(infos[focuseditem].ca.dim);
     end;
-    focuseditem:= int1;
+   }
     if (int1 >= 0) and (assistiveserver <> nil) then begin
      assistiveserver.doitementer(getiassistiveclient(widget),infos,int1);
     end;
