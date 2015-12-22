@@ -10159,7 +10159,7 @@ procedure twidget.mouseevent(var info: mouseeventinfoty);
   include(info.eventstate,es_client);
   try
    clientmouseevent(info);
-   if (assistiveserver <> nil) and (ws_iswidget in widgetstate) then begin
+   if (assistiveserver <> nil) {and (ws_iswidget in widgetstate)} then begin
     assistiveserver.clientmouseevent(getiassistiveclient(),info);
    end;
   finally
