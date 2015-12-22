@@ -29,6 +29,8 @@ type
   firstname: msestring;
   middlename: msestring;
   lastname: msestring;
+  groupname: msestring;
+  rolename: msestring;
   userid: card32;
   groupid: card32;
   admin: card32;
@@ -133,6 +135,7 @@ type
    procedure start(const procname: string; const params: string);
    function getinfo(const procname: string; const items: array of byte;
                                                   const async: boolean): string;
+   function runcommand(const procname: string; const params: string): boolean;
    function getmsestringitem(var buffer: pointer; out res: msestring;
                                const cutspace: boolean = false): boolean;
                                                          //returns eof state
@@ -145,16 +148,16 @@ type
 //   function gettext(const procname: string;
 //                 const maxrowcount: integer; var res:  msestringarty): boolean;
                                  //circular buffer
-   function gettext(const params: string; const procname: string;
+   function gettext(const procname: string; const params: string;
                  const maxrowcount: integer; var res:  msestringarty): boolean;
-                                 //circular buffer
+                                 //circular buffer, returns false on timeout
    procedure startmonitor(const procname: string; const aparams: string);
    function serviceisrunning: boolean;
-   function tagaction(const aaction: int32; const aprocname: string; 
+   function tagaction(const aprocname: string; const aaction: int32; 
                               var res: msestringarty;
                               const maxrowcount: int32): boolean;
-   function tagaction(const aaction: int32; const aprocname: string): boolean;
-   function traceaction(const aaction: int32; const aprocname: string; 
+   function tagaction(const aprocname: string; const aaction: int32): boolean;
+   function traceaction(const aprocname: string; const aaction: int32;
                          const aid: card32; var res: msestringarty;
                          const maxrowcount: int32): boolean;
   public
@@ -168,6 +171,7 @@ type
    function users(): fbuserinfoarty;
    function user(const ausername: msestring; var ainfo: fbuserinfoty): boolean;
                                                        //false if not found
+   function adduser(const ainfo: fbuserinfoty; const password: string): boolean;
    function getlog(var res: msestringarty;
                                  const maxrowcount: int32 = 0): boolean;
               //circular buffer, 0 -> unlimited, returns false on timeout
@@ -213,6 +217,7 @@ type
                               //CHARACTER SET                 CHARACTER SET   
    procedure repairstart(const adbname: msestring;
                                        const aoptions: repairoptionsty);
+
    property lasterror: statusvectorty read flasterror;
    property lasterrormessage: msestring read flasterrormessage;
   published
@@ -782,6 +787,14 @@ begin
  end;
 end;
 
+function tfbservice.runcommand(const procname: string;
+               const params: string): boolean;
+var
+ ar1: msestringarty;
+begin
+ result:= gettext(procname,params,1,ar1);
+end;
+
 function tfbservice.getmsestringitem(var buffer: pointer; out res: msestring;
                            const cutspace: boolean = false): boolean;
 var
@@ -918,6 +931,8 @@ begin
     if not (getmsestringitem(po1,isc_spb_sec_firstname,firstname) or
             getmsestringitem(po1,isc_spb_sec_middlename,middlename) or
             getmsestringitem(po1,isc_spb_sec_lastname,lastname) or
+            getmsestringitem(po1,isc_spb_sec_groupname,groupname) or
+            getmsestringitem(po1,isc_spb_sql_role_name,rolename) or
             getvalueitem(po1,isc_spb_sec_userid,userid) or
             getvalueitem(po1,isc_spb_sec_groupid,groupid) or
             getvalueitem(po1,isc_spb_sec_admin,admin)) then begin
@@ -945,6 +960,27 @@ begin
   ainfo:= ar1[0];
  end;
 end;
+
+function tfbservice.adduser(const ainfo: fbuserinfoty;
+               const password: string): boolean;
+var
+ params1: string;
+begin
+ params1:= char(isc_action_svc_add_user);
+ with ainfo do begin
+  addmseparam(params1,isc_spb_sec_username,username);
+  addmseparam(params1,isc_spb_sec_firstname,firstname);
+  addmseparam(params1,isc_spb_sec_middlename,middlename);
+  addmseparam(params1,isc_spb_sec_lastname,lastname);
+  addmseparam(params1,isc_spb_sec_groupname,groupname);
+  addmseparam(params1,isc_spb_sql_role_name,rolename);
+  addparam(params1,isc_spb_sec_userid,userid);
+  addparam(params1,isc_spb_sec_groupid,groupid);
+  addparam(params1,isc_spb_sec_admin,admin);
+ end;
+ addparam(params1,isc_spb_sec_password,password);
+ result:= runcommand('adduser',params1);
+end;
 {
 function tfbservice.gettext(const procname: string;
             const maxrowcount: integer; var res:  msestringarty): boolean;
@@ -966,7 +1002,7 @@ begin
  end;
 end;
 }
-function tfbservice.gettext(const params: string; const procname: string;
+function tfbservice.gettext(const procname: string; const params: string;
             const maxrowcount: integer; var res:  msestringarty): boolean;
 
 var
@@ -1022,6 +1058,7 @@ begin
     po1:= pointer(buffer1)+1;
     i1:= readvalue16(po1);
     if i1 <= 0 then begin
+     result:= not serviceisrunning();
      break; //eof or timeout
     end;
     if i1 > length(buffer1)-1-2 then begin
@@ -1063,6 +1100,9 @@ begin
   stackarray(copy(res,0,circindex),ar1);
   res:= ar1;
  end;
+ if not result then begin
+  cancel();
+ end;
  exclude(fstate,fbss_busy);
 end;
 
@@ -1093,7 +1133,7 @@ end;
 function tfbservice.getlog(var res: msestringarty;
                                const maxrowcount: int32 = 0): boolean ;
 begin
- result:= tagaction(isc_action_svc_get_fb_log,'getlog',res,maxrowcount);
+ result:= tagaction('getlog',isc_action_svc_get_fb_log,res,maxrowcount);
 end;
 
 procedure tfbservice.tracestart(const cfg: msestring;
@@ -1109,28 +1149,28 @@ begin
  startmonitor('tracestart',params1);
 end;
 
-function tfbservice.tagaction(const aaction: int32; const aprocname: string; 
+function tfbservice.tagaction(const aprocname: string; const aaction: int32;
                               var res: msestringarty;
                               const maxrowcount: int32): boolean;
 begin
- result:= gettext(char(aaction),aprocname,maxrowcount,res);
+ result:= gettext(aprocname,char(aaction),maxrowcount,res);
 end;
 
-function tfbservice.tagaction(const aaction: int32;
-               const aprocname: string): boolean;
+function tfbservice.tagaction(const aprocname: string; 
+                                   const aaction: int32): boolean;
 var
  ar1: msestringarty;
 begin
- result:= tagaction(aaction,aprocname,ar1,1);
+ result:= tagaction(aprocname,aaction,ar1,1);
 end;
 
 function tfbservice.tracelist(var res: msestringarty;
                               const maxrowcount: int32 = 0): boolean;
 begin
- result:= tagaction(isc_action_svc_trace_list,'tracelist',res,maxrowcount);
+ result:= tagaction('tracelist',isc_action_svc_trace_list,res,maxrowcount);
 end;
 
-function tfbservice.traceaction(const aaction: int32; const aprocname: string;
+function tfbservice.traceaction(const aprocname: string; const aaction: int32;
                const aid: card32; var res: msestringarty;
                const maxrowcount: int32): boolean;
 var
@@ -1138,38 +1178,38 @@ var
 begin
  params1:= char(aaction);
  addparam(params1,isc_spb_trc_id,aid);
- result:= gettext(params1,aprocname,maxrowcount,res);
+ result:= gettext(aprocname,params1,maxrowcount,res);
 end;
 
 function tfbservice.tracestop(const aid: card32; var res: msestringarty;
                               const maxrowcount: int32 = 0): boolean;
 begin
- result:= traceaction(isc_action_svc_trace_stop,'tracestop',
+ result:= traceaction('tracestop',isc_action_svc_trace_stop,
                                                    aid,res,maxrowcount);
 end;
 
 function tfbservice.tracesuspend(const aid: card32; var res: msestringarty;
                const maxrowcount: int32 = 0): boolean;
 begin
- result:= traceaction(isc_action_svc_trace_suspend,'tracesuspend',
+ result:= traceaction('tracesuspend',isc_action_svc_trace_suspend,
                                                    aid,res,maxrowcount);
 end;
 
 function tfbservice.traceresume(const aid: card32; var res: msestringarty;
                const maxrowcount: int32 = 0): boolean;
 begin
- result:= traceaction(isc_action_svc_trace_resume,'traceresume',
+ result:= traceaction('traceresume',isc_action_svc_trace_resume,
                                                    aid,res,maxrowcount);
 end;
 
 function tfbservice.setmapping(): boolean;
 begin
- result:= tagaction(isc_action_svc_set_mapping,'setmapping');
+ result:= tagaction('setmapping',isc_action_svc_set_mapping);
 end;
 
 function tfbservice.dropmapping(): boolean;
 begin
- result:= tagaction(isc_action_svc_drop_mapping,'dropmapping');
+ result:= tagaction('dropmapping',isc_action_svc_drop_mapping);
 end;
 
 function tfbservice.dbstats(const adbname: msestring;
@@ -1184,7 +1224,7 @@ begin
  if acommandline <> '' then begin
   addmseparam(params1,isc_spb_command_line,acommandline);
  end;
- result:= gettext(params1,'dbstats',maxrowcount,res);
+ result:= gettext('dbstats',params1,maxrowcount,res);
 end;
 
 procedure tfbservice.validatestart(const dbname: msestring;
