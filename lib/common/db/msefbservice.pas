@@ -24,15 +24,6 @@ type
   get_env_msg: msestring;
  end;
 
- fbuseritemty = (fbu_username,fbu_firstname,fbu_middlename,fbu_lastname,
-                 fbu_groupname,fbu_rolename,fbu_userid,fbu_groupid,fbu_admin,
-                 fbu_password);
- fbuseritemsty = set of fbuseritemty;
-const
- allfbuseritems = [fbu_username,fbu_firstname,fbu_middlename,fbu_lastname,
-                 fbu_groupname,fbu_rolename,fbu_userid,fbu_groupid,fbu_admin,
-                 fbu_password];
-type
  fbuserinfoty = record
   username: msestring;
   firstname: msestring;
@@ -48,6 +39,59 @@ type
  pfbuserinfoty = ^fbuserinfoty;
  fbuserinfoarty = array of fbuserinfoty;
 
+ fbuseritemty = (fbu_username,fbu_firstname,fbu_middlename,fbu_lastname,
+                 fbu_groupname,fbu_rolename,fbu_userid,fbu_groupid,fbu_admin,
+                 fbu_password);
+ fbuseritemsty = set of fbuseritemty;
+
+const
+ allfbuseritems = [fbu_username,fbu_firstname,fbu_middlename,fbu_lastname,
+                 fbu_groupname,fbu_rolename,fbu_userid,fbu_groupid,fbu_admin,
+                 fbu_password];
+
+type
+ accessmodety = (amo_readonly,amo_readwrite);
+ writemodety = (wmo_async,wmo_sync);
+ runmodety = (rmo_normal,rmo_multi,rmo_single,rmo_full);
+ reservespacety = (rsp_full,rsp_res);
+ propertyoptionty = (pro_activate,pro_dbonline);
+ propertyoptionsty = set of propertyoptionty;
+ 
+ fbpropertyinfoty = record
+  pagebuffers: card32;
+  sweepinterval: card32;
+  shutdowndb: card32;
+  denynewattachments: card32;
+  denynewtransactions: card32;
+  reservespace: reservespacety;
+  writemode: writemodety;
+  accessmode: accessmodety;
+  setsqldialect: card32;
+  options: propertyoptionsty;
+  forceshutdown: card32;
+  attachmentsshutdown: card32;
+  transactionsshutdown: card32;
+  shutdownmode: runmodety;
+  onlinemode: runmodety;
+ end;
+ 
+ fbpropertyitemty = (fbp_pagebuffers,fbp_sweepinterval,fbp_shutdowndb,
+                     fbp_denynewattachments,fbp_denynewtransactions,
+                     fbp_reservespace,fbp_writemode,fbp_accessmode,
+                     fbp_setsqldialect,fbp_options,fbp_forceshutdown,
+                     fbp_attachmentsshutdown,fbp_transactionsshutdown,
+                     fbp_shutdownmode,fbp_onlinemode);
+ fbpropertyitemsty = set of fbpropertyitemty;
+ 
+const
+ allfbpropertyitems = [fbp_pagebuffers,fbp_sweepinterval,fbp_shutdowndb,
+                     fbp_denynewattachments,fbp_denynewtransactions,
+                     fbp_reservespace,fbp_writemode,fbp_accessmode,
+                     fbp_setsqldialect,fbp_options,fbp_forceshutdown,
+                     fbp_attachmentsshutdown,fbp_transactionsshutdown,
+                     fbp_shutdownmode,fbp_onlinemode];
+
+type
  dbstatoptionty = (dbsto_datapages,dbsto_dblog,dbsto_hdrpages,
                    dbsto_idxpages,dbsto_sysrelations,dbsto_recordversions,
                    dbsto_table,dbsto_nocreation);
@@ -62,12 +106,10 @@ type
                     reo_one_at_a_time,reo_replace,reo_create,reo_use_all_space);
  restoreoptionsty = set of restoreoptionty;
 
- accessmodety = (amo_readonly,amo_readwrite);
-
  repairoptionty = (rpo_validate_db,rpo_sweep_db,rpo_mend_db,limbo_trans,
                    rpo_check_db,rpo_ignore_checksum,rpo_kill_shadows,rpo_full);
  repairoptionsty = set of repairoptionty;
-
+ 
  tfbservice = class;
 
  efbserviceerror = class(edatabaseerror)
@@ -156,8 +198,8 @@ type
                                                 //value limited to 65535 chars
    function internalusers(const ausername: string): fbuserinfoarty;
    procedure gettext(const procname: string; const params: string;
-                 const maxrowcount: integer; var res:  msestringarty);
-                                 //circular buffer
+                 var res:  msestringarty; const maxrowcount: integer);
+                                 //ring buffer
    procedure startmonitor(const procname: string; const aparams: string);
    function serviceisrunning: boolean;
    procedure tagaction(const aprocname: string; const aaction: int32; 
@@ -176,6 +218,7 @@ type
    function tomsestring(const avalue: string): msestring;
    procedure cancel();
    function busy(): boolean;
+
    function serverinfo(): fbserverinfoty;
    function users(): fbuserinfoarty;
    function user(const ausername: msestring; var ainfo: fbuserinfoty): boolean;
@@ -183,17 +226,14 @@ type
    procedure adduser(const ainfo: fbuserinfoty; const items: fbuseritemsty);
    procedure modifyuser(const ainfo: fbuserinfoty; const items: fbuseritemsty);
                                                      //fbu_username must be set
-   procedure deleteuser(const ausername: msestring;
-                                const arolename: msestring = '');
-   procedure getlog(var res: msestringarty;
-                                 const maxrowcount: int32 = 0);
-              //circular buffer, 0 -> unlimited
-   procedure tracestart(const cfg: msestring; 
-                                     const _name: msestring = '');
+   procedure deleteuser(const ausername: msestring; 
+                                           const arolename: msestring = '');
+   procedure getlog(var res: msestringarty; const maxrowcount: int32 = 0);
+                             //ring buffer, 0 -> unlimited
+   procedure tracestart(const cfg: msestring; const _name: msestring = '');
                 //async, stop it by connected:= false or call of cancel()
-   procedure tracelist(var res: msestringarty;
-                         const maxrowcount: int32 = 0);
-              //circular buffer, 0 -> unlimited
+   procedure tracelist(var res: msestringarty; const maxrowcount: int32 = 0);
+                            //ring buffer, 0 -> unlimited
    procedure tracestop(const aid: card32; var res: msestringarty;
                          const maxrowcount: int32 = 0);
    procedure tracesuspend(const aid: card32; var res: msestringarty;
@@ -206,18 +246,21 @@ type
    procedure dbstats(const adbname: msestring;
                const aoptions: dbstatoptionsty; const acommandline: msestring; 
                var res: msestringarty; const maxrowcount: int32 = 0);
+   procedure properties(const adbname: msestring;
+                const ainfo: fbpropertyinfoty; const aitems: fbpropertyitemsty;
+                var res:  msestringarty; const maxrowcount: integer);
+                         //ring buffer, 0 -> unlimited                
                     
    procedure validatestart(const dbname: msestring;
              const tabincl: msestring = ''; const tabexcl: msestring = '';
              const idxincl: msestring = ''; const idxexcl: msestring = '';
                                                  const locktimeout: card32 = 0);
    procedure backupstart(const dbname: msestring;
-           const backupfiles: array of msestring; const lengths: array of card32;
+          const backupfiles: array of msestring; const lengths: array of card32;
                                              //bytes, none for last file
-           const verbose: boolean = false; const stat: string = '';
+          const verbose: boolean = false; const stat: string = '';
              //stat for FB 2.5.5 only, 1..4 chars, valid chars = T|D|R|W
-           const aoptions: backupoptionsty = [];
-           const factor: card32 = 0);
+          const aoptions: backupoptionsty = []; const factor: card32 = 0);
    procedure restorestart(const backupfiles: array of msestring;
            const dbfiles: array of msestring; const lengths: array of card32;
                                               //pages, none for last dbfile
@@ -254,12 +297,17 @@ implementation
 uses
  msebits,msearrayutils,mseapplication,msesysintf;
 const
- restoreflags: array[restoreoptionty] of card32 = (isc_spb_res_deactivate_idx,
+ restoreconsts: array[restoreoptionty] of card32 = (isc_spb_res_deactivate_idx,
      isc_spb_res_no_shadow,isc_spb_res_no_validity,isc_spb_res_one_at_a_time,
      isc_spb_res_replace,isc_spb_res_create,isc_spb_res_use_all_space);
- accessmodeflags: array[accessmodety] of card32 =(isc_spb_prp_am_readonly,
+ accessmodeconsts: array[accessmodety] of card32 = (isc_spb_prp_am_readonly,
                                                      isc_spb_prp_am_readwrite);
-
+ writemodeconsts: array[writemodety] of card32 = (isc_spb_prp_wm_async,
+                                                   isc_spb_prp_wm_sync);
+ propertyconsts: array[propertyoptionty] of card32 = (isc_spb_prp_activate,
+                                                       isc_spb_prp_db_online);
+ reservespaceconsts: array[reservespacety] of card32 = (isc_spb_prp_res_use_full,
+                                                       isc_spb_prp_res);
 function readvalue16(var buffer: pbyte): card16;
 begin
  result:= buffer^;
@@ -805,7 +853,7 @@ procedure tfbservice.runcommand(const procname: string;
 var
  ar1: msestringarty;
 begin
- gettext(procname,params,1,ar1);
+ gettext(procname,params,ar1,1);
 end;
 
 function tfbservice.getmsestringitem(var buffer: pointer; out res: msestring;
@@ -1045,7 +1093,7 @@ begin
 end;
 
 procedure tfbservice.gettext(const procname: string; const params: string;
-            const maxrowcount: integer; var res:  msestringarty);
+            var res:  msestringarty; const maxrowcount: integer);
 
 var
  circindex: int32;
@@ -1193,7 +1241,7 @@ procedure tfbservice.tagaction(const aprocname: string; const aaction: int32;
                               var res: msestringarty;
                               const maxrowcount: int32);
 begin
- gettext(aprocname,char(aaction),maxrowcount,res);
+ gettext(aprocname,char(aaction),res,maxrowcount);
 end;
 
 procedure tfbservice.tagaction(const aprocname: string; const aaction: int32);
@@ -1217,7 +1265,7 @@ var
 begin
  params1:= char(aaction);
  addparam(params1,isc_spb_trc_id,aid);
- gettext(aprocname,params1,maxrowcount,res);
+ gettext(aprocname,params1,res,maxrowcount);
 end;
 
 procedure tfbservice.tracestop(const aid: card32; var res: msestringarty;
@@ -1260,7 +1308,74 @@ begin
  if acommandline <> '' then begin
   addmseparam(params1,isc_spb_command_line,acommandline);
  end;
- gettext('dbstats',params1,maxrowcount,res);
+ gettext('dbstats',params1,res,maxrowcount);
+end;
+
+procedure tfbservice.properties(const adbname: msestring;
+               const ainfo: fbpropertyinfoty; const aitems: fbpropertyitemsty;
+               var res:  msestringarty; const maxrowcount: integer);
+var
+ params1: string;
+ ca1: card32;
+ opt1: propertyoptionty;
+begin
+ params1:= char(isc_action_svc_properties);
+ addmseparam(params1,isc_spb_dbname,adbname);
+ with ainfo do begin
+  if fbp_pagebuffers in aitems then begin
+   addparam(params1,isc_spb_prp_page_buffers,pagebuffers);
+  end;
+  if fbp_sweepinterval in aitems then begin
+   addparam(params1,isc_spb_prp_sweep_interval,sweepinterval);
+  end;
+  if fbp_shutdowndb in aitems then begin
+   addparam(params1,isc_spb_prp_shutdown_db,shutdowndb);
+  end;
+  if fbp_denynewattachments in aitems then begin
+   addparam(params1,isc_spb_prp_deny_new_attachments,denynewattachments);
+  end;
+  if fbp_denynewtransactions in aitems then begin
+   addparam(params1,isc_spb_prp_deny_new_transactions,denynewtransactions);
+  end;
+  if fbp_reservespace in aitems then begin
+   addparam(params1,isc_spb_prp_reserve_space,
+                             card8(reservespaceconsts[reservespace]));
+  end;
+  if fbp_writemode in aitems then begin
+   addparam(params1,isc_spb_prp_write_mode,
+                             card8(writemodeconsts[writemode]));
+  end;
+  if fbp_accessmode in aitems then begin
+   addparam(params1,isc_spb_prp_access_mode,
+                             card8(accessmodeconsts[accessmode]));
+  end;
+  if fbp_setsqldialect in aitems then begin
+   addparam(params1,isc_spb_prp_set_sql_dialect,setsqldialect);
+  end;
+  if fbp_options in aitems then begin
+   ca1:= 0;
+   for opt1:= low(opt1) to high(opt1) do begin
+    ca1:= ca1 or propertyconsts[opt1];
+   end;
+   addparam(params1,isc_spb_options,ca1);
+  end;
+  if fbp_forceshutdown in aitems then begin
+   addparam(params1,isc_spb_prp_force_shutdown,forceshutdown);
+  end;
+  if fbp_attachmentsshutdown in aitems then begin
+   addparam(params1,isc_spb_prp_attachments_shutdown,attachmentsshutdown);
+  end;
+  if fbp_transactionsshutdown in aitems then begin
+   addparam(params1,isc_spb_prp_transactions_shutdown,transactionsshutdown);
+  end;
+  if fbp_shutdownmode in aitems then begin
+   addparam(params1,isc_spb_prp_shutdown_mode,card8(shutdownmode));
+  end;
+  if fbp_onlinemode in aitems then begin
+   addparam(params1,isc_spb_prp_online_mode,card8(onlinemode));
+  end;
+ end;
+ gettext('properties',params1,res,maxrowcount);
 end;
 
 procedure tfbservice.validatestart(const dbname: msestring;
@@ -1355,12 +1470,12 @@ begin
   ca1:= 0;
   for opt1:= low(opt1) to high(opt1) do begin
    if opt1 in aoptions then begin
-    ca1:= ca1 or restoreflags[opt1];
+    ca1:= ca1 or restoreconsts[opt1];
    end;
   end;
   addparam(params1,isc_spb_options,ca1);
  end;
- addparam(params1,isc_spb_res_access_mode,card8(accessmodeflags[accessmode]));
+ addparam(params1,isc_spb_res_access_mode,card8(accessmodeconsts[accessmode]));
  if buffers <> 0 then begin
   addparam(params1,isc_spb_res_buffers,buffers);
  end;
