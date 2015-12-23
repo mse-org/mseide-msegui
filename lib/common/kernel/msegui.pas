@@ -4256,6 +4256,7 @@ var
  imageoffs: integer;
  rect1: rectty;
  col1: colorty;
+ imagesize1: sizety;
 begin
  rect1:= rect2;
  if afi.levelo <> 0 then begin
@@ -4279,9 +4280,64 @@ begin
  if afi.leveli <> 0 then begin
   draw3dframe(canvas,rect1,afi.leveli,afi.framecolors,afi.hiddenedges);
  end;
- if afi.frameimage_list <> nil then begin
+ if (afi.frameimage_list <> nil) and 
+                      afi.frameimage_list.bitmap.hasimage then begin
   imageoffs:= calcframestateoffs(astate,frameoffsetsty(afi.frameimage_offsets));
   if imageoffs >= 0 then begin
+   imagesize1:= afi.frameimage_list.size;
+   if not (edg_left in afi.hiddenedges) then begin
+    afi.frameimage_list.paint(canvas,imageoffs+0,rect1.pos); //topleft
+    rect1.x:= rect2.x;
+    rect1.y:= rect2.y + imagesize1.cy;
+    rect1.cx:= imagesize1.cx;
+    rect1.cy:= rect2.cy - imagesize1.cy -imagesize1.cy;
+    afi.frameimage_list.paint(canvas,imageoffs+1,rect1,[al_stretchy]); //left
+    if edg_bottom in afi.hiddenedges then begin
+     afi.frameimage_list.paint(canvas,imageoffs+2,
+                                 mp(rect1.x,rect1.y+rect1.cy)); //bottomleft
+    end;
+   end;
+   if not (edg_bottom in afi.hiddenedges) then begin
+    rect1.x:= rect2.x;
+    rect1.y:= rect2.y + rect2.cy - imagesize1.cy;
+    afi.frameimage_list.paint(canvas,imageoffs+2,rect1.pos); //bottomleft
+    rect1.x:= rect2.x + imagesize1.cx;
+    rect1.cy:= imagesize1.cy;
+    rect1.cx:= rect2.cx - imagesize1.cx -imagesize1.cx;
+    afi.frameimage_list.paint(canvas,imageoffs+3,rect1,[al_stretchx]); //bottom
+    if edg_right in afi.hiddenedges then begin
+     afi.frameimage_list.paint(canvas,imageoffs+4,
+                               mp(rect1.x+rect1.cx,rect1.y)); //bottomright
+    end;
+   end;
+   if not (edg_right in afi.hiddenedges) then begin
+    rect1.x:= rect2.x + rect2.cx - imagesize1.cx;
+    rect1.y:= rect2.y + rect2.cy - imagesize1.cy;
+    afi.frameimage_list.paint(canvas,imageoffs+4,rect1.pos); //bottomright
+    rect1.y:= rect2.y + imagesize1.cy;
+    rect1.cx:= imagesize1.cx;
+    rect1.cy:= rect2.cy - imagesize1.cy - imagesize1.cy;
+    afi.frameimage_list.paint(canvas,imageoffs+5,rect1,[al_stretchy]); //right
+    if edg_top in afi.hiddenedges then begin
+     afi.frameimage_list.paint(canvas,imageoffs+6,mp(rect1.x,rect2.y)); 
+                                                             //topright
+    end;
+   end;
+   if not (edg_top in afi.hiddenedges) then begin
+    rect1.x:= rect2.x + rect2.cx - imagesize1.cx;
+    rect1.y:= rect2.y;
+    afi.frameimage_list.paint(canvas,imageoffs+6,rect1.pos); //topright
+    rect1.x:= rect2.x + imagesize1.cx;
+    rect1.cy:= imagesize1.cy;
+    rect1.cx:= rect2.cx - imagesize1.cx - imagesize1.cx;
+    afi.frameimage_list.paint(canvas,imageoffs+7,rect1,[al_stretchx]); //top
+    if edg_left in afi.hiddenedges then begin
+     afi.frameimage_list.paint(canvas,imageoffs+0,mp(rect2.x,rect2.y));
+                                                             //topleft
+    end;
+   end;
+   
+{   
    if afi.hiddenedges * [edg_left,edg_top] = [] then begin
     afi.frameimage_list.paint(canvas,imageoffs,rect2.pos); //topleft
    end;
@@ -4351,6 +4407,7 @@ begin
     afi.frameimage_list.paint(canvas,imageoffs+7,rect1,[al_stretchx]);
                                                          //top
    end;
+   }
   end;
  end;
 end;
