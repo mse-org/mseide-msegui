@@ -109,7 +109,10 @@ type
  repairoptionty = (rpo_validate_db,rpo_sweep_db,rpo_mend_db,limbo_trans,
                    rpo_check_db,rpo_ignore_checksum,rpo_kill_shadows,rpo_full);
  repairoptionsty = set of repairoptionty;
- 
+
+ nbakoptionty = (nbo_notriggers);
+ nbakoptionsty = set of nbakoptionty;
+  
  tfbservice = class;
 
  efbserviceerror = class(edatabaseerror)
@@ -271,6 +274,10 @@ type
            const buffers: card32 = 0; const pagesize: card32 = 0;
            const fixfssdata: string = ''; const fixfssmetadata: string = '');
                               //CHARACTER SET                 CHARACTER SET   
+   procedure nbakstart(const dbname: msestring; const _file: msestring;
+                        const level: card32; const options: nbakoptionsty;
+                        const direct: string = '');
+                                  //'on or 'off'
    procedure repairstart(const adbname: msestring;
                                        const aoptions: repairoptionsty);
 
@@ -1489,6 +1496,23 @@ begin
   addparam(params1,isc_spb_res_fix_fss_metadata,fixfssmetadata);
  end;
  startmonitor('restorestart',params1);
+end;
+
+procedure tfbservice.nbakstart(const dbname: msestring; const _file: msestring;
+               const level: card32; const options: nbakoptionsty;
+               const direct: string = '');
+var
+ params1: string;
+begin
+ params1:= char(isc_action_svc_nbak);
+ addmseparam(params1,isc_spb_dbname,dbname);
+ addmseparam(params1,isc_spb_nbk_file,_file);
+ addparam(params1,isc_spb_nbk_level,level);
+ addparam(params1,isc_spb_options,card32(options));
+ if direct <> '' then begin
+  addparam(params1,isc_spb_nbk_direct,direct);
+ end; 
+ startmonitor('nbak',params1);
 end;
 
 procedure tfbservice.repairstart(const adbname: msestring;
