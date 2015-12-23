@@ -3,7 +3,7 @@ unit msefbservice;
 {$if fpc_fullversion >= 30000}
  {$define fpcv3}
 {$endif}
-{under construction}
+
 interface
 uses
  classes,mclasses,mseclasses,ibase60dyn,msetypes,mdb,msestrings,mibconnection,
@@ -278,6 +278,8 @@ type
                         const level: card32; const options: nbakoptionsty;
                         const direct: string = '');
                                   //'on or 'off'
+   procedure nreststart(const dbname: msestring;
+                 const files: array of msestring; const options: nbakoptionsty);
    procedure repairstart(const adbname: msestring;
                                        const aoptions: repairoptionsty);
 
@@ -1513,6 +1515,21 @@ begin
   addparam(params1,isc_spb_nbk_direct,direct);
  end; 
  startmonitor('nbak',params1);
+end;
+
+procedure tfbservice.nreststart(const dbname: msestring;
+               const files: array of msestring; const options: nbakoptionsty);
+var
+ params1: string;
+ i1: int32;
+begin
+ params1:= char(isc_action_svc_nrest);
+ addmseparam(params1,isc_spb_dbname,dbname);
+ for i1:= 0 to high(files) do begin
+  addmseparam(params1,isc_spb_nbk_file,files[i1]);
+ end;
+ addparam(params1,isc_spb_options,card32(options));
+ startmonitor('nrest',params1);
 end;
 
 procedure tfbservice.repairstart(const adbname: msestring;

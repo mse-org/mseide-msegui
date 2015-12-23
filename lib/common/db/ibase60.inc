@@ -904,7 +904,7 @@ type
   { Retrieves a bitmask representing licensed options on the server  }
      isc_info_svc_get_license_mask = 52;
   { Retrieves the parameters and values for IB_CONFIG  }
-     isc_info_svc_get_config = 53;
+     isc_info_svc_get_config = 53; //mse: not implemented in fb 2.5.5
   { Retrieves the version of the services manager  }
      isc_info_svc_version = 54;                         //card32
   { Retrieves the version of the InterBase server  }
