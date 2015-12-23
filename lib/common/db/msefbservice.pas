@@ -24,6 +24,15 @@ type
   get_env_msg: msestring;
  end;
 
+ fbuseritemty = (fbu_username,fbu_firstname,fbu_middlename,fbu_lastname,
+                 fbu_groupname,fbu_rolename,fbu_userid,fbu_groupid,fbu_admin,
+                 fbu_password);
+ fbuseritemsty = set of fbuseritemty;
+const
+ allfbuseritems = [fbu_username,fbu_firstname,fbu_middlename,fbu_lastname,
+                 fbu_groupname,fbu_rolename,fbu_userid,fbu_groupid,fbu_admin,
+                 fbu_password];
+type
  fbuserinfoty = record
   username: msestring;
   firstname: msestring;
@@ -34,6 +43,7 @@ type
   userid: card32;
   groupid: card32;
   admin: card32;
+  password: ansistring;
  end;
  pfbuserinfoty = ^fbuserinfoty;
  fbuserinfoarty = array of fbuserinfoty;
@@ -157,6 +167,8 @@ type
    procedure traceaction(const aprocname: string; const aaction: int32;
                          const aid: card32; var res: msestringarty;
                          const maxrowcount: int32);
+   procedure adduserparams(var params1: string; 
+                      const ainfo: fbuserinfoty; const aitems: fbuseritemsty);
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy(); override;
@@ -168,7 +180,11 @@ type
    function users(): fbuserinfoarty;
    function user(const ausername: msestring; var ainfo: fbuserinfoty): boolean;
                                                        //false if not found
-   procedure adduser(const ainfo: fbuserinfoty; const password: string);
+   procedure adduser(const ainfo: fbuserinfoty; const items: fbuseritemsty);
+   procedure modifyuser(const ainfo: fbuserinfoty; const items: fbuseritemsty);
+                                                     //fbu_username must be set
+   procedure deleteuser(const ausername: msestring;
+                                const arolename: msestring = '');
    procedure getlog(var res: msestringarty;
                                  const maxrowcount: int32 = 0);
               //circular buffer, 0 -> unlimited
@@ -958,25 +974,74 @@ begin
  end;
 end;
 
+procedure tfbservice.adduserparams(var params1: string; 
+                      const ainfo: fbuserinfoty; const aitems: fbuseritemsty);
+begin
+ with ainfo do begin
+  if fbu_username in aitems then begin
+   addmseparam(params1,isc_spb_sec_username,username);
+  end;
+  if fbu_firstname in aitems then begin
+   addmseparam(params1,isc_spb_sec_firstname,firstname);
+  end;
+  if fbu_middlename in aitems then begin
+   addmseparam(params1,isc_spb_sec_middlename,middlename);
+  end;
+  if fbu_lastname in aitems then begin
+   addmseparam(params1,isc_spb_sec_lastname,lastname);
+  end;
+  if fbu_groupname in aitems then begin
+   addmseparam(params1,isc_spb_sec_groupname,groupname);
+  end;
+  if fbu_rolename in aitems then begin
+   addmseparam(params1,isc_spb_sql_role_name,rolename);
+  end;
+  if fbu_userid in aitems then begin
+   addparam(params1,isc_spb_sec_userid,userid);
+  end;
+  if fbu_groupid in aitems then begin
+   addparam(params1,isc_spb_sec_groupid,groupid);
+  end;
+  if fbu_admin in aitems then begin
+   addparam(params1,isc_spb_sec_admin,admin);
+  end;
+  if fbu_password in aitems then begin
+   addparam(params1,isc_spb_sec_password,password);
+  end;
+ end;
+end;
+
 procedure tfbservice.adduser(const ainfo: fbuserinfoty;
-               const password: string);
+                                         const items: fbuseritemsty);
 var
  params1: string;
 begin
  params1:= char(isc_action_svc_add_user);
- with ainfo do begin
-  addmseparam(params1,isc_spb_sec_username,username);
-  addmseparam(params1,isc_spb_sec_firstname,firstname);
-  addmseparam(params1,isc_spb_sec_middlename,middlename);
-  addmseparam(params1,isc_spb_sec_lastname,lastname);
-  addmseparam(params1,isc_spb_sec_groupname,groupname);
-  addmseparam(params1,isc_spb_sql_role_name,rolename);
-  addparam(params1,isc_spb_sec_userid,userid);
-  addparam(params1,isc_spb_sec_groupid,groupid);
-  addparam(params1,isc_spb_sec_admin,admin);
- end;
- addparam(params1,isc_spb_sec_password,password);
+ adduserparams(params1,ainfo,items);
  runcommand('adduser',params1);
+end;
+
+procedure tfbservice.modifyuser(const ainfo: fbuserinfoty;
+               const items: fbuseritemsty);
+var
+ params1: string;
+begin
+ params1:= char(isc_action_svc_modify_user);
+ adduserparams(params1,ainfo,items);
+ runcommand('modifyuser',params1);
+end;
+
+procedure tfbservice.deleteuser(const ausername: msestring;
+                                        const arolename: msestring = '');
+var
+ params1: string;
+begin
+ params1:= char(isc_action_svc_delete_user);
+ addmseparam(params1,isc_spb_sec_username,ausername);
+ if arolename <> '' then begin
+  addmseparam(params1,isc_spb_sql_role_name,arolename);
+ end;
+ runcommand('deleteuser',params1);
 end;
 
 procedure tfbservice.gettext(const procname: string; const params: string;
