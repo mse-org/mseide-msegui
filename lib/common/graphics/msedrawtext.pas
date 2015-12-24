@@ -426,7 +426,7 @@ var
 {$ifdef mswindows}
  fontmetrics1: fontmetricsty;
  hasitaliccomp: boolean;
- italicsavetymargin: int32;
+ italicsafetymargin: int32;
 {$endif}
     
 begin
@@ -656,7 +656,7 @@ begin
     with drawinfo.getfontmetrics do begin
      fontdata:= getfontdata(canvas.font.handle);
      resultpo:= @fontmetrics1;       
-     italicsavetymargin:= (lineheight+10) div 20;
+     italicsafetymargin:= (lineheight+10) div 20;
     end;
    end;
   {$endif}
@@ -674,7 +674,7 @@ begin
        liwidth:= liwidth - fontmetrics1.leftbearing;
        char:= getucs4char(text.text,liindex+licount-1);
        msefont.getfontmetrics({datapo,}drawinfo);
-       liwidth:= liwidth-fontmetrics1.rightbearing + 1 + italicsavetymargin;
+       liwidth:= liwidth-fontmetrics1.rightbearing + 1 + italicsafetymargin;
       end;
      end;
     {$endif}
