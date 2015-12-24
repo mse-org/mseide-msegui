@@ -538,6 +538,7 @@ var
  str1: string;
  ok: boolean;
  ar1: msestringarty;
+ ar2: pointerarty;
  rowindex1: int32;
  mstr1,remainder: msestring;
  po2,ps,pe: pmsechar;
@@ -560,18 +561,26 @@ var
  end; //add
  
  procedure endtext();
+ var
+  i1: int32;
  begin
   if rowindex1 = 0 then begin
    fowner.fasynctext:= ar1;
   end
   else begin
-   fowner.fasynctext:= copy(ar1,rowindex1,rowmax1-rowindex1);
-   stackarray(copy(ar1,0,rowindex1),fowner.fasynctext);
+   allocuninitedarray(length(ar1),sizeof(pointer),ar2);
+   i1:= rowmax1-rowindex1;
+   move(ar1[rowindex1],ar2[0],i1*sizeof(pointer));
+   move(ar1[0],ar2[i1],rowindex1*sizeof(pointer));
+   pointer(fowner.fasynctext):= pointer(ar1);
+   pointer(ar1):= nil;
+//   fowner.fasynctext:= copy(ar1,rowindex1,rowmax1-rowindex1);
+//   stackarray(copy(ar1,0,rowindex1),fowner.fasynctext);
   end;
  end;
  
 const
- buffersize = 20{4096};
+ buffersize = 4096;
 begin
  ok:= false;
  params1:= '';
@@ -1219,7 +1228,7 @@ var
  pa,pb,pc,pe: pchar;
  i1: int32;
  remainder: string;
- ar1: msestringarty;
+ ar1: pointerarty;
 begin
  checkbusy();
  start(procname,params);
@@ -1281,9 +1290,16 @@ begin
   add(pointer(remainder),length(remainder));
  end;
  if circindex > 0 then begin
-  ar1:= copy(res,circindex,maxrowcount-circindex);
-  stackarray(copy(res,0,circindex),ar1);
-  res:= ar1;
+  allocuninitedarray(length(res),sizeof(pointer),ar1);
+  i1:= maxrowcount-circindex;
+  move(res[circindex],ar1[0],i1*sizeof(pointer));
+  move(res[0],ar1[i1],circindex*sizeof(pointer));
+  res:= pointer(ar1);
+  pointer(ar1):= nil;
+
+//  ar1:= copy(res,circindex,maxrowcount-circindex);
+//  stackarray(copy(res,0,circindex),ar1);
+//  res:= ar1;
  end;
  exclude(fstate,fbss_busy);
 end;
