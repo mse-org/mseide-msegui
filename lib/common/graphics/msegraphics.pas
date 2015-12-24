@@ -630,6 +630,7 @@ type
    function isxscalestored(): boolean;
    function isstylestored(): boolean;
    procedure readdummy(reader: treader);
+   procedure setlocalprops(const avalue: fontlocalpropsty);
   protected
    finfo: fontinfoty;
    fhandlepo: ^fontnumty;
@@ -732,8 +733,9 @@ type
    property xscale: real read getxscale write setxscale stored isxscalestored;
                                  //default 1.0
 
-   property localprops: fontlocalpropsty read flocalprops write flocalprops
-                                  {default []}; //before template!
+   property localprops: fontlocalpropsty read flocalprops write setlocalprops;
+                //before template!
+                //No default, is optional object streaming placeholder
    property template: tfontcomp read ftemplate write settemplate;
  end;
  pfont = ^tfont;
@@ -3248,6 +3250,16 @@ end;
 procedure tfont.readdummy(reader: treader);
 begin
  reader.readinteger();
+end;
+
+procedure tfont.setlocalprops(const avalue: fontlocalpropsty);
+begin
+ if flocalprops <> avalue then begin
+  flocalprops:= avalue;
+  if ftemplate <> nil then begin
+   settemplateinfo(ftemplate.template.fi);
+  end;
+ end;
 end;
 
 procedure tfont.defineproperties(filer: tfiler);
