@@ -225,34 +225,38 @@ type
    function serverinfo(): fbserverinfoty;
    function users(): fbuserinfoarty;
    function user(const ausername: msestring; var ainfo: fbuserinfoty): boolean;
-                                                       //false if not found
+                                                     //false if not found
    procedure adduser(const ainfo: fbuserinfoty; const items: fbuseritemsty);
    procedure modifyuser(const ainfo: fbuserinfoty; const items: fbuseritemsty);
                                                      //fbu_username must be set
    procedure deleteuser(const ausername: msestring; 
                                            const arolename: msestring = '');
-   procedure getlog(var res: msestringarty; const maxrowcount: int32 = 0);
-                             //ring buffer, 0 -> unlimited
+   procedure getlog(var res: msestringarty; const maxrowcount: int32 = -1);
+                             //ring buffer, -1 -> unlimited
    procedure tracestart(const cfg: msestring; const _name: msestring = '');
                 //async, stop it by connected:= false or call of cancel()
-   procedure tracelist(var res: msestringarty; const maxrowcount: int32 = 0);
-                            //ring buffer, 0 -> unlimited
+   procedure tracelist(var res: msestringarty; const maxrowcount: int32 = -1);
+                            //ring buffer, -1 -> unlimited
    procedure tracestop(const aid: card32; var res: msestringarty;
-                         const maxrowcount: int32 = 0);
+                                           const maxrowcount: int32 = -1);
+                                             //ring buffer, -1 -> unlimited
    procedure tracesuspend(const aid: card32; var res: msestringarty;
-                         const maxrowcount: int32 = 0);
+                                           const maxrowcount: int32 = -1);
+                                             //ring buffer, -1 -> unlimited
    procedure traceresume(const aid: card32; var res: msestringarty;
-                         const maxrowcount: int32 = 0);
+                                           const maxrowcount: int32 = -1);
+                                            //ring buffer, -1 -> unlimited
    procedure setmapping();
    procedure dropmapping();
 
    procedure dbstats(const adbname: msestring;
                const aoptions: dbstatoptionsty; const acommandline: msestring; 
-               var res: msestringarty; const maxrowcount: int32 = 0);
+               var res: msestringarty; const maxrowcount: int32 = -1);
+                            //ring buffer, -1 -> unlimited
    procedure properties(const adbname: msestring;
                 const ainfo: fbpropertyinfoty; const aitems: fbpropertyitemsty;
-                var res:  msestringarty; const maxrowcount: integer);
-                         //ring buffer, 0 -> unlimited                
+                var res:  msestringarty; const maxrowcount: integer= -1);
+                           //ring buffer, -1 -> unlimited                
                     
    procedure validatestart(const dbname: msestring;
              const tabincl: msestring = ''; const tabexcl: msestring = '';
@@ -1118,7 +1122,7 @@ var
    widestringmanager.ansi2unicodemoveproc(atext,
                                    {$ifdef fpcv3}cp_acp,{$endif}mstr1,len);
   end;
-  if (maxrowcount > 0) and (length(res) >= maxrowcount) then begin
+  if {(maxrowcount > 0) and (}length(res) >= card32(maxrowcount) then begin
    res[circindex]:= mstr1;
    inc(circindex);
    if circindex >= maxrowcount then begin
@@ -1164,28 +1168,30 @@ begin
     if i1 > length(buffer1)-1-2 then begin
      invalidresponse(procname);
     end;
-    pa:= po1;
-    pb:= pa;
-    pe:= pa + i1;
-    while (pb < pe) do begin
-     if pb^ = c_linefeed then begin
-      pc:= pb;
-      if (pc > pa) and ((pc-1)^ = c_return) then begin
-       dec(pc);
+    if maxrowcount <> 0 then begin
+     pa:= po1;
+     pb:= pa;
+     pe:= pa + i1;
+     while (pb < pe) do begin
+      if pb^ = c_linefeed then begin
+       pc:= pb;
+       if (pc > pa) and ((pc-1)^ = c_return) then begin
+        dec(pc);
+       end;
+       if remainder <> '' then begin
+        remainder:= remainder+stringsegment(pa,pb);
+        add(pointer(remainder),length(remainder));
+        remainder:= '';
+       end
+       else begin
+        add(pa,pc-pa);
+       end;
+       pa:= pb+1;
       end;
-      if remainder <> '' then begin
-       remainder:= remainder+stringsegment(pa,pb);
-       add(pointer(remainder),length(remainder));
-       remainder:= '';
-      end
-      else begin
-       add(pa,pc-pa);
-      end;
-      pa:= pb+1;
+      inc(pb);
      end;
-     inc(pb);
+     remainder:= remainder+stringsegment(pa,pe);
     end;
-    remainder:= remainder+stringsegment(pa,pe);
    end;
    else begin
     invalidresponse(procname);
@@ -1228,7 +1234,7 @@ begin
 end;
 
 procedure tfbservice.getlog(var res: msestringarty;
-                               const maxrowcount: int32 = 0);
+                               const maxrowcount: int32 = -1);
 begin
  tagaction('getlog',isc_action_svc_get_fb_log,res,maxrowcount);
 end;
@@ -1261,7 +1267,7 @@ begin
 end;
 
 procedure tfbservice.tracelist(var res: msestringarty;
-                              const maxrowcount: int32 = 0);
+                              const maxrowcount: int32 = -1);
 begin
  tagaction('tracelist',isc_action_svc_trace_list,res,maxrowcount);
 end;
@@ -1278,19 +1284,19 @@ begin
 end;
 
 procedure tfbservice.tracestop(const aid: card32; var res: msestringarty;
-                              const maxrowcount: int32 = 0);
+                              const maxrowcount: int32 = -1);
 begin
  traceaction('tracestop',isc_action_svc_trace_stop,aid,res,maxrowcount);
 end;
 
 procedure tfbservice.tracesuspend(const aid: card32; var res: msestringarty;
-               const maxrowcount: int32 = 0);
+                                                 const maxrowcount: int32 = -1);
 begin
  traceaction('tracesuspend',isc_action_svc_trace_suspend,aid,res,maxrowcount);
 end;
 
 procedure tfbservice.traceresume(const aid: card32; var res: msestringarty;
-                                                 const maxrowcount: int32 = 0);
+                                                 const maxrowcount: int32 = -1);
 begin
  traceaction('traceresume',isc_action_svc_trace_resume,aid,res,maxrowcount);
 end;
@@ -1307,7 +1313,7 @@ end;
 
 procedure tfbservice.dbstats(const adbname: msestring;
                const aoptions: dbstatoptionsty; const acommandline: msestring; 
-               var res: msestringarty; const maxrowcount: int32 = 0);
+               var res: msestringarty; const maxrowcount: int32 = -1);
 var
  params1: string;
 begin
