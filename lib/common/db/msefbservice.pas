@@ -168,6 +168,8 @@ type
    fmonitor: tfbservicemonitor;
    fonerror: fbserviceerroreventty;
    fonasyncend: fbserviceendeventty;
+   fasynctext: msestringarty;
+   fasyncmaxrowcount: int32;
    function getconnected: boolean;
    procedure setconnected(const avalue: boolean);
   protected
@@ -289,7 +291,10 @@ type
 
    property lasterror: statusvectorty read flasterror;
    property lasterrormessage: msestring read flasterrormessage;
+   property asynctext: msestringarty read fasynctext write fasynctext;
   published
+   property asyncmaxrowcount: int32 read fasyncmaxrowcount 
+                            write fasyncmaxrowcount default 0; //-1 = unlimited
    property hostname : ansistring read fhostname write fhostname;
    property username : ansistring read fusername write fusername;
    property password : ansistring read fpassword write fpassword;
@@ -529,11 +534,44 @@ function tfbservicemonitor.execute(thread: tmsethread): integer;
 var
  params1,items1,buffer1: string;
  po1: pointer;
- i1,i2: int32;
+ i1,i2,rowmax1: int32;
  str1: string;
  ok: boolean;
+ ar1: msestringarty;
+ rowindex1: int32;
+ mstr1,remainder: msestring;
+ po2,ps,pe: pmsechar;
+
+ procedure add();
+ begin
+  if length(ar1) < rowmax1 then begin
+   additem(ar1,remainder);
+  end
+  else begin
+   if rowmax1 <> 0 then begin
+    ar1[rowindex1]:= remainder;
+    inc(rowindex1);
+    if rowindex1 >= rowmax1 then begin
+     rowindex1:= 0;
+    end;
+   end;
+  end;
+  remainder:= '';
+ end; //add
+ 
+ procedure endtext();
+ begin
+  if rowindex1 = 0 then begin
+   fowner.fasynctext:= ar1;
+  end
+  else begin
+   fowner.fasynctext:= copy(ar1,rowindex1,rowmax1-rowindex1);
+   stackarray(copy(ar1,0,rowindex1),fowner.fasynctext);
+  end;
+ end;
+ 
 const
- buffersize = 4096;
+ buffersize = 20{4096};
 begin
  ok:= false;
  params1:= '';
@@ -541,6 +579,9 @@ begin
  setlength(buffer1,buffersize);
  items1:= char(isc_info_svc_to_eof);
  str1:= '';
+ remainder:= '';
+ rowindex1:= 0;
+ ar1:= nil;
  while not terminated and not application.terminated do begin
   fowner.checkerror(fprocname,isc_service_query(@fowner.fstatus,@fowner.fhandle,
     nil,length(params1),pointer(params1),length(items1),pointer(items1),
@@ -562,8 +603,41 @@ begin
      if str1 <> '' then begin
       application.lock();
       try
+       mstr1:= fowner.tomsestring(str1);
+       rowmax1:= fowner.fasyncmaxrowcount;
+       if rowmax1 < 0 then begin
+        rowmax1:= high(rowmax1);
+       end;
+       if length(ar1) > rowmax1 then begin
+        setlength(ar1,rowmax1);
+       end;
+       if rowindex1 > rowmax1 then begin
+        rowindex1:= 0;
+       end;
+       if rowmax1 > 0 then begin
+        po2:= pointer(mstr1);
+        ps:= po2;
+        pe:= po2+length(mstr1);
+        while po2 < pe do begin
+         if (po2^ = c_return) or (po2^ = c_linefeed) then begin
+          addstringsegment(remainder,ps,po2);
+          add();
+          if (po2^ = c_return) then begin
+           inc(po2);
+          end;
+          if (po2^ = c_linefeed) then begin
+           inc(po2);
+          end;
+          ps:= po2;
+         end
+         else begin
+          inc(po2);
+         end;
+        end;
+        addstringsegment(remainder,ps,po2);
+       end;
        if assigned(fowner.fonasynctext) then begin
-        fowner.fonasynctext(fowner,fowner.tomsestring(str1));
+        fowner.fonasynctext(fowner,mstr1);
        end;
       finally
        application.unlock();
@@ -574,8 +648,10 @@ begin
       application.lock();
       try
        if not fowner.serviceisrunning() then begin
+        add();
         ok:= true;
         cancel();
+        endtext();
         if assigned(fowner.fonasyncend) then begin
          fowner.fonasyncend(fowner,false);
         end;
@@ -595,7 +671,9 @@ begin
  if not ok then begin 
   application.lock();
   try
+   add();
    cancel();
+   endtext();
    if assigned(fowner.fonasyncend) then begin
      fowner.fonasyncend(fowner,true);
    end;
@@ -835,6 +913,7 @@ end;
 procedure tfbservice.start(const procname: string; const params: string);
 begin
  checkbusy();
+ fasynctext:= nil;
  checkerror(procname,isc_service_start(@fstatus,@fhandle,nil,
                                    length(params),pointer(params)));
  include(fstate,fbss_busy);
@@ -1122,7 +1201,7 @@ var
    widestringmanager.ansi2unicodemoveproc(atext,
                                    {$ifdef fpcv3}cp_acp,{$endif}mstr1,len);
   end;
-  if {(maxrowcount > 0) and (}length(res) >= card32(maxrowcount) then begin
+  if (maxrowcount > 0) and (length(res) >= maxrowcount) then begin
    res[circindex]:= mstr1;
    inc(circindex);
    if circindex >= maxrowcount then begin
@@ -1198,7 +1277,7 @@ begin
    end;
   end;
  end;
- if remainder <> '' then begin
+ if maxrowcount <> 0 then begin
   add(pointer(remainder),length(remainder));
  end;
  if circindex > 0 then begin
