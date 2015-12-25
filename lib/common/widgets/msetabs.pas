@@ -297,7 +297,7 @@ type
    procedure settabs(const Value: ttabs);
    procedure layoutchanged;
    procedure checklayout;
-   procedure updatelayout;
+   procedure updatelayout();
    function getactivetab: integer;
    procedure setactivetab(const Value: integer);
    procedure tabschanged(const sender: tarrayprop; const index: integer);
@@ -1041,6 +1041,9 @@ var
  cysizeinflate: integer;
  frame1: framety;
  textflags1: textflagsty;
+ negtabshift1: boolean;
+ tabshift1: int32;
+ 
 begin
  with layout do begin
   horzimage:= tabs.imagepos in horzimagepos;
@@ -1069,6 +1072,8 @@ begin
    end;
   end;
   textflags1:= tabs.textflags - [tf_ellipseleft,tf_ellipseright];
+  tabshift1:= tabs.ftabshift;
+  negtabshift1:= tabshift1 < 0;
   if shs_vert in options then begin
    totsize.cx:= 0;
    aval:= dim.y;
@@ -1110,23 +1115,33 @@ begin
        lasttab:= int1;
       end;
      end;
+     dim.cx:= layout.dim.cx;
      if ts_active in fstate then begin
-      dim.x:= tabs.ftabshift;
       if shs_opposite in options then begin
-       dim.x:= -dim.x;
+       if negtabshift1 then begin
+        dim.cx:= dim.cx - tabshift1;
+       end
+       else begin
+        dim.x:= -tabshift1;
+       end;
+      end
+      else begin
+       dim.x:= tabs.ftabshift;
+       if negtabshift1 then begin
+        dim.cx:= dim.cx - tabshift1;
+       end;
       end;
      end
      else begin
       dim.x:= 0;
      end;
      dim.x:= dim.x + layout.dim.x;
-     dim.cx:= layout.dim.cx;
     end;
    end;
    totsize.cy:= asize-dim.y;
    totsize.cx:= totsize.cx + cxsizeinflate;
   end
-  else begin
+  else begin //horizontal
    aval:= dim.x;
    asize:= aval;
    endval:= dim.x + dim.cx;
@@ -1136,7 +1151,7 @@ begin
      dim.x:= aval;
      dofont(tabs[int1],cells[int1]);
      rect1:= textrect(canvas,fcaption,
-               makerect(aval,layout.dim.y,bigint,layout.dim.cy),textflags1,font);
+              makerect(aval,layout.dim.y,bigint,layout.dim.cy),textflags1,font);
      docommon(tabs[int1],cells[int1],rect1);
      if rect1.cy > totsize.cy then begin
       totsize.cy:= rect1.cy;
@@ -1177,17 +1192,33 @@ begin
        lasttab:= int1;
       end;
      end;
+     dim.cy:= layout.dim.cy;
      if ts_active in fstate then begin
+      if shs_opposite in options then begin
+       if negtabshift1 then begin
+        dim.cy:= dim.cy - tabshift1;
+       end
+       else begin
+        dim.y:= -tabshift1;
+       end;
+      end
+      else begin
+       dim.y:= tabs.ftabshift;
+       if negtabshift1 then begin
+        dim.cy:= dim.cy - tabshift1;
+       end;
+      end;
+      {
       dim.y:= tabs.ftabshift;
       if shs_opposite in options then begin
        dim.y:= -dim.y;
       end;
+      }
      end
      else begin
       dim.y:= 0;
      end;
      dim.y:= dim.y + layout.dim.y;
-     dim.cy:= layout.dim.cy;
     end;
    end;
    totsize.cx:= asize-dim.x;
@@ -2110,7 +2141,7 @@ begin
  flayoutinfo.tabs.assign(Value);
 end;
 
-procedure tcustomtabbar.updatelayout;
+procedure tcustomtabbar.updatelayout();
 var
  int1,int2,int3: integer;
 begin
