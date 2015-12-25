@@ -2335,7 +2335,7 @@ begin
  with flayoutinfo do begin
   int1:= high(cells);
   rect1:= innerclientrect;
-  canvas.intersectcliprect(rect1);
+//  canvas.intersectcliprect(rect1);
   if shs_vert in options then begin
    if shs_opposite in options then begin
     int2:= rect1.x;
