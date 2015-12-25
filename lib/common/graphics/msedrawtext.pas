@@ -372,7 +372,7 @@ var
    end;
   end;
  end;
-
+//{$define mswindows}
  function tabitemwidth(const charindex: integer;
                        const stopchar: msechar): integer;
  var
@@ -423,9 +423,9 @@ var
  
 var
  y1,orig1,int5: integer;
-{$ifdef mswindows}
  fontmetrics1: fontmetricsty;
  hasitaliccomp: boolean;
+{$ifdef mswindows}
  italicsafetymargin: int32;
 {$endif}
     
@@ -650,34 +650,34 @@ begin
    res.x:= bigint;
    res.cy:= height;
    res.cx:= 0;
-  {$ifdef mswindows}
    hasitaliccomp:= (text.format = nil) and font.italic;
-   if hasitaliccomp then begin
+   if true{hasitaliccomp} then begin
     with drawinfo.getfontmetrics do begin
      fontdata:= getfontdata(canvas.font.handle);
      resultpo:= @fontmetrics1;       
+  {$ifdef mswindows}
      italicsafetymargin:= (lineheight+10) div 20;
+  {$endif}
     end;
    end;
-  {$endif}
    for int3:= 0 to high(lineinfos) do begin
     with layoutinfo.lineinfos[int3] do begin
      liy:= y1;
      y1:= y1 + lineheight;     
      listartx:= info.dest.x;
-    {$ifdef mswindows}
      if hasitaliccomp and (licount > 0) then begin
       with drawinfo.getfontmetrics do begin
        char:= getucs4char(text.text,liindex);
        msefont.getfontmetrics({datapo,}drawinfo);
-       listartx:= listartx + fontmetrics1.leftbearing + 1;
+       listartx:= listartx - fontmetrics1.leftbearing
+                                {$ifdef mswindows} + 1{$endif};
        liwidth:= liwidth - fontmetrics1.leftbearing;
        char:= getucs4char(text.text,liindex+licount-1);
        msefont.getfontmetrics({datapo,}drawinfo);
-       liwidth:= liwidth-fontmetrics1.rightbearing + 1 + italicsafetymargin;
+       liwidth:= liwidth-fontmetrics1.rightbearing 
+                  {$ifdef mswindows}+ 1 + italicsafetymargin{$endif}
       end;
      end;
-    {$endif}
      if tf_xcentered in flags then begin
       if info.dest.cx < liwidth then begin
        listartx:= listartx + (info.dest.cx - liwidth - 1) div 2;

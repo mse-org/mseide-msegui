@@ -1511,7 +1511,7 @@ begin
     xfttextextents32(appdisp,pxftfont(font),@char,1,@glyphinfo);
     with resultpo^ do begin
      width:= glyphinfo.xoff;
-     leftbearing:= glyphinfo.x;
+     leftbearing:= -glyphinfo.x;
      rightbearing:= glyphinfo.xoff-glyphinfo.width+glyphinfo.x;
     end;
    end
