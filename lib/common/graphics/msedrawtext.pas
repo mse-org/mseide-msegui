@@ -651,7 +651,7 @@ begin
    res.cy:= height;
    res.cx:= 0;
    hasitaliccomp:= (text.format = nil) and font.italic;
-   if true{hasitaliccomp} then begin
+   if hasitaliccomp then begin
     with drawinfo.getfontmetrics do begin
      fontdata:= getfontdata(canvas.font.handle);
      resultpo:= @fontmetrics1;       
@@ -675,7 +675,7 @@ begin
        char:= getucs4char(text.text,liindex+licount-1);
        msefont.getfontmetrics({datapo,}drawinfo);
        liwidth:= liwidth-fontmetrics1.rightbearing 
-                  {$ifdef mswindows}+ 1 + italicsafetymargin{$endif}
+                  {$ifdef mswindows}+ 1 + italicsafetymargin{$endif};
       end;
      end;
      if tf_xcentered in flags then begin
