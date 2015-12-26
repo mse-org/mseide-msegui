@@ -2357,9 +2357,9 @@ end;
 procedure tcustomtabbar.dopaintforeground(const canvas: tcanvas);
 var
  int1,int2,int3: integer;
- color1: colorty;
+ color1,color2: colorty;
  rect1: rectty;
-// bo1: boolean;
+ bo1: boolean;
 begin
  inherited;
  checklayout;

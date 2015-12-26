@@ -572,6 +572,7 @@ var
    i1:= rowmax1-rowindex1;
    move(ar1[rowindex1],ar2[0],i1*sizeof(pointer));
    move(ar1[0],ar2[i1],rowindex1*sizeof(pointer));
+   fowner.fasynctext:= nil;
    pointer(fowner.fasynctext):= pointer(ar1);
    pointer(ar1):= nil;
 //   fowner.fasynctext:= copy(ar1,rowindex1,rowmax1-rowindex1);
@@ -1306,7 +1307,7 @@ end;
 
 procedure tfbservice.startmonitor(const procname: string; const aparams: string);
 begin
- checkbusy();
+// checkbusy();
  start(procname,aparams);
  freeandnil(fmonitor);
  fmonitor:= tfbservicemonitor.create(self,procname);
