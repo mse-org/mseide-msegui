@@ -27,6 +27,8 @@ const
 
 // styleactionstates: actionstatesty = [as_shortcutcaption,as_radiobutton];
 type
+ buttonedgety =  (bedg_none,bedg_right,bedg_top,bedg_left,bedg_bottom);
+
  tagmouseprocty = procedure (const tag: integer; const info: mouseeventinfoty) of object;
 
  captioninfoty = record
@@ -814,10 +816,13 @@ begin
 end;
 
 function drawbuttonframe(const canvas: tcanvas; const info: shapeinfoty;
-        out clientrect: rectty): boolean; //true if clientrect > 0
+        out clientrect: rectty; 
+                     const hiddenedge: buttonedgety = bedg_none): boolean; 
+                                               //true if clientrect not empty
 var
  level: integer;
  col1: colorty;
+ rect1: rectty;
 begin
  result:= false;
  with canvas,info do begin
@@ -853,8 +858,6 @@ begin
     canvas.drawframe(clientrect,-1,cl_black);
     inflaterect1(clientrect,-1);
    end;
-   draw3dframe(canvas,clientrect,level,defaultframecolors,[]);
-   inflaterect1(clientrect,-abs(level));
    if (clientrect.cx > 0) and (clientrect.cy > 0) then begin
     result:= true;
     col1:= color;
@@ -868,7 +871,34 @@ begin
      face.paint(canvas,clientrect);
     end;
    end;
+   if (hiddenedge <> bedg_none) and not (shs_flat in state) then begin
+    rect1:= clientrect;
+    with rect1 do begin
+     case hiddenedge of
+      bedg_left: begin
+       x:= x - 1;
+       cx:= cx + 1
+      end;
+      bedg_top: begin
+       y:= y - 1;
+       cy:= cy + 1;
+      end;
+      bedg_right: begin
+       cx:= cx + 1;
+      end;
+      bedg_bottom: begin
+       cy:= cy + 1;
+      end;
+     end;
+    end;
+    draw3dframe(canvas,rect1,level,defaultframecolors,[]);
+   end
+   else begin
+    draw3dframe(canvas,clientrect,level,defaultframecolors,[]);
+   end;
+   inflaterect1(clientrect,-abs(level));
   end;
+  result:=(clientrect.cx > 0) and (clientrect.cy > 0);
  end;
 end;
 
@@ -1290,6 +1320,9 @@ var
  rect1,rect2,rect3: rectty;
  pos1: imageposty;
  frame1: framety;
+ pt1,pt2: pointty;
+ edge1: buttonedgety;
+ 
 begin
  with canvas,info do begin
   if not (shs_invisible in state) then begin
@@ -1306,7 +1339,27 @@ begin
     deflaterect1(ca.dim,frame1);
     frameskinoptionstoshapestate(frame,info);
    end;     
-   if drawbuttonframe(canvas,info,rect1) then begin
+   edge1:= bedg_none;
+
+   if shs_active in state then begin
+    if shs_opposite in state then begin
+     if shs_vert in state then begin
+      edge1:= bedg_left;
+     end
+     else begin
+      edge1:= bedg_top;
+     end;
+    end
+    else begin
+     if shs_vert in state then begin
+      edge1:= bedg_right;
+     end
+     else begin
+      edge1:= bedg_bottom;
+     end;
+    end;
+   end;
+   if drawbuttonframe(canvas,info,rect1,edge1) then begin
     if ca.imagepos = ip_right then begin
      pos1:= ip_right;
     end
@@ -1327,7 +1380,6 @@ begin
     drawbuttoncaption(canvas,info,rect1,pos1,@rect2);
    end;
    if frame <> nil then begin
-{$warnings off}
     inflaterect1(info.ca.dim,frame1);
     frame.paintoverlay(canvas,info.ca.dim);
     ca.dim:= rect3;
@@ -1347,8 +1399,8 @@ begin
     else begin
      int1:= ca.dim.x+ca.dim.cx-1;
     end;
-    canvas.drawline(makepoint(int1,ca.dim.y),
-                        makepoint(int1,ca.dim.y+ca.dim.cy-1),color1);
+    pt1:= makepoint(int1,ca.dim.y);
+    pt2:= makepoint(int1,ca.dim.y+ca.dim.cy-1);
    end
    else begin
     if shs_opposite in state then begin
@@ -1357,13 +1409,13 @@ begin
     else begin
      int1:= ca.dim.y+ca.dim.cy-1;
     end;
-    canvas.drawline(makepoint(ca.dim.x,int1),
-                         makepoint(ca.dim.x+ca.dim.cx-1,int1),color1);
+    pt1:= makepoint(ca.dim.x,int1);
+    pt2:= makepoint(ca.dim.x+ca.dim.cx-1,int1);
    end;
+   canvas.drawline(pt1,pt2,color1);
   end;
  end;
 end;
-{$warnings on}
 
 initialization
  buttontab:= tcustomtabulators.create;
