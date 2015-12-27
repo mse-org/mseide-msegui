@@ -794,6 +794,24 @@ type
    procedure settab_widthmax(const avalue: integer);
    function gettab_optionsskin: optionsskinty;
    procedure settab_optionsskin(const avalue: optionsskinty);
+   function getedge_level: int32;
+   procedure setedge_level(const avalue: int32);
+   function getedge_colordkshadow: colorty;
+   procedure setedge_colordkshadow(const avalue: colorty);
+   function getedge_colorshadow: colorty;
+   procedure setedge_colorshadow(const avalue: colorty);
+   function getedge_colorlight: colorty;
+   procedure setedge_colorlight(const avalue: colorty);
+   function getedge_colorhighlight: colorty;
+   procedure setedge_colorhighlight(const avalue: colorty);
+   function getedge_colordkwidth: int32;
+   procedure setedge_colordkwidth(const avalue: int32);
+   function getedge_colorhlwidth: int32;
+   procedure setedge_colorhlwidth(const avalue: int32);
+   function getedge_imagelist: timagelist;
+   procedure setedge_imagelist(const avalue: timagelist);
+   function getedge_imageoffset: int32;
+   procedure setedge_imageoffset(const avalue: int32);
   protected
    ftabs: tcustomtabbar1;
    fupdating: integer;
@@ -918,6 +936,29 @@ type
    property tab_shift: integer read gettab_shift write settab_shift
                                                       default defaulttabshift;
                        //defaulttabshift (-100) -> 1
+   property tab_edge_level: int32 read getedge_level write setedge_level
+                                             default defaultedgelevel;
+                       //defaultedgelevel (-100) -> -1
+   property tab_edge_colordkshadow: colorty read getedge_colordkshadow
+                      write setedge_colordkshadow default cl_default;
+   property tab_edge_colorshadow: colorty read getedge_colorshadow
+                      write setedge_colorshadow default cl_default;
+   property tab_edge_colorlight: colorty read getedge_colorlight
+                      write setedge_colorlight default cl_default;
+   property tab_edge_colorhighlight: colorty read getedge_colorhighlight
+                      write setedge_colorhighlight default cl_default;
+   property tab_edge_colordkwidth: int32 read getedge_colordkwidth
+                      write setedge_colordkwidth default -1;
+                                  //-1 = default
+   property tab_edge_colorhlwidth: int32 read getedge_colorhlwidth
+                      write setedge_colorhlwidth default -1;
+                                  //-1 = default
+   property tab_edge_imagelist: timagelist read getedge_imagelist 
+                    write setedge_imagelist;
+                   //imagenr 0 -> startpoint, 1 -> edge, imagenr 2 -> endpoint
+   property tab_edge_imageoffset: int32 read getedge_imageoffset
+                    write setedge_imageoffset default 0;
+                    
    property tab_frametab: tframe read gettab_frametab write settab_frametab;
    property tab_facetab: tface read gettab_facetab write settab_facetab;
    property tab_faceactivetab: tface read gettab_faceactivetab write settab_faceactivetab;
@@ -932,6 +973,7 @@ type
                  write settab_optionsskin default [];
    property tab_optionswidget1: optionswidget1ty read gettab_optionswidget1
                  write settab_optionswidget1 default defaultoptionswidget1tab;
+
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read getstatvarname write fstatvarname;
    property statpriority: integer read fstatpriority 
@@ -989,6 +1031,15 @@ type
    property tab_captionframe_bottom;
    property tab_imagedist;
    property tab_shift;
+   property tab_edge_level;
+   property tab_edge_colordkshadow;
+   property tab_edge_colorshadow;
+   property tab_edge_colorlight;
+   property tab_edge_colorhighlight;
+   property tab_edge_colordkwidth;
+   property tab_edge_colorhlwidth;
+   property tab_edge_imagelist;
+   property tab_edge_imageoffset;
    property tab_colortab;
    property tab_coloractivetab;
    property tab_frametab;
@@ -5216,6 +5267,96 @@ end;
 procedure tcustomtabwidget.settab_optionsskin(const avalue: optionsskinty);
 begin
  ftabs.optionsskin:= avalue;
+end;
+
+function tcustomtabwidget.getedge_level: int32;
+begin
+ result:= ftabs.tabs.edge_level;
+end;
+
+procedure tcustomtabwidget.setedge_level(const avalue: int32);
+begin
+ ftabs.tabs.edge_level:= avalue;
+end;
+
+function tcustomtabwidget.getedge_colordkshadow: colorty;
+begin
+ result:= ftabs.tabs.edge_colordkshadow;
+end;
+
+procedure tcustomtabwidget.setedge_colordkshadow(const avalue: colorty);
+begin
+ ftabs.tabs.edge_colordkshadow:= avalue;
+end;
+
+function tcustomtabwidget.getedge_colorshadow: colorty;
+begin
+ result:= ftabs.tabs.edge_colorshadow;
+end;
+
+procedure tcustomtabwidget.setedge_colorshadow(const avalue: colorty);
+begin
+ ftabs.tabs.edge_colorshadow:= avalue;
+end;
+
+function tcustomtabwidget.getedge_colorlight: colorty;
+begin
+ result:= ftabs.tabs.edge_colorlight;
+end;
+
+procedure tcustomtabwidget.setedge_colorlight(const avalue: colorty);
+begin
+ ftabs.tabs.edge_colorlight:= avalue;
+end;
+
+function tcustomtabwidget.getedge_colorhighlight: colorty;
+begin
+ result:= ftabs.tabs.edge_colorhighlight;
+end;
+
+procedure tcustomtabwidget.setedge_colorhighlight(const avalue: colorty);
+begin
+ ftabs.tabs.edge_colorhighlight:= avalue;
+end;
+
+function tcustomtabwidget.getedge_colordkwidth: int32;
+begin
+ result:= ftabs.tabs.edge_colordkwidth;
+end;
+
+procedure tcustomtabwidget.setedge_colordkwidth(const avalue: int32);
+begin
+ ftabs.tabs.edge_colordkwidth:= avalue;
+end;
+
+function tcustomtabwidget.getedge_colorhlwidth: int32;
+begin
+ result:= ftabs.tabs.edge_colorhlwidth;
+end;
+
+procedure tcustomtabwidget.setedge_colorhlwidth(const avalue: int32);
+begin
+ ftabs.tabs.edge_colorhlwidth:= avalue;
+end;
+
+function tcustomtabwidget.getedge_imagelist: timagelist;
+begin
+ result:= ftabs.tabs.edge_imagelist;
+end;
+
+procedure tcustomtabwidget.setedge_imagelist(const avalue: timagelist);
+begin
+ ftabs.tabs.edge_imagelist:= avalue;
+end;
+
+function tcustomtabwidget.getedge_imageoffset: int32;
+begin
+ result:= ftabs.tabs.edge_imageoffset;
+end;
+
+procedure tcustomtabwidget.setedge_imageoffset(const avalue: int32);
+begin
+ ftabs.tabs.edge_imageoffset:= avalue;
 end;
 
 function tcustomtabwidget.gettab_font: ttab_font;
