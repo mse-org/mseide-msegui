@@ -12,7 +12,7 @@ unit mseskin;
 interface
 uses
  classes,mclasses,mseclasses,msegui,msescrollbar,mseedit,
- msegraphics,msegraphutils,
+ msegraphics,msegraphutils,msebitmap,
  msetabs,msetoolbar,msedataedits,msemenus,msearrayprops,msegraphedits,
  msesimplewidgets,
  msegrids,msewidgets,msetypes,mseglob,msestrings,msedrawtext,mseguiglob;
@@ -98,6 +98,15 @@ type
   svface: tfacecomp;
   svfaceactive: tfacecomp;
   svshift: integer;
+  svsedge_level: int32;
+  svsedge_colordkshadow: colorty;
+  svsedge_colorshadow: colorty;
+  svsedge_colorlight: colorty;
+  svsedge_colorhighlight: colorty;
+  svsedge_colordkwidth: int32;
+  svsedge_colorhlwidth: int32;
+  svsedge_imagelist: timagelist;
+  svsedge_imageoffset: int32;
  end;
  tabbarskininfoty = record
   svwidgethorz: widgetskininfoty;
@@ -557,22 +566,26 @@ type
    procedure setcontainer_face(const avalue: tfacecomp);
    procedure setcontainer_frame(const avalue: tframecomp);
 
+   procedure settabbar_horz_tab_edge_imagelist(const avalue: timagelist);
    procedure settabbar_horz_face(const avalue: tfacecomp);
    procedure settabbar_horz_frame(const avalue: tframecomp);
    procedure settabbar_horz_tab_frame(const avalue: tframecomp);
    procedure settabbar_horz_tab_face(const avalue: tfacecomp);
    procedure settabbar_horz_tab_faceactive(const avalue: tfacecomp);
+   procedure settabbar_vert_tab_edge_imagelist(const avalue: timagelist);
    procedure settabbar_vert_face(const avalue: tfacecomp);
    procedure settabbar_vert_frame(const avalue: tframecomp);
    procedure settabbar_vert_tab_frame(const avalue: tframecomp);
    procedure settabbar_vert_tab_face(const avalue: tfacecomp);
    procedure settabbar_vert_tab_faceactive(const avalue: tfacecomp);
 
+   procedure settabbar_horzopo_tab_edge_imagelist(const avalue: timagelist);
    procedure settabbar_horzopo_face(const avalue: tfacecomp);
    procedure settabbar_horzopo_frame(const avalue: tframecomp);
    procedure settabbar_horzopo_tab_frame(const avalue: tframecomp);
    procedure settabbar_horzopo_tab_face(const avalue: tfacecomp);
    procedure settabbar_horzopo_tab_faceactive(const avalue: tfacecomp);
+   procedure settabbar_vertopo_tab_edge_imagelist(const avalue: timagelist);
    procedure settabbar_vertopo_face(const avalue: tfacecomp);
    procedure settabbar_vertopo_frame(const avalue: tframecomp);
    procedure settabbar_vertopo_tab_frame(const avalue: tframecomp);
@@ -870,6 +883,37 @@ type
                                write settabbar_horz_tab_faceactive;
    property tabbar_horz_tab_shift: integer read ftabbar.svtabhorz.svshift
                      write ftabbar.svtabhorz.svshift default defaulttabshift;
+   property tabbar_horz_tab_edge_level: int32 
+              read ftabbar.svtabhorz.svsedge_level
+           write ftabbar.svtabhorz.svsedge_level default defaultedgelevel;
+                       //defaultedgelevel (-100) -> -1
+   property tabbar_horz_tab_edge_colordkshadow: colorty
+              read ftabbar.svtabhorz.svsedge_colordkshadow
+              write ftabbar.svtabhorz.svsedge_colordkshadow default cl_default;
+   property tabbar_horz_tab_edge_colorshadow: colorty
+              read ftabbar.svtabhorz.svsedge_colorshadow
+              write ftabbar.svtabhorz.svsedge_colorshadow default cl_default;
+   property tabbar_horz_tab_edge_colorlight: colorty
+              read ftabbar.svtabhorz.svsedge_colorlight
+              write ftabbar.svtabhorz.svsedge_colorlight default cl_default;
+   property tabbar_horz_tab_edge_colorhighlight: colorty
+              read ftabbar.svtabhorz.svsedge_colorhighlight
+              write ftabbar.svtabhorz.svsedge_colorhighlight default cl_default;
+   property tabbar_horz_tab_edge_colordkwidth: int32
+              read ftabbar.svtabhorz.svsedge_colordkwidth
+              write ftabbar.svtabhorz.svsedge_colordkwidth default -1;
+                                  //-1 = default
+   property tabbar_horz_tab_edge_colorhlwidth: int32
+              read ftabbar.svtabhorz.svsedge_colorhlwidth
+              write ftabbar.svtabhorz.svsedge_colorhlwidth default -1;
+                                  //-1 = default
+   property tabbar_horz_tab_edge_imagelist: timagelist 
+              read ftabbar.svtabhorz.svsedge_imagelist 
+              write settabbar_horz_tab_edge_imagelist;
+                   //imagenr 0 -> startpoint, 1 -> edge, imagenr 2 -> endpoint
+   property tabbar_horz_tab_edge_imageoffset: int32
+              read ftabbar.svtabhorz.svsedge_imageoffset
+              write ftabbar.svtabhorz.svsedge_imageoffset default 0;
 
    property tabbar_horzopo_face: tfacecomp read ftabbar.svwidgethorzopo.svface
                                             write settabbar_horzopo_face;
@@ -891,6 +935,37 @@ type
                                write settabbar_horzopo_tab_faceactive;
    property tabbar_horzopo_tab_shift: integer read ftabbar.svtabhorzopo.svshift
                   write ftabbar.svtabhorzopo.svshift default defaulttabshift;
+   property tabbar_horzopo_tab_edge_level: int32 
+              read ftabbar.svtabhorzopo.svsedge_level
+           write ftabbar.svtabhorzopo.svsedge_level default defaultedgelevel;
+                       //defaultedgelevel (-100) -> -1
+   property tabbar_horzopo_tab_edge_colordkshadow: colorty
+              read ftabbar.svtabhorzopo.svsedge_colordkshadow
+              write ftabbar.svtabhorzopo.svsedge_colordkshadow default cl_default;
+   property tabbar_horzopo_tab_edge_colorshadow: colorty
+              read ftabbar.svtabhorzopo.svsedge_colorshadow
+              write ftabbar.svtabhorzopo.svsedge_colorshadow default cl_default;
+   property tabbar_horzopo_tab_edge_colorlight: colorty
+              read ftabbar.svtabhorzopo.svsedge_colorlight
+              write ftabbar.svtabhorzopo.svsedge_colorlight default cl_default;
+   property tabbar_horzopo_tab_edge_colorhighlight: colorty
+              read ftabbar.svtabhorzopo.svsedge_colorhighlight
+              write ftabbar.svtabhorzopo.svsedge_colorhighlight default cl_default;
+   property tabbar_horzopo_tab_edge_colordkwidth: int32
+              read ftabbar.svtabhorzopo.svsedge_colordkwidth
+              write ftabbar.svtabhorzopo.svsedge_colordkwidth default -1;
+                                  //-1 = default
+   property tabbar_horzopo_tab_edge_colorhlwidth: int32
+              read ftabbar.svtabhorzopo.svsedge_colorhlwidth
+              write ftabbar.svtabhorzopo.svsedge_colorhlwidth default -1;
+                                  //-1 = default
+   property tabbar_horzopo_tab_edge_imagelist: timagelist 
+              read ftabbar.svtabhorzopo.svsedge_imagelist 
+              write settabbar_horzopo_tab_edge_imagelist;
+                   //imagenr 0 -> startpoint, 1 -> edge, imagenr 2 -> endpoint
+   property tabbar_horzopo_tab_edge_imageoffset: int32
+              read ftabbar.svtabhorzopo.svsedge_imageoffset
+              write ftabbar.svtabhorzopo.svsedge_imageoffset default 0;
 
    property tabbar_vert_face: tfacecomp read ftabbar.svwidgetvert.svface
                                write settabbar_vert_face;
@@ -911,6 +986,37 @@ type
                                write settabbar_vert_tab_faceactive;
    property tabbar_vert_tab_shift: integer read ftabbar.svtabvert.svshift
                       write ftabbar.svtabvert.svshift default defaulttabshift;
+   property tabbar_vert_tab_edge_level: int32 
+              read ftabbar.svtabvert.svsedge_level
+           write ftabbar.svtabvert.svsedge_level default defaultedgelevel;
+                       //defaultedgelevel (-100) -> -1
+   property tabbar_vert_tab_edge_colordkshadow: colorty
+              read ftabbar.svtabvert.svsedge_colordkshadow
+              write ftabbar.svtabvert.svsedge_colordkshadow default cl_default;
+   property tabbar_vert_tab_edge_colorshadow: colorty
+              read ftabbar.svtabvert.svsedge_colorshadow
+              write ftabbar.svtabvert.svsedge_colorshadow default cl_default;
+   property tabbar_vert_tab_edge_colorlight: colorty
+              read ftabbar.svtabvert.svsedge_colorlight
+              write ftabbar.svtabvert.svsedge_colorlight default cl_default;
+   property tabbar_vert_tab_edge_colorhighlight: colorty
+              read ftabbar.svtabvert.svsedge_colorhighlight
+              write ftabbar.svtabvert.svsedge_colorhighlight default cl_default;
+   property tabbar_vert_tab_edge_colordkwidth: int32
+              read ftabbar.svtabvert.svsedge_colordkwidth
+              write ftabbar.svtabvert.svsedge_colordkwidth default -1;
+                                  //-1 = default
+   property tabbar_vert_tab_edge_colorhlwidth: int32
+              read ftabbar.svtabvert.svsedge_colorhlwidth
+              write ftabbar.svtabvert.svsedge_colorhlwidth default -1;
+                                  //-1 = default
+   property tabbar_vert_tab_edge_imagelist: timagelist 
+              read ftabbar.svtabvert.svsedge_imagelist 
+              write settabbar_vert_tab_edge_imagelist;
+                   //imagenr 0 -> startpoint, 1 -> edge, imagenr 2 -> endpoint
+   property tabbar_vert_tab_edge_imageoffset: int32
+              read ftabbar.svtabvert.svsedge_imageoffset
+              write ftabbar.svtabvert.svsedge_imageoffset default 0;
 
    property tabbar_vertopo_face: tfacecomp read ftabbar.svwidgetvertopo.svface
                                write settabbar_vertopo_face;
@@ -933,6 +1039,37 @@ type
                          write settabbar_vertopo_tab_faceactive;
    property tabbar_vertopo_tab_shift: integer read ftabbar.svtabvertopo.svshift
                 write ftabbar.svtabvertopo.svshift default defaulttabshift;
+   property tabbar_vertopo_tab_edge_level: int32 
+              read ftabbar.svtabvertopo.svsedge_level
+           write ftabbar.svtabvertopo.svsedge_level default defaultedgelevel;
+                       //defaultedgelevel (-100) -> -1
+   property tabbar_vertopo_tab_edge_colordkshadow: colorty
+              read ftabbar.svtabvertopo.svsedge_colordkshadow
+              write ftabbar.svtabvertopo.svsedge_colordkshadow default cl_default;
+   property tabbar_vertopo_tab_edge_colorshadow: colorty
+              read ftabbar.svtabvertopo.svsedge_colorshadow
+              write ftabbar.svtabvertopo.svsedge_colorshadow default cl_default;
+   property tabbar_vertopo_tab_edge_colorlight: colorty
+              read ftabbar.svtabvertopo.svsedge_colorlight
+              write ftabbar.svtabvertopo.svsedge_colorlight default cl_default;
+   property tabbar_vertopo_tab_edge_colorhighlight: colorty
+              read ftabbar.svtabvertopo.svsedge_colorhighlight
+              write ftabbar.svtabvertopo.svsedge_colorhighlight default cl_default;
+   property tabbar_vertopo_tab_edge_colordkwidth: int32
+              read ftabbar.svtabvertopo.svsedge_colordkwidth
+              write ftabbar.svtabvertopo.svsedge_colordkwidth default -1;
+                                  //-1 = default
+   property tabbar_vertopo_tab_edge_colorhlwidth: int32
+              read ftabbar.svtabvertopo.svsedge_colorhlwidth
+              write ftabbar.svtabvertopo.svsedge_colorhlwidth default -1;
+                                  //-1 = default
+   property tabbar_vertopo_tab_edge_imagelist: timagelist 
+              read ftabbar.svtabvertopo.svsedge_imagelist 
+              write settabbar_vertopo_tab_edge_imagelist;
+                   //imagenr 0 -> startpoint, 1 -> edge, imagenr 2 -> endpoint
+   property tabbar_vertopo_tab_edge_imageoffset: int32
+              read ftabbar.svtabvertopo.svsedge_imageoffset
+              write ftabbar.svtabvertopo.svsedge_imageoffset default 0;
 
    property toolbar_horz_face: tfacecomp read ftoolbar_horz.svwidget.svface
                                         write settoolbar_horz_face;
@@ -1799,9 +1936,47 @@ begin
   inc(fskinupdating);
   beginupdate;
   try
-   if (ainfo.svshift <> defaulttabshift) and (shift = defaulttabshift) then begin
+   if (ainfo.svshift <> defaulttabshift) and 
+                               (shift = defaulttabshift) then begin
     shift:= ainfo.svshift;
    end;
+   if (ainfo.svsedge_level <> defaultedgelevel) and 
+                  (edge_level = defaultedgelevel) then begin
+    edge_level:= ainfo.svsedge_level;
+   end;
+   if (ainfo.svsedge_colordkshadow <> cl_default) and 
+                  (edge_colordkshadow = cl_default) then begin
+    edge_colordkshadow:= ainfo.svsedge_colordkshadow;
+   end;
+   if (ainfo.svsedge_colorshadow <> cl_default) and 
+                  (edge_colorshadow = cl_default) then begin
+    edge_colorshadow:= ainfo.svsedge_colorshadow;
+   end;
+   if (ainfo.svsedge_colorlight <> cl_default) and 
+                  (edge_colorlight = cl_default) then begin
+    edge_colorlight:= ainfo.svsedge_colorlight;
+   end;
+   if (ainfo.svsedge_colorhighlight <> cl_default) and 
+                  (edge_colorhighlight = cl_default) then begin
+    edge_colorhighlight:= ainfo.svsedge_colorhighlight;
+   end;
+   if (ainfo.svsedge_colordkwidth <> -1) and 
+                  (edge_colordkwidth = -1) then begin
+    edge_colordkwidth:= ainfo.svsedge_colordkwidth;
+   end;
+   if (ainfo.svsedge_colorhlwidth <> -1) and 
+                  (edge_colorhlwidth = -1) then begin
+    edge_colorhlwidth:= ainfo.svsedge_colorhlwidth;
+   end;
+   if (ainfo.svsedge_imagelist <> nil) and 
+                  (edge_imagelist = nil) then begin
+    edge_imagelist:= ainfo.svsedge_imagelist;
+   end;
+   if (ainfo.svsedge_imageoffset <> 0) and 
+                  (edge_imageoffset = -1) then begin
+    edge_imageoffset:= ainfo.svsedge_imageoffset;
+   end;
+
    if {(frame = nil) and} (ainfo.svframe <> nil) then begin
     createframe;
     setframetemplate(ainfo.svframe,frame);
@@ -2166,6 +2341,20 @@ end;
 
 { tskincontroller }
 
+procedure inittabsskininfo(var info: tabsskininfoty);
+begin
+ info.svcolor:= cl_default;
+ info.svcoloractive:= cl_default;
+ info.svshift:= defaulttabshift;
+ info.svsedge_level:= defaultedgelevel;
+ info.svsedge_colordkshadow:= cl_default;
+ info.svsedge_colorshadow:= cl_default;
+ info.svsedge_colorlight:= cl_default;
+ info.svsedge_colorhighlight:= cl_default;
+ info.svsedge_colordkwidth:= -1;
+ info.svsedge_colorhlwidth:= -1;
+end;
+
 constructor tskincontroller.create(aowner: tcomponent);
 begin
  fwidgetcolor.svcolor:= cl_default;
@@ -2193,6 +2382,11 @@ begin
  fslider.svsb_vert.svcolorglyph:= cl_default;
  fframebutton.svcolor:= cl_default;
  fframebutton.svcolorglyph:= cl_default;
+ inittabsskininfo(ftabbar.svtabhorz);
+ inittabsskininfo(ftabbar.svtabvert);
+ inittabsskininfo(ftabbar.svtabhorzopo);
+ inittabsskininfo(ftabbar.svtabvertopo);
+{
  ftabbar.svtabhorz.svcolor:= cl_default;
  ftabbar.svtabhorz.svcoloractive:= cl_default;
  ftabbar.svtabhorz.svshift:= defaulttabshift;
@@ -2205,6 +2399,7 @@ begin
  ftabbar.svtabvertopo.svcolor:= cl_default;
  ftabbar.svtabvertopo.svcoloractive:= cl_default;
  ftabbar.svtabvertopo.svshift:= defaulttabshift;
+}
  ftabpage.svcolortab:= cl_default;
  ftabpage.svcoloractivetab:= cl_default;
  inherited;
@@ -2254,6 +2449,30 @@ end;
 procedure tskincontroller.setcontainer_frame(const avalue: tframecomp);
 begin
  setlinkedvar(avalue,tmsecomponent(fcontainer.svwidget.svframe));
+end;
+
+procedure tskincontroller.settabbar_horz_tab_edge_imagelist(
+                                          const avalue: timagelist);
+begin
+ setlinkedvar(avalue,tmsecomponent(ftabbar.svtabhorz.svsedge_imagelist));
+end;
+
+procedure tskincontroller.settabbar_vert_tab_edge_imagelist(
+                                          const avalue: timagelist);
+begin
+ setlinkedvar(avalue,tmsecomponent(ftabbar.svtabvert.svsedge_imagelist));
+end;
+
+procedure tskincontroller.settabbar_horzopo_tab_edge_imagelist(
+                                          const avalue: timagelist);
+begin
+ setlinkedvar(avalue,tmsecomponent(ftabbar.svtabhorzopo.svsedge_imagelist));
+end;
+
+procedure tskincontroller.settabbar_vertopo_tab_edge_imagelist(
+                                          const avalue: timagelist);
+begin
+ setlinkedvar(avalue,tmsecomponent(ftabbar.svtabvertopo.svsedge_imagelist));
 end;
 
 procedure tskincontroller.setsb_vert_facebutton(const avalue: tfacecomp);
