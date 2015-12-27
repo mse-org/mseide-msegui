@@ -238,7 +238,9 @@ var
  bmp1: tmaskedbitmap;
 begin
  if fcopyitems <> nil then begin
-  bmp1:= tmaskedbitmap.create(bmk_rgb);
+  bmp1:= tmaskedbitmap.create(imagelist.kind);
+  bmp1.maskkind:= imagelist.maskkind;
+  bmp1.masked:= imagelist.masked;
   imagelist.beginupdate();
   insertid:= disp.focusedindex;
   copystart:= imagelist.count;
