@@ -773,7 +773,7 @@ begin
       if not (fso_flat in separatorframetemplate.optionsskin) then begin
        draw3dframe(canvas,
          inflaterect(deflaterect(ca.dim,separatorframetemplate.innerframe),1),
-                                                     -1,defaultframecolors,[]);
+                                              -1,defaultframecolors.edges,[]);
       end;
       separatorframetemplate.paintoverlayframe(canvas,ca.dim);
      end

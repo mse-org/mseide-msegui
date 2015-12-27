@@ -74,8 +74,9 @@ type
 
 procedure updateedgerect(var arect: rectty; const awidth: integer;
                                     const hiddenedges: edgesty);
-procedure draw3dframe(const canvas: tcanvas; const arect: rectty; level: integer;
-                      colorinfo: framecolorinfoty; const hiddenedges: edgesty);
+procedure draw3dframe(const canvas: tcanvas; const arect: rectty;
+                      level: integer; colorinfo: edgecolorpairinfoty; 
+                      const hiddenedges: edgesty);
 procedure drawfocusrect(const canvas: tcanvas; const arect: rectty);
 procedure drawtoolbutton(const canvas: tcanvas; var info: shapeinfoty);
 procedure drawbutton(const canvas: tcanvas; const info: shapeinfoty);
@@ -566,8 +567,9 @@ begin
  end;
 end;
 
-procedure draw3dframe(const canvas: tcanvas; const arect: rectty; level: integer;
-                       colorinfo: framecolorinfoty; const hiddenedges: edgesty);
+procedure draw3dframe(const canvas: tcanvas; 
+                const arect: rectty; level: integer;
+                 colorinfo: edgecolorpairinfoty; const hiddenedges: edgesty);
 //todo: optimize
 
 type
@@ -688,7 +690,7 @@ begin
  if (level = 0) or (arect.cx = 0) or (arect.cy = 0) then begin
   exit;
  end;
- with colorinfo.edges do begin
+ with colorinfo do begin
   if shadow.effectcolor = cl_default then begin
    shadow.effectcolor:= defaultframecolors.edges.shadow.effectcolor;
   end;
@@ -716,7 +718,7 @@ begin
   down:= false;
  end;
 
- with lightcorner,colorinfo.edges.light do begin
+ with lightcorner,colorinfo.light do begin
   int1:= abs(effectwidth);
   if int1 > level then begin
    col1:= effectcolor;
@@ -738,7 +740,7 @@ begin
    end;
   end;
  end;
- with shadowcorner,colorinfo.edges.shadow do begin
+ with shadowcorner,colorinfo.shadow do begin
   int1:= abs(effectwidth);
   if int1 > level then begin
    col1:= color;
@@ -779,7 +781,7 @@ begin
     po1:= @lightcorner;
     if (level > 2) and (hiddenedges * [edg_left,edg_top] = []) then begin
      canvas.drawline(pos,makepoint(pos.x+level-1,pos.y+level-1),
-                  colorinfo.edges.light.effectcolor);
+                  colorinfo.light.effectcolor);
     end;
    end;
    drawcorner(po1^,edg_left in hiddenedges,edg_top in hiddenedges,
@@ -787,7 +789,7 @@ begin
    if not down and (level > 2) and 
                           (hiddenedges * [edg_left,edg_top] = []) then begin
     canvas.drawline(pos,makepoint(pos.x+level-1,pos.y+level-1),
-                 colorinfo.edges.light.effectcolor);
+                 colorinfo.light.effectcolor);
    end;
   end;
   if hiddenedges * [edg_right,edg_bottom] <> [edg_right,edg_bottom] then begin
@@ -817,7 +819,7 @@ end;
 
 function drawbuttonframe(const canvas: tcanvas; const info: shapeinfoty;
         out clientrect: rectty; 
-                     const hiddenedge: buttonedgety = bedg_none): boolean; 
+                     const hiddenedges: edgesty = []): boolean; 
                                                //true if clientrect not empty
 var
  level: integer;
@@ -828,7 +830,7 @@ begin
  with canvas,info do begin
   if shs_separator in state then begin
    if not (shs_flat in state) then begin
-    draw3dframe(canvas,ca.dim,-1,defaultframecolors,[]);
+    draw3dframe(canvas,ca.dim,-1,defaultframecolors.edges,[]);
    end;
   end
   else begin
@@ -871,6 +873,7 @@ begin
      face.paint(canvas,clientrect);
     end;
    end;
+  {
    if (hiddenedge <> bedg_none) and not (shs_flat in state) then begin
     rect1:= clientrect;
     with rect1 do begin
@@ -891,12 +894,16 @@ begin
       end;
      end;
     end;
-    draw3dframe(canvas,rect1,level,defaultframecolors,[]);
+    draw3dframe(canvas,rect1,level,defaultframecolors.edges,[]);
    end
    else begin
-    draw3dframe(canvas,clientrect,level,defaultframecolors,[]);
+   }
+    draw3dframe(canvas,clientrect,level,defaultframecolors.edges,hiddenedges);
+ //   draw3dframe(canvas,clientrect,level,defaultframecolors.edges,[]);
+   {
    end;
    inflaterect1(clientrect,-abs(level));
+   }
   end;
   result:=(clientrect.cx > 0) and (clientrect.cy > 0);
  end;
@@ -1227,7 +1234,7 @@ begin
   end;
   if (info.checkboxframe = nil) or 
                not (fso_flat in info.checkboxframe.optionsskin) then begin
-   draw3dframe(canvas,rect2,-1,defaultframecolors,[]);
+   draw3dframe(canvas,rect2,-1,defaultframecolors.edges,[]);
   end;
   if pos = ip_left then begin
    inc(arect.x,menucheckboxwidth);
@@ -1321,7 +1328,7 @@ var
  pos1: imageposty;
  frame1: framety;
  pt1,pt2: pointty;
- edge1: buttonedgety;
+ edges1: edgesty;
  
 begin
  with canvas,info do begin
@@ -1339,27 +1346,27 @@ begin
     deflaterect1(ca.dim,frame1);
     frameskinoptionstoshapestate(frame,info);
    end;     
-   edge1:= bedg_none;
+//   edge1:= bedg_none;
 
-   if shs_active in state then begin
+//   if state * [shs_active,shs_clicked] = [shs_active] then begin
     if shs_opposite in state then begin
      if shs_vert in state then begin
-      edge1:= bedg_left;
+      edges1:= [edg_left];
      end
      else begin
-      edge1:= bedg_top;
+      edges1:= [edg_top];
      end;
     end
     else begin
      if shs_vert in state then begin
-      edge1:= bedg_right;
+      edges1:= [edg_right];
      end
      else begin
-      edge1:= bedg_bottom;
+      edges1:= [edg_bottom];
      end;
     end;
-   end;
-   if drawbuttonframe(canvas,info,rect1,edge1) then begin
+//   end;
+   if drawbuttonframe(canvas,info,rect1,edges1) then begin
     if ca.imagepos = ip_right then begin
      pos1:= ip_right;
     end
@@ -1385,6 +1392,7 @@ begin
     ca.dim:= rect3;
    end; 
   end;
+  {
   if not (shs_active in state) then begin
    if shs_opposite in state then begin
     color1:= defaultframecolors.edges.shadow.color;
@@ -1414,6 +1422,7 @@ begin
    end;
    canvas.drawline(pt1,pt2,color1);
   end;
+  }
  end;
 end;
 

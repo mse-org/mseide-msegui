@@ -4039,6 +4039,8 @@ begin
   colorframeactive:= cl_default;
   colorglyph:= cl_default;
   colorpattern:= cl_default;
+  initdefaultvalues(framecolors.edges);
+{
   with framecolors.edges do begin
    shadow.effectcolor:= cl_default;
    shadow.color:= cl_default;
@@ -4046,7 +4048,8 @@ begin
    light.color:= cl_default;
    light.effectcolor:= cl_default;
    light.effectwidth:= -1;
-  end; 
+  end;
+}
  end;
 end;
 
@@ -4264,7 +4267,7 @@ var
 begin
  rect1:= rect2;
  if afi.levelo <> 0 then begin
-  draw3dframe(canvas,rect1,afi.levelo,afi.framecolors,afi.hiddenedges);
+  draw3dframe(canvas,rect1,afi.levelo,afi.framecolors.edges,afi.hiddenedges);
   updateedgerect(rect1,abs(afi.levelo),afi.hiddenedges);
  end;
  if afi.framewidth > 0 then begin
@@ -4282,7 +4285,7 @@ begin
   updateedgerect(rect1,afi.framewidth,afi.hiddenedges);
  end;
  if afi.leveli <> 0 then begin
-  draw3dframe(canvas,rect1,afi.leveli,afi.framecolors,afi.hiddenedges);
+  draw3dframe(canvas,rect1,afi.leveli,afi.framecolors.edges,afi.hiddenedges);
  end;
  if (afi.frameimage_list <> nil) and 
                       afi.frameimage_list.bitmap.hasimage then begin

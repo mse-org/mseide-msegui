@@ -27,6 +27,7 @@ const
  defaultcaptiondist = 1;
  defaultimagedist = 0;
  defaulttabshift = -100; //-> 1
+ defaultedgelevel = -100; //-> -1
  defaultimagepos = ip_right;
  defaulttabpageskinoptions = defaultcontainerskinoptions;
  defaultoptionswidgettab = defaultoptionswidgetnofocus;
@@ -156,6 +157,8 @@ type
    fwidth: integer;
    fwidthmin: integer;
    fwidthmax: integer;
+   fedge_level: int32;
+   fedge: edgecolorpairinfoty;
    procedure setitems(const index: integer; const Value: ttab);
    function getitems(const index: integer): ttab; reintroduce;
    function getface: tface;
@@ -184,6 +187,13 @@ type
    procedure setwidth(const avalue: integer);
    procedure setwidthmin(const avalue: integer);
    procedure setwidthmax(const avalue: integer);
+   procedure setedge_level(const avalue: int32);
+   procedure setedge_colordkshadow(const avalue: colorty);
+   procedure setedge_colorshadow(const avalue: colorty);
+   procedure setedge_colorlight(const avalue: colorty);
+   procedure setedge_colorhighlight(const avalue: colorty);
+   procedure setedge_colordkwidth(const avalue: int32);
+   procedure setedge_colorhlwidth(const avalue: int32);
   protected
    fskinupdating: integer;
    ffont: ttabsfont;
@@ -253,6 +263,24 @@ type
                                                        default defaultimagedist;
    property shift: integer read fshift write setshift default defaulttabshift;
                        //defaulttabshift (-100) -> 1
+   property edge_level: int32 read fedge_level write setedge_level
+                                             default defaultedgelevel;
+                       //defaultedgelevel (-100) -> -1
+   property edge_colordkshadow: colorty read fedge.shadow.effectcolor
+                      write setedge_colordkshadow default cl_default;
+   property edge_colorshadow: colorty read fedge.shadow.color
+                      write setedge_colorshadow default cl_default;
+   property edge_colorlight: colorty read fedge.light.color
+                      write setedge_colorlight default cl_default;
+   property edge_colorhighlight: colorty read fedge.light.effectcolor
+                      write setedge_colorhighlight default cl_default;
+   property edge_colordkwidth: int32 read fedge.shadow.effectwidth
+                      write setedge_colordkwidth default -1;
+                                  //-1 = default
+   property edge_colorhlwidth: int32 read fedge.light.effectwidth
+                      write setedge_colorhlwidth default -1;
+                                  //-1 = default
+
    property frame: tframe read getframe write setframe;
    property face: tface read getface write setface;
    property faceactive: tface read getfaceactive write setfaceactive;
@@ -1662,6 +1690,8 @@ begin
  fimagedist:= defaultimagedist;
  fshift:= defaulttabshift;
  ftabshift:= 1;
+ fedge_level:= defaultedgelevel;
+ initdefaultvalues(fedge);
  inherited create(aowner,aclasstype);
 end;
 
@@ -1791,6 +1821,54 @@ begin
   fwidthmax:= avalue;
   changed;
  end;
+end;
+
+procedure ttabs.setedge_level(const avalue: int32);
+begin
+ if avalue <> fedge_level then begin
+  fedge_level:= avalue;
+  changed;
+ end;
+end;
+
+procedure ttabs.setedge_colordkshadow(const avalue: colorty);
+begin
+ if avalue <> fedge.shadow.effectcolor then begin
+  fedge.shadow.effectcolor:= avalue;
+  changed;
+ end;
+end;
+
+procedure ttabs.setedge_colorshadow(const avalue: colorty);
+begin
+ if avalue <> fedge.shadow.color then begin
+  fedge.shadow.color:= avalue;
+  changed;
+ end;
+end;
+
+procedure ttabs.setedge_colorlight(const avalue: colorty);
+begin
+ if avalue <> fedge.light.color then begin
+  fedge.light.color:= avalue;
+  changed;
+ end;
+end;
+
+procedure ttabs.setedge_colorhighlight(const avalue: colorty);
+begin
+ if avalue <> fedge.light.effectcolor then begin
+  fedge.light.effectcolor:= avalue;
+  changed;
+ end;
+end;
+
+procedure ttabs.setedge_colordkwidth(const avalue: int32);
+begin
+end;
+
+procedure ttabs.setedge_colorhlwidth(const avalue: int32);
+begin
 end;
 
 procedure ttabs.setcaptionframe_left(const avalue: integer);
@@ -2338,6 +2416,7 @@ begin
   movetab(sender.findex,0);
  end;
  sender.active:= true;
+ checklayout();
  include(flayoutinfo.cells[sender.index].state,shs_mouse);
 end;
 
@@ -2359,41 +2438,60 @@ var
  int1,int2,int3: integer;
  color1: colorty;
  rect1: rectty;
+ edgelevel1: int32;
+ hiddenedges1: edgesty;
+ actcell1: int32;
+ po1: pshapeinfoty;
 begin
  inherited;
  checklayout;
  with flayoutinfo do begin
-  int1:= high(cells);
-  rect1:= innerclientrect;
-//  canvas.intersectcliprect(rect1);
-  if shs_vert in options then begin
-   if shs_opposite in options then begin
-    int2:= rect1.x;
-    color1:= defaultframecolors.edges.shadow.color;
-   end
-   else begin
-    int2:= rect1.x+rect1.cx-1;
-    color1:= defaultframecolors.edges.light.effectcolor;
-   end;
-   int3:= rect1.y+rect1.cy-1;
-   canvas.drawline(makepoint(int2,rect1.y),makepoint(int2,int3),color1);
-  end
-  else begin
-   if shs_opposite in options then begin
-    int2:= rect1.y;
-    color1:= defaultframecolors.edges.shadow.color;
-   end
-   else begin
-    int2:= rect1.y+rect1.cy-1;
-    color1:= defaultframecolors.edges.light.effectcolor;
-   end;
-   int3:= rect1.x+rect1.cx-1;
-   canvas.drawline(makepoint(rect1.x,int2),makepoint(int3,int2),color1);
+//  int1:= high(cells);
+  edgelevel1:= tabs.fedge_level;
+  if edgelevel1 = defaultedgelevel then begin
+   edgelevel1:= -1;
   end;
+  actcell1:= -1;
+  po1:= @cells[firsttab];
   for int1:= firsttab to lasttab do begin
-   tabs.factcellindex:= int1;
-   cells[int1].frame:= tabs.fframe; //todo: move to layoutcalc
-   drawtab(canvas,cells[int1],@tabs.fcaptionframe);
+   with po1^ do begin
+    if int1 = activetab then begin
+     actcell1:= int1;
+    end
+    else begin
+     tabs.factcellindex:= int1;
+     frame:= tabs.fframe; //todo: move to layoutcalc
+     drawtab(canvas,po1^,@tabs.fcaptionframe);
+    end;
+   end;
+   inc(po1);
+  end;
+  if edgelevel1 <> 0 then begin
+//   rect1:= innerclientrect;
+   if shs_vert in options then begin
+    if shs_opposite in options then begin
+     hiddenedges1:= [edg_top,edg_bottom,edg_right];
+    end
+    else begin
+     hiddenedges1:= [edg_left,edg_top,edg_bottom];
+    end;
+   end
+   else begin
+    if shs_opposite in options then begin
+     hiddenedges1:= [edg_left,edg_bottom,edg_right];
+    end
+    else begin
+     hiddenedges1:= [edg_left,edg_top,edg_right];
+    end;
+   end;
+   draw3dframe(canvas,clientrect{innerclientrect},edgelevel1,
+                                 tabs.fedge,hiddenedges1);
+  end;
+  if actcell1 >= 0 then begin
+   tabs.factcellindex:= actcell1;
+   po1:= @cells[actcell1];
+   po1^.frame:= tabs.fframe; //todo: move to layoutcalc
+   drawtab(canvas,po1^,@tabs.fcaptionframe);
   end;
  end;
 end;

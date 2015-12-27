@@ -1357,6 +1357,9 @@ var
 procedure init;
 procedure deinit;
 
+procedure initdefaultvalues(var avalue: edgecolorinfoty);
+procedure initdefaultvalues(var avalue: edgecolorpairinfoty);
+
 procedure gdi_lock();
 procedure gdi_unlock();
 function gdi_locked(): boolean;
@@ -1426,7 +1429,20 @@ type
 
 var
  gdilockcount: integer;
- 
+
+procedure initdefaultvalues(var avalue: edgecolorinfoty);
+begin
+ avalue.color:= cl_default;
+ avalue.effectcolor:= cl_default;
+ avalue.effectwidth:= -1;
+end;
+
+procedure initdefaultvalues(var avalue: edgecolorpairinfoty);
+begin
+ initdefaultvalues(avalue.shadow);
+ initdefaultvalues(avalue.light);
+end;
+
 {$ifdef mse_debuggdisync}
 procedure gdilockerror(const text: msestring);
 var

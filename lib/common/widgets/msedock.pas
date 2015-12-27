@@ -4320,7 +4320,7 @@ begin
   case akind of
    dbr_close: begin
     if factgripsize >= 8 then begin
-     draw3dframe(acanvas,arect,i1,defaultframecolors,hiddenedges1);
+     draw3dframe(acanvas,arect,i1,defaultframecolors.edges,hiddenedges1);
      drawcross(inflaterect(arect,-2),acolorglyph);
     end
     else begin
@@ -4328,12 +4328,12 @@ begin
     end;
    end;
    dbr_maximize: begin
-    draw3dframe(acanvas,arect,i1,defaultframecolors,hiddenedges1);
+    draw3dframe(acanvas,arect,i1,defaultframecolors.edges,hiddenedges1);
     drawframe(inflaterect(arect,-2),-1,acolorglyph);
     drawvect(makepoint(x+2,y+3),gd_right,cx-5,acolorglyph);
    end;
    dbr_normalize: begin
-    draw3dframe(acanvas,arect,i1,defaultframecolors,hiddenedges1);
+    draw3dframe(acanvas,arect,i1,defaultframecolors.edges,hiddenedges1);
     rect2.cx:= cx * 2 div 3 - 3;
     rect2.cy:= rect2.cx;
     rect2.pos:= addpoint(pos,makepoint(2,2));
@@ -4343,7 +4343,7 @@ begin
     drawrect(rect2,acolorglyph);
    end;
    dbr_minimize: begin
-    draw3dframe(acanvas,arect,i1,defaultframecolors,hiddenedges1);
+    draw3dframe(acanvas,arect,i1,defaultframecolors.edges,hiddenedges1);
     acanvas.move(pos);
     case fgrip_pos of
      cp_left: begin
@@ -4367,11 +4367,11 @@ begin
    end;
    dbr_fixsize: begin
     i1:= calclevel(od_fixsize);
-    draw3dframe(acanvas,arect,i1,defaultframecolors,hiddenedges1);
+    draw3dframe(acanvas,arect,i1,defaultframecolors.edges,hiddenedges1);
     drawframe(inflaterect(arect,-2),-1,acolorglyph);
    end;
    dbr_float: begin
-    draw3dframe(acanvas,arect,i1,defaultframecolors,hiddenedges1);
+    draw3dframe(acanvas,arect,i1,defaultframecolors.edges,hiddenedges1);
     int1:= cx div 2;
     acanvas.move(pos);
     drawlines([mp(2,int1),mp(2,2),mp(int1,2)],false,acolorglyph);
@@ -4381,7 +4381,7 @@ begin
    dbr_top: begin
     int1:= x + cx div 2;
     i1:= calclevel(od_top);
-    draw3dframe(acanvas,arect,i1,defaultframecolors,hiddenedges1);
+    draw3dframe(acanvas,arect,i1,defaultframecolors.edges,hiddenedges1);
     drawlines([makepoint(int1-3,y+4),makepoint(int1,y+1),
                      makepoint(int1,y+cy-1)],false,acolorglyph);
     drawline(makepoint(int1+3,y+4),makepoint(int1,y+1),acolorglyph);
@@ -4389,20 +4389,20 @@ begin
    dbr_background: begin
     int1:= x + cx div 2;
     i1:= calclevel(od_background);
-    draw3dframe(acanvas,arect,i1,defaultframecolors,hiddenedges1);
+    draw3dframe(acanvas,arect,i1,defaultframecolors.edges,hiddenedges1);
     drawlines([makepoint(int1-3,y+cx-4),makepoint(int1,y+cy-1),
                                      makepoint(int1,y+1)],false,acolorglyph);
     drawline(makepoint(int1+3,y+cx-4),makepoint(int1,y+cy-1),acolorglyph);
    end;
    dbr_lock: begin
     i1:= calclevel(od_lock);
-    draw3dframe(acanvas,arect,i1,defaultframecolors,hiddenedges1);
+    draw3dframe(acanvas,arect,i1,defaultframecolors.edges,hiddenedges1);
     drawellipse1(makerect(arect.x+2,arect.y+2,arect.cx-5,arect.cy-5),
                                                                acolorglyph);
    end;
    dbr_nolock: begin
     i1:= calclevel(od_nolock);
-    draw3dframe(acanvas,arect,i1,defaultframecolors,hiddenedges1);
+    draw3dframe(acanvas,arect,i1,defaultframecolors.edges,hiddenedges1);
     fillellipse1(makerect(arect.x+2,arect.y+2,arect.cx-5,arect.cy-5),
                                                                acolorglyph);
     drawellipse1(makerect(arect.x+2,arect.y+2,arect.cx-5,arect.cy-5),
