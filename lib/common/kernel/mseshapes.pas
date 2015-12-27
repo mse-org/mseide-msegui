@@ -77,6 +77,9 @@ procedure updateedgerect(var arect: rectty; const awidth: integer;
 procedure draw3dframe(const canvas: tcanvas; const arect: rectty;
                       level: integer; colorinfo: edgecolorpairinfoty; 
                       const hiddenedges: edgesty);
+procedure drawimageframe(const canvas: tcanvas; const imagelist: timagelist;
+                         const imageoffs: int32; const dest: rectty;
+                                                const hiddenedges: edgesty);
 procedure drawfocusrect(const canvas: tcanvas; const arect: rectty);
 procedure drawtoolbutton(const canvas: tcanvas; var info: shapeinfoty);
 procedure drawbutton(const canvas: tcanvas; const info: shapeinfoty);
@@ -812,6 +815,69 @@ begin
  end;
 end;
 
+procedure drawimageframe(const canvas: tcanvas; const imagelist: timagelist;
+                         const imageoffs: int32; const dest: rectty;
+                                                const hiddenedges: edgesty);
+var
+ imagesize1: sizety;
+ rect1: rectty;
+begin
+ if (imageoffs >= -8) and (imagelist.bitmap.hasimage) then begin
+  imagesize1:= imagelist.size;
+  if not (edg_left in hiddenedges) then begin
+   imagelist.paint(canvas,imageoffs+0,dest.pos); //topleft
+   rect1.x:= dest.x;
+   rect1.y:= dest.y + imagesize1.cy;
+   rect1.cx:= imagesize1.cx;
+   rect1.cy:= dest.cy - imagesize1.cy -imagesize1.cy;
+   imagelist.paint(canvas,imageoffs+1,rect1,[al_stretchy]); //left
+   if edg_bottom in hiddenedges then begin
+    imagelist.paint(canvas,imageoffs+2,
+                                mp(rect1.x,rect1.y+rect1.cy)); //bottomleft
+   end;
+  end;
+  if not (edg_bottom in hiddenedges) then begin
+   rect1.x:= dest.x;
+   rect1.y:= dest.y + dest.cy - imagesize1.cy;
+   imagelist.paint(canvas,imageoffs+2,rect1.pos); //bottomleft
+   rect1.x:= dest.x + imagesize1.cx;
+   rect1.cy:= imagesize1.cy;
+   rect1.cx:= dest.cx - imagesize1.cx -imagesize1.cx;
+   imagelist.paint(canvas,imageoffs+3,rect1,[al_stretchx]); //bottom
+   if edg_right in hiddenedges then begin
+    imagelist.paint(canvas,imageoffs+4,
+                              mp(rect1.x+rect1.cx,rect1.y)); //bottomright
+   end;
+  end;
+  if not (edg_right in hiddenedges) then begin
+   rect1.x:= dest.x + dest.cx - imagesize1.cx;
+   rect1.y:= dest.y + dest.cy - imagesize1.cy;
+   imagelist.paint(canvas,imageoffs+4,rect1.pos); //bottomright
+   rect1.y:= dest.y + imagesize1.cy;
+   rect1.cx:= imagesize1.cx;
+   rect1.cy:= dest.cy - imagesize1.cy - imagesize1.cy;
+   imagelist.paint(canvas,imageoffs+5,rect1,[al_stretchy]); //right
+   if edg_top in hiddenedges then begin
+    imagelist.paint(canvas,imageoffs+6,mp(rect1.x,dest.y)); 
+                                                            //topright
+   end;
+  end;
+  if not (edg_top in hiddenedges) then begin
+   rect1.x:= dest.x + dest.cx - imagesize1.cx;
+   rect1.y:= dest.y;
+   imagelist.paint(canvas,imageoffs+6,rect1.pos); //topright
+   rect1.x:= dest.x + imagesize1.cx;
+   rect1.cy:= imagesize1.cy;
+   rect1.cx:= dest.cx - imagesize1.cx - imagesize1.cx;
+   imagelist.paint(canvas,imageoffs+7,rect1,[al_stretchx]); //top
+   if edg_left in hiddenedges then begin
+    imagelist.paint(canvas,imageoffs+0,mp(dest.x,dest.y));
+                                                            //topleft
+   end;
+  end;
+ end;
+end;
+
 procedure drawfocusrect(const canvas: tcanvas; const arect: rectty);
 begin
  canvas.drawxorframe(arect,-1,stockobjects.bitmaps[stb_block1]);
@@ -824,7 +890,7 @@ function drawbuttonframe(const canvas: tcanvas; const info: shapeinfoty;
 var
  level: integer;
  col1: colorty;
- rect1: rectty;
+// rect1: rectty;
 begin
  result:= false;
  with canvas,info do begin
@@ -1322,12 +1388,12 @@ end;
 procedure drawtab(const canvas: tcanvas; var info: shapeinfoty; 
                                    const innerframe: pframety = nil);
 var
- int1: integer;
- color1: colorty;
+// int1: integer;
+// color1: colorty;
  rect1,rect2,rect3: rectty;
  pos1: imageposty;
  frame1: framety;
- pt1,pt2: pointty;
+// pt1,pt2: pointty;
  edges1: edgesty;
  
 begin

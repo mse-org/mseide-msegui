@@ -159,6 +159,8 @@ type
    fwidthmax: integer;
    fedge_level: int32;
    fedge: edgecolorpairinfoty;
+   fedge_imagelist: timagelist;
+   fedge_imageoffset: int32;
    procedure setitems(const index: integer; const Value: ttab);
    function getitems(const index: integer): ttab; reintroduce;
    function getface: tface;
@@ -194,6 +196,8 @@ type
    procedure setedge_colorhighlight(const avalue: colorty);
    procedure setedge_colordkwidth(const avalue: int32);
    procedure setedge_colorhlwidth(const avalue: int32);
+   procedure setedge_imagelist(const avalue: timagelist);
+   procedure setedge_imageoffset(const avalue: int32);
   protected
    fskinupdating: integer;
    ffont: ttabsfont;
@@ -280,6 +284,11 @@ type
    property edge_colorhlwidth: int32 read fedge.light.effectwidth
                       write setedge_colorhlwidth default -1;
                                   //-1 = default
+   property edge_imagelist: timagelist read fedge_imagelist 
+                    write setedge_imagelist;
+                   //imagenr 0 -> startpoint, 1 -> edge, imagenr 2 -> endpoint
+   property edge_imageoffset: int32 read fedge_imageoffset
+                    write setedge_imageoffset default 0;
 
    property frame: tframe read getframe write setframe;
    property face: tface read getface write setface;
@@ -1827,7 +1836,7 @@ procedure ttabs.setedge_level(const avalue: int32);
 begin
  if avalue <> fedge_level then begin
   fedge_level:= avalue;
-  changed;
+  changed();
  end;
 end;
 
@@ -1835,7 +1844,7 @@ procedure ttabs.setedge_colordkshadow(const avalue: colorty);
 begin
  if avalue <> fedge.shadow.effectcolor then begin
   fedge.shadow.effectcolor:= avalue;
-  changed;
+  changed();
  end;
 end;
 
@@ -1843,7 +1852,7 @@ procedure ttabs.setedge_colorshadow(const avalue: colorty);
 begin
  if avalue <> fedge.shadow.color then begin
   fedge.shadow.color:= avalue;
-  changed;
+  changed();
  end;
 end;
 
@@ -1851,7 +1860,7 @@ procedure ttabs.setedge_colorlight(const avalue: colorty);
 begin
  if avalue <> fedge.light.color then begin
   fedge.light.color:= avalue;
-  changed;
+  changed();
  end;
 end;
 
@@ -1859,16 +1868,40 @@ procedure ttabs.setedge_colorhighlight(const avalue: colorty);
 begin
  if avalue <> fedge.light.effectcolor then begin
   fedge.light.effectcolor:= avalue;
-  changed;
+  changed();
  end;
 end;
 
 procedure ttabs.setedge_colordkwidth(const avalue: int32);
 begin
+ if avalue <> fedge.shadow.effectwidth then begin
+  fedge.shadow.effectwidth:= avalue;
+  changed();
+ end;
 end;
 
 procedure ttabs.setedge_colorhlwidth(const avalue: int32);
 begin
+ if avalue <> fedge.light.effectwidth then begin
+  fedge.light.effectwidth:= avalue;
+  changed();
+ end;
+end;
+
+procedure ttabs.setedge_imagelist(const avalue: timagelist);
+begin
+ if avalue <> fedge_imagelist then begin
+  tcustomtabbar(fowner).setlinkedvar(avalue,tmsecomponent(fedge_imagelist));
+  changed();
+ end;
+end;
+
+procedure ttabs.setedge_imageoffset(const avalue: int32);
+begin
+ if avalue <> fedge_imageoffset then begin
+  fedge_imageoffset:= avalue;
+  changed();
+ end;
 end;
 
 procedure ttabs.setcaptionframe_left(const avalue: integer);
@@ -2435,9 +2468,9 @@ end;
 
 procedure tcustomtabbar.dopaintforeground(const canvas: tcanvas);
 var
- int1,int2,int3: integer;
- color1: colorty;
- rect1: rectty;
+ int1{,int2,int3}: integer;
+// color1: colorty;
+// rect1: rectty;
  edgelevel1: int32;
  hiddenedges1: edgesty;
  actcell1: int32;
@@ -2466,8 +2499,26 @@ begin
    end;
    inc(po1);
   end;
-  if edgelevel1 <> 0 then begin
-//   rect1:= innerclientrect;
+  if (tabs.fedge_imagelist <> nil) or (edgelevel1 <> 0) then begin
+   if shs_vert in options then begin
+    if shs_opposite in options then begin
+     int1:= -4; //imagebase
+     hiddenedges1:= [edg_top,edg_bottom,edg_right];
+    end
+    else begin
+     int1:= 0;
+     hiddenedges1:= [edg_left,edg_top,edg_bottom];
+    end;
+   end
+   else begin
+    if shs_opposite in options then begin
+     int1:= -6;
+     hiddenedges1:= [edg_left,edg_bottom,edg_right];
+    end
+    else begin
+     int1:= -2;
+    end;
+   end;
    if shs_vert in options then begin
     if shs_opposite in options then begin
      hiddenedges1:= [edg_top,edg_bottom,edg_right];
@@ -2484,8 +2535,14 @@ begin
      hiddenedges1:= [edg_left,edg_top,edg_right];
     end;
    end;
-   draw3dframe(canvas,clientrect{innerclientrect},edgelevel1,
-                                 tabs.fedge,hiddenedges1);
+   if edgelevel1 <> 0 then begin
+    draw3dframe(canvas,clientrect,edgelevel1,
+                                  tabs.fedge,hiddenedges1);
+   end;
+   if tabs.fedge_imagelist <> nil then begin
+    drawimageframe(canvas,tabs.fedge_imagelist,tabs.fedge_imageoffset+int1,
+                   clientrect,hiddenedges1);
+   end;
   end;
   if actcell1 >= 0 then begin
    tabs.factcellindex:= actcell1;
