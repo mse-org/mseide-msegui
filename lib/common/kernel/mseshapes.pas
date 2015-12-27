@@ -688,24 +688,24 @@ begin
  if (level = 0) or (arect.cx = 0) or (arect.cy = 0) then begin
   exit;
  end;
- with colorinfo do begin
+ with colorinfo.edges do begin
   if shadow.effectcolor = cl_default then begin
-   shadow.effectcolor:= defaultframecolors.shadow.effectcolor;
+   shadow.effectcolor:= defaultframecolors.edges.shadow.effectcolor;
   end;
   if shadow.color = cl_default then begin
-   shadow.color:= defaultframecolors.shadow.color;
+   shadow.color:= defaultframecolors.edges.shadow.color;
   end;
   if light.color = cl_default then begin
-   light.color:= defaultframecolors.light.color;
+   light.color:= defaultframecolors.edges.light.color;
   end;
   if light.effectcolor = cl_default then begin
-   light.effectcolor:= defaultframecolors.light.effectcolor;
+   light.effectcolor:= defaultframecolors.edges.light.effectcolor;
   end;
   if shadow.effectwidth < 0 then begin
-   shadow.effectwidth:= defaultframecolors.shadow.effectwidth;
+   shadow.effectwidth:= defaultframecolors.edges.shadow.effectwidth;
   end;
   if light.effectwidth < 0 then begin
-   light.effectwidth:= defaultframecolors.light.effectwidth;
+   light.effectwidth:= defaultframecolors.edges.light.effectwidth;
   end;
  end;
  if level < 0 then begin
@@ -716,7 +716,7 @@ begin
   down:= false;
  end;
 
- with lightcorner,colorinfo.light do begin
+ with lightcorner,colorinfo.edges.light do begin
   int1:= abs(effectwidth);
   if int1 > level then begin
    col1:= effectcolor;
@@ -738,7 +738,7 @@ begin
    end;
   end;
  end;
- with shadowcorner,colorinfo.shadow do begin
+ with shadowcorner,colorinfo.edges.shadow do begin
   int1:= abs(effectwidth);
   if int1 > level then begin
    col1:= color;
@@ -779,7 +779,7 @@ begin
     po1:= @lightcorner;
     if (level > 2) and (hiddenedges * [edg_left,edg_top] = []) then begin
      canvas.drawline(pos,makepoint(pos.x+level-1,pos.y+level-1),
-                  colorinfo.light.effectcolor);
+                  colorinfo.edges.light.effectcolor);
     end;
    end;
    drawcorner(po1^,edg_left in hiddenedges,edg_top in hiddenedges,
@@ -787,7 +787,7 @@ begin
    if not down and (level > 2) and 
                           (hiddenedges * [edg_left,edg_top] = []) then begin
     canvas.drawline(pos,makepoint(pos.x+level-1,pos.y+level-1),
-                 colorinfo.light.effectcolor);
+                 colorinfo.edges.light.effectcolor);
    end;
   end;
   if hiddenedges * [edg_right,edg_bottom] <> [edg_right,edg_bottom] then begin
@@ -1387,10 +1387,10 @@ begin
   end;
   if not (shs_active in state) then begin
    if shs_opposite in state then begin
-    color1:= defaultframecolors.shadow.color;
+    color1:= defaultframecolors.edges.shadow.color;
    end
    else begin
-    color1:= defaultframecolors.light.effectcolor;
+    color1:= defaultframecolors.edges.light.effectcolor;
    end;
    if shs_vert in state then begin
     if shs_opposite in state then begin

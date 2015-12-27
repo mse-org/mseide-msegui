@@ -175,18 +175,18 @@ type
    procedure setcolors;
    procedure restorecolors;
   published
-   property colordkshadow: colorty read fframecolors.shadow.effectcolor
-              write fframecolors.shadow.effectcolor default cl_default;
-   property colorshadow: colorty read fframecolors.shadow.color
-              write fframecolors.shadow.color default cl_default;
-   property colorlight: colorty read fframecolors.light.color
-              write fframecolors.light.color default cl_default;
-   property colorhighlight: colorty read fframecolors.light.effectcolor
-              write fframecolors.light.effectcolor default cl_default;
-   property colordkwidth: integer read fframecolors.shadow.effectwidth
-              write fframecolors.shadow.effectwidth default -1;
-   property colorhlwidth: integer read fframecolors.light.effectwidth
-              write fframecolors.light.effectwidth default -1;
+   property colordkshadow: colorty read fframecolors.edges.shadow.effectcolor
+              write fframecolors.edges.shadow.effectcolor default cl_default;
+   property colorshadow: colorty read fframecolors.edges.shadow.color
+              write fframecolors.edges.shadow.color default cl_default;
+   property colorlight: colorty read fframecolors.edges.light.color
+              write fframecolors.edges.light.color default cl_default;
+   property colorhighlight: colorty read fframecolors.edges.light.effectcolor
+              write fframecolors.edges.light.effectcolor default cl_default;
+   property colordkwidth: integer read fframecolors.edges.shadow.effectwidth
+              write fframecolors.edges.shadow.effectwidth default -1;
+   property colorhlwidth: integer read fframecolors.edges.light.effectwidth
+              write fframecolors.edges.light.effectwidth default -1;
    property colorframe: colorty read fframecolors.frame
               write fframecolors.frame default cl_default;
    property edittext: colorty read feditfontcolors.text
@@ -1127,7 +1127,7 @@ end;
 
 constructor tskincolors.create;
 begin
- with fframecolors do begin
+ with fframecolors,edges do begin
   light.color:= cl_default;
   light.effectcolor:= cl_default;
   light.effectwidth:= -1;
@@ -1161,26 +1161,26 @@ begin
   end;
  end;
  fframecolorsbefore:= defaultframecolors;
- with fframecolors.light do begin
+ with fframecolors.edges.light do begin
   if color <> cl_default then begin
-   defaultframecolors.light.color:= color;
+   defaultframecolors.edges.light.color:= color;
   end;
   if effectcolor <> cl_default then begin
-   defaultframecolors.light.effectcolor:= effectcolor;
+   defaultframecolors.edges.light.effectcolor:= effectcolor;
   end;
   if effectwidth <> -1 then begin
-   defaultframecolors.light.effectwidth:= effectwidth;
+   defaultframecolors.edges.light.effectwidth:= effectwidth;
   end;
  end;
- with fframecolors.shadow do begin
+ with fframecolors.edges.shadow do begin
   if color <> cl_default then begin
-   defaultframecolors.shadow.color:= color;
+   defaultframecolors.edges.shadow.color:= color;
   end;
   if effectcolor <> cl_default then begin
-   defaultframecolors.shadow.effectcolor:= effectcolor;
+   defaultframecolors.edges.shadow.effectcolor:= effectcolor;
   end;
   if effectwidth <> -1 then begin
-   defaultframecolors.shadow.effectwidth:= effectwidth;
+   defaultframecolors.edges.shadow.effectwidth:= effectwidth;
   end;
  end;
  if fframecolors.frame <> cl_default then begin

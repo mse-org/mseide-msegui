@@ -2369,11 +2369,11 @@ begin
   if shs_vert in options then begin
    if shs_opposite in options then begin
     int2:= rect1.x;
-    color1:= defaultframecolors.shadow.color;
+    color1:= defaultframecolors.edges.shadow.color;
    end
    else begin
     int2:= rect1.x+rect1.cx-1;
-    color1:= defaultframecolors.light.effectcolor;
+    color1:= defaultframecolors.edges.light.effectcolor;
    end;
    int3:= rect1.y+rect1.cy-1;
    canvas.drawline(makepoint(int2,rect1.y),makepoint(int2,int3),color1);
@@ -2381,11 +2381,11 @@ begin
   else begin
    if shs_opposite in options then begin
     int2:= rect1.y;
-    color1:= defaultframecolors.shadow.color;
+    color1:= defaultframecolors.edges.shadow.color;
    end
    else begin
     int2:= rect1.y+rect1.cy-1;
-    color1:= defaultframecolors.light.effectcolor;
+    color1:= defaultframecolors.edges.light.effectcolor;
    end;
    int3:= rect1.x+rect1.cx-1;
    canvas.drawline(makepoint(rect1.x,int2),makepoint(int3,int2),color1);

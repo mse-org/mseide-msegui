@@ -638,22 +638,22 @@ type
                      write setcolorframeactive
                      stored iscolorframeactivestored default cl_default;
 
-   property colordkshadow: colorty read fi.framecolors.shadow.effectcolor
+   property colordkshadow: colorty read fi.framecolors.edges.shadow.effectcolor
               write setcolordkshadow
                      stored iscolordkshadowstored default cl_default;
-   property colorshadow: colorty read fi.framecolors.shadow.color
+   property colorshadow: colorty read fi.framecolors.edges.shadow.color
                      write setcolorshadow
                      stored iscolorshadowstored default cl_default;
-   property colorlight: colorty read fi.framecolors.light.color
+   property colorlight: colorty read fi.framecolors.edges.light.color
                      write setcolorlight
                      stored iscolorlightstored default cl_default;
-   property colorhighlight: colorty read fi.framecolors.light.effectcolor
+   property colorhighlight: colorty read fi.framecolors.edges.light.effectcolor
                      write setcolorhighlight
                      stored iscolorhighlightstored default cl_default;
-   property colordkwidth: integer read fi.framecolors.shadow.effectwidth
+   property colordkwidth: integer read fi.framecolors.edges.shadow.effectwidth
                      write setcolordkwidth
                      stored iscolordkwidthstored default -1;
-   property colorhlwidth: integer read fi.framecolors.light.effectwidth
+   property colorhlwidth: integer read fi.framecolors.edges.light.effectwidth
                      write setcolorhlwidth
                      stored iscolorhlwidthstored default -1;
    property hiddenedges: edgesty read fi.hiddenedges 
@@ -1050,17 +1050,21 @@ type
                         write setimagedistbottom default 0;
    property colorclient: colorty read fi.ba.colorclient write setcolorclient 
                                             default cl_transparent;
-   property colordkshadow: colorty read fi.ba.framecolors.shadow.effectcolor
+   property colordkshadow: colorty 
+                      read fi.ba.framecolors.edges.shadow.effectcolor
                       write setcolordkshadow default cl_default;
-   property colorshadow: colorty read fi.ba.framecolors.shadow.color
+   property colorshadow: colorty read fi.ba.framecolors.edges.shadow.color
                       write setcolorshadow default cl_default;
-   property colorlight: colorty read fi.ba.framecolors.light.color
+   property colorlight: colorty read fi.ba.framecolors.edges.light.color
                       write setcolorlight default cl_default;
-   property colorhighlight: colorty read fi.ba.framecolors.light.effectcolor
+   property colorhighlight: colorty 
+                      read fi.ba.framecolors.edges.light.effectcolor
                       write setcolorhighlight default cl_default;
-   property colordkwidth: integer read fi.ba.framecolors.shadow.effectwidth
+   property colordkwidth: integer 
+                      read fi.ba.framecolors.edges.shadow.effectwidth
                       write setcolordkwidth default -1;
-   property colorhlwidth: integer read fi.ba.framecolors.light.effectwidth
+   property colorhlwidth: integer 
+                      read fi.ba.framecolors.edges.light.effectwidth
                       write setcolorhlwidth default -1;
    property hiddenedges: edgesty read fi.ba.hiddenedges write sethiddenedges
                            default [];
@@ -4035,7 +4039,7 @@ begin
   colorframeactive:= cl_default;
   colorglyph:= cl_default;
   colorpattern:= cl_default;
-  with framecolors do begin
+  with framecolors.edges do begin
    shadow.effectcolor:= cl_default;
    shadow.color:= cl_default;
    shadow.effectwidth:= -1;
@@ -4995,8 +4999,8 @@ end;
 procedure tcustomframe.setcolordkshadow(const avalue: colorty);
 begin
  include(flocalprops,frl_colordkshadow);
- if fi.framecolors.shadow.effectcolor <> avalue then begin
-  fi.framecolors.shadow.effectcolor:= avalue;
+ if fi.framecolors.edges.shadow.effectcolor <> avalue then begin
+  fi.framecolors.edges.shadow.effectcolor:= avalue;
   fintf.invalidatewidget;
  end;
 end;
@@ -5004,8 +5008,8 @@ end;
 procedure tcustomframe.setcolorshadow(const avalue: colorty);
 begin
  include(flocalprops,frl_colorshadow);
- if fi.framecolors.shadow.color <> avalue then begin
-  fi.framecolors.shadow.color:= avalue;
+ if fi.framecolors.edges.shadow.color <> avalue then begin
+  fi.framecolors.edges.shadow.color:= avalue;
   fintf.invalidatewidget;
  end;
 end;
@@ -5013,8 +5017,8 @@ end;
 procedure tcustomframe.setcolorlight(const avalue: colorty);
 begin
  include(flocalprops,frl_colorlight);
- if fi.framecolors.light.color <> avalue then begin
-  fi.framecolors.light.color:= avalue;
+ if fi.framecolors.edges.light.color <> avalue then begin
+  fi.framecolors.edges.light.color:= avalue;
   fintf.invalidatewidget;
  end;
 end;
@@ -5022,8 +5026,8 @@ end;
 procedure tcustomframe.setcolorhighlight(const avalue: colorty);
 begin
  include(flocalprops,frl_colorhighlight);
- if fi.framecolors.light.effectcolor <> avalue then begin
-  fi.framecolors.light.effectcolor:= avalue;
+ if fi.framecolors.edges.light.effectcolor <> avalue then begin
+  fi.framecolors.edges.light.effectcolor:= avalue;
   fintf.invalidatewidget;
  end;
 end;
@@ -5031,8 +5035,8 @@ end;
 procedure tcustomframe.setcolordkwidth(const avalue: integer);
 begin
  include(flocalprops,frl_colordkwidth);
- if fi.framecolors.shadow.effectwidth <> avalue then begin
-  fi.framecolors.shadow.effectwidth:= avalue;
+ if fi.framecolors.edges.shadow.effectwidth <> avalue then begin
+  fi.framecolors.edges.shadow.effectwidth:= avalue;
   fintf.invalidatewidget;
  end;
 end;
@@ -5040,8 +5044,8 @@ end;
 procedure tcustomframe.setcolorhlwidth(const avalue: integer);
 begin
  include(flocalprops,frl_colorhlwidth);
- if fi.framecolors.light.effectwidth <> avalue then begin
-  fi.framecolors.light.effectwidth:= avalue;
+ if fi.framecolors.edges.light.effectwidth <> avalue then begin
+  fi.framecolors.edges.light.effectwidth:= avalue;
   fintf.invalidatewidget;
  end;
 end;
@@ -5091,24 +5095,24 @@ begin
   if not (frl_colorframeactive in flocalprops) then begin
    colorframeactive:= ainfo.ba.colorframeactive;
   end;
-  with framecolors do begin
+  with framecolors.edges do begin
    if not (frl_colordkshadow in flocalprops) then begin
-    shadow.effectcolor:= ainfo.ba.framecolors.shadow.effectcolor;
+    shadow.effectcolor:= ainfo.ba.framecolors.edges.shadow.effectcolor;
    end;
    if not (frl_colorshadow in flocalprops) then begin
-    shadow.color:= ainfo.ba.framecolors.shadow.color;
+    shadow.color:= ainfo.ba.framecolors.edges.shadow.color;
    end;
    if not (frl_colorlight in flocalprops) then begin
-    light.color:= ainfo.ba.framecolors.light.color;
+    light.color:= ainfo.ba.framecolors.edges.light.color;
    end;
    if not (frl_colorhighlight in flocalprops) then begin
-    light.effectcolor:= ainfo.ba.framecolors.light.effectcolor;
+    light.effectcolor:= ainfo.ba.framecolors.edges.light.effectcolor;
    end;
    if not (frl_colordkwidth in flocalprops) then begin
-    shadow.effectwidth:= ainfo.ba.framecolors.shadow.effectwidth;
+    shadow.effectwidth:= ainfo.ba.framecolors.edges.shadow.effectwidth;
    end;
    if not (frl_colorhlwidth in flocalprops) then begin
-    light.effectwidth:= ainfo.ba.framecolors.light.effectwidth;
+    light.effectwidth:= ainfo.ba.framecolors.edges.light.effectwidth;
    end;
   end;
   if not (frl_hiddenedges in flocalprops) then begin
@@ -5613,8 +5617,10 @@ begin
    levelo:= round(levelo * ascale);
    framewidth:= round(framewidth * ascale);
  //  extraspace:= round(extraspace * ascale);
-   framecolors.shadow.effectwidth:= round(framecolors.shadow.effectwidth*ascale);
-   framecolors.light.effectwidth:= round(framecolors.light.effectwidth*ascale);
+   framecolors.edges.shadow.effectwidth:= 
+                    round(framecolors.edges.shadow.effectwidth*ascale);
+   framecolors.edges.light.effectwidth:= 
+                    round(framecolors.edges.light.effectwidth*ascale);
    framei_left:= round(framei_left * ascale);
    framei_top:= round(framei_top * ascale);
    framei_right:= round(framei_right * ascale);
@@ -5714,37 +5720,37 @@ end;
 
 procedure tframetemplate.setcolordkshadow(const avalue: colorty);
 begin
- fi.ba.framecolors.shadow.effectcolor:= avalue;
+ fi.ba.framecolors.edges.shadow.effectcolor:= avalue;
  changed;
 end;
 
 procedure tframetemplate.setcolorshadow(const avalue: colorty);
 begin
- fi.ba.framecolors.shadow.color:= avalue;
+ fi.ba.framecolors.edges.shadow.color:= avalue;
  changed;
 end;
 
 procedure tframetemplate.setcolorlight(const avalue: colorty);
 begin
- fi.ba.framecolors.light.color:= avalue;
+ fi.ba.framecolors.edges.light.color:= avalue;
  changed;
 end;
 
 procedure tframetemplate.setcolorhighlight(const avalue: colorty);
 begin
- fi.ba.framecolors.light.effectcolor:= avalue;
+ fi.ba.framecolors.edges.light.effectcolor:= avalue;
  changed;
 end;
 
 procedure tframetemplate.setcolordkwidth(const avalue: integer);
 begin
- fi.ba.framecolors.shadow.effectwidth:= avalue;
+ fi.ba.framecolors.edges.shadow.effectwidth:= avalue;
  changed;
 end;
 
 procedure tframetemplate.setcolorhlwidth(const avalue: integer);
 begin
- fi.ba.framecolors.light.effectwidth:= avalue;
+ fi.ba.framecolors.edges.light.effectwidth:= avalue;
  changed;
 end;
 
