@@ -291,6 +291,7 @@ type
                     write setedge_imageoffset default 0;
 
    property frame: tframe read getframe write setframe;
+                  //frameimage_offset1 active for first tab
    property face: tface read getface write setface;
    property faceactive: tface read getfaceactive write setfaceactive;
    property hint: msestring read fhint write fhint;
@@ -2157,8 +2158,12 @@ end;
 
 function ttabs.getframestateflags: framestateflagsty;
 begin
- result:= shapestatetoframestate(factcellindex,
-                              tcustomtabbar(fowner).flayoutinfo.cells);
+ with tcustomtabbar(fowner).flayoutinfo do begin
+  result:= shapestatetoframestate(factcellindex,cells);
+  if factcellindex = firsttab then begin
+   include(result,fsf_offset1);
+  end;
+ end;
 end;
 
 procedure ttabs.dochange(const index: integer);
