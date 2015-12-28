@@ -166,6 +166,7 @@ type
   public
    procedure setvalue(const value: msestring); override;
    function getvalue: msestring; override;
+   procedure edit(); override;
  end;
     
 const   
@@ -718,12 +719,27 @@ function tindexlookupeditor.getvalue: msestring;
 var
  mstr1: msestring;
 begin
- mstr1:= getmsestringvalue(0);
+ mstr1:= getmsestringvalue(0,true);
  if mstr1 = '' then begin
   result:= '<empty>';
  end
  else begin
   result:= '<'+inttostrmse(length(mstr1))+'>';
+ end;
+end;
+
+procedure tindexlookupeditor.edit();
+var
+ mstr1: msestring;
+ imagelist: timagelist;
+begin
+ mstr1:= getmsestringvalue(0,true);
+ imagelist:= nil;
+ if fcomponent is timagelist then begin
+  pointer(imagelist):= fcomponent;
+ end;
+ if editlookupindex(mstr1,imagelist) then begin
+  setmsestringvalue(mstr1,true);
  end;
 end;
 

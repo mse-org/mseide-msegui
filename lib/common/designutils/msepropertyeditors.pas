@@ -73,8 +73,10 @@ type
   procedure setcurrencyvalue(const value: currency);
   function getstringvalue(const index: integer = 0): string;
   procedure setstringvalue(const value: string);
-  function getmsestringvalue(const index: integer = 0): msestring;
-  procedure setmsestringvalue(const value: msestring);
+  function getmsestringvalue(const index: integer = 0;
+                           const raw: boolean = false): msestring;
+  procedure setmsestringvalue(const value: msestring;
+                           const raw: boolean = false);
   function getvariantvalue(const index: integer = 0): variant;
   procedure setvariantvalue(const value: variant);
   function getparenteditor: tpropertyeditor;
@@ -134,8 +136,10 @@ type
    procedure setcurrencyvalue(const value: currency); virtual;
    function getstringvalue(const index: integer = 0): string; virtual;
    procedure setstringvalue(const value: string); virtual;
-   function getmsestringvalue(const index: integer = 0): msestring; virtual;
-   procedure setmsestringvalue(const value: msestring); virtual;
+   function getmsestringvalue(const index: integer = 0;
+                            const raw: boolean = false): msestring; virtual;
+   procedure setmsestringvalue(const value: msestring;
+                                       const raw: boolean = false); virtual;
    function getvariantvalue(const index: integer = 0): variant; virtual;
    procedure setvariantvalue(const value: variant); virtual;
    
@@ -658,8 +662,10 @@ type
    procedure setfloatvalue(const value: extended); override;
    function getstringvalue(const index: integer = 0): string; override;
    procedure setstringvalue(const value: string); override;
-   function getmsestringvalue(const index: integer = 0): msestring; override;
-   procedure setmsestringvalue(const value: msestring); override;
+   function getmsestringvalue(const index: integer = 0;
+                           const raw: boolean = false): msestring; override;
+   procedure setmsestringvalue(const value: msestring;
+                           const raw: boolean = false); override;
    
    function getselectedpropinstances: objectarty; virtual;
 
@@ -1960,15 +1966,20 @@ begin
 end;
 
 function tpropertyeditor.getmsestringvalue(
-  const index: integer): msestring;
+  const index: integer = 0; const raw: boolean = false): msestring;
 
 begin
  if fremote <> nil then begin
-  result:= fremote.getmsestringvalue(index);
+  result:= fremote.getmsestringvalue(index,raw);
  end
  else begin
   with fprops[index] do begin
-   result:= decodemsestring(getmsestringprop(instance,propinfo));
+   if raw then begin
+    result:= getmsestringprop(instance,propinfo);
+   end
+   else begin
+    result:= decodemsestring(getmsestringprop(instance,propinfo));
+   end;
 //  {$ifdef mse_unicodestring}
 //   result:= decodemsestring(GetunicodestrProp(instance,propinfo));     
 //  {$else}
@@ -1978,7 +1989,8 @@ begin
  end;
 end;
 
-procedure tpropertyeditor.setmsestringvalue(const value: msestring);
+procedure tpropertyeditor.setmsestringvalue(const value: msestring;
+                                                const raw: boolean=false);
 var
  mstr1: msestring;
  int1: integer;
@@ -1988,7 +2000,12 @@ begin
   fremote.setmsestringvalue(value);
  end
  else begin
-  mstr1:= encodemsestring(value);
+  if raw then begin
+   mstr1:= value;
+  end
+  else begin
+   mstr1:= encodemsestring(value);
+  end;
   ar1:= queryselectedpropinstances;
   if ar1 = nil then begin
    for int1:= 0 to high(fprops) do begin
@@ -3707,14 +3724,16 @@ begin
  modified;
 end;
 
-function tarrayelementeditor.getmsestringvalue(const index: integer = 0): msestring;
+function tarrayelementeditor.getmsestringvalue(const index: integer = 0;
+                                       const raw: boolean = false): msestring;
 begin
  with fprops[index] do begin
   result:= tmsestringarrayprop(getpointerprop1(instance,propinfo))[findex];
  end;
 end;
 
-procedure tarrayelementeditor.setmsestringvalue(const value: msestring);
+procedure tarrayelementeditor.setmsestringvalue(const value: msestring;
+                                                const raw: boolean = false);
 var
  int1: integer;
 begin
