@@ -26,7 +26,7 @@ implementation
 
 uses
  classes,mclasses,msethreadcomp,msebitmap,msetimer,msestatfile,mseact,
- mseactions,mseshapes,
+ mseactions,mseshapes,msewidgets,mseindexlookupeditor,
  msedesignintf,msemenus,msegui,msepipestream,sysutils,
  msegraphutils,regkernel_bmp,msegraphics,msestrings,msepostscriptprinter,
  mseprinter,msetypes,msedatalist,msedatamodules,mseclasses,formdesigner,
@@ -161,7 +161,13 @@ type
   protected
    function geteditorclass: propertyeditorclassty; override;
  end;
-   
+
+ tindexlookupeditor = class(tmsestringpropertyeditor)
+  public
+   procedure setvalue(const value: msestring); override;
+   function getvalue: msestring; override;
+ end;
+    
 const   
  datamoduleintf: designmoduleintfty = 
   (createfunc: {$ifdef FPC}@{$endif}createmsedatamodule;
@@ -221,6 +227,11 @@ begin
                                     tfacetemplatefadeopacoloreditor);
  registerpropertyeditor(typeinfo(trealarrayprop),tfacetemplate,'fade_opapos',
                                     tfacetemplatefadeopaposeditor);
+ 
+ registerpropertyeditor(typeinfo(msestring),timagelist,'indexlookup',
+                                                       tindexlookupeditor);
+ registerpropertyeditor(typeinfo(msestring),tfacelist,'indexlookup',
+                                                       tindexlookupeditor);
 
  registerpropertyeditor(typeinfo(tsumdownarrayprop),nil,'',
                                     tlevelarraypropertyeditor);
@@ -688,6 +699,32 @@ function tskincolorarraypropertyeditor.itemgetvalue(
 begin
  result:= msestring('<'+colortostring(tskincolor(
             tarrayelementeditor1(sender).getpointervalue(0)).color) + '>');
+end;
+
+{ tindexlookupeditor }
+
+procedure tindexlookupeditor.setvalue(const value: msestring);
+begin
+ if (value = '') and 
+      askyesno('Do you want to delete the lookup list?') then begin
+  inherited setvalue('');
+ end
+ else begin
+  inherited setvalue(getmsestringvalue(0));
+ end;
+end;
+
+function tindexlookupeditor.getvalue: msestring;
+var
+ mstr1: msestring;
+begin
+ mstr1:= getmsestringvalue(0);
+ if mstr1 = '' then begin
+  result:= '<empty>';
+ end
+ else begin
+  result:= '<'+inttostrmse(length(mstr1))+'>';
+ end;
 end;
 
 initialization
