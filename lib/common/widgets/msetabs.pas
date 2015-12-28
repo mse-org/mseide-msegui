@@ -2526,7 +2526,8 @@ procedure tcustomtabbar.dopaintforeground(const canvas: tcanvas);
 var
  int1{,int2,int3}: integer;
 // color1: colorty;
-// rect1: rectty;
+ rect1: rectty;
+ size1: sizety;
  edgelevel1: int32;
  hiddenedges1: edgesty;
  actcell1: int32;
@@ -2575,7 +2576,11 @@ begin
      int1:= -2;
     end;
    end;
+   rect1:= paintsizerect;
+   size1:= tcustomstepframe1(fframe).fdim.size; //todo: button positions
    if shs_vert in options then begin
+    rect1.y:= rect1.y - size1.cy;
+    rect1.cy:= rect1.cy + size1.cy;
     if shs_opposite in options then begin
      hiddenedges1:= [edg_top,edg_bottom,edg_right];
     end
@@ -2584,6 +2589,7 @@ begin
     end;
    end
    else begin
+    rect1.cx:= rect1.cx + size1.cx;
     if shs_opposite in options then begin
      hiddenedges1:= [edg_left,edg_bottom,edg_right];
     end
@@ -2592,12 +2598,12 @@ begin
     end;
    end;
    if edgelevel1 <> 0 then begin
-    draw3dframe(canvas,clientrect,edgelevel1,
+    draw3dframe(canvas,rect1,edgelevel1,
                                   tabs.fedge,hiddenedges1);
    end;
    if tabs.fedge_imagelist <> nil then begin
     drawimageframe(canvas,tabs.fedge_imagelist,tabs.fedge_imageoffset+int1,
-                   clientrect,hiddenedges1);
+                   rect1,hiddenedges1);
    end;
   end;
   if actcell1 >= 0 then begin
