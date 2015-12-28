@@ -1283,6 +1283,7 @@ type
  tfacelist = class(tmsecomponent,iface)
   private
    flist: tfacearrayprop;
+   findexlookup: msestring;
    procedure setlist(const avalue: tfacearrayprop);
     //iface
    procedure invalidatewidget();
@@ -1292,15 +1293,19 @@ type
    function getclientrect: rectty;
    function getcomponentstate: tcomponentstate;
    procedure widgetregioninvalid;
+   procedure setindexlookup(const avalue: msestring);
   protected
    procedure objectevent(const sender: tobject;
                              const event: objecteventty); override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   function lookup(const aindex: int32): int32;
   published
    property list: tfacearrayprop read flist write setlist;
- end;
+   property indexlookup: msestring read findexlookup write setindexlookup;
+                    //array of int16
+end;
  
  tfacetemplate = class(tpersistenttemplate)
   private
@@ -4239,9 +4244,10 @@ begin
   canvas.fillrect(rect1,fi.colorclient);
  end;
  if fi.frameface_list <> nil then begin
-  faceoffs:= calcframestateoffs(fintf.getframestateflags,
-                                  frameoffsetsty(fi.frameface_offsets));
-  if (faceoffs >= 0) and (faceoffs < fi.frameface_list.list.count) then begin
+  faceoffs:= fi.frameface_list.lookup(
+           calcframestateoffs(fintf.getframestateflags,
+                                  frameoffsetsty(fi.frameface_offsets)));
+  if (faceoffs >= 0) {and (faceoffs < fi.frameface_list.list.count)} then begin
    with fi.frameface_list.list[faceoffs] do begin
     if not (fao_overlay in options) then begin
      paint(canvas,rect1);
@@ -4376,9 +4382,10 @@ var
  faceoffs: int32;
 begin
  if fi.frameface_list <> nil then begin
-  faceoffs:= calcframestateoffs(fintf.getframestateflags,
-                                  frameoffsetsty(fi.frameface_offsets));
-  if (faceoffs >= 0) and (faceoffs < fi.frameface_list.list.count) then begin
+  faceoffs:= fi.frameface_list.lookup(
+         calcframestateoffs(fintf.getframestateflags,
+                                  frameoffsetsty(fi.frameface_offsets)));
+  if (faceoffs >= 0) {and (faceoffs < fi.frameface_list.list.count)} then begin
    with fi.frameface_list.list[faceoffs] do begin
     if fao_overlay in options then begin
      paint(canvas,deflaterect(arect,fpaintframe));
@@ -5986,8 +5993,9 @@ begin
   acanvas.fillrect(arect,fi.ba.colorclient);
  end;
  if fi.ba.frameface_list <> nil then begin
-  int1:= calcframestateoffs(astate,frameoffsetsty(fi.ba.frameface_offsets));
-  if (int1 >= 0) and (int1 < fi.ba.frameface_list.list.count) then begin
+  int1:= fi.ba.frameface_list.lookup(
+          calcframestateoffs(astate,frameoffsetsty(fi.ba.frameface_offsets)));
+  if (int1 >= 0){ and (int1 < fi.ba.frameface_list.list.count)} then begin
    fi.ba.frameface_list.list[int1].paint(acanvas,arect);
   end;
  end;
@@ -6525,32 +6533,32 @@ var
    end;
   end;
   if fi.frameimage_list <> nil then begin
-   fi.frameimage_list.paint(canvas,fi.frameimage_offset,arect.pos);
-   fi.frameimage_list.paint(canvas,fi.frameimage_offset+1,
-   makerect(arect.x,
-            arect.y+fi.frameimage_list.height,
-            fi.frameimage_list.width,
-            arect.cy-2*fi.frameimage_list.height),[al_stretchy]);
-   fi.frameimage_list.paint(canvas,fi.frameimage_offset+2,arect,[al_bottom]);
-   fi.frameimage_list.paint(canvas,fi.frameimage_offset+3,
-   makerect(arect.x+fi.frameimage_list.width,
-            arect.y+arect.cy-fi.frameimage_list.height,
-            arect.cx-2*fi.frameimage_list.width,
-            fi.frameimage_list.height),[al_stretchx]);
-   fi.frameimage_list.paint(canvas,fi.frameimage_offset+4,arect,
+   fi.frameimage_list.paintlookup(canvas,fi.frameimage_offset,arect.pos);
+   fi.frameimage_list.paintlookup(canvas,fi.frameimage_offset+1,
+     makerect(arect.x,
+              arect.y+fi.frameimage_list.height,
+              fi.frameimage_list.width,
+              arect.cy-2*fi.frameimage_list.height),[al_stretchy]);
+   fi.frameimage_list.paintlookup(canvas,fi.frameimage_offset+2,arect,[al_bottom]);
+   fi.frameimage_list.paintlookup(canvas,fi.frameimage_offset+3,
+     makerect(arect.x+fi.frameimage_list.width,
+              arect.y+arect.cy-fi.frameimage_list.height,
+              arect.cx-2*fi.frameimage_list.width,
+              fi.frameimage_list.height),[al_stretchx]);
+   fi.frameimage_list.paintlookup(canvas,fi.frameimage_offset+4,arect,
                                                 [al_bottom,al_right]);
-   fi.frameimage_list.paint(canvas,fi.frameimage_offset+5,
-   makerect(arect.x+arect.cx-fi.frameimage_list.width,
-            arect.y+fi.frameimage_list.height,
-            fi.frameimage_list.width,
-            arect.cy-2*fi.frameimage_list.height),[al_stretchy]);
-   fi.frameimage_list.paint(canvas,fi.frameimage_offset+6,arect,[al_right]);
-   fi.frameimage_list.paint(canvas,fi.frameimage_offset+7,
-   makerect(arect.x+fi.frameimage_list.width,arect.y,
-            arect.cx-2*fi.frameimage_list.width,
-            fi.frameimage_list.height),[al_stretchx]);
+   fi.frameimage_list.paintlookup(canvas,fi.frameimage_offset+5,
+     makerect(arect.x+arect.cx-fi.frameimage_list.width,
+              arect.y+fi.frameimage_list.height,
+              fi.frameimage_list.width,
+              arect.cy-2*fi.frameimage_list.height),[al_stretchy]);
+   fi.frameimage_list.paintlookup(canvas,fi.frameimage_offset+6,arect,[al_right]);
+   fi.frameimage_list.paintlookup(canvas,fi.frameimage_offset+7,
+     makerect(arect.x+fi.frameimage_list.width,arect.y,
+              arect.cx-2*fi.frameimage_list.width,
+              fi.frameimage_list.height),[al_stretchx]);
   end;
- end;
+ end; //paintimage
 
 begin
  rect:= deflaterect(arect,fi.framei);
@@ -7158,6 +7166,17 @@ begin
  flist.free;
 end;
 
+function tfacelist.lookup(const aindex: int32): int32;
+begin
+ result:= aindex;
+ if findexlookup <> '' then begin
+  result:= -1;
+  if (aindex >= 0) and (aindex < length(findexlookup)) then begin
+   result:= pint16(findexlookup)[aindex];
+  end;
+ end;
+end;
+
 procedure tfacelist.setlist(const avalue: tfacearrayprop);
 begin
  flist.assign(avalue);
@@ -7192,6 +7211,11 @@ end;
 procedure tfacelist.widgetregioninvalid;
 begin
  //dummy
+end;
+
+procedure tfacelist.setindexlookup(const avalue: msestring);
+begin
+ findexlookup:= avalue;
 end;
 
 procedure tfacelist.objectevent(const sender: tobject;

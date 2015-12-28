@@ -825,53 +825,53 @@ begin
  if (imageoffs >= -8) and (imagelist.bitmap.hasimage) then begin
   imagesize1:= imagelist.size;
   if not (edg_left in hiddenedges) then begin
-   imagelist.paint(canvas,imageoffs+0,dest.pos); //topleft
+   imagelist.paintlookup(canvas,imageoffs+0,dest.pos); //topleft
    rect1.x:= dest.x;
    rect1.y:= dest.y + imagesize1.cy;
    rect1.cx:= imagesize1.cx;
    rect1.cy:= dest.cy - imagesize1.cy -imagesize1.cy;
-   imagelist.paint(canvas,imageoffs+1,rect1,[al_stretchy]); //left
+   imagelist.paintlookup(canvas,imageoffs+1,rect1,[al_stretchy]); //left
    if edg_bottom in hiddenedges then begin
-    imagelist.paint(canvas,imageoffs+2,
+    imagelist.paintlookup(canvas,imageoffs+2,
                                 mp(rect1.x,rect1.y+rect1.cy)); //bottomleft
    end;
   end;
   if not (edg_bottom in hiddenedges) then begin
    rect1.x:= dest.x;
    rect1.y:= dest.y + dest.cy - imagesize1.cy;
-   imagelist.paint(canvas,imageoffs+2,rect1.pos); //bottomleft
+   imagelist.paintlookup(canvas,imageoffs+2,rect1.pos); //bottomleft
    rect1.x:= dest.x + imagesize1.cx;
    rect1.cy:= imagesize1.cy;
    rect1.cx:= dest.cx - imagesize1.cx -imagesize1.cx;
-   imagelist.paint(canvas,imageoffs+3,rect1,[al_stretchx]); //bottom
+   imagelist.paintlookup(canvas,imageoffs+3,rect1,[al_stretchx]); //bottom
    if edg_right in hiddenedges then begin
-    imagelist.paint(canvas,imageoffs+4,
+    imagelist.paintlookup(canvas,imageoffs+4,
                               mp(rect1.x+rect1.cx,rect1.y)); //bottomright
    end;
   end;
   if not (edg_right in hiddenedges) then begin
    rect1.x:= dest.x + dest.cx - imagesize1.cx;
    rect1.y:= dest.y + dest.cy - imagesize1.cy;
-   imagelist.paint(canvas,imageoffs+4,rect1.pos); //bottomright
+   imagelist.paintlookup(canvas,imageoffs+4,rect1.pos); //bottomright
    rect1.y:= dest.y + imagesize1.cy;
    rect1.cx:= imagesize1.cx;
    rect1.cy:= dest.cy - imagesize1.cy - imagesize1.cy;
-   imagelist.paint(canvas,imageoffs+5,rect1,[al_stretchy]); //right
+   imagelist.paintlookup(canvas,imageoffs+5,rect1,[al_stretchy]); //right
    if edg_top in hiddenedges then begin
-    imagelist.paint(canvas,imageoffs+6,mp(rect1.x,dest.y)); 
+    imagelist.paintlookup(canvas,imageoffs+6,mp(rect1.x,dest.y)); 
                                                             //topright
    end;
   end;
   if not (edg_top in hiddenedges) then begin
    rect1.x:= dest.x + dest.cx - imagesize1.cx;
    rect1.y:= dest.y;
-   imagelist.paint(canvas,imageoffs+6,rect1.pos); //topright
+   imagelist.paintlookup(canvas,imageoffs+6,rect1.pos); //topright
    rect1.x:= dest.x + imagesize1.cx;
    rect1.cy:= imagesize1.cy;
    rect1.cx:= dest.cx - imagesize1.cx - imagesize1.cx;
-   imagelist.paint(canvas,imageoffs+7,rect1,[al_stretchx]); //top
+   imagelist.paintlookup(canvas,imageoffs+7,rect1,[al_stretchx]); //top
    if edg_left in hiddenedges then begin
-    imagelist.paint(canvas,imageoffs+0,mp(dest.x,dest.y));
+    imagelist.paintlookup(canvas,imageoffs+0,mp(dest.x,dest.y));
                                                             //topleft
    end;
   end;

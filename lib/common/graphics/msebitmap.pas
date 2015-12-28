@@ -391,6 +391,7 @@ type
    fupdating: integer;
    fonchange: notifyeventty;
 //   fkind: bitmapkindty;
+   findexlookup: msestring;
    procedure setsize(const avalue: sizety);
 //   function getmonochrome: boolean;
 //   procedure setmonochrome(const Value: boolean);
@@ -416,6 +417,7 @@ type
    procedure readmonochrome(reader: treader);
    function getoptions: bitmapoptionsty;
    procedure setoptions(const avalue: bitmapoptionsty);
+   procedure setindexlookup(const avalue: msestring);
   protected
    function indextoorg(index: integer): pointty;
    procedure change;
@@ -458,6 +460,26 @@ type
                    const acolorbackground: colorty = cl_default;
                    const aopacity: colorty = cl_default
             ); overload;
+   procedure paintlookup(const acanvas: tcanvas; const index: integer;
+                   const dest: pointty; const acolor: colorty = cl_default;
+                   const acolorbackground: colorty = cl_default;
+                   const aopacity: colorty = cl_default
+            ); overload;
+   procedure paintlookup(const acanvas: tcanvas; const index: integer;
+                   const dest: rectty; const alignment: alignmentsty = [];
+                   const acolor: colorty = cl_default;
+                   const acolorbackground: colorty = cl_default;
+                   const aopacity: colorty = cl_default
+            ); overload;
+   procedure paintlookup(const acanvas: tcanvas; const index: integer;
+                   const dest: rectty; source: rectty;
+                   const alignment: alignmentsty = [];
+                   const acolor: colorty = cl_default;
+                   const acolorbackground: colorty = cl_default;
+                   const aopacity: colorty = cl_default
+            ); overload;
+   function lookup(const aindex: int32): int32;
+
    procedure assign(sender: tpersistent); override;
 
    property size: sizety read fsize write setsize;
@@ -485,6 +507,8 @@ type
                          write settransparentcolor default cl_none;
    property count: integer read fcount write setcount default 0;
                  //last!
+   property indexlookup: msestring read findexlookup write setindexlookup;
+                    //array of int16
    property onchange: notifyeventty read fonchange write fonchange;
  end;
 
@@ -2873,6 +2897,33 @@ begin
  end;
 end;
 
+procedure timagelist.paintlookup(const acanvas: tcanvas; const index: integer;
+               const dest: pointty; const acolor: colorty = cl_default;
+               const acolorbackground: colorty = cl_default;
+               const aopacity: colorty = cl_default             );
+begin
+ paint(acanvas,lookup(index),dest,acolor,acolorbackground,aopacity);
+end;
+
+procedure timagelist.paintlookup(const acanvas: tcanvas; const index: integer;
+               const dest: rectty; const alignment: alignmentsty = [];
+               const acolor: colorty = cl_default;
+               const acolorbackground: colorty = cl_default;
+               const aopacity: colorty = cl_default             );
+begin
+ paint(acanvas,lookup(index),dest,alignment,acolor,acolorbackground,aopacity);
+end;
+
+procedure timagelist.paintlookup(const acanvas: tcanvas; const index: integer;
+               const dest: rectty; source: rectty;
+               const alignment: alignmentsty = [];
+               const acolor: colorty = cl_default;
+               const acolorbackground: colorty = cl_default;
+               const aopacity: colorty = cl_default             );
+begin
+ paint(acanvas,lookup(index),dest,alignment,acolor,acolorbackground,aopacity);
+end;
+
 procedure timagelist.paint(const acanvas: tcanvas; const index: integer;
                    const dest: pointty; const acolor: colorty = cl_default;
                    const acolorbackground: colorty = cl_default;
@@ -3261,6 +3312,17 @@ begin
  filer.ancestor:= ancestorbefore;
 end;
 
+function timagelist.lookup(const aindex: int32): int32;
+begin
+ result:= aindex;
+ if findexlookup <> '' then begin
+  result:= -1;
+  if (aindex >= 0) and (aindex < length(findexlookup)) then begin
+   result:= pint16(findexlookup)[aindex];
+  end;
+ end;
+end;
+
 procedure timagelist.assign(sender: tpersistent);
 begin
  if sender is timagelist then begin
@@ -3307,6 +3369,12 @@ end;
 procedure timagelist.setoptions(const avalue: bitmapoptionsty);
 begin
  fbitmap.options:= avalue;
+end;
+
+procedure timagelist.setindexlookup(const avalue: msestring);
+begin
+ findexlookup:= avalue;
+ change;
 end;
 
 { tcenteredbitmap }
