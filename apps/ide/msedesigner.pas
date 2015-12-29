@@ -4926,7 +4926,7 @@ var
  mstr2: filenamety;
 begin
  if (backupcount > 0) and not backupcreated and 
-      issamefilename(newname,origname) then begin
+      issamefilename(newname,origname) and findfile(origname) then begin
   backupcreated:= true;
   mstr1:= origname + backupext;
   for int1:= backupcount-1 downto 2 do begin

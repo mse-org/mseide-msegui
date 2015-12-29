@@ -347,7 +347,7 @@ type
   published
    property transparentcolor: colorty read ftransparentcolor 
                               write settransparentcolor default cl_default;
-                     //cl_default ->bottom right pixel
+                     //cl_default ->bottom left pixel
    property options: bitmapoptionsty read getoptions write setoptions default [];
    property source: tbitmapcomp read fsource write setsource;
    property mask_source: tbitmapcomp read fmask_source write setmask_source;
