@@ -45,7 +45,7 @@ type
 
 implementation
 uses
- msestockobjects,imageselectorform,mseclasses;
+ msestockobjects,mseimageselectorform,mseclasses;
  
 { tstockglypharraypropertyeditor }
 

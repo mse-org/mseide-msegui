@@ -14,7 +14,7 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 }
-unit mseimageselectorform;
+unit msefaceselectorform;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
@@ -23,7 +23,7 @@ uses
  msegraphutils,mseevent,mseclasses,mseforms,msedataedits,msedatanodes,mseedit,
  msegrids,mselistbrowser,msestrings,msetypes,msebitmap,msestatfile;
 type
- timageselectorfo = class(tmseform)
+ tfaceselectorfo = class(tmseform)
    lv: tlistview;
    tstatfile1: tstatfile;
    procedure itemev(const sender: tcustomlistview; const index: Integer;
@@ -37,11 +37,11 @@ type
  end;
 implementation
 uses
- imageselectorform_mfm,sysutils,mseformatstr;
+ faceselectorform_mfm,sysutils,mseformatstr;
  
-{ timageselectorfo }
+{ tfaceselectorfo }
 
-constructor timageselectorfo.create(const aowner: tcomponent;
+constructor tfaceselectorfo.create(const aowner: tcomponent;
                const aimagelist: timagelist; var aimagenr: integer);
 var
  int1: integer;

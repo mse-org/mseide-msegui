@@ -5,7 +5,7 @@ interface
 
 implementation
 uses
- mseclasses,imageselectorform;
+ mseclasses,mseimageselectorform;
 
 const
  objdata: record size: integer; data: array[0..686] of byte end =

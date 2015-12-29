@@ -41,7 +41,7 @@ function editlookupindex(var indexlist: msestring; const imagelist: timagelist;
 
 implementation
 uses
- mseindexlookupeditor_mfm,imageselectorform;
+ mseindexlookupeditor_mfm,mseimageselectorform;
 
 function editlookupindex(var indexlist: msestring;
                const imagelist: timagelist; const facelist: tfacelist): boolean;
