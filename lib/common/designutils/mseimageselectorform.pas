@@ -37,7 +37,7 @@ type
  end;
 implementation
 uses
- imageselectorform_mfm,sysutils,mseformatstr;
+ mseimageselectorform_mfm,sysutils,mseformatstr;
  
 { timageselectorfo }
 

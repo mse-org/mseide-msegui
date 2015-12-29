@@ -41,7 +41,7 @@ function editlookupindex(var indexlist: msestring; const imagelist: timagelist;
 
 implementation
 uses
- mseindexlookupeditor_mfm,mseimageselectorform;
+ mseindexlookupeditor_mfm,mseimageselectorform,msefaceselectorform;
 
 function editlookupindex(var indexlist: msestring;
                const imagelist: timagelist; const facelist: tfacelist): boolean;
@@ -108,7 +108,14 @@ var
  i1: int32;
 begin
  i1:= indexed.value;
- timageselectorfo.create(nil,fimagelist,i1);
+ if fimagelist <> nil then begin
+  timageselectorfo.create(nil,fimagelist,i1);
+ end
+ else begin
+  if ffacelist <> nil then begin
+   tfaceselectorfo.create(nil,ffacelist,i1);
+  end;
+ end;
  indexed.value:= i1;
 end;
 

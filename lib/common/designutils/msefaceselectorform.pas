@@ -29,40 +29,43 @@ type
    procedure itemev(const sender: tcustomlistview; const index: Integer;
                    var info: celleventinfoty);
   private
-   fimagelist: timagelist;
-   fimagenr: integer;
+   ffacelist: tfacelist;
+   ffacenr: integer;
   public
-   constructor create(const aowner: tcomponent; const aimagelist: timagelist;
-                      var aimagenr: integer); reintroduce;
+   constructor create(const aowner: tcomponent; const afacelist: tfacelist;
+                      var afacenr: integer); reintroduce;
  end;
 implementation
 uses
- faceselectorform_mfm,sysutils,mseformatstr;
+ msefaceselectorform_mfm,sysutils,mseformatstr;
  
 { tfaceselectorfo }
 
 constructor tfaceselectorfo.create(const aowner: tcomponent;
-               const aimagelist: timagelist; var aimagenr: integer);
+               const afacelist: tfacelist; var afacenr: integer);
 var
  int1: integer;
 begin
- if aimagelist <> nil then begin
-  fimagelist:= aimagelist;
-  fimagenr:= aimagenr;
+ if afacelist <> nil then begin
+  ffacelist:= afacelist;
+  ffacenr:= afacenr;
   inherited create(aowner);
   with lv do begin
+  {
    int1:= aimagelist.width + 2;
    if int1 < 20 then begin
     int1:= 20;
    end;
    cellwidth:= int1;
    cellheight:= aimagelist.height + font.lineheight + 3;
+  }
+   cellsize:= ms(25,25);
   end;
   with lv.itemlist do begin
-   imagelist:= aimagelist;
-   count:= aimagelist.count;
-   imagewidth:= aimagelist.width;
-   imageheight:= aimagelist.height+2;
+//   imagelist:= aimagelist;
+   count:= afacelist.list.count;
+//   imagewidth:= aimagelist.width;
+//   imageheight:= aimagelist.height+2;
    for int1:= 0 to count -1 do begin
     with items[int1] do begin
      imagenr:= int1;
@@ -70,18 +73,18 @@ begin
     end;
    end;
   end;
-  lv.focusedindex:= fimagenr;
+  lv.focusedindex:= ffacenr;
   show(true);
-  aimagenr:= fimagenr;
+  afacenr:= ffacenr;
  end;
  release;
 end;
 
-procedure timageselectorfo.itemev(const sender: tcustomlistview;
+procedure tfaceselectorfo.itemev(const sender: tcustomlistview;
                const index: Integer; var info: celleventinfoty);
 begin
  if iscellclick(info) then begin
-  fimagenr:= index;
+  ffacenr:= index;
   window.modalresult:= mr_ok;
  end;
 end;

@@ -1,4 +1,4 @@
-unit imageselectorform_mfm;
+unit mseimageselectorform_mfm;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 
 interface

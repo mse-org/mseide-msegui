@@ -291,6 +291,8 @@ type
    function getcellheightmax: integer;
    procedure setcellheightmax(const avalue: integer);
    procedure setcellcursor(const avalue: cursorshapety);
+   function getcellsize: sizety;
+   procedure setcellsize(const avalue: sizety);
   protected
    fitemlist: titemviewlist;
    procedure setframeinstance(instance: tcustomframe); override;
@@ -360,6 +362,7 @@ type
                          write setcellwidthmin default defaultcellwidthmin;
    property cellwidthmax: integer read fcellwidthmax 
                          write setcellwidthmax default 0;
+   property cellsize: sizety read getcellsize write setcellsize;
    property cellframe: tcellframe read getcellframe write setcellframe;
    property cellcursor: cursorshapety read fcellcursor write setcellcursor 
                                                            default cr_default;
@@ -2400,6 +2403,17 @@ begin
    end;
   end;
  end;
+end;
+
+function tcustomlistview.getcellsize: sizety;
+begin
+ result:= ms(cellwidth,cellheight);
+end;
+
+procedure tcustomlistview.setcellsize(const avalue: sizety);
+begin
+ cellwidth:= avalue.cx;
+ cellheight:= avalue.cy;
 end;
 
 function tcustomlistview.getonselectionchanged: listvieweventty;
