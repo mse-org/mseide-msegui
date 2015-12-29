@@ -44,7 +44,7 @@ uses
 constructor timageselectorfo.create(const aowner: tcomponent;
                const aimagelist: timagelist; var aimagenr: integer);
 var
- int1: integer;
+ int1,i2: integer;
 begin
  if aimagelist <> nil then begin
   fimagelist:= aimagelist;
@@ -52,8 +52,9 @@ begin
   inherited create(aowner);
   with lv do begin
    int1:= aimagelist.width + 2;
-   if int1 < 20 then begin
-    int1:= 20;
+   i2:= getcanvas().getstringwidth('999')+2;
+   if int1 < i2 then begin
+    int1:= i2;
    end;
    cellwidth:= int1;
    cellheight:= aimagelist.height + font.lineheight + 3;
