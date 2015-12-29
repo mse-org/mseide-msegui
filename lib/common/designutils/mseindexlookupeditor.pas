@@ -23,35 +23,41 @@ type
    procedure closequexe(const sender: tcustommseform;
                    var amodalresult: modalresultty);
    procedure selectexe(const sender: TObject);
+   procedure iconpaintexe(const sender: tcustomintegergraphdataedit;
+                   const acanvas: tcanvas; const avalue: Integer;
+                   const arow: Integer);
   protected
    findexlist: pmsestring;
    fimagelist: timagelist;
+   ffacelist: tfacelist;
    fok: pboolean;
   public
    constructor create(var indexlist: msestring; const imagelist: timagelist;
-                          out ok: boolean);
+                          const facelist: tfacelist; out ok: boolean);
  end;
  
-function editlookupindex(var indexlist: msestring;
-                                 const imagelist: timagelist): boolean;
+function editlookupindex(var indexlist: msestring; const imagelist: timagelist;
+                                            const facelist: tfacelist): boolean;
 
 implementation
 uses
  mseindexlookupeditor_mfm,imageselectorform;
 
 function editlookupindex(var indexlist: msestring;
-                                 const imagelist: timagelist): boolean;
+               const imagelist: timagelist; const facelist: tfacelist): boolean;
 begin
- tmseindexlookupeditorfo.create(indexlist,imagelist,result);
+ tmseindexlookupeditorfo.create(indexlist,imagelist,facelist,result);
 end;
 
 { tmseindexlookupeditorfo } 
 
 constructor tmseindexlookupeditorfo.create(var indexlist: msestring;
-               const imagelist: timagelist; out ok: boolean);
+               const imagelist: timagelist; const facelist: tfacelist;
+                                                           out ok: boolean);
 begin
  findexlist:= @indexlist;
  fimagelist:= imagelist;
+ ffacelist:= facelist;
  fok:= @ok;
  inherited create(nil);
 end;
@@ -104,6 +110,15 @@ begin
  i1:= indexed.value;
  timageselectorfo.create(nil,fimagelist,i1);
  indexed.value:= i1;
+end;
+
+procedure tmseindexlookupeditorfo.iconpaintexe(
+              const sender: tcustomintegergraphdataedit; const acanvas: tcanvas;
+               const avalue: Integer; const arow: Integer);
+begin
+ if ffacelist <> nil then begin
+  ffacelist.paint(acanvas,avalue,sender.clientrect);
+ end;
 end;
 
 end.

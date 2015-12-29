@@ -732,13 +732,18 @@ procedure tindexlookupeditor.edit();
 var
  mstr1: msestring;
  imagelist: timagelist;
+ facelist: tfacelist;
 begin
  mstr1:= getmsestringvalue(0,true);
  imagelist:= nil;
+ facelist:= nil;
  if fcomponent is timagelist then begin
   pointer(imagelist):= fcomponent;
  end;
- if editlookupindex(mstr1,imagelist) then begin
+ if fcomponent is tfacelist then begin
+  pointer(facelist):= fcomponent;
+ end;
+ if editlookupindex(mstr1,imagelist,facelist) then begin
   setmsestringvalue(mstr1,true);
  end;
 end;

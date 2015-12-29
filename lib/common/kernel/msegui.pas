@@ -1300,6 +1300,8 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   procedure paint(const canvas: tcanvas; const aindex: int32;
+                                                   const dest: rectty);
    function lookup(const aindex: int32): int32;
   published
    property list: tfacearrayprop read flist write setlist;
@@ -7164,6 +7166,14 @@ destructor tfacelist.destroy;
 begin
  inherited;
  flist.free;
+end;
+
+procedure tfacelist.paint(const canvas: tcanvas; const aindex: int32;
+               const dest: rectty);
+begin
+ if (aindex >= 0) and (aindex <= high(flist.fitems)) then begin
+  tface(flist.fitems[aindex]).paint(canvas,dest);
+ end;
 end;
 
 function tfacelist.lookup(const aindex: int32): int32;

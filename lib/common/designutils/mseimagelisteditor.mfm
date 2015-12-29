@@ -3,20 +3,20 @@ object imagelisteditorfo: timagelisteditorfo
   visible = False
   bounds_x = 220
   bounds_y = 297
-  bounds_cx = 301
-  bounds_cy = 359
+  bounds_cx = 310
+  bounds_cy = 355
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets]
   container.frame.localprops = []
   container.frame.localprops1 = []
   container.bounds = (
     0
     0
-    301
-    359
+    310
+    355
   )
   options = [fo_closeonesc, fo_localshortcuts, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
   statfile = statfile1
-  caption = 'Imagelisteditor'
+  caption = 'Imagelist Editor'
   moduleclassname = 'tmseform'
   object disp: tlistview
     optionswidget1 = [ow1_fontglyphheight]
@@ -25,8 +25,8 @@ object imagelisteditorfo: timagelisteditorfo
     popupmenu = popup
     bounds_x = 0
     bounds_y = 0
-    bounds_cx = 303
-    bounds_cy = 288
+    bounds_cx = 310
+    bounds_cy = 299
     anchors = [an_top, an_bottom]
     cellheight = 62
     optionsgrid = [og_colsizing, og_rowsizing, og_focuscellonenter, og_wraprow, og_wrapcol, og_autopopup]
@@ -46,7 +46,7 @@ object imagelisteditorfo: timagelisteditorfo
     frame.localprops1 = []
     taborder = 1
     bounds_x = 0
-    bounds_y = 291
+    bounds_y = 302
     bounds_cx = 301
     bounds_cy = 53
     anchors = [an_left, an_bottom]

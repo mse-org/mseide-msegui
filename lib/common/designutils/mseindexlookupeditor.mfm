@@ -13,6 +13,7 @@ object mseindexlookupeditorfo: tmseindexlookupeditorfo
   )
   options = [fo_freeonclose, fo_createmodal, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savezorder, fo_savestate]
   statfile = statfile1
+  caption = 'Indexlookup Editor'
   oncreate = createexe
   onclosequery = closequexe
   moduleclassname = 'tmseform'
@@ -74,7 +75,7 @@ object mseindexlookupeditorfo: tmseindexlookupeditorfo
     bounds_cx = 383
     bounds_cy = 293
     anchors = [an_top]
-    optionsgrid = [og_rowmoving, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_colchangeontabkey, og_wrapcol, og_autopopup, og_mousescrollcol]
+    optionsgrid = [og_rowmoving, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_selectedrowsdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_colchangeontabkey, og_wrapcol, og_autopopup, og_mousescrollcol]
     fixcols.count = 1
     fixcols.items = <    
       item
@@ -91,23 +92,25 @@ object mseindexlookupeditorfo: tmseindexlookupeditorfo
           end>
       end>
     datacols.count = 3
+    datacols.options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savevalue, co_savestate, co_mousescrollrow]
     datacols.items = <    
       item[indexed]
         width = 77
-        options = [co_savevalue, co_savestate, co_mousescrollrow, co_rowdatachange]
+        options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savevalue, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow, co_rowdatachange]
         name = 'index'
         widgetname = 'indexed'
         dataclass = tgridintegerdatalist
       end    
       item[icondi]
         width = 21
-        options = [co_drawfocus, co_savevalue, co_savestate, co_mousescrollrow]
+        options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savevalue, co_savestate, co_mousescrollrow]
         widgetname = 'icondi'
         dataclass = tgridintegerdatalist
       end    
       item[tstockglyphdatabutton1]
         color = -2147483646
         width = 18
+        options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savevalue, co_savestate, co_mousescrollrow]
         widgetname = 'tstockglyphdatabutton1'
         dataclass = tgridintegerdatalist
       end>
@@ -125,10 +128,21 @@ object mseindexlookupeditorfo: tmseindexlookupeditorfo
       min = -2147483648
       reffontheight = 14
     end
-    object tstockglyphdatabutton1: tstockglyphdatabutton
+    object icondi: tdataicon
       optionswidget1 = []
       optionsskin = [osk_framebuttononly]
       taborder = 2
+      bounds_x = 78
+      bounds_y = 0
+      bounds_cx = 21
+      bounds_cy = 16
+      visible = False
+      onpaintglyph = iconpaintexe
+    end
+    object tstockglyphdatabutton1: tstockglyphdatabutton
+      optionswidget1 = []
+      optionsskin = [osk_framebuttononly]
+      taborder = 3
       bounds_x = 100
       bounds_y = 0
       bounds_cx = 18
@@ -136,16 +150,6 @@ object mseindexlookupeditorfo: tmseindexlookupeditorfo
       state = [as_invisible, as_localinvisible, as_localimagelist, as_localimagenr, as_localonexecute]
       glyph = stg_ellipsesmall
       onexecute = selectexe
-    end
-    object icondi: tdataicon
-      optionswidget1 = []
-      optionsskin = [osk_framebuttononly]
-      taborder = 3
-      bounds_x = 78
-      bounds_y = 0
-      bounds_cx = 21
-      bounds_cy = 16
-      visible = False
     end
   end
   object statfile1: tstatfile
