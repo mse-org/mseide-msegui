@@ -269,6 +269,7 @@ begin
     info.changed:= compfileinfos(info.infovorher,info.info);
    end
    else begin
+    bo1:= not (fc_removed in info.changed); //report only once
     info.changed:= [fc_removed];
    end;
    if isroot and (info.changed = []) then begin
@@ -278,14 +279,16 @@ begin
     include(info.changed,fc_force);
     info.force:= false;
    end;
-   if info.changed - notcheckflags <> [] then begin
+   if bo1 and (info.changed - notcheckflags <> []) then begin
     aevent:= tfilechangeevent.Create(ievent(owner),0);
     aevent.info:= info;
     application.postevent(aevent);
     str1:= ansistring(info.infovorher.name);
     info.infovorher:= info.info;
     info.infovorher.name:= filenamety(str1);
-    info.changed:= [];
+    if not (fc_removed in info.changed) then begin
+     info.changed:= [];
+    end;
    end;
   end;
  end;
