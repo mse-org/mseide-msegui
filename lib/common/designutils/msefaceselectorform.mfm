@@ -24,14 +24,19 @@ object faceselectorfo: tfaceselectorfo
     bounds_cx = 320
     bounds_cy = 244
     anchors = []
-    cellheight = 16
-    options = [lvo_readonly, lvo_horz, lvo_drawfocus, lvo_leftbuttonfocusonly, lvo_focusselect, lvo_mouseselect]
+    optionsgrid = [og_colsizing, og_rowsizing, og_focuscellonenter, og_savestate, og_colchangeontabkey, og_wraprow, og_wrapcol, og_autopopup, og_mousescrollcol]
+    options = [lvo_readonly, lvo_horz, lvo_drawfocus, lvo_leftbuttonfocusonly, lvo_focusselect, lvo_mouseselect, lvo_savestate]
+    itemlist.onpaintitem = paintitemexe
     itemlist.captionpos = cp_bottom
+    itemlist.imagewidth = 16
+    itemlist.imageheight = 16
+    statfile = tstatfile1
+    onlayoutchanged = layoutcha
     onitemevent = itemev
     reffontheight = 14
   end
   object tstatfile1: tstatfile
-    filename = 'imageselector.sta'
+    filename = 'faceselector.sta'
     options = [sfo_memory, sfo_activatorread, sfo_activatorwrite]
     left = 72
     top = 48

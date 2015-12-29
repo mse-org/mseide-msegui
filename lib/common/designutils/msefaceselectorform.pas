@@ -19,15 +19,18 @@ unit msefaceselectorform;
 interface
 uses
  classes,mclasses,mseglob,mseguiglob,mseapplication,msestat,msemenus,msegui,
- msegraphics,
- msegraphutils,mseevent,mseclasses,mseforms,msedataedits,msedatanodes,mseedit,
- msegrids,mselistbrowser,msestrings,msetypes,msebitmap,msestatfile;
+ msegraphics,msegraphutils,mseevent,mseclasses,mseforms,msedataedits,
+ msedatanodes,mseedit,msegrids,mselistbrowser,msestrings,msetypes,msebitmap,
+ msestatfile;
 type
  tfaceselectorfo = class(tmseform)
    lv: tlistview;
    tstatfile1: tstatfile;
    procedure itemev(const sender: tcustomlistview; const index: Integer;
                    var info: celleventinfoty);
+   procedure paintitemexe(const sender: titemviewlist; const canvas: tcanvas;
+                   const item: tlistedititem);
+   procedure layoutcha(const sender: tcustomlistview);
   private
    ffacelist: tfacelist;
    ffacenr: integer;
@@ -50,17 +53,17 @@ begin
   ffacelist:= afacelist;
   ffacenr:= afacenr;
   inherited create(aowner);
+{
   with lv do begin
-  {
    int1:= aimagelist.width + 2;
    if int1 < 20 then begin
     int1:= 20;
    end;
    cellwidth:= int1;
    cellheight:= aimagelist.height + font.lineheight + 3;
-  }
-   cellsize:= ms(25,25);
+   cellsize:= ms(35,40);
   end;
+}
   with lv.itemlist do begin
 //   imagelist:= aimagelist;
    count:= afacelist.list.count;
@@ -87,6 +90,20 @@ begin
   ffacenr:= index;
   window.modalresult:= mr_ok;
  end;
+end;
+
+procedure tfaceselectorfo.paintitemexe(const sender: titemviewlist;
+               const canvas: tcanvas; const item: tlistedititem);
+begin
+ if ffacelist <> nil then begin
+  ffacelist.paint(canvas,item.index,sender.layoutinfo.imagerect);
+ end;
+end;
+
+procedure tfaceselectorfo.layoutcha(const sender: tcustomlistview);
+begin
+ sender.itemlist.imagesize:= 
+    ms(sender.cellwidth,sender.cellheight-sender.font.glyphheight-2);
 end;
 
 end.
