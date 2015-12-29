@@ -43,7 +43,8 @@ type
           lvo_focusselect,lvo_mouseselect,lvo_keyselect,
           lvo_multiselect,lvo_resetselectonexit,{lvo_noresetselect,}
           lvo_fill,
-          lvo_locate,lvo_casesensitive,lvo_savevalue,lvo_hintclippedtext
+          lvo_locate,lvo_casesensitive,lvo_savevalue,lvo_savestate,
+          lvo_hintclippedtext
                      );
  listviewoptionsty = set of listviewoptionty;
  
@@ -144,9 +145,15 @@ type
  nodenotificationeventty = procedure(const sender: tlistitem;
            var action: nodeactionty) of object;
 
+ titemviewlist = class;
+ 
+ paintlistitemeventty = procedure(const sender: titemviewlist;
+                 const canvas: tcanvas; const item: tlistedititem) of object;
+ 
  titemviewlist = class(tcustomitemlist,iitemlist)
   private
    flistview: tcustomlistview;
+   fonpaintitem: paintlistitemeventty;
    function getoncreateitem: createlistitemeventty;
    procedure setoncreateitem(const Value: createlistitemeventty);
   protected
@@ -155,7 +162,7 @@ type
    procedure updatelayout; override;
    procedure invalidate; override;
 
-   //iitemlist
+    //iitemlist
    function getgrid: tcustomgrid;
    function getlayoutinfo(const acellinfo: pcellinfoty): plistitemlayoutinfoty;
    procedure itemcountchanged;
@@ -166,9 +173,12 @@ type
   public
    constructor create(const alistview: tcustomlistview);
    property listview: tcustomlistview read flistview;
+   property layoutinfo: listitemlayoutinfoty read flayoutinfo;
   published
    property oncreateitem: createlistitemeventty read getoncreateitem 
                                           write setoncreateitem;
+   property onpaintitem: paintlistitemeventty read fonpaintitem 
+                                                     write fonpaintitem;
    property options;
    property captionpos;
    property fonts;
@@ -311,6 +321,9 @@ type
    procedure loaded; override;
    procedure dokeydown(var info: keyeventinfoty); override;
    procedure scrolled(const dist: pointty); override;
+
+   procedure dostatread(const reader: tstatreader); override;
+   procedure dostatwrite(const writer: tstatwriter); override;
 
     //iedit
    function getoptionsedit: optionseditty;
@@ -1133,13 +1146,18 @@ end;
 
 procedure tlistcol.drawcell(const acanvas: tcanvas);
 var
- item: tlistitem;
+ item1: tlistitem;
 begin
  inherited;
  with cellinfoty(acanvas.drawinfopo^) do begin
-  item:= items[cell.row];
-  if item <> nil then begin
-   item.drawcell(acanvas);
+  item1:= items[cell.row];
+  if item1 <> nil then begin
+   item1.drawcell(acanvas);
+   with tcustomlistview(grid),fitemlist do begin
+    if assigned(fonpaintitem) then begin
+     fonpaintitem(fitemlist,acanvas,tlistedititem(pointer(item1)));
+    end;
+   end;
   end;
  end;
 end;
@@ -1517,6 +1535,8 @@ begin
 end;
 
 procedure tcustomlistview.initdatacol(const item: tdatacol);
+var
+ opt1: coloptionsty;
 begin
 // item.options:= coloptionsty(
 //      replacebits(
@@ -1524,11 +1544,13 @@ begin
 //      {$ifdef FPC}longword{$else}longword{$endif}(item.options),
 //      {$ifdef FPC}longword{$else}longword{$endif}(bitmask[integer(lvo_coloptions)+1])
 //               shl listviewoptionshift));
- item.options:= coloptionsty(
+ opt1:= coloptionsty(
       replacebits(
       {$ifdef FPC}longword{$else}longword{$endif}(foptions),
       {$ifdef FPC}longword{$else}longword{$endif}(item.options),
       {$ifdef FPC}longword{$else}longword{$endif}(coloptionsmask)));
+// updatebit(longword(opt1),ord(co_savestate),lvo_savestate in foptions);
+ item.options:= opt1;
  if fcellframe <> nil then begin
   item.frame:= fcellframe;
  end;
@@ -1841,6 +1863,9 @@ begin
   item1:= tlistitem1(focuseditem);
   if item1 <> nil then begin
    item1.drawimage(fitemlist.flayoutinfo,acanvas);
+   if assigned(fitemlist.fonpaintitem) then begin
+    fitemlist.fonpaintitem(fitemlist,acanvas,tlistedititem(pointer(item1)));
+   end;
    pt1:= cellrect(ffocusedcell,cil_paint).pos;
    acanvas.remove(pt1);
    feditor.dopaint(acanvas);
@@ -2139,6 +2164,22 @@ begin
  if focusedcellvalid then begin
   feditor.scroll(dist);
  end;
+end;
+
+procedure tcustomlistview.dostatread(const reader: tstatreader);
+begin
+ if lvo_savestate in foptions then begin
+  cellwidth:= reader.readinteger('cellwidth',cellwidth);
+ end;
+ inherited;
+end;
+
+procedure tcustomlistview.dostatwrite(const writer: tstatwriter);
+begin
+ if (lvo_savestate in foptions) and writer.canstate then begin
+  writer.writeinteger('cellwidth',cellwidth);
+ end;
+ inherited;
 end;
 
 function tcustomlistview.getoptionsedit: optionseditty;
