@@ -58,7 +58,8 @@ type
  frameskinoptionty = (fso_flat,
                       fso_noanim,fso_nomouseanim,fso_noclickanim,fso_nofocusanim,
                       fso_focusrect,fso_nofocusrect,fso_forcefocusrect,
-                      fso_nodefaultrect,fso_noinnerrect);
+                      fso_nodefaultrect,fso_noinnerrect,
+                      fso_clientfacerect,fso_faceoverlay);
  frameskinoptionsty = set of frameskinoptionty;
 
  frameskincontrolleroptionty =
@@ -593,6 +594,7 @@ type
    function ishintarea(const apos: pointty; var aid: int32): boolean; virtual;
    procedure checkminscrollsize(var asize: sizety); virtual;
    procedure checkminclientsize(var asize: sizety); virtual;
+   procedure paintframeface(const canvas: tcanvas; const arect: rectty);
    class procedure drawframe(const canvas: tcanvas; const rect2: rectty; 
            const afi: baseframeinfoty; const astate: framestateflagsty
            {const disabled,active,clicked,mouse: boolean});
@@ -4235,28 +4237,63 @@ begin
  end;
 end;
 
+procedure tcustomframe.paintframeface(const canvas: tcanvas;
+                                                     const arect: rectty);
+var
+ faceoffs: int32;
+ rect1: rectty;
+ reg1: regionty;
+begin 
+ if fi.frameface_list <> nil then begin
+  faceoffs:= fi.frameface_list.lookup(
+         calcframestateoffs(fintf.getframestateflags,
+                                  frameoffsetsty(fi.frameface_offsets)));
+  if faceoffs >= 0 then begin
+   if fso_clientfacerect in optionsskin then begin
+    reg1:= canvas.copyclipregion;
+    rect1.x:= arect.x + fclientrect.x;
+    rect1.y:= arect.y + fclientrect.y;
+    rect1.cx:= arect.cx + fclientrect.cx - fpaintrect.cx;
+    rect1.cy:= arect.cy + fclientrect.cy - fpaintrect.cy;
+    canvas.intersectcliprect(arect);
+    fi.frameface_list.list[faceoffs].paint(canvas,rect1);
+    canvas.clipregion:= reg1;
+   end
+   else begin
+    fi.frameface_list.list[faceoffs].paint(canvas,arect);
+   end;
+  end;
+ end;
+end;
+
 procedure tcustomframe.paintbackground(const canvas: tcanvas;
                             const arect: rectty; const clipandmove: boolean);
 var
- rect1: rectty;
- faceoffs: integer;
+ rect1{,rect2}: rectty;
+// faceoffs: integer;
+// reg1: regionty;
 begin
  rect1:= deflaterect(arect,fpaintframe);
  if fi.colorclient <> cl_transparent then begin
   canvas.fillrect(rect1,fi.colorclient);
  end;
+ if not (fso_faceoverlay in optionsskin) then begin
+  paintframeface(canvas,rect1);
+ end;
+(*
  if fi.frameface_list <> nil then begin
   faceoffs:= fi.frameface_list.lookup(
            calcframestateoffs(fintf.getframestateflags,
                                   frameoffsetsty(fi.frameface_offsets)));
-  if (faceoffs >= 0) {and (faceoffs < fi.frameface_list.list.count)} then begin
+  if (faceoffs >= 0){ and (faceoffs < fi.frameface_list.list.count)} then begin
    with fi.frameface_list.list[faceoffs] do begin
     if not (fao_overlay in options) then begin
-     paint(canvas,rect1);
+     paintframeface(canvas,mr(addpoint(rect1.pos,fclientrect.pos).);
     end;
    end;
   end;
  end;
+*)
  if clipandmove then begin
   canvas.intersectcliprect(rect1);
   canvas.move(addpoint(fpaintrect.pos,fclientrect.pos));
@@ -4298,79 +4335,6 @@ begin
  if (afi.frameimage_list <> nil) then begin
   imageoffs:= calcframestateoffs(astate,frameoffsetsty(afi.frameimage_offsets));
   drawimageframe(canvas,afi.frameimage_list,imageoffs,rect2,afi.hiddenedges);
-   
-{   
-   if afi.hiddenedges * [edg_left,edg_top] = [] then begin
-    afi.frameimage_list.paint(canvas,imageoffs,rect2.pos); //topleft
-   end;
-   if not (edg_left in afi.hiddenedges) then begin
-    rect1:= rect2;
-    if not (edg_top in afi.hiddenedges) then begin
-     inc(rect1.y,afi.frameimage_list.height);
-     dec(rect1.cy,afi.frameimage_list.height);
-    end;
-    rect1.cx:= afi.frameimage_list.width;
-    if not (edg_bottom in afi.hiddenedges) then begin
-     dec(rect1.cy,afi.frameimage_list.height);
-    end;    
-    afi.frameimage_list.paint(canvas,imageoffs+1,rect1,[al_stretchy]);
-                                                          //left
-   end;
-   if afi.hiddenedges * [edg_bottom,edg_left] = [] then begin
-    afi.frameimage_list.paint(canvas,imageoffs+2,rect2,[al_bottom]); 
-                                                          //bottomleft
-   end;
-   if not (edg_bottom in afi.hiddenedges) then begin
-    rect1:= rect2;
-    if not (edg_left in afi.hiddenedges) then begin
-     inc(rect1.x,afi.frameimage_list.width);
-     dec(rect1.cx,afi.frameimage_list.width);
-    end;
-    rect1.y:= rect2.y + rect2.cy - afi.frameimage_list.height;
-    rect1.cy:= afi.frameimage_list.width;
-    if not (edg_right in afi.hiddenedges) then begin
-     dec(rect1.cx,afi.frameimage_list.width);
-    end;
-    afi.frameimage_list.paint(canvas,imageoffs+3,rect1,[al_stretchx]);
-                                                          //bottom
-   end;
-   if afi.hiddenedges * [edg_bottom,edg_right] = [] then begin
-    afi.frameimage_list.paint(canvas,imageoffs+4,rect2,[al_bottom,al_right]); 
-                                                          //bottomright
-   end;
-   if not (edg_right in afi.hiddenedges) then begin
-    rect1:= rect2;
-    if not (edg_bottom in afi.hiddenedges) then begin
-     dec(rect1.cy,afi.frameimage_list.height);
-    end;
-    rect1.x:= rect2.x + rect2.cx - afi.frameimage_list.width;
-    rect1.cx:= afi.frameimage_list.width;
-    if not (edg_top in afi.hiddenedges) then begin
-     inc(rect1.y,afi.frameimage_list.height);
-     dec(rect1.cy,afi.frameimage_list.height);
-    end;
-    afi.frameimage_list.paint(canvas,imageoffs+5,rect1,[al_stretchy]);
-                                                          //right
-   end;
-   if afi.hiddenedges * [edg_top,edg_right] = [] then begin
-    afi.frameimage_list.paint(canvas,imageoffs+6,rect2,[al_right]);
-                                                          //topright
-   end;
-   if not (edg_top in afi.hiddenedges) then begin
-    rect1:= rect2;
-    if not (edg_right in afi.hiddenedges) then begin
-     dec(rect1.cx,afi.frameimage_list.width);
-    end;
-    rect1.cy:= afi.frameimage_list.height;
-    if not (edg_left in afi.hiddenedges) then begin
-     inc(rect1.x,afi.frameimage_list.width);
-     dec(rect1.cx,afi.frameimage_list.width);
-    end;
-    afi.frameimage_list.paint(canvas,imageoffs+7,rect1,[al_stretchx]);
-                                                         //top
-   end;
-  end;
-   }
  end;
 end;
 
@@ -4380,20 +4344,9 @@ begin
 end;
 
 procedure tcustomframe.paintoverlay(const canvas: tcanvas; const arect: rectty);
-var
- faceoffs: int32;
 begin
- if fi.frameface_list <> nil then begin
-  faceoffs:= fi.frameface_list.lookup(
-         calcframestateoffs(fintf.getframestateflags,
-                                  frameoffsetsty(fi.frameface_offsets)));
-  if (faceoffs >= 0) {and (faceoffs < fi.frameface_list.list.count)} then begin
-   with fi.frameface_list.list[faceoffs] do begin
-    if fao_overlay in options then begin
-     paint(canvas,deflaterect(arect,fpaintframe));
-    end;
-   end;
-  end;
+ if fso_faceoverlay in optionsskin then begin
+  paintframeface(canvas,deflaterect(arect,fpaintframe));
  end;
  drawframe(canvas,deflaterect(arect,fouterframe),fi,fintf.getframestateflags);
 end;
