@@ -778,8 +778,13 @@ begin
              end;
             end
             else begin
-             if msestartsstr(pointer(token.name),wpo1) and 
-                              checktokenwhitespace(token,wpo1) then begin
+             if (caseinsensitive and msestartsstrcaseinsensitive(
+                                              pointer(token.name),wpo1) or
+                  not caseinsensitive and 
+                            msestartsstr(pointer(token.name),wpo1)) and 
+                                  checktokenwhitespace(token,wpo1)  then begin
+//             if msestartsstr(pointer(token.name),wpo1) and 
+//                              checktokenwhitespace(token,wpo1) then begin
               bo1:= false;
               int2:= length(token.name);
              end;
