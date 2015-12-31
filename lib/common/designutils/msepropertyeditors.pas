@@ -1901,6 +1901,7 @@ begin
     c_tab: begin po1^:= numcharchar; inc(po1); po1^:= 't'; end;
     c_linefeed: begin po1^:= numcharchar; inc(po1); po1^:= 'n'; end;
     c_return: begin po1^:= numcharchar; inc(po1); po1^:= 'r'; end;
+    c_softhyphen: begin po1^:= numcharchar; inc(po1); po1^:= 's'; end;
     numcharchar: begin po1^:= numcharchar; inc(po1); po1^:= numcharchar; end;
     else begin
      if avalue[int1] < widechar(32) then begin
@@ -1940,6 +1941,7 @@ begin
      't': po1^:= c_tab;
      'n': po1^:= c_linefeed;
      'r': po1^:= c_return;
+     's': po1^:= c_softhyphen;
      '0'..'9': begin
       int2:= int1+2;
       while (avalue[int2] >= '0') and (avalue[int2] <= '9') do begin
