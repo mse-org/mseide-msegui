@@ -259,7 +259,8 @@ type
 
    property optionsedit default defaulttexteditoptions;
    procedure setfontstyle(const start,stop: gridcoordty;
-                               const astyle: fontstylety; const aset: boolean);
+                            const astyle: fontstylety; const aset: boolean;
+                            const acolorbackground: colorty = cl_default);
    property selectstart: gridcoordty read fselectstart;
    property selectend: gridcoordty read fselectend;
    procedure setselection(const start,stop: gridcoordty;
@@ -1471,11 +1472,13 @@ begin
 end;
 
 procedure tcustomtextedit.setfontstyle(const start,stop: gridcoordty;
-                               const astyle: fontstylety; const aset: boolean);
+            const astyle: fontstylety; const aset: boolean;
+                  const acolorbackground: colorty = cl_default);
 var
  a,b: gridcoordty;
  int1,int2: integer;
  po1: prichstringty;
+ bo1: boolean;
 begin
  normalizetextrect(start,stop,a,b);
  int2:= bigint;
@@ -1484,7 +1487,11 @@ begin
   if int1 = b.row then begin
    int2:= b.col - a.col;
   end;
-  if updatefontstyle1(po1^.format,a.col,int2,astyle,aset) then begin
+  bo1:= updatefontstyle1(po1^.format,a.col,int2,astyle,aset);
+  if acolorbackground <> cl_default then begin
+   bo1:= setcolorbackground1(po1^.format,a.col,int2,acolorbackground) or bo1;
+  end;
+  if bo1 then begin
    with fgridintf.getcol do begin
     invalidatecell(int1);
     if int1 = grid.row then begin

@@ -197,6 +197,7 @@ type
    fencoding: integer;
    fnoformdesignerdocking: boolean;
    ftrimtrailingwhitespace: boolean;
+   fbracketbkgcolor: integer;
    function limitgridsize(const avalue: integer): integer;
    procedure setgridsizex(const avalue: integer);
    procedure setgridsizey(const avalue: integer);
@@ -238,6 +239,8 @@ type
    property editfontcolor: integer read feditfontcolor write feditfontcolor;
    property editbkcolor: integer read feditbkcolor write feditbkcolor;
    property statementcolor: integer read fstatementcolor write fstatementcolor;
+   property bracketbkgcolor: integer read fbracketbkgcolor 
+                                             write fbracketbkgcolor;
    
    property editfontantialiased: boolean read feditfontantialiased 
                                               write feditfontantialiased;
@@ -805,6 +808,7 @@ type
    twidgetgrid6: twidgetgrid;
    syntaxdeffile: tfilenameedit;
    syntaxdeffilemask: tmemodialogedit;
+   bracketbkgcolor: tcoloredit;
    procedure acttiveselectondataentered(const sender: TObject);
    procedure colonshowhint(const sender: tdatacol; const arow: Integer; 
                       var info: hintinfoty);
@@ -851,6 +855,7 @@ type
    procedure toolshortcutdropdown(const sender: TObject);
    procedure toolsrowdatachanged(const sender: tcustomgrid;
                    const acell: gridcoordty);
+   procedure bracketbkcolhint(const sender: TObject; var info: hintinfoty);
   private
    procedure activegroupchanged;
  end;
@@ -2775,6 +2780,12 @@ begin
  end;
 end;
 
+procedure tprojectoptionsfo.bracketbkcolhint(const sender: TObject;
+               var info: hintinfoty);
+begin
+ info.caption:= tcustomedit(sender).text + lineend + info.caption;
+end;
+
 { tprojectoptions }
 
 constructor tprojectoptions.create;
@@ -2837,6 +2848,7 @@ begin
  editfontcolor:= integer(cl_text);
  editbkcolor:= integer(cl_foreground);
  statementcolor:= $E0FFFF;
+ bracketbkgcolor:= int32(cl_none);
  editfontantialiased:= true;
  editmarkbrackets:= true;
  backupfilecount:= 2;

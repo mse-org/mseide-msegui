@@ -52,7 +52,7 @@ keyword =
 string
 
 editorcolors =
-COLORS [[[fontcolor [backgroundcolor [statementcolor]]]
+COLORS [fontcolor [backgroundcolor [statementcolor [markbracketsbkgcolor]]]]
 //   cl_default for project options settings
 
 scope =
@@ -192,6 +192,11 @@ type
 
  scopestackcachearty = array of scopestackcachety;
 
+ boldcharinfoty = record
+  backgroundcolor: colorty;
+  items: gridcoordarty;
+ end;
+ 
  clientinfoty = record
   client: tobject;
   syntaxdefhandle: integer;
@@ -201,7 +206,7 @@ type
   scopestackcachepo: integer;
   list: trichstringdatalist;
   onlinechanged: integerchangedeventty;
-  boldchars: gridcoordarty;
+  boldchars: boldcharinfoty;
  end;
  pclientinfoty = ^clientinfoty;
  clientinfoarty = array of clientinfoty;
@@ -210,6 +215,7 @@ type
   font: colorty;
   background: colorty;
   statement: colorty;
+  bracketbkg: colorty;
  end;
  
  syntaxdefty = record
@@ -240,6 +246,7 @@ type
    fdefsdir: filenamety;
    fdeftext: tmsestringdatalist;
    fdefaultsyntax: integer;
+//   fdefaultboldbkgcolor: colorty;
    procedure dotimer(const sender: tobject);
    procedure syntaxchanged;
    procedure internalpaintsyntax(handle: integer; start,count: integer;
@@ -252,8 +259,8 @@ type
    procedure calcrefreshinfo(var info: refreshinfoty; var startscope: integer);
    procedure setdeftext(const avalue: tmsestringdatalist);
    procedure deflistchanged(const sender: tobject);
-   function getboldchars(index: integer): gridcoordarty;
-   procedure setboldchars(index: integer; const avalue: gridcoordarty);
+   function getboldchars(index: integer): boldcharinfoty;
+   procedure setboldchars(index: integer; const avalue: boldcharinfoty);
    function getcolors(index: integer): syntaxcolorinfoty;
   protected
 
@@ -278,10 +285,14 @@ type
    function linkdeffile(const sourcefilename: filenamety): integer;
                  //-1 if syntaxdef not found
    property defaultsyntax: integer read fdefaultsyntax;
-   property boldchars[index: integer]: gridcoordarty read getboldchars 
+   property boldchars[index: integer]: boldcharinfoty read getboldchars 
                                     write setboldchars;
    property colors[index: integer]: syntaxcolorinfoty read getcolors;
   published
+  {
+   property defaultboldbkgcolor: colorty read fdefaultboldbkgcolor 
+                            write fdefaultboldbkgcolor default cl_none;
+  }
    property linesperslice: integer read flinesperslice write setlinesperslice
                 default defaultlinesperslice;
    property defdefs: tdoublemsestringdatalist read fdefdefs write setdefdefs;
@@ -414,6 +425,7 @@ begin
  flinesperslice:= defaultlinesperslice;
  fdefdefs:= tdoublemsestringdatalist.create;
  fdefaultsyntax:= -1;
+// fdefaultboldbkgcolor:= cl_none;
  fdeftext:= tmsestringdatalist.create;
  fdeftext.onchange:= {$ifdef FPC}@{$endif}deflistchanged;
  inherited;
@@ -473,6 +485,7 @@ begin
    font:= cl_default;
    background:= cl_default;
    statement:= cl_default;
+   bracketbkg:= cl_default;
   end;
  end;
 end;
@@ -610,7 +623,7 @@ var
  po1: pointer;
  changed: boolean;
  int1,int2,int3: integer;
- bo1: boolean;
+ bo1,bo2: boolean;
  ristr: prichstringty;
  wpo1: pmsechar;
  alen,keywordlen: integer;
@@ -858,16 +871,17 @@ begin
    end;
   end;
 endlab:
-  for int1:= 0 to high(boldchars) do begin
-   with boldchars[int1] do begin
+  for int1:= 0 to high(boldchars.items) do begin
+   with boldchars.items[int1] do begin
     if (row >= firstrow) and (row <= lastrow) then begin
      bo1:= not (fs_bold in getcharstyle(
                        list.richitemspo[row]^.format,col).fontstyle);
-     if updatefontstyle1(list.richitemspo[row]^.format,
-                                    col,1,fs_bold,bo1) then begin
-      if assigned(onlinechanged) then begin
-       onlinechanged(self,row);
-      end;
+     bo2:= updatefontstyle1(list.richitemspo[row]^.format,col,1,fs_bold,bo1);
+     bo2:= (boldchars.backgroundcolor <> cl_none) and 
+        setcolorbackground1(list.richitemspo[row]^.format,col,1,
+                                       boldchars.backgroundcolor) or bo2;
+     if bo2 and assigned(onlinechanged) then begin
+      onlinechanged(self,row);
      end;
     end;
    end;
@@ -1391,6 +1405,8 @@ begin
          if getcolor(lstr1,colors.font) then begin
           if getcolor(lstr1,colors.background) then begin
            if getcolor(lstr1,colors.statement) then begin
+            if getcolor(lstr1,colors.bracketbkg) then begin
+            end;
            end;
           end;
          end;
@@ -1762,14 +1778,14 @@ begin
  end;
 end;
 
-function tsyntaxpainter.getboldchars(index: integer): gridcoordarty;
+function tsyntaxpainter.getboldchars(index: integer): boldcharinfoty;
 begin
  checkarrayindex(fclients,index);
  result:= fclients[index].boldchars;
 end;
 
-procedure tsyntaxpainter.setboldchars(index: integer;
-               const avalue: gridcoordarty);
+procedure tsyntaxpainter.setboldchars(index: integer; 
+                                            const avalue: boldcharinfoty);
 begin
  checkarrayindex(fclients,index);
  fclients[index].boldchars:= avalue;

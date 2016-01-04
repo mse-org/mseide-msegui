@@ -204,7 +204,7 @@ object projectoptionsfo: tprojectoptionsfo
             taborder = 2
             bounds_x = 0
             bounds_y = 94
-            bounds_cx = 608
+            bounds_cx = 616
             bounds_cy = 37
             optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
             optionslayout = [lao_aligny]
@@ -308,7 +308,7 @@ object projectoptionsfo: tprojectoptionsfo
               optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext]
               ondataentered = fontondataentered
               value = -1879048183
-              dropdown.options = [deo_autodropdown, deo_keydropdown]
+              dropdown.options = [deo_autodropdown, deo_keydropdown, deo_cliphint]
               reffontheight = 14
             end
             object editbkcolor: tcoloredit
@@ -333,7 +333,7 @@ object projectoptionsfo: tprojectoptionsfo
               optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext]
               ondataentered = fontondataentered
               value = -1879048186
-              dropdown.options = [deo_autodropdown, deo_keydropdown]
+              dropdown.options = [deo_autodropdown, deo_keydropdown, deo_cliphint]
               reffontheight = 14
             end
             object editfontantialiased: tbooleanedit
@@ -347,7 +347,7 @@ object projectoptionsfo: tprojectoptionsfo
                 2
               )
               taborder = 6
-              bounds_x = 519
+              bounds_x = 527
               bounds_y = 20
               bounds_cx = 89
               bounds_cy = 16
@@ -362,11 +362,36 @@ object projectoptionsfo: tprojectoptionsfo
             taborder = 1
             bounds_x = 0
             bounds_y = 39
-            bounds_cx = 608
+            bounds_cx = 712
             bounds_cy = 53
             optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
             optionslayout = [lao_aligny]
             align_glue = wam_start
+            object bracketbkgcolor: tcoloredit
+              frame.caption = 'BracketBkCol'
+              frame.localprops = []
+              frame.localprops1 = []
+              frame.button.color = -2147483646
+              frame.buttonellipse.color = -2147483646
+              frame.buttonellipse.imagenr = 17
+              frame.outerframe = (
+                0
+                17
+                0
+                0
+              )
+              taborder = 4
+              hint = 'Background color of marked brackets.'
+              onshowhint = bracketbkcolhint
+              bounds_x = 431
+              bounds_y = 0
+              bounds_cx = 84
+              bounds_cy = 37
+              optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savevalue, oe1_savestate]
+              optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext]
+              dropdown.options = [deo_autodropdown, deo_keydropdown, deo_cliphint]
+              reffontheight = 14
+            end
             object encoding: tenumedit
               frame.caption = 'Encoding'
               frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive]
@@ -378,8 +403,8 @@ object projectoptionsfo: tprojectoptionsfo
                 0
                 0
               )
-              taborder = 4
-              bounds_x = 431
+              taborder = 5
+              bounds_x = 527
               bounds_y = 0
               bounds_cx = 84
               bounds_cy = 37
@@ -461,7 +486,7 @@ object projectoptionsfo: tprojectoptionsfo
               optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext]
               ondataentered = fontondataentered
               value = 14745599
-              dropdown.options = [deo_autodropdown, deo_keydropdown]
+              dropdown.options = [deo_autodropdown, deo_keydropdown, deo_cliphint]
               reffontheight = 14
             end
             object tlayouter14: tlayouter
@@ -533,8 +558,8 @@ object projectoptionsfo: tprojectoptionsfo
                 76
                 16
               )
-              taborder = 5
-              bounds_x = 519
+              taborder = 6
+              bounds_x = 623
               bounds_y = 6
               bounds_cx = 89
               bounds_cy = 44
@@ -563,7 +588,7 @@ object projectoptionsfo: tprojectoptionsfo
                 0
               )
               taborder = 6
-              bounds_x = 519
+              bounds_x = 527
               bounds_y = 0
               bounds_cx = 114
               bounds_cy = 37
@@ -1158,7 +1183,7 @@ object projectoptionsfo: tprojectoptionsfo
             2
           )
           taborder = 8
-          bounds_x = 519
+          bounds_x = 527
           bounds_y = 53
           bounds_cx = 66
           bounds_cy = 16
