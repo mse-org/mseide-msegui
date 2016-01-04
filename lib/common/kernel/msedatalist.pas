@@ -31,20 +31,6 @@ type
     dl_complex,dl_rowstate,dl_custom);
  listdatatypesty = set of listdatatypety;
  
- doublestringty = record
-  a,b: string;
- end;
- pdoublestringty = ^doublestringty;
- doublestringarty = array of doublestringty;
-
- doublemsestringty = record
-  a,b: msestring;
- end;
- pdoublemsestringty = ^doublemsestringty;
- doublemsestringarty = array of doublemsestringty;
- doublemsestringaty = array[0..0] of doublemsestringty;
- pdoublemsestringaty = ^doublemsestringaty;
- 
  dataprocty = procedure(var data) of object;
 {
  internallistoptionty = (ilo_needsfree,ilo_needscopy,ilo_needsinit,

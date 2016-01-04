@@ -16,7 +16,7 @@ sdef file =
 {scope}
 //last scope is default scope
 globaldefinition = CASEINSENSITIVE | keywordchars | addkeywordchars |
-     keyworddefs | editorcolors | styles
+     keyworddefs | editorcolors | styles | pairwords
 
 keywordchars =
 KEYWORDCHARS newline
@@ -52,8 +52,15 @@ keyword =
 string
 
 editorcolors =
-COLORS [fontcolor [backgroundcolor [statementcolor [markbracketsbkgcolor]]]]
+COLORS [fontcolor [backgroundcolor [statementcolor [pairmarkbackgroundcolor]]]]
 //   cl_default for project options settings
+
+pairwords =
+PAIRWORDS newline
+{pairbegin pairend newline}
+
+pairbegin = string
+pairend = string
 
 scope =
 SCOPE scopename [stylename] newline
@@ -192,7 +199,7 @@ type
 
  scopestackcachearty = array of scopestackcachety;
 
- boldcharinfoty = record
+ markinfoty = record
   backgroundcolor: colorty;
   items: gridcoordarty;
  end;
@@ -206,7 +213,7 @@ type
   scopestackcachepo: integer;
   list: trichstringdatalist;
   onlinechanged: integerchangedeventty;
-  boldchars: boldcharinfoty;
+  boldchars: markinfoty;
  end;
  pclientinfoty = ^clientinfoty;
  clientinfoarty = array of clientinfoty;
@@ -215,12 +222,13 @@ type
   font: colorty;
   background: colorty;
   statement: colorty;
-  bracketbkg: colorty;
+  pairmarkbackground: colorty;
  end;
  
  syntaxdefty = record
   defdefsnr: integer; //-1 -> mit readdeffile geladen
   charstyles: tcharstyledatalist;
+  pairwords: doublemsestringarty;
   caseinsensitive: boolean;
   scopeinfos: scopeinfoarty;
   aktscopeinfo: integer;
@@ -246,7 +254,6 @@ type
    fdefsdir: filenamety;
    fdeftext: tmsestringdatalist;
    fdefaultsyntax: integer;
-//   fdefaultboldbkgcolor: colorty;
    procedure dotimer(const sender: tobject);
    procedure syntaxchanged;
    procedure internalpaintsyntax(handle: integer; start,count: integer;
@@ -259,9 +266,11 @@ type
    procedure calcrefreshinfo(var info: refreshinfoty; var startscope: integer);
    procedure setdeftext(const avalue: tmsestringdatalist);
    procedure deflistchanged(const sender: tobject);
-   function getboldchars(index: integer): boldcharinfoty;
-   procedure setboldchars(index: integer; const avalue: boldcharinfoty);
+   function getboldchars(index: integer): markinfoty;
+   procedure setboldchars(index: integer; const avalue: markinfoty);
    function getcolors(index: integer): syntaxcolorinfoty;
+   function getpairwords(index: int32): doublemsestringarty;
+   function getcaseinsensitive(index: int32): boolean;
   protected
 
   public
@@ -285,14 +294,12 @@ type
    function linkdeffile(const sourcefilename: filenamety): integer;
                  //-1 if syntaxdef not found
    property defaultsyntax: integer read fdefaultsyntax;
-   property boldchars[index: integer]: boldcharinfoty read getboldchars 
+   property boldchars[index: integer]: markinfoty read getboldchars 
                                     write setboldchars;
    property colors[index: integer]: syntaxcolorinfoty read getcolors;
+   property caseinsensitive[index: int32]: boolean read getcaseinsensitive;
+   property pairwords[index: int32]: doublemsestringarty read getpairwords;
   published
-  {
-   property defaultboldbkgcolor: colorty read fdefaultboldbkgcolor 
-                            write fdefaultboldbkgcolor default cl_none;
-  }
    property linesperslice: integer read flinesperslice write setlinesperslice
                 default defaultlinesperslice;
    property defdefs: tdoublemsestringdatalist read fdefdefs write setdefdefs;
@@ -485,7 +492,7 @@ begin
    font:= cl_default;
    background:= cl_default;
    statement:= cl_default;
-   bracketbkg:= cl_default;
+   pairmarkbackground:= cl_default;
   end;
  end;
 end;
@@ -1101,7 +1108,7 @@ end;
 function tsyntaxpainter.readdeffile(stream: ttextstream): integer;
 type
  tokennrty = (tn_styles,tn_caseinsensitive,tn_keywordchars,tn_addkeywordchars,
-              tn_colors,tn_keyworddefs,
+              tn_colors,tn_pairwords,tn_keyworddefs,
               tn_scope,tn_endtokens,tn_keywords,tn_jumptokens,tn_calltokens,
               tn_return);
 const
@@ -1110,7 +1117,7 @@ const
  nonetoken = 'NONE';
  tokens: array[tokennrty] of string = (
        'STYLES','CASEINSENSITIVE','KEYWORDCHARS','ADDKEYWORDCHARS',
-       'COLORS','KEYWORDDEFS',
+       'COLORS','PAIRWORDS','KEYWORDDEFS',
        'SCOPE','ENDTOKENS','KEYWORDS','JUMPTOKENS','CALLTOKENS',
        'RETURN');
  tn_localstart = tn_scope;
@@ -1325,7 +1332,7 @@ const
  defaultname = 'DEFAULT';
 var
  flags: set of tokennrty;
- str1: string;
+ str1,str2: string;
  keys: tpointeransistringhashdatalist;
  scopenames,stylenames: tpointeransistringhashdatalist;
  int1,int2,int3,int4: integer;
@@ -1405,13 +1412,13 @@ begin
          if getcolor(lstr1,colors.font) then begin
           if getcolor(lstr1,colors.background) then begin
            if getcolor(lstr1,colors.statement) then begin
-            if getcolor(lstr1,colors.bracketbkg) then begin
+            if getcolor(lstr1,colors.pairmarkbackground) then begin
             end;
            end;
           end;
          end;
         end;
-        tn_addkeywordchars,tn_styles: begin
+        tn_addkeywordchars,tn_styles,tn_pairwords: begin
         end;
         else begin
          invalidtoken;
@@ -1502,6 +1509,13 @@ begin
          invalidstyle;
 //         error('Invalid style '''+line+''''+lineinfo);
         end;
+       end;
+       tn_pairwords: begin
+        if not nextquotedstring(lstr1,str1) or 
+                          not nextquotedstring(lstr1,str2) then begin
+         invalidstring();
+        end;
+        additem(pairwords,msestring(msestring(str1)),msestring(str2));
        end;
        tn_calltokens,tn_jumptokens: begin
         bo1:= nexttokeninfo(lstr1,str1,tf1);
@@ -1778,14 +1792,13 @@ begin
  end;
 end;
 
-function tsyntaxpainter.getboldchars(index: integer): boldcharinfoty;
+function tsyntaxpainter.getboldchars(index: integer): markinfoty;
 begin
  checkarrayindex(fclients,index);
  result:= fclients[index].boldchars;
 end;
 
-procedure tsyntaxpainter.setboldchars(index: integer; 
-                                            const avalue: boldcharinfoty);
+procedure tsyntaxpainter.setboldchars(index: integer; const avalue: markinfoty);
 begin
  checkarrayindex(fclients,index);
  fclients[index].boldchars:= avalue;
@@ -1795,6 +1808,18 @@ function tsyntaxpainter.getcolors(index: integer): syntaxcolorinfoty;
 begin
  checkarrayindex(fclients,index);
  result:= fsyntaxdefs[fclients[index].syntaxdefhandle].colors;
+end;
+
+function tsyntaxpainter.getpairwords(index: int32): doublemsestringarty;
+begin
+ checkarrayindex(fclients,index);
+ result:= fsyntaxdefs[fclients[index].syntaxdefhandle].pairwords;
+end;
+
+function tsyntaxpainter.getcaseinsensitive(index: int32): boolean;
+begin
+ checkarrayindex(fclients,index);
+ result:= fsyntaxdefs[fclients[index].syntaxdefhandle].caseinsensitive;
 end;
 
 { tkeywordlist }

@@ -101,6 +101,21 @@ type
  msestringaty = array[0..0] of msestring;
  pmsestringaty = ^msestringaty;
  msestringararty = array of msestringarty;
+
+ doublestringty = record
+  a,b: string;
+ end;
+ pdoublestringty = ^doublestringty;
+ doublestringarty = array of doublestringty;
+
+ doublemsestringty = record
+  a,b: msestring;
+ end;
+ pdoublemsestringty = ^doublemsestringty;
+ doublemsestringarty = array of doublemsestringty;
+ doublemsestringaty = array[0..0] of doublemsestringty;
+ pdoublemsestringaty = ^doublemsestringaty;
+ 
  widestringarty = array of widestring;
  charaty = array[0..maxdatasize-1] of char;
  pcharaty = ^charaty;

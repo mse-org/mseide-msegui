@@ -51,7 +51,8 @@ type
    procedure change; virtual;
    property recordsize: integer read frecordsize;
   public
-   constructor create(const arecordsize: integer; const aoptions: recordliststatesty = []);
+   constructor create(const arecordsize: integer;
+                               const aoptions: recordliststatesty = []);
    destructor destroy; override;
    procedure assign(const source: trecordlist);
    function invalidindex(const aindex: int32): boolean; inline;

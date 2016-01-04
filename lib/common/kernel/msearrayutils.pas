@@ -94,6 +94,8 @@ function additem(var dest: winidarty; const value: winidty;
 
 procedure additem(var dest: stringarty; const value: string); overload;
 procedure additem(var dest: msestringarty; const value: msestring); overload;
+procedure additem(var dest: doublemsestringarty;
+                          const valuea,valueb: msestring); overload;
 procedure additem(var dest: msestringararty; 
                              const value: msestringarty); overload;
 procedure additem(var dest: integerarty; const value: integer); overload;
@@ -795,6 +797,16 @@ procedure additem(var dest: msestringarty; const value: msestring);
 begin
  setlength(dest,high(dest)+2);
  dest[high(dest)]:= value;
+end;
+
+procedure additem(var dest: doublemsestringarty;
+                          const valuea,valueb: msestring);
+begin
+ setlength(dest,high(dest)+2);
+ with dest[high(dest)] do begin
+  a:= valuea;
+  b:= valueb;
+ end;
 end;
 
 procedure additem(var dest: msestringararty;

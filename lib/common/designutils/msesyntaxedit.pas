@@ -40,7 +40,7 @@ type
    fsyntaxchanging: integer;
    fbracketsetting: integer;
    fbracketchecking: integer;
-   fmarkbracketbkgcolor: colorty;
+   fpairmarkbkgcolor: colorty;
    procedure setsyntaxpainter(const Value: tsyntaxpainter);
    procedure unregistersyntaxpainter;
    procedure syntaxchanged(const sender: tobject; const index: integer);
@@ -110,8 +110,8 @@ type
 //                             write setdefaultsyntax default false;
    property options: syntaxeditoptionsty read foptions write setoptions 
                                                                   default [];
-   property markbracketbkgcolor: colorty read fmarkbracketbkgcolor 
-                                 write fmarkbracketbkgcolor default cl_none;
+   property pairmarkbkgcolor: colorty read fpairmarkbkgcolor 
+                                 write fpairmarkbkgcolor default cl_none;
  end;
 
 function checkbracketkind(const achar: msechar; out open: boolean): bracketkindty;
@@ -155,7 +155,7 @@ begin
  flinkpos:= invalidcell;
  fbracket1:= invalidcell;
  fbracket2:= invalidcell;
- fmarkbracketbkgcolor:= cl_none;
+ fpairmarkbkgcolor:= cl_none;
  inherited;
 end;
 
@@ -610,7 +610,7 @@ begin
 end;
 
 const
- noboldchars: boldcharinfoty = (backgroundcolor: cl_none; items: nil);
+ noboldchars: markinfoty = (backgroundcolor: cl_none; items: nil);
  
 procedure tsyntaxedit.clearbrackets();
 begin
@@ -641,7 +641,7 @@ var
  open,open2: boolean;
  pt1,pt2: gridcoordty;
  ar1: gridcoordarty;
- boldinfo1: boldcharinfoty;
+ boldinfo1: markinfoty;
 begin
  clearbrackets;
  pt2:= invalidcell;
@@ -672,15 +672,15 @@ begin
  if pt2.col >= 0 then begin
   fbracket1:= pt1;
   fbracket2:= pt2;
-  boldinfo1.backgroundcolor:= fmarkbracketbkgcolor;
+  boldinfo1.backgroundcolor:= fpairmarkbkgcolor;
   if syntaxpainterhandle >= 0 then begin
    setlength(ar1,2);
    ar1[0]:= fbracket1;
    ar1[1]:= fbracket2;
    boldinfo1.backgroundcolor:= 
-            syntaxpainter.colors[syntaxpainterhandle].bracketbkg;
+            syntaxpainter.colors[syntaxpainterhandle].pairmarkbackground;
    if boldinfo1.backgroundcolor = cl_default then begin
-    boldinfo1.backgroundcolor:= fmarkbracketbkgcolor;
+    boldinfo1.backgroundcolor:= fpairmarkbkgcolor;
    end;
    boldinfo1.items:= ar1;
    syntaxpainter.boldchars[syntaxpainterhandle]:= boldinfo1;

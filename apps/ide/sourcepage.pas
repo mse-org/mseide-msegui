@@ -1315,7 +1315,7 @@ begin
     end;
    end;
    grid.wheelscrollheight:= e.scrollheight;
-   edit.markbracketbkgcolor:= e.bracketbkgcolor;
+   edit.pairmarkbkgcolor:= e.pairmarkcolor;
    if edit.syntaxpainterhandle >= 0 then begin
     colors:= edit.syntaxpainter.colors[edit.syntaxpainterhandle];
     with colors do begin

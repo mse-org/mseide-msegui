@@ -197,7 +197,7 @@ type
    fencoding: integer;
    fnoformdesignerdocking: boolean;
    ftrimtrailingwhitespace: boolean;
-   fbracketbkgcolor: integer;
+   fpairmarkcolor: integer;
    function limitgridsize(const avalue: integer): integer;
    procedure setgridsizex(const avalue: integer);
    procedure setgridsizey(const avalue: integer);
@@ -239,8 +239,8 @@ type
    property editfontcolor: integer read feditfontcolor write feditfontcolor;
    property editbkcolor: integer read feditbkcolor write feditbkcolor;
    property statementcolor: integer read fstatementcolor write fstatementcolor;
-   property bracketbkgcolor: integer read fbracketbkgcolor 
-                                             write fbracketbkgcolor;
+   property pairmarkcolor: integer read fpairmarkcolor 
+                                             write fpairmarkcolor;
    
    property editfontantialiased: boolean read feditfontantialiased 
                                               write feditfontantialiased;
@@ -808,7 +808,7 @@ type
    twidgetgrid6: twidgetgrid;
    syntaxdeffile: tfilenameedit;
    syntaxdeffilemask: tmemodialogedit;
-   bracketbkgcolor: tcoloredit;
+   pairmarkcolor: tcoloredit;
    procedure acttiveselectondataentered(const sender: TObject);
    procedure colonshowhint(const sender: tdatacol; const arow: Integer; 
                       var info: hintinfoty);
@@ -2848,7 +2848,7 @@ begin
  editfontcolor:= integer(cl_text);
  editbkcolor:= integer(cl_foreground);
  statementcolor:= $E0FFFF;
- bracketbkgcolor:= int32(cl_none);
+ pairmarkcolor:= int32(cl_none);
  editfontantialiased:= true;
  editmarkbrackets:= true;
  backupfilecount:= 2;
