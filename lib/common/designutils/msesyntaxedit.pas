@@ -63,7 +63,7 @@ type
    procedure loaded; override;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    procedure defineproperties(filer: tfiler); override;
-   procedure clearbrackets();
+   procedure clearpairmarks();
    procedure checkpairmarks();
    procedure editnotification(var info: editnotificationinfoty); override;
    procedure doasyncevent(var atag: integer); override;
@@ -612,7 +612,7 @@ end;
 const
  noboldchars: markinfoty = (backgroundcolor: cl_none; items: nil);
  
-procedure tsyntaxedit.clearbrackets();
+procedure tsyntaxedit.clearpairmarks();
 begin
  if (fbracket1.col >= 0) and (fbracketsetting = 0) then begin
   inc(fbracketsetting);
@@ -643,7 +643,7 @@ var
  ar1: gridcoordarty;
  boldinfo1: markinfoty;
 begin
- clearbrackets;
+ clearpairmarks();
  pt2:= invalidcell;
  pt1:= editpos;
  mch1:= charatpos(pt1);
@@ -972,7 +972,7 @@ procedure tsyntaxedit.editnotification(var info: editnotificationinfoty);
 begin
  inherited;
  if (info.action = ea_beforechange) and not syntaxchanging then begin
-  clearbrackets;
+  clearpairmarks();
  end
  else begin
   if (seo_markbrackets in options) and
