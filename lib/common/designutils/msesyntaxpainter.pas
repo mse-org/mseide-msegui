@@ -199,9 +199,15 @@ type
 
  scopestackcachearty = array of scopestackcachety;
 
+ markitemty = record
+  bold: boolean;
+  pos: gridcoordty;
+ end;
+ markitemarty = array of markitemty;
+ 
  markinfoty = record
   backgroundcolor: colorty;
-  items: gridcoordarty;
+  items: markitemarty;
  end;
  
  clientinfoty = record
@@ -879,7 +885,7 @@ begin
   end;
 endlab:
   for int1:= 0 to high(boldchars.items) do begin
-   with boldchars.items[int1] do begin
+   with boldchars.items[int1].pos do begin
     if (row >= firstrow) and (row <= lastrow) then begin
      bo1:= not (fs_bold in getcharstyle(
                        list.richitemspo[row]^.format,col).fontstyle);

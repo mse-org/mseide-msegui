@@ -640,7 +640,7 @@ var
  br1,br2: bracketkindty;
  open,open2: boolean;
  pt1,pt2: gridcoordty;
- ar1: gridcoordarty;
+ ar1: markitemarty;
  boldinfo1: markinfoty;
 begin
  clearpairmarks();
@@ -675,8 +675,8 @@ begin
   boldinfo1.backgroundcolor:= fpairmarkbkgcolor;
   if syntaxpainterhandle >= 0 then begin
    setlength(ar1,2);
-   ar1[0]:= fbracket1;
-   ar1[1]:= fbracket2;
+   ar1[0].pos:= fbracket1;
+   ar1[1].pos:= fbracket2;
    boldinfo1.backgroundcolor:= 
             syntaxpainter.colors[syntaxpainterhandle].pairmarkbackground;
    if boldinfo1.backgroundcolor = cl_default then begin
