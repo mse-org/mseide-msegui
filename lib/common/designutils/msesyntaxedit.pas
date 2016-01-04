@@ -64,7 +64,7 @@ type
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    procedure defineproperties(filer: tfiler); override;
    procedure clearbrackets();
-   procedure checkbrackets();
+   procedure checkpairmarks();
    procedure editnotification(var info: editnotificationinfoty); override;
    procedure doasyncevent(var atag: integer); override;
    procedure doafterpaint(const canvas: tcanvas); override;
@@ -634,7 +634,7 @@ begin
  end;  
 end;
 
-procedure tsyntaxedit.checkbrackets();
+procedure tsyntaxedit.checkpairmarks();
 var
  mch1: msechar;
  br1,br2: bracketkindty;
@@ -991,7 +991,7 @@ begin
  inherited;
  if atag = checkbrackettag then begin
   fbracketchecking:= 0;
-  checkbrackets();
+  checkpairmarks();
  end;
 end;
 
