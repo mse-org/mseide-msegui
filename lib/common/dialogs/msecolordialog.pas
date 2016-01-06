@@ -156,6 +156,8 @@ type
    function getfixcolclass: dropdownfixcolclassty; override;
   public
    constructor create(const intf: idropdownlist);
+  published
+   property options default defaultautodropdownoptions;
  end;
  
 function colordialog(var acolor: colorty): modalresultty;
@@ -277,7 +279,7 @@ begin
   fcolorvalues[int1]:= colorty(colortorgb(fcolorvalues[int1]));
  end;
  }
- options:= [deo_autodropdown,deo_keydropdown];
+ options:= defaultautodropdownoptions;
 end;
 
 function tcolordropdowncontroller.getbuttonframeclass():

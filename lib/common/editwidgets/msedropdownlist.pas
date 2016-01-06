@@ -48,6 +48,7 @@ type
 
 const
  defaultdropdownoptionsedit = [deo_keydropdown];
+ defaultautodropdownoptions = defaultdropdownoptionsedit + [deo_autodropdown];
 type
  tcustomdropdownlistcontroller = class;
 
