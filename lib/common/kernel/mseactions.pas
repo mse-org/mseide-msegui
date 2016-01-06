@@ -240,18 +240,31 @@ type
   private
    fonhelp: helpcontrollereventty;
    fonhelp1: helpcontrollerprocty;
+   fshortcut: shortcutty;
+   fshortcut1: shortcutty;
+   fshortcutregistered: boolean;
+   procedure setshortcut(const avalue: shortcutty);
+   procedure setshortcut1(const avalue: shortcutty);
+   procedure checkshortcuts();
   protected
    procedure dohelp(const sender: tmsecomponent; var handled: boolean); virtual;
+   procedure doshortcut(const sender: twidget; var keyinfo: keyeventinfoty);
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    property onhelp: helpcontrollereventty read fonhelp write fonhelp;
    property onhelp1: helpcontrollerprocty read fonhelp1 write fonhelp1;
+   property shortcut: shortcutty read fshortcut write setshortcut
+                                                  default ord(key_none) ;
+   property shortcut1: shortcutty read fshortcut1 write setshortcut1
+                                                  default ord(key_none);
  end;
 
  thelpcontroller = class(tcustomhelpcontroller)
   published 
    property onhelp;
+   property shortcut;
+   property shortcut1;
  end;
 
 function issameshortcut(const a,b: shortcutarty): boolean;
@@ -1842,8 +1855,43 @@ destructor tcustomhelpcontroller.destroy;
 begin
  if not (csdesigning in componentstate) then begin
   application.unregisterhelphandler({$ifdef FPC}@{$endif}dohelp);
+  fshortcut:= 0;
+  fshortcut1:= 0;
+  checkshortcuts(); //unregister
  end;
  inherited;
+end;
+
+procedure tcustomhelpcontroller.setshortcut(const avalue: shortcutty);
+begin
+ if avalue <> fshortcut then begin
+  fshortcut:= avalue;
+  checkshortcuts();
+ end;
+end;
+
+procedure tcustomhelpcontroller.setshortcut1(const avalue: shortcutty);
+begin
+ if avalue <> fshortcut1 then begin
+  fshortcut1:= avalue;
+  checkshortcuts();
+ end;
+end;
+
+procedure tcustomhelpcontroller.checkshortcuts();
+begin
+ if not (csdesigning in componentstate) and 
+     (fshortcutregistered xor 
+             ((fshortcut <> 0) or (fshortcut1 <> 0))) then begin
+  if fshortcutregistered then begin
+   application.unregisteronshortcut(@doshortcut);
+   fshortcutregistered:= false;
+  end
+  else begin
+   application.registeronshortcut(@doshortcut);
+   fshortcutregistered:= true;
+  end;
+ end;
 end;
 
 procedure tcustomhelpcontroller.dohelp(const sender: tmsecomponent;
@@ -1854,6 +1902,18 @@ begin
  end;
  if not handled and assigned(fonhelp1) then begin
   fonhelp1(self,sender,handled);
+ end;
+end;
+
+procedure tcustomhelpcontroller.doshortcut(const sender: twidget;
+               var keyinfo: keyeventinfoty);
+begin
+ if not (es_processed in keyinfo.eventstate) and 
+            not (ss_repeat in keyinfo.shiftstate) and
+               (checkshortcutcode(fshortcut,keyinfo) or 
+                checkshortcutcode(fshortcut1,keyinfo)) then begin
+  include(keyinfo.eventstate,es_processed);
+  application.help(sender);
  end;
 end;
 
