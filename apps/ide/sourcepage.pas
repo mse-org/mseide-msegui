@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2014 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2016 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -1303,6 +1303,7 @@ begin
 //   edit.tabulators.setdefaulttabs(int1 * tabstops / edit.tabulators.ppmm);
    edit.autoindent:= e.autoindent;
    edit.markbrackets:= e.editmarkbrackets;
+   edit.markpairwords:= e.editmarkpairwords;
    case e.encoding of
     1: begin
      edit.encoding:= ce_utf8;

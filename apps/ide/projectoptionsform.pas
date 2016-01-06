@@ -193,6 +193,7 @@ type
    fstatementcolor: integer;
    feditfontantialiased: boolean;
    feditmarkbrackets: boolean;
+   feditmarkpairwords: boolean;
    fbackupfilecount: integer;
    fencoding: integer;
    fnoformdesignerdocking: boolean;
@@ -246,6 +247,8 @@ type
                                               write feditfontantialiased;
    property editmarkbrackets: boolean read feditmarkbrackets 
                                               write feditmarkbrackets;
+   property editmarkpairwords: boolean read feditmarkpairwords 
+                                              write feditmarkpairwords;
    property backupfilecount: integer read fbackupfilecount 
                                               write fbackupfilecount;
    property encoding: integer read fencoding write fencoding;
@@ -685,9 +688,6 @@ type
    editfontheight: tintegeredit;
    editfontname: tstringedit;
    tlayouter11: tlayouter;
-   encoding: tenumedit;
-   scrollheight: tintegeredit;
-   rightmarginchars: tintegeredit;
    tlayouter10: tlayouter;
    backupfilecount: tintegeredit;
    spacetabs: tbooleanedit;
@@ -732,7 +732,6 @@ type
    editfontcolor: tcoloredit;
    editbkcolor: tcoloredit;
    editfontantialiased: tbooleanedit;
-   statementcolor: tcoloredit;
    ttabpage17: ttabpage;
    ttabpage18: ttabpage;
    befcommandgrid: twidgetgrid;
@@ -803,12 +802,18 @@ type
    toolsc: tstringedit;
    toolscalt: tstringedit;
    editmarkbrackets: tbooleanedit;
-   trimtrailingwhitespace: tbooleanedit;
    fpcgdbworkaround: tbooleanedit;
    twidgetgrid6: twidgetgrid;
    syntaxdeffile: tfilenameedit;
    syntaxdeffilemask: tmemodialogedit;
+   editmarkpairwords: tbooleanedit;
+   tlayouter15: tlayouter;
+   trimtrailingwhitespace: tbooleanedit;
+   encoding: tenumedit;
    pairmarkcolor: tcoloredit;
+   statementcolor: tcoloredit;
+   scrollheight: tintegeredit;
+   rightmarginchars: tintegeredit;
    procedure acttiveselectondataentered(const sender: TObject);
    procedure colonshowhint(const sender: tdatacol; const arow: Integer; 
                       var info: hintinfoty);
@@ -2851,6 +2856,7 @@ begin
  pairmarkcolor:= int32(cl_none);
  editfontantialiased:= true;
  editmarkbrackets:= true;
+ editmarkpairwords:= true;
  backupfilecount:= 2;
  setlength(ar1,1);
  ar1[0]:= '${TEMPLATEDIR}';

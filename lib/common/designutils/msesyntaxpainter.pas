@@ -202,6 +202,7 @@ type
  markitemty = record
   bold: boolean;
   pos: gridcoordty;
+  len: int32;
  end;
  markitemarty = array of markitemty;
  
@@ -682,7 +683,8 @@ begin
       if length(scopestackcache) < scopestackcachepo then begin
        setlength(scopestackcache,scopestackcachepo);
       end;
-      scopestackcache[scopestackcachepo-1].stack:= copy(scopestack,0,scopestackpo+1);
+      scopestackcache[scopestackcachepo-1].stack:= 
+                                       copy(scopestack,0,scopestackpo+1);
       scopestackcache[scopestackcachepo-1].startscope:= startscopenr;
      end;
      changed:= false;
@@ -885,13 +887,16 @@ begin
   end;
 endlab:
   for int1:= 0 to high(boldchars.items) do begin
-   with boldchars.items[int1].pos do begin
+   with boldchars.items[int1],pos do begin
     if (row >= firstrow) and (row <= lastrow) then begin
-     bo1:= not (fs_bold in getcharstyle(
-                       list.richitemspo[row]^.format,col).fontstyle);
-     bo2:= updatefontstyle1(list.richitemspo[row]^.format,col,1,fs_bold,bo1);
+     bo2:= false;
+     if bold then begin
+      bo1:= not (fs_bold in getcharstyle(
+                        list.richitemspo[row]^.format,col).fontstyle);
+      bo2:= updatefontstyle1(list.richitemspo[row]^.format,col,len,fs_bold,bo1);
+     end;
      bo2:= (boldchars.backgroundcolor <> cl_none) and 
-        setcolorbackground1(list.richitemspo[row]^.format,col,1,
+        setcolorbackground1(list.richitemspo[row]^.format,col,len,
                                        boldchars.backgroundcolor) or bo2;
      if bo2 and assigned(onlinechanged) then begin
       onlinechanged(self,row);
@@ -1520,6 +1525,10 @@ begin
         if not nextquotedstring(lstr1,str1) or 
                           not nextquotedstring(lstr1,str2) then begin
          invalidstring();
+        end;
+        if caseinsensitive then begin
+         str1:= struppercase(str1);
+         str2:= struppercase(str2);
         end;
         additem(pairwords,msestring(msestring(str1)),msestring(str2));
        end;

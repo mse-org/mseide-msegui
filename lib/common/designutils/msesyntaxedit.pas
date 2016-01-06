@@ -26,7 +26,8 @@ const
  closebrackets: array[bracketkindty] of msechar = (#0,')',']','}');
 
 type
- syntaxeditoptionty = (seo_autoindent,seo_markbrackets,seo_defaultsyntax);
+ syntaxeditoptionty = (seo_autoindent,seo_markbrackets,seo_markpairwords,
+                                        seo_caseinsensitive,seo_defaultsyntax);
  syntaxeditoptionsty = set of syntaxeditoptionty;
  
  tsyntaxedit = class(tundotextedit)
@@ -41,6 +42,7 @@ type
    fbracketsetting: integer;
    fbracketchecking: integer;
    fpairmarkbkgcolor: colorty;
+   fpairwords: doublemsestringarty;
    procedure setsyntaxpainter(const Value: tsyntaxpainter);
    procedure unregistersyntaxpainter;
    procedure syntaxchanged(const sender: tobject; const index: integer);
@@ -53,10 +55,15 @@ type
    function getmarkbrackets: boolean;
    procedure setmarkbrackets(const avalue: boolean);
    procedure setoptions(const avalue: syntaxeditoptionsty);
+   function getmarkpairwords: boolean;
+   procedure setmarkpairwords(const avalue: boolean);
+   function getcaseinsensitive: boolean;
+   procedure setcaseinsensitive(const avalue: boolean);
   protected
    foptions: syntaxeditoptionsty;
-   fbracket1,fbracket2: gridcoordty;
-   procedure objectevent(const sender: tobject; const event: objecteventty); override;
+   fmark1,fmark2: markitemty;
+   procedure objectevent(const sender: tobject;
+                                  const event: objecteventty); override;
    procedure gridvaluechanged(const index: integer); override;
    procedure insertlinebreak; override;
    procedure dokeydown(var info: keyeventinfoty); override;
@@ -80,7 +87,7 @@ type
    function charatpos(const apos: gridcoordty): msechar; //0 if none
    function charbeforepos(const apos: gridcoordty): msechar; //0 if none
    function wordatpos(const apos: gridcoordty; out word: msestring;
-              const delimchars: msestring; 
+              const delimchars: msestring; //'' -> default
               const nodelimstrings: array of msestring;
               const leftofcursor: boolean = false): gridcoordty; overload;
    function wordatpos(const apos: gridcoordty; out start: gridcoordty;
@@ -99,10 +106,17 @@ type
    procedure selectword(const apos: gridcoordty; const delimchars: msestring);
    function matchbracket(const apos: gridcoordty; const akind: bracketkindty;
                 const open: boolean; maxrows: integer = 100): gridcoordty;
+   function matchpairword(var apos: gridcoordty; //adjusted to word a start
+             out lena,lenb: int32; maxrows: integer = 100): gridcoordty;
+   property pairwords: doublemsestringarty read fpairwords write fpairwords;
+                 //values must be uppercase for caseinsensitive
    property syntaxpainterhandle: integer read fsyntaxpainterhandle;
    function syntaxchanging: boolean;
    property autoindent: boolean read getautoindent write setautoindent;
    property markbrackets: boolean read getmarkbrackets write setmarkbrackets;
+   property markpairwords: boolean read getmarkpairwords write setmarkpairwords;
+   property caseinsensitive: boolean read getcaseinsensitive 
+                                                      write setcaseinsensitive;
   published
    property syntaxpainter: tsyntaxpainter read fsyntaxpainter
                                                     write setsyntaxpainter;
@@ -114,7 +128,8 @@ type
                                  write fpairmarkbkgcolor default cl_none;
  end;
 
-function checkbracketkind(const achar: msechar; out open: boolean): bracketkindty;
+function checkbracketkind(const achar: msechar;
+                                         out open: boolean): bracketkindty;
 
 implementation
 uses
@@ -149,12 +164,16 @@ end;
 
 { tsyntaxedit }
 
+const
+ invalidmark: markitemty = (bold: false; 
+                          pos: (col: invalidaxis; row: invalidaxis); len: 0);
+ 
 constructor tsyntaxedit.create(aowner: tcomponent);
 begin
  fsyntaxpainterhandle:= -1;
  flinkpos:= invalidcell;
- fbracket1:= invalidcell;
- fbracket2:= invalidcell;
+ fmark1:= invalidmark;
+ fmark2:= invalidmark;
  fpairmarkbkgcolor:= cl_none;
  inherited;
 end;
@@ -255,6 +274,10 @@ end;
 procedure tsyntaxedit.syntaxchanged(const sender: tobject;
   const index: integer);
 begin
+ if (sender <> nil) and (sender = fsyntaxpainter) then begin
+  caseinsensitive:= fsyntaxpainter.caseinsensitive[fsyntaxpainterhandle];
+  pairwords:= fsyntaxpainter.pairwords[fsyntaxpainterhandle];
+ end;
  if fgridintf <> nil then begin
   inc(fsyntaxchanging);
   try
@@ -609,22 +632,229 @@ begin
  end;
 end;
 
+function tsyntaxedit.matchpairword(var apos: gridcoordty;
+                                             out lena,lenb: int32;
+                                     maxrows: integer = 100): gridcoordty;
+var
+ mstr1,mstr1l,mstr2,mstr2l: msestring;
+ forward1: boolean;
+ strpo,strpe: prichstringty;
+ pa,pae,pab,pal,palb,pb,pbe,pbb,pbl,pblb,po1,po2,pe: pmsechar;
+ level1: int32;
+ i1: int32;
+begin
+ if fpairwords <> nil then begin
+  mstr1:= '';
+  if (apos.row >= 0) and (apos.row < flines.count) then begin
+   mstr2:= flines.items[apos.row];
+   if (mstr2 <> '') and (apos.col >= 0) and 
+                                       (apos.col <= length(mstr2)) then begin
+    pe:= pmsechar(pointer(mstr2))+apos.col;
+    po1:= pe-1;
+    while isnamechar(pe^) do begin
+     inc(pe);
+    end;
+    while (po1 >= pointer(mstr2)) and isnamechar(po1^) do begin
+     dec(po1);
+    end;
+    inc(po1);
+    mstr1:= stringsegment(po1,pe);
+    apos.col:= po1-pmsechar(pointer(mstr2));
+   end;
+  end;
+  if mstr1 <> '' then begin
+   if caseinsensitive then begin
+    mstr1:= mseuppercase(mstr1);
+   end;
+   mstr2:= '';
+   for i1:= 0 to high(fpairwords) do begin
+    with fpairwords[i1] do begin
+     if a = mstr1 then begin
+      mstr2:= b;
+      forward1:= true;
+      break;
+     end;
+     if b = mstr1 then begin
+      mstr2:= a;
+      forward1:= false;
+      break;
+     end;
+    end;
+   end;
+   if mstr2 <> '' then begin
+    lena:= length(mstr1);
+    lenb:= length(mstr2);
+    if caseinsensitive then begin
+     mstr1l:= mselowercase(mstr1);
+     mstr2l:= mselowercase(mstr2);
+    end
+    else begin
+     mstr1l:= mstr1;
+     mstr2l:= mstr2;
+    end;
+
+    strpo:= flines.getitempo(apos.row);
+    if forward1 then begin
+     pa:= pointer(mstr1);
+     pb:= pointer(mstr2);
+     pal:= pointer(mstr1l);
+     pbl:= pointer(mstr2l);
+     level1:= 1;
+     po1:= @pmsechar(pointer(strpo^.text))[apos.col+lena];
+     i1:= flines.count-apos.row;
+     if i1 > maxrows then begin
+      i1:= maxrows;
+     end;
+     strpe:= strpo + i1;
+     while true do begin
+      repeat
+       while not isnamechar(po1^) and (po1^ <> #0) do begin
+        inc(po1);
+       end;
+       if (po1^ = pa^) or (po1^ = pal^) then begin
+        po2:= po1;
+        repeat
+         inc(pa);
+         inc(pal);
+         inc(po2);
+         if (pa^ = #0) and not isnamechar(po2^) then begin //match
+          inc(level1);
+          po1:= po2;
+         end;
+        until (po2^ <> pa^) and (po2^ <> pal^);
+        pa:= pointer(mstr1);
+        pal:= pointer(mstr1l);
+       end;
+       if (po1^ = pb^) or (po1^ = pbl^) then begin
+        po2:= po1;
+        repeat
+         inc(pb);
+         inc(pbl);
+         inc(po2);
+         if (pb^ = #0) and not isnamechar(po2^) then begin //match
+          dec(level1);
+          if level1 = 0 then begin //found
+           result.col:= po1-pmsechar(pointer(strpo^.text));
+           result.row:= strpo-prichstringty(flines.datapo);
+           exit;
+          end;
+         end;
+        until (po2^ <> pb^) and (po2^ <> pbl^);
+        pb:= pointer(mstr2);
+        pbl:= pointer(mstr2l);
+       end;
+       while isnamechar(po1^) do begin
+        inc(po1);
+       end;
+      until po1^ = #0;
+      inc(strpo);
+      if strpo >= strpe then begin
+       break;
+      end;
+      po1:= pmsechar(strpo^.text);
+     end;
+    end
+    else begin //backward
+     pae:= pointer(mstr1);
+     pbe:= pointer(mstr2);
+//     pale:= pointer(mstr1l);
+//     pble:= pointer(mstr2l);
+     pab:= pae+length(mstr1)-1; //backup
+     pbb:= pbe+length(mstr2)-1;
+     palb:= pmsechar(pointer(mstr1l))+length(mstr1l)-1;
+     pblb:= pmsechar(pointer(mstr2l))+length(mstr2l)-1;
+     pa:= pab;
+     pb:= pbb;
+     pal:= palb;
+     pbl:= pblb;
+     
+     level1:= 1;
+     pe:= pointer(strpo^.text);
+     po1:= pe + apos.col - 1;
+     i1:= apos.row;
+     if i1 > maxrows then begin
+      i1:= maxrows;
+     end;
+     strpe:= strpo - i1;
+     while true do begin
+      if pe <> nil then begin
+       repeat
+        while not isnamechar(po1^) and (po1 > pe) do begin
+         dec(po1);
+        end;
+        if (po1^ = pa^) or (po1^ = pal^) then begin
+         po2:= po1;
+         repeat
+          dec(pa);
+          dec(pal);
+          dec(po2);
+          if (pa < pae) and 
+                   ((po2 < pe) or not isnamechar(po2^)) then begin //match
+           inc(level1);
+           po1:= po2;
+          end;
+         until (po2^ <> pa^) and (po2^ <> pal^) or (po2 < pe);
+         pa:= pab;
+         pal:= palb;
+        end;
+        if (po1^ = pb^) or (po1^ = pbl^) then begin
+         po2:= po1;
+         repeat
+          dec(pb);
+          dec(pbl);
+          dec(po2);
+          if (pb < pbe) and 
+                   ((po2 < pe) or not isnamechar(po2^)) then begin //match
+           dec(level1);
+           if level1 = 0 then begin //found
+            result.col:= po2-pmsechar(pointer(strpo^.text))+1;
+            result.row:= strpo-prichstringty(flines.datapo);
+            exit;
+           end;
+           po1:= po2;
+          end;
+         until (po2^ <> pb^) and (po2^ <> pbl^) or (po2 < pe);
+         pb:= pbb;
+         pbl:= pblb;
+        end;
+        while isnamechar(po1^) and (po1 > pe) do begin
+         dec(po1);
+        end;
+        dec(po1);
+       until po1 < pe;
+      end;
+      dec(strpo);
+      if strpo < strpe then begin
+       break;
+      end;
+      pe:= pointer(strpo^.text);
+      po1:= pe + length(strpo^.text) - 1;
+     end;
+    end;
+   end;
+  end;
+ end;
+ result:= invalidcell;
+ lena:= 0;
+ lenb:= 0;
+end;
+
 const
  noboldchars: markinfoty = (backgroundcolor: cl_none; items: nil);
  
 procedure tsyntaxedit.clearpairmarks();
 begin
- if (fbracket1.col >= 0) and (fbracketsetting = 0) then begin
+ if (fmark1.pos.col >= 0) and (fbracketsetting = 0) then begin
   inc(fbracketsetting);
   try
-   setfontstyle(fbracket1,makegridcoord(fbracket1.col+1,fbracket1.row),
+   setfontstyle(fmark1.pos,makegridcoord(fmark1.pos.col+1,fmark1.pos.row),
                                   fs_bold,false,cl_transparent);
-   setfontstyle(fbracket2,makegridcoord(fbracket2.col+1,fbracket2.row),
+   setfontstyle(fmark2.pos,makegridcoord(fmark2.pos.col+1,fmark2.pos.row),
                                   fs_bold,false,cl_transparent);
-   refreshsyntax(fbracket1.row,1);
-   refreshsyntax(fbracket2.row,1);
-   fbracket1:= invalidcell;
-   fbracket2:= invalidcell;
+   refreshsyntax(fmark1.pos.row,1);
+   refreshsyntax(fmark2.pos.row,1);
+   fmark1:= invalidmark;
+   fmark2:= invalidmark;
    if syntaxpainterhandle >= 0 then begin
     syntaxpainter.boldchars[syntaxpainterhandle]:= noboldchars;
    end;
@@ -642,60 +872,89 @@ var
  pt1,pt2: gridcoordty;
  ar1: markitemarty;
  boldinfo1: markinfoty;
+ iswordmark: boolean;
 begin
  clearpairmarks();
  pt2:= invalidcell;
- pt1:= editpos;
- mch1:= charatpos(pt1);
- br1:= checkbracketkind(mch1,open);
- if (br1 <> bki_none) and (pt1.col > 0) then begin
-  dec(pt1.col);
-  br2:= checkbracketkind(charatpos(pt1),open2);
-  if (br2 = bki_none) or (open <> open2) then begin
-   inc(pt1.col);
+ if seo_markbrackets in foptions then begin
+  fmark1.bold:= true;
+  fmark2.bold:= true;
+  fmark1.len:= 1;
+  fmark2.len:= 1;
+  pt1:= editpos;
+  mch1:= charatpos(pt1);
+  br1:= checkbracketkind(mch1,open);
+  if (br1 <> bki_none) and (pt1.col > 0) then begin
+   dec(pt1.col);
+   br2:= checkbracketkind(charatpos(pt1),open2);
+   if (br2 = bki_none) or (open <> open2) then begin
+    inc(pt1.col);
+   end
+   else begin
+    br1:= br2;
+   end;
+   pt2:= matchbracket(pt1,br1,open);
   end
   else begin
-   br1:= br2;
-  end;
-  pt2:= matchbracket(pt1,br1,open);
- end
- else begin
-  dec(pt1.col);
-  if pt1.col >= 0 then begin
-   mch1:= charatpos(pt1);
-   br1:= checkbracketkind(mch1,open);
-   if br1 <> bki_none then begin
-    pt2:= matchbracket(pt1,br1,open);
+   dec(pt1.col);
+   if pt1.col >= 0 then begin
+    mch1:= charatpos(pt1);
+    br1:= checkbracketkind(mch1,open);
+    if br1 <> bki_none then begin
+     pt2:= matchbracket(pt1,br1,open);
+    end;
    end;
   end;
  end;
+ iswordmark:= false;
+ if (seo_markpairwords in foptions) and (pt2.col < 0) then begin
+  iswordmark:= true;
+  pt1:= editpos;
+  pt2:= matchpairword(pt1,fmark1.len,fmark2.len);
+ end;
  if pt2.col >= 0 then begin
-  fbracket1:= pt1;
-  fbracket2:= pt2;
+  fmark1.pos:= pt1;
+  fmark2.pos:= pt2;
   boldinfo1.backgroundcolor:= fpairmarkbkgcolor;
+  if iswordmark then begin
+   fmark1.bold:= boldinfo1.backgroundcolor = cl_none;
+   fmark2.bold:= fmark1.bold;
+  end;
   if syntaxpainterhandle >= 0 then begin
    setlength(ar1,2);
-   ar1[0].pos:= fbracket1;
-   ar1[1].pos:= fbracket2;
+   ar1[0]:= fmark1;
+   ar1[1]:= fmark2;
    boldinfo1.backgroundcolor:= 
             syntaxpainter.colors[syntaxpainterhandle].pairmarkbackground;
    if boldinfo1.backgroundcolor = cl_default then begin
     boldinfo1.backgroundcolor:= fpairmarkbkgcolor;
    end;
+   if iswordmark then begin
+    fmark1.bold:= boldinfo1.backgroundcolor = cl_none;
+    fmark2.bold:= fmark1.bold;
+   end;
    boldinfo1.items:= ar1;
    syntaxpainter.boldchars[syntaxpainterhandle]:= boldinfo1;
-   refreshsyntax(fbracket1.row,1);
-   refreshsyntax(fbracket2.row,1);
+   refreshsyntax(fmark1.pos.row,1);
+   refreshsyntax(fmark2.pos.row,1);
   end;
   inc(fbracketsetting);
   try
    if boldinfo1.backgroundcolor = cl_none then begin
     boldinfo1.backgroundcolor:= cl_transparent;
    end;
-   setfontstyle(pt1,makegridcoord(pt1.col+1,pt1.row),fs_bold,true,
-                                             boldinfo1.backgroundcolor);
-   setfontstyle(pt2,makegridcoord(pt2.col+1,pt2.row),fs_bold,true,
-                                             boldinfo1.backgroundcolor);
+   if fmark1.bold then begin
+    setfontstyle(pt1,makegridcoord(pt1.col+fmark1.len,pt1.row),
+                          fs_bold,true,cl_default, boldinfo1.backgroundcolor);
+    setfontstyle(pt2,makegridcoord(pt2.col+fmark1.len,pt2.row),
+                           fs_bold,true,cl_default,boldinfo1.backgroundcolor);
+   end
+   else begin
+    setfontstyle(pt1,makegridcoord(pt1.col+fmark1.len,pt1.row),fs_force,false,
+                                          cl_default,boldinfo1.backgroundcolor);
+    setfontstyle(pt2,makegridcoord(pt2.col+fmark2.len,pt2.row),fs_force,false,
+                                        cl_default,boldinfo1.backgroundcolor);    
+   end;
   finally
    dec(fbracketsetting);
   end;
@@ -975,7 +1234,7 @@ begin
   clearpairmarks();
  end
  else begin
-  if (seo_markbrackets in options) and
+  if (options * [seo_markbrackets,seo_markpairwords] <> []) and
       (info.action in [ea_indexmoved,ea_delchar,ea_deleteselection,
                               ea_pasteselection,ea_textentered]) then begin
    if (fbracketchecking = 0) then begin
@@ -1035,6 +1294,36 @@ begin
  end
  else begin
   options:= options - [seo_markbrackets];
+ end;
+end;
+
+function tsyntaxedit.getmarkpairwords: boolean;
+begin
+ result:= seo_markpairwords in options;
+end;
+
+procedure tsyntaxedit.setmarkpairwords(const avalue: boolean);
+begin
+ if avalue then begin
+  options:= options + [seo_markpairwords];
+ end
+ else begin
+  options:= options - [seo_markpairwords];
+ end;
+end;
+
+function tsyntaxedit.getcaseinsensitive: boolean;
+begin
+ result:= seo_caseinsensitive in options;
+end;
+
+procedure tsyntaxedit.setcaseinsensitive(const avalue: boolean);
+begin
+ if avalue then begin
+  options:= options + [seo_caseinsensitive];
+ end
+ else begin
+  options:= options - [seo_caseinsensitive];
  end;
 end;
 

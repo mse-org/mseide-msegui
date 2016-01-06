@@ -260,7 +260,9 @@ type
    property optionsedit default defaulttexteditoptions;
    procedure setfontstyle(const start,stop: gridcoordty;
                             const astyle: fontstylety; const aset: boolean;
+                            const afontcolor: colorty = cl_default;
                             const acolorbackground: colorty = cl_default);
+                        //astyle = fs_force -> set colors only
    property selectstart: gridcoordty read fselectstart;
    property selectend: gridcoordty read fselectend;
    procedure setselection(const start,stop: gridcoordty;
@@ -1473,6 +1475,7 @@ end;
 
 procedure tcustomtextedit.setfontstyle(const start,stop: gridcoordty;
             const astyle: fontstylety; const aset: boolean;
+                  const afontcolor: colorty = cl_default;
                   const acolorbackground: colorty = cl_default);
 var
  a,b: gridcoordty;
@@ -1487,7 +1490,11 @@ begin
   if int1 = b.row then begin
    int2:= b.col - a.col;
   end;
-  bo1:= updatefontstyle1(po1^.format,a.col,int2,astyle,aset);
+  bo1:= (astyle <> fs_force) and 
+                           updatefontstyle1(po1^.format,a.col,int2,astyle,aset);
+  if afontcolor <> cl_default then begin
+   bo1:= setfontcolor1(po1^.format,a.col,int2,afontcolor) or bo1;
+  end;
   if acolorbackground <> cl_default then begin
    bo1:= setcolorbackground1(po1^.format,a.col,int2,acolorbackground) or bo1;
   end;
