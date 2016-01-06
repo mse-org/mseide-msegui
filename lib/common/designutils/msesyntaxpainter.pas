@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2016 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -57,7 +57,7 @@ COLORS [fontcolor [backgroundcolor [statementcolor [pairmarkbackgroundcolor]]]]
 
 pairwords =
 PAIRWORDS newline
-{pairbegin pairend newline}
+{pairbegin {pairbegin} pairend newline}
 
 pairbegin = string
 pairend = string
@@ -235,7 +235,7 @@ type
  syntaxdefty = record
   defdefsnr: integer; //-1 -> mit readdeffile geladen
   charstyles: tcharstyledatalist;
-  pairwords: doublemsestringarty;
+  pairwords: msestringararty;
   caseinsensitive: boolean;
   scopeinfos: scopeinfoarty;
   aktscopeinfo: integer;
@@ -276,7 +276,7 @@ type
    function getboldchars(index: integer): markinfoty;
    procedure setboldchars(index: integer; const avalue: markinfoty);
    function getcolors(index: integer): syntaxcolorinfoty;
-   function getpairwords(index: int32): doublemsestringarty;
+   function getpairwords(index: int32): msestringararty;
    function getcaseinsensitive(index: int32): boolean;
   protected
 
@@ -305,7 +305,7 @@ type
                                     write setboldchars;
    property colors[index: integer]: syntaxcolorinfoty read getcolors;
    property caseinsensitive[index: int32]: boolean read getcaseinsensitive;
-   property pairwords[index: int32]: doublemsestringarty read getpairwords;
+   property pairwords[index: int32]: msestringararty read getpairwords;
   published
    property linesperslice: integer read flinesperslice write setlinesperslice
                 default defaultlinesperslice;
@@ -1358,7 +1358,7 @@ const
  defaultname = 'DEFAULT';
 var
  flags: set of tokennrty;
- str1,str2: string;
+ str1{,str2}: string;
  keys: tpointeransistringhashdatalist;
  scopenames,stylenames: tpointeransistringhashdatalist;
  int1,int2,int3,int4: integer;
@@ -1368,6 +1368,7 @@ var
  bo1: boolean;
  aktkeywordfontinfonr: integer;
  ar1: tokeninfoarty; 
+ ar2: msestringarty;
  tokenchars1: tokencharsty;
  isnextline: boolean;
  tf1: tokenflagsty;
@@ -1537,15 +1538,19 @@ begin
         end;
        end;
        tn_pairwords: begin
-        if not nextquotedstring(lstr1,str1) or 
-                          not nextquotedstring(lstr1,str2) then begin
-         invalidstring();
+        ar2:= nil;
+        while nextquotedstring(lstr1,str1) do begin
+         if caseinsensitive then begin
+          str1:= struppercase(str1);
+         end;
+         additem(ar2,msestring(str1));
         end;
-        if caseinsensitive then begin
-         str1:= struppercase(str1);
-         str2:= struppercase(str2);
+        if ar2 <> nil then begin
+         additem(pairwords,ar2);
+        end
+        else begin
+         invalidstring;
         end;
-        additem(pairwords,msestring(msestring(str1)),msestring(str2));
        end;
        tn_calltokens,tn_jumptokens: begin
         bo1:= nexttokeninfo(lstr1,str1,tf1);
@@ -1840,7 +1845,7 @@ begin
  result:= fsyntaxdefs[fclients[index].syntaxdefhandle].colors;
 end;
 
-function tsyntaxpainter.getpairwords(index: int32): doublemsestringarty;
+function tsyntaxpainter.getpairwords(index: int32): msestringararty;
 begin
  checkarrayindex(fclients,index);
  result:= fsyntaxdefs[fclients[index].syntaxdefhandle].pairwords;

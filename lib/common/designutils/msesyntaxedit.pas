@@ -9,7 +9,7 @@
 }
 unit msesyntaxedit;
 
-{$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+{$ifdef FPC}{$mode objfpc}{$h+}{$goto on}{$endif}
 
 interface
 uses
@@ -42,7 +42,8 @@ type
    fbracketsetting: integer;
    fbracketchecking: integer;
    fpairmarkbkgcolor: colorty;
-   fpairwords: doublemsestringarty;
+   fpairwords: msestringararty;
+   fpairwordslower: msestringararty;
    procedure setsyntaxpainter(const Value: tsyntaxpainter);
    procedure unregistersyntaxpainter;
    procedure syntaxchanged(const sender: tobject; const index: integer);
@@ -59,6 +60,7 @@ type
    procedure setmarkpairwords(const avalue: boolean);
    function getcaseinsensitive: boolean;
    procedure setcaseinsensitive(const avalue: boolean);
+   procedure setpairwords(const avalue: msestringararty);
   protected
    foptions: syntaxeditoptionsty;
    fmark1,fmark2: markitemty;
@@ -77,6 +79,7 @@ type
    procedure doasyncevent(var atag: integer); override;
    procedure doafterpaint(const canvas: tcanvas); override;
    function needsfocuspaint: boolean; override;
+   procedure updatepairwords();
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -109,7 +112,8 @@ type
                 const open: boolean; maxrows: integer = 100): gridcoordty;
    function matchpairword(var apos: gridcoordty; //adjusted to word a start
              out lena,lenb: int32; maxrows: integer = 100): gridcoordty;
-   property pairwords: doublemsestringarty read fpairwords write fpairwords;
+   property pairwords: msestringararty read fpairwords write setpairwords;
+                 //last item of a pairword item is endtoken
                  //values must be uppercase for caseinsensitive
    property syntaxpainterhandle: integer read fsyntaxpainterhandle;
    function syntaxchanging: boolean;
@@ -650,6 +654,9 @@ var
  pa,pae,pab,pal,palb,pb,pbe,pbb,pbl,pblb,po1,po2,pe: pmsechar;
  level1: int32;
  i1: int32;
+ par1,par1l,pare: pmsestringarty;
+label
+ lab1;
 begin
  if fpairwords <> nil then begin
   mstr1:= '';
@@ -675,38 +682,24 @@ begin
     mstr1:= mseuppercase(mstr1);
    end;
    mstr2:= '';
-   for i1:= 0 to high(fpairwords) do begin
-    with fpairwords[i1] do begin
-     if a = mstr1 then begin
-      mstr2:= b;
-      forward1:= true;
-      break;
-     end;
-     if b = mstr1 then begin
-      mstr2:= a;
-      forward1:= false;
-      break;
+   par1:= pointer(fpairwords);
+   pare:= par1+high(fpairwords);
+   while par1 <= pare do begin
+    for i1:= 0 to high(par1^) do begin
+     if par1^[i1] = mstr1 then begin
+      forward1:= i1 < high(par1^);
+      goto lab1;
      end;
     end;
+    inc(par1);
    end;
-   if mstr2 <> '' then begin
+lab1:
+   if par1 <= pare then begin //found
+    par1l:= pointer(par1)-pointer(fpairwords)+
+                                 pointer(fpairwordslower); //lowercase
     lena:= length(mstr1);
-    lenb:= length(mstr2);
-    if caseinsensitive then begin
-     mstr1l:= mselowercase(mstr1);
-     mstr2l:= mselowercase(mstr2);
-    end
-    else begin
-     mstr1l:= mstr1;
-     mstr2l:= mstr2;
-    end;
-
     strpo:= flines.getitempo(apos.row);
     if forward1 then begin
-     pa:= pointer(mstr1);
-     pb:= pointer(mstr2);
-     pal:= pointer(mstr1l);
-     pbl:= pointer(mstr2l);
      level1:= 1;
      po1:= @pmsechar(pointer(strpo^.text))[apos.col+lena];
      i1:= flines.count-apos.row;
@@ -719,40 +712,37 @@ begin
        while not isnamechar(po1^) and (po1^ <> #0) do begin
         inc(po1);
        end;
-       if (po1^ = pa^) or (po1^ = pal^) then begin
-        po2:= po1;
-        repeat
-         inc(pa);
-         inc(pal);
-         inc(po2);
-         if (pa^ = #0) and not isnamechar(po2^) then begin //match
-          inc(level1);
-          po1:= po2;
+       if po1^ <> #0 then begin
+        for i1:= 0 to high(par1^) do begin
+         pa:= pmsechar(par1^[i1]);
+         pal:= pmsechar(par1l^[i1]);
+         if (po1^ = pa^) or (po1^ = pal^) then begin
+          po2:= po1;
+          repeat
+           inc(pa);
+           inc(pal);
+           inc(po2);
+           if (pa^ = #0) and not isnamechar(po2^) then begin //match
+            if i1 = high(par1^) then begin //end
+             dec(level1);
+             if level1 = 0 then begin //found
+              lenb:= length(par1^[i1]);
+              result.col:= po1-pmsechar(pointer(strpo^.text));
+              result.row:= strpo-prichstringty(flines.datapo);
+              exit;
+             end;
+            end
+            else begin
+             inc(level1);
+             po1:= po2;
+            end;
+           end;
+          until (po2^ <> pa^) and (po2^ <> pal^);
          end;
-        until (po2^ <> pa^) and (po2^ <> pal^);
-        pa:= pointer(mstr1);
-        pal:= pointer(mstr1l);
-       end;
-       if (po1^ = pb^) or (po1^ = pbl^) then begin
-        po2:= po1;
-        repeat
-         inc(pb);
-         inc(pbl);
-         inc(po2);
-         if (pb^ = #0) and not isnamechar(po2^) then begin //match
-          dec(level1);
-          if level1 = 0 then begin //found
-           result.col:= po1-pmsechar(pointer(strpo^.text));
-           result.row:= strpo-prichstringty(flines.datapo);
-           exit;
-          end;
-         end;
-        until (po2^ <> pb^) and (po2^ <> pbl^);
-        pb:= pointer(mstr2);
-        pbl:= pointer(mstr2l);
-       end;
-       while isnamechar(po1^) do begin
-        inc(po1);
+        end;
+        while isnamechar(po1^) do begin
+         inc(po1);
+        end;
        end;
       until po1^ = #0;
       inc(strpo);
@@ -787,48 +777,44 @@ begin
      while true do begin
       if pe <> nil then begin
        repeat
-        while not isnamechar(po1^) and (po1 > pe) do begin
+        while not isnamechar(po1^) and (po1 >= pe) do begin
          dec(po1);
         end;
-        if (po1^ = pa^) or (po1^ = pal^) then begin
-         po2:= po1;
-         repeat
-          dec(pa);
-          dec(pal);
-          dec(po2);
-          if (pa < pae) and 
-                   ((po2 < pe) or not isnamechar(po2^)) then begin //match
-           inc(level1);
-           po1:= po2;
+        if po1 >= pe then begin
+         for i1:= 0 to high(par1^) do begin
+          pae:= pmsechar(par1^[i1]);
+          pa:= pmsechar(pae+length(par1^[i1])-1);
+          pal:= pmsechar(par1l^[i1])+length(par1l^[i1])-1;
+          if (po1^ = pa^) or (po1^ = pal^) then begin
+           po2:= po1;
+           repeat
+            dec(pa);
+            dec(pal);
+            dec(po2);
+            if (pa < pae) and 
+                     ((po2 < pe) or not isnamechar(po2^)) then begin //match
+             if i1 = high(par1^) then begin //end
+              inc(level1);
+              po1:= po2;
+             end
+             else begin
+              dec(level1);
+              if level1 = 0 then begin //found
+               lenb:= length(par1^[i1]);
+               result.col:= po2-pmsechar(pointer(strpo^.text))+1;
+               result.row:= strpo-prichstringty(flines.datapo);
+               exit;
+              end;
+             end;
+            end;
+           until (po2^ <> pa^) and (po2^ <> pal^) or (po2 < pe);
           end;
-         until (po2^ <> pa^) and (po2^ <> pal^) or (po2 < pe);
-         pa:= pab;
-         pal:= palb;
-        end;
-        if (po1^ = pb^) or (po1^ = pbl^) then begin
-         po2:= po1;
-         repeat
-          dec(pb);
-          dec(pbl);
-          dec(po2);
-          if (pb < pbe) and 
-                   ((po2 < pe) or not isnamechar(po2^)) then begin //match
-           dec(level1);
-           if level1 = 0 then begin //found
-            result.col:= po2-pmsechar(pointer(strpo^.text))+1;
-            result.row:= strpo-prichstringty(flines.datapo);
-            exit;
-           end;
-           po1:= po2;
-          end;
-         until (po2^ <> pb^) and (po2^ <> pbl^) or (po2 < pe);
-         pb:= pbb;
-         pbl:= pblb;
-        end;
-        while isnamechar(po1^) and (po1 > pe) do begin
+         end;
+         while isnamechar(po1^) and (po1 > pe) do begin
+          dec(po1);
+         end;
          dec(po1);
-        end;
-        dec(po1);
+        end;         
        until po1 < pe;
       end;
       dec(strpo);
@@ -1275,6 +1261,29 @@ begin
  result:= (fgridintf = nil) and inherited needsfocuspaint;
 end;
 
+procedure tsyntaxedit.updatepairwords();
+var
+ i1,i2: int32;
+begin
+ setlength(fpairwordslower,length(fpairwords));
+ if caseinsensitive then begin
+  for i1:= 0 to high(fpairwords) do begin
+   setlength(fpairwordslower[i1],length(fpairwords[i1]));
+   for i2:= 0 to high(fpairwords[i1]) do begin
+    fpairwordslower[i1,i2]:= mselowercase(fpairwords[i1,i2]);
+   end;
+  end;
+ end
+ else begin
+  for i1:= 0 to high(fpairwords) do begin
+   setlength(fpairwordslower[i1],length(fpairwords[i1]));
+   for i2:= 0 to high(fpairwords[i1]) do begin
+    fpairwordslower[i1,i2]:= fpairwords[i1,i2];
+   end;
+  end;
+ end;
+end;
+
 function tsyntaxedit.getautoindent: boolean;
 begin
  result:= seo_autoindent in options;
@@ -1335,6 +1344,12 @@ begin
  end;
 end;
 
+procedure tsyntaxedit.setpairwords(const avalue: msestringararty);
+begin
+ fpairwords:= avalue;
+ updatepairwords();
+end;
+
 procedure tsyntaxedit.setoptions(const avalue: syntaxeditoptionsty);
 var
  delta: syntaxeditoptionsty;
@@ -1344,6 +1359,9 @@ begin
   foptions:= avalue;
   if seo_defaultsyntax in delta then begin
    checkdefaultsyntax;
+  end;
+  if seo_caseinsensitive in delta then begin
+   updatepairwords();
   end;
  end;
 end;
