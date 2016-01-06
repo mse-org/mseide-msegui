@@ -2852,7 +2852,7 @@ begin
  editfontcolor:= integer(cl_text);
  editbkcolor:= integer(cl_foreground);
  statementcolor:= $E0FFFF;
- pairmarkcolor:= int32(cl_yellow);
+ pairmarkcolor:= int32(cl_ltyellow);
  editfontantialiased:= true;
  editmarkbrackets:= true;
  editmarkpairwords:= true;
