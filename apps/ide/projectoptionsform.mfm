@@ -291,8 +291,10 @@ object projectoptionsfo: tprojectoptionsfo
               frame.localprops = []
               frame.localprops1 = []
               frame.button.color = -2147483646
+              frame.button.options = [fbo_inactiveinvisible]
               frame.buttonellipse.color = -2147483646
               frame.buttonellipse.imagenr = 17
+              frame.buttonellipse.options = [fbo_inactiveinvisible]
               frame.outerframe = (
                 0
                 17
@@ -315,8 +317,10 @@ object projectoptionsfo: tprojectoptionsfo
               frame.localprops = []
               frame.localprops1 = []
               frame.button.color = -2147483646
+              frame.button.options = [fbo_inactiveinvisible]
               frame.buttonellipse.color = -2147483646
               frame.buttonellipse.imagenr = 17
+              frame.buttonellipse.options = [fbo_inactiveinvisible]
               frame.outerframe = (
                 0
                 17
@@ -501,8 +505,10 @@ object projectoptionsfo: tprojectoptionsfo
                 frame.localprops = []
                 frame.localprops1 = []
                 frame.button.color = -2147483646
+                frame.button.options = [fbo_inactiveinvisible]
                 frame.buttonellipse.color = -2147483646
                 frame.buttonellipse.imagenr = 17
+                frame.buttonellipse.options = [fbo_inactiveinvisible]
                 frame.outerframe = (
                   0
                   31
@@ -525,8 +531,10 @@ object projectoptionsfo: tprojectoptionsfo
                 frame.localprops = []
                 frame.localprops1 = []
                 frame.button.color = -2147483646
+                frame.button.options = [fbo_inactiveinvisible]
                 frame.buttonellipse.color = -2147483646
                 frame.buttonellipse.imagenr = 17
+                frame.buttonellipse.options = [fbo_inactiveinvisible]
                 frame.outerframe = (
                   0
                   31
@@ -4083,7 +4091,9 @@ object projectoptionsfo: tprojectoptionsfo
           frame.caption = 'Error Color'
           frame.localprops = []
           frame.localprops1 = []
+          frame.button.options = [fbo_inactiveinvisible]
           frame.buttonellipse.imagenr = 17
+          frame.buttonellipse.options = [fbo_inactiveinvisible]
           frame.outerframe = (
             0
             17
@@ -4096,7 +4106,6 @@ object projectoptionsfo: tprojectoptionsfo
           bounds_cx = 108
           bounds_cy = 37
           value = -1610612712
-          dropdown.options = [deo_autodropdown, deo_keydropdown]
           reffontheight = 14
         end
         object tspacer5: tspacer
@@ -4112,7 +4121,9 @@ object projectoptionsfo: tprojectoptionsfo
           frame.caption = 'Warning Color'
           frame.localprops = []
           frame.localprops1 = []
+          frame.button.options = [fbo_inactiveinvisible]
           frame.buttonellipse.imagenr = 17
+          frame.buttonellipse.options = [fbo_inactiveinvisible]
           frame.outerframe = (
             0
             17
@@ -4125,7 +4136,6 @@ object projectoptionsfo: tprojectoptionsfo
           bounds_cx = 108
           bounds_cy = 37
           value = -1610612717
-          dropdown.options = [deo_autodropdown, deo_keydropdown]
           reffontheight = 14
         end
         object tspacer6: tspacer
@@ -4141,7 +4151,9 @@ object projectoptionsfo: tprojectoptionsfo
           frame.caption = 'Note Color'
           frame.localprops = []
           frame.localprops1 = []
+          frame.button.options = [fbo_inactiveinvisible]
           frame.buttonellipse.imagenr = 17
+          frame.buttonellipse.options = [fbo_inactiveinvisible]
           frame.outerframe = (
             0
             17
@@ -4154,7 +4166,6 @@ object projectoptionsfo: tprojectoptionsfo
           bounds_cx = 108
           bounds_cy = 37
           value = -1610612716
-          dropdown.options = [deo_autodropdown, deo_keydropdown]
           reffontheight = 14
         end
         object tspacer4: tspacer
@@ -4845,7 +4856,6 @@ object projectoptionsfo: tprojectoptionsfo
             optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick]
             value = 0
             valuedefault = 0
-            dropdown.options = [deo_autodropdown, deo_keydropdown]
             onsetvalue = colsetvalue
             reffontheight = 14
           end

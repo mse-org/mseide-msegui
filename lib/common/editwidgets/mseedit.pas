@@ -212,8 +212,9 @@ type
  end;
  buttoneventty = procedure(const sender: tobject; var action: buttonactionty;
                        const buttonindex: integer) of object;
- framebuttonoptionty = (fbo_left,fbo_invisible,fbo_disabled,fbo_flat,
-             fbo_noanim,fbo_nomouseanim,fbo_noclickanim,fbo_nofocusanim);
+ framebuttonoptionty = 
+       (fbo_left,fbo_invisible,fbo_inactiveinvisible,fbo_disabled,
+        fbo_flat,fbo_noanim,fbo_nomouseanim,fbo_noclickanim,fbo_nofocusanim);
  framebuttonoptionsty = set of framebuttonoptionty;
 
  tcustombuttonsframe = class;
@@ -645,7 +646,8 @@ end;
 
 procedure tframebutton.optionstostate();
 begin
- updatebit(longword(finfo.state),ord(shs_invisible),fbo_invisible in foptions);
+ updatebit(longword(finfo.state),ord(shs_invisible),
+                                          (fbo_invisible in foptions));
  updatebit(longword(finfo.state),ord(shs_disabled),fbo_disabled in foptions);
  updatebit(longword(finfo.state),ord(shs_flat),fbo_flat in foptions);
  updatebit(longword(finfo.state),ord(shs_noanimation),fbo_noanim in foptions);
@@ -667,7 +669,8 @@ begin
  foptions:= Value;
  optionstostate();
  if (statebefore <> finfo.state) or 
-       ((optionsbefore >< foptions) * [fbo_left,fbo_invisible] <> []) then begin
+       ((optionsbefore >< foptions) * 
+          [fbo_left,fbo_invisible,fbo_inactiveinvisible] <> []) then begin
   changed();
  end;
 end;
@@ -845,7 +848,6 @@ begin
  changed();
 end;
 
-
 procedure tframebutton.updatewidgetstate(const awidget: twidget);
 //var
 // invisiblebefore: boolean;
@@ -853,6 +855,13 @@ begin
 // invisiblebefore:= ss_invisible in finfo.state;
  updatewidgetshapestate(finfo,awidget,fbo_disabled in foptions,
                                  {fbo_invisible in foptions,}fframe);
+ if (fbo_inactiveinvisible in foptions) and 
+  (awidget.componentstate * [csdesigning,csdestroying] = []) then begin
+  if awidget.active xor not(shs_invisible in finfo.state) then begin
+   togglebit1(longword(finfo.state),ord(shs_invisible));
+   tcustombuttonframe(fowner).internalupdatestate();
+  end;
+ end;
 // updatebit(longword(finfo.state),ord(ss_invisible),invisiblebefore);
 end;
 
@@ -1182,7 +1191,8 @@ begin
  color2:= cl_none;
  for int1:= 0 to fbuttons.count-1 do begin
   with fbuttons[int1] do begin
-   if not (fbo_invisible in foptions) then begin
+   if not (shs_invisible in finfo.state)
+                            {(fbo_invisible in foptions)} then begin
     if fframe <> nil then begin
 //     canvas.save;
      fframe.paintbackground(canvas,fframerect,false);

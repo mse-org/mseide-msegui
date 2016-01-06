@@ -175,7 +175,7 @@ type
                  fs_sbhorztop,fs_sbvertleft,
                  fs_sbleft,fs_sbtop,fs_sbright,fs_sbbottom,
                  fs_nowidget,fs_nosetinstance,fs_framemouse,
-                 fs_disabled,fs_creating,
+                 fs_disabled,fs_creating,fs_stateupdating,
                  fs_cancaptionsyncx,fs_cancaptionsyncy,
                  fs_drawfocusrect,fs_paintrectfocus,
                  fs_captionfocus,fs_captionhint,fs_rectsvalid,
@@ -4510,7 +4510,14 @@ end;
 procedure tcustomframe.internalupdatestate;
 begin
  if not (csloading in fintf.getcomponentstate) then begin
-  updatestate;
+  if not (fs_stateupdating in fstate) then begin
+   include(fstate,fs_stateupdating);
+   try
+    updatestate;
+   finally
+    exclude(fstate,fs_stateupdating);
+   end;
+  end;
  end
  else begin
   exclude(fstate,fs_rectsvalid);
