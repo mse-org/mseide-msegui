@@ -696,7 +696,6 @@ type
    autoindent: tbooleanedit;
    ttabwidget2: ttabwidget;
    ttabpage13: ttabpage;
-   tspacer3: tspacer;
    filefiltergrid: tstringgrid;
    ttabpage14: ttabpage;
    serverla: tlayouter;

@@ -62,6 +62,7 @@ type
   protected
    foptions: syntaxeditoptionsty;
    fmark1,fmark2: markitemty;
+   procedure initsyntaxparams();
    procedure objectevent(const sender: tobject;
                                   const event: objecteventty); override;
    procedure gridvaluechanged(const index: integer); override;
@@ -259,6 +260,12 @@ begin
  end;
 end;
 
+procedure tsyntaxedit.initsyntaxparams();
+begin
+ caseinsensitive:= fsyntaxpainter.caseinsensitive[fsyntaxpainterhandle];
+ pairwords:= fsyntaxpainter.pairwords[fsyntaxpainterhandle];
+end;
+
 procedure tsyntaxedit.setsyntaxdef(const handle: integer);
 begin
  if fsyntaxpainter <> nil then begin
@@ -266,6 +273,7 @@ begin
   if handle >= 0 then begin
    fsyntaxpainterhandle:= fsyntaxpainter.registerclient(self,flines,
            {$ifdef FPC}@{$endif}syntaxchanged,handle);
+   initsyntaxparams();
    refreshsyntax(0,bigint);
   end;
  end;
@@ -274,9 +282,9 @@ end;
 procedure tsyntaxedit.syntaxchanged(const sender: tobject;
   const index: integer);
 begin
- if (sender <> nil) and (sender = fsyntaxpainter) then begin
-  caseinsensitive:= fsyntaxpainter.caseinsensitive[fsyntaxpainterhandle];
-  pairwords:= fsyntaxpainter.pairwords[fsyntaxpainterhandle];
+ if (index < 0) and (fsyntaxpainterhandle >= 0) and 
+                  (sender <> nil) and (sender = fsyntaxpainter) then begin
+  initsyntaxparams();
  end;
  if fgridintf <> nil then begin
   inc(fsyntaxchanging);
@@ -847,10 +855,10 @@ begin
  if (fmark1.pos.col >= 0) and (fbracketsetting = 0) then begin
   inc(fbracketsetting);
   try
-   setfontstyle(fmark1.pos,makegridcoord(fmark1.pos.col+1,fmark1.pos.row),
-                                  fs_bold,false,cl_transparent);
-   setfontstyle(fmark2.pos,makegridcoord(fmark2.pos.col+1,fmark2.pos.row),
-                                  fs_bold,false,cl_transparent);
+   setfontstyle(fmark1.pos,mgc(fmark1.pos.col+fmark1.len,fmark1.pos.row),
+                                  fs_bold,false,cl_default,cl_transparent);
+   setfontstyle(fmark2.pos,mgc(fmark2.pos.col+fmark2.len,fmark2.pos.row),
+                                  fs_bold,false,cl_default,cl_transparent);
    refreshsyntax(fmark1.pos.row,1);
    refreshsyntax(fmark2.pos.row,1);
    fmark1:= invalidmark;

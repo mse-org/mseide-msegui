@@ -284,8 +284,8 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    procedure clear;
-   procedure paintsyntax(handle: integer; start,count: halfinteger; //startrow,rowcount
-                         background: boolean = false);
+   procedure paintsyntax(handle: integer; start,count: halfinteger; 
+                                              background: boolean = false);
                                //-1 = letzte in fscopeinfos
    function registerclient(sender: tobject; alist: trichstringdatalist;
                   aonlinechanged: integerchangedeventty = nil;
@@ -637,14 +637,14 @@ var
  po1: pointer;
  changed: boolean;
  int1,int2,int3: integer;
- bo1,bo2: boolean;
+ bo1{,bo2}: boolean;
  ristr: prichstringty;
  wpo1: pmsechar;
  alen,keywordlen: integer;
 // ar1: msestringarty;
  stok1: starttokenty;
  format: formatinfoarty;
- firstrow,lastrow: integer;
+// firstrow,lastrow: integer;
  wpo2: pmsechar;
 
 label
@@ -655,8 +655,8 @@ begin
  format:= nil; //copilerwarning
  str1:= '';
  int2:= 0;
- firstrow:= start;
- lastrow:= start+count-1;
+// firstrow:= start;
+// lastrow:= start+count-1;
  with fclients[handle] do begin
   if (syntaxdefhandle < 0) or (syntaxdefhandle > high(fsyntaxdefs)) or
               (fsyntaxdefs[syntaxdefhandle].charstyles = nil) then begin
@@ -869,6 +869,19 @@ begin
       end;
      end;
      if changed then begin
+      for int1:= 0 to high(boldchars.items) do begin
+       with boldchars.items[int1],pos do begin
+        if row = start then begin
+         if bold then begin
+          bo1:= not (fs_bold in getcharstyle(format,col).fontstyle);
+          updatefontstyle1(format,col,len,fs_bold,bo1);
+         end;
+         if (boldchars.backgroundcolor <> cl_none) then begin
+          setcolorbackground1(format,col,len,boldchars.backgroundcolor);
+         end;
+        end;
+       end;
+      end;
       if assigned(onlinechanged) then begin
        bo1:= isequalformat(ristr^.format,format);
        if not bo1 then begin
@@ -886,6 +899,7 @@ begin
    end;
   end;
 endlab:
+{
   for int1:= 0 to high(boldchars.items) do begin
    with boldchars.items[int1],pos do begin
     if (row >= firstrow) and (row <= lastrow) then begin
@@ -904,6 +918,7 @@ endlab:
     end;
    end;
   end;
+}
  end;
 end;
 
