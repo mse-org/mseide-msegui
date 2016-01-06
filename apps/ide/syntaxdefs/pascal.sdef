@@ -1,4 +1,9 @@
 caseinsensitive
+colors cl_default cl_default cl_default cl_default
+pairwords
+ 'BEGIN' 'END'
+ 'REPEAT' 'UNTIL'
+
 styles
  default ''
  words 'b'

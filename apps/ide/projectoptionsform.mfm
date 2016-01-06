@@ -510,7 +510,7 @@ object projectoptionsfo: tprojectoptionsfo
                   0
                 )
                 taborder = 2
-                hint = 'Background color of marked brackets and word pairs.'
+                hint = 'Background color of marked brackets and word pairs.'#10'cl_none -> none.'
                 onshowhint = bracketbkcolhint
                 bounds_x = 264
                 bounds_y = 0
