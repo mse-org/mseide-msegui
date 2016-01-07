@@ -1,5 +1,8 @@
 #for nested {} comments
 caseinsensitive
+pairwords
+ 'BEGIN' 'CASE' 'TRY' 'RECORD' 'CLASS' 'OBJECT' 'INTERFACE' 'END'
+ 'REPEAT' 'UNTIL'
 
 # COLORS font/paper
 COLORS $93a1a1 $002b36
