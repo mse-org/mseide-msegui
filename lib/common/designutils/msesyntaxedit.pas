@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2016 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -872,14 +872,17 @@ begin
   pt1:= editpos;
   mch1:= charatpos(pt1);
   br1:= checkbracketkind(mch1,open);
-  if (br1 <> bki_none) and (pt1.col > 0) then begin
-   dec(pt1.col);
-   br2:= checkbracketkind(charatpos(pt1),open2);
-   if (br2 = bki_none) or (open <> open2) then begin
-    inc(pt1.col);
-   end
-   else begin
-    br1:= br2;
+  if (br1 <> bki_none) then begin
+   if (pt1.col > 0) then begin
+    dec(pt1.col);
+    br2:= checkbracketkind(charatpos(pt1),open2);
+    if (br2 = bki_none) {or (open <> open2)} then begin
+     inc(pt1.col);
+    end
+    else begin
+     br1:= br2;
+     open:= open2;
+    end;
    end;
    pt2:= matchbracket(pt1,br1,open);
   end
