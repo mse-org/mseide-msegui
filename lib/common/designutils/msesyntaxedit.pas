@@ -648,10 +648,10 @@ function tsyntaxedit.matchpairword(var apos: gridcoordty;
                                              out lena,lenb: int32;
                                      maxrows: integer = 100): gridcoordty;
 var
- mstr1,mstr1l,mstr2,mstr2l: msestring;
+ mstr1,{mstr1l,}mstr2{,mstr2l}: msestring;
  forward1: boolean;
  strpo,strpe: prichstringty;
- pa,pae,pab,pal,palb,pb,pbe,pbb,pbl,pblb,po1,po2,pe: pmsechar;
+ pa,pae,{pab,}pal,{palb,}{pb,pbe,pbb,pbl,pblb,}po1,po2,pe: pmsechar;
  level1: int32;
  i1: int32;
  par1,par1l,pare: pmsestringarty;
@@ -753,18 +753,6 @@ lab1:
      end;
     end
     else begin //backward
-     pae:= pointer(mstr1);
-     pbe:= pointer(mstr2);
-//     pale:= pointer(mstr1l);
-//     pble:= pointer(mstr2l);
-     pab:= pae+length(mstr1)-1; //backup
-     pbb:= pbe+length(mstr2)-1;
-     palb:= pmsechar(pointer(mstr1l))+length(mstr1l)-1;
-     pblb:= pmsechar(pointer(mstr2l))+length(mstr2l)-1;
-     pa:= pab;
-     pb:= pbb;
-     pal:= palb;
-     pbl:= pblb;
      
      level1:= 1;
      pe:= pointer(strpo^.text);
