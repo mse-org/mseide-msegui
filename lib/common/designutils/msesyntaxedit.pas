@@ -1348,7 +1348,7 @@ end;
 procedure tsyntaxedit.setpairwords(const avalue: pairwordsty);
  procedure error();
  begin
-  componentexception(self,'Invaid pairwords');
+  componentexception(self,'Invalid pairwords');
  end; //error
 var
  i1,i2: int32;
@@ -1359,7 +1359,7 @@ begin
   end;
   for i1:= 0 to high(upper) do begin
    for i2:= 0 to high(upper[i1]) do begin
-    if high(upper[i1,i2]) <> high(lower[i1,i2]) then begin
+    if length(upper[i1,i2]) <> length(lower[i1,i2]) then begin
      error();
     end;
    end;
