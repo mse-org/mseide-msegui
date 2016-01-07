@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2016 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -183,7 +183,7 @@ const
     (name: 'cl_brush';  rgb:                 (blue: $ff; green: $ff; red: $ff; res: $00)), //4
     (name: 'cl_brushcanvas'; rgb:            (blue: $ff; green: $ff; red: $ff; res: $00)), //5
     (name: 'cl_none';  rgb:                  (blue: $ff; green: $ff; red: $ff; res: $00)), //6
-    (name: 'cl_font';  rgb:                  (blue: $00; green: $00; red: $00; res: $00)), //7
+    (name: 'cl_font';  rgb:                  (blue: $ff; green: $ff; red: $ff; res: $00)), //7
     (name: 'cl_normal';  rgb:                (blue: $ff; green: $ff; red: $ff; res: $00))  //8
 //    (name: 'cl_mask'; rgb:                   (blue: $00; green: $00; red: $00; res: $00))
 //    (name: 'cl_grayed'; rgb:                 (blue: $80; green: $80; red: $80; res: $00))
@@ -908,7 +908,7 @@ var
  int1,int2: integer;
 begin
  setlength(result,namedrgbcolorcount+mappedcolorcount+
-          functionalcolorcount+usercolorcount-1);
+                   functionalcolorcount+usercolorcount-1); //cl_invalid skipped
  for int1:= 0 to high(defaultnamedrgb) do begin
   result[int1]:= msestring(defaultnamedrgb[int1].name);
  end;
@@ -918,6 +918,7 @@ begin
  end;
  inc(int2,mappedcolorcount);
  result[int2]:= msestring(defaultfunctional[cl_nonenum].name);
+                                                   //cl_invalid skipped
  for int1:= 1 to cl_nonenum-1 do begin
   result[int1+int2]:= msestring(defaultfunctional[int1].name);
  end;
@@ -940,7 +941,7 @@ var
  int1,int2: integer;
 begin
  setlength(result,namedrgbcolorcount+mappedcolorcount+
-                     functionalcolorcount+usercolorcount-1);
+                    functionalcolorcount+usercolorcount-1);//cl_invalid skipped
  for int1:= 0 to high(defaultnamedrgb) do begin
   result[int1]:= cl_namedrgb + longword(int1);
  end;
@@ -949,12 +950,12 @@ begin
   result[int1+int2]:= cl_mapped + longword(int1);
  end;
  inc(int2,mappedcolorcount);
- result[int2]:= cl_functional+cl_nonenum;
+ result[int2]:= cl_functional+cl_nonenum; //cl_invalid skipped
  for int1:= 1 to cl_nonenum-1 do begin
   result[int1+int2]:= cl_functional + longword(int1);
  end;
  for int1:= cl_nonenum+1 to functionalcolorcount-1 do begin
-  result[int1+int2]:= cl_functional + longword(int1);
+  result[int1-1+int2]:= cl_functional + longword(int1);
  end;
  inc(int2,functionalcolorcount-1);
  for int1:= 0 to high(defaultuser) do begin
