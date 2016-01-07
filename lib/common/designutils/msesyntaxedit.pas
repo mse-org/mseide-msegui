@@ -42,8 +42,8 @@ type
    fbracketsetting: integer;
    fbracketchecking: integer;
    fpairmarkbkgcolor: colorty;
-   fpairwords: msestringararty;
-   fpairwordslower: msestringararty;
+   fpairwords: pairwordsty;
+//   fpairwordslower: msestringararty;
    procedure setsyntaxpainter(const Value: tsyntaxpainter);
    procedure unregistersyntaxpainter;
    procedure syntaxchanged(const sender: tobject; const index: integer);
@@ -60,7 +60,7 @@ type
    procedure setmarkpairwords(const avalue: boolean);
    function getcaseinsensitive: boolean;
    procedure setcaseinsensitive(const avalue: boolean);
-   procedure setpairwords(const avalue: msestringararty);
+   procedure setpairwords(const avalue: pairwordsty);
   protected
    foptions: syntaxeditoptionsty;
    fmark1,fmark2: markitemty;
@@ -79,7 +79,7 @@ type
    procedure doasyncevent(var atag: integer); override;
    procedure doafterpaint(const canvas: tcanvas); override;
    function needsfocuspaint: boolean; override;
-   procedure updatepairwords();
+//   procedure updatepairwords();
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -112,9 +112,9 @@ type
                 const open: boolean; maxrows: integer = 100): gridcoordty;
    function matchpairword(var apos: gridcoordty; //adjusted to word a start
              out lena,lenb: int32; maxrows: integer = 100): gridcoordty;
-   property pairwords: msestringararty read fpairwords write setpairwords;
+   property pairwords: pairwordsty read fpairwords write setpairwords;
                  //last item of a pairword item is endtoken
-                 //values must be uppercase for caseinsensitive
+                 //upprcase values must be uppercase for caseinsensitive
    property syntaxpainterhandle: integer read fsyntaxpainterhandle;
    function syntaxchanging: boolean;
    property autoindent: boolean read getautoindent write setautoindent;
@@ -658,7 +658,7 @@ var
 label
  lab1;
 begin
- if fpairwords <> nil then begin
+ if fpairwords.upper <> nil then begin
   mstr1:= '';
   if (apos.row >= 0) and (apos.row < flines.count) then begin
    mstr2:= flines.items[apos.row];
@@ -682,8 +682,8 @@ begin
     mstr1:= mseuppercase(mstr1);
    end;
    mstr2:= '';
-   par1:= pointer(fpairwords);
-   pare:= par1+high(fpairwords);
+   par1:= pointer(fpairwords.upper);
+   pare:= par1+high(fpairwords.upper);
    while par1 <= pare do begin
     for i1:= 0 to high(par1^) do begin
      if par1^[i1] = mstr1 then begin
@@ -695,8 +695,8 @@ begin
    end;
 lab1:
    if par1 <= pare then begin //found
-    par1l:= pointer(par1)-pointer(fpairwords)+
-                                 pointer(fpairwordslower); //lowercase
+    par1l:= pointer(par1)-pointer(fpairwords.upper)+
+                                 pointer(fpairwords.lower); //lowercase
     lena:= length(mstr1);
     strpo:= flines.getitempo(apos.row);
     if forward1 then begin
@@ -1257,7 +1257,7 @@ function tsyntaxedit.needsfocuspaint: boolean;
 begin
  result:= (fgridintf = nil) and inherited needsfocuspaint;
 end;
-
+{
 procedure tsyntaxedit.updatepairwords();
 var
  i1,i2: int32;
@@ -1280,7 +1280,7 @@ begin
   end;
  end;
 end;
-
+}
 function tsyntaxedit.getautoindent: boolean;
 begin
  result:= seo_autoindent in options;
@@ -1341,10 +1341,28 @@ begin
  end;
 end;
 
-procedure tsyntaxedit.setpairwords(const avalue: msestringararty);
+procedure tsyntaxedit.setpairwords(const avalue: pairwordsty);
+ procedure error();
+ begin
+  componentexception(self,'Invaid pairwords');
+ end; //error
+var
+ i1,i2: int32;
 begin
+ with avalue do begin
+  if high(upper) <> high(lower) then begin
+   error();
+  end;
+  for i1:= 0 to high(upper) do begin
+   for i2:= 0 to high(upper[i1]) do begin
+    if high(upper[i1,i2]) <> high(lower[i1,i2]) then begin
+     error();
+    end;
+   end;
+  end;
+ end;
  fpairwords:= avalue;
- updatepairwords();
+// updatepairwords();
 end;
 
 procedure tsyntaxedit.setoptions(const avalue: syntaxeditoptionsty);
@@ -1357,9 +1375,9 @@ begin
   if seo_defaultsyntax in delta then begin
    checkdefaultsyntax;
   end;
-  if seo_caseinsensitive in delta then begin
-   updatepairwords();
-  end;
+//  if seo_caseinsensitive in delta then begin
+//   updatepairwords();
+//  end;
  end;
 end;
 

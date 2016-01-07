@@ -53,11 +53,12 @@ string
 
 editorcolors =
 COLORS [fontcolor [backgroundcolor [statementcolor [pairmarkbackgroundcolor]]]]
-//   cl_default for project options settings
+//   cl_default for MSEide project options settings
 
 pairwords =
 PAIRWORDS newline
 {pairbegin {pairbegin} pairend newline}
+// used in MSEide
 
 pairbegin = string
 pairend = string
@@ -232,10 +233,14 @@ type
   pairmarkbackground: colorty;
  end;
  
+ pairwordsty = record
+  upper: msestringararty;
+  lower: msestringararty;
+ end;
  syntaxdefty = record
   defdefsnr: integer; //-1 -> mit readdeffile geladen
   charstyles: tcharstyledatalist;
-  pairwords: msestringararty;
+  pairwords: pairwordsty;
   caseinsensitive: boolean;
   scopeinfos: scopeinfoarty;
   aktscopeinfo: integer;
@@ -276,7 +281,7 @@ type
    function getboldchars(index: integer): markinfoty;
    procedure setboldchars(index: integer; const avalue: markinfoty);
    function getcolors(index: integer): syntaxcolorinfoty;
-   function getpairwords(index: int32): msestringararty;
+   function getpairwords(index: int32): pairwordsty;
    function getcaseinsensitive(index: int32): boolean;
   protected
 
@@ -305,7 +310,7 @@ type
                                     write setboldchars;
    property colors[index: integer]: syntaxcolorinfoty read getcolors;
    property caseinsensitive[index: int32]: boolean read getcaseinsensitive;
-   property pairwords[index: int32]: msestringararty read getpairwords;
+   property pairwords[index: int32]: pairwordsty read getpairwords;
   published
    property linesperslice: integer read flinesperslice write setlinesperslice
                 default defaultlinesperslice;
@@ -1540,13 +1545,13 @@ begin
        tn_pairwords: begin
         ar2:= nil;
         while nextquotedstring(lstr1,str1) do begin
-         if caseinsensitive then begin
-          str1:= struppercase(str1);
-         end;
+//         if caseinsensitive then begin
+//          str1:= struppercase(str1);
+//         end;
          additem(ar2,msestring(str1));
         end;
         if ar2 <> nil then begin
-         additem(pairwords,ar2);
+         additem(pairwords.upper,ar2);
         end
         else begin
          invalidstring;
@@ -1660,12 +1665,32 @@ begin
    until stream.eof and not (isnextline and (lstr1.len > 0));
    updateaktscope;
   finally
-   keys.Free;
+   keys.free;
    scopenames.free;
    stylenames.Free;
   end;
+  with pairwords do begin
+   setlength(lower,length(upper));
+   if caseinsensitive then begin
+    for int1:= 0 to high(upper) do begin
+     setlength(lower[int1],length(upper[int1]));
+     for int2:= 0 to high(upper[int1]) do begin
+      upper[int1,int2]:= mseuppercase(upper[int1,int2]);
+      lower[int1,int2]:= mselowercase(upper[int1,int2]);
+     end;
+    end;
+   end
+   else begin
+    for int1:= 0 to high(upper) do begin
+     setlength(lower[int1],length(upper[int1]));
+     for int2:= 0 to high(upper[int1]) do begin
+      lower[int1,int2]:= upper[int1,int2];    //copy original
+     end;
+    end;
+   end;
+  end;
  end;
- syntaxchanged;
+ syntaxchanged();
 end;
 
 function tsyntaxpainter.readdeffile(const afilename: filenamety): integer;
@@ -1845,7 +1870,7 @@ begin
  result:= fsyntaxdefs[fclients[index].syntaxdefhandle].colors;
 end;
 
-function tsyntaxpainter.getpairwords(index: int32): msestringararty;
+function tsyntaxpainter.getpairwords(index: int32): pairwordsty;
 begin
  checkarrayindex(fclients,index);
  result:= fsyntaxdefs[fclients[index].syntaxdefhandle].pairwords;
