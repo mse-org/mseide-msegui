@@ -825,14 +825,20 @@ const
  noboldchars: markinfoty = (backgroundcolor: cl_none; items: nil);
  
 procedure tsyntaxedit.clearpairmarks();
+var
+ style1: fontstylety;
 begin
  if (fmark1.pos.col >= 0) and (fbracketsetting = 0) then begin
   inc(fbracketsetting);
   try
+   style1:= fs_force; //do not change
+   if fmark1.bold then begin
+    style1:= fs_bold;
+   end;
    setfontstyle(fmark1.pos,mgc(fmark1.pos.col+fmark1.len,fmark1.pos.row),
-                                  fs_bold,false,cl_default,cl_transparent);
+                                  style1,false,cl_default,cl_transparent);
    setfontstyle(fmark2.pos,mgc(fmark2.pos.col+fmark2.len,fmark2.pos.row),
-                                  fs_bold,false,cl_default,cl_transparent);
+                                  style1,false,cl_default,cl_transparent);
    refreshsyntax(fmark1.pos.row,1);
    refreshsyntax(fmark2.pos.row,1);
    fmark1:= invalidmark;
