@@ -731,10 +731,12 @@ lab1:
               result.row:= strpo-prichstringty(flines.datapo);
               exit;
              end;
+             break;
             end
             else begin
              inc(level1);
              po1:= po2;
+             break;
             end;
            end;
           until (po2^ <> pa^) and (po2^ <> pal^);
@@ -784,6 +786,7 @@ lab1:
              if i1 = high(par1^) then begin //end
               inc(level1);
               po1:= po2;
+              break;
              end
              else begin
               dec(level1);
@@ -793,6 +796,7 @@ lab1:
                result.row:= strpo-prichstringty(flines.datapo);
                exit;
               end;
+              break;
              end;
             end;
            until (po2^ <> pa^) and (po2^ <> pal^) or (po2 < pe);
