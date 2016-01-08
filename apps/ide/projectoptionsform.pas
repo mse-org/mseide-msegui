@@ -859,7 +859,7 @@ type
    procedure toolshortcutdropdown(const sender: TObject);
    procedure toolsrowdatachanged(const sender: tcustomgrid;
                    const acell: gridcoordty);
-   procedure bracketbkcolhint(const sender: TObject; var info: hintinfoty);
+   procedure colorhint(const sender: TObject; var info: hintinfoty);
   private
    procedure activegroupchanged;
  end;
@@ -2784,7 +2784,7 @@ begin
  end;
 end;
 
-procedure tprojectoptionsfo.bracketbkcolhint(const sender: TObject;
+procedure tprojectoptionsfo.colorhint(const sender: TObject;
                var info: hintinfoty);
 begin
  info.caption:= tcustomedit(sender).text + lineend + info.caption;
