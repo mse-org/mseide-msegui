@@ -131,6 +131,9 @@ type
                                                                   default [];
    property pairmarkbkgcolor: colorty read fpairmarkbkgcolor 
                                  write fpairmarkbkgcolor default cl_none;
+        //cl_none -> force none,
+        //cl_default -> use syntaxpainter value if defined else cl_none
+        //otherwise use syntaxpainter value if defined
  end;
 
 function checkbracketkind(const achar: msechar;
