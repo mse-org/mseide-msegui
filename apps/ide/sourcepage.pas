@@ -1326,7 +1326,7 @@ begin
      if background <> cl_default then begin
       grid.frame.colorclient:= background;
      end;
-     if statement <> cl_default then begin
+     if (statement <> cl_default) and (grid.rowcolors[0] <> cl_none) then begin
       grid.rowcolors[0]:= statement;
      end;
     end;

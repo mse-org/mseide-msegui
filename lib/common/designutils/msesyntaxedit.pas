@@ -921,8 +921,14 @@ begin
    ar1[1]:= fmark2;
    boldinfo1.backgroundcolor:= 
             syntaxpainter.colors[syntaxpainterhandle].pairmarkbackground;
-   if boldinfo1.backgroundcolor = cl_default then begin
-    boldinfo1.backgroundcolor:= fpairmarkbkgcolor;
+   if (boldinfo1.backgroundcolor = cl_default) or 
+                               (fpairmarkbkgcolor = cl_none) then begin
+    if fpairmarkbkgcolor = cl_default then begin
+     boldinfo1.backgroundcolor:= cl_none;
+    end
+    else begin
+     boldinfo1.backgroundcolor:= fpairmarkbkgcolor;
+    end;
    end;
    if iswordmark then begin
     fmark1.bold:= boldinfo1.backgroundcolor = cl_none;

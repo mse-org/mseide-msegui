@@ -516,7 +516,7 @@ object projectoptionsfo: tprojectoptionsfo
                   0
                 )
                 taborder = 2
-                hint = 'Background color of marked brackets and word pairs.'#10'cl_none -> none.'#10'Will be overridden by setting in syntax definition file.'
+                hint = 'Background color of marked brackets and word pairs.'#10'Will be overridden by setting in syntax definition file.'#10'cl_none -> force none.'
                 onshowhint = colorhint
                 bounds_x = 264
                 bounds_y = 0
@@ -542,7 +542,7 @@ object projectoptionsfo: tprojectoptionsfo
                   0
                 )
                 taborder = 3
-                hint = 'Background color of the active row while debugging.'#10'cl_none -> none.'#10'Will be overridden by setting in syntax definition file.'
+                hint = 'Background color of the active row while debugging.'#10'Will be overridden by setting in syntax definition file.'#10'cl_none -> force none.'
                 onshowhint = colorhint
                 bounds_x = 160
                 bounds_y = 0
