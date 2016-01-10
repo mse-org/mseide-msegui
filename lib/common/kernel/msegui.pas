@@ -7915,7 +7915,7 @@ begin
     end;
     if (fwindow <> nil) and ownswindow1 then begin
      newpos:= translatewidgetpoint(fwidgetrect.pos,nil,value);
-     fwindow.fownerwidget:= nil;
+//     fwindow.fownerwidget:= nil;
      freeandnil(fwindow);
     end
     else begin
