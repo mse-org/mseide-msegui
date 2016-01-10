@@ -1786,8 +1786,10 @@ end;
 function tcustommseform.getchildicon: tmaskedbitmap;
 begin
  result:= nil;
- if ficon.hasimage then begin
-  result:= ficon;
+ if not (csdestroying in componentstate) then begin
+  if ficon.hasimage then begin
+   result:= ficon;
+  end;
  end;
 end;
 
@@ -2349,7 +2351,7 @@ end;
 function tcustomdockform.getchildicon(): tmaskedbitmap;
 begin
  result:= inherited getchildicon();
- if result = nil then begin
+ if (result = nil) and not (csdestroying in componentstate) then begin
   result:= fdragdock.childicon();
  end;
 end;
