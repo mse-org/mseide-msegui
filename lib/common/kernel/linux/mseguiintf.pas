@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2015 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2016 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -318,8 +318,8 @@ const
 type
   Bool = cint;
   XID = type culong;
-  TXICCEncodingStyle = (XStringStyle,XCompoundTextStyle,XTextStyle,
-     XStdICCTextStyle,XUTF8StringStyle);
+//  TXICCEncodingStyle = (XStringStyle,XCompoundTextStyle,XTextStyle,
+//     XStdICCTextStyle,XUTF8StringStyle);
 {$ifdef FPC}
  Colormap = TXID;
  Atom = type culong;
@@ -735,6 +735,7 @@ type
        net_wm_window_type_dnd,
        net_wm_window_type_normal,
        net_wm_icon,
+       net_wm_name,
 
        net_frame_extents,
        net_request_frame_extents,
@@ -772,6 +773,7 @@ const
        '_NET_WM_WINDOW_TYPE_DND',
        '_NET_WM_WINDOW_TYPE_NORMAL',
        '_NET_WM_ICON',
+       '_NET_WM_NAME',
 
        '_NET_FRAME_EXTENTS', 
        '_NET_REQUEST_FRAME_EXTENTS',
@@ -889,11 +891,11 @@ begin
    end;
   end;
   po2^:= ca1;
+  inc(po1);
+  inc(po2);
   if ca1 = 0 then begin
    break;
   end;
-  inc(po1);
-  inc(po2);
  end;
  setlength(result,po2-pwchar_t(pointer(result)));
 end;
@@ -905,6 +907,18 @@ begin
 {$endif} 
  xchangeproperty(appdisp,id,prop,stringatom,8,propmodereplace,
                                         pbyte(pchar(value)),length(value)+1);
+end;
+
+procedure setmsestringproperty(id: winidty; prop: atom; const value: msestring);
+var
+ str1: string;
+begin
+{$ifdef mse_debuggdisync}
+ checkgdilock;
+{$endif}
+ str1:= stringtoutf8(value);
+ xchangeproperty(appdisp,id,prop,utf8_stringatom,8,propmodereplace,
+                     pbyte(pchar(str1)),length(str1)+1);
 end;
 
 procedure setwinidproperty(id: winidty; prop: atom; value: winidty);
@@ -1100,19 +1114,40 @@ function stringtotextproperty(const value: msestring;
                                  const style: txiccencodingstyle;
                                      out textproperty: xtextproperty): boolean;
 var
- list: array[0..0] of pchar;
+ listxwctext: array[0..0] of ucs4string;
+ listutf8: array[0..0] of pchar;
  str1: string;
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
 {$endif} 
-// list[0]:= msestringtoucs4string(value);
- str1:= stringtoutf8ansi(value);
- list[0]:= pchar(str1);
- result:= xutf8textlisttotextproperty(
-                          appdisp,@list,1,ord(style),@textproperty) >= 0;
+ if style = xstdicctextstyle then begin
+  listxwctext[0]:= msestringtoucs4string(value);
+  result:= xwctextlisttotextproperty(appdisp,@listxwctext,1,style,
+                                                   @textproperty) >= 0;
+ end
+ else begin
+  str1:= stringtoutf8ansi(value);
+  listutf8[0]:= pchar(str1);
+  result:= xutf8textlisttotextproperty(
+                          appdisp,@listutf8,1,ord(style),@textproperty) >= 0;
+ end;
  if not result then begin
   fillchar(textproperty,0,sizeof(textproperty));
+ end;
+end;
+
+
+function setnetstring(const id: winidty; const aproperty: netatomty;
+                                         const avalue: msestring): boolean;
+begin
+{$ifdef mse_debuggdisync}
+ checkgdilock;
+{$endif} 
+ result:= false;
+ if netatoms[aproperty] <> 0 then begin
+  setmsestringproperty(id,netatoms[aproperty],avalue);
+  result:= true;
  end;
 end;
 
@@ -1726,7 +1761,9 @@ var
  textprop: xtextproperty;
 begin
  gdi_lock;
- if stringtotextproperty(caption,xutf8stringstyle,textprop) then begin
+ if stringtotextproperty(caption,
+                  xstdicctextstyle{xutf8stringstyle},textprop) then begin
+                                  //jwm can not handle xutf8stringstyle 
   xsetwmname(appdisp,id,@textprop);
   freetextproperty(textprop);
   result:= gue_ok;
@@ -1734,6 +1771,7 @@ begin
  else begin
   result:= gue_characterencoding;
  end;
+ setnetstring(id,net_wm_name,caption);
  gdi_unlock;
 end;
 
