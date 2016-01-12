@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2012 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2016 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -138,7 +138,8 @@ type
     constructor create;
     function finditembyname(const aname: string): pprocedureinfoty;
     function finditembyuppername(const aname: lstringty;
-                  const info: methodparaminfoty): pprocedureinfoty;
+                  var info: methodparaminfoty;
+                  const anyparam: boolean = false): pprocedureinfoty;
     function matchmethod(const atype: ptypeinfo;
                                     const amanaged: boolean): integerarty;
     function matchedmethodnames(const atype: ptypeinfo;
@@ -989,7 +990,8 @@ begin
 end;
 
 function tprocedureinfolist.finditembyuppername(const aname: lstringty;
-                  const info: methodparaminfoty): pprocedureinfoty;
+                     var info: methodparaminfoty;
+                                   const anyparam: boolean): pprocedureinfoty;
 var
  po1: pprocedureinfoty;
  int1: integer;
@@ -1004,6 +1006,18 @@ begin
    break;
   end;
   inc(po1);
+ end;
+ if (result = nil) and anyparam then begin
+  po1:= datapo;
+  for int1:= 0 to fcount - 1 do begin
+   if (po1^.params.kind = info.kind) and
+                  (lstringcomp(aname,po1^.uppername) = 0) then begin
+    result:= po1;
+    info:= po1^.params;
+    break;
+   end;
+   inc(po1);
+  end;
  end;
 end;
 

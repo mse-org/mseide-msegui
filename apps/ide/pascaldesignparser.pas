@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2015 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2016 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -42,7 +42,8 @@ type
     function parserecord: boolean;
     function parseobject: boolean;
     function parseprocparams(const akind: tmethodkind;
-                var aflags: methodflagsty; var params: paraminfoarty): boolean;
+                var aflags: methodflagsty; var params: paraminfoarty;
+                                const acceptnameonly: boolean): boolean;
     function parseclassprocedureheader(atoken: pascalidentty;
                   classinfopo: pclassinfoty; const managed: boolean): boolean;
     function skipprocedureparams(atoken: pascalidentty): boolean;
@@ -349,7 +350,8 @@ end;
 
 function tpascaldesignparser.parseprocparams(const akind: tmethodkind;
                             var aflags: methodflagsty;
-                            var params: paraminfoarty): boolean;
+                            var params: paraminfoarty;
+                            const acceptnameonly: boolean): boolean;
 var
  ar1: stringarty;
  paraflags: tparamflags;
@@ -382,7 +384,7 @@ begin
  params:= nil;
  result:= false;
  if checkoperator(';') then begin
-  if not (akind in [mkfunction,mkclassfunction]) then begin
+  if not (akind in [mkfunction,mkclassfunction]) or acceptnameonly then begin
    result:= true;   //no params
   end;
  end
@@ -451,7 +453,7 @@ begin
      end;
     end
     else begin
-     result:= false;
+     result:= acceptnameonly;
     end;
    end;
   end;
@@ -487,7 +489,7 @@ begin
   result:= not checkoperator('.'); //interface proc definition?
   if result then begin
    uppername:= uppercase(name);
-   result:= parseprocparams(params.kind,params.flags,params.params);
+   result:= parseprocparams(params.kind,params.flags,params.params,false);
    if result then begin
     intendpos:= sourcepos;
    end;
@@ -564,10 +566,10 @@ var
 begin
  case atoken of
   pid_procedure: begin
-   result:= parseprocparams(mkprocedure,flags1,ar1);
+   result:= parseprocparams(mkprocedure,flags1,ar1,false);
   end;
   pid_function: begin
-   result:= parseprocparams(mkfunction,flags1,ar1);
+   result:= parseprocparams(mkfunction,flags1,ar1,false);
   end
   else begin
    result:= false;
@@ -1165,18 +1167,20 @@ var
      po1:= nil;
     end;
     methodinfo.kind:= akind;
-    if parseprocparams(akind,methodinfo.flags,methodinfo.params) then begin
-     if po1 <> nil then begin
+    if parseprocparams(akind,methodinfo.flags,
+                            methodinfo.params,classname.po <> nil) then begin
+     if po1 <> nil then begin //class or object
+      po2:= po1^.procedurelist.finditembyuppername(procname,methodinfo,true);
+                                    //can update methodinfo
+      if po2 = nil then begin
+       po2:= po1^.procedurelist.newitem;
+       setprocinfo(po2);
+      end;
       po3:= funitinfopo^.deflist.beginnode(
                 lstringtostring(classname)+'.'+lstringtostring(procname)+
                      mangleprocparams(methodinfo),
                             syk_classprocimp,pos1,sourcepos);
       deflist1:= tdeflist1(po3^.deflist);
-      po2:= po1^.procedurelist.finditembyuppername(procname,methodinfo);
-      if po2 = nil then begin
-       po2:= po1^.procedurelist.newitem;
-       setprocinfo(po2);
-      end;
 //      if po2 <> nil then begin
 //       po2^.impheaderstartpos:= pos1;
 //       po2^.impheaderendpos:= sourcepos;
@@ -1184,7 +1188,8 @@ var
       deflist1.fparentscope:= po1^.deflist;
      end
      else begin
-      po2:= funitinfopo^.p.procedurelist.finditembyuppername(procname,methodinfo);
+      po2:= funitinfopo^.p.procedurelist.finditembyuppername(
+                                              procname,methodinfo,false);
       if po2 = nil then begin
        po2:= funitinfopo^.p.procedurelist.newitem;
        setprocinfo(po2)
