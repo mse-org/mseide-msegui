@@ -278,7 +278,11 @@ begin
    mstr1:= mstr1 + intf1.getdockcontroller.getdockcaption+',';
   end;
  end;
- updatecaption(copy(mstr1,1,length(mstr1)-1)); //remove last comma
+ if mstr1 <> '' then begin
+  setlength(mstr1,length(mstr1)-1);
+ end;
+ fdragdock.caption:= mstr1;
+ updatecaption(mstr1);
 end;
 
 procedure tpanelfo.paintexe(const sender: twidget; const acanvas: tcanvas);
