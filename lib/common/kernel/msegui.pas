@@ -15011,10 +15011,9 @@ begin
  appinst.setmousewidget(capture);
 end;
 
-procedure twindow.dispatchmouseevent(var info: moeventinfoty;
-                   capture: twidget);
+procedure twindow.dispatchmouseevent(var info: moeventinfoty; capture: twidget);
 var
- posbefore{,absposbefore}: pointty;
+ posbefore: pointty;
  mousecapturewidgetbefore: twidget;
  int1: integer;
  po1: peventaty;
@@ -17934,7 +17933,7 @@ begin
        if (focusedwidgetbefore <> nil) then begin
         focusedwidgetbefore.activate(true,false);
        end;
-       if appinst.active then begin
+       if appinst.active and (appinst.fwantedactivewindow = nil) then begin
         window1.activate;
        end;
       end;

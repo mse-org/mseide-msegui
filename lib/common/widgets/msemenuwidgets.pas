@@ -1773,6 +1773,7 @@ end;
 
 procedure tpopupmenuwidget.release1(const acancelmodal: boolean);
 begin
+ visible:= false;
  release;
 end;
 
