@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2013 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2016 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -61,7 +61,7 @@ implementation
 uses
  findinfilepage_mfm,sourcepage,sourceform,mseeditglob,sysutils,mserichstring,
  msegraphics,msestream,msefileutils,msesys,findinfiledialogform,msegraphutils,
- projectoptionsform,msesystypes,mseformatstr;
+ projectoptionsform,msesystypes,mseformatstr,main;
 
 type
  stringconsts = (
@@ -291,10 +291,17 @@ begin
   end;
  end
  else begin
-  mstr1:= tfindinfilepagefo(sender.datapo).finfo.directory;
-  application.lock;
-  expandprmacros1(mstr1);
-  application.unlock;
+  if finfo.source = fs_inprojectdir then begin
+   application.lock();
+   mstr1:= filedir(mainfo.projectname);
+   application.unlock();
+  end
+  else begin
+   mstr1:= tfindinfilepagefo(sender.datapo).finfo.directory;
+   application.lock;
+   expandprmacros1(mstr1);
+   application.unlock;
+  end;
   searchdirectory(mstr1);
  end;
 end;

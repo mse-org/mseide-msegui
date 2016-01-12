@@ -336,6 +336,7 @@ type
    procedure stackframechanged(const frameno: integer);
    procedure refreshframe;
    procedure toggleformunit;
+   property projectname: filenamety read fprojectname;
    property lastform: tcustommseform read flastform;
    property execstamp: integer read fexecstamp;
    property stopinfo: stopinfoty read fstopinfo;
