@@ -126,18 +126,18 @@ object findinfileadialogfo: tfindinfiledialogfo
       onsetvalue = dirsetval
     end
     object casesensitive: tbooleanedit
-      frame.caption = 'c&asesensitive'
+      frame.caption = 'C&asesensitive'
       frame.localprops = []
       frame.localprops1 = []
       frame.outerframe = (
         0
         1
-        88
+        89
         2
       )
       bounds_x = 8
       bounds_y = 16
-      bounds_cx = 101
+      bounds_cx = 102
       bounds_cy = 16
       statfile = statfile1
     end
@@ -170,18 +170,18 @@ object findinfileadialogfo: tfindinfiledialogfo
     bounds_cy = 66
     optionsscale = [osc_expandx, osc_shrinkx]
     object wholeword: tbooleanedit
-      frame.caption = '&whole word'
+      frame.caption = '&Whole word'
       frame.localprops = []
       frame.localprops1 = []
       frame.outerframe = (
         0
         1
-        73
+        75
         2
       )
       bounds_x = 8
       bounds_y = 16
-      bounds_cx = 86
+      bounds_cx = 88
       bounds_cy = 16
       statfile = statfile1
     end
