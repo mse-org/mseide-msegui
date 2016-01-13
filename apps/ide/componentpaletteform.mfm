@@ -20,7 +20,7 @@ object componentpalettefo: tcomponentpalettefo
     69
   )
   dragdock.caption = 'Component Palette'
-  dragdock.optionsdock = [od_savepos, od_savezorder, od_canmove, od_canfloat, od_candock, od_proportional, od_propsize, od_captionhint]
+  dragdock.optionsdock = [od_savepos, od_savezorder, od_canmove, od_canfloat, od_candock, od_proportional, od_propsize, od_captionhint, od_buttonhints, od_childicons]
   options = [fo_savepos, fo_savezorder, fo_savestate]
   statfile = mainfo.projectstatfile
   icon.transparentcolor = -2147483642

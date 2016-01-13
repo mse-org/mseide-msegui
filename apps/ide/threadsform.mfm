@@ -18,7 +18,7 @@ object threadsfo: tthreadsfo
     276
   )
   dragdock.caption = 'Threads'
-  dragdock.optionsdock = [od_savepos, od_canmove, od_canfloat, od_candock, od_propsize, od_captionhint]
+  dragdock.optionsdock = [od_savepos, od_canmove, od_canfloat, od_candock, od_propsize, od_captionhint, od_buttonhints, od_childicons]
   options = [fo_savepos, fo_savestate]
   statfile = mainfo.projectstatfile
   caption = 'Threads'
