@@ -153,7 +153,17 @@ const
   'baris yang terpilih?',        //sc_selected_rows
   'Hanya satu item',     //sc_Single_item_only,
   'Salin Cell',          //sc_Copy_Cells
-  'Tempel Cell'          //sc_Paste_Cells 
+  'Tempel Cell',         //sc_Paste_Cells 
+  'Close',               //sc_close
+  'Maximize',            //sc_maximize
+  'Normalize',           //sc_normalize
+  'Minimize',            //sc_minimize
+  'Fix size',            //sc_fix_size
+  'Float',               //sc_float
+  'Stay on top',         //sc_stay_on_top
+  'Stay in background',  //sc_stay_in_background
+  'Lock children',       //sc_lock_children
+  'No lock'              //sc_no_lock
 );
     
 function delete_n_selected_rows(const params: array of const): msestring;

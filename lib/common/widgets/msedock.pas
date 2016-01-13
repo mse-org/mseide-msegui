@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2015 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2016 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -36,7 +36,7 @@ type
             od_propsize,od_fixsize,od_top,od_background,
             od_alignbegin,od_aligncenter,od_alignend,
             od_nofit,od_banded,od_nosplitsize,od_nosplitmove,
-            od_lock,od_nolock,od_thumbtrack,od_captionhint,
+            od_lock,od_nolock,od_thumbtrack,od_captionhint,od_buttonhints,
             od_childicons); //for tformdockcontroller
  optionsdockty = set of optiondockty;
 
@@ -44,7 +44,8 @@ type
                      dbr_minimize,dbr_fixsize,dbr_float,
                      dbr_top,dbr_background,dbr_lock,dbr_nolock);
 const
- defaultoptionsdock = [od_savepos,od_savezorder,od_savechildren,od_captionhint,
+ defaultoptionsdock = [od_savepos,od_savezorder,od_savechildren,
+                       od_captionhint,od_buttonhints,
                        od_childicons];
  defaultoptionsdocknochildren = defaultoptionsdock - [od_savechildren];
  dbr_first = dbr_handle;
@@ -3084,7 +3085,7 @@ begin
  if (result = dbr_none) and 
             pointinrect(apos,
                  idockcontroller(fintf).getbuttonrects(dbr_handle)) then begin
-  result:= dbr_handle; //handel rect can include buttons
+  result:= dbr_handle; //handle rect can include buttons
  end;
 end;
 
@@ -4278,8 +4279,40 @@ end;
 
 procedure tgripframe.showhint(const aid: int32; var info: hintinfoty);
 begin
- if -(aid - hintidframe) = ord(dbr_handle) then begin
-  info.caption:= fcontroller.getfloatcaption;
+ case dockbuttonrectty(-(aid - hintidframe)) of
+  dbr_handle: begin
+   info.caption:= fcontroller.getfloatcaption;
+  end;
+  dbr_close: begin
+   info.caption:= sc(sc_close);
+  end;
+  dbr_maximize: begin
+   info.caption:= sc(sc_maximize);
+  end;
+  dbr_normalize: begin
+   info.caption:= sc(sc_normalize);
+  end;
+  dbr_minimize: begin
+   info.caption:= sc(sc_minimize);
+  end;
+  dbr_fixsize: begin
+   info.caption:= sc(sc_fix_size);
+  end;
+  dbr_float: begin
+   info.caption:= sc(sc_float);
+  end;
+  dbr_top: begin
+   info.caption:= sc(sc_stay_on_top);
+  end;
+  dbr_background: begin
+   info.caption:= sc(sc_stay_in_background);
+  end;
+  dbr_lock: begin
+   info.caption:= sc(sc_lock_children);
+  end;
+  dbr_nolock: begin
+   info.caption:= sc(sc_no_lock);
+  end;
  end;
 end;
 
@@ -5227,10 +5260,20 @@ end;
 
 function tgripframe.ishintarea(const apos: pointty; var aid: int32): boolean;
 begin
- result:= pointinrect(apos,fgriprect{frects[dbr_handle]}) and 
-                          (od_captionhint in fcontroller.optionsdock);
+ result:= pointinrect(apos,fgriprect{frects[dbr_handle]});
  if result then begin
-  aid:= hintidframe - ord(dbr_handle);
+  if od_buttonhints in fcontroller.optionsdock then begin
+   aid:= hintidframe - ord(fcontroller.checkbuttonarea(apos));
+   if not (od_captionhint in fcontroller.optionsdock) and 
+                   (aid = hintidframe-ord(dbr_handle)) then begin
+    result:= false;
+   end;
+  end
+  else begin
+   if (od_captionhint in fcontroller.optionsdock) then begin
+    aid:= hintidframe - ord(dbr_handle);
+   end;
+  end;
  end
  else begin
   result:= inherited ishintarea(apos,aid);

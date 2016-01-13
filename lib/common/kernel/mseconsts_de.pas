@@ -153,7 +153,17 @@ const
   'gew'#228'hlte Zeilen',      //sc_selected_rows
   'Nur Einzeleintrag erlaubt', //sc_Single_item_only 
   'Zellen kopieren',           //sc_Copy_Cells
-  'Zellen einf'#252'gen'       //sc_Paste_Cells
+  'Zellen einf'#252'gen',      //sc_Paste_Cells
+  'Schliessen',                //sc_close
+  'Maximieren',                //sc_maximize
+  'Normalisieren',             //sc_normalize
+  'Minimieren',                //sc_minimize
+  'Feste Gr'#246'sse',         //sc_fix_size
+  'Lösen',                     //sc_float
+  'Im Fordergrund',            //sc_stay_on_top
+  'Im Hintergrund',            //sc_stay_in_background
+  'Blockiere Unterfenster',    //sc_lock_children
+  'Kein Blockieren'            //sc_no_lock
 );
     
 function delete_n_selected_rows(const params: array of const): msestring;

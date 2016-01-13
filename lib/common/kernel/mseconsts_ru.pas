@@ -198,7 +198,17 @@ const
   #1074#1099#1073#1088#1072#1085#1085#1099#1077' '#1089#1090#1088#1086#1082#1080'?',     //sc_selected_rows
   #1058#1086#1083#1100#1082#1086' '#1087#1088#1086#1089#1090#1086#1081' '#1087#1091#1085#1082#1090,    //sc_Single_item_only 
   #1050#1086#1087#1080#1088#1086#1074#1072#1090#1100' '#1103#1095#1077#1081#1082#1080,          //sc_Copy_Cells
-  #1042#1089#1090#1072#1074#1080#1090#1100' '#1103#1095#1077#1081#1082#1080          //sc_Paste_Cells
+  #1042#1089#1090#1072#1074#1080#1090#1100' '#1103#1095#1077#1081#1082#1080,          //sc_Paste_Cells
+  'Close',               //sc_close
+  'Maximize',            //sc_maximize
+  'Normalize',           //sc_normalize
+  'Minimize',            //sc_minimize
+  'Fix size',            //sc_fix_size
+  'Float',               //sc_float
+  'Stay on top',         //sc_stay_on_top
+  'Stay in background',  //sc_stay_in_background
+  'Lock children',       //sc_lock_children
+  'No lock'              //sc_no_lock
 );
     
 function delete_n_selected_rows(const params: array of const): msestring;

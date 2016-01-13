@@ -194,7 +194,17 @@ const
   'Lignes s'#233'lectionn'#233'es',       //sc_selected_rows
   'seulement un '#233'l'#233'ment',       //sc_Single_item_only 
   'Copier cellules',                      //sc_Copy_Cells
-  'Coller cellules'                       //sc_Paste_Cells
+  'Coller cellules',                      //sc_Paste_Cells
+  'Close',               //sc_close
+  'Maximize',            //sc_maximize
+  'Normalize',           //sc_normalize
+  'Minimize',            //sc_minimize
+  'Fix size',            //sc_fix_size
+  'Float',               //sc_float
+  'Stay on top',         //sc_stay_on_top
+  'Stay in background',  //sc_stay_in_background
+  'Lock children',       //sc_lock_children
+  'No lock'              //sc_no_lock
 );
     
 function delete_n_selected_rows(const params: array of const): msestring;

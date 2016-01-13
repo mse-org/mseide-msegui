@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2016 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -133,7 +133,10 @@ type
                     sc_filter_off,
                     sc_portrait,sc_landscape,
                     sc_Delete_row_question,sc_selected_rows,
-                    sc_Single_item_only,sc_Copy_Cells,sc_Paste_Cells
+                    sc_Single_item_only,sc_Copy_Cells,sc_Paste_Cells,
+                    sc_close,sc_maximize,sc_normalize,sc_minimize,sc_fix_size,
+                    sc_float,sc_stay_on_top,sc_stay_in_background,
+                    sc_lock_children,sc_no_lock
                     );
  textgeneratorfuncty = function(const params: array of const): msestring;
  textgeneratorty = (tg_delete_n_selected_rows);
