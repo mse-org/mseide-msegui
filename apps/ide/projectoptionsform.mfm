@@ -118,7 +118,7 @@ object projectoptionsfo: tprojectoptionsfo
           color = -2147483645
           frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_optionsskin]
           frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive]
-          taborder = 6
+          taborder = 7
           bounds_x = 0
           bounds_y = 84
           bounds_cx = 754
@@ -372,46 +372,46 @@ object projectoptionsfo: tprojectoptionsfo
             object tlayouter14: tlayouter
               bounds_x = 7
               bounds_y = 0
-              bounds_cx = 123
+              bounds_cx = 121
               bounds_cy = 70
               optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
               optionslayout = [lao_placey]
               place_mindist = 2
               place_maxdist = 2
               object rightmarginon: tbooleanedit
-                frame.caption = 'Right Margin Line'
+                frame.caption = 'Right margin line'
                 frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive]
                 frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive]
                 frame.outerframe = (
                   0
                   1
-                  110
+                  108
                   2
                 )
                 taborder = 1
                 bounds_x = 0
                 bounds_y = 18
-                bounds_cx = 123
+                bounds_cx = 121
                 bounds_cy = 16
                 value = True
               end
               object linenumberson: tbooleanedit
-                frame.caption = 'Line Numbers'
+                frame.caption = 'Line numbers'
                 frame.localprops = []
                 frame.localprops1 = []
                 frame.outerframe = (
                   0
                   1
-                  88
+                  87
                   2
                 )
                 bounds_x = 0
                 bounds_y = 0
-                bounds_cx = 101
+                bounds_cx = 100
                 bounds_cy = 16
               end
               object editmarkbrackets: tbooleanedit
-                frame.caption = 'Mark Brackets'
+                frame.caption = 'Mark brackets'
                 frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive]
                 frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive]
                 frame.outerframe = (
@@ -428,7 +428,7 @@ object projectoptionsfo: tprojectoptionsfo
                 value = True
               end
               object editmarkpairwords: tbooleanedit
-                frame.caption = 'Mark Pairwords'
+                frame.caption = 'Mark pairwords'
                 frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive]
                 frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive]
                 frame.outerframe = (
@@ -456,7 +456,7 @@ object projectoptionsfo: tprojectoptionsfo
               optionslayout = [lao_aligny]
               align_glue = wam_start
               object trimtrailingwhitespace: tbooleanedit
-                frame.caption = 'Trim trailing'#10'Whitspace'#10'on save'
+                frame.caption = 'Trim trailing'#10'whitspace'#10'on save'
                 frame.localprops = []
                 frame.localprops1 = []
                 frame.outerframe = (
@@ -501,7 +501,7 @@ object projectoptionsfo: tprojectoptionsfo
                 reffontheight = 14
               end
               object pairmarkcolor: tcoloredit
-                frame.caption = 'Mark'#10'Color'
+                frame.caption = 'Mark'#10'color'
                 frame.localprops = []
                 frame.localprops1 = []
                 frame.button.color = -2147483646
@@ -527,7 +527,7 @@ object projectoptionsfo: tprojectoptionsfo
                 reffontheight = 14
               end
               object statementcolor: tcoloredit
-                frame.caption = 'Statement'#10'Color'
+                frame.caption = 'Statement'#10'color'
                 frame.localprops = []
                 frame.localprops1 = []
                 frame.button.color = -2147483646
@@ -555,20 +555,20 @@ object projectoptionsfo: tprojectoptionsfo
                 reffontheight = 14
               end
               object scrollheight: tintegeredit
-                frame.caption = 'Scroll'#10'Height'
+                frame.caption = 'Scroll'#10'height'
                 frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive]
                 frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive]
                 frame.outerframe = (
                   0
                   31
-                  7
+                  6
                   0
                 )
                 taborder = 4
                 hint = '0 -> accelerated,'#10'-1 -> paged'
                 bounds_x = 104
                 bounds_y = 0
-                bounds_cx = 43
+                bounds_cx = 42
                 bounds_cy = 51
                 min = -1
                 max = 1000
@@ -611,19 +611,19 @@ object projectoptionsfo: tprojectoptionsfo
             optionslayout = [lao_aligny]
             align_glue = wam_start
             object backupfilecount: tintegeredit
-              frame.caption = 'Backup File Count'
+              frame.caption = 'Backup file count'
               frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive]
               frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive]
               frame.outerframe = (
                 0
                 17
-                78
+                74
                 0
               )
               taborder = 6
               bounds_x = 511
               bounds_y = 0
-              bounds_cx = 114
+              bounds_cx = 110
               bounds_cy = 37
               value = 2
               max = 10
@@ -720,19 +720,19 @@ object projectoptionsfo: tprojectoptionsfo
               reffontheight = 14
             end
             object showtabs: tbooleanedit
-              frame.caption = 'Show Tabs'
+              frame.caption = 'Show tabs'
               frame.localprops = []
               frame.localprops1 = []
               frame.outerframe = (
                 0
                 1
-                70
+                68
                 2
               )
               taborder = 5
               bounds_x = 359
               bounds_y = 20
-              bounds_cx = 83
+              bounds_cx = 81
               bounds_cy = 16
             end
           end
@@ -847,20 +847,20 @@ object projectoptionsfo: tprojectoptionsfo
           reffontheight = 14
         end
         object moveonfirstclick: tbooleanedit
-          frame.caption = 'Move on'#10'first Click'
+          frame.caption = 'Move on first click'
           frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive]
           frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive]
           frame.outerframe = (
             0
-            8
-            59
-            9
+            1
+            114
+            2
           )
-          taborder = 5
+          taborder = 6
           bounds_x = 359
-          bounds_y = 46
-          bounds_cx = 72
-          bounds_cy = 30
+          bounds_y = 58
+          bounds_cx = 127
+          bounds_cy = 16
           value = True
         end
         object ttabwidget2: ttabwidget
@@ -872,7 +872,7 @@ object projectoptionsfo: tprojectoptionsfo
           bounds_cy = 191
           bounds_cymin = 84
           anchors = [an_top, an_bottom]
-          taborder = 7
+          taborder = 8
           activepageindex = 0
           tab_frame.localprops = []
           tab_frame.localprops1 = []
@@ -1071,7 +1071,7 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_cx = 754
             bounds_cy = 173
             anchors = [an_left, an_top, an_right, an_bottom]
-            caption = 'Code Templates'
+            caption = 'Code templates'
             object twidgetgrid5: twidgetgrid
               optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusout, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets]
               frame.options = [cfo_fixtop, cfo_fixbottom]
@@ -1206,12 +1206,28 @@ object projectoptionsfo: tprojectoptionsfo
             53
             2
           )
-          taborder = 8
-          bounds_x = 510
-          bounds_y = 53
+          taborder = 5
+          bounds_x = 359
+          bounds_y = 34
           bounds_cx = 66
           bounds_cy = 16
           options = [bo_executeonclick, bo_executeonkey, bo_executeonshortcut, bo_executedefaultonenterkey, bo_reversed]
+        end
+        object componenthints: tbooleanedit
+          frame.caption = 'Component hints'
+          frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive]
+          frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive]
+          frame.outerframe = (
+            0
+            1
+            110
+            2
+          )
+          taborder = 9
+          bounds_x = 511
+          bounds_y = 34
+          bounds_cx = 123
+          bounds_cy = 16
         end
       end
       object debuggerpage: ttabpage

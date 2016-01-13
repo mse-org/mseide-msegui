@@ -199,6 +199,7 @@ type
    fnoformdesignerdocking: boolean;
    ftrimtrailingwhitespace: boolean;
    fpairmarkcolor: integer;
+   fcomponenthints: boolean;
    function limitgridsize(const avalue: integer): integer;
    procedure setgridsizex(const avalue: integer);
    procedure setgridsizey(const avalue: integer);
@@ -219,6 +220,8 @@ type
                                          write fmoveonfirstclick;
    property noformdesignerdocking: boolean read fnoformdesignerdocking
                                          write fnoformdesignerdocking;
+   property componenthints: boolean read fcomponenthints
+                                         write fcomponenthints;
    property gridsizex: integer read fgridsizex write setgridsizex;
    property gridsizey: integer read fgridsizey write setgridsizey;
    property autoindent: boolean read fautoindent write fautoindent;
@@ -813,6 +816,7 @@ type
    statementcolor: tcoloredit;
    scrollheight: tintegeredit;
    rightmarginchars: tintegeredit;
+   componenthints: tbooleanedit;
    procedure acttiveselectondataentered(const sender: TObject);
    procedure colonshowhint(const sender: tdatacol; const arow: Integer; 
                       var info: hintinfoty);
@@ -1597,7 +1601,7 @@ begin
  
  end;
  with projectoptions,e,t do begin
-
+  
   additem(fsourcefilemasks,'"*.pas" "*.dpr" "*.lpr" "*.pp" "*.inc"');
   additem(fsyntaxdeffiles,'${SYNTAXDEFDIR}pascal.sdef');
   additem(fsourcefilemasks,'"*.c" "*.cc" "*.h"');
@@ -2840,6 +2844,7 @@ begin
  showgrid:= true;
  snaptogrid:= true;
  moveonfirstclick:= true;
+ componenthints:= true;
  gridsizex:= defaultgridsizex;
  gridsizey:= defaultgridsizey;
  encoding:= 1; //utf8n

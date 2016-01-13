@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2015 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2016 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -19093,14 +19093,20 @@ begin
  fillchar(info,sizeof(info),0);
  with info do begin
   flags:= defaulthintflags;
-  if ow_timedhint in ahintedwidget.foptionswidget then begin
+  if (ahintedwidget <> nil) and 
+                    (ow_timedhint in ahintedwidget.foptionswidget) then begin
    showtime:= defaulthintshowtime;
   end
   else begin
    showtime:= 0;
   end;
   mouserefpos:= fmouse.pos;
-  posrect.pos:= translateclientpoint(mouserefpos,nil,ahintedwidget);
+  if ahintedwidget <> nil then begin
+   posrect.pos:= translateclientpoint(mouserefpos,nil,ahintedwidget);
+  end
+  else begin
+   posrect.pos:= mouserefpos
+  end;;
   posrect.cx:= 24;
   posrect.cy:= 24;
   placement:= cp_bottomleft;

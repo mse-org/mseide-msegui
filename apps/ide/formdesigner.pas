@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2015 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2016 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -192,6 +192,7 @@ type
    fsizebefore: sizety;
    fshift: pointty;
    fshiftroot: tcomponent;
+   fhintedcomp: tcomponent;
    procedure drawgrid(const canvas: tcanvas);
    procedure hidexorpic(const canvas: tcanvas);
    procedure showxorpic(const canvas: tcanvas);
@@ -267,7 +268,6 @@ type
    procedure setrootpos(const component: tcomponent; const apos: pointty);
    procedure beginselect;
    procedure endselect;
-//   procedure updateselections;
    procedure updatecursorshape(const ashiftstate: shiftstatesty;
                                                           const area: areaty);
    procedure updateclickedcomponent;
@@ -299,7 +299,6 @@ type
    procedure doasyncevent(var atag: integer); override;
    procedure dobeforepaint(const canvas: tcanvas); override;
    procedure doafterpaint(const canvas: tcanvas); override;
-//   procedure createwindow; override;
    procedure doactivate; override;
    procedure validaterename(acomponent: tcomponent;
                                       const curname, newname: string); override;
@@ -317,17 +316,11 @@ type
    function markerrect: rectty; virtual;
    function widgetrefpoint: pointty; virtual;
    function compplacementrect: rectty; virtual;
-//   function gridsizex: integer; virtual;
-//   function gridsizey: integer; virtual;
-//   function showgrid: boolean; virtual;
-//   function snaptogrid: boolean; virtual;
    procedure recalcclientsize;
    procedure setcomponentscrollsize(const avalue: sizety); virtual;
    function fixformsize: boolean; virtual;
    function getdesignrect: rectty; virtual;
    procedure setdesignrect(const arect: rectty); virtual;
-//   procedure deletecomponent(const comp: tcomponent);
-//   function candelete(const acomponent: tcomponent): boolean; virtual;
    function checkdelete(): boolean; virtual;
    function dodelete: boolean; //true if ok
    procedure componentmoving(const apos: pointty); virtual;
@@ -1204,8 +1197,13 @@ end;
 procedure tformdesignerfo.notification(acomponent: tcomponent;
                                       operation: toperation); 
 begin
- if (operation = opremove) and (acomponent = fmodule) then begin
-  fmodule:= nil;
+ if (operation = opremove) then begin
+  if (acomponent = fmodule) then begin
+   fmodule:= nil;
+  end;
+  if (acomponent = fhintedcomp) then begin
+   fhintedcomp:= nil;
+  end;
  end;
  inherited;
 end;
@@ -3449,6 +3447,36 @@ var
   application.mouse.move(subpoint(pos1,posbefore));
  end;
 
+ function getcompatpos(const mousepos: pointty; out dest: tcomponent): boolean;
+                                               //true if widget
+ begin
+  result:= false;
+  dest:= componentatpos(mousepos);
+  if (dest = nil) then begin
+   if (form <> nil) and 
+            not hidewidgetact.checked then begin
+    dest:= widgetatpos(mousepos,true,true);
+    result:= true;
+   end
+   else begin
+    dest:= module;
+   end;
+  end;
+ end; //getcompatpos
+
+ function getcompatpos(const mousepos: pointty): tcomponent;
+ begin
+  getcompatpos(mousepos,result);
+ end;
+ 
+ procedure removehint();
+ begin
+  if fhintedcomp <> nil then begin
+   application.hidehint();
+   fhintedcomp:= nil;
+  end;
+ end; //removehint
+
 var
  component: tcomponent;
  int1: integer;
@@ -3461,14 +3489,15 @@ var
  designactive: boolean;
  po1: pformselectedinfoty;
  pt1: pointty;
-// dockintf: idockcontroller;
+ hintinfo1: hintinfoty;
 label
  1;
 begin
  if (module = nil) or (info.mouse.eventkind = ek_mousewheel) then begin
   exit; //continue normal handling
- end;
+ end;  
  if info.mouse.eventkind in [ek_mouseleave,ek_mouseenter] then begin
+  removehint();
   fclickedcompbefore:= nil;
   include(info.mouse.eventstate,es_processed);
   exit;
@@ -3482,6 +3511,33 @@ begin
   isinpaintrect:= pointinrect(mousepos1,gridrect);
   if eventkind in [ek_buttonpress,ek_buttonrelease] then begin
    fmousepos:= mousepos1;
+  end;
+  if (fhintedcomp <> nil) and 
+                           (info.mouse.eventkind in mouseposevents) then begin
+   if getcompatpos(mousepos1) <> fhintedcomp then begin
+    removehint();
+   end;
+  end;
+  if (info.mouse.eventkind = ek_mousepark) and 
+            projectoptions.e.componenthints and (fhintedcomp = nil) then begin
+   bo1:= getcompatpos(mousepos1,fhintedcomp);
+   if (fhintedcomp <> nil) then begin
+    if bo1 then begin
+     widget1:= twidget(fhintedcomp);
+    end
+    else begin
+     if fform <> nil then begin
+      widget1:= fform;
+     end
+     else begin
+      widget1:= fformcont;
+     end;
+    end;
+    application.inithintinfo(hintinfo1,widget1);
+    hintinfo1.caption:= msestring(
+                        fhintedcomp.name+' ('+fhintedcomp.classname+')');
+    application.showhint(widget1,hintinfo1);
+   end;
   end;
   component:= nil;
   if not (es_processed in eventstate) then begin
@@ -3498,16 +3554,7 @@ begin
      if (actarea in [ar_component,ar_none]) and 
                                      not (ss_shift in ss1) then begin
       if isinpaintrect then begin
-       component:= componentatpos(mousepos1);
-       if (component = nil) then begin
-        if (form <> nil) and 
-                 not hidewidgetact.checked then begin
-         component:= widgetatpos(mousepos1,true,true);
-        end
-        else begin
-         component:= module;
-        end;
-       end;
+       component:= getcompatpos(mousepos1);
       end;
       if component <> nil then begin
        if (factcompindex < 0) or 
