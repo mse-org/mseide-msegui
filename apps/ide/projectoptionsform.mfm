@@ -118,7 +118,7 @@ object projectoptionsfo: tprojectoptionsfo
           color = -2147483645
           frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_optionsskin]
           frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive]
-          taborder = 7
+          taborder = 8
           bounds_x = 0
           bounds_y = 84
           bounds_cx = 754
@@ -465,6 +465,7 @@ object projectoptionsfo: tprojectoptionsfo
                   76
                   16
                 )
+                taborder = 5
                 bounds_x = 456
                 bounds_y = 20
                 bounds_cx = 89
@@ -481,7 +482,7 @@ object projectoptionsfo: tprojectoptionsfo
                   0
                   0
                 )
-                taborder = 1
+                taborder = 4
                 bounds_x = 368
                 bounds_y = 14
                 bounds_cx = 84
@@ -515,7 +516,7 @@ object projectoptionsfo: tprojectoptionsfo
                   0
                   0
                 )
-                taborder = 2
+                taborder = 3
                 hint = 'Background color of marked brackets and word pairs.'#10'Will be overridden by setting in syntax definition file.'#10'cl_none -> force none.'
                 onshowhint = colorhint
                 bounds_x = 264
@@ -541,7 +542,7 @@ object projectoptionsfo: tprojectoptionsfo
                   0
                   0
                 )
-                taborder = 3
+                taborder = 2
                 hint = 'Background color of the active row while debugging.'#10'Will be overridden by setting in syntax definition file.'#10'cl_none -> force none.'
                 onshowhint = colorhint
                 bounds_x = 160
@@ -564,7 +565,7 @@ object projectoptionsfo: tprojectoptionsfo
                   6
                   0
                 )
-                taborder = 4
+                taborder = 1
                 hint = '0 -> accelerated,'#10'-1 -> paged'
                 bounds_x = 104
                 bounds_y = 0
@@ -584,7 +585,6 @@ object projectoptionsfo: tprojectoptionsfo
                   35
                   0
                 )
-                taborder = 5
                 bounds_x = 8
                 bounds_y = 14
                 bounds_cx = 71
@@ -872,7 +872,7 @@ object projectoptionsfo: tprojectoptionsfo
           bounds_cy = 191
           bounds_cymin = 84
           anchors = [an_top, an_bottom]
-          taborder = 8
+          taborder = 9
           activepageindex = 0
           tab_frame.localprops = []
           tab_frame.localprops1 = []
@@ -1223,7 +1223,7 @@ object projectoptionsfo: tprojectoptionsfo
             110
             2
           )
-          taborder = 9
+          taborder = 7
           bounds_x = 511
           bounds_y = 34
           bounds_cx = 123
