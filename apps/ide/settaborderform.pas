@@ -178,7 +178,7 @@ begin
   mousetaborder.value:= info.newcell.row;
  end
  else begin
-  if start.enabled and iscellclick(info,[ccr_dblclick]) then begin
+  if start.enabled and iscellclick(info,[ccr_dblclick,ccr_nokeyreturn]) then begin
    w1:= fchildren[windex[info.cell.row]];
    if w1.childrencount > 0 then begin
     settaborderdialog(w1[0]);

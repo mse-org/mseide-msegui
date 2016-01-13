@@ -68,6 +68,7 @@ object findinfileadialogfo: tfindinfiledialogfo
     anchors = [an_left, an_top, an_right]
     statfile = statfile1
     textflags = [tf_ycentered, tf_noselect, tf_ellipseleft]
+    onsetvalue = dirsetvalue
     controller.options = [fdo_directory]
     controller.ongetfilename = dirgetfilenameexe
     controller.onbeforeexecute = dironbeforeexecute

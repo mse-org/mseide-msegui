@@ -5,6 +5,8 @@ object settaborderfo: tsettaborderfo
   bounds_cx = 292
   bounds_cy = 205
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets]
+  container.frame.localprops = []
+  container.frame.localprops1 = []
   container.bounds = (
     0
     0
@@ -20,6 +22,8 @@ object settaborderfo: tsettaborderfo
   moduleclassname = 'tmseform'
   object grid: twidgetgrid
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets]
+    frame.localprops = []
+    frame.localprops1 = []
     bounds_x = 0
     bounds_y = 29
     bounds_cx = 290
@@ -58,7 +62,7 @@ object settaborderfo: tsettaborderfo
       frame.levelo = 0
       frame.colorclient = -2147483646
       frame.localprops = [frl_levelo, frl_colorclient]
-      frame.dummy = 0
+      frame.localprops1 = []
       taborder = 1
       visible = False
       bounds_x = 0
@@ -74,7 +78,7 @@ object settaborderfo: tsettaborderfo
       frame.levelo = 0
       frame.colorclient = -2147483646
       frame.localprops = [frl_levelo, frl_colorclient]
-      frame.dummy = 0
+      frame.localprops1 = []
       taborder = 2
       visible = False
       bounds_x = 202
@@ -110,7 +114,8 @@ object settaborderfo: tsettaborderfo
   object mousetaborder: tintegeredit
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
     frame.captionpos = cp_right
-    frame.dummy = 0
+    frame.localprops = []
+    frame.localprops1 = []
     taborder = 1
     bounds_x = 3
     bounds_y = 4

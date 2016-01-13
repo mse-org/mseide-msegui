@@ -55,6 +55,8 @@ type
                    var accept: Boolean);
    procedure opensetval(const sender: TObject; var avalue: Boolean;
                    var accept: Boolean);
+   procedure dirsetvalue(const sender: TObject; var avalue: msestring;
+                   var accept: Boolean);
   private
    procedure valuestoinfo(out info: findinfileinfoty);
    procedure infotovalues(const info: findinfileinfoty);
@@ -65,7 +67,7 @@ function findinfiledialogexecute(var info: findinfileinfoty;
 
 implementation
 uses
- msebits,findinfiledialogform_mfm,projectoptionsform;
+ msebits,findinfiledialogform_mfm,projectoptionsform,main,msefileutils;
 
 function findinfiledialogexecute(var info: findinfileinfoty;
                                          const useinfo: boolean): boolean;
@@ -170,24 +172,9 @@ procedure tfindinfiledialogfo.dirshowhint(const sender: TObject;
                var info: hintinfoty);
 begin
  hintmacros(tcustomstringedit(sender),info);
-{
- if dir.editor.textclipped then begin
-  info.caption:= dir.value;
- end;
-}
+ info.caption:= info.caption+lineend+'Empty -> project directory';
 end;
 
-{
-procedure tfindinfiledialogfo.chainopenfiles(const sender: TObject);
-begin
- if inopenfiles.value then begin
-  indirectories.value:= false;
-  dir.enabled:= false;
-  mask.enabled:= false;
-  subdirs.enabled:= false;
- end;
-end;
-}
 procedure tfindinfiledialogfo.dirgetfilenameexe(const sender: TObject;
                var avalue: msestring; var accept: Boolean);
 begin
@@ -204,7 +191,6 @@ begin
  end
  else begin
   if inopenfiles.value then begin
-//   indirectories.value:= false;
    dir.enabled:= false;
    mask.enabled:= false;
    subdirs.enabled:= false;
@@ -231,6 +217,14 @@ begin
  if avalue then begin
   inprojectdir.value:= false;
   indirectories.value:= false;
+ end;
+end;
+
+procedure tfindinfiledialogfo.dirsetvalue(const sender: TObject;
+               var avalue: msestring; var accept: Boolean);
+begin
+ if avalue = '' then begin
+  avalue:= filedir(mainfo.projectname);
  end;
 end;
 
