@@ -3,7 +3,7 @@ object stackfo: tstackfo
   frame.localprops = []
   frame.localprops1 = []
   frame.grip_size = 10
-  frame.grip_options = [go_closebutton, go_fixsizebutton, go_floatbutton, go_topbutton, go_backgroundbutton, go_nolockbutton]
+  frame.grip_options = [go_closebutton, go_fixsizebutton, go_floatbutton, go_topbutton, go_backgroundbutton, go_nolockbutton, go_buttonhints]
   popupmenu = tpopupmenu1
   visible = False
   bounds_x = 407
@@ -22,7 +22,7 @@ object stackfo: tstackfo
   )
   dragdock.splitter_size = 0
   dragdock.caption = 'Stack'
-  dragdock.optionsdock = [od_savepos, od_canmove, od_canfloat, od_candock, od_proportional, od_propsize, od_captionhint, od_buttonhints, od_childicons]
+  dragdock.optionsdock = [od_savepos, od_canmove, od_canfloat, od_candock, od_proportional, od_propsize, od_captionhint, od_childicons]
   options = [fo_savepos, fo_savestate]
   statfile = mainfo.projectstatfile
   caption = 'Stack'

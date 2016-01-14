@@ -2,7 +2,7 @@ object disassfo: tdisassfo
   frame.localprops = []
   frame.localprops1 = []
   frame.grip_size = 10
-  frame.grip_options = [go_closebutton, go_fixsizebutton, go_floatbutton, go_topbutton, go_backgroundbutton, go_nolockbutton]
+  frame.grip_options = [go_closebutton, go_fixsizebutton, go_floatbutton, go_topbutton, go_backgroundbutton, go_nolockbutton, go_buttonhints]
   onactivate = act
   ondeactivate = deact
   visible = False
@@ -20,7 +20,7 @@ object disassfo: tdisassfo
   )
   dragdock.splitter_size = 0
   dragdock.caption = 'Assembler'
-  dragdock.optionsdock = [od_savepos, od_savezorder, od_canmove, od_canfloat, od_candock, od_propsize, od_captionhint, od_buttonhints, od_childicons]
+  dragdock.optionsdock = [od_savepos, od_savezorder, od_canmove, od_canfloat, od_candock, od_propsize, od_captionhint, od_childicons]
   options = [fo_savepos, fo_savezorder, fo_savestate]
   statfile = mainfo.projectstatfile
   caption = 'Assembler'

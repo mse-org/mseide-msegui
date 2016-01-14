@@ -36,7 +36,7 @@ type
             od_propsize,od_fixsize,od_top,od_background,
             od_alignbegin,od_aligncenter,od_alignend,
             od_nofit,od_banded,od_nosplitsize,od_nosplitmove,
-            od_lock,od_nolock,od_thumbtrack,od_captionhint,od_buttonhints,
+            od_lock,od_nolock,od_thumbtrack,od_captionhint,{od_buttonhints,}
             od_childicons); //for tformdockcontroller
  optionsdockty = set of optiondockty;
 
@@ -45,8 +45,7 @@ type
                      dbr_top,dbr_background,dbr_lock,dbr_nolock);
 const
  defaultoptionsdock = [od_savepos,od_savezorder,od_savechildren,
-                       od_captionhint,od_buttonhints,
-                       od_childicons];
+                       od_captionhint,od_childicons];
  defaultoptionsdocknochildren = defaultoptionsdock - [od_savechildren];
  dbr_first = dbr_handle;
  dbr_last = dbr_nolock;
@@ -459,12 +458,13 @@ type
                  go_fixsizebutton,
                  go_floatbutton,go_topbutton,go_backgroundbutton,
                  go_lockbutton,go_nolockbutton,go_buttonframe,
+                 go_buttonhints,
                  go_horz,go_vert,go_opposite,go_showsplitcaption,
                  go_showfloatcaption);
  gripoptionsty = set of gripoptionty;
 
 const
- defaultgripoptions = [go_closebutton];
+ defaultgripoptions = [go_closebutton,go_buttonhints];
  defaultdockpaneloptionswidget = defaultoptionswidget + [ow_subfocus];
  defaulttextflagstop = [tf_ycentered,tf_clipo];
  defaulttextflagsleft = [tf_ycentered,tf_rotate90,tf_clipo];
@@ -5281,7 +5281,7 @@ function tgripframe.ishintarea(const apos: pointty; var aid: int32): boolean;
 begin
  result:= pointinrect(apos,fgriprect{frects[dbr_handle]});
  if result then begin
-  if od_buttonhints in fcontroller.optionsdock then begin
+  if go_buttonhints in fgrip_options then begin
    aid:= hintidframe - ord(fcontroller.checkbuttonarea(apos));
    if not (od_captionhint in fcontroller.optionsdock) and 
                    (aid = hintidframe-ord(dbr_handle)) then begin

@@ -3,7 +3,7 @@ object mainfo: tmainfo
   frame.localprops = []
   frame.localprops1 = []
   frame.grip_size = 10
-  frame.grip_options = [go_fixsizebutton, go_floatbutton, go_topbutton, go_backgroundbutton, go_lockbutton, go_nolockbutton]
+  frame.grip_options = [go_fixsizebutton, go_floatbutton, go_topbutton, go_backgroundbutton, go_lockbutton, go_nolockbutton, go_buttonhints]
   visible = False
   bounds_x = 45
   bounds_y = 165
@@ -25,7 +25,7 @@ object mainfo: tmainfo
     449
     133
   )
-  dragdock.optionsdock = [od_savepos, od_savezorder, od_canmove, od_cansize, od_canfloat, od_candock, od_captionhint, od_buttonhints, od_childicons]
+  dragdock.optionsdock = [od_savepos, od_savezorder, od_canmove, od_cansize, od_canfloat, od_candock, od_captionhint, od_childicons]
   optionswindow = [wo_taskbar]
   mainmenu = mainmenu1
   options = [fo_main, fo_terminateonclose, fo_globalshortcuts, fo_savepos, fo_savezorder, fo_savestate]
