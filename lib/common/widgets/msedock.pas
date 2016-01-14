@@ -114,6 +114,7 @@ type
    function gethandlerect: rectty;
    procedure clientmouseevent(var info: mouseeventinfoty); override;
    procedure dopaintforeground(const canvas: tcanvas); override;
+   function gethint: msestring; override;
   public
    constructor create(aowner: tcomponent); override;
   published
@@ -2434,11 +2435,21 @@ begin
  ischild1:= false;
  if not(csdesigning in widget1.ComponentState) then begin
   with info do begin
-   mouseinhandle:= (fdockhandle <> nil) and pointinrect(
-     translateclientpoint(info.pos,idockcontroller(fintf).getwidget,fdockhandle),
-       fdockhandle.gethandlerect) or
-      pointinrect({widget1.clientpostowidgetpos(}info.pos{)},
-                            idockcontroller(fintf).getbuttonrects(dbr_handle));
+   if fdockhandle <> nil then begin
+    mouseinhandle:= (fdockhandle <> nil) and 
+    pointinrect(translateclientpoint(info.pos,
+      idockcontroller(fintf).getwidget,fdockhandle),fdockhandle.gethandlerect);
+   end
+   else begin
+    mouseinhandle:=
+        pointinrect({widget1.clientpostowidgetpos(}info.pos{)},
+                           idockcontroller(fintf).getbuttonrects(dbr_handle));
+   end;
+//   mouseinhandle:= (fdockhandle <> nil) and pointinrect(
+//     translateclientpoint(info.pos,idockcontroller(fintf).getwidget,fdockhandle),
+//       fdockhandle.gethandlerect) or
+//      pointinrect({widget1.clientpostowidgetpos(}info.pos{)},
+//                            idockcontroller(fintf).getbuttonrects(dbr_handle));
    case eventkind of
     dek_begin: begin
      if mouseinhandle then begin
@@ -3082,10 +3093,18 @@ begin
    break;
   end;
  end;
- if (result = dbr_none) and 
-            pointinrect(apos,
+ if (result = dbr_none) then begin
+  if fdockhandle <> nil then begin
+   if pointinrect(apos,fdockhandle.paintparentrect) then begin
+    result:= dbr_handle;
+   end;
+  end
+  else begin
+   if pointinrect(apos,
                  idockcontroller(fintf).getbuttonrects(dbr_handle)) then begin
-  result:= dbr_handle; //handle rect can include buttons
+    result:= dbr_handle; //handle rect can include buttons
+   end;
+  end;
  end;
 end;
 
@@ -5420,6 +5439,15 @@ begin
    end;
   end;
  end;
+end;
+
+function tdockhandle.gethint: msestring;
+begin
+ result:= inherited gethint();
+ if (result = '') and (fcontroller <> nil) and 
+                      (od_captionhint in fcontroller.optionsdock) then begin
+  result:= fcontroller.caption;
+ end;  
 end;
 
 { tdockpanel }
