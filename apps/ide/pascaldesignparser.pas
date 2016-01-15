@@ -231,7 +231,7 @@ begin
          parsetypedef;
         end;
        end;
-       syk_vardef: begin
+       syk_vardef,syk_pardef: begin
         bo1:= true;
         while bo1 and checkoperator(',') do begin
          bo1:= checknamenoident;
@@ -356,6 +356,7 @@ var
  ar1: stringarty;
  paraflags: tparamflags;
  defaultstr: string;
+ apos,epos: sourceposty;
 
  procedure putparams(const atypename: string);
  var
@@ -369,6 +370,8 @@ var
     flags:= paraflags;
     typename:= atypename;
     defaultvalue:= defaultstr;
+    start:= apos;
+    stop:= epos;
    end;
    inc(int2);
   end;
@@ -403,8 +406,10 @@ begin
     if (paraflags = []) and (int1 >= 0) then begin
      break;
     end;
+    apos:= sourcepos;
     ar1:= lstringartostringar(getorignamelist);
     if not checkoperator(':') then begin
+     epos:= sourcepos;
      putparams(''); //untyped
     end
     else begin
@@ -430,6 +435,7 @@ begin
       skipexpression;
       defaultstr:= getorigtext(po1);
      end;
+     epos:= sourcepos;
      putparams(str1);
     end;
     if checkoperator(')') then begin
@@ -1145,7 +1151,8 @@ var
      uppername:= lstringtostring(procname);
     end;
    end;
-
+ var
+  i1: int32;
  begin
   if procnestinglevel < 32 then begin
    classname.po:= nil;
@@ -1206,6 +1213,12 @@ var
       po2^.impheaderstartpos:= pos1;
       po2^.impheaderendpos:= sourcepos;
      end;
+     for i1:= 0 to high(methodinfo.params) do begin
+      with methodinfo.params[i1] do begin
+       funitinfopo^.deflist.add(name,syk_pardef,start,stop);
+      end;
+     end;
+
      while not eof do begin
       if getident(aident) then begin
        case pascalidentty(aident) of

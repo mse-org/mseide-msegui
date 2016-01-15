@@ -99,6 +99,7 @@ type
    name: string;
    typename: string;
    defaultvalue: string;
+   start,stop: sourceposty;
   end;
   paraminfoarty = array of paraminfoty;
   
@@ -269,7 +270,8 @@ type
   end;
   symbolkindty = (syk_none,syk_nopars,syk_substr,syk_deleted,syk_root,syk_classdef,
                   syk_procdef,syk_procimp,syk_classprocimp,
-                  syk_vardef,syk_constdef,syk_typedef,syk_interfacedef,syk_identuse);
+                  syk_vardef,syk_pardef,
+                  syk_constdef,syk_typedef,syk_interfacedef,syk_identuse);
   defnamety = record
    name: string;
    id: nameidty;

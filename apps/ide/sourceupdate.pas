@@ -797,7 +797,8 @@ function tsourceupdater.getdefinfotext(const adef: pdefinfoty): string;
 var
  item1: sourceitemty;
 begin
- if adef^.kind in [syk_typedef,syk_vardef,syk_classdef,syk_procdef,syk_procimp,
+ if adef^.kind in [syk_typedef,syk_vardef,syk_pardef,syk_classdef,
+                         syk_procdef,syk_procimp,
                          syk_classprocimp,syk_interfacedef] then begin
   item1.filename:= adef^.pos.filename;
   item1.startoffset:= adef^.pos.offset;
@@ -860,7 +861,7 @@ begin
     getidents(po1,sourcefo.gettextstream(designer.designfiles.getname(
                               po1^.pos.filename),false));
    end;
-   syk_typedef,syk_vardef,syk_classdef,syk_procdef,syk_classprocimp,
+   syk_typedef,syk_vardef,syk_pardef,syk_classdef,syk_procdef,syk_classprocimp,
                          syk_procimp,syk_interfacedef: begin
     list1:= nil;
     try
