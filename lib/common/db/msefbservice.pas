@@ -268,7 +268,7 @@ type
                                                  const locktimeout: card32 = 0);
    procedure backupstart(const dbname: msestring;
           const backupfiles: array of msestring;
-          const lengths: array of card32; //bytes, none (not 0!) for last file
+          const lengths: array of card32; //bytes, no item for last file
           const verbose: boolean = false; const stat: string = '';
              //stat for FB 2.5.5 only, 1..4 chars, valid chars = T|D|R|W
           const aoptions: backupoptionsty = []; const factor: card32 = 0);
@@ -302,7 +302,7 @@ type
    property password : ansistring read fpassword write fpassword;
    property connected: boolean read getconnected 
                                     write setconnected default false;
-                                 //connected will be rest by a server error
+                                 //connected will be reset by a server error
    property options: fbserviceoptionsty read foptions write foptions default [];
    property infotimeout: int32 read finfotimeout write finfotimeout 
                        default defaultinfotimeout; //seconds, -1 -> none
@@ -311,7 +311,7 @@ type
    property onasyncend: fbserviceendeventty read fonasyncend 
                                    write fonasyncend; //runs in service thread
    property onasyncendmain: fbserviceendeventty read fonasyncendmain 
-                          write fonasyncendmain; //runs in main thread
+                               write fonasyncendmain; //runs in main thread
                                                     
    property onerror: fbserviceerroreventty read fonerror write fonerror;
  end;
