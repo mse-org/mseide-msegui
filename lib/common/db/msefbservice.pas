@@ -170,11 +170,13 @@ type
    fonasyncend: fbserviceendeventty;
    fasynctext: msestringarty;
    fasyncmaxrowcount: int32;
+   fonasyncendmain: fbserviceendeventty;
    function getconnected: boolean;
    procedure setconnected(const avalue: boolean);
   protected
    function connectionmessage(atext: pchar): msestring;
    procedure loaded(); override;
+   procedure doasyncevent(var atag: int32); override;
    procedure connect();
    procedure closeconn();
    procedure disconnect();
@@ -307,7 +309,10 @@ type
    property onasynctext: fbservicetexteventty read fonasynctext 
                                                    write fonasynctext;
    property onasyncend: fbserviceendeventty read fonasyncend 
-                                                    write fonasyncend;
+                                   write fonasyncend; //runs in service thread
+   property onasyncendmain: fbserviceendeventty read fonasyncendmain 
+                          write fonasyncendmain; //runs in main thread
+                                                    
    property onerror: fbserviceerroreventty read fonerror write fonerror;
  end;
  
@@ -326,6 +331,9 @@ const
                                                        isc_spb_prp_db_online);
  reservespaceconsts: array[reservespacety] of card32 = (isc_spb_prp_res_use_full,
                                                        isc_spb_prp_res);
+const
+ asyncendtag = 5790432; //not aborted, +1 -> aborted                            
+ 
 function readvalue16(var buffer: pbyte): card16;
 begin
  result:= buffer^;
@@ -560,7 +568,7 @@ var
   remainder:= '';
  end; //add
  
- procedure endtext();
+ procedure endtext(const canceled: boolean);
  var
   i1: int32;
  begin
@@ -575,8 +583,17 @@ var
    fowner.fasynctext:= nil;
    pointer(fowner.fasynctext):= pointer(ar1);
    pointer(ar1):= nil;
-//   fowner.fasynctext:= copy(ar1,rowindex1,rowmax1-rowindex1);
-//   stackarray(copy(ar1,0,rowindex1),fowner.fasynctext);
+  end;
+  if assigned(fowner.fonasyncend) then begin
+    fowner.fonasyncend(fowner,true);
+  end;
+  if assigned(fowner.fonasyncendmain) then begin
+   if canceled then begin
+    fowner.asyncevent(asyncendtag+1);
+   end
+   else begin
+    fowner.asyncevent(asyncendtag);
+   end;
   end;
  end;
  
@@ -661,10 +678,7 @@ begin
         add();
         ok:= true;
         cancel();
-        endtext();
-        if assigned(fowner.fonasyncend) then begin
-         fowner.fonasyncend(fowner,false);
-        end;
+        endtext(false);
         break;
        end;
       finally
@@ -685,10 +699,7 @@ begin
     add();
    end;
    cancel();
-   endtext();
-   if assigned(fowner.fonasyncend) then begin
-     fowner.fonasyncend(fowner,true);
-   end;
+   endtext(true);
   finally
    application.unlock();
   end;
@@ -760,6 +771,21 @@ begin
  inherited;
  if fbss_connected in fstate then begin
   connect();
+ end;
+end;
+
+procedure tfbservice.doasyncevent(var atag: int32);
+begin
+ inherited;
+ if canevent(tmethod(fonasyncendmain)) then begin
+  if atag = asyncendtag then begin
+   fonasyncendmain(self,false);
+  end
+  else begin
+   if (atag = asyncendtag+1) then begin
+    fonasyncendmain(self,false);
+   end;
+  end;
  end;
 end;
 
