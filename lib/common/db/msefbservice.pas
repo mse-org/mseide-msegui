@@ -265,8 +265,8 @@ type
              const idxincl: msestring = ''; const idxexcl: msestring = '';
                                                  const locktimeout: card32 = 0);
    procedure backupstart(const dbname: msestring;
-          const backupfiles: array of msestring; const lengths: array of card32;
-                                             //bytes, none for last file
+          const backupfiles: array of msestring;
+          const lengths: array of card32; //bytes, none (not 0!) for last file
           const verbose: boolean = false; const stat: string = '';
              //stat for FB 2.5.5 only, 1..4 chars, valid chars = T|D|R|W
           const aoptions: backupoptionsty = []; const factor: card32 = 0);
@@ -681,7 +681,9 @@ begin
  if not ok then begin 
   application.lock();
   try
-   add();
+   if ar1 <> nil then begin
+    add();
+   end;
    cancel();
    endtext();
    if assigned(fowner.fonasyncend) then begin
