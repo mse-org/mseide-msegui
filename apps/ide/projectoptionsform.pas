@@ -2857,10 +2857,11 @@ begin
  editfontcolor:= integer(cl_text);
  editbkcolor:= integer(cl_foreground);
  statementcolor:= $E0FFFF;
- pairmarkcolor:= int32(cl_ltyellow);
+// pairmarkcolor:= int32(cl_ltyellow);
+ pairmarkcolor:= int32(cl_none);
  editfontantialiased:= true;
  editmarkbrackets:= true;
- editmarkpairwords:= true;
+// editmarkpairwords:= true;
  backupfilecount:= 2;
  setlength(ar1,1);
  ar1[0]:= '${TEMPLATEDIR}';
