@@ -553,21 +553,19 @@ var
 
  procedure add();
  begin
-  if ar1 <> nil then begin
-   if length(ar1) < rowmax1 then begin
-    additem(ar1,remainder);
-   end
-   else begin
-    if rowmax1 <> 0 then begin
-     ar1[rowindex1]:= remainder;
-     inc(rowindex1);
-     if rowindex1 >= rowmax1 then begin
-      rowindex1:= 0;
-     end;
+  if length(ar1) < rowmax1 then begin
+   additem(ar1,remainder);
+  end
+  else begin
+   if rowmax1 <> 0 then begin
+    ar1[rowindex1]:= remainder;
+    inc(rowindex1);
+    if rowindex1 >= rowmax1 then begin
+     rowindex1:= 0;
     end;
    end;
-   remainder:= '';
   end;
+  remainder:= '';
  end; //add
  
  procedure endtext(const canceled: boolean);
@@ -610,6 +608,7 @@ begin
  str1:= '';
  remainder:= '';
  rowindex1:= 0;
+ rowmax1:= 0;
  ar1:= nil;
  while not terminated and not application.terminated do begin
   fowner.checkerror(fprocname,isc_service_query(@fowner.fstatus,@fowner.fhandle,
