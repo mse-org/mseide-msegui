@@ -1833,11 +1833,24 @@ begin
 end;
 
 procedure tcustomlabel.setoptions(const avalue: labeloptionsty);
+var
+ opt1: labeloptionsty;
 begin
  if foptions <> avalue then begin
+  opt1:= foptions >< avalue;
   foptions:= avalue;
   updatetextflags;
   invalidate;
+  if (lao_nounderline in opt1) and not(csreading in componentstate) then begin
+   if lao_nounderline in avalue then begin
+    fcaption.text:= richstringtocaption(fcaption);
+    fcaption.format:= nil;
+   end
+   else begin
+    captiontorichstring(fcaption.text,fcaption);
+   end;
+   checkautosize();
+  end;
  end;
 end;
 

@@ -247,6 +247,11 @@ type
    function getvalue: msestring; override;
  end;
 
+ tvolatileordinalpropertyeditor = class(tordinalpropertyeditor)
+  protected
+   function getdefaultstate: propertystatesty; override;
+ end;
+  
  tint64propertyeditor = class(tpropertyeditor)
   protected
    function getdefaultstate: propertystatesty; override;
@@ -513,6 +518,17 @@ type
    function getvalue: msestring; override;
    procedure setvalue(const value: msestring); override;
    function subproperties: propertyeditorarty; override;
+ end;
+
+ tvolatilesetpropertyeditor = class(tsetpropertyeditor)
+  protected
+   function getdefaultstate: propertystatesty; override;
+  public
+  constructor create(const adesigner: idesigner;
+        const amodule: tmsecomponent; const acomponent: tcomponent;
+            const aobjectinspector: iobjectinspector;
+            const aprops: propinstancearty; atypeinfo: ptypeinfo); override;
+   
  end;
 
  tmethodpropertyeditor = class(tpropertyeditor)
@@ -2305,6 +2321,13 @@ begin
  result:= inherited getdefaultstate + [ps_isordprop,ps_candefault];
 end;
 
+{ tvolatileintegerpropertyeditor }
+
+function tvolatileordinalpropertyeditor.getdefaultstate: propertystatesty;
+begin
+ result:= inherited getdefaultstate + [ps_volatile];
+end;
+
 { tint64propertyeditor }
 
 function tint64propertyeditor.allequal: boolean;
@@ -2615,6 +2638,9 @@ end;
 function tsetelementeditor.getdefaultstate: propertystatesty;
 begin
  result:= inherited getdefaultstate + [ps_valuelist,ps_candefault,ps_refresh];
+ if (fparenteditor <> nil) and (ps_volatile in fparenteditor.fstate) then begin
+  include(result,ps_volatile);
+ end;
 end;
 
 function tsetelementeditor.getvalue: msestring;
@@ -5860,6 +5886,21 @@ end;
 function toptionaldatalistpropertyeditor.getdefaultstate: propertystatesty;
 begin
  result:= inherited getdefaultstate + [ps_dialog];
+end;
+
+{ tvolatilesetpropertyeditor }
+
+function tvolatilesetpropertyeditor.getdefaultstate: propertystatesty;
+begin
+ result:= inherited getdefaultstate + [ps_volatile];
+end;
+
+constructor tvolatilesetpropertyeditor.create(const adesigner: idesigner;
+               const amodule: tmsecomponent; const acomponent: tcomponent;
+               const aobjectinspector: iobjectinspector;
+               const aprops: propinstancearty; atypeinfo: ptypeinfo);
+begin
+ inherited;
 end;
 
 initialization

@@ -90,11 +90,6 @@ type
    function getvalue: msestring; override;
  end;
 
- tvolatileordinalpropertyeditor = class(tordinalpropertyeditor)
-  protected
-   function getdefaultstate: propertystatesty; override;
- end;
-  
  tcolheaderspropertyeditor = class(tpersistentarraypropertyeditor)
   protected
    function geteditorclass: propertyeditorclassty; override;
@@ -257,6 +252,9 @@ begin
                                            tframebuttoneditor);
  registerpropertyeditor(typeinfo(tframebuttons),nil,'',
                                            tframebuttonseditor);
+
+ registerpropertyeditor(typeinfo(labeloptionsty),tcustomlabel,'',
+                                           tvolatilesetpropertyeditor);
   
  registerunitgroup(['msegrids'],['msegui','msegraphutils','mseclasses']);
  registerunitgroup(['msewidgetgrid'],['msedataedits',
@@ -352,13 +350,6 @@ end;
 function tcolheaderelementeditor.getvalue: msestring;
 begin
  result:= '<'+tcolheader(getpointervalue).caption+'>';
-end;
-
-{ tvolatileintegerpropertyeditor }
-
-function tvolatileordinalpropertyeditor.getdefaultstate: propertystatesty;
-begin
- result:= inherited getdefaultstate + [ps_volatile];
 end;
 
 { tcolheaderspropertyeditor }
