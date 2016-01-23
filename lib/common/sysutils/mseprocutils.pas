@@ -23,8 +23,13 @@ uses
  
 type
  pipedescriptorty = record
+ {$ifdef mswindows}
+  readdes: ptrint;
+  writedes: ptrint;
+ {$else} 
   readdes: integer;
   writedes: integer;
+ {$endif}
  end;
  execoptionty = (exo_shell,                    //default on Linux
                  exo_noshell,                  //default on Windows
@@ -401,7 +406,7 @@ begin
  fillchar(sa,sizeof(sa),0);
  sa.nlength:= sizeof(sa);
  sa.bInheritHandle:= true;
- if createpipe(longword(desc.readdes),longword(desc.writedes),@sa,0) then begin
+ if createpipe(ptruint(desc.readdes),ptruint(desc.writedes),@sa,0) then begin
   if write then begin
    po1:= @desc.writedes;
   end

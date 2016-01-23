@@ -119,7 +119,7 @@ type
   caseinsensitive: boolean;
  end;
 
- dirstreampty = array[0..7] of longword;
+ dirstreampty = array[0..7] of pointer;
  dirstreamty = record
 //  checkcallback: dirstreamcheckeventty;
   dirinfo: dirstreaminfoty;

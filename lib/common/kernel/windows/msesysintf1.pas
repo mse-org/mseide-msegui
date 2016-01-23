@@ -20,11 +20,15 @@ var
 {$include ..\msesysintf1.inc}
 
 type
- win32semty = record
-  event: cardinal;
-  semacount: integer;
-  destroyed: integer;
-  platformdata: array[3..7] of cardinal;
+ win32semty = record               //64 bit
+  event: thandle;                  //8
+  semacount: integer;              //4
+  destroyed: integer;              //4 total 16
+ {$ifdef cpu64}                    //semty = 64
+  platformdata: array[2..7] of pointer;
+ {$else}
+  platformdata: array[3..7] of pointer;
+ {$endif}
  end;
 
 implementation
@@ -44,21 +48,29 @@ type
           Reserved : DWORD;
        end;
  {$endif}
- win32mutexty = record
-  mutex: trtlcriticalsection;
-  trycount: integer;
-  lockco: integer; 
-  owningth: threadty;
-  platformdata: array[7..7] of cardinal;
+ win32mutexty = record                      //64bit
+  mutex: trtlcriticalsection;               //40 bytes
+  trycount: integer;                        //4
+  lockco: integer;                          //4
+  owningth: threadty;                       //8 total   56
+ {$ifdef cpu64}                             //mutexty = 80
+  platformdata: array[7..9] of pointer;     //          24
+ {$else}
+  platformdata: array[7..7] of pointer;
+ {$endif}
  end;
 
  condeventsty = (ce_signal,ce_broadcast);
- win32condty = record
-  events: array[condeventsty] of cardinal;
-  waiterscount: integer;
-  waiterscountlock: trtlcriticalsection;
-  mutex: trtlcriticalsection;
-  platformdata: array[15..31] of cardinal;
+ win32condty = record                       //64bit
+  events: array[condeventsty] of thandle;   //16
+  waiterscountlock: trtlcriticalsection;    //40
+  mutex: trtlcriticalsection;               //40 total 100
+  waiterscount: integer;                    //4
+ {$ifdef cpu64}                             //condty = 256
+  platformdata: array[25..63] of cardinal;  //         156
+ {$else}
+  platformdata: array[15..31] of pointer;
+ {$endif}
  end;
 
 var

@@ -106,9 +106,9 @@ const
  filetimeoffset = -109205.0;
 
 type
- win32threadinfoty = record
-  handle: cardinal;
-  platformdata: array[1..3] of cardinal;
+ win32threadinfoty = record                //64bit
+  handle: thandle;                         //8
+  platformdata: array[1..3] of pointer;   
  end;
 
  winfileinfoty = record
@@ -151,12 +151,16 @@ type
   nFileIndexLow: DWORD;
  end;
 
- dirstreamwin32ty = record
-  handle: cardinal;
-  finddatapo: pwin32_find_dataw;
-  last: boolean;
-  drivenum: integer; //for root directory
-  platformdata: array[4..7] of cardinal;
+ dirstreamwin32ty = record                //64bit
+  handle: thandle;                        //8
+  finddatapo: pwin32_find_dataw;          //8
+  last: boolean;                          //4
+  drivenum: integer; //for root directory //4 total 24
+ {$ifdef cpu64}                           //platformdata = 64
+  platformdata: array[3..7] of pointer;
+ {$else}
+  platformdata: array[4..7] of pointer;
+ {$endif}
  end;
  
 const
@@ -742,7 +746,7 @@ end;
 }
 {$ifdef FPC}
 
-function threadexec(infopo : pointer) : longint;
+function threadexec(infopo : pointer) : ptrint;
 begin
 //result:= 0;
 //exit;
@@ -1574,7 +1578,7 @@ begin
              {$ifdef FPC}@finddata
              {$else}twin32finddataw(finddata){$endif});
  end;
- if cardinal(handle) <> invalid_handle_value then begin
+ if thandle(handle) <> invalid_handle_value then begin
   with win32_find_dataw(finddata) do begin
 {
    if winfo.dwfileattributes and file_attribute_directory <> 0 then begin

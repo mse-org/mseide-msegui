@@ -133,7 +133,7 @@ begin
  end;
 end;
 
-procedure TimerProc(hwnd: hwnd; uMsg: longword; idEvent: longword;
+procedure TimerProc(hwnd: hwnd; uMsg: longword; idEvent: ptruint;
           dwTime: longword); stdcall;
 begin
  killtimer;
