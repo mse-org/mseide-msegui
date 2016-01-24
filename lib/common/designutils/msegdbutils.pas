@@ -4395,7 +4395,7 @@ end;
 function tgdbmi.readpascalvariable(varname: string; 
                                           out aresult: msestring): gdbresultty;
 var
- str1,str2: string;
+ str1,str2,str3: string;
  int1{,int2}: integer;
  ar1: stringarty;
 begin
@@ -4422,6 +4422,12 @@ begin
   end;
   updatepascalexpression(varname);
   result:= symboltype(varname,str1);
+  if (pos('type = ^',str1) = 1) and
+                (symboltype(varname+'^' ,str3) = gdb_ok) then begin
+   if pos('type = array of ',str3) = 1 then begin //dwarf dynarray
+    str1:= 'type = ^(array [0..-1] of '+copy(trim(str1),9,bigint)+')'+lineend;
+   end;
+  end;
   if result = gdb_ok then begin
    result:= evaluateexpression(varname,str2);
    case result of
