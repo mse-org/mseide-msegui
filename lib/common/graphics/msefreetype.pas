@@ -422,7 +422,7 @@ procedure ftcheckerror(const aerror: integer; const amessage: msestring);
 begin
  if aerror <> 0 then begin
   raise efreetype.create('Freetype error '+inttostr(aerror)+':'+lineend+
-                                amessage);
+                                ansistring(amessage));
  end;
 end;
 
