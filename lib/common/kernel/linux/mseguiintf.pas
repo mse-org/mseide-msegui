@@ -6509,7 +6509,7 @@ begin
 end;
 
 initialization
- norestackwindow:= true;
+// norestackwindow:= true;
  noreconfigurewmwindow:= true;
  stackmodebelowworkaround:= false;
 // nocreatestaticgravity:= true;
