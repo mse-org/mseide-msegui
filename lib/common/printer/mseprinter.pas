@@ -225,12 +225,14 @@ type
  end;
 
  tstreamprinter = class;
- updateprinteransistringeventty = procedure(const sender: tstreamprinter;
-                                   var avalue: ansistring) of object;
+// updateprinteransistringeventty = procedure(const sender: tstreamprinter;
+//                                   var avalue: ansistring) of object;
+ updateprinterstringeventty = procedure(const sender: tstreamprinter;
+                                   var avalue: msestring) of object;
  tstreamprinter = class(tprinter)
   private
    fprintcommand: msestring;
-   fonupdateprintcommand: updateprinteransistringeventty;
+   fonupdateprintcommand: updateprinterstringeventty;
    procedure setstream(const avalue: ttextstream);
   protected
    procedure dostatread(const reader: tstatreader); override;
@@ -248,7 +250,7 @@ type
    property printcommand: msestring read fprintcommand write fprintcommand;
    property options;
    property onerror;  //call abort for quiet cancel
-   property onupdateprintcommand: updateprinteransistringeventty 
+   property onupdateprintcommand: updateprinterstringeventty 
                       read fonupdateprintcommand write fonupdateprintcommand;
                       //runs in main thread
  end;
@@ -1721,7 +1723,7 @@ end;
 procedure tstreamprinter.doupdateprintcommand(const adata: pointer);
 begin
  if canevent(tmethod(fonupdateprintcommand)) then begin
-  fonupdateprintcommand(self,pstring(adata)^);
+  fonupdateprintcommand(self,pmsestring(adata)^);
  end;
 end;
 
