@@ -16561,8 +16561,23 @@ end;
 function tinternalapplication.getmousewinid: winidty;
 begin
  result:= fmousewinid;
- if (result = 0) and (fmousecapturewidget <> nil) then begin
+ if (result <> 0) then begin
+  exit;
+ end;
+ if  fmousecapturewidget <> nil then begin
   result:= fmousecapturewidget.window.winid;
+ end;
+ if (result <> 0) then begin
+  exit;
+ end;
+ if activewindow <> nil then begin
+  result:= activewindow.winid;
+ end;
+ if (result <> 0) then begin
+  exit;
+ end;
+ if (mainwindow <> nil) and (mainwindow.visible) then begin
+  result:= mainwindow.winid;
  end;
 end;
 
