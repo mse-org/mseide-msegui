@@ -224,7 +224,7 @@ type
   charwidths: pcharwidthsty;
   overhang: integer;
   xwidth: integer;
-  local: array[3..15] of longword; //plattform dependent
+  local: array[{$ifdef cpu64}2{$else}3{$endif}..15] of pointer; //plattform dependent
  end;
  
 type

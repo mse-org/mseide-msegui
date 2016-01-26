@@ -1172,7 +1172,7 @@ begin
        {$ifdef CPUARM}
          int64(ar8ty(cur1)):= round(asfloat * intexp10(-SQLScale));
        {$else}
-         int64(cur1):= round(asfloat * intexp10(-SQLScale));
+         int64(ar8ty(cur1)):= round(asfloat * intexp10(-SQLScale));
        {$endif}
       {$else}
          int64(ar8ty(cur1)):= round(asfloat * intexp10(-SQLScale));

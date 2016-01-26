@@ -461,7 +461,11 @@ var
  wstr1: filenamety;
  dirinfo: tdirinfo;
  info: fileinfoty;
+{$ifdef mswindows}
+ fd: thandle;
+{$else}
  fd: integer;
+{$endif}
 
 begin
  wstr1:= filepath(filename);
@@ -513,7 +517,7 @@ begin
      FILE_NOTIFY_CHANGE_ATTRIBUTES or FILE_NOTIFY_CHANGE_SIZE or
      file_notify_change_last_write or file_notify_change_security);
   end;
-  if cardinal(fd) <> invalid_handle_value then begin
+  if fd <> invalid_handle_value then begin
    setlength(dirdescriptors,int1+2);
    dirdescriptors[int1+1]:= fd;
 {$else unix}

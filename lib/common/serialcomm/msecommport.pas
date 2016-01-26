@@ -1439,7 +1439,7 @@ function tcustomrs232.piperead(var buf; const acount: integer;
                const nonblocked: boolean): boolean;
 {$ifdef mswindows}
 var
- w1: ptruint;
+ w1: dword;
  bo1: boolean;
 {$endif}
 begin
@@ -1489,7 +1489,7 @@ end;
 function tcustomrs232.pipewrite(const buffer; count: longint): longint;
 {$ifdef mswindows}
 var
- w1: ptruint;
+ w1: dword;
  bo1: boolean;
 {$endif}
 begin

@@ -206,7 +206,7 @@ var
  desktopwindow: hwnd;
  eventlist: tobjectqueue;
 // timer: longword;
- mouseidletimer: longword;
+ mouseidletimer: ptruint;
  mainthread: threadty;
  mousewindow: hwnd;
  lastfocuswindow: hwnd;
@@ -909,7 +909,8 @@ begin
  dc:= getdc(0);
  setdibits(dc,result,0,size.cy,po1,windows.bitmapinfo(pointer(@bitmapinfo)^),dib_rgb_colors);
  releasedc(0,dc);
- localfree(longword(po1));
+ localfree(ptruint(po1));
+// localfree(longword(po1));
  {$ifdef FPC}{$checkpointer default}{$endif}
 end;
 
@@ -996,7 +997,7 @@ end;
 procedure gui_freeimagemem(data: plongwordaty);
 begin
  dec(imagememalloc);
- localfree(longword(data));
+ localfree(ptruint(data));
 end;
 
 function gui_pixmaptoimage(pixmap: pixmapty; out image: imagety;
@@ -1919,7 +1920,7 @@ end;
 
 procedure checkmousewindow(window: hwnd; const pos: pointty); forward;
 
-procedure mouseidleproc(ahwnd: hwnd; uMsg: longword; idEvent: longword;
+procedure mouseidleproc(ahwnd: hwnd; uMsg: longword; idEvent: ptruint;
           dwTime: longword); stdcall;
 var
  po1: tpoint;
@@ -2190,7 +2191,7 @@ function gui_postevent(event: tmseevent): guierrorty;
 //var
 // int1: integer;
 begin
- if windows.postmessage(applicationwindow,msemessage,longword(event),0) then begin
+ if windows.postmessage(applicationwindow,msemessage,ptruint(event),0) then begin
   result:= gue_ok;
  end
  else begin

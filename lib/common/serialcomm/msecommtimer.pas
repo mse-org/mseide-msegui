@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2016 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -44,6 +44,7 @@ type
    fresolution: integer;
    ftimehandle: integer;
   protected
+   fid: int32; //index in instance array
   public
    constructor create;
    destructor destroy; override;
@@ -77,16 +78,34 @@ function timeSetEvent(uDelay, uResolution: UINT;
 
 implementation
 uses
- sysutils;
+ {$ifdef mswindows}msesystypes,msesysintf1,{$endif}sysutils;
 
 {$ifdef mswindows}
+var
+ timerinstances: array of tmmtimermse;
+ timerlock: mutexty;
 
+procedure locktimer();
+begin
+ sys_mutexlock(timerlock);
+end;
+
+procedure unlocktimer();
+begin
+ sys_mutexunlock(timerlock);
+end;
+ 
 procedure mmtimerevent(uTimerID, uMessage: UINT;
     dwUser, dw1, dw2: DWORD); stdcall;
+var
+ ti1: tmmtimermse;
 begin
- with tmmtimermse(dwuser) do begin
+ locktimer();
+ ti1:= timerinstances[dwuser];
+ unlocktimer();
+ with ti1 do begin
   if assigned(fontimer) then begin
-   fontimer(tmmtimermse(dwuser));
+   fontimer(ti1);
   end;
   setevent(fevent);
  end;
@@ -101,6 +120,8 @@ begin
 end;
 
 constructor tmmtimermse.create;
+var
+ i1: int32;
 begin
  fevent:= createevent(nil,false,false,nil);
  timegetdevcaps(@ftimecaps,sizeof(timecaps));
@@ -110,6 +131,19 @@ begin
  end;
  timebeginperiod(fresolution);
  inherited;
+ fid:= -1;
+ locktimer();
+ for i1:= 0 to high(timerinstances) do begin
+  if timerinstances[i1] = nil then begin
+   fid:= i1;
+  end;
+ end;
+ if fid < 0 then begin
+  fid:= length(timerinstances);
+  setlength(timerinstances,fid+1);
+ end;
+ timerinstances[fid]:= self;
+ unlocktimer();
 end;
 
 destructor tmmtimermse.destroy;
@@ -117,6 +151,9 @@ begin
  abort;
  closehandle(fevent);
  timeendperiod(fresolution);
+ locktimer();
+ timerinstances[fid]:= nil;
+ unlocktimer();
  inherited;
 end;
 
@@ -128,13 +165,13 @@ begin
  fontimer:= aontimer;
  ms:= us div 1000;
  if ms >= ftimecaps.wPeriodMin then begin
-  ftimehandle:= timesetevent(ms,1,@mmtimerevent,longword(self),time_oneshot);
+  ftimehandle:= timesetevent(ms,1,@mmtimerevent,fid,time_oneshot);
   if ftimehandle = 0 then begin
    raise exception.Create('timererror');
   end;
  end
  else begin
-  mmtimerevent(0,0,integer(self),0,0);
+  mmtimerevent(0,0,fid,0,0);
  end;
 end;
 
@@ -150,6 +187,10 @@ begin
  wait;
 end;
 
+initialization
+ sys_mutexcreate(timerlock);
+finalization
+ sys_mutexdestroy(timerlock);
 {$endif}
 
 end.
