@@ -66,7 +66,11 @@ const
   platformtext = 'i386-bsd';
    {$endif}
   {$else}
+   {$ifdef cpu64}
+   platformtext = 'x86_64-win64';
+   {$else}
    platformtext = 'i386-win32';
+   {$endif}
   {$endif}
  {$endif}
 {$endif}
