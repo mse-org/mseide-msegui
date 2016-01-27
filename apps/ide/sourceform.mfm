@@ -7,8 +7,8 @@ object sourcefo: tsourcefo
   onenter = enterexe
   onactivate = enterexe
   visible = False
-  bounds_x = 96
-  bounds_y = 116
+  bounds_x = 98
+  bounds_y = 139
   bounds_cx = 433
   bounds_cy = 327
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets]

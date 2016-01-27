@@ -2206,10 +2206,17 @@ var
 begin
  fpointersize:= 4;
  if (evaluateexpression('sizeof(void*)',str1) = gdb_ok) or 
+                          //does not work on gdb win64 7.9
        (evaluateexpression('sizeof(pointer)',str1) = gdb_ok) then begin
    //I know there is a gdbcommand for this, I could not find it
   if trystrtoint(str1,int1) then begin
    fpointersize:= int1;
+  end;
+ end
+ else begin
+  if (clicommand('show architecture') = gdb_ok) and 
+                      (pos('x86-64',fclivalues) > 0) then begin
+   fpointersize:= 8;
   end;
  end;
  fpointerhexdigits:= 2*fpointersize;
@@ -2697,7 +2704,7 @@ end;
 
 function tgdbmi.breakinsert(const address: qword): integer;
 begin
- if synccommand('-break-insert *'+hextocstr(address,8)) <> gdb_ok then begin
+ if synccommand('-break-insert *'+hextocstr(address,0)) <> gdb_ok then begin
   result:= -1;
  end
  else begin
