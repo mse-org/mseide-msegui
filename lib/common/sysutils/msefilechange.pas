@@ -63,11 +63,15 @@ type
 
   dirchangedeventty = procedure(const sender: tdirinfo) of object;
 
+{$ifdef mswindows}
+ handlearty = array of thandle;
+{$endif}
+
   tdirchangethread = class(tsemthread)
    private
 {$ifdef mswindows}
     sem: cardinal;
-    dirdescriptors: integerarty;
+    dirdescriptors: handlearty;
 {$endif}
     fdirs: array of tdirinfo;
 {$ifdef UNIX}
@@ -322,7 +326,7 @@ begin
  move(fdirs[index+1],fdirs[index],(length(fdirs)-index-1)*sizeof(fdirs[0]));
  setlength(fdirs,length(fdirs)-1);
 {$ifdef mswindows}
- deleteitem(integerarty(dirdescriptors),index+1);
+ deleteitem(pointerarty(dirdescriptors),index+1);
  releasesemaphore(sem,1,nil);
 {$endif}
  unlock;
@@ -400,8 +404,8 @@ function tdirchangethread.execute(thread: tmsethread): integer;
 {$ifdef mswindows}
 var
  Obj: DWORD;
- Handles: integerarty;
- fafd: integer;
+ Handles: handlearty;
+ fafd: thandle;
 begin
  result:= 0;
  handles:= nil; //compilerwarning
