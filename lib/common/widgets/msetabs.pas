@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2015 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2016 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -161,6 +161,7 @@ type
    fedge: edgecolorpairinfoty;
    fedge_imagelist: timagelist;
    fedge_imageoffset: int32;
+   fedge_imagepaintshift: int32;
    procedure setitems(const index: integer; const Value: ttab);
    function getitems(const index: integer): ttab; reintroduce;
    function getface: tface;
@@ -198,6 +199,7 @@ type
    procedure setedge_colorhlwidth(const avalue: int32);
    procedure setedge_imagelist(const avalue: timagelist);
    procedure setedge_imageoffset(const avalue: int32);
+   procedure setedge_imagepaintshift(const avalue: int32);
   protected
    fskinupdating: integer;
    ffont: ttabsfont;
@@ -223,6 +225,7 @@ type
                                const noclip: boolean = false);
    function getwidget: twidget;
    function getframestateflags: framestateflagsty; virtual;
+   function getedgeshift(): int32;
   public
    constructor create(const aowner: tcustomtabbar; 
                            aclasstype: indexpersistentclassty); reintroduce;
@@ -289,6 +292,8 @@ type
                    //imagenr 0 -> startpoint, 1 -> edge, imagenr 2 -> endpoint
    property edge_imageoffset: int32 read fedge_imageoffset
                     write setedge_imageoffset default 0;
+   property edge_imagepaintshift: int32 read fedge_imagepaintshift 
+                                     write setedge_imagepaintshift default 0;
 
    property frame: tframe read getframe write setframe;
                   //frameimage_offset1 active for first tab
@@ -1132,6 +1137,7 @@ var
  textflags1: textflagsty;
  negtabshift1: boolean;
  tabshift1: int32;
+ edgesize: int32;
  
 begin
  with layout do begin
@@ -1143,9 +1149,16 @@ begin
    firsttab:= 0;
   end;
   lasttab:= -1;
+  edgesize:= tabs.getedgeshift();
   cxinflate:= tabs.fcaptionframe.left + tabs.fcaptionframe.right + 2;
+  if not(shs_vert in options) then begin
+   cxinflate:= cxinflate + edgesize;
+  end;  
   cxsizeinflate:= cxinflate;
   cyinflate:= tabs.fcaptionframe.top + tabs.fcaptionframe.bottom + 2;
+  if shs_vert in options then begin
+   cyinflate:= cyinflate + edgesize;
+  end;  
   cysizeinflate:= cyinflate;
   if tabs.fframe <> nil then begin
    with tabs.fframe do begin
@@ -1163,6 +1176,9 @@ begin
   textflags1:= tabs.textflags - [tf_ellipseleft,tf_ellipseright];
   tabshift1:= tabs.ftabshift;
   negtabshift1:= tabshift1 < 0;
+  if not(shs_opposite in options) then begin
+   edgesize:= -edgesize;
+  end;
   if shs_vert in options then begin
    totsize.cx:= 0;
    aval:= dim.y;
@@ -1222,7 +1238,8 @@ begin
       end;
      end
      else begin
-      dim.x:= 0;
+      dim.x:= edgesize;
+//      dim.x:= 0;
      end;
      dim.x:= dim.x + layout.dim.x;
     end;
@@ -1305,7 +1322,8 @@ begin
       }
      end
      else begin
-      dim.y:= 0;
+      dim.y:= edgesize;
+//      dim.y:= 0;
      end;
      dim.y:= dim.y + layout.dim.y;
     end;
@@ -1956,6 +1974,14 @@ begin
  end;
 end;
 
+procedure ttabs.setedge_imagepaintshift(const avalue: int32);
+begin
+ if avalue <> fedge_imagepaintshift then begin
+  fedge_imagepaintshift:= avalue;
+  changed();
+ end;
+end;
+
 procedure ttabs.setcaptionframe_left(const avalue: integer);
 begin
  if avalue <> fcaptionframe.left then begin
@@ -2162,6 +2188,25 @@ begin
   result:= shapestatetoframestate(factcellindex,cells);
   if factcellindex = firsttab then begin
    include(result,fsf_offset1);
+  end;
+ end;
+end;
+
+function ttabs.getedgeshift(): int32;
+begin
+ result:= 1; //default
+ if fedge_imagelist <> nil then begin
+  if tabo_vertical in tcustomtabbar(fowner).foptions then begin
+   result:= fedge_imagelist.height;
+  end
+  else begin
+   result:= fedge_imagelist.width;
+  end;  
+  result:= result + fedge_imagepaintshift;
+ end
+ else begin
+  if fedge_level <> defaultedgelevel then begin
+   result:= fedge_level;
   end;
  end;
 end;
