@@ -1138,6 +1138,7 @@ var
  negtabshift1: boolean;
  tabshift1: int32;
  edgesize: int32;
+ normpos,normsize: int32;
  
 begin
  with layout do begin
@@ -1150,16 +1151,14 @@ begin
   end;
   lasttab:= -1;
   edgesize:= tabs.getedgeshift();
+  textflags1:= tabs.textflags - [tf_ellipseleft,tf_ellipseright];
+  tabshift1:= tabs.ftabshift;
+  negtabshift1:= tabshift1 < 0;
+
   cxinflate:= tabs.fcaptionframe.left + tabs.fcaptionframe.right + 2;
-  if not(shs_vert in options) then begin
-   cxinflate:= cxinflate + edgesize;
-  end;  
-  cxsizeinflate:= cxinflate;
+                                                       //for not flat button 
   cyinflate:= tabs.fcaptionframe.top + tabs.fcaptionframe.bottom + 2;
-  if shs_vert in options then begin
-   cyinflate:= cyinflate + edgesize;
-  end;  
-  cysizeinflate:= cyinflate;
+                                                       //for not flat button
   if tabs.fframe <> nil then begin
    with tabs.fframe do begin
     frame1:= innerframe;
@@ -1167,18 +1166,50 @@ begin
     cyinflate:= cyinflate + frame1.top + frame1.bottom;
     if fso_flat in optionsskin then begin
      cxinflate:= cxinflate - 2;
-     cxsizeinflate:= cxsizeinflate - 2;
+//     cxsizeinflate:= cxsizeinflate - 2;
      cyinflate:= cyinflate - 2;
-     cysizeinflate:= cysizeinflate - 2;
+//     cysizeinflate:= cysizeinflate - 2;
     end;
    end;
   end;
-  textflags1:= tabs.textflags - [tf_ellipseleft,tf_ellipseright];
-  tabshift1:= tabs.ftabshift;
-  negtabshift1:= tabshift1 < 0;
-  if not(shs_opposite in options) then begin
-   edgesize:= -edgesize;
-  end;
+
+  cxsizeinflate:= cxinflate;
+  cysizeinflate:= cyinflate;
+  if shs_vert in options then begin
+   cxsizeinflate:= cxsizeinflate + edgesize;
+   normsize:= dim.cx - edgesize;
+   normpos:= dim.x;
+   if negtabshift1 then begin
+    cxsizeinflate:= cxsizeinflate - tabshift1;
+    normsize:= normsize + tabshift1;
+   end;
+   if shs_opposite in options then begin
+    normpos:= normpos + edgesize;
+   end
+   else begin
+    if negtabshift1 then begin
+     normpos:= normpos - tabshift1;
+    end;
+   end;
+  end
+  else begin
+   cysizeinflate:= cysizeinflate + edgesize;
+   normsize:= dim.cy - edgesize;
+   normpos:= dim.y;
+   if negtabshift1 then begin
+    cysizeinflate:= cysizeinflate - tabshift1;
+    normsize:= normsize + tabshift1;
+   end;
+   if shs_opposite in options then begin
+    normpos:= normpos + edgesize;
+   end
+   else begin
+    if negtabshift1 then begin
+     normpos:= normpos - tabshift1;
+    end;
+   end;
+  end;  
+
   if shs_vert in options then begin
    totsize.cx:= 0;
    aval:= dim.y;
@@ -1189,7 +1220,7 @@ begin
      dim.y:= aval;
      dofont(tabs[int1],cells[int1]);
      rect1:= textrect(canvas,fcaption,
-                        makerect(layout.dim.x,aval,layout.dim.cx-cxinflate,
+                        makerect(layout.dim.x,aval,layout.dim.cx-cxsizeinflate,
                                    bigint),textflags1,font);
      docommon(tabs[int1],cells[int1],rect1);
      if rect1.cx > totsize.cx then begin
@@ -1220,26 +1251,18 @@ begin
        lasttab:= int1;
       end;
      end;
-     dim.cx:= layout.dim.cx;
      if ts_active in fstate then begin
-      if shs_opposite in options then begin
-       if negtabshift1 then begin
-        dim.cx:= dim.cx - tabshift1;
-       end
-       else begin
-        dim.x:= -tabshift1;
-       end;
-      end
-      else begin
-       dim.x:= tabs.ftabshift;
-       if negtabshift1 then begin
-        dim.cx:= dim.cx - tabshift1;
+      dim.cx:= layout.dim.cx;
+      if not negtabshift1 then begin
+       dim.cx:= dim.cx - tabshift1;
+       if not (shs_opposite in options) then begin
+        dim.x:= tabshift1;
        end;
       end;
      end
      else begin
-      dim.x:= edgesize;
-//      dim.x:= 0;
+      dim.x:= normpos;
+      dim.cx:= normsize;
      end;
      dim.x:= dim.x + layout.dim.x;
     end;
@@ -1257,7 +1280,8 @@ begin
      dim.x:= aval;
      dofont(tabs[int1],cells[int1]);
      rect1:= textrect(canvas,fcaption,
-              makerect(aval,layout.dim.y,bigint,layout.dim.cy),textflags1,font);
+              makerect(aval,layout.dim.y,bigint,
+                               layout.dim.cy-cysizeinflate),textflags1,font);
      docommon(tabs[int1],cells[int1],rect1);
      if rect1.cy > totsize.cy then begin
       totsize.cy:= rect1.cy;
@@ -1298,32 +1322,18 @@ begin
        lasttab:= int1;
       end;
      end;
-     dim.cy:= layout.dim.cy;
      if ts_active in fstate then begin
-      if shs_opposite in options then begin
-       if negtabshift1 then begin
-        dim.cy:= dim.cy - tabshift1;
-       end
-       else begin
-        dim.y:= -tabshift1;
-       end;
-      end
-      else begin
-       dim.y:= tabs.ftabshift;
-       if negtabshift1 then begin
-        dim.cy:= dim.cy - tabshift1;
+      dim.cy:= layout.dim.cy;
+      if not negtabshift1 then begin
+       dim.cy:= dim.cy - tabshift1;
+       if not (shs_opposite in options) then begin
+        dim.y:= tabshift1;
        end;
       end;
-      {
-      dim.y:= tabs.ftabshift;
-      if shs_opposite in options then begin
-       dim.y:= -dim.y;
-      end;
-      }
      end
      else begin
-      dim.y:= edgesize;
-//      dim.y:= 0;
+      dim.y:= normpos;
+      dim.cy:= normsize;
      end;
      dim.y:= dim.y + layout.dim.y;
     end;
