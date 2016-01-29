@@ -1166,9 +1166,7 @@ begin
     cyinflate:= cyinflate + frame1.top + frame1.bottom;
     if fso_flat in optionsskin then begin
      cxinflate:= cxinflate - 2;
-//     cxsizeinflate:= cxsizeinflate - 2;
      cyinflate:= cyinflate - 2;
-//     cysizeinflate:= cysizeinflate - 2;
     end;
    end;
   end;
@@ -1209,7 +1207,6 @@ begin
     end;
    end;
   end;  
-
   if shs_vert in options then begin
    totsize.cx:= 0;
    aval:= dim.y;
@@ -1220,8 +1217,8 @@ begin
      dim.y:= aval;
      dofont(tabs[int1],cells[int1]);
      rect1:= textrect(canvas,fcaption,
-                        makerect(layout.dim.x,aval,layout.dim.cx-cxsizeinflate,
-                                   bigint),textflags1,font);
+                makerect(normpos,aval,normsize-cxinflate,bigint),
+                                                              textflags1,font);
      docommon(tabs[int1],cells[int1],rect1);
      if rect1.cx > totsize.cx then begin
       totsize.cx:= rect1.cx;
@@ -1280,8 +1277,8 @@ begin
      dim.x:= aval;
      dofont(tabs[int1],cells[int1]);
      rect1:= textrect(canvas,fcaption,
-              makerect(aval,layout.dim.y,bigint,
-                               layout.dim.cy-cysizeinflate),textflags1,font);
+                makerect(aval,normpos,bigint,normsize-cyinflate),
+                                                              textflags1,font);
      docommon(tabs[int1],cells[int1],rect1);
      if rect1.cy > totsize.cy then begin
       totsize.cy:= rect1.cy;
