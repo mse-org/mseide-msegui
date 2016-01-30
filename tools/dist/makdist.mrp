@@ -11,7 +11,7 @@ run.sta=6
  stackedunder=
  x=337
  y=266
- cx=897
+ cx=767
  cy=460
 macros.sta=9
  [macrosfo]
@@ -57,8 +57,8 @@ groupedit.sta=9
  stackedunder=
  x=225
  y=419
- cx=596
- cy=581
+ cx=604
+ cy=525
  wsize=0
  active=1
  visible=1
@@ -91,8 +91,8 @@ c=1
    ae=0
    eec=0
    cr=0
-   ao=
-   ae=
+   ao=0
+   ae=0
    aec=0
    ie=0
    )
@@ -133,8 +133,8 @@ c=1
    ae=0
    eec=
    cr=0
-   ao=
-   ae=
+   ao=0
+   ae=0
    aec=0
    ie=0
    )
@@ -155,8 +155,8 @@ c=1
    ae=0
    eec=
    cr=0
-   ao=
-   ae=
+   ao=0
+   ae=0
    aec=0
    ie=0
    )
@@ -177,8 +177,8 @@ c=1
    ae=0
    eec=
    cr=0
-   ao=
-   ae=
+   ao=0
+   ae=0
    aec=0
    ie=0
    )
@@ -254,7 +254,7 @@ macroon=10
  63
  63
  63
-macrogroup=0
+macrogroup=1
 groupcomment=6
  386
  x64

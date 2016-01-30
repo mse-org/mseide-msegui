@@ -220,6 +220,7 @@ type
  tmsecomponent1 = class(tmsecomponent);
  tframetemplate1 = class(tframetemplate);
  tcustomframe1 = class(tcustomframe);
+ tguiapplication1 = class(tguiapplication);
 
 function showpopupmenu(const menu: tmenuitem; const transientfor: twidget;
                  const pos: rectty; const dir: graphicdirectionty;
@@ -1915,9 +1916,10 @@ begin
       if ar2[1] > ar2[0] then begin
       {$ifdef mse_debugzorder}
        debugwindow('**mainmenuwidget.restorefocus',fwindow.winid);
-       debugwindow('  before',fstackedunderbefore.winid);
+       debugwindow('  before ',fstackedunderbefore.winid);
       {$endif}
        gui_stackunderwindow(fwindow.winid,fstackedunderbefore.winid);
+       tguiapplication1(application).zorderinvalid;
       end;
      end;
     end

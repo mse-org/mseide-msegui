@@ -567,8 +567,8 @@ type
    class function calcinnerframe(const afi: baseframeinfoty): framety;
    procedure calcrects;
    procedure updaterects; virtual;
-   procedure internalupdatestate;
-   procedure updatestate; virtual;
+   procedure internalupdatestate();
+   procedure updatestate(); virtual;
    procedure checkstate;
    procedure poschanged; virtual;
    procedure fontcanvaschanged; virtual;
@@ -2647,6 +2647,7 @@ end;
    procedure objecteventdestroyed(const sender: tobjectevent); override;
    procedure dragstarted; //calls dragstarted of all known widgets
    procedure internalpackwindowzorder(); virtual;
+   procedure zorderinvalid();
   public
    constructor create(aowner: tcomponent); override;
    procedure destroyforms;
@@ -3163,7 +3164,6 @@ type
    procedure registerwindow(window: twindow);
    procedure unregisterwindow(window: twindow);
    procedure widgetdestroyed(const widget: twidget);
-   procedure zorderinvalid();
 
    procedure processexposeevent(event: twindowrectevent);
    procedure processconfigureevent(event: twindowrectevent);
@@ -4490,7 +4490,7 @@ begin
  calcrects;
 end;
 
-procedure tcustomframe.updatestate;
+procedure tcustomframe.updatestate();
 var
  po1: pointty;
 begin
@@ -4507,8 +4507,9 @@ begin
  fintf.clientrectchanged;
 end;
 
-procedure tcustomframe.internalupdatestate;
+procedure tcustomframe.internalupdatestate();
 begin
+ exclude(fstate,fs_rectsvalid);
  if not (csloading in fintf.getcomponentstate) then begin
   if not (fs_stateupdating in fstate) then begin
    include(fstate,fs_stateupdating);
@@ -4518,9 +4519,6 @@ begin
     exclude(fstate,fs_stateupdating);
    end;
   end;
- end
- else begin
-  exclude(fstate,fs_rectsvalid);
  end;
  exclude(fstate,fs_creating);
 end;
@@ -17187,17 +17185,6 @@ begin
  end;
 end;
 
-procedure tinternalapplication.zorderinvalid();
-begin
- exclude(fstate,aps_zordervalid);
- if gao_forcezorder in foptionsgui then begin
- {$ifdef mse_debugzorder}
-  debugwriteln('*needsupdatewindowstack');
- {$endif}
-  include(fstate,aps_needsupdatewindowstack);
- end;
-end;
-
 procedure tinternalapplication.registerwindow(window: twindow);
 begin
  lock;
@@ -18024,10 +18011,10 @@ var
 begin
  for int1:= 0 to high(ar3) do begin
   if ar3[int1].fownerwidget.visible then begin
-   debugwrite('+ ');
+   debugwrite(inttostr(int1)+'+ ');
   end
   else begin
-   debugwrite('- ');
+   debugwrite(inttostr(int1)+'- ');
   end;
   debugwriteln(debugwindowinfo(ar3[int1])+' transientfor:'+
                  debugwindowinfo(ar3[int1].ftransientfor));
@@ -18178,10 +18165,10 @@ end;
 
 function compwindowzorder(const l,r): integer;
 const
- raiseweight =              1;
- lowerweight =              1;
+ raiseweight =              1 shl 1;
+ lowerweight =              raiseweight;
  backgroundweight =         1 shl 2;
- topweight =                1 shl 2;
+ topweight =                backgroundweight;
 // popupweight =              1 shl 4;
  modalweight =              1 shl 5;
 // transientforcountweight =  1 shl 6;
@@ -18196,6 +18183,8 @@ var
 {$ifdef mse_debugzorder}
  ch1: char;
 {$endif}
+label
+ endlab;
 begin
  result:= 0;
  if (tws_windowvisible in twindow(l).fstate) then begin
@@ -18208,7 +18197,7 @@ begin
    dec(result,invisibleweight);
   end
   else begin
-   exit; //both invisible -> no change in order
+   goto endlab; //both invisible -> no change in order
   end;
  end;
  if tws_raise in  twindow(l).fstate then begin
@@ -18281,7 +18270,7 @@ begin
  while window1.ftransientfor <> nil do begin
   if window1.ftransientfor = twindow(r) then begin
    inc(result,transientforweight);
-   exit;
+   goto endlab;
   end;
   window1:= window1.ftransientfor;
  end;
@@ -18289,10 +18278,11 @@ begin
  while window1.ftransientfor <> nil do begin
   if window1.ftransientfor = twindow(l) then begin
    dec(result,transientforweight);
-   exit;
+   goto endlab;
   end;
   window1:= window1.ftransientfor;
- end;  
+ end;
+endlab:
 {$ifdef mse_debugzorder}
  if result < 0 then begin
   ch1:= '-';
@@ -18344,6 +18334,10 @@ begin
    end;
   end;
   if int2 >= 0 then begin
+  {$ifdef mse_debugzorder}
+   debugwriteln('++++ invalid stackorder ' + inttostr(int2) +
+                                     ' high(ar3) ' + inttostr(high(ar3)));
+  {$endif}
    if gui_canstackunder then begin
     bo1:= true;
     for int1:= int2+1 to high(ar3) do begin
@@ -18355,6 +18349,7 @@ begin
     if bo1 then begin //single local raise
      gui_stackoverwindow(ar4[int2].winid,ar4[high(ar4)].winid);
      fwindowstack:= nil;
+     zorderinvalid();
      exit;
     end;
    end;
@@ -19010,8 +19005,19 @@ var
  ar2,ar3: integerarty;
 begin
  ar1:= nil; //compiler warning
+{$ifdef mse_debugzorder}
+ if aps_zordervalid in fstate then begin
+  debugwriteln('* sortzorder valid');
+ end
+ else begin
+  debugwrite('* sortzorder');
+ end;
+{$endif}
  if not (aps_zordervalid in fstate) then begin
   ar1:= winidar;
+ {$ifdef mse_debugzorder}
+  debugwriteln(' n='+inttostr(length(ar1)));
+ {$endif}
   if high(ar1) >= 0 then begin
    gui_getzorder(ar1,ar2);
    sortarray(ar2,ar3);
@@ -19916,6 +19922,17 @@ end;
 procedure tguiapplication.internalpackwindowzorder;
 begin
  //dummy
+end;
+
+procedure tguiapplication.zorderinvalid();
+begin
+ exclude(fstate,aps_zordervalid);
+ if gao_forcezorder in foptionsgui then begin
+ {$ifdef mse_debugzorder}
+  debugwriteln('*needsupdatewindowstack');
+ {$endif}
+  include(fstate,aps_needsupdatewindowstack);
+ end;
 end;
 
 function tguiapplication.getforcezorder: boolean;
