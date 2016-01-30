@@ -818,6 +818,8 @@ type
    procedure setedge_imagelist(const avalue: timagelist);
    function getedge_imageoffset: int32;
    procedure setedge_imageoffset(const avalue: int32);
+   function getedge_imagepaintshift: int32;
+   procedure setedge_imagepaintshift(const avalue: int32);
   protected
    ftabs: tcustomtabbar1;
    fupdating: integer;
@@ -837,14 +839,17 @@ type
    procedure doactivepagechanged; virtual;
    procedure dopageadded(const apage: twidget); virtual;
    procedure dopageremoved(const apage: twidget); virtual;
-   procedure createpagetab(const sender: tcustomtabbar; const index: integer; var tab: ttab);
+   procedure createpagetab(const sender: tcustomtabbar;
+                                           const index: integer; var tab: ttab);
    procedure dokeydown(var info: keyeventinfoty); override;
-   procedure childmouseevent(const sender: twidget; var info: mouseeventinfoty); override;
+   procedure childmouseevent(const sender: twidget; 
+                                          var info: mouseeventinfoty); override;
    procedure dobeforepaint(const canvas: tcanvas); override;
    procedure doafterpaint(const canvas: tcanvas); override;
 //   procedure dofontheightdelta(var delta: integer); override;
    procedure doclosepage(const sender: tobject); virtual;
-   procedure updatepopupmenu(var amenu: tpopupmenu; var mouseinfo: mouseeventinfoty); override;
+   procedure updatepopupmenu(var amenu: tpopupmenu;
+                                     var mouseinfo: mouseeventinfoty); override;
 
     //istatfile
    procedure dostatread(const reader: tstatreader);
@@ -856,7 +861,8 @@ type
 
    function checkpickoffset(const aoffset: pointty): pointty;
     //iobjectpicker
-   function getcursorshape(const sender: tobjectpicker; var shape: cursorshapety): boolean;
+   function getcursorshape(const sender: tobjectpicker;
+                                             var shape: cursorshapety): boolean;
                              //true if found
    procedure getpickobjects(const sender: tobjectpicker;
                                 var objects: integerarty);
@@ -900,9 +906,11 @@ type
    property idents: integerarty read getidents;
    property activepageindex: integer read getactivepageindex 
                       write setactivepageindex1 default -1;
-   property onactivepagechanged: notifyeventty read fonactivepagechanged write fonactivepagechanged;
+   property onactivepagechanged: notifyeventty read fonactivepagechanged 
+                                                     write fonactivepagechanged;
    property onpageadded: widgeteventty read fonpageadded write fonpageadded;
-   property onpageremoved: widgeteventty read fonpageremoved write fonpageremoved;
+   property onpageremoved: widgeteventty read fonpageremoved 
+                                                           write fonpageremoved;
    property optionswidget default defaulttaboptionswidget;
    property font: twidgetfont read getfont write setfont stored isfontstored;
    property fontempty: twidgetfontempty read getfontempty 
@@ -911,24 +919,27 @@ type
                                                      settab_options default [];
    property tab_frame: tstepboxframe1 read gettab_frame write settab_frame;
    property tab_face: tface read gettab_face write settab_face;
-   property tab_color: colorty read gettab_color write settab_color default cl_default;
+   property tab_color: colorty read gettab_color 
+                                   write settab_color default cl_default;
    property tab_colortab: colorty read gettab_colortab 
-                        write settab_colortab default cl_default;
+                                   write settab_colortab default cl_default;
    property tab_coloractivetab: colorty read gettab_coloractivetab 
                         write settab_coloractivetab default cl_default;
    property tab_font: ttab_font read gettab_font write settab_font 
                                                         stored istab_fontstored;
    property tab_fonttab: ttab_fonttab read gettab_fonttab write settab_fonttab 
-                                                        stored istab_fonttabstored;
+                                                    stored istab_fonttabstored;
    property tab_fontactivetab: ttab_fontactivetab read gettab_fontactivetab 
-                          write set_tabfontactivetab stored istab_fontactivetabstored;
+                   write set_tabfontactivetab stored istab_fontactivetabstored;
    property tab_imagepos: imageposty read gettab_imagepos write
                           settab_imagepos default defaultimagepos;
    property tab_textflags: textflagsty read gettab_textflags write
                           settab_textflags default defaultcaptiontextflags;
    property tab_width: integer read gettab_width write settab_width default 0;
-   property tab_widthmin: integer read gettab_widthmin write settab_widthmin default 0;
-   property tab_widthmax: integer read gettab_widthmax write settab_widthmax default 0;
+   property tab_widthmin: integer read gettab_widthmin 
+                                                write settab_widthmin default 0;
+   property tab_widthmax: integer read gettab_widthmax 
+                                                write settab_widthmax default 0;
    property tab_captionframe_left: integer read gettab_captionframe_left write
                           settab_captionframe_left default defaultcaptiondist;
    property tab_captionframe_top: integer read gettab_captionframe_top write
@@ -964,6 +975,8 @@ type
                    //imagenr 0 -> startpoint, 1 -> edge, imagenr 2 -> endpoint
    property tab_edge_imageoffset: int32 read getedge_imageoffset
                     write setedge_imageoffset default 0;
+   property tab_edge_imagepaintshift: int32 read getedge_imagepaintshift 
+                                     write setedge_imagepaintshift default 0;
                     
    property tab_frametab: tframe read gettab_frametab write settab_frametab;
    property tab_facetab: tface read gettab_facetab write settab_facetab;
@@ -1057,6 +1070,7 @@ type
    property tab_optionswidget;
    property tab_optionswidget1;
    property tab_optionsskin;
+   property tab_edge_imagepaintshift;
    property statfile;
    property statvarname;
    property statpriority;
@@ -5420,6 +5434,16 @@ end;
 procedure tcustomtabwidget.setedge_imageoffset(const avalue: int32);
 begin
  ftabs.tabs.edge_imageoffset:= avalue;
+end;
+
+function tcustomtabwidget.getedge_imagepaintshift: int32;
+begin
+ result:= ftabs.tabs.edge_imagepaintshift;
+end;
+
+procedure tcustomtabwidget.setedge_imagepaintshift(const avalue: int32);
+begin
+ ftabs.tabs.edge_imagepaintshift:= avalue;
 end;
 
 function tcustomtabwidget.gettab_font: ttab_font;

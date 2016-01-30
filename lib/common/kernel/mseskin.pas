@@ -107,6 +107,7 @@ type
   svsedge_colorhlwidth: int32;
   svsedge_imagelist: timagelist;
   svsedge_imageoffset: int32;
+  svsedge_imagepaintshift: int32;
  end;
  tabbarskininfoty = record
   svwidgethorz: widgetskininfoty;
@@ -914,6 +915,9 @@ type
    property tabbar_horz_tab_edge_imageoffset: int32
               read ftabbar.svtabhorz.svsedge_imageoffset
               write ftabbar.svtabhorz.svsedge_imageoffset default 0;
+   property tabbar_horz_tab_edge_imagepaintshift: int32
+              read ftabbar.svtabhorz.svsedge_imagepaintshift
+              write ftabbar.svtabhorz.svsedge_imagepaintshift default 0;
 
    property tabbar_horzopo_face: tfacecomp read ftabbar.svwidgethorzopo.svface
                                             write settabbar_horzopo_face;
@@ -966,6 +970,9 @@ type
    property tabbar_horzopo_tab_edge_imageoffset: int32
               read ftabbar.svtabhorzopo.svsedge_imageoffset
               write ftabbar.svtabhorzopo.svsedge_imageoffset default 0;
+   property tabbar_horzopo_tab_edge_imagepaintshift: int32
+              read ftabbar.svtabhorzopo.svsedge_imagepaintshift
+              write ftabbar.svtabhorzopo.svsedge_imagepaintshift default 0;
 
    property tabbar_vert_face: tfacecomp read ftabbar.svwidgetvert.svface
                                write settabbar_vert_face;
@@ -1017,6 +1024,9 @@ type
    property tabbar_vert_tab_edge_imageoffset: int32
               read ftabbar.svtabvert.svsedge_imageoffset
               write ftabbar.svtabvert.svsedge_imageoffset default 0;
+   property tabbar_vert_tab_edge_imagepaintshift: int32
+              read ftabbar.svtabvert.svsedge_imagepaintshift
+              write ftabbar.svtabvert.svsedge_imagepaintshift default 0;
 
    property tabbar_vertopo_face: tfacecomp read ftabbar.svwidgetvertopo.svface
                                write settabbar_vertopo_face;
@@ -1070,6 +1080,9 @@ type
    property tabbar_vertopo_tab_edge_imageoffset: int32
               read ftabbar.svtabvertopo.svsedge_imageoffset
               write ftabbar.svtabvertopo.svsedge_imageoffset default 0;
+   property tabbar_vertopo_tab_edge_imagepaintshift: int32
+              read ftabbar.svtabvertopo.svsedge_imagepaintshift
+              write ftabbar.svtabvertopo.svsedge_imagepaintshift default 0;
 
    property toolbar_horz_face: tfacecomp read ftoolbar_horz.svwidget.svface
                                         write settoolbar_horz_face;
@@ -1975,6 +1988,10 @@ begin
    if (ainfo.svsedge_imageoffset <> 0) and 
                   (edge_imageoffset = -1) then begin
     edge_imageoffset:= ainfo.svsedge_imageoffset;
+   end;
+   if (ainfo.svsedge_imagepaintshift <> 0) and 
+                  (edge_imagepaintshift = 0) then begin
+    edge_imagepaintshift:= ainfo.svsedge_imagepaintshift;
    end;
 
    if {(frame = nil) and} (ainfo.svframe <> nil) then begin
