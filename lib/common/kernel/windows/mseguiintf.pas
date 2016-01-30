@@ -64,7 +64,8 @@ implementation
 //todo: 19.10.03 rasterops for textout
 uses
  sysutils,mselist,msekeyboard,msebits,msearrayutils,msesysutils,msegui,
- msesystimer,msegdi32gdi,msesysintf1,msedynload,msewindnd,msebitmap;
+ msesystimer,msegdi32gdi,msesysintf1,msedynload,msewindnd,msebitmap
+ {$ifdef mse_debugzorder},typinfo{$endif} ;
 
 type
 
@@ -1444,10 +1445,10 @@ end;
 
 function gui_stackunderwindow(id: winidty; predecessor: winidty): guierrorty;
 begin
- if id <> predecessor then begin
 {$ifdef mse_debugzorder}
  debugwindow('gui_stackunderwindow ',id,predecessor);
 {$endif}
+ if id <> predecessor then begin
   windows.SetWindowPos(id,predecessor,0,0,0,0,swp_noactivate or swp_nomove or
                           swp_noownerzorder or swp_nosize);
  end;
@@ -1458,6 +1459,9 @@ function gui_stackoverwindow(id: winidty; predecessor: winidty): guierrorty;
 var
  id1: winidty;
 begin
+{$ifdef mse_debugzorder}
+ debugwindow('gui_stackoverwindow ',id,predecessor);
+{$endif}
  if id <> predecessor then begin
   id1:= windows.GetWindow(predecessor,gw_hwndprev);
   if id1 = 0 then begin
@@ -1494,6 +1498,12 @@ begin
  else begin
   result:= gue_windownotfound;
  end;
+{$ifdef mse_debugzorder}
+ debugwriteln('gui_getzorder '+getenumname(typeinfo(result),ord(result)));
+ for int1:= 0 to high(ids) do begin
+  debugwindow(inttostr(zorders[int1])+' ',ids[int1]);
+ end;
+{$endif}
 end;
 
 function gui_setwindowcaption(id: winidty; const caption: msestring): guierrorty;
@@ -2460,8 +2470,9 @@ begin
     if (swp_showwindow and flags <> 0) and (gui_getwindowsize(ahwnd) <> wsi_minimized) then begin
      eventlist.add(twindowevent.create(ek_show,ahwnd));
     end;
-    if ((swp_nomove or swp_nosize) and flags <> (swp_nomove or swp_nosize)) and
-            windowvisible(ahwnd) then begin
+    if (((swp_nomove or swp_nosize) and flags <> (swp_nomove or swp_nosize)) or 
+                (flags and swp_nozorder = 0)) and
+                                           windowvisible(ahwnd) then begin
      postconfigureevent(ahwnd);
 //     getwindowrectpa(ahwnd,rect1,pt1); 
 //     eventlist.add(twindowrectevent.create(ek_configure,ahwnd,rect1,pt1));
