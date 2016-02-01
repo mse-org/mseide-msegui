@@ -5060,6 +5060,7 @@ begin
    sourcefo.filechangenotifyer.removenotification(filename,filetag);
   end;
   stream1:= tmemorystream.Create;
+  application.beginwait();
   try
    writemodule(modulepo,stream1);
    stream2:= tbufstream.createtransaction(afilename);
@@ -5089,6 +5090,7 @@ begin
     formtexttoobjsource(afilename,moduleclassname,'',fobjformat);
    end;
   finally
+   application.endwait();
    stream1.free;
   end;
  end;
