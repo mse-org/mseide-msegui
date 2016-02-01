@@ -243,6 +243,7 @@ begin
   try
    objecttexttobinarymse(instream,memstream);
    outstream:= ttextstream.createtransaction(filenamety(outname)+'.pas');
+   outstream.usewritebuffer:= true;
    try
     outstream.writeln('unit ' + unitname + formdataext+';');
     outstream.writeln(compilerdefaults);

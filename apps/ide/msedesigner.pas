@@ -5044,7 +5044,7 @@ function tdesigner.saveformfile(const modulepo: pmoduleinfoty;
                       //false if aborted
 var
  stream1: tmemorystream;
- stream2: tmsefilestream;
+ stream2: tbufstream;
  info: fileinfoty; 
 begin
  if createdatafile and projectoptions.o.checkmethods 
@@ -5062,7 +5062,8 @@ begin
   stream1:= tmemorystream.Create;
   try
    writemodule(modulepo,stream1);
-   stream2:= tmsefilestream.createtransaction(afilename);
+   stream2:= tbufstream.createtransaction(afilename);
+   stream2.usewritebuffer:= true;
    try
     stream1.position:= 0;
     try
