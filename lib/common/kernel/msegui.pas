@@ -16563,19 +16563,19 @@ begin
   exit;
  end;
  if  fmousecapturewidget <> nil then begin
-  result:= fmousecapturewidget.window.winid;
- end;
- if (result <> 0) then begin
+//  result:= fmousecapturewidget.window.winid; 
+  result:= fmousecapturewidget.window.fwindow.id; 
+               //do not trigger checkwindow, there could be a pending
+               //configure event
   exit;
  end;
  if activewindow <> nil then begin
-  result:= activewindow.winid;
- end;
- if (result <> 0) then begin
+  result:= activewindow.fwindow.id;
   exit;
  end;
  if (mainwindow <> nil) and (mainwindow.visible) then begin
-  result:= mainwindow.winid;
+  result:= mainwindow.fwindow.id;
+  exit;
  end;
 end;
 
@@ -16610,6 +16610,10 @@ var
 begin
  if findwindow(event.fwinid,window) then begin
   if event.kind = ek_show then begin
+   if window.windowpos in windowmaximizedstates then begin
+    window.fstate:= window.fstate + [tws_posvalid,tws_sizevalid];
+            //do not override changing to normal state by window manager
+   end;
    window.showed;
   end
   else begin
