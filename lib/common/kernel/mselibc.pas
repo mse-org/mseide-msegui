@@ -2610,6 +2610,7 @@ function waitpid(__pid:__pid_t; var __stat_loc:longint;
                              cdecl;external clib name 'waitpid'; overload;
 
 function WEXITSTATUS(status: cint): cint;
+function WTERMSIG(status: cint): cint;
 function WIFEXITED(status: cint): boolean;
 function WIFSIGNALED(status: cint): boolean;
 
@@ -3068,6 +3069,11 @@ end;
 function WEXITSTATUS(status: cint): cint;
 begin
  result:=(status and $ff00) shr 8;
+end;
+
+function WTERMSIG(status: cint): cint;
+begin
+ result:= status and $7f;
 end;
 
 function WIFEXITED(status: cint): boolean;

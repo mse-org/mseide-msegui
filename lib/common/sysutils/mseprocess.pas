@@ -628,7 +628,7 @@ begin
      end;
     end; 
    until bo1;
-   result:= procerr = pee_ok;
+   result:= procerr in [pee_ok,pee_signaled];
    if not result then begin
     if pro_escapekill in foptions then begin
      killprocess(fprochandle);
@@ -636,12 +636,12 @@ begin
     else begin
      terminateprocess(fprochandle);
     end;
-    procend;
+    procend();
    end;
   end
   else begin
    procerr:= mseprocutils.getprocessexitcode(fprochandle,fexitcode,atimeoutus);
-   result:= procerr = pee_ok;
+   result:= procerr in [pee_ok,pee_signaled];
   end;
   application.relockall(int1);
  end
