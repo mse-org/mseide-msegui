@@ -423,9 +423,9 @@ begin
       end;
       inc(pmsechar(pointer(pa)),int2);
       inc(pmsechar(pointer(pb)),int2);
-      w1[high(w1)]:= 0;
-      w2[high(w1)]:= 0;
-      for int2:= 0 to high(w1)-1 do begin
+      w1[colllen]:= 0;
+      w2[colllen]:= 0;
+      for int2:= 0 to colllen-1 do begin
        w1[int2]:= word(pa^[0]);
        if pa^[0] <> #0 then begin
         inc(pmsechar(pointer(pa)));
@@ -479,9 +479,9 @@ begin
       end;
       inc(pmsechar(pointer(pa)),int2);
       inc(pmsechar(pointer(pb)),int2);
-      w1[high(w1)]:= 0;
-      w2[high(w1)]:= 0;
-      for int2:= 0 to high(w1)-1 do begin
+      w1[colllen]:= 0;
+      w2[colllen]:= 0;
+      for int2:= 0 to colllen-1 do begin
        w1[int2]:= towupper(word(pa^[0]));
        if pa^[0] <> #0 then begin
         inc(pmsechar(pointer(pa)));
