@@ -898,8 +898,8 @@ begin
   doafterload;
  end;
  if (fo_createmodal in foptions) and 
-         (componentstate*[csdesigning,csdestroying,csloading] = []) and
-                                                           showing then begin
+         (componentstate*[csdesigning,csdestroying,csloading] = []){ and
+                                                           showing} then begin
   show(true);
  end;
 end;
@@ -1286,7 +1286,7 @@ begin
   ek_loaded: begin
    doeventloopstart;
    if (fo_modal in foptions) and 
-          (componentstate*[csloading,csdesigning] = []) and showing  then begin
+          (componentstate*[csloading,csdesigning] = []){ and showing}  then begin
     show(true);
    end;
   end;
