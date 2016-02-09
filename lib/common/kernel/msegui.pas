@@ -18311,6 +18311,7 @@ var
  bo1: boolean;
 begin
  if flockupdatewindowstack = nil then begin
+  exclude(fstate,aps_zordervalid); //possible missing configure events
   checkwindowstack;
   sortzorder;
   ar3:= windowar; //refcount 1
@@ -18351,6 +18352,9 @@ begin
      end;
     end;
     if bo1 then begin //single local raise
+    {$ifdef mse_debugzorder}
+     debugwriteln('++++ single local raise');
+    {$endif}
      gui_stackoverwindow(ar4[int2].winid,ar4[high(ar4)].winid);
      fwindowstack:= nil;
      zorderinvalid();
