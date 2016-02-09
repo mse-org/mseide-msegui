@@ -1235,6 +1235,10 @@ begin
      rect1:= flinkleft.widgetrect;
      if an_left in flinkleft.anchors then begin
       rect1.cx:= bounds_x - fdist_left - flinkleft.bounds_x;
+      with twidget1(flinkleft) do begin
+       fparentclientsize.cx:= twidget1(fparentwidget).minclientsize.cx;
+           //no change by pending parentclientrectchanged()
+      end;
      end
      else begin
       rect1.x:= bounds_x - fdist_left - flinkleft.bounds_cx;
@@ -1247,6 +1251,10 @@ begin
      rect1:= flinkright.widgetrect;
      if an_right in flinkright.anchors then begin
       rect1.cx:= rect1.cx + (rect1.x - po1.x);
+      with twidget1(flinkright) do begin
+       fparentclientsize.cx:= twidget1(fparentwidget).minclientsize.cx;
+           //no change by pending parentclientrectchanged()
+      end;
      end;
      rect1.pos.x:= po1.x;
      flinkright.widgetrect:= rect1;
@@ -1257,6 +1265,10 @@ begin
      rect1:= flinktop.widgetrect;
      if an_top in flinktop.anchors then begin
       rect1.cy:= bounds_y - fdist_top - flinktop.bounds_y;
+      with twidget1(flinktop) do begin
+       fparentclientsize.cy:= twidget1(fparentwidget).minclientsize.cy;
+           //no change by pending parentclientrectchanged()
+      end;
      end
      else begin
       rect1.y:= bounds_y - fdist_top - flinktop.bounds_cy;
@@ -1269,6 +1281,10 @@ begin
      rect1:= flinkbottom.widgetrect;
      if an_bottom in flinkbottom.anchors then begin
       rect1.cy:= rect1.cy + (rect1.y - po1.y);
+      with twidget1(flinkbottom) do begin
+       fparentclientsize.cy:= twidget1(fparentwidget).minclientsize.cy;
+           //no change by pending parentclientrectchanged()
+      end;
      end;
      rect1.pos.y:= po1.y;
      flinkbottom.widgetrect:= rect1;

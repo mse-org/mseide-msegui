@@ -1467,7 +1467,6 @@ end;
    fonnavigrequest: navigrequesteventty;
    geframewidth: integer;
    procedure invalidateparentminclientsize;
-   function minclientsize: sizety;
    function getwidgets(const index: integer): twidget;
    function dofindwidget(const awidgets: widgetarty; 
                                            aname: ansistring): twidget;
@@ -1560,6 +1559,7 @@ end;
    fhint: msestring;
    fdefaultfocuschild: twidget;
 
+   function minclientsize: sizety;
    function isdesignwidget(): boolean; virtual;
    procedure designmouseevent(var info: moeventinfoty;
                                              capture: twidget); virtual;
