@@ -8649,9 +8649,21 @@ begin
 end;
 
 procedure twidget.sizechanged;
+var
+ bo1: boolean;
 begin
  if fframe <> nil then begin
-  fframe.internalupdatestate;
+  with fframe do begin
+   bo1:= fs_stateupdating in fstate;
+   exclude(fstate,fs_stateupdating);
+   try
+    fframe.internalupdatestate();
+   finally
+    if bo1 then begin
+     include(fstate,fs_stateupdating);
+    end;
+   end;
+  end;
  end
  else begin
   clientrectchanged;
