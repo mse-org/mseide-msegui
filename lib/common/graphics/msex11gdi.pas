@@ -383,7 +383,7 @@ begin
  defdepth:= adepth;
  
  hasxrender:= hasxrender and 
-                  (xrenderqueryextension(msedisplay,@int1,@int2) <> 0);
+                  (xrenderqueryextension(appdisp,@int1,@int2) <> 0);
  if hasxrender then begin
 //  pictformats[bmk_mono]:= xrenderfindstandardformat(appdisp,pictstandarda1);
 //  pictformats[bmk_gray]:= xrenderfindstandardformat(appdisp,pictstandarda8);  
