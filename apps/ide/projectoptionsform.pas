@@ -2351,7 +2351,7 @@ var
  int1: integer;
 begin
  int1:= macrosplitter.bounds_y;
- placeyorder(0,[0],[selectactivegroupgrid,macrosplitter,macrogrid],1);
+ placeyorder(0,[0],[selectactivegroupgrid,macrosplitter,macrogrid],0);
  macrosplitter.move(makepoint(0,int1-macrosplitter.bounds_y));
 end;
 
