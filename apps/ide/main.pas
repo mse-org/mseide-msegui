@@ -2800,8 +2800,8 @@ end;
 
 procedure tmainfo.aboutonexecute(const sender: TObject);
 begin
- showmessage('MSEgui version: '+mseguiversiontext+c_linefeed+
-             'MSEide version: '+versiontext+c_linefeed+
+ showmessage('MSEide version: '+versiontext+c_linefeed+
+             'MSEgui version: '+mseguiversiontext+c_linefeed+
              'Host: '+ platformtext+ c_linefeed+
              c_linefeed+
              copyrighttext+c_linefeed+
