@@ -1,11 +1,11 @@
 MSEide+MSEgui Pascal Cross Platform GUI Development System.
 
-2015-11-13 Version 4.0
+2016-02-24 Version 4.2
 Copyright (c) 1999-2015 by Martin Schreiber
 
 - Compiles with FPC 2.6.4 or FPC 3.0.0
-- Tested on i386-linux SuSE 13.1, x86_64-linux SuSE 13.1, x86_64-freebsd,
-  Raspberry Pi, i386-win32 2000, XP and Vista.
+- For FreeBSD-x86_64, Linux-i386, Linux-x86_64, Linux-arm(Raspberry Pi),
+  Windows-i386, Windows-x86_64.
 - Links to xlib and gdi32, no external widget library needed.
 - Internal character encoding is utf-16.
 - Uses anti aliased fonts on Linux (Xft).
@@ -36,9 +36,9 @@ Installation:
 *************
 1. Download and install FPC 3.0.0, you can get it from 
    http://www.freepascal.org/download.var
-2. Download mseide_msegui_src_4_0.zip and the mseide_* archive
+2. Download mseide_msegui_src_4_2.zip and the mseide_* archive
    for your system.
-   http://sourceforge.net/projects/mseide-msegui/files/mseide-msegui/4.0/
+   http://sourceforge.net/projects/mseide-msegui/files/mseide-msegui/4.2/
 3. Extract them to a directory of your choice ('yourdirectory') .
 4. Run 'yourdirectory/bin/mseide' on linux and freebsed or 
    'yourdirectory\bin\mseide.exe' on windows.
