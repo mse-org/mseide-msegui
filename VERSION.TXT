@@ -1,5 +1,7 @@
 MSEide+MSEgui breaking changes version history
 
+Version 4.2
+2016-02-24
 2015-12-23
  Endpoints of visible tframe.frameimage edges are always painted independed of 
   the hiddenedges state of neighbors. Copy the middle image to the end images
@@ -9,7 +11,7 @@ MSEide+MSEgui breaking changes version history
   twidget.findtagwidget() -> findtagchild().
 
 Version 4.0
- 2015-11-13
+2015-11-13
 2015-11-03
  tcustomface opacity values of alpha blending inverted, white is
   full opaqueness of the elements.
