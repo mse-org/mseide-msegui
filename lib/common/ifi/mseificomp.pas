@@ -4613,14 +4613,18 @@ end;
 function tgridclientcontroller.rowempty(const arow: integer): boolean;
 var
  int1: integer;
+ link1: tifivaluelinkcomp;
 begin
  result:= true;
  if arow >= 0 then begin
   for int1:= 0 to high(datacols.fitems) do begin
-   with tificolitem(datacols.fitems[int1]).link.controller.datalist do begin
-    if (arow < count) and not empty(arow) then begin
-     result:= false;
-     break;
+   link1:= tificolitem(datacols.fitems[int1]).link;
+   if link1 <> nil then begin
+    with link1.controller.datalist do begin
+     if (arow < count) and not empty(arow) then begin
+      result:= false;
+      break;
+     end;
     end;
    end;
   end;
