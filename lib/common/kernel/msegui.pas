@@ -78,7 +78,8 @@ type
                    ow_focusbackonesc,                   
                    ow_keyreturntaborder, 
                      //key_return and key_enter work like key_tab
-                   ow_nosistershortcut, //do not react to shortcuts from sisters
+                   ow_nosiblingshortcut, //do not react to shortcuts
+                                         //from siblings
                    ow_nochildshortcut,  //do not propagate shortcuts to parent
                    ow_noparentshortcut, //do not react to shortcuts from parent
                    ow_canclosenil,      // don't use, moved to optionswidget1
@@ -11881,7 +11882,7 @@ begin
    int2:= indexofwidget(sender);
    for int1:= int2 + 1 to widgetcount - 1 do begin
     with widgets[int1] do begin
-     if not (ow_nosistershortcut in foptionswidget) then begin
+     if not (ow_nosiblingshortcut in foptionswidget) then begin
       doshortcut(info,nil);
       if es_processed in info.eventstate then begin
        break;
@@ -11892,7 +11893,7 @@ begin
    if not (es_processed in info.eventstate) then begin
     for int1:= 0 to int2 - 1 do begin
      with widgets[int1] do begin
-      if not (ow_nosistershortcut in foptionswidget) then begin
+      if not (ow_nosiblingshortcut in foptionswidget) then begin
        doshortcut(info,nil);
        if es_processed in info.eventstate then begin
         break;
