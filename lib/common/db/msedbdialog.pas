@@ -33,6 +33,8 @@ type
    function getgriddatasource: tdatasource;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    procedure modified; override;
+   procedure doshortcut(var info: keyeventinfoty; 
+                                      const sender: twidget); override;
 //   function getoptionsedit: optionseditty; override;
 //   procedure dochange; override;
 //   procedure doenter; override;
@@ -70,6 +72,8 @@ type
    function getgriddatasource: tdatasource;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    procedure modified; override;
+   procedure doshortcut(var info: keyeventinfoty; 
+                                      const sender: twidget); override;
 //   function getoptionsedit: optionseditty; override;
 //   procedure dochange; override;
 //   procedure doenter; override;
@@ -108,6 +112,8 @@ type
    function getgriddatasource: tdatasource;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    procedure modified; override;
+   procedure doshortcut(var info: keyeventinfoty; 
+                                      const sender: twidget); override;
 //   function getoptionsedit: optionseditty; override;
 //   procedure dochange; override;
 //   procedure doenter; override;
@@ -239,6 +245,15 @@ procedure tdbfilenameedit.modified;
 begin
  fdatalink.modified;
  inherited;
+end;
+
+procedure tdbfilenameedit.doshortcut(var info: keyeventinfoty;
+               const sender: twidget);
+begin
+ fdatalink.doshortcut(info,sender);
+ if not (es_processed in info.eventstate) then begin
+  inherited;
+ end;
 end;
 {
 function tdbfilenameedit.getoptionsedit: optionseditty;
@@ -372,6 +387,15 @@ begin
  fdatalink.modified;
  inherited;
 end;
+
+procedure tdbremotefilenameedit.doshortcut(var info: keyeventinfoty;
+               const sender: twidget);
+begin
+ fdatalink.doshortcut(info,sender);
+ if not (es_processed in info.eventstate) then begin
+  inherited;
+ end;
+end;
 {
 function tdbremotefilenameedit.getoptionsedit: optionseditty;
 begin
@@ -504,6 +528,15 @@ procedure tdbcoloredit.modified;
 begin
  fdatalink.modified;
  inherited;
+end;
+
+procedure tdbcoloredit.doshortcut(var info: keyeventinfoty;
+               const sender: twidget);
+begin
+ fdatalink.doshortcut(info,sender);
+ if not (es_processed in info.eventstate) then begin
+  inherited;
+ end;
 end;
 {
 function tdbcoloredit.getoptionsedit: optionseditty;

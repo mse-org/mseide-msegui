@@ -115,6 +115,8 @@ type
    procedure defineproperties(filer: tfiler); override;
    procedure setvalue(const avalue: string); override;
    procedure gridtovalue(row: integer); override;
+   procedure doshortcut(var info: keyeventinfoty; 
+                                      const sender: twidget); override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -267,6 +269,15 @@ end;
 procedure tdbdataimage.gridtovalue(row: integer);
 begin
  //dummy
+end;
+
+procedure tdbdataimage.doshortcut(var info: keyeventinfoty;
+               const sender: twidget);
+begin
+ fdatalink.doshortcut(info,sender);
+ if not (es_processed in info.eventstate) then begin
+  inherited;
+ end;
 end;
 
 procedure tdbdataimage.setvalue(const avalue: string);

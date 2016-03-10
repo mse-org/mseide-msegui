@@ -15,7 +15,7 @@ unit msedbcalendardatetimeedit;
 interface
 uses
  mdb,classes,mclasses,msecalendardatetimeedit,msedbedit,msedb,msegui,
- msewidgetgrid,
+ msewidgetgrid,mseevent,
  msedatalist,mseeditglob,msegrids,msemenus,mseguiglob,mseedit,msedataedits,
  msestrings,msetypes;
  
@@ -32,6 +32,8 @@ type
    function getgriddatasource: tdatasource;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    procedure modified; override;
+   procedure doshortcut(var info: keyeventinfoty; 
+                                      const sender: twidget); override;
 //   function getoptionsedit: optionseditty; override;
 //   procedure dochange; override;
 //   procedure doenter; override;
@@ -81,6 +83,15 @@ procedure tdbcalendardatetimeedit.modified;
 begin
  fdatalink.modified;
  inherited;
+end;
+
+procedure tdbcalendardatetimeedit.doshortcut(var info: keyeventinfoty;
+               const sender: twidget);
+begin
+ fdatalink.doshortcut(info,sender);
+ if not (es_processed in info.eventstate) then begin
+  inherited;
+ end;
 end;
 {
 function tdbcalendardatetimeedit.getoptionsedit: optionseditty;

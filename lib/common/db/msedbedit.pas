@@ -182,7 +182,9 @@ type
    procedure inithints;
    procedure doexecute(const sender: tobject);
    procedure loaded; override;
-   procedure doshortcut(var info: keyeventinfoty; const sender: twidget); override;
+   procedure internalshortcut(var info: keyeventinfoty; const sender: twidget);
+   procedure doshortcut(var info: keyeventinfoty;
+                                              const sender: twidget); override;
    procedure doasyncevent(var atag: integer); override;
    procedure dostatread(const reader: tstatreader); override;
    procedure dostatwrite(const writer: tstatwriter); override;
@@ -350,6 +352,8 @@ type
    procedure griddatasourcechanged;
    function edit: Boolean;
    procedure modified;
+   procedure doshortcut(var info: keyeventinfoty; const sender: twidget);
+
 //   procedure datachanged;
 //   procedure updateoptionsedit(var aoptions: optionseditty);
    function cuttext(const atext: msestring; out maxlength: integer): boolean; 
@@ -425,6 +429,8 @@ type
    function getgriddatasource: tdatasource;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    procedure modified; override;
+   procedure doshortcut(var info: keyeventinfoty; 
+                                      const sender: twidget); override;
 //   function getoptionsedit: optionseditty; override;
 //   procedure dochange; override;
 //   procedure doenter; override;
@@ -511,6 +517,8 @@ type
    function getgriddatasource: tdatasource;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    procedure modified; override;
+   procedure doshortcut(var info: keyeventinfoty; 
+                                      const sender: twidget); override;
 //   function getoptionsedit: optionseditty; override;
 //   procedure dochange; override;
 //   procedure doenter; override;
@@ -660,6 +668,8 @@ type
    function getgriddatasource: tdatasource;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    procedure modified; override;
+   procedure doshortcut(var info: keyeventinfoty; 
+                                      const sender: twidget); override;
 //   function getoptionsedit: optionseditty; override;
 //   procedure dochange; override;
 //   procedure doenter; override;
@@ -694,6 +704,8 @@ type
    function getgriddatasource: tdatasource;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    procedure modified; override;
+   procedure doshortcut(var info: keyeventinfoty; 
+                                      const sender: twidget); override;
 //   function getoptionsedit: optionseditty; override;
 //   procedure dochange; override;
 //   procedure doenter; override;
@@ -736,6 +748,8 @@ type
 //   procedure doenter; override;
 //   procedure doexit; override;
    procedure modified; override;
+   procedure doshortcut(var info: keyeventinfoty; 
+                                      const sender: twidget); override;
 //   function getoptionsedit: optionseditty; override;
    function getrowdatapo(const arow: integer): pointer; override;
     //idbeditfieldlink
@@ -768,6 +782,8 @@ type
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    function checkvalue(const quiet: boolean = false): boolean; reintroduce;
    procedure modified; override;
+   procedure doshortcut(var info: keyeventinfoty; 
+                                      const sender: twidget); override;
 //   procedure dochange; override;
 //   procedure doenter; override;
 //   procedure doexit; override;
@@ -809,6 +825,8 @@ type
 //   procedure doenter; override;
 //   procedure doexit; override;
    procedure modified; override;
+   procedure doshortcut(var info: keyeventinfoty; 
+                                      const sender: twidget); override;
 //   function getoptionsedit: optionseditty; override;
    function getrowdatapo(const arow: integer): pointer; override;
     //idbeditfieldlink
@@ -875,6 +893,8 @@ type
 //   procedure doenter; override;
 //   procedure doexit; override;
    procedure modified; override;
+   procedure doshortcut(var info: keyeventinfoty; 
+                                      const sender: twidget); override;
 //   function getoptionsedit: optionseditty; override;
    function getrowdatapo(const arow: integer): pointer; override;
     //idbeditfieldlink
@@ -907,6 +927,8 @@ type
    function getgriddatasource: tdatasource;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    procedure modified; override;
+   procedure doshortcut(var info: keyeventinfoty; 
+                                      const sender: twidget); override;
 //   function getoptionsedit: optionseditty; override;
 //   procedure dochange; override;
 //   procedure doenter; override;
@@ -945,6 +967,8 @@ type
    function getgriddatasource: tdatasource;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    procedure modified; override;
+   procedure doshortcut(var info: keyeventinfoty; 
+                                      const sender: twidget); override;
 //   function getoptionsedit: optionseditty; override;
 //   procedure dochange; override;
 //   procedure doenter; override;
@@ -990,6 +1014,8 @@ type
 //   procedure doenter; override;
 //   procedure doexit; override;
    procedure modified; override;
+   procedure doshortcut(var info: keyeventinfoty; 
+                                      const sender: twidget); override;
    function getrowdatapo(const arow: integer): pointer; override;
     //idbeditfieldlink
    procedure valuetofield;
@@ -1098,6 +1124,8 @@ type
    function getgriddatasource: tdatasource;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    procedure modified; override;
+   procedure doshortcut(var info: keyeventinfoty; 
+                                      const sender: twidget); override;
 //   function getoptionsedit: optionseditty; override;
 //   procedure dochange; override;
 //   procedure doenter; override;
@@ -1403,6 +1431,7 @@ type
    function canclose(const newfocus: twidget): boolean;
    procedure painted;
    procedure loaded;
+   procedure doshortcut(var info: keyeventinfoty; const sender: twidget);
    procedure setselected(const cell: gridcoordty;
                                        const avalue: boolean);
    procedure beforefocuscell(const cell: gridcoordty;
@@ -1755,6 +1784,8 @@ type
    procedure dopaint(const acanvas: tcanvas); override;
    procedure dohide; override;
    procedure loaded; override;
+   procedure doshortcut(var info: keyeventinfoty; 
+                                      const sender: twidget); override;
 
    procedure setselected(const cell: gridcoordty;
                                        const avalue: boolean); override;
@@ -2052,6 +2083,8 @@ type
    procedure dopaint(const acanvas: tcanvas); override;
    procedure dohide; override;
    procedure loaded; override;
+   procedure doshortcut(var info: keyeventinfoty; 
+                                      const sender: twidget); override;
    function cangridcopy: boolean;
 
    function caninsertrow: boolean; override;
@@ -2450,6 +2483,8 @@ type
    function getgriddatasource: tdatasource;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    procedure modified; override;
+   procedure doshortcut(var info: keyeventinfoty; 
+                                      const sender: twidget); override;
 //   function getoptionsedit: optionseditty; override;
 //   procedure dochange; override;
 //   procedure doenter; override;
@@ -2507,6 +2542,8 @@ type
    function getgriddatasource: tdatasource;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    procedure modified; override;
+   procedure doshortcut(var info: keyeventinfoty; 
+                                      const sender: twidget); override;
 //   function getoptionsedit: optionseditty; override;
 //   procedure dochange; override;
 //   procedure doenter; override;
@@ -3066,7 +3103,8 @@ begin
  inithints;
 end;
 
-procedure tdbnavigator.doshortcut(var info: keyeventinfoty; const sender: twidget);
+procedure tdbnavigator.internalshortcut(var info: keyeventinfoty;
+                                                    const sender: twidget);
 var
  bu1: dbnavigbuttonty;
 begin
@@ -3081,6 +3119,12 @@ begin
    end;
   end;
  end;
+end;
+
+procedure tdbnavigator.doshortcut(var info: keyeventinfoty;
+                                                  const sender: twidget);
+begin
+ internalshortcut(info,sender);
  if not (es_processed in info.eventstate) then begin;
   inherited;
  end;
@@ -3330,6 +3374,16 @@ begin
   end;
  end;
  include(fstate,fds_modified);
+end;
+
+procedure tcustomeditwidgetdatalink.doshortcut(var info: keyeventinfoty;
+               const sender: twidget);
+begin
+ if (info.eventstate * [es_preview,es_processed] = []) and 
+                     (fnavigator <> nil) and fnavigator.showing and
+                                               fnavigator.isenabled then begin
+  fnavigator.internalshortcut(info,sender);
+ end;
 end;
 
 procedure tcustomeditwidgetdatalink.updateoptionsedit(var avalue: optionseditty);
@@ -3794,6 +3848,15 @@ begin
  fdatalink.modified;
  inherited;
 end;
+
+procedure tdbstringedit.doshortcut(var info: keyeventinfoty;
+               const sender: twidget);
+begin
+ fdatalink.doshortcut(info,sender);
+ if not (es_processed in info.eventstate) then begin
+  inherited;
+ end;
+end;
 {
 function tdbstringedit.getoptionsedit: optionseditty;
 begin
@@ -4030,6 +4093,15 @@ procedure tcustomdbdropdownlistedit.modified;
 begin
  fdatalink.Modified;
  inherited;
+end;
+
+procedure tcustomdbdropdownlistedit.doshortcut(var info: keyeventinfoty;
+               const sender: twidget);
+begin
+ fdatalink.doshortcut(info,sender);
+ if not (es_processed in info.eventstate) then begin
+  inherited;
+ end;
 end;
 {
 function tcustomdbdropdownlistedit.getoptionsedit: optionseditty;
@@ -4305,6 +4377,15 @@ begin
  fdatalink.modified;
  inherited;
 end;
+
+procedure tdbmemoedit.doshortcut(var info: keyeventinfoty;
+               const sender: twidget);
+begin
+ fdatalink.doshortcut(info,sender);
+ if not (es_processed in info.eventstate) then begin
+  inherited;
+ end;
+end;
 {
 function tdbmemoedit.getoptionsedit: optionseditty;
 begin
@@ -4426,6 +4507,15 @@ procedure tdbintegeredit.modified;
 begin
  fdatalink.modified;
  inherited;
+end;
+
+procedure tdbintegeredit.doshortcut(var info: keyeventinfoty;
+               const sender: twidget);
+begin
+ fdatalink.doshortcut(info,sender);
+ if not (es_processed in info.eventstate) then begin
+  inherited;
+ end;
 end;
 {
 function tdbintegeredit.getoptionsedit: optionseditty;
@@ -4642,6 +4732,15 @@ begin
  inherited;
 end;
 
+procedure tdbbooleanedit.doshortcut(var info: keyeventinfoty;
+               const sender: twidget);
+begin
+ fdatalink.doshortcut(info,sender);
+ if not (es_processed in info.eventstate) then begin
+  inherited;
+ end;
+end;
+
 procedure tdbbooleanedit.setmaxlength(const avalue: integer);
 begin
  //dummy
@@ -4761,6 +4860,15 @@ procedure tdbdataicon.modified;
 begin
  fdatalink.modified;
  inherited;
+end;
+
+procedure tdbdataicon.doshortcut(var info: keyeventinfoty;
+               const sender: twidget);
+begin
+ fdatalink.doshortcut(info,sender);
+ if not (es_processed in info.eventstate) then begin
+  inherited;
+ end;
 end;
 
 procedure tdbdataicon.setmaxlength(const avalue: integer);
@@ -4884,6 +4992,15 @@ begin
  inherited;
 end;
 
+procedure tdbdatabutton.doshortcut(var info: keyeventinfoty;
+               const sender: twidget);
+begin
+ fdatalink.doshortcut(info,sender);
+ if not (es_processed in info.eventstate) then begin
+  inherited;
+ end;
+end;
+
 procedure tdbdatabutton.setmaxlength(const avalue: integer);
 begin
  //dummy
@@ -4956,6 +5073,15 @@ begin
   fdatalink.modified;
  end;
  inherited;
+end;
+
+procedure tdbbooleaneditradio.doshortcut(var info: keyeventinfoty;
+               const sender: twidget);
+begin
+ fdatalink.doshortcut(info,sender);
+ if not (es_processed in info.eventstate) then begin
+  inherited;
+ end;
 end;
 {
 function tdbbooleaneditradio.getoptionsedit: optionseditty;
@@ -5060,6 +5186,15 @@ procedure tdbrealedit.modified;
 begin
  fdatalink.Modified;
  inherited;
+end;
+
+procedure tdbrealedit.doshortcut(var info: keyeventinfoty;
+               const sender: twidget);
+begin
+ fdatalink.doshortcut(info,sender);
+ if not (es_processed in info.eventstate) then begin
+  inherited;
+ end;
 end;
 {
 function tdbrealedit.getoptionsedit: optionseditty;
@@ -5181,6 +5316,15 @@ procedure tdbrealspinedit.modified;
 begin
  fdatalink.Modified;
  inherited;
+end;
+
+procedure tdbrealspinedit.doshortcut(var info: keyeventinfoty;
+               const sender: twidget);
+begin
+ fdatalink.doshortcut(info,sender);
+ if not (es_processed in info.eventstate) then begin
+  inherited;
+ end;
 end;
 {
 function tdbrealspinedit.getoptionsedit: optionseditty;
@@ -5397,6 +5541,14 @@ procedure tdbslider.modified;
 begin
  fdatalink.modified;
  inherited;
+end;
+
+procedure tdbslider.doshortcut(var info: keyeventinfoty; const sender: twidget);
+begin
+ fdatalink.doshortcut(info,sender);
+ if not (es_processed in info.eventstate) then begin
+  inherited;
+ end;
 end;
 
 procedure tdbslider.setmaxlength(const avalue: integer);
@@ -5665,6 +5817,15 @@ procedure tcustomdbenumedit.modified;
 begin
  fdatalink.modified;
  inherited;
+end;
+
+procedure tcustomdbenumedit.doshortcut(var info: keyeventinfoty;
+               const sender: twidget);
+begin
+ fdatalink.doshortcut(info,sender);
+ if not (es_processed in info.eventstate) then begin
+  inherited;
+ end;
 end;
 {
 function tcustomdbenumedit.getoptionsedit: optionseditty;
@@ -8257,6 +8418,16 @@ begin
  doupdaterowdata(-1);
 end;
 
+procedure tgriddatalink.doshortcut(var info: keyeventinfoty;
+               const sender: twidget);
+begin
+ if (info.eventstate * [es_preview,es_processed] = []) and 
+                     (fnavigator <> nil) and fnavigator.showing and
+                                               fnavigator.isenabled then begin
+  fnavigator.internalshortcut(info,sender);
+ end;
+end;
+
 function tgriddatalink.checkvalue: boolean;
 begin
  if editing then begin
@@ -9048,6 +9219,15 @@ procedure tcustomdbwidgetgrid.loaded;
 begin
  inherited;
  fdatalink.loaded;
+end;
+
+procedure tcustomdbwidgetgrid.doshortcut(var info: keyeventinfoty;
+               const sender: twidget);
+begin
+ fdatalink.doshortcut(info,sender);
+ if not (es_processed in info.eventstate) then begin
+  inherited;
+ end;
 end;
 
 function tcustomdbwidgetgrid.getgriddatalink: pointer;
@@ -10047,6 +10227,15 @@ begin
  fdatalink.loaded;
 end;
 
+procedure tcustomdbstringgrid.doshortcut(var info: keyeventinfoty;
+               const sender: twidget);
+begin
+ fdatalink.doshortcut(info,sender);
+ if not (es_processed in info.eventstate) then begin
+  inherited;
+ end;
+end;
+
 function tcustomdbstringgrid.cangridcopy: boolean;
 begin
  result:= fdatacols.hasselection;
@@ -10731,6 +10920,15 @@ begin
  fdatalink.modified;
  inherited;
 end;
+
+procedure tdbenum64editlb.doshortcut(var info: keyeventinfoty;
+               const sender: twidget);
+begin
+ fdatalink.doshortcut(info,sender);
+ if not (es_processed in info.eventstate) then begin
+  inherited;
+ end;
+end;
 {
 function tdbenum64editlb.getoptionsedit: optionseditty;
 begin
@@ -10860,6 +11058,15 @@ procedure tdbenum64editdb.modified;
 begin
  fdatalink.modified;
  inherited;
+end;
+
+procedure tdbenum64editdb.doshortcut(var info: keyeventinfoty;
+               const sender: twidget);
+begin
+ fdatalink.doshortcut(info,sender);
+ if not (es_processed in info.eventstate) then begin
+  inherited;
+ end;
 end;
 {
 function tdbenum64editdb.getoptionsedit: optionseditty;
