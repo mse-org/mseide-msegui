@@ -784,7 +784,7 @@ type
               gdf_fonthasglyph,
               gdf_getfont,gdf_getfonthighres,gdf_freefontdata,
               gdf_gettext16width,gdf_getchar16widths,gdf_getfontmetrics
-              );
+             );
 
  gdifunctionaty = array[gdifuncty] of gdifunctionty;
 // pgdifunctionaty = ^gdifunctionaty;

@@ -2090,7 +2090,7 @@ begin
     end
     else begin
      info.reason:= sr_startup;
-     fstate:= fstate + [gs_execloaded,gs_attached,gs_started];
+     fstate:= fstate + [gs_execloaded,gs_attached,gs_started,gs_startup];
      with frames1[0] do begin
       info.filename:= filename;
       info.line:= line;
@@ -2136,7 +2136,7 @@ begin
    end
    else begin
     info.reason:= sr_startup;
-    fstate:= fstate + [gs_execloaded,gs_attached,gs_started];
+    fstate:= fstate + [gs_execloaded,gs_attached,gs_started,gs_startup];
     with frames1[0] do begin
      info.filename:= filename;
      info.line:= line;
