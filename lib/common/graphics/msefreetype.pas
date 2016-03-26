@@ -406,11 +406,12 @@ var
  libinfo: dynlibinfoty;
 const
  ftposshift = 6;
+ ftposscale = 64; //2^6
  ftposhalf = (1 shl ftposshift) div 2;
  
 function ftpostopixel(const apos: ft_pos): integer; inline;
 begin
- result:= (apos + ftposhalf) shr ftposshift;
+ result:= (apos + ftposhalf) div ftposscale;
 end;
 
 function FT_IS_SCALABLE(face: PFT_Face): boolean;
