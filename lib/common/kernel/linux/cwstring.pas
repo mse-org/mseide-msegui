@@ -312,24 +312,39 @@ procedure Ansi2WideMove(source:pchar;var dest:widestring;len:SizeInt);
 end;
 
 
-function LowerWideString(const s : WideString) : WideString;
-  var
-    i : SizeInt;
-  begin
-    SetLength(result,length(s));
-    for i:=1 to length(s) do
-      result[i]:=WideChar(towlower(wint_t(s[i])));
-  end;
+function lowerwidestring(const s : widestring) : widestring;
+var
+ i1: int32;
+ ps,pd,pe: pmsechar;
+begin
+ i1:= length(s);
+ setlength(result,i1);
+ ps:= pointer(s);
+ pd:= pointer(result);
+ pe:= pd + i1;
+ while pd < pe do begin
+  pd^:= widechar(towlower(wint_t(ps^)));
+  inc(ps);
+  inc(pd);
+ end;
+end;
 
-
-function UpperWideString(const s : WideString) : WideString;
-  var
-    i : SizeInt;
-  begin
-    SetLength(result,length(s));
-    for i:=1 to length(s) do
-      result[i]:=WideChar(towupper(wint_t(s[i])));
-  end;
+function upperwidestring(const s : widestring) : widestring;
+var
+ i1: int32;
+ ps,pd,pe: pmsechar;
+begin
+ i1:= length(s);
+ setlength(result,i1);
+ ps:= pointer(s);
+ pd:= pointer(result);
+ pe:= pd + i1;
+ while pd < pe do begin
+  pd^:= widechar(towupper(wint_t(ps^)));
+  inc(ps);
+  inc(pd);
+ end;
+end;
  
 function CompareWideString(const s1, s2 : WideString): PtrInt;
 var                   //no surrogate pair handling, no decomposition handling
