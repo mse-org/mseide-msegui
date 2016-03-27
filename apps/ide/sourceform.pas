@@ -440,7 +440,7 @@ begin
  if findex > 0 then begin
   result:= true;
   dec(findex);
-  updateshowpos(cep_none);
+  updateshowpos(cep_rowcenteredif);
  end
  else begin
   result:= false;
@@ -452,7 +452,7 @@ begin
  if (findex < count - 1) then begin
   result:= true;
   inc(findex);
-  updateshowpos(cep_none);
+  updateshowpos(cep_rowcenteredif);
  end
  else begin
   result:= false;
