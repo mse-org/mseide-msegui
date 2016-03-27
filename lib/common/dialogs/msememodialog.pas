@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2016 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -25,6 +25,11 @@ type
  tmemodialogedit = class(tcustomdialogstringed)
   protected
    function createdialogcontroller: tstringdialogcontroller; override;
+  public
+   constructor create(aowner: tcomponent); override;
+  published
+   property textflags default defaulttextflagsnoycentered;
+   property textflagsactive default defaulttextflagsactivenoycentered;
  end;
  
  tmsememodialogfo = class(tmseform)
@@ -108,6 +113,14 @@ begin
 end;
 
 { tmemodialogedit }
+
+constructor tmemodialogedit.create(aowner: tcomponent);
+begin
+ inherited;
+ ftextflags:= defaulttextflagsnoycentered;
+ ftextflagsactive:= defaulttextflagsactivenoycentered;
+ updatetextflags();
+end;
 
 function tmemodialogedit.createdialogcontroller: tstringdialogcontroller;
 begin
