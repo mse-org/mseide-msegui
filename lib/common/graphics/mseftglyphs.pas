@@ -63,35 +63,37 @@ var
  i1,i2,step: int32;
 begin
  result:= false;
+ abitmap.beginupdate();
  abitmap.clear();
  if ft_load_glyph(fftface,ft_get_char_index(fftface,ord(achar)),
                                           ft_load_default) = 0 then begin
   if ft_render_glyph(fftface^.glyph,ft_render_mode_normal) = 0 then begin
-   abitmap.beginupdate();
    abitmap.options:= [bmo_masked,bmo_graymask];
-   with fftface^.glyph^.bitmap do begin //todo: check bitmap format    
-    abitmap.size:= ms(width,rows);
-    abitmap.init(acolor);
-    if pitch < 0 then begin
-     so:= buffer+(rows-1)*pitch;
-    end
-    else begin
-     so:= buffer;
-    end;
-    step:= abitmap.mask.scanlinestep;
-    de:= abitmap.mask.scanline[0];
-    for i1:= rows - 1 downto 0 do begin
-     for i2:= width-1 downto 0 do begin
-      de[i2]:= so[i2];
+   with fftface^.glyph^.bitmap do begin //todo: check bitmap format
+    if (width > 0) and (rows > 0) then begin
+     abitmap.size:= ms(width,rows);
+     abitmap.init(acolor);
+     if pitch < 0 then begin
+      so:= buffer+(rows-1)*pitch;
+     end
+     else begin
+      so:= buffer;
      end;
-     so:= so + pitch;
-     de:= de + step;
-    end;    
+     step:= abitmap.mask.scanlinestep;
+     de:= abitmap.mask.scanline[0];
+     for i1:= rows - 1 downto 0 do begin
+      for i2:= width-1 downto 0 do begin
+       de[i2]:= so[i2];
+      end;
+      so:= so + pitch;
+      de:= de + step;
+     end;
+    end;
    end;
-   abitmap.endupdate();
    result:= true;
   end;
  end;
+ abitmap.endupdate();
 end;
 
 end.

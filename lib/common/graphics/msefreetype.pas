@@ -21,7 +21,7 @@ unit msefreetype;
 
 interface
 uses
- msestrings,sysutils;
+ msestrings,sysutils,msectypes;
  
 const
 
@@ -108,29 +108,24 @@ const
 
 type
 
-  FT_Bool = boolean;
-  FT_FWord = smallint;
-  FT_UFWord = word;
-  FT_Char = char;
-  FT_Byte = byte;
-  FT_String = char;
-  FT_Short = smallint;
-  FT_UShort = word;
-  FT_Int = longint;
-  FT_UInt = longword;
-  {$if defined(cpu64) and not(defined(win64) and defined(cpux86_64))}
-  FT_Long = int64;
-  FT_ULong = qword;
-  FT_Pos = int64;
-  {$ELSE}
-  FT_Long = longint;
-  FT_ULong = longword;
-  FT_Pos = longint;
-  {$ENDIF}
-  FT_F2Dot14 = smallint;
-  FT_F26Dot6 = longint;
-  FT_Fixed = longint;
-  FT_Error = longint;
+  FT_Bool = cuchar;
+  FT_FWord = cshort;
+  FT_UFWord = cushort;
+  FT_Char = cchar;
+  FT_Byte = cuchar;
+  FT_Bytes = ^FT_Byte;
+  FT_String = cchar;
+  FT_Short = cshort;
+  FT_UShort = cushort;
+  FT_Int = cint;
+  FT_UInt = cuint;
+  FT_Long = clong;
+  FT_ULong = culong;
+  FT_Pos = clong;
+  FT_F2Dot14 = cshort;
+  FT_F26Dot6 = clong;
+  FT_Fixed = clong;
+  FT_Error = cint;
   FT_Pointer = pointer;
   //FT_Offset = size_t;
   //FT_PtrDist = size_t;
@@ -196,13 +191,13 @@ type
   PFT_BBox = ^FT_BBox;
 
   FT_Bitmap = record
-    rows : integer;
-    width : integer;
-    pitch : integer;
+    rows : cint;
+    width : cint;
+    pitch : cint;
     buffer : pointer;
-    num_grays : shortint;
-    pixel_mode : char;
-    palette_mode : char;
+    num_grays : ft_short;
+    pixel_mode : cchar;
+    palette_mode : cchar;
     palette : pointer;
   end;
 
