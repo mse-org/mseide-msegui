@@ -8453,7 +8453,7 @@ end;
 function tgriddatalink.domoveby(const distance: integer): integer;
 begin
  result:= 0;
- if dataset.state <> dsfilter then begin
+ if active and (dataset.state <> dsfilter) then begin
   result:= inherited moveby(distance);
  end;
 end;
