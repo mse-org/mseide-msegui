@@ -4250,7 +4250,7 @@ begin
   faceoffs:= fi.frameface_list.lookup(
          calcframestateoffs(fintf.getframestateflags,
                                   frameoffsetsty(fi.frameface_offsets)));
-  if faceoffs >= 0 then begin
+  if (faceoffs >= 0) and (faceoffs < fi.frameface_list.list.count) then begin
    if fso_clientfacerect in optionsskin then begin
     reg1:= canvas.copyclipregion;
     rect1.x:= arect.x + fclientrect.x;
