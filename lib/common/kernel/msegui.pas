@@ -7196,11 +7196,10 @@ var
 begin
  inherited;
  if (event = oe_changed) and (sender is tfacecomp) then begin
-  for int1:= 0 to list.count do begin
+  for int1:= 0 to list.count - 1 do begin
    fa1:= tcustomface(flist.fitems[int1]);
    if fa1.template = sender then begin
     fa1.checktemplate(sender);
-    break;
    end;
   end;
  end;
