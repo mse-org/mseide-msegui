@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2014 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2016 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -223,9 +223,9 @@ type
   private
    fdragbuttons: shiftstatesty;
    procedure setsbhorz(const Value: tcustomscrollbar);
-   function getsbhorz: tcustomscrollbar;
+//   function getsbhorz: tcustomscrollbar;
    procedure setsbvert(const Value: tcustomscrollbar);
-   function getsbvert: tcustomscrollbar;
+//   function getsbvert: tcustomscrollbar;
    procedure setdragbuttons(const avalue: shiftstatesty);
   protected
    fhorz,fvert: tcustomscrollbar;
@@ -253,8 +253,8 @@ type
    property dragbuttons: shiftstatesty read fdragbuttons write setdragbuttons 
                                        default defaultdragbuttons;
    property state: framestatesty read fstate;
-   property sbhorz: tcustomscrollbar read getsbhorz write setsbhorz;
-   property sbvert: tcustomscrollbar read getsbvert write setsbvert;
+   property sbhorz: tcustomscrollbar read fhorz write setsbhorz;
+   property sbvert: tcustomscrollbar read fvert write setsbvert;
  end;
 
  tscrollframe = class(tcustomscrollframe)
@@ -3182,11 +3182,11 @@ begin
  with info do begin
   if not (es_processed in eventstate) then begin
    scrollbar:= nil;
-   if pointinrect(info.pos,sbvert.dim) then begin
+   if (fs_sbverton in fstate) and pointinrect(info.pos,sbvert.dim) then begin
     scrollbar:= sbvert;
    end
    else begin
-    if pointinrect(info.pos,sbhorz.dim) then begin
+    if (fs_sbhorzon in fstate) and pointinrect(info.pos,sbhorz.dim) then begin
      scrollbar:= sbhorz;
     end
     else begin
@@ -3400,22 +3400,22 @@ begin
   iscrollframe(fintf).getwidget.invalidatewidget;
  end;
 end;
-
+{
 function tcustomscrollframe.getsbhorz: tcustomscrollbar;
 begin
  result:= fhorz;
 end;
-
+}
 procedure tcustomscrollframe.setsbhorz(const Value: tcustomscrollbar);
 begin
  fhorz.assign(Value);
 end;
-
+{
 function tcustomscrollframe.getsbvert: tcustomscrollbar;
 begin
  result:= fvert;
 end;
-
+}
 procedure tcustomscrollframe.setsbvert(const Value: tcustomscrollbar);
 begin
  fvert.assign(Value);
