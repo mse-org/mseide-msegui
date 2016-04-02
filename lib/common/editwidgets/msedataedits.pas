@@ -609,7 +609,7 @@ type
  end;
 
 const
- defaulthistorymaxcount = 10;
+ defaulthistorymaxcount = 15;
  defaulthistoryeditoptions = defaultdropdownoptionsedit + [deo_autosavehistory];
 
 type
