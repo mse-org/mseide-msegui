@@ -2261,7 +2261,7 @@ procedure tmainfo.newproject(const fromprogram,empty: boolean);
 var
  aname: filenamety;
  mstr1,mstr2: msestring;
- int1: integer;
+ i1: integer;
  curdir,source,dest: filenamety;
  macrolist: tmacrolist;
  copiedfiles: filenamearty;
@@ -2318,6 +2318,18 @@ begin
                                      ['*.prj','*'],'prj') = mr_ok then begin
    curdir:= filedir(aname);
    setcurrentdirmse(curdir);
+   insertitem(projecthistory,0,aname);
+   i1:= 1;
+   while i1 <= high(projecthistory) do begin
+    if projecthistory[i1] = aname then begin
+     deleteitem(projecthistory,i1);
+    end;
+    inc(i1);
+   end;
+   if high(projecthistory) >= 
+             projectfiledia.controller.historymaxcount then begin
+    setlength(projecthistory,projectfiledia.controller.historymaxcount);
+   end;
    if not fromprogram then begin
     mstr1:= removefileext(filename(aname));
     with projectoptions,o do begin
@@ -2330,10 +2342,10 @@ begin
       try
        macrolist.add(['%PROJECTNAME%','%PROJECTDIR%'],[mstr1,curdir],[]);
        if runscript(scriptbeforecopy,true,false) then begin
-        for int1:= 0 to high(newprojectfiles) do begin
-         source:= filepath(newprojectfiles[int1]);
-         if int1 <= high(newprojectfilesdest) then begin
-          dest:= newprojectfilesdest[int1];
+        for i1:= 0 to high(newprojectfiles) do begin
+         source:= filepath(newprojectfiles[i1]);
+         if i1 <= high(newprojectfilesdest) then begin
+          dest:= newprojectfilesdest[i1];
          end
          else begin
           dest:= '';
@@ -2350,10 +2362,10 @@ begin
          else begin
           dest:= filename(source);
          end;
-         copiedfiles[int1]:= dest;
-         if newprojectfiles[int1] <> '' then begin
-          if (int1 <= high(expandprojectfilemacros)) and 
-                             expandprojectfilemacros[int1] then begin
+         copiedfiles[i1]:= dest;
+         if newprojectfiles[i1] <> '' then begin
+          if (i1 <= high(expandprojectfilemacros)) and 
+                             expandprojectfilemacros[i1] then begin
            copynewfile(source,dest,false,false,['%PROJECTNAME%','%PROJECTDIR%'],
                                        [mstr1,curdir]);
           end
@@ -2376,16 +2388,16 @@ begin
      end;
      saveproject(aname);
      bo1:= true;
-     for int1:= 0 to high(copiedfiles) do begin
-      if int1 > high(loadprojectfile) then begin
+     for i1:= 0 to high(copiedfiles) do begin
+      if i1 > high(loadprojectfile) then begin
        break;
       end;
-      if loadprojectfile[int1] then begin
-       if checkfileext(copiedfiles[int1],[formfileext])then begin
-        openformfile(copiedfiles[int1],true,false,false,true,false);
+      if loadprojectfile[i1] then begin
+       if checkfileext(copiedfiles[i1],[formfileext])then begin
+        openformfile(copiedfiles[i1],true,false,false,true,false);
        end
        else begin
-        sourcefo.openfile(copiedfiles[int1],bo1);
+        sourcefo.openfile(copiedfiles[i1],bo1);
         bo1:= false;
        end;
       end;
