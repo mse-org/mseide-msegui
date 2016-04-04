@@ -3672,6 +3672,9 @@ begin
     break;
    end;
   until result > length(s);
+  if result > length(s) then begin
+   result:= 0;
+  end;
  end
  else begin
   if so_caseinsensitive in options then begin
@@ -3770,6 +3773,9 @@ begin
     break;
    end;
   until result > length(s);
+  if result > length(s) then begin
+   result:= 0;
+  end;
  end
  else begin
   if so_caseinsensitive in options then begin
