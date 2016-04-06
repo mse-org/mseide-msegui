@@ -94,6 +94,13 @@ object breakpointsfo: tbreakpointsfo
     bounds_cy = 104
     anchors = [an_top, an_bottom]
     optionsgrid = [og_colsizing, og_rowmoving, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_colchangeontabkey, og_wrapcol, og_autopopup]
+    fixcols.count = 1
+    fixcols.items = <    
+      item
+        width = 20
+        numstart = 1
+        numstep = 1
+      end>
     fixrows.count = 1
     fixrows.items = <    
       item
@@ -211,7 +218,7 @@ object breakpointsfo: tbreakpointsfo
       end    
       item[condition]
         linecolorfix = -1610612733
-        width = 145
+        width = 124
         options = [co_fill, co_savevalue, co_savestate]
         widthmin = 0
         widgetname = 'condition'
@@ -394,7 +401,7 @@ object breakpointsfo: tbreakpointsfo
       visible = False
       bounds_x = 438
       bounds_y = 0
-      bounds_cx = 145
+      bounds_cx = 124
       bounds_cy = 16
       optionsedit1 = [oe1_savevalue]
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_trimright, oe_trimleft]
@@ -407,7 +414,7 @@ object breakpointsfo: tbreakpointsfo
       optionsskin = [osk_framebuttononly]
       taborder = 12
       visible = False
-      bounds_x = 584
+      bounds_x = 563
       bounds_y = 0
       bounds_cx = 19
       bounds_cy = 16
@@ -421,7 +428,7 @@ object breakpointsfo: tbreakpointsfo
       optionsskin = [osk_framebuttononly]
       taborder = 13
       visible = False
-      bounds_x = 604
+      bounds_x = 583
       bounds_y = 0
       bounds_cx = 17
       bounds_cy = 16

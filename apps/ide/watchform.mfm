@@ -72,7 +72,7 @@ object watchfo: twatchfo
     fixcols.count = 1
     fixcols.items = <    
       item
-        width = 18
+        width = 20
         numstart = 1
         numstep = 1
       end>
@@ -125,7 +125,7 @@ object watchfo: twatchfo
         dataclass = tgridmsestringdatalist
       end    
       item[expresult]
-        width = 82
+        width = 80
         options = [co_fill]
         widthmin = 50
         oncellevent = resultcellevent
@@ -186,7 +186,7 @@ object watchfo: twatchfo
       visible = False
       bounds_x = 167
       bounds_y = 0
-      bounds_cx = 82
+      bounds_cx = 80
       bounds_cy = 16
       optionsedit1 = []
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext]
@@ -198,7 +198,7 @@ object watchfo: twatchfo
       frame.localprops = [frl_optionsskin]
       frame.localprops1 = []
       taborder = 4
-      bounds_x = 250
+      bounds_x = 248
       bounds_y = 0
       bounds_cx = 12
       bounds_cy = 16
@@ -227,7 +227,7 @@ object watchfo: twatchfo
       frame.localprops1 = []
       taborder = 5
       visible = False
-      bounds_x = 263
+      bounds_x = 261
       bounds_y = 0
       bounds_cx = 13
       bounds_cy = 16
