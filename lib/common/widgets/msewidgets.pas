@@ -223,9 +223,7 @@ type
   private
    fdragbuttons: shiftstatesty;
    procedure setsbhorz(const Value: tcustomscrollbar);
-//   function getsbhorz: tcustomscrollbar;
    procedure setsbvert(const Value: tcustomscrollbar);
-//   function getsbvert: tcustomscrollbar;
    procedure setdragbuttons(const avalue: shiftstatesty);
   protected
    fhorz,fvert: tcustomscrollbar;
@@ -4367,7 +4365,7 @@ var
  rect1: rectty;
 begin
  if fscrolling = 0 then begin
-  if event = sbe_valuechanged then begin
+  if event = sbe_setvalue{valuechanged} then begin
    rect1:= fclientrect;
    scrollpostoclientpos(rect1);
    setclientpos(rect1.pos);
