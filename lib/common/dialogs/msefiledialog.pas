@@ -100,7 +100,7 @@ type
  end;
 
 const
- defaulthistorymaxcount = 15;
+ defaulthistorymaxcount = 20;
  
 type
  filedialogoptionty = (fdo_filtercasesensitive,    //flvo_maskcasesensitive
