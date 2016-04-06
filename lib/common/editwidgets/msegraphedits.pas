@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2015 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2016 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -31,7 +31,8 @@ const
  defaultsliderwidth = 200;
  defaultsliderheight = 20;
  defaultboxsize = 13;
- defaultsliderscrollbaroptions = defaultscrollbaroptions + [sbo_valuekeys];
+ defaultsliderscrollbaroptions = defaultscrollbaroptions + 
+                                                [sbo_valuekeys,sbo_thumbtrack];
  defaultgrapheditframeoptions = defaultcaptionframeoptions + [cfo_captionfocus];
  
 type
@@ -237,7 +238,6 @@ type
    procedure readstatoptions(const reader: tstatreader); virtual;
    procedure writestatoptions(const writer: tstatwriter); virtual;
 
-//   property optionsdb: optionseditdbty read foptionsdb write foptionsdb;   
   public
    constructor create(aowner: tcomponent); override;
    procedure initnewcomponent(const ascale: real); override;
@@ -257,7 +257,6 @@ type
 
    property objectlinker: tobjectlinker read getobjectlinker
                 {$ifdef msehasimplements}implements istatfile{$endif};
-//   property oncellevent: celleventty read foncellevent write foncellevent;
    property colorglyph: colorty read fcolorglyph write setcolorglyph
            default cl_glyph;
    property readonly: boolean read getreadonly write setreadonly;
@@ -273,8 +272,6 @@ type
    property onchange: notifyeventty read fonchange write fonchange;
    property ondataentered: notifyeventty read fondataentered 
                                                     write fondataentered;
-//   property onmouseevent: mouseeventty read fonmouseevent write fonmouseevent;
-//   property onkeydown: keyeventty read fonkeydown write fonkeydown;
  end;
 
  tpointeredit = class;
@@ -317,41 +314,14 @@ type
  
  tsliderscrollbar = class(tscrollbar,iface)
   private
-//   fface: tface;
   protected
-{
-    //iface
-   procedure invalidate;
-   function translatecolor(const acolor: colorty): colorty;
-   function getclientrect: rectty;
-   procedure setlinkedvar(const source: tmsecomponent; var dest: tmsecomponent;
-               const linkintf: iobjectlink = nil);
-   function getcomponentstate: tcomponentstate;
-   procedure widgetregioninvalid;
-}
   public
    constructor create(intf: iscrollbar; org: originty = org_client;
               ondimchanged: proceventty = nil); override;
    destructor destroy; override;
-//   procedure paint(const canvas: tcanvas; const acolor: colorty = cl_none); override;
   published
    property options default defaultsliderscrollbaroptions;
-//   property stepsize;
-//   property stepctrlfact;
-//   property stepshiftfact;
-//   property pagesize;
-//   property wheelsensitivity;
    property buttonlength default defaultbuttonminlength;
-//   property buttonendlength;
-//   property buttonminlength;
-//   property color;
-//   property colorpattern;
-//   property colorglyph;
-//   property facebutton;
-//   property faceendbutton;
-//   property framebutton;
-//   property frameendbutton1;
-//   property frameendbutton2;
  end;
 
  tcustomrealgraphdataedit = class;
@@ -1473,7 +1443,7 @@ begin
   rea1:= 0;
  end; 
  inc(fupdating);
- fscrollbar.value:= rea1;
+// fscrollbar.value:= rea1;
  if @avalue <> nil then begin
   bo1:= fscrollbar.focused;
   fscrollbar.focused:= false;
@@ -1538,7 +1508,7 @@ var
  rea1: realty;
 begin
  case event of
-  sbe_valuechanged: begin
+  sbe_setvalue{valuechanged}: begin
    if fupdating = 0 then begin
     inc(fupdating);
     rea1:= sender.value;

@@ -50,7 +50,8 @@ const
 type
  tcustomscrollbar = class;
 
- scrolleventty =  (sbe_none,sbe_valuechanged,sbe_stepup,sbe_stepdown,
+ scrolleventty =  (sbe_none,sbe_valuechanged,sbe_setvalue,
+                   sbe_stepup,sbe_stepdown,
                    sbe_pageup,sbe_pagedown,sbe_wheelup,sbe_wheeldown,
                    sbe_thumbposition,sbe_thumbtrack);
 
@@ -187,6 +188,7 @@ type
                                              //false if not valid
    procedure setoptions(const avalue: scrollbaroptionsty); virtual;
    procedure invalidate;
+   procedure dosetvalue();
    procedure dostep(akind: scrolleventty; astep: real);
    procedure dothumbevent(const aevent: scrolleventty);
    function dostepup(const ashiftstate: shiftstatesty): boolean;
@@ -1282,6 +1284,11 @@ begin
  end;
 end;
 
+procedure tcustomscrollbar.dosetvalue();
+begin
+ fintf.scrollevent(self,sbe_setvalue);
+end;
+
 procedure tcustomscrollbar.dostep(akind: scrolleventty; astep: real);
 begin
  if assigned(fonbeforeevent) then begin
@@ -1290,6 +1297,7 @@ begin
  if akind <> sbe_none then begin
   if sbo_moveauto in foptions then begin
    value:= fvalue + astep;
+   dosetvalue();
   end;
   fintf.scrollevent(self,akind);
   if assigned(fonafterevent) then begin
@@ -1300,6 +1308,7 @@ end;
 
 procedure tcustomscrollbar.dothumbevent(const aevent: scrolleventty);
 begin
+ dosetvalue();
  if assigned(fonafterevent) then begin
   fonafterevent(self,aevent,value);
  end;
