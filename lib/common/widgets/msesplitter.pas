@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2015 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2016 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -194,7 +194,7 @@ type
  spaceroptionty = (spao_glueright,spao_gluebottom);
  spaceroptionsty = set of spaceroptionty;
  
- tspacer = class(tscalingwidget)
+ tcustomspacer = class(tscalingwidget)
   private
    flinkleft: twidget;
    flinktop: twidget;
@@ -220,7 +220,6 @@ type
    procedure parentwidgetregionchanged(const sender: twidget); override;
   public
    constructor create(aowner: tcomponent); override;
-  published
    property linkleft: twidget read flinkleft write setlinkleft;
    property linktop: twidget read flinktop write setlinktop;
    property linkright: twidget read flinkright write setlinkright;
@@ -235,8 +234,23 @@ type
                                     write setdist_bottom default 0;
    property options: spaceroptionsty read foptions write foptions default [];
    property optionswidget default defaultoptionswidgetnofocus;
+  published
    property visible default false;
  end;
+ 
+ tspacer = class(tcustomspacer)
+  published
+   property linkleft;
+   property linktop;
+   property linkright;
+   property linkbottom;
+   property dist_left;
+   property dist_top;
+   property dist_right;
+   property dist_bottom;
+   property options;
+   property optionswidget;
+  end;
 
  layoutoptionty = (lao_alignx,lao_placex,lao_aligny,lao_placey,
                    lao_scaleleft,lao_scaletop,
@@ -276,10 +290,10 @@ type
                     las_delayedupdatelayoutpending);
  layouterstatesty = set of layouterstatety;
  
- tlayouter = class;
- layoutereventty = procedure(const sender: tlayouter) of object;
+ tcustomlayouter = class;
+ layoutereventty = procedure(const sender: tcustomlayouter) of object;
 
- tlayouter = class(tspacer)
+ tcustomlayouter = class(tcustomspacer)
   private
    foptionslayout: layoutoptionsty;
    flayoutupdating: integer;
@@ -334,7 +348,6 @@ type
    procedure doasyncevent(var atag: integer); override;
   public
    constructor create(aowner: tcomponent); override;
-  published
    property optionslayout: layoutoptionsty read foptionslayout write setoptionslayout
                            default defaultlayoutoptions;
    property align_mode: widgetalignmodety read falign_mode write setalign_mode
@@ -355,9 +368,34 @@ type
                                                     write fonbeforelayout;
    property onafterlayout: layoutereventty read fonafterlayout 
                                                     write fonafterlayout;
+  published
    property visible default true;
  end;
- 
+
+ tlayouter = class(tcustomlayouter)
+  published
+   property optionslayout;
+   property align_mode;
+   property align_leader;
+   property align_glue;
+   property place_mindist;
+   property place_maxdist;
+   property place_mode;
+   property place_options;
+   property onbeforelayout;
+   property onafterlayout;
+
+   property linkleft; //tspacer
+   property linktop;
+   property linkright;
+   property linkbottom;
+   property dist_left;
+   property dist_top;
+   property dist_right;
+   property dist_bottom;
+   property options;
+ end;
+  
 implementation
 uses
  msebits,math;
@@ -1133,58 +1171,58 @@ begin
  result:= fstatpriority;
 end;
 
-{ tspacer }
+{ tcustomspacer }
 
-constructor tspacer.create(aowner: tcomponent);
+constructor tcustomspacer.create(aowner: tcomponent);
 begin
  inherited;
  foptionswidget:= defaultoptionswidgetnofocus;
  fwidgetstate:= fwidgetstate - (defaultwidgetstates-defaultwidgetstatesinvisible);
 end;
 
-procedure tspacer.setlinkleft(const avalue: twidget);
+procedure tcustomspacer.setlinkleft(const avalue: twidget);
 begin
  setlinkedvar(avalue,tmsecomponent(flinkleft));
  updatespace;
 end;
 
-procedure tspacer.setlinktop(const avalue: twidget);
+procedure tcustomspacer.setlinktop(const avalue: twidget);
 begin
  setlinkedvar(avalue,tmsecomponent(flinktop));
  updatespace;
 end;
 
-procedure tspacer.setlinkright(const avalue: twidget);
+procedure tcustomspacer.setlinkright(const avalue: twidget);
 begin
  setlinkedvar(avalue,tmsecomponent(flinkright));
  updatespace;
 end;
 
-procedure tspacer.setlinkbottom(const avalue: twidget);
+procedure tcustomspacer.setlinkbottom(const avalue: twidget);
 begin
  setlinkedvar(avalue,tmsecomponent(flinkbottom));
  updatespace;
 end;
 
-procedure tspacer.setdist_left(const avalue: integer);
+procedure tcustomspacer.setdist_left(const avalue: integer);
 begin
  fdist_left:= avalue;
  updatespace;
 end;
 
-procedure tspacer.setdist_top(const avalue: integer);
+procedure tcustomspacer.setdist_top(const avalue: integer);
 begin
  fdist_top:= avalue;
  updatespace;
 end;
 
-procedure tspacer.setdist_right(const avalue: integer);
+procedure tcustomspacer.setdist_right(const avalue: integer);
 begin
  fdist_right:= avalue;
  updatespace;
 end;
 
-procedure tspacer.setdist_bottom(const avalue: integer);
+procedure tcustomspacer.setdist_bottom(const avalue: integer);
 begin
  fdist_bottom:= avalue;
  updatespace;
@@ -1196,7 +1234,7 @@ begin
                        not (csdestroying in acomponent.componentstate);
 end;
 
-procedure tspacer.updatespace;
+procedure tcustomspacer.updatespace;
 var
  po1: pointty;
  rect1: rectty;
@@ -1288,13 +1326,13 @@ begin
  end;
 end;
 
-procedure tspacer.loaded;
+procedure tcustomspacer.loaded;
 begin
  inherited;
  updatespace;
 end;
 
-procedure tspacer.parentwidgetregionchanged(const sender: twidget);
+procedure tcustomspacer.parentwidgetregionchanged(const sender: twidget);
 begin
  inherited;
  if (sender <> nil) and ((sender = flinkleft) or (sender = flinktop) or
@@ -1304,9 +1342,9 @@ begin
  end;
 end;
 
-{ tlayouter }
+{ tcustomlayouter }
 
-constructor tlayouter.create(aowner: tcomponent);
+constructor tcustomlayouter.create(aowner: tcomponent);
 begin
  foptionslayout:= defaultlayoutoptions;
  falign_mode:= wam_center;
@@ -1319,7 +1357,7 @@ begin
  include(fwidgetstate,ws_visible);
 end;
 
-procedure tlayouter.setoptionslayout(const avalue: layoutoptionsty);
+procedure tcustomlayouter.setoptionslayout(const avalue: layoutoptionsty);
 const
  mask1: layoutoptionsty = [lao_alignx,lao_placex];
  mask2: layoutoptionsty = [lao_aligny,lao_placey];
@@ -1338,7 +1376,7 @@ begin
  end;
 end;
 
-function tlayouter.childrenwidth: integer;
+function tcustomlayouter.childrenwidth: integer;
 var
  int1: integer;
 begin
@@ -1352,7 +1390,7 @@ begin
  end;
 end;
 
-function tlayouter.childrenheight: integer;
+function tcustomlayouter.childrenheight: integer;
 var
  int1: integer;
 begin
@@ -1366,7 +1404,7 @@ begin
  end;
 end;
 
-function tlayouter.childrenleft: integer;
+function tcustomlayouter.childrenleft: integer;
 var
  int1: integer;
 begin
@@ -1385,7 +1423,7 @@ begin
  end;
 end;
 
-function tlayouter.childrenright: integer;
+function tcustomlayouter.childrenright: integer;
 var
  int1: integer;
  int2: integer;
@@ -1406,7 +1444,7 @@ begin
  end;
 end;
 
-function tlayouter.childrentop: integer;
+function tcustomlayouter.childrentop: integer;
 var
  int1: integer;
 begin
@@ -1425,7 +1463,7 @@ begin
  end;
 end;
 
-function tlayouter.childrenbottom: integer;
+function tcustomlayouter.childrenbottom: integer;
 var
  int1: integer;
  int2: integer;
@@ -1446,7 +1484,7 @@ begin
  end;
 end;
 
-procedure tlayouter.updatelayout;
+procedure tcustomlayouter.updatelayout;
 var
  ar2: integerarty;
  space,margin: integer;
@@ -1699,7 +1737,7 @@ begin
  end;
 end;
 
-procedure tlayouter.updatescalesizeref;
+procedure tcustomlayouter.updatescalesizeref;
 var
  int1,int3: integer;
  sum: sizety;
@@ -1749,7 +1787,7 @@ begin
  include(fstate,las_scalesizerefvalid);
 end;
 
-function tlayouter.calcminscrollsize: sizety;
+function tcustomlayouter.calcminscrollsize: sizety;
 var
  int1,int2,int3,int4: integer;
 begin
@@ -1829,7 +1867,7 @@ begin
  end;
 end;
 
-procedure tlayouter.loaded;
+procedure tcustomlayouter.loaded;
 var
  int1: integer;
 begin
@@ -1840,7 +1878,7 @@ begin
  updatelayout;
 end;
 
-procedure tlayouter.fontchanged;
+procedure tcustomlayouter.fontchanged;
 begin
  inherited;
  if flayoutupdating = 0 then begin
@@ -1853,7 +1891,7 @@ begin
  end;
 end;
 
-procedure tlayouter.childclientrectchanged(const sender: twidget);
+procedure tcustomlayouter.childclientrectchanged(const sender: twidget);
 var
  int1: integer;
 begin
@@ -1866,7 +1904,7 @@ begin
  end;
 end;
 
-procedure tlayouter.widgetregionchanged(const sender: twidget);
+procedure tcustomlayouter.widgetregionchanged(const sender: twidget);
 var
  int1: integer;
 begin
@@ -1889,7 +1927,7 @@ begin
  end;
 end;
 
-procedure tlayouter.setalign_mode(const avalue: widgetalignmodety);
+procedure tcustomlayouter.setalign_mode(const avalue: widgetalignmodety);
 begin
  if avalue <> falign_mode then begin
   falign_mode:= avalue;
@@ -1897,7 +1935,7 @@ begin
  end;
 end;
 
-procedure tlayouter.setalign_glue(const avalue: widgetalignmodety);
+procedure tcustomlayouter.setalign_glue(const avalue: widgetalignmodety);
 begin
  if falign_glue <> avalue then begin
   falign_glue:= avalue;
@@ -1905,7 +1943,7 @@ begin
  end;
 end;
 
-procedure tlayouter.setalign_leader(const avalue: twidget);
+procedure tcustomlayouter.setalign_leader(const avalue: twidget);
 begin
  if falign_leader <> avalue then begin
   setlinkedvar(avalue,tmsecomponent(falign_leader));
@@ -1913,7 +1951,7 @@ begin
  end;
 end;
 
-procedure tlayouter.setplace_mindist(const avalue: integer);
+procedure tcustomlayouter.setplace_mindist(const avalue: integer);
 begin
  if fplace_mindist <> avalue then begin
   fplace_mindist:= avalue;
@@ -1922,7 +1960,7 @@ begin
  end;
 end;
 
-procedure tlayouter.setplace_maxdist(const avalue: integer);
+procedure tcustomlayouter.setplace_maxdist(const avalue: integer);
 begin
  if fplace_maxdist <> avalue then begin
   fplace_maxdist:= avalue;
@@ -1930,7 +1968,7 @@ begin
  end;
 end;
 
-procedure tlayouter.setplace_mode(const avalue: widgetalignmodety);
+procedure tcustomlayouter.setplace_mode(const avalue: widgetalignmodety);
 begin
  if fplace_mode <> avalue then begin
   fplace_mode:= avalue;
@@ -1938,7 +1976,7 @@ begin
  end;
 end;
 
-procedure tlayouter.setplace_options(const avalue: placeoptionsty);
+procedure tcustomlayouter.setplace_options(const avalue: placeoptionsty);
 begin
  if fplace_options <> avalue then begin
   if (plo_scalesize in avalue) and 
@@ -1953,7 +1991,7 @@ begin
  end;
 end;
 
-procedure tlayouter.clientrectchanged;
+procedure tcustomlayouter.clientrectchanged;
 var
  refsi: sizety;
  pt1: pointty;
@@ -2033,20 +2071,20 @@ begin
  updatelayout;
 end;
 
-procedure tlayouter.childautosizechanged(const sender: twidget);
+procedure tcustomlayouter.childautosizechanged(const sender: twidget);
 begin
  inherited;
  updatelayout;
 end;
 
-procedure tlayouter.registerchildwidget(const child: twidget);
+procedure tcustomlayouter.registerchildwidget(const child: twidget);
 begin
  setlength(fwidgetinfos,high(fwidgetinfos)+2);
  updatewidgetinfo(fwidgetinfos[high(fwidgetinfos)],child);
  inherited;
 end;
 
-procedure tlayouter.unregisterchildwidget(const child: twidget);
+procedure tcustomlayouter.unregisterchildwidget(const child: twidget);
 var
  int1: integer;
 begin
@@ -2062,7 +2100,7 @@ begin
  inherited;
 end;
 
-function tlayouter.widgetinfoindex(const awidget: twidget): integer;
+function tcustomlayouter.widgetinfoindex(const awidget: twidget): integer;
 var
  int1: integer;
 begin
@@ -2075,7 +2113,7 @@ begin
  end;
 end;
 
-procedure tlayouter.updatewidgetinfo(var ainfo: widgetlayoutinfoty;
+procedure tcustomlayouter.updatewidgetinfo(var ainfo: widgetlayoutinfoty;
                const awidget: twidget);
 var
  size1,size2: sizety;
@@ -2138,7 +2176,7 @@ begin
  end;
 end;
 
-function tlayouter.scalesizeref: sizety;
+function tcustomlayouter.scalesizeref: sizety;
 begin
  if not (las_scalesizerefvalid in fstate) then begin
   updatescalesizeref;
@@ -2146,7 +2184,7 @@ begin
  result:= fscalesizeref;
 end;
 
-procedure tlayouter.scalesizerefchanged;
+procedure tcustomlayouter.scalesizerefchanged;
 begin
  if (componentstate * [csloading,csdestroying] = []) and 
                             (flayoutupdating = 0) then begin
@@ -2154,7 +2192,7 @@ begin
  end;
 end;
 
-procedure tlayouter.scalebasechanged(const sender: twidget);
+procedure tcustomlayouter.scalebasechanged(const sender: twidget);
 var
  int1: integer;
  size1: sizety;
@@ -2175,7 +2213,7 @@ end;
 const
  updatelayouttag = 8436026;
  
-procedure tlayouter.delayedupdatelayout;
+procedure tcustomlayouter.delayedupdatelayout;
 begin
  if not (las_delayedupdatelayoutpending in fstate) then begin
   include(fstate,las_delayedupdatelayoutpending);
@@ -2184,7 +2222,7 @@ begin
  end;
 end;
 
-procedure tlayouter.doasyncevent(var atag: integer);
+procedure tcustomlayouter.doasyncevent(var atag: integer);
 begin
  inherited;
  if atag = updatelayouttag then begin
